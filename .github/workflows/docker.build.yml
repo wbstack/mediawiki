@@ -1,16 +1,26 @@
-name: Docker build & push
+name: Docker build
 
 on:
   push:
-    branches: main
+    branches:
+      - 'main'
+    tags:
+      - '*'
+  pull_request:
 
 jobs:
-  docker-build-and-push:
+  docker-build:
     runs-on: ubuntu-latest
     steps:
       -
         name: Checkout
         uses: actions/checkout@v2
+      -
+        name: Docker meta
+        id: docker_meta
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: ghcr.io/${{ github.repository }}
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -41,6 +51,6 @@ jobs:
           platforms: linux/amd64
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
-          push: true
-          tags: |
-            ghcr.io/wbstack/mediawiki:latest
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
