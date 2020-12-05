@@ -1,0 +1,3 @@
+.github
+extensions/*/vendor
+extensions/*/node_modules
