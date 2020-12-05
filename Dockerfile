@@ -98,3 +98,5 @@ COPY --chown=www-data:www-data ./ /var/www/html/w
 # TODO it would be much better to ADD / COPY files after this? urgff.
 # or cache the output of the cache rebuild and then try to grab that during buildss!!! :D
 RUN WW_DOMAIN=maint php ./w/maintenance/rebuildLocalisationCache.php
+
+LABEL org.opencontainers.image.source="https://github.com/wbstack/mediawiki"
