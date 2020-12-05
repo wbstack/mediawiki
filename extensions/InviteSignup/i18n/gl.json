@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm",
+			"Toliño"
+		]
+	},
+	"invitesignup": "Convidar xente a este wiki",
+	"is-desc": "Enviar convites por correo electrónico",
+	"is-tableth-date": "Data e hora",
+	"is-tableth-email": "Correo electrónico",
+	"is-tableth-inviter": "Persoa que convidou",
+	"is-tableth-signup": "Rexistrado",
+	"is-tableth-groups": "Grupos",
+	"is-add": "Engadir",
+	"is-delete": "Borrar",
+	"is-invalidemail": "\"<b>$1</b>\" non é un enderezo de correo electrónico válido.",
+	"is-emailsubj": "Recibiu unha invitación para unirse a {{SITENAME}}",
+	"is-emailbody": "Boas:\n\n{{GENDER:$1|$1}} envioulle unha invitación para que se rexistre en {{SITENAME}}.\nPode facelo no seguinte enderezo: $2",
+	"right-invitesignup": "Convidar usuarios para que se rexistren",
+	"action-invitesignup": "convidar usuarios para que se rexistren neste sitio"
+}

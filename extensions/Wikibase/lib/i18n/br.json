@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fohanno",
+			"Fulup",
+			"Pymouss",
+			"VIGNERON",
+			"Y-M D"
+		]
+	},
+	"wikibase-sitelinks-wikipedia": "Wikipedia",
+	"wikibase-snakview-snaktypeselector-novalue": "talvoud ebet",
+	"datatypes-type-string": "Neudennad",
+	"datatypes-type-quantity": "Kementad",
+	"datatypes-type-monolingualtext": "Testenn unyezhek",
+	"datatypes-type-multilingualtext": "Testenn liesyezhek",
+	"datatypes-type-number": "Niver",
+	"datatypes-type-mediawiki-title": "Titl MediaWiki",
+	"datatypes-type-unknown": "Anspisaet",
+	"datatypes-type-boolean": "Boulean",
+	"datatypes-type-globe-coordinate": "Daveennoù douaroniel",
+	"datatypes-type-time": "Mare en amzer",
+	"datatypes-type-geo-shape": "Gwiskad douaroniel",
+	"wikibase-time-precision-BCE-century": "{{PLURAL:$1|1añ kantved|$1vet kantved}} kt JK",
+	"wikibase-entity-summary-wbsetlabel-add": "Skridennad [$2] ouzhpennet",
+	"wikibase-entity-summary-wbsetlabel-set": "Skridennad [$2] kemmet",
+	"wikibase-entity-summary-wbsetaliases-add-remove": "Ouzhpennet ha dilamet {{PLURAL:$1|un alias|aliasoù}} [$2]",
+	"wikibase-entity-summary-wbsetaliases-remove": "Dilamet {{PLURAL:$1|un alias|aliasoù}} [$2]",
+	"wikibase-entity-summary-wbsetlabeldescriptionaliases": "Cheñchet skridennad, deskrivadur hag alias [$2]"
+}

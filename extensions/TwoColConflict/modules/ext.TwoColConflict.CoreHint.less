@@ -1,0 +1,22 @@
+.mw-twocolconflict-core-ui-hint {
+	.oo-ui-messageWidget.oo-ui-messageWidget-block {
+		margin: 10px 0;
+		padding-right: 48px;
+
+		.oo-ui-icon-close {
+			cursor: pointer;
+			margin: auto;
+			position: absolute;
+			right: 22px;
+			top: 16px;
+		}
+	}
+
+	input[ type='checkbox' ] {
+		display: none;
+
+		&:checked + .oo-ui-messageWidget {
+			display: none;
+		}
+	}
+}

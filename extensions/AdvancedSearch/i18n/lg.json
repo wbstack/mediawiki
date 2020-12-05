@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"AKibombo"
+		]
+	},
+	"advancedsearch-optgroup-text": "Noonya mu lutimbe luno",
+	"advancedsearch-optgroup-structure": "Ekikula",
+	"advancedsearch-optgroup-files": "Ebiwandiiko ne bifanaanyi",
+	"advancedsearch-field-plain": "Ebigambo bino",
+	"advancedsearch-field-phrase": "Ekiwandiiko kino kyennyini",
+	"advancedsearch-field-or": "Ekimu ku bigambo bino",
+	"advancedsearch-field-not": "Ssi bigambo bino",
+	"advancedsearch-filetype-bitmap": "Ekifanaanyi",
+	"advancedsearch-namespaces-search-in": "Noonya mu:",
+	"advancedsearch-namespaces-preset-all": "Byonna"
+}

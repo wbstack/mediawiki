@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rail",
+			"Railfail536",
+			"Sp5uhe",
+			"Ty221"
+		]
+	},
+	"skinname-modern": "Nowoczesna",
+	"modern.css": "/* Umieszczony tutaj kod CSS wpłynie na wygląd skórki Nowoczesna */",
+	"modern.js": "/* Umieszczony tutaj kod JavaScript zostanie załadowany wyłącznie przez użytkowników korzystających ze skórki Nowoczesna */",
+	"modern-desc": "Niebieska/szara skórka z paskiem bocznym i górnym. Pochodna skórki Książka"
+}

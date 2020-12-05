@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"Thibaut120094",
+			"Y-M D"
+		]
+	},
+	"invitesignup": "Inviter des personnes sur ce wiki",
+	"is-desc": "Envoyer des courriels d'invitation",
+	"is-tableth-date": "Date",
+	"is-tableth-email": "Courriel",
+	"is-tableth-inviter": "Invitant",
+	"is-tableth-signup": "Inscrit",
+	"is-tableth-groups": "Groupes",
+	"is-add": "Ajouter",
+	"is-delete": "Supprimer",
+	"is-invalidemail": "<b>$1</b> n’est pas une adresse de courriel valide.",
+	"is-emailsubj": "Vous êtes  invité à rejoindre {{SITENAME}}",
+	"is-emailbody": "Bonjour,\n\n{{GENDER:$1|$1}} vous a invité à vous inscrire sur {{SITENAME}}.\nVous pouvez le faire ici: $2",
+	"right-invitesignup": "Inviter les utilisateurs à s'inscrire",
+	"action-invitesignup": "inviter les utilisateurs à s’inscrire sur ce site"
+}

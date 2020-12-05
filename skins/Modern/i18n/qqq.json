@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Raymond",
+			"Shirayuki",
+			"Umherirrender"
+		]
+	},
+	"skinname-modern": "{{name}}\n{{Identical|Modern}}",
+	"modern.css": "{{optional}}",
+	"modern.js": "{{optional}}",
+	"modern-desc": "{{desc|what=skin|name=Modern|url=https://www.mediawiki.org/wiki/Skin:Modern}}"
+}

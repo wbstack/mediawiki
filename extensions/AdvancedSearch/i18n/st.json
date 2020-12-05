@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mapoza2"
+		]
+	},
+	"advancedsearch-field-plain": "Mantsoe ana",
+	"advancedsearch-field-or": "Le leng la mantsoe ana",
+	"advancedsearch-field-not": "Eseng mantsoe ana",
+	"advancedsearch-field-filetype": "Mofuta oa faele",
+	"advancedsearch-inlanguage-default": "Khetha puo",
+	"advancedsearch-filesize-equals": "e lekana le",
+	"advancedsearch-filesize-greater-than": "e feta",
+	"advancedsearch-filesize-smaller-than": "e nyane ho",
+	"advancedsearch-namespaces-preset-all": "Tsohle"
+}

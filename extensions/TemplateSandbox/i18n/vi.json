@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Minh Nguyen"
+		]
+	},
+	"templatesandbox": "Chỗ thử bản mẫu",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Kết xuất một trang]] bằng cách lấy các bản mẫu từ chỗ thử",
+	"templatesandbox-suffix": "chỗ thử",
+	"templatesandbox-legend": "Chỗ thử bản mẫu",
+	"templatesandbox-text": "Bạn có thể chọn một loạt bản mẫu được lưu trong không gian thử nghiệm của bạn theo tiền tố.\nThí dụ để xem trước một phiên bản {{ns:Template}}:Thử được lưu tại “{{ns:User}}:Ví dụ/{{int:templatesandbox-suffix}}/{{ns:Template}}:Thử”, hãy sử dụng tiền tố “{{ns:User}}:Ví dụ/{{int:templatesandbox-suffix}}”.",
+	"templatesandbox-prefix-label": "Tiền tố chỗ thử:",
+	"templatesandbox-page-label": "Kết xuất trang:",
+	"templatesandbox-revid-label": "Kết xuất phiên bản:",
+	"templatesandbox-text-label": "Kết xuất mã wiki:",
+	"templatesandbox-submit": "Xem",
+	"templatesandbox-title-output": "Chỗ thử bản mẫu: $1",
+	"templatesandbox-editform-legend": "Xem trước trang dùng bản mẫu này",
+	"templatesandbox-editform-page-label": "Tên trang",
+	"templatesandbox-editform-view-label": "Xem trước",
+	"templatesandbox-preview": "Xem trước $2",
+	"templatesandbox-previewnote": "'''Đây chỉ mới là bản xem trước [[:$1]].'''\nCác thay đổi của bạn vẫn chưa được lưu!",
+	"templatesandbox-invalid-title": "Tên trang chỉ định không hợp lệ.",
+	"templatesandbox-title-not-exists": "Tên trang chỉ định không tồn tại.",
+	"templatesandbox-revision-not-exists": "Phiên bản chỉ định không tồn tại.",
+	"templatesandbox-invalid-prefix": "Tiền tố chỗ thử chỉ định không hợp lệ.",
+	"templatesandbox-prefix-not-local": "Tiền tố chỗ thử chỉ định không có trực thuộc wiki này.",
+	"templatesandbox-page-or-revid": "Bạn cần chỉ định tên trang hoặc số phiên bản.",
+	"templatesandbox-fail-post": "<em>Dữ liệu phiên bị mất, nên bản xem trước bị ẩn để tránh tấn công JavaScript.</em>\n\n<strong>Nếu bạn thực sự muốn xem trước mã nguồn này, xin hãy thử lại nữa.</strong>\nNếu vẫn không được, hãy thử [[Special:UserLogout|đăng xuất]] rồi đăng nhập lại.",
+	"templatesandbox-fail-post-anon": "<em>Dữ liệu phiên bị mất, nên bản xem trước bị ẩn để tránh tấn công JavaScript.</em>\n\n<strong>Nếu bạn thực sự muốn xem trước mã nguồn này, xin hãy thử lại nữa.</strong>\nNếu vẫn không được, hãy [[Special:UserLogin|đăng nhập]] và thử lại lần nữa.",
+	"templatesandbox-anon-limited-preview": "[[Special:UserLogin|Đăng nhập]] và thử lại để xem trước các thay đổi JavaScript và CSS.",
+	"templatesandbox-editform-need-template": "Cần chỉ định một tên bản mẫu để xem trước trang khác dùng bản mẫu này.",
+	"templatesandbox-editform-need-title": "Cần chỉ định một tên trang để xem trước trang khác dùng bản mẫu này.",
+	"templatesandbox-editform-invalid-template": "Bạn đã chỉ định một tên bản mẫu không hợp lệ.",
+	"templatesandbox-editform-invalid-title": "Tên trang được chỉ định để xem trước không hợp lệ.",
+	"templatesandbox-editform-title-not-exists": "Tên trang được chỉ định để xem trước không tồn tại."
+}

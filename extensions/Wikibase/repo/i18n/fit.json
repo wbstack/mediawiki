@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Palmtree222",
+			"Pyscowicz"
+		]
+	},
+	"wikibase-edit": "mookkaa",
+	"wikibase-save": "säästä",
+	"wikibase-publish": "anna ulos",
+	"wikibase-cancel": "lopeta",
+	"wikibase-add": "lissää",
+	"wikibase-save-inprogress": "Säästethään...",
+	"wikibase-publish-inprogress": "Annethaan ulos...",
+	"wikibase-remove-inprogress": "Otetaan poies...",
+	"wikibase-entitytermsforlanguagelistview-description": "Kuvvaus",
+	"wikibase-label-empty": "Nimeä ei ole lisätty",
+	"wikibase-description-empty": "Kuvvausta ei ole lisätty",
+	"wikibase-description-edit-placeholder": "kirjota kuvvaus",
+	"wikibase-diffview-description": "kuvvaus",
+	"wikibase-diffview-link": "länkit",
+	"wikibase-sitelinks-special": "Muut sivustot",
+	"wikibase-undo-title": "Kumothaan sivuun $1 tehty mookkaus",
+	"wikibase-restore-title": "Sivun ”$1” vanhan versuunin palauttaminen",
+	"wikibase-partial-undo": "Mookkaus voidaan kumota osittain.",
+	"wikibase-statementview-rank-normal": "Normaali status",
+	"wikibase-gotolinkedpage-submit": "Siiry",
+	"wikibase-newentity-description": "Kuvvaus:",
+	"wikibase-setdescription-submit": "Aseta kuvvaus",
+	"wikibase-setlabeldescriptionaliases-description-label": "Kuvvaus:"
+}

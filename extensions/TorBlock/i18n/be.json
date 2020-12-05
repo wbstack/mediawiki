@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Artsiom91"
+		]
+	},
+	"tag-tor-description": "Калі гэтая бірка ўсталявана, то праўка была зроблена праз выхадны вузел Tor.",
+	"tag-tor": "Зроблена праз Tor",
+	"abusefilter-edit-builder-vars-tor-exit-node": "Ці была праўка здзейснена праз вузел Tor"
+}

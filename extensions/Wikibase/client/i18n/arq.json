@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bachounda",
+			"GeekEmad",
+			"Hussam",
+			"Oldstoneage"
+		]
+	},
+	"tooltip-t-wikibase": "الوصل بعنصر مرتبط في غاراج المعلومات",
+	"wikibase-comment-update": "تبديل عنصر {{WBREPONAME}}",
+	"wikibase-dataitem": "عنصر بيانات",
+	"wikibase-editlinks": "تبديل الوصيله",
+	"wikibase-editlinkstitle": "تبديلت الوصيلات ما بين اللوغات",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "خبّي",
+	"wikibase-rc-hide-wikidata-show": "ورّي",
+	"wikibase-rc-wikibase-edit-letter": "د",
+	"wikibase-rc-wikibase-edit-title": "تبدبل {{WBREPONAME}}",
+	"wikibase-unconnectedpages-submit": "وري الصفحة",
+	"wikibase-otherprojects": "في مشارع اخرى"
+}

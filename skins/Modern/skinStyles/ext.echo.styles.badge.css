@@ -1,0 +1,7 @@
+/* Some basic handling for echo badges */
+#p-personal li#pt-notifications-alert a,
+#p-personal li#pt-notifications-notice a {
+	background-repeat: no-repeat;
+	background-position: 50% 0;
+	padding: 0 1.5em 0 1em;
+}

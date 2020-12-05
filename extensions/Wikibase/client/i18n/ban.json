@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Carma citrawati",
+			"Joseagush",
+			"NoiX180"
+		]
+	},
+	"tooltip-t-wikibase": "Pranala maring item panyimpenan data sané kasambung",
+	"wikibase-comment-update": "Item {{WBREPONAME}} kauah",
+	"wikibase-dataitem": "Item {{WBREPONAME}}",
+	"wikibase-editlinks": "Uah pranala",
+	"wikibase-editlinkstitle": "Uah pranala pantaraning basa",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Engkebang",
+	"wikibase-rc-hide-wikidata-show": "Sinahang",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "Uahan {{WBREPONAME}}",
+	"wikibase-otherprojects": "Ring proyék lianan"
+}

@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"StanProg",
+			"Vlad5250"
+		]
+	},
+	"jsonconfig-desc": "Позволява конфигурацията на JSON да се складира на уики",
+	"jsonconfig-duplicate-field": "Открита е повече от една стойност „$1“",
+	"jsonconfig-err-array": "Параметърът „$1“ трябва да бъде списък, както например <kbd>[\"стойност1\", \"стойност2\", ...]</kbd>",
+	"jsonconfig-err-array-count": "Списъкът „$1“ има $2 {{PLURAL:$2|стойност|стойности}}, но трябва да има $3 {{PLURAL:$3|стойност|стойности}}, т.е. същият брой стойности като „$4“",
+	"jsonconfig-err-assoc-array": "Параметърът „$1“ трябва да бъде асоциативен масив (речник), например <kbd>{\"ключ\": \"стойност\", ...}</kbd>",
+	"jsonconfig-optional-field": "(незадължително)",
+	"jsonconfig-type-name-invalid": "невалиден",
+	"jsonconfig-type-name-string": "низ",
+	"jsonconfig-type-name-number": "число",
+	"jsonconfig-type-name-boolean": "булев",
+	"jsonconfig-license": "Данните са достъпни под $1.",
+	"jsonconfig-license-not-set": "При редактиране на страницата се съгласявате, че публикувате приносите си съгласно лиценза, който е указан в поле <code>лиценз</code>.",
+	"right-jsonconfig-flush": "Работа с JsonConfig чрез API",
+	"action-jsonconfig-flush": "работа с JsonConfig чрез API"
+}

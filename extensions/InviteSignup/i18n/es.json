@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Macofe"
+		]
+	},
+	"invitesignup": "Invitar personas a este wiki",
+	"is-desc": "Enviar invitaciones por correo",
+	"is-tableth-date": "Fecha",
+	"is-tableth-email": "Correo electrónico",
+	"is-tableth-inviter": "Invitador",
+	"is-tableth-signup": "Registrado",
+	"is-tableth-groups": "Grupos",
+	"is-add": "Añadir",
+	"is-delete": "Eliminar",
+	"is-invalidemail": "<b>$1</b> no es una dirección de correo electrónico válida.",
+	"is-emailsubj": "Te han invitado a unirte a {{SITENAME}}",
+	"is-emailbody": "Hola,\n\n{{GENDER:$1|$1}} te invitó a registrarte en {{SITENAME}}.\nPuedes hacerlo en $2",
+	"right-invitesignup": "Invitar usuarios a registrarse",
+	"action-invitesignup": "invitar a usuarios a registrarse en este sitio"
+}

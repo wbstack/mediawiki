@@ -1,0 +1,124 @@
+{
+	"name": "Cite",
+	"author": [
+		"Ævar Arnfjörð Bjarmason",
+		"Andrew Garrett",
+		"Brion Vibber",
+		"Ed Sanders",
+		"Marius Hoch",
+		"Steve Sanbeg",
+		"Trevor Parscal",
+		"..."
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Cite",
+	"descriptionmsg": "cite-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "parserhook",
+	"requires": {
+		"MediaWiki": ">= 1.34.0"
+	},
+	"MessagesDirs": {
+		"Cite": [
+			"i18n",
+			"modules/ve-cite/i18n"
+		]
+	},
+	"Hooks": {
+		"APIQuerySiteInfoGeneralInfo": "Cite\\Hooks\\CiteHooks::onAPIQuerySiteInfoGeneralInfo",
+		"ContentHandlerDefaultModelFor": "Cite\\Hooks\\CiteHooks::onContentHandlerDefaultModelFor",
+		"ParserAfterParse": "Cite\\Hooks\\CiteParserHooks::onParserAfterParse",
+		"ParserClearState": "Cite\\Hooks\\CiteParserHooks::onParserClearStateOrCloned",
+		"ParserCloned": "Cite\\Hooks\\CiteParserHooks::onParserClearStateOrCloned",
+		"ParserFirstCallInit": "Cite\\Hooks\\CiteParserHooks::onParserFirstCallInit",
+		"ResourceLoaderGetConfigVars": "Cite\\Hooks\\CiteHooks::onResourceLoaderGetConfigVars",
+		"ResourceLoaderRegisterModules": "Cite\\Hooks\\CiteHooks::onResourceLoaderRegisterModules"
+	},
+	"ResourceModules": {
+		"ext.cite.styles": {
+			"styles": {
+				"ext.cite.styles.css": {},
+				"ext.cite.print.css": {
+					"media": "print"
+				}
+			},
+			"skinStyles": {
+				"minerva": "ext.cite.styles.minerva.less"
+			},
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		},
+		"ext.cite.style": {
+			"class": "Cite\\ResourceLoader\\CiteCSSFileModule",
+			"styles": "ext.cite.style.css",
+			"targets": [
+				"desktop",
+				"mobile"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "Cite/modules"
+	},
+	"QUnitTestModule": {
+		"localBasePath": "modules/ve-cite/tests",
+		"remoteExtPath": "Cite/modules/ve-cite/tests",
+		"scripts": [
+			"ve.dm.citeExample.js",
+			"ve.dm.Converter.test.js",
+			"ve.dm.InternalList.test.js",
+			"ve.dm.Transaction.test.js",
+			"ve.ui.DiffElement.test.js",
+			"ve.ui.MWWikitextStringTransferHandler.test.js"
+		],
+		"dependencies": [
+			"ext.cite.visualEditor",
+			"test.VisualEditor"
+		]
+	},
+	"attributes": {
+		"CodeMirror": {
+			"TagModes": {
+				"ref": "text/mediawiki"
+			}
+		},
+		"EventLogging": {
+			"Schemas": {
+				"ReferencePreviewsBaseline": 19489336,
+				"ReferencePreviewsCite": 19489328
+			}
+		},
+		"VisualEditor": {
+			"PluginModules": [
+				"ext.cite.visualEditor"
+			]
+		}
+	},
+	"ConfigRegistry": {
+		"cite": "GlobalVarConfig::newInstance"
+	},
+	"config": {
+		"CiteBookReferencing": {
+			"description": "Development feature flag for Book Referencing, a way to nest citations. Please don't enable in production.",
+			"public": true,
+			"value": false
+		},
+		"CiteVisualEditorOtherGroup": {
+			"public": true,
+			"value": false
+		},
+		"CiteResponsiveReferences": {
+			"public": true,
+			"value": true
+		}
+	},
+	"AutoloadNamespaces": {
+		"Cite\\": "src/"
+	},
+	"TrackingCategories": [
+		"cite-tracking-category-cite-error"
+	],
+	"manifest_version": 2
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"An13sa",
+			"Mikel Ibaiba",
+			"Sator",
+			"Subi"
+		]
+	},
+	"graph-ve-dialog-button-tooltip": "Grafikoa",
+	"graph-ve-dialog-edit-height": "Altuera",
+	"graph-ve-dialog-edit-padding-left": "Ezkerrera",
+	"graph-ve-dialog-edit-size-field": "Tamaina",
+	"graph-ve-dialog-edit-size-table-unit": "Pixelak",
+	"graph-ve-dialog-edit-width": "Zabalera"
+}

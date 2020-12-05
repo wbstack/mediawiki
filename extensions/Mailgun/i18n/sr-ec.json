@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Zoranzoki21"
+		]
+	},
+	"mailgun-desc": "Слање имејлова путем услуге Mailgun API-ја из Медијавикија."
+}

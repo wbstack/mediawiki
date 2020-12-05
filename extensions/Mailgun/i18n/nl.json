@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mainframe98"
+		]
+	},
+	"mailgun-desc": "Verstuur e-mails via de Mailgun API service vanuit MediaWiki"
+}

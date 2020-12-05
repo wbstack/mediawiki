@@ -1,0 +1,22 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/language/es6",
+		"../.eslintshared.js"
+	],
+	"parserOptions": {
+		"sourceType": "module",
+		"ecmaVersion": 6
+	},
+	"env": {
+		"browser": true,
+		"commonjs": true
+	},
+	"rules": {
+		"no-var": "off",
+		"jsdoc/check-tag-names": "off",
+		"jsdoc/no-undefined-types": "off",
+		"jsdoc/valid-types": "off"
+	}
+}

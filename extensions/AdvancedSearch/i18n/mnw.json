@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aue Nai"
+		]
+	},
+	"advancedsearch-optgroup-structure": "လဒက်ပတန်",
+	"advancedsearch-optgroup-files": "ဝှာၚ် ကေုာံ သၞိၚ်ရုပ်ဂမၠိုၚ်",
+	"advancedsearch-field-plain": "လိက်ဏံတအ်",
+	"advancedsearch-field-phrase": "လိက်ဏံဗွဲမဍာံ",
+	"advancedsearch-field-filetype": "ဂကူ ဝှာၚ်",
+	"advancedsearch-inlanguage-default": "ရုဲဘာသာဇကုညိ",
+	"advancedsearch-filetype-section-types": "ဂကူ ဝှာၚ် နာနာဂမၠိုၚ်",
+	"advancedsearch-filetype-section-image": "နဲကဲကၠောန်ၜိုတ် သၞိၚ်ရုပ်",
+	"advancedsearch-filetype-section-video": "နဲကဲကၠောန်ၜိုတ် ရုပ်ဒမျိုၚ်",
+	"advancedsearch-filetype-section-audio": "နဲကဲကၠောန်ၜိုတ် ရမျှာၚ်",
+	"advancedsearch-filetype-section-document": "နဲကဲကၠောန်ၜိုတ် တၞးလိက်ဂမၠိုၚ်",
+	"advancedsearch-filetype-section-other": "နဲကဲကၠောန်ၜိုတ်ဂမၠိုၚ် တၞဟ်ဟ်",
+	"advancedsearch-filetype-default": "ရုဲစှ် ဂကူ ဝှာၚ်",
+	"advancedsearch-filetype-bitmap": "သၞိၚ်ရုပ်",
+	"advancedsearch-filetype-drawing": "ချူဓဇက်",
+	"advancedsearch-filetype-audio": "ရမျှာၚ်",
+	"advancedsearch-filetype-video": "ရုပ်ဒမျိုၚ်",
+	"advancedsearch-filetype-office": "ရုၚ်",
+	"advancedsearch-filesize-equals": "တုပ်သၟဟ်ကဵု",
+	"advancedsearch-filesize-greater-than": "ဇၞော်နူ",
+	"advancedsearch-filesize-smaller-than": "ဍောတ်နူ",
+	"advancedsearch-sort-preview-last-edit-desc": "စၟတ်တ္ၚဲ မဒါန်",
+	"advancedsearch-sort-preview-create-timestamp-desc": "တ္ၚဲ ခၞံကၠောန်",
+	"advancedsearch-namespaces-search-in": "ဂၠာဲ ပ္ဍဲ:",
+	"advancedsearch-namespaces-remember": "သမ္တီကေတ်မရုဲစှ်သွက်ဂွံဂၠာဲအနာဂတ်",
+	"advancedsearch-namespaces-preset-all": " သီုဖအိုတ်",
+	"advancedsearch-namespaces-preset-default": "မူလ",
+	"advancedsearch-namespaces-preset-general-help": "ရီုဗၚ်နာနာ",
+	"advancedsearch-namespaces-preset-discussion": "သဳကၠဳ",
+	"advancedsearch-namespaces-placeholder": "ထပ် ဒၞဲါယၟု...",
+	"prefs-advancedsearch": "ဂၠာဲမတၟေၚ်"
+}

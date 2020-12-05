@@ -1,0 +1,16 @@
+/**
+ * @license GNU GPL v2+
+ * @author H. Snater < mediawiki@snater.com >
+ */
+.wikibase-descriptionview.wb-empty {
+	background-color: inherit;
+}
+
+.wikibase-descriptionview .wikibase-descriptionview-input {
+	font-family: inherit;
+	font-size: inherit;
+}
+
+.wikibase-descriptionview .wikibase-descriptionview-input:focus {
+	background-color: #eaf3ff;
+}

@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Subi"
+		]
+	},
+	"is-tableth-date": "Data",
+	"is-tableth-groups": "Taldeak",
+	"is-add": "Gehitu",
+	"is-delete": "Ezabatu"
+}

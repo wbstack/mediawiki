@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ravi Mundkur"
+		]
+	},
+	"mwoauth-prefs-managegrantslink": "ನಡಪಾಲೆ {{PLURAL:$1|$1 connected application|$1  connected applications|0=connected applications}}"
+}

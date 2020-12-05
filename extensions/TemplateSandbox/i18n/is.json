@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Snævar",
+			"Sveinn í Felli"
+		]
+	},
+	"templatesandbox": "Sandkassi fyrir sniðmát",
+	"templatesandbox-suffix": "sandkassi",
+	"templatesandbox-legend": "Sandkassi fyrir sniðmát",
+	"templatesandbox-submit": "Skoða",
+	"templatesandbox-title-output": "Sandkassi fyrir sniðmát: $1",
+	"templatesandbox-editform-legend": "Forskoða síðu með þessu sniði",
+	"templatesandbox-editform-page-label": "Titill síðu",
+	"templatesandbox-editform-view-label": "Sýna forskoðun",
+	"templatesandbox-preview": "Forskoðun á $2",
+	"templatesandbox-previewnote": "„Mundu að þetta er eingöngu forskoðun af [[:$1]].” Breytingarnar þínar hafa ekki verið vistaðar!",
+	"templatesandbox-invalid-title": "Titilinn sem þú gafst upp er ógildur.",
+	"templatesandbox-title-not-exists": "Umbeðinn titill er ekki til.",
+	"templatesandbox-revision-not-exists": "Umbeðin útgáfa er ekki til.",
+	"templatesandbox-fail-post-anon": "<em>Þar sem þú ert ekki skráð/ur inn, þá hefur forskoðunin verið falin sem vörn gegn JavaScript árásum.</em>\n\n<strong>Ef þetta er lögleg tilraun til forskoðunar, reyndu að [[Special:UserLogin|skrá þig inn]], og prófa aftur.</strong>"
+}

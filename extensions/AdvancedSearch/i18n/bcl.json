@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Brazal.dang"
+		]
+	},
+	"advancedsearch-optgroup-sort": "Salansang pasurunod",
+	"advancedsearch-field-plain": "Ining mga tataramon",
+	"advancedsearch-field-phrase": "Eksaktong ining teksto",
+	"advancedsearch-field-or": "Saro sa mga tataramon na ini",
+	"advancedsearch-field-not": "Mayo sa mga tataramon na ini",
+	"advancedsearch-field-subpageof": "Subpahina kan pahinang ini",
+	"advancedsearch-field-intitle": "An titulo kan pahina igwa nin",
+	"advancedsearch-inlanguage-default": "Magpili nin lengguwahe",
+	"advancedsearch-filetype-audio": "Audio",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Office",
+	"advancedsearch-sort-last-edit-desc": "Petsa kan pagliwat - pinakabago sa itaas",
+	"advancedsearch-sort-create-timestamp-desc": "Petsa kan pagliwat - pinakabago sa itaas",
+	"advancedsearch-sort-preview-last-edit-desc": "Petsa kan pagliwat",
+	"advancedsearch-sort-preview-create-timestamp-desc": "Petsa kan paggibo",
+	"advancedsearch-namespaces-preset-all": "Gabos",
+	"advancedsearch-namespaces-preset-default": "Panugmad"
+}

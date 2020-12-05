@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jopparn",
+			"Lokal Profil",
+			"Macofe",
+			"Skalman",
+			"WikiPhoenix"
+		]
+	},
+	"templatesandbox": "Mallsandlåda",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Visar en sida]] som infogar mallar från en sandlåda",
+	"templatesandbox-suffix": "sandlåda",
+	"templatesandbox-legend": "Mallsandlåda",
+	"templatesandbox-text": "Du kan välja en uppsättning mallar som har sparats i din sandlåderymd med hjälp av ett lämpligt sandlådeprefix.\nOm du till exempel vill förhandsgranska en version av {{ns:Template}}:Test som du har sparat som \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", så använder du \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" som prefix.",
+	"templatesandbox-prefix-label": "Sandlådeprefix:",
+	"templatesandbox-page-label": "Rendera sida:",
+	"templatesandbox-revid-label": "Rendera sidversion:",
+	"templatesandbox-text-label": "Rendera wikitext:",
+	"templatesandbox-submit": "Visa",
+	"templatesandbox-title-output": "Mallsandlåda: $1",
+	"templatesandbox-editform-legend": "Förhandsgranska sida med denna mall",
+	"templatesandbox-editform-page-label": "Sidtitel",
+	"templatesandbox-editform-view-label": "Visa förhandsgranskning",
+	"templatesandbox-preview": "Förhandsvisning av $2",
+	"templatesandbox-previewnote": "'''Kom ihåg att detta bara är en förhandsgranskning av [[:$1]].'''\nDina ändringar har ännu inte sparats!",
+	"templatesandbox-invalid-title": "Titeln du angav är ogiltig.",
+	"templatesandbox-title-not-exists": "Titeln du angav finns inte.",
+	"templatesandbox-revision-not-exists": "Versionen du angav finns inte.",
+	"templatesandbox-invalid-prefix": "Sandlådeprefixet du angav finns inte.",
+	"templatesandbox-prefix-not-local": "Sandlådeprefixet du angav är inte lokal.",
+	"templatesandbox-page-or-revid": "Du måste ange antingen ett sidnamn eller ett versions-ID-nummer.",
+	"templatesandbox-fail-post": "<em>Eftersom {{SITENAME}} har rå HTML aktiverat och det uppstod en förlust av sessionsdata har förhandsgranskningen dolts som en försiktighetsåtgärd för att skydda mot JavaScript-attacker.</em>\n\n<strong>Om detta är ett äkta försök att förhandsgranska sidan, vänligen försök igen.</strong>\nOm det fortfarande inte fungerar, försök att [[Special:UserLogout|logga ut]] och sedan logga in igen.",
+	"templatesandbox-fail-post-anon": "<em>Eftersom {{SITENAME}} har rå HTML aktiverat och du inte är inloggad har förhandsgranskningen dolts som en försiktighetsåtgärd för att skydda mot JavaScript-attacker.</em>\n\n<strong>Om detta är ett äkta försök att förhandsgranska sidan, vänligen [[Special:UserLogin|logga in]] och försök igen.</strong>",
+	"templatesandbox-editform-need-template": "För att förhandsgranska en annan sida med den här mallen så måste ett mallnamn anges.",
+	"templatesandbox-editform-need-title": "För att förhandsgranska en annan sida med den här mallen så måste ett sidnamn anges.",
+	"templatesandbox-editform-invalid-template": "Mallnamnet som du angav är ogiltigt.",
+	"templatesandbox-editform-invalid-title": "Sidnamnet du angav för förhandsgranskning är ogiltigt.",
+	"templatesandbox-editform-title-not-exists": "Sidan du angav för att förhandsgranska finns inte.",
+	"templatesandbox-apihelp-contentmodel": "Innehållsmodell för <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Innehållsformat för <var>$1templatesandboxtext</var>."
+}

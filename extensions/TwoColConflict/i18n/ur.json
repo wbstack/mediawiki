@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"BukhariSaeed",
+			"Muhammad Shuaib"
+		]
+	},
+	"twocolconflict": "دوکالمی‌تنازع‌ترمیم",
+	"twocolconflict-beta-feature-message": "دو کالمی تنازع ترمیم",
+	"twocolconflict-beta-feature-description": "تنازع ترمیم کے وقت مزید بہتر اور اضافی خصوصیات سے مزین دو کالمی نمائش دیکھیں۔",
+	"twocolconflict-split-header-hint-beta": "اِس بِیٹا فیچر کا استعمال کرنے کا شکریہ۔ [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View اس صفحہ پر] فیڈ بیک دے کر آپ بھی اس کی مزید بہتری میں مدد کر سکتے ہیں۔",
+	"twocolconflict-split-your-version-header": "آپ کا نسخہ",
+	"twocolconflict-split-current-version-header": "حالیہ نسخہ بمطابق $1",
+	"twocolconflict-split-not-saved-at": "اب تک شائع نہیں ہوا",
+	"twocolconflict-split-choose-version": "براہ مہربانی ایک نسخہ چُنیں",
+	"twocolconflict-split-tour-popup3-header": "نمایاں عبارت",
+	"twocolconflict-split-edit-tooltip": "متن میں ترمیم",
+	"twocolconflict-split-save-tooltip": "تبدیلیاں شائع کرکے خانہ ترمیم سے باہر نکلیں۔",
+	"twocolconflict-split-reset-tooltip": "متن ری سیٹ کریں",
+	"twocolconflict-split-reset-warning-cancel": "منسوخ",
+	"twocolconflict-split-reset-warning-accept": "مسترد",
+	"twocolconflict-split-collapse-tooltip": "عبارت چھپائیں",
+	"twocolconflict-split-expand-tooltip": "مکمل عبارت دکھائیں"
+}

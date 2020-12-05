@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jeblad",
+			"Macofe",
+			"Njardarlogar"
+		]
+	},
+	"templatesandbox": "Malsandkasse",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Visualiserer ei side]] som inkluderer malar frå ein sandkasse",
+	"templatesandbox-suffix": "sandkasse",
+	"templatesandbox-legend": "Alternativ for malsandkasse",
+	"templatesandbox-text": "Du kan velja eit sett med malar som er lagra i sandkassen din med hjelp av eit passande sandkasseførefeste. Om du til dømes vil førehandsvisa ein versjon av {{ns:Template}}:Test som du har lagra som «{{ns:User}}:Foo/sandkasse/{{ns:Template}}:Test», så bruk «{{ns:User}}:Foo/sandkasse» som førefeste.",
+	"templatesandbox-prefix-label": "Sandkasseførefeste:",
+	"templatesandbox-page-label": "Teikn ut side:",
+	"templatesandbox-revid-label": "Teikn ut versjon:",
+	"templatesandbox-text-label": "Teikn ut wikitekst:",
+	"templatesandbox-submit": "Vis",
+	"templatesandbox-title-output": "Malsandkasse: $1",
+	"templatesandbox-editform-legend": "Førehandsvis ei side med denne malen",
+	"templatesandbox-editform-page-label": "Sidetittel",
+	"templatesandbox-editform-view-label": "Førehandsvis",
+	"templatesandbox-preview": "Førehandsvising av $2",
+	"templatesandbox-previewnote": "'''Hugs at dette berre er ei førehandsvising av [[:$1]].'''\nEndringane dine er ikkje lagra enno!",
+	"templatesandbox-invalid-title": "Tittelen du oppgav er ugild.",
+	"templatesandbox-title-not-exists": "Tittelen du oppgav finst ikkje.",
+	"templatesandbox-revision-not-exists": "Versjonen du oppgav finst ikkje.",
+	"templatesandbox-invalid-prefix": "Sandkasseførefestet du oppgav er ugildt.",
+	"templatesandbox-prefix-not-local": "Sandkasseførefestet du oppgav er ikkje lokalt.",
+	"templatesandbox-page-or-revid": "Du må oppgje anten ein tittel for ei side eller eit versjonsnummer.",
+	"templatesandbox-editform-need-title": "For å førhandsvise ei anna side med denne malen, må du oppgje ein tittel.",
+	"templatesandbox-editform-invalid-title": "Tittelen du oppgav for førehandsvising er ugild.",
+	"templatesandbox-editform-title-not-exists": "Tittelen du oppgav for førehandsvising finst ikkje."
+}

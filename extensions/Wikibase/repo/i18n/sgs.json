@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hugo.arg",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "taisītė",
+	"wikibase-add": "prėdietė",
+	"wikibase-label-empty": "Žīmies nie",
+	"wikibase-description-empty": "Aprašīms nie ožpėldīts",
+	"wikibase-sitelinks-special": "Kėtė tėnklapē",
+	"wikibase-statementview-rank-normal": "Paprasts rētings",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|šaltėnis|šaltėnē|šaltėniu}}"
+}

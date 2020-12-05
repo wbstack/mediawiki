@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joris Darlington Quarshie"
+		]
+	},
+	"twocolconflict-split-edit-tooltip": "Klik om hierdie teks te wysig",
+	"twocolconflict-split-save-tooltip": "Pas u wysigings op hierdie teks toe",
+	"twocolconflict-split-reset-tooltip": "Gooi al u wysigings aan hierdie teks weg",
+	"twocolconflict-split-collapse-tooltip": "Vou onveranderde teks in",
+	"twocolconflict-split-expand-tooltip": "Brei onveranderde teks uit",
+	"twocolconflict-split-help-tooltip": "Wys hulp"
+}

@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"AlimOmar",
+			"Macofe",
+			"Sahran",
+			"Uzdil"
+		]
+	},
+	"wikibase-entity-query": "سۈرۈشتۈر",
+	"wikibase-edit": "تەھرىرلەش",
+	"wikibase-add": "قوش",
+	"wikibase-label-empty": "خەتكۈچكە ئېنىقلىما بېرىلمىگەن",
+	"wikibase-description-empty": "ئېنىقلىما بېرىلگەن ئىزاھات يوق",
+	"wikibase-sitelink-site-edit-placeholder": "site",
+	"wikibase-sitelink-page-edit-placeholder": "ماقالىلەر",
+	"wikibase-sitelinks-special": "باشقا بېكەتلەر",
+	"wikibase-remove": "چىقىرىۋەت",
+	"wikibase-propertypage-datatype": "سانلىق-مەلۇمات تىپى",
+	"wikibase-statementview-rank-normal": "نورمال دەرىجە",
+	"wikibase-itemlink-id-wrapper": "($1)",
+	"wikibase-itembytitle-lookup-site": "تور بېكەت:",
+	"wikibase-itembytitle-lookup-page": "بەت:",
+	"wikibase-itembytitle-submit": "ئىزدە",
+	"wikibase-itemdisambiguation-lookup-language": ":تىل كودى",
+	"wikibase-itemdisambiguation-lookup-label": "ئەن:",
+	"wikibase-itemdisambiguation-submit": "ئىزدە",
+	"wikibase-newproperty-datatype": "سانلىق-مەلۇمات تىپى:",
+	"wikibase-newentity-label": "ئەن:",
+	"wikibase-newentity-description": "چۈشەندۈرۈش:",
+	"wikibase-newentity-submit": "قۇر",
+	"wikibase-setlabel-label": "ئەن",
+	"wikibase-modifyentity-id": "كىملىكى",
+	"wikibase-modifyterm-language": ":تىل كودى",
+	"wikibase-restoreold": "ئەسلىگە كەلتۈر",
+	"wikibase-setclaim-warning-duplicatemainsnak": "كۆپەيتىلگەن ئاساسلىق snak بايقالدى. بايانات قوشۇلمىدى."
+}

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fryed-peach",
+			"Otokoume",
+			"Shirayuki"
+		]
+	},
+	"invitesignup": "このウィキに人を招待",
+	"is-desc": "招待メールを送信する",
+	"is-tableth-date": "日時",
+	"is-tableth-email": "メール",
+	"is-tableth-inviter": "招待者",
+	"is-tableth-signup": "利用者登録",
+	"is-tableth-groups": "グループ",
+	"is-add": "追加",
+	"is-delete": "削除",
+	"is-invalidemail": "<b>$1</b> は有効なメールアドレスではありません。",
+	"is-emailsubj": "{{SITENAME}}へのご招待",
+	"is-emailbody": "{{GENDER:$1|$1}} があなたを {{SITENAME}} への参加を招待しています。\n$2 で登録できます",
+	"right-invitesignup": "利用者を招待",
+	"action-invitesignup": "利用者をこのサイトに招待"
+}

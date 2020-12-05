@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Niklas Laxström"
+		]
+	},
+	"invitesignup": "Invite people to this wiki",
+	"is-desc": "Send email invites",
+	"is-tableth-date": "Date",
+	"is-tableth-email": "Email",
+	"is-tableth-inviter": "Inviter",
+	"is-tableth-signup": "Signed up",
+	"is-tableth-groups": "Groups",
+	"is-add": "Add",
+	"is-delete": "Delete",
+	"is-invalidemail": "<b>$1</b> is not a valid email address.",
+	"is-emailsubj": "You are invited to join {{SITENAME}}",
+	"is-emailbody": "Hello,\n\n{{GENDER:$1|$1}} has invited you to sign up to {{SITENAME}}.\nYou can sign up at $2",
+	"right-invitesignup": "Invite users to sign up",
+	"action-invitesignup": "invite users to sign up to this site"
+}

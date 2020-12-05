@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dvorapa",
+			"Li-sung",
+			"Mormegil",
+			"Patriccck"
+		]
+	},
+	"skinname-modern": "Moderní",
+	"modern.css": "/* Zde uvedené CSS bude ovlivňovat pouze vzhled „Moderní“ */",
+	"modern.js": "/* Zde uvedený JavaScript bude použit pouze pro uživatele vzhledu „Moderní“ */",
+	"modern-desc": "Šedomodrý vzhled s postranním a horním panelem. Odvozen ze vzhledu Kniha."
+}

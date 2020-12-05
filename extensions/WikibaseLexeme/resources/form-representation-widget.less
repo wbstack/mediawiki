@@ -1,0 +1,141 @@
+@import 'mediawiki.mixins';
+@import 'mediawiki.ui/variables';
+
+.representation-widget {
+	display: flex;
+	margin-right: 18em; /* compensate absolutely positioned toolbar (.wikibase-entityview .wikibase-toolbar-container) */
+	min-width: 0;
+
+	&_representation-list {
+		margin: 0 !important;
+		padding: 0 !important;
+		list-style: none;
+		display: flex;
+		flex-wrap: wrap;
+		flex-grow: 1;
+		min-width: 0;
+	}
+
+	&_representation {
+		display: flex;
+		flex-direction: column;
+		border-left: 5px solid @colorGray12;
+		padding: 0 9px;
+		margin: 0.785em 0;
+		min-width: 0;
+	}
+
+	&_representation-value {
+		font-size: 1em;
+		.hyphens( auto );
+	}
+
+	&_representation-language {
+		font-size: 1em;
+	}
+
+	&_edit-area {
+		display: flex;
+		border: 0.143em solid #9cf;
+	}
+
+	&_edit-area-controls {
+		margin: 0;
+	}
+
+	&_controls {
+		width: 100px;
+		padding: 20px 40px;
+		background: #eaf3ff;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	&_control {
+		background: transparent;
+		border: 0;
+		font-size: 1em;
+		margin: 10px;
+		cursor: pointer;
+		color: @colorProgressive;
+	}
+
+	&_representation-edit-box {
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-around;
+		border-left: 6px solid #eaf3ff;
+		padding: 0 18px 0 9px;
+		margin: 0.5em 0;
+	}
+
+	&_representation-value-label {
+		font-size: 0.9em;
+	}
+
+	&_representation-value-input {
+		resize: horizontal;
+		min-width: 7.5em;
+		padding-right: 1.25em;
+		font-size: 1em;
+	}
+
+	&_representation-value-input:active {
+		width: auto;
+	}
+
+	&_representation-language-label {
+		font-size: 0.9em;
+		margin-top: 1em;
+	}
+
+	&_representation-language-input {
+		resize: horizontal;
+		min-width: 7.5em;
+		font-size: 1em;
+		padding-right: 1.25em;
+	}
+
+	&_representation-language-input_redundant-language,
+	&_redundant-language-warning {
+		background-color: @warning-background;
+		border-color: @warning-color;
+	}
+
+	&_redundant-language-warning p {
+		padding: 0.5em 0.5em;
+	}
+
+	&_representation-language-input:active {
+		width: auto;
+	}
+
+	&_representation-remove {
+		border: 0;
+		background: transparent;
+		font-size: 1em;
+		position: absolute;
+		top: -0.3em;
+		right: 0.125em;
+
+		&:enabled {
+			color: @colorProgressiveActive;
+			cursor: pointer;
+		}
+
+		&:disabled {
+			color: @colorGray7;
+		}
+	}
+
+	&_add {
+		height: 100%;
+		border: 0;
+		font-size: 1em;
+		text-align: center;
+		background: #eaf3ff;
+		cursor: pointer;
+	}
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jyllanj",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "redigiir",
+	"wikibase-add": "tilfye",
+	"wikibase-label-empty": "Ien etikett ä definiirtj",
+	"wikibase-description-empty": "Ien beskriiwels definiirtj",
+	"wikibase-statementsection-statements": "Utsawn",
+	"wikibase-sitelinks-special": "Anje webbstede",
+	"wikibase-statementview-rank-normal": "Normal rång",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|referens|referense}}"
+}

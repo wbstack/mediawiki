@@ -1,0 +1,43 @@
+{
+	"name": "WikibaseInWikitext",
+	"author": [
+		"Addshore"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:WikibaseInWikitext",
+	"descriptionmsg": "wikibaseInWikitext-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.32.0"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikibaseInWikitext\\": "includes/"
+	},
+	"config": {
+		"WikibaseInWikitextSparqlDefaultUi": {
+			"description": "Default UI URI for the sparql tag",
+			"value": false
+		}
+	},
+	"Hooks": {
+		"ParserFirstCallInit": "MediaWiki\\Extension\\WikibaseInWikitext\\Hooks::onParserFirstCallInit"
+	},
+	"MessagesDirs": {
+		"WikibaseInWikitext": [
+			"i18n"
+		]
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "WikibaseInWikitext/resources"
+	},
+	"ResourceModules": {
+		"ext.wikibaseInWikitext": {
+			"dependencies": [],
+			"messages": [],
+			"styles": [],
+			"scripts": []
+		}
+	},
+	"manifest_version": 2
+}

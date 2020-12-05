@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31",
+			"Macofe"
+		]
+	},
+	"templatesandbox": "Nauc de sabla de modèl",
+	"templatesandbox-suffix": "Nauc de sabla",
+	"templatesandbox-legend": "Nauc de sabla de modèl",
+	"templatesandbox-prefix-label": "Prefix de nauc de sabla :",
+	"templatesandbox-page-label": "Rendut de la pagina :",
+	"templatesandbox-revid-label": "Rendut de la revision :",
+	"templatesandbox-text-label": "Rendut del wikitèxte :",
+	"templatesandbox-submit": "Afichar",
+	"templatesandbox-editform-page-label": "Títol de la pagina",
+	"templatesandbox-editform-view-label": "Afichar l'apercebut",
+	"templatesandbox-preview": "Apercebut de $2",
+	"templatesandbox-editform-need-template": "Per aver un apercebut d’una autra pagina amb aqueste modèl, un nom de modèl deu èsser especificat."
+}

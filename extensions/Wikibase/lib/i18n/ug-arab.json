@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sahran",
+			"Uzdil"
+		]
+	},
+	"wikibase-sitelinks-wikipedia": "ۋىكىقامۇس",
+	"datatypes-type-string": "تېكىست",
+	"datatypes-type-quantity": "سانى",
+	"datatypes-type-number": "نومۇرى",
+	"datatypes-type-unknown": "بەلگىلەنمىگەن",
+	"datatypes-type-boolean": "بۇلىن",
+	"datatypes-type-wikibase-item": "تۈر"
+}

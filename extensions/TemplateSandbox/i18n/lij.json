@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"templatesandbox": "Paggina de proeuva Template",
+	"templatesandbox-text": "Indicando un prefisso pe-a sandbox, ti pœu seleçionâ un groppo de template sarvæ into to spaççio sandbox.\nPrexempio, se ti vœu fâ l'anteprimma de 'na verscion de {{ns:Template}}:Test che t'hæ sarvou comme \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", dœuvia comme prefisso \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\"."
+}

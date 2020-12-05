@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dbc334",
+			"Eleassar",
+			"HairyFotr"
+		]
+	},
+	"templatesandbox": "Peskovnik za predloge",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Prikaže stran]] z vključitvijo predlog iz peskovnika",
+	"templatesandbox-suffix": "peskovnik",
+	"templatesandbox-legend": "Peskovnik za predloge",
+	"templatesandbox-text": "Z uporabo ustrezne predpone peskovnika lahko izberete množico predlog, ki ste jih shranili v svojem peskovniku.\nČe želite npr. prikazati predogled različice {{ns:Template}}:Test, ki ste jo shranili kot  »{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test«, uporabite predpono »{{ns:User}}:Foo/{{int:templatesandbox-suffix}}«.",
+	"templatesandbox-prefix-label": "Predpona peskovnika:",
+	"templatesandbox-page-label": "Prikazana stran:",
+	"templatesandbox-revid-label": "Prikazana redakcija:",
+	"templatesandbox-text-label": "Prikazano wikibesedilo:",
+	"templatesandbox-submit": "Ogled",
+	"templatesandbox-title-output": "Peskovnik za predloge: $1",
+	"templatesandbox-editform-legend": "Predogled strani s to predlogo",
+	"templatesandbox-editform-page-label": "Naslov strani",
+	"templatesandbox-editform-view-label": "Prikaži predogled",
+	"templatesandbox-preview": "Predogled strani $2",
+	"templatesandbox-previewnote": "'''To je samo predogled strani [[:$1]].'''\nVaše spremembe še niso shranjene!",
+	"templatesandbox-invalid-title": "Navedeni naslov ni veljaven.",
+	"templatesandbox-title-not-exists": "Navedeni naslov ne obstaja.",
+	"templatesandbox-revision-not-exists": "Navedena redakcija ne obstaja.",
+	"templatesandbox-invalid-prefix": "Navedena predpona peskovnika ni veljavna.",
+	"templatesandbox-prefix-not-local": "Navedena predpona peskovnika ni lokalna.",
+	"templatesandbox-page-or-revid": "Navesti morate naslov strani ali ID-številko redakcije.",
+	"templatesandbox-fail-post": "<em>Ker je prišlo do izgube podatkov o seji, smo predogled skrili kot previdnostni ukrep pred napadi z JavaScriptom.</em>\n\n<strong>Če je to veljaven poskus predogleda, poskusite znova.</strong>\nČe še vedno ne deluje, se poskusite [[Special:UserLogout|odjaviti]] in znova prijaviti.",
+	"templatesandbox-fail-post-anon": "<em>Ker niste prijavljeni, smo predogled skrili kot previdnostni ukrep pred napadi z JavaScriptom.</em>\n\n<strong>Če je to veljaven poskus predogleda, se [[Special:UserLogin|prijavite]] in poskusite znova.</strong>",
+	"templatesandbox-editform-need-template": "Za predogled še ene strani s to predlogo morate določiti ime predloge.",
+	"templatesandbox-editform-need-title": "Za predogled druge strani s to predlogo morate navesti naslov strani.",
+	"templatesandbox-editform-invalid-template": "Ime predloge, ki ste jo določili, ni veljavno.",
+	"templatesandbox-editform-invalid-title": "Naslov, ki ste ga navedli za predogled, ni veljaven.",
+	"templatesandbox-editform-title-not-exists": "Naslov, ki ste ga navedli za predogled, ne obstaja."
+}

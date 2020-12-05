@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Angpradesh",
+			"Samyo"
+		]
+	},
+	"tooltip-t-wikibase": "सम्बद्ध डाटा भण्डार प्रविष्टि केरऽ कड़ी",
+	"wikibase-comment-update": "{{WBREPONAME}} आइटम बदललऽ गेलै",
+	"wikibase-dataitem": "{{WBREPONAME}} प्रविष्टि",
+	"wikibase-editlinks": "कड़ी संपादित करऽ",
+	"wikibase-editlinkstitle": "अन्तरभाषा कड़ी संपादित करऽ",
+	"wikibase-rc-hide-wikidata": "विकिडेटा $1",
+	"wikibase-rc-hide-wikidata-hide": "छुपाबऽ",
+	"wikibase-rc-hide-wikidata-show": "देखाबऽ",
+	"wikibase-rc-wikibase-edit-letter": "ड.",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} संपादन",
+	"wikibase-otherprojects": "आरू प्रकल्प म॑"
+}

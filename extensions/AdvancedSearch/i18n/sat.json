@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fagunkoyel Hansdah",
+			"Ramjit Tudu"
+		]
+	},
+	"advancedsearch-optgroup-text": "ᱥᱟᱦᱴᱟ ᱚᱞ ᱨᱮ ᱥᱮᱸᱫᱽᱨᱟ",
+	"advancedsearch-optgroup-structure": "ᱜᱚᱲᱦᱚᱱ",
+	"advancedsearch-optgroup-files": "ᱨᱮᱫᱠᱚ ᱟᱨ ᱪᱤᱛᱟᱹᱨᱠᱚ",
+	"advancedsearch-field-plain": "ᱱᱩᱠᱩ ᱟᱹᱲᱟᱹᱠᱚ:",
+	"advancedsearch-field-phrase": "ᱱᱚᱶᱟ ᱚᱞ ᱩᱛᱟᱹᱨᱜᱮ:",
+	"advancedsearch-field-or": "ᱱᱩᱠᱩ ᱟᱹᱲᱟᱹ ᱠᱷᱚᱱ ᱢᱤᱫᱴᱟᱝ",
+	"advancedsearch-field-not": "ᱱᱩᱠᱩ ᱟᱹᱲᱟᱹᱫᱚ ᱵᱟᱝ:",
+	"advancedsearch-field-deepcategory": "ᱱᱚᱶᱟ ᱛᱷᱚᱠ ᱨᱮᱱᱟᱜ ᱥᱟᱦᱴᱟᱠᱚ:",
+	"advancedsearch-field-hastemplate": "ᱱᱚᱶᱟ ᱪᱷᱟᱸᱪᱠᱚ ᱥᱟᱶᱛᱮᱭᱟᱜ ᱥᱟᱦᱴᱟᱠᱚ:",
+	"advancedsearch-field-inlanguage": "ᱱᱚᱶᱟ ᱯᱟᱹᱨᱥᱤ ᱨᱮᱱᱟᱜ ᱥᱟᱦᱴᱟᱠᱚ",
+	"advancedsearch-field-filetype": "ᱨᱮᱫ ᱞᱮᱠᱟᱱᱟᱜ:",
+	"advancedsearch-field-filew": "ᱨᱮᱫ ᱚᱥᱟᱨ ᱯᱤᱠᱥᱮᱞᱨᱮ:",
+	"advancedsearch-field-fileh": "ᱨᱮᱫ ᱩᱥᱩᱞ ᱯᱩᱠᱥᱮᱞ ᱛᱮ:",
+	"advancedsearch-inlanguage-default": "ᱯᱟᱹᱨᱥᱤ ᱵᱟᱪᱷᱚᱱ ᱢᱮ",
+	"advancedsearch-filetype-section-types": "ᱥᱟᱫᱷᱟᱨᱚᱱ ᱨᱮᱫ ᱞᱮᱠᱟᱱ",
+	"advancedsearch-filetype-section-image": "ᱪᱤᱛᱟᱹᱨ ᱯᱷᱚᱨᱢᱮᱴᱥ",
+	"advancedsearch-filetype-bitmap": "ᱪᱤᱛᱟᱹᱨ",
+	"advancedsearch-filetype-drawing": "ᱵᱮᱱᱟᱣ",
+	"advancedsearch-filetype-audio": "ᱟᱸᱡᱚᱢᱟᱱᱟᱜ",
+	"advancedsearch-filetype-video": "ᱵᱷᱤᱰᱤᱭᱳ",
+	"advancedsearch-filetype-office": "ᱩᱯᱤᱥ",
+	"advancedsearch-filesize-equals": "ᱥᱚᱢᱟᱱ",
+	"advancedsearch-filesize-greater-than": "ᱠᱷᱚᱱ ᱢᱟᱨᱟᱝ",
+	"advancedsearch-filesize-smaller-than": "ᱠᱷᱚᱱ ᱦᱩᱰᱤᱧ",
+	"advancedsearch-namespaces-search-in": "ᱥᱮᱸᱫᱽᱨᱟ ᱨᱮ:",
+	"advancedsearch-namespaces-remember": "ᱵᱟᱪᱷᱚᱱ ᱨᱮᱵᱮᱫᱽ ᱢᱮ ᱦᱟᱯᱮᱱ ᱯᱟᱱᱛᱮᱠᱚ ᱞᱟᱹᱜᱤᱫ",
+	"advancedsearch-namespaces-preset-all": "ᱡᱚᱛᱚ",
+	"advancedsearch-namespaces-preset-default": "ᱰᱤᱯᱷᱚᱞᱴ",
+	"advancedsearch-namespaces-preset-general-help": "ᱥᱟᱫᱷᱟᱨᱚᱱ ᱜᱚᱲᱚ",
+	"advancedsearch-namespaces-preset-discussion": "ᱜᱟᱞᱚᱪ",
+	"advancedsearch-namespaces-placeholder": "ᱨᱟᱠᱷᱟᱧᱩᱛᱩᱢ ᱥᱮᱞᱮᱫ"
+}

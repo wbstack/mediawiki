@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"EugeneZelenko",
+			"Jim-by",
+			"Macofe",
+			"Red Winged Duck",
+			"Renessaince",
+			"Wizardist"
+		]
+	},
+	"math-desc": "Выводзіць матэматычныя формулы, запісаныя паміж тэгамі <code>&lt;math&gt;</code> і <code>&lt;/math&gt;</code>",
+	"math-visualeditor-mwchemdialog-title": "Хімічная формула",
+	"math-visualeditor-mwcheminspector-title": "Хімічная формула",
+	"math-visualeditor-mwlatexcontextitem-quickedit": "Хуткае рэдагаваньне",
+	"math-visualeditor-mwlatexdialog-card-formula": "Формула",
+	"math-visualeditor-mwlatexdialog-card-options": "Налады",
+	"math-visualeditor-mwlatexinspector-id": "Ідэнтыфікатар спасылкі (неабавязковы)",
+	"math_failure": "Немагчыма разабраць",
+	"math_syntax_error": "сынтаксычная памылка",
+	"math-tracking-category-error": "Старонкі з матэматычнымі памылкамі",
+	"math-tracking-category-render-error": "Старонкі з памылкамі ў матэматычных формулах",
+	"math_unknown_error": "невядомая памылка",
+	"math_unknown_function": "невядомая функцыя '$1'",
+	"mw_math_latexml": "LaTeXML (экспэрымэнтальна; ужывае MathML)",
+	"mw_math_mathml": "MathML зь вяртаньнем да SVG ці PNG (рэкамэндуецца для сучасных браўзэраў і інструмэнтаў падвышэньня даступнасьці)",
+	"mw_math_png": "PNG-выявы",
+	"mw_math_source": "LaTeX-разьметка (для тэкставых браўзэраў)",
+	"prefs-math": "Матэматычныя формулы",
+	"mathstatus": "Генэрацыя матэматычных формулаў",
+	"wikibase-listdatatypes-math-head": "Матэматычны выраз"
+}

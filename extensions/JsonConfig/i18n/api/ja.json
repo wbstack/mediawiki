@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki"
+		]
+	},
+	"apihelp-jsonconfig-description": "JsonConfig サブシステムに直接アクセスできるようにします。",
+	"apihelp-jsonconfig-param-title": "処理するページ名です。",
+	"apihelp-jsonconfig-example-1": "設定内容を表示",
+	"apihelp-jsonconfig-example-2": "[[Data:Brazil/Amazonas.map]] をリセット",
+	"apihelp-jsonconfig-example-3": "[[Data:Brazil/Amazonas.map]] を再読み込み"
+}

@@ -1,0 +1,77 @@
+.wikibase-rankselector {
+	border: 0;
+	background: none transparent;
+	cursor: pointer;
+}
+
+.wikibase-rankselector.ui-state-disabled {
+	cursor: default;
+}
+
+.wikibase-rankselector .ui-icon.ui-icon-rankselector {
+	/* SVG support using a transparent gradient to guarantee cross-browser
+	 * compatibility (browsers able to understand gradient syntax support also SVG).
+	 * http://pauginer.tumblr.com/post/36614680636/invisible-gradient-technique */
+	background-image: url( images/rankselector.png );
+	/* @embed */
+	background-image: linear-gradient( transparent, transparent ), url( images/rankselector.svg );
+	width: 8px;
+	height: 20px;
+}
+
+.wikibase-rankselector .ui-icon.wikibase-rankselector-preferred {
+	background-position: 0;
+}
+
+.wikibase-rankselector .ui-icon.wikibase-rankselector-normal {
+	background-position: -9px;
+}
+
+.wikibase-rankselector .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -18px;
+}
+
+.wikibase-rankselector.ui-state-disabled .ui-icon.wikibase-rankselector-preferred,
+.wb-edit.wikibase-rankselector.ui-state-active .ui-icon.wikibase-rankselector-preferred {
+	background-position: -27px;
+}
+
+.wikibase-rankselector.ui-state-disabled .ui-icon.wikibase-rankselector-normal,
+.wb-edit.wikibase-rankselector.ui-state-active .ui-icon.wikibase-rankselector-normal {
+	background-position: -36px;
+}
+
+.wikibase-rankselector.ui-state-disabled .ui-icon.wikibase-rankselector-deprecated,
+.wb-edit.wikibase-rankselector.ui-state-active .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -45px;
+}
+
+.wikibase-rankselector.ui-state-default .ui-icon.wikibase-rankselector-preferred {
+	background-position: -54px;
+}
+
+.wikibase-rankselector.ui-state-default .ui-icon.wikibase-rankselector-normal {
+	background-position: -63px;
+}
+
+.wikibase-rankselector.ui-state-default .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -72px;
+}
+
+.wikibase-rankselector.ui-state-hover .ui-icon.wikibase-rankselector-preferred {
+	background-position: -81px;
+}
+
+.wikibase-rankselector.ui-state-hover .ui-icon.wikibase-rankselector-normal {
+	background-position: -90px;
+}
+
+.wikibase-rankselector.ui-state-hover .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -99px;
+}
+
+.wikibase-rankselector-menu {
+	cursor: pointer;
+	position: absolute;
+	z-index: 2; /* Monobook #content has 2 */
+}

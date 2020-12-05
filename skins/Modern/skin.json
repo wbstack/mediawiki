@@ -1,0 +1,53 @@
+{
+	"name": "Modern",
+	"author": [
+		"River Tarnell",
+		"..."
+	],
+	"url": "https://www.mediawiki.org/wiki/Skin:Modern",
+	"descriptionmsg": "modern-desc",
+	"namemsg": "skinname-modern",
+	"license-name": "GPL-2.0-or-later",
+	"type": "skin",
+	"requires": {
+		"MediaWiki": ">= 1.30.0"
+	},
+	"ValidSkinNames": {
+		"modern": "Modern"
+	},
+	"MessagesDirs": {
+		"Modern": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"skins.modern": {
+			"class": "ResourceLoaderSkinModule",
+			"features": [ "legacy" ],
+			"styles": {
+				"resources/main.css": {
+					"media": "screen"
+				},
+				"resources/print.css": {
+					"media": "print"
+				}
+			}
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteSkinPath": "Modern"
+	},
+	"AutoloadClasses": {
+		"SkinModern": "SkinModern.php",
+		"ModernTemplate": "ModernTemplate.php"
+	},
+	"ResourceModuleSkinStyles": {
+		"modern": {
+			"+oojs-ui-core.styles": "skinStyles/ooui.less",
+			"+mediawiki.action.view.redirectPage": "skinStyles/mediawiki.action.view.redirectPage.css",
+			"+ext.echo.styles.badge": "skinStyles/ext.echo.styles.badge.css"
+		}
+	},
+	"manifest_version": 2
+}

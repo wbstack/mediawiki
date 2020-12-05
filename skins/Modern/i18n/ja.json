@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fryed-peach",
+			"Omotecho",
+			"青子守歌"
+		]
+	},
+	"skinname-modern": "モダン",
+	"modern.css": "/* ここに記述したCSSはモダン外装の利用者に影響します */",
+	"modern.js": "/* ここにあるすべてのJavaScriptは、モダン外装を使用している利用者に対して読み込まれます */",
+	"modern-desc": "サイドバーとトップバーのある、青とグレーの外装。モノブックからの派生。"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joao Xavier",
+			"Malafaya"
+		]
+	},
+	"confirmaccount-review": "Revizar",
+	"confirmaccount-real": "Nomo:",
+	"confirmaccount-noreason": "(nulo)",
+	"confirmaccount-ip": "IP-adreso:",
+	"confirmaccount-submit": "Konfirmez",
+	"confirmaccount-summary": "Kreo di nova pagino por nova uzero.",
+	"confirmaccount-wsum": "Bonveno!"
+}

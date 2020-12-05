@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dr Lotus Black"
+		]
+	},
+	"wikibase-lexeme-mergelexemes-error-lexeme-not-found": "Lexeme '$1' မတွေ့ရှိနိုင်ပါ။",
+	"wikibase-lexeme-mergelexemes-error-permission-denied": "ခွင့်ပြုချက် ငြင်းပယ်လိုက်သည်။"
+}

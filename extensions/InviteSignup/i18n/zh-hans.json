@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"Xiaomingyan",
+			"Yfdyh000"
+		]
+	},
+	"invitesignup": "邀请其他人加入此wiki",
+	"is-desc": "发送电子邮件邀请",
+	"is-tableth-date": "日期",
+	"is-tableth-email": "电子邮箱",
+	"is-tableth-inviter": "邀请者",
+	"is-tableth-signup": "已注册",
+	"is-tableth-groups": "组",
+	"is-add": "添加",
+	"is-delete": "删除",
+	"is-invalidemail": "<b>$1</b>不是一个有效的电子邮件地址。",
+	"is-emailsubj": "您被邀请加入{{SITENAME}}",
+	"is-emailbody": "您好，\n\n{{GENDER:$1|$1}} 邀请您注册 {{SITENAME}}。\n您可以在 $2 注册",
+	"right-invitesignup": "邀请用户注册",
+	"action-invitesignup": "邀请用户在该网站注册"
+}

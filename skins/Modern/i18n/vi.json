@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Minh Nguyen",
+			"Vinhtantran"
+		]
+	},
+	"skinname-modern": "Hiện đại",
+	"modern.css": "/* Tất cả mã CSS tại đây sẽ được tải khi người dùng sử dụng giao diện Hiện đại */",
+	"modern.js": "/* Tất cả mã JavaScript tại đây sẽ được tải khi người dùng sử dụng giao diện Hiện đại */",
+	"modern-desc": "Giao diện màu xanh/xám có thanh bên và thanh trên. Phỏng theo MonoBook."
+}

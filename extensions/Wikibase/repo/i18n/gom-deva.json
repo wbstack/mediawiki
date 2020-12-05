@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Darshan kandolkar",
+			"Konknni mogi 24",
+			"Ladsgroup",
+			"Supriya kankumbikar",
+			"The Discoverer",
+			"Vaishali Parab"
+		]
+	},
+	"wikibase-edit": "बदल",
+	"wikibase-add": "जोड",
+	"wikibase-label-empty": "कुरू निश्चीत करुं ना",
+	"wikibase-description-empty": "आतां मेरेन खंयचेंच वर्णन दिवूंक ना",
+	"wikibase-statementsection-statements": "विधानां",
+	"wikibase-sitelinks-special": "हेर वेबसायट",
+	"wikibase-statementview-rank-normal": "सामान्य क्रम",
+	"wikibase-statementview-references-counter": "$1 {{बहुवचन:$|संदर्भ|संदर्भ}}"
+}

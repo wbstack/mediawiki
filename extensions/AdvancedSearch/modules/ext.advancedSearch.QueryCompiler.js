@@ -1,0 +1,78 @@
+( function () {
+	'use strict';
+
+	mw.libs = mw.libs || {};
+	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
+
+	/**
+	 * @param {Array} searchFields
+	 * @class
+	 * @constructor
+	 */
+	mw.libs.advancedSearch.QueryCompiler = function ( searchFields ) {
+		this.fields = searchFields;
+	};
+
+	/**
+	 * @private
+	 * @param {mw.libs.advancedSearch.dm.SearchModel} state
+	 * @return {string[]}
+	 */
+	mw.libs.advancedSearch.QueryCompiler.prototype.formatSearchFields = function ( state ) {
+		var queryElements = [],
+			greedyQuery = null;
+
+		this.fields.forEach( function ( field ) {
+			var val = state.getField( field.id ),
+				formattedQueryElement = val ? field.formatter( val ) : '';
+
+			if ( !formattedQueryElement ) {
+				return;
+			}
+
+			// FIXME: Should fail if there is more than one greedy field!
+			if ( field.greedy && !greedyQuery ) {
+				greedyQuery = field.formatter( val );
+			} else {
+				queryElements.push( formattedQueryElement );
+			}
+		} );
+		if ( greedyQuery ) {
+			queryElements.push( greedyQuery );
+		}
+
+		return queryElements;
+	};
+
+	/**
+	 * @param {mw.libs.advancedSearch.dm.SearchModel} state
+	 * @return {string}
+	 */
+	mw.libs.advancedSearch.QueryCompiler.prototype.compileSearchQuery = function ( state ) {
+		return this.formatSearchFields( state ).join( ' ' );
+	};
+
+	/**
+	 * @param {string} haystack
+	 * @param {string} needle
+	 * @return {boolean}
+	 */
+	var stringEndsWith = function ( haystack, needle ) {
+		var position = haystack.length - needle.length;
+		return position >= 0 && haystack.indexOf( needle, position ) === position;
+	};
+
+	/**
+	 * @param {string} search The current search string
+	 * @param {mw.libs.advancedSearch.dm.SearchModel} state
+	 * @return {string}
+	 */
+	mw.libs.advancedSearch.QueryCompiler.prototype.removeCompiledQueryFromSearch = function ( search, state ) {
+		var advancedQuery = this.compileSearchQuery( state );
+		if ( advancedQuery && stringEndsWith( search, advancedQuery ) ) {
+			return search.slice( 0, -advancedQuery.length ).replace( /\s+$/, '' );
+		}
+		return search;
+	};
+
+}() );

@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dvorapa",
+			"Ilimanaq29",
+			"JAn Dudík",
+			"Ján Kepler",
+			"Martin Urbanec",
+			"Matěj Suchánek",
+			"Mormegil",
+			"Patriccck"
+		]
+	},
+	"twocolconflict": "Dvousloupcový editační konflikt",
+	"twocolconflict-desc": "Při řešení editačního konfliktu zobrazuje slučovací obrazovku s verzemi vedle sebe",
+	"twocolconflict-beta-feature-message": "Dvousloupcový editační konflikt",
+	"twocolconflict-beta-feature-description": "Zobrazovat obrazovku editačního konfliktu pomocí vylepšeného dvousloupcového vzhledu.",
+	"twocolconflict-split-header-hint-beta": "Děkujeme vám za používání tohoto beta nástroje. Ve vývoji můžete přispět odesláním zpětné vazby [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View na této stránce].",
+	"twocolconflict-split-your-version-header": "Vaše revize",
+	"twocolconflict-split-current-version-header": "Aktuální verze zveřejněná $1",
+	"twocolconflict-split-not-saved-at": "Zatím nezveřejněno",
+	"twocolconflict-split-choose-version": "Prosíme, vyberte verzi",
+	"twocolconflict-split-tour-dialog-header": "Vyřešit editační konflikt",
+	"twocolconflict-split-tour-dialog-message": "Bohužel nastal editační konflikt: Během vaší editace jiný uživatel stránku také upravil a zveřejnil. Stránka nyní neobsahuje vaši editaci, ale editaci jiného uživatele. Žádáme vás, abyste svou verzi sloučili s nejnovější verzí jiného uživatele.",
+	"twocolconflict-split-tour-dialog-btn-text": "Začít slučovat",
+	"twocolconflict-split-tour-popup-btn-text": "Dobře, chápu.",
+	"twocolconflict-split-tour-popup3-header": "Zvýraznit text",
+	"twocolconflict-split-edit-tooltip": "Editovat text",
+	"twocolconflict-split-save-tooltip": "Použít vaše změny tohoto textu",
+	"twocolconflict-split-reset-tooltip": "Zahodit všechny vaše změny tohoto textu",
+	"twocolconflict-split-reset-warning": "Zahodit změny? Text se vrátí do okamžiku, kdy se editační konflikt stal.",
+	"twocolconflict-split-reset-warning-cancel": "Storno",
+	"twocolconflict-split-reset-warning-accept": "Zahodit",
+	"twocolconflict-split-collapse-tooltip": "Sbalit nezměněný text",
+	"twocolconflict-split-expand-tooltip": "Rozbalit nezměněný text"
+}

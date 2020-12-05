@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joanmp17"
+		]
+	},
+	"minerva-talk-add-topic": "ምይይጥ ወስኽ",
+	"mobile-frontend-editor-edit": "ኣተዓራረየ",
+	"minerva-download": "ፔ.ዲ.ኤፍ ኣውርድ",
+	"mobile-frontend-editor-redlink-create": "ገጽ ፈጠረ",
+	"mobile-frontend-home-button": "መበገሲ",
+	"mobile-frontend-language-article-heading": "ቋንቋ",
+	"mobile-frontend-main-menu-login": "ብመንነት እተው",
+	"mobile-frontend-main-menu-logout": "ብመንነት ውጻእ",
+	"mobile-frontend-main-menu-settings": "ኣቀማምጣታት",
+	"mobile-frontend-placeholder": "ብ{{SITENAME}} ምድላይ",
+	"mobile-frontend-random-button": "ዘፈቀዳዊ",
+	"mobile-frontend-user-page-talk": "ምይይጥ",
+	"minerva-page-actions-overflow": "ተወሳኺ",
+	"minerva-page-actions-info": "ናይዚ ገጽ ሓበሬታ",
+	"minerva-page-actions-backlinks": "ናብዚ ገጽ መጋጠሚታት",
+	"minerva-page-actions-language-switcher": "ቋንቋታት",
+	"minerva-page-actions-history": "ታሪኽ"
+}

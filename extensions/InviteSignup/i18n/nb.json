@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"invitesignup": "Inviter personer til denne wikien",
+	"is-desc": "Send epostinvitasjoner",
+	"is-tableth-date": "Dato",
+	"is-tableth-email": "Epost",
+	"is-tableth-inviter": "Inviterende",
+	"is-tableth-signup": "Registrert",
+	"is-tableth-groups": "Grupper",
+	"is-add": "Legg til",
+	"is-delete": "Slett",
+	"is-invalidemail": "<b>$1</b> er ikke en gyldig epostadresse.",
+	"is-emailsubj": "Du er invitert til {{SITENAME}}",
+	"is-emailbody": "Hei,\n\n{{GENDER:$1|$1}} har invitert deg til å bli med på {{SITENAME}}.\nDu kan registrere deg på $2",
+	"right-invitesignup": "Invitere brukere til å registrere seg",
+	"action-invitesignup": "invitere brukere til å registrere seg på dette nettstedet"
+}

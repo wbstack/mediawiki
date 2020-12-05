@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dj",
+			"Tacsipacsi"
+		]
+	},
+	"skinname-modern": "Modern",
+	"modern.css": "/* Az ide elhelyezett CSS hatással lesz a Modern felület használóira */",
+	"modern.js": "/* A Modern felületet használó szerkesztők számára betöltendő JavaScriptek */",
+	"modern-desc": "Egy kék/szürke felület oldalsávval és felső sávval. A MonoBookból kifejlesztve"
+}

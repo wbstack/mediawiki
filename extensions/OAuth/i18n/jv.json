@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"NoiX180"
+		]
+	},
+	"mwoauth-prefs-managegrants": "Aplikasi-aplikasi kang ginayut:",
+	"mwoauth-prefs-managegrantslink": "Tata $1 {{PLURAL:$1|aplikasi|aplikasi}} kang ginayut",
+	"oauthmanagemygrants": "Tata aplikasi-aplikasi kang ginayut",
+	"mwoauthmanagemygrants-confirm-legend": "Tata aplikasi kang ginayut"
+}

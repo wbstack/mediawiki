@@ -1,0 +1,9 @@
+{
+	"root": true,
+	"extends": [
+		"../src/.eslintrc.json"
+	],
+	"rules": {
+		"no-alert": "off"
+	}
+}

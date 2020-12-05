@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joao Xavier"
+		]
+	},
+	"templatesandbox": "Probilo por shabloni",
+	"templatesandbox-legend": "Probilo por shabloni",
+	"templatesandbox-title-output": "Probilo por shabloni: $1",
+	"templatesandbox-editform-legend": "Previdar pagino kun ica shablono",
+	"templatesandbox-editform-page-label": "Titulo di la pagino",
+	"templatesandbox-editform-view-label": "Montrez previdado"
+}

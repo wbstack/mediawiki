@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Erdemaslancan",
+			"Gırd",
+			"Kumkumuk",
+			"Mirzali"
+		]
+	},
+	"templatesandbox": "QumdorŞablon",
+	"templatesandbox-suffix": "qumdor",
+	"templatesandbox-legend": "Qumdorê Şabloni",
+	"templatesandbox-prefix-label": "Veroley qumdor:",
+	"templatesandbox-submit": "Bıvêne",
+	"templatesandbox-title-output": "QumdorŞablon:$1",
+	"templatesandbox-editform-legend": "Verasayışê pele be nê şabloni ra",
+	"templatesandbox-editform-page-label": "Sernameyê pele",
+	"templatesandbox-editform-view-label": "Verasayışi bımocne",
+	"templatesandbox-preview": "Verasayışê $2"
+}

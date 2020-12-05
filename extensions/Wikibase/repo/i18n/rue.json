@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dicto23456",
+			"Macofe",
+			"Tkalyn"
+		]
+	},
+	"wikibase-edit": "едітовати",
+	"wikibase-add": "додати",
+	"wikibase-sitelink-page-edit-placeholder": "сторінка",
+	"wikibase-itembytitle-lookup-page": "Сторінка:",
+	"wikibase-itemdisambiguation-lookup-language": "Код языка:",
+	"wikibase-modifyterm-language": "Код языка:"
+}

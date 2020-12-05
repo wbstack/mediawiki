@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"IAlex",
+			"Zetud"
+		]
+	},
+	"skinname-modern": "Moderne",
+	"modern.css": "/* Le CSS placé ici affectera les utilisateurs de l’habillage Modern. */",
+	"modern.js": "/* Tout JavaScript ici sera chargé avec les pages accédées par les utilisateurs de l’habillage Moderne uniquement */",
+	"modern-desc": "Un habillage bleu/gris avec barre latérale et bandeau supérieur. Dérivé de MonoBook"
+}

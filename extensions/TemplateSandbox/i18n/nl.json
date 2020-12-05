@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"JurgenNL",
+			"Mainframe98",
+			"Multichill",
+			"Romaine",
+			"Siebrand",
+			"Sjoerddebruin",
+			"Southparkfan"
+		]
+	},
+	"templatesandbox": "Sjabloonzandbak",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Rendert een pagina]] door sjablonen uit een testomgeving te transcluderen",
+	"templatesandbox-suffix": "zandbak",
+	"templatesandbox-legend": "Sjabloonzandbak",
+	"templatesandbox-text": "U kunt een verzameling sjablonen kiezen om in uw zandbakruimte op te slaan door het bijbehorende zandbakvoorvoegsel te gebruiken.\nAls u bijvoorbeeld een voorvertoning wilt zien van {{ns:Template}}:Test dat u hebt opgeslagen als \"{{ns:User}}:Gebruikersnaam/zandbak/{{ns:Template}}:Test\", gebruik dan \"{{ns:User}}:Gebruikersnaam/zandbak\" als het voorvoegsel.",
+	"templatesandbox-prefix-label": "Zandbakvoorvoegsel:",
+	"templatesandbox-page-label": "Te renderen pagina:",
+	"templatesandbox-revid-label": "Te renderen versie:",
+	"templatesandbox-text-label": "Te renderen wikitekst:",
+	"templatesandbox-submit": "Bekijken",
+	"templatesandbox-title-output": "Sjabloonzandbak: $1",
+	"templatesandbox-editform-legend": "Voorvertoning weergeven met dit sjabloon",
+	"templatesandbox-editform-page-label": "Paginanaam",
+	"templatesandbox-editform-view-label": "Voorvertoning weergeven",
+	"templatesandbox-preview": "Voorvertoning van $2",
+	"templatesandbox-previewnote": "'''Dit is een voorvertoning van [[:$1]].'''\nUw wijzigingen zijn nog niet opgeslagen!",
+	"templatesandbox-invalid-title": "De opgegeven pagina is ongeldig.",
+	"templatesandbox-title-not-exists": "De titel die u hebt opgegeven bestaat niet.",
+	"templatesandbox-revision-not-exists": "De versie die u hebt opgegeven bestaat niet.",
+	"templatesandbox-revision-no-content": "De opgegeven versie heeft geen inhoud, of u hebt geen toestemming om deze te bekijken.",
+	"templatesandbox-invalid-prefix": "Het zandbakvoorvoegsel dat u hebt opgegeven is ongeldig.",
+	"templatesandbox-prefix-not-local": "Het zandbakvoorvoegsel dat u hebt opgegeven is niet lokaal.",
+	"templatesandbox-page-or-revid": "U moet een paginanaam of versienummer opgeven.",
+	"templatesandbox-editform-need-template": "Geef een sjabloonnaam op om een voorvertoning van deze sjabloon met een andere pagina te bekijken.",
+	"templatesandbox-editform-need-title": "Om een andere pagina met dit sjabloon te bekijken, moet een paginanaam opgegeven worden.",
+	"templatesandbox-editform-invalid-template": "De naam van de sjabloon die u hebt opgegeven is ongeldig.",
+	"templatesandbox-editform-invalid-title": "De opgegeven pagina voor de voorvertoning is ongeldig.",
+	"templatesandbox-editform-title-not-exists": "De opgegeven pagina voor de voorvertoning bestaat niet.",
+	"templatesandbox-apihelp-contentmodel": "Inhoudsmodel van<var>$1templatesandboxtext</var>."
+}

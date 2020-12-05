@@ -1,0 +1,21 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery"
+	],
+	"globals": {
+		"mw": "readonly",
+		"module": "readonly",
+		"util": "readonly",
+		"wikibase": "readonly"
+	},
+	"rules": {
+		"max-len": "off",
+		"no-underscore-dangle": "off",
+		"no-use-before-define": [ "error", "nofunc" ],
+		"one-var": "off",
+		"operator-linebreak": "off",
+		"vars-on-top": "off"
+	}
+}

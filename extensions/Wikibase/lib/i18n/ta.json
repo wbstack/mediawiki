@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jayarathina",
+			"Shanmugamp7",
+			"மதனாஹரன்"
+		]
+	},
+	"wikibase-sitelinks-wikipedia": "விக்கிப்பீடியா",
+	"datatypes-type-quantity": "அளவு",
+	"datatypes-type-number": "எண்",
+	"datatypes-type-mediawiki-title": "மீடியாவிக்கி தலைப்பு",
+	"datatypes-type-unknown": "குறிப்பிடப்படவில்லை",
+	"datatypes-type-wikibase-item": "உருப்படி",
+	"datatypes-type-commonsMedia": "பொதுவூடகக் கோப்பு",
+	"wikibase-entity-summary-wbsetitem": "ஒரு புதிய உருப்படி உருவாக்கப்பட்டது",
+	"wikibase-entity-summary-wbsetdescription-set": "[$2] விளக்கம் மாற்றப்பட்டது",
+	"wikibase-entity-summary-wbsetdescription-remove": "[$2] விளக்கம் நீக்கப்பட்டது",
+	"wikibase-item-summary-wbeditentity": "ஒரு புதிய உருப்படி உருவாக்கப்பட்டது"
+}

@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ladsgroup",
+			"Manuae"
+		]
+	},
+	"wikibase-edit": "schaffe",
+	"wikibase-add": "d'zufiesche",
+	"wikibase-label-empty": "Noch kä B'zaischnung oagewwe",
+	"wikibase-description-empty": "S'hodd noch kä Bschraiwung",
+	"wikibase-statementsection-statements": "Aussaache",
+	"wikibase-sitelinks-special": "Onnare Saide",
+	"wikibase-statementview-rank-normal": "Noamala Rong",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|Änzlnochwees}}"
+}

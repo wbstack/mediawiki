@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Les Meloures",
+			"Robby",
+			"Soued031"
+		]
+	},
+	"invitesignup": "Leit op dës Wiki invitéieren",
+	"is-desc": "E-Mail-Invitatioune schécken",
+	"is-tableth-date": "Datum",
+	"is-tableth-email": "E-Mail",
+	"is-tableth-inviter": "Invitéieren",
+	"is-tableth-signup": "Registréiert",
+	"is-tableth-groups": "Gruppen",
+	"is-add": "Derbäisetzen",
+	"is-delete": "Läschen",
+	"is-invalidemail": "<b>$1</b> ass keng valabel E-Mail-Adress.",
+	"is-emailsubj": "Dir sidd invitéiert op {{SITENAME}} matzemaachen",
+	"is-emailbody": "Bonjour,\n\n{{GENDER:$1|$1}} huet Iech invitéiert fir Iech op {{SITENAME}} anzeschreiwen.\nDir kënnt Iech op der Säit $2 aschreiwen.",
+	"right-invitesignup": "Benotzer invitéiere sech anzeschreiwen",
+	"action-invitesignup": "Benotzer invitéiere sech op dëse Site anzewchreiwen"
+}

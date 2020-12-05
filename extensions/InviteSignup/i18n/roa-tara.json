@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"invitesignup": "Invite le crestiane sus a sta uicchi",
+	"is-desc": "Manne le invite via e-mail",
+	"is-tableth-date": "Date",
+	"is-tableth-email": "E-mail",
+	"is-tableth-inviter": "Invitande",
+	"is-tableth-signup": "Reggìstrate",
+	"is-tableth-groups": "Gruppe",
+	"is-add": "Aggiunge",
+	"is-delete": "Scangille",
+	"is-invalidemail": "<b>$1</b> non g'è 'n'indirizze email valide.",
+	"is-emailsubj": "E' state invitate a reggistrarte sus a {{SITENAME}}",
+	"is-emailbody": "Cià,\n\n{{GENDER:$1|$1}} t'ha invitate a reggistrarte sus a {{SITENAME}}.\nTu te puè reggistrà sus a $2",
+	"right-invitesignup": "Invite le utinde a reggistrarse",
+	"action-invitesignup": "invite le utinde a reggistrarse a stu site"
+}

@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fwolff",
+			"Naudefj",
+			"Robby"
+		]
+	},
+	"specialpages-group-wikibase": "Wikibase-databank",
+	"wikibase-error-unexpected": "'n Onverwagte fout het voorgekom.",
+	"wikibase-error-ui-no-external-page": "Die gespesifiseerde bladsy kon nie op die ooreenkomende webwerf gevind word nie.",
+	"wikibase-error-ui-edit-conflict": "Twee wysigings bots met mekaar. Laai asseblief oor en stoor weer.",
+	"wikibase-sitelinks-wikipedia": "Wikipedia",
+	"wikibase-snakview-snaktypeselector-somevalue": "onbekende waarde",
+	"wikibase-snakview-snaktypeselector-novalue": "geen waarde",
+	"datatypes-type-monolingualtext": "Eentalige teks",
+	"datatypes-type-multilingualtext": "Meertalige teks",
+	"datatypes-type-globe-coordinate": "Geografiese koördinate",
+	"datatypes-type-wikibase-item": "Item",
+	"datatypes-type-commonsMedia": "Medialêer van Commons",
+	"version-wikibase": "Wikibase",
+	"wikibase-entity-summary-wbsetitem": "Nuwe item geskep",
+	"wikibase-item-summary-wbeditentity": "Nuwe item geskep",
+	"wikibase-item-summary-wbeditentity-create": "Nuwe item geskep",
+	"wikibase-item-summary-wbeditentity-update": "Item bygewerk"
+}

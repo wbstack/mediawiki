@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mirzali"
+		]
+	},
+	"entityschema-newschema-label": "Etîket:",
+	"entityschema-newschema-description": "Danasîn:",
+	"entityschema-editpage-schema-inputlabel": "ShEx:",
+	"entityschema-special-label": "Etîket:",
+	"entityschema-special-description": "Danasîn:"
+}

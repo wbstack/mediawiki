@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Papuass"
+		]
+	},
+	"entityschema-newschema-submit": "Izveidot",
+	"entityschema-edit": "labot",
+	"entityschema-special-id-inputlabel": "ID",
+	"entityschema-special-language-inputlabel": "Valodas kods",
+	"entityschema-special-description": "Apraksts:"
+}

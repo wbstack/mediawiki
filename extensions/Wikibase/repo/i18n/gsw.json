@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Als-Holder",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-desc": "Repositorium vu strukturierte Date",
+	"wikibase-entity-item": "Objäkt",
+	"wikibase-entity-property": "Eigeschaft",
+	"wikibase-entity-query": "Abfrog",
+	"wikibase-edit": "bearbeite",
+	"wikibase-save": "spyychere",
+	"wikibase-cancel": "abbräche",
+	"wikibase-add": "zuefiege",
+	"wikibase-label-empty": "S git kei Uusdruck",
+	"wikibase-label-edit-placeholder": "Bezeichnig yygee",
+	"wikibase-description-empty": "S git kei Bschrybig",
+	"wikibase-description-edit-placeholder": "Bschryybig yygee",
+	"wikibase-label-input-help-message": "Gib dr Name fir dää Datesatz in $1 aa.",
+	"wikibase-statementsection-statements": "Uussage",
+	"wikibase-sitelinks": "{{SITENAME}}-Syte, wu mit däm Datenelemänt verchnipft sin",
+	"wikibase-sitelinks-empty": "Bishär sin kei {{SITENAME}}-Syte mit däm Datenelemänt verchnipft.",
+	"wikibase-sitelinks-special": "Anderi Websyte",
+	"wikibase-remove": "uuseneh",
+	"wikibase-statementview-rank-normal": "Normale Rang",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|Fueßnote}}"
+}

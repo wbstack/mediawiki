@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dağlı95",
+			"Khan27",
+			"Ladsgroup",
+			"Wertuose"
+		]
+	},
+	"wikibase-entity-item": "maddə",
+	"wikibase-edit": "redaktə",
+	"wikibase-add": "əlavə et",
+	"wikibase-addreference": "mənbə əlavə et",
+	"wikibase-statementlistview-add": "dəyər əlavə et",
+	"wikibase-statementgrouplistview-add": "müddəa əlavə et",
+	"wikibase-entitytermsview-entitytermsforlanguagelistview-toggler": "Digər dillərdə",
+	"wikibase-entitytermsforlanguagelistview-more": "Daxil edilmiş bütün dillər",
+	"wikibase-label-empty": "Etiket yoxdur",
+	"wikibase-description-empty": "İzah verilməyib",
+	"wikibase-sitelink-page-edit-placeholder": "səhifə",
+	"wikibase-statementsection-statements": "Müddəalar",
+	"wikibase-sitelinks-special": "Digər saytlar",
+	"wikibase-statementview-rank-normal": "Normal dərəcə",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|mənbə|mənbələr}}",
+	"wikibase-validator-no-such-property": "$1 xüsusiyyəti tapılmadı",
+	"special-newitem": "Yeni müddəa yarat",
+	"wikibase-newitem-fieldset": "Yeni müddəa yarat",
+	"wikibase-listdatatypes-wikibase-property-head": "Xüsusiyyət"
+}

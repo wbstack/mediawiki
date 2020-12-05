@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Milicevic01",
+			"Obsuser",
+			"Srdjan m",
+			"Vlad5250",
+			"Сербијана"
+		]
+	},
+	"templatesandbox": "Pesak za šablone",
+	"templatesandbox-suffix": "pijesak",
+	"templatesandbox-editform-legend": "Vidi stranicu sa ovim šablonom",
+	"templatesandbox-editform-page-label": "Naslov stranice",
+	"templatesandbox-editform-view-label": "Pretpregled",
+	"templatesandbox-preview": "Pregled $2",
+	"templatesandbox-previewnote": "'''Ovo je samo pregled [[:$1]].'''\nVaše izmene još nisu sačuvane!",
+	"templatesandbox-editform-need-title": "Da bi se prikazao pretpregled druge stranice sa ovim šablonom, naslov stranice mora da bude određen."
+}

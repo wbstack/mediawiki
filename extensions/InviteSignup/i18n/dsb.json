@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"invitesignup": "Luźi do toś togo wikija pśepšosyś",
+	"is-desc": "E-mailowe pśepšosenja rozpósłaś",
+	"is-tableth-date": "Datum",
+	"is-tableth-email": "E-mail",
+	"is-tableth-inviter": "Pśepšosowaŕ",
+	"is-tableth-signup": "Registrěrowaś",
+	"is-tableth-groups": "Kupki",
+	"is-add": "Pśidaś",
+	"is-delete": "Wulašowaś",
+	"is-invalidemail": "<b>$1</b> njejo płaśiwa e-mailowa adresa.",
+	"is-emailsubj": "Sy pśepšosony, {{GRAMMAR:datiw|{{SITENAME}}}} pśistupiś",
+	"is-emailbody": "Halo,\n\n{{GENDER:$1|$1}} jo śi {{GENDER:$1|pśepšosył|pśepšosyła}}, śi na {{GRAMMAR:lokatiw|{{SITENAME}}}} registrěrowaś. \nMóžoš se na $2 registrěrowaś.",
+	"right-invitesignup": "Wužywarjow pśepšosyś se registrěrowaś",
+	"action-invitesignup": "wužywarjow pśepšosyś, se na toś tom sedle registrěrowaś"
+}

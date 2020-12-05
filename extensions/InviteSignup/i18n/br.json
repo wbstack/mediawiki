@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fohanno",
+			"Y-M D"
+		]
+	},
+	"invitesignup": "Pedit tud er wiki-mañ",
+	"is-desc": "Kas posteloù pediñ",
+	"is-tableth-date": "Deiziad",
+	"is-tableth-email": "Postel",
+	"is-tableth-inviter": "Peder",
+	"is-tableth-signup": "En em enskrivet",
+	"is-tableth-groups": "Strolladoù",
+	"is-add": "Ouzhpennañ",
+	"is-delete": "Diverkañ",
+	"is-invalidemail": "N'eo ket <b>$1</b> ur chomlec'h postel reizh.",
+	"is-emailsubj": "Pedet oc'h da zont war {{SITENAME}}",
+	"right-invitesignup": "Pediñ an implijerien d'en em enskrivañ",
+	"action-invitesignup": "Pediñ an implijerien d'en em enskrivañ el lec'hienn-mañ"
+}

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Gianfranco",
+			"Nemo bis"
+		]
+	},
+	"invitesignup": "Invita persone in questo wiki",
+	"is-desc": "Invio delle email di invito",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "Email",
+	"is-tableth-inviter": "Autore dell'invito",
+	"is-tableth-signup": "Iscrizione",
+	"is-tableth-groups": "Gruppi",
+	"is-add": "Aggiungi",
+	"is-delete": "Cancella",
+	"is-invalidemail": "<b>$1</b> non è un indirizzo email valido.",
+	"is-emailsubj": "Siete invitati a iscrivervi a {{SITENAME}}",
+	"is-emailbody": "Ciao,\n\n{{GENDER:$1|$1}} ti ha invitato a iscriverti a {{SITENAME}}.\nPuoi iscriverti in $2",
+	"right-invitesignup": "Invita gli utenti a iscriversi",
+	"action-invitesignup": "invitare gli utenti a iscriversi a questo sito"
+}

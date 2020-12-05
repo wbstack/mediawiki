@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck",
+			"Wizardist"
+		]
+	},
+	"templatesandbox": "Пясочніца для шаблёнаў",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Адлюстроўвае старонку]], уключыўшы на яе шаблён зь пясочніцы",
+	"templatesandbox-suffix": "пясочніца",
+	"templatesandbox-legend": "Пясочніца для шаблёнаў",
+	"templatesandbox-text": "Вы можаце выбраць набор шаблёнаў, захаваных у вашай пясочніцы, з дапамогай адпаведнага прэфіксу. Напрыклад, калі вы хочаце ўбачыць, як выглядае {{ns:Template}}:Тэст, які вы захавалі як «{{ns:User}}:Імя_ўдзельніка/{{int:templatesandbox-suffix}}/{{ns:Template}}:Тэст», скарыстайцеся прэфіксам «{{ns:User}}:Імя_ўдзельніка/{{int:templatesandbox-suffix}}».",
+	"templatesandbox-prefix-label": "Прэфікс пясочніцы:",
+	"templatesandbox-page-label": "Паказаць на старонцы:",
+	"templatesandbox-revid-label": "Вэрсія для адлюстраваньня:",
+	"templatesandbox-text-label": "Дадаць вікітэкст:",
+	"templatesandbox-submit": "Паказаць",
+	"templatesandbox-title-output": "TemplateSandbox: $1",
+	"templatesandbox-editform-legend": "Паказаць старонку з гэтым шаблёнам",
+	"templatesandbox-editform-page-label": "Назва старонкі",
+	"templatesandbox-editform-view-label": "Праглядзець",
+	"templatesandbox-preview": "Прагляд «$2»",
+	"templatesandbox-previewnote": "'''Памятайце, што гэта толькі папярэдні прагляд [[:$1]].'''\nВышыя зьмены яшчэ не захаваныя!",
+	"templatesandbox-invalid-title": "Пазначаная няслушная назва.",
+	"templatesandbox-title-not-exists": "Пазначаная старонка не існуе.",
+	"templatesandbox-revision-not-exists": "Пазначаная вэрсія не існуе.",
+	"templatesandbox-invalid-prefix": "Пазначаны няслушны прэфікс пясочніцы",
+	"templatesandbox-prefix-not-local": "Мусіць быць пазначаны лякальны прэфікс пясочніцы.",
+	"templatesandbox-page-or-revid": "Трэба пазначыць назву старонкі або нумар вэрсіі.",
+	"templatesandbox-editform-need-title": "Каб пабачыць іншую старонку з гэтым шаблёнам, трэба пазначыць назву старонкі.",
+	"templatesandbox-editform-invalid-title": "Пазначаная для прагляду старонка няслушная.",
+	"templatesandbox-editform-title-not-exists": "Пазначаная для прагляду старонка не існуе."
+}

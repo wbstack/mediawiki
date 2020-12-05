@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bengtsson96",
+			"WikiPhoenix"
+		]
+	},
+	"wikibaselexeme-deletedentity-form": "Raderat formulär",
+	"wikibaselexeme-newlexeme-language-placeholder": "Ange språk, t.ex. engelska",
+	"wikibaselexeme-lemma-field-language-label": "Stavningsvariant",
+	"wikibaselexeme-form-field-language-label": "Stavningsvariant",
+	"wikibaselexeme-gloss-field-language-label": "Språk",
+	"datatypes-type-wikibase-form": "Formulär",
+	"wikibaselexeme-add-form": "lägg till formulär",
+	"wikibase-lexeme-summary-add-form": "Lade till nya formen $3 med {{PLURAL:$1|representation|representationer}}",
+	"wikibaselexeme-field-language-label": "Språk",
+	"wikibaselexeme-diffview-language": "språk",
+	"wikibaselexeme-diffview-form": "formulär",
+	"wikibaselexeme-form-grammatical-features": "Grammatiska funktioner",
+	"wikibaselexeme-form-description": "$1 för: $2 ($3): $4",
+	"wikibaselexeme-search-result-stats": "$1 {{PLURAL:$1|uttalande|uttalanden}}, $2 {{PLURAL:$2|formulär}}",
+	"wikibaselexeme-unknown-language": "Okänt språk",
+	"wikibaselexeme-unknown-category": "Okänd",
+	"wikibase-lexeme-mergelexemes-from-id": "ID att sammanfoga från",
+	"wikibase-lexeme-mergelexemes-to-id": "ID att sammanfoga till",
+	"wikibase-lexeme-mergelexemes-success": "$1 sammanfogades till $2 och omdirigerades.",
+	"wikibase-lexeme-mergelexemes-error-permission-denied": "Tillstånd nekat."
+}

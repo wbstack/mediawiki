@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jopparn",
+			"Tobulos1",
+			"WikiPhoenix"
+		]
+	},
+	"valueview-expert-unsupportedvalue-unsupporteddatavalue": "Hantering av \"$1\"-värden stöds ännu inte.",
+	"valueview-expert-unsupportedvalue-unsupporteddatatype": "Hantering av värden för \"$1\"-datatyper stöds ännu inte.",
+	"valueview-expert-emptyvalue-empty": "tom",
+	"valueview-expert-globecoordinateinput-precision": "Precision:",
+	"valueview-expert-globecoordinateinput-nullprecision": "ospecificerad",
+	"valueview-expert-globecoordinateinput-customprecision": "special ($1)",
+	"valueview-expert-timevalue-calendar-gregorian": "Gregoriansk",
+	"valueview-expert-timevalue-calendar-julian": "Juliansk",
+	"valueview-expert-timeinput-precision": "Precision:",
+	"valueview-expert-timeinput-calendar": "Kalender:",
+	"valueview-expertextender-languageselector-languagetemplate": "$1 ($2)",
+	"valueview-expertextender-languageselector-label": "Språk (obligatoriskt):",
+	"valueview-expertextender-unitsuggester-label": "Enhet (valfritt):",
+	"valueview-preview-label": "kommer att visas som:",
+	"valueview-preview-novalue": "inget giltigt värde erkänns",
+	"valueview-listrotator-manually": "ställ in manuellt"
+}

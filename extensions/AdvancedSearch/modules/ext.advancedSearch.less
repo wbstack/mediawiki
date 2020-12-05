@@ -1,0 +1,195 @@
+@import 'mediawiki.mixins';
+@import 'mediawiki.ui/variables';
+
+.mw-advancedSearch-container {
+	textarea,
+	input {
+		/* This will flip with CSSJanus */
+		direction: ltr;
+	}
+}
+
+.mw-advancedSearch-searchPreview-label {
+	font-weight: bold;
+	margin-right: 0.3125em;
+}
+
+.advancedsearch-namespacesPreview-label {
+	font-weight: bold;
+	margin-right: 0.3125em;
+}
+
+.mw-advancedSearch-searchPreview-previewPill > .oo-ui-labelElement-label > .mw-advancedSearch-searchPreview-content {
+	display: inline-block;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	max-width: 5em;
+	padding-left: 0.3em;
+	vertical-align: bottom;
+}
+
+.mw-advancedSearch-searchPreview-previewPill.mw-advancedSearch-searchPreview-preview-sort > .oo-ui-labelElement-label > .mw-advancedSearch-searchPreview-content {
+	max-width: none;
+}
+
+.mw-advancedSearch-fieldContainer {
+	background: linear-gradient( rgba( 0, 0, 0, 0.1 ), #fff 0.5em );
+	border: solid 1px #c8ccd1;
+	border-top: 0;
+	.box-sizing( border-box );
+	margin: 0;
+	margin-top: -1px;
+	max-width: 50em;
+	padding: 1em;
+
+	fieldset {
+		border-top: solid 1px #c8ccd1;
+		margin-top: 1em;
+	}
+
+	/* FIXME: Why does this try to mimic a <fieldset><legend> element instead of being an actual one? */
+	/* See https://phabricator.wikimedia.org/T151061 and https://gerrit.wikimedia.org/r/#/c/325243/  */
+	.oo-ui-labelElement > .oo-ui-fieldsetLayout-header > .oo-ui-labelElement-label {
+		background: #fff;
+		color: #54595d;
+		font-weight: normal;
+		font-size: 1em;
+		left: 1em;
+		line-height: 1;
+		padding: 0 0.2em;
+		position: relative;
+		top: -0.8em;
+	}
+}
+
+.mw-advancedSearch-expandablePane-options,
+.mw-advancedSearch-expandablePane-namespaces {
+	clear: both;
+	display: block;
+	margin: 0;
+	max-width: 50em;
+	padding-top: 0.3em;
+}
+
+.mw-advancedSearch-expandablePane-button {
+	width: 100%;
+
+	> .oo-ui-buttonElement-button {
+		text-align: left;
+		font-weight: normal;
+		white-space: normal;
+		width: 100%;
+	}
+
+	&.oo-ui-widget-enabled.oo-ui-buttonWidget {
+		&.oo-ui-buttonElement-pressed > .oo-ui-buttonElement-button {
+			background-color: #f8f9fa;
+		}
+
+		> .oo-ui-buttonElement-button:hover {
+			background-color: #f8f9fa;
+			color: #202122;
+		}
+	}
+}
+
+.mw-advancedSearch-expandablePane-pane {
+	display: none;
+}
+
+.mw-advancedSearch-filetype-presets .oo-ui-multioptionWidget {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.mw-advancedSearch-filesize {
+	.operator-container,
+	.value-container {
+		width: 50%;
+		float: left;
+		.box-sizing( border-box );
+	}
+
+	.operator-container {
+		padding-right: 1em;
+	}
+}
+
+.mw-advancedSearch-namespacePresets {
+	/* Required to clear the float started by the "remember" checkbox */
+	clear: right;
+	margin-right: 0;
+
+	label {
+		display: inline-block;
+		margin-right: 0.7em;
+		width: auto;
+
+		&.oo-ui-checkboxMultioptionWidget {
+			padding: 0;
+		}
+	}
+}
+
+.mw-advancedSearch-namespacePresets .oo-ui-multiselectWidget-group {
+	margin-left: 0.5em;
+	padding-top: 0.5em;
+}
+
+.mw-advancedSearch-namespace-selection-header {
+	display: block;
+	padding-top: 0.5em;
+
+	> .oo-ui-labelElement {
+		float: right;
+		margin: 0 0.5em 0.4em 0;
+	}
+
+	> .mw-advancedSearch-namespace-search-in-label {
+		float: left;
+		font-weight: bold;
+	}
+}
+
+.mw-advancedSearch-namespace-selection {
+	background: linear-gradient( rgba( 0, 0, 0, 0.1 ), #f8f9fa 0.5em );
+	border: solid 1px #a2a9b1;
+	/* stylelint-disable-next-line no-descending-specificity */
+	.box-sizing( border-box );
+	max-width: 50em;
+	position: relative;
+	border-bottom: 0;
+	border-top: 0;
+}
+
+.mw-advancedSearch-namespace-border {
+	border-top: 4px solid #c8ccd1;
+	border-bottom: 1px solid #c8ccd1;
+}
+
+.mw-advancedSearch-namespaceFilter .oo-ui-tagMultiselectWidget-handle {
+	border-top: 0;
+	border-left: 0;
+	border-right: 0;
+	border-radius: 0 0 2px 2px;
+}
+
+.mw-advancedSearch-namespaceFilter .oo-ui-tagMultiselectWidget-input .oo-ui-inputWidget-input {
+	border-left: 0;
+	border-right: 0;
+}
+
+// that's how nested the background-color property of a tagWidget is
+.oo-ui-tagMultiselectWidget.oo-ui-widget-enabled.oo-ui-tagMultiselectWidget-outlined .oo-ui-tagItemWidget.oo-ui-widget-enabled {
+	&.selected {
+		background-color: #eaf3ff;
+		border-color: @colorProgressive;
+	}
+}
+
+.oo-ui-popupWidget-popup .mw-advancedSearch-tooltip-head {
+	color: #72777d;
+	// Override MW core's h1-h6 top padding.
+	padding-top: 0;
+	font-size: 110%;
+}

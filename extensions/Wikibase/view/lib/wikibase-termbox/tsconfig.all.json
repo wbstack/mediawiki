@@ -1,0 +1,38 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "sourceMap": true,
+    "typeRoots": [
+      "./src/types",
+      "./src/types/client",
+      "./src/types/server",
+      "./node_modules/@types"
+    ],
+    "types": [
+      "webpack-env",
+      "jest",
+      "node"
+    ],
+    "lib": [
+      "esnext",
+      "es5",
+      "dom",
+      "dom.iterable",
+      "scripthost"
+    ],
+    "allowJs": true
+  },
+  "include": [
+    "./*.js",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "tests/**/*.ts",
+    "tests/**/*.tsx"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

@@ -1,0 +1,34 @@
+@import 'mediawiki.mixins';
+@import 'ext.uls.mixins.less';
+
+/* stylelint-disable selector-max-id */
+#p-lang .body ul .uls-trigger,
+#p-lang .pBody ul .uls-trigger {
+	background-image: none;
+	padding: 0;
+}
+/* stylelint-enable selector-max-id */
+
+.mw-interlanguage-selector,
+.mw-interlanguage-selector:active {
+	cursor: pointer;
+	padding: 4px 6px 4px 25px;
+	font-size: 13px;
+	font-weight: normal;
+	background-image: url( ../images/compact-links-trigger.svg );
+	background-size: 18px;
+	background-repeat: no-repeat;
+	background-position: left 4px center;
+	margin: 4px 0;
+	text-align: left;
+}
+
+.mw-interlanguage-selector:active,
+.mw-interlanguage-selector.selector-open {
+	background-color: #c8ccd1;
+	color: #54595d;
+}
+
+.interlanguage-uls-menu {
+	.caret();
+}

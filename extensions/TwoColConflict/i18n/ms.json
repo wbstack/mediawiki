@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tofeiku"
+		]
+	},
+	"twocolconflict-copy-action": "salin teks penuh",
+	"twocolconflict-split-select-all": "Pilih semua",
+	"twocolconflict-split-select-all-your-tooltip": "Klik untuk pilih semua perubahan semakan anda",
+	"twocolconflict-split-select-your-tooltip": "Klik untuk pilih versi anda",
+	"twocolconflict-split-selected-other-tooltip": "Versi lain dipilih",
+	"twocolconflict-split-selected-your-tooltip": "Versi anda dipilih"
+}

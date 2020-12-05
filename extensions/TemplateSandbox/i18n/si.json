@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"templatesandbox": "සැකිලි වැලිපිල්ල",
+	"templatesandbox-suffix": "වැලිපිල්ල",
+	"templatesandbox-legend": "සැකිලි වැලිපිල්ල",
+	"templatesandbox-prefix-label": "වැලිපිල්ලේ උපසර්ගය:",
+	"templatesandbox-page-label": "විදහාපෑම් පිටුව:",
+	"templatesandbox-revid-label": "විදහාපෑම් නිරීක්ෂණය:",
+	"templatesandbox-text-label": "විදහාපෑම් විකිපාඨය:",
+	"templatesandbox-submit": "දසුන",
+	"templatesandbox-title-output": "සැකිලි වැලිපිල්ල: $1",
+	"templatesandbox-editform-legend": "මෙම සැකිල්ල සමඟ පිටුව පෙරදසුන්ගත කරන්න",
+	"templatesandbox-editform-page-label": "පිටුවේ මාතෘකාව",
+	"templatesandbox-editform-view-label": "පෙරදසුන පෙන්වන්න",
+	"templatesandbox-preview": "$2 හී පෙරදසුන",
+	"templatesandbox-invalid-title": "ඔබ සඳහන් කළ මාතෘකාව වලංගු නොවේ.",
+	"templatesandbox-title-not-exists": "ඔබ විසින් විශේෂණය කෙරූ මාතෘකාව නොපවතියි.",
+	"templatesandbox-revision-not-exists": "ඔබ විසින් විශේෂණය කෙරූ සංශෝධනය නොපවතියි.",
+	"templatesandbox-invalid-prefix": "ඔබ විශේෂණය කෙරූ වැලිපිල්ලේ උපසර්ගය වලංගු නොවේ.",
+	"templatesandbox-prefix-not-local": "ඔබ විශේෂණය කෙරූ වැලිපිල්ලේ ස්ථානික නොවේ.",
+	"templatesandbox-page-or-revid": "කරුණාකර පිටුවේ ශීර්ෂය හෝ සංශෝධන හැඳුනුම් අංකය යොදන්න.",
+	"templatesandbox-editform-need-title": "මෙම සැකිල්ල සමඟ වෙනත් පිටුවක පෙරදසුන්ගත කිරීම සඳහා, පිටු ශීර්ෂය විශේෂණය කල යුතු වේ.",
+	"templatesandbox-editform-invalid-title": "පෙරදසුන්ගත කිරීම සඳහා ඔබ විශේෂණය කෙරූ ශීර්ෂය වලංගු නොවේ.",
+	"templatesandbox-editform-title-not-exists": "පෙරදසුන්ගත කිරීම සඳහා ඔබ විශේෂණය කෙරූ ශීර්ෂය නොපවතී."
+}

@@ -1,0 +1,10 @@
+export const SET_ALL_UNTAINTED = 'setAllUntainted';
+export const SET_ALL_POPPERS_HIDDEN = 'setAllPoppersHidden';
+export const SET_TAINTED = 'setTainted';
+export const SET_UNTAINTED = 'setUntainted';
+export const SET_POPPER_HIDDEN = 'setPopperHidden';
+export const SET_POPPER_VISIBLE = 'setPopperVisible';
+export const SET_HELP_LINK = 'setHelpLink';
+export const SET_ALL_EDIT_MODE_FALSE = 'setAllStatementEditFalse';
+export const SET_STATEMENT_EDIT_TRUE = 'setStatementEditTrue';
+export const SET_STATEMENT_EDIT_FALSE = 'setStatementEditFalse';

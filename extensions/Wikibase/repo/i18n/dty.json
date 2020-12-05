@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ladsgroup",
+			"Nirajan pant",
+			"जनक राज भट्ट",
+			"रमेश सिंह बोहरा",
+			"राम प्रसाद जोशी"
+		]
+	},
+	"wikibase-edit": "सम्पादन गर्न्या",
+	"wikibase-add": "जोड्या",
+	"wikibase-entitytermsview-entitytermsforlanguagelistview-toggler": "अन्य भाषामी",
+	"wikibase-label-empty": "परिभाषित नामपत्र आथिन",
+	"wikibase-description-empty": "कसैलै बिवरणलाई परिभाषित नगरया |",
+	"wikibase-statementsection-statements": "बयान",
+	"wikibase-sitelinks-special": "और साइटअन",
+	"wikibase-statementview-rank-normal": "सानतिनो ओहदा",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|reference|सन्दर्भहरू}}"
+}

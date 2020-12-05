@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Abbas dhothar",
+			"BukhariSaeed",
+			"Khalid Mahmood",
+			"Saanvel"
+		]
+	},
+	"mobile-frontend-editor-edit": "لکھو",
+	"mobile-frontend-editor-redlink-create": "صفہ بناؤ",
+	"mobile-frontend-editor-redlink-explain": "ایہ صفہ ہالے بنایا نہیں گیا ہے۔",
+	"mobile-frontend-editor-redlink-leave": "نہیں، شکریہ۔",
+	"mobile-frontend-history": "اس صفہ دی ایڈیٹ تریخ ویکھو۔",
+	"mobile-frontend-home-button": "گھر",
+	"mobile-frontend-language-article-heading": "ہور بولی وچ پڑھو",
+	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|جی آیاں نوں}}، $1!",
+	"mobile-frontend-main-menu-button-tooltip": "پہلا صفہ کھولو",
+	"mobile-frontend-main-menu-login": "لاگ ان",
+	"mobile-frontend-main-menu-nearby": "نیڑے",
+	"mobile-frontend-main-menu-settings": "ورتن ول",
+	"mobile-frontend-main-menu-watchlist": "اکھ تھلے رکھی لسٹ",
+	"mobile-frontend-meta-data-issues-header": "صفہ دے مسئلے",
+	"mobile-frontend-pageaction-edit-tooltip": "ایس صفے دے موہری حصے تے لکھو",
+	"mobile-frontend-placeholder": "کھوج",
+	"mobile-frontend-random-button": "الٹے پلٹے",
+	"mobile-frontend-user-page-contributions": "حصے",
+	"mobile-frontend-user-page-talk": "گل بات"
+}

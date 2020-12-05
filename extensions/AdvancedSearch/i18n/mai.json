@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Haribanshi"
+		]
+	},
+	"advancedsearch-filetype-bitmap": "तस्वीर",
+	"advancedsearch-filetype-drawing": "चित्र",
+	"advancedsearch-filetype-audio": "ऑडियो",
+	"advancedsearch-filetype-video": "भिडियो",
+	"advancedsearch-filetype-office": "ऑफ़िस",
+	"advancedsearch-filesize-equals": "बराबर",
+	"advancedsearch-filesize-greater-than": "नमहर",
+	"advancedsearch-filesize-smaller-than": "छाेट",
+	"advancedsearch-namespaces-search-in": "ताकी",
+	"advancedsearch-namespaces-preset-all": "सब",
+	"advancedsearch-namespaces-preset-default": "पूर्वनिर्धारित",
+	"advancedsearch-namespaces-preset-discussion": "वार्ता",
+	"advancedsearch-namespaces-placeholder": "नामस्थान जोडु",
+	"prefs-advancedsearch": "विशेष खोज"
+}

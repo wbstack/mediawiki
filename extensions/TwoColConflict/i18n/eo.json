@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mirin"
+		]
+	},
+	"twocolconflict-split-your-version-header": "Via ŝanĝo",
+	"twocolconflict-split-not-saved-at": "Ne jam publikigita",
+	"twocolconflict-split-choose-version": "Bonvolu elekti version",
+	"twocolconflict-split-tour-popup-btn-text": "Bone, komprenite.",
+	"twocolconflict-split-tour-popup3-header": "Reliefigita teksto",
+	"twocolconflict-split-edit-tooltip": "Redakti tekston",
+	"twocolconflict-split-reset-tooltip": "Restarigi tekston",
+	"twocolconflict-split-reset-warning-cancel": "Nuligi",
+	"twocolconflict-split-reset-warning-accept": "Forĵeti"
+}

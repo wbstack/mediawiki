@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"The Discoverer"
+		]
+	},
+	"wikibase-edit": "bodol",
+	"wikibase-add": "Zod",
+	"wikibase-label-empty": "Kuru nischit korunk nam",
+	"wikibase-description-empty": "Vornon poribhashit korunk na",
+	"wikibase-statementsection-statements": "Vidhanam",
+	"wikibase-sitelinks-special": "Her websaiti",
+	"wikibase-statementview-rank-normal": "Samanya dorzo",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|sondorbh}}"
+}

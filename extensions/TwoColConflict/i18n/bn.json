@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftabuzzaman",
+			"Bodhisattwa",
+			"Elias Ahmmad",
+			"আফতাবুজ্জামান"
+		]
+	},
+	"twocolconflict": "অনুচ্ছেদ ভিত্তিক সম্পাদনা দ্বন্দ্ব",
+	"twocolconflict-desc": "সম্পাদনা দ্বন্দ্ব নিরসনের জন্য পার্শ্ব-প্রতি-পার্শ্ব সম্পাদনা একত্রীকরণের স্ক্রীন দেখায়",
+	"twocolconflictprovidesubmittedtext": "সম্পাদনা দ্বন্দ্ব:",
+	"twocolconflict-beta-feature-message": "অনুচ্ছেদ ভিত্তিক সম্পাদনা দ্বন্দ্ব",
+	"twocolconflict-beta-feature-description": "আরো উন্নত অনুচ্ছেদ ভিত্তিক দৃশ্য ব্যবহার সম্পাদনা দ্বন্দ্বের দৃশ্য প্রদর্শন করানো হবে।",
+	"twocolconflict-copy-action": "পূর্ণ লেখা অনুলিপি করুন",
+	"twocolconflict-copy-tab-action": "পূর্ণ লেখা দেখুন",
+	"twocolconflict-core-ui-hint-close": "কখনো দেখাবেন না",
+	"twocolconflict-special-not-saved": "প্রকাশিত হয়নি",
+	"twocolconflict-split-your-version-header": "আপনার সংস্করণ",
+	"twocolconflict-split-current-version-header": "$1 অনুযায়ী সর্বশেষ সংস্করণ",
+	"twocolconflict-split-not-saved-at": "এখনো প্রকাশিত হয়নি",
+	"twocolconflict-split-choose-version": "দয়া করে একটি সংস্করণ নির্বাচন করুন",
+	"twocolconflict-split-other-version-chosen": "অন্য সংস্করণ",
+	"twocolconflict-split-your-version-chosen": "আপনার সংস্করণ",
+	"twocolconflict-split-select-all": "সব নির্বাচন করুন",
+	"twocolconflict-split-tour-dialog-header": "দ্বন্দ্ব ঘটানো সংস্করণ একত্রীত করুন",
+	"twocolconflict-split-tour-dialog-btn-text": "একত্রীকরণ শুরু করুন",
+	"twocolconflict-split-tour-popup-btn-text": "ঠিক আছে, বুঝেছি।",
+	"twocolconflict-split-reset-warning-cancel": "বাতিল",
+	"twocolconflict-split-reset-warning-accept": "বাতিল",
+	"twocolconflict-split-help-tooltip": "সাহায্য দেখান",
+	"twocolconflict-talk-your": "আপনার ভুক্তি",
+	"twocolconflict-talk-conflicting": "দ্বন্দ্ব ঘটানো ভুক্তি"
+}

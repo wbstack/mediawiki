@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kyouko"
+		]
+	},
+	"advancedsearch-field-plain": "Aceste cuvinte",
+	"advancedsearch-field-phrase": "Exact aceste cuvinte",
+	"advancedsearch-field-or": "Unul dintre aceste cuvinte",
+	"advancedsearch-field-not": "Fără aceste cuvinte",
+	"advancedsearch-field-intitle": "Titlul paginii conține",
+	"advancedsearch-field-hastemplate": "Pagini cu aceste șabloane",
+	"advancedsearch-field-inlanguage": "Pagini în această limbă",
+	"advancedsearch-field-filetype": "Tip de fișier",
+	"advancedsearch-field-filew": "Lățimea fișierului în pixeli",
+	"advancedsearch-field-fileh": "Înălțimea fișierului în pixeli"
+}

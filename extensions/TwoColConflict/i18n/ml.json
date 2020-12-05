@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adithyak1997",
+			"Jameela P.",
+			"Praveenp"
+		]
+	},
+	"twocolconflict": "സമരസപ്പെടായ്കഇരട്ടനിരയിൽ",
+	"twocolconflict-desc": "തിരുത്ത് സമരസപ്പെടായ്കയുടെ പരിഹാരത്തിനായി തിരുത്തുകൾ അരികിൽ-അരികിൽ പ്രദർശിപ്പിക്കുന്നു",
+	"twocolconflict-beta-feature-message": "തിരുത്തൽ സമരസപ്പെടായ്ക രണ്ട് നിരയിൽ",
+	"twocolconflict-beta-feature-description": "തിരുത്തൽ സമരസപ്പെടായ്ക കാണിക്കൽ കൂടുതൽ നവീനമായ ഇരട്ട നിര രീതിയിൽ പ്രദർശിപ്പിക്കുക.",
+	"twocolconflict-split-header-hint-beta": "പരീക്ഷണാടിസ്ഥാനത്തിലുള്ള ഈ സവിശേഷത ഉപയോഗിക്കുന്നതിന് നന്ദി. [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View ഈ താളിൽ] അഭിപ്രായം ചേർത്ത് ഇത് മെച്ചപ്പെടുത്താനുള്ള പ്രയത്നത്തിൽ താങ്കൾക് ഇനിയും പങ്ക് ചേരാവുന്നതാണ്.",
+	"twocolconflict-split-your-version-header": "താങ്കളുടെ നാൾപ്പതിപ്പ്",
+	"twocolconflict-split-current-version-header": "$1-ന് നിലവിലുള്ള രൂപം",
+	"twocolconflict-split-not-saved-at": "ഇതുവരെ പ്രസിദ്ധീകരിച്ചില്ല",
+	"twocolconflict-split-choose-version": "ഒരു പതിപ്പ് തിരഞ്ഞെടുക്കുക",
+	"twocolconflict-split-tour-dialog-header": "സമരസപ്പെടാത്ത പതിപ്പുകൾ ലയിപ്പിക്കുക",
+	"twocolconflict-split-tour-dialog-btn-text": "ലയിപ്പിക്കൽ തുടങ്ങുക",
+	"twocolconflict-split-tour-popup-btn-text": "ശരി, മനസ്സിലായി.",
+	"twocolconflict-split-tour-popup3-header": "പ്രമുഖമാക്കി കാണിക്കുന്ന എഴുത്ത്",
+	"twocolconflict-split-edit-tooltip": "ഈ എഴുത്ത് തിരുത്താൻ ഞെക്കുക",
+	"twocolconflict-split-save-tooltip": "ഈ എഴുത്തിൽ താങ്കൾ വരുത്തിയ മാറ്റങ്ങൾ ബാധകമാക്കുക",
+	"twocolconflict-split-reset-tooltip": "ഈ എഴുത്തിൽ താങ്കൾ വരുത്തിയ മാറ്റങ്ങൾ ഒഴിവാക്കുക",
+	"twocolconflict-split-reset-warning": "മാറ്റങ്ങൾ ഒഴിവാക്കണോ? ഈ പെട്ടിയിലെ എഴുത്ത്, തിരുത്ത് സമരസപ്പെടായ്ക ഉണ്ടായപ്പോഴത്തെ അവസ്ഥയിലേക്ക് പുനഃസജ്ജീകരിക്കപ്പെടുന്നതാണ്.",
+	"twocolconflict-split-reset-warning-cancel": "റദ്ദാക്കുക",
+	"twocolconflict-split-reset-warning-accept": "ഒഴിവാക്കുക",
+	"twocolconflict-split-collapse-tooltip": "മാറ്റമില്ലാത്ത എഴുത്ത് ചുരുക്കുക",
+	"twocolconflict-split-expand-tooltip": "മാറ്റമില്ലാത്ത എഴുത്ത് വികസിപ്പിക്കുക"
+}

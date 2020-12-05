@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Albinus",
+			"Amire80",
+			"Fagunkoyel Hansdah",
+			"Manik Soren",
+			"Ramjit Tudu"
+		]
+	},
+	"tooltip-t-wikibase": "ᱜᱩᱫᱟᱹᱢ ᱚᱲᱟᱜ ᱥᱟᱶᱛᱮᱱ ᱠᱟᱛᱷᱟᱠᱩ ᱡᱚᱱᱚᱲ",
+	"wikibase-comment-update": "{{WBREPONAME}} ᱥᱟᱛᱚᱢ ᱵᱚᱫᱚᱞ ᱦᱩᱭᱠᱟᱱᱟ",
+	"wikibase-dataitem": "{{WBREPONAME}} ᱡᱤᱱᱤᱥ",
+	"wikibase-editlinks": "ᱡᱚᱱᱚᱲᱠᱩ ᱥᱟᱯᱲᱟᱣ",
+	"wikibase-editlinkstitle": "ᱵᱷᱤᱛᱨᱤ ᱯᱟᱹᱨᱥᱤ ᱡᱚᱱᱚᱲ ᱠᱚ ᱵᱚᱫᱚᱞ",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "ᱫᱟᱱᱟᱝ",
+	"wikibase-rc-hide-wikidata-show": "ᱧᱮᱞ",
+	"wikibase-rc-wikibase-edit-letter": "ᱰ",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} ᱥᱟᱯᱲᱟᱣ",
+	"wikibase-replicationnote": "ᱧᱮᱞᱢᱮ ᱪᱤ ᱱᱚᱣᱟ ᱛᱤᱢᱤᱱ ᱚᱠᱛᱚᱭ ᱤᱫᱤᱭᱟ ᱵᱚᱫᱚᱞ ᱠᱚ ᱡᱚᱛᱚ ᱣᱤᱠᱤ ᱨᱮ ᱧᱮᱞᱚᱜ ᱞᱟᱹᱜᱤᱫ ᱾",
+	"wikibase-otherprojects": "ᱮᱴᱟᱜ ᱯᱨᱚᱡᱮᱠᱴ ᱠᱚᱨᱮ"
+}

@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Banjo",
+			"Elisardojm",
+			"Sabelaraga"
+		]
+	},
+	"twocolconflict": "TwoColConflict",
+	"twocolconflict-desc": "Amosa unha pantalla doble de fusión de edicións para amañar conflitos de edición",
+	"twocolconflictprovidesubmittedtext": "Editar conflito:",
+	"twocolconflict-beta-feature-message": "Conflito de edición sobre dúas columnas",
+	"twocolconflict-beta-feature-description": "Amosar o conflito de edición utilizando unha versión máis avanzada da vista en dúas columnas.\n\nConsello: se prefire non esperar ata que se atope cun conflito de edición real, pode simular conflitos de edición na nosa páxina de probas.\n[//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/Edit_Conflicts/Feedback_Round_Test_Page Prema aquí] para descubrir como funciona.",
+	"twocolconflict-copy-tab-action": "Ver texto completo",
+	"twocolconflict-special-footer-hint": "Pecha esta páxina para volver á interface de edición de conflitos.",
+	"twocolconflict-special-header-overview": "Mentras editabas, outro usuario editou a mesma páxina e publicouna antes ca ti. Unha copia de só lectura da túa revisión está dispoñible ao final. Calquera cambio feito na interface de edición de conflitos non esta reflectido. Para fusionar os cambios, utilizando a interface de edición de conflitos, regresa á pestana anterior.",
+	"twocolconflict-special-not-saved": "Non publicado.",
+	"twocolconflict-special-textarea-hint": "Podes ver e copiar a fonte da túa revisión",
+	"twocolconflict-split-your-version-header": "A súa revisión",
+	"twocolconflict-split-not-saved-at": "Sen publicar aínda",
+	"twocolconflict-split-choose-version": "Por favor, escolla unha versión",
+	"twocolconflict-split-tour-dialog-header": "Resolver conflitos de edición",
+	"twocolconflict-split-tour-dialog-btn-text": "Comezar fusión",
+	"twocolconflict-split-tour-popup-btn-text": "Entendido.",
+	"twocolconflict-split-tour-popup3-header": "Texto resaltado",
+	"twocolconflict-split-edit-tooltip": "Editar texto",
+	"twocolconflict-split-reset-tooltip": "Inicializar o texto",
+	"twocolconflict-split-reset-warning-cancel": "Cancelar",
+	"twocolconflict-split-reset-warning-accept": "Desbotar",
+	"twocolconflict-split-collapse-tooltip": "Minimizar texto",
+	"twocolconflict-split-expand-tooltip": "Expandir texto"
+}

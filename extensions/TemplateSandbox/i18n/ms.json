@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Anakmalaysia",
+			"Macofe"
+		]
+	},
+	"templatesandbox": "Kotak pasir templat",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Mempersembahkan halaman]] yang mentransklusikan templat dari kotak pasir",
+	"templatesandbox-suffix": "kotak pasir",
+	"templatesandbox-legend": "Kotak pasir templat",
+	"templatesandbox-text": "Anda boleh memilih satu set templat yang tersimpan dalam ruang kotak pasir anda dengan menggunakan awalan kotak pasir yang bertepatan.\n\nMisalnya, jika anda ingin mempralihatkan versi {{ns:Template}}:Test yang telah anda simpan sebagai \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", gunakan \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" sebagai awalan.",
+	"templatesandbox-prefix-label": "Awalan kotak pasir:",
+	"templatesandbox-page-label": "Halaman persembahan:",
+	"templatesandbox-revid-label": "Semakan persembahan:",
+	"templatesandbox-text-label": "Teks wiki persembahan:",
+	"templatesandbox-submit": "Paparkan",
+	"templatesandbox-title-output": "Kotak pasir templat: $1",
+	"templatesandbox-editform-legend": "Pralihatkan halaman ini dengan templat ini",
+	"templatesandbox-editform-page-label": "Tajuk halaman",
+	"templatesandbox-editform-view-label": "Paparkan Pralihat",
+	"templatesandbox-preview": "Pralihat $2",
+	"templatesandbox-previewnote": "'''Ingat, ini hanya pralihat [[:$1]].'''\nSuntngan anda belum disimpan!",
+	"templatesandbox-invalid-title": "Tajuk yang anda nyatakan tidak sah.",
+	"templatesandbox-title-not-exists": "Tajuk yang anda nyatakan tidak wujud.",
+	"templatesandbox-revision-not-exists": "Semakan yang anda nyatakan tidak wujud.",
+	"templatesandbox-invalid-prefix": "Awalan kotak pasir yang anda nyatakan tidak sah.",
+	"templatesandbox-prefix-not-local": "Awalan kotak pasir yang anda nyatakan tidak setempat.",
+	"templatesandbox-page-or-revid": "Anda mesti memasukkan sama ada tajuk halaman atau nombor ID semakan.",
+	"templatesandbox-editform-need-title": "Untuk mempralihatkan satu lagi halaman dengan templat ini, tajuk halaman mesti dinyatakan.",
+	"templatesandbox-editform-invalid-title": "Halaman yang anda nyatakan untuk pratayang adalah tidak sah.",
+	"templatesandbox-editform-title-not-exists": "Halaman yang anda nyatakan untuk pralihat tidak wujud."
+}

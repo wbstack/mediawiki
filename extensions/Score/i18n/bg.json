@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"StanProg",
+			"Ted Masters",
+			"Vlad5250",
+			"Лорд Бъмбъри"
+		]
+	},
+	"score-deprecated-category": "Страници, използващи непрепоръчителни атрибути за партитура",
+	"score-deprecated-category-desc": "Страниците използват опции от разширението „Score“, които са непрепоръчителни. Такива са: „override_audio“, „override_ogg“, и „override_midi“.",
+	"score-error-category": "Страници с грешки при визуализирането на партитура",
+	"score-error-category-desc": "Грешка при визуализирането на партитурата.",
+	"score-visualeditor-mwscoreinspector-lang": "Език",
+	"score-visualeditor-mwscoreinspector-title": "Музикална нотация",
+	"datatypes-type-musical-notation": "Музикална нотация",
+	"wikibase-listdatatypes-musical-notation-head": "Музикална нотация",
+	"wikibase-listdatatypes-musical-notation-body": "Буквално поле за данни за музикална партитура, написана в LilyPond нотация"
+}

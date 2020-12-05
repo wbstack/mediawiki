@@ -1,0 +1,66 @@
+{
+	"name": "TemplateSandbox",
+	"version": "1.1.0",
+	"author": "Brad Jorsch",
+	"url": "https://www.mediawiki.org/wiki/Extension:TemplateSandbox",
+	"descriptionmsg": "templatesandbox-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "specialpage",
+	"requires": {
+		"MediaWiki": ">= 1.35.0"
+	},
+	"SpecialPages": {
+		"TemplateSandbox": "SpecialTemplateSandbox"
+	},
+	"MessagesDirs": {
+		"TemplateSandbox": [
+			"i18n"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"TemplateSandboxAlias": "TemplateSandbox.alias.php"
+	},
+	"AutoloadClasses": {
+		"TemplateSandboxHooks": "includes/TemplateSandboxHooks.php",
+		"SpecialTemplateSandbox": "includes/SpecialTemplateSandbox.php",
+		"TemplateSandboxLogic": "includes/TemplateSandboxLogic.php"
+	},
+	"ResourceModules": {
+		"ext.TemplateSandbox.top": {
+			"styles": "ext.TemplateSandbox.less"
+		},
+		"ext.TemplateSandbox": {
+			"scripts": "ext.TemplateSandbox.js",
+			"dependencies": "ext.TemplateSandbox.top"
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "TemplateSandbox/modules"
+	},
+	"Hooks": {
+		"EditPage::importFormData": [
+			"TemplateSandboxHooks::importFormData"
+		],
+		"EditPage::showStandardInputs:options": [
+			"TemplateSandboxHooks::injectOptions"
+		],
+		"AlternateEditPreview": [
+			"TemplateSandboxHooks::templateSandboxPreview"
+		],
+		"APIGetAllowedParams": [
+			"TemplateSandboxHooks::onAPIGetAllowedParams"
+		],
+		"ApiMakeParserOptions": [
+			"TemplateSandboxHooks::onApiMakeParserOptions"
+		]
+	},
+	"config": {
+		"TemplateSandboxEditNamespaces": {
+			"value": [
+				10
+			]
+		}
+	},
+	"manifest_version": 2
+}

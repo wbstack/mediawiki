@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Athena in Wonderland",
+			"Fúlvio",
+			"Hamilton Abreu",
+			"Mansil alfalb",
+			"McDutchie",
+			"Vitorvicentevalente"
+		]
+	},
+	"twocolconflict": "TwoColConflict",
+	"twocolconflict-desc": "Apresenta um ecrã de fusão de edições lado a lado, para resolução de conflitos de edição",
+	"twocolconflict-beta-feature-message": "Conflito entre edições em duas colunas",
+	"twocolconflict-beta-feature-description": "Mostrar o conflito entre edições numa forma mais avançada em duas colunas.",
+	"twocolconflict-split-header-hint-beta": "Obrigado por usar esta funcionalidade beta. Pode ajudar a melhorá-la, deixando um comentário [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View nesta página].",
+	"twocolconflict-split-your-version-header": "A sua revisão",
+	"twocolconflict-split-current-version-header": "Edição atual desde as $1",
+	"twocolconflict-split-not-saved-at": "Ainda não publicada",
+	"twocolconflict-split-choose-version": "Selecione uma versão, por favor",
+	"twocolconflict-split-tour-dialog-header": "Combinar versões em conflito",
+	"twocolconflict-split-tour-dialog-message": "Infelizmente, enquanto estava a editar, outro utilizador editou a mesma página e publicou-a antes de si.\n\nNão se preocupe, porque as suas edições não estão perdidas! Reveja ambas as versões e combine-as, por favor. Se for necessário, pode editar o texto selecionado. Só o texto das caixas selecionadas será gravado quando clicar \"{{int:publishchanges}}\".",
+	"twocolconflict-split-tour-dialog-btn-text": "Iniciar fusão",
+	"twocolconflict-split-tour-popup-btn-text": "Entendido.",
+	"twocolconflict-split-tour-popup1-header": "As mudanças divergentes são mostradas linha a linha.",
+	"twocolconflict-split-tour-popup1-message": "Quando há diferenças entre o texto do outro utilizador e o seu, as duas versões são mostradas lado a lado: a versão do outro utilizador na caixa amarela à esquerda e a sua na caixa azul à direita.<br /><br />Quando não há diferenças entre as duas versões, as linhas são mostradas em caixas cinzentas. Estas podem ser expandidas ou recolhidas e editadas, se necessário.",
+	"twocolconflict-split-tour-popup2-header": "Escolha as alterações que deseja manter",
+	"twocolconflict-split-tour-popup2-message": "Escolha a versão do texto que deseja manter, clicando um dos dois botões entre cada par de linhas. Depois de selecionar uma versão, pode editá-la clicando no ícone da caneta. Também é possível copiar o texto da versão que não selecionou, usando a função copiar e inserir do teclado ou o botão direito do rato.<br /><br />Tem de selecionar uma versão de cada linha alterada, para gravar o texto fundido.",
+	"twocolconflict-split-tour-popup3-header": "Texto realçado",
+	"twocolconflict-split-tour-popup3-message": "O texto que foi alterado em cada versão de uma linha aparece realçado. Depois de editar o texto, o realce desaparecerá.",
+	"twocolconflict-split-edit-tooltip": "Editar texto",
+	"twocolconflict-split-save-tooltip": "Gravar alterações e sair do modo de edição.",
+	"twocolconflict-split-reset-tooltip": "Repor texto",
+	"twocolconflict-split-reset-warning": "Descartar as alterações? O texto nesta caixa ficará tal como estava quando o conflito de edições ocorreu.",
+	"twocolconflict-split-reset-warning-cancel": "Cancelar",
+	"twocolconflict-split-reset-warning-accept": "Descartar",
+	"twocolconflict-split-collapse-tooltip": "Minimizar texto",
+	"twocolconflict-split-expand-tooltip": "Expandir texto",
+	"twocolconflict-talk-same-order": "Manter após",
+	"twocolconflict-talk-reverse-order": "Mover para antes"
+}

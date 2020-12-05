@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Artsiom91",
+			"Macofe",
+			"Mikalai Udodau"
+		]
+	},
+	"templatesandbox": "Пясочніца для шаблонаў",
+	"templatesandbox-suffix": "пясочніца",
+	"templatesandbox-legend": "Пясочніца для шаблонаў",
+	"templatesandbox-submit": "Прагляд",
+	"templatesandbox-editform-legend": "Папярэдні прагляд старонкі з гэтым шаблонам",
+	"templatesandbox-editform-page-label": "Назва старонкі",
+	"templatesandbox-editform-view-label": "Як будзе",
+	"templatesandbox-preview": "Перадпаказ старонкі $2",
+	"templatesandbox-previewnote": "'''Памятайце, гэта толькі папярэдні паказ старонкі [[:$1]].'''\nПраўкі яшчэ не замацаваныя!",
+	"templatesandbox-editform-need-title": "Для прагляду іншай старонкі з выкарыстаннем дадзенага шаблона трэба пазначыць назву старонкі.",
+	"templatesandbox-editform-title-not-exists": "Загаловак, які Вы вызначылі для папярэдняга прагляду, не існуе."
+}

@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"פוילישער"
+		]
+	},
+	"templatesandbox": "מוסטער זאמדקאסטן",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|ווייזט א בלאט]] אריבערשליסנדיק מוסטערן פון א זאמדקאסטן",
+	"templatesandbox-suffix": "זאמדקאסטן",
+	"templatesandbox-legend": "מוסטער זאמדקאסטן",
+	"templatesandbox-prefix-label": "זאמדקאסטן פרעפיקס:",
+	"templatesandbox-page-label": "ווייזן בלאט:",
+	"templatesandbox-revid-label": "ווײַזן רעוויזיע:",
+	"templatesandbox-text-label": "ווײַזן וויקיטעקסט:",
+	"templatesandbox-submit": "ווייזן",
+	"templatesandbox-title-output": "מוסטער זאמדקאסטן: $1",
+	"templatesandbox-editform-legend": "פארויסשטעלן בלאט מיט דעם מוסטער",
+	"templatesandbox-editform-page-label": "בלאט קעפל",
+	"templatesandbox-editform-view-label": "ווייזן פארויסשטעלונג",
+	"templatesandbox-preview": "פארויסשטעלונג פון $2",
+	"templatesandbox-previewnote": "'''געדענקט אז דאס איז נאָר אין אַ פֿאָרויסשטעלונג פון [[:$1]].'''\nאייערע ענדערונגען זענען נאָך נישט געהיט!",
+	"templatesandbox-invalid-title": "דאס קעפל איר האט ספעציפירט איז אומגילטיק.",
+	"templatesandbox-title-not-exists": "דאס קעפל וואס איר האט ספעציפֿירט עקזיסטירט נישט.",
+	"templatesandbox-revision-not-exists": "די רעוויזיע וואס איר האט ספעציפֿירט עקזיסטירט נישט.",
+	"templatesandbox-invalid-prefix": "דער זאמדקאסטן פרעפיקס איר האט ספעציפירט איז אומגילטיק.",
+	"templatesandbox-prefix-not-local": "דער זאמדקאסטן פרעפיקס איר האט ספעציפירט איז נישט לאקאל.",
+	"templatesandbox-page-or-revid": "איר דארפט אריינגעבן אדער א בלאט קעפל אדער א רעוויזיע אידענטיפיצירן נומער.",
+	"templatesandbox-editform-need-title": "כדי פארויסשטעלן אן אנדער בלאט מיט דעם מוסטער, דארפט איר ספעציפירן א בלאט קעפל.",
+	"templatesandbox-editform-invalid-template": "דער נאמען פונעם מוסטער וואס איר האט ספעציפיצירט איז אומגילטיק.",
+	"templatesandbox-editform-invalid-title": "דאס קעפל וואס איר האט ספעציפירט פארויסצושטעלן איז אומגילטיק.",
+	"templatesandbox-editform-title-not-exists": "דאס קעפל וואס איר האט ספעציפירט פארויסצושטעלן עקזיסטירט נישט."
+}

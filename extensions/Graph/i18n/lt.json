@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eitvys200",
+			"Zygimantus"
+		]
+	},
+	"graph-broken-category": "Puslapiai su sugedusiais grafikais",
+	"graph-ve-dialog-edit-height": "Aukštis",
+	"graph-ve-dialog-edit-padding-bottom": "Apačioje",
+	"graph-ve-dialog-edit-padding-left": "Kairėje",
+	"graph-ve-dialog-edit-padding-right": "Dešinėje",
+	"graph-ve-dialog-edit-padding-top": "Viršuje",
+	"graph-ve-dialog-edit-page-data": "Duomenys",
+	"graph-ve-dialog-edit-page-general": "Bendra",
+	"graph-ve-dialog-edit-page-raw": "Neapdoroti duomenys",
+	"graph-ve-dialog-edit-size-field": "Dydis",
+	"graph-ve-dialog-edit-size-table-unit": "Pikseliai",
+	"graph-ve-dialog-edit-width": "Plotis"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"A Retired User",
+			"Liuxinyu970226",
+			"Xiaomingyan",
+			"予弦",
+			"神樂坂秀吉"
+		]
+	},
+	"skinname-modern": "现代",
+	"modern.css": "/* 这里放置的CSS将影响使用现代皮肤的用户 */",
+	"modern.js": "/* 这里的任何JavaScript将为使用现代皮肤的用户加载 */",
+	"modern-desc": "带侧边栏和顶栏的蓝灰色皮肤。从MonoBook衍生而来"
+}

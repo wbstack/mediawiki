@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nikosgranturismogt"
+		]
+	},
+	"mailgun-desc": "Στέλνει μηνύματα ηλεκτρονικού ταχυδρομείου μέσω της υπηρεσίας Mailgun API από το Mediawiki"
+}

@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Glavkos",
+			"Macofe",
+			"Protnet"
+		]
+	},
+	"templatesandbox": "Αμμοδοχείο προτύπου",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Αποδίδει μια σελίδα]] ενσωματώνοντας πρότυπα από ένα αμμοδοχείο",
+	"templatesandbox-suffix": "αμμοδοχείο",
+	"templatesandbox-legend": "Αμμοδοχείο προτύπου",
+	"templatesandbox-text": "Μπορείτε να επιλέξετε μια ομάδα προτύπων που έχουν σωθεί στο χώρο του  αμμοδοχείου  σας χρησιμοποιώντας ένα κατάλληλο πρόθεμα αμμοδοχείου.  Για παράδειγμα, αν θέλετε να κάνετε προεπισκόπηση  σε μια έκδοση του {{ns:Template}}:Κάνετε τη δοκιμή με αυτό που έχετε αποθηκεύσει ως \"{{ns:User}}:Foo/αμμοδοχείο/{{ns:Template}}:Δοκιμή\", κάντε χρήση του  \"{{ns:User}}:Foo/αμμοδοχείο\" ως πρόθεμα.",
+	"templatesandbox-prefix-label": "Πρόθεμα αμμοδοχείου:",
+	"templatesandbox-page-label": "Απόδοση σελίδας:",
+	"templatesandbox-revid-label": "Απόδοση αναθεώρησης:",
+	"templatesandbox-text-label": "Απόδοση βικικειμένου:",
+	"templatesandbox-submit": "Προβολή",
+	"templatesandbox-title-output": "Αμμοδοχείο προτύπου:$1",
+	"templatesandbox-editform-legend": "Προεπισκόπιση σελίδας με αυτό το πρότυπο",
+	"templatesandbox-editform-page-label": "Τίτλος σελίδας",
+	"templatesandbox-editform-view-label": "Εμφάνιση προεπισκόπησης",
+	"templatesandbox-preview": "Προεπισκόπηση της $2",
+	"templatesandbox-previewnote": "'''Να θυμάστε ότι αυτό είναι μόνο μια προεπισκόπηση του [[:$1]].'''\nΟι αλλαγές σας δεν έχουν ακόμα αποθηκευτεί!",
+	"templatesandbox-invalid-title": "Ο τίτλος που καθορίσατε δεν είναι έγκυρος.",
+	"templatesandbox-title-not-exists": "Ο τίτλος που καθορίσατε δεν υπάρχει.",
+	"templatesandbox-revision-not-exists": "Η αναθεώρηση που καθορίσατε δεν υπάρχει.",
+	"templatesandbox-invalid-prefix": "Το πρόθεμα αμμοδοχείου  που καθορίσατε είναι άκυρο.",
+	"templatesandbox-prefix-not-local": "Το πρόθεμα αμμοδοχείου που καθορίσατε δεν είναι τοπικό.",
+	"templatesandbox-page-or-revid": "Θα πρέπει να εισαγάγετε είτε τίτλο σελίδας είτε αναγνωριστικό αριθμό έκδοσης.",
+	"templatesandbox-fail-post": "<em>Λόγω απώλειας δεδομένων της περιόδου σύνδεσης, η προεπισκόπηση είναι κρυμμένη ως προληπτικό μέτρο κατά επιθέσεων JavaScript.</em>\n\n<strong>Αν αυτή είναι μια θεμιτή απόπειρα προεπισκόπησης, παρακαλούμε δοκιμάστε ξανά.</strong>\nΑν εξακολουθεί να μην λειτουργεί, δοκιμάστε να [[Special:UserLogout|αποσυνδεθείτε]] και να συνδεθείτε ξανά και βεβαιωθείτε ότι το πρόγραμμα περιήγησής σας επιτρέπει cookies από αυτόν τον ιστότοπο.",
+	"templatesandbox-editform-need-title": "Για να κάνετε προεπισκόπηση σε μια άλλη σελίδα με αυτό το πρότυπο, πρέπει να καθοριστεί ένας τίτλος σελίδας.",
+	"templatesandbox-editform-invalid-title": "Ο τίτλος που καθορίσατε για την προεπισκόπηση είναι άκυρος.",
+	"templatesandbox-editform-title-not-exists": "Ο τίτλος που καθορίσατε για προεπισκόπηση δεν υπάρχει."
+}

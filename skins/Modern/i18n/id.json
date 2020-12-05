@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Arifin.wijaya",
+			"Bennylin",
+			"Iwan Novirion",
+			"William Surya Permana"
+		]
+	},
+	"skinname-modern": "Modern",
+	"modern.css": "/* CSS yang ada di sini akan diterapkan pada kulit Modern. */",
+	"modern.js": "/* Semua JavaScript di sini akan dimuatkan untuk para pengguna yang menggunakan kulit Modern */",
+	"modern-desc": "Tema biru/abu dengan bilah sisi dan bilah atas. Berasal dari MonoBook"
+}

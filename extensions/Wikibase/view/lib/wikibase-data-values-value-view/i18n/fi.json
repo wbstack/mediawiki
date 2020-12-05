@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nike",
+			"Pyscowicz",
+			"Silvonen",
+			"Stryn",
+			"Surjection",
+			"Valtlait"
+		]
+	},
+	"valueview-expert-unsupportedvalue-unsupporteddatavalue": "Tyyppiä $1 olevien arvojen käsittelyä ei vielä tueta.",
+	"valueview-expert-unsupportedvalue-unsupporteddatatype": "Datatyypin ”$1” arvojen käsittelyä ei vielä tueta.",
+	"valueview-expert-emptyvalue-empty": "tyhjä",
+	"valueview-expert-globecoordinateinput-precision": "Tarkkuus:",
+	"valueview-expert-globecoordinateinput-nullprecision": "määrittelemätön",
+	"valueview-expert-globecoordinateinput-customprecision": "erikoinen ($1)",
+	"valueview-expert-timevalue-calendar-gregorian": "Gregoriaaninen",
+	"valueview-expert-timevalue-calendar-julian": "Juliaaninen",
+	"valueview-expert-timeinput-precision": "Tarkkuus:",
+	"valueview-expert-timeinput-calendar": "Kalenteri:",
+	"valueview-expertextender-languageselector-languagetemplate": "$1 ($2)",
+	"valueview-expertextender-languageselector-label": "Kieli (pakollinen):",
+	"valueview-expertextender-unitsuggester-label": "Yksikkö (valinnainen):",
+	"valueview-preview-label": "näytetään muodossa:",
+	"valueview-preview-novalue": "kelvollista arvoa ei tunnistettu",
+	"valueview-listrotator-manually": "aseta manuaalisesti"
+}

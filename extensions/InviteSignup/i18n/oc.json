@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31"
+		]
+	},
+	"invitesignup": "Convidar de monde sus aqueste wiki",
+	"is-desc": "Mandar de corrièrs electronics de convit",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "Corrièr electronic",
+	"is-tableth-inviter": "Convidaire",
+	"is-tableth-signup": "Inscrit",
+	"is-tableth-groups": "Gropes",
+	"is-add": "Apondre",
+	"is-delete": "Suprimir",
+	"is-invalidemail": "<b>$1</b> es pas una adreça de corrièr electronic valida.",
+	"is-emailsubj": "Sètz convidat a rejónher {{SITENAME}}",
+	"is-emailbody": "Bonjorn,\n\n{{GENDER:$1|$1}} vos a convidat a vos inscriure sus {{SITENAME}}.\nO podètz far aicí : $2",
+	"right-invitesignup": "Convidar los utilizaires a s'inscriure",
+	"action-invitesignup": "convidar los utilizaires a s'inscriure sus aqueste site"
+}

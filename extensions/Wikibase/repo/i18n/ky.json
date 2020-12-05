@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Growingup",
+			"Janatkg",
+			"Macofe",
+			"Викиней"
+		]
+	},
+	"wikibase-edit": "оңдоо",
+	"wikibase-save": "сактоо",
+	"wikibase-cancel": "жокко чыгаруу",
+	"wikibase-add": "кошуу",
+	"wikibase-sitelink-site-edit-placeholder": "сайт",
+	"wikibase-sitelinks-special": "Башка сайттар",
+	"wikibase-remove": "өчүрүү",
+	"wikibase-itembytitle-lookup-site": "Сайт:",
+	"wikibase-itembytitle-lookup-page": "Барак:",
+	"wikibase-itembytitle-submit": "Табуу",
+	"wikibase-itemdisambiguation-lookup-language": "Тилдин коду:",
+	"wikibase-itemdisambiguation-submit": "Табуу",
+	"wikibase-newentity-description": "Баяндама:",
+	"wikibase-modifyterm-language": "Тилдин коду:"
+}

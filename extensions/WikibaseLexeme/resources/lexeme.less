@@ -1,0 +1,150 @@
+.clearfix() {
+	&:after {
+		content: '';
+		display: table;
+		clear: both;
+	}
+}
+
+.wb-lexemepage #firstHeading {
+	display: none;
+}
+
+#wb-lexeme-header-lemmas {
+	font-size: 100%;
+	margin: -1.428em 0 0.25em 0;
+	display: flex;
+	align-items: center;
+}
+
+.wb-lexeme-header_id {
+	font-size: 1.25em;
+	color: #72777d;
+}
+
+.wb-lexeme-header_lemma-widget {
+	flex-grow: 1;
+	margin-left: 1.6em;
+	min-width: 0;
+}
+
+.wb-lexeme.wikibase-entityview {
+	float: none;
+}
+
+.wb-lexeme .wikibase-entitytermsforlanguagelistview .wikibase-entitytermsforlanguagelistview-header .wikibase-entitytermsforlanguagelistview-header-row {
+	border-right: 0;
+	width: 60%;
+}
+
+.wikibase-lexeme-forms {
+	margin-left: 10px;
+}
+
+.wikibase-lexeme-forms .wikibase-lexeme-form {
+	position: relative;
+	clear: left;
+	margin-bottom: 2em;
+}
+
+.wikibase-lexeme-form-header {
+	display: flex;
+	align-items: center;
+}
+
+.wikibase-lexeme-form-id {
+	font-size: 1em;
+	min-width: 2.5em;
+	margin-right: 1.25em;
+}
+
+.wikibase-lexeme-form-body {
+	margin-left: 3.75em;
+}
+
+.wikibase-lexeme-form h2.wb-section-heading {
+	padding-left: 0;
+	font-size: 1.2em;
+}
+
+.wikibase-lexeme-forms-section {
+	.clearfix;
+}
+
+.wikibase-lexeme-forms-section > .wikibase-toolbar-container {
+	position: static;
+	float: left;
+}
+
+.wikibase-lexeme-form-grammatical-features {
+	display: flex;
+}
+
+.wikibase-lexeme-form-grammatical-features-header {
+	white-space: nowrap;
+	align-self: center;
+}
+
+.wikibase-lexeme-form-grammatical-features-values {
+	margin: 0 10px;
+	flex-grow: 1;
+}
+
+.wikibase-lexeme-form .wikibase-statementgrouplistview,
+.wikibase-lexeme-form .wikibase-listview,
+.wikibase-lexeme-form .wikibase-addtoolbar {
+	.clearfix;
+}
+
+.wb-lexeme {
+	@import '_variables';
+	@import 'lemma-widget';
+	@import 'form-representation-widget';
+	@import 'sense-gloss-widget';
+}
+
+.wikibase-lexeme-senses .wikibase-lexeme-sense {
+	position: relative;
+	clear: left;
+	margin-bottom: 2em;
+}
+
+.wikibase-lexeme-senses-section {
+	.clearfix;
+}
+
+.wikibase-lexeme-senses-section > .wikibase-toolbar-container {
+	position: static;
+	float: left;
+}
+
+.wikibase-lexeme-sense .wikibase-statementgrouplistview {
+	.clearfix;
+}
+
+.wikibase-lexeme-sense-id {
+	padding: 5px 0;
+	flex-basis: 3.75em;
+	flex-shrink: 0;
+	white-space: nowrap;
+	margin-right: 1.25em;
+}
+
+.wikibase-lexeme-sense-header {
+	padding-left: 10px;
+	display: flex;
+	align-items: center;
+}
+
+.wikibase-lexeme-sense .wikibase-lexeme-sense-statements .wikibase-statements {
+	padding-left: 0;
+}
+
+.wikibase-lexeme-sense h2.wb-section-heading {
+	padding-left: 0;
+	font-size: 1.2em;
+}
+
+.wikibase-lexeme-sense .wikibase-lexeme-sense-statements {
+	margin-left: calc( 3.75em * 1.2 );
+}

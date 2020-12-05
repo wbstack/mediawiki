@@ -1,0 +1,134 @@
+/**
+ * Styles specific to the mobile version of Wikibase.
+ *
+ * @license GNU GPL v2+
+ * @author Bene* < benestar.wikimedia@gmail.com >
+ */
+
+.wikibase-title-id {
+	color: #72777d;
+	font-size: 0.6em;
+	margin-left: 0.4em;
+}
+
+.wb-section-heading span {
+	width: 100%;
+}
+
+.wikibase-toolbar-container {
+	position: absolute;
+	top: 5px;
+	right: 5px;
+	font-size: 0;
+}
+
+.wikibase-toolbar-button-edit a {
+	/* @embed */
+	background-image: url( pencil.svg );
+	display: block;
+	height: 24px;
+	width: 24px;
+}
+
+/* fix positioning of toolbar */
+.wikibase-entitytermsview,
+.wikibase-sitelinkgroupview {
+	position: relative;
+}
+
+.wikibase-entitytermsview-heading-aliases ul {
+	color: #72777d;
+	margin: 0;
+	word-wrap: break-word;
+}
+
+.wikibase-entitytermsview-heading-aliases li {
+	display: inline;
+}
+
+.wikibase-entitytermsview-heading-aliases li:before {
+	content: '|';
+	padding: 0 0.4em;
+}
+
+.wikibase-entitytermsview-heading-aliases li:first-child:before {
+	content: '';
+	padding: 0;
+}
+
+.wikibase-entitytermsview-entitytermsforlanguagelistview {
+	display: none;
+}
+
+.wikibase-statementgrouplistview,
+.wikibase-sitelinklistview {
+	-webkit-column-width: 280px;
+	-moz-column-width: 280px;
+	column-width: 280px;
+}
+
+.wikibase-statementgroupview {
+	/* Same as toc */
+	background-color: #f8f9fa;
+	border: 1px solid #eaecf0;
+	/* Prevent statementgroupview to be split among columns */
+	display: inline-block;
+	margin: 0 0 10px;
+	width: 100%;
+}
+
+.wikibase-statementgroupview > div {
+	padding: 2px 5px;
+}
+
+.wikibase-statementgroupview-property-label a,
+.wikibase-snakview-property a {
+	color: #54595d;
+}
+
+.wikibase-statementview {
+	margin-bottom: 10px;
+}
+
+.wikibase-statementview-rankselector .ui-icon.ui-icon-rankselector {
+	display: block;
+	float: left;
+	margin: 5px 5px 0 0;
+}
+
+.wikibase-statementview-mainsnak .wikibase-snakview-value {
+	font-size: 1.2em;
+}
+
+.wikibase-statementview div.thumb img,
+.wikibase-statementview div.thumb audio,
+.wikibase-statementview div.thumb video {
+	border: 1px solid #c8ccd1;
+}
+
+.wikibase-snakview div {
+	display: inline;
+}
+
+.wikibase-snakview div.commons-media-caption {
+	display: block;
+}
+
+.wikibase-statementview-references-container,
+.wikibase-statementview-qualifiers {
+	font-size: 0.8em;
+}
+
+.wikibase-referenceview {
+	margin: 5px 0;
+}
+
+.wikibase-sitelinkgroupview-counter {
+	font-size: smaller;
+	font-weight: normal;
+	margin-left: 0.6em;
+}
+
+.wikibase-sitelinklistview {
+	line-height: 1.2;
+}

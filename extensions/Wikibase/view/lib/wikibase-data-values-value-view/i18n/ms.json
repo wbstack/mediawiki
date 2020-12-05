@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Anakmalaysia"
+		]
+	},
+	"valueview-expert-unsupportedvalue-unsupporteddatavalue": "Pengelolaan nilai \"$1\" belum disokong.",
+	"valueview-expert-unsupportedvalue-unsupporteddatatype": "Pengelolaan nilai untuk jenis data \"$1\" belum disokong.",
+	"valueview-expert-emptyvalue-empty": "kosong",
+	"valueview-expert-globecoordinateinput-precision": "Kepersisan:",
+	"valueview-expert-timevalue-calendar-gregorian": "Gregory",
+	"valueview-expert-timevalue-calendar-julian": "Julius",
+	"valueview-expert-timeinput-precision": "Kepersisan:",
+	"valueview-expert-timeinput-calendar": "Kalendar:",
+	"valueview-preview-label": "akan dipaparkan sebagai:",
+	"valueview-preview-novalue": "tiada nilai sah yang dikenali"
+}

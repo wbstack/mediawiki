@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Ильнар"
+		]
+	},
+	"templatesandbox": "Калып өчен комлык",
+	"templatesandbox-suffix": "комлык",
+	"templatesandbox-legend": "Калып өчен комлык",
+	"templatesandbox-prefix-label": "Комлык префиксы:",
+	"templatesandbox-page-label": "Битне күрсәтү:",
+	"templatesandbox-revid-label": "Күрсәтү юрамасы:",
+	"templatesandbox-text-label": "Викитекстны күрсәтү:",
+	"templatesandbox-submit": "Карау",
+	"templatesandbox-title-output": "Калып өчен комлык: $1",
+	"templatesandbox-editform-page-label": "Битнең исеме",
+	"templatesandbox-editform-view-label": "Алдан карау",
+	"templatesandbox-preview": "$2 өчен алдан карау"
+}

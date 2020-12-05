@@ -1,0 +1,33 @@
+/**
+ * @license GNU GPL v2+
+ * @author H. Snater < mediawiki@snater.com >
+ */
+
+.wikibase-entitysearch-list .wb-entitysearch-suggestions {
+	background-color: #fff;
+	border-top-style: solid;
+}
+
+.wikibase-entitysearch-list .wb-entitysearch-suggestions.ui-state-hover {
+	background-color: #4c59a6;
+	border-top-style: solid;
+	color: #fff;
+}
+
+.wikibase-entitysearch-list .wb-entitysearch-suggestions .suggestions-special {
+	background-color: transparent;
+	border: 0;
+	display: block;
+	margin: 0;
+	padding: 0;
+}
+
+.wikibase-entitysearch-list .wb-entitysearch-suggestions .special-query {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.wikibase-entitysearch-list .wb-entitysearch-suggestions.ui-state-hover div {
+	color: #fff;
+}

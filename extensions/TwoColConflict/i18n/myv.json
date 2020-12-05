@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rueter"
+		]
+	},
+	"twocolconflict-label-show": "невтемс",
+	"twocolconflict-label-hide": "кекшемс",
+	"twocolconflict-label-unchanged": "апак полавто текст"
+}

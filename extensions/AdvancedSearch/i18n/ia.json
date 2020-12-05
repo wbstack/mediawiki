@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"advancedsearch-desc": "Accesso facile al functiones de recerca avantiate sur [[Special:Search]]",
+	"advancedsearch-options-pane-head": "Recerca avantiate:",
+	"advancedsearch-optgroup-text": "Cercar in le texto del pagina",
+	"advancedsearch-optgroup-structure": "Structura",
+	"advancedsearch-optgroup-files": "Files e imagines",
+	"advancedsearch-optgroup-sort": "Ordination",
+	"advancedsearch-field-plain": "Iste parolas",
+	"advancedsearch-field-phrase": "Exactemente iste texto",
+	"advancedsearch-field-or": "Un de iste parolas",
+	"advancedsearch-field-not": "Non iste parolas",
+	"advancedsearch-field-subpageof": "Subpaginas de iste pagina",
+	"advancedsearch-field-intitle": "Le titulo del pagina contine",
+	"advancedsearch-field-deepcategory": "Paginas in iste categorias",
+	"advancedsearch-field-hastemplate": "Paginas con iste patronos",
+	"advancedsearch-field-inlanguage": "Paginas in iste lingua",
+	"advancedsearch-field-filetype": "Typo de file",
+	"advancedsearch-field-filew": "Latitude del file in pixels",
+	"advancedsearch-field-fileh": "Altitude del file in pixels",
+	"advancedsearch-field-sort": "Ordination",
+	"advancedsearch-field-preview-sort": "Ordinar per $1",
+	"advancedsearch-help-plain": ";Description\n:Cerca iste parolas in le titulo o le texto.\n;Presta attention a lo sequente:\n:* Es possibile entrar plure parolas hic.\n:* Le signos de punctuation e altere characteres non alphanumeric (con le exception del duo punctos e le comma) essera ignorate.\n:* Il pote haber resultatos que non contine un o plus de tu terminos de recerca.\n:* Le derivation de parolas se applica. Exemplo: si tu scribe ''auto'', le recerca etiam considera ''autos''. Le derivation de parolas es specific de cata lingua.\n;Pagina de adjuta\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Recerca de texto complete]\n;Equivalente syntactic in le recerca normal\n:<code>sesame street car</code>",
+	"advancedsearch-help-phrase": ";Description\n:Cerca un sequentia specific de characteres. Le signos de punctuation es ignorate.\n;Nota ben lo sequente \n:(solmente valide si se usa virgulettas, vide le exemplo hic infra) \n:* Separa le phrases a cercar per comma o spatio, p.ex. <code>\"bon matino\"</code>, <code>\"salute amico!\"</code>.\n:* Signos de punctuation e altere characteres non alphanumeric (excepte le duo punctos e le comma) essera ignorate.\n:* Le recerca non distingue inter majusculas e minusculas.\n:* Non se cerca le radices de parolas con suffixos.\n;Pagina de adjuta\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Parolas, phrases e modificatores]\n;Equivalente syntactic in recerca normal\n:Parolas inter virgulettas, per exemplo <code>\"Comenciar al initio\"</code>.",
+	"advancedsearch-placeholder-exact-text": "\"catto ama capra\""
+}

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ата"
+		]
+	},
+	"mailgun-desc": "Відправляти листи через API сервіс Mailgun з Медіавікі"
+}

@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beyronvan",
+			"Bonevarluri",
+			"Lorestani",
+			"Mogoeilor"
+		]
+	},
+	"tooltip-t-wikibase": "هوم پاٛڤٱنؽا د آمایٱ جا رٱسینٱ یا",
+	"wikibase-comment-update": "{{WBREPONAME}} قلٱم آلشت بی",
+	"wikibase-comment-sitelink-add": "هوم پیوند زون اضاف بیه:$1",
+	"wikibase-comment-sitelink-change": "هوم پیوند زون د $1 تا $2 آلشت بی",
+	"wikibase-comment-sitelink-remove": "هوم پیوند زون ورداشته بیه:$1",
+	"wikibase-comment-multi": "$1 {{PLURAL:$1|آلشت|آلشتیا}}",
+	"wikibase-dataitem": "{{WBREPONAME}} قلٱم",
+	"wikibase-editlinks": "ڤیرایش هوم پاٛڤٱنؽا",
+	"wikibase-editlinkstitle": "ڤیرایش هوم پاٛڤٱن زڤونی",
+	"wikibase-linkitem-addlinks": "اضاف کردن هوم پیوندیا",
+	"wikibase-linkitem-title": "هوم پیوند کردن وا بلگه",
+	"wikibase-linkitem-linkpage": "هوم پیوند کردن وا بلگه",
+	"wikibase-linkitem-selectlink": "لطفن یه گل سیلجا و بلگه که شما میهایت د ای بلگه هوم پیوند با انتخاو بکید.",
+	"wikibase-linkitem-input-site": "زون:",
+	"wikibase-linkitem-input-page": "بلگه:",
+	"wikibase-linkitem-confirmitem-button": "پش راست کردن",
+	"wikibase-linkitem-not-loggedin-title": "شما با بیایت وامین",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "قایم كردن",
+	"wikibase-rc-hide-wikidata-show": "نشوݩ داٛئن",
+	"wikibase-rc-show-wikidata-pref": "نشو دئن ویرایشتیا ویکی دیتا د سیل برگ تو",
+	"wikibase-rc-wikibase-edit-letter": "د",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} ڤیرایش",
+	"wikibase-watchlist-show-changes-pref": "نشو دئن ویرایشتیا ویکی دیتا د سیل برگ تو",
+	"wikibase-unconnectedpages-submit": "رو",
+	"wikibase-pageinfo-entity-id-none": "هيش كوم",
+	"wikibase-otherprojects": "پرۉژٱیا هنی",
+	"wikibase-sitelinks-sitename-columnheading": "زون",
+	"wikibase-sitelinks-link-columnheading": "بلگه هوم پیوندار"
+}

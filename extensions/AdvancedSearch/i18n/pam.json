@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Leeheonjin"
+		]
+	},
+	"advancedsearch-field-plain": "Ing katayang ini:",
+	"advancedsearch-field-or": "Metung kareng kataya:",
+	"advancedsearch-field-not": "Ali ya ing katayang ini:",
+	"advancedsearch-field-intitle": "Atin ya ing pamagat ning bulung ning:",
+	"advancedsearch-field-deepcategory": "Ing bulung king kategoriyang ini:",
+	"advancedsearch-field-filetype": "Tinduk ning simpan:",
+	"advancedsearch-field-filew": "Lapad ning simpan king piksel:",
+	"advancedsearch-field-fileh": "Katas ning simpan king piksel:",
+	"advancedsearch-filesize-greater-than": "mas maragul ya pa king",
+	"advancedsearch-namespaces-preset-discussion": "Pamisabi-sabi"
+}

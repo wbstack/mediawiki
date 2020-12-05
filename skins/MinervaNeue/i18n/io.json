@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Joao Xavier"
+		]
+	},
+	"mobile-frontend-editor-edit": "Redaktar",
+	"minerva-download": "Deskargar PDF",
+	"mobile-frontend-home-button": "Frontispico",
+	"mobile-frontend-language-article-heading": "Linguo",
+	"mobile-frontend-main-menu-button-tooltip": "Apertar la precipua menuo",
+	"mobile-frontend-main-menu-login": "Enirar",
+	"mobile-frontend-main-menu-logout": "Ekirar",
+	"mobile-frontend-main-menu-nearby": "Vicina",
+	"mobile-frontend-main-menu-settings": "Parametri",
+	"mobile-frontend-main-menu-watchlist": "Surveyo-listo",
+	"mobile-frontend-pageaction-edit-tooltip": "Redaktar la precipua segmento de ica pagino.",
+	"mobile-frontend-placeholder": "Serchez en {{SITENAME}}",
+	"mobile-frontend-random-button": "Hazarde",
+	"minerva-page-actions-user-groups": "Uzero-grupi"
+}

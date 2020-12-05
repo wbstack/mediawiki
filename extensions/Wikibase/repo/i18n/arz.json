@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ghaly",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "تعديل",
+	"wikibase-add": "ضيف",
+	"wikibase-statementsection-statements": "بيانات",
+	"wikibase-sitelinks-special": "مواقع تانيه",
+	"wikibase-statementview-rank-normal": "ترتيب طبيعى",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|مرجع واحد|مرجعين|$1 مراجع|$1 مراجع|$1 مرجع|0=مافيش مراجع}}"
+}

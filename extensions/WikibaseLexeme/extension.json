@@ -1,0 +1,88 @@
+{
+	"name": "WikibaseLexeme",
+	"author": [
+		"The Wikidata team"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:WikibaseLexeme",
+	"descriptionmsg": "wikibaselexeme-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "wikibase",
+	"requires": {
+		"MediaWiki": ">= 1.35.0"
+	},
+	"load_composer_autoloader": true,
+	"AutoloadNamespaces": {
+		"Wikibase\\Lexeme\\": "src/"
+	},
+	"TestAutoloadNamespaces": {
+		"Wikibase\\Lexeme\\Tests\\": "tests/phpunit/composer/",
+		"Wikibase\\Lexeme\\Tests\\MediaWiki\\": "tests/phpunit/mediawiki/",
+		"Wikibase\\Lexeme\\Tests\\Unit\\": "tests/phpunit/unit/"
+	},
+	"callback": "Wikibase\\Lexeme\\Registrar::registerExtension",
+	"config": {
+		"LexemeEnableRepo": {
+			"value": true
+		},
+		"LexemeNamespace": {
+			"value": 146
+		},
+		"LexemeTalkNamespace": {
+			"value": 147
+		},
+		"LexemeLanguageCodePropertyId": {
+			"value": null
+		},
+		"LexemeEnableDataTransclusion": {
+			"value": false
+		}
+	},
+	"ExtensionMessagesFiles": {
+		"WikibaseLexemeAlias": "WikibaseLexeme.i18n.alias.php"
+	},
+	"Hooks": {
+		"InfoAction": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onInfoAction"
+		],
+		"WikibaseRepoEntityNamespaces": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseRepoEntityNamespaces"
+		],
+		"CanonicalNamespaces": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onCanonicalNamespaces"
+		],
+		"WikibaseRepoEntityTypes": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseRepoEntityTypes"
+		],
+		"WikibaseRepoDataTypes": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseDataTypes"
+		],
+		"WikibaseContentLanguages": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseContentLanguages"
+		],
+		"WikibaseClientEntityTypes": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseClientEntityTypes"
+		],
+		"WikibaseClientDataTypes": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onWikibaseClientDataTypes"
+		],
+		"ResourceLoaderTestModules": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onResourceLoaderTestModules"
+		],
+		"WikibaseRepoOnParserOutputUpdaterConstruction": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onParserOutputUpdaterConstruction"
+		],
+		"ScribuntoExternalLibraries": [
+			"Wikibase\\Lexeme\\WikibaseLexemeHooks::onScribuntoExternalLibraries"
+		]
+	},
+	"MessagesDirs": {
+		"WikibaseLexeme": [
+			"i18n",
+			"i18n/api"
+		]
+	},
+	"ServiceWiringFiles": [
+		"WikibaseLexeme.mediawiki-services.php"
+	],
+	"manifest_version": 2
+}

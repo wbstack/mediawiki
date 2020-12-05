@@ -1,0 +1,278 @@
+{
+	"name": "AdvancedSearch",
+	"author": [
+		"Thiemo Kreuz",
+		"Gabriel Birke",
+		"Tonina Zhelyazkova",
+		"Christoph Jauera",
+		"Kai Nissen",
+		"Tim Eulitz"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:AdvancedSearch",
+	"descriptionmsg": "advancedsearch-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"requires": {
+		"MediaWiki": ">= 1.35.0"
+	},
+	"AutoloadNamespaces": {
+		"AdvancedSearch\\": "includes/"
+	},
+	"TestAutoloadNamespaces": {
+		"AdvancedSearch\\Tests\\": "tests/phpunit/"
+	},
+	"config": {
+		"AdvancedSearchDeepcatEnabled": {
+			"description": "Category search also includes child categories.",
+			"value": true
+		},
+		"AdvancedSearchNamespacePresets": {
+			"description": "Groups of namespaces to offer as presets. Can be specified ('namespaces') or determined dynamically ('provider').",
+			"value": {
+				"defaultNamespaces": {
+					"enabled": true,
+					"provider": "defaultNamespaces",
+					"label": "advancedsearch-namespaces-preset-default"
+				},
+				"discussion": {
+					"enabled": true,
+					"provider": "discussion",
+					"label": "advancedsearch-namespaces-preset-discussion"
+				},
+				"generalHelp": {
+					"enabled": true,
+					"namespaces": [
+						"4",
+						"12"
+					],
+					"label": "advancedsearch-namespaces-preset-general-help"
+				},
+				"all": {
+					"enabled": true,
+					"provider": "all",
+					"label": "advancedsearch-namespaces-preset-all"
+				}
+			},
+			"merge_strategy": "array_plus_2d"
+		}
+	},
+	"Hooks": {
+		"GetPreferences": "AdvancedSearch\\Hooks::onGetPreferences",
+		"SpecialPageBeforeExecute": "AdvancedSearch\\Hooks::onSpecialPageBeforeExecute",
+		"SpecialSearchResultsPrepend": "AdvancedSearch\\Hooks::onSpecialSearchResultsPrepend"
+	},
+	"MessagesDirs": {
+		"AdvancedSearch": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"ext.advancedSearch.initialstyles": {
+			"styles": [
+				"modules/ext.advancedSearch.init.less"
+			]
+		},
+		"ext.advancedSearch.styles": {
+			"styles": [
+				"modules/ext.advancedSearch.less"
+			],
+			"skinStyles": {
+				"timeless": [
+					"modules/ext.advancedSearch.timeless.less"
+				],
+				"monobook": [
+					"modules/ext.advancedSearch.monobook.less"
+				]
+			}
+		},
+		"ext.advancedSearch.searchtoken": {
+			"class": "AdvancedSearch\\SearchnamespaceTokenModule"
+		},
+		"ext.advancedSearch.elements": {
+			"scripts": [
+				"modules/ext.advancedSearch.defaultFields.js",
+				"modules/ext.advancedSearch.FieldCollection.js",
+				"modules/ext.advancedSearch.FieldElementBuilder.js",
+				"modules/ext.advancedSearch.QueryCompiler.js",
+				"modules/ext.advancedSearch.SearchField.js",
+				"modules/dm/ext.advancedSearch.getDefaultNamespaces.js",
+				"modules/dm/ext.advancedSearch.SearchModel.js",
+				"modules/ui/ext.advancedSearch.StoreListener.js",
+				"modules/ui/ext.advancedSearch.FormState.js",
+				"modules/ui/ext.advancedSearch.ExpandablePane.js",
+				"modules/ui/ext.advancedSearch.NamespaceFilters.js",
+				"modules/ui/ext.advancedSearch.NamespacePresets.js",
+				"modules/ui/ext.advancedSearch.SearchPreview.js",
+				"modules/ui/ext.advancedSearch.NamespacesPreview.js",
+				"modules/dm/ext.advancedSearch.NamespacePresetProviders.js",
+				"modules/dm/trackingEvents/ext.advancedSearch.SearchRequest.js",
+				"modules/dm/ext.advancedSearch.getSortMethods.js",
+				"modules/ui/ext.advancedSearch.MenuSelectWidget.js",
+				"modules/ui/ext.advancedSearch.ItemMenuOptionWidget.js",
+				"modules/ui/ext.advancedSearch.CheckboxInputWidget.js",
+				"modules/ext.advancedSearch.util.js"
+			],
+			"messages": [
+				"advancedsearch-options-pane-head",
+				"advancedsearch-namespaces-search-in",
+				"advancedsearch-namespaces-placeholder",
+				"advancedsearch-sort-relevance",
+				"advancedsearch-sort-last-edit-desc",
+				"advancedsearch-sort-create-timestamp-desc",
+				"advancedsearch-optgroup-text",
+				"advancedsearch-optgroup-structure",
+				"advancedsearch-optgroup-files",
+				"advancedsearch-optgroup-sort",
+				"advancedsearch-namespaces-remember",
+				"advancedsearch-namespaces-preset-all",
+				"advancedsearch-namespaces-preset-default",
+				"advancedsearch-namespaces-preset-general-help",
+				"advancedsearch-namespaces-preset-discussion",
+				"advancedsearch-filesize-equals-symbol",
+				"advancedsearch-filesize-greater-than-symbol",
+				"advancedsearch-filesize-smaller-than-symbol",
+				"advancedsearch-field-plain",
+				"advancedsearch-field-phrase",
+				"advancedsearch-field-or",
+				"advancedsearch-field-not",
+				"advancedsearch-field-subpageof",
+				"advancedsearch-field-inlanguage",
+				"advancedsearch-field-intitle",
+				"advancedsearch-field-deepcategory",
+				"advancedsearch-field-hastemplate",
+				"advancedsearch-field-filetype",
+				"advancedsearch-field-filew",
+				"advancedsearch-field-fileh",
+				"advancedsearch-field-sort",
+				"advancedsearch-field-preview-sort",
+				"advancedsearch-sort-preview-relevance",
+				"advancedsearch-sort-preview-last-edit-desc",
+				"advancedsearch-sort-preview-create-timestamp-desc"
+			],
+			"dependencies": [
+				"mediawiki.user",
+				"mediawiki.jqueryMsg",
+				"mediawiki.Uri",
+				"mediawiki.util",
+				"oojs",
+				"oojs-ui-widgets",
+				"oojs-ui.styles.icons-layout",
+				"oojs-ui.styles.icons-interactions",
+				"ext.advancedSearch.styles"
+			]
+		},
+		"ext.advancedSearch.init": {
+			"scripts": [
+				"modules/ext.advancedSearch.init.js"
+			],
+			"dependencies": [
+				"ext.advancedSearch.searchtoken",
+				"ext.advancedSearch.elements"
+			]
+		},
+		"ext.advancedSearch.SearchFieldUI": {
+			"scripts" : [
+				"modules/dm/ext.advancedSearch.TitleCache.js",
+				"modules/dm/ext.advancedSearch.MultiselectLookup.js",
+				"modules/ui/ext.advancedSearch.ArbitraryWordInput.js",
+				"modules/ui/ext.advancedSearch.DeepCategoryFilter.js",
+				"modules/ui/ext.advancedSearch.TemplateSearch.js",
+				"modules/ui/ext.advancedSearch.StoreListener.js",
+				"modules/ui/mixins/ext.advancedSearch.ClassesForDropdownOptions.js",
+				"modules/ui/ext.advancedSearch.FileTypeSelection.js",
+				"modules/ui/ext.advancedSearch.SortPreference.js",
+				"modules/ui/ext.advancedSearch.LanguageSelection.js",
+				"modules/ui/ext.advancedSearch.TextInput.js",
+				"modules/ui/ext.advancedSearch.ImageDimensionInput.js",
+				"modules/ui/ext.advancedSearch.ImageDimensionLayout.js",
+				"modules/ui/ext.advancedSearch.TextInput.js",
+				"modules/dm/ext.advancedSearch.FileTypeOptionProvider.js",
+				"modules/dm/ext.advancedSearch.LanguageOptionProvider.js"
+			],
+			"messages": [
+				"advancedsearch-placeholder-exact-text",
+				"advancedsearch-field-deepcategory",
+				"advancedsearch-field-fileh",
+				"advancedsearch-field-filetype",
+				"advancedsearch-field-filew",
+				"advancedsearch-field-hastemplate",
+				"advancedsearch-field-inlanguage",
+				"advancedsearch-field-intitle",
+				"advancedsearch-field-not",
+				"advancedsearch-field-or",
+				"advancedsearch-field-phrase",
+				"advancedsearch-field-plain",
+				"advancedsearch-field-subpageof",
+				"advancedsearch-field-sort",
+				"advancedsearch-filetype-section-types",
+				"advancedsearch-filetype-section-image",
+				"advancedsearch-filetype-section-video",
+				"advancedsearch-filetype-section-audio",
+				"advancedsearch-filetype-section-document",
+				"advancedsearch-filetype-section-other",
+				"advancedsearch-filetype-default",
+				"advancedsearch-filetype-bitmap",
+				"advancedsearch-filetype-drawing",
+				"advancedsearch-filetype-audio",
+				"advancedsearch-filetype-video",
+				"advancedsearch-filetype-office",
+				"advancedsearch-inlanguage-default",
+				"advancedsearch-filesize-equals",
+				"advancedsearch-filesize-greater-than",
+				"advancedsearch-filesize-smaller-than",
+				"advancedsearch-sort-relevance",
+				"advancedsearch-sort-last-edit-desc",
+				"advancedsearch-sort-create-timestamp-desc"
+			],
+			"dependencies": [
+				"oojs",
+				"oojs-ui-widgets",
+				"mediawiki.Title"
+			]
+		}
+	},
+	"QUnitTestModule": {
+		"localBasePath": "tests/qunit",
+		"remoteExtPath": "AdvancedSearch/tests/qunit",
+		"scripts": [
+			"FieldCollection.test.js",
+			"QueryCompiler.test.js",
+			"SearchField.test.js",
+			"ui/ArbitraryWordInput.test.js",
+			"ui/CheckboxInputWidget.test.js",
+			"ui/ItemMenuOptionWidget.test.js",
+			"ui/FileTypeSelection.test.js",
+			"ui/MenuSelectWidget.test.js",
+			"ui/LanguageSelection.test.js",
+			"ui/NamespaceFilters.test.js",
+			"ui/NamespacePresets.test.js",
+			"ui/SearchPreview.test.js",
+			"dm/getDefaultNamespaces.test.js",
+			"dm/NamespacePresetProviders.test.js",
+			"dm/SearchModel.test.js",
+			"dm/FileTypeOptionProvider.test.js",
+			"dm/TitleCache.test.js",
+			"dm/LanguageOptionProvider.test.js",
+			"dm/MultiselectLookup.test.js",
+			"dm/trackingEvents/SearchRequest.test.js",
+			"util.test.js"
+		],
+		"dependencies": [
+			"ext.advancedSearch.elements",
+			"ext.advancedSearch.SearchFieldUI",
+			"oojs-ui"
+		]
+	},
+	"attributes": {
+		"EventLogging": {
+			"Schemas": {
+				"AdvancedSearchRequest": 19512287
+			}
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "AdvancedSearch"
+	},
+	"manifest_version": 2
+}

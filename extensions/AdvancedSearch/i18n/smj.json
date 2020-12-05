@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gadnihasj"
+		]
+	},
+	"advancedsearch-options-pane-head": "Dárkkelis paramehtara:",
+	"advancedsearch-optgroup-text": "Åtså dán biele tevstan",
+	"advancedsearch-optgroup-structure": "Struktuvrra",
+	"advancedsearch-optgroup-files": "Fijlajt ja gåvåjt",
+	"advancedsearch-field-plain": "Dájt bágojt:",
+	"advancedsearch-field-phrase": "Jurra dáv tevstav:",
+	"advancedsearch-field-or": "Avtav dajs bágojs:",
+	"advancedsearch-field-not": "Ij dájt bágojt:",
+	"advancedsearch-field-subpageof": "Dán biele vuollebielijn:",
+	"advancedsearch-field-intitle": "Biele bajelttjálan la:",
+	"advancedsearch-field-deepcategory": "Bielijt dájn kategoriajn:",
+	"advancedsearch-field-hastemplate": "Bielijt dáj skåvij:",
+	"advancedsearch-field-inlanguage": "Bielijt dájn gielajn:",
+	"advancedsearch-field-filetype": "Fijllatjærdda:",
+	"advancedsearch-field-filew": "Fijla gåbddudahka piksalijn:",
+	"advancedsearch-field-fileh": "Filja alludahka piksalijn:",
+	"advancedsearch-placeholder-exact-text": "\"gáhtto æhttsá gájtsav\"",
+	"advancedsearch-inlanguage-default": "Vállji gielav",
+	"advancedsearch-filetype-section-types": "Gájkkásasj fijllatjerda",
+	"advancedsearch-filetype-section-image": "Gåvvåformáhta",
+	"advancedsearch-filetype-section-video": "Videoformáhta",
+	"advancedsearch-filetype-section-audio": "Jiednaformáhta",
+	"advancedsearch-filetype-section-document": "Dokumænntaformáhta",
+	"advancedsearch-filetype-section-other": "Ietjá formáhta",
+	"advancedsearch-filetype-default": "Vállji fijllatjerdav",
+	"advancedsearch-filetype-bitmap": "Gåvvå",
+	"advancedsearch-filetype-drawing": "Tjuorgas",
+	"advancedsearch-filetype-audio": "Jiedna",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Office",
+	"advancedsearch-filesize-greater-than": "stuoráp gå",
+	"advancedsearch-filesize-smaller-than": "unnep gå",
+	"advancedsearch-namespaces-search-in": "Åtså dánna:",
+	"advancedsearch-namespaces-preset-all": "Gájkka"
+}

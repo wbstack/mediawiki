@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ladsgroup",
+			"Rachitrali"
+		]
+	},
+	"wikibase-edit": "ترمیم",
+	"wikibase-add": "شامل کورے",
+	"wikibase-label-empty": "کیہ لیبل ڈیفائن کورونو نو بیتی شیر",
+	"wikibase-description-empty": "ھیچ کیہ عنوان نیکی",
+	"wikibase-statementsection-statements": "بیانات",
+	"wikibase-sitelinks-special": "دیگر ویب سائٹ",
+	"wikibase-statementview-rank-normal": "عام درجہ بندی",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|حوالہ|حوالہ جات}}"
+}

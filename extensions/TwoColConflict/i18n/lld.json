@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Starladin"
+		]
+	},
+	"twocolconflict-split-edit-tooltip": "Clichëia por mudé fora chësc test",
+	"twocolconflict-split-save-tooltip": "Aplichëia tües mudaziuns a chësc test",
+	"twocolconflict-split-reset-tooltip": "Tol demez dötes les mudaziuns a chësc test",
+	"twocolconflict-split-collapse-tooltip": "Smendrësc le test nia mudé fora",
+	"twocolconflict-split-expand-tooltip": "Fá maiú le test nia mudé fora",
+	"twocolconflict-split-help-tooltip": "Mostra aiüt"
+}

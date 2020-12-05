@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Vriullop"
+		]
+	},
+	"templatesandbox": "Proves de plantilles",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Mostra una pàgina]] utilitzant plantilles de proves",
+	"templatesandbox-suffix": "proves",
+	"templatesandbox-legend": "Proves de plantilles",
+	"templatesandbox-text": "Podeu triar un conjunt de plantilles desades en el vostre espai de proves mitjançant l'ús d'un prefix de proves apropiat. \nPer exemple, si voleu previsualitzar una versió de {{ns:Template}}:Test que heu desat a «{{ns:User}}:Exemple/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test», utilitzeu «{{ns:User}}:Exemple/{{int:templatesandbox-suffix}}» com a prefix.",
+	"templatesandbox-prefix-label": "Prefix de proves:",
+	"templatesandbox-page-label": "Pàgina a generar:",
+	"templatesandbox-revid-label": "Revisió a generar:",
+	"templatesandbox-text-label": "Text wiki a generar:",
+	"templatesandbox-submit": "Mostra",
+	"templatesandbox-title-output": "Proves de plantilles: $1",
+	"templatesandbox-editform-legend": "Previsualització d'una pàgina amb aquesta plantilla",
+	"templatesandbox-editform-page-label": "Títol de la pàgina",
+	"templatesandbox-editform-view-label": "Mostra previsualització",
+	"templatesandbox-preview": "Previsualització de $2",
+	"templatesandbox-previewnote": "'''Això només és una previsualització de la pàgina [[:$1]].'''\nEls vostres canvis encara no han estat desats!",
+	"templatesandbox-invalid-title": "El títol que heu especificat no és vàlid.",
+	"templatesandbox-title-not-exists": "El títol que heu especificat no existeix.",
+	"templatesandbox-revision-not-exists": "La revisió que heu especificat no existeix.",
+	"templatesandbox-invalid-prefix": "El prefix de proves que heu especificat no és vàlid.",
+	"templatesandbox-prefix-not-local": "El prefix de proves que heu especificat no és local.",
+	"templatesandbox-page-or-revid": "Heu d'introduir un títol de pàgina o un número d'identificació de revisió.",
+	"templatesandbox-editform-need-title": "Per previsualitzar una altra pàgina amb aquesta plantilla, heu d'especificar un títol de pàgina.",
+	"templatesandbox-editform-invalid-title": "El títol que heu especificat per a la previsualització no és vàlid.",
+	"templatesandbox-editform-title-not-exists": "El títol que heu especificat per a la previsualització no existeix."
+}

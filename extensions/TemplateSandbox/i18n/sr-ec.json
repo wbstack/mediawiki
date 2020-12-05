@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Acamicamacaraca",
+			"BadDog",
+			"Macofe",
+			"Milicevic01",
+			"Obsuser",
+			"Srdjan m",
+			"Vlad5250",
+			"Сербијана"
+		]
+	},
+	"templatesandbox": "Песак за шаблоне",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Рендерује страницу]] са шаблоном из песка",
+	"templatesandbox-suffix": "песак",
+	"templatesandbox-editform-legend": "Претпреглед странице са овим шаблоном",
+	"templatesandbox-editform-page-label": "Наслов странице",
+	"templatesandbox-editform-view-label": "Претпреглед",
+	"templatesandbox-preview": "Преглед $2",
+	"templatesandbox-previewnote": "'''Ово је само преглед [[:$1]].'''\nВаше измене још нису сачуване!",
+	"templatesandbox-editform-need-title": "Да би се приказао претпреглед друге странице са овим шаблоном, наслов странице мора да буде одређен."
+}

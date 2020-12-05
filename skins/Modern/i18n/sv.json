@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lokal Profil",
+			"WikiPhoenix"
+		]
+	},
+	"skinname-modern": "Modern",
+	"modern.css": "/* CSS som skrivs här kommer att påverka alla användare av utseendet Modern */",
+	"modern.js": "/* JavaScript här kommer att laddas för dem som använder utseendet Modern */",
+	"modern-desc": "Ett blått/grått utseende med sido- och toppfält. Härstammar från MonoBook."
+}

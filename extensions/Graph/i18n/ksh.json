@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Purodha"
+		]
+	},
+	"graph-desc": "Mähd uß &lt;graph&gt;-Befähle udder jannze Sigge em Wikki Jraffike op dä Basis vum <i lang=\"en\" xml:lang=\"en\" title=\"Vega visualization grammar\">[http://vega.github.io/ Vega]</i>.",
+	"graphsandbox": "Schpillwiß för Dijajramme",
+	"graph-tracking-category": "Sigge met Dijajramme.",
+	"graph-tracking-category-desc": "en dä Sigg es ene <code><nowiki><graph></nowiki></code> Befähl dren.",
+	"graph-broken-category": "Sigge met kappodde Jraffike",
+	"graph-broken-category-desc": "en dä Sigg es ene <code><nowiki><graph></nowiki></code> Befähl dren, wi hä ävver nit jebruch wähde kann.",
+	"graph-ve-dialog-button-tooltip": "Dijajramm",
+	"graph-ve-dialog-edit-padding-bottom": "Onge",
+	"graph-ve-dialog-edit-padding-left": "Lengks",
+	"graph-ve-dialog-edit-padding-right": "Rääschs",
+	"graph-ve-dialog-edit-padding-top": "Bovve",
+	"graph-ve-dialog-edit-page-data": "Dahte",
+	"graph-ve-empty-graph": "Läddesch Diajajramm",
+	"graph-ve-vega-error": "Et <i lang=\"en\" xml:lang=\"en\" title=\"Vega visualization grammar\">Vega</i> hädd ene Fähler jefonge beim Ußjävve vun heh dämm Dijajramm.",
+	"graph-ve-vega-error-no-render": "Et <i lang=\"en\" xml:lang=\"en\" title=\"Vega visualization grammar\">Vega</i> kunnt dat Dijajramm nid ußjävve."
+}

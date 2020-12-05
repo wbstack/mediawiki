@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jawadywn",
+			"Masjawad99"
+		]
+	},
+	"tooltip-t-wikibase": "Gentolan buat ngubungke objek di jero pangking penyetoran data.",
+	"wikibase-comment-update": "Item {{WBREPONAME}} berobah",
+	"wikibase-dataitem": "Item di {{WBREPONAME}}",
+	"wikibase-editlinks": "Robah géntolan",
+	"wikibase-editlinkstitle": "Robah géntolan interwiki",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Singitke",
+	"wikibase-rc-hide-wikidata-show": "Jingokke",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "Robahan {{WBREPONAME}}",
+	"wikibase-otherprojects": "Dalem gawéan laén"
+}

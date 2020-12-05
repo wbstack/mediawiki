@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"invitesignup": "Канење на луѓе на викито",
+	"is-desc": "Испрати покани по е-пошта",
+	"is-tableth-date": "Датум",
+	"is-tableth-email": "Е-пошта",
+	"is-tableth-inviter": "Канител",
+	"is-tableth-signup": "Зачленет",
+	"is-tableth-groups": "Групи",
+	"is-add": "Додај",
+	"is-delete": "Избриши",
+	"is-invalidemail": "<b>$1</b> не е важечка е-поштенска адреса.",
+	"is-emailsubj": "Понанети сте да се зачлените на {{SITENAME}}",
+	"is-emailbody": "Здраво,\n\n{{GENDER:$1|$1}} ве покани да се зачлените на {{SITENAME}}.\nТоа можете да го сторите на $2",
+	"right-invitesignup": "Канење на корисници да се зачленат",
+	"action-invitesignup": "канење на корисници да се зачленат на викито"
+}

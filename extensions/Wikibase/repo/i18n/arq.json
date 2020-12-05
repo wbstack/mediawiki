@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bachounda",
+			"Ladsgroup",
+			"Oldstoneage"
+		]
+	},
+	"wikibase-edit": "تبديله",
+	"wikibase-add": "زيد",
+	"wikibase-label-empty": "حتا وشيمة ما معرّفة حتا لضركا",
+	"wikibase-description-empty": "ما كاين حتا وصيفة مصوّبة",
+	"wikibase-statementsection-statements": "تصراحات",
+	"wikibase-sitelinks-special": "سيتات وحدخرين",
+	"wikibase-statementview-rank-normal": "ترتاب عادي",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|مرجع|مراجع}}",
+	"special-gotolinkedpage": "روح لل پاجة المتربطة"
+}

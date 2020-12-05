@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"invitesignup": "Ludźi do tutoho wikija přeprosyć",
+	"is-desc": "E-mejlowe přeprošenja rozpósłać",
+	"is-tableth-date": "Datum",
+	"is-tableth-email": "E-mejl",
+	"is-tableth-inviter": "Přeprošowar",
+	"is-tableth-signup": "Zregistrowany",
+	"is-tableth-groups": "Skupiny",
+	"is-add": "Přidać",
+	"is-delete": "Zhašeć",
+	"is-invalidemail": "<b>$1</b> płaćiwa e-mejlowa adresa njeje.",
+	"is-emailsubj": "Sy přeprošeny. do {{GRAMMAR:genitiw|{{SITENAME}}}} zastupić",
+	"is-emailbody": "Halo,\n\n{{GENDER:$1|$1}} je će {{GENDER:$1|přeprosył|přeprosyła}}, će na {{GRAMMAR:lokatiw|{{SITENAME}}}} registrować. \nMóžeš so na $2 registrować.",
+	"right-invitesignup": "Wužiwarjow přeprosyć so registrować",
+	"action-invitesignup": "wužiwarjow přeprosyć, so na tutym sydle registrować"
+}

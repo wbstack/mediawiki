@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nixiéoffset",
+			"Papuass"
+		]
+	},
+	"wikibaselexeme-newlexeme-fieldset": "Izveidot jaunu leksēmu",
+	"datatypes-type-wikibase-lexeme": "Leksēma",
+	"datatypes-type-wikibase-form": "Forma",
+	"wikibase-listdatatypes-wikibase-lexeme-head": "Leksēma",
+	"wikibaselexeme-field-language-label": "Valoda"
+}

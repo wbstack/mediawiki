@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Omshivaprakash",
+			"Stryn",
+			"VASANTH S.N.",
+			"రహ్మానుద్దీన్"
+		]
+	},
+	"wikibase-edit": "ಸಂಪಾದಿಸಿ",
+	"wikibase-save": "ಉಳಿಸಿ",
+	"wikibase-cancel": "ರದ್ಧುಮಾಡು",
+	"wikibase-add": "ಸೇರಿಸು",
+	"wikibase-label-empty": "ಲೇಬಲ್ ಉಲ್ಲೇಖಿಸಲ್ಪಟ್ಟಿಲ್ಲ",
+	"wikibase-diffview-rank": "ಶ್ರೇಣಿ",
+	"wikibase-diffview-label": "ಗುರುತು ಪಟ್ಟಿ",
+	"wikibase-diffview-description": "ವಿವರ",
+	"wikibase-diffview-link": "ಕೊಂಡಿಗಳು",
+	"wikibase-sitelink-page-edit-placeholder": "ಪುಟ",
+	"wikibase-statementsection-statements": "ಹೇಳಿಕೆಗಳು",
+	"wikibase-sitelinks-special": "ಇತರೆ ತಾಣಗಳು",
+	"wikibase-remove": "ತೆಗೆ",
+	"wikibase-statementview-rank-normal": "ಸಾಧಾರಣ ಶ್ರೇಣಿ",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|ಉಲ್ಲೇಖ|ಉಲ್ಲೇಖಗಳು}}",
+	"wikibase-entityselector-more": "ಹೆಚ್ಚು",
+	"wikibase-validator-bad-value": "ದತ್ತಾಂಶದ ಮೌಲ್ಯ ಕೆಟ್ಟುಹೋದ: $1",
+	"wikibase-itembytitle-lookup-page": "ಪುಟ:",
+	"wikibase-itembytitle-submit": "ಹುಡುಕು",
+	"wikibase-itemdisambiguation-lookup-language": "ಭಾಷಾ ಸಂಕೇತ:",
+	"wikibase-itemdisambiguation-lookup-label": "ಗುರುತು ಪಟ್ಟಿ:",
+	"wikibase-itemdisambiguation-submit": "ಹುಡುಕು",
+	"wikibase-newentity-label": "ಗುರುತು ಪಟ್ಟಿ:",
+	"wikibase-newentity-description": "ವಿವರ:",
+	"wikibase-newentity-submit": "ಸೃಷ್ಟಿಸು",
+	"wikibase-setlabel-label": "ಗುರುತು ಪಟ್ಟಿ:",
+	"wikibase-setdescription-label": "ವಿವರ:",
+	"wikibase-modifyterm-language": "ಭಾಷಾ ಸಂಕೇತ:"
+}

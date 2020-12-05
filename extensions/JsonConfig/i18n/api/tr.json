@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"BaRaN6161 TURK"
+		]
+	},
+	"apihelp-jsonconfig-description": "JsonConfig alt sistemine doğrudan erişim sağlar.",
+	"apihelp-jsonconfig-summary": "JsonConfig alt sistemine doğrudan erişim sağlar.",
+	"apihelp-jsonconfig-param-command": "JsonConfig üzerinde hangi alt eylemin gerçekleştirileceği:\n;status:JsonConfig yapılandırmasını gösterir.\n;reset:Yapılandırmaları önbellekten temizler. $1title parametresi ve jsonconfig-reset hakkı gerektirir.\n;reload:Yapılandırma deposundan yapılandırmaları yeniden yükler ve önbelleğe alır. $1title parametresi ve jsonconfig-reset hakkı gerektirir.",
+	"apihelp-jsonconfig-param-namespace": "İşlenecek başlığın ad alanı numarası.",
+	"apihelp-jsonconfig-param-title": "Ad alanı öneki olmadan işlenecek başlık.",
+	"apihelp-jsonconfig-param-content": "$1command=reload yükleme için bunun yerine bu içeriği kullanın.",
+	"apihelp-jsonconfig-example-1": "Yapılandırmayı göster",
+	"apihelp-jsonconfig-example-2": "[[Data:Brazil/Amazonas.map]] sıfırla",
+	"apihelp-jsonconfig-example-3": "[[Data:Brazil/Amazonas.map]] sıfırla",
+	"apihelp-jsondata-description": "Yerelleştirilmiş JSON verilerini alın.",
+	"apihelp-jsondata-summary": "Yerelleştirilmiş JSON verilerini alın.",
+	"apihelp-jsondata-param-title": "Alınacak başlık. Varsayılan olarak ad alanının \"Data:\" olduğunu varsayar.",
+	"apihelp-jsondata-example-1": "Kullanıcının diline göre yerelleştirilmiş Sample.tab sayfasının JSON içeriğini alma",
+	"apihelp-jsondata-example-2": "Sample.tab sayfasının JSON içeriğini Fransızca olarak yerelleştirin",
+	"apierror-jsonconfig-paramrequired": "Bu komut için <var>$1</var> parametresi gerekiyor.",
+	"apierror-jsonconfig-badtitle": "<var>namespace</var> ve <var>title</var> parametreleri tarafından belirtilen sayfa geçersiz veya JsonConfig yapılandırmasına kayıtlı değil."
+}
