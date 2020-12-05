@@ -1,5 +1,9 @@
 <?php
 
+require_once __DIR__ . '/wikWikiInfoOrFail.php';
+
+
+
 /**
  * This is the entry point for the REST API.
  *

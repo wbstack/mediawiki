@@ -1,4 +1,8 @@
-<?php // For broken web servers: ><pre>
+<?php
+
+require_once __DIR__ . '/wikWikiInfoOrFail.php';
+
+ // For broken web servers: ><pre>
 
 // If you are reading this in your web browser, your server is probably
 // not configured correctly to run PHP applications!

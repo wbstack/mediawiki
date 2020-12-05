@@ -1,4 +1,8 @@
 <?php
+
+require_once __DIR__ . '/wikWikiInfoOrFail.php';
+
+
 /**
  * The web entry point for ResourceLoader, which serves static CSS/JavaScript
  * via ResourceLoaderModule subclasses.

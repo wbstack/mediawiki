@@ -1,4 +1,8 @@
 <?php
+
+require_once __DIR__ . '/../wikWikiInfoOrFailCli.php';
+
+
 /**
  * We want to make this whole thing as seamless as possible to the
  * end-user. Unfortunately, we can't do _all_ of the work in the class
