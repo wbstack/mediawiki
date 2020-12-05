@@ -19,6 +19,7 @@
 ./wbstack/dwnthing.sh extensions/Thanks https://codeload.github.com/wikimedia/mediawiki-extensions-Thanks/zip/d307eba7201b9a03121585f38664973a8e7c96d2 & \
 ./wbstack/dwnthing.sh extensions/TwoColConflict https://codeload.github.com/wikimedia/mediawiki-extensions-TwoColConflict/zip/d21e1adea79c9f0ac24a1bd02d165d3ec3dd57d8 & \
 ./wbstack/dwnthing.sh extensions/OAuth https://codeload.github.com/wikimedia/mediawiki-extensions-OAuth/zip/d64a696e32bbfe39b0ecbe0946aaf6300f2f4b8e & \
+./wbstack/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-ea86f45.tar.gz & \
 ./wbstack/dwnthing.sh extensions/WikibaseLexeme https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexeme/zip/db5f4b11502c3149d37c399712c3467cf240648b & \
 ./wbstack/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/64831e3f9a4e8d33af017cbf22876ac3dd89466a & \
 ./wbstack/dwnthing.sh extensions/SyntaxHighlight_GeSHi https://codeload.github.com/wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi/zip/6bd7a93f3f0ebc64de1a475bf97aff4397e4d05b & \
@@ -52,6 +53,7 @@
 ###########
 # skins
 ###########
+./wbstack/dwnthing.sh skins/Vector https://codeload.github.com/wikimedia/mediawiki-skins-Vector/zip/771c8764c856a2b9ed2a8ff84ad5cfd38cdfaf5e & \
 ./wbstack/dwnthing.sh skins/Timeless https://codeload.github.com/wikimedia/mediawiki-skins-Timeless/zip/e8f1e5aba16e8f7c922aaaf3a263c53474703b20 & \
 ./wbstack/dwnthing.sh skins/Modern https://codeload.github.com/wikimedia/mediawiki-skins-Modern/zip/ca6e5009ea8ffe5db39a642fdddfbc4fe6d6c7d5 & \
 ./wbstack/dwnthing.sh skins/MinervaNeue https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/fc8ac05b8c9270440be8bfb88ed49b79c2ca5fac & \

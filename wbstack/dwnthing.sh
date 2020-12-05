@@ -9,10 +9,11 @@ fi
 
 echo "Fetching $THING"
 mkdir -p "$DIR"
-curl -s "$URL" -o "$THING.zip"
-bsdtar --strip-components=1 -xf "$THING".zip -C "$DIR"
-rm "$THING".zip
+curl -s "$URL" -o "$THING.compressed"
+bsdtar --strip-components=1 -xf "$THING".compressed -C "$DIR"
+rm "$THING".compressed
 
 if [ "$THING" = "core" ]; then
     rm -rf ./extensions/*
+    rm -rf ./skins*/
 fi
