@@ -2,17 +2,27 @@
 # Syncs the whole git repo in the correct way
 # This is probably the file that you want to run..
 
+# This script should only be run from the mediawiki directory
+# as I didn't make the paths nice in the shell scripts...
+BASEDIR=$(dirname "$0")
+if [ "$BASEDIR" = "./wbstack" ]; then 
+    echo "Running from the mediawiki directory, can continue :)"
+else
+    echo "ERROR: this script must be run from the mediawiki directory :("
+    exit
+fi;
+
 # Clears everything in the repo
-./wbstack/clear.sh
+$BASEDIR/sync/clear.sh
 
 # Fetches things from the web
-./wbstack/docker-fetch.sh
+$BASEDIR/sync/docker-fetch.sh
 
 # Removes some not needed things from the things fetched
-./wbstack/less-files.sh
+$BASEDIR/sync/less-files.sh
 
 # Does a composer install
-./wbstack/docker-composer.sh
+$BASEDIR/sync/docker-composer.sh
 
 # Removes some not needed things from the things fetched
-./wbstack/docker-entrypoint-overrides.sh
+$BASEDIR/sync/docker-entrypoint-overrides.sh

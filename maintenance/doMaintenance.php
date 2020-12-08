@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../wikWikiInfoOrFailCli.php';
+require_once __DIR__ . '/../wbstack/EntryShimCli.php';
 
 
 /**
