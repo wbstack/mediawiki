@@ -1,10 +1,19 @@
 # mediawiki
 
-## 1.35
+## 1.35-7.3-20201208-0
 
-### December 2020
+- Update some extensions and skins to latest REL1_35 commits [commit](https://github.com/wbstack/mediawiki/commit/926b4a3dcfcfa993a3159bccf5dc09f222081032)
+  - OAuth
+  - Score
+  - MinervaNeue
+- Update WikibaseInWikitext [commit](https://github.com/wbstack/mediawiki/commit/773bdc85dc8c813afaab37211a783a95f322ce28)
+- Move a bunch of the WBStack custom files around [commit](https://github.com/wbstack/mediawiki/commit/666f55b0ef56ea184313065d04652530858afbd8)
 
-- 1.35-7.3-2.0 - 135 From Github build...
+## 1.35-7.3-2.0
+
+- Build moved to Github, but other than that everything remains the same.
+
+## 1.35 (Build on GCE)
 
 ### November 2020
 
