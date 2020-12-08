@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Your Name"
+			"Addshore"
 		]
 	},
-	"wikibaseInWikitext-desc": "This is an example extension"
+	"wikibaseInWikitext-desc": "Extension allowing use of <sparql> in wikitext for SPARQL queries."
 }

@@ -27,17 +27,5 @@
 			"i18n"
 		]
 	},
-	"ResourceFileModulePaths": {
-		"localBasePath": "resources",
-		"remoteExtPath": "WikibaseInWikitext/resources"
-	},
-	"ResourceModules": {
-		"ext.wikibaseInWikitext": {
-			"dependencies": [],
-			"messages": [],
-			"styles": [],
-			"scripts": []
-		}
-	},
 	"manifest_version": 2
 }

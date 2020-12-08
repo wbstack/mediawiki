@@ -25,9 +25,7 @@
 ./wbstack/dwnthing.sh extensions/Thanks https://codeload.github.com/wikimedia/mediawiki-extensions-Thanks/zip/d307eba7201b9a03121585f38664973a8e7c96d2 & \
 ./wbstack/dwnthing.sh extensions/TwoColConflict https://codeload.github.com/wikimedia/mediawiki-extensions-TwoColConflict/zip/d21e1adea79c9f0ac24a1bd02d165d3ec3dd57d8 & \
 ./wbstack/dwnthing.sh extensions/OAuth https://codeload.github.com/wikimedia/mediawiki-extensions-OAuth/zip/5d974d0b1b19228f3fc902f2aa48c1ec35a74b98 & \
-./wbstack/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-ea86f45.tar.gz & \
 ./wbstack/dwnthing.sh extensions/WikibaseLexeme https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexeme/zip/db5f4b11502c3149d37c399712c3467cf240648b & \
-./wbstack/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/64831e3f9a4e8d33af017cbf22876ac3dd89466a & \
 ./wbstack/dwnthing.sh extensions/SyntaxHighlight_GeSHi https://codeload.github.com/wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi/zip/6bd7a93f3f0ebc64de1a475bf97aff4397e4d05b & \
 ./wbstack/dwnthing.sh extensions/JsonConfig https://codeload.github.com/wikimedia/mediawiki-extensions-JsonConfig/zip/a0bdbfbf7bccba99834a384224b91ed52eb459d6 & \
 ./wbstack/dwnthing.sh extensions/Kartographer https://codeload.github.com/wikimedia/mediawiki-extensions-Kartographer/zip/1ed9c132d80d8f6340e2cf21b102b659aaeb5c90 & \
@@ -50,8 +48,14 @@
 ./wbstack/dwnthing.sh extensions/DeleteBatch https://codeload.github.com/wikimedia/mediawiki-extensions-DeleteBatch/zip/3650f3c94f42b77e099907102fb7e0f456af5ff2 & \
 ./wbstack/dwnthing.sh extensions/MultimediaViewer https://codeload.github.com/wikimedia/mediawiki-extensions-MultimediaViewer/zip/bad41902b05f475d7b17a20d2dc18224a633f509 & \
 
+# Automatic script skips this one
+./wbstack/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/64831e3f9a4e8d33af017cbf22876ac3dd89466a & \
+
+# Extension Distributor
+./wbstack/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-ea86f45.tar.gz & \
+
 # Custom wbstack
-./wbstack/dwnthing.sh extensions/WikibaseInWikitext https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/d0ac236624eeb4cd9e2a2b3c0cc921f65556588b & \
+./wbstack/dwnthing.sh extensions/WikibaseInWikitext https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9 & \
 
 # Elsewhere
 ./wbstack/dwnthing.sh extensions/EmbedVideo https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/archive/v2.8.0/EmbedVideo-v2.8.0.zip & \
