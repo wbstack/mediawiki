@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Clears the git repo from fetched files and stuff..
 
 echo "Clearing git repo (except the files that we maintain here)"

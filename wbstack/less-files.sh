@@ -1,3 +1,4 @@
+#!/usr/bin/env sh
 # Delete a bunch of files that we don't really care about tracking (and don't want to deploy?)
 
 echo "Deleting a bunch of not needed files...."

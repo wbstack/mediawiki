@@ -7,27 +7,26 @@ $releaseBranch = 'REL1_35';
 
 /////////////////
 
+// A github access token is needed to access the github API
 if( !file_exists( __DIR__ . '/.github' ) ) {
     die('.github file with personal access token for public_repo must exist. eg. addshore:eu21yh0fj10f');
 }
-
-$getRegexForRepo = function( $repoName ) {
-    return '/^(ADD https:\/\/github.com\/wikimedia\/)(' . $repoName . ')(\/archive\/)([a-z0-9]+)(\.zip \.)$/m';
-};
-
-$getRegexMatchingAllRepos = function() {
-    return '/^(ADD https:\/\/github.com\/wikimedia\/)(mediawiki-(skins|extensions)-[^\/]+)(\/archive\/)([a-z0-9]+)(\.zip \.)$/m';
-};
-
 $getGithubApiUrl = function ( $repoName ) use ( $releaseBranch ) {
     return 'https://api.github.com/repos/wikimedia/' . $repoName . '/commits/' . $releaseBranch;
 };
 
+// We need some regexes to extract things from the fetch.sh file
+$getRegexForRepo = function( $repoName ) {
+    return '/(https:\/\/codeload\.github\.com\/wikimedia\/)(' . $repoName . ')(\/zip\/)([a-z0-9]+)/m';
+};
+$regexMatchingAllRepos = '/(https:\/\/codeload\.github\.com\/wikimedia\/)(mediawiki-(skins|extensions)-[^\/]+)(\/zip\/)([a-z0-9]+)/m';
+
+// These methods actually calls the Github API
 $getCommits = function ( $repoName ) use ( $getGithubApiUrl ) {
     $url = $getGithubApiUrl( $repoName );
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url );
-    curl_setopt($ch, CURLOPT_USERAGENT, "wbstack.com - mediawiki docker file updater" );
+    curl_setopt($ch, CURLOPT_USERAGENT, "wbstack.com - mediawiki code version updater" );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Authorization: token ' . trim(json_decode(file_get_contents(__DIR__ .'/.github'))),
@@ -43,26 +42,29 @@ $getCommits = function ( $repoName ) use ( $getGithubApiUrl ) {
     curl_close($ch);
     return json_decode( $output, true );
 };
-
 $getLatestCommitHash = function ( $repoName ) use ( $getCommits ) {
     $commits = $getCommits( $repoName );
     if(!array_key_exists( 'sha', $commits )) {
         var_dump($commits);
-        exit(1);
+        return false;
     }
     return $commits['sha'];
 };
 
-$updateCommitInDockerfile = function ( $repoName, $df ) use ( $getLatestCommitHash, $getRegexForRepo ) {
+// This method updates the fetch.sh file
+$updateCommitInDockerfile = function ( $repoName, $fetchScript ) use ( $getLatestCommitHash, $getRegexForRepo ) {
     $newHash = $getLatestCommitHash( $repoName );
-    return preg_replace( $getRegexForRepo( $repoName ), '${1}${2}${3}' . $newHash . '${5}', $df );
+    if(!$newHash){
+        return $fetchScript;
+    }
+    return preg_replace( $getRegexForRepo( $repoName ), '${1}${2}${3}' . $newHash, $fetchScript );
 };
 
 echo "Running for branch {$releaseBranch}" . PHP_EOL;
 
-$df = file_get_contents( __DIR__ . '/Dockerfile' );
+$fetchScript = file_get_contents( __DIR__ . '/fetch.sh' );
 
-preg_match_all( $getRegexMatchingAllRepos(), $df, $matches );
+preg_match_all( $regexMatchingAllRepos, $fetchScript, $matches );
 $repoNames = $matches[2];
 
 foreach( $repoNames as $repoName ) {
@@ -71,7 +73,8 @@ foreach( $repoNames as $repoName ) {
         continue;
     }
     echo "Updating for {$repoName}" . PHP_EOL;
-    $df = $updateCommitInDockerfile( $repoName, $df );
+    $fetchScript = $updateCommitInDockerfile( $repoName, $fetchScript );
 }
 
-$result = file_put_contents( __DIR__ . '/Dockerfile', $df );
+$result = file_put_contents( __DIR__ . '/fetch.sh', $fetchScript );
+echo "FILE SAVED!" . PHP_EOL;

@@ -1,4 +1,6 @@
+#!/usr/bin/env sh
 # Syncs the whole git repo in the correct way
+# This is probably the file that you want to run..
 
 # Clears everything in the repo
 ./wbstack/clear.sh
