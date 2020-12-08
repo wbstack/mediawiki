@@ -1,4 +1,10 @@
-# Fetch core
+#!/usr/bin/env sh
+# This script very simply and quickly downloads core, extensions and skins for the deployment.
+# Nothing is faster :)
+
+###########
+# core
+###########
 ./wbstack/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/227ed74bdb7c364e42194dcdba2bd7c20bd69c9a
 
 ###########
@@ -18,7 +24,7 @@
 ./wbstack/dwnthing.sh extensions/Gadgets https://codeload.github.com/wikimedia/mediawiki-extensions-Gadgets/zip/1e54c8014828168d297795d515c12ef060f4f849 & \
 ./wbstack/dwnthing.sh extensions/Thanks https://codeload.github.com/wikimedia/mediawiki-extensions-Thanks/zip/d307eba7201b9a03121585f38664973a8e7c96d2 & \
 ./wbstack/dwnthing.sh extensions/TwoColConflict https://codeload.github.com/wikimedia/mediawiki-extensions-TwoColConflict/zip/d21e1adea79c9f0ac24a1bd02d165d3ec3dd57d8 & \
-./wbstack/dwnthing.sh extensions/OAuth https://codeload.github.com/wikimedia/mediawiki-extensions-OAuth/zip/d64a696e32bbfe39b0ecbe0946aaf6300f2f4b8e & \
+./wbstack/dwnthing.sh extensions/OAuth https://codeload.github.com/wikimedia/mediawiki-extensions-OAuth/zip/5d974d0b1b19228f3fc902f2aa48c1ec35a74b98 & \
 ./wbstack/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-ea86f45.tar.gz & \
 ./wbstack/dwnthing.sh extensions/WikibaseLexeme https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexeme/zip/db5f4b11502c3149d37c399712c3467cf240648b & \
 ./wbstack/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/64831e3f9a4e8d33af017cbf22876ac3dd89466a & \
@@ -26,7 +32,7 @@
 ./wbstack/dwnthing.sh extensions/JsonConfig https://codeload.github.com/wikimedia/mediawiki-extensions-JsonConfig/zip/a0bdbfbf7bccba99834a384224b91ed52eb459d6 & \
 ./wbstack/dwnthing.sh extensions/Kartographer https://codeload.github.com/wikimedia/mediawiki-extensions-Kartographer/zip/1ed9c132d80d8f6340e2cf21b102b659aaeb5c90 & \
 ./wbstack/dwnthing.sh extensions/Math https://codeload.github.com/wikimedia/mediawiki-extensions-Math/zip/b5a8f57b98cf2eecdf9cf241050d1acb6af8749e & \
-./wbstack/dwnthing.sh extensions/Score https://codeload.github.com/wikimedia/mediawiki-extensions-Score/zip/6d89ba4bdf2f412e254534db3ed88f1c4cf3a8c8 & \
+./wbstack/dwnthing.sh extensions/Score https://codeload.github.com/wikimedia/mediawiki-extensions-Score/zip/00a1762249c2c5073d34407fac1f7fe48eb32648 & \
 ./wbstack/dwnthing.sh extensions/PageImages https://codeload.github.com/wikimedia/mediawiki-extensions-PageImages/zip/9a2f95e712ccfbe255b7cb192ca6a597cd08d117 & \
 ./wbstack/dwnthing.sh extensions/Scribunto https://codeload.github.com/wikimedia/mediawiki-extensions-Scribunto/zip/e44ec268924acd06d352e3dc5593f12c3314c4fd & \
 ./wbstack/dwnthing.sh extensions/Cite https://codeload.github.com/wikimedia/mediawiki-extensions-Cite/zip/98efd80db7542d33130fc938a5cadfa4f6726f29 & \
@@ -56,7 +62,7 @@
 ./wbstack/dwnthing.sh skins/Vector https://codeload.github.com/wikimedia/mediawiki-skins-Vector/zip/771c8764c856a2b9ed2a8ff84ad5cfd38cdfaf5e & \
 ./wbstack/dwnthing.sh skins/Timeless https://codeload.github.com/wikimedia/mediawiki-skins-Timeless/zip/e8f1e5aba16e8f7c922aaaf3a263c53474703b20 & \
 ./wbstack/dwnthing.sh skins/Modern https://codeload.github.com/wikimedia/mediawiki-skins-Modern/zip/ca6e5009ea8ffe5db39a642fdddfbc4fe6d6c7d5 & \
-./wbstack/dwnthing.sh skins/MinervaNeue https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/fc8ac05b8c9270440be8bfb88ed49b79c2ca5fac & \
+./wbstack/dwnthing.sh skins/MinervaNeue https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/2e2378bf8ff0ecb977f4e7d200f6840982c40f74 & \
 
 # And wait for all the background tasks to be done...
 wait
