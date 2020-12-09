@@ -1,5 +1,16 @@
 # mediawiki
 
+## 1.35-7.3-20201209-0
+
+- Move the InternalSettings.php files around [commit](https://github.com/wbstack/mediawiki/commit/6ac5ead75ddf63ed52a58153a734915d46aa254d)
+- Add [Auth_remoteuser extension](https://www.mediawiki.org/wiki/Extension:Auth_remoteuser)
+  - [Introduction](https://github.com/wbstack/mediawiki/commit/0a2f6f102d6e0ac2b73eb613e32dc42c95916525)
+  - Settings [pt1](https://github.com/wbstack/mediawiki/commit/36d4f121abfe12e14020cbf96881a7078808d33b) [pt2](https://github.com/wbstack/mediawiki/commit/f394a42d4454c9d398751e0c636df24754e9f76e)
+- Alter ApiWbStackInit to allow passwords, and make emails optional
+  - [pt1](https://github.com/wbstack/mediawiki/commit/1cb230a37b79610a441e28196c11aace7b062f59)
+  - [pt2](https://github.com/wbstack/mediawiki/commit/43870909b762c09dfb4a72eff8d1b17c48ecf00f)
+  - [pt3](https://github.com/wbstack/mediawiki/commit/c257deb582c431e2bdcf28517a3c6dcfe8f8660f) (Though the deadlock still happened? but the module continued? and worked..)
+
 ## 1.35-7.3-20201208-0
 
 - Update some extensions and skins to latest REL1_35 commits [commit](https://github.com/wbstack/mediawiki/commit/926b4a3dcfcfa993a3159bccf5dc09f222081032)
