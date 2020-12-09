@@ -1,8 +1,27 @@
 # wbstack MediaWiki overrides
 
-This directory contains the hacks around MediaWiki to make it better for the wbstack usecase.
+This directory contains the code around MediaWiki to make it better for the wbstack usecase.
 
-It's currently quite a big mess of files and should probably be split into directories..
+This ultimately repackages MediaWiki, extensions, skins, and the wbstack code into a new "application" with a much tighter external interface (particulary around configuration).
+
+This application reaches out to some API (currently the wbstack api) to get the "details" of wikis to be run based on a domain.
+
+This URL is currently always:
+
+```php
+'http://' . getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/wiki/getWikiForDomain?domain=' . urlencode($requestDomain);
+```
+
+This must respond with a format that looks like the JSON in maintWikWiki.json (which is currently used during Dockerfile building)
+
+This response is then used to configure MediaWiki.
+
+Currently 2 other backend APIs are also included:
+
+- One allows external services to make mediawiki run update.php
+- One allows external services to request OAuth consumers
+
+That is all..
 
 ## Build scripts
 
