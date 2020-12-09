@@ -1,12 +1,10 @@
 <?php
 
 // If we have internal settings, and have been told to load them, then load them...
-if( getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/InternalSettings.php' ) ) {
-    // TODO add even more checks here?
-    require_once __DIR__ . DIRECTORY_SEPARATOR . 'InternalSettings.php';
+if( getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/internal/load.php' ) ) {
+    require_once __DIR__ . '/internal/load.php';
 } else {
     // Code for ONLY the public mw services
-
     $wgReservedUsernames = array_merge(
         $wgReservedUsernames,
         [

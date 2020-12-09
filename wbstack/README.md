@@ -29,6 +29,6 @@ Other PHP files are all loaded from within one of these main files.
   - WikWikiSpi.php
   - WikWikiLogger.php
   - FinalSettings.php
-    - InternalSettings.php - Only loaded for the BACKEND flavour of MediaWiki
+    - internal/load.php - Only loaded for the BACKEND flavour of MediaWiki
 - EntryShim* - These files are loaded at the start of the MediaWiki entry points
   - WikWiki.php - Main code for fetching things from the platform API
