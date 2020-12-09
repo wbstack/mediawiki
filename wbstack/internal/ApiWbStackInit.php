@@ -36,9 +36,6 @@ class ApiWbStackInit extends ApiBase {
         }
 
         // Create the user
-        if($email){
-            $user->setEmail( $email );
-        }
         $createStatus = MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
             $user,
             MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
@@ -48,7 +45,9 @@ class ApiWbStackInit extends ApiBase {
 
         // Mark the e-mail address confirmed.
         if($email){
+            $user->setEmail( $email );
             $user->confirmEmail();
+            $user->saveSettings();
         }
 
         // Set a password if needed
@@ -62,11 +61,9 @@ class ApiWbStackInit extends ApiBase {
                 $this->addFailedNote('User password could not be set');
                 return;
             }
+            // TODO this saveSettings might not be needed...
+            $user->saveSettings();
         }
-
-        // Save save settings
-        // TODO should this only be done after the confirmEmail call? Does the password one need this?
-        $user->saveSettings();
 
         // Add groups to the user
         $promotions = [
