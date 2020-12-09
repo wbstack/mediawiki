@@ -2,7 +2,10 @@
 
 /**
  * This API is called when a wiki is first created.
- * It creates a user account from an name and email, sending that user a reset email (including temporary password)
+ * It creates a user account.
+ * It optionally sets a password.
+ * It optionally sets an email.
+ * If an email is set and no password is set, then a reset email will be sent.
  *
  * This code is a combination of maintenance/createAndPromote.php and SpecialPasswordReset.php ideas
  */
@@ -18,38 +21,56 @@ class ApiWbStackInit extends ApiBase {
     public function executeWikiUser() {
         $username = $this->getParameter('username');
         $email = $this->getParameter('email');
+        $password = $this->getParameter('password');
 
         // TODO validation? but our app should always send the right stuff now anyway..
-        // TODO call back to the API and make sure that this email address is a manager of the wiki?
 
-        // Get a user object
+        // Get a user object that we will be interacting with
         $user = User::newFromName( $username );
 
-        // Check the user doesnt already exist (they shouldn't)
-        // TODO the user could be renamed, so check if # of users > 0 instead here..
-        // ie. if there is any user registered..
+        // The user that we want to create should NOT already exist, so bail quickly if it does.
+        // TODO the user could be renamed?, so check if # of users > 0 instead here too?
         if($user->idForName() !== 0){
-            $res = [
-                'success' => '0',
-            ];
-            $this->getResult()->addValue( null, $this->getModuleName(), $res );
+            $this->addFailedNote('User already existed');
             return;
         }
 
-        $user->setEmail( $email );
-
         // Create the user
+        if($email){
+            $user->setEmail( $email );
+        }
         $createStatus = MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
             $user,
             MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
             false
         );
+        // TODO check the status of $createStatus
 
         // Mark the e-mail address confirmed.
-        $user->confirmEmail();
+        if($email){
+            $user->confirmEmail();
+        }
+
+        // Set a password if needed
+        if($password){
+            try {
+                $passwordStatus = $user->changeAuthenticationData([
+                    'username' => $user->getName(),
+                    'password' => $password,
+                    'retype' => $password,
+                ]);
+                if(!$passwordStatus->isGood()){
+                    $this->addFailedNote('User password could not be set');
+                    return;
+                }
+            }
+        }
+
+        // Save save settings
+        // TODO should this only be done after the confirmEmail call? Does the password one need this?
         $user->saveSettings();
 
-        // Promote the user (admin and crat)
+        // Add groups to the user
         $promotions = [
             'sysop',
             'bureaucrat',
@@ -58,30 +79,59 @@ class ApiWbStackInit extends ApiBase {
         ];
         array_map( [ $user, 'addGroup' ], $promotions );
 
-        // Reset the password (triggers email)
-        $services = MediaWiki\MediaWikiServices::getInstance();
-        $passwordReset = $services->getPasswordReset();
-        $resetStatus = $passwordReset->execute( $user, $username, $email );
+        // Send a password reset email (If password not specified)
+        $sendResetPasswordEmail = $email && !$password;
+        if($sendResetPasswordEmail){
+            $services = MediaWiki\MediaWikiServices::getInstance();
+            $passwordReset = $services->getPasswordReset();
+            $resetStatus = $passwordReset->execute( $user, $username, $email );
+            // TODO check $resetStatus?
+        }
 
         // Update the site stats
         $ssu = SiteStatsUpdate::factory( [ 'users' => 1 ] );
         $ssu->doUpdate();
 
-        $res = [
-            'success' => '1',
-            'userId' => $user->getId(),
-        ];
-        $this->getResult()->addValue( null, $this->getModuleName(), $res );
+        // Return an API Result
+        $this->getResult()->addValue(
+            null,
+            $this->getModuleName(),
+            [
+                'success' => '1',
+                'userId' => $user->getId(),
+                'userSet' => $username,
+                'emailSet' => (bool)$email,
+                'passwordSet' => (bool)$password,
+                'emailSent' => $sendResetPasswordEmail,
+            ]
+        );
+    }
+    private function addFailedNote( $note ) {
+        $this->getResult()->addValue(
+            null,
+            $this->getModuleName(),
+            [
+                'success' => '0',
+                'note' => $note,
+            ]
+        );
     }
     public function getAllowedParams() {
         return [
             'username' => [
                 ApiBase::PARAM_TYPE => 'string',
+                // Always require a username, always provided by default, and can be provided for sandboxes too?
                 ApiBase::PARAM_REQUIRED => true
             ],
             'email' => [
                 ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_REQUIRED => true
+                // Don't require, as for sandboxes we will not have any emails...
+                ApiBase::PARAM_REQUIRED => false
+            ],
+            'password' => [
+                ApiBase::PARAM_TYPE => 'string',
+                // For sandboxes we want to specify a password, but for default behaviour we still want to do password reset emails...
+                ApiBase::PARAM_REQUIRED => false
             ],
         ];
     }
