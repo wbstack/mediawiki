@@ -213,6 +213,12 @@ if( $wikWiki->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
 }
 
+# Auth_remoteuser, By default not enabled, enabled in maintWikWiki.json
+if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
+    wfLoadExtension( 'Auth_remoteuser' );
+    $wgAuthRemoteuserUserName = "SandboxAdmin";
+}
+
 // Load the extra settings!
 // Only when not doing rebuildLocalisationCache.php (done at build time) as this file will not exist then...
 // TODO perhaps change this so that the rebuildLocalisationCache.php passes in an ENV var to block loading the extra settings instead?
