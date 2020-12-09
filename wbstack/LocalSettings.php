@@ -217,6 +217,10 @@ if( $wikWiki->getSetting('wwExtEnableWikibaseLexeme') ) {
 if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
     wfLoadExtension( 'Auth_remoteuser' );
     $wgAuthRemoteuserUserName = "SandboxAdmin";
+    # Allow Auth_remoteuser to create missing accounts
+    $wgGroupPermissions['*']['autocreateaccount'] = true;
+    # Stop users making any additional accounts
+    $wgGroupPermissions['*']['createaccount'] = false;
 }
 
 // Load the extra settings!
