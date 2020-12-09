@@ -24,5 +24,5 @@ $BASEDIR/sync/less-files.sh
 # Does a composer install
 $BASEDIR/sync/docker-composer.sh
 
-# Removes some not needed things from the things fetched
+# Adds shim to .php entrypoints
 $BASEDIR/sync/docker-entrypoint-overrides.sh

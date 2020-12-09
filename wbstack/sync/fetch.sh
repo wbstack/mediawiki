@@ -47,6 +47,7 @@
 ./wbstack/sync/dwnthing.sh extensions/MobileFrontend https://codeload.github.com/wikimedia/mediawiki-extensions-MobileFrontend/zip/1421405c1fe4f3dbafe0cd18f43aa9054b974c4e & \
 ./wbstack/sync/dwnthing.sh extensions/DeleteBatch https://codeload.github.com/wikimedia/mediawiki-extensions-DeleteBatch/zip/3650f3c94f42b77e099907102fb7e0f456af5ff2 & \
 ./wbstack/sync/dwnthing.sh extensions/MultimediaViewer https://codeload.github.com/wikimedia/mediawiki-extensions-MultimediaViewer/zip/bad41902b05f475d7b17a20d2dc18224a633f509 & \
+./wbstack/sync/dwnthing.sh extensions/Auth_remoteuser https://codeload.github.com/wikimedia/mediawiki-extensions-Auth_remoteuser/zip/6f570b83ff3fe9502a43f7894533273ff37d41f2 & \
 
 # Automatic script skips this one
 ./wbstack/sync/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/64831e3f9a4e8d33af017cbf22876ac3dd89466a & \
