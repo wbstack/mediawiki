@@ -53,16 +53,14 @@ class ApiWbStackInit extends ApiBase {
 
         // Set a password if needed
         if($password){
-            try {
-                $passwordStatus = $user->changeAuthenticationData([
-                    'username' => $user->getName(),
-                    'password' => $password,
-                    'retype' => $password,
-                ]);
-                if(!$passwordStatus->isGood()){
-                    $this->addFailedNote('User password could not be set');
-                    return;
-                }
+            $passwordStatus = $user->changeAuthenticationData([
+                'username' => $user->getName(),
+                'password' => $password,
+                'retype' => $password,
+            ]);
+            if(!$passwordStatus->isGood()){
+                $this->addFailedNote('User password could not be set');
+                return;
             }
         }
 
