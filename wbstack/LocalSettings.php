@@ -221,6 +221,13 @@ if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
     $wgGroupPermissions['*']['autocreateaccount'] = true;
     # Stop users making any additional accounts
     $wgGroupPermissions['*']['createaccount'] = false;
+
+    # Allow users to act like admins, and pretend they have confirmed emails (so no captchas)
+    $wgAddGroups['user'][] = 'emailconfirmed';
+    $wgAddGroups['user'][] = 'sysop';
+
+    # Do not force people verify their email account, as they can't do that...
+    $wgEmailConfirmToEdit = false;
 }
 
 // Load the extra settings!
