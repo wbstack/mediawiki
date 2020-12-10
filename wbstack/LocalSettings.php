@@ -79,7 +79,12 @@ if( $wwDomainSaysLocal ) {
 	$wgServer = "//" . $wikWiki->domain;
 }
 
+$wgScriptPath = "/w";
+$wgArticlePath = "/wiki/$1";
+
 $wgDBname = $wikWiki->wiki_db->name;
+$wgDBprefix = $wikWiki->wiki_db->prefix . '_';
+$wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=binary";
 
 $wgDBservers = [
     [
@@ -110,20 +115,49 @@ if( !$wwDomainSaysMaint ){
     ];
 }
 
+// Jobs
+# For now jobs will run in the requests, this obviously isn't the ideal solution and really
+# there should be a job running service deployed...
+# This was set to 2 as Andra experienced a backup of jobs. https://github.com/addshore/wbstack/issues/51
+$wgJobRunRate = 2;
+
+// Notifications
+$wgEnotifUserTalk = false;
+$wgEnotifWatchlist = false;
+
+// Files
+// $wgUseImageMagick Is needed so that Score auto trims rendered musical notations
+$wgUseImageMagick = true;
+$wgEnableUploads = false;
+$wgAllowCopyUploads = false;
+$wgUseInstantCommons = false;
+$wgFileExtensions = array_merge( $wgFileExtensions,
+    array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
+        'tiff', 'odt', 'odg', 'ods', 'odp', 'svg'
+    )
+);
+//$wgFileExtensions[] = 'djvu';
+
+// Email
+$wgEnableEmail = true;
+$wgEnableUserEmail = false;
+$wgAllowHTMLEmail = true;
+// enable email authentication (confirmation) for this wiki
+$wgEmailAuthentication = true;
+// require email authentication
+$wgEmailConfirmToEdit = true;
+// TODO make this a real wbstack email address?
+$wgEmergencyContact = "emergency.wbstack@addshore.com";
+$wgPasswordSender = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
+$wgNoReplyAddress = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
+
 // Output compression needs to be disabled in 1.35 until the below phab task is fixed...
 // TODO dig more to see if there is something else to do here...
 // https://phabricator.wikimedia.org/T235554
 $wgDisableOutputCompression  = true;
 
-$wgDBprefix = $wikWiki->wiki_db->prefix . '_';
-$wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=binary";
-
 ## Keys
 $wgAuthenticationTokenVersion = "1";
-
-// TODO no idea if this is right?
-$wgScriptPath = "/w";
-$wgArticlePath = "/wiki/$1";
 
 // So we are uniform, have the project namespace as Project
 $wgMetaNamespace = 'Project';

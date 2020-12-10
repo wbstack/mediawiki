@@ -121,42 +121,6 @@ $wgCdnServersNoPurge = [
 // This one is needed prior to 1.34
 $wgSquidServersNoPurge = $wgCdnServersNoPurge;
 
-// Jobs
-# For now jobs will run in the requests, this obviously isn't the ideal solution and really
-# there should be a job running service deployed...
-# This was set to 2 as Andra experienced a backup of jobs. https://github.com/addshore/wbstack/issues/51
-$wgJobRunRate = 2;
-
-// Notifications
-$wgEnotifUserTalk = false;
-$wgEnotifWatchlist = false;
-
-// Files
-// $wgUseImageMagick Is needed so that Score auto trims rendered musical notations
-$wgUseImageMagick = true;
-$wgEnableUploads = false;
-$wgAllowCopyUploads = false;
-$wgUseInstantCommons = false;
-$wgFileExtensions = array_merge( $wgFileExtensions,
-    array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
-        'tiff', 'odt', 'odg', 'ods', 'odp', 'svg'
-    )
-);
-//$wgFileExtensions[] = 'djvu';
-
-// Email
-$wgEnableEmail = true;
-$wgEnableUserEmail = false;
-$wgAllowHTMLEmail = true;
-// enable email authentication (confirmation) for this wiki
-$wgEmailAuthentication = true;
-// require email authentication
-$wgEmailConfirmToEdit = true;
-// TODO make this a real wbstack email address?
-$wgEmergencyContact = "emergency.wbstack@addshore.com";
-$wgPasswordSender = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
-$wgNoReplyAddress = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
-
 #######################################
 ## ---        Permissions        --- ##
 #######################################
