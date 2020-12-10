@@ -1,5 +1,11 @@
 # mediawiki
 
+## 1.35-7.3-20201210-0
+
+- Allow sandbox mode users to actually edit their wikis
+  - [pt1](https://github.com/wbstack/mediawiki/commit/7d053f76de25a1f0dd591cd41fb53a8a5e74b0b3)
+  - [pt2](https://github.com/wbstack/mediawiki/commit/88c626b66a4a50916a49759df5da4fa361864886)
+
 ## 1.35-7.3-20201209-0
 
 - Move the InternalSettings.php files around [commit](https://github.com/wbstack/mediawiki/commit/6ac5ead75ddf63ed52a58153a734915d46aa254d)
