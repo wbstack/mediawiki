@@ -13,3 +13,6 @@ require_once __DIR__ . DIRECTORY_SEPARATOR . 'ApiWbStackUpdate.php';
 $wgAPIModules['wbstackInit'] = ApiWbStackInit::class;
 $wgAPIModules['wbstackPlatformOauthGet'] = ApiWbStackOauthGet::class;
 $wgAPIModules['wbstackUpdate'] = ApiWbStackUpdate::class;
+
+// This is needed for Sandbox sites to have their Example data loaded via API
+wfLoadExtension( 'WikibaseExampleData' );

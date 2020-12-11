@@ -1,0 +1,261 @@
+{
+    "type": "item",
+    "id": "Q1199348",
+    "labels": {
+        "fr": {
+            "language": "fr",
+            "value": "Beau comme un a\u00e9roport"
+        },
+        "en": {
+            "language": "en",
+            "value": "The Long Dark Tea-Time of the Soul"
+        },
+        "de": {
+            "language": "de",
+            "value": "Der lange dunkle F\u00fcnfuhrtee der Seele"
+        },
+        "fi": {
+            "language": "fi",
+            "value": "Sielun pitk\u00e4 pime\u00e4 teehetki"
+        },
+        "sv": {
+            "language": "sv",
+            "value": "Tedags f\u00f6r dystra sj\u00e4lar"
+        },
+        "da": {
+            "language": "da",
+            "value": "Sj\u00e6lens lange m\u00f8rke te-pause"
+        },
+        "it": {
+            "language": "it",
+            "value": "La lunga oscura pausa caff\u00e8 dell'anima"
+        },
+        "he": {
+            "language": "he",
+            "value": "\u05e9\u05e2\u05ea \u05d4\u05ea\u05d4 \u05d4\u05d0\u05e8\u05d5\u05db\u05d4 \u05d5\u05d4\u05d0\u05e4\u05dc\u05d4 \u05e9\u05dc \u05d4\u05e0\u05e4\u05e9"
+        },
+        "cs": {
+            "language": "cs",
+            "value": "Dlouh\u00fd, temn\u00fd \u010das sva\u010diny du\u0161e"
+        },
+        "hu": {
+            "language": "hu",
+            "value": "A l\u00e9lek hossz\u00fa, s\u00f6t\u00e9t tead\u00e9lut\u00e1nja"
+        },
+        "ru": {
+            "language": "ru",
+            "value": "\u0414\u043e\u043b\u0433\u043e\u0435 \u0447\u0430\u0435\u043f\u0438\u0442\u0438\u0435"
+        },
+        "nl": {
+            "language": "nl",
+            "value": "The Long Dark Tea-Time of the Soul"
+        },
+        "es": {
+            "language": "es",
+            "value": "Iras celestiales: Una investigaci\u00f3n de Dirk Gently"
+        },
+        "ar": {
+            "language": "ar",
+            "value": "\u0648\u0642\u062a \u0627\u0644\u0634\u0627\u064a \u0627\u0644\u0637\u0648\u064a\u0644 \u0627\u0644\u0645\u0638\u0644\u0645 \u0644\u0644\u0631\u0648\u062d"
+        },
+        "eo": {
+            "language": "eo",
+            "value": "La Longa Malluma Teman\u011do de la Animo"
+        }
+    },
+    "descriptions": {
+        "it": {
+            "language": "it",
+            "value": "romanzo scritto da Douglas Adams"
+        },
+        "en": {
+            "language": "en",
+            "value": "1988 Book by Douglas Adams"
+        },
+        "de": {
+            "language": "de",
+            "value": "Buch von Douglas Adams (1988)"
+        },
+        "nl": {
+            "language": "nl",
+            "value": "boek van Douglas Adams"
+        },
+        "he": {
+            "language": "he",
+            "value": "\u05e1\u05e4\u05e8 \u05de\u05d0\u05ea \u05d3\u05d0\u05d2\u05dc\u05e1 \u05d0\u05d3\u05d0\u05de\u05e1"
+        },
+        "ar": {
+            "language": "ar",
+            "value": "\u0643\u062a\u0627\u0628 \u0645\u0646 \u062a\u0623\u0644\u064a\u0641 \u062f\u0648\u063a\u0644\u0627\u0633 \u0622\u062f\u0645\u0632"
+        },
+        "fr": {
+            "language": "fr",
+            "value": "livre de Douglas Adams"
+        },
+        "es": {
+            "language": "es",
+            "value": "libro de Douglas Adams"
+        },
+        "hu": {
+            "language": "hu",
+            "value": "Douglas Adams k\u00f6nyve"
+        },
+        "br": {
+            "language": "br",
+            "value": "romant"
+        },
+        "sv": {
+            "language": "sv",
+            "value": "roman av Douglas Adams fr\u00e5n 1988"
+        }
+    },
+    "aliases": {
+        "fr": [
+            {
+                "language": "fr",
+                "value": "Beau Comme Un A\u00e9roport"
+            },
+            {
+                "language": "fr",
+                "value": "Beau comme un aeroport"
+            },
+            {
+                "language": "fr",
+                "value": "The Long Dark Tea-Time of the Soul"
+            }
+        ],
+        "fi": [
+            {
+                "language": "fi",
+                "value": "The Long Dark Tea-Time of the Soul"
+            }
+        ],
+        "it": [
+            {
+                "language": "it",
+                "value": "The Long Dark Tea-Time of the Soul"
+            }
+        ],
+        "ru": [
+            {
+                "language": "ru",
+                "value": "\u0414\u043e\u043b\u0433\u043e\u0435 \u0431\u0435\u0437\u0443\u043c\u043d\u043e\u0435 \u0447\u0430\u0435\u043f\u0438\u0442\u0438\u0435 \u0434\u0443\u0448\u0438"
+            }
+        ]
+    },
+    "claims": {
+        "P31": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P31",
+                    "hash": "56d2ce980dfb7e5844c4c8777065c37181767334",
+                    "datavalue": {
+                        "value": {
+                            "entity-type": "item",
+                            "numeric-id": 47461344,
+                            "id": "Q47461344"
+                        },
+                        "type": "wikibase-entityid"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P50": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P50",
+                    "hash": "ee487a71e6afef6135b5610a541992db6c8edeb4",
+                    "datavalue": {
+                        "value": {
+                            "entity-type": "item",
+                            "numeric-id": 42,
+                            "id": "Q42"
+                        },
+                        "type": "wikibase-entityid"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P123": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P123",
+                    "hash": "bebf67e048e7363bc0bea186e637817be0384c5f",
+                    "datavalue": {
+                        "value": {
+                            "entity-type": "item",
+                            "numeric-id": 6273015,
+                            "id": "Q6273015"
+                        },
+                        "type": "wikibase-entityid"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P577": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P577",
+                    "hash": "741e132d36991fe1e046e55f885932b4fee8be65",
+                    "datavalue": {
+                        "value": {
+                            "time": "+1988-00-00T00:00:00Z",
+                            "timezone": 0,
+                            "before": 0,
+                            "after": 0,
+                            "precision": 9,
+                            "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                        },
+                        "type": "time"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P1476": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P1476",
+                    "hash": "31af439f7146adfa783d38c30c7ef23d3ec2d004",
+                    "datavalue": {
+                        "value": {
+                            "text": "The Long Dark Tea-Time of the Soul",
+                            "language": "en"
+                        },
+                        "type": "monolingualtext"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P5331": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P5331",
+                    "hash": "904b2912d8b4ae70c380b45873f83397386b97c9",
+                    "datavalue": {
+                        "value": "48525071",
+                        "type": "string"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ]
+    },
+    "sitelinks": []
+}
