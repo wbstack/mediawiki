@@ -72,7 +72,7 @@ if( $wwDomainSaysLocal ) {
 	// TODO fix totally hardcoded port for dev us
 	$wgServer = "//" . $wikWiki->requestDomain . ":8083";
 	// Internal is on 8073...
-	if(getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/InternalSettings.php' )){
+	if(getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/internal/load.php' )){
         $wgServer = "//" . $wikWiki->requestDomain . ":8073";
     }
 } else {
