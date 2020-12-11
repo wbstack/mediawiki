@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.3-20201211-0
+
+- [Enable sandboxes to be loaded with some preset data](https://github.com/wbstack/mediawiki/commit/fe67991c8036dd41023baf0226407c8f33c446a2)
+
 ## 1.35-7.3-20201210-0
 
 - Allow sandbox mode users to actually edit their wikis
