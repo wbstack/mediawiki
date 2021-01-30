@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
+class ComposerStaticInit3b5f6d4cbf6840baa2a12e9d1f76ee22
 {
     public static $files = array (
         '7cb394c3af2b1ae832979b0368e0da62' => __DIR__ . '/..' . '/data-values/data-values/DataValues.php',
@@ -22,9 +22,6 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         'c3f7f0e81464740a933532e81fa26cc7' => __DIR__ . '/..' . '/wikimedia/base-convert/src/Functions.php',
         '3ef87127dc6892a0a78f223558a0b940' => __DIR__ . '/..' . '/diff/diff/Diff.php',
-        '256c1545158fc915c75e51a931bdba60' => __DIR__ . '/..' . '/lcobucci/jwt/compat/class-aliases.php',
-        '0d273777b2b0d96e49fb3d800c6b0e81' => __DIR__ . '/..' . '/lcobucci/jwt/compat/json-exception-polyfill.php',
-        'd6b246ac924292702635bb2349f4a64b' => __DIR__ . '/..' . '/lcobucci/jwt/compat/lcobucci-clock-polyfill.php',
         'c50606d667a3fde2b80a955639479d3d' => __DIR__ . '/..' . '/wikimedia/timestamp/src/defines.php',
         '4d945db823e5f6ca6dd83ad1f5fbcc43' => __DIR__ . '/..' . '/wikimedia/relpath/src/RelPath/RelPath.php',
         '6513700b70192b7dfd0e5e9fc8082cf3' => __DIR__ . '/..' . '/wikimedia/relpath/src/Wikimedia/RelPath.php',
@@ -92,6 +89,7 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
             'League\\OAuth2\\Server\\' => 21,
             'League\\Event\\' => 13,
             'Lcobucci\\JWT\\' => 13,
+            'Lcobucci\\Clock\\' => 15,
         ),
         'J' => 
         array (
@@ -310,6 +308,10 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'Lcobucci\\JWT\\' => 
         array (
             0 => __DIR__ . '/..' . '/lcobucci/jwt/src',
+        ),
+        'Lcobucci\\Clock\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/lcobucci/clock/src',
         ),
         'JsonSchema\\' => 
         array (
@@ -587,6 +589,7 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'Composer\\Installers\\Plugin' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Plugin.php',
         'Composer\\Installers\\PortoInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PortoInstaller.php',
         'Composer\\Installers\\PrestashopInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PrestashopInstaller.php',
+        'Composer\\Installers\\ProcessWireInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ProcessWireInstaller.php',
         'Composer\\Installers\\PuppetInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PuppetInstaller.php',
         'Composer\\Installers\\PxcmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PxcmsInstaller.php',
         'Composer\\Installers\\RadPHPInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/RadPHPInstaller.php',
@@ -598,6 +601,7 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'Composer\\Installers\\ShopwareInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ShopwareInstaller.php',
         'Composer\\Installers\\SilverStripeInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SilverStripeInstaller.php',
         'Composer\\Installers\\SiteDirectInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SiteDirectInstaller.php',
+        'Composer\\Installers\\StarbugInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/StarbugInstaller.php',
         'Composer\\Installers\\SyDESInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyDESInstaller.php',
         'Composer\\Installers\\SyliusInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/SyliusInstaller.php',
         'Composer\\Installers\\Symfony1Installer' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/Symfony1Installer.php',
@@ -1324,24 +1328,24 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'JsonSchema\\Uri\\UriResolver' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Uri/UriResolver.php',
         'JsonSchema\\Uri\\UriRetriever' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Uri/UriRetriever.php',
         'JsonSchema\\Validator' => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema/Validator.php',
+        'Lcobucci\\Clock\\Clock' => __DIR__ . '/..' . '/lcobucci/clock/src/Clock.php',
+        'Lcobucci\\Clock\\FrozenClock' => __DIR__ . '/..' . '/lcobucci/clock/src/FrozenClock.php',
+        'Lcobucci\\Clock\\SystemClock' => __DIR__ . '/..' . '/lcobucci/clock/src/SystemClock.php',
         'Lcobucci\\JWT\\Builder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Builder.php',
-        'Lcobucci\\JWT\\Claim' => __DIR__ . '/..' . '/lcobucci/jwt/src/Claim.php',
-        'Lcobucci\\JWT\\Claim\\Basic' => __DIR__ . '/..' . '/lcobucci/jwt/src/Claim/Basic.php',
-        'Lcobucci\\JWT\\Claim\\EqualsTo' => __DIR__ . '/..' . '/lcobucci/jwt/src/Claim/EqualsTo.php',
-        'Lcobucci\\JWT\\Claim\\Factory' => __DIR__ . '/..' . '/lcobucci/jwt/src/Claim/Factory.php',
-        'Lcobucci\\JWT\\Claim\\GreaterOrEqualsTo' => __DIR__ . '/..' . '/lcobucci/jwt/src/Claim/GreaterOrEqualsTo.php',
-        'Lcobucci\\JWT\\Claim\\LesserOrEqualsTo' => __DIR__ . '/..' . '/lcobucci/jwt/src/Claim/LesserOrEqualsTo.php',
-        'Lcobucci\\JWT\\Claim\\Validatable' => __DIR__ . '/..' . '/lcobucci/jwt/src/Claim/Validatable.php',
+        'Lcobucci\\JWT\\ClaimsFormatter' => __DIR__ . '/..' . '/lcobucci/jwt/src/ClaimsFormatter.php',
         'Lcobucci\\JWT\\Configuration' => __DIR__ . '/..' . '/lcobucci/jwt/src/Configuration.php',
+        'Lcobucci\\JWT\\Decoder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Decoder.php',
+        'Lcobucci\\JWT\\Encoder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoder.php',
         'Lcobucci\\JWT\\Encoding\\CannotDecodeContent' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoding/CannotDecodeContent.php',
         'Lcobucci\\JWT\\Encoding\\CannotEncodeContent' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoding/CannotEncodeContent.php',
+        'Lcobucci\\JWT\\Encoding\\ChainedFormatter' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoding/ChainedFormatter.php',
+        'Lcobucci\\JWT\\Encoding\\JoseEncoder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoding/JoseEncoder.php',
+        'Lcobucci\\JWT\\Encoding\\MicrosecondBasedDateConversion' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoding/MicrosecondBasedDateConversion.php',
+        'Lcobucci\\JWT\\Encoding\\UnifyAudience' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoding/UnifyAudience.php',
+        'Lcobucci\\JWT\\Encoding\\UnixTimestampDates' => __DIR__ . '/..' . '/lcobucci/jwt/src/Encoding/UnixTimestampDates.php',
         'Lcobucci\\JWT\\Exception' => __DIR__ . '/..' . '/lcobucci/jwt/src/Exception.php',
         'Lcobucci\\JWT\\Parser' => __DIR__ . '/..' . '/lcobucci/jwt/src/Parser.php',
-        'Lcobucci\\JWT\\Parsing\\Decoder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Parsing/Decoder.php',
-        'Lcobucci\\JWT\\Parsing\\Encoder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Parsing/Encoder.php',
-        'Lcobucci\\JWT\\Signature' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signature.php',
         'Lcobucci\\JWT\\Signer' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer.php',
-        'Lcobucci\\JWT\\Signer\\BaseSigner' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/BaseSigner.php',
         'Lcobucci\\JWT\\Signer\\CannotSignPayload' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/CannotSignPayload.php',
         'Lcobucci\\JWT\\Signer\\Ecdsa' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Ecdsa.php',
         'Lcobucci\\JWT\\Signer\\Ecdsa\\ConversionFailed' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Ecdsa/ConversionFailed.php',
@@ -1350,6 +1354,7 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'Lcobucci\\JWT\\Signer\\Ecdsa\\Sha384' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Ecdsa/Sha384.php',
         'Lcobucci\\JWT\\Signer\\Ecdsa\\Sha512' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Ecdsa/Sha512.php',
         'Lcobucci\\JWT\\Signer\\Ecdsa\\SignatureConverter' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Ecdsa/SignatureConverter.php',
+        'Lcobucci\\JWT\\Signer\\Eddsa' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Eddsa.php',
         'Lcobucci\\JWT\\Signer\\Hmac' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Hmac.php',
         'Lcobucci\\JWT\\Signer\\Hmac\\Sha256' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Hmac/Sha256.php',
         'Lcobucci\\JWT\\Signer\\Hmac\\Sha384' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Hmac/Sha384.php',
@@ -1359,7 +1364,6 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'Lcobucci\\JWT\\Signer\\Key\\FileCouldNotBeRead' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Key/FileCouldNotBeRead.php',
         'Lcobucci\\JWT\\Signer\\Key\\InMemory' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Key/InMemory.php',
         'Lcobucci\\JWT\\Signer\\Key\\LocalFileReference' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Key/LocalFileReference.php',
-        'Lcobucci\\JWT\\Signer\\Keychain' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Keychain.php',
         'Lcobucci\\JWT\\Signer\\None' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/None.php',
         'Lcobucci\\JWT\\Signer\\OpenSSL' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/OpenSSL.php',
         'Lcobucci\\JWT\\Signer\\Rsa' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Rsa.php',
@@ -1367,20 +1371,26 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
         'Lcobucci\\JWT\\Signer\\Rsa\\Sha384' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Rsa/Sha384.php',
         'Lcobucci\\JWT\\Signer\\Rsa\\Sha512' => __DIR__ . '/..' . '/lcobucci/jwt/src/Signer/Rsa/Sha512.php',
         'Lcobucci\\JWT\\Token' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token.php',
+        'Lcobucci\\JWT\\Token\\Builder' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/Builder.php',
         'Lcobucci\\JWT\\Token\\DataSet' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/DataSet.php',
         'Lcobucci\\JWT\\Token\\InvalidTokenStructure' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/InvalidTokenStructure.php',
+        'Lcobucci\\JWT\\Token\\Parser' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/Parser.php',
+        'Lcobucci\\JWT\\Token\\Plain' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/Plain.php',
         'Lcobucci\\JWT\\Token\\RegisteredClaimGiven' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/RegisteredClaimGiven.php',
         'Lcobucci\\JWT\\Token\\RegisteredClaims' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/RegisteredClaims.php',
+        'Lcobucci\\JWT\\Token\\Signature' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/Signature.php',
         'Lcobucci\\JWT\\Token\\UnsupportedHeaderFound' => __DIR__ . '/..' . '/lcobucci/jwt/src/Token/UnsupportedHeaderFound.php',
-        'Lcobucci\\JWT\\ValidationData' => __DIR__ . '/..' . '/lcobucci/jwt/src/ValidationData.php',
+        'Lcobucci\\JWT\\UnencryptedToken' => __DIR__ . '/..' . '/lcobucci/jwt/src/UnencryptedToken.php',
         'Lcobucci\\JWT\\Validation\\Constraint' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint.php',
         'Lcobucci\\JWT\\Validation\\ConstraintViolation' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/ConstraintViolation.php',
         'Lcobucci\\JWT\\Validation\\Constraint\\IdentifiedBy' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/IdentifiedBy.php',
         'Lcobucci\\JWT\\Validation\\Constraint\\IssuedBy' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/IssuedBy.php',
         'Lcobucci\\JWT\\Validation\\Constraint\\LeewayCannotBeNegative' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/LeewayCannotBeNegative.php',
+        'Lcobucci\\JWT\\Validation\\Constraint\\LooseValidAt' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/LooseValidAt.php',
         'Lcobucci\\JWT\\Validation\\Constraint\\PermittedFor' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/PermittedFor.php',
         'Lcobucci\\JWT\\Validation\\Constraint\\RelatedTo' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/RelatedTo.php',
         'Lcobucci\\JWT\\Validation\\Constraint\\SignedWith' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/SignedWith.php',
+        'Lcobucci\\JWT\\Validation\\Constraint\\StrictValidAt' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/StrictValidAt.php',
         'Lcobucci\\JWT\\Validation\\Constraint\\ValidAt' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/Constraint/ValidAt.php',
         'Lcobucci\\JWT\\Validation\\NoConstraintsGiven' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/NoConstraintsGiven.php',
         'Lcobucci\\JWT\\Validation\\RequiredConstraintsViolated' => __DIR__ . '/..' . '/lcobucci/jwt/src/Validation/RequiredConstraintsViolated.php',
@@ -2537,11 +2547,11 @@ class ComposerStaticInit0dbe2997c04cc79b48201d997750b032
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit0dbe2997c04cc79b48201d997750b032::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit0dbe2997c04cc79b48201d997750b032::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit0dbe2997c04cc79b48201d997750b032::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit0dbe2997c04cc79b48201d997750b032::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit0dbe2997c04cc79b48201d997750b032::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit3b5f6d4cbf6840baa2a12e9d1f76ee22::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit3b5f6d4cbf6840baa2a12e9d1f76ee22::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit3b5f6d4cbf6840baa2a12e9d1f76ee22::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit3b5f6d4cbf6840baa2a12e9d1f76ee22::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit3b5f6d4cbf6840baa2a12e9d1f76ee22::$classMap;
 
         }, null, ClassLoader::class);
     }

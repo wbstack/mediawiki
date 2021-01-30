@@ -9,7 +9,7 @@ $releaseBranch = 'REL1_35';
 
 // A github access token is needed to access the github API
 if( !file_exists( __DIR__ . '/.github' ) ) {
-    die('.github file with personal access token for public_repo must exist. eg. addshore:eu21yh0fj10f');
+    die('.github file with personal access token for public_repo must exist. eg. eu21yh0fj10f');
 }
 $getGithubApiUrl = function ( $repoName ) use ( $releaseBranch ) {
     return 'https://api.github.com/repos/wikimedia/' . $repoName . '/commits/' . $releaseBranch;
@@ -29,7 +29,7 @@ $getCommits = function ( $repoName ) use ( $getGithubApiUrl ) {
     curl_setopt($ch, CURLOPT_USERAGENT, "wbstack.com - mediawiki code version updater" );
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-        'Authorization: token ' . trim(json_decode(file_get_contents(__DIR__ .'/.github'))),
+        'Authorization: token ' . trim(file_get_contents(__DIR__ .'/.github')),
     ));
     // XXX: the 2 below are evil..... but this is not so critical and right now i just want it to work...
     curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
