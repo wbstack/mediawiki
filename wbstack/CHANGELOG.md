@@ -2,9 +2,9 @@
 
 ## 1.35-7.4-20210130-0
 
-- [PHP 7.4](https://github.com/wbstack/mediawiki/commit/54546c403132c5da209fba2da51e0af997d2d867)
-  - [And needed libonig-dev](https://github.com/wbstack/mediawiki/commit/31a6a2b00808d3b503ccf52b21c8b2e29eb81043)
-- [1.35 Updates](https://github.com/wbstack/mediawiki/commit/38d651ebd8cd23a6356e9d89b1ceb093391f5169)
+- [PHP 7.4](https://github.com/wbstack/mediawiki/commit/1f377cd59cc25fac162dc23c1532a63df8bf492c)
+  - [And needed libonig-dev](https://github.com/wbstack/mediawiki/commit/75632cba8af8b6438f66d9d403bb2e598e80522a)
+- [1.35 Updates](https://github.com/wbstack/mediawiki/commit/cdf00150b4cebdbffa29828f3193110b3da6aa75)
 
 ## 1.35-7.3-20201211-0
 
