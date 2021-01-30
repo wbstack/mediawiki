@@ -47,6 +47,7 @@ return array(
     'League\\OAuth2\\Server\\' => array($vendorDir . '/league/oauth2-server/src'),
     'League\\Event\\' => array($vendorDir . '/league/event/src'),
     'Lcobucci\\JWT\\' => array($vendorDir . '/lcobucci/jwt/src'),
+    'Lcobucci\\Clock\\' => array($vendorDir . '/lcobucci/clock/src'),
     'JsonSchema\\' => array($vendorDir . '/justinrainbow/json-schema/src/JsonSchema'),
     'Http\\Promise\\' => array($vendorDir . '/php-http/promise/src'),
     'Http\\Discovery\\' => array($vendorDir . '/php-http/discovery/src'),

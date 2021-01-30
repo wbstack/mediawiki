@@ -70,10 +70,13 @@ class CreateOAuthConsumer extends \Maintenance {
 			'version'      => $this->getOption( 'version' ),
 			'description'  => $this->getOption( 'description' ),
 			'callbackUrl'  => $this->getOption( 'callbackUrl' ),
+			'oauthVersion' => 1,
 			'callbackIsPrefix' => $this->hasOption( 'callbackIsPrefix' ),
 			'grants' => '["' . implode( '","', $this->getOption( 'grants' ) ) . '"]',
 			'granttype' => 'normal',
 			'ownerOnly' => false,
+			'oauth2IsConfidential' => false, // only support OAUth 1 for now
+			'oauth2GrantTypes' => null, // only support OAUth 1 for now
 			'email' => $user->getEmail(),
 			'wiki' => '*', // All wikis
 			'rsaKey' => '', // Generate a key

@@ -32,11 +32,13 @@ Also other things, see the script itself for details.
 
 Gotchas: Must be run from the "mediawiki" directory.
 
-### sync/updateFetchScript
+### sync/updateFetchScript.sh
 
 This script can be used to update lots (but not all) of the component hashes to the latest versions.
 
 TODO decide if this is even needed any more since we commit everything in git instead of just building in a Dockerfile...
+
+Gotchas: Must be run from the "sync" directory.
 
 ## MediaWiki Files
 
