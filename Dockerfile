@@ -1,4 +1,4 @@
-FROM php:7.3-apache
+FROM php:7.4-apache
 
 # This file is mostly copied from the community mediawiki-docker image
 # Just with the actual mediawiki install etc removed
