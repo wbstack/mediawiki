@@ -1,5 +1,11 @@
 # mediawiki
 
+## 1.35-7.4-20210130-0
+
+- [PHP 7.4](https://github.com/wbstack/mediawiki/commit/54546c403132c5da209fba2da51e0af997d2d867)
+  - [And needed libonig-dev](https://github.com/wbstack/mediawiki/commit/31a6a2b00808d3b503ccf52b21c8b2e29eb81043)
+- [1.35 Updates](https://github.com/wbstack/mediawiki/commit/38d651ebd8cd23a6356e9d89b1ceb093391f5169)
+
 ## 1.35-7.3-20201211-0
 
 - [Enable sandboxes to be loaded with some preset data](https://github.com/wbstack/mediawiki/commit/fe67991c8036dd41023baf0226407c8f33c446a2)
