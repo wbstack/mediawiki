@@ -27,6 +27,8 @@ RUN set -eux; \
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
 		libicu-dev \
+		# Needed for mbstring php ext (from PHP 7.4)
+		libonig-dev \
 		# Needed for bz2 php ext
 		libbz2-dev \
 	; \
