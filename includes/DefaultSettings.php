@@ -2164,6 +2164,7 @@ $wgSharedPrefix = false;
 
 /**
  * @see $wgSharedDB
+ * The installer will add 'actor' to this list for all new wikis.
  */
 $wgSharedTables = [ 'user', 'user_properties' ];
 
@@ -6876,9 +6877,7 @@ $wgStatsdMetricPrefix = 'MediaWiki';
  * Rates are sampling probabilities (e.g. 0.1 means 1 in 10 events are sampled).
  * @since 1.28
  */
-$wgStatsdSamplingRates = [
-	'wanobjectcache:*' => 0.001
-];
+$wgStatsdSamplingRates = [];
 
 /**
  * InfoAction retrieves a list of transclusion links (both to and from).
@@ -9341,6 +9340,10 @@ $wgEventRelayerConfig = [
  * MediaWiki developers to help guide future development efforts.
  *
  * For details about what data is sent, see: https://www.mediawiki.org/wiki/Manual:$wgPingback
+ *
+ * For the pingback privacy policy, see: https://wikimediafoundation.org/wiki/MediaWiki_Pingback_Privacy_Statement
+ *
+ * Aggregate pingback data is available at: https://pingback.wmflabs.org/
  *
  * @var bool
  * @since 1.28

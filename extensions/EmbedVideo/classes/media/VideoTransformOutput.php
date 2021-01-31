@@ -3,30 +3,34 @@
  * EmbedVideo
  * VideoTransformOutput Class
  *
- * @author		Alexia E. Smith
- * @license		MIT
- * @package		EmbedVideo
- * @link		https://www.mediawiki.org/wiki/Extension:EmbedVideo
- *
+ * @author  Alexia E. Smith
+ * @license MIT
+ * @package EmbedVideo
+ * @link    https://www.mediawiki.org/wiki/Extension:EmbedVideo
  **/
 
 namespace EmbedVideo;
 
+use Html;
+
 class VideoTransformOutput extends \MediaTransformOutput {
+	/** @var array */
+	private $parameters;
+
 	/**
 	 * Main Constructor
 	 *
-	 * @access	public
-	 * @param	object	File
-	 * @param	array	Parameters for constructing HTML.
-	 * @return	void
+	 * @access public
+	 * @param  \File $file
+	 * @param  array $parameters	Parameters for constructing HTML.
+	 * @return void
 	 */
 	public function __construct($file, $parameters) {
 		$this->file = $file;
 		$this->parameters = $parameters;
 		$this->width = (isset($parameters['width']) ? $parameters['width'] : null);
 		$this->height = (isset($parameters['height']) ? $parameters['height'] : null);
-		$this->path = $file->getLocalRefPath();
+		$this->path = null;
 		$this->lang = false;
 		$this->page = $parameters['page'];
 		$this->url = $file->getFullUrl();
@@ -35,23 +39,19 @@ class VideoTransformOutput extends \MediaTransformOutput {
 	/**
 	 * Fetch HTML for this transform output
 	 *
-	 * @access	public
-	 * @param	array	$options Associative array of options. Boolean options
-	 *     should be indicated with a value of true for true, and false or
-	 *     absent for false.
+	 * @access public
+	 * @param  array $options Associative array of options. Boolean options
+	 *                        should be indicated with a value of true for true, and false or
+	 *                        absent for false.
+	 *                        alt                Alternate text or caption
+	 *                        desc-link          Boolean, show a description link
+	 *                        file-link          Boolean, show a file download link
+	 *                        custom-url-link    Custom URL to link to
+	 *                        custom-title-link  Custom Title object to link to
+	 *                        valign             vertical-align property, if the output is an inline element
+	 *                        img-class          Class applied to the "<img>" tag, if there is such a tag
 	 *
-	 *     alt          Alternate text or caption
-	 *     desc-link    Boolean, show a description link
-	 *     file-link    Boolean, show a file download link
-	 *     custom-url-link    Custom URL to link to
-	 *     custom-title-link  Custom Title object to link to
-	 *     valign       vertical-align property, if the output is an inline element
-	 *     img-class    Class applied to the "<img>" tag, if there is such a tag
-	 *
-	 * For images, desc-link and file-link are implemented as a click-through. For
-	 * sounds and videos, they may be displayed in other ways.
-	 *
-	 * @return	string	HTML
+	 * @return string	HTML
 	 */
 	public function toHtml($options = []) {
 		$parameters = $this->parameters;
@@ -92,8 +92,15 @@ class VideoTransformOutput extends \MediaTransformOutput {
 			}
 		}
 
-		$html = "<video src='{$this->url}".($inOut !== false ? '#t='.implode(',', $inOut) : '')."' width='{$this->getWidth()}' height='{$this->getHeight()}'".(!empty($class) ? " class='{$class}'" : "").(!empty($style) ? " style='".implode(" ", $style)."'" : "")." controls><a href='{$parameters['descriptionUrl']}'>{$parameters['descriptionUrl']}</a></video>";
+		$descLink = Html::element( 'a', [ 'href' => $parameters['descriptionUrl'] ], $parameters['descriptionUrl'] );
 
-		return $html;
+		return Html::rawElement( 'video', [
+			'src' => $this->url . ($inOut !== false ? '#t=' . implode(',', $inOut) : ''),
+			'width' => $this->getWidth(),
+			'height' => $this->getHeight(),
+			'class' => $class ?: false,
+			'style' => $style ? implode( ' ', $style ) : false,
+			'controls' => true,
+		], $descLink );
 	}
 }

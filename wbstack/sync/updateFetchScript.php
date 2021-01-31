@@ -78,3 +78,5 @@ foreach( $repoNames as $repoName ) {
 
 $result = file_put_contents( __DIR__ . '/fetch.sh', $fetchScript );
 echo "FILE SAVED!" . PHP_EOL;
+
+echo "REMEMBER: things like mediawiki are not uopdated by this script!" . PHP_EOL;

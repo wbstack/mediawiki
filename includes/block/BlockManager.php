@@ -119,9 +119,11 @@ class BlockManager {
 	 * @param bool $fromReplica Whether to check the replica DB first.
 	 *  To improve performance, non-critical checks are done against replica DBs.
 	 *  Check when actually saving should be done against master.
+	 * @param bool $disableIpBlockExemptChecking This is used internally to prevent
+	 *   a infinite recursion with autopromote. See T270145.
 	 * @return AbstractBlock|null The most relevant block, or null if there is no block.
 	 */
-	public function getUserBlock( User $user, $request, $fromReplica ) {
+	public function getUserBlock( User $user, $request, $fromReplica, $disableIpBlockExemptChecking = false ) {
 		$fromMaster = !$fromReplica;
 		$ip = null;
 
@@ -129,6 +131,11 @@ class BlockManager {
 		// or they may be exempt (case #2). If affected, look for additional blocks
 		// against the IP address and referenced in a cookie.
 		$checkIpBlocks = $request &&
+			// Because calling getBlock within Autopromote leads back to here,
+			// thus causing a infinite recursion. We fix this by not checking for
+			// ipblock-exempt when calling getBlock within Autopromote.
+			// See T270145.
+			!$disableIpBlockExemptChecking &&
 			!$this->permissionManager->userHasRight( $user, 'ipblock-exempt' );
 
 		if ( $request && $checkIpBlocks ) {

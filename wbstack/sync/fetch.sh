@@ -5,7 +5,7 @@
 ###########
 # core
 ###########
-./wbstack/sync/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/227ed74bdb7c364e42194dcdba2bd7c20bd69c9a
+./wbstack/sync/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/1a3083861f0f3a5beeb256594ae8865701665479
 
 ###########
 # extensions
@@ -50,9 +50,11 @@
 ./wbstack/sync/dwnthing.sh extensions/Auth_remoteuser https://codeload.github.com/wikimedia/mediawiki-extensions-Auth_remoteuser/zip/6f570b83ff3fe9502a43f7894533273ff37d41f2 & \
 
 # Automatic script skips this one
-./wbstack/sync/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/64831e3f9a4e8d33af017cbf22876ac3dd89466a & \
+# https://github.com/wikimedia/mediawiki-extensions-EntitySchema/tree/REL1_35
+./wbstack/sync/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/e6019ac5b10a70f4cc98adf11b358917a3f6e85d & \
 
 # Extension Distributor
+# https://www.mediawiki.org/wiki/Special:ExtensionDistributor/Wikibase
 ./wbstack/sync/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-ea86f45.tar.gz & \
 
 # Custom wbstack
@@ -62,7 +64,7 @@
 ./wbstack/sync/dwnthing.sh extensions/WikibaseExampleData https://codeload.github.com/wmde/WikibaseExampleData/zip/c129f0b759bf4602aa9b09e2bb9b694682784320 & \
 
 # Elsewhere
-./wbstack/sync/dwnthing.sh extensions/EmbedVideo https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/archive/v2.8.0/EmbedVideo-v2.8.0.zip & \
+./wbstack/sync/dwnthing.sh extensions/EmbedVideo https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/archive/v2.9.0/EmbedVideo-v2.9.0.zip & \
 
 ###########
 # skins
