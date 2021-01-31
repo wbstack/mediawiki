@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210131-0
+
+- [1.35 Updates (part 2)](https://github.com/wbstack/mediawiki/commit/0c4ba980622208fd5f1509b07ff47d01f4b6576a)
+
 ## 1.35-7.4-20210130-0
 
 - [PHP 7.4](https://github.com/wbstack/mediawiki/commit/1f377cd59cc25fac162dc23c1532a63df8bf492c)
