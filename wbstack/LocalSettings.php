@@ -246,6 +246,11 @@ require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
 if( $wikWiki->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
 }
+# Federated Properties, By default not enabled, not enabled in maint mode
+if( $wikWiki->getSetting('wwEnableWikibaseFederatedProperties') ) {
+    // This will use wikidata.org by default
+    $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
+}
 
 # Auth_remoteuser, By default not enabled, enabled in maintWikWiki.json
 if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
