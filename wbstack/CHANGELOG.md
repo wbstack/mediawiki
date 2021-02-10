@@ -1,5 +1,12 @@
 # mediawiki
 
+## 1.35-7.4-20210210-0
+
+- [Wikibase Federated properties](https://github.com/wbstack/mediawiki/pull/4)
+  - Code briefly tested in production before merging this PR
+  - Working from the branch at https://github.com/addshore/Wikibase/pull/1 which has a backport for 1.35
+  - Includes a config setting to enable the functionality (not tested)
+
 ## 1.35-7.4-20210131-0
 
 - [1.35 Updates (part 2)](https://github.com/wbstack/mediawiki/commit/0c4ba980622208fd5f1509b07ff47d01f4b6576a)
