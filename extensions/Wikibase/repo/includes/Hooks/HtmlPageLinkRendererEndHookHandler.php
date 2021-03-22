@@ -14,17 +14,18 @@ use Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
+use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookupException;
 use Wikibase\DataModel\Services\Lookup\TermLookup;
 use Wikibase\DataModel\Term\TermFallback;
 use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\Store\EntityExistenceChecker;
-use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
 use Wikibase\Lib\Store\LinkTargetEntityIdLookup;
+use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
 use Wikibase\Repo\Hooks\Formatters\EntityLinkFormatterFactory;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -37,7 +38,7 @@ use Wikibase\Repo\WikibaseRepo;
  * Label lookups are relatively expensive if done repeatedly for individual labels. If possible,
  * labels should be pre-loaded and buffered for later use via the HtmlPageLinkRendererEnd hook.
  *
- * @see LabelPrefetchHookHandlers
+ * @see LabelPrefetchHookHandler
  *
  * @license GPL-2.0-or-later
  * @author Katie Filbert < aude.wiki@gmail.com >
@@ -48,11 +49,6 @@ class HtmlPageLinkRendererEndHookHandler {
 	 * @var EntityExistenceChecker
 	 */
 	private $entityExistenceChecker;
-
-	/**
-	 * @var EntityIdLookup
-	 */
-	private $entityIdLookup;
 
 	/**
 	 * @var EntityIdParser
@@ -105,6 +101,13 @@ class HtmlPageLinkRendererEndHookHandler {
 	private $linkTargetEntityIdLookup;
 
 	/**
+	 * @var string|null
+	 */
+	private $federatedPropertiesSourceScriptUrl;
+
+	private $federatedPropertiesEnabled;
+
+	/**
 	 * @return self
 	 */
 	private static function newFromGlobalState() {
@@ -116,7 +119,6 @@ class HtmlPageLinkRendererEndHookHandler {
 		$entityIdParser = $wikibaseRepo->getEntityIdParser();
 		return new self(
 			$wikibaseRepo->getEntityExistenceChecker(),
-			$wikibaseRepo->getEntityIdLookup(),
 			$entityIdParser,
 			$wikibaseRepo->getTermLookup(),
 			$wikibaseRepo->getEntityNamespaceLookup(),
@@ -125,7 +127,9 @@ class HtmlPageLinkRendererEndHookHandler {
 			$services->getSpecialPageFactory(),
 			$wikibaseRepo->getLanguageFallbackChainFactory(),
 			$wikibaseRepo->getEntityUrlLookup(),
-			$wikibaseRepo->getLinkTargetEntityIdLookup()
+			$wikibaseRepo->getLinkTargetEntityIdLookup(),
+			$wikibaseRepo->getSettings()->getSetting( 'federatedPropertiesSourceScriptUrl' ),
+			$wikibaseRepo->getSettings()->getSetting( 'federatedPropertiesEnabled' )
 		);
 	}
 
@@ -171,7 +175,6 @@ class HtmlPageLinkRendererEndHookHandler {
 
 	public function __construct(
 		EntityExistenceChecker $entityExistenceChecker,
-		EntityIdLookup $entityIdLookup,
 		EntityIdParser $entityIdParser,
 		TermLookup $termLookup,
 		EntityNamespaceLookup $entityNamespaceLookup,
@@ -180,10 +183,11 @@ class HtmlPageLinkRendererEndHookHandler {
 		SpecialPageFactory $specialPageFactory,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
 		EntityUrlLookup $entityUrlLookup,
-		LinkTargetEntityIdLookup $linkTargetEntityIdLookup
+		LinkTargetEntityIdLookup $linkTargetEntityIdLookup,
+		?string $federatedPropertiesSourceScriptUrl,
+		bool $federatedPropertiesEnabled
 	) {
 		$this->entityExistenceChecker = $entityExistenceChecker;
-		$this->entityIdLookup = $entityIdLookup;
 		$this->entityIdParser = $entityIdParser;
 		$this->termLookup = $termLookup;
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
@@ -193,6 +197,8 @@ class HtmlPageLinkRendererEndHookHandler {
 		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
 		$this->entityUrlLookup = $entityUrlLookup;
 		$this->linkTargetEntityIdLookup = $linkTargetEntityIdLookup;
+		$this->federatedPropertiesSourceScriptUrl = $federatedPropertiesSourceScriptUrl;
+		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
 	}
 
 	/**
@@ -213,8 +219,7 @@ class HtmlPageLinkRendererEndHookHandler {
 		RequestContext $context,
 		&$html = null
 	) {
-		$out = $context->getOutput();
-		$outTitle = $out->getTitle();
+		$outTitle = $context->getOutput()->getTitle();
 
 		// For good measure: Don't do anything in case the OutputPage has no Title set.
 		if ( !$outTitle ) {
@@ -227,16 +232,74 @@ class HtmlPageLinkRendererEndHookHandler {
 			return true;
 		}
 
-		$foreignEntityId = $this->parseForeignEntityId( $target );
-		if ( !$foreignEntityId && !$this->entityNamespaceLookup->isEntityNamespace( $target->getNamespace() )
-		) {
-			return true;
-		}
-
 		// Only continue on pages with edit summaries (histories / diffs) or on special pages.
 		// Don't run this code when accessing it through the api (eg. for parsing) as the title is
 		// set to a special page dummy in api.php, see https://phabricator.wikimedia.org/T111346
 		if ( defined( 'MW_API' ) || !$this->shouldConvert( $outTitle, $context ) ) {
+			return true;
+		}
+
+		try {
+			return $this->internalDoHtmlPageLinkRendererEnd( $linkRenderer, $target, $text, $customAttribs, $context, $html );
+		} catch ( FederatedPropertiesException $ex ) {
+			$this->federatedPropsDegradedDoHtmlPageLinkRendererEnd( $target, $text, $customAttribs );
+
+			return true;
+		}
+	}
+
+	/**
+	 * Hook handling logic for the HtmlPageLinkRendererEnd hook in case federated properties are
+	 * enabled, but access to the source wiki failed.
+	 *
+	 * @param Title $linkTarget
+	 * @param HtmlArmor|string|null &$text
+	 * @param array &$customAttribs
+	 */
+	private function federatedPropsDegradedDoHtmlPageLinkRendererEnd(
+		LinkTarget $linkTarget,
+		&$text,
+		array &$customAttribs
+		): void {
+		$entityId = $this->linkTargetEntityIdLookup->getEntityId( $linkTarget );
+		$text = $entityId->getSerialization();
+
+		// This is a hack and could probably use the TitleIsAlwaysKnown hook instead.
+		// Filter out the "new" class to avoid red links for existing entities.
+		$customAttribs['class'] = $this->removeNewClass( $customAttribs['class'] ?? '' );
+		// Use the entity id as title, as we can't lookup the label
+		$customAttribs['title'] = $entityId->getSerialization();
+
+		$customAttribs['href'] = $this->federatedPropertiesSourceScriptUrl .
+			'index.php?title=Special:EntityData/' . urlencode( $entityId->getSerialization() );
+	}
+
+	/**
+	 * Parts of the hook handling logic for the HtmlPageLinkRendererEnd hook that potentially
+	 * interact with entity storage.
+	 *
+	 * @param LinkRenderer $linkRenderer
+	 * @param Title $target
+	 * @param HtmlArmor|string|null &$text
+	 * @param array &$customAttribs
+	 * @param RequestContext $context
+	 * @param string|null &$html
+	 *
+	 * @return bool true to continue processing the link, false to use $html directly for the link
+	 */
+	private function internalDoHtmlPageLinkRendererEnd(
+		LinkRenderer $linkRenderer,
+		Title $target,
+		&$text,
+		array &$customAttribs,
+		RequestContext $context,
+		&$html = null
+	) {
+		$out = $context->getOutput();
+
+		$foreignEntityId = $this->parseForeignEntityId( $target );
+		if ( !$foreignEntityId && !$this->entityNamespaceLookup->isEntityNamespace( $target->getNamespace() )
+		) {
 			return true;
 		}
 
@@ -257,7 +320,11 @@ class HtmlPageLinkRendererEndHookHandler {
 			return true;
 		}
 
-		$customAttribs['href'] = $this->entityUrlLookup->getLinkUrl( $entityId );
+		if ( $target->isRedirect() ) {
+			$customAttribs['href'] = wfAppendQuery( $this->entityUrlLookup->getLinkUrl( $entityId ), [ 'redirect' => 'no' ] );
+		} else {
+			$customAttribs['href'] = $this->entityUrlLookup->getLinkUrl( $entityId );
+		}
 
 		if ( !$this->entityExistenceChecker->exists( $entityId ) ) {
 			// The link points to a non-existing entity.
@@ -266,12 +333,7 @@ class HtmlPageLinkRendererEndHookHandler {
 
 		// This is a hack and could probably use the TitleIsAlwaysKnown hook instead.
 		// Filter out the "new" class to avoid red links for existing entities.
-		$customAttribs['class'] = implode( ' ', array_filter(
-			preg_split( '/\s+/', $customAttribs['class'] ?? '' ),
-			function ( $class ) {
-				return $class !== 'new';
-			}
-		) );
+		$customAttribs['class'] = $this->removeNewClass( $customAttribs['class'] ?? '' );
 
 		$labelDescriptionLookup = $this->getLabelDescriptionLookup( $context );
 		try {
@@ -298,8 +360,26 @@ class HtmlPageLinkRendererEndHookHandler {
 
 		// add wikibase styles in all cases, so we can format the link properly:
 		$out->addModuleStyles( [ 'wikibase.common' ] );
-
+		if ( $this->federatedPropertiesEnabled && $entityId instanceof PropertyId ) {
+			$customAttribs [ 'class' ] = $customAttribs [ 'class' ] == '' ? 'fedprop' : $customAttribs [ 'class' ] . ' fedprop';
+			$out->addModules( 'wikibase.federatedPropertiesLeavingSiteNotice' );
+		}
 		return true;
+	}
+
+	/**
+	 * Remove the new class from a space separated list of classes.
+	 *
+	 * @param string $classes
+	 * @return string
+	 */
+	private function removeNewClass( string $classes ): string {
+		return implode( ' ', array_filter(
+			preg_split( '/\s+/', $classes ),
+			function ( $class ) {
+				return $class !== 'new';
+			}
+		) );
 	}
 
 	/**
@@ -358,7 +438,13 @@ class HtmlPageLinkRendererEndHookHandler {
 			return null;
 		}
 
-		return $this->extractForeignIdStringSpecialNs( Title::newFromText( $linkTarget->getText() ) );
+		$linkTargetChangedNamespace = Title::newFromText( $linkTarget->getText() );
+
+		if ( $linkTargetChangedNamespace === null ) {
+			return null;
+		}
+
+		return $this->extractForeignIdStringSpecialNs( $linkTargetChangedNamespace );
 	}
 
 	private function extractForeignIdStringSpecialNs( LinkTarget $linkTarget ): ?string {

@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\FederatedProperties;
 
-use LogicException;
 use MediaWiki\Storage\RevisionRecord;
 use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -95,6 +94,6 @@ class SummaryParsingPrefetchHelper {
 			return $revisionRow->rev_comment_text;
 		}
 
-		throw new LogicException( 'Rows should have either rc_comment_text or rev_comment_text field' );
+		throw new \LogicException( 'Rows should have either rc_comment_text or rev_comment_text field' );
 	}
 }

@@ -118,29 +118,34 @@ call_user_func( function() {
 				$apiHelperFactory->getErrorReporter( $apiMain ),
 				$apiHelperFactory->getResultBuilder( $apiMain ),
 				$wikibaseRepo->getEntityRevisionLookup(),
-				$wikibaseRepo->getEntityIdParser()
+				$wikibaseRepo->getEntityIdParser(),
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
 	$wgAPIModules['wbsetlabel'] = [
 		'class' => SetLabel::class,
 		'factory' => function ( ApiMain $mainModule, $moduleName ) {
+			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 			return new SetLabel(
 				$mainModule,
 				$moduleName,
-				WikibaseRepo::getDefaultInstance()->getChangeOpFactoryProvider()
-					->getFingerprintChangeOpFactory()
+				$wikibaseRepo->getChangeOpFactoryProvider()
+				      ->getFingerprintChangeOpFactory(),
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
 	$wgAPIModules['wbsetdescription'] = [
 		'class' => SetDescription::class,
 		'factory' => function ( ApiMain $mainModule, $moduleName ) {
+			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 			return new SetDescription(
 				$mainModule,
 				$moduleName,
-				WikibaseRepo::getDefaultInstance()->getChangeOpFactoryProvider()
-					->getFingerprintChangeOpFactory()
+				$wikibaseRepo->getChangeOpFactoryProvider()
+				      ->getFingerprintChangeOpFactory(),
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -171,11 +176,13 @@ call_user_func( function() {
 	$wgAPIModules['wbsetaliases'] = [
 		'class' => SetAliases::class,
 		'factory' => function ( ApiMain $mainModule, $moduleName ) {
+			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 			return new SetAliases(
 				$mainModule,
 				$moduleName,
-				WikibaseRepo::getDefaultInstance()->getChangeOpFactoryProvider()
-					->getFingerprintChangeOpFactory()
+				$wikibaseRepo->getChangeOpFactoryProvider()
+				      ->getFingerprintChangeOpFactory(),
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -201,7 +208,8 @@ call_user_func( function() {
 					new ChangedLanguagesCollector(),
 					new ChangedLanguagesCounter(),
 					new NonLanguageBoundChangesCounter()
-				)
+				),
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -243,7 +251,8 @@ call_user_func( function() {
 				$moduleName,
 				$wikibaseRepo->getChangeOpFactoryProvider()
 					->getSiteLinkChangeOpFactory(),
-				$wikibaseRepo->getSiteLinkBadgeChangeOpSerializationValidator()
+				$wikibaseRepo->getSiteLinkBadgeChangeOpSerializationValidator(),
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -273,7 +282,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -325,7 +335,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -355,7 +366,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -386,7 +398,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -416,7 +429,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -447,7 +461,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -477,7 +492,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -509,7 +525,8 @@ call_user_func( function() {
 				},
 				function ( $module ) use ( $apiHelperFactory ) {
 					return $apiHelperFactory->getEntitySavingHelper( $module );
-				}
+				},
+				$wikibaseRepo->inFederatedPropertyMode()
 			);
 		}
 	];
@@ -629,7 +646,7 @@ call_user_func( function() {
 
 	$wgHooks['LoadExtensionSchemaUpdates'][] = 'Wikibase\Repo\Store\Sql\DatabaseSchemaUpdater::onSchemaUpdate';
 	$wgHooks['HtmlPageLinkRendererEnd'][] = 'Wikibase\Repo\Hooks\HtmlPageLinkRendererEndHookHandler::onHtmlPageLinkRendererEnd';
-	$wgHooks['ChangesListInitRows'][] = 'Wikibase\Repo\Hooks\LabelPrefetchHookHandlers::onChangesListInitRows';
+	$wgHooks['ChangesListInitRows'][] = 'Wikibase\Repo\Hooks\LabelPrefetchHookHandler::onChangesListInitRows';
 	$wgHooks['ShowSearchHit'][] = 'Wikibase\Repo\Hooks\ShowSearchHitHandler::onShowSearchHit';
 	$wgHooks['ShowSearchHitTitle'][] = 'Wikibase\Repo\Hooks\ShowSearchHitHandler::onShowSearchHitTitle';
 	$wgHooks['OutputPageBeforeHTML'][] = 'Wikibase\Repo\Hooks\OutputPageBeforeHTMLHookHandler::onOutputPageBeforeHTML';

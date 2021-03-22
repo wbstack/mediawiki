@@ -70,17 +70,17 @@
     },
     {
         "name": "guzzlehttp/promises",
-        "version": "1.4.0",
-        "version_normalized": "1.4.0.0",
+        "version": "1.4.1",
+        "version_normalized": "1.4.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/promises.git",
-            "reference": "60d379c243457e073cff02bc323a2a86cb355631"
+            "reference": "8e7d04f1f6450fef59366c399cfad4b9383aa30d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/promises/zipball/60d379c243457e073cff02bc323a2a86cb355631",
-            "reference": "60d379c243457e073cff02bc323a2a86cb355631",
+            "url": "https://api.github.com/repos/guzzle/promises/zipball/8e7d04f1f6450fef59366c399cfad4b9383aa30d",
+            "reference": "8e7d04f1f6450fef59366c399cfad4b9383aa30d",
             "shasum": ""
         },
         "require": {
@@ -89,7 +89,7 @@
         "require-dev": {
             "symfony/phpunit-bridge": "^4.4 || ^5.1"
         },
-        "time": "2020-09-30T07:37:28+00:00",
+        "time": "2021-03-07T09:25:29+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -123,17 +123,17 @@
     },
     {
         "name": "guzzlehttp/psr7",
-        "version": "1.7.0",
-        "version_normalized": "1.7.0.0",
+        "version": "1.8.1",
+        "version_normalized": "1.8.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/guzzle/psr7.git",
-            "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3"
+            "reference": "35ea11d335fd638b5882ff1725228b3d35496ab1"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/guzzle/psr7/zipball/53330f47520498c0ae1f61f7e2c90f55690c06a3",
-            "reference": "53330f47520498c0ae1f61f7e2c90f55690c06a3",
+            "url": "https://api.github.com/repos/guzzle/psr7/zipball/35ea11d335fd638b5882ff1725228b3d35496ab1",
+            "reference": "35ea11d335fd638b5882ff1725228b3d35496ab1",
             "shasum": ""
         },
         "require": {
@@ -151,7 +151,7 @@
         "suggest": {
             "laminas/laminas-httphandlerrunner": "Emit PSR-7 responses"
         },
-        "time": "2020-09-30T07:37:11+00:00",
+        "time": "2021-03-21T16:25:00+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -577,17 +577,17 @@
     },
     {
         "name": "symfony/polyfill-intl-idn",
-        "version": "v1.22.0",
-        "version_normalized": "1.22.0.0",
+        "version": "v1.22.1",
+        "version_normalized": "1.22.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-intl-idn.git",
-            "reference": "0eb8293dbbcd6ef6bf81404c9ce7d95bcdf34f44"
+            "reference": "2d63434d922daf7da8dd863e7907e67ee3031483"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/0eb8293dbbcd6ef6bf81404c9ce7d95bcdf34f44",
-            "reference": "0eb8293dbbcd6ef6bf81404c9ce7d95bcdf34f44",
+            "url": "https://api.github.com/repos/symfony/polyfill-intl-idn/zipball/2d63434d922daf7da8dd863e7907e67ee3031483",
+            "reference": "2d63434d922daf7da8dd863e7907e67ee3031483",
             "shasum": ""
         },
         "require": {
@@ -598,7 +598,7 @@
         "suggest": {
             "ext-intl": "For best performance"
         },
-        "time": "2021-01-07T16:49:33+00:00",
+        "time": "2021-01-22T09:19:47+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -663,17 +663,17 @@
     },
     {
         "name": "symfony/polyfill-intl-normalizer",
-        "version": "v1.22.0",
-        "version_normalized": "1.22.0.0",
+        "version": "v1.22.1",
+        "version_normalized": "1.22.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-intl-normalizer.git",
-            "reference": "6e971c891537eb617a00bb07a43d182a6915faba"
+            "reference": "43a0283138253ed1d48d352ab6d0bdb3f809f248"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/6e971c891537eb617a00bb07a43d182a6915faba",
-            "reference": "6e971c891537eb617a00bb07a43d182a6915faba",
+            "url": "https://api.github.com/repos/symfony/polyfill-intl-normalizer/zipball/43a0283138253ed1d48d352ab6d0bdb3f809f248",
+            "reference": "43a0283138253ed1d48d352ab6d0bdb3f809f248",
             "shasum": ""
         },
         "require": {
@@ -682,7 +682,7 @@
         "suggest": {
             "ext-intl": "For best performance"
         },
-        "time": "2021-01-07T17:09:11+00:00",
+        "time": "2021-01-22T09:19:47+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -746,8 +746,8 @@
     },
     {
         "name": "symfony/polyfill-php72",
-        "version": "v1.22.0",
-        "version_normalized": "1.22.0.0",
+        "version": "v1.22.1",
+        "version_normalized": "1.22.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-php72.git",

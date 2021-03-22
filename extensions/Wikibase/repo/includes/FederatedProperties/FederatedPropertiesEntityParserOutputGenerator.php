@@ -67,7 +67,6 @@ class FederatedPropertiesEntityParserOutputGenerator implements EntityParserOutp
 			$po = $this->inner->getParserOutput( $entityRevision, $generateHtml );
 			$po->setEnableOOUI( true );
 			$po->addModules( 'wikibase.federatedPropertiesEditRequestFailureNotice' );
-			$po->addModules( 'wikibase.federatedPropertiesLeavingSiteNotice' );
 
 		} catch ( FederatedPropertiesException $ex ) {
 
@@ -92,12 +91,15 @@ class FederatedPropertiesEntityParserOutputGenerator implements EntityParserOutp
 		$propertyIds = array_map( function( $snak ) {
 			return $snak->getPropertyId();
 		}, $entity->getStatements()->getAllSnaks() );
-
 		if ( empty( $propertyIds ) ) {
 			return;
 		}
 
-		$this->apiEntityLookup->fetchEntities( array_unique( $propertyIds ) );
+		$propertyIds = array_unique( $propertyIds );
+
+		$this->apiEntityLookup->fetchEntities(
+			$propertyIds
+		);
 	}
 
 }

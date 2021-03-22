@@ -55,11 +55,7 @@
 
 # Extension Distributor
 # https://www.mediawiki.org/wiki/Special:ExtensionDistributor/Wikibase
-./wbstack/sync/dwnthing.sh extensions/Wikibase-tmp https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-ea86f45.tar.gz & \
-# XXX: fetch normal 1_35 into a tmp dir, and the fed props code into a new dir.
-# These are the merged evily further down this file...
-# because submodules...
-./wbstack/sync/dwnthing.sh extensions/Wikibase https://codeload.github.com/addshore/Wikibase/zip/c61b0865d487b0f93f9a195e0cfcb449b86994d7 & \
+./wbstack/sync/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-292153f.tar.gz & \
 
 # Custom wbstack
 ./wbstack/sync/dwnthing.sh extensions/WikibaseInWikitext https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9 & \
@@ -80,11 +76,3 @@
 
 # And wait for all the background tasks to be done...
 wait
-
-cp -r ./extensions/Wikibase-tmp/view/lib/wikibase-data-values-value-view ./extensions/Wikibase/view/lib
-cp -r ./extensions/Wikibase-tmp/view/lib/wikibase-serialization ./extensions/Wikibase/view/lib
-cp -r ./extensions/Wikibase-tmp/view/lib/wikibase-data-values ./extensions/Wikibase/view/lib
-cp -r ./extensions/Wikibase-tmp/view/lib/wikibase-data-model ./extensions/Wikibase/view/lib
-cp -r ./extensions/Wikibase-tmp/view/lib/wikibase-termbox ./extensions/Wikibase/view/lib
-cp -r ./extensions/Wikibase-tmp/lib/resources/wikibase-api ./extensions/Wikibase/lib/resources
-rm -rf ./extensions/Wikibase-tmp
