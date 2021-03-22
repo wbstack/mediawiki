@@ -1,5 +1,10 @@
 # mediawiki
 
+## 1.35-7.4-20210322-2
+
+- Load WikibaseManifest in maint scripts
+- Change version for one with fix :) (not master)
+
 ## 1.35-7.4-20210322-1
 
 - Add WikibaseManifest
