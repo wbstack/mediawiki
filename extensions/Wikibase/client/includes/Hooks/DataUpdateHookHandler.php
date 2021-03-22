@@ -14,6 +14,7 @@ use MediaWiki\Page\Hook\ArticleDeleteCompleteHook;
 use ParserCache;
 use ParserOptions;
 use ParserOutput;
+use RuntimeException;
 use Title;
 use User;
 use Wikibase\Client\Store\AddUsagesForPageJob;
@@ -125,14 +126,25 @@ class DataUpdateHookHandler implements
 	}
 
 	public function doLinksUpdateComplete( LinksUpdate $linksUpdate ): void {
-		$title = $linksUpdate->getTitle();
+		$pageId = $linksUpdate->mId;
+		if ( !$pageId ) {
+			// TODO inject logger
+			WikibaseClient::getDefaultInstance()->getLogger()
+				->info( __METHOD__ . ': skipping page ID {pageId} for title {title} (T264929)', [
+					'pageId' => $pageId,
+					'title' => $linksUpdate->getTitle()->getPrefixedText(),
+					'causeAction' => $linksUpdate->getCauseAction(),
+					'exception' => new RuntimeException(),
+				] );
+			return;
+		}
 
 		$parserOutput = $linksUpdate->getParserOutput();
 		$usageAcc = new ParserOutputUsageAccumulator( $parserOutput, $this->entityUsageFactory );
 
 		// Please note that page views that happen between the page save but before this is run will have
 		// their usages removed (as we might add the usages via onParserCacheSaveComplete before this is run).
-		$this->usageUpdater->replaceUsagesForPage( $title->getArticleID(), $usageAcc->getUsages() );
+		$this->usageUpdater->replaceUsagesForPage( $pageId, $usageAcc->getUsages() );
 	}
 
 	/**

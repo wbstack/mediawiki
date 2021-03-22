@@ -2555,7 +2555,7 @@ class WikibaseRepo {
 		}
 	}
 
-	private function inFederatedPropertyMode(): bool {
+	public function inFederatedPropertyMode(): bool {
 		return $this->getSettings()->getSetting( 'federatedPropertiesEnabled' );
 	}
 

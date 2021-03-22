@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210322-0
+
+- Update Wikibase to have more backports related to Federated Properties
+
 ## 1.35-7.4-20210210-0
 
 - [Wikibase Federated properties](https://github.com/wbstack/mediawiki/pull/4)

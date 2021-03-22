@@ -19,14 +19,11 @@ use Wikibase\Lib\Store\EntityTermLookupBase;
  */
 class ApiPrefetchingTermLookup extends EntityTermLookupBase implements PrefetchingTermLookup {
 
-	/**
-	 * @var array[] entity numeric id -> terms array
-	 */
+	/** @var array[] entity numeric id -> terms array */
 	private $terms = [];
 
-	/**
-	 * @var bool[] entity ID, term type, language -> true for prefetched terms
-	 * example: [ "P1|label|en" => true ]
+	/** @var bool[] entity ID, term type, language -> true for prefetched terms
+	 * example "P1|label|en" -> true
 	 */
 	private $termKeys = [];
 
@@ -45,6 +42,14 @@ class ApiPrefetchingTermLookup extends EntityTermLookupBase implements Prefetchi
 	}
 
 	/**
+	 * not implemented
+	 * @throws BadMethodCallException always
+	 */
+	public function getPrefetchedAliases( EntityId $entityId, $languageCode ) {
+		throw new BadMethodCallException( 'Cannot get Aliases. Only labels' );
+	}
+
+	/**
 	 * @param EntityId $entityId
 	 * @param string $termType
 	 * @param array $languageCodes
@@ -53,14 +58,14 @@ class ApiPrefetchingTermLookup extends EntityTermLookupBase implements Prefetchi
 	protected function getTermsOfType( EntityId $entityId, $termType, array $languageCodes ): array {
 		$this->prefetchTerms( [ $entityId ], [ $termType ], $languageCodes );
 
-		$result = [];
+		$ret = [];
 		foreach ( $languageCodes as $languageCode ) {
 			$term = $this->getPrefetchedTerm( $entityId, $termType, $languageCode );
 			if ( $term !== false ) {
-				$result[$languageCode] = $term;
+				$ret[$languageCode] = $term;
 			}
 		}
-		return $result;
+		return $ret;
 	}
 
 	/**
@@ -70,13 +75,15 @@ class ApiPrefetchingTermLookup extends EntityTermLookupBase implements Prefetchi
 	 * @param EntityId[] $entityIds
 	 * @param string[] $termTypes The desired term types.
 	 * @param string[] $languageCodes The desired languages.
+	 *
+	 * @throws BadMethodCallException if $termTypes is anything other than [ 'label' ]
 	 */
 	public function prefetchTerms( array $entityIds, array $termTypes, array $languageCodes ): void {
 		$this->validateTermTypes( $termTypes );
 
 		$entityIdsToFetch = $this->getEntityIdsToFetch( $entityIds, $termTypes, $languageCodes );
 
-		if ( empty( $entityIdsToFetch ) ) {
+		if ( $entityIdsToFetch === [] ) {
 			return;
 		}
 
@@ -118,7 +125,8 @@ class ApiPrefetchingTermLookup extends EntityTermLookupBase implements Prefetchi
 	 * @param string $termType
 	 * @param string $languageCode
 	 *
-	 * @return string|false|null The term, or false of that term is known to not exist, or null if the term was not prefetched.
+	 * @return string|false|null The term, or false of that term is known to not exist,
+	 *         or null if the term was not yet requested via prefetchTerms().
 	 */
 	public function getPrefetchedTerm( EntityId $entityId, $termType, $languageCode ) {
 		$key = $this->getKey( $entityId, $termType, $languageCode );
@@ -127,15 +135,23 @@ class ApiPrefetchingTermLookup extends EntityTermLookupBase implements Prefetchi
 		}
 		$termType = implode( "|", $this->translateTermTypesToApiProps( [ $termType ] ) );
 
-		// return false if entityId has been covered by prefetchTerms but term does not exist
+		// return false if entityId has been been covered by prefetchTerms but term does not exist
 		return $this->terms[$entityId->getSerialization()][$termType][$languageCode]['value'] ?? false;
 	}
 
-	private function getKey( EntityId $entityId, string $termType, string $languageCode ): string {
+	private function getKey(
+		EntityId $entityId,
+		string $termType,
+		string $languageCode
+	): string {
 		return $this->getKeyString( $entityId->getSerialization(), $termType, $languageCode );
 	}
 
-	private function getKeyString( string $entityId, string $termType, string $languageCode ): string {
+	private function getKeyString(
+		string $entityId,
+		string $termType,
+		string $languageCode
+	): string {
 		return $entityId . '|' . $termType . '|' . $languageCode;
 	}
 
@@ -150,7 +166,11 @@ class ApiPrefetchingTermLookup extends EntityTermLookupBase implements Prefetchi
 		}
 	}
 
-	private function isPrefetched( EntityId $entityId, array $termTypes, array $languageCodes ): bool {
+	private function isPrefetched(
+		EntityId $entityId,
+		array $termTypes,
+		array $languageCodes
+	): bool {
 		foreach ( $termTypes as $termType ) {
 			foreach ( $languageCodes as $languageCode ) {
 				$key = $this->getKey( $entityId, $termType, $languageCode );
@@ -183,13 +203,5 @@ class ApiPrefetchingTermLookup extends EntityTermLookupBase implements Prefetchi
 				throw new BadMethodCallException( "term type $termType is not supported by " . __CLASS__ );
 			}
 		}
-	}
-
-	/**
-	 * Not implemented
-	 * @throws BadMethodCallException always
-	 */
-	public function getPrefetchedAliases( EntityId $entityId, $languageCode ) {
-		throw new BadMethodCallException( 'Cannot get Aliases. Only labels' );
 	}
 }
