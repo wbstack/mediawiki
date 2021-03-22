@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"WMDE"
+		]
+	},
+	"wikibasemanifest": "WikibaseManifest",
+	"wikibasemanifest-desc": "Combines metadata about a Wikibase installation exposing it as a simple API"
+}

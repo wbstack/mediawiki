@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardo Addad de Oliveira",
+			"Eduardoaddad"
+		]
+	},
+	"wikibasemanifest-desc": "Combina metadados sobre uma instalação da Wikibase, expondo-a como uma API simples"
+}

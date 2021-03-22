@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210322-1
+
+- Add WikibaseManifest
+
 ## 1.35-7.4-20210322-0
 
 - Update Wikibase to have more backports related to Federated Properties

@@ -1,0 +1,35 @@
+- hosts: test_systems
+  name: "Cleanup the test system for the 'WikibaseManifest' extension"
+  become: yes
+  tasks:
+    - name: "Get service facts"
+      service_facts:
+
+    - name: "Get package facts"
+      package_facts:
+
+    - name: Run `docker-compose down`
+      docker_compose:
+          project_src: "{{ PROJECT_DIR }}"
+          state: absent
+      when: "ansible_facts.services['docker'] is defined and ansible_facts.services['docker'].state == 'running'"
+
+    - name: Prune containers and volumes
+      docker_prune:
+          containers: yes
+          volumes: yes
+      when: "ansible_facts.services['docker'] is defined and ansible_facts.services['docker'].state == 'running'"
+
+    - name: Remove cron jobs
+      cron:
+          name: "{{ item }}"
+          user: "mediawiki"
+          state: absent
+      loop:
+          - "wbm-update"
+          - "wbm-logrotate"
+
+    - name: Remove project directory
+      file:
+          path: "{{ PROJECT_DIR }}"
+          state: absent
