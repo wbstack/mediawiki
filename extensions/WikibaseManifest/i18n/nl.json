@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mainframe98"
+		]
+	},
+	"wikibasemanifest-desc": "Combineert metadata over een Wikibase installatie en maakt deze beschikbaar via een eenvoudige API"
+}

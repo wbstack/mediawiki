@@ -1,0 +1,14 @@
+test_systems:
+  hosts:
+    wb-product-testing.wikidata-dev.eqiad.wmflabs:
+      SCHEME: "https"
+      SERVER_NAME: "wikibase-product-testing.wmflabs.org"
+      PORT: ""
+
+  vars:
+    ansible_python_interpreter: "/usr/bin/python3"
+    PROJECT_NAME: "WikibaseManifest"
+    PROJECT_DIR: "/opt/{{ PROJECT_NAME }}"
+    SCRIPTS_DIR: "{{ PROJECT_DIR }}/scripts"
+    LOG_DIR: "{{ PROJECT_DIR }}/log"
+    MW_PATH: "{{ PROJECT_DIR }}/src"

@@ -1,0 +1,27 @@
+#!/bin/sh
+MW_PATH={{ MW_PATH }}
+UPDATE_LOG={{ LOG_DIR }}/update.log
+GIT_LOG={{ LOG_DIR }}/git.log
+COMPOSER_LOG={{ LOG_DIR }}/composer.log
+MAINT_LOG={{ LOG_DIR }}/maintenance.log
+ERROR_LOG={{ LOG_DIR }}/error.log
+
+log () {
+  echo $1 | tee -a  $2
+}
+
+log_all () {
+  echo $1 | tee -a  ${UPDATE_LOG} ${GIT_LOG} ${COMPOSER_LOG} ${MAINT_LOG} ${ERROR_LOG}
+}
+
+# start
+log_all "########### $(date) ###########"
+
+log "## running composer update" ${UPDATE_LOG}
+docker exec wikibase php /var/www/html/composer.phar update 2>&1 | tee -a ${COMPOSER_LOG}
+
+log "## running maintenance/update.php" ${UPDATE_LOG}
+docker exec wikibase php maintenance/update.php --quick 2>> $ERROR_LOG  | tee -a ${MAINT_LOG}
+
+# done
+log_all "########### $(date) ###########"

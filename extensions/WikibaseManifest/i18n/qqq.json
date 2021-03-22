@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Umherirrender",
+			"WMDE"
+		]
+	},
+	"wikibasemanifest": "{{name}}\nThe name of the extension",
+	"wikibasemanifest-desc": "{{desc|name=WikibaseManifest|url=}}"
+}

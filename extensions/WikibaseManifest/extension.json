@@ -1,0 +1,49 @@
+{
+	"name": "WikibaseManifest",
+	"author": "The Wikidata team",
+	"license-name": "GPL-2.0-or-later",
+	"version": "0.0.1",
+	"namemsg": "wikibasemanifest",
+	"descriptionmsg": "wikibasemanifest-desc",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
+	"manifest_version": 2,
+	"MessagesDirs": {
+		"WikibaseManifest": [
+			"i18n"
+		]
+	},
+	"config": {
+		"WbManifestWikidataEntityMapping": {
+			"description": "The mapping of Wikidata entity ids to local Wikibase entity ids.",
+			"value": []
+		},
+		"WbManifestExternalServiceMapping": {
+			"description": "The mapping of external service identifiers to URLs.",
+			"value": []
+		},
+		"WbManifestMaxLag": {
+			"description": "The max_lag value in seconds.",
+			"value": 5
+		}
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikibaseManifest\\": "includes/"
+	},
+	"type": "wikibase",
+	"RestRoutes": [
+		{
+			"path": "/wikibase-manifest/v0/manifest",
+			"method": "GET",
+			"class": "MediaWiki\\Extension\\WikibaseManifest\\RestApi",
+			"services": [
+				"WikibaseManifestGenerator",
+				"EmptyValueCleaner"
+			]
+		}
+	],
+	"ServiceWiringFiles": [
+		"includes/ServiceWiring.php"
+	]
+}
