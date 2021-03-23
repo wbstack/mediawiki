@@ -4,8 +4,8 @@
 
 # This script should only be run from the mediawiki directory
 # as I didn't make the paths nice in the shell scripts...
-BASEDIR=$(dirname "$0")
-if [ "$BASEDIR" = "./wbstack" ]; then 
+BASEDIR=$(cd `dirname "$0"` && pwd)
+if [ "${BASEDIR#$PWD}" = "/wbstack" ]; then
     echo "Running from the mediawiki directory, can continue :)"
 else
     echo "ERROR: this script must be run from the mediawiki directory :("
