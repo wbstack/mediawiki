@@ -1,5 +1,0 @@
----
-roles:
-  - src: git+https://github.com/wmde/ansible-roles.git
-    version: main
-    name: git_updater
