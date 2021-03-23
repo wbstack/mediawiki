@@ -1,1 +1,3 @@
 .github
+vendor
+composer.lock
