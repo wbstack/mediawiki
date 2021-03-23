@@ -70,10 +70,10 @@ if ( !$wwIsInPhpUnit && !$wwIsInLocalisationRebuild ) {
 if( $wwDomainSaysLocal ) {
 	// TODO this code path shouldn't be accessible when in PROD
 	// TODO fix totally hardcoded port for dev us
-	$wgServer = "https://" . $wikWiki->requestDomain . ":8083";
+	$wgServer = "http://" . $wikWiki->requestDomain . ":8083";
 	// Internal is on 8073...
 	if(getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/internal/load.php' )){
-        $wgServer = "https://" . $wikWiki->requestDomain . ":8073";
+        $wgServer = "http://" . $wikWiki->requestDomain . ":8073";
     }
 } else {
 	$wgServer = "https://" . $wikWiki->domain;
