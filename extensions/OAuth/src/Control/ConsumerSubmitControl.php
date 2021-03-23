@@ -50,6 +50,12 @@ class ConsumerSubmitControl extends SubmitControl {
 	protected $dbw;
 
 	/**
+	 * MySQL Blob Size is 2^16 - 1 = 65535 as per "L + 2 bytes, where L < 216" on
+	 * https://dev.mysql.com/doc/refman/8.0/en/storage-requirements.html
+	 */
+	private const BLOB_SIZE = 65535;
+
+	/**
 	 * @param \IContextSource $context
 	 * @param array $params
 	 * @param DBConnRef $dbw Result of MWOAuthUtils::getCentralDB( DB_MASTER )
@@ -64,6 +70,9 @@ class ConsumerSubmitControl extends SubmitControl {
 			if ( trim( $s ) === '' ) {
 				return true;
 			}
+			if ( strlen( $s ) > self::BLOB_SIZE ) {
+				return false;
+			}
 			$key = openssl_pkey_get_public( $s );
 			if ( $key === false ) {
 				return false;
@@ -75,15 +84,29 @@ class ConsumerSubmitControl extends SubmitControl {
 			return true;
 		};
 
+		$suppress = [ 'suppress' => '/^[01]$/' ];
+		$base = [
+			'consumerKey'  => '/^[0-9a-f]{32}$/',
+			'reason'       => '/^.{0,255}$/',
+			'changeToken'  => '/^[0-9a-f]{40}$/'
+		];
+
+		$validateBlobSize = function ( $s ) {
+			return strlen( $s ) < self::BLOB_SIZE;
+		};
+
 		return [
 			// Proposer (application administrator) actions:
 			'propose'     => [
 				'name'         => '/^.{1,128}$/',
 				'version'      => '/^\d{1,3}(\.\d{1,2}){0,2}(-(dev|alpha|beta))?$/',
 				'callbackUrl'  => function ( $s, $vals ) {
+					if ( strlen( $s ) > 2000 ) {
+						return false;
+					}
 					return $vals['ownerOnly'] || wfParseUrl( $s ) !== false;
 				},
-				'description'  => '/^.*$/s',
+				'description'  => $validateBlobSize,
 				'email'        => function ( $s ) {
 					return \Sanitizer::validateEmail( $s );
 				},
@@ -96,46 +119,30 @@ class ConsumerSubmitControl extends SubmitControl {
 				},
 				'granttype'    => '/^(authonly|authonlyprivate|normal)$/',
 				'grants'       => function ( $s ) {
+					if ( strlen( $s ) > self::BLOB_SIZE ) {
+						return false;
+					}
 					$grants = \FormatJson::decode( $s, true );
 					return is_array( $grants ) && Utils::grantsAreValid( $grants );
 				},
+				'restrictions' => $validateBlobSize,
 				'rsaKey'       => $validateRsaKey,
 				'agreement'    => function ( $s ) {
 					return ( $s == true );
 				},
 			],
-			'update'      => [
-				'consumerKey'  => '/^[0-9a-f]{32}$/',
+			'update'      => array_merge( $base, [
+				'restrictions' => $validateBlobSize,
 				'rsaKey'       => $validateRsaKey,
 				'resetSecret'  => function ( $s ) {
 					return is_bool( $s );
 				},
-				'reason'       => '/^.{0,255}$/',
-				'changeToken'  => '/^[0-9a-f]{40}$/'
-			],
+			] ),
 			// Approver (project administrator) actions:
-			'approve'     => [
-				'consumerKey'  => '/^[0-9a-f]{32}$/',
-				'reason'       => '/^.{0,255}$/',
-				'changeToken'  => '/^[0-9a-f]{40}$/'
-			],
-			'reject'      => [
-				'consumerKey'  => '/^[0-9a-f]{32}$/',
-				'reason'       => '/^.{0,255}$/',
-				'suppress'     => '/^[01]$/',
-				'changeToken'  => '/^[0-9a-f]{40}$/'
-			],
-			'disable'     => [
-				'consumerKey'  => '/^[0-9a-f]{32}$/',
-				'reason'       => '/^.{0,255}$/',
-				'suppress'     => '/^[01]$/',
-				'changeToken'  => '/^[0-9a-f]{40}$/'
-			],
-			'reenable'    => [
-				'consumerKey'  => '/^[0-9a-f]{32}$/',
-				'reason'       => '/^.{0,255}$/',
-				'changeToken'  => '/^[0-9a-f]{40}$/'
-			]
+			'approve'     => $base,
+			'reject'      => array_merge( $base, $suppress ),
+			'disable'     => array_merge( $base, $suppress ),
+			'reenable'    => $base
 		];
 	}
 
