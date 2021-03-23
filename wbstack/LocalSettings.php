@@ -273,8 +273,8 @@ if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
 wfLoadExtension( 'WikibaseManifest' );
 $wgWbManifestExternalServiceMapping = [
     'queryservice_ui' => 'https://' . $wikWiki->requestDomain . '/query',
-    "queryservice" => 'https://' . $wikWiki->requestDomain . '/query/sparql',
-    "quickstatements" => 'https://' . $wikWiki->requestDomain . "/tools/quickstatements",
+    'queryservice' => 'https://' . $wikWiki->requestDomain . '/query/sparql',
+    'quickstatements' => 'https://' . $wikWiki->requestDomain . '/tools/quickstatements',
 ];
 
 // Load the extra settings!
