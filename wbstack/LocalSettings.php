@@ -270,23 +270,12 @@ if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
 }
 
 # WikibaseManifest
-if( $wikWiki->getSetting('wwEnableWikibaseManifest') ) {
-    wfLoadExtension( 'WikibaseManifest' );
-    $wgWbManifestExternalServiceMapping = [
-        'queryservice_ui' => 'https://' . $wikWiki->requestDomain . '/query',
-        "queryservice" => 'https://' . $wikWiki->requestDomain . '/query/sparql',
-        "quickstatements" => 'https://' . $wikWiki->requestDomain . "/tools/quickstatements",
-    ];
-//     $wgWbManifestWikidataEntityMapping = [
-//     'properties' => [
-//         "P31" => 'P1'
-//     ],
-//     'items' => [
-//         'Q42' => 'Q1'
-//     ]
-// ];
-// $wgWbManifestMaxLag = 10;
-}
+wfLoadExtension( 'WikibaseManifest' );
+$wgWbManifestExternalServiceMapping = [
+    'queryservice_ui' => 'https://' . $wikWiki->requestDomain . '/query',
+    "queryservice" => 'https://' . $wikWiki->requestDomain . '/query/sparql',
+    "quickstatements" => 'https://' . $wikWiki->requestDomain . "/tools/quickstatements",
+];
 
 // Load the extra settings!
 // Only when not doing rebuildLocalisationCache.php (done at build time) as this file will not exist then...
