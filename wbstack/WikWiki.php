@@ -12,7 +12,7 @@ class WikWiki
     /**
      * Construct directly from API response from API backend...
      * @param $apiResult
-     * @return bool|WikWiki
+     * @return WikWiki|null
      */
     public static function newFromApiResult(
         /*object*/ $apiResult
@@ -20,7 +20,7 @@ class WikWiki
         $data = $apiResult->data;
         // TODO cleanup condition, as data will never be an array (as it is an object when true...)
         if ($data === null || $data === []) {
-            return false;
+            return null;
         }
         return new self($data);
     }
@@ -39,8 +39,8 @@ class WikWiki
         /** @var WikWiki $wikWiki */
         $GLOBALS[WIKWIKI_GLOBAL] = $wikWiki;
 
-        // Let's assume success unless the "data" is false.
-        return $wikWiki !== false;
+        // Let's assume success unless the "data" is null.
+        return $wikWiki !== null;
     }
 
     private static function getData( $requestDomain ) {
@@ -61,7 +61,7 @@ class WikWiki
         return apcu_fetch( self::getApcKey($requestDomain) );
     }
 
-    private static function writeDataToApcCache( $requestDomain, WikWiki $wikWiki, $ttl ) {
+    private static function writeDataToApcCache( $requestDomain, ?WikWiki $wikWiki, $ttl ) {
         $result = apcu_store( self::getApcKey($requestDomain), $wikWiki, $ttl );
         if(!$result) {
             // TODO log?!
@@ -74,7 +74,7 @@ class WikWiki
 
     /**
      * @param $requestDomain
-     * @return bool|WikWiki
+     * @return WikWiki|null
      */
     private static function getDataFromApiRequest( $requestDomain ) {
         // START generic getting of wiki info from domain
@@ -94,8 +94,8 @@ class WikWiki
         // TODO detect non 200 response here, and pass that out to the user as an error
 
         $wikWiki = WikWiki::newFromApiResult(json_decode($response));
-        if ($wikWiki === false) {
-            return false;
+        if (!$wikWiki) {
+            return null;
         }
         $wikWiki->requestDomain = $requestDomain;
         return $wikWiki;
