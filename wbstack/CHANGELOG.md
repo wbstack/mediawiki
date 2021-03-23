@@ -1,5 +1,10 @@
 # mediawiki
 
+## 1.35-7.4-TO-BE-TAGGED
+
+- Enable WikibaseManifest by default on all wikis
+- Fix protocol in $wgServer MediaWiki variable
+
 ## 1.35-7.4-20210322-2
 
 - Load WikibaseManifest in maint scripts
