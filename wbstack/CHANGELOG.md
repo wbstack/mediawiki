@@ -3,6 +3,7 @@
 ## 1.35-7.4-TO-BE-TAGGED
 
 - REL1_35 updates for MediaWiki, skins and extensions
+- Actually include wmde/php-vuejs-templating for WikibaseLexeme
 - Fix exception shown when wikis don't exist or are deleted
 - Enable WikibaseManifest by default on all wikis
 - Fix protocol in $wgServer MediaWiki variable

@@ -1,0 +1,7 @@
+<phpunit>
+    <testsuites>
+        <testsuite name="PhpVuejsTemplating">
+            <directory>tests/</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
