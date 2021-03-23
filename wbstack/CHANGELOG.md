@@ -2,6 +2,7 @@
 
 ## 1.35-7.4-TO-BE-TAGGED
 
+- REL1_35 updates for MediaWiki, skins and extensions
 - Enable WikibaseManifest by default on all wikis
 - Fix protocol in $wgServer MediaWiki variable
 
