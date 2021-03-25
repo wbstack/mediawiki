@@ -247,7 +247,12 @@ if( $wikWiki->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
 }
 # Federated Properties, By default not enabled, not enabled in maint mode
-if( $wikWiki->getSetting('wwEnableWikibaseFederatedProperties') ) {
+if(
+    // TODO remove the legacy `wwEnableWikibaseFederatedProperties` in favour of the new setting name
+    // This added for 1 wiki before the proper setting name was created...
+    $wikWiki->getSetting('wwEnableWikibaseFederatedProperties') ||
+    $wikWiki->getSetting('wikibaseFedPropsEnable')
+) {
     // This will use wikidata.org by default
     $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
 }
