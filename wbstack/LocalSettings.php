@@ -276,6 +276,9 @@ $wgWbManifestExternalServiceMapping = [
     'queryservice' => 'https://' . $wikWiki->requestDomain . '/query/sparql',
     'quickstatements' => 'https://' . $wikWiki->requestDomain . '/tools/quickstatements',
 ];
+if( $wikWiki->getSetting('wikibaseManifestEquivEntities') ) {
+    $wgWbManifestWikidataEntityMapping = json_decode( $wikWiki->getSetting('wikibaseManifestEquivEntities'), true );
+}
 
 // Load the extra settings!
 // Only when not doing rebuildLocalisationCache.php (done at build time) as this file will not exist then...
