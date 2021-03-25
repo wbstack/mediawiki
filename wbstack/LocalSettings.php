@@ -285,11 +285,11 @@ if( $wikWiki->getSetting('wikibaseManifestEquivEntities') ) {
     $wwEquivEntities = json_decode( $wikWiki->getSetting('wikibaseManifestEquivEntities'), true );
     if ( is_array( $wwEquivEntities ) ) {
         $wgWbManifestWikidataEntityMapping = $wwEquivEntities;
-        if ( array_key_exists( 'P1630', $wwEquivEntities ) ) {
-            $wgWBRepoSettings['formatterUrlProperty'] = $wwEquivEntities['P1630'];
+        if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P1630', $wwEquivEntities['properties'] ) ) {
+            $wgWBRepoSettings['formatterUrlProperty'] = $wwEquivEntities['properties']['P1630'];
         }
-        if ( array_key_exists( 'P1921', $wwEquivEntities ) ) {
-            $wgWBRepoSettings['canonicalUriProperty'] = $wwEquivEntities['P1921'];
+        if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P1921', $wwEquivEntities['properties'] ) ) {
+            $wgWBRepoSettings['canonicalUriProperty'] = $wwEquivEntities['properties']['P1921'];
         }
     }
 }
