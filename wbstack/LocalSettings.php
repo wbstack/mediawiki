@@ -282,7 +282,16 @@ $wgWbManifestExternalServiceMapping = [
     'quickstatements' => 'https://' . $wikWiki->requestDomain . '/tools/quickstatements',
 ];
 if( $wikWiki->getSetting('wikibaseManifestEquivEntities') ) {
-    $wgWbManifestWikidataEntityMapping = json_decode( $wikWiki->getSetting('wikibaseManifestEquivEntities'), true );
+    $wwEquivEntities = json_decode( $wikWiki->getSetting('wikibaseManifestEquivEntities'), true );
+    if ( is_array( $wwEquivEntities ) ) {
+        $wgWbManifestWikidataEntityMapping = $wwEquivEntities;
+        if ( array_key_exists( 'P1630', $wwEquivEntities ) ) {
+            $wgWBRepoSettings['formatterUrlProperty'] = $wwEquivEntities['P1630'];
+        }
+        if ( array_key_exists( 'P1921', $wwEquivEntities ) ) {
+            $wgWBRepoSettings['canonicalUriProperty'] = $wwEquivEntities['P1921'];
+        }
+    }
 }
 
 // Load the extra settings!
