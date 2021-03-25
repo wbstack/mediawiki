@@ -1,6 +1,6 @@
 # mediawiki
 
-## PENDING RELEASE
+## 1.35-7.4-20210325-5
 
 - Big internal setting & build refactorings
 
