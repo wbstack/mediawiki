@@ -198,7 +198,7 @@ $wgMusicalNotationEnableWikibaseDataType = true;
 // Wikibase
 
 // Force the URIs to be http
-$wwWbSiteBaseUri = 'http://' . $wikiInfo->domain;
+$wwWbSiteBaseUri = 'http://' . $wikWiki->domain;
 $wwWbConceptUri = $wwWbSiteBaseUri . '/entity/';
 
 $wwWikibaseStringLengthString = $wikWiki->getSetting('wwWikibaseStringLengthMonolingualText');
