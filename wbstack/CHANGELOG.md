@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210325-3
+
+- Fix `conceptBaseUri` to be http again...
+
 ## 1.35-7.4-20210325-2
 
 - Fix `conceptBaseUri` to be http

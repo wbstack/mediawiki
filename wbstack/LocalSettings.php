@@ -243,9 +243,6 @@ require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
 require_once "$IP/extensions/Wikibase/client/WikibaseClient.php";
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
 
-// Force conceptBaseUri to be http
-$wgWBRepoSettings['conceptBaseUri'] = 'http://' . $wikiInfo->domain . '/entity/';
-
 # WikibaseLexeme, By default not enabled, enabled in maintWikWiki.json
 if( $wikWiki->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
