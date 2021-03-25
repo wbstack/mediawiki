@@ -1,0 +1,38 @@
+name: MediaWiki Verify
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@master
+
+    - uses: shivammathur/setup-php@v2
+      with:
+        php-version: 7.4
+        extensions: apcu, redis, intl, mbstring, mysqli, opcache, calendar, pcntl, bz2
+
+    - name: Run PHP built in web server
+      run: nohup php -S 0.0.0.0:8000  &> phpout.log &
+
+      # Make sure the endpoints all just return 2 lines :)
+    - run: curl -s http://localhost:8000/ | wc -l | grep -q 2
+    - run: curl -s http://localhost:8000/api.php | wc -l | grep -q 2
+    - run: curl -s http://localhost:8000/load.php | wc -l | grep -q 2
+    - run: curl -s http://localhost:8000/rest.php | wc -l | grep -q 2
+      # And that they say the wiki can't be loaded...
+    - run: curl -s http://localhost:8000/ | wc -l | grep -q "can not currently be loaded"
+    - run: curl -s http://localhost:8000/api.php | wc -l | grep -q "can not currently be loaded"
+    - run: curl -s http://localhost:8000/load.php | wc -l | grep -q "can not currently be loaded"
+    - run: curl -s http://localhost:8000/rest.php | wc -l | grep -q "can not currently be loaded"
+
+# Final output
+    - name: Output PHP built in web server logs
+      if: always()
+      run: cat phpout.log
