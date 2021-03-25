@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210325-2
+
+- Fix `conceptBaseUri` to be http
+
 ## 1.35-7.4-20210325-1
 
 - Fix for `$wgWBRepoSettings['formatterUrlProperty']` and `$wgWBRepoSettings['canonicalUriProperty']` (use `properties` key)
