@@ -227,6 +227,7 @@ require_once "$IP/extensions/Wikibase/repo/Wikibase.php";
 require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
 require_once "$IP/extensions/Wikibase/client/WikibaseClient.php";
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
+
 # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
