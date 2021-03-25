@@ -8,6 +8,7 @@
 - Enable WikibaseManifest by default on all wikis
 - Fix protocol in $wgServer MediaWiki variable
 - Add `wikibaseFedPropsEnable` setting for toggling federated properties
+- Add `wikibaseManifestEquivEntities` setting for WikibaseManifest
 
 ## 1.35-7.4-20210322-2
 
