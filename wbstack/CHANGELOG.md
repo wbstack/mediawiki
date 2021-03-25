@@ -1,6 +1,6 @@
 # mediawiki
 
-## 1.35-7.4-TO-BE-TAGGED
+## 1.35-7.4-20210325-0
 
 - REL1_35 updates for MediaWiki, skins and extensions
 - Actually include wmde/php-vuejs-templating for WikibaseLexeme
