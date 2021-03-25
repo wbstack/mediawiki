@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/../wbstack/EntryShimCli.php';
+require_once __DIR__ . '/../wbstack/src/Shim/Cli.php';
 
 
 /**
