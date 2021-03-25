@@ -1,8 +1,12 @@
 {
     "require-dev": {
-        "php-parallel-lint/php-parallel-lint": "^1.2"
+        "php-parallel-lint/php-parallel-lint": "^1.2",
+        "seld/jsonlint": "^1.8"
     },
     "scripts": {
-        "lint": "parallel-lint ."
+        "lint": [
+            "parallel-lint .",
+            "find ./ -name '*.json' -exec vendor/bin/jsonlint {} \\;"
+            ]
     }
 }

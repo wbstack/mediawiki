@@ -1,6 +1,6 @@
 <?php
 
-require_once __DIR__ . '/wbstack/EntryShimWeb.php';
+require_once __DIR__ . '/wbstack/src/Shim/Web.php';
 
 
 

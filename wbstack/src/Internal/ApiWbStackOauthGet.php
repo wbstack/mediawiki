@@ -1,5 +1,7 @@
 <?php
 
+namespace WBStack\Internal;
+
 /**
  * This API is used by tools that need OAuth consumers.
  * Calling this API will either give you details for the spec that you ask if they already exist.
@@ -8,7 +10,7 @@
  * Most of the logic for OAuth stuff currently lives within WbStackPlatformReservedUser
  */
 
-class ApiWbStackOauthGet extends ApiBase {
+class ApiWbStackOauthGet extends \ApiBase {
     public function mustBePosted() {return true;}
     public function isWriteMode() {return true;}
     public function isInternal() {return true;}
@@ -21,7 +23,7 @@ class ApiWbStackOauthGet extends ApiBase {
 
         // If it doesnt exist, make sure the user and consumer do
         if(!$consumerData) {
-            $callbackUrl = 'https://' . $GLOBALS[WIKWIKI_GLOBAL]->requestDomain . $this->getParameter('callbackUrlTail');
+            $callbackUrl = 'https://' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . $this->getParameter('callbackUrlTail');
 
             WbStackPlatformReservedUser::createIfNotExists();
             WbStackPlatformReservedUser::createOauthConsumer(
@@ -52,20 +54,20 @@ class ApiWbStackOauthGet extends ApiBase {
     public function getAllowedParams() {
         return [
             'consumerName' => [
-                ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_REQUIRED => true
+                \ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_REQUIRED => true
             ],
             'consumerVersion' => [
-                ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_REQUIRED => true
+                \ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_REQUIRED => true
             ],
             'grants' => [
-                ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_ISMULTI => true,
+                \ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_ISMULTI => true,
             ],
             'callbackUrlTail' => [
-                ApiBase::PARAM_TYPE => 'string',
-                ApiBase::PARAM_REQUIRED => true
+                \ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_REQUIRED => true
             ],
         ];
     }

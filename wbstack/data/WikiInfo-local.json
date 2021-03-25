@@ -2,29 +2,29 @@
   "success": true,
   "data": {
     "id": 1,
-    "domain": "maintenance",
-    "sitename": "Maintenance",
+    "domain": "localhost",
+    "sitename": "A Local Test Site",
     "deleted_at": null,
-    "created_at": "2019-10-28 10:44:54",
-    "updated_at": "2019-10-28 10:44:54",
+    "created_at": "2021-01-01 10:10:10",
+    "updated_at": "2021-01-01 10:10:10",
     "wiki_db": {
       "id": 1,
       "name": "mwdb_somedb",
       "prefix": "mwt_someprefix",
       "user": "mwu_someuser",
       "password": "somepassword",
-      "version": "mw1.34-wbs1",
+      "version": "mw1.35-wbs1",
       "wiki_id": 1,
-      "created_at": "2019-10-27 12:53:48",
-      "updated_at": "2019-10-27 12:53:48"
+      "created_at": "2021-01-01 10:10:10",
+      "updated_at": "2021-01-01 10:10:10"
     },
     "wiki_queryservice_namespace": {
       "id": 1,
       "namespace": "qsns_somenamespace",
       "backend": "someservice:9999",
       "wiki_id": 1,
-      "created_at": "2019-10-27 12:53:52",
-      "updated_at": "2019-10-27 12:53:52"
+      "created_at": "2021-01-01 10:10:10",
+      "updated_at": "2021-01-01 10:10:10"
     },
     "settings": [
       {
@@ -32,40 +32,40 @@
         "name": "wgSecretKey",
         "value": "somesecret",
         "wiki_id": 1,
-        "created_at": "2019-10-28 10:44:54",
-        "updated_at": "2019-10-28 10:44:54"
+        "created_at": "2021-01-01 10:10:10",
+        "updated_at": "2021-01-01 10:10:10"
       },
       {
         "id": 2,
         "name": "wwExtEnableWikibaseLexeme",
         "value": "1",
         "wiki_id": 1,
-        "created_at": "2019-10-28 10:44:54",
-        "updated_at": "2019-10-28 10:44:54"
+        "created_at": "2021-01-01 10:10:10",
+        "updated_at": "2021-01-01 10:10:10"
       },
       {
         "id": 3,
         "name": "wwExtEnableInviteSignup",
         "value": "1",
         "wiki_id": 1,
-        "created_at": "2019-10-28 10:44:54",
-        "updated_at": "2019-10-28 10:44:54"
+        "created_at": "2021-01-01 10:10:10",
+        "updated_at": "2021-01-01 10:10:10"
       },
       {
         "id": 4,
         "name": "wwExtEnableConfirmAccount",
         "value": "1",
         "wiki_id": 1,
-        "created_at": "2019-10-28 10:44:54",
-        "updated_at": "2019-10-28 10:44:54"
+        "created_at": "2021-01-01 10:10:10",
+        "updated_at": "2021-01-01 10:10:10"
       },
       {
         "id": 5,
         "name": "wwSandboxAutoUserLogin",
         "value": "1",
         "wiki_id": 1,
-        "created_at": "2019-10-28 10:44:54",
-        "updated_at": "2019-10-28 10:44:54"
+        "created_at": "2021-01-01 10:10:10",
+        "updated_at": "2021-01-01 10:10:10"
       }
     ]
   }

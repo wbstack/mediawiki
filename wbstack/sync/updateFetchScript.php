@@ -15,7 +15,7 @@ $getGithubApiUrl = function ( $repoName ) use ( $releaseBranch ) {
     return 'https://api.github.com/repos/wikimedia/' . $repoName . '/commits/' . $releaseBranch;
 };
 
-// We need some regexes to extract things from the fetch.sh file
+// We need some regexes to extract things from the 02-fetch.sh file
 $getRegexForRepo = function( $repoName ) {
     return '/(https:\/\/codeload\.github\.com\/wikimedia\/)(' . $repoName . ')(\/zip\/)([a-z0-9]+)/m';
 };
@@ -51,7 +51,7 @@ $getLatestCommitHash = function ( $repoName ) use ( $getCommits ) {
     return $commits['sha'];
 };
 
-// This method updates the fetch.sh file
+// This method updates the 02-fetch.sh file
 $updateCommitInDockerfile = function ( $repoName, $fetchScript ) use ( $getLatestCommitHash, $getRegexForRepo ) {
     $newHash = $getLatestCommitHash( $repoName );
     if(!$newHash){
@@ -62,7 +62,7 @@ $updateCommitInDockerfile = function ( $repoName, $fetchScript ) use ( $getLates
 
 echo "Running for branch {$releaseBranch}" . PHP_EOL;
 
-$fetchScript = file_get_contents( __DIR__ . '/fetch.sh' );
+$fetchScript = file_get_contents( __DIR__ . '/02-fetch.sh' );
 
 preg_match_all( $regexMatchingAllRepos, $fetchScript, $matches );
 $repoNames = $matches[2];
@@ -76,7 +76,7 @@ foreach( $repoNames as $repoName ) {
     $fetchScript = $updateCommitInDockerfile( $repoName, $fetchScript );
 }
 
-$result = file_put_contents( __DIR__ . '/fetch.sh', $fetchScript );
+$result = file_put_contents( __DIR__ . '/02-fetch.sh', $fetchScript );
 echo "FILE SAVED!" . PHP_EOL;
 
-echo "REMEMBER: things like mediawiki are not uopdated by this script!" . PHP_EOL;
+echo "REMEMBER: things like mediawiki.git are not updated by this script!" . PHP_EOL;

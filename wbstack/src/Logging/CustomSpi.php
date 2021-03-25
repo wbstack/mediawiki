@@ -1,8 +1,10 @@
 <?php
 
+namespace WBStack\Logging;
+
 use MediaWiki\Logger\Spi;
 
-class WikWikiSpi implements Spi {
+class CustomSpi implements Spi {
 
     // Array of channels to log
     protected $config;
@@ -32,6 +34,6 @@ class WikWikiSpi implements Spi {
      * @return \Psr\Log\AbstractLogger Logger instance
      */
     public function getLogger( $channel ) {
-        return new WikWikiLogger( $channel, $this->config);
+        return new CustomLogger( $channel, $this->config);
     }
 }
