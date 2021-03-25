@@ -23,6 +23,10 @@ $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
 
+#######################################
+## ---  Base MediaWiki Settings  --- ##
+#######################################
+
 // No error output or debugging in production
 ini_set( 'display_errors', 0 );
 $wgShowExceptionDetails = false;
@@ -106,6 +110,10 @@ if( !$wwDomainIsMaintenance ){
 # This was set to 2 as Andra experienced a backup of jobs. https://github.com/addshore/wbstack/issues/51
 $wgJobRunRate = 2;
 
+// Storage
+// Compress revisions
+$wgCompressRevisions = true;
+
 // Notifications
 $wgEnotifUserTalk = false;
 $wgEnotifWatchlist = false;
@@ -122,6 +130,56 @@ $wgFileExtensions = array_merge( $wgFileExtensions,
     )
 );
 //$wgFileExtensions[] = 'djvu';
+
+$wgSitename = $wikiInfo->sitename;
+
+// Logos
+$wgLogos = [
+    "1x" => $wikiInfo->getSetting('wgLogo'),
+];
+if( $wgLogos["1x"] === null ) {
+    // Fallback to the mediawiki logo without the wgLogo overlay
+    $wgLogos = [
+        "1x" => "https://storage.googleapis.com/wbstack-static/assets/mediawiki/mediawiki.png",
+    ];
+}
+
+// Favicon
+$wgFavicon = $wikiInfo->getSetting('wgFavicon');
+if( $wgFavicon === null ) {
+    // Default from install, but maybe we want to change this?
+    $wgFavicon = "/favicon.ico";
+}
+
+// https://www.mediawiki.org/wiki/Manual:$wgFooterIcons
+// Add the custom powered by icons....
+// TODO the Wikibase one should be in Wikibase..
+$wgFooterIcons = [
+    "copyright" => [
+        "copyright" => [], // placeholder for the built in copyright icon
+    ],
+    "poweredby" => [
+        "wbstack" => [
+            "src" => "https://storage.googleapis.com/wbstack-static/assets/Powered_by_WBStack_88x31.png",
+            "url" => "https://wbstack.com/",
+            "alt" => "Powered by WBStack",
+        ],
+        "wikibase" => [
+            "src" => "https://storage.googleapis.com/wbstack-static/assets/Powered_by_Wikibase_88x31.png",
+            "url" => "https://wikiba.se/",
+            "alt" => "Powered by Wikibase",
+        ],
+        "mediawiki" => [
+            "src" => "https://storage.googleapis.com/wbstack-static/assets/mediawiki/poweredby_mediawiki_88x31.png",
+            "url" => "https://www.mediawiki.org/",
+            "alt" => "Powered by MediaWiki",
+        ]
+    ],
+];
+
+// Language
+// TODO this should be settings from the main platform
+$wgLanguageCode = "en";
 
 // Email
 $wgEnableEmail = true;
@@ -142,13 +200,11 @@ $wgNoReplyAddress = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 $wgDisableOutputCompression  = true;
 
 ## Keys
+$wgSecretKey = $wikiInfo->getSetting('wgSecretKey');
 $wgAuthenticationTokenVersion = "1";
 
 // So we are uniform, have the project namespace as Project
 $wgMetaNamespace = 'Project';
-
-// TODO custom favicons
-$wgFavicon = "{$wgScriptPath}/favicon.ico";
 
 // TODO sort out directories and stuff...?
 //$wgUploadDirectory = "{$IP}/images/docker/{$dockerDb}";
@@ -163,35 +219,82 @@ $wgFavicon = "{$wgScriptPath}/favicon.ico";
  */
 $wgShellLocale = "C.UTF-8";
 
-## --- CACHING ---
-$wgCacheDirectory = '/tmp/mw-cache';
+#######################################
+## ---   Default Permissions     --- ##
+#######################################
 
-//  Set this to true to disable cache updates on web requests.
-$wgLocalisationCacheConf['manualRecache'] = true;
+# Disallow anon editing for now
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['*']['createpage'] = false;
 
-## --- SKINS ---
+# Stop crats from being able to interact with the platform group
+$wgGroupPermissions['bureaucrat']['userrights'] = false;
+$wgAddGroups['bureaucrat'][] = 'sysop';
+$wgAddGroups['bureaucrat'][] = 'bureaucrat';
+$wgAddGroups['bureaucrat'][] = 'bot';
+$wgAddGroups['bureaucrat'][] = 'emailconfirmed';
+$wgRemoveGroups['bureaucrat'][] = 'sysop';
+$wgRemoveGroups['bureaucrat'][] = 'bureaucrat';
+$wgRemoveGroups['bureaucrat'][] = 'bot';
+$wgRemoveGroups['bureaucrat'][] = 'emailconfirmed';
+
+# Remove the predefined interface-admin group
+unset( $wgGroupPermissions['interface-admin'] );
+unset( $wgRevokePermissions['interface-admin'] );
+unset( $wgAddGroups['interface-admin'] );
+unset( $wgRemoveGroups['interface-admin'] );
+unset( $wgGroupsAddToSelf['interface-admin'] );
+unset( $wgGroupsRemoveFromSelf['interface-admin'] );
+
+# Allow crats to editsitecss
+$wgGroupPermissions['bureaucrat']['editsitecss'] = true;
+
+# Disable user CSS and JS editing for now
+$wgGroupPermissions['user']['editmyusercss'] = false;
+$wgGroupPermissions['user']['editmyuserjs'] = false;
+
+# Allow emailconfirmed to skip captcha
+$wgGroupPermissions['emailconfirmed']['skipcaptcha'] = true;
+
+# Oauth
+$wgGroupPermissions['sysop']['mwoauthproposeconsumer'] = true;
+$wgGroupPermissions['sysop']['mwoauthmanageconsumer'] = true;
+$wgGroupPermissions['sysop']['mwoauthviewprivate'] = true;
+$wgGroupPermissions['sysop']['mwoauthupdateownconsumer'] = true;
+$wgGroupPermissions['platform']['mwoauthproposeconsumer'] = true;
+$wgGroupPermissions['platform']['mwoauthmanageconsumer'] = true;
+$wgGroupPermissions['platform']['mwoauthviewprivate'] = true;
+$wgGroupPermissions['platform']['mwoauthupdateownconsumer'] = true;
+
+#######################################
+## ---          Skins            --- ##
+#######################################
 wfLoadSkin( 'Vector' );
 wfLoadSkin( 'Timeless' );
 wfLoadSkin( 'Modern' );
 wfLoadSkin( 'MinervaNeue' );
 
-## --- EXTENSIONS ---
+// TODO allow turning some skins on and off?
+$wgDefaultSkin = $wikiInfo->getSetting('wgDefaultSkin');
+if( $wgDefaultSkin === null ) {
+    // Fallback to vector
+    $wgDefaultSkin = "vector";
+}
+
+#######################################
+## ---        Extensions         --- ##
+#######################################
 wfLoadExtension( 'SyntaxHighlight_GeSHi' );
 wfLoadExtension( 'RevisionSlider' );
-wfLoadExtension( 'Mailgun' );
 wfLoadExtension( 'TorBlock' );
 wfLoadExtension( 'Nuke' );
-wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
-wfLoadExtension( 'WikibaseInWikitext' ); // custom wbstack extension
 wfLoadExtension( 'EntitySchema' );
 wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtension( 'cldr' );
 # TODO load again once there is a fix for localization cache reload without DBhttps://phabricator.wikimedia.org/T237148
 #wfLoadExtension( 'Gadgets' );
-wfLoadExtension( 'TwoColConflict' );
 wfLoadExtension( 'OAuth' );
 wfLoadExtension( 'JsonConfig' );
-wfLoadExtension( 'Score' );
 wfLoadExtension( 'Math' );
 wfLoadExtension( 'Kartographer' );
 wfLoadExtension( 'PageImages' );
@@ -209,36 +312,145 @@ wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'AdvancedSearch' );
 wfLoadExtension( 'ParserFunctions' );
 wfLoadExtension( 'EmbedVideo' );
-wfLoadExtension( 'MobileFrontend' );
 wfLoadExtension( 'DeleteBatch' );
 wfLoadExtension( 'MultimediaViewer' );
-if( $wikiInfo->getSetting('wwExtEnableInviteSignup') ) {
-    wfLoadExtension( 'InviteSignup' );
-}
+
+# ConfirmAccount (only loaded when the setting is on)
 if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
     require_once "$IP/extensions/ConfirmAccount/ConfirmAccount.php";
+    $wgMakeUserPageFromBio = false;
+    $wgAutoWelcomeNewUsers = false;
+    $wgConfirmAccountRequestFormItems = [
+        'UserName'        => [ 'enabled' => true ],
+        'RealName'        => [ 'enabled' => false ],
+        'Biography'       => [ 'enabled' => false, 'minWords' => 50 ],
+        'AreasOfInterest' => [ 'enabled' => false ],
+        'CV'              => [ 'enabled' => false ],
+        'Notes'           => [ 'enabled' => true ],
+        'Links'           => [ 'enabled' => false ],
+        'TermsOfService'  => [ 'enabled' => false ],
+    ];
+    $wgGroupPermissions['bureaucrat']['confirmaccount-notify'] = true;
+    $wgGroupPermissions['bureaucrat']['requestips'] = false;
+    $wgGroupPermissions['bureaucrat']['lookupcredentials'] = false;
+    $wgGroupPermissions['*']['requestips'] = false;
+    $wgGroupPermissions['*']['lookupcredentials'] = false;
+    $wgHooks['PersonalUrls'][] = 'onPersonalUrlsConfirmAccount';
+    function onPersonalUrlsConfirmAccount( array &$personal_urls, Title $title, SkinTemplate $skin  ) {
+        // Add a link to Special:RequestAccount if a link exists for login
+        if ( isset( $personal_urls['login'] ) || isset( $personal_urls['anonlogin'] ) ) {
+            $personal_urls['createaccount'] = array(
+                'text' => wfMessage( 'requestaccount' )->text(),
+                'href' => SpecialPage::getTitleFor( 'RequestAccount' )->getFullURL()
+            );
+        }
+        return true;
+    }
 }
-# TODO configure
-#wfLoadExtension( 'Elastica' );
-#require_once "$IP/extensions/CirrusSearch/CirrusSearch.php";
 
-# Wikibase
+# InviteSignup (only loaded when the setting is on)
+if( $wikiInfo->getSetting('wwExtEnableInviteSignup') ) {
+    wfLoadExtension( 'InviteSignup' );
+    # Restrict account creation
+    $wgGroupPermissions['*']['createaccount'] = false;
+    $wgGroupPermissions['user']['createaccount'] = false;
+    # Allow sysops to review the queue
+    $wgGroupPermissions['sysop']['invitesignup'] = true;
+    # Suggest / add invited people to confirmed
+    $wgISGroups = [ 'confirmed' ];
+}
+
+# WikibaseInWikitext
+wfLoadExtension( 'WikibaseInWikitext' ); // custom wbstack extension
+$wgWikibaseInWikitextSparqlDefaultUi = $wgServer . '/query';
+
+# TwoColConflict
+wfLoadExtension( 'TwoColConflict' );
+// Enable the feature by default
+$wgTwoColConflictBetaFeature = false;
+
+# ConfirmEdit
+wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
+$wgCaptchaClass = 'ReCaptchaNoCaptcha';
+$wgReCaptchaSendRemoteIP = true;
+$wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
+$wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+
+# Mailgun
+wfLoadExtension( 'Mailgun' );
+$wgMailgunAPIKey = getenv('MW_MAILGUN_API_KEY');
+$wgMailgunDomain = getenv('MW_MAILGUN_DOMAIN');
+
+# MobileFrontend
+wfLoadExtension( 'MobileFrontend' );
+$wgMFDefaultSkinClass = 'SkinMinerva';
+
+# Score
+wfLoadExtension( 'Score' );
+$wgMusicalNotationEnableWikibaseDataType = true;
+
+#######################################
+## ---          Wikibase         --- ##
+#######################################
+// TODO use wfLoadExtension
 require_once "$IP/extensions/Wikibase/repo/Wikibase.php";
 require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
 require_once "$IP/extensions/Wikibase/client/WikibaseClient.php";
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
+
+// Force the concept URIs to be http (as this has always been the way on wbstack)
+$wgWBRepoSettings['conceptBaseUri'] = 'http://' . $wikiInfo->domain . '/entity/';
+
+$wwWikibaseStringLengthString = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
+if($wwWikibaseStringLengthString) {
+    $wgWBRepoSettings['string-limits']['VT:string']['length'] = (int)$wwWikibaseStringLengthString;
+}
+$wwWikibaseStringLengthMonolingualText = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
+if($wwWikibaseStringLengthMonolingualText) {
+    $wgWBRepoSettings['string-limits']['VT:monolingualtext']['length'] = (int)$wwWikibaseStringLengthMonolingualText;
+}
+$wwWikibaseStringLengthMultilang = $wikiInfo->getSetting('wwWikibaseStringLengthMultilang');
+if($wwWikibaseStringLengthMultilang) {
+    $wgWBRepoSettings['string-limits']['multilang']['length'] = (int)$wwWikibaseStringLengthMultilang;
+}
+
+$wgWBClientSettings['siteGlobalID'] = $wgDBname;
+$wgWBClientSettings['repoScriptPath'] = '/w';
+$wgWBClientSettings['repoArticlePath'] = '/wiki/$1';
+$wgWBClientSettings['siteGroup'] = null;
+$wgWBClientSettings['thisWikiIsTheRepo'] = true;
+$wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
+$wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
+$wgWBClientSettings['repositories'] = [
+    '' => [
+        // Use false (meaning the local wiki's database) if this wiki is the repo,
+        // otherwise default to null (meaning we can't access the repo's DB directly).
+        'repoDatabase' => false,
+        'baseUri' => $wgWBRepoSettings['conceptBaseUri'],
+        'entityNamespaces' => [
+            'item' => 120,
+            'property' => 122,
+        ],
+        'prefixMapping' => [ '' => '' ],
+    ]
+];
+
+// TODO below setting will be empty by default in the future and we could remove them
+$wgWBRepoSettings['siteLinkGroups'] = [];
+// TODO below setting will be empty by default in the future and we could remove them
+$wgWBRepoSettings['specialSiteLinkGroups'] = [];
+$wgWBRepoSettings['dataRightsUrl'] = null;
+$wgWBRepoSettings['dataRightsText'] = 'None yet set.';
+
+// Until we can scale redis memory we don't want to do this - https://github.com/addshore/wbstack/issues/37
+$wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
 
 # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
 }
 # Federated Properties, By default not enabled, not enabled in maint mode
-if(
-    // TODO remove the legacy `wwEnableWikibaseFederatedProperties` in favour of the new setting name
-    // This added for 1 wiki before the proper setting name was created...
-    $wikiInfo->getSetting('wwEnableWikibaseFederatedProperties') ||
-    $wikiInfo->getSetting('wikibaseFedPropsEnable')
-) {
+if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {
     // This will use wikidata.org by default
     $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
 }
@@ -263,9 +475,9 @@ if( $wikiInfo->getSetting('wwSandboxAutoUserLogin') ) {
 # WikibaseManifest
 wfLoadExtension( 'WikibaseManifest' );
 $wgWbManifestExternalServiceMapping = [
-    'queryservice_ui' => 'https://' . $wikiInfo->requestDomain . '/query',
-    'queryservice' => 'https://' . $wikiInfo->requestDomain . '/query/sparql',
-    'quickstatements' => 'https://' . $wikiInfo->requestDomain . '/tools/quickstatements',
+    'queryservice_ui' => $wgServer . '/query',
+    'queryservice' => $wgServer . '/query/sparql',
+    'quickstatements' => $wgServer . '/tools/quickstatements',
 ];
 if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
     $wwEquivEntities = json_decode( $wikiInfo->getSetting('wikibaseManifestEquivEntities'), true );
@@ -280,9 +492,29 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
     }
 }
 
-// Load the extra settings!
-// Only when not doing rebuildLocalisationCache.php (done at build time) as this file will not exist then...
-// TODO perhaps change this so that the rebuildLocalisationCache.php passes in an ENV var to block loading the extra settings instead?
+#######################################
+## ---  l10n rebuild and beyond  --- ##
+#######################################
+// Skip some things when in l10n rebuild, as they complicate things.
+// TODO perhaps change this so that the rebuildLocalisationCache.php passes in an ENV var to block loading the extra settings instead of detecting?
+
 if( !$wwIsLocalisationRebuild ) {
-    require_once __DIR__ . DIRECTORY_SEPARATOR . 'FinalSettings.php';
+    // Only load cache settings (redis db etc) when not doing a l10n rebuild
+    require_once __DIR__ . '/Cache.php';
+
+    // If we have internal settings, and have been told to load them, then load them...
+    if( getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/../loadInternal.php' ) ) {
+        require_once __DIR__ . '/../loadInternal.php';
+    } else {
+        // Code for ONLY the public mw services
+        $wgReservedUsernames = array_merge(
+            $wgReservedUsernames,
+            [
+                // TODO should this be a constant
+                'PlatformReservedUser',
+            ]
+        );
+    }
+
+    require_once __DIR__ . '/Hooks.php';
 }
