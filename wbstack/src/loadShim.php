@@ -6,3 +6,4 @@
 const WBSTACK_INFO_GLOBAL = 'WBStackInfo';
 
 require_once __DIR__ . '/Info/WBStackInfo.php';
+require_once __DIR__ . '/Info/GlobalSet.php';

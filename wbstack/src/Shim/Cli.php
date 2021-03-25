@@ -13,6 +13,6 @@ if( getenv( 'WBS_DOMAIN' ) == false ) {
 }
 
 // Try and get the wiki info (from env var) or fail with a message
-if(!\WBStack\Info\WBStackInfo::setGlobalForRequestDomain( getenv( 'WBS_DOMAIN' ) )) {
+if(!\WBStack\Info\GlobalSet::forDomain( getenv( 'WBS_DOMAIN' ) )) {
     die('Failed to work for WBS_DOMAIN: ' . getenv( 'WBS_DOMAIN' ) . PHP_EOL);
 }
