@@ -1,8 +1,8 @@
 <?
 
-const WIKWIKI_GLOBAL = 'WBStackInfo';
+namespace WBStack\Info;
 
-class WikWiki
+class WBStackInfo
 {
 
     public $data;
@@ -12,7 +12,7 @@ class WikWiki
     /**
      * Construct directly from API response from API backend...
      * @param $apiResult
-     * @return WikWiki|null
+     * @return WBStackInfo|null
      */
     public static function newFromApiResult(
         /*object*/ $apiResult
@@ -33,48 +33,48 @@ class WikWiki
             return true;
         }
 
-        $wikWiki = self::getData( $requestDomain );
+        $info = self::getData( $requestDomain );
 
         // Set the model to the globals to be used by local settings..
-        /** @var WikWiki $wikWiki */
-        $GLOBALS[WIKWIKI_GLOBAL] = $wikWiki;
+        /** @var WBStackInfo $info */
+        $GLOBALS[WBSTACK_INFO_GLOBAL] = $info;
 
         // Let's assume success unless the "data" is null.
-        return $wikWiki !== null;
+        return $info !== null;
     }
 
     private static function getData( $requestDomain ) {
-        $wikWiki = self::getDataFromApcCache( $requestDomain );
-        if( $wikWiki ) {
-            return $wikWiki;
+        $info = self::getDataFromApcCache( $requestDomain );
+        if( $info ) {
+            return $info;
         }
         // TODO create an APC lock saying this proc is going to get fresh data?
         // TODO in reality all of this needs to change...
-        $wikWiki = self::getDataFromApiRequest( $requestDomain );
+        $info = self::getDataFromApiRequest( $requestDomain );
         // Cache positive results for 10 seconds, negative for 2
-        $ttl = $wikWiki ? 10 : 2;
-        self::writeDataToApcCache( $requestDomain, $wikWiki, $ttl );
-        return $wikWiki;
+        $ttl = $info ? 10 : 2;
+        self::writeDataToApcCache( $requestDomain, $info, $ttl );
+        return $info;
     }
 
     private static function getDataFromApcCache( $requestDomain ) {
         return apcu_fetch( self::getApcKey($requestDomain) );
     }
 
-    private static function writeDataToApcCache( $requestDomain, ?WikWiki $wikWiki, $ttl ) {
-        $result = apcu_store( self::getApcKey($requestDomain), $wikWiki, $ttl );
+    private static function writeDataToApcCache( $requestDomain, ?WBStackInfo $info, $ttl ) {
+        $result = apcu_store( self::getApcKey($requestDomain), $info, $ttl );
         if(!$result) {
             // TODO log?!
         }
     }
 
     private static function getApcKey( $requestDomain ) {
-        return 'WikWiki.v1.requestDomain.' . $requestDomain;
+        return 'WBStackInfo.v1.requestDomain.' . $requestDomain;
     }
 
     /**
      * @param $requestDomain
-     * @return WikWiki|null
+     * @return WBStackInfo|null
      */
     private static function getDataFromApiRequest( $requestDomain ) {
         // START generic getting of wiki info from domain
@@ -87,28 +87,28 @@ class WikWiki
         $client = curl_init($url);
         curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WikWiki::getDataFromApiRequest" );
+        curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WBStackInfo::getDataFromApiRequest" );
 
         $response = curl_exec($client);
 
         // TODO detect non 200 response here, and pass that out to the user as an error
 
-        $wikWiki = WikWiki::newFromApiResult(json_decode($response));
-        if (!$wikWiki) {
+        $info = WBStackInfo::newFromApiResult(json_decode($response));
+        if (!$info) {
             return null;
         }
-        $wikWiki->requestDomain = $requestDomain;
-        return $wikWiki;
+        $info->requestDomain = $requestDomain;
+        return $info;
     }
 
     private function setGlobalForGeneralMaintScript() {
-        $wikWiki = WikWiki::newFromApiResult(json_decode(file_get_contents(__DIR__ . '/maintWikWiki.json')));
+        $info = WBStackInfo::newFromApiResult(json_decode(file_get_contents(__DIR__ . '/WikiInfo-maint.json')));
 
-        $wikWiki->requestDomain = 'maintenance';
+        $info->requestDomain = 'maintenance';
 
         // Set the model to the globals to be used by local settings..
-        /** @var WikWiki $wikWiki */
-        $GLOBALS[WIKWIKI_GLOBAL] = $wikWiki;
+        /** @var WBStackInfo $info */
+        $GLOBALS[WBSTACK_INFO_GLOBAL] = $info;
     }
 
     public function __construct($data)

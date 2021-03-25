@@ -1,8 +1,8 @@
 <?php
 
 // If we have internal settings, and have been told to load them, then load them...
-if( getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/internal/load.php' ) ) {
-    require_once __DIR__ . '/internal/load.php';
+if( getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/src/loadInternal.php' ) ) {
+    require_once __DIR__ . '/src/loadInternal.php';
 } else {
     // Code for ONLY the public mw services
     $wgReservedUsernames = array_merge(
@@ -15,10 +15,10 @@ if( getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/int
 }
 
 // Main stuff from the platform
-$wgSitename = $wikWiki->sitename;
-$wgSecretKey = $wikWiki->getSetting('wgSecretKey');
+$wgSitename = $wikiInfo->sitename;
+$wgSecretKey = $wikiInfo->getSetting('wgSecretKey');
 $wgLogos = [
-    "1x" => $wikWiki->getSetting('wgLogo'),
+    "1x" => $wikiInfo->getSetting('wgLogo'),
 ];
 if( $wgLogos["1x"] === null ) {
     // Fallback to the mediawiki logo without the wgLogo overlay
@@ -26,7 +26,7 @@ if( $wgLogos["1x"] === null ) {
         "1x" => "https://storage.googleapis.com/wbstack-static/assets/mediawiki/mediawiki.png",
     ];
 }
-$wgFavicon = $wikWiki->getSetting('wgFavicon');
+$wgFavicon = $wikiInfo->getSetting('wgFavicon');
 if( $wgFavicon === null ) {
     // Default from install, but maybe we want to change this?
     $wgFavicon = "/favicon.ico";
@@ -34,7 +34,7 @@ if( $wgFavicon === null ) {
 // TODO this should be settings from the main platform
 $wgLanguageCode = "en";
 ## TODO allow turning some skins on and off?
-$wgDefaultSkin = $wikWiki->getSetting('wgDefaultSkin');
+$wgDefaultSkin = $wikiInfo->getSetting('wgDefaultSkin');
 if( $wgDefaultSkin === null ) {
     // Fallback to vector
     $wgDefaultSkin = "vector";
@@ -199,15 +199,15 @@ $wgMusicalNotationEnableWikibaseDataType = true;
 $wwWbSiteBaseUri = preg_replace( '!^//!', 'http://', $GLOBALS['wgServer'] );
 $wwWbConceptUri = $wwWbSiteBaseUri . '/entity/';
 
-$wwWikibaseStringLengthString = $wikWiki->getSetting('wwWikibaseStringLengthMonolingualText');
+$wwWikibaseStringLengthString = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
 if($wwWikibaseStringLengthString) {
     $wgWBRepoSettings['string-limits']['VT:string']['length'] = (int)$wwWikibaseStringLengthString;
 }
-$wwWikibaseStringLengthMonolingualText = $wikWiki->getSetting('wwWikibaseStringLengthMonolingualText');
+$wwWikibaseStringLengthMonolingualText = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
 if($wwWikibaseStringLengthMonolingualText) {
     $wgWBRepoSettings['string-limits']['VT:monolingualtext']['length'] = (int)$wwWikibaseStringLengthMonolingualText;
 }
-$wwWikibaseStringLengthMultilang = $wikWiki->getSetting('wwWikibaseStringLengthMultilang');
+$wwWikibaseStringLengthMultilang = $wikiInfo->getSetting('wwWikibaseStringLengthMultilang');
 if($wwWikibaseStringLengthMultilang) {
     $wgWBRepoSettings['string-limits']['multilang']['length'] = (int)$wwWikibaseStringLengthMultilang;
 }
@@ -245,7 +245,7 @@ $wgWBRepoSettings['conceptBaseUri'] = $wwWbConceptUri;
 $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
 
 // InviteSignup
-if( $wikWiki->getSetting('wwExtEnableInviteSignup') ) {
+if( $wikiInfo->getSetting('wwExtEnableInviteSignup') ) {
     # Restrict account creation
     $wgGroupPermissions['*']['createaccount'] = false;
     $wgGroupPermissions['user']['createaccount'] = false;
@@ -256,7 +256,7 @@ if( $wikWiki->getSetting('wwExtEnableInviteSignup') ) {
 }
 
 // ConfirmAccount
-if( $wikWiki->getSetting('wwExtEnableConfirmAccount') ) {
+if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
     $wgMakeUserPageFromBio = false;
     $wgAutoWelcomeNewUsers = false;
     $wgConfirmAccountRequestFormItems = [
@@ -319,7 +319,7 @@ $wgFooterIcons = [
 ];
 
 // https://www.mediawiki.org/wiki/Manual:Hooks/SkinBuildSidebar
-$wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikWiki ) {
+$wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikiInfo ) {
     $sidebar['Wikibase'][] = [
         'text'  => 'New Item',
         'href'  => '/wiki/Special:NewItem',
@@ -328,7 +328,7 @@ $wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikWiki ) 
         'text'  => 'New Property',
         'href'  => '/wiki/Special:NewProperty',
     ];
-    if( $wikWiki->getSetting('wwExtEnableWikibaseLexeme') ) {
+    if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
         $sidebar['Wikibase'][] = [
             'text'  => 'New Lexeme',
             'href'  => '/wiki/Special:NewLexeme',
@@ -366,13 +366,13 @@ class WBStackPageUpdateHandler {
     }
 
     private static function scheduleDeferredUpdateIfNeeded() {
-        global $wikWiki;
+        global $wikiInfo;
         if( !self::$hasScheduledDeferredUpdate ) {
             self::$hasScheduledDeferredUpdate = true;
             $data = [];
             foreach( self::$titles as $titleData ) {
                 $data[] = [
-                    'wiki_id' => $wikWiki->id,
+                    'wiki_id' => $wikiInfo->id,
                     'title' => $titleData[0],
                     'namespace' => $titleData[1],
                 ];

@@ -1,5 +1,7 @@
 <?php
 
+namespace WBStack\Internal;
+
 /**
  * This API can be used to shell out to update.php
  * 
@@ -8,18 +10,18 @@
  * TODO allow other maint scripts too?
  */
 
-class ApiWbStackUpdate extends ApiBase {
+class ApiWbStackUpdate extends \ApiBase {
     public function mustBePosted() {return true;}
     public function isWriteMode() {return true;}
     public function isInternal() {return true;}
     public function execute() {
-        global $wikWiki;
-        
+        global $IP;
+
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 
 		// Run update.php
-		$cmd = 'WW_DOMAIN=' . $wikWiki->requestDomain . ' php ' . __DIR__ . '/maintenance/update.php --quick';
+		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/maintenance/update.php --quick';
 		exec($cmd, $out, $return);
 
 		// Return appropriate result

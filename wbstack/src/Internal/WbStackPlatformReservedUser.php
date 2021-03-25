@@ -1,5 +1,7 @@
 <?php
 
+namespace WBStack\Internal;
+
 /**
  * This class performs some set of actions as the PlatformReservedUser
  * These functionalities are used by other internal APIs
@@ -28,9 +30,9 @@ class WbStackPlatformReservedUser{
 
         // Create the user
         // TODO check create status?
-        $createStatus = MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
+        $createStatus = \MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
             $user,
-            MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
+            \MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
             false
         );
 

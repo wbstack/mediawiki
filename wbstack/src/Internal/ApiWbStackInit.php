@@ -1,5 +1,7 @@
 <?php
 
+namespace WBStack\Internal;
+
 /**
  * This API is called when a wiki is first created.
  * It creates a user account.
@@ -10,7 +12,7 @@
  * This code is a combination of maintenance/createAndPromote.php and SpecialPasswordReset.php ideas
  */
 
-class ApiWbStackInit extends ApiBase {
+class ApiWbStackInit extends \ApiBase {
     public function mustBePosted() {return true;}
     public function isWriteMode() {return true;}
     public function isInternal() {return true;}
@@ -26,7 +28,7 @@ class ApiWbStackInit extends ApiBase {
         // TODO validation? but our app should always send the right stuff now anyway..
 
         // Get a user object that we will be interacting with
-        $user = User::newFromName( $username );
+        $user = \User::newFromName( $username );
 
         // The user that we want to create should NOT already exist, so bail quickly if it does.
         // TODO the user could be renamed?, so check if # of users > 0 instead here too?
@@ -36,9 +38,9 @@ class ApiWbStackInit extends ApiBase {
         }
 
         // Create the user
-        $createStatus = MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
+        $createStatus = \MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
             $user,
-            MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
+            \MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
             false
         );
         // TODO check the status of $createStatus
@@ -77,14 +79,14 @@ class ApiWbStackInit extends ApiBase {
         // Send a password reset email (If password not specified)
         $sendResetPasswordEmail = $email && !$password;
         if($sendResetPasswordEmail){
-            $services = MediaWiki\MediaWikiServices::getInstance();
+            $services = \MediaWiki\MediaWikiServices::getInstance();
             $passwordReset = $services->getPasswordReset();
             $resetStatus = $passwordReset->execute( $user, $username, $email );
             // TODO check $resetStatus?
         }
 
         // Update the site stats
-        $ssu = SiteStatsUpdate::factory( [ 'users' => 1 ] );
+        $ssu = \SiteStatsUpdate::factory( [ 'users' => 1 ] );
         $ssu->doUpdate();
 
         // Return an API Result
@@ -114,19 +116,19 @@ class ApiWbStackInit extends ApiBase {
     public function getAllowedParams() {
         return [
             'username' => [
-                ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_TYPE => 'string',
                 // Always require a username, always provided by default, and can be provided for sandboxes too?
-                ApiBase::PARAM_REQUIRED => true
+                \ApiBase::PARAM_REQUIRED => true
             ],
             'email' => [
-                ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_TYPE => 'string',
                 // Don't require, as for sandboxes we will not have any emails...
-                ApiBase::PARAM_REQUIRED => false
+                \ApiBase::PARAM_REQUIRED => false
             ],
             'password' => [
-                ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_TYPE => 'string',
                 // For sandboxes we want to specify a password, but for default behaviour we still want to do password reset emails...
-                ApiBase::PARAM_REQUIRED => false
+                \ApiBase::PARAM_REQUIRED => false
             ],
         ];
     }

@@ -1,9 +1,11 @@
 <?php
 
+namespace WBStack\Logging;
+
 use Psr\Log\AbstractLogger;
 use MediaWiki\Logger\LegacyLogger;
 
-class WikWikiLogger extends AbstractLogger {
+class Logger extends AbstractLogger {
 
     private $channel;
     private $config;

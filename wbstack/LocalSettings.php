@@ -4,14 +4,14 @@
  * These settings should also not be needed for the localization rebuild
  */
 
-if ( !array_key_exists( WIKWIKI_GLOBAL, $GLOBALS ) ) {
+if ( !array_key_exists( WBSTACK_INFO_GLOBAL, $GLOBALS ) ) {
 	// We shouldn't reach here as all entry points should create this GLOBAL..
     // However if new things get introduced we will end up here.
-	die('LS not got wiki info.');
+	die('LS.php not got wiki info.');
 }
 
-/** @var WikWiki $wikWiki */
-$wikWiki = $GLOBALS[WIKWIKI_GLOBAL];
+/** @var \WBStack\Info\WBStackInfo $wikiInfo */
+$wikiInfo = $GLOBALS[WBSTACK_INFO_GLOBAL];
 
 // Define STDERR if it is not already. This is used for logging.
 if ( !defined( 'STDERR' ) ) {
@@ -19,8 +19,8 @@ if ( !defined( 'STDERR' ) ) {
 }
 
 // Define some decision making pointers
-$wwDomainSaysLocal = substr($wikWiki->requestDomain,-9, 9) === 'localhost';
-$wwDomainSaysMaint = $wikWiki->requestDomain === 'maint' || $wikWiki->requestDomain === 'maintenance'; // TODO probably only need to check one of these..
+$wwDomainSaysLocal = substr($wikiInfo->requestDomain,-9, 9) === 'localhost';
+$wwDomainSaysMaint = $wikiInfo->requestDomain === 'maint' || $wikiInfo->requestDomain === 'maintenance'; // TODO probably only need to check one of these..
 $wwIsInPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsInLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
 
@@ -35,10 +35,8 @@ if( $wwDomainSaysLocal || $wwDomainSaysMaint ) {
 
 // Load Logging stuff if we are not running in phpunit
 if ( !$wwIsInPhpUnit && !$wwIsInLocalisationRebuild ) {
-    require_once __DIR__ . DIRECTORY_SEPARATOR . 'WikWikiSpi.php';
-    require_once __DIR__ . DIRECTORY_SEPARATOR . 'WikWikiLogger.php';
     $wgMWLoggerDefaultSpi = [
-        'class' => \WikWikiSpi::class,
+        'class' => \WBStack\Logging\CustomSpi::class,
         'args' => [[
             'ignoreLevels' => [
                 'debug',
@@ -70,28 +68,28 @@ if ( !$wwIsInPhpUnit && !$wwIsInLocalisationRebuild ) {
 if( $wwDomainSaysLocal ) {
 	// TODO this code path shouldn't be accessible when in PROD
 	// TODO fix totally hardcoded port for dev us
-	$wgServer = "http://" . $wikWiki->requestDomain . ":8083";
+	$wgServer = "http://" . $wikiInfo->requestDomain . ":8083";
 	// Internal is on 8073...
 	if(getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/internal/load.php' )){
-        $wgServer = "http://" . $wikWiki->requestDomain . ":8073";
+        $wgServer = "http://" . $wikiInfo->requestDomain . ":8073";
     }
 } else {
-	$wgServer = "https://" . $wikWiki->domain;
+	$wgServer = "https://" . $wikiInfo->domain;
 }
 
 $wgScriptPath = "/w";
 $wgArticlePath = "/wiki/$1";
 
-$wgDBname = $wikWiki->wiki_db->name;
-$wgDBprefix = $wikWiki->wiki_db->prefix . '_';
+$wgDBname = $wikiInfo->wiki_db->name;
+$wgDBprefix = $wikiInfo->wiki_db->prefix . '_';
 $wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=binary";
 
 $wgDBservers = [
     [
         'host' => getenv('MW_DB_SERVER_MASTER'),
         'dbname' => $wgDBname,
-        'user' => $wikWiki->wiki_db->user,
-        'password' => $wikWiki->wiki_db->password,
+        'user' => $wikiInfo->wiki_db->user,
+        'password' => $wikiInfo->wiki_db->password,
         'type' => "mysql",
         'flags' => DBO_DEFAULT,
         'load' => 1,
@@ -100,14 +98,14 @@ $wgDBservers = [
 
 // DO NOT add the replica server config if we are just running a non wiki maint script.
 // For example schema generation or localization cache reload
-// WW_DOMAIN=maint php ./w/maintenance/update.php --schema sql.sql --quick
+// WBS_DOMAIN=maint php ./w/maintenance/update.php --schema sql.sql --quick
 // As in these contexts there is often no replica.... and thus one would fail...
 if( !$wwDomainSaysMaint ){
     $wgDBservers[] = [
         'host' => getenv('MW_DB_SERVER_REPLICA'),
         'dbname' => $wgDBname,
-        'user' => $wikWiki->wiki_db->user,
-        'password' => $wikWiki->wiki_db->password,
+        'user' => $wikiInfo->wiki_db->user,
+        'password' => $wikiInfo->wiki_db->password,
         'type' => "mysql",
         'flags' => DBO_DEFAULT,
         'max lag' => 10,
@@ -227,10 +225,10 @@ wfLoadExtension( 'EmbedVideo' );
 wfLoadExtension( 'MobileFrontend' );
 wfLoadExtension( 'DeleteBatch' );
 wfLoadExtension( 'MultimediaViewer' );
-if( $wikWiki->getSetting('wwExtEnableInviteSignup') ) {
+if( $wikiInfo->getSetting('wwExtEnableInviteSignup') ) {
     wfLoadExtension( 'InviteSignup' );
 }
-if( $wikWiki->getSetting('wwExtEnableConfirmAccount') ) {
+if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
     require_once "$IP/extensions/ConfirmAccount/ConfirmAccount.php";
 }
 # TODO configure
@@ -242,23 +240,23 @@ require_once "$IP/extensions/Wikibase/repo/Wikibase.php";
 require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
 require_once "$IP/extensions/Wikibase/client/WikibaseClient.php";
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
-# WikibaseLexeme, By default not enabled, enabled in maintWikWiki.json
-if( $wikWiki->getSetting('wwExtEnableWikibaseLexeme') ) {
+# WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
+if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
 }
 # Federated Properties, By default not enabled, not enabled in maint mode
 if(
     // TODO remove the legacy `wwEnableWikibaseFederatedProperties` in favour of the new setting name
     // This added for 1 wiki before the proper setting name was created...
-    $wikWiki->getSetting('wwEnableWikibaseFederatedProperties') ||
-    $wikWiki->getSetting('wikibaseFedPropsEnable')
+    $wikiInfo->getSetting('wwEnableWikibaseFederatedProperties') ||
+    $wikiInfo->getSetting('wikibaseFedPropsEnable')
 ) {
     // This will use wikidata.org by default
     $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
 }
 
-# Auth_remoteuser, By default not enabled, enabled in maintWikWiki.json
-if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
+# Auth_remoteuser, By default not enabled, enabled in WikiInfo-maint.json
+if( $wikiInfo->getSetting('wwSandboxAutoUserLogin') ) {
     wfLoadExtension( 'Auth_remoteuser' );
     $wgAuthRemoteuserUserName = "SandboxAdmin";
     # Allow Auth_remoteuser to create missing accounts
@@ -277,12 +275,12 @@ if( $wikWiki->getSetting('wwSandboxAutoUserLogin') ) {
 # WikibaseManifest
 wfLoadExtension( 'WikibaseManifest' );
 $wgWbManifestExternalServiceMapping = [
-    'queryservice_ui' => 'https://' . $wikWiki->requestDomain . '/query',
-    'queryservice' => 'https://' . $wikWiki->requestDomain . '/query/sparql',
-    'quickstatements' => 'https://' . $wikWiki->requestDomain . '/tools/quickstatements',
+    'queryservice_ui' => 'https://' . $wikiInfo->requestDomain . '/query',
+    'queryservice' => 'https://' . $wikiInfo->requestDomain . '/query/sparql',
+    'quickstatements' => 'https://' . $wikiInfo->requestDomain . '/tools/quickstatements',
 ];
-if( $wikWiki->getSetting('wikibaseManifestEquivEntities') ) {
-    $wwEquivEntities = json_decode( $wikWiki->getSetting('wikibaseManifestEquivEntities'), true );
+if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
+    $wwEquivEntities = json_decode( $wikiInfo->getSetting('wikibaseManifestEquivEntities'), true );
     if ( is_array( $wwEquivEntities ) ) {
         $wgWbManifestWikidataEntityMapping = $wwEquivEntities;
         if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P1630', $wwEquivEntities['properties'] ) ) {

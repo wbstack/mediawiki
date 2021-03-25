@@ -1,27 +1,23 @@
-# wbstack MediaWiki overrides
+# WBStack MediaWiki modifications
 
-This directory contains the code around MediaWiki to make it better for the wbstack usecase.
+This directory contains the code around MediaWiki to make it work for the WBStack usecase.
 
-This ultimately repackages MediaWiki, extensions, skins, and the wbstack code into a new "application" with a much tighter external interface (particulary around configuration).
+This ultimately repackages MediaWiki, extensions, skins, and the WBStack code into a new "application" with a much tighter external interface (particularly around configuration).
 
-This application reaches out to some API (currently the wbstack api) to get the "details" of wikis to be run based on a domain.
+This application reaches out to some API (currently the WBStack api) to get the "wiki info" for a given domain.
 
-This URL is currently always:
+This request currently always goes to:
 
 ```php
-'http://' . getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/wiki/getWikiForDomain?domain=' . urlencode($requestDomain);
+getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/wiki/getWikiForDomain?domain=' . urlencode($requestDomain);
 ```
 
-This must respond with a format that looks like the JSON in maintWikWiki.json (which is currently used during Dockerfile building)
+This must respond with a format that looks like the JSON in `data/WikiInfo-maint.json` (which is currently used during Dockerfile building)
 
 This response is then used to configure MediaWiki.
 
-Currently 2 other backend APIs are also included:
-
-- One allows external services to make mediawiki run update.php
-- One allows external services to request OAuth consumers
-
-That is all..
+An internal flavour of this application also exists that loads some internal only API modules.
+These can be found in the `src/Internal` directory.
 
 ## Build scripts
 
@@ -46,10 +42,12 @@ MediaWiki loads some files directly from this directory.
 
 Other PHP files are all loaded from within one of these main files.
 
-- LocalSettings.php - Is loaded from the MediaWiki LocalSettings.php
-  - WikWikiSpi.php
-  - WikWikiLogger.php
-  - FinalSettings.php
-    - internal/load.php - Only loaded for the BACKEND flavour of MediaWiki
 - EntryShim* - These files are loaded at the start of the MediaWiki entry points
-  - WikWiki.php - Main code for fetching things from the platform API
+  - src/load.php
+    - src/Info/WBStackInfo.php - Main code for fetching things from the platform API
+    - src/Logging/WikWikiSpi.php
+    - src/Logging/WikWikiLogger.php
+- LocalSettings.php - Is loaded from the MediaWiki LocalSettings.php (where it normally would be)
+  - FinalSettings.php
+    - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
+      - src/Internal/*
