@@ -1,7 +1,7 @@
 <?php
 
 # Load things that are only needed internally
-# This is normally called from within settings
+# This is called from within settings
 
 # Double check that we want to do this
 if ( getenv('WBSTACK_LOAD_MW_INTERNAL') !== 'yes' ) {
