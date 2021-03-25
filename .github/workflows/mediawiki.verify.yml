@@ -20,6 +20,13 @@ jobs:
 
     - name: Run PHP built in web server
       run: nohup php -S 0.0.0.0:8000  &> phpout.log &
+    - name: Wait for server to accept connections
+      uses: nick-invision/retry@v2
+      with:
+        max_attempts: 10
+        retry_wait_seconds: 1
+        timeout_seconds: 10
+        command: curl -s http://localhost:8000/
 
       # Make sure the endpoints all just return 2 lines :)
     - run: curl -s http://localhost:8000/ | wc -l | grep -q 2
@@ -33,6 +40,6 @@ jobs:
     - run: curl -s http://localhost:8000/rest.php | wc -l | grep -q "can not currently be loaded"
 
 # Final output
-    - name: Output PHP built in web server logs
+    - name: Output the server logs
       if: always()
       run: cat phpout.log
