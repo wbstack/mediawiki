@@ -5,24 +5,49 @@ namespace WBStack\Info;
 class WBStackInfo
 {
 
+    public $requestDomain;
     public $data;
     private $settingsIndex = [];
-    public $requestDomain;
+
+    public function __construct($data)
+    {
+        // Create settings index
+        foreach ($data->settings as $setting) {
+            $this->settingsIndex[$setting->name] = $setting->value;
+        }
+        // Remove settings from general data
+        unset($data->settings);
+        // Make the rest of the data accessible
+        $this->data = $data;
+    }
 
     /**
-     * Construct directly from API response from API backend...
-     * @param $apiResult
+     * Construct an info object for use in settings from some JSON string
+     * This could be from an API response or from a file
+     *
+     * @param string $apiResult some JSON
+     * @param string $requestDomain for the info object
      * @return WBStackInfo|null
      */
-    public static function newFromApiResult(
-        /*object*/ $apiResult
-    ) {
-        $data = $apiResult->data;
-        // TODO cleanup condition, as data will never be an array (as it is an object when true...)
-        if ($data === null || $data === []) {
+    public static function newFromJsonString( $infoJsonString, $requestDomain ) {
+        $data = json_decode($infoJsonString);
+
+        // Check if the string we were given was invalid and thus not parsed!
+        if ( $data === null ) {
             return null;
         }
-        return new self($data);
+
+        // Get the inner data from the response
+        $data = $data->data;
+
+        // Data from the api should always be an array with at least an id...
+        if (!is_array($data) || !array_key_exists('id', $data)) {
+            return null;
+        }
+
+        $info = new self($data);
+        $info->requestDomain = $requestDomain;
+        return $info;
     }
 
     public static function setGlobalForRequestDomain( $requestDomain ) {
@@ -93,34 +118,26 @@ class WBStackInfo
 
         // TODO detect non 200 response here, and pass that out to the user as an error
 
-        $info = WBStackInfo::newFromApiResult(json_decode($response));
+        $info = WBStackInfo::newFromJsonString($response, $requestDomain);
         if (!$info) {
             return null;
         }
-        $info->requestDomain = $requestDomain;
         return $info;
     }
 
     private function setGlobalForGeneralMaintScript() {
-        $info = WBStackInfo::newFromApiResult(json_decode(file_get_contents(__DIR__ . '/../../data/WikiInfo-maint.json')));
+        $info = WBStackInfo::newFromJsonString(
+            file_get_contents(__DIR__ . '/../../data/WikiInfo-maint.json'),
+            'maintenance'
+        );
 
-        $info->requestDomain = 'maintenance';
+        if($info === null) {
+            die("Failed to load json from file, probably invalid.");
+        }
 
         // Set the model to the globals to be used by local settings..
         /** @var WBStackInfo $info */
         $GLOBALS[WBSTACK_INFO_GLOBAL] = $info;
-    }
-
-    public function __construct($data)
-    {
-        // Create settings index
-        foreach ($data->settings as $setting) {
-            $this->settingsIndex[$setting->name] = $setting->value;
-        }
-        // Remove settings from general data
-        unset($data->settings);
-        // Make the rest of the data accessible
-        $this->data = $data;
     }
 
     // Get a setting by name, null if not set..
