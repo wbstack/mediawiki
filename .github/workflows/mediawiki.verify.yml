@@ -34,10 +34,10 @@ jobs:
     - run: curl -s http://localhost:8000/load.php | wc -l | grep -q 2
     - run: curl -s http://localhost:8000/rest.php | wc -l | grep -q 2
       # And that they say the wiki can't be loaded...
-    - run: curl -s http://localhost:8000/ | wc -l | grep -q "can not currently be loaded"
-    - run: curl -s http://localhost:8000/api.php | wc -l | grep -q "can not currently be loaded"
-    - run: curl -s http://localhost:8000/load.php | wc -l | grep -q "can not currently be loaded"
-    - run: curl -s http://localhost:8000/rest.php | wc -l | grep -q "can not currently be loaded"
+    - run: curl -s http://localhost:8000/ | grep -q "can not currently be loaded"
+    - run: curl -s http://localhost:8000/api.php | grep -q "can not currently be loaded"
+    - run: curl -s http://localhost:8000/load.php | grep -q "can not currently be loaded"
+    - run: curl -s http://localhost:8000/rest.php | grep -q "can not currently be loaded"
 
 # Final output
     - name: Output the server logs
