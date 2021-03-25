@@ -6,7 +6,7 @@
 
 if ( !array_key_exists( WBSTACK_INFO_GLOBAL, $GLOBALS ) ) {
 	// We shouldn't reach here as all entry points should create this GLOBAL..
-    // However if new things get introduced we will end up here.
+    // However if new things get introduced we will end up here, and we will need another shim!
 	die('LS.php not got wiki info.');
 }
 
@@ -18,23 +18,21 @@ if ( !defined( 'STDERR' ) ) {
     define( 'STDERR', fopen( 'php://stderr', 'w' ) );
 }
 
-// Define some decision making pointers
-$wwDomainSaysLocal = substr($wikiInfo->requestDomain,-9, 9) === 'localhost';
-$wwDomainSaysMaint = $wikiInfo->requestDomain === 'maint' || $wikiInfo->requestDomain === 'maintenance'; // TODO probably only need to check one of these..
-$wwIsInPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
-$wwIsInLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
+// Define some conditions to switch behaviour on
+$wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
+$wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
+$wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
 
-// Show errors when being localhost or when in a maint script
-if( $wwDomainSaysLocal || $wwDomainSaysMaint ) {
+// No error output or debugging in production
+ini_set( 'display_errors', 0 );
+$wgShowExceptionDetails = false;
+if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild ) {
     ini_set( 'display_errors', 1 );
     $wgShowExceptionDetails = true;
-} else {
-    ini_set( 'display_errors', 0 );
-    $wgShowExceptionDetails = false;
 }
 
-// Load Logging stuff if we are not running in phpunit
-if ( !$wwIsInPhpUnit && !$wwIsInLocalisationRebuild ) {
+// Load Logging when not in phpunit or doing l10n rebuild
+if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
     $wgMWLoggerDefaultSpi = [
         'class' => \WBStack\Logging\CustomSpi::class,
         'args' => [[
@@ -65,18 +63,7 @@ if ( !$wwIsInPhpUnit && !$wwIsInLocalisationRebuild ) {
     ];
 }
 
-if( $wwDomainSaysLocal ) {
-	// TODO this code path shouldn't be accessible when in PROD
-	// TODO fix totally hardcoded port for dev us
-	$wgServer = "http://" . $wikiInfo->requestDomain . ":8083";
-	// Internal is on 8073...
-	if(getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/internal/load.php' )){
-        $wgServer = "http://" . $wikiInfo->requestDomain . ":8073";
-    }
-} else {
-	$wgServer = "https://" . $wikiInfo->domain;
-}
-
+$wgServer = "https://" . $wikiInfo->domain;
 $wgScriptPath = "/w";
 $wgArticlePath = "/wiki/$1";
 
@@ -100,7 +87,7 @@ $wgDBservers = [
 // For example schema generation or localization cache reload
 // WBS_DOMAIN=maint php ./w/maintenance/update.php --schema sql.sql --quick
 // As in these contexts there is often no replica.... and thus one would fail...
-if( !$wwDomainSaysMaint ){
+if( !$wwDomainIsMaintenance ){
     $wgDBservers[] = [
         'host' => getenv('MW_DB_SERVER_REPLICA'),
         'dbname' => $wgDBname,
@@ -295,6 +282,6 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
 // Load the extra settings!
 // Only when not doing rebuildLocalisationCache.php (done at build time) as this file will not exist then...
 // TODO perhaps change this so that the rebuildLocalisationCache.php passes in an ENV var to block loading the extra settings instead?
-if( !$wwIsInLocalisationRebuild ) {
+if( !$wwIsLocalisationRebuild ) {
     require_once __DIR__ . DIRECTORY_SEPARATOR . 'FinalSettings.php';
 }
