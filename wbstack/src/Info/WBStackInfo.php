@@ -102,7 +102,7 @@ class WBStackInfo
     }
 
     private function setGlobalForGeneralMaintScript() {
-        $info = WBStackInfo::newFromApiResult(json_decode(file_get_contents(__DIR__ . '/WikiInfo-maint.json')));
+        $info = WBStackInfo::newFromApiResult(json_decode(file_get_contents(__DIR__ . '/../../data/WikiInfo-maint.json')));
 
         $info->requestDomain = 'maintenance';
 
