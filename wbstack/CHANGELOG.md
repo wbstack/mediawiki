@@ -8,6 +8,7 @@
 - Enable WikibaseManifest by default on all wikis
 - Fix protocol in $wgServer MediaWiki variable
 - Add `wikibaseManifestEquivEntities` setting for WikibaseManifest
+- Set `$wgWBRepoSettings['formatterUrlProperty']` and `$wgWBRepoSettings['canonicalUriProperty']` based on `wikibaseManifestEquivEntities`
 
 ## 1.35-7.4-20210322-2
 
