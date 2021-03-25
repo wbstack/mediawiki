@@ -36,18 +36,24 @@ TODO decide if this is even needed any more since we commit everything in git in
 
 Gotchas: Must be run from the "sync" directory.
 
-## MediaWiki Files
+## MediaWiki Loading
 
-MediaWiki loads some files directly from this directory.
+MediaWiki loads this code in 2 ways.
 
-Other PHP files are all loaded from within one of these main files.
+Firstly through entry point shims:
 
-- EntryShim* - These files are loaded at the start of the MediaWiki entry points
-  - src/load.php
-    - src/Info/WBStackInfo.php - Main code for fetching things from the platform API
-    - src/Logging/WikWikiSpi.php
-    - src/Logging/WikWikiLogger.php
-- LocalSettings.php - Is loaded from the MediaWiki LocalSettings.php (where it normally would be)
-  - FinalSettings.php
-    - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
-      - src/Internal/*
+- **(index|load|api|rest).php** - MediaWiki entry points
+  - src/Shim/*.php - These files are loaded at the start of the MediaWiki entry points
+    - src/loadShim.php
+      - src/Info/WBStackInfo.php - Main code for fetching things from the platform API
+      - src/Logging/WikWikiSpi.php
+      - src/Logging/WikWikiLogger.php
+
+And secondly via LocalSettings.php
+
+- **LocalSettings.php** - The actual MediaWiki settings file
+  - src/Settings/LocalSettings.php - Is loaded from the MediaWiki LocalSettings.php (where it normally would be)
+    - src/loadAll.php - Only loaded for the INTERNAL flavour of the app.
+    - src/Settings/FinalSettings.php
+      - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
+        - src/Internal/*
