@@ -13,16 +13,16 @@ else
 fi;
 
 # Clears everything in the repo
-$BASEDIR/sync/clear.sh
+$BASEDIR/sync/01-clear.sh
 
 # Fetches things from the web
-$BASEDIR/sync/docker-fetch.sh
+$BASEDIR/sync/02-docker-fetch.sh
 
 # Removes some not needed things from the things fetched
-$BASEDIR/sync/less-files.sh
+$BASEDIR/sync/03-less-files.sh
 
 # Does a composer install
-$BASEDIR/sync/docker-composer.sh
+$BASEDIR/sync/04-docker-composer.sh
 
 # Adds shim to .php entrypoints
-$BASEDIR/sync/docker-entrypoint-overrides.sh
+$BASEDIR/sync/05-docker-entrypoint-overrides.sh

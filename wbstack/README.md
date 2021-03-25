@@ -21,20 +21,19 @@ These can be found in the `src/Internal` directory.
 
 ## Build scripts
 
-### sync.sh
-
-This script will resync the WHOLE git repo based on repo hashes that are maintained in the sync/fetch.sh file.
-Also other things, see the script itself for details.
-
-Gotchas: Must be run from the "mediawiki" directory.
-
 ### sync/updateFetchScript.sh
 
-This script can be used to update lots (but not all) of the component hashes to the latest versions.
+This script can be used to update lots (but not all) of the component hashes in `02-fetch.sh` to the latest versions for the branch.
+
+Gotchas: Must be run from the "sync" directory.
 
 TODO decide if this is even needed any more since we commit everything in git instead of just building in a Dockerfile...
 
-Gotchas: Must be run from the "sync" directory.
+### sync.sh
+
+This script will resync the WHOLE git repo based on repo hashes that are maintained in the sync/02-fetch.sh file.
+
+Gotchas: Must be run from the "mediawiki" directory.
 
 ## MediaWiki Loading
 
