@@ -5,7 +5,8 @@
 
 # Double check that we want to do this
 if ( getenv('WBSTACK_LOAD_MW_INTERNAL') !== 'yes' ) {
-    die( 'no!' );
+    echo 'no!';
+    die(1);
 }
 
 // Load the files

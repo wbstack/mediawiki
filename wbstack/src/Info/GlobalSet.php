@@ -42,7 +42,8 @@ class GlobalSet {
         );
 
         if($info === null) {
-            die('Failed to load json from file, probably invalid.');
+            echo 'Failed to load json from file, probably invalid.';
+            die(1);
         }
 
         self::setGlobal( $info );

@@ -7,7 +7,8 @@
 if ( !array_key_exists( WBSTACK_INFO_GLOBAL, $GLOBALS ) ) {
 	// We shouldn't reach here as all entry points should create this GLOBAL..
     // However if new things get introduced we will end up here, and we will need another shim!
-	die('LS.php not got wiki info.');
+    echo 'LS.php not got wiki info.';
+	die(1);
 }
 
 require_once __DIR__ . '/../loadAll.php';
