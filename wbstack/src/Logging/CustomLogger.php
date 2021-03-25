@@ -5,7 +5,7 @@ namespace WBStack\Logging;
 use Psr\Log\AbstractLogger;
 use MediaWiki\Logger\LegacyLogger;
 
-class Logger extends AbstractLogger {
+class CustomLogger extends AbstractLogger {
 
     private $channel;
     private $config;

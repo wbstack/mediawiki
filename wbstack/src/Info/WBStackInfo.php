@@ -13,6 +13,9 @@ class WBStackInfo
     public $data;
     private $settingsIndex = [];
 
+    /**
+     * @param object $data
+     */
     public function __construct($data)
     {
         // Create settings index
@@ -45,7 +48,7 @@ class WBStackInfo
         $data = $data->data;
 
         // Data from the api should always be an array with at least an id...
-        if (!is_array($data) || !array_key_exists('id', $data)) {
+        if (!is_object($data) || !property_exists($data, 'id')) {
             return null;
         }
 

@@ -10,6 +10,8 @@ if ( !array_key_exists( WBSTACK_INFO_GLOBAL, $GLOBALS ) ) {
 	die('LS.php not got wiki info.');
 }
 
+require_once __DIR__ . '/../loadAll.php';
+
 /** @var \WBStack\Info\WBStackInfo $wikiInfo */
 $wikiInfo = $GLOBALS[WBSTACK_INFO_GLOBAL];
 
@@ -30,7 +32,7 @@ $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocal
 // No error output or debugging in production
 ini_set( 'display_errors', 0 );
 $wgShowExceptionDetails = false;
-if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild ) {
+if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild || $wikiInfo->requestDomain === 'localhost' ) {
     ini_set( 'display_errors', 1 );
     $wgShowExceptionDetails = true;
 }

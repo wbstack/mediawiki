@@ -34,6 +34,6 @@ class CustomSpi implements Spi {
      * @return \Psr\Log\AbstractLogger Logger instance
      */
     public function getLogger( $channel ) {
-        return new \WBStack\Logging\CustomLogger( $channel, $this->config);
+        return new CustomLogger( $channel, $this->config);
     }
 }
