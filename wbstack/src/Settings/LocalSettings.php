@@ -515,6 +515,6 @@ if( !$wwIsLocalisationRebuild ) {
             ]
         );
     }
-
-    require_once __DIR__ . '/Hooks.php';
 }
+
+require_once __DIR__ . '/Hooks.php';

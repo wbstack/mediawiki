@@ -52,7 +52,8 @@ And secondly via LocalSettings.php
 
 - **LocalSettings.php** - The actual MediaWiki settings file
   - src/Settings/LocalSettings.php - Is loaded from the MediaWiki LocalSettings.php (where it normally would be)
-    - src/loadAll.php - Only loaded for the INTERNAL flavour of the app.
-    - src/Settings/FinalSettings.php
-      - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
-        - src/Internal/*
+    - src/loadAll.php
+    - src/Settings/Cache.php
+    - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
+      - src/Internal/*
+    - src/Settings/Hooks.php

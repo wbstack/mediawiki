@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210325-5
+
+- Big internal setting & build refactorings
+
 ## 1.35-7.4-20210325-4
 
 - Fix `conceptBaseUri` to be http again... again...
