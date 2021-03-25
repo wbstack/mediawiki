@@ -1,15 +1,14 @@
 <?php
 
-// Create new versions of various files we need to add PHP to the start of
+// Create new versions of various files we need to add PHP shims to the start of
 // Hijacking entrypoints (for now)
 // Will probably do something different in the future (and do this in some other service)
 
-
 // Config
-$webShim = "require_once __DIR__ . '/wbstack/EntryShimWeb.php';";
+$webShim = "require_once __DIR__ . '/wbstack/src/Shim/Web.php';";
 $mapOfChanges = [
     # TODO thumb?
-    'maintenance/doMaintenance.php' => "require_once __DIR__ . '/../wbstack/EntryShimCli.php';",
+    'maintenance/doMaintenance.php' => "require_once __DIR__ . '/../wbstack/src/Shim/Cli.php';",
     'api.php' => $webShim,
     'rest.php' => $webShim,
     'index.php' => $webShim,
