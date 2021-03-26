@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"A2093064",
+			"Cwlin0416",
+			"Kly",
+			"LNDDYL",
+			"Waihorace",
+			"Xiplus"
+		]
+	},
+	"codemirror-desc": "提供 wikitext 編輯器語法醒目標示",
+	"codemirror-toggle-label": "語法醒目標示"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andriykopanytsia",
+			"Dars",
+			"Piramidion",
+			"SimondR",
+			"Ата"
+		]
+	},
+	"codemirror-desc": "Забезпечує підсвічування синтаксису у редакторі вікітексту",
+	"codemirror-toggle-label": "Підсвічування синтаксису"
+}

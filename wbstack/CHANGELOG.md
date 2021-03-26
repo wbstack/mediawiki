@@ -4,6 +4,7 @@
 
 - `$wgContentNamespaces[] = 120;` - Requires running `updateArticleCount.php` on all wikis to complete.
 - Enable MediaWiki Extension `WikiHiero`
+- Enable MediaWiki Extension `CodeMirror`
 
 ## 1.35-7.4-20210326-0
 

@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"pastakhov"
+		]
+	},
+	"codemirror-desc": "Provides syntax highlighting in wikitext editor",
+	"codemirror-toggle-label": "Syntax highlighting"
+}

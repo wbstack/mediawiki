@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pikne"
+		]
+	},
+	"codemirror-desc": "Võimaldab vikiteksti toimetis süntaksi esiletõstu.",
+	"codemirror-toggle-label": "Süntaksi esiletõst"
+}

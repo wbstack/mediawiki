@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Acamicamacaraca",
+			"BadDog",
+			"Obsuser"
+		]
+	},
+	"codemirror-desc": "Омогућава истицање синтаксе у уређивачу викитекста",
+	"codemirror-toggle-label": "Истицање синтаксе"
+}

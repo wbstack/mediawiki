@@ -311,6 +311,7 @@ wfLoadExtension( 'Cite' );
 wfLoadExtension( 'TemplateSandbox' );
 wfLoadExtension( 'WikiEditor' );
 wfLoadExtension( 'CodeEditor' );
+wfLoadExtension( 'CodeMirror' );
 wfLoadExtension( 'SecureLinkFixer' );
 wfLoadExtension( 'Echo' );
 wfLoadExtension( 'Thanks' );

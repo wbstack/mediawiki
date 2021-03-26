@@ -36,6 +36,7 @@
 ./wbstack/sync/dwnthing.sh extensions/Cite https://codeload.github.com/wikimedia/mediawiki-extensions-Cite/zip/52f3cf3aab68a3610fa82d02f1dd17e06f15c703 & \
 ./wbstack/sync/dwnthing.sh extensions/TemplateSandbox https://codeload.github.com/wikimedia/mediawiki-extensions-TemplateSandbox/zip/291e326fa3e071b84b9c81841c88894ae8a5dca4 & \
 ./wbstack/sync/dwnthing.sh extensions/CodeEditor https://codeload.github.com/wikimedia/mediawiki-extensions-CodeEditor/zip/1fafe27dc395ba1bc636f69fca15e1bb5a59caae & \
+./wbstack/sync/dwnthing.sh extensions/CodeMirror https://codeload.github.com/wikimedia/mediawiki-extensions-CodeMirror/zip/b5c9a1b6d225875ad531d8ced8f5d81f996880ca & \
 ./wbstack/sync/dwnthing.sh extensions/WikiEditor https://codeload.github.com/wikimedia/mediawiki-extensions-WikiEditor/zip/9bc2d0b806a33777fd66afb5e272203f735567e8 & \
 ./wbstack/sync/dwnthing.sh extensions/SecureLinkFixer https://codeload.github.com/wikimedia/mediawiki-extensions-SecureLinkFixer/zip/47f12670b23b5a59e7fdd1a2bd9b5a49693940c8 & \
 ./wbstack/sync/dwnthing.sh extensions/Echo https://codeload.github.com/wikimedia/mediawiki-extensions-Echo/zip/fd6a33e7b8f2945777a9182a13dbdb74a61b8159 & \

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Delim",
+			"Shirayuki",
+			"SkyDaisy9",
+			"Suzukaze-c"
+		]
+	},
+	"codemirror-desc": "ウィキテキストエディターに構文強調の機能を追加する",
+	"codemirror-toggle-label": "構文の強調"
+}

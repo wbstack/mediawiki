@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln",
+			"Metalhead64"
+		]
+	},
+	"codemirror-desc": "Ermöglicht Syntaxhervorhebungen im Wikitext-Editor",
+	"codemirror-toggle-label": "Syntaxhervorhebung"
+}
