@@ -9,7 +9,8 @@ $releaseBranch = 'REL1_35';
 
 // A github access token is needed to access the github API
 if( !file_exists( __DIR__ . '/.github' ) ) {
-    die('.github file with personal access token for public_repo must exist. eg. eu21yh0fj10f');
+    echo '.github file with personal access token for public_repo must exist. eg. eu21yh0fj10f';
+    die(1);
 }
 $getGithubApiUrl = function ( $repoName ) use ( $releaseBranch ) {
     return 'https://api.github.com/repos/wikimedia/' . $repoName . '/commits/' . $releaseBranch;

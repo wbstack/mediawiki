@@ -32,7 +32,7 @@ class WBStackInfo
      * Construct an info object for use in settings from some JSON string
      * This could be from an API response or from a file
      *
-     * @param string $apiResult some JSON
+     * @param string $infoJsonString some JSON
      * @param string $requestDomain for the info object
      * @return WBStackInfo|null
      */

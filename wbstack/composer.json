@@ -6,7 +6,7 @@
     "scripts": {
         "lint": [
             "parallel-lint .",
-            "find ./ -name '*.json' -exec vendor/bin/jsonlint {} \\;"
+            "rc=0 && for x in `find . -name \"*.json\" -type f`; do vendor/bin/jsonlint \"$x\" || rc=$?; done && exit $rc"
             ]
     }
 }
