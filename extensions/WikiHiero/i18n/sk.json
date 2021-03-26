@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Helix84",
+			"Robert Važan"
+		]
+	},
+	"hieroglyphs": "Pieskovisko hieroglyfov",
+	"wikihiero-category-A": "A: Muž a jeho práce",
+	"wikihiero-category-Aa": "Aa: Nezaradené",
+	"wikihiero-category-B": "B: Žena a jej práce",
+	"wikihiero-category-C": "C: Antropomorfné božstvá",
+	"wikihiero-category-D": "D: Časti ľudského tela",
+	"wikihiero-category-E": "E: Cicavce",
+	"wikihiero-category-F": "F: Časti cicavcov",
+	"wikihiero-category-G": "G: Vtáky",
+	"wikihiero-category-H": "H: Časti vtákov",
+	"wikihiero-category-I": "I: Obojživelníky, plazy atď.",
+	"wikihiero-category-K": "K: Ryby a časti rýb",
+	"wikihiero-category-L": "L: Bezstavovce a nižšie druhy",
+	"wikihiero-category-Z": "Z: Ťahy, geometrické obrazce atď.",
+	"wikihiero-desc": "Pridáva značku <code>&lt;hiero&gt;</code> na zobrazovanie [[Special:Hieroglyphs|hieroglyfov]]",
+	"wikihiero-eol": "Koniec riadka",
+	"wikihiero-juxtaposition": "Juxtapozícia",
+	"wikihiero-separator": "Oddeľovač",
+	"wikihiero-superposition": "Podrozdelenie",
+	"wikihiero-syntax": "Syntax",
+	"wikihiero-visualeditor-mwhieroinspector-title": "Hieroglyfy"
+}

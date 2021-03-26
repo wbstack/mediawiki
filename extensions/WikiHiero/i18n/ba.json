@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Assele",
+			"Haqmar"
+		]
+	},
+	"wikihiero-desc": "[[Special:Hieroglyphs|Иероглифтарҙы]] күрһәтеү өсөн <code>&lt;hiero&gt;</code> билдәһен өҫтәй",
+	"wikihiero-eol": "Юл аҙағы",
+	"wikihiero-input": "Инеш тексты:",
+	"wikihiero-juxtaposition": "Горизонталь группалау",
+	"wikihiero-result": "Һөҙөмтә",
+	"wikihiero-separator": "Айырғыс",
+	"wikihiero-superposition": "Вертикаль группалау",
+	"wikihiero-syntax": "Синтаксис",
+	"wikihiero-th-code": "Код",
+	"wikihiero-th-example": "Код үрнәге",
+	"wikihiero-th-meaning": "Мәғәнәһе",
+	"wikihiero-th-result": "Һөҙөмтә"
+}
