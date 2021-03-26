@@ -49,6 +49,7 @@
 ./wbstack/sync/dwnthing.sh extensions/MultimediaViewer https://codeload.github.com/wikimedia/mediawiki-extensions-MultimediaViewer/zip/4b3219b60eb6c3b9718ff18887610e29cb88cc69 & \
 ./wbstack/sync/dwnthing.sh extensions/Auth_remoteuser https://codeload.github.com/wikimedia/mediawiki-extensions-Auth_remoteuser/zip/6f570b83ff3fe9502a43f7894533273ff37d41f2 & \
 ./wbstack/sync/dwnthing.sh extensions/WikibaseManifest https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseManifest/zip/959a25fe0741df3c10acb06518c5fc8e22cac7ba & \
+./wbstack/sync/dwnthing.sh extensions/WikiHiero https://codeload.github.com/wikimedia/mediawiki-extensions-WikiHiero/zip/c32ec80791eca5a031963d1c3029e0bc5b71808c & \
 
 
 # Automatic script skips this one
