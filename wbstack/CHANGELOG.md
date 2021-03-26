@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210326-1
+
+- `$wgContentNamespaces[] = 120;` - Requires running `updateArticleCount.php` on all wikis to complete.
+
 ## 1.35-7.4-20210326-0
 
 - Big internal setting & build refactorings
