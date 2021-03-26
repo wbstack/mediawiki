@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Meliganai",
+			"Mormegil"
+		]
+	},
+	"codemirror-desc": "Poskytuje zvýrazňování syntaxe v editoru wikitextu",
+	"codemirror-toggle-label": "Zvýraznění syntaxe"
+}

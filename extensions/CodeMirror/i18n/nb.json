@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danmichaelo",
+			"Jon Harald Søby",
+			"Pmt",
+			"Weblars"
+		]
+	},
+	"codemirror-desc": "Gir syntaksfremheving i wikitekstredigereren",
+	"codemirror-toggle-label": "Syntaksfremheving"
+}

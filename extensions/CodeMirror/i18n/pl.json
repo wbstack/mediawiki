@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps",
+			"Railfail536",
+			"Woytecr"
+		]
+	},
+	"codemirror-desc": "Dostarcza podświetlanie składni w edytorze wikitekstu",
+	"codemirror-toggle-label": "Podświetlanie składni"
+}

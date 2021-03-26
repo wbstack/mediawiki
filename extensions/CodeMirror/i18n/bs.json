@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Srdjan m"
+		]
+	},
+	"codemirror-desc": "Omogućava isticanje sintakse u uređivaču wikiteksta",
+	"codemirror-toggle-label": "Isticanje sintakse"
+}
