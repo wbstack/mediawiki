@@ -210,6 +210,8 @@ $wgAuthenticationTokenVersion = "1";
 $wgMetaNamespace = 'Project';
 
 // TODO sort out directories and stuff...?
+// $wgCacheDirectory is needed at least for the l10n rebuild
+$wgCacheDirectory = '/tmp/mw-cache';
 //$wgUploadDirectory = "{$IP}/images/docker/{$dockerDb}";
 //$wgUploadPath = "{$wgScriptPath}/images/docker/{$dockerDb}";
 //$wgTmpDirectory = "{$wgUploadDirectory}/tmp";
@@ -501,9 +503,14 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
 // Skip some things when in l10n rebuild, as they complicate things.
 // TODO perhaps change this so that the rebuildLocalisationCache.php passes in an ENV var to block loading the extra settings instead of detecting?
 
+// Disable any chance of localization cache updates during web requests
+$wgLocalisationCacheConf['manualRecache'] = true;
+
+// $wgCacheDirectory setting must also be valid for the l10n cache to land on disk
+
 if( !$wwIsLocalisationRebuild ) {
     // Only load cache settings (redis db etc) when not doing a l10n rebuild
-    require_once __DIR__ . '/Cache.php';
+    require_once __DIR__ . '/ProductionCache.php';
 
     // If we have internal settings, and have been told to load them, then load them...
     if( getenv('WBSTACK_LOAD_MW_INTERNAL') === 'yes' && file_exists( __DIR__ . '/../loadInternal.php' ) ) {

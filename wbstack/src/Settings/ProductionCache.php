@@ -1,12 +1,5 @@
 <?php
 
-$wgCacheDirectory = '/tmp/mw-cache';
-
-// Disable any chance of localization cache updates during web requests
-$wgLocalisationCacheConf['manualRecache'] = true;
-
-$wgParserCacheType = 'db-replicated'; // 'db-replicated' is defined in LocalSetting.pjp currently
-
 // Know about proxies... so that we get the real IP..
 $wgCdnServersNoPurge = [
     # IP range matches current kubernetes pod IPs for GKE
@@ -16,6 +9,8 @@ $wgCdnServersNoPurge = [
 // This one is needed prior to 1.34
 // TODO this can probably be removed now?
 $wgSquidServersNoPurge = $wgCdnServersNoPurge;
+
+$wgParserCacheType = 'db-replicated'; // 'db-replicated' is defined in LocalSetting.pjp currently
 
 // Don't specify a redis cache when running dbless maint script
 // TODO we probably do want a redis connection in some maint scripts...
