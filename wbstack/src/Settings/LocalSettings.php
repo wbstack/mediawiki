@@ -208,6 +208,9 @@ $wgAuthenticationTokenVersion = "1";
 
 // So we are uniform, have the project namespace as Project
 $wgMetaNamespace = 'Project';
+// Needed so that Wikibase items appear in Special:Random and are counted as content pages.
+// TODO this should be a Wikibase default behaviour?
+$wgContentNamespaces[] = 120;
 
 // TODO sort out directories and stuff...?
 // $wgCacheDirectory is needed at least for the l10n rebuild
