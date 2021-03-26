@@ -3,6 +3,7 @@
 ## 1.35-7.4-20210326-1
 
 - `$wgContentNamespaces[] = 120;` - Requires running `updateArticleCount.php` on all wikis to complete.
+- Enable MediaWiki Extension `WikiHiero`
 
 ## 1.35-7.4-20210326-0
 
