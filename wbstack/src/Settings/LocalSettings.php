@@ -493,11 +493,16 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
     $wwEquivEntities = json_decode( $wikiInfo->getSetting('wikibaseManifestEquivEntities'), true );
     if ( is_array( $wwEquivEntities ) ) {
         $wgWbManifestWikidataEntityMapping = $wwEquivEntities;
+        // Wikibase
         if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P1630', $wwEquivEntities['properties'] ) ) {
             $wgWBRepoSettings['formatterUrlProperty'] = $wwEquivEntities['properties']['P1630'];
         }
         if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P1921', $wwEquivEntities['properties'] ) ) {
             $wgWBRepoSettings['canonicalUriProperty'] = $wwEquivEntities['properties']['P1921'];
+        }
+        // WikibaseLexeme
+        if ( array_key_exists( 'properties', $wwEquivEntities ) && array_key_exists( 'P218', $wwEquivEntities['properties'] ) ) {
+            $wgLexemeLanguageCodePropertyId = $wwEquivEntities['properties']['P218'];
         }
     }
 }
