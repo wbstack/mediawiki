@@ -1,5 +1,10 @@
 # mediawiki
 
+## 1.35-7.4-20210402-0
+
+- [Set wgLexemeLanguageCodePropertyId from equiv entities](https://github.com/wbstack/mediawiki/pull/55)
+- [$wgLexemeEnableDataTransclusion = true](https://github.com/wbstack/mediawiki/pull/56)
+
 ## 1.35-7.4-20210326-1
 
 - `$wgContentNamespaces[] = 120;` - Requires running `updateArticleCount.php` on all wikis to complete.
