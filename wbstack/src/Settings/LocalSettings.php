@@ -458,6 +458,7 @@ $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
 # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
+    $wgLexemeEnableDataTransclusion = true;
 }
 # Federated Properties, By default not enabled, not enabled in maint mode
 if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {
