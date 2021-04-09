@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210409-0
+
+- Multiple 1.35 branch updates
+
 ## 1.35-7.4-20210402-0
 
 - [Set wgLexemeLanguageCodePropertyId from equiv entities](https://github.com/wbstack/mediawiki/pull/55)
