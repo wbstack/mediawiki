@@ -216,8 +216,8 @@ class AccountRequestSubmission {
 			}
 			# Start a transaction, move file from temp to account request directory.
 			$repo = ConfirmAccount::getFileRepo( $wgConfirmAccountFSRepos['accountreqs'] );
-			$key = sha1_file( $this->attachmentTempPath ) . '.' . $finalExt;
-			$pathRel = UserAccountRequest::relPathFromKey( $key );
+			$storageKey = sha1_file( $this->attachmentTempPath ) . '.' . $finalExt;
+			$pathRel = UserAccountRequest::relPathFromKey( $storageKey );
 			$triplet = [ $this->attachmentTempPath, 'public', $pathRel ];
 			$status = $repo->storeBatch( [ $triplet ], FileRepo::OVERWRITE_SAME ); // save!
 			if ( !$status->isOk() ) {
@@ -243,7 +243,7 @@ class AccountRequestSubmission {
 				: null,
 			'type' 			=> $this->type,
 			'areas' 		=> $this->areas,
-			'storage_key' 	=> isset( $key ) ? $key : null,
+			'storage_key' 	=> isset( $storageKey ) ? $storageKey : null,
 			'comment' 		=> '',
 			'email_token' 	=> md5( $token ),
 			'email_token_expires' => $expires,
