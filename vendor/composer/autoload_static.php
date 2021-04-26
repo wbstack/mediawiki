@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
+class ComposerStaticInitc580894e904f7a7452ee2d3bb72aabe8
 {
     public static $files = array (
         '7cb394c3af2b1ae832979b0368e0da62' => __DIR__ . '/..' . '/data-values/data-values/DataValues.php',
@@ -19,6 +19,7 @@ class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
         'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         'eccc0347283a01e62f5536bcf76b6e62' => __DIR__ . '/..' . '/wikimedia/at-ease/src/Wikimedia/Functions.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         'c15f8000750e4e04ba559d9745044427' => __DIR__ . '/..' . '/data-values/number/Number.php',
         'c3f7f0e81464740a933532e81fa26cc7' => __DIR__ . '/..' . '/wikimedia/base-convert/src/Functions.php',
         '3ef87127dc6892a0a78f223558a0b940' => __DIR__ . '/..' . '/diff/diff/Diff.php',
@@ -60,6 +61,7 @@ class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
         ),
         'S' => 
         array (
+            'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Php72\\' => 23,
             'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
             'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
@@ -244,6 +246,10 @@ class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
         array (
             0 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
             1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+        ),
+        'Symfony\\Polyfill\\Php80\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
         'Symfony\\Polyfill\\Php72\\' => 
         array (
@@ -507,6 +513,7 @@ class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
     );
 
     public static $classMap = array (
+        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'CLDRPluralRuleParser\\Converter' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Converter.php',
         'CLDRPluralRuleParser\\Converter\\Expression' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Converter/Expression.php',
         'CLDRPluralRuleParser\\Converter\\Fragment' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Converter/Fragment.php',
@@ -1919,17 +1926,21 @@ class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
         'Serializers\\Exceptions\\SerializationException' => __DIR__ . '/..' . '/serialization/serialization/src/Serializers/Exceptions/SerializationException.php',
         'Serializers\\Exceptions\\UnsupportedObjectException' => __DIR__ . '/..' . '/serialization/serialization/src/Serializers/Exceptions/UnsupportedObjectException.php',
         'Serializers\\Serializer' => __DIR__ . '/..' . '/serialization/serialization/src/Serializers/Serializer.php',
+        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Idn' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Idn.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Info' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Info.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Resources\\unidata\\DisallowedRanges' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Resources/unidata/DisallowedRanges.php',
         'Symfony\\Polyfill\\Intl\\Idn\\Resources\\unidata\\Regex' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Resources/unidata/Regex.php',
         'Symfony\\Polyfill\\Intl\\Normalizer\\Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Normalizer.php',
         'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
+        'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'TextCat' => __DIR__ . '/..' . '/wikimedia/textcat/src/TextCat.php',
+        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'UtfNormal\\Constants' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Constants.php',
         'UtfNormal\\Utils' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Util.php',
         'UtfNormal\\Validator' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Validator.php',
+        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'ValueFormatters\\BasicNumberLocalizer' => __DIR__ . '/..' . '/data-values/number/src/ValueFormatters/BasicNumberLocalizer.php',
         'ValueFormatters\\DecimalFormatter' => __DIR__ . '/..' . '/data-values/number/src/ValueFormatters/DecimalFormatter.php',
         'ValueFormatters\\Exceptions\\MismatchingDataValueTypeException' => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters/Exceptions/MismatchingDataValueTypeException.php',
@@ -2096,6 +2107,7 @@ class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
         'Wikibase\\DataModel\\Services\\Lookup\\EntityLookupException' => __DIR__ . '/..' . '/wikibase/data-model-services/src/Lookup/EntityLookupException.php',
         'Wikibase\\DataModel\\Services\\Lookup\\EntityRedirectLookup' => __DIR__ . '/..' . '/wikibase/data-model-services/src/Lookup/EntityRedirectLookup.php',
         'Wikibase\\DataModel\\Services\\Lookup\\EntityRedirectLookupException' => __DIR__ . '/..' . '/wikibase/data-model-services/src/Lookup/EntityRedirectLookupException.php',
+        'Wikibase\\DataModel\\Services\\Lookup\\EntityRedirectTargetLookup' => __DIR__ . '/..' . '/wikibase/data-model-services/src/Lookup/EntityRedirectTargetLookup.php',
         'Wikibase\\DataModel\\Services\\Lookup\\EntityRetrievingClosestReferencedEntityIdLookup' => __DIR__ . '/..' . '/wikibase/data-model-services/src/Lookup/EntityRetrievingClosestReferencedEntityIdLookup.php',
         'Wikibase\\DataModel\\Services\\Lookup\\EntityRetrievingDataTypeLookup' => __DIR__ . '/..' . '/wikibase/data-model-services/src/Lookup/EntityRetrievingDataTypeLookup.php',
         'Wikibase\\DataModel\\Services\\Lookup\\EntityRetrievingTermLookup' => __DIR__ . '/..' . '/wikibase/data-model-services/src/Lookup/EntityRetrievingTermLookup.php',
@@ -2670,11 +2682,11 @@ class ComposerStaticInitbe86993176480f59d69686c1a5c3f42a
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitbe86993176480f59d69686c1a5c3f42a::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitbe86993176480f59d69686c1a5c3f42a::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitbe86993176480f59d69686c1a5c3f42a::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitbe86993176480f59d69686c1a5c3f42a::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitbe86993176480f59d69686c1a5c3f42a::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc580894e904f7a7452ee2d3bb72aabe8::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc580894e904f7a7452ee2d3bb72aabe8::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc580894e904f7a7452ee2d3bb72aabe8::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitc580894e904f7a7452ee2d3bb72aabe8::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitc580894e904f7a7452ee2d3bb72aabe8::$classMap;
 
         }, null, ClassLoader::class);
     }

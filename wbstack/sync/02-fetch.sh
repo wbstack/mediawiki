@@ -59,7 +59,7 @@
 
 # Extension Distributor
 # https://www.mediawiki.org/wiki/Special:ExtensionDistributor/Wikibase
-./wbstack/sync/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-41f8257.tar.gz & \
+./wbstack/sync/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-1b0d104.tar.gz & \
 
 # Custom wbstack
 ./wbstack/sync/dwnthing.sh extensions/WikibaseInWikitext https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9 & \
