@@ -1,9 +1,11 @@
 # mediawiki
 
-## 1.35-7.4-2021040926-0
+## 1.35-7.4-20210426-0
 
 - REL1_35 updates
-- Load & Enable WikibaseEdtf data type for all sites
+- Add wbstack shims to missing MediaWiki entry points
+- Load & Enable `WikibaseEdtf`, `TextExtracts`, `Popups` for all sites
+- Conditionally load `nyurik/ThatSrc`
 
 ## 1.35-7.4-20210409-0
 
