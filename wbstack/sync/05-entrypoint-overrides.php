@@ -7,12 +7,18 @@
 // Config
 $webShim = "require_once __DIR__ . '/wbstack/src/Shim/Web.php';";
 $mapOfChanges = [
-    # TODO thumb?
+    # Main maintenance entrypoint
     'maintenance/doMaintenance.php' => "require_once __DIR__ . '/../wbstack/src/Shim/Cli.php';",
+    # Main web entrypoint
+    'index.php' => $webShim,
+    # API entrypoints
     'api.php' => $webShim,
     'rest.php' => $webShim,
-    'index.php' => $webShim,
+    # Utility web entrypoints
     'load.php' => $webShim,
+    'opensearch_desc.php' => $webShim,
+    'thumb.php' => $webShim,
+    'img_auth.php' => $webShim,
 ];
 
 /////////////////

@@ -1,4 +1,8 @@
 <?php
+
+require_once __DIR__ . '/wbstack/src/Shim/Web.php';
+
+
 /**
  * The web entry point for retrieving media thumbnails, created by a MediaHandler
  * subclass or proxy request if FileRepo::getThumbProxyUrl is configured.

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Andrei Stroe",
+			"Andreyyshore",
+			"Minisarm"
+		]
+	},
+	"popups-message": "Previzualizări de pagină",
+	"popups-desc": "Afișează previzualizări când utilizatorul trece cu cursorul peste o legătură internă",
+	"popups-settings-title": "Previzualizare pagină",
+	"popups-settings-option-simple": "Activează",
+	"popups-settings-option-simple-description": "Obțineți o previzualizare rapidă a unui subiect în timp ce lecturați o pagină.",
+	"popups-settings-option-advanced": "Avansat",
+	"popups-settings-option-advanced-description": "Vedeți previzualizări ale legăturilor și accesați meniuri cu funcții de editare. Această metodă este folosită de mulți dintre editori.",
+	"popups-settings-option-off": "Dezactivează",
+	"popups-settings-save": "Salvare",
+	"popups-settings-help-ok": "Realizat",
+	"popups-settings-cancel": "Revocare",
+	"popups-settings-help": "Puteți reactiva previzualizările accesând legătura din subsolul paginii.",
+	"popups-settings-enable": "Activează previzualizările",
+	"prefs-reading": "Opțiuni lectură"
+}

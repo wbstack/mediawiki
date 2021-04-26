@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ernác",
+			"Iltever"
+		]
+	},
+	"popups-message": "Ачылыучу терезеле",
+	"popups-desc": "Бир бетге элтген джибериуге курсорну келтиргенде, бетни ичиндегисин суратлагъан ачылыучу терезени кёргюзтеди",
+	"popups-settings-title": "Бетге ал къарау",
+	"popups-settings-option-simple": "Тюз",
+	"popups-settings-option-simple-description": "Бетде биринчи айтым бла суратны кёргюзтеди.\nБу, окъуучулагъа рекомендация этиледи.",
+	"popups-settings-option-advanced": "Кенгерген",
+	"popups-settings-option-off": "Ал къарауну джукълат",
+	"popups-settings-save": "Сакъла",
+	"popups-settings-help-ok": "ОК",
+	"popups-settings-cancel": "Ызына ал",
+	"popups-settings-help": "Бетни тюбюндеги тиек бла алдан къарау (превью) амалны джандырыргъа боллукъсуз.",
+	"popups-settings-enable": "Ал къарауну джандыр"
+}

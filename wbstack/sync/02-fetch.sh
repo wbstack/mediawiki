@@ -5,19 +5,19 @@
 ###########
 # core
 ###########
-./wbstack/sync/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/50af9adc3c8db3b5321c06322cf67a28f5224bbe
+./wbstack/sync/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/2e18b74da807bb49745ecd5d69703c4c39f3b03e
 
 ###########
 # extensions
 ###########
 ./wbstack/sync/dwnthing.sh extensions/RevisionSlider https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/d1a6af207e26e220d93d16381a58055259575d3b & \
 ./wbstack/sync/dwnthing.sh extensions/Mailgun https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/7b0fe10c1639ec90eb056eb50e6d015ed5607fb7 & \
-./wbstack/sync/dwnthing.sh extensions/ConfirmEdit https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/eceeda60d620499a6f6990b08b0d5a264606c2de & \
+./wbstack/sync/dwnthing.sh extensions/ConfirmEdit https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/2c4f3dd87745bad392f4576412d158ac249a9646 & \
 ./wbstack/sync/dwnthing.sh extensions/ConfirmAccount https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmAccount/zip/341181fc7acdc85ee2b507b76286787fbf2fda1f & \
 ./wbstack/sync/dwnthing.sh extensions/Nuke https://codeload.github.com/wikimedia/mediawiki-extensions-Nuke/zip/3de3b0f8889a10a824c205e6258c63da3afd2268 & \
-./wbstack/sync/dwnthing.sh extensions/InviteSignup https://codeload.github.com/wikimedia/mediawiki-extensions-InviteSignup/zip/d84690985bb15ef01b0b61d9e32a2ea79d63d15e & \
+./wbstack/sync/dwnthing.sh extensions/InviteSignup https://codeload.github.com/wikimedia/mediawiki-extensions-InviteSignup/zip/9bfed949f3aeb9cedabd60e8985d4294cf8d2b4c & \
 ./wbstack/sync/dwnthing.sh extensions/TorBlock https://codeload.github.com/wikimedia/mediawiki-extensions-TorBlock/zip/ac05aa0294b2bd5a37580c600517a62d60e28a05 & \
-./wbstack/sync/dwnthing.sh extensions/Elastica https://codeload.github.com/wikimedia/mediawiki-extensions-Elastica/zip/c101a4c17fff7e8711b0199cc9f7c342699e1221 & \
+./wbstack/sync/dwnthing.sh extensions/Elastica https://codeload.github.com/wikimedia/mediawiki-extensions-Elastica/zip/63401ad6e4b7f29d7697aa751364b29b172ea174 & \
 ./wbstack/sync/dwnthing.sh extensions/CirrusSearch https://codeload.github.com/wikimedia/mediawiki-extensions-CirrusSearch/zip/6379aa8cda5a43e6852213dba9f0196d8d412d8b & \
 ./wbstack/sync/dwnthing.sh extensions/UniversalLanguageSelector https://codeload.github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/zip/a3c19a98c3d1b90405af12f0680defee9efac42d & \
 ./wbstack/sync/dwnthing.sh extensions/cldr https://codeload.github.com/wikimedia/mediawiki-extensions-cldr/zip/fec3e2945455099866f79b314e58f9854dde30e6 & \
@@ -51,6 +51,8 @@
 ./wbstack/sync/dwnthing.sh extensions/Auth_remoteuser https://codeload.github.com/wikimedia/mediawiki-extensions-Auth_remoteuser/zip/6f570b83ff3fe9502a43f7894533273ff37d41f2 & \
 ./wbstack/sync/dwnthing.sh extensions/WikibaseManifest https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseManifest/zip/ebabf21b37f801f25d4802024cdc2dcda21a1f0f & \
 ./wbstack/sync/dwnthing.sh extensions/WikiHiero https://codeload.github.com/wikimedia/mediawiki-extensions-WikiHiero/zip/c32ec80791eca5a031963d1c3029e0bc5b71808c & \
+./wbstack/sync/dwnthing.sh extensions/TextExtracts https://codeload.github.com/wikimedia/mediawiki-extensions-TextExtracts/zip/4a617d3a46b2541d48fbf7437da3c31f27ab79a8 & \
+./wbstack/sync/dwnthing.sh extensions/Popups https://codeload.github.com/wikimedia/mediawiki-extensions-Popups/zip/dccd60752353eac1063a79f81a8059b3b06b9353 & \
 
 
 # Automatic script skips this one
@@ -59,7 +61,7 @@
 
 # Extension Distributor
 # https://www.mediawiki.org/wiki/Special:ExtensionDistributor/Wikibase
-./wbstack/sync/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-41f8257.tar.gz & \
+./wbstack/sync/dwnthing.sh extensions/Wikibase https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_35-1b0d104.tar.gz & \
 
 # Custom wbstack
 ./wbstack/sync/dwnthing.sh extensions/WikibaseInWikitext https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9 & \
@@ -69,6 +71,8 @@
 
 # Elsewhere
 ./wbstack/sync/dwnthing.sh extensions/EmbedVideo https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/archive/v2.9.0/EmbedVideo-v2.9.0.zip & \
+./wbstack/sync/dwnthing.sh extensions/WikibaseEdtf https://codeload.github.com/ProfessionalWiki/WikibaseEdtf/zip/9b9efd4f209fffe39fd1e677b0fbe19275644ba1 & \
+./wbstack/sync/dwnthing.sh extensions/ThatSrc https://codeload.github.com/nyurik/ThatSrc/zip/3e039311504eb82f8c5c488a457b9e376b5cf7e3 & \
 
 ###########
 # skins
@@ -76,7 +80,7 @@
 ./wbstack/sync/dwnthing.sh skins/Vector https://codeload.github.com/wikimedia/Vector/zip/771c8764c856a2b9ed2a8ff84ad5cfd38cdfaf5e & \
 ./wbstack/sync/dwnthing.sh skins/Timeless https://codeload.github.com/wikimedia/mediawiki-skins-Timeless/zip/c2b39e7b08ffa210c6cda09ee4da89a0b3e64345 & \
 ./wbstack/sync/dwnthing.sh skins/Modern https://codeload.github.com/wikimedia/mediawiki-skins-Modern/zip/d84e84e7b08cc03963099081a269e26b3030b586 & \
-./wbstack/sync/dwnthing.sh skins/MinervaNeue https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/4f165666d0f69fa4d70a29d3221f2147fc6255ae & \
+./wbstack/sync/dwnthing.sh skins/MinervaNeue https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/d82e32c7038c86aa88b917212ebbf35db76ca296 & \
 
 # And wait for all the background tasks to be done...
 wait
