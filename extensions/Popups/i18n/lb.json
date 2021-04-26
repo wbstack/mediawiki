@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"popups-message": "Biller wéi Säiten ausgesinn",
+	"popups-desc": "Weist Biller wéi et ausgesäit wann de Benotzer mat der Maus iwwer e Säitelink fiert.",
+	"popups-settings-title": "Säit kucken ouni ofzespäicheren",
+	"popups-settings-option-simple": "Aschalten",
+	"popups-settings-option-simple-description": "Et séieren Iwwerbléck iwwer en Thema kréien iwwer dem Liese vun enger Säit.",
+	"popups-settings-option-advanced": "Erweidert",
+	"popups-settings-option-off": "Ausschalten",
+	"popups-settings-save": "Späicheren",
+	"popups-settings-help-ok": "Fäerdeg",
+	"popups-settings-cancel": "Ofbriechen",
+	"popups-settings-enable": "Kucken ouni ze späicheren aktivéieren",
+	"popups-preview-no-preview": "Et gouf e Problem fir dëst ze weisen",
+	"popups-preview-footer-read": "Op dës Säit goen",
+	"popups-preview-disambiguation": "Dësen Titel bezitt sech op méi wéi eng Säit",
+	"popups-preview-disambiguation-link": "Änlech Säite weisen",
+	"prefs-reading": "Lies-Astellungen",
+	"popups-prefs-optin-title": "Miniatur vun der säit (séier gewise kréie wéi e Sujet duergestallt ass iwwer dem Liese vun enger Säit):",
+	"popups-prefs-optin-enabled-label": "Aschalten",
+	"popups-prefs-optin-disabled-label": "Ausschalten",
+	"popups-refpreview-reference": "Referenz",
+	"popups-refpreview-book": "Buch-Referenz",
+	"popups-refpreview-journal": "Zeitungs-Referenz",
+	"popups-refpreview-news": "Neiegkeeten-Referenz",
+	"popups-refpreview-web": "Internet-Referenz",
+	"popups-refpreview-jump-to-reference": "Op d'Referenz sprangen"
+}

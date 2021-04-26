@@ -51,6 +51,8 @@
 ./wbstack/sync/dwnthing.sh extensions/Auth_remoteuser https://codeload.github.com/wikimedia/mediawiki-extensions-Auth_remoteuser/zip/6f570b83ff3fe9502a43f7894533273ff37d41f2 & \
 ./wbstack/sync/dwnthing.sh extensions/WikibaseManifest https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseManifest/zip/ebabf21b37f801f25d4802024cdc2dcda21a1f0f & \
 ./wbstack/sync/dwnthing.sh extensions/WikiHiero https://codeload.github.com/wikimedia/mediawiki-extensions-WikiHiero/zip/c32ec80791eca5a031963d1c3029e0bc5b71808c & \
+./wbstack/sync/dwnthing.sh extensions/TextExtracts https://codeload.github.com/wikimedia/mediawiki-extensions-TextExtracts/zip/4a617d3a46b2541d48fbf7437da3c31f27ab79a8 & \
+./wbstack/sync/dwnthing.sh extensions/Popups https://codeload.github.com/wikimedia/mediawiki-extensions-Popups/zip/dccd60752353eac1063a79f81a8059b3b06b9353 & \
 
 
 # Automatic script skips this one

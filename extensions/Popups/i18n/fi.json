@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kyykaarme",
+			"Majavah",
+			"Mikahama",
+			"Nike",
+			"Pxos",
+			"Pyscowicz",
+			"Stryn"
+		]
+	},
+	"popups-message": "Esikatselut",
+	"popups-desc": "Näyttää esikatselut, kun käyttäjä vie hiiren linkin päälle",
+	"popups-settings-title": "Sivun esikatselu",
+	"popups-settings-option-simple": "Ota käyttöön",
+	"popups-settings-option-simple-description": "Näytä aiheiden pikaesikatselut lukutilassa.",
+	"popups-settings-option-advanced": "Laajennettu",
+	"popups-settings-option-off": "Poista käytöstä",
+	"popups-settings-save": "Tallenna",
+	"popups-settings-help-ok": "Valmis",
+	"popups-settings-cancel": "Peruuta",
+	"popups-settings-enable": "Ota esikatselu käyttöön",
+	"popups-preview-no-preview": "Virheen vuoksi esikatselua ei voida näyttää",
+	"popups-preview-footer-read": "Mene tälle sivulle",
+	"popups-preview-disambiguation": "Tämä sivun nimi liittyy useampaan kuin yhteen sivuun",
+	"popups-preview-disambiguation-link": "Katso samankaltaisia sivuja",
+	"prefs-reading": "Lukemisen asetukset",
+	"popups-prefs-optin-title": "Sivun esikatselut (näe nopeasti aiheen esikatselut sivua lukiessasi):",
+	"popups-prefs-optin-enabled-label": "Ota käyttöön",
+	"popups-prefs-optin-disabled-label": "Poista käytöstä",
+	"popups-prefs-disable-nav-gadgets-info": "Sinun täytyy ottaa pois käytöstä [[$1 | Navigation popups -pienoisohjelma]] ottaaksesi sivujen esikatselut käyttöön.",
+	"popups-prefs-conflicting-gadgets-info": "Jotkin pienoisohjemat ja muut omien asetusten muutokset voivat vaikuttaa siihen, miten tämä ominaisuus toimii. Jos sinulla on ongelmia, käy läpi omat pienoisohjelmasi ja käyttäjäskriptisi, myös järjestelmänlaajuiset."
+}

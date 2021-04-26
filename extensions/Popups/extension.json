@@ -1,0 +1,225 @@
+{
+	"name": "Popups",
+	"namemsg": "popups-message",
+	"author": [
+		"Prateek Saxena",
+		"[https://www.mediawiki.org/wiki/Reading/Web/Team Readers Web Team]",
+		"Yair Rand"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Popups",
+	"descriptionmsg": "popups-desc",
+	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.31.0"
+	},
+	"AutoloadNamespaces": {
+		"Popups\\": "includes/"
+	},
+	"ConfigRegistry": {
+		"popups": "GlobalVarConfig::newInstance"
+	},
+	"Hooks": {
+		"BeforePageDisplay": "Popups\\PopupsHooks::onBeforePageDisplay",
+		"ResourceLoaderGetConfigVars": "Popups\\PopupsHooks::onResourceLoaderGetConfigVars",
+		"GetPreferences": "Popups\\PopupsHooks::onGetPreferences",
+		"PreferencesFormPreSave": "Popups\\UserPreferencesChangeHandler::onPreferencesFormPreSave",
+		"UserGetDefaultOptions": "Popups\\PopupsHooks::onUserGetDefaultOptions",
+		"MakeGlobalVariablesScript": "Popups\\PopupsHooks::onMakeGlobalVariablesScript",
+		"LocalUserCreated": "Popups\\PopupsHooks::onLocalUserCreated",
+		"GetBetaFeaturePreferences": "Popups\\PopupsHooks::onGetBetaFeaturePreferences"
+	},
+	"MessagesDirs": {
+		"Popups": [
+			"i18n"
+		]
+	},
+	"attributes": {
+		"EventLogging": {
+			"Schemas": {
+				"Popups": 18904225,
+				"ReferencePreviewsPopups": 19489344,
+				"VirtualPageView": 17780078
+			}
+		}
+	},
+	"config": {
+		"PopupsVirtualPageViews": {
+			"description": "@var bool: Whether the extension should log virtual pageviews.",
+			"value": false
+		},
+		"PopupsHideOptInOnPreferencesPage": {
+			"description": "@var bool: Whether the option to enable/disable Page Previews should be hidden on Preferences page. False by default",
+			"value": false
+		},
+		"PopupsOptInDefaultState": {
+			"description": "@var string:['1'|'0'] Default Page Previews visibility for old accounts. Has to be a string as a compatibility with beta feature settings. For more info see @T191888",
+			"value": "1"
+		},
+		"PopupsOptInStateForNewAccounts": {
+			"description": "@var string:['1'|'0'] Default Page Previews visibility for newly created accounts (from Q2 2018). For more info see @T191888",
+			"value": "1"
+		},
+		"PopupsConflictingNavPopupsGadgetName": {
+			"description": "@var string: Navigation popups gadget name",
+			"value": "Navigation_popups"
+		},
+		"PopupsGateway": {
+			"description": "Which gateway to use for fetching Popups data. Available options: [mwApiPlain|restbasePlain|restbaseHTML]. Full and always up to date list is available in src/gateway/index.js",
+			"value": "mwApiPlain"
+		},
+		"PopupsRestGatewayEndpoint": {
+			"description": "Specify a REST endpoint where summaries should be sourced from. Endpoint must meet the spec at https://www.mediawiki.org/wiki/Specs/Summary/1.2.0",
+			"value": "/api/rest_v1/page/summary/"
+		},
+		"PopupsReferencePreviews": {
+			"description": "Temporary feature flag to disable reference previews during developement.",
+			"value": true
+		},
+		"PopupsReferencePreviewsBetaFeature": {
+			"description": "Make Reference Previews a Beta feature.",
+			"value": true
+		},
+		"PopupsEventLogging": {
+			"description": "Whether we should log events. Note if this is enabled without using that variable events will be logged for all users without any sampling! Be careful!",
+			"value": false
+		},
+		"PopupsStatsvSamplingRate": {
+			"description": "Sampling rate for logging performance data to statsv.",
+			"value": 0
+		},
+		"PopupsPageDisabled": {
+			"description": "List of pages that should not show Popups. Includes subpages. These pages are subject to the HTML cache policy of the wiki. A purge on these pages maybe needed to see the effect of this configuration variable. Every excluded page should be defined by a canonical name, eg: Special:Userlogin",
+			"value": [
+				"Special:CreateAccount",
+				"Special:GlobalRenameRequest",
+				"Special:Userlogin",
+				"Special:MergeAccount",
+				"Special:ChangeCredentials",
+				"Special:OAuthListConsumers",
+				"Special:GlobalUserRights",
+				"Special:Notifications",
+				"Special:UserRights",
+				"Special:Upload",
+				"Special:VipsTest",
+				"Special:ApiFeatureUsage",
+				"Special:ExpandTemplates",
+				"Special:GadgetUsage",
+				"Special:GraphSandbox",
+				"Special:TemplateSandbox",
+				"Special:MostLinkedFiles",
+				"Special:Book"
+			]
+		}
+	},
+	"ResourceModules": {
+		"ext.popups.images": {
+			"selector": ".mw-ui-icon-{name}:before",
+			"class": "ResourceLoaderImageModule",
+			"images": {
+				"popups-settings": "resources/ext.popups.images/cog.svg",
+				"popups-close": "resources/ext.popups.images/close.svg",
+				"preview-generic": {
+					"file": {
+						"ltr": "resources/ext.popups.images/sad-face-ltr.svg",
+						"rtl": "resources/ext.popups.images/sad-face-rtl.svg"
+					}
+				},
+				"footer": {
+					"file": {
+						"ltr": "resources/ext.popups.images/footer-ltr.svg",
+						"rtl": "resources/ext.popups.images/footer-rtl.svg"
+					}
+				},
+				"preview-disambiguation": {
+					"file": {
+						"ltr": "resources/ext.popups.images/articles-ltr.svg",
+						"rtl": "resources/ext.popups.images/articles-rtl.svg"
+					}
+				},
+				"reference-generic": "resources/ext.popups.images/reference.svg",
+				"reference-book": {
+					"file": {
+						"ltr": "resources/ext.popups.images/book-ltr.svg",
+						"rtl": "resources/ext.popups.images/book-rtl.svg"
+					}
+				},
+				"reference-journal": {
+					"file": {
+						"ltr": "resources/ext.popups.images/journal-ltr.svg",
+						"rtl": "resources/ext.popups.images/journal-rtl.svg"
+					}
+				},
+				"reference-news": {
+					"file": {
+						"ltr": "resources/ext.popups.images/newspaper-ltr.svg",
+						"rtl": "resources/ext.popups.images/newspaper-rtl.svg"
+					}
+				},
+				"reference-web": {
+					"file": {
+						"ltr": "resources/ext.popups.images/browser-ltr.svg",
+						"rtl": "resources/ext.popups.images/browser-rtl.svg"
+					}
+				}
+			}
+		},
+		"ext.popups": {
+			"targets": [ "desktop", "mobile" ],
+			"scripts": [
+				"resources/ext.popups/index.js"
+			]
+		},
+		"ext.popups.main": {
+			"targets": [ "desktop", "mobile" ],
+			"scripts": [
+				"resources/dist/index.js"
+			],
+			"styles": [
+				"src/ui/index.less"
+			],
+			"messages": [
+				"popups-settings-title",
+				"popups-settings-option-simple",
+				"popups-settings-option-simple-description",
+				"popups-settings-option-advanced",
+				"popups-settings-option-advanced-description",
+				"popups-settings-option-off",
+				"popups-settings-save",
+				"popups-settings-cancel",
+				"popups-settings-enable",
+				"popups-settings-help",
+				"popups-settings-help-ok",
+				"popups-preview-no-preview",
+				"popups-preview-footer-read",
+				"popups-preview-disambiguation",
+				"popups-preview-disambiguation-link",
+				"popups-refpreview-reference",
+				"popups-refpreview-book",
+				"popups-refpreview-journal",
+				"popups-refpreview-news",
+				"popups-refpreview-web",
+				"popups-refpreview-jump-to-reference"
+			],
+			"dependencies": [
+				"ext.popups.images",
+				"mediawiki.experiments",
+				"mediawiki.jqueryMsg",
+				"mediawiki.storage",
+				"mediawiki.Title",
+				"mediawiki.ui.button",
+				"mediawiki.ui.icon",
+				"mediawiki.Uri",
+				"mediawiki.user",
+				"mediawiki.util"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteExtPath": "Popups"
+	},
+	"ServiceWiringFiles": [
+		"includes/ServiceWiring.php"
+	],
+	"manifest_version": 2
+}

@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Indus Asia",
+			"KaleemBhatti",
+			"Mehtab ahmed",
+			"Tweety"
+		]
+	},
+	"popups-message": "پيش-نگاھون",
+	"popups-desc": "جڏھن ڪو واپرائيندڙ ڳنڍڻي جي مٿان مائوس رکي تہ پيش-نگاھ ڏيکاري ٿو",
+	"popups-settings-title": "صحفي جي نمائش",
+	"popups-settings-option-simple": "قابل-بڻايو",
+	"popups-settings-option-simple-description": "پڙهڻ دوران عنوانن بابت پيش-نگاھ ڏسو",
+	"popups-settings-option-advanced": "متقدم",
+	"popups-settings-option-off": "غيرفعال",
+	"popups-settings-save": "سانڍيو",
+	"popups-settings-help-ok": "ٿي ويو",
+	"popups-settings-cancel": "رد",
+	"popups-settings-enable": "پيش-نگاھ فعاليو",
+	"popups-preview-no-preview": "ھي پيش-نگاھ ڏيکارڻ ۾ ڪو مسئلو ھيو",
+	"popups-preview-footer-read": "ھن صفحي تي وڃو",
+	"popups-preview-disambiguation": "ھي عنوان ھڪ کان وڌيڪ صفحن سان تعلق رکي ٿو",
+	"popups-preview-disambiguation-link": "ھڪجڙا صفحا ڏيکاريو",
+	"prefs-reading": "پڙھڻ جون ترجيحون",
+	"popups-prefs-optin-enabled-label": "قابل-بڻايو",
+	"popups-prefs-optin-disabled-label": "غيرفعال",
+	"popups-refpreview-reference": "حوالو",
+	"popups-refpreview-book": "ڪتابي حوالو",
+	"popups-refpreview-journal": "جرنل جو حوالو",
+	"popups-refpreview-news": "خبر جو حوالو",
+	"popups-refpreview-web": "ويب حوالو",
+	"popups-refpreview-jump-to-reference": "حوالي ڏانھن ٽپ ڏيو",
+	"popups-refpreview-user-preference-label": "حوالو پيش-نگاھون (فٽ-نوٽن جون تڪڙيون پيش-نگاھون وٺو)",
+	"popups-refpreview-beta-feature-message": "حوالو پيش-نگاھون"
+}
