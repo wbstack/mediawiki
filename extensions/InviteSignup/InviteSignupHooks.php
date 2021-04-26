@@ -36,7 +36,8 @@ class InviteSignupHooks {
 				if ( !is_array( $wgWhitelistRead ) ) {
 					$wgWhitelistRead = [];
 				}
-				array_push( $wgWhitelistRead, "Special:CreateAccount" );
+
+				$wgWhitelistRead[] = $title->getPrefixedText();
 			}
 		}
 	}
