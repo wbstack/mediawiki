@@ -377,6 +377,11 @@ $wgWikibaseInWikitextSparqlDefaultUi = $wgServer . '/query';
 # WikibaseEdtf
 wfLoadExtension( 'WikibaseEdtf' );
 
+# ThatSrc: Only load it when manually enabled on a wiki https://github.com/wbstack/mediawiki/issues/57#issuecomment-827116895
+if( $wikiInfo->getSetting('nyurikThatSrcEnable') ) {
+    wfLoadExtension( 'ThatSrc' );
+}
+
 # TwoColConflict
 wfLoadExtension( 'TwoColConflict' );
 // Enable the feature by default
