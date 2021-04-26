@@ -1,5 +1,10 @@
 # mediawiki
 
+## 1.35-7.4-2021040926-0
+
+- REL1_35 updates
+- Load & Enable WikibaseEdtf data type for all sites
+
 ## 1.35-7.4-20210409-0
 
 - Multiple 1.35 branch updates
