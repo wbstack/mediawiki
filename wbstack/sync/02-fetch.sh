@@ -69,6 +69,7 @@
 
 # Elsewhere
 ./wbstack/sync/dwnthing.sh extensions/EmbedVideo https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/archive/v2.9.0/EmbedVideo-v2.9.0.zip & \
+./wbstack/sync/dwnthing.sh extensions/WikibaseEdtf https://codeload.github.com/ProfessionalWiki/WikibaseEdtf/zip/9b9efd4f209fffe39fd1e677b0fbe19275644ba1 & \
 
 ###########
 # skins

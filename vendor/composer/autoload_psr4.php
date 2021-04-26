@@ -34,6 +34,8 @@ return array(
     'Symfony\\Polyfill\\Php72\\' => array($vendorDir . '/symfony/polyfill-php72'),
     'Symfony\\Polyfill\\Intl\\Normalizer\\' => array($vendorDir . '/symfony/polyfill-intl-normalizer'),
     'Symfony\\Polyfill\\Intl\\Idn\\' => array($vendorDir . '/symfony/polyfill-intl-idn'),
+    'Symfony\\Contracts\\Translation\\' => array($vendorDir . '/symfony/translation-contracts'),
+    'Symfony\\Component\\Translation\\' => array($vendorDir . '/symfony/translation'),
     'Serializers\\' => array($vendorDir . '/serialization/serialization/src/Serializers'),
     'RemexHtml\\' => array($vendorDir . '/wikimedia/remex-html/RemexHtml'),
     'React\\Promise\\' => array($vendorDir . '/react/promise/src'),
@@ -63,6 +65,7 @@ return array(
     'Firebase\\JWT\\' => array($vendorDir . '/firebase/php-jwt/src'),
     'Elasticsearch\\' => array($vendorDir . '/elasticsearch/elasticsearch/src/Elasticsearch'),
     'Elastica\\' => array($vendorDir . '/ruflin/elastica/lib/Elastica'),
+    'EDTF\\' => array($vendorDir . '/professional-wiki/edtf/src'),
     'Diff\\' => array($vendorDir . '/diff/diff/src'),
     'Deserializers\\' => array($vendorDir . '/serialization/serialization/src/Deserializers'),
     'Defuse\\Crypto\\' => array($vendorDir . '/defuse/php-encryption/src'),
@@ -72,5 +75,6 @@ return array(
     'DataValues\\' => array($vendorDir . '/data-values/common/src/DataValues', $vendorDir . '/data-values/data-values/src/DataValues'),
     'Composer\\Semver\\' => array($vendorDir . '/composer/semver/src'),
     'Composer\\Installers\\' => array($vendorDir . '/composer/installers/src/Composer/Installers'),
+    'Carbon\\' => array($vendorDir . '/nesbot/carbon/src/Carbon'),
     'CLDRPluralRuleParser\\' => array($vendorDir . '/wikimedia/cldr-plural-rule-parser/src'),
 );

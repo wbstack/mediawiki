@@ -374,6 +374,9 @@ if( $wikiInfo->getSetting('wwExtEnableInviteSignup') ) {
 wfLoadExtension( 'WikibaseInWikitext' ); // custom wbstack extension
 $wgWikibaseInWikitextSparqlDefaultUi = $wgServer . '/query';
 
+# WikibaseEdtf
+wfLoadExtension( 'WikibaseEdtf' );
+
 # TwoColConflict
 wfLoadExtension( 'TwoColConflict' );
 // Enable the feature by default
