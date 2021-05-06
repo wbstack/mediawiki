@@ -1,5 +1,9 @@
 # mediawiki
 
+## 1.35-7.4-20210506-0
+
+- Use Wikibase 1.35 wmde.1 release
+
 ## 1.35-7.4-20210426-0
 
 - REL1_35 updates
