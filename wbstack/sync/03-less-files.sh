@@ -9,7 +9,7 @@ find ./ -mindepth 1 -regex '^./\(tests\|docs\)\(/.*\)?' -delete
 # General stuff
 find ./ -mindepth 1 -regex '^./\(extensions\|skins\)/\w+/\(tests\|.phan\|.storybook\|.vscode\|.gitignore\|.eslintrc.json\|.gitreview\|.phpcs.xml\|Gruntfile.js\|Doxyfile\|.stylelintrc.json\|.rubocop\(_todo\)?.yml\)\(/.*\)?' -delete
 
-# Things from extension distributor
+# Wikibase packaged vendor and composer lock (TODO do this for all skins and extensions?)
 find ./ -mindepth 1 -regex '^./extensions/Wikibase/\(vendor\|composer.lock\)\(/.*\)?' -delete
 
 # Extension specific
