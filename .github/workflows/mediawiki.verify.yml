@@ -27,7 +27,7 @@ jobs:
       run: php -S localhost:8002 ./wbstack/test/server.php  &> phpout-api.log &
 
     - name: Wait for server to accept connections
-      uses: nick-invision/retry@v2
+      uses: nick-invision/retry@v2.4.0
       with:
         max_attempts: 10
         retry_wait_seconds: 1
