@@ -21,18 +21,13 @@ services:
     environment:
       - PLATFORM_API_BACKEND_HOST=api.svc
       - DB_SERVER=mysql.svc:3306
-      - MW_ADMIN_NAME=${MW_ADMIN_NAME}
-      - MW_ADMIN_PASS=${MW_ADMIN_PASS}
-      - MW_ADMIN_EMAIL=${MW_ADMIN_EMAIL}
-      - MW_WG_SECRET_KEY=${MW_SECRET_KEY}
       - DB_USER=${DB_USER}
       - DB_PASS=${DB_PASS}
       - DB_NAME=${DB_NAME}
 
-      - REDIS_HOST=redis.svc
-      - REDIS_DB="2"
-      - REDIS_CACHE_DB="3"
-      - REDIS_PREFIX=wbstack_api
+      - MW_REDIS_SERVER_READ=redis.svc
+      - MW_REDIS_SERVER_WRITE=redis.svc
+      - MW_REDIS_PASSWORD=
 
     volumes:
       - ".:/var/www/html/w:cached"
