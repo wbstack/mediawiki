@@ -1,5 +1,12 @@
 # mediawiki
 
+Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
+
+## 1.35-7.4-20210623-0
+
+- [Update MediaWiki & Main Skins / Extensions 1.35 branches](https://github.com/wbstack/mediawiki/pull/90)
+- [Update WikibaseEdtf to 1.2.0](https://github.com/wbstack/mediawiki/pull/91)
+
 ## 1.35-7.4-20210506-0
 
 - Use Wikibase 1.35 wmde.1 release
