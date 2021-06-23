@@ -19,9 +19,9 @@ It an open source project developed and maintained by [Professional.Wiki]. Contr
 
 ## Platform requirements
 
-* [PHP] 7.4 or later, including PHP 8.0
-* [MediaWiki] 1.35
-* [Wikibase Repository] REL1_35
+* [PHP] 7.4 or later, including PHP 8.x
+* [MediaWiki] 1.35.x (1.36.x probably also works)
+* [Wikibase Repository] REL1_35 (REL1_36 probably also works)
 
 See the [release notes](#release-notes) for more information on the different versions of this extension.
 
@@ -36,24 +36,32 @@ On the commandline, go to your wikis root directory. Then run these two commands
 
 ```shell script
 COMPOSER=composer.local.json composer require --no-update professional-wiki/wikibase-edtf:*
+```
+```shell script
 composer update professional-wiki/wikibase-edtf --no-dev -o
 ```
 
 **Enabling the extension**
 
-Then enable the extension by adding the following to the bottom of your wikis `LocalSettings.php` file:
+Then enable the extension by adding the following to the bottom of your wikis "LocalSettings.php" file:
 
 ```php
 wfLoadExtension( 'WikibaseEdtf' );
 ```
 
-You can verify the extension was enabled successfully by opening your wikis Special:Version page in your browser.
+You can verify the extension was enabled successfully by opening your wiki's "Special:Version" page in your browser.
 
 ## Running the tests
 
 * PHP tests: `php tests/phpunit/phpunit.php -c extensions/WikibaseEdtf/`
 
 ## Release notes
+
+### Version 1.2.0 - 2021-04-28
+
+* Improved humanization of sets
+* Improved validation of intervals and sets
+* Fixed DoS vector
 
 ### Version 1.1.0 - 2021-04-04
 

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487
+class ComposerStaticInitd944adf0b06d60851377da2568060c25
 {
     public static $files = array (
         '7cb394c3af2b1ae832979b0368e0da62' => __DIR__ . '/..' . '/data-values/data-values/DataValues.php',
@@ -845,6 +845,10 @@ class ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487
         'EDTF\\Model\\Qualification' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/Qualification.php',
         'EDTF\\Model\\Season' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/Season.php',
         'EDTF\\Model\\Set' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/Set.php',
+        'EDTF\\Model\\SetElement' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/SetElement.php',
+        'EDTF\\Model\\SetElement\\OpenSetElement' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/SetElement/OpenSetElement.php',
+        'EDTF\\Model\\SetElement\\RangeSetElement' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/SetElement/RangeSetElement.php',
+        'EDTF\\Model\\SetElement\\SingleDateSetElement' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/SetElement/SingleDateSetElement.php',
         'EDTF\\Model\\UnspecifiedDigit' => __DIR__ . '/..' . '/professional-wiki/edtf/src/Model/UnspecifiedDigit.php',
         'EDTF\\PackagePrivate\\Carbon\\CarbonFactory' => __DIR__ . '/..' . '/professional-wiki/edtf/src/PackagePrivate/Carbon/CarbonFactory.php',
         'EDTF\\PackagePrivate\\Carbon\\DatetimeFactoryException' => __DIR__ . '/..' . '/professional-wiki/edtf/src/PackagePrivate/Carbon/DatetimeFactoryException.php',
@@ -2917,11 +2921,11 @@ class ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInite8f9349e176f5d9d48fec1414b6e1487::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitd944adf0b06d60851377da2568060c25::$classMap;
 
         }, null, ClassLoader::class);
     }
