@@ -48,11 +48,12 @@ services:
     restart: unless-stopped
     volumes:
       - mediawiki-mysql-data:/var/lib/mysql
+      - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
     environment:
       # CONFIG - Change the default values below (should match values passed to wikibase)
-      MYSQL_DATABASE: 'my_wiki'
-      MYSQL_USER: 'wikiuser'
-      MYSQL_PASSWORD: 'sqlpass'
+      MYSQL_DATABASE: 'mwdb_somedb'
+      MYSQL_USER: 'mwu_someuser'
+      MYSQL_PASSWORD: 'somepassword'
       MYSQL_ROOT_PASSWORD: 'toor'
     networks:
       default:
