@@ -19,6 +19,20 @@ This response is then used to configure MediaWiki.
 An internal flavour of this application also exists that loads some internal only API modules.
 These can be found in the `src/Internal` directory.
 
+## Environment variables
+
+- `MW_DB_SERVER_MASTER`: points to a writable mysql service
+- `MW_DB_SERVER_REPLICA`: points to a readable mysql service
+- `MW_REDIS_SERVER_WRITE`: points to a writable redis service
+- `MW_REDIS_SERVER_READ`: points to a readable redis service
+- `MW_REDIS_PASSWORD`
+- `MW_MAILGUN_API_KEY`
+- `MW_MAILGUN_DOMAIN`
+- `MW_EMAIL_DOMAIN`
+- `MW_RECAPTCHA_SITEKEY`
+- `MW_RECAPTCHA_SECRETKEY`
+- `PLATFORM_API_BACKEND_HOST`: points to an internal mode wbstack api service
+
 ## Build scripts
 
 ### sync/updateFetchScript.sh
