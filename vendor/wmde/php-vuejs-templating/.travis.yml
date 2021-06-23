@@ -1,15 +1,15 @@
 language: php
 
+dist: xenial
+
 php:
-  - 5.5
-  - 5.6
-  - 7.0
-  - 7.1
   - 7.2
-  - hhvm
+  - 7.3
+  - 7.4
+  - 8.0
 
 sudo: false
 
 install: travis_retry composer install --prefer-source
 
-script: composer phpunit
+script: composer test
