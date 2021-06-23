@@ -72,6 +72,7 @@ class GlobalSet {
         // TODO in reality all of this needs to change...
 
         $info = self::getInfoFromApi( $requestDomain );
+
         // Cache positive results for 10 seconds, negative for 2
         $ttl = $info ? 10 : 2;
         self::writeInfoToApcCache( $requestDomain, $info, $ttl );
@@ -109,13 +110,14 @@ class GlobalSet {
      */
     private static function getInfoFromApi( $requestDomain ) {
         // START generic getting of wiki info from domain
-        $url = 'http://' . getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/wiki/getWikiForDomain?domain=' . urlencode($requestDomain);
+        $url = 'http://' . getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/wiki/getWikiForDomain/?domain=' . urlencode($requestDomain);
         $headers = [
             'X-Backend-Service: backend-service',
             'X-Backend-Token: backend-token',
         ];
 
         $client = curl_init($url);
+        // TODO MAKE CURL FOLLOW REDIRECT FOR DEV
         curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, true);
         curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WBStackInfo::getInfoFromApi" );

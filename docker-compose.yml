@@ -1,0 +1,79 @@
+version: '2.2'
+
+services:
+  mediawiki:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    links:
+      - mysql
+      - redis
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+    networks:
+      default:
+        aliases:
+         - mediawiki.svc
+    environment:
+      - PLATFORM_API_BACKEND_HOST=api.svc
+      - DB_SERVER=mysql.svc:3306
+      - MW_ADMIN_NAME=${MW_ADMIN_NAME}
+      - MW_ADMIN_PASS=${MW_ADMIN_PASS}
+      - MW_ADMIN_EMAIL=${MW_ADMIN_EMAIL}
+      - MW_WG_SECRET_KEY=${MW_SECRET_KEY}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_NAME=${DB_NAME}
+
+      - REDIS_HOST=redis.svc
+      - REDIS_DB="2"
+      - REDIS_CACHE_DB="3"
+      - REDIS_PREFIX=wbstack_api
+
+    volumes:
+      - ".:/var/www/html/w:cached"
+
+  api:
+    image: php:7.4-apache
+    networks:
+      default:
+        aliases:
+         - api.svc
+    ports:
+      - "8002:80"
+    volumes:
+      - ./wbstack/test/server.php:/var/www/html/backend/wiki/getWikiForDomain/index.php
+      - ./wbstack/data/:/var/www/html/backend/wiki/data/
+
+  mysql:
+    image: mariadb:10.3
+    restart: unless-stopped
+    volumes:
+      - mediawiki-mysql-data:/var/lib/mysql
+    environment:
+      # CONFIG - Change the default values below (should match values passed to wikibase)
+      MYSQL_DATABASE: 'my_wiki'
+      MYSQL_USER: 'wikiuser'
+      MYSQL_PASSWORD: 'sqlpass'
+      MYSQL_ROOT_PASSWORD: 'toor'
+    networks:
+      default:
+        aliases:
+         - mysql.svc
+
+  redis:
+    image: redis:latest
+    restart: always
+    expose:
+      - 6379
+    networks:
+      default:
+        aliases:
+          - redis.svc
+
+volumes:
+  mediawiki-mysql-data:
