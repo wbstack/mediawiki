@@ -114,7 +114,7 @@ class GlobalSet {
         $headers = [
             'X-Backend-Service: backend-service',
             'X-Backend-Token: backend-token',
-            'host: '. $requestDomain . ':8001', # todo what about the port...
+            'host: '. $requestDomain
         ];
 
         $client = curl_init($url);
