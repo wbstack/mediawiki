@@ -33,6 +33,7 @@ services:
 
     volumes:
       - ".:/var/www/html/w:cached"
+      - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   api:
     image: php:7.4-apache
@@ -45,6 +46,7 @@ services:
     volumes:
       - ./wbstack/test/server.php:/var/www/html/backend/wiki/getWikiForDomain/index.php
       - ./wbstack/data/:/var/www/html/backend/wiki/data/
+      - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   mysql:
     image: mariadb:10.3
