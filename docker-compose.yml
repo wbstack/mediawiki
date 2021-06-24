@@ -13,7 +13,7 @@ services:
       - redis
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "8001:80"
     networks:
       default:
         aliases:

@@ -72,7 +72,7 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
 }
 
 if ( $wwDomainSaysLocal ) {
-    $wgServer = "http://" . $wikiInfo->domain;
+    $wgServer = "http://" . $wikiInfo->domain . ':' . $_SERVER['SERVER_PORT'];
 } else {
     $wgServer = "https://" . $wikiInfo->domain;
 }
