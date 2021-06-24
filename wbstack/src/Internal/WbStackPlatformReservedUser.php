@@ -67,7 +67,7 @@ class WbStackPlatformReservedUser{
             'rsaKey' => '',
             'agreement' => true,
             'restrictions' => \MWRestrictions::newDefault(),
-            'oauthVersion' => '1.0',
+            'oauthVersion' => 1,
             'oauth2IsConfidential' => false,
             'oauth2GrantTypes' => null
         ];

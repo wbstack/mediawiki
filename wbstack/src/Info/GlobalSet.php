@@ -110,7 +110,7 @@ class GlobalSet {
      */
     private static function getInfoFromApi( $requestDomain ) {
         // START generic getting of wiki info from domain
-        $url = 'http://' . getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/wiki/getWikiForDomain/?domain=' . urlencode($requestDomain);
+        $url = 'http://' . getenv( 'PLATFORM_API_BACKEND_HOST' ) . '/backend/wiki/getWikiForDomain?domain=' . urlencode($requestDomain);
         $headers = [
             'X-Backend-Service: backend-service',
             'X-Backend-Token: backend-token',
@@ -120,6 +120,7 @@ class GlobalSet {
         // TODO MAKE CURL FOLLOW REDIRECT FOR DEV
         curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($client, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WBStackInfo::getInfoFromApi" );
 
         $response = curl_exec($client);
