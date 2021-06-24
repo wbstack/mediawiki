@@ -72,6 +72,7 @@ class GlobalSet {
         // TODO in reality all of this needs to change...
 
         $info = self::getInfoFromApi( $requestDomain );
+
         // Cache positive results for 10 seconds, negative for 2
         $ttl = $info ? 10 : 2;
         self::writeInfoToApcCache( $requestDomain, $info, $ttl );

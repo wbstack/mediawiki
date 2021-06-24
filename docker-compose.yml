@@ -1,0 +1,105 @@
+version: '2.2'
+
+services:
+  mediawiki:
+    build:
+        context: .
+        dockerfile: Dockerfile
+    links:
+      - mysql
+      - redis
+    depends_on:
+      - mysql
+      - redis
+    restart: unless-stopped
+    ports:
+      - "8001:80"
+    networks:
+      default:
+        aliases:
+         - mediawiki.svc
+    environment:
+
+      - WBSTACK_LOAD_MW_INTERNAL=yes # THIS is normally hidden
+      - PLATFORM_API_BACKEND_HOST=api.svc
+
+      - MW_DB_SERVER_MASTER=mysql.svc:3306
+      - MW_DB_SERVER_REPLICA=mysql.svc:3306
+
+      - MW_REDIS_SERVER_READ=redis.svc
+      - MW_REDIS_SERVER_WRITE=redis.svc
+      - MW_REDIS_PASSWORD=
+
+    volumes:
+      - ".:/var/www/html/w:cached"
+      - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
+
+  api:
+    build:
+      context: wbstack/test/
+      dockerfile: Dockerfile
+    networks:
+      default:
+        aliases:
+         - api.svc
+    ports:
+      - "8002:80"
+    volumes:
+      - ./wbstack/test/server.php:/var/www/html/index.php
+      - ./wbstack/data/:/var/www/data/
+      - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
+
+  mysql:
+    image: mariadb:10.3
+    restart: unless-stopped
+    volumes:
+      - mediawiki-mysql-data:/var/lib/mysql
+      - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
+    environment:
+      # CONFIG - Change the default values below (should match values passed to wikibase)
+      MYSQL_DATABASE: 'mwdb_somedb'
+      MYSQL_USER: 'mwu_someuser'
+      MYSQL_PASSWORD: 'somepassword'
+      MYSQL_ROOT_PASSWORD: 'toor'
+    networks:
+      default:
+        aliases:
+         - mysql.svc
+
+  redis:
+    image: redis:latest
+    restart: always
+    expose:
+      - 6379
+    networks:
+      default:
+        aliases:
+          - redis.svc
+
+  quickstatements:
+    build:
+      context: ../quickstatements
+      dockerfile: Dockerfile
+    restart: always
+    volumes:
+      - quickstatements-data:/quickstatements/data
+      - ../quickstatements:/var/www/html/quickstatements:cached
+      - ../magnustools:/var/www/html/magnustools:cached
+    ports:
+      - "8086:80"
+    depends_on:
+      - mediawiki
+    networks:
+      default:
+        aliases:
+         - quickstatements.svc
+    environment:
+      - PLATFORM_MW_BACKEND_HOST=mediawiki.svc
+      - WB_PROPERTY_NAMESPACE=122
+      - "WB_PROPERTY_PREFIX=Property:"
+      - WB_ITEM_NAMESPACE=120
+      - "WB_ITEM_PREFIX=Item:"
+
+volumes:
+  mediawiki-mysql-data:
+  quickstatements-data:

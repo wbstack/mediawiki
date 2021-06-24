@@ -22,6 +22,7 @@ if ( !defined( 'STDERR' ) ) {
 }
 
 // Define some conditions to switch behaviour on
+$wwDomainSaysLocal = $_SERVER['SERVER_NAME'] === 'localhost';
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
@@ -70,7 +71,13 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
     ];
 }
 
-$wgServer = "https://" . $wikiInfo->domain;
+if ( $wwDomainSaysLocal ) {
+    $wgServer = "http://" . $wikiInfo->domain . ':' . $_SERVER['SERVER_PORT'];
+} else {
+    $wgServer = "https://" . $wikiInfo->domain;
+}
+
+
 $wgScriptPath = "/w";
 $wgArticlePath = "/wiki/$1";
 
