@@ -1,9 +1,7 @@
 <?php
 
-
-if( $_SERVER['SERVER_NAME'] !== 'localhost' && $_SERVER['SERVER_NAME'] !== 'api.svc'  ){
-    //echo 'This is only meant for testing from localhost';
-    var_dump($_SERVER['SERVER_NAME']);
+if( $_SERVER['SERVER_NAME'] !== 'localhost' ){
+    echo 'This is only meant for testing from localhost';
     die(1);
 }
 

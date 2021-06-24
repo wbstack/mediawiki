@@ -114,13 +114,12 @@ class GlobalSet {
         $headers = [
             'X-Backend-Service: backend-service',
             'X-Backend-Token: backend-token',
+            'host: '. $requestDomain . ':8001', # todo what about the port...
         ];
 
         $client = curl_init($url);
-        // TODO MAKE CURL FOLLOW REDIRECT FOR DEV
         curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($client, CURLOPT_FOLLOWLOCATION, true);
         curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WBStackInfo::getInfoFromApi" );
 
         $response = curl_exec($client);

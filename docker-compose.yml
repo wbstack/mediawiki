@@ -36,7 +36,9 @@ services:
       - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   api:
-    image: php:7.4-apache
+    build:
+      context: wbstack/test/
+      dockerfile: Dockerfile
     networks:
       default:
         aliases:
@@ -44,8 +46,8 @@ services:
     ports:
       - "8002:80"
     volumes:
-      - ./wbstack/test/server.php:/var/www/html/backend/wiki/getWikiForDomain/index.php
-      - ./wbstack/data/:/var/www/html/backend/wiki/data/
+      - ./wbstack/test/server.php:/var/www/html/index.php
+      - ./wbstack/data/:/var/www/data/
       - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   mysql:
