@@ -67,16 +67,13 @@ class WbStackPlatformReservedUser{
             'rsaKey' => '',
             'agreement' => true,
             'restrictions' => \MWRestrictions::newDefault(),
-            'oauthVersion' => 1,
-            'oauth2IsConfidential' => false,
-            'oauth2GrantTypes' => null
         ];
 
         $context = \RequestContext::getMain();
         $context->setUser( self::getUser() );
 
-        $dbw = \MediaWiki\Extensions\OAuth\Backend\Utils::getCentralDB( DB_MASTER );
-        $control = new \MediaWiki\Extensions\OAuth\Control\ConsumerSubmitControl( $context, $data, $dbw );
+        $dbw = \MediaWiki\Extensions\OAuth\MWOAuthUtils::getCentralDB( DB_MASTER );
+        $control = new \MediaWiki\Extensions\OAuth\MWOAuthConsumerSubmitControl( $context, $data, $dbw );
         $status = $control->submit();
 
         if ( !$status->isGood() ) {
@@ -92,7 +89,7 @@ class WbStackPlatformReservedUser{
             'reason'       => 'Approved by platform',
             'changeToken'  => $cmr->getChangeToken( $context ),
         ];
-        $control = new \MediaWiki\Extensions\OAuth\Control\ConsumerSubmitControl( $context, $data, $dbw );
+        $control = new \MediaWiki\Extensions\OAuth\MWOAuthConsumerSubmitControl( $context, $data, $dbw );
         $approveStatus = $control->submit();
 
         if ( !$approveStatus->isGood() ) {
@@ -112,11 +109,11 @@ class WbStackPlatformReservedUser{
             return false;
         }
 
-        $db = \MediaWiki\Extensions\OAuth\Backend\Utils::getCentralDB( DB_REPLICA );
+        $db = \MediaWiki\Extensions\OAuth\MWOAuthUtils::getCentralDB( DB_REPLICA );
 
-        // $c is a Consumer
-        // https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/src/Backend/Consumer.php
-        $c = \MediaWiki\Extensions\OAuth\Backend\Consumer::newFromNameVersionUser(
+        // $c is a MWOAuthConsumer
+        // https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/includes/backend/MWOAuthConsumer.php
+        $c = \MediaWiki\Extensions\OAuth\MWOAuthConsumer::newFromNameVersionUser(
             $db,
             $consumerName,
             $version,
@@ -130,7 +127,7 @@ class WbStackPlatformReservedUser{
         return [
             'agent' => $c->getName(),
             'consumerKey' => $c->getConsumerKey(),
-            'consumerSecret' => \MediaWiki\Extensions\OAuth\Backend\Utils::hmacDBSecret( $c->getSecretKey() ),
+            'consumerSecret' => \MediaWiki\Extensions\OAuth\MWOAuthUtils::hmacDBSecret( $c->getSecretKey() ),
         ];
     }
 }
