@@ -114,8 +114,8 @@ class WbStackPlatformReservedUser{
 
         $db = \MediaWiki\Extensions\OAuth\Backend\Utils::getCentralDB( DB_REPLICA );
 
-        // $c is a MWOAuthConsumer
-        // https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/includes/backend/MWOAuthConsumer.php
+        // $c is a Consumer
+        // https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/src/Backend/Consumer.php
         $c = \MediaWiki\Extensions\OAuth\Backend\Consumer::newFromNameVersionUser(
             $db,
             $consumerName,
