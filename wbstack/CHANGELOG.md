@@ -2,6 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20210624-0
+
+- [Re add some development environment stuff](https://github.com/wbstack/mediawiki/commit/97482213fb4d04b1b4c9215348ccba420fbcde85)
+- [Maybe fix OAuth consumer creation etc](https://github.com/wbstack/mediawiki/commit/903182b91c8410d695404e83efe5f168ac7332c8)
+
 ## 1.35-7.4-20210623-0
 
 - [Update MediaWiki & Main Skins / Extensions 1.35 branches](https://github.com/wbstack/mediawiki/pull/90)
