@@ -95,10 +95,18 @@ services:
          - quickstatements.svc
     environment:
       - PLATFORM_MW_BACKEND_HOST=mediawiki.svc
-      - WB_PROPERTY_NAMESPACE=122
-      - "WB_PROPERTY_PREFIX=Property:"
-      - WB_ITEM_NAMESPACE=120
-      - "WB_ITEM_PREFIX=Item:"
+
+  elasticsearch:
+    image: wikibase/elasticsearch:6.5.4-wmde.1
+    restart: unless-stopped
+    networks:
+      default:
+        aliases:
+         - elasticsearch.svc
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+
 
 volumes:
   mediawiki-mysql-data:
