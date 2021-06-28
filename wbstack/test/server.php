@@ -1,6 +1,6 @@
 <?php
 
-if( $_SERVER['SERVER_NAME'] !== 'localhost' ){
+if( $_SERVER['SERVER_NAME'] !== 'localhost' && $_SERVER['SERVER_NAME'] !== 'api.svc' ){
     echo 'This is only meant for testing from localhost';
     die(1);
 }
