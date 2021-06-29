@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitd944adf0b06d60851377da2568060c25
+class ComposerStaticInit6025326618c5c0bedc526d4b08adfdc3
 {
     public static $files = array (
         '7cb394c3af2b1ae832979b0368e0da62' => __DIR__ . '/..' . '/data-values/data-values/DataValues.php',
@@ -2921,11 +2921,11 @@ class ComposerStaticInitd944adf0b06d60851377da2568060c25
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitd944adf0b06d60851377da2568060c25::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitd944adf0b06d60851377da2568060c25::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit6025326618c5c0bedc526d4b08adfdc3::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit6025326618c5c0bedc526d4b08adfdc3::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit6025326618c5c0bedc526d4b08adfdc3::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit6025326618c5c0bedc526d4b08adfdc3::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit6025326618c5c0bedc526d4b08adfdc3::$classMap;
 
         }, null, ClassLoader::class);
     }
