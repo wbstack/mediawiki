@@ -12,50 +12,18 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v2.3.4
-
-    - uses: shivammathur/setup-php@v2
-      with:
-        php-version: 7.4
-        extensions: apcu, redis, intl, mbstring, mysqli, opcache, calendar, pcntl, bz2
-
-      # TODO fixme, we depend on $_SERVER['SERVER_NAME'], and when using in built web server we must thus start more D:
-    - name: Run PHP built in web server (MediaWiki 127.0.0.1)
-      run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S 127.0.0.1:8000  &> phpout-mw.log &
-    - name: Run PHP built in web server (MediaWiki localhost)
-      run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S localhost:8001  &> phpout-mw.log &
-    - name: Run PHP built in web server (Fake API)
-      run: php -S localhost:8002 ./wbstack/test/server.php  &> phpout-api.log &
-
+    - name: build docker
+      run: docker-compose up -d
     - name: Wait for server to accept connections
-      uses: nick-invision/retry@v2.4.1
+      uses: nick-invision/retry@v2
       with:
-        max_attempts: 10
-        retry_wait_seconds: 1
-        timeout_seconds: 10
-        command: curl -s http://localhost:8000/
+        timeout_minutes: 5
+        max_attempts: 100
+        retry_wait_seconds: 5
+        warning_on_retry: false
+        command: docker-compose logs mysql | grep "ready for connections" | wc -l | grep 2
 
-      # Make sure the 127.0.0.1 endpoints all just return 2 lines (as expected for no wiki)
-    - run: curl -s http://127.0.0.1:8000/ | wc -l | grep -q 2
-    - run: curl -s http://127.0.0.1:8000/api.php | wc -l | grep -q 2
-    - run: curl -s http://127.0.0.1:8000/load.php | wc -l | grep -q 2
-    - run: curl -s http://127.0.0.1:8000/rest.php | wc -l | grep -q 2
-      # And that they say the wiki can't be loaded...
-    - run: curl -s http://127.0.0.1:8000/ | grep -q "can not currently be loaded"
-    - run: curl -s http://127.0.0.1:8000/api.php | grep -q "can not currently be loaded"
-    - run: curl -s http://127.0.0.1:8000/load.php | grep -q "can not currently be loaded"
-    - run: curl -s http://127.0.0.1:8000/rest.php | grep -q "can not currently be loaded"
-
-      # Make sure that localhost gets a bit further (but right now still returns errors)
-    - run: curl -s http://localhost:8001/ | grep -q "invalid configured server"
-    - run: curl -s http://localhost:8001/api.php | grep -q "invalid configured server"
-    - run: curl -s http://localhost:8001/load.php | grep -q "invalid configured server"
-    - run: curl -s http://localhost:8001/rest.php | grep -q "invalid configured server"
-
-# Final output
-    - name: Output the server logs (MediaWiki)
-      if: always()
-      run: cat phpout-mw.log
-    - name: Output the server logs (Fake API)
-      if: always()
-      run: cat phpout-api.log
-
+    - run: curl -L -s -N "http://localhost:8001/" | grep -q "Main Page"
+    - run: curl -L -s -N "http://localhost:8001/w/api.php" | grep -q "Main module"
+    - run: curl -L -s -N "http://localhost:8001/w/load.php" | grep -q "no modules were requested"
+    - run: curl -L -s -N "http://localhost:8001/w/rest.php" | grep -q "did not match any known handler"
