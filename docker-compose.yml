@@ -76,26 +76,6 @@ services:
         aliases:
           - redis.svc
 
-  quickstatements:
-    build:
-      context: ../quickstatements
-      dockerfile: Dockerfile
-    restart: always
-    volumes:
-      - quickstatements-data:/quickstatements/data
-      - ../quickstatements:/var/www/html/quickstatements:cached
-      - ../magnustools:/var/www/html/magnustools:cached
-    ports:
-      - "8086:80"
-    depends_on:
-      - mediawiki
-    networks:
-      default:
-        aliases:
-         - quickstatements.svc
-    environment:
-      - PLATFORM_MW_BACKEND_HOST=mediawiki.svc
-
   elasticsearch:
     image: wikibase/elasticsearch:6.5.4-wmde.1
     restart: unless-stopped
