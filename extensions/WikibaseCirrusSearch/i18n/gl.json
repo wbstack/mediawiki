@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Athena in Wonderland",
+			"Banjo",
+			"Elisardojm",
+			"Fisterraeomar",
+			"Iváns",
+			"Ladsgroup",
+			"Macofe",
+			"Toliño",
+			"Vivaelcelta",
+			"아라"
+		]
+	},
+	"wikibasecirrus-search-bad-entity-type": "Tipo de entidade incorrectaː $1",
+	"wikibasecirrus-search-bad-profile-name": "Nome de perfil de procura non válido: $1",
+	"special-entitieswithoutdescription": "Entidades sen descrición",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Obter a lista de entidades sen descrición",
+	"special-entitieswithoutlabel": "Entidades sen etiqueta",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Obter a lista de entidades sen etiqueta",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Código da lingua:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipo:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Procurar",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" non é un código de lingua válido.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" non é un tipo de entidade válido."
+}

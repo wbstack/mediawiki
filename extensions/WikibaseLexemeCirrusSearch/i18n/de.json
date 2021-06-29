@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lucas Werkmeister (WMDE)",
+			"Metalhead64",
+			"Pascalco"
+		]
+	},
+	"wikibaselexemecirrus-desc": "WikibaseLexeme-Softwareerweiterung zur Nutzung der CirrusSearch-Funktionalität",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Rescore-Profil für die Präfix-(Vervollständigungs-)Suche"
+}

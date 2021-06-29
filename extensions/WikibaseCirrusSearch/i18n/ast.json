@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Macofe",
+			"Xuacu"
+		]
+	},
+	"wikibasecirrus-search-bad-entity-type": "Tipu incorreutu d'entidá $1",
+	"wikibasecirrus-search-bad-profile-name": "Nome incorreutu de perfil de gueta: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "La palabra clave «haswbstatement» nun contien declaraciones válides",
+	"special-entitieswithoutdescription": "Entidaes ensin descripción",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Ver la llista d'entidaes ensin descripción",
+	"special-entitieswithoutlabel": "Entidaes ensin etiqueta",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Ver la llista d'entidaes ensin etiqueta",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Códigu de llingua:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipu:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Alcontrar",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "«$1» nun ye un códigu d'idioma válidu.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" nun ye un tipu d'entidá válidu."
+}

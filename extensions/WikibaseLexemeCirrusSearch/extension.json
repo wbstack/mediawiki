@@ -1,0 +1,62 @@
+{
+	"name": "WikibaseLexemeCirrusSearch",
+	"version": "0.1.0",
+	"author": [
+		"The Wikidata team",
+		"Stas Malyshev"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:WikibaseLexemeCirrusSearch",
+	"descriptionmsg": "wikibaselexemecirrus-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "wikibase",
+	"requires": {
+		"extensions": {
+			"WikibaseCirrusSearch": "*",
+			"WikibaseLexeme": "*"
+		},
+		"MediaWiki": ">= 1.33.0"
+	},
+	"AutoloadNamespaces": {
+		"Wikibase\\Lexeme\\Search\\Elastic\\": "src/"
+	},
+	"TestAutoloadNamespaces": {
+		"Wikibase\\Lexeme\\Search\\Elastic\\Tests\\": "tests/phpunit/"
+	},
+	"config": {
+		"LexemeUseCirrus": {
+			"value": false
+		},
+		"LexemePrefixSearchProfile": {
+			"value": "lexeme_prefix"
+		},
+		"LexemePrefixSearchProfiles": {
+			"value": []
+		},
+		"LexemeRescoreFunctions": {
+			"value": []
+		},
+		"LexemePrefixRescoreProfile": {
+			"value": "lexeme_prefix"
+		},
+		"LexemeFulltextRescoreProfile": {
+			"value": "lexeme_fulltext"
+		}
+	},
+	"Hooks": {
+		"CirrusSearchProfileService": [
+			"Wikibase\\Lexeme\\Search\\Elastic\\Hooks::onCirrusSearchProfileService"
+		],
+		"ShowSearchHit": [
+			"Wikibase\\Lexeme\\Search\\Elastic\\Hooks::onShowSearchHit"
+		],
+		"WikibaseRepoEntityTypes": [
+			"Wikibase\\Lexeme\\Search\\Elastic\\Hooks::onWikibaseRepoEntityTypes"
+		]
+	},
+	"MessagesDirs": {
+		"WikibaseCirrusSearch": [
+			"i18n"
+		]
+	},
+	"manifest_version": 2
+}

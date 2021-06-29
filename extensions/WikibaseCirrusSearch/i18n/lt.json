@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Albertas",
+			"Pofka"
+		]
+	},
+	"special-entitieswithoutdescription": "Esybės be aprašymų",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Gauti esybes be aprašymų",
+	"special-entitieswithoutlabel": "Esybės be žymių",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Gauti sąrašą esybių be žymių",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Kalbos kodas:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipas:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Ieškoti",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" yra netinkamas kalbos kodas.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" yra netinkamas esybės tipas."
+}

@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Derugon",
+			"Gomoko",
+			"Oupsa",
+			"Tpt",
+			"Wladek92",
+			"Yzelf"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Extension WikibaseLexeme pour utiliser la fonctionnalité CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Noter de nouveau le profil pour la recherche de préfixe (complétude)"
+}

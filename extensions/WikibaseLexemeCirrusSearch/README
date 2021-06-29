@@ -1,0 +1,11 @@
+MediaWiki extension: WikibaseLexemeCirrusSearch
+-----------------------------------------------
+
+This extension implements ElasticSearch-based search for WikibaseLexeme.
+
+Dependencies
+------------
+
+This extension relies on WikibaseLexeme and WikibaseCirrusSearch extensions to be installed and fully functional.
+Please refer to documentation of these extensions for instructions on how to install them.
+

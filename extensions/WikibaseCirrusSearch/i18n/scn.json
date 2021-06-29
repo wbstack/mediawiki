@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pippinu",
+			"Sarvaturi"
+		]
+	},
+	"special-entitieswithoutdescription": "Ntità senza discrizzioni",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Duna na lista dâ ntità chi nun hannu discrizzioni",
+	"special-entitieswithoutlabel": "Ntità senza etichetta",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Duna na lista dâ ntità chi nun hannu etichetta",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Còdici dâ lingua:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipu:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Attrova",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" nun è nu còdici di lingua vàlidu.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" nun è nu tipu di ntità vàlidu."
+}

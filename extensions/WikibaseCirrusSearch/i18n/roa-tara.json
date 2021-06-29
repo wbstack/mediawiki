@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"wikibasecirrus-desc": "Estenzione Wikibase pe ausà 'a funzione CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "'A parola chiave $1 tène 'nu codece de lènghe scanusciute: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "'A parola chiave $1 tène troppe codece de lènghe. Stoche a cerche $2 de le $3 {{PLURAL:$3|lènghe}} mise",
+	"wikibasecirrus-inlabel-no-query-provided": "parole chiave jndr'ò l'etichette tène 'na stringhe de recerche vacande",
+	"wikibasecirrus-rescore-profile-prefix": "Profile de recupere predefinite pa recerche de combletamende",
+	"wikibasecirrus-rescore-profile-prefix-boost": "Recupere 'u profile pa recerche de combletamende cu potenziamende de le 'struziune",
+	"wikibasecirrus-rescore-profile-fulltext": "Profile de recupere predefinite pa recerche fulltext",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "Recupere 'u profile pa recerche fulltext cu 'u pundegge pe frase",
+	"wikibasecirrus-search-bad-entity-type": "Tipe de endità errate: $1",
+	"wikibasecirrus-search-bad-profile-name": "Recerche d'u nome d'u profile sbagliate: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "'a parola chiave haswbstatement nò tène nisciuna frase valide",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "'a parola chiave haslicense tène arguminde non valide",
+	"special-entitieswithoutdescription": "Endità senze descrizione",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Pigghie l'elenghe de le endità senze descrizione",
+	"special-entitieswithoutlabel": "Endità senze etichette",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Pigghie l'elenghe de le endità senze etichette",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Codece d'a lènghe:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipe:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Iacchie",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" non g'è 'nu codece de lènghe valide.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" non g'è 'nu tipe de endità valide."
+}

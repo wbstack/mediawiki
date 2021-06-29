@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"KuboF",
+			"Macofe",
+			"Yekrats"
+		]
+	},
+	"special-entitieswithoutdescription": "Entoj sen priskribo",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Listigi entojn sen priskribo",
+	"special-entitieswithoutlabel": "Entoj sen etikedo",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Listigi entojn sen etikedo",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Lingva kodo:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipo:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Trovi",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" ne estas valida lingva kodo.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" ne estas valida entotipo."
+}

@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"2nd-player",
+			"Afaz",
+			"Dgstranz",
+			"Fryed-peach",
+			"Higa4",
+			"Kkairri",
+			"Ladsgroup",
+			"Los688",
+			"Omotecho",
+			"Otokoume",
+			"Shirayuki",
+			"Sujiniku",
+			"Suyama",
+			"Translatealcd",
+			"Vogone",
+			"Whym",
+			"Wicklo",
+			"Zolo",
+			"おはぐろ蜻蛉",
+			"ネイ",
+			"朝彦",
+			"赤城。",
+			"아라"
+		]
+	},
+	"special-entitieswithoutdescription": "説明がないエンティティ",
+	"wikibasecirrus-entitieswithoutdescription-legend": "説明がないエンティティ一覧の取得",
+	"special-entitieswithoutlabel": "ラベルがないエンティティ",
+	"wikibasecirrus-entitieswithoutlabel-legend": "ラベルがないエンティティ一覧の取得",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "言語コード:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "種類:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "検索",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "「$1」は有効な言語コードではありません。",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "「$1」はエンティティの型として有効なものではありません。"
+}

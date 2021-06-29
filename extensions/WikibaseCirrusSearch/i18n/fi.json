@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Stryn",
+			"Valtlait"
+		]
+	},
+	"special-entitieswithoutdescription": "Aiheet ilman kuvausta",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Hae luettelo aiheista, joissa ei ole kuvausta",
+	"special-entitieswithoutlabel": "Aiheet ilman nimeä",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Hae luettelo aiheista ilman nimeä",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Kielikoodi:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tyyppi",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Etsi",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "”$1” ei ole kelvollinen kielikoodi.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "”$1” ei ole kelvollinen aiheen tyyppi."
+}

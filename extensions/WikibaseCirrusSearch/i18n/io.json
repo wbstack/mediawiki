@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joao Xavier"
+		]
+	},
+	"special-entitieswithoutdescription": "Enti sen deskripto",
+	"special-entitieswithoutlabel": "Enti sen etiketo",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Linguala kodexo:",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" ne esas valida linguala kodexo."
+}

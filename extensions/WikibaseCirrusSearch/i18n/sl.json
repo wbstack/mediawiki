@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dbc334",
+			"Janezdrilc"
+		]
+	},
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Koda jezika:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Vrsta:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Poišči",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" ni veljavna koda jezika."
+}

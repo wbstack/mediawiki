@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borichèt",
+			"Dragonòt",
+			"Macofe",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"special-entitieswithoutdescription": "Entità sensa descrission",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Oten-e na lista dj'entità sensa descrission",
+	"special-entitieswithoutlabel": "Entità sensa tichëtta",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Arcuperé la lista dj'entità sensa tichëtta",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Còdes ëd lenga:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Sòrt:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Treuva",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" a l'é pa un còdes ëd lenga bon.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "«$1» a l'é pa na sòrt d'identità bon-a."
+}
