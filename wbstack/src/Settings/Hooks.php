@@ -21,6 +21,10 @@ $wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikiInfo )
         'href'  => '/wiki/Special:NewEntitySchema',
     ];
     $sidebar['Wikibase'][] = [
+        'text'  => 'All Properties',
+        'href'  => '/wiki/Special:ListProperties',
+    ];
+    $sidebar['Wikibase'][] = [
         'text'  => 'Query Service',
         'href'  => '/query/',
     ];
