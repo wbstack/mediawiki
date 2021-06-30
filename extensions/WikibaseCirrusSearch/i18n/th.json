@@ -4,13 +4,5 @@
 			"Aefgh39622"
 		]
 	},
-	"special-entitieswithoutdescription": "เอนทิตีที่ไม่มีคำอธิบาย",
-	"wikibasecirrus-entitieswithoutdescription-legend": "รับรายการเอนทิตีที่ไม่มีคำอธิบาย",
-	"special-entitieswithoutlabel": "เอนทิตีที่ไม่มีป้ายกำกับ",
-	"wikibasecirrus-entitieswithoutlabel-legend": "รับรายการเอนทิตีที่ไม่มีป้ายกำกับ",
-	"wikibasecirrus-entitieswithoutlabel-label-language": "รหัสภาษา:",
-	"wikibasecirrus-entitieswithoutlabel-label-type": "ชนิด:",
-	"wikibasecirrus-entitieswithoutlabel-submit": "ค้นหา",
-	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" ไม่ใช่รหัสภาษาที่ถูกต้อง",
-	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" ไม่ใช่ชนิดเอนทิตีที่ถูกต้อง"
+	"wikibasecirrus-entitieswithoutlabel-label-language": "รหัสภาษา:"
 }

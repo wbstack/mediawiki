@@ -27,7 +27,7 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 	/**
 	 * Field name
 	 */
-	public const NAME = 'statement_keywords';
+	const NAME = 'statement_keywords';
 
 	/**
 	 * String which separates property from value in statement representation.
@@ -35,13 +35,13 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 	 * - Not part of property ID serialization
 	 * - Regex-safe
 	 */
-	public const STATEMENT_SEPARATOR = '=';
+	const STATEMENT_SEPARATOR = '=';
 
 	/**
 	 * Strings which enclose a qualifier for a statement
 	 */
-	private const QUALIFIER_START = '[';
-	private const QUALIFIER_END = ']';
+	const QUALIFIER_START = '[';
+	const QUALIFIER_END = ']';
 
 	/**
 	 * @var array List of properties to index, as a flipped array with the property IDs as keys.

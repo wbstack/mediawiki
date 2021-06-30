@@ -18,7 +18,7 @@ class LabelsField extends TermIndexField {
 	/**
 	 * Field name
 	 */
-	public const NAME = "labels";
+	const NAME = "labels";
 
 	/**
 	 * List of available languages

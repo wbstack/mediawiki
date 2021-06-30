@@ -21,7 +21,7 @@ use Wikibase\Repo\WikibaseRepo;
  * Builder for entity fulltext queries
  */
 class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
-	public const ENTITY_FULL_TEXT_MARKER = 'entity_full_text';
+	const ENTITY_FULL_TEXT_MARKER = 'entity_full_text';
 
 	/**
 	 * @var array
@@ -73,15 +73,14 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 	 * @throws \MWException
 	 */
 	public static function newFromGlobals( array $settings ) {
-		$services = MediaWikiServices::getInstance();
 		$repo = WikibaseRepo::getDefaultInstance();
-		$config = $services->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
+		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
 		return new static(
 			$config->get( 'UseStemming' ),
 			$settings,
-			WikibaseRepo::getLanguageFallbackChainFactory( $services ),
-			WikibaseRepo::getEntityIdParser( $services ),
-			WikibaseRepo::getUserLanguage( $services )->getCode()
+			$repo->getLanguageFallbackChainFactory(),
+			$repo->getEntityIdParser(),
+			$repo->getUserLanguage()->getCode()
 		);
 	}
 

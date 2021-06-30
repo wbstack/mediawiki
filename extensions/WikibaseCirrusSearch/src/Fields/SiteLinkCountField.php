@@ -15,7 +15,7 @@ class SiteLinkCountField extends WikibaseNumericField {
 	/**
 	 * Field name
 	 */
-	public const NAME = 'sitelink_count';
+	const NAME = 'sitelink_count';
 
 	/**
 	 * @see SearchIndexField::getFieldData

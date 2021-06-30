@@ -15,7 +15,6 @@ use Wikibase\Lib\WikibaseContentLanguages;
 use Wikibase\Repo\WikibaseRepo;
 use Wikibase\Search\Elastic\Fields\StatementsField;
 use Wikibase\Search\Elastic\Query\HasDataForLangFeature;
-use Wikibase\Search\Elastic\Query\HasLicenseFeature;
 use Wikibase\Search\Elastic\Query\HasWbStatementFeature;
 use Wikibase\Search\Elastic\Query\InLabelFeature;
 use Wikibase\Search\Elastic\Query\WbStatementQuantityFeature;
@@ -109,7 +108,8 @@ class Hooks {
 		];
 
 		// Language analyzers for descriptions
-		$wbBuilder = new ConfigBuilder( WikibaseRepo::getTermsLanguages()->getLanguages(),
+		$repo = WikibaseRepo::getDefaultInstance();
+		$wbBuilder = new ConfigBuilder( $repo->getTermsLanguages()->getLanguages(),
 			self::getWBCSConfig(),
 			$builder
 		);
@@ -134,7 +134,7 @@ class Hooks {
 
 		$repo = WikibaseRepo::getDefaultInstance();
 		$namespacesForContexts = [];
-		$entityNsLookup = WikibaseRepo::getEntityNamespaceLookup();
+		$entityNsLookup = $repo->getEntityNamespaceLookup();
 		foreach ( $repo->getFulltextSearchTypes() as $type => $profileContext ) {
 			$namespace = $entityNsLookup->getEntityNamespace( $type );
 			if ( $namespace === null ) {
@@ -291,7 +291,8 @@ class Hooks {
 			return;
 		}
 		$foreignRepoNames = [];
-		$foreignRepos = WikibaseRepo::getSettings()->getSetting(
+		$repo = WikibaseRepo::getDefaultInstance();
+		$foreignRepos = $repo->getSettings()->getSetting(
 			'foreignRepositories'
 		);
 		if ( !empty( $foreignRepos ) ) {
@@ -300,12 +301,9 @@ class Hooks {
 		$extraFeatures[] = new HasWbStatementFeature( $foreignRepoNames );
 		$extraFeatures[] = new WbStatementQuantityFeature( $foreignRepoNames );
 
-		$licenseMapping = HasLicenseFeature::getConfiguredLicenseMap( $searchConfig );
-		$extraFeatures[] = new HasLicenseFeature( $licenseMapping );
-
 		$languageCodes = WikibaseContentLanguages::getDefaultInstance()
 			->getContentLanguages( 'term' )->getLanguages();
-		$extraFeatures[] = new InLabelFeature( WikibaseRepo::getLanguageFallbackChainFactory(), $languageCodes );
+		$extraFeatures[] = new InLabelFeature( $repo->getLanguageFallbackChainFactory(), $languageCodes );
 
 		$extraFeatures[] = new HasDataForLangFeature( $languageCodes );
 	}
@@ -317,10 +315,10 @@ class Hooks {
 	 * @param array &$results
 	 */
 	public static function amendSearchResults( WikibaseRepo $repo, Language $lang, array &$results ) {
-		$lookupFactory = WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory();
-		$idParser = WikibaseRepo::getEntityIdParser();
+		$lookupFactory = $repo->getLanguageFallbackLabelDescriptionLookupFactory();
+		$idParser = $repo->getEntityIdParser();
 		$entityIds = [];
-		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
+		$namespaceLookup = $repo->getEntityNamespaceLookup();
 
 		foreach ( $results as &$result ) {
 			if ( empty( $result['title'] ) ||
@@ -368,7 +366,7 @@ class Hooks {
 			return;
 		}
 		$repo = WikibaseRepo::getDefaultInstance();
-		self::amendSearchResults( $repo, WikibaseRepo::getUserLanguage(), $results );
+		self::amendSearchResults( $repo, $repo->getUserLanguage(), $results );
 	}
 
 	/**

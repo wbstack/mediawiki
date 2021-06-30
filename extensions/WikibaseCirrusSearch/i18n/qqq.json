@@ -59,7 +59,6 @@
 	"wikibasecirrus-search-bad-entity-type": "Error message displayed when user supplies bad entity type to wbsearchentities",
 	"wikibasecirrus-search-bad-profile-name": "Error message displayed when user supplies bad search profile name",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Error message when haswbstatement keyword has no valid arguments",
-	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Error message when haslicense keyword has no valid arguments",
 	"special-entitieswithoutdescription": "{{doc-special|EntitiesWithoutDescription}}\nThis special page returns a list of entities without description for a given language",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Legend of the form that allow to change the language.",
 	"special-entitieswithoutlabel": "{{doc-special|EntitiesWithoutLabel}}\nThis special page returns a list of entities without label for a given language",
@@ -68,6 +67,5 @@
 	"wikibasecirrus-entitieswithoutlabel-label-type": "Label of the entity type selector that allows to restrict the request to one type.\n{{Identical|Type}}",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Label for the button that activate the action.\n{{Identical|Find}}",
 	"wikibasecirrus-entitieswithoutlabel-invalid-language": "Error message shown when the language code passed in parameter is invalid.\n\nParameters:\n* $1 - language code\nSee also:\n* {{msg-mw|Wikibase-unconnectedpages-invalid-language}}",
-	"wikibasecirrus-entitieswithoutlabel-invalid-type": "Parameters:\n* $1 - an invalid entity type. Valid entity types are: item, property and query.",
-	"wikibasecirrus-license-mapping": "{{notranslate}}\nMap of license names to structured data statements, for use with the haslicense keyword feature.  They must be specified as license-name|P123=Q456,P123=Q789. You can translate the text, including \"Leave this line exactly as it is\". Some lines of this messages have one (1) leading space. \n\nThis message will be shown with left-to-right direction, so when you are translating to a right-to-left language, you may want to test how it looks in left-to-right and add right-to-left marks as needed."
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "Parameters:\n* $1 - an invalid entity type. Valid entity types are: item, property and query."
 }

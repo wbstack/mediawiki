@@ -27,40 +27,40 @@ class EntitySearchElastic implements EntitySearchHelper {
 	/**
 	 * Default rescore profile
 	 */
-	public const DEFAULT_RESCORE_PROFILE = 'wikibase_prefix';
+	const DEFAULT_RESCORE_PROFILE = 'wikibase_prefix';
 
 	/**
 	 * Name of the context for profile name resolution
 	 */
-	public const CONTEXT_WIKIBASE_PREFIX = 'wikibase_prefix_search';
+	const CONTEXT_WIKIBASE_PREFIX = 'wikibase_prefix_search';
 
 	/**
 	 * Name of the context for profile name resolution
 	 */
-	public const CONTEXT_WIKIBASE_FULLTEXT = 'wikibase_fulltext_search';
+	const CONTEXT_WIKIBASE_FULLTEXT = 'wikibase_fulltext_search';
 
 	/**
 	 * Name of the profile type used to build the elastic query
 	 */
-	public const WIKIBASE_PREFIX_QUERY_BUILDER = 'wikibase_prefix_querybuilder';
+	const WIKIBASE_PREFIX_QUERY_BUILDER = 'wikibase_prefix_querybuilder';
 
 	/**
 	 * Default query builder profile for prefix searches
 	 */
-	public const DEFAULT_QUERY_BUILDER_PROFILE = 'default';
+	const DEFAULT_QUERY_BUILDER_PROFILE = 'default';
 
 	/**
 	 * Default query builder profile for fulltext searches
 	 *
 	 */
-	public const DEFAULT_FULL_TEXT_QUERY_BUILDER_PROFILE = 'wikibase';
+	const DEFAULT_FULL_TEXT_QUERY_BUILDER_PROFILE = 'wikibase';
 
 	/**
 	 * Replacement syntax for statement boosting
 	 * @see \CirrusSearch\Profile\SearchProfileRepositoryTransformer
 	 * and repo/config/ElasticSearchRescoreFunctions.php
 	 */
-	public const STMT_BOOST_PROFILE_REPL = 'functions.*[type=term_boost].params[statement_keywords=_statementBoost_].statement_keywords';
+	const STMT_BOOST_PROFILE_REPL = 'functions.*[type=term_boost].params[statement_keywords=_statementBoost_].statement_keywords';
 
 	/**
 	 * @var LanguageFallbackChainFactory
@@ -313,11 +313,14 @@ class EntitySearchElastic implements EntitySearchHelper {
 			[ 'language' => $languageCode ] );
 		$result = $searcher->performSearch( $query );
 
+		// FIXME: this is a hack, we need to return Status upstream instead
+		foreach ( $result->getErrors() as $error ) {
+			wfLogWarning( json_encode( $error ) );
+		}
+
 		if ( $result->isOK() ) {
 			$result = $result->getValue();
 		} else {
-			// FIXME: $result->getErrors() contains error messages for the
-			// end user, but we don't have any way to pass them on.
 			$result = [];
 		}
 

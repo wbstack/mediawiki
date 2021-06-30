@@ -16,7 +16,7 @@ class AllLabelsField extends TermIndexField {
 	/**
 	 * Field name
 	 */
-	public const NAME = 'labels_all';
+	const NAME = 'labels_all';
 
 	public function __construct() {
 		parent::__construct( static::NAME, \SearchIndexField::INDEX_TYPE_TEXT );

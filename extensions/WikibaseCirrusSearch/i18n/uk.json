@@ -35,7 +35,6 @@
 	"wikibasecirrus-search-bad-entity-type": "Хибний тип сутності: $1",
 	"wikibasecirrus-search-bad-profile-name": "Хибна назва пошукового профілю: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Ключове слово haswbstatement не містить жодних дійсних тверджень",
-	"wikibasecirrus-haslicense-feature-no-valid-arguments": "ключове слово haslicense не містить правильних аргументів",
 	"special-entitieswithoutdescription": "Сутності без опису",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Отримати список сутностей без опису",
 	"special-entitieswithoutlabel": "Список сутностей без назви",

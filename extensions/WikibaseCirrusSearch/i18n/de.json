@@ -43,7 +43,6 @@
 	"wikibasecirrus-search-bad-entity-type": "Ungültiger Objekttyp: $1",
 	"wikibasecirrus-search-bad-profile-name": "Ungültiger Suchprofilname: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Das Schlüsselwort haswbstatement enthält keine gültigen Aussagen",
-	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Das Schlüsselwort haslicense enthält keine gültigen Aussagen",
 	"special-entitieswithoutdescription": "Entitäten ohne Beschreibung",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Hole Liste von Entitäten ohne Beschreibung",
 	"special-entitieswithoutlabel": "Entitäten ohne Bezeichnung",

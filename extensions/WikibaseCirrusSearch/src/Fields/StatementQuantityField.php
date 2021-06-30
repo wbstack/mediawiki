@@ -23,7 +23,7 @@ class StatementQuantityField extends StatementsField implements WikibaseIndexFie
 	/**
 	 * Field name
 	 */
-	public const NAME = 'statement_quantity';
+	const NAME = 'statement_quantity';
 
 	/**
 	 * @var array

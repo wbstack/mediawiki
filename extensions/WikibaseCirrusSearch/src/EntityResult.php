@@ -4,7 +4,7 @@ namespace Wikibase\Search\Elastic;
 use CirrusSearch\Search\Result;
 use CirrusSearch\Searcher;
 use HtmlArmor;
-use Wikibase\Lib\TermLanguageFallbackChain;
+use Wikibase\Lib\LanguageFallbackChain;
 use Wikibase\Repo\Search\ExtendedResult;
 
 /**
@@ -14,7 +14,7 @@ class EntityResult extends Result implements ExtendedResult {
 	/**
 	 * Key which holds wikibase data for result extra data.
 	 */
-	private const WIKIBASE_EXTRA_DATA = 'wikibase';
+	const WIKIBASE_EXTRA_DATA = 'wikibase';
 
 	/**
 	 * Label data with highlighting.
@@ -44,7 +44,7 @@ class EntityResult extends Result implements ExtendedResult {
 	/**
 	 * Did we capture actual match in display of
 	 * label or description?
-	 * @var bool
+	 * @var boolean
 	 */
 	private $haveMatch;
 	/**
@@ -66,10 +66,10 @@ class EntityResult extends Result implements ExtendedResult {
 
 	/**
 	 * @param string $displayLanguage
-	 * @param TermLanguageFallbackChain $displayFallbackChain
+	 * @param LanguageFallbackChain $displayFallbackChain
 	 * @param \Elastica\Result $result
 	 */
-	public function __construct( $displayLanguage, TermLanguageFallbackChain $displayFallbackChain,
+	public function __construct( $displayLanguage, LanguageFallbackChain $displayFallbackChain,
 									$result ) {
 		// Let Cirrus\Result class handle the boring stuff
 		parent::__construct( null, $result );
@@ -129,14 +129,14 @@ class EntityResult extends Result implements ExtendedResult {
 	 * Extract field value from highlighting or source data.
 	 * @param string $field
 	 * @param string $displayLanguage
-	 * @param TermLanguageFallbackChain $displayFallbackChain
+	 * @param LanguageFallbackChain $displayFallbackChain
 	 * @param array $highlightData
 	 * @param array $sourceData
 	 * @param bool $useOffsets Is highlighter using offsets option?
 	 * @return array [ $language, $text ] or [null, null] if nothing found
 	 */
 	private function getHighlightOrField( $field, $displayLanguage,
-			TermLanguageFallbackChain $displayFallbackChain,
+			LanguageFallbackChain $displayFallbackChain,
 			$highlightData, $sourceData, $useOffsets = false
 	) {
 		// Try highlights first, if we have needed language there, use highlighted data
@@ -168,12 +168,12 @@ class EntityResult extends Result implements ExtendedResult {
 	 * @param string $field Field in source data where we're looking.
 	 *                      The field will contain subfield by language names.
 	 * @param string $displayLanguage
-	 * @param TermLanguageFallbackChain $displayFallbackChain
+	 * @param LanguageFallbackChain $displayFallbackChain
 	 * @param array $sourceData The source data as returned by Elastic.
 	 * @return array
 	 */
 	private function getSourceField( $field, $displayLanguage,
-			TermLanguageFallbackChain $displayFallbackChain,
+			LanguageFallbackChain $displayFallbackChain,
 			$sourceData
 	) {
 		$term = EntitySearchUtils::findTermForDisplay( $sourceData, $field, $displayFallbackChain );

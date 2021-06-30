@@ -2,7 +2,7 @@
 namespace Wikibase\Search\Elastic;
 
 use CirrusSearch\Search\BaseCirrusSearchResultSet;
-use Wikibase\Lib\TermLanguageFallbackChain;
+use Wikibase\Lib\LanguageFallbackChain;
 
 /**
  * Result set for entity search
@@ -11,9 +11,9 @@ class EntityResultSet extends BaseCirrusSearchResultSet {
 
 	/**
 	 * Display fallback chain.
-	 * @var TermLanguageFallbackChain
+	 * @var LanguageFallbackChain
 	 */
-	private $termFallbackChain;
+	private $fallbackChain;
 	/**
 	 * Display language code
 	 * @var string
@@ -27,20 +27,20 @@ class EntityResultSet extends BaseCirrusSearchResultSet {
 
 	/**
 	 * @param string $displayLanguage
-	 * @param TermLanguageFallbackChain $displayFallbackChain
+	 * @param LanguageFallbackChain $displayFallbackChain
 	 * @param \Elastica\ResultSet $result
 	 */
 	public function __construct( $displayLanguage,
-		TermLanguageFallbackChain $displayFallbackChain,
+		LanguageFallbackChain $displayFallbackChain,
 		\Elastica\ResultSet $result
 	) {
 		$this->result = $result;
-		$this->termFallbackChain = $displayFallbackChain;
+		$this->fallbackChain = $displayFallbackChain;
 		$this->displayLanguage = $displayLanguage;
 	}
 
 	protected function transformOneResult( \Elastica\Result $result ) {
-		return new EntityResult( $this->displayLanguage, $this->termFallbackChain, $result );
+		return new EntityResult( $this->displayLanguage, $this->fallbackChain, $result );
 	}
 
 	/**

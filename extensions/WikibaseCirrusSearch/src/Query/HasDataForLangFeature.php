@@ -20,7 +20,7 @@ use Elastica\Query\Exists;
 class HasDataForLangFeature extends SimpleKeywordFeature implements FilterQueryFeature {
 
 	/** @var int A limit to the number of fields that can be queried at once */
-	private const MAX_FIELDS = 30;
+	const MAX_FIELDS = 30;
 
 	/** @var true[] Keyed by known language codes for set membership check */
 	private $validLangs;

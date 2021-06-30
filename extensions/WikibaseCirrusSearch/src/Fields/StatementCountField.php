@@ -15,7 +15,7 @@ class StatementCountField extends WikibaseNumericField {
 	/**
 	 * Field name
 	 */
-	public const NAME = 'statement_count';
+	const NAME = 'statement_count';
 
 	/**
 	 * @see SearchIndexField::getFieldData

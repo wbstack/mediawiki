@@ -4,6 +4,7 @@
 // Note that these will be merged with Cirrus standard profiles,
 // so prefixing with 'wikibase' is recommended.
 
+
 use Wikibase\Lexeme\Search\Elastic\LexemeFullTextQueryBuilder;
 
 return [

@@ -27,7 +27,7 @@ use Wikimedia\Assert\Assert;
  */
 class InLabelFeature extends SimpleKeywordFeature implements FilterQueryFeature {
 	/** @var int A limit to the number of fields that can be queried at once */
-	public const MAX_FIELDS = 30;
+	const MAX_FIELDS = 30;
 
 	/** @var LanguageFallbackChainFactory */
 	private $languageChainFactory;

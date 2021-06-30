@@ -24,7 +24,6 @@
 	"wikibasecirrus-search-bad-entity-type": "Bad entity type: $1",
 	"wikibasecirrus-search-bad-profile-name": "Bad search profile name: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement keyword contains no valid statements",
-	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense keyword contains no valid arguments",
 	"special-entitieswithoutdescription": "Entities without description",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Get list of entities without description",
 	"special-entitieswithoutlabel": "Entities without label",
@@ -33,7 +32,5 @@
 	"wikibasecirrus-entitieswithoutlabel-label-type": "Type:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Find",
 	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" is not a valid language code.",
-	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" is not a valid entity type.",
-
-	"wikibasecirrus-license-mapping": " #<!-- leave this line exactly as it is --> <pre>\n# Map of license names to structured data statements, for use with the haslicense keyword feature.\n# Changes to this take effect immediately.\n# The syntax is as follows:\n#   * Everything from a \"#\" character to the end of the line is a comment.\n#   * Every non-blank line is the license name, followed by a \"|\" character followed by a comma-separated list of <property>=<item> statements.\n# Examples of good lines:\n# cc-by-sa|P123=Q456,P123=Q789\n# cc-by|P123=Q000\n# Adding additional whitespace for improved legibility (e.g. newlines) is allowed around the | and , characters.\n# Example:\n# cc-by-sa|\n#     P123=Q456,\n#     P123=Q789,\n# cc-by|\n#     P123=Q000,\n #</pre> <!-- leave this line exactly as it is -->"
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" is not a valid entity type."
 }

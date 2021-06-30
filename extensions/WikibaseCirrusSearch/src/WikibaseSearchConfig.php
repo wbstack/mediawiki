@@ -10,7 +10,7 @@ use Config;
  */
 class WikibaseSearchConfig implements Config {
 
-	private const WIKIBASE_SEARCH_CONFIG_PREFIX = 'wgWBCS';
+	const WIKIBASE_SEARCH_CONFIG_PREFIX = 'wgWBCS';
 
 	/**
 	 * Global config.

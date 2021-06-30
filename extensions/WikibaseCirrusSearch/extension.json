@@ -64,10 +64,6 @@
 		"UseStemming": {
 			"value": [],
 			"description": "List of languages that we want to have stemming analyzers."
-		},
-		"LicenseMapping": {
-			"value": [],
-			"description": "Map of licence search strings to wikibase statements."
 		}
 	},
 	"ConfigRegistry": {
