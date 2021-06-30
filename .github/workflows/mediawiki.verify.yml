@@ -76,10 +76,10 @@ jobs:
     #- run: curl -s http://localhost:8001/rest.php | grep -q "did not match any known handler"
 
 # Final output
-    - name: Output the server logs (MediaWiki)
-      if: always()
-      run: cat phpout-mw.log
-    - name: Output the server logs (Fake API)
-      if: always()
-      run: cat phpout-api.log
+    # - name: Output the server logs (MediaWiki)
+    #   if: always()
+    #   run: cat phpout-mw.log
+    # - name: Output the server logs (Fake API)
+    #   if: always()
+    #   run: cat phpout-api.log
 
