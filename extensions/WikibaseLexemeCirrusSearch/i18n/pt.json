@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Athena in Wonderland",
+			"Hamilton Abreu",
+			"Ldacosta"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Extensão do WikibaseLexeme para usar a funcionalidade CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Perfil de reavaliação para pesquisa por prefixo (pesquisa de preenchimento)"
+}

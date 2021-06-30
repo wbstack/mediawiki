@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Anakmalaysia",
+			"Macofe"
+		]
+	},
+	"special-entitieswithoutlabel": "Entiti tanpa label",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Dapatkan senarai entiti tanpa label",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Kod bahasa:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Jenis:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Cari",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" bukan kod bahasa yang sah.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" bukan jenis entiti yang sah."
+}

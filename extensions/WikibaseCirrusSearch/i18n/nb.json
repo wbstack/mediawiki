@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danmichaelo",
+			"Event",
+			"Jeblad",
+			"Jon Harald Søby",
+			"Kjetil r",
+			"Macofe",
+			"Njardarlogar"
+		]
+	},
+	"wikibasecirrus-desc": "Wikibase-utvidelse for å bruke CirrusSearch-funksjonalitet",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "Nøkkelordet $1 inneholder ukjent språkkode: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "Nøkkelordet $1 ga for mange språkkoder. Søker i $2 av de $3 angitte {{PLURAL:$3|språkene}}",
+	"wikibasecirrus-inlabel-no-query-provided": "Nøkkelordet inlabel ble gitt en tom søkestreng",
+	"wikibasecirrus-rescore-profile-prefix": "Standard rescore-profil for fullføringssøk",
+	"wikibasecirrus-rescore-profile-prefix-boost": "Rescore-profil for fullføringssøk med påstandsforsterkning",
+	"wikibasecirrus-rescore-profile-fulltext": "Standard rescore-profil for fulltekstsøk",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "Rescore-profil for fulltekstsøk med fraseskåring",
+	"wikibasecirrus-search-bad-entity-type": "Ugyldig entitetstype: $1",
+	"wikibasecirrus-search-bad-profile-name": "Ugyldig søkeprofilnavn: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Nøkkelordet haswbstatement inneholder ingen gyldige påstander",
+	"special-entitieswithoutdescription": "Elementer uten beskrivelse",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Hent liste over elementer uten beskrivelse",
+	"special-entitieswithoutlabel": "Entiteter uten etikett",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Hent en liste over entiteter uten etikett",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Språkkode:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Type:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Søk",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "«$1» er ikke en gyldig språkkode.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "«$1» er en ugyldig entitetstype"
+}

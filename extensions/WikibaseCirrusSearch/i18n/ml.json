@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Praveenp"
+		]
+	},
+	"wikibasecirrus-entitieswithoutlabel-label-language": "ഭാഷയുടെ കോഡ്:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "തരം:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "കണ്ടെത്തുക",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" എന്നത് സാധുവായ ഭാഷാ കോഡ് അല്ല."
+}

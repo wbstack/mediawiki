@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Njardarlogar"
+		]
+	},
+	"special-entitieswithoutdescription": "Einingar utan skildring",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Få ei liste over eininigar utan skildring",
+	"special-entitieswithoutlabel": "Einingar utan merkelapp",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Hent liste over einingar utan merkelapp",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Språkkode:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Type:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Finn",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "«$1» er ikkje ein gild språkkode.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "«$1» er ikkje ein gild einingstype."
+}

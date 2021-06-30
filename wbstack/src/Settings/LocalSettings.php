@@ -101,7 +101,7 @@ $wgDBservers = [
 // For example schema generation or localization cache reload
 // WBS_DOMAIN=maint php ./w/maintenance/update.php --schema sql.sql --quick
 // As in these contexts there is often no replica.... and thus one would fail...
-if( !$wwDomainIsMaintenance ){
+if( !$wwDomainIsMaintenance && !$wwDomainSaysLocal ){
     $wgDBservers[] = [
         'host' => getenv('MW_DB_SERVER_REPLICA'),
         'dbname' => $wgDBname,
@@ -524,6 +524,14 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
         }
     }
 }
+
+# CirrusSearch etc.
+// wfLoadExtension( 'Elastica' );
+// wfLoadExtension( 'CirrusSearch' );
+// wfLoadExtension( 'WikibaseCirrusSearch' );
+// if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
+//     wfLoadExtension('WikibaseLexemeCirrusSearch');
+// }
 
 #######################################
 ## ---  l10n rebuild and beyond  --- ##

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Nikosguard",
+			"Protnet"
+		]
+	},
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Κωδικός γλώσσας:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Τύπος:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Εύρεση",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "Το \"$1\" δεν είναι έγκυρος κώδικας γλώσσας."
+}

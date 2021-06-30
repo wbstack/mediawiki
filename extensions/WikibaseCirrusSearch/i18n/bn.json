@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Leemon2010",
+			"আফতাবুজ্জামান"
+		]
+	},
+	"special-entitieswithoutdescription": "বিবরণ ছাড়া সত্তা",
+	"wikibasecirrus-entitieswithoutdescription-legend": "বিবরণ ছাড়া সত্তার তালিকা দেয়",
+	"special-entitieswithoutlabel": "লেবেল বিহীন ভুক্তি",
+	"wikibasecirrus-entitieswithoutlabel-legend": "লেবেল ছাড়া ভুক্তি তালিকা পান",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "ভাষার কোড:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "ধরন:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "অনুসন্ধান করুন",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" বৈধ ভাষা কোড নয়।",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" কোন বৈধ সত্তা নয়।"
+}

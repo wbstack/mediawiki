@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Tacsipacsi",
+			"Tgr"
+		]
+	},
+	"special-entitieswithoutdescription": "Entitások leírás nélkül",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Leírás nélküli entitások listájának lekérése",
+	"special-entitieswithoutlabel": "Címke nélküli fogalmak",
+	"wikibasecirrus-entitieswithoutlabel-legend": "A címke nélküli fogalmak listázása",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Nyelvkód:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Típus:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Keresés",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "Érvénytelen nyelvkód: „$1”",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "„$1” nem egy érvényes entitástípus."
+}

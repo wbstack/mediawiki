@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"פוילישער"
+		]
+	},
+	"special-entitieswithoutdescription": "ענטיטעטן אן באשרייבונג",
+	"special-entitieswithoutlabel": "אביעקטן אָן באצייכענונג",
+	"wikibasecirrus-entitieswithoutlabel-legend": "באקומען א ליסטע פון אביעקטן אן א באצייכענונג",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "שפראַך:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "טיפ:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "טרעפֿן",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" איז נישט קיין גילטיקער שפראך־קאד.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" איז נישט קיין גילטיקער אביעקט־טיפ."
+}

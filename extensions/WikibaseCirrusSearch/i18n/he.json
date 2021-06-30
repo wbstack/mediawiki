@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Esh77",
+			"ExampleTomer",
+			"Guycn1",
+			"Guycn2",
+			"Inkbug",
+			"LaG roiL",
+			"Yona b",
+			"חיים",
+			"ערן",
+			"פוילישער",
+			"שמזן"
+		]
+	},
+	"wikibasecirrus-desc": "הרחבת ויקיבייס לשימוש ב־CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "מילת המפתח $1 מכילה קוד שפה בלתי־ידוע: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "מילת המפתח $1 מכילה יותר מדי קודי שפה. מתבצע חיפוש ב־$2 מתוך $3 {{PLURAL:$3|שפות}}",
+	"wikibasecirrus-inlabel-no-query-provided": "למילת המפתח inlabel ניתנה מחרוזת חיפוש ריקה",
+	"wikibasecirrus-rescore-profile-prefix": "פרופיל דירוג משני התחלתי לחיפוש השלמה",
+	"wikibasecirrus-rescore-profile-prefix-boost": "פרופיל להשלמת החיפוש עם הצהרה מוגברת",
+	"wikibasecirrus-rescore-profile-fulltext": "פרופיל דירוג משני לחיפוש בטקסט מלא",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "פרופיל דירוג משני לחיפוש בטקסט מלא עם דירוג משפטים",
+	"wikibasecirrus-search-bad-entity-type": "סוג ישות רע: $1",
+	"wikibasecirrus-search-bad-profile-name": "שם פרופיל חיפוש רע: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "מילת המפתח haswbstatement אינה מכילה קביעות תקינות",
+	"special-entitieswithoutdescription": "ישויות ללא תיאור",
+	"wikibasecirrus-entitieswithoutdescription-legend": "קבלת רשימת ישויות ללא תיאור",
+	"special-entitieswithoutlabel": "ישויות ללא תווית",
+	"wikibasecirrus-entitieswithoutlabel-legend": "לקבל רשימת ישויות ללא תווית",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "קוד שפה:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "סוג:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "למצוא",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" אינו קוד שפה תקין.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" הוא לא סוג ישות תקין."
+}

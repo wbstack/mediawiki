@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06",
+			"Ladsgroup",
+			"Macofe",
+			"Stryn",
+			"Vlad5250"
+		]
+	},
+	"wikibasecirrus-desc": "Додаток на Викибазата за употреба на можноста CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "Клучниот збор $1 содржи непознат јазичен код: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "Клучниот збор $1 има премногу јазични кодови. Пребарувам $2 од {{PLURAL:$3|укажаниот јазик|укажаните $3 јазика}}",
+	"wikibasecirrus-inlabel-no-query-provided": "на клучниот збор во натписот му е укажано празно пребарување",
+	"wikibasecirrus-rescore-profile-prefix": "Основен преоценувачки профил за самодополнето пребарување",
+	"wikibasecirrus-rescore-profile-prefix-boost": "Преоценувачки профил за самодополнето пребарување со истакнување на искази",
+	"wikibasecirrus-rescore-profile-fulltext": "Основен преоценувачки профил за целотекстно пребарување",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "Преоценувачки профил за целотекстно пребарување со оценување на изрази",
+	"wikibasecirrus-search-bad-entity-type": "Неисправен тип на единица: $1",
+	"wikibasecirrus-search-bad-profile-name": "Неисправно пребарувачко профилно име: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Клучниот збор haswbstatement не содржи важечки искази",
+	"special-entitieswithoutdescription": "Единици без опис",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Дава список на единици без опис",
+	"special-entitieswithoutlabel": "Единици без натпис",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Список на предмети без натпис",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Јазичен код:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Тип:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Најди",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "„$1“ не претставува важечки јазичен код.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "„$1“ не претставува важечки тип на единица."
+}
