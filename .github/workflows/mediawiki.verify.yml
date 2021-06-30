@@ -7,6 +7,14 @@ on:
   pull_request:
 
 jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.3.4
+    - name: build docker
+      run: docker-compose up -d
   checks:
     runs-on: ubuntu-latest
     steps:
@@ -17,41 +25,24 @@ jobs:
     #  with:
     #    php-version: 7.4
     #    extensions: apcu, redis, intl, mbstring, mysqli, opcache, calendar, pcntl, bz2
-
-<<<<<<< HEAD
-    - name: build mediwiki with docker-composer
-      run: docker-compose up -d
-=======
-    - name: build
-      run: docker-compose up -d
     - name: wait for docker build
       uses: tomchv/wait-my-workflow@v1.1.0
       id: wait-build
       with:
           token: ${{ secrets.GITHUB_TOKEN }}
           checkName: build
-          ref: ${{ github.pull_request.head.sha || github.sha }}
+          # ref: ${{ github.pull_request.head.sha || github.sha }}
           intervalSeconds: 10
           timeoutSeconds: 100
->>>>>>> a4a0e2278b06e5e5587cb6499bb4a8ceedd5977b
 
       # TODO fixme, we depend on $_SERVER['SERVER_NAME'], and when using in built web server we must thus start more D:
-    #- name: Run PHP built in web server (MediaWiki 127.0.0.1)
-    #  run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S 127.0.0.1:8000  &> phpout-mw.log &
-    #- name: Run PHP built in web server (MediaWiki localhost)
-    #  run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S localhost:8001  &> phpout-mw.log &
-    #- name: Run PHP built in web server (Fake API)
-    #  run: php -S localhost:8002 ./wbstack/test/server.php  &> phpout-api.log &
+    - name: Run PHP built in web server (MediaWiki 127.0.0.1)
+      run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S 127.0.0.1:8000  &> phpout-mw.log &
+    - name: Run PHP built in web server (MediaWiki localhost)
+      run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S localhost:8001  &> phpout-mw.log &
+    - name: Run PHP built in web server (Fake API)
+      run: php -S localhost:8002 ./wbstack/test/server.php  &> phpout-api.log &
 
-<<<<<<< HEAD
-    - name: Wait for server to accept connections
-      uses: nick-invision/retry@v2.4.1
-      with:
-        max_attempts: 10
-        retry_wait_seconds: 1
-        timeout_seconds: 10
-        command: curl -s http://localhost:8000/
-=======
     #- name: Wait for server to accept connections
     #  uses: nick-invision/retry@v2.4.1
     #  with:
@@ -59,7 +50,6 @@ jobs:
     #    retry_wait_seconds: 1
     #   timeout_seconds: 10
     #    command: curl -s http://localhost:8000/
->>>>>>> a4a0e2278b06e5e5587cb6499bb4a8ceedd5977b
 
       # Make sure the 127.0.0.1 endpoints all just return 2 lines (as expected for no wiki)
     - name: check endpoints
@@ -80,17 +70,10 @@ jobs:
     #- run: curl -s http://127.0.0.1:8000/rest.php | grep -q "can not currently be loaded"
 
       # Make sure that localhost gets a bit further (but right now still returns errors)
-<<<<<<< HEAD
-    - run: curl -s http://localhost:8001/ | grep -q "Main Page"
-    - run: curl -s http://localhost:8001/api.php | grep -q "invalid configured server"
-    - run: curl -s http://localhost:8001/load.php | grep -q "invalid configured server"
-    - run: curl -s http://localhost:8001/rest.php | grep -q "did not match any known handler"
-=======
     #- run: curl -s http://localhost:8001/ | grep -q "Main Page"
     #- run: curl -s http://localhost:8001/api.php | grep -q "invalid configured server"
     #- run: curl -s http://localhost:8001/load.php | grep -q "invalid configured server"
     #- run: curl -s http://localhost:8001/rest.php | grep -q "did not match any known handler"
->>>>>>> a4a0e2278b06e5e5587cb6499bb4a8ceedd5977b
 
 # Final output
     - name: Output the server logs (MediaWiki)
