@@ -36,12 +36,12 @@ jobs:
           timeoutSeconds: 100
 
       # TODO fixme, we depend on $_SERVER['SERVER_NAME'], and when using in built web server we must thus start more D:
-    - name: Run PHP built in web server (MediaWiki 127.0.0.1)
-      run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S 127.0.0.1:8000  &> phpout-mw.log &
-    - name: Run PHP built in web server (MediaWiki localhost)
-      run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S localhost:8001  &> phpout-mw.log &
-    - name: Run PHP built in web server (Fake API)
-      run: php -S localhost:8002 ./wbstack/test/server.php  &> phpout-api.log &
+    # - name: Run PHP built in web server (MediaWiki 127.0.0.1)
+    #   run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S 127.0.0.1:8000  &> phpout-mw.log &
+    # - name: Run PHP built in web server (MediaWiki localhost)
+    #   run: PLATFORM_API_BACKEND_HOST=localhost:8002 php -S localhost:8001  &> phpout-mw.log &
+    # - name: Run PHP built in web server (Fake API)
+    #   run: php -S localhost:8002 ./wbstack/test/server.php  &> phpout-api.log &
 
     #- name: Wait for server to accept connections
     #  uses: nick-invision/retry@v2.4.1
@@ -54,7 +54,7 @@ jobs:
       # Make sure the 127.0.0.1 endpoints all just return 2 lines (as expected for no wiki)
     - name: check endpoints
       if: steps.wait-build.outputs.conclusion == 'success'
-      run: |
+      run:
         curl -s http://127.0.0.1:8000/ | wc -l | grep -q 2
         curl -s http://127.0.0.1:8000/api.php | wc -l | grep -q 2
         curl -s http://127.0.0.1:8000/load.php | wc -l | grep -q 2
