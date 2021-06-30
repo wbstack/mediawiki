@@ -526,12 +526,12 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
 }
 
 # CirrusSearch etc.
-wfLoadExtension( 'Elastica' );
-wfLoadExtension( 'CirrusSearch' );
-wfLoadExtension( 'WikibaseCirrusSearch' );
-if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
-    wfLoadExtension('WikibaseLexemeCirrusSearch');
-}
+// wfLoadExtension( 'Elastica' );
+// wfLoadExtension( 'CirrusSearch' );
+// wfLoadExtension( 'WikibaseCirrusSearch' );
+// if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
+//     wfLoadExtension('WikibaseLexemeCirrusSearch');
+// }
 
 #######################################
 ## ---  l10n rebuild and beyond  --- ##
