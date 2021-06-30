@@ -19,8 +19,8 @@
 ./wbstack/sync/dwnthing.sh extensions/TorBlock https://codeload.github.com/wikimedia/mediawiki-extensions-TorBlock/zip/9344f53d83475120010c4da35a8dff55246e8df2 & \
 ./wbstack/sync/dwnthing.sh extensions/Elastica https://codeload.github.com/wikimedia/mediawiki-extensions-Elastica/zip/8af6b458adf628a98af4ba8e407f9c676bf4a4fb & \
 ./wbstack/sync/dwnthing.sh extensions/CirrusSearch https://codeload.github.com/wikimedia/mediawiki-extensions-CirrusSearch/zip/203237ef2828c46094c5f6ba26baaeff2ab3596b & \
-./wbstack/sync/dwnthing.sh extensions/WikibaseCirrusSearch https://extdist.wmflabs.org/dist/extensions/WikibaseCirrusSearch-REL1_36-88b1b82.tar.gz & \
-./wbstack/sync/dwnthing.sh extensions/WikibaseLexemeCirrusSearch https://extdist.wmflabs.org/dist/extensions/WikibaseLexemeCirrusSearch-REL1_36-0c79555.tar.gz & \
+./wbstack/sync/dwnthing.sh extensions/WikibaseCirrusSearch https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch/zip/4bbdfdc55cd19c7e171445cf0bb80ed744975490 & \
+./wbstack/sync/dwnthing.sh extensions/WikibaseLexemeCirrusSearch https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch/zip/d5a8b8636ba5f5841491248852c9d3d0f0d88319 & \
 ./wbstack/sync/dwnthing.sh extensions/UniversalLanguageSelector https://codeload.github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/zip/e7ab607dd91b55f15a733bcba793619cf48d3604 & \
 ./wbstack/sync/dwnthing.sh extensions/cldr https://codeload.github.com/wikimedia/mediawiki-extensions-cldr/zip/69363ef473877eb454c9b1186e53264b48806143 & \
 ./wbstack/sync/dwnthing.sh extensions/Gadgets https://codeload.github.com/wikimedia/mediawiki-extensions-Gadgets/zip/8f6007d7a52871cf09a5161fc5062fdaa69d58c9 & \
