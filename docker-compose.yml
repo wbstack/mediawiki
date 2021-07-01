@@ -52,6 +52,8 @@ services:
   mysql:
     image: mariadb:10.3
     restart: unless-stopped
+    depends_on:
+      - mysql-replica-configure-replication
     volumes:
       - mediawiki-mysql-data:/var/lib/mysql
       - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
@@ -65,6 +67,46 @@ services:
       default:
         aliases:
          - mysql.svc
+
+  mysql-replica:
+    image: "${MYSQL_IMAGE:-mariadb:10.5}"
+    environment:
+      - MYSQL_ROOT_PASSWORD=toor
+    hostname: mysql-replica.mwdd.localhost
+    depends_on:
+      - mysql
+      - mysql-replica-configure-replication
+    dns:
+      - 10.0.0.10
+    networks:
+      default:
+        aliases:
+          - dps
+    volumes:
+      - mysql-replica-data:/var/lib/mysql
+      - ./mysql/replica:/mwdd-custom
+    entrypoint: "/mwdd-custom/entrypoint.sh"
+    command: "mysqld"
+
+  mysql-replica-configure-replication:
+    image: "${MYSQL_IMAGE:-mariadb:10.5}"
+    environment:
+      - "MYSQL_REPLICA_PASSWORD=toor"
+      - "MYSQL_MAIN_PASSWORD=toor"
+      - "MYSQL_ROOT_PASSWORD=toor"
+      - "MYSQL_REPLICATION_USER=repl"
+      - "MYSQL_REPLICATION_PASSWORD=repl"
+    dns:
+      - 10.0.0.10
+    networks:
+      default:
+        aliases:
+          - dps
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh:ro
+      - ./mysql/replica:/mwdd-custom
+      - mysql-configure-replication-data:/mwdd-connector
+    command: /bin/bash -x /mwdd-custom/mysql_connector_replica.sh
 
   redis:
     image: redis:latest
@@ -90,3 +132,5 @@ services:
 
 volumes:
   mediawiki-mysql-data:
+  mysql-configure-replication-data:
+  mysql-replica-data:
