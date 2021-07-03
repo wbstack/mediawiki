@@ -334,6 +334,20 @@ wfLoadExtension( 'DeleteBatch' );
 wfLoadExtension( 'MultimediaViewer' );
 wfLoadExtension( 'WikiHiero' );
 
+wfLoadExtension( 'VisualEditor' );
+// For 1.36+
+//wfLoadExtension( 'Parsoid', 'vendor/wikimedia/parsoid/extension.json' );
+$wgDefaultUserOptions['visualeditor-editor'] = "visualeditor";
+if ( $wwDomainSaysLocal ) {
+    $wgVirtualRestConfig['modules']['parsoid'] = array(
+        // URL to the Parsoid instance.
+        // You should change $wgServer to match the non-local host running Parsoid
+        'url' => 'localhost:80' . $wgScriptPath . '/rest.php',
+        // Parsoid "domain", see below (optional, rarely needed)
+        // 'domain' => 'localhost',
+    );
+}
+
 # ConfirmAccount (only loaded when the setting is on)
 if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
     require_once "$IP/extensions/ConfirmAccount/ConfirmAccount.php";
