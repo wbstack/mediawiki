@@ -56,6 +56,8 @@
 ./wbstack/sync/dwnthing.sh extensions/TextExtracts https://codeload.github.com/wikimedia/mediawiki-extensions-TextExtracts/zip/b97d85901027a9861ce614ac5864db2c9acae028 & \
 ./wbstack/sync/dwnthing.sh extensions/Popups https://codeload.github.com/wikimedia/mediawiki-extensions-Popups/zip/dccd60752353eac1063a79f81a8059b3b06b9353 & \
 
+#./wbstack/sync/dwnthing.sh extensions/VisualEditor https://codeload.github.com/wikimedia/mediawiki-extensions-VisualEditor/zip/b73df7e472116ff09f3febb6ece1f513808c08bd & \
+git clone --recurse-submodules --depth 20 --branch REL1_35 https://github.com/wikimedia/mediawiki-extensions-VisualEditor.git extensions/VisualEditor && git -C extensions/VisualEditor checkout b73df7e472116ff09f3febb6ece1f513808c08bd & \
 
 # Automatic script skips this one
 # https://github.com/wikimedia/mediawiki-extensions-EntitySchema/tree/REL1_35
