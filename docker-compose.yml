@@ -26,6 +26,8 @@ services:
       - MW_DB_SERVER_MASTER=mysql.svc:3306
       - MW_DB_SERVER_REPLICA=mysql-replica.svc:3306
 
+      - MW_ELASTICSEARCH_HOST=elasticsearch.svc
+
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
       - MW_REDIS_PASSWORD=

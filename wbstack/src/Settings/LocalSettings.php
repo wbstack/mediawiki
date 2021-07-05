@@ -538,7 +538,7 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     }
 
     $wgSearchType = 'CirrusSearch';
-    $wgCirrusSearchServers = [ 'elasticsearch.svc' ];
+    $wgCirrusSearchServers = [ getenv('MW_ELASTICSEARCH_HOST') ];
     $wgWBCSUseCirrus = true;
 }
 
