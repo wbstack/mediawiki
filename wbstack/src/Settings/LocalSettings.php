@@ -537,7 +537,6 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         wfLoadExtension('WikibaseLexemeCirrusSearch');
     }
 
-    // $wgDisableSearchUpdate = true;
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchServers = [ 'elasticsearch.svc' ];
     $wgWBCSUseCirrus = true;
