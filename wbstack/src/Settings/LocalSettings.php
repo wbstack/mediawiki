@@ -525,12 +525,17 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
     }
 }
 
-# CirrusSearch etc.
+// ElasticSearch
 if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     error_log( "elastica enabled" );
     wfLoadExtension( 'Elastica' );
     wfLoadExtension( 'CirrusSearch' );
     wfLoadExtension( 'WikibaseCirrusSearch' );
+
+    // If Wikibase Lexemes are enabled, enable lexeme cirrus search
+    if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
+        wfLoadExtension('WikibaseLexemeCirrusSearch');
+    }
 
     // $wgDisableSearchUpdate = true;
     $wgSearchType = 'CirrusSearch';
@@ -538,9 +543,6 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgWBCSUseCirrus = true;
 }
 
-if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
-    wfLoadExtension('WikibaseLexemeCirrusSearch');
-}
 
 #######################################
 ## ---  l10n rebuild and beyond  --- ##
