@@ -24,7 +24,7 @@ services:
       - PLATFORM_API_BACKEND_HOST=api.svc
 
       - MW_DB_SERVER_MASTER=mysql.svc:3306
-      - MW_DB_SERVER_REPLICA=mysql.svc:3306
+      - MW_DB_SERVER_REPLICA=mysql-replica.svc:3306
 
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
@@ -50,13 +50,17 @@ services:
       - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   mysql:
-    image: mariadb:10.3
+    image: mariadb:10.5
     restart: unless-stopped
+    depends_on:
+      - mysql-configure-replication
     volumes:
       - mediawiki-mysql-data:/var/lib/mysql
+      - ./wbstack/docker-compose/mysql/main:/mwdd-custom
       - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
+    entrypoint: "/mwdd-custom/entrypoint.sh"
+    command: "mysqld"
     environment:
-      # CONFIG - Change the default values below (should match values passed to wikibase)
       MYSQL_DATABASE: 'mwdb_somedb'
       MYSQL_USER: 'mwu_someuser'
       MYSQL_PASSWORD: 'somepassword'
@@ -64,7 +68,58 @@ services:
     networks:
       default:
         aliases:
+         - mysql
          - mysql.svc
+
+  mysql-replica:
+    image: mariadb:10.5
+    environment:
+      MYSQL_DATABASE: 'mwdb_somedb'
+      MYSQL_USER: 'mwu_someuser'
+      MYSQL_PASSWORD: 'somepassword'
+      MYSQL_ROOT_PASSWORD: 'toor'
+    depends_on:
+      - mysql
+      - mysql-replica-configure-replication
+    volumes:
+      - mysql-replica-data:/var/lib/mysql
+      - ./wbstack/docker-compose/mysql/replica:/mwdd-custom
+      - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
+    entrypoint: "/mwdd-custom/entrypoint.sh"
+    command: "mysqld"
+    networks:
+      default:
+        aliases:
+         - mysql-replica
+         - mysql-replica.svc
+
+  mysql-configure-replication:
+    image: mariadb:10.5
+    environment:
+      - "MYSQL_REPLICA_PASSWORD=toor"
+      - "MYSQL_MAIN_PASSWORD=toor"
+      - "MYSQL_ROOT_PASSWORD=toor"
+      - "MYSQL_REPLICATION_USER=repl"
+      - "MYSQL_REPLICATION_PASSWORD=repl"
+    volumes:
+      - ./wbstack/docker-compose/wait-for-it.sh:/wait-for-it.sh:ro
+      - ./wbstack/docker-compose/mysql/main:/mwdd-custom
+      - mysql-configure-replication-data:/mwdd-connector
+    command: /bin/bash -x /mwdd-custom/mysql_connector_main.sh
+
+  mysql-replica-configure-replication:
+    image: mariadb:10.5
+    environment:
+      - "MYSQL_REPLICA_PASSWORD=toor"
+      - "MYSQL_MAIN_PASSWORD=toor"
+      - "MYSQL_ROOT_PASSWORD=toor"
+      - "MYSQL_REPLICATION_USER=repl"
+      - "MYSQL_REPLICATION_PASSWORD=repl"
+    volumes:
+      - ./wbstack/docker-compose/wait-for-it.sh:/wait-for-it.sh:ro
+      - ./wbstack/docker-compose/mysql/replica:/mwdd-custom
+      - mysql-configure-replication-data:/mwdd-connector
+    command: /bin/bash -x /mwdd-custom/mysql_connector_replica.sh
 
   redis:
     image: redis:latest
@@ -79,6 +134,8 @@ services:
   elasticsearch:
     image: wikibase/elasticsearch:6.5.4-wmde.1
     restart: unless-stopped
+    ports:
+      - 9200:9200
     networks:
       default:
         aliases:
@@ -87,6 +144,12 @@ services:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
 
+  adminer:
+    image: adminer:4.8.0
+    ports:
+      - 8003:8080
 
 volumes:
   mediawiki-mysql-data:
+  mysql-replica-data:
+  mysql-configure-replication-data:
