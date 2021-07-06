@@ -537,6 +537,9 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         wfLoadExtension('WikibaseLexemeCirrusSearch');
     }
 
+    // prepends indices with subdomain
+    $wgCirrusSearchIndexBaseName = $wikiInfo->requestDomain;
+
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchServers = [ getenv('MW_ELASTICSEARCH_HOST') ];
     $wgWBCSUseCirrus = true;
