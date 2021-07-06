@@ -32,6 +32,7 @@ These can be found in the `src/Internal` directory.
 - `MW_RECAPTCHA_SITEKEY`
 - `MW_RECAPTCHA_SECRETKEY`
 - `PLATFORM_API_BACKEND_HOST`: points to an internal mode wbstack api service
+- `MW_ELASTICSEARCH_HOST`: elasticsearch hostname
 
 ## Build scripts
 
@@ -71,3 +72,14 @@ And secondly via LocalSettings.php
     - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
       - src/Internal/*
     - src/Settings/Hooks.php
+
+## ElasticSearch index configuration
+
+In order to enable elasticsearch the UpdateSearchIndexConfig.php needs to be executed for that wiki.
+On wiki creation through the API this is done by the ApiWbStackElasticSearchInit job.
+
+To do this manually in the docker-compose development environment a request can be sent to the site in question. (_The request takes a while to execute_)
+
+```sh
+curl -l -X POST http://site1.localhost:8001/w/api.php&action=wbstackElasticSearchInit&format=json
+```
