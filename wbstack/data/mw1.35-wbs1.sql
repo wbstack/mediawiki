@@ -1,6 +1,10 @@
--- Adminer 4.6.3 MySQL dump
+CREATE DATABASE IF NOT EXISTS `<<REPLACE_DATABASE>>`;
+GRANT ALL ON `<<REPLACE_DATABASE>>`.* TO 'mwu_someuser'@'%';
 
-CREATE TABLE `mwt_someprefix_account_credentials` (
+USE <<REPLACE_DATABASE>>;
+
+-- Adminer 4.6.3 MySQL dump
+CREATE TABLE `<<REPLACE_PREFIX>>_account_credentials` (
   `acd_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `acd_user_id` int(10) unsigned NOT NULL,
   `acd_real_name` varbinary(255) NOT NULL DEFAULT '',
@@ -23,7 +27,7 @@ CREATE TABLE `mwt_someprefix_account_credentials` (
   UNIQUE KEY `acd_user_id` (`acd_user_id`,`acd_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_account_requests` (
+CREATE TABLE `<<REPLACE_PREFIX>>_account_requests` (
   `acr_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `acr_name` varbinary(255) NOT NULL DEFAULT '',
   `acr_real_name` varbinary(255) NOT NULL DEFAULT '',
@@ -54,7 +58,7 @@ CREATE TABLE `mwt_someprefix_account_requests` (
   KEY `acr_type_del_reg` (`acr_type`,`acr_deleted`,`acr_registration`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_actor` (
+CREATE TABLE `<<REPLACE_PREFIX>>_actor` (
   `actor_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `actor_user` int(10) unsigned DEFAULT NULL,
   `actor_name` varbinary(255) NOT NULL,
@@ -63,7 +67,7 @@ CREATE TABLE `mwt_someprefix_actor` (
   UNIQUE KEY `actor_user` (`actor_user`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_archive` (
+CREATE TABLE `<<REPLACE_PREFIX>>_archive` (
   `ar_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ar_namespace` int(11) NOT NULL DEFAULT 0,
   `ar_title` varbinary(255) NOT NULL DEFAULT '',
@@ -83,7 +87,7 @@ CREATE TABLE `mwt_someprefix_archive` (
   KEY `ar_actor_timestamp` (`ar_actor`,`ar_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_bot_passwords` (
+CREATE TABLE `<<REPLACE_PREFIX>>_bot_passwords` (
   `bp_user` int(10) unsigned NOT NULL,
   `bp_app_id` varbinary(32) NOT NULL,
   `bp_password` tinyblob NOT NULL,
@@ -93,7 +97,7 @@ CREATE TABLE `mwt_someprefix_bot_passwords` (
   PRIMARY KEY (`bp_user`,`bp_app_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_category` (
+CREATE TABLE `<<REPLACE_PREFIX>>_category` (
   `cat_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `cat_title` varbinary(255) NOT NULL,
   `cat_pages` int(11) NOT NULL DEFAULT 0,
@@ -104,7 +108,7 @@ CREATE TABLE `mwt_someprefix_category` (
   KEY `cat_pages` (`cat_pages`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_categorylinks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_categorylinks` (
   `cl_from` int(10) unsigned NOT NULL DEFAULT 0,
   `cl_to` varbinary(255) NOT NULL DEFAULT '',
   `cl_sortkey` varbinary(230) NOT NULL DEFAULT '',
@@ -118,7 +122,7 @@ CREATE TABLE `mwt_someprefix_categorylinks` (
   KEY `cl_collation_ext` (`cl_collation`,`cl_to`,`cl_type`,`cl_from`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_change_tag` (
+CREATE TABLE `<<REPLACE_PREFIX>>_change_tag` (
   `ct_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ct_rc_id` int(11) DEFAULT NULL,
   `ct_log_id` int(10) unsigned DEFAULT NULL,
@@ -132,7 +136,7 @@ CREATE TABLE `mwt_someprefix_change_tag` (
   KEY `change_tag_tag_id_id` (`ct_tag_id`,`ct_rc_id`,`ct_rev_id`,`ct_log_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_change_tag_def` (
+CREATE TABLE `<<REPLACE_PREFIX>>_change_tag_def` (
   `ctd_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `ctd_name` varbinary(255) NOT NULL,
   `ctd_user_defined` tinyint(1) NOT NULL,
@@ -143,7 +147,7 @@ CREATE TABLE `mwt_someprefix_change_tag_def` (
   KEY `ctd_user_defined` (`ctd_user_defined`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_comment` (
+CREATE TABLE `<<REPLACE_PREFIX>>_comment` (
   `comment_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `comment_hash` int(11) NOT NULL,
   `comment_text` blob NOT NULL,
@@ -152,7 +156,7 @@ CREATE TABLE `mwt_someprefix_comment` (
   KEY `comment_hash` (`comment_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_content` (
+CREATE TABLE `<<REPLACE_PREFIX>>_content` (
   `content_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `content_size` int(10) unsigned NOT NULL,
   `content_sha1` varbinary(32) NOT NULL,
@@ -161,17 +165,17 @@ CREATE TABLE `mwt_someprefix_content` (
   PRIMARY KEY (`content_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_content_models` (
+CREATE TABLE `<<REPLACE_PREFIX>>_content_models` (
   `model_id` smallint(6) NOT NULL AUTO_INCREMENT,
   `model_name` varbinary(64) NOT NULL,
   PRIMARY KEY (`model_id`),
   UNIQUE KEY `model_name` (`model_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-INSERT INTO `mwt_someprefix_content_models` (`model_id`, `model_name`) VALUES
+INSERT INTO `<<REPLACE_PREFIX>>_content_models` (`model_id`, `model_name`) VALUES
 (1,	UNHEX('77696B6974657874'));
 
-CREATE TABLE `mwt_someprefix_echo_email_batch` (
+CREATE TABLE `<<REPLACE_PREFIX>>_echo_email_batch` (
   `eeb_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `eeb_user_id` int(10) unsigned NOT NULL,
   `eeb_event_priority` tinyint(3) unsigned NOT NULL DEFAULT 10,
@@ -182,7 +186,7 @@ CREATE TABLE `mwt_someprefix_echo_email_batch` (
   KEY `echo_email_batch_user_hash_priority` (`eeb_user_id`,`eeb_event_hash`,`eeb_event_priority`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_echo_event` (
+CREATE TABLE `<<REPLACE_PREFIX>>_echo_event` (
   `event_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `event_type` varbinary(64) NOT NULL,
   `event_variant` varbinary(64) DEFAULT NULL,
@@ -196,7 +200,7 @@ CREATE TABLE `mwt_someprefix_echo_event` (
   KEY `echo_event_page_id` (`event_page_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_echo_notification` (
+CREATE TABLE `<<REPLACE_PREFIX>>_echo_notification` (
   `notification_event` int(10) unsigned NOT NULL,
   `notification_user` int(10) unsigned NOT NULL,
   `notification_timestamp` binary(14) NOT NULL,
@@ -208,13 +212,13 @@ CREATE TABLE `mwt_someprefix_echo_notification` (
   KEY `echo_notification_user_read_timestamp` (`notification_user`,`notification_read_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_echo_push_provider` (
+CREATE TABLE `<<REPLACE_PREFIX>>_echo_push_provider` (
   `epp_id` tinyint(3) unsigned NOT NULL,
   `epp_name` tinyblob NOT NULL,
   PRIMARY KEY (`epp_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_echo_push_subscription` (
+CREATE TABLE `<<REPLACE_PREFIX>>_echo_push_subscription` (
   `eps_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `eps_user` int(10) unsigned NOT NULL,
   `eps_token` blob NOT NULL,
@@ -226,10 +230,10 @@ CREATE TABLE `mwt_someprefix_echo_push_subscription` (
   UNIQUE KEY `eps_token_sha256` (`eps_token_sha256`),
   KEY `eps_provider` (`eps_provider`),
   KEY `echo_push_subscription_user_id` (`eps_user`),
-  CONSTRAINT `echo_push_subscription_ibfk_1` FOREIGN KEY (`eps_provider`) REFERENCES `mwt_someprefix_echo_push_provider` (`epp_id`)
+  CONSTRAINT `echo_push_subscription_ibfk_1` FOREIGN KEY (`eps_provider`) REFERENCES `<<REPLACE_PREFIX>>_echo_push_provider` (`epp_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_echo_target_page` (
+CREATE TABLE `<<REPLACE_PREFIX>>_echo_target_page` (
   `etp_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `etp_page` int(10) unsigned NOT NULL DEFAULT 0,
   `etp_event` int(10) unsigned NOT NULL DEFAULT 0,
@@ -238,11 +242,11 @@ CREATE TABLE `mwt_someprefix_echo_target_page` (
   KEY `echo_target_page_page_event` (`etp_page`,`etp_event`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_entityschema_id_counter` (
+CREATE TABLE `<<REPLACE_PREFIX>>_entityschema_id_counter` (
   `id_value` int(10) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_externallinks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_externallinks` (
   `el_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `el_from` int(10) unsigned NOT NULL DEFAULT 0,
   `el_to` blob NOT NULL,
@@ -256,7 +260,7 @@ CREATE TABLE `mwt_someprefix_externallinks` (
   KEY `el_from_index_60` (`el_from`,`el_index_60`,`el_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_filearchive` (
+CREATE TABLE `<<REPLACE_PREFIX>>_filearchive` (
   `fa_id` int(11) NOT NULL AUTO_INCREMENT,
   `fa_name` varbinary(255) NOT NULL DEFAULT '',
   `fa_archive_name` varbinary(255) DEFAULT '',
@@ -286,7 +290,7 @@ CREATE TABLE `mwt_someprefix_filearchive` (
   KEY `fa_sha1` (`fa_sha1`(10))
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_image` (
+CREATE TABLE `<<REPLACE_PREFIX>>_image` (
   `img_name` varbinary(255) NOT NULL DEFAULT '',
   `img_size` int(10) unsigned NOT NULL DEFAULT 0,
   `img_width` int(11) NOT NULL DEFAULT 0,
@@ -308,7 +312,7 @@ CREATE TABLE `mwt_someprefix_image` (
   KEY `img_media_mime` (`img_media_type`,`img_major_mime`,`img_minor_mime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_imagelinks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_imagelinks` (
   `il_from` int(10) unsigned NOT NULL DEFAULT 0,
   `il_from_namespace` int(11) NOT NULL DEFAULT 0,
   `il_to` varbinary(255) NOT NULL DEFAULT '',
@@ -317,7 +321,7 @@ CREATE TABLE `mwt_someprefix_imagelinks` (
   KEY `il_backlinks_namespace` (`il_from_namespace`,`il_to`,`il_from`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_interwiki` (
+CREATE TABLE `<<REPLACE_PREFIX>>_interwiki` (
   `iw_prefix` varbinary(32) NOT NULL,
   `iw_url` blob NOT NULL,
   `iw_api` blob NOT NULL,
@@ -327,7 +331,7 @@ CREATE TABLE `mwt_someprefix_interwiki` (
   PRIMARY KEY (`iw_prefix`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-INSERT INTO `mwt_someprefix_interwiki` (`iw_prefix`, `iw_url`, `iw_api`, `iw_wikiid`, `iw_local`, `iw_trans`) VALUES
+INSERT INTO `<<REPLACE_PREFIX>>_interwiki` (`iw_prefix`, `iw_url`, `iw_api`, `iw_wikiid`, `iw_local`, `iw_trans`) VALUES
 (UNHEX('6163726F6E796D'),	'https://www.acronymfinder.com/~/search/af.aspx?string=exact&Acronym=$1',	'',	UNHEX(''),	0,	0),
 (UNHEX('6164766F6761746F'),	'http://www.advogato.org/$1',	'',	UNHEX(''),	0,	0),
 (UNHEX('6172786976'),	'https://www.arxiv.org/abs/$1',	'',	UNHEX(''),	0,	0),
@@ -395,7 +399,7 @@ INSERT INTO `mwt_someprefix_interwiki` (`iw_prefix`, `iw_url`, `iw_api`, `iw_wik
 (UNHEX('77696B74'),	'https://en.wiktionary.org/wiki/$1',	'https://en.wiktionary.org/w/api.php',	UNHEX(''),	0,	0),
 (UNHEX('77696B74696F6E617279'),	'https://en.wiktionary.org/wiki/$1',	'https://en.wiktionary.org/w/api.php',	UNHEX(''),	0,	0);
 
-CREATE TABLE `mwt_someprefix_invitesignup` (
+CREATE TABLE `<<REPLACE_PREFIX>>_invitesignup` (
   `is_inviter` int(10) unsigned NOT NULL,
   `is_invitee` int(10) unsigned DEFAULT NULL,
   `is_email` varbinary(255) NOT NULL,
@@ -406,7 +410,7 @@ CREATE TABLE `mwt_someprefix_invitesignup` (
   PRIMARY KEY (`is_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_ipblocks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_ipblocks` (
   `ipb_id` int(11) NOT NULL AUTO_INCREMENT,
   `ipb_address` tinyblob NOT NULL,
   `ipb_user` int(10) unsigned NOT NULL DEFAULT 0,
@@ -434,7 +438,7 @@ CREATE TABLE `mwt_someprefix_ipblocks` (
   KEY `ipb_parent_block_id` (`ipb_parent_block_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_ipblocks_restrictions` (
+CREATE TABLE `<<REPLACE_PREFIX>>_ipblocks_restrictions` (
   `ir_ipb_id` int(11) NOT NULL,
   `ir_type` tinyint(1) NOT NULL,
   `ir_value` int(11) NOT NULL,
@@ -442,7 +446,7 @@ CREATE TABLE `mwt_someprefix_ipblocks_restrictions` (
   KEY `ir_type_value` (`ir_type`,`ir_value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_ip_changes` (
+CREATE TABLE `<<REPLACE_PREFIX>>_ip_changes` (
   `ipc_rev_id` int(10) unsigned NOT NULL DEFAULT 0,
   `ipc_rev_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
   `ipc_hex` varbinary(35) NOT NULL DEFAULT '',
@@ -451,7 +455,7 @@ CREATE TABLE `mwt_someprefix_ip_changes` (
   KEY `ipc_hex_time` (`ipc_hex`,`ipc_rev_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_iwlinks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_iwlinks` (
   `iwl_from` int(10) unsigned NOT NULL DEFAULT 0,
   `iwl_prefix` varbinary(20) NOT NULL DEFAULT '',
   `iwl_title` varbinary(255) NOT NULL DEFAULT '',
@@ -460,7 +464,7 @@ CREATE TABLE `mwt_someprefix_iwlinks` (
   KEY `iwl_prefix_from_title` (`iwl_prefix`,`iwl_from`,`iwl_title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_job` (
+CREATE TABLE `<<REPLACE_PREFIX>>_job` (
   `job_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `job_cmd` varbinary(60) NOT NULL DEFAULT '',
   `job_namespace` int(11) NOT NULL,
@@ -480,14 +484,14 @@ CREATE TABLE `mwt_someprefix_job` (
   KEY `job_timestamp` (`job_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_l10n_cache` (
+CREATE TABLE `<<REPLACE_PREFIX>>_l10n_cache` (
   `lc_lang` varbinary(35) NOT NULL,
   `lc_key` varbinary(255) NOT NULL,
   `lc_value` mediumblob NOT NULL,
   PRIMARY KEY (`lc_lang`,`lc_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_langlinks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_langlinks` (
   `ll_from` int(10) unsigned NOT NULL DEFAULT 0,
   `ll_lang` varbinary(35) NOT NULL DEFAULT '',
   `ll_title` varbinary(255) NOT NULL DEFAULT '',
@@ -495,7 +499,7 @@ CREATE TABLE `mwt_someprefix_langlinks` (
   KEY `ll_lang` (`ll_lang`,`ll_title`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_logging` (
+CREATE TABLE `<<REPLACE_PREFIX>>_logging` (
   `log_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `log_type` varbinary(32) NOT NULL DEFAULT '',
   `log_action` varbinary(32) NOT NULL DEFAULT '',
@@ -517,7 +521,7 @@ CREATE TABLE `mwt_someprefix_logging` (
   KEY `log_type_action` (`log_type`,`log_action`,`log_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_log_search` (
+CREATE TABLE `<<REPLACE_PREFIX>>_log_search` (
   `ls_field` varbinary(32) NOT NULL,
   `ls_value` varbinary(255) NOT NULL,
   `ls_log_id` int(10) unsigned NOT NULL DEFAULT 0,
@@ -525,7 +529,7 @@ CREATE TABLE `mwt_someprefix_log_search` (
   KEY `ls_log_id` (`ls_log_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_mathoid` (
+CREATE TABLE `<<REPLACE_PREFIX>>_mathoid` (
   `math_inputhash` varbinary(16) NOT NULL,
   `math_input` blob NOT NULL,
   `math_tex` blob DEFAULT NULL,
@@ -537,14 +541,14 @@ CREATE TABLE `mwt_someprefix_mathoid` (
   PRIMARY KEY (`math_inputhash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_module_deps` (
+CREATE TABLE `<<REPLACE_PREFIX>>_module_deps` (
   `md_module` varbinary(255) NOT NULL,
   `md_skin` varbinary(32) NOT NULL,
   `md_deps` mediumblob NOT NULL,
   PRIMARY KEY (`md_module`,`md_skin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_oauth2_access_tokens` (
+CREATE TABLE `<<REPLACE_PREFIX>>_oauth2_access_tokens` (
   `oaat_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `oaat_identifier` varbinary(255) NOT NULL,
   `oaat_expires` varbinary(14) NOT NULL,
@@ -555,7 +559,7 @@ CREATE TABLE `mwt_someprefix_oauth2_access_tokens` (
   KEY `oaat_acceptance_id` (`oaat_acceptance_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_oauth_accepted_consumer` (
+CREATE TABLE `<<REPLACE_PREFIX>>_oauth_accepted_consumer` (
   `oaac_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `oaac_wiki` varbinary(255) NOT NULL,
   `oaac_user_id` int(10) unsigned NOT NULL,
@@ -572,7 +576,7 @@ CREATE TABLE `mwt_someprefix_oauth_accepted_consumer` (
   KEY `oaac_user_id` (`oaac_user_id`,`oaac_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_oauth_registered_consumer` (
+CREATE TABLE `<<REPLACE_PREFIX>>_oauth_registered_consumer` (
   `oarc_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `oarc_consumer_key` varbinary(32) NOT NULL,
   `oarc_name` varbinary(128) NOT NULL,
@@ -604,7 +608,7 @@ CREATE TABLE `mwt_someprefix_oauth_registered_consumer` (
   KEY `oarc_stage_timestamp` (`oarc_stage`,`oarc_stage_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_objectcache` (
+CREATE TABLE `<<REPLACE_PREFIX>>_objectcache` (
   `keyname` varbinary(255) NOT NULL DEFAULT '',
   `value` mediumblob DEFAULT NULL,
   `exptime` datetime DEFAULT NULL,
@@ -612,7 +616,7 @@ CREATE TABLE `mwt_someprefix_objectcache` (
   KEY `exptime` (`exptime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_oldimage` (
+CREATE TABLE `<<REPLACE_PREFIX>>_oldimage` (
   `oi_name` varbinary(255) NOT NULL DEFAULT '',
   `oi_archive_name` varbinary(255) NOT NULL DEFAULT '',
   `oi_size` int(10) unsigned NOT NULL DEFAULT 0,
@@ -634,7 +638,7 @@ CREATE TABLE `mwt_someprefix_oldimage` (
   KEY `oi_sha1` (`oi_sha1`(10))
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_page` (
+CREATE TABLE `<<REPLACE_PREFIX>>_page` (
   `page_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `page_namespace` int(11) NOT NULL,
   `page_title` varbinary(255) NOT NULL,
@@ -655,7 +659,7 @@ CREATE TABLE `mwt_someprefix_page` (
   KEY `page_redirect_namespace_len` (`page_is_redirect`,`page_namespace`,`page_len`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_pagelinks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_pagelinks` (
   `pl_from` int(10) unsigned NOT NULL DEFAULT 0,
   `pl_from_namespace` int(11) NOT NULL DEFAULT 0,
   `pl_namespace` int(11) NOT NULL DEFAULT 0,
@@ -665,7 +669,7 @@ CREATE TABLE `mwt_someprefix_pagelinks` (
   KEY `pl_backlinks_namespace` (`pl_from_namespace`,`pl_namespace`,`pl_title`,`pl_from`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_page_props` (
+CREATE TABLE `<<REPLACE_PREFIX>>_page_props` (
   `pp_page` int(11) NOT NULL,
   `pp_propname` varbinary(60) NOT NULL,
   `pp_value` blob NOT NULL,
@@ -675,7 +679,7 @@ CREATE TABLE `mwt_someprefix_page_props` (
   UNIQUE KEY `pp_propname_sortkey_page` (`pp_propname`,`pp_sortkey`,`pp_page`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_page_restrictions` (
+CREATE TABLE `<<REPLACE_PREFIX>>_page_restrictions` (
   `pr_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `pr_page` int(11) NOT NULL,
   `pr_type` varbinary(60) NOT NULL,
@@ -690,7 +694,7 @@ CREATE TABLE `mwt_someprefix_page_restrictions` (
   KEY `pr_cascade` (`pr_cascade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_protected_titles` (
+CREATE TABLE `<<REPLACE_PREFIX>>_protected_titles` (
   `pt_namespace` int(11) NOT NULL,
   `pt_title` varbinary(255) NOT NULL,
   `pt_user` int(10) unsigned NOT NULL,
@@ -702,7 +706,7 @@ CREATE TABLE `mwt_someprefix_protected_titles` (
   KEY `pt_timestamp` (`pt_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_querycache` (
+CREATE TABLE `<<REPLACE_PREFIX>>_querycache` (
   `qc_type` varbinary(32) NOT NULL,
   `qc_value` int(10) unsigned NOT NULL DEFAULT 0,
   `qc_namespace` int(11) NOT NULL DEFAULT 0,
@@ -710,7 +714,7 @@ CREATE TABLE `mwt_someprefix_querycache` (
   KEY `qc_type` (`qc_type`,`qc_value`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_querycachetwo` (
+CREATE TABLE `<<REPLACE_PREFIX>>_querycachetwo` (
   `qcc_type` varbinary(32) NOT NULL,
   `qcc_value` int(10) unsigned NOT NULL DEFAULT 0,
   `qcc_namespace` int(11) NOT NULL DEFAULT 0,
@@ -722,13 +726,13 @@ CREATE TABLE `mwt_someprefix_querycachetwo` (
   KEY `qcc_titletwo` (`qcc_type`,`qcc_namespacetwo`,`qcc_titletwo`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_querycache_info` (
+CREATE TABLE `<<REPLACE_PREFIX>>_querycache_info` (
   `qci_type` varbinary(32) NOT NULL DEFAULT '',
   `qci_timestamp` binary(14) NOT NULL DEFAULT '19700101000000',
   PRIMARY KEY (`qci_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_recentchanges` (
+CREATE TABLE `<<REPLACE_PREFIX>>_recentchanges` (
   `rc_id` int(11) NOT NULL AUTO_INCREMENT,
   `rc_timestamp` varbinary(14) NOT NULL DEFAULT '',
   `rc_actor` bigint(20) unsigned NOT NULL,
@@ -764,7 +768,7 @@ CREATE TABLE `mwt_someprefix_recentchanges` (
   KEY `rc_this_oldid` (`rc_this_oldid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_redirect` (
+CREATE TABLE `<<REPLACE_PREFIX>>_redirect` (
   `rd_from` int(10) unsigned NOT NULL DEFAULT 0,
   `rd_namespace` int(11) NOT NULL DEFAULT 0,
   `rd_title` varbinary(255) NOT NULL DEFAULT '',
@@ -774,7 +778,7 @@ CREATE TABLE `mwt_someprefix_redirect` (
   KEY `rd_ns_title` (`rd_namespace`,`rd_title`,`rd_from`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_revision` (
+CREATE TABLE `<<REPLACE_PREFIX>>_revision` (
   `rev_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `rev_page` int(10) unsigned NOT NULL,
   `rev_comment_id` bigint(20) unsigned NOT NULL DEFAULT 0,
@@ -793,7 +797,7 @@ CREATE TABLE `mwt_someprefix_revision` (
   KEY `rev_page_actor_timestamp` (`rev_page`,`rev_actor`,`rev_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary MAX_ROWS=10000000 AVG_ROW_LENGTH=1024;
 
-CREATE TABLE `mwt_someprefix_revision_actor_temp` (
+CREATE TABLE `<<REPLACE_PREFIX>>_revision_actor_temp` (
   `revactor_rev` int(10) unsigned NOT NULL,
   `revactor_actor` bigint(20) unsigned NOT NULL,
   `revactor_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
@@ -804,14 +808,14 @@ CREATE TABLE `mwt_someprefix_revision_actor_temp` (
   KEY `page_actor_timestamp` (`revactor_page`,`revactor_actor`,`revactor_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_revision_comment_temp` (
+CREATE TABLE `<<REPLACE_PREFIX>>_revision_comment_temp` (
   `revcomment_rev` int(10) unsigned NOT NULL,
   `revcomment_comment_id` bigint(20) unsigned NOT NULL,
   PRIMARY KEY (`revcomment_rev`,`revcomment_comment_id`),
   UNIQUE KEY `revcomment_rev` (`revcomment_rev`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_searchindex` (
+CREATE TABLE `<<REPLACE_PREFIX>>_searchindex` (
   `si_page` int(10) unsigned NOT NULL,
   `si_title` varchar(255) NOT NULL DEFAULT '',
   `si_text` mediumtext NOT NULL,
@@ -820,7 +824,7 @@ CREATE TABLE `mwt_someprefix_searchindex` (
   FULLTEXT KEY `si_text` (`si_text`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
-CREATE TABLE `mwt_someprefix_sites` (
+CREATE TABLE `<<REPLACE_PREFIX>>_sites` (
   `site_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `site_global_key` varbinary(64) NOT NULL,
   `site_type` varbinary(32) NOT NULL,
@@ -843,7 +847,7 @@ CREATE TABLE `mwt_someprefix_sites` (
   KEY `sites_forward` (`site_forward`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_site_identifiers` (
+CREATE TABLE `<<REPLACE_PREFIX>>_site_identifiers` (
   `si_type` varbinary(32) NOT NULL,
   `si_key` varbinary(32) NOT NULL,
   `si_site` int(10) unsigned NOT NULL,
@@ -852,7 +856,7 @@ CREATE TABLE `mwt_someprefix_site_identifiers` (
   KEY `site_ids_key` (`si_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_site_stats` (
+CREATE TABLE `<<REPLACE_PREFIX>>_site_stats` (
   `ss_row_id` int(10) unsigned NOT NULL,
   `ss_total_edits` bigint(20) unsigned DEFAULT NULL,
   `ss_good_articles` bigint(20) unsigned DEFAULT NULL,
@@ -863,7 +867,7 @@ CREATE TABLE `mwt_someprefix_site_stats` (
   PRIMARY KEY (`ss_row_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_slots` (
+CREATE TABLE `<<REPLACE_PREFIX>>_slots` (
   `slot_revision_id` bigint(20) unsigned NOT NULL,
   `slot_role_id` smallint(5) unsigned NOT NULL,
   `slot_content_id` bigint(20) unsigned NOT NULL,
@@ -872,17 +876,17 @@ CREATE TABLE `mwt_someprefix_slots` (
   KEY `slot_revision_origin_role` (`slot_revision_id`,`slot_origin`,`slot_role_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_slot_roles` (
+CREATE TABLE `<<REPLACE_PREFIX>>_slot_roles` (
   `role_id` smallint(6) NOT NULL AUTO_INCREMENT,
   `role_name` varbinary(64) NOT NULL,
   PRIMARY KEY (`role_id`),
   UNIQUE KEY `role_name` (`role_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-INSERT INTO `mwt_someprefix_slot_roles` (`role_id`, `role_name`) VALUES
+INSERT INTO `<<REPLACE_PREFIX>>_slot_roles` (`role_id`, `role_name`) VALUES
 (1,	UNHEX('6D61696E'));
 
-CREATE TABLE `mwt_someprefix_templatelinks` (
+CREATE TABLE `<<REPLACE_PREFIX>>_templatelinks` (
   `tl_from` int(10) unsigned NOT NULL DEFAULT 0,
   `tl_from_namespace` int(11) NOT NULL DEFAULT 0,
   `tl_namespace` int(11) NOT NULL DEFAULT 0,
@@ -892,20 +896,20 @@ CREATE TABLE `mwt_someprefix_templatelinks` (
   KEY `tl_backlinks_namespace` (`tl_from_namespace`,`tl_namespace`,`tl_title`,`tl_from`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_text` (
+CREATE TABLE `<<REPLACE_PREFIX>>_text` (
   `old_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `old_text` mediumblob NOT NULL,
   `old_flags` tinyblob NOT NULL,
   PRIMARY KEY (`old_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary MAX_ROWS=10000000 AVG_ROW_LENGTH=10240;
 
-CREATE TABLE `mwt_someprefix_updatelog` (
+CREATE TABLE `<<REPLACE_PREFIX>>_updatelog` (
   `ul_key` varbinary(255) NOT NULL,
   `ul_value` blob DEFAULT NULL,
   PRIMARY KEY (`ul_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-INSERT INTO `mwt_someprefix_updatelog` (`ul_key`, `ul_value`) VALUES
+INSERT INTO `<<REPLACE_PREFIX>>_updatelog` (`ul_key`, `ul_value`) VALUES
 (UNHEX('416464524643616E64504D4944496E74657277696B69'),	NULL),
 (UNHEX('4368616E67654368616E67654F626A65637449642E73716C'),	NULL),
 (UNHEX('44656475706C6963617465417263686976655265764964'),	NULL),
@@ -959,7 +963,7 @@ INSERT INTO `mwt_someprefix_updatelog` (`ul_key`, `ul_value`) VALUES
 (UNHEX('77625F7465726D732D7465726D5F726F775F69642D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F7265706F2F696E636C756465732F53746F72652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F4D616B65526F774944734269672E73716C'),	NULL),
 (UNHEX('7762635F656E746974795F75736167652D65755F6173706563742D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F636C69656E742F696E636C756465732F55736167652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F656E746974795F75736167652D616C7465722D6173706563742D76617262696E6172792D33372E73716C'),	NULL);
 
-CREATE TABLE `mwt_someprefix_uploadstash` (
+CREATE TABLE `<<REPLACE_PREFIX>>_uploadstash` (
   `us_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `us_user` int(10) unsigned NOT NULL,
   `us_key` varbinary(255) NOT NULL,
@@ -983,7 +987,7 @@ CREATE TABLE `mwt_someprefix_uploadstash` (
   KEY `us_timestamp` (`us_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_user` (
+CREATE TABLE `<<REPLACE_PREFIX>>_user` (
   `user_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `user_name` varbinary(255) NOT NULL DEFAULT '',
   `user_real_name` varbinary(255) NOT NULL DEFAULT '',
@@ -1005,13 +1009,13 @@ CREATE TABLE `mwt_someprefix_user` (
   KEY `user_email` (`user_email`(50))
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_user_former_groups` (
+CREATE TABLE `<<REPLACE_PREFIX>>_user_former_groups` (
   `ufg_user` int(10) unsigned NOT NULL DEFAULT 0,
   `ufg_group` varbinary(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`ufg_user`,`ufg_group`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_user_groups` (
+CREATE TABLE `<<REPLACE_PREFIX>>_user_groups` (
   `ug_user` int(10) unsigned NOT NULL DEFAULT 0,
   `ug_group` varbinary(255) NOT NULL DEFAULT '',
   `ug_expiry` varbinary(14) DEFAULT NULL,
@@ -1020,7 +1024,7 @@ CREATE TABLE `mwt_someprefix_user_groups` (
   KEY `ug_expiry` (`ug_expiry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_user_newtalk` (
+CREATE TABLE `<<REPLACE_PREFIX>>_user_newtalk` (
   `user_id` int(10) unsigned NOT NULL DEFAULT 0,
   `user_ip` varbinary(40) NOT NULL DEFAULT '',
   `user_last_timestamp` varbinary(14) DEFAULT NULL,
@@ -1028,7 +1032,7 @@ CREATE TABLE `mwt_someprefix_user_newtalk` (
   KEY `un_user_ip` (`user_ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_user_properties` (
+CREATE TABLE `<<REPLACE_PREFIX>>_user_properties` (
   `up_user` int(10) unsigned NOT NULL,
   `up_property` varbinary(255) NOT NULL,
   `up_value` blob DEFAULT NULL,
@@ -1036,7 +1040,7 @@ CREATE TABLE `mwt_someprefix_user_properties` (
   KEY `user_properties_property` (`up_property`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_watchlist` (
+CREATE TABLE `<<REPLACE_PREFIX>>_watchlist` (
   `wl_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `wl_user` int(10) unsigned NOT NULL,
   `wl_namespace` int(11) NOT NULL DEFAULT 0,
@@ -1048,14 +1052,14 @@ CREATE TABLE `mwt_someprefix_watchlist` (
   KEY `wl_user_notificationtimestamp` (`wl_user`,`wl_notificationtimestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_watchlist_expiry` (
+CREATE TABLE `<<REPLACE_PREFIX>>_watchlist_expiry` (
   `we_item` int(10) unsigned NOT NULL,
   `we_expiry` binary(14) NOT NULL,
   PRIMARY KEY (`we_item`),
   KEY `we_expiry` (`we_expiry`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wbc_entity_usage` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wbc_entity_usage` (
   `eu_row_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `eu_entity_id` varbinary(255) NOT NULL,
   `eu_aspect` varbinary(37) NOT NULL,
@@ -1065,7 +1069,7 @@ CREATE TABLE `mwt_someprefix_wbc_entity_usage` (
   KEY `eu_page_id` (`eu_page_id`,`eu_entity_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wbt_item_terms` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wbt_item_terms` (
   `wbit_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `wbit_item_id` int(10) unsigned NOT NULL,
   `wbit_term_in_lang_id` int(10) unsigned NOT NULL,
@@ -1074,7 +1078,7 @@ CREATE TABLE `mwt_someprefix_wbt_item_terms` (
   KEY `wbt_item_terms_item_id` (`wbit_item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wbt_property_terms` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wbt_property_terms` (
   `wbpt_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `wbpt_property_id` int(10) unsigned NOT NULL,
   `wbpt_term_in_lang_id` int(10) unsigned NOT NULL,
@@ -1083,7 +1087,7 @@ CREATE TABLE `mwt_someprefix_wbt_property_terms` (
   KEY `wbt_property_terms_property_id` (`wbpt_property_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wbt_term_in_lang` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wbt_term_in_lang` (
   `wbtl_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `wbtl_type_id` int(10) unsigned NOT NULL,
   `wbtl_text_in_lang_id` int(10) unsigned NOT NULL,
@@ -1092,14 +1096,14 @@ CREATE TABLE `mwt_someprefix_wbt_term_in_lang` (
   KEY `wbt_term_in_lang_type_id_text_in` (`wbtl_type_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wbt_text` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wbt_text` (
   `wbx_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `wbx_text` varbinary(255) NOT NULL,
   PRIMARY KEY (`wbx_id`),
   UNIQUE KEY `wbt_text_text` (`wbx_text`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wbt_text_in_lang` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wbt_text_in_lang` (
   `wbxl_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `wbxl_language` varbinary(20) NOT NULL,
   `wbxl_text_id` int(10) unsigned NOT NULL,
@@ -1108,14 +1112,14 @@ CREATE TABLE `mwt_someprefix_wbt_text_in_lang` (
   KEY `wbt_text_in_lang_language` (`wbxl_language`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wbt_type` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wbt_type` (
   `wby_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `wby_name` varbinary(45) NOT NULL,
   PRIMARY KEY (`wby_id`),
   UNIQUE KEY `wbt_type_name` (`wby_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wb_changes` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wb_changes` (
   `change_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `change_type` varbinary(25) NOT NULL,
   `change_time` varbinary(14) NOT NULL,
@@ -1131,7 +1135,7 @@ CREATE TABLE `mwt_someprefix_wb_changes` (
   KEY `wb_changes_change_revision_id` (`change_revision_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wb_changes_dispatch` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wb_changes_dispatch` (
   `chd_site` varbinary(32) NOT NULL,
   `chd_db` varbinary(32) NOT NULL,
   `chd_seen` int(11) NOT NULL DEFAULT 0,
@@ -1143,7 +1147,7 @@ CREATE TABLE `mwt_someprefix_wb_changes_dispatch` (
   KEY `wb_changes_dispatch_chd_touched` (`chd_touched`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wb_changes_subscription` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wb_changes_subscription` (
   `cs_row_id` bigint(20) NOT NULL AUTO_INCREMENT,
   `cs_entity_id` varbinary(255) NOT NULL,
   `cs_subscriber_id` varbinary(255) NOT NULL,
@@ -1152,13 +1156,13 @@ CREATE TABLE `mwt_someprefix_wb_changes_subscription` (
   KEY `cs_subscriber_id` (`cs_subscriber_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wb_id_counters` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wb_id_counters` (
   `id_value` int(10) unsigned NOT NULL,
   `id_type` varbinary(32) NOT NULL,
   UNIQUE KEY `wb_id_counters_type` (`id_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wb_items_per_site` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wb_items_per_site` (
   `ips_row_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `ips_item_id` int(10) unsigned NOT NULL,
   `ips_site_id` varbinary(32) NOT NULL,
@@ -1168,7 +1172,7 @@ CREATE TABLE `mwt_someprefix_wb_items_per_site` (
   KEY `wb_ips_item_id` (`ips_item_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wb_property_info` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wb_property_info` (
   `pi_property_id` int(10) unsigned NOT NULL,
   `pi_type` varbinary(32) NOT NULL,
   `pi_info` blob NOT NULL,
@@ -1176,7 +1180,7 @@ CREATE TABLE `mwt_someprefix_wb_property_info` (
   KEY `pi_type` (`pi_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
-CREATE TABLE `mwt_someprefix_wb_terms` (
+CREATE TABLE `<<REPLACE_PREFIX>>_wb_terms` (
   `term_row_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `term_entity_id` int(10) unsigned NOT NULL,
   `term_full_entity_id` varbinary(32) DEFAULT NULL,

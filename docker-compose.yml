@@ -60,11 +60,14 @@ services:
     volumes:
       - mediawiki-mysql-data:/var/lib/mysql
       - ./wbstack/docker-compose/mysql/main:/mwdd-custom
-      - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
+      - ./wbstack/docker-compose/mysql/write-db-template.sh:/write-db-template.sh
+      - ./wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
+
     environment:
-      MYSQL_DATABASE: 'mwdb_somedb'
+      MYSQL_PREFIXES: 'mwdb_site1,mwdb_site2'
+      MYSQL_DATABASES: 'mwdb_somedb1,mwdb_somedb2'
       MYSQL_USER: 'mwu_someuser'
       MYSQL_PASSWORD: 'somepassword'
       MYSQL_ROOT_PASSWORD: 'toor'
@@ -77,7 +80,8 @@ services:
   mysql-replica:
     image: mariadb:10.5
     environment:
-      MYSQL_DATABASE: 'mwdb_somedb'
+      MYSQL_PREFIXES: 'mwdb_site1,mwdb_site2'
+      MYSQL_DATABASES: 'mwdb_somedb1,mwdb_somedb2'
       MYSQL_USER: 'mwu_someuser'
       MYSQL_PASSWORD: 'somepassword'
       MYSQL_ROOT_PASSWORD: 'toor'
@@ -87,7 +91,8 @@ services:
     volumes:
       - mysql-replica-data:/var/lib/mysql
       - ./wbstack/docker-compose/mysql/replica:/mwdd-custom
-      - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
+      - ./wbstack/docker-compose/mysql/write-db-template.sh:/write-db-template.sh
+      - ./wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
     networks:

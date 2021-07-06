@@ -5,9 +5,21 @@ if( $_SERVER['SERVER_NAME'] !== 'localhost' && $_SERVER['SERVER_NAME'] !== 'api.
     die(1);
 }
 
-if( $_GET['domain'] !== 'localhost' ){
-    echo 'Requested domain as a param must be localhost';
+$matches = [];
+$domainIsLocalHost = preg_match("/(\w+)\.(localhost)/", $_GET['domain'], $matches) === 1;
+if( !$domainIsLocalHost ){
+    echo 'Requested domain as a param must be subdomain of localhost';
+    die(1);
+    
+}
+
+// subdomain is 1 element
+$subdomain = $matches[1];
+
+$file = __DIR__ . '/../data/WikiInfo-'.$subdomain.'.json';
+if ( !file_exists($file) ) {
+    echo 'Requested subdomain does not exist in test data';
     die(1);
 }
 
-echo file_get_contents( __DIR__ . '/../data/WikiInfo-local.json' );
+echo file_get_contents( $file );
