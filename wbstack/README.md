@@ -33,6 +33,7 @@ These can be found in the `src/Internal` directory.
 - `MW_RECAPTCHA_SECRETKEY`
 - `PLATFORM_API_BACKEND_HOST`: points to an internal mode wbstack api service
 - `MW_ELASTICSEARCH_HOST`: elasticsearch hostname
+- `MW_ELASTICSEARCH_PORT`: elasticsearch port
 
 ## Build scripts
 
@@ -81,5 +82,5 @@ On wiki creation through the API this is done by the ApiWbStackElasticSearchInit
 To do this manually in the docker-compose development environment a request can be sent to the site in question. (_The request takes a while to execute_)
 
 ```sh
-curl -l -X POST http://site1.localhost:8001/w/api.php&action=wbstackElasticSearchInit&format=json
+curl -l -X POST http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json
 ```

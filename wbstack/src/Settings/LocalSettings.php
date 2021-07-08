@@ -541,7 +541,12 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgCirrusSearchIndexBaseName = $wikiInfo->requestDomain;
 
     $wgSearchType = 'CirrusSearch';
-    $wgCirrusSearchServers = [ getenv('MW_ELASTICSEARCH_HOST') ];
+    $wgCirrusSearchDefaultCluster = 'default';
+    $wgCirrusSearchClusters = [
+        'default' => [
+            [ 'host' => getenv('MW_ELASTICSEARCH_HOST'), 'port' => getenv('MW_ELASTICSEARCH_PORT') ],
+        ]
+    ];
     $wgWBCSUseCirrus = true;
 }
 
