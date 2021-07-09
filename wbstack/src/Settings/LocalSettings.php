@@ -525,17 +525,21 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
     }
 }
 
-// ElasticSearch
-if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
-    error_log( "elastica enabled" );
+// ElasticSearch extension loading
+// Allow maintainance scripts to enter this for the localization cache to be built
+if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) || $wwDomainIsMaintenance ) {
     wfLoadExtension( 'Elastica' );
     wfLoadExtension( 'CirrusSearch' );
     wfLoadExtension( 'WikibaseCirrusSearch' );
 
     // If Wikibase Lexemes are enabled, enable lexeme cirrus search
-    if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
+    if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') || $wwDomainIsMaintenance ) {
         wfLoadExtension('WikibaseLexemeCirrusSearch');
     }
+}
+
+// ElasticSearch configuration
+if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
 
     // prepends indices with subdomain
     $wgCirrusSearchIndexBaseName = $wikiInfo->requestDomain;
