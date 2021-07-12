@@ -527,13 +527,13 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
 
 // ElasticSearch extension loading
 // Allow maintainance scripts to enter this for the localization cache to be built
-if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) || $wwDomainIsMaintenance ) {
+if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     wfLoadExtension( 'Elastica' );
     wfLoadExtension( 'CirrusSearch' );
     wfLoadExtension( 'WikibaseCirrusSearch' );
 
     // If Wikibase Lexemes are enabled, enable lexeme cirrus search
-    if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') || $wwDomainIsMaintenance ) {
+    if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
         wfLoadExtension('WikibaseLexemeCirrusSearch');
     }
 }
