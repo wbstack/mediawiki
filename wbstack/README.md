@@ -74,13 +74,35 @@ And secondly via LocalSettings.php
       - src/Internal/*
     - src/Settings/Hooks.php
 
-## ElasticSearch index configuration
+## Secondary setup
 
-In order to enable elasticsearch the UpdateSearchIndexConfig.php needs to be executed for that wiki.
-On wiki creation through the API this is done by the ApiWbStackElasticSearchInit job.
+### ElasticSearch index configuration
 
-To do this manually in the docker-compose development environment a request can be sent to the site in question. (_The request takes a while to execute_)
+In order to enable elasticsearch the `UpdateSearchIndexConfig.php` needs to be executed for that wiki.
+On wiki creation through the API this is done by the `ApiWbStackElasticSearchInit` job.
+
+## Development Environment
+
+Start the dev environment using:
 
 ```sh
-curl -l -X POST http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json
+docker-compose up -d
+```
+
+Wait until both sites are accessible:
+
+ - http://site1.localhost:8001/wiki/Main_Page
+ - http://site2.localhost:8001/wiki/Main_Page
+
+ You may need to add an entry to your `hosts` file:
+
+ ```
+ 127.0.0.1 site1.localhost site2.localhost
+ ```
+
+ Once the sites are accessible you can perform secondary setup (_The request takes a while to execute_):
+
+ ```sh
+curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
 ```
