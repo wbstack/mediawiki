@@ -26,6 +26,9 @@ services:
       - MW_DB_SERVER_MASTER=mysql.svc:3306
       - MW_DB_SERVER_REPLICA=mysql-replica.svc:3306
 
+      - MW_ELASTICSEARCH_HOST=elasticsearch.svc # 172.17.0.1 if proxied through minikube
+      - MW_ELASTICSEARCH_PORT=9200 # 8234 if proxied through minikube
+
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
       - MW_REDIS_PASSWORD=
@@ -57,11 +60,14 @@ services:
     volumes:
       - mediawiki-mysql-data:/var/lib/mysql
       - ./wbstack/docker-compose/mysql/main:/mwdd-custom
-      - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
+      - ./wbstack/docker-compose/mysql/write-db-template.sh:/write-db-template.sh
+      - ./wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
+
     environment:
-      MYSQL_DATABASE: 'mwdb_somedb'
+      MYSQL_PREFIXES: 'mwdb_site1,mwdb_site2'
+      MYSQL_DATABASES: 'mwdb_somedb1,mwdb_somedb2'
       MYSQL_USER: 'mwu_someuser'
       MYSQL_PASSWORD: 'somepassword'
       MYSQL_ROOT_PASSWORD: 'toor'
@@ -74,7 +80,8 @@ services:
   mysql-replica:
     image: mariadb:10.5
     environment:
-      MYSQL_DATABASE: 'mwdb_somedb'
+      MYSQL_PREFIXES: 'mwdb_site1,mwdb_site2'
+      MYSQL_DATABASES: 'mwdb_somedb1,mwdb_somedb2'
       MYSQL_USER: 'mwu_someuser'
       MYSQL_PASSWORD: 'somepassword'
       MYSQL_ROOT_PASSWORD: 'toor'
@@ -84,7 +91,8 @@ services:
     volumes:
       - mysql-replica-data:/var/lib/mysql
       - ./wbstack/docker-compose/mysql/replica:/mwdd-custom
-      - ./wbstack/data/mw1.35-wbs1.sql:/docker-entrypoint-initdb.d/mw1.35-wbs1.sql
+      - ./wbstack/docker-compose/mysql/write-db-template.sh:/write-db-template.sh
+      - ./wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
     networks:

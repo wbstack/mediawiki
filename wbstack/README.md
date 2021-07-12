@@ -32,6 +32,8 @@ These can be found in the `src/Internal` directory.
 - `MW_RECAPTCHA_SITEKEY`
 - `MW_RECAPTCHA_SECRETKEY`
 - `PLATFORM_API_BACKEND_HOST`: points to an internal mode wbstack api service
+- `MW_ELASTICSEARCH_HOST`: elasticsearch hostname
+- `MW_ELASTICSEARCH_PORT`: elasticsearch port
 
 ## Build scripts
 
@@ -71,3 +73,36 @@ And secondly via LocalSettings.php
     - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
       - src/Internal/*
     - src/Settings/Hooks.php
+
+## Secondary setup
+
+### ElasticSearch index configuration
+
+In order to enable elasticsearch the `UpdateSearchIndexConfig.php` needs to be executed for that wiki.
+On wiki creation through the API this is done by the `ApiWbStackElasticSearchInit` job.
+
+## Development Environment
+
+Start the dev environment using:
+
+```sh
+docker-compose up -d
+```
+
+Wait until both sites are accessible:
+
+ - http://site1.localhost:8001/wiki/Main_Page
+ - http://site2.localhost:8001/wiki/Main_Page
+
+ You may need to add an entry to your `hosts` file:
+
+ ```
+ 127.0.0.1 site1.localhost site2.localhost
+ ```
+
+ Once the sites are accessible you can perform secondary setup (_The request takes a while to execute_):
+
+ ```sh
+curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+```

@@ -22,7 +22,7 @@ if ( !defined( 'STDERR' ) ) {
 }
 
 // Define some conditions to switch behaviour on
-$wwDomainSaysLocal = $_SERVER['SERVER_NAME'] === 'localhost';
+$wwDomainSaysLocal = preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
@@ -34,7 +34,7 @@ $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocal
 // No error output or debugging in production
 ini_set( 'display_errors', 0 );
 $wgShowExceptionDetails = false;
-if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild || $wikiInfo->requestDomain === 'localhost' ) {
+if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild || $wwDomainSaysLocal ) {
     ini_set( 'display_errors', 1 );
     $wgShowExceptionDetails = true;
 }
@@ -525,13 +525,35 @@ if( $wikiInfo->getSetting('wikibaseManifestEquivEntities') ) {
     }
 }
 
-# CirrusSearch etc.
-// wfLoadExtension( 'Elastica' );
-// wfLoadExtension( 'CirrusSearch' );
-// wfLoadExtension( 'WikibaseCirrusSearch' );
-// if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
-//     wfLoadExtension('WikibaseLexemeCirrusSearch');
-// }
+// ElasticSearch extension loading
+// Allow maintainance scripts to enter this for the localization cache to be built
+if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
+    wfLoadExtension( 'Elastica' );
+    wfLoadExtension( 'CirrusSearch' );
+    wfLoadExtension( 'WikibaseCirrusSearch' );
+
+    // If Wikibase Lexemes are enabled, enable lexeme cirrus search
+    if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
+        wfLoadExtension('WikibaseLexemeCirrusSearch');
+    }
+}
+
+// ElasticSearch configuration
+if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
+
+    // prepends indices with subdomain
+    $wgCirrusSearchIndexBaseName = $wikiInfo->requestDomain;
+
+    $wgSearchType = 'CirrusSearch';
+    $wgCirrusSearchDefaultCluster = 'default';
+    $wgCirrusSearchClusters = [
+        'default' => [
+            [ 'host' => getenv('MW_ELASTICSEARCH_HOST'), 'port' => getenv('MW_ELASTICSEARCH_PORT') ],
+        ]
+    ];
+    $wgWBCSUseCirrus = true;
+}
+
 
 #######################################
 ## ---  l10n rebuild and beyond  --- ##

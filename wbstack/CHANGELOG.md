@@ -2,6 +2,15 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## To Be Released
+
+- Load WikibaseCirrusSearch and WikibaseLexemeCirrusSearch code
+- Add `MW_ELASTICSEARCH_HOST` and `MW_ELASTICSEARCH_PORT` environment variables for when elastic search is used
+- Add `wwExtEnableElasticSearch` setting for when to enable elastic search
+- Update composer dependencies
+- Lots of dev environment changes (including touching production files)
+- [Add Special:ListProperties to sidebar](https://github.com/wbstack/mediawiki/commit/2b21416c30c6820e645e33478d796f36493bdb66)
+
 ## 1.35-7.4-20210624-0
 
 - [Re add some development environment stuff](https://github.com/wbstack/mediawiki/commit/97482213fb4d04b1b4c9215348ccba420fbcde85)

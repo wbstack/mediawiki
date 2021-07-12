@@ -6,5 +6,7 @@ rm -rf /etc/mysql/conf.d/*.cnf
 cp /mwdd-custom/replica.cnf /etc/mysql/conf.d/replica.cnf
 chmod 0444 /etc/mysql/conf.d/replica.cnf
 
+bash /write-db-template.sh
+
 # Then execute the regular mysql / mariadb entrypoint
 /usr/local/bin/docker-entrypoint.sh $@
