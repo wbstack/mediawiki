@@ -2,7 +2,7 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
-## To Be Released
+## 1.35-7.4-20210715-0
 
 - Load WikibaseCirrusSearch and WikibaseLexemeCirrusSearch code
 - Add `MW_ELASTICSEARCH_HOST` and `MW_ELASTICSEARCH_PORT` environment variables for when elastic search is used
