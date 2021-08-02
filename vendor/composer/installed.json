@@ -671,17 +671,17 @@
     },
     {
         "name": "data-values/time",
-        "version": "1.0.3",
-        "version_normalized": "1.0.3.0",
+        "version": "1.0.4",
+        "version_normalized": "1.0.4.0",
         "source": {
             "type": "git",
             "url": "https://github.com/wmde/Time.git",
-            "reference": "2e69a4349f4fa433bcc5c3c2b2e800ee07802537"
+            "reference": "abbb585f2c71ca8a1ac9aea858cf5ba6b8920320"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/wmde/Time/zipball/2e69a4349f4fa433bcc5c3c2b2e800ee07802537",
-            "reference": "2e69a4349f4fa433bcc5c3c2b2e800ee07802537",
+            "url": "https://api.github.com/repos/wmde/Time/zipball/abbb585f2c71ca8a1ac9aea858cf5ba6b8920320",
+            "reference": "abbb585f2c71ca8a1ac9aea858cf5ba6b8920320",
             "shasum": ""
         },
         "require": {
@@ -694,7 +694,7 @@
             "mediawiki/mediawiki-codesniffer": "34.0.0",
             "phpunit/phpunit": "~8.5"
         },
-        "time": "2021-03-19T09:36:00+00:00",
+        "time": "2021-07-15T13:35:54+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -1273,17 +1273,17 @@
     },
     {
         "name": "justinrainbow/json-schema",
-        "version": "5.2.10",
-        "version_normalized": "5.2.10.0",
+        "version": "5.2.11",
+        "version_normalized": "5.2.11.0",
         "source": {
             "type": "git",
             "url": "https://github.com/justinrainbow/json-schema.git",
-            "reference": "2ba9c8c862ecd5510ed16c6340aa9f6eadb4f31b"
+            "reference": "2ab6744b7296ded80f8cc4f9509abbff393399aa"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/justinrainbow/json-schema/zipball/2ba9c8c862ecd5510ed16c6340aa9f6eadb4f31b",
-            "reference": "2ba9c8c862ecd5510ed16c6340aa9f6eadb4f31b",
+            "url": "https://api.github.com/repos/justinrainbow/json-schema/zipball/2ab6744b7296ded80f8cc4f9509abbff393399aa",
+            "reference": "2ab6744b7296ded80f8cc4f9509abbff393399aa",
             "shasum": ""
         },
         "require": {
@@ -1294,7 +1294,7 @@
             "json-schema/json-schema-test-suite": "1.2.0",
             "phpunit/phpunit": "^4.8.35"
         },
-        "time": "2020-05-27T16:41:55+00:00",
+        "time": "2021-07-22T09:24:00+00:00",
         "bin": [
             "bin/validate-json"
         ],
@@ -1801,23 +1801,24 @@
     },
     {
         "name": "nesbot/carbon",
-        "version": "2.50.0",
-        "version_normalized": "2.50.0.0",
+        "version": "2.51.1",
+        "version_normalized": "2.51.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/briannesbitt/Carbon.git",
-            "reference": "f47f17d17602b2243414a44ad53d9f8b9ada5fdb"
+            "reference": "8619c299d1e0d4b344e1f98ca07a1ce2cfbf1922"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/f47f17d17602b2243414a44ad53d9f8b9ada5fdb",
-            "reference": "f47f17d17602b2243414a44ad53d9f8b9ada5fdb",
+            "url": "https://api.github.com/repos/briannesbitt/Carbon/zipball/8619c299d1e0d4b344e1f98ca07a1ce2cfbf1922",
+            "reference": "8619c299d1e0d4b344e1f98ca07a1ce2cfbf1922",
             "shasum": ""
         },
         "require": {
             "ext-json": "*",
             "php": "^7.1.8 || ^8.0",
             "symfony/polyfill-mbstring": "^1.0",
+            "symfony/polyfill-php80": "^1.16",
             "symfony/translation": "^3.4 || ^4.0 || ^5.0"
         },
         "require-dev": {
@@ -1830,15 +1831,15 @@
             "phpunit/phpunit": "^7.5.20 || ^8.5.14",
             "squizlabs/php_codesniffer": "^3.4"
         },
-        "time": "2021-06-28T22:38:45+00:00",
+        "time": "2021-07-28T13:16:28+00:00",
         "bin": [
             "bin/carbon"
         ],
         "type": "library",
         "extra": {
             "branch-alias": {
-                "dev-master": "2.x-dev",
-                "dev-3.x": "3.x-dev"
+                "dev-3.x": "3.x-dev",
+                "dev-master": "2.x-dev"
             },
             "laravel": {
                 "providers": [
@@ -3539,23 +3540,23 @@
     },
     {
         "name": "symfony/polyfill-php80",
-        "version": "v1.23.0",
-        "version_normalized": "1.23.0.0",
+        "version": "v1.23.1",
+        "version_normalized": "1.23.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/polyfill-php80.git",
-            "reference": "eca0bf41ed421bed1b57c4958bab16aa86b757d0"
+            "reference": "1100343ed1a92e3a38f9ae122fc0eb21602547be"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/eca0bf41ed421bed1b57c4958bab16aa86b757d0",
-            "reference": "eca0bf41ed421bed1b57c4958bab16aa86b757d0",
+            "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/1100343ed1a92e3a38f9ae122fc0eb21602547be",
+            "reference": "1100343ed1a92e3a38f9ae122fc0eb21602547be",
             "shasum": ""
         },
         "require": {
             "php": ">=7.1"
         },
-        "time": "2021-02-19T12:13:01+00:00",
+        "time": "2021-07-28T13:41:28+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -3621,24 +3622,24 @@
     },
     {
         "name": "symfony/translation",
-        "version": "v5.3.3",
-        "version_normalized": "5.3.3.0",
+        "version": "v5.3.4",
+        "version_normalized": "5.3.4.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/translation.git",
-            "reference": "380b8c9e944d0e364b25f28e8e555241eb49c01c"
+            "reference": "d89ad7292932c2699cbe4af98d72c5c6bbc504c1"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/symfony/translation/zipball/380b8c9e944d0e364b25f28e8e555241eb49c01c",
-            "reference": "380b8c9e944d0e364b25f28e8e555241eb49c01c",
+            "url": "https://api.github.com/repos/symfony/translation/zipball/d89ad7292932c2699cbe4af98d72c5c6bbc504c1",
+            "reference": "d89ad7292932c2699cbe4af98d72c5c6bbc504c1",
             "shasum": ""
         },
         "require": {
             "php": ">=7.2.5",
             "symfony/deprecation-contracts": "^2.1",
             "symfony/polyfill-mbstring": "~1.0",
-            "symfony/polyfill-php80": "^1.15",
+            "symfony/polyfill-php80": "^1.16",
             "symfony/translation-contracts": "^2.3"
         },
         "conflict": {
@@ -3652,7 +3653,7 @@
             "symfony/translation-implementation": "2.3"
         },
         "require-dev": {
-            "psr/log": "~1.0",
+            "psr/log": "^1|^2|^3",
             "symfony/config": "^4.4|^5.0",
             "symfony/console": "^4.4|^5.0",
             "symfony/dependency-injection": "^5.0",
@@ -3668,7 +3669,7 @@
             "symfony/config": "",
             "symfony/yaml": ""
         },
-        "time": "2021-06-27T12:22:47+00:00",
+        "time": "2021-07-25T09:39:16+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
