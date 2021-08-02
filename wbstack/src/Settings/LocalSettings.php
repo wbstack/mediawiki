@@ -416,6 +416,7 @@ $wgBlacklistSettings = [
     ],
 ];
 
+# Check IPs at https://whatismyipaddress.com/blacklist-check if they are troublesome
 $wgDnsBlacklistUrls =
     [
         'combined.abuse.ch.',
@@ -425,6 +426,9 @@ $wgDnsBlacklistUrls =
         'cbl.abuseat.org.',
         'http.dnsbl.sorbs.net.',
         'opm.tornevall.org.',
+        'all.s5h.net',
+        'dnsbl.spfbl.net',
+        'dnsbl.dronebl.org',
     ];
 
 # ConfirmEdit
