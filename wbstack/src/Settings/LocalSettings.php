@@ -413,6 +413,17 @@ $wgBlacklistSettings = [
     ],
 ];
 
+$wgDnsBlacklistUrls =
+    [
+        'combined.abuse.ch.',
+        'xbl.spamhaus.org.',
+        'dbsbl-3.uceprotect.net.',
+        'dbsbl-2.uceprotect.net',
+        'cbl.abuseat.org.',
+        'http.dnsbl.sorbs.net.',
+        'opm.tornevall.org.',
+    ];
+
 # ConfirmEdit
 wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
 $wgCaptchaClass = 'ReCaptchaNoCaptcha';
