@@ -402,21 +402,14 @@ $wgBlacklistSettings = [
 	'spam' => [
 		'files' => [
 			"https://meta.wikimedia.org/w/index.php?title=Spam_blacklist&action=raw&sb_ver=1",
-			"https://en.wikipedia.org/w/index.php?title=MediaWiki:Spam-blacklist&action=raw&sb_ver=1"
+			"https://en.wikipedia.org/w/index.php?title=MediaWiki:Spam-blacklist&action=raw&sb_ver=1",
+			"https://raw.githubusercontent.com/wbstack/mediawiki-spam-lists/main/spam_list",
 		],
 	],
     'email' => [
-        'regexes' => [
-            '(?<=[/@.])visagency\.us\b',
-            '(?<=[/@.])visagency\.online\b',
-            '(?<=[/@.])linkbuilding\.network\b',
-            '(?<=[/@.])linkbuildingtools\.work\b',
-            '(?<=[/@.])1mail\.x24hr\.com\b',
-            '\.dynamailbox\.com\b',
-            '\.affordablespecs\.online\b',
-            '\.solarlamps\.store\b',
-            '\.indiatravel\.network\b',
-        ],
+	    'files' => [
+			"https://raw.githubusercontent.com/wbstack/mediawiki-spam-lists/main/email_list",
+		],
     ],
 ];
 
