@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido",
+			"Macofe",
+			"MarcoAurelio"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Si la dirección IP se encuentra bloqueada usando la lista de stopforumspam.com",
+	"right-sfsblock-bypass": "Eludir bloqueos hechos por la extensión StopForumSpam en base a su lista negra",
+	"right-stopforumspam": "Enviar datos sobre usuarios bloqueados a stopforumspam.com",
+	"stopforumspam-blocked": "Se ha bloqueado la edición para tu dirección IP ($1) porque esta se ha usado recientemente para publicar contenido no deseado en sitios web.",
+	"stopforumspam-desc": "Integración con [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "La dirección IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> se ha bloqueado por publicar spam."
+}

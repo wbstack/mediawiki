@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vlad5250"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Je li IP-adresa blokirana koristeći popis iz stopforumspam.com",
+	"action-sfsblock-bypass": "zaobilaženje blokova IP-adresa crnog spiska datih od dodatka StopForumSpam",
+	"action-stopforumspam": "unesivanje podataka o blokiranim korisnicima na stopforumspam.com",
+	"right-sfsblock-bypass": "Zaobići blokove IP-adresa crnog spiska datih od dodatka StopForumSpam",
+	"right-stopforumspam": "Unesivanje podatke o blokiranim korisnicima na stopforumspam.com",
+	"stopforumspam-blocked": "Uređivanje s vaše IP-adrese ($1) blokirano je jer je nedavno koristila za spamiranje.",
+	"stopforumspam-desc": "Kretanje uz [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "IP-adresa <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> blokirana je zbog spamiranja."
+}

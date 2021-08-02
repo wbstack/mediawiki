@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hym411",
+			"Nuevo Paso",
+			"Revi",
+			"Ykhwong",
+			"아라"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "stopforumspam.com 목록을 사용하여 IP 주소가 차단되었는지의 여부",
+	"right-stopforumspam": "차단된 사용자에 관한 데이터를 stopforumspam.com에 제춣랍니다",
+	"stopforumspam-blocked": "당신이 IP 주소($1)를 통해 한 편집은 해당 IP가 최근에 스팸 사이트에서 사용되었기 때문에 차단되었습니다.",
+	"stopforumspam-desc": "관리자가 [https://stopforumspam.com stopforumspam.com]에 데이터를 보내도록 허용합니다.",
+	"stopforumspam-is-blocked": "<strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> IP 주소는 스팸을 넣었으므로 차단되었습니다."
+}

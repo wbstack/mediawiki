@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps"
+		]
+	},
+	"action-stopforumspam": "przesyłania danych o zablokowanych użytkownikach do stopforumspam.com",
+	"stopforumspam-blocked": "Edycja z Twojego adresu IP ($1) została zablokowana, ponieważ ostatnio był on wykorzystany do spamu stron internetowych.",
+	"stopforumspam-desc": "Umożliwia administratorom wysyłanie danych do [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "Adres IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> został zablokowany za rozsyłanie spamu."
+}

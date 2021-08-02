@@ -396,6 +396,9 @@ wfLoadExtension( 'TwoColConflict' );
 // Enable the feature by default
 $wgTwoColConflictBetaFeature = false;
 
+# StopForumSpam
+wfLoadExtension( 'StopForumSpam' );
+
 # SpamBlacklist
 wfLoadExtension( 'SpamBlacklist' );
 $wgBlacklistSettings = [

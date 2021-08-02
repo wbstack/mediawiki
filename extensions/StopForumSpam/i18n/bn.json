@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftabuzzaman",
+			"আফতাবুজ্জামান"
+		]
+	},
+	"stopforumspam-is-blocked": "স্প্যাম করার কারণে আইপি ঠিকানা <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> অবরুদ্ধ করা হয়েছে।"
+}

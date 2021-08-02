@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Facenapalm",
+			"Okras",
+			"Vlad5250"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Заблокирован ли IP-адрес в списке stopforumspam.com",
+	"action-sfsblock-bypass": "обход блокировок IP-адресов в чёрном списке, выдаваемых расширением StopForumSpam",
+	"action-stopforumspam": "отправка данных о заблокированных участниках на stopforumspam.com",
+	"right-sfsblock-bypass": "Обходить блокировки IP-адресов в чёрном списке, выдаваемых расширением StopForumSpam",
+	"right-stopforumspam": "отправка данных о заблокированных участниках на stopforumspam.com",
+	"stopforumspam-blocked": "Внесение правок с вашего IP-адреса ($1) было заблокировано, так как он недавно был использован для спама веб-сайтов.",
+	"stopforumspam-desc": "Интеграция с [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "IP-адрес <strong>[https://stopforumspam.com/ipcheck/$1 $1] </strong> был заблокирован за спам."
+}

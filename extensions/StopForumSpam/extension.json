@@ -1,0 +1,63 @@
+{
+	"name": "StopForumSpam",
+	"version": "0.3.0",
+	"author": [
+		"Kunal Mehta",
+		"Ryan Schmidt"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:StopForumSpam",
+	"descriptionmsg": "stopforumspam-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "antispam",
+	"requires": {
+		"MediaWiki": ">= 1.35.0"
+	},
+	"AvailableRights": [
+		"sfsblock-bypass",
+		"stopforumspam"
+	],
+	"GroupPermissions": {
+		"sysop": {
+			"stopforumspam": true,
+			"sfsblock-bypass": true
+		}
+	},
+	"MessagesDirs": {
+		"StopForumSpam": [
+			"i18n"
+		]
+	},
+	"AutoloadClasses": {
+		"MediaWiki\\StopForumSpam\\Hooks": "includes/Hooks.php",
+		"MediaWiki\\StopForumSpam\\BlacklistManager": "includes/BlacklistManager.php",
+		"MediaWiki\\StopForumSpam\\BlacklistUpdate": "includes/BlacklistUpdate.php"
+	},
+	"Hooks": {
+		"AbuseFilter-computeVariable": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterComputeVariable",
+		"AbuseFilter-generateUserVars": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterGenerateUserVars",
+		"AbuseFilter-builder": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterBuilder",
+		"getUserPermissionsErrorsExpensive": "MediaWiki\\StopForumSpam\\Hooks::onGetUserPermissionsErrorsExpensive",
+		"OtherBlockLogLink": "MediaWiki\\StopForumSpam\\Hooks::onOtherBlockLogLink"
+	},
+	"config": {
+		"SFSReportOnly": {
+			"value": false
+		},
+		"SFSIPListLocation": {
+			"value": false
+		},
+		"SFSValidateIPList": {
+			"value": true
+		},
+		"SFSEnableDeferredUpdates": {
+			"value": true
+		},
+		"SFSIPThreshold": {
+			"value": 5
+		},
+		"SFSBlacklistCacheDuration": {
+			"value": 432000
+		}
+	},
+	"manifest_version": 2
+}

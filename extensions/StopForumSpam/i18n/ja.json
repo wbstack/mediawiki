@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shirayuki"
+		]
+	},
+	"stopforumspam-blocked": "あなたの IP アドレス ($1) は、ウェブサイトへのスパム攻撃に最近使用されたため、編集ブロックされています。",
+	"stopforumspam-desc": "管理者がデータを [https://stopforumspam.com/ stopforumspam.com] に送信できるようにする",
+	"stopforumspam-is-blocked": "IP アドレス <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> は、スパム攻撃を行なったためブロックされています。"
+}

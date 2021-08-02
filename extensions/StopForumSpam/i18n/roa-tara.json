@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Ce l'indirizze IP jè bloccate ausanne l'elenghe stopforumspam.com",
+	"action-sfsblock-bypass": "zumbe le IP bloccate jndr'à lista gnore fatte da l'estenzione StopForumSpam",
+	"action-stopforumspam": "conferme 'u date sus a l'utinde bloccacte jndr'à stopforumspam.com",
+	"right-sfsblock-bypass": "Zumbe le IP bloccate jndr'à lista gnore fatte da l'estenzione StopForumSpam",
+	"right-stopforumspam": "Conferme 'u date sus a l'utinde bloccacte jndr'à stopforumspam.com",
+	"stopforumspam-blocked": "'U cangiamende da l'indirizze IP tune ($1) ha state bloccate purcé urtemamende ha state ausate pe mannà spam a site web.",
+	"stopforumspam-desc": "Indegrazione cu [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "L'indirizze IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> ha state bloccate pe spam."
+}

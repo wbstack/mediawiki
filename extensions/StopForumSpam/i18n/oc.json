@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cedric31"
+		]
+	},
+	"stopforumspam-blocked": "L'edicion a partir de vòstra adreça IP ($1) es estada blocada perque es estada utilizada recentament per de spam de sites web.",
+	"stopforumspam-desc": "Permet als administrators de mandar de donadas a [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "L’adreça IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> es estada blocada per causa de mandadís de corrièrs electronics."
+}

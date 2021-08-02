@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Дали IP-адресата е блокирана користејќи список од stopforumspam.com",
+	"action-sfsblock-bypass": "заобиколување на блокови на IP-адреси на црниот список дадени од додатокот StopForumSpam",
+	"action-stopforumspam": "поднесување на податоци за блокирани корисници на stopforumspam.com",
+	"right-sfsblock-bypass": "Заобиколи блокови на IP-адреси на црниот список дадени од додатокот StopForumSpam",
+	"right-stopforumspam": "Поднесување податоци за блокирани корисници на stopforumspam.com",
+	"stopforumspam-blocked": "Уредувањето од вашата IP-адреса ($1) е блокирано бидејќи неодамна се користела за спамирање.",
+	"stopforumspam-desc": "Преселба со [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "IP-адресата <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> е блокирана поради спамирање."
+}
