@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Oergell"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Os yw'r cyfeiriad IP wedi ei rhwystro yn ôl rhestr stopforumspam.com",
+	"action-sfsblock-bypass": "caniatáu cyfeiriadau IP sydd ar y rhestr ddu wrth ategyn StopForumSpam",
+	"action-stopforumspam": "anfon data am ddefnyddwyr a rhwystrwyd at stopforumspam.com",
+	"right-sfsblock-bypass": "Caniatáu cyfeiriadau IP sydd ar y rhestr ddu wrth ategyn StopForumSpam",
+	"right-stopforumspam": "Anfon data am ddefnyddwyr a rhwystrwyd at stopforumspam.com",
+	"stopforumspam-blocked": "Mae golygu o'ch cyfeiriad IP ($1) wedi cael ei rhwystro achos mae rhywun wedi ei ddefnyddio i sbamio gwefannau..",
+	"stopforumspam-desc": "Integreiddiad gyda [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "Mae'r cyfeiriad IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> wedi ei rhwystro am sbamio.."
+}

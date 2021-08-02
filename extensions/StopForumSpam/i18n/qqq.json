@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kunal Mehta",
+			"Liuxinyu970226",
+			"MarcoAurelio",
+			"Shirayuki",
+			"Umherirrender"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Abuse filter syntax option in a dropdown from the group {{msg-mw|abusefilter-edit-builder-group-vars}}.",
+	"action-sfsblock-bypass": "{{doc-action|sfsblock-bypass}}",
+	"action-stopforumspam": "{{doc-action|stopforumspam}}",
+	"right-sfsblock-bypass": "{{doc-right|sfsblock-bypass}}",
+	"right-stopforumspam": "{{doc-right|stopforumspam}}",
+	"stopforumspam-blocked": "Message a user sees when their IP address is blacklisted and they cannot edit.\n\nParameters:\n* $1 - the user's current IP address",
+	"stopforumspam-desc": "{{desc|name=StopForumSpam|url=https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:StopForumSpam}}",
+	"stopforumspam-is-blocked": "Shown when going to block an IP address that is currently blacklisted.\n\nParameters:\n* $1 - the IP address"
+}

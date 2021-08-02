@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm",
+			"Maria zaos",
+			"Toliño"
+		]
+	},
+	"action-stopforumspam": "Enviar datos sobre usuarios bloqueados a stopforumspam.com",
+	"stopforumspam-blocked": "Bloqueouse a edición desde o seu enderezo IP ($1), dado que recentemente se utilizou para incluír spam a sitios web.",
+	"stopforumspam-desc": "Integración con [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "O enderezo IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> foi bloqueado por publicar spam."
+}

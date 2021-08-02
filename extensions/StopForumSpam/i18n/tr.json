@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"BaRaN6161 TURK"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "IP adresinin stopforumspam.com listesi kullanılarak engellenip engellenmediği",
+	"action-sfsblock-bypass": "StopForumSpam uzantısı tarafından verilen kara listedeki IP bloklarını atla",
+	"action-stopforumspam": "engellenen kullanıcılar hakkındaki verileri stopforumspam.com adresine gönderin",
+	"right-sfsblock-bypass": "StopForumSpam uzantısı tarafından verilen kara listeye alınmış IP bloklarını atla",
+	"right-stopforumspam": "Engellenen kullanıcılar hakkındaki verileri stopforumspam.com adresine gönderin",
+	"stopforumspam-blocked": "IP adresinizden ($1) yapılan düzenleme, son zamanlarda spam web sitelerinde kullanıldığı için engellendi.",
+	"stopforumspam-desc": "[https://stopforumspam.com/ stopforumspam.com] ile entegrasyon",
+	"stopforumspam-is-blocked": "<strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> IP adresi spam nedeniyle engellendi."
+}

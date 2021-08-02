@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Si la direición IP ta bloquiada usando la llista de stopforumspam.com",
+	"action-sfsblock-bypass": "saltar los bloqueos d'IP de la llista prieta puestos pola estensión StopForumSpam",
+	"action-stopforumspam": "Unviar datos sobro usuarios bloquiaos a stopforumspam.com",
+	"right-sfsblock-bypass": "Saltar los bloqueos d'IP de la llista prieta puestos pola estensión StopForumSpam",
+	"right-stopforumspam": "Unviar datos sobro usuarios bloquiaos a stopforumspam.com",
+	"stopforumspam-blocked": "Bloquióse la edición dende la so direición IP ($1) porque de recién usóse pa facer spam en sitios web.",
+	"stopforumspam-desc": "Integración con [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "La direición IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> bloquióse por facer spam."
+}

@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"Linedwell",
+			"Pols12",
+			"Urhixidur",
+			"Wladek92"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Si l’adresse IP est bloquée en utilisant la liste de stopforumspam.com",
+	"action-sfsblock-bypass": "court-circuiter les blocages IP en liste noire provenant de l’extension StopForumSpam",
+	"action-stopforumspam": "soumettre les données sur les utilisateurs bloqués à stopforumspam.com",
+	"right-sfsblock-bypass": "Ignorer les blocs d'adresses IP en liste noire générés par l'extension StopForumSpam",
+	"right-stopforumspam": "Soumettre à stopforumspam.com, les données concernant les utilisateurs bloqués",
+	"stopforumspam-blocked": "L’édition à partir de votre adresse IP ($1) a été bloquée car elle a été récemment utilisée par des pourriels de sites web.",
+	"stopforumspam-desc": "Integration avec [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "L’adresse IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> a été bloquée pour cause d’envoi de pourriels."
+}

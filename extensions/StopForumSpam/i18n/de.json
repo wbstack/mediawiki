@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln",
+			"Metalhead64"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Ob die IP-Adresse mittels der Liste von stopforumspam.com gesperrt ist",
+	"action-sfsblock-bypass": "schwarzgelistete IP-Sperren zu umgehen, die von der Softwareerweiterung „StopForumSpam“ erstellt wurden",
+	"action-stopforumspam": "Daten über gesperrte Benutzer an stopforumspam.com zu übermitteln",
+	"right-sfsblock-bypass": "Schwarzgelistete IP-Sperren umgehen, die von der Softwareerweiterung „StopForumSpam“ erstellt wurden",
+	"right-stopforumspam": "Daten über gesperrte Benutzer an stopforumspam.com übermitteln",
+	"stopforumspam-blocked": "Das Bearbeiten mit deiner IP-Adresse ($1) wurde gesperrt, da sie kürzlich zum Spammen auf Websites verwendet wurde.",
+	"stopforumspam-desc": "Integration mit [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "Die IP-Adresse <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> wurde aufgrund von Spamming gesperrt."
+}

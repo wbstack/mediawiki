@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jopparn",
+			"WikiPhoenix"
+		]
+	},
+	"action-sfsblock-bypass": "kringgå IP-block i svartlistan som adresseras av tillägget StopForumSpam",
+	"action-stopforumspam": "skicka data om blockerade användare till stopforumspam.com",
+	"right-sfsblock-bypass": "Kringgå IP-block i svartlistan som adresseras av tillägget StopForumSpam",
+	"right-stopforumspam": "Skicka data om blockerade användare till stopforumspam.com",
+	"stopforumspam-blocked": "Redigering från din IP-adress ($1) har blockerats eftersom den nyligen har använts till att spamma webbplatser.",
+	"stopforumspam-desc": "Gör det möjligt för administratörer att skicka data till [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "IP-adressen <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> har blockerats för spammning."
+}

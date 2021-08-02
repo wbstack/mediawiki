@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"ديفيد"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "ما إذا كان عنوان الآيبي ممنوعا باستخدام قائمة stopforumspam.com",
+	"action-sfsblock-bypass": "تجاوز القائمة السوداء لمنع الآيبي الصادرة عن تمديد StopForumSpam",
+	"action-stopforumspam": "إرسال بيانات حول المستخدمين الممنوعين إلى stopforumspam.com",
+	"right-sfsblock-bypass": "تجاوز القائمة السوداء لمنع الآيبي الصادرة عن تمديد StopForumSpam",
+	"right-stopforumspam": "إرسال بيانات حول المستخدمين الممنوعين إلى stopforumspam.com",
+	"stopforumspam-blocked": "تم منع التحرير من عنوان الآيبي الخاص بك ($1) لأنه تم استخدامه مؤخرا لمواقع السخام.",
+	"stopforumspam-desc": "التكامل مع [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "تم منع عنوان الآيبي <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> بسبب السخام."
+}

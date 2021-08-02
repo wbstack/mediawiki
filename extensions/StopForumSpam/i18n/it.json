@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Margherita.mignanelli"
+		]
+	},
+	"stopforumspam-blocked": "La modifica dal tuo indirizzo IP ($1) è stata bloccata poiché recentemente è stato utilizzato per inviare spam a siti web.",
+	"stopforumspam-desc": "Integrazione con [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "L'indirizzo IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> è stato bloccato per spam."
+}

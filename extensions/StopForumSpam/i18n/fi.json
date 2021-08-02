@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pyscowicz"
+		]
+	},
+	"stopforumspam-blocked": "Muokkaaminen IP-osoitteestasi ($1) on estetty, koska sitä on viime aikoina käytetty nettisivustojen spämmäämiseen."
+}

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"Yfdyh000"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "IP地址是否已通过stopforumspam.com列表封禁",
+	"stopforumspam-blocked": "已禁止从您的IP地址（$1）编辑，因为它最近被用于网站垃圾信息。",
+	"stopforumspam-desc": "集成[https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "IP地址<strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong>已被封禁，以免垃圾信息侵袭。"
+}

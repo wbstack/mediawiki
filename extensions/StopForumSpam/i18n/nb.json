@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "Hvorvidt IP-adressen er blokkert med stopforumspam.com-listen",
+	"action-sfsblock-bypass": "forbigå svartelistede IP-blokkeringer utstedt av StopForumSpam-utvidelsen",
+	"action-stopforumspam": "sende inn data om blokkerte brukere til stopforumspam.com",
+	"right-sfsblock-bypass": "Forbigå svartelistede IP-blokkeringer utstedt av StopForumSpam-utvidelsen",
+	"right-stopforumspam": "Sende inn data om blokkerte brukere til stopforumspam.com",
+	"stopforumspam-blocked": "Redigering fra din IP-adresse ($1) har blitt blokkert siden den nylig har blitt brukt til å spamme nettsteder.",
+	"stopforumspam-desc": "Integrering med [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "IP-adressa <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> har blitt blokkert for spamming."
+}
