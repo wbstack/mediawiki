@@ -2,6 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20210802-0
+
+- Add `SpamBlacklist` MediaWiki extension
+- Use wbstack/mediawiki-spam-lists
+
 ## 1.35-7.4-20210715-0
 
 - Load WikibaseCirrusSearch and WikibaseLexemeCirrusSearch code
