@@ -410,17 +410,6 @@ $wgBlacklistSettings = [
 	    'files' => [
 			"https://raw.githubusercontent.com/wbstack/mediawiki-spam-lists/main/email_list",
 		],
-        'regexes' => [
-            '(?<=[/@.])visagency\.us\b',
-            '(?<=[/@.])visagency\.online\b',
-            '(?<=[/@.])linkbuilding\.network\b',
-            '(?<=[/@.])linkbuildingtools\.work\b',
-            '(?<=[/@.])1mail\.x24hr\.com\b',
-            '\.dynamailbox\.com\b',
-            '\.affordablespecs\.online\b',
-            '\.solarlamps\.store\b',
-            '\.indiatravel\.network\b',
-        ],
     ],
 ];
 
