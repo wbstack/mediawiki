@@ -1,5 +1,6 @@
 <?php
 
+//// CUSTOM Sidebar for WBStack
 // https://www.mediawiki.org/wiki/Manual:Hooks/SkinBuildSidebar
 $wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikiInfo ) {
     $sidebar['Wikibase'][] = [
@@ -38,9 +39,7 @@ $wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikiInfo )
     ];
 };
 
-//// CUSTOM HOOKS
-//TODO these should probably be in an extension...
-
+//// CUSTOM Query Service Updater hooks
 class WBStackPageUpdateHandler {
 
     private static $titles = [];
@@ -101,4 +100,22 @@ $wgHooks['TitleMoveComplete'][] = function ( $title, $newTitle, $user, $oldid, $
 // https://www.mediawiki.org/wiki/Manual:Hooks/ArticleDeleteComplete
 $wgHooks['ArticleUndelete'][] = function ( $title, $create, $comment, $oldPageId, $restoredPages ) {
     WBStackPageUpdateHandler::registerUpdate( $title );
+};
+
+//// CUSTOM User account login and creation logs
+class WBStackUserAccountLogging {
+    public static function log( $type, $user ) {
+        $ip = RequestContext::getMain()->getRequest()->getIP();
+        $name = $user->getName();
+        $email = $user->getEmail();
+        $dnsBlackListed = \MediaWiki\MediaWikiServices::getInstance()->getBlockManager()->isDnsBlacklisted( $ip, false );
+        wfDebugLog( 'WBSTACK', "WBStackUserAccountLogging: $type $ip $name $email dns:$dnsBlackListed" );
+    }
+}
+
+$wgHooks['LocalUserCreated'][] = function ( $user, $autocreated ) {
+    WBStackUserAccountLogging::log( 'create', $user );
+};
+$wgHooks['UserLoggedIn'][] = function ( $user ) {
+    WBStackUserAccountLogging::log( 'login', $user );
 };
