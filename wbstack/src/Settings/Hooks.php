@@ -105,11 +105,12 @@ $wgHooks['ArticleUndelete'][] = function ( $title, $create, $comment, $oldPageId
 //// CUSTOM User account login and creation logs
 class WBStackUserAccountLogging {
     public static function log( $type, $user ) {
+        global $wgServer;
         $ip = RequestContext::getMain()->getRequest()->getIP();
         $name = $user->getName();
         $email = $user->getEmail();
         $dnsBlackListed = \MediaWiki\MediaWikiServices::getInstance()->getBlockManager()->isDnsBlacklisted( $ip, false );
-        wfDebugLog( 'WBSTACK', "WBStackUserAccountLogging: $type $ip $name $email dns:$dnsBlackListed" );
+        wfDebugLog( 'WBSTACK', "WBStackUserAccountLogging: $type $wgServer $ip $name $email dns:$dnsBlackListed" );
     }
 }
 
