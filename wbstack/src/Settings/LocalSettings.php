@@ -417,6 +417,7 @@ $wgBlacklistSettings = [
 ];
 
 # Check IPs at https://whatismyipaddress.com/blacklist-check if they are troublesome
+$wgEnableDnsBlacklist = true;
 $wgDnsBlacklistUrls =
     [
         'combined.abuse.ch.',
