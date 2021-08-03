@@ -2,10 +2,15 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20210803-2
+
+- `$wgEnableDnsBlacklist = true;`
+- Configure `wgDnsBlacklistUrls`
+- Add extra backend user create login logging
+
 ## 1.35-7.4-20210802-1
 
 - Add `StopForumSpam` MediaWiki extension
-- Configure `wgDnsBlacklistUrls` a bit more
 
 ## 1.35-7.4-20210802-0
 
