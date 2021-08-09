@@ -83,10 +83,17 @@ On wiki creation through the API this is done by the `ApiWbStackElasticSearchIni
 
 ## Development Environment
 
-Start the dev environment using:
+There is a [docker-compose file](../docker-compose.yml) in the root directory that allows for serving multiple development sites locally.
+
+These are currently not using the real api but rather gets their settings from the static json files included in the data folder.
+
+The fake api is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
+
+
+### Start the dev environment
 
 ```sh
-docker-compose up -d
+docker-compose up
 ```
 
 Wait until both sites are accessible:
