@@ -113,3 +113,17 @@ Wait until both sites are accessible:
 curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
 curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
 ```
+
+### Debugging Elastic
+
+General overview of the cluster
+
+```
+http://localhost:9200/_stats
+```
+
+Entries in the content index (Items, Lexemes) for `site1.localhost` can be found by going to the following url
+
+```
+http://localhost:9200/site1.localhost_content_first/_search
+```
