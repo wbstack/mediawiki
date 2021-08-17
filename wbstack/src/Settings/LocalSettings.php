@@ -428,7 +428,6 @@ $wgDnsBlacklistUrls =
         'http.dnsbl.sorbs.net.',
         'opm.tornevall.org.',
         'all.s5h.net',
-        'dnsbl.spfbl.net',
         'dnsbl.dronebl.org',
     ];
 
