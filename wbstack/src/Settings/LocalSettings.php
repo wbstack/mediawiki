@@ -66,6 +66,7 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
             ],
             'logAllInGroupExceptDebug' => [
                 //'Wikibase',
+                'BlockManager',// we want info https://gerrit.wikimedia.org/g/mediawiki/core/+/916c0307a06e64b49d4b7f0340808a38b6d5b9a4/includes/block/BlockManager.php#426
             ],
         ]],
     ];
