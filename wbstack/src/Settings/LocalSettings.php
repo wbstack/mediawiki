@@ -423,13 +423,11 @@ $wgDnsBlacklistUrls =
     [
         'combined.abuse.ch.',
         'xbl.spamhaus.org.',
-        'dbsbl-3.uceprotect.net.',
-        'dbsbl-2.uceprotect.net',
         'cbl.abuseat.org.',
         'http.dnsbl.sorbs.net.',
         'opm.tornevall.org.',
-        'all.s5h.net',
-        'dnsbl.dronebl.org',
+        'all.s5h.net.',
+        'dnsbl.dronebl.org.',
     ];
 
 # ConfirmEdit
