@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20210818-0
+
+- Log useful `BlockManager` logs
+
 ## 1.35-7.4-20210817-0
 
 - Remove `dnsbl.spfbl.net` as it is causing issues
