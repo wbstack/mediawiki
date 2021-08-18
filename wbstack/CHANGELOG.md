@@ -2,6 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20210818-1
+
+- Stop using `uceprotect` in DNSBL
+- Add `.` to end of DNSBL entries missing it
+
 ## 1.35-7.4-20210818-0
 
 - Log useful `BlockManager` logs
