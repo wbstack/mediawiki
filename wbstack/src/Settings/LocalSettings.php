@@ -582,10 +582,9 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         $wgContentNamespaces[] = 146;
 
         // Add lexeme searchIndexTypes
-        $wgWBRepoSettings['searchIndexTypes'] = [
-            'string', 'external-id', 'url', 'wikibase-item', 'wikibase-property',
-            'wikibase-lexeme', 'wikibase-form', 'wikibase-sense'
-        ];
+        $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-lexeme';
+        $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-form';
+        $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-sense';
     }
 }
 
