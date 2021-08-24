@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20210824-0
+
+- [Configure elasticsearch for WikibaseLexeme](https://github.com/wbstack/mediawiki/pull/121)
+
 ## 1.35-7.4-20210818-1
 
 - Stop using `uceprotect` in DNSBL

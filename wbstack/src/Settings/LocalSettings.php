@@ -566,9 +566,23 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     wfLoadExtension( 'CirrusSearch' );
     wfLoadExtension( 'WikibaseCirrusSearch' );
 
+    $wgWBRepoSettings['searchIndexTypes'] = [
+        'string', 'external-id', 'url', 'wikibase-item', 'wikibase-property'
+    ];
+
     // If Wikibase Lexemes are enabled, enable lexeme cirrus search
     if ( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
         wfLoadExtension('WikibaseLexemeCirrusSearch');
+
+        $wgLexemeUseCirrus = true;
+
+        // So that Lexemes are indexed in the content index
+        $wgContentNamespaces[] = 146;
+
+        // Add lexeme searchIndexTypes
+        $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-lexeme';
+        $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-form';
+        $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-sense';
     }
 }
 
