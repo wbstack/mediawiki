@@ -66,6 +66,7 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
             ],
             'logAllInGroupExceptDebug' => [
                 //'Wikibase',
+                'BlockManager',// we want info https://gerrit.wikimedia.org/g/mediawiki/core/+/916c0307a06e64b49d4b7f0340808a38b6d5b9a4/includes/block/BlockManager.php#426
             ],
         ]],
     ];
@@ -422,14 +423,11 @@ $wgDnsBlacklistUrls =
     [
         'combined.abuse.ch.',
         'xbl.spamhaus.org.',
-        'dbsbl-3.uceprotect.net.',
-        'dbsbl-2.uceprotect.net',
         'cbl.abuseat.org.',
         'http.dnsbl.sorbs.net.',
         'opm.tornevall.org.',
-        'all.s5h.net',
-        'dnsbl.spfbl.net',
-        'dnsbl.dronebl.org',
+        'all.s5h.net.',
+        'dnsbl.dronebl.org.',
     ];
 
 # ConfirmEdit

@@ -6,6 +6,19 @@ Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build numb
 
 - [Configure elasticsearch for WikibaseLexeme](https://github.com/wbstack/mediawiki/pull/121)
 
+## 1.35-7.4-20210818-1
+
+- Stop using `uceprotect` in DNSBL
+- Add `.` to end of DNSBL entries missing it
+
+## 1.35-7.4-20210818-0
+
+- Log useful `BlockManager` logs
+
+## 1.35-7.4-20210817-0
+
+- Remove `dnsbl.spfbl.net` as it is causing issues
+
 ## 1.35-7.4-20210803-2
 
 - `$wgEnableDnsBlacklist = true;`
