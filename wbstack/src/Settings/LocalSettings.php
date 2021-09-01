@@ -584,13 +584,9 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-form';
         $wgWBRepoSettings['searchIndexTypes'][] = 'wikibase-sense';
     }
-}
 
-// ElasticSearch configuration
-if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
-
-    // prepends indices with subdomain
-    $wgCirrusSearchIndexBaseName = $wikiInfo->requestDomain;
+    // prepends indices with database name
+    $wgCirrusSearchIndexBaseName = $wgDBname;
 
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchDefaultCluster = 'default';
