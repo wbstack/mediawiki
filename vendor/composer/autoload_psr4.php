@@ -8,6 +8,7 @@ $baseDir = dirname($vendorDir);
 return array(
     'Wikimedia\\Zest\\' => array($vendorDir . '/wikimedia/zest-css/src'),
     'Wikimedia\\XMPReader\\' => array($vendorDir . '/wikimedia/xmp-reader/src'),
+    'Wikimedia\\WikiPEG\\' => array($vendorDir . '/wikimedia/wikipeg/src'),
     'Wikimedia\\Timestamp\\' => array($vendorDir . '/wikimedia/timestamp/src'),
     'Wikimedia\\Services\\' => array($vendorDir . '/wikimedia/services/src'),
     'Wikimedia\\Purtle\\Tests\\' => array($vendorDir . '/wikimedia/purtle/tests/phpunit'),
@@ -24,7 +25,6 @@ return array(
     'Wikibase\\InternalSerialization\\' => array($vendorDir . '/wikibase/internal-serialization/src'),
     'Wikibase\\DataModel\\Services\\' => array($vendorDir . '/wikibase/data-model-services/src'),
     'Wikibase\\DataModel\\' => array($vendorDir . '/wikibase/data-model/src', $vendorDir . '/wikibase/data-model-serialization/src'),
-    'WikiPEG\\Tests\\' => array($vendorDir . '/wikimedia/wikipeg/tests/php'),
     'WikiPEG\\' => array($vendorDir . '/wikimedia/wikipeg/src'),
     'WMDE\\VueJsTemplating\\' => array($vendorDir . '/wmde/php-vuejs-templating/src'),
     'ValueValidators\\' => array($vendorDir . '/data-values/interfaces/src/ValueValidators'),
