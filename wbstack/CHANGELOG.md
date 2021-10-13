@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20211013-0
+
+- Updates for 1.35 releases
+
 ## 1.35-7.4-20210902-0
 
 - [Use dbname in elasticsearch indexes](https://github.com/wbstack/mediawiki/pull/128)

@@ -15,7 +15,7 @@
 	],
 	"support": {
 		"issues": "https://phabricator.wikimedia.org/tag/mediawiki-extensions-universallanguageselector/",
-		"irc": "irc://irc.freenode.net/mediawiki-i18n"
+		"irc": "irc://irc.libera.chat/mediawiki-i18n"
 	},
 	"require": {
 		"php": ">=7.1",
@@ -38,9 +38,10 @@
 		],
 		"test": [
 			"parallel-lint . --exclude vendor --exclude node_modules",
-			"phpcs -p -s",
+			"@phpcs",
 			"minus-x check ."
 		],
-		"phan": "phan -d . --long-progress-bar"
+		"phan": "phan -d . --long-progress-bar",
+		"phpcs": "phpcs -sp --cache"
 	}
 }

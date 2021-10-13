@@ -10,6 +10,7 @@ $releaseBranch = 'REL1_35';
 // A github access token is needed to access the github API
 if( !file_exists( __DIR__ . '/.github' ) ) {
     echo '.github file with personal access token for public_repo must exist. eg. eu21yh0fj10f';
+    echo 'You can retrieve a token from https://github.com/settings/tokens';
     die(1);
 }
 $getGithubApiUrl = function ( $repoName ) use ( $releaseBranch ) {

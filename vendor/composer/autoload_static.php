@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
+class ComposerStaticInit620d46593b1846a2c58f8b0f0fba51b7
 {
     public static $files = array (
         '7cb394c3af2b1ae832979b0368e0da62' => __DIR__ . '/..' . '/data-values/data-values/DataValues.php',
@@ -35,6 +35,7 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
         array (
             'Wikimedia\\Zest\\' => 15,
             'Wikimedia\\XMPReader\\' => 20,
+            'Wikimedia\\WikiPEG\\' => 18,
             'Wikimedia\\Timestamp\\' => 20,
             'Wikimedia\\Services\\' => 19,
             'Wikimedia\\Purtle\\Tests\\' => 23,
@@ -51,7 +52,6 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
             'Wikibase\\InternalSerialization\\' => 31,
             'Wikibase\\DataModel\\Services\\' => 28,
             'Wikibase\\DataModel\\' => 19,
-            'WikiPEG\\Tests\\' => 14,
             'WikiPEG\\' => 8,
             'WMDE\\VueJsTemplating\\' => 21,
         ),
@@ -158,6 +158,10 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
         array (
             0 => __DIR__ . '/..' . '/wikimedia/xmp-reader/src',
         ),
+        'Wikimedia\\WikiPEG\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/wikipeg/src',
+        ),
         'Wikimedia\\Timestamp\\' => 
         array (
             0 => __DIR__ . '/..' . '/wikimedia/timestamp/src',
@@ -226,10 +230,6 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
         array (
             0 => __DIR__ . '/..' . '/wikibase/data-model/src',
             1 => __DIR__ . '/..' . '/wikibase/data-model-serialization/src',
-        ),
-        'WikiPEG\\Tests\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/wikimedia/wikipeg/tests/php',
         ),
         'WikiPEG\\' => 
         array (
@@ -692,6 +692,7 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
         'Composer\\Installers\\OsclassInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OsclassInstaller.php',
         'Composer\\Installers\\OxidInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/OxidInstaller.php',
         'Composer\\Installers\\PPIInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PPIInstaller.php',
+        'Composer\\Installers\\PantheonInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PantheonInstaller.php',
         'Composer\\Installers\\PhiftyInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhiftyInstaller.php',
         'Composer\\Installers\\PhpBBInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PhpBBInstaller.php',
         'Composer\\Installers\\PimcoreInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/PimcoreInstaller.php',
@@ -2245,14 +2246,6 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
         'WMDE\\VueJsTemplating\\JsParsing\\StringLiteral' => __DIR__ . '/..' . '/wmde/php-vuejs-templating/src/JsParsing/StringLiteral.php',
         'WMDE\\VueJsTemplating\\JsParsing\\VariableAccess' => __DIR__ . '/..' . '/wmde/php-vuejs-templating/src/JsParsing/VariableAccess.php',
         'WMDE\\VueJsTemplating\\Templating' => __DIR__ . '/..' . '/wmde/php-vuejs-templating/src/Templating.php',
-        'WikiPEG\\DefaultTracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/DefaultTracer.php',
-        'WikiPEG\\Expectation' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Expectation.php',
-        'WikiPEG\\InternalError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/InternalError.php',
-        'WikiPEG\\Location' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Location.php',
-        'WikiPEG\\LocationRange' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/LocationRange.php',
-        'WikiPEG\\PEGParserBase' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/PEGParserBase.php',
-        'WikiPEG\\SyntaxError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/SyntaxError.php',
-        'WikiPEG\\Tracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Tracer.php',
         'Wikibase\\DataModel\\Assert\\RepositoryNameAssert' => __DIR__ . '/..' . '/wikibase/data-model/src/Assert/RepositoryNameAssert.php',
         'Wikibase\\DataModel\\ByPropertyIdArray' => __DIR__ . '/..' . '/wikibase/data-model/src/ByPropertyIdArray.php',
         'Wikibase\\DataModel\\DeserializerFactory' => __DIR__ . '/..' . '/wikibase/data-model-serialization/src/DeserializerFactory.php',
@@ -2907,6 +2900,14 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
         'Wikimedia\\Timestamp\\ConvertibleTimestamp' => __DIR__ . '/..' . '/wikimedia/timestamp/src/ConvertibleTimestamp.php',
         'Wikimedia\\Timestamp\\TimestampException' => __DIR__ . '/..' . '/wikimedia/timestamp/src/TimestampException.php',
         'Wikimedia\\WaitConditionLoop' => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src/WaitConditionLoop.php',
+        'Wikimedia\\WikiPEG\\DefaultTracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/DefaultTracer.php',
+        'Wikimedia\\WikiPEG\\Expectation' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Expectation.php',
+        'Wikimedia\\WikiPEG\\InternalError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/InternalError.php',
+        'Wikimedia\\WikiPEG\\Location' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Location.php',
+        'Wikimedia\\WikiPEG\\LocationRange' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/LocationRange.php',
+        'Wikimedia\\WikiPEG\\PEGParserBase' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/PEGParserBase.php',
+        'Wikimedia\\WikiPEG\\SyntaxError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/SyntaxError.php',
+        'Wikimedia\\WikiPEG\\Tracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Tracer.php',
         'Wikimedia\\WrappedString' => __DIR__ . '/..' . '/wikimedia/wrappedstring/src/WrappedString.php',
         'Wikimedia\\WrappedStringList' => __DIR__ . '/..' . '/wikimedia/wrappedstring/src/WrappedStringList.php',
         'Wikimedia\\XMPReader\\Info' => __DIR__ . '/..' . '/wikimedia/xmp-reader/src/Info.php',
@@ -2921,11 +2922,11 @@ class ComposerStaticInite6a2277d002d2f2d111695770135fe0d
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite6a2277d002d2f2d111695770135fe0d::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite6a2277d002d2f2d111695770135fe0d::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInite6a2277d002d2f2d111695770135fe0d::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInite6a2277d002d2f2d111695770135fe0d::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInite6a2277d002d2f2d111695770135fe0d::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit620d46593b1846a2c58f8b0f0fba51b7::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit620d46593b1846a2c58f8b0f0fba51b7::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit620d46593b1846a2c58f8b0f0fba51b7::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit620d46593b1846a2c58f8b0f0fba51b7::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit620d46593b1846a2c58f8b0f0fba51b7::$classMap;
 
         }, null, ClassLoader::class);
     }
