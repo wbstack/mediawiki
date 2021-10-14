@@ -10,7 +10,7 @@ $wgCdnServersNoPurge = [
 // TODO this can probably be removed now?
 $wgSquidServersNoPurge = $wgCdnServersNoPurge;
 
-$wgParserCacheType = 'db-replicated'; // 'db-replicated' is defined in LocalSetting.pjp currently
+$wgParserCacheType = 'db-replicated'; // 'db-replicated' is defined in LocalSettings.php currently
 
 // Don't specify a redis cache when running dbless maint script
 // TODO we probably do want a redis connection in some maint scripts...
