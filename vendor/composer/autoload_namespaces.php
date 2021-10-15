@@ -10,8 +10,6 @@ return array(
     'ValueFormatters\\' => array($vendorDir . '/data-values/number/src', $vendorDir . '/data-values/time/src'),
     'TextCat' => array($vendorDir . '/wikimedia/textcat/src'),
     'Net' => array($vendorDir . '/pear/net_smtp', $vendorDir . '/pear/net_socket'),
-    'Mailgun\\Tests' => array($vendorDir . '/mailgun/mailgun-php/tests'),
-    'Mailgun' => array($vendorDir . '/mailgun/mailgun-php/src'),
     'Mail' => array($vendorDir . '/pear/mail', $vendorDir . '/pear/mail_mime'),
     'Liuggio' => array($vendorDir . '/liuggio/statsd-php-client/src'),
     'Less' => array($vendorDir . '/wikimedia/less.php/lib'),
