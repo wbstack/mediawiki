@@ -441,6 +441,8 @@ $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
 wfLoadExtension( 'Mailgun' );
 $wgMailgunAPIKey = getenv('MW_MAILGUN_API_KEY');
 $wgMailgunDomain = getenv('MW_MAILGUN_DOMAIN');
+// Example Endpoint "https://api.mailgun.net"
+$wgMailgunEndpoint = getenv('MW_MAILGUN_ENDPOINT');
 
 # MobileFrontend
 wfLoadExtension( 'MobileFrontend' );

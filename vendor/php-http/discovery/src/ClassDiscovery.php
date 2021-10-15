@@ -2,130 +2,176 @@
 
 namespace Http\Discovery;
 
-use Puli\Discovery\Api\Discovery;
+use Http\Discovery\Exception\ClassInstantiationFailedException;
+use Http\Discovery\Exception\DiscoveryFailedException;
+use Http\Discovery\Exception\NoCandidateFoundException;
+use Http\Discovery\Exception\StrategyUnavailableException;
 
 /**
  * Registry that based find results on class existence.
  *
  * @author David de Boer <david@ddeboer.nl>
  * @author Márk Sági-Kazár <mark.sagikazar@gmail.com>
+ * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 abstract class ClassDiscovery
 {
     /**
-     * @var GeneratedPuliFactory
-     */
-    private static $puliFactory;
-
-    /**
-     * @var Discovery
-     */
-    private static $puliDiscovery;
-
-    /**
-     * @return GeneratedPuliFactory
-     */
-    public static function getPuliFactory()
-    {
-        if (null === self::$puliFactory) {
-            if (!defined('PULI_FACTORY_CLASS')) {
-                throw new \RuntimeException('Puli Factory is not available');
-            }
-
-            $puliFactoryClass = PULI_FACTORY_CLASS;
-
-            if (!class_exists($puliFactoryClass)) {
-                throw new \RuntimeException('Puli Factory class does not exist');
-            }
-
-            self::$puliFactory = new $puliFactoryClass();
-        }
-
-        return self::$puliFactory;
-    }
-
-    /**
-     * Sets the Puli factory.
+     * A list of strategies to find classes.
      *
-     * @param object $puliFactory
+     * @var array
      */
-    public static function setPuliFactory($puliFactory)
-    {
-        if (!is_callable([$puliFactory, 'createRepository']) || !is_callable([$puliFactory, 'createDiscovery'])) {
-            throw new \InvalidArgumentException('The Puli Factory must expose a repository and a discovery');
-        }
+    private static $strategies = [
+        Strategy\CommonClassesStrategy::class,
+        Strategy\CommonPsr17ClassesStrategy::class,
+        Strategy\PuliBetaStrategy::class,
+    ];
 
-        self::$puliFactory = $puliFactory;
-        self::$puliDiscovery = null;
-    }
+    private static $deprecatedStrategies = [
+        Strategy\PuliBetaStrategy::class => true,
+    ];
 
     /**
-     * Resets the factory.
-     */
-    public static function resetPuliFactory()
-    {
-        self::$puliFactory = null;
-        self::$puliDiscovery = null;
-    }
-
-    /**
-     * Returns the Puli discovery layer.
+     * Discovery cache to make the second time we use discovery faster.
      *
-     * @return Discovery
+     * @var array
      */
-    public static function getPuliDiscovery()
-    {
-        if (!isset(self::$puliDiscovery)) {
-            $factory = self::getPuliFactory();
-            $repository = $factory->createRepository();
-
-            self::$puliDiscovery = $factory->createDiscovery($repository);
-        }
-
-        return self::$puliDiscovery;
-    }
+    private static $cache = [];
 
     /**
      * Finds a class.
      *
-     * @param $type
+     * @param string $type
      *
-     * @return string
+     * @return string|\Closure
      *
-     * @throws NotFoundException
+     * @throws DiscoveryFailedException
      */
-    public static function findOneByType($type)
+    protected static function findOneByType($type)
     {
-        $bindings = self::getPuliDiscovery()->findBindings($type);
-
-        foreach ($bindings as $binding) {
-            if ($binding->hasParameterValue('depends')) {
-                $dependency = $binding->getParameterValue('depends');
-
-                if (!self::evaluateCondition($dependency)) {
-                    continue;
-                }
-            }
-
-            // TODO: check class binding
-            return $binding->getClassName();
+        // Look in the cache
+        if (null !== ($class = self::getFromCache($type))) {
+            return $class;
         }
 
-        throw new NotFoundException(sprintf('Resource of type "%s" not found', $type));
+        $exceptions = [];
+        foreach (self::$strategies as $strategy) {
+            try {
+                $candidates = call_user_func($strategy.'::getCandidates', $type);
+            } catch (StrategyUnavailableException $e) {
+                if (!isset(self::$deprecatedStrategies[$strategy])) {
+                    $exceptions[] = $e;
+                }
+
+                continue;
+            }
+
+            foreach ($candidates as $candidate) {
+                if (isset($candidate['condition'])) {
+                    if (!self::evaluateCondition($candidate['condition'])) {
+                        continue;
+                    }
+                }
+
+                // save the result for later use
+                self::storeInCache($type, $candidate);
+
+                return $candidate['class'];
+            }
+
+            $exceptions[] = new NoCandidateFoundException($strategy, $candidates);
+        }
+
+        throw DiscoveryFailedException::create($exceptions);
     }
 
     /**
-     * Finds a resource.
+     * Get a value from cache.
      *
-     * @return object
+     * @param string $type
+     *
+     * @return string|null
      */
-    public static function find()
+    private static function getFromCache($type)
     {
-        throw new \LogicException('Not implemented');
+        if (!isset(self::$cache[$type])) {
+            return;
+        }
+
+        $candidate = self::$cache[$type];
+        if (isset($candidate['condition'])) {
+            if (!self::evaluateCondition($candidate['condition'])) {
+                return;
+            }
+        }
+
+        return $candidate['class'];
     }
 
     /**
-     * Evaulates conditions to boolean.
+     * Store a value in cache.
+     *
+     * @param string $type
+     * @param string $class
+     */
+    private static function storeInCache($type, $class)
+    {
+        self::$cache[$type] = $class;
+    }
+
+    /**
+     * Set new strategies and clear the cache.
+     *
+     * @param array $strategies string array of fully qualified class name to a DiscoveryStrategy
+     */
+    public static function setStrategies(array $strategies)
+    {
+        self::$strategies = $strategies;
+        self::clearCache();
+    }
+
+    /**
+     * Returns the currently configured discovery strategies as fully qualified class names.
+     *
+     * @return string[]
+     */
+    public static function getStrategies(): iterable
+    {
+        return self::$strategies;
+    }
+
+    /**
+     * Append a strategy at the end of the strategy queue.
+     *
+     * @param string $strategy Fully qualified class name to a DiscoveryStrategy
+     */
+    public static function appendStrategy($strategy)
+    {
+        self::$strategies[] = $strategy;
+        self::clearCache();
+    }
+
+    /**
+     * Prepend a strategy at the beginning of the strategy queue.
+     *
+     * @param string $strategy Fully qualified class name to a DiscoveryStrategy
+     */
+    public static function prependStrategy($strategy)
+    {
+        array_unshift(self::$strategies, $strategy);
+        self::clearCache();
+    }
+
+    /**
+     * Clear the cache.
+     */
+    public static function clearCache()
+    {
+        self::$cache = [];
+    }
+
+    /**
+     * Evaluates conditions to boolean.
      *
      * @param mixed $condition
      *
@@ -135,22 +181,72 @@ abstract class ClassDiscovery
     {
         if (is_string($condition)) {
             // Should be extended for functions, extensions???
-            return class_exists($condition);
-        } elseif (is_callable($condition)) {
-            return $condition();
-        } elseif (is_bool($condition)) {
+            return self::safeClassExists($condition);
+        }
+        if (is_callable($condition)) {
+            return (bool) $condition();
+        }
+        if (is_bool($condition)) {
             return $condition;
-        } elseif (is_array($condition)) {
-            $evaluatedCondition = true;
-
-            // Immediately stop execution if the condition is false
-            for ($i = 0; $i < count($condition) && false !== $evaluatedCondition; ++$i) {
-                $evaluatedCondition &= static::evaluateCondition($condition[$i]);
+        }
+        if (is_array($condition)) {
+            foreach ($condition as $c) {
+                if (false === static::evaluateCondition($c)) {
+                    // Immediately stop execution if the condition is false
+                    return false;
+                }
             }
 
-            return $evaluatedCondition;
+            return true;
         }
 
         return false;
+    }
+
+    /**
+     * Get an instance of the $class.
+     *
+     * @param string|\Closure $class A FQCN of a class or a closure that instantiate the class.
+     *
+     * @return object
+     *
+     * @throws ClassInstantiationFailedException
+     */
+    protected static function instantiateClass($class)
+    {
+        try {
+            if (is_string($class)) {
+                return new $class();
+            }
+
+            if (is_callable($class)) {
+                return $class();
+            }
+        } catch (\Exception $e) {
+            throw new ClassInstantiationFailedException('Unexpected exception when instantiating class.', 0, $e);
+        }
+
+        throw new ClassInstantiationFailedException('Could not instantiate class because parameter is neither a callable nor a string');
+    }
+
+    /**
+     * We want to do a "safe" version of PHP's "class_exists" because Magento has a bug
+     * (or they call it a "feature"). Magento is throwing an exception if you do class_exists()
+     * on a class that ends with "Factory" and if that file does not exits.
+     *
+     * This function will catch all potential exceptions and make sure it returns a boolean.
+     *
+     * @param string $class
+     * @param bool   $autoload
+     *
+     * @return bool
+     */
+    public static function safeClassExists($class)
+    {
+        try {
+            return class_exists($class) || interface_exists($class);
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

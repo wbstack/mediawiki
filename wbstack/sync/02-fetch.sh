@@ -11,7 +11,7 @@
 # extensions
 ###########
 ./wbstack/sync/dwnthing.sh extensions/RevisionSlider https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/219b8784bc4b2bc9c954ad1a6ef0aa556a3aaf0f & \
-./wbstack/sync/dwnthing.sh extensions/Mailgun https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/d1e1e3022b437374b962d3ee529388ae74ed3777 & \
+./wbstack/sync/dwnthing.sh extensions/Mailgun https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/66597736dc16c72a3f4b317127ed78bc551e76ca & \
 ./wbstack/sync/dwnthing.sh extensions/StopForumSpam https://codeload.github.com/wikimedia/mediawiki-extensions-StopForumSpam/zip/993d41f8b65eb9237f79db7e3559da3c49773911 & \
 ./wbstack/sync/dwnthing.sh extensions/SpamBlacklist https://codeload.github.com/wikimedia/mediawiki-extensions-SpamBlacklist/zip/51d9e302a4e01e3dbc671d6240422dbac5713930 & \
 ./wbstack/sync/dwnthing.sh extensions/ConfirmEdit https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/8638ebdc99384cd2aae42588f34adb0f8c3f9af8 & \

@@ -1,6 +1,6 @@
 {
 	"name": "Mailgun",
-	"version": "1.0",
+	"version": "2.1",
 	"author": [
 		"Tony Thomas",
 		"Alangi Derick"
@@ -22,7 +22,8 @@
 	"load_composer_autoloader": true,
 	"config": {
 		"MailgunAPIKey": "",
-		"MailgunDomain": ""
+		"MailgunDomain": "",
+		"MailgunEndpoint": ""
 	},
 	"manifest_version": 1
 }
