@@ -23,12 +23,12 @@ jobs:
         warning_on_retry: false
         command: docker-compose logs mysql | grep "ready for connections" | wc -l | grep 2
 
-    - run: curl -L -s -N "http://site1.localhost:8001/" | grep -q "Main Page"
+    - run: curl -L -s -N "http://site1.localhost:8001/wiki/Main_Page" | grep -q "Main Page"
     - run: curl -L -s -N "http://site1.localhost:8001/w/api.php" | grep -q "Main module"
     - run: curl -L -s -N "http://site1.localhost:8001/w/load.php" | grep -q "no modules were requested"
     - run: curl -L -s -N "http://site1.localhost:8001/w/rest.php" | grep -q "did not match any known handler"
 
-    - run: curl -L -s -N "http://site2.localhost:8001/" | grep -q "Main Page"
+    - run: curl -L -s -N "http://site2.localhost:8001/wiki/Main_Page" | grep -q "Main Page"
     - run: curl -L -s -N "http://site2.localhost:8001/w/api.php" | grep -q "Main module"
     - run: curl -L -s -N "http://site2.localhost:8001/w/load.php" | grep -q "no modules were requested"
     - run: curl -L -s -N "http://site2.localhost:8001/w/rest.php" | grep -q "did not match any known handler"
