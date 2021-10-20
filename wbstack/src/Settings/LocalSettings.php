@@ -72,6 +72,19 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
     ];
 }
 
+// Disable logging for local dev setup so it get's redirected to stderr and therefore can be viewed in the Kubernetes dashboard
+if ( $wwDomainSaysLocal ) {
+    $wgMWLoggerDefaultSpi = [
+        'class' => \WBStack\Logging\CustomSpi::class,
+        'args' => [[
+            'ignoreLevels' => [],
+            'ignoreAllInGroup' => [],
+            'logAllInGroup' => [],
+            'logAllInGroupExceptDebug' => [],
+        ]],
+    ];
+}
+
 if ( $wwDomainSaysLocal ) {
     $wgServer = "http://" . $wikiInfo->domain . ':' . $_SERVER['SERVER_PORT'];
 } else {
