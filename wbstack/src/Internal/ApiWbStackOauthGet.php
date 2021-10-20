@@ -14,6 +14,12 @@ class ApiWbStackOauthGet extends \ApiBase {
     public function mustBePosted() {return true;}
     public function isWriteMode() {return true;}
     public function isInternal() {return true;}
+
+    private function getScheme(): String {
+        $isLocal = preg_match("/(\w\.localhost)/", $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain) === 1;
+        $isLocal ? 'http://' : 'https://';
+    }
+
     public function execute() {
         // Try and get the required consumer
         $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
@@ -23,7 +29,7 @@ class ApiWbStackOauthGet extends \ApiBase {
 
         // If it doesnt exist, make sure the user and consumer do
         if(!$consumerData) {
-            $callbackUrl = 'https://' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . $this->getParameter('callbackUrlTail');
+            $callbackUrl = $this->getScheme() . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . $this->getParameter('callbackUrlTail');
 
             WbStackPlatformReservedUser::createIfNotExists();
             WbStackPlatformReservedUser::createOauthConsumer(
