@@ -2,6 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20211022-0
+
+- Add `MW_LOG_TO_STDERR` which can be set for local development
+- Remove port from localhost sites (gets in the way of mwde-wbaas-deploy dev env)
+
 ## 1.35-7.4-20211015-0
 
 - Mailgun code updates
