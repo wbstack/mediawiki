@@ -73,7 +73,7 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
 }
 
 // Disable logging for local dev setup so it get's redirected to stderr and therefore can be viewed in the Kubernetes dashboard
-if ( $wwDomainSaysLocal ) {
+if ( getenv('MW_LOG_TO_STDERR') === 'yes' ) {
     $wgMWLoggerDefaultSpi = [
         'class' => \WBStack\Logging\CustomSpi::class,
         'args' => [[
