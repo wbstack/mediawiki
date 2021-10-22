@@ -34,6 +34,7 @@ These can be found in the `src/Internal` directory.
 - `PLATFORM_API_BACKEND_HOST`: points to an internal mode wbstack api service
 - `MW_ELASTICSEARCH_HOST`: elasticsearch hostname
 - `MW_ELASTICSEARCH_PORT`: elasticsearch port
+- `MW_LOG_TO_STDERR`: set to "yes" to redirect all mediawiki logging to stderr (so it ends up in the kubernetes pod logs)
 
 ## Build scripts
 
