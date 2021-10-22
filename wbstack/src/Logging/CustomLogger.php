@@ -36,7 +36,7 @@ class CustomLogger extends AbstractLogger {
     }
 
     private function doLog( $level, $message, $context ) {
-        fwrite( STDERR, "[wbstack-mediawiki] [$level] " .
+        fwrite( STDERR, "[$level] " .
             LegacyLogger::format( $this->channel, $message, $context ) );
     }
 
