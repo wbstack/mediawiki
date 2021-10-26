@@ -9,12 +9,12 @@ mkdir -p ${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 # composer install
 docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app \
   --volume $SCRIPT_COMPOSER_CACHE:/tmp/cache \
-composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675 install --no-dev --no-progress --optimize-autoloader
+composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675 install --no-dev --no-progress --optimize-autoloader --ignore-platform-reqs
 
 # composer update
 docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app \
   --volume $SCRIPT_COMPOSER_CACHE:/tmp/cache \
-composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675 update --no-dev --no-progress --optimize-autoloader
+composer@sha256:d374b2e1f715621e9d9929575d6b35b11cf4a6dc237d4a08f2e6d1611f534675 update --no-dev --no-progress --optimize-autoloader --ignore-platform-reqs
 
 # Sometimes composer git clones things rather than using zips.
 # so make sure to remove the .git directories so that things get committed correctly.
