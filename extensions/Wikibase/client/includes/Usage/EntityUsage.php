@@ -24,28 +24,31 @@ class EntityUsage {
 	 * @note: This does NOT cover sitelinks used in wikitext (e.g. via Lua).
 	 *        Use OTHER_USAGE for that.
 	 */
-	const SITELINK_USAGE = 'S';
+	public const SITELINK_USAGE = 'S';
 
 	/**
 	 * Usage flag indicating that one of the entity's labels were used.
 	 * This would be the case when showing the label of a referenced entity. Note that
 	 * label usage is typically tracked with a modifier specifying the label's language code.
 	 */
-	const LABEL_USAGE = 'L';
+	public const LABEL_USAGE = 'L';
 
 	/**
 	 * Usage flag indicating that one of the entity's descriptions were used.
 	 * This would be the case when showing the descriptions of a referenced entity. Note that
 	 * descriptions usage is typically tracked with a modifier specifying the language code.
 	 */
-	const DESCRIPTION_USAGE = 'D';
+	public const DESCRIPTION_USAGE = 'D';
 
 	/**
-	 * Usage flag indicating that the entity's local page name was used.
+	 * Usage flag indicating that the entity's local page name was used,
+	 * i.e. the title of the local (client) page linked to the entity.
 	 * This would be the case when linking a referenced entity to the
 	 * corresponding local wiki page.
+	 * This can be thought of as a special kind of sitelink usage,
+	 * specifically for the sitelink for the local wiki.
 	 */
-	const TITLE_USAGE = 'T';
+	public const TITLE_USAGE = 'T';
 
 	/**
 	 * Usage flag indicating that certain statements (identified by their property id)
@@ -53,13 +56,13 @@ class EntityUsage {
 	 * This currently implies that we also have an OTHER_USAGE or an ALL_USAGE
 	 * for the same entity (STATEMENT_USAGE is never used alone).
 	 */
-	const STATEMENT_USAGE = 'C';
+	public const STATEMENT_USAGE = 'C';
 
 	/**
 	 * Usage flag indicating that any and all aspects of the entity
 	 * were (or may have been) used.
 	 */
-	const ALL_USAGE = 'X';
+	public const ALL_USAGE = 'X';
 
 	/**
 	 * Usage flag indicating that some aspect of the entity was changed
@@ -67,10 +70,9 @@ class EntityUsage {
 	 * the specific usage flags together with the "other" flag are equivalent
 	 * to the "all" flag ( S + T + L + O = X or rather O = X - S - T - L ).
 	 *
-	 * Due to migration efforts, this is currently used redundantly with
-	 * STATEMENT_USAGE or DESCRIPTION_USAGE, as they were only added later.
+	 * This currently covers alias usage and entity existence checks.
 	 */
-	const OTHER_USAGE = 'O';
+	public const OTHER_USAGE = 'O';
 
 	/**
 	 * List of all valid aspects. Only the array keys are used, the values are meaningless.

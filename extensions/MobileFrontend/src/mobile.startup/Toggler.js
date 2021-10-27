@@ -41,7 +41,7 @@ function Toggler( options ) {
  * @return {Object} representing open sections
  */
 function getExpandedSections( page ) {
-	var expandedSections = JSON.parse( mw.storage.get( 'expandedSections' ) || '{}' );
+	var expandedSections = JSON.parse( mw.storage.session.get( 'expandedSections' ) || '{}' );
 	expandedSections[page.title] = expandedSections[page.title] || {};
 	return expandedSections;
 }
@@ -51,7 +51,16 @@ function getExpandedSections( page ) {
  * Save expandedSections to localStorage
  */
 function saveExpandedSections( expandedSections ) {
-	mw.storage.set(
+	if ( mw.storage.get( 'expandedSections' ) ) {
+		mw.storage.session.set(
+			'expandedSections', JSON.stringify( mw.storage.get( 'expandedSections' ) )
+		);
+		// Clean up any old storage.
+		// The following line can be removed 1 week after
+		// Ib7c0a45fcf8645a900288a26d172781612fa1606 is deployed
+		mw.storage.remove( 'expandedSections' );
+	}
+	mw.storage.session.set(
 		'expandedSections', JSON.stringify( expandedSections )
 	);
 }
@@ -68,7 +77,7 @@ function storeSectionToggleState( $heading, page ) {
 		isSectionOpen = $heading.hasClass( 'open-block' ),
 		expandedSections = getExpandedSections( page );
 
-	if ( headline ) {
+	if ( headline && expandedSections[page.title] ) {
 		if ( isSectionOpen ) {
 			expandedSections[page.title][headline] = ( new Date() ).getTime();
 		} else {
@@ -257,6 +266,7 @@ Toggler.prototype._enable = function ( $container, prefix, page, isClosed ) {
 		// Old default behavior if on cached output
 		collapseSectionsByDefault = true;
 	}
+	// NB: 'expandSections' uses localStorage, unlike 'expandedSections' which uses sessionStorage
 	expandSections = !collapseSectionsByDefault || mw.storage.get( 'expandSections' ) === 'true';
 
 	$container.children( tagName ).each( function ( i ) {
@@ -334,10 +344,16 @@ Toggler.prototype._enable = function ( $container, prefix, page, isClosed ) {
 	 */
 	function checkHash() {
 		var hash = window.location.hash;
+		var decodedHash;
 		if ( hash.indexOf( '#' ) === 0 ) {
 			// Non-latin characters in the hash will be provided percent-encoded, which
 			// jQuery would later fail to cope with.
-			self.reveal( decodeURIComponent( hash ), $container, page );
+			try {
+				decodedHash = decodeURIComponent( hash );
+				self.reveal( decodedHash, $container, page );
+			} catch ( e ) {
+				// sometimes decoding will fail e.g. T262599, T264914. If that happens ignore.
+			}
 		}
 	}
 

@@ -6,6 +6,8 @@ use ApiBase;
 use ApiMain;
 use LogicException;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\SerializerFactory;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermLanguageValidator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermSerializationValidator;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
@@ -19,10 +21,12 @@ use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
+use Wikibase\Lib\StringNormalizer;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
+use Wikibase\Repo\ChangeOp\Deserialization\ClaimsChangeOpDeserializer;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
@@ -33,7 +37,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class AddSense extends ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var AddSenseRequestParser
@@ -68,29 +72,37 @@ class AddSense extends ApiBase {
 	/**
 	 * @return self
 	 */
-	public static function newFromGlobalState( \ApiMain $mainModule, $moduleName ) {
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		SerializerFactory $baseDataModelSerializerFactory,
+		EntityIdParser $entityIdParser,
+		StringNormalizer $stringNormalizer
+	) {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
 
-		$serializerFactory = $wikibaseRepo->getBaseDataModelSerializerFactory();
-
 		$senseSerializer = new SenseSerializer(
-			$serializerFactory->newTermListSerializer(),
-			$serializerFactory->newStatementListSerializer()
+			$baseDataModelSerializerFactory->newTermListSerializer(),
+			$baseDataModelSerializerFactory->newStatementListSerializer()
 		);
 
 		return new self(
 			$mainModule,
 			$moduleName,
 			new AddSenseRequestParser(
-				$wikibaseRepo->getEntityIdParser(),
+				$entityIdParser,
 				new EditSenseChangeOpDeserializer(
 					new GlossesChangeOpDeserializer(
 						new TermDeserializer(),
-						$wikibaseRepo->getStringNormalizer(),
+						$stringNormalizer,
 						new LexemeTermSerializationValidator(
 							new LexemeTermLanguageValidator( WikibaseLexemeServices::getTermLanguages() )
 						)
+					),
+					new ClaimsChangeOpDeserializer(
+						$wikibaseRepo->getExternalFormatStatementDeserializer(),
+						$wikibaseRepo->getChangeOpFactoryProvider()->getStatementChangeOpFactory()
 					)
 				)
 			),
@@ -168,7 +180,7 @@ class AddSense extends ApiBase {
 					[] ) );
 			}
 		} catch ( StorageException $e ) {
-			//TODO Test it
+			// TODO Test it
 			if ( $e->getStatus() ) {
 				$this->dieStatus( $e->getStatus() );
 			} else {
@@ -214,7 +226,7 @@ class AddSense extends ApiBase {
 		}
 
 		$tokenThatDoesNotNeedChecking = false;
-		//FIXME: Handle failure
+		// FIXME: Handle failure
 		$status = $editEntity->attemptSave(
 			$lexeme,
 			$summaryString,
@@ -223,7 +235,7 @@ class AddSense extends ApiBase {
 		);
 
 		if ( !$status->isGood() ) {
-			$this->dieStatus( $status ); //Seems like it is good enough
+			$this->dieStatus( $status ); // Seems like it is good enough
 		}
 
 		/** @var EntityRevision $entityRevision */

@@ -9,7 +9,8 @@ use MediaWiki\Page\Hook\ArticleDeleteAfterSuccessHook;
 use OutputPage;
 use Title;
 use Wikibase\Client\RepoLinker;
-use Wikibase\Client\WikibaseClient;
+use Wikibase\Client\Store\ClientStore;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\SiteLinkLookup;
 
 /**
@@ -47,14 +48,14 @@ class DeletePageNoticeCreator implements ArticleDeleteAfterSuccessHook {
 		$this->repoLinker = $repoLinker;
 	}
 
-	public static function newFromGlobalState(): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$siteLinkLookup = $wikibaseClient->getStore()->getSiteLinkLookup();
-		$repoLinker = $wikibaseClient->newRepoLinker();
-
+	public static function factory(
+		RepoLinker $repoLinker,
+		SettingsArray $clientSettings,
+		ClientStore $store
+	): self {
 		return new self(
-			$siteLinkLookup,
-			$wikibaseClient->getSettings()->getSetting( 'siteGlobalID' ),
+			$store->getSiteLinkLookup(),
+			$clientSettings->getSetting( 'siteGlobalID' ),
 			$repoLinker
 		);
 	}

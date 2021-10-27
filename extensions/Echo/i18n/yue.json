@@ -2,7 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Deryck Chan",
+			"Hello903hello",
 			"Ktchankt",
+			"Moon0319",
+			"Roy17",
 			"Suzukaze-c",
 			"William915",
 			"Wong128hk"
@@ -47,7 +50,7 @@
 	"notification-link-text-view-edit": "去睇改咗啲乜",
 	"echo-notification-alert-text-only": "提示",
 	"echo-notification-notice-text-only": "通知",
-	"echo-overlay-link": "所有通知",
+	"echo-overlay-link": "全部通知",
 	"echo-overlay-title": "<b>通知</b>",
 	"echo-mark-all-as-read": "全部標做讀過",
 	"echo-date-today": "今日",

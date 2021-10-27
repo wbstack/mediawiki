@@ -53,7 +53,7 @@ abstract class JCDataContent extends JCObjContent {
 		if ( !$this->isValid() ) {
 			return null;
 		}
-		$result = new stdClass();
+		$result = (object)[];
 		$this->localizeData( $result, $lang );
 		return $result;
 	}

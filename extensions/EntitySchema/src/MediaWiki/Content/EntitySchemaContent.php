@@ -2,18 +2,20 @@
 
 namespace EntitySchema\MediaWiki\Content;
 
+use EntitySchema\Services\SchemaConverter\SchemaConverter;
 use JsonContent;
 use ParserOptions;
 use ParserOutput;
 use Title;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
 
 /**
  * Represents the content of a EntitySchema page
+ *
+ * @license GPL-2.0-or-later
  */
 class EntitySchemaContent extends JsonContent {
 
-	const CONTENT_MODEL_ID = 'EntitySchema';
+	public const CONTENT_MODEL_ID = 'EntitySchema';
 
 	public function __construct( $text, $modelId = self::CONTENT_MODEL_ID ) {
 		parent::__construct( $text, $modelId );

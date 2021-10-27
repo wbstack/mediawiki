@@ -6,7 +6,8 @@
 			"Ellif",
 			"MemphisA5",
 			"SeoJeongHo",
-			"Ykhwong"
+			"Ykhwong",
+			"밝은소년"
 		]
 	},
 	"twocolconflict": "Paragraph-based Edit Conflict",
@@ -14,9 +15,11 @@
 	"twocolconflictprovidesubmittedtext": "편집 충돌:",
 	"twocolconflict-beta-feature-message": "단락 기반 편집 충돌",
 	"twocolconflict-beta-feature-description": "더 진보된 단락 기반 뷰를 사용하여 편집 충돌 뷰를 표시합니다.",
+	"twocolconflict-copy-action": "전체 텍스트 복사",
 	"twocolconflict-core-ui-hint-close": "다시는 보지 않기",
 	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|단락 기반 편집 충돌 인터페이스]]를 사용하여 편집 충돌 해결",
 	"twocolconflict-special-not-saved": "게시되지 않음",
+	"twocolconflict-special-malformed-title": "존재하지 않거나 유효하지 않은 제목입니다.",
 	"twocolconflict-split-header-hint-beta": "이 베타 기능을 사용해 주셔서 감사합니다. [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 이 문서]에 의견을 남겨주시면 개선에 더 도움이 될 수 있습니다.",
 	"twocolconflict-split-header-overview": "당신이 편집하는 동안 다른 사용자가 같은 문서를 편집하고 당신보다 먼저 게시했습니다. 두 판을 모두 검토한 이후에 편집하신 내용을 병합해 주세요. \"{{int:publishchanges}}\"를 클릭하면 선택한 상자의 문구만 저장됩니다.",
 	"twocolconflict-split-your-version-header": "나의 판",

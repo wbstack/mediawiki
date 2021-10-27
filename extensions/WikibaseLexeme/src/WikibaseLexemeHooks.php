@@ -5,7 +5,6 @@ namespace Wikibase\Lexeme;
 use IContextSource;
 use MediaWiki\MediaWikiServices;
 use PageProps;
-use ResourceLoader;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\Lexeme\MediaWiki\Actions\InfoActionHookHandler;
 use Wikibase\Lexeme\MediaWiki\ParserOutput\LexemeParserOutputUpdater;
@@ -156,171 +155,6 @@ class WikibaseLexemeHooks {
 		$contentLanguages['term-lexicographical'] = WikibaseLexemeServices::getTermLanguages();
 	}
 
-	public static function onResourceLoaderTestModules( array &$testModules, ResourceLoader $rl ) {
-		$moduleBase = [
-			'localBasePath' => dirname( __DIR__ ),
-			'remoteExtPath' => 'WikibaseLexeme',
-		];
-
-		$testModules['qunit'] += [
-			'WikibaseLexeme.tests' => $moduleBase + [
-				'scripts' => [
-					'tests/qunit/datamodel/Form.tests.js',
-					'tests/qunit/datamodel/Sense.tests.js',
-					'tests/qunit/experts/Lexeme.tests.js',
-					'tests/qunit/experts/Form.tests.js',
-					'tests/qunit/jquery.wikibase.lexemeformlistview.tests.js',
-					'tests/qunit/jquery.wikibase.lexemeformview.tests.js',
-					'tests/qunit/jquery.wikibase.grammaticalfeatureview.tests.js',
-					'tests/qunit/jquery.wikibase.senselistview.tests.js',
-					'tests/qunit/jquery.wikibase.senseview.tests.js',
-					'tests/qunit/widgets/ItemSelectorWidget.tests.js',
-				],
-				'dependencies' => [
-					'jquery.valueview.tests.testExpert',
-					'oojs-ui',
-					'wikibase.experts.Lexeme',
-					'wikibase.experts.Form',
-					'wikibase.lexeme.datamodel',
-					'wikibase.lexeme.lexemeview',
-					'wikibase.lexeme.widgets.ItemSelectorWidget',
-					'wikibase.lexeme.view.ViewFactoryFactory',
-					'wikibase.view.tests.getMockListItemAdapter',
-					'vue',
-					'vuex',
-				],
-			],
-			'WikibaseLexeme.tests.GrammaticalFeatureListWidget' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/widgets/GrammaticalFeatureListWidget.tests.js',
-					'resources/widgets/GrammaticalFeatureListWidget.js'
-				],
-				'dependencies' => [
-					'mediawiki.widgets',
-					'oojs-ui-core',
-					'oojs-ui-widgets'
-				]
-			],
-			'WikibaseLexeme.tests.ItemLookup' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/services/ItemLookup.tests.js',
-					'resources/services/ItemLookup.js',
-				],
-			],
-			'WikibaseLexeme.tests.LanguageFromItemExtractor' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/services/LanguageFromItemExtractor.tests.js',
-					'resources/services/LanguageFromItemExtractor.js',
-				],
-			],
-			'WikibaseLexeme.tests.LexemeLanguageFieldObserver' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/special/formHelpers/LexemeLanguageFieldObserver.tests.js',
-					'resources/special/formHelpers/LexemeLanguageFieldObserver.js',
-				],
-			],
-			'WikibaseLexeme.tests.FormChanger' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/entityChangers/FormChanger.tests.js',
-					'resources/entityChangers/FormChanger.js',
-					'resources/serialization/FormSerializer.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.view.ViewFactoryFactory",
-					"wikibase.datamodel",
-				]
-			],
-			'WikibaseLexeme.tests.SenseChanger' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/entityChangers/SenseChanger.tests.js',
-					'resources/entityChangers/SenseChanger.js',
-					'resources/serialization/SenseSerializer.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.view.ViewFactoryFactory"
-				]
-			],
-			'WikibaseLexeme.tests.LexemeRevisionStore' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/entityChangers/LexemeRevisionStore.tests.js',
-					'resources/entityChangers/LexemeRevisionStore.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.view.ViewFactoryFactory"
-				]
-			],
-			'WikibaseLexeme.tests.LexemeDeserializer' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/serialization/LexemeDeserializer.tests.js',
-					'resources/serialization/LexemeDeserializer.js',
-					'resources/datamodel/Lexeme.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.getDeserializer"
-				]
-			],
-			'WikibaseLexeme.tests.datamodel.Lexeme' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/datamodel/Lexeme.tests.js',
-					'resources/datamodel/Lexeme.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.getDeserializer"
-				]
-			],
-			'WikibaseLexeme.tests.serialization.FormSerializer' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/serialization/FormSerializer.tests.js',
-					'resources/serialization/FormSerializer.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.view.ViewFactoryFactory"
-				]
-			],
-			'WikibaseLexeme.tests.serialization.SenseSerializer' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/serialization/SenseSerializer.tests.js',
-					'resources/serialization/SenseSerializer.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.view.ViewFactoryFactory"
-				]
-			],
-			'WikibaseLexeme.tests.ViewFactoryFactory' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/view/ViewFactoryFactory.tests.js',
-					'resources/view/ViewFactoryFactory.js',
-					'resources/view/ReadModeViewFactory.js',
-					'resources/view/ControllerViewFactory.js',
-					'resources/entityChangers/LexemeRevisionStore.js',
-					'resources/entityChangers/FormChanger.js',
-					'resources/serialization/FormSerializer.js',
-					'resources/entityChangers/SenseChanger.js',
-					'resources/serialization/SenseSerializer.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.view.ViewFactoryFactory"
-				]
-			],
-			'WikibaseLexeme.tests.ControllerViewFactory' => $moduleBase + [
-				'packageFiles' => [
-					'tests/qunit/view/ControllerViewFactory.tests.js',
-					'resources/view/ControllerViewFactory.js',
-					'resources/entityChangers/LexemeRevisionStore.js',
-					'resources/entityChangers/FormChanger.js',
-					'resources/serialization/FormSerializer.js',
-					'resources/entityChangers/SenseChanger.js',
-					'resources/serialization/SenseSerializer.js',
-				],
-				'dependencies' => [
-					"wikibase.lexeme.view.ViewFactoryFactory"
-				]
-			],
-		];
-
-		return true;
-	}
-
 	/**
 	 * @param string[] $namespaces
 	 * @param int $namespaceId
@@ -365,10 +199,10 @@ class WikibaseLexemeHooks {
 			return;
 		}
 
-		$namespaceChecker = WikibaseRepo::getDefaultInstance()->getEntityNamespaceLookup();
+		$namespaceChecker = WikibaseRepo::getEntityNamespaceLookup();
 		$infoActionHookHandler = new InfoActionHookHandler(
 			$namespaceChecker,
-			WikibaseRepo::getDefaultInstance()->getEntityIdLookup(),
+			WikibaseRepo::getEntityIdLookup(),
 			PageProps::getInstance(),
 			$context
 		);
@@ -381,7 +215,7 @@ class WikibaseLexemeHooks {
 		if ( !$config->get( 'LexemeEnableDataTransclusion' ) ) {
 			return;
 		}
-		$clientSettings = WikibaseClient::getDefaultInstance()->getSettings();
+		$clientSettings = WikibaseClient::getSettings();
 		if ( !$clientSettings->getSetting( 'allowDataTransclusion' ) ) {
 			return;
 		}
@@ -394,6 +228,13 @@ class WikibaseLexemeHooks {
 				'deferLoad' => true,
 			];
 		}
+	}
+
+	public static function getLexemeViewLanguages(): array {
+		return [
+			'lexemeTermLanguages' => MediaWikiServices::getInstance()
+				->getService( 'WikibaseLexemeTermLanguages' )->getLanguages(),
+		];
 	}
 
 }

@@ -2,11 +2,10 @@ import LabelEdit from '@/components/LabelEdit.vue';
 import { ResizingTextField } from '@wmde/wikibase-vuejs-components';
 import { shallowMount } from '@vue/test-utils';
 import { createStore } from '@/store';
-import { action, mutation } from '@wmde/vuex-helpers/dist/namespacedStoreMethods';
-import { NS_ENTITY, NS_LANGUAGE } from '@/store/namespaces';
+import { mutation } from '@wmde/vuex-helpers/dist/namespacedStoreMethods';
+import { NS_LANGUAGE } from '@/store/namespaces';
 import Language from '@/datamodel/Language';
 import { LANGUAGE_UPDATE } from '@/store/language/mutationTypes';
-import { ENTITY_LABEL_EDIT } from '@/store/entity/actionTypes';
 import { MessageKey } from '@/common/MessageKey';
 import mockMessageMixin from '../store/mockMessageMixin';
 import newConfigMixin, { ConfigOptions } from '@/components/mixins/newConfigMixin';
@@ -36,10 +35,10 @@ describe( 'LabelEdit', () => {
 			store,
 		} );
 
-		expect( wrapper.find( ResizingTextField ).props( 'value' ) ).toBe( label );
+		expect( wrapper.findComponent( ResizingTextField ).props( 'value' ) ).toBe( label );
 	} );
 
-	it( `triggers ${ENTITY_LABEL_EDIT} when the label is edited`, () => {
+	it( 'emits input event when the label is edited', () => {
 		const language = 'en';
 
 		const store = createStoreWithLanguage( { code: language, directionality: 'ltr' } );
@@ -52,12 +51,10 @@ describe( 'LabelEdit', () => {
 			store,
 		} );
 		const newLabel = 'hello';
-		wrapper.find( ResizingTextField ).vm.$emit( 'input', newLabel );
+		wrapper.findComponent( ResizingTextField ).vm.$emit( 'input', newLabel );
+		expect( wrapper.emitted( 'input' ) ).toHaveLength( 1 );
+		expect( wrapper.emitted( 'input' )![ 0 ][ 0 ] ).toEqual( { language, value: newLabel } );
 
-		expect( store.dispatch ).toHaveBeenCalledWith(
-			action( NS_ENTITY, ENTITY_LABEL_EDIT ),
-			{ language, value: newLabel },
-		);
 	} );
 
 	it( 'has an isPrimary prop', () => {
@@ -87,7 +84,7 @@ describe( 'LabelEdit', () => {
 			],
 		} );
 
-		expect( wrapper.find( ResizingTextField ).attributes( 'placeholder' ) ).toBe( placeholderMessage );
+		expect( wrapper.findComponent( ResizingTextField ).attributes( 'placeholder' ) ).toBe( placeholderMessage );
 	} );
 
 	it( 'passes a maxlength down', () => {
@@ -104,7 +101,7 @@ describe( 'LabelEdit', () => {
 				} as ConfigOptions ) ],
 		} );
 
-		expect( wrapper.find( ResizingTextField ).attributes( 'maxlength' ) ).toBe( maxLength.toString() );
+		expect( wrapper.findComponent( ResizingTextField ).attributes( 'maxlength' ) ).toBe( maxLength.toString() );
 	} );
 
 	describe( 'directionality and language code', () => {

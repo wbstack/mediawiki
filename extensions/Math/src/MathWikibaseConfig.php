@@ -1,7 +1,11 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MWException;
+use Site;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -145,20 +149,18 @@ class MathWikibaseConfig {
 	 */
 	public static function getDefaultMathWikibaseConfig() : MathWikibaseConfig {
 		if ( !self::$defaultConfig ) {
-			$wikibaseClient = WikibaseClient::getDefaultInstance();
-
 			$site = null;
 			try {
-				$site = $wikibaseClient->getSite();
+				$site = WikibaseClient::getSite();
 			} catch ( MWException $e ) {
 				$logger = LoggerFactory::getInstance( 'Math' );
 				$logger->warning( "Cannot get Site handler: " . $e->getMessage() );
 			}
 
 			self::$defaultConfig = new MathWikibaseConfig(
-				$wikibaseClient->getEntityIdParser(),
-				$wikibaseClient->getStore()->getEntityRevisionLookup(),
-				$wikibaseClient->getLanguageFallbackLabelDescriptionLookupFactory(),
+				WikibaseClient::getEntityIdParser(),
+				WikibaseClient::getStore()->getEntityRevisionLookup(),
+				WikibaseClient::getLanguageFallbackLabelDescriptionLookupFactory(),
 				$site
 			);
 		}

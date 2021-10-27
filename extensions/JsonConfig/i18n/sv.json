@@ -6,6 +6,7 @@
 			"Yurik"
 		]
 	},
+	"nstab-data": "Data",
 	"jsonconfig-desc": "Tillåter JSON-konfigurationer att lagras i en wiki",
 	"jsonconfig-duplicate-field": "Fler än ett värde \"$1\" hittades",
 	"jsonconfig-edit-action-apply": "Verkställ",

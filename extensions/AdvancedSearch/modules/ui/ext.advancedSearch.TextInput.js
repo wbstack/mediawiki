@@ -7,7 +7,7 @@
 
 	/**
 	 * @class
-	 * @extends {OO.ui.TextInputWidget}
+	 * @extends OO.ui.TextInputWidget
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store

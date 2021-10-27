@@ -2,11 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Ganbarzada",
-			"Patriot Kur"
+			"Patriot Kur",
+			"Гусейн"
 		]
 	},
 	"wikibase-edit": "dəqiş karde",
 	"wikibase-cancel": "ləğv karde",
-	"wikibase-add": "əlovə",
+	"wikibase-add": "ziyod",
+	"wikibase-label-empty": "Nom ni",
+	"wikibase-description-empty": "Nom-nışon nıvıştə bıəni",
+	"wikibase-sitelinks-special": "Co sayton",
+	"wikibase-statementview-rank-normal": "Normalə ranq",
 	"wikibase-setlabeldescriptionaliases-description-label": "Təsvir:"
 }

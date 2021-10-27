@@ -44,8 +44,10 @@ class EntitySource {
 	 */
 	private $conceptBaseUri;
 
+	/** @var string */
 	private $rdfNodeNamespacePrefix;
 
+	/** @var string */
 	private $rdfPredicateNamespacePrefix;
 
 	/**
@@ -137,7 +139,7 @@ class EntitySource {
 		return $this->databaseName;
 	}
 
-	public function getSourceName() {
+	public function getSourceName(): string {
 		return $this->sourceName;
 	}
 

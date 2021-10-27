@@ -18,6 +18,7 @@ use Wikibase\Repo\Store\Sql\SqlEntityIdPager;
 use Wikibase\Repo\Store\Sql\SqlEntityIdPagerFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\AtEase\AtEase;
 
 $basePath = getenv( 'MW_INSTALL_PATH' ) !== false ? getenv( 'MW_INSTALL_PATH' ) : __DIR__ . '/../../../..';
 
@@ -41,14 +42,16 @@ abstract class DumpEntities extends Maintenance {
 	 */
 	private $logFileHandle = false;
 
+	/** @var string[] */
 	private $existingEntityTypes = [];
 
+	/** @var string[] */
 	private $entityTypesToExcludeFromOutput = [];
 
 	public function __construct() {
 		parent::__construct();
 
-		$this->addDescription( 'Generate a JSON dump from entities in the repository.' );
+		$this->addDescription( 'Generate a ' . $this->getDumpType() . ' dump from entities in the repository.' );
 
 		$this->addOption( 'list-file', "A file containing one entity ID per line.", false, true );
 		$this->addOption(
@@ -97,6 +100,12 @@ abstract class DumpEntities extends Maintenance {
 		$this->existingEntityTypes = $existingEntityTypes;
 		$this->entityTypesToExcludeFromOutput = $entityTypesToExcludeFromOutput;
 	}
+
+	/**
+	 * Used in description of script at command-line
+	 * @return string
+	 */
+	abstract protected function getDumpType(): string;
 
 	/**
 	 * Create concrete dumper instance
@@ -219,9 +228,9 @@ abstract class DumpEntities extends Maintenance {
 		$dumper->setBatchSize( $batchSize );
 
 		$idStream = $this->makeIdStream( $entityTypes, $exceptionReporter );
-		\Wikimedia\suppressWarnings();
+		AtEase::suppressWarnings();
 		$dumper->generateDump( $idStream );
-		\Wikimedia\restoreWarnings();
+		AtEase::restoreWarnings();
 
 		if ( $idStream instanceof EntityIdReader ) {
 			// close stream / free resources
@@ -253,7 +262,7 @@ abstract class DumpEntities extends Maintenance {
 				return;
 			}
 
-			// Don't use WikibaseRepo here as this is run very early on, thus
+			// Don't use WikibaseRepo or MediaWikiServices here as this is run very early on, thus
 			// the bootstrapping code is not ready yet (T202452).
 			$settings = WikibaseSettings::getRepoSettings();
 			$dumpDBDefaultGroup = $settings->getSetting( 'dumpDBDefaultGroup' );
@@ -264,11 +273,25 @@ abstract class DumpEntities extends Maintenance {
 		};
 	}
 
-	private function getEntityTypes() {
-		return array_diff(
+	/**
+	 * @return string[]
+	 */
+	private function getEntityTypes(): array {
+		$inputTypes = array_diff(
 			$this->getOption( 'entity-type', $this->existingEntityTypes ),
 			$this->entityTypesToExcludeFromOutput
 		);
+
+		$types = [];
+		foreach ( $inputTypes as $type ) {
+			if ( !in_array( $type, $this->existingEntityTypes ) ) {
+				$this->logMessage( "Warning: Unknown entity type $type." );
+				continue;
+			}
+			$types[] = $type;
+		}
+
+		return $types;
 	}
 
 	/**
@@ -345,7 +368,7 @@ abstract class DumpEntities extends Maintenance {
 			throw new MWException( "Failed to open ID file: $listFile" );
 		}
 
-		$stream = new EntityIdReader( new LineReader( $input ), WikibaseRepo::getDefaultInstance()->getEntityIdParser() );
+		$stream = new EntityIdReader( new LineReader( $input ), WikibaseRepo::getEntityIdParser() );
 		$stream->setExceptionHandler( $exceptionReporter );
 
 		return $stream;

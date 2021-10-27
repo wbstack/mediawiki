@@ -127,7 +127,7 @@ class JCDefaultContentView extends JCContentView {
 	/**
 	 * Determine if data is a container and should be rendered as a complex structure
 	 * @param JCContent $content
-	 * @param array|object $data
+	 * @param array|\stdClass $data
 	 * @param array $path
 	 * @return bool
 	 */
@@ -142,7 +142,7 @@ class JCDefaultContentView extends JCContentView {
 	 * Determine if data is a special container that needs to be rendered as a comma-separated list.
 	 * By default,
 	 * @param JCContent $content
-	 * @param array|object $data
+	 * @param array|\stdClass $data
 	 * @param array $path
 	 * @return bool
 	 */

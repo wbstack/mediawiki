@@ -1,12 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lib\Formatters;
 
 use DataValues\Geo\Formatters\GlobeCoordinateFormatter;
 use DataValues\Geo\Formatters\LatLongFormatter;
 use InvalidArgumentException;
 use Language;
-use Psr\SimpleCache\CacheInterface;
 use RequestContext;
 use ValueFormatters\DecimalFormatter;
 use ValueFormatters\FormatterOptions;
@@ -28,6 +29,7 @@ use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
 use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
+use Wikibase\Lib\TermFallbackCache\TermFallbackCacheFacade;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -95,7 +97,7 @@ class WikibaseValueFormatterBuilders {
 	private $entityRevisionLookup;
 
 	/**
-	 * @var CacheInterface
+	 * @var TermFallbackCacheFacade
 	 */
 	private $cache;
 
@@ -149,80 +151,30 @@ class WikibaseValueFormatterBuilders {
 	 */
 	private $entityRedirectChecker;
 
-	/**
-	 * @param FormatterLabelDescriptionLookupFactory $labelDescriptionLookupFactory
-	 * @param LanguageNameLookup $languageNameLookup
-	 * @param EntityIdParser $itemUriParser
-	 * @param string $geoShapeStorageBaseUrl
-	 * @param string $tabularDataStorageBaseUrl
-	 * @param CacheInterface $formatterCache
-	 * @param int $cacheTtlInSeconds
-	 * @param EntityLookup $entityLookup
-	 * @param EntityRevisionLookup $entityRevisionLookup
-	 * @param int $entitySchemaNamespace
-	 * @param EntityExistenceChecker $entityExistenceChecker
-	 * @param EntityTitleTextLookup $entityTitleTextLookup
-	 * @param EntityUrlLookup $entityUrlLookup
-	 * @param EntityRedirectChecker $entityRedirectChecker
-	 * @param EntityTitleLookup|null $entityTitleLookup
-	 * @param CachingKartographerEmbeddingHandler|null $kartographerEmbeddingHandler
-	 * @param bool $useKartographerMaplinkInWikitext
-	 * @param array $thumbLimits
-	 */
 	public function __construct(
 		FormatterLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
 		LanguageNameLookup $languageNameLookup,
 		EntityIdParser $itemUriParser,
-		$geoShapeStorageBaseUrl,
-		$tabularDataStorageBaseUrl,
-		CacheInterface $formatterCache,
-		$cacheTtlInSeconds,
+		string $geoShapeStorageBaseUrl,
+		string $tabularDataStorageBaseUrl,
+		TermFallbackCacheFacade $termFallbackCacheFacade,
+		int $cacheTtlInSeconds,
 		EntityLookup $entityLookup,
 		EntityRevisionLookup $entityRevisionLookup,
-		$entitySchemaNamespace,
+		int $entitySchemaNamespace,
 		EntityExistenceChecker $entityExistenceChecker,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		EntityRedirectChecker $entityRedirectChecker,
 		EntityTitleLookup $entityTitleLookup = null,
 		CachingKartographerEmbeddingHandler $kartographerEmbeddingHandler = null,
-		$useKartographerMaplinkInWikitext = false,
-		$thumbLimits = []
+		bool $useKartographerMaplinkInWikitext = false,
+		array $thumbLimits = []
 	) {
-		Assert::parameterType(
-			'string',
-			$geoShapeStorageBaseUrl,
-			'$geoShapeStorageBaseUrl'
-		);
-
-		Assert::parameterType(
-			'string',
-			$tabularDataStorageBaseUrl,
-			'$tabularDataStorageBaseUrl'
-		);
-
-		Assert::parameterType(
-			'integer',
-			$cacheTtlInSeconds,
-			'$cacheTtlInSeconds'
-		);
-
 		Assert::parameter(
 			$cacheTtlInSeconds >= 0,
 			'$cacheTtlInSeconds',
 			"should be non-negative"
-		);
-
-		Assert::parameterType(
-			'integer',
-			$entitySchemaNamespace,
-			'$entitySchemaNamespace'
-		);
-
-		Assert::parameterType(
-			'array',
-			$thumbLimits,
-			'$thumbLimits'
 		);
 
 		$this->labelDescriptionLookupFactory = $labelDescriptionLookupFactory;
@@ -233,7 +185,7 @@ class WikibaseValueFormatterBuilders {
 		$this->entityTitleLookup = $entityTitleLookup;
 		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->entityLookup = $entityLookup;
-		$this->cache = $formatterCache;
+		$this->cache = $termFallbackCacheFacade;
 		$this->snakFormat = new SnakFormat();
 		$this->cacheTtlInSeconds = $cacheTtlInSeconds;
 		$this->kartographerEmbeddingHandler = $kartographerEmbeddingHandler;
@@ -340,8 +292,7 @@ class WikibaseValueFormatterBuilders {
 			$this->cache,
 			new RedirectResolvingLatestRevisionLookup( $this->entityRevisionLookup ),
 			$this->getNonCachingLookup( $options ),
-			$options->getOption( FormatterLabelDescriptionLookupFactory::OPT_LANGUAGE_FALLBACK_CHAIN ),
-			$this->cacheTtlInSeconds
+			$options->getOption( FormatterLabelDescriptionLookupFactory::OPT_LANGUAGE_FALLBACK_CHAIN )
 		);
 	}
 

@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Les Meloures",
-			"Robby"
+			"Robby",
+			"Soued031"
 		]
 	},
 	"deletebatch": "Rei vu Säite läschen",
@@ -22,9 +23,9 @@
 	"deletebatch-omitting-invalid": "Déi ongëlteg Säit $1 iwwersprangen.",
 	"deletebatch-file-bad-format": "De Fichier sollt als textfile virleien",
 	"deletebatch-file-missing": "De Fichier deen ukoum konnt net gelies ginn",
-	"deletebatch-select-script": "de Script vun der Säit läschen",
+	"deletebatch-select-script": "de Skript vun der Säit läschen",
 	"deletebatch-select-yourself": "Dir",
-	"deletebatch-system-username": "Script vun der Säit läschen",
+	"deletebatch-system-username": "Skript vun der Säit läschen",
 	"right-deletebatch": "Méi Säiten zesumme läschen",
 	"deletebatch-deleting-file-only": "D'Beschreiwungssäit vum Fichier $1 gëtt et net, dowéinst gëtt just de Fichier geläscht. Dës Aktioun gëtt net geloggt."
 }

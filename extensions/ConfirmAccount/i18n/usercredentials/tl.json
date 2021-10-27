@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"AnakngAraw",
-			"Jojit fb"
+			"Jojit fb",
+			"Yivan000"
 		]
 	},
 	"usercredentials": "Mga katibayan ng katangian ng tagagamit",
@@ -14,7 +15,7 @@
 	"usercredentials-leg-person": "Pansariling kabatiran",
 	"usercredentials-leg-other": "Iba pang kabatiran",
 	"usercredentials-leg-ip": "Dato ng tirahang IP",
-	"usercredentials-email": "E-liham:",
+	"usercredentials-email": "Adres ng email:",
 	"usercredentials-real": "Totoong pangalan:",
 	"usercredentials-bio": "Talambuhay:",
 	"usercredentials-attach": "Talaan ng karanasan sa hanapbuhay:",

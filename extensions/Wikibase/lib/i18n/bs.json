@@ -6,10 +6,10 @@
 			"KWiki",
 			"Palapa",
 			"Semso98",
-			"Srdjan m"
+			"Srdjan m",
+			"Srđan"
 		]
 	},
-	"wikibase-lib-desc": "Sadrži zajedničku funkcionalnost za Wikibazu i proširenje za Wikibaza klijent.",
 	"specialpages-group-wikibase": "Wikibase",
 	"wikibase-error-unexpected": "Greška: $1.",
 	"wikibase-error-save-generic": "Ne mogu sačuvati zbog greške.",

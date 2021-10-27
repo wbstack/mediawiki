@@ -32,7 +32,6 @@
 
 	mw.uls = mw.uls || {};
 	mw.uls.previousLanguagesStorageKey = 'uls-previous-languages';
-	mw.uls.languageSettingsModules = [ 'ext.uls.inputsettings', 'ext.uls.displaysettings' ];
 
 	/**
 	 * Change the language of wiki using API or set cookie and reload the page
@@ -40,68 +39,68 @@
 	 * @param {string} language Language code.
 	 */
 	mw.uls.changeLanguage = function ( language ) {
-		var deferred = new $.Deferred();
+		mw.uls.setLanguage( language ).then( function () {
+			location.reload();
+		} );
+	};
+
+	/**
+	 * Change the language of wiki using API or set cookie.
+	 *
+	 * @param {string} language Language code.
+	 * @return {jQuery.Promise}
+	 */
+	mw.uls.setLanguage = function ( language ) {
+		var api = new mw.Api();
 
 		function changeLanguageAnon() {
 			if ( mw.config.get( 'wgULSAnonCanChangeLanguage' ) ) {
 				mw.cookie.set( 'language', language );
-				location.reload();
 			}
+			return $.Deferred().resolve();
 		}
 
-		deferred.done( function () {
-			var api = new mw.Api();
+		// Track if event logging is enabled
+		mw.hook( 'mw.uls.interface.language.change' ).fire( language );
 
-			if ( mw.user.isAnon() ) {
-				changeLanguageAnon();
-				return;
+		if ( mw.user.isAnon() ) {
+			return changeLanguageAnon();
+		}
+
+		// TODO We can avoid doing this query if we know global preferences are not enabled
+		return api.get( {
+			action: 'query',
+			meta: 'globalpreferences',
+			gprprop: 'preferences'
+		} ).then( function ( res ) {
+			// Check whether global preferences are in use. If they are not, `res.query` is
+			// an empty object. `res` will also contain warnings about unknown parameters.
+			try {
+				return !!res.query.globalpreferences.preferences.language;
+			} catch ( e ) {
+				return false;
+			}
+		} ).then( function ( hasGlobalPreference ) {
+			var apiModule;
+
+			if ( hasGlobalPreference ) {
+				apiModule = 'globalpreferenceoverrides';
+				mw.storage.set( 'uls-gp', '1' );
+			} else {
+				apiModule = 'options';
+				mw.storage.remove( 'uls-gp' );
 			}
 
-			// TODO We can avoid doing this query if we know global preferences are not enabled
-			api.get( {
-				action: 'query',
-				meta: 'globalpreferences',
-				gprprop: 'preferences'
-			} ).then( function ( res ) {
-				// Check whether global preferences are in use. If they are not, `res.query` is
-				// an empty object. `res` will also contain warnings about unknown parameters.
-				try {
-					return !!res.query.globalpreferences.preferences.language;
-				} catch ( e ) {
-					return false;
-				}
-			} ).then( function ( hasGlobalPreference ) {
-				var apiModule;
-
-				if ( hasGlobalPreference ) {
-					apiModule = 'globalpreferenceoverrides';
-					mw.storage.set( 'uls-gp', '1' );
-				} else {
-					apiModule = 'options';
-					mw.storage.remove( 'uls-gp' );
-				}
-
-				return api.postWithToken( 'csrf', {
-					action: apiModule,
-					optionname: 'language',
-					optionvalue: language
-				} );
-			} ).done( function () {
-				location.reload();
-			} ).fail( function () {
-				// Setting the option failed. Maybe the user has logged off.
-				// Continue like anonymous user and set cookie.
-				changeLanguageAnon();
+			return api.postWithToken( 'csrf', {
+				action: apiModule,
+				optionname: 'language',
+				optionvalue: language
 			} );
+		} ).catch( function () {
+			// Setting the option failed. Maybe the user has logged off.
+			// Continue like anonymous user and set cookie.
+			return changeLanguageAnon();
 		} );
-
-		mw.hook( 'mw.uls.interface.language.change' ).fire( language, deferred );
-
-		// Delay is zero if event logging is not enabled
-		setTimeout( function () {
-			deferred.resolve();
-		}, mw.config.get( 'wgULSEventLogging' ) * 500 );
-
 	};
 
 	mw.uls.setPreviousLanguages = function ( previousLanguages ) {
@@ -111,6 +110,35 @@
 				JSON.stringify( previousLanguages.slice( 0, 9 ) )
 			);
 		} catch ( e ) {}
+	};
+
+	/**
+	 * Normalize a language code for ULS usage.
+	 *
+	 * MediaWiki language codes (especially on WMF sites) are inconsistent
+	 * with ULS codes. We need to use ULS codes to access the proper data.
+	 *
+	 * @param {string} code
+	 * @return {string} Normalized language code
+	 */
+	mw.uls.convertMediaWikiLanguageCodeToULS = function ( code ) {
+		code = code.toLowerCase();
+		return $.uls.data.isRedirect( code ) || code;
+	};
+
+	/**
+	 * @param {Element[]} nodes to parse
+	 * @return {Object} that maps language codes to the corresponding DOM elements
+	 */
+	mw.uls.getInterlanguageListFromNodes = function ( nodes ) {
+		var interlanguageList = {};
+
+		Array.prototype.forEach.call( nodes, function ( el ) {
+			var langCode = mw.uls.convertMediaWikiLanguageCodeToULS( el.lang );
+			interlanguageList[ langCode ] = el;
+		} );
+
+		return interlanguageList;
 	};
 
 	mw.uls.getPreviousLanguages = function () {

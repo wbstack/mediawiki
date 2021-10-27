@@ -215,6 +215,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 			$language,
 			$this->out->getContext()
 		) )->getHtml( $this->twoColContext->isUsedAsBetaFeature() );
+		// @phan-suppress-next-line SecurityCheck-DoubleEscaped
 		$out .= ( new HtmlSplitConflictView(
 			new HtmlEditableTextComponent(
 				$this->out->getContext(),
@@ -231,6 +232,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	}
 
 	private function buildResolutionSuggestionView( TalkPageResolution $suggestion ) : string {
+		// @phan-suppress-next-line SecurityCheck-DoubleEscaped
 		return ( new HtmlTalkPageResolutionView(
 			new HtmlEditableTextComponent(
 				$this->out->getContext(),

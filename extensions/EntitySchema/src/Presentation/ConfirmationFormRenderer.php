@@ -18,6 +18,7 @@ use User;
  */
 class ConfirmationFormRenderer {
 
+	/** @var MessageLocalizer */
 	private $msgLocalizer;
 
 	public function __construct( MessageLocalizer $msgLocalizer ) {
@@ -71,6 +72,7 @@ class ConfirmationFormRenderer {
 		$formHTML .= $this->getEditButton() . "\n";
 		$formHTML .= $this->getCancelLink( $title );
 		$formHTML .= '</div>'; // editButtons
+		// @phan-suppress-next-line PhanPluginDuplicateAdjacentStatement
 		$formHTML .= '</div>'; // editOptions
 
 		$hidden = [

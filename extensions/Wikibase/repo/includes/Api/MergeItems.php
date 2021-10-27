@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Api;
 
 use ApiBase;
@@ -16,6 +18,7 @@ use Wikibase\Repo\ChangeOp\ChangeOpsMerge;
 use Wikibase\Repo\Interactors\ItemMergeException;
 use Wikibase\Repo\Interactors\ItemMergeInteractor;
 use Wikibase\Repo\Interactors\RedirectCreationException;
+use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
@@ -57,7 +60,7 @@ class MergeItems extends ApiBase {
 	 */
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		EntityIdParser $idParser,
 		ItemMergeInteractor $interactor,
 		ApiErrorReporter $errorReporter,
@@ -72,15 +75,35 @@ class MergeItems extends ApiBase {
 		$this->resultBuilder = $resultBuilderInstantiator( $this );
 	}
 
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		EntityIdParser $entityIdParser
+	): self {
+		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
+
+		return new self(
+			$mainModule,
+			$moduleName,
+			$entityIdParser,
+			$wikibaseRepo->newItemMergeInteractor( $mainModule->getContext() ),
+			$apiHelperFactory->getErrorReporter( $mainModule ),
+			function ( $module ) use ( $apiHelperFactory ) {
+				return $apiHelperFactory->getResultBuilder( $module );
+			}
+		);
+	}
+
 	/**
 	 * @param array $parameters
 	 * @param string $name
 	 *
 	 * @return ItemId
-	 * @throws ApiUsageException if the given parameter is not a valiue ItemId
+	 * @throws ApiUsageException if the given parameter is not a valid ItemId
 	 * @throws LogicException
 	 */
-	private function getItemIdParam( array $parameters, $name ) {
+	private function getItemIdParam( array $parameters, string $name ): ItemId {
 		if ( !isset( $parameters[$name] ) ) {
 			$this->errorReporter->dieWithError( [ 'param-missing', $name ], 'param-missing' );
 		}
@@ -98,7 +121,7 @@ class MergeItems extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	public function execute() {
+	public function execute(): void {
 		$params = $this->extractRequestParams();
 
 		try {
@@ -115,9 +138,7 @@ class MergeItems extends ApiBase {
 			$this->mergeItems( $fromId, $toId, $ignoreConflicts, $summary, $params['bot'] );
 		} catch ( EntityIdParsingException $ex ) {
 			$this->errorReporter->dieException( $ex, 'invalid-entity-id' );
-		} catch ( ItemMergeException $ex ) {
-			$this->handleException( $ex, $ex->getErrorCode() );
-		} catch ( RedirectCreationException $ex ) {
+		} catch ( ItemMergeException | RedirectCreationException $ex ) {
 			$this->handleException( $ex, $ex->getErrorCode() );
 		}
 	}
@@ -126,12 +147,12 @@ class MergeItems extends ApiBase {
 	 * @param ItemId $fromId
 	 * @param ItemId $toId
 	 * @param string[] $ignoreConflicts
-	 * @param string $summary
+	 * @param string|null $summary
 	 * @param bool $bot
 	 * @throws ItemMergeException
 	 * @throws RedirectCreationException
 	 */
-	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, $summary, $bot ) {
+	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, ?string $summary, bool $bot ): void {
 		list( $newRevisionFrom, $newRevisionTo, $redirected )
 			= $this->interactor->mergeItems( $fromId, $toId, $ignoreConflicts, $summary, $bot );
 
@@ -149,7 +170,7 @@ class MergeItems extends ApiBase {
 	 *
 	 * @throws ApiUsageException always
 	 */
-	private function handleException( Exception $ex, $errorCode, $extraData = [] ) {
+	private function handleException( Exception $ex, string $errorCode, array $extraData = [] ): void {
 		$cause = $ex->getPrevious();
 
 		if ( $cause ) {
@@ -160,7 +181,7 @@ class MergeItems extends ApiBase {
 		}
 	}
 
-	private function addEntityToOutput( EntityRevision $entityRevision, $name ) {
+	private function addEntityToOutput( EntityRevision $entityRevision, string $name ): void {
 		$entityId = $entityRevision->getEntity()->getId();
 		$revisionId = $entityRevision->getRevisionId();
 
@@ -178,14 +199,14 @@ class MergeItems extends ApiBase {
 	 *
 	 * @return string
 	 */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	protected function getAllowedParams() {
+	protected function getAllowedParams(): array {
 		return [
 			'fromid' => [
 				self::PARAM_TYPE => 'string',
@@ -197,7 +218,7 @@ class MergeItems extends ApiBase {
 			],
 			'ignoreconflicts' => [
 				self::PARAM_ISMULTI => true,
-				self::PARAM_TYPE => ChangeOpsMerge::$conflictTypes,
+				self::PARAM_TYPE => ChangeOpsMerge::CONFLICT_TYPES,
 				self::PARAM_REQUIRED => false,
 			],
 			'summary' => [
@@ -217,7 +238,7 @@ class MergeItems extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		return [
 			'action=wbmergeitems&fromid=Q42&toid=Q222' =>
 				'apihelp-wbmergeitems-example-1',
@@ -235,7 +256,7 @@ class MergeItems extends ApiBase {
 	 *
 	 * @return bool Always true.
 	 */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 

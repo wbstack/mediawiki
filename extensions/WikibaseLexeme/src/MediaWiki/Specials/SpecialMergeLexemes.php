@@ -6,7 +6,6 @@ use Exception;
 use Html;
 use HTMLForm;
 use InvalidArgumentException;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionManager;
 use Message;
 use SpecialPage;
@@ -26,8 +25,8 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class SpecialMergeLexemes extends SpecialPage {
 
-	const FROM_ID = 'from-id';
-	const TO_ID = 'to-id';
+	private const FROM_ID = 'from-id';
+	private const TO_ID = 'to-id';
 
 	/**
 	 * @var MergeLexemesInteractor
@@ -96,14 +95,17 @@ class SpecialMergeLexemes extends SpecialPage {
 		}
 	}
 
-	public static function newFromGlobalState() {
+	public static function factory(
+		PermissionManager $permissionManager,
+		EntityTitleLookup $entityTitleLookup
+	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new self(
 			WikibaseLexemeServices::createGlobalInstance( false )->newMergeLexemesInteractor(),
-			$repo->getEntityTitleLookup(),
+			$entityTitleLookup,
 			$repo->getExceptionLocalizer(),
-			MediaWikiServices::getInstance()->getPermissionManager()
+			$permissionManager
 		);
 	}
 

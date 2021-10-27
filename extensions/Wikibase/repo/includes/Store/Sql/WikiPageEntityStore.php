@@ -65,6 +65,7 @@ class WikiPageEntityStore implements EntityStore {
 	 */
 	private $revisionStore;
 
+	/** @var EntitySource */
 	private $entitySource;
 
 	/**
@@ -495,7 +496,7 @@ class WikiPageEntityStore implements EntityStore {
 			[
 				'rev_page' => $revision->getPageId(),
 				'rev_id > ' . (int)$lastRevId
-				. ' OR rev_timestamp > ' . $dbw->addQuotes( $revision->getTimestamp() ),
+				. ' OR rev_timestamp > ' . $dbw->addQuotes( $dbw->timestamp( $revision->getTimestamp() ) ),
 				'NOT( ' . $revWhere['conds'] . ' )',
 			],
 			__METHOD__,
@@ -524,7 +525,7 @@ class WikiPageEntityStore implements EntityStore {
 		$title = $this->getTitleForEntity( $id );
 
 		if (
-			$user->isLoggedIn() &&
+			$user->isRegistered() &&
 			$title &&
 			( $watch != $user->isWatched( $title, User::IGNORE_USER_RIGHTS ) )
 		) {

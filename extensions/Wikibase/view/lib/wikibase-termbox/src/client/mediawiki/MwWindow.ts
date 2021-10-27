@@ -34,7 +34,7 @@ interface MediaWiki {
 }
 
 export interface WikibaseContentLanguages {
-	getAllPairs: () => {
+	getLanguageNameMap: () => {
 		[ key: string ]: string;
 	};
 }
@@ -53,7 +53,7 @@ export interface MWCookie {
 }
 
 interface Wikibase {
-	WikibaseContentLanguages: new() => WikibaseContentLanguages;
+	WikibaseContentLanguages: { getTermLanguages: () => WikibaseContentLanguages };
 	getUserLanguages: () => string[];
 }
 

@@ -9,9 +9,18 @@
  * @file
  */
 
+namespace MediaWiki\Extension\Math;
+
+use DeferredUpdates;
 use MediaWiki\Extension\Math\InputCheck\RestbaseChecker;
 use MediaWiki\Logger\LoggerFactory;
+use MWException;
+use Parser;
 use Psr\Log\LoggerInterface;
+use RequestContext;
+use Sanitizer;
+use stdClass;
+use StringUtils;
 
 /**
  * Abstract base class with static methods for rendering the <math> tags using
@@ -130,12 +139,11 @@ abstract class MathRenderer {
 
 	/**
 	 * @param string $md5
-	 * @return MathRenderer the MathRenderer generated from md5
+	 * @return self the MathRenderer generated from md5
 	 */
 	public static function newFromMd5( $md5 ) {
-		$class = get_called_class();
-		/** @var MathRenderer $instance */
-		$instance = new $class;
+		// @phan-suppress-next-line PhanTypeInstantiateAbstractStatic
+		$instance = new static();
 		$instance->setMd5( $md5 );
 		$instance->readFromDatabase();
 		return $instance;
@@ -147,7 +155,7 @@ abstract class MathRenderer {
 	 * @param string $tex LaTeX markup
 	 * @param array $params HTML attributes
 	 * @param string $mode indicating rendering mode
-	 * @return MathRenderer appropriate renderer for mode
+	 * @return self appropriate renderer for mode
 	 */
 	public static function getRenderer( $tex, $params = [], $mode = 'png' ) {
 		global $wgDefaultUserOptions, $wgMathEnableExperimentalInputFormats, $wgMathoidCli;
@@ -188,8 +196,13 @@ abstract class MathRenderer {
 					$renderer = new MathMathML( $tex, $params );
 				}
 		}
-		LoggerFactory::getInstance( 'Math' )->debug( 'Start rendering $' . $renderer->tex .
-			'$ in mode ' . $mode );
+		LoggerFactory::getInstance( 'Math' )->debug(
+			'Start rendering "{tex}" in mode {mode}',
+			[
+				'tex' => $tex,
+				'mode' => $mode
+			]
+		);
 		return $renderer;
 	}
 
@@ -339,42 +352,47 @@ abstract class MathRenderer {
 	 */
 	public function writeToDatabase( $dbw = null ) {
 		# Now save it back to the DB:
-		if ( !wfReadOnly() ) {
-			$this->logger->debug( 'Store entry for $' . $this->tex .
-				'$ in database (hash:' . $this->getMd5() . ')' );
-			$outArray = $this->dbOutArray();
-			$mathTableName = $this->getMathTableName();
-			$fname = __METHOD__;
-			if ( $this->isInDatabase() ) {
-				$inputHash = $this->getInputHash();
-				DeferredUpdates::addCallableUpdate( function () use (
-					$dbw, $outArray, $inputHash, $mathTableName, $fname
-				) {
-					$dbw = $dbw ?: wfGetDB( DB_MASTER );
+		if ( wfReadOnly() ) {
+			return;
+		}
+		$outArray = $this->dbOutArray();
+		$mathTableName = $this->getMathTableName();
+		$fname = __METHOD__;
+		if ( $this->isInDatabase() ) {
+			$this->debug( 'Update database entry' );
+			$inputHash = $this->getInputHash();
+			DeferredUpdates::addCallableUpdate( function () use (
+				$dbw, $outArray, $inputHash, $mathTableName, $fname
+			) {
+				$dbw = $dbw ?: wfGetDB( DB_MASTER );
 
-					$dbw->update( $mathTableName, $outArray,
-						[ 'math_inputhash' => $inputHash ], $fname );
-					$this->logger->debug(
-						'Row updated after db transaction was idle: ' .
-						var_export( $outArray, true ) . " to database" );
-				} );
-			} else {
-				DeferredUpdates::addCallableUpdate( function () use (
-					$dbw, $outArray, $mathTableName, $fname
-				) {
-					$dbw = $dbw ?: wfGetDB( DB_MASTER );
+				$dbw->update( $mathTableName, $outArray,
+					[ 'math_inputhash' => $inputHash ], $fname );
+				$this->logger->debug(
+					'Row updated after db transaction was idle: ' .
+					var_export( $outArray, true ) . " to database" );
+			} );
+		} else {
+			$this->storedInDatabase = true;
+			$this->debug( 'Store new entry in database' );
+			DeferredUpdates::addCallableUpdate( function () use (
+				$dbw, $outArray, $mathTableName, $fname
+			) {
+				$dbw = $dbw ?: wfGetDB( DB_MASTER );
 
-					$dbw->insert( $mathTableName, $outArray, $fname, [ 'IGNORE' ] );
-					$this->logger->debug(
-						'Row inserted after db transaction was idle ' .
-						var_export( $outArray, true ) . " to database" );
-					if ( $dbw->affectedRows() == 0 ) {
-						// That's the price for the delayed update.
-						$this->logger->warning(
-							'Entry could not be written. Might be changed in between.' );
-					}
-				} );
-			}
+				$dbw->insert( $mathTableName, $outArray, $fname, [ 'IGNORE' ] );
+				LoggerFactory::getInstance( 'Math' )->debug(
+					'Row inserted after db transaction was idle {out}.',
+					[
+						'out' => var_export( $outArray, true ),
+					]
+				);
+				if ( $dbw->affectedRows() == 0 ) {
+					// That's the price for the delayed update.
+					$this->logger->warning(
+						'Entry could not be written. Might be changed in between.' );
+				}
+			} );
 		}
 	}
 
@@ -435,8 +453,7 @@ abstract class MathRenderer {
 	protected function getAttributes( $tag, $defaults = [], $overrides = [] ) {
 		$attribs = Sanitizer::validateTagAttributes( $this->params, $tag );
 		$attribs = Sanitizer::mergeAttributes( $defaults, $attribs );
-		$attribs = Sanitizer::mergeAttributes( $attribs, $overrides );
-		return $attribs;
+		return Sanitizer::mergeAttributes( $attribs, $overrides );
 	}
 
 	/**
@@ -444,13 +461,13 @@ abstract class MathRenderer {
 	 * @return bool
 	 */
 	public function writeCache() {
-		$this->logger->debug( 'Writing of cache requested.' );
+		$this->debug( 'Writing of cache requested' );
 		if ( $this->isChanged() ) {
-			$this->logger->debug( 'Change detected. Perform writing.' );
+			$this->debug( 'Change detected. Perform writing' );
 			$this->writeToDatabase();
 			return true;
 		} else {
-			$this->logger->debug( "Nothing was changed. Don't write to database." );
+			$this->debug( "Nothing was changed. Don't write to database" );
 			return false;
 		}
 	}
@@ -618,14 +635,17 @@ abstract class MathRenderer {
 	public function checkTeX() {
 		if ( $this->texSecure || self::getDisableTexFilter() == 'always' ) {
 			// equation was already checked or checking is disabled
+			$this->debug( 'Skip TeX check ' );
 			return true;
 		} else {
 			if ( self::getDisableTexFilter() == 'new' && $this->mode != 'source' ) {
 				if ( $this->readFromDatabase() ) {
+					$this->debug( 'Skip TeX check' );
 					$this->texSecure = true;
 					return true;
 				}
 			}
+			$this->debug( 'Perform TeX check' );
 			return $this->doCheck();
 		}
 	}
@@ -687,21 +707,28 @@ abstract class MathRenderer {
 		return trim( $this->svg );
 	}
 
+	/**
+	 * @return string
+	 */
 	abstract protected function getMathTableName();
 
 	public function getModeStr() {
-		$names = MathHooks::getMathNames();
+		$names = Hooks::getMathNames();
 		return $names[ $this->getMode() ];
 	}
 
 	public static function getValidModes() {
 		global $wgMathValidModes;
-		return array_map( "MathHooks::mathModeToString", $wgMathValidModes );
+		return array_map( "MediaWiki\\Extension\\Math\\Hooks::mathModeToString", $wgMathValidModes );
 	}
 
 	public static function getDisableTexFilter() {
 		global $wgMathDisableTexFilter;
-		return MathHooks::mathCheckToString( $wgMathDisableTexFilter );
+		if ( $wgMathDisableTexFilter === true ) {
+			// ensure backwards compatibility
+			$wgMathDisableTexFilter = 'never';
+		}
+		return Hooks::mathCheckToString( $wgMathDisableTexFilter );
 	}
 
 	/**
@@ -743,4 +770,9 @@ abstract class MathRenderer {
 		return $this->png;
 	}
 
+	protected function debug( $msg ) {
+		$this->logger->debug( "$msg for \"{tex}\".", [ 'tex' => $this->userInputTex ] );
+	}
 }
+
+class_alias( MathRenderer::class, 'MathRenderer' );

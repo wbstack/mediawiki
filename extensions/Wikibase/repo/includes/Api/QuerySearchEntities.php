@@ -64,7 +64,12 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 		$this->entityTypes = $entityTypes;
 	}
 
-	public static function newFromGlobalState( ApiQuery $apiQuery, string $moduleName ): self {
+	public static function factory(
+		ApiQuery $apiQuery,
+		string $moduleName,
+		EntityTitleLookup $entityTitleLookup,
+		ContentLanguages $termsLanguages
+	): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 
 		return new self(
@@ -74,8 +79,8 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 				$repo->getEntitySearchHelperCallbacks(),
 				$apiQuery->getRequest()
 			),
-			$repo->getEntityTitleLookup(),
-			$repo->getTermsLanguages(),
+			$entityTitleLookup,
+			$termsLanguages,
 			$repo->getEnabledEntityTypes()
 		);
 	}
@@ -92,7 +97,7 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 			$title = $this->titleLookup->getTitleForId( $match->getEntityId() );
 
 			$values = [
-				'ns' => intval( $title->getNamespace() ),
+				'ns' => $title->getNamespace(),
 				'title' => $title->getPrefixedText(),
 				'pageid' => intval( $title->getArticleID() ),
 				'displaytext' => $match->getMatchedTerm()->getText(),

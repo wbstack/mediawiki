@@ -167,28 +167,32 @@ class SpecialMobileDiff extends MobileSpecialPage {
 	 */
 	protected function displayDiffPage() {
 		$unhide = $this->getRequest()->getBool( 'unhide' );
-		$context = $this->getContext();
 		$contentHandler = MediaWikiServices::getInstance()
 			->getContentHandlerFactory()
 			->getContentHandler(
 				$this->rev->getSlot( SlotRecord::MAIN, RevisionRecord::RAW )->getModel()
 			);
-		$engine = $contentHandler->createDifferenceEngine( $this->getContext(),
+
+		// Set the title of the page, used for content model checks (T245172)
+		// There should be a better way to tell the DifferenceEngine which Title to use.
+		$correctTitleContext = new DerivativeContext( $this->getContext() );
+		$correctTitleContext->setTitle( $this->targetTitle );
+		// By setting the title, we lose the revision ID passed as subpage parameter,
+		// so pretend that it was set as URL parameter, so that links work (T263937)
+		$correctTitleContext->setRequest( new DerivativeRequest(
+			$this->getRequest(),
+			$this->getRequest()->getValues() + [ 'diff' => $this->revId ]
+		) );
+
+		$engine = $contentHandler->createDifferenceEngine( $correctTitleContext,
 			$this->getPrevId(), $this->revId, 0, false, $unhide );
 
 		$this->showHeader( $unhide );
-		if ( function_exists( 'wikidiff2_do_diff' ) ) {
-			$engine->setSlotDiffOptions( [ 'diff-type' => 'inline' ] );
-			$engine->showDiffPage( true );
-			$this->getOutput()->addHTML(
-				$engine->markPatrolledLink()
-			);
-		} elseif ( get_class( $engine ) === DifferenceEngine::class ) {
-			wfDeprecated( 'Please install wikidiff2 to retain inline diff functionality.', '1.35.0' );
-			$engine = new InlineDifferenceEngine( $context, $this->getPrevId(), $this->revId, 0,
-				false, $unhide );
-			$engine->showDiffPage( false );
-		}
+		$engine->setSlotDiffOptions( [ 'diff-type' => 'inline' ] );
+		$engine->showDiffPage( true );
+		$this->getOutput()->addHTML(
+			$engine->markPatrolledLink()
+		);
 	}
 
 	/**

@@ -10,6 +10,8 @@
 			"Ата"
 		]
 	},
+	"nstab-data": "Дані",
+	"tooltip-ca-nstab-data": "Переглянути сторінку даних",
 	"jsonconfig-desc": "Дозволяє зберігати налаштування JSON у вікі-проекті",
 	"jsonconfig-duplicate-field": "Більше, ніж одне значення \"$1\" знайдено",
 	"jsonconfig-edit-action-apply": "Застосувати",

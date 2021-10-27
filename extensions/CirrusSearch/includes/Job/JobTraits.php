@@ -97,9 +97,6 @@ trait JobTraits {
 				$config = new HashSearchConfig( [ 'CirrusSearchReplicaGroup' => $otherIndex->getCrossClusterName() ],
 					[ HashSearchConfig::FLAG_INHERIT ], $config );
 			}
-			$clusterNames = array_filter( $clusterNames, function ( $cluster ) use ( $otherIndex ) {
-				return !$otherIndex->isClusterBlacklisted( $cluster );
-			} );
 		}
 
 		// Limit private data writes, such as archive index, to appropriately
@@ -130,7 +127,9 @@ trait JobTraits {
 	 * @return bool
 	 */
 	public function run() {
-		if ( $this->getSearchConfig()->get( 'DisableSearchUpdate' ) ) {
+		if ( $this->getSearchConfig()->get( 'DisableSearchUpdate' ) ||
+			$this->getSearchConfig()->get( 'CirrusSearchDisableUpdate' )
+		) {
 			return true;
 		}
 

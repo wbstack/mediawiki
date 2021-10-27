@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Artsiom91",
-			"Da voli"
+			"Da voli",
+			"Maksim L."
 		]
 	},
 	"advancedsearch-desc": "Лёгкі доступ да пашыраных магчымасцей пошуку ў [[Special:Search]]",
@@ -70,5 +71,5 @@
 	"advancedsearch-namespaces-placeholder": "Дадаць прасторы назваў…",
 	"prefs-advancedsearch": "Пашыраны пошук",
 	"advancedsearch-preference-help": "Пашыраны пошук дадае на старонку Адмысловае:Пошук форму з дадатковымі палямі. Гэта дазваляе выконваць спецыялізаваны пошук, нават калі Вы не ведаеце пошукавага сінтаксісу. Ён таксама змяняе спосаб выбару прасторы назваў.",
-	"advancedsearch-preference-disable": "Не паказваць інтэрфейс пашыранага пошуку"
+	"advancedsearch-preference-disable": "Не паказваць інтэрфейс пашыранага пошуку пры выкарыстанні Special:Search"
 }

@@ -6,8 +6,8 @@ use Html;
 use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\Lib\LanguageFallbackChainFactory;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Page for listing all available badges.
@@ -58,14 +58,17 @@ class SpecialAvailableBadges extends SpecialWikibasePage {
 		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
 	}
 
-	public static function newFromGlobalState(): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
+	public static function factory(
+		EntityTitleLookup $entityTitleLookup,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		PrefetchingTermLookup $prefetchingTermLookup,
+		SettingsArray $repoSettings
+	): self {
 		return new self(
-			$wikibaseRepo->getPrefetchingTermLookup(),
-			$wikibaseRepo->getEntityTitleLookup(),
-			$wikibaseRepo->getLanguageFallbackChainFactory(),
-			$wikibaseRepo->getSettings()->getSetting( 'badgeItems' )
+			$prefetchingTermLookup,
+			$entityTitleLookup,
+			$languageFallbackChainFactory,
+			$repoSettings->getSetting( 'badgeItems' )
 		);
 	}
 

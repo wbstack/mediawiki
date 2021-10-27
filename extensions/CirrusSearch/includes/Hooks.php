@@ -5,7 +5,6 @@ namespace CirrusSearch;
 use ApiBase;
 use ApiMain;
 use ApiOpenSearch;
-use ApiUsageException;
 use CirrusSearch\Job\JobTraits;
 use CirrusSearch\Profile\SearchProfileServiceFactory;
 use CirrusSearch\Search\FancyTitleResultsType;
@@ -199,7 +198,7 @@ class Hooks {
 		);
 
 		foreach ( $lines as $line ) {
-			if ( false === strpos( $line, ':' ) ) {
+			if ( strpos( $line, ':' ) === false ) {
 				continue;
 			}
 			list( $k, $v ) = explode( ':', $line, 2 );
@@ -493,7 +492,6 @@ class Hooks {
 	 * @param string $term the original search term and all language variants
 	 * @param null|Title &$titleResult resulting match.  A Title if we found something, unchanged otherwise.
 	 * @return bool return false if we find something, true otherwise so mediawiki can try its default behavior
-	 * @throws ApiUsageException
 	 */
 	public static function onSearchGetNearMatch( $term, &$titleResult ) {
 		global $wgSearchType;
@@ -516,14 +514,7 @@ class Hooks {
 			$term = $title->getText();
 		}
 		$searcher->setResultsType( new FancyTitleResultsType( 'near_match' ) );
-		try {
-			$status = $searcher->nearMatchTitleSearch( $term );
-		} catch ( ApiUsageException $e ) {
-			if ( defined( 'MW_API' ) ) {
-				throw $e;
-			}
-			return true;
-		}
+		$status = $searcher->nearMatchTitleSearch( $term );
 		// There is no way to send errors or warnings back to the caller here so we have to make do with
 		// only sending results back if there are results and relying on the logging done at the status
 		// construction site to log errors.
@@ -588,7 +579,7 @@ class Hooks {
 				'docId' => self::getConfig()->makeId( $oldId )
 			] );
 			// Push the job after DB commit but cancel on rollback
-			wfGetDB( DB_MASTER )->onTransactionIdle( function () use ( $job ) {
+			wfGetDB( DB_MASTER )->onTransactionCommitOrIdle( function () use ( $job ) {
 				JobQueueGroup::singleton()->lazyPush( $job );
 			}, __METHOD__ );
 		}
@@ -726,9 +717,13 @@ class Hooks {
 			$wgOut->addModules( 'ext.cirrus.explore-similar' );
 		}
 
-		$wgOut->addJsConfigVars( [
+		$jsVars = [
 			'wgCirrusSearchRequestSetToken' => Util::getRequestSetToken(),
-		] );
+		];
+		if ( UserTesting::isInitialized() ) {
+			$jsVars['wgCirrusSearchBackendUserTests'] = UserTesting::getInstance()->getActiveTestNamesWithBucket();
+		}
+		$wgOut->addJsConfigVars( $jsVars );
 
 		// This ignores interwiki results for now...not sure what do do with those
 		ElasticsearchIntermediary::setResultPages( [
@@ -822,7 +817,8 @@ class Hooks {
 					$serviceContainer->getService( InterwikiResolver::SERVICE ),
 					/** @phan-suppress-next-line PhanTypeMismatchArgument $config is actually a SearchConfig */
 					$config,
-					$serviceContainer->getLocalServerObjectCache()
+					$serviceContainer->getLocalServerObjectCache(),
+					new CirrusSearchHookRunner( $serviceContainer->getHookContainer() )
 				);
 			}
 		);

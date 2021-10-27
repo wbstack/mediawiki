@@ -35,14 +35,17 @@ class ApiServiceFactory {
 
 	public static function resetClassStatics() {
 		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
-			throw new Exception(
-				'Cannot reset ApiServiceFactory class statics outside of tests.'
-			);
+			throw new Exception( 'Cannot reset ApiServiceFactory class statics outside of tests.' );
 		}
 		self::$apiEntityLookupInstance = null;
 		self::$apiEntityNamespaceInfoLookup = null;
 	}
 
+	/**
+	 * ApiServiceFactory constructor.
+	 * @param string $federatedPropertiesSourceScriptUrl
+	 * @param string $serverName
+	 */
 	public function __construct(
 		string $federatedPropertiesSourceScriptUrl,
 		string $serverName
@@ -67,15 +70,19 @@ class ApiServiceFactory {
 	public function newApiEntitySearchHelper(): ApiEntitySearchHelper {
 		return new ApiEntitySearchHelper(
 			$this->newFederatedPropertiesApiClient(),
-			WikibaseRepo::getDefaultInstance()->getDataTypeDefinitions()->getTypeIds()
+			WikibaseRepo::getDataTypeDefinitions()->getTypeIds()
 		);
 	}
 
+	/**
+	 * Returns the singleton instance of ApiEntityNamespaceInfoLookup
+	 * @return ApiEntityNamespaceInfoLookup
+	 */
 	private function getApiEntityNamespaceInfoLookup(): ApiEntityNamespaceInfoLookup {
 		if ( self::$apiEntityNamespaceInfoLookup === null ) {
 			self::$apiEntityNamespaceInfoLookup = new ApiEntityNamespaceInfoLookup(
 				$this->newFederatedPropertiesApiClient(),
-				WikibaseRepo::getDefaultInstance()->getContentModelMappings()
+				WikibaseRepo::getContentModelMappings()
 			);
 		}
 		return self::$apiEntityNamespaceInfoLookup;
@@ -106,6 +113,10 @@ class ApiServiceFactory {
 		);
 	}
 
+	/**
+	 * Returns the singleton instance of ApiEntityLookup
+	 * @return ApiEntityLookup
+	 */
 	public function getApiEntityLookup(): ApiEntityLookup {
 		if ( self::$apiEntityLookupInstance === null ) {
 			self::$apiEntityLookupInstance = new ApiEntityLookup( $this->newFederatedPropertiesApiClient() );

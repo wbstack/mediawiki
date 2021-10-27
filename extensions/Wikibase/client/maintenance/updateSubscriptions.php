@@ -57,12 +57,11 @@ class UpdateSubscriptions extends Maintenance {
 			);
 		}
 
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$settings = $wikibaseClient->getSettings();
-		$repoDB = $wikibaseClient->getDatabaseDomainNameOfLocalRepo();
+		$settings = WikibaseClient::getSettings();
+		$repoDB = WikibaseClient::getItemAndPropertySource()->getDatabaseName();
 		$clientId = $settings->getSetting( 'siteGlobalID' );
 
-		$idParser = $wikibaseClient->getEntityIdParser();
+		$idParser = WikibaseClient::getEntityIdParser();
 		$startItemOption = $this->getOption( 'start-item' );
 
 		$startItem = $startItemOption === null ? null : $idParser->parse( $startItemOption );

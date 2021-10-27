@@ -3,14 +3,15 @@
 namespace Wikibase\Client\Specials;
 
 use Html;
-use MWNamespace;
+use NamespaceInfo;
 use QueryPage;
 use Skin;
 use Title;
+use TitleFactory;
 use Wikibase\Client\NamespaceChecker;
-use Wikibase\Client\WikibaseClient;
 use Wikimedia\Rdbms\FakeResultWrapper;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -26,20 +27,28 @@ class SpecialUnconnectedPages extends QueryPage {
 	/**
 	 * @var int maximum supported offset
 	 */
-	const MAX_OFFSET = 10000;
+	private const MAX_OFFSET = 10000;
 
-	/**
-	 * @var NamespaceChecker|null
-	 */
-	private $namespaceChecker = null;
+	/** @var NamespaceInfo */
+	private $namespaceInfo;
 
-	/**
-	 * @see SpecialPage::__construct
-	 *
-	 * @param string $name
-	 */
-	public function __construct( $name = 'UnconnectedPages' ) {
-		parent::__construct( $name );
+	/** @var TitleFactory */
+	private $titleFactory;
+
+	/** @var NamespaceChecker */
+	private $namespaceChecker;
+
+	public function __construct(
+		ILoadBalancer $loadBalancer,
+		NamespaceInfo $namespaceInfo,
+		TitleFactory $titleFactory,
+		NamespaceChecker $namespaceChecker
+	) {
+		parent::__construct( 'UnconnectedPages' );
+		$this->setDBLoadBalancer( $loadBalancer );
+		$this->namespaceInfo = $namespaceInfo;
+		$this->titleFactory = $titleFactory;
+		$this->namespaceChecker = $namespaceChecker;
 	}
 
 	/**
@@ -60,41 +69,22 @@ class SpecialUnconnectedPages extends QueryPage {
 		return false;
 	}
 
-	public function setNamespaceChecker( NamespaceChecker $namespaceChecker ) {
-		$this->namespaceChecker = $namespaceChecker;
-	}
-
-	/**
-	 * @return NamespaceChecker
-	 */
-	public function getNamespaceChecker() {
-		if ( $this->namespaceChecker === null ) {
-			$this->namespaceChecker = WikibaseClient::getDefaultInstance()->getNamespaceChecker();
-		}
-
-		return $this->namespaceChecker;
-	}
-
 	/**
 	 * Build conditionals for namespace
 	 *
 	 * @param IDatabase $dbr
 	 * @param Title|null $title
-	 * @param NamespaceChecker|null $checker
 	 *
 	 * @return string[]
 	 */
-	public function buildConditionals( IDatabase $dbr, Title $title = null, NamespaceChecker $checker = null ) {
+	public function buildConditionals( IDatabase $dbr, Title $title = null ) {
 		$conds = [];
 
-		if ( $checker === null ) {
-			$checker = $this->getNamespaceChecker();
-		}
 		if ( $title !== null ) {
 			$conds[] = 'page_title >= ' . $dbr->addQuotes( $title->getDBkey() );
-			$conds[] = 'page_namespace = ' . (int)$title->getNamespace();
+			$conds[] = 'page_namespace = ' . $title->getNamespace();
 		}
-		$wbNamespaces = $checker->getWikibaseNamespaces();
+		$wbNamespaces = $this->namespaceChecker->getWikibaseNamespaces();
 		$ns = $this->getRequest()->getIntOrNull( 'namespace' );
 		if ( $ns !== null && in_array( $ns, $wbNamespaces ) ) {
 			$conds[] = 'page_namespace = ' . $ns;
@@ -111,7 +101,7 @@ class SpecialUnconnectedPages extends QueryPage {
 	 * @return array[]
 	 */
 	public function getQueryInfo() {
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_REPLICA );
 
 		$conds = $this->buildConditionals( $dbr );
 		$conds['page_is_redirect'] = 0;
@@ -168,8 +158,11 @@ class SpecialUnconnectedPages extends QueryPage {
 	 * @return string
 	 */
 	public function formatResult( $skin, $result ) {
-		// FIXME: This should use a TitleFactory.
-		$title = Title::newFromID( $result->value );
+		$title = $this->titleFactory->newFromID( $result->value );
+		if ( $title === null ) {
+			return false;
+		}
+
 		$out = $this->getLinkRenderer()->makeKnownLink( $title );
 
 		if ( $result->page_num_iwlinks > 0 ) {
@@ -187,8 +180,8 @@ class SpecialUnconnectedPages extends QueryPage {
 	 */
 	public function getPageHeader() {
 		$excludeNamespaces = array_diff(
-			MWNamespace::getValidNamespaces(),
-			$this->getNamespaceChecker()->getWikibaseNamespaces()
+			$this->namespaceInfo->getValidNamespaces(),
+			$this->namespaceChecker->getWikibaseNamespaces()
 		);
 
 		$limit = $this->getRequest()->getIntOrNull( 'limit' );

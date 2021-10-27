@@ -22,7 +22,7 @@
 	"templatesandbox-editform-page-label": "Ime stranice",
 	"templatesandbox-editform-view-label": "Prikaži kako će izgledati",
 	"templatesandbox-preview": "Pregled predloška $2",
-	"templatesandbox-previewnote": "'''Ne zaboravite da je ovo samo pregled predloška [[:$1]].'''\nVaše uređivanje još nije snimljeno!",
+	"templatesandbox-previewnote": "'''Ne zaboravite da je ovo samo pregled predloška na stranici [[:$1]].'''\nVaše uređivanje još nije snimljeno!",
 	"templatesandbox-invalid-title": "Naslov koji ste naveli nije valjan.",
 	"templatesandbox-title-not-exists": "Naslov koji ste naveli ne postoji.",
 	"templatesandbox-revision-not-exists": "Uređivanje koje ste naveli ne postoji.",

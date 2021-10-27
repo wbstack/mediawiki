@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adeliine",
 			"Pikne"
 		]
 	},
@@ -15,7 +16,7 @@
 	"cirrussearch-pref-label": "Uus otsing",
 	"cirrussearch-pref-desc": "Proovi uut otsingut, mis toetab rohkem keeli, näitab ajakohasemaid tulemusi ja leiab isegi mallis oleva teksti.",
 	"cirrussearch-give-feedback": "Anna meile tagasisidet",
-	"cirrussearch-query-too-long": "Päring on pikem kui maksimaalselt lubatud. ($1 > $2)",
+	"cirrussearch-query-too-long": "Päring on pikem kui maksimaalselt lubatud. (Päritud: $1; lubatud: $2)",
 	"prefs-completion": "Otsingu viimistlemine",
 	"cirrussearch-pref-completion-section-desc": "Viimistletud soovitused",
 	"cirrussearch-pref-completion-profile-help": "Määra, kuidas näidatakse automaatseid otsisoovitusi (otsimine tippimise ajal).\n\n[https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:CirrusSearch/CompletionSuggester Viimistletud soovituste] algoritm tuleb tippimisvigadega paremini toime ja pakub asjakohasemaid otsisoovitusi. Eesliite otsing kasutab vana tippimise ajal soovituste pakkumise algoritmi.",
@@ -31,5 +32,6 @@
 	"cirrussearch-completion-profile-normal-subphrases-pref-desc": "Ei paranda tippimisvigu. Lahendab ligidased ümbersuunamised. Vastab pealkirjades sisalduvale alamfraasile.",
 	"cirrussearch-completion-profile-classic-pref-name": "Tavapärane eesliite otsing",
 	"cirrussearch-completion-profile-classic-pref-desc": "Ei paranda tippimisvigu. Soovitused vastavad pealkirjade algustele.",
+	"cirrussearch-regex-timed-out": "Regulaaravaldisega otsing aegus, saadaval on ainult osa tulemusi. Selleks et kõik tulemused hankida, proovi regulaaravaldist lihtsustada.",
 	"cirrussearch-article-words": "Sõnu kõigil sisulehekülgedel"
 }

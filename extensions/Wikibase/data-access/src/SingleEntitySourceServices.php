@@ -7,7 +7,7 @@ use Deserializers\DispatchingDeserializer;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Storage\NameTableStore;
-use Wikibase\DataAccess\Serializer\ForbiddenSerializer;
+use Serializers\Serializer;
 use Wikibase\DataModel\DeserializerFactory;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -17,11 +17,14 @@ use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
 use Wikibase\InternalSerialization\DeserializerFactory as InternalDeserializerFactory;
 use Wikibase\Lib\Interactors\MatchingTermsSearchInteractorFactory;
 use Wikibase\Lib\Interactors\TermSearchInteractorFactory;
-use Wikibase\Lib\Store\BufferingTermIndexTermLookup;
+use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\Store\EntityContentDataCodec;
+use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityRevision;
+use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStoreWatcher;
 use Wikibase\Lib\Store\MatchingTermsLookup;
+use Wikibase\Lib\Store\PropertyInfoLookup;
 use Wikibase\Lib\Store\Sql\EntityIdLocalPartPageTableEntityQuery;
 use Wikibase\Lib\Store\Sql\PrefetchingWikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\PropertyInfoTable;
@@ -29,20 +32,17 @@ use Wikibase\Lib\Store\Sql\Terms\DatabaseMatchingTermsLookup;
 use Wikibase\Lib\Store\Sql\Terms\DatabaseTermInLangIdsResolver;
 use Wikibase\Lib\Store\Sql\Terms\DatabaseTypeIdsStore;
 use Wikibase\Lib\Store\Sql\Terms\PrefetchingItemTermLookup;
-use Wikibase\Lib\Store\Sql\Terms\TermStoreDelegatingMatchingTermsLookup;
-use Wikibase\Lib\Store\Sql\TermSqlIndex;
 use Wikibase\Lib\Store\Sql\TypeDispatchingWikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\WikiPageEntityDataLoader;
 use Wikibase\Lib\Store\Sql\WikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\WikiPageEntityMetaDataLookup;
 use Wikibase\Lib\Store\Sql\WikiPageEntityRevisionLookup;
 use Wikibase\Lib\Store\TypeDispatchingEntityRevisionLookup;
-use Wikibase\Lib\WikibaseSettings;
 use Wikimedia\Assert\Assert;
 
 /**
  * Collection of services for a single EntitySource.
- * Some GenericServices are injected alongside some more specific services for the EntitySource.
+ * Some generic services are injected alongside some more specific services for the EntitySource.
  * Various logic then pulls these services together into more composed services.
  *
  * TODO fixme, lots of things in this class bind to wikibase lib and mediawiki directly.
@@ -52,17 +52,14 @@ use Wikimedia\Assert\Assert;
 class SingleEntitySourceServices implements EntityStoreWatcher {
 
 	/**
-	 * @var GenericServices
-	 */
-	private $genericServices;
-
-	/**
 	 * @var EntityIdParser
 	 */
 	private $entityIdParser;
 
+	/** @var EntityIdComposer */
 	private $entityIdComposer;
 
+	/** @var Deserializer */
 	private $dataValueDeserializer;
 
 	/**
@@ -74,7 +71,14 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 	 * @var EntitySource
 	 */
 	private $entitySource;
+
+	/** @var LanguageFallbackChainFactory */
+	private $languageFallbackChainFactory;
+
+	/** @var callable[] */
 	private $deserializerFactoryCallbacks;
+
+	/** @var callable[] */
 	private $entityMetaDataAccessorCallbacks;
 
 	/**
@@ -82,14 +86,16 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 	 */
 	private $prefetchingTermLookupCallbacks;
 
+	/** @var NameTableStore */
 	private $slotRoleStore;
+
+	/** @var EntityRevisionLookup|null */
 	private $entityRevisionLookup = null;
 
+	/** @var TermSearchInteractorFactory|null */
 	private $termSearchInteractorFactory = null;
 
-	private $termIndex = null;
-	private $termIndexPrefetchingTermLookup = null;
-
+	/** @var PrefetchingTermLookup|null */
 	private $prefetchingTermLookup = null;
 
 	/**
@@ -97,18 +103,24 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 	 */
 	private $entityMetaDataAccessor = null;
 
+	/** @var PropertyInfoLookup|null */
 	private $propertyInfoLookup = null;
 
+	/** @var callable[] */
 	private $entityRevisionLookupFactoryCallbacks;
 
+	/** @var Serializer */
+	private $storageEntitySerializer;
+
 	public function __construct(
-		GenericServices $genericServices,
 		EntityIdParser $entityIdParser,
 		EntityIdComposer $entityIdComposer,
 		Deserializer $dataValueDeserializer,
 		NameTableStore $slotRoleStore,
 		DataAccessSettings $dataAccessSettings,
 		EntitySource $entitySource,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		Serializer $storageEntitySerializer,
 		array $deserializerFactoryCallbacks,
 		array $entityMetaDataAccessorCallbacks,
 		array $prefetchingTermLookupCallbacks,
@@ -121,13 +133,14 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 			$entityRevisionFactoryLookupCallbacks
 		);
 
-		$this->genericServices = $genericServices;
 		$this->entityIdParser = $entityIdParser;
 		$this->entityIdComposer = $entityIdComposer;
 		$this->dataValueDeserializer = $dataValueDeserializer;
 		$this->slotRoleStore = $slotRoleStore;
 		$this->dataAccessSettings = $dataAccessSettings;
 		$this->entitySource = $entitySource;
+		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
+		$this->storageEntitySerializer = $storageEntitySerializer;
 		$this->deserializerFactoryCallbacks = $deserializerFactoryCallbacks;
 		$this->entityMetaDataAccessorCallbacks = $entityMetaDataAccessorCallbacks;
 		$this->prefetchingTermLookupCallbacks = $prefetchingTermLookupCallbacks;
@@ -165,21 +178,8 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 	/**
 	 * @return EntitySource The EntitySource object for this set of services
 	 */
-	public function getEntitySource() : EntitySource {
+	public function getEntitySource(): EntitySource {
 		return $this->entitySource;
-	}
-
-	/**
-	 * @deprecated This should not be used, and was introduced only to fix an UBN on master.
-	 * This is currently used to create a TermStoresDelegatingPrefetchingItemTermLookup,
-	 * when that service construction should actually be moved to within this class.
-	 * The TermStoresDelegatingPrefetchingItemTermLookup service will be going away once we remove
-	 * all wb_terms migration related code, and thus we will remove this method after that point.
-	 *
-	 * @return DataAccessSettings
-	 */
-	public function getDataAccessSettings() : DataAccessSettings {
-		return $this->dataAccessSettings;
 	}
 
 	/**
@@ -187,7 +187,7 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 	 * but current users need a method only provided by DatabaseTermInLangIdsResolver
 	 * @return DatabaseTermInLangIdsResolver
 	 */
-	public function getTermInLangIdsResolver() : DatabaseTermInLangIdsResolver {
+	public function getTermInLangIdsResolver(): DatabaseTermInLangIdsResolver {
 		$mediaWikiServices = MediaWikiServices::getInstance();
 		$logger = LoggerFactory::getInstance( 'Wikibase' );
 
@@ -212,15 +212,9 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 
 	public function getEntityRevisionLookup() {
 		if ( $this->entityRevisionLookup === null ) {
-			if ( !WikibaseSettings::isRepoEnabled() ) {
-				$serializer = new ForbiddenSerializer( 'Entity serialization is not supported on the client!' );
-			} else {
-				$serializer = $this->genericServices->getStorageEntitySerializer();
-			}
-
 			$codec = new EntityContentDataCodec(
 				$this->entityIdParser,
-				$serializer,
+				$this->storageEntitySerializer,
 				$this->getEntityDeserializer(),
 				$this->dataAccessSettings->maxSerializedEntitySizeInBytes()
 			);
@@ -239,7 +233,7 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 			// as a default it should go in the wiring files for each entity type. See: T246451
 			$wikiPageEntityRevisionStoreLookup = new WikiPageEntityRevisionLookup(
 				$metaDataAccessor,
-				new WikiPageEntityDataLoader( $codec, $blobStoreFactory->newBlobStore( $databaseName ) ),
+				new WikiPageEntityDataLoader( $codec, $blobStoreFactory->newBlobStore( $databaseName ), $databaseName ),
 				$revisionStoreFactory->getRevisionStore( $databaseName ),
 				$databaseName
 			);
@@ -275,11 +269,13 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 
 	private function getEntityMetaDataAccessor() {
 		if ( $this->entityMetaDataAccessor === null ) {
-			// TODO: Having this lookup in GenericServices seems shady, this class should
-			// probably create/provide one for itself (all data needed in in the entity source)
-			$entityNamespaceLookup = $this->genericServices->getEntityNamespaceLookup();
+			$entityNamespaceLookup = new EntityNamespaceLookup(
+				$this->entitySource->getEntityNamespaceIds(),
+				$this->entitySource->getEntitySlotNames()
+			);
 			$repositoryName = '';
 			$databaseName = $this->entitySource->getDatabaseName();
+			$logger = LoggerFactory::getInstance( 'Wikibase' ); // TODO inject
 			$this->entityMetaDataAccessor = new PrefetchingWikiPageEntityMetaDataAccessor(
 				new TypeDispatchingWikiPageEntityMetaDataAccessor(
 					$this->entityMetaDataAccessorCallbacks,
@@ -289,13 +285,13 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 							$entityNamespaceLookup,
 							$this->slotRoleStore
 						),
-						$this->entitySource
+						$this->entitySource,
+						$logger
 					),
 					$databaseName,
 					$repositoryName
 				),
-				// TODO: inject?
-				LoggerFactory::getInstance( 'Wikibase' )
+				$logger
 			);
 		}
 
@@ -304,15 +300,9 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 
 	public function getTermSearchInteractorFactory(): TermSearchInteractorFactory {
 		if ( $this->termSearchInteractorFactory === null ) {
-			$delegatingMatchingTermsLookup = new TermStoreDelegatingMatchingTermsLookup(
-				$this->getTermIndex(),
-				$this->getMatchingTermsLookup(),
-				$this->dataAccessSettings->itemSearchMigrationStage(),
-				$this->dataAccessSettings->propertySearchMigrationStage()
-			);
 			$this->termSearchInteractorFactory = new MatchingTermsSearchInteractorFactory(
-				$delegatingMatchingTermsLookup,
-				$this->genericServices->getLanguageFallbackChainFactory(),
+				$this->getMatchingTermsLookup(),
+				$this->languageFallbackChainFactory,
 				$this->getPrefetchingTermLookup()
 			);
 		}
@@ -338,37 +328,6 @@ class SingleEntitySourceServices implements EntityStoreWatcher {
 			$this->entityIdComposer,
 			$logger
 		);
-	}
-
-	private function getTermIndex() {
-		if ( $this->termIndex === null ) {
-			$this->termIndex = new TermSqlIndex(
-				$this->genericServices->getStringNormalizer(),
-				$this->entityIdParser,
-				$this->entitySource
-			);
-
-			$this->termIndex->setUseSearchFields( $this->dataAccessSettings->useSearchFields() );
-			$this->termIndex->setForceWriteSearchFields( $this->dataAccessSettings->forceWriteSearchFields() );
-
-		}
-
-		return $this->termIndex;
-	}
-
-	/**
-	 * @deprecated This will be removed once wb_terms related code has been removed from Wikibase
-	 * @return BufferingTermIndexTermLookup
-	 */
-	public function getTermIndexPrefetchingTermLookup() : PrefetchingTermLookup {
-		if ( $this->termIndexPrefetchingTermLookup === null ) {
-
-			$this->termIndexPrefetchingTermLookup = new BufferingTermIndexTermLookup(
-				$this->getTermIndex(), // TODO: customize buffer sizes
-				1000
-			);
-		}
-		return $this->termIndexPrefetchingTermLookup;
 	}
 
 	public function getPrefetchingTermLookup() {

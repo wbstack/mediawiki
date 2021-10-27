@@ -2,6 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Macofe",
+			"SaldırganSincap",
+			"Tokvo",
 			"Xuacu"
 		]
 	},
@@ -73,8 +75,8 @@
 	"apihelp-wbgetentities-description": "Recibe los datos pa múltiples entidaes de Wikibase",
 	"apihelp-wbgetentities-summary": "Recibe los datos pa múltiples entidaes de Wikibase.",
 	"apihelp-wbgetentities-param-ids": "Los IDs de les entidaes de les que recibir os datos",
-	"apihelp-wbgetentities-param-sites": "Identificador pal sitiu nel que ta la páxina correspondiente\nUsar xunto con <code>title</code> (títulu), pero sólo da un sitiu pa dellos títulos o dellos sitios pa un títulu.",
-	"apihelp-wbgetentities-param-titles": "El títulu de la páxina correspondiente\nUsar xunto con <code>sites</code> (sitios), pero sólo da un sitiu pa dellos títulos o dellos sitios pa un títulu.",
+	"apihelp-wbgetentities-param-sites": "Identificador pal sitiu nel que ta la páxina correspondiente.\nUsar xunto con <code>title</code> (títulu), pero sólo da un sitiu pa dellos títulos o dellos sitios pa un títulu.",
+	"apihelp-wbgetentities-param-titles": "El títulu de la páxina correspondiente.\nUsar xunto con <code>sites</code> (sitios), pero sólo da un sitiu pa dellos títulos o dellos sitios pa un títulu.",
 	"apihelp-wbgetentities-param-redirects": "Si les redireiciones tienen de resolves.\nSi se configura como «non», les redireiciones trataránse como entidaes borraes.",
 	"apihelp-wbgetentities-param-props": "Los nomes de les propiedaes a recuperar de cada entidá.\nFiltriaráse más poles llingües indicaes.",
 	"apihelp-wbgetentities-param-languages": "De mou predetermináu, los valores internacionalizaos devuélvense'n toles llingües disponibles.\nEsti parámetru permite filtriar esto pa dexar sólo una llingua o más indicando unu o más códigos de llingua.",
@@ -162,6 +164,7 @@
 	"apihelp-wbsearchentities-example-4": "Buscar «abc» nel idioma inglés con una llende de 2 y una allancia de 2",
 	"apihelp-wbsearchentities-example-5": "Buscar \"alphabet\" n'inglés ensin poner el parámetru url",
 	"apihelp-wbsearchentities-example-6": "Buscar \"Q1234\" n'idioma inglés, pa casar col ID de la entidá.",
+	"apihelp-query+entityterms-example-item": "Recibir les etiquetes y alcuños del elementu Q84.",
 	"apihelp-query+wbcontentlanguages-summary": "Devuelve información sobro los idiomes de conteníu que Wikibase aceuta en distintos contestos.",
 	"apihelp-query+wbcontentlanguages-param-context": "El contestu nel que los idiomes del conteníu tendríen de ser válidos.",
 	"apihelp-query+wbcontentlanguages-paramvalue-context-term": "Los términos (etiqueta, descripción, alcuños) d'una entidá.",

@@ -42,7 +42,7 @@
 	"requestaccount-sent": "Är Ufro fir e Benotzerkont gouf fortgeschéckt a muss elo nach akzeptéiert ginn.\nEng Konfirmatiounsmail gouf op Är E-Mailadress geschéckt.",
 	"requestaccount-econf": "Är E-Mail-Adress gouf confirméiert a gëtt elo als E-Mail-Adress an är Ufro fir e Benotzerkont integréiert.",
 	"requestaccount-email-subj": "{{SITENAME}} Konfirmatioun vun der E-Mail-Adress",
-	"requestaccount-email-body": "Een, wahrscheinlech Dir vun der IP-Adress $1, huet e Benotzerkont \"$2\" mat dëser E-Mail-Adress op {{SITENAME}} ugefrot.\n\nFir ze confirméieren datt dëse Benotzerkont op {{SITENAME}} Iech wierklech gehéiert, klickt wgl. op dëse Link an Ärem Browser:\n\n$3\n\nWann De Benotzerkont ugeluecht ass, kritt Dir eleng d'Passwuert per E-Mail geschéckt.\nWann Dir et *net\" sidd, da klickt net op de Link.\nDës Confirmatioun ass just valabel bis $4.",
+	"requestaccount-email-body": "Een, warscheinlech Dir vun der IP-Adress $1, huet e Benotzerkont \"$2\" mat dëser E-Mail-Adress op {{SITENAME}} ugefrot.\n\nFir ze confirméieren datt dëse Benotzerkont op {{SITENAME}} Iech wierklech gehéiert, klickt wgl. op dëse Link an Ärem Browser:\n\n$3\n\nWann De Benotzerkont ugeluecht ass, kritt Dir eleng d'Passwuert per E-Mail geschéckt.\nWann Dir et *net\" sidd, da klickt net op de Link.\nDës Confirmatioun ass just valabel bis $4.",
 	"requestaccount-email-subj-admin": "{{SITENAME}} Ufro fir ee Benotzerkont",
 	"requestaccount-email-body-admin": "$1 huet e Benotzerkont ugefrot a waart op eng Confirmatioun.\nD'E-Mailadresse ass confirméiert. Dir kënnt déi Ufro hei confirméieren:\n\n$2",
 	"acct_request_throttle_hit": "Pardon, Dir hutt scho(nn) {{PLURAL:$1|1Benotzerkont|$1 Benotzerkonten}} ugefrot.\nDir kënnt elo keng weider Ufroe méi maachen."

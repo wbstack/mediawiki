@@ -64,6 +64,7 @@ body {
 	font-variant: small-caps;
 }
 
+#p-personal #pt-anonuserpage,
 #p-personal h3 {
 	display: none;
 }
@@ -258,6 +259,7 @@ ul {
 	display: none;
 }
 
+#p-cactions #ca-view,
 #siteSub {
 	display: none;
 }
@@ -291,6 +293,10 @@ img {
 .mw-footer ul {
 	padding: 0 0 0 0;
 	margin: 0 0 0 0;
+}
+
+#footer-poweredbyico {
+	display: block;
 }
 
 p {
@@ -366,85 +372,85 @@ h6 {
 	overflow: hidden;
 }
 
-#content a.external {
+.mw-parser-output a.external {
 	/* @embed */
 	background: url( images/external.png ) center right no-repeat;
 	padding-right: 13px;
 }
 
-#content a.external[ href^='https://' ],
+.mw-parser-output a.external[ href^='https://' ],
 .link-https {
 	/* @embed */
 	background: url( images/lock_icon.gif ) center right no-repeat;
 	padding-right: 16px;
 }
 
-#content a.external[ href^='mailto:' ],
+.mw-parser-output a.external[ href^='mailto:' ],
 .link-mailto {
 	/* @embed */
 	background: url( images/mail_icon.gif ) center right no-repeat;
 	padding-right: 18px;
 }
 
-#content a.external[ href^='news:' ] {
+.mw-parser-output a.external[ href^='news:' ] {
 	/* @embed */
 	background: url( images/news_icon.png ) center right no-repeat;
 	padding-right: 18px;
 }
 
-#content a.external[ href^='ftp://' ],
+.mw-parser-output a.external[ href^='ftp://' ],
 .link-ftp {
 	/* @embed */
 	background: url( images/file_icon.gif ) center right no-repeat;
 	padding-right: 18px;
 }
 
-#content a.external[ href^='irc://' ],
-#content a.external[ href^='ircs://' ],
+.mw-parser-output a.external[ href^='irc://' ],
+.mw-parser-output a.external[ href^='ircs://' ],
 .link-irc {
 	/* @embed */
 	background: url( images/discussionitem_icon.gif ) center right no-repeat;
 	padding-right: 18px;
 }
 
-#content a.external[ href$='.ogg' ],
-#content a.external[ href$='.OGG' ],
-#content a.external[ href$='.mid' ],
-#content a.external[ href$='.MID' ],
-#content a.external[ href$='.midi' ],
-#content a.external[ href$='.MIDI' ],
-#content a.external[ href$='.mp3' ],
-#content a.external[ href$='.MP3' ],
-#content a.external[ href$='.wav' ],
-#content a.external[ href$='.WAV' ],
-#content a.external[ href$='.wma' ],
-#content a.external[ href$='.WMA' ],
+.mw-parser-output a.external[ href$='.ogg' ],
+.mw-parser-output a.external[ href$='.OGG' ],
+.mw-parser-output a.external[ href$='.mid' ],
+.mw-parser-output a.external[ href$='.MID' ],
+.mw-parser-output a.external[ href$='.midi' ],
+.mw-parser-output a.external[ href$='.MIDI' ],
+.mw-parser-output a.external[ href$='.mp3' ],
+.mw-parser-output a.external[ href$='.MP3' ],
+.mw-parser-output a.external[ href$='.wav' ],
+.mw-parser-output a.external[ href$='.WAV' ],
+.mw-parser-output a.external[ href$='.wma' ],
+.mw-parser-output a.external[ href$='.WMA' ],
 .link-audio {
 	/* @embed */
 	background: url( images/audio.png ) center right no-repeat;
 	padding-right: 13px;
 }
 
-#content a.external[ href$='.ogm' ],
-#content a.external[ href$='.OGM' ],
-#content a.external[ href$='.avi' ],
-#content a.external[ href$='.AVI' ],
-#content a.external[ href$='.mpeg' ],
-#content a.external[ href$='.MPEG' ],
-#content a.external[ href$='.mpg' ],
-#content a.external[ href$='.MPG' ],
+.mw-parser-output a.external[ href$='.ogm' ],
+.mw-parser-output a.external[ href$='.OGM' ],
+.mw-parser-output a.external[ href$='.avi' ],
+.mw-parser-output a.external[ href$='.AVI' ],
+.mw-parser-output a.external[ href$='.mpeg' ],
+.mw-parser-output a.external[ href$='.MPEG' ],
+.mw-parser-output a.external[ href$='.mpg' ],
+.mw-parser-output a.external[ href$='.MPG' ],
 .link-video {
 	/* @embed */
 	background: url( images/video.png ) center right no-repeat;
 	padding-right: 13px;
 }
 
-#content a.external[ href$='.pdf' ],
-#content a.external[ href$='.PDF' ],
-#content a.external[ href*='.pdf#' ],
-#content a.external[ href*='.PDF#' ],
-#content a.external[ href*='.pdf?' ],
-#content a.external[ href*='.PDF?' ],
+.mw-parser-output a.external[ href$='.pdf' ],
+.mw-parser-output a.external[ href$='.PDF' ],
+.mw-parser-output a.external[ href*='.pdf#' ],
+.mw-parser-output a.external[ href*='.PDF#' ],
+.mw-parser-output a.external[ href*='.pdf?' ],
+.mw-parser-output a.external[ href*='.PDF?' ],
 .link-document {
 	/* @embed */
 	background: url( images/document.png ) center right no-repeat;
@@ -630,12 +636,12 @@ table.toc td {
 }
 
 /* disable interwiki styling */
-#content a.extiw,
-#content a.extiw:active {
+.mw-parser-output a.extiw,
+.mw-parser-output a.extiw:active {
 	color: #36b;
 }
 
-#content a.external {
+.mw-parser-output a.external {
 	color: #36b;
 }
 
@@ -809,11 +815,13 @@ pre,
 	background: url( images/footer-grad.png ) repeat-x bottom left;
 }
 
+.usermessage p,
 .mw-topbox p {
 	padding: 0 0 0 0;
 	margin: 0 0 0 0;
 }
 
+.usermessage,
 .mw-topbox {
 	color: #000;
 	font-weight: bold;

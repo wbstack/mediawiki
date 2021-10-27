@@ -1,11 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\View;
 
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Term\FingerprintProvider;
-use Wikibase\Lib\LanguageFallbackChain;
+use Wikibase\Lib\TermLanguageFallbackChain;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -15,17 +17,18 @@ use Wikimedia\Assert\Assert;
  */
 class FingerprintableEntityMetaTagsCreator implements EntityMetaTagsCreator {
 
-	private $languageFallbackChain;
+	/** @var TermLanguageFallbackChain */
+	private $termLanguageFallbackChain;
 
-	public function __construct( LanguageFallbackChain $languageFallbackChain ) {
-		$this->languageFallbackChain = $languageFallbackChain;
+	public function __construct( TermLanguageFallbackChain $termLanguageFallbackChain ) {
+		$this->termLanguageFallbackChain = $termLanguageFallbackChain;
 	}
 
 	/**
 	 * @inheritDoc
 	 * @suppress PhanTypeMismatchArgument
 	 */
-	public function getMetaTags( EntityDocument $entity ) : array {
+	public function getMetaTags( EntityDocument $entity ): array {
 		Assert::parameterType( FingerprintProvider::class, $entity, '$entity' );
 		/** @var FingerprintProvider $entity */
 
@@ -41,16 +44,11 @@ class FingerprintableEntityMetaTagsCreator implements EntityMetaTagsCreator {
 		return $metaTags;
 	}
 
-	/**
-	 * @param FingerprintProvider $entity
-	 *
-	 * @return string|null
-	 */
-	private function getDescriptionText( FingerprintProvider $entity ) {
+	private function getDescriptionText( FingerprintProvider $entity ): ?string {
 		$descriptions = $entity->getFingerprint()
 			->getDescriptions()
 			->toTextArray();
-		$preferred = $this->languageFallbackChain->extractPreferredValue( $descriptions );
+		$preferred = $this->termLanguageFallbackChain->extractPreferredValue( $descriptions );
 
 		if ( is_array( $preferred ) ) {
 			return $preferred['value'];
@@ -64,11 +62,11 @@ class FingerprintableEntityMetaTagsCreator implements EntityMetaTagsCreator {
 	 * @return string|null
 	 * @suppress PhanTypeMismatchDeclaredParam,PhanUndeclaredMethod Intersection type
 	 */
-	private function getTitleText( FingerprintProvider $entity ) {
+	private function getTitleText( FingerprintProvider $entity ): ?string {
 		$labels = $entity->getFingerprint()
 			->getLabels()
 			->toTextArray();
-		$preferred = $this->languageFallbackChain->extractPreferredValue( $labels );
+		$preferred = $this->termLanguageFallbackChain->extractPreferredValue( $labels );
 
 		if ( is_array( $preferred ) ) {
 			return $preferred['value'];

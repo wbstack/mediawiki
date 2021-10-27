@@ -10,7 +10,9 @@
 			"KATRINE1992",
 			"Macofe",
 			"MarcoAurelio",
+			"MarleneR329",
 			"Nicolas Ramirez",
+			"Rossnyev",
 			"Tiberius1701",
 			"ZebaX2010"
 		]
@@ -66,10 +68,14 @@
 	"advancedsearch-filesize-greater-than": "mayor que",
 	"advancedsearch-filesize-smaller-than": "menor que",
 	"advancedsearch-sort-relevance": "Relevancia",
+	"advancedsearch-sort-last-edit-asc": "Fecha de edición; más antiguas arriba",
 	"advancedsearch-sort-last-edit-desc": "Fecha de edición; actual en la parte superior",
+	"advancedsearch-sort-create-timestamp-asc": "Fecha de creación; más antiguas arriba",
 	"advancedsearch-sort-create-timestamp-desc": "Fecha de creación; actual en la parte superior",
 	"advancedsearch-sort-preview-relevance": "relevancia",
+	"advancedsearch-sort-preview-last-edit-asc": "Menos editada recientemente",
 	"advancedsearch-sort-preview-last-edit-desc": "fecha de edición",
+	"advancedsearch-sort-preview-create-timestamp-asc": "Menos recientemente creado",
 	"advancedsearch-sort-preview-create-timestamp-desc": "fecha de creación",
 	"advancedsearch-namespaces-search-in": "Buscar en:",
 	"advancedsearch-namespaces-remember": "Recordar la selección en búsquedas futuras",
@@ -80,5 +86,5 @@
 	"advancedsearch-namespaces-placeholder": "Añadir espacios de nombres…",
 	"prefs-advancedsearch": "Búsqueda avanzada",
 	"advancedsearch-preference-help": "La búsqueda avanzada añade un formulario a la página Especial:Buscar. Este te permite realizar búsquedas especializadas, incluso si no conoces ninguna sintaxis de búsqueda. También cambia la manera en que se pueden seleccionar los espacios de nombres.",
-	"advancedsearch-preference-disable": "No mostrar la interfaz de búsqueda avanzada."
+	"advancedsearch-preference-disable": "No mostrar la opcion de búsqueda avanzada."
 }

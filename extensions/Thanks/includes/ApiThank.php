@@ -1,6 +1,15 @@
 <?php
 
+namespace MediaWiki\Extension\Thanks;
+
+use ActorMigration;
+use ApiBase;
+use ExtensionRegistry;
+use ManualLogEntry;
+use MediaWiki\CheckUser\Hooks;
 use MediaWiki\MediaWikiServices;
+use Title;
+use User;
 
 /**
  * Base API module for Thanks
@@ -110,7 +119,7 @@ abstract class ApiThank extends ApiBase {
 
 		if ( ExtensionRegistry::getInstance()->isLoaded( 'CheckUser' ) ) {
 			$recentChange = $logEntry->getRecentChange();
-			CheckUserHooks::updateCheckUserData( $recentChange );
+			Hooks::updateCheckUserData( $recentChange );
 		}
 	}
 

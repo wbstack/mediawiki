@@ -1,11 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"BrennodAloisi",
 			"Coriandre",
 			"Unuaiga"
 		]
 	},
+	"advancedsearch-field-inlanguage": "Paginas en aquesta lenga",
 	"advancedsearch-namespaces-remember": "Se remembrar de la seleccion per las recèrcas venentas",
 	"advancedsearch-namespaces-preset-default": "Per defaut",
+	"advancedsearch-namespaces-preset-discussion": "Discussion",
 	"advancedsearch-namespaces-placeholder": "Apondre de noms d'espacis"
 }

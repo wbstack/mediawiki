@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\FederatedProperties;
 
+use LogicException;
 use MediaWiki\Storage\RevisionRecord;
 use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -37,7 +38,7 @@ class SummaryParsingPrefetchHelper {
 	 * @param array $languageCodes
 	 * @param array $termTypes
 	 */
-	public function prefetchFederatedProperties( $rows, array $languageCodes, array $termTypes ) : void {
+	public function prefetchFederatedProperties( $rows, array $languageCodes, array $termTypes ): void {
 		$resultProperties = $this->extractSummaryProperties( $rows );
 		if ( empty( $resultProperties ) ) {
 			return;
@@ -59,7 +60,7 @@ class SummaryParsingPrefetchHelper {
 	 * @param IResultWrapper|array $result
 	 * @return PropertyId[]
 	 */
-	public function extractSummaryProperties( $result ) : array {
+	public function extractSummaryProperties( $result ): array {
 		$propertyIds = [];
 		foreach ( $result as $revisionRow ) {
 
@@ -94,6 +95,6 @@ class SummaryParsingPrefetchHelper {
 			return $revisionRow->rev_comment_text;
 		}
 
-		throw new \LogicException( 'Rows should have either rc_comment_text or rev_comment_text field' );
+		throw new LogicException( 'Rows should have either rc_comment_text or rev_comment_text field' );
 	}
 }

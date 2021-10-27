@@ -32,7 +32,7 @@
 	"templatesandbox-invalid-prefix": "תחילית ארגז החול שציינת אינה קיימת.",
 	"templatesandbox-prefix-not-local": "תחילית ארגז החול שציינת אינה מקומית.",
 	"templatesandbox-page-or-revid": "יש לציין כותרת דף או מספר מזהה של גרסה.",
-	"templatesandbox-fail-post": "<em>בשל אובדן נתוני הכניסה, התצוגה המקדימה מוסתרת בתור אמצעי זהירות מפני התקפות JavaScript.</em>\n\n<strong>אם זה ניסיון תצוגה מקדימה לגיטימי, נא לנסות שוב.</strong>\nאם זה עדיין לא עובד, נא לנסות [[Special:UserLogout|לצאת מהחשבון]] ולהיכנס חזרה.",
+	"templatesandbox-fail-post": "<em>בשל אובדן נתוני ההתחברות, התצוגה המקדימה מוסתרת בתור אמצעי זהירות מפני התקפות JavaScript.</em>\n\n<strong>אם זה ניסיון תצוגה מקדימה לגיטימי, נא לנסות שוב.</strong>\nאם זה עדיין לא עובד, נא לנסות [[Special:UserLogout|לצאת מהחשבון]] ולהיכנס חזרה.",
 	"templatesandbox-fail-post-anon": "<em>מכיוון שלא נכנסת לחשבון, התצוגה המקדימה מוסתרת בתור אמצעי זהירות מפני התקפות JavaScript.</em>\n\n<strong>אם זה ניסיון תקין להציג תצוגה מקדימה, יש [[Special:UserLogin|להיכנס לחשבון]] ולנסות שוב.</strong>",
 	"templatesandbox-anon-limited-preview": "תצוגה מקדימה של שינויים ב־JavaScript וב־CSS אינה זמינה מחוץ לחשבון. אם ברצונך לצפות בתצוגה מקדימה של שינויים כאלה, נא [[Special:UserLogin|להיכנס לחשבון]] ולנסות שוב.",
 	"templatesandbox-editform-need-template": "כדי לצפות בתצוגה מקדימה של דף עם התבנית הזאת, יש לספק שם תבנית.",

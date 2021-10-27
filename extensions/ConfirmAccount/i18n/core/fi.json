@@ -17,6 +17,8 @@
 	"requestaccount-loginnotice": "Saadaksesi käyttäjätunnuksen on tehtävä '''[[Special:RequestAccount|käyttäjätunnuspyyntö]]'''.",
 	"action-confirmaccount": "tarkastaa ja hyväksyä tunnuksia",
 	"right-confirmaccount": "Nähdä [[Special:ConfirmAccounts|listan pyydetyistä tunnuksista]]",
-	"right-requestips": "Nähdä hakijan IP-osoitteet käyttäjätilejä käsiteltäessä",
-	"right-lookupcredentials": "Nähdä [[Special:UserCredentials|käyttäjän luotettavuustiedot]]"
+	"action-requestips": "nähdä hakijan IP-osoitteita käyttäjätunnuksia käsitellessä",
+	"right-requestips": "Nähdä hakijan IP-osoitteet käyttäjätunnuksia käsiteltäessä",
+	"action-lookupcredentials": "nähdä käyttäjän kirjautumistietoja",
+	"right-lookupcredentials": "Nähdä [[Special:UserCredentials|käyttäjän kirjautumistiedot]]"
 }

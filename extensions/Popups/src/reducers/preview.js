@@ -14,7 +14,7 @@ export default function preview( state, action ) {
 		state = {
 			enabled: undefined,
 			activeLink: undefined,
-			activeEvent: undefined,
+			measures: undefined,
 			activeToken: '',
 			shouldShow: false,
 			isUserDwelling: false,
@@ -25,12 +25,12 @@ export default function preview( state, action ) {
 	switch ( action.type ) {
 		case actionTypes.BOOT:
 			return nextState( state, {
-				enabled: action.isEnabled
+				enabled: action.initiallyEnabled
 			} );
 
 		case actionTypes.SETTINGS_CHANGE:
 			return nextState( state, {
-				enabled: action.enabled
+				enabled: action.newValue
 			} );
 
 		case actionTypes.LINK_DWELL:
@@ -38,7 +38,7 @@ export default function preview( state, action ) {
 				// New interaction
 				return nextState( state, {
 					activeLink: action.el,
-					activeEvent: action.event,
+					measures: action.measures,
 					activeToken: action.token,
 
 					// When the user dwells on a link with their keyboard, a preview is
@@ -57,21 +57,13 @@ export default function preview( state, action ) {
 				isUserDwelling: true
 			} );
 
-		case actionTypes.REFERENCE_CLICK:
-			return nextState( state, {
-				activeLink: action.el,
-				activeToken: action.token,
-				isUserDwelling: true,
-				wasClicked: true
-			} );
-
 		case actionTypes.FETCH_ABORTED:
 		case actionTypes.ABANDON_END:
 			if ( action.token === state.activeToken && !state.isUserDwelling ) {
 				return nextState( state, {
 					activeLink: undefined,
 					activeToken: undefined,
-					activeEvent: undefined,
+					measures: undefined,
 					fetchResponse: undefined,
 					shouldShow: false
 				} );

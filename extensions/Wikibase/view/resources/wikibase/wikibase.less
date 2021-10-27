@@ -199,10 +199,6 @@ div.wikibase-statementview textarea {
 	position: absolute;
 	top: 0;
 	bottom: 0;
-	overflow-x: hidden;
-	/* In rare cases, the title might be too long, since we need to position absolute, we cannot
-	have the container height adjusted. */
-	overflow-y: auto;
 	z-index: 1; /* should overlay borders of claim containers etc. */
 }
 
@@ -214,6 +210,8 @@ div.wikibase-statementview textarea {
 	padding-bottom: 0; /* avoid scrollbars on multi-line property labels */
 	-webkit-transition: top 0.1s ease-out;
 	transition: top 0.1s ease-out;
+	position: sticky;
+	top: 10px;
 }
 
 /* A single claim */
@@ -303,7 +301,7 @@ div .wikibase-snakview-value span.error.wb-format-error {
 
 .wb-language-fallback-indicator {
 	font-style: italic;
-	margin: 0 0.5em;
+	margin-right: 0.5em;
 	line-height: 1;
 	font-size: 0.8em;
 

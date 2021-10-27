@@ -62,7 +62,7 @@ class ChangeNotificationJob extends Job {
 		);
 
 		// TODO inject me
-		$this->logger = WikibaseClient::getDefaultInstance()->getLogger();
+		$this->logger = WikibaseClient::getLogger();
 	}
 
 	/**
@@ -87,7 +87,7 @@ class ChangeNotificationJob extends Job {
 
 			// load actual change records from the changes table
 			// TODO: allow mock store for testing!
-			$changeLookup = WikibaseClient::getDefaultInstance()->getStore()->getEntityChangeLookup();
+			$changeLookup = WikibaseClient::getStore()->getEntityChangeLookup();
 			$this->changes = $changeLookup->loadByChangeIds( $ids );
 
 			$this->logger->debug(
@@ -146,7 +146,7 @@ class ChangeNotificationJob extends Job {
 	 */
 	private function getChangeHandler() {
 		if ( !$this->changeHandler ) {
-			$this->changeHandler = WikibaseClient::getDefaultInstance()->getChangeHandler();
+			$this->changeHandler = WikibaseClient::getChangeHandler();
 		}
 
 		return $this->changeHandler;

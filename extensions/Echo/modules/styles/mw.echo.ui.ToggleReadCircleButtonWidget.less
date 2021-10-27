@@ -25,6 +25,13 @@
 	// Override OOUI specific rule for frameless buttons that adds a ~2.5em padding-top
 	&.oo-ui-widget.oo-ui-widget-enabled.oo-ui-buttonElement.oo-ui-buttonElement-frameless > .oo-ui-buttonElement-button {
 		padding-top: 0;
+		// Remove padding for dummy icon
+		padding-left: 0;
+	}
+
+	&.oo-ui-buttonElement-frameless.oo-ui-iconElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+		// Hide dummy icon
+		display: none;
 	}
 
 	&:hover .mw-echo-ui-toggleReadCircleButtonWidget-circle {

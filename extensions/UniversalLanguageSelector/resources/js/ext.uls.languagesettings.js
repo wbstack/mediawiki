@@ -60,6 +60,7 @@
 		this.top = this.options.top;
 		this.modules = {};
 		this.$settingsPanel = this.$window.find( '#languagesettings-settings-panel' );
+		this.$applyButton = this.$window.find( '.uls-settings-apply' );
 		this.init();
 		this.listen();
 	}
@@ -78,7 +79,7 @@
 
 			this.$window.find( '#languagesettings-close, button.uls-settings-cancel' )
 				.on( 'click', mw.hook( 'mw.uls.settings.cancel' ).fire.bind( this ) );
-			this.$window.find( 'button.uls-settings-apply' )
+			this.$applyButton
 				.on( 'click', mw.hook( 'mw.uls.settings.apply' ).fire.bind( this ) );
 			// Hide the window when clicked outside
 			$( document.documentElement ).on( 'click', this.hide.bind( this ) );
@@ -173,12 +174,16 @@
 		},
 
 		position: function () {
+			if ( this.options.onPosition ) {
+				return this.options.onPosition.call( this );
+			}
+
 			this.top = this.top || this.$element.offset().top + this.$element.outerHeight();
 			this.left = this.left || '25%';
-			this.$window.css( {
+			return {
 				top: this.top,
 				left: this.left
-			} );
+			};
 		},
 
 		i18n: function () {
@@ -186,7 +191,7 @@
 		},
 
 		show: function () {
-			this.position();
+			this.$window.css( this.position() );
 
 			if ( !this.initialized ) {
 				this.render();
@@ -240,16 +245,14 @@
 		 *     false to unset the busy mode.
 		 */
 		setBusy: function ( busy ) {
-			var $applyButton = this.$window.find( 'button.uls-settings-apply' );
-
 			if ( busy ) {
 				this.$window.addClass( 'waiting' );
-				$applyButton
+				this.$applyButton
 					.text( $.i18n( 'ext-uls-language-settings-applying' ) )
 					.prop( 'disabled', true );
 			} else {
 				this.$window.removeClass( 'waiting' );
-				$applyButton.text( $.i18n( 'ext-uls-language-settings-apply' ) );
+				this.$applyButton.text( $.i18n( 'ext-uls-language-settings-apply' ) );
 			}
 		},
 
@@ -282,8 +285,12 @@
 			}
 		},
 
+		enableApplyButton: function () {
+			this.$applyButton.prop( 'disabled', false );
+		},
+
 		disableApplyButton: function () {
-			this.$window.find( 'button.uls-settings-apply' ).prop( 'disabled', true );
+			this.$applyButton.prop( 'disabled', true );
 		}
 	};
 
@@ -308,9 +315,10 @@
 		template: windowTemplate,
 		defaultModule: false, // Name of the default module
 		onClose: null, // An onClose event handler.
-		top: null, // Top position of this window
-		left: null, // Left position of this window
-		onVisible: null // A callback that runs after the ULS panel becomes visible
+		top: null, // DEPRECATED: Top position of this window
+		left: null, // DEPRECATED: Left position of this window
+		onVisible: null, // A callback that runs after the ULS panel becomes visible
+		onPosition: null // A callback that allows positioning the dialog
 	};
 
 	$.fn.languagesettings.Constructor = LanguageSettings;

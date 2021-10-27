@@ -24,6 +24,11 @@ class LexemeTemplateFactory {
 		$this->templateRegistry = new TemplateRegistry( $templates );
 	}
 
+	public static function factory(): self {
+		$templates = include __DIR__ . '/../../../../resources/templates.php';
+		return new self( $templates );
+	}
+
 	/**
 	 * Shorthand function to retrieve a template filled with the specified parameters.
 	 *
@@ -31,13 +36,11 @@ class LexemeTemplateFactory {
 	 * be sure to escape your params before using this function!
 	 *
 	 * @param string $key template key
-	 * Varargs: normal template parameters
+	 * @param array  ...$params normal template parameters
 	 *
 	 * @return string
 	 */
-	public function render( $key /*...*/ ) {
-		$params = func_get_args();
-		array_shift( $params );
+	public function render( $key, ...$params ) {
 
 		if ( isset( $params[0] ) && is_array( $params[0] ) ) {
 			$params = $params[0];

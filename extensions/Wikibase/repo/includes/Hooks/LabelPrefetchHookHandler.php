@@ -3,10 +3,12 @@
 namespace Wikibase\Repo\Hooks;
 
 use ChangesList;
-use RequestContext;
+use MediaWiki\Hook\ChangesListInitRowsHook;
 use Title;
 use TitleFactory;
+use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Services\Term\TermBuffer;
+use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\TermIndexEntry;
@@ -24,7 +26,7 @@ use Wikimedia\Rdbms\IResultWrapper;
  * @license GPL-2.0-or-later
  * @author Daniel Kinzler
  */
-class LabelPrefetchHookHandler {
+class LabelPrefetchHookHandler implements ChangesListInitRowsHook {
 
 	/**
 	 * @var TermBuffer
@@ -47,9 +49,9 @@ class LabelPrefetchHookHandler {
 	private $termTypes;
 
 	/**
-	 * @var string[]
+	 * @var LanguageFallbackChainFactory
 	 */
-	private $languageCodes;
+	private $languageFallbackChainFactory;
 
 	/**
 	 * @var bool
@@ -62,53 +64,27 @@ class LabelPrefetchHookHandler {
 	private $federatedPropertiesPrefetchingHelper;
 
 	/**
-	 * @return self|null
+	 * @return self
 	 */
-	private static function newFromGlobalState() {
+	public static function factory(
+		TitleFactory $titleFactory,
+		EntityIdLookup $entityIdLookup,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		PrefetchingTermLookup $prefetchingTermLookup,
+		TermBuffer $termBuffer
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$termBuffer = $wikibaseRepo->getTermBuffer();
-
-		if ( $termBuffer === null ) {
-			return null;
-		}
-
 		$termTypes = [ TermIndexEntry::TYPE_LABEL, TermIndexEntry::TYPE_DESCRIPTION ];
-
-		// NOTE: keep in sync with fallback chain construction in LinkBeginHookHandler::newFromGlobalState
-		$context = RequestContext::getMain();
-		$languageFallbackChainFactory = $wikibaseRepo->getLanguageFallbackChainFactory();
-		$languageFallbackChain = $languageFallbackChainFactory->newFromContext( $context );
 
 		return new self(
 			$termBuffer,
-			$wikibaseRepo->getEntityIdLookup(),
-			new TitleFactory(),
+			$entityIdLookup,
+			$titleFactory,
 			$termTypes,
-			$languageFallbackChain->getFetchLanguageCodes(),
+			$languageFallbackChainFactory,
 			$wikibaseRepo->inFederatedPropertyMode(),
-			new SummaryParsingPrefetchHelper( $wikibaseRepo->getPrefetchingTermLookup() )
+			new SummaryParsingPrefetchHelper( $prefetchingTermLookup )
 		);
-	}
-
-	/**
-	 * Static handler for the ChangesListInitRows hook.
-	 *
-	 * @param ChangesList $list
-	 * @param IResultWrapper|object[] $rows
-	 *
-	 * @return bool
-	 */
-	public static function onChangesListInitRows(
-		ChangesList $list,
-		$rows
-	) {
-		$handler = self::newFromGlobalState();
-
-		if ( !$handler ) {
-			return true;
-		}
-
-		return $handler->doChangesListInitRows( $list, $rows );
 	}
 
 	/**
@@ -116,7 +92,7 @@ class LabelPrefetchHookHandler {
 	 * @param EntityIdLookup $idLookup
 	 * @param TitleFactory $titleFactory
 	 * @param string[] $termTypes
-	 * @param string[] $languageCodes
+	 * @param LanguageFallbackChainFactory $languageFallbackChainFactory
 	 * @param bool $federatedPropertiesEnabled
 	 * @param SummaryParsingPrefetchHelper $summaryParsingPrefetchHelper
 	 */
@@ -125,7 +101,7 @@ class LabelPrefetchHookHandler {
 		EntityIdLookup $idLookup,
 		TitleFactory $titleFactory,
 		array $termTypes,
-		array $languageCodes,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
 		bool $federatedPropertiesEnabled,
 		SummaryParsingPrefetchHelper $summaryParsingPrefetchHelper
 	) {
@@ -133,7 +109,7 @@ class LabelPrefetchHookHandler {
 		$this->idLookup = $idLookup;
 		$this->titleFactory = $titleFactory;
 		$this->termTypes = $termTypes;
-		$this->languageCodes = $languageCodes;
+		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
 		$this->federatedPropertiesPrefetchingHelper = $summaryParsingPrefetchHelper;
 	}
@@ -141,26 +117,26 @@ class LabelPrefetchHookHandler {
 	/**
 	 * @param ChangesList $list
 	 * @param IResultWrapper|object[] $rows
-	 *
-	 * @return bool
 	 */
-	public function doChangesListInitRows( ChangesList $list, $rows ) {
+	public function onChangesListInitRows( $list, $rows ): void {
 		try {
 			$titles = $this->getChangedTitles( $rows );
 			$entityIds = $this->idLookup->getEntityIds( $titles );
-			$this->buffer->prefetchTerms( $entityIds, $this->termTypes, $this->languageCodes );
+			$languageCodes = $this->languageFallbackChainFactory->newFromContext( $list )
+				->getFetchLanguageCodes();
+			$this->buffer->prefetchTerms( $entityIds, $this->termTypes, $languageCodes );
+
 			if ( $this->federatedPropertiesEnabled ) {
 				$this->federatedPropertiesPrefetchingHelper->prefetchFederatedProperties(
 					$rows,
-					$this->languageCodes,
+					$languageCodes,
 					$this->termTypes
 				);
 			}
+
 		} catch ( StorageException $ex ) {
 			wfLogWarning( __METHOD__ . ': ' . $ex->getMessage() );
 		}
-
-		return true;
 	}
 
 	/**
@@ -177,5 +153,4 @@ class LabelPrefetchHookHandler {
 
 		return $titles;
 	}
-
 }

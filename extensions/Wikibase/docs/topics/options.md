@@ -7,9 +7,9 @@ However, Wikibase settings are placed in associative arrays, `$wgWBRepoSettings`
 
 So, if the setting `foo` is described below, you would need to use ```$wgWBRepoSettings['foo']``` or ```$wgWBClientSettings['foo']``` in LocalSettings.php.
 
-Default settings in each Wikibase settings array are setup buy loading WikibaseLib.default.php followed by the default settings file for either:
+Default settings in each Wikibase settings array are setup by loading WikibaseLib.default.php followed by the default settings file for either:
  - Wikibase.default.php (for Repos)
- - WikibaseClient.default.php (For Clients)
+ - WikibaseClient.default.php (for Clients)
 
 [TOC]
 
@@ -105,24 +105,15 @@ The duration of entries in the shared object cache, in seconds.
 
 DEFAULT: 3600 seconds (1 hour).
 
-#### sharedCacheType
+#### sharedCacheType {#common_sharedCacheType}
 The type of cache to use for the shared object cache. Use `CACHE_XXX` constants.
 
 DEFAULT: [$wgMainCacheType]
 
-### wb_terms
+#### termFallbackCacheVersion {#common_termFallbackCacheVersion}
+Integer value to be appended to the shared cache prefix. Can be used to invalidate the term fallback cache by incrementing/changing this value.
 
-The [wb_terms] table is DEPRECATED and will be removed in the future.
-
-#### useTermsTableSearchFields {#common_useTermsTableSearchFields}
-Whether to use the search-related fields (`term_search_key` and `term_weight`) of the [wb_terms] table.
-
-This should not be disabled unless some other search backend is used.
-
-#### forceWriteTermsTableSearchFields
-If true, write search-related fields of the [wb_terms] table even if they are not used.
-
-Useful if you want to experiment with [useTermsTableSearchFields] and don’t want missed updates in the table.
+DEFAULT: null
 
 ### Miscellaneous
 
@@ -130,19 +121,6 @@ Useful if you want to experiment with [useTermsTableSearchFields] and don’t wa
 An associative array mapping entity source names to settings relevant to the particular source.
 
 See the [entitysources topic] for more details about the value of this setting.
-
-#### localEntitySourceName
-Name of the entity source name of the "local" repo.
-"local" is in quotes here, as "local" does not necessarily mean the local wiki.
-Should be the name of the entity source defined in [entitySources] setting.
-
-This setting is intended to be used by Wikibase installations with complex setups which have multiple repos attached.
-In these complex situations:
-
-- Repo: This should likely ALWAYS be the name of the entity source of the LOCAL repository (same site)
-- Client: This should be the name of the entity source of the site containing Item definitions (data is used from here, including sitelinks)
-
-DEFAULT: ```local```
 
 #### disabledDataTypes
 Array listing of disabled data types on a wiki.
@@ -201,6 +179,11 @@ EXAMPLE: ```http://www.wikidata.org/entity/```
 
 #### globeUris
 Mapping of globe URIs to canonical names, as recognized and used by [GeoData] extension when indexing and querying for coordinates.
+
+If you want to remove one from this list, set its value to false. For example:
+```php
+$wgWBRepoSettings['globeUris']['http://www.wikidata.org/entity/Q2'] = false;
+```
 
 EXAMPLE: ```['http://www.wikidata.org/entity/Q2' => 'earth']```
 
@@ -357,6 +340,22 @@ Note: keep that low, because such caches cannot always be purged easily.
 
 DEFAULT: [$wgCdnMaxAge]
 
+#### entityDataCachePaths
+URL paths for which entity data shall be cacheable.
+A list of strings, each of which should be a URL path pattern,
+usually starting with [$wgArticlePath] or [$wgScriptPath] and containing `{entity_id}` and `{revision_id}` placeholders,
+but not including [$wgServer] or any other server.
+
+Entity data is only cached if the request URL exactly matches one of the patterns specified here.
+
+DEFAULT (assuming [$wgArticlePath] is `/wiki/$1`):
+```
+[
+    '/wiki/Special:EntityData/{entity_id}.json?revision={revision_id}',
+    '/wiki/Special:EntityData/{entity_id}.ttl?flavor=dump&revision={revision_id}',
+]
+```
+
 ### Search
 
 #### enableEntitySearchUI
@@ -420,6 +419,15 @@ If disabled, user-specific termbox markup will only be created by client-side re
 Text for data license link.
 
 DEFAULT: [$wgRightsText]
+
+#### localEntitySourceName
+Name of the entity source of the local repo (the same site).
+
+Must match the name of the entity source as defined in [entitySources] setting.
+
+This setting is intended to be used by Wikibase installations with complex setups which have multiple repos attached.
+
+DEFAULT: ```local```
 
 #### statementSections
 Configuration to group statements together based on their datatype or other criteria like "propertySet". For example, putting all of external identifiers in one place.
@@ -489,6 +497,11 @@ Which URL schemes should be allowed in URL data values.
 Supported schemes are `ftps`, `ircs`, `mms`, `nntp`, `redis`, `sftp`, `telnet`, `worldwind` and `gopher`.
 Schemes (protocols) added here will only have any effect if validation is supported for that protocol; that is, adding `ftps` will work, while adding `dummy` will do nothing.
 
+If you want to remove one from this list, set its value to false. For example:
+```php
+$wgWBRepoSettings['urlSchemes']['mailto'] = false;
+```
+
 DEFAULT: is ```['bzr', 'cvs', 'ftp', 'git', 'http', 'https', 'irc', 'mailto', 'ssh', 'svn']```
 
 #### entityNamespaces {#entityNamespaces}
@@ -514,12 +527,18 @@ Definition for unit conversion storage.
 
 Should be in the format [ObjectFactory] understands.
 
-EXAMPLE: ```[ 'class' => 'Wikibase\\Lib\\JsonUnitStorage', 'args' => [ 'myUnits.json' ] ]```
+EXAMPLE: ```[ 'class' => 'Wikibase\Lib\Units\JsonUnitStorage', 'args' => [ __DIR__ . '/myUnits.json' ] ]```
 
-### canonicalLanguageCodes
+#### canonicalLanguageCodes
 Special non-canonical languages and their BCP 47 mappings
 
 Based on: https://meta.wikimedia.org/wiki/Special_language_codes
+
+If you want to remove one from this list, set its value to false. For example:
+```php
+$wgWBRepoSettings['canonicalLanguageCodes']['simple'] = false;
+```
+
 
 #### dataBridgeEnabled {#repo_dataBridgeEnabled}
 Enable the repo parts of the Data Bridge Feature; see the corresponding client setting for more information.
@@ -543,21 +562,23 @@ The set url path should allow access to both `index.php` and `api.php`
 
 DEFAULT: ```https://www.wikidata.org/w/```
 
-### propagateChangeVisibility {#repo_propagateChangeVisibility}
-Whether to propagate changes in revision visibility to client wikis.
-
-DEFAULT: ```false```.
-
 ### changeVisibilityNotificationClientRCMaxAge {#repo_changeVisibilityNotificationClientRCMaxAge}
 Value of the `$wgRCMaxAge` setting, which specifies the max age (in seconds) of entries in the `recentchanges` table, on the client wikis.
 
 DEFAULT: [$wgRCMaxAge].
 
-
 ### changeVisibilityNotificationJobBatchSize {#repo_changeVisibilityNotificationJobBatchSize}
 Batch size (how many revisions per job) to use when pushing `ChangeVisibilityNotification` jobs to clients.
 
 DEFAULT: ```3```.
+
+
+### deleteNotificationClientRCMaxAge {#repo_deleteNotificationClientRCMaxAge}
+Value of the `$wgRCMaxAge` setting, which specifies the max age (in seconds) of entries in the `recentchanges` table, on the client wikis.
+
+Example: On entity-page deletion the DeleteDispatcher hook is called and creates a DispatchChangeDeletionNotification job which in turn collects the revision rows from `archive` using this threshold.
+
+DEFAULT: [$wgRCMaxAge].
 
 Client Settings
 ----------------------------------------------------------------------------------------
@@ -605,7 +626,7 @@ DEFAULT: Same as [siteGlobalID] wikibase setting
 Site name of the connected repository wiki.
 
 The default is to assume client and repo are same wiki, so defaults to global [$wgSitename] setting.
-If not the same wiki, defaults to 'Wikidata'.
+If not the same wiki, defaults to 'Wikibase'.
 This setting can also be set to an i18n message key and will be handled as a message, if the message key exists so that the repo site name can be translatable.
 
 DEFAULT: [$wgSitename]
@@ -666,6 +687,11 @@ DEFAULT: ```true```
 
 #### allowLocalShortDesc
 Switch to enable local override of the central description with `{{SHORTDESC:}}`.
+
+DEFAULT: ```false```
+
+#### forceLocalShortDesc
+Switch to force local override of the central description with `{{SHORTDESC:}}`. Requires `allowLocalShortDesc` to be enabled.
 
 DEFAULT: ```false```
 
@@ -810,6 +836,15 @@ Each repository's settings are an associative array containing the following key
  - 'baseUri': A base URI (string) for concept URIs. It should contain scheme and authority part of the URI.
  - 'prefixMapping': A prefix mapping array, see also docs/foreign-entity-ids.wiki in the DataModel component.
 
+#### itemAndPropertySourceName
+Name of the providing Item and Property definitions (data is used from here, including sitelinks).
+
+Must match the name of the entity source as defined in [entitySources] setting.
+
+This setting is intended to be used by Wikibase installations with complex setups which have multiple repos attached.
+
+DEFAULT: ```local```
+
 #### propagateChangesToRepo
 Switch to enable or disable the propagation of client changes to the repo.
 
@@ -894,7 +929,6 @@ DEFAULT: array mapping each well-known name to `null`.
 [Scribunto]: (https://www.mediawiki.org/wiki/Scribunto)
 [siteLinkGroups]: #common_siteLinkGroups
 [entitySources]: #common_entitySources
-[useTermsTableSearchFields]: #common_useTermsTableSearchFields
 [sharedCacheKeyPrefix]: #common_sharedCacheKeyPrefix
 [termboxEnabled]: #repo_termboxEnabled
 [client dataBridgeEnabled]: #client_dataBridgeEnabled
@@ -905,7 +939,6 @@ DEFAULT: array mapping each well-known name to `null`.
 [purgeCacheBatchSize]: #client_purgeCacheBatchSize
 [wikiPageUpdaterDbBatchSize]: #client_wikiPageUpdaterDbBatchSize
 [siteGlobalID]: #client_siteGlobalID
-[wb_terms]: @ref md_docs_sql_wb_terms
 [entitysources topic]: @ref md_docs_topics_entitysources
 [wbc_entity_usage]: @ref md_docs_sql_wbc_entity_usage
 [reference URL]: https://www.wikidata.org/wiki/Property:P854

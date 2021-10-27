@@ -1,7 +1,13 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use ExtensionRegistry;
 use MediaWiki\Logger\LoggerFactory;
+use MWException;
+use PermissionsError;
 use Psr\Log\LoggerInterface;
+use SpecialPage;
 
 /**
  * MediaWiki math extension
@@ -31,7 +37,7 @@ class SpecialMathStatus extends SpecialPage {
 		$this->setHeaders();
 
 		$out = $this->getOutput();
-		$enabledMathModes = MathHooks::getMathNames();
+		$enabledMathModes = Hooks::getMathNames();
 		$out->addWikiMsg( 'math-status-introduction', count( $enabledMathModes ) );
 
 		foreach ( $enabledMathModes as $modeNr => $modeName ) {
@@ -47,18 +53,18 @@ class SpecialMathStatus extends SpecialPage {
 	}
 
 	private function runMathMLTest( $modeName ) {
-		$this->getOutput()->addWikiMsgArray( 'math-test-start', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-start', [ $modeName ] );
 		$this->testSpecialCaseText();
 		$this->testMathMLIntegration();
 		$this->testPmmlInput();
-		$this->getOutput()->addWikiMsgArray( 'math-test-end', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-end', [ $modeName ] );
 	}
 
 	private function runMathLaTeXMLTest( $modeName ) {
-		$this->getOutput()->addWikiMsgArray( 'math-test-start', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-start', [ $modeName ] );
 		$this->testLaTeXMLIntegration();
 		$this->testLaTeXMLLinebreak();
-		$this->getOutput()->addWikiMsgArray( 'math-test-end', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-end', [ $modeName ] );
 	}
 
 	public function testSpecialCaseText() {

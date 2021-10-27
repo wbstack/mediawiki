@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Jaroslav Cerny",
 			"Jkjk",
 			"Matěj Grabovský"
 		]
@@ -9,6 +10,7 @@
 	"deletebatch-desc": "[[Special:DeleteBatch|Hromadné mazání stránek]]",
 	"deletebatch-help": "Hromadné mazání stránek.\nMůžete buď smazat jednu stránku, nebo stránky podle seznamu.\nVyberte uživatele, který se objeví v záznamech.\nNahrávané soubory by měly na každé řádce obsahovat název stránky a volitelně důvod oddělený „|“.",
 	"deletebatch-caption": "Seznam stránek:",
+	"deletebatch-default-reason": "Výchozí důvod ke smazání:",
 	"deletebatch-title": "Smazat požadavek",
 	"deletebatch-link-back": "Vrátit se na speciální stránku",
 	"deletebatch-as": "Spustit skript jako:",

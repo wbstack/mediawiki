@@ -28,6 +28,7 @@ use MediaWiki\Extensions\OAuth\Backend\Utils;
 use MediaWiki\Extensions\OAuth\Lib\OAuthException;
 use MediaWiki\Extensions\OAuth\Repository\AccessTokenRepository;
 use MediaWiki\Logger\LoggerFactory;
+use Mediawiki\MediaWikiServices;
 use Wikimedia\Rdbms\DBConnRef;
 
 /**
@@ -48,7 +49,7 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 	/**
 	 * @param \IContextSource $context
 	 * @param array $params
-	 * @param DBConnRef $dbw Result of MWOAuthUtils::getCentralDB( DB_MASTER )
+	 * @param DBConnRef $dbw Result of Utils::getCentralDB( DB_MASTER )
 	 * @param int $oauthVersion
 	 */
 	public function __construct(
@@ -90,9 +91,11 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 
 	protected function checkBasePermissions() {
 		$user = $this->getUser();
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
 		if ( !$user->getID() ) {
 			return $this->failure( 'not_logged_in', 'badaccess-group0' );
-		} elseif ( !$user->isAllowed( 'mwoauthmanagemygrants' ) ) {
+		} elseif ( !$permissionManager->userHasRight( $user, 'mwoauthmanagemygrants' ) ) {
 			return $this->failure( 'permission_denied', 'badaccess-group0' );
 		} elseif ( wfReadOnly() ) {
 			return $this->failure( 'readonly', 'readonlytext', wfReadOnlyReason() );

@@ -75,19 +75,19 @@ class JCTabularContent extends JCDataContent {
 			$fieldCount = count( $this->getField( $fieldsPath )->getValue() );
 			for ( $idx = 0; $idx < $fieldCount; $idx++ ) {
 				$header = false;
-				$hasError |= !$this->test( [ 'schema', 'fields', $idx, 'name' ],
+				$hasError = !$this->test( [ 'schema', 'fields', $idx, 'name' ],
 					JCValidators::isHeaderString( $allHeaders ),
 					function ( JCValue $jcv ) use ( &$header ) {
 						$header = $jcv->getValue();
 						return true;
-					} );
-				$hasError |= !$this->test( [ 'schema', 'fields', $idx, 'type' ],
-					JCValidators::validateDataType( $typeValidators ) );
+					} ) || $hasError;
+				$hasError = !$this->test( [ 'schema', 'fields', $idx, 'type' ],
+					JCValidators::validateDataType( $typeValidators ) ) || $hasError;
 				if ( $header ) {
-					$hasError |= !$this->testOptional( [ 'schema', 'fields', $idx, 'title' ],
+					$hasError = !$this->testOptional( [ 'schema', 'fields', $idx, 'title' ],
 						function () use ( $header ) {
 							return (object)[ 'en' => $header ];
-						}, JCValidators::isLocalizedString() );
+						}, JCValidators::isLocalizedString() ) || $hasError;
 				}
 			}
 			$countValidator = JCValidators::checkListSize( $fieldCount, 'schema/fields' );
@@ -114,7 +114,7 @@ class JCTabularContent extends JCDataContent {
 				$lastIdx = count( $path );
 				foreach ( array_keys( $typeValidators ) as $k ) {
 					$path[$lastIdx] = $k;
-					$isOk &= $this->test( $path, $typeValidators[$k] );
+					$isOk = $this->test( $path, $typeValidators[$k] ) && $isOk;
 				}
 				return $isOk;
 			} );
@@ -123,7 +123,7 @@ class JCTabularContent extends JCDataContent {
 
 	/**
 	 * Resolve any override-specific localizations, and add it to $result
-	 * @param object $result
+	 * @param \stdClass $result
 	 * @param Language $lang
 	 */
 	protected function localizeData( $result, Language $lang ) {

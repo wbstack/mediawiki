@@ -3,13 +3,14 @@
 namespace CirrusSearch\Maintenance;
 
 use CirrusSearch\CirrusSearch;
+use CirrusSearch\CirrusSearchHookRunner;
 use CirrusSearch\Connection;
 use CirrusSearch\Search\CirrusIndexField;
 use CirrusSearch\Search\CirrusSearchIndexFieldFactory;
 use CirrusSearch\Search\SourceTextIndexField;
 use CirrusSearch\Search\TextIndexField;
 use CirrusSearch\SearchConfig;
-use Hooks;
+use MediaWiki\MediaWikiServices;
 use SearchIndexField;
 use Wikimedia\Assert\Assert;
 
@@ -33,9 +34,9 @@ use Wikimedia\Assert\Assert;
  */
 class MappingConfigBuilder {
 	// Bit field parameters for buildConfig
-	const PREFIX_START_WITH_ANY = 1;
-	const PHRASE_SUGGEST_USE_TEXT = 2;
-	const OPTIMIZE_FOR_EXPERIMENTAL_HIGHLIGHTER = 4;
+	public const PREFIX_START_WITH_ANY = 1;
+	public const PHRASE_SUGGEST_USE_TEXT = 2;
+	public const OPTIMIZE_FOR_EXPERIMENTAL_HIGHLIGHTER = 4;
 
 	/**
 	 * Version number for the core analysis. Increment the major
@@ -43,7 +44,7 @@ class MappingConfigBuilder {
 	 * and change the minor version when it changes but isn't
 	 * incompatible
 	 */
-	const VERSION = '1.10';
+	public const VERSION = '1.10';
 
 	/**
 	 * @var bool should the index be optimized for the experimental highlighter?
@@ -69,14 +70,23 @@ class MappingConfigBuilder {
 	 * @var int
 	 */
 	protected $flags = 0;
+	/**
+	 * @var CirrusSearchHookRunner
+	 */
+	private $cirrusSearchHookRunner;
 
 	/**
 	 * @param bool $optimizeForExperimentalHighlighter should the index be optimized for the experimental highlighter?
 	 * @param int $flags
 	 * @param SearchConfig|null $config
-	 * @throws \ConfigException
+	 * @param CirrusSearchHookRunner|null $cirrusSearchHookRunner
 	 */
-	public function __construct( $optimizeForExperimentalHighlighter, $flags = 0, SearchConfig $config = null ) {
+	public function __construct(
+		$optimizeForExperimentalHighlighter,
+		$flags = 0,
+		SearchConfig $config = null,
+		CirrusSearchHookRunner $cirrusSearchHookRunner = null
+	) {
 		$this->optimizeForExperimentalHighlighter = $optimizeForExperimentalHighlighter;
 		if ( $this->optimizeForExperimentalHighlighter ) {
 			$flags |= self::OPTIMIZE_FOR_EXPERIMENTAL_HIGHLIGHTER;
@@ -85,6 +95,8 @@ class MappingConfigBuilder {
 		$this->engine = new CirrusSearch( $config );
 		$this->config = $this->engine->getConfig();
 		$this->searchIndexFieldFactory = new CirrusSearchIndexFieldFactory( $this->config );
+		$this->cirrusSearchHookRunner = $cirrusSearchHookRunner ?: new CirrusSearchHookRunner(
+			MediaWikiServices::getInstance()->getHookContainer() );
 	}
 
 	/**
@@ -262,7 +274,7 @@ class MappingConfigBuilder {
 			// For now only trigger the hook on the "page" indices.
 			// It's probably that implementors don't pay attention to the new getMainType()
 			// method.
-			Hooks::run( 'CirrusSearchMappingConfig', [ &$mappingConfig, $this ] );
+			$this->cirrusSearchHookRunner->onCirrusSearchMappingConfig( $mappingConfig, $this );
 			Assert::postcondition( count( $mappingConfig ) === 1,
 				'CirrusSearchMappingConfig implementations must not add a new mapping type' );
 		}

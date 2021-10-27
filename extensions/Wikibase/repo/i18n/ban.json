@@ -2,15 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Carma citrawati",
+			"Chinamoonroll",
 			"Joseagush",
 			"Luh Gede Krismayanti",
 			"NoiX180"
 		]
 	},
 	"wikibase-edit": "uah",
-	"wikibase-add": "tambeh",
-	"wikibase-label-empty": "nenten wenten label",
-	"wikibase-description-empty": "Nenten madue daging",
+	"wikibase-add": "tambahin",
+	"wikibase-label-empty": "nenten wénten label",
+	"wikibase-description-empty": "Nénten madué daging",
 	"wikibase-sitelinks-special": "Situs lianan",
 	"wikibase-referenceview-tabs-manual": "Manual",
 	"wikibase-statementview-rank-normal": "Tincapan sane sedeng"

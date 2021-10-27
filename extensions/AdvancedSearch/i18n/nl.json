@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Akoopal",
 			"Bdijkstra",
 			"Elroy",
 			"Klaas van Buiten",
@@ -57,7 +58,9 @@
 	"advancedsearch-filesize-greater-than": "groter dan",
 	"advancedsearch-filesize-smaller-than": "kleiner dan",
 	"advancedsearch-sort-relevance": "Relevantie",
+	"advancedsearch-sort-last-edit-asc": "Datum van laatste bewerking – oudste bovenaan",
 	"advancedsearch-sort-last-edit-desc": "Datum van laatste bewerking – huidige bovenaan",
+	"advancedsearch-sort-create-timestamp-asc": "Aanmaakdatum – oudste bovenaan",
 	"advancedsearch-sort-create-timestamp-desc": "Aanmaakdatum – huidige bovenaan",
 	"advancedsearch-sort-preview-relevance": "relevantie",
 	"advancedsearch-sort-preview-last-edit-desc": "bewerkingsdatum",

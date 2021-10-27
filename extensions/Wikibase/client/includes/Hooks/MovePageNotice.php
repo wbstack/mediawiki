@@ -7,7 +7,8 @@ use MediaWiki\Hook\SpecialMovepageAfterMoveHook;
 use MovePageForm;
 use Title;
 use Wikibase\Client\RepoLinker;
-use Wikibase\Client\WikibaseClient;
+use Wikibase\Client\Store\ClientStore;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\SiteLinkLookup;
 
 /**
@@ -45,14 +46,14 @@ class MovePageNotice implements SpecialMovepageAfterMoveHook {
 		$this->repoLinker = $repoLinker;
 	}
 
-	public static function newFromGlobalState() {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$siteLinkLookup = $wikibaseClient->getStore()->getSiteLinkLookup();
-		$repoLinker = $wikibaseClient->newRepoLinker();
-
+	public static function factory(
+		RepoLinker $repoLinker,
+		SettingsArray $clientSettings,
+		ClientStore $store
+	) {
 		return new self(
-			$siteLinkLookup,
-			$wikibaseClient->getSettings()->getSetting( 'siteGlobalID' ),
+			$store->getSiteLinkLookup(),
+			$clientSettings->getSetting( 'siteGlobalID' ),
 			$repoLinker
 		);
 	}

@@ -40,7 +40,7 @@ Entity usage on client pages is tracked using the following codes (each represen
  - description (D.xx) - The entity's description in language xx is used.
  - title (T) - The title of the local page corresponding to the entity is used.
  - statements (C) - Certain statements (identified by their property id) from the entity are used.
- - other (O) - Something else about the entity is used. This currently implicates statement and description usage.
+ - other (O) - Something else about the entity is used. This currently implies alias usage and entity existence checks.
  - all (X) - All aspects of an entity are or may be used.
 
 Changes result in updates to pages that use the respective entity based on the aspect that is used.
@@ -73,6 +73,25 @@ Overview of events that trigger updates to usage tracking:
  - [ArticleDeleteComplete]
    - Prune all entries, unsubscribe unused entries
 
+### Usages not stored in the database
+
+There are two kinds of usages that are not stored in the database, but created on-the-fly.
+(Their names are admittedly far from ideal,
+and could probably be improved to make the difference between them clearer.)
+
+#### Virtual usages
+
+*Virtual usages* are synthesized based on a change to an entity and the diff introduced by that change.
+[AffectedPagesFinder] adds virtual usages when an item’s sitelink for the local wiki is edited,
+based on the old and new title in the sitelink, so that both get updated.
+
+#### Implicit usages
+
+*Implicit usages* are synthesized based on the “steady state” of the entity data,
+not directly related to any change to the entity.
+[ImplicitDescriptionUsageLookup] adds implicit usages on the descriptions of items linked to local pages,
+so that description edits are added to the recent changes even if the descriptions are not used directly.
+
 ### Repo side usage tracking
 
 Each repo tracks which client uses which entity. This is done in the [wb_changes_subscription] table.
@@ -85,3 +104,5 @@ To do this, the client wiki must, whenever a page is edited, determine which ent
 [LinksUpdateComplete]: https://www.mediawiki.org/wiki/Manual:Hooks/LinksUpdateComplete
 [ParserCacheSave]: https://www.mediawiki.org/wiki/Manual:Hooks/ParserCacheSave
 [ArticleDeleteComplete]: https://www.mediawiki.org/wiki/Manual:Hooks/ArticleDeleteComplete
+[AffectedPagesFinder]: @ref Wikibase::Client::Changes::AffectedPagesFinder
+[ImplicitDescriptionUsageLookup]: @ref Wikibase::Client::Usage::ImplicitDescriptionUsageLookup

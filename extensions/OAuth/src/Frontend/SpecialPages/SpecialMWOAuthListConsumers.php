@@ -21,7 +21,6 @@ namespace MediaWiki\Extensions\OAuth\Frontend\SpecialPages;
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-use Html;
 use MediaWiki\Extensions\OAuth\Backend\Consumer;
 use MediaWiki\Extensions\OAuth\Backend\ConsumerAcceptance;
 use MediaWiki\Extensions\OAuth\Backend\Utils;
@@ -82,23 +81,23 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		$dbr = Utils::getCentralDB( DB_REPLICA );
 		$cmrAc = ConsumerAccessControl::wrap(
 			Consumer::newFromKey( $dbr, $consumerKey ), $this->getContext() );
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
 		if ( !$cmrAc ) {
 			$out->addWikiMsg( 'mwoauth-invalid-consumer-key' );
 			return;
-		} elseif ( $cmrAc->getDeleted() && !$user->isAllowed( 'mwoauthviewsuppressed' ) ) {
+		} elseif ( $cmrAc->getDeleted()
+			&& !$permissionManager->userHasRight( $user, 'mwoauthviewsuppressed' ) ) {
 			throw new \PermissionsError( 'mwoauthviewsuppressed' );
 		}
 
 		$grants = $cmrAc->getGrants();
 		if ( $grants === [ 'mwoauth-authonly' ] || $grants === [ 'mwoauth-authonlyprivate' ] ) {
-			$s = $this->msg( 'grant-' . $grants[0] )->plain() . "\n";
+			$s = $this->msg( 'grant-' . $grants[0] )->plain();
+		} elseif ( $grants === [ 'basic' ] ) {
+			$s = $this->msg( 'mwoauthlistconsumers-basicgrantsonly' )->plain();
 		} else {
 			$s = \MWGrants::getGrantsWikiText( $grants, $this->getLanguage() );
-			if ( $s == '' ) {
-				$s = $this->msg( 'mwoauthlistconsumers-basicgrantsonly' )->plain();
-			} else {
-				$s .= "\n";
-			}
 		}
 
 		$stageKey = Consumer::$stageNames[$cmrAc->getDAO()->getStage()];
@@ -115,11 +114,8 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			'mwoauthlistconsumers-callbackurl' => $cmrAc->getCallbackUrl(),
 			'mwoauthlistconsumers-callbackisprefix' => $cmrAc->getCallbackIsPrefix() ?
 				$this->msg( 'htmlform-yes' ) : $this->msg( 'htmlform-no' ),
+			'mwoauthlistconsumers-grants' => new HtmlSnippet( $out->parseInlineAsInterface( $s ) ),
 		];
-
-		if ( $grants !== [ 'basic' ] ) {
-			$data[ 'mwoauthlistconsumers-grants' ] = new HtmlSnippet( $out->parseInlineAsInterface( $s ) );
-		}
 
 		$out->addHTML( UIUtils::generateInfoTable( $data, $this->getContext() ) );
 
@@ -192,7 +188,6 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 
 	/**
 	 * Show a paged list of consumers with links to details
-	 * @suppress SecurityCheck-XSS For getNavigationBar, see T201811 for more information
 	 */
 	protected function showConsumerList() {
 		$request = $this->getRequest();
@@ -217,7 +212,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			$this->getOutput()->addWikiMsg( "mwoauthlistconsumers-none" );
 		}
 		# Every 30th view, prune old deleted items
-		if ( 0 == mt_rand( 0, 29 ) ) {
+		if ( mt_rand( 0, 29 ) == 0 ) {
 			Utils::runAutoMaintenance( Utils::getCentralDB( DB_MASTER ) );
 		}
 	}
@@ -230,21 +225,21 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	public function formatRow( DBConnRef $db, $row ) {
 		$cmrAc = ConsumerAccessControl::wrap(
 			Consumer::newFromRow( $db, $row ), $this->getContext() );
-
 		$cmrKey = $cmrAc->getConsumerKey();
 		$stageKey = Consumer::$stageNames[$cmrAc->getStage()];
+		$permMgr = MediaWikiServices::getInstance()->getPermissionManager();
 
 		$links = [];
-		$links[] = \Linker::linkKnown(
+		$links[] = $this->getLinkRenderer()->makeKnownLink(
 			$this->getPageTitle( "view/{$cmrKey}" ),
-			$this->msg( 'mwoauthlistconsumers-view' )->escaped(),
+			$this->msg( 'mwoauthlistconsumers-view' )->text(),
 			[],
 			$this->getRequest()->getValues( 'name', 'publisher', 'stage' ) // stick
 		);
-		if ( $this->getUser()->isAllowed( 'mwoauthmanageconsumer' ) ) {
-			$links[] = \Linker::linkKnown(
-				\SpecialPage::getTitleFor( 'OAuthManageConsumers', $cmrKey ),
-				$this->msg( 'mwoauthmanageconsumers-review' )->escaped()
+		if ( !$permMgr->userHasRight( $this->getUser(), 'mwoauthmanageconsumer' ) ) {
+			$links[] = $this->getLinkRenderer()->makeKnownLink(
+				SpecialPage::getTitleFor( 'OAuthManageConsumers', $cmrKey ),
+				$this->msg( 'mwoauthmanageconsumers-review' )->text()
 			);
 		}
 		$links = $this->getLanguage()->pipeList( $links );
@@ -278,10 +273,12 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			$r .= '<p>' . $this->msg( $msg )->escaped() . ': ' . $encValue . '</p>';
 		}
 
-		$rcUrl = SpecialPage::getTitleFor( 'Recentchanges' )
-			->getFullURL( [ 'tagfilter' => Utils::getTagName( $cmrAc->getId() ) ] );
-		$rcLink = Html::element( 'a', [ 'href' => $rcUrl ],
-			$this->msg( 'mwoauthlistconsumers-rclink' )->plain() );
+		$rcLink = $this->getLinkRenderer()->makeKnownLink(
+			SpecialPage::getTitleFor( 'Recentchanges' ),
+			$this->msg( 'mwoauthlistconsumers-rclink' )->plain(),
+			[],
+			[ 'tagfilter' => Utils::getTagName( $cmrAc->getId() ) ]
+		);
 		$r .= '<p>' . $rcLink . '</p>';
 
 		$r .= '</li>';
@@ -300,7 +297,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	private function addNavigationSubtitle( ConsumerAccessControl $cmrAc ): void {
 		$user = $this->getUser();
 		$centralUserId = Utils::getCentralIdFromLocalUser( $user );
-		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+		$linkRenderer = $this->getLinkRenderer();
 		$consumer = $cmrAc->getDAO();
 
 		$siteLinks = array_merge(
@@ -349,7 +346,9 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 	private function manageConsumerLink(
 		Consumer $consumer, \User $user, \MediaWiki\Linker\LinkRenderer $linkRenderer
 	): array {
-		if ( Utils::isCentralWiki() && $user->isAllowed( 'mwoauthmanageconsumer' ) ) {
+		$permMgr = MediaWikiServices::getInstance()->getPermissionManager();
+
+		if ( Utils::isCentralWiki() && $permMgr->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
 			return [
 				$linkRenderer->makeKnownLink( SpecialPage::getTitleFor( 'OAuthManageConsumers',
 					$consumer->getConsumerKey() ),

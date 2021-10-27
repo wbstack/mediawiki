@@ -2,6 +2,8 @@
 
 namespace AdvancedSearch;
 
+use MessageLocalizer;
+
 /**
  * Generate HTML tooltips from messages
  *
@@ -14,32 +16,45 @@ namespace AdvancedSearch;
  */
 class TooltipGenerator {
 
+	private const MESSAGE_KEYS = [
+		'advancedsearch-help-plain',
+		'advancedsearch-help-phrase',
+		'advancedsearch-help-or',
+		'advancedsearch-help-not',
+		'advancedsearch-help-deepcategory',
+		'advancedsearch-help-hastemplate',
+		'advancedsearch-help-inlanguage',
+		'advancedsearch-help-intitle',
+		'advancedsearch-help-subpageof',
+		'advancedsearch-help-filetype',
+		'advancedsearch-help-filew',
+		'advancedsearch-help-fileh',
+		'advancedsearch-help-sort'
+	];
+
+	/**
+	 * @var MessageLocalizer
+	 */
+	private $messageLocalizer;
+
+	/**
+	 * @param MessageLocalizer $messageLocalizer
+	 */
+	public function __construct( MessageLocalizer $messageLocalizer ) {
+		$this->messageLocalizer = $messageLocalizer;
+	}
+
 	/**
 	 * @return string[]
 	 */
-	public static function generateToolTips() {
-		$messageKeys = [
-			'advancedsearch-help-plain',
-			'advancedsearch-help-phrase',
-			'advancedsearch-help-or',
-			'advancedsearch-help-not',
-			'advancedsearch-help-deepcategory',
-			'advancedsearch-help-hastemplate',
-			'advancedsearch-help-inlanguage',
-			'advancedsearch-help-intitle',
-			'advancedsearch-help-subpageof',
-			'advancedsearch-help-filetype',
-			'advancedsearch-help-filew',
-			'advancedsearch-help-fileh',
-			'advancedsearch-help-sort'
-		];
+	public function generateTooltips() {
+		$tooltips = [];
 
-		return array_combine(
-			$messageKeys,
-			array_map( function ( $messageKey ) {
-				return \wfMessage( $messageKey )->parse();
-			}, $messageKeys )
-		);
+		foreach ( self::MESSAGE_KEYS as $key ) {
+			$tooltips[$key] = $this->messageLocalizer->msg( $key )->parse();
+		}
+
+		return $tooltips;
 	}
 
 }

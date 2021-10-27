@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\ParserOutput;
 
 use ExtensionRegistry;
@@ -12,11 +14,13 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class TermboxFlag {
 
+	/** @var SettingsArray */
 	private $settings;
 
+	/** @var ExtensionRegistry */
 	private $extensionRegistry;
 
-	const TERMBOX_FLAG = 'termboxEnabled';
+	public const TERMBOX_FLAG = 'termboxEnabled';
 
 	public function __construct(
 		SettingsArray $settings,
@@ -26,9 +30,9 @@ class TermboxFlag {
 		$this->extensionRegistry = $extensionRegistry;
 	}
 
-	public static function getInstance() {
+	public static function getInstance(): self {
 		return new self(
-			WikibaseRepo::getDefaultInstance()->getSettings(),
+			WikibaseRepo::getSettings(),
 			ExtensionRegistry::getInstance()
 		);
 	}
@@ -38,7 +42,7 @@ class TermboxFlag {
 	 *
 	 * @return bool
 	 */
-	public function shouldRenderTermbox() {
+	public function shouldRenderTermbox(): bool {
 		return $this->settings->getSetting( self::TERMBOX_FLAG )
 			&& $this->extensionRegistry->isLoaded( 'MobileFrontend' )
 			&& MobileContext::singleton()->shouldDisplayMobileView();

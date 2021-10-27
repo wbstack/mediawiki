@@ -8,6 +8,7 @@ use MediaWiki\MediaWikiServices;
 use Onoi\MessageReporter\CallbackMessageReporter;
 use Onoi\MessageReporter\MessageReporter;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\DataModel\Services\Lookup\LegacyAdapterItemLookup;
 use Wikibase\Repo\RangeTraversable;
 use Wikibase\Repo\Store\ItemTermsRebuilder;
 use Wikibase\Repo\Store\Store;
@@ -89,12 +90,14 @@ class RebuildItemTerms extends Maintenance {
 		}
 
 		$rebuilder = new ItemTermsRebuilder(
-			$this->wikibaseRepo->getNewTermStoreWriterFactory()->newItemTermStoreWriter(),
+			WikibaseRepo::getTermStoreWriterFactory()->newItemTermStoreWriter(),
 			$iterator,
 			$this->getReporter(),
 			$this->getErrorReporter(),
 			MediaWikiServices::getInstance()->getDBLoadBalancerFactory(),
-			$this->wikibaseRepo->getItemLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY ),
+			new LegacyAdapterItemLookup(
+				WikibaseRepo::getStore()->getEntityLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY )
+			),
 			(int)$this->getOption( 'batch-size', 250 ),
 			(int)$this->getOption( 'sleep', 10 )
 		);

@@ -26,6 +26,7 @@
 	"wikibasecirrus-search-bad-entity-type": "סוג ישות רע: $1",
 	"wikibasecirrus-search-bad-profile-name": "שם פרופיל חיפוש רע: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "מילת המפתח haswbstatement אינה מכילה קביעות תקינות",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "מילת המפתח haslicense אינה מכילה שום ארגומנט תקין",
 	"special-entitieswithoutdescription": "ישויות ללא תיאור",
 	"wikibasecirrus-entitieswithoutdescription-legend": "קבלת רשימת ישויות ללא תיאור",
 	"special-entitieswithoutlabel": "ישויות ללא תווית",

@@ -67,8 +67,8 @@ class TwoColConflictContext {
 	 * @param Title $title
 	 *
 	 * @return bool True if the new conflict interface should be used for this
-	 *   user and title.  The user may have opted out, or the title namespace
-	 *   may be blacklisted for this interface.
+	 *   user and title.  The user may have opted out, or the titles namespace
+	 *   may be excluded for this interface.
 	 */
 	public function shouldTwoColConflictBeShown( User $user, Title $title ) : bool {
 		// T249817: Temporarily disabled on mobile

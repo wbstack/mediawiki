@@ -7,6 +7,7 @@ use ApiEditPage;
 use ApiModuleManager;
 use ApiQuery;
 use ApiQuerySiteinfo;
+use CentralIdLookup;
 use Content;
 use ContentHandler;
 use ExtensionRegistry;
@@ -31,23 +32,30 @@ use SkinTemplate;
 use StubUserLang;
 use Title;
 use User;
-use Wikibase\Lib\Changes\CentralIdLookupFactory;
+use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Entity\Property;
 use Wikibase\Lib\Formatters\AutoCommentFormatter;
+use Wikibase\Lib\LibHooks;
 use Wikibase\Lib\ParserFunctions\CommaSeparatedList;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\Sql\EntityChangeLookup;
+use Wikibase\Lib\WikibaseContentLanguages;
 use Wikibase\Repo\Api\MetaDataBridgeConfig;
 use Wikibase\Repo\Content\EntityContent;
 use Wikibase\Repo\Content\EntityHandler;
+use Wikibase\Repo\Hooks\Helpers\OutputPageEntityViewChecker;
 use Wikibase\Repo\Hooks\InfoActionHookHandler;
 use Wikibase\Repo\Hooks\OutputPageEntityIdReader;
 use Wikibase\Repo\Hooks\SidebarBeforeOutputHookHandler;
+use Wikibase\Repo\Notifications\RepoEntityChange;
 use Wikibase\Repo\ParserOutput\PlaceholderEmittingEntityTermsView;
 use Wikibase\Repo\ParserOutput\TermboxFlag;
 use Wikibase\Repo\ParserOutput\TermboxVersionParserCacheValueRejector;
 use Wikibase\Repo\ParserOutput\TermboxView;
 use Wikibase\Repo\Store\Sql\DispatchStats;
 use Wikibase\Repo\Store\Sql\SqlSubscriptionLookup;
+use Wikibase\View\ViewHooks;
 use WikiPage;
 
 /**
@@ -67,7 +75,7 @@ final class RepoHooks {
 	 * @param Skin $skin
 	 */
 	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
-		$settings = WikibaseRepo::getDefaultInstance()->getSettings();
+		$settings = WikibaseRepo::getSettings();
 		if ( $settings->getSetting( 'enableEntitySearchUI' ) === true ) {
 			$out->addModules( 'wikibase.ui.entitysearch' );
 		}
@@ -84,16 +92,19 @@ final class RepoHooks {
 	 * @param Skin $skin
 	 */
 	public static function onBeforePageDisplayMobile( OutputPage $out, Skin $skin ) {
-		$title = $out->getTitle();
-		$repo = WikibaseRepo::getDefaultInstance();
-		$entityNamespaceLookup = $repo->getEntityNamespaceLookup();
-		$isEntityTitle = $entityNamespaceLookup->isNamespaceWithEntities( $title->getNamespace() );
-		$useNewTermbox = $repo->getSettings()->getSetting( 'termboxEnabled' );
+		$entityNamespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
+		$namespace = $out->getTitle()->getNamespace();
+		$isEntityTitle = $entityNamespaceLookup->isNamespaceWithEntities( $namespace );
 
 		if ( $isEntityTitle ) {
 			$out->addModules( 'wikibase.mobile' );
 
-			if ( $useNewTermbox ) {
+			$useNewTermbox = WikibaseRepo::getSettings()->getSetting( 'termboxEnabled' );
+			$entityType = $entityNamespaceLookup->getEntityType( $namespace );
+			$isEntityTypeWithTermbox = $entityType === Item::ENTITY_TYPE
+				|| $entityType === Property::ENTITY_TYPE;
+
+			if ( $useNewTermbox && $isEntityTypeWithTermbox ) {
 				$out->addModules( 'wikibase.termbox' );
 				$out->addModuleStyles( [ 'wikibase.termbox.styles' ] );
 			}
@@ -114,12 +125,12 @@ final class RepoHooks {
 
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$namespaces = $wikibaseRepo->getLocalEntityNamespaces();
-		$namespaceLookup = $wikibaseRepo->getEntityNamespaceLookup();
+		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 
 		// Register entity namespaces.
 		// Note that $wgExtraNamespaces and $wgNamespaceAliases have already been processed at this
 		// point and should no longer be touched.
-		$contentModelIds = $wikibaseRepo->getContentModelMappings();
+		$contentModelIds = WikibaseRepo::getContentModelMappings();
 
 		foreach ( $namespaces as $entityType => $namespace ) {
 			// TODO: once there is a mechanism for registering the default content model for
@@ -135,8 +146,8 @@ final class RepoHooks {
 
 		// Register callbacks for instantiating ContentHandlers for EntityContent.
 		foreach ( $contentModelIds as $entityType => $model ) {
-			$wgContentHandlers[$model] = function () use ( $wikibaseRepo, $entityType ) {
-				$entityContentFactory = $wikibaseRepo->getEntityContentFactory();
+			$wgContentHandlers[$model] = function () use ( $entityType ) {
+				$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 				return $entityContentFactory->getContentHandlerForType( $entityType );
 			};
 		}
@@ -152,19 +163,6 @@ final class RepoHooks {
 	 */
 	public static function registerUnitTests( array &$paths ) {
 		$paths[] = __DIR__ . '/../tests/phpunit/';
-	}
-
-	/**
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ResourceLoaderTestModules
-	 *
-	 * @param array[] &$testModules
-	 * @param ResourceLoader $resourceLoader
-	 */
-	public static function registerQUnitTests( array &$testModules, ResourceLoader $resourceLoader ) {
-		$testModules['qunit'] = array_merge(
-			$testModules['qunit'],
-			require __DIR__ . '/../tests/qunit/resources.php'
-		);
 	}
 
 	/**
@@ -184,8 +182,7 @@ final class RepoHooks {
 	}
 
 	private static function isNamespaceUsedByLocalEntities( $namespace ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$namespaceLookup = $wikibaseRepo->getEntityNamespaceLookup();
+		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 
 		// TODO: this logic seems badly misplaced, probably WikibaseRepo should be asked and be
 		// providing different and more appropriate EntityNamespaceLookup instance
@@ -201,14 +198,14 @@ final class RepoHooks {
 			return false;
 		}
 
-		$entitySource = $wikibaseRepo->getEntitySourceDefinitions()->getSourceForEntityType(
+		$entitySource = WikibaseRepo::getEntitySourceDefinitions()->getSourceForEntityType(
 			$entityType
 		);
 		if ( $entitySource === null ) {
 			return false;
 		}
 
-		$localEntitySourceName = $wikibaseRepo->getSettings()->getSetting( 'localEntitySourceName' );
+		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
 		if ( $entitySource->getSourceName() === $localEntitySourceName ) {
 			return true;
 		}
@@ -232,7 +229,7 @@ final class RepoHooks {
 		$baseID,
 		UserIdentity $user
 	) {
-		$entityContentFactory = WikibaseRepo::getDefaultInstance()->getEntityContentFactory();
+		$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 
 		if ( $entityContentFactory->isEntityContentModel( $wikiPage->getContent()->getModel() ) ) {
 			self::notifyEntityStoreWatcherOnUpdate(
@@ -240,7 +237,7 @@ final class RepoHooks {
 				$revisionRecord
 			);
 
-			$notifier = WikibaseRepo::getDefaultInstance()->getChangeNotifier();
+			$notifier = WikibaseRepo::getChangeNotifier();
 			$parentId = $revisionRecord->getParentId();
 
 			if ( !$parentId ) {
@@ -266,7 +263,7 @@ final class RepoHooks {
 		EntityContent $content,
 		RevisionRecord $revision
 	) {
-		$watcher = WikibaseRepo::getDefaultInstance()->getEntityStoreWatcher();
+		$watcher = WikibaseRepo::getEntityStoreWatcher();
 
 		// Notify storage/lookup services that the entity was updated. Needed to track page-level changes.
 		// May be redundant in some cases. Take care not to cause infinite regress.
@@ -305,8 +302,7 @@ final class RepoHooks {
 		?Content $content,
 		LogEntry $logEntry
 	) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$entityContentFactory = $wikibaseRepo->getEntityContentFactory();
+		$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 
 		// Bail out if we are not looking at an entity
 		if ( !$content || !$entityContentFactory->isEntityContentModel( $content->getModel() ) ) {
@@ -318,9 +314,9 @@ final class RepoHooks {
 
 		// Notify storage/lookup services that the entity was deleted. Needed to track page-level deletion.
 		// May be redundant in some cases. Take care not to cause infinite regress.
-		$wikibaseRepo->getEntityStoreWatcher()->entityDeleted( $content->getEntityId() );
+		WikibaseRepo::getEntityStoreWatcher()->entityDeleted( $content->getEntityId() );
 
-		$notifier = $wikibaseRepo->getChangeNotifier();
+		$notifier = WikibaseRepo::getChangeNotifier();
 		$notifier->notifyOnPageDeleted( $content, $user, $logEntry->getTimestamp() );
 	}
 
@@ -332,8 +328,7 @@ final class RepoHooks {
 	 * @param string $comment
 	 */
 	public static function onArticleUndelete( Title $title, $created, $comment ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$entityContentFactory = $wikibaseRepo->getEntityContentFactory();
+		$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 
 		// Bail out if we are not looking at an entity
 		if ( !$entityContentFactory->isEntityContentModel( $title->getContentModel() ) ) {
@@ -350,7 +345,7 @@ final class RepoHooks {
 			return;
 		}
 
-		$notifier = $wikibaseRepo->getChangeNotifier();
+		$notifier = WikibaseRepo::getChangeNotifier();
 		$notifier->notifyOnPageUndeleted( $revisionRecord );
 	}
 
@@ -376,18 +371,20 @@ final class RepoHooks {
 		}
 
 		if ( $logType === null || ( $logType === 'delete' && $logAction === 'restore' ) ) {
-			$changeLookup = WikibaseRepo::getDefaultInstance()->getStore()->getEntityChangeLookup();
+			$changeLookup = WikibaseRepo::getStore()->getEntityChangeLookup();
 
+			/** @var RepoEntityChange $change */
 			$change = $changeLookup->loadByRevisionId( $revId, EntityChangeLookup::FROM_MASTER );
+			'@phan-var RepoEntityChange $change';
 
 			if ( $change ) {
-				$changeStore = WikibaseRepo::getDefaultInstance()->getStore()->getChangeStore();
+				$changeStore = WikibaseRepo::getStore()->getChangeStore();
 
-				$centralIdLookup = ( new CentralIdLookupFactory() )->getCentralIdLookup();
+				$centralIdLookup = CentralIdLookup::factoryNonLocal();
 				if ( $centralIdLookup === null ) {
 					$centralUserId = 0;
 				} else {
-					$repoUser = $recentChange->getPerformer();
+					$repoUser = User::newFromIdentity( $recentChange->getPerformerIdentity() );
 					$centralUserId = $centralIdLookup->centralIdFromLocalUser(
 						$repoUser
 					);
@@ -450,7 +447,7 @@ final class RepoHooks {
 	 */
 	public static function onPageHistoryLineEnding( HistoryPager $history, $row, &$html, array $classes ) {
 		// Note: This assumes that HistoryPager::getTitle returns a Title.
-		$entityContentFactory = WikibaseRepo::getDefaultInstance()->getEntityContentFactory();
+		$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 
 		$wikiPage = $history->getWikiPage();
 		$services = MediaWikiServices::getInstance();
@@ -489,7 +486,7 @@ final class RepoHooks {
 	 * @param array[] &$links
 	 */
 	public static function onPageTabs( SkinTemplate $skinTemplate, array &$links ) {
-		$entityContentFactory = WikibaseRepo::getDefaultInstance()->getEntityContentFactory();
+		$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 
 		$title = $skinTemplate->getRelevantTitle();
 
@@ -500,8 +497,9 @@ final class RepoHooks {
 			if ( MediaWikiServices::getInstance()->getPermissionManager()
 					->quickUserCan( 'edit', $skinTemplate->getUser(), $title )
 			) {
+				$out = $skinTemplate->getOutput();
 				$request = $skinTemplate->getRequest();
-				$old = !$skinTemplate->isRevisionCurrent()
+				$old = !$out->isRevisionCurrent()
 					&& !$request->getCheck( 'diff' );
 
 				$restore = $request->getCheck( 'restore' );
@@ -511,7 +509,7 @@ final class RepoHooks {
 
 					$revid = $restore
 						? $request->getText( 'restore' )
-						: $skinTemplate->getRevisionId();
+						: $out->getRevisionId();
 
 					$rev = MediaWikiServices::getInstance()
 						->getRevisionLookup()
@@ -562,8 +560,8 @@ final class RepoHooks {
 	public static function onOutputPageBodyAttributes( OutputPage $out, Skin $skin, array &$bodyAttrs ) {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$outputPageEntityIdReader = new OutputPageEntityIdReader(
-			$wikibaseRepo->getEntityContentFactory(),
-			$wikibaseRepo->getEntityIdParser()
+			new OutputPageEntityViewChecker( WikibaseRepo::getEntityContentFactory() ),
+			WikibaseRepo::getEntityIdParser()
 		);
 
 		$entityId = $outputPageEntityIdReader->getEntityIdFromOutputPage( $out );
@@ -621,12 +619,12 @@ final class RepoHooks {
 			 * Don't make Wikibase check if a user can execute when the namespace in question does
 			 * not refer to a namespace used locally for Wikibase entities.
 			 */
-			$localEntitySource = $wikibaseRepo->getLocalEntitySource();
+			$localEntitySource = WikibaseRepo::getLocalEntitySource();
 			if ( !in_array( $namespace, $localEntitySource->getEntityNamespaceIds() ) ) {
 					return true;
 			}
 
-			$entityContentFactory = $wikibaseRepo->getEntityContentFactory();
+			$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 			$entityTypes = $wikibaseRepo->getEnabledEntityTypes();
 
 			foreach ( $entityContentFactory->getEntityContentModels() as $contentModel ) {
@@ -679,7 +677,7 @@ final class RepoHooks {
 	 * @param string[] &$types The types of protection available
 	 */
 	public static function onTitleGetRestrictionTypes( Title $title, array &$types ) {
-		$namespaceLookup = WikibaseRepo::getDefaultInstance()->getLocalEntityNamespaceLookup();
+		$namespaceLookup = WikibaseRepo::getLocalEntityNamespaceLookup();
 
 		if ( $namespaceLookup->isEntityNamespace( $title->getNamespace() ) ) {
 			// Remove create and move protection for Wikibase namespaces
@@ -729,7 +727,7 @@ final class RepoHooks {
 			return;
 		}
 
-		$namespaceLookup = WikibaseRepo::getDefaultInstance()->getEntityNamespaceLookup();
+		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 		$entityType = $namespaceLookup->getEntityType( $title->getNamespace() );
 		if ( $entityType === null ) {
 			return;
@@ -799,10 +797,8 @@ final class RepoHooks {
 	 * @return bool
 	 */
 	public static function onContentModelCanBeUsedOn( $contentModel, LinkTarget $title, &$ok ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
-		$namespaceLookup = $wikibaseRepo->getEntityNamespaceLookup();
-		$contentModelIds = $wikibaseRepo->getContentModelMappings();
+		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
+		$contentModelIds = WikibaseRepo::getContentModelMappings();
 
 		// Find any entity type that is mapped to the title namespace
 		$expectedEntityType = $namespaceLookup->getEntityType( $title->getNamespace() );
@@ -813,8 +809,8 @@ final class RepoHooks {
 		}
 
 		// If the entity type is not from the local source, don't check anything else
-		$entitySource = $wikibaseRepo->getEntitySourceDefinitions()->getSourceForEntityType( $expectedEntityType );
-		if ( $entitySource->getSourceName() !== $wikibaseRepo->getLocalEntitySource()->getSourceName() ) {
+		$entitySource = WikibaseRepo::getEntitySourceDefinitions()->getSourceForEntityType( $expectedEntityType );
+		if ( $entitySource->getSourceName() !== WikibaseRepo::getLocalEntitySource()->getSourceName() ) {
 			return true;
 		}
 
@@ -845,8 +841,8 @@ final class RepoHooks {
 	 * @param array &$data
 	 */
 	public static function onAPIQuerySiteInfoGeneralInfo( ApiQuerySiteinfo $api, array &$data ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$dataTypes = $wikibaseRepo->getDataTypeFactory()->getTypes();
+		$repoSettings = WikibaseRepo::getSettings();
+		$dataTypes = WikibaseRepo::getDataTypeFactory()->getTypes();
 		$propertyTypes = [];
 
 		foreach ( $dataTypes as $id => $type ) {
@@ -855,16 +851,16 @@ final class RepoHooks {
 
 		$data['wikibase-propertytypes'] = $propertyTypes;
 
-		$conceptBaseUri = $wikibaseRepo->getSettings()->getSetting( 'conceptBaseUri' );
+		$conceptBaseUri = $repoSettings->getSetting( 'conceptBaseUri' );
 		$data['wikibase-conceptbaseuri'] = $conceptBaseUri;
 
-		$geoShapeStorageBaseUrl = $wikibaseRepo->getSettings()->getSetting( 'geoShapeStorageBaseUrl' );
+		$geoShapeStorageBaseUrl = $repoSettings->getSetting( 'geoShapeStorageBaseUrl' );
 		$data['wikibase-geoshapestoragebaseurl'] = $geoShapeStorageBaseUrl;
 
-		$tabularDataStorageBaseUrl = $wikibaseRepo->getSettings()->getSetting( 'tabularDataStorageBaseUrl' );
+		$tabularDataStorageBaseUrl = $repoSettings->getSetting( 'tabularDataStorageBaseUrl' );
 		$data['wikibase-tabulardatastoragebaseurl'] = $tabularDataStorageBaseUrl;
 
-		$sparqlEndpoint = $wikibaseRepo->getSettings()->getSetting( 'sparqlEndpoint' );
+		$sparqlEndpoint = $repoSettings->getSetting( 'sparqlEndpoint' );
 		if ( is_string( $sparqlEndpoint ) ) {
 			$data['wikibase-sparql'] = $sparqlEndpoint;
 		}
@@ -931,9 +927,8 @@ final class RepoHooks {
 	 */
 	public static function onImportHandleRevisionXMLTag( $importer, $pageInfo, $revisionInfo ) {
 		if ( isset( $revisionInfo['model'] ) ) {
-			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-			$contentModels = $wikibaseRepo->getContentModelMappings();
-			$allowImport = $wikibaseRepo->getSettings()->getSetting( 'allowEntityImport' );
+			$contentModels = WikibaseRepo::getContentModelMappings();
+			$allowImport = WikibaseRepo::getSettings()->getSetting( 'allowEntityImport' );
 
 			if ( !$allowImport && in_array( $revisionInfo['model'], $contentModels ) ) {
 				// Skip entities.
@@ -954,13 +949,12 @@ final class RepoHooks {
 	 * @return void
 	 */
 	public static function onSidebarBeforeOutput( Skin $skin, array &$sidebar ): void {
-		$repo = WikibaseRepo::getDefaultInstance();
 		$hookHandler = new SidebarBeforeOutputHookHandler(
-			$repo->getSettings()->getSetting( 'conceptBaseUri' ),
-			$repo->getEntityIdLookup(),
-			$repo->getEntityLookup(),
-			$repo->getEntityNamespaceLookup(),
-			$repo->getLogger()
+			WikibaseRepo::getSettings()->getSetting( 'conceptBaseUri' ),
+			WikibaseRepo::getEntityIdLookup(),
+			WikibaseRepo::getEntityLookup(),
+			WikibaseRepo::getEntityNamespaceLookup(),
+			WikibaseRepo::getLogger()
 		);
 
 		$conceptUriLink = $hookHandler->buildConceptUriLink( $skin );
@@ -985,8 +979,23 @@ final class RepoHooks {
 
 		$modules = [
 			'wikibase.WikibaseContentLanguages' => $moduleTemplate + [
-				'scripts' => [
+				'packageFiles' => [
 					'resources/wikibase.WikibaseContentLanguages.js',
+
+					[
+						'name' => 'resources/contentLanguages.json',
+						'callback' => function () {
+							$contentLanguages = WikibaseRepo::getWikibaseContentLanguages();
+							return [
+								WikibaseContentLanguages::CONTEXT_MONOLINGUAL_TEXT => $contentLanguages
+									->getContentLanguages( WikibaseContentLanguages::CONTEXT_MONOLINGUAL_TEXT )
+									->getLanguages(),
+								WikibaseContentLanguages::CONTEXT_TERM => $contentLanguages
+									->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM )
+									->getLanguages(),
+							];
+						},
+					]
 				],
 				'dependencies' => [
 					'util.ContentLanguages',
@@ -1000,6 +1009,7 @@ final class RepoHooks {
 					'resources/wikibase.special/wikibase.special.languageLabelDescriptionAliases.js',
 				],
 				'dependencies' => [
+					'wikibase.getLanguageNameByCode',
 					'oojs-ui',
 				],
 				'messages' => [
@@ -1029,9 +1039,7 @@ final class RepoHooks {
 	 * @param array[] &$pageInfo
 	 */
 	public static function onInfoAction( IContextSource $context, array &$pageInfo ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
-		$namespaceChecker = $wikibaseRepo->getEntityNamespaceLookup();
+		$namespaceChecker = WikibaseRepo::getEntityNamespaceLookup();
 		$title = $context->getTitle();
 
 		if ( !$title || !$namespaceChecker->isNamespaceWithEntities( $title->getNamespace() ) ) {
@@ -1042,7 +1050,7 @@ final class RepoHooks {
 		$mediaWikiServices = MediaWikiServices::getInstance();
 		$loadBalancer = $mediaWikiServices->getDBLoadBalancer();
 		$subscriptionLookup = new SqlSubscriptionLookup( $loadBalancer );
-		$entityIdLookup = $wikibaseRepo->getEntityIdLookup();
+		$entityIdLookup = WikibaseRepo::getEntityIdLookup( $mediaWikiServices );
 
 		$siteLookup = $mediaWikiServices->getSiteLookup();
 
@@ -1067,7 +1075,7 @@ final class RepoHooks {
 	 */
 	public static function onApiMaxLagInfo( array &$lagInfo ) {
 
-		$dispatchLagToMaxLagFactor = WikibaseRepo::getDefaultInstance()->getSettings()->getSetting(
+		$dispatchLagToMaxLagFactor = WikibaseRepo::getSettings()->getSetting(
 			'dispatchLagToMaxLagFactor'
 		);
 
@@ -1133,11 +1141,9 @@ final class RepoHooks {
 				'meta',
 				[
 					'class' => MetaDataBridgeConfig::class,
-					'factory' => function( ApiQuery $apiQuery, $moduleName ) {
-						$repo = WikibaseRepo::getDefaultInstance();
-
+					'factory' => function( ApiQuery $apiQuery, string $moduleName, SettingsArray $repoSettings ) {
 						return new MetaDataBridgeConfig(
-							$repo->getSettings(),
+							$repoSettings,
 							$apiQuery,
 							$moduleName,
 							function ( string $pagename ): ?string {
@@ -1146,6 +1152,9 @@ final class RepoHooks {
 							}
 						);
 					},
+					'services' => [
+						'WikibaseRepo.Settings',
+					],
 				]
 			);
 		}
@@ -1165,5 +1174,37 @@ final class RepoHooks {
 			CommaSeparatedList::NAME,
 			[ CommaSeparatedList::class, 'handle' ]
 		);
+	}
+
+	public static function onRegistration() {
+		global $wgResourceModules, $wgRateLimits;
+
+		LibHooks::onRegistration();
+		ViewHooks::onRegistration();
+
+		$wgResourceModules = array_merge(
+			$wgResourceModules,
+			require __DIR__ . '/../resources/Resources.php'
+		);
+		self::inheritDefaultRateLimits( $wgRateLimits );
+	}
+
+	/**
+	 * Make the 'wikibase-idgenerator' rate limit inherit the 'create' rate limit,
+	 * or the 'edit' rate limit if no 'create' limit is defined,
+	 * unless the 'wikibase-idgenerator' rate limit was itself customized.
+	 *
+	 * @param array $rateLimits should be $wgRateLimits or a similar array
+	 */
+	public static function inheritDefaultRateLimits( array &$rateLimits ) {
+		if ( isset( $rateLimits['wikibase-idgenerator']['&inherit-create-edit'] ) ) {
+			unset( $rateLimits['wikibase-idgenerator']['&inherit-create-edit'] );
+			$limits = $rateLimits['create'] ?? $rateLimits['edit'] ?? [];
+			foreach ( $limits as $group => $limit ) {
+				if ( !isset( $rateLimits['wikibase-idgenerator'][$group] ) ) {
+					$rateLimits['wikibase-idgenerator'][$group] = $limit;
+				}
+			}
+		}
 	}
 }

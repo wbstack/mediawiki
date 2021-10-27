@@ -1,6 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
+			"NMW03",
+			"Neriman2003",
 			"Toghrul Rahimli",
 			"Wertuose"
 		]
@@ -12,9 +14,11 @@
 	"popups-settings-option-simple-description": "Bir məqalə oxuyarkən daxili keçidlərə cəld baxış.",
 	"popups-settings-option-off": "Söndür",
 	"popups-settings-save": "Qeyd et",
+	"popups-preview-no-preview": "Səhifəyə ilkin baxış göstərilə bilmədi",
+	"popups-preview-footer-read": "Bu səhifəyə keç",
+	"popups-preview-disambiguation": "Bu başlıq birdən çox səhifəyə aiddir",
+	"popups-preview-disambiguation-link": "Oxşar səhifələrə baxın",
 	"prefs-reading": "Oxu seçimləri",
-	"popups-prefs-optin-title": "Səhifə ön görünüşü (səhifə oxuyarkən məqaləyə cəld ilkin baxış):",
-	"popups-prefs-optin-enabled-label": "Açıq",
-	"popups-prefs-optin-disabled-label": "Qapalı",
+	"popups-prefs-optin": "Səhifə ön görünüşü (səhifə oxuyarkən məqaləyə cəld ilkin baxış):",
 	"popups-prefs-conflicting-gadgets-info": "Bəzi qədcetlər və digər uyğunlaşdırmalar bu funksiyanın performansına təsir edə bilər. Əgər problemlərlə qarşılarşırsınızsa, qloballar da daxil olmaqla qədcetlərinizi, istifadəçi skriptlərini nəzərdən keçirin."
 }

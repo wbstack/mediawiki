@@ -7,6 +7,8 @@
 			"Yurik"
 		]
 	},
+	"nstab-data": "נתונים",
+	"tooltip-ca-nstab-data": "הצגת דף הנתונים",
 	"jsonconfig-desc": "מאפשר לאחסן בוויקי תצורה בתסדיר JSON",
 	"jsonconfig-duplicate-field": "נמצא יותר מערך \"$1\" אחד",
 	"jsonconfig-edit-action-apply": "החלה",

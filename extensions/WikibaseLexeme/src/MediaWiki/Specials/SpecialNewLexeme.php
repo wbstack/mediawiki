@@ -17,6 +17,7 @@ use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\MediaWiki\Specials\HTMLForm\ItemSelectorWidgetField;
 use Wikibase\Lexeme\MediaWiki\Specials\HTMLForm\LemmaLanguageField;
 use Wikibase\Lib\FormatableSummary;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
@@ -36,10 +37,10 @@ use Wikimedia\Assert\Assert;
  */
 class SpecialNewLexeme extends SpecialPage {
 
-	/* public */ const FIELD_LEXEME_LANGUAGE = 'lexeme-language';
-	/* public */ const FIELD_LEXICAL_CATEGORY = 'lexicalcategory';
-	/* public */ const FIELD_LEMMA = 'lemma';
-	/* public */ const FIELD_LEMMA_LANGUAGE = 'lemma-language';
+	public const FIELD_LEXEME_LANGUAGE = 'lexeme-language';
+	public const FIELD_LEXICAL_CATEGORY = 'lexicalcategory';
+	public const FIELD_LEMMA = 'lemma';
+	public const FIELD_LEMMA_LANGUAGE = 'lemma-language';
 
 	private $copyrightView;
 	private $entityNamespaceLookup;
@@ -66,21 +67,24 @@ class SpecialNewLexeme extends SpecialPage {
 		$this->editEntityFactory = $editEntityFactory;
 	}
 
-	public static function newFromGlobalState(): self {
+	public static function factory(
+		EntityNamespaceLookup $entityNamespaceLookup,
+		EntityTitleLookup $entityTitleLookup,
+		SettingsArray $repoSettings
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 
-		$settings = $wikibaseRepo->getSettings();
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
-			$settings->getSetting( 'dataRightsUrl' ),
-			$settings->getSetting( 'dataRightsText' )
+			$repoSettings->getSetting( 'dataRightsUrl' ),
+			$repoSettings->getSetting( 'dataRightsText' )
 		);
 
 		return new self(
 			$copyrightView,
-			$wikibaseRepo->getEntityNamespaceLookup(),
+			$entityNamespaceLookup,
 			$wikibaseRepo->getSummaryFormatter(),
-			$wikibaseRepo->getEntityTitleLookup(),
+			$entityTitleLookup,
 			$wikibaseRepo->newEditEntityFactory()
 		);
 	}

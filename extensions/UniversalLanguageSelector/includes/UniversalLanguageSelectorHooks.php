@@ -27,7 +27,7 @@ class UniversalLanguageSelectorHooks {
 	 */
 	public static function setVersionConstant() {
 		global $wgHooks;
-		define( 'ULS_VERSION', '2018-10-26' );
+		define( 'ULS_VERSION', '2020-07-20' );
 		// The SkinAfterPortlet hook was introduced in version >= 1.35.
 		// It is the same as BaseTemplateAfterPortlet with the exception of its parameters.
 		if ( interface_exists( MediaWiki\Skins\Hook\SkinAfterPortletHook::class ) ) {
@@ -64,16 +64,11 @@ class UniversalLanguageSelectorHooks {
 	 */
 	private static function isCompactLinksEnabled( User $user ) {
 		global $wgULSEnable, $wgInterwikiMagic,
-			$wgULSCompactLinksEnableAnon,
 			$wgHideInterlanguageLinks, $wgULSCompactLanguageLinksBetaFeature;
 
 		// Whether any user visible features are enabled
 		if ( !$wgULSEnable ) {
 			return false;
-		}
-
-		if ( $user->isAnon() && $wgULSCompactLinksEnableAnon ) {
-			return true;
 		}
 
 		if ( $wgULSCompactLanguageLinksBetaFeature === true &&
@@ -90,25 +85,17 @@ class UniversalLanguageSelectorHooks {
 		if ( $wgULSCompactLanguageLinksBetaFeature === false ) {
 			// Compact language links is a default feature in this wiki.
 			// Check user preference
-			return $user->getBoolOption( 'compact-language-links' );
+			$services = MediaWikiServices::getInstance();
+			if ( method_exists( $services, 'getUserOptionsLookup' ) ) {
+				// MW 1.35 +
+				return $services->getUserOptionsLookup()
+					->getBoolOption( $user, 'compact-language-links' );
+			} else {
+				return $user->getBoolOption( 'compact-language-links' );
+			}
 		}
 
 		return false;
-	}
-
-	/**
-	 * Sets user preference to enable the Compact language links if the
-	 * user account is new.
-	 *
-	 * To be removed once no longer needed.
-	 * @param User $user
-	 * @param bool $autoCreate
-	 */
-	public static function onLocalUserCreated( User $user, $autoCreate ) {
-		if ( RequestContext::getMain()->getConfig()->get( 'ULSCompactLinksForNewAccounts' ) ) {
-			$user->setOption( 'compact-language-links', 1 );
-			$user->saveSettings();
-		}
 	}
 
 	/**
@@ -116,13 +103,27 @@ class UniversalLanguageSelectorHooks {
 	 * @param Skin $skin
 	 * Hook: BeforePageDisplay
 	 */
-	public static function addModules( OutputPage $out, $skin ) {
+	public static function addModules( OutputPage $out, Skin $skin ) {
 		global $wgULSPosition, $wgULSGeoService;
-
+		$unsupportedSkins = [ 'minerva' ];
+		if ( in_array( $skin->getSkinName(), $unsupportedSkins ) ) {
+			return;
+		}
 		// Soft dependency to Wikibase client. Don't enable CLL if links are managed manually.
 		$excludedLinks = $out->getProperty( 'noexternallanglinks' );
 		$override = is_array( $excludedLinks ) && in_array( '*', $excludedLinks );
-		if ( !$override && self::isCompactLinksEnabled( $out->getUser() ) ) {
+		$config = [
+			'wgULSPosition' => $wgULSPosition,
+		];
+
+		// Load compact links if no mw-interlanguage-selector element is present in the page HTML.
+		// We use the same mechanism as Skin::getDefaultModules and check the HTML for the presence in the HTML,
+		// using the class as the heuristic.
+		// Note if the element is rendered by the skin, its assumed that no collapsing is needed.
+		// See T264824 for more information.
+		if ( !$override && self::isCompactLinksEnabled( $out->getUser() ) &&
+			strpos( $out->getHTML(), 'mw-interlanguage-selector' ) === false
+		) {
 			$out->addModules( 'ext.uls.compactlinks' );
 		}
 
@@ -137,7 +138,8 @@ class UniversalLanguageSelectorHooks {
 
 		// This is added here, and not in addConfig to allow skins and extensions to vary it
 		// For example, ContentTranslation special pages depend on being able to change it.
-		$out->addJsConfigVars( 'wgULSPosition', $wgULSPosition );
+		$out->addJsConfigVars( $config );
+
 		if ( $wgULSPosition === 'personal' ) {
 			$out->addModuleStyles( 'ext.uls.pt' );
 		} else {
@@ -353,18 +355,20 @@ class UniversalLanguageSelectorHooks {
 	/**
 	 * Hook: ResourceLoaderGetConfigVars
 	 * @param array &$vars
+	 * @param string $skin
 	 */
-	public static function addConfig( array &$vars ) {
+	public static function addConfig( array &$vars, $skin ) {
 		global $wgULSGeoService,
 			$wgULSIMEEnabled, $wgULSWebfontsEnabled,
 			$wgULSNoWebfontsSelectors,
 			$wgULSAnonCanChangeLanguage,
-			$wgULSEventLogging,
 			$wgULSImeSelectors, $wgULSNoImeSelectors,
 			$wgULSFontRepositoryBasePath,
 			$wgExtensionAssetsPath,
 			$wgInterwikiSortingSortPrepend;
 
+		$extRegistry = ExtensionRegistry::getInstance();
+		$skinConfig = $extRegistry->getAttribute( 'UniversalLanguageSelectorSkinConfig' )[ $skin ] ?? [];
 		// Place constant stuff here (not depending on request context)
 
 		if ( is_string( $wgULSGeoService ) ) {
@@ -374,11 +378,10 @@ class UniversalLanguageSelectorHooks {
 		$vars['wgULSIMEEnabled'] = $wgULSIMEEnabled;
 		$vars['wgULSWebfontsEnabled'] = $wgULSWebfontsEnabled;
 		$vars['wgULSAnonCanChangeLanguage'] = $wgULSAnonCanChangeLanguage;
-		$vars['wgULSEventLogging'] = $wgULSEventLogging
-			&& ExtensionRegistry::getInstance()->isLoaded( 'EventLogging' );
 		$vars['wgULSImeSelectors'] = $wgULSImeSelectors;
 		$vars['wgULSNoImeSelectors'] = $wgULSNoImeSelectors;
 		$vars['wgULSNoWebfontsSelectors'] = $wgULSNoWebfontsSelectors;
+		$vars['wgULSDisplaySettingsInInterlanguage'] = $skinConfig['ULSDisplaySettingsInInterlanguage'] ?? false;
 
 		if ( is_string( $wgULSFontRepositoryBasePath ) ) {
 			$vars['wgULSFontRepositoryBasePath'] = $wgULSFontRepositoryBasePath;
@@ -400,7 +403,7 @@ class UniversalLanguageSelectorHooks {
 	public static function addVariables( array &$vars, OutputPage $out ) {
 		// Place request context dependent stuff here
 		$user = $out->getUser();
-		$loggedIn = $user->isLoggedIn();
+		$loggedIn = $user->isRegistered();
 
 		// Do not output accept languages if there is risk it will get cached across requests
 		if ( $out->getConfig()->get( 'ULSAnonCanChangeLanguage' ) || $loggedIn ) {
@@ -432,6 +435,12 @@ class UniversalLanguageSelectorHooks {
 
 	public static function onGetPreferences( $user, array &$preferences ) {
 		global $wgULSCompactLanguageLinksBetaFeature;
+
+		// T259037: Does not work well on Minerva
+		$skin = RequestContext::getMain()->getSkin();
+		if ( $skin->getSkinName() === 'minerva' ) {
+			return;
+		}
 
 		$preferences['uls-preferences'] = [
 			'type' => 'api',
@@ -486,6 +495,8 @@ class UniversalLanguageSelectorHooks {
 	}
 
 	/**
+	 * Kept for backward compatability with MW < 1.35, and older versions of skins
+	 * such as Vector and Timeless
 	 * @param QuickTemplate $template
 	 * @param string $name
 	 * @param string &$content
@@ -495,7 +506,20 @@ class UniversalLanguageSelectorHooks {
 		string $name,
 		string &$content
 	) {
-		self::onSkinAfterPortlet( $template->getSkin(), $name, $content );
+		global $wgULSPosition;
+
+		if ( $wgULSPosition !== 'interlanguage' ) {
+			return;
+		}
+
+		if ( !self::isToolbarEnabled( $template->getSkin()->getUser() ) ) {
+			return;
+		}
+
+		// Set to an empty array, just to make sure that the section appears
+		if ( $template->get( 'language_urls' ) === false ) {
+			$template->set( 'language_urls', [] );
+		}
 	}
 
 	/**

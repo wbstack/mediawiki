@@ -3,8 +3,8 @@
 namespace TwoColConflict\ProvideSubmittedText;
 
 use Html;
+use IBufferingStatsdDataFactory;
 use MediaWiki\EditPage\TextboxBuilder;
-use MediaWiki\MediaWikiServices;
 use ObjectCache;
 use OOUI\HtmlSnippet;
 use OOUI\MessageWidget;
@@ -20,8 +20,24 @@ use UnlistedSpecialPage;
  * @author Christoph Jauera <christoph.jauera@wikimedia.de>
  */
 class SpecialProvideSubmittedText extends UnlistedSpecialPage {
-	public function __construct() {
+
+	/** @var IBufferingStatsdDataFactory */
+	private $statsdDataFactory;
+
+	/** @var TwoColConflictContext */
+	private $twoColConflictContext;
+
+	/**
+	 * @param IBufferingStatsdDataFactory $statsdDataFactory
+	 * @param TwoColConflictContext $twoColConflictContext
+	 */
+	public function __construct(
+		IBufferingStatsdDataFactory $statsdDataFactory,
+		TwoColConflictContext $twoColConflictContext
+	) {
 		parent::__construct( 'TwoColConflictProvideSubmittedText' );
+		$this->statsdDataFactory = $statsdDataFactory;
+		$this->twoColConflictContext = $twoColConflictContext;
 	}
 
 	/**
@@ -32,12 +48,16 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 		$out = $this->getOutput();
 		$out->addModuleStyles( 'ext.TwoColConflict.SplitCss' );
 		$out->enableOOUI();
-		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
-		$stats->increment( 'TwoColConflict.copy.special.load' );
+		$this->statsdDataFactory->increment( 'TwoColConflict.copy.special.load' );
 
 		$title = Title::newFromDBkey( $subPage ?? '' );
 		if ( !$title ) {
-			// TODO: Return with a 404 ("Not Found") and show an error message
+			// Should be the same error code as for every malformed title
+			$out->setStatusCode( 404 );
+			$out->addHTML( new MessageWidget( [
+				'label' => $this->msg( 'twocolconflict-special-malformed-title' )->text(),
+				'type' => 'error',
+			] ) );
 			return;
 		}
 
@@ -53,11 +73,16 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 		);
 
 		if ( !$text ) {
-			// TODO Return with a 410 ("Gone") and show an error message
+			// 401 means "gone", which is quite literally what happened here
+			$out->setStatusCode( 410 );
+			$out->addHTML( new MessageWidget( [
+				'label' => $this->msg( 'twocolconflict-special-expired' )->text(),
+				'type' => 'warning',
+			] ) );
 			return;
 		}
 
-		$stats->increment( 'TwoColConflict.copy.special.retrieved' );
+		$this->statsdDataFactory->increment( 'TwoColConflict.copy.special.retrieved' );
 
 		$html = $this->getHeaderHintsHtml();
 		$html .= $this->getTextHeaderLabelHtml();
@@ -68,9 +93,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 	}
 
 	private function getHeaderHintsHtml() : string {
-		/** @var TwoColConflictContext $twoColContext */
-		$twoColContext = MediaWikiServices::getInstance()->getService( 'TwoColConflictContext' );
-		$hintMsg = $twoColContext->isUsedAsBetaFeature()
+		$hintMsg = $this->twoColConflictContext->isUsedAsBetaFeature()
 			? 'twocolconflict-split-header-hint-beta'
 			: 'twocolconflict-split-header-hint';
 

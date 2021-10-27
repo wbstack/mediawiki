@@ -14,6 +14,7 @@ use ResourceLoaderModule;
 
 class DataModule extends ResourceLoaderModule {
 
+	/** @inheritDoc */
 	protected $targets = [ 'desktop', 'mobile' ];
 
 	/**
@@ -31,6 +32,9 @@ class DataModule extends ResourceLoaderModule {
 		] );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function enableModuleContentVersion() {
 		return true;
 	}

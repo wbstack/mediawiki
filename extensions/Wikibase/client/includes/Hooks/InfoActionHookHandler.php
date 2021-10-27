@@ -8,11 +8,15 @@ use MediaWiki\Hook\InfoActionHook;
 use Title;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\RepoLinker;
+use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Store\DescriptionLookup;
 use Wikibase\Client\Usage\UsageLookup;
-use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\DataModel\Services\Lookup\TermLookup;
+use Wikibase\DataModel\Services\Term\TermBuffer;
+use Wikibase\Lib\LanguageFallbackChainFactory;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\SiteLinkLookup;
 
@@ -82,25 +86,29 @@ class InfoActionHookHandler implements InfoActionHook {
 		$this->descriptionLookup = $descriptionLookup;
 	}
 
-	public static function newFromGlobalState(): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$settings = $wikibaseClient->getSettings();
-
-		$namespaceChecker = $wikibaseClient->getNamespaceChecker();
-		$usageLookup = $wikibaseClient->getStore()->getUsageLookup();
+	public static function factory(
+		DescriptionLookup $descriptionLookup,
+		EntityIdParser $idParser,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		NamespaceChecker $namespaceChecker,
+		RepoLinker $repoLinker,
+		SettingsArray $clientSettings,
+		ClientStore $store,
+		TermBuffer $termBuffer,
+		TermLookup $termLookup
+	): self {
+		$usageLookup = $store->getUsageLookup();
 		$labelDescriptionLookupFactory = new LanguageFallbackLabelDescriptionLookupFactory(
-			$wikibaseClient->getLanguageFallbackChainFactory(),
-			$wikibaseClient->getTermLookup(),
-			$wikibaseClient->getTermBuffer()
+			$languageFallbackChainFactory,
+			$termLookup,
+			$termBuffer
 		);
-		$idParser = $wikibaseClient->getEntityIdParser();
-		$descriptionLookup = $wikibaseClient->getDescriptionLookup();
 
 		return new self(
 			$namespaceChecker,
-			$wikibaseClient->newRepoLinker(),
-			$wikibaseClient->getStore()->getSiteLinkLookup(),
-			$settings->getSetting( 'siteGlobalID' ),
+			$repoLinker,
+			$store->getSiteLinkLookup(),
+			$clientSettings->getSetting( 'siteGlobalID' ),
 			$usageLookup,
 			$labelDescriptionLookupFactory,
 			$idParser,
@@ -246,12 +254,9 @@ class InfoActionHookHandler implements InfoActionHook {
 	private function formatEntityUsage( IContextSource $context, array $usage ) {
 		$usageAspectsByEntity = [];
 		$entities = [];
-		foreach ( $usage as $key => $entityUsage ) {
+		foreach ( $usage as $entityUsage ) {
 			$entityId = $entityUsage->getEntityId()->getSerialization();
 			$entities[$entityId] = $entityUsage->getEntityId();
-			if ( !isset( $usageAspectsByEntity[$entityId] ) ) {
-				$usageAspectsByEntity[$entityId] = [];
-			}
 			$usageAspectsByEntity[$entityId][] = [
 				$entityUsage->getAspect(),
 				$entityUsage->getModifier()

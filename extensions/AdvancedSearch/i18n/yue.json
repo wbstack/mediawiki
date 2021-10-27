@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Hello903hello"
+			"Hello903hello",
+			"Moon0319",
+			"Roy17"
 		]
 	},
 	"advancedsearch-options-pane-head": "高級參數：",
@@ -20,6 +22,7 @@
 	"advancedsearch-field-filetype": "檔類型",
 	"advancedsearch-field-filew": "檔闊度（像素）",
 	"advancedsearch-field-fileh": "檔高度（像素）",
+	"advancedsearch-field-preview-sort": "按$1嚟排",
 	"advancedsearch-placeholder-exact-text": "\"貓中意山羊\"",
 	"advancedsearch-inlanguage-default": "揀語言",
 	"advancedsearch-filetype-section-types": "一般檔類型",
@@ -27,7 +30,7 @@
 	"advancedsearch-filetype-section-video": "片格式",
 	"advancedsearch-filetype-section-audio": "聲格式",
 	"advancedsearch-filetype-section-document": "文格式",
-	"advancedsearch-filetype-section-other": "其他格式",
+	"advancedsearch-filetype-section-other": "第啲格式",
 	"advancedsearch-filetype-default": "揀檔類型",
 	"advancedsearch-filetype-bitmap": "圖",
 	"advancedsearch-filetype-drawing": "畫",

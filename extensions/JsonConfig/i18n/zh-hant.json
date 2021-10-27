@@ -9,6 +9,8 @@
 			"Yurik"
 		]
 	},
+	"nstab-data": "資料",
+	"tooltip-ca-nstab-data": "檢視資料頁面",
 	"jsonconfig-desc": "允許在 Wiki 儲存 JSON 設定",
 	"jsonconfig-duplicate-field": "發現值 \"$1\" 超過一個",
 	"jsonconfig-edit-action-apply": "套用",

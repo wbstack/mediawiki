@@ -8,7 +8,6 @@ var Overlay = require( '../mobile.startup/Overlay' ),
 	Button = require( '../mobile.startup/Button' ),
 	Icon = require( '../mobile.startup/Icon' ),
 	toast = require( '../mobile.startup/showOnPageReload' ),
-	saveFailureMessage = require( './saveFailureMessage' ),
 	mfExtend = require( '../mobile.startup/mfExtend' ),
 	blockMessageDrawer = require( './blockMessageDrawer' ),
 	MessageBox = require( '../mobile.startup/MessageBox' ),
@@ -301,26 +300,30 @@ mfExtend( EditorOverlayBase, Overlay, {
 	 * @param {Object} data API response
 	 */
 	onSaveFailure: function ( data ) {
-		var key = data && data.errors && data.errors[0] && data.errors[0].code,
-			// TODO: This looks incomplete and most of the error codes are wrong.
+		var code = data && data.errors && data.errors[0] && data.errors[0].code,
 			// Compare to ve.init.mw.ArticleTargetEvents.js in VisualEditor.
 			typeMap = {
-				editconflict: 'editConflict',
-				wasdeleted: 'editPageDeleted',
+				badtoken: 'userBadToken',
+				assertanonfailed: 'userNewUser',
+				assertuserfailed: 'userNewUser',
+				assertnameduserfailed: 'userNewUser',
 				'abusefilter-disallowed': 'extensionAbuseFilter',
+				'abusefilter-warning': 'extensionAbuseFilter',
 				captcha: 'extensionCaptcha',
-				spamprotectiontext: 'extensionSpamBlacklist',
-				'titleblacklist-forbidden-edit': 'extensionTitleBlacklist'
+				spamblacklist: 'extensionSpamBlacklist',
+				'titleblacklist-forbidden': 'extensionTitleBlacklist',
+				pagedeleted: 'editPageDeleted',
+				editconflict: 'editConflict'
 			};
 
 		if ( data.edit && data.edit.captcha ) {
-			key = 'captcha';
+			code = 'captcha';
 		}
 
 		this.log( {
 			action: 'saveFailure',
-			message: saveFailureMessage( data ),
-			type: typeMap[key] || 'responseUnknown'
+			message: code,
+			type: typeMap[code] || 'responseUnknown'
 		} );
 	},
 	/**
@@ -488,14 +491,16 @@ mfExtend( EditorOverlayBase, Overlay, {
 	 * @memberof EditorOverlayBase
 	 * @instance
 	 * @param {Function} exit Callback to exit the overlay
+	 * @param {Function} cancel Callback to cancel exiting the overlay
 	 */
-	onBeforeExit: function ( exit ) {
-		var windowManager,
-			self = this;
+	onBeforeExit: function ( exit, cancel ) {
+		var self = this;
 		if ( this.hasChanged() && !this.switching ) {
-			windowManager = OO.ui.getWindowManager();
-			windowManager.addWindows( [ new mw.widgets.AbandonEditDialog() ] );
-			windowManager.openWindow( 'abandonedit' )
+			if ( !this.windowManager ) {
+				this.windowManager = OO.ui.getWindowManager();
+				this.windowManager.addWindows( [ new mw.widgets.AbandonEditDialog() ] );
+			}
+			this.windowManager.openWindow( 'abandonedit' )
 				.closed.then( function ( data ) {
 					if ( data && data.action === 'discard' ) {
 						// log abandonment
@@ -504,11 +509,15 @@ mfExtend( EditorOverlayBase, Overlay, {
 							mechanism: 'cancel',
 							type: 'abandon'
 						} );
-						self.allowCloseWindow.release();
+						// May not be set if overlay has not been previously shown
+						if ( self.allowCloseWindow ) {
+							self.allowCloseWindow.release();
+						}
 						mw.hook( 'mobileFrontend.editorClosed' ).fire();
 						exit();
 					}
 				} );
+			cancel();
 			return;
 		}
 		if ( !this.switching && !this.saved ) {
@@ -524,7 +533,10 @@ mfExtend( EditorOverlayBase, Overlay, {
 				type: ( this.target && this.target.edited ) ? 'abandon' : 'nochange'
 			} );
 		}
-		this.allowCloseWindow.release();
+		// If undefined .show may not have been called
+		if ( this.allowCloseWindow ) {
+			this.allowCloseWindow.release();
+		}
 		mw.hook( 'mobileFrontend.editorClosed' ).fire();
 		exit();
 	},

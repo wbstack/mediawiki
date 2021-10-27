@@ -1,13 +1,15 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lib\Formatters;
 
 use InvalidArgumentException;
 use Language;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
-use Wikibase\Lib\LanguageFallbackChain;
 use Wikibase\Lib\LanguageFallbackChainFactory;
+use Wikibase\Lib\TermLanguageFallbackChain;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -76,10 +78,7 @@ class OutputFormatValueFormatterFactory {
 	 *        callback must return a ValueFormatter suitable for emitting the given output format,
 	 *        or null.
 	 */
-	public function setFormatterFactoryCallback( $type, $factoryFunction ) {
-		Assert::parameterType( 'string', $type, '$type' );
-		Assert::parameterType( 'callable|null', $factoryFunction, '$factoryFunction' );
-
+	public function setFormatterFactoryCallback( string $type, ?callable $factoryFunction ) {
 		if ( $factoryFunction === null ) {
 			unset( $this->factoryFunctions[$type] );
 		} else {
@@ -117,9 +116,9 @@ class OutputFormatValueFormatterFactory {
 			);
 		}
 
-		if ( !( $options->getOption( $fallbackOption ) instanceof LanguageFallbackChain ) ) {
+		if ( !( $options->getOption( $fallbackOption ) instanceof TermLanguageFallbackChain ) ) {
 			throw new InvalidArgumentException( 'The value of OPT_LANGUAGE_FALLBACK_CHAIN must be '
-				. 'an instance of LanguageFallbackChain.' );
+				. 'an instance of TermLanguageFallbackChain.' );
 		}
 	}
 

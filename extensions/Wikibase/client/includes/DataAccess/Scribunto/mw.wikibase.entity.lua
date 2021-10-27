@@ -16,8 +16,15 @@ local methodtable = {}
 local util = require 'libraryUtil'
 local checkType = util.checkType
 local checkTypeMulti = util.checkTypeMulti
+local settings = {}
 
 metatable.__index = methodtable
+
+local function incrementStatsKey( key )
+	if math.random() <= settings.trackLuaFunctionCallsSampleRate then
+		php.incrementStatsKey( key )
+	end
+end
 
 -- Claim ranks (Claim::RANK_* in PHP)
 Entity.claimRanks = {
@@ -129,7 +136,7 @@ function Entity.create( data )
 	end
 
 	local entity = data
-	maskEntityTables( entity, php.getSetting( 'fineGrainedLuaTracking' ) )
+	maskEntityTables( entity, settings.fineGrainedLuaTracking )
 
 	setmetatable( entity, metatable )
 	return entity
@@ -148,7 +155,7 @@ end
 -- @param {string} termType A valid key in the entity table (either labels, descriptions or aliases)
 -- @param {string|number} langCode
 local function getTermAndLang( entity, termType, langCode )
-	php.incrementStatsKey( 'wikibase.client.scribunto.entity.getTermAndLang.call' )
+	incrementStatsKey( 'wikibase.client.scribunto.entity.getTermAndLang.call' )
 
 	langCode = langCode or php.getLanguageCode()
 
@@ -218,7 +225,7 @@ end
 --
 -- @param {string|number} [globalSiteId]
 function methodtable.getSitelink( entity, globalSiteId )
-	php.incrementStatsKey( 'wikibase.client.scribunto.entity.getSitelink.call' )
+	incrementStatsKey( 'wikibase.client.scribunto.entity.getSitelink.call' )
 
 	checkTypeMulti( 'getSitelink', 1, globalSiteId, { 'string', 'number', 'nil' } )
 
@@ -245,7 +252,7 @@ end
 -- @param {string} propertyLabelOrId
 -- @param {string} funcName for error logging
 local function getEntityStatements( entity, propertyLabelOrId, funcName )
-	php.incrementStatsKey( 'wikibase.client.scribunto.entity.getEntityStatements.call' )
+	incrementStatsKey( 'wikibase.client.scribunto.entity.getEntityStatements.call' )
 
 	checkType( funcName, 1, propertyLabelOrId, 'string' )
 
@@ -297,7 +304,7 @@ end
 
 -- Get a table with all property ids attached to the entity.
 function methodtable.getProperties( entity )
-	php.incrementStatsKey( 'wikibase.client.scribunto.entity.getProperties.call' )
+	incrementStatsKey( 'wikibase.client.scribunto.entity.getProperties.call' )
 
 	if entity.claims == nil then
 		return {}
@@ -352,7 +359,7 @@ end
 -- @param {string} propertyLabelOrId
 -- @param {table} [acceptableRanks]
 function methodtable.formatPropertyValues( entity, propertyLabelOrId, acceptableRanks )
-	php.incrementStatsKey( 'wikibase.client.scribunto.entity.formatPropertyValues.call' )
+	incrementStatsKey( 'wikibase.client.scribunto.entity.formatPropertyValues.call' )
 
 	checkType( 'formatPropertyValues', 1, propertyLabelOrId, 'string' )
 	checkTypeMulti( 'formatPropertyValues', 2, acceptableRanks, { 'table', 'nil' } )
@@ -371,7 +378,7 @@ end
 -- @param {string} propertyLabelOrId
 -- @param {table} [acceptableRanks]
 function methodtable.formatStatements( entity, propertyLabelOrId, acceptableRanks )
-	php.incrementStatsKey( 'wikibase.client.scribunto.entity.formatStatements.call' )
+	incrementStatsKey( 'wikibase.client.scribunto.entity.formatStatements.call' )
 
 	checkType( 'formatStatements', 1, propertyLabelOrId, 'string' )
 	checkTypeMulti( 'formatStatements', 2, acceptableRanks, { 'table', 'nil' } )
@@ -384,7 +391,12 @@ function methodtable.formatStatements( entity, propertyLabelOrId, acceptableRank
 	);
 end
 
+function Entity.setupInterface( options )
+    -- Remove setup function
+    Entity.setupInterface = nil
+    settings = options
+end
+
 mw.wikibase.entity = Entity
 package.loaded['mw.wikibase.entity'] = Entity
-
 return Entity

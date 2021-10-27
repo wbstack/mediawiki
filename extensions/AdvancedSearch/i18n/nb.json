@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Danmichaelo",
+			"Fredrilj",
 			"Imre Eilertsen",
 			"Jeblad",
 			"Jon Harald Søby",
@@ -14,7 +15,7 @@
 	"advancedsearch-optgroup-text": "Søk i sidetekst",
 	"advancedsearch-optgroup-structure": "Struktur",
 	"advancedsearch-optgroup-files": "Filer og bilder",
-	"advancedsearch-optgroup-sort": "Sorteringsrekkefølge",
+	"advancedsearch-optgroup-sort": "Sortering",
 	"advancedsearch-field-plain": "Disse ordene",
 	"advancedsearch-field-phrase": "Nøyaktig denne teksten",
 	"advancedsearch-field-or": "Ett av disse ordene",
@@ -60,10 +61,14 @@
 	"advancedsearch-filesize-greater-than": "større enn",
 	"advancedsearch-filesize-smaller-than": "mindre enn",
 	"advancedsearch-sort-relevance": "Relevans",
+	"advancedsearch-sort-last-edit-asc": "Redigeringsdato – eldste øverst",
 	"advancedsearch-sort-last-edit-desc": "Redigeringsdato – nyeste først",
+	"advancedsearch-sort-create-timestamp-asc": "Opprettelsesdato – eldste øverst",
 	"advancedsearch-sort-create-timestamp-desc": "Opprettelsesdato – nyeste først",
 	"advancedsearch-sort-preview-relevance": "relevans",
+	"advancedsearch-sort-preview-last-edit-asc": "senest redigert",
 	"advancedsearch-sort-preview-last-edit-desc": "redigeringsdato",
+	"advancedsearch-sort-preview-create-timestamp-asc": "senest opprettet",
 	"advancedsearch-sort-preview-create-timestamp-desc": "opprettelsesdato",
 	"advancedsearch-namespaces-search-in": "Søk i:",
 	"advancedsearch-namespaces-remember": "Husk valgene for fremtidige søk",
@@ -74,5 +79,5 @@
 	"advancedsearch-namespaces-placeholder": "Legg til navnerom …",
 	"prefs-advancedsearch": "Avansert søk",
 	"advancedsearch-preference-help": "Avansert søk legger til et skjema på søkesiden. Dette lar deg utføre spesialiserte søk selv om du ikke kan søkesyntaksen. Det endrer også måten navnerom velges på.",
-	"advancedsearch-preference-disable": "Ikke vis grensesnittet for avansert søk"
+	"advancedsearch-preference-disable": "Ikke vis grensesnittet for avansert søk når du bruker Special:Search"
 }

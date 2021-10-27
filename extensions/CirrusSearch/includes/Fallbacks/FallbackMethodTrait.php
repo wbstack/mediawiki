@@ -2,7 +2,6 @@
 
 namespace CirrusSearch\Fallbacks;
 
-use CirrusSearch\Parser\BasicQueryClassifier;
 use CirrusSearch\Parser\QueryStringRegex\SearchQueryParseException;
 use CirrusSearch\Search\CirrusSearchResultSet;
 use CirrusSearch\Search\SearchQuery;
@@ -88,7 +87,6 @@ trait FallbackMethodTrait {
 		if ( !$originalQuery->isAllowRewrite()
 			 || !$context->costlyCallAllowed()
 			 || $this->resultsThreshold( $previousSet, $resultsThreshold )
-			 || !$originalQuery->getParsedQuery()->isQueryOfClass( BasicQueryClassifier::SIMPLE_BAG_OF_WORDS )
 		) {
 			// Only provide the suggestion, not the results of the suggestion.
 			return FallbackStatus::suggestQuery( $suggestedQuery, $suggestedQuerySnippet );
@@ -96,7 +94,7 @@ trait FallbackMethodTrait {
 
 		try {
 			$rewrittenQuery = SearchQueryBuilder::forRewrittenQuery( $originalQuery, $suggestedQuery,
-					$context->getNamespacePrefixParser() )->build();
+					$context->getNamespacePrefixParser(), $context->getCirrusSearchHookRunner() )->build();
 		} catch ( SearchQueryParseException $e ) {
 			LoggerFactory::getInstance( 'CirrusSearch' )
 				->warning( "Cannot parse rewritten query", [ 'exception' => $e ] );

@@ -68,6 +68,7 @@
 	"wikibasecirrus-search-bad-entity-type": "Type invalide d'entité: $1",
 	"wikibasecirrus-search-bad-profile-name": "Nom de profil recherché invalide: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Le mot clé haswbstatement ne contient pas d'instructions valides",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "le mot-clé ''haslicense'' n’a aucun argument valide",
 	"special-entitieswithoutdescription": "Entités sans description",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Obtenir une liste des entités sans description",
 	"special-entitieswithoutlabel": "Entités sans libellé",

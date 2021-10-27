@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Aefgh39622",
 			"Ans",
 			"Geonuch",
 			"Harley Hartwell",
@@ -15,6 +16,7 @@
 	"usercredentials-leg-areas": "หัวข้อที่สนใจ",
 	"usercredentials-leg-person": "ข้อมูลส่วนตัว",
 	"usercredentials-leg-other": "ข้อมูลอื่น ๆ",
+	"usercredentials-leg-ip": "ข้อมูลที่อยู่ไอพี",
 	"usercredentials-email": "อีเมล:",
 	"usercredentials-real": "ชื่อจริง",
 	"usercredentials-bio": "ชีวประวัติ:",
@@ -22,5 +24,7 @@
 	"usercredentials-notes": "รายละเอียดเพิ่มเติม:",
 	"usercredentials-urls": "รายชื่อเว็บไซต์:",
 	"usercredentials-ip": "ไอพีแอดเดรสดั้งเิดิม:",
-	"usercredentials-member": "สิทธิ:"
+	"usercredentials-agent": "ตัวแทนผู้ใช้ดั้งเดิม:",
+	"usercredentials-member": "สิทธิ:",
+	"usercredentials-badid": "ไม่พบข้อมูลประจำตัวสำหรับผู้ใช้นี้\nตรวจสอบว่าชื่อสะกดถูกต้อง"
 }

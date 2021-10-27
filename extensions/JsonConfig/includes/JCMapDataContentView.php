@@ -38,8 +38,8 @@ class JCMapDataContentView extends JCContentView {
 		if ( $localizedData ) {
 			$extReg = ExtensionRegistry::getInstance();
 
-			// Test both because for some reason mTagHooks is not set during preview
-			if ( isset( $mainParser->mTagHooks['mapframe'] ) ||
+			// Test both because for some reason getTags() is empty during preview
+			if ( in_array( 'mapframe', $mainParser->getTags(), true ) ||
 				$extReg->isLoaded( 'Kartographer' )
 			) {
 				$zoom = $content->getField( 'zoom' );
@@ -64,7 +64,7 @@ $jsonText
 EOT;
 			} else {
 				$jsonText = FormatJson::encode( $localizedData->data, true, FormatJson::UTF8_OK );
-				if ( isset( $mainParser->mTagHooks['syntaxhighlight'] ) ||
+				if ( in_array( 'syntaxhighlight', $mainParser->getTags(), true ) ||
 					$extReg->isLoaded( 'SyntaxHighlight' )
 				) {
 					$text = "<syntaxhighlight lang=json>\n$jsonText\n</syntaxhighlight>";

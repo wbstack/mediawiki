@@ -1,6 +1,7 @@
 {
 	"name": "AdvancedSearch",
 	"author": [
+		"[https://meta.wikimedia.org/wiki/WMDE_Technical_Wishes Wikimedia Deutschland Technical Wishes Team]",
 		"Thiemo Kreuz",
 		"Gabriel Birke",
 		"Tonina Zhelyazkova",
@@ -117,7 +118,9 @@
 				"advancedsearch-namespaces-search-in",
 				"advancedsearch-namespaces-placeholder",
 				"advancedsearch-sort-relevance",
+				"advancedsearch-sort-last-edit-asc",
 				"advancedsearch-sort-last-edit-desc",
+				"advancedsearch-sort-create-timestamp-asc",
 				"advancedsearch-sort-create-timestamp-desc",
 				"advancedsearch-optgroup-text",
 				"advancedsearch-optgroup-structure",
@@ -146,7 +149,9 @@
 				"advancedsearch-field-sort",
 				"advancedsearch-field-preview-sort",
 				"advancedsearch-sort-preview-relevance",
+				"advancedsearch-sort-preview-last-edit-asc",
 				"advancedsearch-sort-preview-last-edit-desc",
+				"advancedsearch-sort-preview-create-timestamp-asc",
 				"advancedsearch-sort-preview-create-timestamp-desc"
 			],
 			"dependencies": [
@@ -171,7 +176,7 @@
 			]
 		},
 		"ext.advancedSearch.SearchFieldUI": {
-			"scripts" : [
+			"scripts": [
 				"modules/dm/ext.advancedSearch.TitleCache.js",
 				"modules/dm/ext.advancedSearch.MultiselectLookup.js",
 				"modules/ui/ext.advancedSearch.ArbitraryWordInput.js",

@@ -2,17 +2,18 @@
 
 namespace EntitySchema\MediaWiki\Actions;
 
-use IContextSource;
-use Page;
 use EntitySchema\MediaWiki\Content\EntitySchemaSlotDiffRenderer;
 use EntitySchema\Presentation\ConfirmationFormRenderer;
 use EntitySchema\Presentation\DiffRenderer;
+use IContextSource;
+use Page;
 
 /**
  * @license GPL-2.0-or-later
  */
 class UndoViewAction extends AbstractUndoAction {
 
+	/** @var EntitySchemaSlotDiffRenderer */
 	private $slotDiffRenderer;
 
 	public function __construct(

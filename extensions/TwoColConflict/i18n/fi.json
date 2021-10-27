@@ -15,5 +15,6 @@
 	"twocolconflict-desc": "Näyttää rinnakkaisen muokkaustenyhdistämisnäytön päällekkäisten muokkausten ratkaisemiseksi.",
 	"twocolconflict-beta-feature-message": "Kaksisarakkeinen muokkausristiriita",
 	"twocolconflict-beta-feature-description": "Näytä muokkausristiriitanäkymä käyttäen kehittyneempää kaksisarakkeista näkymää.",
+	"twocolconflict-special-malformed-title": "Puuttuva tai virheellinen otsikko.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Ratkaise ongelma"
 }

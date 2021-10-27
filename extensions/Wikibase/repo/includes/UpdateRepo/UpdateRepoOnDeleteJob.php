@@ -56,8 +56,11 @@ class UpdateRepoOnDeleteJob extends UpdateRepoJob {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 
 		$this->initServices(
-			$wikibaseRepo->getEntityLookup( Store::LOOKUP_CACHING_DISABLED, LookupConstants::LATEST_FROM_MASTER ),
-			$wikibaseRepo->getEntityStore(),
+			WikibaseRepo::getStore()->getEntityLookup(
+				Store::LOOKUP_CACHING_DISABLED,
+				LookupConstants::LATEST_FROM_MASTER
+			),
+			WikibaseRepo::getEntityStore(),
 			$wikibaseRepo->getSummaryFormatter(),
 			LoggerFactory::getInstance( 'UpdateRepo' ),
 			$wikibaseRepo->getSiteLookup(),

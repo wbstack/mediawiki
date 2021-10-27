@@ -121,7 +121,7 @@ class MatchingTermsLookupSearchInteractor implements ConfigurableTermSearchInter
 	) {
 		$languageCodes = [ $languageCode ];
 
-		$matchedTermIndexEntries = $this->matchingTermsLookup->getTopMatchingTerms(
+		$matchedTermIndexEntries = $this->matchingTermsLookup->getMatchingTerms(
 			$this->makeTermIndexSearchCriteria(
 				$text,
 				$languageCodes,
@@ -134,14 +134,7 @@ class MatchingTermsLookupSearchInteractor implements ConfigurableTermSearchInter
 
 		$limit = $this->termSearchOptions->getLimit();
 
-		// Shortcut out if we already have enough TermIndexEntries
-		if ( count( $matchedTermIndexEntries ) >= $limit
-			|| !$this->termSearchOptions->getUseLanguageFallback()
-		) {
-			return $matchedTermIndexEntries;
-		}
-
-		if ( $this->termSearchOptions->getUseLanguageFallback() ) {
+		if ( count( $matchedTermIndexEntries ) < $limit && $this->termSearchOptions->getUseLanguageFallback() ) {
 			// Matches in the main language will always be first
 			$matchedTermIndexEntries = array_merge(
 				$matchedTermIndexEntries,
@@ -193,7 +186,7 @@ class MatchingTermsLookupSearchInteractor implements ConfigurableTermSearchInter
 		$entityType,
 		array $matchedEntityIdSerializations
 	) {
-		$fallbackMatchedTermIndexEntries = $this->matchingTermsLookup->getTopMatchingTerms(
+		$fallbackMatchedTermIndexEntries = $this->matchingTermsLookup->getMatchingTerms(
 			$this->makeTermIndexSearchCriteria(
 				$text,
 				$this->addFallbackLanguageCodes( $languageCodes ),

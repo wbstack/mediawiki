@@ -10,12 +10,12 @@ use Wikimedia\Rdbms\IResultWrapper;
 class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 	// Performance-safe value with PageImages. Try to keep in sync with
 	// WatchListGateway.
-	const LIMIT = 50;
+	public const LIMIT = 50;
 
-	const VIEW_OPTION_NAME = 'mfWatchlistView';
-	const FILTER_OPTION_NAME = 'mfWatchlistFilter';
-	const VIEW_LIST = 'a-z';
-	const VIEW_FEED = 'feed';
+	public const VIEW_OPTION_NAME = 'mfWatchlistView';
+	public const FILTER_OPTION_NAME = 'mfWatchlistFilter';
+	public const VIEW_LIST = 'a-z';
+	public const VIEW_FEED = 'feed';
 
 	/** @var string Saves, how the watchlist is sorted: a-z or as a feed */
 	private $view;
@@ -276,7 +276,6 @@ class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 
 		ChangeTags::modifyDisplayQuery( $tables, $fields, $conds, $join_conds, $query_options, '' );
 
-		// @phan-suppress-next-line SecurityCheck-SQLInjection getQueryInfo's $tables & $fields are safe
 		return $dbr->select( $tables, $fields, $conds, __METHOD__, $query_options, $join_conds );
 	}
 
@@ -356,7 +355,7 @@ class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 
 	/**
 	 * Render a result row in feed view
-	 * @param object $row a row of db result
+	 * @param \stdClass $row a row of db result
 	 */
 	protected function showFeedResultRow( $row ) {
 		if ( $row->rc_deleted ) {

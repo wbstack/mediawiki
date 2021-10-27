@@ -6,20 +6,37 @@
  * @license GPL-2.0-or-later
  */
 
+namespace MediaWiki\Extension\Math;
+
+use Exception;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MWException;
 use Psr\Log\LoggerInterface;
+use RestbaseVirtualRESTService;
+use stdClass;
+use VirtualRESTServiceClient;
 
 class MathRestbaseInterface {
+	/** @var string|false */
 	private $hash = false;
+	/** @var string */
 	private $tex;
+	/** @var string */
 	private $type;
+	/** @var string|null */
 	private $checkedTex;
+	/** @var bool|null */
 	private $success;
+	/** @var array */
 	private $identifiers;
+	/** @var stdClass|null */
 	private $error;
+	/** @var string|null */
 	private $mathoidStyle;
+	/** @var string|null */
 	private $mml;
+	/** @var array */
 	private $warnings = [];
 	/** @var bool is there a request to purge the existing mathematical content */
 	private $purge = false;
@@ -122,7 +139,7 @@ class MathRestbaseInterface {
 	 * Generates error messages on failure
 	 * @see Http::post()
 	 *
-	 * @param array $request the request object
+	 * @param array $request
 	 * @return array
 	 */
 	private function executeRestbaseCheckRequest( $request ) {
@@ -371,15 +388,14 @@ class MathRestbaseInterface {
 	 * @throws MWException
 	 */
 	public function getCheckRequest() {
-		$request = [
-				'method' => 'POST',
-				'body'   => [
-					'type' => $this->type,
-					'q'    => $this->tex
-				],
-				'url'    => $this->getUrl( "media/math/check/{$this->type}" )
+		return [
+			'method' => 'POST',
+			'body'   => [
+				'type' => $this->type,
+				'q'    => $this->tex
+			],
+			'url'    => $this->getUrl( "media/math/check/{$this->type}" )
 		];
-		return $request;
 	}
 
 	/**
@@ -480,3 +496,5 @@ class MathRestbaseInterface {
 		throw new MWException( "Cannot get $type. $detail" );
 	}
 }
+
+class_alias( MathRestbaseInterface::class, 'MathRestbaseInterface' );

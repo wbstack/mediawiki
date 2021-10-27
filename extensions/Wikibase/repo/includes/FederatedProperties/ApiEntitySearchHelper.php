@@ -13,6 +13,7 @@ use Wikibase\Repo\Api\PropertyDataTypeSearchHelper;
 
 /**
  * Helper class to search for entities via an api from another wikibase instance
+ * @license GPL-2.0-or-later
  */
 class ApiEntitySearchHelper implements EntitySearchHelper {
 
@@ -64,7 +65,6 @@ class ApiEntitySearchHelper implements EntitySearchHelper {
 		$allResults = [];
 
 		if ( $entityType !== Property::ENTITY_TYPE ) {
-
 			throw new InvalidArgumentException( 'Wrong argument passed in. Entity type must be a property' );
 		}
 		$jsonResult = $this->makeRequest( $text, $languageCode, $entityType, $limit, $strictLanguage );

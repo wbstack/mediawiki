@@ -136,7 +136,7 @@ class JCValidators {
 	 */
 	public static function isUrl() {
 		return function ( JCValue $v, array $path ) {
-			if ( false === filter_var( $v->getValue(), FILTER_VALIDATE_URL ) ) {
+			if ( filter_var( $v->getValue(), FILTER_VALIDATE_URL ) === false ) {
 				$v->error( 'jsonconfig-err-url', $path );
 				return false;
 			}

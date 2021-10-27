@@ -4,18 +4,21 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Hooks;
 
-use ChangesList;
 use EnhancedChangesList;
 use MediaWiki\Hook\EnhancedChangesListModifyBlockLineDataHook;
 use MediaWiki\Hook\EnhancedChangesListModifyLineDataHook;
 use MediaWiki\Hook\OldChangesListRecentChangesLineHook;
+use MediaWiki\User\UserNameUtils;
 use OldChangesList;
 use RecentChange;
 use UnexpectedValueException;
 use Wikibase\Client\RecentChanges\ChangeLineFormatter;
 use Wikibase\Client\RecentChanges\ExternalChangeFactory;
 use Wikibase\Client\RecentChanges\RecentChangeFactory;
+use Wikibase\Client\RepoLinker;
 use Wikibase\Client\WikibaseClient;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\Lib\SettingsArray;
 
 /**
  * Handlers for hooks dealing with Wikibase changes in client recent changes and watchlists
@@ -45,15 +48,21 @@ class ChangesListLinesHandler implements
 		$this->formatter = $formatter;
 	}
 
-	public static function newFromGlobalState(): self {
+	public static function factory(
+		UserNameUtils $userNameUtils,
+		EntityIdParser $entityIdParser,
+		RepoLinker $repoLinker,
+		SettingsArray $clientSettings
+	): self {
 		$wikibaseClient = WikibaseClient::getDefaultInstance();
 		$changeFactory = new ExternalChangeFactory(
-			$wikibaseClient->getSettings()->getSetting( 'repoSiteId' ),
+			$clientSettings->getSetting( 'repoSiteId' ),
 			$wikibaseClient->getContentLanguage(),
-			$wikibaseClient->getEntityIdParser()
+			$entityIdParser
 		);
 		$formatter = new ChangeLineFormatter(
-			$wikibaseClient->newRepoLinker()
+			$repoLinker,
+			$userNameUtils
 		);
 
 		return new self( $changeFactory, $formatter );
@@ -81,7 +90,14 @@ class ChangesListLinesHandler implements
 			}
 
 			// fixme: inject formatter and flags into a changes list formatter
-			$flag = $changesList->recentChangesFlags( [ 'wikibase-edit' => true ], '' );
+			$flag = $changesList->recentChangesFlags(
+				[
+					'wikibase-edit' => true,
+					'minor' => $rc->getAttribute( 'rc_minor' ),
+					'bot' => $rc->getAttribute( 'rc_bot' ),
+				],
+				''
+			);
 			$lang = $changesList->getLanguage();
 			$user = $changesList->getUser();
 			$line = $this->formatter->format( $externalChange, $rc->getTitle(), $rc->counter, $flag, $lang, $user );

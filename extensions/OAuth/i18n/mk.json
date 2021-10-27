@@ -30,6 +30,7 @@
 	"mwoauth-consumer-owner-only-help": "Со оваа можност, потрошувачот ќе биде автоматски одобрен и прифатин за употреба од $1. Нема да може да го користи било кој друг корисник, и нема да работи вообичаениот тек на овластување. Дејствата на овој потрошувач нема да се означуваат.",
 	"mwoauth-consumer-description": "Опис на извршникот:",
 	"mwoauth-consumer-callbackurl": "URL-адреса за повикување на OAuth:",
+	"mwoauth-consumer-callbackurl-warning": "(џокерска порта)",
 	"mwoauth-consumer-callbackisprefix": "Овозможи му на потрошувачот да укаже повратен повик во барањата и погоре да користи URL за повратен повик како задолжителна претставка.",
 	"mwoauth-consumer-granttypes": "Видови доделувања што се бараат:",
 	"mwoauth-consumer-grantsneeded": "Применливи доделувања:",
@@ -249,6 +250,7 @@
 	"mwoauth-form-button-approve": "Дозволи",
 	"mwoauth-form-button-cancel": "Откажи",
 	"mwoauth-error": "Грешка во поврзувањето со извршникот",
+	"mwoauth-error-missing-callback-url-non-owner": "Се бара callback_url за само несопственички клиенти",
 	"mwoauth-grants-heading": "Побарани дозволи:",
 	"mwoauth-grants-nogrants": "Извршникот нема побарано ниедна дозвола.",
 	"mwoauth-acceptance-cancelled": "Одбравте на „$1“ да не му дозволите пристап на вашата сметка. „$1“ ќе работи само ако му дадете дозвола. Можете да се вратите на „$1“ или пак да направите [[Special:OAuthManageMyGrants|нагодувања]] на поврзаните извршници.",
@@ -325,5 +327,9 @@
 	"mwoauth-consumer-access-no-user": "Потрошувачкото одобрение мора да биде врзано за важечки корисник. Укажан е корисник со назнака 0",
 	"mwoauth-login-required-reason": "Ќе треба да се најавите со вашата сметка на {{SITENAME}} за да ги овластите прилозите за пристап до неа.",
 	"mwoauthconsumer-consumer-view": "Погл. го потрошувачов",
-	"mwoauthconsumer-application-view": "Погр. го прилогов"
+	"mwoauthconsumer-application-view": "Погр. го прилогов",
+	"grant-oauthmanageownclient": "Раководење со вашите клиенти на OAuth",
+	"mwoauth-consumer-user-mismatch": "Не можете да вршите дејства врз клиенти кои не ви припаѓаат вам",
+	"mwoauth-consumer-deleted-error": "Не можете да вршите дејства врз избришани клиенти",
+	"mwoauth-consumer-submit-error": "Се појави грешка при зачувувањето на потрошувач"
 }

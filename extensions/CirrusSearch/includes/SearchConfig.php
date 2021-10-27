@@ -16,15 +16,15 @@ use RequestContext;
  */
 class SearchConfig implements \Config {
 	// Constants for referring to various config values. Helps prevent fat-fingers
-	const INDEX_BASE_NAME = 'CirrusSearchIndexBaseName';
-	const PREFIX_IDS = 'CirrusSearchPrefixIds';
-	const CIRRUS_VAR_PREFIX = 'wgCirrus';
+	public const INDEX_BASE_NAME = 'CirrusSearchIndexBaseName';
+	private const PREFIX_IDS = 'CirrusSearchPrefixIds';
+	private const CIRRUS_VAR_PREFIX = 'wgCirrus';
 
 	// Magic word to tell the SearchConfig to translate INDEX_BASE_NAME into wfWikiID()
-	const WIKI_ID_MAGIC_WORD = '__wikiid__';
+	public const WIKI_ID_MAGIC_WORD = '__wikiid__';
 
-	/** @static string[] non cirrus vars to load when loading external wiki config */
-	private static $nonCirrusVars = [
+	/** Non cirrus vars to load when loading external wiki config */
+	private const NON_CIRRUS_VARS = [
 		'wgLanguageCode',
 		'wgContentNamespaces',
 		'wgNamespacesToBeSearchedDefault',
@@ -259,7 +259,7 @@ class SearchConfig implements \Config {
 	 * @return string[] list of "non-cirrus" var names
 	 */
 	public static function getNonCirrusConfigVarNames() {
-		return self::$nonCirrusVars;
+		return self::NON_CIRRUS_VARS;
 	}
 
 	/**

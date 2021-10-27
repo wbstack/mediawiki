@@ -6,7 +6,7 @@ use Elastica\Query\Match;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Term\Term;
-use Wikibase\Lib\LanguageFallbackChain;
+use Wikibase\Lib\TermLanguageFallbackChain;
 
 /**
  * Utilities useful for entity searches.
@@ -74,10 +74,10 @@ final class EntitySearchUtils {
 	 * Locate label for display among the source data, basing on fallback chain.
 	 * @param array $sourceData
 	 * @param string $field
-	 * @param LanguageFallbackChain $fallbackChain
+	 * @param TermLanguageFallbackChain $termFallbackChain
 	 * @return null|Term
 	 */
-	public static function findTermForDisplay( $sourceData, $field, LanguageFallbackChain $fallbackChain ) {
+	public static function findTermForDisplay( $sourceData, $field, TermLanguageFallbackChain $termFallbackChain ) {
 		if ( empty( $sourceData[$field] ) ) {
 			return null;
 		}
@@ -98,7 +98,7 @@ final class EntitySearchUtils {
 		// Drop empty ones
 		$labels_data = array_filter( $labels_data );
 
-		$preferredValue = $fallbackChain->extractPreferredValueOrAny( $labels_data );
+		$preferredValue = $termFallbackChain->extractPreferredValueOrAny( $labels_data );
 		if ( $preferredValue ) {
 			return new Term( $preferredValue['language'], $preferredValue['value'] );
 		}

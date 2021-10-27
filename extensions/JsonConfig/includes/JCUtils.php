@@ -213,7 +213,7 @@ class JCUtils {
 		if ( is_a( $data, JCValue::class ) ) {
 			$value = $data->getValue();
 			if ( $skipDefaults && $data->defaultUsed() ) {
-				return is_array( $value ) ? [] : ( is_object( $value ) ? new stdClass() : null );
+				return is_array( $value ) ? [] : ( is_object( $value ) ? (object)[] : null );
 			}
 		} else {
 			$value = $data;
@@ -240,7 +240,7 @@ class JCUtils {
 			}
 			return $data;
 		}
-		$result = new stdClass();
+		$result = (object)[];
 		foreach ( $data as $fld => $val ) {
 			if ( is_a( $val, JCValue::class ) ) {
 				/** @var JCValue $val */

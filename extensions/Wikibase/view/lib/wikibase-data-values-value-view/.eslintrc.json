@@ -1,10 +1,10 @@
 {
-	"extends": "wikimedia",
-	"plugins": [
-		"mediawiki"
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/mediawiki"
 	],
 	"env": {
-		"browser": true,
 		"jquery": true,
 		"commonjs": true
 	},
@@ -17,7 +17,6 @@
 		"valueParsers": false
 	},
 	"rules": {
-		"mediawiki/valid-package-file-require": "error",
 		"array-bracket-spacing": "off",
 		"comma-spacing": "off",
 		"computed-property-spacing": "off",
@@ -30,6 +29,8 @@
 		"space-before-function-paren": "off",
 		"valid-jsdoc": "off",
 		"vars-on-top": "off",
-		"wrap-iife": "off"
+		"wrap-iife": "off",
+		"no-shadow": "warn",
+		"mediawiki/class-doc": "warn"
 	}
 }

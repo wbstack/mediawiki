@@ -6,10 +6,8 @@
 		]
 	},
 	"abusefilter-edit-builder-vars-sfs-blocked": "Whether the IP address is blocked using the stopforumspam.com list",
-	"action-sfsblock-bypass": "bypass blacklisted IP blocks issued by the StopForumSpam extension",
-	"action-stopforumspam": "submit data about blocked users to stopforumspam.com",
-	"right-sfsblock-bypass": "Bypass blacklisted IP blocks issued by the StopForumSpam extension",
-	"right-stopforumspam": "Submit data about blocked users to stopforumspam.com",
+	"action-sfsblock-bypass": "bypass denylisted IP blocks issued by the StopForumSpam extension",
+	"right-sfsblock-bypass": "Bypass IP blocks issued by the StopForumSpam extension",
 	"stopforumspam-blocked": "Editing from your IP address ($1) has been blocked since it has recently been used to spam websites.",
 	"stopforumspam-desc": "Integration with [https://stopforumspam.com/ stopforumspam.com]",
 	"stopforumspam-is-blocked": "The IP address <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> has been blocked for spamming."

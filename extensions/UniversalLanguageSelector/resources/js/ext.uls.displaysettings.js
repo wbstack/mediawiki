@@ -110,6 +110,7 @@
 		this.$webfonts = null;
 		this.$parent = $parent;
 		this.savedRegistry = $.extend( true, {}, mw.webfonts.preferences );
+		this.dirty = false;
 	}
 
 	DisplaySettings.prototype = {
@@ -117,11 +118,36 @@
 		constructor: DisplaySettings,
 
 		/**
+		 * Loads the webfonts module sets the `webfonts` property when its safe to do so
+		 */
+		setupWebFonts: function () {
+			var d = $.Deferred();
+			mw.loader.using( [ 'ext.uls.webfonts.fonts' ] ).then( function () {
+				if ( this.isWebFontsEnabled ) {
+					mw.webfonts.setup();
+				}
+
+				// Allow the webfonts library to finish loading (hack)
+				setTimeout( function () {
+					this.$webfonts = $( document.body ).data( 'webfonts' );
+					d.resolve();
+				}.bind( this ), 1 );
+			}.bind( this ) );
+			return d;
+		},
+		/**
 		 * Render the module into a given target
 		 */
 		render: function () {
+			this.setupWebFonts().then( function () {
+				this.renderAfterDependenciesLoaded();
+			}.bind( this ) );
+		},
+		/**
+		 * Render the module into a given target after all
+		 */
+		renderAfterDependenciesLoaded: function () {
 			this.$parent.$settingsPanel.empty();
-			this.$webfonts = $( document.body ).data( 'webfonts' );
 			this.$parent.$settingsPanel.append( this.$template );
 			this.prepareLanguages();
 			this.prepareUIFonts();
@@ -132,7 +158,6 @@
 			// might not be.
 			this.preview( this.uiLanguage );
 			this.listen();
-			this.dirty = false;
 		},
 
 		prepareWebfontsCheckbox: function () {
@@ -182,30 +207,14 @@
 
 				new mw.Api().parse( $.i18n( 'ext-uls-display-settings-anon-log-in-cta' ) )
 					.done( function ( parsedCta ) {
-						var deferred = new $.Deferred();
-
-						$loginCta.html( parsedCta ); // The parsed CTA is HTML
-						$loginCta.find( 'a' ).on( 'click', function ( event ) {
-							event.preventDefault();
-							// Because browsers navigate away when clicking a link,
-							// we are overriding the normal click behavior to allow
-							// the event be logged first - currently there is no
-							// local queue for events. Since the hook system does not
-							// allow returning values, we have this ugly hack
-							// for event logging to delay the page loading if event logging
-							// is enabled. The promise is passed to the hook, so that
-							// if event logging is enabled, in can resole the promise
-							// immediately to avoid extra delays.
-							deferred.done( function () {
-								location.href = event.target.href;
-							} );
-
-							mw.hook( 'mw.uls.login.click' ).fire( deferred );
-
-							// Delay is zero if event logging is not enabled
-							setTimeout( function () {
-								deferred.resolve();
-							}, mw.config.get( 'wgULSEventLogging' ) * 500 );
+						// The parsed CTA is HTML
+						$loginCta.html( parsedCta );
+						$loginCta.find( 'a' ).on( 'click', function () {
+							// If EventLogging is installed and enabled for ULS, give it a
+							// chance to log this event. There is no promise provided and in
+							// most browsers this will use the Beacon API in the background.
+							// In older browsers, this event will likely get lost.
+							mw.hook( 'mw.uls.login.click' );
 						} );
 					} );
 
@@ -293,8 +302,7 @@
 			$languages.append( $moreLanguagesButton );
 			// Show the long language list to select a language for display settings
 			$moreLanguagesButton.uls( {
-				left: displaySettings.$parent.left,
-				top: displaySettings.$parent.top,
+				onPosition: this.$parent.position.bind( this.$parent ),
 				onReady: function () {
 					var $wrap,
 						uls = this,
@@ -319,8 +327,6 @@
 					uls.$menu.toggleClass( 'selector-right', displaySettings.$parent.$window.hasClass( 'selector-right' ) );
 				},
 				onVisible: function () {
-					var $parent;
-
 					this.$menu.find( '.uls-languagefilter' )
 						.prop( 'placeholder', $.i18n( 'ext-uls-display-settings-ui-language' ) );
 
@@ -331,15 +337,6 @@
 						return;
 					}
 
-					$parent = $( '#language-settings-dialog' );
-
-					// Re-position the element according to the window that called it
-					if ( parseInt( $parent.css( 'left' ), 10 ) ) {
-						this.$menu.css( 'left', $parent.css( 'left' ) );
-					}
-					if ( parseInt( $parent.css( 'top' ), 10 ) ) {
-						this.$menu.css( 'top', $parent.css( 'top' ) );
-					}
 					// If the ULS is shown in the sidebar,
 					// add a caret pointing to the icon
 					// eslint-disable-next-line no-jquery/no-class-state
@@ -528,7 +525,7 @@
 		 */
 		markDirty: function () {
 			this.dirty = true;
-			this.$parent.$window.find( 'button.uls-settings-apply' ).prop( 'disabled', false );
+			this.$parent.enableApplyButton();
 		},
 
 		/**
@@ -546,25 +543,18 @@
 				displaySettings.markDirty();
 
 				if ( this.checked ) {
-					mw.loader.using( 'ext.uls.webfonts.fonts', function () {
-						mw.webfonts.setup();
+					displaySettings.setupWebFonts().then( function () {
+						mw.webfonts.preferences.enable();
 
-						// Allow the webfonts library to finish loading
-						setTimeout( function () {
-							displaySettings.$webfonts = $( document.body ).data( 'webfonts' );
+						displaySettings.prepareContentFonts();
+						displaySettings.prepareUIFonts();
 
-							mw.webfonts.preferences.enable();
+						displaySettings.i18n();
+						// eslint-disable-next-line no-jquery/no-sizzle
+						displaySettings.$webfonts.apply( $uiFontSelector.find( 'option:selected' ) );
+						displaySettings.$webfonts.refresh();
 
-							displaySettings.prepareContentFonts();
-							displaySettings.prepareUIFonts();
-
-							displaySettings.i18n();
-							// eslint-disable-next-line no-jquery/no-sizzle
-							displaySettings.$webfonts.apply( $uiFontSelector.find( 'option:selected' ) );
-							displaySettings.$webfonts.refresh();
-
-							$fontSelectors.removeClass( 'hide' );
-						}, 1 );
+						$fontSelectors.removeClass( 'hide' );
 					} );
 				} else {
 					$fontSelectors.addClass( 'hide' );

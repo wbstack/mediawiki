@@ -34,7 +34,13 @@ class ScoreException extends Exception {
 	 * @param Exception|null $previous Exception that caused this exception.
 	 */
 	public function __construct( $message, $code = 0, Exception $previous = null ) {
-		parent::__construct( $message->inContentLanguage()->parse(), $code, $previous );
+		parent::__construct(
+			$message->inContentLanguage()
+				->title( Title::makeTitle( NS_SPECIAL, 'Badtitle' ) )
+				->parse(),
+			$code,
+			$previous
+		);
 	}
 
 	/**
@@ -43,7 +49,7 @@ class ScoreException extends Exception {
 	 *
 	 * @return string Error message HTML.
 	 */
-	public function  __toString() {
+	public function __toString() {
 		return Html::rawElement(
 			'div',
 			[ 'class' => [ 'errorbox', 'mw-ext-score-error' ] ],

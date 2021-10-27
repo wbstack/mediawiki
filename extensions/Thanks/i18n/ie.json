@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Mithridates",
 			"OIS"
 		]
 	},
-	"thanks-thank": "mersiar"
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|mersiar}}}}",
+	"thanks-thank-tooltip": "{{GENDER:$1|Inviar}} un mersí a ti-ci {{GENDER:$2|usator}}"
 }

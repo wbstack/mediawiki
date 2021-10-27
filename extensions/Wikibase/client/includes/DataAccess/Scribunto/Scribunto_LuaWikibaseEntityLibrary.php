@@ -61,7 +61,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 
 		$propertyIdResolver = new PropertyIdResolver(
 			$entityLookup,
-			$wikibaseClient->getPropertyLabelResolver(),
+			WikibaseClient::getPropertyLabelResolver(),
 			$this->getUsageAccumulator()
 		);
 
@@ -85,10 +85,10 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 		return new WikibaseLuaEntityBindings(
 			$plainTextTransclusionInteractor,
 			$richWikitextTransclusionInteractor,
-			$wikibaseClient->getEntityIdParser(),
+			WikibaseClient::getEntityIdParser(),
 			$lang,
 			$this->getUsageAccumulator(),
-			$wikibaseClient->getSettings()->getSetting( 'siteGlobalID' )
+			WikibaseClient::getSettings()->getSetting( 'siteGlobalID' )
 		);
 	}
 
@@ -122,15 +122,15 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	private function getLuaFunctionCallTracker() {
 		if ( !$this->luaFunctionCallTracker ) {
 			$mwServices = MediaWikiServices::getInstance();
-			$wikibaseClient = WikibaseClient::getDefaultInstance();
-			$settings = $wikibaseClient->getSettings();
+			$settings = WikibaseClient::getSettings( $mwServices );
 
 			$this->luaFunctionCallTracker = new LuaFunctionCallTracker(
 				$mwServices->getStatsdDataFactory(),
 				$settings->getSetting( 'siteGlobalID' ),
-				$wikibaseClient->getSiteGroup(),
+				WikibaseClient::getSiteGroup( $mwServices ),
 				$settings->getSetting( 'trackLuaFunctionCallsPerSiteGroup' ),
-				$settings->getSetting( 'trackLuaFunctionCallsPerWiki' )
+				$settings->getSetting( 'trackLuaFunctionCallsPerWiki' ),
+				$settings->getSetting( 'trackLuaFunctionCallsSampleRate' )
 			);
 		}
 
@@ -162,7 +162,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 * @return bool
 	 */
 	private function allowDataAccessInUserLanguage() {
-		$settings = WikibaseClient::getDefaultInstance()->getSettings();
+		$settings = WikibaseClient::getSettings();
 
 		return $settings->getSetting( 'allowDataAccessInUserLanguage' );
 	}
@@ -173,7 +173,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	public function getUsageAccumulator() {
 		return new ParserOutputUsageAccumulator(
 			$this->getParser()->getOutput(),
-			new EntityUsageFactory( WikibaseClient::getDefaultInstance()->getEntityIdParser() )
+			new EntityUsageFactory( WikibaseClient::getEntityIdParser() )
 		);
 	}
 
@@ -244,26 +244,19 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 			'addDescriptionUsage' => [ $this, 'addDescriptionUsage' ],
 			'addSiteLinksUsage' => [ $this, 'addSiteLinksUsage' ],
 			'addOtherUsage' => [ $this, 'addOtherUsage' ],
-			'getSetting' => [ $this, 'getSetting' ],
 			'incrementStatsKey' => [ $this, 'incrementStatsKey' ],
 		];
 
-		return $this->getEngine()->registerInterface(
-			__DIR__ . '/mw.wikibase.entity.lua', $lib, []
-		);
-	}
+		$settings = WikibaseClient::getSettings();
+		// These settings will be exposed to the Lua module.
+		$options = [
+			'fineGrainedLuaTracking' => $settings->getSetting( 'fineGrainedLuaTracking' ),
+			'trackLuaFunctionCallsSampleRate' => $settings->getSetting( 'trackLuaFunctionCallsSampleRate' ),
+		];
 
-	/**
-	 * Wrapper for getSetting
-	 *
-	 * @param string $setting
-	 *
-	 * @return array
-	 */
-	public function getSetting( $setting ) {
-		$this->checkType( 'setting', 1, $setting, 'string' );
-		$settings = WikibaseClient::getDefaultInstance()->getSettings();
-		return [ $settings->getSetting( $setting ) ];
+		return $this->getEngine()->registerInterface(
+			__DIR__ . '/mw.wikibase.entity.lua', $lib, $options
+		);
 	}
 
 	/**

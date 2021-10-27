@@ -1,0 +1,97 @@
+name: Wikibase Secondary CI
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  secondary-ci:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - env:
+            DBTYPE: sqlite
+            LANG: ru
+            WB: both
+          php-versions: '7.3.27'
+        - env:
+            DBTYPE: sqlite
+            LANG: en
+            WB: client
+          php-versions: '7.2.34'
+        - env:
+            DBTYPE: mysql
+            LANG: en
+            WB: repo
+          php-versions: '7.2.34'
+        - env:
+            DBTYPE: sqlite
+            LANG: ar
+            WB: both
+          php-versions: '7.3.27'
+        - env:
+            DBTYPE: mysql
+            LANG: en
+            WB: both
+          php-versions: '7.2.34'
+        - env:
+            DBTYPE: mysql
+            LANG: en
+            WB: both
+          php-versions: '7.3.27'
+        - env:
+            DBTYPE: mysql
+            LANG: en
+            WB: both
+          php-versions: '7.4.15'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set up MySQL
+      uses: mirromutth/mysql-action@v1.1
+      with:
+        mysql version: '5.7'
+        mysql database: 'test_db_wiki'
+        mysql root password: 'root'
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-versions }}
+        extensions: pdo_sqlite, mysqlnd
+    - name: Cache Composer cache
+      uses: actions/cache@v2
+      with:
+        path: $HOME/.composer/cache
+        key: composer-cache-php${{ matrix.php-versions }}
+    - name: install.sh
+      env: ${{ matrix.env }}
+      run: |
+        bash ./build/ci-scripts/install.sh
+    - name: Apply WB settings
+      env: ${{ matrix.env }}
+      run: |
+        bash ./build/ci-scripts/mw-apply-wb-settings.sh
+    - name: Update DB
+      env: ${{ matrix.env }}
+      run: |
+        bash ./build/ci-scripts/update-db.sh
+    - name: Run script
+      env: ${{ matrix.env }}
+      run: |
+        bash ./build/ci-scripts/script.sh
+    - name: Send mail
+      if: ${{ failure() }}
+      uses: dawidd6/action-send-mail@v2
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        username: ${{secrets.MAIL_USERNAME}}
+        password: ${{secrets.MAIL_PASSWORD}}
+        subject: Github Action job failed for Wikibase
+        # Literal body:
+        body: >
+          Job secondary-ci failed for php version ${{ matrix.php-versions }}!
+          For more information see https://github.com/wikimedia/Wikibase/actions/workflows/secondaryCI.yml
+        to: wikidata-ci-status@wikimedia.de
+        from: Wikibase Github Action CI

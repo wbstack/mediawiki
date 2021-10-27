@@ -37,7 +37,7 @@
 		"EventLogging": {
 			"Schemas": {
 				"Popups": 18904225,
-				"ReferencePreviewsPopups": 19489344,
+				"ReferencePreviewsPopups": "/analytics/legacy/referencepreviewspopups/1.0.0",
 				"VirtualPageView": 17780078
 			}
 		}
@@ -62,6 +62,10 @@
 		"PopupsConflictingNavPopupsGadgetName": {
 			"description": "@var string: Navigation popups gadget name",
 			"value": "Navigation_popups"
+		},
+		"PopupsConflictingRefTooltipsGadgetName": {
+			"description": "@var string: Name of a gadget that would cause duplicate reference preview popups. Known conflicting gadgets include \"ReferenceTooltips\", \"CiteTooltip\" alias \"RefTooltip\", \"ReferencePopups\", and \"tooltipRef\" (see T274353).",
+			"value": "ReferenceTooltips"
 		},
 		"PopupsGateway": {
 			"description": "Which gateway to use for fetching Popups data. Available options: [mwApiPlain|restbasePlain|restbaseHTML]. Full and always up to date list is available in src/gateway/index.js",
@@ -109,14 +113,24 @@
 				"Special:MostLinkedFiles",
 				"Special:Book"
 			]
+		},
+		"PopupsTextExtractsIntroOnly": {
+			"description": "Whether we should extract intro text only or full page text. This is only applicable when using PopupsGateway=mwApiPlain.",
+			"value": true
 		}
 	},
 	"ResourceModules": {
+		"ext.popups.icons": {
+			"class": "ResourceLoaderOOUIIconPackModule",
+			"icons": [
+				"infoFilled",
+				"settings"
+			]
+		},
 		"ext.popups.images": {
 			"selector": ".mw-ui-icon-{name}:before",
 			"class": "ResourceLoaderImageModule",
 			"images": {
-				"popups-settings": "resources/ext.popups.images/cog.svg",
 				"popups-close": "resources/ext.popups.images/close.svg",
 				"preview-generic": {
 					"file": {
@@ -179,14 +193,17 @@
 			],
 			"messages": [
 				"popups-settings-title",
+				"popups-settings-unified-title",
 				"popups-settings-option-simple",
 				"popups-settings-option-simple-description",
 				"popups-settings-option-advanced",
 				"popups-settings-option-advanced-description",
+				"popups-settings-option-unified-description",
 				"popups-settings-option-off",
 				"popups-settings-save",
 				"popups-settings-cancel",
 				"popups-settings-enable",
+				"popups-settings-icon-gear-title",
 				"popups-settings-help",
 				"popups-settings-help-ok",
 				"popups-preview-no-preview",
@@ -197,10 +214,12 @@
 				"popups-refpreview-book",
 				"popups-refpreview-journal",
 				"popups-refpreview-news",
+				"popups-refpreview-note",
 				"popups-refpreview-web",
-				"popups-refpreview-jump-to-reference"
+				"popups-refpreview-collapsible-placeholder"
 			],
 			"dependencies": [
+				"ext.popups.icons",
 				"ext.popups.images",
 				"mediawiki.experiments",
 				"mediawiki.jqueryMsg",

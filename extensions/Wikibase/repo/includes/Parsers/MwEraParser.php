@@ -10,12 +10,13 @@ use ValueParsers\ValueParser;
 
 /**
  * Class to parse localized era from values.
+ * @license GPL-2.0-or-later
  */
 class MwEraParser extends EraParser {
 
-	const FORMAT_NAME = 'mw-era';
+	public const FORMAT_NAME = 'mw-era';
 
-	const MESSAGE_KEY = 'wikibase-time-precision-BCE';
+	public const MESSAGE_KEY = 'wikibase-time-precision-BCE';
 
 	/**
 	 * @var Language

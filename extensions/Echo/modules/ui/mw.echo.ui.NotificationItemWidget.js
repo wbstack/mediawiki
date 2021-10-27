@@ -38,7 +38,6 @@
 		// Mark as read
 		this.markAsReadButton = new mw.echo.ui.ToggleReadCircleButtonWidget( {
 			framed: false,
-			title: mw.msg( 'echo-notification-markasread-tooltip' ),
 			classes: [ 'mw-echo-ui-notificationItemWidget-markAsReadButton' ],
 			markAsRead: !this.model.isRead()
 		} );
@@ -136,17 +135,17 @@
 			// (where all actions are inside the menu) or there are more than
 			// two prioritized actions (all others go into the menu)
 			isOutsideMenu = !this.bundle &&
+				(
 					(
-						(
-							// Make sure we don't have too many prioritized items
-							urlObj.prioritized &&
-							outsideMenuItemCounter < mw.echo.config.maxPrioritizedActions
-						) ||
-						// If the number of total items are equal to or less than the
-						// maximum allowed, they all go outside the menu
-						// mw.echo.config.maxPrioritizedActions is 2 on desktop and 1 on mobile.
-						secondaryUrls.length <= mw.echo.config.maxPrioritizedActions
-					);
+						// Make sure we don't have too many prioritized items
+						urlObj.prioritized &&
+						outsideMenuItemCounter < mw.echo.config.maxPrioritizedActions
+					) ||
+					// If the number of total items are equal to or less than the
+					// maximum allowed, they all go outside the menu
+					// mw.echo.config.maxPrioritizedActions is 2 on desktop and 1 on mobile.
+					secondaryUrls.length <= mw.echo.config.maxPrioritizedActions
+				);
 
 			linkButton = new mw.echo.ui.MenuItemWidget( {
 				type: urlObj.type,
@@ -184,9 +183,7 @@
 			this.$content.append(
 				this.markAsReadButton.$element,
 				$message,
-				$( '<div>' )
-					.addClass( 'mw-echo-ui-notificationItemWidget-content-table' )
-					.append( this.$actions )
+				this.$actions
 			);
 			this.$element.append( $icon, this.$content );
 		}
@@ -200,24 +197,17 @@
 			.toggleClass( 'mw-echo-ui-notificationItemWidget-initiallyUnseen', !this.model.isSeen() && !this.bundle )
 			.toggleClass( 'mw-echo-ui-notificationItemWidget-bundled', this.bundle );
 
-		// Wrap the entire item with primary url
 		if ( this.model.getPrimaryUrl() ) {
-			this.$element.contents()
-				.wrapAll(
-					// HACK: Wrap the entire item with a link that takes
-					// the user to the primary url. This is not perfect,
-					// but it makes the behavior native to the browser rather
-					// than us listening to click events and opening new
-					// windows.
-					$( '<a>' )
-						.addClass( 'mw-echo-ui-notificationItemWidget-linkWrapper' )
-						.attr( 'href', this.model.getPrimaryUrl() )
-						.on( 'click', this.onPrimaryLinkClick.bind( this ) )
-				);
+			this.$element
+				.attr( 'href', this.model.getPrimaryUrl() )
+				.on( 'click', this.onPrimaryLinkClick.bind( this ) );
 		}
 	};
 
 	OO.inheritClass( mw.echo.ui.NotificationItemWidget, OO.ui.Widget );
+
+	// Make the whole item a link to get native link behaviour
+	mw.echo.ui.NotificationItemWidget.static.tagName = 'a';
 
 	/**
 	 * Respond to primary link click.

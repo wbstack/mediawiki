@@ -1,12 +1,15 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Api;
 
 use ApiMain;
 use ApiUsageException;
-use MediaWiki\MediaWikiServices;
+use IBufferingStatsdDataFactory;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Term\AliasesProvider;
+use Wikibase\Lib\EntityFactory;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOps;
@@ -26,19 +29,42 @@ class SetAliases extends ModifyEntity {
 	 */
 	private $termChangeOpFactory;
 
-	/**
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param FingerprintChangeOpFactory $termChangeOpFactory
-	 */
+	/** @var IBufferingStatsdDataFactory */
+	private $stats;
+
+	/** @var EntityFactory */
+	private $entityFactory;
+
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		FingerprintChangeOpFactory $termChangeOpFactory,
-		bool $federatedPropertiesEnabled
+		IBufferingStatsdDataFactory $stats,
+		bool $federatedPropertiesEnabled,
+		EntityFactory $entityFactory
 	) {
 		parent::__construct( $mainModule, $moduleName, $federatedPropertiesEnabled );
 		$this->termChangeOpFactory = $termChangeOpFactory;
+		$this->stats = $stats;
+		$this->entityFactory = $entityFactory;
+	}
+
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		IBufferingStatsdDataFactory $stats,
+		EntityFactory $entityFactory
+	): self {
+		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		return new self(
+			$mainModule,
+			$moduleName,
+			$wikibaseRepo->getChangeOpFactoryProvider()
+				->getFingerprintChangeOpFactory(),
+			$stats,
+			$wikibaseRepo->inFederatedPropertyMode(),
+			$entityFactory
+		);
 	}
 
 	/**
@@ -46,7 +72,7 @@ class SetAliases extends ModifyEntity {
 	 *
 	 * @return string
 	 */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
@@ -55,7 +81,7 @@ class SetAliases extends ModifyEntity {
 	 *
 	 * @return bool Always true.
 	 */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -66,7 +92,7 @@ class SetAliases extends ModifyEntity {
 	 *
 	 * @throws ApiUsageException
 	 */
-	protected function validateParameters( array $params ) {
+	protected function validateParameters( array $params ): void {
 		parent::validateParameters( $params );
 
 		if ( !( ( !empty( $params['add'] ) || !empty( $params['remove'] ) )
@@ -79,7 +105,7 @@ class SetAliases extends ModifyEntity {
 		}
 	}
 
-	private function adjustSummary( Summary &$summary, array $params, AliasesProvider $entity ) {
+	private function adjustSummary( Summary $summary, array $params, AliasesProvider $entity ): void {
 		if ( !empty( $params['add'] ) && !empty( $params['remove'] ) ) {
 			$language = $params['language'];
 
@@ -96,16 +122,7 @@ class SetAliases extends ModifyEntity {
 		}
 	}
 
-	/**
-	 * @see ModifyEntity::modifyEntity
-	 *
-	 * @param EntityDocument &$entity
-	 * @param ChangeOp $changeOp
-	 * @param array $preparedParameters
-	 *
-	 * @return Summary
-	 */
-	protected function modifyEntity( EntityDocument &$entity, ChangeOp $changeOp, array $preparedParameters ) {
+	protected function modifyEntity( EntityDocument $entity, ChangeOp $changeOp, array $preparedParameters ): Summary {
 		if ( !( $entity instanceof AliasesProvider ) ) {
 			$this->errorReporter->dieError( 'The given entity cannot contain aliases', 'not-supported' );
 		}
@@ -115,10 +132,9 @@ class SetAliases extends ModifyEntity {
 		// FIXME: if we have ADD and REMOVE operations in the same call,
 		// we will also have two ChangeOps updating the same edit summary.
 		// This will cause the edit summary to be overwritten by the last ChangeOp being applied.
-		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
-		$stats->increment( 'wikibase.repo.api.wbsetaliases.total' );
+		$this->stats->increment( 'wikibase.repo.api.wbsetaliases.total' );
 		if ( !empty( $preparedParameters['add'] ) && !empty( $preparedParameters['remove'] ) ) {
-			$stats->increment( 'wikibase.repo.api.wbsetaliases.addremove' );
+			$this->stats->increment( 'wikibase.repo.api.wbsetaliases.addremove' );
 		}
 
 		$summary = $this->createSummary( $preparedParameters );
@@ -142,7 +158,7 @@ class SetAliases extends ModifyEntity {
 	 *
 	 * @return string[]
 	 */
-	private function normalizeAliases( array $aliases ) {
+	private function normalizeAliases( array $aliases ): array {
 		$stringNormalizer = $this->stringNormalizer;
 
 		$aliases = array_map(
@@ -162,15 +178,7 @@ class SetAliases extends ModifyEntity {
 		return $aliases;
 	}
 
-	/**
-	 * @see ModifyEntity::getChangeOp
-	 *
-	 * @param array $preparedParameters
-	 * @param EntityDocument $entity
-	 *
-	 * @return ChangeOp
-	 */
-	protected function getChangeOp( array $preparedParameters, EntityDocument $entity ) {
+	protected function getChangeOp( array $preparedParameters, EntityDocument $entity ): ChangeOp {
 		$changeOps = [];
 		$language = $preparedParameters['language'];
 
@@ -208,7 +216,7 @@ class SetAliases extends ModifyEntity {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getAllowedParams() {
+	protected function getAllowedParams(): array {
 		return array_merge(
 			parent::getAllowedParams(),
 			[
@@ -225,7 +233,8 @@ class SetAliases extends ModifyEntity {
 					self::PARAM_ISMULTI => true,
 				],
 				'language' => [
-					self::PARAM_TYPE => WikibaseRepo::getDefaultInstance()->getTermsLanguages()->getLanguages(),
+					// TODO inject TermsLanguages as a service
+					self::PARAM_TYPE => WikibaseRepo::getTermsLanguages()->getLanguages(),
 					self::PARAM_REQUIRED => true,
 				],
 				'new' => [
@@ -235,12 +244,10 @@ class SetAliases extends ModifyEntity {
 		);
 	}
 
-	protected function getEntityTypesWithAliases() {
-		// TODO inject me
-		$entityFactory = WikibaseRepo::getDefaultInstance()->getEntityFactory();
+	protected function getEntityTypesWithAliases(): array {
 		$supportedEntityTypes = [];
 		foreach ( $this->enabledEntityTypes as $entityType ) {
-			$testEntity = $entityFactory->newEmpty( $entityType );
+			$testEntity = $this->entityFactory->newEmpty( $entityType );
 			if ( $testEntity instanceof AliasesProvider ) {
 				$supportedEntityTypes[] = $entityType;
 			}
@@ -251,7 +258,7 @@ class SetAliases extends ModifyEntity {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		return [
 			'action=wbsetaliases&language=en&id=Q1&set=Foo|Bar'
 				=> 'apihelp-wbsetaliases-example-1',

@@ -4,6 +4,8 @@ namespace EntitySchema\MediaWiki;
 
 use Article;
 use DatabaseUpdater;
+use EntitySchema\MediaWiki\Content\EntitySchemaContent;
+use EntitySchema\Presentation\AutocommentFormatter;
 use HistoryPager;
 use Html;
 use MediaWiki\MediaWikiServices;
@@ -11,12 +13,12 @@ use MediaWiki\Revision\RevisionRecord;
 use MWException;
 use SkinTemplate;
 use Title;
-use EntitySchema\MediaWiki\Content\EntitySchemaContent;
-use EntitySchema\Presentation\AutocommentFormatter;
 use WikiImporter;
 
 /**
  * Hooks utilized by the EntitySchema extension
+ *
+ * @license GPL-2.0-or-later
  */
 final class EntitySchemaHooks {
 
@@ -26,7 +28,7 @@ final class EntitySchemaHooks {
 	public static function onCreateDBSchema( DatabaseUpdater $updater ) {
 		$updater->addExtensionTable(
 			'entityschema_id_counter',
-			__DIR__ . '/../../sql/EntitySchema.sql'
+			dirname( __DIR__, 2 ) . "/sql/{$updater->getDB()->getType()}/tables-generated.sql"
 		);
 	}
 

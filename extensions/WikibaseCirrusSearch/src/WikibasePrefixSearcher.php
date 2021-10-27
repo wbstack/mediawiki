@@ -31,13 +31,10 @@ class WikibasePrefixSearcher extends Searcher {
 	 */
 	public function __construct( $offset, $limit, CirrusDebugOptions $options = null ) {
 		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'CirrusSearch' );
-		/**
-		 * @var SearchConfig $config
-		 */
-		/* @phan-suppress-next-line PhanTypeMismatchArgument */
+		/** @var SearchConfig $config */
+		'@phan-var SearchConfig $config';
 		$connection = new Connection( $config );
-		/* @phan-suppress-next-line PhanTypeMismatchArgument */
-		parent::__construct( $connection, $offset, $limit, $config, null, null, null, $options );
+		parent::__construct( $connection, $offset, $limit, $config, null, null, false, $options );
 	}
 
 	/**

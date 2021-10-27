@@ -53,8 +53,6 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 	}
 
 	public function execute( $par ) {
-		global $wgMWOAuthSecureTokenTransfer, $wgMWOAuthReadOnly;
-
 		$this->requireLogin();
 		$this->checkPermissions();
 
@@ -65,7 +63,7 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 
 		// Redirect to HTTPs if attempting to access this page via HTTP.
 		// Proposals and updates to consumers can involve sending new secrets.
-		if ( $wgMWOAuthSecureTokenTransfer
+		if ( $this->getConfig()->get( 'MWOAuthSecureTokenTransfer' )
 			&& $request->detectProtocol() == 'http'
 			&& substr( wfExpandUrl( '/', PROTO_HTTPS ), 0, 8 ) === 'https://'
 		) {
@@ -84,7 +82,7 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 			throw new \UserBlockedError( $block );
 		}
 		$this->checkReadOnly();
-		if ( !$this->getUser()->isLoggedIn() ) {
+		if ( !$this->getUser()->isRegistered() ) {
 			throw new \UserNotLoggedIn();
 		}
 
@@ -93,13 +91,15 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 		$action = $navigation[0] ?? null;
 		$consumerKey = $navigation[1] ?? null;
 
-		if ( $wgMWOAuthReadOnly && $action !== 'list' ) {
+		if ( $this->getConfig()->get( 'MWOAuthReadOnly' ) && $action !== 'list' ) {
 			throw new \ErrorPageError( 'mwoauth-error', 'mwoauth-db-readonly' );
 		}
 
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
 		switch ( $action ) {
 		case 'propose':
-			if ( !$user->isAllowed( 'mwoauthproposeconsumer' ) ) {
+			if ( !$permissionManager->userHasRight( $user, 'mwoauthproposeconsumer' ) ) {
 				throw new \PermissionsError( 'mwoauthproposeconsumer' );
 			}
 
@@ -281,7 +281,7 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 					$data['grants'] = \FormatJson::encode( // adapt form to controller
 						preg_replace( '/^grant-/', '', $data['grants'] ) );
 					// 'callbackUrl' must be present,
-					// otherwise MWOAuthSubmitControl::validateFields() fails.
+					// otherwise SubmitControl::validateFields() fails.
 					if ( $data['ownerOnly'] && !isset( $data['callbackUrl'] ) ) {
 						$data['callbackUrl'] = '';
 					}
@@ -337,7 +337,7 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 			}
 			break;
 		case 'update':
-			if ( !$user->isAllowed( 'mwoauthupdateownconsumer' ) ) {
+			if ( !$permissionManager->userHasRight( $user, 'mwoauthupdateownconsumer' ) ) {
 				throw new \PermissionsError( 'mwoauthupdateownconsumer' );
 			}
 
@@ -347,7 +347,8 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 			if ( !$cmrAc ) {
 				$this->getOutput()->addWikiMsg( 'mwoauth-invalid-consumer-key' );
 				break;
-			} elseif ( $cmrAc->getDAO()->getDeleted() && !$user->isAllowed( 'mwoauthviewsuppressed' ) ) {
+			} elseif ( $cmrAc->getDAO()->getDeleted()
+				&& !$permissionManager->userHasRight( $user, 'mwoauthviewsuppressed' ) ) {
 				throw new \PermissionsError( 'mwoauthviewsuppressed' );
 			} elseif ( $cmrAc->getDAO()->getUserId() !== $centralUserId ) {
 				// Do not show private information to other users
@@ -367,8 +368,8 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 							'mwoauth-consumer-name' => $cmrAc->getName(),
 							'mwoauth-consumer-version' => $cmrAc->getVersion(),
 							'mwoauth-oauth-version' => $cmrAc->getOAuthVersion() === Consumer::OAUTH_VERSION_2 ?
-								wfMessage( 'mwoauth-oauth-version-2' )->text() :
-								wfMessage( 'mwoauth-oauth-version-1' )->text(),
+								$this->msg( 'mwoauth-oauth-version-2' )->text() :
+								$this->msg( 'mwoauth-oauth-version-1' )->text(),
 							'mwoauth-consumer-key' => $cmrAc->getConsumerKey(),
 						], $this->getContext() ),
 					],
@@ -482,7 +483,7 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 				$this->getOutput()->addWikiMsg( "mwoauthconsumerregistration-none" );
 			}
 			# Every 30th view, prune old deleted items
-			if ( 0 == mt_rand( 0, 29 ) ) {
+			if ( mt_rand( 0, 29 ) == 0 ) {
 				Utils::runAutoMaintenance( Utils::getCentralDB( DB_MASTER ) );
 			}
 			break;
@@ -505,31 +506,34 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 	protected function addSubtitleLinks( $action, $consumerKey ) {
 		$listLinks = [];
 		if ( $consumerKey || $action !== 'propose' ) {
-			$listLinks[] = \Linker::linkKnown(
+			$listLinks[] = $this->getLinkRenderer()->makeKnownLink(
 				$this->getPageTitle( 'propose' ),
-				$this->msg( 'mwoauthconsumerregistration-propose' )->escaped() );
+				$this->msg( 'mwoauthconsumerregistration-propose' )->text()
+			);
 		} else {
 			$listLinks[] = $this->msg( 'mwoauthconsumerregistration-propose' )->escaped();
 		}
 		if ( $consumerKey || $action !== 'list' ) {
-			$listLinks[] = \Linker::linkKnown(
+			$listLinks[] = $this->getLinkRenderer()->makeKnownLink(
 				$this->getPageTitle( 'list' ),
-				$this->msg( 'mwoauthconsumerregistration-list' )->escaped() );
+				$this->msg( 'mwoauthconsumerregistration-list' )->text()
+			);
 		} else {
 			$listLinks[] = $this->msg( 'mwoauthconsumerregistration-list' )->escaped();
 		}
 		if ( $consumerKey && $action == 'update' ) {
-			$listLinks[] = \Linker::linkKnown(
+			$listLinks[] = $this->getLinkRenderer()->makeKnownLink(
 				\SpecialPage::getTitleFor( 'OAuthListConsumers', "view/$consumerKey" ),
-				$this->msg( 'mwoauthconsumer-consumer-view' )->escaped() );
+				$this->msg( 'mwoauthconsumer-consumer-view' )->text()
+			);
 		}
 
 		$linkHtml = $this->getLanguage()->pipeList( $listLinks );
 
 		$viewall = $this->msg( 'parentheses' )->rawParams(
-			\Linker::linkKnown(
+			$this->getLinkRenderer()->makeKnownLink(
 				$this->getPageTitle(),
-				$this->msg( 'mwoauthconsumerregistration-main' )->escaped()
+				$this->msg( 'mwoauthconsumerregistration-main' )->text()
 			)
 		)->escaped();
 
@@ -549,14 +553,14 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 		$cmrKey = $cmrAc->getConsumerKey();
 
 		$links = [];
-		$links[] = \Linker::linkKnown(
+		$links[] = $this->getLinkRenderer()->makeKnownLink(
 			\SpecialPage::getTitleFor( 'OAuthListConsumers', "view/$cmrKey" ),
-			$this->msg( 'mwoauthlistconsumers-view' )->escaped()
+			$this->msg( 'mwoauthlistconsumers-view' )->text()
 		);
 
-		$links[] = \Linker::linkKnown(
+		$links[] = $this->getLinkRenderer()->makeKnownLink(
 			$this->getPageTitle( 'update/' . $cmrKey ),
-			$this->msg( 'mwoauthconsumerregistration-manage' )->escaped()
+			$this->msg( 'mwoauthconsumerregistration-manage' )->text()
 		);
 
 		$links = $this->getLanguage()->pipeList( $links );
@@ -580,8 +584,8 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 
 		$lang = $this->getLanguage();
 		$oauthVersionMessage = $cmrAc->getOAuthVersion() === Consumer::OAUTH_VERSION_2 ?
-			wfMessage( 'mwoauth-oauth-version-2' )->text() :
-			wfMessage( 'mwoauth-oauth-version-1' )->text();
+			$this->msg( 'mwoauth-oauth-version-2' )->text() :
+			$this->msg( 'mwoauth-oauth-version-1' )->text();
 		$data = [
 			'mwoauthconsumerregistration-name' => $cmrAc->escapeForHtml( $cmrAc->getNameAndVersion() ),
 			'mwoauth-oauth-version' => $cmrAc->escapeForHtml( $oauthVersionMessage ),

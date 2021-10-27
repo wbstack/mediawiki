@@ -29,23 +29,12 @@ class NoLangLinkHandler {
 	 * @param string ...$langs Language codes or '*'
 	 */
 	public static function handle( Parser $parser, ...$langs ) {
-		$handler = self::newFromGlobalState();
+		$handler = self::factory();
 		$handler->doHandle( $parser, $langs );
 	}
 
-	/**
-	 * @return self
-	 */
-	private static function newFromGlobalState() {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$settings = $wikibaseClient->getSettings();
-
-		$namespaceChecker = new NamespaceChecker(
-			$settings->getSetting( 'excludeNamespaces' ),
-			$settings->getSetting( 'namespaces' )
-		);
-
-		return new self( $namespaceChecker );
+	private static function factory(): self {
+		return new self( WikibaseClient::getNamespaceChecker() );
 	}
 
 	public function __construct( NamespaceChecker $namespaceChecker ) {

@@ -1,13 +1,20 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use SpecialPage;
+
 /**
  * Description of SpecialMathShowSVG
  *
  * @author Moritz Schubotz (Physikerwelt)
  */
 class SpecialMathShowImage extends SpecialPage {
+	/** @var bool */
 	private $noRender = false;
+	/** @var MathRenderer|null */
 	private $renderer = null;
+	/** @var string */
 	private $mode = 'mathml';
 
 	public function __construct() {
@@ -53,7 +60,7 @@ class SpecialMathShowImage extends SpecialPage {
 			$asciimath = '';
 		}
 		$mode = $request->getText( 'mode' );
-		$this->mode = MathHooks::mathModeToString( $mode, 'mathml' );
+		$this->mode = Hooks::mathModeToString( $mode, 'mathml' );
 
 		if ( !in_array( $this->mode, MathRenderer::getValidModes() ) ) {
 			// Fallback to the default if an invalid mode was specified

@@ -2,7 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"David1010",
-			"Macofe"
+			"Macofe",
+			"Გიო ოქრო",
+			"Იო ოქრო"
 		]
 	},
 	"templatesandbox": "თარგის სავარჯიშო",
@@ -14,5 +16,7 @@
 	"templatesandbox-editform-legend": "გვერდის წინასწარი გადახედვა ამ თარგით",
 	"templatesandbox-editform-page-label": "გვერდის სათაური",
 	"templatesandbox-editform-view-label": "წინასწარი გადახედვა",
-	"templatesandbox-preview": "$2-ის წინასწარი გადახედვა"
+	"templatesandbox-preview": "$2-ის წინასწარი გადახედვა",
+	"templatesandbox-previewnote": "'''დაიმახსოვრეთ, ეს მხოლოდ [[:$1]]-ის წინასწარი გადახედვაა.'''\nთქვენი ცვლილებები ჯერ არ შენახულა!",
+	"templatesandbox-editform-title-not-exists": "გვერდი, რომელიც თქვენ აირჩიეთ წინასწარ გადასახედად, არ არსებობს."
 }

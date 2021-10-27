@@ -3,6 +3,7 @@
 		"authors": [
 			"BaRaN6161 TURK",
 			"Sadrettin",
+			"SaldırganSincap",
 			"SwornToTranslate29",
 			"TmY e12",
 			"ToprakM"
@@ -12,7 +13,7 @@
 	"templatesandbox-desc": "[[Special:TemplateSandbox|Deneme tahtası şablonlar]] içeren bir sayfa oluşturur",
 	"templatesandbox-suffix": "deneme tahtası",
 	"templatesandbox-legend": "Şablon deneme tahtası",
-	"templatesandbox-text": "Uygun bir korumalı alan önekini kullanarak sandbox'a kaydedilmiş bir dizi şablon seçebilirsiniz.\nÖrneğin, {{ns:Template}}:Test sürümünün bir önizlemesini görüntülemek istiyorsanız: \"{{ns:User}}:Örnek/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", Öneki \"{{ns:User}}:Örnek/{{int:templatesandbox-suffix}}\" olarak kullanın.",
+	"templatesandbox-text": "Uygun bir deneme tahtası önekini kullanarak deneme tahtasına kaydedilmiş bir dizi şablon seçebilirsiniz.\nÖrneğin, {{ns:Template}}:Test sürümünün bir önizlemesini görüntülemek istiyorsanız: \"{{ns:User}}:Örnek/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", öneki \"{{ns:User}}:Örnek/{{int:templatesandbox-suffix}}\" olarak kullanın.",
 	"templatesandbox-prefix-label": "Deneme tahtası öneki:",
 	"templatesandbox-page-label": "Sayfayı işle:",
 	"templatesandbox-revid-label": "Revizyonu işle:",
@@ -33,7 +34,7 @@
 	"templatesandbox-page-or-revid": "Bir sayfa başlığı veya düzeltme kimlik numarası girmelisiniz.",
 	"templatesandbox-fail-post": "<em>Oturum verilerinin kaybolması nedeniyle, önizleme JavaScript saldırılarına karşı bir önlem olarak gizlenir.</em>\n\n<strong>Bu yasal bir önizleme girişimi ise, lütfen tekrar deneyin.</strong>\nHala çalışmıyorsa, [[Special:UserLogout|çıkış yapın]] ve tekrar oturum açmayı deneyin.",
 	"templatesandbox-fail-post-anon": "<em>Oturum açmadığınız için önizleme, JavaScript saldırılarına karşı bir önlem olarak gizlenir.</em>\n\n<strong>Bu yasal bir önizleme girişimi ise, lütfen [[Special:UserLogin|oturum açın]] ve tekrar deneyin.</strong>",
-	"templatesandbox-anon-limited-preview": "Giriş yapılmadığında JavaScript ve CSS değişikliklerinin önizlemesi devre dışı bırakılır. Bu tür değişiklikleri önizlemeniz gerekiyorsa, lütfen [[Special:UserLogin|oturum açın]] ve tekrar deneyin.",
+	"templatesandbox-anon-limited-preview": "Oturum açmadığından JavaScript ve CSS değişikliklerinin önizlemesi devre dışı bırakılır. Bu tür değişiklikleri önizlemeniz gerekiyorsa, lütfen [[Special:UserLogin|oturum açın]] ve tekrar deneyin.",
 	"templatesandbox-editform-need-template": "Bu şablonla başka bir sayfayı önizlemek için bir şablon adı belirtilmelidir.",
 	"templatesandbox-editform-need-title": "Bu şablonla başka bir sayfayı önizlemek için bir sayfa başlığı belirtilmelidir.",
 	"templatesandbox-editform-invalid-template": "Belirttiğiniz şablonun adı geçersiz.",

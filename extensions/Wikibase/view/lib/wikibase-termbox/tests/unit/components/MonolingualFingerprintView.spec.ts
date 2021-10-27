@@ -9,12 +9,13 @@ import AliasesEdit from '@/components/AliasesEdit.vue';
 import { createStore } from '@/store';
 import { NS_LANGUAGE, NS_ENTITY } from '@/store/namespaces';
 import { LANGUAGE_UPDATE } from '@/store/language/mutationTypes';
-import { mutation } from '@wmde/vuex-helpers/dist/namespacedStoreMethods';
+import { mutation, action } from '@wmde/vuex-helpers/dist/namespacedStoreMethods';
 import { ENTITY_UPDATE } from '@/store/entity/mutationTypes';
 import { EDITMODE_SET } from '@/store/mutationTypes';
 import newFingerprintable from '../../newFingerprintable';
 import hotUpdateDeep from '@wmde/vuex-helpers/dist/hotUpdateDeep';
 import emptyServices from '../emptyServices';
+import { ENTITY_DESCRIPTION_EDIT, ENTITY_LABEL_EDIT } from '@/store/entity/actionTypes';
 
 function createMinimalStoreWithLanguage( languageCode: string ) {
 	const store = createStore( emptyServices as any );
@@ -50,14 +51,15 @@ describe( 'MonolingualFingerprintView.vue', () => {
 				{ store, propsData: { languageCode: language.code } },
 			);
 
-			expect( wrapper.find( Label ).exists() ).toBeTruthy();
-			expect( wrapper.find( Label ).props( 'label' ) ).toBe( entity.labels[ language.code ] );
+			expect( wrapper.findComponent( Label ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( Label ).props( 'label' ) ).toBe( entity.labels[ language.code ] );
 
-			expect( wrapper.find( Description ).exists() ).toBeTruthy();
-			expect( wrapper.find( Description ).props( 'description' ) ).toBe( entity.descriptions[ language.code ] );
+			expect( wrapper.findComponent( Description ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( Description ).props( 'description' ) )
+				.toBe( entity.descriptions[ language.code ] );
 
-			expect( wrapper.find( Aliases ).exists() ).toBeTruthy();
-			expect( wrapper.find( Aliases ).props( 'aliases' ) ).toBe( entity.aliases[ language.code ] );
+			expect( wrapper.findComponent( Aliases ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( Aliases ).props( 'aliases' ) ).toBe( entity.aliases[ language.code ] );
 		} );
 
 		it( 'renders in editmode', () => {
@@ -80,19 +82,62 @@ describe( 'MonolingualFingerprintView.vue', () => {
 				propsData: { languageCode: language.code },
 			} );
 
-			expect( wrapper.find( LabelEdit ).exists() ).toBeTruthy();
-			expect( wrapper.find( LabelEdit ).props( 'label' ) ).toBe( entity.labels[ language.code ] );
-			expect( wrapper.find( LabelEdit ).props( 'languageCode' ) ).toBe( languageCode );
+			expect( wrapper.findComponent( LabelEdit ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( LabelEdit ).props( 'label' ) ).toBe( entity.labels[ language.code ] );
+			expect( wrapper.findComponent( LabelEdit ).props( 'languageCode' ) ).toBe( languageCode );
 
-			expect( wrapper.find( DescriptionEdit ).exists() ).toBeTruthy();
-			expect( wrapper.find( DescriptionEdit ).props( 'description' ) )
+			expect( wrapper.findComponent( DescriptionEdit ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( DescriptionEdit ).props( 'description' ) )
 				.toBe( entity.descriptions[ language.code ] );
-			expect( wrapper.find( DescriptionEdit ).props( 'languageCode' ) ).toBe( languageCode );
+			expect( wrapper.findComponent( DescriptionEdit ).props( 'languageCode' ) ).toBe( languageCode );
 
-			expect( wrapper.find( AliasesEdit ).exists() ).toBeTruthy();
-			expect( wrapper.find( AliasesEdit ).props( 'languageCode' ) ).toBe( languageCode );
-			expect( wrapper.find( AliasesEdit ).props( 'aliases' ) ).toBe( entity.aliases[ language.code ] );
+			expect( wrapper.findComponent( AliasesEdit ).exists() ).toBeTruthy();
+			expect( wrapper.findComponent( AliasesEdit ).props( 'languageCode' ) ).toBe( languageCode );
+			expect( wrapper.findComponent( AliasesEdit ).props( 'aliases' ) ).toBe( entity.aliases[ language.code ] );
 		} );
+
+		it( 'triggers ENTITY_LABEL_EDIT on label edits', () => {
+			const languageCode = 'de';
+
+			const store = createStore( emptyServices as any );
+			store.dispatch = jest.fn();
+
+			store.commit( EDITMODE_SET, true );
+
+			const wrapper = shallowMount( MonolingualFingerprintView, {
+				store,
+				propsData: {
+					label: { language: languageCode, value: 'oldValue' },
+					languageCode,
+				},
+			} );
+
+			const newValue = { language: languageCode, value: 'newValue' };
+			const labelEdit = wrapper.findComponent( LabelEdit );
+			labelEdit.vm.$emit( 'input', newValue );
+
+			expect( store.dispatch )
+				.toHaveBeenCalledWith( action( NS_ENTITY, ENTITY_LABEL_EDIT ), newValue );
+		} );
+	} );
+
+	it( 'triggers ENTITY_DESCRIPTION_EDIT on description edits', () => {
+		const store = createStore( emptyServices as any );
+		store.dispatch = jest.fn();
+		store.commit( EDITMODE_SET, true );
+
+		const languageCode = 'de';
+		const wrapper = shallowMount( MonolingualFingerprintView, {
+			store,
+			propsData: { languageCode },
+		} );
+
+		const newValue = { language: languageCode, value: 'newValue' };
+		const descriptionEdit = wrapper.findComponent( DescriptionEdit );
+		descriptionEdit.vm.$emit( 'input', newValue );
+
+		expect( store.dispatch )
+			.toHaveBeenCalledWith( action( NS_ENTITY, ENTITY_DESCRIPTION_EDIT ), newValue );
 	} );
 
 	describe( 'primary Fingerprint', () => {
@@ -110,7 +155,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 				},
 			);
 			expect( wrapper.classes( 'wb-ui-monolingualfingerprintview--primaryLanguage' ) ).toBeTruthy();
-			expect( wrapper.find( Label ).props() ).toHaveProperty( 'isPrimary', true );
+			expect( wrapper.findComponent( Label ).props() ).toHaveProperty( 'isPrimary', true );
 		} );
 
 		it( 'renders the component with no modifier and no primary label if isPrimary flag is false', () => {
@@ -127,7 +172,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 				},
 			);
 			expect( wrapper.classes() ).toEqual( [ 'wb-ui-monolingualfingerprintview' ] );
-			expect( wrapper.find( Label ).props() ).toHaveProperty( 'isPrimary', false );
+			expect( wrapper.findComponent( Label ).props() ).toHaveProperty( 'isPrimary', false );
 		} );
 	} );
 
@@ -158,7 +203,7 @@ describe( 'MonolingualFingerprintView.vue', () => {
 
 		const languageNameInUserLanguage = wrapper.find( '.wb-ui-monolingualfingerprintview__language' );
 		expect( getTranslationInUserLanguage ).toHaveBeenCalledWith( languageCode );
-		expect( languageNameInUserLanguage.is( 'span' ) ).toBeTruthy();
+		expect( languageNameInUserLanguage.element.tagName ).toBe( 'SPAN' );
 		expect( languageNameInUserLanguage.text() ).toBe( languageTranslation );
 	} );
 

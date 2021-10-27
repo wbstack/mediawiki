@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Specials;
 
 use ExtensionRegistry;
@@ -7,9 +9,8 @@ use Html;
 use IContextSource;
 use Language;
 use SpecialPage;
-use Wikibase\Lib\LanguageFallbackChain;
 use Wikibase\Lib\LanguageFallbackChainFactory;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\Lib\TermLanguageFallbackChain;
 
 /**
  * Page for displaying the current language fallback chain for debugging.
@@ -20,7 +21,7 @@ use Wikibase\Repo\WikibaseRepo;
 class SpecialMyLanguageFallbackChain extends SpecialPage {
 
 	/**
-	 * @var LanguageFallbackChain
+	 * @var TermLanguageFallbackChain
 	 */
 	private $chain;
 
@@ -37,64 +38,33 @@ class SpecialMyLanguageFallbackChain extends SpecialPage {
 		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
 	}
 
-	public static function newFromGlobalState(): self {
-		return new self(
-			WikibaseRepo::getDefaultInstance()->getLanguageFallbackChainFactory()
-		);
-	}
-
-	/**
-	 * @see SpecialPage::getGroupName
-	 *
-	 * @return string
-	 */
-	protected function getGroupName() {
+	/** @inheritDoc */
+	protected function getGroupName(): string {
 		return 'wikibase';
 	}
 
-	/**
-	 * @see SpecialPage::getDescription
-	 *
-	 * @return string
-	 */
-	public function getDescription() {
+	/** @inheritDoc */
+	public function getDescription(): string {
 		return $this->msg( 'special-mylanguagefallbackchain' )->text();
 	}
 
 	/**
-	 * Set the context.
-	 *
 	 * @param IContextSource $context
 	 */
-	public function setContext( $context ) {
+	public function setContext( $context ): void {
 		$this->chain = null;
 		parent::setContext( $context );
 	}
 
 	/**
 	 * Get the chain stored for display.
-	 *
-	 * @return LanguageFallbackChain
 	 */
-	public function getLanguageFallbackChain() {
+	public function getLanguageFallbackChain(): TermLanguageFallbackChain {
 		if ( $this->chain === null ) {
-			$this->setLanguageFallbackChain(
-				$this->languageFallbackChainFactory->newFromContext( $this->getContext() )
-			);
+			$this->chain = $this->languageFallbackChainFactory->newFromContext( $this->getContext() );
 		}
 
 		return $this->chain;
-	}
-
-	/**
-	 * Set a new chain for display and return the original one.
-	 *
-	 * @param LanguageFallbackChain $chain
-	 *
-	 * @return LanguageFallbackChain
-	 */
-	public function setLanguageFallbackChain( LanguageFallbackChain $chain ) {
-		return wfSetVar( $this->chain, $chain );
 	}
 
 	/**
@@ -102,7 +72,7 @@ class SpecialMyLanguageFallbackChain extends SpecialPage {
 	 *
 	 * @param string|null $subPage
 	 */
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		$this->setHeaders();
 		$this->outputHeader();
 
@@ -125,7 +95,7 @@ class SpecialMyLanguageFallbackChain extends SpecialPage {
 
 			if ( $sourceLanguage ) {
 				$sourceLanguageName = Language::fetchLanguageName( $sourceLanguage->getCode(), $inLanguage );
-				$msgHtml = wfMessage(
+				$msgHtml = $this->msg(
 					'wikibase-mylanguagefallbackchain-converted-item',
 					$language->getHtmlCode(),
 					$languageName,
@@ -133,7 +103,7 @@ class SpecialMyLanguageFallbackChain extends SpecialPage {
 					$sourceLanguageName
 				)->parse();
 			} else {
-				$msgHtml = wfMessage(
+				$msgHtml = $this->msg(
 					'wikibase-mylanguagefallbackchain-verbatim-item',
 					$language->getHtmlCode(),
 					$languageName

@@ -111,7 +111,13 @@ class JCTabularContentView extends JCContentView {
 					$colIsValid = $column && $column instanceof JCValue && !$column->error();
 					$column =
 						( $column && $column instanceof JCValue ) ? $column->getValue() : $column;
-					$header = $headerAttributes[ count( $vals ) ];
+
+					if ( count( $vals ) >= count( $headerAttributes ) ) {
+						$header = [];
+					} else {
+						$header = $headerAttributes[ count( $vals ) ];
+					}
+
 					if ( !$colIsValid ) {
 						$header['class'] = 'mw-tabular-error';
 					}

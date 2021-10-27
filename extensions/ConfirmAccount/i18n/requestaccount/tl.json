@@ -46,5 +46,5 @@
 	"requestaccount-email-body": "May isang tao, marahil ikaw na nagmula sa IP address na $1, ang humiling ng isang account na \"$2\" na may ganitong email address sa {{SITENAME}}.\n\nUpang patotohanan na talagang ikaw ang may-ari ng account na itong nasa {{SITENAME}}, buksan ang kawing na ito sa iyong browser:\n\n$3\n\nKapag nalikha na ang account, sa iyo lamang ipapadala ang password sa pamamagitan ng email.\nKung *hindi* ikaw ito, huwag sundan ang link.\nMawawalan ng bisa ang kodigo ng pagpapatotoong ito sa $4.",
 	"requestaccount-email-subj-admin": "Paghiling ng account sa {{SITENAME}}",
 	"requestaccount-email-body-admin": "Humiling si $1 ng isang account at naghihintay ng pagtitiyak.\nNatiyak na ang email address. Matitiyak mo ang kahilingan mula dito:\n\n$2",
-	"acct_request_throttle_hit": "Paumanhin, nakahiling ka na ng {{PLURAL:$1|1 account|$1 mga account}}."
+	"acct_request_throttle_hit": "Paumanhin, hiniling mo na ang $1 account.\nHindi ka na makagagawa pa ng kahit anong karagdagang hiling."
 }

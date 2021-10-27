@@ -5,6 +5,8 @@ namespace Wikibase\Repo\Specials;
 use InvalidArgumentException;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Term\DescriptionsProvider;
+use Wikibase\Lib\ContentLanguages;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOps;
@@ -27,7 +29,8 @@ class SpecialSetDescription extends SpecialModifyTerm {
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
 		MediawikiEditEntityFactory $editEntityFactory,
-		EntityPermissionChecker $entityPermissionChecker
+		EntityPermissionChecker $entityPermissionChecker,
+		ContentLanguages $termsLanguages
 	) {
 		parent::__construct(
 			'SetDescription',
@@ -35,26 +38,32 @@ class SpecialSetDescription extends SpecialModifyTerm {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
-			$entityPermissionChecker
+			$entityPermissionChecker,
+			$termsLanguages
 		);
 	}
 
-	public static function newFromGlobalState(): self {
+	public static function factory(
+		EntityPermissionChecker $entityPermissionChecker,
+		EntityTitleLookup $entityTitleLookup,
+		SettingsArray $repoSettings,
+		ContentLanguages $termsLanguages
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 
-		$settings = $wikibaseRepo->getSettings();
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
-			$settings->getSetting( 'dataRightsUrl' ),
-			$settings->getSetting( 'dataRightsText' )
+			$repoSettings->getSetting( 'dataRightsUrl' ),
+			$repoSettings->getSetting( 'dataRightsText' )
 		);
 
 		return new self(
 			$copyrightView,
 			$wikibaseRepo->getSummaryFormatter(),
-			$wikibaseRepo->getEntityTitleLookup(),
+			$entityTitleLookup,
 			$wikibaseRepo->newEditEntityFactory(),
-			$wikibaseRepo->getEntityPermissionChecker()
+			$entityPermissionChecker,
+			$termsLanguages
 		);
 	}
 

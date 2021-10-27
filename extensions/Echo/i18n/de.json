@@ -4,6 +4,7 @@
 			"ChrisiPK",
 			"DerHexer",
 			"FriedhelmW",
+			"Inkowik",
 			"Kghbln",
 			"Lucas Werkmeister",
 			"MGChecker",
@@ -16,6 +17,7 @@
 			"TMg",
 			"Tiin",
 			"Tobi 406",
+			"Umherirrender",
 			"Vogone"
 		]
 	},
@@ -74,7 +76,7 @@
 	"echo-pref-tooltip-user-rights": "Benachrichtige mich, wenn jemand meine Benutzerrechte ändert.",
 	"echo-pref-tooltip-emailuser": "Benachrichtige mich, wenn mir jemand eine E-Mail sendet.",
 	"echo-pref-tooltip-article-reminder": "Benachrichtige mich über diese Seite, wenn ich dies verlange.",
-	"echo-pref-tooltip-thank-you-edit": "Benachrichtige mich, wenn ich meine 1., 10., 100., …  Bearbeitung erreiche.",
+	"echo-pref-tooltip-thank-you-edit": "Benachrichtige mich, wenn ich meine 1., 10., 100., … Bearbeitung erreiche.",
 	"echo-pref-tooltip-watchlist": "Benachrichtige mich, wenn jemand eine (nicht-kleine) Bearbeitung an einer Seite auf meiner Beobachtungsliste macht.",
 	"echo-pref-tooltip-minor-watchlist": "Benachrichtige mich, wenn jemand eine kleine Bearbeitung an einer Seite auf meiner Beobachtungsliste macht.",
 	"notifications": "Benachrichtigungen",
@@ -149,8 +151,8 @@
 	"notification-header-mention-other-nosection": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf <strong>$4</strong>.",
 	"notification-header-mention-user-talkpage-v2": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf der <strong>Benutzerdiskussionsseite {{GENDER:$5|von}} $4</strong> in „<strong>$6</strong>“.",
 	"notification-header-mention-user-talkpage-nosection": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf der <strong>Benutzerdiskussionsseite {{GENDER:$5|von}} $4</strong>.",
-	"notification-header-mention-agent-talkpage": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf <strong>{{GENDER:$2|seiner|ihrer|Benutzers}} Diskussionsseite</strong> in „<strong>$4</strong>“.",
-	"notification-header-mention-agent-talkpage-nosection": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf <strong>{{GENDER:$2|seiner|ihrer|Benutzers}} Diskussionsseite</strong>.",
+	"notification-header-mention-agent-talkpage": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf <strong>{{GENDER:$2|seiner|ihrer|der eigenen}} Diskussionsseite</strong> in „<strong>$4</strong>“.",
+	"notification-header-mention-agent-talkpage-nosection": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf <strong>{{GENDER:$2|seiner|ihrer|der eigenen}} Diskussionsseite</strong>.",
 	"notification-header-mention-article-talkpage": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf der Diskussionsseite von <strong>$4</strong> in „<strong>$5</strong>“.",
 	"notification-header-mention-article-talkpage-nosection": "$1 {{GENDER:$2|erwähnte}} {{GENDER:$3|dich}} auf der Diskussionsseite von <strong>$4</strong>.",
 	"notification-header-mention-failure-user-unknown": "{{GENDER:$2|Deine}} Erwähnung von <strong>$3</strong> wurde nicht gesendet, da der Benutzer nicht gefunden wurde.",
@@ -234,5 +236,10 @@
 	"notification-header-foreign-alert": "Weitere Meldungen von {{PLURAL:$5|einem anderen Wiki|$5 anderen Wikis}}",
 	"notification-header-foreign-notice": "Weitere Mitteilungen von {{PLURAL:$5|einem anderen Wiki|$5 anderen Wikis}}",
 	"notification-header-foreign-all": "Weitere Benachrichtigungen von {{PLURAL:$5|einem weiteren Wiki|$5 weiteren Wikis}}",
-	"echo-foreign-wiki-lang": "$1 – $2"
+	"echo-foreign-wiki-lang": "$1 – $2",
+	"right-manage-all-push-subscriptions": "Verwalten aller Push-Abonnements",
+	"action-manage-all-push-subscriptions": "verwalten aller Push-Abonnements",
+	"group-push-subscription-manager": "Push-Abonnementverwalter",
+	"group-push-subscription-manager-member": "{{GENDER:$1|Push-Abonnementverwalter|Push-Abonnementverwalterin}}",
+	"grouppage-push-subscription-manager": "{{ns:project}}:Push-Abonnementverwalter"
 }

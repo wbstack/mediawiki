@@ -25,7 +25,7 @@ class NonPhraseParser {
 	 *
 	 * few markups are added
 	 */
-	const NEGATION = '/\G[-!](?=[\w])/u';
+	private const NEGATION = '/\G[-!](?=[\w])/u';
 
 	/**
 	 * Consume non quoted chars (negated phrase queries as well)
@@ -34,34 +34,34 @@ class NonPhraseParser {
 	 * - !- only if they are not followed by " (accepts $ to consume !- at the end of the string)
 	 * - stops at first ", ! or -
 	 */
-	const NON_QUOTE = '/\\\\.|[!-](?!")|(?<stop>["!\pZ\pC-])/u';
+	private const NON_QUOTE = '/\\\\.|[!-](?!")|(?<stop>["!\pZ\pC-])/u';
 
 	/**
 	 * Detect simple prefix nodes
 	 * only letters and number allowed
 	 */
-	const PREFIX_QUERY = '/^(?<prefix>\w+)[*]+$/u';
+	private const PREFIX_QUERY = '/^(?<prefix>\w+)[*]+$/u';
 
 	/**
 	 * Wildcards disallowed at the beginning
 	 * we arbitrarily allow 3 wildcards to avoid catching random garbage
 	 * and too costly queries.
 	 */
-	const DISALLOWED_LEADING_WILDCARD = '/^(?:\w+[?*]){1,3}\w*$/u';
+	private const DISALLOWED_LEADING_WILDCARD = '/^(?:\w+[?*]){1,3}\w*$/u';
 
 	/**
 	 * Wildcards allowed at the beginning
 	 * but we still force the wildcards to be surrounded by letters
 	 * we allow only 3 wildcards
 	 */
-	const ALLOWED_LEADING_WILDCARD = '/^(?:(?:[?*](?=\w)(?:\w+[?*]|\w+){1,2}\w*)|(?:(?:\w+[?*]){1,3}\w*))$/u';
+	private const ALLOWED_LEADING_WILDCARD = '/^(?:(?:[?*](?=\w)(?:\w+[?*]|\w+){1,2}\w*)|(?:(?:\w+[?*]){1,3}\w*))$/u';
 
 	/**
 	 * We force fuzzy words to have letters in them
 	 * NOTE that we disallow * or ? here so we can't
 	 * match fuzzy and wildcard at the same time
 	 */
-	const FUZZY_WORD = '/^(?<word>\w+)~(?<fuzzyness>[0-2])?$/u';
+	private const FUZZY_WORD = '/^(?<word>\w+)~(?<fuzzyness>[0-2])?$/u';
 
 	/**
 	 * @var Escaper
@@ -88,10 +88,13 @@ class NonPhraseParser {
 	/**
 	 * @param string $query
 	 * @param int $start
+	 * @param int $end
 	 * @return ParsedNode|null
 	 */
-	public function parse( $query, $start ) {
+	public function parse( string $query, int $start, int $end ) {
 		$match = [];
+		Assert::precondition( $start < $end, '$start < $end' );
+		Assert::precondition( $end <= strlen( $query ), '$end <= strlen( $query )' );
 		$ret = preg_match( self::NEGATION, $query, $match, PREG_OFFSET_CAPTURE, $start );
 		Assert::postcondition( $ret !== false, 'Regex failed: ' . preg_last_error() );
 		$wholeStart = $start;
@@ -104,7 +107,6 @@ class NonPhraseParser {
 		}
 		$wholeEnd = -1;
 
-		$end = strlen( $query );
 		while ( $start < $end ) {
 			$ret = preg_match( self::NON_QUOTE, $query, $match, PREG_OFFSET_CAPTURE, $start );
 			Assert::postcondition( $ret !== false, 'Regex failed: ' . preg_last_error() );

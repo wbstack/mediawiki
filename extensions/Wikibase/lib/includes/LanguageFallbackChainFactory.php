@@ -8,12 +8,15 @@ use IContextSource;
 use InvalidArgumentException;
 use Language;
 use LanguageConverter;
-use LogicException;
+use MediaWiki\Languages\LanguageConverterFactory;
+use MediaWiki\Languages\LanguageFactory;
+use MediaWiki\Languages\LanguageFallback;
+use MediaWiki\MediaWikiServices;
 use MWException;
 use User;
 
 /**
- * Object creating LanguageFallbackChain objects in Wikibase.
+ * Object creating TermLanguageFallbackChain objects in Wikibase.
  *
  * @license GPL-2.0-or-later
  * @author Liangent < liangent@gmail.com >
@@ -23,38 +26,58 @@ class LanguageFallbackChainFactory {
 	/**
 	 * Fallback levels
 	 */
-	const FALLBACK_ALL = 0xff;
+	public const FALLBACK_ALL = 0xff;
 
 	/**
 	 * The language itself, e.g. 'en' for 'en'.
 	 */
-	const FALLBACK_SELF = 1;
+	public const FALLBACK_SELF = 1;
 
 	/**
 	 * Other compatible languages that can be translated into the requested language
 	 * (and translation is automatically done), e.g. 'sr', 'sr-ec' and 'sr-el' for 'sr'.
 	 */
-	const FALLBACK_VARIANTS = 2;
+	public const FALLBACK_VARIANTS = 2;
 
 	/**
 	 * All other language from the system fallback chain, e.g. 'de' and 'en' for 'de-formal'.
 	 */
-	const FALLBACK_OTHERS = 4;
+	public const FALLBACK_OTHERS = 4;
+
+	/** @var LanguageFactory */
+	private $languageFactory;
+
+	/** @var LanguageConverterFactory */
+	private $languageConverterFactory;
+
+	/** @var LanguageFallback */
+	private $languageFallback;
 
 	/**
 	 * @var array[]
 	 */
-	private $languageCache;
+	private $languageCache = [];
 
 	/**
 	 * @var array[]
 	 */
-	private $userLanguageCache;
+	private $userLanguageCache = [];
 
-	/**
-	 * @var callback
-	 */
-	private $getLanguageFallbacksFor = 'Language::getFallbacksFor';
+	public function __construct(
+		?LanguageFactory $languageFactory = null,
+		?LanguageConverterFactory $languageConverterFactory = null,
+		?LanguageFallback $languageFallback = null
+	) {
+		// note: do not extract MediaWikiServices::getInstance() into a variable –
+		// if all three services are given, the service container should never be loaded
+		// (important in unit tests, where it isn’t set up)
+		$this->languageFactory = $languageFactory ?:
+			MediaWikiServices::getInstance()->getLanguageFactory();
+		$this->languageConverterFactory = $languageConverterFactory ?:
+			MediaWikiServices::getInstance()->getLanguageConverterFactory();
+		$this->languageFallback = $languageFallback ?:
+			MediaWikiServices::getInstance()->getLanguageFallback();
+	}
 
 	/**
 	 * Get the fallback chain based a single language, and specified fallback level.
@@ -62,14 +85,17 @@ class LanguageFallbackChainFactory {
 	 * @param Language $language
 	 * @param int $mode Bitfield of self::FALLBACK_*
 	 *
-	 * @return LanguageFallbackChain
+	 * @return TermLanguageFallbackChain
 	 */
 	public function newFromLanguage( Language $language, $mode = self::FALLBACK_ALL ) {
 		$languageCode = $language->getCode();
 
 		if ( !isset( $this->languageCache[$languageCode][$mode] ) ) {
 			$chain = $this->buildFromLanguage( $language, $mode );
-			$this->languageCache[$languageCode][$mode] = new LanguageFallbackChain( $chain );
+			$this->languageCache[$languageCode][$mode] = new TermLanguageFallbackChain(
+				$chain,
+				WikibaseContentLanguages::getDefaultInstance()->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM )
+			);
 		}
 
 		return $this->languageCache[$languageCode][$mode];
@@ -81,14 +107,17 @@ class LanguageFallbackChainFactory {
 	 * @param string $languageCode
 	 * @param int $mode Bitfield of self::FALLBACK_*
 	 *
-	 * @return LanguageFallbackChain
+	 * @return TermLanguageFallbackChain
 	 */
 	public function newFromLanguageCode( $languageCode, $mode = self::FALLBACK_ALL ) {
 		$languageCode = LanguageWithConversion::validateLanguageCode( $languageCode );
 
 		if ( !isset( $this->languageCache[$languageCode][$mode] ) ) {
 			$chain = $this->buildFromLanguage( $languageCode, $mode );
-			$this->languageCache[$languageCode][$mode] = new LanguageFallbackChain( $chain );
+			$this->languageCache[$languageCode][$mode] = new TermLanguageFallbackChain(
+				$chain,
+				WikibaseContentLanguages::getDefaultInstance()->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM )
+			);
 		}
 
 		return $this->languageCache[$languageCode][$mode];
@@ -99,13 +128,13 @@ class LanguageFallbackChainFactory {
 	 *
 	 * @param Language|string $language Language object or language code as string
 	 * @param int $mode Bitfield of self::FALLBACK_*
-	 * @param LanguageFallbackChain[] $chain for recursive calls
+	 * @param TermLanguageFallbackChain[] $chain for recursive calls
 	 * @param bool[] $fetched for recursive calls
 	 *
 	 * @throws InvalidArgumentException
 	 * @return LanguageWithConversion[]
 	 */
-	private function buildFromLanguage( $language, $mode, array &$chain = [], array &$fetched = [] ) {
+	private function buildFromLanguage( $language, $mode, array $chain = [], array &$fetched = [] ) {
 		if ( !is_int( $mode ) ) {
 			throw new InvalidArgumentException( '$mode must be an integer' );
 		}
@@ -129,29 +158,30 @@ class LanguageFallbackChainFactory {
 
 			if ( in_array( $pieces[0], LanguageConverter::$languagesWithVariants ) ) {
 				if ( is_string( $language ) ) {
-					$language = Language::factory( $language );
+					$language = $this->languageFactory->getLanguage( $language );
 				}
-				$parentLanguage = $language->getParentLanguage();
+				$parentLanguage = $this->languageFactory->getParentLanguage( $language->getCode() );
 			}
 
 			if ( $parentLanguage ) {
 				// It's less likely to trigger conversion mistakes by converting
 				// zh-tw to zh-hk first instead of converting zh-cn to zh-tw.
-				$variantFallbacks = $parentLanguage->getConverter()
-					->getVariantFallbacks( $languageCode );
+				$parentLanguageConverter = $this->languageConverterFactory->getLanguageConverter( $parentLanguage );
+				$variantFallbacks = $parentLanguageConverter->getVariantFallbacks( $languageCode );
 				if ( is_array( $variantFallbacks ) ) {
 					$variants = array_unique( array_merge(
-						$variantFallbacks, $parentLanguage->getVariants()
+						$variantFallbacks,
+						$parentLanguageConverter->getVariants()
 					) );
 				} else {
-					$variants = $parentLanguage->getVariants();
+					$variants = $parentLanguageConverter->getVariants();
 				}
 
 				foreach ( $variants as $variant ) {
 					if ( !isset( $fetched[$variant] )
 						// The self::FALLBACK_SELF mode is already responsible for self-references.
 						&& $variant !== $languageCode
-						&& $parentLanguage->hasVariant( $variant )
+						&& $parentLanguageConverter->hasVariant( $variant )
 					) {
 						$chain[] = LanguageWithConversion::factory( $language, $variant );
 						$fetched[$variant] = true;
@@ -169,9 +199,9 @@ class LanguageFallbackChainFactory {
 			$recursiveMode &= self::FALLBACK_VARIANTS;
 			$recursiveMode |= self::FALLBACK_SELF;
 
-			$fallbacks = call_user_func( $this->getLanguageFallbacksFor, $languageCode );
+			$fallbacks = $this->languageFallback->getAll( $languageCode );
 			foreach ( $fallbacks as $other ) {
-				$this->buildFromLanguage( $other, $recursiveMode, $chain, $fetched );
+				$chain = $this->buildFromLanguage( $other, $recursiveMode, $chain, $fetched );
 			}
 		}
 
@@ -183,7 +213,7 @@ class LanguageFallbackChainFactory {
 	 *
 	 * @param IContextSource $context
 	 *
-	 * @return LanguageFallbackChain
+	 * @return TermLanguageFallbackChain
 	 */
 	public function newFromContext( IContextSource $context ) {
 		return $this->newFromUserAndLanguageCode( $context->getUser(), $context->getLanguage()->getCode() );
@@ -195,7 +225,7 @@ class LanguageFallbackChainFactory {
 	 * @param IContextSource $context
 	 * @param string $languageCode
 	 *
-	 * @return LanguageFallbackChain
+	 * @return TermLanguageFallbackChain
 	 */
 	public function newFromContextAndLanguageCode( IContextSource $context, $languageCode ) {
 		return $this->newFromUserAndLanguageCode( $context->getUser(), $languageCode );
@@ -207,7 +237,7 @@ class LanguageFallbackChainFactory {
 	 * @param User $user
 	 * @param string $languageCode
 	 *
-	 * @return LanguageFallbackChain
+	 * @return TermLanguageFallbackChain
 	 */
 	public function newFromUserAndLanguageCode( User $user, $languageCode ) {
 		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Babel' ) || $user->isAnon() ) {
@@ -223,7 +253,10 @@ class LanguageFallbackChainFactory {
 		$babel = $this->getBabel( $languageCode, $user );
 
 		$chain = $this->buildFromBabel( $babel );
-		$languageFallbackChain = new LanguageFallbackChain( $chain );
+		$languageFallbackChain = new TermLanguageFallbackChain(
+			$chain,
+			WikibaseContentLanguages::getDefaultInstance()->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM )
+		);
 
 		$this->userLanguageCache[$user->getName()][$languageCode] = $languageFallbackChain;
 
@@ -291,7 +324,7 @@ class LanguageFallbackChainFactory {
 					} catch ( MWException $e ) {
 						continue;
 					}
-					$this->buildFromLanguage( $languageCode, $mode, $chain, $fetched );
+					$chain = $this->buildFromLanguage( $languageCode, $mode, $chain, $fetched );
 				}
 			}
 		}
@@ -304,7 +337,7 @@ class LanguageFallbackChainFactory {
 				} catch ( MWException $e ) {
 					continue;
 				}
-				$this->buildFromLanguage(
+				$chain = $this->buildFromLanguage(
 					$languageCode,
 					self::FALLBACK_OTHERS | self::FALLBACK_VARIANTS,
 					$chain,
@@ -314,19 +347,6 @@ class LanguageFallbackChainFactory {
 		}
 
 		return $chain;
-	}
-
-	/**
-	 * @param callable $getLanguageFallbacksFor
-	 */
-	public function setGetLanguageFallbacksFor( $getLanguageFallbacksFor ) {
-		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
-			throw new LogicException(
-				'Overriding the getLanguageFallbacksFor function is only supported in test mode'
-			);
-		}
-
-		$this->getLanguageFallbacksFor = $getLanguageFallbacksFor;
 	}
 
 }

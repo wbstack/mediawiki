@@ -4,6 +4,8 @@ namespace Wikibase\Lexeme\MediaWiki\Api;
 
 use ApiMain;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\SerializerFactory;
 use Wikibase\Lexeme\Domain\Model\Form;
 use Wikibase\Lexeme\MediaWiki\Api\Error\FormNotFound;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\FormIdDeserializer;
@@ -26,7 +28,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class EditFormElements extends \ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var EntityRevisionLookup
@@ -63,15 +65,19 @@ class EditFormElements extends \ApiBase {
 	 */
 	private $entityStore;
 
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		SerializerFactory $baseDataModelSerializerFactory,
+		EntityIdParser $entityIdParser,
+		EntityStore $entityStore
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
 
-		$serializerFactory = $wikibaseRepo->getBaseDataModelSerializerFactory();
-
 		$formSerializer = new FormSerializer(
-			$serializerFactory->newTermListSerializer(),
-			$serializerFactory->newStatementListSerializer()
+			$baseDataModelSerializerFactory->newTermListSerializer(),
+			$baseDataModelSerializerFactory->newStatementListSerializer()
 		);
 
 		return new self(
@@ -80,7 +86,7 @@ class EditFormElements extends \ApiBase {
 			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
 			new EditFormElementsRequestParser(
-				new FormIdDeserializer( $wikibaseRepo->getEntityIdParser() ),
+				new FormIdDeserializer( $entityIdParser ),
 				WikibaseLexemeServices::getEditFormChangeOpDeserializer()
 			),
 			$wikibaseRepo->getSummaryFormatter(),
@@ -88,7 +94,7 @@ class EditFormElements extends \ApiBase {
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			},
-			$wikibaseRepo->getEntityStore()
+			$entityStore
 		);
 	}
 

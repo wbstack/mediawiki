@@ -11,7 +11,6 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 	/**
 	 * Insert a notification record
 	 * @param EchoNotification $notification
-	 * @return null
 	 */
 	public function insert( EchoNotification $notification ) {
 		$dbw = $this->dbFactory->getEchoDb( DB_MASTER );
@@ -352,6 +351,7 @@ class EchoNotificationMapper extends EchoAbstractMapper {
 			'notification_user' => $userId,
 			'notification_event < ' . (int)$eventId
 		] );
+		$iterator->setCaller( __METHOD__ );
 
 		foreach ( $iterator as $batch ) {
 			$eventIds = [];

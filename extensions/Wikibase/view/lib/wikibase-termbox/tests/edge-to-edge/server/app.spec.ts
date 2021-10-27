@@ -22,8 +22,9 @@ import OpenAPIRequestCoercer from 'openapi-request-coercer';
 import OpenAPIRequestValidator from 'openapi-request-validator';
 import Metrics from '@/server/Metrics';
 import qs from 'querystring';
-import TermList from '@/datamodel/TermList';
+import { TermList } from '@wmde/wikibase-datamodel-types';
 import MessageCollection from '@/datamodel/MessageCollection';
+import globalRequestParamsInterceptor from '@/common/axios/globalParamsRequestInterceptor';
 
 /**
  * edge-to-edge tests are simulating actual requests against the server
@@ -53,10 +54,9 @@ const termboxSpecParameters = openApiJson.paths[ '/termbox' ].get.parameters;
 const testAxios = axios.create( {
 	baseURL: WIKIBASE_TEST_HOST,
 	adapter: httpAdapter, // https://github.com/axios/axios/issues/305#issuecomment-272162405
-	params: {
-		...GLOBAL_REQUEST_PARAMS,
-	},
 } );
+testAxios.interceptors.request.use( globalRequestParamsInterceptor );
+
 const services = new BundleRendererServices(
 	testAxios,
 	logger,

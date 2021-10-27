@@ -7,12 +7,15 @@ use SpecialPage;
 
 class Sandbox extends SpecialPage {
 
-	const PAGENAME = 'GraphSandbox';
+	public const PAGENAME = 'GraphSandbox';
 
 	public function __construct() {
 		parent::__construct( self::PAGENAME );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	protected function getGroupName() {
 		return 'wiki';
 	}

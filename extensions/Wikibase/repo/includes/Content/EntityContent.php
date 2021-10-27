@@ -56,7 +56,7 @@ abstract class EntityContent extends AbstractContent {
 	 *
 	 * @note: must not collide with the EDIT_XXX flags defined by MediaWiki core in Defines.php.
 	 */
-	const EDIT_IGNORE_CONSTRAINTS = 1024;
+	public const EDIT_IGNORE_CONSTRAINTS = 1024;
 
 	/**
 	 * @see Content::isValid()
@@ -340,11 +340,11 @@ abstract class EntityContent extends AbstractContent {
 	}
 
 	/**
-	 * Returns a textual representation of the content suitable for use in edit summaries and log
-	 * messages.
+	 * Returns a textual representation of the content suitable for use in edit summaries and log messages.
 	 *
 	 * @param int $maxLength maximum length of the summary text
 	 * @return string
+	 * @throws MWException
 	 */
 	public function getTextForSummary( $maxLength = 250 ) {
 		if ( $this->isRedirect() ) {
@@ -353,23 +353,28 @@ abstract class EntityContent extends AbstractContent {
 
 		$entity = $this->getEntity();
 
-		// TODO: This assumes all entities are LabelsProvider. Fix it.
-		if ( $entity instanceof LabelsProvider ) {
-			$labels = $entity->getLabels();
-			$languageCode = MediaWikiServices::getInstance()->getContentLanguage()->getCode();
-
-			if ( $labels->hasTermForLanguage( $languageCode ) ) {
-				$label = $labels->getByLanguage( $languageCode )->getText();
-				return substr( $label, 0, $maxLength );
-			}
-
-			// Return first term it can find
-			foreach ( $labels->getIterator() as $term ) {
-				return substr( $term->getText(), 0, $maxLength );
-			}
+		// TODO: This assumes all entities not implementing their own getTextForSummary are LabelsProvider. Fix it.
+		if ( !( $entity instanceof LabelsProvider ) ) {
+			throw new LogicException(
+				"Entity type {$entity->getType()} must implement its own getTextForSummary method."
+			);
 		}
 
-		return '';
+		$labels = $entity->getLabels();
+		if ( $labels->isEmpty() ) {
+			return '';
+		}
+
+		$language = MediaWikiServices::getInstance()->getContentLanguage();
+
+		if ( $labels->hasTermForLanguage( $language->getCode() ) ) {
+			$label = $labels->getByLanguage( $language->getCode() )->getText();
+			return $language->truncateForDatabase( $label, $maxLength );
+		}
+
+		// Return first term it can find
+		$term = $labels->getIterator()->current();
+		return $language->truncateForDatabase( $term->getText(), $maxLength );
 	}
 
 	/**
@@ -408,7 +413,7 @@ abstract class EntityContent extends AbstractContent {
 		}
 
 		// NOTE: this may or may not be consistent with what EntityContentCodec does!
-		$serializer = WikibaseRepo::getDefaultInstance()->getAllTypesEntitySerializer();
+		$serializer = WikibaseRepo::getAllTypesEntitySerializer();
 		try {
 			return $serializer->serialize( $this->getEntity() );
 		} catch ( SerializationException $ex ) {
@@ -507,7 +512,7 @@ abstract class EntityContent extends AbstractContent {
 		$toEntity = ( $toContent->isRedirect() || $toContent->getEntityHolder() === null ) ?
 			$this->makeEmptyEntity() : $toContent->getEntity();
 
-		$entityDiffer = WikibaseRepo::getDefaultInstance()->getEntityDiffer();
+		$entityDiffer = WikibaseRepo::getEntityDiffer();
 		$entityDiff = $entityDiffer->diffEntities( $fromEntity, $toEntity );
 
 		return new EntityContentDiff( $entityDiff, $redirectDiff, $fromEntity->getType() );
@@ -531,7 +536,7 @@ abstract class EntityContent extends AbstractContent {
 
 			if ( !$patched ) {
 				throw new PatcherException( 'Cannot create a redirect using content model '
-				                            . $this->getModel() . '!' );
+					. $this->getModel() . '!' );
 			}
 		} else {
 			if ( $this->isRedirect() ) {
@@ -541,7 +546,7 @@ abstract class EntityContent extends AbstractContent {
 				$entityAfterPatch = $this->getEntity()->copy();
 			}
 
-			$patcher = WikibaseRepo::getDefaultInstance()->getEntityPatcher();
+			$patcher = WikibaseRepo::getEntityPatcher();
 			$patcher->patchEntity( $entityAfterPatch, $patch->getEntityDiff() );
 
 			$patched = $handler->makeEntityContent( new EntityInstanceHolder( $entityAfterPatch ) );

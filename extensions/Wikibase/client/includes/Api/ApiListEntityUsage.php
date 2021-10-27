@@ -10,7 +10,6 @@ use ApiResult;
 use Title;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Usage\EntityUsage;
-use Wikibase\Client\WikibaseClient;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -35,14 +34,6 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 		parent::__construct( $query, $moduleName, 'wbeu' );
 
 		$this->repoLinker = $repoLinker;
-	}
-
-	public static function newFromGlobalState( ApiQuery $apiQuery, string $moduleName ): self {
-		return new self(
-			$apiQuery,
-			$moduleName,
-			WikibaseClient::getDefaultInstance()->newRepoLinker()
-		);
 	}
 
 	/**
@@ -136,6 +127,7 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 
 		}
 		if ( $entry ) {
+			// @phan-suppress-next-line PhanPossiblyUndeclaredVariable
 			$this->formatPageData( $row, $currentPageId, $entry, $result );
 		}
 	}
@@ -279,7 +271,17 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 					EntityUsage::STATEMENT_USAGE,
 					EntityUsage::ALL_USAGE,
 					EntityUsage::OTHER_USAGE,
-				]
+				],
+				// This reuses the message from the ApiPropsEntityUsage module to avoid needless duplication
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => [
+					EntityUsage::SITELINK_USAGE => 'apihelp-query+wbentityusage-paramvalue-aspect-S',
+					EntityUsage::LABEL_USAGE => 'apihelp-query+wbentityusage-paramvalue-aspect-L',
+					EntityUsage::DESCRIPTION_USAGE => 'apihelp-query+wbentityusage-paramvalue-aspect-D',
+					EntityUsage::TITLE_USAGE => 'apihelp-query+wbentityusage-paramvalue-aspect-T',
+					EntityUsage::STATEMENT_USAGE => 'apihelp-query+wbentityusage-paramvalue-aspect-C',
+					EntityUsage::ALL_USAGE => 'apihelp-query+wbentityusage-paramvalue-aspect-X',
+					EntityUsage::OTHER_USAGE => 'apihelp-query+wbentityusage-paramvalue-aspect-O',
+				],
 			],
 			'entities' => [
 				ApiBase::PARAM_ISMULTI => true,

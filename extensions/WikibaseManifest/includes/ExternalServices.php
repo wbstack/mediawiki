@@ -34,7 +34,7 @@ class ExternalServices {
 	private function validateMapping( array $mapping ): void {
 		foreach ( $mapping as $k => $v ) {
 			if ( !is_string( $k ) || !in_array( $k, self::ALLOWLIST ) ) {
-				throw new InvalidArgumentException( 'Keys of mapping should be whitelisted strings' );
+				throw new InvalidArgumentException( 'Keys of mapping should be allowed strings' );
 			}
 			if ( !is_string( $v ) || !filter_var( $v, FILTER_VALIDATE_URL ) ) {
 				throw new InvalidArgumentException( 'Values of mapping should be string URLs' );

@@ -27,4 +27,20 @@ class ConfirmAccountHooks {
 		}
 	}
 
+	/**
+	 * @param SpecialPage $special
+	 * @param string $subPage
+	 *
+	 * @return false
+	 * @throws MWException
+	 */
+	public static function onSpecialPageBeforeExecute( $special, $subPage ) {
+		// Redirect direct visits on Special:CreateAccount to Special:RequestAccount
+		// for users not allowed to 'createaccount'
+		if ( $special->getName() === 'CreateAccount' && !$special->getUser()->isAllowed( 'createaccount' ) ) {
+			$special->getOutput()->redirect( SpecialPage::getTitleFor( 'RequestAccount' )->getFullURL() );
+			return false;
+		}
+	}
+
 }

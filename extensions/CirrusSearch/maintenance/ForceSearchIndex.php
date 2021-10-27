@@ -43,7 +43,7 @@ require_once "$IP/maintenance/Maintenance.php";
 require_once __DIR__ . '/../includes/Maintenance/Maintenance.php';
 
 class ForceSearchIndex extends Maintenance {
-	const SECONDS_BETWEEN_JOB_QUEUE_LENGTH_CHECKS = 3;
+	private const SECONDS_BETWEEN_JOB_QUEUE_LENGTH_CHECKS = 3;
 	/** @var MWTimestamp|null */
 	public $fromDate = null;
 	/** @var MWTimestamp|null */
@@ -60,7 +60,7 @@ class ForceSearchIndex extends Maintenance {
 	public $lastJobQueueCheckTime = 0;
 
 	/**
-	 * @var boolean true if the script is run with --ids
+	 * @var bool true if the script is run with --ids
 	 */
 	private $runWithIds;
 
@@ -131,6 +131,7 @@ class ForceSearchIndex extends Maintenance {
 			'matching the CONTENT_MODEL_* constants.', false, true, false );
 		$this->addOption( 'useDbIndex',
 			'Use specific index when fetching IDs from the database.', false, true, false );
+		$this->requireExtension( 'CirrusSearch' );
 	}
 
 	public function execute() {
@@ -411,6 +412,8 @@ class ForceSearchIndex extends Maintenance {
 
 		$it->setFetchColumns( [ 'log_timestamp', 'log_namespace', 'log_title', 'log_page' ] );
 
+		$it->setCaller( __METHOD__ );
+
 		return new CallbackIterator( $it, function ( $batch ) {
 			$titlesToDelete = [];
 			$docIdsToDelete = [];
@@ -446,6 +449,7 @@ class ForceSearchIndex extends Maintenance {
 		$it->addConditions( [
 			'page_id in (' . $dbr->makeList( $this->pageIds, LIST_COMMA ) . ')',
 		] );
+		$it->setCaller( __METHOD__ );
 		$this->attachPageConditions( $dbr, $it, 'page' );
 
 		return $this->wrapDecodeResults( $it, 'page_id' );
@@ -465,6 +469,7 @@ class ForceSearchIndex extends Maintenance {
 		$it->addJoinConditions( [
 			'revision' => [ 'JOIN', [ 'rev_page = page_id', 'rev_id = page_latest' ] ]
 		] );
+		$it->setCaller( __METHOD__ );
 
 		$this->attachTimestampConditions( $dbr, $it, 'rev' );
 		$this->attachPageConditions( $dbr, $it, 'page' );
@@ -478,6 +483,7 @@ class ForceSearchIndex extends Maintenance {
 		$it = new BatchRowIterator( $dbr,  $pageQuery['tables'], 'page_id', $this->getBatchSize() );
 		$it->setFetchColumns( $pageQuery['fields'] );
 		$it->addJoinConditions( $pageQuery['joins'] );
+		$it->setCaller( __METHOD__ );
 		$fromId = $this->getOption( 'fromId', 0 );
 		if ( $fromId > 0 ) {
 			$it->addConditions( [
@@ -511,7 +517,7 @@ class ForceSearchIndex extends Maintenance {
 	}
 
 	private function attachPageConditions( IDatabase $dbr, BatchRowIterator $it, $columnPrefix ) {
-		if ( $this->namespace ) {
+		if ( $this->namespace !== null ) {
 			$it->addConditions( [
 				"{$columnPrefix}_namespace" => $this->namespace,
 			] );

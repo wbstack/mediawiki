@@ -209,8 +209,8 @@
 	"echo-email-plain-footer": "כדי לבחור אילו מכתבים נשלח {{GENDER:$1|אליך|אלייך|אליכם}}, אנא {{GENDER:$1|בדוק|בִדקי|בִדקו}} את ההעדפות {{GENDER:$1|שלך|שלך|שלכם}}:",
 	"echo-email-html-footer-preference-link-text": "{{GENDER:$1|בדוק|בִדקי|בִדקו}} את ההעדפות {{GENDER:$1|שלך|שלך|שלכם}}",
 	"echo-email-html-footer-with-link": "כדי לבחור אילו מכתבים נשלח {{GENDER:$2|אליך|אלייך|אליכם}}, אנא $1.",
-	"echo-notification-alert": "{{PLURAL:$1|התראות ($1)|100=התראות (99+)}}",
-	"echo-notification-notice": "{{PLURAL:$1|הודעה אחת|הודעות ($1)|100=הודעות (99+)}}",
+	"echo-notification-alert": "{{PLURAL:$1|התראה|התראות ($1)|100=התראות (99+)}}",
+	"echo-notification-notice": "{{PLURAL:$1|הודעה|הודעות ($1)|100=הודעות (99+)}}",
 	"echo-notification-alert-text-only": "התראות",
 	"echo-notification-notice-text-only": "הודעות",
 	"echo-overlay-link": "כל ההודעות",
@@ -230,5 +230,10 @@
 	"notification-header-foreign-alert": "עוד התראות {{PLURAL:$5|מאתר ויקי אחר|מ־$5 אתרי ויקי אחרים}}",
 	"notification-header-foreign-notice": "עוד הודעות {{PLURAL:$5|מאתר ויקי אחר|מ־$5 אתרי ויקי אחרים}}",
 	"notification-header-foreign-all": "עוד הודעות {{PLURAL:$5|מאתר ויקי אחר|מ־$5 אתרי ויקי אחרים}}",
-	"echo-foreign-wiki-lang": "$1 – $2"
+	"echo-foreign-wiki-lang": "$1 – $2",
+	"right-manage-all-push-subscriptions": "ניהול כל מינויי הדחיפה",
+	"action-manage-all-push-subscriptions": "לנהל את כל מינויי הדחיפה",
+	"group-push-subscription-manager": "מנהלי מינויי דחיפה",
+	"group-push-subscription-manager-member": "{{GENDER:$1|מנהל|מנהלת}} מינויי דחיפה",
+	"grouppage-push-subscription-manager": "{{ns:project}}:מנהל מינויי דחיפה"
 }

@@ -1,12 +1,17 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Api;
 
 use ApiBase;
 use ApiMain;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\Repo\ChangeOp\ChangeOpMainSnak;
 use Wikibase\Repo\ChangeOp\StatementChangeOpFactory;
+use Wikibase\Repo\WikibaseRepo;
 
 /**
  * API module for creating claims.
@@ -47,7 +52,7 @@ class CreateClaim extends ApiBase {
 
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		StatementChangeOpFactory $statementChangeOpFactory,
 		ApiErrorReporter $errorReporter,
 		StatementModificationHelper $modificationHelper,
@@ -66,10 +71,44 @@ class CreateClaim extends ApiBase {
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
 	}
 
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		EntityIdParser $entityIdParser,
+		StatementGuidValidator $statementGuidValidator
+	): self {
+		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		$changeOpFactoryProvider = $wikibaseRepo->getChangeOpFactoryProvider();
+		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
+		$errorReporter = $apiHelperFactory->getErrorReporter( $mainModule );
+
+		$modificationHelper = new StatementModificationHelper(
+			$wikibaseRepo->getSnakFactory(),
+			$entityIdParser,
+			$statementGuidValidator,
+			$errorReporter
+		);
+
+		return new self(
+			$mainModule,
+			$moduleName,
+			$changeOpFactoryProvider->getStatementChangeOpFactory(),
+			$errorReporter,
+			$modificationHelper,
+			function ( $module ) use ( $apiHelperFactory ) {
+				return $apiHelperFactory->getResultBuilder( $module );
+			},
+			function ( $module ) use ( $apiHelperFactory ) {
+				return $apiHelperFactory->getEntitySavingHelper( $module );
+			},
+			$wikibaseRepo->inFederatedPropertyMode()
+		);
+	}
+
 	/**
 	 * @inheritDoc
 	 */
-	public function execute() {
+	public function execute(): void {
 		$params = $this->extractRequestParams();
 		$this->validateParameters( $params );
 
@@ -110,7 +149,7 @@ class CreateClaim extends ApiBase {
 	 *
 	 * @param array $params
 	 */
-	private function validateParameters( array $params ) {
+	private function validateParameters( array $params ): void {
 		if ( $params['snaktype'] === 'value' xor isset( $params['value'] ) ) {
 			if ( $params['snaktype'] === 'value' ) {
 				$this->errorReporter->dieWithError(
@@ -143,7 +182,7 @@ class CreateClaim extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -152,14 +191,14 @@ class CreateClaim extends ApiBase {
 	 *
 	 * @return string
 	 */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	protected function getAllowedParams() {
+	protected function getAllowedParams(): array {
 		return array_merge(
 			[
 				'entity' => [
@@ -198,7 +237,7 @@ class CreateClaim extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		return [
 			'action=wbcreateclaim&entity=Q42&property=P9001&snaktype=novalue'
 				=> 'apihelp-wbcreateclaim-example-1',

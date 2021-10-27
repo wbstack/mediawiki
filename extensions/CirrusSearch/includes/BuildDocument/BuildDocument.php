@@ -2,11 +2,11 @@
 
 namespace CirrusSearch\BuildDocument;
 
+use CirrusSearch\CirrusSearchHookRunner;
 use CirrusSearch\Connection;
 use CirrusSearch\Search\CirrusIndexField;
 use CirrusSearch\SearchConfig;
 use Elastica\Document;
-use Hooks;
 use IDatabase;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\Revision\RevisionAccessException;
@@ -50,14 +50,14 @@ use WikiPage;
  * http://www.gnu.org/copyleft/gpl.html
  */
 class BuildDocument {
-	const HINT_FLAGS = 'BuildDocument_flags';
+	private const HINT_FLAGS = 'BuildDocument_flags';
 
 	// Bit field parameters for constructor et al.
-	const INDEX_EVERYTHING = 0;
-	const INDEX_ON_SKIP = 1;
-	const SKIP_PARSE = 2;
-	const SKIP_LINKS = 4;
-	const FORCE_PARSE = 8;
+	public const INDEX_EVERYTHING = 0;
+	public const INDEX_ON_SKIP = 1;
+	public const SKIP_PARSE = 2;
+	public const SKIP_LINKS = 4;
+	public const FORCE_PARSE = 8;
 
 	/** @var SearchConfig */
 	private $config;
@@ -69,24 +69,29 @@ class BuildDocument {
 	private $parserCache;
 	/** @var RevisionStore */
 	private $revStore;
+	/** @var CirrusSearchHookRunner */
+	private $cirrusSearchHookRunner;
 
 	/**
 	 * @param Connection $connection Cirrus connection to read page properties from
 	 * @param IDatabase $db Wiki database connection to read page properties from
 	 * @param ParserCache $parserCache Cache to read parser output from
 	 * @param RevisionStore $revStore Store for retrieving revisions by id
+	 * @param CirrusSearchHookRunner $cirrusSearchHookRunner
 	 */
 	public function __construct(
 		Connection $connection,
 		IDatabase $db,
 		ParserCache $parserCache,
-		RevisionStore $revStore
+		RevisionStore $revStore,
+		CirrusSearchHookRunner $cirrusSearchHookRunner
 	) {
 		$this->config = $connection->getConfig();
 		$this->connection = $connection;
 		$this->db = $db;
 		$this->parserCache = $parserCache;
 		$this->revStore = $revStore;
+		$this->cirrusSearchHookRunner = $cirrusSearchHookRunner;
 	}
 
 	/**
@@ -113,7 +118,7 @@ class BuildDocument {
 
 			// Use of this hook is deprecated, integration should happen through content handler
 			// interfaces.
-			Hooks::run( 'CirrusSearchBuildDocumentParse', [
+			$this->cirrusSearchHookRunner->onCirrusSearchBuildDocumentParse(
 				$documents[$page->getId()],
 				$page->getTitle(),
 				$page->getContent(),
@@ -122,7 +127,7 @@ class BuildDocument {
 				// not use the parser output.
 				new ParserOutput( null ),
 				$this->connection
-			] );
+			);
 		}
 
 		foreach ( $builders as $builder ) {
@@ -177,7 +182,7 @@ class BuildDocument {
 		$forceParse = $flags & self::FORCE_PARSE;
 		$builders = [ new DefaultPageProperties( $this->db ) ];
 		if ( !$skipParse ) {
-			$builders[] = new ParserOutputPageProperties( $this->parserCache, (bool)$forceParse );
+			$builders[] = new ParserOutputPageProperties( $this->parserCache, (bool)$forceParse, $this->config );
 		}
 		if ( !$skipLinks ) {
 			$builders[] = new RedirectsAndIncomingLinks( $this->connection );

@@ -22,6 +22,8 @@
 	"twocolconflict-special-header-overview": "Додека уредувавте, друг корисник ја уредил истата страница и ја објавил пред вас. Подолу е запазен чисто нагледен примерок на вашата преработка. Сите промени направени во посредникот за спротиставености не се одразени. За да ги споите промените и да го решите проблемот со посредникот, вратете се на претходното јазиче.",
 	"twocolconflict-special-not-saved": "Необјавено",
 	"twocolconflict-special-textarea-hint": "Можете да го погледате и копирате изворот на вашата преработка:",
+	"twocolconflict-special-malformed-title": "Насловот недостасува или е неважечки.",
+	"twocolconflict-special-expired": "Овде нема што да се види. Ова веројатно значи дека претходно сте наишле на спротиставеност во уредувањата, но тоа било пред извесно време и привремено складираниот текст ви е истечен.",
 	"twocolconflict-split-header-hint": "За да ја подобриме оваа можност уште повеќе, би ве замолиле да ни дадете ваше мислење [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface на оваа страница].",
 	"twocolconflict-split-header-hint-beta": "Ви благодариме што ја користите оваа бета-можност. Можете да ни помогнете да ја подобриме уште повеќе давајќи ваше мислење на [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface на оваа страница].",
 	"twocolconflict-split-header-overview": "Додека уредувавте, друг корисник ја измени истата страница и ја објави пред вас. Прегледајте ги двете верзии и спојте ги. Ќе се зачува само текстот во избраните полиња кога ќе стиснете на „{{int:publishchanges}}“.",
@@ -64,10 +66,10 @@
 	"twocolconflict-split-tour-dialog-message-single-column-view": "За жал, некој напишал објава истовремено со вас. Прегледате ги коментарите на следната страница. Ако е потребно, можете да ги уредите вашите и да го смените конечниот редослед.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Реши проблем",
 	"twocolconflict-talk-header-overview": "Некој друг објавил истовремено со вас. Прегледајте ги коментарите подолу и изберете го редоследот за објавување. Ако има потреба, можете да го измените вашиот текст.",
-	"twocolconflict-talk-your": "Ваша ставка",
-	"twocolconflict-talk-conflicting": "Спротиставена ставка",
+	"twocolconflict-talk-your": "Ваш коментар",
+	"twocolconflict-talk-conflicting": "Спротиставен коментар",
 	"twocolconflict-talk-switch-tooltip": "Замени редослед",
-	"twocolconflict-talk-reorder-prompt": "Ставете ја вашата ставка во однос на спротиставената:",
+	"twocolconflict-talk-reorder-prompt": "Ставете го вашиот коментар во однос на спротиставениот:",
 	"twocolconflict-talk-same-order": "Задржи ја како наредна",
 	"twocolconflict-talk-reverse-order": "Премести ја како претходна"
 }

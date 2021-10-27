@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\DataAccess\ChangeOp\Validation;
 
 use Wikibase\DataModel\Entity\ItemId;
@@ -18,7 +20,7 @@ class LexemeTermLanguageValidator {
 	/**
 	 * According to BCP 47 (https://tools.ietf.org/html/bcp47)
 	 */
-	const PRIVATE_USE_SUBTAG_SEPARATOR = '-x-';
+	private const PRIVATE_USE_SUBTAG_SEPARATOR = '-x-';
 
 	/**
 	 * @var ContentLanguages
@@ -32,8 +34,9 @@ class LexemeTermLanguageValidator {
 	/**
 	 * @param string $input
 	 * @param ValidationContext $context
+	 * @param string|null $termText for context in the error message, if available
 	 */
-	public function validate( $input, ValidationContext $context ) {
+	public function validate( $input, ValidationContext $context, $termText = null ) {
 		if ( !is_string( $input ) ) {
 			$context->addViolation( new JsonFieldHasWrongType( 'string', gettype( $input ) ) );
 			return;
@@ -52,7 +55,7 @@ class LexemeTermLanguageValidator {
 		}
 
 		if ( !$this->languages->hasLanguage( $language ) ) {
-			$context->addViolation( new UnknownLanguage( $language ) );
+			$context->addViolation( new UnknownLanguage( $language, $termText ) );
 		}
 
 		if ( count( $parts ) > 1 && !$this->isValidItemId( $parts[1] ) ) {

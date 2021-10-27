@@ -7,7 +7,7 @@ use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Term\Fingerprint;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\DataModel\Term\TermList;
-use Wikibase\Lib\LanguageFallbackChain;
+use Wikibase\Lib\TermLanguageFallbackChain;
 use Wikibase\View\FingerprintableEntityMetaTagsCreator;
 
 /**
@@ -19,16 +19,15 @@ use Wikibase\View\FingerprintableEntityMetaTagsCreator;
 class FingerprintableEntityMetaTagsCreatorTest extends EntityMetaTagsCreatorTestCase {
 
 	public function provideTestGetMetaTags() {
-		$mock = $this->createMock( LanguageFallbackChain::class );
-		$mock->expects( $this->any() )
-			->method( 'extractPreferredValue' )
-			->will( $this->returnCallback( function( $input ) {
+		$mock = $this->createMock( TermLanguageFallbackChain::class );
+		$mock->method( 'extractPreferredValue' )
+			->willReturnCallback( function( $input ) {
 				$langString = $input['en'] ?? null;
 				if ( $langString !== null ) {
 					return [ 'value' => $langString ];
 				}
 				return null;
-			} ) );
+			} );
 
 		$fingerprintableEntityMetaTags = new FingerprintableEntityMetaTagsCreator( $mock );
 

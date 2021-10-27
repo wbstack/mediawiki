@@ -2,7 +2,9 @@
 
 namespace Wikibase\Lib;
 
-use Hooks;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\MediaWikiServices;
 use OutOfRangeException;
 
 /**
@@ -46,29 +48,97 @@ class WikibaseContentLanguages {
 		}
 	}
 
-	public static function getDefaultInstance() {
-		$contentLanguages = [];
-		$contentLanguages[self::CONTEXT_TERM] = self::getDefaultTermsLanguages();
-		$contentLanguages[self::CONTEXT_MONOLINGUAL_TEXT] = self::getDefaultMonolingualTextLanguages();
+	public static function getDefaultInstance(
+		HookContainer $hookContainer = null,
+		LanguageNameUtils $languageNameUtils = null
+	) {
+		if ( $hookContainer === null ) {
+			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+		}
 
-		Hooks::runWithoutAbort( 'WikibaseContentLanguages', [ &$contentLanguages ] );
+		$contentLanguages = [];
+		$contentLanguages[self::CONTEXT_TERM] = self::getDefaultTermsLanguages( $languageNameUtils );
+		$contentLanguages[self::CONTEXT_MONOLINGUAL_TEXT] = self::getDefaultMonolingualTextLanguages( $languageNameUtils );
+
+		$hookContainer->run(
+			'WikibaseContentLanguages',
+			[ &$contentLanguages ],
+			[ 'abortable' => false ]
+		);
 
 		return new self( $contentLanguages );
 	}
 
-	public static function getDefaultTermsLanguages() {
-		return new MediaWikiContentLanguages();
+	public static function getDefaultTermsLanguages( LanguageNameUtils $languageNameUtils = null ) {
+		// Note: this list is also the basis of getDefaultMonolingualTextLanguages(); custom
+		// (non-MediaWikiContentLanguages) terms languages also become monolingual text languages.
+		return new UnionContentLanguages(
+			new MediaWikiContentLanguages( $languageNameUtils ),
+			new StaticContentLanguages(
+				[
+					'bag', // T263946
+					'bas', // T263946
+					'bax', // T263946
+					'bbj', // T263946
+					'bfd', // T263946
+					'bkc', // T263946
+					'bkh', // T263946
+					'bkm', // T263946
+					'bqz', // T263946
+					'byv', // T263946
+					'cak', // T278854
+					'cnh', // T278853
+					'dag', // T260037
+					'dua', // T263946
+					'eto', // T263946
+					'etu', // T263946
+					'ewo', // T263946
+					'fkv', // T167259
+					'fmp', // T263946
+					'gya', // T263946
+					'isu', // T263946
+					'kea', // T127435
+					'ker', // T263946
+					'ksf', // T263946
+					'lem', // T263946
+					'lns', // T263946
+					'mcp', // T263946
+					'mua', // T263946
+					'nan-hani', // T180771
+					'nge', // T263946
+					'nla', // T263946
+					'nmg', // T263946
+					'nnh', // T263946
+					'nnz', // T263946
+					'nod', // T93880
+					'ota', // T59342
+					'pap-aw', // T275682
+					'quc', // T278851
+					'rmf', // T226701
+					'rwr', // T61905
+					'ryu', // T271215
+					'sjd', // T226701
+					'sje', // T146707
+					'sju', // T226701
+					'smj', // T146707
+					'sms', // T220118, T223544
+					'srq', // T113408
+					'tvu', // T263946
+					'vut', // T263946
+					'wes', // T263946
+					'yas', // T263946
+					'yat', // T263946
+					'yav', // T263946
+					'ybb' // T263946
+				]
+			)
+		);
 	}
 
-	public static function getDefaultMonolingualTextLanguages() {
-		// This has to be a superset of the language codes returned by
-		// wikibase.WikibaseContentLanguages.
-		// We don't want to have language codes in the suggester that are not
-		// supported by the backend. The other way round is currently acceptable,
-		// but will be fixed in T124758.
+	public static function getDefaultMonolingualTextLanguages( LanguageNameUtils $languageNameUtils = null ) {
 		return new DifferenceContentLanguages(
 			new UnionContentLanguages(
-				new MediaWikiContentLanguages(),
+				self::getDefaultTermsLanguages( $languageNameUtils ),
 				new StaticContentLanguages( [
 					// Special ISO 639-2 codes
 					'und', 'mis', 'mul', 'zxx',
@@ -81,6 +151,7 @@ class WikibaseContentLanguages {
 					'bdr', // T234330
 					'bnn', // T174230
 					'brx', // T155369
+					'cal', // T266423
 					'ccp', // T210311
 					'chn', // T155370
 					'ckt', // T240097
@@ -88,7 +159,9 @@ class WikibaseContentLanguages {
 					'cnr', // T185800
 					'cop', // T155371
 					'crb', // T220284
+					'crl', // T264532
 					'dag', // T240098
+					'dru', // T267915
 					'el-cy', // T198674
 					'ett', // T125066
 					'eya', // T155372
@@ -99,29 +172,45 @@ class WikibaseContentLanguages {
 					'fro', // T181823
 					'fuf', // T155429
 					'gez', // T155373
+					'gil', // T241424
+					'gml', // T217131
 					'gmy', // T155421
 					'hai', // T138131
 					'haz', // T155374
 					'hbo', // T155368
+					'ja-hani', // T195816
+					'ja-hira', // T195816
+					'ja-hrkt', // T195816
+					'ja-kana', // T195816
 					'kjh', // T155377
 					'kld', // T198366
 					'koy', // T125066
 					'lag', // T161983
 					'lcm', // T234761
+					'lij-mc', // T254968
 					'lkt', // T125066
 					'mfa', // T235468
+					'mic', // T258331
 					'mid', // T155418
 					'mnc', // T137808
 					'moe', // T151129
+					'ms-arab', // T270059
 					'non', // T137115
+					'non-runr', // T265782
 					'nr', // T155430
 					'nrf-gg', // T165648
 					'nrf-je', // T165648
 					'nsk', // T250246
 					'nxm', // T167745
+					'oj', // T268431
+					'ojp', // T195816
+					'ojp-hani', // T195816
+					'ojp-hira', // T195816
 					'ood', // T155423
 					'otk', // T137809
 					'peo', // T189427
+					'phn-latn', // T155425
+					'phn-phnx', // T155425
 					'pi-sidd', // T230881
 					'pjt', // T155426
 					'ppu', // T174233
@@ -129,6 +218,7 @@ class WikibaseContentLanguages {
 					'pyu', // T174227
 					'quc', // T155376
 					'qya', // T185194
+					'rah', // T267479
 					'rar', // T155427
 					'rm-puter', // T222426
 					'rm-rumgr', // T222426
@@ -161,7 +251,6 @@ class WikibaseContentLanguages {
 					'zun', // T155435
 				] )
 			),
-
 			// MediaWiki language codes we don't want for monolingual text values
 			new StaticContentLanguages( [
 				// Language codes that are not even well-formed BCP 47 language codes

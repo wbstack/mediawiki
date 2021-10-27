@@ -19,7 +19,7 @@ class TextIndexField extends CirrusIndexField {
 	 * Distance that lucene places between multiple values of the same field.
 	 * Set pretty high to prevent accidental phrase queries between those values.
 	 */
-	const POSITION_INCREMENT_GAP = 10;
+	public const POSITION_INCREMENT_GAP = 10;
 
 	/* Bit field parameters for string fields.
 	 *   ENABLE_NORMS: Enable norms on the field.  Good for text you search against but useless
@@ -30,12 +30,12 @@ class TextIndexField extends CirrusIndexField {
 	 *   SUPPORT_REGEX: If the wikimedia-extra plugin is available add a trigram
 	 *     index to speed up search.
 	 */
-	const ENABLE_NORMS = 0x1000000;
+	public const ENABLE_NORMS = 0x1000000;
 	// FIXME: when exactly we want to disable norms for text fields?
-	const COPY_TO_SUGGEST = 0x2000000;
-	const SPEED_UP_HIGHLIGHTING = 0x4000000;
-	const SUPPORT_REGEX = 0x8000000;
-	const STRING_FIELD_MASK = 0xFFFFFF;
+	public const COPY_TO_SUGGEST = 0x2000000;
+	public const SPEED_UP_HIGHLIGHTING = 0x4000000;
+	public const SUPPORT_REGEX = 0x8000000;
+	public const STRING_FIELD_MASK = 0xFFFFFF;
 
 	/**
 	 * Extra definitions.

@@ -56,8 +56,8 @@ class ChangePropertyDataType extends Maintenance {
 
 		$propertyDataTypeChanger = new PropertyDataTypeChanger(
 			$repo->getEntityRevisionLookup(),
-			$repo->getEntityStore(),
-			$repo->getDataTypeFactory()
+			WikibaseRepo::getEntityStore(),
+			WikibaseRepo::getDataTypeFactory()
 		);
 
 		// "Maintenance script" is in MediaWiki's $wgReservedUsernames

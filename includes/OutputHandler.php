@@ -35,7 +35,7 @@ class OutputHandler {
 	 */
 	public static function handle( $s, $phase ) {
 		global $wgDisableOutputCompression, $wgMangleFlashPolicy;
-		if ( $phase | PHP_OUTPUT_HANDLER_CLEAN ) {
+		if ( ( $phase & PHP_OUTPUT_HANDLER_CLEAN ) === PHP_OUTPUT_HANDLER_CLEAN ) {
 			// Don't send headers if output is being discarded (T278579)
 			return $s;
 		}
@@ -64,7 +64,7 @@ class OutputHandler {
 	 * @return string
 	 */
 	private static function findUriExtension() {
-		/// @todo FIXME: this sort of dupes some code in WebRequest::getRequestUrl()
+		// @todo FIXME: this sort of dupes some code in WebRequest::getRequestUrl()
 		if ( isset( $_SERVER['REQUEST_URI'] ) ) {
 			// Strip the query string...
 			$path = explode( '?', $_SERVER['REQUEST_URI'], 2 )[0];

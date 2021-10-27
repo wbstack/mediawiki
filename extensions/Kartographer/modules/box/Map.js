@@ -128,8 +128,8 @@ KartographerMap = L.Map.extend( {
 	 *   add to the map.**
 	 * @param {boolean} [options.alwaysInteractive=false] Prevents the map
 	 *   from becoming static when the screen is too small.
-	 * @param {Array|L.LatLng} [options.center] **Initial map center.**
-	 * @param {number} [options.zoom] **Initial map zoom.**
+	 * @param {Array|L.LatLng|string} [options.center] **Initial map center.**
+	 * @param {number|string} [options.zoom] **Initial map zoom.**
 	 * @param {string} [options.lang] Language for map labels
 	 * @param {string} [options.style] Map style. _Defaults to
 	 *  `mw.config.get( 'wgKartographerDfltStyle' )`, or `'osm-intl'`._
@@ -297,8 +297,16 @@ KartographerMap = L.Map.extend( {
 			this._invalidateInteractive();
 		}
 
+		// The `ready` function has not fired yet so there is no center or zoom defined.
+		// Disable panning and zooming until that has happened.
+		// See T257872.
+		map.dragging.disable();
+		map.touchZoom.disable();
+
 		function ready() {
 			map.initView( options.center, options.zoom );
+			map.dragging.enable();
+			map.touchZoom.enable();
 			map.fire(
 				/**
 				 * @event
@@ -325,6 +333,10 @@ KartographerMap = L.Map.extend( {
 			} else {
 				ready();
 			}
+		}, function () {
+			// T25787
+			ready();
+			mw.log.error( 'Unable to add datalayers to map.' );
 		} );
 	},
 

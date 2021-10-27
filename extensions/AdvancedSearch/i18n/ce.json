@@ -5,7 +5,7 @@
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]] тӀехь шуьйрачу лахаран атта тӀекхачар.",
-	"advancedsearch-options-pane-head": "Шуьйра параметраш:",
+	"advancedsearch-options-pane-head": "Шуьйра лахар:",
 	"advancedsearch-optgroup-text": "АгӀонан йозанан юкъехь лаха",
 	"advancedsearch-optgroup-structure": "Структура",
 	"advancedsearch-optgroup-files": "Файлаш а, суьрташ а",
@@ -50,7 +50,7 @@
 	"advancedsearch-namespaces-preset-all": "Ерриге",
 	"advancedsearch-namespaces-preset-default": "Ӏадйитаран кеп",
 	"advancedsearch-namespaces-preset-general-help": "Юкъара гӀо",
-	"advancedsearch-namespaces-preset-discussion": "Дийцаре",
+	"advancedsearch-namespaces-preset-discussion": "Дийцарш",
 	"advancedsearch-namespaces-placeholder": "ТӀетоха цӀерийн меттиг...",
 	"prefs-advancedsearch": "Шуьйра лахар",
 	"advancedsearch-preference-help": "Шуьйрачу лахаро Белхан:лахар агӀона тӀетуху кхин сов меттигаш йолуш форма. Оцо йиш хуьйлюту леррина лаха, хьуна лахаран синтаксис хууш яцахь а. Цул совнах оцу хуьйу меттигийн цӀерш харжаран кеп.",

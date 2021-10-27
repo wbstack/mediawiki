@@ -4,11 +4,13 @@
 			"Cainamarques",
 			"Diego Queiroz",
 			"Eduardo Addad de Oliveira",
-			"Felipe L. Ewald"
+			"Eduardoaddad",
+			"Felipe L. Ewald",
+			"Jaideraf"
 		]
 	},
 	"skinname-modern": "Moderno",
-	"modern.css": "/* CSS colocado aqui irá afetar usuários do tema Modern */",
-	"modern.js": "/* Qualquer JavaScript aqui colocado será carregado para usuários usando o tema Modern */",
-	"modern-desc": "Uma pele azul/cinza com barras lateral e de topo. Derivado do MonoBook"
+	"modern.css": "/* Todos os CSS colocado aqui serão carregados para usuários do tema Modern */",
+	"modern.js": "/* Todos os JavaScript aqui colocado será carregado para usuários do tema Modern */",
+	"modern-desc": "Um tema azul/cinza com barra lateral e de topo. Derivado do MonoBook"
 }

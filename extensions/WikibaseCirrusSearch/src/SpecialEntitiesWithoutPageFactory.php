@@ -20,14 +20,12 @@ use Wikibase\Repo\WikibaseRepo;
 class SpecialEntitiesWithoutPageFactory {
 
 	private static function newFromGlobalState(): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 		return new self(
-			$wikibaseRepo->getLocalEntityTypes(),
-			$wikibaseRepo->getTermsLanguages(),
+			WikibaseRepo::getLocalEntityTypes(),
+			WikibaseRepo::getTermsLanguages(),
 			new LanguageNameLookup(),
-			$wikibaseRepo->getEntityFactory(),
-			$wikibaseRepo->getEntityNamespaceLookup()
+			WikibaseRepo::getEntityFactory(),
+			WikibaseRepo::getEntityNamespaceLookup()
 		);
 	}
 
@@ -39,10 +37,25 @@ class SpecialEntitiesWithoutPageFactory {
 		return self::newFromGlobalState()->createSpecialEntitiesWithoutDescription();
 	}
 
+	/**
+	 * @var string[]
+	 */
 	private $entityTypes;
+	/**
+	 * @var ContentLanguages
+	 */
 	private $termsLanguages;
+	/**
+	 * @var LanguageNameLookup
+	 */
 	private $languageNameLookup;
+	/**
+	 * @var EntityFactory
+	 */
 	private $entityFactory;
+	/**
+	 * @var EntityNamespaceLookup
+	 */
 	private $entityNamespaceLookup;
 
 	/**

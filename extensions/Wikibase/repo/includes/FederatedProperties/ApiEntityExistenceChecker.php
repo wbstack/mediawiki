@@ -12,6 +12,7 @@ use Wikibase\Lib\Store\EntityExistenceChecker;
  */
 class ApiEntityExistenceChecker implements EntityExistenceChecker {
 
+	/** @var ApiEntityLookup */
 	private $apiEntityLookup;
 
 	public function __construct( ApiEntityLookup $apiEntityLookup ) {
@@ -23,5 +24,15 @@ class ApiEntityExistenceChecker implements EntityExistenceChecker {
 			'missing',
 			$this->apiEntityLookup->getResultPartForId( $id )
 		);
+	}
+
+	public function existsBatch( array $ids ): array {
+		$this->apiEntityLookup->fetchEntities( $ids );
+
+		$ret = [];
+		foreach ( $ids as $id ) {
+			$ret[$id->getSerialization()] = $this->exists( $id );
+		}
+		return $ret;
 	}
 }

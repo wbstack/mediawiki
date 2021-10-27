@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"A Retired User",
+			"CXuesong",
 			"Chenxiaoqino",
 			"Hydra",
 			"Impersonator 1",
@@ -73,9 +74,9 @@
 	"confirmaccount-held": "（在$3 $4被[[User:$1|$1]]标记为“挂起”）",
 	"confirmaccount-blockip": "封禁IP地址",
 	"confirmaccount-create": "接受 （创建账户）",
-	"confirmaccount-deny": "拒绝 （反列示）",
+	"confirmaccount-deny": "拒绝（从列表中移除）",
 	"confirmaccount-hold": "挂起",
-	"confirmaccount-spam": "垃圾（请不要发送电子邮件）",
+	"confirmaccount-spam": "垃圾（不发送电子邮件）",
 	"confirmaccount-reason": "评论（包含在拒绝和搁置邮件中）：",
 	"confirmaccount-ip": "IP地址：",
 	"confirmaccount-xff": "X-Forwarded-For:",

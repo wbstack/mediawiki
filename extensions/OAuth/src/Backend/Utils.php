@@ -26,6 +26,15 @@ class Utils {
 	}
 
 	/**
+	 * @return string|bool
+	 */
+	public static function getCentralWiki() {
+		global $wgMWOAuthCentralWiki;
+
+		return $wgMWOAuthCentralWiki;
+	}
+
+	/**
 	 * @param int $index DB_MASTER/DB_REPLICA
 	 * @return DBConnRef
 	 */
@@ -247,9 +256,11 @@ class Utils {
 		} else {
 			$name = '';
 			$user = \User::newFromId( $userId );
+			$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
 			if ( $audience === 'raw'
 				|| !$user->isHidden()
-				|| ( $audience instanceof \User && $audience->isAllowed( 'hideuser' ) )
+				|| ( $audience instanceof \User && $permissionManager->userHasRight( $audience, 'hideuser' ) )
 			) {
 				$name = $user->getName();
 			}

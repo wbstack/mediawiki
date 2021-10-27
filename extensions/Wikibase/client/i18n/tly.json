@@ -2,14 +2,20 @@
 	"@metadata": {
 		"authors": [
 			"Ganbarzada",
-			"Patriot Kur"
+			"Patriot Kur",
+			"Гусейн"
 		]
 	},
+	"tooltip-t-wikibase": "Link bə elementon repozitoriyə rımuz",
 	"wikibase-comment-update": "{{WBREPONAME}} element degiş be",
 	"wikibase-dataitem": "çı {{WBREPONAME}} element",
 	"wikibase-editlinks": "Keçidon sərost bıkə",
 	"wikibase-editlinkstitle": "Çı zıvınəarə keçidon sərost bıkə",
+	"wikibase-linkitem-addlinks": "Linkon əlovəkə",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Niyo kardə",
 	"wikibase-rc-hide-wikidata-show": "Nişo doy",
 	"wikibase-rc-wikibase-edit-letter": "D",
-	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} dəqiş karde"
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} dəqiş karde",
+	"wikibase-otherprojects": "Co naxşənədə"
 }

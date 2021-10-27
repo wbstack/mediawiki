@@ -5,6 +5,7 @@
  */
 class MWEchoEventLogging {
 
+	/** @var int[] */
 	private static $revisionIds = [
 		'Echo' => 7731316,
 		'EchoMail' => 5467650,
@@ -53,7 +54,7 @@ class MWEchoEventLogging {
 		} else {
 			$agent = $event->getAgent();
 			if ( $agent ) {
-				$sender = $agent->isAnon() ? $agent->getName() : $agent->getId();
+				$sender = $agent->getId() ?: $agent->getName();
 			} else {
 				$sender = -1;
 			}
@@ -116,7 +117,7 @@ class MWEchoEventLogging {
 			[
 				'context' => 'archive',
 				'action' => 'special-page-visit',
-				'userId' => (int)$user->getId(),
+				'userId' => $user->getId(),
 				'editCount' => (int)$user->getEditCount(),
 				'notifWiki' => wfWikiID(),
 				// Hack: Figure out if we are in the mobile skin

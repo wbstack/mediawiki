@@ -18,6 +18,7 @@ require_once "$IP/maintenance/Maintenance.php";
  */
 class GenerateSampleNotifications extends Maintenance {
 
+	/** @var string[] */
 	private $supportedNotificationTypes = [
 		'welcome',
 		'edit-user-talk',
@@ -33,6 +34,7 @@ class GenerateSampleNotifications extends Maintenance {
 		'page-connection',
 	];
 
+	/** @var int */
 	private $timestampCounter = 5;
 
 	public function __construct() {
@@ -182,7 +184,7 @@ class GenerateSampleNotifications extends Maintenance {
 	private function getOptionUser( $optionName ) {
 		$username = $this->getOption( $optionName );
 		$user = User::newFromName( $username );
-		if ( $user->isAnon() ) {
+		if ( !$user->isRegistered() ) {
 			$this->error( "User $username does not seem to exist in this wiki", 1 );
 		}
 		return $user;
@@ -267,7 +269,8 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function generateReverted( User $user, User $agent ) {
-		$agent->addGroup( 'sysop' );
+		$services = MediaWikiServices::getInstance();
+		$services->getUserGroupManager()->addUserToGroup( $agent, 'sysop' );
 
 		// revert (undo)
 		$moai = Title::newFromText( 'Moai' );
@@ -277,12 +280,10 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->addToPageContent( $moai, $user, "\nadding a line here\n" );
 
 		$undoRev = $page->getRevisionRecord();
-		$previous = MediaWikiServices::getInstance()
-			->getRevisionLookup()
+		$previous = $services->getRevisionLookup()
 			->getPreviousRevision( $undoRev );
 
-		$handler = MediaWikiServices::getInstance()
-			->getContentHandlerFactory()
+		$handler = $services->getContentHandlerFactory()
 			->getContentHandler(
 				$undoRev->getSlot( SlotRecord::MAIN, RevisionRecord::RAW )
 					->getModel()
@@ -397,7 +398,9 @@ class GenerateSampleNotifications extends Maintenance {
 		$content = "checkout [[{$pageBeingLinked->getPrefixedText()}]]!";
 		$this->output( "{$agent->getName()} is linking to {$pageBeingLinked->getPrefixedText()} from multiple pages\n" );
 		$this->addToPageContent( $this->generateNewPageTitle(), $agent, $content );
+		// @phan-suppress-next-line PhanPluginDuplicateAdjacentStatement
 		$this->addToPageContent( $this->generateNewPageTitle(), $agent, $content );
+		// @phan-suppress-next-line PhanPluginDuplicateAdjacentStatement
 		$this->addToPageContent( $this->generateNewPageTitle(), $agent, $content );
 	}
 
@@ -533,6 +536,7 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function generateWikibase( User $user, User $agent ) {
+		// @phan-suppress-next-line PhanUndeclaredClassReference
 		if ( !class_exists( EchoNotificationsHandlers::class ) ) {
 			// should use !ExtensionRegistry::getInstance()->isLoaded( 'Wikibase' ) when possible
 			$this->output( "Skipping Wikibase. Extension not installed.\n" );

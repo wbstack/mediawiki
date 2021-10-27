@@ -7,25 +7,32 @@ $languageNames = [
 	 */
 	'abe' => 'Westliches Abenaki',
 	'abs' => 'Ambonesisches Malaysisch',
-	'abq' => 'Abasinisch', # used by Wikidata, T155367
-	'abq-latn' => 'Abasinisch', # used by Wikidata, T155424
+	# used by Wikidata, T155367
+	'abq' => 'Abasinisch',
+	# used by Wikidata, T155424
+	'abq-latn' => 'Abasinisch',
 	'ady-cyrl' => 'Adygeisch (kyrillisch Schrift)',
 	'aeb-arab' => 'Tunesisches Arabisch (arabische Schrift)',
 	'aeb-latn' => 'Tunesisches Arabisch (lateinische Schrift)',
-	'alc' => 'Kawesqar', # used by Wikidata, T190981
+	# used by Wikidata, T190981
+	'alc' => 'Kawesqar',
 	'ami' => 'Amisisch',
 	'azb' => 'Südaserbaidschanisch',
 	'bat-smg' => 'Schemaitisch',
 	'bbc-latn' => 'Batak Toba (lateinische Schrift)',
 	'bcc' => 'Südliches Belutschi',
 	'bcl' => 'Zentralbikolano',
-	'bdr' => 'Westküsten-Bajau', # used by Wikidata, T234330
+	# used by Wikidata, T234330
+	'bdr' => 'Westküsten-Bajau',
 	'be-tarask' => 'Weißrussisch (Taraschkewiza)',
-	'be-x-old' => 'Weißrussisch (Taraschkewiza)', # still the internal code of be-tarask.wikipedia.org
+	# still the internal code of be-tarask.wikipedia.org
+	'be-x-old' => 'Weißrussisch (Taraschkewiza)',
 	'bgp' => 'Östliches Belutschi',
 	'bh' => 'Bhojpuri',
 	'bnn' => 'Bunun',
 	'bxr' => 'Russisches Burjatisch',
+	# used by Wikidata T266423
+	'cal' => 'Karolinisch',
 	'cbk-zam' => 'Chavacano',
 	'cdo' => 'Min Dong',
 	'cja-arab' => 'Westliches Cham (arabische Schrift)',
@@ -39,23 +46,36 @@ $languageNames = [
 	'cjy-hans' => 'Jin (vereinfacht)',
 	'cjy-hant' => 'Jin (traditionell)',
 	'cjy' => 'Jin',
-	'ckt' => 'Tschuktschisch', # used by Wikidata, T240097
-	'clc' => 'Tschilcotin', # used by Wikidata, T222020
+	# used by Wikidata, T240097
+	'ckt' => 'Tschuktschisch',
+	# used by Wikidata, T222020
+	'clc' => 'Tschilcotin',
 	'cnr' => 'Montenegrinisch',
 	'crb' => 'Insel-Karibisch',
 	'crh-cyrl' => 'Krimtatarisch (kyrillische Schrift)',
 	'crh-latn' => 'Krimtatarisch (lateinische Schrift)',
 	'crh' => 'Krimtatarisch',
-	'dag' => 'Dagbani', # used by Wikidata, T240098
+	# used by Wikidata, T264532
+	'crl' => 'Ost-Cree',
+	# used by Wikidata, T240098
+	'dag' => 'Dagbani',
 	'de-formal' => 'Deutsch (Sie-Form)',
 	# 'dlc' => 'Dalecarlian', // German translation unassured
-	'dty' => 'Doteli', // https://d-nb.info/gnd/7543852-5
+	// https://d-nb.info/gnd/7543852-5
+	'dty' => 'Doteli',
 	'eml' => 'Emilianisch',
-	'el-cy' => 'Zypriotisches Griechisch', # used by Wikidata, T198674
+	# used by Wikidata, T198674
+	'el-cy' => 'Zypriotisches Griechisch',
+	# part of CldrNamesEn.php, missing in CLDR 38
+	'en-au' => 'Australisches Englisch',
 	'en-ca' => 'Kanadisches Englisch',
 	'en-gb' => 'Britisches Englisch',
 	'en-uk' => 'Britisches Englisch',
 	'en-us' => 'Amerikanisches Englisch',
+	# part of CldrNamesEn.php, missing in CLDR 38
+	'es-es' => 'Europäisches Spanisch',
+	# part of CldrNamesEn.php, missing in CLDR 38
+	'es-mx' => 'Mexikanisches Spanisch',
 	'ett' => 'Etruskisch',
 	'fkv' => 'Kvenisch',
 	'fr-ca' => 'Kanadisches Französisch',
@@ -64,6 +84,8 @@ $languageNames = [
 	'gan-hans' => 'Gan (Vereinfachte Schrift)',
 	'gan-hant' => 'Gan (Traditionelle Schrift)',
 	'gcr' => 'Französisch-Guayana Kreolisch',
+	# used by Wikidata T217131
+	'gml' => 'Mittelniederdeutsch',
 	'gmy' => 'Mykenisches Griechisch',
 	'gom-deva' => 'Goa-Konkani (Devanagari)',
 	'gom-latn' => 'Goa-Konkani (lateinische Schrift)',
@@ -74,6 +96,14 @@ $languageNames = [
 	'hyw' => 'Westarmenisch',
 	'ike-cans' => 'Inuktitut (kanadische Silbenschrift)',
 	'ike-latn' => 'Inuktitut (lateinische Schrift)',
+	# used by Wikidata, T195816
+	'ja-hani' => 'Japanisch (Kanji-Schrift)',
+	# used by Wikidata, T195816
+	'ja-hira' => 'Japanisch (Hiragana-Schrift)',
+	# used by Wikidata, T195816
+	'ja-hrkt' => 'Japanisch (Kana-Schrift)',
+	# used by Wikidata, T195816
+	'ja-kana' => 'Japanisch (Katakana-Schrift)',
 	'kbd-cyrl' => 'Kabardinisch (kyrillische Schrift)',
 	'kbp' => 'Kabiyé',
 	'kjh' => 'Chakassisch',
@@ -84,7 +114,8 @@ $languageNames = [
 	'kk-kz' => 'Kasachisch (Kasachstan)',
 	'kk-latn' => 'Kasachisch (lateinische Schrift)',
 	'kk-tr' => 'Kasachisch (Türkei)',
-	'kld' => 'Kamilaroi', # used by Wikidata, T198366
+	# used by Wikidata, T198366
+	'kld' => 'Kamilaroi',
 	# 'knn' => 'Maharashtrian Konkani', // German translation unassured
 	'ko-kp' => 'Koreanisch (Nordkorea)',
 	'koy' => 'Koyukon',
@@ -93,12 +124,16 @@ $languageNames = [
 	'ku-arab' => 'Kurdisch (arabische Schrift)',
 	'ku-latn' => 'Kurdisch (lateinische Schrift)',
 	'lbe' => 'Lakisch',
-	'lcm' => 'Tungag', # used by Wikidata, T234761
+	# used by Wikidata, T234761
+	'lcm' => 'Tungag',
 	'lki' => 'Leki',
+	# used by Wikidata, T254968
+	'lij-mc' => 'Monegassisch',
 	'lld' => 'Ladinisch',
 	'luz' => 'Südliches Lori',
 	'map-bms' => 'Banyumasan',
-	'mfa' => 'Pattani-Malaiisch', # used by Wikidata, T235468
+	# used by Wikidata, T235468
+	'mfa' => 'Pattani-Malaiisch',
 	'mhr' => 'Ostmari',
 	'mid' => 'Mandäisch',
 	'mis' => 'nicht unterstützte Sprache',
@@ -107,37 +142,63 @@ $languageNames = [
 	'mui' => 'Musi',
 	'nah' => 'Nahuatl',
 	'nod' => 'Lanna',
-	'nrf-gg' => 'Guernésiais', # used by Wikidata T165648
-	'nrf-je' => 'Jèrriais', # used by Wikidata T165648
+	# used by Wikidata T265782
+	'non-runr' => 'Altnordisch (Runen-Schrift)',
+	# used by Wikidata T165648
+	'nrf-gg' => 'Guernésiais',
+	# used by Wikidata T165648
+	'nrf-je' => 'Jèrriais',
 	'nrm' => 'Normannisch',
 	'nsk' => 'Naskapi',
 	'nxm' => 'Numidisch',
 	# 'nys' => 'Nyunga', // German translation unassured
+	# used by Wikidata, T195816
+	'ojp' => 'Altjapanisch',
+	# used by Wikidata, T195816
+	'ojp-hani' => 'Altjapanisch (Kanji-Schrift)',
+	# used by Wikidata, T195816
+	'ojp-hira' => 'Altjapanisch (Hiragana-Schrift)',
 	'olo' => 'Olonetzisch',
 	'otk' => 'Alttürkisch',
-	'pi-sidd' => 'Pali (Siddham-Schrift)', # used by Wikidata T230881
+	# used by Wikidata T155425
+	'phn-latn' => 'Phönizisch (lateinische Schrift)',
+	# used by Wikidata T155425
+	'phn-phnx' => 'Phönizisch (phönizische Schrift)',
+	# used by Wikidata T230881
+	'pi-sidd' => 'Pali (Siddham-Schrift)',
 	'pih' => 'Pitcairn-Englisch',
 	'pnb' => 'Westliches Panjabi',
 	# 'ppu' => 'Papora-Hoanya', // German translation unassured
 	'prs' => 'Dari',
 	'pt-br' => 'Brasilianisches Portugiesisch',
+	# part of CldrNamesEn.php, missing in CLDR 38
+	'pt-pt' => 'Europäisches Portugiesisch',
 	# 'pwn' => 'Paiwan', // German translation unassured
 	# 'pyu' => 'Puyuma', // German translation unassured
-	'qya' => 'Quenya', # used by Wikidata, T185194
+	# used by Wikidata, T185194
+	'qya' => 'Quenya',
 	'rm-puter' => 'Oberengadinisch',
 	'rm-rumgr' => 'Rumantsch Grischun',
 	'rm-surmiran' => 'Surmeirisch',
 	'rm-sursilv' => 'Surselvisch',
 	'rm-sutsilv' => 'Sutselvisch',
 	'rm-vallader' => 'Vallader',
-	'rmc' => 'Karpathen-Romani', # T223524
-	'rmf' => 'Finnisches Romani', # T223524
-	'rmg' => 'Skandinavisches Romani', # T223524
-	'rml' => 'Baltisches Romani', # T223524
-	'rmn' => 'Balkan-Romani', # T223524
-	'rmo' => 'Sinte-Romani', # T223524
-	'rmw' => 'Welsh-Roman', # T223524
-	'rmy' => 'Vlax-Romani', # T223524
+	# T223524
+	'rmc' => 'Karpathen-Romani',
+	# T223524
+	'rmf' => 'Finnisches Romani',
+	# T223524
+	'rmg' => 'Skandinavisches Romani',
+	# T223524
+	'rml' => 'Baltisches Romani',
+	# T223524
+	'rmn' => 'Balkan-Romani',
+	# T223524
+	'rmo' => 'Sinte-Romani',
+	# T223524
+	'rmw' => 'Welsh-Roman',
+	# T223524
+	'rmy' => 'Vlax-Romani',
 	'roa-rup' => 'Aromunisch',
 	'roa-tara' => 'Tarandíne',
 	'ruq-cyrl' => 'Meglenorumänisch (kyrillische Schrift)',
@@ -145,20 +206,27 @@ $languageNames = [
 	'ruq-latn' => 'Meglenorumänisch (lateinische Schrift)',
 	'ruq' => 'Meglenorumänisch',
 	'rwr' => 'Marwari (Indien)',
-	'sa-sidd' => 'Sanskrit (Siddham-Schrift)', # used by Wikidata T230881
+	# used by Wikidata T230881
+	'sa-sidd' => 'Sanskrit (Siddham-Schrift)',
+	# needs upstream fix
+	'sh' => 'Serbokroatisch',
 	'shi-latn' => 'Taschelhit (lateinische Schrift)',
 	'shi-tfng' => 'Taschelhit (Tifinagh-Schrift)',
 	'shy-arab' => 'Shawiya (arabische Schrift)',
 	'shy-latn' => 'Shawiya (lateinische Schrift)',
 	'shy-tfng' => 'Shawiya (Tifinagh-Schrift)',
 	'shy' => 'Shawiya',
-	'sia' => 'Akkalasamisch', # used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
+	# used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
+	'sia' => 'Akkalasamisch',
 	'simple' => 'einfaches Englisch',
 	'sjd' => 'Kildinsamisch',
 	'sje' => 'Pitesamisch',
-	'sjk' => 'Kemisamisch', # used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
-	'sjn' => 'Sindarin', # used by Wikidata, T185194
-	'sjt' => 'Tersamisch', # used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
+	# used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
+	'sjk' => 'Kemisamisch',
+	# used by Wikidata, T185194
+	'sjn' => 'Sindarin',
+	# used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
+	'sjt' => 'Tersamisch',
 	'sju' => 'Umesamisch',
 	'skr' => 'Saraiki',
 	'skr-arab' => 'Saraiki (arabische Schrift)',
@@ -169,7 +237,8 @@ $languageNames = [
 	'tg-cyrl' => 'Tadschikisch (kyrillische Schrift)',
 	'tg-latn' => 'Tadschikisch (lateinische Schrift)',
 	# 'tlb' => 'Tobelo', // German translation unassured
-	'tnq' => 'Taíno', # used by Wikidata T220284
+	# used by Wikidata T220284
+	'tnq' => 'Taíno',
 	'tt-cyrl' => 'Tatarisch (kyrillische Schrift)',
 	'tt-latn' => 'Tatarisch (lateinische Schrift)',
 	'tzl' => 'Talossanisch',
@@ -179,10 +248,12 @@ $languageNames = [
 	'uun' => 'Pazeh',
 	'uz-cyrl' => 'Usbekisch (kyrillische Schrift)',
 	'uz-latn' => 'Usbekisch (lateinische Schrift)',
-	'wls' => 'Wallisianisch', # used by Wikidata, T239411
+	# used by Wikidata, T239411
+	'wls' => 'Wallisianisch',
 	'xpu' => 'Punisch',
-	'xsy' => 'Saisiyat', # https://d-nb.info/gnd/1075555310
-	'ydd' => 'Ost-Jiddisch',
+	# https://d-nb.info/gnd/1075555310
+	'xsy' => 'Saisiyat',
+	'ydd' => 'Ostjiddisch',
 	'zh-classical' => 'klassisches Chinesisch',
 	'zh-cn' => 'Chinesisch (China)',
 	'zh-hk' => 'Chinesisch (Hongkong)',

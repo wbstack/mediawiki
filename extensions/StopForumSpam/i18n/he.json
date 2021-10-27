@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80"
+		]
+	},
+	"abusefilter-edit-builder-vars-sfs-blocked": "האם כתובת ה־IP חסומה באמצעות רשימת stopforumspam.com",
+	"action-sfsblock-bypass": "לעקוף חסימות IP מסוג denylist שנעשו באמצעות ההרחבה StopForumSpam",
+	"right-sfsblock-bypass": "עקיפת חסימת IP שנעשו באמצעות ההרחבה StopForumSpam",
+	"stopforumspam-blocked": "העריכה מכתובת ה־IP שלך ($1) נחסמה מכיוון שלאחרונה היא שימשה לשליחת זבל לאתרים.",
+	"stopforumspam-desc": "אינטגרציה עם [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "כתובת ה־IP <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> נחסמה בשל שליחת זבל."
+}

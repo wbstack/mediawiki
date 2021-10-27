@@ -14,7 +14,6 @@ use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Term\TermBuffer;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\TermIndexEntry;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Provides wikibase terms (labels, descriptions, aliases) for entity pages.
@@ -22,15 +21,18 @@ use Wikibase\Repo\WikibaseRepo;
  * "capital city of the US", calling entityterms with titles=Q61 would include
  * that label and description in the response.
  *
- * @note This closely mirrors the Client pageterms API, except for newFromGlobalState.
+ * @note This closely mirrors the Client pageterms API, except for the services injected.
  *
  * @license GPL-2.0-or-later
  */
 class EntityTerms extends ApiQueryBase {
 
+	/** @var AliasTermBuffer */
+	private $aliasTermBuffer;
+
 	/**
 	 * @todo Use LabelDescriptionLookup for labels/descriptions, so we can apply language fallback.
-	 * @var TermBuffer|AliasTermBuffer
+	 * @var TermBuffer
 	 */
 	private $termBuffer;
 
@@ -40,27 +42,16 @@ class EntityTerms extends ApiQueryBase {
 	private $idLookup;
 
 	public function __construct(
-		TermBuffer $termBuffer,
-		EntityIdLookup $idLookup,
 		ApiQuery $query,
-		string $moduleName
+		string $moduleName,
+		AliasTermBuffer $aliasTermBuffer,
+		EntityIdLookup $idLookup,
+		TermBuffer $termBuffer
 	) {
 		parent::__construct( $query, $moduleName, 'wbet' );
+		$this->aliasTermBuffer = $aliasTermBuffer;
 		$this->termBuffer = $termBuffer;
 		$this->idLookup = $idLookup;
-	}
-
-	public static function newFromGlobalState( ApiQuery $apiQuery, string $moduleName ): self {
-		$repo = WikibaseRepo::getDefaultInstance();
-		$termBuffer = $repo->getTermBuffer();
-		$entityIdLookup = $repo->getEntityContentFactory();
-
-		return new self(
-			$termBuffer,
-			$entityIdLookup,
-			$apiQuery,
-			$moduleName
-		);
 	}
 
 	public function execute(): void {
@@ -113,7 +104,7 @@ class EntityTerms extends ApiQueryBase {
 						] );
 					}
 				} else {
-					$termTexts = $this->termBuffer->getPrefetchedAliases( $entityId, $languageCode ) ?: [];
+					$termTexts = $this->aliasTermBuffer->getPrefetchedAliases( $entityId, $languageCode ) ?: [];
 					foreach ( $termTexts as $termText ) {
 						$terms[] = new TermIndexEntry( [
 							TermIndexEntry::FIELD_ENTITY => $entityId,

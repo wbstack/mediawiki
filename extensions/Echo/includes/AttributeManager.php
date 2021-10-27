@@ -1,10 +1,17 @@
 <?php
 
+use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserIdentity;
+
 /**
  * An object that manages attributes of echo notifications: category, elegibility,
  * group, section etc.
  */
 class EchoAttributeManager {
+	/**
+	 * @var UserGroupManager
+	 */
+	private $userGroupManager;
 
 	/**
 	 * @var array[]
@@ -29,10 +36,11 @@ class EchoAttributeManager {
 	/**
 	 * Notification section constant
 	 */
-	const ALERT = 'alert';
-	const MESSAGE = 'message';
-	const ALL = 'all';
+	public const ALERT = 'alert';
+	public const MESSAGE = 'message';
+	public const ALL = 'all';
 
+	/** @var string */
 	protected static $DEFAULT_SECTION = self::ALERT;
 
 	/**
@@ -47,14 +55,8 @@ class EchoAttributeManager {
 	/**
 	 * Names for keys in $wgEchoNotifications notification config
 	 */
-	const ATTR_LOCATORS = 'user-locators';
-	const ATTR_FILTERS = 'user-filters';
-
-	/**
-	 * An EchoAttributeManager instance created from global variables
-	 * @var self
-	 */
-	protected static $globalVarInstance;
+	public const ATTR_LOCATORS = 'user-locators';
+	public const ATTR_FILTERS = 'user-filters';
 
 	/**
 	 * @param array[] $notifications Notification attributes
@@ -64,12 +66,14 @@ class EchoAttributeManager {
 	 * @param array[] $notifyTypeAvailabilityByCategory Associative array with
 	 *   categories as keys and value an associative array as with
 	 *   $defaultNotifyTypeAvailability.
+	 * @param UserGroupManager $userGroupManager
 	 */
 	public function __construct(
 		array $notifications,
 		array $categories,
 		array $defaultNotifyTypeAvailability,
-		array $notifyTypeAvailabilityByCategory
+		array $notifyTypeAvailabilityByCategory,
+		UserGroupManager $userGroupManager
 	) {
 		// Extensions can define their own notifications and categories
 		$this->notifications = $notifications;
@@ -77,36 +81,7 @@ class EchoAttributeManager {
 
 		$this->defaultNotifyTypeAvailability = $defaultNotifyTypeAvailability;
 		$this->notifyTypeAvailabilityByCategory = $notifyTypeAvailabilityByCategory;
-	}
-
-	/**
-	 * Create an instance from global variables
-	 * @return EchoAttributeManager
-	 */
-	public static function newFromGlobalVars() {
-		global $wgEchoNotifications, $wgEchoNotificationCategories,
-			$wgDefaultNotifyTypeAvailability, $wgNotifyTypeAvailabilityByCategory;
-
-		// Unit test may alter the global data for test purpose
-		if ( defined( 'MW_PHPUNIT_TEST' ) ) {
-			return new self(
-				$wgEchoNotifications,
-				$wgEchoNotificationCategories,
-				$wgDefaultNotifyTypeAvailability,
-				$wgNotifyTypeAvailabilityByCategory
-			);
-		}
-
-		if ( self::$globalVarInstance === null ) {
-			self::$globalVarInstance = new self(
-				$wgEchoNotifications,
-				$wgEchoNotificationCategories,
-				$wgDefaultNotifyTypeAvailability,
-				$wgNotifyTypeAvailabilityByCategory
-			);
-		}
-
-		return self::$globalVarInstance;
+		$this->userGroupManager = $userGroupManager;
 	}
 
 	/**
@@ -214,12 +189,12 @@ class EchoAttributeManager {
 	 * See if a user is eligible to receive a certain type of notification
 	 * (based on user groups, not user preferences)
 	 *
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @param string $category A notification category defined in $wgEchoNotificationCategories
 	 * @return bool
 	 */
 	public function getCategoryEligibility( $user, $category ) {
-		$usersGroups = $user->getGroups();
+		$usersGroups = $this->userGroupManager->getUserGroups( $user );
 		if ( isset( $this->categories[$category]['usergroups'] ) ) {
 			$allowedGroups = $this->categories[$category]['usergroups'];
 			if ( !array_intersect( $usersGroups, $allowedGroups ) ) {

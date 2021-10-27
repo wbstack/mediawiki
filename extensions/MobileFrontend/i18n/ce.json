@@ -109,13 +109,17 @@
 	"mobile-frontend-watchlist-filter-all": "Массо",
 	"mobile-frontend-watchlist-filter-articles": "АгӀонаш",
 	"mobile-frontend-watchlist-filter-other": "Кхиерш",
-	"mobile-frontend-watchlist-filter-talk": "Дийцаре",
+	"mobile-frontend-watchlist-filter-talk": "Дийцарш",
 	"mobile-frontend-watchlist-more": "кхин дӀа",
 	"mobile-frontend-user-page-describe-yourself-editors": "тадархой",
 	"nearby": "Уллера объектех лаьцна агӀонаш",
 	"tag-mobile_edit": "Телефонаца дина нисдар",
 	"tag-mobile_edit-description": "Сайтан телефонан версица дина нисдарш",
+	"tag-advanced_mobile_edit": "Шордина телефонан нисдар",
+	"tag-advanced_mobile_edit-description": "Декъашхочо Магийна ражехь дина нисдар",
 	"tag-mobile_web_edit": "Сайтан телефонан версица дина нисдарш",
 	"tag-mobile_web_edit-description": "Сайтан телефонан версица дина нисдарш",
-	"mobile-frontend-loading-message": "Чуйолуш..."
+	"mobile-frontend-loading-message": "Чуйолуш...",
+	"mobile-frontend-mobile-option-amc": "Шуьйра раж",
+	"mobile-frontend-mobile-option-amc-learn-more": "Цул совнаха хаа"
 }

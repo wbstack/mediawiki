@@ -171,12 +171,6 @@ class MinervaHooks {
 
 		if ( $skin instanceof SkinMinerva ) {
 			switch ( $name ) {
-				case 'MobileMenu':
-					$out->addModuleStyles( [
-						'skins.minerva.mainMenu.icons',
-						'skins.minerva.mainMenu.styles',
-					] );
-					break;
 				case 'Recentchanges':
 					$isEnhancedDefaultForUser = $special->getUser()->getBoolOption( 'usenewrc' );
 					$enhanced = $request->getBool( 'enhanced', $isEnhancedDefaultForUser );
@@ -192,7 +186,7 @@ class MinervaHooks {
 					// if no warning message set.
 					if (
 						!$request->getVal( 'warning' ) &&
-						!$special->getUser()->isLoggedIn() &&
+						!$special->getUser()->isRegistered() &&
 						!$request->wasPosted()
 					) {
 						$request->setVal( 'warning', 'mobile-frontend-generic-login-new' );
@@ -232,6 +226,7 @@ class MinervaHooks {
 				// here results in a circular dependency error which is why
 				// SkinUserPageHelper is being instantiated instead.
 				$relevantUserPageHelper = new SkinUserPageHelper(
+					$services->getUserNameUtils(),
 					$title->inNamespace( NS_USER_TALK ) ? $title->getSubjectPage() : $title
 				);
 				$isUserPageOrUserTalkPage = $relevantUserPageHelper->isUserPage();
@@ -336,7 +331,6 @@ class MinervaHooks {
 			$roConf = MediaWikiServices::getInstance()->getConfiguredReadOnlyMode();
 			$vars += [
 				'wgMinervaABSamplingRate' => $config->get( 'MinervaABSamplingRate' ),
-				'wgMinervaCountErrors' => $config->get( 'MinervaCountErrors' ),
 				'wgMinervaReadOnly' => $roConf->isReadOnly(),
 			];
 		}
@@ -355,22 +349,42 @@ class MinervaHooks {
 	public static function onOutputPageBodyAttributes( OutputPage $out, Skin $skin, &$bodyAttrs ) {
 		$classes = $out->getProperty( 'bodyClassName' );
 		$skinOptions = MediaWikiServices::getInstance()->getService( 'Minerva.SkinOptions' );
+		$isMinerva = $skin instanceof SkinMinerva;
 
-		if ( $skinOptions->get( SkinOptions::HISTORY_IN_PAGE_ACTIONS ) ) {
+		if ( $isMinerva && $skinOptions->get( SkinOptions::HISTORY_IN_PAGE_ACTIONS ) ) {
 			// Class is used when page actions is modified to contain more elements
 			$classes .= ' minerva--history-page-action-enabled';
-
 		}
 
-		$isSimplifiedTalk = false;
-		if ( $skin instanceof SkinMinerva ) {
-			$isSimplifiedTalk = $skin->isSimplifiedTalkPageEnabled();
-		}
+		if ( $isMinerva ) {
+			// phan doesn't realize that $skin can only be an instance of SkinMinerva without this:
+			'@phan-var SkinMinerva $skin';
+			if ( $skin->isSimplifiedTalkPageEnabled() ) {
+				$classes .= ' skin-minerva--talk-simplified';
+			}
 
-		if ( $isSimplifiedTalk ) {
-			$classes .= ' skin-minerva--talk-simplified';
+			$bodyAttrs['class'] .= ' ' . $classes;
 		}
+	}
 
-		$bodyAttrs[ 'class' ] .= ' ' . $classes;
+	/**
+	 * SkinPageReadyConfig hook handler
+	 *
+	 * Disable collapsible and sortable on page load
+	 *
+	 * @param ResourceLoaderContext $context
+	 * @param mixed[] &$config Associative array of configurable options
+	 * @return void This hook must not abort, it must return no value
+	 */
+	public static function onSkinPageReadyConfig(
+		ResourceLoaderContext $context,
+		array &$config
+	) {
+		if ( $context->getSkin() === 'minerva' ) {
+			$config['search'] = false;
+			$config['collapsible'] = false;
+			$config['sortable'] = false;
+			$config['selectorLogoutLink'] = 'a.menu__item--logout[data-mw="interface"]';
+		}
 	}
 }

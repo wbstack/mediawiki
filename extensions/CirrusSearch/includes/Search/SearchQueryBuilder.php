@@ -3,6 +3,7 @@
 namespace CirrusSearch\Search;
 
 use CirrusSearch\CirrusDebugOptions;
+use CirrusSearch\CirrusSearchHookRunner;
 use CirrusSearch\CrossSearchStrategy;
 use CirrusSearch\HashSearchConfig;
 use CirrusSearch\Parser\AST\ParsedQuery;
@@ -99,6 +100,11 @@ final class SearchQueryBuilder {
 	private $profileContextParameters = [];
 
 	/**
+	 * @var string[] list of extra fields to extract
+	 */
+	private $extraFieldsToExtract = [];
+
+	/**
 	 * Construct a new FT (FullText) SearchQueryBuilder using the config
 	 * and query string provided.
 	 *
@@ -108,16 +114,20 @@ final class SearchQueryBuilder {
 	 * @param SearchConfig $config
 	 * @param string $queryString
 	 * @param NamespacePrefixParser $namespacePrefixParser
+	 * @param CirrusSearchHookRunner $cirrusSearchHookRunner
 	 * @return SearchQueryBuilder
+	 * @throws \CirrusSearch\Parser\ParsedQueryClassifierException
 	 * @throws \CirrusSearch\Parser\QueryStringRegex\SearchQueryParseException
 	 */
 	public static function newFTSearchQueryBuilder(
 		SearchConfig $config,
 		$queryString,
-		NamespacePrefixParser $namespacePrefixParser
+		NamespacePrefixParser $namespacePrefixParser,
+		CirrusSearchHookRunner $cirrusSearchHookRunner
 	): SearchQueryBuilder {
 		$builder = new self();
-		$builder->parsedQuery = QueryParserFactory::newFullTextQueryParser( $config, $namespacePrefixParser )->parse( $queryString );
+		$builder->parsedQuery = QueryParserFactory::newFullTextQueryParser( $config,
+			$namespacePrefixParser, $cirrusSearchHookRunner )->parse( $queryString );
 		$builder->initialNamespaces = [ NS_MAIN ];
 		$builder->sort = \SearchEngine::DEFAULT_SORT;
 		$builder->debugOptions = CirrusDebugOptions::defaultOptions();
@@ -188,6 +198,9 @@ final class SearchQueryBuilder {
 				$forcedProfiles[$type] = $name;
 			}
 		}
+		// we do not copy extraFieldsToExtract as we have no way to know if they are available on a
+		// target wiki
+		$builder->extraFieldsToExtract = [];
 
 		$builder->forcedProfiles = $forcedProfiles;
 		// We force to false, during cross project/lang searches
@@ -221,20 +234,23 @@ final class SearchQueryBuilder {
 	 * @param SearchQuery $original
 	 * @param string $term
 	 * @param NamespacePrefixParser $namespacePrefixParser
+	 * @param CirrusSearchHookRunner $cirrusSearchHookRunner
 	 * @return SearchQueryBuilder
 	 * @throws \CirrusSearch\Parser\QueryStringRegex\SearchQueryParseException
+	 * @throws \MWException
 	 */
 	public static function forRewrittenQuery(
 		SearchQuery $original,
 		$term,
-		NamespacePrefixParser $namespacePrefixParser
+		NamespacePrefixParser $namespacePrefixParser,
+		CirrusSearchHookRunner $cirrusSearchHookRunner
 	): SearchQueryBuilder {
 		Assert::precondition( $original->isAllowRewrite(), 'The original query must allow rewrites' );
 		// Hack to prevent a second pass on this cleaning algo because its destructive
 		$config = new HashSearchConfig( [ 'CirrusSearchStripQuestionMarks' => 'no' ],
 			[ HashSearchConfig::FLAG_INHERIT ], $original->getSearchConfig() );
 
-		$builder = self::newFTSearchQueryBuilder( $config, $term, $namespacePrefixParser );
+		$builder = self::newFTSearchQueryBuilder( $config, $term, $namespacePrefixParser, $cirrusSearchHookRunner );
 		$builder->contextualFilters = $original->getContextualFilters();
 		$builder->forcedProfiles = $original->getForcedProfiles();
 		$builder->initialNamespaces = $original->getInitialNamespaces();
@@ -247,6 +263,7 @@ final class SearchQueryBuilder {
 		$builder->extraIndicesSearch = $original->getInitialCrossSearchStrategy()->isExtraIndicesSearchSupported();
 		$builder->withDYMSuggestion = false;
 		$builder->allowRewrite = false;
+		$builder->extraFieldsToExtract = $original->getExtraFieldsToExtract();
 		return $builder;
 	}
 
@@ -272,7 +289,8 @@ final class SearchQueryBuilder {
 			$this->searchConfig,
 			$this->withDYMSuggestion,
 			$this->allowRewrite,
-			$this->profileContextParameters
+			$this->profileContextParameters,
+			$this->extraFieldsToExtract
 		);
 	}
 
@@ -416,6 +434,15 @@ final class SearchQueryBuilder {
 	 */
 	public function addProfileContextParameter( $key, $value ): SearchQueryBuilder {
 		$this->profileContextParameters[$key] = $value;
+		return $this;
+	}
+
+	/**
+	 * @param string[] $fields
+	 * @return SearchQueryBuilder
+	 */
+	public function setExtraFieldsToExtract( array $fields ): SearchQueryBuilder {
+		$this->extraFieldsToExtract = $fields;
 		return $this;
 	}
 }

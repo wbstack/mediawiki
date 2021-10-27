@@ -4,7 +4,9 @@ namespace EchoPush\Api;
 
 use ApiBase;
 use ApiMain;
+use ApiUsageException;
 use EchoPush\SubscriptionManager;
+use EchoPush\Utils;
 use EchoServices;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -49,8 +51,20 @@ class ApiEchoPushSubscriptionsDelete extends ApiBase {
 	 * @inheritDoc
 	 */
 	public function execute(): void {
-		$token = $this->getParameter( 'providertoken' );
-		$numRowsDeleted = $this->subscriptionManager->delete( $this->getUser(), $token );
+		$tokens = $this->getParameter( 'providertoken' );
+		$userId = null;
+
+		if ( !$tokens ) {
+			$this->dieWithError( [ 'apierror-paramempty', 'providertoken' ], 'paramempty_providertoken' );
+		}
+		// Restrict deletion to the user's own token(s) if not a push subscription manager
+		try {
+			$this->checkUserRightsAny( 'manage-all-push-subscriptions' );
+		} catch ( ApiUsageException $e ) {
+			$userId = Utils::getPushUserId( $this->getUser() );
+		}
+
+		$numRowsDeleted = $this->subscriptionManager->delete( $tokens, $userId );
 		if ( $numRowsDeleted == 0 ) {
 			$this->dieWithError( 'apierror-echo-push-token-not-found' );
 		}
@@ -70,6 +84,7 @@ class ApiEchoPushSubscriptionsDelete extends ApiBase {
 			'providertoken' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
+				ParamValidator::PARAM_ISMULTI => true,
 			],
 		];
 	}

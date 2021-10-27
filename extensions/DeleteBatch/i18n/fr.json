@@ -9,6 +9,7 @@
 			"McDutchie",
 			"Od1n",
 			"Pols12",
+			"Verdy p",
 			"Wladek92"
 		]
 	},
@@ -17,6 +18,7 @@
 	"deletebatch-help": "Supprime un lot de pages. \nVous pouvez soit lancer une simple suppression, soit supprimer des pages listées dans un fichier.\nChoisissez un utilisateur qui sera affiché dans le journal des suppressions.\nLes fichiers téléversés doivent contenir un nom de page et un motif facultatif séparés par un « | ».",
 	"deletebatch-caption": "Liste des pages :",
 	"deletebatch-default-reason": "Motif par défaut de la suppression :",
+	"deletebatch-extensionname": "Delete Batch",
 	"deletebatch-title": "Supprimer en lot",
 	"deletebatch-link-back": "Revenir à la page spéciale",
 	"deletebatch-as": "Lancer le script comme :",

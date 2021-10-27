@@ -1,7 +1,12 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
 use DataValues\StringValue;
+use InvalidArgumentException;
+use Language;
 use MediaWiki\Logger\LoggerFactory;
+use MWException;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
@@ -61,9 +66,7 @@ class MathWikibaseConnector {
 			$entityRevision = $entityRevisionLookup->getEntityRevision( $entityId );
 		} catch ( EntityIdParsingException $e ) {
 			throw new InvalidArgumentException( "Invalid Wikibase ID." );
-		} catch ( RevisionedUnresolvedRedirectException $e ) {
-			throw new InvalidArgumentException( "Non-existing Wikibase ID." );
-		} catch ( StorageException $e ) {
+		} catch ( RevisionedUnresolvedRedirectException | StorageException $e ) {
 			throw new InvalidArgumentException( "Non-existing Wikibase ID." );
 		}
 
@@ -203,7 +206,7 @@ class MathWikibaseConnector {
 	/**
 	 * Fetch the page url for a given entity id.
 	 * @param EntityId $entityId
-	 * @return string|bool
+	 * @return string|false
 	 */
 	private function fetchPageUrl( EntityId $entityId ) {
 		try {
@@ -245,12 +248,10 @@ class MathWikibaseConnector {
 	 * @return string
 	 */
 	public static function buildURL( $qID ) {
-		$baseurl = WikibaseClient::getDefaultInstance()
-			->getSettings()->getSetting( 'repoUrl' );
-		$articlePath = WikibaseClient::getDefaultInstance()
-			->getSettings()->getSetting( 'repoArticlePath' );
-		$namespaces = WikibaseClient::getDefaultInstance()
-			->getSettings()->getSetting( 'repoNamespaces' );
+		$settings = WikibaseClient::getSettings();
+		$baseurl = $settings->getSetting( 'repoUrl' );
+		$articlePath = $settings->getSetting( 'repoArticlePath' );
+		$namespaces = $settings->getSetting( 'repoNamespaces' );
 
 		$url = $baseurl . $articlePath;
 

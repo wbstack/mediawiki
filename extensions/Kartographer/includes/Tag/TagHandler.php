@@ -31,13 +31,13 @@ abstract class TagHandler {
 	protected $tag;
 
 	/** @var Status */
-	protected $status;
+	private $status;
 
 	/** @var stdClass[] */
-	protected $geometries = [];
+	private $geometries = [];
 
 	/** @var string[] */
-	protected $args;
+	private $args;
 
 	/** @var float */
 	protected $lat;
@@ -57,8 +57,8 @@ abstract class TagHandler {
 	/** @var string */
 	protected $resolvedLangCode;
 
-	/** @var string name of the group, or null for private */
-	protected $groupName;
+	/** @var string|null name of the group, or null for private */
+	private $groupName;
 
 	/** @var string[] list of groups to show */
 	protected $showGroups = [];
@@ -77,20 +77,6 @@ abstract class TagHandler {
 
 	/** @var stdClass */
 	protected $markerProperties;
-
-	/**
-	 * @return stdClass[]
-	 */
-	public function getGeometries() {
-		return $this->geometries;
-	}
-
-	/**
-	 * @return Status
-	 */
-	public function getStatus() {
-		return $this->status;
-	}
 
 	/**
 	 * Entry point for all tags
@@ -115,7 +101,7 @@ abstract class TagHandler {
 	 * @param PPFrame $frame
 	 * @return string
 	 */
-	final private function handle( $input, array $args, Parser $parser, PPFrame $frame ) {
+	private function handle( $input, array $args, Parser $parser, PPFrame $frame ) {
 		global $wgKartographerMapServer;
 
 		$this->parser = $parser;
@@ -133,14 +119,19 @@ abstract class TagHandler {
 		$this->parseArgs();
 
 		if ( !$this->status->isGood() ) {
-			return $this->reportError();
+			$result = $this->reportError();
+			State::setState( $output, $this->state );
+			return $result;
 		}
 
 		$this->saveData();
 
 		$this->state->setValidTags();
 
-		return $this->render();
+		$result = $this->render();
+
+		State::setState( $output, $this->state );
+		return $result;
 	}
 
 	/**
@@ -150,7 +141,7 @@ abstract class TagHandler {
 	 * @param Parser $parser
 	 * @param PPFrame $frame
 	 */
-	protected function parseGeometries( $input, Parser $parser, PPFrame $frame ) {
+	private function parseGeometries( $input, Parser $parser, PPFrame $frame ) {
 		$simpleStyle = new SimpleStyleParser( $parser, $frame );
 
 		$this->status = $simpleStyle->parse( $input );
@@ -168,7 +159,7 @@ abstract class TagHandler {
 
 		$this->lat = $this->getFloat( 'latitude', null );
 		$this->lon = $this->getFloat( 'longitude', null );
-		if ( ( $this->lat === null ) ^ ( $this->lon === null ) ) {
+		if ( ( $this->lat === null ) xor ( $this->lon === null ) ) {
 			$this->status->fatal( 'kartographer-error-latlon' );
 		}
 
@@ -243,7 +234,7 @@ abstract class TagHandler {
 	 * @param string|bool|null $default
 	 * @return float|bool|null
 	 */
-	protected function getFloat( $name, $default = false ) {
+	private function getFloat( $name, $default = false ) {
 		$value = $this->getText( $name, $default, '/^-?[0-9]*\.?[0-9]+$/' );
 		if ( $value !== false && $value !== null ) {
 			$value = floatval( $value );
@@ -276,7 +267,7 @@ abstract class TagHandler {
 		return $value;
 	}
 
-	protected function saveData() {
+	private function saveData() {
 		$this->state->addRequestedGroups( $this->showGroups );
 
 		if ( !$this->geometries ) {

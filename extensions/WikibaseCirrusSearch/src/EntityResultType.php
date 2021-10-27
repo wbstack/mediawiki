@@ -4,7 +4,7 @@ namespace Wikibase\Search\Elastic;
 use CirrusSearch\Search\BaseCirrusSearchResultSet;
 use CirrusSearch\Search\BaseResultsType;
 use CirrusSearch\Searcher;
-use Wikibase\Lib\LanguageFallbackChain;
+use Wikibase\Lib\TermLanguageFallbackChain;
 
 /**
  * Result class for fulltext search of entities.
@@ -13,9 +13,9 @@ class EntityResultType extends BaseResultsType {
 
 	/**
 	 * Display fallback chain.
-	 * @var LanguageFallbackChain
+	 * @var TermLanguageFallbackChain
 	 */
-	private $fallbackChain;
+	private $termFallbackChain;
 	/**
 	 * Display language code
 	 * @var string
@@ -24,10 +24,10 @@ class EntityResultType extends BaseResultsType {
 
 	/**
 	 * @param string $displayLanguage Display Language code
-	 * @param LanguageFallbackChain $displayFallbackChain Fallback chain for display
+	 * @param TermLanguageFallbackChain $displayFallbackChain Fallback chain for display
 	 */
-	public function __construct( $displayLanguage, LanguageFallbackChain $displayFallbackChain ) {
-		$this->fallbackChain = $displayFallbackChain;
+	public function __construct( $displayLanguage, TermLanguageFallbackChain $displayFallbackChain ) {
+		$this->termFallbackChain = $displayFallbackChain;
 		$this->displayLanguage = $displayLanguage;
 	}
 
@@ -41,7 +41,7 @@ class EntityResultType extends BaseResultsType {
 		$fields[] = 'timestamp';
 		$fields[] = 'sitelink_count';
 		$fields[] = 'statement_count';
-		foreach ( $this->fallbackChain->getFetchLanguageCodes() as $code ) {
+		foreach ( $this->termFallbackChain->getFetchLanguageCodes() as $code ) {
 			$fields[] = "labels.$code";
 			$fields[] = "descriptions.$code";
 		}
@@ -79,7 +79,7 @@ class EntityResultType extends BaseResultsType {
 			'matched_fields' => [ 'title.keyword' ]
 		];
 
-		foreach ( $this->fallbackChain->getFetchLanguageCodes() as $code ) {
+		foreach ( $this->termFallbackChain->getFetchLanguageCodes() as $code ) {
 			$config['fields']["labels.{$code}.plain"] = [
 				'type' => 'experimental',
 				'fragmenter' => "none",
@@ -125,7 +125,7 @@ class EntityResultType extends BaseResultsType {
 	 * @return mixed Set of search results, the types of which vary by implementation.
 	 */
 	public function transformElasticsearchResult( \Elastica\ResultSet $result ) {
-		return new EntityResultSet( $this->displayLanguage, $this->fallbackChain, $result );
+		return new EntityResultSet( $this->displayLanguage, $this->termFallbackChain, $result );
 	}
 
 	/**

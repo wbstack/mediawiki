@@ -5,6 +5,7 @@ namespace MediaWiki\Extensions\OAuth;
 use InvalidArgumentException;
 use League\OAuth2\Server\AuthorizationServer;
 use MediaWiki\Extensions\OAuth\Repository\AccessTokenRepository;
+use MediaWiki\Extensions\OAuth\Repository\ClaimStore;
 use MediaWiki\Extensions\OAuth\Repository\ClientRepository;
 use MediaWiki\Extensions\OAuth\Repository\ScopeRepository;
 use MediaWiki\MediaWikiServices;
@@ -14,6 +15,8 @@ class AuthorizationServerFactory {
 	protected $privateKey;
 	/** @var string */
 	protected $encryptionKey;
+	/** @var string */
+	private $canonicalServer;
 
 	/**
 	 * @return static
@@ -24,15 +27,20 @@ class AuthorizationServerFactory {
 		$mainConfig = $services->getMainConfig();
 		$privateKey = $extConfig->get( 'OAuth2PrivateKey' );
 		$encryptionKey = $extConfig->get( 'OAuthSecretKey' ) ?? $mainConfig->get( 'SecretKey' );
-
-		return new static( $privateKey, $encryptionKey );
+		$canonicalServer = $mainConfig->get( 'CanonicalServer' );
+		return new static( $privateKey, $encryptionKey, $canonicalServer );
 	}
 
 	/**
 	 * @param string $privateKey
 	 * @param string $encryptionKey
+	 * @param string $canonicalServer
 	 */
-	public function __construct( $privateKey, $encryptionKey ) {
+	public function __construct(
+		string $privateKey,
+		string $encryptionKey,
+		string $canonicalServer
+	) {
 		$this->privateKey = $privateKey;
 		$this->encryptionKey = trim( $encryptionKey );
 
@@ -40,6 +48,8 @@ class AuthorizationServerFactory {
 			// Empty encryption key would not break the workflow, but would cause security issues
 			throw new InvalidArgumentException( 'Encryption key must be set' );
 		}
+
+		$this->canonicalServer = $canonicalServer;
 	}
 
 	/**
@@ -48,10 +58,12 @@ class AuthorizationServerFactory {
 	public function getAuthorizationServer() {
 		return new AuthorizationServer(
 			new ClientRepository(),
-			new AccessTokenRepository(),
+			new AccessTokenRepository( $this->canonicalServer ),
 			new ScopeRepository(),
 			$this->privateKey,
-			$this->encryptionKey
+			$this->encryptionKey,
+			null,
+			new ClaimStore()
 		);
 	}
 }

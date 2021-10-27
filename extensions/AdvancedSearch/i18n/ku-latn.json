@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Balyozxane",
+			"Bikarhêner",
+			"Guherto"
+		]
+	},
+	"advancedsearch-desc": "Bidestxistina hêsan a taybetmendiyên lêgerîna pêşketî li ser rûpela [[Special:Search]]",
+	"advancedsearch-options-pane-head": "Lêgerîna pêşketî:",
+	"advancedsearch-optgroup-text": "Di naveroka rûpelê de lê bigere",
+	"advancedsearch-field-plain": "Ev peyv",
+	"advancedsearch-field-or": "Yek ji van peyvan",
+	"advancedsearch-field-not": "Ne ev peyv",
+	"advancedsearch-field-subpageof": "Binrûpelên vê rûpelê",
+	"advancedsearch-field-intitle": "Navê rûpelê dihundurîne",
+	"advancedsearch-field-deepcategory": "Rûpelên di van kategoriyan de",
+	"advancedsearch-field-hastemplate": "Rûpelên bi van şablonan",
+	"advancedsearch-help-plain": ";Danasîn\n:Ev peyv di navê rûpelan û naverokê de tên lêgerîn.\n;Hay ji van rewşan hebe\n:* Ji yekî zêdetir peyv dikarî binivîsî.\n:* Nuqteşanî û nîşanên din yên ne-alfabeyî (ji xeynî : û ,) dê werin tunehesibandin.\n:* Encamên ku tê de hin peyvên tu lê geriya tune ne dibe ku hebin.\n:* Ku \"car\" lê bigerî, encam dê \"cars\" jî nîşan bide. Ew li gorî rehê peyvê û zimanê ku lê digerî diguhere.\n;Rûpela alîkariyê\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Lêgerina nivîsê ya tam]\n;Syntax-equivalent in the normal search\n:<code>sesame street car</code>",
+	"advancedsearch-namespaces-search-in": "Di van de lê bigere:",
+	"prefs-advancedsearch": "Lêgerîna Pêşketî",
+	"advancedsearch-preference-disable": "Navrûya Lêgerîna Pêşketî nîşan nede gava bikaranîna Special:Search"
+}

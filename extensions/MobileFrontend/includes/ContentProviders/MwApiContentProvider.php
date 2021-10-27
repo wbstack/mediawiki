@@ -81,7 +81,12 @@ class MwApiContentProvider implements IContentProvider {
 			}
 			$url .= '&page=' . rawurlencode( $title->getPrefixedDBkey() );
 		}
-		$url .= '&useskin=' . $this->skinName;
+		// The skin must exist on the target wiki and not be hidden for this to work.
+		if ( in_array( $this->skinName, [ 'vector', 'minerva', 'monobook', 'timeless', 'modern' ] ) ) {
+			$url .= '&useskin=' . $this->skinName;
+		} else {
+			$url .= '&useskin=apioutput';
+		}
 
 		$resp = $this->fileGetContents( $url );
 		$json = FormatJson::decode( $resp, true );
@@ -115,7 +120,7 @@ class MwApiContentProvider implements IContentProvider {
 			if ( array_key_exists( 'langlinks', $parse ) ) {
 				$langlinks = [];
 				foreach ( $parse['langlinks'] as $lang ) {
-					$langlinks[] = ':' . $lang['lang'] . ':' . $lang['title'];
+					$langlinks[] = $lang['lang'] . ':' . $lang['title'];
 				}
 				$out->setLanguageLinks( $langlinks );
 			}

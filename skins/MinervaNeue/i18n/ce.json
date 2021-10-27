@@ -10,7 +10,7 @@
 	"mobile-frontend-editor-edit": "Нисъе",
 	"minerva-download": "Схьаэца",
 	"mobile-frontend-editor-redlink-create": "АгӀо кхолла",
-	"mobile-frontend-editor-redlink-leave": "ХӀахӀа, баркалла",
+	"mobile-frontend-editor-redlink-leave": "ХӀан-хӀа, баркалла.",
 	"mobile-frontend-history": "ХӀокху агӀона исторега хьажар.",
 	"mobile-frontend-home-button": "ЦӀехьа",
 	"mobile-frontend-language-article-heading": "Еша кхечу маттахь",
@@ -36,5 +36,6 @@
 	"mobile-frontend-user-newmessages": "Хьан дийцаре агӀонгахь керла хаамаш бу",
 	"mobile-frontend-user-page-contributions": "Къинхьегам",
 	"mobile-frontend-user-page-talk": "Дийцаре",
-	"minerva-skin-desc": "Дуьххьара адаптан телефонан кечъяран тема."
+	"minerva-skin-desc": "Дуьххьара адаптан телефонан кечъяран тема.",
+	"skin-minerva-issue-learn-more": "Цул совнаха хаа"
 }

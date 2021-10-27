@@ -5,6 +5,7 @@
 			"Afaz",
 			"Fryed-peach",
 			"Kkairri",
+			"LaMagiaaa",
 			"Marine-Blue",
 			"Ochaochaocha3",
 			"Omotecho",
@@ -19,7 +20,8 @@
 			"Translatealcd",
 			"Vigorous action",
 			"Whym",
-			"Yusuke1109"
+			"Yusuke1109",
+			"おはぐろ蜻蛉"
 		]
 	},
 	"echo-desc": "イベントおよびメッセージについて、利用者に通知するシステム",
@@ -115,10 +117,10 @@
 	"echo-notification-more-options-tooltip": "その他の操作",
 	"notification-dynamic-actions-mute-page-linked": "「$1」のリンク通知を{{GENDER:$2|ミュートする}}",
 	"notification-dynamic-actions-mute-page-linked-confirmation": "ページ「$1」に対する「ページリンク」通知は無効になりました",
-	"notification-dynamic-actions-mute-page-linked-confirmation-description": "{{GENDER:$2|あなた}}は、[$1 設定]からいつでもミュートしたページを管理することができます。",
+	"notification-dynamic-actions-mute-page-linked-confirmation-description": "{{GENDER:$2|あなた}}は、[$1 設定]からいつでもミュートしたページを管理できます。",
 	"notification-dynamic-actions-unmute-page-linked": "「$1」のリンク通知の{{GENDER:$2|ミュートを解除する}}",
 	"notification-dynamic-actions-unmute-page-linked-confirmation": "ページ「$1」に対する「ページリンク」通知は有効になりました",
-	"notification-dynamic-actions-unmute-page-linked-confirmation-description": "{{GENDER:$2|あなた}}は、[$1 設定]からいつでもミュートしたページを管理することができます。",
+	"notification-dynamic-actions-unmute-page-linked-confirmation-description": "{{GENDER:$2|あなた}}は、[$1 設定]からいつでもミュートしたページを管理できます。",
 	"notification-dynamic-actions-unwatch-confirmation-description": "{{GENDER:$3|あなた}}はいつでも[$2 このページ]を閲覧できます。",
 	"notification-link-text-expand-all": "展開",
 	"notification-link-text-expand-alert-count": "{{PLURAL:$1|$1件のアラート}}を表示",
@@ -161,6 +163,7 @@
 	"notification-header-user-rights-add-and-remove": "{{GENDER:$6|あなたの}}利用者権限が{{GENDER:$1|変更されました}}: $2へ追加され、$4から除外されました。",
 	"notification-header-welcome": "$1 さん、{{SITENAME}} へ{{GENDER:$2|ようこそ}}！{{GENDER:$2|あなた}}の参加を歓迎します。",
 	"notification-header-mention-summary": "$1 が <strong>$4</strong> の「編集の要約欄」で{{GENDER:$3|あなた}}に{{GENDER:$2|言及しました}} 。",
+	"notification-header-watchlist-multiuser-restored": "<strong>$1</strong>、{{GENDER:$2|あなた}}のウォッチリストを$3{{PLURAL:$3|time|times}}のものに復元しました。",
 	"notification-welcome-linktext": "ようこそ",
 	"notification-header-thank-you-1-edit": "{{GENDER:$2|あなた}}は初めて編集を行いました。寄稿をありがとうございます。そして、ようこそ！",
 	"notification-header-thank-you-10-edit": "{{GENDER:$2|あなた}}は10回の編集を行いました。これからも頑張りましょう！",
@@ -190,10 +193,10 @@
 	"notification-inbox-filter-read": "既読",
 	"notification-inbox-filter-unread": "未読",
 	"notification-inbox-filter-all": "すべて",
-	"echo-specialmute-label-mute-notifications": "この利用者からの通知をミュートする",
+	"echo-specialmute-label-mute-notifications": "この{{GENDER:$1|利用者}}からの通知をミュートする",
 	"echo-email-plain-footer": "{{GENDER:$1|あなた}}が受け取るメールの設定を変更するには、個人設定をご確認ください:",
 	"echo-email-html-footer-preference-link-text": "{{GENDER:$1|個人設定}}をご確認ください",
-	"echo-email-html-footer-with-link": "{{{{GENDER:$2|皆さん}}}}にお届けするメールを変更するには、$1。",
+	"echo-email-html-footer-with-link": "{{GENDER:$2|}}お届けするメールを変更するには、$1。",
 	"echo-notification-alert": "{{PLURAL:$1|アラート ($1)|100=アラート (99件以上)}}",
 	"echo-notification-notice": "{{PLURAL:$1|通知 ($1件)|100=通知 (99件以上)}}",
 	"echo-notification-alert-text-only": "アラート",
@@ -214,5 +217,6 @@
 	"echo-email-batch-link-text-view-all-notifications": "すべての通知を閲覧",
 	"notification-header-foreign-alert": "{{PLURAL:$5|他のウィキ|他の$5個のウィキ}}からのアラートがあります",
 	"notification-header-foreign-notice": "{{PLURAL:$5|他のウィキ|他の$5個のウィキ}}からの通知があります",
-	"notification-header-foreign-all": "{{PLURAL:$5|他のウィキ|他の$5個のウィキ}}からの通知があります"
+	"notification-header-foreign-all": "{{PLURAL:$5|他のウィキ|他の$5個のウィキ}}からの通知があります",
+	"group-push-subscription-manager": "プッシュサブスクリプションマネージャ"
 }
