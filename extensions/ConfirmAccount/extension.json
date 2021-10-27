@@ -72,7 +72,8 @@
 		"BeforePageDisplay": "ConfirmAccountUIHooks::confirmAccountsNotice",
 		"AdminLinks": "ConfirmAccountUIHooks::confirmAccountAdminLinks",
 		"AuthChangeFormFields": "ConfirmAccountUIHooks::onAuthChangeFormFields",
-		"LoadExtensionSchemaUpdates": "ConfirmAccountUpdaterHooks::addSchemaUpdates"
+		"LoadExtensionSchemaUpdates": "ConfirmAccountUpdaterHooks::addSchemaUpdates",
+		"SpecialPageBeforeExecute": "ConfirmAccountHooks::onSpecialPageBeforeExecute"
 	},
 	"AvailableRights": [
 		"confirmaccount",

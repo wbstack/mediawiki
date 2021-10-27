@@ -20,13 +20,15 @@
 ( function () {
 	'use strict';
 
-	var mwImeRulesPath, inputSelector, inputPreferences, ulsIMEPreferences, customHelpLink;
+	var mwImeRulesPath, inputSelector, inputPreferences, ulsIMEPreferences, customHelpLink,
+		getULSPreferences = require( 'ext.uls.preferences' ),
+		languageSettingsModules = [ 'ext.uls.displaysettings' ];
 
 	mwImeRulesPath = mw.config.get( 'wgExtensionAssetsPath' ) +
 		'/UniversalLanguageSelector/lib/jquery.ime/';
 	inputSelector = 'input:not([type]), input[type=text], input[type=search], textarea, [contenteditable]';
 
-	inputPreferences = mw.uls.preferences();
+	inputPreferences = getULSPreferences();
 
 	mw.ime = mw.ime || {};
 
@@ -73,7 +75,7 @@
 			// we don't want to save isDirty field.
 			this.registry.isDirty = undefined;
 			// get updated copy of preferences
-			inputPreferences = mw.uls.preferences();
+			inputPreferences = getULSPreferences();
 			inputPreferences.set( 'ime', this.registry );
 			inputPreferences.save( callback );
 			// reset the dirty bit
@@ -82,6 +84,19 @@
 
 		load: function () {
 			this.registry = inputPreferences.get( 'ime' ) || this.registry;
+			// Some validation in case the stored preferences are corrupt
+			if ( typeof this.registry.language !== 'string' ) {
+				this.registry.language = null;
+			}
+			if ( !Array.isArray( this.registry.previousLanguages ) ) {
+				this.registry.previousLanguages = [];
+			}
+			if ( !Array.isArray( this.registry.previousInputMethods ) ) {
+				this.registry.previousInputMethods = [];
+			}
+			if ( !$.isPlainObject( this.registry.imes ) ) {
+				this.registry.imes = {};
+			}
 		},
 
 		disable: function () {
@@ -145,7 +160,7 @@
 
 		// Apparently we depend on some styles which are loaded with
 		// these modules. This needs refactoring.
-		mw.loader.using( mw.uls.languageSettingsModules, function () {
+		mw.loader.using( languageSettingsModules, function () {
 			$moreSettingsLink.languagesettings( {
 				defaultModule: 'input',
 				onClose: function () {

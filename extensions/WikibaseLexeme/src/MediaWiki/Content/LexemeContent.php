@@ -4,9 +4,11 @@ namespace Wikibase\Lexeme\MediaWiki\Content;
 
 use InvalidArgumentException;
 use LogicException;
+use MediaWiki\MediaWikiServices;
 use Title;
 use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
+use Wikibase\Lexeme\Presentation\Content\LemmaTextSummaryFormatter;
 use Wikibase\Repo\Content\EntityContent;
 use Wikibase\Repo\Content\EntityHolder;
 use Wikimedia\Assert\Assert;
@@ -18,7 +20,7 @@ use Wikimedia\Assert\Assert;
  */
 class LexemeContent extends EntityContent {
 
-	const CONTENT_MODEL_ID = 'wikibase-lexeme';
+	public const CONTENT_MODEL_ID = 'wikibase-lexeme';
 
 	/**
 	 * @var EntityHolder|null
@@ -34,6 +36,11 @@ class LexemeContent extends EntityContent {
 	 * @var Title
 	 */
 	private $redirectTitle;
+
+	/**
+	 * @var LemmaTextSummaryFormatter
+	 */
+	private $summaryFormatter;
 
 	/**
 	 * @param EntityHolder|null $lexemeHolder
@@ -58,6 +65,10 @@ class LexemeContent extends EntityContent {
 		} elseif ( $redirect !== null ) {
 			$this->constructAsRedirect( $redirect, $redirectTitle );
 		}
+
+		$this->summaryFormatter = new LemmaTextSummaryFormatter(
+			MediaWikiServices::getInstance()->getContentLanguage()
+		);
 	}
 
 	public static function newFromRedirect( $redirect, $title ) {
@@ -143,18 +154,18 @@ class LexemeContent extends EntityContent {
 
 		$count = $lexeme->getStatements()->count();
 
-		foreach ( $lexeme->getForms()->toArray() as $form ) {
+		foreach ( $lexeme->getForms()->toArrayUnordered() as $form ) {
 			$count += $form->getStatements()->count();
 		}
 
-		foreach ( $lexeme->getSenses()->toArray() as $sense ) {
+		foreach ( $lexeme->getSenses()->toArrayUnordered() as $sense ) {
 			$count += $sense->getStatements()->count();
 		}
 
 		$properties['wb-claims'] = $count;
 
-		$properties['wbl-senses'] = count( $lexeme->getSenses()->toArray() );
-		$properties['wbl-forms'] = count( $lexeme->getForms()->toArray() );
+		$properties['wbl-senses'] = $lexeme->getSenses()->count();
+		$properties['wbl-forms'] = $lexeme->getForms()->count();
 
 		return $properties;
 	}
@@ -201,4 +212,20 @@ class LexemeContent extends EntityContent {
 		$this->redirectTitle = $redirectTitle;
 	}
 
+	/**
+	 * Returns a textual representation of the content suitable for use in edit summaries and log messages.
+	 *
+	 * @param int $maxLength maximum length of the summary text
+	 * @return string
+	 */
+	public function getTextForSummary( $maxLength = 250 ) {
+		if ( $this->isRedirect() ) {
+			return $this->getRedirectText();
+		}
+
+		return $this->summaryFormatter->getSummary(
+			$this->getEntity()->getLemmas(),
+			$maxLength
+		);
+	}
 }

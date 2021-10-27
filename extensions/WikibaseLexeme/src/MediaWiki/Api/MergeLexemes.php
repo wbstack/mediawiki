@@ -20,10 +20,10 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class MergeLexemes extends ApiBase {
 
-	const SOURCE_ID_PARAM = 'source';
-	const TARGET_ID_PARAM = 'target';
-	const SUMMARY_PARAM = 'summary';
-	const BOT_PARAM = 'bot';
+	public const SOURCE_ID_PARAM = 'source';
+	public const TARGET_ID_PARAM = 'target';
+	public const SUMMARY_PARAM = 'summary';
+	private const BOT_PARAM = 'bot';
 
 	/**
 	 * @var ApiErrorReporter
@@ -39,7 +39,7 @@ class MergeLexemes extends ApiBase {
 		$this->errorReporter = $errorReporterCallback( $this );
 	}
 
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
+	public static function factory( ApiMain $mainModule, string $moduleName ): self {
 		$repo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $repo->getApiHelperFactory( $mainModule->getContext() );
 		return new self(

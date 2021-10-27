@@ -7,7 +7,7 @@ use DataValues\TimeValue;
 use ValueParsers\ParseException;
 use ValueParsers\ParserOptions;
 use ValueParsers\StringValueParser;
-use Wikimedia;
+use Wikimedia\AtEase\AtEase;
 
 /**
  * This parser is in essence the inverse operation of MediaWiki's Language::sprintfDate.
@@ -19,16 +19,16 @@ use Wikimedia;
  */
 class DateFormatParser extends StringValueParser {
 
-	const FORMAT_NAME = 'date-format';
+	private const FORMAT_NAME = 'date-format';
 
-	const OPT_DATE_FORMAT = 'dateFormat';
+	public const OPT_DATE_FORMAT = 'dateFormat';
 
 	/**
 	 * Option for unlocalizing non-canonical digits. Must be an array of strings, mapping canonical
 	 * digit characters ("1", "2" and so on, possibly including "." and ",") to localized
 	 * characters.
 	 */
-	const OPT_DIGIT_TRANSFORM_TABLE = 'digitTransformTable';
+	public const OPT_DIGIT_TRANSFORM_TABLE = 'digitTransformTable';
 
 	/**
 	 * Option for localized month names. Should be a two-dimensional array, the first dimension
@@ -36,13 +36,13 @@ class DateFormatParser extends StringValueParser {
 	 * full month names, genitive names and abbreviations. Can also be a one-dimensional array of
 	 * strings.
 	 */
-	const OPT_MONTH_NAMES = 'monthNames';
+	public const OPT_MONTH_NAMES = 'monthNames';
 
 	/**
 	 * Option to override the precision auto-detection and set a specific precision. Should be an
 	 * integer or string containing one of the TimeValue::PRECISION_... constants.
 	 */
-	const OPT_PRECISION = 'precision';
+	public const OPT_PRECISION = 'precision';
 
 	public function __construct( ParserOptions $options = null ) {
 		parent::__construct( $options );
@@ -116,7 +116,7 @@ class DateFormatParser extends StringValueParser {
 		}
 	}
 
-	// @codingStandardsIgnoreStart
+	// phpcs:disable Generic.Metrics.CyclomaticComplexity.MaxExceeded,Squiz.WhiteSpace.FunctionSpacing
 	/**
 	 * @see Language::sprintfDate
 	 *
@@ -282,7 +282,6 @@ class DateFormatParser extends StringValueParser {
 				case 'xoY':
 				case 'xtY':
 					throw new ParseException( 'Unsupported date format "' . $code . '"' );
-					break;
 
 				// Character with no meaning
 				default:
@@ -298,7 +297,7 @@ class DateFormatParser extends StringValueParser {
 
 		return $pattern . '$>iu';
 	}
-	// @codingStandardsIgnoreEnd
+	// phpcs:enable
 
 	/**
 	 * @return string Partial regular expression
@@ -339,9 +338,9 @@ class DateFormatParser extends StringValueParser {
 	private function parseDate( $input ) {
 		$pattern = $this->parseDateFormat( $this->getDateFormat() );
 
-		Wikimedia\suppressWarnings();
+		AtEase::suppressWarnings();
 		$success = preg_match( $pattern, $input, $matches );
-		Wikimedia\restoreWarnings();
+		AtEase::restoreWarnings();
 
 		if ( !$success ) {
 			throw new ParseException(

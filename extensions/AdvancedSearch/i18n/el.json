@@ -3,11 +3,13 @@
 		"authors": [
 			"Geraki",
 			"KATRINE1992",
-			"Nikosgranturismogt"
+			"NikosLikomitros",
+			"Nikosgranturismogt",
+			"Protnet"
 		]
 	},
 	"advancedsearch-desc": "Εύκολη πρόσβαση σε προηγμένες δυνατότητες αναζήτησης στην [[Special:Search]]",
-	"advancedsearch-options-pane-head": "Προχωρημένες παράμετροι:",
+	"advancedsearch-options-pane-head": "Σύνθετη αναζήτηση:",
 	"advancedsearch-optgroup-text": "Αναζήτηση στο κείμενο σελίδας",
 	"advancedsearch-optgroup-structure": "Δομή",
 	"advancedsearch-optgroup-files": "Αρχεία και εικόνες",

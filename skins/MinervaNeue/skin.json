@@ -22,12 +22,9 @@
 	"url": "https://www.mediawiki.org/wiki/Skin:MinervaNeue",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"config": {
-		"MinervaCountErrors": {
-			"value": false
-		},
 		"MinervaDonateLink": {
 			"value": {
 				"base": true
@@ -39,7 +36,7 @@
 			]
 		},
 		"MinervaEnableSiteNotice": {
-			"value": false
+			"value": true
 		},
 		"MinervaApplyKnownTemplateHacks": {
 			"value": false
@@ -127,6 +124,9 @@
 		"ResourceLoaderRegisterModules": [
 			"MinervaHooks::onResourceLoaderRegisterModules"
 		],
+		"SkinPageReadyConfig": [
+			"MinervaHooks::onSkinPageReadyConfig"
+		],
 		"UserLogoutComplete": [
 			"MinervaHooks::onUserLogoutComplete"
 		],
@@ -152,6 +152,9 @@
 			"MinervaHooks::onOutputPageBodyAttributes"
 		]
 	},
+	"SkinLessImportPaths": {
+		"minerva": "resources/mediawiki.less"
+	},
 	"MessagesDirs": {
 		"MinervaNeue": [
 			"i18n"
@@ -163,6 +166,9 @@
 	},
 	"ResourceModuleSkinStyles": {
 		"minerva": {
+			"mobile.init.styles": [
+				"skinStyles/mobile.init.styles/mobile.less"
+			],
 			"mediawiki.diff.styles": [
 				"skinStyles/mediawiki.diff.styles.less"
 			],
@@ -215,9 +221,6 @@
 			"mobile.special.styles": [
 				"skinStyles/mobile.special.styles/minerva.less"
 			],
-			"ext.echo.styles.special": [
-				"skinStyles/ext.echo.styles.special/SpecialNotificationsOverlay.less"
-			],
 			"mediawiki.editfont.styles": [
 				"skinStyles/mediawiki.editfont.styles/minerva.css"
 			],
@@ -232,12 +235,6 @@
 			"mobile.special.mobilemenu.styles": [
 				"skinStyles/mobile.special.mobilemenu.styles/minerva.less"
 			],
-			"ext.echo.mobile": [
-				"skinStyles/ext.echo.mobile/minerva.less"
-			],
-			"mobile.notifications.overlay": [
-				"skinStyles/ext.echo.mobile/minerva.less"
-			],
 			"mediawiki.content.json": [
 				"skinStyles/mediawiki.content-json/minerva.less"
 			],
@@ -247,14 +244,10 @@
 			],
 			"mediawiki.special.changeslist.legend": [
 				"skinStyles/mediawiki.special.changeslist.legend.less"
+			],
+			"mobile.special.pagefeed.styles": [
+				"skinStyles/mobile.special.pagefeed.styles.less"
 			]
-		}
-	},
-	"attributes": {
-		"EventLogging": {
-			"Schemas": {
-				"WebClientError": 18340282
-			}
 		}
 	},
 	"ResourceModules": {
@@ -294,7 +287,6 @@
 			"images": {
 				"toast.mw-notification-type-error,.mw-notification.mw-notification-type-error":
 					"resources/skins.minerva.content.styles.images/error.svg",
-				"input.search,.mw-ui-icon-minerva-magnifying-glass:before": "resources/skins.minerva.content.styles.images/magnifying-glass.svg",
 				"a.external": {
 					"file": {
 						"ltr": "resources/skins.minerva.content.styles.images/link-external-ltr.svg",
@@ -547,9 +539,7 @@
 				"mobile-frontend-redirected-from",
 				"minerva-talk-full-page",
 				"minerva-talk-topic-feedback",
-				"minerva-talk-reply-success",
-				"logging-out-notify",
-				"logout-failed"
+				"minerva-talk-reply-success"
 			],
 			"styles": [
 				"resources/skins.minerva.scripts/styles.less",
@@ -566,7 +556,6 @@
 				"resources/skins.minerva.scripts/drawers.js",
 				"resources/skins.minerva.scripts/ctaDrawers.js",
 				"resources/skins.minerva.scripts/menu.js",
-				"resources/skins.minerva.scripts/errorLogging.js",
 				"resources/skins.minerva.scripts/preInit.js",
 				"resources/skins.minerva.scripts/downloadPageAction.js",
 				"resources/skins.minerva.scripts/page-issues/parser.js",
@@ -628,12 +617,14 @@
 			"resources/skins.minerva.scripts/page-issues/index.js",
 			"resources/skins.minerva.scripts/UriUtil.js",
 			"resources/skins.minerva.scripts/TitleUtil.js",
+			"resources/skins.minerva.scripts/watchstar.js",
 			"tests/qunit/skins.minerva.scripts/downloadPageAction.test.js",
 			"tests/qunit/skins.minerva.scripts/page-issues/parser.test.js",
 			"tests/qunit/skins.minerva.scripts/AB.test.js",
 			"tests/qunit/skins.minerva.scripts/page-issues/index.test.js",
 			"tests/qunit/skins.minerva.scripts/UriUtil.test.js",
-			"tests/qunit/skins.minerva.scripts/TitleUtil.test.js"
+			"tests/qunit/skins.minerva.scripts/TitleUtil.test.js",
+			"tests/qunit/skins.minerva.scripts/watchstar.test.js"
 		]
 	},
 	"ServiceWiringFiles": [

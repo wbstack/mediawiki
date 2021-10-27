@@ -25,7 +25,7 @@ use Wikimedia\Rdbms\IResultWrapper;
  */
 class PageHistoryPagerHookHandler implements PageHistoryPager__doBatchLookupsHook {
 
- 	/** @var bool */
+	/** @var bool */
 	private $federatedPropertiesEnabled;
 
 	/** @var LinkTargetEntityIdLookup */
@@ -57,13 +57,17 @@ class PageHistoryPagerHookHandler implements PageHistoryPager__doBatchLookupsHoo
 		}
 	}
 
-	public static function factory(): self {
+	public static function factory(
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		LinkTargetEntityIdLookup $linkTargetEntityIdLookup,
+		PrefetchingTermLookup $prefetchingTermLookup
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		return new self(
 			$wikibaseRepo->inFederatedPropertyMode(),
-			$wikibaseRepo->getPrefetchingTermLookup(),
-			$wikibaseRepo->getLinkTargetEntityIdLookup(),
-			$wikibaseRepo->getLanguageFallbackChainFactory()
+			$prefetchingTermLookup,
+			$linkTargetEntityIdLookup,
+			$languageFallbackChainFactory
 		);
 	}
 

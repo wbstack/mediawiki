@@ -11,8 +11,8 @@
 	 * Both button and pane can have arbitrary jQuery content.
 	 *
 	 * @class
-	 * @extends {OO.ui.Widget}
-	 * @mixins {OO.ui.mixin.IndicatorElement}
+	 * @extends OO.ui.Widget
+	 * @mixes OO.ui.mixin.IndicatorElement
 	 * @constructor
 	 *
 	 * @param {Object} config

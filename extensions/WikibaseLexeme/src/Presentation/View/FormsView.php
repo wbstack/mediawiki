@@ -8,6 +8,7 @@ use Wikibase\DataModel\Term\Term;
 use Wikibase\Lexeme\Domain\Model\Form;
 use Wikibase\Lexeme\Domain\Model\FormSet;
 use Wikibase\Lexeme\Presentation\View\Template\LexemeTemplateFactory;
+use Wikibase\Lexeme\Presentation\View\Template\VueTemplates;
 use Wikibase\View\LocalizedTextProvider;
 use Wikibase\View\StatementGroupListView;
 use WMDE\VueJsTemplating\Templating;
@@ -67,10 +68,9 @@ class FormsView {
 		foreach ( $forms->toArray() as $form ) {
 			$html .= $this->getFormHtml( $form );
 		}
-		$html .= '</div>';
-		$html .= '</div>';
-		$html .= $this->getRepresentationsVueTemplate();
-
+		$html .= '</div>'; // wikibase-lexeme-forms
+		// @phan-suppress-next-line PhanPluginDuplicateAdjacentStatement
+		$html .= '</div>'; // wikibase-lexeme-forms-section
 		return $html;
 	}
 
@@ -107,7 +107,7 @@ class FormsView {
 			$this->renderRepresentationWidget( $form ),
 			$grammaticalFeaturesHtml,
 			$this->getStatementSectionHtml( $form ),
-			//Anchor separated from ID to avoid issue with front-end rendering
+			// Anchor separated from ID to avoid issue with front-end rendering
 			htmlspecialchars( $form->getId()->getIdSuffix() )
 		] );
 	}
@@ -117,6 +117,7 @@ class FormsView {
 	 */
 	private function renderRepresentationWidget( Form $form ) {
 		$templating = new Templating();
+		$representationsVueTemplate = file_get_contents( __DIR__ . VueTemplates::REPRESENTATIONS );
 
 		$representations = array_map(
 			function ( Term $r ) {
@@ -126,7 +127,7 @@ class FormsView {
 		);
 
 		$result = $templating->render(
-			$this->getRawRepresentationVueTemplate(),
+			$representationsVueTemplate,
 			[
 				'inEditMode' => false,
 				'representations' => $representations
@@ -150,73 +151,6 @@ class FormsView {
 	 */
 	private function getGrammaticalFeatureHtml( ItemId $id ) {
 		return $this->entityIdFormatter->formatEntityId( $id );
-	}
-
-	private function getRepresentationsVueTemplate() {
-		return <<<HTML
-<script id="representation-widget-vue-template" type="x-template">
-	{$this->getRawRepresentationVueTemplate()}
-</script>
-HTML;
-	}
-
-	private function getRawRepresentationVueTemplate() {
-		return <<<'HTML'
-<div class="representation-widget">
-	<ul v-if="!inEditMode" class="representation-widget_representation-list">
-		<li v-for="representation in representations" class="representation-widget_representation">
-			<span class="representation-widget_representation-value"
-				:lang="representation.language">{{representation.value}}</span>
-			<span class="representation-widget_representation-language">
-				{{representation.language}}
-			</span>
-		</li>
-	</ul>
-	<div v-else>
-		<div class="representation-widget_edit-area">
-			<ul class="representation-widget_representation-list">
-				<li v-for="(representation, index) in representations"
-					class="representation-widget_representation-edit-box">
-					<label :for="inputRepresentationId(index)"
-						class="representation-widget_representation-value-label">
-						{{'wikibaselexeme-form-field-representation-label'|message}}
-					</label>
-					<input size="1" class="representation-widget_representation-value-input"
-						:value="representation.value"
-						:id="inputRepresentationId(index)"
-						@input="updateValue(representation, $event)">
-					<label :for="inputLanguageId(index)"
-						class="representation-widget_representation-language-label">
-						{{'wikibaselexeme-form-field-language-label'|message}}
-					</label>
-					<input size="1" class="representation-widget_representation-language-input"
-						:id="inputLanguageId(index)"
-						:value="representation.language"
-						@input="updateLanguage(representation, $event)"
-						:class="{
-							'representation-widget_representation-language-input_redundant-language':
-								isRedundantLanguage(representation.language)
-						}"
-						:aria-invalid="isRedundantLanguage(representation.language)">
-					<button class="representation-widget_representation-remove"
-						v-on:click="remove(representation)"
-						:disabled="representations.length <= 1"
-						:title="'wikibase-remove'|message">
-						&times;
-					</button>
-				</li>
-				<li class="representation-widget_edit-area-controls">
-					<button type="button" class="representation-widget_add" v-on:click="add"
-						:title="'wikibase-add'|message">+</button>
-				</li>
-			</ul>
-		</div>
-		<div v-if="hasRedundantLanguage" class="representation-widget_redundant-language-warning">
-			<p>{{'wikibaselexeme-form-representation-redundant-language'|message}}</p>
-		</div>
-	</div>
-</div>
-HTML;
 	}
 
 	/**

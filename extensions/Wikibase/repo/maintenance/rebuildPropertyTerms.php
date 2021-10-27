@@ -66,7 +66,7 @@ class RebuildPropertyTerms extends Maintenance {
 		$this->wikibaseRepo = WikibaseRepo::getDefaultInstance();
 
 		$rebuilder = new PropertyTermsRebuilder(
-			$this->wikibaseRepo->getNewTermStoreWriterFactory()->newPropertyTermStoreWriter(),
+			WikibaseRepo::getTermStoreWriterFactory()->newPropertyTermStoreWriter(),
 			$this->newEntityIdPager(),
 			$this->getReporter(),
 			$this->getErrorReporter(),
@@ -83,8 +83,8 @@ class RebuildPropertyTerms extends Maintenance {
 
 	private function newEntityIdPager(): SqlEntityIdPager {
 		$sqlEntityIdPagerFactory = new SqlEntityIdPagerFactory(
-			$this->wikibaseRepo->getEntityNamespaceLookup(),
-			$this->wikibaseRepo->getEntityIdLookup()
+			WikibaseRepo::getEntityNamespaceLookup(),
+			WikibaseRepo::getEntityIdLookup()
 		);
 
 		$pager = $sqlEntityIdPagerFactory->newSqlEntityIdPager( [ 'property' ] );

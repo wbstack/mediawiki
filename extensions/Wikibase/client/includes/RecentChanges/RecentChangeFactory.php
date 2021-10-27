@@ -24,7 +24,7 @@ class RecentChangeFactory {
 	 * Classification of Wikibase changes in the rc_source column of the
 	 * recentchanges table.
 	 */
-	const SRC_WIKIBASE = 'wb';
+	public const SRC_WIKIBASE = 'wb';
 
 	/**
 	 * @var Language
@@ -51,7 +51,7 @@ class RecentChangeFactory {
 	 * @param SiteLinkCommentCreator $siteLinkCommentCreator
 	 * @param CentralIdLookup|null $centralIdLookup CentralIdLookup, or null if
 	 *   this repository is not connected to a central user system (see
-	 *   Wikibase\Lib\Changes\CentralIdLookupFactory).
+	 *   CentralIdLookup::factoryNonLocal).
 	 * @param ExternalUserNames|null $externalUsernames
 	 */
 	public function __construct(

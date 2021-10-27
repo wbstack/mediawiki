@@ -26,7 +26,7 @@ class EchoNotificationsHandlers {
 	/**
 	 * Type of notification
 	 */
-	const NOTIFICATION_TYPE = 'page-connection';
+	public const NOTIFICATION_TYPE = 'page-connection';
 
 	/**
 	 * @var RepoLinker
@@ -74,16 +74,15 @@ class EchoNotificationsHandlers {
 		$this->repoSiteName = $repoSiteName;
 	}
 
-	/**
-	 * @return self
-	 */
-	public static function newFromGlobalState() {
+	// TODO convert this to a proper hook handler class,
+	// register factory with services in extension JSON file
+	public static function factory(): self {
 		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$settings = $wikibaseClient->getSettings();
+		$settings = WikibaseClient::getSettings();
 
 		return new self(
-			$wikibaseClient->newRepoLinker(),
-			$wikibaseClient->getNamespaceChecker(),
+			WikibaseClient::getRepoLinker(),
+			WikibaseClient::getNamespaceChecker(),
 			$settings->getSetting( 'siteGlobalID' ),
 			$settings->getSetting( 'sendEchoNotification' ),
 			$settings->getSetting( 'repoSiteName' )
@@ -110,7 +109,7 @@ class EchoNotificationsHandlers {
 	 * @param bool $autocreated True when account was auto-created
 	 */
 	public static function onLocalUserCreated( User $user, $autocreated ) {
-		$self = self::newFromGlobalState();
+		$self = self::factory();
 		$self->doLocalUserCreated( $user, $autocreated );
 	}
 
@@ -132,7 +131,7 @@ class EchoNotificationsHandlers {
 	 * @param Change $change
 	 */
 	public static function onWikibaseHandleChange( Change $change ) {
-		$self = self::newFromGlobalState();
+		$self = self::factory();
 		$self->doWikibaseHandleChange( $change );
 	}
 

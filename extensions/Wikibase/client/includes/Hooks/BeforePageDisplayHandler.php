@@ -9,7 +9,7 @@ use Skin;
 use Title;
 use User;
 use Wikibase\Client\NamespaceChecker;
-use Wikibase\Client\WikibaseClient;
+use Wikibase\Lib\SettingsArray;
 
 /**
  * Adds CSS for the edit links sidebar link or JS to create a new item
@@ -35,11 +35,13 @@ class BeforePageDisplayHandler implements BeforePageDisplayHook {
 		$this->dataBridgeEnabled = $dataBridgeEnabled;
 	}
 
-	public static function newFromGlobalState(): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
+	public static function factory(
+		NamespaceChecker $namespaceChecker,
+		SettingsArray $clientSettings
+	): self {
 		return new self(
-			$wikibaseClient->getNamespaceChecker(),
-			$wikibaseClient->getSettings()->getSetting( 'dataBridgeEnabled' )
+			$namespaceChecker,
+			$clientSettings->getSetting( 'dataBridgeEnabled' )
 		);
 	}
 
@@ -116,7 +118,7 @@ class BeforePageDisplayHandler implements BeforePageDisplayHook {
 
 	private function hasLinkItemWidget( User $user, OutputPage $out, Title $title, $actionName ) {
 		if (
-			$out->getLanguageLinks() !== [] || !$user->isLoggedIn()
+			$out->getLanguageLinks() !== [] || !$user->isRegistered()
 			|| !$this->hasEditOrAddLinks( $out, $title, $actionName )
 		) {
 			return false;

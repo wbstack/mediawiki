@@ -9,6 +9,7 @@ use Wikibase\Lib\Store\EntityTitleTextLookup;
 
 /**
  * Utility class to format entity links with labels for usage in hooks.
+ * @license GPL-2.0-or-later
  */
 class DefaultEntityLinkFormatter implements EntityLinkFormatter {
 
@@ -57,11 +58,11 @@ class DefaultEntityLinkFormatter implements EntityLinkFormatter {
 
 	/**
 	 * @param string[]|null $termData A term record as returned by
-	 * LanguageFallbackChain::extractPreferredValueOrAny(),
+	 * TermLanguageFallbackChain::extractPreferredValueOrAny(),
 	 * containing the 'value' and 'language' fields, or null
 	 * or an empty array.
 	 *
-	 * @see LanguageFallbackChain::extractPreferredValueOrAny
+	 * @see TermLanguageFallbackChain::extractPreferredValueOrAny
 	 *
 	 * @return array list( string $text, Language $language )
 	 */

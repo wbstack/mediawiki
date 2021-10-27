@@ -7,7 +7,7 @@
 
 	/**
 	 * @class
-	 * @extends {OO.ui.MultiselectLookup}
+	 * @extends OO.ui.MultiselectLookup
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store

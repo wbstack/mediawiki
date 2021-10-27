@@ -2,9 +2,36 @@
 	"@metadata": {
 		"authors": [
 			"Dbc334",
+			"Eleassar",
 			"Janezdrilc"
 		]
 	},
-	"twocolconflict-beta-feature-message": "Navzkrižno urejanje, temelječe na odstavkih",
-	"twocolconflict-beta-feature-description": "Prikaži navzkrižje urejanj s pomočjo naprednejšega pogleda, temelječega na odstavkih."
+	"twocolconflict-beta-feature-message": "Navzkrižno urejanje na podlagi odstavkov",
+	"twocolconflict-beta-feature-description": "Prikaži navzkrižje urejanj z naprednejšim prikazom na podlagi odstavkov",
+	"twocolconflict-copy-action": "Skopiraj vse besedilo",
+	"twocolconflict-split-header-hint-beta": "Hvala za uporabo te beta možnosti. Še dodatno jo lahko pomagate izboljšati, če pustite komentar [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface na tej strani].",
+	"twocolconflict-split-current-version-header": "Zadnja redakcija $1.",
+	"twocolconflict-split-not-saved-at": "Še ni objavljena",
+	"twocolconflict-split-choose-version": "Izberite različico",
+	"twocolconflict-split-other-version-chosen": "Druga redakcija",
+	"twocolconflict-split-your-version-chosen": "Vaša redakcija",
+	"twocolconflict-split-select-all": "Izberi vse",
+	"twocolconflict-split-tour-dialog-dot-message": "Za koristne namige kliknite žareči modri piki.",
+	"twocolconflict-split-tour-dialog-header": "Združite navzkrižni redakciji",
+	"twocolconflict-split-tour-dialog-message": "Žal je med vašim urejanjem stran spremenil in na njej objavil še nekdo drug.\n\nNe skrbite; vaša urejanja niso izgubljena. Preglejte obe različici in ju združite. Po potrebi lahko izbrano besedilo uredite. Ob kliku »{{int:publishchanges}}« se bo shranilo samo besedilo v izbranih poljih.",
+	"twocolconflict-split-tour-dialog-btn-text": "Začnite združevati",
+	"twocolconflict-split-tour-popup-btn-text": "V redu, razumem.",
+	"twocolconflict-split-tour-popup1-header": "Razhajajoče se spremembe so prikazane vrstico za vrstico.",
+	"twocolconflict-split-tour-popup1-message": "Ko se vaša različica in različica drugega uporabnika razlikujeta, sta druga ob drugi prikazani obe različici: različica drugega uporabnika v rumenem polju na levi strani in vaša različica v modrem polju na desni strani.<br /><br />Če med obema različicama ni razlike, sta vrstici prikazani v sivih poljih. Ta lahko razširite ali skrčite in po potrebi uredite.",
+	"twocolconflict-split-edit-tooltip": "Kliknite, da uredite to besedilo",
+	"twocolconflict-split-reset-warning": "Zavržem spremembe? Besedilo v tem polju bo ponastavljeno na tako, kakršno je bilo pred pojavom navzkrižja urejanj.",
+	"twocolconflict-split-select-all-other-tooltip": "Kliknite, da izberete vse spremembe drugega uporabnika",
+	"twocolconflict-split-selected-other-tooltip": "Izbrana je druga redakcija",
+	"twocolconflict-split-selected-your-tooltip": "Izbrana je vaša redakcija",
+	"twocolconflict-split-tour-dialog-header-single-column-view": "Navzkrižje urejanj",
+	"twocolconflict-split-tour-dialog-message-single-column-view": "Žal je stran sočasno kot vi urejal še nekdo drug. Če je potrebno, lahko uredite svojo redakcijo in spremenite končni vrstni red.",
+	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Odpravi težavo",
+	"twocolconflict-talk-your": "Vaš komentar",
+	"twocolconflict-talk-conflicting": "Navzkrižni komentar",
+	"twocolconflict-talk-reorder-prompt": "Postavite svoj komentar glede na navzkrižni komentar:"
 }

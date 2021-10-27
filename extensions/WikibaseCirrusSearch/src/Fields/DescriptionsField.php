@@ -18,7 +18,7 @@ class DescriptionsField extends TermIndexField {
 	/**
 	 * Field name
 	 */
-	const NAME = 'descriptions';
+	public const NAME = 'descriptions';
 
 	/**
 	 * List of available languages

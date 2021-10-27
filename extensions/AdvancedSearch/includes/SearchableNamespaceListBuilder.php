@@ -11,8 +11,8 @@ class SearchableNamespaceListBuilder {
 
 	/**
 	 * Get a curated list of namespaces. Adds Main namespace and removes unnamed namespaces
-	 * @param array $configNamespaces Key is namespace ID and value namespace string
-	 * @return array
+	 * @param string[] $configNamespaces Key is namespace ID and value namespace string
+	 * @return string[]
 	 */
 	public static function getCuratedNamespaces( array $configNamespaces ) {
 		self::addMainNamespace( $configNamespaces );
@@ -20,10 +20,16 @@ class SearchableNamespaceListBuilder {
 		return $configNamespaces;
 	}
 
+	/**
+	 * @param string[] &$configNamespaces
+	 */
 	private static function addMainNamespace( array &$configNamespaces ) {
 		$configNamespaces[ NS_MAIN ] = wfMessage( self::MAIN_NAMESPACE )->text();
 	}
 
+	/**
+	 * @param string[] &$configNamespaces
+	 */
 	private static function filterUnnamedNamespaces( array &$configNamespaces ) {
 		$configNamespaces = array_filter( $configNamespaces );
 	}

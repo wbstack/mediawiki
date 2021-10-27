@@ -7,7 +7,6 @@ var PARENT = $.ui.suggester;
  * @class jQuery.ui.unitsuggester
  * @extends jQuery.ui.suggester
  * @license GNU GPL v2+
- * @author Thiemo Mättig
  * @author Jonas Kress
  *
  * @constructor
@@ -16,6 +15,7 @@ $.widget( 'ui.unitsuggester', PARENT, {
 
 	/**
 	 * Options
+	 *
 	 * @property {Object}
 	 */
 	options: {
@@ -38,6 +38,7 @@ $.widget( 'ui.unitsuggester', PARENT, {
 
 	/**
 	 * Caches retrieved results.
+	 *
 	 * @property {Object} [_cache={}]
 	 * @private
 	 */
@@ -147,6 +148,7 @@ $.widget( 'ui.unitsuggester', PARENT, {
 	/**
 	 * Initializes the default source pointing the the `wbsearchentities` API module via the URL
 	 * provided in the options.
+	 *
 	 * @protected
 	 *
 	 * @return {Function}
@@ -186,6 +188,7 @@ $.widget( 'ui.unitsuggester', PARENT, {
 
 	/**
 	 * Generates the label for a suggester entity.
+	 *
 	 * @protected
 	 *
 	 * @param {Object} entityStub
@@ -291,6 +294,7 @@ $.widget( 'ui.unitsuggester', PARENT, {
 	 * Returns the URL of the selected entity. URLs pointing to items on wikidata.org are normalized
 	 * to their canonical concept URI, e.g. https://wikidata.org/wiki/Q650 is returned as
 	 * http://www.wikidata.org/entity/Q650.
+	 *
 	 * @return {string|null}
 	 */
 	getSelectedConceptUri: function() {

@@ -30,15 +30,15 @@ use MediaWiki\Minerva\Skins\SkinUserPageHelper;
  * A skin that works on both desktop and mobile
  * @ingroup Skins
  */
-class SkinMinerva extends SkinTemplate {
+class SkinMinerva extends SkinMustache {
 	/** @const LEAD_SECTION_NUMBER integer which corresponds to the lead section
 	 * in editing mode
 	 */
 	public const LEAD_SECTION_NUMBER = 0;
 
-	/** @var string $skinname Name of this skin */
+	/** @var string Name of this skin */
 	public $skinname = 'minerva';
-	/** @var string $template Name of this used template */
+	/** @var string Name of this used template */
 	public $template = 'MinervaTemplate';
 
 	/** @var SkinOptions */
@@ -55,8 +55,25 @@ class SkinMinerva extends SkinTemplate {
 	 * Initialize Minerva Skin
 	 */
 	public function __construct() {
-		parent::__construct( 'minerva' );
+		parent::__construct( [
+			'name' => 'minerva',
+			'templateDirectory' => __DIR__,
+			'messages' => [
+				'mobile-frontend-footer-sitename'
+			],
+			'responsive' => true
+		] );
 		$this->skinOptions = MediaWikiServices::getInstance()->getService( 'Minerva.SkinOptions' );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getTemplateData() {
+			$data = parent::getTemplateData();
+			$tpl = $this->prepareQuickTemplate();
+			$tplData = $tpl->execute();
+			return $data + $tplData;
 	}
 
 	/**
@@ -93,51 +110,12 @@ class SkinMinerva extends SkinTemplate {
 	}
 
 	/**
-	 * Returns the site name for the footer, either as a text or <img> tag
-	 * @return string
-	 */
-	public function getSitename() {
-		$config = $this->getConfig();
-		$logos = ResourceLoaderSkinModule::getAvailableLogos( $config );
-		$wordmark = $logos['wordmark'] ?? false;
-
-		$footerSitename = $this->msg( 'mobile-frontend-footer-sitename' )->text();
-
-		// If there's a custom site logo, use that instead of text.
-		if ( $wordmark ) {
-			$wordmarkAttrs = [];
-
-			foreach ( [ 'src', 'width', 'height' ] as $key ) {
-				if ( isset( $wordmark[ $key ] ) ) {
-					$wordmarkAttrs[ $key ] = $wordmark[ $key ];
-				}
-			}
-			$attributes = $wordmarkAttrs + [
-				'alt' => $footerSitename,
-			];
-			if ( isset( $wordmark[ '1x' ] ) ) {
-				$attributes['srcset'] = $wordmark['1x'] . ' 1x';
-			}
-			$sitename = Html::element( 'img', $attributes );
-		} else {
-			$sitename = $footerSitename;
-		}
-
-		return $sitename;
-	}
-
-	/**
 	 * initialize various variables and generate the template
 	 * @return QuickTemplate
 	 * @suppress PhanTypeMismatchArgument
 	 */
 	protected function prepareQuickTemplate() {
 		$out = $this->getOutput();
-
-		// add head items
-		$out->addMeta( 'viewport', 'initial-scale=1.0, user-scalable=yes, minimum-scale=0.25, ' .
-				'maximum-scale=5.0, width=device-width'
-		);
 
 		// Generate skin template
 		$tpl = parent::prepareQuickTemplate();
@@ -262,7 +240,7 @@ class SkinMinerva extends SkinTemplate {
 			$className .= ' page-Main_Page ';
 		}
 
-		if ( $this->getUser()->isLoggedIn() ) {
+		if ( $this->getUser()->isRegistered() ) {
 			$className .= ' is-authenticated';
 		}
 		// The new treatment should only apply to the main namespace
@@ -310,7 +288,7 @@ class SkinMinerva extends SkinTemplate {
 		$notificationIconClass = MinervaUI::iconClass( 'bellOutline-base20',
 			'element', '', 'wikimedia' );
 
-		if ( $user->isLoggedIn() ) {
+		if ( $user->isRegistered() ) {
 			$badge = Html::element( 'a', [
 				'class' => $notificationIconClass,
 				'href' => SpecialPage::getTitleFor( 'Mytalk' )->getLocalURL(
@@ -399,14 +377,15 @@ class SkinMinerva extends SkinTemplate {
 	 * @return array
 	 */
 	protected function getHistoryLink( Title $title ) {
-		$isLatestRevision = $this->getRevisionId() === $title->getLatestRevID();
+		$out = $this->getOutput();
+		$isLatestRevision = $out->getRevisionId() === $title->getLatestRevID();
 		// Get rev_timestamp of current revision (preloaded by MediaWiki core)
-		$timestamp = $this->getOutput()->getRevisionTimestamp();
+		$timestamp = $out->getRevisionTimestamp();
 		# No cached timestamp, load it from the database
 		if ( $timestamp === null ) {
 			$timestamp = MediaWikiServices::getInstance()
 				->getRevisionLookup()
-				->getTimestampFromId( $this->getOutput()->getRevisionId() );
+				->getTimestampFromId( $out->getRevisionId() );
 		}
 
 		return !$isLatestRevision || $title->isMainPage() ?
@@ -512,7 +491,7 @@ class SkinMinerva extends SkinTemplate {
 			$this->skinOptions->get( SkinOptions::SIMPLIFIED_TALK ) &&
 			// Only if viewing the latest revision, as we can't get the section numbers otherwise
 			// (and even if we could, they would be useless, because edits often add and remove sections).
-			$this->getRevisionId() === $title->getLatestRevID() &&
+			$this->getOutput()->getRevisionId() === $title->getLatestRevID() &&
 			$title->getContentModel() === CONTENT_MODEL_WIKITEXT;
 	}
 
@@ -543,7 +522,7 @@ class SkinMinerva extends SkinTemplate {
 
 			$message = $sectionCount > 0 ? wfMessage( 'minerva-talk-explained' )
 				: wfMessage( 'minerva-talk-explained-empty' );
-			$html = $html . Html::element( 'div', [ 'class' =>
+			$html .= Html::element( 'div', [ 'class' =>
 				'minerva-talk-content-explained' ], $message->text() );
 		}
 
@@ -564,7 +543,7 @@ class SkinMinerva extends SkinTemplate {
 			$pageTitle = '';
 			$msg = $this->msg( 'mobile-frontend-logged-in-homepage-notification', $user->getName() );
 
-			if ( $user->isLoggedIn() && !$msg->isDisabled() ) {
+			if ( $user->isRegistered() && !$msg->isDisabled() ) {
 				$pageTitle = $msg->text();
 			}
 
@@ -580,7 +559,6 @@ class SkinMinerva extends SkinTemplate {
 		}
 		$tpl->set( 'headinghtml', $this->getHeadingHtml() );
 
-		$tpl->set( 'footer-site-heading-html', $this->getSitename() );
 		// set defaults
 		if ( !isset( $tpl->data['postbodytext'] ) ) {
 			$tpl->set( 'postbodytext', '' ); // not currently set in desktop skin
@@ -779,15 +757,26 @@ class SkinMinerva extends SkinTemplate {
 
 		// FIXME: T223204: Dequeue default content modules except for the history
 		// action. Allow default history action content modules
-		// (mediawiki.page.ready, jquery.makeCollapsible,
-		// jquery.makeCollapsible.styles, etc) in order to enable toggling of the
+		// in order to enable toggling of the
 		// filters. Long term this won't be necessary when T111565 is resolved and a
 		// more general solution can be used.
 		if ( Action::getActionName( $this->getContext() ) !== 'history' ) {
 			// dequeue default content modules (toc, sortable, collapsible, etc.)
-			$modules['content'] = [];
+			$modules['content'] = array_diff( $modules['content'], [
+				// T233340
+				'jquery.tablesorter',
+				// T111565
+				'jquery.makeCollapsible',
+				// Minerva provides its own implementation. Loading this will break display.
+				'mediawiki.toc'
+			] );
 			// dequeue styles associated with `content` key.
-			$modules['styles']['content'] = [];
+			$modules['styles']['content'] = array_diff( $modules['styles']['content'], [
+				// T233340
+				'jquery.tablesorter.styles',
+				// T111565
+				'jquery.makeCollapsible.styles',
+			] );
 		}
 		$modules['styles']['core'] = $this->getSkinStyles();
 
@@ -798,7 +787,7 @@ class SkinMinerva extends SkinTemplate {
 			]
 		);
 
-		Hooks::run( 'SkinMinervaDefaultModules', [ $this, &$modules ] );
+		Hooks::run( 'SkinMinervaDefaultModules', [ $this, &$modules ], '1.36' );
 
 		return $modules;
 	}
@@ -833,7 +822,7 @@ class SkinMinerva extends SkinTemplate {
 			$styles[] = 'skins.minerva.talk.styles';
 		}
 
-		if ( $this->getUser()->isLoggedIn() ) {
+		if ( $this->getUser()->isRegistered() ) {
 			$styles[] = 'skins.minerva.loggedin.styles';
 			$styles[] = 'skins.minerva.icons.loggedin';
 		}

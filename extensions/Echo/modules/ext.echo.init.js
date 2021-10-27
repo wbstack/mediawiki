@@ -9,13 +9,19 @@ mw.echo.config.maxPrioritizedActions = 2;
  */
 function initDesktop() {
 	'use strict';
+	var uri;
 
 	// Remove ?markasread=XYZ from the URL
-	var uri = new mw.Uri();
-	if ( uri.query.markasread !== undefined ) {
-		delete uri.query.markasread;
-		delete uri.query.markasreadwiki;
-		window.history.replaceState( null, document.title, uri );
+	try {
+		uri = new mw.Uri();
+		if ( uri.query.markasread !== undefined ) {
+			delete uri.query.markasread;
+			delete uri.query.markasreadwiki;
+			window.history.replaceState( null, document.title, uri );
+		}
+	} catch ( e ) {
+		// Catch problems when the URI is malformed (T261799)
+		// e.g. #/media/Fitxer:Campbells_Soup_Cans_MOMA_reduced_80%.jpg
 	}
 
 	// Activate ooui
@@ -274,6 +280,7 @@ function initDesktop() {
 			alertController.refreshUnreadCount();
 			messageController.refreshUnreadCount();
 			// Make notification update after n*pollingRate(time in secs) where n depends on document.hidden
+			// eslint-disable-next-line compat/compat
 			setTimeout( pollForNotificationCountUpdates, ( document.hidden ? 5 : 1 ) * pollingRate * 1000 );
 		}
 

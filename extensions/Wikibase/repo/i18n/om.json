@@ -1,10 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Maammee",
+			"Oromoo",
 			"Tumsaa"
 		]
 	},
+	"wikibase-edit": "gulaali",
+	"wikibase-add": "dabali",
 	"wikibase-entitytermsforlanguagelistview-more": "Afaanota dabalataa",
+	"wikibase-sitelinks-special": "Marsaalee biroo",
 	"wikibase-itemdisambiguation-lookup-language": "Lakkaddaa Afaanii",
-	"wikibase-modifyterm-language": "Lakkaddaa Afaanii"
+	"wikibase-modifyterm-language": "Lakkaddaa Afaanii",
+	"wikibase-federated-properties-leaving-site-notice-cancel": "Dhiisi"
 }

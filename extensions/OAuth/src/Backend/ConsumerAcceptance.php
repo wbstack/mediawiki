@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extensions\OAuth\Backend;
 
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\DBConnRef;
 
 /**
@@ -84,7 +85,7 @@ class ConsumerAcceptance extends MWOAuthDAO {
 	/**
 	 * @param DBConnRef $db
 	 * @param string $token Access token
-	 * @param int $flags MWOAuthConsumerAcceptance::READ_* bitfield
+	 * @param int $flags ConsumerAcceptance::READ_* bitfield
 	 * @return ConsumerAcceptance|bool
 	 */
 	public static function newFromToken( DBConnRef $db, $token, $flags = 0 ) {
@@ -109,7 +110,7 @@ class ConsumerAcceptance extends MWOAuthDAO {
 	 * @param string $userId of user who authorized (central wiki's id)
 	 * @param Consumer $consumer
 	 * @param string $wiki wiki associated with the acceptance
-	 * @param int $flags MWOAuthConsumerAcceptance::READ_* bitfield
+	 * @param int $flags ConsumerAcceptance::READ_* bitfield
 	 * @param string $oauthVersion
 	 * @return ConsumerAcceptance|bool
 	 */
@@ -181,7 +182,7 @@ class ConsumerAcceptance extends MWOAuthDAO {
 
 	/**
 	 * Secret key used to derive the access secret for the OAuth protocol.
-	 * The actual access secret will be calculated via MWOAuthUtils::hmacDBSecret() to mitigate
+	 * The actual access secret will be calculated via Utils::hmacDBSecret() to mitigate
 	 * DB leaks.
 	 * @return string
 	 */
@@ -251,8 +252,10 @@ class ConsumerAcceptance extends MWOAuthDAO {
 
 	protected function userCanSee( $name, \IContextSource $context ) {
 		$centralUserId = Utils::getCentralIdFromLocalUser( $context->getUser() );
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
 		if ( $this->userId != $centralUserId
-			&& !$context->getUser()->isAllowed( 'mwoauthviewprivate' )
+			&& !$permissionManager->userHasRight( $context->getUser(), 'mwoauthviewprivate' )
 		) {
 			return $context->msg( 'mwoauth-field-private' );
 		} else {
@@ -261,7 +264,9 @@ class ConsumerAcceptance extends MWOAuthDAO {
 	}
 
 	protected function userCanSeePrivate( $name, \IContextSource $context ) {
-		if ( !$context->getUser()->isAllowed( 'mwoauthviewprivate' ) ) {
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
+		if ( !$permissionManager->userHasRight( $context->getUser(), 'mwoauthviewprivate' ) ) {
 			return $context->msg( 'mwoauth-field-private' );
 		} else {
 			return $this->userCanSee( $name, $context );

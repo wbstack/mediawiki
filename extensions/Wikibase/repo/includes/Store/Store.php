@@ -10,15 +10,11 @@ use Wikibase\Lib\Store\EntityByLinkedTitleLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\EntityStoreWatcher;
-use Wikibase\Lib\Store\EntityTermStoreWriter;
-use Wikibase\Lib\Store\LabelConflictFinder;
-use Wikibase\Lib\Store\LegacyEntityTermStoreReader;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\PropertyInfoLookup;
 use Wikibase\Lib\Store\PropertyInfoStore;
 use Wikibase\Lib\Store\SiteLinkStore;
 use Wikibase\Lib\Store\Sql\EntityChangeLookup;
-use Wikibase\Lib\Store\TermIndex;
 
 /**
  * Store interface. All interaction with store Wikibase does on top
@@ -32,9 +28,9 @@ use Wikibase\Lib\Store\TermIndex;
  */
 interface Store {
 
-	const LOOKUP_CACHING_ENABLED = '';
-	const LOOKUP_CACHING_DISABLED = 'uncached';
-	const LOOKUP_CACHING_RETRIEVE_ONLY = 'retrieve-only';
+	public const LOOKUP_CACHING_ENABLED = '';
+	public const LOOKUP_CACHING_DISABLED = 'uncached';
+	public const LOOKUP_CACHING_RETRIEVE_ONLY = 'retrieve-only';
 
 	/**
 	 * @return SiteLinkStore
@@ -52,54 +48,6 @@ interface Store {
 	public function clear();
 
 	/**
-	 * Rebuilds the store from the original data source.
-	 */
-	public function rebuild();
-
-	/**
-	 * Use of this method indicates cases that should be migrated away from the expectation
-	 * that all of this functionality is provided by a single class. Or that said thing needs
-	 * to select one of the more specific services mentioned in the deprecated message.
-	 *
-	 * @depreacted Use getLegacyEntityTermStoreReader, getLegacyEntityTermStoreWriter
-	 * or getLabelConflictFinder directly.
-	 *
-	 * @return TermIndex
-	 */
-	public function getTermIndex();
-
-	/**
-	 * Use of this method represents cases that still need to be migrated away from
-	 * using the legacy terms storage.
-	 *
-	 * @deprecated This will stop working once Wikibase migrates away from wb_terms
-	 * An exact alternative MAY NOT be available.
-	 *
-	 * @return LegacyEntityTermStoreReader
-	 */
-	public function getLegacyEntityTermStoreReader();
-
-	/**
-	 * This method will result in having 0 calls post migration as the service used
-	 * to write to the term store changes in WikibaseRepo::getItemTermStoreWriter
-	 * and WikibaseRepo::getPropertyTermStoreWriter
-	 *
-	 * @deprecated This will stop working once Wikibase migrates away from wb_terms
-	 * An alternative will be available
-	 *
-	 * @return EntityTermStoreWriter
-	 */
-	public function getLegacyEntityTermStoreWriter();
-
-	/**
-	 * @deprecated This will stop working once Wikibase migrates away from wb_terms
-	 * An alternative will be available
-	 *
-	 * @return LabelConflictFinder
-	 */
-	public function getLabelConflictFinder();
-
-	/**
 	 * @return ItemsWithoutSitelinksFinder
 	 */
 	public function newItemsWithoutSitelinksFinder();
@@ -115,8 +63,7 @@ interface Store {
 	 *        self::LOOKUP_CACHING_RETRIEVE_ONLY to get a lookup which reads from the cache, but doesn't store retrieved entities
 	 *        self::LOOKUP_CACHING_ENABLED to get a caching lookup (default)
 	 *
-	 * @param string $lookupMode One of the EntityRevisionLookup lookup mode constants
-	 * TODO this should perhaps not refer to EntityRevisionLookup
+	 * @param string $lookupMode One of LookupConstants::LATEST_FROM_*
 	 *
 	 * @return EntityLookup
 	 */
@@ -154,11 +101,6 @@ interface Store {
 	 * @return PropertyInfoStore
 	 */
 	public function getPropertyInfoStore();
-
-	/**
-	 * @return SiteLinkConflictLookup
-	 */
-	public function getSiteLinkConflictLookup();
 
 	/**
 	 * Returns an EntityPrefetcher which can be used to prefetch a list of entity

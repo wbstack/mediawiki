@@ -100,9 +100,10 @@ class JCSingleton {
 		array $configs, array $models, $warn = true
 	) {
 		$defaultModelId = 'JsonConfig';
-		// @codingStandardsIgnoreStart - T154789
-		$warnFunc = $warn ? 'wfLogWarning' : function( $msg ) {};
-		// @codingStandardsIgnoreEnd
+		$warnFunc = $warn
+			? 'wfLogWarning'
+			: function ( $msg ) {
+			};
 
 		$namespaces = [];
 		$titleMap = [];
@@ -113,7 +114,7 @@ class JCSingleton {
 				);
 				continue;
 			}
-			if ( null === self::getConfObject( $warnFunc, $conf, $confId ) ) {
+			if ( self::getConfObject( $warnFunc, $conf, $confId ) === null ) {
 				continue; // warned inside the function
 			}
 
@@ -163,7 +164,7 @@ class JCSingleton {
 				// 'store' does not exist, use it as a flag to indicate remote storage
 				$conf->store = false;
 				$remote = self::getConfObject( $warnFunc, $conf, 'remote', $confId, 'url' );
-				if ( null === $remote ) {
+				if ( $remote === null ) {
 					continue; // warned inside the function
 				}
 				if ( self::getConfVal( $remote, 'url', '' ) === '' ) {
@@ -183,7 +184,7 @@ class JCSingleton {
 				}
 				$conf->remote = null;
 				$store = self::getConfObject( $warnFunc, $conf, 'store', $confId );
-				if ( null === $store ) {
+				if ( $store === null ) {
 					continue; // warned inside the function
 				}
 				self::getConfVal( $store, 'cacheNewValue', true );
@@ -307,7 +308,7 @@ class JCSingleton {
 	 * @param string $field
 	 * @param string|null $confId
 	 * @param string|null $treatAsField
-	 * @return null|object|stdClass
+	 * @return null|stdClass
 	 */
 	private static function getConfObject(
 		$warnFunc, &$value, $field, $confId = null, $treatAsField = null
@@ -321,7 +322,7 @@ class JCSingleton {
 			$val = & $value->$field;
 		}
 		if ( $val === null || $val === true ) {
-			$val = new stdClass();
+			$val = (object)[];
 		} elseif ( is_array( $val ) ) {
 			$val = (object)$val;
 		} elseif ( is_string( $val ) && $treatAsField !== null ) {
@@ -630,6 +631,27 @@ class JCSingleton {
 	}
 
 	/**
+	 * Ensure that ContentHandler knows about our dynamic models (T259126)
+	 * @param string[] &$models
+	 * @return bool
+	 */
+	public static function onGetContentModels( array &$models ) {
+		global $wgJsonConfigModels;
+		if ( !self::jsonConfigIsStorage() ) {
+			return true;
+		}
+
+		self::init();
+		// TODO: this is copied from onContentHandlerForModelID()
+		$ourModels = array_replace_recursive(
+			\ExtensionRegistry::getInstance()->getAttribute( 'JsonConfigModels' ),
+			$wgJsonConfigModels
+		);
+		$models = array_merge( $models, array_keys( $ourModels ) );
+		return true;
+	}
+
+	/**
 	 * Instantiate JCContentHandler if we can handle this modelId
 	 * @param string $modelId
 	 * @param \ContentHandler &$handler
@@ -911,24 +933,6 @@ class JCSingleton {
 		return true;
 	}
 
-	public static function onAbortMove(
-		/** @noinspection PhpUnusedParameterInspection */
-		Title $title, Title $newTitle, $user, &$err, $reason
-	) {
-		if ( !self::jsonConfigIsStorage() ) {
-			return true;
-		}
-
-		$status = new \Status();
-		self::onMovePageIsValidMove( $title, $newTitle, $status );
-		if ( !$status->isOK() ) {
-			$err = $status->getHTML();
-			return false;
-		}
-
-		return true;
-	}
-
 	/**
 	 * Conditionally load API module 'jsondata' depending on whether or not
 	 * this wiki stores any jsonconfig data
@@ -1002,7 +1006,7 @@ class JCSingleton {
 	}
 
 	/**
-	 * @param object $value
+	 * @param \WikiPage|Title $value
 	 * @param JCContent|null $content
 	 * @return bool
 	 */

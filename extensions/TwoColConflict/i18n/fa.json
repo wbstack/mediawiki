@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ahmad252",
 			"Alifakoor",
 			"FarsiNevis",
 			"Ladsgroup",
@@ -13,6 +14,7 @@
 	"twocolconflict-beta-feature-message": "تعارض ویرایشی دو ستونی",
 	"twocolconflict-beta-feature-description": "تعارض‌های ویرایشی را به شکل دوستونی نمایش می‌دهد.",
 	"twocolconflict-core-ui-hint-close": "دیگر هرگز نشان نده",
+	"twocolconflict-preference-enabled": "فعال کردن [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|رابط کاربری حل تعارض ویرایشی بر اساس بند]] برای حل تعارض‌های ویرایشی.",
 	"twocolconflict-split-header-hint-beta": "ممنون که از این خصوصیت آزمایشی استفاده می‌کنید. برای بهبود آن، لطفاً در [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View این صفحه] بازخورد بگذارید.",
 	"twocolconflict-split-your-version-header": "نسخه شما",
 	"twocolconflict-split-current-version-header": "جدیدترین نسخه $1",

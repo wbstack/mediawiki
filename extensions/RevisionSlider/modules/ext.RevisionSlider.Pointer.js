@@ -2,68 +2,69 @@
  * @external PointerLine
  * @external PointerView
  */
-( function () {
+var PointerLine = require( './ext.RevisionSlider.PointerLine.js' ),
+	PointerView = require( './ext.RevisionSlider.PointerView.js' );
+
+/**
+ * Module containing logic for the revision pointers
+ *
+ * @class Pointer
+ * @param {string} name
+ * @constructor
+ */
+function Pointer( name ) {
+	this.view = new PointerView( this, name );
+	this.line = new PointerLine( this, name );
+}
+
+$.extend( Pointer.prototype, {
 	/**
-	 * Module containing logic for the revision pointers
-	 *
-	 * @class Pointer
-	 * @param {string} name
-	 * @constructor
+	 * @type {number}
 	 */
-	var Pointer = function ( name ) {
-		this.view = new mw.libs.revisionSlider.PointerView( this, name );
-		this.line = new mw.libs.revisionSlider.PointerLine( this, name );
-	};
+	position: 0,
 
 	/**
-	 * @class mw.libs.revisionSlider.Pointer
+	 * @type {PointerView}
 	 */
-	$.extend( Pointer.prototype, {
-		/**
-		 * @type {number}
-		 */
-		position: 0,
+	view: null,
 
-		/**
-		 * @type {PointerView}
-		 */
-		view: null,
+	/**
+	 * @type {PointerLine}
+	 */
+	line: null,
 
-		/**
-		 * @type {PointerLine}
-		 */
-		line: null,
+	/**
+	 * @param {number} p
+	 */
+	setPosition: function ( p ) {
+		this.position = p;
+		this.getView().setDataPositionAttribute( p );
+	},
 
-		/**
-		 * @param {number} p
-		 */
-		setPosition: function ( p ) {
-			this.position = p;
-			this.getView().setDataPositionAttribute( p );
-		},
+	/**
+	 * @return {number}
+	 */
+	getPosition: function () {
+		return this.position;
+	},
 
-		/**
-		 * @return {number}
-		 */
-		getPosition: function () {
-			return this.position;
-		},
+	/**
+	 * @return {PointerView}
+	 */
+	getView: function () {
+		return this.view;
+	},
 
-		/**
-		 * @return {PointerView}
-		 */
-		getView: function () {
-			return this.view;
-		},
+	/**
+	 * @return {PointerLine}
+	 */
+	getLine: function () {
+		return this.line;
+	}
+} );
 
-		/**
-		 * @return {PointerLine}
-		 */
-		getLine: function () {
-			return this.line;
-		}
-	} );
-
-	mw.libs.revisionSlider = mw.libs.revisionSlider || {};
-	mw.libs.revisionSlider.Pointer = Pointer;
-}() );
+module.exports = {
+	Pointer: Pointer,
+	PointerLine: PointerLine,
+	PointerView: PointerView
+};

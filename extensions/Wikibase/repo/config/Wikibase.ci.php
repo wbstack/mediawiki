@@ -7,8 +7,8 @@
  * with some settings that are not part of the default example yet
  * and also some overrides specific to browser tests.
  *
- * This file is NOT an entry point the Wikibase extension. Use Wikibase.php.
- * It should furthermore not be included from outside the extension.
+ * This file is NOT an entry point the Wikibase extension.
+ * It should not be included from outside the extension.
  *
  * @see docs/options.wiki
  *
@@ -21,7 +21,7 @@ require __DIR__ . '/Wikibase.example.php';
 $wgWBCSUseCirrus = false;
 
 // CirrusSearch should not perform any updates
-$wgDisableSearchUpdate = true;
+$wgCirrusSearchDisableUpdate = true;
 
 // enable data bridge
 $wgWBRepoSettings['dataBridgeEnabled'] = true;

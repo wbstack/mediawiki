@@ -7,7 +7,7 @@
 
 	/**
 	 * @class
-	 * @extends {OO.ui.TagMultiselectWidget}
+	 * @extends OO.ui.TagMultiselectWidget
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store

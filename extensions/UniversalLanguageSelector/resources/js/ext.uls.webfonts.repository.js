@@ -76,9 +76,9 @@
 		],
 		"ckb": [
 			"system",
-			"Amiri",
 			"Lateef",
-			"Scheherazade"
+			"Scheherazade",
+			"Amiri"
 		],
 		"cr": [
 			"OskiEast"
@@ -124,6 +124,10 @@
 		"et": [
 			"system",
 			"OpenDyslexic"
+		],
+		"eu": [
+			"system",
+			"GochiHand"
 		],
 		"fa": [
 			"system",
@@ -184,6 +188,10 @@
 			"Alef",
 			"Miriam CLM",
 			"Taamey Frank CLM"
+		],
+		"hoc": [
+			"system",
+			"Boyo Gagrai"
 		],
 		"hu": [
 			"system",
@@ -470,6 +478,9 @@
 			"woff": "Artaxerxes/Artaxerxes.woff?c1ed7",
 			"woff2": "Artaxerxes/Artaxerxes.woff2?7a96e"
 		},
+		"Boyo Gagrai": {
+			"woff2": "BoyoGagrai/BoyoGagrai.woff2?d1060"
+		},
 		"CharisSIL": {
 			"woff": "CharisSIL/CharisSIL-R.woff?3a622",
 			"woff2": "CharisSIL/CharisSIL-R.woff2?b2a18"
@@ -531,6 +542,10 @@
 			"fontstyle": "italic",
 			"woff": "GentiumPlus/GentiumPlus-I.woff?ab550",
 			"woff2": "GentiumPlus/GentiumPlus-I.woff2?35b11"
+		},
+		"GochiHand": {
+			"woff": "GochiHand/GochiHand-Regular.woff?310cc",
+			"woff2": "GochiHand/GochiHand-Regular.woff2?b6160"
 		},
 		"Hanuman": {
 			"woff": "Hanuman/Hanuman.woff?d5078",
@@ -594,8 +609,8 @@
 			"woff2": "Junicode/Junicode-Italic.woff2?3fe39"
 		},
 		"Kadiri": {
-			"woff": "Kadiri/Kadiri.woff?1b711",
-			"woff2": "Kadiri/Kadiri.woff2?a266a"
+			"woff": "Kadiri/Kadiri.woff?98297",
+			"woff2": "Kadiri/Kadiri.woff2?0cfa1"
 		},
 		"KhmerOS": {
 			"woff": "KhmerOS/KhmerOS.woff?2ef9e",
@@ -765,8 +780,8 @@
 			"woff2": "Ponomar/PonomarUnicode.woff2?ea5c5"
 		},
 		"Pustaka Bali": {
-			"woff": "PustakaBali/PustakaBali.woff?cb41e",
-			"woff2": "PustakaBali/PustakaBali.woff2?743c0"
+			"woff": "PustakaBali/PustakaBali.woff?7c072",
+			"woff2": "PustakaBali/PustakaBali.woff2?6b142"
 		},
 		"RailwaySans": {
 			"woff": "RailwaySans/RailwaySans.woff?fda9a",
@@ -817,8 +832,8 @@
 			"woff2": "UnifrakturMaguntia/UnifrakturMaguntia.woff2?23272"
 		},
 		"Vimala": {
-			"woff": "Vimala/Vimala.woff?e387b",
-			"woff2": "Vimala/Vimala.woff2?70690"
+			"woff": "Vimala/Vimala.woff?f75ba",
+			"woff2": "Vimala/Vimala.woff2?a3b10"
 		},
 		"lklug": {
 			"woff": "lklug/lklug.woff?57de7",

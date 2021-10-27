@@ -25,14 +25,13 @@
 	/**
 	 * @class
 	 * @constructor
-	 * @mixins OO.EventEmitter
+	 * @mixes OO.EventEmitter
 	 * @param {string[]} [defaultNamespaces] The namespaces selected by default (for new searches)
 	 * @param {Object} defaultFieldValues Defaults for search field values
 	 */
 	mw.libs.advancedSearch.dm.SearchModel = function ( defaultNamespaces, defaultFieldValues ) {
 		this.searchFields = {};
 		this.namespaces = defaultNamespaces || [];
-		this.sortMethod = 'relevance';
 		this.defaultFieldValues = defaultFieldValues || {};
 
 		// Mixin constructor
@@ -146,7 +145,6 @@
 	};
 
 	/**
-	 *
 	 * @param {string} fieldId
 	 * @param {*} comparisonValue
 	 * @return {boolean}
@@ -290,15 +288,15 @@
 	};
 
 	/**
- 	* @return {string[]}
- 	*/
+	 * @return {string}
+	 */
 	mw.libs.advancedSearch.dm.SearchModel.prototype.getSortMethod = function () {
-		return this.sortMethod;
+		return this.sortMethod || 'relevance';
 	};
 
 	/**
- 	* @param {string} sortMethod
- 	*/
+	 * @param {string} sortMethod
+	 */
 	mw.libs.advancedSearch.dm.SearchModel.prototype.setSortMethod = function ( sortMethod ) {
 		this.sortMethod = sortMethod;
 		this.emitUpdate();

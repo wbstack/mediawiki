@@ -223,18 +223,12 @@ Defines the sampling rate for the Search schema.
 * Type: `Number`
 * Default: `0.001`
 
-#### $wgMFSpecialCaseMainPage
 
-If set to true, main page HTML will receive special massaging.
+#### $wgMFTrackBlockNotices
 
-See <https://m.mediawiki.org/wiki/Mobile_Gateway/Mobile_homepage_formatting>
-
-Use is discouraged as it leads to unnecessary technical debt and on the long
-term the goal is to deprecate usage of this config variable. Use at your own
-risk!
-
-If this feature is enabled you can disable it temporarily by appending
-?debug=1&mfnolegacytransform=1 to the main page URI.
+If set to true, block notices will be tracked on display, along with some limited
+user interactions. Counts will be stored for later analysis. No personal data will
+be collected.
 
 * Type: `Boolean`
 * Default: `false`
@@ -274,9 +268,9 @@ viewport.
 ```php
   [
     // These will enable lazy loading images in beta mode
-    'beta' => false,
+    'beta' => true,
     // These will enable lazy loading images in all modes
-    'base' => false,
+    'base' => true,
   ]
 ```
 

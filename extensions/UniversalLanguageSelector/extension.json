@@ -1,6 +1,6 @@
 {
 	"name": "UniversalLanguageSelector",
-	"version": "2020-04-20",
+	"version": "2021-01-21",
 	"author": [
 		"Alolita Sharma",
 		"Amir Aharoni",
@@ -17,14 +17,13 @@
 	"descriptionmsg": "uls-desc",
 	"license-name": "GPL-2.0-or-later OR MIT",
 	"requires": {
-		"MediaWiki": ">= 1.33.0"
+		"MediaWiki": ">= 1.34.0"
 	},
 	"Hooks": {
 		"BeforePageDisplay": "UniversalLanguageSelectorHooks::addModules",
 		"EnterMobileMode": "UniversalLanguageSelectorHooks::onEnterMobileMode",
 		"GetBetaFeaturePreferences": "UniversalLanguageSelectorHooks::onGetBetaFeaturePreferences",
 		"GetPreferences": "UniversalLanguageSelectorHooks::onGetPreferences",
-		"LocalUserCreated": "UniversalLanguageSelectorHooks::onLocalUserCreated",
 		"MakeGlobalVariablesScript": "UniversalLanguageSelectorHooks::addVariables",
 		"PersonalUrls": "UniversalLanguageSelectorHooks::addPersonalBarTrigger",
 		"ResourceLoaderGetConfigVars": "UniversalLanguageSelectorHooks::addConfig",
@@ -95,10 +94,6 @@
 			"description": "The location and the form of the language selection trigger.  The possible values are: (a) \"personal\"- as a link near the username or the log in link in the personal toolbar (default). (b) \"interlanguage\": as an icon near the header of the list of interlanguage  links in the sidebar.",
 			"value": "personal"
 		},
-		"ULSEventLogging": {
-			"description": "Whether to use EventLogging. The EventLogging extension must be installed if this option is enabled. @since 2013.06",
-			"value": false
-		},
 		"ULSImeSelectors": {
 			"description": "Array of jQuery selectors of elements on which IME should be enabled. @since 2013.11",
 			"value": [
@@ -130,14 +125,6 @@
 		"ULSCompactLanguageLinksBetaFeature": {
 			"description": "Set compact interlanguage links as beta feature or not. If set false, compact interlanguage links will be available by default to all users.",
 			"value": true
-		},
-		"ULSCompactLinksForNewAccounts": {
-			"description": "Enable compact interlanguage links for new user accounts.",
-			"value": false
-		},
-		"ULSCompactLinksEnableAnon": {
-			"description": "Enable compact interlanguage links for anonymous users.",
-			"value": false
 		}
 	},
 	"callback": "UniversalLanguageSelectorHooks::setVersionConstant",
@@ -148,7 +135,6 @@
 				"mobile"
 			],
 			"scripts": [
-				"js/ext.uls.eventlogger.js",
 				"js/ext.uls.common.js"
 			],
 			"styles": "css/ext.uls.less",
@@ -167,13 +153,15 @@
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.compactlinks": {
-			"scripts": "js/ext.uls.compactlinks.js",
+			"packageFiles": [
+				"js/ext.uls.compactlinks.js"
+			],
 			"styles": "css/ext.uls.compactlinks.less",
 			"dependencies": [
 				"mediawiki.jqueryMsg",
 				"mediawiki.language",
-				"mediawiki.ui.button",
-				"ext.uls.init"
+				"ext.uls.common",
+				"mediawiki.ui.button"
 			],
 			"messages": [
 				"ext-uls-compact-link-count",
@@ -184,13 +172,22 @@
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.displaysettings": {
-			"scripts": "js/ext.uls.displaysettings.js",
-			"styles": "css/ext.uls.displaysettings.less",
+			"scripts": [
+				"js/ext.uls.inputsettings.js",
+				"js/ext.uls.displaysettings.js"
+			],
+			"styles": [
+				"css/ext.uls.inputsettings.less",
+				"css/ext.uls.displaysettings.less"
+			],
 			"dependencies": [
+				"ext.uls.ime",
+				"jquery.ime",
 				"ext.uls.languagesettings",
 				"ext.uls.mediawiki",
 				"ext.uls.webfonts",
 				"mediawiki.api",
+				"mediawiki.ui.radio",
 				"mediawiki.ui.checkbox",
 				"mediawiki.ui.button",
 				"mediawiki.user"
@@ -219,33 +216,14 @@
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
-		"ext.uls.init": {
-			"targets": [
-				"desktop"
-			],
-			"dependencies": [
-				"ext.uls.common"
-			]
-		},
-		"ext.uls.inputsettings": {
-			"scripts": "js/ext.uls.inputsettings.js",
-			"styles": "css/ext.uls.inputsettings.less",
-			"dependencies": [
-				"ext.uls.ime",
-				"ext.uls.languagesettings",
-				"ext.uls.mediawiki",
-				"jquery.ime",
-				"mediawiki.ui.button",
-				"mediawiki.ui.radio"
-			],
-			"localBasePath": "resources",
-			"remoteExtPath": "UniversalLanguageSelector/resources"
-		},
 		"ext.uls.interface": {
-			"scripts": "js/ext.uls.interface.js",
+			"targets": [ "desktop", "mobile" ],
+			"packageFiles": [
+				"js/ext.uls.interface.js",
+				"js/ext.uls.launch.js"
+			],
 			"styles": "css/ext.uls.interface.less",
 			"dependencies": [
-				"ext.uls.common",
 				"mediawiki.jqueryMsg",
 				"mediawiki.storage",
 				"mediawiki.user",
@@ -261,6 +239,7 @@
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.interlanguage": {
+			"targets": [ "desktop", "mobile" ],
 			"styles": "css/ext.uls.interlanguage.less",
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
@@ -291,6 +270,7 @@
 				"ext.uls.languagenames",
 				"ext.uls.messages",
 				"jquery.uls",
+				"ext.uls.webfonts",
 				"jquery.uls.grid",
 				"mediawiki.util"
 			],
@@ -304,10 +284,15 @@
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.preferences": {
+			"targets": [
+				"desktop",
+				"mobile"
+			],
 			"scripts": "js/ext.uls.preferences.js",
 			"dependencies": [
+				"mediawiki.api",
 				"mediawiki.user",
-				"mediawiki.api"
+				"mediawiki.storage"
 			],
 			"localBasePath": "resources",
 			"remoteExtPath": "UniversalLanguageSelector/resources"
@@ -318,6 +303,7 @@
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.pt": {
+			"targets": [ "desktop", "mobile" ],
 			"styles": "css/ext.uls.pt.less",
 			"localBasePath": "resources",
 			"skinStyles": {
@@ -326,9 +312,9 @@
 			"remoteExtPath": "UniversalLanguageSelector/resources"
 		},
 		"ext.uls.webfonts": {
+			"targets": [ "desktop", "mobile" ],
 			"scripts": "js/ext.uls.webfonts.js",
 			"dependencies": [
-				"ext.uls.common",
 				"ext.uls.preferences",
 				"jquery.client"
 			],
@@ -436,16 +422,9 @@
 		],
 		"dependencies": [
 			"jquery.uls",
-			"ext.uls.init",
+			"ext.uls.common",
 			"ext.uls.preferences"
 		]
-	},
-	"attributes": {
-		"EventLogging": {
-			"Schemas": {
-				"UniversalLanguageSelector": 17799034
-			}
-		}
 	},
 	"manifest_version": 2
 }

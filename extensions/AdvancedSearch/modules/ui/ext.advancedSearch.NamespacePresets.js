@@ -79,7 +79,7 @@
 
 	/**
 	 * @class
-	 * @extends {OO.ui.CheckboxMultiselectInputWidget}
+	 * @extends OO.ui.CheckboxMultiselectInputWidget
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store

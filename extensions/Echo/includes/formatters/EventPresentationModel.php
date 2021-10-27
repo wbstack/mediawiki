@@ -13,31 +13,31 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * Recommended length of usernames included in messages, in
 	 * characters (not bytes).
 	 */
-	const USERNAME_RECOMMENDED_LENGTH = 20;
+	private const USERNAME_RECOMMENDED_LENGTH = 20;
 
 	/**
 	 * Recommended length of usernames used as link label, in
 	 * characters (not bytes).
 	 */
-	const USERNAME_AS_LABEL_RECOMMENDED_LENGTH = 15;
+	private const USERNAME_AS_LABEL_RECOMMENDED_LENGTH = 15;
 
 	/**
 	 * Recommended length of page names included in messages, in
 	 * characters (not bytes).
 	 */
-	const PAGE_NAME_RECOMMENDED_LENGTH = 50;
+	protected const PAGE_NAME_RECOMMENDED_LENGTH = 50;
 
 	/**
 	 * Recommended length of page names used as link label, in
 	 * characters (not bytes).
 	 */
-	const PAGE_NAME_AS_LABEL_RECOMMENDED_LENGTH = 15;
+	private const PAGE_NAME_AS_LABEL_RECOMMENDED_LENGTH = 15;
 
 	/**
 	 * Recommended length of section titles included in messages, in
 	 * characters (not bytes).
 	 */
-	const SECTION_TITLE_RECOMMENDED_LENGTH = 50;
+	public const SECTION_TITLE_RECOMMENDED_LENGTH = 50;
 
 	/**
 	 * @var EchoEvent
@@ -144,8 +144,6 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	}
 
 	/**
-	 * Get the distribution type
-	 *
 	 * @return string 'web' or 'email'
 	 */
 	final public function getDistributionType() {
@@ -580,7 +578,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 			return null;
 		}
 
-		$url = $user->isAnon()
+		$url = !$user->isRegistered()
 			? SpecialPage::getTitleFor( 'Contributions', $user->getName() )->getFullURL()
 			: $user->getUserPage()->getFullURL();
 

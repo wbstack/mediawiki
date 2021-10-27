@@ -121,15 +121,12 @@ class HtmlTalkPageResolutionView {
 		);
 	}
 
-	private function wrapRow( string $html, $isConflicting = false ) : string {
-		return Html::rawElement(
-			'div',
-			[
-				'class' => 'mw-twocolconflict-single-row' .
-					( $isConflicting ? ' mw-twocolconflict-conflicting-talk-row' : '' )
-			],
-			$html
-		);
+	private function wrapRow( string $html, bool $isConflicting = false ) : string {
+		$class = [ 'mw-twocolconflict-single-row' ];
+		if ( $isConflicting ) {
+			$class[] = 'mw-twocolconflict-conflicting-talk-row';
+		}
+		return Html::rawElement( 'div', [ 'class' => $class ], $html );
 	}
 
 	private function buildOrderSelector() {

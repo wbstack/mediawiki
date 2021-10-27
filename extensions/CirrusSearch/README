@@ -4,7 +4,9 @@ MediaWiki extension: CirrusSearch
 Installation
 ------------
 Get Elasticsearch up and running somewhere. Elasticsearch v6.x is only supported but 6.5.4 or higher is
-recommended.
+recommended. If you will be running Elasticsearch on a host separate from the mediawiki installation see
+https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-network.html. Be careful with the
+network configuration, never expose an unprotected node to the internet.
 
 Place the CirrusSearch extension in your extensions directory.
 You also need to install the Elastica MediaWiki extension.
@@ -104,7 +106,7 @@ LocalSettings.php like so:
  wfLoadExtension( 'PoolCounter');
  // Configuration for standard searches.
  $wgPoolCounterConf[ 'CirrusSearch-Search' ] = [
-	'class' => 'PoolCounter_Client',
+	'class' => 'MediaWiki\Extension\PoolCounter\Client',
 	'timeout' => 30,
 	'workers' => 25,
 	'maxqueue' => 50,
@@ -112,7 +114,7 @@ LocalSettings.php like so:
  // Configuration for prefix searches.  These are usually quite quick and
  // plentiful.
  $wgPoolCounterConf[ 'CirrusSearch-Prefix' ] = [
-	'class' => 'PoolCounter_Client',
+	'class' => 'MediaWiki\Extension\PoolCounter\Client',
 	'timeout' => 10,
 	'workers' => 50,
 	'maxqueue' => 100,
@@ -120,7 +122,7 @@ LocalSettings.php like so:
  // Configuration for regex searches.  These are slow and use lots of resources
  // so we only allow a few at a time.
  $wgPoolCounterConf[ 'CirrusSearch-Regex' ] = [
-	'class' => 'PoolCounter_Client',
+	'class' => 'MediaWiki\Extension\PoolCounter\Client',
 	'timeout' => 30,
 	'workers' => 10,
 	'maxqueue' => 10,
@@ -128,7 +130,7 @@ LocalSettings.php like so:
  // Configuration for funky namespace lookups.  These should be reasonably fast
  // and reasonably rare.
  $wgPoolCounterConf[ 'CirrusSearch-NamespaceLookup' ] = [
-		'class' => 'PoolCounter_Client',
+		'class' => 'MediaWiki\Extension\PoolCounter\Client',
 		'timeout' => 10,
 		'workers' => 20,
 		'maxqueue' => 20,

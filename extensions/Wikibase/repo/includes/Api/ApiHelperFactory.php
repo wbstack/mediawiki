@@ -4,8 +4,10 @@ namespace Wikibase\Repo\Api;
 
 use ApiBase;
 use MediaWiki\Permissions\PermissionManager;
+use MediaWiki\Revision\RevisionLookup;
 use Serializers\Serializer;
 use SiteLookup;
+use TitleFactory;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\SerializerFactory;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
@@ -13,9 +15,9 @@ use Wikibase\Lib\EntityFactory;
 use Wikibase\Lib\Store\EntityByLinkedTitleLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
-use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Localizer\ExceptionLocalizer;
+use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\SummaryFormatter;
 
 /**
@@ -30,9 +32,9 @@ use Wikibase\Repo\SummaryFormatter;
 class ApiHelperFactory {
 
 	/**
-	 * @var EntityTitleLookup
+	 * @var EntityTitleStoreLookup
 	 */
-	private $titleLookup;
+	private $entityTitleStoreLookup;
 
 	/**
 	 * @var ExceptionLocalizer
@@ -84,6 +86,12 @@ class ApiHelperFactory {
 	 */
 	private $permissionManager;
 
+	/** @var RevisionLookup */
+	private $revisionLookup;
+
+	/** @var TitleFactory */
+	private $titleFactory;
+
 	/**
 	 * @var EntityByLinkedTitleLookup|null
 	 */
@@ -100,7 +108,7 @@ class ApiHelperFactory {
 	private $entityStore;
 
 	/**
-	 * @param EntityTitleLookup $titleLookup
+	 * @param EntityTitleStoreLookup $entityTitleStoreLookup
 	 * @param ExceptionLocalizer $exceptionLocalizer
 	 * @param PropertyDataTypeLookup $dataTypeLookup
 	 * @param SiteLookup $siteLookup
@@ -111,12 +119,14 @@ class ApiHelperFactory {
 	 * @param Serializer $entitySerializer
 	 * @param EntityIdParser $idParser
 	 * @param PermissionManager $permissionManager
+	 * @param RevisionLookup $revisionLookup,
+	 * @param TitleFactory $titleFactory
 	 * @param EntityByLinkedTitleLookup|null $entityByLinkedTitleLookup
 	 * @param EntityFactory|null $entityFactory
 	 * @param EntityStore|null $entityStore
 	 */
 	public function __construct(
-		EntityTitleLookup $titleLookup,
+		EntityTitleStoreLookup $entityTitleStoreLookup,
 		ExceptionLocalizer $exceptionLocalizer,
 		PropertyDataTypeLookup $dataTypeLookup,
 		SiteLookup $siteLookup,
@@ -127,11 +137,13 @@ class ApiHelperFactory {
 		Serializer $entitySerializer,
 		EntityIdParser $idParser,
 		PermissionManager $permissionManager,
+		RevisionLookup $revisionLookup,
+		TitleFactory $titleFactory,
 		EntityByLinkedTitleLookup $entityByLinkedTitleLookup = null,
 		EntityFactory $entityFactory = null,
 		EntityStore $entityStore = null
 	) {
-		$this->titleLookup = $titleLookup;
+		$this->entityTitleStoreLookup = $entityTitleStoreLookup;
 		$this->exceptionLocalizer = $exceptionLocalizer;
 		$this->dataTypeLookup = $dataTypeLookup;
 		$this->siteLookup = $siteLookup;
@@ -142,6 +154,8 @@ class ApiHelperFactory {
 		$this->entitySerializer = $entitySerializer;
 		$this->idParser = $idParser;
 		$this->permissionManager = $permissionManager;
+		$this->revisionLookup = $revisionLookup;
+		$this->titleFactory = $titleFactory;
 		$this->entityByLinkedTitleLookup = $entityByLinkedTitleLookup;
 		$this->entityFactory = $entityFactory;
 		$this->entityStore = $entityStore;
@@ -157,7 +171,7 @@ class ApiHelperFactory {
 	public function getResultBuilder( ApiBase $api ) {
 		return new ResultBuilder(
 			$api->getResult(),
-			$this->titleLookup,
+			$this->entityTitleStoreLookup,
 			$this->serializerFactory,
 			$this->entitySerializer,
 			$this->siteLookup,
@@ -194,8 +208,11 @@ class ApiHelperFactory {
 	public function getEntitySavingHelper( ApiBase $apiBase ) {
 		$helper = new EntitySavingHelper(
 			$apiBase,
+			$this->revisionLookup,
+			$this->titleFactory,
 			$this->idParser,
 			$this->entityRevisionLookup,
+			$this->entityTitleStoreLookup,
 			$this->getErrorReporter( $apiBase ),
 			$this->summaryFormatter,
 			$this->editEntityFactory,
@@ -230,8 +247,11 @@ class ApiHelperFactory {
 	public function getEntityLoadingHelper( ApiBase $apiBase ) {
 		$helper = new EntityLoadingHelper(
 			$apiBase,
+			$this->revisionLookup,
+			$this->titleFactory,
 			$this->idParser,
 			$this->entityRevisionLookup,
+			$this->entityTitleStoreLookup,
 			$this->getErrorReporter( $apiBase )
 		);
 

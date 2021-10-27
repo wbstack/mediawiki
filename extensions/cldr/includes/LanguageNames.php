@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * A class for querying translated language names from CLDR data.
  *
@@ -12,11 +14,26 @@ class LanguageNames extends CldrNames {
 
 	private static $cache = [];
 
-	public const FALLBACK_NATIVE = 0; // Missing entries fallback to native name
-	public const FALLBACK_NORMAL = 1; // Missing entries fallback through the fallback chain
-	public const LIST_MW_SUPPORTED = 0; // Only names that have localisation in MediaWiki
-	public const LIST_MW = 1; // All names that are in Names.php
-	public const LIST_MW_AND_CLDR = 2; // Combination of Names.php and what is in cldr
+	/**
+	 * Missing entries fallback to native name
+	 */
+	public const FALLBACK_NATIVE = 0;
+	/**
+	 * Missing entries fallback through the fallback chain
+	 */
+	public const FALLBACK_NORMAL = 1;
+	/**
+	 * Only names that have localisation in MediaWiki
+	 */
+	public const LIST_MW_SUPPORTED = 0;
+	/**
+	 * All names that are in Names.php
+	 */
+	public const LIST_MW = 1;
+	/**
+	 * Combination of Names.php and what is in cldr
+	 */
+	public const LIST_MW_AND_CLDR = 2;
 
 	/**
 	 * Get localized language names for a particular language, using fallback languages for missing
@@ -32,9 +49,11 @@ class LanguageNames extends CldrNames {
 		$list = self::LIST_MW
 	) {
 		$xx = self::loadLanguage( $code );
-		$native = Language::fetchLanguageNames(
-			null,
-			$list === self::LIST_MW_SUPPORTED ? 'mwfile' : 'mw'
+
+		$native = MediaWikiServices::getInstance()->getLanguageNameUtils()
+			->getLanguageNames(
+				null,
+				$list === self::LIST_MW_SUPPORTED ? 'mwfile' : 'mw'
 		);
 
 		if ( $fbMethod === self::FALLBACK_NATIVE ) {
@@ -87,7 +106,9 @@ class LanguageNames extends CldrNames {
 
 		self::$cache[$code] = [];
 
-		if ( !Language::isValidBuiltInCode( $code ) ) {
+		if ( !MediaWikiServices::getInstance()->getLanguageNameUtils()
+			->isValidBuiltInCode( $code )
+		) {
 			return [];
 		}
 
@@ -108,7 +129,7 @@ class LanguageNames extends CldrNames {
 			require $filename;
 			// @phan-suppress-next-line PhanImpossibleCondition
 			if ( is_array( $languageNames ) ) {
-				self::$cache[$code] = self::$cache[$code] + $languageNames;
+				self::$cache[$code] += $languageNames;
 			}
 		} else {
 			wfDebug( __METHOD__ . ": Unable to load language names for $filename\n" );

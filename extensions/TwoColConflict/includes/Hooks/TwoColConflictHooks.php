@@ -168,25 +168,28 @@ class TwoColConflictHooks {
 			$conflictChunks = 0;
 			$conflictChars = 0;
 			if ( $baseRevision && $latestRevision ) {
-				// Attempt the automatic merge, to measure the number of actual conflicts.
-				/** @var ThreeWayMerge $merge */
-				$merge = MediaWikiServices::getInstance()->getService( 'TwoColConflictThreeWayMerge' );
-				$result = $merge->merge3(
-					$baseRevision->getContent( SlotRecord::MAIN )->serialize(),
-					$latestRevision->getContent( SlotRecord::MAIN )->serialize(),
-					$editPage->textbox2
-				);
+				$baseContent = $baseRevision->getContent( SlotRecord::MAIN );
+				$latestContent = $latestRevision->getContent( SlotRecord::MAIN );
+				if ( $baseContent && $latestContent ) {
+					// Attempt the automatic merge, to measure the number of actual conflicts.
+					/** @var ThreeWayMerge $merge */
+					$merge = MediaWikiServices::getInstance()->getService( 'TwoColConflictThreeWayMerge' );
+					$result = $merge->merge3(
+						$baseContent->serialize(),
+						$latestContent->serialize(),
+						$editPage->textbox2
+					);
 
-				if ( !$result->isCleanMerge() ) {
-					$conflictChunks = $result->getOverlappingChunkCount();
-					$conflictChars = $result->getOverlappingChunkSize();
+					if ( !$result->isCleanMerge() ) {
+						$conflictChunks = $result->getOverlappingChunkCount();
+						$conflictChars = $result->getOverlappingChunkSize();
+					}
 				}
 			}
 
-			// https://meta.wikimedia.org/w/index.php?title=Schema:TwoColConflictConflict&oldid=19872073
 			\EventLogging::logEvent(
 				'TwoColConflictConflict',
-				19950885,
+				-1,
 				[
 					'twoColConflictShown' => $this->twoColContext->shouldTwoColConflictBeShown(
 						$user,

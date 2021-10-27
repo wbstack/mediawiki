@@ -14,7 +14,7 @@ use Traversable;
 /**
  * @license GPL-2.0-or-later
  */
-final class SimpleCacheWithBagOStuff implements CacheInterface {
+class SimpleCacheWithBagOStuff implements CacheInterface {
 
 	use LoggerAwareTrait;
 
@@ -213,9 +213,9 @@ final class SimpleCacheWithBagOStuff implements CacheInterface {
 		$this->assertKeysAreValid( $keys );
 		$result = true;
 		foreach ( $keys as $key ) {
-			$result &= $this->delete( $key );
+			$result = $this->delete( $key ) && $result;
 		}
-		return (bool)$result;
+		return $result;
 	}
 
 	/**
@@ -342,7 +342,7 @@ final class SimpleCacheWithBagOStuff implements CacheInterface {
 	 *                                    the driver supports TTL then the library may set a default value
 	 *                                    for it or let the driver take care of that.
 	 *
-	 * @return int UNIX timestamp when the item should expire or \BagOStuff::TTL_INDEFINITE
+	 * @return int Time to live in form of seconds from now
 	 * @throws CacheInvalidArgumentException
 	 */
 	private function normalizeTtl( $ttl ) {
@@ -353,11 +353,13 @@ final class SimpleCacheWithBagOStuff implements CacheInterface {
 		if ( $ttl instanceof DateInterval ) {
 			$date = new DateTime();
 			$date->add( $ttl );
-			return $date->getTimestamp() + 1;
+			return $date->getTimestamp() - time() + 1;
 		} elseif ( $ttl === 0 ) {
-			return time();
+			// BagOStuff treats zero as indefinite while PSR requires this to be ttl meaning zero
+			// is basically an expired entry (we have tests relying on this assumption)
+			return -1;
 		} elseif ( is_int( $ttl ) ) {
-			return $ttl + time() + 1;
+			return $ttl;
 		} elseif ( $ttl === null ) {
 			return BagOStuff::TTL_INDEFINITE;
 		} else {

@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Api;
 
 use ApiBase;
@@ -8,12 +10,16 @@ use ApiUsageException;
 use DataValues\DataValue;
 use DataValues\IllegalValueException;
 use DataValues\StringValue;
+use IBufferingStatsdDataFactory;
 use InvalidArgumentException;
 use LogicException;
+use NullStatsdDataFactory;
 use ValueFormatters\FormatterOptions;
+use ValueFormatters\FormattingException;
 use ValueFormatters\ValueFormatter;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
+use Wikibase\Lib\DataTypeFactory;
 use Wikibase\Lib\DataValueFactory;
 use Wikibase\Lib\Formatters\OutputFormatSnakFormatterFactory;
 use Wikibase\Lib\Formatters\OutputFormatValueFormatterFactory;
@@ -42,6 +48,9 @@ class FormatSnakValue extends ApiBase {
 	 */
 	private $snakFormatterFactory;
 
+	/** @var DataTypeFactory */
+	private $dataTypeFactory;
+
 	/**
 	 * @var DataValueFactory
 	 */
@@ -52,6 +61,9 @@ class FormatSnakValue extends ApiBase {
 	 */
 	private $errorReporter;
 
+	/** @var IBufferingStatsdDataFactory */
+	private $stats;
+
 	/**
 	 * @see ApiBase::__construct
 	 *
@@ -59,29 +71,58 @@ class FormatSnakValue extends ApiBase {
 	 * @param string $moduleName
 	 * @param OutputFormatValueFormatterFactory $valueFormatterFactory
 	 * @param OutputFormatSnakFormatterFactory $snakFormatterFactory
+	 * @param DataTypeFactory $dataTypeFactory
 	 * @param DataValueFactory $dataValueFactory
 	 * @param ApiErrorReporter $apiErrorReporter
+	 * @param IBufferingStatsdDataFactory|null $stats
 	 */
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		OutputFormatValueFormatterFactory $valueFormatterFactory,
 		OutputFormatSnakFormatterFactory $snakFormatterFactory,
+		DataTypeFactory $dataTypeFactory,
 		DataValueFactory $dataValueFactory,
-		ApiErrorReporter $apiErrorReporter
+		ApiErrorReporter $apiErrorReporter,
+		IBufferingStatsdDataFactory $stats = null
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
 		$this->valueFormatterFactory = $valueFormatterFactory;
 		$this->snakFormatterFactory = $snakFormatterFactory;
+		$this->dataTypeFactory = $dataTypeFactory;
 		$this->dataValueFactory = $dataValueFactory;
 		$this->errorReporter = $apiErrorReporter;
+		$this->stats = $stats ?: new NullStatsdDataFactory();
+	}
+
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		IBufferingStatsdDataFactory $stats,
+		DataTypeFactory $dataTypeFactory,
+		DataValueFactory $dataValueFactory,
+		OutputFormatValueFormatterFactory $valueFormatterFactory
+	): self {
+		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
+
+		return new self(
+			$mainModule,
+			$moduleName,
+			$valueFormatterFactory,
+			$wikibaseRepo->getSnakFormatterFactory(),
+			$dataTypeFactory,
+			$dataValueFactory,
+			$apiHelperFactory->getErrorReporter( $mainModule ),
+			$stats
+		);
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function execute() {
+	public function execute(): void {
 		$this->getMain()->setCacheMode( 'public' );
 
 		$params = $this->extractRequestParams();
@@ -93,14 +134,16 @@ class FormatSnakValue extends ApiBase {
 			$formattedValue = $this->formatValue( $params, $value, $dataTypeId );
 		} catch ( FederatedPropertiesException $ex ) {
 			$this->errorReporter->dieException(
-				new FederatedPropertiesException( wfMessage( 'wikibase-federated-properties-failed-request-api-error-message' )->text() ),
+				new FederatedPropertiesException(
+					$this->msg( 'wikibase-federated-properties-failed-request-api-error-message' )->text()
+				),
 				'federated-properties-failed-request',
 				503,
 				[ 'property' => $params['property'] ]
 			);
-		} catch ( InvalidArgumentException $invalidArgumentException ) {
+		} catch ( InvalidArgumentException | FormattingException $exception ) {
 			$this->errorReporter->dieException(
-				$invalidArgumentException,
+				$exception,
 				'param-illegal'
 			);
 		}
@@ -112,7 +155,7 @@ class FormatSnakValue extends ApiBase {
 		);
 	}
 
-	private function formatValue( $params, $value, $dataTypeId ) {
+	private function formatValue( array $params, DataValue $value, ?string $dataTypeId ): string {
 		$snak = null;
 		if ( isset( $params['property'] ) ) {
 			$snak = $this->decodeSnak( $params['property'], $value );
@@ -140,7 +183,7 @@ class FormatSnakValue extends ApiBase {
 	 * @throws LogicException
 	 * @return ValueFormatter
 	 */
-	private function getValueFormatter( $params ) {
+	private function getValueFormatter( array $params ): ValueFormatter {
 		$options = $this->getOptionsObject( $params['options'] );
 		$formatter = $this->valueFormatterFactory->getValueFormatter( $params['generate'], $options );
 
@@ -159,20 +202,14 @@ class FormatSnakValue extends ApiBase {
 	 * @throws LogicException
 	 * @return SnakFormatter
 	 */
-	private function getSnakFormatter( $params ) {
+	private function getSnakFormatter( array $params ): SnakFormatter {
 		$options = $this->getOptionsObject( $params['options'] );
 		$formatter = $this->snakFormatterFactory->getSnakFormatter( $params['generate'], $options );
 
 		return $formatter;
 	}
 
-	/**
-	 * @param string $propertyIdSerialization
-	 * @param DataValue $dataValue
-	 *
-	 * @return PropertyValueSnak
-	 */
-	private function decodeSnak( $propertyIdSerialization, DataValue $dataValue ) {
+	private function decodeSnak( string $propertyIdSerialization, DataValue $dataValue ): PropertyValueSnak {
 		try {
 			$propertyId = new PropertyId( $propertyIdSerialization );
 		} catch ( InvalidArgumentException $ex ) {
@@ -189,7 +226,7 @@ class FormatSnakValue extends ApiBase {
 	 * @throws LogicException
 	 * @return DataValue
 	 */
-	private function decodeDataValue( $json ) {
+	private function decodeDataValue( string $json ): DataValue {
 		$data = json_decode( $json, true );
 
 		if ( !is_array( $data ) ) {
@@ -206,12 +243,7 @@ class FormatSnakValue extends ApiBase {
 		throw new LogicException( 'ApiErrorReporter::dieException did not throw an ApiUsageException' );
 	}
 
-	/**
-	 * @param string|null $optionsParam
-	 *
-	 * @return FormatterOptions
-	 */
-	private function getOptionsObject( $optionsParam ) {
+	private function getOptionsObject( ?string $optionsParam ): FormatterOptions {
 		$formatterOptions = new FormatterOptions();
 		$formatterOptions->setOption( ValueFormatter::OPT_LANG, $this->getLanguage()->getCode() );
 
@@ -220,6 +252,7 @@ class FormatSnakValue extends ApiBase {
 
 			if ( is_array( $options ) ) {
 				foreach ( $options as $name => $value ) {
+					$this->stats->increment( "wikibase.repo.api.formatvalue.options.$name" );
 					$formatterOptions->setOption( $name, $value );
 				}
 			}
@@ -235,7 +268,7 @@ class FormatSnakValue extends ApiBase {
 	 *
 	 * @return string|null
 	 */
-	private function getDataTypeId( array $params ) {
+	private function getDataTypeId( array $params ): ?string {
 		//TODO: could be looked up based on a property ID
 		return $params['datatype'];
 	}
@@ -243,7 +276,7 @@ class FormatSnakValue extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getAllowedParams() {
+	protected function getAllowedParams(): array {
 		return [
 			'generate' => [
 				self::PARAM_TYPE => [
@@ -261,7 +294,7 @@ class FormatSnakValue extends ApiBase {
 				self::PARAM_REQUIRED => true,
 			],
 			'datatype' => [
-				self::PARAM_TYPE => WikibaseRepo::getDefaultInstance()->getDataTypeFactory()->getTypeIds(),
+				self::PARAM_TYPE => $this->dataTypeFactory->getTypeIds(),
 				self::PARAM_REQUIRED => false,
 			],
 			'property' => [
@@ -278,7 +311,7 @@ class FormatSnakValue extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		$query = 'action=' . $this->getModuleName();
 		$hello = new StringValue( 'hello' );
 		$acme = new StringValue( 'http://acme.org' );

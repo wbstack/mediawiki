@@ -8,8 +8,8 @@ use ValueFormatters\ValueFormatter;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
 use Wikibase\DataModel\Services\Lookup\LanguageLabelDescriptionLookup;
 use Wikibase\DataModel\Services\Lookup\TermLookup;
-use Wikibase\Lib\LanguageFallbackChain;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
+use Wikibase\Lib\TermLanguageFallbackChain;
 
 /**
  * Factory for LabelDescriptionLookup objects based on FormatterOptions.
@@ -18,7 +18,7 @@ use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
  * OPT_LANGUAGE_FALLBACK_CHAIN, and ValueFormatter::OPT_LANG:
  *
  * * If OPT_LANGUAGE_FALLBACK_CHAIN is set, a LanguageFallbackLabelDescriptionLookup will be created byed on
- *   the LanguageFallbackChain contained in that option.
+ *   the TermLanguageFallbackChain contained in that option.
  * * If ValueFormatter::OPT_LANG is set, a LanguageLabelDescriptionLookup is created
  * * If none of these options is set, an InvalidArgumentException is thrown.
  *
@@ -27,7 +27,7 @@ use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
  */
 class FormatterLabelDescriptionLookupFactory {
 
-	const OPT_LANGUAGE_FALLBACK_CHAIN = 'languages';
+	public const OPT_LANGUAGE_FALLBACK_CHAIN = 'languages';
 
 	/**
 	 * @var TermLookup
@@ -58,9 +58,9 @@ class FormatterLabelDescriptionLookupFactory {
 	private function newLanguageFallbackLabelDescriptionLookup( FormatterOptions $options ) {
 		$fallbackChain = $options->getOption( self::OPT_LANGUAGE_FALLBACK_CHAIN );
 
-		if ( !( $fallbackChain instanceof LanguageFallbackChain ) ) {
+		if ( !( $fallbackChain instanceof TermLanguageFallbackChain ) ) {
 			throw new InvalidArgumentException( 'OPT_LANGUAGE_FALLBACK_CHAIN must be used ' .
-				'with an instance of LanguageFallbackChain.' );
+				'with an instance of TermLanguageFallbackChain.' );
 		}
 
 		return new LanguageFallbackLabelDescriptionLookup( $this->termLookup, $fallbackChain );

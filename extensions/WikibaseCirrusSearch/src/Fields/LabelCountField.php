@@ -15,7 +15,7 @@ class LabelCountField extends WikibaseNumericField {
 	/**
 	 * Field name
 	 */
-	const NAME = 'label_count';
+	public const NAME = 'label_count';
 
 	/**
 	 * @see SearchIndexField::getFieldData

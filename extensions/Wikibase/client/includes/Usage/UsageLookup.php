@@ -18,10 +18,12 @@ interface UsageLookup {
 	/**
 	 * Get the entities used on the given page.
 	 *
+	 * The returned array uses the {@link EntityUsage::getIdentityString() identity string}
+	 * as the key, so that a specific usage can be found quickly.
+	 *
 	 * @param int $pageId
 	 *
-	 * @return EntityUsage[]
-	 * @throws UsageTrackerException
+	 * @return EntityUsage[] keyed by identity string
 	 */
 	public function getUsagesForPage( $pageId );
 
@@ -34,7 +36,6 @@ interface UsageLookup {
 	 *
 	 * @return Traversable A traversable over PageEntityUsages of pages using any of the given
 	 *  entities. If $aspects is given, only usages of these aspects are included in the result.
-	 * @throws UsageTrackerException
 	 */
 	public function getPagesUsing( array $entityIds, array $aspects = [] );
 
@@ -47,7 +48,6 @@ interface UsageLookup {
 	 * @param EntityId[] $entityIds
 	 *
 	 * @return EntityId[] A list of elements of $entityIds that are unused.
-	 * @throws UsageTrackerException
 	 */
 	public function getUnusedEntities( array $entityIds );
 

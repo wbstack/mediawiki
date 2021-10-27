@@ -6,11 +6,11 @@
 	mw.libs.advancedSearch.ui = mw.libs.advancedSearch.ui || {};
 
 	var markNonExistent = function ( item ) {
-		item.$label.children().addClass( 'new' );
+		item.$label.addClass( 'new' );
 	};
 
 	var markPageExistence = function ( item, queryCache ) {
-		if ( queryCache.get( item.$label.text() ) === 'NO' ) {
+		if ( queryCache.get( item.getLabel() ) === 'NO' ) {
 			markNonExistent( item );
 		}
 	};
@@ -31,8 +31,13 @@
 		return pages;
 	};
 
-	var getFullPageTitle = function ( name, self ) {
-		return mw.Title.newFromText( name, mw.config.get( 'wgNamespaceIds' )[ self.lookupId ] ).getPrefixedText();
+	/**
+	 * @param {string} name
+	 * @param {string} namespace
+	 * @return {mw.Title|null}
+	 */
+	var getTitle = function ( name, namespace ) {
+		return mw.Title.newFromText( name, mw.config.get( 'wgNamespaceIds' )[ namespace ] );
 	};
 
 	mw.libs.advancedSearch.dm.MultiselectLookup = function ( store, config ) {
@@ -96,13 +101,19 @@
 		var deferred = $.Deferred(),
 			self = this;
 
+		var title = getTitle( name, this.lookupId );
+		if ( !title ) {
+			this.queryCache[ name ] = 'NO';
+			return deferred.resolve( [] ).promise();
+		}
+
 		this.queryCache[ name ] = 'PENDING';
 
 		this.api.get( {
 			formatversion: 2,
 			action: 'query',
 			prop: 'info',
-			titles: getFullPageTitle( name, self )
+			titles: title.getPrefixedText()
 		} ).done( function ( res ) {
 			var pages = populateCache( res, self );
 			deferred.resolve( pages );
@@ -117,11 +128,25 @@
 		var deferred = $.Deferred(),
 			self = this;
 
+		names = names.map( function ( name ) {
+			var title = getTitle( name, self.lookupId );
+			if ( !title ) {
+				this.queryCache[ name ] = 'NO';
+				return null;
+			}
+			return title.getPrefixedText();
+		} ).filter( function ( name ) {
+			return name !== null;
+		} );
+		if ( names.length === 0 ) {
+			return deferred.resolve( [] ).promise();
+		}
+
 		this.api.get( {
 			formatversion: 2,
 			action: 'query',
 			prop: 'info',
-			titles: names.map( function ( name ) { return getFullPageTitle( name, self ); } ).join( '|' )
+			titles: names.join( '|' )
 		} ).done( function ( res ) {
 			var pages = [];
 			populateCache( res, self );
@@ -135,18 +160,26 @@
 
 	mw.libs.advancedSearch.dm.MultiselectLookup.prototype.createTagItemWidget = function ( data, label ) {
 		label = label || data;
-		var title = mw.Title.newFromText( label, mw.config.get( 'wgNamespaceIds' )[ this.lookupId ] ),
-			$tagItemLabel = $( '<a>' ).attr( {
+		var title = getTitle( label, this.lookupId ),
+			$tagItemLabel = $( '<a>' ),
+			tagItem;
+
+		if ( title ) {
+			$tagItemLabel.attr( {
 				target: '_blank',
 				href: title.getUrl(),
 				title: title.getPrefixedText()
-			} ).text( label ),
-			tagItem = new OO.ui.TagItemWidget( { data: data, label: label } );
+			} );
+		}
 
-		tagItem.setLabel( $tagItemLabel );
+		tagItem = new OO.ui.TagItemWidget( {
+			data: data,
+			label: label,
+			$label: $tagItemLabel
+		} );
 
-		if ( !this.queryCache.has( tagItem.$label.text() ) ) {
-			this.searchForPageInNamespace( tagItem.$label.text() )
+		if ( !this.queryCache.has( tagItem.getLabel() ) ) {
+			this.searchForPageInNamespace( tagItem.getLabel() )
 				.then( function ( response ) {
 					if ( response.length === 0 ) {
 						markNonExistent( tagItem );

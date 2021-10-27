@@ -1,7 +1,12 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use Exception;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MWException;
+use stdClass;
 
 /**
  * @author Moritz Schubotz
@@ -41,7 +46,7 @@ class MathMathMLCli extends MathMathML {
 	}
 
 	/**
-	 * @param Object $res
+	 * @param stdClass $res
 	 * @return bool
 	 */
 	private function initializeFromCliResponse( $res ) {

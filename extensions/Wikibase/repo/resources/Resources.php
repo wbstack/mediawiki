@@ -90,7 +90,7 @@ return call_user_func( function() {
 		'mw.config.values.wbDataTypes' => $moduleTemplate + [
 			'class' => DataTypesModule::class,
 			'datatypefactory' => function() {
-				return WikibaseRepo::getDefaultInstance()->getDataTypeFactory();
+				return WikibaseRepo::getDataTypeFactory();
 			},
 			'datatypesconfigvarname' => 'wbDataTypes',
 		],
@@ -122,14 +122,13 @@ return call_user_func( function() {
 				'wikibase.EntityInitializer.js',
 
 				[
-				"name" => "config.json",
-				"callback" => function () {
-					return [
-						'entityTypes' => WikibaseRepo::getDefaultInstance()->getEntityTypesConfigValue()
-					];
-				}
-			],
-
+					"name" => "config.json",
+					"callback" => function () {
+						return [
+							'entityTypes' => WikibaseRepo::getDefaultInstance()->getEntityTypesConfigValue()
+						];
+					}
+				],
 			],
 			'dependencies' => [
 				'wikibase',
@@ -143,7 +142,7 @@ return call_user_func( function() {
 				[
 					'name' => 'termLanguages.json',
 					'callback' => function () {
-						return WikibaseRepo::getDefaultInstance()->getTermsLanguages()->getLanguages();
+						return WikibaseRepo::getTermsLanguages()->getLanguages();
 					},
 				]
 			],
@@ -190,7 +189,7 @@ return call_user_func( function() {
 				[
 					"name" => "repo/resources/config.json",
 					"callback" => function () {
-						$settings = WikibaseRepo::getDefaultInstance()->getSettings();
+						$settings = WikibaseRepo::getSettings();
 						return [
 							'geoShapeStorageApiEndpoint' => $settings->getSetting( 'geoShapeStorageApiEndpointUrl' )
 						];
@@ -276,9 +275,6 @@ return call_user_func( function() {
 			'scripts' => [
 				'wikibase.special/wikibase.special.newEntity.js',
 			],
-			'dependencies' => [
-				'wikibase.WikibaseContentLanguages'
-			],
 			'styles' => [
 				'../../view/resources/wikibase/wikibase.less'
 			]
@@ -292,7 +288,7 @@ return call_user_func( function() {
 
 		'wikibase.experts.modules' => $moduleTemplate + [
 				'factory' => function () {
-					return WikibaseRepo::getDefaultInstance()->getPropertyValueExpertsModule();
+					return WikibaseRepo::getPropertyValueExpertsModule();
 				}
 		],
 
@@ -314,7 +310,7 @@ return call_user_func( function() {
 						'name' => 'federatedPropertiesHostWikibase.json',
 						'callback' => function () {
 							return parse_url(
-								WikibaseRepo::getDefaultInstance()->getSettings()->getSetting( 'federatedPropertiesSourceScriptUrl' ),
+								WikibaseRepo::getSettings()->getSetting( 'federatedPropertiesSourceScriptUrl' ),
 								PHP_URL_HOST
 							);
 						},

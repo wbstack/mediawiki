@@ -1,4 +1,3 @@
-{{{headelement}}}
 <div id="mw-mf-viewport">
 	<div id="mw-mf-page-center">
 		<a class="mw-mf-page-center__mask" href="#"></a>
@@ -14,11 +13,12 @@
 				</nav>
 				<div class="branding-box">
 					<a href="{{mainPageURL}}">
-						<span>{{{siteheading}}}</span>
+						<span>{{>Logo}}</span>
 						{{#isBeta}}<sup>&beta;</sup>{{/isBeta}}
 					</a>
 				</div>
 				<div class="search-box">
+					<input type="hidden" name="title" value="{{searchPageTitle}}"/>
 					<input class="search mw-ui-background-icon-search skin-minerva-search-trigger" type="search" name="search" id="searchInput"
 						autocomplete="off" placeholder="{{placeholder}}" aria-label="{{placeholder}}"
 						value="{{search}}">
@@ -58,7 +58,6 @@
 				<div class="minerva__subtitle">{{{subtitle}}}</div>
 			</div>
 			{{/hasheadingholder}}
-			{{{precontenthtml}}}
 			{{{contenthtml}}}
 			<div class="post-content" id="page-secondary-actions">
 			{{{secondaryactionshtml}}}
@@ -68,4 +67,4 @@
 	</div>
 </div>
 <div class="mw-notification-area" data-mw="interface"></div>
-<!-- v:8.3.0 -->
+<!-- v:8.3.1 -->

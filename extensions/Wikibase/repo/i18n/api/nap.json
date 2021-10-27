@@ -4,7 +4,8 @@
 			"C.R.",
 			"Candalua",
 			"Macofe",
-			"Ruthven"
+			"Ruthven",
+			"SaldırganSincap"
 		]
 	},
 	"apihelp-wbavailablebadges-description": "Addimanne ncopp'a l'elemente 'n distizione",
@@ -69,7 +70,7 @@
 	"apihelp-wbgetentities-description": "Piglia 'e date 'e ll'entità multiple 'e Wikibase",
 	"apihelp-wbgetentities-param-ids": "Ll'ID 'e ll'entità addò se pigliassero 'e date",
 	"apihelp-wbgetentities-param-sites": "Identificatore d' 'o sito addò na paggena ca currispunnesse fosse astipata\nAusate nzieme c' 'o 'titolo', ma date uno surtanto pe' tante titule o date mmece tante site pe' nu titolo solo.",
-	"apihelp-wbgetentities-param-titles": "'O titolo d' 'a paggena currispunnente\nAusate nzieme ch' 'e 'site', ma date surtanto nu sito pe' tante titule o date mmece tante site pe' nu titolo solo.",
+	"apihelp-wbgetentities-param-titles": "'O titolo d' 'a paggena currispunnente\nAusate nzieme ch' 'e <code>sites</code>, ma date surtanto nu sito pe' tante titule o date mmece tante site pe' nu titolo solo.",
 	"apihelp-wbgetentities-param-redirects": "Si 'e redirect s'avesser'arricetta.\nSi mpustat'a \"no\", 'e redirect sarranno trattate comm'a n'elemento scancellato.",
 	"apihelp-wbgetentities-param-props": "'E nomme 'e pruprietà a se piglià arreto d'ogne entità.\nSarrà filtrato p' 'e llengue date.",
 	"apihelp-wbgetentities-param-languages": "Predetefinito fossero 'e valure nternaziunalizzate ca fossero turnate dint'a tuttuquante llengue a disposizione.\nStu parametro permettesse filtrà chiste nfin'a una o cchiù llengue danno uno o cchiù codece 'e llengue.",
@@ -145,6 +146,7 @@
 	"apihelp-wbsearchentities-example-1": "Circa \"abc\" dint'a lengua ngrese, ch' 'e predefinite pe' tipe e nu lemmeto",
 	"apihelp-wbsearchentities-example-2": "Circa \"abc\" dint' 'a lengua ngrese cu nu lemmeto 'e 50",
 	"apihelp-wbsearchentities-example-3": "Circa pe \"alphabet\" dint' 'a lengua ngrese pe' tipo 'e pruprietà",
+	"apihelp-query+entityterms-example-item": "Piglia etichette e aliasse 'e ll'item Q84.",
 	"apihelp-query+wbsearch-description": "Asciasse l'entità ausanno etichette e aliasse.\nChesto se putesse ausà comm'a nu generatore 'e l'ati query.\nTurnasse 'e tièrmene ncuntrate ca s'avesser'a mmustà.",
 	"apihelp-query+wbsearch-param-search": "Ascìa pe stu testo.",
 	"apihelp-query+wbsearch-param-language": "Ascìa dint'a sta lengua.",

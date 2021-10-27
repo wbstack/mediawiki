@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\Store;
 
 use InvalidArgumentException;
@@ -15,23 +17,24 @@ use Wikibase\Lib\TermIndexEntry;
  * A description is an explanation of what the page is about, in the content language of the page,
  * short enough that it can be used in interface elements such as dropdowns to contextualize or
  * disambiguate pages.
+ * @license GPL-2.0-or-later
  */
 class DescriptionLookup {
 
 	/**
 	 * Local description, in the form of a {{SHORTDESC:...}} parser function.
 	 */
-	const SOURCE_LOCAL = 'local';
+	public const SOURCE_LOCAL = 'local';
 
 	/**
 	 * Central description, from a associated Wikibase repo installation.
 	 */
-	const SOURCE_CENTRAL = 'central';
+	public const SOURCE_CENTRAL = 'central';
 
 	/**
 	 * page_props key.
 	 */
-	const LOCAL_PROPERTY_NAME = 'wikibase-shortdesc';
+	public const LOCAL_PROPERTY_NAME = 'wikibase-shortdesc';
 
 	/**
 	 * @var EntityIdLookup
@@ -43,9 +46,17 @@ class DescriptionLookup {
 	 */
 	private $termLookup;
 
-	public function __construct( EntityIdLookup $idLookup, TermBuffer $termLookup ) {
+	/** @var PageProps */
+	private $pageProps;
+
+	public function __construct(
+		EntityIdLookup $idLookup,
+		TermBuffer $termLookup,
+		PageProps $pageProps
+	) {
 		$this->idLookup = $idLookup;
 		$this->termLookup = $termLookup;
+		$this->pageProps = $pageProps;
 	}
 
 	/**
@@ -118,7 +129,7 @@ class DescriptionLookup {
 		if ( !$titlesByPageId ) {
 			return [];
 		}
-		return PageProps::getInstance()->getProperties( $titlesByPageId, self::LOCAL_PROPERTY_NAME );
+		return $this->pageProps->getProperties( $titlesByPageId, self::LOCAL_PROPERTY_NAME );
 	}
 
 	/**

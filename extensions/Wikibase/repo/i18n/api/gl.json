@@ -4,6 +4,7 @@
 			"Amire80",
 			"Elisardojm",
 			"Macofe",
+			"SaldırganSincap",
 			"Toliño"
 		]
 	},
@@ -76,7 +77,7 @@
 	"apihelp-wbgetentities-summary": "Obtén a información para múltiples entidades de Wikibase",
 	"apihelp-wbgetentities-param-ids": "Identificadores das entidades das que obter os datos",
 	"apihelp-wbgetentities-param-sites": "Identificador para o sitio no que reside a páxina correspondente\nUsar xunto con <code>title</code> (título), pero indicar só un sitio para varios títulos ou varios sitios para un título.",
-	"apihelp-wbgetentities-param-titles": "Título da páxina correspondente\nUsar xunto con <code>sites</code> (sitios), pero só indicar un sitio para varios títulos ou varios sitios para un título.",
+	"apihelp-wbgetentities-param-titles": "Título da páxina correspondente.\nUsar xunto con <code>sites</code> (sitios), pero só indicar un sitio para varios títulos ou varios sitios para un título.",
 	"apihelp-wbgetentities-param-redirects": "Se as redireccións deben ser resoltas.\nSe se fixa a \"non\", as redireccións serán tratadas como entidades borradas.",
 	"apihelp-wbgetentities-param-props": "Nomes das propiedades a obter de cada entidade.\nFiltrarase máis polos idiomas indicados.",
 	"apihelp-wbgetentities-param-languages": "Por defecto os valores internacionalizados devólvense en todos os idiomas dispoñibles.\nEste parámetro permite filtrar isto para deixar só un ou máis idiomas indicando un ou máis códigos de idioma.",
@@ -162,6 +163,7 @@
 	"apihelp-wbsearchentities-example-3": "Buscar \"alphabet\" en inglés para a propiedade tipo",
 	"apihelp-wbsearchentities-example-4": "Buscar \"abc\" no idioma inglés cun límite de 2 e un desprazamento de 2",
 	"apihelp-wbsearchentities-example-5": "Buscar \"alphabet\" en inglés omitindo o parámetro do URL",
+	"apihelp-query+entityterms-example-item": "Obter as etiquetas e alias do elemento Q84.",
 	"apihelp-query+wbsearch-description": "Buscas para entidades usando as etiquetas e os alias.\nIsto pode ser usado coma un xerador para outras buscas. Devolve o termo correspondente que debe ser visualizado.",
 	"apihelp-query+wbsearch-summary": "Buscas de entidades usando etiquetas e alias.",
 	"apihelp-query+wbsearch-extended-description": "Pode usarse como xerador para outras consultas. Devolve o termo correspondente que debería visualizarse.",

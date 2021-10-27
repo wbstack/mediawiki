@@ -9,7 +9,6 @@ use CirrusSearch\Search\CompletionResultsCollector;
 use CirrusSearch\Search\FancyTitleResultsType;
 use CirrusSearch\Search\SearchContext;
 use CirrusSearch\Search\SearchRequestBuilder;
-use Elastica\Exception\ExceptionInterface;
 use Elastica\Index;
 use Elastica\Multi\Search as MultiSearch;
 use Elastica\Query;
@@ -74,25 +73,25 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 	/**
 	 * @const string multisearch key to identify the comp suggest request
 	 */
-	const MSEARCH_KEY_SUGGEST = "suggest";
+	private const MSEARCH_KEY_SUGGEST = "suggest";
 
 	/**
 	 * @const string multisearch key to identify the prefix search request
 	 */
-	const MSEARCH_KEY_PREFIX = "prefix";
+	private const MSEARCH_KEY_PREFIX = "prefix";
 
 	/**
 	 * Search type (used for logs & timeout configs)
 	 */
-	const SEARCH_TYPE = 'comp_suggest';
+	private const SEARCH_TYPE = 'comp_suggest';
 
 	/**
-	 * @var integer maximum number of result (final)
+	 * @var int maximum number of result (final)
 	 */
 	private $limit;
 
 	/**
-	 * @var integer offset (final)
+	 * @var int offset (final)
 	 */
 	private $offset;
 
@@ -180,7 +179,7 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 	 *
 	 * @param string $text Search term
 	 * @param string[]|null $variants Search term variants
-	 *  Usually issued via Language::autoConvertToAllVariants( $text ) for the content language.
+	 *  Usually issued via LanguageConverter::autoConvertToAllVariants( $text ) for the content language.
 	 * @return Status
 	 */
 	public function suggest( $text, $variants = null ) {
@@ -200,7 +199,7 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 		}
 
 		$this->connection->setTimeout( $this->getClientTimeout( self::SEARCH_TYPE ) );
-		$result = Util::doPoolCounterWork(
+		return Util::doPoolCounterWork(
 			'CirrusSearch-Completion',
 			$this->user,
 			function () use( $msearch, $text ) {
@@ -208,23 +207,13 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 					'query' => $text,
 					'offset' => $this->offset,
 				] );
-				$this->start( $log );
-				try {
-					$results = $msearch->search();
-					if ( $results->hasError() ||
-						// Catches HTTP errors (ex: 5xx) not reported
-						// by hasError()
-						!$results->getResponse()->isOk()
-					) {
-						return $this->multiFailure( $results );
+				return $this->runMSearch( $msearch, $log, $this->connection,
+					function ( \Elastica\Multi\ResultSet $results ) use ( $log ) {
+						return $this->processMSearchResponse( $results->getResultSets(), $log );
 					}
-					return $this->success( $this->processMSearchResponse( $results->getResultSets(), $log ) );
-				} catch ( ExceptionInterface $e ) {
-					return $this->failure( $e );
-				}
+				);
 			}
 		);
-		return $result;
 	}
 
 	/**
@@ -233,7 +222,8 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 	 * @return SearchSuggestionSet
 	 */
 	private function processMSearchResponse( array $results, CompletionRequestLog $log ) {
-		$collector = new CompletionResultsCollector( $this->limit, $this->offset );
+		$collector = new CompletionResultsCollector(
+			$this->limit, $this->offset, $this->config->get( 'CirrusSearchCompletionBannedPageIds' ) );
 		$totalHits = $this->collectCompSuggestResults( $collector, $results, $log );
 		$totalHits += $this->collectPrefixSearchResults( $collector, $results, $log );
 		$log->setTotalHits( $totalHits );
@@ -308,7 +298,7 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 	/**
 	 * @param string $text Search term
 	 * @param string[]|null $variants Search term variants
-	 *  Usually issued via Language::autoConvertToAllVariants( $text ) for the content language.
+	 *  Usually issued via LanguageConverter::autoConvertToAllVariants( $text ) for the content language.
 	 * @return Search|null
 	 */
 	private function getSuggestSearchRequest( $text, $variants ) {
@@ -330,7 +320,7 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 	/**
 	 * @param string $term Search term
 	 * @param string[]|null $variants Search term variants
-	 *  Usually issued via Language::autoConvertToAllVariants( $text ) for the content language.
+	 *  Usually issued via LanguageConverter::autoConvertToAllVariants( $text ) for the content language.
 	 * @return Search|null
 	 */
 	private function getPrefixSearchRequest( $term, $variants ) {
@@ -341,7 +331,7 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 
 		foreach ( $namespaces as $k => $v ) {
 			// non-strict comparison, it can be strings
-			if ( $v == NS_MAIN ) {
+			if ( $v === NS_MAIN ) {
 				unset( $namespaces[$k] );
 			}
 		}
@@ -356,6 +346,10 @@ class CompletionSuggester extends ElasticsearchIntermediary {
 		$prefixSearchContext = new SearchContext( $this->config, $namespaces );
 		$prefixSearchContext->setResultsType( new FancyTitleResultsType( 'prefix' ) );
 		$this->prefixSearchQueryBuilder->build( $prefixSearchContext, $term, $variants );
+		if ( !$prefixSearchContext->areResultsPossible() ) {
+			// $prefixSearchContext might contain warnings, but these are lost.
+			return null;
+		}
 		$this->prefixSearchRequestBuilder = new SearchRequestBuilder( $prefixSearchContext, $this->connection, $this->indexBaseName );
 		$this->prefixSearchRequestBuilder->setTimeout( $this->getTimeout( self::SEARCH_TYPE ) );
 		return $this->prefixSearchRequestBuilder->setLimit( $limit )

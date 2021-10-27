@@ -5,6 +5,7 @@ namespace Wikibase\Repo;
 use Language;
 use Message;
 use Wikibase\View\LocalizedTextProvider;
+use Wikibase\View\RawMessageParameter;
 
 /**
  * A LocalizedTextProvider wrapping MediaWiki's message system
@@ -34,6 +35,22 @@ class MediaWikiLocalizedTextProvider implements LocalizedTextProvider {
 	 */
 	public function get( $key, array $params = [] ) {
 		return ( new Message( $key, $params, $this->language ) )->text();
+	}
+
+	/**
+	 * @param string $key
+	 * @param array<string|RawMessageParameter> $params Parameters that could be used for generating the text
+	 *
+	 * @return string The localized text
+	 */
+	public function getEscaped( $key, array $params = [] ) {
+		return ( new Message(
+			$key,
+			array_map( function ( $param ) {
+				return $param instanceof RawMessageParameter ? Message::rawParam( $param->getContents() ) : $param;
+			}, $params ),
+			$this->language
+		) )->escaped();
 	}
 
 	/**

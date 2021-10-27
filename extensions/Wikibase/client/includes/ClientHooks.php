@@ -29,7 +29,7 @@ final class ClientHooks {
 	 * @return bool
 	 */
 	protected static function isWikibaseEnabled( $namespace ) {
-		return WikibaseClient::getDefaultInstance()->getNamespaceChecker()->isWikibaseEnabled( $namespace );
+		return WikibaseClient::getNamespaceChecker()->isWikibaseEnabled( $namespace );
 	}
 
 	/**
@@ -39,7 +39,7 @@ final class ClientHooks {
 	 * @param string[] &$extraLibraries
 	 */
 	public static function onScribuntoExternalLibraries( $engine, array &$extraLibraries ) {
-		$allowDataTransclusion = WikibaseClient::getDefaultInstance()->getSettings()->getSetting( 'allowDataTransclusion' );
+		$allowDataTransclusion = WikibaseClient::getSettings()->getSetting( 'allowDataTransclusion' );
 		if ( $engine == 'lua' && $allowDataTransclusion === true ) {
 			$extraLibraries['mw.wikibase'] = Scribunto_LuaWikibaseLibrary::class;
 			$extraLibraries['mw.wikibase.entity'] = Scribunto_LuaWikibaseEntityLibrary::class;
@@ -59,8 +59,7 @@ final class ClientHooks {
 	 * @param string|null $wikiId The ID of the wiki the comment applies to, if not the local wiki.
 	 */
 	public static function onFormat( &$comment, $pre, $auto, $post, $title, $local, $wikiId = null ) {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$repoId = $wikibaseClient->getSettings()->getSetting( 'repoSiteId' );
+		$repoId = WikibaseClient::getSettings()->getSetting( 'repoSiteId' );
 
 		// Only do special formatting for comments from a wikibase repo.
 		// XXX: what to do if the local wiki is the repo? For entity pages, RepoHooks has a handler.
@@ -95,18 +94,18 @@ final class ClientHooks {
 		$entityId = null;
 
 		if ( $idString !== null ) {
-			$entityIdParser = $wbClient->getEntityIdParser();
+			$entityIdParser = WikibaseClient::getEntityIdParser();
 			$entityId = $entityIdParser->parse( $idString );
 		} elseif ( $title &&
 			Action::getActionName( $skin->getContext() ) !== 'view' && $title->exists()
 		) {
 			// Try to load the item ID from Database, but only do so on non-article views,
 			// (where the article's OutputPage isn't available to us).
-			$entityId = self::getEntityIdForTitle( $title, $wbClient );
+			$entityId = self::getEntityIdForTitle( $title );
 		}
 
 		if ( $entityId !== null ) {
-			$repoLinker = $wbClient->newRepoLinker();
+			$repoLinker = WikibaseClient::getRepoLinker();
 
 			return [
 				'id' => 't-wikibase',
@@ -120,16 +119,14 @@ final class ClientHooks {
 
 	/**
 	 * @param Title $title
-	 * @param WikibaseClient $wbClient
-	 *
 	 * @return EntityId|null
 	 */
-	private static function getEntityIdForTitle( Title $title, WikibaseClient $wbClient ): ?EntityId {
+	private static function getEntityIdForTitle( Title $title ): ?EntityId {
 		if ( !self::isWikibaseEnabled( $title->getNamespace() ) ) {
 			return null;
 		}
 
-		$entityIdLookup = $wbClient->getEntityIdLookup();
+		$entityIdLookup = WikibaseClient::getEntityIdLookup();
 		return $entityIdLookup->getEntityIdForTitle( $title );
 	}
 
@@ -140,7 +137,7 @@ final class ClientHooks {
 	 * @param array[] &$prefs
 	 */
 	public static function onGetPreferences( User $user, array &$prefs ) {
-		$settings = WikibaseClient::getDefaultInstance()->getSettings();
+		$settings = WikibaseClient::getSettings();
 
 		if ( !$settings->getSetting( 'showExternalRecentChanges' ) ) {
 			return;
@@ -180,11 +177,12 @@ final class ClientHooks {
 	 * @return bool Always true.
 	 */
 	public static function onSkinAfterBottomScripts( Skin $skin, &$html ) {
-		$client = WikibaseClient::getDefaultInstance();
-		$enabledNamespaces = $client->getSettings()->getSetting( 'pageSchemaNamespaces' );
+		$services = MediaWikiServices::getInstance();
+		$enabledNamespaces = WikibaseClient::getSettings( $services )
+			->getSetting( 'pageSchemaNamespaces' );
 
 		$out = $skin->getOutput();
-		$entityId = self::parseEntityId( $client, $out->getProperty( 'wikibase_item' ) );
+		$entityId = self::parseEntityId( $out->getProperty( 'wikibase_item' ) );
 		$title = $out->getTitle();
 		if (
 			!$entityId ||
@@ -195,7 +193,12 @@ final class ClientHooks {
 			return true;
 		}
 
-		$handler = new SkinAfterBottomScriptsHandler( $client, $client->newRepoLinker() );
+		$handler = new SkinAfterBottomScriptsHandler(
+			$services->getContentLanguage()->getCode(),
+			WikibaseClient::getRepoLinker( $services ),
+			WikibaseClient::getTermLookup( $services ),
+			$services->getRevisionLookup()
+		);
 		$revisionTimestamp = $out->getRevisionTimestamp();
 		$html .= $handler->createSchemaElement(
 			$title,
@@ -206,19 +209,13 @@ final class ClientHooks {
 		return true;
 	}
 
-	/**
-	 * @param WikibaseClient $client
-	 * @param string|null $prefixedId
-	 *
-	 * @return EntityId|null
-	 */
-	private static function parseEntityId( WikibaseClient $client, $prefixedId = null ) {
+	private static function parseEntityId( ?string $prefixedId ): ?EntityId {
 		if ( !$prefixedId ) {
 			return null;
 		}
 
 		try {
-			return $client->getEntityIdParser()->parse( $prefixedId );
+			return WikibaseClient::getEntityIdParser()->parse( $prefixedId );
 		} catch ( EntityIdParsingException $ex ) {
 			return null;
 		}
@@ -238,27 +235,15 @@ final class ClientHooks {
 			$key,
 			$cache::TTL_DAY,
 			function () {
-				$wikibaseClient = WikibaseClient::getDefaultInstance();
-
-				/**
-				 * @var \MediaWikiSite $site
-				 */
-				$site = $wikibaseClient->getSite();
-
-				$currentSite = [];
-				if ( $site ) {
-					$currentSite = [
-						'globalSiteId' => $site->getGlobalId(),
-						'languageCode' => $site->getLanguageCode(),
-						'langLinkSiteGroup' => $wikibaseClient->getLangLinkSiteGroup()
-					];
-				}
+				$site = WikibaseClient::getSite();
+				$currentSite = [
+					'globalSiteId' => $site->getGlobalId(),
+					'languageCode' => $site->getLanguageCode(),
+					'langLinkSiteGroup' => WikibaseClient::getLangLinkSiteGroup()
+				];
 
 				return [ 'currentSite' => $currentSite ];
-			},
-			// @fixme These options only exist in WanObjectCache, but this code is using BagOStuff!
-			// @phan-suppress-next-line PhanTypeMismatchArgument
-			[ 'lockTSE' => 10, 'pcTTL' => $cache::TTL_PROC_LONG ]
+			}
 		);
 	}
 

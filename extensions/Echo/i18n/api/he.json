@@ -31,8 +31,9 @@
 	"apihelp-echopushsubscriptions+create-param-provider": "ספק שירותי הדחיפה שצריך לרשום אסימון עבורו.",
 	"apihelp-echopushsubscriptions+create-param-providertoken": "האסימון שצריך לרשום.",
 	"apihelp-echopushsubscriptions+create-example": "רישום מינוי בדחיפה עבור המשתמש הנוכחי.",
-	"apihelp-echopushsubscriptions+delete-summary": "ביטול רישום מינויים בדחיפה עבור המשתמש הנוכחי.",
+	"apihelp-echopushsubscriptions+delete-summary": "ביטול רישום מינויי דחיפה עבור המשתמש הנוכחי או משתמש אחר שיצוין.",
 	"apihelp-echopushsubscriptions+delete-param-providertoken": "האסימון המשויך עם המינוי בדחיפה שצריך לבטל את הרישום שלו.",
+	"apihelp-echopushsubscriptions+delete-param-centraluserid": "מזהה המשתמש המרכזי שמזוהה עם המינוי שצריך לבטל את הרישום שלו.",
 	"apihelp-echopushsubscriptions+delete-example": "ביטול רישום מינוי בדחיפה עבור המשתמש הנוכחי.",
 	"apihelp-query+notifications-description": "קבלת התראות שממתינות למשתמש הנוכחי.",
 	"apihelp-query+notifications-summary": "קבלת התראות שממתינות למשתמש הנוכחי.",
@@ -67,7 +68,7 @@
 	"apihelp-echoarticlereminder-param-pageid": "מזהה הערך שלגביו המשתמש יתוזכר",
 	"apihelp-echoarticlereminder-param-title": "שם הערך שלגביו המשתמש יתוזכר",
 	"apihelp-echoarticlereminder-param-timestamp": "מתי לתזכר את המשתמש (תאריך ושעה)",
-	"apihelp-echoarticlereminder-param-comment": "הערת משתמש אופציונלית שתיכלל בתזכור",
+	"apihelp-echoarticlereminder-param-comment": "הערת משתמש אופציונלית שתיכלל בתזכורת",
 	"apihelp-echoarticlereminder-example-1": "יצירת הודעת תזכור לגבי ערך למחר עם הערה",
 	"apihelp-echoarticlereminder-example-2": "יצירת הודעת תזכור לגבי ערך למחר ללא הערה",
 	"apiwarn-echo-deprecation-timestampformat": "תסדיר חותם־הזמן של מדיה־ויקי הוגדר כאן בתור מיושן. בעתיד, ISO 8601 תמיד ישמש לפלט של חותם־הזמן. נא לתקן את הלקוח שלך ולהגדיר את <var>timestampFormat</var> לערך <kbd>ISO_8601</kbd>.",
@@ -75,5 +76,7 @@
 	"apiwarn-echo-deprecation-html": "<kbd>notformat=html</kbd> הוכרז בתור מיושן ויוסר כליל בקרוב. נא להשתמש ב־<kbd>notformat=special</kbd> במקומו.",
 	"apierror-echo-event-creation-failed": "לא ניתן היה ליצור את פעולת ה־Echo",
 	"apierror-echo-push-token-exists": "האסימון שסופק כבר קיים במסד הנתונים.",
-	"apierror-echo-push-token-not-found": "האסימון שסופק לא נמצא במסד הנתונים."
+	"apierror-echo-push-token-not-found": "האסימון שסופק לא נמצא במסד הנתונים.",
+	"apierror-echo-push-too-many-subscriptions": "המשתמש הנוכחי כבר רשם את המספר המרבי של מינויי דחיפה ($1)",
+	"apierror-echo-push-topic-required": "שדה הנושא נדרש על־ידי הספק הזה."
 }

@@ -50,8 +50,8 @@
 			return codeMirror.doc.getSelection();
 		},
 		setSelection: function ( options ) {
-			codeMirror.focus();
 			codeMirror.doc.setSelection( codeMirror.doc.posFromIndex( options.start ), codeMirror.doc.posFromIndex( options.end ) );
+			codeMirror.focus();
 			return this;
 		},
 		replaceSelection: function ( value ) {
@@ -94,7 +94,7 @@
 		var config = mw.config.get( 'extCodeMirrorConfig' );
 
 		mw.loader.using( codeMirrorCoreModules.concat( config.pluginModules ), function () {
-			var $codeMirror,
+			var $codeMirror, cmOptions,
 				selectionStart = $textbox1.prop( 'selectionStart' ),
 				selectionEnd = $textbox1.prop( 'selectionEnd' ),
 				scrollTop = $textbox1.scrollTop();
@@ -109,10 +109,11 @@
 			CodeMirror.keyMap.pcDefault[ 'Alt-Left' ] = false;
 			CodeMirror.keyMap.pcDefault[ 'Alt-Right' ] = false;
 
-			codeMirror = CodeMirror.fromTextArea( $textbox1[ 0 ], {
+			cmOptions = {
 				mwConfig: config,
 				// styleActiveLine: true, // disabled since Bug: T162204, maybe should be optional
 				lineWrapping: true,
+				lineNumbers: true,
 				readOnly: $textbox1[ 0 ].readOnly,
 				// select mediawiki as text input mode
 				mode: 'text/mediawiki',
@@ -126,7 +127,16 @@
 				inputStyle: 'contenteditable',
 				spellcheck: true,
 				viewportMargin: Infinity
-			} );
+			};
+
+			if ( mw.config.get( 'wgCodeMirrorEnableBracketMatching' ) ) {
+				cmOptions.matchBrackets = {
+					highlightNonMatching: false,
+					maxHighlightLineLength: 10000
+				};
+			}
+
+			codeMirror = CodeMirror.fromTextArea( $textbox1[ 0 ], cmOptions );
 			$codeMirror = $( codeMirror.getWrapperElement() );
 
 			// Allow textSelection() functions to work with CodeMirror editing field.
@@ -158,12 +168,35 @@
 				lang: $textbox1.attr( 'lang' )
 			} );
 
-			// T194102: UniversalLanguageSelector integration is buggy, disabling it completely
-			$( codeMirror.getInputField() ).addClass( 'noime' );
+			$( codeMirror.getInputField() )
+				// T259347: Use accesskey of the original textbox
+				.attr( 'accesskey', $textbox1.attr( 'accesskey' ) )
+				// T194102: UniversalLanguageSelector integration is buggy, disabling it completely
+				.addClass( 'noime' );
 
 			// set the height of the textarea
 			codeMirror.setSize( null, $textbox1.height() );
+
+			if ( mw.config.get( 'wgCodeMirrorAccessibilityColors' ) ) {
+				$codeMirror.addClass( 'cm-mw-accessible-colors' );
+			}
 		} );
+	}
+
+	function logUsage( data ) {
+		var event, editCountBucket;
+
+		/* eslint-disable camelcase */
+		event = $.extend( {
+			session_token: mw.user.sessionId(),
+			user_id: mw.user.getId()
+		}, data );
+		editCountBucket = mw.config.get( 'wgUserEditCountBucket' );
+		if ( editCountBucket !== null ) {
+			event.user_edit_count_bucket = editCountBucket;
+		}
+		/* eslint-enable camelcase */
+		mw.track( 'event.CodeMirrorUsage', event );
 	}
 
 	/**
@@ -210,13 +243,28 @@
 			setCodeEditorPreference( true );
 		}
 		updateToolbarButton();
+
+		logUsage( {
+			editor: 'wikitext',
+			enabled: codeMirror !== null,
+			toggled: true,
+			// eslint-disable-next-line no-jquery/no-global-selector,camelcase
+			edit_start_ts_ms: parseInt( $( 'input[name="wpStarttime"]' ).val() ) * 1000 || 0
+		} );
 	}
 
 	/**
 	 * Adds the CodeMirror button to WikiEditor
 	 */
 	function addCodeMirrorToWikiEditor() {
-		var $codeMirrorButton;
+		var $codeMirrorButton,
+			context = $textbox1.data( 'wikiEditor-context' ),
+			toolbar = context && context.modules && context.modules.toolbar;
+
+		// Guard against something having removed WikiEditor (T271457)
+		if ( !toolbar ) {
+			return;
+		}
 
 		$textbox1.wikiEditor(
 			'addToToolbar',
@@ -242,23 +290,30 @@
 			}
 		);
 
-		$codeMirrorButton = $textbox1.data( 'wikiEditor-context' ).modules.toolbar.$toolbar.find( '.tool[rel=CodeMirror]' );
+		$codeMirrorButton = toolbar.$toolbar.find( '.tool[rel=CodeMirror]' );
 		$codeMirrorButton
 			.attr( 'id', 'mw-editbutton-codemirror' );
 
 		if ( useCodeMirror ) {
 			enableCodeMirror();
 		}
-
 		updateToolbarButton();
+
+		logUsage( {
+			editor: 'wikitext',
+			enabled: useCodeMirror,
+			toggled: false,
+			// eslint-disable-next-line no-jquery/no-global-selector,camelcase
+			edit_start_ts_ms: parseInt( $( 'input[name="wpStarttime"]' ).val() ) * 1000 || 0
+		} );
 	}
 
 	$( function () {
-		// eslint-disable-next-line no-jquery/no-global-selector
-		$textbox1 = $( '#wpTextbox1' );
-
 		// Add CodeMirror button to the enhanced editing toolbar.
-		$textbox1.on( 'wikiEditor-toolbar-doneInitialSections', addCodeMirrorToWikiEditor );
+		mw.hook( 'wikiEditor.toolbarReady' ).add( function ( $textarea ) {
+			$textbox1 = $textarea;
+			addCodeMirrorToWikiEditor();
+		} );
 	} );
 
 	// Synchronize textarea with CodeMirror before leaving

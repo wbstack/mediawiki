@@ -38,7 +38,7 @@ class EchoUpdatePerUserBlacklist extends LoggedUpdateMaintenance {
 			$dbr,
 			'user_properties',
 			[ 'up_user', 'up_property' ],
-			$this->mBatchSize
+			$this->getBatchSize()
 		);
 		$iterator->setFetchColumns( [
 			'up_user',
@@ -47,6 +47,8 @@ class EchoUpdatePerUserBlacklist extends LoggedUpdateMaintenance {
 		$iterator->addConditions( [
 			'up_property' => 'echo-notifications-blacklist'
 		] );
+
+		$iterator->setCaller( __METHOD__ );
 
 		$this->output( "Updating Echo Notification Blacklist...\n" );
 

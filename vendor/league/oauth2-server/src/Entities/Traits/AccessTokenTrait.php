@@ -16,6 +16,7 @@ use Lcobucci\JWT\Signer\Key\LocalFileReference;
 use Lcobucci\JWT\Signer\Rsa\Sha256;
 use Lcobucci\JWT\Token;
 use League\OAuth2\Server\CryptKey;
+use League\OAuth2\Server\Entities\ClaimEntityInterface;
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 
@@ -60,13 +61,24 @@ trait AccessTokenTrait
     {
         $this->initJwtConfiguration();
 
-        return $this->jwtConfiguration->builder()
+        $builder = $this->jwtConfiguration->builder()
             ->permittedFor($this->getClient()->getIdentifier())
             ->identifiedBy($this->getIdentifier())
             ->issuedAt(new DateTimeImmutable())
             ->canOnlyBeUsedAfter(new DateTimeImmutable())
             ->expiresAt($this->getExpiryDateTime())
-            ->relatedTo((string) $this->getUserIdentifier())
+            ->relatedTo((string) $this->getUserIdentifier());
+
+        if ($this->getIssuer()) {
+            $builder->issuedBy($this->getIssuer());
+        }
+
+        foreach ($this->getClaims() as $claim) {
+            $builder->withClaim($claim->getName(), $claim->getValue());
+        }
+
+        return $builder
+            // Set scope claim late to prevent it from being overridden.
             ->withClaim('scopes', $this->getScopes())
             ->getToken($this->jwtConfiguration->signer(), $this->jwtConfiguration->signingKey());
     }
@@ -100,7 +112,17 @@ trait AccessTokenTrait
     abstract public function getScopes();
 
     /**
+     * @return ClaimEntityInterface[]
+     */
+    abstract public function getClaims();
+
+    /**
      * @return string
      */
     abstract public function getIdentifier();
+
+    /**
+     * @return string
+     */
+    abstract public function getIssuer();
 }

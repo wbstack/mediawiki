@@ -4,8 +4,10 @@ use MediaWiki\MediaWikiServices;
 
 class ApiEchoMute extends ApiBase {
 
+	/** @var CentralIdLookup|null */
 	private $centralIdLookup = null;
 
+	/** @var string[][] */
 	private static $muteLists = [
 		'user' => [
 			'pref' => 'echo-notifications-blacklist',
@@ -19,7 +21,7 @@ class ApiEchoMute extends ApiBase {
 
 	public function execute() {
 		$user = $this->getUser()->getInstanceForUpdate();
-		if ( !$user || $user->isAnon() ) {
+		if ( !$user || !$user->isRegistered() ) {
 			$this->dieWithError(
 				[ 'apierror-mustbeloggedin', $this->msg( 'action-editmyoptions' ) ],
 				'notloggedin'
@@ -113,10 +115,6 @@ class ApiEchoMute extends ApiBase {
 
 	public function needsToken() {
 		return 'csrf';
-	}
-
-	public function getTokenSalt() {
-		return '';
 	}
 
 	public function mustBePosted() {

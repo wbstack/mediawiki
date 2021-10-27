@@ -32,6 +32,8 @@
 	"twocolconflict-special-header-overview": "Pendant que vous modifiiez, un autre utilisateur a modifié la même page et l’a publiée avant vous. Une copie en lecture seule de votre révision est conservée ci-dessous. Toute modification faite dans l’interface de conflit de modification n’y est pas reflétée. Pour fusionner les modifications et résoudre le problème en utilisant l’interface de conflit de modification, revenir à l’onglet précédent.",
 	"twocolconflict-special-not-saved": "Non publié",
 	"twocolconflict-special-textarea-hint": "Vous pouvez afficher et copier la source de votre révision :",
+	"twocolconflict-special-malformed-title": "Titre manquant ou non valide.",
+	"twocolconflict-special-expired": "Rien à voir ici. Cela veut probablement dire que vous avez eu un conflit de modification auparavant, mais cela fait un moment, et votre texte stocké temporairement a expiré.",
 	"twocolconflict-split-header-hint": "Vous pouvez aider à améliorer cette fonctionnalité davantage, si vous laissez un avis [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface sur cette page].",
 	"twocolconflict-split-header-hint-beta": "Merci d’utiliser cette fonctionnalité bêta. Vous pouvez aider à l’améliorer davantage en laissant un commentaire [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface sur cette page].",
 	"twocolconflict-split-header-overview": "Pendant vos modifications, autre personne a modifié la même page et l’a publiée avant vous. Veuillez vérifier les deux versions et les fusionner. Seul le texte dans les cases sélectionnées sera enregistré lorsque vous cliquerez sur « {{int:publishchanges}} ».",
@@ -74,10 +76,10 @@
 	"twocolconflict-split-tour-dialog-message-single-column-view": "Malheureusement, quelqu’un d’autre a publié en même temps que vous. Veuillez vérifier les commentaires sur la page suivante. Si nécessaire, vous pouvez modifier les vôtres et modifier l’ordre final.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Résoudre le problème",
 	"twocolconflict-talk-header-overview": "Quelqu’un d’autre a envoyé un commentaire en même temps que vous. Veuillez examiner les commentaires ci-dessous et choisir l’ordre de publication. Si nécessaire, vous pouvez modifier votre texte.",
-	"twocolconflict-talk-your": "Votre entrée",
-	"twocolconflict-talk-conflicting": "Entrée en conflit",
+	"twocolconflict-talk-your": "Votre commentaire",
+	"twocolconflict-talk-conflicting": "Commentaire du conflit",
 	"twocolconflict-talk-switch-tooltip": "Changer l'ordre",
-	"twocolconflict-talk-reorder-prompt": "Positionner votre entrée en relation avec l'entrée conflictuelle :",
+	"twocolconflict-talk-reorder-prompt": "Positionner votre commentaire en relation avec le commentaire conflictuel :",
 	"twocolconflict-talk-same-order": "Garder après",
 	"twocolconflict-talk-reverse-order": "Déplacer avant"
 }

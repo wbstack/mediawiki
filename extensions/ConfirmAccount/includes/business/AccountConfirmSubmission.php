@@ -358,7 +358,7 @@ class AccountConfirmSubmission {
 
 	protected function createUserPage( User $user ) {
 		global $wgMakeUserPageFromBio, $wgAutoUserBioText;
-		global $wgConfirmAccountSortkey, $wgContLang;
+		global $wgConfirmAccountSortkey;
 
 		$body = ''; // page text
 
@@ -403,7 +403,7 @@ class AccountConfirmSubmission {
 			);
 			$body .= "\n{{DEFAULTSORT:{$sortKey}}}";
 			# Clean up any other categories...
-			$catNS = $wgContLang->getNSText( NS_CATEGORY );
+			$catNS = MediaWikiServices::getInstance()->getContentLanguage()->getNSText( NS_CATEGORY );
 			$replace = '/\[\[' . preg_quote( $catNS ) . ':([^\]]+)\]\]/i'; // [[Category:x]]
 			$with = "[[{$catNS}:$1|" . str_replace( '$', '\$', $sortKey ) . "]]"; // [[Category:x|sortkey]]
 			$body = preg_replace( $replace, $with, $body );

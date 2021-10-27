@@ -81,6 +81,8 @@
 	"math-tracking-category-error-desc": "As páginas nesta categoria contêm erros no uso dos elementos de formatação matemática.",
 	"math-tracking-category-mhchem-deprecation": "Páginas que usam um formato descontinuado das etiquetas de química",
 	"math-tracking-category-mhchem-deprecation-desc": "As páginas nesta categoria usam um formato descontinuado das etiquetas de química",
+	"math-tracking-category-texvc-deprecation": "Páginas que usam um formato descontinuado das etiquetas de matemática",
+	"math-tracking-category-texvc-deprecation-desc": "As páginas nesta categoria usam um formato descontinuado das etiquetas de matemática",
 	"math-tracking-category-render-error": "Páginas com erros de composição de imagem matemática",
 	"math-tracking-category-render-error-desc": "As páginas desta categoria têm erros de composição de imagem nas etiquetas de matemática.",
 	"math_unknown_error": "erro desconhecido",
@@ -108,6 +110,6 @@
 	"math-wikibase-special-form-button": "Pedir informação",
 	"math-wikibase-special-error-header": "Erro",
 	"math-wikibase-special-error-invalid-argument": "O identificador de elemento Wikibase especificado não existe.",
-	"math-wikibase-special-error-unknown": "Ocorreu um erro desconhecido ao obter os dados da wiki Wikibase.",
+	"math-wikibase-special-error-unknown": "Ocorreu um erro desconhecido ao obter dados da wiki Wikibase.",
 	"math-wikibase-special-error-no-wikibase": "A extensão Wikibase é necessária para usar esta página especial."
 }

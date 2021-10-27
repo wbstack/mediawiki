@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Majavah",
 			"Nike",
 			"Pyscowicz",
 			"SMAUG",
@@ -46,7 +47,9 @@
 	"advancedsearch-filesize-greater-than": "enemmän kuin",
 	"advancedsearch-filesize-smaller-than": "vähemmän kuin",
 	"advancedsearch-sort-relevance": "Osuvimmat",
+	"advancedsearch-sort-last-edit-asc": "Muokkauspäivä – tuorein ylhäällä",
 	"advancedsearch-sort-last-edit-desc": "Muokkauspäivä – tuorein ylhäällä",
+	"advancedsearch-sort-create-timestamp-asc": "Luontipäivä – tuorein ylhäällä",
 	"advancedsearch-sort-create-timestamp-desc": "Luontipäivä – tuorein ylhäällä",
 	"advancedsearch-sort-preview-relevance": "osuvin",
 	"advancedsearch-sort-preview-last-edit-desc": "muokkauspäivä",

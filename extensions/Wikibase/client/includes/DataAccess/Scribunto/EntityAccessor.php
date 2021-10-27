@@ -17,7 +17,7 @@ use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
 use Wikibase\DataModel\Statement\StatementListProvider;
 use Wikibase\Lib\ContentLanguages;
-use Wikibase\Lib\LanguageFallbackChain;
+use Wikibase\Lib\TermLanguageFallbackChain;
 
 /**
  * Functionality needed to expose Entities to Lua.
@@ -57,9 +57,9 @@ class EntityAccessor {
 	private $dataTypeLookup;
 
 	/**
-	 * @var LanguageFallbackChain
+	 * @var TermLanguageFallbackChain
 	 */
-	private $fallbackChain;
+	private $termFallbackChain;
 
 	/**
 	 * @var Language
@@ -88,7 +88,7 @@ class EntityAccessor {
 	 * @param Serializer $entitySerializer
 	 * @param Serializer $statementSerializer
 	 * @param PropertyDataTypeLookup $dataTypeLookup
-	 * @param LanguageFallbackChain $fallbackChain
+	 * @param TermLanguageFallbackChain $termFallbackChain
 	 * @param Language $language
 	 * @param ContentLanguages $termsLanguages
 	 * @param bool $fineGrainedLuaTracking Whether to track each used aspect
@@ -101,7 +101,7 @@ class EntityAccessor {
 		Serializer $entitySerializer,
 		Serializer $statementSerializer,
 		PropertyDataTypeLookup $dataTypeLookup,
-		LanguageFallbackChain $fallbackChain,
+		TermLanguageFallbackChain $termFallbackChain,
 		Language $language,
 		ContentLanguages $termsLanguages,
 		$fineGrainedLuaTracking,
@@ -113,7 +113,7 @@ class EntityAccessor {
 		$this->entitySerializer = $entitySerializer;
 		$this->statementSerializer = $statementSerializer;
 		$this->dataTypeLookup = $dataTypeLookup;
-		$this->fallbackChain = $fallbackChain;
+		$this->termFallbackChain = $termFallbackChain;
 		$this->language = $language;
 		$this->termsLanguages = $termsLanguages;
 		$this->fineGrainedLuaTracking = $fineGrainedLuaTracking;
@@ -213,7 +213,6 @@ class EntityAccessor {
 
 		$propertyId = new PropertyId( $propertyIdSerialization );
 		$this->usageAccumulator->addStatementUsage( $entityId, $propertyId );
-		$this->usageAccumulator->addOtherUsage( $entityId );
 
 		try {
 			$entity = $this->entityLookup->getEntity( $entityId );
@@ -246,10 +245,10 @@ class EntityAccessor {
 			$this->dataTypeLookup,
 			array_unique( array_merge(
 				$this->termsLanguages->getLanguages(),
-				$this->fallbackChain->getFetchLanguageCodes(),
+				$this->termFallbackChain->getFetchLanguageCodes(),
 				[ $this->language->getCode() ]
 			) ),
-			[ $this->language->getCode() => $this->fallbackChain ]
+			[ $this->language->getCode() => $this->termFallbackChain ]
 		);
 	}
 

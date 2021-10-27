@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Casadelproverbio",
 			"Joetaras"
 		]
 	},
@@ -55,10 +56,14 @@
 	"advancedsearch-filesize-greater-than": "cchiù granne de",
 	"advancedsearch-filesize-smaller-than": "cchiù piccinne de",
 	"advancedsearch-sort-relevance": "Rilevanze",
+	"advancedsearch-sort-last-edit-asc": "Date d'u cangiamende - le cchiù vecchie stonne sus",
 	"advancedsearch-sort-last-edit-desc": "Date d'u cangiamende - quedde de mò ste sus",
+	"advancedsearch-sort-create-timestamp-asc": "Date de ccrejazione - le cchiù vecchie stonne sus",
 	"advancedsearch-sort-create-timestamp-desc": "Date de ccrejazione - quedde de mò ste sus",
 	"advancedsearch-sort-preview-relevance": "rilevanze",
+	"advancedsearch-sort-preview-last-edit-asc": "le urteme cangiate",
 	"advancedsearch-sort-preview-last-edit-desc": "date d'u cangiamende",
+	"advancedsearch-sort-preview-create-timestamp-asc": "le urtme ccrejate",
 	"advancedsearch-sort-preview-create-timestamp-desc": "date de ccrejazione",
 	"advancedsearch-namespaces-search-in": "Cirche pe:",
 	"advancedsearch-namespaces-remember": "Arrecuèrde 'a selezione pe le prossime ricerche",
@@ -69,5 +74,5 @@
 	"advancedsearch-namespaces-placeholder": "Aggiunge namespace…",
 	"prefs-advancedsearch": "Ricerche avanzate",
 	"advancedsearch-preference-help": "'A Ricerche avanzate aggiunge 'nu module a 'a pàgene Special:Search . Quiste permette de fà recerche specializzate, pure ca non ge canusce 'a sindasse. Puè pure cangià le namespace ca puè scacchià.",
-	"advancedsearch-preference-disable": "No ffà 'ndrucà l'inderfacce d'a Ricerche avanzate"
+	"advancedsearch-preference-disable": "No ffà 'ndrucà l'inderfacce d'a Ricerche avanzate quanne ste ause Special:Search"
 }

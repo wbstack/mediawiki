@@ -17,6 +17,7 @@
 	"twocolconflict-core-ui-hint-close": "Non mostrare più",
 	"twocolconflict-special-footer-hint": "Chiudi questa pagina per tornare all'interfaccia del conflitto di modifica.",
 	"twocolconflict-special-not-saved": "Non pubblicata",
+	"twocolconflict-special-malformed-title": "Titolo mancante o non valido.",
 	"twocolconflict-split-header-hint-beta": "Grazie per aver provato questa funzione beta. Puoi aiutare a migliorala lasciando il tuo parere [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface su questa pagina].",
 	"twocolconflict-split-your-version-header": "La tua versione",
 	"twocolconflict-split-current-version-header": "Versione attuale delle $1",
@@ -45,5 +46,6 @@
 	"twocolconflict-split-selected-other-tooltip": "Un'altra versione è selezionata",
 	"twocolconflict-split-selected-your-tooltip": "La tua versione è selezionata",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Risolvi anomalia",
+	"twocolconflict-talk-your": "Il tuo commento",
 	"twocolconflict-talk-reverse-order": "Sposta prima"
 }

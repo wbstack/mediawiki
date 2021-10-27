@@ -25,14 +25,15 @@ require_once $basePath . '/maintenance/Maintenance.php';
  *
  * Those entities will be populated with randomly generated terms (labels, descriptions, aliases),
  * in a set of different languages (can be modified through options).
+ * @license GPL-2.0-or-later
  */
 class PopulateWithRandomEntitiesAndTerms extends Maintenance {
-	const SCRIPT_USER_NAME = 'script_populate_random_entities';
-	const SUMMARY_TEXT = 'Created using PopulateWithRandomEntitiesAndTerms maintenance script';
+	private const SCRIPT_USER_NAME = 'script_populate_random_entities';
+	private const SUMMARY_TEXT = 'Created using PopulateWithRandomEntitiesAndTerms maintenance script';
 
-	const OPTION_DEFAULT_AT_LEAST = 1;
-	const OPTION_DEFAULT_AT_MOST = 50;
-	const OPTION_DEFAULT_DUPLICATION_DEGREE = 0.5;
+	private const OPTION_DEFAULT_AT_LEAST = 1;
+	private const OPTION_DEFAULT_AT_MOST = 50;
+	private const OPTION_DEFAULT_DUPLICATION_DEGREE = 0.5;
 
 	public function __construct() {
 		parent::__construct();
@@ -95,8 +96,7 @@ class PopulateWithRandomEntitiesAndTerms extends Maintenance {
 	}
 
 	public function execute() {
-		if ( WikibaseRepo::getDefaultInstance()
-			 ->getSettings()
+		if ( WikibaseRepo::getSettings()
 			 ->getSetting( 'enablePopulateWithRandomEntitiesAndTermsScript' ) !== true
 		) {
 			$this->output(

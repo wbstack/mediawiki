@@ -2,11 +2,11 @@
 
 namespace CirrusSearch;
 
-use ApiUsageException;
 use CirrusSearch\Parser\NamespacePrefixParser;
 use CirrusSearch\Parser\QueryStringRegex\SearchQueryParseException;
 use CirrusSearch\Profile\ContextualProfileOverride;
 use CirrusSearch\Profile\SearchProfileService;
+use CirrusSearch\Search\ArrayCirrusSearchResult;
 use CirrusSearch\Search\CirrusSearchIndexFieldFactory;
 use CirrusSearch\Search\CirrusSearchResultSet;
 use CirrusSearch\Search\FancyTitleResultsType;
@@ -15,8 +15,10 @@ use CirrusSearch\Search\SearchQuery;
 use CirrusSearch\Search\SearchQueryBuilder;
 use CirrusSearch\Search\TitleHelper;
 use CirrusSearch\Search\TitleResultsType;
+use CirrusSearch\Wikimedia\WeightedTagsHooks;
 use ISearchResultSet;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\ProperPageIdentity;
 use RequestContext;
 use SearchEngine;
 use SearchIndexField;
@@ -25,6 +27,7 @@ use Status;
 use Title;
 use User;
 use WebRequest;
+use Wikimedia\Assert\Assert;
 
 /**
  * SearchEngine implementation for CirrusSearch.  Delegates to
@@ -57,17 +60,32 @@ class CirrusSearch extends SearchEngine {
 	 * is returned by self::getProfiles so instead of assigning a default
 	 * profile at this point we use this special profile.
 	 */
-	const AUTOSELECT_PROFILE = 'engine_autoselect';
+	public const AUTOSELECT_PROFILE = 'engine_autoselect';
 
 	/** @const string name of the prefixsearch fallback profile */
-	const COMPLETION_PREFIX_FALLBACK_PROFILE = 'classic';
+	public const COMPLETION_PREFIX_FALLBACK_PROFILE = 'classic';
 
 	/**
 	 * @const int Maximum title length that we'll check in prefix and keyword searches.
 	 * Since titles can be 255 bytes in length we're setting this to 255
 	 * characters.
 	 */
-	const MAX_TITLE_SEARCH = 255;
+	public const MAX_TITLE_SEARCH = 255;
+
+	/**
+	 * Name of the feature to extract more fields during a fulltext search request.
+	 * Expected value is a list of strings identifying the fields to extract out
+	 * of the source document.
+	 * @see SearchEngine::supports() anf SearchEngine::setFeatureData()
+	 */
+	public const EXTRA_FIELDS_TO_EXTRACT = 'extra-fields-to-extract';
+
+	/**
+	 * Name of the entry in the extension data array holding the extracted field
+	 * requested using the EXTRA_FIELDS_TO_EXTRACT feature.
+	 * @see \SearchResult::getExtensionData()
+	 */
+	private const EXTRA_FIELDS = ArrayCirrusSearchResult::EXTRA_FIELDS;
 
 	/**
 	 * @var array metrics about the last thing we searched sourced from the
@@ -128,18 +146,21 @@ class CirrusSearch extends SearchEngine {
 	private $titleHelper;
 
 	/**
+	 * @var CirrusSearchHookRunner|null
+	 */
+	private $cirrusSearchHookRunner;
+
+	/**
 	 * @param SearchConfig|null $config
 	 * @param CirrusDebugOptions|null $debugOptions
 	 * @param NamespacePrefixParser|null $namespacePrefixParser
 	 * @param InterwikiResolver|null $interwikiResolver
 	 * @param TitleHelper|null $titleHelper
 	 */
-	public function __construct(
-		SearchConfig $config = null,
+	public function __construct( SearchConfig $config = null,
 		CirrusDebugOptions $debugOptions = null,
 		NamespacePrefixParser $namespacePrefixParser = null,
-		InterwikiResolver $interwikiResolver = null,
-		TitleHelper $titleHelper = null
+		InterwikiResolver $interwikiResolver = null, TitleHelper $titleHelper = null
 	) {
 		// Initialize UserTesting before we create a Connection
 		// This is useful to do tests across multiple clusters
@@ -200,6 +221,9 @@ class CirrusSearch extends SearchEngine {
 		case 'search-update':
 		case 'list-redirects':
 			return false;
+		case self::FT_QUERY_INDEP_PROFILE_TYPE:
+		case self::EXTRA_FIELDS_TO_EXTRACT:
+			return true;
 		default:
 			return parent::supports( $feature );
 		}
@@ -213,7 +237,7 @@ class CirrusSearch extends SearchEngine {
 	protected function doSearchText( $term ) {
 		try {
 			$builder = SearchQueryBuilder::newFTSearchQueryBuilder( $this->config,
-				$term, $this->namespacePrefixParser );
+				$term, $this->namespacePrefixParser, $this->getCirrusSearchHookRunner() );
 		} catch ( SearchQueryParseException $e ) {
 			return $e->asStatus();
 		}
@@ -228,7 +252,8 @@ class CirrusSearch extends SearchEngine {
 			->setWithDYMSuggestion( $this->showSuggestion )
 			->setAllowRewrite( $this->isFeatureEnabled( 'rewrite' ) )
 			->addProfileContextParameter( ContextualProfileOverride::LANGUAGE,
-				$this->requestContext->getLanguage()->getCode() );
+				$this->requestContext->getLanguage()->getCode() )
+			->setExtraFieldsToExtract( $this->features[self::EXTRA_FIELDS_TO_EXTRACT] ?? [] );
 
 		if ( $this->prefix !== '' ) {
 			$builder->addContextualFilter( 'prefix',
@@ -287,7 +312,8 @@ class CirrusSearch extends SearchEngine {
 			( $this->debugOptions->isReturnRaw() || method_exists( $result, 'addInterwikiResults' ) )
 		) {
 			$iwSearch = new InterwikiSearcher( $this->connection, $query->getSearchConfig(), $this->namespaces, null,
-				$this->debugOptions, $this->namespacePrefixParser, $this->interwikiResolver, $this->titleHelper );
+				$this->debugOptions, $this->namespacePrefixParser, $this->interwikiResolver, $this->titleHelper,
+				$this->getCirrusSearchHookRunner() );
 			$interwikiResults = $iwSearch->getInterwikiResults( $query );
 			if ( $interwikiResults->isOK() && $interwikiResults->getValue() !== [] ) {
 				foreach ( $interwikiResults->getValue() as $interwiki => $interwikiResult ) {
@@ -381,9 +407,9 @@ class CirrusSearch extends SearchEngine {
 
 		// Not really useful, mostly for testing purpose
 		$variants = $this->debugOptions->getCirrusCompletionVariant();
-		if ( empty( $variants ) ) {
-			$contentLang = MediaWikiServices::getInstance()->getContentLanguage();
-			$variants = $contentLang->autoConvertToAllVariants( $search );
+		if ( !$variants ) {
+			$converter = MediaWikiServices::getInstance()->getLanguageConverterFactory()->getLanguageConverter();
+			$variants = $converter->autoConvertToAllVariants( $search );
 		} elseif ( count( $variants ) > 3 ) {
 			// We should not allow too many variants
 			$variants = array_slice( $variants, 0, 3 );
@@ -442,14 +468,7 @@ class CirrusSearch extends SearchEngine {
 			$searcher->setResultsType( new TitleResultsType() );
 		}
 
-		try {
-			$status = $searcher->prefixSearch( $search, $variants );
-		} catch ( ApiUsageException $e ) {
-			if ( defined( 'MW_API' ) ) {
-				throw $e;
-			}
-			return SearchSuggestionSet::emptySuggestionSet();
-		}
+		$status = $searcher->prefixSearch( $search, $variants );
 
 		// There is no way to send errors or warnings back to the caller here so we have to make do with
 		// only sending results back if there are results and relying on the logging done at the status
@@ -570,6 +589,83 @@ class CirrusSearch extends SearchEngine {
 	}
 
 	/**
+	 * Request the setting of the weighted_tags field for the given tag(s) and weight(s).
+	 * Will set a "$tagPrefix/$tagName" tag for each element of $tagNames, and will unset
+	 * all other tags with the same prefix (in other words, this will replace the existing
+	 * tag set for a given prefix). When $tagName is omitted, 'exists' will be used - this
+	 * is canonical for tag types where the tag is fully determined by the prefix.
+	 *
+	 * This is meant for testing and non-production setups. For production a more efficient batched
+	 * update process can be implemented outside MediaWiki.
+	 *
+	 * @param ProperPageIdentity $page
+	 * @param string $tagPrefix
+	 * @param string|string[]|null $tagNames
+	 * @param int|int[]|null $tagWeights Tag weights (between 1-1000). When $tagNames is omitted,
+	 *   $tagWeights should be a single number; otherwise it should be a tagname => weight map.
+	 */
+	public function updateWeightedTags( ProperPageIdentity $page, string $tagPrefix, $tagNames = null, $tagWeights = null ): void {
+		Assert::parameterType( [ 'string', 'array', 'null' ], $tagNames, '$tagNames' );
+		if ( is_array( $tagNames ) ) {
+			Assert::parameterElementType( 'string', $tagNames, '$tagNames' );
+		}
+		Assert::precondition( strpos( $tagPrefix, '/' ) === false,
+			"invalid tag prefix $tagPrefix: must not contain /" );
+		foreach ( (array)$tagNames as $tagName ) {
+			Assert::precondition( strpos( $tagName, '|' ) === false,
+				"invalid tag name $tagName: must not contain |" );
+		}
+		if ( $tagWeights !== null ) {
+			if ( $tagNames === null ) {
+				$tagWeightsToCheck = [ $tagWeights ];
+			} else {
+				$tagWeightsToCheck = $tagWeights;
+			}
+			foreach ( $tagWeightsToCheck as $tagName => $weight ) {
+				if ( $tagNames ) {
+					Assert::precondition( in_array( $tagName, (array)$tagNames, true ),
+						"tag name $tagName used in \$tagWeights but not found in \$tagNames" );
+				}
+				Assert::precondition( is_int( $weight ), "weights must be integers but $weight is "
+					. gettype( $weight ) );
+				Assert::precondition( $weight >= 1 && $weight <= 1000,
+					"weights must be between 1 and 1000 (found: $weight)" );
+			}
+		}
+
+		// This will cause unnecessary indexing load, but for a temporary BC fix that will be removed in a few
+		// weeks dual writes seems preferable over a refactoring.
+		$fields = [ WeightedTagsHooks::FIELD_NAME, 'ores_articletopics' ];
+		foreach ( $fields as $tagField ) {
+			$this->getUpdater()->updateWeightedTags( $page,
+				$tagField, $tagPrefix, $tagNames, $tagWeights );
+		}
+	}
+
+	/**
+	 * Request the reset of the weighted_tags field for the category $tagCategory.
+	 *
+	 * @param ProperPageIdentity $page
+	 * @param string $tagPrefix
+	 */
+	public function resetWeightedTags( ProperPageIdentity $page, string $tagPrefix ): void {
+		// This will cause unnecessary indexing load, but for a temporary BC fix that will be removed in a few
+		// weeks dual writes seems preferable over a refactoring.
+		$fields = [ WeightedTagsHooks::FIELD_NAME, 'ores_articletopics' ];
+		foreach ( $fields as $tagField ) {
+			$this->getUpdater()->resetWeightedTags( $page, $tagField, $tagPrefix );
+		}
+	}
+
+	/**
+	 * Helper method to facilitate mocking during tests.
+	 * @return Updater
+	 */
+	protected function getUpdater() {
+		return new Updater( $this->connection );
+	}
+
+	/**
 	 * @return Status Contains a single integer indicating the number
 	 *  of content words in the wiki
 	 */
@@ -591,6 +687,14 @@ class CirrusSearch extends SearchEngine {
 	 */
 	private function makeSearcher( SearchConfig $config = null ) {
 		return new Searcher( $this->connection, $this->offset, $this->limit, $config ?? $this->config, $this->namespaces,
-				null, false, $this->debugOptions, $this->namespacePrefixParser, $this->interwikiResolver, $this->titleHelper );
+				null, false, $this->debugOptions, $this->namespacePrefixParser, $this->interwikiResolver, $this->titleHelper,
+				$this->getCirrusSearchHookRunner() );
+	}
+
+	private function getCirrusSearchHookRunner(): CirrusSearchHookRunner {
+		if ( $this->cirrusSearchHookRunner == null ) {
+			$this->cirrusSearchHookRunner = new CirrusSearchHookRunner( $this->getHookContainer() );
+		}
+		return $this->cirrusSearchHookRunner;
 	}
 }

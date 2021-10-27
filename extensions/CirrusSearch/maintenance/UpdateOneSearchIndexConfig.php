@@ -44,7 +44,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	private $indexType;
 
 	/**
-	 * @var bool  Are we going to blow the index away and start from scratch?
+	 * @var bool Are we going to blow the index away and start from scratch?
 	 */
 	private $startOver;
 
@@ -69,7 +69,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	private $reindexAndRemoveOk;
 
 	/**
-	 * @var boolean are there too few replicas in the index we're making?
+	 * @var bool are there too few replicas in the index we're making?
 	 */
 	private $tooFewReplicas = false;
 
@@ -160,6 +160,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			"operates on a single cluster." );
 		$this->addOption( 'indexType', 'Index to update.  Either content or general.', true, true );
 		self::addSharedOptions( $this );
+		$this->requireExtension( 'CirrusSearch' );
 	}
 
 	/**

@@ -2,22 +2,24 @@
 
 namespace CirrusSearch\Parser;
 
+use CirrusSearch\CirrusSearchHookRunner;
 use CirrusSearch\Query\BoostTemplatesFeature;
 use CirrusSearch\Query\ContentModelFeature;
 use CirrusSearch\Query\DeepcatFeature;
 use CirrusSearch\Query\FileNumericFeature;
 use CirrusSearch\Query\FileTypeFeature;
+use CirrusSearch\Query\HasRecommendationFeature;
 use CirrusSearch\Query\HasTemplateFeature;
 use CirrusSearch\Query\InCategoryFeature;
 use CirrusSearch\Query\InSourceFeature;
 use CirrusSearch\Query\InTitleFeature;
 use CirrusSearch\Query\KeywordFeature;
 use CirrusSearch\Query\LanguageFeature;
-use CirrusSearch\Query\LegacyKeywordFeature;
 use CirrusSearch\Query\LinksToFeature;
 use CirrusSearch\Query\LocalFeature;
 use CirrusSearch\Query\MoreLikeFeature;
 use CirrusSearch\Query\MoreLikeThisFeature;
+use CirrusSearch\Query\PageIdFeature;
 use CirrusSearch\Query\PreferRecentFeature;
 use CirrusSearch\Query\PrefixFeature;
 use CirrusSearch\Query\SimpleKeywordFeature;
@@ -25,6 +27,7 @@ use CirrusSearch\Query\SubPageOfFeature;
 use CirrusSearch\Query\TextFieldFilterFeature;
 use CirrusSearch\SearchConfig;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Sparql\SparqlClient;
 
 /**
@@ -32,19 +35,23 @@ use MediaWiki\Sparql\SparqlClient;
  */
 class FullTextKeywordRegistry implements KeywordRegistry {
 	/**
-	 * @var (LegacyKeywordFeature|KeywordFeature)[]
+	 * @var KeywordFeature[]
 	 */
 	private $features;
 
 	/**
 	 * FullTextKeywordRegistry constructor.
 	 * @param SearchConfig $config
+	 * @param CirrusSearchHookRunner|null $cirrusSearchHookRunner
 	 * @param NamespacePrefixParser|null $namespacePrefixParser
 	 * @param SparqlClient|null $client
-	 * @throws \FatalError
-	 * @throws \MWException
 	 */
-	public function __construct( SearchConfig $config, NamespacePrefixParser $namespacePrefixParser = null, SparqlClient $client = null ) {
+	public function __construct(
+		SearchConfig $config,
+		CirrusSearchHookRunner $cirrusSearchHookRunner = null,
+		NamespacePrefixParser $namespacePrefixParser = null,
+		SparqlClient $client = null
+	) {
 		$this->features = [
 			// Handle morelike keyword (greedy). Kept for BC reasons with existing clients.
 			// The morelikethis keyword should be preferred.
@@ -83,12 +90,17 @@ class FullTextKeywordRegistry implements KeywordRegistry {
 			// deepcat feature
 			new DeepcatFeature( $config, $client ),
 			// morelikethis feature: a non-greedy version of the morelike keyword.
-			new MoreLikeThisFeature( $config )
+			new MoreLikeThisFeature( $config ),
+			// ids query
+			new PageIdFeature(),
+			// article recommendations filter
+			new HasRecommendationFeature()
 		];
 
 		$extraFeatures = [];
-		\Hooks::run( 'CirrusSearchAddQueryFeatures', [ $config, &$extraFeatures ] );
-		// @phan-suppress-next-line PhanEmptyForeach May be set by hook
+		$cirrusSearchHookRunner = $cirrusSearchHookRunner ?: new CirrusSearchHookRunner(
+			MediaWikiServices::getInstance()->getHookContainer() );
+		$cirrusSearchHookRunner->onCirrusSearchAddQueryFeatures( $config, $extraFeatures );
 		foreach ( $extraFeatures as $extra ) {
 			if ( $extra instanceof SimpleKeywordFeature ) {
 				$this->features[] = $extra;

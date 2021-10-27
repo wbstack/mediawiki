@@ -3,10 +3,10 @@
 namespace Wikibase\Lib\Store\Sql\Terms;
 
 use InvalidArgumentException;
-use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use stdClass;
+use Wikibase\Lib\Store\Sql\Terms\Util\StatsdMonitoring;
 use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
 
@@ -17,6 +17,8 @@ use Wikimedia\Rdbms\IResultWrapper;
  * @license GPL-2.0-or-later
  */
 class DatabaseTermInLangIdsResolver implements TermInLangIdsResolver {
+
+	use StatsdMonitoring;
 
 	/** @var TypeIdsResolver */
 	private $typeIdsResolver;
@@ -146,13 +148,14 @@ class DatabaseTermInLangIdsResolver implements TermInLangIdsResolver {
 		array $types = null,
 		array $languages = null
 	): array {
-		$conditions[] = $this->getDbr()->addIdentifierQuotes( $joinColumn ) . ' = wbtl_id';
+		$joinConditions = [ $joinTable => [ 'JOIN', $this->getDbr()->addIdentifierQuotes( $joinColumn ) . ' = wbtl_id' ] ];
 		$records = $this->selectTermsViaJoin(
 			[ $joinTable ],
 			[ $groupColumn ],
 			$conditions,
 			$types,
-			$languages
+			$languages,
+			$joinConditions
 		);
 
 		$this->preloadTypes( $records );
@@ -173,11 +176,10 @@ class DatabaseTermInLangIdsResolver implements TermInLangIdsResolver {
 		array $columns,
 		array $conditions,
 		array $types = null,
-		array $languages = null
+		array $languages = null,
+		array $joinConditions = []
 	): IResultWrapper {
-		MediaWikiServices::getInstance()->getStatsdDataFactory()->increment(
-			'wikibase.repo.term_store.DatabaseTermIdsResolver_selectTermsViaJoin'
-		);
+		$this->incrementForQuery( 'DatabaseTermIdsResolver_selectTermsViaJoin' );
 		if ( $types !== null ) {
 			$conditions['wbtl_type_id'] = $this->lookupTypeIds( $types );
 		}
@@ -188,11 +190,13 @@ class DatabaseTermInLangIdsResolver implements TermInLangIdsResolver {
 		return $this->getDbr()->select(
 			array_merge( [ 'wbt_term_in_lang', 'wbt_text_in_lang', 'wbt_text' ], $joinTables ),
 			array_merge( [ 'wbtl_id', 'wbtl_type_id', 'wbxl_language', 'wbx_text' ], $columns ),
+			$conditions,
+			__METHOD__,
+			[],
 			array_merge( [
-				'wbtl_text_in_lang_id=wbxl_id',
-				'wbxl_text_id=wbx_id',
-			], $conditions ),
-			__METHOD__
+				'wbt_text_in_lang' => [ 'JOIN', 'wbtl_text_in_lang_id=wbxl_id' ],
+				'wbt_text' => [ 'JOIN', 'wbxl_text_id=wbx_id' ],
+			], $joinConditions )
 		);
 	}
 

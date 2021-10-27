@@ -10,6 +10,7 @@ use MWException;
 use MWExceptionHandler;
 use Onoi\MessageReporter\ObservableMessageReporter;
 use Psr\Log\LoggerInterface;
+use Wikibase\Client\WikibaseClient;
 use Wikibase\Lib\Reporting\ReportingExceptionHandler;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\ChunkCache;
@@ -88,10 +89,13 @@ class DispatchChanges extends Maintenance {
 
 		// If this repo is also a client, make sure it dispatches also to itself.
 		if ( WikibaseSettings::isClientEnabled() ) {
-			$clientSettings = WikibaseSettings::getClientSettings();
+			$clientSettings = WikibaseClient::getSettings();
 			$repoName = $clientSettings->getSetting( 'repoSiteId' );
-			$repoDb = $clientSettings->getSetting( 'repoDatabase' );
 
+			$repoDb = false;
+			if ( $clientSettings->hasSetting( 'repoDatabase' ) ) {
+				$repoDb = $clientSettings->getSetting( 'repoDatabase' );
+			}
 			if ( $repoDb === false ) {
 				$repoDb = MediaWikiServices::getInstance()->getMainConfig()->get( 'DBname' );
 			}
@@ -230,8 +234,8 @@ class DispatchChanges extends Maintenance {
 			throw new MWException( "WikibaseRepository has not been loaded." );
 		}
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$defaultMaxTime = $wikibaseRepo->getSettings()->getSetting( 'dispatchMaxTime' );
+		$repoSettings = WikibaseRepo::getSettings();
+		$defaultMaxTime = $repoSettings->getSetting( 'dispatchMaxTime' );
 
 		if ( $defaultMaxTime == 0 ) {
 			$this->log( 'dispatchMaxTime 0, so exiting early and not performing dispatch operations.' );
@@ -240,11 +244,11 @@ class DispatchChanges extends Maintenance {
 
 		$maxTime = (int)$this->getOption( 'max-time', $defaultMaxTime );
 		$maxPasses = (int)$this->getOption( 'max-passes', $maxTime < PHP_INT_MAX ? PHP_INT_MAX : 1 );
-		$delay = (int)$this->getOption( 'idle-delay', $wikibaseRepo->getSettings()->getSetting( 'dispatchIdleDelay' ) );
+		$delay = (int)$this->getOption( 'idle-delay', $repoSettings->getSetting( 'dispatchIdleDelay' ) );
 		$selectedClients = $this->getOption( 'client' );
 
 		$clientWikis = $this->getClientWikis(
-			$wikibaseRepo->getSettings()->getSetting( 'localClientDatabases' )
+			$repoSettings->getSetting( 'localClientDatabases' )
 		);
 
 		if ( empty( $clientWikis ) ) {
@@ -259,9 +263,9 @@ class DispatchChanges extends Maintenance {
 
 		$dispatcher = $this->newChangeDispatcher(
 			$clientWikis,
-			$wikibaseRepo->getStore()->getEntityChangeLookup(),
-			$wikibaseRepo->getSettings(),
-			$wikibaseRepo->getLogger()
+			WikibaseRepo::getStore()->getEntityChangeLookup(),
+			$repoSettings,
+			WikibaseRepo::getLogger()
 		);
 
 		$dispatcher->getDispatchCoordinator()->initState( $clientWikis );

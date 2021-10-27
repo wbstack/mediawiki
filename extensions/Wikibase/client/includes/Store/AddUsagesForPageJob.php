@@ -76,9 +76,8 @@ class AddUsagesForPageJob extends Job {
 			$params['usages'],
 			'$params["usages"]' );
 
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$usageUpdater = $wikibaseClient->getStore()->getUsageUpdater();
-		$idParser = $wikibaseClient->getEntityIdParser();
+		$usageUpdater = WikibaseClient::getStore()->getUsageUpdater();
+		$idParser = WikibaseClient::getEntityIdParser();
 		$this->overrideServices( $usageUpdater, $idParser );
 	}
 

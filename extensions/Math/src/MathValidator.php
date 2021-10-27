@@ -1,7 +1,11 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
 use DataValues\StringValue;
+use InvalidArgumentException;
 use MediaWiki\Extension\Math\InputCheck\RestbaseChecker;
+use MediaWiki\MediaWikiServices;
 use ValueValidators\Error;
 use ValueValidators\Result;
 use ValueValidators\ValueValidator;
@@ -18,18 +22,24 @@ class MathValidator implements ValueValidator {
 	 *
 	 * @param StringValue $value The value to validate
 	 *
-	 * @return \ValueValidators\Result
+	 * @return Result
 	 * @throws InvalidArgumentException if not called with a StringValue
 	 */
 	public function validate( $value ) {
+		global $wgMathUseRestBase;
 		if ( !( $value instanceof StringValue ) ) {
 			throw new InvalidArgumentException( '$value must be a StringValue' );
 		}
 
 		// get input String from value
 		$tex = $value->getValue();
-
-		$checker = new RestbaseChecker( $tex );
+		if ( $wgMathUseRestBase ) {
+			$checker = new RestbaseChecker( $tex );
+		} else {
+			$checker = MediaWikiServices::getInstance()
+				->getService( 'Math.CheckerFactory' )
+				->newMathoidChecker( $tex, 'tex' );
+		}
 		if ( $checker->isValid() ) {
 			return Result::newSuccess();
 		}

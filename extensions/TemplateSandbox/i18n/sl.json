@@ -28,7 +28,7 @@
 	"templatesandbox-invalid-prefix": "Navedena predpona peskovnika ni veljavna.",
 	"templatesandbox-prefix-not-local": "Navedena predpona peskovnika ni lokalna.",
 	"templatesandbox-page-or-revid": "Navesti morate naslov strani ali ID-številko redakcije.",
-	"templatesandbox-fail-post": "<em>Ker je prišlo do izgube podatkov o seji, smo predogled skrili kot previdnostni ukrep pred napadi z JavaScriptom.</em>\n\n<strong>Če je to veljaven poskus predogleda, poskusite znova.</strong>\nČe še vedno ne deluje, se poskusite [[Special:UserLogout|odjaviti]] in znova prijaviti.",
+	"templatesandbox-fail-post": "<em>Ker je prišlo do izgube podatkov o seji, smo predogled zaradi preprečevanja napadov z JavaScriptom skrili.</em>\n\n<strong>Če je to veljaven poskus predogleda, poskusite znova.</strong>\nČe dejanje še vedno ne bo mogoče, se poskusite [[Special:UserLogout|odjaviti]] in znova prijaviti.",
 	"templatesandbox-fail-post-anon": "<em>Ker niste prijavljeni, smo predogled skrili kot previdnostni ukrep pred napadi z JavaScriptom.</em>\n\n<strong>Če je to veljaven poskus predogleda, se [[Special:UserLogin|prijavite]] in poskusite znova.</strong>",
 	"templatesandbox-editform-need-template": "Za predogled še ene strani s to predlogo morate določiti ime predloge.",
 	"templatesandbox-editform-need-title": "Za predogled druge strani s to predlogo morate navesti naslov strani.",

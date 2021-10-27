@@ -26,6 +26,8 @@
 	"twocolconflict-special-header-overview": "在您進行編輯時，剛好也有其他編者在相同的頁面上編輯，並比您先發布內容。您的修訂的唯讀複本保存在下方。在編輯衝突介面裡所做出的變動並不會直接反映出。要使用編輯衝突介面來合併更改並解決問題，請返回到前一個分頁。",
 	"twocolconflict-special-not-saved": "尚未發布",
 	"twocolconflict-special-textarea-hint": "您可以檢視並複製您的修訂的原有 wiki 語法：",
+	"twocolconflict-special-malformed-title": "缺少或無效的標題。",
+	"twocolconflict-special-expired": "沒有內容。此問題代表著在前一陣子您之前有遇到編輯衝突，而當時您臨時儲存的文字現在已逾期。",
 	"twocolconflict-split-header-hint": "若您有在[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 此頁面]留下意見回饋，您可以協助讓此功能變得更好。",
 	"twocolconflict-split-header-hint-beta": "感謝您使用此測試功能。若您願意[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 在此頁面]留下意見回饋，就能協助這個功能可以變得更好。",
 	"twocolconflict-split-header-overview": "當您在編輯時，有另一位使用者剛好編輯了相同頁面，並早於您之前做出發布。請檢閱兩邊的版本，並合併它們。當您點擊「{{int:publishchanges}}」時，所選框內的文字將會被儲存下來。",
@@ -68,10 +70,10 @@
 	"twocolconflict-split-tour-dialog-message-single-column-view": "很不巧地，有其他人和您在同一時間做出發布，請在下一個頁面預覽註解。如有需要的話，您可以編輯您自己的內容，並在最後的次序更改。",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "解決問題",
 	"twocolconflict-talk-header-overview": "有其他人剛好與您在同一時間做出發布。請檢閱下方註解，並挑選發布的順序。若有需要的話，您可以編輯您的文字。",
-	"twocolconflict-talk-your": "您的項目",
-	"twocolconflict-talk-conflicting": "衝突項目",
+	"twocolconflict-talk-your": "您的評論",
+	"twocolconflict-talk-conflicting": "衝突評論",
 	"twocolconflict-talk-switch-tooltip": "切換順序",
-	"twocolconflict-talk-reorder-prompt": "定位您與衝突項目關聯的項目：",
+	"twocolconflict-talk-reorder-prompt": "定位您與衝突評論關聯的評論：",
 	"twocolconflict-talk-same-order": "維持在後",
 	"twocolconflict-talk-reverse-order": "向前移動"
 }

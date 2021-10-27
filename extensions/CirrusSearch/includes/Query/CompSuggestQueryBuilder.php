@@ -22,7 +22,7 @@ use Wikimedia\Assert\Assert;
 class CompSuggestQueryBuilder {
 	use QueryBuilderTraits;
 
-	const VARIANT_EXTRA_DISCOUNT = 0.0001;
+	public const VARIANT_EXTRA_DISCOUNT = 0.0001;
 
 	/** @var SearchContext (final) */
 	private $searchContext;
@@ -39,7 +39,7 @@ class CompSuggestQueryBuilder {
 	/** @var int (final) */
 	private $offset;
 
-	/** @var array $mergedProfiles (mutable) state built after calling self::build */
+	/** @var array (mutable) state built after calling self::build */
 	private $mergedProfiles;
 
 	/**
@@ -84,7 +84,7 @@ class CompSuggestQueryBuilder {
 	 * @return Suggest
 	 */
 	public function build( $term, $variants = null ) {
-		$this->checkTitleSearchRequestLength( $term );
+		$this->checkTitleSearchRequestLength( $term, $this->searchContext );
 		$origTerm = $term;
 		if ( mb_strlen( $term ) > SuggestBuilder::MAX_INPUT_LENGTH ) {
 			// Trim the query otherwise we won't find results
@@ -290,7 +290,7 @@ class CompSuggestQueryBuilder {
 	 * @return int the number of results to fetch from elastic
 	 */
 	public static function computeHardLimit( $limit, $offset, SearchConfig $config ) {
-		$limit = $limit + $offset;
+		$limit += $offset;
 		$hardLimit = $config->get( 'CirrusSearchCompletionSuggesterHardLimit' );
 		if ( $hardLimit === null ) {
 			$hardLimit = 50;

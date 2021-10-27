@@ -8,6 +8,23 @@ use MediaWiki\Storage\NameTableStore;
 
 return [
 
+	'EchoAttributeManager' => function ( MediaWikiServices $services ): EchoAttributeManager {
+		$userGroupManager = $services->getUserGroupManager();
+		$echoConfig = $services->getConfigFactory()->makeConfig( 'Echo' );
+		$notifications = $echoConfig->get( 'EchoNotifications' );
+		$categories = $echoConfig->get( 'EchoNotificationCategories' );
+		$typeAvailability = $echoConfig->get( 'DefaultNotifyTypeAvailability' );
+		$typeAvailabilityByCategory = $echoConfig->get( 'NotifyTypeAvailabilityByCategory' );
+
+		return new EchoAttributeManager(
+			$notifications,
+			$categories,
+			$typeAvailability,
+			$typeAvailabilityByCategory,
+			$userGroupManager
+		);
+	},
+
 	'EchoPushNotificationServiceClient' => function ( MediaWikiServices $services ):
 	NotificationServiceClient {
 		$echoConfig = $services->getConfigFactory()->makeConfig( 'Echo' );
@@ -30,8 +47,6 @@ return [
 		$dbw = $loadBalancer->getLazyConnectionRef( DB_MASTER, [], $database );
 		$dbr = $loadBalancer->getLazyConnectionRef( DB_REPLICA, [], $database );
 
-		$centralIdLookup = CentralIdLookup::factory();
-
 		$pushProviderStore = new NameTableStore(
 			$loadBalancer,
 			$services->getMainWANObjectCache(),
@@ -43,7 +58,26 @@ return [
 			$database
 		);
 
-		return new SubscriptionManager( $dbw, $dbr, $centralIdLookup, $pushProviderStore );
+		$pushTopicStore = new NameTableStore(
+			$loadBalancer,
+			$services->getMainWANObjectCache(),
+			LoggerFactory::getInstance( 'Echo' ),
+			'echo_push_topic',
+			'ept_id',
+			'ept_text',
+			null,
+			$database
+		);
+
+		$maxSubscriptionsPerUser = $echoConfig->get( 'EchoPushMaxSubscriptionsPerUser' );
+
+		return new SubscriptionManager(
+			$dbw,
+			$dbr,
+			$pushProviderStore,
+			$pushTopicStore,
+			$maxSubscriptionsPerUser
+		);
 	}
 
 ];

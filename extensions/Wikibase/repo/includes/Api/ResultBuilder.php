@@ -16,11 +16,12 @@ use Wikibase\DataModel\Statement\Statement;
 use Wikibase\DataModel\Statement\StatementList;
 use Wikibase\DataModel\Term\AliasGroupList;
 use Wikibase\DataModel\Term\TermList;
-use Wikibase\Lib\LanguageFallbackChain;
 use Wikibase\Lib\Serialization\CallbackFactory;
 use Wikibase\Lib\Serialization\SerializationModifier;
 use Wikibase\Lib\Store\EntityRevision;
-use Wikibase\Lib\Store\EntityTitleLookup;
+use Wikibase\Lib\TermLanguageFallbackChain;
+use Wikibase\Repo\Dumpers\JsonDataTypeInjector;
+use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -45,9 +46,9 @@ class ResultBuilder {
 	private $result;
 
 	/**
-	 * @var EntityTitleLookup
+	 * @var EntityTitleStoreLookup
 	 */
-	private $entityTitleLookup;
+	private $entityTitleStoreLookup;
 
 	/**
 	 * @var SerializerFactory
@@ -90,8 +91,13 @@ class ResultBuilder {
 	private $missingEntityCounter = -1;
 
 	/**
+	 * @var JsonDataTypeInjector
+	 */
+	private $dataTypeInjector;
+
+	/**
 	 * @param ApiResult $result
-	 * @param EntityTitleLookup $entityTitleLookup
+	 * @param EntityTitleStoreLookup $entityTitleStoreLookup
 	 * @param SerializerFactory $serializerFactory
 	 * @param Serializer $entitySerializer
 	 * @param SiteLookup $siteLookup
@@ -100,7 +106,7 @@ class ResultBuilder {
 	 */
 	public function __construct(
 		ApiResult $result,
-		EntityTitleLookup $entityTitleLookup,
+		EntityTitleStoreLookup $entityTitleStoreLookup,
 		SerializerFactory $serializerFactory,
 		Serializer $entitySerializer,
 		SiteLookup $siteLookup,
@@ -108,7 +114,7 @@ class ResultBuilder {
 		$addMetaData = null
 	) {
 		$this->result = $result;
-		$this->entityTitleLookup = $entityTitleLookup;
+		$this->entityTitleStoreLookup = $entityTitleStoreLookup;
 		$this->serializerFactory = $serializerFactory;
 		$this->entitySerializer = $entitySerializer;
 		$this->siteLookup = $siteLookup;
@@ -117,6 +123,12 @@ class ResultBuilder {
 
 		$this->modifier = new SerializationModifier();
 		$this->callbackFactory = new CallbackFactory();
+
+		$this->dataTypeInjector = new JsonDataTypeInjector(
+			$this->modifier,
+			$this->callbackFactory,
+			$dataTypeLookup
+		);
 	}
 
 	/**
@@ -267,7 +279,7 @@ class ResultBuilder {
 	 * @param string[]|string $props a list of fields to include, or "all"
 	 * @param string[]|null $filterSiteIds A list of site IDs to filter by
 	 * @param string[] $filterLangCodes A list of language codes to filter by
-	 * @param LanguageFallbackChain[] $fallbackChains with keys of the origional language
+	 * @param TermLanguageFallbackChain[] $termFallbackChains with keys of the origional language
 	 */
 	public function addEntityRevision(
 		$sourceEntityIdSerialization,
@@ -275,7 +287,7 @@ class ResultBuilder {
 		$props = 'all',
 		array $filterSiteIds = null,
 		array $filterLangCodes = [],
-		array $fallbackChains = []
+		array $termFallbackChains = []
 	) {
 		$entity = $entityRevision->getEntity();
 		$entityId = $entity->getId();
@@ -304,7 +316,7 @@ class ResultBuilder {
 				$props,
 				$filterSiteIds,
 				$filterLangCodes,
-				$fallbackChains
+				$termFallbackChains
 			);
 
 			$record = array_merge( $record, $entitySerialization );
@@ -329,7 +341,7 @@ class ResultBuilder {
 	}
 
 	private function addPageInfoToRecord( array $record, EntityRevision $entityRevision ): array {
-		$title = $this->entityTitleLookup->getTitleForId( $entityRevision->getEntity()->getId() );
+		$title = $this->entityTitleStoreLookup->getTitleForId( $entityRevision->getEntity()->getId() );
 		$record['pageid'] = $title->getArticleID();
 		$record['ns'] = $title->getNamespace();
 		$record['title'] = $title->getPrefixedText();
@@ -359,16 +371,16 @@ class ResultBuilder {
 	 * @param array|string $props
 	 * @param string[]|null $filterSiteIds
 	 * @param string[] $filterLangCodes
-	 * @param LanguageFallbackChain[] $fallbackChains
+	 * @param TermLanguageFallbackChain[] $termFallbackChains
 	 *
 	 * @return array
 	 */
-	private function getModifiedEntityArray(
+	public function getModifiedEntityArray(
 		EntityDocument $entity,
 		$props,
 		?array $filterSiteIds,
 		array $filterLangCodes,
-		array $fallbackChains
+		array $termFallbackChains
 	) {
 		$serialization = $this->entitySerializer->serialize( $entity );
 
@@ -378,10 +390,10 @@ class ResultBuilder {
 			$serialization = $this->injectEntitySerializationWithSiteLinkUrls( $serialization );
 		}
 		$serialization = $this->sortEntitySerializationSiteLinks( $serialization );
-		$serialization = $this->injectEntitySerializationWithDataTypes( $serialization );
+		$serialization = $this->dataTypeInjector->injectEntitySerializationWithDataTypes( $serialization );
 		$serialization = $this->filterEntitySerializationUsingSiteIds( $serialization, $filterSiteIds );
-		if ( !empty( $fallbackChains ) ) {
-			$serialization = $this->addEntitySerializationFallbackInfo( $serialization, $fallbackChains );
+		if ( !empty( $termFallbackChains ) ) {
+			$serialization = $this->addEntitySerializationFallbackInfo( $serialization, $termFallbackChains );
 		}
 		$serialization = $this->filterEntitySerializationUsingLangCodes(
 			$serialization,
@@ -436,23 +448,6 @@ class ResultBuilder {
 		return $serialization;
 	}
 
-	private function injectEntitySerializationWithDataTypes( array $serialization ) {
-		$serialization = $this->modifier->modifyUsingCallback(
-			$serialization,
-			'claims/*/*/mainsnak',
-			$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup )
-		);
-		$serialization = $this->getArrayWithDataTypesInGroupedSnakListAtPath(
-			$serialization,
-			'claims/*/*/qualifiers'
-		);
-		$serialization = $this->getArrayWithDataTypesInGroupedSnakListAtPath(
-			$serialization,
-			'claims/*/*/references/*/snaks'
-		);
-		return $serialization;
-	}
-
 	private function filterEntitySerializationUsingSiteIds(
 		array $serialization,
 		array $siteIds = null
@@ -469,25 +464,25 @@ class ResultBuilder {
 
 	/**
 	 * @param array $serialization
-	 * @param LanguageFallbackChain[] $fallbackChains
+	 * @param TermLanguageFallbackChain[] $termFallbackChains
 	 *
 	 * @return array
 	 */
 	private function addEntitySerializationFallbackInfo(
 		array $serialization,
-		array $fallbackChains
+		array $termFallbackChains
 	) {
 		if ( isset( $serialization['labels'] ) ) {
 			$serialization['labels'] = $this->getTermsSerializationWithFallbackInfo(
 				$serialization['labels'],
-				$fallbackChains
+				$termFallbackChains
 			);
 		}
 
 		if ( isset( $serialization['descriptions'] ) ) {
 			$serialization['descriptions'] = $this->getTermsSerializationWithFallbackInfo(
 				$serialization['descriptions'],
-				$fallbackChains
+				$termFallbackChains
 			);
 		}
 
@@ -496,16 +491,16 @@ class ResultBuilder {
 
 	/**
 	 * @param array $serialization
-	 * @param LanguageFallbackChain[] $fallbackChains
+	 * @param TermLanguageFallbackChain[] $termFallbackChains
 	 *
 	 * @return array
 	 */
 	private function getTermsSerializationWithFallbackInfo(
 		array $serialization,
-		array $fallbackChains
+		array $termFallbackChains
 	) {
 		$newSerialization = $serialization;
-		foreach ( $fallbackChains as $requestedLanguageCode => $fallbackChain ) {
+		foreach ( $termFallbackChains as $requestedLanguageCode => $fallbackChain ) {
 			if ( !array_key_exists( $requestedLanguageCode, $serialization ) ) {
 				$fallbackSerialization = $fallbackChain->extractPreferredValue( $serialization );
 				if ( $fallbackSerialization !== null ) {
@@ -860,10 +855,9 @@ class ResultBuilder {
 			);
 		}
 
-		$values = $this->modifier->modifyUsingCallback(
+		$values = $this->dataTypeInjector->getArrayWithDataTypesInSnakAtPath(
 			$values,
-			'*/*/mainsnak',
-			$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup )
+			'*/*/mainsnak'
 		);
 
 		if ( $this->addMetaData ) {
@@ -893,10 +887,9 @@ class ResultBuilder {
 			$value = $this->getClaimsArrayWithMetaData( $value );
 		}
 
-		$value = $this->modifier->modifyUsingCallback(
+		$value = $this->dataTypeInjector->getArrayWithDataTypesInSnakAtPath(
 			$value,
-			'mainsnak',
-			$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup )
+			'mainsnak'
 		);
 
 		$this->setValue( null, 'claim', $value );
@@ -912,19 +905,20 @@ class ResultBuilder {
 		array $array,
 		$claimPath = ''
 	) {
-		$array = $this->getArrayWithDataTypesInGroupedSnakListAtPath(
+		$array = $this->dataTypeInjector->getArrayWithDataTypesInGroupedSnakListAtPath(
 			$array,
 			$claimPath . 'references/*/snaks'
 		);
-		$array = $this->getArrayWithDataTypesInGroupedSnakListAtPath(
+		$array = $this->dataTypeInjector->getArrayWithDataTypesInGroupedSnakListAtPath(
 			$array,
 			$claimPath . 'qualifiers'
 		);
-		$array = $this->modifier->modifyUsingCallback(
+
+		$array = $this->dataTypeInjector->getArrayWithDataTypesInSnakAtPath(
 			$array,
-			$claimPath . 'mainsnak',
-			$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup )
+			$claimPath . 'mainsnak'
 		);
+
 		return $array;
 	}
 
@@ -987,27 +981,13 @@ class ResultBuilder {
 
 		$value = $serializer->serialize( $reference );
 
-		$value = $this->getArrayWithDataTypesInGroupedSnakListAtPath( $value, 'snaks' );
+		$value = $this->dataTypeInjector->getArrayWithDataTypesInGroupedSnakListAtPath( $value, 'snaks' );
 
 		if ( $this->addMetaData ) {
 			$value = $this->getReferenceArrayWithMetaData( $value );
 		}
 
 		$this->setValue( null, 'reference', $value );
-	}
-
-	/**
-	 * @param array $array
-	 * @param string $path
-	 *
-	 * @return array
-	 */
-	private function getArrayWithDataTypesInGroupedSnakListAtPath( array $array, $path ) {
-		return $this->modifier->modifyUsingCallback(
-			$array,
-			$path,
-			$this->callbackFactory->getCallbackToAddDataTypeToSnaksGroupedByProperty( $this->dataTypeLookup )
-		);
 	}
 
 	private function getReferenceArrayWithMetaData( array $array ) {

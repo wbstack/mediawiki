@@ -3,8 +3,7 @@
 	"require": {
 		"php-http/httplug": "^2.0",
 		"php-http/discovery": "^1.9.1",
-		"php-http/guzzle6-adapter": "^2.0.0",
-		"mailgun/mailgun-php": "^3.2.0",
+		"mailgun/mailgun-php": "^3.5.1",
 		"nyholm/psr7": "^1.4"
 	},
 	"require-dev": {
@@ -16,11 +15,14 @@
 	"scripts": {
 		"test": [
 			"parallel-lint . --exclude vendor --exclude node_modules",
-			"minus-x check ."
+			"minus-x check .",
+			"@phpcs"
 		],
 		"fix": [
-			"minus-x fix ."
-		]
+			"minus-x fix .",
+			"phpcbf"
+		],
+		"phpcs": "phpcs -sp --cache"
 	},
 	"prepend-autoloader": false,
 	"optimize-autoloader": true

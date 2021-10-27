@@ -12,10 +12,11 @@ use Wikibase\Lib\Modules\MediaWikiConfigModule;
  * Dynamically registering data bridge resource loader modules in extension.json
  * It should be deleted and moved to extension.json once the feature flag has been removed.
  *
+ * @license GPL-2.0-or-later
  */
 class DataBridgeResourceLoaderModules {
 	public static function initModule() {
-		$clientSettings = WikibaseClient::getDefaultInstance()->getSettings();
+		$clientSettings = WikibaseClient::getSettings();
 		return new ResourceLoaderFileModule(
 			[
 				'scripts' => [
@@ -36,7 +37,7 @@ class DataBridgeResourceLoaderModules {
 	}
 
 	public static function externalModifiersModule() {
-		$clientSettings = WikibaseClient::getDefaultInstance()->getSettings();
+		$clientSettings = WikibaseClient::getSettings();
 		return new ResourceLoaderFileModule(
 			[
 				'styles' => [
@@ -53,7 +54,7 @@ class DataBridgeResourceLoaderModules {
 	}
 
 	public static function configModule() {
-		$clientSettings = WikibaseClient::getDefaultInstance()->getSettings();
+		$clientSettings = WikibaseClient::getSettings();
 		return new MediaWikiConfigModule(
 			[
 				'getconfigvalueprovider' => function () use ( $clientSettings ) {
@@ -70,7 +71,7 @@ class DataBridgeResourceLoaderModules {
 	}
 
 	public static function appModule() {
-		$clientSettings = WikibaseClient::getDefaultInstance()->getSettings();
+		$clientSettings = WikibaseClient::getSettings();
 		return new ResourceLoaderFileModule(
 			[
 				'scripts' => [
@@ -165,7 +166,7 @@ class DataBridgeResourceLoaderModules {
 	}
 
 	public static function modernAppModule() {
-		$clientSettings = WikibaseClient::getDefaultInstance()->getSettings();
+		$clientSettings = WikibaseClient::getSettings();
 		return new ResourceLoaderFileModule(
 			[
 				'scripts' => [
@@ -181,7 +182,7 @@ class DataBridgeResourceLoaderModules {
 	}
 
 	public static function legacyAppModule() {
-		$clientSettings = WikibaseClient::getDefaultInstance()->getSettings();
+		$clientSettings = WikibaseClient::getSettings();
 		return new ResourceLoaderFileModule(
 			[
 				'scripts' => [

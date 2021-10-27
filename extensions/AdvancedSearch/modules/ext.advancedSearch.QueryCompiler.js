@@ -19,8 +19,7 @@
 	 * @return {string[]}
 	 */
 	mw.libs.advancedSearch.QueryCompiler.prototype.formatSearchFields = function ( state ) {
-		var queryElements = [],
-			greedyQuery = null;
+		var queryElements = [];
 
 		this.fields.forEach( function ( field ) {
 			var val = state.getField( field.id ),
@@ -30,16 +29,8 @@
 				return;
 			}
 
-			// FIXME: Should fail if there is more than one greedy field!
-			if ( field.greedy && !greedyQuery ) {
-				greedyQuery = field.formatter( val );
-			} else {
-				queryElements.push( formattedQueryElement );
-			}
+			queryElements.push( formattedQueryElement );
 		} );
-		if ( greedyQuery ) {
-			queryElements.push( greedyQuery );
-		}
 
 		return queryElements;
 	};

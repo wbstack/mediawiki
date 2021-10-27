@@ -114,11 +114,9 @@ class StatementModificationHelper {
 		try {
 			$snak = $this->snakFactory->newSnak( $propertyId, $params['snaktype'], $valueData );
 			return $snak;
-		} catch ( InvalidArgumentException $ex ) {
-			$this->errorReporter->dieException( $ex, 'invalid-snak' );
-		} catch ( OutOfBoundsException $ex ) {
-			$this->errorReporter->dieException( $ex, 'invalid-snak' );
 		} catch ( PropertyDataTypeLookupException $ex ) {
+			$this->errorReporter->dieException( $ex, 'no-such-entity' );
+		} catch ( InvalidArgumentException | OutOfBoundsException $ex ) {
 			$this->errorReporter->dieException( $ex, 'invalid-snak' );
 		}
 

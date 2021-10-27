@@ -1,5 +1,8 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use ParserOutput;
 use Wikibase\DataModel\Services\Entity\PropertyDataTypeMatcher;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\Repo\ParserOutput\StatementDataUpdater;
@@ -12,7 +15,9 @@ use Wikibase\Repo\ParserOutput\StatementDataUpdater;
  */
 class MathDataUpdater implements StatementDataUpdater {
 
+	/** @var bool */
 	private $hasMath = false;
+
 	/**
 	 * @var PropertyDataTypeMatcher
 	 */
@@ -53,3 +58,5 @@ class MathDataUpdater implements StatementDataUpdater {
 		}
 	}
 }
+
+class_alias( MathDataUpdater::class, 'MathDataUpdater' );

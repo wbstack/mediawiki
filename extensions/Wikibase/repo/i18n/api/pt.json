@@ -3,7 +3,8 @@
 		"authors": [
 			"Athena in Wonderland",
 			"Fúlvio",
-			"Hamilton Abreu"
+			"Hamilton Abreu",
+			"SaldırganSincap"
 		]
 	},
 	"apihelp-wbavailablebadges-description": "Consulta os objetos de emblemas disponíveis.",
@@ -75,7 +76,7 @@
 	"apihelp-wbgetentities-summary": "Obter os dados de várias entidades Wikibase",
 	"apihelp-wbgetentities-param-ids": "Os identificadores das entidades das quais serão obtidos os dados",
 	"apihelp-wbgetentities-param-sites": "O identificador do sítio onde reside a página correspondente\nUsar em conjunto com o título (<code>title</code>), mas indicar só um sítio para vários títulos ou só um título para vários sítios.",
-	"apihelp-wbgetentities-param-titles": "O título dá página correspondente\nUsar em conjunto com <code>sites</code>, mas indicar só um sítio para vários títulos ou só um título para vários sítios.",
+	"apihelp-wbgetentities-param-titles": "O título dá página correspondente.\nUsar em conjunto com <code>sites</code>, mas indicar só um sítio para vários títulos ou só um título para vários sítios.",
 	"apihelp-wbgetentities-param-redirects": "Indica se os redirecionamentos devem ser resolvidos.\nSe definido como não (\"no\"), os redirecionamentos serão tratados como entidades eliminadas.",
 	"apihelp-wbgetentities-param-props": "Os nomes das propriedades a serem obtidas de cada entidade.\nSerão também filtradas por quaisquer línguas indicadas.",
 	"apihelp-wbgetentities-param-languages": "Por omissão, os valores internacionalizados são devolvidos nas línguas disponíveis.\nEste parâmetro permite filtrá-los para obter apenas uma ou mais línguas, fornecendo um ou mais códigos de língua.",
@@ -163,6 +164,7 @@
 	"apihelp-wbsearchentities-example-4": "Pesquisar \"abc\" em inglês com o limite 2 e a posição 2",
 	"apihelp-wbsearchentities-example-5": "Pesquisar \"alphabet\" em inglês omitindo o parâmetro do URL",
 	"apihelp-wbsearchentities-example-6": "Pesquisar \"Q1234\" em inglês, para corresponder ao identificador da entidade.",
+	"apihelp-query+entityterms-example-item": "Obter os rótulos e nomes alternativos do elemento Q84.",
 	"apihelp-query+wbcontentlanguages-summary": "Devolve informação sobre as línguas de conteúdo que a extensão Wikibase aceita em diferentes contextos.",
 	"apihelp-query+wbcontentlanguages-param-context": "O contexto no qual as línguas de conteúdo devem ser válidas.",
 	"apihelp-query+wbcontentlanguages-paramvalue-context-term": "Os termos (rótulo, descrição, nomes alternativos) de uma entidade.",

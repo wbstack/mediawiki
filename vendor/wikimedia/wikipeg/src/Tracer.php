@@ -1,10 +1,7 @@
 <?php
 
-namespace Wikimedia\WikiPEG;
+namespace WikiPEG;
 
 interface Tracer {
-	public function trace( $event );
+  function trace($event);
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( Tracer::class, 'WikiPEG\Tracer' );

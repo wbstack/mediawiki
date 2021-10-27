@@ -2,6 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
+			"Jaideraf",
 			"Leonardo9387"
 		]
 	},
@@ -14,7 +16,7 @@
 	"advancedsearch-field-plain": "Esta palavra",
 	"advancedsearch-field-phrase": "Exatamente este texto",
 	"advancedsearch-field-or": "Uma dessas palavras",
-	"advancedsearch-field-not": "Não são estas palavras",
+	"advancedsearch-field-not": "Sem estas palavras",
 	"advancedsearch-field-subpageof": "Subpáginas desta página",
 	"advancedsearch-field-intitle": "O título da página contém",
 	"advancedsearch-field-deepcategory": "Página nestas categorias",
@@ -56,10 +58,14 @@
 	"advancedsearch-filesize-greater-than": "maior que",
 	"advancedsearch-filesize-smaller-than": "menor que",
 	"advancedsearch-sort-relevance": "Relevância",
+	"advancedsearch-sort-last-edit-asc": "Editar dados - mais antigo no topo",
 	"advancedsearch-sort-last-edit-desc": "Data de edição - atual no topo",
+	"advancedsearch-sort-create-timestamp-asc": "Data da criação - mais antiga no topo",
 	"advancedsearch-sort-create-timestamp-desc": "Data de criação - atual no topo",
 	"advancedsearch-sort-preview-relevance": "relevância",
+	"advancedsearch-sort-preview-last-edit-asc": "editado pelo menos recentemente",
 	"advancedsearch-sort-preview-last-edit-desc": "data de edição",
+	"advancedsearch-sort-preview-create-timestamp-asc": "criado pelo menos recentemente",
 	"advancedsearch-sort-preview-create-timestamp-desc": "data de criação",
 	"advancedsearch-namespaces-search-in": "Pesquisar em:",
 	"advancedsearch-namespaces-remember": "Lembrar seleção para futuras pesquisas",
@@ -70,5 +76,5 @@
 	"advancedsearch-namespaces-placeholder": "Acrescentar espaços nominais…",
 	"prefs-advancedsearch": "Pesquisa avançada",
 	"advancedsearch-preference-help": "A pesquisa avançada adiciona um formulário à página Special:Search. Este permite-lhe fazer pesquisas especializadas, mesmo que não conheça nenhuma sintaxe de pesquisa. Também altera a forma como os espaços nominais/domínios podem ser selecionados.",
-	"advancedsearch-preference-disable": "Não mostrar a interface da pesquisa avançada"
+	"advancedsearch-preference-disable": "Não mostrar a interface da pesquisa avançada ao usar Especial:Pesquisar"
 }

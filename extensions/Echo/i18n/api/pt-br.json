@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
 			"Felipe L. Ewald",
 			"TheEduGobi"
 		]
@@ -32,8 +33,9 @@
 	"apihelp-echopushsubscriptions+create-param-provider": "O provedor de serviços push para o qual registrar um token.",
 	"apihelp-echopushsubscriptions+create-param-providertoken": "O token para registrar.",
 	"apihelp-echopushsubscriptions+create-example": "Registre uma assinatura push para o usuário atual.",
-	"apihelp-echopushsubscriptions+delete-summary": "Cancele o registro de assinaturas push para o usuário atual.",
+	"apihelp-echopushsubscriptions+delete-summary": "Cancele o registro de assinaturas push para o usuário atual ou outro usuário especificado.",
 	"apihelp-echopushsubscriptions+delete-param-providertoken": "O token associado à assinatura push para cancelar o registro.",
+	"apihelp-echopushsubscriptions+delete-param-centraluserid": "O ID do usuário central associado à assinatura para cancelar o registro.",
 	"apihelp-echopushsubscriptions+delete-example": "Cancele o registro de uma assinatura push para o usuário atual.",
 	"apihelp-query+notifications-description": "Receber notificações aguardando pelo usuário atual.",
 	"apihelp-query+notifications-summary": "Receber notificações aguardando pelo usuário atual.",
@@ -76,5 +78,7 @@
 	"apiwarn-echo-deprecation-html": "<kbd>notformat=html</kbd> foi depreciado e será removido em breve. Use <kbd>notformat=special</kbd> em vez disso.",
 	"apierror-echo-event-creation-failed": "Não foi possível criar evento Echo",
 	"apierror-echo-push-token-exists": "O token fornecido já existe no banco de dados.",
-	"apierror-echo-push-token-not-found": "O token fornecido não foi encontrado no banco de dados."
+	"apierror-echo-push-token-not-found": "O token fornecido não foi encontrado no banco de dados.",
+	"apierror-echo-push-too-many-subscriptions": "O usuário atual já registrou o número máximo permitido de assinaturas push ($1).",
+	"apierror-echo-push-topic-required": "O campo do tópico é obrigatório para este provedor."
 }

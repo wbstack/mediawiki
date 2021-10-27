@@ -6,7 +6,6 @@ use HttpError;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\Lib\Store\EntityTitleLookup;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Special page for addressing entity data pages without knowing the namespace.
@@ -33,18 +32,23 @@ class SpecialEntityPage extends SpecialWikibasePage {
 	 */
 	private $entityTitleLookup;
 
-	public function __construct( EntityIdParser $entityIdParser, EntityTitleLookup $entityTitleLookup ) {
+	/**
+	 * @var string[]
+	 */
+	private $allowedQueryParameters;
+
+	public function __construct(
+		EntityIdParser $entityIdParser,
+		EntityTitleLookup $entityTitleLookup
+	) {
 		parent::__construct( 'EntityPage' );
 
 		$this->entityIdParser = $entityIdParser;
 		$this->entityTitleLookup = $entityTitleLookup;
-	}
-
-	public static function newFromGlobalState(): self {
-		return new self(
-			WikibaseRepo::getDefaultInstance()->getEntityIdParser(),
-			WikibaseRepo::getDefaultInstance()->getEntityTitleLookup()
-		);
+		$this->allowedQueryParameters = [
+			'action',
+			'oldid',
+		];
 	}
 
 	/**
@@ -72,11 +76,12 @@ class SpecialEntityPage extends SpecialWikibasePage {
 		$title = $this->entityTitleLookup->getTitleForId( $entityId );
 
 		if ( $title === null ) {
-			// @phan-suppress-next-line SecurityCheck-DoubleEscaped
 			throw new HttpError( 400, $this->msg( 'wikibase-entitypage-bad-id', $id ) );
 		}
 
-		$this->getOutput()->redirect( $title->getFullURL(), 301 );
+		$params = $this->getRequest()->getValues( ...$this->allowedQueryParameters );
+
+		$this->getOutput()->redirect( $title->getFullURL( $params ), 301 );
 	}
 
 }

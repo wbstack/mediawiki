@@ -8,6 +8,8 @@
 			"그냥기여자"
 		]
 	},
+	"nstab-data": "데이터",
+	"tooltip-ca-nstab-data": "데이터 페이지 보기",
 	"jsonconfig-edit-action-apply": "적용",
 	"jsonconfig-edit-action-cancel": "취소",
 	"jsonconfig-edit-button-label": "표로 편집",

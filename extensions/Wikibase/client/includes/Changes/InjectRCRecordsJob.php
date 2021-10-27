@@ -114,6 +114,7 @@ class InjectRCRecordsJob extends Job {
 	 * @param EntityChangeLookup $changeLookup
 	 * @param EntityChangeFactory $changeFactory
 	 * @param RecentChangeFactory $rcFactory
+	 * @param TitleFactory $titleFactory
 	 * @param array $params Needs to have two keys: "change": the id of the change,
 	 *     "pages": array of pages, represented as $pageId => [ $namespace, $dbKey ].
 	 *
@@ -124,6 +125,7 @@ class InjectRCRecordsJob extends Job {
 		EntityChangeLookup $changeLookup,
 		EntityChangeFactory $changeFactory,
 		RecentChangeFactory $rcFactory,
+		TitleFactory $titleFactory,
 		array $params
 	) {
 		$title = Title::makeTitle( NS_SPECIAL, 'Badtitle/' . __CLASS__ );
@@ -156,8 +158,7 @@ class InjectRCRecordsJob extends Job {
 		$this->changeLookup = $changeLookup;
 		$this->changeFactory = $changeFactory;
 		$this->rcFactory = $rcFactory;
-
-		$this->titleFactory = new TitleFactory();
+		$this->titleFactory = $titleFactory;
 		$this->logger = new NullLogger();
 	}
 
@@ -165,17 +166,20 @@ class InjectRCRecordsJob extends Job {
 		$mwServices = MediaWikiServices::getInstance();
 		$wbServices = WikibaseClient::getDefaultInstance();
 
+		$store = WikibaseClient::getStore( $mwServices );
+
 		$job = new self(
 			$mwServices->getDBLoadBalancerFactory(),
-			$wbServices->getStore()->getEntityChangeLookup(),
-			$wbServices->getEntityChangeFactory(),
-			$wbServices->getRecentChangeFactory(),
+			$store->getEntityChangeLookup(),
+			WikibaseClient::getEntityChangeFactory( $mwServices ),
+			WikibaseClient::getRecentChangeFactory( $mwServices ),
+			$mwServices->getTitleFactory(),
 			$params
 		);
 
-		$job->setRecentChangesFinder( $wbServices->getStore()->getRecentChangesFinder() );
+		$job->setRecentChangesFinder( $store->getRecentChangesFinder() );
 
-		$job->setLogger( $wbServices->getLogger() );
+		$job->setLogger( WikibaseClient::getLogger( $mwServices ) );
 		$job->setStats( $mwServices->getStatsdDataFactory() );
 
 		return $job;
@@ -183,10 +187,6 @@ class InjectRCRecordsJob extends Job {
 
 	public function setRecentChangesFinder( RecentChangesFinder $rcDuplicateDetector ) {
 		$this->rcDuplicateDetector = $rcDuplicateDetector;
-	}
-
-	public function setTitleFactory( TitleFactory $titleFactory ) {
-		$this->titleFactory = $titleFactory;
 	}
 
 	public function setLogger( LoggerInterface $logger ) {

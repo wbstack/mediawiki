@@ -12,6 +12,7 @@ use Language;
 use MediaWiki\MediaWikiServices;
 use MWContentSerializationException;
 use MWException;
+use ParserCache;
 use ParserOutput;
 use Revision;
 use SearchEngine;
@@ -45,7 +46,7 @@ abstract class EntityHandler extends ContentHandler {
 	 * Bump the version when making incompatible changes
 	 * to parser output.
 	 */
-	const PARSER_VERSION = 3;
+	public const PARSER_VERSION = 3;
 
 	/**
 	 * @var FieldDefinitions
@@ -409,7 +410,7 @@ abstract class EntityHandler extends ContentHandler {
 	 * @param EntityId $id
 	 *
 	 * @throws InvalidArgumentException if $id refers to an entity of the wrong type.
-	 * @return Title
+	 * @return Title|null
 	 */
 	public function getTitleForId( EntityId $id ) {
 		if ( $id->getEntityType() !== $this->getEntityType() ) {
@@ -447,7 +448,7 @@ abstract class EntityHandler extends ContentHandler {
 	 * @return int
 	 */
 	final public function getEntityNamespace() {
-		$entityNamespaceLookup = WikibaseRepo::getDefaultInstance()->getEntityNamespaceLookup();
+		$entityNamespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 
 		$ns = $entityNamespaceLookup->getEntityNamespace( $this->getEntityType() );
 
@@ -465,7 +466,7 @@ abstract class EntityHandler extends ContentHandler {
 	 * @return string the role name of the slot
 	 */
 	final public function getEntitySlotRole() {
-		$entityNamespaceLookup = WikibaseRepo::getDefaultInstance()->getEntityNamespaceLookup();
+		$entityNamespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 
 		return $entityNamespaceLookup->getEntitySlotRole( $this->getEntityType() );
 	}
@@ -687,6 +688,34 @@ abstract class EntityHandler extends ContentHandler {
 		}
 
 		return $fieldsData;
+	}
+
+	/**
+	 * Produce page output suitable for indexing.
+	 * Does not include HTML.
+	 *
+	 * @param WikiPage $page
+	 * @param ParserCache|null $cache
+	 * @return bool|ParserOutput|null
+	 */
+	public function getParserOutputForIndexing( WikiPage $page, ParserCache $cache = null ) {
+		$parserOptions = $page->makeParserOptions( 'canonical' );
+		if ( $cache ) {
+			$parserOutput = $cache->get( $page, $parserOptions );
+			if ( $parserOutput ) {
+				return $parserOutput;
+			}
+		}
+
+		$renderer = MediaWikiServices::getInstance()->getRevisionRenderer();
+		$revisionRecord = $this->latestRevision( $page );
+		$parserOutput = $renderer->getRenderedRevision( $revisionRecord, $parserOptions )
+			// this will call EntityContent::getParserOutput() with $generateHtml = false
+			->getRevisionParserOutput( [
+				'generate-html' => false,
+			] );
+		// since we didn’t generate HTML, don’t call $cache->save()
+		return $parserOutput;
 	}
 
 }

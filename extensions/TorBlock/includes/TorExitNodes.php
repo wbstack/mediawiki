@@ -26,7 +26,13 @@
  * @license GPL-2.0-or-later
  */
 
+namespace MediaWiki\Extension\TorBlock;
+
+use CachedBagOStuff;
+use FormatJson;
+use Http;
 use MediaWiki\MediaWikiServices;
+use RequestContext;
 use Wikimedia\IPUtils;
 
 /**
@@ -107,6 +113,11 @@ class TorExitNodes {
 	 */
 	private static function fetchExitNodes() {
 		wfDebugLog( 'torblock', "Loading Tor exit node list cold." );
+
+		if ( defined( 'MW_PHPUNIT_TEST' ) ) {
+			// TEST-NET-1, RFC 5737
+			return [ '192.0.2.111', '192.0.2.222' ];
+		}
 
 		return self::fetchExitNodesFromOnionooServer() ?: self::fetchExitNodesFromTorProject();
 	}

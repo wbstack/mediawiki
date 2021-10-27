@@ -1,10 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"BaRaN6161 TURK"
+			"BaRaN6161 TURK",
+			"MuratTheTurkish"
 		]
 	},
-	"jsonconfig-desc": "JSON yapılandırmasının bir wikide depolanmasına izin verir",
+	"nstab-data": "Veri",
+	"tooltip-ca-nstab-data": "Medya sayfasını gör",
+	"jsonconfig-desc": "JSON yapılandırmasının bir vikide depolanmasına izin verir",
 	"jsonconfig-duplicate-field": "Birden fazla \"$1\" değeri bulundu",
 	"jsonconfig-edit-action-apply": "Uygula",
 	"jsonconfig-edit-action-cancel": "İptal",
@@ -19,7 +22,7 @@
 	"jsonconfig-edit-dialog-error-schema-missing": "JSON <code>schema</code> özelliği eksik veya bir nesne değil",
 	"jsonconfig-edit-dialog-title": "JSON'u düzenle",
 	"jsonconfig-err-array": "\"$1\" parametresi bir liste olmalıdır, ör. <kbd>[\"value1\", \"value2\", ...]</kbd>",
-	"jsonconfig-err-array-count": "\"$1\" listesinde $2 {{PLURAL:$2|değer|değer}} var, ancak \"$4\" ile aynı sayıda $3 {{PLURAL:$3|değer|değer}} olmalıdır.",
+	"jsonconfig-err-array-count": "\"$1\" listesinde $2 değer var, ancak \"$4\" ile aynı sayıda $3 değer olmalıdır.",
 	"jsonconfig-err-array-expected": "\"$1\" değerinin [...] parantezleri ile çevrili bir liste olması bekleniyordu",
 	"jsonconfig-err-assoc-array": "\"$1\" parametresi ilişkilendirilebilir bir dizi (sözlük) olmalıdır, ör. <kbd>{\"key\": \"value\", ...}</kbd>",
 	"jsonconfig-err-bad-header-string": "\"$1\" başlığı yalnızca harf, sayı ve alt çizgi karakterlerinden oluşmalı ve bir sayı ile başlamamalıdır",
@@ -43,7 +46,7 @@
 	"jsonconfig-optional-field": "(isteğe bağlı)",
 	"jsonconfig-type-name-invalid": "geçersiz",
 	"jsonconfig-type-name-string": "dize",
-	"jsonconfig-type-name-localized": "lokalize",
+	"jsonconfig-type-name-localized": "yerelleştirilmiş",
 	"jsonconfig-type-name-number": "numara",
 	"jsonconfig-type-name-boolean": "boole",
 	"jsonconfig-license": "$1 altındaki veriler.",
@@ -53,7 +56,7 @@
 	"jsonconfig-license-name-dl-de-by-1.0": "Veri lisansı Almanya – atıf – Sürüm 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Veri lisansı Almanya – atıf – sürüm 2.0",
 	"jsonconfig-license-copyrightwarning": "Değişiklikleri kaydederek [https://meta.wikimedia.org/wiki/Terms_of_Use/tr Kullanım Şartları]'nı kabul etmiş olursunuz ve katkınızı [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Değişiklikleri kaydederek [https://meta.wikimedia.org/wiki/Terms_of_Use Kullanım Şartları]'nı kabul edersiniz ve <code>licence</code> alanında belirtilen lisansa göre katkınızı geri dönülmez şekilde bırakmayı kabul edersiniz.",
+	"jsonconfig-license-copyrightwarning-license-unset": "Değişiklikleri kaydederek [https://meta.wikimedia.org/wiki/Terms_of_Use/tr Kullanım Şartları]'nı kabul edersiniz ve <code>licence</code> alanında belirtilen lisansa göre katkınızı geri dönülmez şekilde bırakmayı kabul edersiniz.",
 	"jsonconfig-license-notice": "'''Not:''' Bu sayfayı düzenlediğinizde, katkınızı [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] altında bırakmayı kabul edersiniz.",
 	"jsonconfig-license-notice-license-unset": "'''Not:''' Bu sayfayı düzenlediğinizde, katkınızı <code>licence</code> alanında belirtilen lisansa göre bırakmayı kabul edersiniz.",
 	"right-jsonconfig-flush": "API ile JsonConfig'i değiştir",

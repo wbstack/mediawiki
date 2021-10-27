@@ -11,6 +11,7 @@ use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\EntityLookupException;
 use Wikibase\DataModel\Services\Lookup\EntityRedirectLookup;
 use Wikibase\Lib\Store\SiteLinkLookup;
+use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
 
 /**
@@ -77,14 +78,19 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 		$this->entityLookup = $entityLookup;
 	}
 
-	public static function newFromGlobalState(): self {
+	public static function factory(
+		EntityIdParser $entityIdParser,
+		Store $store
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		// TODO move SiteLinkStore, EntityRedirectLookup and EntityLookup to service container
+		// and inject them directly instead of via Store
 		return new self(
 			$wikibaseRepo->getSiteLookup(),
-			$wikibaseRepo->getStore()->newSiteLinkStore(),
-			$wikibaseRepo->getStore()->getEntityRedirectLookup(),
-			$wikibaseRepo->getEntityIdParser(),
-			$wikibaseRepo->getStore()->getEntityLookup()
+			$store->newSiteLinkStore(),
+			$store->getEntityRedirectLookup(),
+			$entityIdParser,
+			$store->getEntityLookup()
 		);
 	}
 

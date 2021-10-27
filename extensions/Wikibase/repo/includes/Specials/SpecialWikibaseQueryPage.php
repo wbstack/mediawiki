@@ -19,19 +19,19 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 	/**
 	 * Max server side caching time in seconds.
 	 */
-	const CACHE_TTL_IN_SECONDS = 10;
+	protected const CACHE_TTL_IN_SECONDS = 10;
 
 	/**
 	 * The offset in use
 	 *
-	 * @var integer
+	 * @var int
 	 */
 	protected $offset = 0;
 
 	/**
 	 * The limit in use
 	 *
-	 * @var integer
+	 * @var int
 	 */
 	protected $limit = 0;
 
@@ -40,7 +40,7 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 	 * only makes sense in functions that are run after the query has been
 	 * done.
 	 *
-	 * @var integer
+	 * @var int
 	 */
 	protected $numRows;
 
@@ -57,7 +57,7 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 	public function __construct( $name = '', $restriction = '', $listed = true ) {
 		parent::__construct( $name, $restriction, $listed );
 
-		$this->entityTitleLookup = WikibaseRepo::getDefaultInstance()->getEntityTitleLookup();
+		$this->entityTitleLookup = WikibaseRepo::getEntityTitleLookup();
 	}
 
 	/**

@@ -1,12 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bjh21",
 			"Dejavu",
 			"Dr. Shikha Jaggi"
 		]
 	},
-	"twocolconflict": "TwoColConflict",
+	"twocolconflict": "Paragraph-based Edit Conflict",
 	"twocolconflict-desc": "Showing a side-by-side edit merge screen for edit conflict resolution",
-	"twocolconflict-beta-feature-message": "Two column edit conflict",
-	"twocolconflict-beta-feature-description": "Show the edit conflict view using a more advanced two column view."
+	"twocolconflict-beta-feature-message": "Paragraph-based edit conflict",
+	"twocolconflict-beta-feature-description": "Show the edit conflict view using a more advanced paragraph-based view."
 }

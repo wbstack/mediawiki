@@ -8,9 +8,11 @@ use Psr\Log\LoggerInterface;
 use Site;
 use SiteLookup;
 use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\SiteLinkLookup;
 use Wikibase\Repo\SiteLinkTargetProvider;
+use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
 
 /**
@@ -91,22 +93,28 @@ class SpecialItemByTitle extends SpecialWikibasePage {
 		$this->groups = $siteLinkGroups;
 	}
 
-	public static function newFromGlobalState(): self {
+	public static function factory(
+		EntityTitleLookup $entityTitleLookup,
+		LoggerInterface $logger,
+		SettingsArray $repoSettings,
+		Store $store
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 
 		$siteLinkTargetProvider = new SiteLinkTargetProvider(
 			$wikibaseRepo->getSiteLookup(),
-			$wikibaseRepo->getSettings()->getSetting( 'specialSiteLinkGroups' )
+			$repoSettings->getSetting( 'specialSiteLinkGroups' )
 		);
 
 		return new self(
-			$wikibaseRepo->getEntityTitleLookup(),
+			$entityTitleLookup,
 			new LanguageNameLookup(),
 			$wikibaseRepo->getSiteLookup(),
-			$wikibaseRepo->getStore()->newSiteLinkStore(),
+			// TODO move SiteLinkStore to service container and inject it directly
+			$store->newSiteLinkStore(),
 			$siteLinkTargetProvider,
-			$wikibaseRepo->getLogger(),
-			$wikibaseRepo->getSettings()->getSetting( 'siteLinkGroups' )
+			$logger,
+			$repoSettings->getSetting( 'siteLinkGroups' )
 		);
 	}
 

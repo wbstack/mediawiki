@@ -60,10 +60,14 @@
 	"advancedsearch-filesize-greater-than": "größer als",
 	"advancedsearch-filesize-smaller-than": "kleiner als",
 	"advancedsearch-sort-relevance": "Relevanz",
+	"advancedsearch-sort-last-edit-asc": "Datum der Bearbeitung – älteste zuerst",
 	"advancedsearch-sort-last-edit-desc": "Letzte Bearbeitung – neueste zuerst",
+	"advancedsearch-sort-create-timestamp-asc": "Datum der Erstellung – älteste zuerst",
 	"advancedsearch-sort-create-timestamp-desc": "Erstelldatum – neueste zuerst",
 	"advancedsearch-sort-preview-relevance": "Relevanz",
+	"advancedsearch-sort-preview-last-edit-asc": "zuletzt bearbeitet",
 	"advancedsearch-sort-preview-last-edit-desc": "letzter Bearbeitung",
+	"advancedsearch-sort-preview-create-timestamp-asc": "zuletzt erstellt",
 	"advancedsearch-sort-preview-create-timestamp-desc": "Erstelldatum",
 	"advancedsearch-namespaces-search-in": "Suchen in:",
 	"advancedsearch-namespaces-remember": "Auswahl für zukünftige Suchanfragen merken",
@@ -74,5 +78,5 @@
 	"advancedsearch-namespaces-placeholder": "Namensräume hinzufügen …",
 	"prefs-advancedsearch": "Erweiterte Suche",
 	"advancedsearch-preference-help": "Die Erweiterte Suchoberfläche ergänzt ein Formular auf der Such-Spezialseite. Dieses erlaubt dir, spezialisierte Suchanfragen durchzuführen, auch wenn du keine Suchsyntax beherrschst. Es ändert auch die Weise, wie Namensräume ausgewählt werden können.",
-	"advancedsearch-preference-disable": "Die Erweiterte Suchoberfläche nicht anzeigen"
+	"advancedsearch-preference-disable": "Die Oberfläche der erweiterten Suche nicht anzeigen, wenn Spezial:Suche verwendet wird"
 }

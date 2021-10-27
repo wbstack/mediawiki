@@ -1,0 +1,42 @@
+/* Skin:Modern notification icon styles */
+
+// 14px icon relative to 13px menu font-size.
+@size-icon: 14px;
+@font-size-menu: 13px;
+@size-icon--relative: unit( @size-icon / @font-size-menu, em );
+
+#pt-notifications-alert,
+#pt-notifications-notice {
+	.mw-echo-notifications-badge {
+		height: @size-icon--relative;
+		width: @size-icon--relative;
+		padding: 0 1.5em 0 1em;
+
+		// FIXME: move to Echo.
+		display: inline-block;
+		background-size: auto 100%;
+		background-repeat: no-repeat;
+		background-position: center;
+		vertical-align: middle;
+		margin: 0;
+		top: auto;
+
+		&:after {
+			right: -5%;
+			bottom: -10%;
+			font-size: 0.8em;
+
+			// FIXME: move to Echo.
+			top: auto;
+			left: auto;
+		}
+
+		// FIXME: move to Echo.
+		&:focus {
+			// Simulate browser focus ring
+			outline: dotted 1px; // Firefox style
+			outline: auto -webkit-focus-ring-color; // Webkit style
+			box-shadow: none;
+		}
+	}
+}

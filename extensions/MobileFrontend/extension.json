@@ -18,7 +18,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"ConfigRegistry": {
 		"mobilefrontend": "GlobalVarConfig::newInstance"
@@ -27,12 +27,18 @@
 		"History": "SpecialMobileHistory",
 		"MobileDiff": "SpecialMobileDiff",
 		"MobileOptions": "SpecialMobileOptions",
-		"MobileLanguages": "SpecialMobileLanguages",
+		"MobileLanguages": {
+			"class": "SpecialMobileLanguages",
+			"services": [
+				"LanguageConverterFactory",
+				"LanguageNameUtils"
+			]
+		},
 		"Uploads": "SpecialUploads"
 	},
 	"APIModules": {
-		"mobileview": "ApiMobileView",
-		"webapp-manifest": "ApiWebappManifest"
+		"mobileview": "MobileFrontend\\Api\\ApiMobileView",
+		"webapp-manifest": "MobileFrontend\\Api\\ApiWebappManifest"
 	},
 	"MessagesDirs": {
 		"MobileFrontend": [
@@ -70,14 +76,7 @@
 		"MobileFrontendSkinHooks": "includes/MobileFrontendSkinHooks.php",
 		"MobileContext": "includes/MobileContext.php",
 		"MobileFormatter": "includes/MobileFormatter.php",
-		"MobileCollection": "includes/models/MobileCollection.php",
-		"MobilePage": "includes/models/MobilePage.php",
 		"MobileUI": "includes/MobileUI.php",
-		"ApiMobileView": "includes/api/ApiMobileView.php",
-		"ApiParseExtender": "includes/api/ApiParseExtender.php",
-		"ApiWebappManifest": "includes/api/ApiWebappManifest.php",
-		"InlineDiffFormatter": "includes/diff/InlineDiffFormatter.php",
-		"InlineDifferenceEngine": "includes/diff/InlineDifferenceEngine.php",
 		"SpecialUploads": "includes/specials/SpecialUploads.php",
 		"SpecialMobileHistory": "includes/specials/SpecialMobileHistory.php",
 		"SpecialMobileDiff": "includes/specials/SpecialMobileDiff.php",
@@ -403,10 +402,20 @@
 				"mobile-frontend-editor-switch-editor",
 				"mobile-frontend-editor-switch-visual-editor",
 				"mobile-frontend-editor-anonwarning",
-				"ok",
 				"mobile-frontend-editor-editing",
+				"mobile-frontend-editor-blocked-drawer-action-login",
+				"mobile-frontend-editor-blocked-drawer-action-ok",
+				"mobile-frontend-editor-blocked-drawer-action-randompage",
 				"mobile-frontend-editor-blocked-drawer-title",
 				"mobile-frontend-editor-blocked-drawer-title-partial",
+				"mobile-frontend-editor-blocked-drawer-title-ip",
+				"mobile-frontend-editor-blocked-drawer-title-ip-partial",
+				"mobile-frontend-editor-blocked-drawer-body-partial",
+				"mobile-frontend-editor-blocked-drawer-body-login",
+				"mobile-frontend-editor-blocked-drawer-body-login-partial",
+				"mobile-frontend-editor-blocked-drawer-body-login-createaccount",
+				"mobile-frontend-editor-blocked-drawer-body-login-createaccount-partial",
+				"mobile-frontend-editor-blocked-drawer-body-link",
 				"mobile-frontend-editor-blocked-drawer-reason-header",
 				"mobile-frontend-editor-blocked-drawer-creator-header",
 				"mobile-frontend-editor-blocked-drawer-expiry-header",
@@ -421,7 +430,7 @@
 			"class": "ResourceLoaderOOUIIconPackModule",
 			"selectorWithVariant": ".mw-ui-icon-mf-{name}-{variant}:before",
 			"icons": [
-				"stopHand"
+				"block"
 			],
 			"variants": {
 				"destructive": {
@@ -705,8 +714,8 @@
 		}
 	},
 	"Hooks": {
-		"APIGetAllowedParams": "ApiParseExtender::onAPIGetAllowedParams",
-		"APIAfterExecute": "ApiParseExtender::onAPIAfterExecute",
+		"APIGetAllowedParams": "MobileFrontend\\Api\\ApiParseExtender::onAPIGetAllowedParams",
+		"APIAfterExecute": "MobileFrontend\\Api\\ApiParseExtender::onAPIAfterExecute",
 		"APIQuerySiteInfoGeneralInfo": "MobileFrontendHooks::onAPIQuerySiteInfoGeneralInfo",
 		"AuthChangeFormFields": "MobileFrontendHooks::onAuthChangeFormFields",
 		"RequestContextCreateSkin": "MobileFrontendHooks::onRequestContextCreateSkin",
@@ -723,15 +732,15 @@
 		"SpecialPage_initList": "MobileFrontendHooks::onSpecialPageInitList",
 		"ListDefinedTags": [
 			"MobileFrontendHooks::onListDefinedTags",
-			"MobileFrontend\\AMC\\Hooks::onListDefinedTags"
+			"MobileFrontend\\Amc\\Hooks::onListDefinedTags"
 		],
 		"ChangeTagsListActive": [
 			"MobileFrontendHooks::onListDefinedTags",
-			"MobileFrontend\\AMC\\Hooks::onListDefinedTags"
+			"MobileFrontend\\Amc\\Hooks::onListDefinedTags"
 		],
 		"RecentChange_save": [
 			"MobileFrontendHooks::onTaggableObjectCreation",
-			"MobileFrontend\\AMC\\Hooks::onRecentChangeSave"
+			"MobileFrontend\\Amc\\Hooks::onRecentChangeSave"
 		],
 		"AbuseFilter-generateUserVars": "MobileFrontendHooks::onAbuseFilterGenerateUserVars",
 		"AbuseFilter-builder": "MobileFrontendHooks::onAbuseFilterBuilder",
@@ -740,13 +749,12 @@
 		"BeforePageDisplay": "MobileFrontendHooks::onBeforePageDisplay",
 		"GetPreferences": [
 			"MobileFrontendHooks::onGetPreferences",
-			"MobileFrontend\\AMC\\Hooks::onGetPreferences"
+			"MobileFrontend\\Amc\\Hooks::onGetPreferences"
 		],
 		"Gadgets::allowLegacy": "MobileFrontendHooks::onAllowLegacyGadgets",
 		"CentralAuthLoginRedirectData": "MobileFrontendHooks::onCentralAuthLoginRedirectData",
 		"CentralAuthSilentLoginRedirect": "MobileFrontendHooks::onCentralAuthSilentLoginRedirect",
 		"ResourceLoaderRegisterModules": "MobileFrontendEditorHooks::onResourceLoaderRegisterModules",
-		"ResourceLoaderTestModules": "MobileFrontendHooks::onResourceLoaderTestModules",
 		"OutputPageParserOutput": "MobileFrontendHooks::onOutputPageParserOutput",
 		"HTMLFileCache::useFileCache": "MobileFrontendHooks::onHTMLFileCacheUseFileCache",
 		"LoginFormValidErrorMessages": "MobileFrontendHooks::onLoginFormValidErrorMessages",
@@ -760,10 +768,10 @@
 		"TitleSquidURLs": "MobileFrontendHooks::onTitleSquidURLs",
 		"UserGetDefaultOptions": [
 			"MobileFrontendHooks::onUserGetDefaultOptions",
-			"MobileFrontend\\AMC\\Hooks::onUserGetDefaultOptions"
+			"MobileFrontend\\Amc\\Hooks::onUserGetDefaultOptions"
 		],
 		"ManualLogEntryBeforePublish": [
-			"MobileFrontend\\AMC\\Hooks::onManualLogEntryBeforePublish",
+			"MobileFrontend\\Amc\\Hooks::onManualLogEntryBeforePublish",
 			"MobileFrontendHooks::onTaggableObjectCreation"
 		]
 	},
@@ -810,7 +818,8 @@
 			"value": false
 		},
 		"MFDefaultEditor": {
-			"value": "source"
+			"description": "Default editor when there is no user preference set (mobile-editor). One of 'source', 'visual', or 'preference' (inherit desktop editor preference).",
+			"value": "preference"
 		},
 		"MFEnableJSConsoleRecruitment": {
 			"value": false
@@ -832,9 +841,6 @@
 				]
 			}
 		},
-		"MFSpecialCaseMainPage": {
-			"value": false
-		},
 		"MFMobileHeader": {
 			"value": "X-Subdomain"
 		},
@@ -843,6 +849,7 @@
 				"beta": [],
 				"base": [
 					".navbox",
+					".vertical-navbox",
 					".nomobile"
 				]
 			}
@@ -1009,9 +1016,15 @@
 		"MFSchemaEditAttemptStepOversample": {
 			"value": false
 		},
+		"MFTrackBlockNotices": {
+			"value": false
+		},
 		"MFStopMobileRedirectCookieSecureValue": {
 			"value": true
 		}
+	},
+	"DefaultUserOptions": {
+		"mobile-editor": ""
 	},
 	"ServiceWiringFiles": [
 		"includes/ServiceWiring.php"

@@ -9,6 +9,7 @@
 	"twocolconflict-core-ui-hint-close": "Vis aldrig igen",
 	"twocolconflict-split-your-version-header": "Din revision",
 	"twocolconflict-split-not-saved-at": "Endnu ikke offentliggjort",
+	"twocolconflict-split-choose-version": "Vælg venligst en version",
 	"twocolconflict-split-other-version-chosen": "Anden version",
 	"twocolconflict-split-your-version-chosen": "Din version",
 	"twocolconflict-split-select-all": "Vælg alle",
@@ -18,5 +19,6 @@
 	"twocolconflict-split-reset-warning-cancel": "Annullér",
 	"twocolconflict-split-reset-warning-accept": "Kasser",
 	"twocolconflict-split-collapse-tooltip": "Sammenfold tekst",
-	"twocolconflict-split-expand-tooltip": "Udvid tekst"
+	"twocolconflict-split-expand-tooltip": "Udvid tekst",
+	"twocolconflict-talk-your": "Din kommentar"
 }

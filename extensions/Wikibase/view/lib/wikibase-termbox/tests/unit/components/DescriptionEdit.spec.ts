@@ -6,9 +6,6 @@ import { mutation } from '@wmde/vuex-helpers/dist/namespacedStoreMethods';
 import { NS_LANGUAGE } from '@/store/namespaces';
 import Language from '@/datamodel/Language';
 import { LANGUAGE_UPDATE } from '@/store/language/mutationTypes';
-import { ENTITY_DESCRIPTION_EDIT } from '@/store/entity/actionTypes';
-import { action } from '@wmde/vuex-helpers/dist/namespacedStoreMethods';
-import { NS_ENTITY } from '@/store/namespaces';
 import { MessageKey } from '@/common/MessageKey';
 import mockMessageMixin from '../store/mockMessageMixin';
 import newConfigMixin, { ConfigOptions } from '@/components/mixins/newConfigMixin';
@@ -38,12 +35,12 @@ describe( 'DescriptionEdit', () => {
 			store,
 		} );
 
-		const textField = wrapper.find( ResizingTextField );
+		const textField = wrapper.findComponent( ResizingTextField );
 		expect( textField.props( 'value' ) ).toBe( description );
 
 	} );
 
-	it( `triggers ${ENTITY_DESCRIPTION_EDIT} when the description is edited`, () => {
+	it( 'emits input event when the description is edited', () => {
 		const language = 'en';
 
 		const store = createStoreWithLanguage( { code: language, directionality: 'ltr' } );
@@ -56,12 +53,10 @@ describe( 'DescriptionEdit', () => {
 			store,
 		} );
 		const newDescription = 'a new description';
-		wrapper.find( ResizingTextField ).vm.$emit( 'input', newDescription );
+		wrapper.findComponent( ResizingTextField ).vm.$emit( 'input', newDescription );
 
-		expect( store.dispatch ).toHaveBeenCalledWith(
-			action( NS_ENTITY, ENTITY_DESCRIPTION_EDIT ),
-			{ language, value: newDescription },
-		);
+		expect( wrapper.emitted( 'input' ) ).toHaveLength( 1 );
+		expect( wrapper.emitted( 'input' )![ 0 ][ 0 ] ).toEqual( { language, value: newDescription } );
 	} );
 
 	it( 'passes a placeholder down', () => {
@@ -77,7 +72,7 @@ describe( 'DescriptionEdit', () => {
 			],
 		} );
 
-		expect( wrapper.find( ResizingTextField ).attributes( 'placeholder' ) ).toBe( placeholderMessage );
+		expect( wrapper.findComponent( ResizingTextField ).attributes( 'placeholder' ) ).toBe( placeholderMessage );
 	} );
 
 	it( 'passes a maxlength down', () => {
@@ -94,7 +89,7 @@ describe( 'DescriptionEdit', () => {
 				} as ConfigOptions ) ],
 		} );
 
-		expect( wrapper.find( ResizingTextField ).attributes( 'maxlength' ) ).toBe( maxLength.toString() );
+		expect( wrapper.findComponent( ResizingTextField ).attributes( 'maxlength' ) ).toBe( maxLength.toString() );
 	} );
 
 	describe( 'directionality and language code', () => {

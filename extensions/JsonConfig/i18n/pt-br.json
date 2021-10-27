@@ -3,10 +3,13 @@
 		"authors": [
 			"Araceletorres",
 			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
 			"Felipe L. Ewald",
 			"Yurik"
 		]
 	},
+	"nstab-data": "Dados",
+	"tooltip-ca-nstab-data": "Ver os dados da página",
 	"jsonconfig-desc": "Permite que a configuração JSON seja armazenada na wiki",
 	"jsonconfig-duplicate-field": "Mais de um valor \"$1\" encontrado",
 	"jsonconfig-edit-action-apply": "Aplicar",
@@ -26,7 +29,7 @@
 	"jsonconfig-err-array-expected": "O valor em \"$1\" era esperado para ser uma lista cercada por colchetes [...]",
 	"jsonconfig-err-assoc-array": "O parâmetro \"$1\" deve ser uma matriz associativa (dicionário), por exemplo, <kbd>{\"chave\": \"valor\", ...}<kbd>",
 	"jsonconfig-err-bad-header-string": "O cabeçalho \"$1\" deve consistir apenas em letras, números e caracteres de sublinhado, e não deve começar com um número",
-	"jsonconfig-err-bad-geojson": "O parâmetro \"$1\" deve ser um objeto de dados GeoJSON válido ou uma matriz de objetos GeoJSON. Se o campo \"properties\" contiver \"title\" ou \"description\", eles devem ser strings de linha única sem abas ou espaços de trânsito, ou um objeto multilíngüe de tais strings, por exemplo,  { \"en\":\"String in English\", ... }",
+	"jsonconfig-err-bad-geojson": "O parâmetro \"$1\" deve ser um objeto de dados GeoJSON válido ou uma matriz de objetos GeoJSON. Se o campo <code>properties</code> contiver <code>title</code> ou <code>description</code>, eles devem ser strings de linha única sem abas ou espaços de trânsito, ou um objeto multilíngue de tais strings, por exemplo,  <kbd>{ \"en\":\"String in English\", ... }</kbd>",
 	"jsonconfig-err-bad-type": "O parâmetro \"$1\" deve ser um tipo válido como <code>string</code>, <code>number</code>, ou <code>boolean</code>",
 	"jsonconfig-err-bool": "Parâmetro \"$1\" deve ser <code>true</code> ou <code>false</code>",
 	"jsonconfig-err-integer": "O parâmetro \"$1\" deve ser um número inteiro",

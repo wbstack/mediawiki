@@ -9,7 +9,7 @@
 	 * FieldLayout that can show and hide itself when the store changes, based on visibility function
 	 *
 	 * @class
-	 * @extends {OO.ui.FieldLayout}
+	 * @extends OO.ui.FieldLayout
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store

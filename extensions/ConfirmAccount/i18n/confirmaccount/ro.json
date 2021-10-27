@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Andrei Stroe",
+			"Andreyyshore",
 			"Firilacroco",
 			"KlaudiuMihaila",
 			"Mihai",
@@ -56,5 +57,5 @@
 	"confirmaccount-summary": "Crearea unei pagini de utilizator pentru un utilizator nou",
 	"confirmaccount-welc": "'''Bun venit la ''{{SITENAME}}''!'''\nSperăm că veți contribui mult și bine.\nVeți dori probabil să citiți [{{MediaWiki:Helppage}} paginile de ajutor].\nDin nou, bun venit și distracție plăcută!",
 	"confirmaccount-wsum": "Bun venit!",
-	"confirmaccount-email-body2": "Cererea dvs. pentru un cont a fost aprobată pe {{SITENAME}}.\n\nNumele contului: $1\n\nParola: $2\n\n$3\n\nDin motive de securitate va trebui să vă schimbaţi parola la prima autentificare.\nPentru a vă autentifica, vă rugăm mergeţi aici: {{fullurl:Special:UserLogin}}."
+	"confirmaccount-email-body2": "Cererea dvs. pentru un cont a fost aprobată pe {{SITENAME}}.\n\nNumele contului: $1\n\nParola: $2\n\n$3\n\nDin motive de securitate, va trebui să vă schimbați parola la prima autentificare.\nPentru a vă autentifica, vă rugăm mergeți aici: {{fullurl:Special:UserLogin}}."
 }

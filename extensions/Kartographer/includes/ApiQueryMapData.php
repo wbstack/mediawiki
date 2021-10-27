@@ -19,10 +19,12 @@ class ApiQueryMapData extends ApiQueryBase {
 		parent::__construct( $query, $moduleName, 'mpd' );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function execute() {
 		$params = $this->extractRequestParams();
 		$limit = $params['limit'];
-		$continue = $params['continue'] ?? 0;
 		$groups = $params['groups'] === '' ? false : explode( '|', $params['groups'] );
 		$titles = $this->getPageSet()->getGoodTitles();
 		if ( !$titles ) {
@@ -38,7 +40,7 @@ class ApiQueryMapData extends ApiQueryBase {
 
 			$page = WikiPage::factory( $title );
 			$parserOutput = $page->getParserOutput( ParserOptions::newCanonical( 'canonical' ) );
-			$state = State::getState( $parserOutput );
+			$state = $parserOutput ? State::getState( $parserOutput ) : null;
 			if ( !$state ) {
 				continue;
 			}
@@ -107,6 +109,9 @@ class ApiQueryMapData extends ApiQueryBase {
 		return 'public';
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function isInternal() {
 		return true;
 	}

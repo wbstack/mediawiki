@@ -2,10 +2,10 @@
 
 namespace EntitySchema\DataAccess;
 
+use EntitySchema\Domain\Model\SchemaId;
 use InvalidArgumentException;
 use Language;
 use MediaWiki\MediaWikiServices;
-use EntitySchema\Domain\Model\SchemaId;
 
 /**
  * @license GPL-2.0-or-later
@@ -162,7 +162,10 @@ class SchemaEncoder {
 		}
 	}
 
-	private static function isSequentialArrayOfStrings( array $array ) {
+	private static function isSequentialArrayOfStrings( $array ) {
+		if ( !is_array( $array ) ) {
+			return false;
+		}
 		$values = array_values( $array );
 		if ( $array !== $values ) {
 			// Array is associative or sparse. Fast solution from

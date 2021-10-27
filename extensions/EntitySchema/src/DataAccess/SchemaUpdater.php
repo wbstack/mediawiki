@@ -3,9 +3,9 @@
 namespace EntitySchema\DataAccess;
 
 use CommentStoreComment;
+use EntitySchema\Domain\Model\SchemaId;
 use InvalidArgumentException;
 use RuntimeException;
-use EntitySchema\Domain\Model\SchemaId;
 
 /**
  * @license GPL-2.0-or-later
@@ -18,7 +18,7 @@ interface SchemaUpdater {
 	 * @param SchemaId $id
 	 * @param string[] $labels
 	 * @param string[] $descriptions
-	 * @param string[] $aliasGroups
+	 * @param string[][] $aliasGroups
 	 * @param string $schemaText
 	 * @param int $baseRevId
 	 * @param CommentStoreComment $summary

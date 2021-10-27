@@ -11,16 +11,25 @@ use Kartographer\SpecialMap;
  * The <maplink> tag creates a link that, when clicked,
  */
 class MapLink extends TagHandler {
+
+	/** @inheritDoc */
 	protected $tag = 'maplink';
 
-	protected $cssClass;
+	/** @var string */
+	private $cssClass = '';
 
+	/**
+	 * @inheritDoc
+	 */
 	protected function parseArgs() {
 		$this->state->useMaplink();
 		parent::parseArgs();
 		$this->cssClass = $this->getText( 'class', '', '/^(|[a-zA-Z][-_a-zA-Z0-9]*)$/' );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	protected function render() {
 		$output = $this->parser->getOutput();
 		$output->addModules( 'ext.kartographer.link' );
@@ -76,13 +85,11 @@ class MapLink extends TagHandler {
 		if ( $wgKartographerUseMarkerStyle
 			&& $this->markerProperties
 			&& property_exists( $this->markerProperties, 'marker-color' )
-		) {
 			// JsonSchema already validates this value for us, however this regex will also fail
 			// if the color is invalid
-			preg_match( '/^#?(([0-9a-fA-F]{3}){1,2})$/', $this->markerProperties->{'marker-color'}, $m );
-			if ( $m && isset( $m[1] ) && isset( $m[2] ) ) {
-				return "background: #{$m[1]};";
-			}
+			&& preg_match( '/^#?((?:[\da-f]{3}){1,2})$/i', $this->markerProperties->{'marker-color'}, $m )
+		) {
+			return "background: #{$m[1]};";
 		}
 
 		return '';

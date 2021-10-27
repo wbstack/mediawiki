@@ -259,10 +259,10 @@ class RequestAccountPage extends SpecialPage {
 			$form .= $formInformation['html'];
 			$form .= '</fieldset>';
 		}
-		$form .= Html::Hidden( 'title', $this->getPageTitle()->getPrefixedDBKey() ) . "\n";
-		$form .= Html::Hidden( 'wpEditToken', $reqUser->getEditToken() ) . "\n";
-		$form .= Html::Hidden( 'attachment', $this->mPrevAttachment ) . "\n";
-		$form .= Html::Hidden( 'forgotAttachment', $this->mForgotAttachment ) . "\n";
+		$form .= Html::hidden( 'title', $this->getPageTitle()->getPrefixedDBKey() ) . "\n";
+		$form .= Html::hidden( 'wpEditToken', $reqUser->getEditToken() ) . "\n";
+		$form .= Html::hidden( 'attachment', $this->mPrevAttachment ) . "\n";
+		$form .= Html::hidden( 'forgotAttachment', $this->mForgotAttachment ) . "\n";
 		$form .= "<p>" . Xml::submitButton( $this->msg( 'requestaccount-submit' )->text() ) . "</p>";
 		$form .= Xml::closeElement( 'form' );
 

@@ -1,6 +1,17 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use Exception;
+use Html;
+use InvalidArgumentException;
+use MediaWiki\Extension\Math\Widget\WikibaseEntitySelector;
 use MediaWiki\Logger\LoggerFactory;
+use Message;
+use OOUI\ButtonInputWidget;
+use OOUI\FormLayout;
+use OutputPage;
+use SpecialPage;
 
 class SpecialMathWikibase extends SpecialPage {
 	/**
@@ -30,14 +41,14 @@ class SpecialMathWikibase extends SpecialPage {
 	public function execute( $par ) {
 		global $wgLanguageCode;
 
-		if ( !$this->isWikibaseAvailable() ) {
+		if ( !self::isWikibaseAvailable() ) {
 			$out = $this->getOutput();
 
 			$out->setPageTitle(
 				$this->getPlainText( 'math-wikibase-special-error-header' )
 			);
 			$out->addHTML(
-				wfMessage( 'math-wikibase-special-error-no-wikibase' )->inContentLanguage()->parse()
+				$this->msg( 'math-wikibase-special-error-no-wikibase' )->inContentLanguage()->parse()
 			);
 			return;
 		}
@@ -53,7 +64,7 @@ class SpecialMathWikibase extends SpecialPage {
 		$output->enableOOUI();
 
 		$this->setHeaders();
-		$output->addModules( [ 'ext.math.wikibase.scripts' ] );
+		$output->addModules( [ 'mw.widgets.MathWbEntitySelector' ] );
 
 		$output->setPageTitle(
 			$this->getPlainText( 'math-wikibase-header' )
@@ -82,14 +93,14 @@ class SpecialMathWikibase extends SpecialPage {
 	 */
 	private function showForm() {
 		$actionField = new \OOUI\ActionFieldLayout(
-			new \OOUI\TextInputWidget( [
+			new WikibaseEntitySelector( [
 				'name' => self::PARAMETER,
 				'placeholder' => $this->getPlainText( 'math-wikibase-special-form-placeholder' ),
 				'required' => true,
-				'autocomplete' => false,
-				'classes' => [ 'mwe-math-wikibase-entityselector-input' ]
+				'infusable' => true,
+				'id' => 'wbEntitySelector'
 			] ),
-			new OOUI\ButtonInputWidget( [
+			new ButtonInputWidget( [
 				'name' => 'request-qid',
 				'label' => $this->getPlainText( 'math-wikibase-special-form-button' ),
 				'type' => 'submit',
@@ -102,7 +113,7 @@ class SpecialMathWikibase extends SpecialPage {
 			]
 		);
 
-		$formLayout = new \OOUI\FormLayout( [
+		$formLayout = new FormLayout( [
 			'method' => 'POST',
 			'items' => [ $actionField ]
 		] );
@@ -122,14 +133,14 @@ class SpecialMathWikibase extends SpecialPage {
 		if ( $e instanceof InvalidArgumentException ) {
 			$this->logger->warning( "An invalid ID was specified. Reason: " . $e->getMessage() );
 			$this->getOutput()->addHTML(
-				wfMessage( 'math-wikibase-special-error-invalid-argument' )->inContentLanguage()->parse()
+				$this->msg( 'math-wikibase-special-error-invalid-argument' )->inContentLanguage()->parse()
 			);
 		} else {
-			$this->logger->error( "An unknown error occured due fetching data from Wikibase.", [
+			$this->logger->error( "An unknown error occurred while fetching data from Wikibase.", [
 				'exception' => $e
 			] );
 			$this->getOutput()->addHTML(
-				wfMessage( 'math-wikibase-special-error-unknown' )->inContentLanguage()->parse()
+				$this->msg( 'math-wikibase-special-error-unknown' )->inContentLanguage()->parse()
 			);
 		}
 	}
@@ -140,7 +151,7 @@ class SpecialMathWikibase extends SpecialPage {
 	 * @return string the plain text in current content language
 	 */
 	private function getPlainText( $key ) {
-		return wfMessage( $key )->inContentLanguage()->plain();
+		return $this->msg( $key )->inContentLanguage()->plain();
 	}
 
 	/**

@@ -20,6 +20,10 @@ git checkout master
 
 Since the Wikidata runs a weekly snapshot of Wikibase master we can be explicit about which version of termbox we run by changing the commit of the submodule rather than always having to use master of termbox.
 
+### JavaScript in MediaWiki
+
+Wikibase is an extension to MediaWiki and as such uses [its JavaScript delivery mechanism](https://www.mediawiki.org/wiki/ResourceLoader). In order to reduce the amount of bytes transferred to users, libraries used in multiple sub-products, like vue in termbox, are [externalized](https://cli.vuejs.org/guide/build-targets.html#library) on build and [shipped through MediaWiki](https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/extensions/Wikibase/+/26fe53d/view/resources.php#893). For this to work successfully, it is important that the same version of the libraries are used. As a consequence, some libraries are pinned to specific versions in dependency management (see `package.json`). Their update must be coordinated with the update of the library in MediaWiki.
+
 ## Installation
 
 ### Configuring
@@ -109,13 +113,8 @@ blubber .pipeline/blubber.yaml test > Dockerfile
 docker build -t wmde/wikibase-termbox-test .
 docker run --rm wmde/wikibase-termbox-test
 ```
-### Browsertests
-#### Browsertests in Integration
-* Start chromedriver: `chromedriver --url-base=wd/hub --port=4444`
-* change to your `Wikibase` folder of your `extension` folder in your `Mediawiki` installation
-* from there got into `repo/tests/selenium`
-* put `'__dirname + '/../../../view/lib/wikibase-termbox/tests/selenium/specs/*.js'` in the `specs` section (aproximatly near line 27 ) in the `wdio.conf.js`
-* follow the instruction in `README.md` to run the tests
+
+To read more about tests, and the intricacies of browser tests in particular, see [`docs/tests.md`](./docs/tests.md)
 
 ### Vue CLI
 

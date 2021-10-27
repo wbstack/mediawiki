@@ -4,6 +4,7 @@
 			"Araceletorres",
 			"Cybermandrake",
 			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
 			"Felipe L. Ewald",
 			"Hamilton Abreu",
 			"He7d3r",
@@ -39,6 +40,7 @@
 	"mwoauth-consumer-owner-only-help": "Selecionar esta opção fará com que o consumidor seja automaticamente aprovado e aceito para uso em $1. Não será utilizável por nenhum outro usuário e o fluxo de autorização usual não funcionará. As ações tomadas com esse consumidor não serão marcadas.",
 	"mwoauth-consumer-description": "Descrição do aplicativo:",
 	"mwoauth-consumer-callbackurl": "OAuth \"callback\" URL:",
+	"mwoauth-consumer-callbackurl-warning": "(porta curinga)",
 	"mwoauth-consumer-callbackisprefix": "Permitir que o consumidor especifique um retorno nos pedidos e use o URL \"callback\" acima como um prefixo necessário.",
 	"mwoauth-consumer-granttypes": "Tipos de permissões sendo solicitadas:",
 	"mwoauth-consumer-grantsneeded": "Permissões aplicáveis:",
@@ -256,6 +258,7 @@
 	"mwoauth-form-button-approve": "Permitir",
 	"mwoauth-form-button-cancel": "Cancelar",
 	"mwoauth-error": "Erro de conexão do aplicativo",
+	"mwoauth-error-missing-callback-url-non-owner": "callback_url é necessário para clientes não proprietários",
 	"mwoauth-grants-heading": "Permissões solicitadas:",
 	"mwoauth-grants-nogrants": "O aplicativo não solicitou nenhuma permissão.",
 	"mwoauth-acceptance-cancelled": "Escolheu que o aplicativo \"$1\" não pode aceder à sua conta. \"$1\" não irá funcionar a menos que permita o seu acesso. Pode regressar a \"$1\" ou [[Special:OAuthManageMyGrants|gerir]] os seus aplicativos conectados.",
@@ -332,5 +335,9 @@
 	"mwoauth-consumer-access-no-user": "A aprovação do consumidor deve estar vinculada a um usuário válido, usuário com o ID 0 fornecido",
 	"mwoauth-login-required-reason": "Você precisa entrar na sua conta {{SITENAME}} para autorizar aplicativos a acessá-lo.",
 	"mwoauthconsumer-consumer-view": "Ver este consumidor",
-	"mwoauthconsumer-application-view": "Ver esta aplicação"
+	"mwoauthconsumer-application-view": "Ver esta aplicação",
+	"grant-oauthmanageownclient": "Gerenciar seus clientes OAuth",
+	"mwoauth-consumer-user-mismatch": "Você não pode realizar ações em clientes que não pertencem a você",
+	"mwoauth-consumer-deleted-error": "Você não pode executar ações em clientes excluídos",
+	"mwoauth-consumer-submit-error": "Ocorreu um erro ao salvar um consumidor"
 }

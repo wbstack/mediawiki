@@ -36,19 +36,19 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 		$languageNameLookup = $this->createMock( LanguageNameLookup::class );
 		$languageNameLookup->expects( $this->exactly( $languageNameCalls ) )
 			->method( 'getName' )
-			->will( $this->returnCallback( function( $languageCode ) {
+			->willReturnCallback( function( $languageCode ) {
 				return "<LANGUAGENAME-$languageCode>";
-			} ) );
+			} );
 
 		$languageDirectionalityLookup = $this->createMock( LanguageDirectionalityLookup::class );
 		$languageDirectionalityLookup->method( 'getDirectionality' )
-			->will( $this->returnCallback( function( $languageCode ) {
+			->willReturnCallback( function( $languageCode ) {
 				return [
 					'en' => 'ltr',
 					'arc' => 'rtl',
 					'qqx' => 'ltr'
 				][ $languageCode ];
-			} ) );
+			} );
 
 		return new TermsListView(
 			TemplateFactory::getDefaultInstance(),
@@ -150,20 +150,6 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 		$this->assertStringContainsString( '(wikibase-entitytermsforlanguagelistview-aliases)', $html );
 
 		$this->assertStringNotContainsString( '&amp;', $html, 'no double escaping' );
-	}
-
-	public function testGetTermsListView_isEscaped() {
-		$textProvider = $this->createMock( LocalizedTextProvider::class );
-		$textProvider->method( 'get' )
-			->will( $this->returnCallback( function( $key ) {
-				return $key === 'wikibase-entitytermsforlanguagelistview-language' ? '"RAW"' : "($key)";
-			} ) );
-
-		$view = $this->getTermsListView( 0, $textProvider );
-		$html = $view->getHtml( new TermList(), new TermList(), new AliasGroupList(), [] );
-
-		$this->assertStringContainsString( '&quot;RAW&quot;', $html );
-		$this->assertStringNotContainsString( '"RAW"', $html );
 	}
 
 	public function testGetTermsListView_noAliasesProvider() {

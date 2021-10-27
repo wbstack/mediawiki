@@ -7,17 +7,13 @@ namespace Wikibase\Client\Api;
 use ApiQuery;
 use ApiQueryBase;
 use ApiResult;
-use ExtensionRegistry;
 use InvalidArgumentException;
 use Title;
-use Wikibase\Client\WikibaseClient;
 use Wikibase\DataAccess\AliasTermBuffer;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Term\TermBuffer;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\TermIndexEntry;
-use Wikibase\Lib\WikibaseSettings;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Provides wikibase terms (labels, descriptions, aliases, etc.) for local pages.
@@ -26,16 +22,19 @@ use Wikibase\Repo\WikibaseRepo;
  * pageterms with titles=Washington_DC would include that label and description
  * in the response.
  *
- * @note This closely mirrors the Repo entityterms API, except for newFromGlobalState.
+ * @note This closely mirrors the Repo entityterms API, except for the services injected.
  *
  * @license GPL-2.0-or-later
  * @author Daniel Kinzler
  */
 class PageTerms extends ApiQueryBase {
 
+	/** @var AliasTermBuffer */
+	private $aliasTermBuffer;
+
 	/**
 	 * @todo Use LabelDescriptionLookup for labels/descriptions, so we can apply language fallback.
-	 * @var TermBuffer|AliasTermBuffer
+	 * @var TermBuffer
 	 */
 	private $termBuffer;
 
@@ -45,39 +44,16 @@ class PageTerms extends ApiQueryBase {
 	private $idLookup;
 
 	public function __construct(
-		TermBuffer $termBuffer,
-		EntityIdLookup $idLookup,
 		ApiQuery $query,
-		string $moduleName
+		string $moduleName,
+		AliasTermBuffer $aliasTermBuffer,
+		EntityIdLookup $idLookup,
+		TermBuffer $termBuffer
 	) {
 		parent::__construct( $query, $moduleName, 'wbpt' );
+		$this->aliasTermBuffer = $aliasTermBuffer;
 		$this->termBuffer = $termBuffer;
 		$this->idLookup = $idLookup;
-	}
-
-	public static function newFromGlobalState( ApiQuery $apiQuery, string $moduleName ): self {
-		// FIXME: HACK: make pageterms work directly on entity pages on the repo.
-		// We should instead use an EntityIdLookup that combines the repo and the client
-		// implementation, see T115117.
-		// NOTE: when changing repo and/or client integration, remember to update the
-		// self-documentation of the API module in the "apihelp-query+pageterms-description"
-		// message and the PageTerms::getExamplesMessages() method.
-		if ( ExtensionRegistry::getInstance()->isLoaded( 'WikibaseRepository' ) ) {
-			$repo = WikibaseRepo::getDefaultInstance();
-			$termBuffer = $repo->getTermBuffer();
-			$entityIdLookup = $repo->getEntityContentFactory();
-		} else {
-			$client = WikibaseClient::getDefaultInstance();
-			$termBuffer = $client->getTermBuffer();
-			$entityIdLookup = $client->getEntityIdLookup();
-		}
-
-		return new self(
-			$termBuffer,
-			$entityIdLookup,
-			$apiQuery,
-			$moduleName
-		);
 	}
 
 	public function execute(): void {
@@ -130,7 +106,7 @@ class PageTerms extends ApiQueryBase {
 						] );
 					}
 				} else {
-					$termTexts = $this->termBuffer->getPrefetchedAliases( $entityId, $languageCode ) ?: [];
+					$termTexts = $this->aliasTermBuffer->getPrefetchedAliases( $entityId, $languageCode ) ?: [];
 					foreach ( $termTexts as $termText ) {
 						$terms[] = new TermIndexEntry( [
 							TermIndexEntry::FIELD_ENTITY => $entityId,
@@ -290,16 +266,12 @@ class PageTerms extends ApiQueryBase {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
-		if ( WikibaseSettings::isRepoEnabled() ) {
-			return [];
-		} else {
-			return [
-				'action=query&prop=pageterms&titles=London'
-					=> 'apihelp-query+pageterms-example-simple',
-				'action=query&prop=pageterms&titles=London&wbptterms=label|alias&uselang=en'
-					=> 'apihelp-query+pageterms-example-label-en',
-			];
-		}
+		return [
+			'action=query&prop=pageterms&titles=London'
+				=> 'apihelp-query+pageterms-example-simple',
+			'action=query&prop=pageterms&titles=London&wbptterms=label|alias&uselang=en'
+				=> 'apihelp-query+pageterms-example-label-en',
+		];
 	}
 
 }

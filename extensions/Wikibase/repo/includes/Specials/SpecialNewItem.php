@@ -9,6 +9,7 @@ use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Term\Term;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
@@ -30,12 +31,12 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class SpecialNewItem extends SpecialNewEntity {
 
-	const FIELD_LANG = 'lang';
-	const FIELD_LABEL = 'label';
-	const FIELD_DESCRIPTION = 'description';
-	const FIELD_ALIASES = 'aliases';
-	const FIELD_SITE = 'site';
-	const FIELD_PAGE = 'page';
+	public const FIELD_LANG = 'lang';
+	public const FIELD_LABEL = 'label';
+	public const FIELD_DESCRIPTION = 'description';
+	public const FIELD_ALIASES = 'aliases';
+	public const FIELD_SITE = 'site';
+	public const FIELD_PAGE = 'page';
 
 	/**
 	 * @var SiteLookup
@@ -76,25 +77,30 @@ class SpecialNewItem extends SpecialNewEntity {
 		$this->termsCollisionDetector = $termsCollisionDetector;
 	}
 
-	public static function newFromGlobalState(): self {
+	public static function factory(
+		EntityNamespaceLookup $entityNamespaceLookup,
+		EntityTitleLookup $entityTitleLookup,
+		TermsCollisionDetector $itemTermsCollisionDetector,
+		SettingsArray $repoSettings,
+		TermValidatorFactory $termValidatorFactory
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 
-		$settings = $wikibaseRepo->getSettings();
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
-			$settings->getSetting( 'dataRightsUrl' ),
-			$settings->getSetting( 'dataRightsText' )
+			$repoSettings->getSetting( 'dataRightsUrl' ),
+			$repoSettings->getSetting( 'dataRightsText' )
 		);
 
 		return new self(
 			$copyrightView,
-			$wikibaseRepo->getEntityNamespaceLookup(),
+			$entityNamespaceLookup,
 			$wikibaseRepo->getSummaryFormatter(),
-			$wikibaseRepo->getEntityTitleLookup(),
+			$entityTitleLookup,
 			$wikibaseRepo->newEditEntityFactory(),
 			$wikibaseRepo->getSiteLookup(),
-			$wikibaseRepo->getTermValidatorFactory(),
-			$wikibaseRepo->getItemTermsCollisionDetector()
+			$termValidatorFactory,
+			$itemTermsCollisionDetector
 		);
 	}
 
@@ -280,7 +286,7 @@ class SpecialNewItem extends SpecialNewEntity {
 		}
 
 		if ( $formData[self::FIELD_ALIASES] !== [] ) {
-			$validator = $this->termValidatorFactory->getAliasValidator( $this->getEntityType() );
+			$validator = $this->termValidatorFactory->getAliasValidator();
 			foreach ( $formData[self::FIELD_ALIASES] as $alias ) {
 				$result = $validator->validate( $alias );
 				if ( !$result->isValid() ) {

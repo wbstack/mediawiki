@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sumbukompor"
+		]
+	},
+	"skinname-modern": "Modhèren",
+	"modern.css": "/* Kabèh CSS ing kéné bakal dimot kanggo naraguna ules Modhèren */",
+	"modern.js": "/* Kabèh JavaScript ing kéné bakal dimot kanggo naraguna ules Modhèren */",
+	"modern-desc": "Ules biru/klawu mawa wilah sisih lan wilah dhuwur. Kaasal saka MonoBuku"
+}

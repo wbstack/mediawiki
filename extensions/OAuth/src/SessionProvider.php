@@ -97,7 +97,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 			if ( $oauthVersion === Consumer::OAUTH_VERSION_2 ) {
 				$resourceServer = ResourceServer::factory();
 				$accessTokenKey = $this->verifyOAuth2Request( $resourceServer, $request );
-				$accessTokenRepo = new AccessTokenRepository();
+				$accessTokenRepo = new AccessTokenRepository( $this->config->get( 'CanonicalServer' ) );
 				$accessId = $accessTokenRepo->getApprovalId( $accessTokenKey );
 				if ( $accessId === 0 ) {
 					if (
@@ -382,7 +382,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 	 * @return bool true
 	 */
 	public function onRecentChange_save( $rc ) {
-		$consumerId = $this->getPublicConsumerId( $rc->getPerformer() ?: null );
+		$consumerId = $this->getPublicConsumerId( User::newFromIdentity( $rc->getPerformerIdentity() ) );
 		if ( $consumerId !== null ) {
 			$rc->addTags( Utils::getTagName( $consumerId ) );
 		}

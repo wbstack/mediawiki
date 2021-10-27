@@ -6,7 +6,7 @@
 		]
 	},
 	"skinname-modern": "Modern",
-	"modern.css": "/* CSS som skrivs här kommer att påverka alla användare av utseendet Modern */",
-	"modern.js": "/* JavaScript här kommer att laddas för dem som använder utseendet Modern */",
+	"modern.css": "/* All CSS här kommer att läsas in för de som använder utseendet Modern */",
+	"modern.js": "/* All JavaScript här kommer att läsas in för alla som använder utseendet Modern */",
 	"modern-desc": "Ett blått/grått utseende med sido- och toppfält. Härstammar från MonoBook."
 }

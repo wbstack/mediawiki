@@ -3,7 +3,7 @@
 // Updates the Dockerfile with newer hashes
 
 // Config
-$releaseBranch = 'REL1_35';
+$releaseBranch = 'REL1_36';
 
 /////////////////
 

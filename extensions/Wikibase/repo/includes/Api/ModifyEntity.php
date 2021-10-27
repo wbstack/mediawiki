@@ -1,14 +1,18 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Api;
 
 use ApiBase;
 use ApiMain;
+use ApiUsageException;
 use LogicException;
 use MWContentSerializationException;
 use Status;
 use User;
 use Wikibase\DataModel\Entity\EntityDocument;
+use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\StringNormalizer;
@@ -98,19 +102,19 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @see ApiBase::__construct
 	 */
-	public function __construct( ApiMain $mainModule, $moduleName, bool $federatedPropertiesEnabled, $modulePrefix = '' ) {
+	public function __construct( ApiMain $mainModule, string $moduleName, bool $federatedPropertiesEnabled, string $modulePrefix = '' ) {
 		parent::__construct( $mainModule, $moduleName, $modulePrefix );
 
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $this->getContext() );
-		$settings = $wikibaseRepo->getSettings();
+		$settings = WikibaseRepo::getSettings();
 
 		//TODO: provide a mechanism to override the services
 		$this->errorReporter = $apiHelperFactory->getErrorReporter( $this );
 		$this->resultBuilder = $apiHelperFactory->getResultBuilder( $this );
 		$this->entitySavingHelper = $apiHelperFactory->getEntitySavingHelper( $this );
-		$this->stringNormalizer = $wikibaseRepo->getStringNormalizer();
-		$this->enabledEntityTypes = $wikibaseRepo->getLocalEntityTypes();
+		$this->stringNormalizer = WikibaseRepo::getStringNormalizer();
+		$this->enabledEntityTypes = WikibaseRepo::getLocalEntityTypes();
 
 		$this->entitySavingHelper->setEntityIdParam( 'id' );
 
@@ -121,29 +125,23 @@ abstract class ModifyEntity extends ApiBase {
 
 		// TODO: use the EntitySavingHelper to load the entity, instead of an EntityRevisionLookup.
 		$this->revisionLookup = $wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED );
-		$this->permissionChecker = $wikibaseRepo->getEntityPermissionChecker();
-		$this->titleLookup = $wikibaseRepo->getEntityTitleLookup();
+		$this->permissionChecker = WikibaseRepo::getEntityPermissionChecker();
+		$this->titleLookup = WikibaseRepo::getEntityTitleStoreLookup();
 		$this->siteLinkGroups = $settings->getSetting( 'siteLinkGroups' );
 		$this->badgeItems = $settings->getSetting( 'badgeItems' );
 
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
 	}
 
-	public function setServices( SiteLinkTargetProvider $siteLinkTargetProvider ) {
+	public function setServices( SiteLinkTargetProvider $siteLinkTargetProvider ): void {
 		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
 	}
 
-	/**
-	 * @return EntityTitleStoreLookup
-	 */
-	protected function getTitleLookup() {
+	protected function getTitleLookup(): EntityTitleStoreLookup {
 		return $this->titleLookup;
 	}
 
-	/**
-	 * @return ResultBuilder
-	 */
-	protected function getResultBuilder() {
+	protected function getResultBuilder(): ResultBuilder {
 		return $this->resultBuilder;
 	}
 
@@ -154,7 +152,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return Summary
 	 */
-	protected function createSummary( array $params ) {
+	protected function createSummary( array $params ): Summary {
 		$summary = new Summary( $this->getModuleName() );
 		$summary->setUserSummary( $params['summary'] );
 		return $summary;
@@ -163,17 +161,17 @@ abstract class ModifyEntity extends ApiBase {
 	/**
 	 * Actually modify the entity.
 	 *
-	 * @param EntityDocument &$entity
+	 * @param EntityDocument $entity
 	 * @param ChangeOp $changeOp
 	 * @param array $preparedParameters
 	 *
 	 * @return Summary|null a summary of the modification, or null to indicate failure.
 	 */
 	abstract protected function modifyEntity(
-		EntityDocument &$entity,
+		EntityDocument $entity,
 		ChangeOp $changeOp,
 		array $preparedParameters
-	);
+	): ?Summary;
 
 	/**
 	 * Applies the given ChangeOp to the given Entity.
@@ -185,7 +183,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return ChangeOpResult
 	 */
-	protected function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, Summary $summary = null ) {
+	protected function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, Summary $summary = null ): ChangeOpResult {
 		try {
 			// NOTE: Always validate modification against the current revision, if it exists!
 			//       Otherwise, we may miss e.g. a combination of language/label/description
@@ -237,15 +235,15 @@ abstract class ModifyEntity extends ApiBase {
 	 * @param array $params
 	 * @return array
 	 */
-	protected function prepareParameters( array $params ) {
+	protected function prepareParameters( array $params ): array {
 		return $params;
 	}
 
 	protected function validateEntitySpecificParameters(
 		array $preparedParameters,
 		EntityDocument $entity,
-		$baseRevId
-	) {
+		int $baseRevId
+	): void {
 	}
 
 	/**
@@ -253,7 +251,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @param array $params
 	 */
-	protected function validateParameters( array $params ) {
+	protected function validateParameters( array $params ): void {
 		$entityReferenceBySiteLinkGiven = isset( $params['site'] ) && isset( $params['title'] );
 		$entityReferenceBySiteLinkPartial = ( isset( $params['site'] ) xor isset( $params['title'] ) );
 		$entityIdGiven = isset( $params['id'] );
@@ -287,7 +285,7 @@ abstract class ModifyEntity extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	public function execute() {
+	public function execute(): void {
 		$params = $this->extractRequestParams();
 		$user = $this->getUser();
 
@@ -296,7 +294,7 @@ abstract class ModifyEntity extends ApiBase {
 		$this->validateAlteringEntityById( $entityId );
 
 		// Try to find the entity or fail and create it, or die in the process
-		$entity = $this->entitySavingHelper->loadEntity( $entityId );
+		$entity = $this->loadEntityFromSavingHelper( $entityId );
 		$entityRevId = $this->entitySavingHelper->getBaseRevisionId();
 
 		if ( $entity->getId() === null ) {
@@ -345,7 +343,35 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return ChangeOp
 	 */
-	abstract protected function getChangeOp( array $preparedParameters, EntityDocument $entity );
+	abstract protected function getChangeOp( array $preparedParameters, EntityDocument $entity ): ChangeOp;
+
+	/**
+	 * Try to find the entity or fail and create it, or die in the process.
+	 *
+	 * @param EntityId|null $entityId
+	 *
+	 * @return EntityDocument
+	 * @throws ApiUsageException
+	 */
+	private function loadEntityFromSavingHelper( ?EntityId $entityId ): EntityDocument {
+		$entity = $this->entitySavingHelper->loadEntity( $entityId, EntitySavingHelper::NO_FRESH_ID );
+
+		if ( $entity->getId() === null ) {
+			// Make sure the user is allowed to create an entity before attempting to assign an id
+			$permStatus = $this->permissionChecker->getPermissionStatusForEntity(
+				$this->getUser(),
+				EntityPermissionChecker::ACTION_EDIT,
+				$entity
+			);
+			if ( !$permStatus->isOK() ) {
+				$this->errorReporter->dieStatus( $permStatus, 'permissiondenied' );
+			}
+
+			$entity = $this->entitySavingHelper->loadEntity( $entityId, EntitySavingHelper::ASSIGN_FRESH_ID );
+		}
+
+		return $entity;
+	}
 
 	/**
 	 * Check the rights for the user accessing the module.
@@ -356,7 +382,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return Status the check's result
 	 */
-	private function checkPermissions( EntityDocument $entity, User $user, ChangeOp $changeOp ) {
+	private function checkPermissions( EntityDocument $entity, User $user, ChangeOp $changeOp ): Status {
 		$status = Status::newGood();
 
 		foreach ( $changeOp->getActions() as $perm ) {
@@ -367,7 +393,7 @@ abstract class ModifyEntity extends ApiBase {
 		return $status;
 	}
 
-	private function addToOutput( EntityDocument $entity, Status $status, $oldRevId = null ) {
+	private function addToOutput( EntityDocument $entity, Status $status, int $oldRevId ): void {
 		$this->getResultBuilder()->addBasicEntityInformation( $entity->getId(), 'entity' );
 		$this->getResultBuilder()->addRevisionIdFromStatusToResult( $status, 'entity', $oldRevId );
 
@@ -386,7 +412,7 @@ abstract class ModifyEntity extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getAllowedParams() {
+	protected function getAllowedParams(): array {
 		return array_merge(
 			parent::getAllowedParams(),
 			$this->getAllowedParamsForId(),
@@ -401,7 +427,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return array[]
 	 */
-	private function getAllowedParamsForId() {
+	private function getAllowedParamsForId(): array {
 		return [
 			'id' => [
 				self::PARAM_TYPE => 'string',
@@ -418,7 +444,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return array[]
 	 */
-	private function getAllowedParamsForSiteLink() {
+	private function getAllowedParamsForSiteLink(): array {
 		$sites = $this->siteLinkTargetProvider->getSiteList( $this->siteLinkGroups );
 
 		return [
@@ -436,7 +462,7 @@ abstract class ModifyEntity extends ApiBase {
 	 *
 	 * @return array
 	 */
-	private function getAllowedParamsForEntity() {
+	private function getAllowedParamsForEntity(): array {
 		return [
 			'baserevid' => [
 				self::PARAM_TYPE => 'integer',

@@ -80,6 +80,7 @@ class SaneitizeJobs extends Maintenance {
 		$this->addOption( 'job-name', 'Tells the script the name of the ' .
 			'sanitize job only useful to run multiple sanitize jobs. ' .
 			'Defaults to "default".', false, true );
+		$this->requireExtension( 'CirrusSearch' );
 	}
 
 	public function execute() {
@@ -170,7 +171,7 @@ class SaneitizeJobs extends Maintenance {
 
 		$loopId = $jobInfo->has( 'sanitize_job_loop_id' ) ? $jobInfo->get( 'sanitize_job_loop_id' ) : 0;
 		$idsTodo = $this->maxId - $jobInfo->get( 'sanitize_job_id_offset' );
-		$loopEta = date( $fmt, time() + ( $idsTodo * $jobsRate ) );
+		$loopEta = date( $fmt, time() + ( $idsTodo * $idsRate ) );
 		$loopRestartMinTime = date( $fmt, $jobInfo->get( 'sanitize_job_last_loop' ) + $minLoopDuration );
 
 		$this->output( <<<EOD

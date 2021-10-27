@@ -14,16 +14,19 @@ use MediaWiki\Page\Hook\ArticleDeleteCompleteHook;
 use ParserCache;
 use ParserOptions;
 use ParserOutput;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use RuntimeException;
 use Title;
 use User;
 use Wikibase\Client\Store\AddUsagesForPageJob;
+use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Store\UsageUpdater;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikibase\Client\Usage\EntityUsageFactory;
 use Wikibase\Client\Usage\ParserOutputUsageAccumulator;
 use Wikibase\Client\Usage\UsageLookup;
-use Wikibase\Client\WikibaseClient;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use WikiPage;
 
 /**
@@ -38,9 +41,9 @@ use WikiPage;
  * @author Marius Hoch
  */
 class DataUpdateHookHandler implements
-				LinksUpdateCompleteHook,
-				ArticleDeleteCompleteHook,
-				ParserCacheSaveCompleteHook
+	LinksUpdateCompleteHook,
+	ArticleDeleteCompleteHook,
+	ParserCacheSaveCompleteHook
 {
 
 	/**
@@ -63,14 +66,20 @@ class DataUpdateHookHandler implements
 	 */
 	private $entityUsageFactory;
 
-	public static function newFromGlobalState(): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
+	/** @var LoggerInterface */
+	private $logger;
 
+	public static function factory(
+		EntityIdParser $entityIdParser,
+		LoggerInterface $logger,
+		ClientStore $store
+	): self {
 		return new self(
-			$wikibaseClient->getStore()->getUsageUpdater(),
+			$store->getUsageUpdater(),
 			JobQueueGroup::singleton(),
-			$wikibaseClient->getStore()->getUsageLookup(),
-			new EntityUsageFactory( $wikibaseClient->getEntityIdParser() )
+			$store->getUsageLookup(),
+			new EntityUsageFactory( $entityIdParser ),
+			$logger
 		);
 	}
 
@@ -78,12 +87,14 @@ class DataUpdateHookHandler implements
 		UsageUpdater $usageUpdater,
 		JobQueueGroup $jobScheduler,
 		UsageLookup $usageLookup,
-		EntityUsageFactory $entityUsageFactory
+		EntityUsageFactory $entityUsageFactory,
+		LoggerInterface $logger = null
 	) {
 		$this->usageUpdater = $usageUpdater;
 		$this->jobScheduler = $jobScheduler;
 		$this->usageLookup = $usageLookup;
 		$this->entityUsageFactory = $entityUsageFactory;
+		$this->logger = $logger ?: new NullLogger();
 	}
 
 	/**
@@ -128,14 +139,15 @@ class DataUpdateHookHandler implements
 	public function doLinksUpdateComplete( LinksUpdate $linksUpdate ): void {
 		$pageId = $linksUpdate->mId;
 		if ( !$pageId ) {
-			// TODO inject logger
-			WikibaseClient::getDefaultInstance()->getLogger()
-				->info( __METHOD__ . ': skipping page ID {pageId} for title {title} (T264929)', [
+			$this->logger->info(
+				__METHOD__ . ': skipping page ID {pageId} for title {title} (T264929)',
+				[
 					'pageId' => $pageId,
 					'title' => $linksUpdate->getTitle()->getPrefixedText(),
 					'causeAction' => $linksUpdate->getCauseAction(),
 					'exception' => new RuntimeException(),
-				] );
+				]
+			);
 			return;
 		}
 
@@ -174,9 +186,7 @@ class DataUpdateHookHandler implements
 			// schedule the usage updates in the job queue, to avoid writing to the database
 			// during a GET request.
 
-			$currentUsages = $this->reindexEntityUsages(
-				$this->usageLookup->getUsagesForPage( $title->getArticleID() )
-			);
+			$currentUsages = $this->usageLookup->getUsagesForPage( $title->getArticleID() );
 			$newUsages = array_diff_key( $usages, $currentUsages );
 			if ( $newUsages === [] ) {
 				return;

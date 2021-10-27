@@ -4,10 +4,12 @@ namespace Wikibase\Repo\Store\Sql;
 
 use DatabaseUpdater;
 use HashBagOStuff;
+use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 use MediaWiki\MediaWikiServices;
 use MWException;
 use Onoi\MessageReporter\ObservableMessageReporter;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\DataModel\Services\Lookup\LegacyAdapterItemLookup;
 use Wikibase\DataModel\Services\Lookup\LegacyAdapterPropertyLookup;
 use Wikibase\Lib\Store\CachingEntityRevisionLookup;
 use Wikibase\Lib\Store\EntityRevisionCache;
@@ -17,8 +19,6 @@ use Wikibase\Lib\Store\Sql\PropertyInfoTable;
 use Wikibase\Lib\Store\Sql\WikiPageEntityDataLoader;
 use Wikibase\Lib\Store\Sql\WikiPageEntityMetaDataLookup;
 use Wikibase\Lib\Store\Sql\WikiPageEntityRevisionLookup;
-use Wikibase\Repo\Maintenance\PopulateTermFullEntityId;
-use Wikibase\Repo\Maintenance\RebuildTermsSearchKey;
 use Wikibase\Repo\RangeTraversable;
 use Wikibase\Repo\Store\ItemTermsRebuilder;
 use Wikibase\Repo\Store\PropertyTermsRebuilder;
@@ -31,43 +31,19 @@ use Wikimedia\Rdbms\IDatabase;
  * @author Daniel Kinzler
  * @author Marius Hoch
  */
-class DatabaseSchemaUpdater {
-
-	/**
-	 * @var Store
-	 */
-	private $store;
-
-	public function __construct( Store $store ) {
-		$this->store = $store;
-	}
-
-	private static function newFromGlobalState() {
-		$store = WikibaseRepo::getDefaultInstance()->getStore();
-
-		return new self( $store );
-	}
+class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 
 	/**
 	 * Schema update to set up the needed database tables.
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/LoadExtensionSchemaUpdates
 	 *
 	 * @param DatabaseUpdater $updater
-	 *
-	 * @return bool
 	 */
-	public static function onSchemaUpdate( DatabaseUpdater $updater ) {
-		$schemaUpdater = self::newFromGlobalState();
-		$schemaUpdater->doSchemaUpdate( $updater );
-
-		return true;
-	}
-
-	public function doSchemaUpdate( DatabaseUpdater $updater ) {
+	public function onLoadExtensionSchemaUpdates( $updater ) {
 		$db = $updater->getDB();
 		$type = $db->getType();
 
-		if ( $type !== 'mysql' && $type !== 'sqlite' ) {
+		if ( $type !== 'mysql' && $type !== 'sqlite' && $type !== 'postgres' ) {
 			wfWarn( "Database type '$type' is not supported by the Wikibase repository." );
 			return;
 		}
@@ -80,24 +56,26 @@ class DatabaseSchemaUpdater {
 			$updater->dropExtensionTable( 'wb_items' );
 			$updater->dropExtensionTable( 'wb_aliases' );
 			$updater->dropExtensionTable( 'wb_texts_per_lang' );
-
-			$updater->addExtensionTable(
-				'wb_items_per_site',
-				$this->getUpdateScriptPath( 'Wikibase', $db->getType() )
-			);
-
-			$this->store->rebuild();
-		} elseif ( !$db->tableExists( 'wb_items_per_site', __METHOD__ ) ) {
-			// Clean installation
-			$updater->addExtensionTable(
-				'wb_items_per_site',
-				$this->getUpdateScriptPath( 'Wikibase', $db->getType() )
-			);
-
-			$this->store->rebuild();
 		}
 
-		$this->updateTermsTable( $updater, $db );
+		$updater->addExtensionTable(
+			'wb_id_counters',
+			$this->getScriptPath( 'wb_id_counters', $db->getType() )
+		);
+		$updater->addExtensionTable(
+			'wb_items_per_site',
+			$this->getScriptPath( 'wb_items_per_site', $db->getType() )
+		);
+		// NOTE: This update is neither needed nor does it work on SQLite or Postgres.
+		if ( $db->getType() === 'mysql' ) {
+			// make ips_row_id BIGINT
+			$updater->modifyExtensionField(
+				'wb_items_per_site',
+				'ips_row_id',
+				$this->getUpdateScriptPath( 'MakeRowIDsBig', $db->getType() )
+			);
+		}
+
 		$this->updateItemsPerSiteTable( $updater, $db );
 		$this->updateChangesTable( $updater, $db );
 
@@ -109,7 +87,7 @@ class DatabaseSchemaUpdater {
 
 		$updater->addExtensionTable(
 			'wbt_text',
-			$this->getUpdateScriptPath( 'AddNormalizedTermsTablesDDL', $db->getType() )
+			$this->getScriptPath( 'term_store', $db->getType() )
 		);
 		if ( !$updater->updateRowExists( __CLASS__ . '::rebuildPropertyTerms' ) ) {
 			$updater->addExtensionUpdate( [
@@ -121,6 +99,40 @@ class DatabaseSchemaUpdater {
 				[ __CLASS__, 'rebuildItemTerms' ]
 			] );
 		}
+
+		$updater->dropExtensionTable( 'wb_terms' );
+
+		$this->updateChangesSubscriptionTable( $updater );
+
+		$updater->dropExtensionIndex(
+			'wb_changes',
+			'wb_changes_change_type',
+			$this->getUpdateScriptPath( 'patch-wb_changes-drop-change_type_index', $db->getType() )
+		);
+
+		$updater->modifyExtensionField(
+			'wb_changes_dispatch',
+			'chd_seen',
+			$this->getUpdateScriptPath( 'patch-wb_changes_dispatch-make-chd_seen-unsigned', $db->getType() )
+		);
+	}
+
+	private function updateChangesSubscriptionTable( DatabaseUpdater $dbUpdater ): void {
+		$table = 'wb_changes_subscription';
+
+		if ( !$dbUpdater->tableExists( $table ) ) {
+			$db = $dbUpdater->getDB();
+			$script = $this->getScriptPath( 'wb_changes_subscription', $db->getType() );
+			$dbUpdater->addExtensionTable( $table, $script );
+
+			// Register function for populating the table.
+			// Note that this must be done with a static function,
+			// for reasons that do not need explaining at this juncture.
+			$dbUpdater->addExtensionUpdate( [
+				[ __CLASS__, 'fillSubscriptionTable' ],
+				$table
+			] );
+		}
 	}
 
 	/**
@@ -130,7 +142,7 @@ class DatabaseSchemaUpdater {
 	private function addChangesTable( DatabaseUpdater $updater, $type ) {
 		$updater->addExtensionTable(
 			'wb_changes',
-			$this->getUpdateScriptPath( 'changes', $type )
+			$this->getScriptPath( 'wb_changes', $type )
 		);
 
 		if ( $type === 'mysql' && !$updater->updateRowExists( 'ChangeChangeObjectId.sql' ) ) {
@@ -145,11 +157,14 @@ class DatabaseSchemaUpdater {
 
 		$updater->addExtensionTable(
 			'wb_changes_dispatch',
-			$this->getUpdateScriptPath( 'changes_dispatch', $type )
+			$this->getScriptPath( 'wb_changes_dispatch', $type )
 		);
 	}
 
 	private function updateItemsPerSiteTable( DatabaseUpdater $updater, IDatabase $db ) {
+		if ( $db->getType() == 'postgres' ) {
+			return;
+		}
 		// Make wb_items_per_site.ips_site_page VARCHAR(310) - T99459
 		// NOTE: this update doesn't work on SQLite, but it's not needed there anyway.
 		if ( $db->getType() !== 'sqlite' ) {
@@ -159,6 +174,14 @@ class DatabaseSchemaUpdater {
 				$this->getUpdateScriptPath( 'MakeIpsSitePageLarger', $db->getType() )
 			);
 		}
+
+		// creates wb_item_per_site.ips_row_id.
+		$updater->addExtensionField(
+			'wb_items_per_site',
+			'ips_row_id',
+			$this->getUpdateScriptPath( 'AddRowIDs', $db->getType() )
+		);
+
 		$updater->dropExtensionIndex(
 			'wb_items_per_site',
 			'wb_ips_site_page',
@@ -168,8 +191,8 @@ class DatabaseSchemaUpdater {
 
 	private function updateChangesTable( DatabaseUpdater $updater, IDatabase $db ) {
 		// Make wb_changes.change_info MEDIUMBLOB - T108246
-		// NOTE: this update doesn't work on SQLite, but it's not needed there anyway.
-		if ( $db->getType() !== 'sqlite' ) {
+		// NOTE: This update is neither needed nor does it work on SQLite or Postgres.
+		if ( $db->getType() === 'mysql' ) {
 			$updater->modifyExtensionField(
 				'wb_changes',
 				'change_info',
@@ -183,12 +206,7 @@ class DatabaseSchemaUpdater {
 
 		if ( !$updater->tableExists( $table ) ) {
 			$type = $updater->getDB()->getType();
-			$fileBase = __DIR__ . '/../../../sql/' . $table;
-
-			$file = $fileBase . '.' . $type . '.sql';
-			if ( !file_exists( $file ) ) {
-				$file = $fileBase . '.sql';
-			}
+			$file = $this->getScriptPath( $table, $type );
 
 			$updater->addExtensionTable( $table, $file );
 
@@ -207,9 +225,8 @@ class DatabaseSchemaUpdater {
 	 */
 	public static function rebuildPropertyInfo( DatabaseUpdater $updater ) {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$localEntitySourceName = $wikibaseRepo->getSettings()->getSetting( 'localEntitySourceName' );
-		$propertySource = $wikibaseRepo
-			->getEntitySourceDefinitions()
+		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
+		$propertySource = WikibaseRepo::getEntitySourceDefinitions()
 			->getSourceForEntityType( 'property' );
 		if ( $propertySource->getSourceName() !== $localEntitySourceName ) {
 			// Foreign properties, skip this part
@@ -222,25 +239,25 @@ class DatabaseSchemaUpdater {
 			}
 		);
 
-		$propertySource = $wikibaseRepo->getEntitySourceDefinitions()->getSourceForEntityType( 'property' );
-
 		$table = new PropertyInfoTable(
-			$wikibaseRepo->getEntityIdComposer(),
+			WikibaseRepo::getEntityIdComposer(),
 			$propertySource->getDatabaseName(),
 			true
 		);
 
 		$contentCodec = $wikibaseRepo->getEntityContentDataCodec();
 		$propertyInfoBuilder = $wikibaseRepo->newPropertyInfoBuilder();
+		$entityNamespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 
 		$wikiPageEntityLookup = new WikiPageEntityRevisionLookup(
 			new WikiPageEntityMetaDataLookup(
-				$wikibaseRepo->getEntityNamespaceLookup(),
+				$entityNamespaceLookup,
 				new EntityIdLocalPartPageTableEntityQuery(
-					$wikibaseRepo->getEntityNamespaceLookup(),
+					$entityNamespaceLookup,
 					MediaWikiServices::getInstance()->getSlotRoleStore()
 				),
-				$propertySource
+				$propertySource,
+				WikibaseRepo::getLogger()
 			),
 			new WikiPageEntityDataLoader( $contentCodec, MediaWikiServices::getInstance()->getBlobStore() ),
 			MediaWikiServices::getInstance()->getRevisionStore(),
@@ -258,7 +275,7 @@ class DatabaseSchemaUpdater {
 			new LegacyAdapterPropertyLookup( $entityLookup ),
 			$propertyInfoBuilder,
 			$wikibaseRepo->getEntityIdComposer(),
-			$wikibaseRepo->getEntityNamespaceLookup()
+			$entityNamespaceLookup
 		);
 		$builder->setReporter( $reporter );
 		$builder->setUseTransactions( false );
@@ -269,17 +286,16 @@ class DatabaseSchemaUpdater {
 
 	public static function rebuildPropertyTerms( DatabaseUpdater $updater ) {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$localEntitySourceName = $wikibaseRepo->getSettings()->getSetting( 'localEntitySourceName' );
-		$propertySource = $wikibaseRepo
-			->getEntitySourceDefinitions()
+		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
+		$propertySource = WikibaseRepo::getEntitySourceDefinitions()
 			->getSourceForEntityType( 'property' );
 		if ( $propertySource->getSourceName() !== $localEntitySourceName ) {
 			// Foreign properties, skip this part
 			return;
 		}
 		$sqlEntityIdPagerFactory = new SqlEntityIdPagerFactory(
-			$wikibaseRepo->getEntityNamespaceLookup(),
-			$wikibaseRepo->getEntityIdLookup()
+			WikibaseRepo::getEntityNamespaceLookup(),
+			WikibaseRepo::getEntityIdLookup()
 		);
 		$reporter = new ObservableMessageReporter();
 		$reporter->registerReporterCallback(
@@ -293,7 +309,7 @@ class DatabaseSchemaUpdater {
 		$lbFactory->waitForReplication();
 
 		$rebuilder = new PropertyTermsRebuilder(
-			$wikibaseRepo->getNewTermStoreWriterFactory()->newPropertyTermStoreWriter(),
+			WikibaseRepo::getTermStoreWriterFactory()->newPropertyTermStoreWriter(),
 			$sqlEntityIdPagerFactory->newSqlEntityIdPager( [ 'property' ] ),
 			$reporter,
 			$reporter,
@@ -309,9 +325,8 @@ class DatabaseSchemaUpdater {
 
 	public static function rebuildItemTerms( DatabaseUpdater $updater ) {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$localEntitySourceName = $wikibaseRepo->getSettings()->getSetting( 'localEntitySourceName' );
-		$itemSource = $wikibaseRepo
-			->getEntitySourceDefinitions()
+		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
+		$itemSource = WikibaseRepo::getEntitySourceDefinitions()
 			->getSourceForEntityType( 'item' );
 		if ( $itemSource->getSourceName() !== $localEntitySourceName ) {
 			// Foreign items, skip this part
@@ -344,12 +359,14 @@ class DatabaseSchemaUpdater {
 		$lbFactory->waitForReplication();
 
 		$rebuilder = new ItemTermsRebuilder(
-			$wikibaseRepo->getNewTermStoreWriterFactory()->newItemTermStoreWriter(),
+			WikibaseRepo::getTermStoreWriterFactory()->newItemTermStoreWriter(),
 			self::newItemIdIterator( $highestId ),
 			$reporter,
 			$reporter,
 			$lbFactory,
-			$wikibaseRepo->getItemLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY ),
+			new LegacyAdapterItemLookup(
+				WikibaseRepo::getStore()->getEntityLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY )
+			),
 			250,
 			2
 		);
@@ -369,162 +386,49 @@ class DatabaseSchemaUpdater {
 		}
 	}
 
-	/**
-	 * Returns the script directory that contains a file with the given name.
-	 *
-	 * @param string $fileName with extension
-	 *
-	 * @throws MWException If the file was not found in any script directory
-	 * @return string The directory that contains the file
-	 */
-	private function getUpdateScriptDir( $fileName ) {
-		$dirs = [
-			__DIR__,
-			__DIR__ . '/../../../sql'
-		];
-
-		foreach ( $dirs as $dir ) {
-			if ( file_exists( "$dir/$fileName" ) ) {
-				return $dir;
-			}
-		}
-
-		throw new MWException( "Update script not found: $fileName" );
+	private function getUpdateScriptPath( $name, $type ) {
+		return $this->getScriptPath( 'archives/' . $name, $type );
 	}
 
-	/**
-	 * Returns the appropriate script file for use with the given database type.
-	 * Searches for files with type-specific extensions in the script directories,
-	 * falling back to the plain ".sql" extension if no specific script is found.
-	 *
-	 * @param string $name the script's name, without file extension
-	 * @param string $type the database type, as returned by IDatabase::getType()
-	 *
-	 * @return string The path to the script file
-	 * @throws MWException If the script was not found in any script directory
-	 */
-	private function getUpdateScriptPath( $name, $type ) {
-		$extensions = [
-			'sqlite' => 'sqlite.sql',
-			//'postgres' => 'pg.sql', // PG support is broken as of Dec 2013
-			'mysql' => 'mysql.sql',
+	private function getScriptPath( $name, $type ) {
+		$types = [
+			$type,
+			'mysql'
 		];
 
-		// Find the base directory by looking for a plain ".sql" file.
-		$dir = $this->getUpdateScriptDir( "$name.sql" );
+		foreach ( $types as $type ) {
+			$path = __DIR__ . '/../../../sql/' . $type . '/' . $name . '.sql';
 
-		if ( isset( $extensions[$type] ) ) {
-			$extension = $extensions[$type];
-			$path = "$dir/$name.$extension";
-
-			// if a type-specific file exists, use it
-			if ( file_exists( "$dir/$name.$extension" ) ) {
+			if ( file_exists( $path ) ) {
 				return $path;
 			}
-		} else {
-			throw new MWException( "Database type $type is not supported by Wikibase!" );
 		}
 
-		// we already know that the generic file exists
-		$path = "$dir/$name.sql";
-		return $path;
+		throw new MWException( "Could not find schema script '$name'" );
 	}
 
 	/**
-	 * Applies updates to the wb_terms table.
+	 * Static wrapper for EntityUsageTableBuilder::fillUsageTable
 	 *
-	 * @param DatabaseUpdater $updater
-	 * @param IDatabase $db
+	 * @param DatabaseUpdater $dbUpdater
+	 * @param string $table
 	 */
-	private function updateTermsTable( DatabaseUpdater $updater, IDatabase $db ) {
-		// ---- Update from 0.1 or 0.2. ----
-		if ( !$db->fieldExists( 'wb_terms', 'term_search_key', __METHOD__ ) ) {
-			$updater->addExtensionField(
-				'wb_terms',
-				'term_search_key',
-				$this->getUpdateScriptPath( 'AddTermsSearchKey', $db->getType() )
-			);
-
-			$updater->addPostDatabaseUpdateMaintenance( RebuildTermsSearchKey::class );
-		}
-
-		// creates wb_terms.term_row_id
-		// and also wb_item_per_site.ips_row_id.
-		$updater->addExtensionField(
-			'wb_terms',
-			'term_row_id',
-			$this->getUpdateScriptPath( 'AddRowIDs', $db->getType() )
+	public static function fillSubscriptionTable( DatabaseUpdater $dbUpdater, $table ) {
+		$primer = new ChangesSubscriptionTableBuilder(
+			// would be nice to pass in $dbUpdater->getDB().
+			MediaWikiServices::getInstance()->getDBLoadBalancer(),
+			WikibaseRepo::getEntityIdComposer(),
+			$table,
+			1000
 		);
 
-		// add weight to wb_terms
-		$updater->addExtensionField(
-			'wb_terms',
-			'term_weight',
-			$this->getUpdateScriptPath( 'AddTermsWeight', $db->getType() )
-		);
+		$reporter = new ObservableMessageReporter();
+		$reporter->registerReporterCallback( function( $msg ) use ( $dbUpdater ) {
+			$dbUpdater->output( "\t$msg\n" );
+		} );
+		$primer->setProgressReporter( $reporter );
 
-		// ---- Update from 0.4 ----
-
-		// NOTE: this update doesn't work on SQLite, but it's not needed there anyway.
-		if ( $db->getType() !== 'sqlite' ) {
-			// make term_row_id BIGINT
-			$updater->modifyExtensionField(
-				'wb_terms',
-				'term_row_id',
-				$this->getUpdateScriptPath( 'MakeRowIDsBig', $db->getType() )
-			);
-		}
-
-		// updated indexes
-		$updater->dropExtensionIndex(
-			'wb_terms',
-			'wb_terms_entity_type',
-			$this->getUpdateScriptPath( 'DropUnusedTermIndexes', $db->getType() )
-		);
-
-		// T159851
-		$updater->addExtensionField(
-			'wb_terms',
-			'term_full_entity_id',
-			$this->getUpdateScriptPath( 'AddTermsFullEntityId', $db->getType() )
-		);
-
-		$updater->dropExtensionIndex(
-			'wb_terms',
-			'term_search',
-			$this->getUpdateScriptPath( 'DropNotFullEntityIdTermIndexes', $db->getType() )
-		);
-
-		// T202265
-		$updater->addExtensionIndex(
-			'wb_terms',
-			'tmp1',
-			$this->getUpdateScriptPath( 'AddWbTermsTmp1Index', $db->getType() )
-		);
-
-		// T204836
-		$updater->addExtensionIndex(
-			'wb_terms',
-			'wb_terms_entity_id',
-			$this->getUpdateScriptPath( 'AddWbTermsEntityIdIndex', $db->getType() )
-		);
-
-		// T204837
-		$updater->addExtensionIndex(
-			'wb_terms',
-			'wb_terms_text',
-			$this->getUpdateScriptPath( 'AddWbTermsTextIndex', $db->getType() )
-		);
-
-		// T204838
-		$updater->addExtensionIndex(
-			'wb_terms',
-			'wb_terms_search_key',
-			$this->getUpdateScriptPath( 'AddWbTermsSearchKeyIndex', $db->getType() )
-		);
-
-		$updater->addPostDatabaseUpdateMaintenance( PopulateTermFullEntityId::class );
-		// TODO: drop old column as now longer needed (but only if all rows got the new column populated!)
+		$primer->fillSubscriptionTable();
 	}
 
 }

@@ -1,16 +1,21 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Api;
 
 use ApiBase;
 use ApiMain;
 use ApiUsageException;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Services\Statement\StatementGuidParser;
+use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\ChangeOp\StatementChangeOpFactory;
+use Wikibase\Repo\WikibaseRepo;
 
 /**
  * API module for removing qualifiers from a statement.
@@ -55,7 +60,7 @@ class RemoveQualifiers extends ApiBase {
 
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		ApiErrorReporter $errorReporter,
 		StatementChangeOpFactory $statementChangeOpFactory,
 		StatementModificationHelper $modificationHelper,
@@ -75,10 +80,45 @@ class RemoveQualifiers extends ApiBase {
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
 	}
 
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		EntityIdParser $entityIdParser,
+		StatementGuidParser $statementGuidParser,
+		StatementGuidValidator $statementGuidValidator
+	): self {
+		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
+		$changeOpFactoryProvider = $wikibaseRepo->getChangeOpFactoryProvider();
+
+		$modificationHelper = new StatementModificationHelper(
+			$wikibaseRepo->getSnakFactory(),
+			$entityIdParser,
+			$statementGuidValidator,
+			$apiHelperFactory->getErrorReporter( $mainModule )
+		);
+
+		return new self(
+			$mainModule,
+			$moduleName,
+			$apiHelperFactory->getErrorReporter( $mainModule ),
+			$changeOpFactoryProvider->getStatementChangeOpFactory(),
+			$modificationHelper,
+			$statementGuidParser,
+			function ( $module ) use ( $apiHelperFactory ) {
+				return $apiHelperFactory->getResultBuilder( $module );
+			},
+			function ( $module ) use ( $apiHelperFactory ) {
+				return $apiHelperFactory->getEntitySavingHelper( $module );
+			},
+			$wikibaseRepo->inFederatedPropertyMode()
+		);
+	}
+
 	/**
 	 * @inheritDoc
 	 */
-	public function execute() {
+	public function execute(): void {
 		$params = $this->extractRequestParams();
 		$this->validateParameters( $params );
 
@@ -113,7 +153,7 @@ class RemoveQualifiers extends ApiBase {
 	 *
 	 * @throws ApiUsageException
 	 */
-	private function validateParameters( array $params ) {
+	private function validateParameters( array $params ): void {
 		if ( !( $this->modificationHelper->validateStatementGuid( $params['claim'] ) ) ) {
 			$this->errorReporter->dieError( 'Invalid claim guid', 'invalid-guid' );
 		}
@@ -125,7 +165,7 @@ class RemoveQualifiers extends ApiBase {
 	 *
 	 * @return ChangeOp[]
 	 */
-	private function getChangeOps( $statementGuid, array $qualifierHashes ) {
+	private function getChangeOps( string $statementGuid, array $qualifierHashes ): array {
 		$changeOps = [];
 
 		foreach ( $qualifierHashes as $hash ) {
@@ -144,7 +184,7 @@ class RemoveQualifiers extends ApiBase {
 	 *
 	 * @return string[]
 	 */
-	private function getQualifierHashesFromParams( array $params, Statement $statement ) {
+	private function getQualifierHashesFromParams( array $params, Statement $statement ): array {
 		$qualifiers = $statement->getQualifiers();
 		$hashes = [];
 
@@ -162,7 +202,7 @@ class RemoveQualifiers extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -171,14 +211,14 @@ class RemoveQualifiers extends ApiBase {
 	 *
 	 * @return string
 	 */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	protected function getAllowedParams() {
+	protected function getAllowedParams(): array {
 		return array_merge(
 			[
 				'claim' => [
@@ -210,7 +250,7 @@ class RemoveQualifiers extends ApiBase {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		return [
 			'action=wbremovequalifiers&claim=Q42$D8404CDA-25E4-4334-AF13-A3290BCD9C0F'
 				. '&references=1eb8793c002b1d9820c833d234a1b54c8e94187e&token=foobar'

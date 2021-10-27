@@ -53,7 +53,7 @@ class CirrusShowSearchHitHandler {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 
 		return new self(
-			$wikibaseRepo->getEntityIdLookup(),
+			WikibaseRepo::getEntityIdLookup(),
 			$wikibaseRepo->getEntityLinkFormatterFactory( $context->getLanguage() )->getDefaultLinkFormatter()
 		);
 	}

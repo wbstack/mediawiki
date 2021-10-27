@@ -11,10 +11,13 @@ use MediaWiki\Hook\EditPage__showStandardInputs_optionsHook;
 use MessageLocalizer;
 use OutputPage;
 use Wikibase\Client\RepoLinker;
+use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikibase\Client\Usage\UsageLookup;
-use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\Services\Lookup\TermLookup;
+use Wikibase\DataModel\Services\Term\TermBuffer;
+use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 
 /**
@@ -57,19 +60,23 @@ class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook 
 		$this->idParser = $idParser;
 	}
 
-	public static function newFromGlobalState(): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-
-		$usageLookup = $wikibaseClient->getStore()->getUsageLookup();
+	public static function factory(
+		EntityIdParser $idParser,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		RepoLinker $repoLinker,
+		ClientStore $store,
+		TermBuffer $termBuffer,
+		TermLookup $termLookup
+	): self {
+		$usageLookup = $store->getUsageLookup();
 		$labelDescriptionLookupFactory = new LanguageFallbackLabelDescriptionLookupFactory(
-			$wikibaseClient->getLanguageFallbackChainFactory(),
-			$wikibaseClient->getTermLookup(),
-			$wikibaseClient->getTermBuffer()
+			$languageFallbackChainFactory,
+			$termLookup,
+			$termBuffer
 		);
-		$idParser = $wikibaseClient->getEntityIdParser();
 
 		return new self(
-			$wikibaseClient->newRepoLinker(),
+			$repoLinker,
 			$usageLookup,
 			$labelDescriptionLookupFactory,
 			$idParser
@@ -107,7 +114,7 @@ class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook 
 	}
 
 	/**
-	 * @param string[] $rowAspects
+	 * @param string[][] $rowAspects
 	 * @param IContextSource $context
 	 *
 	 * @return string HTML
@@ -146,12 +153,9 @@ class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook 
 		$usageAspectsByEntity = [];
 		$entityIds = [];
 
-		foreach ( $usages as $key => $entityUsage ) {
+		foreach ( $usages as $entityUsage ) {
 			$entityId = $entityUsage->getEntityId()->getSerialization();
 			$entityIds[$entityId] = $entityUsage->getEntityId();
-			if ( !isset( $usageAspectsByEntity[$entityId] ) ) {
-				$usageAspectsByEntity[$entityId] = [];
-			}
 			$usageAspectsByEntity[$entityId][] = [
 				$entityUsage->getAspect(),
 				$entityUsage->getModifier()

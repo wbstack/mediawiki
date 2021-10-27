@@ -12,7 +12,11 @@
 	function getCacheKey( name ) {
 		// Note: The Title class is used for normalization, even if the incoming strings aren't page
 		// titles, but namespace names.
-		return ( new mw.Title( name ) ).getPrefixedDb();
+		try {
+			return ( new mw.Title( name ) ).getPrefixedDb();
+		} catch ( e ) {
+			return name;
+		}
 	}
 
 	mw.libs.advancedSearch.dm.TitleCache.prototype.get = function ( name ) {

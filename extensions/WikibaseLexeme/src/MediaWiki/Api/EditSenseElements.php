@@ -5,6 +5,8 @@ namespace Wikibase\Lexeme\MediaWiki\Api;
 use ApiMain;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\SerializerFactory;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermLanguageValidator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermSerializationValidator;
 use Wikibase\Lexeme\Domain\Model\Sense;
@@ -17,10 +19,12 @@ use Wikibase\Lexeme\WikibaseLexemeServices;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
+use Wikibase\Lib\StringNormalizer;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
+use Wikibase\Repo\ChangeOp\Deserialization\ClaimsChangeOpDeserializer;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
@@ -31,7 +35,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class EditSenseElements extends \ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var EntityRevisionLookup
@@ -68,15 +72,20 @@ class EditSenseElements extends \ApiBase {
 	 */
 	private $entityStore;
 
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		SerializerFactory $baseDataModelSerializerFactory,
+		EntityIdParser $entityIdParser,
+		EntityStore $entityStore,
+		StringNormalizer $stringNormalizer
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
 
-		$serializerFactory = $wikibaseRepo->getBaseDataModelSerializerFactory();
-
 		$senseSerializer = new SenseSerializer(
-			$serializerFactory->newTermListSerializer(),
-			$serializerFactory->newStatementListSerializer()
+			$baseDataModelSerializerFactory->newTermListSerializer(),
+			$baseDataModelSerializerFactory->newStatementListSerializer()
 		);
 
 		return new self(
@@ -85,14 +94,18 @@ class EditSenseElements extends \ApiBase {
 			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
 			new EditSenseElementsRequestParser(
-				new SenseIdDeserializer( $wikibaseRepo->getEntityIdParser() ),
+				new SenseIdDeserializer( $entityIdParser ),
 				new EditSenseChangeOpDeserializer(
 					new GlossesChangeOpDeserializer(
 						new TermDeserializer(),
-						$wikibaseRepo->getStringNormalizer(),
+						$stringNormalizer,
 						new LexemeTermSerializationValidator(
 							new LexemeTermLanguageValidator( WikibaseLexemeServices::getTermLanguages() )
 						)
+					),
+					new ClaimsChangeOpDeserializer(
+						$wikibaseRepo->getExternalFormatStatementDeserializer(),
+						$wikibaseRepo->getChangeOpFactoryProvider()->getStatementChangeOpFactory()
 					)
 				)
 			),
@@ -101,7 +114,7 @@ class EditSenseElements extends \ApiBase {
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			},
-			$wikibaseRepo->getEntityStore()
+			$entityStore
 		);
 	}
 

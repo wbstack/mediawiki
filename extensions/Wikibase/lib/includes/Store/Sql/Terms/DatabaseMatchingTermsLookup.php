@@ -2,12 +2,14 @@
 
 namespace Wikibase\Lib\Store\Sql\Terms;
 
+use FakeResultWrapper;
 use InvalidArgumentException;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Storage\NameTableAccessException;
 use Psr\Log\LoggerInterface;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
 use Wikibase\Lib\Store\MatchingTermsLookup;
+use Wikibase\Lib\Store\Sql\Terms\Util\StatsdMonitoring;
 use Wikibase\Lib\Store\TermIndexSearchCriteria;
 use Wikibase\Lib\TermIndexEntry;
 use Wikimedia\Rdbms\IDatabase;
@@ -21,6 +23,8 @@ use Wikimedia\Rdbms\IResultWrapper;
  * @license GPL-2.0-or-later
  */
 class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
+
+	use StatsdMonitoring;
 
 	/** @var ILoadBalancer */
 	private $lb;
@@ -72,9 +76,7 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 
 		$results = $this->criteriaToQueryResults( $dbr, $criteria, $termType, $entityType, $options );
 
-		MediaWikiServices::getInstance()->getStatsdDataFactory()->increment(
-			'wikibase.repo.term_store.MatchingTermsLookup_getMatchingTerms'
-		);
+		$this->incrementForQuery( 'MatchingTermsLookup_getMatchingTerms' );
 
 		if ( isset( $options['LIMIT'] ) && $options['LIMIT'] > 0 ) {
 			return $this->buildTermResult( $results, $options['LIMIT'] );
@@ -163,7 +165,13 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 			$termType = $mask->getTermType();
 		}
 		if ( $termType !== null ) {
-			$conditions['wbtl_type_id'] = $this->typeIdsAcquirer->acquireTypeIds( [ $termType ] )[$termType];
+			try {
+				$conditions['wbtl_type_id'] = $this->typeIdsAcquirer->acquireTypeIds( [ $termType ] )[$termType];
+			} catch ( NameTableAccessException $e ) {
+				// Edge case: attempting to do a term lookup before the first insert of the respective term type. Unlikely to happen in
+				// production, but annoying/confusing if it happens in tests.
+				return new FakeResultWrapper( [] );
+			}
 		}
 
 		$fields = [ 'wbtl_id', 'wbtl_type_id', 'wbxl_language', 'wbx_text' ];
@@ -230,19 +238,6 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 		}
 
 		return $matchingTerms;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	public function getTopMatchingTerms(
-		array $criteria,
-		$termType = null,
-		$entityType = null,
-		array $options = []
-	) {
-		// The new term store doesn't support order by weight.
-		return $this->getMatchingTerms( $criteria, $termType, $entityType, $options );
 	}
 
 	/**

@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Äberlausitzer"
+		]
+	},
+	"advancedsearch-optgroup-text": "Eim Seitatext sucha",
+	"advancedsearch-optgroup-structure": "Struktur",
+	"advancedsearch-optgroup-files": "Dateien und Bilder",
+	"advancedsearch-optgroup-sort": "Sortierreihenfulge",
+	"advancedsearch-field-phrase": "Genau dieser Text",
+	"advancedsearch-field-subpageof": "Underseita dieser Seite",
+	"advancedsearch-field-intitle": "Seitatittel enthält",
+	"advancedsearch-field-deepcategory": "Seita ei diesen Kategorien",
+	"advancedsearch-field-hastemplate": "Seita mit diesen Vurlooga",
+	"advancedsearch-field-inlanguage": "Seita ei dieser Sproache",
+	"advancedsearch-field-filetype": "Dateityp",
+	"advancedsearch-field-filew": "Dateibreite ei Pixeln",
+	"advancedsearch-field-sort": "Sortierreihenfulge",
+	"advancedsearch-field-preview-sort": "Sortieren noach $1",
+	"advancedsearch-placeholder-exact-text": "\"Koatze liebt Ziege\"",
+	"advancedsearch-filetype-section-image": "Bildformate",
+	"advancedsearch-filetype-section-audio": "Audioformate",
+	"advancedsearch-filetype-section-document": "Dokumentformate",
+	"advancedsearch-filetype-bitmap": "Bild",
+	"advancedsearch-filetype-audio": "Audio",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Office",
+	"advancedsearch-filesize-smaller-than": "kleener ols",
+	"advancedsearch-sort-relevance": "Relevanz",
+	"advancedsearch-sort-preview-relevance": "Relevanz",
+	"advancedsearch-namespaces-search-in": "Sucha ei:",
+	"advancedsearch-namespaces-preset-all": "Olle",
+	"advancedsearch-namespaces-preset-default": "Standard"
+}

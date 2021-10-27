@@ -19,7 +19,7 @@
 	}
 
 	/**
-	 * @desc It is possible for the namespace field to be completely empty
+	 * @description It is possible for the namespace field to be completely empty
 	 and at the same time have the file type option selected.
 	 This would lead to an empty search result in most cases,
 	 as the default namespaces (which are used when no namespaces are selected) do not contain files.
@@ -62,15 +62,17 @@
 				$compiledSearchField = $( '<input>' ).prop( {
 					name: $searchField.prop( 'name' ),
 					type: 'hidden'
-				} ).val( compiledQuery ),
-				$sortField = $( '<input>' ).prop( {
+				} ).val( compiledQuery );
+			$searchField.prop( 'name', '' )
+				.after( $compiledSearchField );
+
+			// Skip the default to avoid noise in the user's address bar
+			if ( state.getSortMethod() !== 'relevance' ) {
+				$searchField.after( $( '<input>' ).prop( {
 					name: 'sort',
 					type: 'hidden'
-				} ).val( state.getSortMethod() );
-			$searchField.prop( 'name', '' )
-				.after( $compiledSearchField )
-				.after( $sortField );
-
+				} ).val( state.getSortMethod() ) );
+			}
 		} );
 	}
 
@@ -78,8 +80,15 @@
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} currentState
 	 */
 	function updateSearchResultLinks( currentState ) {
+		var extraParams = '';
+		// Skip the default to avoid noise in the user's address bar
+		if ( currentState.getSortMethod() !== 'relevance' ) {
+			extraParams += '&sort=' + currentState.getSortMethod();
+		}
+		extraParams += '&advancedSearch-current=' + currentState.toJSON();
+
 		$( '.mw-prevlink, .mw-nextlink, .mw-numlink' ).attr( 'href', function ( i, href ) {
-			return href + '&advancedSearch-current=' + currentState.toJSON();
+			return href + extraParams;
 		} );
 	}
 
@@ -234,6 +243,11 @@
 			$advancedSearch = $( '<div>' ).addClass( 'mw-advancedSearch-container' ),
 			$searchField = $search.find( 'input[name="search"]' ),
 			$profileField = $search.find( 'input[name="profile"]' );
+
+		// There is possibly no form, e.g. when the special page failed (T266163)
+		if ( !$searchField.length ) {
+			return;
+		}
 
 		$search.append( $advancedSearch );
 

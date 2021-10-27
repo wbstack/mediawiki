@@ -3,6 +3,7 @@
 namespace Wikibase\View\Tests;
 
 use Wikibase\View\DummyLocalizedTextProvider;
+use Wikibase\View\RawMessageParameter;
 
 /**
  * @covers \Wikibase\View\DummyLocalizedTextProvider
@@ -14,24 +15,69 @@ use Wikibase\View\DummyLocalizedTextProvider;
  */
 class DummyLocalizedTextProviderTest extends \PHPUnit\Framework\TestCase {
 
+	/**
+	 * @dataProvider dummyLocalizedTextProviderProvider
+	 */
+	public function testGet( $messageKey, $params, $expectedValue ) {
+		$this->assertEquals(
+			$expectedValue,
+			( new DummyLocalizedTextProvider() )->get( $messageKey, $params )
+		);
+	}
+
 	public function dummyLocalizedTextProviderProvider() {
-		return [
-			[
-				new DummyLocalizedTextProvider(),
-				true,
-				'(parentheses: VALUE)',
-				'qqx'
-			]
+		yield [
+			'messageKey' => 'parentheses',
+			'params' => [ 'VALUE' ],
+			'expectedValue' => '(parentheses: VALUE)',
+		];
+
+		yield [
+			'messageKey' => 'some-message-key',
+			'params' => [ 'foo', '<bar />' ],
+			'expectedValue' => '(some-message-key: foo, <bar />)',
 		];
 	}
 
 	/**
-	 * @dataProvider dummyLocalizedTextProviderProvider
+	 * @dataProvider escapedMessageProvider
 	 */
-	public function testGet( DummyLocalizedTextProvider $localizedTextProvider, $has, $content, $languageCode ) {
-		$this->assertEquals( $localizedTextProvider->has( 'parentheses' ), $has );
-		$this->assertEquals( $localizedTextProvider->get( 'parentheses', [ 'VALUE' ] ), $content );
-		$this->assertEquals( $localizedTextProvider->getLanguageOf( 'parentheses' ), $languageCode );
+	public function testGetEscaped( $messageKey, $params, $expectedValue ) {
+		$this->assertEquals(
+			$expectedValue,
+			( new DummyLocalizedTextProvider() )->getEscaped( $messageKey, $params )
+		);
+	}
+
+	public function escapedMessageProvider() {
+		yield [
+			'messageKey' => 'parentheses',
+			'params' => [ 'VALUE' ],
+			'expectedValue' => '(parentheses: VALUE)',
+		];
+
+		yield [
+			'messageKey' => 'some-message-key',
+			'params' => [ 'foo', '<bar />' ],
+			'expectedValue' => '(some-message-key: foo, &lt;bar /&gt;)',
+		];
+
+		yield [
+			'messageKey' => 'some-message-key',
+			'params' => [ 'foo', new RawMessageParameter( '<bar />' ) ],
+			'expectedValue' => '(some-message-key: foo, <bar />)',
+		];
+	}
+
+	public function testHas() {
+		$this->assertTrue( ( new DummyLocalizedTextProvider() )->has( 'some-message-key' ) );
+	}
+
+	public function testGetLanguageOf() {
+		$this->assertEquals(
+			'qqx',
+			( new DummyLocalizedTextProvider() )->getLanguageOf( 'some-message-key' )
+		);
 	}
 
 }

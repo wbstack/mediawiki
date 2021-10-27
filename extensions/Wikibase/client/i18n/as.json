@@ -3,7 +3,8 @@
 		"authors": [
 			"Dibya Dutta",
 			"Gitartha.bordoloi",
-			"IKHazarika"
+			"IKHazarika",
+			"Simbu123"
 		]
 	},
 	"tooltip-t-wikibase": "সংযোজিত তথ্যভঁৰালৰ আইটেমলৈ লিংক",
@@ -14,6 +15,7 @@
 	"wikibase-dataitem": "{{WBREPONAME}} আইটেম",
 	"wikibase-editlinks": "আন্তঃৱিকি লিংক সম্পাদনা কৰক",
 	"wikibase-editlinkstitle": "আন্তঃৱিকি লিংক সম্পাদনা কৰক",
+	"wikibase-linkitem-addlinks": "লিংক যোগ কৰক",
 	"wikibase-linkitem-close": "এই বাৰ্তা বন্ধ কৰি পৃষ্ঠাটো পুনৰ ল'ড কৰক",
 	"wikibase-linkitem-title": "পৃষ্ঠাৰ লগত সংযোগ",
 	"wikibase-linkitem-linkpage": "পৃষ্ঠাৰ লগত সংযোগ কৰক",
@@ -34,5 +36,6 @@
 	"wikibase-replicationnote": "অনুগ্ৰহ কৰি লক্ষ্য কৰিব যে এই সালসলনি সকলো ৱিকিতে দৃশ্যমান হ'বলৈ কেইবামিনিটো লাগিব পাৰে।",
 	"wikibase-watchlist-show-changes-pref": "আপোনাৰ লক্ষ্য-তালিকাত {{WBREPONAME}} সম্পাদনাসমূহ দেখুৱাব",
 	"wikibase-unconnectedpages-submit": "যাওক",
+	"wikibase-pageinfo-description-central": "গোলকীয় বিৱৰণ",
 	"wikibase-otherprojects": "আন প্ৰকল্পসমূহত"
 }

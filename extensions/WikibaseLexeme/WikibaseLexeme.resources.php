@@ -4,7 +4,8 @@
  * TODO => should rather be defined in extension.json. To be moved there once client-
  * and repo-specific functionality have been split to separate extensions.
  */
-return call_user_func( function() {
+
+return call_user_func( function () {
 	$moduleTemplate = [
 		'localBasePath' => __DIR__ . '/resources',
 		'remoteExtPath' => 'WikibaseLexeme/resources',
@@ -47,6 +48,12 @@ return call_user_func( function() {
 				"widgets/LemmaWidget.newLemmaWidget.js",
 				"widgets/RepresentationWidget.js",
 				"widgets/RedundantLanguageIndicator.js",
+				[
+					// used by GlossWidget
+					'name' => 'widgets/languages.json',
+					'callback' => 'Wikibase\Lexeme\WikibaseLexemeHooks::getLexemeViewLanguages'
+				],
+
 			],
 			"dependencies" => [
 				"jquery.util.getDirectionality",
@@ -63,7 +70,6 @@ return call_user_func( function() {
 				"wikibase.templates.lexeme",
 				"wikibase.getLanguageNameByCode",
 				"wikibase.lexeme.getDeserializer",
-				"wikibase.WikibaseContentLanguages",
 				"wikibase.lexeme.view.ViewFactoryFactory",
 				"oojs-ui-core",
 				"oojs-ui-widgets",
@@ -96,12 +102,24 @@ return call_user_func( function() {
 				"wikibaselexeme-sense-gloss-invalid-language",
 				"wikibaselexeme-sense-gloss-redundant-language",
 				"wikibase-lexeme-language-selector-label"
+			],
+			"templates" => [
+				'lexemeHeader.vue' => 'templates/lexemeHeader.vue.html',
+				'glossWidget.vue' => 'templates/glossWidget.vue.html',
+				'languageAndLexicalCategoryWidget.vue' => 'templates/languageAndLexicalCategoryWidget.vue.html',
+				'lemma.vue' => 'templates/lemma.vue.html',
+				'representations.vue' => 'templates/representations.vue.html',
 			]
 		],
 		"wikibase.templates.lexeme" => $moduleTemplate + [
 			"class" => "\\Wikibase\\Lexeme\\Presentation\\View\\TemplateModule",
 			"dependencies" => [
 				"wikibase.templates"
+			]
+		],
+		"mediawiki.template.vue" => $moduleTemplate + [
+			'scripts' => [
+				'mediawiki.template.vue.js'
 			]
 		],
 		"wikibase.lexeme.datamodel" => $moduleTemplate + [

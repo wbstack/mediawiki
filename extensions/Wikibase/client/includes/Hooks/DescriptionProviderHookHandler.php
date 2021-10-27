@@ -8,21 +8,28 @@ use MediaWiki\Rest\Entity\SearchResultPageIdentity;
 use MediaWiki\Rest\Hook\SearchResultProvideDescriptionHook;
 use Title;
 use Wikibase\Client\Store\DescriptionLookup;
-use Wikibase\Client\WikibaseClient;
+use Wikibase\Lib\SettingsArray;
 
 /**
  * Description Provider Hook Handler for Search Results
+ * @license GPL-2.0-or-later
  */
 class DescriptionProviderHookHandler implements SearchResultProvideDescriptionHook {
 
-	private $descriptionLookup;
+	/** @var bool */
 	private $allowLocalShortDesc;
+	/** @var bool */
+	private $forceLocalShortDesc;
+	/** @var DescriptionLookup */
+	private $descriptionLookup;
 
 	public function __construct(
 		bool $allowLocalShortDesc,
+		bool $forceLocalShortDesc,
 		DescriptionLookup $descriptionLookup
 	) {
 		$this->allowLocalShortDesc = $allowLocalShortDesc;
+		$this->forceLocalShortDesc = $forceLocalShortDesc;
 		$this->descriptionLookup = $descriptionLookup;
 	}
 
@@ -32,6 +39,8 @@ class DescriptionProviderHookHandler implements SearchResultProvideDescriptionHo
 	): void {
 		if ( !$this->allowLocalShortDesc ) {
 			$sources = [ DescriptionLookup::SOURCE_CENTRAL ];
+		} elseif ( $this->forceLocalShortDesc ) {
+			$sources = [ DescriptionLookup::SOURCE_LOCAL ];
 		} else {
 			$sources = [ DescriptionLookup::SOURCE_CENTRAL, DescriptionLookup::SOURCE_LOCAL ];
 		}
@@ -50,11 +59,14 @@ class DescriptionProviderHookHandler implements SearchResultProvideDescriptionHo
 		}
 	}
 
-	public static function newFromGlobalState(): DescriptionProviderHookHandler {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$allowLocalShortDesc = $wikibaseClient->getSettings()->getSetting( 'allowLocalShortDesc' );
-		$descriptionLookup = $wikibaseClient->getDescriptionLookup();
-		return new DescriptionProviderHookHandler( $allowLocalShortDesc, $descriptionLookup );
+	public static function factory(
+		DescriptionLookup $descriptionLookup,
+		SettingsArray $clientSettings
+	): self {
+		$allowLocalShortDesc = $clientSettings->getSetting( 'allowLocalShortDesc' );
+		$forceLocalShortDesc = $clientSettings->getSetting( 'forceLocalShortDesc' );
+
+		return new self( $allowLocalShortDesc, $forceLocalShortDesc, $descriptionLookup );
 	}
 
 }

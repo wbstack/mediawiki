@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"CptViraj"
+		]
+	},
+	"advancedsearch-field-filetype": "ફાઈલનો પ્રકાર",
+	"advancedsearch-filetype-bitmap": "છબી",
+	"advancedsearch-filetype-drawing": "ચિત્ર",
+	"advancedsearch-filetype-audio": "ધ્વનિ",
+	"advancedsearch-filetype-video": "ચલચિત્ર"
+}

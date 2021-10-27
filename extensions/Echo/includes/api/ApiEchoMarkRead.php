@@ -8,7 +8,7 @@ class ApiEchoMarkRead extends ApiBase {
 		$this->getMain()->getVal( '_' );
 
 		$user = $this->getUser();
-		if ( $user->isAnon() ) {
+		if ( !$user->isRegistered() ) {
 			$this->dieWithError( 'apierror-mustbeloggedin-generic', 'login-required' );
 		} elseif ( MWEchoDbFactory::newFromDefault()->isReadOnly() ) {
 			$this->dieReadOnly();
@@ -93,10 +93,6 @@ class ApiEchoMarkRead extends ApiBase {
 
 	public function needsToken() {
 		return 'csrf';
-	}
-
-	public function getTokenSalt() {
-		return '';
 	}
 
 	public function mustBePosted() {

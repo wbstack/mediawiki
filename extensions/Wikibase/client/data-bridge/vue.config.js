@@ -10,13 +10,17 @@ const DEV_MODE = process.env.WEBPACK_TARGET === 'dev';
  * in dev it is still webpack's job to make them available
  */
 function externals() {
-	return DEV_MODE ? [] : [
-		'vue',
-		'vuex',
-	];
+	if ( DEV_MODE ) {
+		return [];
+	}
+
+	// get external packages from @wmde/lib-version-check config
+	const package = require( './package.json' );
+	return Object.keys( package.config.remoteVersion );
 }
 
 module.exports = {
+	productionSourceMap: false,
 	configureWebpack: () => ( {
 		output: {
 			filename: `${filePrefix}[name]${process.env.VUE_CLI_MODERN_BUILD ? '.modern' : ''}.js`,
@@ -35,7 +39,7 @@ module.exports = {
 			minimize: !DEV_MODE,
 			minimizer: [ new TerserPlugin( {
 				include: /\.js$/,
-				sourceMap: true,
+				sourceMap: false,
 				extractComments: false,
 			} ) ],
 		},

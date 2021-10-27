@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Kambai Akau"
+		]
+	},
+	"advancedsearch-optgroup-files": "A̱yaafail ma̱ng nghwughwu",
+	"advancedsearch-optgroup-sort": "Oda tswang",
+	"advancedsearch-field-plain": "Swáng a̱lyiat jini",
+	"advancedsearch-field-phrase": "Lyuut huni ma̱ ca̱caat",
+	"advancedsearch-field-or": "Jhyiung mami swáng a̱lyiat jini",
+	"advancedsearch-field-not": "Swáng a̱lyiat jini ja bah",
+	"advancedsearch-field-subpageof": "A̱bapejí peji huni",
+	"advancedsearch-field-intitle": "A̱lyoot peji byia̱",
+	"advancedsearch-field-deepcategory": "Pejí mi̱ si̱sa jini",
+	"advancedsearch-field-inlanguage": "Pejí da̱ a̱lyem kani",
+	"advancedsearch-field-filetype": "Kak fail",
+	"advancedsearch-sort-create-timestamp-asc": "Mam zwat nkhwuk - a̱khwukhwop lan swak wu tazwa"
+}

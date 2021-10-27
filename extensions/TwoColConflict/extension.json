@@ -1,7 +1,7 @@
 {
 	"name": "TwoColConflict",
 	"author": [
-		"TCB team (Wikimedia Deutschland)",
+		"[https://meta.wikimedia.org/wiki/WMDE_Technical_Wishes Wikimedia Deutschland Technical Wishes Team]",
 		"Christoph Jauera",
 		"Addshore",
 		"Andrew Kostka",
@@ -14,7 +14,7 @@
 	"type": "other",
 	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"config": {
 		"TwoColConflictBetaFeature": {
@@ -151,7 +151,7 @@
 				"twocolconflict-split-tour-dialog-header-single-column-view",
 				"twocolconflict-split-tour-dialog-message-single-column-view",
 				"twocolconflict-split-tour-dialog-btn-text-single-column-view",
-				"savechanges"
+				"publishchanges"
 			]
 		},
 		"ext.TwoColConflict.Util": {
@@ -171,7 +171,13 @@
 		"TwoColConflictAlias": "TwoColConflict.alias.php"
 	},
 	"SpecialPages": {
-		"TwoColConflictProvideSubmittedText": "TwoColConflict\\ProvideSubmittedText\\SpecialProvideSubmittedText"
+		"TwoColConflictProvideSubmittedText": {
+			"class": "TwoColConflict\\ProvideSubmittedText\\SpecialProvideSubmittedText",
+			"services": [
+				"StatsdDataFactory",
+				"TwoColConflictContext"
+			]
+		}
 	},
 	"QUnitTestModule": {
 		"localBasePath": "tests/qunit",
@@ -187,8 +193,8 @@
 	"attributes": {
 		"EventLogging": {
 			"Schemas": {
-				"TwoColConflictConflict": 19950885,
-				"TwoColConflictExit": 19982300
+				"TwoColConflictConflict": "/analytics/legacy/twocolconflictconflict/1.0.0",
+				"TwoColConflictExit": "/analytics/legacy/twocolconflictexit/1.0.0"
 			}
 		}
 	},

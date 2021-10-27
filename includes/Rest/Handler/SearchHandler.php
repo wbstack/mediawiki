@@ -11,14 +11,12 @@ use MediaWiki\Rest\Handler;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\Response;
 use MediaWiki\Search\Entity\SearchResultThumbnail;
-use RequestContext;
 use SearchEngine;
 use SearchEngineConfig;
 use SearchEngineFactory;
 use SearchResult;
 use SearchSuggestion;
 use Status;
-use User;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
@@ -28,17 +26,14 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  */
 class SearchHandler extends Handler {
 
-	/** @var PermissionManager */
-	private $permissionManager;
-
 	/** @var SearchEngineFactory */
 	private $searchEngineFactory;
 
 	/** @var SearchEngineConfig */
 	private $searchEngineConfig;
 
-	/** @var User */
-	private $user;
+	/** @var PermissionManager */
+	private $permissionManager;
 
 	/**
 	 * Search page body and titles.
@@ -79,22 +74,19 @@ class SearchHandler extends Handler {
 
 	/**
 	 * @param Config $config
-	 * @param PermissionManager $permissionManager
 	 * @param SearchEngineFactory $searchEngineFactory
 	 * @param SearchEngineConfig $searchEngineConfig
+	 * @param PermissionManager $permissionManager
 	 */
 	public function __construct(
 		Config $config,
-		PermissionManager $permissionManager,
 		SearchEngineFactory $searchEngineFactory,
-		SearchEngineConfig $searchEngineConfig
+		SearchEngineConfig $searchEngineConfig,
+		PermissionManager $permissionManager
 	) {
-		$this->permissionManager = $permissionManager;
 		$this->searchEngineFactory = $searchEngineFactory;
 		$this->searchEngineConfig = $searchEngineConfig;
-
-		// @todo Inject this, when there is a good way to do that, see T239753
-		$this->user = RequestContext::getMain()->getUser();
+		$this->permissionManager = $permissionManager;
 
 		// @todo Avoid injecting the entire config, see T246377
 		$this->completionCacheExpiry = $config->get( 'SearchSuggestCacheExpiry' );
@@ -199,7 +191,7 @@ class SearchHandler extends Handler {
 			if ( $title && $title->exists() ) {
 				$pageID = $title->getArticleID();
 				if ( !isset( $pageInfos[$pageID] ) &&
-					$this->permissionManager->quickUserCan( 'read', $this->user, $title )
+					$this->getAuthority()->probablyCan( 'read', $title )
 				) {
 					$pageInfos[ $pageID ] = [ $title, $sugg, null ];
 				}
@@ -225,7 +217,7 @@ class SearchHandler extends Handler {
 				$title = $result->getTitle();
 				$pageID = $title->getArticleID();
 				if ( !isset( $pageInfos[$pageID] ) &&
-					$this->permissionManager->quickUserCan( 'read', $this->user, $title )
+					$this->getAuthority()->probablyCan( 'read', $title )
 				) {
 					$pageInfos[$pageID] = [ $title, null, $result ];
 				}
@@ -242,7 +234,7 @@ class SearchHandler extends Handler {
 	 * @return array[] of pageId => [ $title, null, $result ]
 	 */
 	private function buildResultFromPageInfos( array $pageInfos ): array {
-		return array_map( function ( $pageInfo ) {
+		return array_map( static function ( $pageInfo ) {
 			list( $title, $sugg, $result ) = $pageInfo;
 			return [
 				'id' => $title->getArticleID(),
@@ -291,7 +283,7 @@ class SearchHandler extends Handler {
 
 		$this->getHookRunner()->onSearchResultProvideDescription( $pageIdentities, $descriptions );
 
-		return array_map( function ( $description ) {
+		return array_map( static function ( $description ) {
 			return [ 'description' => $description ];
 		}, $descriptions );
 	}
@@ -324,7 +316,7 @@ class SearchHandler extends Handler {
 	public function execute() {
 		$searchEngine = $this->createSearchEngine();
 		$pageInfos = $this->doSearch( $searchEngine );
-		$pageIdentities = array_map( function ( $pageInfo ) {
+		$pageIdentities = array_map( static function ( $pageInfo ) {
 			list( $title ) = $pageInfo;
 			return new SearchResultPageIdentityValue(
 				$title->getArticleID(),
@@ -338,14 +330,17 @@ class SearchHandler extends Handler {
 			$this->buildDescriptionsFromPageIdentities( $pageIdentities ),
 			$this->buildThumbnailsFromPageIdentities( $pageIdentities )
 		);
-
 		$response = $this->getResponseFactory()->createJson( [ 'pages' => $result ] );
 
 		if ( $this->mode === self::COMPLETION_MODE && $this->completionCacheExpiry ) {
 			// Type-ahead completion matches should be cached by the client and
 			// in the CDN, especially for short prefixes.
 			// See also $wgSearchSuggestCacheExpiry and ApiOpenSearch
-			$response->setHeader( 'Cache-Control', 'public, max-age=' . $this->completionCacheExpiry );
+			 if ( $this->permissionManager->isEveryoneAllowed( 'read' ) ) {
+				$response->setHeader( 'Cache-Control', 'public, max-age=' . $this->completionCacheExpiry );
+			 } else {
+				 $response->setHeader( 'Cache-Control', 'no-store, max-age=0' );
+			 }
 		}
 
 		return $response;

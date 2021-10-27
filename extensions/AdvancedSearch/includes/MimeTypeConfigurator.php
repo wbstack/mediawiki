@@ -9,6 +9,9 @@ use MimeAnalyzer;
  */
 class MimeTypeConfigurator {
 
+	/**
+	 * @var MimeAnalyzer
+	 */
 	private $mimeAnalyzer;
 
 	/**

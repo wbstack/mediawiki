@@ -42,6 +42,7 @@
 	"advancedsearch-filesize-greater-than": "lebih besar daripada",
 	"advancedsearch-filesize-smaller-than": "lebih kecil daripada",
 	"advancedsearch-sort-relevance": "Relevan",
+	"advancedsearch-sort-last-edit-asc": "Tarikh suntingan – tertua di atas",
 	"advancedsearch-sort-last-edit-desc": "Sunting tarikh - terkini di atas",
 	"advancedsearch-sort-create-timestamp-desc": "Tarikh penciptaan - terkini di atas",
 	"advancedsearch-sort-preview-relevance": "releven",

@@ -1,12 +1,15 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Hooks;
 
 use Html;
 use HtmlArmor;
-use IContextSource;
 use InvalidArgumentException;
 use Language;
+use MediaWiki\Search\Hook\ShowSearchHitHook;
+use MediaWiki\Search\Hook\ShowSearchHitTitleHook;
 use MWException;
 use RequestContext;
 use SearchResult;
@@ -19,15 +22,12 @@ use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
 use Wikibase\DataModel\Statement\StatementListProvider;
 use Wikibase\DataModel\Term\DescriptionsProvider;
 use Wikibase\DataModel\Term\TermFallback;
-use Wikibase\Lib\LanguageFallbackChain;
+use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\LanguageFallbackIndicator;
 use Wikibase\Lib\LanguageNameLookup;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Repo\Content\EntityContentFactory;
-use Wikibase\Repo\Hooks\Formatters\DefaultEntityLinkFormatter;
-use Wikibase\Repo\Hooks\Formatters\EntityLinkFormatter;
 use Wikibase\Repo\Search\ExtendedResult;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Handler to format entities in the search results
@@ -36,56 +36,27 @@ use Wikibase\Repo\WikibaseRepo;
  * @author Matěj Suchánek
  * @author Daniel Kinzler
  */
-class ShowSearchHitHandler {
+class ShowSearchHitHandler implements ShowSearchHitHook, ShowSearchHitTitleHook {
 
-	/**
-	 * @var EntityContentFactory
-	 */
+	/** @var EntityContentFactory */
 	private $entityContentFactory;
-
-	/**
-	 * @var LanguageFallbackChain
-	 */
-	private $languageFallbackChain;
-
-	/**
-	 * @var EntityIdLookup
-	 */
+	/** @var EntityIdLookup */
 	private $entityIdLookup;
-
-	/**
-	 * @var EntityLookup
-	 */
+	/** @var EntityLookup */
 	private $entityLookup;
+	/** @var LanguageFallbackChainFactory */
+	private $fallbackChainFactory;
 
 	public function __construct(
 		EntityContentFactory $entityContentFactory,
-		LanguageFallbackChain $languageFallbackChain,
 		EntityIdLookup $entityIdLookup,
 		EntityLookup $entityLookup,
-		EntityLinkFormatter $linkFormatter
+		LanguageFallbackChainFactory $fallbackChainFactory
 	) {
 		$this->entityContentFactory = $entityContentFactory;
-		$this->languageFallbackChain = $languageFallbackChain;
 		$this->entityIdLookup = $entityIdLookup;
 		$this->entityLookup = $entityLookup;
-	}
-
-	/**
-	 * @param IContextSource $context
-	 * @return self
-	 */
-	private static function newFromGlobalState( IContextSource $context ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$languageFallbackChainFactory = $wikibaseRepo->getLanguageFallbackChainFactory();
-
-		return new self(
-			$wikibaseRepo->getEntityContentFactory(),
-			$languageFallbackChainFactory->newFromContext( $context ),
-			$wikibaseRepo->getEntityIdLookup(),
-			$wikibaseRepo->getEntityLookup(),
-			new DefaultEntityLinkFormatter( $context->getLanguage(), $wikibaseRepo->getEntityTitleTextLookup() )
-		);
+		$this->fallbackChainFactory = $fallbackChainFactory;
 	}
 
 	/**
@@ -93,29 +64,30 @@ class ShowSearchHitHandler {
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ShowSearchHit
 	 * @see showEntityResultHit
 	 * @see showPlainSearchHit
-	 *
+	 * @param SpecialSearch $searchPage
+	 * @param SearchResult $result
+	 * @param string[] $terms
+	 * @param string &$link
+	 * @param string &$redirect
+	 * @param string &$section
+	 * @param string &$extract
+	 * @param string &$score
+	 * @param string &$size
+	 * @param string &$date
+	 * @param string &$related
+	 * @param string &$html
+	 * @return void
 	 */
-	public static function onShowSearchHit( SpecialSearch $searchPage, SearchResult $result,
-		array $terms, &$link, &$redirect, &$section, &$extract, &$score, &$size, &$date, &$related,
+	public function onShowSearchHit( $searchPage, $result,
+		$terms, &$link, &$redirect, &$section, &$extract, &$score, &$size, &$date, &$related,
 		&$html
-	) {
+	): void {
 		if ( $result instanceof ExtendedResult ) {
 			return;
 		}
-		$self = self::newFromGlobalState( $searchPage->getContext() );
-		$self->showPlainSearchHit( $searchPage, $result, $terms, $link, $redirect, $section, $extract,
-				$score, $size, $date, $related, $html );
-	}
 
-	/**
-	 * Show result hit display
-	 */
-	private function showPlainSearchHit( SpecialSearch $searchPage, SearchResult $result, array $terms,
-		&$link, &$redirect, &$section, &$extract, &$score, &$size, &$date, &$related, &$html
-	) {
-		if ( $result instanceof ExtendedResult ) {
-			return;
-		}
+		$languageFallbackChain = $this->fallbackChainFactory->newFromContext( $searchPage->getContext() );
+
 		$title = $result->getTitle();
 
 		if ( !$this->isTitleEntity( $title ) ) {
@@ -135,7 +107,7 @@ class ShowSearchHitHandler {
 		$extract = '';
 
 		$entityTerms = $entity->getDescriptions()->toTextArray();
-		$termData = $this->languageFallbackChain->extractPreferredValue( $entityTerms );
+		$termData = $languageFallbackChain->extractPreferredValue( $entityTerms );
 		if ( $termData !== null ) {
 			// TODO: do something akin to SearchResult::getTextSnippet here?
 			self::addDescription( $extract, $termData, $searchPage );
@@ -160,22 +132,12 @@ class ShowSearchHitHandler {
 		)->escaped();
 	}
 
-	/**
-	 * Check whether the title represents entity
-	 * @param Title $title
-	 * @return bool
-	 */
-	private function isTitleEntity( Title $title ) {
+	private function isTitleEntity( Title $title ): bool {
 		$contentModel = $title->getContentModel();
 		return $this->entityContentFactory->isEntityContentModel( $contentModel );
 	}
 
-	/**
-	 * Retrieve entity by title
-	 * @param Title $title
-	 * @return EntityDocument|null
-	 */
-	private function getEntity( Title $title ) {
+	private function getEntity( Title $title ): ?EntityDocument {
 		$entityId = $this->entityIdLookup->getEntityIdForTitle( $title );
 		if ( $entityId ) {
 			return $this->entityLookup->getEntity( $entityId );
@@ -189,7 +151,7 @@ class ShowSearchHitHandler {
 	 * @param string $displayLanguage
 	 * @param array $text Text description array, with language in ['language']
 	 */
-	public static function addLanguageAttrs( array &$attr, $displayLanguage, array $text ) {
+	public static function addLanguageAttrs( array &$attr, string $displayLanguage, array $text ) {
 		if ( $text['language'] !== $displayLanguage ) {
 			try {
 				$language = Language::factory( $text['language'] );
@@ -207,7 +169,7 @@ class ShowSearchHitHandler {
 	 * @param string[] $description Description as [language, value] array
 	 * @param SpecialSearch $searchPage
 	 */
-	public static function addDescription( &$html, array $description, SpecialSearch $searchPage ) {
+	public static function addDescription( string &$html, array $description, SpecialSearch $searchPage ) {
 		RequestContext::getMain()->getOutput()->addModuleStyles( [ 'wikibase.common' ] );
 		$displayLanguage = $searchPage->getLanguage()->getCode();
 		$description = self::withLanguage( $description, $displayLanguage );
@@ -225,40 +187,30 @@ class ShowSearchHitHandler {
 	 *
 	 * @todo Add highlighting when Q##-id matches and not label text.
 	 *
-	 * @param Title $title
-	 * @param string &$titleSnippet
+	 * @param Title &$title
+	 * @param string|HtmlArmor|null &$titleSnippet
 	 * @param SearchResult $result
-	 * @param string $terms
+	 * @param array $terms
 	 * @param SpecialSearch $specialSearch
 	 * @param string[] &$query
-	 * @param string[] $attributes
+	 * @param string[] &$attributes
+	 * @return void
 	 */
-	public static function onShowSearchHitTitle(
-		Title $title,
+	public function onShowSearchHitTitle(
+		&$title,
 		&$titleSnippet,
-		SearchResult $result,
+		$result,
 		$terms,
-		SpecialSearch $specialSearch,
-		array &$query,
-		array &$attributes
-	) {
+		$specialSearch,
+		&$query,
+		&$attributes
+	): void {
 		if ( $result instanceof ExtendedResult ) {
 			return;
 		}
-		$self = self::newFromGlobalState( $specialSearch->getContext() );
-		$self->showPlainSearchTitle( $title, $titleSnippet );
-	}
-
-	/**
-	 * Handle search result title
-	 * @param Title $title
-	 * @param string &$titleSnippet
-	 */
-	private function showPlainSearchTitle( Title $title, &$titleSnippet ) {
 		if ( $this->isTitleEntity( $title ) ) {
 			$titleSnippet = $title->getFullText();
 		}
-		// The rest of the plain title work is done in LinkBeginHookHandler
 	}
 
 	/**

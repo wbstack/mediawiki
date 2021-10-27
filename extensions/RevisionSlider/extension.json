@@ -1,7 +1,7 @@
 {
 	"name": "RevisionSlider",
 	"author": [
-		"TCB team (Wikimedia Deutschland)",
+		"[https://meta.wikimedia.org/wiki/WMDE_Technical_Wishes Wikimedia Deutschland Technical Wishes Team]",
 		"Addshore",
 		"Leszek Manicki",
 		"Jakob Warkotsch",
@@ -69,8 +69,7 @@
 		},
 		"ext.RevisionSlider.init": {
 			"packageFiles": [
-				"modules/ext.RevisionSlider.init.js",
-				"modules/ext.RevisionSlider.Revision.js"
+				"modules/ext.RevisionSlider.init.js"
 			],
 			"styles": [
 				"modules/ext.RevisionSlider.less"
@@ -121,20 +120,20 @@
 			]
 		},
 		"ext.RevisionSlider.Pointer": {
-			"scripts": [
+			"packageFiles": [
+				"modules/ext.RevisionSlider.Pointer.js",
 				"modules/ext.RevisionSlider.PointerLine.js",
-				"modules/ext.RevisionSlider.PointerView.js",
-				"modules/ext.RevisionSlider.Pointer.js"
+				"modules/ext.RevisionSlider.PointerView.js"
 			]
 		},
 		"ext.RevisionSlider.Slider": {
-			"scripts": [
+			"packageFiles": [
+				"modules/ext.RevisionSlider.Slider.js",
 				"modules/ext.RevisionSlider.Api.js",
 				"modules/ext.RevisionSlider.DiffPage.js",
 				"modules/ext.RevisionSlider.util.js",
 				"modules/ext.RevisionSlider.SliderView.js",
-				"modules/ext.RevisionSlider.SliderArrowView.js",
-				"modules/ext.RevisionSlider.Slider.js"
+				"modules/ext.RevisionSlider.SliderArrowView.js"
 			],
 			"dependencies": [
 				"jquery.ui",
@@ -151,10 +150,10 @@
 			]
 		},
 		"ext.RevisionSlider.RevisionList": {
-			"scripts": [
+			"packageFiles": [
+				"modules/ext.RevisionSlider.RevisionList.js",
 				"modules/ext.RevisionSlider.Revision.js",
-				"modules/ext.RevisionSlider.RevisionListView.js",
-				"modules/ext.RevisionSlider.RevisionList.js"
+				"modules/ext.RevisionSlider.RevisionListView.js"
 			],
 			"messages": [
 				"colon-separator",
@@ -175,7 +174,7 @@
 			]
 		},
 		"ext.RevisionSlider.HelpDialog": {
-			"scripts": [
+			"packageFiles": [
 				"modules/ext.RevisionSlider.HelpDialog.js",
 				"modules/ext.RevisionSlider.HelpButtonView.js"
 			],

@@ -3,6 +3,7 @@
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionStore;
+use MediaWiki\User\UserIdentity;
 
 /**
  * This class represents the controller for notifications
@@ -111,6 +112,7 @@ class EchoNotificationController {
 		$notifyTypes = self::getEventNotifyTypes( $type );
 		$userIds = [];
 		$userIdsCount = 0;
+		/** @var User $user */
 		foreach ( self::getUsersToNotifyForEvent( $event ) as $user ) {
 			$userIds[$user->getId()] = $user->getId();
 			$userNotifyTypes = $notifyTypes;
@@ -136,6 +138,10 @@ class EchoNotificationController {
 				$userIds = [];
 				$userIdsCount = 0;
 			}
+
+			$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
+			$stats->increment( 'echo.notification.all' );
+			$stats->increment( "echo.notification.$type" );
 		}
 
 		// process the userIds left in the array
@@ -202,7 +208,7 @@ class EchoNotificationController {
 	 *  this event type
 	 */
 	public static function getEventNotifyTypes( $eventType ) {
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
 
 		$category = $attributeManager->getNotificationCategory( $eventType );
 
@@ -212,18 +218,51 @@ class EchoNotificationController {
 	}
 
 	/**
+	 * Helper function to extract event task params
+	 * @param EchoEvent $event
+	 * @return array Event params
+	 */
+	public static function getEventParams( EchoEvent $event ) {
+		$delay = $event->getExtraParam( 'delay' );
+		$rootJobSignature = $event->getExtraParam( 'rootJobSignature' );
+		$rootJobTimestamp = $event->getExtraParam( 'rootJobTimestamp' );
+
+		return [ 'eventId' => $event->getId() ]
+			+ ( $delay ? [ 'jobReleaseTimestamp' => (int)wfTimestamp() + $delay ] : [] )
+			+ ( $rootJobSignature ? [ 'rootJobSignature' => $rootJobSignature ] : [] )
+			+ ( $rootJobTimestamp ? [ 'rootJobTimestamp' => $rootJobTimestamp ] : [] );
+	}
+
+	/**
 	 * Push $event onto the mediawiki job queue
 	 *
 	 * @param EchoEvent $event
 	 */
 	public static function enqueueEvent( EchoEvent $event ) {
+		$queue = JobQueueGroup::singleton();
+		$params = self::getEventParams( $event );
+
 		$job = new EchoNotificationJob(
-			$event->getTitle() ?: Title::newMainPage(),
-			[
-				'eventId' => $event->getId(),
-			]
+			$event->getTitle() ?: Title::newMainPage(), $params
 		);
-		JobQueueGroup::singleton()->push( $job );
+
+		if ( isset( $params[ 'jobReleaseTimestamp' ] ) && !$queue->get( $job->getType() )->delayedJobsEnabled() ) {
+			$logger = LoggerFactory::getInstance( 'Echo' );
+			$logger->warning(
+				'Delayed jobs are not enabled. Skipping enqueuing event {id} of type {type}.',
+				[
+					'id' => $event->getId(),
+					'type' => $event->getType()
+				]
+			);
+			return;
+		}
+
+		$queue->push( $job );
+
+		if ( $job->hasRootJobParams() ) {
+			$queue->deduplicateRootJob( $job );
+		}
 	}
 
 	/**
@@ -377,7 +416,7 @@ class EchoNotificationController {
 		}
 
 		// Don't send any notifications to anonymous users
-		if ( $user->isAnon() ) {
+		if ( !$user->isRegistered() ) {
 			throw new MWException( "Cannot notify anonymous user: {$user->getName()}" );
 		}
 
@@ -393,7 +432,7 @@ class EchoNotificationController {
 	 * @return array
 	 */
 	public static function evaluateUserCallable( EchoEvent $event, $locator = EchoAttributeManager::ATTR_LOCATORS ) {
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
 		$type = $event->getType();
 		$result = [];
 		foreach ( $attributeManager->getUserCallable( $type, $locator ) as $callable ) {
@@ -441,11 +480,11 @@ class EchoNotificationController {
 		foreach ( self::evaluateUserCallable( $event, EchoAttributeManager::ATTR_FILTERS ) as $users ) {
 			// the result of the callback can be both an iterator or array
 			$users = is_array( $users ) ? $users : iterator_to_array( $users );
-			$notify->addFilter( function ( User $user ) use ( $users ) {
+			$notify->addFilter( function ( UserIdentity $user ) use ( $users ) {
 				// we need to check if $user is in $users, but they're not
 				// guaranteed to be the same object, so I'll compare ids.
 				$userId = $user->getId();
-				$userIds = array_map( function ( User $user ) {
+				$userIds = array_map( function ( UserIdentity $user ) {
 					return $user->getId();
 				}, $users );
 				return !in_array( $userId, $userIds );
@@ -463,7 +502,7 @@ class EchoNotificationController {
 
 				return false;
 			}
-			if ( $user->isAnon() || isset( $seen[$user->getId()] ) ) {
+			if ( !$user->isRegistered() || isset( $seen[$user->getId()] ) ) {
 				return false;
 			}
 			$seen[$user->getId()] = true;

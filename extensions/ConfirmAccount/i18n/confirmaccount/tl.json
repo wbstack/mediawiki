@@ -3,7 +3,8 @@
 		"authors": [
 			"AnakngAraw",
 			"Jojit fb",
-			"Sky Harbor"
+			"Sky Harbor",
+			"Yivan000"
 		]
 	},
 	"confirmaccounts": "Tiyakin ang mga paghiling ng account",
@@ -18,7 +19,7 @@
 	"confirmaccount-none-r": "Kasalukuyang walang mga paghiling ng account na tinanggihan kamakailan lamang sa loob ng talaang ito.",
 	"confirmaccount-none-e": "Kasalukuyang walang lipas na mga paghiling ng account sa loob ng talaang ito.",
 	"confirmaccount-real-q": "Pangalan",
-	"confirmaccount-email-q": "E-liham",
+	"confirmaccount-email-q": "Email",
 	"confirmaccount-bio-q": "Talambuhay",
 	"confirmaccount-showopen": "bukas na mga paghiling",
 	"confirmaccount-showrej": "tinanggihang mga paghiling",

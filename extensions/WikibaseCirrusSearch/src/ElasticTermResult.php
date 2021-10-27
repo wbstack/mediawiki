@@ -7,7 +7,7 @@ use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\Lib\Interactors\TermSearchResult;
-use Wikibase\Lib\LanguageFallbackChain;
+use Wikibase\Lib\TermLanguageFallbackChain;
 
 /**
  * This result type implements the result for searching
@@ -32,23 +32,23 @@ class ElasticTermResult extends BaseResultsType {
 
 	/**
 	 * Display fallback chain.
-	 * @var LanguageFallbackChain
+	 * @var TermLanguageFallbackChain
 	 */
-	private $fallbackChain;
+	private $termFallbackChain;
 
 	/**
 	 * @param EntityIdParser $idParser
 	 * @param string[] $searchLanguageCodes Language fallback chain for search
-	 * @param LanguageFallbackChain $displayFallbackChain Fallback chain for display
+	 * @param TermLanguageFallbackChain $displayFallbackChain Fallback chain for display
 	 */
 	public function __construct(
 		EntityIdParser $idParser,
 		array $searchLanguageCodes,
-		LanguageFallbackChain $displayFallbackChain
+		TermLanguageFallbackChain $displayFallbackChain
 	) {
 		$this->idParser = $idParser;
 		$this->searchLanguageCodes = $searchLanguageCodes;
-		$this->fallbackChain = $displayFallbackChain;
+		$this->termFallbackChain = $displayFallbackChain;
 	}
 
 	/**
@@ -58,7 +58,7 @@ class ElasticTermResult extends BaseResultsType {
 	 */
 	public function getSourceFiltering() {
 		$fields = parent::getSourceFiltering();
-		foreach ( $this->fallbackChain->getFetchLanguageCodes() as $code ) {
+		foreach ( $this->termFallbackChain->getFetchLanguageCodes() as $code ) {
 			$fields[] = "labels.$code";
 			$fields[] = "descriptions.$code";
 		}
@@ -144,8 +144,8 @@ class ElasticTermResult extends BaseResultsType {
 
 			// Highlight part contains information about what has actually been matched.
 			$highlight = $r->getHighlights();
-			$displayLabel = EntitySearchUtils::findTermForDisplay( $sourceData, 'labels', $this->fallbackChain );
-			$displayDescription = EntitySearchUtils::findTermForDisplay( $sourceData, 'descriptions', $this->fallbackChain );
+			$displayLabel = EntitySearchUtils::findTermForDisplay( $sourceData, 'labels', $this->termFallbackChain );
+			$displayDescription = EntitySearchUtils::findTermForDisplay( $sourceData, 'descriptions', $this->termFallbackChain );
 
 			if ( !empty( $highlight['title'] ) ) {
 				// If we matched title, this means it's a match by ID
@@ -179,7 +179,7 @@ class ElasticTermResult extends BaseResultsType {
 	 * The new highlighter can return offsets as: 1:1-XX:YY|Text Snippet
 	 * or even SNIPPET_START:MATCH1_START-MATCH1_END,MATCH2_START-MATCH2_END,...:SNIPPET_END|Text
 	 */
-	const HIGHLIGHT_PATTERN = '/^\d+:\d+-\d+(?:,\d+-\d+)*:\d+\|(.+)/';
+	public const HIGHLIGHT_PATTERN = '/^\d+:\d+-\d+(?:,\d+-\d+)*:\d+\|(.+)/';
 
 	/**
 	 * Extract term, language and type from highlighter results.

@@ -42,9 +42,9 @@ describe( 'LicenseAgreement', () => {
 			],
 		} );
 
-		expect( wrapper.find( IconMessageBox ).props( 'type' ) ).toBe( 'warning' );
-		expect( wrapper.find( IconMessageBox ).element.innerHTML ).toBe( expectedMessage );
-		expect( wrapper.find( IconMessageBox ).find( 'strong' ).exists() ).toBeTruthy();
+		expect( wrapper.findComponent( IconMessageBox ).props( 'type' ) ).toBe( 'warning' );
+		expect( wrapper.findComponent( IconMessageBox ).element.innerHTML ).toBe( expectedMessage );
+		expect( wrapper.findComponent( IconMessageBox ).find( 'strong' ).exists() ).toBeTruthy();
 	} );
 
 	it( 'ensures links open in a new tab', () => {
@@ -113,7 +113,7 @@ describe( 'LicenseAgreement', () => {
 			mixins: [ mockMessageMixin( { [ MessageKey.LICENSE_AGREEMENT_ACCEPT_PERSIST ]: label } ) ],
 		} );
 
-		const checkbox = wrapper.find( Checkbox );
+		const checkbox = wrapper.findComponent( Checkbox );
 		expect( checkbox.exists() ).toBeTruthy();
 		expect( checkbox.props( 'label' ) ).toBe( label );
 		expect( checkbox.props( 'value' ) ).toBe( true );
@@ -142,7 +142,7 @@ describe( 'LicenseAgreement', () => {
 		expect( mockSetPreference ).toHaveBeenCalledWith( expect.anything(), {
 			name: UserPreference.ACKNOWLEDGED_COPYRIGHT_VERSION,
 			value: copyrightVersion,
-		}, undefined );
+		} );
 	} );
 
 	it( 'unsets the "remember my choice" preference when unchecking the checkbox and clicking publish', () => {
@@ -159,12 +159,12 @@ describe( 'LicenseAgreement', () => {
 			} ),
 		} );
 
-		wrapper.find( Checkbox ).vm.$emit( 'input', false );
+		wrapper.findComponent( Checkbox ).vm.$emit( 'input', false );
 		wrapper.find( '.wb-ui-event-emitting-button--primaryProgressive' ).trigger( 'click' );
 
 		expect( mockSetPreference ).toHaveBeenCalledWith( expect.anything(), {
 			name: UserPreference.ACKNOWLEDGED_COPYRIGHT_VERSION,
 			value: null,
-		}, undefined );
+		} );
 	} );
 } );

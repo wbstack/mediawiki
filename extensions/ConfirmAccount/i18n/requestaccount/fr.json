@@ -39,6 +39,7 @@
 	"requestaccount-reqtype": "Situation :",
 	"requestaccount-level-0": "auteur",
 	"requestaccount-level-1": "contributeur",
+	"requestaccount-info": "(?)",
 	"requestaccount-bio": "Biographie personnelle (texte brut seulement)  :",
 	"requestaccount-attach": "CV (facultatif) :",
 	"requestaccount-notes": "Notes supplémentaires :",

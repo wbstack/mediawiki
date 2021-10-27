@@ -2,6 +2,10 @@
 
 use MediaWiki\MediaWikiServices;
 use MobileFrontend\ContentProviders\ContentProviderFactory;
+use MobileFrontend\Transforms\LazyImageTransform;
+use MobileFrontend\Transforms\MakeSectionsTransform;
+use MobileFrontend\Transforms\MoveLeadParagraphTransform;
+use MobileFrontend\Transforms\SubHeadingTransform;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\ItemId;
@@ -88,23 +92,43 @@ class ExtMobileFrontend {
 			return $html;
 		}
 
-		$formatter = MobileFormatter::newFromContext( $context, $provider, $enableSections, $config );
+		$formatter = new MobileFormatter(
+			MobileFormatter::wrapHtml( $html ),
+			$title,
+			$config,
+			$context
+		);
 
 		$hookContainer = $services->getHookContainer();
 		$hookContainer->run( 'MobileFrontendBeforeDOM', [ $context, $formatter ] );
 
-		if ( $context->getContentTransformations() ) {
-			$isSpecialPage = $title->isSpecialPage();
-			$removeImages = $featureManager->isFeatureAvailableForCurrentUser( 'MFLazyLoadImages' );
-			$leadParagraphEnabled = in_array( $ns, $config->get( 'MFNamespacesWithLeadParagraphs' ) );
-			$showFirstParagraphBeforeInfobox = $leadParagraphEnabled &&
-				$featureManager->isFeatureAvailableForCurrentUser( 'MFShowFirstParagraphBeforeInfobox' );
+		$shouldLazyTransformImages = $featureManager->isFeatureAvailableForCurrentUser( 'MFLazyLoadImages' );
+		$leadParagraphEnabled = in_array( $ns, $config->get( 'MFNamespacesWithLeadParagraphs' ) );
+		$showFirstParagraphBeforeInfobox = $leadParagraphEnabled &&
+			$featureManager->isFeatureAvailableForCurrentUser( 'MFShowFirstParagraphBeforeInfobox' );
 
-			// Remove images if they're disabled from special pages, but don't transform otherwise
-			$formatter->filterContent( !$isSpecialPage,
-				null,
-				$removeImages, $showFirstParagraphBeforeInfobox );
+		$transforms = [];
+		if ( $enableSections ) {
+			$options = $config->get( 'MFMobileFormatterOptions' );
+			$topHeadingTags = $options['headings'];
+
+			$transforms[] = new SubHeadingTransform( $topHeadingTags );
+
+			$transforms[] = new MakeSectionsTransform(
+				$topHeadingTags,
+				true
+			);
 		}
+
+		if ( $shouldLazyTransformImages ) {
+			$transforms[] = new LazyImageTransform( $config->get( 'MFLazyLoadSkipSmallImages' ) );
+		}
+
+		if ( $showFirstParagraphBeforeInfobox ) {
+			$transforms[] = new MoveLeadParagraphTransform( $title, $title->getLatestRevID() );
+		}
+
+		$formatter->applyTransforms( $transforms );
 
 		return $formatter->getText();
 	}
@@ -186,8 +210,7 @@ class ExtMobileFrontend {
 		}
 
 		try {
-			$entityLookup = WikibaseClient::getDefaultInstance()
-				->getStore()
+			$entityLookup = WikibaseClient::getStore()
 				->getEntityLookup();
 			$entity = $entityLookup->getEntity( new ItemId( $item ) );
 			if ( !$entity ) {

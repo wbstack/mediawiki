@@ -4,7 +4,9 @@ namespace CirrusSearch\Search\Rescore;
 
 use CirrusSearch\SearchConfig;
 use Elastica\Query\FunctionScore;
-use MWNamespace;
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
+use NamespaceInfo;
 
 /**
  * Builds a set of functions with namespaces.
@@ -24,32 +26,41 @@ class NamespacesFunctionScoreBuilder extends FunctionScoreBuilder {
 	private $namespacesToBoost;
 
 	/**
+	 * @var NamespaceInfo
+	 */
+	private $namespaceInfo;
+
+	/**
 	 * @param SearchConfig $config
 	 * @param int[]|null $namespaces
 	 * @param float $weight
+	 * @param NamespaceInfo|null $namespaceInfo
 	 */
-	public function __construct( SearchConfig $config, $namespaces, $weight ) {
+	public function __construct( SearchConfig $config, $namespaces, $weight, NamespaceInfo $namespaceInfo = null ) {
 		parent::__construct( $config, $weight );
+
+		$this->namespaceInfo = $namespaceInfo ?: MediaWikiServices::getInstance()->getNamespaceInfo();
 		$this->namespacesToBoost =
-			$namespaces ?: MWNamespace::getValidNamespaces();
+			$namespaces ?: $this->namespaceInfo->getValidNamespaces();
 		if ( !$this->namespacesToBoost || count( $this->namespacesToBoost ) == 1 ) {
 			// nothing to boost, no need to initialize anything else.
 			return;
 		}
 		$this->normalizedNamespaceWeights = [];
-		$language = $config->get( 'ContLang' );
 		foreach ( $config->get( 'CirrusSearchNamespaceWeights' ) as $ns =>
 				  $weight
 		) {
-			if ( is_string( $ns ) ) {
-				$ns = $language->getNsIndex( $ns );
-				// Ignore namespaces that don't exist.
-				if ( $ns === false ) {
-					continue;
-				}
+			if ( !is_int( $ns ) && !ctype_digit( $ns ) ) {
+				LoggerFactory::getInstance( 'CirrusSearch' )->warning(
+					'Namespace names are no longer accepted as namespaces in '
+					. "CirrusSearchNamespaceWeights. Ignoring {invalid_ns}",
+					[ 'invalid_ns' => $ns ]
+				);
+
+				continue;
 			}
 			// Now $ns should always be an integer.
-			$this->normalizedNamespaceWeights[$ns] = $weight;
+			$this->normalizedNamespaceWeights[(int)$ns] = $weight;
 		}
 	}
 
@@ -63,14 +74,14 @@ class NamespacesFunctionScoreBuilder extends FunctionScoreBuilder {
 		if ( isset( $this->normalizedNamespaceWeights[$namespace] ) ) {
 			return $this->normalizedNamespaceWeights[$namespace];
 		}
-		if ( MWNamespace::isSubject( $namespace ) ) {
+		if ( $this->namespaceInfo->isSubject( $namespace ) ) {
 			if ( $namespace === NS_MAIN ) {
 				return 1;
 			}
 
 			return $this->config->get( 'CirrusSearchDefaultNamespaceWeight' );
 		}
-		$subjectNs = MWNamespace::getSubject( $namespace );
+		$subjectNs = $this->namespaceInfo->getSubject( $namespace );
 		if ( isset( $this->normalizedNamespaceWeights[$subjectNs] ) ) {
 			return $this->config->get( 'CirrusSearchTalkNamespaceWeight' ) *
 				   $this->normalizedNamespaceWeights[$subjectNs];

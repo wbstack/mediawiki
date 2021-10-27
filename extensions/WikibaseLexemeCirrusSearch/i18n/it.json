@@ -4,8 +4,10 @@
 			"ArTrix",
 			"Beta16",
 			"Ricordisamoa",
-			"Sarah Bernabei"
+			"Sarah Bernabei",
+			"TheRukk"
 		]
 	},
+	"wikibaselexemecirrus-desc": "Estensione di WikibaseLexeme per utilizzare le funzionalità di CirrusSearch",
 	"wikibaselexemecirrus-rescore-profile-prefix": "Rielabora i profili attraverso la ricerca per prefissi (completamento)"
 }

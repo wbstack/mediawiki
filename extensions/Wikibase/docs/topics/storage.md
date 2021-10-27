@@ -7,8 +7,9 @@
 * @subpage md_docs_storage_propertyinfo
 * @subpage md_docs_storage_sitelinks
 * @subpage md_docs_storage_terms
+* @subpage md_docs_storage_terms-caching
 
-## SQL Tables
+## SQL Tables {#sql_tables}
 
 **Repo**
 
@@ -23,7 +24,6 @@
 * \ref md_docs_storage_propertyinfo
   * @subpage md_docs_sql_wb_property_info
 * \ref md_docs_storage_terms
-  * @subpage md_docs_sql_wb_terms (DEPRECATED)
   * @subpage md_docs_sql_wbt_item_terms
   * @subpage md_docs_sql_wbt_property_terms
   * @subpage md_docs_sql_wbt_term_in_lang

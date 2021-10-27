@@ -46,7 +46,12 @@ class WikiHiero {
 	private $scale = 100;
 	private $config;
 
-	private static $phonemes, $prefabs, $files;
+	/** @var string[] */
+	private static $phonemes;
+	/** @var string[] */
+	private static $prefabs;
+	/** @var int[][] */
+	private static $files;
 
 	/**
 	 * @param Config|null $config
@@ -59,7 +64,7 @@ class WikiHiero {
 
 	/**
 	 * Loads hieroglyph information
-	 * @suppress PhanUndeclaredVariable Vars definied in file passed to require_once
+	 * @suppress PhanUndeclaredVariable,PhanTypeMismatchPropertyProbablyReal Phan doesn't understand require_once
 	 */
 	private static function loadData() {
 		if ( self::$phonemes ) {
@@ -279,7 +284,7 @@ class WikiHiero {
 						$contentHtml .= "<hr />\n";
 					}
 
-				} elseif ( strchr( $code[0], '<' ) ) {
+				} elseif ( strstr( $code[0], '<' ) ) {
 					// start cartouche
 					$contentHtml .= '<td>' . $this->renderGlyph( $code[0] ) . '</td>';
 					$is_cartouche = true;
@@ -288,7 +293,7 @@ class WikiHiero {
 						self::CARTOUCHE_WIDTH . "px;\"></td></tr><tr><td>" . self::TABLE_START .
 						"<tr>";
 
-				} elseif ( strchr( $code[0], '>' ) ) {
+				} elseif ( strstr( $code[0], '>' ) ) {
 					// end cartouche
 					$contentHtml .= "</tr></table></td></tr><tr><td class=\"mw-hiero-box\" " .
 						"style=\"height: " . self::CARTOUCHE_WIDTH .

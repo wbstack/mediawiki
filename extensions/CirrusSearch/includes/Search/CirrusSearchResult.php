@@ -30,7 +30,7 @@ abstract class CirrusSearchResult extends SearchResult {
 	 */
 	public function __construct( Title $title ) {
 		$this->title = $title;
-		if ( $this->getTitle()->getNamespace() == NS_FILE ) {
+		if ( $this->getTitle()->getNamespace() === NS_FILE ) {
 			$this->file = MediaWikiServices::getInstance()->getRepoGroup()
 				->findFile( $this->title );
 		}
@@ -68,7 +68,7 @@ abstract class CirrusSearchResult extends SearchResult {
 	final public function isMissingRevision() {
 		global $wgCirrusSearchDevelOptions;
 		if ( isset( $wgCirrusSearchDevelOptions['ignore_missing_rev'] ) ) {
-			return true;
+			return false;
 		}
 		return !$this->getTitle()->isKnown();
 	}

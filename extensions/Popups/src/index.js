@@ -11,19 +11,20 @@ import createUserSettings from './userSettings';
 import createPreviewBehavior from './previewBehavior';
 import createSettingsDialogRenderer from './ui/settingsDialogRenderer';
 import registerChangeListener from './changeListener';
-import createIsEnabled from './isEnabled';
+import createIsPagePreviewsEnabled from './isPagePreviewsEnabled';
 import { fromElement as titleFromElement } from './title';
 import { init as rendererInit } from './ui/renderer';
 import createExperiments from './experiments';
 import { isEnabled as isStatsvEnabled } from './instrumentation/statsv';
-import { isEnabled as isEventLoggingEnabled }
-	from './instrumentation/eventLogging';
+import { isEnabled as isEventLoggingEnabled } from './instrumentation/eventLogging';
 import changeListeners from './changeListeners';
 import * as actions from './actions';
 import reducers from './reducers';
 import createMediaWikiPopupsObject from './integrations/mwpopups';
 import getPageviewTracker, { getSendBeacon } from './getPageviewTracker';
 import { previewTypes, getPreviewType } from './preview/model';
+import isReferencePreviewsEnabled from './isReferencePreviewsEnabled';
+import setUserConfigFlags from './setUserConfigFlags';
 
 const EXCLUDED_LINK_SELECTORS = [
 	'.extiw',
@@ -33,6 +34,7 @@ const EXCLUDED_LINK_SELECTORS = [
 	'.external',
 	'.mw-cite-backlink a',
 	'.oo-ui-buttonedElement-button',
+	'.ve-ce-surface a', // T259889
 	'.cancelLink a'
 ];
 
@@ -114,36 +116,36 @@ function getCurrentTimestamp() {
  * [store](http://redux.js.org/docs/api/Store.html#store).
  *
  * @param {Redux.Store} store
- * @param {Object} actions
+ * @param {Object} registerActions
  * @param {UserSettings} userSettings
  * @param {Function} settingsDialog
  * @param {PreviewBehavior} previewBehavior
  * @param {EventTracker} statsvTracker
  * @param {EventTracker} eventLoggingTracker
  * @param {EventTracker} pageviewTracker
- * @param {Function} getCurrentTimestamp
+ * @param {Function} callbackCurrentTimestamp
  * @return {void}
  */
 function registerChangeListeners(
-	store, actions, userSettings, settingsDialog, previewBehavior,
-	statsvTracker, eventLoggingTracker, pageviewTracker, getCurrentTimestamp
+	store, registerActions, userSettings, settingsDialog, previewBehavior,
+	statsvTracker, eventLoggingTracker, pageviewTracker, callbackCurrentTimestamp
 ) {
-	registerChangeListener( store, changeListeners.footerLink( actions ) );
+	registerChangeListener( store, changeListeners.footerLink( registerActions ) );
 	registerChangeListener( store, changeListeners.linkTitle() );
 	registerChangeListener( store, changeListeners.render( previewBehavior ) );
 	registerChangeListener(
-		store, changeListeners.statsv( actions, statsvTracker ) );
+		store, changeListeners.statsv( registerActions, statsvTracker ) );
 	registerChangeListener(
 		store, changeListeners.syncUserSettings( userSettings ) );
 	registerChangeListener(
-		store, changeListeners.settings( actions, settingsDialog ) );
+		store, changeListeners.settings( registerActions, settingsDialog ) );
 	registerChangeListener(
 		store,
 		changeListeners.eventLogging(
-			actions, eventLoggingTracker, getCurrentTimestamp
+			registerActions, eventLoggingTracker, callbackCurrentTimestamp
 		) );
 	registerChangeListener( store,
-		changeListeners.pageviews( actions, pageviewTracker )
+		changeListeners.pageviews( registerActions, pageviewTracker )
 	);
 }
 
@@ -159,6 +161,8 @@ function registerChangeListeners(
  *   - Binding hover and click events to the eligible links to trigger actions
  */
 ( function init() {
+	setUserConfigFlags( mw.config );
+
 	let compose = Redux.compose;
 	const
 		// So-called "services".
@@ -166,7 +170,7 @@ function registerChangeListeners(
 		pagePreviewGateway = createPagePreviewGateway( mw.config ),
 		referenceGateway = createReferenceGateway(),
 		userSettings = createUserSettings( mw.storage ),
-		settingsDialog = createSettingsDialogRenderer(),
+		settingsDialog = createSettingsDialogRenderer( mw.config ),
 		experiments = createExperiments( mw.experiments ),
 		statsvTracker = getStatsvTracker( mw.user, mw.config, experiments ),
 		// Virtual pageviews are always tracked.
@@ -180,7 +184,7 @@ function registerChangeListeners(
 			mw.config,
 			window
 		),
-		isEnabled = createIsEnabled( mw.user, userSettings, mw.config );
+		isPagePreviewsEnabled = createIsPagePreviewsEnabled( mw.user, userSettings, mw.config );
 
 	// If debug mode is enabled, then enable Redux DevTools.
 	if ( mw.config.get( 'debug' ) === true ||
@@ -207,7 +211,8 @@ function registerChangeListeners(
 	);
 
 	boundActions.boot(
-		isEnabled,
+		// FIXME: Currently this disables all popup types (for anonymous users).
+		isPagePreviewsEnabled,
 		mw.user,
 		userSettings,
 		mw.config,
@@ -225,9 +230,7 @@ function registerChangeListeners(
 		const excludedLinksSelector = EXCLUDED_LINK_SELECTORS.join( ', ' );
 		selectors.push( `#mw-content-text a[href][title]:not(${excludedLinksSelector})` );
 	}
-	// TODO: Replace with mw.user.options.get( 'popupsreferencepreviews' ) === '1' when not in Beta
-	// any more, and the temporary feature flag is not needed any more.
-	if ( mw.config.get( 'wgPopupsReferencePreviews' ) ) {
+	if ( isReferencePreviewsEnabled( mw.config ) ) {
 		selectors.push( '#mw-content-text .reference a[ href*="#" ]' );
 	}
 	if ( !selectors.length ) {
@@ -261,7 +264,23 @@ function registerChangeListeners(
 					return;
 			}
 
-			boundActions.linkDwell( mwTitle, this, event, gateway, generateToken, type );
+			const $target = $( this );
+			const $window = $( window );
+
+			const measures = {
+				pageX: event.pageX,
+				pageY: event.pageY,
+				clientY: event.clientY,
+				width: $target.width(),
+				height: $target.height(),
+				offset: $target.offset(),
+				clientRects: this.getClientRects(),
+				windowWidth: $window.width(),
+				windowHeight: $window.height(),
+				scrollTop: $window.scrollTop()
+			};
+
+			boundActions.linkDwell( mwTitle, this, measures, gateway, generateToken, type );
 		} )
 		.on( 'mouseout blur', validLinkSelector, function () {
 			const mwTitle = titleFromElement( this, mw.config );
@@ -270,24 +289,11 @@ function registerChangeListeners(
 				boundActions.abandon();
 			}
 		} )
-		.on( 'click', validLinkSelector, function ( event ) {
+		.on( 'click', validLinkSelector, function () {
 			const mwTitle = titleFromElement( this, mw.config );
 			if ( mwTitle ) {
-				const type = getPreviewType( this, mw.config, mwTitle );
-
-				switch ( type ) {
-					case previewTypes.TYPE_PAGE:
-						boundActions.linkClick( this );
-						break;
-					case previewTypes.TYPE_REFERENCE:
-						event.preventDefault();
-						boundActions.referenceClick(
-							mwTitle,
-							this,
-							referenceGateway,
-							generateToken
-						);
-						break;
+				if ( previewTypes.TYPE_PAGE === getPreviewType( this, mw.config, mwTitle ) ) {
+					boundActions.linkClick( this );
 				}
 			}
 		} );

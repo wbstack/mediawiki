@@ -14,6 +14,7 @@ use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
  */
 class FederatedPropertiesEntityIdFormatter implements EntityIdFormatter {
 
+	/** @var EntityIdFormatter */
 	private $innerFormatter;
 
 	public function __construct( EntityIdFormatter $innerFormatter ) {

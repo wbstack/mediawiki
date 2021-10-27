@@ -16,7 +16,7 @@ use WANObjectCache;
  * be stored by this base class.
  */
 abstract class BaseInterwikiResolver implements InterwikiResolver {
-	const CONFIG_CACHE_TTL = 600;
+	private const CONFIG_CACHE_TTL = 600;
 
 	/** @var array[]|null full IW matrix (@see loadMatrix()) */
 	private $matrix;
@@ -119,7 +119,7 @@ abstract class BaseInterwikiResolver implements InterwikiResolver {
 		list( $wiki, $prefix ) = $wikiAndPrefix;
 		return $this->loadConfigFromAPI(
 			[ $prefix => $wiki ],
-			[ HashSearchConfig::FLAG_LOAD_CONT_LANG ],
+			[],
 			[ $this, 'minimalSearchConfig' ] );
 	}
 

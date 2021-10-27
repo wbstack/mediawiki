@@ -6,6 +6,7 @@
 			"JtFuruhata",
 			"Schu",
 			"Shirayuki",
+			"つぶあん派",
 			"青子守歌"
 		]
 	},
@@ -67,7 +68,7 @@
 	"confirmaccount-deny": "棄却 (一覧から削除)",
 	"confirmaccount-hold": "保留",
 	"confirmaccount-spam": "スパム (メールは送信しません)",
-	"confirmaccount-reason": "判断理由 (メールに記載されます):",
+	"confirmaccount-reason": "コメント(拒否メールや保留メールに記載されます):",
 	"confirmaccount-ip": "IP アドレス:",
 	"confirmaccount-xff": "X-Forwarded-For:",
 	"confirmaccount-agent": "User-Agent:",

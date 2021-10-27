@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"ArenaL5",
 			"Athena in Wonderland",
 			"Banjo",
 			"Elisardojm",
@@ -25,8 +26,8 @@
 	"advancedsearch-field-filetype": "Tipo de ficheiro",
 	"advancedsearch-field-filew": "Ancho do ficheiro en pixels",
 	"advancedsearch-field-fileh": "Alto do ficheiro en pixels",
-	"advancedsearch-help-plain": ";Descrición\n:Procura estas palabras no título ou no texto.\n;Teña en conta o seguinte\n:* Poden indicarse múltiples palabras\n:* Ignóranse as marcas de puntuación e outros caracteres non alfanuméricos (exceptuando a coma e os dous puntos).\n:* Poden darse resultados que non conteñan un ou máis dos elementos de procura indicados.\n:* Aplícase a derivación de palabras. Por exemplo: Cando se introduce \"coche\", a procura tamén considera \"coches\". A derivación de palabras e específica de cada lingua.\n;Páxina de axuda\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#Full_text_search Full text search]",
-	"advancedsearch-help-filetype": ";Descrición\n:Procura só ficheiros do tipo seleccionado.\n;Teña en conta o seguinte\n:* Só pode procurar un tipo de ficheiro.\n:* Só pode seleccionar os tipos de ficheiro presentados no menú despregable.\n;Páxinas de axuda\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#filetype Filetype] e [https://www.mediawiki.org/wiki/Help:CirrusSearch#filemime filemime]\n;Equivalente sintáctico na procura normal\n:Palabras precedidas de <code>filetype:</code> como <code>filetype:ogg</code>",
+	"advancedsearch-help-plain": ";Descrición\n:Procura estas palabras no título ou no texto.\n;Teña en conta o seguinte\n:* Poden indicarse múltiples palabras\n:* Ignóranse as marcas de puntuación e outros caracteres non alfanuméricos (exceptuando a coma e os dous puntos).\n:* Poden darse resultados que non conteñan un ou máis dos elementos de procura indicados.\n:* Aplícase a derivación de palabras. Por exemplo: Cando se introduce \"coche\", a procura tamén considera \"coches\". A derivación de palabras é específica de cada lingua.\n;Páxina de axuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Full text search]",
+	"advancedsearch-help-filetype": ";Descrición\n:Procura só ficheiros do tipo seleccionado.\n;Teña en conta o seguinte\n:* Só pode procurar un tipo de ficheiro.\n:* Só pode seleccionar os tipos de ficheiro presentados no menú despregable.\n;Páxinas de axuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filetype Filetype] e [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filemime filemime]\n;Equivalente sintáctico na procura normal\n:Palabras precedidas de <code>filetype:</code> como <code>filetype:ogg</code>",
 	"advancedsearch-placeholder-exact-text": "\"o gato ama a cabra\"",
 	"advancedsearch-inlanguage-default": "Escoller unha lingua",
 	"advancedsearch-filetype-section-types": "Tipos de ficheiro xenéricos",

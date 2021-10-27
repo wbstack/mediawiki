@@ -100,6 +100,15 @@ class UserTesting {
 	}
 
 	/**
+	 * Whether or not the singleton is initialized.
+	 *
+	 * @return bool true when {@link getInstance()} has been called
+	 */
+	public static function isInitialized(): bool {
+		return self::$instance !== null;
+	}
+
+	/**
 	 * @param array[] $config
 	 * @param callable|null $callback
 	 * @param string|null $trigger Value to manually trigger a test.
@@ -228,7 +237,7 @@ class UserTesting {
 			$piece = substr( $hash, $i, 4 );
 			$dec = hexdec( $piece );
 			// xor will retain the uniform distribution
-			$sum = $sum ^ $dec;
+			$sum ^= $dec;
 		}
 		return $sum / ( ( 1 << 16 ) - 1 );
 	}

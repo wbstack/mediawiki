@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"01miki10",
 			"Centerlink",
 			"Cimon Avaro",
 			"Crt",
@@ -15,7 +16,7 @@
 	},
 	"usercredentials": "Käyttäjän valtuudet",
 	"usercredentials-leg": "Etsi käyttäjän vahvistetut valtuudet",
-	"usercredentials-user": "Käyttäjätunnus:",
+	"usercredentials-user": "Käyttäjänimi:",
 	"usercredentials-text": "Valitun käyttäjätunnuksen vahvistetut valtuudet ovat alla.",
 	"usercredentials-leg-user": "Käyttäjätunnus",
 	"usercredentials-leg-areas": "Tärkeimmät kiinnostuksen kohteet",

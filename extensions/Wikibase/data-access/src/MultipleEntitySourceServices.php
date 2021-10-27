@@ -5,8 +5,11 @@ namespace Wikibase\DataAccess;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\DataModel\Entity\Property;
+use Wikibase\DataModel\Services\Entity\EntityPrefetcher;
 use Wikibase\Lib\Interactors\DispatchingTermSearchInteractorFactory;
+use Wikibase\Lib\Interactors\TermSearchInteractorFactory;
 use Wikibase\Lib\Store\EntityRevision;
+use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStoreWatcher;
 use Wikimedia\Assert\Assert;
 
@@ -25,34 +28,33 @@ class MultipleEntitySourceServices implements WikibaseServices, EntityStoreWatch
 	 */
 	private $entitySourceDefinitions;
 
-	private $genericServices;
-
 	/**
 	 * @var SingleEntitySourceServices[] indexed by source name
 	 */
 	private $singleSourceServices;
 
+	/** @var EntityRevisionLookup|null */
 	private $entityRevisionLookup = null;
 
+	/** @var TermSearchInteractorFactory|null */
 	private $termSearchInteractorFactory = null;
 
+	/** @var PrefetchingTermLookup|null */
 	private $prefetchingTermLookup = null;
 
+	/** @var EntityPrefetcher|null */
 	private $entityPrefetcher = null;
 
 	/**
 	 * @param EntitySourceDefinitions $entitySourceDefinitions
-	 * @param GenericServices $genericServices
 	 * @param SingleEntitySourceServices[] $singleSourceServices indexed by source name
 	 */
 	public function __construct(
 		EntitySourceDefinitions $entitySourceDefinitions,
-		GenericServices $genericServices,
 		array $singleSourceServices
 	) {
 		Assert::parameterElementType( SingleEntitySourceServices::class, $singleSourceServices, '$singleSourceServices' );
 		$this->entitySourceDefinitions = $entitySourceDefinitions;
-		$this->genericServices = $genericServices;
 		$this->singleSourceServices = $singleSourceServices;
 	}
 
@@ -147,40 +149,6 @@ class MultipleEntitySourceServices implements WikibaseServices, EntityStoreWatch
 		if ( $source !== null ) {
 			$this->singleSourceServices[$source->getSourceName()]->entityDeleted( $entityId );
 		}
-	}
-
-	public function getEntityNamespaceLookup() {
-		// TODO: entity namespace lookup is actually source-specific service, should not be provided by
-		// GenericServices
-		return $this->genericServices->getEntityNamespaceLookup();
-	}
-
-	public function getFullEntitySerializer() {
-		return $this->genericServices->getFullEntitySerializer();
-	}
-
-	public function getCompactEntitySerializer() {
-		return $this->genericServices->getCompactEntitySerializer();
-	}
-
-	public function getStorageEntitySerializer() {
-		return $this->genericServices->getStorageEntitySerializer();
-	}
-
-	public function getBaseDataModelSerializerFactory() {
-		return $this->genericServices->getBaseDataModelSerializerFactory();
-	}
-
-	public function getCompactBaseDataModelSerializerFactory() {
-		return $this->genericServices->getCompactBaseDataModelSerializerFactory();
-	}
-
-	public function getLanguageFallbackChainFactory() {
-		return $this->genericServices->getLanguageFallbackChainFactory();
-	}
-
-	public function getStringNormalizer() {
-		return $this->genericServices->getStringNormalizer();
 	}
 
 	public function getTermBuffer() {

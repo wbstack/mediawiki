@@ -4,15 +4,18 @@ namespace Wikibase\Lib\Store\Sql\Terms;
 
 use BagOStuff;
 use InvalidArgumentException;
-use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\Lib\Store\AbstractTermPropertyLabelResolver;
+use Wikibase\Lib\Store\Sql\Terms\Util\StatsdMonitoring;
 
 /**
  * Resolves and caches property labels (which are unique per language) into entity IDs
  * through DatabaseTermIdsResolver api.
+ * @license GPL-2.0-or-later
  */
 class CachedDatabasePropertyLabelResolver extends AbstractTermPropertyLabelResolver {
+
+	use StatsdMonitoring;
 
 	/**
 	 * @var DatabaseTermInLangIdsResolver
@@ -22,7 +25,7 @@ class CachedDatabasePropertyLabelResolver extends AbstractTermPropertyLabelResol
 	/**
 	 * @param string $languageCode The language of the labels to look up (typically, the wiki's content language)
 	 * @param TermInLangIdsResolver $dbTermInLangIdsResolver Must be instance of {@link DatabaseTermInLangIdsResolver}
-	 * @param BagOStuff $cache      The cache to use for labels (typically from wfGetMainCache())
+	 * @param BagOStuff $cache      The cache to use for labels (typically from ObjectCache::getLocalClusterInstance())
 	 * @param int $cacheDuration    Number of seconds to keep the cached version for.
 	 *                              Defaults to 3600 seconds = 1 hour.
 	 * @param string $cacheKey      The cache key to use, auto-generated based on $lang per default.
@@ -45,9 +48,7 @@ class CachedDatabasePropertyLabelResolver extends AbstractTermPropertyLabelResol
 	}
 
 	protected function loadProperties(): array {
-		MediaWikiServices::getInstance()->getStatsdDataFactory()->increment(
-			'wikibase.repo.term_store.CachedDatabasePropertyLabelResolver_loadProperties'
-		);
+		$this->incrementForQuery( 'CachedDatabasePropertyLabelResolver_loadProperties' );
 		$termsByPropertyId = $this->dbTermInLangIdsResolver->resolveTermsViaJoin(
 			'wbt_property_terms',
 			'wbpt_term_in_lang_id',

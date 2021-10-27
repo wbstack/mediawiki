@@ -81,10 +81,12 @@ class DumpJson extends DumpEntities {
 	public function execute() {
 		if ( !$this->hasHadServicesSet ) {
 			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+			$mwServices = MediaWikiServices::getInstance();
+
 			$sqlEntityIdPagerFactory = new SqlEntityIdPagerFactory(
-				$wikibaseRepo->getEntityNamespaceLookup(),
-				$wikibaseRepo->getEntityIdLookup(),
-				MediaWikiServices::getInstance()->getLinkCache()
+				WikibaseRepo::getEntityNamespaceLookup( $mwServices ),
+				WikibaseRepo::getEntityIdLookup( $mwServices ),
+				$mwServices->getLinkCache()
 			);
 			$revisionLookup = $wikibaseRepo->getEntityRevisionLookup(
 				$this->getEntityRevisionLookupCacheMode()
@@ -93,10 +95,10 @@ class DumpJson extends DumpEntities {
 			$this->setServices(
 				$sqlEntityIdPagerFactory,
 				$wikibaseRepo->getEnabledEntityTypes(),
-				$wikibaseRepo->getStore()->getEntityPrefetcher(),
+				WikibaseRepo::getStore( $mwServices )->getEntityPrefetcher(),
 				$wikibaseRepo->getPropertyDataTypeLookup(),
 				$revisionLookup,
-				$wikibaseRepo->getCompactEntitySerializer()
+				WikibaseRepo::getCompactEntitySerializer( $mwServices )
 			);
 		}
 		parent::execute();
@@ -122,6 +124,9 @@ class DumpJson extends DumpEntities {
 		return $dumper;
 	}
 
+	protected function getDumpType(): string {
+		return "JSON";
+	}
 }
 
 $maintClass = DumpJson::class;

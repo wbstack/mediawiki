@@ -6,6 +6,7 @@ use ApiBase;
 use ApiMain;
 use LogicException;
 use Message;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
 use Wikibase\Lexeme\MediaWiki\Api\Error\SenseNotFound;
@@ -27,7 +28,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class RemoveSense extends ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var RemoveSenseRequestParser
@@ -54,10 +55,11 @@ class RemoveSense extends ApiBase {
 	 */
 	private $entityRevisionLookup;
 
-	/**
-	 * @return self
-	 */
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		EntityIdParser $entityIdParser
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
 
@@ -65,9 +67,7 @@ class RemoveSense extends ApiBase {
 			$mainModule,
 			$moduleName,
 			new RemoveSenseRequestParser(
-				new SenseIdDeserializer(
-					$wikibaseRepo->getEntityIdParser()
-				)
+				new SenseIdDeserializer( $entityIdParser )
 			),
 			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
@@ -135,7 +135,7 @@ class RemoveSense extends ApiBase {
 				$this->dieWithError( $error->asApiMessage( RemoveSenseRequestParser::PARAM_SENSE_ID, [] ) );
 			}
 		} catch ( StorageException $e ) {
-			//TODO Test it
+			// TODO Test it
 			if ( $e->getStatus() ) {
 				$this->dieStatus( $e->getStatus() );
 			} else {
@@ -173,7 +173,7 @@ class RemoveSense extends ApiBase {
 		}
 
 		$tokenThatDoesNotNeedChecking = false;
-		//FIXME: Handle failure
+		// FIXME: Handle failure
 		$status = $editEntity->attemptSave(
 			$lexeme,
 			$this->summaryFormatter->formatSummary( $summary ),

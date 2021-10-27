@@ -19,71 +19,77 @@ use Wikimedia\Assert\Assert;
 class RdfVocabulary {
 
 	// Change this when changing data format!
-	const FORMAT_VERSION = '1.0.0';
-	const ONTOLOGY_VERSION = '1.0';
+	public const FORMAT_VERSION = '1.0.0';
+	private const ONTOLOGY_VERSION = '1.0';
 
-	const ONTOLOGY_BASE_URI = 'http://wikiba.se/ontology';
-	const NS_ONTOLOGY = 'wikibase'; // wikibase ontology (shared)
+	private const ONTOLOGY_BASE_URI = 'http://wikiba.se/ontology';
+	public const NS_ONTOLOGY = 'wikibase'; // wikibase ontology (shared)
+
 	// Nodes
-	const NS_ENTITY = ''; // concept uris
-	const NS_DATA = 'data'; // document uris
-	const NS_STATEMENT = 's'; // statement
-	const NS_REFERENCE = 'ref'; // reference
-	const NS_VALUE = 'v'; // value
+	public const NS_ENTITY = ''; // concept uris
+	public const NS_DATA = 'data'; // document uris
+	public const NS_STATEMENT = 's'; // statement
+	public const NS_REFERENCE = 'ref'; // reference
+	public const NS_VALUE = 'v'; // value
+
 	// Predicates
-	const NSP_DIRECT_CLAIM = 't'; // direct assertion entity -> value
-	const NSP_DIRECT_CLAIM_NORM = 'tn'; // direct assertion entity -> value, normalized
-	const NSP_CLAIM = 'p'; // entity -> statement
-	const NSP_CLAIM_STATEMENT = 'ps'; // statement -> simple value
-	const NSP_CLAIM_VALUE = 'psv'; // statement -> deep value
-	const NSP_CLAIM_VALUE_NORM = 'psn'; // statement -> deep value, normalized
-	const NSP_QUALIFIER = 'pq'; // statement -> qualifier
-	const NSP_QUALIFIER_VALUE = 'pqv'; // statement ->  qualifier deep value
-	const NSP_QUALIFIER_VALUE_NORM = 'pqn'; // statement ->  qualifier deep value, normalized
-	const NSP_REFERENCE = 'pr'; // reference -> simple value
-	const NSP_REFERENCE_VALUE = 'prv'; // reference -> deep value
-	const NSP_REFERENCE_VALUE_NORM = 'prn'; // reference -> deep value, normalized
-	const NSP_NOVALUE = 'no'; // novalue class
+	public const NSP_DIRECT_CLAIM = 't'; // direct assertion entity -> value
+	public const NSP_DIRECT_CLAIM_NORM = 'tn'; // direct assertion entity -> value, normalized
+	public const NSP_CLAIM = 'p'; // entity -> statement
+	public const NSP_CLAIM_STATEMENT = 'ps'; // statement -> simple value
+	public const NSP_CLAIM_VALUE = 'psv'; // statement -> deep value
+	public const NSP_CLAIM_VALUE_NORM = 'psn'; // statement -> deep value, normalized
+	public const NSP_QUALIFIER = 'pq'; // statement -> qualifier
+	public const NSP_QUALIFIER_VALUE = 'pqv'; // statement ->  qualifier deep value
+	public const NSP_QUALIFIER_VALUE_NORM = 'pqn'; // statement ->  qualifier deep value, normalized
+	public const NSP_REFERENCE = 'pr'; // reference -> simple value
+	public const NSP_REFERENCE_VALUE = 'prv'; // reference -> deep value
+	public const NSP_REFERENCE_VALUE_NORM = 'prn'; // reference -> deep value, normalized
+	public const NSP_NOVALUE = 'no'; // novalue class
+
 	// other prefixes
-	const NS_SKOS = 'skos'; // SKOS vocabulary
-	const NS_SCHEMA_ORG = 'schema'; // schema.org vocabulary
-	const NS_CC = 'cc'; // Creative Commons
-	const NS_GEO = 'geo'; // prefix for geolocations
-	const NS_PROV = 'prov'; // for provenance
-	const SKOS_URI = 'http://www.w3.org/2004/02/skos/core#';
-	const SCHEMA_ORG_URI = 'http://schema.org/';
-	const CC_URI = 'http://creativecommons.org/ns#';
+	public const NS_SKOS = 'skos'; // SKOS vocabulary
+	public const NS_SCHEMA_ORG = 'schema'; // schema.org vocabulary
+	public const NS_CC = 'cc'; // Creative Commons
+	public const NS_GEO = 'geo'; // prefix for geolocations
+	public const NS_PROV = 'prov'; // for provenance
+	private const SKOS_URI = 'http://www.w3.org/2004/02/skos/core#';
+	private const SCHEMA_ORG_URI = 'http://schema.org/';
+	private const CC_URI = 'http://creativecommons.org/ns#';
+
 	// External URIs
 	//FIXME: get from config
-	const MEDIA_URI = 'http://commons.wikimedia.org/wiki/Special:FilePath/';
+	private const MEDIA_URI = 'http://commons.wikimedia.org/wiki/Special:FilePath/';
 	//FIXME: get from config
-	const COMMONS_DATA_URI = 'http://commons.wikimedia.org/data/main/';
-	const GEO_URI = 'http://www.opengis.net/ont/geosparql#';
-	const PROV_URI = 'http://www.w3.org/ns/prov#';
+	private const COMMONS_DATA_URI = 'http://commons.wikimedia.org/data/main/';
+	private const GEO_URI = 'http://www.opengis.net/ont/geosparql#';
+	private const PROV_URI = 'http://www.w3.org/ns/prov#';
 
 	// Gregorian calendar link.
 	// I'm not very happy about hardcoding it here but see no better way so far.
 	// See also DataValues\TimeValue\TimeFormatter::XXX_CALENDAR constants.
-	const GREGORIAN_CALENDAR = 'http://www.wikidata.org/entity/Q1985727';
-	const JULIAN_CALENDAR = 'http://www.wikidata.org/entity/Q1985786';
+	private const GREGORIAN_CALENDAR = 'http://www.wikidata.org/entity/Q1985727';
+	private const JULIAN_CALENDAR = 'http://www.wikidata.org/entity/Q1985786';
+
 	/**
 	 * URI for unit "1"
 	 * See: https://phabricator.wikimedia.org/T105432
 	 */
-	const ONE_ENTITY = 'http://www.wikidata.org/entity/Q199';
+	public const ONE_ENTITY = 'http://www.wikidata.org/entity/Q199';
 	// Ranks
-	const WIKIBASE_RANK_BEST = 'BestRank';
+	public const WIKIBASE_RANK_BEST = 'BestRank';
 
-	public static $rankMap = [
+	public const RANK_MAP = [
 		Statement::RANK_DEPRECATED => 'DeprecatedRank',
 		Statement::RANK_NORMAL => 'NormalRank',
 		Statement::RANK_PREFERRED => 'PreferredRank',
 	];
-	// Value properties
+
+	/** @var string[] Value properties */
 	public $claimToValue = [];
-	// Value properties for normalized values
+	/** @var string[] Value properties for normalized values */
 	public $claimToValueNormalized = [];
-	// Value properties for normalized values, including for direct claims
+	/** @var string[] Value properties for normalized values, including for direct claims */
 	public $normalizedPropertyValueNamespace = [];
 
 	/**
@@ -97,8 +103,10 @@ class RdfVocabulary {
 	 */
 	public $entityNamespaceNames = [];
 
+	/** @var string[] */
 	public $dataNamespaceNames = [];
 
+	/** @var string[][] */
 	public $statementNamespaceNames = [];
 
 	/**
@@ -128,21 +136,23 @@ class RdfVocabulary {
 	 */
 	private $pagePropertyDefs;
 
+	/** @var string */
 	private $licenseUrl;
 
+	/** @var string[] */
 	private $sourceNameByEntityType;
 
 	/**
 	 * @param string[] $conceptUris Associative array mapping repository names to base URIs for entity concept URIs.
 	 * @param string[] $dataUris Associative array mapping source/repository names to base URIs for entity description URIs.
 	 * @param EntitySourceDefinitions $entitySourceDefinitions
-	 * @param string $localEntitySourceName
 	 * @param string[] $rdfTurtleNodePrefixes
 	 * @param string[] $rdfTurtlePredicatePrefixes
 	 * @param string[] $canonicalLanguageCodes Mapping of non-standard to canonical language codes.
 	 * @param string[] $dataTypeUris Mapping of property data type IDs to their URIs,
 	 *                 if different from the default mapping.
-	 * @param string[][] $pagePropertyDefs Mapping of page props: pageProp => wikibase predicate
+	 * @param string[][] $pagePropertyDefs Mapping of page props, e.g.:
+	 *                 pageProp => [ 'name' => wikibase predicate, 'type' => integer ]
 	 *                 All predicates will be prefixed with wikibase:
 	 * @param string $licenseUrl
 	 */
@@ -150,28 +160,17 @@ class RdfVocabulary {
 		array $conceptUris,
 		array $dataUris,
 		EntitySourceDefinitions $entitySourceDefinitions,
-		$localEntitySourceName,
 		array $rdfTurtleNodePrefixes,
 		array $rdfTurtlePredicatePrefixes,
 		array $canonicalLanguageCodes = [],
 		array $dataTypeUris = [],
 		array $pagePropertyDefs = [],
-		$licenseUrl = 'http://creativecommons.org/publicdomain/zero/1.0/'
+		string $licenseUrl = 'http://creativecommons.org/publicdomain/zero/1.0/'
 	) {
-		Assert::parameter(
-			array_key_exists( $localEntitySourceName, $conceptUris ),
-			'$conceptUris',
-			'must contain entry for the local repository, ie. ' . $localEntitySourceName
-		);
 		Assert::parameterElementType( 'string', $conceptUris, '$conceptUris' );
 		RepositoryNameAssert::assertParameterKeysAreValidRepositoryNames( $conceptUris, '$conceptUris' );
 
 		Assert::parameterElementType( 'string', $dataUris, '$dataUris' );
-		Assert::parameter(
-			array_key_exists( $localEntitySourceName, $dataUris ),
-			'$dataUris',
-			'must contain entry for the local entity source, ie. ' . $localEntitySourceName
-		);
 
 		Assert::parameter(
 			array_keys( $conceptUris ) === array_keys( $dataUris ),
@@ -197,8 +196,6 @@ class RdfVocabulary {
 			self::NS_GEO => self::GEO_URI,
 			self::NS_PROV => self::PROV_URI,
 		];
-
-		$topUri = $this->getConceptUriBase( $conceptUris[$localEntitySourceName] );
 
 		$propertyNamespaces = [
 			self::NSP_CLAIM,
@@ -509,7 +506,7 @@ class RdfVocabulary {
 	 * Get the map of configured page properties
 	 * @return string[][]
 	 */
-	public function getPageProperties() {
+	public function getPagePropertyDefs() {
 		return $this->pagePropertyDefs;
 	}
 

@@ -6,6 +6,7 @@ use ApiBase;
 use ApiMain;
 use LogicException;
 use Message;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\MediaWiki\Api\Error\FormNotFound;
 use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
@@ -27,7 +28,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class RemoveForm extends ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var RemoveFormRequestParser
@@ -54,10 +55,11 @@ class RemoveForm extends ApiBase {
 	 */
 	private $entityRevisionLookup;
 
-	/**
-	 * @return self
-	 */
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		EntityIdParser $entityIdParser
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
 
@@ -65,9 +67,7 @@ class RemoveForm extends ApiBase {
 			$mainModule,
 			$moduleName,
 			new RemoveFormRequestParser(
-				new FormIdDeserializer(
-					$wikibaseRepo->getEntityIdParser()
-				)
+				new FormIdDeserializer( $entityIdParser )
 			),
 			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
@@ -129,7 +129,7 @@ class RemoveForm extends ApiBase {
 				$this->dieWithError( $error->asApiMessage( RemoveFormRequestParser::PARAM_FORM_ID, [] ) );
 			}
 		} catch ( StorageException $e ) {
-			//TODO Test it
+			// TODO Test it
 			if ( $e->getStatus() ) {
 				$this->dieStatus( $e->getStatus() );
 			} else {
@@ -167,7 +167,7 @@ class RemoveForm extends ApiBase {
 		}
 
 		$tokenThatDoesNotNeedChecking = false;
-		//FIXME: Handle failure
+		// FIXME: Handle failure
 		$status = $editEntity->attemptSave(
 			$lexeme,
 			$this->summaryFormatter->formatSummary( $summary ),

@@ -214,7 +214,7 @@ return call_user_func( function() {
 		'VT:monolingualtext' => [
 			'expert-module' => 'jquery.valueview.experts.MonolingualText',
 			'validator-factory-callback' => function() {
-				$constraints = WikibaseRepo::getDefaultInstance()->getSettings()
+				$constraints = WikibaseRepo::getSettings()
 					->getSetting( 'string-limits' )['VT:monolingualtext'];
 				$maxLength = $constraints['length'];
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
@@ -262,7 +262,7 @@ return call_user_func( function() {
 				$complexValueHelper = ( $flags & RdfProducer::PRODUCE_FULL_VALUES ) ?
 					new ComplexValueRdfHelper( $vocab, $writer->sub(), $dedupe ) : null;
 				$unitConverter = ( $flags & RdfProducer::PRODUCE_NORMALIZED_VALUES ) ?
-					WikibaseRepo::getDefaultInstance()->getUnitConverter() : null;
+					WikibaseRepo::getUnitConverter() : null;
 				return new QuantityRdfBuilder( $complexValueHelper, $unitConverter );
 			},
 			'search-index-data-formatter-callback' => function ( UnboundedQuantityValue $value ) {
@@ -273,14 +273,14 @@ return call_user_func( function() {
 			'expert-module' => 'jquery.valueview.experts.StringValue',
 			'validator-factory-callback' => function() {
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
-				$constraints = WikibaseRepo::getDefaultInstance()->getSettings()
+				$constraints = WikibaseRepo::getSettings()
 					->getSetting( 'string-limits' )['VT:string'];
 				$maxLength = $constraints['length'];
 				// max length is also used in MetaDataBridgeConfig, make sure to keep in sync
 				return $factory->buildStringValidators( $maxLength );
 			},
 			'parser-factory-callback' => function ( ParserOptions $options ) {
-				$normalizer = WikibaseRepo::getDefaultInstance()->getStringNormalizer();
+				$normalizer = WikibaseRepo::getStringNormalizer();
 				return new StringParser( new WikibaseStringValueNormalizer( $normalizer ) );
 			},
 			'formatter-factory-callback' => function( $format, FormatterOptions $options ) {
@@ -331,7 +331,7 @@ return call_user_func( function() {
 		'PT:url' => [
 			'validator-factory-callback' => function() {
 				$factory = WikibaseRepo::getDefaultValidatorBuilders();
-				$constraints = WikibaseRepo::getDefaultInstance()->getSettings()
+				$constraints = WikibaseRepo::getSettings()
 					->getSetting( 'string-limits' )['PT:url'];
 				$maxLength = $constraints['length'];
 				return $factory->buildUrlValidators( $maxLength );
@@ -366,9 +366,8 @@ return call_user_func( function() {
 				EntityMentionListener $tracker,
 				DedupeBag $dedupe
 			) {
-				$repo = WikibaseRepo::getDefaultInstance();
 				$uriPatternProvider = new FieldPropertyInfoProvider(
-					$repo->getStore()->getPropertyInfoLookup(),
+					WikibaseRepo::getStore()->getPropertyInfoLookup(),
 					PropertyInfoStore::KEY_CANONICAL_URI
 				);
 				return new ExternalIdentifierRdfBuilder( $vocab, $uriPatternProvider );
@@ -380,7 +379,7 @@ return call_user_func( function() {
 				return $factory->buildEntityValidators();
 			},
 			'parser-factory-callback' => function ( ParserOptions $options ) {
-				$entityIdParser = WikibaseRepo::getDefaultInstance()->getEntityIdParser();
+				$entityIdParser = WikibaseRepo::getEntityIdParser();
 				return new EntityIdValueParser( $entityIdParser );
 			},
 			'formatter-factory-callback' => function( $format, FormatterOptions $options ) {
@@ -411,7 +410,7 @@ return call_user_func( function() {
 				$snakFormat = new SnakFormat();
 
 				if ( $snakFormat->getBaseFormat( $format ) === SnakFormatter::FORMAT_HTML ) {
-					$logger = LoggerFactory::getInstance( 'Wikibase.NewItemIdFormatter' );
+					$logger = LoggerFactory::getInstance( 'Wikibase' );
 					try {
 						return new EntityIdValueFormatter( $factory->newItemIdHtmlLinkFormatter( $options ) );
 					} catch ( \Exception $e ) {

@@ -6,19 +6,36 @@
  * @license GPL-2.0-or-later
  */
 
+namespace MediaWiki\Extension\Math;
+
+use CurlHttpRequest;
+use Exception;
+use Hooks;
+use Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use PhpHttpRequest;
 use Psr\Log\LoggerInterface;
+use SpecialPage;
+use stdClass;
+use Title;
+use Xml;
+use XmlTypeCheck;
 
 /**
  * Converts LaTeX to MathML using the mathoid-server
  */
 class MathMathML extends MathRenderer {
 
+	/** @var string[] */
 	protected $defaultAllowedRootElements = [ 'math' ];
+	/** @var string[] */
 	protected $restbaseInputTypes = [ 'tex', 'inline-tex', 'chem' ];
+	/** @var string[] */
 	protected $restbaseRenderingModes = [ 'mathml', 'png' ];
+	/** @var string[] */
 	protected $allowedRootElements = [];
+	/** @var string|string[] */
 	protected $hosts;
 
 	/** @var LoggerInterface */
@@ -32,7 +49,7 @@ class MathMathML extends MathRenderer {
 	 */
 	private $svgPath = false;
 
-	/** @var string|bool */
+	/** @var string|false */
 	private $pngPath = false;
 
 	/** @var string|null */
@@ -97,7 +114,7 @@ class MathMathML extends MathRenderer {
 	/**
 	 * Gets the allowed root elements the rendered math tag might have.
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public function getAllowedRootElements() {
 		if ( $this->allowedRootElements ) {
@@ -119,7 +136,7 @@ class MathMathML extends MathRenderer {
 	/**
 	 * Sets the allowed root elements the rendered math tag might have.
 	 * An empty value indicates to use the default settings.
-	 * @param array $settings
+	 * @param string[] $settings
 	 */
 	public function setAllowedRootElements( $settings ) {
 		$this->allowedRootElements = $settings;
@@ -177,26 +194,26 @@ class MathMathML extends MathRenderer {
 		if ( $this->isPurge() ) {
 			$this->logger->debug( 'Rerendering was requested.' );
 			return true;
-		} else {
-			$dbres = $this->isInDatabase();
-			if ( $dbres ) {
-				if ( $this->isValidMathML( $this->getMathml() ) ) {
-					$this->logger->debug( 'Valid MathML entry found in database.' );
-					if ( $this->getSvg( 'cached' ) ) {
-						$this->logger->debug( 'SVG-fallback found in database.' );
-						return false;
-					} else {
-						$this->logger->debug( 'SVG-fallback missing.' );
-						return true;
-					}
+		}
+
+		$dbres = $this->isInDatabase();
+		if ( $dbres ) {
+			if ( $this->isValidMathML( $this->getMathml() ) ) {
+				$this->logger->debug( 'Valid MathML entry found in database.' );
+				if ( $this->getSvg( 'cached' ) ) {
+					$this->logger->debug( 'SVG-fallback found in database.' );
+					return false;
 				} else {
-					$this->logger->debug( 'Malformatted entry found in database' );
+					$this->logger->debug( 'SVG-fallback missing.' );
 					return true;
 				}
 			} else {
-				$this->logger->debug( 'No entry found in database.' );
+				$this->logger->debug( 'Malformatted entry found in database' );
 				return true;
 			}
+		} else {
+			$this->logger->debug( 'No entry found in database.' );
+			return true;
 		}
 	}
 
@@ -282,7 +299,6 @@ class MathMathML extends MathRenderer {
 	 * Calculates the HTTP POST Data for the request. Depends on the settings
 	 * and the input string only.
 	 * @return string HTTP POST data
-	 * @throws MWException
 	 */
 	public function getPostData() {
 		$input = $this->getTex();
@@ -292,7 +308,14 @@ class MathMathML extends MathRenderer {
 		} elseif ( $this->inputType == 'ascii' ) {
 			$out = 'type=asciimath&q=' . rawurlencode( $input );
 		} else {
-			throw new MWException( 'Internal error: Restbase should be used for tex rendering' );
+			if ( $this->getMathStyle() === 'inlineDisplaystyle' ) {
+				// default preserve the (broken) layout as it was
+				$out = 'type=inline-TeX&q=' . rawurlencode( '{\\displaystyle ' . $input . '}' );
+			} elseif ( $this->getMathStyle() === 'inline' ) {
+				$out = 'type=inline-TeX&q=' . rawurlencode( $input );
+			} else {
+				$out = 'type=tex&q=' . rawurlencode( $input );
+			}
 		}
 		$this->logger->debug( 'Get post data: ' . $out );
 		return $out;
@@ -382,7 +405,7 @@ class MathMathML extends MathRenderer {
 	 * @return Title|string
 	 */
 	private function getFallbackImageUrl( $noRender = false ) {
-		if ( 'png' === $this->getMode() && $this->pngPath ) {
+		if ( $this->getMode() === 'png' && $this->pngPath ) {
 			return $this->pngPath;
 		}
 		if ( $this->svgPath ) {
@@ -429,7 +452,7 @@ class MathMathML extends MathRenderer {
 	 * Gets img tag for math image
 	 * @param bool $noRender if true no rendering will be performed
 	 * if the image is not stored in the database
-	 * @param bool|string $classOverride if classOverride
+	 * @param false|string $classOverride if classOverride
 	 * is false the class name will be calculated by getClassName
 	 * @return string XML the image html tag
 	 */
@@ -456,6 +479,9 @@ class MathMathML extends MathRenderer {
 		] ) );
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getMathTableName() {
 		return 'mathoid';
 	}
@@ -535,6 +561,7 @@ class MathMathML extends MathRenderer {
 		if ( $this->getMathTableName() == 'mathoid' ) {
 			$out['math_input'] = $out['math_inputtex'];
 			unset( $out['math_inputtex'] );
+			$out['math_png'] = $this->png;
 		}
 		return $out;
 	}
@@ -558,7 +585,7 @@ class MathMathML extends MathRenderer {
 	}
 
 	/**
-	 * @param object $jsonResult json result
+	 * @param stdClass $jsonResult json result
 	 * @param string $host name
 	 *
 	 * @return bool
@@ -585,7 +612,8 @@ class MathMathML extends MathRenderer {
 			// Avoid PHP 7.1 warning from passing $this by reference
 			$renderer = $this;
 			Hooks::run( 'MathRenderingResultRetrieved',
-				[ &$renderer, &$jsonResult ] ); // Enables debugging of server results
+				[ &$renderer, &$jsonResult ]
+			); // Enables debugging of server results
 			return true;
 		} else {
 			$this->lastError = $this->getError( 'math_unknown_error', $host );
@@ -605,3 +633,5 @@ class MathMathML extends MathRenderer {
 		return false;
 	}
 }
+
+class_alias( MathMathML::class, 'MathMathML' );

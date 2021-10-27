@@ -5,8 +5,11 @@ namespace Wikibase\Client\Hooks;
 use Action;
 use MediaWiki\Skins\Hook\SkinAfterPortletHook;
 use Skin;
+use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\RepoItemLinkGenerator;
-use Wikibase\Client\WikibaseClient;
+use Wikibase\Client\RepoLinker;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\Lib\SettingsArray;
 
 /**
  * Handler for the "SkinAfterPortlet" hook.
@@ -27,16 +30,20 @@ class SkinAfterPortletHandler implements SkinAfterPortletHook {
 		$this->repoItemLinkGenerator = $repoItemLinkGenerator;
 	}
 
-	public static function newFromGlobalState(): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-
+	public static function factory(
+		EntityIdParser $entityIdParser,
+		string $langLinkSiteGroup,
+		NamespaceChecker $namespaceChecker,
+		RepoLinker $repoLinker,
+		SettingsArray $clientSettings
+	): self {
 		return new self(
 			new RepoItemLinkGenerator(
-				$wikibaseClient->getNamespaceChecker(),
-				$wikibaseClient->newRepoLinker(),
-				$wikibaseClient->getEntityIdParser(),
-				$wikibaseClient->getLangLinkSiteGroup(),
-				$wikibaseClient->getSettings()->getSetting( 'siteGlobalID' )
+				$namespaceChecker,
+				$repoLinker,
+				$entityIdParser,
+				$langLinkSiteGroup,
+				$clientSettings->getSetting( 'siteGlobalID' )
 			)
 		);
 	}

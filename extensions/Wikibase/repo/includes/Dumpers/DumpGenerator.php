@@ -79,7 +79,7 @@ abstract class DumpGenerator {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct( $out, EntityPrefetcher $entityPrefetcher ) {
-		if ( !is_resource( $out ) ) {
+		if ( !$out ) {
 			throw new InvalidArgumentException( '$out must be a file handle!' );
 		}
 
@@ -309,11 +309,7 @@ abstract class DumpGenerator {
 				if ( $this->limit && $dumpCount >= $this->limit ) {
 					break;
 				}
-			} catch ( EntityLookupException $ex ) {
-				$this->exceptionHandler->handleException( $ex, 'failed-to-dump', 'Failed to dump ' . $entityId );
-			} catch ( StorageException $ex ) {
-				$this->exceptionHandler->handleException( $ex, 'failed-to-dump', 'Failed to dump ' . $entityId );
-			} catch ( LogicException $ex ) {
+			} catch ( EntityLookupException | StorageException | LogicException $ex ) {
 				$this->exceptionHandler->handleException( $ex, 'failed-to-dump', 'Failed to dump ' . $entityId );
 			}
 		}

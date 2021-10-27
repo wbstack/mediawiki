@@ -4,9 +4,12 @@
 			"Chrumps",
 			"Openbk",
 			"Rail",
-			"Railfail536"
+			"Railfail536",
+			"SemanticPioneer"
 		]
 	},
+	"nstab-data": "Dane",
+	"tooltip-ca-nstab-data": "Zobacz stronę danych",
 	"jsonconfig-desc": "Umożliwia przechowywanie na wiki konfiguracji JSON",
 	"jsonconfig-duplicate-field": "Znaleziono więcej niż jedną wartość „$1”",
 	"jsonconfig-edit-action-apply": "Zastosuj",
@@ -52,6 +55,9 @@
 	"jsonconfig-license": "Dane dostępne w ramach licencji $1.",
 	"jsonconfig-license-not-set": "Edytując tę stronę zgadzasz się na publikowanie twojego wkładu zgodnie z licencją podaną w polu <code>licence</code>.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
+	"jsonconfig-license-name-dl-de-zero-2.0": "Licencja na dane Niemcy - Zero - wersja 2.0",
+	"jsonconfig-license-name-dl-de-by-1.0": "Licencja na dane Niemcy - uznanie autorstwa - wersja 1.0",
+	"jsonconfig-license-name-dl-de-by-2.0": "Licencja na dane Niemcy - uznanie autorstwa - wersja 2.0",
 	"jsonconfig-license-copyrightwarning": "Zapisując zmiany, wyrażasz zgodę na [https://foundation.wikimedia.org/wiki/Terms_of_Use/pl Warunki użytkowania] i nieodwołalnie zgadzasz się na udostępnienie swojego udziału zgodnie z licencją  [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-copyrightwarning-license-unset": "Zapisując zmiany, wyrażasz zgodę na [https://foundation.wikimedia.org/wiki/Terms_of_Use/pl Warunki użytkowania], a nieodwołalnie zgadzasz się na udostępnienie swojego udziału zgodnie z licencją określoną w polu <code>licencja</code>.",
 	"jsonconfig-license-notice": "'''Uwaga:''' Edytując tę stronę zgadzasz się na publikowanie twojego wkładu na licencji [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",

@@ -33,7 +33,7 @@ use WikiPage;
  * http://www.gnu.org/copyleft/gpl.html
  */
 class DataSender extends ElasticsearchIntermediary {
-	const ALL_INDEXES_FROZEN_NAME = 'freeze-everything';
+	private const ALL_INDEXES_FROZEN_NAME = 'freeze-everything';
 
 	/** @var \Psr\Log\LoggerInterface */
 	private $log;
@@ -132,6 +132,154 @@ class DataSender extends ElasticsearchIntermediary {
 	}
 
 	/**
+	 * @param string $indexType
+	 * @param string[] $docIds
+	 * @param string $tagField
+	 * @param string $tagPrefix
+	 * @param string|string[]|null $tagNames
+	 * @param int[]|int[][]|null $tagWeights An optional map of docid => weight. When $tagName is
+	 *   null, the weight is an integer. When $tagName is not null, the weight is itself a
+	 *   tagname => int map. Weights are between 1-1000.
+	 * @param int $batchSize
+	 * @return Status
+	 */
+	public function sendUpdateWeightedTags(
+		string $indexType,
+		array $docIds,
+		string $tagField,
+		string $tagPrefix,
+		$tagNames = null,
+		array $tagWeights = null,
+		int $batchSize = 30
+	): Status {
+		if ( !$this->isAvailableForWrites() ) {
+			return Status::newFatal( 'cirrussearch-indexes-frozen' );
+		}
+
+		Assert::parameterType( [ 'string', 'array', 'null' ], $tagNames, '$tagNames' );
+		if ( is_array( $tagNames ) ) {
+			Assert::parameterElementType( 'string', $tagNames, '$tagNames' );
+		}
+		if ( $tagNames === null ) {
+			$tagNames = [ 'exists' ];
+			if ( $tagWeights !== null ) {
+				$tagWeights = [ 'exists' => $tagWeights ];
+			}
+		} elseif ( is_string( $tagNames ) ) {
+			$tagNames = [ $tagNames ];
+		}
+
+		Assert::precondition( strpos( $tagPrefix, '/' ) === false,
+			"invalid tag prefix $tagPrefix: must not contain /" );
+		foreach ( $tagNames as $tagName ) {
+			Assert::precondition( strpos( $tagName, '|' ) === false,
+				"invalid tag name $tagName: must not contain |" );
+		}
+		if ( $tagWeights ) {
+			foreach ( $tagWeights as $docId => $docWeights ) {
+				Assert::precondition( in_array( $docId, $docIds ),
+					"document ID $docId used in \$tagWeights but not found in \$docIds" );
+				foreach ( $docWeights as $tagName => $weight ) {
+					Assert::precondition( in_array( $tagName, $tagNames, true ),
+						"tag name $tagName used in \$tagWeights but not found in \$tagNames" );
+					Assert::precondition( is_int( $weight ), "weights must be integers but $weight is "
+						. gettype( $weight ) );
+					Assert::precondition( $weight >= 1 && $weight <= 1000,
+						"weights must be between 1 and 1000 (found: $weight)" );
+				}
+			}
+		}
+
+		$client = $this->connection->getClient();
+		$status = Status::newGood();
+		$pageType =
+			$this->connection->getIndexType( $this->indexBaseName, $indexType,
+				Connection::PAGE_TYPE_NAME );
+		foreach ( array_chunk( $docIds, $batchSize ) as $docIdsChunk ) {
+			$bulk = new \Elastica\Bulk( $client );
+			$bulk->setType( $pageType );
+			foreach ( $docIdsChunk as $docId ) {
+				$tags = [];
+				foreach ( $tagNames as $tagName ) {
+					$tagValue = "$tagPrefix/$tagName";
+					if ( $tagWeights !== null ) {
+						// To pass the assertions above, the weight must be either an int, a float
+						// with an integer value, or a string representation of one of those.
+						// Convert to int to ensure there is no trailing '.0'.
+						$tagValue .= '|' . (int)$tagWeights[$docId][$tagName];
+					}
+					$tags[] = $tagValue;
+				}
+				$script = new \Elastica\Script\Script( 'super_detect_noop', [
+					'source' => [ $tagField => $tags ],
+					'handlers' => [ $tagField => CirrusIndexField::MULTILIST_HANDLER ],
+				], 'super_detect_noop' );
+				$script->setId( $docId );
+				$bulk->addScript( $script, 'update' );
+			}
+
+			// Execute the bulk update
+			$exception = null;
+			try {
+				$this->start( new BulkUpdateRequestLog( $this->connection->getClient(),
+					'updating {numBulk} documents',
+					'send_data_reset_weighted_tags' ) );
+				$bulk->send();
+			}
+			catch ( ResponseException $e ) {
+				if ( !$this->bulkResponseExceptionIsJustDocumentMissing( $e ) ) {
+					$exception = $e;
+				}
+			}
+			catch ( \Elastica\Exception\ExceptionInterface $e ) {
+				$exception = $e;
+			}
+			if ( $exception === null ) {
+				$this->success();
+			} else {
+				$this->failure( $exception );
+				$this->failedLog->warning( "Update weighted tag {weightedTagFieldName} for {weightedTagPrefix} in articles: {documents}",
+					[
+						'exception' => $exception,
+						'weightedTagFieldName' => $tagField,
+						'weightedTagPrefix' => $tagPrefix,
+						'weightedTagNames' => implode( '|', $tagNames ),
+						'weightedTagWeight' => $tagWeights,
+						'docIds' => implode( ',', $docIds )
+					] );
+				$status->error( 'cirrussearch-failed-update-weighted-tags' );
+			}
+		}
+		return $status;
+	}
+
+	/**
+	 * @param string $indexType
+	 * @param string[] $docIds
+	 * @param string $tagField
+	 * @param string $tagPrefix
+	 * @param int $batchSize
+	 * @return Status
+	 */
+	public function sendResetWeightedTags(
+		string $indexType,
+		array $docIds,
+		string $tagField,
+		string $tagPrefix,
+		int $batchSize = 30
+	): Status {
+		return $this->sendUpdateWeightedTags(
+			$indexType,
+			$docIds,
+			$tagField,
+			$tagPrefix,
+			CirrusIndexField::MULTILIST_DELETE_GROUPING,
+			null,
+			$batchSize
+		);
+	}
+
+	/**
 	 * @param string $indexType type of index to which to send $documents
 	 * @param \Elastica\Document[] $documents documents to send
 	 * @param string $elasticType Mapping type to use for the document
@@ -161,7 +309,8 @@ class DataSender extends ElasticsearchIntermediary {
 			$this->connection,
 			$services->getDBLoadBalancer()->getConnection( DB_REPLICA ),
 			$services->getParserCache(),
-			$services->getRevisionStore()
+			$services->getRevisionStore(),
+			new CirrusSearchHookRunner( $services->getHookContainer() )
 		);
 		foreach ( $documents as $i => $doc ) {
 			if ( !$builder->finalize( $doc ) ) {
@@ -477,7 +626,7 @@ class DataSender extends ElasticsearchIntermediary {
 			if ( is_string( $error ) ) {
 				// es 1.7 cluster
 				$message = $bulkResponse->getError();
-				if ( false === strpos( $message, 'DocumentMissingException' ) ) {
+				if ( strpos( $message, 'DocumentMissingException' ) === false ) {
 					$justDocumentMissing = false;
 					continue;
 				}

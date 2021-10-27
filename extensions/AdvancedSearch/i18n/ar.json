@@ -5,7 +5,8 @@
 			"Sonic N800",
 			"ديفيد",
 			"زكريا",
-			"علاء"
+			"علاء",
+			"محمد أحمد عبد الفتاح"
 		]
 	},
 	"advancedsearch-desc": "استعمال البحث المتقدم في [[Special:Search]]",
@@ -60,6 +61,7 @@
 	"advancedsearch-filesize-smaller-than": "يقل عن",
 	"advancedsearch-sort-relevance": "التعلق",
 	"advancedsearch-sort-last-edit-desc": "تاريخ التعديل - الحالي في الأعلى",
+	"advancedsearch-sort-create-timestamp-asc": "تاريخ الإنشاء - الأقدم في الأعلى",
 	"advancedsearch-sort-create-timestamp-desc": "تاريخ الإنشاء - الحالي على القمة",
 	"advancedsearch-sort-preview-relevance": "التعلق",
 	"advancedsearch-sort-preview-last-edit-desc": "تاريخ التعديل",

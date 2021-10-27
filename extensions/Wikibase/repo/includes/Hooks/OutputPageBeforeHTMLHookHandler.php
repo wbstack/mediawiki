@@ -2,18 +2,28 @@
 
 namespace Wikibase\Repo\Hooks;
 
-use MediaWiki\MediaWikiServices;
+use IBufferingStatsdDataFactory;
+use Language;
+use MediaWiki\Hook\OutputPageBeforeHTMLHook;
+use MediaWiki\Http\HttpRequestFactory;
 use OutputPage;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\EntityFactory;
+use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\UserLanguageLookup;
 use Wikibase\Repo\BabelUserLanguageLookup;
+use Wikibase\Repo\Content\EntityContentFactory;
 use Wikibase\Repo\Hooks\Helpers\OutputPageEditability;
+use Wikibase\Repo\Hooks\Helpers\OutputPageEntityViewChecker;
 use Wikibase\Repo\Hooks\Helpers\OutputPageRevisionIdReader;
 use Wikibase\Repo\Hooks\Helpers\UserPreferredContentLanguagesLookup;
 use Wikibase\Repo\MediaWikiLanguageDirectionalityLookup;
@@ -36,7 +46,16 @@ use Wikibase\View\ToolbarEditSectionGenerator;
  * @license GPL-2.0-or-later
  * @author Marius Hoch < hoo@online.de >
  */
-class OutputPageBeforeHTMLHookHandler {
+class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
+
+	/** @var HttpRequestFactory */
+	private $httpRequestFactory;
+
+	/** @var IBufferingStatsdDataFactory */
+	private $statsDataFactory;
+
+	/** @var SettingsArray */
+	private $repoSettings;
 
 	/**
 	 * @var TemplateFactory
@@ -93,7 +112,21 @@ class OutputPageBeforeHTMLHookHandler {
 	 */
 	private $userPreferredTermsLanguages;
 
+	/**
+	 * @var OutputPageEntityViewChecker
+	 */
+	private $entityViewChecker;
+
+	/** @var LanguageFallbackChainFactory */
+	private $languageFallbackChainFactory;
+
+	/** @var LoggerInterface */
+	private $logger;
+
 	public function __construct(
+		HttpRequestFactory $httpRequestFactory,
+		IBufferingStatsdDataFactory $statsdDataFactory,
+		SettingsArray $repoSettings,
 		TemplateFactory $templateFactory,
 		UserLanguageLookup $userLanguageLookup,
 		ContentLanguages $termsLanguages,
@@ -104,8 +137,14 @@ class OutputPageBeforeHTMLHookHandler {
 		$cookiePrefix,
 		OutputPageEditability $editability,
 		$isExternallyRendered,
-		UserPreferredContentLanguagesLookup $userPreferredTermsLanguages
+		UserPreferredContentLanguagesLookup $userPreferredTermsLanguages,
+		OutputPageEntityViewChecker $entityViewChecker,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		LoggerInterface $logger = null
 	) {
+		$this->httpRequestFactory = $httpRequestFactory;
+		$this->statsDataFactory = $statsdDataFactory;
+		$this->repoSettings = $repoSettings;
 		$this->templateFactory = $templateFactory;
 		$this->userLanguageLookup = $userLanguageLookup;
 		$this->termsLanguages = $termsLanguages;
@@ -117,37 +156,57 @@ class OutputPageBeforeHTMLHookHandler {
 		$this->isExternallyRendered = $isExternallyRendered;
 		$this->editability = $editability;
 		$this->userPreferredTermsLanguages = $userPreferredTermsLanguages;
+		$this->entityViewChecker = $entityViewChecker;
+		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
+		$this->logger = $logger ?: new NullLogger();
 	}
 
 	/**
 	 * @return self
 	 */
-	public static function newFromGlobalState() {
+	public static function factory(
+		Language $contentLanguage,
+		HttpRequestFactory $httpRequestFactory,
+		IBufferingStatsdDataFactory $statsdDataFactory,
+		EntityContentFactory $entityContentFactory,
+		EntityFactory $entityFactory,
+		EntityIdParser $entityIdParser,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		LoggerInterface $logger,
+		SettingsArray $settings,
+		ContentLanguages $termsLanguages
+	): self {
 		global $wgLang, $wgCookiePrefix;
 
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$termLanguages = $wikibaseRepo->getTermsLanguages();
 		$babelUserLanguageLookup = new BabelUserLanguageLookup();
+		$entityViewChecker = new OutputPageEntityViewChecker( $entityContentFactory );
 
 		return new self(
+			$httpRequestFactory,
+			$statsdDataFactory,
+			$settings,
 			TemplateFactory::getDefaultInstance(),
 			$babelUserLanguageLookup,
-			$termLanguages,
+			$termsLanguages,
 			$wikibaseRepo->getEntityRevisionLookup(),
 			new LanguageNameLookup( $wgLang->getCode() ),
 			new OutputPageEntityIdReader(
-				$wikibaseRepo->getEntityContentFactory(),
-				$wikibaseRepo->getEntityIdParser()
+				$entityViewChecker,
+				$entityIdParser
 			),
-			$wikibaseRepo->getEntityFactory(),
+			$entityFactory,
 			$wgCookiePrefix,
 			new OutputPageEditability(),
 			TermboxFlag::getInstance()->shouldRenderTermbox(),
 			new UserPreferredContentLanguagesLookup(
-				$termLanguages,
+				$termsLanguages,
 				$babelUserLanguageLookup,
-				MediaWikiServices::getInstance()->getContentLanguage()->getCode()
-			)
+				$contentLanguage->getCode()
+			),
+			$entityViewChecker,
+			$languageFallbackChainFactory,
+			$logger
 		);
 	}
 
@@ -159,16 +218,8 @@ class OutputPageBeforeHTMLHookHandler {
 	 * @param OutputPage $out
 	 * @param string &$html the HTML to mangle
 	 */
-	public static function onOutputPageBeforeHTML( OutputPage $out, &$html ) {
-		self::newFromGlobalState()->doOutputPageBeforeHTML( $out, $html );
-	}
-
-	/**
-	 * @param OutputPage $out
-	 * @param string &$html
-	 */
-	public function doOutputPageBeforeHTML( OutputPage $out, &$html ) {
-		if ( !$out->isArticle() ) {
+	public function onOutputPageBeforeHTML( $out, &$html ): void {
+		if ( !$this->entityViewChecker->hasEntityView( $out ) ) {
 			return;
 		}
 
@@ -284,24 +335,21 @@ class OutputPageBeforeHTMLHookHandler {
 	}
 
 	private function getExternallyRenderedEntityViewPlaceholderExpander( OutputPage $out ) {
-		$repo = WikibaseRepo::getDefaultInstance();
-		$languageFallbackChainFactory = $repo->getLanguageFallbackChainFactory();
-
 		return new ExternallyRenderedEntityViewPlaceholderExpander(
 			$out,
-			new TermboxRequestInspector( $languageFallbackChainFactory ),
+			new TermboxRequestInspector( $this->languageFallbackChainFactory ),
 			new TermboxRemoteRenderer(
-				MediaWikiServices::getInstance()->getHttpRequestFactory(),
-				$repo->getSettings()->getSetting( 'ssrServerUrl' ),
-				$repo->getSettings()->getSetting( 'ssrServerTimeout' ),
-				$repo->getLogger(),
-				MediaWikiServices::getInstance()->getStatsdDataFactory()
+				$this->httpRequestFactory,
+				$this->repoSettings->getSetting( 'ssrServerUrl' ),
+				$this->repoSettings->getSetting( 'ssrServerTimeout' ),
+				$this->logger,
+				$this->statsDataFactory
 			),
 			$this->outputPageEntityIdReader,
 			new RepoSpecialPageLinker(),
-			$languageFallbackChainFactory,
+			$this->languageFallbackChainFactory,
 			new OutputPageRevisionIdReader(),
-			$repo->getSettings()->getSetting( 'termboxUserSpecificSsrEnabled' )
+			$this->repoSettings->getSetting( 'termboxUserSpecificSsrEnabled' )
 		);
 	}
 

@@ -13,96 +13,203 @@
 	"APIListModules": {
 		"wblistentityusage": {
 			"class": "\\Wikibase\\Client\\Api\\ApiListEntityUsage",
-			"factory": "\\Wikibase\\Client\\Api\\ApiListEntityUsage::newFromGlobalState"
+			"services": [
+				"WikibaseClient.RepoLinker"
+			]
 		}
 	},
 	"APIMetaModules": {
 		"wikibase": {
 			"class": "\\Wikibase\\Client\\Api\\ApiClientInfo",
-			"factory": "\\Wikibase\\Client\\Api\\ApiClientInfo::newFromGlobalState"
+			"services": [
+				"WikibaseClient.Settings"
+			]
 		}
 	},
 	"APIPropModules": {
 		"pageterms": {
 			"class": "\\Wikibase\\Client\\Api\\PageTerms",
-			"factory": "\\Wikibase\\Client\\Api\\PageTerms::newFromGlobalState"
+			"services": [
+				"WikibaseClient.AliasTermBuffer",
+				"WikibaseClient.EntityIdLookup",
+				"WikibaseClient.TermBuffer"
+			]
 		},
 		"description": {
 			"class": "\\Wikibase\\Client\\Api\\Description",
-			"factory": "\\Wikibase\\Client\\Api\\Description::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Api\\Description::factory",
+			"services": [
+				"WikibaseClient.DescriptionLookup",
+				"WikibaseClient.Settings"
+			]
 		},
 		"wbentityusage": {
 			"class": "\\Wikibase\\Client\\Api\\ApiPropsEntityUsage",
-			"factory": "\\Wikibase\\Client\\Api\\ApiPropsEntityUsage::newFromGlobalState"
+			"services": [
+				"WikibaseClient.RepoLinker"
+			]
 		}
 	},
 	"ExtensionFunctions": [
 		"\\Wikibase\\Client\\Hooks\\ExtensionLoadHandler::onExtensionLoad"
 	],
+	"ServiceWiringFiles": [
+		"client/WikibaseClient.ServiceWiring.php"
+	],
+	"QUnitTestModule": {
+		"remoteExtPath": "Wikibase/lib/tests/qunit",
+		"localBasePath": "lib/tests/qunit",
+		"scripts": [
+			"wikibase.Site.tests.js"
+		],
+		"dependencies": [
+			"wikibase.Site"
+		]
+	},
 	"HookHandlers": {
 		"BeforePageDisplay": {
 			"class": "\\Wikibase\\Client\\Hooks\\BeforePageDisplayHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\BeforePageDisplayHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\BeforePageDisplayHandler::factory",
+			"services": [
+				"WikibaseClient.NamespaceChecker",
+				"WikibaseClient.Settings"
+			]
 		},
 		"ChangesListLines": {
 			"class" : "\\Wikibase\\Client\\Hooks\\ChangesListLinesHandler",
-			"factory" : "\\Wikibase\\Client\\Hooks\\ChangesListLinesHandler::newFromGlobalState"
+			"factory" : "\\Wikibase\\Client\\Hooks\\ChangesListLinesHandler::factory",
+			"services": [
+				"UserNameUtils",
+				"WikibaseClient.EntityIdParser",
+				"WikibaseClient.RepoLinker",
+				"WikibaseClient.Settings"
+			]
 		},
 		"ChangesListSpecialPage": {
 			"class": "\\Wikibase\\Client\\Hooks\\ChangesListSpecialPageHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\ChangesListSpecialPageHookHandler::newFromGlobalStateAndServices",
-			"services": [ "DBLoadBalancer" ]
+			"factory": "\\Wikibase\\Client\\Hooks\\ChangesListSpecialPageHookHandler::factory",
+			"services": [
+				"DBLoadBalancer",
+				"WikibaseClient.Settings"
+			]
 		},
 		"ParserOutputUpdate": {
 			"class": "\\Wikibase\\Client\\Hooks\\ParserOutputUpdateHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\ParserOutputUpdateHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\ParserOutputUpdateHookHandler::factory",
+			"services": [
+				"WikibaseClient.EntityIdParser",
+				"WikibaseClient.NamespaceChecker"
+			]
 		},
 		"DataUpdate": {
 			"class": "\\Wikibase\\Client\\Hooks\\DataUpdateHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\DataUpdateHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\DataUpdateHookHandler::factory",
+			"services": [
+				"WikibaseClient.EntityIdParser",
+				"WikibaseClient.Logger",
+				"WikibaseClient.Store"
+			]
 		},
 		"DeletePageNoticeCreator": {
 			"class": "\\Wikibase\\Client\\Hooks\\DeletePageNoticeCreator",
-			"factory": "\\Wikibase\\Client\\Hooks\\DeletePageNoticeCreator::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\DeletePageNoticeCreator::factory",
+			"services": [
+				"WikibaseClient.RepoLinker",
+				"WikibaseClient.Settings",
+				"WikibaseClient.Store"
+			]
 		},
 		"LibHooks": {
 			"class": "\\Wikibase\\Lib\\LibHooks"
 		},
 		"DescriptionProvider": {
 			"class": "\\Wikibase\\Client\\Hooks\\DescriptionProviderHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\DescriptionProviderHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\DescriptionProviderHookHandler::factory",
+			"services": [
+				"WikibaseClient.DescriptionLookup",
+				"WikibaseClient.Settings"
+			]
+		},
+		"EchoSetup": {
+			"class": "\\Wikibase\\Client\\Hooks\\EchoSetupHookHandler",
+			"factory": "\\Wikibase\\Client\\Hooks\\EchoSetupHookHandler::factory",
+			"services": [
+				"WikibaseClient.Settings"
+			]
 		},
 		"EditAction": {
 			"class": "\\Wikibase\\Client\\Hooks\\EditActionHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\EditActionHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\EditActionHookHandler::factory",
+			"services": [
+				"WikibaseClient.EntityIdParser",
+				"WikibaseClient.LanguageFallbackChainFactory",
+				"WikibaseClient.RepoLinker",
+				"WikibaseClient.Store",
+				"WikibaseClient.TermBuffer",
+				"WikibaseClient.TermLookup"
+			]
 		},
 		"InfoAction": {
 			"class": "\\Wikibase\\Client\\Hooks\\InfoActionHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\InfoActionHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\InfoActionHookHandler::factory",
+			"services": [
+				"WikibaseClient.DescriptionLookup",
+				"WikibaseClient.EntityIdParser",
+				"WikibaseClient.LanguageFallbackChainFactory",
+				"WikibaseClient.NamespaceChecker",
+				"WikibaseClient.RepoLinker",
+				"WikibaseClient.Settings",
+				"WikibaseClient.Store",
+				"WikibaseClient.TermBuffer",
+				"WikibaseClient.TermLookup"
+			]
 		},
 		"Magic": {
 			"class": "\\Wikibase\\Client\\Hooks\\MagicWordHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\MagicWordHookHandler::newFromGlobalState"
+			"services": [
+				"WikibaseClient.Settings"
+			]
 		},
 		"MovePageNotice": {
 			"class": "\\Wikibase\\Client\\Hooks\\MovePageNotice",
-			"factory": "\\Wikibase\\Client\\Hooks\\MovePageNotice::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\MovePageNotice::factory",
+			"services": [
+				"WikibaseClient.RepoLinker",
+				"WikibaseClient.Settings",
+				"WikibaseClient.Store"
+			]
 		},
 		"ParserFunctionRegistrant": {
 			"class": "\\Wikibase\\Client\\Hooks\\ParserFunctionRegistrant",
-			"factory": "\\Wikibase\\Client\\Hooks\\ParserFunctionRegistrant::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\ParserFunctionRegistrant::factory",
+			"services": [
+				"WikibaseClient.Settings"
+			]
 		},
 		"Parser": {
 			"class": "\\Wikibase\\Client\\Hooks\\ParserHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\ParserHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\ParserHookHandler::factory",
+			"services": [
+				"WikibaseClient.Settings"
+			]
 		},
 		"Sidebar": {
 			"class": "\\Wikibase\\Client\\Hooks\\SidebarHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\SidebarHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\SidebarHookHandler::factory",
+			"services": [
+				"WikibaseClient.NamespaceChecker"
+			]
 		},
 		"SkinAfterPortlet": {
 			"class": "\\Wikibase\\Client\\Hooks\\SkinAfterPortletHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\SkinAfterPortletHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\SkinAfterPortletHandler::factory",
+			"services": [
+				"WikibaseClient.EntityIdParser",
+				"WikibaseClient.LangLinkSiteGroup",
+				"WikibaseClient.NamespaceChecker",
+				"WikibaseClient.RepoLinker",
+				"WikibaseClient.Settings"
+			]
 		},
 		"SqlUsageTrackerSchemaUpdater": {
 			"class": "\\Wikibase\\Client\\Usage\\Sql\\SqlUsageTrackerSchemaUpdater"
@@ -112,7 +219,13 @@
 		},
 		"UpdateRepo": {
 			"class": "\\Wikibase\\Client\\Hooks\\UpdateRepoHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\UpdateRepoHookHandler::newFromGlobalState"
+			"factory": "\\Wikibase\\Client\\Hooks\\UpdateRepoHookHandler::factory",
+			"services": [
+			  	"WikibaseClient.ItemAndPropertySource",
+			  	"WikibaseClient.NamespaceChecker",
+			  	"WikibaseClient.Settings",
+				"WikibaseClient.Store"
+			]
 		}
 	},
 	"Hooks": {
@@ -122,7 +235,9 @@
 			"UpdateRepo",
 			"DataUpdate"
 		],
-		"BeforeCreateEchoEvent": "\\Wikibase\\Client\\Hooks\\EchoSetupHookHandlers::onBeforeCreateEchoEvent",
+		"BeforeCreateEchoEvent": [
+			"EchoSetup"
+		],
 		"BeforePageDisplay": [
 			"BeforePageDisplay",
 			"Trivial"
@@ -151,7 +266,6 @@
 		"ParserLimitReportPrepare": "Parser",
 		"ResourceLoaderJqueryMsgModuleMagicWords": "Magic",
 		"ResourceLoaderRegisterModules": "LibHooks",
-		"ResourceLoaderTestModules": "LibHooks",
 		"ScribuntoExternalLibraries": "\\Wikibase\\Client\\ClientHooks::onScribuntoExternalLibraries",
 		"SearchDataForIndex": "Trivial",
 		"SearchIndexFields": "Trivial",
@@ -175,6 +289,7 @@
 	"AutoloadNamespaces": {
 		"Wikibase\\Client\\": "client/includes/",
 		"Wikibase\\Lib\\": "lib/includes/",
+		"Wikibase\\Lib\\Changes\\": "lib/packages/wikibase/changes/src/",
 		"Wikibase\\DataAccess\\": "data-access/src/"
 	},
 	"TestAutoloadNamespaces": {
@@ -182,16 +297,14 @@
 		"Wikibase\\Client\\Tests\\Unit\\": "client/tests/phpunit/unit/includes/",
 		"Wikibase\\Client\\Tests\\Mocks\\": "client/tests/phpunit/mocks/",
 		"Wikibase\\Lib\\Tests\\": "lib/tests/phpunit/",
+		"Wikibase\\Lib\\Tests\\Changes\\": "lib/packages/wikibase/changes/tests/",
 		"Wikibase\\DataAccess\\Tests\\": "data-access/tests/phpunit/"
-	},
-	"TestAutoloadClasses": {
-		"Wikibase\\Repo\\Content\\ItemContent": "repo/includes/Content/ItemContent.php",
-		"Wikibase\\Repo\\Content\\EntityContent": "repo/includes/Content/EntityContent.php"
 	},
 	"JobClasses": {
 		"wikibase-addUsagesForPage": "\\Wikibase\\Client\\Store\\AddUsagesForPageJob",
 		"ChangeNotification": "\\Wikibase\\Client\\ChangeNotificationJob",
-		"ChangeVisibilityNotification": "\\Wikibase\\Client\\ChangeVisibilityNotificationJob::newFromGlobalState",
+		"ChangeVisibilityNotification": "\\Wikibase\\Client\\ChangeModification\\ChangeVisibilityNotificationJob::newFromGlobalState",
+		"ChangeDeletionNotification": "\\Wikibase\\Client\\ChangeModification\\ChangeDeletionNotificationJob::newFromGlobalState",
 		"wikibase-InjectRCRecords": "\\Wikibase\\Client\\Changes\\InjectRCRecordsJob::newFromGlobalState"
 	},
 	"RecentChangesFlags": {
@@ -241,25 +354,29 @@
 		},
 		"jquery.wikibase.linkitem": {
 			"packageFiles": [
-				"jquery.wikibase/jquery.wikibase.linkitem.js",
-				"wikibase.client.PageConnector.js",
-				"wikibase.client.getMwApiForRepo.js",
-				"wikibase.sites.js",
-				"jquery.wikibase/jquery.wikibase.siteselector.js",
-				"jquery.wikibase/jquery.wikibase.wbtooltip.js",
-				"wikibase.buildErrorOutput.js",
-				"util.highlightSubstring.js",
-				"jquery.ui/jquery.ui.suggester.js",
-				"jquery.ui/jquery.ui.ooMenu.js",
-				"jquery.util.getscrollbarwidth.js",
-				"util.inherit.js",
-				"jquery.event.special.eachchange.js"
+				"client/resources/jquery.wikibase/jquery.wikibase.linkitem.js",
+				"client/resources/wikibase.client.PageConnector.js",
+				"client/resources/wikibase.client.getMwApiForRepo.js",
+				"client/resources/wikibase.sites.js",
+				"client/resources/jquery.wikibase/jquery.wikibase.siteselector.js",
+				"client/resources/jquery.wikibase/jquery.wikibase.wbtooltip.js",
+				"client/resources/wikibase.buildErrorOutput.js",
+				"client/resources/util.highlightSubstring.js",
+				"client/resources/jquery.ui/jquery.ui.suggester.js",
+				"client/resources/jquery.ui/jquery.ui.ooMenu.js",
+				"client/resources/jquery.util.getscrollbarwidth.js",
+				"client/resources/util.inherit.js",
+				"client/resources/jquery.event.special.eachchange.js",
+				"lib/resources/wikibase-api/src/namespace.js",
+				"lib/resources/wikibase-api/src/RepoApi.js",
+				"lib/resources/wikibase-api/src/getLocationAgnosticMwApi.js",
+				"lib/resources/wikibase-api/src/RepoApiError.js"
 			],
 			"styles": [
-				"jquery.wikibase/jquery.wikibase.linkitem.css",
-				"jquery.wikibase/jquery.wikibase.wbtooltip.css",
-				"jquery.ui/jquery.ui.suggester.css",
-				"jquery.ui/jquery.ui.ooMenu.css"
+				"client/resources/jquery.wikibase/jquery.wikibase.linkitem.css",
+				"client/resources/jquery.wikibase/jquery.wikibase.wbtooltip.css",
+				"client/resources/jquery.ui/jquery.ui.suggester.css",
+				"client/resources/jquery.ui/jquery.ui.ooMenu.css"
 			],
 			"dependencies": [
 				"jquery.spinner",
@@ -268,9 +385,10 @@
 				"mediawiki.api",
 				"mediawiki.util",
 				"mediawiki.jqueryMsg",
+				"mw.config.values.wbRepo",
 				"mw.config.values.wbSiteDetails",
 				"wikibase.Site",
-				"wikibase.api.RepoApi"
+				"mediawiki.ForeignApi"
 			],
 			"messages": [
 				"wikibase-error-unexpected",
@@ -290,8 +408,18 @@
 				"wikibase-linkitem-failed-modify",
 				"wikibase-replicationnote",
 				"wikibase-sitelinks-sitename-columnheading",
-				"wikibase-sitelinks-link-columnheading"
-			]
+				"wikibase-sitelinks-link-columnheading",
+				"wikibase-error-unexpected",
+				"wikibase-error-unknown",
+				"wikibase-error-save-generic",
+				"wikibase-error-remove-generic",
+				"wikibase-error-save-timeout",
+				"wikibase-error-remove-timeout",
+				"wikibase-error-ui-no-external-page",
+				"wikibase-error-ui-edit-conflict"
+			],
+			"localBasePath": "",
+			"remoteExtPath": "Wikibase/"
 		},
 		"wikibase.client.action.edit.collapsibleFooter": {
 			"scripts": "wikibase.client.action.edit.collapsibleFooter.js",
@@ -321,14 +449,31 @@
 		}
 	},
 	"SpecialPages": {
-		"UnconnectedPages": "Wikibase\\Client\\Specials\\SpecialUnconnectedPages",
+		"UnconnectedPages": {
+			"class": "Wikibase\\Client\\Specials\\SpecialUnconnectedPages",
+			"services": [
+				"DBLoadBalancer",
+				"NamespaceInfo",
+				"TitleFactory",
+				"WikibaseClient.NamespaceChecker"
+			]
+		},
 		"PagesWithBadges": {
 			"class": "Wikibase\\Client\\Specials\\SpecialPagesWithBadges",
-			"factory": "Wikibase\\Client\\Specials\\SpecialPagesWithBadges::newFromGlobalState"
+			"factory": "Wikibase\\Client\\Specials\\SpecialPagesWithBadges::factory",
+			"services": [
+				"WikibaseClient.LanguageFallbackChainFactory",
+				"WikibaseClient.Settings",
+				"WikibaseClient.TermBuffer",
+				"WikibaseClient.TermLookup"
+			]
 		},
 		"EntityUsage": {
 			"class": "Wikibase\\Client\\Specials\\SpecialEntityUsage",
-			"factory": "Wikibase\\Client\\Specials\\SpecialEntityUsage::newFromGlobalState"
+			"services": [
+				"LanguageConverterFactory",
+				"WikibaseClient.EntityIdParser"
+			]
 		}
 	},
 	"MessagesDirs": {

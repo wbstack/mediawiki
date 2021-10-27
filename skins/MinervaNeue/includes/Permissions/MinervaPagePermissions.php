@@ -63,10 +63,10 @@ final class MinervaPagePermissions implements IMinervaPagePermissions {
 	 */
 	private $languagesHelper;
 
-  /**
-   * @var PermissionManager MediaWiki Core PermissionManager
-   */
-  private $permissionManager;
+	/**
+	 * @var PermissionManager MediaWiki Core PermissionManager
+	 */
+	private $permissionManager;
 
 	/**
 	 * Initialize internal Minerva Permissions system
@@ -187,7 +187,7 @@ final class MinervaPagePermissions implements IMinervaPagePermissions {
 
 		return $this->isAllowed( self::TALK ) &&
 			   ( $this->title->isTalkPage() || $this->title->canHaveTalkPage() ) &&
-			   $this->user->isLoggedIn();
+			   $this->user->isRegistered();
 	}
 
 	/**

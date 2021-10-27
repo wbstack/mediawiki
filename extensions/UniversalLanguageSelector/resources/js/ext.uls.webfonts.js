@@ -20,10 +20,10 @@
 ( function () {
 	'use strict';
 
-	var ulsPreferences;
+	var getULSPreferences = require( 'ext.uls.preferences' ),
+		ulsPreferences = getULSPreferences();
 
 	mw.webfonts = mw.webfonts || {};
-	ulsPreferences = mw.uls.preferences();
 	mw.webfonts.preferences = {
 		registry: {
 			fonts: {},
@@ -52,7 +52,7 @@
 
 		save: function ( callback ) {
 			// get updated copy of preferences
-			ulsPreferences = mw.uls.preferences();
+			ulsPreferences = getULSPreferences();
 			ulsPreferences.set( 'webfonts', this.registry );
 			ulsPreferences.save( callback );
 		},
@@ -135,7 +135,10 @@
 		mw.webfonts.preferences.load();
 
 		if ( mw.webfonts.preferences.isEnabled() ) {
-			mw.loader.using( 'ext.uls.webfonts.fonts', mw.webfonts.setup );
+			// Queue to next idle period to optimize loading.
+			mw.requestIdleCallback( function () {
+				mw.loader.using( 'ext.uls.webfonts.fonts' ).then( mw.webfonts.setup );
+			} );
 		}
 	} );
 

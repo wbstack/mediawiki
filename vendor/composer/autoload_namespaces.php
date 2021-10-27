@@ -18,5 +18,6 @@ return array(
     'ComposerVendorHtaccessCreator' => array($baseDir . '/includes/composer'),
     'ComposerPhpunitXmlCoverageEdit' => array($baseDir . '/includes/composer'),
     'ComposerHookHandler' => array($baseDir . '/includes/composer'),
+    'CSSMin' => array($vendorDir . '/wikimedia/minify/src'),
     '' => array($vendorDir . '/cssjanus/cssjanus/src', $vendorDir . '/pear/pear-core-minimal/src'),
 );

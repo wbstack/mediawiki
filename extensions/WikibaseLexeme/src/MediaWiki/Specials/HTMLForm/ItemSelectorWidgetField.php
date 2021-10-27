@@ -16,7 +16,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class ItemSelectorWidgetField extends HTMLItemReferenceField {
 
-	const NATIVE_AGENT_AUTOCOMPLETE = false;
+	private const NATIVE_AGENT_AUTOCOMPLETE = false;
 
 	/**
 	 * @var string|null
@@ -42,9 +42,9 @@ class ItemSelectorWidgetField extends HTMLItemReferenceField {
 
 		parent::__construct( $params );
 
-		$this->idParser = $idParser ?: WikibaseRepo::getDefaultInstance()->getEntityIdParser();
+		$this->idParser = $idParser ?: WikibaseRepo::getEntityIdParser();
 		$this->labelLookup = $lookup ?:
-			WikibaseRepo::getDefaultInstance()->getLanguageFallbackLabelDescriptionLookupFactory()
+			WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory()
 				->newLabelDescriptionLookup( Language::factory( 'en' ) );
 
 		if ( isset( $params['labelFieldName'] ) ) {

@@ -30,6 +30,23 @@ ve.ui.CodeMirrorTool.static.group = 'codeMirror';
 ve.ui.CodeMirrorTool.static.commandName = 'codeMirror';
 ve.ui.CodeMirrorTool.static.deactivateOnSelect = false;
 
+// TODO: consolidate with code in ext.CodeMirror.js, see T272035
+ve.ui.CodeMirrorTool.prototype.logUsage = function ( data ) {
+	var event, editCountBucket;
+
+	/* eslint-disable camelcase */
+	event = $.extend( {
+		session_token: mw.user.sessionId(),
+		user_id: mw.user.getId()
+	}, data );
+	editCountBucket = mw.config.get( 'wgUserEditCountBucket' );
+	if ( editCountBucket !== null ) {
+		event.user_edit_count_bucket = editCountBucket;
+	}
+	/* eslint-enable camelcase */
+	mw.track( 'event.CodeMirrorUsage', event );
+};
+
 /**
  * @inheritdoc
  */
@@ -44,6 +61,14 @@ ve.ui.CodeMirrorTool.prototype.onSelect = function () {
 
 	new mw.Api().saveOption( 'usecodemirror', useCodeMirror ? 1 : 0 );
 	mw.user.options.set( 'usecodemirror', useCodeMirror ? 1 : 0 );
+
+	this.logUsage( {
+		editor: 'wikitext-2017',
+		enabled: useCodeMirror,
+		toggled: true,
+		// eslint-disable-next-line camelcase
+		edit_start_ts_ms: ( this.toolbar.target.startTimeStamp * 1000 ) || 0
+	} );
 };
 
 /**
@@ -60,6 +85,16 @@ ve.ui.CodeMirrorTool.prototype.onSurfaceChange = function ( oldSurface, newSurfa
 		useCodeMirror = mw.user.options.get( 'usecodemirror' ) > 0;
 		command.execute( surface, [ useCodeMirror ] );
 		this.setActive( useCodeMirror );
+
+		if ( this.toolbar.target.startTimeStamp ) {
+			this.logUsage( {
+				editor: 'wikitext-2017',
+				enabled: useCodeMirror,
+				toggled: false,
+				// eslint-disable-next-line camelcase
+				edit_start_ts_ms: ( this.toolbar.target.startTimeStamp * 1000 ) || 0
+			} );
+		}
 	}
 };
 

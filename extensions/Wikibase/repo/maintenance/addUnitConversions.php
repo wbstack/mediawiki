@@ -34,7 +34,7 @@ class AddUnitConversions extends Maintenance {
 	/**
 	 * Max chunk of values processed by one query
 	 */
-	const MAX_QUERY_CHUNK = 100;
+	private const MAX_QUERY_CHUNK = 100;
 
 	/**
 	 * @var RdfVocabulary
@@ -85,7 +85,7 @@ class AddUnitConversions extends Maintenance {
 	protected $builder;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 */
 	private $dryRun;
 
@@ -134,15 +134,15 @@ class AddUnitConversions extends Maintenance {
 			$this->out = fopen( $this->getOption( 'output' ), 'w' );
 		}
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		$settings = WikibaseRepo::getSettings();
 		$endPoint = $this->getOption( 'sparql',
-				$wikibaseRepo->getSettings()->getSetting( 'sparqlEndpoint' ) );
+				$settings->getSetting( 'sparqlEndpoint' ) );
 		if ( !$endPoint ) {
 			$this->fatalError( 'SPARQL endpoint should be supplied in config or parameters' );
 		}
 
 		$baseUri = $this->getOption( 'base-uri',
-				$wikibaseRepo->getSettings()->getSetting( 'conceptBaseUri' ) );
+				$settings->getSetting( 'conceptBaseUri' ) );
 
 		$this->client = new SparqlClient( $endPoint, MediaWikiServices::getInstance()->getHttpRequestFactory() );
 		$this->client->appendUserAgent( __CLASS__ );
@@ -164,9 +164,10 @@ class AddUnitConversions extends Maintenance {
 	 * @param string $format File extension or MIME type of the output format.
 	 */
 	public function initializeWriter( $baseUri, $format ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$this->rdfVocabulary = $this->createRdfVocabulary( $baseUri,
-				$wikibaseRepo->getDataTypeDefinitions()->getRdfTypeUris() );
+		$this->rdfVocabulary = $this->createRdfVocabulary(
+			$baseUri,
+			WikibaseRepo::getDataTypeDefinitions()->getRdfTypeUris()
+		);
 		$this->rdfWriter = $this->createRdfWriter( $format );
 
 		$ns = $this->rdfVocabulary->getNamespaces();
@@ -351,12 +352,10 @@ QUERY;
 	private function createRdfVocabulary( $baseUri, $typeUris ) {
 		$entityDataTitle = Title::makeTitle( NS_SPECIAL, 'EntityData' );
 
-		$irrelevantValue = 1000;
 		return new RdfVocabulary(
 			[ '' => $baseUri ],
 			[ '' => $entityDataTitle->getCanonicalURL() . '/' ],
 			new EntitySourceDefinitions( [], new EntityTypeDefinitions( [] ) ),
-			'',
 			[ '' => 'wd' ],
 			[ '' => '' ],
 			[],

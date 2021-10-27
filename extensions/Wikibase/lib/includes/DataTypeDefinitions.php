@@ -35,14 +35,14 @@ class DataTypeDefinitions {
 	 * prefixes in the array keys indicating whether the callback applies to a value type or a
 	 * property data type.
 	 */
-	const PREFIXED_MODE = 'prefixed';
+	public const PREFIXED_MODE = 'prefixed';
 
 	/**
 	 * Constant for indicating that callback maps should be returned for property data types only,
 	 * with no prefixes in the array keys, but with fallbacks for value types merged into the
 	 * definitions for the property data types.
 	 */
-	const RESOLVED_MODE = 'resolved';
+	private const RESOLVED_MODE = 'resolved';
 
 	/**
 	 * @var array[]
@@ -104,7 +104,7 @@ class DataTypeDefinitions {
 	 */
 	private function filterDisabledDataTypes( array $dataTypeDefinitions, array $disabledTypes ) {
 		foreach ( $dataTypeDefinitions as $id => $def ) {
-			if ( 0 === strpos( $id, 'PT' ) ) {
+			if ( strpos( $id, 'PT' ) === 0 ) {
 				if ( in_array( substr( $id, 3 ), $disabledTypes ) ) {
 					unset( $dataTypeDefinitions[$id] );
 				}

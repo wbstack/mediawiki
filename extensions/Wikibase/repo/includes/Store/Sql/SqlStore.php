@@ -5,6 +5,7 @@ namespace Wikibase\Repo\Store\Sql;
 use HashBagOStuff;
 use Hooks;
 use MediaWiki\MediaWikiServices;
+use ObjectCache;
 use Wikibase\DataAccess\EntitySource;
 use Wikibase\DataAccess\WikibaseServices;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -14,6 +15,7 @@ use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\EntityRedirectLookup;
 use Wikibase\DataModel\Services\Lookup\RedirectResolvingEntityLookup;
 use Wikibase\Lib\Changes\EntityChangeFactory;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\CacheAwarePropertyInfoStore;
 use Wikibase\Lib\Store\CacheRetrievingEntityRevisionLookup;
 use Wikibase\Lib\Store\CachingEntityRevisionLookup;
@@ -25,9 +27,6 @@ use Wikibase\Lib\Store\EntityRevisionCache;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\EntityStoreWatcher;
-use Wikibase\Lib\Store\EntityTermStoreWriter;
-use Wikibase\Lib\Store\LabelConflictFinder;
-use Wikibase\Lib\Store\LegacyEntityTermStoreReader;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\PropertyInfoLookup;
 use Wikibase\Lib\Store\PropertyInfoStore;
@@ -38,16 +37,12 @@ use Wikibase\Lib\Store\Sql\PrefetchingWikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\PropertyInfoTable;
 use Wikibase\Lib\Store\Sql\SiteLinkTable;
 use Wikibase\Lib\Store\Sql\SqlChangeStore;
-use Wikibase\Lib\Store\Sql\TermSqlIndex;
-use Wikibase\Lib\Store\TermIndex;
 use Wikibase\Lib\Store\TypeDispatchingEntityRevisionLookup;
 use Wikibase\Lib\Store\TypeDispatchingEntityStore;
-use Wikibase\Lib\StringNormalizer;
 use Wikibase\Repo\Store\DispatchingEntityStoreWatcher;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\Store\IdGenerator;
 use Wikibase\Repo\Store\ItemsWithoutSitelinksFinder;
-use Wikibase\Repo\Store\SiteLinkConflictLookup;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -116,11 +111,6 @@ class SqlStore implements Store {
 	private $propertyInfoTable = null;
 
 	/**
-	 * @var TermIndex|LabelConflictFinder|null
-	 */
-	private $termIndex = null;
-
-	/**
 	 * @var PrefetchingWikiPageEntityMetaDataAccessor|null
 	 */
 	private $entityPrefetcher = null;
@@ -170,19 +160,8 @@ class SqlStore implements Store {
 	 */
 	private $idGenerator;
 
-	/**
-	 * @var bool
-	 */
-	private $useSearchFields;
-
-	/**
-	 * @var bool
-	 */
-	private $forceWriteSearchFields;
-
+	/** @var EntitySource */
 	private $entitySource;
-
-	private $dataAccessSettings;
 
 	/**
 	 * @param EntityChangeFactory $entityChangeFactory
@@ -194,6 +173,7 @@ class SqlStore implements Store {
 	 * @param IdGenerator $idGenerator
 	 * @param WikibaseServices $wikibaseServices Service container providing data access services
 	 * @param EntitySource $entitySource
+	 * @param SettingsArray $settings
 	 */
 	public function __construct(
 		EntityChangeFactory $entityChangeFactory,
@@ -204,7 +184,8 @@ class SqlStore implements Store {
 		EntityNamespaceLookup $entityNamespaceLookup,
 		IdGenerator $idGenerator,
 		WikibaseServices $wikibaseServices,
-		EntitySource $entitySource
+		EntitySource $entitySource,
+		SettingsArray $settings
 	) {
 		$this->entityChangeFactory = $entityChangeFactory;
 		$this->entityIdParser = $entityIdParser;
@@ -216,90 +197,10 @@ class SqlStore implements Store {
 		$this->wikibaseServices = $wikibaseServices;
 		$this->entitySource = $entitySource;
 
-		//TODO: inject settings
-		$repo = WikibaseRepo::getDefaultInstance();
-		$settings = $repo->getSettings();
 		$this->cacheKeyPrefix = $settings->getSetting( 'sharedCacheKeyPrefix' );
 		$this->cacheKeyGroup = $settings->getSetting( 'sharedCacheKeyGroup' );
 		$this->cacheType = $settings->getSetting( 'sharedCacheType' );
 		$this->cacheDuration = $settings->getSetting( 'sharedCacheDuration' );
-		$this->useSearchFields = $settings->getSetting( 'useTermsTableSearchFields' );
-		$this->forceWriteSearchFields = $settings->getSetting( 'forceWriteTermsTableSearchFields' );
-		$this->dataAccessSettings = $repo->getDataAccessSettings();
-	}
-
-	/**
-	 * @see Store::getTermIndex
-	 *
-	 * If you need a TermIndex implementation for a EntityHandler, when the entity handler
-	 * doesn't do anything with the TermIndex please use a NulLTermIndex.
-	 *
-	 * @depreacted Use getLegacyEntityTermStoreReader, getLegacyEntityTermStoreWriter
-	 * or getLabelConflictFinder directly.
-	 *
-	 * @return TermSqlIndex
-	 */
-	public function getTermIndex() {
-		if ( !$this->termIndex ) {
-			$this->termIndex = $this->newTermIndex();
-		}
-
-		return $this->termIndex;
-	}
-
-	/**
-	 * @see Store::getLegacyEntityTermStoreReader
-	 *
-	 * @deprecated This will stop working once Wikibase migrates away from wb_terms
-	 * An exact alternative MAY NOT be available.
-	 *
-	 * @return LegacyEntityTermStoreReader
-	 */
-	public function getLegacyEntityTermStoreReader() {
-		return $this->getTermIndex();
-	}
-
-	/**
-	 * @see Store::getLegacyEntityTermStoreWriter
-	 *
-	 * @deprecated This will stop working once Wikibase migrates away from wb_terms
-	 * An alternative will be available
-	 *
-	 * @return EntityTermStoreWriter
-	 */
-	public function getLegacyEntityTermStoreWriter() {
-		return $this->getTermIndex();
-	}
-
-	/**
-	 * @see Store::getLabelConflictFinder
-	 *
-	 * @deprecated This will stop working once Wikibase migrates away from wb_terms
-	 * An alternative will be available
-	 *
-	 * @return LabelConflictFinder
-	 */
-	public function getLabelConflictFinder() {
-		return $this->getTermIndex();
-	}
-
-	/**
-	 * @return TermSqlIndex
-	 */
-	private function newTermIndex() {
-		//TODO: Get $stringNormalizer from WikibaseRepo?
-		//      Can't really pass this via the constructor...
-		// TODO: why this creating its own instance? It probably should have the "multi repository/source" one?
-		$stringNormalizer = new StringNormalizer();
-		$termSqlIndex = new TermSqlIndex(
-			$stringNormalizer,
-			$this->entityIdParser,
-			$this->entitySource
-		);
-		$termSqlIndex->setUseSearchFields( $this->useSearchFields );
-		$termSqlIndex->setForceWriteSearchFields( $this->forceWriteSearchFields );
-
-		return $termSqlIndex;
 	}
 
 	/**
@@ -307,15 +208,6 @@ class SqlStore implements Store {
 	 */
 	public function clear() {
 		$this->newSiteLinkStore()->clear();
-		$this->getTermIndex()->clear();
-	}
-
-	/**
-	 * @see Store::rebuild
-	 *
-	 * Does nothing.
-	 */
-	public function rebuild() {
 	}
 
 	/**
@@ -414,7 +306,7 @@ class SqlStore implements Store {
 	 * @return EntityStore
 	 */
 	private function newEntityStore() {
-		$contentFactory = WikibaseRepo::getDefaultInstance()->getEntityContentFactory();
+		$contentFactory = WikibaseRepo::getEntityContentFactory();
 
 		$store = new WikiPageEntityStore(
 			$contentFactory,
@@ -492,7 +384,7 @@ class SqlStore implements Store {
 		// Lower caching layer using persistent cache (e.g. memcached).
 		$persistentCachingLookup = new CachingEntityRevisionLookup(
 			new EntityRevisionCache(
-				wfGetCache( $this->cacheType ),
+				ObjectCache::getInstance( CACHE_NONE ),
 				$this->cacheDuration,
 				$this->getEntityRevisionLookupCacheKey()
 			),
@@ -521,7 +413,7 @@ class SqlStore implements Store {
 		if ( !$this->cacheRetrievingEntityRevisionLookup ) {
 			$cacheRetrievingEntityRevisionLookup = new CacheRetrievingEntityRevisionLookup(
 				new EntityRevisionCache(
-					wfGetCache( $this->cacheType ),
+					ObjectCache::getInstance( $this->cacheType ),
 					$this->cacheDuration,
 					$this->getEntityRevisionLookupCacheKey()
 				),
@@ -616,13 +508,6 @@ class SqlStore implements Store {
 			);
 		}
 		return $this->propertyInfoTable;
-	}
-
-	/**
-	 * @return SiteLinkConflictLookup
-	 */
-	public function getSiteLinkConflictLookup() {
-		return new SqlSiteLinkConflictLookup( $this->entityIdComposer );
 	}
 
 	/**

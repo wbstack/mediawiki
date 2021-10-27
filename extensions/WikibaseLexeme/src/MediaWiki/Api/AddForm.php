@@ -8,6 +8,8 @@ use LogicException;
 use RuntimeException;
 use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\SerializerFactory;
 use Wikibase\Lexeme\Domain\Model\Exceptions\ConflictException;
 use Wikibase\Lexeme\Domain\Model\FormId;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
@@ -32,7 +34,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class AddForm extends ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var AddFormRequestParser
@@ -64,25 +66,25 @@ class AddForm extends ApiBase {
 	 */
 	private $entityRevisionLookup;
 
-	/**
-	 * @return self
-	 */
-	public static function newFromGlobalState( \ApiMain $mainModule, $moduleName ) {
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		SerializerFactory $baseDataModelSerializerFactory,
+		EntityIdParser $entityIdParser
+	): self {
 		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
 
-		$serializerFactory = $wikibaseRepo->getBaseDataModelSerializerFactory();
-
 		$formSerializer = new FormSerializer(
-			$serializerFactory->newTermListSerializer(),
-			$serializerFactory->newStatementListSerializer()
+			$baseDataModelSerializerFactory->newTermListSerializer(),
+			$baseDataModelSerializerFactory->newStatementListSerializer()
 		);
 
 		return new self(
 			$mainModule,
 			$moduleName,
 			new AddFormRequestParser(
-				$wikibaseRepo->getEntityIdParser(),
+				$entityIdParser,
 				WikibaseLexemeServices::getEditFormChangeOpDeserializer()
 			),
 			$formSerializer,
@@ -172,7 +174,7 @@ class AddForm extends ApiBase {
 		$status = $this->saveNewLexemeRevision( $lexeme, $baseRevId, $summary, $flags );
 
 		if ( !$status->isGood() ) {
-			$this->dieStatus( $status ); //Seems like it is good enough
+			$this->dieStatus( $status ); // Seems like it is good enough
 		}
 
 		$this->fillApiResultFromStatus( $status );
@@ -296,7 +298,7 @@ class AddForm extends ApiBase {
 				LookupConstants::LATEST_FROM_MASTER
 			);
 		} catch ( StorageException $e ) {
-			//TODO Test it
+			// TODO Test it
 			if ( $e->getStatus() ) {
 				$this->dieStatus( $e->getStatus() );
 			} else {
@@ -346,7 +348,7 @@ class AddForm extends ApiBase {
 		);
 
 		$tokenThatDoesNotNeedChecking = false;
-		//FIXME: Handle failure
+		// FIXME: Handle failure
 		try {
 			$status = $editEntity->attemptSave(
 				$lexeme,

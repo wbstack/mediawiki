@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Api;
 
 use Wikibase\Lib\Summary;
@@ -24,8 +26,8 @@ abstract class ModifyTerm extends ModifyEntity {
 	 *
 	 * @return Summary
 	 */
-	protected function createSummary( array $params ) {
-		$set = isset( $params['value'] ) && 0 < strlen( $params['value'] );
+	protected function createSummary( array $params ): Summary {
+		$set = isset( $params['value'] ) && strlen( $params['value'] ) > 0;
 
 		$summary = parent::createSummary( $params );
 		$summary->setAction( $set ? 'set' : 'remove' );
@@ -37,12 +39,13 @@ abstract class ModifyTerm extends ModifyEntity {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getAllowedParams() {
+	protected function getAllowedParams(): array {
 		return array_merge(
 			parent::getAllowedParams(),
 			[
 				'language' => [
-					self::PARAM_TYPE => WikibaseRepo::getDefaultInstance()->getTermsLanguages()->getLanguages(),
+					// TODO inject TermsLanguages as a service
+					self::PARAM_TYPE => WikibaseRepo::getTermsLanguages()->getLanguages(),
 					self::PARAM_REQUIRED => true,
 				],
 				'value' => [

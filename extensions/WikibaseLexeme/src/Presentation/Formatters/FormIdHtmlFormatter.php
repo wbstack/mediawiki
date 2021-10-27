@@ -3,10 +3,13 @@
 namespace Wikibase\Lexeme\Presentation\Formatters;
 
 use Html;
+use MediaWiki\Languages\LanguageFactory;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
 use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
+use Wikibase\DataModel\Term\Term;
+use Wikibase\DataModel\Term\TermList;
 use Wikibase\Lexeme\Domain\Model\Form;
 use Wikibase\Lexeme\Domain\Model\FormId;
 use Wikibase\Lib\Formatters\NonExistingEntityIdHtmlFormatter;
@@ -19,9 +22,9 @@ use Wikibase\View\LocalizedTextProvider;
  */
 class FormIdHtmlFormatter implements EntityIdFormatter {
 
-	const REPRESENTATION_SEPARATOR_I18N =
+	private const REPRESENTATION_SEPARATOR_I18N =
 		'wikibaselexeme-formidformatter-separator-multiple-representation';
-	const GRAMMATICAL_FEATURES_SEPARATOR_I18N =
+	private const GRAMMATICAL_FEATURES_SEPARATOR_I18N =
 		'wikibaselexeme-formidformatter-separator-grammatical-features';
 
 	/**
@@ -54,12 +57,18 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 	 */
 	private $labelDescriptionLookup;
 
+	/**
+	 * @var LanguageFactory
+	 */
+	private $languageFactory;
+
 	public function __construct(
 		EntityRevisionLookup $revisionLookup,
 		LabelDescriptionLookup $labelDescriptionLookup,
 		EntityTitleLookup $titleLookup,
 		LocalizedTextProvider $localizedTextProvider,
-		RedirectedLexemeSubEntityIdHtmlFormatter $redirectedLexemeSubEntityIdHtmlFormatter
+		RedirectedLexemeSubEntityIdHtmlFormatter $redirectedLexemeSubEntityIdHtmlFormatter,
+		LanguageFactory $languageFactory
 	) {
 		$this->revisionLookup = $revisionLookup;
 		$this->labelDescriptionLookup = $labelDescriptionLookup;
@@ -69,6 +78,7 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 		$this->nonExistingIdFormatter = new NonExistingEntityIdHtmlFormatter(
 			'wikibaselexeme-deletedentity-'
 		);
+		$this->languageFactory = $languageFactory;
 	}
 
 	/**
@@ -91,23 +101,21 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 		/** @var Form $form */
 		$form = $formRevision->getEntity();
 		'@phan-var Form $form';
-		$representations = $form->getRepresentations();
-		$representationSeparator = $this->localizedTextProvider->get(
-			self::REPRESENTATION_SEPARATOR_I18N
+
+		$representationMarkup = implode(
+			$this->localizedTextProvider->getEscaped(
+				self::REPRESENTATION_SEPARATOR_I18N
+			),
+			$this->buildRepresentationMarkupElements( $form->getRepresentations() )
 		);
 
-		$representationString = implode(
-			$representationSeparator,
-			$representations->toTextArray()
-		);
-
-		return Html::element(
+		return Html::rawElement(
 			'a',
 			[
 				'href'  => $title->isLocal() ? $title->getLinkURL() : $title->getFullURL(),
 				'title' => $this->getLinkTitle( $form )
 			],
-			$representationString
+			$representationMarkup
 		);
 	}
 
@@ -150,6 +158,20 @@ class FormIdHtmlFormatter implements EntityIdFormatter {
 		}
 
 		return $labels;
+	}
+
+	private function buildRepresentationMarkupElements( TermList $representations ): array {
+		return array_map( function ( Term $representation ) {
+			$language = $this->languageFactory->getLanguage( $representation->getLanguageCode() );
+			return Html::element(
+				'span',
+				[
+					'lang' => $language->getHtmlCode(),
+					'dir' => $language->getDir(),
+				],
+				$representation->getText()
+			);
+		}, iterator_to_array( $representations->getIterator() ) );
 	}
 
 }

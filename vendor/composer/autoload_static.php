@@ -4,20 +4,17 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
+class ComposerStaticInit1680b6337dea9899c9ac7e17399c57af
 {
     public static $files = array (
         '7cb394c3af2b1ae832979b0368e0da62' => __DIR__ . '/..' . '/data-values/data-values/DataValues.php',
         'd1715cacc3c23b16a030645514266a76' => __DIR__ . '/..' . '/data-values/interfaces/Interfaces.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '90559502573a0d473dc66fde5c0ff7e2' => __DIR__ . '/..' . '/data-values/common/Common.php',
-        'e69f7f6ee287b969198c3c9d6777bd38' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/bootstrap.php',
-        '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
-        'f598d06aa772fa33d905e87be6398fb1' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/bootstrap.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
         '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
@@ -38,13 +35,13 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         array (
             'Wikimedia\\Zest\\' => 15,
             'Wikimedia\\XMPReader\\' => 20,
-            'Wikimedia\\WikiPEG\\' => 18,
             'Wikimedia\\Timestamp\\' => 20,
             'Wikimedia\\Services\\' => 19,
+            'Wikimedia\\RequestTimeout\\' => 25,
             'Wikimedia\\Purtle\\Tests\\' => 23,
             'Wikimedia\\Purtle\\' => 17,
-            'Wikimedia\\PasswordBlacklist\\' => 28,
             'Wikimedia\\Parsoid\\' => 18,
+            'Wikimedia\\Minify\\' => 17,
             'Wikimedia\\Composer\\Merge\\V2\\' => 28,
             'Wikimedia\\CommonPasswords\\' => 26,
             'Wikimedia\\AtEase\\' => 17,
@@ -55,6 +52,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
             'Wikibase\\InternalSerialization\\' => 31,
             'Wikibase\\DataModel\\Services\\' => 28,
             'Wikibase\\DataModel\\' => 19,
+            'WikiPEG\\Tests\\' => 14,
             'WikiPEG\\' => 8,
             'Webmozart\\Assert\\' => 17,
             'WMDE\\VueJsTemplating\\' => 21,
@@ -69,12 +67,10 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         array (
             'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Php73\\' => 23,
-            'Symfony\\Polyfill\\Php72\\' => 23,
-            'Symfony\\Polyfill\\Intl\\Normalizer\\' => 33,
-            'Symfony\\Polyfill\\Intl\\Idn\\' => 26,
             'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Component\\Translation\\' => 30,
             'Symfony\\Component\\OptionsResolver\\' => 34,
+            'Shellbox\\' => 9,
             'Serializers\\' => 12,
         ),
         'R' => 
@@ -125,7 +121,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
             'Http\\Discovery\\' => 15,
             'Http\\Client\\Common\\' => 19,
             'Http\\Client\\' => 12,
-            'Http\\Adapter\\Guzzle6\\' => 21,
+            'HtmlFormatter\\' => 14,
         ),
         'G' => 
         array (
@@ -174,10 +170,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         array (
             0 => __DIR__ . '/..' . '/wikimedia/xmp-reader/src',
         ),
-        'Wikimedia\\WikiPEG\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/wikimedia/wikipeg/src',
-        ),
         'Wikimedia\\Timestamp\\' => 
         array (
             0 => __DIR__ . '/..' . '/wikimedia/timestamp/src',
@@ -185,6 +177,10 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Services\\' => 
         array (
             0 => __DIR__ . '/..' . '/wikimedia/services/src',
+        ),
+        'Wikimedia\\RequestTimeout\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/request-timeout/src',
         ),
         'Wikimedia\\Purtle\\Tests\\' => 
         array (
@@ -194,13 +190,13 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         array (
             0 => __DIR__ . '/..' . '/wikimedia/purtle/src',
         ),
-        'Wikimedia\\PasswordBlacklist\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/wikimedia/common-passwords/src/PasswordBlacklist',
-        ),
         'Wikimedia\\Parsoid\\' => 
         array (
             0 => __DIR__ . '/..' . '/wikimedia/parsoid/src',
+        ),
+        'Wikimedia\\Minify\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/minify/src',
         ),
         'Wikimedia\\Composer\\Merge\\V2\\' => 
         array (
@@ -224,7 +220,8 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
             1 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
             2 => __DIR__ . '/..' . '/wikimedia/object-factory/src',
             3 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
-            4 => __DIR__ . '/..' . '/wikimedia/wrappedstring/src',
+            4 => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src',
+            5 => __DIR__ . '/..' . '/wikimedia/wrappedstring/src',
         ),
         'Wikibase\\Lexeme\\Tests\\' => 
         array (
@@ -246,6 +243,10 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         array (
             0 => __DIR__ . '/..' . '/wikibase/data-model/src',
             1 => __DIR__ . '/..' . '/wikibase/data-model-serialization/src',
+        ),
+        'WikiPEG\\Tests\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/wikipeg/tests/php',
         ),
         'WikiPEG\\' => 
         array (
@@ -281,18 +282,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php73',
         ),
-        'Symfony\\Polyfill\\Php72\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php72',
-        ),
-        'Symfony\\Polyfill\\Intl\\Normalizer\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer',
-        ),
-        'Symfony\\Polyfill\\Intl\\Idn\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-intl-idn',
-        ),
         'Symfony\\Contracts\\Translation\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/translation-contracts',
@@ -304,6 +293,10 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Symfony\\Component\\OptionsResolver\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/options-resolver',
+        ),
+        'Shellbox\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/shellbox/src',
         ),
         'Serializers\\' => 
         array (
@@ -411,9 +404,9 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         array (
             0 => __DIR__ . '/..' . '/php-http/httplug/src',
         ),
-        'Http\\Adapter\\Guzzle6\\' => 
+        'HtmlFormatter\\' => 
         array (
-            0 => __DIR__ . '/..' . '/php-http/guzzle6-adapter/src',
+            0 => __DIR__ . '/..' . '/wikimedia/html-formatter/src',
         ),
         'GuzzleHttp\\Stream\\' => 
         array (
@@ -576,6 +569,10 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
             array (
                 0 => __DIR__ . '/../..' . '/includes/composer',
             ),
+            'CSSMin' => 
+            array (
+                0 => __DIR__ . '/..' . '/wikimedia/minify/src',
+            ),
         ),
     );
 
@@ -594,7 +591,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'CLDRPluralRuleParser\\Evaluator' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Evaluator.php',
         'CLDRPluralRuleParser\\Range' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Range.php',
         'CSSJanus' => __DIR__ . '/..' . '/cssjanus/cssjanus/src/CSSJanus.php',
-        'CSSJanusTokenizer' => __DIR__ . '/..' . '/cssjanus/cssjanus/src/CSSJanus.php',
         'Carbon\\Carbon' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Carbon.php',
         'Carbon\\CarbonConverterInterface' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonConverterInterface.php',
         'Carbon\\CarbonImmutable' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonImmutable.php',
@@ -682,6 +678,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'ComposerHookHandler' => __DIR__ . '/../..' . '/includes/composer/ComposerHookHandler.php',
         'ComposerPhpunitXmlCoverageEdit' => __DIR__ . '/../..' . '/includes/composer/ComposerPhpunitXmlCoverageEdit.php',
         'ComposerVendorHtaccessCreator' => __DIR__ . '/../..' . '/includes/composer/ComposerVendorHtaccessCreator.php',
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Composer\\Installers\\AglInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AglInstaller.php',
         'Composer\\Installers\\AimeosInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AimeosInstaller.php',
         'Composer\\Installers\\AnnotateCmsInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/AnnotateCmsInstaller.php',
@@ -785,11 +782,15 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Composer\\Installers\\ZendInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ZendInstaller.php',
         'Composer\\Installers\\ZikulaInstaller' => __DIR__ . '/..' . '/composer/installers/src/Composer/Installers/ZikulaInstaller.php',
         'Composer\\Semver\\Comparator' => __DIR__ . '/..' . '/composer/semver/src/Comparator.php',
-        'Composer\\Semver\\Constraint\\AbstractConstraint' => __DIR__ . '/..' . '/composer/semver/src/Constraint/AbstractConstraint.php',
+        'Composer\\Semver\\CompilingMatcher' => __DIR__ . '/..' . '/composer/semver/src/CompilingMatcher.php',
+        'Composer\\Semver\\Constraint\\Bound' => __DIR__ . '/..' . '/composer/semver/src/Constraint/Bound.php',
         'Composer\\Semver\\Constraint\\Constraint' => __DIR__ . '/..' . '/composer/semver/src/Constraint/Constraint.php',
         'Composer\\Semver\\Constraint\\ConstraintInterface' => __DIR__ . '/..' . '/composer/semver/src/Constraint/ConstraintInterface.php',
-        'Composer\\Semver\\Constraint\\EmptyConstraint' => __DIR__ . '/..' . '/composer/semver/src/Constraint/EmptyConstraint.php',
+        'Composer\\Semver\\Constraint\\MatchAllConstraint' => __DIR__ . '/..' . '/composer/semver/src/Constraint/MatchAllConstraint.php',
+        'Composer\\Semver\\Constraint\\MatchNoneConstraint' => __DIR__ . '/..' . '/composer/semver/src/Constraint/MatchNoneConstraint.php',
         'Composer\\Semver\\Constraint\\MultiConstraint' => __DIR__ . '/..' . '/composer/semver/src/Constraint/MultiConstraint.php',
+        'Composer\\Semver\\Interval' => __DIR__ . '/..' . '/composer/semver/src/Interval.php',
+        'Composer\\Semver\\Intervals' => __DIR__ . '/..' . '/composer/semver/src/Intervals.php',
         'Composer\\Semver\\Semver' => __DIR__ . '/..' . '/composer/semver/src/Semver.php',
         'Composer\\Semver\\VersionParser' => __DIR__ . '/..' . '/composer/semver/src/VersionParser.php',
         'Console_Getopt' => __DIR__ . '/..' . '/pear/console_getopt/Console/Getopt.php',
@@ -1357,8 +1358,11 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Firebase\\JWT\\JWK' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWK.php',
         'Firebase\\JWT\\JWT' => __DIR__ . '/..' . '/firebase/php-jwt/src/JWT.php',
         'Firebase\\JWT\\SignatureInvalidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/SignatureInvalidException.php',
+        'GuzzleHttp\\BodySummarizer' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizer.php',
+        'GuzzleHttp\\BodySummarizerInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/BodySummarizerInterface.php',
         'GuzzleHttp\\Client' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Client.php',
         'GuzzleHttp\\ClientInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/ClientInterface.php',
+        'GuzzleHttp\\ClientTrait' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/ClientTrait.php',
         'GuzzleHttp\\Cookie\\CookieJar' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Cookie/CookieJar.php',
         'GuzzleHttp\\Cookie\\CookieJarInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Cookie/CookieJarInterface.php',
         'GuzzleHttp\\Cookie\\FileCookieJar' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Cookie/FileCookieJar.php',
@@ -1370,7 +1374,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'GuzzleHttp\\Exception\\GuzzleException' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Exception/GuzzleException.php',
         'GuzzleHttp\\Exception\\InvalidArgumentException' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Exception/InvalidArgumentException.php',
         'GuzzleHttp\\Exception\\RequestException' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Exception/RequestException.php',
-        'GuzzleHttp\\Exception\\SeekException' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Exception/SeekException.php',
         'GuzzleHttp\\Exception\\ServerException' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Exception/ServerException.php',
         'GuzzleHttp\\Exception\\TooManyRedirectsException' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Exception/TooManyRedirectsException.php',
         'GuzzleHttp\\Exception\\TransferException' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Exception/TransferException.php',
@@ -1384,6 +1387,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'GuzzleHttp\\Handler\\Proxy' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/Proxy.php',
         'GuzzleHttp\\Handler\\StreamHandler' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Handler/StreamHandler.php',
         'GuzzleHttp\\MessageFormatter' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/MessageFormatter.php',
+        'GuzzleHttp\\MessageFormatterInterface' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/MessageFormatterInterface.php',
         'GuzzleHttp\\Middleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Middleware.php',
         'GuzzleHttp\\Pool' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Pool.php',
         'GuzzleHttp\\PrepareBodyMiddleware' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/PrepareBodyMiddleware.php',
@@ -1475,13 +1479,9 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'GuzzleHttp\\Stream\\StreamInterface' => __DIR__ . '/..' . '/guzzlehttp/streams/src/StreamInterface.php',
         'GuzzleHttp\\Stream\\Utils' => __DIR__ . '/..' . '/guzzlehttp/streams/src/Utils.php',
         'GuzzleHttp\\TransferStats' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/TransferStats.php',
-        'GuzzleHttp\\UriTemplate' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/UriTemplate.php',
         'GuzzleHttp\\Utils' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/Utils.php',
         'Hashable' => __DIR__ . '/..' . '/data-values/data-values/src/interfaces/Hashable.php',
         'HtmlFormatter\\HtmlFormatter' => __DIR__ . '/..' . '/wikimedia/html-formatter/src/HtmlFormatter.php',
-        'Http\\Adapter\\Guzzle6\\Client' => __DIR__ . '/..' . '/php-http/guzzle6-adapter/src/Client.php',
-        'Http\\Adapter\\Guzzle6\\Exception\\UnexpectedValueException' => __DIR__ . '/..' . '/php-http/guzzle6-adapter/src/Exception/UnexpectedValueException.php',
-        'Http\\Adapter\\Guzzle6\\Promise' => __DIR__ . '/..' . '/php-http/guzzle6-adapter/src/Promise.php',
         'Http\\Client\\Common\\BatchClient' => __DIR__ . '/..' . '/php-http/client-common/src/BatchClient.php',
         'Http\\Client\\Common\\BatchClientInterface' => __DIR__ . '/..' . '/php-http/client-common/src/BatchClientInterface.php',
         'Http\\Client\\Common\\BatchResult' => __DIR__ . '/..' . '/php-http/client-common/src/BatchResult.php',
@@ -1774,12 +1774,14 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'League\\OAuth2\\Server\\CryptTrait' => __DIR__ . '/..' . '/league/oauth2-server/src/CryptTrait.php',
         'League\\OAuth2\\Server\\Entities\\AccessTokenEntityInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/AccessTokenEntityInterface.php',
         'League\\OAuth2\\Server\\Entities\\AuthCodeEntityInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/AuthCodeEntityInterface.php',
+        'League\\OAuth2\\Server\\Entities\\ClaimEntityInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/ClaimEntityInterface.php',
         'League\\OAuth2\\Server\\Entities\\ClientEntityInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/ClientEntityInterface.php',
         'League\\OAuth2\\Server\\Entities\\RefreshTokenEntityInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/RefreshTokenEntityInterface.php',
         'League\\OAuth2\\Server\\Entities\\ScopeEntityInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/ScopeEntityInterface.php',
         'League\\OAuth2\\Server\\Entities\\TokenInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/TokenInterface.php',
         'League\\OAuth2\\Server\\Entities\\Traits\\AccessTokenTrait' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/Traits/AccessTokenTrait.php',
         'League\\OAuth2\\Server\\Entities\\Traits\\AuthCodeTrait' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/Traits/AuthCodeTrait.php',
+        'League\\OAuth2\\Server\\Entities\\Traits\\ClaimEntityTrait' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/Traits/ClaimEntityTrait.php',
         'League\\OAuth2\\Server\\Entities\\Traits\\ClientTrait' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/Traits/ClientTrait.php',
         'League\\OAuth2\\Server\\Entities\\Traits\\EntityTrait' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/Traits/EntityTrait.php',
         'League\\OAuth2\\Server\\Entities\\Traits\\RefreshTokenTrait' => __DIR__ . '/..' . '/league/oauth2-server/src/Entities/Traits/RefreshTokenTrait.php',
@@ -1800,6 +1802,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'League\\OAuth2\\Server\\Middleware\\ResourceServerMiddleware' => __DIR__ . '/..' . '/league/oauth2-server/src/Middleware/ResourceServerMiddleware.php',
         'League\\OAuth2\\Server\\Repositories\\AccessTokenRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/AccessTokenRepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\AuthCodeRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/AuthCodeRepositoryInterface.php',
+        'League\\OAuth2\\Server\\Repositories\\ClaimRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/ClaimRepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\ClientRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/ClientRepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\RefreshTokenRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/RefreshTokenRepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\RepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/RepositoryInterface.php',
@@ -1882,7 +1885,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'LightnCandy\\Partial' => __DIR__ . '/..' . '/zordius/lightncandy/src/Partial.php',
         'LightnCandy\\Runtime' => __DIR__ . '/..' . '/zordius/lightncandy/src/Runtime.php',
         'LightnCandy\\SafeString' => __DIR__ . '/..' . '/zordius/lightncandy/src/SafeString.php',
-        'LightnCandy\\StringObject' => __DIR__ . '/..' . '/zordius/lightncandy/src/Runtime.php',
         'LightnCandy\\Token' => __DIR__ . '/..' . '/zordius/lightncandy/src/Token.php',
         'LightnCandy\\Validator' => __DIR__ . '/..' . '/zordius/lightncandy/src/Validator.php',
         'Liuggio\\StatsdClient\\Entity\\StatsdData' => __DIR__ . '/..' . '/liuggio/statsd-php-client/src/Liuggio/StatsdClient/Entity/StatsdData.php',
@@ -2202,7 +2204,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Monolog\\Utils' => __DIR__ . '/..' . '/monolog/monolog/src/Monolog/Utils.php',
         'Net_SMTP' => __DIR__ . '/..' . '/pear/net_smtp/Net/SMTP.php',
         'Net_Socket' => __DIR__ . '/..' . '/pear/net_socket/Net/Socket.php',
-        'Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Resources/stubs/Normalizer.php',
+        'Net_URL2' => __DIR__ . '/..' . '/pear/net_url2/Net/URL2.php',
         'Nyholm\\Psr7\\Factory\\HttplugFactory' => __DIR__ . '/..' . '/nyholm/psr7/src/Factory/HttplugFactory.php',
         'Nyholm\\Psr7\\Factory\\Psr17Factory' => __DIR__ . '/..' . '/nyholm/psr7/src/Factory/Psr17Factory.php',
         'Nyholm\\Psr7\\MessageTrait' => __DIR__ . '/..' . '/nyholm/psr7/src/MessageTrait.php',
@@ -2254,6 +2256,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'OOUI\\ProgressBarWidget' => __DIR__ . '/..' . '/oojs/oojs-ui/php/widgets/ProgressBarWidget.php',
         'OOUI\\RadioInputWidget' => __DIR__ . '/..' . '/oojs/oojs-ui/php/widgets/RadioInputWidget.php',
         'OOUI\\RadioSelectInputWidget' => __DIR__ . '/..' . '/oojs/oojs-ui/php/widgets/RadioSelectInputWidget.php',
+        'OOUI\\RequiredElement' => __DIR__ . '/..' . '/oojs/oojs-ui/php/mixins/RequiredElement.php',
         'OOUI\\SearchInputWidget' => __DIR__ . '/..' . '/oojs/oojs-ui/php/widgets/SearchInputWidget.php',
         'OOUI\\SelectFileInputWidget' => __DIR__ . '/..' . '/oojs/oojs-ui/php/widgets/SelectFileInputWidget.php',
         'OOUI\\SelectWidget' => __DIR__ . '/..' . '/oojs/oojs-ui/php/widgets/SelectWidget.php',
@@ -2278,7 +2281,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Onoi\\MessageReporter\\ObservableMessageReporter' => __DIR__ . '/..' . '/onoi/message-reporter/src/ObservableMessageReporter.php',
         'Onoi\\MessageReporter\\SpyMessageReporter' => __DIR__ . '/..' . '/onoi/message-reporter/src/SpyMessageReporter.php',
         'PEAR' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR.php',
-        'PEAR_Error' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR.php',
         'PEAR_ErrorStack' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/PEAR/ErrorStack.php',
         'PEAR_Exception' => __DIR__ . '/..' . '/pear/pear_exception/PEAR/Exception.php',
         'Pleo\\BloomFilter\\BitArray' => __DIR__ . '/..' . '/pleonasm/bloom-filter/src/BitArray.php',
@@ -2414,6 +2416,62 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Serializers\\Exceptions\\SerializationException' => __DIR__ . '/..' . '/serialization/serialization/src/Serializers/Exceptions/SerializationException.php',
         'Serializers\\Exceptions\\UnsupportedObjectException' => __DIR__ . '/..' . '/serialization/serialization/src/Serializers/Exceptions/UnsupportedObjectException.php',
         'Serializers\\Serializer' => __DIR__ . '/..' . '/serialization/serialization/src/Serializers/Serializer.php',
+        'Shellbox\\Action\\CallAction' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Action/CallAction.php',
+        'Shellbox\\Action\\MultipartAction' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Action/MultipartAction.php',
+        'Shellbox\\Action\\ShellAction' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Action/ShellAction.php',
+        'Shellbox\\Client' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Client.php',
+        'Shellbox\\ClientLogHandler' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ClientLogHandler.php',
+        'Shellbox\\Command\\BashWrapper' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/BashWrapper.php',
+        'Shellbox\\Command\\BoxedCommand' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/BoxedCommand.php',
+        'Shellbox\\Command\\BoxedExecutor' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/BoxedExecutor.php',
+        'Shellbox\\Command\\BoxedResult' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/BoxedResult.php',
+        'Shellbox\\Command\\Command' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/Command.php',
+        'Shellbox\\Command\\FirejailWrapper' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/FirejailWrapper.php',
+        'Shellbox\\Command\\InputFile' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/InputFile.php',
+        'Shellbox\\Command\\InputFileFromFile' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/InputFileFromFile.php',
+        'Shellbox\\Command\\InputFileFromStream' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/InputFileFromStream.php',
+        'Shellbox\\Command\\InputFileFromString' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/InputFileFromString.php',
+        'Shellbox\\Command\\InputFilePlaceholder' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/InputFilePlaceholder.php',
+        'Shellbox\\Command\\LocalBoxedExecutor' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/LocalBoxedExecutor.php',
+        'Shellbox\\Command\\OutputEntity' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputEntity.php',
+        'Shellbox\\Command\\OutputFile' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputFile.php',
+        'Shellbox\\Command\\OutputFilePlaceholder' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputFilePlaceholder.php',
+        'Shellbox\\Command\\OutputFileToFile' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputFileToFile.php',
+        'Shellbox\\Command\\OutputFileToStream' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputFileToStream.php',
+        'Shellbox\\Command\\OutputFileToString' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputFileToString.php',
+        'Shellbox\\Command\\OutputGlob' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputGlob.php',
+        'Shellbox\\Command\\OutputGlobPlaceholder' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputGlobPlaceholder.php',
+        'Shellbox\\Command\\OutputGlobToFile' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputGlobToFile.php',
+        'Shellbox\\Command\\OutputGlobToString' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/OutputGlobToString.php',
+        'Shellbox\\Command\\RemoteBoxedExecutor' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/RemoteBoxedExecutor.php',
+        'Shellbox\\Command\\ServerBoxedExecutor' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/ServerBoxedExecutor.php',
+        'Shellbox\\Command\\ServerBoxedResult' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/ServerBoxedResult.php',
+        'Shellbox\\Command\\ServerUnboxedExecutor' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/ServerUnboxedExecutor.php',
+        'Shellbox\\Command\\SystemdWrapper' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/SystemdWrapper.php',
+        'Shellbox\\Command\\UnboxedCommand' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/UnboxedCommand.php',
+        'Shellbox\\Command\\UnboxedExecutor' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/UnboxedExecutor.php',
+        'Shellbox\\Command\\UnboxedResult' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/UnboxedResult.php',
+        'Shellbox\\Command\\ValidationError' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/ValidationError.php',
+        'Shellbox\\Command\\Validator' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/Validator.php',
+        'Shellbox\\Command\\WindowsWrapper' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/WindowsWrapper.php',
+        'Shellbox\\Command\\Wrapper' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Command/Wrapper.php',
+        'Shellbox\\FileUtils' => __DIR__ . '/..' . '/wikimedia/shellbox/src/FileUtils.php',
+        'Shellbox\\GuzzleHttpClient' => __DIR__ . '/..' . '/wikimedia/shellbox/src/GuzzleHttpClient.php',
+        'Shellbox\\HttpClientInterface' => __DIR__ . '/..' . '/wikimedia/shellbox/src/HttpClientInterface.php',
+        'Shellbox\\Multipart\\MultipartError' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Multipart/MultipartError.php',
+        'Shellbox\\Multipart\\MultipartReader' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Multipart/MultipartReader.php',
+        'Shellbox\\Multipart\\MultipartUtils' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Multipart/MultipartUtils.php',
+        'Shellbox\\Server' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Server.php',
+        'Shellbox\\ShellParser\\Node' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellParser/Node.php',
+        'Shellbox\\ShellParser\\PEGParser' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellParser/PEGParser.php',
+        'Shellbox\\ShellParser\\ShellParser' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellParser/ShellParser.php',
+        'Shellbox\\ShellParser\\ShellSyntaxError' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellParser/ShellSyntaxError.php',
+        'Shellbox\\ShellParser\\SyntaxInfo' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellParser/SyntaxInfo.php',
+        'Shellbox\\ShellParser\\SyntaxTree' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellParser/SyntaxTree.php',
+        'Shellbox\\ShellParser\\UnimplementedError' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellParser/UnimplementedError.php',
+        'Shellbox\\Shellbox' => __DIR__ . '/..' . '/wikimedia/shellbox/src/Shellbox.php',
+        'Shellbox\\ShellboxError' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellboxError.php',
+        'Shellbox\\TempDirManager' => __DIR__ . '/..' . '/wikimedia/shellbox/src/TempDirManager.php',
         'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'Symfony\\Component\\OptionsResolver\\Debug\\OptionsResolverIntrospector' => __DIR__ . '/..' . '/symfony/options-resolver/Debug/OptionsResolverIntrospector.php',
         'Symfony\\Component\\OptionsResolver\\Exception\\AccessException' => __DIR__ . '/..' . '/symfony/options-resolver/Exception/AccessException.php',
@@ -2520,19 +2578,13 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Symfony\\Contracts\\Translation\\TranslatableInterface' => __DIR__ . '/..' . '/symfony/translation-contracts/TranslatableInterface.php',
         'Symfony\\Contracts\\Translation\\TranslatorInterface' => __DIR__ . '/..' . '/symfony/translation-contracts/TranslatorInterface.php',
         'Symfony\\Contracts\\Translation\\TranslatorTrait' => __DIR__ . '/..' . '/symfony/translation-contracts/TranslatorTrait.php',
-        'Symfony\\Polyfill\\Intl\\Idn\\Idn' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Idn.php',
-        'Symfony\\Polyfill\\Intl\\Idn\\Info' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Info.php',
-        'Symfony\\Polyfill\\Intl\\Idn\\Resources\\unidata\\DisallowedRanges' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Resources/unidata/DisallowedRanges.php',
-        'Symfony\\Polyfill\\Intl\\Idn\\Resources\\unidata\\Regex' => __DIR__ . '/..' . '/symfony/polyfill-intl-idn/Resources/unidata/Regex.php',
-        'Symfony\\Polyfill\\Intl\\Normalizer\\Normalizer' => __DIR__ . '/..' . '/symfony/polyfill-intl-normalizer/Normalizer.php',
-        'Symfony\\Polyfill\\Php72\\Php72' => __DIR__ . '/..' . '/symfony/polyfill-php72/Php72.php',
         'Symfony\\Polyfill\\Php73\\Php73' => __DIR__ . '/..' . '/symfony/polyfill-php73/Php73.php',
         'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'TextCat' => __DIR__ . '/..' . '/wikimedia/textcat/src/TextCat.php',
         'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'UtfNormal\\Constants' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Constants.php',
-        'UtfNormal\\Utils' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Util.php',
+        'UtfNormal\\Utils' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Utils.php',
         'UtfNormal\\Validator' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Validator.php',
         'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'ValueFormatters\\BasicNumberLocalizer' => __DIR__ . '/..' . '/data-values/number/src/ValueFormatters/BasicNumberLocalizer.php',
@@ -2603,6 +2655,14 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Webmozart\\Assert\\Assert' => __DIR__ . '/..' . '/webmozart/assert/src/Assert.php',
         'Webmozart\\Assert\\InvalidArgumentException' => __DIR__ . '/..' . '/webmozart/assert/src/InvalidArgumentException.php',
         'Webmozart\\Assert\\Mixin' => __DIR__ . '/..' . '/webmozart/assert/src/Mixin.php',
+        'WikiPEG\\DefaultTracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/DefaultTracer.php',
+        'WikiPEG\\Expectation' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Expectation.php',
+        'WikiPEG\\InternalError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/InternalError.php',
+        'WikiPEG\\Location' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Location.php',
+        'WikiPEG\\LocationRange' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/LocationRange.php',
+        'WikiPEG\\PEGParserBase' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/PEGParserBase.php',
+        'WikiPEG\\SyntaxError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/SyntaxError.php',
+        'WikiPEG\\Tracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Tracer.php',
         'Wikibase\\DataModel\\Assert\\RepositoryNameAssert' => __DIR__ . '/..' . '/wikibase/data-model/src/Assert/RepositoryNameAssert.php',
         'Wikibase\\DataModel\\ByPropertyIdArray' => __DIR__ . '/..' . '/wikibase/data-model/src/ByPropertyIdArray.php',
         'Wikibase\\DataModel\\DeserializerFactory' => __DIR__ . '/..' . '/wikibase/data-model-serialization/src/DeserializerFactory.php',
@@ -2908,6 +2968,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikibase\\Lexeme\\MediaWiki\\Api\\Error\\FormNotFound' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Api/Error/FormNotFound.php',
         'Wikibase\\Lexeme\\MediaWiki\\Api\\Error\\InvalidFormClaims' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Api/Error/InvalidFormClaims.php',
         'Wikibase\\Lexeme\\MediaWiki\\Api\\Error\\InvalidItemId' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Api/Error/InvalidItemId.php',
+        'Wikibase\\Lexeme\\MediaWiki\\Api\\Error\\InvalidSenseClaims' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Api/Error/InvalidSenseClaims.php',
         'Wikibase\\Lexeme\\MediaWiki\\Api\\Error\\JsonFieldHasWrongType' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Api/Error/JsonFieldHasWrongType.php',
         'Wikibase\\Lexeme\\MediaWiki\\Api\\Error\\JsonFieldIsNotAnItemId' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Api/Error/JsonFieldIsNotAnItemId.php',
         'Wikibase\\Lexeme\\MediaWiki\\Api\\Error\\JsonFieldIsRequired' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Api/Error/JsonFieldIsRequired.php',
@@ -2960,6 +3021,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikibase\\Lexeme\\Presentation\\ChangeOp\\Deserialization\\SenseIdDeserializer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/ChangeOp/Deserialization/SenseIdDeserializer.php',
         'Wikibase\\Lexeme\\Presentation\\ChangeOp\\Deserialization\\SenseListChangeOpDeserializer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/ChangeOp/Deserialization/SenseListChangeOpDeserializer.php',
         'Wikibase\\Lexeme\\Presentation\\ChangeOp\\Deserialization\\ValidationContext' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/ChangeOp/Deserialization/ValidationContext.php',
+        'Wikibase\\Lexeme\\Presentation\\Content\\LemmaTextSummaryFormatter' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/Content/LemmaTextSummaryFormatter.php',
         'Wikibase\\Lexeme\\Presentation\\Diff\\FormDiffView' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/Diff/FormDiffView.php',
         'Wikibase\\Lexeme\\Presentation\\Diff\\GrammaticalFeatureDiffVisualizer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/Diff/GrammaticalFeatureDiffVisualizer.php',
         'Wikibase\\Lexeme\\Presentation\\Diff\\ItemReferenceDifferenceVisualizer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/Diff/ItemReferenceDifferenceVisualizer.php',
@@ -2980,6 +3042,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikibase\\Lexeme\\Presentation\\View\\SensesView' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/View/SensesView.php',
         'Wikibase\\Lexeme\\Presentation\\View\\TemplateModule' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/View/TemplateModule.php',
         'Wikibase\\Lexeme\\Presentation\\View\\Template\\LexemeTemplateFactory' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/View/Template/LexemeTemplateFactory.php',
+        'Wikibase\\Lexeme\\Presentation\\View\\Template\\VueTemplates' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/View/Template/VueTemplates.php',
         'Wikibase\\Lexeme\\Registrar' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Registrar.php',
         'Wikibase\\Lexeme\\Serialization\\ExternalLexemeSerializer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Serialization/ExternalLexemeSerializer.php',
         'Wikibase\\Lexeme\\Serialization\\FormSerializer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Serialization/FormSerializer.php',
@@ -3010,6 +3073,9 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Composer\\Merge\\V2\\StabilityFlags' => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src/StabilityFlags.php',
         'Wikimedia\\IPSet' => __DIR__ . '/..' . '/wikimedia/ip-set/src/IPSet.php',
         'Wikimedia\\IPUtils' => __DIR__ . '/..' . '/wikimedia/ip-utils/src/IPUtils.php',
+        'Wikimedia\\Minify\\CSSMin' => __DIR__ . '/..' . '/wikimedia/minify/src/CSSMin.php',
+        'Wikimedia\\Minify\\Cli' => __DIR__ . '/..' . '/wikimedia/minify/src/Cli.php',
+        'Wikimedia\\Minify\\JavaScriptMinifier' => __DIR__ . '/..' . '/wikimedia/minify/src/JavaScriptMinifier.php',
         'Wikimedia\\ObjectFactory' => __DIR__ . '/..' . '/wikimedia/object-factory/src/ObjectFactory.php',
         'Wikimedia\\PSquare' => __DIR__ . '/..' . '/wikimedia/running-stat/src/Wikimedia/PSquare.php',
         'Wikimedia\\Parsoid\\Config\\Api\\ApiHelper' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Config/Api/ApiHelper.php',
@@ -3021,6 +3087,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Config\\Env' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Config/Env.php',
         'Wikimedia\\Parsoid\\Config\\PageConfig' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Config/PageConfig.php',
         'Wikimedia\\Parsoid\\Config\\PageContent' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Config/PageContent.php',
+        'Wikimedia\\Parsoid\\Config\\Profile' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Config/Profile.php',
         'Wikimedia\\Parsoid\\Config\\SiteConfig' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Config/SiteConfig.php',
         'Wikimedia\\Parsoid\\Config\\WikitextConstants' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Config/WikitextConstants.php',
         'Wikimedia\\Parsoid\\Core\\ClientError' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Core/ClientError.php',
@@ -3030,6 +3097,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Core\\InternalException' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Core/InternalException.php',
         'Wikimedia\\Parsoid\\Core\\PageBundle' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Core/PageBundle.php',
         'Wikimedia\\Parsoid\\Core\\ResourceLimitExceededException' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Core/ResourceLimitExceededException.php',
+        'Wikimedia\\Parsoid\\Core\\Sanitizer' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Core/Sanitizer.php',
         'Wikimedia\\Parsoid\\Core\\SelserData' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Core/SelserData.php',
         'Wikimedia\\Parsoid\\Core\\WikitextContentModelHandler' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Core/WikitextContentModelHandler.php',
         'Wikimedia\\Parsoid\\Ext\\Cite\\Cite' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/Cite/Cite.php',
@@ -3042,7 +3110,9 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Ext\\DOMDataUtils' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/DOMDataUtils.php',
         'Wikimedia\\Parsoid\\Ext\\DOMProcessor' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/DOMProcessor.php',
         'Wikimedia\\Parsoid\\Ext\\DOMUtils' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/DOMUtils.php',
+        'Wikimedia\\Parsoid\\Ext\\ExtensionError' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/ExtensionError.php',
         'Wikimedia\\Parsoid\\Ext\\ExtensionModule' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/ExtensionModule.php',
+        'Wikimedia\\Parsoid\\Ext\\ExtensionTag' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/ExtensionTag.php',
         'Wikimedia\\Parsoid\\Ext\\ExtensionTagHandler' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/ExtensionTagHandler.php',
         'Wikimedia\\Parsoid\\Ext\\Gallery\\Gallery' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/Gallery/Gallery.php',
         'Wikimedia\\Parsoid\\Ext\\Gallery\\Mode' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/Gallery/Mode.php',
@@ -3054,6 +3124,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Ext\\Gallery\\ParsedLine' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/Gallery/ParsedLine.php',
         'Wikimedia\\Parsoid\\Ext\\Gallery\\SlideshowMode' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/Gallery/SlideshowMode.php',
         'Wikimedia\\Parsoid\\Ext\\Gallery\\TraditionalMode' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/Gallery/TraditionalMode.php',
+        'Wikimedia\\Parsoid\\Ext\\ImageMap\\ImageMap' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/ImageMap/ImageMap.php',
         'Wikimedia\\Parsoid\\Ext\\JSON\\JSON' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/JSON/JSON.php',
         'Wikimedia\\Parsoid\\Ext\\LST\\LST' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/LST/LST.php',
         'Wikimedia\\Parsoid\\Ext\\Nowiki\\Nowiki' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Ext/Nowiki/Nowiki.php',
@@ -3139,6 +3210,21 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Mocks\\MockPageConfig' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Mocks/MockPageConfig.php',
         'Wikimedia\\Parsoid\\Mocks\\MockPageContent' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Mocks/MockPageContent.php',
         'Wikimedia\\Parsoid\\Mocks\\MockSiteConfig' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Mocks/MockSiteConfig.php',
+        'Wikimedia\\Parsoid\\ParserTests\\Article' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/Article.php',
+        'Wikimedia\\Parsoid\\ParserTests\\Grammar' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/Grammar.php',
+        'Wikimedia\\Parsoid\\ParserTests\\Item' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/Item.php',
+        'Wikimedia\\Parsoid\\ParserTests\\MockApiHelper' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/MockApiHelper.php',
+        'Wikimedia\\Parsoid\\ParserTests\\ParserHook' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/ParserHook.php',
+        'Wikimedia\\Parsoid\\ParserTests\\ParserHookProcessor' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/ParserHookProcessor.php',
+        'Wikimedia\\Parsoid\\ParserTests\\RawHTML' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/RawHTML.php',
+        'Wikimedia\\Parsoid\\ParserTests\\SiteConfig' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/SiteConfig.php',
+        'Wikimedia\\Parsoid\\ParserTests\\Stats' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/Stats.php',
+        'Wikimedia\\Parsoid\\ParserTests\\StyleTag' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/StyleTag.php',
+        'Wikimedia\\Parsoid\\ParserTests\\Test' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/Test.php',
+        'Wikimedia\\Parsoid\\ParserTests\\TestFileReader' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/TestFileReader.php',
+        'Wikimedia\\Parsoid\\ParserTests\\TestRunner' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/TestRunner.php',
+        'Wikimedia\\Parsoid\\ParserTests\\TestUtils' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/TestUtils.php',
+        'Wikimedia\\Parsoid\\ParserTests\\UnexpectedException' => __DIR__ . '/..' . '/wikimedia/parsoid/src/ParserTests/UnexpectedException.php',
         'Wikimedia\\Parsoid\\Parsoid' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Parsoid.php',
         'Wikimedia\\Parsoid\\Tokens\\CommentTk' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Tokens/CommentTk.php',
         'Wikimedia\\Parsoid\\Tokens\\EOFTk' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Tokens/EOFTk.php',
@@ -3188,6 +3274,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\AddRedLinks' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/AddRedLinks.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\ComputeDSR' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/ComputeDSR.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\ConvertOffsets' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/ConvertOffsets.php',
+        'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\I18n' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/I18n.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\LangConverter' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/LangConverter.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\Linter' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/Linter.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\MarkFosteredContent' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/MarkFosteredContent.php',
@@ -3196,6 +3283,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\Normalize' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/Normalize.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\PWrap' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/PWrap.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\ProcessTreeBuilderFixups' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/ProcessTreeBuilderFixups.php',
+        'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\Section' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/Section.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\WrapSections' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/WrapSections.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PP\\Processors\\WrapTemplates' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PP/Processors/WrapTemplates.php',
         'Wikimedia\\Parsoid\\Wt2Html\\PageConfigFrame' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/PageConfigFrame.php',
@@ -3220,7 +3308,7 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Wt2Html\\TT\\ParserFunctions' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/ParserFunctions.php',
         'Wikimedia\\Parsoid\\Wt2Html\\TT\\PreHandler' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/PreHandler.php',
         'Wikimedia\\Parsoid\\Wt2Html\\TT\\QuoteTransformer' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/QuoteTransformer.php',
-        'Wikimedia\\Parsoid\\Wt2Html\\TT\\Sanitizer' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/Sanitizer.php',
+        'Wikimedia\\Parsoid\\Wt2Html\\TT\\SanitizerHandler' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/SanitizerHandler.php',
         'Wikimedia\\Parsoid\\Wt2Html\\TT\\TemplateHandler' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/TemplateHandler.php',
         'Wikimedia\\Parsoid\\Wt2Html\\TT\\TokenCollector' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/TokenCollector.php',
         'Wikimedia\\Parsoid\\Wt2Html\\TT\\TokenHandler' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TT/TokenHandler.php',
@@ -3230,7 +3318,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Parsoid\\Wt2Html\\TokenizerUtils' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/TokenizerUtils.php',
         'Wikimedia\\Parsoid\\Wt2Html\\Wt2HtmlDOMProcessor' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/Wt2HtmlDOMProcessor.php',
         'Wikimedia\\Parsoid\\Wt2Html\\XMLSerializer' => __DIR__ . '/..' . '/wikimedia/parsoid/src/Wt2Html/XMLSerializer.php',
-        'Wikimedia\\PasswordBlacklist\\PasswordBlacklist' => __DIR__ . '/..' . '/wikimedia/common-passwords/src/PasswordBlacklist/PasswordBlacklist.php',
         'Wikimedia\\PhpSessionSerializer' => __DIR__ . '/..' . '/wikimedia/php-session-serializer/src/Wikimedia/PhpSessionSerializer.php',
         'Wikimedia\\Purtle\\BNodeLabeler' => __DIR__ . '/..' . '/wikimedia/purtle/src/BNodeLabeler.php',
         'Wikimedia\\Purtle\\JsonLdRdfWriter' => __DIR__ . '/..' . '/wikimedia/purtle/src/JsonLdRdfWriter.php',
@@ -3243,6 +3330,17 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Purtle\\TurtleRdfWriter' => __DIR__ . '/..' . '/wikimedia/purtle/src/TurtleRdfWriter.php',
         'Wikimedia\\Purtle\\UnicodeEscaper' => __DIR__ . '/..' . '/wikimedia/purtle/src/UnicodeEscaper.php',
         'Wikimedia\\Purtle\\XmlRdfWriter' => __DIR__ . '/..' . '/wikimedia/purtle/src/XmlRdfWriter.php',
+        'Wikimedia\\RequestTimeout\\CriticalSectionMismatchException' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/CriticalSectionMismatchException.php',
+        'Wikimedia\\RequestTimeout\\CriticalSectionProvider' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/CriticalSectionProvider.php',
+        'Wikimedia\\RequestTimeout\\CriticalSectionScope' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/CriticalSectionScope.php',
+        'Wikimedia\\RequestTimeout\\Detail\\BasicRequestTimeout' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/Detail/BasicRequestTimeout.php',
+        'Wikimedia\\RequestTimeout\\Detail\\CriticalSection' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/Detail/CriticalSection.php',
+        'Wikimedia\\RequestTimeout\\Detail\\ExcimerRequestTimeout' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/Detail/ExcimerRequestTimeout.php',
+        'Wikimedia\\RequestTimeout\\Detail\\ExcimerTimerWrapper' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/Detail/ExcimerTimerWrapper.php',
+        'Wikimedia\\RequestTimeout\\EmergencyTimeoutException' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/EmergencyTimeoutException.php',
+        'Wikimedia\\RequestTimeout\\RequestTimeout' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/RequestTimeout.php',
+        'Wikimedia\\RequestTimeout\\RequestTimeoutException' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/RequestTimeoutException.php',
+        'Wikimedia\\RequestTimeout\\TimeoutException' => __DIR__ . '/..' . '/wikimedia/request-timeout/src/TimeoutException.php',
         'Wikimedia\\RunningStat' => __DIR__ . '/..' . '/wikimedia/running-stat/src/Wikimedia/RunningStat.php',
         'Wikimedia\\ScopedCallback' => __DIR__ . '/..' . '/wikimedia/scoped-callback/src/ScopedCallback.php',
         'Wikimedia\\Services\\CannotReplaceActiveServiceException' => __DIR__ . '/..' . '/wikimedia/services/src/CannotReplaceActiveServiceException.php',
@@ -3257,14 +3355,6 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
         'Wikimedia\\Timestamp\\ConvertibleTimestamp' => __DIR__ . '/..' . '/wikimedia/timestamp/src/ConvertibleTimestamp.php',
         'Wikimedia\\Timestamp\\TimestampException' => __DIR__ . '/..' . '/wikimedia/timestamp/src/TimestampException.php',
         'Wikimedia\\WaitConditionLoop' => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src/WaitConditionLoop.php',
-        'Wikimedia\\WikiPEG\\DefaultTracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/DefaultTracer.php',
-        'Wikimedia\\WikiPEG\\Expectation' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Expectation.php',
-        'Wikimedia\\WikiPEG\\InternalError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/InternalError.php',
-        'Wikimedia\\WikiPEG\\Location' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Location.php',
-        'Wikimedia\\WikiPEG\\LocationRange' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/LocationRange.php',
-        'Wikimedia\\WikiPEG\\PEGParserBase' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/PEGParserBase.php',
-        'Wikimedia\\WikiPEG\\SyntaxError' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/SyntaxError.php',
-        'Wikimedia\\WikiPEG\\Tracer' => __DIR__ . '/..' . '/wikimedia/wikipeg/src/Tracer.php',
         'Wikimedia\\WrappedString' => __DIR__ . '/..' . '/wikimedia/wrappedstring/src/WrappedString.php',
         'Wikimedia\\WrappedStringList' => __DIR__ . '/..' . '/wikimedia/wrappedstring/src/WrappedStringList.php',
         'Wikimedia\\XMPReader\\Info' => __DIR__ . '/..' . '/wikimedia/xmp-reader/src/Info.php',
@@ -3279,11 +3369,11 @@ class ComposerStaticInit43b7133761cfee24c458489a00aa9a9c
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit43b7133761cfee24c458489a00aa9a9c::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit43b7133761cfee24c458489a00aa9a9c::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit43b7133761cfee24c458489a00aa9a9c::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit43b7133761cfee24c458489a00aa9a9c::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit43b7133761cfee24c458489a00aa9a9c::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit1680b6337dea9899c9ac7e17399c57af::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit1680b6337dea9899c9ac7e17399c57af::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit1680b6337dea9899c9ac7e17399c57af::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit1680b6337dea9899c9ac7e17399c57af::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit1680b6337dea9899c9ac7e17399c57af::$classMap;
 
         }, null, ClassLoader::class);
     }

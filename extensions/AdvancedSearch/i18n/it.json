@@ -71,5 +71,5 @@
 	"advancedsearch-namespaces-placeholder": "Aggiungi namespace…",
 	"prefs-advancedsearch": "Ricerca avanzata",
 	"advancedsearch-preference-help": "La ricerca avanzata aggiunge un modulo alla pagina Speciale:Ricerca per consentirti di effettuare ricerche specializzate, anche se non conosci la sintassi di ricerca. Inoltre cambia il modo in cui si possono selezionare i namespace.",
-	"advancedsearch-preference-disable": "Non mostrare l'interfaccia di ricerca avanzata"
+	"advancedsearch-preference-disable": "Non mostrare l'interfaccia di ricerca avanzata quanto utilizzi Speciale:Ricerca"
 }

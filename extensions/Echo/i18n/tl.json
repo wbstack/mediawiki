@@ -4,10 +4,12 @@
 			"AnakngAraw",
 			"Brazal.dang",
 			"Emem.calist",
+			"GinawaSaHapon",
 			"Jojit fb",
 			"Leeheonjin",
 			"Sky Harbor",
-			"TheSleepyhollow02"
+			"TheSleepyhollow02",
+			"Yivan000"
 		]
 	},
 	"echo-desc": "Sistema ng pagpapabatid",
@@ -18,7 +20,7 @@
 	"echo-pref-send-to": "Ipadala kay:",
 	"echo-pref-email-format": "Kaanyuan ng e-liham:",
 	"echo-pref-web": "Web",
-	"echo-pref-email": "E-liham",
+	"echo-pref-email": "Email",
 	"echo-pref-email-frequency-never": "Huwag magpadala sa akin ng anumang pabatid sa e-liham",
 	"echo-pref-email-frequency-immediately": "Mga indibiduwal na pabatid nang papasok ito",
 	"echo-pref-email-frequency-daily": "Isang arawang buod ng mga pabatid",
@@ -37,7 +39,7 @@
 	"echo-pref-tooltip-mention": "Ipabatid sa aking kung may kumawing sa aking pahina ng tagagamit mula sa anumang pahinang usapan.",
 	"echo-pref-tooltip-article-reminder": "PakiTawag-Pansin mo ako kapag ito ay naitanong.",
 	"notifications": "Mga pagpapabatid",
-	"tooltip-pt-notifications-alert": "{{GENDER:|Iyong}} mga babala",
+	"tooltip-pt-notifications-alert": "Mga alerto mo",
 	"echo-specialpage": "Mga pabatid",
 	"echo-none": "Wala kang mga pabatid.",
 	"echo-notification-loginrequired": "Kailangan mong mag-login upang makita ang iyong mga pabatid.",

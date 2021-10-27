@@ -5,6 +5,7 @@ use Wikibase\Client\Usage\EntityUsage;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\WikibaseSettings;
+use Wikibase\Repo\WikibaseRepo;
 
 // manually load EntityUsage so we can use its constants below –
 // extension.json AutoloadNamespaces has not been processed yet
@@ -40,10 +41,9 @@ return call_user_func( function() {
 		'referencedEntityIdMaxReferencedEntityVisits' => 50,
 		'pageSchemaNamespaces' => [],
 		'allowLocalShortDesc' => false,
+		'forceLocalShortDesc' => false,
 		'propagateChangesToRepo' => true,
 		'propertyOrderUrl' => null,
-		'useTermsTableSearchFields' => true,
-		'forceWriteTermsTableSearchFields' => false,
 		// List of additional CSS class names for site links that have badges,
 		// e.g. [ 'Q101' => 'badge-goodarticle' ]
 		'badgeClassNames' => [],
@@ -123,8 +123,8 @@ return call_user_func( function() {
 		'useKartographerMaplinkInWikitext' => false,
 		'trackLuaFunctionCallsPerSiteGroup' => false,
 		'trackLuaFunctionCallsPerWiki' => false,
-
-		'localEntitySourceName' => 'local',
+		'trackLuaFunctionCallsSampleRate' => 1,
+		'itemAndPropertySourceName' => 'local',
 		'entitySources' => [],
 
 		'dataBridgeEnabled' => false, # if true, the next setting must also be specified
@@ -143,6 +143,11 @@ return call_user_func( function() {
 			'publicationDate' => null,
 			'retrievedDate' => null,
 		],
+
+		'termFallbackCacheVersion' => null,
+
+		// enable implicit usage on the description of a page in its content language (T191831)
+		'enableImplicitDescriptionUsage' => false,
 	];
 
 	// Some defaults depend on information not available at this time.
@@ -170,7 +175,7 @@ return call_user_func( function() {
 			'property' => 120
 		];
 		if ( $settings->getSetting( 'thisWikiIsTheRepo' ) ) {
-			$entityNamespaces = WikibaseSettings::getRepoSettings()->getSetting( 'entityNamespaces' );
+			$entityNamespaces = WikibaseRepo::getSettings()->getSetting( 'entityNamespaces' );
 		}
 
 		return [
@@ -212,7 +217,7 @@ return call_user_func( function() {
 			// if this is the repo wiki, look up the namespace names based on the entityNamespaces setting
 			$namespaceNames = array_map(
 				[ MWNamespace::class, 'getCanonicalName' ],
-				WikibaseSettings::getRepoSettings()->getSetting( 'entityNamespaces' )
+				WikibaseRepo::getSettings()->getSetting( 'entityNamespaces' )
 			);
 			return $namespaceNames;
 		} else {
@@ -264,7 +269,7 @@ return call_user_func( function() {
 	};
 
 	$defaults['otherProjectsLinks'] = function ( SettingsArray $settings ) {
-		$otherProjectsSitesProvider = WikibaseClient::getDefaultInstance()->getOtherProjectsSitesProvider();
+		$otherProjectsSitesProvider = WikibaseClient::getOtherProjectsSitesProvider();
 		return $otherProjectsSitesProvider->getOtherProjectsSiteIds( $settings->getSetting( 'siteLinkGroups' ) );
 	};
 

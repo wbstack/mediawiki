@@ -11,7 +11,7 @@
 	 * Use it to search for image/video heights and widths.
 	 *
 	 * @class
-	 * @extends {OO.ui.Widget}
+	 * @extends OO.ui.Widget
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store

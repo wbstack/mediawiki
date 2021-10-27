@@ -5,7 +5,7 @@ class SpecialNotifications extends SpecialPage {
 	/**
 	 * Number of notification records to display per page/load
 	 */
-	const DISPLAY_NUM = 20;
+	private const DISPLAY_NUM = 20;
 
 	public function __construct() {
 		parent::__construct( 'Notifications' );
@@ -27,7 +27,7 @@ class SpecialNotifications extends SpecialPage {
 		] );
 
 		$user = $this->getUser();
-		if ( $user->isAnon() ) {
+		if ( !$user->isRegistered() ) {
 			// Redirect to login page and inform user of the need to login
 			$this->requireLogin( 'echo-notification-loginrequired' );
 			return;
