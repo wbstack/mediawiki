@@ -18,6 +18,7 @@ docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app \
   --entrypoint composer -w /app \
   docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 update --no-dev --no-progress --optimize-autoloader --ignore-platform-reqs
 
+
 # Sometimes composer git clones things rather than using zips.
 # so make sure to remove the .git directories so that things get committed correctly.
 # https://github.com/wbstack/mediawiki/issues/5
