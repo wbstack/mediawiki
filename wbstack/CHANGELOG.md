@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.36-7.4-20211028-0
+
+- First 1.36 code release (at this point untested)
+
 ## 1.35-7.4-20211022-0
 
 - Add `MW_LOG_TO_STDERR` which can be set for local development
