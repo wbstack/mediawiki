@@ -2,6 +2,14 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+
+## 1.36-7.4-20211029-0
+
+- Enable replication locally
+- Fix deprecration warnings from EmbedVideo
+- Bump memory_limit to 256M in Dockerfile
+- Update deprecated hook PageContentSaveComplete
+
 ## 1.36-7.4-20211028-0
 
 - First 1.36 code release (at this point untested)
