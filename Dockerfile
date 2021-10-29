@@ -79,6 +79,11 @@ RUN { \
 		echo 'opcache.revalidate_freq=60'; \
 	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
+# Tweak other PHP.ini settings
+RUN { \
+		echo 'memory_limit = 256M'; \
+	} > /usr/local/etc/php/conf.d/tweaks.ini
+
 RUN set -eux; \
 	a2enmod rewrite; \
 	{ \
