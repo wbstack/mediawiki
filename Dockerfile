@@ -81,7 +81,7 @@ RUN { \
 
 # Tweak other PHP.ini settings
 RUN { \
-		echo 'memory_limit = 1256M'; \
+		echo 'memory_limit = 256M'; \
 	} > /usr/local/etc/php/conf.d/tweaks.ini
 
 RUN set -eux; \
