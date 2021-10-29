@@ -72,16 +72,15 @@ class EmbedVideoHooks {
 	 * @return void
 	 */
 	public static function onExtension() {
-		global $wgEmbedVideoDefaultWidth, $wgMediaHandlers, $wgFileExtensions;
-
-		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('main');
-
+		global $wgEmbedVideoDefaultWidth, $wgMediaHandlers, $wgFileExtensions,
+			$wgEmbedVideoEnableAudioHandler, $wgEmbedVideoEnableVideoHandler, $wgEmbedVideoAddFileExtensions;
+		
 		if (!isset($wgEmbedVideoDefaultWidth) && (isset($_SERVER['HTTP_X_MOBILE']) && $_SERVER['HTTP_X_MOBILE'] == 'true') && $_COOKIE['stopMobileRedirect'] != 1) {
 			// Set a smaller default width when in mobile view.
 			$wgEmbedVideoDefaultWidth = 320;
 		}
 
-		if ($config->get('EmbedVideoEnableAudioHandler')) {
+		if ($wgEmbedVideoEnableAudioHandler) {
 			$wgMediaHandlers['application/ogg']		= 'EmbedVideo\AudioHandler';
 			$wgMediaHandlers['audio/flac']			= 'EmbedVideo\AudioHandler';
 			$wgMediaHandlers['audio/ogg']			= 'EmbedVideo\AudioHandler';
@@ -91,7 +90,7 @@ class EmbedVideoHooks {
 			$wgMediaHandlers['audio/webm']			= 'EmbedVideo\AudioHandler';
 			$wgMediaHandlers['audio/x-flac']		= 'EmbedVideo\AudioHandler';
 		}
-		if ($config->get('EmbedVideoEnableVideoHandler')) {
+		if ($wgEmbedVideoEnableVideoHandler) {
 			$wgMediaHandlers['video/mp4']			= 'EmbedVideo\VideoHandler';
 			$wgMediaHandlers['video/ogg']			= 'EmbedVideo\VideoHandler';
 			$wgMediaHandlers['video/quicktime']		= 'EmbedVideo\VideoHandler';
@@ -99,7 +98,7 @@ class EmbedVideoHooks {
 			$wgMediaHandlers['video/x-matroska']	= 'EmbedVideo\VideoHandler';
 		}
 
-		if ($config->get('EmbedVideoAddFileExtensions')) {
+		if ($wgEmbedVideoAddFileExtensions) {
 			$wgFileExtensions[] = 'flac';
 			$wgFileExtensions[] = 'mkv';
 			$wgFileExtensions[] = 'mov';
