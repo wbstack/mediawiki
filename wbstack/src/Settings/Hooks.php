@@ -82,7 +82,7 @@ class WBStackPageUpdateHandler {
 }
 
 // https://www.mediawiki.org/wiki/Manual:Hooks/PageSaveComplete
-$wgHooks['PageSaveComplete'][] = function ( WikiPage $wikiPage, MediaWiki\User\UserIdentity $user, string $summary, int $flags, MediaWiki\Revision\RevisionRecord $revisionRecord, MediaWiki\Storage\EditResult $editResult  ) {
+$wgHooks['PageSaveComplete'][] = function ( \WikiPage $wikiPage, \MediaWiki\User\UserIdentity $user, string $summary, int $flags, \MediaWiki\Revision\RevisionRecord $revisionRecord, \MediaWiki\Storage\EditResult $editResult  ) {
     WBStackPageUpdateHandler::registerUpdate( $wikiPage->getTitle() );
 };
 
