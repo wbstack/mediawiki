@@ -149,13 +149,13 @@ class DenyListUpdate implements DeferrableUpdate {
 	 * @param HttpRequestFactory $factory
 	 * @param array $httpOptions
 	 * @param string $fileUrl
-	 * @return null|string
+	 * @return string
 	 */
 	private static function fetchRemoteFile(
 		HttpRequestFactory $factory,
 		array $httpOptions,
 		string $fileUrl
-	) {
+	) : string {
 		$req = $factory->create( $fileUrl, $httpOptions );
 		if ( !$req->execute()->isOK() ) {
 			throw new RuntimeException( "Failed to download resource at {$fileUrl}" );
@@ -163,7 +163,7 @@ class DenyListUpdate implements DeferrableUpdate {
 		if ( $req->getStatus() !== 200 ) {
 			throw new RuntimeException( "Unexpected HTTP {$req->getStatus()} response from {$fileUrl}" );
 		}
-		return $req->getContent();
+		return (string)$req->getContent();
 	}
 
 	/**
@@ -173,7 +173,8 @@ class DenyListUpdate implements DeferrableUpdate {
 	 * @return string[] list of SFS denylisted IP addresses
 	 */
 	private static function fetchDenyListIPsRemote() : array {
-		global $wgSFSIPListLocation, $wgSFSIPListLocationMD5, $wgSFSProxy;
+		global $wgSFSIPListLocation, $wgSFSIPListLocationMD5,
+			$wgSFSValidateIPListLocationMD5, $wgSFSProxy;
 
 		// Hacky, but neededed to keep a sensible default value of $wgSFSIPListLocation for
 		// users, whilst also preventing HTTP requests for other extension when they call
@@ -211,15 +212,18 @@ class DenyListUpdate implements DeferrableUpdate {
 			$options,
 			$wgSFSIPListLocation
 		);
-		$fileDataMD5 = self::fetchRemoteFile(
-			$reqFac,
-			$options,
-			$wgSFSIPListLocationMD5
-		);
 
-		// check vendor-provided md5
-		if ( $fileData == null || md5( $fileData ) !== $fileDataMD5 ) {
-			throw new RuntimeException( "SFS IP file contents and file md5 do not match!" );
+		if ( $wgSFSValidateIPListLocationMD5 !== false ) {
+			$fileDataMD5 = self::fetchRemoteFile(
+				$reqFac,
+				$options,
+				$wgSFSIPListLocationMD5
+			);
+
+			// check vendor-provided md5
+			if ( $fileData == null || md5( $fileData ) !== $fileDataMD5 ) {
+				throw new RuntimeException( "SFS IP file contents and file md5 do not match!" );
+			}
 		}
 
 		// ungzip and process vendor file
