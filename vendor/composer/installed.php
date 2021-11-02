@@ -5,7 +5,7 @@
         'type' => 'mediawiki-core',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '323da2e878ff6b7699bee80fbe70ac51188e008e',
+        'reference' => '8c2a9ea155d041e28086cc779f81218ce1627b6f',
         'name' => 'mediawiki/core',
         'dev' => false,
     ),
@@ -273,7 +273,7 @@
             'type' => 'mediawiki-core',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '323da2e878ff6b7699bee80fbe70ac51188e008e',
+            'reference' => '8c2a9ea155d041e28086cc779f81218ce1627b6f',
             'dev_requirement' => false,
         ),
         'mediawiki/data-values' => array(
@@ -688,12 +688,12 @@
             'dev_requirement' => false,
         ),
         'symfony/translation' => array(
-            'pretty_version' => 'v5.3.9',
-            'version' => '5.3.9.0',
+            'pretty_version' => 'v5.3.10',
+            'version' => '5.3.10.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/translation',
             'aliases' => array(),
-            'reference' => '6e69f3551c1a3356cf6ea8d019bf039a0f8b6886',
+            'reference' => '6ef197aea2ac8b9cd63e0da7522b3771714035aa',
             'dev_requirement' => false,
         ),
         'symfony/translation-contracts' => array(
