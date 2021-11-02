@@ -12,7 +12,7 @@
 ###########
 ./wbstack/sync/dwnthing.sh extensions/RevisionSlider https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/e998cb97e7f01062ff08178cd57fcd8d316e0d44 & \
 ./wbstack/sync/dwnthing.sh extensions/Mailgun https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/d7f015194de8b1673a4429f7303368c34c099050 & \
-./wbstack/sync/dwnthing.sh extensions/StopForumSpam https://codeload.github.com/wikimedia/mediawiki-extensions-StopForumSpam/zip/c63878f5fda752f83f563799c957a120a972163c & \
+./wbstack/sync/dwnthing.sh extensions/StopForumSpam https://codeload.github.com/wikimedia/mediawiki-extensions-StopForumSpam/zip/6b9f57bbb522665eb67c305ccee2cdb392d1af76 & \
 ./wbstack/sync/dwnthing.sh extensions/SpamBlacklist https://codeload.github.com/wikimedia/mediawiki-extensions-SpamBlacklist/zip/5b978fb6b258185247b428313be0808e1fc9125c & \
 ./wbstack/sync/dwnthing.sh extensions/ConfirmEdit https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/08afeb725ef590ff235732939bc0869e1e37e821 & \
 ./wbstack/sync/dwnthing.sh extensions/ConfirmAccount https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmAccount/zip/3195e5a4864ae480aacd62828d392dbf7988ba66 & \
