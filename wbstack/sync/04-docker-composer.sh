@@ -10,13 +10,13 @@ mkdir -p ${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app \
   --volume $SCRIPT_COMPOSER_CACHE:/tmp/cache \
   --entrypoint composer -w /app \
-  docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 install --no-dev --no-progress --optimize-autoloader --ignore-platform-reqs
+  docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 install --no-dev --no-progress --optimize-autoloader
 
 # composer update
 docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app \
   --volume $SCRIPT_COMPOSER_CACHE:/tmp/cache \
   --entrypoint composer -w /app \
-  docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 update --no-dev --no-progress --optimize-autoloader --ignore-platform-reqs
+  docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 update --no-dev --no-progress --optimize-autoloader
 
 
 # Sometimes composer git clones things rather than using zips.
@@ -24,4 +24,3 @@ docker run --rm -it -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app \
 # https://github.com/wbstack/mediawiki/issues/5
 echo "Cleaning up any .git directories in composer packages..."
 find ./ -mindepth 1 -regex '^./vendor/.*/.*/\.git\(/.*\)?' -delete
-
