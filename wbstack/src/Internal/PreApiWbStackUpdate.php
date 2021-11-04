@@ -26,6 +26,6 @@ class PreApiWbStackUpdate {
 			'return' => $return,
 			'output' => $out,
 		];
-		echo json_encode($res);
+		echo json_encode(['wbstackUpdate' => $res]);
     }
 }
