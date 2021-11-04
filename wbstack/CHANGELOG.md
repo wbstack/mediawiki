@@ -2,6 +2,14 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.36-7.4-20211104-0 
+
+- Move internal update API outside of MediaWiki
+
+## 1.36-7.4-20211103-0
+
+- Update StopForumSpam extension (bug fix)
+- Don't ignore composer platform reqs
 
 ## 1.36-7.4-20211029-0
 
@@ -13,6 +21,11 @@ Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build numb
 ## 1.36-7.4-20211028-0
 
 - First 1.36 code release (at this point untested)
+
+
+## 1.35-7.4-20211022-0-fix1
+
+- Enable replication locally
 
 ## 1.35-7.4-20211022-0
 
