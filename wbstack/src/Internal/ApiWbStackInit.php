@@ -1,6 +1,8 @@
 <?php
 
 namespace WBStack\Internal;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 
 /**
  * This API is called when a wiki is first created.
@@ -25,20 +27,22 @@ class ApiWbStackInit extends \ApiBase {
         $email = $this->getParameter('email');
         $password = $this->getParameter('password');
 
+        $services = MediaWikiServices::getInstance();
+
         // TODO validation? but our app should always send the right stuff now anyway..
 
         // Get a user object that we will be interacting with
-        $user = \User::newFromName( $username );
+        $user = $services->getUserFactory()->newFromName( $username, UserFactory::RIGOR_VALID );
 
         // The user that we want to create should NOT already exist, so bail quickly if it does.
         // TODO the user could be renamed?, so check if # of users > 0 instead here too?
         if($user->idForName() !== 0){
-            $this->addFailedNote('User already existed');
+            $this->addFailedNote( 'User already existed: ' . $user->idForName() );
             return;
         }
 
         // Create the user
-        $createStatus = \MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
+        $createStatus = $services->getAuthManager()->autoCreateUser(
             $user,
             \MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
             false
