@@ -10,18 +10,14 @@ namespace WBStack\Internal;
  * TODO allow other maint scripts too?
  */
 
-class ApiWbStackUpdate extends \ApiBase {
-    public function mustBePosted() {return true;}
-    public function isWriteMode() {return true;}
-    public function isInternal() {return true;}
+class PreApiWbStackUpdate {
     public function execute() {
-        global $IP;
-
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 
 		// Run update.php
-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/maintenance/update.php --quick';
+		$mwPath = realpath( __DIR__ . '/../../../' );
+		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $mwPath . '/maintenance/update.php --quick';
 		exec($cmd, $out, $return);
 
 		// Return appropriate result
@@ -30,9 +26,6 @@ class ApiWbStackUpdate extends \ApiBase {
 			'return' => $return,
 			'output' => $out,
 		];
-		$this->getResult()->addValue( null, $this->getModuleName(), $res );
-    }
-    public function getAllowedParams() {
-        return [];
+		echo json_encode(['wbstackUpdate' => $res]);
     }
 }
