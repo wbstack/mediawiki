@@ -22,7 +22,6 @@ Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build numb
 
 - First 1.36 code release (at this point untested)
 
-
 ## 1.35-7.4-20211022-0-fix1
 
 - Enable replication locally
