@@ -27,6 +27,11 @@ $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
 
+$wwUseMailgunExtension = true; // default for wbstack
+if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
+    $wwUseMailgunExtension = false;
+}
+
 #######################################
 ## ---  Base MediaWiki Settings  --- ##
 #######################################
@@ -217,6 +222,18 @@ $wgEmailConfirmToEdit = true;
 $wgEmergencyContact = "emergency.wbstack@addshore.com";
 $wgPasswordSender = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 $wgNoReplyAddress = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
+
+// SMTP
+if (getenv('MW_SMTP_ENABLED') === 'yes') {
+    $wgSMTP = [
+        'host'     => getenv('MW_SMTP_HOST'),     // could also be an IP address. Where the SMTP server is located. If using SSL or TLS, add the prefix "ssl://" or "tls://".
+        'IDHost'   => getenv('MW_EMAIL_DOMAIN'),  // Generally this will be the domain name of your website (aka mywiki.org)
+        'port'     => getenv('MW_SMTP_PORT'),     // Port to use when connecting to the SMTP server
+        'auth'     => getenv('MW_SMTP_AUTH'),     // Should we use SMTP authentication (true or false)
+        'username' => getenv('MW_SMTP_USERNAME'), // Username to use for SMTP authentication (if being used)
+        'password' => getenv('MW_SMTP_PASSWORD')  // Password to use for SMTP authentication (if being used)
+    ];
+}
 
 // Output compression needs to be disabled in 1.35 until the below phab task is fixed...
 // TODO dig more to see if there is something else to do here...
@@ -451,11 +468,13 @@ $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
 $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
 
 # Mailgun
-wfLoadExtension( 'Mailgun' );
-$wgMailgunAPIKey = getenv('MW_MAILGUN_API_KEY');
-$wgMailgunDomain = getenv('MW_MAILGUN_DOMAIN');
-// Example Endpoint "https://api.mailgun.net"
-$wgMailgunEndpoint = getenv('MW_MAILGUN_ENDPOINT');
+if ($wwUseMailgunExtension) {
+    wfLoadExtension( 'Mailgun' );
+    $wgMailgunAPIKey = getenv('MW_MAILGUN_API_KEY');
+    $wgMailgunDomain = getenv('MW_MAILGUN_DOMAIN');
+    // Example Endpoint "https://api.mailgun.net"
+    $wgMailgunEndpoint = getenv('MW_MAILGUN_ENDPOINT');
+}
 
 # MobileFrontend
 wfLoadExtension( 'MobileFrontend' );
