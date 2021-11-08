@@ -1,6 +1,8 @@
 <?php
 
 namespace WBStack\Internal;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 
 /**
  * This class performs some set of actions as the PlatformReservedUser
@@ -12,12 +14,14 @@ class WbStackPlatformReservedUser{
     // TODO the email address should not be hardcoded? Use one from a mediawiki setting?
     const PLATFORM_RESERVED_EMAIL = 'PlatformReservedUser.mediawikiuser.platform@wbstack.com';
 
-    public static function getUser() {
-        return \User::newFromName( self::PLATFORM_RESERVED_USER );
+    public static function getUser( MediaWikiServices $services = null ) {
+        $services = $services ?: MediaWikiServices::getInstance();
+        return $services->getUserFactory()->newFromName( self::PLATFORM_RESERVED_USER, UserFactory::RIGOR_VALID );
     }
 
     public static function createIfNotExists() {
-        $user = self::getUser();
+        $services = MediaWikiServices::getInstance();
+        $user = self::getUser( $services );
 
         // Check the user doesn't already exist
         // TODO the user could be renamed, so check if # of users > 0 instead here..
@@ -30,7 +34,7 @@ class WbStackPlatformReservedUser{
 
         // Create the user
         // TODO check create status?
-        $createStatus = \MediaWiki\Auth\AuthManager::singleton()->autoCreateUser(
+        $createStatus = $services->getAuthManager()->autoCreateUser(
             $user,
             \MediaWiki\Auth\AuthManager::AUTOCREATE_SOURCE_MAINT,
             false
