@@ -229,7 +229,7 @@ if (getenv('MW_SMTP_ENABLED') === 'yes') {
         'host'     => getenv('MW_SMTP_HOST'),     // could also be an IP address. Where the SMTP server is located. If using SSL or TLS, add the prefix "ssl://" or "tls://".
         'IDHost'   => getenv('MW_EMAIL_DOMAIN'),  // Generally this will be the domain name of your website (aka mywiki.org)
         'port'     => getenv('MW_SMTP_PORT'),     // Port to use when connecting to the SMTP server
-        'auth'     => getenv('MW_SMTP_AUTH'),     // Should we use SMTP authentication (true or false)
+        'auth'     => getenv('MW_SMTP_AUTH') === true,     // Should we use SMTP authentication (true or false)
         'username' => getenv('MW_SMTP_USERNAME'), // Username to use for SMTP authentication (if being used)
         'password' => getenv('MW_SMTP_PASSWORD')  // Password to use for SMTP authentication (if being used)
     ];
