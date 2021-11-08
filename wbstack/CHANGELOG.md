@@ -2,6 +2,12 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.36-7.4-20211108-0
+
+- Update deprecated usages of `UserFactory` in wbstack code
+- Update deprecated usages of `AuthManager` in wbstack code
+- Add (conditional) SMTP configuration
+
 ## 1.36-7.4-20211104-0 
 
 - Move internal update API outside of MediaWiki
