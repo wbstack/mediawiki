@@ -27,6 +27,11 @@ $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
 
+$wwUseMailgunExtension = true; // default for wbstack
+if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
+    $wwUseMailgunExtension = false;
+}
+
 #######################################
 ## ---  Base MediaWiki Settings  --- ##
 #######################################
@@ -219,7 +224,7 @@ $wgPasswordSender = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 $wgNoReplyAddress = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 
 // SMTP
-if (getenv('MW_MAILGUN_ENABLED') !== 'yes') {     // do not configure SMTP if Mailgun Extension is wanted
+if (getenv('MW_SMTP_ENABLED') === 'yes') {
     $wgSMTP = [
         'host'     => getenv('MW_SMTP_HOST'),     // could also be an IP address. Where the SMTP server is located. If using SSL or TLS, add the prefix "ssl://" or "tls://".
         'IDHost'   => getenv('MW_EMAIL_DOMAIN'),  // Generally this will be the domain name of your website (aka mywiki.org)
@@ -463,7 +468,7 @@ $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
 $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
 
 # Mailgun
-if (getenv('MW_MAILGUN_ENABLED') === 'yes') {
+if ($wwUseMailgunExtension) {
     wfLoadExtension( 'Mailgun' );
     $wgMailgunAPIKey = getenv('MW_MAILGUN_API_KEY');
     $wgMailgunDomain = getenv('MW_MAILGUN_DOMAIN');
