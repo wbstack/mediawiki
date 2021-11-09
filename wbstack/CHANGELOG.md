@@ -2,9 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
-## 1.36-7.4-20211108-1
+## 1.36-7.4-20211109-0
 
 - Fix (conditional) SMTP configuration auth boolean setting
+
+## 1.36-7.4-20211108-1
 
 ## 1.36-7.4-20211108-0
 
