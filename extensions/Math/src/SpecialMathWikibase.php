@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\Math;
 
 use Exception;
+use ExtensionRegistry;
 use Html;
 use InvalidArgumentException;
 use MediaWiki\Extension\Math\Widget\WikibaseEntitySelector;
@@ -238,7 +239,7 @@ class SpecialMathWikibase extends SpecialPage {
 	 * @param string $header Plain text
 	 * @return string Raw HTML
 	 */
-	private static function createHTMLHeader( string $header ) : string {
+	private static function createHTMLHeader( string $header ): string {
 		return Html::rawElement(
 			'h2',
 			[],
@@ -251,6 +252,6 @@ class SpecialMathWikibase extends SpecialPage {
 	 * @return bool
 	 */
 	public static function isWikibaseAvailable() {
-		return class_exists( '\Wikibase\Client\WikibaseClient' );
+		return ExtensionRegistry::getInstance()->isLoaded( 'WikibaseClient' );
 	}
 }

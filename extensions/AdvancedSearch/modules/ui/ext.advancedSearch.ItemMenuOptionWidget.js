@@ -5,7 +5,7 @@
 	 * @extends OO.ui.MenuOptionWidget
 	 *
 	 * @constructor
-	 * @param {Object} config Configuration object
+	 * @param {Object} [config]
 	 */
 	mw.libs.advancedSearch.ui.ItemMenuOptionWidget = function ( config ) {
 		var layout,

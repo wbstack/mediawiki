@@ -1,6 +1,5 @@
 <?php
 
-use MediaWiki\Auth\AuthManager;
 use MediaWiki\MediaWikiServices;
 
 class AccountRequestSubmission {
@@ -146,12 +145,8 @@ class AccountRequestSubmission {
 				return [ false, $context->msg( 'requestaccount-resub' )->escaped() ];
 			}
 		}
-		if ( method_exists( MediaWikiServices::class, 'getAuthManager' ) ) {
-			// MediaWiki 1.35+
-			$authManager = MediaWikiServices::getInstance()->getAuthManager();
-		} else {
-			$authManager = AuthManager::singleton();
-		}
+
+		$authManager = MediaWikiServices::getInstance()->getAuthManager();
 		# Check if already in use
 		if ( $u->idForName() != 0 || $authManager->userExists( $u->getName() ) ) {
 			return [
@@ -164,7 +159,7 @@ class AccountRequestSubmission {
 		$u->setRealName( $this->realName );
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$dbw = $lbFactory->getMainLB()->getConnection( DB_MASTER );
+		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
 		$dbw->startAtomic( __METHOD__ ); // ready to acquire locks
 		# Check pending accounts for name use
 		if ( !UserAccountRequest::acquireUsername( $u->getName() ) ) {
@@ -221,7 +216,7 @@ class AccountRequestSubmission {
 			$triplet = [ $this->attachmentTempPath, 'public', $pathRel ];
 			$status = $repo->storeBatch( [ $triplet ], FileRepo::OVERWRITE_SAME ); // save!
 			if ( !$status->isOk() ) {
-				$lbFactory->rollbackMasterChanges( __METHOD__ );
+				$lbFactory->rollbackPrimaryChanges( __METHOD__ );
 				return [ 'acct_request_file_store_error',
 					$context->msg( 'filecopyerror', $this->attachmentTempPath, $pathRel )->escaped() ];
 			}
@@ -255,7 +250,7 @@ class AccountRequestSubmission {
 		# Send confirmation, required!
 		$result = ConfirmAccount::sendConfirmationMail( $u, $this->ip, $token, $expires );
 		if ( !$result->isOK() ) {
-			$lbFactory->rollbackMasterChanges( __METHOD__ ); // nevermind
+			$lbFactory->rollbackPrimaryChanges( __METHOD__ ); // nevermind
 			if ( isset( $repo ) && isset( $pathRel ) ) { // remove attachment
 				$repo->cleanupBatch( [ [ 'public', $pathRel ] ] );
 			}
@@ -269,7 +264,7 @@ class AccountRequestSubmission {
 
 		$dbw->endAtomic( __METHOD__ );
 
-		DeferredUpdates::addCallableUpdate( function () use ( $context, $reqUser, $cache ) {
+		DeferredUpdates::addCallableUpdate( static function () use ( $context, $reqUser, $cache ) {
 			global $wgAccountRequestThrottle;
 			# Clear cache for notice of how many account requests there are
 			ConfirmAccount::clearAccountRequestCountCache();

@@ -19,7 +19,6 @@
  */
 
 use MediaWiki\StopForumSpam\DenyListManager;
-use MediaWiki\StopForumSpam\DenyListUpdate;
 use Wikimedia\IPUtils;
 
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
@@ -54,16 +53,17 @@ class SFSDenyListUpdate extends Maintenance {
 
 	public function execute() {
 		global $wgSFSIPListLocation;
+
 		if ( $wgSFSIPListLocation === false ) {
-			$this->fatalError( '$wgSFSIPListLocation has not been properly configured.' );
+			$this->fatalError( '$wgSFSIPListLocation has not been configured.' );
 		}
 
 		if ( $this->hasOption( 'show' ) ) {
 			$this->output( "List of SFS IPs...\n\n" );
-			$IPs = DenyListUpdate::getDenyListIPs();
+			$ipAddresses = DenyListManager::singleton()->getCachedIpDenyList();
 			$this->output(
-				is_array( $IPs )
-				? implode( "\n", $IPs ) . "\n"
+				is_array( $ipAddresses )
+				? implode( "\n", $ipAddresses ) . "\n"
 				: "No denylisted IPs found in cache.\n"
 			);
 			return;
@@ -72,17 +72,17 @@ class SFSDenyListUpdate extends Maintenance {
 		if ( $this->hasOption( 'purge' ) ) {
 			$this->output( "Purge list of SFS IPs from cache...\n" );
 			$this->output(
-				DenyListUpdate::purgeDenyListIPs() === true ?
+				DenyListManager::singleton()->purgeCachedIpDenyList() === true ?
 				"Purge successful\n" : "Purge failed.\n"
 			);
 			return;
 		}
 
 		if ( $this->hasOption( 'check-ip' ) ) {
-			$IPAddress = IPUtils::sanitizeIP( $this->getOption( 'check-ip' ) );
-			if ( $IPAddress !== null ) {
-				$this->output( "Checking cache for IP '{$IPAddress}'...\n\n" );
-				$result = DenyListManager::isDenyListed( $IPAddress );
+			$ipAddress = IPUtils::sanitizeIP( $this->getOption( 'check-ip' ) );
+			if ( $ipAddress !== null ) {
+				$this->output( "Checking cache for IP '{$ipAddress}'...\n\n" );
+				$result = DenyListManager::singleton()->isIpDenyListed( $ipAddress );
 				$outputMsg = $result == true ? "Found!" : "NOT Found!";
 				$this->output( "{$outputMsg}\n\n" );
 			} else {
@@ -95,8 +95,7 @@ class SFSDenyListUpdate extends Maintenance {
 		$before = microtime( true );
 
 		// Where the magic happens!
-		$dlu = new DenyListUpdate();
-		$results = $dlu->doUpdate();
+		$results = DenyListManager::singleton()->getIpDenyList( 'recache' );
 		if ( $results ) {
 			$diff = microtime( true ) - $before;
 

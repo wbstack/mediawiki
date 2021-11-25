@@ -12,7 +12,7 @@
 	"type": "editor",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.34.0"
+		"MediaWiki": ">= 1.35.0"
 	},
 	"config": {
 		"CodeMirrorEnableBracketMatching": {
@@ -23,6 +23,11 @@
 		"CodeMirrorAccessibilityColors": {
 			"value": false,
 			"description": "Temporary feature flag for accessibility colors.",
+			"public": true
+		},
+		"CodeMirrorLineNumberingNamespaces": {
+			"value": null,
+			"description": "List of namespace IDs where line numbering should be enabled, or `null` to enable for all namespaces. Set to [] to disable everywhere. Defaults to `null` for all namespaces.",
 			"public": true
 		}
 	},
@@ -159,6 +164,9 @@
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
 		"remoteExtPath": "CodeMirror/resources"
+	},
+	"DefaultUserOptions": {
+		"usecodemirror": 0
 	},
 	"QUnitTestModule": {
 		"localBasePath": "",

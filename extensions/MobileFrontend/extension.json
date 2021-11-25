@@ -1,6 +1,6 @@
 {
 	"name": "MobileFrontend",
-	"version": "2.3.0",
+	"version": "2.4.0",
 	"author": [
 		"Patrick Reilly",
 		"Max Semenik",
@@ -110,15 +110,6 @@
 			],
 			"styles": [
 				"resources/mobile.pagesummary.styles/pagesummary.less"
-			]
-		},
-		"mobile.messageBox.styles": {
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"styles": [
-				"resources/mobile.messageBox.styles/messageBox.less"
 			]
 		},
 		"mobile.placeholder.images": {
@@ -278,14 +269,10 @@
 				"user.options",
 				"mediawiki.util",
 				"mediawiki.api",
-				"mediawiki.viewport",
 				"mediawiki.router",
-				"jquery.throttle-debounce",
-				"mobile.messageBox.styles"
+				"jquery.throttle-debounce"
 			],
 			"messages": [
-				"mobile-frontend-categories-heading",
-				"mobile-frontend-categories-add",
 				"echo-mark-all-as-read",
 				"echo-overlay-link",
 				"mobile-frontend-talk-add-overlay-submit",
@@ -497,38 +484,6 @@
 				"mobile-frontend-media-load-fail-retry"
 			]
 		},
-		"mobile.categories.overlays": {
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"dependencies": [
-				"mediawiki.Title",
-				"mediawiki.router",
-				"mobile.startup",
-				"mobile.editor.overlay",
-				"oojs-ui.styles.icons-interactions",
-				"oojs-ui"
-			],
-			"scripts": [
-				"resources/dist/mobile.categories.overlays.js"
-			],
-			"styles": [
-				"resources/mobile.categories.overlays/categories.less"
-			],
-			"messages": [
-				"mobile-frontend-categories-subheading",
-				"mobile-frontend-categories-notification",
-				"mobile-frontend-categories-nocat",
-				"mobile-frontend-categories-search",
-				"mobile-frontend-categories-nodata",
-				"mobile-frontend-categories-summary",
-				"mobile-frontend-categories-add-heading",
-				"mobile-frontend-categories-add-wait",
-				"mobile-frontend-categories-normal",
-				"mobile-frontend-categories-hidden"
-			]
-		},
 		"mobile.languages.structured": {
 			"targets": [
 				"mobile",
@@ -547,7 +502,9 @@
 			"messages": [
 				"mobile-frontend-languages-structured-overlay-suggested-languages-header",
 				"mobile-frontend-languages-structured-overlay-all-languages-header",
-				"mobile-frontend-languages-structured-overlay-search-input-placeholder"
+				"mobile-frontend-languages-structured-overlay-search-input-placeholder",
+				"mobile-frontend-languages-structured-overlay-no-results",
+				"mobile-frontend-languages-structured-overlay-no-results-body"
 			]
 		},
 		"mobile.site": {
@@ -706,13 +663,6 @@
 		"localBasePath": "",
 		"remoteExtPath": "MobileFrontend"
 	},
-	"attributes": {
-		"EventLogging": {
-			"Schemas": {
-				"MobileWebSearch": 12054448
-			}
-		}
-	},
 	"Hooks": {
 		"APIGetAllowedParams": "MobileFrontend\\Api\\ApiParseExtender::onAPIGetAllowedParams",
 		"APIAfterExecute": "MobileFrontend\\Api\\ApiParseExtender::onAPIAfterExecute",
@@ -799,20 +749,16 @@
 				"amc": true
 			}
 		},
-		"MFContentProviderTryLocalContentFirst": {
-			"value": true
+		"MFUseDesktopContributionsPage": {
+			"value": {
+				"base": false,
+				"beta": false,
+				"amc": true
+			}
 		},
-		"MFContentProviderClass": {
-			"value": "MobileFrontend\\ContentProviders\\DefaultContentProvider"
-		},
-		"MFMwApiContentProviderBaseUri": {
-			"value": "https://en.wikipedia.org/w/api.php"
-		},
-		"MFContentProviderScriptPath": {
+		"wgMFScriptPath": {
+			"description": "Reroute search queries to a different host",
 			"value": ""
-		},
-		"MFMcsContentProviderBaseUri": {
-			"value": "https://en.wikipedia.org/api/rest_v1"
 		},
 		"MFEnableXAnalyticsLogging": {
 			"value": false
@@ -824,11 +770,12 @@
 		"MFEnableJSConsoleRecruitment": {
 			"value": false
 		},
-		"MFAlwaysUseContentProvider": {
-			"value": false
-		},
 		"MFMobileFormatterOptions": {
 			"value": {
+				"excludeNamespaces": [
+					10,
+					-1
+				],
 				"maxImages": 1000,
 				"maxHeadings": 4000,
 				"headings": [
@@ -873,18 +820,6 @@
 		},
 		"MFLazyLoadSkipSmallImages": {
 			"value": false
-		},
-		"MFMobileFormatterNamespaceBlacklist": {
-			"value": [
-				10,
-				-1
-			]
-		},
-		"MFNoMobileCategory": {
-			"value": false
-		},
-		"MFNoMobilePages": {
-			"value": []
 		},
 		"MFSpecialPageTaglines": {
 			"value": []
@@ -974,9 +909,6 @@
 		},
 		"MFRSSFeedLink": {
 			"value": false
-		},
-		"MFSchemaSearchSampleRate": {
-			"value": 0.001
 		},
 		"MFStripResponsiveImages": {
 			"value": true

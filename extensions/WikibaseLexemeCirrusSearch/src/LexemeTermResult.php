@@ -193,7 +193,7 @@ class LexemeTermResult extends BaseResultsType {
 			$descriptionMaker = new LexemeDescription( $termLookup, $this->idParser,
 				$this->displayLanguage );
 			// Create full descriptons and instantiate TermSearchResult objects
-			return array_map( function ( $raw ) use ( $descriptionMaker, $langCode ) {
+			return array_map( static function ( $raw ) use ( $descriptionMaker, $langCode ) {
 				return new TermSearchResult(
 					$raw['term'],
 					$raw['type'],

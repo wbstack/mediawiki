@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Anont",
 			"Bluemersen",
 			"Garam",
 			"Hwangjy9",
@@ -15,6 +16,7 @@
 		]
 	},
 	"minerva-last-modified-date": "$1 $2에 마지막으로 편집됨",
+	"minerva-watchlist-cta": "이 문서와 문서의 모든 변경사항을 추적하세요.",
 	"minerva-talk-add-topic": "토론 추가",
 	"mobile-frontend-cookies-required": "보기 모드를 전환하려면 쿠키가 필요합니다. 쿠키를 활성화하고 나서 다시 시도하세요.",
 	"mobile-frontend-editor-edit": "편집",
@@ -60,6 +62,10 @@
 	"minerva-page-actions-permalink": "고유 링크",
 	"minerva-page-actions-backlinks": "여기를 가리키는 문서",
 	"minerva-page-actions-cite": "문서 인용",
+	"minerva-page-actions-move": "이동",
+	"minerva-page-actions-delete": "삭제",
+	"minerva-page-actions-protect": "보호",
+	"minerva-page-actions-unprotect": "보호 해제",
 	"minerva-page-actions-user-groups": "사용자 그룹",
 	"minerva-page-actions-logs": "기록",
 	"minerva-page-actions-wikibase": "{{WBREPONAME}} 항목",
@@ -72,7 +78,8 @@
 	"skinname-minerva": "미네르바 노이에",
 	"minerva-skin-desc": "반응형 모바일 우선 스킨",
 	"skin-minerva-issue-learn-more": "더 알아보기",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton": "분류",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton-description": "문서 분류 보기",
-	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "문서의 문제들(틀:ambox)은 문서에서 인라인 처리됩니다."
+	"skin-minerva-mobile-option-MinervaShowCategories": "분류",
+	"skin-minerva-mobile-option-MinervaShowCategories-description": "문서 분류 보기",
+	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "문서의 문제들(틀:ambox)은 문서에서 인라인 처리됩니다.",
+	"skin-minerva-recentchanges-warning-enhanced-not-supported": "유감스럽지만, 문서별 그룹화는 모바일에서는 가능하지 않습니다. 페이지별 그룹화를 원하신다면 데스크탑 사이트를 방문해 주세요."
 }

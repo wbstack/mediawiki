@@ -5,12 +5,12 @@ namespace Wikibase\Client\UpdateRepo;
 use IJobSpecification;
 use JobQueueGroup;
 use JobSpecification;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserIdentity;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Title;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Store\SiteLinkLookup;
 
 /**
@@ -21,11 +21,6 @@ use Wikibase\Lib\Store\SiteLinkLookup;
  * @author Marius Hoch < hoo@online.de >
  */
 abstract class UpdateRepo {
-
-	/**
-	 * @var string
-	 */
-	private $repoDB;
 
 	/**
 	 * @var UserIdentity
@@ -53,12 +48,16 @@ abstract class UpdateRepo {
 	private $logger;
 
 	/**
+	 * @var ClientDomainDb
+	 */
+	private $clientDb;
+
+	/**
 	 * @var EntityId|null|bool
 	 */
 	private $entityId = false;
 
 	/**
-	 * @param string $repoDB IDatabase name of the repo
 	 * @param SiteLinkLookup $siteLinkLookup
 	 * @param LoggerInterface $logger
 	 * @param UserIdentity $user
@@ -66,19 +65,19 @@ abstract class UpdateRepo {
 	 * @param Title $title Title in the client that has been changed
 	 */
 	public function __construct(
-		$repoDB,
 		SiteLinkLookup $siteLinkLookup,
 		LoggerInterface $logger,
+		ClientDomainDb $clientDb,
 		UserIdentity $user,
 		$siteId,
 		Title $title
 	) {
-		$this->repoDB = $repoDB;
 		$this->siteLinkLookup = $siteLinkLookup;
 		$this->logger = $logger;
 		$this->user = $user;
 		$this->siteId = $siteId;
 		$this->title = $title;
+		$this->clientDb = $clientDb;
 	}
 
 	/**
@@ -163,7 +162,7 @@ abstract class UpdateRepo {
 	 * @return int
 	 */
 	protected function getJobDelay() {
-		$lagArray = MediaWikiServices::getInstance()->getDBLoadBalancer()->getMaxLag();
+		$lagArray = $this->clientDb->replication()->getMaxLag();
 		// This should be good enough, especially given that lagged servers get
 		// less load by the load balancer, thus it's very unlikely we'll end
 		// up on the server with the highest lag.

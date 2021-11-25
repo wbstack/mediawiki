@@ -46,7 +46,7 @@ export default function createReferenceGateway() {
 
 	/**
 	 * @param {mw.Title} title
-	 * @param {Element} el
+	 * @param {HTMLAnchorElement} el
 	 * @return {AbortPromise<ReferencePreviewModel>}
 	 */
 	function fetchPreviewForTitle( title, el ) {
@@ -59,7 +59,7 @@ export default function createReferenceGateway() {
 			( !$referenceText.text().trim() && !$referenceText.children().length )
 		) {
 			return $.Deferred().reject(
-				'Footnote not found',
+				'Footnote not found or empty',
 				// Required to set `showNullPreview` to false and not open an error popup
 				{ textStatus: 'abort', xhr: { readyState: 0 } }
 			).promise( { abort() {} } );
@@ -70,7 +70,8 @@ export default function createReferenceGateway() {
 			extract: $referenceText.html(),
 			type: previewTypes.TYPE_REFERENCE,
 			referenceType: scrapeReferenceType( $referenceText ),
-			sourceElementId: el && el.parentNode && el.parentNode.id
+			// Note: Even the top-most HTMLHtmlElement is guaranteed to have a parent.
+			sourceElementId: el.parentNode.id
 		};
 
 		return $.Deferred().resolve( model ).promise( { abort() {} } );

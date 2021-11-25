@@ -148,6 +148,10 @@ $.extend( RevisionListView.prototype, {
 	 * @param {MouseEvent} event
 	 */
 	setRevisionHovered: function ( $revisionWrapper, event ) {
+		if ( !$revisionWrapper.length ) {
+			return;
+		}
+
 		var hasMovedTop = event.pageY - $revisionWrapper.offset().top < $revisionWrapper.height() / 2,
 			isOlderTop = $revisionWrapper.hasClass( 'mw-revslider-revision-older' ) && hasMovedTop,
 			isNewerBottom = $revisionWrapper.hasClass( 'mw-revslider-revision-newer' ) && !hasMovedTop,
@@ -210,9 +214,10 @@ $.extend( RevisionListView.prototype, {
 	 * @param {jQuery} $revisionWrapper
 	 */
 	unsetRevisionGhosts: function ( $revisionWrapper ) {
-		$revisionWrapper.children().removeClass( 'mw-revslider-revision-hovered' );
-		$revisionWrapper.prev().children().removeClass( 'mw-revslider-revision-hovered' );
-		$revisionWrapper.next().children().removeClass( 'mw-revslider-revision-hovered' );
+		$revisionWrapper.children()
+			.add( $revisionWrapper.prev().children() )
+			.add( $revisionWrapper.next().children() )
+			.removeClass( 'mw-revslider-revision-hovered' );
 	},
 
 	/**

@@ -1,22 +1,21 @@
 {
 	"@metadata": {
 		"authors": [
+			"Les Meloures",
 			"Robby"
 		]
 	},
 	"popups-message": "Biller wéi Säiten ausgesinn",
 	"popups-desc": "Weist e Popup wéi et ausgesäit, wann de Benotzer mat der Maus iwwer e Säitelink fiert.",
-	"popups-settings-title": "Säit kucken ouni ofzespäicheren",
-	"popups-settings-option-simple": "Aschalten",
-	"popups-settings-option-simple-description": "Et séieren Iwwerbléck iwwer en Thema kréien iwwer dem Liese vun enger Säit.",
-	"popups-settings-option-advanced": "Erweidert",
-	"popups-settings-option-advanced-description": "Weist wéi de Link ausgesäit an d'Ännerungsfunktioun an de Menüe. Dëst gëtt vu villen Auteure benotzt.",
-	"popups-settings-option-off": "Ausschalten",
+	"popups-settings-title": "Gekuckt ouni ofzespäicheren",
+	"popups-settings-option-page": "Aschalten",
+	"popups-settings-option-page-description": "Et séieren Iwwerbléck iwwer en Thema kréien iwwer dem Liese vun enger Säit.",
+	"popups-settings-option-reference": "Referenze kucken ouni ze späicheren",
 	"popups-settings-save": "Späicheren",
 	"popups-settings-help-ok": "Fäerdeg",
 	"popups-settings-cancel": "Ofbriechen",
-	"popups-settings-enable": "Kucken ouni ze späicheren aktivéieren",
-	"popups-preview-no-preview": "Et gouf e Problem fir dëst ze weisen",
+	"popups-settings-enable": "Astellungen vun 'Kucken ouni ze späicheren' änneren",
+	"popups-preview-no-preview": "Et gouf e Probleem fir dëst ze weisen",
 	"popups-preview-footer-read": "Op dës Säit goen",
 	"popups-preview-disambiguation": "Dësen Titel bezitt sech op méi wéi eng Säit",
 	"popups-preview-disambiguation-link": "Änlech Säite weisen",

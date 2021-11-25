@@ -2,15 +2,16 @@
 
 namespace Wikibase\Lib\Store\Sql;
 
-use DBAccessBase;
 use InvalidArgumentException;
 use MediaWiki\Logger\LoggerFactory;
 use MWException;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\SiteLink;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\SiteLinkStore;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\IDatabase;
@@ -23,7 +24,7 @@ use Wikimedia\Rdbms\IDatabase;
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  * @author Daniel Kinzler
  */
-class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
+class SiteLinkTable implements SiteLinkStore {
 
 	/**
 	 * @var LoggerInterface
@@ -40,31 +41,24 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 	 */
 	protected $readonly;
 
+	/** @var RepoDomainDb */
+	private $db;
+
 	/**
 	 * @param string $table The table to use for the sitelinks
 	 * @param bool $readonly Whether the table can be modified.
-	 * @param string|bool $wiki The wiki's database to connect to.
-	 *        Must be a value LBFactory understands. Defaults to false, which is the local wiki.
-	 *
-	 * @throws MWException
+	 * @param RepoDomainDb $db
 	 */
-	public function __construct( $table, $readonly, $wiki = false ) {
-		if ( !is_string( $table ) ) {
-			throw new MWException( '$table must be a string.' );
-		}
-		if ( !is_bool( $readonly ) ) {
-			throw new MWException( '$readonly must be boolean.' );
-		}
-		if ( !is_string( $wiki ) && $wiki !== false ) {
-			throw new MWException( '$wiki must be a string or false.' );
-		}
-
+	public function __construct(
+		string $table,
+		bool $readonly,
+		RepoDomainDb $db
+	) {
 		$this->table = $table;
 		$this->readonly = $readonly;
+		$this->db = $db;
 		// TODO: Inject
 		$this->logger = LoggerFactory::getInstance( 'Wikibase' );
-
-		parent::__construct( $wiki );
 	}
 
 	/**
@@ -115,7 +109,7 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 		}
 
 		$ok = true;
-		$dbw = $this->getConnection( DB_MASTER );
+		$dbw = $this->db->connections()->getWriteConnectionRef();
 
 		if ( $linksToDelete ) {
 			$this->logger->debug(
@@ -138,8 +132,6 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 			);
 			$ok = $this->insertLinks( $item, $linksToInsert, $dbw );
 		}
-
-		$this->releaseConnection( $dbw );
 
 		return $ok;
 	}
@@ -225,15 +217,13 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 			throw new MWException( 'Cannot write when in readonly mode' );
 		}
 
-		$dbw = $this->getConnection( DB_MASTER );
+		$dbw = $this->db->connections()->getWriteConnectionRef();
 
 		$dbw->delete(
 			$this->table,
 			[ 'ips_item_id' => $itemId->getNumericId() ],
 			__METHOD__
 		);
-
-		$this->releaseConnection( $dbw );
 
 		return true;
 	}
@@ -256,9 +246,9 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 		// We store page titles with spaces instead of underscores
 		$pageTitle = str_replace( '_', ' ', $pageTitle );
 
-		$db = $this->getConnection( DB_REPLICA );
+		$dbr = $this->db->connections()->getReadConnectionRef();
 
-		$result = $db->selectRow(
+		$result = $dbr->selectRow(
 			$this->table,
 			[ 'ips_item_id' ],
 			[
@@ -268,7 +258,6 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 			__METHOD__
 		);
 
-		$this->releaseConnection( $db );
 		return $result === false ? null : ItemId::newFromNumber( (int)$result->ips_item_id );
 	}
 
@@ -284,51 +273,44 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 	}
 
 	/**
-	 * @see SiteLinkStore::clear
-	 *
-	 * @return boolean Success indicator
-	 * @throws MWException
-	 */
-	public function clear() {
-		if ( $this->readonly ) {
-			throw new MWException( 'Cannot write when in readonly mode' );
-		}
-
-		$dbw = $this->getConnection( DB_MASTER );
-
-		$dbw->delete( $this->table, '*', __METHOD__ );
-
-		$this->releaseConnection( $dbw );
-		return true;
-	}
-
-	/**
-	 * @see SiteLinkLookup::getLinks
-	 *
-	 * @param int[] $numericIds Numeric (unprefixed) item ids
-	 * @param string[] $siteIds
-	 * @param string[] $pageNames
-	 *
-	 * @return array[]
 	 * @note The arrays returned by this method do not contain badges!
 	 */
-	public function getLinks( array $numericIds = [], array $siteIds = [], array $pageNames = [] ) {
-		$dbr = $this->getConnection( DB_REPLICA );
-
+	public function getLinks(
+		?array $numericIds = null,
+		?array $siteIds = null,
+		?array $pageNames = null
+	): array {
 		$conditions = [];
 
-		if ( $numericIds !== [] ) {
+		if ( $numericIds !== null ) {
 			$conditions['ips_item_id'] = $numericIds;
 		}
 
-		if ( $siteIds !== [] ) {
+		if ( $siteIds !== null ) {
 			$conditions['ips_site_id'] = $siteIds;
 		}
 
-		if ( $pageNames !== [] ) {
+		if ( $pageNames !== null ) {
 			$conditions['ips_site_page'] = $pageNames;
 		}
 
+		foreach ( $conditions as $condition ) {
+			if ( $condition === [] ) {
+				return [];
+			}
+		}
+
+		if ( $numericIds === null && $pageNames === null ) {
+			$this->logger->warning(
+				__METHOD__ . ': querying for all links of one or more sites, this is expensive! (T276762)',
+				[
+					'siteIds' => $siteIds,
+					'exception' => new RuntimeException()
+				]
+			);
+		}
+
+		$dbr = $this->db->connections()->getReadConnectionRef();
 		$links = $dbr->select(
 			$this->table,
 			[
@@ -350,7 +332,6 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 			];
 		}
 
-		$this->releaseConnection( $dbr );
 		return $siteLinks;
 	}
 
@@ -365,7 +346,7 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 	public function getSiteLinksForItem( ItemId $itemId ) {
 		$numericId = $itemId->getNumericId();
 
-		$dbr = $this->getConnection( DB_REPLICA );
+		$dbr = $this->db->connections()->getReadConnectionRef();
 
 		$rows = $dbr->select(
 			$this->table,
@@ -383,8 +364,6 @@ class SiteLinkTable extends DBAccessBase implements SiteLinkStore {
 		foreach ( $rows as $row ) {
 			$siteLinks[] = new SiteLink( $row->ips_site_id, $row->ips_site_page );
 		}
-
-		$this->releaseConnection( $dbr );
 
 		return $siteLinks;
 	}

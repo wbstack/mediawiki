@@ -4,10 +4,11 @@ namespace Wikibase\Lexeme\MediaWiki\Api;
 
 use ApiBase;
 use ApiMain;
+use Deserializers\Deserializer;
 use LogicException;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\DataModel\SerializerFactory;
+use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermLanguageValidator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermSerializationValidator;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
@@ -24,13 +25,14 @@ use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\StringNormalizer;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\ChangeOp\Deserialization\ClaimsChangeOpDeserializer;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
@@ -75,13 +77,16 @@ class AddSense extends ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
 		SerializerFactory $baseDataModelSerializerFactory,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityIdParser $entityIdParser,
-		StringNormalizer $stringNormalizer
+		Deserializer $externalFormatStatementDeserializer,
+		Store $store,
+		StringNormalizer $stringNormalizer,
+		SummaryFormatter $summaryFormatter
 	) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
 		$senseSerializer = new SenseSerializer(
 			$baseDataModelSerializerFactory->newTermListSerializer(),
 			$baseDataModelSerializerFactory->newStatementListSerializer()
@@ -101,16 +106,16 @@ class AddSense extends ApiBase {
 						)
 					),
 					new ClaimsChangeOpDeserializer(
-						$wikibaseRepo->getExternalFormatStatementDeserializer(),
-						$wikibaseRepo->getChangeOpFactoryProvider()->getStatementChangeOpFactory()
+						$externalFormatStatementDeserializer,
+						$changeOpFactoryProvider->getStatementChangeOpFactory()
 					)
 				)
 			),
 			$senseSerializer,
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
-			$wikibaseRepo->getSummaryFormatter(),
-			function ( $module ) use ( $apiHelperFactory ) {
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
+			$summaryFormatter,
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			}
 		);
@@ -211,7 +216,7 @@ class AddSense extends ApiBase {
 		}
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$request->getLexemeId(),
 			$lexemeRevision->getRevisionId()
 		);
@@ -231,7 +236,9 @@ class AddSense extends ApiBase {
 			$lexeme,
 			$summaryString,
 			$flags,
-			$tokenThatDoesNotNeedChecking
+			$tokenThatDoesNotNeedChecking,
+			null,
+			$params['tags'] ?: []
 		);
 
 		if ( !$status->isGood() ) {
@@ -267,6 +274,10 @@ class AddSense extends ApiBase {
 				AddSenseRequestParser::PARAM_DATA => [
 					self::PARAM_TYPE => 'text',
 					self::PARAM_REQUIRED => true,
+				],
+				'tags' => [
+					self::PARAM_TYPE => 'tags',
+					self::PARAM_ISMULTI => true,
 				],
 				'bot' => [
 					self::PARAM_TYPE => 'boolean',
@@ -320,10 +331,10 @@ class AddSense extends ApiBase {
 			AddSenseRequestParser::PARAM_DATA => json_encode( $exampleData )
 		] );
 
-		$languages = array_map( function ( $r ) {
+		$languages = array_map( static function ( $r ) {
 			return $r['language'];
 		}, $exampleData['glosses'] );
-		$glosses = array_map( function ( $r ) {
+		$glosses = array_map( static function ( $r ) {
 			return $r['value'];
 		}, $exampleData['glosses'] );
 

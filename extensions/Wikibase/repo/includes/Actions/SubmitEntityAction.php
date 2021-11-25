@@ -12,8 +12,6 @@ use MWException;
 use Page;
 use Status;
 use Title;
-use User;
-use WatchAction;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Content\EntityContent;
 use Wikibase\Repo\SummaryFormatter;
@@ -46,8 +44,7 @@ class SubmitEntityAction extends EditEntityAction {
 	public function __construct( Page $page, IContextSource $context = null ) {
 		parent::__construct( $page, $context );
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$this->summaryFormatter = $wikibaseRepo->getSummaryFormatter();
+		$this->summaryFormatter = WikibaseRepo::getSummaryFormatter();
 	}
 
 	public function getName() {
@@ -246,14 +243,13 @@ class SubmitEntityAction extends EditEntityAction {
 		$page = WikiPage::factory( $title );
 
 		// NOTE: Constraint checks are performed automatically via EntityContent::prepareSave.
-		$status = $page->doEditContent(
+		$status = $page->doUserEditContent(
 			$content,
+			$this->getUser(),
 			$summary,
 			/* flags */ 0,
 			$originalRevId ?: false,
-			$this->getUser(),
-			/* serialFormat */ null,
-			[],
+			/* tags */ [],
 			$undidRevId
 		);
 
@@ -302,15 +298,9 @@ class SubmitEntityAction extends EditEntityAction {
 	private function getEditTokenStatus( $editToken ) {
 		$status = Status::newGood();
 		$user = $this->getUser();
-
 		if ( !$user->matchEditToken( $editToken ) ) {
-			if ( $user->matchEditTokenNoSuffix( $editToken ) ) {
-				$status = Status::newFatal( 'token_suffix_mismatch' );
-			} else {
-				$status = Status::newFatal( 'session_fail_preview' );
-			}
+			$status = Status::newFatal( 'session_fail_preview' );
 		}
-
 		return $status;
 	}
 
@@ -322,11 +312,14 @@ class SubmitEntityAction extends EditEntityAction {
 	private function doWatch( Title $title ) {
 		$user = $this->getUser();
 
+		$services = MediaWikiServices::getInstance();
+		$userOptionsLookup = $services->getUserOptionsLookup();
+		$watchlistManager = $services->getWatchlistManager();
 		if ( $user->isRegistered()
-			&& $user->getOption( 'watchdefault' )
-			&& !$user->isWatched( $title, User::IGNORE_USER_RIGHTS )
+			&& $userOptionsLookup->getOption( $user, 'watchdefault' )
+			&& !$watchlistManager->isWatchedIgnoringRights( $user, $title )
 		) {
-			WatchAction::doWatch( $title, $user, User::IGNORE_USER_RIGHTS );
+			$watchlistManager->addWatchIgnoringRights( $user, $title );
 		}
 	}
 

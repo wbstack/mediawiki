@@ -6,7 +6,7 @@ use HashBagOStuff;
 use Hooks;
 use MediaWiki\MediaWikiServices;
 use ObjectCache;
-use Wikibase\DataAccess\EntitySource;
+use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataAccess\WikibaseServices;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Services\Entity\EntityPrefetcher;
@@ -15,6 +15,7 @@ use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\EntityRedirectLookup;
 use Wikibase\DataModel\Services\Lookup\RedirectResolvingEntityLookup;
 use Wikibase\Lib\Changes\EntityChangeFactory;
+use Wikibase\Lib\EntityTypeDefinitions;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\CacheAwarePropertyInfoStore;
 use Wikibase\Lib\Store\CacheRetrievingEntityRevisionLookup;
@@ -160,7 +161,7 @@ class SqlStore implements Store {
 	 */
 	private $idGenerator;
 
-	/** @var EntitySource */
+	/** @var DatabaseEntitySource */
 	private $entitySource;
 
 	/**
@@ -172,7 +173,7 @@ class SqlStore implements Store {
 	 * @param EntityNamespaceLookup $entityNamespaceLookup
 	 * @param IdGenerator $idGenerator
 	 * @param WikibaseServices $wikibaseServices Service container providing data access services
-	 * @param EntitySource $entitySource
+	 * @param DatabaseEntitySource $entitySource
 	 * @param SettingsArray $settings
 	 */
 	public function __construct(
@@ -184,7 +185,7 @@ class SqlStore implements Store {
 		EntityNamespaceLookup $entityNamespaceLookup,
 		IdGenerator $idGenerator,
 		WikibaseServices $wikibaseServices,
-		EntitySource $entitySource,
+		DatabaseEntitySource $entitySource,
 		SettingsArray $settings
 	) {
 		$this->entityChangeFactory = $entityChangeFactory;
@@ -204,19 +205,16 @@ class SqlStore implements Store {
 	}
 
 	/**
-	 * @inheritDoc
-	 */
-	public function clear() {
-		$this->newSiteLinkStore()->clear();
-	}
-
-	/**
 	 * @see Store::newSiteLinkStore
 	 *
 	 * @return SiteLinkStore
 	 */
 	public function newSiteLinkStore() {
-		return new SiteLinkTable( 'wb_items_per_site', false );
+		return new SiteLinkTable(
+			'wb_items_per_site',
+			false,
+			WikibaseRepo::getRepoDomainDbFactory()->newForEntitySource( $this->entitySource )
+		);
 	}
 
 	/**
@@ -239,7 +237,8 @@ class SqlStore implements Store {
 	 */
 	public function newItemsWithoutSitelinksFinder() {
 		return new SqlItemsWithoutSitelinksFinder(
-			$this->entityNamespaceLookup
+			$this->entityNamespaceLookup,
+			WikibaseRepo::getRepoDomainDbFactory()->newForEntitySource( $this->entitySource )
 		);
 	}
 
@@ -250,7 +249,7 @@ class SqlStore implements Store {
 		return new WikiPageEntityRedirectLookup(
 			$this->entityTitleLookup,
 			$this->entityIdLookup,
-			MediaWikiServices::getInstance()->getDBLoadBalancer()
+			WikibaseRepo::getRepoDomainDbFactory()->newForEntitySource( $this->entitySource )
 		);
 	}
 
@@ -307,19 +306,25 @@ class SqlStore implements Store {
 	 */
 	private function newEntityStore() {
 		$contentFactory = WikibaseRepo::getEntityContentFactory();
+		$entityTitleStoreLookup = WikibaseRepo::getEntityTitleStoreLookup();
+		$services = MediaWikiServices::getInstance();
 
 		$store = new WikiPageEntityStore(
 			$contentFactory,
+			$entityTitleStoreLookup,
 			$this->idGenerator,
 			$this->entityIdComposer,
-			MediaWikiServices::getInstance()->getRevisionStore(),
+			$services->getRevisionStore(),
 			$this->entitySource,
-			MediaWikiServices::getInstance()->getPermissionManager()
+			$services->getPermissionManager(),
+			$services->getWatchlistManager(),
+			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb()
 		);
 		$store->registerWatcher( $this->getEntityStoreWatcher() );
 
 		$store = new TypeDispatchingEntityStore(
-			WikibaseRepo::getDefaultInstance()->getEntityStoreFactoryCallbacks(),
+			WikibaseRepo::getEntityTypeDefinitions() // TODO inject
+				->get( EntityTypeDefinitions::ENTITY_STORE_FACTORY_CALLBACK ),
 			$store,
 			$this->getEntityRevisionLookup( self::LOOKUP_CACHING_DISABLED )
 		);
@@ -377,7 +382,8 @@ class SqlStore implements Store {
 		$nonCachingLookup = $this->wikibaseServices->getEntityRevisionLookup();
 
 		$nonCachingLookup = new TypeDispatchingEntityRevisionLookup(
-			WikibaseRepo::getDefaultInstance()->getEntityRevisionLookupFactoryCallbacks(),
+			WikibaseRepo::getEntityTypeDefinitions() // TODO inject
+				->get( EntityTypeDefinitions::ENTITY_REVISION_LOOKUP_FACTORY_CALLBACK ),
 			$nonCachingLookup
 		);
 
@@ -503,7 +509,7 @@ class SqlStore implements Store {
 		if ( $this->propertyInfoTable === null ) {
 			$this->propertyInfoTable = new PropertyInfoTable(
 				$this->entityIdComposer,
-				$this->entitySource->getDatabaseName(),
+				WikibaseRepo::getRepoDomainDbFactory()->newForEntitySource( $this->entitySource ),
 				true
 			);
 		}
@@ -532,14 +538,21 @@ class SqlStore implements Store {
 	 * @return EntityChangeLookup
 	 */
 	public function getEntityChangeLookup() {
-		return new EntityChangeLookup( $this->entityChangeFactory, $this->entityIdParser );
+		return new EntityChangeLookup(
+			$this->entityChangeFactory,
+			$this->entityIdParser,
+			WikibaseRepo::getRepoDomainDbFactory()->newRepoDb()
+		);
 	}
 
 	/**
 	 * @return SqlChangeStore
 	 */
 	public function getChangeStore() {
-		return new SqlChangeStore( MediaWikiServices::getInstance()->getDBLoadBalancer() );
+		return new SqlChangeStore(
+			WikibaseRepo::getRepoDomainDbFactory()
+				->newForEntitySource( $this->entitySource )
+		);
 	}
 
 }

@@ -2,10 +2,10 @@
 
 namespace Wikibase\Lib\Store\Sql;
 
-use DBAccessBase;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\Changes\EntityChange;
 use Wikibase\Lib\Changes\EntityChangeFactory;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\ChunkAccess;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\IResultWrapper;
@@ -16,14 +16,7 @@ use Wikimedia\Rdbms\IResultWrapper;
  * @license GPL-2.0-or-later
  * @author Marius Hoch
  */
-class EntityChangeLookup extends DBAccessBase implements ChunkAccess {
-
-	/**
-	 * Flag to indicate that we need to query a master database.
-	 */
-	public const FROM_MASTER = 'master';
-
-	public const FROM_REPLICA = 'replica';
+class EntityChangeLookup implements ChunkAccess {
 
 	/**
 	 * @var EntityChangeFactory
@@ -35,20 +28,22 @@ class EntityChangeLookup extends DBAccessBase implements ChunkAccess {
 	 */
 	private $entityIdParser;
 
+	/** @var RepoDomainDb */
+	private $db;
+
 	/**
 	 * @param EntityChangeFactory $entityChangeFactory
 	 * @param EntityIdParser $entityIdParser
-	 * @param string|bool $wiki The target wiki's name. This must be an ID
-	 * that LBFactory can understand.
+	 * @param RepoDomainDb $db
 	 */
 	public function __construct(
 		EntityChangeFactory $entityChangeFactory,
 		EntityIdParser $entityIdParser,
-		$wiki = false
+		RepoDomainDb $db
 	) {
-		parent::__construct( $wiki );
 		$this->entityChangeFactory = $entityChangeFactory;
 		$this->entityIdParser = $entityIdParser;
+		$this->db = $db;
 	}
 
 	/**
@@ -100,38 +95,30 @@ class EntityChangeLookup extends DBAccessBase implements ChunkAccess {
 	}
 
 	/**
-	 * @param int $revisionId
-	 * @param string $mode One of the self::FROM_... constants.
+	 * @param string $entityId
 	 *
-	 * @return EntityChange|null
+	 * @return EntityChange[]
 	 */
-	public function loadByRevisionId( $revisionId, $mode = self::FROM_REPLICA ) {
-		Assert::parameterType( 'integer', $revisionId, '$revisionId' );
-
-		$change = $this->loadChanges(
-			[ 'change_revision_id' => $revisionId ],
-			[
-				'LIMIT' => 1
-			],
-			__METHOD__,
-			$mode === self::FROM_MASTER ? DB_MASTER : DB_REPLICA
-		);
-
-		return $change[0] ?? null;
+	public function loadByEntityIdFromPrimary( string $entityId ): array {
+		return $this->loadChanges( [ 'change_object_id' => $entityId ], [], __METHOD__, DB_PRIMARY );
 	}
 
 	/**
 	 * @param array $where
 	 * @param array $options
 	 * @param string $method
-	 * @param int $mode (DB_REPLICA or DB_MASTER)
+	 * @param int $mode (DB_REPLICA or DB_PRIMARY)
 	 *
 	 * @return EntityChange[]
 	 */
 	private function loadChanges( array $where, array $options, $method, $mode = DB_REPLICA ) {
-		$dbr = $this->getConnection( $mode );
+		if ( $mode === DB_REPLICA ) {
+			$db = $this->db->connections()->getReadConnectionRef();
+		} else {
+			$db = $this->db->connections()->getWriteConnectionRef();
+		}
 
-		$rows = $dbr->select(
+		$rows = $db->select(
 			'wb_changes',
 			[
 				'change_id', 'change_type', 'change_time', 'change_object_id',

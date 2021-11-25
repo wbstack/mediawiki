@@ -71,6 +71,10 @@ class SkinMinerva extends SkinMustache {
 	 */
 	public function getTemplateData() {
 			$data = parent::getTemplateData();
+			if ( !$this->hasCategoryLinks() ) {
+				unset( $data['html-categories'] );
+			}
+
 			$tpl = $this->prepareQuickTemplate();
 			$tplData = $tpl->execute();
 			return $data + $tplData;
@@ -154,8 +158,10 @@ class SkinMinerva extends SkinMustache {
 		$personalUrls = $tpl->get( 'personal_urls' );
 		$personalTools = $this->getSkin()->getPersonalToolsForMakeListItem( $personalUrls );
 
+		$nav = $tpl->get( 'content_navigation' ) ?? [];
+		$actions = $nav['actions'] ?? [];
 		$tpl->set( 'mainMenu', $this->getMainMenu()->getMenuData() );
-		$tpl->set( 'pageActionsMenu', $pageActionsDirector->buildMenu( $sidebar['TOOLBOX'] ) );
+		$tpl->set( 'pageActionsMenu', $pageActionsDirector->buildMenu( $sidebar['TOOLBOX'], $actions ) );
 		$tpl->set( 'userMenuHTML', $userMenuDirector->renderMenuData( $personalTools ) );
 	}
 
@@ -429,7 +435,8 @@ class SkinMinerva extends SkinMustache {
 		if ( $this->getUserPageHelper()->isUserPage() ) {
 			$pageUser = $this->getUserPageHelper()->getPageUser();
 			$fromDate = $pageUser->getRegistration();
-			if ( is_string( $fromDate ) ) {
+
+			if ( $this->getUserPageHelper()->isUserPageAccessibleToCurrentUser() && is_string( $fromDate ) ) {
 				$fromDateTs = wfTimestamp( TS_UNIX, $fromDate );
 
 				// This is shown when js is disabled. js enhancement made due to caching
@@ -459,7 +466,9 @@ class SkinMinerva extends SkinMustache {
 	 * @return string HTML for header
 	 */
 	protected function getHeadingHtml() {
-		if ( $this->getUserPageHelper()->isUserPage() ) {
+		$isUserPage = $this->getUserPageHelper()->isUserPage();
+		$isUserPageAccessible = $this->getUserPageHelper()->isUserPageAccessibleToCurrentUser();
+		if ( $isUserPage && $isUserPageAccessible ) {
 			// The heading is just the username without namespace
 			$heading = $this->getUserPageHelper()->getPageUser()->getName();
 		} else {
@@ -474,6 +483,12 @@ class SkinMinerva extends SkinMustache {
 	 */
 	private function isTalkPageWithViewAction() {
 		$title = $this->getTitle();
+
+		// Hook is @unstable and only for use by DiscussionTools. Do not use for any other purpose.
+		$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+		if ( !$hookContainer->run( 'MinervaNeueTalkPageOverlay', [ $title, $this->getOutput() ] ) ) {
+			return false;
+		}
 
 		return $title->isTalkPage() && Action::getActionName( $this->getContext() ) === "view";
 	}
@@ -581,9 +596,6 @@ class SkinMinerva extends SkinMustache {
 			}
 		}
 		$tpl->set( 'banners', $banners );
-		// These banners unlike 'banners' show inside the main content chrome underneath the
-		// page actions.
-		$tpl->set( 'internalBanner', '' );
 	}
 
 	/**
@@ -633,22 +645,6 @@ class SkinMinerva extends SkinMustache {
 	}
 
 	/**
-	 * Returns an array with details for a categories button.
-	 * @return array
-	 */
-	protected function getCategoryButton() {
-		return [
-			'attributes' => [
-				'href' => '#/categories',
-				// add hidden class (the overlay works only, when JS is enabled (class will
-				// be removed in categories/init.js)
-				'class' => 'category-button hidden',
-			],
-			'label' => $this->msg( 'categories' )->text()
-		];
-	}
-
-	/**
 	 * Returns an array of links for page secondary actions
 	 * @param BaseTemplate $tpl
 	 * @return array
@@ -686,10 +682,6 @@ class SkinMinerva extends SkinMustache {
 			$buttons['language'] = $this->getLanguageButton();
 		}
 
-		if ( $this->hasCategoryLinks() ) {
-			$buttons['categories'] = $this->getCategoryButton();
-		}
-
 		return $buttons;
 	}
 
@@ -705,7 +697,7 @@ class SkinMinerva extends SkinMustache {
 	 * @inheritDoc
 	 * @return array
 	 */
-	protected function getJsConfigVars() : array {
+	protected function getJsConfigVars(): array {
 		$title = $this->getTitle();
 
 		return array_merge( parent::getJsConfigVars(), [
@@ -731,20 +723,6 @@ class SkinMinerva extends SkinMustache {
 			$title = Title::newFromLinkTarget( $namespaceInfo->getTalkPage( $title ) );
 		}
 		return $title->isWikitextPage();
-	}
-
-	/**
-	 * Returns an array of modules related to the current context of the page.
-	 * @return array
-	 */
-	public function getContextSpecificModules() {
-		$modules = [];
-		$mobileFrontend = ExtensionRegistry::getInstance()->isLoaded( 'MobileFrontend' );
-		if ( $this->skinOptions->hasSkinOptions() && $mobileFrontend ) {
-			$modules[] = 'skins.minerva.options';
-		}
-
-		return $modules;
 	}
 
 	/**
@@ -780,14 +758,9 @@ class SkinMinerva extends SkinMustache {
 		}
 		$modules['styles']['core'] = $this->getSkinStyles();
 
-		$modules['minerva'] = array_merge(
-			$this->getContextSpecificModules(),
-			[
-				'skins.minerva.scripts'
-			]
-		);
-
-		Hooks::run( 'SkinMinervaDefaultModules', [ $this, &$modules ], '1.36' );
+		$modules['minerva'] = [
+			'skins.minerva.scripts'
+		];
 
 		return $modules;
 	}
@@ -805,7 +778,6 @@ class SkinMinerva extends SkinMustache {
 		$title = $this->getTitle();
 		$styles = [
 			'skins.minerva.base.styles',
-			'skins.minerva.content.styles',
 			'skins.minerva.content.styles.images',
 			'mediawiki.hlist',
 			'mediawiki.ui.icon',
@@ -820,6 +792,10 @@ class SkinMinerva extends SkinMustache {
 			$styles[] = 'skins.minerva.userpage.styles';
 		} elseif ( $this->isTalkPageWithViewAction() ) {
 			$styles[] = 'skins.minerva.talk.styles';
+		}
+
+		if ( $this->hasCategoryLinks() ) {
+			$styles[] = 'skins.minerva.categories.styles';
 		}
 
 		if ( $this->getUser()->isRegistered() ) {

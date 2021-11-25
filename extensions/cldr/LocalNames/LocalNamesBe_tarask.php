@@ -1,5 +1,6 @@
 <?php
 
+/** @phpcs-require-sorted-array */
 $languageNames = [
 	'ab' => 'абхаская',
 	'af' => 'афрыкаанс',
@@ -123,14 +124,15 @@ $languageNames = [
 	'udm' => 'удмурцкая',
 	'ug' => 'уйгурская',
 	'uk' => 'украінская',
+	'und' => 'невядомая',
 	'uz' => 'узбэцкая',
 	'vi' => 'віетнамская',
 	'vo' => 'валапюк',
-	'und' => 'невядомая',
 	'yi' => 'ідыш',
 	'zh' => 'кітайская',
 ];
 
+/** @phpcs-require-sorted-array */
 $currencyNames = [
 	'ALL' => 'альбанскі лек',
 	'AMD' => 'армянскі драм',
@@ -245,6 +247,7 @@ $currencyNames = [
 	'YER' => 'еменскі рыял',
 ];
 
+/** @phpcs-require-sorted-array */
 $countryNames = [
 	'AC' => 'Востраў Ушэсьця',
 	'AD' => 'Андора',

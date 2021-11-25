@@ -80,16 +80,23 @@
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} currentState
 	 */
 	function updateSearchResultLinks( currentState ) {
-		var extraParams = '';
-		// Skip the default to avoid noise in the user's address bar
-		if ( currentState.getSortMethod() !== 'relevance' ) {
-			extraParams += '&sort=' + currentState.getSortMethod();
-		}
-		extraParams += '&advancedSearch-current=' + currentState.toJSON();
+		var extraParams = '',
+			sort = currentState.getSortMethod(),
+			json = currentState.toJSON();
 
-		$( '.mw-prevlink, .mw-nextlink, .mw-numlink' ).attr( 'href', function ( i, href ) {
-			return href + extraParams;
-		} );
+		// Skip the default to avoid noise in the user's address bar
+		if ( sort !== 'relevance' ) {
+			extraParams += '&sort=' + sort;
+		}
+		if ( json ) {
+			extraParams += '&advancedSearch-current=' + json;
+		}
+
+		if ( extraParams ) {
+			$( '.mw-prevlink, .mw-nextlink, .mw-numlink' ).attr( 'href', function ( i, href ) {
+				return href + extraParams;
+			} );
+		}
 	}
 
 	/**
@@ -147,7 +154,7 @@
 	 * @param {jQuery} header
 	 * @param {mw.libs.advancedSearch.ui.NamespacePresets} presets
 	 * @param {mw.libs.advancedSearch.ui.NamespaceFilters} selection
-	 * @param {mw.libs.advancedSearch.dm.SearchableNamespaces} searchableNamespaces
+	 * @param {Object} searchableNamespaces Mapping namespace IDs to localized names
 	 * @return {jQuery}
 	 */
 	function buildNamespacesPaneElement( state, header, presets, selection, searchableNamespaces ) {
@@ -177,7 +184,7 @@
 	}
 
 	/**
-	 * @param {Array} searchableNamespaces
+	 * @param {Object} searchableNamespaces Mapping namespace IDs to localized names
 	 * @return {string[]}
 	 */
 	function getNamespacesFromUrl( searchableNamespaces ) {
@@ -204,7 +211,7 @@
 	}
 
 	/**
-	 * @param {Object} searchableNamespaces
+	 * @param {Object} searchableNamespaces Mapping namespace IDs to localized names
 	 * @param {mw.libs.advancedSearch.FieldCollection} fieldCollection
 	 * @return {mw.libs.advancedSearch.dm.SearchModel}
 	 */

@@ -30,7 +30,7 @@ class DeleteBatchForm {
 		$this->mPage = $request->getText( 'wpPage' );
 		$this->mReason = $request->getText( 'wpReason' );
 		$this->mFile = $request->getFileName( 'wpFile' );
-		$this->mFileTemp = $request->getFileTempName( 'wpFile' );
+		$this->mFileTemp = $request->getFileTempname( 'wpFile' );
 	}
 
 	/**
@@ -184,7 +184,7 @@ class DeleteBatchForm {
 		}
 
 		/* @todo run tests - run many tests */
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		if ( $filename ) {
 			/* if from filename, delete from filename */
 			for ( $linenum = 1; !feof( $file ); $linenum++ ) {
@@ -320,7 +320,7 @@ class DeleteBatchForm {
 		if ( $localFileExists ) {
 			// Flush DBs in case of fragile file operations
 			$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-			$lbFactory->commitMasterChanges( __METHOD__ );
+			$lbFactory->commitPrimaryChanges( __METHOD__ );
 		}
 
 		return true;

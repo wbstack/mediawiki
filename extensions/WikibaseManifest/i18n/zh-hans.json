@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Shizhao"
+		]
+	},
+	"wikibasemanifest-desc": "结合有关Wikibase安装的元数据，将其作为简单的API公开"
+}

@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use Wikimedia\Timestamp\TimestampException;
 
@@ -112,6 +113,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 		global $wgEchoNotifications;
 		// @todo don't depend upon globals
 
+		// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
 		$class = $wgEchoNotifications[$event->getType()]['presentation-model'];
 		return new $class( $event, $language, $user, $distributionType );
 	}
@@ -185,7 +187,7 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 */
 	public function getBundledIds() {
 		if ( $this->isBundled() ) {
-			return array_map( function ( EchoEvent $event ) {
+			return array_map( static function ( EchoEvent $event ) {
 				return $event->getId();
 			}, $this->getBundledEvents() );
 		}
@@ -671,7 +673,8 @@ abstract class EchoEventPresentationModel implements JsonSerializable {
 	 * @return array Array compatible with dynamic action link
 	 */
 	final protected function getWatchActionLink( Title $title ) {
-		$isTitleWatched = $this->getUser()->isWatched( $title );
+		$isTitleWatched = MediaWikiServices::getInstance()->getWatchlistManager()
+			->isWatched( $this->getUser(), $title );
 		$availableAction = $isTitleWatched ? 'unwatch' : 'watch';
 
 		$data = [

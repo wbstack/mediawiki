@@ -4,9 +4,10 @@ declare( strict_types = 1 );
 namespace Wikibase\Repo\FederatedProperties;
 
 use InvalidArgumentException;
+use Wikibase\DataAccess\ApiEntitySource;
 use Wikibase\DataModel\Entity\Property;
-use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Term\Term;
+use Wikibase\Lib\FederatedProperties\FederatedPropertyId;
 use Wikibase\Lib\Interactors\TermSearchResult;
 use Wikibase\Repo\Api\EntitySearchHelper;
 use Wikibase\Repo\Api\PropertyDataTypeSearchHelper;
@@ -39,14 +40,20 @@ class ApiEntitySearchHelper implements EntitySearchHelper {
 	private $typesEnabled = [];
 
 	/**
+	 * @var ApiEntitySource
+	 */
+	private $entitySource;
+
+	/**
 	 * @param GenericActionApiClient $api
 	 * @param string[] $enabledDataTypes
 	 */
-	public function __construct( GenericActionApiClient $api, array $enabledDataTypes ) {
+	public function __construct( GenericActionApiClient $api, array $enabledDataTypes, ApiEntitySource $entitySource ) {
 		$this->api = $api;
 		foreach ( $enabledDataTypes as $dataType ) {
 			$this->typesEnabled[$dataType] = true;
 		}
+		$this->entitySource = $entitySource;
 	}
 
 	/**
@@ -63,10 +70,10 @@ class ApiEntitySearchHelper implements EntitySearchHelper {
 	 */
 	public function getRankedSearchResults( $text, $languageCode, $entityType, $limit, $strictLanguage ) {
 		$allResults = [];
-
 		if ( $entityType !== Property::ENTITY_TYPE ) {
 			throw new InvalidArgumentException( 'Wrong argument passed in. Entity type must be a property' );
 		}
+
 		$jsonResult = $this->makeRequest( $text, $languageCode, $entityType, $limit, $strictLanguage );
 		$filteredResult = $this->filterRequest( $jsonResult, $limit );
 
@@ -74,7 +81,7 @@ class ApiEntitySearchHelper implements EntitySearchHelper {
 			$termSearchResult = new TermSearchResult(
 				$this->getMatchedTerm( $result['match'] ),
 				$result['match']['type'],
-				new PropertyId( $result['id'] ),
+				new FederatedPropertyId( $this->entitySource->getConceptBaseUri() . $result['id'], $result['id'] ),
 				array_key_exists( 'label', $result ) ? new Term( $languageCode, $result['label'] ) : null,
 				array_key_exists( 'description', $result ) ? new Term( $languageCode, $result['description'] ) : null,
 				[

@@ -35,7 +35,5 @@
 	"templatesandbox-editform-need-title": "이 틀로 다른 문서를 미리 보려면 문서 제목을 지정해야 합니다.",
 	"templatesandbox-editform-invalid-template": "지정한 틀 이름이 유효하지 않습니다.",
 	"templatesandbox-editform-invalid-title": "미리 보기 위해 지정한 제목이 잘못되었습니다.",
-	"templatesandbox-editform-title-not-exists": "미리 보기 위해 지정한 제목이 존재하지 않습니다.",
-	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var>의 콘텐츠 모델.",
-	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var>의 콘텐츠 포맷."
+	"templatesandbox-editform-title-not-exists": "미리 보기 위해 지정한 제목이 존재하지 않습니다."
 }

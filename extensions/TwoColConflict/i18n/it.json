@@ -5,6 +5,7 @@
 			"Fringio",
 			"Martinligabue",
 			"Ontsed",
+			"Sakretsu",
 			"Selven",
 			"Senpremì"
 		]
@@ -45,7 +46,10 @@
 	"twocolconflict-split-select-your-tooltip": "Clicca per selezionare la tua versione",
 	"twocolconflict-split-selected-other-tooltip": "Un'altra versione è selezionata",
 	"twocolconflict-split-selected-your-tooltip": "La tua versione è selezionata",
+	"twocolconflict-split-tour-dialog-header-single-column-view": "Post in conflitto",
+	"twocolconflict-split-tour-dialog-message-single-column-view": "Purtroppo qualcun altro ha scritto un messaggio nello stesso momento. Per favore, controlla i commenti sulla prossima pagina. Se vuoi, puoi modificare i tuoi e cambiare l'ordine finale.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Risolvi anomalia",
 	"twocolconflict-talk-your": "Il tuo commento",
+	"twocolconflict-talk-conflicting": "Il commento in conflitto",
 	"twocolconflict-talk-reverse-order": "Sposta prima"
 }

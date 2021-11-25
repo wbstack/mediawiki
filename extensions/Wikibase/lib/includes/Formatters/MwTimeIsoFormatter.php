@@ -7,7 +7,6 @@ use InvalidArgumentException;
 use Language;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
-use ValueFormatters\ValueFormatterBase;
 
 /**
  * @license GPL-2.0-or-later
@@ -17,7 +16,7 @@ use ValueFormatters\ValueFormatterBase;
  *
  * @todo move me to DataValues-time
  */
-class MwTimeIsoFormatter extends ValueFormatterBase {
+class MwTimeIsoFormatter implements ValueFormatter {
 
 	/**
 	 * @var Language
@@ -25,12 +24,18 @@ class MwTimeIsoFormatter extends ValueFormatterBase {
 	private $language;
 
 	/**
+	 * @var FormatterOptions
+	 */
+	private $options;
+
+	/**
 	 * @param FormatterOptions|null $options
 	 */
 	public function __construct( FormatterOptions $options = null ) {
-		parent::__construct( $options );
+		$this->options = $options ?: new FormatterOptions();
+		$this->options->defaultOption( ValueFormatter::OPT_LANG, 'en' );
 
-		$languageCode = $this->getOption( ValueFormatter::OPT_LANG );
+		$languageCode = $this->options->getOption( ValueFormatter::OPT_LANG );
 		$this->language = Language::factory( $languageCode );
 	}
 
@@ -281,6 +286,13 @@ class MwTimeIsoFormatter extends ValueFormatterBase {
 			if ( $isBCE ) {
 				return wfMessage(
 					'wikibase-time-precision-BCE',
+					$year
+				)
+				->inLanguage( $this->language )
+				->text();
+			} elseif ( strlen( $year ) <= 2 ) {
+				return wfMessage(
+					'wikibase-time-precision-CE',
 					$year
 				)
 				->inLanguage( $this->language )

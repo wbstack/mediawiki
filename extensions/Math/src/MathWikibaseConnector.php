@@ -12,6 +12,7 @@ use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Snak\Snak;
@@ -23,7 +24,6 @@ use Wikibase\Lib\Store\StorageException;
  * A class that connects with the local instance of wikibase to fetch
  * information from single items. There is always only one instance of this class.
  *
- * @see WikibaseRepo::getDefaultInstance()      the instance thats been used to fetch the data
  * @see MathWikibaseConnector::getInstance()    to get an instance of the class
  */
 class MathWikibaseConnector {
@@ -243,26 +243,11 @@ class MathWikibaseConnector {
 	}
 
 	/**
-	 * @todo should be refactored once there is an easier way to get the URL
 	 * @param string $qID
 	 * @return string
 	 */
 	public static function buildURL( $qID ) {
-		$settings = WikibaseClient::getSettings();
-		$baseurl = $settings->getSetting( 'repoUrl' );
-		$articlePath = $settings->getSetting( 'repoArticlePath' );
-		$namespaces = $settings->getSetting( 'repoNamespaces' );
-
-		$url = $baseurl . $articlePath;
-
-		if ( $namespaces && $namespaces["item"] ) {
-			$articleId = $namespaces["item"] . ":" . $qID;
-		} else {
-			$articleId = $qID;
-		}
-
-		// repoArticlePath contains the placeholder $1 for the page title
-		// see: https://www.mediawiki.org/wiki/Manual:$wgArticlePath
-		return str_replace( '$1', $articleId, $url );
+		return WikibaseClient::getRepoLinker()
+			->getEntityUrl( new ItemId( $qID ) );
 	}
 }

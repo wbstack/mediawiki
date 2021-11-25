@@ -20,7 +20,7 @@ class SplitConflictMerger {
 		array $contentRows,
 		array $extraLineFeeds,
 		$sideSelection
-	) : string {
+	): string {
 		$textLines = [];
 
 		foreach ( $contentRows as $num => $row ) {
@@ -65,7 +65,7 @@ class SplitConflictMerger {
 	 *
 	 * @return string
 	 */
-	private function pickBestPossibleValue( $postedValues, string $key ) : string {
+	private function pickBestPossibleValue( $postedValues, string $key ): string {
 		// A mismatch here means the request is either incomplete (by design) or broken, and already
 		// detected as such (see ConflictFormValidator). Intentionally return the most recent, most
 		// conflicting value. Fall back to the users unsaved edit, or to *whatever* is there, no
@@ -82,13 +82,13 @@ class SplitConflictMerger {
 	 *
 	 * @return string[]
 	 */
-	private function parseExtraLineFeeds( string $postedValue ) : array {
+	private function parseExtraLineFeeds( string $postedValue ): array {
 		$counts = explode( ',', $postedValue, 2 );
 		// "Before" and "after" are intentionally flipped, because "before" is very rare
 		return [ $counts[1] ?? '', $counts[0] ];
 	}
 
-	private function lineFeeds( string $count ) : string {
+	private function lineFeeds( string $count ): string {
 		$count = (int)$count;
 
 		// Arbitrary limit just to not end with megabytes in case of an attack

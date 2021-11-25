@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Fraxinus.cs",
 			"Guycn2",
 			"Ilimanaq29",
 			"JAn Dudík",
@@ -15,7 +16,6 @@
 	"wikibase-client-desc": "Klient pro rozšíření Wikibase",
 	"tooltip-t-wikibase": "Odkaz na propojenou položku datového úložiště",
 	"wikibase-after-page-move": "Vaše přejmenování by nyní mělo změnit mezijazykový odkaz [$1 v související položce {{grammar:2sg|{{WBREPONAME}}}}]. Prosíme, zkontrolujte, zda k tomu došlo.",
-	"wikibase-after-page-move-queued": "Související [$1 položka {{grammar:2sg|{{WBREPONAME}}}}] bude automaticky aktualizována. Upozorňujeme, že se to nemusí stát okamžitě.",
 	"wikibase-after-page-delete": "Odkaz na tuto stránku by měl být odstraněn [$1 ze související položky {{grammar:2sg|{{WBREPONAME}}}}]. Prosíme, zkontrolujte, zda k tomu došlo.",
 	"wikibase-after-page-delete-queued": "Související [$1 položka {{grammar:2sg|{{WBREPONAME}}}}] bude automaticky aktualizována. Upozorňujeme, že se to nemusí stát okamžitě.",
 	"wikibase-comment-add": "Byla vytvořena položka na {{grammar:6sg|{{WBREPONAME}}}}.",
@@ -36,6 +36,7 @@
 	"wikibase-linkitem-alreadylinked": "Stránka, kterou chcete propojit, je již v ústředním úložišti propojená s [$1 položkou], která odkazuje na [[$2]] na tomto serveru. Položky smí mít pro každý server jen jeden odkaz. Prosím, zvolte jinou stránku.",
 	"wikibase-linkitem-close": "Zavřít dialog a obnovit stránku",
 	"wikibase-linkitem-failure": "Došlo k neznámé chybě při pokusu o odkaz na danou stránku.",
+	"wikibase-linkitem-failed-modify": "Nebylo možné propojit stránky: sloučení odpovídajících položek na {{GRAMMAR:6sg|{{WBREPONAME}}}} selhalo.",
 	"wikibase-linkitem-title": "Propojit se stránkou",
 	"wikibase-linkitem-linkpage": "Propojit se stránkou",
 	"wikibase-linkitem-selectlink": "Prosím vyberte jazyk a stránku, kterou chcete propojit s touto stránkou.",
@@ -63,7 +64,7 @@
 	"wikibase-rcfilters-hide-wikibase-conflicts-major-global": "Všechny editace {{GRAMMAR:2sg|{{WBREPONAME}}}} jsou označeny jako „malé“, filtr „Editace {{GRAMMAR:2sg|{{WBREPONAME}}}}“ je proto v konfliktu s filtrem „Nemalé editace“.",
 	"wikibase-rcfilters-major-conflicts-hide-wikibase": "Všechny editace {{GRAMMAR:2sg|{{WBREPONAME}}}} jsou označeny jako „malé“, filtr „Editace {{GRAMMAR:2sg|{{WBREPONAME}}}}“ je proto v konfliktu s filtrem „Nemalé editace“.",
 	"wikibase-rcfilters-hide-wikibase-conflicts-major": "Všechny editace {{GRAMMAR:2sg|{{WBREPONAME}}}} jsou označeny jako „malé“, filtr „Editace {{GRAMMAR:2sg|{{WBREPONAME}}}}“ je proto v konfliktu s filtrem „Nemalé editace“.",
-	"wikibase-replicationnote": "Vezměte prosím na vědomí, že než se změny projeví na všech wiki, může to trvat pár minut.",
+	"wikibase-replicationnote": "Vezměte prosím na vědomí, že než se změny projeví na všech wiki, může to trvat několik minut.",
 	"wikibase-watchlist-show-changes-pref": "Zobrazit změny {{grammar:2sg|{{WBREPONAME}}}} ve sledovaných stránkách",
 	"wikibase-error-deserialize-error": "Nepodařilo se deserializovat data.",
 	"wikibase-error-serialize-error": "Nepodařilo se zaserializovat data.",
@@ -100,7 +101,7 @@
 	"wikibase-pageinfo-entity-usage-C": "Některá tvrzení",
 	"wikibase-pageinfo-entity-usage-C-with-modifier": "Tvrzení: $1",
 	"wikibase-pageinfo-entity-usage-X": "Všechny údaje entity",
-	"wikibase-pageinfo-entity-usage-O": "Jiné (tvrzení)",
+	"wikibase-pageinfo-entity-usage-O": "Různé (např. aliasy nebo existence entity)",
 	"wikibase-property-render-error": "Nepodařilo se zobrazit vlastnost $1: $2",
 	"wikibase-otherprojects": "Na jiných projektech",
 	"wikibase-otherprojects-beta-message": "Panel Jiné projekty",

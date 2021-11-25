@@ -20,7 +20,7 @@
 	"mobile-frontend-editor-redlink-leave": "نہیں، شکریہ۔",
 	"mobile-frontend-history": "اس صفحہ کا ترمیمی تاریخچہ ملاحظہ کریں۔",
 	"mobile-frontend-home-button": "صفحۂ اول",
-	"mobile-frontend-language-article-heading": "دوسری زبانوں میں پڑھیں",
+	"mobile-frontend-language-article-heading": "زبان",
 	"mobile-frontend-languages-not-available": "یہ صفحہ دوسری زبانوں میں دستیاب نہیں۔",
 	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|خوش آمدید}} $1!",
 	"mobile-frontend-main-menu-button-tooltip": "مرکزی مینیو کھولیں",
@@ -66,8 +66,8 @@
 	"skinname-minerva": "مائینروا",
 	"minerva-skin-desc": "موبائل کے لیے تیار شدہ خصوصی پوشاک",
 	"skin-minerva-issue-learn-more": "مزید جانیں",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton": "زمرہ جات",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton-description": "صفحات میں موجود زمرہ جات دکھائیں",
+	"skin-minerva-mobile-option-MinervaShowCategories": "زمرہ جات",
+	"skin-minerva-mobile-option-MinervaShowCategories-description": "صفحات میں موجود زمرہ جات دکھائیں",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "صفحات میں درپیش مسائل کے ساتھ مزید بہتر سلوک",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "صفحہ کے اعلانات (یعنی سانچہ:Ambox) مضمون کی ابتدائی سطروں میں ظاہر ہوں گے۔"
 }

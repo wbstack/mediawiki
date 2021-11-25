@@ -7,6 +7,7 @@ namespace Wikibase\Repo\Api;
 use ApiBase;
 use ApiMain;
 use IBufferingStatsdDataFactory;
+use SiteLookup;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
@@ -18,7 +19,7 @@ use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
 use Wikibase\Lib\StringNormalizer;
-use Wikibase\Repo\SiteLinkTargetProvider;
+use Wikibase\Repo\SiteLinkGlobalIdentifiersProvider;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -42,9 +43,9 @@ class GetEntities extends ApiBase {
 	private $languageFallbackChainFactory;
 
 	/**
-	 * @var SiteLinkTargetProvider
+	 * @var SiteLinkGlobalIdentifiersProvider
 	 */
-	private $siteLinkTargetProvider;
+	private $siteLinkGlobalIdentifiersProvider;
 
 	/**
 	 * @var EntityPrefetcher
@@ -76,6 +77,9 @@ class GetEntities extends ApiBase {
 	 */
 	private $idParser;
 
+	/** @var SiteLookup */
+	private $siteLookup;
+
 	/** @var IBufferingStatsdDataFactory */
 	private $stats;
 
@@ -84,7 +88,7 @@ class GetEntities extends ApiBase {
 	 * @param string $moduleName
 	 * @param StringNormalizer $stringNormalizer
 	 * @param LanguageFallbackChainFactory $languageFallbackChainFactory
-	 * @param SiteLinkTargetProvider $siteLinkTargetProvider
+	 * @param SiteLinkGlobalIdentifiersProvider $siteLinkGlobalIdentifiersProvider
 	 * @param EntityPrefetcher $entityPrefetcher
 	 * @param string[] $siteLinkGroups
 	 * @param ApiErrorReporter $errorReporter
@@ -101,13 +105,14 @@ class GetEntities extends ApiBase {
 		string $moduleName,
 		StringNormalizer $stringNormalizer,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
-		SiteLinkTargetProvider $siteLinkTargetProvider,
+		SiteLinkGlobalIdentifiersProvider $siteLinkGlobalIdentifiersProvider,
 		EntityPrefetcher $entityPrefetcher,
 		array $siteLinkGroups,
 		ApiErrorReporter $errorReporter,
 		ResultBuilder $resultBuilder,
 		EntityRevisionLookup $entityRevisionLookup,
 		EntityIdParser $idParser,
+		SiteLookup $siteLookup,
 		IBufferingStatsdDataFactory $stats,
 		bool $federatedPropertiesEnabled
 	) {
@@ -115,13 +120,14 @@ class GetEntities extends ApiBase {
 
 		$this->stringNormalizer = $stringNormalizer;
 		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
-		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
+		$this->siteLinkGlobalIdentifiersProvider = $siteLinkGlobalIdentifiersProvider;
 		$this->entityPrefetcher = $entityPrefetcher;
 		$this->siteLinkGroups = $siteLinkGroups;
 		$this->errorReporter = $errorReporter;
 		$this->resultBuilder = $resultBuilder;
 		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->idParser = $idParser;
+		$this->siteLookup = $siteLookup;
 		$this->stats = $stats;
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
 	}
@@ -129,36 +135,33 @@ class GetEntities extends ApiBase {
 	public static function factory(
 		ApiMain $apiMain,
 		string $moduleName,
+		SiteLookup $siteLookup,
 		IBufferingStatsdDataFactory $stats,
+		ApiHelperFactory $apiHelperFactory,
 		EntityIdParser $entityIdParser,
+		EntityRevisionLookup $entityRevisionLookup,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
 		SettingsArray $repoSettings,
+		SiteLinkGlobalIdentifiersProvider $siteLinkGlobalIdentifiersProvider,
 		Store $store,
 		StringNormalizer $stringNormalizer
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $apiMain->getContext() );
-
-		$siteLinkTargetProvider = new SiteLinkTargetProvider(
-			$wikibaseRepo->getSiteLookup(),
-			$repoSettings->getSetting( 'specialSiteLinkGroups' )
-		);
-
 		return new self(
 			$apiMain,
 			$moduleName,
 			$stringNormalizer,
 			$languageFallbackChainFactory,
-			$siteLinkTargetProvider,
+			$siteLinkGlobalIdentifiersProvider,
 			// TODO move EntityPrefetcher to service container and inject that directly
 			$store->getEntityPrefetcher(),
 			$repoSettings->getSetting( 'siteLinkGroups' ),
 			$apiHelperFactory->getErrorReporter( $apiMain ),
 			$apiHelperFactory->getResultBuilder( $apiMain ),
-			$wikibaseRepo->getEntityRevisionLookup(),
+			$entityRevisionLookup,
 			$entityIdParser,
+			$siteLookup,
 			$stats,
-			$wikibaseRepo->inFederatedPropertyMode()
+			$repoSettings->getSetting( 'federatedPropertiesEnabled' )
 		);
 	}
 
@@ -256,14 +259,13 @@ class GetEntities extends ApiBase {
 	}
 
 	private function getItemByTitleHelper(): EntityByTitleHelper {
-		// TODO inject Store/EntityByLinkedTitleLookup and SiteLookup as services
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+		// TODO inject Store/EntityByLinkedTitleLookup as services
 		$siteLinkStore = WikibaseRepo::getStore()->getEntityByLinkedTitleLookup();
 		return new EntityByTitleHelper(
 			$this,
 			$this->resultBuilder,
 			$siteLinkStore,
-			$wikibaseRepo->getSiteLookup(),
+			$this->siteLookup,
 			$this->stringNormalizer
 		);
 	}
@@ -386,7 +388,7 @@ class GetEntities extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getAllowedParams(): array {
-		$sites = $this->siteLinkTargetProvider->getSiteList( $this->siteLinkGroups );
+		$siteIds = $this->siteLinkGlobalIdentifiersProvider->getList( $this->siteLinkGroups );
 
 		return array_merge( parent::getAllowedParams(), [
 			'ids' => [
@@ -394,7 +396,7 @@ class GetEntities extends ApiBase {
 				self::PARAM_ISMULTI => true,
 			],
 			'sites' => [
-				self::PARAM_TYPE => $sites->getGlobalIdentifiers(),
+				self::PARAM_TYPE => $siteIds,
 				self::PARAM_ISMULTI => true,
 				self::PARAM_ALLOW_DUPLICATES => true
 			],
@@ -427,7 +429,7 @@ class GetEntities extends ApiBase {
 				self::PARAM_DFLT => false
 			],
 			'sitefilter' => [
-				self::PARAM_TYPE => $sites->getGlobalIdentifiers(),
+				self::PARAM_TYPE => $siteIds,
 				self::PARAM_ISMULTI => true,
 				self::PARAM_ALLOW_DUPLICATES => true
 			],

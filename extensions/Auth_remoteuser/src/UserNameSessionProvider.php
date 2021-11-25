@@ -359,11 +359,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			# @see AuthManager::autoCreateUser()
 			if ( $sessionInfo && $userInfo->getUser()->isAnon() ) {
 				$anon = $userInfo->getUser();
-				$permissions = $anon->getGroupPermissions( $anon->getEffectiveGroups() );
-				if (
-					in_array( 'autocreateaccount', $permissions, true )
-					|| in_array( 'createaccount', $permissions, true )
-				) {
+				if ( $anon->isAllowedAny( 'autocreateaccount', 'createaccount' ) ) {
 					$this->logger->warning(
 						"Renew session due to global permission change " .
 						"in (auto) creating new users."
@@ -510,8 +506,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			# accounts for all users) and user switching is forbidden. A wiki admin with
 			# this permission can then access this page to create accounts explicitly.
 			$user = $info->getUserInfo()->getUser();
-			$permissions = $user->getGroupPermissions( $user->getEffectiveGroups() );
-			if ( !in_array( 'createaccount', $permissions, true ) ) {
+			if ( !$user->isAllowed( 'createaccount' ) ) {
 				$disableSpecialPages += [ 'CreateAccount' => true ];
 			}
 		}
@@ -547,7 +542,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			if ( $this->canChangeUser() ) {
 				Hooks::register(
 					'UserLogout',
-					function () use ( $url, $metadata, $switchedUser ) {
+					static function () use ( $url, $metadata, $switchedUser ) {
 						if ( $url instanceof Closure ) {
 							$url = call_user_func( $url, $metadata );
 						}
@@ -566,7 +561,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 						}
 						Hooks::register(
 							'UserLogoutComplete',
-							function () use ( $url ) {
+							static function () use ( $url ) {
 								global $wgOut;
 								$wgOut->redirect( $url );
 								return true;
@@ -578,7 +573,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			} else {
 				Hooks::register(
 					'PersonalUrls',
-					function ( &$personalurls ) use ( $url, $metadata ) {
+					static function ( &$personalurls ) use ( $url, $metadata ) {
 						if ( $url instanceof Closure ) {
 							$url = call_user_func( $url, $metadata );
 						}
@@ -650,7 +645,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			$keys = array_keys( $preferences );
 			Hooks::register(
 				'GetPreferences',
-				function ( $user, &$prefs ) use ( $keys ) {
+				static function ( $user, &$prefs ) use ( $keys ) {
 					foreach ( $keys as $key ) {
 
 						if ( $key === 'email' ) {
@@ -684,7 +679,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 
 		Hooks::register(
 			'SpecialPage_initList',
-			function ( &$specials ) use ( $disableSpecialPages ) {
+			static function ( &$specials ) use ( $disableSpecialPages ) {
 				foreach ( $disableSpecialPages as $page => $true ) {
 					if ( $true ) {
 						unset( $specials[ $page ] );
@@ -696,7 +691,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 
 		Hooks::register(
 			'PersonalUrls',
-			function ( &$personalurls ) use ( $disablePersonalUrls ) {
+			static function ( &$personalurls ) use ( $disablePersonalUrls ) {
 				foreach ( $disablePersonalUrls as $url => $true ) {
 					if ( $true ) {
 						unset( $personalurls[ $url ] );

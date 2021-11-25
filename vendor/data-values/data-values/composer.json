@@ -18,36 +18,34 @@
 		}
 	],
 	"require": {
-		"php": ">=5.5.9"
+		"php": ">=7.2.0"
 	},
 	"require-dev": {
-		"phpunit/phpunit": "~4.8",
-		"wikibase/wikibase-codesniffer": "^0.1.0"
+		"phpunit/phpunit": "~8.0",
+		"wikibase/wikibase-codesniffer": "~1.2.0"
 	},
 	"replace": {
 		"mediawiki/data-values": "*"
 	},
 	"autoload": {
-		"files" : [
-			"DataValues.php"
-		],
-		"classmap": [
-			"src/interfaces",
-			"tests/phpunit/DataValueTest.php"
-		],
 		"psr-4": {
-			"DataValues\\": "src/DataValues/"
+			"DataValues\\": "src/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"DataValues\\Tests\\": "tests/phpunit/"
 		}
 	},
 	"extra": {
 		"branch-alias": {
-			"dev-master": "2.x-dev"
+			"dev-master": "3.x-dev"
 		}
 	},
 	"scripts": {
 		"test": [
 			"composer validate --no-interaction",
-			"phpunit",
+			"vendor/bin/phpunit",
 			"@cs"
 		],
 		"cs": [

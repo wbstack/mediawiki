@@ -27,33 +27,29 @@ class UniversalLanguageSelectorHooks {
 	 */
 	public static function setVersionConstant() {
 		global $wgHooks;
+
 		define( 'ULS_VERSION', '2020-07-20' );
-		// The SkinAfterPortlet hook was introduced in version >= 1.35.
-		// It is the same as BaseTemplateAfterPortlet with the exception of its parameters.
-		if ( interface_exists( MediaWiki\Skins\Hook\SkinAfterPortletHook::class ) ) {
-			$wgHooks['SkinAfterPortlet'][] = "UniversalLanguageSelectorHooks::onSkinAfterPortlet";
-		} else {
-			$wgHooks['BaseTemplateAfterPortlet'][] = "UniversalLanguageSelectorHooks::onBaseTemplateAfterPortlet";
+
+		// For MediaWiki < 1.37, there is no `user-interface-preferences` menu. We use
+		// the PersonalUrls hook to make sure the language button is added.
+		// In MediaWiki > 1.37, the personal urls was split out into multiple new menus,
+		// In the new format, the `user-interface-preferences` is the most relevant place to put
+		// this button. Using the SkinTemplateNavigation::Universal hook will ensure the button is
+		// added to the correct menu.
+		if ( version_compare( MW_VERSION, '1.37', '<' ) ) {
+			$wgHooks['PersonalUrls'][] = "UniversalLanguageSelectorHooks::onPersonalUrls";
 		}
 	}
 
 	/**
-	 * Whether ULS user toolbar (language selection and settings) is enabled.
-	 *
-	 * @param User $user
+	 * Whether user visible ULS features are enabled (language changing, input methods, web
+	 * fonts, language change undo tooltip).
 	 * @return bool
 	 */
-	private static function isToolbarEnabled( User $user ) {
-		global $wgULSEnable, $wgULSEnableAnon;
+	private static function isEnabled(): bool {
+		global $wgULSEnable;
 
-		if ( !$wgULSEnable ) {
-			return false;
-		}
-		if ( !$wgULSEnableAnon && $user->isAnon() ) {
-			return false;
-		}
-
-		return true;
+		return (bool)$wgULSEnable;
 	}
 
 	/**
@@ -85,14 +81,8 @@ class UniversalLanguageSelectorHooks {
 		if ( $wgULSCompactLanguageLinksBetaFeature === false ) {
 			// Compact language links is a default feature in this wiki.
 			// Check user preference
-			$services = MediaWikiServices::getInstance();
-			if ( method_exists( $services, 'getUserOptionsLookup' ) ) {
-				// MW 1.35 +
-				return $services->getUserOptionsLookup()
-					->getBoolOption( $user, 'compact-language-links' );
-			} else {
-				return $user->getBoolOption( 'compact-language-links' );
-			}
+			return MediaWikiServices::getInstance()->getUserOptionsLookup()
+				->getBoolOption( $user, 'compact-language-links' );
 		}
 
 		return false;
@@ -114,6 +104,7 @@ class UniversalLanguageSelectorHooks {
 		$override = is_array( $excludedLinks ) && in_array( '*', $excludedLinks );
 		$config = [
 			'wgULSPosition' => $wgULSPosition,
+			'wgULSisCompactLinksEnabled' => self::isCompactLinksEnabled( $out->getUser() ),
 		];
 
 		// Load compact links if no mw-interlanguage-selector element is present in the page HTML.
@@ -131,7 +122,7 @@ class UniversalLanguageSelectorHooks {
 			$out->addModules( 'ext.uls.geoclient' );
 		}
 
-		if ( self::isToolbarEnabled( $out->getUser() ) ) {
+		if ( self::isEnabled() ) {
 			// Enable UI language selection for the user.
 			$out->addModules( 'ext.uls.interface' );
 		}
@@ -179,91 +170,67 @@ class UniversalLanguageSelectorHooks {
 	}
 
 	/**
-	 * @param ResourceLoader $resourceLoader
+	 * Add some tabs for navigation for users who do not use Ajax interface.
+	 * Hook: PersonalUrls
+	 * @param array &$personal_urls
+	 * @param Title $title
+	 * @param SkinTemplate $skin
 	 */
-	public static function onResourceLoaderRegisterModules( ResourceLoader $resourceLoader ) {
-		global $wgVersion;
+	public static function onPersonalUrls( &$personal_urls, $title, SkinTemplate $skin ) {
+		$personal_urls = self::addPersonalBarTrigger(
+			$personal_urls,
+			$skin
+		);
+	}
 
-		// Support: MediaWiki 1.34
-		$hasOldNotify = version_compare( $wgVersion, '1.35', '<' );
-
-		$tpl = [
-			'localBasePath' => dirname( __DIR__ ) . '/resources',
-			'remoteExtPath' => 'UniversalLanguageSelector/resources',
-		];
-
-		$modules = [
-			"ext.uls.ime" => $tpl + [
-				"scripts" => "js/ext.uls.ime.js",
-				"dependencies" => array_merge( [
-					"ext.uls.common",
-					"ext.uls.preferences",
-					"ext.uls.mediawiki",
-					"ext.uls.messages",
-					"jquery.ime",
-				], $hasOldNotify ? [ 'mediawiki.notify' ] : [] ),
-				"messages" => [
-					"uls-ime-helppage"
-				],
-			],
-			"ext.uls.setlang" => $tpl + [
-				"styles" => [
-					"css/ext.uls.dialog.less",
-					"css/ext.uls.setlang.less"
-				],
-				"scripts" => [
-					"js/ext.uls.dialog.js",
-					"js/ext.uls.setlang.js"
-				],
-				"dependencies" => array_merge( [
-					"mediawiki.api",
-					"mediawiki.ui.button",
-					"mediawiki.Uri"
-				], $hasOldNotify ? [ 'mediawiki.notify' ] : [] ),
-				"messages" => [
-					"ext-uls-setlang-error",
-					"ext-uls-setlang-unknown-error",
-					"ext-uls-setlang-heading",
-					"ext-uls-setlang-message",
-					"ext-uls-setlang-accept",
-					"ext-uls-setlang-cancel",
-					"ext-uls-setlang-loading"
-				],
-			],
-		];
-
-		$resourceLoader->register( $modules );
+	/**
+	 * @param SkinTemplate $skin
+	 * @param array &$links
+	 */
+	public static function onSkinTemplateNavigationUniversal( SkinTemplate $skin, array &$links ) {
+		// In modern skins which separate out the user menu,
+		// e.g. Vector. (T282196)
+		// this should appear in the `user-interface-preferences` menu.
+		// For older skins not separating out the user menu this will be prepended.
+		if ( isset( $links['user-interface-preferences'] ) ) {
+			$links['user-interface-preferences'] = self::addPersonalBarTrigger(
+				$links['user-interface-preferences'],
+				$skin
+			);
+		}
 	}
 
 	/**
 	 * Add some tabs for navigation for users who do not use Ajax interface.
-	 * Hook: PersonalUrls
 	 * @param array &$personal_urls
-	 * @param Title &$title
 	 * @param SkinTemplate $context SkinTemplate object providing context
+	 * @return array of modified personal urls
 	 */
-	public static function addPersonalBarTrigger(
+	private static function addPersonalBarTrigger(
 		array &$personal_urls,
-		&$title,
 		SkinTemplate $context
 	) {
 		global $wgULSPosition;
 
 		if ( $wgULSPosition !== 'personal' ) {
-			return;
+			return $personal_urls;
 		}
 
-		if ( !self::isToolbarEnabled( $context->getUser() ) ) {
-			return;
+		if ( !self::isEnabled() ) {
+			return $personal_urls;
 		}
 
 		// The element id will be 'pt-uls'
 		$langCode = $context->getLanguage()->getCode();
-		$personal_urls = [
+		return [
 			'uls' => [
 				'text' => Language::fetchLanguageName( $langCode ),
 				'href' => '#',
-				'class' => 'uls-trigger',
+				// Skin meta data to allow skin (e.g. Vector) to add icons
+				'icon' => 'wikimedia-language',
+				// Skin meta data to allow skin (e.g. Vector) to convert to button.
+				'button' => true,
+				'link-class' => [ 'uls-trigger' ],
 				'active' => true
 			]
 		] + $personal_urls;
@@ -314,7 +281,7 @@ class UniversalLanguageSelectorHooks {
 			$context->getOutput()->addVaryHeader( 'Accept-Language' );
 		}
 
-		if ( !self::isToolbarEnabled( $user ) ) {
+		if ( !self::isEnabled() ) {
 			return;
 		}
 
@@ -453,7 +420,7 @@ class UniversalLanguageSelectorHooks {
 			'section' => 'personal/i18n',
 			// We use this class to hide this from no-JS users
 			'cssclass' => 'uls-preferences-link-wrapper',
-			'default' => "<a id='uls-preferences-link' role='button' tabindex='0'>" .
+			'default' => "<a id='uls-preferences-link' class='uls-settings-trigger' role='button' tabindex='0'>" .
 				wfMessage( 'ext-uls-language-settings-preferences-link' )->escaped() . "</a>",
 		];
 
@@ -495,34 +462,6 @@ class UniversalLanguageSelectorHooks {
 	}
 
 	/**
-	 * Kept for backward compatability with MW < 1.35, and older versions of skins
-	 * such as Vector and Timeless
-	 * @param QuickTemplate $template
-	 * @param string $name
-	 * @param string &$content
-	 */
-	public static function onBaseTemplateAfterPortlet(
-		QuickTemplate $template,
-		string $name,
-		string &$content
-	) {
-		global $wgULSPosition;
-
-		if ( $wgULSPosition !== 'interlanguage' ) {
-			return;
-		}
-
-		if ( !self::isToolbarEnabled( $template->getSkin()->getUser() ) ) {
-			return;
-		}
-
-		// Set to an empty array, just to make sure that the section appears
-		if ( $template->get( 'language_urls' ) === false ) {
-			$template->set( 'language_urls', [] );
-		}
-	}
-
-	/**
 	 * @param Skin $skin
 	 * @param string $name
 	 * @param string &$content
@@ -542,7 +481,7 @@ class UniversalLanguageSelectorHooks {
 			return;
 		}
 
-		if ( !self::isToolbarEnabled( $skin->getUser() ) ) {
+		if ( !self::isEnabled() ) {
 			return;
 		}
 

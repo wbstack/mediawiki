@@ -15,7 +15,8 @@
 			"Tmv",
 			"Whym",
 			"Yusuke1109",
-			"夢蝶葬花"
+			"夢蝶葬花",
+			"RYOUMA1117"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]]の高度な検索機能への簡単なアクセス",
@@ -76,6 +77,7 @@
 	"advancedsearch-sort-preview-relevance": "関連度順",
 	"advancedsearch-sort-preview-last-edit-asc": "最新の編集",
 	"advancedsearch-sort-preview-last-edit-desc": "ページ編集日",
+	"advancedsearch-sort-preview-create-timestamp-asc": "最近作成",
 	"advancedsearch-sort-preview-create-timestamp-desc": "ページ作成日",
 	"advancedsearch-namespaces-search-in": "検索範囲:",
 	"advancedsearch-namespaces-remember": "この選択を今後の検索のために記憶させる",

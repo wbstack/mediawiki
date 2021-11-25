@@ -4,6 +4,8 @@ namespace Wikibase\Repo\Maintenance;
 
 use LoggedUpdateMaintenance;
 use Onoi\MessageReporter\ObservableMessageReporter;
+use Wikibase\DataModel\Entity\Property;
+use Wikibase\DataModel\Services\Lookup\LegacyAdapterPropertyLookup;
 use Wikibase\Lib\Store\Sql\PropertyInfoTable;
 use Wikibase\Lib\WikibaseSettings;
 use Wikibase\Repo\Store\Sql\PropertyInfoTableBuilder;
@@ -40,25 +42,29 @@ class RebuildPropertyInfo extends LoggedUpdateMaintenance {
 			$this->output( "You need to have Wikibase enabled in order to use this maintenance script!\n\n" );
 			exit;
 		}
+		if ( !in_array( Property::ENTITY_TYPE, WikibaseRepo::getLocalEntitySource()->getEntityTypes() ) ) {
+			$this->fatalError(
+				"You can't run this maintenance script on foreign properties!",
+				1
+			);
+		}
 
 		$reporter = new ObservableMessageReporter();
 		$reporter->registerReporterCallback(
 			[ $this, 'report' ]
 		);
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$propertySource = WikibaseRepo::getEntitySourceDefinitions()
-			->getSourceForEntityType( 'property' );
+			->getDatabaseSourceForEntityType( 'property' );
 
 		$builder = new PropertyInfoTableBuilder(
 			new PropertyInfoTable(
 				WikibaseRepo::getEntityIdComposer(),
-				$propertySource->getDatabaseName(),
+				WikibaseRepo::getRepoDomainDbFactory()->newForEntitySource( $propertySource ),
 				true
 			),
-			$wikibaseRepo->getPropertyLookup(),
-			$wikibaseRepo->newPropertyInfoBuilder(),
-			WikibaseRepo::getEntityIdComposer(),
+			new LegacyAdapterPropertyLookup( WikibaseRepo::getEntityLookup() ),
+			WikibaseRepo::getPropertyInfoBuilder(),
 			WikibaseRepo::getEntityNamespaceLookup()
 		);
 		$builder->setReporter( $reporter );

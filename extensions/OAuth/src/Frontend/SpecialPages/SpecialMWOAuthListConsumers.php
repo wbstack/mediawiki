@@ -176,8 +176,9 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			],
 			$this->getContext()
 		);
-		$form->setAction( $this->getPageTitle()->getFullURL() ); // always go back to listings
-		$form->setSubmitCallback( function () {
+		// always go back to listings
+		$form->setAction( $this->getPageTitle()->getFullURL() );
+		$form->setSubmitCallback( static function () {
 			return false;
 		} );
 		$form->setMethod( 'get' );
@@ -213,7 +214,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		}
 		# Every 30th view, prune old deleted items
 		if ( mt_rand( 0, 29 ) == 0 ) {
-			Utils::runAutoMaintenance( Utils::getCentralDB( DB_MASTER ) );
+			Utils::runAutoMaintenance( Utils::getCentralDB( DB_PRIMARY ) );
 		}
 	}
 
@@ -234,7 +235,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			$this->getPageTitle( "view/{$cmrKey}" ),
 			$this->msg( 'mwoauthlistconsumers-view' )->text(),
 			[],
-			$this->getRequest()->getValues( 'name', 'publisher', 'stage' ) // stick
+			$this->getRequest()->getValues( 'name', 'publisher', 'stage' )
 		);
 		if ( !$permMgr->userHasRight( $this->getUser(), 'mwoauthmanageconsumer' ) ) {
 			$links[] = $this->getLinkRenderer()->makeKnownLink(
@@ -244,7 +245,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		}
 		$links = $this->getLanguage()->pipeList( $links );
 
-		$encStageKey = htmlspecialchars( $stageKey ); // sanity
+		$encStageKey = htmlspecialchars( $stageKey );
 		$r = "<li class=\"mw-mwoauthlistconsumers-{$encStageKey}\">";
 
 		$name = $cmrAc->getNameAndVersion();
@@ -260,7 +261,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			),
 			'mwoauthlistconsumers-user' => $cmrAc->escapeForHtml( $cmrAc->getUserName() ),
 			'mwoauthlistconsumers-description' => $cmrAc->escapeForHtml(
-				$cmrAc->get( 'description', function ( $s ) use ( $lang ) {
+				$cmrAc->get( 'description', static function ( $s ) use ( $lang ) {
 					return $lang->truncateForVisual( $s, 10024 );
 				} )
 			),

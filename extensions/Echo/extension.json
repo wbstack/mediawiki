@@ -15,17 +15,26 @@
 	"license-name": "MIT",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.37.0"
 	},
 	"APIMetaModules": {
-		"notifications": "ApiEchoNotifications",
+		"notifications": {
+			"class": "ApiEchoNotifications",
+			"services": [ "MainConfig" ]
+		},
 		"unreadnotificationpages": "ApiEchoUnreadNotificationPages"
 	},
 	"APIModules": {
 		"echomarkread": "ApiEchoMarkRead",
 		"echomarkseen": "ApiEchoMarkSeen",
 		"echoarticlereminder": "ApiEchoArticleReminder",
-		"echomute": "ApiEchoMute"
+		"echomute": {
+			"class": "ApiEchoMute",
+			"services": [
+				"CentralIdLookup",
+				"UserOptionsManager"
+			]
+		}
 	},
 	"DefaultUserOptions": {
 		"echo-email-frequency": 0,
@@ -41,7 +50,13 @@
 	},
 	"SpecialPages": {
 		"Notifications": "SpecialNotifications",
-		"DisplayNotificationsConfiguration": "SpecialDisplayNotificationsConfiguration",
+		"DisplayNotificationsConfiguration": {
+			"class": "SpecialDisplayNotificationsConfiguration",
+			"services": [
+				"EchoAttributeManager",
+				"UserOptionsManager"
+			]
+		},
 		"NotificationsMarkRead": "SpecialNotificationsMarkRead"
 	},
 	"AvailableRights": [
@@ -458,15 +473,13 @@
 		"SkinMinervaReplaceNotificationsBadge": "EchoHooks::onSkinMinervaReplaceNotificationsBadge",
 		"LoadExtensionSchemaUpdates": "EchoHooks::onLoadExtensionSchemaUpdates",
 		"GetPreferences": "EchoHooks::getPreferences",
-		"PersonalUrls": "EchoHooks::onPersonalUrls",
 		"BeforePageDisplay": "EchoHooks::beforePageDisplay",
 		"ResourceLoaderRegisterModules": "EchoHooks::onResourceLoaderRegisterModules",
 		"UserGroupsChanged": "EchoHooks::onUserGroupsChanged",
-		"UserLoadOptions": "EchoHooks::onUserLoadOptions",
-		"UserSaveOptions": "EchoHooks::onUserSaveOptions",
+		"LoadUserOptions": "EchoHooks::onLoadUserOptions",
+		"SaveUserOptions": "EchoHooks::onSaveUserOptions",
 		"UserGetDefaultOptions": "EchoHooks::onUserGetDefaultOptions",
 		"UserClearNewTalkNotification": "EchoHooks::onUserClearNewTalkNotification",
-		"ParserTestTables": "EchoHooks::onParserTestTables",
 		"EmailUserComplete": "EchoHooks::onEmailUserComplete",
 		"LoginFormValidErrorMessages": "EchoHooks::onLoginFormValidErrorMessages",
 		"OutputPageCheckLastModified": "EchoHooks::onOutputPageCheckLastModified",
@@ -1035,7 +1048,8 @@
 	"attributes": {
 		"EventLogging": {
 			"Schemas": {
-				"EchoInteraction": 15823738
+				"EchoInteraction": "/analytics/legacy/echointeraction/1.0.0",
+				"EchoMail": "/analytics/legacy/echomail/1.0.0"
 			}
 		}
 	},

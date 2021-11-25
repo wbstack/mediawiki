@@ -75,7 +75,7 @@ class ConsumerSubmitControl extends SubmitControl {
 	/**
 	 * @param IContextSource $context
 	 * @param array $params
-	 * @param DBConnRef $dbw Result of Utils::getCentralDB( DB_MASTER )
+	 * @param DBConnRef $dbw Result of Utils::getCentralDB( DB_PRIMARY )
 	 */
 	public function __construct( IContextSource $context, array $params, DBConnRef $dbw ) {
 		parent::__construct( $context, $params );
@@ -83,7 +83,7 @@ class ConsumerSubmitControl extends SubmitControl {
 	}
 
 	protected function getRequiredFields() {
-		$validateRsaKey = function ( $s ) {
+		$validateRsaKey = static function ( $s ) {
 			if ( trim( $s ) === '' ) {
 				return true;
 			}
@@ -95,10 +95,8 @@ class ConsumerSubmitControl extends SubmitControl {
 				return false;
 			}
 			$info = openssl_pkey_get_details( $key );
-			if ( $info['type'] !== OPENSSL_KEYTYPE_RSA ) {
-				return false;
-			}
-			return true;
+
+			return ( $info['type'] === OPENSSL_KEYTYPE_RSA );
 		};
 
 		$suppress = [ 'suppress' => '/^[01]$/' ];
@@ -108,15 +106,15 @@ class ConsumerSubmitControl extends SubmitControl {
 			'changeToken'  => '/^[0-9a-f]{40}$/'
 		];
 
-		$validateBlobSize = function ( $s ) {
+		$validateBlobSize = static function ( $s ) {
 			return strlen( $s ) < self::BLOB_SIZE;
 		};
 
 		return [
 			// Proposer (application administrator) actions:
-			'propose'     => [
-				'name'         => '/^.{1,128}$/',
-				'version'      => function ( $s ) {
+			'propose' => [
+				'name' => '/^.{1,128}$/',
+				'version' => static function ( $s ) {
 					if ( strlen( $s ) > 32 ) {
 						return false;
 					}
@@ -128,25 +126,25 @@ class ConsumerSubmitControl extends SubmitControl {
 						return false;
 					}
 				},
-				'callbackUrl'  => function ( $s, $vals ) {
+				'callbackUrl' => static function ( $s, $vals ) {
 					if ( strlen( $s ) > 2000 ) {
 						return false;
 					}
 					return $vals['ownerOnly'] || wfParseUrl( $s ) !== false;
 				},
-				'description'  => $validateBlobSize,
-				'email'        => function ( $s ) {
+				'description' => $validateBlobSize,
+				'email' => static function ( $s ) {
 					return Sanitizer::validateEmail( $s );
 				},
-				'wiki'         => function ( $s ) {
+				'wiki' => static function ( $s ) {
 					global $wgConf;
 					return ( $s === '*'
 						|| in_array( $s, $wgConf->getLocalDatabases() )
 						|| array_search( $s, Utils::getAllWikiNames() ) !== false
 					);
 				},
-				'granttype'    => '/^(authonly|authonlyprivate|normal)$/',
-				'grants'       => function ( $s ) {
+				'granttype' => '/^(authonly|authonlyprivate|normal)$/',
+				'grants' => static function ( $s ) {
 					if ( strlen( $s ) > self::BLOB_SIZE ) {
 						return false;
 					}
@@ -154,15 +152,15 @@ class ConsumerSubmitControl extends SubmitControl {
 					return is_array( $grants ) && Utils::grantsAreValid( $grants );
 				},
 				'restrictions' => $validateBlobSize,
-				'rsaKey'       => $validateRsaKey,
-				'agreement'    => function ( $s ) {
+				'rsaKey' => $validateRsaKey,
+				'agreement' => static function ( $s ) {
 					return ( $s == true );
 				},
 			],
-			'update'      => array_merge( $base, [
+			'update' => array_merge( $base, [
 				'restrictions' => $validateBlobSize,
-				'rsaKey'       => $validateRsaKey,
-				'resetSecret'  => function ( $s ) {
+				'rsaKey' => $validateRsaKey,
+				'resetSecret' => static function ( $s ) {
 					return is_bool( $s );
 				},
 			] ),
@@ -183,7 +181,7 @@ class ConsumerSubmitControl extends SubmitControl {
 			return $this->failure( 'user_blocked', 'badaccess-group0' );
 		} elseif ( wfReadOnly() ) {
 			return $this->failure( 'readonly', 'readonlytext', wfReadOnlyReason() );
-		} elseif ( !Utils::isCentralWiki() ) { // sanity
+		} elseif ( !Utils::isCentralWiki() ) {
 			// This logs consumer changes to the local logging table on the central wiki
 			throw new LogicException( "This can only be used from the OAuth management wiki." );
 		}
@@ -192,11 +190,12 @@ class ConsumerSubmitControl extends SubmitControl {
 
 	protected function processAction( $action ) {
 		$context = $this->getContext();
-		$user = $this->getUser(); // proposer or admin
-		$dbw = $this->dbw; // convenience
+		// proposer or admin
+		$user = $this->getUser();
+		$dbw = $this->dbw;
 
 		$centralUserId = Utils::getCentralIdFromLocalUser( $user );
-		if ( !$centralUserId ) { // sanity
+		if ( !$centralUserId ) {
 			return $this->failure( 'permission_denied', 'badaccess-group0' );
 		}
 
@@ -257,7 +256,8 @@ class ConsumerSubmitControl extends SubmitControl {
 					break;
 				case 'normal':
 					$grants = array_unique( array_merge(
-						MWGrants::getHiddenGrants(), // implied grants
+						// implied grants
+						MWGrants::getHiddenGrants(),
 						FormatJson::decode( $this->vals['grants'], true )
 					) );
 					break;
@@ -266,11 +266,11 @@ class ConsumerSubmitControl extends SubmitControl {
 			$now = wfTimestampNow();
 			$cmr = Consumer::newFromArray(
 				[
-					'id'                 => null, // auto-increment
+					'id'                 => null,
 					'consumerKey'        => MWCryptRand::generateHex( 32 ),
 					'userId'             => $centralUserId,
 					'email'              => $user->getEmail(),
-					'emailAuthenticated' => $now, // see above
+					'emailAuthenticated' => $now,
 					'developerAgreement' => 1,
 					'secretKey'          => MWCryptRand::generateHex( 32 ),
 					'registration'       => $now,
@@ -340,7 +340,7 @@ class ConsumerSubmitControl extends SubmitControl {
 				return $this->failure( 'permission_denied', 'badaccess-group0' );
 			} elseif ( $cmr->getDeleted()
 				&& !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' ); // sanity
+				return $this->failure( 'permission_denied', 'badaccess-group0' );
 			} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
 				return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
 			}

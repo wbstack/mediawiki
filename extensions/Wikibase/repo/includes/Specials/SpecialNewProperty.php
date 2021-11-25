@@ -20,7 +20,6 @@ use Wikibase\Repo\Specials\HTMLForm\HTMLContentLanguageField;
 use Wikibase\Repo\Specials\HTMLForm\HTMLTrimmedTextField;
 use Wikibase\Repo\Store\TermsCollisionDetector;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Page for creating new Wikibase properties.
@@ -44,6 +43,7 @@ class SpecialNewProperty extends SpecialNewEntity {
 	private $termsCollisionDetector;
 
 	public function __construct(
+		array $tags,
 		SpecialPageCopyrightView $specialPageCopyrightView,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		SummaryFormatter $summaryFormatter,
@@ -55,6 +55,7 @@ class SpecialNewProperty extends SpecialNewEntity {
 		parent::__construct(
 			'NewProperty',
 			'property-create',
+			$tags,
 			$specialPageCopyrightView,
 			$entityNamespaceLookup,
 			$summaryFormatter,
@@ -68,13 +69,13 @@ class SpecialNewProperty extends SpecialNewEntity {
 
 	public static function factory(
 		DataTypeFactory $dataTypeFactory,
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityTitleLookup $entityTitleLookup,
 		TermsCollisionDetector $propertyTermsCollisionDetector,
-		SettingsArray $repoSettings
+		SettingsArray $repoSettings,
+		SummaryFormatter $summaryFormatter
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
 			$repoSettings->getSetting( 'dataRightsUrl' ),
@@ -82,11 +83,12 @@ class SpecialNewProperty extends SpecialNewEntity {
 		);
 
 		return new self(
+			$repoSettings->getSetting( 'specialPageTags' ),
 			$copyrightView,
 			$entityNamespaceLookup,
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$entityTitleLookup,
-			$wikibaseRepo->newEditEntityFactory(),
+			$editEntityFactory,
 			$dataTypeFactory,
 			$propertyTermsCollisionDetector
 		);

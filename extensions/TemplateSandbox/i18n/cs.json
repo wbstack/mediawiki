@@ -37,8 +37,5 @@
 	"templatesandbox-editform-need-title": "Pokud chcete zobrazit náhled jiné stránky s využitím této šablony, musíte zadat název stránky.",
 	"templatesandbox-editform-invalid-template": "Zadaný název šablony je neplatný.",
 	"templatesandbox-editform-invalid-title": "Zadaný název stránky pro náhled je neplatný.",
-	"templatesandbox-editform-title-not-exists": "Zadaný název stránky pro náhled neexistuje.",
-	"templatesandbox-apihelp-prefix": "Předpona pískoviště šablon, jako u [[Special:TemplateSandbox]].",
-	"templatesandbox-apihelp-contentmodel": "Model obsahu <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Formát obsahu <var>$1templatesandboxtext</var>."
+	"templatesandbox-editform-title-not-exists": "Zadaný název stránky pro náhled neexistuje."
 }

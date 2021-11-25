@@ -16,7 +16,7 @@ class ConflictFormValidator {
 	 * @param WebRequest $request
 	 * @return bool True when valid
 	 */
-	public function validateRequest( WebRequest $request ) : bool {
+	public function validateRequest( WebRequest $request ): bool {
 		$contentRows = $request->getArray( 'mw-twocolconflict-split-content' );
 		if ( $contentRows === null ) {
 			// Not a conflict form.
@@ -45,7 +45,7 @@ class ConflictFormValidator {
 	 *
 	 * @return bool
 	 */
-	private function validateSideSelection( array $contentRows, array $sideSelection ) : bool {
+	private function validateSideSelection( array $contentRows, array $sideSelection ): bool {
 		foreach ( $contentRows as $num => $row ) {
 			$side = $sideSelection[$num] ?? 'copy';
 			if ( !isset( $row[$side] ) || !is_string( $row[$side] ) ) {
@@ -61,7 +61,7 @@ class ConflictFormValidator {
 	 *
 	 * @return bool
 	 */
-	private function validateSingleColumnForm( array $contentRows ) : bool {
+	private function validateSingleColumnForm( array $contentRows ): bool {
 		foreach ( $contentRows as $num => $row ) {
 			if ( !is_array( $row ) || count( $row ) !== 1 ) {
 				// Must be an array with exactly one column.

@@ -3,6 +3,7 @@
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Session\SessionManager;
+use MediaWiki\User\UserIdentity;
 
 class EchoForeignWikiRequest {
 
@@ -59,18 +60,21 @@ class EchoForeignWikiRequest {
 		return $this->doRequests( $reqs );
 	}
 
+	/**
+	 * @param UserIdentity $user
+	 * @return int
+	 */
 	protected function getCentralId( $user ) {
-		$lookup = CentralIdLookup::factory();
-		$id = $lookup->centralIdFromLocalUser( $user, CentralIdLookup::AUDIENCE_RAW );
-		return $id;
+		return MediaWikiServices::getInstance()
+			->getCentralIdLookup()
+			->centralIdFromLocalUser( $user, CentralIdLookup::AUDIENCE_RAW );
 	}
 
 	protected function canUseCentralAuth() {
-		// phpcs:ignore MediaWiki.Usage.DeprecatedGlobalVariables.Deprecated$wgUser
-		global $wgFullyInitialised, $wgUser;
+		global $wgFullyInitialised;
 
 		return $wgFullyInitialised &&
-			$wgUser->isSafeToLoad() &&
+			RequestContext::getMain()->getUser()->isSafeToLoad() &&
 			$this->user->isSafeToLoad() &&
 			SessionManager::getGlobalSession()->getProvider() instanceof CentralAuthSessionProvider &&
 			$this->getCentralId( $this->user ) !== 0;

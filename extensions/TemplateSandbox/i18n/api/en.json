@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Brad Jorsch",
+			"Amire80"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Template sandbox prefix, as with [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Parse the page using <var>$1templatesandboxtext</var> in place of the contents of the page named here.",
+	"templatesandbox-apihelp-text": "Parse the page using this page content in place of the page named by <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Content model of <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Content format of <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "The parameters <var>$1templatesandboxtitle</var> and <var>$1templatesandboxtext</var> must both be specified or both be omitted."
+}

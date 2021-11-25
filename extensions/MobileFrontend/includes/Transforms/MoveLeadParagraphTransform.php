@@ -37,7 +37,7 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 	public function apply( DOMElement $node ) {
 		$section = $node->getElementsByTagName( 'section' )->item( 0 );
 		if ( $section ) {
-			/** @phan-suppress-next-line PhanTypeMismatchArgument DOMNode vs. DOMElement */
+			/** @phan-suppress-next-line PhanTypeMismatchArgumentSuperType DOMNode vs. DOMElement */
 			$this->moveFirstParagraphBeforeInfobox( $section, $section->ownerDocument );
 		}
 	}
@@ -80,7 +80,7 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 	 * @param DOMElement $section Where to search for an infobox
 	 * @return DOMElement|null The first infobox
 	 */
-	private function identifyInfoboxElement( DOMXPath $xPath, DOMElement $section ) : ?DOMElement {
+	private function identifyInfoboxElement( DOMXPath $xPath, DOMElement $section ): ?DOMElement {
 		$paths = [
 			// Infoboxes: *.infobox
 			'.//*[contains(concat(" ",normalize-space(@class)," ")," infobox ")]',
@@ -130,13 +130,14 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 	 * @param DOMElement $section Where to search for paragraphs
 	 * @return DOMElement|null The lead paragraph
 	 */
-	private function identifyLeadParagraph( DOMXPath $xPath, DOMElement $section ) : ?DOMElement {
+	private function identifyLeadParagraph( DOMXPath $xPath, DOMElement $section ): ?DOMElement {
 		$paragraphs = $xPath->query( './p', $section );
 
 		$index = 0;
 		while ( $index < $paragraphs->length ) {
 			$node = $paragraphs->item( $index );
 			if ( $node && !$this->isNonLeadParagraph( $xPath, $node ) ) {
+				/** @phan-suppress-next-line PhanTypeMismatchReturn DOMNode vs. DOMElement */
 				return $node;
 			}
 
@@ -193,7 +194,7 @@ class MoveLeadParagraphTransform implements IMobileTransform {
 				}
 			} elseif ( !$isTopLevelInfobox ) {
 				$isInWrongPlace = $this->hasNoNonEmptyPrecedingParagraphs( $xPath,
-					/** @phan-suppress-next-line PhanTypeMismatchArgument DOMNode vs. DOMElement */
+					/** @phan-suppress-next-line PhanTypeMismatchArgumentSuperType DOMNode vs. DOMElement */
 					self::findParentWithParent( $infobox, $leadSection )
 				);
 				$loggingEnabled = MediaWikiServices::getInstance()

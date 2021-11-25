@@ -9,10 +9,9 @@ use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\EntityLookupException;
-use Wikibase\DataModel\Services\Lookup\EntityRedirectLookup;
+use Wikibase\DataModel\Services\Lookup\EntityRedirectTargetLookup;
 use Wikibase\Lib\Store\SiteLinkLookup;
 use Wikibase\Repo\Store\Store;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Enables accessing a linked page on a site by providing the item id and site
@@ -34,7 +33,7 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 	private $siteLinkLookup;
 
 	/**
-	 * @var EntityRedirectLookup
+	 * @var EntityRedirectTargetLookup
 	 */
 	private $redirectLookup;
 
@@ -58,14 +57,14 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 	 *
 	 * @param SiteLookup $siteLookup
 	 * @param SiteLinkLookup $siteLinkLookup
-	 * @param EntityRedirectLookup $redirectLookup
+	 * @param EntityRedirectTargetLookup $redirectLookup
 	 * @param EntityIdParser $idParser
 	 * @param EntityLookup $entityLookup
 	 */
 	public function __construct(
 		SiteLookup $siteLookup,
 		SiteLinkLookup $siteLinkLookup,
-		EntityRedirectLookup $redirectLookup,
+		EntityRedirectTargetLookup $redirectLookup,
 		EntityIdParser $idParser,
 		EntityLookup $entityLookup
 	) {
@@ -79,18 +78,19 @@ class SpecialGoToLinkedPage extends SpecialWikibasePage {
 	}
 
 	public static function factory(
+		SiteLookup $siteLookup,
 		EntityIdParser $entityIdParser,
+		EntityLookup $entityLookup,
 		Store $store
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		// TODO move SiteLinkStore, EntityRedirectLookup and EntityLookup to service container
+		// TODO move SiteLinkStore and EntityRedirectLookup to service container
 		// and inject them directly instead of via Store
 		return new self(
-			$wikibaseRepo->getSiteLookup(),
+			$siteLookup,
 			$store->newSiteLinkStore(),
 			$store->getEntityRedirectLookup(),
 			$entityIdParser,
-			$store->getEntityLookup()
+			$entityLookup
 		);
 	}
 

@@ -15,6 +15,7 @@ use Kartographer\Tag\TagHandler;
 use Parser;
 
 class Hooks {
+
 	/**
 	 * ParserFirstCallInit hook handler
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ParserFirstCallInit
@@ -45,4 +46,10 @@ class Hooks {
 		}
 	}
 
+	/**
+	 * @inheritDoc
+	 */
+	public static function onParserTestGlobals( array &$globals ) {
+		$globals['wgKartographerMapServer'] = 'https://maps.wikimedia.org';
+	}
 }

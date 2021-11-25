@@ -63,20 +63,24 @@ local function maskEntityTable( entity, tableName, usageFunc )
 		return
 	end
 
+	local actualEntityId = entity.id
 	local actualEntityTable = entity[tableName]
 	entity[tableName] = {}
 
 	local function logNext( _, key )
 		local k, v = next( actualEntityTable, key )
 		if k ~= nil then
-			usageFunc( entity.id, k )
+			usageFunc( actualEntityId, k )
 		end
 		return k, v
 	end
 
 	local pseudoTableMetatable = {
 		__index = function( _, key )
-			usageFunc( entity.id, key )
+			if type( key ) ~= 'string' then
+				return nil
+			end
+			usageFunc( actualEntityId, key )
 			return actualEntityTable[key]
 		end,
 
@@ -92,27 +96,15 @@ local function maskEntityTable( entity, tableName, usageFunc )
 	setmetatable( entity[tableName], pseudoTableMetatable )
 end
 
-local function noUsageTracking()
-end
-
 -- Function to mask an entity's subtables in order to log access and prevent modifications
 --
 -- @param {table} entity
--- @param {bool} fineGrainedTracking
-local function maskEntityTables( entity, fineGrainedTracking )
-	if fineGrainedTracking then
-		maskEntityTable( entity, 'claims', addStatementUsage )
-		maskEntityTable( entity, 'labels', php.addLabelUsage )
-		maskEntityTable( entity, 'sitelinks', php.addSiteLinksUsage )
-		maskEntityTable( entity, 'descriptions', php.addDescriptionUsage )
-		maskEntityTable( entity, 'aliases', php.addOtherUsage )
-	else
-		maskEntityTable( entity, 'claims', noUsageTracking )
-		maskEntityTable( entity, 'labels', noUsageTracking )
-		maskEntityTable( entity, 'sitelinks', noUsageTracking )
-		maskEntityTable( entity, 'descriptions', noUsageTracking )
-		maskEntityTable( entity, 'aliases', noUsageTracking )
-	end
+local function maskEntityTables( entity )
+	maskEntityTable( entity, 'claims', addStatementUsage )
+	maskEntityTable( entity, 'labels', php.addLabelUsage )
+	maskEntityTable( entity, 'sitelinks', php.addSiteLinksUsage )
+	maskEntityTable( entity, 'descriptions', php.addDescriptionUsage )
+	maskEntityTable( entity, 'aliases', php.addOtherUsage )
 end
 
 -- Create new entity object from given data
@@ -136,7 +128,7 @@ function Entity.create( data )
 	end
 
 	local entity = data
-	maskEntityTables( entity, settings.fineGrainedLuaTracking )
+	maskEntityTables( entity )
 
 	setmetatable( entity, metatable )
 	return entity
@@ -157,7 +149,7 @@ end
 local function getTermAndLang( entity, termType, langCode )
 	incrementStatsKey( 'wikibase.client.scribunto.entity.getTermAndLang.call' )
 
-	langCode = langCode or php.getLanguageCode()
+	langCode = langCode or settings.languageCode
 
 	if langCode == nil then
 		return nil, nil
@@ -233,7 +225,7 @@ function methodtable.getSitelink( entity, globalSiteId )
 		return nil
 	end
 
-	globalSiteId = globalSiteId or php.getGlobalSiteId()
+	globalSiteId = globalSiteId or settings.globalSiteId
 
 	if globalSiteId == nil then
 		return nil
@@ -353,7 +345,7 @@ local function formatValuesByPropertyId( entity, phpFormatterFunction, propertyL
 	}
 end
 
--- Format the main Snaks belonging to a Statement (which is identified by a PropertyId
+-- Format the main Snaks belonging to a Statement (which is identified by a NumericPropertyId
 -- or the label of a Property) as wikitext escaped plain text.
 --
 -- @param {string} propertyLabelOrId
@@ -372,7 +364,7 @@ function methodtable.formatPropertyValues( entity, propertyLabelOrId, acceptable
 	);
 end
 
--- Format the main Snaks belonging to a Statement (which is identified by a PropertyId
+-- Format the main Snaks belonging to a Statement (which is identified by a NumericPropertyId
 -- or the label of a Property) as rich wikitext.
 --
 -- @param {string} propertyLabelOrId

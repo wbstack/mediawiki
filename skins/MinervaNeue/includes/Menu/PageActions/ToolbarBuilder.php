@@ -32,6 +32,7 @@ use MediaWiki\Minerva\Permissions\IMinervaPagePermissions;
 use MediaWiki\Minerva\SkinOptions;
 use MediaWiki\Minerva\Skins\SkinUserPageHelper;
 use MediaWiki\User\UserIdentity;
+use MediaWiki\Watchlist\WatchlistManager;
 use MessageLocalizer;
 use MinervaUI;
 use MWException;
@@ -81,6 +82,11 @@ class ToolbarBuilder {
 	private $watchlistExpiryEnabled;
 
 	/**
+	 * @var WatchlistManager
+	 */
+	private $watchlistManager;
+
+	/**
 	 * ServiceOptions needed.
 	 */
 	public const CONSTRUCTOR_OPTIONS = [
@@ -100,6 +106,7 @@ class ToolbarBuilder {
 	 * Title and NOT with the user talk page Title.
 	 * @param LanguagesHelper $languagesHelper Helper to check title languages/variants
 	 * @param ServiceOptions $options
+	 * @param WatchlistManager $watchlistManager
 	 */
 	public function __construct(
 		Title $title,
@@ -109,7 +116,8 @@ class ToolbarBuilder {
 		SkinOptions $skinOptions,
 		SkinUserPageHelper $relevantUserPageHelper,
 		LanguagesHelper $languagesHelper,
-		ServiceOptions $options
+		ServiceOptions $options,
+		WatchlistManager $watchlistManager
 	) {
 		$this->title = $title;
 		$this->user = $user;
@@ -119,6 +127,7 @@ class ToolbarBuilder {
 		$this->relevantUserPageHelper = $relevantUserPageHelper;
 		$this->languagesHelper = $languagesHelper;
 		$this->watchlistExpiryEnabled = $options->get( 'WatchlistExpiry' );
+		$this->watchlistManager = $watchlistManager;
 	}
 
 	/**
@@ -128,10 +137,10 @@ class ToolbarBuilder {
 	public function getGroup(): Group {
 		$group = new Group( 'p-views' );
 		$permissions = $this->permissions;
-		$userPageOrUserTalkPageWithOveflowMode = $this->skinOptions->get( SkinOptions::TOOLBAR_SUBMENU )
+		$userPageOrUserTalkPageWithOverflowMode = $this->skinOptions->get( SkinOptions::TOOLBAR_SUBMENU )
 			&& $this->relevantUserPageHelper->isUserPage();
 
-		if ( !$userPageOrUserTalkPageWithOveflowMode && $permissions->isAllowed(
+		if ( !$userPageOrUserTalkPageWithOverflowMode && $permissions->isAllowed(
 			IMinervaPagePermissions::SWITCH_LANGUAGE ) ) {
 			$group->insertEntry( new LanguageSelectorEntry(
 				$this->title,
@@ -151,7 +160,9 @@ class ToolbarBuilder {
 			$group->insertEntry( $this->getHistoryPageAction() );
 		}
 
-		if ( $this->relevantUserPageHelper->isUserPage() ) {
+		$isUserPage = $this->relevantUserPageHelper->isUserPage();
+		$isUserPageAccessible = $this->relevantUserPageHelper->isUserPageAccessibleToCurrentUser();
+		if ( $isUserPage && $isUserPageAccessible ) {
 			// T235681: Contributions icon should be added to toolbar on user pages
 			// and user talk pages for all users
 			$user = $this->relevantUserPageHelper->getPageUser();
@@ -236,10 +247,11 @@ class ToolbarBuilder {
 	 * @throws MWException
 	 */
 	protected function createWatchPageAction(): IMenuEntry {
-		$isWatched = $this->user->isRegistered() && $this->user->isWatched( $this->title );
+		$isWatched = $this->user->isRegistered() &&
+			$this->watchlistManager->isWatched( $this->user, $this->title );
 		$isTempWatched = $this->watchlistExpiryEnabled &&
 			$isWatched &&
-			$this->user->isTempWatched( $this->title );
+			$this->watchlistManager->isTempWatched( $this->user, $this->title );
 		$newModeToSet = $isWatched ? 'unwatch' : 'watch';
 		$href = $this->user->isAnon()
 			? $this->getLoginUrl( [ 'returnto' => $this->title ] )

@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\User\UserOptionsManager;
+
 class SpecialDisplayNotificationsConfiguration extends UnlistedSpecialPage {
 	/**
 	 * EchoAttributeManager to access notification configuration
@@ -7,13 +9,6 @@ class SpecialDisplayNotificationsConfiguration extends UnlistedSpecialPage {
 	 * @var EchoAttributeManager
 	 */
 	protected $attributeManager;
-
-	/**
-	 * Notification controller
-	 *
-	 * @var EchoNotificationController
-	 */
-	protected $notificationController;
 
 	/**
 	 * Category names, mapping internal name to HTML-formatted name
@@ -53,11 +48,23 @@ class SpecialDisplayNotificationsConfiguration extends UnlistedSpecialPage {
 	 */
 	protected $flippedNotifyTypes;
 
-	public function __construct() {
+	/**
+	 * @var UserOptionsManager
+	 */
+	private $userOptionsManager;
+
+	/**
+	 * @param EchoAttributeManager $attributeManager
+	 * @param UserOptionsManager $userOptionsManager
+	 */
+	public function __construct(
+		EchoAttributeManager $attributeManager,
+		UserOptionsManager $userOptionsManager
+	) {
 		parent::__construct( 'DisplayNotificationsConfiguration' );
 
-		$this->attributeManager = EchoServices::getInstance()->getAttributeManager();
-		$this->notificationController = new EchoNotificationController();
+		$this->attributeManager = $attributeManager;
+		$this->userOptionsManager = $userOptionsManager;
 	}
 
 	public function execute( $subPage ) {
@@ -136,7 +143,7 @@ class SpecialDisplayNotificationsConfiguration extends UnlistedSpecialPage {
 		array $columnLabelMapping,
 		array $value
 	) {
-		$form = new HTMLForm(
+		$form = new OOUIHTMLForm(
 			[
 				$id => [
 					'type' => 'checkmatrix',
@@ -262,14 +269,20 @@ class SpecialDisplayNotificationsConfiguration extends UnlistedSpecialPage {
 			$this->msg( 'echo-displaynotificationsconfiguration-enabled-default-header' )->text()
 		) );
 
+		// Some of the preferences are mapped to existing ones defined in core MediaWiki
+		$virtualOptions = EchoHooks::getVirtualUserOptions();
+
 		// In reality, anon users are not relevant to Echo, but this lets us easily query default options.
 		$anonUser = new User;
 
 		$byCategoryValueExisting = [];
 		foreach ( $this->notifyTypes as $notifyType => $displayNotifyType ) {
 			foreach ( $this->categoryNames as $category => $displayCategory ) {
-				$tag = "$notifyType-$category";
-				if ( $anonUser->getOption( "echo-subscriptions-$tag" ) ) {
+				$prefKey = "echo-subscriptions-$notifyType-$category";
+				if ( isset( $virtualOptions[ $prefKey ] ) ) {
+					$prefKey = $virtualOptions[ $prefKey ];
+				}
+				if ( $anonUser->getOption( $prefKey ) ) {
 					$byCategoryValueExisting[] = "$notifyType-$category";
 				}
 			}
@@ -288,14 +301,17 @@ class SpecialDisplayNotificationsConfiguration extends UnlistedSpecialPage {
 		// We can't run the actual hook, to avoid side effects.
 		$overrides = EchoHooks::getNewUserPreferenceOverrides();
 		foreach ( $overrides as $prefKey => $value ) {
-			$loggedInUser->setOption( $prefKey, $value );
+			$this->userOptionsManager->setOption( $loggedInUser, $prefKey, $value );
 		}
 
 		$byCategoryValueNew = [];
 		foreach ( $this->notifyTypes as $notifyType => $displayNotifyType ) {
 			foreach ( $this->categoryNames as $category => $displayCategory ) {
-				$tag = "$notifyType-$category";
-				if ( $loggedInUser->getOption( "echo-subscriptions-$tag" ) ) {
+				$prefKey = "echo-subscriptions-$notifyType-$category";
+				if ( isset( $virtualOptions[ $prefKey ] ) ) {
+					$prefKey = $virtualOptions[ $prefKey ];
+				}
+				if ( $loggedInUser->getOption( $prefKey ) ) {
 					$byCategoryValueNew[] = "$notifyType-$category";
 				}
 			}

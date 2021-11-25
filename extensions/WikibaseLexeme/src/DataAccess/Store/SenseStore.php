@@ -109,14 +109,15 @@ class SenseStore implements EntityStore {
 	 * @param int|bool $baseRevId
 	 *
 	 * @throws \DomainException always
-	 * @return int
+	 * @return never
 	 */
 	public function saveRedirect(
 		EntityRedirect $redirect,
 		$summary,
 		User $user,
 		$flags = 0,
-		$baseRevId = false
+		$baseRevId = false,
+		array $tags = []
 	) {
 		throw new \DomainException( 'Senses currently don\'t support redirects' );
 	}

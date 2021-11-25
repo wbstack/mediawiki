@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\Hooks;
 
 use Content;
@@ -23,10 +25,8 @@ use Wikibase\Client\Store\AddUsagesForPageJob;
 use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Store\UsageUpdater;
 use Wikibase\Client\Usage\EntityUsage;
-use Wikibase\Client\Usage\EntityUsageFactory;
-use Wikibase\Client\Usage\ParserOutputUsageAccumulator;
+use Wikibase\Client\Usage\UsageAccumulatorFactory;
 use Wikibase\Client\Usage\UsageLookup;
-use Wikibase\DataModel\Entity\EntityIdParser;
 use WikiPage;
 
 /**
@@ -62,23 +62,23 @@ class DataUpdateHookHandler implements
 	private $usageLookup;
 
 	/**
-	 * @var EntityUsageFactory
+	 * @var UsageAccumulatorFactory
 	 */
-	private $entityUsageFactory;
+	private $usageAccumulatorFactory;
 
 	/** @var LoggerInterface */
 	private $logger;
 
 	public static function factory(
-		EntityIdParser $entityIdParser,
 		LoggerInterface $logger,
-		ClientStore $store
+		ClientStore $store,
+		UsageAccumulatorFactory $usageAccumulatorFactory
 	): self {
 		return new self(
 			$store->getUsageUpdater(),
 			JobQueueGroup::singleton(),
 			$store->getUsageLookup(),
-			new EntityUsageFactory( $entityIdParser ),
+			$usageAccumulatorFactory,
 			$logger
 		);
 	}
@@ -87,13 +87,13 @@ class DataUpdateHookHandler implements
 		UsageUpdater $usageUpdater,
 		JobQueueGroup $jobScheduler,
 		UsageLookup $usageLookup,
-		EntityUsageFactory $entityUsageFactory,
+		UsageAccumulatorFactory $usageAccumulatorFactory,
 		LoggerInterface $logger = null
 	) {
 		$this->usageUpdater = $usageUpdater;
 		$this->jobScheduler = $jobScheduler;
 		$this->usageLookup = $usageLookup;
-		$this->entityUsageFactory = $entityUsageFactory;
+		$this->usageAccumulatorFactory = $usageAccumulatorFactory;
 		$this->logger = $logger ?: new NullLogger();
 	}
 
@@ -152,7 +152,7 @@ class DataUpdateHookHandler implements
 		}
 
 		$parserOutput = $linksUpdate->getParserOutput();
-		$usageAcc = new ParserOutputUsageAccumulator( $parserOutput, $this->entityUsageFactory );
+		$usageAcc = $this->usageAccumulatorFactory->newFromParserOutput( $parserOutput );
 
 		// Please note that page views that happen between the page save but before this is run will have
 		// their usages removed (as we might add the usages via onParserCacheSaveComplete before this is run).
@@ -171,7 +171,7 @@ class DataUpdateHookHandler implements
 	 */
 	public function onParserCacheSaveComplete( $parserCache, $parserOutput, $title, $popts, $revId ): void {
 		DeferredUpdates::addCallableUpdate( function () use ( $parserOutput, $title ) {
-			$usageAcc = new ParserOutputUsageAccumulator( $parserOutput, $this->entityUsageFactory );
+			$usageAcc = $this->usageAccumulatorFactory->newFromParserOutput( $parserOutput );
 
 			$usages = $this->reindexEntityUsages( $usageAcc->getUsages() );
 			if ( $usages === [] ) {
@@ -206,7 +206,7 @@ class DataUpdateHookHandler implements
 	 * @throws InvalidArgumentException
 	 * @return EntityUsage[]
 	 */
-	private function reindexEntityUsages( array $usages ) {
+	private function reindexEntityUsages( array $usages ): array {
 		$reindexed = [];
 
 		foreach ( $usages as $usage ) {

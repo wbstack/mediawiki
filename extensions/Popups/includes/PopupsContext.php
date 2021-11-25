@@ -24,7 +24,7 @@ use BetaFeatures;
 use Config;
 use ExtensionRegistry;
 use MediaWiki\MediaWikiServices;
-use Popups\EventLogging\EventLogger;
+use MediaWiki\User\UserOptionsLookup;
 use Title;
 
 /**
@@ -44,17 +44,23 @@ class PopupsContext {
 	/**
 	 * User preference value for enabled Page Previews
 	 */
-	public const PREVIEWS_ENABLED = '1';
+	public const PREVIEWS_ENABLED = true;
 
 	/**
 	 * User preference value for disabled Page Previews
 	 */
-	public const PREVIEWS_DISABLED = '0';
+	public const PREVIEWS_DISABLED = false;
 
 	/**
 	 * User preference key to enable/disable Page Previews
 	 */
 	public const PREVIEWS_OPTIN_PREFERENCE_NAME = 'popups';
+
+	/**
+	 * User preference key to enable/disable Reference Previews. Named
+	 * "mwe-popups-referencePreviews-enabled" in localStorage for anonymous users.
+	 */
+	public const REFERENCE_PREVIEWS_PREFERENCE_NAME_AFTER_BETA = 'popups-reference-previews';
 
 	/**
 	 * User preference key to enable/disable Reference Previews
@@ -90,22 +96,26 @@ class PopupsContext {
 	private $gadgetsIntegration;
 
 	/**
-	 * @var EventLogger
+	 * @var UserOptionsLookup
 	 */
-	private $eventLogger;
+	private $userOptionsLookup;
 
 	/**
 	 * @param Config $config Mediawiki configuration
 	 * @param ExtensionRegistry $extensionRegistry MediaWiki extension registry
 	 * @param PopupsGadgetsIntegration $gadgetsIntegration Gadgets integration helper
-	 * @param EventLogger $eventLogger A logger capable of logging EventLogging
+	 * @param UserOptionsLookup $userOptionsLookup
 	 *  events
 	 */
-	public function __construct( Config $config, ExtensionRegistry $extensionRegistry,
-		PopupsGadgetsIntegration $gadgetsIntegration, EventLogger $eventLogger ) {
+	public function __construct(
+		Config $config,
+		ExtensionRegistry $extensionRegistry,
+		PopupsGadgetsIntegration $gadgetsIntegration,
+		UserOptionsLookup $userOptionsLookup
+	) {
 		$this->extensionRegistry = $extensionRegistry;
 		$this->gadgetsIntegration = $gadgetsIntegration;
-		$this->eventLogger = $eventLogger;
+		$this->userOptionsLookup = $userOptionsLookup;
 
 		$this->config = $config;
 	}
@@ -140,7 +150,7 @@ class PopupsContext {
 	 * @return bool whether or not to show reference previews
 	 */
 	public function isReferencePreviewsEnabled( \User $user ) {
-		// TODO: Remove when the feature flag is ot needed any more
+		// TODO: Remove when the feature flag is not needed any more
 		if ( !$this->config->get( 'PopupsReferencePreviews' ) ) {
 			return false;
 		}
@@ -152,7 +162,10 @@ class PopupsContext {
 				self::REFERENCE_PREVIEWS_PREFERENCE_NAME
 			);
 		}
-		return $user->getBoolOption( self::REFERENCE_PREVIEWS_PREFERENCE_NAME );
+
+		return !$user->isRegistered() || $this->userOptionsLookup->getBoolOption(
+			$user, self::REFERENCE_PREVIEWS_PREFERENCE_NAME_AFTER_BETA
+		);
 	}
 
 	/**
@@ -180,9 +193,17 @@ class PopupsContext {
 	 * @return bool
 	 */
 	public function shouldSendModuleToUser( \User $user ) {
-		return $user->isAnon() ||
-			$user->getBoolOption( self::PREVIEWS_OPTIN_PREFERENCE_NAME ) ||
-			$this->isReferencePreviewsEnabled( $user );
+		if ( !$user->isRegistered() ) {
+			return true;
+		}
+
+		$shouldLoadPagePreviews = $this->userOptionsLookup->getBoolOption(
+			$user,
+			self::PREVIEWS_OPTIN_PREFERENCE_NAME
+		);
+		$shouldLoadReferencePreviews = $this->isReferencePreviewsEnabled( $user );
+
+		return $shouldLoadPagePreviews || $shouldLoadReferencePreviews;
 	}
 
 	/**
@@ -246,25 +267,4 @@ class PopupsContext {
 	public function getLogger() {
 		return MediaWikiServices::getInstance()->getService( 'Popups.Logger' );
 	}
-
-	/**
-	 * Log disabled event
-	 */
-	public function logUserDisabledPagePreviewsEvent() {
-		// @see https://phabricator.wikimedia.org/T167365
-		$this->eventLogger->log( [
-			'pageTitleSource' => 'Special:Preferences',
-			'namespaceIdSource' => NS_SPECIAL,
-			'pageIdSource' => -1,
-			'hovercardsSuppressedByGadget' => false,
-			'pageToken' => wfRandomString(),
-			// we don't have access to mw.user.sessionId()
-			'sessionToken' => wfRandomString(),
-			'action' => 'disabled',
-			'isAnon' => false,
-			'popupEnabled' => false,
-			'previewCountBucket' => 'unknown'
-		] );
-	}
-
 }

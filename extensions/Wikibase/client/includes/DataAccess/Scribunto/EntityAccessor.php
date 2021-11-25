@@ -11,7 +11,7 @@ use Wikibase\Client\Serializer\ClientEntitySerializer;
 use Wikibase\Client\Serializer\ClientStatementListSerializer;
 use Wikibase\Client\Usage\UsageAccumulator;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
@@ -72,11 +72,6 @@ class EntityAccessor {
 	private $termsLanguages;
 
 	/**
-	 * @var bool
-	 */
-	private $fineGrainedLuaTracking;
-
-	/**
 	 * @var LoggerInterface
 	 */
 	private $logger;
@@ -91,8 +86,6 @@ class EntityAccessor {
 	 * @param TermLanguageFallbackChain $termFallbackChain
 	 * @param Language $language
 	 * @param ContentLanguages $termsLanguages
-	 * @param bool $fineGrainedLuaTracking Whether to track each used aspect
-	 *        separately in Lua or just track the All (X) usage.
 	 */
 	public function __construct(
 		EntityIdParser $entityIdParser,
@@ -104,7 +97,6 @@ class EntityAccessor {
 		TermLanguageFallbackChain $termFallbackChain,
 		Language $language,
 		ContentLanguages $termsLanguages,
-		$fineGrainedLuaTracking,
 		LoggerInterface $logger = null
 	) {
 		$this->entityIdParser = $entityIdParser;
@@ -116,7 +108,6 @@ class EntityAccessor {
 		$this->termFallbackChain = $termFallbackChain;
 		$this->language = $language;
 		$this->termsLanguages = $termsLanguages;
-		$this->fineGrainedLuaTracking = $fineGrainedLuaTracking;
 		$this->logger = $logger ?: new NullLogger();
 	}
 
@@ -151,9 +142,6 @@ class EntityAccessor {
 
 		$entityId = $this->entityIdParser->parse( $prefixedEntityId );
 
-		if ( !$this->fineGrainedLuaTracking ) {
-			$this->usageAccumulator->addAllUsage( $entityId );
-		}
 		try {
 			$entityObject = $this->entityLookup->getEntity( $entityId );
 		} catch ( UnresolvedEntityRedirectException $ex ) {
@@ -211,7 +199,7 @@ class EntityAccessor {
 		$prefixedEntityId = trim( $prefixedEntityId );
 		$entityId = $this->entityIdParser->parse( $prefixedEntityId );
 
-		$propertyId = new PropertyId( $propertyIdSerialization );
+		$propertyId = new NumericPropertyId( $propertyIdSerialization );
 		$this->usageAccumulator->addStatementUsage( $entityId, $propertyId );
 
 		try {
@@ -243,6 +231,7 @@ class EntityAccessor {
 		return new ClientEntitySerializer(
 			$this->entitySerializer,
 			$this->dataTypeLookup,
+			$this->entityIdParser,
 			array_unique( array_merge(
 				$this->termsLanguages->getLanguages(),
 				$this->termFallbackChain->getFetchLanguageCodes(),
@@ -255,7 +244,8 @@ class EntityAccessor {
 	private function newClientStatementListSerializer() {
 		return new ClientStatementListSerializer(
 			$this->statementSerializer,
-			$this->dataTypeLookup
+			$this->dataTypeLookup,
+			$this->entityIdParser
 		);
 	}
 

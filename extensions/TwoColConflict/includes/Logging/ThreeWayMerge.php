@@ -14,7 +14,7 @@ class ThreeWayMerge {
 	 * @param string $your
 	 * @return ThreeWayMergeResult
 	 */
-	public function merge3( string $base, string $other, string $your ) : ThreeWayMergeResult {
+	public function merge3( string $base, string $other, string $your ): ThreeWayMergeResult {
 		$isCleanMerge = wfMerge(
 			$base,
 			$your,

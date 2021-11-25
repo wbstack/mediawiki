@@ -25,6 +25,7 @@
 	"wikibasecirrus-search-bad-profile-name": "Bad search profile name: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement keyword contains no valid statements",
 	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense keyword contains no valid arguments",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity keyword contains no valid statements",
 	"special-entitieswithoutdescription": "Entities without description",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Get list of entities without description",
 	"special-entitieswithoutlabel": "Entities without label",

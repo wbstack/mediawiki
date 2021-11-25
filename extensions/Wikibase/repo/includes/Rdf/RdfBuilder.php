@@ -1,14 +1,14 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Rdf;
 
 use SplQueue;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\Lookup\EntityLookup;
-use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
-use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
+use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Repo\Content\EntityContentFactory;
 use Wikimedia\Purtle\RdfWriter;
 
@@ -17,7 +17,7 @@ use Wikimedia\Purtle\RdfWriter;
  *
  * @license GPL-2.0-or-later
  */
-class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
+class RdfBuilder implements EntityRdfBuilder, EntityStubRdfBuilder, EntityMentionListener {
 
 	/**
 	 * A list of entities mentioned/touched to or by this builder.
@@ -50,30 +50,9 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	private $writer;
 
 	/**
-	 * @var DedupeBag
-	 */
-	private $dedupeBag;
-
-	/**
-	 * RDF builders to apply when building RDF for an entity.
-	 * @var EntityRdfBuilder[]
-	 */
-	private $builders = [];
-
-	/**
 	 * @var RdfVocabulary
 	 */
 	private $vocabulary;
-
-	/**
-	 * @var PropertyDataTypeLookup
-	 */
-	private $propertyLookup;
-
-	/**
-	 * @var ValueSnakRdfBuilderFactory
-	 */
-	private $valueSnakRdfBuilderFactory;
 
 	/** @var EntityContentFactory */
 	private $entityContentFactory;
@@ -85,44 +64,38 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	private $entityRdfBuilders;
 
 	/**
-	 * @param RdfVocabulary $vocabulary
-	 * @param ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory
-	 * @param PropertyDataTypeLookup $propertyLookup
-	 * @param EntityRdfBuilderFactory $entityRdfBuilderFactory
-	 * @param int $flavor
-	 * @param RdfWriter $writer
-	 * @param DedupeBag $dedupeBag
-	 * @param EntityContentFactory $entityContentFactory
+	 * Entity-specific stub RDF builders factory
+	 * @var EntityStubRdfBuilderFactory|null
 	 */
+	private $entityStubRdfBuilderFactory;
+
+	/**
+	 * Entity-specific stub RDF builders to apply when building RDF for an entity.
+	 * @var EntityStubRdfBuilder[]
+	 */
+	private $entityStubRdfBuilders;
+	/**
+	 * @var EntityRevisionLookup
+	 */
+	private $entityRevisionLookup;
+
 	public function __construct(
 		RdfVocabulary $vocabulary,
-		ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory,
-		PropertyDataTypeLookup $propertyLookup,
 		EntityRdfBuilderFactory $entityRdfBuilderFactory,
-		$flavor,
+		int $flavor,
 		RdfWriter $writer,
 		DedupeBag $dedupeBag,
-		EntityContentFactory $entityContentFactory
+		EntityContentFactory $entityContentFactory,
+		EntityStubRdfBuilderFactory $entityStubRdfBuilderFactory,
+		EntityRevisionLookup $entityRevisionLookup
 	) {
 		$this->entitiesToOutput = new SplQueue();
 		$this->vocabulary = $vocabulary;
-		$this->propertyLookup = $propertyLookup;
-		$this->valueSnakRdfBuilderFactory = $valueSnakRdfBuilderFactory;
 		$this->writer = $writer;
 		$this->produceWhat = $flavor;
-		$this->dedupeBag = $dedupeBag;
 		$this->entityContentFactory = $entityContentFactory;
-
-		// XXX: move construction of sub-builders to a factory class.
-		$this->builders[] = $entityRdfBuilderFactory->getTermRdfBuilder( $vocabulary, $writer );
-
-		if ( $this->shouldProduce( RdfProducer::PRODUCE_TRUTHY_STATEMENTS ) ) {
-			$this->builders[] = $this->newTruthyStatementRdfBuilder();
-		}
-
-		if ( $this->shouldProduce( RdfProducer::PRODUCE_ALL_STATEMENTS ) ) {
-			$this->builders[] = $this->newFullStatementRdfBuilder();
-		}
+		$this->entityStubRdfBuilderFactory = $entityStubRdfBuilderFactory;
+		$this->entityRevisionLookup = $entityRevisionLookup;
 
 		$this->entityRdfBuilders = $entityRdfBuilderFactory->getEntityRdfBuilders(
 			$flavor,
@@ -131,56 +104,18 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 			$this,
 			$dedupeBag
 		);
-	}
 
-	/**
-	 * @param int $flavorFlags Flavor flags to use for this builder
-	 * @return SnakRdfBuilder
-	 */
-	private function newSnakBuilder( $flavorFlags ) {
-		$statementValueBuilder = $this->valueSnakRdfBuilderFactory->getValueSnakRdfBuilder(
-			$flavorFlags,
-			$this->vocabulary,
-			$this->writer,
-			$this,
-			$this->dedupeBag
+		$this->entityStubRdfBuilders = $this->entityStubRdfBuilderFactory->getEntityStubRdfBuilders(
+			$vocabulary,
+			$writer
 		);
-		$snakBuilder = new SnakRdfBuilder( $this->vocabulary, $statementValueBuilder, $this->propertyLookup );
-		$snakBuilder->setEntityMentionListener( $this );
-
-		return $snakBuilder;
-	}
-
-	/**
-	 * @return EntityRdfBuilder
-	 */
-	private function newTruthyStatementRdfBuilder() {
-		//NOTE: currently, the only simple values are supported in truthy mode!
-		$simpleSnakBuilder = $this->newSnakBuilder( $this->produceWhat & ~RdfProducer::PRODUCE_FULL_VALUES );
-		$statementBuilder = new TruthyStatementRdfBuilder( $this->vocabulary, $this->writer, $simpleSnakBuilder );
-
-		return $statementBuilder;
-	}
-
-	/**
-	 * @return EntityRdfBuilder
-	 */
-	private function newFullStatementRdfBuilder() {
-		$snakBuilder = $this->newSnakBuilder( $this->produceWhat );
-
-		$builder = new FullStatementRdfBuilder( $this->vocabulary, $this->writer, $snakBuilder );
-		$builder->setDedupeBag( $this->dedupeBag );
-		$builder->setProduceQualifiers( $this->shouldProduce( RdfProducer::PRODUCE_QUALIFIERS ) );
-		$builder->setProduceReferences( $this->shouldProduce( RdfProducer::PRODUCE_REFERENCES ) );
-
-		return $builder;
 	}
 
 	/**
 	 * Start writing RDF document
 	 * Note that this builder does not have to finish it, it may be finished later.
 	 */
-	public function startDocument() {
+	public function startDocument(): void {
 		foreach ( $this->getNamespaces() as $gname => $uri ) {
 			$this->writer->prefix( $gname, $uri );
 		}
@@ -192,25 +127,21 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 * Finish writing the document
 	 * After that, nothing should ever be written into the document.
 	 */
-	public function finishDocument() {
+	public function finishDocument(): void {
 		$this->writer->finish();
 	}
 
 	/**
 	 * Returns the RDF generated by the builder
-	 *
-	 * @return string RDF
 	 */
-	public function getRDF() {
+	public function getRDF(): string {
 		return $this->writer->drain();
 	}
 
 	/**
 	 * Returns a map of namespace names to URIs
-	 *
-	 * @return array
 	 */
-	public function getNamespaces() {
+	public function getNamespaces(): array {
 		return $this->vocabulary->getNamespaces();
 	}
 
@@ -219,27 +150,21 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 *
 	 * @return string[][]
 	 */
-	public function getPagePropertyDefs() {
+	public function getPagePropertyDefs(): array {
 		return $this->vocabulary->getPagePropertyDefs();
 	}
 
 	/**
 	 * Should we produce this aspect?
-	 *
-	 * @param int $what
-	 *
-	 * @return bool
 	 */
-	private function shouldProduce( $what ) {
+	private function shouldProduce( int $what ): bool {
 		return ( $this->produceWhat & $what ) !== 0;
 	}
 
 	/**
 	 * @see EntityMentionListener::entityReferenceMentioned
-	 *
-	 * @param EntityId $id
 	 */
-	public function entityReferenceMentioned( EntityId $id ) {
+	public function entityReferenceMentioned( EntityId $id ): void {
 		if ( $this->shouldProduce( RdfProducer::PRODUCE_RESOLVED_ENTITIES ) ) {
 			$this->entityToResolve( $id );
 		}
@@ -247,10 +172,8 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 
 	/**
 	 * @see EntityMentionListener::propertyMentioned
-	 *
-	 * @param PropertyId $id
 	 */
-	public function propertyMentioned( PropertyId $id ) {
+	public function propertyMentioned( PropertyId $id ): void {
 		if ( $this->shouldProduce( RdfProducer::PRODUCE_PROPERTIES ) ) {
 			$this->entityToResolve( $id );
 		}
@@ -258,10 +181,8 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 
 	/**
 	 * @see EntityMentionListener::subEntityMentioned
-	 *
-	 * @param EntityDocument $entity
 	 */
-	public function subEntityMentioned( EntityDocument $entity ) {
+	public function subEntityMentioned( EntityDocument $entity ): void {
 		$this->entitiesToOutput->enqueue( $entity );
 	}
 
@@ -269,10 +190,8 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 * Registers an entity as mentioned.
 	 * Will be recorded as unresolved
 	 * if it wasn't already marked as resolved.
-	 *
-	 * @param EntityId $entityId
 	 */
-	private function entityToResolve( EntityId $entityId ) {
+	private function entityToResolve( EntityId $entityId ): void {
 		$prefixedId = $entityId->getSerialization();
 
 		if ( !isset( $this->entitiesResolved[$prefixedId] ) ) {
@@ -282,10 +201,8 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 
 	/**
 	 * Registers an entity as resolved.
-	 *
-	 * @param EntityId $entityId
 	 */
-	private function entityResolved( EntityId $entityId ) {
+	private function entityResolved( EntityId $entityId ): void {
 		$prefixedId = $entityId->getSerialization();
 		$this->entitiesResolved[$prefixedId] = true;
 	}
@@ -299,7 +216,7 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 * @param int $revision
 	 * @param string $timestamp in TS_MW format
 	 */
-	public function addEntityRevisionInfo( EntityId $entityId, $revision, $timestamp ) {
+	public function addEntityRevisionInfo( EntityId $entityId, int $revision, string $timestamp ): void {
 		$timestamp = wfTimestamp( TS_ISO_8601, $timestamp );
 		$entityLName = $this->vocabulary->getEntityLName( $entityId );
 		$entityRepositoryName = $this->vocabulary->getEntityRepositoryName( $entityId );
@@ -325,7 +242,7 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 * To ensure consistent data, this recalculates the page props from the entity content;
 	 * it does not actually query the page_props table.
 	 */
-	public function addEntityPageProps( EntityDocument $entity ) {
+	public function addEntityPageProps( EntityDocument $entity ): void {
 		if ( !$this->shouldProduce( RdfProducer::PRODUCE_PAGE_PROPS ) ) {
 			return;
 		}
@@ -359,14 +276,11 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	}
 
 	/**
-	 * Adds meta-information about an entity (such as the ID and type) to the RDF graph.
+	 * Adds meta-information about an entity id (such as the ID and type) to the RDF graph.
 	 *
 	 * @todo extract into MetaDataRdfBuilder
-	 *
-	 * @param EntityDocument $entity
 	 */
-	private function addEntityMetaData( EntityDocument $entity ) {
-		$entityId = $entity->getId();
+	private function addEntityMetaData( EntityId $entityId ): void {
 		$entityLName = $this->vocabulary->getEntityLName( $entityId );
 		$entityRepoName = $this->vocabulary->getEntityRepositoryName( $entityId );
 
@@ -374,7 +288,7 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 			$this->vocabulary->entityNamespaceNames[$entityRepoName],
 			$entityLName
 		)
-			->a( RdfVocabulary::NS_ONTOLOGY, $this->vocabulary->getEntityTypeName( $entity->getType() ) );
+			->a( RdfVocabulary::NS_ONTOLOGY, $this->vocabulary->getEntityTypeName( $entityId->getEntityType() ) );
 	}
 
 	/**
@@ -383,7 +297,7 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 *
 	 * @param EntityDocument $entity the entity to output.
 	 */
-	public function addEntity( EntityDocument $entity ) {
+	public function addEntity( EntityDocument $entity ): void {
 		$this->addSingleEntity( $entity );
 		$this->addQueuedEntities();
 	}
@@ -394,16 +308,12 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 *
 	 * @param EntityDocument $entity the entity to output.
 	 */
-	private function addSingleEntity( EntityDocument $entity ) {
-		$this->addEntityMetaData( $entity );
+	private function addSingleEntity( EntityDocument $entity ): void {
+		$this->addEntityMetaData( $entity->getId() );
 
 		$type = $entity->getType();
 		if ( !empty( $this->entityRdfBuilders[$type] ) ) {
 			$this->entityRdfBuilders[$type]->addEntity( $entity );
-		}
-
-		foreach ( $this->builders as $builder ) {
-			$builder->addEntity( $entity );
 		}
 
 		$this->entityResolved( $entity->getId() );
@@ -412,7 +322,7 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	/**
 	 * Add the RDF serialization of all entities in the entitiesToOutput queue
 	 */
-	private function addQueuedEntities() {
+	private function addQueuedEntities(): void {
 		while ( !$this->entitiesToOutput->isEmpty() ) {
 			$this->addSingleEntity( $this->entitiesToOutput->dequeue() );
 		}
@@ -421,11 +331,11 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	/**
 	 * Add stubs for any entities that were previously mentioned (e.g. as properties
 	 * or data values).
-	 *
-	 * @param EntityLookup $entityLookup
 	 */
-	public function resolveMentionedEntities( EntityLookup $entityLookup ) {
+	public function resolveMentionedEntities(): void {
 		$hasRedirect = false;
+
+		$this->markStubEntityDataForPrefetching( $this->entitiesResolved );
 
 		foreach ( $this->entitiesResolved as $id ) {
 			// $value is true if the entity has already been resolved,
@@ -434,19 +344,33 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 				continue;
 			}
 
-			try {
-				$entity = $entityLookup->getEntity( $id );
-
-				if ( !$entity ) {
-					continue;
+			$lookupResult = $this->entityRevisionLookup->getLatestRevisionId( $id );
+			$lookupStatus = $lookupResult->onNonexistentEntity(
+				function () {
+					return 'nonexistent';
 				}
+			)->onConcreteRevision(
+				function () {
+					return 'concrete revision';
+				}
+			)->onRedirect(
+				function ( $revisionId, $redirectsTo ) {
+					return $redirectsTo;
+				}
+			)->map();
 
-				$this->addEntityStub( $entity );
-			} catch ( UnresolvedEntityRedirectException $ex ) {
-				// NOTE: this may add more entries to the end of entitiesResolved
-				$target = $ex->getRedirectTargetId();
-				$this->addEntityRedirect( $id, $target );
-				$hasRedirect = true;
+			switch ( $lookupStatus ) {
+				case 'nonexistent':
+					continue 2;
+				case 'concrete revision':
+					$this->addEntityStub( $id );
+					break;
+				default:
+					// NOTE: this may add more entries to the end of entitiesResolved;
+					$this->addEntityRedirect( $id,
+						$lookupStatus );
+					$hasRedirect = true;
+					break;
 			}
 		}
 
@@ -458,36 +382,29 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 			// redirect targets. The regress will eventually terminate even for circular
 			// redirect chains, because the second time an entity ID is encountered, it
 			// will be marked as already resolved.
-			$this->resolveMentionedEntities( $entityLookup );
+			// @phan-suppress-next-line PhanPossiblyInfiniteRecursionSameParams
+			$this->resolveMentionedEntities();
 		}
 	}
 
 	/**
-	 * Adds stub information for the given Entity to the RDF graph.
+	 * Adds stub information for the given EntityId to the RDF graph.
 	 * Stub information means meta information and labels.
-	 *
-	 * @param EntityDocument $entity
 	 */
-	public function addEntityStub( EntityDocument $entity ) {
-		$this->addEntityMetaData( $entity );
+	public function addEntityStub( EntityId $entityId ): void {
+		$this->markStubEntityDataForPrefetching( [ $entityId ] );
+		$this->addEntityMetaData( $entityId );
 
-		$type = $entity->getType();
-		if ( !empty( $this->entityRdfBuilders[$type] ) ) {
-			$this->entityRdfBuilders[$type]->addEntityStub( $entity );
-		}
-
-		foreach ( $this->builders as $builder ) {
-			$builder->addEntityStub( $entity );
+		$type = $entityId->getEntityType();
+		if ( !empty( $this->entityStubRdfBuilders[ $type ] ) ) {
+			$this->entityStubRdfBuilders[ $type ]->addEntityStub( $entityId );
 		}
 	}
 
 	/**
 	 * Declares $from to be an alias for $to, using the owl:sameAs relationship.
-	 *
-	 * @param EntityId $from
-	 * @param EntityId $to
 	 */
-	public function addEntityRedirect( EntityId $from, EntityId $to ) {
+	public function addEntityRedirect( EntityId $from, EntityId $to ): void {
 		$fromLName = $this->vocabulary->getEntityLName( $from );
 		$fromRepoName = $this->vocabulary->getEntityRepositoryName( $from );
 		$toLName = $this->vocabulary->getEntityLName( $to );
@@ -509,7 +426,7 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 	 *
 	 * @param int $timestamp Timestamp (for testing)
 	 */
-	public function addDumpHeader( $timestamp = 0 ) {
+	public function addDumpHeader( int $timestamp = 0 ): void {
 		// TODO: this should point to "this document"
 		$this->writer->about( RdfVocabulary::NS_ONTOLOGY, 'Dump' )
 			->a( RdfVocabulary::NS_SCHEMA_ORG, "Dataset" )
@@ -518,6 +435,21 @@ class RdfBuilder implements EntityRdfBuilder, EntityMentionListener {
 			->say( RdfVocabulary::NS_SCHEMA_ORG, 'softwareVersion' )->value( RdfVocabulary::FORMAT_VERSION )
 			->say( RdfVocabulary::NS_SCHEMA_ORG, 'dateModified' )->value( wfTimestamp( TS_ISO_8601, $timestamp ), 'xsd', 'dateTime' )
 			->say( 'owl', 'imports' )->is( RdfVocabulary::getOntologyURI() );
+	}
+
+	private function markStubEntityDataForPrefetching( array $entityIds ): void {
+		foreach ( $entityIds as $id ) {
+			if ( !( $id instanceof EntityId ) ) {
+				continue;
+			}
+			$type = $id->getEntityType();
+			if (
+				!empty( $this->entityStubRdfBuilders[$type] )
+				&& $this->entityStubRdfBuilders[$type] instanceof PrefetchingEntityStubRdfBuilder
+			) {
+				$this->entityStubRdfBuilders[$type]->markForPrefetchingEntityStub( $id );
+			}
+		}
 	}
 
 }

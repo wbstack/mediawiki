@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "'U prefisse d'a sandbox d'u template, cumme cu [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Analizze 'a pàgene ausanne <var>$1templatesandboxtext</var> a 'u poste de le condenute d'a pàgene nnomenate aqquà.",
+	"templatesandbox-apihelp-text": "Analizze 'a pàgene ausanne stu condenute d'a pàgene a 'u poste d'a pàgene nnomenate da <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "'U modelle de condenute de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "'U formate de condenute de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Le parametre <var>$1templatesandboxtitle</var> e <var>$1templatesandboxtext</var>onna essere specificate o non ausate tutte e doje."
+}

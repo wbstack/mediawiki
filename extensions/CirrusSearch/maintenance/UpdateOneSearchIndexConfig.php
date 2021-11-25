@@ -69,11 +69,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	private $reindexAndRemoveOk;
 
 	/**
-	 * @var bool are there too few replicas in the index we're making?
-	 */
-	private $tooFewReplicas = false;
-
-	/**
 	 * @var int number of scan slices to use when reindexing
 	 */
 	private $reindexSlices;
@@ -160,7 +155,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			"operates on a single cluster." );
 		$this->addOption( 'indexType', 'Index to update.  Either content or general.', true, true );
 		self::addSharedOptions( $this );
-		$this->requireExtension( 'CirrusSearch' );
 	}
 
 	/**
@@ -235,7 +229,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		if ( $this->indexType === Connection::ARCHIVE_INDEX_TYPE &&
 			!$this->getConnection()->getSettings()->isPrivateCluster()
 		) {
-			$this->fatalError( "Not allowing {$this->indexType} on a non-private cluster" );
+			$this->output( "Warning: Not allowing {$this->indexType} on a non-private cluster\n" );
 			return true;
 		}
 
@@ -304,11 +298,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	}
 
 	private function validateIndex() {
-		// $this->startOver || !$this->getIndex()->exists() are the conditions
-		// under which a new index will be created
-		$this->tooFewReplicas = ( $this->startOver || !$this->getIndex()->exists() )
-			&& $this->reindexAndRemoveOk;
-
 		if ( $this->startOver ) {
 			$this->createIndex( true, "Blowing away index to start over..." );
 		} elseif ( !$this->getIndex()->exists() ) {
@@ -415,9 +404,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			// Do not add the archive index to the global alias
 			$this->validateAllAlias();
 		}
-		if ( $this->tooFewReplicas ) {
-			$this->validateIndexSettings();
-		}
 	}
 
 	/**
@@ -432,9 +418,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$connection,
 			$this->getType(),
 			$this->getOldType(),
-			$this->getShardCount(),
-			$this->getReplicaCount(),
-			$this->getMergeSettings(),
 			$this,
 			array_filter( explode( ',', $this->getOption( 'fieldsToDelete', '' ) ) )
 		);
@@ -447,13 +430,11 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$reindexer,
 			[
 				$this->reindexSlices,
-				$this->refreshInterval,
 				$this->reindexChunkSize,
 				$this->reindexAcceptableCountDeviation
 			],
 			$this->getIndexSettingsValidators(),
 			$this->reindexAndRemoveOk,
-			$this->tooFewReplicas,
 			$this
 		);
 		$status = $validator->validate();

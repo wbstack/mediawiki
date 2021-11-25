@@ -2,13 +2,11 @@
 
 namespace Wikibase\Repo\Notifications;
 
-use CentralIdLookup;
 use InvalidArgumentException;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use User;
 use Wikibase\Lib\Changes\EntityChange;
-use Wikibase\Lib\Changes\EntityChangeFactory;
 use Wikibase\Repo\Content\EntityContent;
 use Wikimedia\Assert\Assert;
 
@@ -22,31 +20,18 @@ use Wikimedia\Assert\Assert;
 class ChangeNotifier {
 
 	/**
-	 * @var EntityChangeFactory
-	 */
-	private $changeFactory;
-
-	/**
 	 * @var ChangeTransmitter[]
 	 */
 	private $changeTransmitters;
 
 	/**
-	 * @var CentralIdLookup|null
+	 * @var WikiPageActionEntityChangeFactory
 	 */
-	private $centralIdLookup;
+	private $changeFactory;
 
-	/**
-	 * @param EntityChangeFactory $changeFactory
-	 * @param ChangeTransmitter[] $changeTransmitters
-	 * @param CentralIdLookup|null $centralIdLookup CentralIdLookup, or null if
-	 *   this repository is not connected to a central user system,
-	 *   see CentralIdLookup::factoryNonLocal.
-	 */
 	public function __construct(
-		EntityChangeFactory $changeFactory,
-		array $changeTransmitters,
-		?CentralIdLookup $centralIdLookup
+		WikiPageActionEntityChangeFactory $changeFactory,
+		array $changeTransmitters
 	) {
 		Assert::parameterElementType(
 			ChangeTransmitter::class,
@@ -56,7 +41,6 @@ class ChangeNotifier {
 
 		$this->changeFactory = $changeFactory;
 		$this->changeTransmitters = $changeTransmitters;
-		$this->centralIdLookup = $centralIdLookup;
 	}
 
 	/**
@@ -77,14 +61,7 @@ class ChangeNotifier {
 			return null;
 		}
 
-		/** @var RepoEntityChange $change */
-		$change = $this->changeFactory->newFromUpdate( EntityChange::REMOVE, $content->getEntity() );
-		'@phan-var RepoEntityChange $change';
-		$change->setTimestamp( $timestamp );
-		$change->setMetadataFromUser(
-			$user,
-			$this->getCentralUserId( $user )
-		);
+		$change = $this->changeFactory->newForPageDeleted( $content, $user, $timestamp );
 
 		$this->transmitChange( $change );
 
@@ -109,24 +86,7 @@ class ChangeNotifier {
 			return null;
 		}
 
-		/** @var RepoEntityChange $change */
-		$change = $this->changeFactory->newFromUpdate( EntityChange::RESTORE, null, $content->getEntity() );
-		'@phan-var RepoEntityChange $change';
-
-		$change->setRevisionInfo(
-			$revisionRecord,
-			/* Will get set below in setMetadataFromUser */ 0
-		);
-
-		// We don't want the change entries of newly undeleted pages to have
-		// the timestamp of the original change.
-		$change->setTimestamp( wfTimestampNow() );
-
-		$user = User::newFromIdentity( $revisionRecord->getUser() );
-		$change->setMetadataFromUser(
-			$user,
-			$this->getCentralUserId( $user )
-		);
+		$change = $this->changeFactory->newForPageUndeleted( $content, $revisionRecord );
 
 		$this->transmitChange( $change );
 
@@ -154,15 +114,9 @@ class ChangeNotifier {
 			return null;
 		}
 
-		/** @var RepoEntityChange $change */
-		$change = $this->changeFactory->newFromUpdate( EntityChange::ADD, null, $content->getEntity() );
-		'@phan-var RepoEntityChange $change';
-		$change->setRevisionInfo(
-			$revisionRecord,
-			$this->getCentralUserId( User::newFromIdentity( $revisionRecord->getUser() ) )
-		);
+		$change = $this->changeFactory->newForPageCreated( $content, $revisionRecord );
 
-		// FIXME: RepoHooks::onRecentChangeSave currently adds to the change later!
+		// FIXME: RecentChangeSaveHookHandler currently adds to the change later!
 		$this->transmitChange( $change );
 
 		return $change;
@@ -183,73 +137,20 @@ class ChangeNotifier {
 		if ( $current->getParentId() !== $parent->getId() ) {
 			throw new InvalidArgumentException( '$parent->getId() must be the same as $current->getParentId()!' );
 		}
+		/** @var EntityContent $parentContent */
+		$parentContent = $parent->getContent( SlotRecord::MAIN );
+		'@phan-var EntityContent $parentContent';
+		$content = $current->getContent( SlotRecord::MAIN );
 
-		$change = $this->getChangeForModification(
-			$parent->getContent( SlotRecord::MAIN ),
-			$current->getContent( SlotRecord::MAIN )
-		);
-
-		if ( !$change ) {
-			// nothing to do
-			return null;
+		if ( $parentContent->isRedirect() && $content->isRedirect() ) {
+			return null; // TODO: notify the client about changes to redirects!
 		}
 
-		$change->setRevisionInfo(
-			$current,
-			$this->getCentralUserId( User::newFromIdentity( $current->getUser() ) )
-		);
+		$change = $this->changeFactory->newForPageModified( $current, $parentContent );
 
 		// FIXME: RepoHooks::onRecentChangeSave currently adds to the change later!
 		$this->transmitChange( $change );
 
-		return $change;
-	}
-
-	/**
-	 * @param User $user Repository user
-	 *
-	 * @return int Central user ID, or 0
-	 */
-	private function getCentralUserId( User $user ) {
-		if ( $this->centralIdLookup ) {
-			return $this->centralIdLookup->centralIdFromLocalUser( $user );
-		}
-
-		return 0;
-	}
-
-	/**
-	 * Returns a EntityChange based on the old and new content object, taking
-	 * redirects into consideration.
-	 *
-	 * @todo Notify the client about changes to redirects explicitly.
-	 *
-	 * @param EntityContent $oldContent
-	 * @param EntityContent $newContent
-	 *
-	 * @return RepoEntityChange|null
-	 */
-	private function getChangeForModification( EntityContent $oldContent, EntityContent $newContent ) {
-		$oldEntity = $oldContent->isRedirect() ? null : $oldContent->getEntity();
-		$newEntity = $newContent->isRedirect() ? null : $newContent->getEntity();
-
-		if ( $oldEntity === null && $newEntity === null ) {
-			// Old and new versions are redirects. Nothing to do.
-			return null;
-		} elseif ( $newEntity === null ) {
-			// The new version is a redirect. For now, treat that as a deletion.
-			$action = EntityChange::REMOVE;
-		} elseif ( $oldEntity === null ) {
-			// The old version is a redirect. For now, treat that like restoring the entity.
-			$action = EntityChange::RESTORE;
-		} else {
-			// No redirects involved
-			$action = EntityChange::UPDATE;
-		}
-
-		/** @var RepoEntityChange $change */
-		$change = $this->changeFactory->newFromUpdate( $action, $oldEntity, $newEntity );
-		'@phan-var RepoEntityChange $change';
 		return $change;
 	}
 

@@ -77,7 +77,7 @@ class FormsField extends TermIndexField {
 			$data[] = [
 				"id" => $form->getId()->getSerialization(),
 				"representation" => array_values( $form->getRepresentations()->toTextArray() ),
-				"features" => array_map( function ( ItemId $item ) {
+				"features" => array_map( static function ( ItemId $item ) {
 									return $item->getSerialization();
 				}, $form->getGrammaticalFeatures() )
 			];

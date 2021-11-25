@@ -8,7 +8,7 @@ use MediaWiki\Storage\NameTableStore;
 
 return [
 
-	'EchoAttributeManager' => function ( MediaWikiServices $services ): EchoAttributeManager {
+	'EchoAttributeManager' => static function ( MediaWikiServices $services ): EchoAttributeManager {
 		$userGroupManager = $services->getUserGroupManager();
 		$echoConfig = $services->getConfigFactory()->makeConfig( 'Echo' );
 		$notifications = $echoConfig->get( 'EchoNotifications' );
@@ -21,12 +21,14 @@ return [
 			$categories,
 			$typeAvailability,
 			$typeAvailabilityByCategory,
-			$userGroupManager
+			$userGroupManager,
+			$services->getUserOptionsLookup()
 		);
 	},
 
-	'EchoPushNotificationServiceClient' => function ( MediaWikiServices $services ):
-	NotificationServiceClient {
+	'EchoPushNotificationServiceClient' => static function (
+		MediaWikiServices $services
+	): NotificationServiceClient {
 		$echoConfig = $services->getConfigFactory()->makeConfig( 'Echo' );
 		$httpRequestFactory = $services->getHttpRequestFactory();
 		$url = $echoConfig->get( 'EchoPushServiceBaseUrl' );
@@ -35,7 +37,7 @@ return [
 		return $client;
 	},
 
-	'EchoPushSubscriptionManager' => function ( MediaWikiServices $services ): SubscriptionManager {
+	'EchoPushSubscriptionManager' => static function ( MediaWikiServices $services ): SubscriptionManager {
 		$echoConfig = $services->getConfigFactory()->makeConfig( 'Echo' );
 		// Use shared DB/cluster for push subscriptions
 		$cluster = $echoConfig->get( 'EchoSharedTrackingCluster' );
@@ -44,7 +46,7 @@ return [
 		$loadBalancer = $cluster
 			? $loadBalancerFactory->getExternalLB( $cluster )
 			: $loadBalancerFactory->getMainLB( $database );
-		$dbw = $loadBalancer->getLazyConnectionRef( DB_MASTER, [], $database );
+		$dbw = $loadBalancer->getLazyConnectionRef( DB_PRIMARY, [], $database );
 		$dbr = $loadBalancer->getLazyConnectionRef( DB_REPLICA, [], $database );
 
 		$pushProviderStore = new NameTableStore(

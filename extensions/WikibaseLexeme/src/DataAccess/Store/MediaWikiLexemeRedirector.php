@@ -2,9 +2,9 @@
 
 namespace Wikibase\Lexeme\DataAccess\Store;
 
-use User;
+use IContextSource;
 use Wikibase\DataModel\Entity\EntityDocument;
-use Wikibase\DataModel\Services\Lookup\EntityRedirectLookup;
+use Wikibase\DataModel\Services\Lookup\EntityRedirectTargetLookup;
 use Wikibase\Lexeme\Domain\LexemeRedirector;
 use Wikibase\Lexeme\Domain\Model\LexemeId;
 use Wikibase\Lib\Store\EntityRevisionLookup;
@@ -21,27 +21,36 @@ use Wikibase\Repo\SummaryFormatter;
 class MediaWikiLexemeRedirector extends EntityRedirectCreationInteractor
 	implements LexemeRedirector {
 
+	/** @var bool */
 	private $botEditRequested;
+
+	/** @var string[] */
+	private $tags;
+
+	/** @var IContextSource */
+	private $context;
 
 	public function __construct(
 		EntityRevisionLookup $entityRevisionLookup,
 		EntityStore $entityStore,
 		EntityPermissionChecker $permissionChecker,
 		SummaryFormatter $summaryFormatter,
-		User $user,
+		IContextSource $context,
 		EditFilterHookRunner $editFilterHookRunner,
-		EntityRedirectLookup $entityRedirectLookup,
+		EntityRedirectTargetLookup $entityRedirectLookup,
 		EntityTitleStoreLookup $entityTitleLookup,
-		$botEditRequested
+		bool $botEditRequested,
+		array $tags
 	) {
 		$this->botEditRequested = $botEditRequested;
+		$this->tags = $tags;
+		$this->context = $context;
 
 		parent::__construct(
 			$entityRevisionLookup,
 			$entityStore,
 			$permissionChecker,
 			$summaryFormatter,
-			$user,
 			$editFilterHookRunner,
 			$entityRedirectLookup,
 			$entityTitleLookup
@@ -49,7 +58,7 @@ class MediaWikiLexemeRedirector extends EntityRedirectCreationInteractor
 	}
 
 	public function redirect( LexemeId $sourceId, LexemeId $targetId ) {
-		$this->createRedirect( $sourceId, $targetId, $this->botEditRequested );
+		$this->createRedirect( $sourceId, $targetId, $this->botEditRequested, $this->tags, $this->context );
 	}
 
 	protected function assertEntityIsRedirectable( EntityDocument $entity ) {

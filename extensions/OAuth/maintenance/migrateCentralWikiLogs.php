@@ -35,9 +35,9 @@ class MigrateCentralWikiLogs extends Maintenance {
 
 		// We only read from $oldDb, but we do want to make sure we get the most recent logs.
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$oldDb = $lbFactory->getMainLB( $oldWiki )->getConnectionRef( DB_MASTER, [], $oldWiki );
+		$oldDb = $lbFactory->getMainLB( $oldWiki )->getConnectionRef( DB_PRIMARY, [], $oldWiki );
 		$targetDb = $lbFactory->getMainLB( $targetWiki )
-			->getConnectionRef( DB_MASTER, [], $targetWiki );
+			->getConnectionRef( DB_PRIMARY, [], $targetWiki );
 
 		$targetMinTS = $targetDb->selectField(
 			'logging',
@@ -55,7 +55,6 @@ class MigrateCentralWikiLogs extends Maintenance {
 
 		$commentStore = CommentStore::getStore();
 		$commentQuery = $commentStore->getJoin( 'log_comment' );
-		$actorQuery = ActorMigration::newMigration()->getJoin( 'log_user' );
 
 		do {
 			$conds = [ 'log_type' => 'mwoauthconsumer' ];
@@ -68,17 +67,20 @@ class MigrateCentralWikiLogs extends Maintenance {
 			}
 
 			$oldLoggs = $oldDb->select(
-				[ 'logging' ] + $commentQuery['tables'] + $actorQuery['tables'],
+				[ 'logging', 'actor' ] + $commentQuery['tables'],
 				[
-					'log_id', 'log_action', 'log_timestamp', 'log_params', 'log_deleted'
-				] + $commentQuery['fields'] + $actorQuery['fields'],
+					'log_id', 'log_action', 'log_timestamp', 'log_params', 'log_deleted',
+					'actor_id', 'actor_name', 'actor_user'
+				] + $commentQuery['fields'],
 				$conds,
 				__METHOD__,
 				[
 					'ORDER BY' => 'log_timestamp DESC',
 					'LIMIT' => $this->mBatchSize + 1,
 				],
-				$commentQuery['joins'] + $actorQuery['joins']
+				[
+					'actor' => [ 'JOIN', 'actor_id=log_actor' ]
+				] + $commentQuery['joins']
 			);
 
 			$rowCount = $oldLoggs->numRows();
@@ -108,13 +110,14 @@ class MigrateCentralWikiLogs extends Maintenance {
 				$lastMinTimestamp = $row->log_timestamp;
 
 				$this->output( "Migrating log {$row->log_id}...\n" );
-				$logUser = User::newFromName( $row->log_user_text );
-				if ( !$logUser->getId() ) {
+				if ( !$row->actor_user ) {
 					$this->output(
 						"Cannot transfer log_id: {$row->log_id}, the log user doesn't exist"
 					);
 					continue;
 				}
+				$logUser = MediaWikiServices::getInstance()->getActorNormalization()
+					->newActorFromRow( $row );
 				$params = unserialize( $row->log_params );
 				if ( !isset( $params['4:consumer'] ) ) {
 					$this->output( "Cannot transfer log_id: {$row->log_id}, param isn't correct" );
@@ -122,7 +125,7 @@ class MigrateCentralWikiLogs extends Maintenance {
 				}
 				$logEntry = new ManualLogEntry( 'mwoauthconsumer', $row->log_action );
 				$logEntry->setPerformer( $logUser );
-				$logEntry->setTarget( Title::makeTitleSafe( NS_USER, $row->log_user_text ) );
+				$logEntry->setTarget( Title::makeTitleSafe( NS_USER, $row->actor_name ) );
 				$logEntry->setComment( $commentStore->getComment( 'log_comment', $row )->text );
 				$logEntry->setParameters( $params );
 				$logEntry->setRelations( [
@@ -138,7 +141,7 @@ class MigrateCentralWikiLogs extends Maintenance {
 
 			$lbFactory->waitForReplication();
 
-		} while ( $rowCount ); // This wastes an extra query, but keeps the logic simpler
+		} while ( $rowCount );
 	}
 
 }

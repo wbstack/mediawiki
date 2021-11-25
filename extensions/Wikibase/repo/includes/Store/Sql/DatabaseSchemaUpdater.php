@@ -1,24 +1,16 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Wikibase\Repo\Store\Sql;
 
 use DatabaseUpdater;
-use HashBagOStuff;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
-use MediaWiki\MediaWikiServices;
 use MWException;
 use Onoi\MessageReporter\ObservableMessageReporter;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\LegacyAdapterItemLookup;
 use Wikibase\DataModel\Services\Lookup\LegacyAdapterPropertyLookup;
-use Wikibase\Lib\Store\CachingEntityRevisionLookup;
-use Wikibase\Lib\Store\EntityRevisionCache;
-use Wikibase\Lib\Store\RevisionBasedEntityLookup;
-use Wikibase\Lib\Store\Sql\EntityIdLocalPartPageTableEntityQuery;
-use Wikibase\Lib\Store\Sql\PropertyInfoTable;
-use Wikibase\Lib\Store\Sql\WikiPageEntityDataLoader;
-use Wikibase\Lib\Store\Sql\WikiPageEntityMetaDataLookup;
-use Wikibase\Lib\Store\Sql\WikiPageEntityRevisionLookup;
 use Wikibase\Repo\RangeTraversable;
 use Wikibase\Repo\Store\ItemTermsRebuilder;
 use Wikibase\Repo\Store\PropertyTermsRebuilder;
@@ -50,14 +42,6 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 
 		$this->addChangesTable( $updater, $type );
 
-		if ( $db->tableExists( 'wb_aliases', __METHOD__ ) ) {
-			// Update from 0.1.
-			$updater->dropExtensionTable( 'wb_items_per_site' );
-			$updater->dropExtensionTable( 'wb_items' );
-			$updater->dropExtensionTable( 'wb_aliases' );
-			$updater->dropExtensionTable( 'wb_texts_per_lang' );
-		}
-
 		$updater->addExtensionTable(
 			'wb_id_counters',
 			$this->getScriptPath( 'wb_id_counters', $db->getType() )
@@ -66,15 +50,6 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			'wb_items_per_site',
 			$this->getScriptPath( 'wb_items_per_site', $db->getType() )
 		);
-		// NOTE: This update is neither needed nor does it work on SQLite or Postgres.
-		if ( $db->getType() === 'mysql' ) {
-			// make ips_row_id BIGINT
-			$updater->modifyExtensionField(
-				'wb_items_per_site',
-				'ips_row_id',
-				$this->getUpdateScriptPath( 'MakeRowIDsBig', $db->getType() )
-			);
-		}
 
 		$this->updateItemsPerSiteTable( $updater, $db );
 		$this->updateChangesTable( $updater, $db );
@@ -115,6 +90,12 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			'chd_seen',
 			$this->getUpdateScriptPath( 'patch-wb_changes_dispatch-make-chd_seen-unsigned', $db->getType() )
 		);
+
+		$updater->addExtensionIndex(
+			'wb_changes',
+			'change_object_id',
+			$this->getUpdateScriptPath( 'patch-wb_changes-change_object_id-index', $db->getType() )
+		);
 	}
 
 	private function updateChangesSubscriptionTable( DatabaseUpdater $dbUpdater ): void {
@@ -135,26 +116,11 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		}
 	}
 
-	/**
-	 * @param DatabaseUpdater $updater
-	 * @param string $type
-	 */
-	private function addChangesTable( DatabaseUpdater $updater, $type ) {
+	private function addChangesTable( DatabaseUpdater $updater, string $type ): void {
 		$updater->addExtensionTable(
 			'wb_changes',
 			$this->getScriptPath( 'wb_changes', $type )
 		);
-
-		if ( $type === 'mysql' && !$updater->updateRowExists( 'ChangeChangeObjectId.sql' ) ) {
-			$updater->addExtensionUpdate( [
-				'applyPatch',
-				$this->getUpdateScriptPath( 'ChangeChangeObjectId', $type ),
-				true
-			] );
-
-			$updater->insertUpdateRow( 'ChangeChangeObjectId.sql' );
-		}
-
 		$updater->addExtensionTable(
 			'wb_changes_dispatch',
 			$this->getScriptPath( 'wb_changes_dispatch', $type )
@@ -174,14 +140,6 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 				$this->getUpdateScriptPath( 'MakeIpsSitePageLarger', $db->getType() )
 			);
 		}
-
-		// creates wb_item_per_site.ips_row_id.
-		$updater->addExtensionField(
-			'wb_items_per_site',
-			'ips_row_id',
-			$this->getUpdateScriptPath( 'AddRowIDs', $db->getType() )
-		);
-
 		$updater->dropExtensionIndex(
 			'wb_items_per_site',
 			'wb_ips_site_page',
@@ -209,93 +167,22 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			$file = $this->getScriptPath( $table, $type );
 
 			$updater->addExtensionTable( $table, $file );
-
-			// populate the table after creating it
-			$updater->addExtensionUpdate( [
-				[ __CLASS__, 'rebuildPropertyInfo' ]
-			] );
 		}
-	}
-
-	/**
-	 * Wrapper for invoking PropertyInfoTableBuilder from DatabaseUpdater
-	 * during a database update.
-	 *
-	 * @param DatabaseUpdater $updater
-	 */
-	public static function rebuildPropertyInfo( DatabaseUpdater $updater ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
-		$propertySource = WikibaseRepo::getEntitySourceDefinitions()
-			->getSourceForEntityType( 'property' );
-		if ( $propertySource->getSourceName() !== $localEntitySourceName ) {
-			// Foreign properties, skip this part
-			return;
-		}
-		$reporter = new ObservableMessageReporter();
-		$reporter->registerReporterCallback(
-			function ( $msg ) use ( $updater ) {
-				$updater->output( "..." . $msg . "\n" );
-			}
-		);
-
-		$table = new PropertyInfoTable(
-			WikibaseRepo::getEntityIdComposer(),
-			$propertySource->getDatabaseName(),
-			true
-		);
-
-		$contentCodec = $wikibaseRepo->getEntityContentDataCodec();
-		$propertyInfoBuilder = $wikibaseRepo->newPropertyInfoBuilder();
-		$entityNamespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
-
-		$wikiPageEntityLookup = new WikiPageEntityRevisionLookup(
-			new WikiPageEntityMetaDataLookup(
-				$entityNamespaceLookup,
-				new EntityIdLocalPartPageTableEntityQuery(
-					$entityNamespaceLookup,
-					MediaWikiServices::getInstance()->getSlotRoleStore()
-				),
-				$propertySource,
-				WikibaseRepo::getLogger()
-			),
-			new WikiPageEntityDataLoader( $contentCodec, MediaWikiServices::getInstance()->getBlobStore() ),
-			MediaWikiServices::getInstance()->getRevisionStore(),
-			false
-		);
-
-		$cachingEntityLookup = new CachingEntityRevisionLookup(
-			new EntityRevisionCache( new HashBagOStuff() ),
-			$wikiPageEntityLookup
-		);
-		$entityLookup = new RevisionBasedEntityLookup( $cachingEntityLookup );
-
-		$builder = new PropertyInfoTableBuilder(
-			$table,
-			new LegacyAdapterPropertyLookup( $entityLookup ),
-			$propertyInfoBuilder,
-			$wikibaseRepo->getEntityIdComposer(),
-			$entityNamespaceLookup
-		);
-		$builder->setReporter( $reporter );
-		$builder->setUseTransactions( false );
-
-		$updater->output( 'Populating ' . $table->getTableName() . "\n" );
-		$builder->rebuildPropertyInfo();
 	}
 
 	public static function rebuildPropertyTerms( DatabaseUpdater $updater ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
 		$propertySource = WikibaseRepo::getEntitySourceDefinitions()
-			->getSourceForEntityType( 'property' );
+			->getDatabaseSourceForEntityType( 'property' );
 		if ( $propertySource->getSourceName() !== $localEntitySourceName ) {
 			// Foreign properties, skip this part
 			return;
 		}
+		$db = WikibaseRepo::getRepoDomainDbFactory()->newForEntitySource( $propertySource );
 		$sqlEntityIdPagerFactory = new SqlEntityIdPagerFactory(
 			WikibaseRepo::getEntityNamespaceLookup(),
-			WikibaseRepo::getEntityIdLookup()
+			WikibaseRepo::getEntityIdLookup(),
+			$db
 		);
 		$reporter = new ObservableMessageReporter();
 		$reporter->registerReporterCallback(
@@ -305,16 +192,17 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		);
 
 		// Tables have potentially only just been created and we may need to wait, T268944
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$lbFactory->waitForReplication();
+		$db->replication()->wait();
 
 		$rebuilder = new PropertyTermsRebuilder(
 			WikibaseRepo::getTermStoreWriterFactory()->newPropertyTermStoreWriter(),
 			$sqlEntityIdPagerFactory->newSqlEntityIdPager( [ 'property' ] ),
 			$reporter,
 			$reporter,
-			$lbFactory,
-			$wikibaseRepo->getPropertyLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY ),
+			$db,
+			new LegacyAdapterPropertyLookup(
+				WikibaseRepo::getStore()->getEntityLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY )
+			),
 			250,
 			2
 		);
@@ -324,10 +212,9 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 	}
 
 	public static function rebuildItemTerms( DatabaseUpdater $updater ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$localEntitySourceName = WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
 		$itemSource = WikibaseRepo::getEntitySourceDefinitions()
-			->getSourceForEntityType( 'item' );
+			->getDatabaseSourceForEntityType( 'item' );
 		if ( $itemSource->getSourceName() !== $localEntitySourceName ) {
 			// Foreign items, skip this part
 			return;
@@ -339,10 +226,7 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 			}
 		);
 
-		$highestId = MediaWikiServices::getInstance()
-			->getDBLoadBalancer()
-			->getConnection( DB_REPLICA )
-			->selectRow(
+		$highestId = $updater->getDB()->selectRow(
 				'wb_id_counters',
 				'id_value',
 				[ 'id_type' => 'wikibase-item' ],
@@ -355,15 +239,15 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		$highestId = (int)$highestId->id_value;
 
 		// Tables have potentially only just been created and we may need to wait, T268944
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$lbFactory->waitForReplication();
+		$db = WikibaseRepo::getRepoDomainDbFactory()->newForEntitySource( $itemSource );
+		$db->replication()->wait();
 
 		$rebuilder = new ItemTermsRebuilder(
 			WikibaseRepo::getTermStoreWriterFactory()->newItemTermStoreWriter(),
 			self::newItemIdIterator( $highestId ),
 			$reporter,
 			$reporter,
-			$lbFactory,
+			$db,
 			new LegacyAdapterItemLookup(
 				WikibaseRepo::getStore()->getEntityLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY )
 			),
@@ -409,14 +293,10 @@ class DatabaseSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 
 	/**
 	 * Static wrapper for EntityUsageTableBuilder::fillUsageTable
-	 *
-	 * @param DatabaseUpdater $dbUpdater
-	 * @param string $table
 	 */
-	public static function fillSubscriptionTable( DatabaseUpdater $dbUpdater, $table ) {
+	public static function fillSubscriptionTable( DatabaseUpdater $dbUpdater, string $table ): void {
 		$primer = new ChangesSubscriptionTableBuilder(
-			// would be nice to pass in $dbUpdater->getDB().
-			MediaWikiServices::getInstance()->getDBLoadBalancer(),
+			WikibaseRepo::getRepoDomainDbFactory()->newRepoDb(),
 			WikibaseRepo::getEntityIdComposer(),
 			$table,
 			1000

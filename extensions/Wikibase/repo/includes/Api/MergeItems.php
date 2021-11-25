@@ -10,15 +10,14 @@ use ApiUsageException;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
-use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Repo\ChangeOp\ChangeOpsMerge;
 use Wikibase\Repo\Interactors\ItemMergeException;
 use Wikibase\Repo\Interactors\ItemMergeInteractor;
 use Wikibase\Repo\Interactors\RedirectCreationException;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
@@ -27,11 +26,6 @@ use Wikibase\Repo\WikibaseRepo;
  * @author Lucie-Aimée Kaffee
  */
 class MergeItems extends ApiBase {
-
-	/**
-	 * @var EntityIdParser
-	 */
-	private $idParser;
 
 	/**
 	 * @var ApiErrorReporter
@@ -49,11 +43,15 @@ class MergeItems extends ApiBase {
 	private $resultBuilder;
 
 	/**
+	 * @var string[]
+	 */
+	private $sandboxEntityIds;
+
+	/**
 	 * @see ApiBase::__construct
 	 *
 	 * @param ApiMain $mainModule
 	 * @param string $moduleName
-	 * @param EntityIdParser $idParser
 	 * @param ItemMergeInteractor $interactor
 	 * @param ApiErrorReporter $errorReporter
 	 * @param callable $resultBuilderInstantiator
@@ -61,37 +59,37 @@ class MergeItems extends ApiBase {
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
-		EntityIdParser $idParser,
 		ItemMergeInteractor $interactor,
 		ApiErrorReporter $errorReporter,
-		callable $resultBuilderInstantiator
+		callable $resultBuilderInstantiator,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
-		$this->idParser = $idParser;
 		$this->interactor = $interactor;
 
 		$this->errorReporter = $errorReporter;
 		$this->resultBuilder = $resultBuilderInstantiator( $this );
+
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
-		EntityIdParser $entityIdParser
+		ApiHelperFactory $apiHelperFactory,
+		ItemMergeInteractor $interactor,
+		SettingsArray $settings
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
 		return new self(
 			$mainModule,
 			$moduleName,
-			$entityIdParser,
-			$wikibaseRepo->newItemMergeInteractor( $mainModule->getContext() ),
+			$interactor,
 			$apiHelperFactory->getErrorReporter( $mainModule ),
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getResultBuilder( $module );
-			}
+			},
+			$settings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -135,7 +133,7 @@ class MergeItems extends ApiBase {
 				$ignoreConflicts = [];
 			}
 
-			$this->mergeItems( $fromId, $toId, $ignoreConflicts, $summary, $params['bot'] );
+			$this->mergeItems( $fromId, $toId, $ignoreConflicts, $summary, $params['bot'], $params['tags'] ?: [] );
 		} catch ( EntityIdParsingException $ex ) {
 			$this->errorReporter->dieException( $ex, 'invalid-entity-id' );
 		} catch ( ItemMergeException | RedirectCreationException $ex ) {
@@ -149,12 +147,13 @@ class MergeItems extends ApiBase {
 	 * @param string[] $ignoreConflicts
 	 * @param string|null $summary
 	 * @param bool $bot
+	 * @param string[] $tags Already permission checked via self::PARAM_TYPE => 'tags'
 	 * @throws ItemMergeException
 	 * @throws RedirectCreationException
 	 */
-	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, ?string $summary, bool $bot ): void {
+	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, ?string $summary, bool $bot, array $tags ): void {
 		list( $newRevisionFrom, $newRevisionTo, $redirected )
-			= $this->interactor->mergeItems( $fromId, $toId, $ignoreConflicts, $summary, $bot );
+			= $this->interactor->mergeItems( $fromId, $toId, $this->getContext(), $ignoreConflicts, $summary, $bot, $tags );
 
 		$this->resultBuilder->setValue( null, 'success', 1 );
 		$this->resultBuilder->setValue( null, 'redirected', (int)$redirected );
@@ -224,6 +223,10 @@ class MergeItems extends ApiBase {
 			'summary' => [
 				self::PARAM_TYPE => 'string',
 			],
+			'tags' => [
+				self::PARAM_TYPE => 'tags',
+				self::PARAM_ISMULTI => true,
+			],
 			'bot' => [
 				self::PARAM_TYPE => 'boolean',
 				self::PARAM_DFLT => false,
@@ -239,15 +242,16 @@ class MergeItems extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$from = $this->sandboxEntityIds[ 'mainItem' ];
+		$to = $this->sandboxEntityIds[ 'auxItem' ];
+
 		return [
-			'action=wbmergeitems&fromid=Q42&toid=Q222' =>
-				'apihelp-wbmergeitems-example-1',
-			'action=wbmergeitems&fromid=Q555&toid=Q3' =>
-				'apihelp-wbmergeitems-example-2',
-			'action=wbmergeitems&fromid=Q66&toid=Q99&ignoreconflicts=sitelink' =>
-				'apihelp-wbmergeitems-example-3',
-			'action=wbmergeitems&fromid=Q66&toid=Q99&ignoreconflicts=sitelink|description' =>
-				'apihelp-wbmergeitems-example-4',
+			'action=wbmergeitems&fromid=' . $from . '&toid=' . $to =>
+				[ 'apihelp-wbmergeitems-example-1', $from, $to ],
+			'action=wbmergeitems&fromid=' . $from . '&toid=' . $to . '&ignoreconflicts=sitelink' =>
+				[ 'apihelp-wbmergeitems-example-3', $from, $to ],
+			'action=wbmergeitems&fromid=' . $from . '&toid=' . $to . '&ignoreconflicts=sitelink|description' =>
+				[ 'apihelp-wbmergeitems-example-4', $from, $to ],
 		];
 	}
 

@@ -3,6 +3,7 @@
 		"authors": [
 			"Avatar6",
 			"Base",
+			"DDPAT",
 			"Gzhegozh",
 			"Movses",
 			"Piramidion",
@@ -54,10 +55,10 @@
 	"advancedsearch-filetype-section-other": "Інші формати",
 	"advancedsearch-filetype-default": "Оберіть тип файлу",
 	"advancedsearch-filetype-bitmap": "Зображення",
-	"advancedsearch-filetype-drawing": "Рисунок",
+	"advancedsearch-filetype-drawing": "Малюнок",
 	"advancedsearch-filetype-audio": "Аудіо",
 	"advancedsearch-filetype-video": "Відео",
-	"advancedsearch-filetype-office": "Office",
+	"advancedsearch-filetype-office": "Офіс",
 	"advancedsearch-filesize-equals": "дорівнює",
 	"advancedsearch-filesize-greater-than": "більше, ніж",
 	"advancedsearch-filesize-smaller-than": "менше, ніж",
@@ -80,5 +81,5 @@
 	"advancedsearch-namespaces-placeholder": "Додати простори назв…",
 	"prefs-advancedsearch": "Розширений пошук",
 	"advancedsearch-preference-help": "Розширений пошук додає певну форму на сторінку Спеціальна:Пошук. Це дає Вам змогу виконувати спеціалізований пошук, навіть якщо Ви не знаєте жодних елементів пошукового синтаксису. Це також змінює спосіб вибору просторів назв.",
-	"advancedsearch-preference-disable": "Не показувати інтерфейс Розширеного пошуку"
+	"advancedsearch-preference-disable": "Не показувати інтерфейс розширеного пошуку на сторінці Спеціальна:Пошук"
 }

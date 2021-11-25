@@ -21,7 +21,6 @@ use Wikibase\Repo\Specials\HTMLForm\HTMLTrimmedTextField;
 use Wikibase\Repo\Store\TermsCollisionDetector;
 use Wikibase\Repo\SummaryFormatter;
 use Wikibase\Repo\Validators\TermValidatorFactory;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Page for creating new Wikibase items.
@@ -54,6 +53,7 @@ class SpecialNewItem extends SpecialNewEntity {
 	private $termsCollisionDetector;
 
 	public function __construct(
+		array $tags,
 		SpecialPageCopyrightView $copyrightView,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		SummaryFormatter $summaryFormatter,
@@ -66,6 +66,7 @@ class SpecialNewItem extends SpecialNewEntity {
 		parent::__construct(
 			'NewItem',
 			'createpage',
+			$tags,
 			$copyrightView,
 			$entityNamespaceLookup,
 			$summaryFormatter,
@@ -78,14 +79,15 @@ class SpecialNewItem extends SpecialNewEntity {
 	}
 
 	public static function factory(
+		SiteLookup $siteLookup,
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityTitleLookup $entityTitleLookup,
 		TermsCollisionDetector $itemTermsCollisionDetector,
 		SettingsArray $repoSettings,
+		SummaryFormatter $summaryFormatter,
 		TermValidatorFactory $termValidatorFactory
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
 			$repoSettings->getSetting( 'dataRightsUrl' ),
@@ -93,12 +95,13 @@ class SpecialNewItem extends SpecialNewEntity {
 		);
 
 		return new self(
+			$repoSettings->getSetting( 'specialPageTags' ),
 			$copyrightView,
 			$entityNamespaceLookup,
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$entityTitleLookup,
-			$wikibaseRepo->newEditEntityFactory(),
-			$wikibaseRepo->getSiteLookup(),
+			$editEntityFactory,
+			$siteLookup,
 			$termValidatorFactory,
 			$itemTermsCollisionDetector
 		);

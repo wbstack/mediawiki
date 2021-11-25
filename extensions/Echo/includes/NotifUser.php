@@ -268,7 +268,7 @@ class MWEchoNotifUser {
 					null,
 					$usertalkTypes,
 					null,
-					DB_MASTER
+					DB_PRIMARY
 				);
 				if ( $unreadEditUserTalk === [] ) {
 					$talkPageNotificationManager->removeUserHasNewMessages( $this->mUser );
@@ -310,7 +310,7 @@ class MWEchoNotifUser {
 					null,
 					$usertalkTypes,
 					null,
-					DB_MASTER
+					DB_PRIMARY
 				);
 				if ( $unreadEditUserTalk !== [] ) {
 					$talkPageNotificationManager->setUserHasNewMessages( $this->mUser );
@@ -344,12 +344,12 @@ class MWEchoNotifUser {
 		}
 
 		$attributeManager = EchoServices::getInstance()->getAttributeManager();
-		$eventTypes = $attributeManager->getUserEnabledEventsbySections( $this->mUser, 'web', $sections );
+		$eventTypes = $attributeManager->getUserEnabledEventsBySections( $this->mUser, 'web', $sections );
 
 		$notifs = $this->notifMapper->fetchUnreadByUser( $this->mUser, $wgEchoMaxUpdateCount, null, $eventTypes );
 
 		$eventIds = array_filter(
-			array_map( function ( EchoNotification $notif ) {
+			array_map( static function ( EchoNotification $notif ) {
 				// This should not happen at all, but use 0 in
 				// such case so to keep the code running
 				if ( $notif->getEvent() ) {
@@ -429,7 +429,7 @@ class MWEchoNotifUser {
 	 * This updates the user's touched timestamp, as well as the value returned by getGlobalUpdateTime().
 	 *
 	 * NOTE: Consider calling this function from a deferred update, since it will read from and write to
-	 * the master DB if cross-wiki notifications are enabled.
+	 * the primary DB if cross-wiki notifications are enabled.
 	 */
 	public function resetNotificationCount() {
 		global $wgEchoCrossWikiNotifications;
@@ -451,7 +451,7 @@ class MWEchoNotifUser {
 			$uw = EchoUnreadWikis::newFromUser( $this->mUser );
 			if ( $uw ) {
 				// Immediately compute new local counts and timestamps
-				$newLocalData = $this->computeLocalCountsAndTimestamps( DB_MASTER );
+				$newLocalData = $this->computeLocalCountsAndTimestamps( DB_PRIMARY );
 				// Write the new values to the echo_unread_wikis table
 				$alertTs = $newLocalData[EchoAttributeManager::ALERT]['timestamp'];
 				$messageTs = $newLocalData[EchoAttributeManager::MESSAGE]['timestamp'];
@@ -553,7 +553,7 @@ class MWEchoNotifUser {
 
 	/**
 	 * Compute the counts and timestamps for the local notifications in each section.
-	 * @param int $dbSource DB_REPLICA or DB_MASTER
+	 * @param int $dbSource DB_REPLICA or DB_PRIMARY
 	 * @return array[] [ 'alert' => [ 'count' => N, 'timestamp' => TS ], ... ]
 	 */
 	protected function computeLocalCountsAndTimestamps( $dbSource = DB_REPLICA ) {
@@ -562,7 +562,7 @@ class MWEchoNotifUser {
 		$totals = [ 'count' => 0, 'timestamp' => -1 ];
 
 		foreach ( EchoAttributeManager::$sections as $section ) {
-			$eventTypesToLoad = $attributeManager->getUserEnabledEventsbySections(
+			$eventTypesToLoad = $attributeManager->getUserEnabledEventsBySections(
 				$this->mUser,
 				'web',
 				[ $section ]
@@ -662,8 +662,9 @@ class MWEchoNotifUser {
 	 */
 	protected function getGlobalMemcKey( $key ) {
 		global $wgEchoCacheVersion;
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser( $this->mUser, CentralIdLookup::AUDIENCE_RAW );
+		$globalId = MediaWikiServices::getInstance()
+			->getCentralIdLookup()
+			->centralIdFromLocalUser( $this->mUser, CentralIdLookup::AUDIENCE_RAW );
 		if ( !$globalId ) {
 			return false;
 		}

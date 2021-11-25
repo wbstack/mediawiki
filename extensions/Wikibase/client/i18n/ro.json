@@ -14,7 +14,6 @@
 	"wikibase-client-desc": "Client pentru extensia Wikibase",
 	"tooltip-t-wikibase": "Legătură către elementul asociat din depozitul de date",
 	"wikibase-after-page-move": "Mutarea dumneavoastră ar trebui acum să [$1 se reflecte în legătura de limbă de la itemul {{WBREPONAME}}]. Vă rugăm să verificați că așa și este.",
-	"wikibase-after-page-move-queued": "[$1 Elementul {{WBREPONAME}}] asociat acestei pagini va fi în curând actualizat în mod automat. Rețineți că este posibil ca aceasta să nu se întâmple instantaneu.",
 	"wikibase-comment-add": "Un element {{WBREPONAME}} a fost creat.",
 	"wikibase-comment-remove": "Elementul {{WBREPONAME}} asociat a fost șters. Legăturile linguale au fost înlăturate.",
 	"wikibase-comment-linked": "Un element {{WBREPONAME}} a fost legat către această pagină.",
@@ -65,7 +64,9 @@
 	"wikibase-sitelinks-sitename-columnheading": "Limbă",
 	"wikibase-sitelinks-link-columnheading": "Pagină legată",
 	"echo-category-title-wikibase-action": "{{PLURAL:$1|Conectare|Conectări}} cu {{WBREPONAME}}",
+	"echo-pref-tooltip-wikibase-action": "Notifică-mă când cineva conectează o pagină pe care {{GENDER:|am creat-o}} la un element {{WBREPONAME}}.",
 	"notification-header-page-connection": "Pagina <strong>$3</strong> a fost {{GENDER:$2|conectată}} la {{PLURAL:$4|-1=un element {{WBREPONAME}}|elementul {{WBREPONAME}} $4}}, unde pot fi colectate date relevante pentru subiect.",
 	"notification-bundle-header-page-connection": "<strong>$3</strong> și {{PLURAL:$4|încă o altă pagină|$4 alte pagini|100=99+ de alte pagini}} au fost {{GENDER:$2|conectate}} la elemente {{WBREPONAME}}, unde pot fi colectate date relevante pentru subiect.",
-	"notification-link-text-view-item": "{{GENDER:$1|Vezi}} elementul"
+	"notification-link-text-view-item": "{{GENDER:$1|Vezi}} elementul",
+	"notification-subject-page-connection": "O pagină de pe {{SITENAME}} pe care ați {{GENDER:$3|creat-o}} a fost {{GENDER:$2|conectată}} la un element {{WBREPONAME}}"
 }

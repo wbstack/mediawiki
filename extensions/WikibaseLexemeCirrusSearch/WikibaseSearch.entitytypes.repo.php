@@ -17,8 +17,7 @@ use Wikibase\Search\Elastic\Fields\StatementProviderFieldDefinitions;
 
 return [
 	'lexeme' => [
-		Def::SEARCH_FIELD_DEFINITIONS => function ( array $languageCodes, SettingsArray $searchSettings ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::SEARCH_FIELD_DEFINITIONS => static function ( array $languageCodes, SettingsArray $searchSettings ) {
 			$services = MediaWikiServices::getInstance();
 			$config = $services->getMainConfig();
 			if ( $config->has( 'LexemeLanguageCodePropertyId' ) ) {
@@ -28,7 +27,8 @@ return [
 			}
 			return new LexemeFieldDefinitions(
 				StatementProviderFieldDefinitions::newFromSettings(
-					new InProcessCachingDataTypeLookup( $repo->getPropertyDataTypeLookup() ),
+					new InProcessCachingDataTypeLookup(
+						WikibaseRepo::getPropertyDataTypeLookup( $services ) ),
 					WikibaseRepo::getDataTypeDefinitions( $services )
 						->getSearchIndexDataFormatterCallbacks(),
 					$searchSettings
@@ -39,8 +39,7 @@ return [
 					: null
 			);
 		},
-		Def::ENTITY_SEARCH_CALLBACK => function ( WebRequest $request ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
 			$entityIdParser = WikibaseRepo::getEntityIdParser();
 			$languageFallbackChainFactory = WikibaseRepo::getLanguageFallbackChainFactory();
 
@@ -53,7 +52,7 @@ return [
 							WikibaseRepo::getTermLookup(),
 							$languageFallbackChainFactory->newFromLanguage( WikibaseRepo::getUserLanguage() )
 						),
-						$repo->getEntityTypeToRepositoryMapping()
+						WikibaseRepo::getEntityTypeToRepositoryMapping()
 					),
 					new LexemeSearchEntity(
 						$entityIdParser,
@@ -68,8 +67,7 @@ return [
 		Def::FULLTEXT_SEARCH_CONTEXT => LexemeFullTextQueryBuilder::CONTEXT_LEXEME_FULLTEXT,
 	],
 	'form' => [
-		Def::ENTITY_SEARCH_CALLBACK => function ( WebRequest $request ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
 			$entityIdParser = WikibaseRepo::getEntityIdParser();
 
 			return new CombinedEntitySearchHelper(
@@ -78,7 +76,7 @@ return [
 						WikibaseRepo::getEntityLookup(),
 						$entityIdParser,
 						new NullLabelDescriptionLookup(),
-						$repo->getEntityTypeToRepositoryMapping()
+						WikibaseRepo::getEntityTypeToRepositoryMapping()
 					),
 					new FormSearchEntity(
 						$entityIdParser,

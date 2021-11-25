@@ -4,6 +4,6 @@ namespace MediaWiki\Extension\WikibaseManifest;
 
 interface EquivEntitiesFactory {
 
-	public function getEquivEntities() : EquivEntities;
+	public function getEquivEntities(): EquivEntities;
 
 }

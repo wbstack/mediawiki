@@ -3,7 +3,7 @@
  */
 
 /* eslint-disable no-implicit-globals */
-var commonInterlanguageList;
+var commonInterlanguageList = null;
 
 /**
  * @param {string[]} languageCodes array of language codes available
@@ -60,6 +60,12 @@ function launchULS( $trigger, languagesObject, forCLS ) {
 			) {
 				return;
 			}
+
+			// TODO: The name of this hook should probably be changed to reflect that it covers
+			// both the user changing their interface language and the user switching to a
+			// different language.
+			mw.hook( 'mw.uls.interface.language.change' ).fire( language, 'content-language-switcher' );
+
 			location.href = languagesObject[ language ].href;
 		},
 		onPosition: function () {
@@ -91,6 +97,9 @@ function launchULS( $trigger, languagesObject, forCLS ) {
 		},
 		onVisible: function () {
 			$trigger.addClass( 'selector-open' );
+
+			// Note well that this hook is unstable.
+			mw.hook( 'mw.uls.compact_language_links.open' ).fire( $trigger );
 		},
 		languageDecorator: function ( $languageLink, language ) {
 			var element = languagesObject[ language ];

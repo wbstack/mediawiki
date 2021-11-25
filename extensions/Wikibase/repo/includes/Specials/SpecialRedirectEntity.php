@@ -5,7 +5,6 @@ namespace Wikibase\Repo\Specials;
 use Exception;
 use Html;
 use HTMLForm;
-use RequestContext;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
@@ -13,7 +12,6 @@ use Wikibase\Lib\UserInputException;
 use Wikibase\Repo\Interactors\ItemRedirectCreationInteractor;
 use Wikibase\Repo\Interactors\TokenCheckInteractor;
 use Wikibase\Repo\Localizer\ExceptionLocalizer;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Special page for creating redirects between entities
@@ -46,34 +44,15 @@ class SpecialRedirectEntity extends SpecialWikibasePage {
 	public function __construct(
 		EntityIdParser $idParser,
 		ExceptionLocalizer $exceptionLocalizer,
-		TokenCheckInteractor $tokenCheck,
-		ItemRedirectCreationInteractor $interactor
+		ItemRedirectCreationInteractor $interactor,
+		TokenCheckInteractor $tokenCheck
 	) {
 		parent::__construct( 'RedirectEntity' );
 
 		$this->idParser = $idParser;
 		$this->exceptionLocalizer = $exceptionLocalizer;
-		$this->tokenCheck = $tokenCheck;
 		$this->interactor = $interactor;
-	}
-
-	public static function factory(
-		EntityIdParser $entityIdParser
-	): self {
-		$user = RequestContext::getMain()->getUser();
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
-		return new self(
-			$entityIdParser,
-			$wikibaseRepo->getExceptionLocalizer(),
-			new TokenCheckInteractor(
-				$user
-			),
-			$wikibaseRepo->newItemRedirectCreationInteractor(
-				$user,
-				RequestContext::getMain()
-			)
-		);
+		$this->tokenCheck = $tokenCheck;
 	}
 
 	/**
@@ -146,9 +125,9 @@ class SpecialRedirectEntity extends SpecialWikibasePage {
 	}
 
 	private function redirectEntity( EntityId $fromId, EntityId $toId ) {
-		$this->tokenCheck->checkRequestToken( $this->getRequest(), 'wpEditToken' );
+		$this->tokenCheck->checkRequestToken( $this->getContext(), 'wpEditToken' );
 
-		$this->interactor->createRedirect( $fromId, $toId, false );
+		$this->interactor->createRedirect( $fromId, $toId, false, [], $this->getContext() );
 
 		$this->getOutput()->addWikiMsg(
 			'wikibase-redirectentity-success',

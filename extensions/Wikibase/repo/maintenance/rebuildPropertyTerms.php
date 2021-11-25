@@ -4,9 +4,10 @@ namespace Wikibase\Repo\Maintenance;
 
 use ExtensionRegistry;
 use Maintenance;
-use MediaWiki\MediaWikiServices;
 use Onoi\MessageReporter\CallbackMessageReporter;
 use Onoi\MessageReporter\MessageReporter;
+use Wikibase\DataModel\Entity\Property;
+use Wikibase\DataModel\Services\Lookup\LegacyAdapterPropertyLookup;
 use Wikibase\Repo\Store\PropertyTermsRebuilder;
 use Wikibase\Repo\Store\Sql\SqlEntityIdPager;
 use Wikibase\Repo\Store\Sql\SqlEntityIdPagerFactory;
@@ -21,11 +22,6 @@ require_once $basePath . '/maintenance/Maintenance.php';
  * @license GPL-2.0-or-later
  */
 class RebuildPropertyTerms extends Maintenance {
-
-	/**
-	 * @var WikibaseRepo
-	 */
-	private $wikibaseRepo;
 
 	public function __construct() {
 		parent::__construct();
@@ -62,16 +58,21 @@ class RebuildPropertyTerms extends Maintenance {
 				1
 			);
 		}
-
-		$this->wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
+		if ( !in_array( Property::ENTITY_TYPE, WikibaseRepo::getLocalEntitySource()->getEntityTypes() ) ) {
+			$this->fatalError(
+				"You can't run this maintenance script on foreign properties!",
+				1
+			);
+		}
 		$rebuilder = new PropertyTermsRebuilder(
 			WikibaseRepo::getTermStoreWriterFactory()->newPropertyTermStoreWriter(),
 			$this->newEntityIdPager(),
 			$this->getReporter(),
 			$this->getErrorReporter(),
-			MediaWikiServices::getInstance()->getDBLoadBalancerFactory(),
-			$this->wikibaseRepo->getPropertyLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY ),
+			WikibaseRepo::getRepoDomainDbFactory()->newRepoDb(),
+			new LegacyAdapterPropertyLookup(
+				WikibaseRepo::getStore()->getEntityLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY )
+			),
 			(int)$this->getOption( 'batch-size', 250 ),
 			(int)$this->getOption( 'sleep', 10 )
 		);
@@ -84,7 +85,8 @@ class RebuildPropertyTerms extends Maintenance {
 	private function newEntityIdPager(): SqlEntityIdPager {
 		$sqlEntityIdPagerFactory = new SqlEntityIdPagerFactory(
 			WikibaseRepo::getEntityNamespaceLookup(),
-			WikibaseRepo::getEntityIdLookup()
+			WikibaseRepo::getEntityIdLookup(),
+			WikibaseRepo::getRepoDomainDbFactory()->newRepoDb()
 		);
 
 		$pager = $sqlEntityIdPagerFactory->newSqlEntityIdPager( [ 'property' ] );

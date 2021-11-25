@@ -42,5 +42,6 @@
 	"advancedsearch-namespaces-preset-general-help": "ზოგადი დახმარება",
 	"advancedsearch-namespaces-preset-discussion": "განხილვა",
 	"advancedsearch-namespaces-placeholder": "სახელთა სივრცის დამატება…",
+	"advancedsearch-preference-help": "გაფართოებული ძიება ამატებს ფორმას სპეციალური:გვერდის ძიება. ეს გვეხმარება სპეციალიზებული ძიების შესრულებაში, მაშინაც კი, როდესაც არ იცით საძიებო სინტაქსი. იგი აგრეთვე ცვლის სახელთა სივრცის არჩევის ფორმას.",
 	"advancedsearch-preference-disable": "არ აჩვენო გაფართოებული ძიების ინტერფეისი"
 }

@@ -91,7 +91,7 @@ class ConsumerAcceptanceAccessControl extends DAOAccessControl {
 	 * @return string|\Message
 	 */
 	public function getWikiName() {
-		return $this->get( 'wiki', function ( $wikiId ) {
+		return $this->get( 'wiki', static function ( $wikiId ) {
 			return Utils::getWikiIdName( $wikiId );
 		} );
 	}
@@ -100,6 +100,7 @@ class ConsumerAcceptanceAccessControl extends DAOAccessControl {
 	 * @return ConsumerAcceptance
 	 */
 	public function getDAO() {
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $this->dao;
 	}
 }

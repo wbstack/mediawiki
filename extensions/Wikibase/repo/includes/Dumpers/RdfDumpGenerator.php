@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Dumpers;
 
 use InvalidArgumentException;
@@ -7,18 +9,15 @@ use MWContentSerializationException;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Entity\EntityPrefetcher;
 use Wikibase\DataModel\Services\Lookup\EntityLookupException;
-use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\RedirectResolvingEntityLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
 use Wikibase\Lib\Store\StorageException;
-use Wikibase\Repo\Content\EntityContentFactory;
-use Wikibase\Repo\Rdf\EntityRdfBuilderFactory;
 use Wikibase\Repo\Rdf\HashDedupeBag;
 use Wikibase\Repo\Rdf\RdfBuilder;
+use Wikibase\Repo\Rdf\RdfBuilderFactory;
 use Wikibase\Repo\Rdf\RdfProducer;
-use Wikibase\Repo\Rdf\RdfVocabulary;
-use Wikibase\Repo\Rdf\ValueSnakRdfBuilderFactory;
+use Wikibase\Repo\Rdf\UnknownFlavorException;
 use Wikimedia\Purtle\BNodeLabeler;
 use Wikimedia\Purtle\RdfWriterFactory;
 
@@ -43,9 +42,9 @@ class RdfDumpGenerator extends DumpGenerator {
 	private $entityRevisionLookup;
 
 	/**
-	 * @var int Fixed timestamp for tests.
+	 * @var int Fixed timestamp for tests (0 means current time).
 	 */
-	private $timestamp;
+	private $timestamp = 0;
 
 	/**
 	 * @param resource             $out
@@ -72,7 +71,7 @@ class RdfDumpGenerator extends DumpGenerator {
 	/**
 	 * Do something before dumping data
 	 */
-	protected function preDump() {
+	protected function preDump(): void {
 		$this->rdfBuilder->startDocument();
 		$this->rdfBuilder->addDumpHeader( $this->timestamp );
 
@@ -83,7 +82,7 @@ class RdfDumpGenerator extends DumpGenerator {
 	/**
 	 * Do something after dumping data
 	 */
-	protected function postDump() {
+	protected function postDump(): void {
 		$this->rdfBuilder->finishDocument();
 
 		$footer = $this->rdfBuilder->getRDF();
@@ -99,7 +98,7 @@ class RdfDumpGenerator extends DumpGenerator {
 	 * @throws StorageException
 	 * @return string|null RDF
 	 */
-	protected function generateDumpForEntityId( EntityId $entityId ) {
+	protected function generateDumpForEntityId( EntityId $entityId ): ?string {
 		try {
 			$entityRevision = $this->entityRevisionLookup->getEntityRevision( $entityId );
 
@@ -140,14 +139,11 @@ class RdfDumpGenerator extends DumpGenerator {
 		return $rdf;
 	}
 
-	/**
-	 * @param int $timestamp
-	 */
-	public function setTimestamp( $timestamp ) {
-		$this->timestamp = (int)$timestamp;
+	public function setTimestamp( int $timestamp ): void {
+		$this->timestamp = $timestamp;
 	}
 
-	private static function getRdfWriter( $name, BNodeLabeler $labeler = null ) {
+	private static function getRdfWriter( string $name, BNodeLabeler $labeler = null ) {
 		$factory = new RdfWriterFactory();
 		$format = $factory->getFormatName( $name );
 
@@ -161,12 +157,9 @@ class RdfDumpGenerator extends DumpGenerator {
 	/**
 	 * Get the producer setting for the given flavor.
 	 *
-	 * @param string|null $flavorName
-	 *
-	 * @return int
-	 * @throws InvalidArgumentException
+	 * @throws UnknownFlavorException
 	 */
-	private static function getFlavorFlags( $flavorName ) {
+	private static function getFlavorFlags( string $flavorName ): int {
 		//Note: RdfProducer::PRODUCE_VERSION_INFO is not needed here as dumps
 		// include that per default.
 
@@ -185,53 +178,36 @@ class RdfDumpGenerator extends DumpGenerator {
 				return RdfProducer::PRODUCE_TRUTHY_STATEMENTS;
 		}
 
-		throw new InvalidArgumentException( "Unsupported flavor: $flavorName" );
+		throw new UnknownFlavorException( $flavorName, [ 'full-dump', 'truthy-dump' ] );
 	}
 
 	/**
-	 * @param string                     $format
-	 * @param resource                   $output
-	 * @param string                     $flavor Either "full" or "truthy"
-	 * @param EntityRevisionLookup       $entityRevisionLookup
-	 * @param PropertyDataTypeLookup     $propertyLookup
-	 * @param ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory
-	 * @param EntityRdfBuilderFactory    $entityRdfBuilderFactory
-	 * @param EntityPrefetcher           $entityPrefetcher
-	 * @param RdfVocabulary              $vocabulary
-	 * @param EntityContentFactory       $entityContentFactory
-	 * @param BNodeLabeler|null          $labeler
+	 * @param string $format
+	 * @param resource $output
+	 * @param string $flavor Either "full" or "truthy"
+	 * @param EntityRevisionLookup $entityRevisionLookup
+	 * @param EntityPrefetcher $entityPrefetcher
+	 * @param BNodeLabeler|null $labeler
+	 * @param RdfBuilderFactory $rdfBuilderFactory
 	 *
+	 * @throws UnknownFlavorException
 	 * @return static
-	 * @throws InvalidArgumentException
 	 */
 	public static function createDumpGenerator(
-		$format,
+		string $format,
 		$output,
-		$flavor,
+		string $flavor,
 		EntityRevisionLookup $entityRevisionLookup,
-		PropertyDataTypeLookup $propertyLookup,
-		ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory,
-		EntityRdfBuilderFactory $entityRdfBuilderFactory,
 		EntityPrefetcher $entityPrefetcher,
-		RdfVocabulary $vocabulary,
-		EntityContentFactory $entityContentFactory,
-		BNodeLabeler $labeler = null
+		?BNodeLabeler $labeler,
+		RdfBuilderFactory $rdfBuilderFactory
 	) {
 		$rdfWriter = self::getRdfWriter( $format, $labeler );
 		if ( !$rdfWriter ) {
 			throw new InvalidArgumentException( "Unknown format: $format" );
 		}
 
-		$rdfBuilder = new RdfBuilder(
-			$vocabulary,
-			$valueSnakRdfBuilderFactory,
-			$propertyLookup,
-			$entityRdfBuilderFactory,
-			self::getFlavorFlags( $flavor ),
-			$rdfWriter,
-			new HashDedupeBag(),
-			$entityContentFactory
-		);
+		$rdfBuilder = $rdfBuilderFactory->getRdfBuilder( self::getFlavorFlags( $flavor ), new HashDedupeBag(), $rdfWriter );
 
 		return new self( $output, $entityRevisionLookup, $rdfBuilder, $entityPrefetcher );
 	}

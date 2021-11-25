@@ -6,6 +6,7 @@
 			"Dalba",
 			"Ebraminio",
 			"Fatemi127",
+			"Jeeputer",
 			"Macofe",
 			"Mjbmr",
 			"ZxxZxxZ"
@@ -37,5 +38,6 @@
 	"templatesandbox-editform-need-title": "برای پیش‌نمایش صفحه با این الگو، می‌بایست یک عنوان صفحه مشخص شده باشد.",
 	"templatesandbox-editform-invalid-template": "نام الگویی که شما تعیین کرده‌اید نامعتبر است.",
 	"templatesandbox-editform-invalid-title": "عنوان مشخص‌شده توسط شما برای پیش‌نمایش نادرست است.",
-	"templatesandbox-editform-title-not-exists": "عنوان مشخص‌شده توسط شما برای پیش‌نمایش ناموجود است."
+	"templatesandbox-editform-title-not-exists": "عنوان مشخص‌شده توسط شما برای پیش‌نمایش ناموجود است.",
+	"templatesandbox-failed-replace-section": "ناتوان در جایگزین بخش صفحهٔ موجود"
 }

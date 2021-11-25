@@ -1,18 +1,19 @@
 {
-        "extends": "wikimedia",
-        "env": {
-                "browser": true,
-                "jquery": true,
-                "commonjs": true
+	"root": true,
+	"extends": [
+		"wikimedia/client",
+		"wikimedia/jquery",
+		"wikimedia/mediawiki"
+	],
+	"env": {
+		"commonjs": true
 	},
 	"globals": {
 		"dataValues": false,
-		"util": false,
-		"wikibase": false
+		"util": false
 	},
 	"rules": {
 		"computed-property-spacing": "off",
-		"indent": "off",
 		"keyword-spacing": "off",
 		"new-parens": "off",
 		"no-underscore-dangle": "off",

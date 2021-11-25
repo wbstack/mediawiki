@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Amire80",
+			"Eli",
 			"Guycn2",
 			"Ronel1",
 			"Yurik"
@@ -43,8 +44,8 @@
 	"jsonconfig-err-unexpected-key": "העצם \"$1\" מכיל שדה בלתי־צפוי \"$2\"",
 	"jsonconfig-err-duplicate-header": "כותרת כפולה \"$2\" נמצאה בשדה \"$1\". כל כותרת צריכה להיות ייחודית.",
 	"jsonconfig-err-url": "הפרמטר \"$1\" צריך להיות URL תקין",
-	"jsonconfig-move-aborted-model": "דגם תצורת ה־JSON של הדף \"$1\" לא יתיאם לדגם החדש \"$2\"",
-	"jsonconfig-move-aborted-ns": "הכותרת החדשה של הדף הזה לא מוגרדת לאחסון תצורת JSON",
+	"jsonconfig-move-aborted-model": "דגם תצורת ה־JSON של הדף \"$1\" לא יתאים לדגם החדש \"$2\"",
+	"jsonconfig-move-aborted-ns": "הכותרת החדשה של הדף הזה לא מוגדרת לאחסון תצורת JSON",
 	"jsonconfig-optional-field": "(לא חובה)",
 	"jsonconfig-type-name-invalid": "בלתי־תקין",
 	"jsonconfig-type-name-string": "מחרוזת",

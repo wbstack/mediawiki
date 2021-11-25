@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"ديفيد"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "بادئة ملعب القالب، كما هو الحال مع [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "تحليل الصفحة باستخدام <var>$1templatesandboxtext</var> بدلا من محتويات الصفحة المحددة هنا.",
+	"templatesandbox-apihelp-text": "تحليل الصفحة باستخدام هنا بدلا من محتويات الصفحة المحددة <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentmodel": "نموذج محتوى <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "تنسيق محتوى <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "يجب تحديد الوسيطين <var>$1templatesandboxtitle</var> و<var>$1templatesandboxtext</var> أو حذف كليهما."
+}

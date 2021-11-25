@@ -4,8 +4,8 @@ namespace TwoColConflict\ProvideSubmittedText;
 
 use BagOStuff;
 use MediaWiki\Session\SessionId;
+use MediaWiki\User\UserIdentity;
 use UnexpectedValueException;
-use User;
 use Wikimedia\LightweightObjectStore\ExpirationAwareness;
 
 /**
@@ -28,44 +28,44 @@ class SubmittedTextCache {
 
 	/**
 	 * @param string $titleDbKey
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @param SessionId|null $sessionId
 	 * @param string $text
 	 *
 	 * @return bool If caching was successful or not.
 	 */
-	public function stashText( string $titleDbKey, User $user, ?SessionId $sessionId, string $text ) {
+	public function stashText( string $titleDbKey, UserIdentity $user, ?SessionId $sessionId, string $text ) {
 		$key = $this->makeCacheKey( $titleDbKey, $user, $sessionId );
 		return $this->cache->set( $key, $text, ExpirationAwareness::TTL_DAY );
 	}
 
 	/**
 	 * @param string $titleDbKey
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @param SessionId|null $sessionId
 	 *
 	 * @return string
 	 */
-	public function fetchText( string $titleDbKey, User $user, ?SessionId $sessionId ) {
+	public function fetchText( string $titleDbKey, UserIdentity $user, ?SessionId $sessionId ) {
 		$key = $this->makeCacheKey( $titleDbKey, $user, $sessionId );
 		return $this->cache->get( $key );
 	}
 
 	/**
 	 * @param string $titleDbKey
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @param SessionId|null $sessionId
 	 *
 	 * @return string
 	 */
-	private function makeCacheKey( string $titleDbKey, User $user, ?SessionId $sessionId ) {
+	private function makeCacheKey( string $titleDbKey, UserIdentity $user, ?SessionId $sessionId ) {
 		$components = [
 			self::CACHE_KEY,
 			$titleDbKey,
 			$user->getId(),
 		];
 		// The user ID is specific enough for registered users
-		if ( $user->isAnon() ) {
+		if ( !$user->isRegistered() ) {
 			if ( !$sessionId ) {
 				throw new UnexpectedValueException( 'Must provide a session for anonymous users' );
 			}

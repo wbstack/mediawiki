@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ajeje Brazorf",
 			"Amire80",
 			"Gmelfi",
 			"Ladsgroup",
@@ -18,7 +19,7 @@
 	"wikibase-edit": "cancia",
 	"wikibase-save": "sarva",
 	"wikibase-cancel": "annulla",
-	"wikibase-add": "agghiunci",
+	"wikibase-add": "junci",
 	"wikibase-addqualifier": "agghiunci qualificaturi",
 	"wikibase-addreference": "agghiunci rifirimentu",
 	"wikibase-save-inprogress": "Sarvamentu...",
@@ -37,6 +38,7 @@
 	"wikibase-description-empty": "Nudda discrizzioni difinuta",
 	"wikibase-description-edit-placeholder": "scrivi na discrizzioni",
 	"wikibase-description-edit-placeholder-language-aware": "scrivi na discrizzioni n $1",
+	"wikibase-content-language-edit-label": "Lingua:",
 	"wikibase-diffview-reference": "rifirimentu",
 	"wikibase-diffview-rank": "rangu",
 	"wikibase-diffview-rank-preferred": "Rangu prifirutu",
@@ -158,6 +160,7 @@
 	"wikibase-newitem-page": "Nomu dâ prima pàggina culligata",
 	"wikibase-newitem-no-external-page": "La pàggina spicificata nun fu attruvata ntô situ currispunnenti.",
 	"wikibase-newitem-not-recognized-siteid": "Lu còdici idintificativu dû situ spicificatu nun fu arricanusciutu.",
+	"wikibase-newentity-language": "Lingua:",
 	"wikibase-newentity-label": "Etichetta:",
 	"wikibase-newentity-description": "Discrizzioni:",
 	"wikibase-newentity-submit": "Crea",
@@ -317,5 +320,6 @@
 	"action-property-create": "criari prupietà",
 	"right-property-create": "Criari prupità",
 	"wikibase-entity-not-viewable-title": "Nun currispunni lu tipu dû cuntinutu: Nun si pò ammustrari lu cuntinutu",
-	"wikibase-entity-not-viewable": "Lu cuntinutu spicificatu di tipu \"$1\" nun è na Ntità e nun si pò ammustrari nta Wikibase."
+	"wikibase-entity-not-viewable": "Lu cuntinutu spicificatu di tipu \"$1\" nun è na Ntità e nun si pò ammustrari nta Wikibase.",
+	"wikibase-pageinfo-subscription-none": "Nuddu"
 }

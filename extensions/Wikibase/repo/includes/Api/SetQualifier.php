@@ -11,9 +11,11 @@ use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Statement\StatementGuidParser;
 use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\DataModel\Statement\Statement;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Repo\ChangeOp\ChangeOp;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\StatementChangeOpFactory;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\Repo\SnakFactory;
 
 /**
  * API module for creating a qualifier or setting the value of an existing one.
@@ -58,6 +60,11 @@ class SetQualifier extends ApiBase {
 	private $entitySavingHelper;
 
 	/**
+	 * @var string[]
+	 */
+	private $sandboxEntityIds;
+
+	/**
 	 * @param ApiMain $mainModule
 	 * @param string $moduleName
 	 * @param callable $errorReporterInstantiator
@@ -78,7 +85,8 @@ class SetQualifier extends ApiBase {
 		StatementGuidParser $guidParser,
 		callable $resultBuilderInstantiator,
 		callable $entitySavingHelperInstantiator,
-		bool $federatedPropertiesEnabled
+		bool $federatedPropertiesEnabled,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
@@ -90,21 +98,22 @@ class SetQualifier extends ApiBase {
 		$this->resultBuilder = $resultBuilderInstantiator( $this );
 		$this->entitySavingHelper = $entitySavingHelperInstantiator( $this );
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
 		EntityIdParser $entityIdParser,
+		SettingsArray $repoSettings,
+		SnakFactory $snakFactory,
 		StatementGuidParser $statementGuidParser,
 		StatementGuidValidator $statementGuidValidator
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-		$changeOpFactoryProvider = $wikibaseRepo->getChangeOpFactoryProvider();
-
 		$modificationHelper = new StatementModificationHelper(
-			$wikibaseRepo->getSnakFactory(),
+			$snakFactory,
 			$entityIdParser,
 			$statementGuidValidator,
 			$apiHelperFactory->getErrorReporter( $mainModule )
@@ -125,7 +134,8 @@ class SetQualifier extends ApiBase {
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getEntitySavingHelper( $module );
 			},
-			$wikibaseRepo->inFederatedPropertyMode()
+			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
+			$repoSettings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -139,7 +149,7 @@ class SetQualifier extends ApiBase {
 		$entityId = $this->guidParser->parse( $params['claim'] )->getEntityId();
 		$this->validateAlteringEntityById( $entityId );
 
-		$entity = $this->entitySavingHelper->loadEntity( $entityId );
+		$entity = $this->entitySavingHelper->loadEntity( $params, $entityId );
 
 		$summary = $this->modificationHelper->createSummary( $params, $this );
 
@@ -152,7 +162,7 @@ class SetQualifier extends ApiBase {
 		$changeOp = $this->getChangeOp();
 		$this->modificationHelper->applyChangeOp( $changeOp, $entity, $summary );
 
-		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary );
+		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary, $params, $this->getContext() );
 		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'pageinfo' );
 		$this->resultBuilder->markSuccess();
 		$this->resultBuilder->addStatement( $statement );
@@ -282,8 +292,10 @@ class SetQualifier extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$guid = $this->sandboxEntityIds[ 'mainItem' ] . '$4554c0f4-47b2-1cd9-2db9-aa270064c9f3';
+
 		return [
-			'action=wbsetqualifier&claim=Q2$4554c0f4-47b2-1cd9-2db9-aa270064c9f3&property=P1'
+			'action=wbsetqualifier&claim=' . $guid . '&property=P1'
 				. '&value="GdyjxP8I6XB3"&snaktype=value&token=foobar'
 				=> 'apihelp-wbsetqualifier-example-1',
 		];

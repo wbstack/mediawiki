@@ -7,16 +7,22 @@ namespace Wikibase\Repo\Api;
 use ApiBase;
 use ApiMain;
 use Deserializers\Exceptions\DeserializationException;
-use Wikibase\DataModel\DeserializerFactory;
+use Psr\Log\LoggerInterface;
+use Wikibase\DataModel\Deserializers\DeserializerFactory;
+use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Reference;
+use Wikibase\DataModel\ReferenceList;
 use Wikibase\DataModel\Services\Statement\StatementGuidParser;
 use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\DataModel\Snak\SnakList;
 use Wikibase\DataModel\Statement\Statement;
+use Wikibase\Lib\SettingsArray;
+use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOp;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\StatementChangeOpFactory;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\Repo\SnakFactory;
 
 /**
  * API module for creating a reference or setting the value of an existing one.
@@ -54,6 +60,9 @@ class SetReference extends ApiBase {
 	 */
 	private $guidParser;
 
+	/** @var LoggerInterface */
+	private $logger;
+
 	/**
 	 * @var ResultBuilder
 	 */
@@ -64,6 +73,11 @@ class SetReference extends ApiBase {
 	 */
 	private $entitySavingHelper;
 
+	/**
+	 * @var string[]
+	 */
+	private $sandboxEntityIds;
+
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
@@ -72,9 +86,11 @@ class SetReference extends ApiBase {
 		StatementChangeOpFactory $statementChangeOpFactory,
 		StatementModificationHelper $modificationHelper,
 		StatementGuidParser $guidParser,
+		LoggerInterface $logger,
 		callable $resultBuilderInstantiator,
 		callable $entitySavingHelperInstantiator,
-		bool $federatedPropertiesEnabled
+		bool $federatedPropertiesEnabled,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
@@ -83,25 +99,28 @@ class SetReference extends ApiBase {
 		$this->statementChangeOpFactory = $statementChangeOpFactory;
 		$this->modificationHelper = $modificationHelper;
 		$this->guidParser = $guidParser;
+		$this->logger = $logger;
 		$this->resultBuilder = $resultBuilderInstantiator( $this );
 		$this->entitySavingHelper = $entitySavingHelperInstantiator( $this );
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
 		DeserializerFactory $deserializerFactory,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
 		EntityIdParser $entityIdParser,
+		LoggerInterface $logger,
+		SettingsArray $repoSettings,
+		SnakFactory $snakFactory,
 		StatementGuidParser $statementGuidParser,
 		StatementGuidValidator $statementGuidValidator
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-		$changeOpFactoryProvider = $wikibaseRepo->getChangeOpFactoryProvider();
-
 		$modificationHelper = new StatementModificationHelper(
-			$wikibaseRepo->getSnakFactory(),
+			$snakFactory,
 			$entityIdParser,
 			$statementGuidValidator,
 			$apiHelperFactory->getErrorReporter( $mainModule )
@@ -115,13 +134,15 @@ class SetReference extends ApiBase {
 			$changeOpFactoryProvider->getStatementChangeOpFactory(),
 			$modificationHelper,
 			$statementGuidParser,
+			$logger,
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getResultBuilder( $module );
 			},
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getEntitySavingHelper( $module );
 			},
-			$wikibaseRepo->inFederatedPropertyMode()
+			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
+			$repoSettings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -135,7 +156,7 @@ class SetReference extends ApiBase {
 		$entityId = $this->guidParser->parse( $params['statement'] )->getEntityId();
 		$this->validateAlteringEntityById( $entityId );
 
-		$entity = $this->entitySavingHelper->loadEntity( $entityId );
+		$entity = $this->entitySavingHelper->loadEntity( $params, $entityId );
 
 		$summary = $this->modificationHelper->createSummary( $params, $this );
 
@@ -164,11 +185,12 @@ class SetReference extends ApiBase {
 		$snakList->orderByProperty( $snaksOrder );
 
 		$newReference = new Reference( $snakList );
-
 		$changeOp = $this->getChangeOp( $newReference );
-		$this->modificationHelper->applyChangeOp( $changeOp, $entity, $summary );
 
-		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary );
+		$newReference = $this->applyChangeOpAndReturnChangedReference(
+			$changeOp, $entity, $summary, $claim, $newReference );
+
+		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary, $params, $this->getContext() );
 		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'pageinfo' );
 		$this->resultBuilder->markSuccess();
 		$this->resultBuilder->addReference( $newReference );
@@ -210,6 +232,49 @@ class SetReference extends ApiBase {
 		$index = $params['index'] ?? null;
 
 		return $this->statementChangeOpFactory->newSetReferenceOp( $guid, $reference, $hash, $index );
+	}
+
+	/**
+	 * Apply $changeop to $entity (updating $summary) and return the Reference that was changed.
+	 * (Due to data value normalization in the ChangeOp factory,
+	 * this may not be the exact same reference as $newReference.)
+	 */
+	private function applyChangeOpAndReturnChangedReference(
+		ChangeOp $changeOp,
+		EntityDocument $entity,
+		Summary $summary,
+		Statement $statement,
+		Reference $newReference
+	): Reference {
+		$oldReferences = clone $statement->getReferences();
+
+		$this->modificationHelper->applyChangeOp( $changeOp, $entity, $summary );
+
+		$changedReferences = [];
+		foreach ( $statement->getReferences()->getIterator() as $reference ) {
+			if ( !$oldReferences->hasReference( $reference ) ) {
+				$changedReferences[] = $reference;
+			}
+		}
+
+		switch ( count( $changedReferences ) ) {
+			case 0:
+				// no reference changed hash, return original $newReference
+				// (could be a null edit, or its index or snaks-order could have changed)
+				return $newReference;
+			case 1:
+				return $changedReferences[0];
+			default:
+				// this should never happen, but let’s warn instead of crashing
+				$this->logger->warning( __METHOD__ . ': changed {count} references, expected 0-1', [
+					'count' => count( $changedReferences ),
+					'oldReferences' => $oldReferences->serialize(),
+					'newReferences' => $statement->getReferences()->serialize(),
+					'changedReferences' => ( new ReferenceList( $changedReferences ) )->serialize(),
+					'entityId' => $entity->getId()->getSerialization(),
+				] );
+				return $newReference; // it’s the best we have
+		}
 	}
 
 	/**
@@ -272,20 +337,23 @@ class SetReference extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$guid = $this->sandboxEntityIds[ 'mainItem' ] . '$D4FDE516-F20C-4154-ADCE-7C5B609DFDFF';
+		$hash = '1eb8793c002b1d9820c833d234a1b54c8e94187e';
+
 		return [
-			'action=wbsetreference&statement=Q76$D4FDE516-F20C-4154-ADCE-7C5B609DFDFF&snaks='
+			'action=wbsetreference&statement=' . $guid . '&snaks='
 				. '{"P212":[{"snaktype":"value","property":"P212","datavalue":{"type":"string",'
 				. '"value":"foo"}}]}&baserevid=7201010&token=foobar'
-				=> 'apihelp-wbsetreference-example-1',
-			'action=wbsetreference&statement=Q76$D4FDE516-F20C-4154-ADCE-7C5B609DFDFF'
-				. '&reference=1eb8793c002b1d9820c833d234a1b54c8e94187e&snaks='
+				=> [ 'apihelp-wbsetreference-example-1', $guid ],
+			'action=wbsetreference&statement=' . $guid . ''
+				. '&reference=' . $hash . '&snaks='
 				. '{"P212":[{"snaktype":"value","property":"P212","datavalue":{"type":"string",'
 				. '"value":"bar"}}]}&baserevid=7201010&token=foobar'
-				=> 'apihelp-wbsetreference-example-2',
-			'action=wbsetreference&statement=Q76$D4FDE516-F20C-4154-ADCE-7C5B609DFDFF&snaks='
+				=> [ 'apihelp-wbsetreference-example-2', $guid, $hash ],
+			'action=wbsetreference&statement=' . $guid . '&snaks='
 				. '{"P212":[{"snaktype":"novalue","property":"P212"}]}'
 				. '&index=0&baserevid=7201010&token=foobar'
-				=> 'apihelp-wbsetreference-example-3',
+				=> [ 'apihelp-wbsetreference-example-3', $guid ],
 		];
 	}
 

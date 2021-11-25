@@ -92,7 +92,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 		$out->addHTML( $html );
 	}
 
-	private function getHeaderHintsHtml() : string {
+	private function getHeaderHintsHtml(): string {
 		$hintMsg = $this->twoColConflictContext->isUsedAsBetaFeature()
 			? 'twocolconflict-split-header-hint-beta'
 			: 'twocolconflict-split-header-hint';
@@ -149,7 +149,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 		return Html::element( 'p', [], $this->msg( 'twocolconflict-special-footer-hint' )->text() );
 	}
 
-	private function getMessageBox( string $messageKey ) : string {
+	private function getMessageBox( string $messageKey ): string {
 		$html = $this->msg( $messageKey )->parse();
 		return ( new MessageWidget( [
 			'label' => new HtmlSnippet( $html ),

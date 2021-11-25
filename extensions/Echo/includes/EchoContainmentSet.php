@@ -1,5 +1,6 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Preferences\MultiUsernameFilter;
 
 /**
@@ -60,8 +61,9 @@ class EchoContainmentSet {
 
 		if ( $preference ) {
 			$ids = MultiUsernameFilter::splitIds( $preference );
-			$lookup = CentralIdLookup::factory();
-			$names = $lookup->namesFromCentralIds( $ids, $this->recipient );
+			$names = MediaWikiServices::getInstance()
+				->getCentralIdLookup()
+				->namesFromCentralIds( $ids, $this->recipient );
 			$this->addArray( $names );
 		}
 	}
@@ -72,7 +74,7 @@ class EchoContainmentSet {
 	 *
 	 * @param string $preferenceName
 	 */
-	public function addTitleIDsFromUserOption( string $preferenceName ) :void {
+	public function addTitleIDsFromUserOption( string $preferenceName ): void {
 		$preference = $this->recipient->getOption( $preferenceName, [] );
 		if ( !is_string( $preference ) ) {
 			// We expect the preference data to be saved as a string via the

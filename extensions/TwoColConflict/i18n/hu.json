@@ -5,14 +5,15 @@
 			"Bencemac",
 			"Csigabi",
 			"Dj",
+			"Tacsipacsi",
 			"Urbalazs"
 		]
 	},
-	"twocolconflict": "TwoColConflict",
+	"twocolconflict": "Bekezdésalapú szerkesztési ütközés",
 	"twocolconflict-desc": "Kétoszlopos nézet a szerkesztési konfliktusok feloldására",
-	"twocolconflict-beta-feature-message": "Kétoszlopos nézet szerkesztési ütközésnél",
-	"twocolconflict-beta-feature-description": "Szerkesztési ütközés esetén egy fejlettebb, kétoszlopos nézet megjelenítése.",
-	"twocolconflict-split-header-hint-beta": "Köszönjük, hogy használod ezt a béta funkciót. Te is segíthetsz a tökéletesítésében, ha visszajelzéssel szolgálsz [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View ezen a lapon].",
+	"twocolconflict-beta-feature-message": "Bekezdésalapú szerkesztési ütközés",
+	"twocolconflict-beta-feature-description": "Szerkesztési ütközés esetén egy fejlettebb, bekezdésalapú nézet megjelenítése.",
+	"twocolconflict-split-header-hint-beta": "Köszönjük, hogy használod ezt a béta funkciót. Te is segíthetsz a tökéletesítésében, ha visszajelzéssel szolgálsz [https://www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface ezen a lapon].",
 	"twocolconflict-split-your-version-header": "A te változtatásod",
 	"twocolconflict-split-current-version-header": "Aktuális változat: $1",
 	"twocolconflict-split-not-saved-at": "Még nem közzétett",
@@ -27,12 +28,12 @@
 	"twocolconflict-split-tour-popup2-message": "A sorok közti gombokkal válaszd ki, a szöveg melyik változatát szeretnéd megtartani. Amikor kiválasztottál egy változatot, a ceruza ikonra való kattintással tudod szerkeszteni. Lehetséges továbbá átmásolnod szöveget a másik változatból is a klaviatúrád másolás és beillesztés funkciójával vagy a jobb egérgombbal.<br /><br />Az összevont szöveg elmentéséhez minden sorból kell választanod egy változatot.",
 	"twocolconflict-split-tour-popup3-header": "Kiemelt szöveg",
 	"twocolconflict-split-tour-popup3-message": "Bármely változat sorában a megváltozott szöveg ki van emelve. Miután szerkeszted a szöveget, a kiemelés eltűnik.",
-	"twocolconflict-split-edit-tooltip": "Szöveg szerkesztése",
-	"twocolconflict-split-save-tooltip": "Változtatások mentése és a szerkesztési mód elhagyása.",
-	"twocolconflict-split-reset-tooltip": "Szöveg visszaállítása",
-	"twocolconflict-split-reset-warning": "Biztos elveted a változtatásokat? A szöveged a szerkesztési konfliktus előtti állapotra fog visszaállni.",
+	"twocolconflict-split-edit-tooltip": "Kattints a szöveg szerkesztéséhez",
+	"twocolconflict-split-save-tooltip": "A változtatásaid alkalmazása erre a szövegre",
+	"twocolconflict-split-reset-tooltip": "A változtatásaid elvetése a szövegben",
+	"twocolconflict-split-reset-warning": "Biztos elveted a változtatásokat? A dobozban lévő szöveg a szerkesztési konfliktuskori állapotra fog visszaállni.",
 	"twocolconflict-split-reset-warning-cancel": "Mégse",
 	"twocolconflict-split-reset-warning-accept": "Elvetés",
-	"twocolconflict-split-collapse-tooltip": "Szöveg összecsukása",
-	"twocolconflict-split-expand-tooltip": "Szöveg kinyitása"
+	"twocolconflict-split-collapse-tooltip": "Nem változott szöveg összecsukása",
+	"twocolconflict-split-expand-tooltip": "Nem változott szöveg kinyitása"
 }

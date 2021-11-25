@@ -2,6 +2,7 @@
 
 namespace Wikibase\Repo\Interactors;
 
+use IContextSource;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionManager;
 use User;
@@ -58,11 +59,6 @@ class ItemMergeInteractor {
 	private $summaryFormatter;
 
 	/**
-	 * @var User
-	 */
-	private $user;
-
-	/**
 	 * @var ItemRedirectCreationInteractor
 	 */
 	private $interactorRedirect;
@@ -83,7 +79,6 @@ class ItemMergeInteractor {
 		EntityStore $entityStore,
 		EntityPermissionChecker $permissionChecker,
 		SummaryFormatter $summaryFormatter,
-		User $user,
 		ItemRedirectCreationInteractor $interactorRedirect,
 		EntityTitleStoreLookup $entityTitleLookup,
 		PermissionManager $permissionManager
@@ -93,7 +88,6 @@ class ItemMergeInteractor {
 		$this->entityStore = $entityStore;
 		$this->permissionChecker = $permissionChecker;
 		$this->summaryFormatter = $summaryFormatter;
-		$this->user = $user;
 		$this->interactorRedirect = $interactorRedirect;
 		$this->entityTitleLookup = $entityTitleLookup;
 		$this->permissionManager = $permissionManager;
@@ -106,9 +100,9 @@ class ItemMergeInteractor {
 	 *
 	 * @throws ItemMergeException if the permission check fails
 	 */
-	private function checkPermissions( EntityId $entityId ) {
+	private function checkPermissions( EntityId $entityId, User $user ) {
 		$status = $this->permissionChecker->getPermissionStatusForEntityId(
-			$this->user,
+			$user,
 			EntityPermissionChecker::ACTION_MERGE,
 			$entityId
 		);
@@ -126,9 +120,14 @@ class ItemMergeInteractor {
 	 *
 	 * @param ItemId $fromId
 	 * @param ItemId $toId
+	 * @param IContextSource $context ContextSource to obtain the user from and pass
+	 * 	down to createRedirect
 	 * @param string[] $ignoreConflicts The kinds of conflicts to ignore
 	 * @param string|null $summary
 	 * @param bool $bot Mark the edit as bot edit
+	 * @param string[] $tags Change tags to add to the edit.
+	 * Callers are responsible for permission checks
+	 * (typically using {@link ChangeTags::canAddTagsAccompanyingChange}).
 	 *
 	 * @return array A list of exactly two EntityRevision objects and a boolean. The first
 	 *  EntityRevision object represents the modified source item, the second one represents the
@@ -141,12 +140,15 @@ class ItemMergeInteractor {
 	public function mergeItems(
 		ItemId $fromId,
 		ItemId $toId,
+		IContextSource $context,
 		array $ignoreConflicts = [],
-		$summary = null,
-		$bot = false
+		?string $summary = null,
+		bool $bot = false,
+		array $tags = []
 	) {
-		$this->checkPermissions( $fromId );
-		$this->checkPermissions( $toId );
+		$user = $context->getUser();
+		$this->checkPermissions( $fromId, $user );
+		$this->checkPermissions( $toId, $user );
 
 		/**
 		 * @var Item $fromItem
@@ -172,13 +174,13 @@ class ItemMergeInteractor {
 			throw new ItemMergeException( $e->getMessage(), 'failed-modify', $e );
 		}
 
-		$result = $this->attemptSaveMerge( $fromItem, $toItem, $summary, $bot );
+		$result = $this->attemptSaveMerge( $fromItem, $toItem, $summary, $user, $bot, $tags );
 		$this->updateWatchlistEntries( $fromId, $toId );
 
 		$redirected = false;
 
 		if ( $this->isEmpty( $fromId ) ) {
-			$this->interactorRedirect->createRedirect( $fromId, $toId, $bot );
+			$this->interactorRedirect->createRedirect( $fromId, $toId, $bot, $tags, $context );
 			$redirected = true;
 		}
 
@@ -260,27 +262,28 @@ class ItemMergeInteractor {
 	 * @param Item $toItem
 	 * @param string|null $summary
 	 * @param bool $bot
+	 * @param string[] $tags
 	 *
 	 * @return array A list of exactly two EntityRevision objects. The first one represents the
 	 *  modified source item, the second one represents the modified target item.
 	 */
-	private function attemptSaveMerge( Item $fromItem, Item $toItem, $summary, $bot ) {
+	private function attemptSaveMerge( Item $fromItem, Item $toItem, ?string $summary, User $user, bool $bot, array $tags ) {
 		$toSummary = $this->getSummary( 'to', $toItem->getId(), $summary );
-		$fromRev = $this->saveItem( $fromItem, $toSummary, $bot );
+		$fromRev = $this->saveItem( $fromItem, $toSummary, $user, $bot, $tags );
 
 		$fromSummary = $this->getSummary( 'from', $fromItem->getId(), $summary );
-		$toRev = $this->saveItem( $toItem, $fromSummary, $bot );
+		$toRev = $this->saveItem( $toItem, $fromSummary, $user, $bot, $tags );
 
 		return [ $fromRev, $toRev ];
 	}
 
-	private function saveItem( Item $item, FormatableSummary $summary, $bot ) {
+	private function saveItem( Item $item, FormatableSummary $summary, User $user, bool $bot, array $tags ) {
 		// Given we already check all constraints in ChangeOpsMerge, it's
 		// fine to ignore them here. This is also needed to not run into
 		// the constraints we're supposed to ignore (see ChangeOpsMerge::removeConflictsWithEntity
 		// for reference)
 		$flags = EDIT_UPDATE | EntityContent::EDIT_IGNORE_CONSTRAINTS;
-		if ( $bot && $this->permissionManager->userHasRight( $this->user, 'bot' ) ) {
+		if ( $bot && $this->permissionManager->userHasRight( $user, 'bot' ) ) {
 			$flags |= EDIT_FORCE_BOT;
 		}
 
@@ -288,8 +291,10 @@ class ItemMergeInteractor {
 			return $this->entityStore->saveEntity(
 				$item,
 				$this->summaryFormatter->formatSummary( $summary ),
-				$this->user,
-				$flags
+				$user,
+				$flags,
+				false,
+				$tags
 			);
 		} catch ( StorageException $ex ) {
 			throw new ItemMergeException( $ex->getMessage(), 'failed-save', $ex );

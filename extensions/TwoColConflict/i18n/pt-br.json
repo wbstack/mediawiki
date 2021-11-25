@@ -21,7 +21,7 @@
 	"twocolconflict-copy-tooltip": "Copiar o wikitexto completo da sua revisão para a área de transferência (as edições feitas abaixo não estão incluídas)",
 	"twocolconflict-core-ui-hint": "Uma interface atualizada para resolver conflitos de edição está agora disponível. Ative a Interface de conflito de edição baseada em parágrafos nas suas [[Special:Preferences#mw-prefsection-editing|preferências]] para experimentar.",
 	"twocolconflict-core-ui-hint-close": "Nunca mostrar novamente",
-	"twocolconflict-preference-enabled": "Ative o [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Interface de conflitos de edição baseada em parágrafos]] para resolver conflitos de edição",
+	"twocolconflict-preference-enabled": "Ative a [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|interface de conflitos de edição baseada em parágrafos]] para resolver conflitos de edição",
 	"twocolconflict-special-footer-hint": "Feche a página atual para retornar à interface de conflito de edição.",
 	"twocolconflict-special-header-overview": "Enquanto você editava, outro usuário editou a mesma página e publicou antes de você. Uma cópia somente de visualização da sua revisão é preservada abaixo. Quaisquer alterações feitas na interface de conflito de edição não são refletidas. Para mesclar alterações e resolver o problema usando a interface de conflito de edição, retorne à guia anterior.",
 	"twocolconflict-special-not-saved": "Não publicado",

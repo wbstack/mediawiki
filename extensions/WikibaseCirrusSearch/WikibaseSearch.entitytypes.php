@@ -21,8 +21,7 @@ use Wikibase\Search\Elastic\Fields\StatementProviderFieldDefinitions;
 
 return [
 	'item' => [
-		Def::ENTITY_SEARCH_CALLBACK => function ( WebRequest $request ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
 			$entityIdParser = WikibaseRepo::getEntityIdParser();
 			$languageFallbackChainFactory = WikibaseRepo::getLanguageFallbackChainFactory();
 
@@ -35,7 +34,7 @@ return [
 							WikibaseRepo::getTermLookup(),
 							$languageFallbackChainFactory->newFromLanguage( WikibaseRepo::getUserLanguage() )
 						),
-						$repo->getEntityTypeToRepositoryMapping()
+						WikibaseRepo::getEntityTypeToRepositoryMapping()
 					),
 					new EntitySearchElastic(
 						$languageFallbackChainFactory,
@@ -47,14 +46,13 @@ return [
 				]
 			);
 		},
-		Def::SEARCH_FIELD_DEFINITIONS => function ( array $languageCodes, SettingsArray $searchSettings ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::SEARCH_FIELD_DEFINITIONS => static function ( array $languageCodes, SettingsArray $searchSettings ) {
 			$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
 			return new ItemFieldDefinitions( [
 				new LabelsProviderFieldDefinitions( $languageCodes ),
 				new DescriptionsProviderFieldDefinitions( $languageCodes, $config->get( 'UseStemming' ) ),
 				StatementProviderFieldDefinitions::newFromSettings(
-					new InProcessCachingDataTypeLookup( $repo->getPropertyDataTypeLookup() ),
+					new InProcessCachingDataTypeLookup( WikibaseRepo::getPropertyDataTypeLookup() ),
 					WikibaseRepo::getDataTypeDefinitions()->getSearchIndexDataFormatterCallbacks(),
 					$searchSettings
 				)
@@ -63,23 +61,22 @@ return [
 		Def::FULLTEXT_SEARCH_CONTEXT => EntitySearchElastic::CONTEXT_WIKIBASE_FULLTEXT,
 	],
 	'property' => [
-		Def::SEARCH_FIELD_DEFINITIONS => function ( array $languageCodes, SettingsArray $searchSettings ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::SEARCH_FIELD_DEFINITIONS => static function ( array $languageCodes, SettingsArray $searchSettings ) {
 			$services = MediaWikiServices::getInstance();
 			$config = $services->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
 			return new PropertyFieldDefinitions( [
 				new LabelsProviderFieldDefinitions( $languageCodes ),
 				new DescriptionsProviderFieldDefinitions( $languageCodes, $config->get( 'UseStemming' ) ),
 				StatementProviderFieldDefinitions::newFromSettings(
-					new InProcessCachingDataTypeLookup( $repo->getPropertyDataTypeLookup() ),
+					new InProcessCachingDataTypeLookup(
+						WikibaseRepo::getPropertyDataTypeLookup( $services ) ),
 					WikibaseRepo::getDataTypeDefinitions( $services )
 						->getSearchIndexDataFormatterCallbacks(),
 					$searchSettings
 				)
 			] );
 		},
-		Def::ENTITY_SEARCH_CALLBACK => function ( WebRequest $request ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
 			$entityIdParser = WikibaseRepo::getEntityIdParser();
 			$languageFallbackChainFactory = WikibaseRepo::getLanguageFallbackChainFactory();
 
@@ -93,18 +90,18 @@ return [
 								WikibaseRepo::getTermLookup(),
 								$languageFallbackChainFactory->newFromLanguage( WikibaseRepo::getUserLanguage() )
 							),
-							$repo->getEntityTypeToRepositoryMapping()
+							WikibaseRepo::getEntityTypeToRepositoryMapping()
 						),
 						new EntitySearchElastic(
 							$languageFallbackChainFactory,
 							$entityIdParser,
 							WikibaseRepo::getUserLanguage(),
-							$repo->getContentModelMappings(),
+							WikibaseRepo::getContentModelMappings(),
 							$request
 						)
 					]
 				),
-				$repo->getPropertyDataTypeLookup()
+				WikibaseRepo::getPropertyDataTypeLookup()
 			);
 		},
 		Def::FULLTEXT_SEARCH_CONTEXT => EntitySearchElastic::CONTEXT_WIKIBASE_FULLTEXT,

@@ -36,7 +36,5 @@
 	"templatesandbox-editform-need-title": "För att förhandsgranska en annan sida med den här mallen så måste ett sidnamn anges.",
 	"templatesandbox-editform-invalid-template": "Mallnamnet som du angav är ogiltigt.",
 	"templatesandbox-editform-invalid-title": "Sidnamnet du angav för förhandsgranskning är ogiltigt.",
-	"templatesandbox-editform-title-not-exists": "Sidan du angav för att förhandsgranska finns inte.",
-	"templatesandbox-apihelp-contentmodel": "Innehållsmodell för <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Innehållsformat för <var>$1templatesandboxtext</var>."
+	"templatesandbox-editform-title-not-exists": "Sidan du angav för att förhandsgranska finns inte."
 }

@@ -8,20 +8,21 @@ use TwoColConflict\Logging\ThreeWayMerge;
 
 return [
 
-	'TwoColConflictContext' => function ( MediaWikiServices $services ) {
+	'TwoColConflictContext' => static function ( MediaWikiServices $services ) {
 		$extensionRegistry = ExtensionRegistry::getInstance();
 		$mobileContext = $extensionRegistry->isLoaded( 'MobileFrontend' )
 			? $services->getService( 'MobileFrontend.Context' )
 			: null;
 
 		return new TwoColConflictContext(
-			MediaWikiServices::getInstance()->getMainConfig(),
+			$services->getMainConfig(),
+			$services->getUserOptionsLookup(),
 			$extensionRegistry,
 			$mobileContext
 		);
 	},
 
-	'TwoColConflictThreeWayMerge' => function ( MediaWikiServices $services ) {
+	'TwoColConflictThreeWayMerge' => static function ( MediaWikiServices $services ) {
 		return new ThreeWayMerge();
 	},
 

@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"DDPAT",
 			"Ата"
 		]
 	},
-	"mailgun-desc": "Відправляти листи через API сервіс Mailgun з Медіавікі"
+	"mailgun-desc": "Відправляти електронні листи через службу Mailgun API з MediaWiki"
 }

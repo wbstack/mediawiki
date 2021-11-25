@@ -1,15 +1,16 @@
 <?php
 
+declare( strict_types = 1 );
 namespace Wikibase\Client\Changes;
 
-use Hooks;
 use InvalidArgumentException;
+use MediaWiki\HookContainer\HookContainer;
 use Psr\Log\LoggerInterface;
-use SiteLookup;
 use Title;
 use TitleFactory;
 use Wikibase\Client\Usage\PageEntityUsages;
 use Wikibase\Lib\Changes\Change;
+use Wikibase\Lib\Changes\ChangeRow;
 use Wikibase\Lib\Changes\EntityChange;
 
 /**
@@ -44,14 +45,14 @@ class ChangeHandler {
 	private $changeRunCoalescer;
 
 	/**
-	 * @var SiteLookup
-	 */
-	private $siteLookup;
-
-	/**
 	 * @var LoggerInterface
 	 */
 	private $logger;
+
+	/**
+	 * @var HookContainer
+	 */
+	private $hookContainer;
 
 	/**
 	 * @var bool
@@ -63,8 +64,8 @@ class ChangeHandler {
 	 * @param TitleFactory $titleFactory
 	 * @param PageUpdater $updater
 	 * @param ChangeRunCoalescer $changeRunCoalescer
-	 * @param SiteLookup $siteLookup
 	 * @param LoggerInterface $logger
+	 * @param HookContainer $hookContainer
 	 * @param bool $injectRecentChanges
 	 *
 	 * @throws InvalidArgumentException
@@ -74,20 +75,17 @@ class ChangeHandler {
 		TitleFactory $titleFactory,
 		PageUpdater $updater,
 		ChangeRunCoalescer $changeRunCoalescer,
-		SiteLookup $siteLookup,
 		LoggerInterface $logger,
-		$injectRecentChanges = true
-	) {
-		if ( !is_bool( $injectRecentChanges ) ) {
-			throw new InvalidArgumentException( '$injectRecentChanges must be a bool' );
-		}
+		HookContainer $hookContainer,
+		bool $injectRecentChanges = true
 
+	) {
 		$this->affectedPagesFinder = $affectedPagesFinder;
 		$this->titleFactory = $titleFactory;
 		$this->updater = $updater;
 		$this->changeRunCoalescer = $changeRunCoalescer;
-		$this->siteLookup = $siteLookup;
 		$this->logger = $logger;
+		$this->hookContainer = $hookContainer;
 		$this->injectRecentChanges = $injectRecentChanges;
 	}
 
@@ -98,12 +96,12 @@ class ChangeHandler {
 	public function handleChanges( array $changes, array $rootJobParams = [] ) {
 		$changes = $this->changeRunCoalescer->transformChangeList( $changes );
 
-		if ( !Hooks::run( 'WikibaseHandleChanges', [ $changes, $rootJobParams ] ) ) {
+		if ( !$this->hookContainer->run( 'WikibaseHandleChanges', [ $changes, $rootJobParams ] ) ) {
 			return;
 		}
 
 		foreach ( $changes as $change ) {
-			if ( !Hooks::run( 'WikibaseHandleChange', [ $change, $rootJobParams ] ) ) {
+			if ( !$this->hookContainer->run( 'WikibaseHandleChange', [ $change, $rootJobParams ] ) ) {
 				continue;
 			}
 
@@ -167,7 +165,7 @@ class ChangeHandler {
 			$titlesToUpdate,
 			$rootJobParams,
 			$change->getAction(),
-			$change->hasField( 'user_id' ) ? 'uid:' . $change->getUserId() : 'uid:?'
+			$change->hasField( ChangeRow::USER_ID ) ? 'uid:' . $change->getUserId() : 'uid:?'
 		);
 
 		// Removing root job timestamp to make it work: T233520
@@ -219,8 +217,8 @@ class ChangeHandler {
 			// synthetic change!
 			$changeData = $change->getFields();
 
-			if ( isset( $changeData['info']['change-ids'] ) ) {
-				$ids = $changeData['info']['change-ids'];
+			if ( isset( $changeData[ChangeRow::INFO]['change-ids'] ) ) {
+				$ids = $changeData[ChangeRow::INFO]['change-ids'];
 				sort( $ids );
 				return 'change-batch:' . implode( ',', $ids );
 			} else {

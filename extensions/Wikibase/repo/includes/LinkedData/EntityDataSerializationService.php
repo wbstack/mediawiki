@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\LinkedData;
 
 use ApiFormatBase;
@@ -12,20 +14,18 @@ use RequestContext;
 use Serializers\Serializer;
 use SiteLookup;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityRedirect;
-use Wikibase\DataModel\SerializerFactory;
-use Wikibase\DataModel\Services\Lookup\EntityLookup;
+use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\RedirectRevision;
 use Wikibase\Repo\Api\ResultBuilder;
-use Wikibase\Repo\Content\EntityContentFactory;
-use Wikibase\Repo\Rdf\EntityRdfBuilderFactory;
 use Wikibase\Repo\Rdf\HashDedupeBag;
 use Wikibase\Repo\Rdf\RdfBuilder;
+use Wikibase\Repo\Rdf\RdfBuilderFactory;
 use Wikibase\Repo\Rdf\RdfProducer;
-use Wikibase\Repo\Rdf\RdfVocabulary;
-use Wikibase\Repo\Rdf\ValueSnakRdfBuilderFactory;
+use Wikibase\Repo\Rdf\UnknownFlavorException;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikimedia\Purtle\RdfWriterFactory;
 
@@ -45,16 +45,8 @@ use Wikimedia\Purtle\RdfWriterFactory;
  */
 class EntityDataSerializationService {
 
-	/**
-	 * @var EntityLookup|null
-	 */
-	private $entityLookup = null;
-
 	/** @var EntityTitleStoreLookup */
 	private $entityTitleStoreLookup;
-
-	/** @var EntityContentFactory */
-	private $entityContentFactory;
 
 	/**
 	 * @var SerializerFactory
@@ -87,44 +79,33 @@ class EntityDataSerializationService {
 	private $siteLookup;
 
 	/**
-	 * @var RdfVocabulary
+	 * @var RdfBuilderFactory
 	 */
-	private $rdfVocabulary;
+	private $rdfBuilderFactory;
 
 	/**
-	 * @var ValueSnakRdfBuilderFactory
+	 * @var EntityIdParser
 	 */
-	private $valueSnakRdfBuilderFactory;
-
-	/**
-	 * @var EntityRdfBuilderFactory
-	 */
-	private $entityRdfBuilderFactory;
+	private $entityIdParser;
 
 	public function __construct(
-		EntityLookup $entityLookup,
 		EntityTitleStoreLookup $entityTitleStoreLookup,
-		EntityContentFactory $entityContentFactory,
 		PropertyDataTypeLookup $propertyLookup,
-		ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory,
-		EntityRdfBuilderFactory $entityRdfBuilderFactory,
 		EntityDataFormatProvider $entityDataFormatProvider,
 		SerializerFactory $serializerFactory,
 		Serializer $entitySerializer,
 		SiteLookup $siteLookup,
-		RdfVocabulary $rdfVocabulary
+		RdfBuilderFactory $rdfBuilderFactory,
+		EntityIdParser $entityIdParser
 	) {
-		$this->entityLookup = $entityLookup;
 		$this->entityTitleStoreLookup = $entityTitleStoreLookup;
-		$this->entityContentFactory = $entityContentFactory;
 		$this->propertyLookup = $propertyLookup;
-		$this->valueSnakRdfBuilderFactory = $valueSnakRdfBuilderFactory;
-		$this->entityRdfBuilderFactory = $entityRdfBuilderFactory;
 		$this->entityDataFormatProvider = $entityDataFormatProvider;
 		$this->serializerFactory = $serializerFactory;
 		$this->entitySerializer = $entitySerializer;
 		$this->siteLookup = $siteLookup;
-		$this->rdfVocabulary = $rdfVocabulary;
+		$this->rdfBuilderFactory = $rdfBuilderFactory;
+		$this->entityIdParser = $entityIdParser;
 
 		$this->rdfWriterFactory = new RdfWriterFactory();
 	}
@@ -139,15 +120,16 @@ class EntityDataSerializationService {
 	 * @param string|null $flavor The type of the output provided by serializer
 	 *
 	 * @return array tuple of ( $data, $contentType )
+	 * @throws UnknownFlavorException
 	 * @throws MWException
 	 */
 	public function getSerializedData(
-		$format,
+		string $format,
 		EntityRevision $entityRevision,
 		RedirectRevision $followedRedirect = null,
 		array $incomingRedirects = [],
-		$flavor = null
-	) {
+		?string $flavor = null
+	): array {
 
 		$formatName = $this->entityDataFormatProvider->getFormatName( $format );
 
@@ -190,8 +172,8 @@ class EntityDataSerializationService {
 		?RedirectRevision $followedRedirect,
 		array $incomingRedirects,
 		RdfBuilder $rdfBuilder,
-		$flavor = null
-	) {
+		?string $flavor = null
+	): string {
 		$rdfBuilder->startDocument();
 		$redir = null;
 
@@ -222,7 +204,7 @@ class EntityDataSerializationService {
 			$rdfBuilder->addEntityPageProps( $entityRevision->getEntity() );
 
 			$rdfBuilder->addEntity( $entityRevision->getEntity() );
-			$rdfBuilder->resolveMentionedEntities( $this->entityLookup );
+			$rdfBuilder->resolveMentionedEntities();
 		}
 
 		if ( $flavor !== 'dump' ) {
@@ -249,7 +231,7 @@ class EntityDataSerializationService {
 		?EntityRedirect $followedRedirect,
 		array $incomingRedirects,
 		RdfBuilder $rdfBuilder
-	) {
+	): void {
 		foreach ( $incomingRedirects as $rId ) {
 			// don't add the followed redirect again
 			if ( !$followedRedirect || !$followedRedirect->getEntityId()->equals( $rId ) ) {
@@ -262,10 +244,8 @@ class EntityDataSerializationService {
 	 * Returns an ApiMain module that acts as a context for the formatting and serialization.
 	 *
 	 * @param string $format The desired output format, as a format name that ApiBase understands.
-	 *
-	 * @return ApiMain
 	 */
-	private function newApiMain( $format ) {
+	private function newApiMain( string $format ): ApiMain {
 		// Fake request params to ApiMain, with forced format parameters.
 		// We can override additional parameters here, as needed.
 		$params = [
@@ -290,11 +270,11 @@ class EntityDataSerializationService {
 	 * @return ApiFormatBase|null A suitable result printer, or null
 	 *           if the given format is not supported by the API.
 	 */
-	private function createApiSerializer( $formatName ) {
+	private function createApiSerializer( string $formatName ): ?ApiFormatBase {
 		//MediaWiki formats
 		$api = $this->newApiMain( $formatName );
 		$formatNames = $api->getModuleManager()->getNames( 'format' );
-		if ( $formatName !== null && in_array( $formatName, $formatNames ) ) {
+		if ( in_array( $formatName, $formatNames ) ) {
 			return $api->createPrinterByName( $formatName );
 		}
 
@@ -304,12 +284,9 @@ class EntityDataSerializationService {
 	/**
 	 * Get the producer setting for current data format
 	 *
-	 * @param string|null $flavorName
-	 *
-	 * @return int
-	 * @throws MWException
+	 * @throws UnknownFlavorException
 	 */
-	private function getFlavor( $flavorName ) {
+	private function getFlavor( ?string $flavorName ): int {
 		switch ( $flavorName ) {
 			case 'simple':
 				return RdfProducer::PRODUCE_TRUTHY_STATEMENTS
@@ -336,7 +313,7 @@ class EntityDataSerializationService {
 				return RdfProducer::PRODUCE_ALL;
 		}
 
-		throw new MWException( "Unsupported flavor: $flavorName" );
+		throw new UnknownFlavorException( $flavorName, [ 'simple', 'dump', 'long', 'full' ] );
 	}
 
 	/**
@@ -345,10 +322,11 @@ class EntityDataSerializationService {
 	 * @param string $format The desired serialization format, as a format name understood by ApiBase or RdfWriterFactory
 	 * @param string|null $flavorName Flavor name (used for RDF output)
 	 *
+	 * @throws UnknownFlavorException
 	 * @return RdfBuilder|null A suitable result printer, or null
 	 *   if the given format is not supported.
 	 */
-	private function createRdfBuilder( $format, $flavorName = null ) {
+	private function createRdfBuilder( string $format, ?string $flavorName ): ?RdfBuilder {
 		$canonicalFormat = $this->rdfWriterFactory->getFormatName( $format );
 
 		if ( !$canonicalFormat ) {
@@ -357,18 +335,7 @@ class EntityDataSerializationService {
 
 		$rdfWriter = $this->rdfWriterFactory->getWriter( $format );
 
-		$rdfBuilder = new RdfBuilder(
-			$this->rdfVocabulary,
-			$this->valueSnakRdfBuilderFactory,
-			$this->propertyLookup,
-			$this->entityRdfBuilderFactory,
-			$this->getFlavor( $flavorName ),
-			$rdfWriter,
-			new HashDedupeBag(),
-			$this->entityContentFactory
-		);
-
-		return $rdfBuilder;
+		return $this->rdfBuilderFactory->getRdfBuilder( $this->getFlavor( $flavorName ), new HashDedupeBag(), $rdfWriter );
 	}
 
 	/**
@@ -381,10 +348,8 @@ class EntityDataSerializationService {
 	 * @param ApiFormatBase $printer The output printer that will be used for serialization.
 	 *   Used to provide context for generating the ApiResult, and may also be manipulated
 	 *   to fine-tune the output.
-	 *
-	 * @return ApiResult
 	 */
-	private function generateApiResult( EntityRevision $entityRevision, ApiFormatBase $printer ) {
+	private function generateApiResult( EntityRevision $entityRevision, ApiFormatBase $printer ): ApiResult {
 		$res = $printer->getResult();
 
 		// Make sure result is empty. May still be full if this
@@ -398,6 +363,7 @@ class EntityDataSerializationService {
 			$this->entitySerializer,
 			$this->siteLookup,
 			$this->propertyLookup,
+			$this->entityIdParser,
 			true // include metadata for the API result printer
 		);
 		$resultBuilder->addEntityRevision( null, $entityRevision );
@@ -420,7 +386,7 @@ class EntityDataSerializationService {
 	private function getApiSerialization(
 		EntityRevision $entityRevision,
 		ApiFormatBase $printer
-	) {
+	): string {
 		// NOTE: The way the ApiResult is provided to $printer is somewhat
 		//       counter-intuitive. Basically, the relevant ApiResult object
 		//       is owned by the ApiMain module provided by newApiMain().

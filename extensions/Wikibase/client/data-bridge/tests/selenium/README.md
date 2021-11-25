@@ -23,6 +23,28 @@ that user must also have the permissions necessary to create new properties;
 similarly, if the “Data Bridge” does not exist,
 that user must also have the permissions necessary to create new tags.
 
-A complete test command run from the data-bridge directory could be:
+# Selenium tests
 
-    MW_SERVER=http://localhost MW_SCRIPT_PATH=/wiki/ MEDIAWIKI_USER='...' MEDIAWIKI_PASSWORD='...' npm run selenium-test
+For more information see https://www.mediawiki.org/wiki/Selenium
+
+## Setup
+
+See https://www.mediawiki.org/wiki/MediaWiki-Docker/Extension/Wikibase
+
+## Run all tests
+
+    npm run selenium-test
+
+## Run specific tests
+
+Just tests from this folder (client/data-bridge/tests/selenium)
+
+    npm run selenium-test:bridge
+
+Filter by file name:
+
+    npm run selenium-test -- --spec tests/selenium/specs/[FILE-NAME]
+
+Filter by file name and test name:
+
+    npm run selenium-test -- --spec tests/selenium/specs/[FILE-NAME] --mochaOpts.grep [TEST-NAME]

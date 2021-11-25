@@ -2,7 +2,7 @@
 
 namespace Wikibase\DataAccess;
 
-use Wikibase\Lib\EntityTypeDefinitions;
+use Wikibase\Lib\SubEntityTypesMapper;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -19,9 +19,9 @@ class EntitySourceDefinitions {
 	private $sources;
 
 	/**
-	 * @var null|EntitySource[]
+	 * @var null|DatabaseEntitySource[]
 	 */
-	private $entityTypeToSourceMapping = null;
+	private $entityTypeToDatabaseSourceMapping = null;
 
 	/** @var null|string[] */
 	private $sourceToConceptBaseUriMap = null;
@@ -33,19 +33,19 @@ class EntitySourceDefinitions {
 	private $sourceToRdfPredicateNamespacePrefixMap = null;
 
 	/**
-	 * @var string[] Associative array mapping "sub entity type" name to the name of its "parent" entity type
+	 * @var SubEntityTypesMapper
 	 */
-	private $subEntityTypeMap;
+	private $subEntityTypesMapper;
 
 	/**
 	 * @param EntitySource[] $sources with unique names. An single entity type can not be used in two different sources.
-	 * @param EntityTypeDefinitions $entityTypeDefinitions
+	 * @param SubEntityTypesMapper $subEntityTypesMapper
 	 */
-	public function __construct( array $sources, EntityTypeDefinitions $entityTypeDefinitions ) {
+	public function __construct( array $sources, SubEntityTypesMapper $subEntityTypesMapper ) {
 		Assert::parameterElementType( EntitySource::class, $sources, '$sources' );
 		$this->assertNoDuplicateSourcesOrEntityTypes( $sources );
 		$this->sources = $sources;
-		$this->subEntityTypeMap = $this->buildSubEntityTypeMap( $entityTypeDefinitions );
+		$this->subEntityTypesMapper = $subEntityTypesMapper;
 	}
 
 	/**
@@ -66,6 +66,10 @@ class EntitySourceDefinitions {
 			$sourceNamesProvided[] = $sourceName;
 
 			foreach ( $source->getEntityTypes() as $type ) {
+				if ( $source->getType() === ApiEntitySource::TYPE ) {
+					continue; // it's ok to have more than one entity source per entity type if it's an api source
+				}
+
 				if ( array_key_exists( $type, $entityTypesProvided ) ) {
 					throw new \InvalidArgumentException(
 						'Entity type "' . $type . '" has already been defined in source: "' . $entityTypesProvided[$type] . '"'
@@ -77,36 +81,21 @@ class EntitySourceDefinitions {
 		}
 	}
 
-	private function buildSubEntityTypeMap( EntityTypeDefinitions $entityTypeDefinitions ) {
-		$subEntityTypes = $entityTypeDefinitions->get( EntityTypeDefinitions::SUB_ENTITY_TYPES );
-
-		$subEntityTypeMap = [];
-		foreach ( $subEntityTypes as $type => $subTypes ) {
-			foreach ( $subTypes as $subType ) {
-				$subEntityTypeMap[$subType] = $type;
-			}
-		}
-
-		return $subEntityTypeMap;
-	}
-
-	public function getSources() {
+	/**
+	 * @return EntitySource[]
+	 */
+	public function getSources(): array {
 		return $this->sources;
 	}
 
 	/**
-	 * @todo when the same entity type can be provided by multiple source (currently forbidden),
-	 * this should return all sources
-	 *
 	 * @param string $entityType Entity type or sub type
-	 * @return EntitySource|null EntitySource or null if no EntitySource configured for the type
+	 * @return DatabaseEntitySource |null DatabaseEntitySource or null if no DatabaseEntitySource configured for the type
 	 */
-	public function getSourceForEntityType( string $entityType ): ?EntitySource {
-		if ( array_key_exists( $entityType, $this->subEntityTypeMap ) ) {
-			$entityType = $this->subEntityTypeMap[$entityType];
-		}
+	public function getDatabaseSourceForEntityType( string $entityType ): ?DatabaseEntitySource {
+		$entityType = $this->subEntityTypesMapper->getParentEntityType( $entityType ) ?? $entityType;
 
-		$entityTypeToSourceMapping = $this->getEntityTypeToSourceMapping();
+		$entityTypeToSourceMapping = $this->getEntityTypeToDatabaseSourceMapping();
 		if ( array_key_exists( $entityType, $entityTypeToSourceMapping ) ) {
 			return $entityTypeToSourceMapping[$entityType];
 		}
@@ -115,30 +104,46 @@ class EntitySourceDefinitions {
 	}
 
 	/**
-	 * @return EntitySource[]
+	 * As of Federated Properties v2 there is only one source of federation per entity type, so returning a single EntitySource is ok.
 	 */
-	public function getEntityTypeToSourceMapping() {
-		if ( $this->entityTypeToSourceMapping === null ) {
-			$this->buildEntityTypeToSourceMapping();
+	public function getApiSourceForEntityType( string $entityType ): ?ApiEntitySource {
+		$entityType = $this->subEntityTypesMapper->getParentEntityType( $entityType ) ?? $entityType;
+
+		foreach ( $this->sources as $source ) {
+			if ( $source->getType() === ApiEntitySource::TYPE && in_array( $entityType, $source->getEntityTypes() ) ) {
+				return $source;
+			}
 		}
-		return $this->entityTypeToSourceMapping;
+
+		return null;
 	}
 
-	private function buildEntityTypeToSourceMapping() {
-		$this->entityTypeToSourceMapping = [];
+	/**
+	 * @return DatabaseEntitySource[]
+	 */
+	public function getEntityTypeToDatabaseSourceMapping() {
+		if ( $this->entityTypeToDatabaseSourceMapping === null ) {
+			$this->buildEntityTypeToDatabaseSourceMapping();
+		}
+		return $this->entityTypeToDatabaseSourceMapping;
+	}
+
+	private function buildEntityTypeToDatabaseSourceMapping() {
+		$this->entityTypeToDatabaseSourceMapping = [];
 		foreach ( $this->sources as $source ) {
-			$entityTypes = $source->getEntityTypes();
-			foreach ( $entityTypes as $type ) {
-				$this->entityTypeToSourceMapping[$type] = $source;
+			if ( $source->getType() === DatabaseEntitySource::TYPE ) {
+				$entityTypes = $source->getEntityTypes();
+				foreach ( $entityTypes as $type ) {
+					$this->entityTypeToDatabaseSourceMapping[$type] = $source;
+				}
 			}
 		}
-		foreach ( $this->subEntityTypeMap as $subEntityType => $mainEntityType ) {
-			// Only add sub entities that are enabled to be mapping
-			if ( array_key_exists( $mainEntityType, $this->entityTypeToSourceMapping ) ) {
-				$this->entityTypeToSourceMapping[$subEntityType] = $this->entityTypeToSourceMapping[$mainEntityType];
+		foreach ( $this->entityTypeToDatabaseSourceMapping as $mainEntityType => $source ) {
+			foreach ( $this->subEntityTypesMapper->getSubEntityTypes( $mainEntityType ) as $subEntityType ) {
+				$this->entityTypeToDatabaseSourceMapping[$subEntityType] = $this->entityTypeToDatabaseSourceMapping[$mainEntityType];
 			}
 		}
-		return $this->entityTypeToSourceMapping;
+		return $this->entityTypeToDatabaseSourceMapping;
 	}
 
 	/**

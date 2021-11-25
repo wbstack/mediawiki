@@ -17,11 +17,11 @@ use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
@@ -58,21 +58,22 @@ class RemoveForm extends ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
-		EntityIdParser $entityIdParser
+		ApiHelperFactory $apiHelperFactory,
+		MediawikiEditEntityFactory $editEntityFactory,
+		EntityIdParser $entityIdParser,
+		Store $store,
+		SummaryFormatter $summaryFormatter
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
 		return new self(
 			$mainModule,
 			$moduleName,
 			new RemoveFormRequestParser(
 				new FormIdDeserializer( $entityIdParser )
 			),
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
-			$wikibaseRepo->getSummaryFormatter(),
-			function ( $module ) use ( $apiHelperFactory ) {
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
+			$summaryFormatter,
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			}
 		);
@@ -155,7 +156,7 @@ class RemoveForm extends ApiBase {
 		$changeOp->apply( $lexeme, $summary );
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$lexemeId,
 			$lexemeRevision->getRevisionId()
 		);
@@ -172,7 +173,9 @@ class RemoveForm extends ApiBase {
 			$lexeme,
 			$this->summaryFormatter->formatSummary( $summary ),
 			$flags,
-			$tokenThatDoesNotNeedChecking
+			$tokenThatDoesNotNeedChecking,
+			null,
+			$params['tags'] ?: []
 		);
 
 		if ( !$status->isGood() ) {
@@ -197,6 +200,10 @@ class RemoveForm extends ApiBase {
 				RemoveFormRequestParser::PARAM_FORM_ID => [
 					self::PARAM_TYPE => 'string',
 					self::PARAM_REQUIRED => true,
+				],
+				'tags' => [
+					self::PARAM_TYPE => 'tags',
+					self::PARAM_ISMULTI => true,
 				],
 				'bot' => [
 					self::PARAM_TYPE => 'boolean',

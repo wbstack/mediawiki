@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ykhwong"
+		]
+	},
+	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var>의 콘텐츠 모델.",
+	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var>의 콘텐츠 포맷."
+}

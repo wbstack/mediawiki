@@ -113,7 +113,7 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 			if ( $rowCount > 0 ) {
 				$data->data =
 					array_combine( range( 1, $rowCount ),
-						array_map( function ( $row ) use ( $rowIndexes ) {
+						array_map( static function ( $row ) use ( $rowIndexes ) {
 							return array_combine( $rowIndexes, $row );
 						}, $data->data ) );
 			}

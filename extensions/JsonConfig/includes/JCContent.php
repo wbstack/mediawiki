@@ -154,24 +154,6 @@ class JCContent extends \TextContent {
 		$this->data = $this->validate( $data );
 	}
 
-	/**
-	 * Beautifies JSON prior to save.
-	 * @param Title $title Title
-	 * @param \User $user User
-	 * @param \ParserOptions $popts
-	 * @return JCContent
-	 */
-	public function preSaveTransform( Title $title, \User $user, \ParserOptions $popts ) {
-		if ( !$this->isValidJson() ) {
-			return $this; // Invalid JSON - can't do anything with it
-		}
-		$formatted = FormatJson::encode( $this->getData(), false, FormatJson::ALL_OK );
-		if ( $this->getNativeData() !== $formatted ) {
-			return new static( $formatted, $this->getModel(), $this->thorough() );
-		}
-		return $this;
-	}
-
 	protected function fillParserOutput( Title $title, $revId, ParserOptions $options,
 										 $generateHtml, ParserOutput &$output ) {
 		if ( !$generateHtml ) {
@@ -209,6 +191,7 @@ class JCContent extends \TextContent {
 		if ( $view === null ) {
 			$configModels = \ExtensionRegistry::getInstance()->getAttribute( 'JsonConfigModels' )
 				+ $wgJsonConfigModels;
+			// @phan-suppress-previous-line PhanPossiblyUndeclaredVariable
 			if ( array_key_exists( $modelId, $configModels ) ) {
 				$value = $configModels[$modelId];
 				if ( is_array( $value ) && array_key_exists( 'view', $value ) ) {

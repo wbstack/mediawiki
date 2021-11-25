@@ -4,21 +4,9 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Content;
 
-use Hooks;
-use InvalidArgumentException;
-use MediaWiki\Interwiki\InterwikiLookup;
-use MWException;
 use OutOfBoundsException;
-use Title;
-use Wikibase\DataAccess\EntitySource;
-use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\DataModel\Entity\EntityDocument;
-use Wikibase\DataModel\Entity\EntityId;
-use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\EntityRedirect;
-use Wikibase\Lib\Store\EntityIdLookup;
-use Wikibase\Lib\Store\StorageException;
-use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -29,7 +17,7 @@ use Wikimedia\Assert\Assert;
  * @author Daniel Kinzler
  * @author Bene* < benestar.wikimedia@gmail.com >
  */
-class EntityContentFactory implements EntityTitleStoreLookup, EntityIdLookup {
+class EntityContentFactory {
 
 	/**
 	 * @var string[] Entity type ID to content model ID mapping.
@@ -42,45 +30,24 @@ class EntityContentFactory implements EntityTitleStoreLookup, EntityIdLookup {
 	private $entityHandlerFactoryCallbacks;
 
 	/**
-	 * @var InterwikiLookup|null
-	 */
-	private $interwikiLookup;
-
-	/**
 	 * @var EntityHandler[] Entity type ID to entity handler mapping.
 	 */
 	private $entityHandlers = [];
-
-	/** @var EntitySourceDefinitions */
-	private $entitySourceDefinitions;
-	/** @var EntitySource */
-	private $localEntitySource;
-	/** @var Title[] */
-	private $titleForIdCache;
 
 	/**
 	 * @param string[] $entityContentModels Entity type ID to content model ID mapping.
 	 * @param callable[] $entityHandlerFactoryCallbacks Entity type ID to callback mapping for
 	 *  creating ContentHandler objects.
-	 * @param EntitySourceDefinitions $entitySourceDefinitions
-	 * @param EntitySource $localEntitySource
-	 * @param InterwikiLookup|null $interwikiLookup
 	 */
 	public function __construct(
 		array $entityContentModels,
-		array $entityHandlerFactoryCallbacks,
-		EntitySourceDefinitions $entitySourceDefinitions,
-		EntitySource $localEntitySource,
-		InterwikiLookup $interwikiLookup = null
+		array $entityHandlerFactoryCallbacks
 	) {
 		Assert::parameterElementType( 'string', $entityContentModels, '$entityContentModels' );
 		Assert::parameterElementType( 'callable', $entityHandlerFactoryCallbacks, '$entityHandlerFactoryCallbacks' );
 
 		$this->entityContentModels = $entityContentModels;
 		$this->entityHandlerFactoryCallbacks = $entityHandlerFactoryCallbacks;
-		$this->entitySourceDefinitions = $entitySourceDefinitions;
-		$this->localEntitySource = $localEntitySource;
-		$this->interwikiLookup = $interwikiLookup;
 	}
 
 	/**
@@ -106,158 +73,6 @@ class EntityContentFactory implements EntityTitleStoreLookup, EntityIdLookup {
 	 */
 	public function getEntityTypes(): array {
 		return array_keys( $this->entityContentModels );
-	}
-
-	/**
-	 * Returns the Title object for the item with provided id.
-	 *
-	 * @param EntityId $id
-	 *
-	 * @throws MWException
-	 * @throws OutOfBoundsException
-	 * @throws InvalidArgumentException
-	 * @return Title|null
-	 */
-	public function getTitleForId( EntityId $id ): ?Title {
-		if ( isset( $this->titleForIdCache[ $id->getSerialization() ] ) ) {
-			return $this->titleForIdCache[ $id->getSerialization() ];
-		}
-		$title = $this->getTitleForFederatedId( $id );
-		if ( $title ) {
-			$this->titleForIdCache[ $id->getSerialization() ] = $title;
-			return $title;
-		}
-
-		$handler = $this->getContentHandlerForType( $id->getEntityType() );
-		$title = $handler->getTitleForId( $id );
-		$this->titleForIdCache[ $id->getSerialization() ] = $title;
-		return $title;
-	}
-
-	/**
-	 * If the EntityId is federated, return a Title for it. Otherwise return null
-	 *
-	 * @param EntityId $id
-	 * @return null|Title
-	 */
-	private function getTitleForFederatedId( EntityId $id ): ?Title {
-		if ( $this->entityNotFromLocalEntitySource( $id ) ) {
-			$interwiki = $this->entitySourceDefinitions->getSourceForEntityType( $id->getEntityType() )->getInterwikiPrefix();
-			if ( $this->interwikiLookup && $this->interwikiLookup->isValidInterwiki( $interwiki ) ) {
-				$pageName = 'EntityPage/' . $id->getSerialization();
-
-				// TODO: use a TitleFactory
-				$title = Title::makeTitle( NS_SPECIAL, $pageName, '', $interwiki );
-				$this->titleForIdCache[ $id->getSerialization() ] = $title;
-				return $title;
-			}
-		}
-
-		return null;
-	}
-
-	/**
-	 * Returns Title objects for the entities with provided ids
-	 *
-	 * @param EntityId[] $ids
-	 *
-	 * @throws MWException
-	 * @throws OutOfBoundsException
-	 * @throws InvalidArgumentException
-	 * @return (Title|null)[]
-	 */
-	public function getTitlesForIds( array $ids ): array {
-		Assert::parameterElementType( 'Wikibase\DataModel\Entity\EntityId', $ids, '$ids' );
-		$titles = [];
-		$idsByType = [];
-		// get whatever federated ids or cached ids we can, and batch the rest of the ids by type
-		foreach ( $ids as $id ) {
-			$idString = $id->getSerialization();
-			if ( isset( $this->titleForIdCache[$idString] ) ) {
-				$titles[$idString] = $this->titleForIdCache[$idString];
-				continue;
-			}
-			$title = $this->getTitleForFederatedId( $id );
-			if ( $title ) {
-				$titles[$idString] = $title;
-				continue;
-			}
-			$idsByType[ $id->getEntityType() ][] = $id;
-		}
-
-		foreach ( $idsByType as $entityType => $idsForType ) {
-			$handler = $this->getContentHandlerForType( $entityType );
-			$titlesForType = $handler->getTitlesForIds( $idsForType );
-			$titles += $titlesForType;
-		}
-
-		foreach ( $titles as $idString => $title ) {
-			$this->titleForIdCache[$idString] = $title;
-		}
-
-		return $titles;
-	}
-
-	private function entityNotFromLocalEntitySource( EntityId $id ): bool {
-		$entitySource = $this->entitySourceDefinitions->getSourceForEntityType( $id->getEntityType() );
-		return $entitySource->getSourceName() !== $this->localEntitySource->getSourceName();
-	}
-
-	/**
-	 * Returns the ID of the entity associated with the given page title.
-	 *
-	 * @note There is no guarantee that the EntityId returned by this method refers to
-	 * an existing entity.
-	 *
-	 * @param Title $title
-	 *
-	 * @return EntityId|null
-	 */
-	public function getEntityIdForTitle( Title $title ): ?EntityId {
-		$contentModel = $title->getContentModel();
-
-		Hooks::run( 'GetEntityContentModelForTitle', [ $title, &$contentModel ] );
-
-		try {
-			$handler = $this->getEntityHandlerForContentModel( $contentModel );
-			return $handler->getIdForTitle( $title );
-		} catch ( OutOfBoundsException $ex ) {
-			// Not an entity content model
-		} catch ( EntityIdParsingException $ex ) {
-			// @phan-suppress-previous-line PhanPluginDuplicateCatchStatementBody
-			// Not a valid entity page title.
-		}
-
-		return null;
-	}
-
-	/**
-	 * @see EntityIdLookup::getEntityIds
-	 *
-	 * @note the current implementation skips non-existing entities, but there is no guarantee
-	 * that this will always be the case.
-	 *
-	 * @param Title[] $titles
-	 *
-	 * @throws StorageException
-	 * @return EntityId[] Entity IDs, keyed by page IDs.
-	 */
-	public function getEntityIds( array $titles ): array {
-		$entityIds = [];
-
-		foreach ( $titles as $title ) {
-			$pageId = $title->getArticleID();
-
-			if ( $pageId > 0 ) {
-				$entityId = $this->getEntityIdForTitle( $title );
-
-				if ( $entityId !== null ) {
-					$entityIds[$pageId] = $entityId;
-				}
-			}
-		}
-
-		return $entityIds;
 	}
 
 	/**

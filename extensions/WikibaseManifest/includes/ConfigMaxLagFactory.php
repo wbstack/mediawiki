@@ -21,7 +21,7 @@ class ConfigMaxLagFactory implements MaxLagFactory {
 		$this->configValueName = $configValueName;
 	}
 
-	public function getMaxLag() : MaxLag {
+	public function getMaxLag(): MaxLag {
 		return new MaxLag( $this->config->get( $this->configValueName ) );
 	}
 

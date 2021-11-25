@@ -36,12 +36,6 @@ class MobileContext extends ContextSource {
 	protected $useFormat = null;
 
 	/**
-	 * Save whether current page is blacklisted from displaying in mobile view
-	 * @var bool|null
-	 */
-	protected $blacklistedPage = null;
-
-	/**
 	 * Key/value pairs of things to add to X-Analytics response header for analytics
 	 * @var array[]
 	 */
@@ -401,48 +395,6 @@ class MobileContext extends ContextSource {
 			return true;
 		}
 
-		return false;
-	}
-
-	/**
-	 * Checks whether current page is blacklisted from displaying mobile view
-	 * @return bool
-	 */
-	public function isBlacklistedPage() {
-		if ( $this->blacklistedPage === null ) {
-			$this->blacklistedPage = $this->isBlacklistedPageInternal();
-		}
-
-		return $this->blacklistedPage;
-	}
-
-	/**
-	 * Value for isBlacklistedPage()
-	 * @return bool
-	 */
-	private function isBlacklistedPageInternal() {
-		$noMobilePages = $this->config->get( 'MFNoMobilePages' );
-		$noMobileCategory = $this->config->get( 'MFNoMobileCategory' );
-
-		// Check for blacklisted category membership
-		$title = $this->getTitle();
-		if ( $noMobileCategory && $title ) {
-			$id = $title->getArticleID();
-			if ( $id ) {
-				$dbr = wfGetDB( DB_REPLICA );
-				if ( $dbr->selectField( 'categorylinks',
-					'cl_from',
-					[ 'cl_from' => $id, 'cl_to' => $noMobileCategory ],
-					__METHOD__
-				) ) {
-					return true;
-				}
-			}
-		}
-		// ...and individual page blacklisting
-		if ( $noMobilePages && $title && in_array( $title->getPrefixedText(), $noMobilePages ) ) {
-			return true;
-		}
 		return false;
 	}
 
@@ -982,7 +934,7 @@ class MobileContext extends ContextSource {
 	 */
 	public function getAnalyticsLogItems() {
 		return array_map(
-			function ( $val ) {
+			static function ( $val ) {
 				return implode( self::ANALYTICS_HEADER_DELIMITER, $val );
 			},
 			$this->analyticsLogItems

@@ -32,7 +32,7 @@ class EchoUpdatePerUserBlacklist extends LoggedUpdateMaintenance {
 
 	public function doDBUpdates() {
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = $this->getDB( DB_PRIMARY );
 		$dbr = $this->getDB( DB_REPLICA );
 		$iterator = new BatchRowIterator(
 			$dbr,
@@ -52,7 +52,7 @@ class EchoUpdatePerUserBlacklist extends LoggedUpdateMaintenance {
 
 		$this->output( "Updating Echo Notification Blacklist...\n" );
 
-		$lookup = CentralIdLookup::factory();
+		$centralIdLookup = MediaWikiServices::getInstance()->getCentralIdLookup();
 		$processed = 0;
 		foreach ( $iterator as $batch ) {
 			foreach ( $batch as $row ) {
@@ -61,7 +61,7 @@ class EchoUpdatePerUserBlacklist extends LoggedUpdateMaintenance {
 				}
 
 				$value = explode( "\n", $row->up_value );
-				$names = array_filter( $value, function ( $item ) {
+				$names = array_filter( $value, static function ( $item ) {
 					return !is_numeric( $item );
 				} );
 
@@ -72,7 +72,7 @@ class EchoUpdatePerUserBlacklist extends LoggedUpdateMaintenance {
 				}
 
 				$user = User::newFromId( $row->up_user );
-				$ids = $lookup->centralIdsFromNames( $names, $user );
+				$ids = $centralIdLookup->centralIdsFromNames( $names, $user );
 
 				$dbw->update(
 					'user_properties',

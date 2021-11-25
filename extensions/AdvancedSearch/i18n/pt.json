@@ -79,5 +79,5 @@
 	"advancedsearch-namespaces-placeholder": "Acrescentar espaços nominais…",
 	"prefs-advancedsearch": "Pesquisa avançada",
 	"advancedsearch-preference-help": "A pesquisa avançada adiciona um formulário à página Special:Search. Este permite-lhe fazer pesquisas especializadas, mesmo que não conheça nenhuma sintaxe de pesquisa. Também altera a forma como os espaços nominais/domínios podem ser selecionados.",
-	"advancedsearch-preference-disable": "Não mostrar a interface da pesquisa avançada"
+	"advancedsearch-preference-disable": "Não mostrar a interface da pesquisa avançada ao usar Special:Search"
 }

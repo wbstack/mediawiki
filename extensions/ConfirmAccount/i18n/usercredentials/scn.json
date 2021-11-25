@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ajeje Brazorf",
 			"Aushulz"
 		]
 	},
-	"usercredentials-email": "Nnirizzu email:"
+	"usercredentials-user": "Nomu utenti:",
+	"usercredentials-email": "Nnirizzu email:",
+	"usercredentials-bio": "Biografìa:"
 }

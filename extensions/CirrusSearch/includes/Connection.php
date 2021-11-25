@@ -4,7 +4,7 @@ namespace CirrusSearch;
 
 use ElasticaConnection;
 use Exception;
-use MWNamespace;
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -138,6 +138,9 @@ class Connection extends ElasticaConnection {
 		self::$pool[$config->getWikiId()][$clusterId] = $this;
 	}
 
+	/**
+	 * @return never
+	 */
 	public function __sleep() {
 		throw new \RuntimeException( 'Attempting to serialize ES connection' );
 	}
@@ -239,7 +242,7 @@ class Connection extends ElasticaConnection {
 		}
 
 		if ( !$this->getSettings()->isPrivateCluster() ) {
-			$indexTypes = array_filter( $indexTypes, function ( $type ) {
+			$indexTypes = array_filter( $indexTypes, static function ( $type ) {
 				return $type !== self::ARCHIVE_INDEX_TYPE;
 			} );
 		}
@@ -277,7 +280,7 @@ class Connection extends ElasticaConnection {
 			return self::CONTENT_INDEX_TYPE;
 		}
 
-		return MWNamespace::isContent( $namespace ) ?
+		return MediaWikiServices::getInstance()->getNamespaceInfo()->isContent( $namespace ) ?
 			self::CONTENT_INDEX_TYPE : self::GENERAL_INDEX_TYPE;
 	}
 

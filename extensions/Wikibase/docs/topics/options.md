@@ -50,12 +50,6 @@ If this is `true`, the pruneChanges.php script should run periodically to remove
 
 DEFAULT: ```true```
 
-#### changesDatabase {#changesDatabase}
-The database that changes are recorded to by a repo for processing by clients.
-
- - This must be set to a symbolic database identifier that MediaWiki's LBFactory class understands; `false` means that the wiki's own database shall be used.
- - On the client this is normally the same database as the repo db.
-
 ### Storage URLs
 
 #### geoShapeStorageBaseUrl
@@ -168,15 +162,6 @@ DEFAULT: ````null```` (There is no SPARQL endpoint.)
 
 EXAMPLE: ```https://query.wikidata.org/sparql```
 
-#### conceptBaseUri {#conceptBaseUri}
-Base URI for building concept URIs (used in Rdf output).
-
-This has to include the protocol and domain, only an entity identifier will be appended.
-
-DEFAULT: Constructed from [$wgServer] with http protocol and /entity/ path.
-
-EXAMPLE: ```http://www.wikidata.org/entity/```
-
 #### globeUris
 Mapping of globe URIs to canonical names, as recognized and used by [GeoData] extension when indexing and querying for coordinates.
 
@@ -200,6 +185,22 @@ Allows values: `original` or `mysql-upsert`
 Should a separate DB connection be used to generate entity IDs?  (See @ref md_docs_storage_id-counters)
 
 DEFAULT: ```false```
+
+#### idGeneratorInErrorPingLimiter {#repo_idGeneratorInErrorPingLimiter}
+Attempt to create an entity locks an entity id (for items, it would be Q####) and if saving fails due to validation issues for example, that id would be wasted.
+This config helps by adding a bigger number to ratelimit and slow them down to avoid bots wasting significant number of Q-ids by sending faulty data over and over again.
+Value of this config determines how much the user is going to be penalized for an error in creation of entities.
+Zero means no penalty. The higher value, the heavier the penalty would be.
+
+DEFAULT: 0
+
+#### sandboxEntityIds
+Entity ids to be used in various live examples.
+
+These entities will be affected by changes made through those
+examples, such as edits made by the API sandbox.
+
+DEFAULT: ```[ 'mainItem' => 'Q999999998', 'auxItem' => 'Q999999999']```
 
 #### badgeItems
 Items allowed to be used as badges.
@@ -413,6 +414,35 @@ DEFAULT: ```true```
 It only comes into effect if the general [termboxEnabled] is `true`.
 If disabled, user-specific termbox markup will only be created by client-side rendering after initial displaying of the generic termbox markup.
 
+### Tags
+
+These settings define [change tags][Help:Tags] that should be added to different edits.
+All of them default to the empty list, meaning that no tags are added by default;
+when you configure them, you also have to create those tags via Special:Tags.
+
+#### updateRepoTags {#repo_updateRepoTags}
+List of tags to be added to edits made via jobs enqueued by client wikis,
+to update sitelinks when connected pages on the client are moved or deleted.
+(Note that this is a _repo_ setting: the same list of tags is used for updates coming from all client wikis.)
+
+DEFAULT: `[]`
+
+#### viewUiTags
+List of tags to be added to edits made via the main frontend (WikibaseView).
+
+DEFAULT: `[]`
+
+#### termboxTags
+List of tags to be added to edits made via Termbox v2 (see [termboxEnabled]).
+
+DEFAULT: `[]`
+
+#### specialPageTags
+List of tags to be added to edits made via special pages:
+Special:NewItem, Special:SetLabel, etc.
+
+DEFAULT: `[]`
+
 ### Miscellaneous
 
 #### dataRightsText
@@ -504,24 +534,6 @@ $wgWBRepoSettings['urlSchemes']['mailto'] = false;
 
 DEFAULT: is ```['bzr', 'cvs', 'ftp', 'git', 'http', 'https', 'irc', 'mailto', 'ssh', 'svn']```
 
-#### entityNamespaces {#entityNamespaces}
-Defines which kind of entity is managed in which namespace.
-
-It is given as an associative array mapping entity types such as `'item'` to namespaces (IDs or canonical names).
-Mapping must be done for each type of entity that should be supported.
-If entities are stored in alternative slots, the syntax <namespace>/<slot> can be used to define which slot to use.
-
-EXAMPLE: ```['item' => 0, 'property' => 120, 'slottedEntity' => '123/slotname']```
-
-#### foreignRepositories {#foreignRepositories}
-An associative array mapping foreign repository names to settings relevant to the particular repository.
-Each repository's settings are an associative array containing the following keys:
-
- - 'entityNamespaces' - A map of entity type identifiers (strings) that the local wiki supports from the foreign repository to namespaces (IDs or canonical names) related to pages of entities of the given type on foreign repository's wiki. If entities are stored in alternative slots, the syntax <namespace>/<slot> can be used to define which slot to use.
- - 'repoDatabase' - A symbolic database identifier (string) that MediaWiki's LBFactory class understands.
- - 'baseUri' - A base URI (string) for concept URIs. It should contain scheme and authority part of the URI.
- - 'prefixMapping' - A prefix mapping array, see also docs/foreign-entity-ids.wiki in the DataModel component.
-
 #### unitStorage
 Definition for unit conversion storage.
 
@@ -556,24 +568,23 @@ The behaviour is unpredicted if it is disabled after it was enabled.
 
 DEFAULT: ```false```
 
-### federatedPropertiesSourceScriptUrl {#repo_federatedPropertiesSourceScriptUrl}
+#### federatedPropertiesSourceScriptUrl {#repo_federatedPropertiesSourceScriptUrl}
 A url path for the location of the source wikibase instance.
 The set url path should allow access to both `index.php` and `api.php`
 
 DEFAULT: ```https://www.wikidata.org/w/```
 
-### changeVisibilityNotificationClientRCMaxAge {#repo_changeVisibilityNotificationClientRCMaxAge}
+#### changeVisibilityNotificationClientRCMaxAge {#repo_changeVisibilityNotificationClientRCMaxAge}
 Value of the `$wgRCMaxAge` setting, which specifies the max age (in seconds) of entries in the `recentchanges` table, on the client wikis.
 
 DEFAULT: [$wgRCMaxAge].
 
-### changeVisibilityNotificationJobBatchSize {#repo_changeVisibilityNotificationJobBatchSize}
+#### changeVisibilityNotificationJobBatchSize {#repo_changeVisibilityNotificationJobBatchSize}
 Batch size (how many revisions per job) to use when pushing `ChangeVisibilityNotification` jobs to clients.
 
 DEFAULT: ```3```.
 
-
-### deleteNotificationClientRCMaxAge {#repo_deleteNotificationClientRCMaxAge}
+#### deleteNotificationClientRCMaxAge {#repo_deleteNotificationClientRCMaxAge}
 Value of the `$wgRCMaxAge` setting, which specifies the max age (in seconds) of entries in the `recentchanges` table, on the client wikis.
 
 Example: On entity-page deletion the DeleteDispatcher hook is called and creates a DispatchChangeDeletionNotification job which in turn collects the revision rows from `archive` using this threshold.
@@ -630,23 +641,6 @@ If not the same wiki, defaults to 'Wikibase'.
 This setting can also be set to an i18n message key and will be handled as a message, if the message key exists so that the repo site name can be translatable.
 
 DEFAULT: [$wgSitename]
-
-#### repoNamespaces
-An array telling the client wiki which namespaces on the repository are used for which entity type.
-
-This is given as an associative array mapping entity type IDs such as Item::ENTITY_TYPE, to namespace names.
-This information is used when constructing links to entities on the repository.
-
-DEFAULT: (items in main namespace):
-```
-[
-    'item' => "",
-    'property' => 'Property'
-]
-```
-
-Most Wikibases do not use the main namespace.
-The example settings file does not use the main namespace.
 
 ### Urls, URIs & Paths
 
@@ -733,17 +727,18 @@ Whether to track Lua function calls with a per-sitegroup key, like `MediaWiki.wi
 #### trackLuaFunctionCallsPerWiki
 Whether to track Lua function calls with a per-site key, like `MediaWiki.dewiki.wikibase.client.scribunto.wikibase.functionName.call`.
 
-#### fineGrainedLuaTracking
-Enable fine-grained tracking on entities accessed through Lua in client.
-
-Not all (X) usage will be recorded, but each aspect will be recorded individually based on actual usage.
-
 ### Sitelinks
 
 #### languageLinkSiteGroup
 ID of the site group to be shown as language links.
 
 DEFAULT: `null` (That is the site's own site group.)
+
+#### languageLinkAllowedSiteGroups
+List of allowed group of sitelinks to be shown as language links.
+For example for Wikimedia Commons, this can be `commons` and `wikipedia`.
+
+DEFAULT: `null` (Meaning value of languageLinkSiteGroup will be the only allowed group)
 
 #### badgeClassNames
 A list of additional CSS class names for site links that have badges.
@@ -810,7 +805,7 @@ Regular expression to match edit links for which the Data Bridge is enabled.
 Uses JavaScript syntax, with the first capturing group containing the title of the entity, the second one containing the entity ID (usually a part of the first capturing group) and the third one containing the property ID to edit.
 Mandatory if [client dataBridgeEnabled] is set to `true` – there is no default value.
 
-####dataBridgeEditTags
+####dataBridgeEditTags {#client_dataBridgeEditTags}
 A list of tags for tracking edits through the Data Bridge.
 
 Optional if [client dataBridgeEnabled] is set to `true`, with a default value of ```[]```.
@@ -823,18 +818,23 @@ It may have a `<body>` placeholder which will be replaced with some text contain
 
 DEFAULT: `https://phabricator.wikimedia.org/maniphest/task/edit/form/1/?title=Wikidata+Bridge+error&description=${body}&tags=Wikidata-Bridge`
 
+### Tags
+
+These settings define [change tags][Help:Tags] that should be added to different edits.
+All of them default to the empty list, meaning that no tags are added by default;
+when you configure them, you also have to create those tags on the target repository via Special:Tags.
+
+#### linkItemTags
+List of tags to be added to edits made via the sitelink management UI (linking a page to another page).
+Due to caching, changes to this setting may take up to a day to take effect.
+
+DEFAULT: `[]`
+
+See also these related settings:
+- [dataBridgeEditTags]
+- [updateRepoTags]
+
 ### Miscellaneous
-
-#### repositories
-An associative array mapping repository names to settings relevant to the particular repository.
-
-Local repository is identified using the empty string as its name.
-Each repository's settings are an associative array containing the following keys:
-
- - 'entityNamespaces': A map of entity type identifiers (strings) that the local wiki supports from the foreign repository to namespaces (IDs or canonical names) related to pages of entities of the given type on foreign repository's wiki. If entities are stored in alternative slots, the syntax <namespace>/<slot> can be used to define which slot to use.
- - 'repoDatabase': A symbolic database identifier (string) that MediaWiki's LBFactory class understands. Note that `false` would mean “this wiki's database”!
- - 'baseUri': A base URI (string) for concept URIs. It should contain scheme and authority part of the URI.
- - 'prefixMapping': A prefix mapping array, see also docs/foreign-entity-ids.wiki in the DataModel component.
 
 #### itemAndPropertySourceName
 Name of the providing Item and Property definitions (data is used from here, including sitelinks).
@@ -927,12 +927,15 @@ DEFAULT: array mapping each well-known name to `null`.
 [ObjectFactory]: https://www.mediawiki.org/wiki/ObjectFactory
 [page property]: https://www.mediawiki.org/wiki/Manual:Page_props_table
 [Scribunto]: (https://www.mediawiki.org/wiki/Scribunto)
+[Help:Tags]: https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Tags
 [siteLinkGroups]: #common_siteLinkGroups
 [entitySources]: #common_entitySources
 [sharedCacheKeyPrefix]: #common_sharedCacheKeyPrefix
 [termboxEnabled]: #repo_termboxEnabled
+[updateRepoTags]: #repo_updateRepoTags
 [client dataBridgeEnabled]: #client_dataBridgeEnabled
 [dataBridgeHrefRegExp]: #client_dataBridgeHrefRegExp
+[dataBridgeEditTags]: #client_dataBridgeEditTags
 [injectRecentChanges]: #client_injectRecentChanges
 [localClientDatabases]: #client_localClientDatabases
 [recentChangesBatchSize]: #client_recentChangesBatchSize

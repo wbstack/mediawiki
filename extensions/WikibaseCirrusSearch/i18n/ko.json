@@ -22,6 +22,7 @@
 	"wikibasecirrus-search-bad-entity-type": "잘못된 엔티티 유형: $1",
 	"wikibasecirrus-search-bad-profile-name": "잘못된 검색 프로파일 이름: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement 키워드에 유효한 문장이 포함되어 있지 않습니다",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity 키워드에 유효한 문장이 포함되어 있지 않습니다",
 	"special-entitieswithoutdescription": "설명이 없는 개체",
 	"wikibasecirrus-entitieswithoutdescription-legend": "설명이 없는 개체 목록 얻기",
 	"special-entitieswithoutlabel": "레이블이 없는 항목",

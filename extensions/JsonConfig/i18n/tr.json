@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"BaRaN6161 TURK",
+			"Cobija",
 			"MuratTheTurkish"
 		]
 	},
@@ -26,7 +27,7 @@
 	"jsonconfig-err-array-expected": "\"$1\" değerinin [...] parantezleri ile çevrili bir liste olması bekleniyordu",
 	"jsonconfig-err-assoc-array": "\"$1\" parametresi ilişkilendirilebilir bir dizi (sözlük) olmalıdır, ör. <kbd>{\"key\": \"value\", ...}</kbd>",
 	"jsonconfig-err-bad-header-string": "\"$1\" başlığı yalnızca harf, sayı ve alt çizgi karakterlerinden oluşmalı ve bir sayı ile başlamamalıdır",
-	"jsonconfig-err-bad-geojson": "\"$1\" parametresi geçerli bir GeoJSON veri nesnesi veya bir GeoJSON nesneleri dizisi olmalıdır. <code>properties</code> alanı <code>title</code> veya <code>description</code> içeriyorsa, bunlar sekmeleri veya sondaki boşlukları olmayan tek satır dizeleri veya bu dizelerin çok dilli nesneleridir, ör. {\"en\": \"String in English\", ... }",
+	"jsonconfig-err-bad-geojson": "\"$1\" parametresi geçerli bir GeoJSON veri nesnesi veya bir GeoJSON nesne dizisi olmalıdır. <code>properties</code> alanı <code>title</code> veya <code>description</code> içeriyorsa, bunlar sekmeleri veya sondaki boşlukları olmayan tek satır dizeleri veya bu dizelerin çokdilli nesneleridir, ör. {\"en\": \"String in English\", ... }",
 	"jsonconfig-err-bad-type": "\"$1\" parametresi, <code>string</code>, <code>number</code> veya <code>boolean</code> gibi geçerli bir tür olmalıdır",
 	"jsonconfig-err-bool": "\"$1\" parametresi <code>true</code> veya <code>false</code> olarak ayarlanmalıdır",
 	"jsonconfig-err-integer": "\"$1\" parametresi bir tam sayı olmalıdır",

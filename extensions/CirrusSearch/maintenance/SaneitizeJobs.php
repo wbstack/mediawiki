@@ -80,7 +80,6 @@ class SaneitizeJobs extends Maintenance {
 		$this->addOption( 'job-name', 'Tells the script the name of the ' .
 			'sanitize job only useful to run multiple sanitize jobs. ' .
 			'Defaults to "default".', false, true );
-		$this->requireExtension( 'CirrusSearch' );
 	}
 
 	public function execute() {
@@ -246,7 +245,7 @@ EOD
 			// instead run these jobs with concurrency limits to keep them
 			// spread over time. Insert jobs in the order we asked for them
 			// to be run to have some semblance of sanity.
-			usort( $jobs, function ( CheckerJob $job1, CheckerJob $job2 ) {
+			usort( $jobs, static function ( CheckerJob $job1, CheckerJob $job2 ) {
 				return $job1->getReadyTimestamp() - $job2->getReleaseTimestamp();
 			} );
 			JobQueueGroup::singleton()->push( $jobs );
@@ -304,7 +303,7 @@ EOD
 			$this->getSearchConfig()
 				->getProfileService()
 				->listExposedProfiles( SearchProfileService::SANEITIZER );
-		uasort( $profiles, function ( $a, $b ) {
+		uasort( $profiles, static function ( $a, $b ) {
 			return $a['max_wiki_size'] <=> $b['max_wiki_size'];
 		} );
 		$wikiSize = $this->maxId - $this->minId;
@@ -411,8 +410,10 @@ EOD
 	/**
 	 * @param string $msg The error to display
 	 * @param int $exitCode die out using this int as the code
+	 * @return never
 	 */
 	public function fatalError( $msg, $exitCode = 1 ) {
+		// @phan-suppress-previous-line PhanTypeMissingReturn T240141
 		$date = new \DateTime();
 		parent::fatalError( $date->format( 'Y-m-d H:i:s' ) . " " . $msg, $exitCode );
 	}

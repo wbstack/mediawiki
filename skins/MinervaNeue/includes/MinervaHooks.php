@@ -91,9 +91,9 @@ class MinervaHooks {
 		try {
 			$featureManager->registerFeature(
 				new MobileFrontend\Features\Feature(
-					'MinervaShowCategoriesButton',
+					'MinervaShowCategories',
 					'skin-minerva',
-					$config->get( 'MinervaShowCategoriesButton' )
+					$config->get( 'MinervaShowCategories' )
 				)
 			);
 			$featureManager->registerFeature(
@@ -172,7 +172,9 @@ class MinervaHooks {
 		if ( $skin instanceof SkinMinerva ) {
 			switch ( $name ) {
 				case 'Recentchanges':
-					$isEnhancedDefaultForUser = $special->getUser()->getBoolOption( 'usenewrc' );
+					$isEnhancedDefaultForUser = MediaWikiServices::getInstance()
+						->getUserOptionsLookup()
+						->getBoolOption( $special->getUser(), 'usenewrc' );
 					$enhanced = $request->getBool( 'enhanced', $isEnhancedDefaultForUser );
 					if ( $enhanced ) {
 						$out->addHTML( Html::warningBox(
@@ -227,9 +229,13 @@ class MinervaHooks {
 				// SkinUserPageHelper is being instantiated instead.
 				$relevantUserPageHelper = new SkinUserPageHelper(
 					$services->getUserNameUtils(),
-					$title->inNamespace( NS_USER_TALK ) ? $title->getSubjectPage() : $title
+					$title->inNamespace( NS_USER_TALK ) ? $title->getSubjectPage() : $title,
+					$mobileContext
 				);
-				$isUserPageOrUserTalkPage = $relevantUserPageHelper->isUserPage();
+
+				$isUserPage = $relevantUserPageHelper->isUserPage();
+				$isUserPageAccessible = $relevantUserPageHelper->isUserPageAccessibleToCurrentUser();
+				$isUserPageOrUserTalkPage = $isUserPage && $isUserPageAccessible;
 			} else {
 				// If no title this must be false
 				$isUserPageOrUserTalkPage = false;
@@ -243,7 +249,7 @@ class MinervaHooks {
 				SkinOptions::BETA_MODE
 					=> $isBeta,
 				SkinOptions::CATEGORIES
-					=> $featureManager->isFeatureAvailableForCurrentUser( 'MinervaShowCategoriesButton' ),
+					=> $featureManager->isFeatureAvailableForCurrentUser( 'MinervaShowCategories' ),
 				SkinOptions::PAGE_ISSUES
 					=> $featureManager->isFeatureAvailableForCurrentUser( 'MinervaPageIssuesNewTreatment' ),
 				SkinOptions::MOBILE_OPTIONS => true,
@@ -333,6 +339,51 @@ class MinervaHooks {
 				'wgMinervaABSamplingRate' => $config->get( 'MinervaABSamplingRate' ),
 				'wgMinervaReadOnly' => $roConf->isReadOnly(),
 			];
+		}
+	}
+
+	/**
+	 * The Minerva skin loads message box styles differently from core, to
+	 * reduce the amount of styles on the critical path.
+	 * This adds message box styles to pages that need it, to avoid loading them
+	 * on pages where they are not.
+	 *
+	 * @param OutputPage $out
+	 * @param Skin $skin
+	 */
+	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+		if ( $skin->getSkinName() === 'minerva' ) {
+			self::addMessageBoxStylesToPage( $out );
+		}
+	}
+
+	/**
+	 * The Minerva skin loads message box styles differently from core, to
+	 * reduce the amount of styles on the critical path.
+	 * This adds message box styles to pages that need it, to avoid loading them
+	 * on pages where they are not.
+	 * The pages where they are needed are:
+	 * - special pages
+	 * - edit workflow (action=edit and action=submit)
+	 * - when viewing old revisions
+	 *
+	 * @param OutputPage $out
+	 */
+	private static function addMessageBoxStylesToPage( OutputPage $out ) {
+		$request = $out->getRequest();
+		// Warning box styles are needed when reviewing old revisions
+		// and inside the fallback editor styles to action=edit page.
+		$requestAction = $request->getVal( 'action' );
+		$viewAction = $requestAction === null || $requestAction === 'view';
+
+		if (
+			$out->getTitle()->isSpecialPage() ||
+			$request->getText( 'oldid' ) ||
+			!$viewAction
+		) {
+			$out->addModuleStyles( [
+				'skins.minerva.messageBox.styles'
+			] );
 		}
 	}
 

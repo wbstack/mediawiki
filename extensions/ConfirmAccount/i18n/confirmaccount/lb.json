@@ -62,7 +62,7 @@
 	"confirmaccount-deny": "Refuséieren (Benotzerkont gëtt geläscht)",
 	"confirmaccount-hold": "Ofwaarden",
 	"confirmaccount-spam": "Spam (E-Mail net schécken)",
-	"confirmaccount-reason": "Bemierkung (an d'E-Mailen dobäigesat am Fall vun engem Refus oder am Suspens):",
+	"confirmaccount-reason": "Bemierkung (an d'E-Mailen derbäigesat am Fall vun engem Refus oder am Suspens):",
 	"confirmaccount-ip": "IP-Adress:",
 	"confirmaccount-xff": "X-Forwarded-For:",
 	"confirmaccount-agent": "Programm vum Benotzer (User-Agent):",

@@ -6,11 +6,14 @@ use InvalidArgumentException;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\Property;
-use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Term\Term;
+use Wikibase\DataModel\Term\TermList;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\Sql\Terms\TypeIdsLookup;
 use Wikibase\Repo\Store\TermsCollisionDetector;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Queries db term store for collisions on terms
@@ -22,8 +25,8 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 	/** @var string */
 	private $entityType;
 
-	/** @var ILoadBalancer */
-	private $loadBalancer;
+	/** @var RepoDomainDb */
+	private $db;
 
 	/** @var TypeIdsLookup */
 	private $typeIdsLookup;
@@ -33,14 +36,14 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 
 	/**
 	 * @param string $entityType one of the two supported types: Item::ENTITY_TYPE or Property::ENTITY_TYPE
-	 * @param ILoadBalancer $loadBalancer
+	 * @param RepoDomainDb $db
 	 * @param TypeIdsLookup $typeIdsLookup
 	 *
 	 * @throws InvalidArgumentException when non supported entity type is given
 	 */
 	public function __construct(
 		string $entityType,
-		ILoadBalancer $loadBalancer,
+		RepoDomainDb $db,
 		TypeIdsLookup $typeIdsLookup
 	) {
 		if ( !in_array( $entityType, [ Item::ENTITY_TYPE, Property::ENTITY_TYPE ] ) ) {
@@ -51,7 +54,7 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 
 		$this->databaseEntityTermsTableProvider = new DatabaseEntityTermsTableProvider( $entityType );
 		$this->entityType = $entityType;
-		$this->loadBalancer = $loadBalancer;
+		$this->db = $db;
 		$this->typeIdsLookup = $typeIdsLookup;
 	}
 
@@ -112,6 +115,27 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 		return $entityId !== null ? $this->makeEntityId( $entityId ) : null;
 	}
 
+	public function detectLabelsCollision( TermList $termList ): array {
+		if ( $termList->isEmpty() ) {
+			return [];
+		}
+
+		$labelTypeId = $this->typeIdsLookup->lookupTypeIds( [ 'label' ] )['label'] ?? null;
+
+		if ( $labelTypeId === null ) {
+			return [];
+		}
+		$lang = [];
+		$labels = [];
+
+		foreach ( $termList->getIterator() as $label ) {
+			$lang[] = $label->getLanguageCode();
+			$labels[] = $label->getText();
+		}
+
+		return $this->findEntityIdsWithTermsInLangs( $lang, $labels, $labelTypeId );
+	}
+
 	/**
 	 * @param mixed|null $numericEntityId
 	 * @return EntityId|null
@@ -128,12 +152,12 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 		if ( $this->entityType === Item::ENTITY_TYPE ) {
 			return ItemId::newFromNumber( $numericEntityId );
 		} elseif ( $this->entityType === Property::ENTITY_TYPE ) {
-			return PropertyId::newFromNumber( $numericEntityId );
+			return NumericPropertyId::newFromNumber( $numericEntityId );
 		}
 	}
 
 	private function findEntityIdsWithTermInLang(
-		$lang,
+		string $lang,
 		string $text,
 		int $termTypeId,
 		bool $firstMatchOnly = false,
@@ -180,6 +204,65 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 		}
 	}
 
+	private function findEntityIdsWithTermsInLangs(
+		array $lang,
+		array $text,
+		int $termTypeId
+	): array {
+
+		$dbr = $this->getDbr();
+		$options = [];
+
+		list(
+			$table,
+			$joinConditions,
+			$conditions,
+			$entityIdColumn
+		) = $this->getMultiTermQueryParams( $termTypeId, $lang, $text );
+
+		$labelStatements = [];
+		foreach ( $conditions as $condition ) {
+			$labelStatements[] = $dbr->makeList( $condition, $dbr::LIST_AND );
+		}
+
+		$conditions = $dbr->makeList( $labelStatements, $dbr::LIST_OR );
+		$options[] = 'DISTINCT';
+
+		$res = $dbr->select(
+			$table,
+			[ $entityIdColumn, 'wbx_text', 'wbxl_language' ],
+			$conditions,
+			__METHOD__,
+			$options,
+			$joinConditions
+		);
+
+		if ( $res === false ) {
+			// Log warning?
+			return [];
+		}
+
+		$values = [];
+		foreach ( $res as $row ) {
+			$dbEntityId = $row->{$entityIdColumn};
+			$entityId = $this->makeEntityId( $dbEntityId );
+
+			if ( !$entityId ) {
+				throw new \RuntimeException( "Select result contains entityIds that are null." );
+			}
+
+			$values[$entityId->getSerialization()][] = new Term( $row->wbxl_language, $row->wbx_text );
+		}
+
+		return $values;
+	}
+
+	/**
+	 * @param string $typeId
+	 * @param string $lang
+	 * @param string $text
+	 * @return array
+	 */
 	private function getTermQueryParams( $typeId, $lang, $text ) {
 		list(
 			$table,
@@ -187,16 +270,49 @@ class DatabaseTermsCollisionDetector implements TermsCollisionDetector {
 			$entityIdColumn
 		) = $this->databaseEntityTermsTableProvider->getEntityTermsTableAndJoinConditions();
 
-		$conditions = [
-			"wbtl_type_id" => $typeId,
-			"wbxl_language" => $lang,
-			"wbx_text" => $text
+		return [
+			$table,
+			$joinConditions,
+			$this->getTermInLanguageCondition( $typeId, $lang, $text ),
+			$entityIdColumn
 		];
+	}
+
+	/**
+	 * @param string $typeId
+	 * @param array $languages
+	 * @param array $texts
+	 * @return array
+	 */
+	private function getMultiTermQueryParams( $typeId, $languages, $texts ) {
+		list(
+			$table,
+			$joinConditions,
+			$entityIdColumn
+		) = $this->databaseEntityTermsTableProvider->getEntityTermsTableAndJoinConditions();
+
+		$conditions = [];
+
+		for ( $i = 0; $i < count( $languages ); $i++ ) {
+			$language = $languages[$i];
+			$text = $texts[$i];
+
+			$conditions[] = $this->getTermInLanguageCondition( $typeId, $language, $text );
+		}
 
 		return [ $table, $joinConditions, $conditions, $entityIdColumn ];
 	}
 
-	private function getDbr() {
-		return $this->loadBalancer->getConnection( ILoadBalancer::DB_REPLICA, [] );
+	private function getTermInLanguageCondition( string $typeId, string $language, string $text ): array {
+		return [
+			"wbtl_type_id" => $typeId,
+			"wbxl_language" => $language,
+			"wbx_text" => $text
+		];
 	}
+
+	private function getDbr(): IDatabase {
+		return $this->db->connections()->getReadConnectionRef();
+	}
+
 }

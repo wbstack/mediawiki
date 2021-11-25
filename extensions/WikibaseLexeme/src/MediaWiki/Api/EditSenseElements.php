@@ -3,10 +3,12 @@
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
 use ApiMain;
+use Deserializers\Deserializer;
+use Status;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\DataModel\SerializerFactory;
+use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermLanguageValidator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermSerializationValidator;
 use Wikibase\Lexeme\Domain\Model\Sense;
@@ -16,19 +18,21 @@ use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\GlossesChangeOpDeseria
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\SenseIdDeserializer;
 use Wikibase\Lexeme\Serialization\SenseSerializer;
 use Wikibase\Lexeme\WikibaseLexemeServices;
+use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\StringNormalizer;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\ChangeOp\Deserialization\ClaimsChangeOpDeserializer;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
@@ -75,14 +79,17 @@ class EditSenseElements extends \ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
 		SerializerFactory $baseDataModelSerializerFactory,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityIdParser $entityIdParser,
 		EntityStore $entityStore,
-		StringNormalizer $stringNormalizer
+		Deserializer $externalFormatStatementDeserializer,
+		Store $store,
+		StringNormalizer $stringNormalizer,
+		SummaryFormatter $summaryFormatter
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
 		$senseSerializer = new SenseSerializer(
 			$baseDataModelSerializerFactory->newTermListSerializer(),
 			$baseDataModelSerializerFactory->newStatementListSerializer()
@@ -91,8 +98,8 @@ class EditSenseElements extends \ApiBase {
 		return new self(
 			$mainModule,
 			$moduleName,
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
 			new EditSenseElementsRequestParser(
 				new SenseIdDeserializer( $entityIdParser ),
 				new EditSenseChangeOpDeserializer(
@@ -104,14 +111,14 @@ class EditSenseElements extends \ApiBase {
 						)
 					),
 					new ClaimsChangeOpDeserializer(
-						$wikibaseRepo->getExternalFormatStatementDeserializer(),
-						$wikibaseRepo->getChangeOpFactoryProvider()->getStatementChangeOpFactory()
+						$externalFormatStatementDeserializer,
+						$changeOpFactoryProvider->getStatementChangeOpFactory()
 					)
 				)
 			),
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$senseSerializer,
-			function ( $module ) use ( $apiHelperFactory ) {
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			},
 			$entityStore
@@ -197,7 +204,7 @@ class EditSenseElements extends \ApiBase {
 			$this->dieStatus( $status );
 		}
 
-		$this->generateResponse( $sense );
+		$this->generateResponse( $sense, $status );
 	}
 
 	/**
@@ -214,7 +221,7 @@ class EditSenseElements extends \ApiBase {
 		array $params
 	) {
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$sense->getId(),
 			$baseRevisionId
 		);
@@ -232,18 +239,27 @@ class EditSenseElements extends \ApiBase {
 			$sense,
 			$summary,
 			$flags,
-			$tokenThatDoesNotNeedChecking
+			$tokenThatDoesNotNeedChecking,
+			null,
+			$params['tags'] ?: []
 		);
 	}
 
 	/**
 	 * @param Sense $sense
+	 * @param Status $status
 	 */
-	private function generateResponse( Sense $sense ) {
+	private function generateResponse( Sense $sense, Status $status ) {
 		$apiResult = $this->getResult();
 
 		$serializedSense = $this->senseSerializer->serialize( $sense );
 		unset( $serializedSense['claims'] );
+
+		/** @var EntityRevision $entityRevision */
+		$entityRevision = $status->getValue()['revision'];
+		$revisionId = $entityRevision->getRevisionId();
+
+		$apiResult->addValue( null, 'lastrevid', $revisionId );
 
 		// TODO: Do we really need `success` property in response?
 		$apiResult->addValue( null, 'success', 1 );
@@ -263,12 +279,16 @@ class EditSenseElements extends \ApiBase {
 				self::PARAM_TYPE => 'text',
 				self::PARAM_REQUIRED => true,
 			],
+			EditSenseElementsRequestParser::PARAM_BASEREVID => [
+				self::PARAM_TYPE => 'integer',
+			],
+			'tags' => [
+				self::PARAM_TYPE => 'tags',
+				self::PARAM_ISMULTI => true,
+			],
 			'bot' => [
 				self::PARAM_TYPE => 'boolean',
 				self::PARAM_DFLT => false,
-			],
-			EditSenseElementsRequestParser::PARAM_BASEREVID => [
-				self::PARAM_TYPE => 'integer',
 			]
 		];
 	}
@@ -323,10 +343,10 @@ class EditSenseElements extends \ApiBase {
 			EditSenseElementsRequestParser::PARAM_DATA => json_encode( $exampleData )
 		] );
 
-		$languages = array_map( function ( $r ) {
+		$languages = array_map( static function ( $r ) {
 			return $r['language'];
 		}, $exampleData['glosses'] );
-		$glosses = array_map( function ( $r ) {
+		$glosses = array_map( static function ( $r ) {
 			return $r['value'];
 		}, $exampleData['glosses'] );
 

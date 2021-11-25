@@ -4,12 +4,11 @@ namespace Wikibase\Repo;
 
 use ApiBase;
 use ApiEditPage;
+use ApiMain;
 use ApiModuleManager;
 use ApiQuery;
 use ApiQuerySiteinfo;
-use CentralIdLookup;
 use Content;
-use ContentHandler;
 use ExtensionRegistry;
 use HistoryPager;
 use IContextSource;
@@ -21,15 +20,14 @@ use MediaWiki\Revision\SlotRecord;
 use MediaWiki\User\UserIdentity;
 use MWException;
 use OutputPage;
-use PageProps;
 use Parser;
 use ParserOptions;
 use ParserOutput;
-use RecentChange;
 use ResourceLoader;
 use Skin;
 use SkinTemplate;
 use StubUserLang;
+use Throwable;
 use Title;
 use User;
 use Wikibase\DataModel\Entity\Item;
@@ -39,20 +37,20 @@ use Wikibase\Lib\LibHooks;
 use Wikibase\Lib\ParserFunctions\CommaSeparatedList;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityRevision;
-use Wikibase\Lib\Store\Sql\EntityChangeLookup;
 use Wikibase\Lib\WikibaseContentLanguages;
 use Wikibase\Repo\Api\MetaDataBridgeConfig;
+use Wikibase\Repo\Api\ModifyEntity;
 use Wikibase\Repo\Content\EntityContent;
 use Wikibase\Repo\Content\EntityHandler;
 use Wikibase\Repo\Hooks\Helpers\OutputPageEntityViewChecker;
 use Wikibase\Repo\Hooks\InfoActionHookHandler;
 use Wikibase\Repo\Hooks\OutputPageEntityIdReader;
 use Wikibase\Repo\Hooks\SidebarBeforeOutputHookHandler;
-use Wikibase\Repo\Notifications\RepoEntityChange;
 use Wikibase\Repo\ParserOutput\PlaceholderEmittingEntityTermsView;
 use Wikibase\Repo\ParserOutput\TermboxFlag;
 use Wikibase\Repo\ParserOutput\TermboxVersionParserCacheValueRejector;
 use Wikibase\Repo\ParserOutput\TermboxView;
+use Wikibase\Repo\Store\RateLimitingIdGenerator;
 use Wikibase\Repo\Store\Sql\DispatchStats;
 use Wikibase\Repo\Store\Sql\SqlSubscriptionLookup;
 use Wikibase\View\ViewHooks;
@@ -115,7 +113,7 @@ final class RepoHooks {
 	 * Handler for the SetupAfterCache hook, completing the content and namespace setup.
 	 * This updates the $wgContentHandlers and $wgNamespaceContentModels registries
 	 * according to information provided by entity type definitions and the entityNamespaces
-	 * setting.
+	 * setting for the local entity source.
 	 *
 	 * @throws MWException
 	 */
@@ -123,8 +121,7 @@ final class RepoHooks {
 		global $wgContentHandlers,
 			$wgNamespaceContentModels;
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$namespaces = $wikibaseRepo->getLocalEntityNamespaces();
+		$namespaces = WikibaseRepo::getLocalEntitySource()->getEntityNamespaceIds();
 		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 
 		// Register entity namespaces.
@@ -138,7 +135,7 @@ final class RepoHooks {
 			// XXX: we should probably not just ignore $entityTypes that don't match $contentModelIds.
 			if ( !isset( $wgNamespaceContentModels[$namespace] )
 				&& isset( $contentModelIds[$entityType] )
-				&& $namespaceLookup->getEntitySlotRole( $namespace ) === 'main'
+				&& $namespaceLookup->getEntitySlotRole( $entityType ) === 'main'
 			) {
 				$wgNamespaceContentModels[$namespace] = $contentModelIds[$entityType];
 			}
@@ -198,7 +195,7 @@ final class RepoHooks {
 			return false;
 		}
 
-		$entitySource = WikibaseRepo::getEntitySourceDefinitions()->getSourceForEntityType(
+		$entitySource = WikibaseRepo::getEntitySourceDefinitions()->getDatabaseSourceForEntityType(
 			$entityType
 		);
 		if ( $entitySource === null ) {
@@ -350,53 +347,6 @@ final class RepoHooks {
 	}
 
 	/**
-	 * Nasty hack to inject information from RC into the change notification saved earlier
-	 * by the onRevisionFromEditComplete hook handler.
-	 *
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/RecentChange_save
-	 *
-	 * @todo find a better way to do this!
-	 *
-	 * @param RecentChange $recentChange
-	 */
-	public static function onRecentChangeSave( RecentChange $recentChange ) {
-		$logType = $recentChange->getAttribute( 'rc_log_type' );
-		$logAction = $recentChange->getAttribute( 'rc_log_action' );
-		$revId = $recentChange->getAttribute( 'rc_this_oldid' );
-
-		if ( $revId <= 0 ) {
-			// If we don't have a revision ID, we have no chance to find the right change to update.
-			// NOTE: As of February 2015, RC entries for undeletion have rc_this_oldid = 0.
-			return;
-		}
-
-		if ( $logType === null || ( $logType === 'delete' && $logAction === 'restore' ) ) {
-			$changeLookup = WikibaseRepo::getStore()->getEntityChangeLookup();
-
-			/** @var RepoEntityChange $change */
-			$change = $changeLookup->loadByRevisionId( $revId, EntityChangeLookup::FROM_MASTER );
-			'@phan-var RepoEntityChange $change';
-
-			if ( $change ) {
-				$changeStore = WikibaseRepo::getStore()->getChangeStore();
-
-				$centralIdLookup = CentralIdLookup::factoryNonLocal();
-				if ( $centralIdLookup === null ) {
-					$centralUserId = 0;
-				} else {
-					$repoUser = User::newFromIdentity( $recentChange->getPerformerIdentity() );
-					$centralUserId = $centralIdLookup->centralIdFromLocalUser(
-						$repoUser
-					);
-				}
-
-				$change->setMetadataFromRC( $recentChange, $centralUserId );
-				$changeStore->saveChange( $change );
-			}
-		}
-	}
-
-	/**
 	 * Allows to add user preferences.
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences
 	 *
@@ -412,6 +362,10 @@ final class RepoHooks {
 		];
 
 		$preferences['wb-dismissleavingsitenotice'] = [
+			'type' => 'api'
+		];
+
+		$preferences['wb-reftabs-mode'] = [
 			'type' => 'api'
 		];
 
@@ -448,10 +402,9 @@ final class RepoHooks {
 	public static function onPageHistoryLineEnding( HistoryPager $history, $row, &$html, array $classes ) {
 		// Note: This assumes that HistoryPager::getTitle returns a Title.
 		$entityContentFactory = WikibaseRepo::getEntityContentFactory();
-
-		$wikiPage = $history->getWikiPage();
 		$services = MediaWikiServices::getInstance();
 
+		$wikiPage = $services->getWikiPageFactory()->newFromTitle( $history->getTitle() );
 		$revisionRecord = $services->getRevisionFactory()->newRevisionFromRow( $row );
 		$linkTarget = $revisionRecord->getPageAsLinkTarget();
 
@@ -480,12 +433,14 @@ final class RepoHooks {
 
 	/**
 	 * Alter the structured navigation links in SkinTemplates.
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/SkinTemplateNavigation
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/SkinTemplateNavigation::Universal
+	 *
+	 * @todo T282549 Consider moving some of this logic into a place where it can be more adequately tested
 	 *
 	 * @param SkinTemplate $skinTemplate
 	 * @param array[] &$links
 	 */
-	public static function onPageTabs( SkinTemplate $skinTemplate, array &$links ) {
+	public static function onSkinTemplateNavigationUniversal( SkinTemplate $skinTemplate, array &$links ) {
 		$entityContentFactory = WikibaseRepo::getEntityContentFactory();
 
 		$title = $skinTemplate->getRelevantTitle();
@@ -558,7 +513,6 @@ final class RepoHooks {
 	 * @param array &$bodyAttrs
 	 */
 	public static function onOutputPageBodyAttributes( OutputPage $out, Skin $skin, array &$bodyAttrs ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$outputPageEntityIdReader = new OutputPageEntityIdReader(
 			new OutputPageEntityViewChecker( WikibaseRepo::getEntityContentFactory() ),
 			WikibaseRepo::getEntityIdParser()
@@ -613,8 +567,6 @@ final class RepoHooks {
 			// To be verified that this keeps working once T200570 is done in MediaWiki itself.
 			$slots = $params['slots'] ?? [ SlotRecord::MAIN ];
 
-			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 			/**
 			 * Don't make Wikibase check if a user can execute when the namespace in question does
 			 * not refer to a namespace used locally for Wikibase entities.
@@ -625,11 +577,13 @@ final class RepoHooks {
 			}
 
 			$entityContentFactory = WikibaseRepo::getEntityContentFactory();
-			$entityTypes = $wikibaseRepo->getEnabledEntityTypes();
+			$entityTypes = WikibaseRepo::getEnabledEntityTypes();
+
+			$contentHandlerFactory = MediaWikiServices::getInstance()->getContentHandlerFactory();
 
 			foreach ( $entityContentFactory->getEntityContentModels() as $contentModel ) {
 				/** @var EntityHandler $handler */
-				$handler = ContentHandler::getForModelID( $contentModel );
+				$handler = $contentHandlerFactory->getContentHandler( $contentModel );
 				'@phan-var EntityHandler $handler';
 
 				if ( !in_array( $handler->getEntityType(), $entityTypes ) ) {
@@ -809,7 +763,7 @@ final class RepoHooks {
 		}
 
 		// If the entity type is not from the local source, don't check anything else
-		$entitySource = WikibaseRepo::getEntitySourceDefinitions()->getSourceForEntityType( $expectedEntityType );
+		$entitySource = WikibaseRepo::getEntitySourceDefinitions()->getDatabaseSourceForEntityType( $expectedEntityType );
 		if ( $entitySource->getSourceName() !== WikibaseRepo::getLocalEntitySource()->getSourceName() ) {
 			return true;
 		}
@@ -851,8 +805,7 @@ final class RepoHooks {
 
 		$data['wikibase-propertytypes'] = $propertyTypes;
 
-		$conceptBaseUri = $repoSettings->getSetting( 'conceptBaseUri' );
-		$data['wikibase-conceptbaseuri'] = $conceptBaseUri;
+		$data['wikibase-conceptbaseuri'] = WikibaseRepo::getLocalEntitySource()->getConceptBaseUri();
 
 		$geoShapeStorageBaseUrl = $repoSettings->getSetting( 'geoShapeStorageBaseUrl' );
 		$data['wikibase-geoshapestoragebaseurl'] = $geoShapeStorageBaseUrl;
@@ -896,7 +849,7 @@ final class RepoHooks {
 	 * @param array[] &$data
 	 */
 	public static function onAPIQuerySiteInfoStatisticsInfo( array &$data ) {
-		$stats = new DispatchStats();
+		$stats = new DispatchStats( WikibaseRepo::getRepoDomainDbFactory()->newRepoDb() );
 		$stats->load();
 		if ( $stats->hasStats() ) {
 			$data['dispatch'] = [
@@ -950,7 +903,7 @@ final class RepoHooks {
 	 */
 	public static function onSidebarBeforeOutput( Skin $skin, array &$sidebar ): void {
 		$hookHandler = new SidebarBeforeOutputHookHandler(
-			WikibaseRepo::getSettings()->getSetting( 'conceptBaseUri' ),
+			WikibaseRepo::getLocalEntitySource()->getConceptBaseUri(),
 			WikibaseRepo::getEntityIdLookup(),
 			WikibaseRepo::getEntityLookup(),
 			WikibaseRepo::getEntityNamespaceLookup(),
@@ -1048,11 +1001,12 @@ final class RepoHooks {
 		}
 
 		$mediaWikiServices = MediaWikiServices::getInstance();
-		$loadBalancer = $mediaWikiServices->getDBLoadBalancer();
-		$subscriptionLookup = new SqlSubscriptionLookup( $loadBalancer );
+		$subscriptionLookup = new SqlSubscriptionLookup( WikibaseRepo::getRepoDomainDbFactory( $mediaWikiServices )->newRepoDb() );
 		$entityIdLookup = WikibaseRepo::getEntityIdLookup( $mediaWikiServices );
 
 		$siteLookup = $mediaWikiServices->getSiteLookup();
+
+		$pageProps = $mediaWikiServices->getPageProps();
 
 		$infoActionHookHandler = new InfoActionHookHandler(
 			$namespaceChecker,
@@ -1060,7 +1014,7 @@ final class RepoHooks {
 			$siteLookup,
 			$entityIdLookup,
 			$context,
-			PageProps::getInstance()
+			$pageProps
 		);
 
 		$pageInfo = $infoActionHookHandler->handle( $context, $pageInfo );
@@ -1083,7 +1037,7 @@ final class RepoHooks {
 			return;
 		}
 
-		$stats = new DispatchStats();
+		$stats = new DispatchStats( WikibaseRepo::getRepoDomainDbFactory()->newRepoDb() );
 		$stats->load();
 		$median = $stats->getMedian();
 
@@ -1160,10 +1114,6 @@ final class RepoHooks {
 		}
 	}
 
-	public static function onMediaWikiPHPUnitTestStartTest( $test ) {
-		WikibaseRepo::resetClassStatics();
-	}
-
 	/**
 	 * Register the parser functions.
 	 *
@@ -1206,5 +1156,30 @@ final class RepoHooks {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Attempt to create an entity locks an entity id (for items, it would be Q####) and if saving fails
+	 * due to validation issues for example, that id would be wasted.
+	 * We want to penalize the user by adding a bigger number to ratelimit and slow them down
+	 * to avoid bots wasting significant number of Q-ids by sending faulty data over and over again.
+	 * See T284538 for more information.
+	 *
+	 * @param ApiMain $apiMain
+	 * @param Throwable $e
+	 * @return bool|void
+	 * @throws MWException
+	 */
+	public static function onApiMainOnException( $apiMain, $e ) {
+		$module = $apiMain->getModule();
+		if ( !$module instanceof ModifyEntity ) {
+			return;
+		}
+		$repoSettings = WikibaseRepo::getSettings();
+		$idGeneratorInErrorPingLimiterValue = $repoSettings->getSetting( 'idGeneratorInErrorPingLimiter' );
+		if ( !$idGeneratorInErrorPingLimiterValue || !$module->isFreshIdAssigned() ) {
+			return;
+		}
+		$apiMain->getUser()->pingLimiter( RateLimitingIdGenerator::RATELIMIT_NAME, $idGeneratorInErrorPingLimiterValue );
 	}
 }

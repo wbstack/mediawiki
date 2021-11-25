@@ -9,8 +9,11 @@
  * @license GPL-2.0-or-later
  */
 
+use Wikibase\Lib\SettingsArray;
+
 global $wgCdnMaxAge;
 
+/** @phan-file-suppress PhanUnextractableAnnotation */
 return [
 	// feature flag for federated properties
 	'federatedPropertiesEnabled' => false,
@@ -34,10 +37,6 @@ return [
 	'termboxUserSpecificSsrEnabled' => true,
 
 	'reservedIds' => [],
-
-	// List of supported entity types, mapping entity type identifiers to namespace IDs.
-	// This setting is used to enable entity types.
-	'entityNamespaces' => [],
 
 	// List of entity types that (temporarily) can not be changed; identifiers per EntityDocument::getType()
 	'readOnlyEntityTypes' => [],
@@ -84,6 +83,9 @@ return [
 	'dispatchDefaultMaxChunks' => 15,
 	'dispatchDefaultDispatchInterval' => 60,
 	'dispatchDefaultDispatchRandomness' => 15,
+	'dispatchViaJobsEnabled' => false,
+	'dispatchViaJobsAllowedClients' => [],
+	'dispatchViaJobsPruneChangesTableInJobEnabled' => false,
 
 	// Formats that shall be available via Special:EntityData.
 	// The first format will be used as the default.
@@ -136,11 +138,6 @@ return [
 	'sparqlEndpoint' => null,
 
 	'transformLegacyFormatOnExport' => true,
-
-	'conceptBaseUri' => function() {
-		$uri = preg_replace( '!^//!', 'http://', $GLOBALS['wgServer'] );
-		return $uri . '/entity/';
-	},
 
 	// Property used as formatter to link identifiers
 	'formatterUrlProperty' => null,
@@ -259,9 +256,6 @@ return [
 		'wb-identifiers' => [ 'name' => 'identifiers', 'type' => 'integer' ],
 	],
 
-	// Map of foreign repository names to repository-specific settings such as "supportedEntityTypes"
-	'foreignRepositories' => [],
-
 	// URL of geo shape storage API endpoint
 	'geoShapeStorageApiEndpointUrl' => 'https://commons.wikimedia.org/w/api.php',
 
@@ -321,16 +315,18 @@ return [
 	'idGeneratorSeparateDbConnection' => false,
 
 	/**
-	 * Whether rate limiting should be applied to the entity ID generator.
+	 * Number to increase for ping limiter in case creating an entity errors in API
 	 *
-	 * @var bool
-	 * @see https://phabricator.wikimedia.org/T272032
+	 * @var int
+	 * @see https://phabricator.wikimedia.org/T284538
 	 */
-	'idGeneratorRateLimiting' => false,
+	'idGeneratorInErrorPingLimiter' => 0,
 
 	'entityTypesWithoutRdfOutput' => [],
 
-	'entitySources' => [],
+	'entitySources' => function ( SettingsArray $settings ) {
+		throw new Exception( 'entitySources must be configured manually (or use the example settings)' );
+	},
 
 	'localEntitySourceName' => 'local',
 
@@ -352,4 +348,66 @@ return [
 
 	'wikibasePingback' => false,
 	'pingbackHost' => 'https://www.mediawiki.org/beacon/event',
+
+	/**
+	 * @note This config options is primarily added for Wikidata transition use-case and can be
+	 * considered temporary. It could be removed in the future with no warning.
+	 *
+	 * @var bool Whether to serialize empty containers as {} instead of []
+	 * in the json output of wbgetentities for lexemes
+	 */
+	'tmpSerializeEmptyListsAsObjects' => false,
+
+	/**
+	 * @note The entities set in this configuration are subject to data
+	 * modification and may be relabeled, removed, or merged with each other.
+	 *
+	 * @var string[]
+	 * @see https://phabricator.wikimedia.org/T219215
+	 */
+	'sandboxEntityIds' => [
+		'mainItem' => 'Q999999998',
+		'auxItem' => 'Q999999999'
+	],
+
+	/**
+	 * Tags for edits made via UpdateRepo jobs.
+	 *
+	 * @var string[]
+	 * @see https://phabricator.wikimedia.org/T286772
+	 */
+	'updateRepoTags' => [],
+
+	/**
+	 * Tags for edits made via WikibaseView frontend code.
+	 *
+	 * @var string[]
+	 * @see https://phabricator.wikimedia.org/T286773
+	 */
+	'viewUiTags' => [],
+
+	/**
+	 * Tags for edits made via the termbox.
+	 *
+	 * @var string[]
+	 * @see https://phabricator.wikimedia.org/T286775
+	 */
+	'termboxTags' => [],
+
+	/**
+	 * Tags for edits made via special pages.
+	 *
+	 * @var string[]
+	 * @see https://phabricator.wikimedia.org/T286774
+	 */
+	'specialPageTags' => [],
+
+	/**
+	 * @note This config options is primarily added for Wikidata transition use-case and can be
+	 * considered temporary. It could be removed in the future with no warning.
+	 *
+	 * @var bool Whether to normalize data values when saving edits
+	 * @see https://phabricator.wikimedia.org/T251480
+	 */
+	'tmpNormalizeDataValues' => false,
 ];

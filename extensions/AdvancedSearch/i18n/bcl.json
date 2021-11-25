@@ -61,5 +61,6 @@
 	"advancedsearch-namespaces-preset-discussion": "Pag-urulay",
 	"advancedsearch-namespaces-placeholder": "Magdagdag nin mga namespaces...",
 	"prefs-advancedsearch": "Mas advance na paghanap",
+	"advancedsearch-preference-help": "An Advanced Search nagdudugang nin form para sa Special:Search Page. Pigtutugutan ka kaini makagibo nin espesyal na paghanap, dawa dai ka nin aram manungod sa search syntaz. Pighihira man kaini an paagi kan pagpili sa mga namespaces.",
 	"advancedsearch-preference-disable": "Dai ipahiling an mga mas advance pang Search interface"
 }

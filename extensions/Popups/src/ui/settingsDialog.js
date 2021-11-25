@@ -3,50 +3,36 @@
  */
 
 import { renderSettingsDialog } from './templates/settingsDialog/settingsDialog';
+import { previewTypes } from '../preview/model';
 
 /**
  * Create the settings dialog shown to anonymous users.
  *
- * @param {boolean} navPopupsEnabled
- * @param {boolean} isReferencePreviewsInBeta
+ * @param {boolean} referencePreviewsAvaliable
  * @return {JQuery} settings dialog
  */
-export function createSettingsDialog( navPopupsEnabled, isReferencePreviewsInBeta ) {
+export function createSettingsDialog( referencePreviewsAvaliable ) {
 	const choices = [
 		{
-			id: 'simple',
-			name: mw.msg( 'popups-settings-option-simple' ),
-			description: mw.msg(
-				// TODO: Remove when not in Beta any more
-				isReferencePreviewsInBeta ?
-					'popups-settings-option-simple-description' :
-					'popups-settings-option-unified-description'
-			),
-			isChecked: true
+			id: previewTypes.TYPE_PAGE,
+			name: mw.msg( 'popups-settings-option-page' ),
+			description: mw.msg( 'popups-settings-option-page-description' )
 		},
 		{
-			id: 'advanced',
-			name: mw.msg( 'popups-settings-option-advanced' ),
-			description: mw.msg( 'popups-settings-option-advanced-description' )
-		},
-		{
-			id: 'off',
-			name: mw.msg( 'popups-settings-option-off' )
+			id: previewTypes.TYPE_REFERENCE,
+			name: mw.msg( 'popups-settings-option-reference' ),
+			description: mw.msg( 'popups-settings-option-reference-description' )
 		}
 	];
 
-	if ( !navPopupsEnabled ) {
-		// remove the advanced option
+	// TODO: Remove when not in Beta any more
+	if ( !referencePreviewsAvaliable ) {
+		// Anonymous users can't access reference previews as long as they are in beta
 		choices.splice( 1, 1 );
 	}
 
 	return renderSettingsDialog( {
-		heading: mw.msg(
-			// TODO: Remove when not in Beta any more
-			isReferencePreviewsInBeta ?
-				'popups-settings-title' :
-				'popups-settings-unified-title'
-		),
+		heading: mw.msg( 'popups-settings-title' ),
 		closeLabel: mw.msg( 'popups-settings-cancel' ),
 		saveLabel: mw.msg( 'popups-settings-save' ),
 		helpText: mw.msg( 'popups-settings-help' ),

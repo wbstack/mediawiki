@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\ParserOutput;
 
 use InvalidArgumentException;
@@ -8,8 +10,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Title;
 use Wikibase\Client\Hooks\OtherProjectsSidebarGeneratorFactory;
-use Wikibase\Client\Usage\EntityUsageFactory;
-use Wikibase\Client\Usage\ParserOutputUsageAccumulator;
+use Wikibase\Client\Usage\UsageAccumulatorFactory;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
@@ -40,9 +41,9 @@ class ClientParserOutputDataUpdater {
 	private $siteLinkLookup;
 
 	/**
-	 * @var EntityUsageFactory
+	 * @var UsageAccumulatorFactory
 	 */
-	private $entityUsageFactory;
+	private $usageAccumulatorFactory;
 
 	/**
 	 * @var string
@@ -59,7 +60,7 @@ class ClientParserOutputDataUpdater {
 	 *            Use the factory here to defer initialization of things like Site objects.
 	 * @param SiteLinkLookup $siteLinkLookup
 	 * @param EntityLookup $entityLookup
-	 * @param EntityUsageFactory $entityUsageFactory
+	 * @param UsageAccumulatorFactory $usageAccumulatorFactory
 	 * @param string $siteId The global site ID for the local wiki
 	 * @param LoggerInterface|null $logger
 	 *
@@ -69,35 +70,28 @@ class ClientParserOutputDataUpdater {
 		OtherProjectsSidebarGeneratorFactory $otherProjectsSidebarGeneratorFactory,
 		SiteLinkLookup $siteLinkLookup,
 		EntityLookup $entityLookup,
-		EntityUsageFactory $entityUsageFactory,
-		$siteId,
+		UsageAccumulatorFactory $usageAccumulatorFactory,
+		string $siteId,
 		LoggerInterface $logger = null
 	) {
-		if ( !is_string( $siteId ) ) {
-			throw new InvalidArgumentException( '$siteId must be a string.' );
-		}
-
 		$this->otherProjectsSidebarGeneratorFactory = $otherProjectsSidebarGeneratorFactory;
 		$this->entityLookup = $entityLookup;
 		$this->siteLinkLookup = $siteLinkLookup;
-		$this->entityUsageFactory = $entityUsageFactory;
+		$this->usageAccumulatorFactory = $usageAccumulatorFactory;
 		$this->siteId = $siteId;
 		$this->logger = $logger ?: new NullLogger();
 	}
 
 	/**
 	 * Add wikibase_item parser output property
-	 *
-	 * @param Title $title
-	 * @param ParserOutput $out
 	 */
-	public function updateItemIdProperty( Title $title, ParserOutput $out ) {
+	public function updateItemIdProperty( Title $title, ParserOutput $out ): void {
 		$itemId = $this->getItemIdForTitle( $title );
 
 		if ( $itemId ) {
 			$out->setProperty( 'wikibase_item', $itemId->getSerialization() );
 
-			$usageAccumulator = new ParserOutputUsageAccumulator( $out, $this->entityUsageFactory );
+			$usageAccumulator = $this->usageAccumulatorFactory->newFromParserOutput( $out );
 			$usageAccumulator->addSiteLinksUsage( $itemId );
 		} else {
 			$out->unsetProperty( 'wikibase_item' );
@@ -106,11 +100,8 @@ class ClientParserOutputDataUpdater {
 
 	/**
 	 * Add tracking category if the page is a redirect and is connected to an item
-	 *
-	 * @param Title $title
-	 * @param ParserOutput $out
 	 */
-	public function updateTrackingCategories( Title $title, ParserOutput $out ) {
+	public function updateTrackingCategories( Title $title, ParserOutput $out ): void {
 		$itemId = $this->getItemIdForTitle( $title );
 
 		if ( $itemId && $title->isRedirect() ) {
@@ -118,11 +109,11 @@ class ClientParserOutputDataUpdater {
 		}
 	}
 
-	public function updateOtherProjectsLinksData( Title $title, ParserOutput $out ) {
+	public function updateOtherProjectsLinksData( Title $title, ParserOutput $out ): void {
 		$itemId = $this->getItemIdForTitle( $title );
 
 		if ( $itemId ) {
-			$usageAccumulator = new ParserOutputUsageAccumulator( $out, $this->entityUsageFactory );
+			$usageAccumulator = $this->usageAccumulatorFactory->newFromParserOutput( $out );
 			$otherProjectsSidebarGenerator = $this->otherProjectsSidebarGeneratorFactory
 				->getOtherProjectsSidebarGenerator( $usageAccumulator );
 			$otherProjects = $otherProjectsSidebarGenerator->buildProjectLinkSidebar( $title );
@@ -132,7 +123,7 @@ class ClientParserOutputDataUpdater {
 		}
 	}
 
-	public function updateBadgesProperty( Title $title, ParserOutput $out ) {
+	public function updateBadgesProperty( Title $title, ParserOutput $out ): void {
 		$itemId = $this->getItemIdForTitle( $title );
 
 		// first reset all badges in case one got removed
@@ -147,7 +138,7 @@ class ClientParserOutputDataUpdater {
 		}
 	}
 
-	private function setBadgesProperty( ItemId $itemId, ParserOutput $out ) {
+	private function setBadgesProperty( ItemId $itemId, ParserOutput $out ): void {
 		/** @var Item $item */
 		$item = $this->entityLookup->getEntity( $itemId );
 		'@phan-var Item|null $item';
@@ -173,12 +164,7 @@ class ClientParserOutputDataUpdater {
 		}
 	}
 
-	/**
-	 * @param Title $title
-	 *
-	 * @return ItemId|null
-	 */
-	private function getItemIdForTitle( Title $title ) {
+	private function getItemIdForTitle( Title $title ): ?ItemId {
 		return $this->siteLinkLookup->getItemIdForLink(
 			$this->siteId,
 			$title->getPrefixedText()

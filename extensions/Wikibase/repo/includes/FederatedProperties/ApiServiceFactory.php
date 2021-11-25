@@ -3,15 +3,26 @@
 declare( strict_types = 1 );
 namespace Wikibase\Repo\FederatedProperties;
 
-use Exception;
+use MediaWiki\Http\HttpRequestFactory;
 use MediaWiki\Logger\LoggerFactory;
-use MediaWiki\MediaWikiServices;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\DataAccess\EntitySourceDefinitions;
+use Wikibase\DataModel\Entity\Property;
+use Wikibase\Lib\DataTypeDefinitions;
+use Wikibase\Repo\Api\EntitySearchHelper;
 
 /**
  * @license GPL-2.0-or-later
  */
 class ApiServiceFactory {
+
+	/** @var HttpRequestFactory */
+	private $httpRequestFactory;
+
+	/** @var array */
+	private $contentModelMappings;
+
+	/** @var DataTypeDefinitions */
+	private $dataTypeDefinitions;
 
 	/**
 	 * @var string
@@ -26,30 +37,30 @@ class ApiServiceFactory {
 	/**
 	 * @var ApiEntityLookup|null
 	 */
-	private static $apiEntityLookupInstance = null;
+	private $apiEntityLookupInstance = null;
 
 	/**
 	 * @var ApiEntityNamespaceInfoLookup|null
 	 */
-	private static $apiEntityNamespaceInfoLookup = null;
-
-	public static function resetClassStatics() {
-		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
-			throw new Exception( 'Cannot reset ApiServiceFactory class statics outside of tests.' );
-		}
-		self::$apiEntityLookupInstance = null;
-		self::$apiEntityNamespaceInfoLookup = null;
-	}
+	private $apiEntityNamespaceInfoLookup = null;
 
 	/**
-	 * ApiServiceFactory constructor.
-	 * @param string $federatedPropertiesSourceScriptUrl
-	 * @param string $serverName
+	 * @var EntitySourceDefinitions
 	 */
+	private $entitySourceDefinitions;
+
 	public function __construct(
+		HttpRequestFactory $httpRequestFactory,
+		array $contentModelMappings,
+		DataTypeDefinitions $dataTypeDefinitions,
+		EntitySourceDefinitions $entitySourceDefinitions,
 		string $federatedPropertiesSourceScriptUrl,
 		string $serverName
 	) {
+		$this->httpRequestFactory = $httpRequestFactory;
+		$this->contentModelMappings = $contentModelMappings;
+		$this->dataTypeDefinitions = $dataTypeDefinitions;
+		$this->entitySourceDefinitions = $entitySourceDefinitions;
 		$this->federatedPropertiesSourceScriptUrl = $federatedPropertiesSourceScriptUrl;
 		$this->serverName = $serverName;
 	}
@@ -60,17 +71,20 @@ class ApiServiceFactory {
 
 	private function newFederatedPropertiesApiClient(): GenericActionApiClient {
 		return new GenericActionApiClient(
-			MediaWikiServices::getInstance()->getHttpRequestFactory(),
+			$this->httpRequestFactory,
 			$this->getUrlForScriptFile( 'api.php' ),
 			LoggerFactory::getInstance( 'Wikibase.FederatedProperties' ),
 			$this->serverName
 		);
 	}
 
-	public function newApiEntitySearchHelper(): ApiEntitySearchHelper {
-		return new ApiEntitySearchHelper(
+	public function newApiEntitySearchHelper(): EntitySearchHelper {
+		$apiSource = $this->entitySourceDefinitions->getApiSourceForEntityType( Property::ENTITY_TYPE );
+
+		return $apiSource === null ? new NullEntitySearchHelper() : new ApiEntitySearchHelper(
 			$this->newFederatedPropertiesApiClient(),
-			WikibaseRepo::getDataTypeDefinitions()->getTypeIds()
+			$this->dataTypeDefinitions->getTypeIds(),
+			$apiSource
 		);
 	}
 
@@ -79,13 +93,13 @@ class ApiServiceFactory {
 	 * @return ApiEntityNamespaceInfoLookup
 	 */
 	private function getApiEntityNamespaceInfoLookup(): ApiEntityNamespaceInfoLookup {
-		if ( self::$apiEntityNamespaceInfoLookup === null ) {
-			self::$apiEntityNamespaceInfoLookup = new ApiEntityNamespaceInfoLookup(
+		if ( $this->apiEntityNamespaceInfoLookup === null ) {
+			$this->apiEntityNamespaceInfoLookup = new ApiEntityNamespaceInfoLookup(
 				$this->newFederatedPropertiesApiClient(),
-				WikibaseRepo::getContentModelMappings()
+				$this->contentModelMappings
 			);
 		}
-		return self::$apiEntityNamespaceInfoLookup;
+		return $this->apiEntityNamespaceInfoLookup;
 	}
 
 	public function newApiEntityTitleTextLookup(): ApiEntityTitleTextLookup {
@@ -118,10 +132,10 @@ class ApiServiceFactory {
 	 * @return ApiEntityLookup
 	 */
 	public function getApiEntityLookup(): ApiEntityLookup {
-		if ( self::$apiEntityLookupInstance === null ) {
-			self::$apiEntityLookupInstance = new ApiEntityLookup( $this->newFederatedPropertiesApiClient() );
+		if ( $this->apiEntityLookupInstance === null ) {
+			$this->apiEntityLookupInstance = new ApiEntityLookup( $this->newFederatedPropertiesApiClient() );
 		}
-		return self::$apiEntityLookupInstance;
+		return $this->apiEntityLookupInstance;
 	}
 
 	public function newApiEntityExistenceChecker(): ApiEntityExistenceChecker {

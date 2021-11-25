@@ -1,16 +1,17 @@
 <?php
 
+/** @phpcs-require-sorted-array */
 $languageNames = [
 
 	/** Not in CLDR34.
 	 * But Wikipedias in these languages exist and/or used by Wikidata for monolingual text
 	 */
 	'abe' => 'Westliches Abenaki',
-	'abs' => 'Ambonesisches Malaysisch',
 	# used by Wikidata, T155367
 	'abq' => 'Abasinisch',
 	# used by Wikidata, T155424
 	'abq-latn' => 'Abasinisch',
+	'abs' => 'Ambonesisches Malaysisch',
 	'ady-cyrl' => 'Adygeisch (kyrillisch Schrift)',
 	'aeb-arab' => 'Tunesisches Arabisch (arabische Schrift)',
 	'aeb-latn' => 'Tunesisches Arabisch (lateinische Schrift)',
@@ -21,6 +22,7 @@ $languageNames = [
 	'bat-smg' => 'Schemaitisch',
 	'bbc-latn' => 'Batak Toba (lateinische Schrift)',
 	'bcc' => 'Südliches Belutschi',
+	'bci' => 'Baule',
 	'bcl' => 'Zentralbikolano',
 	# used by Wikidata, T234330
 	'bdr' => 'Westküsten-Bajau',
@@ -29,32 +31,41 @@ $languageNames = [
 	'be-x-old' => 'Weißrussisch (Taraschkewiza)',
 	'bgp' => 'Östliches Belutschi',
 	'bh' => 'Bhojpuri',
+	# used by Wikidata, T263946
+	'bkh' => 'Bakoko',
 	'bnn' => 'Bunun',
+	# used by Wikidata, T263946
+	'bqz' => 'Bakaka',
 	'bxr' => 'Russisches Burjatisch',
+	# used by Wikidata, T278854
+	'cak' => 'Cakchiquel',
 	# used by Wikidata T266423
 	'cal' => 'Karolinisch',
 	'cbk-zam' => 'Chavacano',
 	'cdo' => 'Min Dong',
+	'cdo-hani' => 'Min Dong (Hanji)',
+	'cja' => 'Westliches Cham',
 	'cja-arab' => 'Westliches Cham (arabische Schrift)',
 	'cja-cham' => 'Westliches Cham (Cham-Schrift)',
 	'cja-latn' => 'Westliches Cham (lateinische Schrift)',
-	'cja' => 'Westliches Cham',
+	'cjm' => 'Östliches Cham',
 	'cjm-arab' => 'Östliches Cham (arabische Schrift)',
 	'cjm-cham' => 'Östliches Cham (Cham-Schrift)',
 	'cjm-latn' => 'Östliches Cham (lateinische Schrift)',
-	'cjm' => 'Östliches Cham',
+	'cjy' => 'Jin',
 	'cjy-hans' => 'Jin (vereinfacht)',
 	'cjy-hant' => 'Jin (traditionell)',
-	'cjy' => 'Jin',
 	# used by Wikidata, T240097
 	'ckt' => 'Tschuktschisch',
 	# used by Wikidata, T222020
 	'clc' => 'Tschilcotin',
+	# used by Wikidata, T278853
+	'cnh' => 'Hakha Chin',
 	'cnr' => 'Montenegrinisch',
 	'crb' => 'Insel-Karibisch',
+	'crh' => 'Krimtatarisch',
 	'crh-cyrl' => 'Krimtatarisch (kyrillische Schrift)',
 	'crh-latn' => 'Krimtatarisch (lateinische Schrift)',
-	'crh' => 'Krimtatarisch',
 	# used by Wikidata, T264532
 	'crl' => 'Ost-Cree',
 	# used by Wikidata, T240098
@@ -63,17 +74,20 @@ $languageNames = [
 	# 'dlc' => 'Dalecarlian', // German translation unassured
 	// https://d-nb.info/gnd/7543852-5
 	'dty' => 'Doteli',
-	'eml' => 'Emilianisch',
 	# used by Wikidata, T198674
 	'el-cy' => 'Zypriotisches Griechisch',
+	'eml' => 'Emilianisch',
 	# part of CldrNamesEn.php, missing in CLDR 38
 	'en-au' => 'Australisches Englisch',
 	'en-ca' => 'Kanadisches Englisch',
 	'en-gb' => 'Britisches Englisch',
 	'en-uk' => 'Britisches Englisch',
 	'en-us' => 'Amerikanisches Englisch',
+	# part of CldrNamesEn.php, missing in CLDR 39
+	'es-419' => 'Lateinamerikanisches Spanisch',
 	# part of CldrNamesEn.php, missing in CLDR 38
 	'es-es' => 'Europäisches Spanisch',
+	'es-formal' => 'Spanisch (formale Anrede)',
 	# part of CldrNamesEn.php, missing in CLDR 38
 	'es-mx' => 'Mexikanisches Spanisch',
 	'ett' => 'Etruskisch',
@@ -89,10 +103,19 @@ $languageNames = [
 	'gmy' => 'Mykenisches Griechisch',
 	'gom-deva' => 'Goa-Konkani (Devanagari)',
 	'gom-latn' => 'Goa-Konkani (lateinische Schrift)',
+	# used by Wikidata, T262922
+	'gsw-fr' => 'Elsässisch',
+	# Added to core, T286460. Source: http://d-nb.info/gnd/1205170707
+	'guw' => 'Gun',
+	# used by Wikidata, T263946
+	'gya' => 'Nordwest-Gbaya',
+	'hak-hans' => 'Hakka (vereinfacht)',
+	'hak-hant' => 'Hakka (traditionell)',
 	'haz' => 'Hazaragi',
 	'hbo' => 'Biblisches Hebräisch',
-	'hif-latn' => 'Fidschi-Hindi (lateinische Schrift)',
 	'hif' => 'Fidschi-Hindi',
+	'hif-latn' => 'Fidschi-Hindi (lateinische Schrift)',
+	'hu-formal' => 'Ungarisch (formale Anrede)',
 	'hyw' => 'Westarmenisch',
 	'ike-cans' => 'Inuktitut (kanadische Silbenschrift)',
 	'ike-latn' => 'Inuktitut (lateinische Schrift)',
@@ -126,10 +149,12 @@ $languageNames = [
 	'lbe' => 'Lakisch',
 	# used by Wikidata, T234761
 	'lcm' => 'Tungag',
-	'lki' => 'Leki',
 	# used by Wikidata, T254968
 	'lij-mc' => 'Monegassisch',
+	'lki' => 'Leki',
 	'lld' => 'Ladinisch',
+	# used by Wikidata, T263946
+	'lns' => 'Lamnso',
 	'luz' => 'Südliches Lori',
 	'map-bms' => 'Banyumasan',
 	# used by Wikidata, T235468
@@ -137,10 +162,15 @@ $languageNames = [
 	'mhr' => 'Ostmari',
 	'mid' => 'Mandäisch',
 	'mis' => 'nicht unterstützte Sprache',
+	'mix' => 'Mixtepec Mixtekisch',
 	'mo' => 'Moldawisch',
 	'moe' => 'Innu',
+	'ms-arab' => 'Malaiisch (Jawi-Schrift)',
 	'mui' => 'Musi',
 	'nah' => 'Nahuatl',
+	'nl-informal' => 'Niederländusch (informelle Anrede)',
+	# used by Wikidata, T263946
+	'nnz' => 'Nda\'nda\'',
 	'nod' => 'Lanna',
 	# used by Wikidata T265782
 	'non-runr' => 'Altnordisch (Runen-Schrift)',
@@ -152,6 +182,8 @@ $languageNames = [
 	'nsk' => 'Naskapi',
 	'nxm' => 'Numidisch',
 	# 'nys' => 'Nyunga', // German translation unassured
+	# Added to Core, T283053
+	'ojb' => 'Nordwestliches Ojibwe',
 	# used by Wikidata, T195816
 	'ojp' => 'Altjapanisch',
 	# used by Wikidata, T195816
@@ -159,7 +191,10 @@ $languageNames = [
 	# used by Wikidata, T195816
 	'ojp-hira' => 'Altjapanisch (Hiragana-Schrift)',
 	'olo' => 'Olonetzisch',
+	'osa-latn' => 'Osage (lateinische Schrift)',
 	'otk' => 'Alttürkisch',
+	# used by Wikidata T275682
+	'pap-aw' => 'Papiamentu (Aruba)',
 	# used by Wikidata T155425
 	'phn-latn' => 'Phönizisch (lateinische Schrift)',
 	# used by Wikidata T155425
@@ -201,21 +236,23 @@ $languageNames = [
 	'rmy' => 'Vlax-Romani',
 	'roa-rup' => 'Aromunisch',
 	'roa-tara' => 'Tarandíne',
+	'ruq' => 'Meglenorumänisch',
 	'ruq-cyrl' => 'Meglenorumänisch (kyrillische Schrift)',
 	'ruq-grek' => 'Meglenorumänisch (griechische Schrift)',
 	'ruq-latn' => 'Meglenorumänisch (lateinische Schrift)',
-	'ruq' => 'Meglenorumänisch',
 	'rwr' => 'Marwari (Indien)',
+	# used by Wikidata T271215
+	'ryu' => 'Okinawa',
 	# used by Wikidata T230881
 	'sa-sidd' => 'Sanskrit (Siddham-Schrift)',
 	# needs upstream fix
 	'sh' => 'Serbokroatisch',
 	'shi-latn' => 'Taschelhit (lateinische Schrift)',
 	'shi-tfng' => 'Taschelhit (Tifinagh-Schrift)',
+	'shy' => 'Shawiya',
 	'shy-arab' => 'Shawiya (arabische Schrift)',
 	'shy-latn' => 'Shawiya (lateinische Schrift)',
 	'shy-tfng' => 'Shawiya (Tifinagh-Schrift)',
-	'shy' => 'Shawiya',
 	# used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
 	'sia' => 'Akkalasamisch',
 	'simple' => 'einfaches Englisch',
@@ -234,6 +271,7 @@ $languageNames = [
 	'sr-el' => 'Serbisch (lateinische Schrift)',
 	# 'srq' => 'Sirionó', // German translation unassured
 	'ssf' => 'Thao',
+	'sty' => 'Sibirisches Tatarisch',
 	'tg-cyrl' => 'Tadschikisch (kyrillische Schrift)',
 	'tg-latn' => 'Tadschikisch (lateinische Schrift)',
 	# 'tlb' => 'Tobelo', // German translation unassured
@@ -248,12 +286,16 @@ $languageNames = [
 	'uun' => 'Pazeh',
 	'uz-cyrl' => 'Usbekisch (kyrillische Schrift)',
 	'uz-latn' => 'Usbekisch (lateinische Schrift)',
+	# used by Wikidata, T263946
+	'vut' => 'Wute',
 	# used by Wikidata, T239411
 	'wls' => 'Wallisianisch',
+	'wya' => 'Wyandot',
 	'xpu' => 'Punisch',
 	# https://d-nb.info/gnd/1075555310
 	'xsy' => 'Saisiyat',
 	'ydd' => 'Ostjiddisch',
+	'ykg' => 'Tundrajukagirisch',
 	'zh-classical' => 'klassisches Chinesisch',
 	'zh-cn' => 'Chinesisch (China)',
 	'zh-hk' => 'Chinesisch (Hongkong)',

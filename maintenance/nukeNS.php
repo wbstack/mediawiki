@@ -54,7 +54,7 @@ class NukeNS extends Maintenance {
 		$ns = $this->getOption( 'ns', NS_MEDIAWIKI );
 		$delete = $this->hasOption( 'delete' );
 		$all = $this->hasOption( 'all' );
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = $this->getDB( DB_PRIMARY );
 		$this->beginTransaction( $dbw, __METHOD__ );
 
 		$res = $dbw->select( 'page', 'page_title', [ 'page_namespace' => $ns ], __METHOD__ );
@@ -90,7 +90,6 @@ class NukeNS extends Maintenance {
 					$child = $this->runChild( NukePage::class, 'nukePage.php' );
 					'@phan-var NukePage $child';
 					$child->deleteRevisions( $revs );
-					$this->purgeRedundantText( true );
 					$n_deleted++;
 				}
 			} else {
@@ -100,6 +99,8 @@ class NukeNS extends Maintenance {
 		$this->commitTransaction( $dbw, __METHOD__ );
 
 		if ( $n_deleted > 0 ) {
+			$this->purgeRedundantText( true );
+
 			# update statistics - better to decrement existing count, or just count
 			# the page table?
 			$pages = $dbw->selectField( 'site_stats', 'ss_total_pages', [], __METHOD__ );

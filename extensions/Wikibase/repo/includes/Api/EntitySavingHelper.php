@@ -4,9 +4,9 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
 use ApiUsageException;
 use ArrayAccess;
+use IContextSource;
 use InvalidArgumentException;
 use LogicException;
 use MediaWiki\Permissions\PermissionManager;
@@ -91,8 +91,19 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	 */
 	private $entityStore = null;
 
+	/**
+	 * @var bool
+	 */
+	private $isApiModuleWriteMode = false;
+
+	/**
+	 * @var bool|string
+	 */
+	private $apiModuleNeedsToken = false;
+
 	public function __construct(
-		ApiBase $apiModule,
+		bool $isWriteMode,
+		$needsToken,
 		RevisionLookup $revisionLookup,
 		TitleFactory $titleFactory,
 		EntityIdParser $idParser,
@@ -104,7 +115,6 @@ class EntitySavingHelper extends EntityLoadingHelper {
 		PermissionManager $permissionManager
 	) {
 		parent::__construct(
-			$apiModule,
 			$revisionLookup,
 			$titleFactory,
 			$idParser,
@@ -113,6 +123,8 @@ class EntitySavingHelper extends EntityLoadingHelper {
 			$errorReporter
 		);
 
+		$this->isApiModuleWriteMode = $isWriteMode;
+		$this->apiModuleNeedsToken = $needsToken;
 		$this->summaryFormatter = $summaryFormatter;
 		$this->editEntityFactory = $editEntityFactory;
 		$this->permissionManager = $permissionManager;
@@ -156,22 +168,20 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	 *
 	 * @return EntityDocument
 	 */
-	public function loadEntity( ?EntityId $entityId = null, $assignFreshId = self::ASSIGN_FRESH_ID ): EntityDocument {
+	public function loadEntity( array $requestParams, ?EntityId $entityId = null, $assignFreshId = self::ASSIGN_FRESH_ID ): EntityDocument {
 		if ( !in_array( $assignFreshId, [ self::ASSIGN_FRESH_ID, self::NO_FRESH_ID ] ) ) {
 			throw new InvalidArgumentException(
 				'$assignFreshId must be either of the EntitySavingHelper::ASSIGN_FRESH_ID/NO_FRESH_ID constants.'
 			);
 		}
 
-		$params = $this->apiModule->extractRequestParams();
-
 		if ( !$entityId ) {
-			$entityId = $this->getEntityIdFromParams( $params );
+			$entityId = $this->getEntityIdFromParams( $requestParams );
 		}
 
 		// If a base revision is given, use if for consistency!
-		$baseRev = isset( $params['baserevid'] )
-			? (int)$params['baserevid']
+		$baseRev = isset( $requestParams['baserevid'] )
+			? (int)$requestParams['baserevid']
 			: 0;
 
 		if ( $entityId ) {
@@ -187,7 +197,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 			$entityRevision = null;
 		}
 
-		$new = $params['new'] ?? null;
+		$new = $requestParams['new'] ?? null;
 		if ( $entityRevision === null ) {
 			if ( !$this->isEntityCreationSupported() ) {
 				if ( !$entityId ) {
@@ -324,8 +334,14 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	 * @return Status the status of the save operation, as returned by EditEntityHandler::attemptSave()
 	 * @see  EditEntityHandler::attemptSave()
 	 */
-	public function attemptSaveEntity( EntityDocument $entity, $summary, int $flags = 0 ): Status {
-		if ( !$this->apiModule->isWriteMode() ) {
+	public function attemptSaveEntity(
+		EntityDocument $entity,
+		$summary,
+		array $requestParams,
+		IContextSource $context,
+		int $flags = 0
+	): Status {
+		if ( !$this->isApiModuleWriteMode ) {
 			// sanity/safety check
 			throw new LogicException(
 				'attemptSaveEntity() cannot be used by API modules that do not return true from isWriteMode()!'
@@ -344,29 +360,28 @@ class EntitySavingHelper extends EntityLoadingHelper {
 			$summary = $this->summaryFormatter->formatSummary( $summary );
 		}
 
-		$params = $this->apiModule->extractRequestParams();
-		$user = $this->apiModule->getContext()->getUser();
+		$user = $context->getUser();
 
-		if ( isset( $params['bot'] ) && $params['bot'] &&
+		if ( isset( $requestParams['bot'] ) && $requestParams['bot'] &&
 			$this->permissionManager->userHasRight( $user, 'bot' )
 		) {
 			$flags |= EDIT_FORCE_BOT;
 		}
 
 		if ( !$this->baseRevisionId ) {
-			$this->baseRevisionId = isset( $params['baserevid'] ) ? (int)$params['baserevid'] : 0;
+			$this->baseRevisionId = isset( $requestParams['baserevid'] ) ? (int)$requestParams['baserevid'] : 0;
 		}
 
-		$tags = $params['tags'] ?? [];
+		$tags = $requestParams['tags'] ?? [];
 
 		$editEntityHandler = $this->editEntityFactory->newEditEntity(
-			$user,
+			$context,
 			$entity->getId(),
 			$this->baseRevisionId,
 			true
 		);
 
-		$token = $this->evaluateTokenParam( $params );
+		$token = $this->evaluateTokenParam( $requestParams );
 
 		$status = $editEntityHandler->attemptSave(
 			$entity,
@@ -387,7 +402,7 @@ class EntitySavingHelper extends EntityLoadingHelper {
 	 * @return string|bool|null Token string, or false if not needed, or null if not set.
 	 */
 	private function evaluateTokenParam( array $params ) {
-		if ( !$this->apiModule->needsToken() ) {
+		if ( !$this->apiModuleNeedsToken ) {
 			// False disables the token check.
 			return false;
 		}

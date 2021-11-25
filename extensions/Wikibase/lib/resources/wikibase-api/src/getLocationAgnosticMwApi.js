@@ -8,7 +8,7 @@
 	 * @return {string}
 	 */
 	function getHost( url ) {
-	// Internet Explorer returns an incomplete host (without port) when the protocol is missing.
+		// Internet Explorer returns an incomplete host (without port) when the protocol is missing.
 		if ( /^\/\//.test( url ) ) {
 			url = location.protocol + url;
 		}
@@ -28,19 +28,20 @@
 	 * @author Adrian Lang < adrian.lang@wikimedia.de >
 	 *
 	 * @param {string} apiEndpoint
+	 * @param {Object} [options]
 	 * @return {mediaWiki.Api}
 	 */
-	wb.api.getLocationAgnosticMwApi = function ( apiEndpoint ) {
+	wb.api.getLocationAgnosticMwApi = function ( apiEndpoint, options ) {
 		if ( getHost( apiEndpoint ) !== getHost( location.href ) ) {
-		// Use mw.ForeignApi if the api we want to use is on a different domain.
-			return new mw.ForeignApi( apiEndpoint );
+			// Use mw.ForeignApi if the api we want to use is on a different domain.
+			return new mw.ForeignApi( apiEndpoint, options );
 		}
 
-		var mwApiOptions = {
+		var mwApiOptions = $.extend( {}, options, {
 			ajax: {
 				url: apiEndpoint
 			}
-		};
+		} );
 
 		return new mw.Api( mwApiOptions );
 	};

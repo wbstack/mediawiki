@@ -3,6 +3,7 @@
 declare( strict_types=1 );
 namespace Wikibase\Repo\Dumpers;
 
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\Lib\Serialization\CallbackFactory;
 use Wikibase\Lib\Serialization\SerializationModifier;
@@ -23,69 +24,38 @@ class JsonDataTypeInjector {
 	/** @var SerializationModifier */
 	private $modifier;
 
+	/** @var EntityIdParser */
+	private $entityIdParser;
+
 	public function __construct(
 		SerializationModifier $modifier,
 		CallbackFactory $callbackFactory,
-		PropertyDataTypeLookup $dataTypeLookup
+		PropertyDataTypeLookup $dataTypeLookup,
+		EntityIdParser $entityIdParser
 	) {
 		$this->callbackFactory = $callbackFactory;
 		$this->modifier = $modifier;
 		$this->dataTypeLookup = $dataTypeLookup;
+		$this->entityIdParser = $entityIdParser;
 	}
 
 	public function injectEntitySerializationWithDataTypes( array $serialization ) {
-		$modifyPaths = [
-			'claims/*/*/mainsnak',
-			'*/*/claims/*/*/mainsnak', // statements on subentities
-		];
-		$groupedSnakModifyPaths = [
-			'claims/*/*/qualifiers',
-			'claims/*/*/references/*/snaks',
-			'*/*/claims/*/*/qualifiers',
-			'*/*/claims/*/*/references/*/snaks',
-		];
-		foreach ( $modifyPaths as $modifyPath ) {
-			$serialization = $this->modifier->modifyUsingCallback(
-				$serialization,
-				$modifyPath,
-				$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup )
-			);
-		}
-
-		foreach ( $groupedSnakModifyPaths as $groupedSnakModifyPath ) {
-			$serialization = $this->getArrayWithDataTypesInGroupedSnakListAtPath(
-				$serialization,
-				$groupedSnakModifyPath
-			);
-		}
-		return $serialization;
-	}
-
-	/**
-	 * @param array $array
-	 * @param string $path
-	 *
-	 * @return array
-	 */
-	public function getArrayWithDataTypesInGroupedSnakListAtPath( array $array, $path ) {
-		return $this->modifier->modifyUsingCallback(
-			$array,
-			$path,
-			$this->callbackFactory->getCallbackToAddDataTypeToSnaksGroupedByProperty( $this->dataTypeLookup )
+		$callback = $this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup, $this->entityIdParser );
+		$groupedCallback = $this->callbackFactory->getCallbackToAddDataTypeToSnaksGroupedByProperty(
+			$this->dataTypeLookup,
+			$this->entityIdParser
 		);
-	}
 
-	/**
-	 * @param array $array
-	 * @param string $path
-	 *
-	 * @return array
-	 */
-	public function getArrayWithDataTypesInSnakAtPath( array $array, $path ) {
-		return $this->modifier->modifyUsingCallback(
-			$array,
-			$path,
-			$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup )
+		return $this->modifier->modifyUsingCallbacks(
+			$serialization,
+			[
+				'claims/*/*/mainsnak' => $callback,
+				'*/*/claims/*/*/mainsnak' => $callback, // statements on subentities
+				'claims/*/*/qualifiers' => $groupedCallback,
+				'claims/*/*/references/*/snaks' => $groupedCallback,
+				'*/*/claims/*/*/qualifiers' => $groupedCallback,
+				'*/*/claims/*/*/references/*/snaks' => $groupedCallback,
+			]
 		);
 	}
 }

@@ -72,15 +72,6 @@ class QueryStringRegexParser implements QueryParser {
 	private const EXPLICIT_BOOLEAN_OPERATOR = '/\G(?:(?<AND>AND|&&)|(?<OR>OR|\|\|)|(?<NOT>NOT))(?![^\pZ\pC"])/u';
 
 	/**
-	 * Keywords which do not count when measuring the length of the the query
-	 */
-	private const UNLIMITED_KEYWORDS = [
-		'incategory' => true, // T111694
-		'articletopic' => true, // T242560
-		'pageid' => true,
-	];
-
-	/**
 	 * @var \CirrusSearch\Parser\KeywordRegistry
 	 */
 	private $keywordRegistry;
@@ -314,7 +305,7 @@ class QueryStringRegexParser implements QueryParser {
 		$this->warnings = array_merge( $this->warnings, $this->keywordParser->getWarnings() );
 		// All parsed keywords have their offsets marked in $this->keywordOffsetsTracker
 		// We then reparse the query from the beginning finding holes between keyword offsets
-		uasort( $this->preTaggedNodes, function ( ParsedNode $a, ParsedNode $b ) {
+		uasort( $this->preTaggedNodes, static function ( ParsedNode $a, ParsedNode $b ) {
 			if ( $a->getStartOffset() < $b->getStartOffset() ) {
 				return -1;
 			} else {
@@ -829,7 +820,7 @@ class QueryStringRegexParser implements QueryParser {
 			if ( $node instanceof NegatedNode ) {
 				$realNode = $node->getChild();
 			}
-			if ( $realNode instanceof KeywordFeatureNode && $this->unlimitedKeywords( $realNode->getKey() ) ) {
+			if ( $realNode instanceof KeywordFeatureNode ) {
 				$maxLen += mb_strlen( substr( $this->query, $node->getStartOffset(), $node->getEndOffset() ) );
 				$exemptKeywords[] = $realNode->getKey();
 			}
@@ -845,14 +836,5 @@ class QueryStringRegexParser implements QueryParser {
 					$this->maxQueryLen );
 			}
 		}
-	}
-
-	/**
-	 * @param string $keyword
-	 * @return bool true if this keyword name should not be taken into account
-	 * when calculating the query length
-	 */
-	private function unlimitedKeywords( string $keyword ): bool {
-		return self::UNLIMITED_KEYWORDS[$keyword] ?? false;
 	}
 }

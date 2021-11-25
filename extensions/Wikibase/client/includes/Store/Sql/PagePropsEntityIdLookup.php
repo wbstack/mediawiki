@@ -1,12 +1,14 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Wikibase\Client\Store\Sql;
 
+use PageProps;
 use Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\Store\EntityIdLookup;
-use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * Lookup of EntityIds based on wikibase_item entries in the page_props table.
@@ -17,9 +19,9 @@ use Wikimedia\Rdbms\ILoadBalancer;
 class PagePropsEntityIdLookup implements EntityIdLookup {
 
 	/**
-	 * @var ILoadBalancer
+	 * @var PageProps
 	 */
-	private $loadBalancer;
+	private $pageProps;
 
 	/**
 	 * @var EntityIdParser
@@ -27,10 +29,10 @@ class PagePropsEntityIdLookup implements EntityIdLookup {
 	private $idParser;
 
 	public function __construct(
-		ILoadBalancer $loadBalancer,
+		PageProps $pageProps,
 		EntityIdParser $idParser
 	) {
-		$this->loadBalancer = $loadBalancer;
+		$this->pageProps = $pageProps;
 		$this->idParser = $idParser;
 	}
 
@@ -41,44 +43,18 @@ class PagePropsEntityIdLookup implements EntityIdLookup {
 	 *
 	 * @return EntityId[]
 	 */
-	public function getEntityIds( array $titles ) {
-		$db = $this->loadBalancer->getConnection( DB_REPLICA );
-
-		$pageIds = array_map(
-			function ( Title $title ) {
-				return $title->getArticleID();
-			},
-			$titles
-		);
-
-		$res = $db->select(
-			'page_props',
-			[ 'pp_page', 'pp_value' ],
-			[
-				'pp_page' => $pageIds,
-				'pp_propname' => 'wikibase_item',
-			],
-			__METHOD__
-		);
-
-		$entityIds = [];
-
-		foreach ( $res as $row ) {
-			$entityIds[$row->pp_page] = $this->idParser->parse( $row->pp_value );
-		}
-
-		$this->loadBalancer->reuseConnection( $db );
-		return $entityIds;
+	public function getEntityIds( array $titles ): array {
+		$pages = array_filter( $titles, function( Title $title ): bool {
+			return $title->canExist();
+		} );
+		return array_map( [ $this->idParser, 'parse' ],
+			$this->pageProps->getProperties( $pages, 'wikibase_item' ) );
 	}
 
 	/**
 	 * @see EntityIdLookup::getEntityIdForTitle
-	 *
-	 * @param Title $title
-	 *
-	 * @return EntityId|null
 	 */
-	public function getEntityIdForTitle( Title $title ) {
+	public function getEntityIdForTitle( Title $title ): ?EntityId {
 		$entityIds = $this->getEntityIds( [ $title ] );
 
 		return reset( $entityIds ) ?: null;

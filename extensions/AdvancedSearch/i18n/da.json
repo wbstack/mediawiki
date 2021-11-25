@@ -69,5 +69,5 @@
 	"advancedsearch-namespaces-placeholder": "Tilføj navnerum...",
 	"prefs-advancedsearch": "Avanceret søgning",
 	"advancedsearch-preference-help": "Avanceret Søgning er en ekstra formularboks på siden Speciel:Søgning. Dette giver mulighed for avancerede søgninger, selv hvis man ikke kender til søgesyntaks. Måden man vælger navnerum er også anderledes.",
-	"advancedsearch-preference-disable": "Vis ikke formularen for Avanceret Søgning"
+	"advancedsearch-preference-disable": "Vis ikke formularen for Avanceret Søgning når Speciel:Søg bruges"
 }

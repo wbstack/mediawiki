@@ -14,6 +14,7 @@
 			"Ladsgroup",
 			"Mahdy Saffar",
 			"Mjbmr",
+			"Mohammad ebz",
 			"Reza1615"
 		]
 	},
@@ -64,6 +65,9 @@
 	"minerva-page-actions-permalink": "پیوند پایدار",
 	"minerva-page-actions-backlinks": "پیوندها به این صفحه",
 	"minerva-page-actions-cite": "ارجاع به صفحه",
+	"minerva-page-actions-move": "انتقال",
+	"minerva-page-actions-delete": "حذف",
+	"minerva-page-actions-protect": "محافظت",
 	"minerva-page-actions-user-groups": "گروه‌های کاربری",
 	"minerva-page-actions-logs": "سیاهه‌ها",
 	"minerva-page-actions-wikibase": "مورد {{WBREPONAME}}",
@@ -77,7 +81,7 @@
 	"skinname-minerva": "مینروانوئه",
 	"minerva-skin-desc": "پوستۀ واکنش‌گرای موبایل",
 	"skin-minerva-issue-learn-more": "بیشتر بدانید",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton": "رده‌ها",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton-description": "نمایش رده‌های صفحات",
+	"skin-minerva-mobile-option-MinervaShowCategories": "رده‌ها",
+	"skin-minerva-mobile-option-MinervaShowCategories-description": "نمایش رده‌های صفحات",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "مشکلات بهبود یافته در صفحه"
 }

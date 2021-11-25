@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo\EditEntity;
 
+use IContextSource;
 use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
-use User;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Diff\EntityDiffer;
 use Wikibase\DataModel\Services\Diff\EntityPatcher;
@@ -86,7 +86,7 @@ class MediawikiEditEntityFactory {
 	}
 
 	/**
-	 * @param User $user the user performing the edit
+	 * @param IContextSource $context The request context for the edit.
 	 * @param EntityId|null $entityId the id of the entity to edit
 	 * @param bool|int|null $baseRevId the base revision ID for conflict checking.
 	 *        Use 0 to indicate that the current revision should be used as the base revision,
@@ -99,7 +99,7 @@ class MediawikiEditEntityFactory {
 	 * @return EditEntity
 	 */
 	public function newEditEntity(
-		User $user,
+		IContextSource $context,
 		EntityId $entityId = null,
 		$baseRevId = false,
 		$allowMasterConnection = true
@@ -117,7 +117,7 @@ class MediawikiEditEntityFactory {
 				$this->entityDiffer,
 				$this->entityPatcher,
 				$entityId,
-				$user,
+				$context,
 				new StatsdTimeRecordingEditFilterHookRunner(
 					$this->editFilterHookRunner,
 					$this->stats,

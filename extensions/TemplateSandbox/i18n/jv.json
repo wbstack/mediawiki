@@ -31,8 +31,5 @@
 	"templatesandbox-editform-need-title": "Saperlu mratuduh kaca liya mawa cithakan iki, sesirah kaca kudu ana.",
 	"templatesandbox-editform-invalid-template": "Jeneng cithakan kang panjenengan lebokaké ora trep.",
 	"templatesandbox-editform-invalid-title": "Sesirah sing kokwènèh kanggo mratuduh ora sah.",
-	"templatesandbox-editform-title-not-exists": "Sesirah sing kokwènèh kanggo mratuduh ora ana.",
-	"templatesandbox-apihelp-prefix": "Ater-ater bak wedhi cithakan, kaya déné [[Special:TemplateSandbox]].",
-	"templatesandbox-apihelp-contentmodel": "Modhèl isi <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Format isi <var>$1templatesandboxtext</var>."
+	"templatesandbox-editform-title-not-exists": "Sesirah sing kokwènèh kanggo mratuduh ora ana."
 }

@@ -6,7 +6,8 @@ use Language;
 use Wikibase\Client\DataAccess\StatementTransclusionInteractor;
 use Wikibase\Client\Usage\UsageAccumulator;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Entity\NumericPropertyId;
+use Wikibase\Lib\ContentLanguages;
 
 /**
  * Actual implementations of the functions to access Wikibase through the Scribunto extension
@@ -47,17 +48,15 @@ class WikibaseLuaEntityBindings {
 	private $siteId;
 
 	/**
-	 * @param StatementTransclusionInteractor $plainTextTransclusionInteractor
-	 * @param StatementTransclusionInteractor $richWikitextTransclusionInteractor
-	 * @param EntityIdParser $entityIdParser
-	 * @param Language $language
-	 * @param UsageAccumulator $usageAccumulator
-	 * @param string $siteId
+	 * @var ContentLanguages
 	 */
+	private $termsLanguages;
+
 	public function __construct(
 		StatementTransclusionInteractor $plainTextTransclusionInteractor,
 		StatementTransclusionInteractor $richWikitextTransclusionInteractor,
 		EntityIdParser $entityIdParser,
+		ContentLanguages $termsLanguages,
 		Language $language,
 		UsageAccumulator $usageAccumulator,
 		$siteId
@@ -68,10 +67,11 @@ class WikibaseLuaEntityBindings {
 		$this->language = $language;
 		$this->usageAccumulator = $usageAccumulator;
 		$this->siteId = $siteId;
+		$this->termsLanguages = $termsLanguages;
 	}
 
 	/**
-	 * Format the main Snaks belonging to a Statement (which is identified by a PropertyId
+	 * Format the main Snaks belonging to a Statement (which is identified by a NumericPropertyId
 	 * or the label of a Property) as wikitext escaped plain text.
 	 *
 	 * @param string $entityId
@@ -91,7 +91,7 @@ class WikibaseLuaEntityBindings {
 	}
 
 	/**
-	 * Format the main Snaks belonging to a Statement (which is identified by a PropertyId
+	 * Format the main Snaks belonging to a Statement (which is identified by a NumericPropertyId
 	 * or the label of a Property) as rich wikitext.
 	 *
 	 * @param string $entityId
@@ -118,7 +118,7 @@ class WikibaseLuaEntityBindings {
 	 */
 	public function addStatementUsage( $entityId, $propertyId ) {
 		$entityId = $this->entityIdParser->parse( $entityId );
-		$propertyId = new PropertyId( $propertyId );
+		$propertyId = new NumericPropertyId( $propertyId );
 
 		$this->usageAccumulator->addStatementUsage( $entityId, $propertyId );
 	}
@@ -127,10 +127,13 @@ class WikibaseLuaEntityBindings {
 	 * Add a label usage (called once specific labels are accessed).
 	 *
 	 * @param string $entityId The Entity from which the labels were accessed.
-	 * @param string $langCode Language code the labels accessed.
+	 * @param string|null $langCode Language code the labels accessed.
 	 */
 	public function addLabelUsage( $entityId, $langCode ) {
 		$entityId = $this->entityIdParser->parse( $entityId );
+		if ( !$this->termsLanguages->hasLanguage( $langCode ) ) {
+			$langCode = null;
+		}
 		$this->usageAccumulator->addLabelUsage( $entityId, $langCode );
 	}
 
@@ -138,10 +141,13 @@ class WikibaseLuaEntityBindings {
 	 * Add a description usage (called once specific descriptions are accessed).
 	 *
 	 * @param string $entityId The Entity from which the descriptions were accessed.
-	 * @param string $langCode Language code the descriptions accessed.
+	 * @param string|null $langCode Language code the descriptions accessed.
 	 */
 	public function addDescriptionUsage( $entityId, $langCode ) {
 		$entityId = $this->entityIdParser->parse( $entityId );
+		if ( !$this->termsLanguages->hasLanguage( $langCode ) ) {
+			$langCode = null;
+		}
 		$this->usageAccumulator->addDescriptionUsage( $entityId, $langCode );
 	}
 

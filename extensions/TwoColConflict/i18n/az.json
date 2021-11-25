@@ -1,12 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"NMW03",
 			"Toghrul Rahimli",
 			"Vesely35"
 		]
 	},
-	"twocolconflict-beta-feature-message": "İki sütunlu dəyişiklik toqquşması",
-	"twocolconflict-beta-feature-description": "Dəyişiklik toqquşmasını daha müasir və ikili sütun formasında göstər.",
+	"twocolconflict-beta-feature-message": "Paraqraf əsaslı redaktə toqquşması",
+	"twocolconflict-beta-feature-description": "Daha inkişaf etmiş bir paraqraf əsaslı görünüşdən istifadə edərək redaktə toqquşmasını göstər.",
 	"twocolconflict-split-header-overview": "Redaktə edərkən başqa bir istifadəçi eyni səhifəni redaktə etdi və sizdən əvvəl dərc etdi.  Xahiş edirik hər iki versiyanı nəzərdən keçirin və ya onları birləşdirin.  Yalnız \"{{int: yayınlanandeyişikliklər}}\" düyməsini basdıqda seçilmiş qutulardakı mətn yadda qalacaq.",
 	"twocolconflict-split-tour-dialog-message": "Təəssüf ki, redaktə edərkən başqa bir istifadəçi də eyni səhifəni redaktə etdi və sizdən əvvəl dərc etdi.\nNarahat olmayın, düzəlişləriniz itirilmədi! Xahiş edirik, hər iki versiyanı nəzərdən keçirin və onları birləşdirin.  Lazım gələrsə, seçilmiş mətni düzəldə bilərsiniz.  Yalnız \"{{int: yayınlanandeyişikliklər}}\" düyməsini basdıqda seçilmiş qutulardakı mətn yadda qalacaq."
 }

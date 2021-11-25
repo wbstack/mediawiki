@@ -26,8 +26,19 @@ if ( process.env.WIKIBASE_REPO ) {
  * in dev and on server mode it is still webpack's job to make them available
  */
 function externals() {
-	return DEV_MODE || TARGET_NODE ? [] : [
-		'vue',
+	if ( DEV_MODE || TARGET_NODE ) {
+		return [];
+	}
+
+	// get external packages from @wmde/lib-version-check config
+	const package = require( './package.json' );
+	const resourceLoaderModules = Object.keys( package.config.remoteVersion );
+	const resourceLoaderPackageFiles = [
+		'./config.json',
+	];
+	return [
+		...resourceLoaderModules,
+		...resourceLoaderPackageFiles,
 	];
 }
 

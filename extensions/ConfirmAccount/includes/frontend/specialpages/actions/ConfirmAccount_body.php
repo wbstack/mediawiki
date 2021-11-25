@@ -606,7 +606,7 @@ class ConfirmAccountsPage extends SpecialPage {
 	 * @param bool $wasPosted
 	 */
 	protected function loadAccountRequest( $id, $wasPosted ) {
-		$from = $wasPosted ? 'dbmaster' : 'dbslave';
+		$from = $wasPosted ? 'dbmaster' : 'dbreplica';
 		$this->accountReq = UserAccountRequest::newFromId( $id, $from );
 		# Check if parameters are to be overridden
 		if ( $this->accountReq ) {

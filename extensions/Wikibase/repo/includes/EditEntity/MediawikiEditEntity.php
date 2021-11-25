@@ -2,6 +2,7 @@
 
 namespace Wikibase\Repo\EditEntity;
 
+use IContextSource;
 use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
 use MWException;
@@ -98,10 +99,13 @@ class MediawikiEditEntity implements EditEntity {
 	 */
 	private $status = null;
 
+	/** @var IContextSource */
+	private $context;
+
 	/**
-	 * @var User|null
+	 * @var User
 	 */
-	private $user = null;
+	private $user;
 
 	/**
 	 * @var Title|null
@@ -137,7 +141,7 @@ class MediawikiEditEntity implements EditEntity {
 	 * @param EntityPatcher $entityPatcher
 	 * @param EntityId|null $entityId the ID of the entity being edited.
 	 *        May be null when creating a new entity.
-	 * @param User $user the user performing the edit
+	 * @param IContextSource $context the request context for the edit
 	 * @param EditFilterHookRunner $editFilterHookRunner
 	 * @param int $maxSerializedEntitySize the maximal allowed entity size in Kilobytes
 	 * @param int $baseRevId the base revision ID for conflict checking.
@@ -156,7 +160,7 @@ class MediawikiEditEntity implements EditEntity {
 		EntityDiffer $entityDiffer,
 		EntityPatcher $entityPatcher,
 		?EntityId $entityId,
-		User $user,
+		IContextSource $context,
 		EditFilterHookRunner $editFilterHookRunner,
 		$maxSerializedEntitySize,
 		$baseRevId = 0,
@@ -172,7 +176,8 @@ class MediawikiEditEntity implements EditEntity {
 			$baseRevId = 0;
 		}
 
-		$this->user = $user;
+		$this->context = $context;
+		$this->user = $context->getUser();
 		$this->baseRevId = $baseRevId;
 
 		$this->errorType = 0;
@@ -356,7 +361,7 @@ class MediawikiEditEntity implements EditEntity {
 	 * Get the status object. Only defined after attemptSave() was called.
 	 *
 	 * After a successful save, the Status object's value field will contain an array,
-	 * just like the status returned by WikiPage::doEditContent(). Well known fields
+	 * just like the status returned by WikiPage::doUserEditContent(). Well known fields
 	 * in the status value are:
 	 *
 	 *  - new: bool whether the edit created a new page
@@ -535,15 +540,9 @@ class MediawikiEditEntity implements EditEntity {
 	 */
 	public function isTokenOK( $token ) {
 		$tokenOk = $this->user->matchEditToken( $token );
-		$tokenOkExceptSuffix = $this->user->matchEditTokenNoSuffix( $token );
 
 		if ( !$tokenOk ) {
-			if ( $tokenOkExceptSuffix ) {
-				$this->status->fatal( 'token_suffix_mismatch' );
-			} else {
-				$this->status->fatal( 'session_fail_preview' );
-			}
-
+			$this->status->fatal( 'session_fail_preview' );
 			$this->errorType |= EditEntity::TOKEN_ERROR;
 			return false;
 		}
@@ -619,7 +618,7 @@ class MediawikiEditEntity implements EditEntity {
 	 *
 	 * @param EntityDocument $newEntity
 	 * @param string $summary The edit summary.
-	 * @param int $flags The EDIT_XXX flags as used by WikiPage::doEditContent().
+	 * @param int $flags The EDIT_XXX flags as used by WikiPage::doUserEditContent().
 	 *        Additionally, the EntityContent::EDIT_XXX constants can be used.
 	 * @param string|bool $token Edit token to check, or false to disable the token check.
 	 *                                Null will fail the token text, as will the empty string.
@@ -634,10 +633,10 @@ class MediawikiEditEntity implements EditEntity {
 	 * @throws MWException
 	 * @throws ReadOnlyError
 	 *
-	 * @see    WikiPage::doEditContent
+	 * @see    WikiPage::doUserEditContent
 	 * @see    EntityStore::saveEntity
 	 */
-	public function attemptSave( EntityDocument $newEntity, $summary, $flags, $token, $watch = null, array $tags = [] ) {
+	public function attemptSave( EntityDocument $newEntity, string $summary, $flags, $token, $watch = null, array $tags = [] ) {
 		$this->checkReadOnly( $newEntity );
 		$this->checkEntityId( $newEntity->getId() );
 
@@ -715,7 +714,7 @@ class MediawikiEditEntity implements EditEntity {
 		}
 
 		try {
-			$hookStatus = $this->editFilterHookRunner->run( $newEntity, $this->user, $summary );
+			$hookStatus = $this->editFilterHookRunner->run( $newEntity, $this->context, $summary );
 		} catch ( EntityContentTooBigException $ex ) {
 			$this->status->setResult( false, [ 'errorFlags' => $this->errorType ] );
 			$this->status->error( wfMessage( 'wikibase-error-entity-too-big' )->sizeParams( $this->maxSerializedEntitySize * 1024 ) );

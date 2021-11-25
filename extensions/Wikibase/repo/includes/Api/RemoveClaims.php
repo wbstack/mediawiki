@@ -13,11 +13,13 @@ use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\DataModel\Statement\StatementList;
 use Wikibase\DataModel\Statement\StatementListProvider;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\ChangeOp\StatementChangeOpFactory;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\Repo\SnakFactory;
 
 /**
  * API module for removing claims.
@@ -60,6 +62,11 @@ class RemoveClaims extends ApiBase {
 	 */
 	private $entitySavingHelper;
 
+	/**
+	 * @var string[]
+	 */
+	private $sandboxEntityIds;
+
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
@@ -69,7 +76,8 @@ class RemoveClaims extends ApiBase {
 		StatementGuidParser $guidParser,
 		callable $resultBuilderInstantiator,
 		callable $entitySavingHelperInstantiator,
-		bool $federatedPropertiesEnabled
+		bool $federatedPropertiesEnabled,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
@@ -81,21 +89,22 @@ class RemoveClaims extends ApiBase {
 		$this->resultBuilder = $resultBuilderInstantiator( $this );
 		$this->entitySavingHelper = $entitySavingHelperInstantiator( $this );
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
 		EntityIdParser $entityIdParser,
+		SettingsArray $settings,
+		SnakFactory $snakFactory,
 		StatementGuidParser $statementGuidParser,
 		StatementGuidValidator $statementGuidValidator
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-		$changeOpFactoryProvider = $wikibaseRepo->getChangeOpFactoryProvider();
-
 		$modificationHelper = new StatementModificationHelper(
-			$wikibaseRepo->getSnakFactory(),
+			$snakFactory,
 			$entityIdParser,
 			$statementGuidValidator,
 			$apiHelperFactory->getErrorReporter( $mainModule )
@@ -114,7 +123,8 @@ class RemoveClaims extends ApiBase {
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getEntitySavingHelper( $module );
 			},
-			$wikibaseRepo->inFederatedPropertyMode()
+			$settings->getSetting( 'federatedPropertiesEnabled' ),
+			$settings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -127,7 +137,7 @@ class RemoveClaims extends ApiBase {
 
 		$this->validateAlteringEntityById( $entityId );
 
-		$entity = $this->entitySavingHelper->loadEntity( $entityId );
+		$entity = $this->entitySavingHelper->loadEntity( $params, $entityId );
 
 		if ( $entity instanceof StatementListProvider ) {
 			$this->assertStatementListContainsGuids( $entity->getStatements(), $params['claim'] );
@@ -144,7 +154,7 @@ class RemoveClaims extends ApiBase {
 			$this->errorReporter->dieException( $e, 'failed-save' );
 		}
 
-		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary );
+		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary, $params, $this->getContext() );
 		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'pageinfo' );
 		$this->resultBuilder->markSuccess();
 		$this->resultBuilder->setList( null, 'claims', $params['claim'], 'claim' );
@@ -269,10 +279,12 @@ class RemoveClaims extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$guid = $this->sandboxEntityIds[ 'mainItem' ] . '$D8404CDA-25E4-4334-AF13-A3290BCD9C0N';
+
 		return [
-			'action=wbremoveclaims&claim=Q42$D8404CDA-25E4-4334-AF13-A3290BCD9C0N&token=foobar'
+			'action=wbremoveclaims&claim=' . $guid . '&token=foobar'
 				. '&baserevid=7201010'
-				=> 'apihelp-wbremoveclaims-example-1',
+				=> [ 'apihelp-wbremoveclaims-example-1', $guid ]
 		];
 	}
 

@@ -10,6 +10,7 @@
 			"Laundry Machine",
 			"Liuxinyu970226",
 			"NHC",
+			"Wmr",
 			"Xiplus",
 			"予弦",
 			"神樂坂秀吉"
@@ -79,10 +80,10 @@
 	"advancedsearch-namespaces-remember": "記住選項用於往後的搜尋",
 	"advancedsearch-namespaces-preset-all": "全部",
 	"advancedsearch-namespaces-preset-default": "預設",
-	"advancedsearch-namespaces-preset-general-help": "一般說明",
+	"advancedsearch-namespaces-preset-general-help": "綜合幫助",
 	"advancedsearch-namespaces-preset-discussion": "討論",
 	"advancedsearch-namespaces-placeholder": "加入命名空間…",
 	"prefs-advancedsearch": "進階搜尋",
 	"advancedsearch-preference-help": "進階搜尋可添加表單至 Special:Search page。這能讓您即使不瞭解搜尋語法，也能執行特定搜尋。這也會變更命名空間選擇的方式。",
-	"advancedsearch-preference-disable": "不要顯示進階搜尋介面"
+	"advancedsearch-preference-disable": "當使用 Special:Search 時不要顯示進階搜尋介面"
 }

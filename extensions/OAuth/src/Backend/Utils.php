@@ -35,7 +35,7 @@ class Utils {
 	}
 
 	/**
-	 * @param int $index DB_MASTER/DB_REPLICA
+	 * @param int $index DB_PRIMARY/DB_REPLICA
 	 * @return DBConnRef
 	 */
 	public static function getCentralDB( $index ) {
@@ -43,9 +43,9 @@ class Utils {
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
-		// T244415: Use the master if there were changes
-		if ( $index === DB_REPLICA && $lbFactory->hasOrMadeRecentMasterChanges() ) {
-			$index = DB_MASTER;
+		// T244415: Use the primary database if there were changes
+		if ( $index === DB_REPLICA && $lbFactory->hasOrMadeRecentPrimaryChanges() ) {
+			$index = DB_PRIMARY;
 		}
 
 		$db = $lbFactory->getMainLB( $wgMWOAuthCentralWiki )->getLazyConnectionRef(
@@ -155,7 +155,7 @@ class Utils {
 			new \AutoCommitUpdate(
 				$dbw,
 				__METHOD__,
-				function ( IDatabase $dbw ) use ( $cutoff, $fname ) {
+				static function ( IDatabase $dbw ) use ( $cutoff, $fname ) {
 					$dbw->update(
 						'oauth_registered_consumer',
 						[
@@ -186,7 +186,8 @@ class Utils {
 		} else {
 			$host = \WikiMap::getWikiName( $wikiId );
 			if ( strpos( $host, '.' ) ) {
-				return $host; // e.g. "en.wikipedia.org"
+				// e.g. "en.wikipedia.org"
+				return $host;
 			} else {
 				return $wikiId;
 			}
@@ -227,7 +228,7 @@ class Utils {
 	public static function newMWOAuthDataStore() {
 		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		$dbr = self::getCentralDB( DB_REPLICA );
-		$dbw = $lb->getServerCount() > 1 ? self::getCentralDB( DB_MASTER ) : null;
+		$dbw = $lb->getServerCount() > 1 ? self::getCentralDB( DB_PRIMARY ) : null;
 		return new MWOAuthDataStore( $dbr, $dbw, self::getSessionCache() );
 	}
 
@@ -242,8 +243,11 @@ class Utils {
 	public static function getCentralUserNameFromId( $userId, $audience = false ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
 
-		if ( $wgMWOAuthSharedUserIDs ) { // global ID required via hook
-			$lookup = \CentralIdLookup::factory( $wgMWOAuthSharedUserSource );
+		// global ID required via hook
+		if ( $wgMWOAuthSharedUserIDs ) {
+			$lookup = MediaWikiServices::getInstance()
+				->getCentralIdLookupFactory()
+				->getLookup( $wgMWOAuthSharedUserSource );
 			$name = $lookup->nameFromCentralId(
 				$userId,
 				$audience === 'raw'
@@ -279,17 +283,19 @@ class Utils {
 	public static function getLocalUserFromCentralId( $userId ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
 
-		if ( $wgMWOAuthSharedUserIDs ) { // global ID required via hook
-			$lookup = \CentralIdLookup::factory( $wgMWOAuthSharedUserSource );
+		// global ID required via hook
+		if ( $wgMWOAuthSharedUserIDs ) {
+			$lookup = MediaWikiServices::getInstance()
+				->getCentralIdLookupFactory()
+				->getLookup( $wgMWOAuthSharedUserSource );
 			$user = $lookup->localUserFromCentralId( $userId );
 			if ( $user === null || !$lookup->isAttached( $user ) ) {
-				$user = false;
+				return false;
 			}
-		} else {
-			$user = \User::newFromId( $userId );
+			return User::newFromIdentity( $user );
 		}
 
-		return $user;
+		return User::newFromId( $userId );
 	}
 
 	/**
@@ -302,8 +308,9 @@ class Utils {
 	public static function getCentralIdFromLocalUser( \User $user ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
 
-		if ( $wgMWOAuthSharedUserIDs ) { // global ID required via hook
-			// T227688 do not rely on array autocreation for non-stdClass
+		// global ID required via hook
+		if ( $wgMWOAuthSharedUserIDs ) {
+			// T227688 do not rely on array auto-creation for non-stdClass
 			if ( !isset( $user->oAuthUserData ) ) {
 				$user->oAuthUserData = [];
 			}
@@ -312,7 +319,9 @@ class Utils {
 				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
 				$id = $user->oAuthUserData['centralId'];
 			} else {
-				$lookup = \CentralIdLookup::factory( $wgMWOAuthSharedUserSource );
+				$lookup = MediaWikiServices::getInstance()
+					->getCentralIdLookupFactory()
+					->getLookup( $wgMWOAuthSharedUserSource );
 				if ( !$lookup->isAttached( $user ) ) {
 					$id = false;
 				} else {
@@ -340,8 +349,11 @@ class Utils {
 	public static function getCentralIdFromUserName( $username ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
 
-		if ( $wgMWOAuthSharedUserIDs ) { // global ID required via hook
-			$lookup = \CentralIdLookup::factory( $wgMWOAuthSharedUserSource );
+		// global ID required via hook
+		if ( $wgMWOAuthSharedUserIDs ) {
+			$lookup = MediaWikiServices::getInstance()
+				->getCentralIdLookupFactory()
+				->getLookup( $wgMWOAuthSharedUserSource );
 			$id = $lookup->centralIdFromName( $username );
 			if ( $id === 0 ) {
 				$id = false;

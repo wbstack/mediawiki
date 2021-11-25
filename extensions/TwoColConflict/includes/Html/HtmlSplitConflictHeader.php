@@ -8,6 +8,7 @@ use Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use Message;
 use MessageLocalizer;
@@ -16,7 +17,6 @@ use OOUI\MessageWidget;
 use SpecialPage;
 use Title;
 use TwoColConflict\SplitConflictUtils;
-use User;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 use WikiPage;
 
@@ -37,9 +37,9 @@ class HtmlSplitConflictHeader {
 	private $revision;
 
 	/**
-	 * @var User
+	 * @var Authority
 	 */
-	private $user;
+	private $authority;
 
 	/**
 	 * @var Language
@@ -68,7 +68,7 @@ class HtmlSplitConflictHeader {
 
 	/**
 	 * @param Title $title
-	 * @param User $user
+	 * @param Authority $authority
 	 * @param string $newEditSummary
 	 * @param Language $language
 	 * @param MessageLocalizer $messageLocalizer
@@ -79,7 +79,7 @@ class HtmlSplitConflictHeader {
 	 */
 	public function __construct(
 		Title $title,
-		User $user,
+		Authority $authority,
 		string $newEditSummary,
 		Language $language,
 		MessageLocalizer $messageLocalizer,
@@ -88,7 +88,7 @@ class HtmlSplitConflictHeader {
 	) {
 		$this->title = $title;
 		$this->revision = $revision ?? $this->getLatestRevision();
-		$this->user = $user;
+		$this->authority = $authority;
 		$this->language = $language;
 		$this->messageLocalizer = $messageLocalizer;
 		$this->now = new ConvertibleTimestamp( $now );
@@ -100,7 +100,7 @@ class HtmlSplitConflictHeader {
 	/**
 	 * @return RevisionRecord|null
 	 */
-	private function getLatestRevision() : ?RevisionRecord {
+	private function getLatestRevision(): ?RevisionRecord {
 		$wikiPage = WikiPage::factory( $this->title );
 		/** @see https://phabricator.wikimedia.org/T203085 */
 		$wikiPage->loadPageData( WikiPage::READ_LATEST );
@@ -112,7 +112,7 @@ class HtmlSplitConflictHeader {
 	 *
 	 * @return string HTML
 	 */
-	public function getHtml( bool $isUsedAsBetaFeature = false ) : string {
+	public function getHtml( bool $isUsedAsBetaFeature = false ): string {
 		$hintMsg = $isUsedAsBetaFeature
 			? 'twocolconflict-split-header-hint-beta'
 			: 'twocolconflict-split-header-hint';
@@ -134,7 +134,7 @@ class HtmlSplitConflictHeader {
 		return $out;
 	}
 
-	private function buildCurrentVersionHeader() : string {
+	private function buildCurrentVersionHeader(): string {
 		$dateTime = $this->messageLocalizer->msg( 'just-now' )->text();
 		$userTools = '';
 		$summary = '';
@@ -144,7 +144,7 @@ class HtmlSplitConflictHeader {
 			// FIXME: This blocks us from having pure unit tests for this class
 			$userTools = Linker::revUserTools( $this->revision );
 
-			$comment = $this->revision->getComment( RevisionRecord::FOR_THIS_USER, $this->user );
+			$comment = $this->revision->getComment( RevisionRecord::FOR_THIS_USER, $this->authority );
 			if ( $comment ) {
 				$summary = $comment->text;
 			}
@@ -158,7 +158,7 @@ class HtmlSplitConflictHeader {
 		);
 	}
 
-	private function buildYourVersionHeader() : string {
+	private function buildYourVersionHeader(): string {
 		return $this->buildVersionHeader(
 			$this->messageLocalizer->msg( 'twocolconflict-split-your-version-header' ),
 			$this->messageLocalizer->msg( 'twocolconflict-split-not-saved-at' ),
@@ -183,7 +183,7 @@ class HtmlSplitConflictHeader {
 		string $summary,
 		string $class,
 		?bool $showCopy = false
-	) : string {
+	): string {
 		$html = Html::element(
 				'span',
 				[ 'class' => 'mw-twocolconflict-revision-label' ],
@@ -231,11 +231,11 @@ class HtmlSplitConflictHeader {
 	 *
 	 * @return string
 	 */
-	private function getFormattedDateTime( ?string $timestamp ) : string {
+	private function getFormattedDateTime( ?string $timestamp ): string {
 		$diff = ( new ConvertibleTimestamp( $timestamp ?: false ) )->diff( $this->now );
 
 		if ( $diff->days ) {
-			return $this->language->userTimeAndDate( $timestamp, $this->user );
+			return $this->language->userTimeAndDate( $timestamp, $this->authority->getUser() );
 		}
 
 		if ( $diff->h ) {
@@ -254,7 +254,7 @@ class HtmlSplitConflictHeader {
 		return $this->messageLocalizer->msg( 'just-now' )->text();
 	}
 
-	private function getMessageBox( string $messageKey, string $type, $classes = [] ) : string {
+	private function getMessageBox( string $messageKey, string $type, $classes = [] ): string {
 		$html = $this->messageLocalizer->msg( $messageKey )->parse();
 		return ( new MessageWidget( [
 			'label' => new HtmlSnippet( SplitConflictUtils::addTargetBlankToLinks( $html ) ),

@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Wikibase\Client\Usage\Sql;
 
 use Exception;
@@ -9,10 +11,10 @@ use Onoi\MessageReporter\NullMessageReporter;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Reporting\ExceptionHandler;
 use Wikibase\Lib\Reporting\LogWarningExceptionHandler;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILBFactory;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -36,11 +38,6 @@ class EntityUsageTableBuilder {
 	private $idParser;
 
 	/**
-	 * @var ILBFactory
-	 */
-	private $lbFactory;
-
-	/**
 	 * @var string
 	 */
 	private $usageTableName;
@@ -61,29 +58,25 @@ class EntityUsageTableBuilder {
 	private $progressReporter;
 
 	/**
-	 * @param EntityIdParser $idParser
-	 * @param ILBFactory $lbFactory
-	 * @param int $batchSize defaults to 1000
-	 * @param string|null $usageTableName defaults to wbc_entity_usage
-	 *
+	 * @var ClientDomainDb
+	 */
+	private $domainDb;
+
+	/**
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct(
 		EntityIdParser $idParser,
-		ILBFactory $lbFactory,
-		$batchSize = 1000,
-		$usageTableName = null
+		ClientDomainDb $domainDb,
+		int $batchSize = 1000,
+		?string $usageTableName = null
 	) {
-		if ( !is_int( $batchSize ) || $batchSize < 1 ) {
+		if ( $batchSize < 1 ) {
 			throw new InvalidArgumentException( '$batchSize must be an integer >= 1' );
 		}
 
-		if ( !is_string( $usageTableName ) && $usageTableName !== null ) {
-			throw new InvalidArgumentException( '$usageTableName must be a string or null' );
-		}
-
 		$this->idParser = $idParser;
-		$this->lbFactory = $lbFactory;
+		$this->domainDb = $domainDb;
 		$this->batchSize = $batchSize;
 		$this->usageTableName = $usageTableName ?: EntityUsageTable::DEFAULT_TABLE_NAME;
 
@@ -91,20 +84,18 @@ class EntityUsageTableBuilder {
 		$this->progressReporter = new NullMessageReporter();
 	}
 
-	public function setProgressReporter( MessageReporter $progressReporter ) {
+	public function setProgressReporter( MessageReporter $progressReporter ): void {
 		$this->progressReporter = $progressReporter;
 	}
 
-	public function setExceptionHandler( ExceptionHandler $exceptionHandler ) {
+	public function setExceptionHandler( ExceptionHandler $exceptionHandler ): void {
 		$this->exceptionHandler = $exceptionHandler;
 	}
 
 	/**
 	 * Fill the usage table with rows based on entries in page_props.
-	 *
-	 * @param int $fromPageId
 	 */
-	public function fillUsageTable( $fromPageId = 0 ) {
+	public function fillUsageTable( int $fromPageId = 0 ): void {
 		do {
 			$count = $this->processUsageBatch( $fromPageId );
 			$this->progressReporter->reportMessage( "Filling usage table: processed $count pages, starting with page #$fromPageId." );
@@ -118,13 +109,11 @@ class EntityUsageTableBuilder {
 	 *
 	 * @return int The number of entity usages inserted.
 	 */
-	private function processUsageBatch( &$fromPageId = 0 ) {
-		$this->lbFactory->waitForReplication( [
-			'domain' => $this->lbFactory->getLocalDomainID(),
-		] );
+	private function processUsageBatch( int &$fromPageId = 0 ): int {
+		$this->domainDb->replication()->wait();
 
-		$loadBalancer = $this->lbFactory->getMainLB();
-		$db = $loadBalancer->getConnection( DB_MASTER );
+		$connections = $this->domainDb->connections();
+		$db = $connections->getWriteConnection();
 
 		$entityPerPage = $this->getUsageBatch( $db, $fromPageId );
 
@@ -137,18 +126,17 @@ class EntityUsageTableBuilder {
 		// Update $fromPageId to become the first page ID of the next batch.
 		$fromPageId = max( array_keys( $entityPerPage ) ) + 1;
 
-		$loadBalancer->reuseConnection( $db );
+		$connections->releaseConnection( $db );
 
 		return $count;
 	}
 
 	/**
-	 * @param IDatabase $db
 	 * @param EntityId[] $entityPerPage
 	 *
 	 * @return int The number of rows inserted.
 	 */
-	private function insertUsageBatch( IDatabase $db, array $entityPerPage ) {
+	private function insertUsageBatch( IDatabase $db, array $entityPerPage ): int {
 		$db->startAtomic( __METHOD__ );
 
 		$c = 0;
@@ -174,18 +162,15 @@ class EntityUsageTableBuilder {
 	}
 
 	/**
-	 * @param IDatabase $db
-	 * @param int $fromPageId
-	 *
 	 * @return EntityId[] An associative array mapping page IDs to Entity IDs.
 	 */
-	private function getUsageBatch( IDatabase $db, $fromPageId = 0 ) {
+	private function getUsageBatch( IDatabase $db, int $fromPageId = 0 ): array {
 		$res = $db->select(
 			'page_props',
 			[ 'pp_page', 'pp_value' ],
 			[
 				'pp_propname' => 'wikibase_item',
-				'pp_page >= ' . (int)$fromPageId
+				'pp_page >= ' . $fromPageId
 			],
 			__METHOD__,
 			[
@@ -198,11 +183,9 @@ class EntityUsageTableBuilder {
 	}
 
 	/**
-	 * @param IResultWrapper $res
-	 *
 	 * @return EntityId[] An associative array mapping page IDs to Entity IDs.
 	 */
-	private function slurpEntityIds( IResultWrapper $res ) {
+	private function slurpEntityIds( IResultWrapper $res ): array {
 		$entityPerPage = [];
 
 		foreach ( $res as $row ) {

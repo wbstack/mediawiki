@@ -27,7 +27,6 @@ use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Specials\HTMLForm\HTMLTrimmedTextField;
 use Wikibase\Repo\Specials\SpecialPageCopyrightView;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -42,6 +41,8 @@ class SpecialNewLexeme extends SpecialPage {
 	public const FIELD_LEMMA = 'lemma';
 	public const FIELD_LEMMA_LANGUAGE = 'lemma-language';
 
+	/** @var string[] */
+	private $tags;
 	private $copyrightView;
 	private $entityNamespaceLookup;
 	private $summaryFormatter;
@@ -49,6 +50,7 @@ class SpecialNewLexeme extends SpecialPage {
 	private $editEntityFactory;
 
 	public function __construct(
+		array $tags,
 		SpecialPageCopyrightView $copyrightView,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		SummaryFormatter $summaryFormatter,
@@ -60,6 +62,7 @@ class SpecialNewLexeme extends SpecialPage {
 			'createpage'
 		);
 
+		$this->tags = $tags;
 		$this->copyrightView = $copyrightView;
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
 		$this->summaryFormatter = $summaryFormatter;
@@ -68,12 +71,12 @@ class SpecialNewLexeme extends SpecialPage {
 	}
 
 	public static function factory(
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityTitleLookup $entityTitleLookup,
-		SettingsArray $repoSettings
+		SettingsArray $repoSettings,
+		SummaryFormatter $summaryFormatter
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
 			$repoSettings->getSetting( 'dataRightsUrl' ),
@@ -81,11 +84,12 @@ class SpecialNewLexeme extends SpecialPage {
 		);
 
 		return new self(
+			$repoSettings->getSetting( 'specialPageTags' ),
 			$copyrightView,
 			$entityNamespaceLookup,
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$entityTitleLookup,
-			$wikibaseRepo->newEditEntityFactory()
+			$editEntityFactory
 		);
 	}
 
@@ -123,7 +127,7 @@ class SpecialNewLexeme extends SpecialPage {
 	protected function checkBlocked() {
 		$block = $this->getUser()->getBlock();
 		if ( $block && $block->isSitewide() ) {
-			throw new UserBlockedError( $this->getUser()->getBlock() );
+			throw new UserBlockedError( $block );
 		}
 	}
 
@@ -163,7 +167,7 @@ class SpecialNewLexeme extends SpecialPage {
 
 	private function newEditEntity(): EditEntity {
 		return $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			null,
 			0,
 			$this->getRequest()->wasPosted()
@@ -192,7 +196,9 @@ class SpecialNewLexeme extends SpecialPage {
 			$entity,
 			$this->summaryFormatter->formatSummary( $summary ),
 			$flags,
-			$token
+			$token,
+			null,
+			$this->tags
 		);
 	}
 

@@ -1,10 +1,13 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Wikibase\Repo\Maintenance;
 
 use Maintenance;
 use MediaWiki\MediaWikiServices;
 use Onoi\MessageReporter\ObservableMessageReporter;
+use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemIdParser;
 use Wikibase\Lib\Reporting\ReportingExceptionHandler;
 use Wikibase\Lib\Store\Sql\SiteLinkTable;
@@ -49,10 +52,16 @@ class RebuildItemsPerSite extends Maintenance {
 	/**
 	 * @inheritDoc
 	 */
-	public function execute() {
+	public function execute(): void {
 		if ( !WikibaseSettings::isRepoEnabled() ) {
 			$this->output( "You need to have Wikibase enabled in order to use this maintenance script!\n\n" );
 			exit;
+		}
+		if ( !in_array( Item::ENTITY_TYPE, WikibaseRepo::getLocalEntitySource()->getEntityTypes() ) ) {
+			$this->fatalError(
+				"You can't run this maintenance script on foreign items!",
+				1
+			);
 		}
 
 		$batchSize = (int)$this->getOption( 'batch-size', 100 );
@@ -62,16 +71,22 @@ class RebuildItemsPerSite extends Maintenance {
 			[ $this, 'report' ]
 		);
 
-		$siteLinkTable = new SiteLinkTable( 'wb_items_per_site', false );
 		$mwServices = MediaWikiServices::getInstance();
+		$siteLinkTable = new SiteLinkTable(
+			'wb_items_per_site',
+			false,
+			WikibaseRepo::getRepoDomainDbFactory( $mwServices )->newRepoDb()
+		);
 		$store = WikibaseRepo::getStore( $mwServices );
 		// Use an uncached EntityLookup here to avoid memory leaks
 		$entityLookup = $store->getEntityLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY );
+		$domainDB = WikibaseRepo::getRepoDomainDbFactory( $mwServices )->newRepoDb();
+
 		$builder = new ItemsPerSiteBuilder(
 			$siteLinkTable,
 			$entityLookup,
 			$store->getEntityPrefetcher(),
-			$mwServices->getDBLoadBalancerFactory()
+			$domainDB
 		);
 
 		$builder->setReporter( $reporter );
@@ -88,6 +103,7 @@ class RebuildItemsPerSite extends Maintenance {
 			$stream = new SqlEntityIdPager(
 				WikibaseRepo::getEntityNamespaceLookup( $mwServices ),
 				WikibaseRepo::getEntityIdLookup( $mwServices ),
+				$domainDB,
 				[ 'item' ]
 			);
 		}
@@ -98,10 +114,8 @@ class RebuildItemsPerSite extends Maintenance {
 
 	/**
 	 * Outputs a message vis the output() method.
-	 *
-	 * @param string $msg
 	 */
-	public function report( $msg ) {
+	public function report( string $msg ): void {
 		$this->output( "$msg\n" );
 	}
 

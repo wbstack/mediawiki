@@ -4,6 +4,7 @@
 			"2nd-player",
 			"Afaz",
 			"Fryed-peach",
+			"Fumi37s",
 			"Kkairri",
 			"LaMagiaaa",
 			"Marine-Blue",
@@ -21,7 +22,8 @@
 			"Vigorous action",
 			"Whym",
 			"Yusuke1109",
-			"おはぐろ蜻蛉"
+			"おはぐろ蜻蛉",
+			"ネイ"
 		]
 	},
 	"echo-desc": "イベントおよびメッセージについて、利用者に通知するシステム",
@@ -39,6 +41,7 @@
 	"echo-pref-email-format": "メールの形式:",
 	"echo-pref-web": "ウェブ",
 	"echo-pref-email": "メール",
+	"echo-pref-push": "アプリ",
 	"echo-pref-email-frequency-never": "通知メールを何も受け取らない",
 	"echo-pref-email-frequency-immediately": "個別の通知が来るたび",
 	"echo-pref-email-frequency-daily": "通知を1日ごとに要約",
@@ -50,7 +53,7 @@
 	"echo-pref-notifications-page-linked-title-muted-list": "以下のページからのページリンク通知は表示されません ([[mw:Special:MyLanguage/Help:Notifications#mute|詳細]])。",
 	"echo-learn-more": "詳細",
 	"echo-log": "公開記録",
-	"echo-new-messages": "新着メッセージがあります",
+	"echo-new-messages": "あなたの会話ページに新着メッセージがあります",
 	"echo-category-title-edit-user-talk": "トークページヘの{{PLURAL:$1|メッセージ}}",
 	"echo-category-title-article-linked": "ページへの{{PLURAL:$1|リンク}}",
 	"echo-category-title-reverted": "編集の{{PLURAL:$1|差し戻し}}",

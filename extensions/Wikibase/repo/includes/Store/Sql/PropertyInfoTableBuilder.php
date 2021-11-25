@@ -2,12 +2,10 @@
 
 namespace Wikibase\Repo\Store\Sql;
 
-use MediaWiki\MediaWikiServices;
 use Onoi\MessageReporter\MessageReporter;
 use RuntimeException;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\Property;
-use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
 use Wikibase\DataModel\Services\Lookup\PropertyLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\Sql\PropertyInfoTable;
@@ -37,11 +35,6 @@ class PropertyInfoTableBuilder {
 	private $propertyInfoBuilder;
 
 	/**
-	 * @var EntityIdComposer
-	 */
-	private $entityIdComposer;
-
-	/**
 	 * @var EntityNamespaceLookup
 	 */
 	private $entityNamespaceLookup;
@@ -50,11 +43,6 @@ class PropertyInfoTableBuilder {
 	 * @var MessageReporter|null
 	 */
 	private $reporter = null;
-
-	/**
-	 * @var bool
-	 */
-	private $useTransactions = true;
 
 	/**
 	 * Whether all entries should be updated, or only missing entries
@@ -74,13 +62,11 @@ class PropertyInfoTableBuilder {
 		PropertyInfoTable $propertyInfoTable,
 		PropertyLookup $propertyLookup,
 		PropertyInfoBuilder $propertyInfoBuilder,
-		EntityIdComposer $entityIdComposer,
 		EntityNamespaceLookup $entityNamespaceLookup
 	) {
 		$this->propertyInfoTable = $propertyInfoTable;
 		$this->propertyLookup = $propertyLookup;
 		$this->propertyInfoBuilder = $propertyInfoBuilder;
-		$this->entityIdComposer = $entityIdComposer;
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
 	}
 
@@ -108,17 +94,6 @@ class PropertyInfoTableBuilder {
 	}
 
 	/**
-	 * Enables or disables transactions.
-	 * The only good reason to disable transactions is to be able to
-	 * run the rebuild inside an already existing transaction.
-	 *
-	 * @param bool $useTransactions
-	 */
-	public function setUseTransactions( $useTransactions ) {
-		$this->useTransactions = $useTransactions;
-	}
-
-	/**
 	 * Rebuild the property info entries.
 	 * Use the rebuildPropertyInfo.php maintenance script to invoke this from the command line.
 	 *
@@ -133,7 +108,7 @@ class PropertyInfoTableBuilder {
 			throw new RuntimeException( __METHOD__ . ' can not run with no Property namespace defined.' );
 		}
 
-		$dbw = $this->propertyInfoTable->getWriteConnection();
+		$dbw = $this->propertyInfoTable->getDomainDb()->connections()->getWriteConnectionRef();
 
 		$total = 0;
 
@@ -152,19 +127,15 @@ class PropertyInfoTableBuilder {
 			];
 		}
 
-		// @TODO: Inject the LBFactory
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$ticket = $lbFactory->getEmptyTransactionTicket( __METHOD__ );
+		$ticket = $this->propertyInfoTable->getDomainDb()->getEmptyTransactionTicket( __METHOD__ );
 		$pageId = 1;
 
 		while ( true ) {
 			// Make sure we are not running too far ahead of the replicas,
 			// as that would cause the site to be rendered read only.
-			$lbFactory->commitAndWaitForReplication( __METHOD__, $ticket );
+			$this->propertyInfoTable->getDomainDb()->commitAndWaitForReplication( __METHOD__, $ticket );
 
-			if ( $this->useTransactions ) {
-				$dbw->startAtomic( __METHOD__ );
-			}
+			$dbw->startAtomic( __METHOD__ );
 
 			$props = $dbw->select(
 				$tables,
@@ -186,14 +157,12 @@ class PropertyInfoTableBuilder {
 			$c = 0;
 
 			foreach ( $props as $row ) {
-				$this->updatePropertyInfo( new PropertyId( $row->page_title ) );
+				$this->updatePropertyInfo( new NumericPropertyId( $row->page_title ) );
 				$pageId = (int)$row->page_id;
 				$c++;
 			}
 
-			if ( $this->useTransactions ) {
-				$dbw->endAtomic( __METHOD__ );
-			}
+			$dbw->endAtomic( __METHOD__ );
 
 			$this->reportMessage( "Updated $c properties, up to page ID $pageId." );
 			$total += $c;
@@ -213,9 +182,9 @@ class PropertyInfoTableBuilder {
 	 *
 	 * @throws RuntimeException
 	 *
-	 * @param PropertyId $id the Property to process
+	 * @param NumericPropertyId $id the Property to process
 	 */
-	private function updatePropertyInfo( PropertyId $id ) {
+	private function updatePropertyInfo( NumericPropertyId $id ) {
 		$property = $this->propertyLookup->getPropertyForId( $id );
 
 		if ( $property === null ) {

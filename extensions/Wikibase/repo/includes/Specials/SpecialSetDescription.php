@@ -9,12 +9,12 @@ use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Special page for setting the description of a Wikibase entity.
@@ -25,6 +25,8 @@ use Wikibase\Repo\WikibaseRepo;
 class SpecialSetDescription extends SpecialModifyTerm {
 
 	public function __construct(
+		array $tags,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
@@ -34,6 +36,8 @@ class SpecialSetDescription extends SpecialModifyTerm {
 	) {
 		parent::__construct(
 			'SetDescription',
+			$tags,
+			$changeOpFactoryProvider,
 			$copyrightView,
 			$summaryFormatter,
 			$entityTitleLookup,
@@ -44,13 +48,14 @@ class SpecialSetDescription extends SpecialModifyTerm {
 	}
 
 	public static function factory(
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityPermissionChecker $entityPermissionChecker,
 		EntityTitleLookup $entityTitleLookup,
 		SettingsArray $repoSettings,
+		SummaryFormatter $summaryFormatter,
 		ContentLanguages $termsLanguages
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
 			$repoSettings->getSetting( 'dataRightsUrl' ),
@@ -58,10 +63,12 @@ class SpecialSetDescription extends SpecialModifyTerm {
 		);
 
 		return new self(
+			$repoSettings->getSetting( 'specialPageTags' ),
+			$changeOpFactoryProvider,
 			$copyrightView,
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$entityTitleLookup,
-			$wikibaseRepo->newEditEntityFactory(),
+			$editEntityFactory,
 			$entityPermissionChecker,
 			$termsLanguages
 		);

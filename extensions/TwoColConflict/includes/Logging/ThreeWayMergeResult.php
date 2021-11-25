@@ -54,14 +54,14 @@ class ThreeWayMergeResult {
 	/**
 	 * @return bool True if the automatic merge succeeded.
 	 */
-	public function isCleanMerge() : bool {
+	public function isCleanMerge(): bool {
 		return $this->isCleanMerge;
 	}
 
 	/**
 	 * @return int Number of chunks which could not be automatically merged
 	 */
-	public function getOverlappingChunkCount() : int {
+	public function getOverlappingChunkCount(): int {
 		return count( $this->getOverlappingChunks() );
 	}
 
@@ -70,7 +70,7 @@ class ThreeWayMergeResult {
 	 *
 	 * @return int Total number of characters in the chunks which could not be automatically merged.
 	 */
-	public function getOverlappingChunkSize() : int {
+	public function getOverlappingChunkSize(): int {
 		$totalChars = 0;
 		foreach ( $this->getOverlappingChunks() as $chunk ) {
 			$totalChars += mb_strlen( $chunk['text'] );
@@ -78,7 +78,7 @@ class ThreeWayMergeResult {
 		return $totalChars;
 	}
 
-	private function getOverlappingChunks() : array {
+	private function getOverlappingChunks(): array {
 		// TODO: This function is rumored to segfault at about 80kB of haystack.
 		preg_match_all(
 			self::SED_UNIT_PARSER,

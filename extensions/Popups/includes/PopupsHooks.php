@@ -131,7 +131,7 @@ class PopupsHooks {
 		}
 
 		return [
-			PopupsContext::REFERENCE_PREVIEWS_PREFERENCE_NAME => $option
+			PopupsContext::REFERENCE_PREVIEWS_PREFERENCE_NAME_AFTER_BETA => $option
 		];
 	}
 
@@ -178,11 +178,9 @@ class PopupsHooks {
 
 		$vars['wgPopupsVirtualPageViews'] = $config->get( 'PopupsVirtualPageViews' );
 		$vars['wgPopupsGateway'] = $config->get( 'PopupsGateway' );
-		$vars['wgPopupsEventLogging'] = $config->get( 'PopupsEventLogging' );
 		$vars['wgPopupsRestGatewayEndpoint'] = $config->get( 'PopupsRestGatewayEndpoint' );
 		$vars['wgPopupsStatsvSamplingRate'] = $config->get( 'PopupsStatsvSamplingRate' );
 		$vars['wgPopupsTextExtractsIntroOnly'] = $config->get( 'PopupsTextExtractsIntroOnly' );
-		$vars['wgPopupsReferencePreviewsBetaFeature'] = $config->get( 'PopupsReferencePreviewsBetaFeature' );
 	}
 
 	/**
@@ -196,7 +194,6 @@ class PopupsHooks {
 	 *   setting.
 	 * * `wgPopupsConflictsWithNavPopupGadget' - The server's notion of whether or not the
 	 *   user has enabled conflicting Navigational Popups Gadget.
-	 *
 	 * * `wgPopupsConflictsWithRefTooltipsGadget' - The server's notion of whether or not the
 	 *   user has enabled conflicting Reference Tooltips Gadget.
 	 *
@@ -226,7 +223,7 @@ class PopupsHooks {
 		if ( $config->get( 'PopupsReferencePreviews' ) &&
 			!$config->get( 'PopupsReferencePreviewsBetaFeature' )
 		) {
-			$defaultOptions[PopupsContext::REFERENCE_PREVIEWS_PREFERENCE_NAME] = $default;
+			$defaultOptions[PopupsContext::REFERENCE_PREVIEWS_PREFERENCE_NAME_AFTER_BETA] = '1';
 		}
 	}
 
@@ -238,16 +235,26 @@ class PopupsHooks {
 	 */
 	public static function onLocalUserCreated( User $user, $isAutoCreated ) {
 		/** @var Config $config */
-		$config = MediaWikiServices::getInstance()->getService( 'Popups.Config' );
+		$services = MediaWikiServices::getInstance();
+		$config = $services->getService( 'Popups.Config' );
 		$default = $config->get( 'PopupsOptInStateForNewAccounts' );
-		$user->setOption( PopupsContext::PREVIEWS_OPTIN_PREFERENCE_NAME, $default );
+		$userOptionsManager = $services->getUserOptionsManager();
+		$userOptionsManager->setOption(
+			$user,
+			PopupsContext::PREVIEWS_OPTIN_PREFERENCE_NAME,
+			$default
+		);
 
 		// As long as in Beta, don't set a default for Reference Previews. Rely on it either being
 		// null (= disabled), or follow what the "betafeatures-auto-enroll" flag says.
 		if ( $config->get( 'PopupsReferencePreviews' ) &&
 			!$config->get( 'PopupsReferencePreviewsBetaFeature' )
 		) {
-			$user->setOption( PopupsContext::REFERENCE_PREVIEWS_PREFERENCE_NAME, $default );
+			$userOptionsManager->setOption(
+				$user,
+				PopupsContext::REFERENCE_PREVIEWS_PREFERENCE_NAME_AFTER_BETA,
+				$default
+			);
 		}
 	}
 

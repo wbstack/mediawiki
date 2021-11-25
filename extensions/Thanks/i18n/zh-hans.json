@@ -9,12 +9,14 @@
 			"Fantasticfears",
 			"Hzy980512",
 			"Impersonator 1",
+			"Lakejason0",
 			"Liuxinyu970226",
 			"Macofe",
 			"Mywood",
 			"Northteam",
 			"Phenolla",
 			"Qiyue2001",
+			"Shizhao",
 			"WQL",
 			"Xiaomingyan",
 			"Xiplus",
@@ -37,7 +39,7 @@
 	"thanks-button-action-completed": "您已{{GENDER:$1|{{GENDER:$2|感谢}}}}$1",
 	"thanks-error-undefined": "感谢操作失败（错误代码：$1）。请重试。",
 	"thanks-error-invalid-log-id": "找不到日志记录",
-	"thanks-error-invalid-log-type": "日志类型“$1”没有在允许的日志类型白名单中。",
+	"thanks-error-invalid-log-type": "日志类型“$1”没有在允许的日志类型名单中。",
 	"thanks-error-log-deleted": "请求的日志记录已删除，且不能给它提供感谢。",
 	"thanks-error-invalidrevision": "版本ID无效。",
 	"thanks-error-revdeleted": "无法发送感谢，因为修订版本已删除。",
@@ -80,5 +82,6 @@
 	"notification-flow-thanks-post-link": "您的评论",
 	"notification-header-flow-thank": "$1{{GENDER:$2|感谢了}}{{GENDER:$5|您}}在“<strong>$3</strong>”发表的评论。",
 	"notification-compact-header-flow-thank": "$1{{GENDER:$2|感谢了}}{{GENDER:$3|您}}。",
-	"notification-bundle-header-flow-thank": "{{PLURAL:$1|$1个人|100=超过99个人}}感谢了{{GENDER:$3|您}}在“<strong>$2</strong>”发表的评论。"
+	"notification-bundle-header-flow-thank": "{{PLURAL:$1|$1个人|100=超过99个人}}感谢了{{GENDER:$3|您}}在“<strong>$2</strong>”发表的评论。",
+	"ipb-action-thanks": "发送感谢"
 }

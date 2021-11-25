@@ -131,6 +131,40 @@ mobile preferences option.
   ]
 ```
 
+#### $wgMFUseDesktopSpecialWatchlistPage
+
+Enables the desktop version of the watchlist page if set to `true`. If set to
+`false`, the mobile version will be enabled but can still be overridden by the user's
+mobile preferences option.
+
+* Type: `Array`
+* Default:
+```php
+  [
+    'base' => false,
+    'beta' => false,
+    // Enable desktop version of watchlist page when AMC is enabled
+    'amc' => true,
+  ]
+```
+
+#### $wgMFUseDesktopContributionsPage
+
+Enables the desktop version of the contributions page if set to `true`. If set to
+`false`, the mobile version will be enabled but can still be overridden by the user's
+mobile preferences option.
+
+* Type: `Array`
+* Default:
+```php
+  [
+    'base' => false,
+    'beta' => false,
+    // Enable desktop version of watchlist page when AMC is enabled
+    'amc' => true,
+  ]
+```
+
 #### $wgMFEnableJSConsoleRecruitment
 
 Controls whether a message should be logged to the console to attempt to
@@ -148,24 +182,9 @@ See: <https://www.mediawiki.org/wiki/Reading/Features/Article_lead_image>
 * Type: `Boolean`
 * Default: `true`
 
-#### $wgMFContentProviderClass
+#### MFScriptPath
 
-Name of PHP class that is responsible for formatting HTML for mobile.
-Must implement IContentProvider.
-
-* Type: `string`
-* Default: `DefaultContentProvider`
-
-#### MFContentProviderTryLocalContentFirst
-
-When using a ContentProvider in MFContentProviderClass, specify whether you want to allow local content as well as provided content. This is useful if you are wanting to run Selenium browser tests against locally created content but also have the benefit of testing content on a production wiki.
-
-* Type: `boolean`
-* Default: `true`
-
-#### MFContentProviderScriptPath
-
-When set will override the default script path to a foreign content provider
+When set will override the default search script path
 e.g.
 `https://en.wikipedia.org/w`
 will route queries (e.g. API) to English Wikipedia.
@@ -177,21 +196,6 @@ This should not be used in production, it is strictly for development purposes.
 * Type: `string`
 * Default: ''
 
-#### $wgMFMwApiContentProviderBaseUri
-
-URL to be used by the MwApiMobileFormatter class. Points to a MediaWiki
-API that can be queried to obtain content.
-
-* Type: `string`
-* Default: `https://en.wikipedia.org/w/api.php`
-
-#### $wgMFAlwaysUseContentProvider
-
-When enabled the ContentProvider will run on desktop views as well as mobile views.
-
-* Type: `boolean`
-* Default: `false`
-
 #### $wgMFMobileFormatterOptions
 
 This provides options for the MobileFormatter.
@@ -201,6 +205,7 @@ if you don't know, what you do. Moreover, this configuration variable will be
 removed in the near future (hopefully).
 * maxImages - if a page has more than this number of image tags then the formatter will not run
 * maxHeadings - if a page has more than this number of heading tags then the formatter will not run
+* excludeNamespaces - disable the MobileFormatter for these namespaces. Article HTML for mobile will be the same as desktop.
 
 * Type: `Object`
 * Default: `{ headings: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'], maxImages: 1000, maxHeadings: 4000 }`
@@ -209,20 +214,12 @@ removed in the near future (hopefully).
 
 If set to true, styles inside MediaWiki:Mobile.css will become render blocking.
 
-This is intended for situations where the [TemplateStyles extension](https://m.mediawiki.org/wiki/Mobile_Gateway/TemplateStyles)
+This is intended for situations where the [TemplateStyles extension](https://www.mediawiki.org/wiki/Extension:TemplateStyles)
 cannot be used. When enabled, this may increase the time it takes for the mobile
 site to render, depending on how large MediaWiki:Mobile.css is for your wiki.
 
 * Type: `Boolean`
 * Default: `false`
-
-#### $wgMFSchemaSearchSampleRate
-
-Defines the sampling rate for the Search schema.
-
-* Type: `Number`
-* Default: `0.001`
-
 
 #### $wgMFTrackBlockNotices
 
@@ -273,36 +270,6 @@ viewport.
     'base' => true,
   ]
 ```
-
-#### $wgMFMobileFormatterNamespaceBlacklist
-
-Array of namespaces that blacklists certain namespaces from applying mobile
-transformations to page content. This will disable lazy loading images and
-references; special casing and section formatting on the given page.
-MFRemovableClasses will not apply for any blacklisted pages.
-
-* Type: `Array`
-* Default:
-```php
-  [
-    NS_TEMPLATE,
-    NS_SPECIAL
-  ]
-```
-
-#### $wgMFNoMobileCategory
-
-DB key of the category which members will never display mobile view.
-
-* Type: `Boolean`
-* Default: `false`
-
-#### $wgMFNoMobilePages
-
-Prefixed names of pages that will never display mobile view.
-
-* Type: `Array`
-* Default: `[]`
 
 #### $wgMFNearbyRange
 

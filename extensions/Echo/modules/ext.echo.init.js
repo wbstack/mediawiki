@@ -169,9 +169,7 @@ function initDesktop() {
 
 				alertModelManager.on( 'allTalkRead', function () {
 					// If there was a talk page notification, get rid of it
-					$( '#pt-mytalk a' )
-						.removeClass( 'mw-echo-alert' )
-						.text( mw.msg( 'mytalk' ) );
+					$( '#pt-talk-alert' ).remove();
 				} );
 
 				// listen to event countChange and change title only if polling rate is non-zero
@@ -265,7 +263,7 @@ function initDesktop() {
 				if ( hasUnseenAlerts || hasUnseenMessages ) {
 					// Clicked on the flyout due to having unread notifications
 					// This is part of tracking how likely users are to click a badge with unseen notifications.
-					// The other part is the 'echo.unseen' counter, see EchoHooks::onPersonalUrls().
+					// The other part is the 'echo.unseen' counter, see EchoHooks::onSkinTemplateNavigationUniversal().
 					mw.track( 'counter.MediaWiki.echo.unseen.click' );
 				}
 			}, function () {
@@ -280,7 +278,6 @@ function initDesktop() {
 			alertController.refreshUnreadCount();
 			messageController.refreshUnreadCount();
 			// Make notification update after n*pollingRate(time in secs) where n depends on document.hidden
-			// eslint-disable-next-line compat/compat
 			setTimeout( pollForNotificationCountUpdates, ( document.hidden ? 5 : 1 ) * pollingRate * 1000 );
 		}
 

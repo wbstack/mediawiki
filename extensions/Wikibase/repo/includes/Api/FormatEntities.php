@@ -7,18 +7,17 @@ namespace Wikibase\Repo\Api;
 use ApiBase;
 use ApiMain;
 use IBufferingStatsdDataFactory;
-use RemexHtml\HTMLData;
-use RemexHtml\Serializer\HtmlFormatter;
-use RemexHtml\Serializer\Serializer;
-use RemexHtml\Serializer\SerializerNode;
-use RemexHtml\Tokenizer\Tokenizer;
-use RemexHtml\TreeBuilder\Dispatcher;
-use RemexHtml\TreeBuilder\TreeBuilder;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
-use Wikibase\Repo\WikibaseRepo;
 use Wikibase\View\EntityIdFormatterFactory;
+use Wikimedia\RemexHtml\HTMLData;
+use Wikimedia\RemexHtml\Serializer\HtmlFormatter;
+use Wikimedia\RemexHtml\Serializer\Serializer;
+use Wikimedia\RemexHtml\Serializer\SerializerNode;
+use Wikimedia\RemexHtml\Tokenizer\Tokenizer;
+use Wikimedia\RemexHtml\TreeBuilder\Dispatcher;
+use Wikimedia\RemexHtml\TreeBuilder\TreeBuilder;
 
 /**
  * API module for formatting a set of entity IDs.
@@ -74,15 +73,15 @@ class FormatEntities extends ApiBase {
 		ApiMain $apiMain,
 		string $moduleName,
 		IBufferingStatsdDataFactory $dataFactory,
+		ApiHelperFactory $apiHelperFactory,
+		EntityIdFormatterFactory $entityIdFormatterFactory,
 		EntityIdParser $entityIdParser
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $apiMain->getContext() );
 		return new self(
 			$apiMain,
 			$moduleName,
 			$entityIdParser,
-			$wikibaseRepo->getEntityIdHtmlLinkFormatterFactory(),
+			$entityIdFormatterFactory,
 			$apiHelperFactory->getResultBuilder( $apiMain ),
 			$apiHelperFactory->getErrorReporter( $apiMain ),
 			$dataFactory

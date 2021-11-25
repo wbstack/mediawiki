@@ -22,14 +22,13 @@ class RevisionSliderHooks {
 	/**
 	 * @return Config The RevisionSlider extensions config
 	 */
-	private static function getConfig() : Config {
+	private static function getConfig(): Config {
 		return MediaWikiServices::getInstance()->getConfigFactory()
 			->makeConfig( 'revisionslider' );
 	}
 
 	/**
 	 * @param DifferenceEngine $diff
-	 * @suppress SecurityCheck-XSS Issue with OOUI, see T193837 for more information
 	 */
 	public static function onDifferenceEngineViewHeader( DifferenceEngine $diff ) {
 		$oldRevRecord = $diff->getOldRevision();
@@ -54,7 +53,7 @@ class RevisionSliderHooks {
 		 * If the user is logged in and has explictly requested to disable the extension don't load.
 		 */
 		$user = $diff->getUser();
-		if ( !$user->isAnon() && $userOptionsLookup->getBoolOption( $user, 'revisionslider-disable' ) ) {
+		if ( $user->isRegistered() && $userOptionsLookup->getBoolOption( $user, 'revisionslider-disable' ) ) {
 			return;
 		}
 
@@ -148,8 +147,6 @@ class RevisionSliderHooks {
 			'type' => 'toggle',
 			'label-message' => 'revisionslider-preference-disable',
 			'section' => 'rendering/diffs',
-			'default' => MediaWikiServices::getInstance()
-				->getUserOptionsLookup()->getBoolOption( $user, 'revisionslider-disable' ),
 		];
 	}
 

@@ -7,8 +7,8 @@ use CirrusSearch\Search\SearchContext;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\DisMax;
-use Elastica\Query\Match;
 use Elastica\Query\MatchNone;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Language;
 use Wikibase\DataAccess\PrefetchingTermLookup;
@@ -95,7 +95,7 @@ class LexemeSearchEntity implements EntitySearchHelper {
 		$textExact = ltrim( $text );
 		$text = trim( $text );
 
-		$labelsFilter = new Match( 'labels_all.prefix', $text );
+		$labelsFilter = new MatchQuery( 'labels_all.prefix', $text );
 
 		$profile = $context->getConfig()
 			->getProfileService()

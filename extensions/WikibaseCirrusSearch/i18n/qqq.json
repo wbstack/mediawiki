@@ -60,6 +60,7 @@
 	"wikibasecirrus-search-bad-profile-name": "Error message displayed when user supplies bad search profile name",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Error message when haswbstatement keyword has no valid arguments",
 	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Error message when haslicense keyword has no valid arguments",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Error message when wbstatementquantity keyword has no valid arguments",
 	"special-entitieswithoutdescription": "{{doc-special|EntitiesWithoutDescription}}\nThis special page returns a list of entities without description for a given language",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Legend of the form that allow to change the language.",
 	"special-entitieswithoutlabel": "{{doc-special|EntitiesWithoutLabel}}\nThis special page returns a list of entities without label for a given language",

@@ -10,9 +10,8 @@ use Job;
 use MediaWiki\MediaWikiServices;
 use Title;
 use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Repo\LinkedData\EntityDataUriManager;
-use Wikimedia\Rdbms\ILBFactory;
-use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * Job to purge Special:EntityData URLs from the HTTP cache after a page was deleted.
@@ -27,8 +26,8 @@ class PurgeEntityDataJob extends Job {
 	/** @var EntityDataUriManager */
 	private $entityDataUriManager;
 
-	/** @var ILBFactory */
-	private $lbFactory;
+	/** @var RepoDomainDb */
+	private $repoDb;
 
 	/** @var HtmlCacheUpdater */
 	private $htmlCacheUpdater;
@@ -39,7 +38,7 @@ class PurgeEntityDataJob extends Job {
 	public function __construct(
 		EntityIdParser $entityIdParser,
 		EntityDataUriManager $entityDataUriManager,
-		ILBFactory $lbFactory,
+		RepoDomainDb $repoDb,
 		HtmlCacheUpdater $htmlCacheUpdater,
 		int $batchSize,
 		array $params
@@ -47,18 +46,17 @@ class PurgeEntityDataJob extends Job {
 		parent::__construct( 'PurgeEntityData', $params );
 		$this->entityIdParser = $entityIdParser;
 		$this->entityDataUriManager = $entityDataUriManager;
-		$this->lbFactory = $lbFactory;
+		$this->repoDb = $repoDb;
 		$this->htmlCacheUpdater = $htmlCacheUpdater;
 		$this->batchSize = $batchSize;
 	}
 
 	public static function newFromGlobalState( Title $unused, array $params ): self {
-		$repo = WikibaseRepo::getDefaultInstance();
 		$services = MediaWikiServices::getInstance();
 		return new self(
-			$repo->getEntityIdParser(),
-			$repo->getEntityDataUriManager(),
-			$services->getDBLoadBalancerFactory(),
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getEntityDataUriManager( $services ),
+			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
 			$services->getHtmlCacheUpdater(),
 			$services->getMainConfig()->get( 'UpdateRowsPerQuery' ),
 			$params
@@ -84,13 +82,11 @@ class PurgeEntityDataJob extends Job {
 	}
 
 	private function getArchivedRevisionIds(): iterable {
-		// read archive rows from a replica, but only after it has caught up with the master
-		// (in theory we only need to wait for the master pos as of when the job was pushed,
-		// but DBMasterPos is an opaque object, so we can’t put it in the job params)
-		$this->lbFactory->waitForReplication( [
-			'domain' => $this->lbFactory->getLocalDomainID(),
-		] );
-		$dbr = $this->lbFactory->getMainLB()->getConnection( ILoadBalancer::DB_REPLICA );
+		// read archive rows from a replica, but only after it has caught up with the primary
+		// (in theory we only need to wait for the primary pos as of when the job was pushed,
+		// but DBPrimaryPos is an opaque object, so we can’t put it in the job params)
+		$this->repoDb->replication()->wait();
+		$dbr = $this->repoDb->connections()->getReadConnection();
 
 		$iterator = new BatchRowIterator( $dbr, 'archive', [ 'ar_id' ], $this->batchSize );
 		$iterator->setFetchColumns( [ 'ar_rev_id' ] );

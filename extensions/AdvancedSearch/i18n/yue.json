@@ -3,13 +3,15 @@
 		"authors": [
 			"Hello903hello",
 			"Moon0319",
-			"Roy17"
+			"Roy17",
+			"Z423x5c6"
 		]
 	},
-	"advancedsearch-options-pane-head": "高級參數：",
+	"advancedsearch-options-pane-head": "進階搜尋：",
 	"advancedsearch-optgroup-text": "喺版面入面嘅文度搵",
 	"advancedsearch-optgroup-structure": "結構",
 	"advancedsearch-optgroup-files": "檔同圖",
+	"advancedsearch-optgroup-sort": "排列次序",
 	"advancedsearch-field-plain": "呢啲字詞",
 	"advancedsearch-field-phrase": "完全符合呢啲字詞",
 	"advancedsearch-field-or": "呢啲字詞之一",
@@ -22,6 +24,7 @@
 	"advancedsearch-field-filetype": "檔類型",
 	"advancedsearch-field-filew": "檔闊度（像素）",
 	"advancedsearch-field-fileh": "檔高度（像素）",
+	"advancedsearch-field-sort": "排列次序",
 	"advancedsearch-field-preview-sort": "按$1嚟排",
 	"advancedsearch-placeholder-exact-text": "\"貓中意山羊\"",
 	"advancedsearch-inlanguage-default": "揀語言",
@@ -40,6 +43,8 @@
 	"advancedsearch-filesize-equals": "等於",
 	"advancedsearch-filesize-greater-than": "大過",
 	"advancedsearch-filesize-smaller-than": "細過",
+	"advancedsearch-sort-preview-relevance": "相關程度",
+	"advancedsearch-sort-preview-last-edit-desc": "編輯日期",
 	"advancedsearch-namespaces-search-in": "喺呢個名空間度搵：",
 	"advancedsearch-namespaces-remember": "記住今次選擇方便第時搵嘢用返",
 	"advancedsearch-namespaces-preset-all": "全部",

@@ -7,7 +7,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.37.0"
 	},
 	"SpecialPages": {
 		"TemplateSandbox": {
@@ -21,7 +21,8 @@
 	},
 	"MessagesDirs": {
 		"TemplateSandbox": [
-			"i18n"
+			"i18n",
+			"i18n/api"
 		]
 	},
 	"ExtensionMessagesFiles": {
@@ -37,6 +38,32 @@
 		"ext.TemplateSandbox": {
 			"scripts": "ext.TemplateSandbox.js",
 			"dependencies": "ext.TemplateSandbox.top"
+		},
+		"ext.TemplateSandbox.visualeditor": {
+			"messages": [
+				"templatesandbox-editform-view-label",
+				"templatesandbox-editform-page-label",
+				"templatesandbox-editform-legend",
+				"templatesandbox-editform-invalid-title",
+				"templatesandbox-editform-title-not-exists",
+				"templatesandbox-editform-view-label",
+				"templatesandbox-preview"
+			],
+			"targets": [
+				"desktop"
+			],
+			"packageFiles": [
+				"ext.TemplateSandbox.VisualEditor.js",
+				{
+					"name": "namespaces.json",
+					"callback": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::getResourceLoaderData"
+				}
+			],
+			"dependencies": [
+				"oojs-ui",
+				"mediawiki.jqueryMsg",
+				"mediawiki.widgets"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -50,8 +77,16 @@
 		"APIGetAllowedParams": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::onAPIGetAllowedParams",
 		"ApiMakeParserOptions": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::onApiMakeParserOptions"
 	},
+	"attributes": {
+		"VisualEditor": {
+			"PluginModules": [
+				"ext.TemplateSandbox.visualeditor"
+			]
+		}
+	},
 	"config": {
 		"TemplateSandboxEditNamespaces": {
+			"description": "Namespaces to show a page preview box for in edit mode",
 			"value": [
 				10
 			]

@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps",
+			"Woytecr"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Prefiks brudnopisu z szablonami, tak jak w [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-contentmodel": "Model zawartości <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Format zawartości <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Parametry <var>$1templatesandboxtitle</var> i <var>$1templatesandboxtext</var> muszą być podane razem albo nie podany żaden z nich."
+}

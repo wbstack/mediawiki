@@ -13,6 +13,7 @@
 			"M.M.S.",
 			"Najami",
 			"Per",
+			"Sabelöga",
 			"Technic2",
 			"WikiPhoenix"
 		]
@@ -75,7 +76,7 @@
 	"confirmaccount-deny": "Avslå (stryk från listan)",
 	"confirmaccount-hold": "Avvakta",
 	"confirmaccount-spam": "Spam (sänd inte e-post)",
-	"confirmaccount-reason": "Kommentar (skickas som e-post):",
+	"confirmaccount-reason": "Kommentar (ingår i avslag och avvaktande e-postmeddelanden):",
 	"confirmaccount-ip": "IP-adress:",
 	"confirmaccount-xff": "X-Forwarded-For:",
 	"confirmaccount-agent": "Användaragent:",
@@ -84,7 +85,8 @@
 	"confirmaccount-needreason": "Du måste skriva en motivering i kommentarrutan nedan.",
 	"confirmaccount-canthold": "Ansökningen är antingen redan avvaktande eller har avslagits.",
 	"confirmaccount-badaction": "En möjlig åtgärd (acceptera, förkasta, skjut upp) måste specificeras för att fortsätta.",
-	"confirmaccount-acc": "Kontoansökningen har godkänts och användarkontot [[User:$1|$1]] har skapats.",
+	"confirmaccount-mismatched": "Det här fältet måste matcha den ursprungliga ansökningen.",
+	"confirmaccount-acc": "Kontoansökningen har godkänts;\n\tanvändarkontot [[User:$1|$1]] har skapats.",
 	"confirmaccount-rej": "Kontoansökningen har avslagits.",
 	"confirmaccount-viewing": "({{GENDER:$1|granskas}} just nu av [[User:$1|$1]])",
 	"confirmaccount-summary": "Skapar användarsida för en ny användare.",

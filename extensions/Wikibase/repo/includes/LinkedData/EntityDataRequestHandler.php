@@ -20,6 +20,8 @@ use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\RedirectRevision;
 use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
 use Wikibase\Lib\Store\StorageException;
+use Wikibase\Lib\SubEntityTypesMapper;
+use Wikibase\Repo\Rdf\UnknownFlavorException;
 use Wikimedia\Http\HttpAcceptNegotiator;
 use Wikimedia\Http\HttpAcceptParser;
 
@@ -108,6 +110,11 @@ class EntityDataRequestHandler {
 	private $entityTypesWithoutRdfOutput;
 
 	/**
+	 * @var SubEntityTypesMapper
+	 */
+	private $subEntityTypesMap;
+
+	/**
 	 * @param EntityDataUriManager $uriManager
 	 * @param HtmlCacheUpdater $htmlCacheUpdater
 	 * @param EntityIdParser $entityIdParser
@@ -121,6 +128,7 @@ class EntityDataRequestHandler {
 	 * @param int $maxAge number of seconds to cache entity data
 	 * @param bool $useCdn do we have web caches configured?
 	 * @param string|null $frameOptionsHeader for X-Frame-Options
+	 * @param SubEntityTypesMapper $subEntityTypesMap
 	 */
 	public function __construct(
 		EntityDataUriManager $uriManager,
@@ -135,7 +143,8 @@ class EntityDataRequestHandler {
 		$defaultFormat,
 		$maxAge,
 		$useCdn,
-		$frameOptionsHeader
+		$frameOptionsHeader,
+		SubEntityTypesMapper $subEntityTypesMap
 	) {
 		$this->uriManager = $uriManager;
 		$this->htmlCacheUpdater = $htmlCacheUpdater;
@@ -150,6 +159,7 @@ class EntityDataRequestHandler {
 		$this->maxAge = $maxAge;
 		$this->useCdn = $useCdn;
 		$this->frameOptionsHeader = $frameOptionsHeader;
+		$this->subEntityTypesMap = $subEntityTypesMap;
 	}
 
 	/**
@@ -400,6 +410,8 @@ class EntityDataRequestHandler {
 				throw new HttpError( 404, $msg );
 			}
 		} catch ( RevisionedUnresolvedRedirectException $ex ) {
+			$this->validateRedirectability( $id, $ex->getRedirectTargetId() );
+
 			$redirectRevision = new RedirectRevision(
 				new EntityRedirect( $id, $ex->getRedirectTargetId() ),
 				$ex->getRevisionId(), $ex->getRevisionTimestamp()
@@ -452,6 +464,19 @@ class EntityDataRequestHandler {
 		}
 
 		return [ $entityRevision, $redirectRevision ];
+	}
+
+	private function validateRedirectability( EntityId $id, EntityId $redirectTargetId ): void {
+		if ( $this->subEntityTypesMap->getParentEntityType( $id->getEntityType() ) === $redirectTargetId->getEntityType() ) {
+			throw new HttpError(
+				404,
+				wfMessage(
+					'wikibase-entitydata-unresolvable-sub-entity-redirect',
+					$id->getSerialization(),
+					$redirectTargetId->getSerialization()
+				)
+			);
+		}
 	}
 
 	/**
@@ -521,13 +546,24 @@ class EntityDataRequestHandler {
 			$incomingRedirects = $this->getIncomingRedirects( $entityRevision->getEntity()->getId() );
 		}
 
-		list( $data, $contentType ) = $this->serializationService->getSerializedData(
-			$format,
-			$entityRevision,
-			$followedRedirectRevision,
-			$incomingRedirects,
-			$flavor
-		);
+		try {
+			list( $data, $contentType ) = $this->serializationService->getSerializedData(
+				$format,
+				$entityRevision,
+				$followedRedirectRevision,
+				$incomingRedirects,
+				$flavor
+			);
+		} catch ( UnknownFlavorException $e ) {
+			$knownFlavors = $e->getKnownFlavors();
+			throw new HttpError(
+				400,
+				$output->msg( 'wikibase-entitydata-bad-flavor' )
+					->plaintextParams( $e->getUnknownFlavor() )
+					->numParams( count( $knownFlavors ) )
+					->params( implode( '|', $knownFlavors ) )
+			);
+		}
 
 		$output->disable();
 		$this->outputData(

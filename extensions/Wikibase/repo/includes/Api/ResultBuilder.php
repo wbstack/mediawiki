@@ -8,8 +8,9 @@ use SiteLookup;
 use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Reference;
-use Wikibase\DataModel\SerializerFactory;
+use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\SiteLinkList;
 use Wikibase\DataModel\Statement\Statement;
@@ -22,6 +23,7 @@ use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\TermLanguageFallbackChain;
 use Wikibase\Repo\Dumpers\JsonDataTypeInjector;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
+use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -96,12 +98,18 @@ class ResultBuilder {
 	private $dataTypeInjector;
 
 	/**
+	 * @var EntityIdParser
+	 */
+	private $entityIdParser;
+
+	/**
 	 * @param ApiResult $result
 	 * @param EntityTitleStoreLookup $entityTitleStoreLookup
 	 * @param SerializerFactory $serializerFactory
 	 * @param Serializer $entitySerializer
 	 * @param SiteLookup $siteLookup
 	 * @param PropertyDataTypeLookup $dataTypeLookup
+	 * @param EntityIdParser $entityIdParser
 	 * @param bool|null $addMetaData when special elements such as '_element' are needed
 	 */
 	public function __construct(
@@ -111,6 +119,7 @@ class ResultBuilder {
 		Serializer $entitySerializer,
 		SiteLookup $siteLookup,
 		PropertyDataTypeLookup $dataTypeLookup,
+		EntityIdParser $entityIdParser,
 		$addMetaData = null
 	) {
 		$this->result = $result;
@@ -119,6 +128,7 @@ class ResultBuilder {
 		$this->entitySerializer = $entitySerializer;
 		$this->siteLookup = $siteLookup;
 		$this->dataTypeLookup = $dataTypeLookup;
+		$this->entityIdParser = $entityIdParser;
 		$this->addMetaData = $addMetaData;
 
 		$this->modifier = new SerializationModifier();
@@ -127,7 +137,8 @@ class ResultBuilder {
 		$this->dataTypeInjector = new JsonDataTypeInjector(
 			$this->modifier,
 			$this->callbackFactory,
-			$dataTypeLookup
+			$dataTypeLookup,
+			$entityIdParser
 		);
 	}
 
@@ -555,67 +566,79 @@ class ResultBuilder {
 	}
 
 	private function getEntitySerializationWithMetaData( array $serialization ) {
-		$arrayTypes = [
-			'aliases' => 'id',
-			'claims/*/*/references/*/snaks' => 'id',
-			'claims/*/*/qualifiers' => 'id',
-			'claims' => 'id',
-			'descriptions' => 'language',
-			'labels' => 'language',
-			'sitelinks' => 'site',
-		];
-		foreach ( $arrayTypes as $path => $keyName ) {
-			$serialization = $this->modifier->modifyUsingCallback(
-				$serialization,
-				$path,
-				$this->callbackFactory->getCallbackToSetArrayType( 'kvp', $keyName )
-			);
+		$serializeEmptyListsAsObjects = WikibaseRepo::getSettings()->getSetting( 'tmpSerializeEmptyListsAsObjects' );
+		$modifications = [];
+
+		$makeIdKvpCallback = $this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'id' );
+		$makeLanguageKvpCallback = $this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'language' );
+		$makeSiteKvpCallback = $this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'site' );
+
+		$modifications['aliases'][] = $makeIdKvpCallback;
+		$modifications['claims/*/*/references/*/snaks'][] = $makeIdKvpCallback;
+		$modifications['claims/*/*/qualifiers'][] = $makeIdKvpCallback;
+		$modifications['claims'][] = $makeIdKvpCallback;
+		$modifications['descriptions'][] = $makeLanguageKvpCallback;
+		$modifications['labels'][] = $makeLanguageKvpCallback;
+		$modifications['sitelinks'][] = $makeSiteKvpCallback;
+
+		if ( $serializeEmptyListsAsObjects ) {
+			$modifications['*/*/claims/*/*/references/*/snaks'][] = $makeIdKvpCallback;
+			$modifications['*/*/claims/*/*/qualifiers'][] = $makeIdKvpCallback;
+			$modifications['*/*/claims'][] = $makeIdKvpCallback;
 		}
 
-		$kvpMergeArrays = [
-			'descriptions',
-			'labels',
-			'sitelinks',
-		];
-		foreach ( $kvpMergeArrays as $path ) {
-			$serialization = $this->modifier->modifyUsingCallback(
-				$serialization,
-				$path,
-				function( $array ) {
-					if ( is_array( $array ) ) {
-						$array[ApiResult::META_KVP_MERGE] = true;
-					}
-					return $array;
-				}
-			);
+		$kvpMergeCallback = function( $array ) {
+			if ( is_array( $array ) ) {
+				$array[ApiResult::META_KVP_MERGE] = true;
+			}
+			return $array;
+		};
+
+		$modifications['descriptions'][] = $kvpMergeCallback;
+		$modifications['labels'][] = $kvpMergeCallback;
+		$modifications['sitelinks'][] = $kvpMergeCallback;
+
+		$indexLabelCallback = $this->callbackFactory->getCallbackToIndexTags( 'label' );
+		$indexDescriptionCallback = $this->callbackFactory->getCallbackToIndexTags( 'description' );
+		$indexAliasCallback = $this->callbackFactory->getCallbackToIndexTags( 'alias' );
+		$indexLanguageCallback = $this->callbackFactory->getCallbackToIndexTags( 'language' );
+		$indexBadgeCallback = $this->callbackFactory->getCallbackToIndexTags( 'badge' );
+		$indexSitelinkCallback = $this->callbackFactory->getCallbackToIndexTags( 'sitelink' );
+		$indexQualifiersCallback = $this->callbackFactory->getCallbackToIndexTags( 'qualifiers' );
+		$indexPropertyCallback = $this->callbackFactory->getCallbackToIndexTags( 'property' );
+		$indexSnakCallback = $this->callbackFactory->getCallbackToIndexTags( 'snak' );
+		$indexReferenceCallback = $this->callbackFactory->getCallbackToIndexTags( 'reference' );
+		$indexClaimCallback = $this->callbackFactory->getCallbackToIndexTags( 'claim' );
+
+		$modifications['labels'][] = $indexLabelCallback;
+		$modifications['descriptions'][] = $indexDescriptionCallback;
+		$modifications['aliases/*'][] = $indexAliasCallback;
+		$modifications['aliases'][] = $indexLanguageCallback;
+		$modifications['sitelinks/*/badges'][] = $indexBadgeCallback;
+		$modifications['sitelinks'][] = $indexSitelinkCallback;
+		$modifications['claims/*/*/qualifiers/*'][] = $indexQualifiersCallback;
+		$modifications['claims/*/*/qualifiers'][] = $indexPropertyCallback;
+		$modifications['claims/*/*/qualifiers-order'][] = $indexPropertyCallback;
+		$modifications['claims/*/*/references/*/snaks/*'][] = $indexSnakCallback;
+		$modifications['claims/*/*/references/*/snaks'][] = $indexPropertyCallback;
+		$modifications['claims/*/*/references/*/snaks-order'][] = $indexPropertyCallback;
+		$modifications['claims/*/*/references'][] = $indexReferenceCallback;
+		$modifications['claims/*'][] = $indexClaimCallback;
+		$modifications['claims'][] = $indexPropertyCallback;
+
+		if ( $serializeEmptyListsAsObjects ) {
+			$modifications['*/*/claims/*/*/qualifiers/*'][] = $indexQualifiersCallback;
+			$modifications['*/*/claims/*/*/qualifiers'][] = $indexPropertyCallback;
+			$modifications['*/*/claims/*/*/qualifiers-order'][] = $indexPropertyCallback;
+			$modifications['*/*/claims/*/*/references/*/snaks/*'][] = $indexSnakCallback;
+			$modifications['*/*/claims/*/*/references/*/snaks'][] = $indexPropertyCallback;
+			$modifications['*/*/claims/*/*/references/*/snaks-order'][] = $indexPropertyCallback;
+			$modifications['*/*/claims/*/*/references'][] = $indexReferenceCallback;
+			$modifications['*/*/claims/*'][] = $indexClaimCallback;
+			$modifications['*/*/claims'][] = $indexPropertyCallback;
 		}
 
-		$indexTags = [
-			'labels' => 'label',
-			'descriptions' => 'description',
-			'aliases/*' => 'alias',
-			'aliases' => 'language',
-			'sitelinks/*/badges' => 'badge',
-			'sitelinks' => 'sitelink',
-			'claims/*/*/qualifiers/*' => 'qualifiers',
-			'claims/*/*/qualifiers' => 'property',
-			'claims/*/*/qualifiers-order' => 'property',
-			'claims/*/*/references/*/snaks/*' => 'snak',
-			'claims/*/*/references/*/snaks' => 'property',
-			'claims/*/*/references/*/snaks-order' => 'property',
-			'claims/*/*/references' => 'reference',
-			'claims/*' => 'claim',
-			'claims' => 'property',
-		];
-		foreach ( $indexTags as $path => $tag ) {
-			$serialization = $this->modifier->modifyUsingCallback(
-				$serialization,
-				$path,
-				$this->callbackFactory->getCallbackToIndexTags( $tag )
-			);
-		}
-
-		return $serialization;
+		return $this->modifier->modifyUsingCallbacks( $serialization, $modifications );
 	}
 
 	/**
@@ -720,15 +743,12 @@ class ResultBuilder {
 		$values = $serializer->serialize( $aliasGroupList );
 
 		if ( $this->addMetaData ) {
-			$values = $this->modifier->modifyUsingCallback(
+			$values = $this->modifier->modifyUsingCallbacks(
 				$values,
-				null,
-				$this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'id' )
-			);
-			$values = $this->modifier->modifyUsingCallback(
-				$values,
-				'*',
-				$this->callbackFactory->getCallbackToIndexTags( 'alias' )
+				[
+					'' => $this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'id' ),
+					'*' => $this->callbackFactory->getCallbackToIndexTags( 'alias' ),
+				]
 			);
 		}
 
@@ -773,22 +793,18 @@ class ResultBuilder {
 			}
 			return $array;
 		};
-		return $this->modifier->modifyUsingCallback( $array, '*', $addUrlCallback );
+		return $this->modifier->modifyUsingCallbacks( $array, [ '*' => $addUrlCallback ] );
 	}
 
 	private function getSiteLinkListArrayWithMetaData( array $array ) {
-		$array = $this->modifier->modifyUsingCallback(
-			$array,
-			null,
-			$this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'site' )
-		);
 		$array[ApiResult::META_KVP_MERGE] = true;
-		$array = $this->modifier->modifyUsingCallback(
+		return $this->modifier->modifyUsingCallbacks(
 			$array,
-			'*/badges',
-			$this->callbackFactory->getCallbackToIndexTags( 'badge' )
+			[
+				'' => $this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'site' ),
+				'*/badges' => $this->callbackFactory->getCallbackToIndexTags( 'badge' ),
+			]
 		);
-		return $array;
 	}
 
 	/**
@@ -806,10 +822,9 @@ class ResultBuilder {
 			$values[$siteLink->getSiteId()] = $value;
 		}
 		if ( $this->addMetaData ) {
-			$values = $this->modifier->modifyUsingCallback(
+			$values = $this->modifier->modifyUsingCallbacks(
 				$values,
-				null,
-				$this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'site' )
+				[ '' => $this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'site' ) ]
 			);
 			$values[ApiResult::META_KVP_MERGE] = true;
 		}
@@ -829,13 +844,12 @@ class ResultBuilder {
 		$values = $serializer->serialize( $statements );
 
 		if ( is_array( $props ) && !in_array( 'references', $props ) ) {
-			$values = $this->modifier->modifyUsingCallback(
+			$values = $this->modifier->modifyUsingCallbacks(
 				$values,
-				'*/*',
-				function ( $array ) {
+				[ '*/*' => function ( $array ) {
 					unset( $array['references'] );
 					return $array;
-				}
+				} ]
 			);
 		}
 
@@ -843,22 +857,15 @@ class ResultBuilder {
 
 		if ( $this->addMetaData ) {
 			$values = $this->getClaimsArrayWithMetaData( $values, '*/*/' );
-			$values = $this->modifier->modifyUsingCallback(
-				$values,
-				null,
-				$this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'id' )
-			);
-			$values = $this->modifier->modifyUsingCallback(
-				$values,
-				'*',
-				$this->callbackFactory->getCallbackToIndexTags( 'claim' )
-			);
+			$values = $this->modifier->modifyUsingCallbacks( $values, [
+				'' => $this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'id' ),
+				'*' => $this->callbackFactory->getCallbackToIndexTags( 'claim' ),
+			] );
 		}
 
-		$values = $this->dataTypeInjector->getArrayWithDataTypesInSnakAtPath(
-			$values,
-			'*/*/mainsnak'
-		);
+		$values = $this->modifier->modifyUsingCallbacks( $values, [
+			'*/*/mainsnak' => $this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup, $this->entityIdParser ),
+		] );
 
 		if ( $this->addMetaData ) {
 			ApiResult::setArrayType( $values, 'kvp', 'id' );
@@ -887,10 +894,9 @@ class ResultBuilder {
 			$value = $this->getClaimsArrayWithMetaData( $value );
 		}
 
-		$value = $this->dataTypeInjector->getArrayWithDataTypesInSnakAtPath(
-			$value,
-			'mainsnak'
-		);
+		$value = $this->modifier->modifyUsingCallbacks( $value, [
+			'mainsnak' => $this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup, $this->entityIdParser ),
+		] );
 
 		$this->setValue( null, 'claim', $value );
 	}
@@ -905,21 +911,18 @@ class ResultBuilder {
 		array $array,
 		$claimPath = ''
 	) {
-		$array = $this->dataTypeInjector->getArrayWithDataTypesInGroupedSnakListAtPath(
-			$array,
-			$claimPath . 'references/*/snaks'
+		$groupedCallback = $this->callbackFactory->getCallbackToAddDataTypeToSnaksGroupedByProperty(
+			$this->dataTypeLookup,
+			$this->entityIdParser
 		);
-		$array = $this->dataTypeInjector->getArrayWithDataTypesInGroupedSnakListAtPath(
-			$array,
-			$claimPath . 'qualifiers'
-		);
-
-		$array = $this->dataTypeInjector->getArrayWithDataTypesInSnakAtPath(
-			$array,
-			$claimPath . 'mainsnak'
-		);
-
-		return $array;
+		return $this->modifier->modifyUsingCallbacks( $array, [
+			$claimPath . 'references/*/snaks' => $groupedCallback,
+			$claimPath . 'qualifiers' => $groupedCallback,
+			$claimPath . 'mainsnak' => $this->callbackFactory->getCallbackToAddDataTypeToSnak(
+				$this->dataTypeLookup,
+				$this->entityIdParser
+			),
+		] );
 	}
 
 	/**
@@ -929,42 +932,34 @@ class ResultBuilder {
 	 * @return array
 	 */
 	private function getClaimsArrayWithMetaData( array $array, $claimPath = '' ) {
-		$metaDataModifications = [
-			'references/*/snaks/*' => [
+		return $this->modifier->modifyUsingCallbacks( $array, [
+			$claimPath . 'references/*/snaks/*' => [
 				$this->callbackFactory->getCallbackToIndexTags( 'snak' ),
 			],
-			'references/*/snaks' => [
+			$claimPath . 'references/*/snaks' => [
 				$this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'id' ),
 				$this->callbackFactory->getCallbackToIndexTags( 'property' ),
 			],
-			'references/*/snaks-order' => [
+			$claimPath . 'references/*/snaks-order' => [
 				$this->callbackFactory->getCallbackToIndexTags( 'property' )
 			],
-			'references' => [
+			$claimPath . 'references' => [
 				$this->callbackFactory->getCallbackToIndexTags( 'reference' ),
 			],
-			'qualifiers/*' => [
+			$claimPath . 'qualifiers/*' => [
 				$this->callbackFactory->getCallbackToIndexTags( 'qualifiers' ),
 			],
-			'qualifiers' => [
+			$claimPath . 'qualifiers' => [
 				$this->callbackFactory->getCallbackToSetArrayType( 'kvp', 'id' ),
 				$this->callbackFactory->getCallbackToIndexTags( 'property' ),
 			],
-			'qualifiers-order' => [
+			$claimPath . 'qualifiers-order' => [
 				$this->callbackFactory->getCallbackToIndexTags( 'property' )
 			],
-			'mainsnak' => [
-				$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup ),
+			$claimPath . 'mainsnak' => [
+				$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup, $this->entityIdParser ),
 			],
-		];
-
-		foreach ( $metaDataModifications as $path => $callbacks ) {
-			foreach ( $callbacks as $callback ) {
-				$array = $this->modifier->modifyUsingCallback( $array, $claimPath . $path, $callback );
-			}
-		}
-
-		return $array;
+		] );
 	}
 
 	/**
@@ -981,7 +976,12 @@ class ResultBuilder {
 
 		$value = $serializer->serialize( $reference );
 
-		$value = $this->dataTypeInjector->getArrayWithDataTypesInGroupedSnakListAtPath( $value, 'snaks' );
+		$value = $this->modifier->modifyUsingCallbacks( $value, [
+			'snaks' => $this->callbackFactory->getCallbackToAddDataTypeToSnaksGroupedByProperty(
+				$this->dataTypeLookup,
+				$this->entityIdParser
+			),
+		] );
 
 		if ( $this->addMetaData ) {
 			$value = $this->getReferenceArrayWithMetaData( $value );
@@ -991,22 +991,23 @@ class ResultBuilder {
 	}
 
 	private function getReferenceArrayWithMetaData( array $array ) {
-		$array = $this->modifier->modifyUsingCallback( $array, 'snaks-order', function ( $array ) {
-			ApiResult::setIndexedTagName( $array, 'property' );
-			return $array;
-		} );
-		$array = $this->modifier->modifyUsingCallback( $array, 'snaks', function ( $array ) {
-			foreach ( $array as &$snakGroup ) {
-				if ( is_array( $snakGroup ) ) {
-					ApiResult::setArrayType( $array, 'array' );
-					ApiResult::setIndexedTagName( $snakGroup, 'snak' );
+		return $this->modifier->modifyUsingCallbacks( $array, [
+			'snaks-order' => function ( $array ) {
+				ApiResult::setIndexedTagName( $array, 'property' );
+				return $array;
+			},
+			'snaks' => function ( $array ) {
+				foreach ( $array as &$snakGroup ) {
+					if ( is_array( $snakGroup ) ) {
+						ApiResult::setArrayType( $array, 'array' );
+						ApiResult::setIndexedTagName( $snakGroup, 'snak' );
+					}
 				}
-			}
-			ApiResult::setArrayType( $array, 'kvp', 'id' );
-			ApiResult::setIndexedTagName( $array, 'property' );
-			return $array;
-		} );
-		return $array;
+				ApiResult::setArrayType( $array, 'kvp', 'id' );
+				ApiResult::setIndexedTagName( $array, 'property' );
+				return $array;
+			},
+		] );
 	}
 
 	/**
@@ -1063,7 +1064,7 @@ class ResultBuilder {
 	/**
 	 * Adds the ID of the new revision from the Status object to the API result structure.
 	 * The status value is expected to be structured in the way that EditEntity::attemptSave()
-	 * resp WikiPage::doEditContent() do it: as an array, with an EntityRevision object in the
+	 * resp WikiPage::doUserEditContent() do it: as an array, with an EntityRevision object in the
 	 *  'revision' field. If $oldRevId is set and the latest edit was null, a 'nochange' flag
 	 *  is also added.
 	 *

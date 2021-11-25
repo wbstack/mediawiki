@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Wikibase\Repo\Store\Sql;
 
 use Onoi\MessageReporter\MessageReporter;
@@ -9,8 +11,8 @@ use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Entity\EntityPrefetcher;
 use Wikibase\DataModel\Services\EntityId\EntityIdPager;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\Sql\SiteLinkTable;
-use Wikimedia\Rdbms\ILBFactory;
 
 /**
  * Utility class for rebuilding the wb_items_per_site table.
@@ -47,39 +49,34 @@ class ItemsPerSiteBuilder {
 	private $batchSize = 100;
 
 	/**
-	 * @var ILBFactory
+	 * @var RepoDomainDb
 	 */
-	private $lbFactory;
+	private $db;
 
 	public function __construct(
 		SiteLinkTable $siteLinkTable,
 		EntityLookup $entityLookup,
 		EntityPrefetcher $entityPrefetcher,
-		ILBFactory $lbFactory
+		RepoDomainDb $db
 	) {
 		$this->siteLinkTable = $siteLinkTable;
 		$this->entityLookup = $entityLookup;
 		$this->entityPrefetcher = $entityPrefetcher;
-		$this->lbFactory = $lbFactory;
+		$this->db = $db;
 	}
 
-	/**
-	 * @param int $batchSize
-	 */
-	public function setBatchSize( $batchSize ) {
+	public function setBatchSize( int $batchSize ): void {
 		$this->batchSize = $batchSize;
 	}
 
 	/**
-	 * Sets the reporter to use for reporting preogress.
-	 *
-	 * @param MessageReporter $reporter
+	 * Sets the reporter to use for reporting progress.
 	 */
-	public function setReporter( MessageReporter $reporter ) {
+	public function setReporter( MessageReporter $reporter ): void {
 		$this->reporter = $reporter;
 	}
 
-	public function rebuild( EntityIdPager $entityIdPager ) {
+	public function rebuild( EntityIdPager $entityIdPager ): void {
 		$this->report( 'Start rebuild...' );
 
 		$total = 0;
@@ -98,10 +95,8 @@ class ItemsPerSiteBuilder {
 
 	/**
 	 * @param EntityId[] $itemIds
-	 *
-	 * @return int
 	 */
-	private function rebuildSiteLinks( array $itemIds ) {
+	private function rebuildSiteLinks( array $itemIds ): int {
 		$this->entityPrefetcher->prefetch( $itemIds );
 
 		$c = 0;
@@ -124,17 +119,12 @@ class ItemsPerSiteBuilder {
 			$c++;
 		}
 		// Wait for the replicas, just in case we e.g. hit a range of ids which need a lot of writes.
-		$this->lbFactory->waitForReplication( [
-			'domain' => $this->lbFactory->getLocalDomainID(),
-		] );
+		$this->db->replication()->wait();
 
 		return $c;
 	}
 
-	/**
-	 * @param string $msg
-	 */
-	private function report( $msg ) {
+	private function report( string $msg ): void {
 		if ( $this->reporter ) {
 			$this->reporter->reportMessage( $msg );
 		}

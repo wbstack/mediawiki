@@ -4,7 +4,9 @@ namespace MediaWiki\Extension\TemplateSandbox;
 
 use Content;
 use InvalidArgumentException;
+use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\PageReference;
 use MediaWiki\Revision\MutableRevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use OutputPage;
@@ -105,7 +107,7 @@ class Logic {
 
 		MediaWikiServices::getInstance()->getLinkCache()->clear();
 
-		return new ScopedCallback( function () use ( $id ) {
+		return new ScopedCallback( static function () use ( $id ) {
 			global $wgHooks;
 			unset( $wgHooks['TitleExists'][$id] );
 			MediaWikiServices::getInstance()->getLinkCache()->clear();
@@ -119,8 +121,10 @@ class Logic {
 	 */
 	public static function addSubpageHandlerToOutput( array $prefixes, OutputPage $output ) {
 		$cache = [];
-		$output->addContentOverrideCallback( function ( Title $title ) use ( $prefixes, &$cache ) {
-			$titleText = $title->getPrefixedText();
+		$output->addContentOverrideCallback( static function ( $title ) use ( $prefixes, &$cache ) {
+			/** @var PageReference|LinkTarget $title */
+			$formatter = MediaWikiServices::getInstance()->getTitleFormatter();
+			$titleText = $formatter->getPrefixedText( $title );
 			if ( array_key_exists( $titleText, $cache ) ) {
 				return $cache[$titleText];
 			}

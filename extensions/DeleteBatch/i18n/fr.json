@@ -36,7 +36,7 @@
 	"deletebatch-select-yourself": "vous",
 	"deletebatch-no-page": "Veuillez indiquer au moins une page à supprimer OU un fichier donné contenant une liste de pages.",
 	"deletebatch-system-username": "Script de suppression de page",
-	"action-deletebatch": "pages supprimées par lots",
+	"action-deletebatch": "supprimer des pages en lot",
 	"right-deletebatch": "Supprimer des pages en lot",
 	"action-deletebatch-spoof": "supprimer par lots des pages en tant que « Script de suppression de pages »",
 	"right-deletebatch-spoof": "Pages supprimées par lots en tant que \"suppression de page par script\"",

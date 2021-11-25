@@ -43,7 +43,7 @@ class JCTabularContentView extends JCContentView {
 		$headerAttributes = [];
 
 		// Helper to add a class value to an array of attributes
-		$addErr = function ( array $attrs, $isValid ) {
+		$addErr = static function ( array $attrs, $isValid ) {
 			if ( !$isValid ) {
 				$attrs['class'] = 'mw-tabular-error';
 			}
@@ -51,7 +51,7 @@ class JCTabularContentView extends JCContentView {
 		};
 
 		// Helper to create a <tr> element out of an array of raw HTML values
-		$makeRow = function ( array $values, array $attrs = [] ) {
+		$makeRow = static function ( array $values, array $attrs = [] ) {
 			return Html::rawElement( 'tr', $attrs, implode( '', $values ) );
 		};
 

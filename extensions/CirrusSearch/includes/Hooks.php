@@ -5,7 +5,6 @@ namespace CirrusSearch;
 use ApiBase;
 use ApiMain;
 use ApiOpenSearch;
-use CirrusSearch\Job\JobTraits;
 use CirrusSearch\Profile\SearchProfileServiceFactory;
 use CirrusSearch\Search\FancyTitleResultsType;
 use DeferredUpdates;
@@ -188,7 +187,7 @@ class Hooks {
 		$lines = $cache->getWithSetCallback(
 			$cache->makeKey( 'cirrussearch-morelikethis-settings' ),
 			600,
-			function () {
+			static function () {
 				$source = wfMessage( 'cirrussearch-morelikethis-settings' )->inContentLanguage();
 				if ( $source && $source->isDisabled() ) {
 					return [];
@@ -237,6 +236,7 @@ class Hooks {
 					$wgCirrusSearchMoreLikeThisAllowedFields );
 				break;
 			}
+			// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
 			if ( $wgCirrusSearchMoreLikeThisConfig['max_query_terms'] > $wgCirrusSearchMoreLikeThisMaxQueryTermsLimit ) {
 				$wgCirrusSearchMoreLikeThisConfig['max_query_terms'] = $wgCirrusSearchMoreLikeThisMaxQueryTermsLimit;
 			}
@@ -279,6 +279,7 @@ class Hooks {
 			$request, 'cirrusMltMinDocFreq' );
 		self::overrideNumeric( $wgCirrusSearchMoreLikeThisConfig['max_doc_freq'],
 			$request, 'cirrusMltMaxDocFreq' );
+		// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
 		self::overrideNumeric( $wgCirrusSearchMoreLikeThisConfig['max_query_terms'],
 			$request, 'cirrusMltMaxQueryTerms', $wgCirrusSearchMoreLikeThisMaxQueryTermsLimit );
 		self::overrideNumeric( $wgCirrusSearchMoreLikeThisConfig['min_term_freq'],
@@ -310,7 +311,7 @@ class Hooks {
 		$target = $page->getRedirectTarget();
 		if ( $target ) {
 			// DeferredUpdate so we don't end up racing our own page deletion
-			DeferredUpdates::addCallableUpdate( function () use ( $target ) {
+			DeferredUpdates::addCallableUpdate( static function () use ( $target ) {
 				JobQueueGroup::singleton()->push(
 					new Job\LinksUpdate( $target, [
 						'addedLinks' => [],
@@ -365,7 +366,7 @@ class Hooks {
 		$status = $version->get();
 		if ( $status->isOK() ) {
 			// We've already logged if this isn't ok and there is no need to warn the user on this page.
-			$software[ '[https://www.elastic.co/products/elasticsearch Elasticsearch]' ] = $status->getValue();
+			$software[ '[https://www.elastic.co/elasticsearch Elasticsearch]' ] = $status->getValue();
 		}
 	}
 
@@ -434,10 +435,28 @@ class Hooks {
 		} else {
 			$delay = $wgCirrusSearchUpdateDelay['default'];
 		}
-		$params += JobTraits::buildJobDelayOptions( Job\LinksUpdate::class, $delay );
+		$params += Job\LinksUpdate::buildJobDelayOptions( Job\LinksUpdate::class, $delay );
 		$job = new Job\LinksUpdate( $linksUpdate->getTitle(), $params );
 
 		JobQueueGroup::singleton()->push( $job );
+	}
+
+	/**
+	 * Hook into UploadComplete, overwritten files do not seem to trigger LinksUpdateComplete.
+	 * Since files do contain indexed metadata we need to refresh the search index when a file
+	 * is overwritten on an existing title.
+	 * @param \UploadBase $uploadBase
+	 */
+	public static function onUploadComplete( \UploadBase $uploadBase ) {
+		if ( $uploadBase->getTitle()->exists() ) {
+			JobQueueGroup::singleton()->push(
+				new Job\LinksUpdate( $uploadBase->getTitle(), [
+					'addedLinks' => [],
+					'removedLinks' => [],
+					'prioritize' => true
+				] )
+			);
+		}
 	}
 
 	/**
@@ -579,7 +598,7 @@ class Hooks {
 				'docId' => self::getConfig()->makeId( $oldId )
 			] );
 			// Push the job after DB commit but cancel on rollback
-			wfGetDB( DB_MASTER )->onTransactionCommitOrIdle( function () use ( $job ) {
+			wfGetDB( DB_PRIMARY )->onTransactionCommitOrIdle( static function () use ( $job ) {
 				JobQueueGroup::singleton()->lazyPush( $job );
 			}, __METHOD__ );
 		}
@@ -657,6 +676,7 @@ class Hooks {
 	 * @return SearchConfig
 	 */
 	private static function getConfig() {
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return MediaWikiServices::getInstance()
 			->getConfigFactory()
 			->makeConfig( 'CirrusSearch' );
@@ -720,8 +740,18 @@ class Hooks {
 		$jsVars = [
 			'wgCirrusSearchRequestSetToken' => Util::getRequestSetToken(),
 		];
-		if ( UserTesting::isInitialized() ) {
-			$jsVars['wgCirrusSearchBackendUserTests'] = UserTesting::getInstance()->getActiveTestNamesWithBucket();
+		// In theory UserTesting should always have been activated by now, but if
+		// somehow it wasn't we don't want to activate it now at the end of the request
+		// and report incorrect data.
+		if ( UserTestingStatus::hasInstance() ) {
+			$ut = UserTestingStatus::getInstance();
+			if ( $ut->isActive() ) {
+				$trigger = $ut->getTrigger();
+				$jsVars['wgCirrusSearchActiveUserTest'] = $trigger;
+				// bc for first deployment, some users will still have old js.
+				// Should be removed in following deployment.
+				$jsVars['wgCirrusSearchBackendUserTests'] = $trigger ? [ $trigger ] : [];
+			}
 		}
 		$wgOut->addJsConfigVars( $jsVars );
 
@@ -801,7 +831,7 @@ class Hooks {
 		);
 		$container->defineService(
 			InterwikiResolver::SERVICE,
-			function ( MediaWikiServices $serviceContainer ) {
+			static function ( MediaWikiServices $serviceContainer ) {
 				$config = $serviceContainer->getConfigFactory()
 						->makeConfig( 'CirrusSearch' );
 				return $serviceContainer
@@ -810,12 +840,12 @@ class Hooks {
 			}
 		);
 		$container->defineService( SearchProfileServiceFactory::SERVICE_NAME,
-			function ( MediaWikiServices $serviceContainer ) {
+			static function ( MediaWikiServices $serviceContainer ) {
 				$config = $serviceContainer->getConfigFactory()
 					->makeConfig( 'CirrusSearch' );
 				return new SearchProfileServiceFactory(
 					$serviceContainer->getService( InterwikiResolver::SERVICE ),
-					/** @phan-suppress-next-line PhanTypeMismatchArgument $config is actually a SearchConfig */
+					/** @phan-suppress-next-line PhanTypeMismatchArgumentSuperType $config is actually a SearchConfig */
 					$config,
 					$serviceContainer->getLocalServerObjectCache(),
 					new CirrusSearchHookRunner( $serviceContainer->getHookContainer() )

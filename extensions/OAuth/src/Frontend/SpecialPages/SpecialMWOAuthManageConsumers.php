@@ -94,7 +94,6 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 		} elseif ( count( $navigation ) === 1 && $navigation[0] ) {
 			$this->stage = array_search( $navigation[0], Consumer::$stageNames, true );
 			if ( $this->stage !== false ) {
-				$consumerKey = null;
 				$this->stageKey = $navigation[0];
 			} else {
 				$consumerKey = $navigation[0];
@@ -257,7 +256,7 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 			}
 		}
 
-		$dbw = Utils::getCentralDB( DB_MASTER ); // @TODO: lazy handle
+		$dbw = Utils::getCentralDB( DB_PRIMARY );
 		$control = new ConsumerSubmitControl( $this->getContext(), [], $dbw );
 		$form = \HTMLForm::factory( 'ooui',
 			$control->registerValidators( [
@@ -274,7 +273,8 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 					'label-message' => 'mwoauthmanageconsumers-action',
 					'required' => true,
 					'options' => $opts,
-					'default' => '', // no validate on GET
+					// no validate on GET
+					'default' => '',
 				],
 				'reason' => [
 					'type' => 'text',
@@ -293,7 +293,7 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 			$this->getContext()
 		);
 		$form->setSubmitCallback(
-			function ( array $data, \IContextSource $context ) use ( $control ) {
+			static function ( array $data, \IContextSource $context ) use ( $control ) {
 				$data['suppress'] = 0;
 				if ( $data['action'] === 'dsuppress' ) {
 					$data = [ 'action' => 'disable', 'suppress' => 1 ] + $data;
@@ -394,7 +394,7 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 				null : ( $cmrAc->getCallbackIsPrefix() ?
 					$this->msg( 'htmlform-yes' ) : $this->msg( 'htmlform-no' ) ),
 			'mwoauth-consumer-grantsneeded' => $cmrAc->get( 'grants',
-				function ( $grants ) use ( $lang ) {
+				static function ( $grants ) use ( $lang ) {
 					return $lang->semicolonList( \MWGrants::grantNames( $grants, $lang ) );
 				} ),
 			'mwoauth-consumer-email' => $cmrAc->getEmail(),
@@ -465,7 +465,7 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 		}
 		# Every 30th view, prune old deleted items
 		if ( mt_rand( 0, 29 ) == 0 ) {
-			Utils::runAutoMaintenance( Utils::getCentralDB( DB_MASTER ) );
+			Utils::runAutoMaintenance( Utils::getCentralDB( DB_PRIMARY ) );
 		}
 	}
 
@@ -489,7 +489,7 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 		$time = $this->getLanguage()->timeanddate(
 			wfTimestamp( TS_MW, $cmrAc->getRegistration() ), true );
 
-		$encStageKey = htmlspecialchars( $stageKey ); // sanity
+		$encStageKey = htmlspecialchars( $stageKey );
 		$r = "<li class='mw-mwoauthmanageconsumers-{$encStageKey}'>";
 
 		$r .= $time . " (<strong>{$link}</strong>)";
@@ -517,7 +517,7 @@ class SpecialMWOAuthManageConsumers extends \SpecialPage {
 				$this->msg( 'mwoauth-oauth-version-1' )
 			),
 			'mwoauthmanageconsumers-description' => $cmrAc->escapeForHtml(
-				$cmrAc->get( 'description', function ( $s ) use ( $lang ) {
+				$cmrAc->get( 'description', static function ( $s ) use ( $lang ) {
 					return $lang->truncateForVisual( $s, 10024 );
 				} )
 			),

@@ -17,11 +17,11 @@ use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
@@ -58,21 +58,22 @@ class RemoveSense extends ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
-		EntityIdParser $entityIdParser
+		ApiHelperFactory $apiHelperFactory,
+		MediawikiEditEntityFactory $editEntityFactory,
+		EntityIdParser $entityIdParser,
+		Store $store,
+		SummaryFormatter $summaryFormatter
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
 		return new self(
 			$mainModule,
 			$moduleName,
 			new RemoveSenseRequestParser(
 				new SenseIdDeserializer( $entityIdParser )
 			),
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
-			$wikibaseRepo->getSummaryFormatter(),
-			function ( $module ) use ( $apiHelperFactory ) {
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
+			$summaryFormatter,
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			}
 		);
@@ -161,7 +162,7 @@ class RemoveSense extends ApiBase {
 		$changeOp->apply( $lexeme, $summary );
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$lexemeId,
 			$baseRevId
 		);
@@ -178,7 +179,9 @@ class RemoveSense extends ApiBase {
 			$lexeme,
 			$this->summaryFormatter->formatSummary( $summary ),
 			$flags,
-			$tokenThatDoesNotNeedChecking
+			$tokenThatDoesNotNeedChecking,
+			null,
+			$params['tags'] ?: []
 		);
 
 		if ( !$status->isOK() ) {
@@ -207,10 +210,14 @@ class RemoveSense extends ApiBase {
 				AddFormRequestParser::PARAM_BASEREVID => [
 					self::PARAM_TYPE => 'integer',
 				],
+				'tags' => [
+					self::PARAM_TYPE => 'tags',
+					self::PARAM_ISMULTI => true,
+				],
 				'bot' => [
 					self::PARAM_TYPE => 'boolean',
 					self::PARAM_DFLT => false,
-				],
+				]
 			]
 		);
 	}

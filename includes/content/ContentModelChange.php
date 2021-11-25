@@ -113,9 +113,6 @@ class ContentModelChange {
 		$titleWithNewContentModel->setContentModel( $this->newModel );
 
 		$status = PermissionStatus::newEmpty();
-		if ( !$current->exists() ) {
-			$authorizer( 'create', $current, $status );
-		}
 		$authorizer( 'editcontentmodel', $current, $status );
 		$authorizer( 'edit', $current, $status );
 		$authorizer( 'editcontentmodel', $titleWithNewContentModel, $status );
@@ -325,13 +322,12 @@ class ContentModelChange {
 			$flags |= EDIT_FORCE_BOT;
 		}
 
-		$status = $page->doEditContent(
+		$status = $page->doUserEditContent(
 			$newContent,
+			$this->performer,
 			$reason,
 			$flags,
 			$this->latestRevId,
-			$this->performer,
-			null,
 			$this->tags
 		);
 

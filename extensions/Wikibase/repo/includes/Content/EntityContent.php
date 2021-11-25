@@ -52,7 +52,7 @@ abstract class EntityContent extends AbstractContent {
 	/**
 	 * Flag for use with prepareSave(), indicating that no pre-save validation should be applied.
 	 * Can be passed in via EditEntity::attemptSave, EntityStore::saveEntity,
-	 * as well as WikiPage::doEditContent()
+	 * as well as WikiPage::doUserEditContent()
 	 *
 	 * @note: must not collide with the EDIT_XXX flags defined by MediaWiki core in Defines.php.
 	 */
@@ -169,6 +169,11 @@ abstract class EntityContent extends AbstractContent {
 	) {
 		if ( $this->isRedirect() ) {
 			return $this->getParserOutputForRedirect( $generateHtml );
+		} elseif ( !$this->getEntityHolder() ) {
+			// NOTE: There is no entity to render, but getParserOutput() must work for all Content objects.
+			// NOTE: isEmpty() will return true when there is an entity, but that entity is empty. In
+			//       that case, we must not bail out, but call getParserOutputFromEntityView() as normal.
+			return new ParserOutput();
 		} else {
 			if ( $options === null ) {
 				$options = ParserOptions::newFromContext( RequestContext::getMain() );
@@ -229,9 +234,10 @@ abstract class EntityContent extends AbstractContent {
 		$generateHtml = true
 	) {
 		// @todo: move this to the ContentHandler
-		$outputGenerator = WikibaseRepo::getDefaultInstance()->getEntityParserOutputGenerator(
-			$this->getValidUserLanguage( $options->getUserLangObj() )
-		);
+		$outputGenerator = WikibaseRepo::getEntityParserOutputGeneratorFactory()
+			->getEntityParserOutputGenerator(
+				$this->getValidUserLanguage( $options->getUserLangObj() )
+			);
 
 		$entityRevision = $this->getEntityRevision( $revisionId );
 
@@ -322,7 +328,7 @@ abstract class EntityContent extends AbstractContent {
 		}
 
 		// @todo this text for filters stuff should be it's own class with test coverage!
-		$codec = WikibaseRepo::getDefaultInstance()->getEntityContentDataCodec();
+		$codec = WikibaseRepo::getEntityContentDataCodec();
 		$json = $codec->encodeEntity( $this->getEntity(), CONTENT_FORMAT_JSON );
 		$data = json_decode( $json, true );
 

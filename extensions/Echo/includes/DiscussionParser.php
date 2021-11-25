@@ -32,7 +32,7 @@ abstract class EchoDiscussionParser {
 		// use replica database if there is a previous revision
 		if ( $store->getPreviousRevision( $revision ) ) {
 			$title = Title::newFromID( $revision->getPageId() );
-			// use master database for new page
+			// use primary database for new page
 		} else {
 			$title = Title::newFromID( $revision->getPageId(), Title::GAID_FOR_UPDATE );
 		}
@@ -210,7 +210,7 @@ abstract class EchoDiscussionParser {
 				$found = true;
 			}
 		}
-		if ( $found === false ) {
+		if ( !$found ) {
 			return [ 'section-title' => '', 'section-text' => '' ];
 		}
 
@@ -385,6 +385,7 @@ abstract class EchoDiscussionParser {
 
 		$count = 0;
 		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
+		$userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
 
 		foreach ( $userLinks as $dbk => $page_id ) {
 			// If more users are being pinged this is likely a spam/attack vector
@@ -400,7 +401,6 @@ abstract class EchoDiscussionParser {
 				continue;
 			}
 
-			$userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
 			// 2. user is an anonymous IP
 			if ( $userNameUtils->isIP( $dbk ) ) {
 				$userMentions['anonymousUsers'][] = $dbk;
@@ -517,13 +517,15 @@ abstract class EchoDiscussionParser {
 			$store = MediaWikiServices::getInstance()->getRevisionStore();
 			$prevRevision = $store->getRevisionById( $revision->getParentId() );
 			if ( $prevRevision ) {
-				$prevText = ContentHandler::getContentText( $prevRevision->getContent( SlotRecord::MAIN ) ) ?: '';
+				$prevContent = $prevRevision->getContent( SlotRecord::MAIN );
+				$prevText = ( $prevContent instanceof TextContent ) ? $prevContent->getText() : '';
 			}
 		}
 
+		$content = $revision->getContent( SlotRecord::MAIN );
 		$changes = self::getMachineReadableDiff(
 			$prevText,
-			ContentHandler::getContentText( $revision->getContent( SlotRecord::MAIN ) )
+			( $content instanceof TextContent ) ? $content->getText() : null
 		);
 		$output = self::interpretDiff(
 			$changes,

@@ -33,7 +33,7 @@
  */
 class PHPVersionCheck {
 	/** @var string The number of the MediaWiki version used. If you're updating MW_VERSION in Defines.php, you must also update this value. */
-	var $mwVersion = '1.36';
+	var $mwVersion = '1.37';
 
 	/** @var string[] A mapping of PHP functions to PHP extensions. */
 	var $functionsExtensionsMapping = array(
@@ -170,9 +170,9 @@ HTML;
 			$web['longHtml'] = <<<HTML
 		<p>
 		MediaWiki also has some external dependencies that need to be installed via
-		composer or from a separate git repo. Please see
-		<a href="https://www.mediawiki.org/wiki/Download_from_Git#Fetch_external_libraries">mediawiki.org</a>
-		for help on installing the required components.
+		composer or from a separate git repo. Please see the
+		<a href="https://www.mediawiki.org/wiki/Download_from_Git#Fetch_external_libraries">instructions
+		for installing libraries</a> on mediawiki.org for help on installing the required components.
 		</p>
 HTML;
 			// phpcs:enable Generic.Files.LineLength

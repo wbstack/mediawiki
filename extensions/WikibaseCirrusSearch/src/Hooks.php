@@ -122,7 +122,7 @@ class Hooks {
 	}
 
 	/**
-	 * Register our cirrus profiles using WikibaseRepo::getDefaultInstance().
+	 * Register our cirrus profiles using WikibaseRepo.
 	 *
 	 * @param SearchProfileService $service
 	 */
@@ -132,10 +132,9 @@ class Hooks {
 			return;
 		}
 
-		$repo = WikibaseRepo::getDefaultInstance();
 		$namespacesForContexts = [];
 		$entityNsLookup = WikibaseRepo::getEntityNamespaceLookup();
-		foreach ( $repo->getFulltextSearchTypes() as $type => $profileContext ) {
+		foreach ( WikibaseRepo::getFulltextSearchTypes() as $type => $profileContext ) {
 			$namespace = $entityNsLookup->getEntityNamespace( $type );
 			if ( $namespace === null ) {
 				continue;
@@ -290,15 +289,8 @@ class Hooks {
 		if ( !$searchConfig->enabled() ) {
 			return;
 		}
-		$foreignRepoNames = [];
-		$foreignRepos = WikibaseRepo::getSettings()->getSetting(
-			'foreignRepositories'
-		);
-		if ( !empty( $foreignRepos ) ) {
-			$foreignRepoNames = array_keys( $foreignRepos );
-		}
-		$extraFeatures[] = new HasWbStatementFeature( $foreignRepoNames );
-		$extraFeatures[] = new WbStatementQuantityFeature( $foreignRepoNames );
+		$extraFeatures[] = new HasWbStatementFeature();
+		$extraFeatures[] = new WbStatementQuantityFeature();
 
 		$licenseMapping = HasLicenseFeature::getConfiguredLicenseMap( $searchConfig );
 		$extraFeatures[] = new HasLicenseFeature( $licenseMapping );
@@ -312,11 +304,10 @@ class Hooks {
 
 	/**
 	 * Will instantiate descriptions for search results.
-	 * @param WikibaseRepo $repo
 	 * @param Language $lang
 	 * @param array &$results
 	 */
-	public static function amendSearchResults( WikibaseRepo $repo, Language $lang, array &$results ) {
+	public static function amendSearchResults( Language $lang, array &$results ) {
 		$lookupFactory = WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory();
 		$idParser = WikibaseRepo::getEntityIdParser();
 		$entityIds = [];
@@ -340,7 +331,7 @@ class Hooks {
 			return;
 		}
 		$lookup = $lookupFactory->newLabelDescriptionLookup( $lang, $entityIds );
-		$formatterFactory = $repo->getEntityLinkFormatterFactory( $lang );
+		$formatterFactory = WikibaseRepo::getEntityLinkFormatterFactory();
 		foreach ( $results as &$result ) {
 			if ( empty( $result['entityId'] ) ) {
 				continue;
@@ -351,7 +342,7 @@ class Hooks {
 			if ( !$label ) {
 				continue;
 			}
-			$linkFormatter = $formatterFactory->getLinkFormatter( $entityId->getEntityType() );
+			$linkFormatter = $formatterFactory->getLinkFormatter( $entityId->getEntityType(), $lang );
 			$result['extract'] = strip_tags( $linkFormatter->getHtml( $entityId, [
 				'value' => $label->getText(),
 				'language' => $label->getActualLanguageCode(),
@@ -367,8 +358,8 @@ class Hooks {
 		if ( empty( $results ) ) {
 			return;
 		}
-		$repo = WikibaseRepo::getDefaultInstance();
-		self::amendSearchResults( $repo, WikibaseRepo::getUserLanguage(), $results );
+
+		self::amendSearchResults( WikibaseRepo::getUserLanguage(), $results );
 	}
 
 	/**
@@ -390,6 +381,7 @@ class Hooks {
 
 	/**
 	 * @return WikibaseSearchConfig
+	 * @suppress PhanTypeMismatchReturnSuperType
 	 */
 	private static function getWBCSConfig(): WikibaseSearchConfig {
 		return MediaWikiServices::getInstance()

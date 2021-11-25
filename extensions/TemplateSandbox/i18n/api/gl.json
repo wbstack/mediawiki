@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Prefixo da zona de probas dos módulos, como con [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Analizar a páxina usando <var>$1templatesandboxtext</var> no lugar dos contidos da páxina nomeada aquí.",
+	"templatesandbox-apihelp-text": "Analizar a páxina usando o contido desta páxina no canto da páxina nomeada por <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Modelo de contido de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Formato de contido de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Os parámetros <var>$1templatesandboxtitle</var> e <var>$1templatesandboxtext</var> deben especificarse ambos ou omitirse ambos."
+}

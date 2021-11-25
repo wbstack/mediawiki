@@ -1,21 +1,15 @@
 ( function () {
-	var useCodeMirror, codeMirror, api, originHooksTextarea, cmTextSelection,
-		$textbox1,
-		// Keep these modules in sync with CodeMirrorHooks.php
-		codeMirrorCoreModules = [
-			'ext.CodeMirror.lib',
-			'ext.CodeMirror.mode.mediawiki'
-		];
+	var codeMirror, $textbox1;
 
 	// Exit if WikiEditor is disabled
 	if ( !mw.loader.getState( 'ext.wikiEditor' ) ) {
 		return;
 	}
 
-	useCodeMirror = mw.user.options.get( 'usecodemirror' ) > 0;
-	api = new mw.Api();
+	var useCodeMirror = mw.user.options.get( 'usecodemirror' ) > 0;
+	var api = new mw.Api();
 
-	originHooksTextarea = $.valHooks.textarea;
+	var originHooksTextarea = $.valHooks.textarea;
 	// define jQuery hook for searching and replacing text using JS if CodeMirror is enabled, see Bug: T108711
 	$.valHooks.textarea = {
 		get: function ( elem ) {
@@ -38,7 +32,7 @@
 
 	// jQuery.textSelection overrides for CodeMirror.
 	// See jQuery.textSelection.js for method documentation
-	cmTextSelection = {
+	var cmTextSelection = {
 		getContents: function () {
 			return codeMirror.doc.getValue();
 		},
@@ -88,6 +82,27 @@
 	}
 
 	/**
+	 * @return {boolean}
+	 */
+	function isLineNumbering() {
+		// T285660: Backspace related bug on Android browsers as of 2021
+		if ( /Android\b/.test( navigator.userAgent ) ) {
+			return false;
+		}
+
+		var namespaces = mw.config.get( 'wgCodeMirrorLineNumberingNamespaces' );
+		// Set to [] to disable everywhere, or null to enable everywhere
+		return !namespaces ||
+			namespaces.indexOf( mw.config.get( 'wgNamespaceNumber' ) ) !== -1;
+	}
+
+	// Keep these modules in sync with CodeMirrorHooks.php
+	var codeMirrorCoreModules = [
+		'ext.CodeMirror.lib',
+		'ext.CodeMirror.mode.mediawiki'
+	];
+
+	/**
 	 * Replaces the default textarea with CodeMirror
 	 */
 	function enableCodeMirror() {
@@ -113,7 +128,7 @@
 				mwConfig: config,
 				// styleActiveLine: true, // disabled since Bug: T162204, maybe should be optional
 				lineWrapping: true,
-				lineNumbers: true,
+				lineNumbers: isLineNumbering(),
 				readOnly: $textbox1[ 0 ].readOnly,
 				// select mediawiki as text input mode
 				mode: 'text/mediawiki',
@@ -180,6 +195,8 @@
 			if ( mw.config.get( 'wgCodeMirrorAccessibilityColors' ) ) {
 				$codeMirror.addClass( 'cm-mw-accessible-colors' );
 			}
+
+			mw.hook( 'ext.CodeMirror.switch' ).fire( true, $codeMirror );
 		} );
 	}
 
@@ -238,6 +255,8 @@
 			$textbox1.prop( 'selectionStart', selectionStart );
 			$textbox1.prop( 'selectionEnd', selectionEnd );
 			$textbox1.scrollTop( scrollTop );
+
+			mw.hook( 'ext.CodeMirror.switch' ).fire( false, $textbox1 );
 		} else {
 			enableCodeMirror();
 			setCodeEditorPreference( true );
