@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"McDutchie",
 			"Siebrand"
 		]
 	},
 	"skinname-modern": "Modern",
-	"modern.css": "/* CSS die hier wordt geplaatst heeft alleen invloed op het uiterlijk Modern */",
-	"modern.js": "/* JavaScript die hier wordt geplaatst heeft alleen invloed op gebruikers die het uiterlijk Modern gebruiken */",
+	"modern.css": "/* Alle hier geplaatste CSS-code wordt geladen voor gebruikers van de vormgeving Modern */",
+	"modern.js": "/* Alle hier geplaatste JavaScript-code wordt geladen voor gebruikers van de vormgeving Modern */",
 	"modern-desc": "Een blauw-grijs uiterlijk met een zij- en bovenmenu, afgeleid van MonoBook"
 }

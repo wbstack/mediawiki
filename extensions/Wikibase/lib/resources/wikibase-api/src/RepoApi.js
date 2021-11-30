@@ -23,16 +23,18 @@
 	 *
 	 * @param {mediaWiki.Api} api
 	 * @param {string|null} uselang
+	 * @param {string[]} [tags] Change tags to add to edits made through this instance.
 	 *
 	 * @throws {Error} if no `mediaWiki.Api` instance is provided.
 	 */
-	var SELF = MODULE.RepoApi = function WbApiRepoApi( api, uselang ) {
+	var SELF = MODULE.RepoApi = function WbApiRepoApi( api, uselang, tags ) {
 		if ( api === undefined ) {
 			throw new Error( 'mediaWiki.Api instance needs to be provided' );
 		}
 
 		this._api = api;
 		this._uselang = uselang;
+		this._tags = tags || [];
 	};
 
 	$.extend( SELF.prototype, {
@@ -49,8 +51,13 @@
 		_uselang: null,
 
 		/**
+		 * @property {string[]}
+		 * @private
+		 */
+		_tags: null,
+
+		/**
 		 * Creates a new entity with the given type and data.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} type The type of the `Entity` that should be created.
 		 * @param {Object} [data={}] The `Entity` data (may be omitted to create an empty `Entity`).
@@ -74,12 +81,16 @@
 				new: type,
 				data: JSON.stringify( data || {} )
 			};
+
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Edits an `Entity`.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} id `Entity` id.
 		 * @param {number} baseRevId Revision id the edit shall be performed on.
@@ -116,12 +127,15 @@
 				params.clear = clear;
 			}
 
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Formats values (`dataValues.DataValue`s).
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {Object} dataValue `DataValue` serialization.
 		 * @param {Object} [options]
@@ -169,7 +183,6 @@
 
 		/**
 		 * Gets one or more `Entity`s.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string|string[]} ids `Entity` id(s).
 		 * @param {string|string[]|null} [props] Key(s) of property/ies to retrieve from the API.
@@ -214,7 +227,6 @@
 
 		/**
 		 * Gets an `Entity` which is linked with on or more specific sites/pages.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string|string[]} sites `Site`(s). May be used with `titles`. May not be a list when
 		 *        `titles` is a list.
@@ -271,7 +283,6 @@
 
 		/**
 		 * Parses values (`dataValues.DataValue`s).
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} parser Parser id.
 		 * @param {string[]} values `DataValue` serializations.
@@ -306,7 +317,6 @@
 
 		/**
 		 * Sets the label of an `Entity`.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} id `Entity` id.
 		 * @param {number} baseRevId Revision id the edit shall be performed on.
@@ -340,12 +350,15 @@
 				baserevid: baseRevId
 			};
 
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Sets the description of an `Entity`.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} id `Entity` id.
 		 * @param {number} baseRevId Revision id the edit shall be performed on.
@@ -379,12 +392,15 @@
 				baserevid: baseRevId
 			};
 
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Adds and/or remove a number of aliases of an `Entity`.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} id `Entity` id.
 		 * @param {number} baseRevId Revision id the edit shall be performed on.
@@ -422,12 +438,15 @@
 				baserevid: baseRevId
 			};
 
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Creates/Updates an entire `Claim`.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {Object} claim `Claim` serialization.
 		 * @param {number} baseRevId Revision id the edit shall be performed on.
@@ -458,12 +477,15 @@
 				params.index = index;
 			}
 
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Removes a `Claim`.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} claimGuid The GUID of the `Claim` to be removed.
 		 * @param {number} [claimRevisionId] Revision id the edit shall be performed on.
@@ -494,12 +516,15 @@
 				params.baserevid = claimRevisionId;
 			}
 
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Sets a `SiteLink` for an item via the API.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} id `Entity` id.
 		 * @param {number} baseRevId Revision id the edit shall be performed on.
@@ -538,12 +563,15 @@
 				params.badges = this.normalizeMultiValue( badges );
 			}
 
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
+			}
+
 			return this.post( params );
 		},
 
 		/**
 		 * Sets a site link for an item via the API.
-		 * @see wikibase.api.RepoApi.post
 		 *
 		 * @param {string} fromId `Entity` id to merge from.
 		 * @param {string} toId `Entity` id to merge to.
@@ -582,6 +610,10 @@
 
 			if ( summary ) {
 				params.summary = summary;
+			}
+
+			if ( this._tags.length ) {
+				params.tags = this.normalizeMultiValue( this._tags );
 			}
 
 			return this.post( params );
@@ -639,8 +671,6 @@
 		 * Submits the AJAX request to the API of the repo and triggers on the response. This will
 		 * automatically add the required 'token' information for editing into the given parameters
 		 * sent to the API. Additionally, it sets the 'errorformat' and 'uselang' parameters.
-		 * @see mediaWiki.Api.post
-		 * @see mediaWiki.Api.ajax
 		 *
 		 * @param {Object} params parameters for the API call.
 		 * @return {Object} jQuery.Promise

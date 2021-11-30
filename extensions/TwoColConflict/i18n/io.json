@@ -5,7 +5,12 @@
 		]
 	},
 	"twocolconflict-beta-feature-message": "Redakturo-konflikti videbla en du kolumni",
+	"twocolconflict-split-header-hint-beta": "Danko por uzar ca versiono ''beta''. Vu povas helpar plubonigor ol, se vu komentos pri ol [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface hike].",
+	"twocolconflict-split-your-version-header": "Vua modifikuro",
+	"twocolconflict-split-not-saved-at": "Ne publikigita ankore",
+	"twocolconflict-split-choose-version": "Voluntez selektar versiono",
 	"twocolconflict-split-select-all": "Selektar omno",
+	"twocolconflict-split-tour-dialog-message": "Samatempe kam vu redaktabis, ul altra uzero anke redaktis ca pagino, e publikigis ol ante ke vu.\n\nNe suciez! Vua redakturi ne perdabis! Voluntez revizar amba versioni e kunfuzar li. Se vu bezonos, vu povos redaktar la texto selektata. Nur la texto en la selekto-buxi salvesos kande vu kliktos \"{{int:publishchanges}}.\"",
 	"twocolconflict-split-tour-dialog-btn-text": "Komencez mixar",
 	"twocolconflict-split-tour-popup-btn-text": "O.K., me komprenas.",
 	"twocolconflict-split-tour-popup2-header": "Selektez la modifikuri quon vu deziras mantenar"

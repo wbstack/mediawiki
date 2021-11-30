@@ -1,5 +1,6 @@
 <?php
 
+use Wikibase\Repo\WikibaseRepo;
 use Wikibase\View\Module\TemplateModule;
 use Wikibase\View\Termbox\TermboxModule;
 
@@ -216,7 +217,6 @@ return call_user_func( function() {
 				'resources/jquery/wikibase/jquery.wikibase.statementview.RankSelector.js',
 				'resources/jquery/wikibase/jquery.wikibase.siteselector.js',
 				'resources/jquery/ui/jquery.ui.tagadata.js',
-				'resources/jquery/jquery.sticknode.js',
 				'resources/jquery/jquery.removeClassByRegex.js',
 				'lib/wikibase-data-values-value-view/lib/jquery.ui/jquery.ui.toggler.js',
 				'resources/wikibase/utilities/wikibase.utilities.ui.js',
@@ -247,6 +247,7 @@ return call_user_func( function() {
 				'dataValues.DataValue', // For snakview
 				'jquery.animateWithEvent',
 				'jquery.event.special.eachchange',
+				'jquery.spinner', //For snakview
 				'jquery.ui',
 				'jquery.ui.suggester',
 				'jquery.util.getDirectionality',
@@ -490,9 +491,6 @@ return call_user_func( function() {
 		'jquery.event.special.eachchange' => $wikibaseDatavaluesValueviewLibPaths + [
 			'scripts' => [
 				'jquery.event/jquery.event.special.eachchange.js'
-			],
-			'dependencies' => [
-				'jquery.client',
 			],
 		],
 
@@ -897,8 +895,16 @@ return call_user_func( function() {
 
 		'wikibase.termbox' => $wikibaseTermboxPaths + [
 			'class' => TermboxModule::class,
-			'scripts' => [
+			'packageFiles' => [
 				'dist/wikibase.termbox.main.js',
+				[
+					'name' => 'dist/config.json',
+					'callback' => function () {
+						return [
+							'tags' => WikibaseRepo::getSettings()->getSetting( 'termboxTags' ),
+						];
+					},
+				],
 			],
 			'targets' => 'mobile',
 			'dependencies' => [
@@ -907,7 +913,8 @@ return call_user_func( function() {
 				'wikibase.WikibaseContentLanguages',
 				'wikibase.getUserLanguages',
 				'mw.config.values.wbRepo',
-				'vue'
+				'vue',
+				'vuex'
 			],
 			// 'messages' are declared by ./resources.json via TermboxModule.
 		],

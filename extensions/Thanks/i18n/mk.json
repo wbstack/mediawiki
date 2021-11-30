@@ -16,7 +16,7 @@
 	"thanks-button-action-completed": "{{GENDER:$1|{{GENDER:$2|Се заблагодаривте на}}}} $1",
 	"thanks-error-undefined": "Заблагодарувањето не успеа (код на грешката: $1). Обидете се повторно.",
 	"thanks-error-invalid-log-id": "Не ја пронајдов дневничката ставка",
-	"thanks-error-invalid-log-type": "Нема дневник од видот „$1“ на белиот список на дозволени видови дневници.",
+	"thanks-error-invalid-log-type": "Нема дневник од видот „$1“ на списокот на дозволени видови дневници.",
 	"thanks-error-log-deleted": "Побараната дневничка ставка е избришана и затоа не може да се благодари за неа.",
 	"thanks-error-invalidrevision": "Преработката има неважечка назнака.",
 	"thanks-error-revdeleted": "Не можам да благодарам бидејќи преработката е избришана.",
@@ -59,5 +59,6 @@
 	"notification-flow-thanks-post-link": "вашиот коментар",
 	"notification-header-flow-thank": "$1 {{GENDER:$5|ви}} {{GENDER:$2|благодари}} за вашиот коментар на „<strong>$3</strong>“.",
 	"notification-compact-header-flow-thank": "$1 {{GENDER:$3|ви}} се {{GENDER:$2|заблагодари}}.",
-	"notification-bundle-header-flow-thank": "{{PLURAL:$1|Едно лице ви благодари|$1 луѓе ви благодарат|100=Преку 99 луѓе ви благодарат}} за {{GENDER:$3|вашиот}} коментар на „<strong>$2</strong>“."
+	"notification-bundle-header-flow-thank": "{{PLURAL:$1|Едно лице ви благодари|$1 луѓе ви благодарат|100=Преку 99 луѓе ви благодарат}} за {{GENDER:$3|вашиот}} коментар на „<strong>$2</strong>“.",
+	"ipb-action-thanks": "Испраќање на благодарница"
 }

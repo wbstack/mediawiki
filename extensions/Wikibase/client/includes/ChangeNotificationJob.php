@@ -43,18 +43,11 @@ class ChangeNotificationJob extends Job {
 	 * @see      Job::factory.
 	 *
 	 * @param Title $title
-	 * @param array $params Needs to have two keys: "repo": the id of the repository,
-	 *     "changeIds": array of change ids.
+	 * @param array $params Needs to have "changeIds": array of change ids.
 	 */
 	public function __construct( Title $title, array $params = [] ) {
 		parent::__construct( 'ChangeNotification', $title, $params );
 
-		Assert::parameterType( 'array', $params, '$params' );
-		Assert::parameter(
-			isset( $params['repo'] ),
-			'$params',
-			'$params[\'repo\'] not set.'
-		);
 		Assert::parameter(
 			isset( $params['changeIds'] ) && is_array( $params['changeIds'] ),
 			'$params',
@@ -86,8 +79,8 @@ class ChangeNotificationJob extends Job {
 			);
 
 			// load actual change records from the changes table
-			// TODO: allow mock store for testing!
-			$changeLookup = WikibaseClient::getStore()->getEntityChangeLookup();
+			// TODO: allow mock lookup for testing!
+			$changeLookup = WikibaseClient::getEntityChangeLookup();
 			$this->changes = $changeLookup->loadByChangeIds( $ids );
 
 			$this->logger->debug(

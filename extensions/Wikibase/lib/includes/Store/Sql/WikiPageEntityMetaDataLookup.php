@@ -1,17 +1,20 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lib\Store\Sql;
 
-use DBAccessBase;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use stdClass;
-use Wikibase\DataAccess\EntitySource;
+use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikimedia\Rdbms\DBQueryError;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Service for looking up meta data about one or more entities as needed for
@@ -25,7 +28,7 @@ use Wikimedia\Rdbms\DBQueryError;
  * @author Daniel Kinzler
  * @author Marius Hoch < hoo@online.de >
  */
-class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntityMetaDataAccessor {
+class WikiPageEntityMetaDataLookup implements WikiPageEntityMetaDataAccessor {
 
 	/**
 	 * @var EntityNamespaceLookup
@@ -43,22 +46,26 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	private $logger;
 
 	/**
-	 * @var EntitySource
+	 * @var DatabaseEntitySource
 	 */
 	private $entitySource;
+
+	/**
+	 * @var RepoDomainDb
+	 */
+	private $repoDb;
 
 	public function __construct(
 		EntityNamespaceLookup $entityNamespaceLookup,
 		PageTableEntityQuery $pageTableEntityConditionGenerator,
-		EntitySource $entitySource,
+		DatabaseEntitySource $entitySource,
+		RepoDomainDb $repoDb,
 		LoggerInterface $logger = null
 	) {
-		$databaseName = $entitySource->getDatabaseName();
-
-		parent::__construct( $databaseName );
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
 		$this->pageTableEntityQuery = $pageTableEntityConditionGenerator;
 		$this->entitySource = $entitySource;
+		$this->repoDb = $repoDb;
 		$this->logger = $logger ?: new NullLogger();
 	}
 
@@ -74,13 +81,14 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 * @return (stdClass|bool)[] Array mapping entity ID serializations to either objects or false if an entity
 	 *  could not be found.
 	 */
-	public function loadRevisionInformation( array $entityIds, $mode ) {
+	public function loadRevisionInformation( array $entityIds, $mode ): array {
 		$rows = [];
 
 		$this->assertCanHandleEntityIds( $entityIds );
 
 		if ( $mode !== LookupConstants::LATEST_FROM_MASTER ) {
-			$rows = $this->selectRevisionInformationMultiple( $entityIds, DB_REPLICA );
+			$dbReplicaRead = $this->repoDb->connections()->getReadConnectionRef();
+			$rows = $this->selectRevisionInformationMultiple( $entityIds, $dbReplicaRead );
 		}
 
 		if ( $mode !== LookupConstants::LATEST_FROM_REPLICA ) {
@@ -94,9 +102,10 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 			}
 
 			if ( $loadFromMaster ) {
+				$dbPrimaryRead = $this->repoDb->connections()->getWriteConnectionRef();
 				$rows = array_merge(
 					$rows,
-					$this->selectRevisionInformationMultiple( $loadFromMaster, DB_MASTER )
+					$this->selectRevisionInformationMultiple( $loadFromMaster, $dbPrimaryRead )
 				);
 			}
 		}
@@ -123,12 +132,13 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	) {
 		$this->assertCanHandleEntityId( $entityId );
 
-		$row = $this->selectRevisionInformationById( $entityId, $revisionId, DB_REPLICA );
+		$dbReplicaRead = $this->repoDb->connections()->getReadConnectionRef();
+		$row = $this->selectRevisionInformationById( $entityId, $revisionId, $dbReplicaRead );
 
 		if ( !$row && $mode !== LookupConstants::LATEST_FROM_REPLICA ) {
 			// Try loading from master, unless the caller only wants replica data.
 			$this->logger->debug(
-				'{method}: try to load {entityId} with {revisionId} from DB_MASTER.',
+				'{method}: try to load {entityId} with {revisionId} from DB_PRIMARY.',
 				[
 					'method' => __METHOD__,
 					'entityId' => $entityId,
@@ -136,7 +146,8 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 				]
 			);
 
-			$row = $this->selectRevisionInformationById( $entityId, $revisionId, DB_MASTER );
+			$dbPrimaryRead = $this->repoDb->connections()->getWriteConnectionRef();
+			$row = $this->selectRevisionInformationById( $entityId, $revisionId, $dbPrimaryRead );
 		}
 
 		return $row;
@@ -154,13 +165,14 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 * @return (int|bool)[] Array mapping entity ID serializations to revision IDs
 	 * or false if an entity could not be found (including if the page is a redirect).
 	 */
-	public function loadLatestRevisionIds( array $entityIds, $mode ) {
+	public function loadLatestRevisionIds( array $entityIds, $mode ): array {
 		$revisionIds = [];
 
 		$this->assertCanHandleEntityIds( $entityIds );
 
 		if ( $mode !== LookupConstants::LATEST_FROM_MASTER ) {
-			$revisionIds = $this->selectLatestRevisionIdsMultiple( $entityIds, DB_REPLICA );
+			$dbReplicaRead = $this->repoDb->connections()->getReadConnectionRef();
+			$revisionIds = $this->selectLatestRevisionIdsMultiple( $entityIds, $dbReplicaRead );
 		}
 
 		if ( $mode !== LookupConstants::LATEST_FROM_REPLICA ) {
@@ -174,9 +186,10 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 			}
 
 			if ( $loadFromMaster ) {
+				$dbPrimaryRead = $this->repoDb->connections()->getWriteConnectionRef();
 				$revisionIds = array_merge(
 					$revisionIds,
-					$this->selectLatestRevisionIdsMultiple( $loadFromMaster, DB_MASTER )
+					$this->selectLatestRevisionIdsMultiple( $loadFromMaster, $dbPrimaryRead )
 				);
 			}
 		}
@@ -189,13 +202,13 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 *
 	 * @throws InvalidArgumentException When some of $entityIds cannot be handled by this lookup
 	 */
-	private function assertCanHandleEntityIds( array $entityIds ) {
+	private function assertCanHandleEntityIds( array $entityIds ): void {
 		foreach ( $entityIds as $entityId ) {
 			$this->assertCanHandleEntityId( $entityId );
 		}
 	}
 
-	private function assertCanHandleEntityId( EntityId $entityId ) {
+	private function assertCanHandleEntityId( EntityId $entityId ): void {
 		if ( !in_array( $entityId->getEntityType(), $this->entitySource->getEntityTypes() ) ) {
 			throw new InvalidArgumentException(
 				'Could not load data from the database of entity source: ' .
@@ -209,7 +222,7 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 *
 	 * @return string[]
 	 */
-	private function selectFields() {
+	private function selectFields(): array {
 		 // XXX: This could just call RevisionStore::getQueryInfo and
 		//  use the list of fields from there.
 		return [
@@ -225,22 +238,18 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 *
 	 * @param EntityId $entityId The entity to query the DB for.
 	 * @param int $revisionId The desired revision id
-	 * @param int $connType DB_REPLICA or DB_MASTER
+	 * @param IDatabase $db A connection to either DB_REPLICA or DB_PRIMARY
 	 *
 	 * @throws DBQueryError If the query fails.
 	 * @return stdClass|bool a raw database row object, or false if no such entity revision exists.
 	 */
-	private function selectRevisionInformationById( EntityId $entityId, $revisionId, $connType ) {
-		$db = $this->getConnection( $connType );
-
+	private function selectRevisionInformationById( EntityId $entityId, int $revisionId, IDatabase $db ) {
 		$rows = $this->pageTableEntityQuery->selectRows(
 			$this->selectFields(),
 			[ 'revision' => [ 'INNER JOIN', [ 'rev_page=page_id', 'rev_id' => $revisionId ] ] ],
 			[ $entityId ],
 			$db
 		);
-
-		$this->releaseConnection( $db );
 
 		return $this->processRows( [ $entityId ], $rows )[$entityId->getSerialization()];
 	}
@@ -250,23 +259,19 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 * Returns an array like entityid -> object or false (if not found).
 	 *
 	 * @param EntityId[] $entityIds The entities to query the DB for.
-	 * @param int $connType DB_REPLICA or DB_MASTER
+	 * @param IDatabase $db connection to DB_REPLICA or DB_PRIMARY database to query
 	 *
 	 * @throws DBQueryError If the query fails.
 	 * @return (stdClass|false)[] Array mapping entity ID serializations to either objects or false if an entity
 	 *  could not be found.
 	 */
-	private function selectRevisionInformationMultiple( array $entityIds, $connType ) {
-		$db = $this->getConnection( $connType );
-
+	private function selectRevisionInformationMultiple( array $entityIds, IDatabase $db ): array {
 		$rows = $this->pageTableEntityQuery->selectRows(
 			$this->selectFields(),
 			[ 'revision' => [ 'INNER JOIN', 'page_latest=rev_id' ] ],
 			$entityIds,
 			$db
 		);
-
-		$this->releaseConnection( $db );
 
 		return $this->processRows( $entityIds, $rows );
 	}
@@ -276,23 +281,19 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 * Returns an array like entityid -> int or false (if not found).
 	 *
 	 * @param EntityId[] $entityIds The entities to query the DB for.
-	 * @param int $connType DB_REPLICA or DB_MASTER
+	 * @param IDatabase $db connection to the DB_REPLICA or DB_PRIMARY database to query from
 	 *
 	 * @throws DBQueryError If the query fails.
 	 * @return array Array mapping entity ID serializations to either ints
 	 * or false if an entity could not be found (including if the page is a redirect).
 	 */
-	private function selectLatestRevisionIdsMultiple( array $entityIds, $connType ) {
-		$db = $this->getConnection( $connType );
-
+	private function selectLatestRevisionIdsMultiple( array $entityIds, IDatabase $db ): array {
 		$rows = $this->pageTableEntityQuery->selectRows(
 			[ 'page_title', 'page_latest', 'page_is_redirect' ],
 			[],
 			$entityIds,
 			$db
 		);
-
-		$this->releaseConnection( $db );
 
 		return array_map(
 			function ( $revisionInformation ) {
@@ -320,7 +321,7 @@ class WikiPageEntityMetaDataLookup extends DBAccessBase implements WikiPageEntit
 	 * @return (stdClass|false)[] Array mapping entity ID serializations to either objects or false if an entity
 	 *  is not present in $res.
 	 */
-	private function processRows( array $entityIds, array $rows ) {
+	private function processRows( array $entityIds, array $rows ): array {
 		$result = [];
 		foreach ( $entityIds as $entityId ) {
 			// $rows is indexed by page titles without repository prefix but we want to keep prefixes

@@ -3,8 +3,10 @@
 		"authors": [
 			"Liuxinyu970226",
 			"Shizhao",
+			"Tranve",
 			"Xiaomingyan",
 			"Yfdyh000",
+			"Zhang8569",
 			"乌拉跨氪"
 		]
 	},
@@ -16,7 +18,7 @@
 	"templatesandbox-prefix-label": "沙盒前缀：",
 	"templatesandbox-page-label": "生成页面：",
 	"templatesandbox-revid-label": "生成版本：",
-	"templatesandbox-text-label": "生成wiki文本：",
+	"templatesandbox-text-label": "生成wikitext：",
 	"templatesandbox-submit": "查看",
 	"templatesandbox-title-output": "模板沙盒：$1",
 	"templatesandbox-editform-legend": "预览使用本模板的页面",
@@ -27,6 +29,7 @@
 	"templatesandbox-invalid-title": "您指定的标题无效。",
 	"templatesandbox-title-not-exists": "您指定的标题不存在。",
 	"templatesandbox-revision-not-exists": "您指定的修订版本不存在。",
+	"templatesandbox-revision-no-content": "您指定的修订版本没有内容，或者您没有查看它的权限。",
 	"templatesandbox-invalid-prefix": "您指定的沙盒前缀无效。",
 	"templatesandbox-prefix-not-local": "您指定的沙盒前缀不在本地。",
 	"templatesandbox-page-or-revid": "您必须输入一个页面标题或修订版本ID。",
@@ -38,10 +41,5 @@
 	"templatesandbox-editform-invalid-template": "您指定的模板名无效。",
 	"templatesandbox-editform-invalid-title": "您为预览指定的标题无效。",
 	"templatesandbox-editform-title-not-exists": "您为预览指定的标题不存在。",
-	"templatesandbox-apihelp-prefix": "模板沙盒前缀，与[[Special:TemplateSandbox]]一样。",
-	"templatesandbox-apihelp-title": "解析使用<var>$1templatesandboxtext</var>代替此处命名的页面内容的页面。",
-	"templatesandbox-apihelp-text": "解析使用此页面内容代替由<var>$1templatesandboxtitle</var>命名页面的页面。",
-	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var>的内容模型。",
-	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var>的内容格式。",
-	"templatesandbox-apierror-titleandtext": "参数<var>$1templatesandboxtitle</var>和<var>$1templatesandboxtext</var>必须都被指定，或都被忽略。"
+	"templatesandbox-failed-replace-section": "替换现存页面的章节失败了。"
 }

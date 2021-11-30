@@ -26,7 +26,7 @@ describe( 'App', () => {
 
 		DataBridgePage.openAppOnPage( title );
 
-		DataBridgePage.error.waitForDisplayed( 20000 );
+		DataBridgePage.error.waitForDisplayed();
 		assert.ok( DataBridgePage.error.isDisplayed() );
 		assert.ok( DataBridgePage.showsErrorUnknown() );
 
@@ -61,13 +61,13 @@ describe( 'App', () => {
 
 		NetworkUtil.disableNetwork();
 		DataBridgePage.launchApp();
-		DataBridgePage.error.waitForDisplayed( 20000 );
+		DataBridgePage.error.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 
 		assert.ok( DataBridgePage.showsErrorUnknown() );
 
 		NetworkUtil.enableNetwork();
 		DataBridgePage.errorUnknownRelaunch.click();
-		DataBridgePage.app.waitForDisplayed( 20000 );
+		DataBridgePage.app.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 		WarningAnonymousEdit.dismiss();
 		DataBridgePage.bridge.waitForDisplayed();
 	} );
@@ -97,7 +97,7 @@ describe( 'App', () => {
 
 		DataBridgePage.openAppOnPage( title );
 
-		DataBridgePage.bridge.waitForDisplayed( 20000 );
+		DataBridgePage.bridge.waitForDisplayed();
 		assert.ok( DataBridgePage.bridge.isDisplayed() );
 
 		const newValue = 'newValue';
@@ -107,7 +107,7 @@ describe( 'App', () => {
 
 		// show License
 		DataBridgePage.saveButton.click();
-		DataBridgePage.licensePopup.waitForDisplayed();
+		DataBridgePage.licensePopup.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 
 		// lose internet connection
 		NetworkUtil.disableNetwork();
@@ -116,7 +116,7 @@ describe( 'App', () => {
 		DataBridgePage.saveButton.click();
 
 		// show ErrorSaving screen
-		DataBridgePage.error.waitForDisplayed();
+		DataBridgePage.error.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 
 		assert.ok( DataBridgePage.showsErrorSaving() );
 
@@ -126,7 +126,7 @@ describe( 'App', () => {
 		DataBridgePage.thankYouScreen.waitForDisplayed();
 	} );
 
-	it( 'can go back from a save error both on desktop', () => {
+	it( 'can go back from a save error on desktop', () => {
 		const title = DataBridgePage.getDummyTitle();
 		const propertyId = browser.call( () => WikibaseApi.getProperty( 'string' ) );
 		const stringPropertyExampleValue = 'initialValue';
@@ -151,7 +151,7 @@ describe( 'App', () => {
 
 		DataBridgePage.openAppOnPage( title );
 
-		DataBridgePage.bridge.waitForDisplayed( 20000 );
+		DataBridgePage.bridge.waitForDisplayed();
 		assert.ok( DataBridgePage.bridge.isDisplayed() );
 
 		const newValue = 'newValue';
@@ -161,7 +161,7 @@ describe( 'App', () => {
 
 		// show License
 		DataBridgePage.saveButton.click();
-		DataBridgePage.licensePopup.waitForDisplayed();
+		DataBridgePage.licensePopup.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 
 		// lose internet connection
 		NetworkUtil.disableNetwork();
@@ -180,77 +180,6 @@ describe( 'App', () => {
 		assert.ok( DataBridgePage.errorSavingBackButton.isDisplayed() );
 		assert.ok( !DataBridgePage.headerBackButton.isDisplayed() );
 		DataBridgePage.errorSavingBackButton.click();
-
-		DataBridgePage.value.waitForDisplayed();
-		assert.equal( DataBridgePage.value.getValue(), newValue );
-	} );
-
-	// New versions of Chrome don't allow reducing width to 300px
-	// https://bugs.chromium.org/p/chromium/issues/detail?id=875197
-	it.skip( 'can go back from a save error both on mobile', () => {
-		const title = DataBridgePage.getDummyTitle();
-		const propertyId = browser.call( () => WikibaseApi.getProperty( 'string' ) );
-		const stringPropertyExampleValue = 'initialValue';
-		const entityId = browser.call( () => WikibaseApi.createItem( 'data bridge browser test item', {
-			'claims': [ {
-				'mainsnak': {
-					'snaktype': 'value',
-					'property': propertyId,
-					'datavalue': { 'value': stringPropertyExampleValue, 'type': 'string' },
-				},
-				'type': 'statement',
-				'rank': 'normal',
-			} ],
-		} ) );
-		const content = DataBridgePage.createInfoboxWikitext( [ {
-			label: 'official website',
-			entityId,
-			propertyId,
-			editFlow: 'single-best-value',
-		} ] );
-		browser.call( () => Api.bot().then( ( bot ) => bot.edit( title, content ) ) );
-
-		// switch to mobile
-		DataBridgePage.setMobileWindowSize();
-
-		DataBridgePage.openAppOnPage( title );
-
-		DataBridgePage.bridge.waitForDisplayed( 20000 );
-		assert.ok( DataBridgePage.bridge.isDisplayed() );
-
-		const newValue = 'newValue';
-		DomUtil.setValue( DataBridgePage.value, newValue );
-
-		DataBridgePage.editDecision( 'replace' ).click();
-
-		// show License
-		DataBridgePage.saveButton.click();
-		DataBridgePage.licensePopup.waitForDisplayed();
-
-		// lose internet connection
-		NetworkUtil.disableNetwork();
-
-		// actually trigger save
-		DataBridgePage.saveButton.click();
-
-		// show ErrorSaving screen
-		DataBridgePage.error.waitForDisplayed();
-
-		assert.ok( DataBridgePage.showsErrorSaving() );
-
-		// show License
-		DataBridgePage.saveButton.click();
-		DataBridgePage.licensePopup.waitForDisplayed();
-
-		// actually trigger save
-		DataBridgePage.saveButton.click();
-
-		// show ErrorSaving screen
-		DataBridgePage.error.waitForDisplayed();
-
-		DataBridgePage.errorSavingBackButton.waitForDisplayed( undefined, true );
-		DataBridgePage.headerBackButton.waitForDisplayed();
-		DataBridgePage.headerBackButton.click();
 
 		DataBridgePage.value.waitForDisplayed();
 		assert.equal( DataBridgePage.value.getValue(), newValue );
@@ -285,7 +214,7 @@ describe( 'App', () => {
 			browser.call( () => Api.bot().then( ( bot ) => bot.edit( title, content ) ) );
 
 			DataBridgePage.openAppOnPage( title );
-			DataBridgePage.bridge.waitForDisplayed( 20000 );
+			DataBridgePage.bridge.waitForDisplayed();
 
 			const newValue = 'newValue';
 			DomUtil.setValue( DataBridgePage.value, newValue );
@@ -293,7 +222,7 @@ describe( 'App', () => {
 			DataBridgePage.editDecision( 'replace' ).click();
 
 			DataBridgePage.saveButton.click();
-			DataBridgePage.licensePopup.waitForDisplayed();
+			DataBridgePage.licensePopup.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 
 			// log out
 			browser.deleteCookies();
@@ -309,7 +238,7 @@ describe( 'App', () => {
 			// go back, try again
 			ErrorSavingAssertUser.clickBackButton();
 			DataBridgePage.saveButton.click();
-			DataBridgePage.licensePopup.waitForDisplayed();
+			DataBridgePage.licensePopup.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 			DataBridgePage.saveButton.click();
 			DataBridgePage.error.waitForDisplayed();
 
@@ -331,7 +260,9 @@ describe( 'App', () => {
 				DomUtil.setValue( LoginPage.username, browser.config.mwUser );
 				DomUtil.setValue( LoginPage.password, browser.config.mwPwd );
 				LoginPage.loginButton.click();
-				LoginPage.username.waitForDisplayed( undefined, /* reverse: */ true );
+				LoginPage.username.waitForDisplayed( {
+					reverse: true,
+				} );
 			} );
 
 			// app should have returned from error in the meantime
@@ -410,7 +341,7 @@ describe( 'App', () => {
 			browser.call( () => Api.bot().then( ( bot ) => bot.edit( title, content ) ) );
 
 			DataBridgePage.openAppOnPage( title );
-			DataBridgePage.bridge.waitForDisplayed( 20000 );
+			DataBridgePage.bridge.waitForDisplayed();
 
 			const newValue = 'newValue';
 			DomUtil.setValue( DataBridgePage.value, newValue );
@@ -418,7 +349,7 @@ describe( 'App', () => {
 			DataBridgePage.editDecision( 'replace' ).click();
 
 			DataBridgePage.saveButton.click();
-			DataBridgePage.licensePopup.waitForDisplayed();
+			DataBridgePage.licensePopup.waitForDisplayed( { timeout: browser.config.nonApiTimeout } );
 
 			// clear the item, removing the target statement
 			browser.call( () => Api.bot().then( ( bot ) => bot.request( {
@@ -439,7 +370,9 @@ describe( 'App', () => {
 
 			ErrorSavingEditConflict.reloadButton.click();
 
-			DataBridgePage.app.waitForDisplayed( undefined, /* reverse */ true );
+			DataBridgePage.app.waitForDisplayed( {
+				reverse: true,
+			} );
 		} );
 
 		it( 'reloads on close button click', () => {
@@ -447,7 +380,9 @@ describe( 'App', () => {
 
 			DataBridgePage.closeButton.click();
 
-			DataBridgePage.app.waitForDisplayed( undefined, /* reverse */ true );
+			DataBridgePage.app.waitForDisplayed( {
+				reverse: true,
+			} );
 		} );
 	} );
 

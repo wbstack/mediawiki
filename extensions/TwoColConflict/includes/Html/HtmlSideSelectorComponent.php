@@ -27,7 +27,7 @@ class HtmlSideSelectorComponent {
 	/**
 	 * @return string HTML
 	 */
-	public function getHeaderHtml() : string {
+	public function getHeaderHtml(): string {
 		return Html::rawElement(
 			'div',
 			[ 'class' => 'mw-twocolconflict-split-selection-container' ],
@@ -63,7 +63,7 @@ class HtmlSideSelectorComponent {
 	 *
 	 * @return string HTML
 	 */
-	public function getRowHtml( int $rowNum ) : string {
+	public function getRowHtml( int $rowNum ): string {
 		return Html::rawElement(
 			'div',
 			// Note: This CSS class is currently unused
@@ -101,7 +101,7 @@ class HtmlSideSelectorComponent {
 	 *
 	 * @return string HTML
 	 */
-	private function buildSideSelectorLabel( string $msg ) : string {
+	private function buildSideSelectorLabel( string $msg ): string {
 		return Html::rawElement(
 			'div',
 			[ 'class' => 'mw-twocolconflict-split-selector-label' ],

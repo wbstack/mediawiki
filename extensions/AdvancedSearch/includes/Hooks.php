@@ -25,12 +25,14 @@ class Hooks {
 			return;
 		}
 
+		$services = MediaWikiServices::getInstance();
+
 		/**
 		 * If the user is logged in and has explicitly requested to disable the extension, don't load.
 		 * Ensure namespaces are always part of search URLs
 		 */
-		if ( !$special->getUser()->isAnon() &&
-			$special->getUser()->getBoolOption( 'advancedsearch-disable' )
+		if ( $special->getUser()->isRegistered() &&
+			$services->getUserOptionsLookup()->getBoolOption( $special->getUser(), 'advancedsearch-disable' )
 		) {
 			return;
 		}
@@ -45,7 +47,6 @@ class Hooks {
 			return false;
 		}
 
-		$services = MediaWikiServices::getInstance();
 		$mainConfig = $special->getConfig();
 
 		$special->getOutput()->addModules( [
@@ -160,7 +161,6 @@ class Hooks {
 			'type' => 'toggle',
 			'label-message' => 'advancedsearch-preference-disable',
 			'section' => 'searchoptions/advancedsearch',
-			'default' => $user->getBoolOption( 'advancedsearch-disable' ),
 			'help-message' => 'advancedsearch-preference-help',
 		];
 	}

@@ -15,22 +15,14 @@ class SearchableNamespaceListBuilder {
 	 * @return string[]
 	 */
 	public static function getCuratedNamespaces( array $configNamespaces ) {
-		self::addMainNamespace( $configNamespaces );
-		self::filterUnnamedNamespaces( $configNamespaces );
+		// Make sure the main namespace is listed with a non-empty name
+		$configNamespaces[ NS_MAIN ] = wfMessage( self::MAIN_NAMESPACE )->text();
+
+		// Remove entries that still have an empty name
+		$configNamespaces = array_filter( $configNamespaces );
+
+		ksort( $configNamespaces );
 		return $configNamespaces;
 	}
 
-	/**
-	 * @param string[] &$configNamespaces
-	 */
-	private static function addMainNamespace( array &$configNamespaces ) {
-		$configNamespaces[ NS_MAIN ] = wfMessage( self::MAIN_NAMESPACE )->text();
-	}
-
-	/**
-	 * @param string[] &$configNamespaces
-	 */
-	private static function filterUnnamedNamespaces( array &$configNamespaces ) {
-		$configNamespaces = array_filter( $configNamespaces );
-	}
 }

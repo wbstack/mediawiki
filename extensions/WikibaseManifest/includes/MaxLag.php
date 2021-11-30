@@ -25,7 +25,7 @@ class MaxLag {
 		}
 	}
 
-	public function getValue() : int {
+	public function getValue(): int {
 		return $this->value;
 	}
 }

@@ -10,8 +10,10 @@ use IBufferingStatsdDataFactory;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Term\AliasesProvider;
 use Wikibase\Lib\EntityFactory;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOp;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\ChangeOp\FingerprintChangeOpFactory;
 use Wikibase\Repo\WikibaseRepo;
@@ -35,35 +37,44 @@ class SetAliases extends ModifyEntity {
 	/** @var EntityFactory */
 	private $entityFactory;
 
+	/**
+	 * @var string[]
+	 */
+	private $sandboxEntityIds;
+
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
 		FingerprintChangeOpFactory $termChangeOpFactory,
 		IBufferingStatsdDataFactory $stats,
 		bool $federatedPropertiesEnabled,
-		EntityFactory $entityFactory
+		EntityFactory $entityFactory,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName, $federatedPropertiesEnabled );
 		$this->termChangeOpFactory = $termChangeOpFactory;
 		$this->stats = $stats;
 		$this->entityFactory = $entityFactory;
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
 		IBufferingStatsdDataFactory $stats,
-		EntityFactory $entityFactory
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
+		EntityFactory $entityFactory,
+		SettingsArray $repoSettings
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		return new self(
 			$mainModule,
 			$moduleName,
-			$wikibaseRepo->getChangeOpFactoryProvider()
+			$changeOpFactoryProvider
 				->getFingerprintChangeOpFactory(),
 			$stats,
-			$wikibaseRepo->inFederatedPropertyMode(),
-			$entityFactory
+			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
+			$entityFactory,
+			$repoSettings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -259,18 +270,20 @@ class SetAliases extends ModifyEntity {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$id = $this->sandboxEntityIds[ 'mainItem' ];
+
 		return [
-			'action=wbsetaliases&language=en&id=Q1&set=Foo|Bar'
-				=> 'apihelp-wbsetaliases-example-1',
+			'action=wbsetaliases&language=en&id=' . $id . '&set=Foo|Bar'
+				=> [ 'apihelp-wbsetaliases-example-1', $id ],
 
-			'action=wbsetaliases&language=en&id=Q1&add=Foo|Bar'
-				=> 'apihelp-wbsetaliases-example-2',
+			'action=wbsetaliases&language=en&id=' . $id . '&add=Foo|Bar'
+				=> [ 'apihelp-wbsetaliases-example-2', $id ],
 
-			'action=wbsetaliases&language=en&id=Q1&remove=Foo|Bar'
-				=> 'apihelp-wbsetaliases-example-3',
+			'action=wbsetaliases&language=en&id=' . $id . '&remove=Foo|Bar'
+				=> [ 'apihelp-wbsetaliases-example-3', $id ],
 
-			'action=wbsetaliases&language=en&id=Q1&remove=Foo&add=Bar'
-				=> 'apihelp-wbsetaliases-example-4',
+			'action=wbsetaliases&language=en&id=' . $id . '&remove=Foo&add=Bar'
+				=> [ 'apihelp-wbsetaliases-example-4', $id ],
 		];
 	}
 

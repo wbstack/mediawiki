@@ -37,11 +37,11 @@ class ResolutionSuggester {
 	 * @param array $b Second block
 	 * @return bool True if the blocks are both copy blocks, with identical content.
 	 */
-	private function isIdenticalCopyBlock( array $a, array $b ) : bool {
+	private function isIdenticalCopyBlock( array $a, array $b ): bool {
 		return $a['action'] === 'copy' && $a === $b;
 	}
 
-	private function isAddition( array $change ) : bool {
+	private function isAddition( array $change ): bool {
 		return $change['action'] === 'add'
 			|| ( $change['action'] === 'change' && $change['oldtext'] === '' );
 	}
@@ -54,7 +54,7 @@ class ResolutionSuggester {
 	public function getResolutionSuggestion(
 		array $storedLines,
 		array $yourLines
-	) : ?TalkPageResolution {
+	): ?TalkPageResolution {
 		$baseLines = $this->getBaseRevisionLines();
 
 		$formatter = new AnnotatedHtmlDiffFormatter();
@@ -143,7 +143,7 @@ class ResolutionSuggester {
 		return SplitConflictUtils::splitText( $baseText );
 	}
 
-	private function countNewlines( string $text ) : array {
+	private function countNewlines( string $text ): array {
 		// Start from the end, because we want "\n" to be reported as [ 0, 1 ]
 		$endOfText = strlen( rtrim( $text, "\n" ) );
 		$after = strlen( $text ) - $endOfText;

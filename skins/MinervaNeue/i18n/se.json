@@ -4,5 +4,7 @@
 			"Yupik"
 		]
 	},
-	"mobile-frontend-main-menu-watchlist": "Čuovvunlistu"
+	"mobile-frontend-main-menu-watchlist": "Čuovvunlistu",
+	"mobile-frontend-placeholder": "Oza {{SITENAME}}:s",
+	"skin-minerva-mobile-option-MinervaShowCategories": "Kategoriijat"
 }

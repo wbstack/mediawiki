@@ -737,7 +737,7 @@
             [
                 "AM"
             ],
-            "Ojibwemowin"
+            "Anishinaabemowin"
         ],
         "cjy": [
             "cjy-hant"
@@ -898,6 +898,13 @@
                 "AF"
             ],
             "dagbanli"
+        ],
+        "dar": [
+            "Cyrl",
+            [
+                "EU"
+            ],
+            "дарган"
         ],
         "de-at": [
             "Latn",
@@ -1463,6 +1470,13 @@
             ],
             "Gaelg"
         ],
+        "ha": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Hausa"
+        ],
         "ha-arab": [
             "Arab",
             [
@@ -1471,14 +1485,7 @@
             "هَوُسَ"
         ],
         "ha-latn": [
-            "Latn",
-            [
-                "AF"
-            ],
-            "Hausa"
-        ],
-        "ha": [
-            "ha-latn"
+            "ha"
         ],
         "hai": [
             "Latn",
@@ -2854,6 +2861,13 @@
                 "EU"
             ],
             "occitan"
+        ],
+        "ojb": [
+            "Latn",
+            [
+                "AM"
+            ],
+            "Ojibwemowin"
         ],
         "oka": [
             "Latn",
@@ -4736,7 +4750,7 @@
             "ar",
             "ksf",
             "ha-arab",
-            "ha-latn"
+            "ha"
         ],
         "CN": [
             "zh",
@@ -5002,7 +5016,7 @@
             "ee",
             "gur",
             "gaa",
-            "ha-latn",
+            "ha",
             "ff"
         ],
         "GI": [
@@ -5501,7 +5515,7 @@
             "fr"
         ],
         "NE": [
-            "ha-latn",
+            "ha",
             "fr",
             "ar",
             "ff"
@@ -5511,7 +5525,7 @@
         ],
         "NG": [
             "en",
-            "ha-latn",
+            "ha",
             "ig",
             "yo",
             "ha-arab",
@@ -5710,6 +5724,7 @@
             "os",
             "kbd",
             "myv",
+            "dar",
             "mdf",
             "kum",
             "kv",
@@ -5753,7 +5768,7 @@
             "ar",
             "en",
             "ha-arab",
-            "ha-latn"
+            "ha"
         ],
         "SE": [
             "sv",

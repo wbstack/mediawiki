@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Nieszczarda2",
 			"Red Winged Duck",
 			"Renessaince",
 			"Wizardist",
@@ -10,7 +11,6 @@
 	"wikibase-client-desc": "Кліент для пашырэньня Wikibase",
 	"tooltip-t-wikibase": "Спасылка на аб’ект у рэпазыторыі зьвестак",
 	"wikibase-after-page-move": "Ваш перанос цяпер павінен быць [$1 адлюстраваны ў моўнай спасылцы аб’екту {{grammar:genitive|{{WBREPONAME}}}}]. Мы просім вас праверыць, што гэта адбылося.",
-	"wikibase-after-page-move-queued": "[$1 Аб’ект {{WBREPONAME}}], злучаны з гэтай старонкай, неўзабаве будзе абноўлены. Калі ласка, памятайце, што гэта не абавязкова адбудзецца імгненна.",
 	"wikibase-after-page-delete": "Спасылка на гэтую старонку павінна была быць выдаленая з [$1 адпаведнага элемэнту {{GRAMMAR:genitive|{{WBREPONAME}}}}]. Мы просім вас праверыць, што гэта адбылося.",
 	"wikibase-after-page-delete-queued": "[$1 Аб’ект {{GRAMMAR:родны|{{WBREPONAME}}}}], зьвязаны з гэтай старонкай, будзе абноўлены аўтаматычна. Калі ласка, памятайце, што гэта не абавязкова адбудзецца імгненна.",
 	"wikibase-comment-add": "Быў створаны аб’ект {{WBREPONAME}}.",
@@ -58,7 +58,7 @@
 	"wikibase-rcfilters-hide-wikibase-conflicts-major-global": "Усе праўкі {{grammar:родны|{{WBREPONAME}}}} пазначаюцца як «дробныя», таму фільтар «Праўкі {{grammar:родны|{{WBREPONAME}}}}» канфліктуе зь фільтрам «Нядробныя праўкі».",
 	"wikibase-rcfilters-major-conflicts-hide-wikibase": "Усе праўкі {{grammar:родны|{{WBREPONAME}}}} пазначаюцца як «дробныя», таму фільтар «Праўкі {{grammar:родны|{{WBREPONAME}}}}» канфліктуе зь фільтрам «Нядробныя праўкі».",
 	"wikibase-rcfilters-hide-wikibase-conflicts-major": "Усе праўкі {{grammar:родны|{{WBREPONAME}}}} пазначаюцца як «дробныя», таму фільтар «Праўкі {{grammar:родны|{{WBREPONAME}}}}» канфліктуе зь фільтрам «Нядробныя праўкі».",
-	"wikibase-replicationnote": "Калі ласка заўважце, што зьмены могуць зьявіцца ў вікі-праектах толькі празь некалькі хвілін.",
+	"wikibase-replicationnote": "Зьвярніце ўвагу, што зьмены могуць зьявіцца ва ўсіх вікі-праектах толькі празь некалькі хвілінаў.",
 	"wikibase-watchlist-show-changes-pref": "Паказваць зьмены {{WBREPONAME}} у Вашым сьпісе назіраньня",
 	"wikibase-error-deserialize-error": "Не атрымалася дэсэрыялізаваць зьвесткі.",
 	"wikibase-error-serialize-error": "Не ўдалося сэрыялізаваць зьвесткі",
@@ -95,7 +95,7 @@
 	"wikibase-pageinfo-entity-usage-C": "Некаторыя сьцьверджаньні",
 	"wikibase-pageinfo-entity-usage-C-with-modifier": "Сьцьверджаньне: $1",
 	"wikibase-pageinfo-entity-usage-X": "Усе зьвесткі элемэнту",
-	"wikibase-pageinfo-entity-usage-O": "Іншае (сьцьверджаньні)",
+	"wikibase-pageinfo-entity-usage-O": "Роўнае (напр., сынонімы, існаваньне сутнасьцяў)",
 	"wikibase-property-render-error": "Не ўдалося адлюстраваць уласьцівасьць $1: $2",
 	"wikibase-otherprojects": "У іншых праектах",
 	"wikibase-otherprojects-beta-message": "Бакавая панэль іншых праектаў",

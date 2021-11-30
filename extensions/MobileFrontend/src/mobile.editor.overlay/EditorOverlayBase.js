@@ -232,11 +232,11 @@ mfExtend( EditorOverlayBase, Overlay, {
 	 *
 	 * @memberof EditorOverlayBase
 	 * @instance
-	 * @param {number} newRevId ID of the newly created revision
+	 * @param {number|null} newRevId ID of the newly created revision, or null if it was a null
+	 *  edit.
 	 */
 	onSaveComplete: function ( newRevId ) {
 		var msg,
-			$window = util.getWindow(),
 			title = this.options.title,
 			self = this;
 
@@ -252,13 +252,17 @@ mfExtend( EditorOverlayBase, Overlay, {
 		} else {
 			msg = mw.msg( 'mobile-frontend-editor-success' );
 		}
+
 		/**
 		 * Fired after an edit was successfully saved, like postEdit in MediaWiki core.
 		 *
 		 * @event postEditMobile
 		 * @member mw.hook
+		 * @param {Object} data
+		 * @param {number|null} data.newRevId (since MW 1.37) ID of the newly created revision,
+		 *  or null if it was a null edit.
 		 */
-		mw.hook( 'postEditMobile' ).fire();
+		mw.hook( 'postEditMobile' ).fire( { newRevId: newRevId } );
 
 		if ( !mw.config.get( 'wgPostEditConfirmationDisabled' ) ) {
 			toast.showOnPageReload( msg, { type: 'success' } );
@@ -282,8 +286,6 @@ mfExtend( EditorOverlayBase, Overlay, {
 			// eslint-disable-next-line no-restricted-properties
 			window.location.hash = '#';
 		}
-
-		$window.off( 'beforeunload.mfeditorwarning' );
 
 		// Note the "#" may be in the URL.
 		// If so, using window.location alone will not reload the page
@@ -310,7 +312,13 @@ mfExtend( EditorOverlayBase, Overlay, {
 				'abusefilter-disallowed': 'extensionAbuseFilter',
 				'abusefilter-warning': 'extensionAbuseFilter',
 				captcha: 'extensionCaptcha',
+				// FIXME: This language is non-inclusive and we would love to change it,
+				// but this relates to an error code provided by software.
+				// This is blocked on T254649
 				spamblacklist: 'extensionSpamBlacklist',
+				// FIXME: This language is non-inclusive and we would love to change it,
+				// but this relates to an error code provided by software.
+				// Removal of this line is blocked on T254650.
 				'titleblacklist-forbidden': 'extensionTitleBlacklist',
 				pagedeleted: 'editPageDeleted',
 				editconflict: 'editConflict'

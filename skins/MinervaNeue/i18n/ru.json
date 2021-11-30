@@ -7,6 +7,7 @@
 			"DmitTrix",
 			"Facenapalm",
 			"Kareyac",
+			"Lopusanski",
 			"MaxBioHazard",
 			"Movses",
 			"Okras",
@@ -15,6 +16,7 @@
 			"OlegVeliky",
 			"Patrick Star",
 			"Redredsonia",
+			"Rivka Silinsky",
 			"Stjn",
 			"Vlad5250"
 		]
@@ -67,6 +69,10 @@
 	"minerva-page-actions-permalink": "Постоянная ссылка",
 	"minerva-page-actions-backlinks": "Ссылки сюда",
 	"minerva-page-actions-cite": "Цитировать страницу",
+	"minerva-page-actions-move": "Перенести",
+	"minerva-page-actions-delete": "Удалить",
+	"minerva-page-actions-protect": "Защитить",
+	"minerva-page-actions-unprotect": "Снять защиту",
 	"minerva-page-actions-user-groups": "Группы пользователя",
 	"minerva-page-actions-logs": "Журналы",
 	"minerva-page-actions-wikibase": "Элемент {{grammar:genitive|{{WBREPONAME}}}}",
@@ -79,8 +85,8 @@
 	"minerva-talk-reply-success": "Ваш ответ был сохранён на странице обсуждения.",
 	"minerva-skin-desc": "Первая адаптивная мобильная тема оформления.",
 	"skin-minerva-issue-learn-more": "Узнать больше",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton": "Категории",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton-description": "Посмотреть категории страниц",
+	"skin-minerva-mobile-option-MinervaShowCategories": "Категории",
+	"skin-minerva-mobile-option-MinervaShowCategories-description": "Посмотреть категории страниц",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "Улучшенное обнаружение проблем страницы",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "Проблемы со страницей (Шаблон:ambox) будут вписаны в статью.",
 	"skin-minerva-recentchanges-warning-enhanced-not-supported": "К сожалению, группировка результатов по странице недоступна на мобильных устройствах. Если вы хотите использовать эту функцию, пожалуйста, посетите настольную версию."

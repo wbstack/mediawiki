@@ -194,7 +194,7 @@ class SpecialMWOAuthManageMyGrants extends SpecialPage {
 						$cmrAc->getGrants()
 					),
 					'default' => array_map(
-						function ( $g ) {
+						static function ( $g ) {
 							return "grant-$g";
 						},
 						$cmraAc->getGrants()
@@ -208,14 +208,14 @@ class SpecialMWOAuthManageMyGrants extends SpecialPage {
 							$this->msg( 'mwoauthmanagemygrants-authonly-tooltip' )->text(),
 					],
 					'force-options-on' => array_map(
-						function ( $g ) {
+						static function ( $g ) {
 							return "grant-$g";
 						},
 						( $type === 'revoke' )
 							? array_merge( \MWGrants::getValidGrants(), self::irrevocableGrants() )
 							: self::irrevocableGrants()
 					),
-					'validation-callback' => null // different format
+					'validation-callback' => null
 				],
 				'acceptanceId' => [
 					'type' => 'hidden',
@@ -225,12 +225,14 @@ class SpecialMWOAuthManageMyGrants extends SpecialPage {
 			$this->getContext()
 		);
 		$form->setSubmitCallback(
-			function ( array $data, \IContextSource $context ) use ( $action, $cmraAc ) {
+			static function ( array $data, \IContextSource $context ) use ( $action, $cmraAc ) {
 				$data['action'] = $action;
-				$data['grants'] = \FormatJson::encode( // adapt form to controller
-					preg_replace( '/^grant-/', '', $data['grants'] ) );
+				// adapt form to controller
+				$data['grants'] = \FormatJson::encode(
+					preg_replace( '/^grant-/', '', $data['grants'] )
+				);
 
-				$dbw = Utils::getCentralDB( DB_MASTER );
+				$dbw = Utils::getCentralDB( DB_PRIMARY );
 				$control = new ConsumerAcceptanceSubmitControl(
 					$context, $data, $dbw, $cmraAc->getDAO()->getOAuthVersion()
 				);

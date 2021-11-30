@@ -36,20 +36,62 @@ use WikiPage;
 class Hooks {
 
 	/**
-	 * Handler for HistoryTools and DiffTools hooks.
+	 * Handler for the HistoryTools hook
 	 *
+	 * @param RevisionRecord $revisionRecord
+	 * @param array &$links
+	 * @param RevisionRecord|null $oldRevisionRecord
+	 * @param UserIdentity $userIdentity
+	 */
+	public static function onHistoryTools(
+		RevisionRecord $revisionRecord,
+		array &$links,
+		?RevisionRecord $oldRevisionRecord,
+		UserIdentity $userIdentity
+	) {
+		self::insertThankLink( $revisionRecord,
+			$links, $userIdentity );
+	}
+
+	/**
+	 * Handler for the DiffTools hook
+	 *
+	 * @param RevisionRecord $revisionRecord
+	 * @param array &$links
+	 * @param RevisionRecord|null $oldRevisionRecord
+	 * @param UserIdentity $userIdentity
+	 */
+	public static function onDiffTools(
+		RevisionRecord $revisionRecord,
+		array &$links,
+		?RevisionRecord $oldRevisionRecord,
+		UserIdentity $userIdentity
+	) {
+		// Don't allow thanking for a diff that includes multiple revisions
+		// This does a query that is too expensive for history rows (T284274)
+		$previous = MediaWikiServices::getInstance()
+			->getRevisionLookup()
+			->getPreviousRevision( $revisionRecord );
+		if ( $oldRevisionRecord && $previous &&
+			$previous->getId() !== $oldRevisionRecord->getId()
+		) {
+			return;
+		}
+
+		self::insertThankLink( $revisionRecord,
+			$links, $userIdentity );
+	}
+
+	/**
 	 * Insert a 'thank' link into revision interface, if the user is allowed to thank.
 	 *
 	 * @param RevisionRecord $revisionRecord RevisionRecord object to add the thank link for
 	 * @param array &$links Links to add to the revision interface
-	 * @param ?RevisionRecord $oldRevisionRecord RevisionRecord object of the "old" revision
-	 *   when viewing a diff
 	 * @param UserIdentity $userIdentity The user performing the thanks.
 	 */
-	public static function insertThankLink(
+	private static function insertThankLink(
 		RevisionRecord $revisionRecord,
 		array &$links,
-		?RevisionRecord $oldRevisionRecord,
 		UserIdentity $userIdentity
 	) {
 		$recipient = $revisionRecord->getUser();
@@ -59,9 +101,6 @@ class Hooks {
 		}
 
 		$recipient = User::newFromIdentity( $recipient );
-		$previous = MediaWikiServices::getInstance()
-			->getRevisionLookup()
-			->getPreviousRevision( $revisionRecord );
 
 		$user = User::newFromIdentity( $userIdentity );
 
@@ -69,17 +108,14 @@ class Hooks {
 		// Exclude anonymous users.
 		// Exclude users who are blocked.
 		// Check whether bots are allowed to receive thanks.
-		// Check if there's other revisions between $prev and $oldRev
-		// (It supports discontinuous history created by Import or CX but
-		// prevents thanking diff across multiple revisions)
+		// Don't allow thanking for a diff that includes multiple revisions
 		if ( !$user->isAnon()
 			&& !$user->equals( $recipient )
 			&& !self::isUserBlockedFromTitle( $user, $revisionRecord->getPageAsLinkTarget() )
+			&& !self::isUserBlockedFromThanks( $user )
 			&& !$user->isBlockedGlobally()
 			&& self::canReceiveThanks( $recipient )
 			&& !$revisionRecord->isDeleted( RevisionRecord::DELETED_TEXT )
-			&& ( !$oldRevisionRecord || !$previous ||
-				$previous->getId() === $oldRevisionRecord->getId() )
 		) {
 			$links[] = self::generateThankElement(
 				$revisionRecord->getId(),
@@ -93,7 +129,7 @@ class Hooks {
 	 * Check whether the user is blocked from the title associated with the revision.
 	 *
 	 * This queries the replicas for a block; if 'no block' is incorrectly reported, it
-	 * will be caught by ApiThank::dieOnBlockedUser when the user attempts to thank.
+	 * will be caught by ApiThank::dieOnUserBlockedFromTitle when the user attempts to thank.
 	 *
 	 * @param User $user
 	 * @param LinkTarget $title
@@ -102,6 +138,17 @@ class Hooks {
 	private static function isUserBlockedFromTitle( User $user, LinkTarget $title ) {
 		return MediaWikiServices::getInstance()->getPermissionManager()
 			->isBlockedFrom( $user, $title, true );
+	}
+
+	/**
+	 * Check whether the user is blocked from giving thanks.
+	 *
+	 * @param User $user
+	 * @return bool
+	 */
+	private static function isUserBlockedFromThanks( User $user ) {
+		$block = $user->getBlock();
+		return $block && ( $block->isSitewide() || $block->appliesToRight( 'thanks' ) );
 	}
 
 	/**
@@ -323,6 +370,10 @@ class Hooks {
 		$types[] = 'thanks';
 	}
 
+	public static function onGetAllBlockActions( array &$actions ) {
+		$actions[ 'thanks' ] = 100;
+	}
+
 	/**
 	 * Handler for BeforePageDisplay.  Inserts javascript to enhance thank
 	 * links from static urls to in-page dialogs along with reloading
@@ -412,6 +463,7 @@ class Hooks {
 			$user->isAnon()
 			|| $entry->isDeleted( LogPage::DELETED_USER )
 			|| self::isUserBlockedFromTitle( $user, $entry->getTarget() )
+			|| self::isUserBlockedFromThanks( $user )
 			|| $user->isBlockedGlobally()
 		) {
 			return;

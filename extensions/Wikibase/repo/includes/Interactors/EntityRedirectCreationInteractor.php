@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\Interactors;
 
-use User;
+use IContextSource;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityRedirect;
-use Wikibase\DataModel\Services\Lookup\EntityRedirectLookup;
 use Wikibase\DataModel\Services\Lookup\EntityRedirectLookupException;
+use Wikibase\DataModel\Services\Lookup\EntityRedirectTargetLookup;
 use Wikibase\Lib\FormatableSummary;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
@@ -55,17 +55,12 @@ abstract class EntityRedirectCreationInteractor {
 	private $summaryFormatter;
 
 	/**
-	 * @var User
-	 */
-	private $user;
-
-	/**
 	 * @var EditFilterHookRunner
 	 */
 	private $editFilterHookRunner;
 
 	/**
-	 * @var EntityRedirectLookup
+	 * @var EntityRedirectTargetLookup
 	 */
 	private $entityRedirectLookup;
 
@@ -74,16 +69,14 @@ abstract class EntityRedirectCreationInteractor {
 		EntityStore $entityStore,
 		EntityPermissionChecker $permissionChecker,
 		SummaryFormatter $summaryFormatter,
-		User $user,
 		EditFilterHookRunner $editFilterHookRunner,
-		EntityRedirectLookup $entityRedirectLookup,
+		EntityRedirectTargetLookup $entityRedirectLookup,
 		EntityTitleStoreLookup $entityTitleLookup
 	) {
 		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->entityStore = $entityStore;
 		$this->permissionChecker = $permissionChecker;
 		$this->summaryFormatter = $summaryFormatter;
-		$this->user = $user;
 		$this->editFilterHookRunner = $editFilterHookRunner;
 		$this->entityRedirectLookup = $entityRedirectLookup;
 		$this->entityTitleLookup = $entityTitleLookup;
@@ -97,15 +90,23 @@ abstract class EntityRedirectCreationInteractor {
 	 * @param EntityId $toId The ID of the entity the redirect should point to. The Entity must
 	 * exist and must not be a redirect.
 	 * @param bool $bot Whether the edit should be marked as bot
+	 * @param string[] $tags
+	 * @param IContextSource|null $context The context to pass to the edit filter hook and check permissions
 	 *
 	 * @return EntityRedirect
 	 * @throws RedirectCreationException If creating the redirect fails. Calling code may use
 	 * RedirectCreationException::getErrorCode() to get further information about the cause of
 	 * the failure. An explanation of the error codes can be obtained from getErrorCodeInfo().
 	 */
-	public function createRedirect( EntityId $fromId, EntityId $toId, $bot ) {
+	public function createRedirect(
+		EntityId $fromId,
+		EntityId $toId,
+		bool $bot,
+		array $tags,
+		IContextSource $context
+	): EntityRedirect {
 		$this->checkCompatible( $fromId, $toId );
-		$this->checkPermissions( $fromId );
+		$this->checkPermissions( $fromId, $context );
 
 		$this->checkExistsNoRedirect( $toId );
 		$this->checkCanCreateRedirect( $fromId );
@@ -115,7 +116,7 @@ abstract class EntityRedirectCreationInteractor {
 		$summary->addAutoCommentArgs( $fromId->getSerialization(), $toId->getSerialization() );
 
 		$redirect = new EntityRedirect( $fromId, $toId );
-		$this->saveRedirect( $redirect, $summary, $bot );
+		$this->saveRedirect( $redirect, $summary, $context, $bot, $tags );
 
 		return $redirect;
 	}
@@ -124,12 +125,12 @@ abstract class EntityRedirectCreationInteractor {
 	 * Check user's permissions for the given entity ID.
 	 *
 	 * @param EntityId $entityId
-	 *
+	 * @param IContextSource $context
 	 * @throws RedirectCreationException if the permission check fails
 	 */
-	private function checkPermissions( EntityId $entityId ) {
+	private function checkPermissions( EntityId $entityId, IContextSource $context ) {
 		$status = $this->permissionChecker->getPermissionStatusForEntityId(
-			$this->user,
+			$context->getUser(),
 			EntityPermissionChecker::ACTION_REDIRECT,
 			$entityId
 		);
@@ -183,7 +184,7 @@ abstract class EntityRedirectCreationInteractor {
 		try {
 			$redirect = $this->entityRedirectLookup->getRedirectForEntityId(
 				$entityId,
-				'for update'
+				EntityRedirectTargetLookup::FOR_UPDATE
 			);
 		} catch ( EntityRedirectLookupException $ex ) {
 			throw new RedirectCreationException(
@@ -228,13 +229,15 @@ abstract class EntityRedirectCreationInteractor {
 	}
 
 	/**
-	 * @param EntityRedirect $redirect
-	 * @param FormatableSummary $summary
-	 * @param bool $bot Whether the edit should be marked as bot
-	 *
 	 * @throws RedirectCreationException
 	 */
-	private function saveRedirect( EntityRedirect $redirect, FormatableSummary $summary, $bot ) {
+	private function saveRedirect(
+		EntityRedirect $redirect,
+		FormatableSummary $summary,
+		IContextSource $context,
+		bool $bot,
+		array $tags
+	): void {
 		$summary = $this->summaryFormatter->formatSummary( $summary );
 		$flags = 0;
 		if ( $bot ) {
@@ -249,7 +252,7 @@ abstract class EntityRedirectCreationInteractor {
 			$flags |= EDIT_UPDATE;
 		}
 
-		$hookStatus = $this->editFilterHookRunner->run( $redirect, $this->user, $summary );
+		$hookStatus = $this->editFilterHookRunner->run( $redirect, $context, $summary );
 		if ( !$hookStatus->isOK() ) {
 			throw new RedirectCreationException(
 				'EditFilterHook stopped redirect creation',
@@ -261,8 +264,10 @@ abstract class EntityRedirectCreationInteractor {
 			$this->entityStore->saveRedirect(
 				$redirect,
 				$summary,
-				$this->user,
-				$flags
+				$context->getUser(),
+				$flags,
+				false,
+				$tags
 			);
 		} catch ( StorageException $ex ) {
 			throw new RedirectCreationException( $ex->getMessage(), 'cant-redirect', [], $ex );

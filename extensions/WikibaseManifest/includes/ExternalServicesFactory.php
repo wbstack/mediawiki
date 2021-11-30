@@ -4,6 +4,6 @@ namespace MediaWiki\Extension\WikibaseManifest;
 
 interface ExternalServicesFactory {
 
-	public function getExternalServices() : ExternalServices;
+	public function getExternalServices(): ExternalServices;
 
 }

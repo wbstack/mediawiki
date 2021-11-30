@@ -2,7 +2,7 @@
 
 namespace Wikibase\Lexeme\Search\Elastic;
 
-use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\Repo\Search\Fields\FieldDefinitions;
 use Wikibase\Repo\Search\Fields\WikibaseIndexField;
@@ -19,7 +19,7 @@ class LexemeFieldDefinitions implements FieldDefinitions {
 	private $entityLookup;
 
 	/**
-	 * @var PropertyId|null
+	 * @var NumericPropertyId|null
 	 */
 	private $lexemeLanguageCodePropertyId;
 	/**
@@ -29,7 +29,7 @@ class LexemeFieldDefinitions implements FieldDefinitions {
 
 	public function __construct( FieldDefinitions $statements,
 								 EntityLookup $entityLookup,
-								 PropertyId $lexemeLanguageCodePropertyId = null ) {
+								 NumericPropertyId $lexemeLanguageCodePropertyId = null ) {
 		$this->statements = $statements;
 		$this->lexemeLanguageCodePropertyId = $lexemeLanguageCodePropertyId;
 		$this->entityLookup = $entityLookup;

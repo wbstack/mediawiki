@@ -10,5 +10,5 @@
 	"skinname-modern": "現代",
 	"modern.css": "/* 此 CSS 會影響使用 Modern 介面外觀的使用者 */",
 	"modern.js": "/* 此 JavaScript 會用於使用 Modern 介面外觀的使用者 */",
-	"modern-desc": "擁有側欄與上方列的藍/灰色佈景主題。由 MonoBook 主題衍生而來"
+	"modern-desc": "擁有側欄與上方列的藍/灰色外觀。由MonoBook外觀衍生而來"
 }

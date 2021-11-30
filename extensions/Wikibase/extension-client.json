@@ -8,7 +8,7 @@
 	"descriptionmsg": "wikibase-client-desc",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.35"
+		"MediaWiki": ">= 1.37"
 	},
 	"APIListModules": {
 		"wblistentityusage": {
@@ -32,12 +32,12 @@
 			"services": [
 				"WikibaseClient.AliasTermBuffer",
 				"WikibaseClient.EntityIdLookup",
-				"WikibaseClient.TermBuffer"
+				"WikibaseClient.TermBuffer",
+				"WikibaseClient.TermsLanguages"
 			]
 		},
 		"description": {
 			"class": "\\Wikibase\\Client\\Api\\Description",
-			"factory": "\\Wikibase\\Client\\Api\\Description::factory",
 			"services": [
 				"WikibaseClient.DescriptionLookup",
 				"WikibaseClient.Settings"
@@ -76,9 +76,10 @@
 			]
 		},
 		"ChangesListLines": {
-			"class" : "\\Wikibase\\Client\\Hooks\\ChangesListLinesHandler",
-			"factory" : "\\Wikibase\\Client\\Hooks\\ChangesListLinesHandler::factory",
+			"class": "\\Wikibase\\Client\\Hooks\\ChangesListLinesHandler",
+			"factory": "\\Wikibase\\Client\\Hooks\\ChangesListLinesHandler::factory",
 			"services": [
+				"ContentLanguage",
 				"UserNameUtils",
 				"WikibaseClient.EntityIdParser",
 				"WikibaseClient.RepoLinker",
@@ -89,25 +90,26 @@
 			"class": "\\Wikibase\\Client\\Hooks\\ChangesListSpecialPageHookHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\ChangesListSpecialPageHookHandler::factory",
 			"services": [
-				"DBLoadBalancer",
+				"WikibaseClient.ClientDomainDbFactory",
 				"WikibaseClient.Settings"
 			]
 		},
 		"ParserOutputUpdate": {
 			"class": "\\Wikibase\\Client\\Hooks\\ParserOutputUpdateHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\ParserOutputUpdateHookHandler::factory",
 			"services": [
-				"WikibaseClient.EntityIdParser",
-				"WikibaseClient.NamespaceChecker"
+				"WikibaseClient.LangLinkHandlerFactory",
+				"WikibaseClient.NamespaceChecker",
+				"WikibaseClient.ParserOutputDataUpdater",
+				"WikibaseClient.UsageAccumulatorFactory"
 			]
 		},
 		"DataUpdate": {
 			"class": "\\Wikibase\\Client\\Hooks\\DataUpdateHookHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\DataUpdateHookHandler::factory",
 			"services": [
-				"WikibaseClient.EntityIdParser",
 				"WikibaseClient.Logger",
-				"WikibaseClient.Store"
+				"WikibaseClient.Store",
+				"WikibaseClient.UsageAccumulatorFactory"
 			]
 		},
 		"DeletePageNoticeCreator": {
@@ -190,13 +192,14 @@
 			"class": "\\Wikibase\\Client\\Hooks\\ParserHookHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\ParserHookHandler::factory",
 			"services": [
+				"WikibaseClient.RestrictedEntityLookup",
 				"WikibaseClient.Settings"
 			]
 		},
 		"Sidebar": {
 			"class": "\\Wikibase\\Client\\Hooks\\SidebarHookHandler",
-			"factory": "\\Wikibase\\Client\\Hooks\\SidebarHookHandler::factory",
 			"services": [
+				"WikibaseClient.LanguageLinkBadgeDisplay",
 				"WikibaseClient.NamespaceChecker"
 			]
 		},
@@ -221,9 +224,11 @@
 			"class": "\\Wikibase\\Client\\Hooks\\UpdateRepoHookHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\UpdateRepoHookHandler::factory",
 			"services": [
-			  	"WikibaseClient.ItemAndPropertySource",
-			  	"WikibaseClient.NamespaceChecker",
-			  	"WikibaseClient.Settings",
+				"JobQueueGroupFactory",
+				"WikibaseClient.ClientDomainDbFactory",
+				"WikibaseClient.ItemAndPropertySource",
+				"WikibaseClient.NamespaceChecker",
+				"WikibaseClient.Settings",
 				"WikibaseClient.Store"
 			]
 		}
@@ -251,6 +256,7 @@
 		"EnhancedChangesListModifyLineData": "ChangesListLines",
 		"ExtensionTypes": "LibHooks",
 		"FormatAutocomments": "\\Wikibase\\Client\\ClientHooks::onFormat",
+		"GetDoubleUnderscoreIDs": "\\Wikibase\\Client\\ClientHooks::onGetDoubleUnderscoreIDs",
 		"GetPreferences": "\\Wikibase\\Client\\ClientHooks::onGetPreferences",
 		"InfoAction": "InfoAction",
 		"LinksUpdateComplete": "DataUpdate",
@@ -289,7 +295,13 @@
 	"AutoloadNamespaces": {
 		"Wikibase\\Client\\": "client/includes/",
 		"Wikibase\\Lib\\": "lib/includes/",
+		"Wikibase\\Lib\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/src/",
 		"Wikibase\\Lib\\Changes\\": "lib/packages/wikibase/changes/src/",
+		"Wikibase\\DataModel\\": "lib/packages/wikibase/data-model/src/",
+		"Wikibase\\DataModel\\Deserializers\\": "lib/packages/wikibase/data-model-serialization/src/Deserializers/",
+		"Wikibase\\DataModel\\Serializers\\": "lib/packages/wikibase/data-model-serialization/src/Serializers/",
+		"Wikibase\\DataModel\\Services\\": "lib/packages/wikibase/data-model-services/src/",
+		"Wikibase\\InternalSerialization\\": "lib/packages/wikibase/internal-serialization/src/",
 		"Wikibase\\DataAccess\\": "data-access/src/"
 	},
 	"TestAutoloadNamespaces": {
@@ -297,12 +309,17 @@
 		"Wikibase\\Client\\Tests\\Unit\\": "client/tests/phpunit/unit/includes/",
 		"Wikibase\\Client\\Tests\\Mocks\\": "client/tests/phpunit/mocks/",
 		"Wikibase\\Lib\\Tests\\": "lib/tests/phpunit/",
+		"Wikibase\\DataModel\\Fixtures\\": "lib/packages/wikibase/data-model/tests/fixtures/",
+		"Wikibase\\DataModel\\Services\\Fixtures\\": "lib/packages/wikibase/data-model-services/tests/fixtures/",
+		"Wikibase\\Lib\\Tests\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/tests/",
 		"Wikibase\\Lib\\Tests\\Changes\\": "lib/packages/wikibase/changes/tests/",
+		"Tests\\Integration\\Wikibase\\InternalSerialization\\": "lib/packages/wikibase/internal-serialization/tests/integration/",
 		"Wikibase\\DataAccess\\Tests\\": "data-access/tests/phpunit/"
 	},
 	"JobClasses": {
 		"wikibase-addUsagesForPage": "\\Wikibase\\Client\\Store\\AddUsagesForPageJob",
 		"ChangeNotification": "\\Wikibase\\Client\\ChangeNotificationJob",
+		"EntityChangeNotification": "\\Wikibase\\Client\\EntityChangeNotificationJob::newFromGlobalState",
 		"ChangeVisibilityNotification": "\\Wikibase\\Client\\ChangeModification\\ChangeVisibilityNotificationJob::newFromGlobalState",
 		"ChangeDeletionNotification": "\\Wikibase\\Client\\ChangeModification\\ChangeDeletionNotificationJob::newFromGlobalState",
 		"wikibase-InjectRCRecords": "\\Wikibase\\Client\\Changes\\InjectRCRecordsJob::newFromGlobalState"
@@ -342,7 +359,7 @@
 				"wikibase.client.linkitem.init.js",
 				{
 					"name": "config.json",
-					"callback": "Wikibase\\Client\\ClientHooks::getSiteConfiguration"
+					"callback": "Wikibase\\Client\\ClientHooks::getLinkitemConfiguration"
 				}
 			],
 			"messages": [
@@ -452,9 +469,9 @@
 		"UnconnectedPages": {
 			"class": "Wikibase\\Client\\Specials\\SpecialUnconnectedPages",
 			"services": [
-				"DBLoadBalancer",
 				"NamespaceInfo",
 				"TitleFactory",
+				"WikibaseClient.ClientDomainDbFactory",
 				"WikibaseClient.NamespaceChecker"
 			]
 		},
@@ -472,6 +489,7 @@
 			"class": "Wikibase\\Client\\Specials\\SpecialEntityUsage",
 			"services": [
 				"LanguageConverterFactory",
+				"WikibaseClient.ClientDomainDbFactory",
 				"WikibaseClient.EntityIdParser"
 			]
 		}
@@ -482,8 +500,12 @@
 		"WikibaseLib": "lib/i18n"
 	},
 	"ExtensionMessagesFiles": {
-		"Wikibaseclientalias" : "client/WikibaseClient.i18n.alias.php",
+		"Wikibaseclientalias": "client/WikibaseClient.i18n.alias.php",
 		"wikibaseclientmagic": "client/WikibaseClient.i18n.magic.php"
+	},
+	"DefaultUserOptions": {
+		"rcshowwikidata": 0,
+		"wlshowwikibase": 0
 	},
 	"callback": "\\Wikibase\\Lib\\LibHooks::onRegistration",
 	"manifest_version": 2

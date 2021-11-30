@@ -15,7 +15,6 @@ use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\DataModel\Statement\StatementList;
 use Wikibase\DataModel\Statement\StatementListProvider;
 use Wikibase\Repo\StatementRankSerializer;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * API module for getting claims.
@@ -91,13 +90,11 @@ class GetClaims extends ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
 		EntityIdParser $entityIdParser,
 		StatementGuidParser $statementGuidParser,
 		StatementGuidValidator $statementGuidValidator
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
 		return new self(
 			$mainModule,
 			$moduleName,
@@ -132,7 +129,7 @@ class GetClaims extends ApiBase {
 		}
 
 		/** @var EntityId $entityId */
-		$entity = $this->entityLoadingHelper->loadEntity( $entityId );
+		$entity = $this->entityLoadingHelper->loadEntity( $params, $entityId );
 
 		$statements = $this->getStatements( $entity, $guid );
 		$this->resultBuilder->addStatements( $statements, null, $params['props'] );

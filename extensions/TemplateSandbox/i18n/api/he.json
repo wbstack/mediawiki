@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Guycn2"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "תחילית ארגז חול של תבניות, כמו עם [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "לפענח את הדף באמצעות <var>$1templatesandboxtext</var> במקום של התוכן של הדף שרשום כאן.",
+	"templatesandbox-apihelp-text": "לפענח את הדף באמצעות תוכן הדף הזה במקום של הדף ששמו מופיע ב־<var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "מודל התוכן של <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "תסדיר התוכן של <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "הפרמטרים <var>$1templatesandboxtitle</var> ו־<var>$1templatesandboxtext</var> צריכים להיות שניהם מוגדרים או מושמטים."
+}

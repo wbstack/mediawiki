@@ -23,20 +23,20 @@ class HtmlEditableTextComponent {
 	private $language;
 
 	/**
-	 * @var string
+	 * @var string|null
 	 */
 	private $editFontOption;
 
 	/**
 	 * @param MessageLocalizer $messageLocalizer
 	 * @param Language $language
-	 * @param string $editFontOption Supported values are "monospace" (default), "sans-serif", and
-	 *  "serif"
+	 * @param string|null $editFontOption Supported values are "monospace" (default), "sans-serif",
+	 *  and "serif"
 	 */
 	public function __construct(
 		MessageLocalizer $messageLocalizer,
 		Language $language,
-		string $editFontOption = 'monospace'
+		string $editFontOption = null
 	) {
 		$this->messageLocalizer = $messageLocalizer;
 		$this->language = $language;
@@ -45,7 +45,7 @@ class HtmlEditableTextComponent {
 
 	/**
 	 * @param string $diffHtml
-	 * @param string $text
+	 * @param string|null $text
 	 * @param int $rowNum
 	 * @param string $changeType
 	 * @param bool $isDisabled
@@ -54,13 +54,13 @@ class HtmlEditableTextComponent {
 	 */
 	public function getHtml(
 		string $diffHtml,
-		string $text,
+		?string $text,
 		int $rowNum,
 		string $changeType,
 		bool $isDisabled = false
-	) : string {
+	): string {
 		$diffHtml = trim( $diffHtml, "\r\n\u{00A0}" );
-		$editorText = trim( $text, "\r\n" );
+		$editorText = trim( (string)$text, "\r\n" );
 		// This duplicates what EditPage::addNewLineAtEnd() does
 		if ( $editorText !== '' ) {
 			$editorText .= "\n";
@@ -92,7 +92,7 @@ class HtmlEditableTextComponent {
 		return Html::rawElement( 'div', [ 'class' => $classes ], $innerHtml );
 	}
 
-	private function buildResetElements( string $diffHtml ) : string {
+	private function buildResetElements( string $diffHtml ): string {
 		return Html::rawElement(
 				'span', [ 'class' => 'mw-twocolconflict-split-reset-diff-text' ],
 				$diffHtml
@@ -104,9 +104,9 @@ class HtmlEditableTextComponent {
 		int $rowNum,
 		string $changeType,
 		bool $isDisabled
-	) : string {
+	): string {
 		$attributes = [
-			'class' => 'mw-editfont-' . $this->editFontOption . ' mw-twocolconflict-split-editor',
+			'class' => 'mw-editfont-' . ( $this->editFontOption ?: 'monospace' ) . ' mw-twocolconflict-split-editor',
 			'lang' => $this->language->getHtmlCode(),
 			'dir' => $this->language->getDir(),
 			'rows' => $this->rowsForText( $editorText ),
@@ -131,12 +131,15 @@ class HtmlEditableTextComponent {
 		);
 	}
 
-	private function buildLineFeedField( string $text, int $rowNum, string $changeType ) : string {
+	private function buildLineFeedField( ?string $text, int $rowNum, string $changeType ): string {
 		$counts = $this->countExtraLineFeeds( $text );
-		return $counts === '0' ? '' : Html::hidden(
-			"mw-twocolconflict-split-linefeeds[$rowNum][$changeType]",
-			$counts
-		);
+
+		if ( $counts === '0' ) {
+			// Reduce the stuff we transfer back and forth if it's the default value anyway
+			return '';
+		}
+
+		return Html::hidden( "mw-twocolconflict-split-linefeeds[$rowNum][$changeType]", $counts );
 	}
 
 	private function buildEditButton() {
@@ -194,10 +197,18 @@ class HtmlEditableTextComponent {
 		] );
 	}
 
-	private function countExtraLineFeeds( string $text ) : string {
+	private function countExtraLineFeeds( ?string $text ): string {
+		if ( $text === null ) {
+			return '0';
+		}
+
 		$endOfText = strlen( rtrim( $text, "\r\n" ) );
 		$after = substr_count( $text, "\n", $endOfText );
-		if ( $endOfText === 0 && $after ) {
+
+		// Detect text that contains nothing but linebreaks, i.e. appears empty
+		if ( $endOfText === 0 ) {
+			// The merger will drop sections that have been emptied by the user, except they are
+			// marked as "was empty before".
 			return "$after,was-empty";
 		}
 
@@ -217,7 +228,7 @@ class HtmlEditableTextComponent {
 	 *
 	 * @return int Suggested number of rows
 	 */
-	private function rowsForText( string $text ) : int {
+	private function rowsForText( string $text ): int {
 		$thresholds = [
 			80 * 10 => 18,
 			80 * 4 => 6,

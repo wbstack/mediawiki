@@ -1,9 +1,9 @@
 # Wikibase Serialization JavaScript
 
-JavaScript library containing serializers and deserializers for the Wikibase DataModel.
+JavaScript library containing serializers and deserializers for the [Wikibase DataModel](https://github.com/wmde/WikibaseDataModelJavaScript).
 
 ## Release notes
-### 5.0.0 (dev)
+### 5.0.0 (2019-10-21)
 * Removed hooking into global variable wikibase.serialization
 
 ### 4.0.0 (2019-10-08)

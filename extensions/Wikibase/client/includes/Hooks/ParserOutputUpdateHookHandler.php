@@ -10,10 +10,7 @@ use ParserOutput;
 use Title;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\ParserOutput\ClientParserOutputDataUpdater;
-use Wikibase\Client\Usage\EntityUsageFactory;
-use Wikibase\Client\Usage\ParserOutputUsageAccumulator;
-use Wikibase\Client\WikibaseClient;
-use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\Client\Usage\UsageAccumulatorFactory;
 
 /**
  * @license GPL-2.0-or-later
@@ -36,34 +33,20 @@ class ParserOutputUpdateHookHandler implements ContentAlterParserOutputHook {
 	private $parserOutputDataUpdater;
 
 	/**
-	 * @var EntityUsageFactory
+	 * @var UsageAccumulatorFactory
 	 */
-	private $entityUsageFactory;
+	private $usageAccumulatorFactory;
 
 	public function __construct(
-		NamespaceChecker $namespaceChecker,
 		LangLinkHandlerFactory $langLinkHandlerFactory,
+		NamespaceChecker $namespaceChecker,
 		ClientParserOutputDataUpdater $parserOutputDataUpdater,
-		EntityUsageFactory $entityUsageFactory
+		UsageAccumulatorFactory $usageAccumulatorFactory
 	) {
 		$this->namespaceChecker = $namespaceChecker;
 		$this->langLinkHandlerFactory = $langLinkHandlerFactory;
 		$this->parserOutputDataUpdater = $parserOutputDataUpdater;
-		$this->entityUsageFactory = $entityUsageFactory;
-	}
-
-	public static function factory(
-		EntityIdParser $entityIdParser,
-		NamespaceChecker $namespaceChecker
-	): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-
-		return new self(
-			$namespaceChecker,
-			$wikibaseClient->getLangLinkHandlerFactory(),
-			$wikibaseClient->getParserOutputDataUpdater(),
-			new EntityUsageFactory( $entityIdParser )
-		);
+		$this->usageAccumulatorFactory = $usageAccumulatorFactory;
 	}
 
 	/**
@@ -93,7 +76,7 @@ class ParserOutputUpdateHookHandler implements ContentAlterParserOutputHook {
 			return;
 		}
 
-		$usageAccumulator = new ParserOutputUsageAccumulator( $parserOutput, $this->entityUsageFactory );
+		$usageAccumulator = $this->usageAccumulatorFactory->newFromParserOutput( $parserOutput );
 		$langLinkHandler = $this->langLinkHandlerFactory->getLangLinkHandler( $usageAccumulator );
 		$useRepoLinks = $langLinkHandler->useRepoLinks( $title, $parserOutput );
 

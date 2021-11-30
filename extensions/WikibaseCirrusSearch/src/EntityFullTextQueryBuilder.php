@@ -74,7 +74,6 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 	 */
 	public static function newFromGlobals( array $settings ) {
 		$services = MediaWikiServices::getInstance();
-		$repo = WikibaseRepo::getDefaultInstance();
 		$config = $services->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
 		return new static(
 			$config->get( 'UseStemming' ),

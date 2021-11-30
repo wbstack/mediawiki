@@ -37,10 +37,7 @@ class SiteLinkUniquenessValidator implements EntityValidator {
 		$errors = [];
 
 		if ( $entity instanceof Item ) {
-			// TODO: do not use global state
-			$db = wfGetDB( DB_MASTER );
-
-			$conflicts = $this->siteLinkConflictLookup->getConflictsForItem( $entity, $db );
+			$conflicts = $this->siteLinkConflictLookup->getConflictsForItem( $entity, DB_PRIMARY );
 
 			foreach ( $conflicts as $conflict ) {
 				$errors[] = $this->getConflictError( $conflict );
@@ -54,19 +51,28 @@ class SiteLinkUniquenessValidator implements EntityValidator {
 	 * Get Message for a conflict
 	 *
 	 * @param array $conflict A record as returned by SiteLinkConflictLookup::getConflictsForItem()
-	 *
-	 * @return Error
 	 */
-	private function getConflictError( array $conflict ) {
-		return new UniquenessViolation(
-			$conflict['itemId'],
-			'SiteLink conflict',
-			'sitelink-conflict',
-			[
-				new SiteLink( $conflict['siteId'], $conflict['sitePage'] ),
+	private function getConflictError( array $conflict ): Error {
+		if ( $conflict['itemId'] !== null ) {
+			return new UniquenessViolation(
 				$conflict['itemId'],
-			]
-		);
+				'SiteLink conflict',
+				'sitelink-conflict',
+				[
+					new SiteLink( $conflict['siteId'], $conflict['sitePage'] ),
+					$conflict['itemId'],
+				]
+			);
+		} else {
+			return new UniquenessViolation(
+				null,
+				'SiteLink conflict with unknown item',
+				'sitelink-conflict-unknown',
+				[
+					new SiteLink( $conflict['siteId'], $conflict['sitePage'] ),
+				]
+			);
+		}
 	}
 
 }

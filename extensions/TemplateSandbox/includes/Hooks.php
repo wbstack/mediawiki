@@ -5,12 +5,14 @@ namespace MediaWiki\Extension\TemplateSandbox;
 use ApiBase;
 use ApiExpandTemplates;
 use ApiParse;
+use Config;
 use Content;
 use ContentHandler;
 use EditPage;
 use ExtensionRegistry;
 use Html;
 use IContextSource;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Widget\TitleInputWidget;
@@ -24,6 +26,7 @@ use OutputPage;
 use ParserOptions;
 use ParserOutput;
 use RequestContext;
+use ResourceLoaderContext;
 use Title;
 use WebRequest;
 use Wikimedia\ScopedCallback;
@@ -142,6 +145,10 @@ class Hooks {
 				$content = $editpage->getArticle()->getPage()->replaceSectionContent(
 					$editpage->section, $content, $sectionTitle, $editpage->edittime
 				);
+				if ( $content === null ) {
+					$out = self::wrapErrorMsg( $context, 'templatesandbox-failed-replace-section' );
+					return false;
+				}
 			} else {
 				if ( $editpage->section === 'new' ) {
 					$content = $content->addSectionHeader( $sectionTitle );
@@ -154,8 +161,12 @@ class Hooks {
 			);
 			$popts->setIsPreview( true );
 			$popts->setIsSectionPreview( false );
-			$content = $content->preSaveTransform(
-				$templatetitle, $user, $popts
+			$contentTransformer = MediaWikiServices::getInstance()->getContentTransformer();
+			$content = $contentTransformer->preSaveTransform(
+				$content,
+				$templatetitle,
+				$user,
+				$popts
 			);
 
 			$note = $context->msg( 'templatesandbox-previewnote', $title->getPrefixedText() )->plain() .
@@ -243,9 +254,13 @@ class Hooks {
 			ExtensionRegistry::getInstance()->getAttribute( 'TemplateSandboxEditNamespaces' )
 		);
 
-		// Show the form if the title is in an allowed namespace, or if the
-		// user requested it with &wpTemplateSandboxShow
+		$contentModels = ExtensionRegistry::getInstance()->getAttribute(
+			'TemplateSandboxEditContentModels' );
+
+		// Show the form if the title is in an allowed namespace, has an allowed content model
+		// or if the user requested it with &wpTemplateSandboxShow
 		$showForm = $editpage->getTitle()->inNamespaces( $namespaces )
+			|| in_array( $editpage->getTitle()->getContentModel(), $contentModels, true )
 			|| $output->getRequest()->getCheck( 'wpTemplateSandboxShow' );
 
 		if ( !$showForm ) {
@@ -485,7 +500,13 @@ class Hooks {
 			$popts->setIsPreview( true );
 			$popts->setIsSectionPreview( false );
 			$user = RequestContext::getMain()->getUser();
-			$content = $content->preSaveTransform( $templatetitle, $user, $popts );
+			$contentTransformer = MediaWikiServices::getInstance()->getContentTransformer();
+			$content = $contentTransformer->preSaveTransform(
+				$content,
+				$templatetitle,
+				$user,
+				$popts
+			);
 		} else {
 			$templatetitle = null;
 			$content = null;
@@ -497,7 +518,7 @@ class Hooks {
 			$suppressCache = true;
 
 			$id = 'TemplateSandboxHooks.' . ++self::$counter;
-			$wgHooks['ApiParseMakeOutputPage'][$id] = function ( $module, $output )
+			$wgHooks['ApiParseMakeOutputPage'][$id] = static function ( $module, $output )
 				use ( $prefixes, $templatetitle, $content )
 			{
 				if ( $prefixes ) {
@@ -508,7 +529,7 @@ class Hooks {
 				}
 			};
 
-			$reset = new ScopedCallback( function () use ( &$resetLogic, $id ) {
+			$reset = new ScopedCallback( static function () use ( &$resetLogic, $id ) {
 				global $wgHooks;
 				unset( $wgHooks['ApiParseMakeOutputPage'][$id] );
 				ScopedCallback::consume( $resetLogic );
@@ -516,6 +537,21 @@ class Hooks {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Function that returns an array of valid namespaces to show the page
+	 * preview form on for the ResourceLoader
+	 *
+	 * @param ResourceLoaderContext $context
+	 * @param Config $config
+	 * @return array
+	 */
+	public static function getResourceLoaderData( $context, $config ) {
+		return array_merge(
+			$config->get( 'TemplateSandboxEditNamespaces' ),
+			ExtensionRegistry::getInstance()->getAttribute( 'TemplateSandboxEditNamespaces' )
+		);
 	}
 
 }

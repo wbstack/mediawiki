@@ -14,11 +14,11 @@
 	"twocolconflict-split-your-version-chosen": "Din version",
 	"twocolconflict-split-select-all": "Vælg alle",
 	"twocolconflict-split-tour-popup-btn-text": "Okay, modtaget.",
-	"twocolconflict-split-edit-tooltip": "Rediger tekst",
+	"twocolconflict-split-edit-tooltip": "Tryk for at redigere denne tekst",
 	"twocolconflict-split-reset-tooltip": "Nulstil tekst",
 	"twocolconflict-split-reset-warning-cancel": "Annullér",
 	"twocolconflict-split-reset-warning-accept": "Kasser",
-	"twocolconflict-split-collapse-tooltip": "Sammenfold tekst",
-	"twocolconflict-split-expand-tooltip": "Udvid tekst",
+	"twocolconflict-split-collapse-tooltip": "Sammenfold uændret tekst",
+	"twocolconflict-split-expand-tooltip": "Udvid uændret tekst",
 	"twocolconflict-talk-your": "Din kommentar"
 }

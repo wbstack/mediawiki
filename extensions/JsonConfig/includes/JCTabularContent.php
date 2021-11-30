@@ -19,7 +19,7 @@ class JCTabularContent extends JCDataContent {
 	 * @return string|bool The raw text, or false if the conversion failed.
 	 */
 	public function getWikitextForTransclusion() {
-		$toWiki = function ( $value ) {
+		$toWiki = static function ( $value ) {
 			if ( is_object( $value ) ) {
 				global $wgLang;
 				$value = JCUtils::pickLocalizedString( $value, $wgLang );
@@ -37,7 +37,7 @@ class JCTabularContent extends JCDataContent {
 		// Create header
 		$result .= '!' . implode( "!!",
 			array_map(
-				function ( $field ) use ( $toWiki ) {
+				static function ( $field ) use ( $toWiki ) {
 					return $toWiki( $field->title ? : $field->name );
 				},
 				$data->schema->fields
@@ -77,7 +77,7 @@ class JCTabularContent extends JCDataContent {
 				$header = false;
 				$hasError = !$this->test( [ 'schema', 'fields', $idx, 'name' ],
 					JCValidators::isHeaderString( $allHeaders ),
-					function ( JCValue $jcv ) use ( &$header ) {
+					static function ( JCValue $jcv ) use ( &$header ) {
 						$header = $jcv->getValue();
 						return true;
 					} ) || $hasError;
@@ -85,7 +85,7 @@ class JCTabularContent extends JCDataContent {
 					JCValidators::validateDataType( $typeValidators ) ) || $hasError;
 				if ( $header ) {
 					$hasError = !$this->testOptional( [ 'schema', 'fields', $idx, 'title' ],
-						function () use ( $header ) {
+						static function () use ( $header ) {
 							return (object)[ 'en' => $header ];
 						}, JCValidators::isLocalizedString() ) || $hasError;
 				}
@@ -130,7 +130,7 @@ class JCTabularContent extends JCDataContent {
 		parent::localizeData( $result, $lang );
 
 		$data = $this->getData();
-		$localize = function ( $value ) use ( $lang ) {
+		$localize = static function ( $value ) use ( $lang ) {
 			return JCUtils::pickLocalizedString( $value, $lang );
 		};
 
@@ -152,7 +152,7 @@ class JCTabularContent extends JCDataContent {
 			// There are no localized strings in the data, optimize
 			$result->data = $data->data;
 		} else {
-			$result->data = array_map( function ( $row ) use ( $localize, $isLocalized ) {
+			$result->data = array_map( static function ( $row ) use ( $localize, $isLocalized ) {
 				foreach ( $isLocalized as $ind ) {
 					if ( $row[$ind] !== null ) {
 						$row[$ind] = $localize( $row[$ind] );

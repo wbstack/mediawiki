@@ -10,22 +10,14 @@ namespace MediaWiki\Extension\Math;
 
 use DatabaseUpdater;
 use Exception;
-use FatalError;
-use Hooks as MWHooks;
+use ExtensionRegistry;
 use Maintenance;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use MWException;
-use Parser;
 use RequestContext;
 use User;
 
 class Hooks {
-
-	/**
-	 * @var array[]
-	 */
-	private static $tags = [];
 
 	private const MATHCACHEKEY = 'math=';
 
@@ -49,7 +41,7 @@ class Hooks {
 		if ( is_string( $value ) ) {
 			$newValues = [];
 			foreach ( $defs as $k => $v ) {
-				$newValues[$k] = preg_replace_callback( '/_(.)/', function ( $matches ) {
+				$newValues[$k] = preg_replace_callback( '/_(.)/', static function ( $matches ) {
 					return strtoupper( $matches[1] );
 				}, strtolower( substr( $k, strlen( $prefix ) ) ) );
 			}
@@ -157,93 +149,6 @@ class Hooks {
 	}
 
 	/**
-	 * Register the <math> tag with the Parser.
-	 *
-	 * @param Parser $parser
-	 * @return bool true
-	 */
-	public static function onParserFirstCallInit( $parser ) {
-		$parser->setHook( 'math', [ self::class, 'mathTagHook' ] );
-		// @deprecated the ce tag is deprecated in favour of chem cf. T153606
-		$parser->setHook( 'ce', [ self::class, 'chemTagHook' ] );
-		$parser->setHook( 'chem', [ self::class, 'chemTagHook' ] );
-
-		return true;
-	}
-
-	/**
-	 * Callback function for the <math> parser hook.
-	 *
-	 * @param string $content (the LaTeX input)
-	 * @param array $attributes
-	 * @param Parser $parser
-	 * @return array|string
-	 */
-	public static function mathTagHook( $content, $attributes, $parser ) {
-		static $n = 1;
-		if ( trim( $content ) === '' ) { // bug 8372 https://phabricator.wikimedia.org/rSVN18870
-			return '';
-		}
-
-		$mode = self::mathModeToString( $parser->getUser()->getOption( 'math' ) );
-		// Indicate that this page uses math.
-		// This affects the page caching behavior.
-		$parser->getOptions()->optionUsed( 'math' );
-		$renderer = MathRenderer::getRenderer( $content, $attributes, $mode );
-
-		$parser->getOutput()->addModuleStyles( [ 'ext.math.styles' ] );
-		if ( $mode == 'mathml' ) {
-			$parser->getOutput()->addModules( [ 'ext.math.scripts' ] );
-			$marker = Parser::MARKER_PREFIX .
-				'-postMath-' . sprintf( '%08X', $n++ ) .
-				Parser::MARKER_SUFFIX;
-			self::$tags[$marker] = [ $renderer, $parser ];
-			return $marker;
-		}
-		return [ self::mathPostTagHook( $renderer, $parser ), 'markerType' => 'nowiki' ];
-	}
-
-	/**
-	 * Callback function for the <math> parser hook.
-	 *
-	 * @param MathRenderer $renderer
-	 * @param Parser $parser
-	 * @return string
-	 * @throws FatalError
-	 * @throws MWException
-	 */
-	private static function mathPostTagHook( $renderer, $parser ) {
-		$checkResult = $renderer->checkTeX();
-
-		if ( $checkResult !== true ) {
-			$renderer->addTrackingCategories( $parser );
-			return $renderer->getLastError();
-		}
-
-		if ( $renderer->render() ) {
-			LoggerFactory::getInstance( 'Math' )->debug( "Rendering successful. Writing output" );
-			$renderedMath = $renderer->getHtmlOutput();
-			$renderer->addTrackingCategories( $parser );
-		} else {
-			LoggerFactory::getInstance( 'Math' )->warning(
-				"Rendering failed. Printing error message." );
-			// Set a short parser cache time (10 minutes) after encountering
-			// render issues, but not syntax issues.
-			$parser->getOutput()->updateCacheExpiry( 600 );
-			$renderer->addTrackingCategories( $parser );
-			return $renderer->getLastError();
-		}
-		MWHooks::run( 'MathFormulaPostRender',
-			[ $parser, $renderer, &$renderedMath ]
-		); // Enables indexing of math formula
-
-		// Writes cache if rendering was successful
-		$renderer->writeCache();
-
-		return $renderedMath;
-	}
-
-	/**
 	 * Add the new math rendering options to Special:Preferences.
 	 *
 	 * @param User $user current User object
@@ -341,70 +246,13 @@ class Hooks {
 	}
 
 	/**
-	 * Add 'math' and 'mathlatexml' tables to the list of tables that need to be copied to
-	 * temporary tables for parser tests to run.
-	 *
-	 * @param array &$tables
-	 * @return bool
-	 */
-	public static function onParserTestTables( &$tables ) {
-		$tables[] = 'math';
-		$tables[] = 'mathlatexml';
-		return true;
-	}
-
-	/**
-	 * @param Parser $parser
-	 * @param string &$text
-	 * @return bool
-	 */
-	public static function onParserAfterTidy( $parser, &$text ) {
-		global $wgMathoidCli;
-		if ( $wgMathoidCli ) {
-			MathMathMLCli::batchEvaluate( self::$tags );
-		} else {
-			MathMathML::batchEvaluate( self::$tags );
-		}
-		foreach ( self::$tags as $key => $tag ) {
-			$value = call_user_func_array( [ self::class, 'mathPostTagHook' ], $tag );
-			// Workaround for https://phabricator.wikimedia.org/T103269
-			$text = preg_replace(
-				'/(<mw:editsection[^>]*>.*?)' . preg_quote( $key ) . '(.*?)<\/mw:editsection>/',
-				'\1 $' . htmlspecialchars( $tag[0]->getTex() ) . '\2</mw:editsection>',
-				$text
-			);
-			$count = 0;
-			$text = str_replace( $key, $value, $text, $count );
-			if ( $count ) {
-				// This hook might be called multiple times. However once the tag is rendered the job is done.
-				unset( self::$tags[ $key ] );
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Callback function for the <ce> parser hook.
-	 *
-	 * @param string $content (the LaTeX input)
-	 * @param array $attributes
-	 * @param Parser $parser
-	 * @return array
-	 */
-	public static function chemTagHook( $content, $attributes, $parser ) {
-		$attributes['chem'] = true;
-		return self::mathTagHook( '\ce{' . $content . '}', $attributes, $parser );
-	}
-
-	/**
 	 * Remove Special:MathWikibase if the Wikibase client extension isn't loaded
 	 *
 	 * @param array &$list
 	 * @return bool true
 	 */
-	// phpcs:ignore MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName
-	public static function onSpecialPage_initList( &$list ) {
-		if ( !class_exists( '\Wikibase\Client\WikibaseClient' ) ) {
+	public static function onSpecialPageInitList( &$list ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseClient' ) ) {
 			unset( $list['MathWikibase'] );
 		}
 		return true;

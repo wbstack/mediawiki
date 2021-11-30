@@ -132,18 +132,17 @@
 	 *
 	 * @protected
 	 * @param {string} data Item data
-	 * @param {string} label The label text.
+	 * @param {string} [label] The label text.
 	 * @return {OO.ui.TagItemWidget}
 	 */
 	mw.libs.advancedSearch.ui.NamespaceFilters.prototype.createTagItemWidget = function ( data, label ) {
-		label = label || data;
 		// The following classes are used here:
 		// * mw-advancedSearch-namespace-0
 		// * mw-advancedSearch-namespace-1
 		// etc.
 		return new OO.ui.TagItemWidget( {
 			data: data,
-			label: label,
+			label: label || data,
 			draggable: false,
 			classes: [ 'mw-advancedSearch-namespace-' + data ]
 		} );

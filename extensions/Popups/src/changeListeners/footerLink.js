@@ -44,10 +44,10 @@ function createFooterLink() {
  *
  * The change listener covers the following behaviour:
  *
- * * The "Enable previews" link (the "link") is appended to the footer menu
+ * * The "Edit preview settings" link (the "link") is appended to the footer menu
  *   (see `createFooterLink` above).
- * * When Page Previews are disabled, then the link is shown; otherwise, the
- *   link is hidden.
+ * * When at least one popup type is disabled, then the link is shown;
+ *   otherwise, the link is hidden.
  * * When the user clicks the link, then the `showSettings` bound action
  *   creator is called.
  *
@@ -57,7 +57,7 @@ function createFooterLink() {
 export default function footerLink( boundActions ) {
 	let $footerLink;
 
-	return ( prevState, state ) => {
+	return ( oldState, newState ) => {
 		if ( $footerLink === undefined ) {
 			$footerLink = createFooterLink();
 			$footerLink.on( 'click', ( e ) => {
@@ -66,7 +66,7 @@ export default function footerLink( boundActions ) {
 			} );
 		}
 
-		if ( state.settings.shouldShowFooterLink ) {
+		if ( newState.settings.shouldShowFooterLink ) {
 			$footerLink.show();
 		} else {
 			$footerLink.hide();

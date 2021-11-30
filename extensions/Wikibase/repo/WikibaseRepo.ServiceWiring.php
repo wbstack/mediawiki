@@ -13,8 +13,11 @@ use DataValues\UnknownValue;
 use Deserializers\Deserializer;
 use Deserializers\DispatchableDeserializer;
 use Deserializers\DispatchingDeserializer;
+use Diff\Comparer\ComparableComparer;
+use Diff\Differ\OrderedListDiffer;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Site\MediaWikiPageNameNormalizer;
 use Psr\Log\LoggerInterface;
 use Serializers\DispatchingSerializer;
 use Serializers\Serializer;
@@ -22,56 +25,88 @@ use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 use ValueParsers\NullParser;
 use Wikibase\DataAccess\AliasTermBuffer;
-use Wikibase\DataAccess\ByTypeDispatchingPrefetchingTermLookup;
+use Wikibase\DataAccess\ApiEntitySource;
 use Wikibase\DataAccess\DataAccessSettings;
+use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataAccess\EntitySource;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\DataAccess\EntitySourceDefinitionsConfigParser;
+use Wikibase\DataAccess\EntitySourceLookup;
 use Wikibase\DataAccess\MediaWiki\EntitySourceDocumentUrlProvider;
 use Wikibase\DataAccess\MultipleEntitySourceServices;
 use Wikibase\DataAccess\PrefetchingTermLookup;
-use Wikibase\DataAccess\PrefetchingTermLookupFactory;
 use Wikibase\DataAccess\SingleEntitySourceServicesFactory;
+use Wikibase\DataAccess\SourceAndTypeDispatchingPrefetchingTermLookup;
 use Wikibase\DataAccess\WikibaseServices;
-use Wikibase\DataModel\DeserializerFactory;
+use Wikibase\DataModel\Deserializers\DeserializerFactory;
 use Wikibase\DataModel\Entity\DispatchingEntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemIdParser;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\Property;
-use Wikibase\DataModel\SerializerFactory;
+use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\DataModel\Services\Diff\EntityDiffer;
 use Wikibase\DataModel\Services\Diff\EntityPatcher;
 use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
 use Wikibase\DataModel\Services\EntityId\SuffixEntityIdParser;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
+use Wikibase\DataModel\Services\Lookup\InProcessCachingDataTypeLookup;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\TermLookup;
+use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\DataModel\Services\Statement\StatementGuidParser;
 use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\DataModel\Services\Term\TermBuffer;
 use Wikibase\InternalSerialization\DeserializerFactory as InternalDeserializerFactory;
+use Wikibase\Lib\Changes\EntityChange;
 use Wikibase\Lib\Changes\EntityChangeFactory;
+use Wikibase\Lib\Changes\ItemChange;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\DataTypeDefinitions;
 use Wikibase\Lib\DataTypeFactory;
 use Wikibase\Lib\DataValueFactory;
 use Wikibase\Lib\EntityFactory;
+use Wikibase\Lib\EntitySourceAndTypeDefinitions;
 use Wikibase\Lib\EntityTypeDefinitions;
 use Wikibase\Lib\Formatters\CachingKartographerEmbeddingHandler;
 use Wikibase\Lib\Formatters\EntityIdLinkFormatter;
+use Wikibase\Lib\Formatters\EntityIdPlainLinkFormatter;
+use Wikibase\Lib\Formatters\EntityIdValueFormatter;
+use Wikibase\Lib\Formatters\FormatterLabelDescriptionLookupFactory;
+use Wikibase\Lib\Formatters\NumberLocalizerFactory;
+use Wikibase\Lib\Formatters\OutputFormatSnakFormatterFactory;
 use Wikibase\Lib\Formatters\OutputFormatValueFormatterFactory;
 use Wikibase\Lib\Formatters\SnakFormatter;
+use Wikibase\Lib\Formatters\WikibaseSnakFormatterBuilders;
+use Wikibase\Lib\Formatters\WikibaseValueFormatterBuilders;
 use Wikibase\Lib\LanguageFallbackChainFactory;
+use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\LanguageNameLookupFactory;
+use Wikibase\Lib\MediaWikiMessageInLanguageProvider;
+use Wikibase\Lib\MessageInLanguageProvider;
 use Wikibase\Lib\Modules\PropertyValueExpertsModule;
+use Wikibase\Lib\Normalization\ReferenceNormalizer;
+use Wikibase\Lib\Normalization\SnakNormalizer;
+use Wikibase\Lib\Normalization\StatementNormalizer;
+use Wikibase\Lib\Normalization\StringValueNormalizer;
+use Wikibase\Lib\Rdbms\DomainDb;
+use Wikibase\Lib\Rdbms\RepoDomainDbFactory;
+use Wikibase\Lib\ServiceBySourceAndTypeDispatcher;
 use Wikibase\Lib\SettingsArray;
+use Wikibase\Lib\SimpleCacheWithBagOStuff;
+use Wikibase\Lib\SourceDispatchingPropertyDataTypeLookup;
+use Wikibase\Lib\Store\CachingPropertyOrderProvider;
 use Wikibase\Lib\Store\EntityArticleIdLookup;
+use Wikibase\Lib\Store\EntityContentDataCodec;
 use Wikibase\Lib\Store\EntityExistenceChecker;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityLinkTargetEntityIdLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityRedirectChecker;
+use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\EntityStoreWatcher;
 use Wikibase\Lib\Store\EntityTermStoreWriter;
@@ -82,10 +117,21 @@ use Wikibase\Lib\Store\ItemTermStoreWriterAdapter;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\LinkTargetEntityIdLookup;
 use Wikibase\Lib\Store\LookupConstants;
+use Wikibase\Lib\Store\MatchingTermsLookupFactory;
+use Wikibase\Lib\Store\PropertyInfoLookup;
+use Wikibase\Lib\Store\PropertyInfoStore;
 use Wikibase\Lib\Store\PropertyTermStoreWriterAdapter;
+use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
+use Wikibase\Lib\Store\SourceAndTypeDispatchingArticleIdLookup;
+use Wikibase\Lib\Store\SourceAndTypeDispatchingExistenceChecker;
+use Wikibase\Lib\Store\SourceAndTypeDispatchingRedirectChecker;
+use Wikibase\Lib\Store\SourceAndTypeDispatchingTitleTextLookup;
+use Wikibase\Lib\Store\SourceAndTypeDispatchingUrlLookup;
+use Wikibase\Lib\Store\Sql\EntityChangeLookup;
 use Wikibase\Lib\Store\Sql\EntityIdLocalPartPageTableEntityQuery;
 use Wikibase\Lib\Store\Sql\PrefetchingWikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\Terms\DatabaseTypeIdsStore;
+use Wikibase\Lib\Store\Sql\Terms\TermInLangIdsResolverFactory;
 use Wikibase\Lib\Store\Sql\Terms\TermStoreWriterFactory;
 use Wikibase\Lib\Store\Sql\Terms\TypeIdsAcquirer;
 use Wikibase\Lib\Store\Sql\Terms\TypeIdsLookup;
@@ -94,17 +140,9 @@ use Wikibase\Lib\Store\Sql\TypeDispatchingWikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\WikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\WikiPageEntityMetaDataLookup;
 use Wikibase\Lib\Store\ThrowingEntityTermStoreWriter;
-use Wikibase\Lib\Store\TitleLookupBasedEntityArticleIdLookup;
-use Wikibase\Lib\Store\TitleLookupBasedEntityExistenceChecker;
-use Wikibase\Lib\Store\TitleLookupBasedEntityRedirectChecker;
-use Wikibase\Lib\Store\TitleLookupBasedEntityTitleTextLookup;
-use Wikibase\Lib\Store\TitleLookupBasedEntityUrlLookup;
-use Wikibase\Lib\Store\TypeDispatchingArticleIdLookup;
-use Wikibase\Lib\Store\TypeDispatchingExistenceChecker;
-use Wikibase\Lib\Store\TypeDispatchingRedirectChecker;
-use Wikibase\Lib\Store\TypeDispatchingTitleTextLookup;
-use Wikibase\Lib\Store\TypeDispatchingUrlLookup;
+use Wikibase\Lib\Store\WikiPagePropertyOrderProvider;
 use Wikibase\Lib\StringNormalizer;
+use Wikibase\Lib\SubEntityTypesMapper;
 use Wikibase\Lib\TermFallbackCache\TermFallbackCacheFacade;
 use Wikibase\Lib\TermFallbackCache\TermFallbackCacheServiceFactory;
 use Wikibase\Lib\TermFallbackCacheFactory;
@@ -112,23 +150,79 @@ use Wikibase\Lib\Units\UnitConverter;
 use Wikibase\Lib\Units\UnitStorage;
 use Wikibase\Lib\WikibaseContentLanguages;
 use Wikibase\Lib\WikibaseSettings;
+use Wikibase\Repo\Api\ApiHelperFactory;
+use Wikibase\Repo\Api\CombinedEntitySearchHelper;
+use Wikibase\Repo\Api\EntitySearchHelper;
+use Wikibase\Repo\Api\FedPropertiesTypeDispatchingEntitySearchHelper;
+use Wikibase\Repo\Api\TypeDispatchingEntitySearchHelper;
 use Wikibase\Repo\BuilderBasedDataTypeValidatorFactory;
+use Wikibase\Repo\CachingCommonsMediaFileNameLookup;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
+use Wikibase\Repo\ChangeOp\Deserialization\ChangeOpDeserializerFactory;
 use Wikibase\Repo\ChangeOp\Deserialization\SiteLinkBadgeChangeOpSerializationValidator;
+use Wikibase\Repo\ChangeOp\Deserialization\TermChangeOpSerializationValidator;
 use Wikibase\Repo\ChangeOp\EntityChangeOpProvider;
+use Wikibase\Repo\Content\ContentHandlerEntityIdLookup;
+use Wikibase\Repo\Content\ContentHandlerEntityTitleLookup;
 use Wikibase\Repo\Content\EntityContentFactory;
+use Wikibase\Repo\Content\ItemHandler;
+use Wikibase\Repo\Content\PropertyHandler;
 use Wikibase\Repo\DataTypeValidatorFactory;
-use Wikibase\Repo\EntitySourceDefinitionsLegacyRepoSettingsParser;
-use Wikibase\Repo\EntityTypeDefinitionsFedPropsOverrider;
-use Wikibase\Repo\FederatedProperties\FederatedPropertiesEntitySourceDefinitionsConfigParser;
+use Wikibase\Repo\Diff\ClaimDiffer;
+use Wikibase\Repo\Diff\EntityDiffVisualizerFactory;
+use Wikibase\Repo\EditEntity\EditFilterHookRunner;
+use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediawikiEditFilterHookRunner;
+use Wikibase\Repo\EntityIdHtmlLinkFormatterFactory;
+use Wikibase\Repo\EntityIdLabelFormatterFactory;
+use Wikibase\Repo\EntityReferenceExtractors\EntityReferenceExtractorDelegator;
+use Wikibase\Repo\EntityReferenceExtractors\StatementEntityReferenceExtractor;
+use Wikibase\Repo\EntityTypesConfigFeddyPropsAugmenter;
+use Wikibase\Repo\FederatedProperties\ApiServiceFactory;
+use Wikibase\Repo\FederatedProperties\BaseUriExtractor;
+use Wikibase\Repo\FederatedProperties\DefaultFederatedPropertiesEntitySourceAdder;
+use Wikibase\Repo\FederatedProperties\FederatedPropertiesAwareDispatchingEntityIdParser;
+use Wikibase\Repo\FederatedProperties\WrappingEntityIdFormatterFactory;
+use Wikibase\Repo\Hooks\Formatters\EntityLinkFormatterFactory;
+use Wikibase\Repo\Interactors\ItemMergeInteractor;
+use Wikibase\Repo\Interactors\ItemRedirectCreationInteractor;
+use Wikibase\Repo\Interactors\TokenCheckInteractor;
+use Wikibase\Repo\LinkedData\EntityDataFormatProvider;
+use Wikibase\Repo\LinkedData\EntityDataSerializationService;
+use Wikibase\Repo\LinkedData\EntityDataUriManager;
+use Wikibase\Repo\LocalizedTextProviderFactory;
+use Wikibase\Repo\Localizer\ChangeOpApplyExceptionLocalizer;
+use Wikibase\Repo\Localizer\ChangeOpDeserializationExceptionLocalizer;
+use Wikibase\Repo\Localizer\ChangeOpValidationExceptionLocalizer;
+use Wikibase\Repo\Localizer\DispatchingExceptionLocalizer;
+use Wikibase\Repo\Localizer\ExceptionLocalizer;
+use Wikibase\Repo\Localizer\GenericExceptionLocalizer;
+use Wikibase\Repo\Localizer\MessageExceptionLocalizer;
 use Wikibase\Repo\Localizer\MessageParameterFormatter;
+use Wikibase\Repo\Localizer\ParseExceptionLocalizer;
+use Wikibase\Repo\MediaWikiLanguageDirectionalityLookup;
+use Wikibase\Repo\Normalization\CommonsMediaValueNormalizer;
+use Wikibase\Repo\Notifications\ChangeHolder;
 use Wikibase\Repo\Notifications\ChangeNotifier;
-use Wikibase\Repo\Notifications\DatabaseChangeTransmitter;
 use Wikibase\Repo\Notifications\HookChangeTransmitter;
-use Wikibase\Repo\Notifications\RepoEntityChange;
-use Wikibase\Repo\Notifications\RepoItemChange;
+use Wikibase\Repo\Notifications\WikiPageActionEntityChangeFactory;
+use Wikibase\Repo\ParserOutput\DispatchingEntityMetaTagsCreatorFactory;
+use Wikibase\Repo\ParserOutput\DispatchingEntityViewFactory;
+use Wikibase\Repo\ParserOutput\EntityParserOutputGeneratorFactory;
+use Wikibase\Repo\PropertyInfoBuilder;
+use Wikibase\Repo\PropertyServices;
 use Wikibase\Repo\Rdf\EntityRdfBuilderFactory;
+use Wikibase\Repo\Rdf\EntityStubRdfBuilderFactory;
+use Wikibase\Repo\Rdf\RdfBuilderFactory;
 use Wikibase\Repo\Rdf\RdfVocabulary;
 use Wikibase\Repo\Rdf\ValueSnakRdfBuilderFactory;
+use Wikibase\Repo\Search\Fields\FieldDefinitionsFactory;
+use Wikibase\Repo\SiteLinkGlobalIdentifiersProvider;
+use Wikibase\Repo\SiteLinkTargetProvider;
+use Wikibase\Repo\SnakFactory;
+use Wikibase\Repo\StatementGrouperBuilder;
+use Wikibase\Repo\Store\BagOStuffSiteLinkConflictLookup;
+use Wikibase\Repo\Store\CompositeSiteLinkConflictLookup;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\Store\IdGenerator;
@@ -142,10 +236,19 @@ use Wikibase\Repo\Store\TermsCollisionDetector;
 use Wikibase\Repo\Store\TermsCollisionDetectorFactory;
 use Wikibase\Repo\Store\TypeDispatchingEntityTitleStoreLookup;
 use Wikibase\Repo\Store\WikiPageEntityStorePermissionChecker;
+use Wikibase\Repo\SummaryFormatter;
+use Wikibase\Repo\ValidatorBuilders;
 use Wikibase\Repo\Validators\EntityConstraintProvider;
+use Wikibase\Repo\Validators\SnakValidator;
 use Wikibase\Repo\Validators\TermValidatorFactory;
+use Wikibase\Repo\Validators\ValidatorErrorLocalizer;
 use Wikibase\Repo\ValueParserFactory;
+use Wikibase\Repo\View\RepoSpecialPageLinker;
+use Wikibase\Repo\View\WikibaseHtmlSnakFormatterFactory;
 use Wikibase\Repo\WikibaseRepo;
+use Wikibase\View\EntityIdFormatterFactory;
+use Wikibase\View\Template\TemplateFactory;
+use Wikibase\View\ViewFactory;
 use Wikimedia\ObjectFactory;
 
 /** @phpcs-require-sorted-array */
@@ -179,6 +282,37 @@ return [
 		return new DispatchingSerializer( $serializers );
 	},
 
+	'WikibaseRepo.ApiHelperFactory' => function ( MediaWikiServices $services ): ApiHelperFactory {
+		$store = WikibaseRepo::getStore( $services );
+
+		return new ApiHelperFactory(
+			WikibaseRepo::getEntityTitleStoreLookup( $services ),
+			WikibaseRepo::getExceptionLocalizer( $services ),
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			$services->getSiteLookup(),
+			WikibaseRepo::getSummaryFormatter( $services ),
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			WikibaseRepo::getEditEntityFactory( $services ),
+			WikibaseRepo::getBaseDataModelSerializerFactory( $services ),
+			WikibaseRepo::getAllTypesEntitySerializer( $services ),
+			WikibaseRepo::getEntityIdParser( $services ),
+			$services->getPermissionManager(),
+			$services->getRevisionLookup(),
+			$services->getTitleFactory(),
+			$store->getEntityByLinkedTitleLookup(),
+			WikibaseRepo::getEntityFactory( $services ),
+			WikibaseRepo::getEntityStore( $services )
+		);
+	},
+
+	'WikibaseRepo.BagOStuffSiteLinkConflictLookup' => function (
+		MediaWikiServices $services
+	): BagOStuffSiteLinkConflictLookup {
+		return new BagOStuffSiteLinkConflictLookup(
+			ObjectCache::getLocalClusterInstance()
+		);
+	},
+
 	'WikibaseRepo.BaseDataModelDeserializerFactory' => function ( MediaWikiServices $services ): DeserializerFactory {
 		return new DeserializerFactory(
 			WikibaseRepo::getDataValueDeserializer( $services ),
@@ -188,6 +322,19 @@ return [
 
 	'WikibaseRepo.BaseDataModelSerializerFactory' => function ( MediaWikiServices $services ): SerializerFactory {
 		return new SerializerFactory( new DataValueSerializer(), SerializerFactory::OPTION_DEFAULT );
+	},
+
+	'WikibaseRepo.CachingCommonsMediaFileNameLookup' => function (
+		MediaWikiServices $services
+	): CachingCommonsMediaFileNameLookup {
+		return new CachingCommonsMediaFileNameLookup(
+			new MediaWikiPageNameNormalizer(),
+			new HashBagOStuff()
+		);
+	},
+
+	'WikibaseRepo.ChangeHolder' => function ( MediaWikiServices $services ): ChangeHolder {
+		return new ChangeHolder();
 	},
 
 	'WikibaseRepo.ChangeNotifier' => function ( MediaWikiServices $services ): ChangeNotifier {
@@ -200,14 +347,65 @@ return [
 
 		$settings = WikibaseRepo::getSettings( $services );
 		if ( $settings->getSetting( 'useChangesTable' ) ) {
-			$changeStore = WikibaseRepo::getStore( $services )->getChangeStore();
-			$transmitters[] = new DatabaseChangeTransmitter( $changeStore );
+			$transmitters[] = WikibaseRepo::getChangeHolder( $services );
 		}
 
 		return new ChangeNotifier(
-			WikibaseRepo::getEntityChangeFactory( $services ),
-			$transmitters,
-			CentralIdLookup::factoryNonLocal() // TODO inject (T265767)
+			new WikiPageActionEntityChangeFactory(
+				WikibaseRepo::getEntityChangeFactory( $services ),
+				$services->getCentralIdLookupFactory()->getNonLocalLookup()
+			),
+			$transmitters
+		);
+	},
+
+	'WikibaseRepo.ChangeOpDeserializerFactory' => function ( MediaWikiServices $services ): ChangeOpDeserializerFactory {
+		$changeOpFactoryProvider = WikibaseRepo::getChangeOpFactoryProvider( $services );
+		$settings = WikibaseRepo::getSettings( $services );
+
+		return new ChangeOpDeserializerFactory(
+			$changeOpFactoryProvider->getFingerprintChangeOpFactory(),
+			$changeOpFactoryProvider->getStatementChangeOpFactory(),
+			$changeOpFactoryProvider->getSiteLinkChangeOpFactory(),
+			new TermChangeOpSerializationValidator( WikibaseRepo::getTermsLanguages( $services ) ),
+			WikibaseRepo::getSiteLinkBadgeChangeOpSerializationValidator( $services ),
+			WikibaseRepo::getExternalFormatStatementDeserializer( $services ),
+			WikibaseRepo::getSiteLinkTargetProvider( $services ),
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getStringNormalizer( $services ),
+			$settings->getSetting( 'siteLinkGroups' )
+		);
+	},
+
+	'WikibaseRepo.ChangeOpFactoryProvider' => function ( MediaWikiServices $services ): ChangeOpFactoryProvider {
+		$snakValidator = new SnakValidator(
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getDataTypeFactory( $services ),
+			WikibaseRepo::getDataTypeValidatorFactory( $services )
+		);
+
+		$settings = WikibaseRepo::getSettings( $services );
+
+		return new ChangeOpFactoryProvider(
+			WikibaseRepo::getEntityConstraintProvider( $services ),
+			new GuidGenerator(),
+			WikibaseRepo::getStatementGuidValidator( $services ),
+			WikibaseRepo::getStatementGuidParser( $services ),
+			$snakValidator,
+			WikibaseRepo::getTermValidatorFactory( $services ),
+			$services->getSiteLookup(),
+			WikibaseRepo::getSnakNormalizer( $services ),
+			WikibaseRepo::getReferenceNormalizer( $services ),
+			WikibaseRepo::getStatementNormalizer( $services ),
+			array_keys( $settings->getSetting( 'badgeItems' ) ),
+			$settings->getSetting( 'tmpNormalizeDataValues' )
+		);
+	},
+
+	'WikibaseRepo.CommonsMediaValueNormalizer' => function ( MediaWikiServices $services ): CommonsMediaValueNormalizer {
+		return new CommonsMediaValueNormalizer(
+			WikibaseRepo::getCachingCommonsMediaFileNameLookup( $services ),
+			WikibaseRepo::getLogger( $services )
 		);
 	},
 
@@ -250,7 +448,7 @@ return [
 
 	'WikibaseRepo.DatabaseTypeIdsStore' => function ( MediaWikiServices $services ): DatabaseTypeIdsStore {
 		return new DatabaseTypeIdsStore(
-			$services->getDBLoadBalancer(),
+			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
 			$services->getMainWANObjectCache()
 		);
 	},
@@ -259,7 +457,10 @@ return [
 		$baseDataTypes = require __DIR__ . '/../lib/WikibaseLib.datatypes.php';
 		$repoDataTypes = require __DIR__ . '/WikibaseRepo.datatypes.php';
 
-		$dataTypes = array_merge_recursive( $baseDataTypes, $repoDataTypes );
+		$dataTypes = wfArrayPlus2d(
+			$repoDataTypes,
+			$baseDataTypes
+		);
 
 		$services->getHookContainer()->run( 'WikibaseRepoDataTypes', [ &$dataTypes ] );
 
@@ -314,12 +515,129 @@ return [
 		return new DataValueFactory( WikibaseRepo::getDataValueDeserializer( $services ) );
 	},
 
+	'WikibaseRepo.DefaultSnakFormatterBuilders' => function ( MediaWikiServices $services ): WikibaseSnakFormatterBuilders {
+		return new WikibaseSnakFormatterBuilders(
+			WikibaseRepo::getDefaultValueFormatterBuilders( $services ),
+			WikibaseRepo::getStore( $services )->getPropertyInfoLookup(),
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getDataTypeFactory( $services )
+		);
+	},
+
+	/**
+	 * Returns a low level factory object for creating validators for well known data types.
+	 *
+	 * @warning This is for use with {@link WikibaseRepo::getDefaultValidatorBuilders()} during bootstrap only!
+	 * Program logic should use {@link WikibaseRepo::getDataTypeValidatorFactory()} instead!
+	 */
+	'WikibaseRepo.DefaultValidatorBuilders' => function ( MediaWikiServices $services ): ValidatorBuilders {
+		$settings = WikibaseRepo::getSettings( $services );
+
+		return new ValidatorBuilders(
+			WikibaseRepo::getEntityLookup( $services ),
+			WikibaseRepo::getEntityIdParser( $services ),
+			$settings->getSetting( 'urlSchemes' ),
+			WikibaseRepo::getItemVocabularyBaseUri( $services ),
+			WikibaseRepo::getMonolingualTextLanguages( $services ),
+			WikibaseRepo::getCachingCommonsMediaFileNameLookup( $services ),
+			new MediaWikiPageNameNormalizer(), // TODO should probably inject an HttpRequestFactory here (or get from $services?)
+			$settings->getSetting( 'geoShapeStorageApiEndpointUrl' ),
+			$settings->getSetting( 'tabularDataStorageApiEndpointUrl' )
+		);
+	},
+
+	/**
+	 * Returns a low level factory object for creating formatters for well known data types.
+	 *
+	 * @warning This is for use with {@link WikibaseRepo::getDefaultValueFormatterBuilders()} during bootstrap only!
+	 * Program logic should use {@link WikibaseRepo::getSnakFormatterFactory()} instead!
+	 */
+	'WikibaseRepo.DefaultValueFormatterBuilders' => function (
+		MediaWikiServices $services
+	): WikibaseValueFormatterBuilders {
+		$settings = WikibaseRepo::getSettings( $services );
+		$revisionLookup = WikibaseRepo::getEntityRevisionLookup( $services );
+		$termFallbackCache = WikibaseRepo::getTermFallbackCache( $services );
+
+		return new WikibaseValueFormatterBuilders(
+			new FormatterLabelDescriptionLookupFactory(
+				WikibaseRepo::getTermLookup( $services ),
+				$termFallbackCache,
+				new RedirectResolvingLatestRevisionLookup( $revisionLookup )
+			),
+			WikibaseRepo::getLanguageNameLookup( $services ),
+			WikibaseRepo::getItemUrlParser( $services ),
+			$settings->getSetting( 'geoShapeStorageBaseUrl' ),
+			$settings->getSetting( 'tabularDataStorageBaseUrl' ),
+			$termFallbackCache,
+			WikibaseRepo::getEntityLookup( $services ),
+			$revisionLookup,
+			$settings->getSetting( 'entitySchemaNamespace' ),
+			WikibaseRepo::getEntityExistenceChecker( $services ),
+			WikibaseRepo::getEntityTitleTextLookup( $services ),
+			WikibaseRepo::getEntityUrlLookup( $services ),
+			WikibaseRepo::getEntityRedirectChecker( $services ),
+			WikibaseRepo::getEntityTitleLookup( $services ),
+			WikibaseRepo::getKartographerEmbeddingHandler( $services ),
+			$settings->getSetting( 'useKartographerMaplinkInWikitext' ),
+			$services->getMainConfig()->get( 'ThumbLimits' )
+		);
+	},
+
+	'WikibaseRepo.EditEntityFactory' => function ( MediaWikiServices $services ): MediawikiEditEntityFactory {
+		return new MediawikiEditEntityFactory(
+			WikibaseRepo::getEntityTitleStoreLookup( $services ),
+			WikibaseRepo::getStore( $services )
+				->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			WikibaseRepo::getEntityStore( $services ),
+			WikibaseRepo::getEntityPermissionChecker( $services ),
+			WikibaseRepo::getEntityDiffer( $services ),
+			WikibaseRepo::getEntityPatcher( $services ),
+			WikibaseRepo::getEditFilterHookRunner( $services ),
+			$services->getStatsdDataFactory(),
+			WikibaseRepo::getSettings( $services )->getSetting( 'maxSerializedEntitySize' )
+		);
+	},
+
+	'WikibaseRepo.EditFilterHookRunner' => function ( MediaWikiServices $services ): EditFilterHookRunner {
+		return new MediawikiEditFilterHookRunner(
+			WikibaseRepo::getEntityNamespaceLookup( $services ),
+			WikibaseRepo::getEntityTitleStoreLookup( $services ),
+			WikibaseRepo::getEntityContentFactory( $services )
+		);
+	},
+
+	'WikibaseRepo.EnabledEntityTypes' => function ( MediaWikiServices $services ): array {
+		$types = array_keys(
+			WikibaseRepo::getEntitySourceDefinitions( $services )
+				->getEntityTypeToDatabaseSourceMapping()
+		);
+		$subEntityTypes = WikibaseRepo::getEntityTypeDefinitions( $services )
+			->get( EntityTypeDefinitions::SUB_ENTITY_TYPES );
+
+		return array_reduce(
+			$types,
+			function ( $entityTypes, $type ) use ( $subEntityTypes ) {
+				$entityTypes[] = $type;
+				if ( array_key_exists( $type, $subEntityTypes ) ) {
+					$entityTypes = array_merge( $entityTypes, $subEntityTypes[$type] );
+				}
+				return $entityTypes;
+			},
+			[]
+		);
+	},
+
 	'WikibaseRepo.EntityArticleIdLookup' => function ( MediaWikiServices $services ): EntityArticleIdLookup {
-		return new TypeDispatchingArticleIdLookup(
-			WikibaseRepo::getEntityTypeDefinitions( $services )
-				->get( EntityTypeDefinitions::ARTICLE_ID_LOOKUP_CALLBACK ),
-			new TitleLookupBasedEntityArticleIdLookup(
-				WikibaseRepo::getEntityTitleLookup( $services )
+		$callbacks = WikibaseRepo::getEntitySourceAndTypeDefinitions( $services )->getServiceBySourceAndType(
+				EntityTypeDefinitions::ARTICLE_ID_LOOKUP_CALLBACK
+			);
+
+		return new SourceAndTypeDispatchingArticleIdLookup(
+			WikibaseRepo::getEntitySourceLookup( $services ),
+			new ServiceBySourceAndTypeDispatcher(
+				EntityArticleIdLookup::class,
+				$callbacks
 			)
 		);
 	},
@@ -327,7 +645,7 @@ return [
 	'WikibaseRepo.EntityChangeFactory' => function ( MediaWikiServices $services ): EntityChangeFactory {
 		//TODO: take this from a setting or registry.
 		$changeClasses = [
-			Item::ENTITY_TYPE => RepoItemChange::class,
+			Item::ENTITY_TYPE => ItemChange::class,
 			// Other types of entities will use EntityChange
 		];
 
@@ -335,8 +653,16 @@ return [
 			WikibaseRepo::getEntityDiffer( $services ),
 			WikibaseRepo::getEntityIdParser( $services ),
 			$changeClasses,
-			RepoEntityChange::class,
+			EntityChange::class,
 			WikibaseRepo::getLogger( $services )
+		);
+	},
+
+	'WikibaseRepo.EntityChangeLookup' => function ( MediaWikiServices $services ): EntityChangeLookup {
+		return new EntityChangeLookup(
+			WikibaseRepo::getEntityChangeFactory( $services ),
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb()
 		);
 	},
 
@@ -349,7 +675,24 @@ return [
 
 	'WikibaseRepo.EntityConstraintProvider' => function ( MediaWikiServices $services ): EntityConstraintProvider {
 		return new EntityConstraintProvider(
-			new SqlSiteLinkConflictLookup( WikibaseRepo::getEntityIdComposer( $services ) )
+			new CompositeSiteLinkConflictLookup( [
+				new SqlSiteLinkConflictLookup(
+					WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
+					WikibaseRepo::getEntityIdComposer( $services )
+				),
+				WikibaseRepo::getBagOStuffSiteLinkConflictLookup( $services ),
+			] ),
+			WikibaseRepo::getTermValidatorFactory()
+		);
+	},
+
+	'WikibaseRepo.EntityContentDataCodec' => function ( MediaWikiServices $services ): EntityContentDataCodec {
+		return new EntityContentDataCodec(
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getStorageEntitySerializer( $services ),
+			WikibaseRepo::getInternalFormatEntityDeserializer( $services ),
+			WikibaseRepo::getDataAccessSettings( $services )
+				->maxSerializedEntitySizeInBytes()
 		);
 	},
 
@@ -357,10 +700,54 @@ return [
 		return new EntityContentFactory(
 			WikibaseRepo::getContentModelMappings( $services ),
 			WikibaseRepo::getEntityTypeDefinitions( $services )
-				->get( EntityTypeDefinitions::CONTENT_HANDLER_FACTORY_CALLBACK ),
-			WikibaseRepo::getEntitySourceDefinitions( $services ),
-			WikibaseRepo::getLocalEntitySource( $services ),
-			$services->getInterwikiLookup()
+				->get( EntityTypeDefinitions::CONTENT_HANDLER_FACTORY_CALLBACK )
+		);
+	},
+
+	'WikibaseRepo.EntityDataFormatProvider' => function ( MediaWikiServices $services ): EntityDataFormatProvider {
+		$formats = WikibaseRepo::getSettings( $services )->getSetting( 'entityDataFormats' );
+
+		$entityDataFormatProvider = new EntityDataFormatProvider();
+		$entityDataFormatProvider->setAllowedFormats( $formats );
+
+		return $entityDataFormatProvider;
+	},
+
+	'WikibaseRepo.EntityDataSerializationService' => function ( MediaWikiServices $services ): EntityDataSerializationService {
+		return new EntityDataSerializationService(
+			WikibaseRepo::getEntityTitleStoreLookup( $services ),
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getEntityDataFormatProvider( $services ),
+			WikibaseRepo::getBaseDataModelSerializerFactory( $services ),
+			WikibaseRepo::getAllTypesEntitySerializer( $services ),
+			$services->getSiteLookup(),
+			WikibaseRepo::getRdfBuilderFactory( $services ),
+			WikibaseRepo::getEntityIdParser( $services )
+		);
+	},
+
+	'WikibaseRepo.EntityDataUriManager' => function ( MediaWikiServices $services ): EntityDataUriManager {
+		$entityDataFormatProvider = WikibaseRepo::getEntityDataFormatProvider( $services );
+
+		// build a mapping of formats to file extensions and include HTML
+		$supportedExtensions = [];
+		$supportedExtensions['html'] = 'html';
+		foreach ( $entityDataFormatProvider->getSupportedFormats() as $format ) {
+			$ext = $entityDataFormatProvider->getExtension( $format );
+
+			if ( $ext !== null ) {
+				$supportedExtensions[$format] = $ext;
+			}
+		}
+
+		return new EntityDataUriManager(
+			// TODO this should probably use SpecialPageFactory or TitleFactory,
+			// but neither of them seems to have a suitable method yet
+			SpecialPage::getTitleFor( 'EntityData' ),
+			$supportedExtensions,
+			WikibaseRepo::getSettings( $services )
+				->getSetting( 'entityDataCachePaths' ),
+			WikibaseRepo::getEntityTitleLookup( $services )
 		);
 	},
 
@@ -374,13 +761,23 @@ return [
 		return $entityDiffer;
 	},
 
+	'WikibaseRepo.EntityDiffVisualizerFactory' => function ( MediaWikiServices $services ): EntityDiffVisualizerFactory{
+		return new EntityDiffVisualizerFactory(
+			WikibaseRepo::getEntityTypeDefinitions( $services )->get( EntityTypeDefinitions::ENTITY_DIFF_VISUALIZER_CALLBACK ),
+			new ClaimDiffer( new OrderedListDiffer( new ComparableComparer() ) ),
+			$services->getSiteLookup(),
+			WikibaseRepo::getEntityIdHtmlLinkFormatterFactory( $services ),
+			WikibaseRepo::getSnakFormatterFactory( $services )
+		);
+	},
+
 	'WikibaseRepo.EntityExistenceChecker' => function ( MediaWikiServices $services ): EntityExistenceChecker {
-		return new TypeDispatchingExistenceChecker(
-			WikibaseRepo::getEntityTypeDefinitions( $services )
-				->get( EntityTypeDefinitions::EXISTENCE_CHECKER_CALLBACK ),
-			new TitleLookupBasedEntityExistenceChecker(
-				WikibaseRepo::getEntityTitleLookup( $services ),
-				$services->getLinkBatchFactory()
+		return new SourceAndTypeDispatchingExistenceChecker(
+			WikibaseRepo::getEntitySourceLookup( $services ),
+			new ServiceBySourceAndTypeDispatcher(
+				EntityExistenceChecker::class,
+				WikibaseRepo::getEntitySourceAndTypeDefinitions( $services )
+				->getServiceBySourceAndType( EntityTypeDefinitions::EXISTENCE_CHECKER_CALLBACK )
 			)
 		);
 	},
@@ -399,13 +796,50 @@ return [
 		);
 	},
 
+	'WikibaseRepo.EntityIdHtmlLinkFormatterFactory' => function (
+		MediaWikiServices $services
+	): EntityIdFormatterFactory {
+		$factory = new EntityIdHtmlLinkFormatterFactory(
+			WikibaseRepo::getEntityTitleLookup( $services ),
+			WikibaseRepo::getEntityTypeDefinitions( $services )
+				->get( EntityTypeDefinitions::ENTITY_ID_HTML_LINK_FORMATTER_CALLBACK )
+		);
+
+		$federatedPropertiesEnabled = WikibaseRepo::getSettings( $services )
+			->getSetting( 'federatedPropertiesEnabled' );
+
+		return $federatedPropertiesEnabled
+			? new WrappingEntityIdFormatterFactory( $factory )
+			: $factory;
+	},
+
 	'WikibaseRepo.EntityIdLookup' => function ( MediaWikiServices $services ): EntityIdLookup {
-		return WikibaseRepo::getEntityContentFactory( $services );
+		return new ContentHandlerEntityIdLookup( WikibaseRepo::getEntityContentFactory( $services ) );
 	},
 
 	'WikibaseRepo.EntityIdParser' => function ( MediaWikiServices $services ): EntityIdParser {
-		return new DispatchingEntityIdParser(
+
+		$settings = WikibaseRepo::getSettings( $services );
+		$dispatchingEntityIdParser = new DispatchingEntityIdParser(
 			WikibaseRepo::getEntityTypeDefinitions( $services )->getEntityIdBuilders()
+		);
+
+		if ( $settings->getSetting( 'federatedPropertiesEnabled' ) ) {
+			$entitySourceDefinitions = WikibaseRepo::getEntitySourceDefinitions( $services );
+			return new FederatedPropertiesAwareDispatchingEntityIdParser(
+				$dispatchingEntityIdParser,
+				new BaseUriExtractor(),
+				$entitySourceDefinitions
+			);
+		}
+
+		return $dispatchingEntityIdParser;
+	},
+
+	'WikibaseRepo.EntityLinkFormatterFactory' => function ( MediaWikiServices $services ): EntityLinkFormatterFactory {
+		return new EntityLinkFormatterFactory(
+			WikibaseRepo::getEntityTitleTextLookup( $services ),
+			WikibaseRepo::getEntityTypeDefinitions( $services )->get( EntityTypeDefinitions::LINK_FORMATTER_CALLBACK )
 		);
 	},
 
@@ -417,16 +851,62 @@ return [
 			);
 	},
 
+	'WikibaseRepo.EntityMetaTagsCreatorFactory' => function (
+		MediaWikiServices $services
+	): DispatchingEntityMetaTagsCreatorFactory {
+		return new DispatchingEntityMetaTagsCreatorFactory(
+			WikibaseRepo::getEntityTypeDefinitions( $services )
+				->get( EntityTypeDefinitions::META_TAGS_CREATOR_CALLBACK )
+		);
+	},
+
 	'WikibaseRepo.EntityNamespaceLookup' => function ( MediaWikiServices $services ): EntityNamespaceLookup {
-		return array_reduce(
+		$entitySources = array_filter(
 			WikibaseRepo::getEntitySourceDefinitions( $services )->getSources(),
-			function ( EntityNamespaceLookup $nsLookup, EntitySource $source ): EntityNamespaceLookup {
+			function ( EntitySource $entitySource ) {
+				return $entitySource->getType() === DatabaseEntitySource::TYPE;
+			}
+		);
+
+		return array_reduce(
+			$entitySources,
+			function ( EntityNamespaceLookup $nsLookup, DatabaseEntitySource $source ): EntityNamespaceLookup {
 				return $nsLookup->merge( new EntityNamespaceLookup(
 					$source->getEntityNamespaceIds(),
 					$source->getEntitySlotNames()
 				) );
 			},
 			new EntityNamespaceLookup( [], [] )
+		);
+	},
+
+	'WikibaseRepo.EntityParserOutputGeneratorFactory' => function ( MediaWikiServices $services ): EntityParserOutputGeneratorFactory {
+		$settings = WikibaseRepo::getSettings( $services );
+
+		return new EntityParserOutputGeneratorFactory(
+			WikibaseRepo::getEntityViewFactory( $services ),
+			WikibaseRepo::getEntityMetaTagsCreatorFactory( $services ),
+			WikibaseRepo::getEntityTitleLookup( $services ),
+			WikibaseRepo::getLanguageFallbackChainFactory( $services ),
+			WikibaseRepo::getEntityDataFormatProvider( $services ),
+			// FIXME: Should this be done for all usages of this lookup, or is the impact of
+			// CachingPropertyInfoLookup enough?
+			new InProcessCachingDataTypeLookup(
+				WikibaseRepo::getPropertyDataTypeLookup( $services )
+			),
+			new EntityReferenceExtractorDelegator(
+				WikibaseRepo::getEntityTypeDefinitions( $services )
+					->get( EntityTypeDefinitions::ENTITY_REFERENCE_EXTRACTOR_CALLBACK ),
+				new StatementEntityReferenceExtractor(
+					WikibaseRepo::getItemUrlParser( $services )
+				)
+			),
+			WikibaseRepo::getKartographerEmbeddingHandler( $services ),
+			$services->getStatsdDataFactory(),
+			$services->getRepoGroup(),
+			$settings->getSetting( 'preferredGeoDataProperties' ),
+			$settings->getSetting( 'preferredPageImagesProperties' ),
+			$settings->getSetting( 'globeUris' )
 		);
 	},
 
@@ -459,40 +939,98 @@ return [
 	},
 
 	'WikibaseRepo.EntityRedirectChecker' => function ( MediaWikiServices $services ): EntityRedirectChecker {
-		return new TypeDispatchingRedirectChecker(
-			WikibaseRepo::getEntityTypeDefinitions( $services )
-				->get( EntityTypeDefinitions::REDIRECT_CHECKER_CALLBACK ),
-			new TitleLookupBasedEntityRedirectChecker(
-				WikibaseRepo::getEntityTitleLookup( $services )
-			)
+		return new SourceAndTypeDispatchingRedirectChecker(
+			new ServiceBySourceAndTypeDispatcher(
+				EntityRedirectChecker::class,
+				WikibaseRepo::getEntitySourceAndTypeDefinitions( $services )
+					->getServiceBySourceAndType( EntityTypeDefinitions::REDIRECT_CHECKER_CALLBACK )
+			),
+			WikibaseRepo::getEntitySourceLookup( $services )
+		);
+	},
+
+	'WikibaseRepo.EntityRevisionLookup' => function ( MediaWikiServices $services ): EntityRevisionLookup {
+		return WikibaseRepo::getStore( $services )
+			->getEntityRevisionLookup( Store::LOOKUP_CACHING_ENABLED );
+	},
+
+	'WikibaseRepo.EntitySearchHelper' => function ( MediaWikiServices $services ): EntitySearchHelper {
+		$entitySearchHelperCallbacks = WikibaseRepo::getEntityTypeDefinitions( $services )
+			->get( EntityTypeDefinitions::ENTITY_SEARCH_CALLBACK );
+
+		$typeDispatchingEntitySearchHelper = new TypeDispatchingEntitySearchHelper(
+			$entitySearchHelperCallbacks,
+			RequestContext::getMain()->getRequest()
+		);
+
+		if ( WikibaseRepo::getSettings( $services )->getSetting( 'federatedPropertiesEnabled' ) === true ) {
+			return new FedPropertiesTypeDispatchingEntitySearchHelper(
+				new CombinedEntitySearchHelper( [
+					$typeDispatchingEntitySearchHelper,
+					WikibaseRepo::getFederatedPropertiesServiceFactory( $services )->newApiEntitySearchHelper()
+				] ),
+				$typeDispatchingEntitySearchHelper
+			);
+		}
+
+		return $typeDispatchingEntitySearchHelper;
+	},
+
+	'WikibaseRepo.EntitySearchHelperCallbacks' => function ( MediaWikiServices $services ): array {
+		return WikibaseRepo::getEntityTypeDefinitions( $services )
+			->get( EntityTypeDefinitions::ENTITY_SEARCH_CALLBACK );
+	},
+
+	'WikibaseRepo.EntitySourceAndTypeDefinitions' => function ( MediaWikiServices $services ): EntitySourceAndTypeDefinitions {
+		$baseEntityTypes = require __DIR__ . '/../lib/WikibaseLib.entitytypes.php';
+		$repoEntityTypes = require __DIR__ . '/WikibaseRepo.entitytypes.php';
+
+		$entityTypes = wfArrayPlus2d(
+			$repoEntityTypes,
+			$baseEntityTypes
+		);
+
+		$services->getHookContainer()->run( 'WikibaseRepoEntityTypes', [ &$entityTypes ] );
+
+		$entityTypeDefinitionsBySourceType = [ DatabaseEntitySource::TYPE => new EntityTypeDefinitions( $entityTypes ) ];
+
+		if ( WikibaseRepo::getSettings( $services )->getSetting( 'federatedPropertiesEnabled' ) ) {
+			$entityTypeDefinitionsBySourceType[ApiEntitySource::TYPE] = new EntityTypeDefinitions(
+				EntityTypesConfigFeddyPropsAugmenter::factory()->override( $entityTypes )
+			);
+		}
+
+		return new EntitySourceAndTypeDefinitions(
+			$entityTypeDefinitionsBySourceType,
+			WikibaseRepo::getEntitySourceDefinitions( $services )->getSources()
 		);
 	},
 
 	'WikibaseRepo.EntitySourceDefinitions' => function ( MediaWikiServices $services ): EntitySourceDefinitions {
 		$settings = WikibaseRepo::getSettings( $services );
-		$entityTypeDefinitions = WikibaseRepo::getEntityTypeDefinitions( $services );
+		$subEntityTypesMapper = WikibaseRepo::getSubEntityTypesMapper( $services );
 
-		if ( $settings->hasSetting( 'entitySources' ) && !empty( $settings->getSetting( 'entitySources' ) ) ) {
-			$configParser = new EntitySourceDefinitionsConfigParser();
+		$configParser = new EntitySourceDefinitionsConfigParser();
 
-			return $configParser->newDefinitionsFromConfigArray(
-				$settings->getSetting( 'entitySources' ),
-				$entityTypeDefinitions
-			);
-		}
+		$entitySourceDefinitions = $configParser->newDefinitionsFromConfigArray(
+			$settings->getSetting( 'entitySources' ),
+			$subEntityTypesMapper
+		);
 
-		$parser = new EntitySourceDefinitionsLegacyRepoSettingsParser();
+		$fedPropsSourceAdder = new DefaultFederatedPropertiesEntitySourceAdder(
+			$settings->getSetting( 'federatedPropertiesEnabled' ),
+			$settings->getSetting( 'federatedPropertiesSourceScriptUrl' ),
+			$subEntityTypesMapper
+		);
 
-		if ( $settings->getSetting( 'federatedPropertiesEnabled' ) ) {
-			$configParser = new FederatedPropertiesEntitySourceDefinitionsConfigParser( $settings );
+		return $fedPropsSourceAdder->addDefaultIfRequired( $entitySourceDefinitions );
+	},
 
-			return $configParser->initializeDefaults(
-				$parser->newDefinitionsFromSettings( $settings, $entityTypeDefinitions ),
-				$entityTypeDefinitions
-			);
-		}
-
-		return $parser->newDefinitionsFromSettings( $settings, $entityTypeDefinitions );
+	'WikibaseRepo.EntitySourceLookup' => function ( MediaWikiServices $services ): EntitySourceLookup {
+		return new EntitySourceLookup(
+			WikibaseRepo::getEntitySourceDefinitions( $services ),
+			WikibaseRepo::getSubEntityTypesMapper( $services )
+		);
 	},
 
 	'WikibaseRepo.EntityStore' => function ( MediaWikiServices $services ): EntityStore {
@@ -503,6 +1041,14 @@ return [
 		return WikibaseRepo::getStore( $services )->getEntityStoreWatcher();
 	},
 
+	'WikibaseRepo.EntityStubRdfBuilderFactory' => function ( MediaWikiServices $services ): EntityStubRdfBuilderFactory {
+		$entityTypeDefinitions = WikibaseRepo::getEntityTypeDefinitions( $services );
+
+		return new EntityStubRdfBuilderFactory(
+			$entityTypeDefinitions->get( EntityTypeDefinitions::RDF_BUILDER_STUB_FACTORY_CALLBACK )
+		);
+	},
+
 	'WikibaseRepo.EntityTitleLookup' => function ( MediaWikiServices $services ): EntityTitleLookup {
 		return WikibaseRepo::getEntityTitleStoreLookup( $services );
 	},
@@ -511,16 +1057,22 @@ return [
 		return new TypeDispatchingEntityTitleStoreLookup(
 			WikibaseRepo::getEntityTypeDefinitions( $services )
 				->get( EntityTypeDefinitions::ENTITY_TITLE_STORE_LOOKUP_FACTORY_CALLBACK ),
-			WikibaseRepo::getEntityContentFactory( $services )
+			new ContentHandlerEntityTitleLookup(
+				WikibaseRepo::getEntityContentFactory( $services ),
+				WikibaseRepo::getEntitySourceDefinitions( $services ),
+				WikibaseRepo::getLocalEntitySource( $services ),
+				$services->getInterwikiLookup()
+			)
 		);
 	},
 
 	'WikibaseRepo.EntityTitleTextLookup' => function ( MediaWikiServices $services ): EntityTitleTextLookup {
-		return new TypeDispatchingTitleTextLookup(
-			WikibaseRepo::getEntityTypeDefinitions( $services )
-				->get( EntityTypeDefinitions::TITLE_TEXT_LOOKUP_CALLBACK ),
-			new TitleLookupBasedEntityTitleTextLookup(
-				WikibaseRepo::getEntityTitleLookup( $services )
+		return new SourceAndTypeDispatchingTitleTextLookup(
+			WikibaseRepo::getEntitySourceLookup( $services ),
+			new ServiceBySourceAndTypeDispatcher(
+				EntityTitleTextLookup::class,
+				WikibaseRepo::getEntitySourceAndTypeDefinitions( $services )
+				->getServiceBySourceAndType( EntityTypeDefinitions::TITLE_TEXT_LOOKUP_CALLBACK )
 			)
 		);
 	},
@@ -529,30 +1081,108 @@ return [
 		$baseEntityTypes = require __DIR__ . '/../lib/WikibaseLib.entitytypes.php';
 		$repoEntityTypes = require __DIR__ . '/WikibaseRepo.entitytypes.php';
 
-		$entityTypes = array_merge_recursive( $baseEntityTypes, $repoEntityTypes );
+		$entityTypes = wfArrayPlus2d(
+			$repoEntityTypes,
+			$baseEntityTypes
+		);
 
 		$services->getHookContainer()->run( 'WikibaseRepoEntityTypes', [ &$entityTypes ] );
-
-		$settings = WikibaseRepo::getSettings( $services );
-		$overrider = EntityTypeDefinitionsFedPropsOverrider::factory( $settings->getSetting( 'federatedPropertiesEnabled' ) );
-
-		$entityTypes = $overrider->override( $entityTypes );
 
 		return new EntityTypeDefinitions( $entityTypes );
 	},
 
-	'WikibaseRepo.EntityUrlLookup' => function ( MediaWikiServices $services ): EntityUrlLookup {
-		return new TypeDispatchingUrlLookup(
-			WikibaseRepo::getEntityTypeDefinitions( $services )
-				->get( EntityTypeDefinitions::URL_LOOKUP_CALLBACK ),
-			new TitleLookupBasedEntityUrlLookup(
-				WikibaseRepo::getEntityTitleLookup( $services )
-			)
+	'WikibaseRepo.EntityTypesConfigValue' => function ( MediaWikiServices $services ): array {
+		$entityTypeDefinitions = WikibaseRepo::getEntityTypeDefinitions( $services );
+		return [
+			'types' => $entityTypeDefinitions->getEntityTypes(),
+			'deserializer-factory-functions' => $entityTypeDefinitions
+				->get( EntityTypeDefinitions::JS_DESERIALIZER_FACTORY_FUNCTION )
+		];
+	},
+
+	'WikibaseRepo.EntityTypeToRepositoryMapping' => function ( MediaWikiServices $services ): array {
+		// Map all entity types to unprefixed repository.
+		// TODO: This is a bit of a hack but does the job for EntityIdSearchHelper as long as there are no
+		// prefixed IDs in the entity source realm. Probably EntityIdSearchHelper should be changed instead
+		// of getting this map passed from Repo
+		$entityTypes = array_keys(
+			WikibaseRepo::getEntitySourceDefinitions( $services )->getEntityTypeToDatabaseSourceMapping()
 		);
+		return array_fill_keys( $entityTypes, [ '' ] );
+	},
+
+	'WikibaseRepo.EntityUrlLookup' => function ( MediaWikiServices $services ): EntityUrlLookup {
+		return new SourceAndTypeDispatchingUrlLookup(
+			new ServiceBySourceAndTypeDispatcher(
+				EntityUrlLookup::class,
+				WikibaseRepo::getEntitySourceAndTypeDefinitions( $services )
+					->getServiceBySourceAndType( EntityTypeDefinitions::URL_LOOKUP_CALLBACK )
+			),
+			WikibaseRepo::getEntitySourceLookup( $services )
+		);
+	},
+
+	'WikibaseRepo.EntityViewFactory' => function ( MediaWikiServices $services ): DispatchingEntityViewFactory {
+		return new DispatchingEntityViewFactory(
+			WikibaseRepo::getEntityTypeDefinitions( $services )->get( EntityTypeDefinitions::VIEW_FACTORY_CALLBACK )
+		);
+	},
+
+	'WikibaseRepo.ExceptionLocalizer' => function ( MediaWikiServices $services ): ExceptionLocalizer {
+		$formatter = WikibaseRepo::getMessageParameterFormatter( $services );
+
+		return new DispatchingExceptionLocalizer( [
+			'MessageException' => new MessageExceptionLocalizer(),
+			'ParseException' => new ParseExceptionLocalizer(),
+			'ChangeOpValidationException' => new ChangeOpValidationExceptionLocalizer( $formatter ),
+			'ChangeOpDeserializationException' => new ChangeOpDeserializationExceptionLocalizer(),
+			'ChangeOpApplyException' => new ChangeOpApplyExceptionLocalizer(),
+			'Exception' => new GenericExceptionLocalizer(),
+		] );
 	},
 
 	'WikibaseRepo.ExternalFormatStatementDeserializer' => function ( MediaWikiServices $services ): Deserializer {
 		return WikibaseRepo::getBaseDataModelDeserializerFactory( $services )->newStatementDeserializer();
+	},
+
+	'WikibaseRepo.FederatedPropertiesServiceFactory' => function ( MediaWikiServices $services ): ApiServiceFactory {
+		$settings = WikibaseRepo::getSettings( $services );
+
+		if (
+			!$settings->getSetting( 'federatedPropertiesEnabled' ) ||
+			!$settings->hasSetting( 'federatedPropertiesSourceScriptUrl' )
+		) {
+			throw new LogicException(
+				'Federated Property services should not be constructed when federatedProperties feature is not enabled or configured.'
+			);
+		}
+		$entitySourceDefinition = WikibaseRepo::getEntitySourceDefinitions( $services );
+
+		return new ApiServiceFactory(
+			$services->getHttpRequestFactory(),
+			WikibaseRepo::getContentModelMappings( $services ),
+			WikibaseRepo::getDataTypeDefinitions( $services ),
+			$entitySourceDefinition,
+			$settings->getSetting( 'federatedPropertiesSourceScriptUrl' ),
+			$services->getMainConfig()->get( 'ServerName' )
+		);
+	},
+
+	'WikibaseRepo.FieldDefinitionsFactory' => function ( MediaWikiServices $services ): FieldDefinitionsFactory {
+		return new FieldDefinitionsFactory(
+			WikibaseRepo::getEntityTypeDefinitions( $services ),
+			WikibaseRepo::getTermsLanguages( $services ),
+			WikibaseRepo::getSettings( $services )
+		);
+	},
+
+	'WikibaseRepo.FulltextSearchTypes' => function ( MediaWikiServices $services ): array {
+		$searchTypeContexts = WikibaseRepo::getEntityTypeDefinitions( $services )
+			->get( EntityTypeDefinitions::FULLTEXT_SEARCH_CONTEXT );
+
+		return array_map( function ( $context ): string {
+			return is_callable( $context ) ? $context() : $context;
+		}, $searchTypeContexts );
 	},
 
 	'WikibaseRepo.IdGenerator' => function ( MediaWikiServices $services ): IdGenerator {
@@ -561,7 +1191,7 @@ return [
 		switch ( $settings->getSetting( 'idGenerator' ) ) {
 			case 'original':
 				$idGenerator = new SqlIdGenerator(
-					$services->getDBLoadBalancer(),
+					WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
 					$settings->getSetting( 'reservedIds' ),
 					$settings->getSetting( 'idGeneratorSeparateDbConnection' )
 				);
@@ -571,7 +1201,7 @@ return [
 				// but perhaps that is an unnecessary check? People will realize when the DB query for
 				// ID selection fails anyway...
 				$idGenerator = new UpsertSqlIdGenerator(
-					$services->getDBLoadBalancer(),
+					WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
 					$settings->getSetting( 'reservedIds' ),
 					$settings->getSetting( 'idGeneratorSeparateDbConnection' )
 				);
@@ -582,14 +1212,10 @@ return [
 				);
 		}
 
-		if ( $settings->getSetting( 'idGeneratorRateLimiting' ) ) {
-			$idGenerator = new RateLimitingIdGenerator(
-				$idGenerator,
-				RequestContext::getMain()
-			);
-		}
-
-		return $idGenerator;
+		return new RateLimitingIdGenerator(
+			$idGenerator,
+			RequestContext::getMain()
+		);
 	},
 
 	'WikibaseRepo.InternalFormatDeserializerFactory' => function ( MediaWikiServices $services ): InternalDeserializerFactory {
@@ -602,6 +1228,58 @@ return [
 
 	'WikibaseRepo.InternalFormatEntityDeserializer' => function ( MediaWikiServices $services ): Deserializer {
 		return WikibaseRepo::getInternalFormatDeserializerFactory( $services )->newEntityDeserializer();
+	},
+
+	'WikibaseRepo.ItemHandler' => function ( MediaWikiServices $services ): ItemHandler {
+		return new ItemHandler(
+			WikibaseRepo::getItemTermStoreWriter( $services ),
+			WikibaseRepo::getEntityContentDataCodec( $services ),
+			WikibaseRepo::getEntityConstraintProvider( $services ),
+			WikibaseRepo::getValidatorErrorLocalizer( $services ),
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getStore( $services )
+				->newSiteLinkStore(),
+			WikibaseRepo::getBagOStuffSiteLinkConflictLookup( $services ),
+			WikibaseRepo::getEntityIdLookup( $services ),
+			WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory( $services ),
+			WikibaseRepo::getFieldDefinitionsFactory( $services )
+				->getFieldDefinitionsByType( Item::ENTITY_TYPE ),
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getRepoDomainDbFactory( $services )
+				->newRepoDb(),
+			WikibaseRepo::getLegacyFormatDetectorCallback( $services )
+		);
+	},
+
+	'WikibaseRepo.ItemMergeInteractor' => function ( MediaWikiServices $services ): ItemMergeInteractor {
+		return new ItemMergeInteractor(
+			WikibaseRepo::getChangeOpFactoryProvider( $services )
+				->getMergeFactory(),
+			WikibaseRepo::getStore( $services )
+				->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			WikibaseRepo::getEntityStore( $services ),
+			WikibaseRepo::getEntityPermissionChecker( $services ),
+			WikibaseRepo::getSummaryFormatter( $services ),
+			WikibaseRepo::getItemRedirectCreationInteractor( $services ),
+			WikibaseRepo::getEntityTitleStoreLookup( $services ),
+			$services->getPermissionManager()
+		);
+	},
+
+	'WikibaseRepo.ItemRedirectCreationInteractor' => function (
+		MediaWikiServices $services
+	): ItemRedirectCreationInteractor {
+		$store = WikibaseRepo::getStore( $services );
+
+		return new ItemRedirectCreationInteractor(
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			WikibaseRepo::getEntityStore( $services ),
+			WikibaseRepo::getEntityPermissionChecker( $services ),
+			WikibaseRepo::getSummaryFormatter( $services ),
+			WikibaseRepo::getEditFilterHookRunner( $services ),
+			$store->getEntityRedirectLookup(),
+			WikibaseRepo::getEntityTitleStoreLookup( $services )
+		);
 	},
 
 	'WikibaseRepo.ItemTermsCollisionDetector' => function ( MediaWikiServices $services ): TermsCollisionDetector {
@@ -631,7 +1309,7 @@ return [
 
 	'WikibaseRepo.ItemVocabularyBaseUri' => function ( MediaWikiServices $services ): string {
 		$itemSource = WikibaseRepo::getEntitySourceDefinitions( $services )
-			->getSourceForEntityType( Item::ENTITY_TYPE );
+			->getDatabaseSourceForEntityType( Item::ENTITY_TYPE );
 
 		if ( $itemSource === null ) {
 			throw new LogicException( 'No source providing Items configured!' );
@@ -673,6 +1351,49 @@ return [
 			WikibaseRepo::getTermLookup( $services ),
 			WikibaseRepo::getTermBuffer( $services )
 		);
+	},
+
+	'WikibaseRepo.LanguageNameLookup' => function ( MediaWikiServices $services ): LanguageNameLookup {
+		$userLanguage = WikibaseRepo::getUserLanguage( $services );
+		return WikibaseRepo::getLanguageNameLookupFactory( $services )
+			->getForLanguage( $userLanguage );
+	},
+
+	'WikibaseRepo.LanguageNameLookupFactory' => function ( MediaWikiServices $services ): LanguageNameLookupFactory {
+		return new LanguageNameLookupFactory();
+	},
+
+	'WikibaseRepo.LegacyFormatDetectorCallback' => function ( MediaWikiServices $services ): ?callable {
+		$transformOnExport = WikibaseRepo::getSettings( $services )
+			->getSetting( 'transformLegacyFormatOnExport' );
+
+		if ( !$transformOnExport ) {
+			return null;
+		}
+
+		/**
+		 * Detects blobs that may be using a legacy serialization format.
+		 * WikibaseRepo uses this for the $legacyExportFormatDetector parameter
+		 * when constructing EntityHandlers.
+		 *
+		 * @see WikibaseRepo::getItemHandler
+		 * @see WikibaseRepo::getPropertyHandler
+		 * @see EntityHandler::__construct
+		 *
+		 * @note: False positives (detecting a legacy format when really no legacy format was used)
+		 * are acceptable, false negatives (failing to detect a legacy format when one was used)
+		 * are not acceptable.
+		 *
+		 * @param string $blob
+		 * @param string $format
+		 *
+		 * @return bool True if $blob seems to be using a legacy serialization format.
+		 */
+		return function ( $blob, $format ) {
+			// The legacy serialization uses something like "entity":["item",21] or
+			// even "entity":"p21" for the entity ID.
+			return preg_match( '/"entity"\s*:/', $blob ) > 0;
+		};
 	},
 
 	'WikibaseRepo.LinkTargetEntityIdLookup' => function ( MediaWikiServices $services ): LinkTargetEntityIdLookup {
@@ -723,12 +1444,21 @@ return [
 		);
 	},
 
+	'WikibaseRepo.LocalizedTextProviderFactory' => function (
+		MediaWikiServices $services
+	): LocalizedTextProviderFactory {
+		return new LocalizedTextProviderFactory(
+			$services->getLanguageFactory()
+		);
+	},
+
 	'WikibaseRepo.LocalRepoWikiPageMetaDataAccessor' => function ( MediaWikiServices $services ): WikiPageEntityMetaDataAccessor {
 		$entityNamespaceLookup = WikibaseRepo::getEntityNamespaceLookup( $services );
 		$repoName = ''; // Empty string here means this only works for the local repo
 		$dbName = false; // false means the local database
 		$logger = WikibaseRepo::getLogger( $services );
 
+		$entitySource = WikibaseRepo::getLocalEntitySource( $services );
 		return new PrefetchingWikiPageEntityMetaDataAccessor(
 			new TypeDispatchingWikiPageEntityMetaDataAccessor(
 				WikibaseRepo::getEntityTypeDefinitions( $services )
@@ -739,7 +1469,8 @@ return [
 						$entityNamespaceLookup,
 						$services->getSlotRoleStore()
 					),
-					WikibaseRepo::getLocalEntitySource( $services ),
+					$entitySource,
+					WikibaseRepo::getRepoDomainDbFactory( $services )->newForEntitySource( $entitySource ),
 					$logger
 				),
 				$dbName,
@@ -751,6 +1482,19 @@ return [
 
 	'WikibaseRepo.Logger' => function ( MediaWikiServices $services ): LoggerInterface {
 		return LoggerFactory::getInstance( 'Wikibase' );
+	},
+
+	'WikibaseRepo.MatchingTermsLookupFactory' => function ( MediaWikiServices $services ): MatchingTermsLookupFactory {
+		return new MatchingTermsLookupFactory(
+			WikibaseRepo::getEntityIdComposer( $services ),
+			WikibaseRepo::getRepoDomainDbFactory( $services ),
+			WikibaseRepo::getLogger( $services ),
+			$services->getMainWANObjectCache()
+		);
+	},
+
+	'WikibaseRepo.MessageInLanguageProvider' => function ( MediaWikiServices $services ): MessageInLanguageProvider {
+		return new MediaWikiMessageInLanguageProvider();
 	},
 
 	'WikibaseRepo.MessageParameterFormatter' => function ( MediaWikiServices $services ): ValueFormatter {
@@ -770,24 +1514,74 @@ return [
 			->getContentLanguages( WikibaseContentLanguages::CONTEXT_MONOLINGUAL_TEXT );
 	},
 
-	'WikibaseRepo.PrefetchingTermLookup' => function ( MediaWikiServices $services ): PrefetchingTermLookup {
-		$entitySourceDefinitions = WikibaseRepo::getEntitySourceDefinitions( $services );
-		$lookupFactory = WikibaseRepo::getPrefetchingTermLookupFactory( $services );
-
-		$lookups = array_map(
-			[ $lookupFactory, 'getLookupForSource' ],
-			$entitySourceDefinitions->getEntityTypeToSourceMapping()
+	'WikibaseRepo.NumberLocalizerFactory' => function ( MediaWikiServices $services ): NumberLocalizerFactory {
+		return new NumberLocalizerFactory(
+			$services->getLanguageFactory()
 		);
-
-		return new ByTypeDispatchingPrefetchingTermLookup( $lookups );
 	},
 
-	'WikibaseRepo.PrefetchingTermLookupFactory' => function ( MediaWikiServices $services ): PrefetchingTermLookupFactory {
-		return new PrefetchingTermLookupFactory(
-			WikibaseRepo::getEntitySourceDefinitions( $services ),
-			WikibaseRepo::getEntityTypeDefinitions( $services ),
-			WikibaseRepo::getSingleEntitySourceServicesFactory( $services )
+	'WikibaseRepo.PrefetchingTermLookup' => function ( MediaWikiServices $services ): PrefetchingTermLookup {
+		return new SourceAndTypeDispatchingPrefetchingTermLookup(
+			new ServiceBySourceAndTypeDispatcher(
+				PrefetchingTermLookup::class,
+				WikibaseRepo::getEntitySourceAndTypeDefinitions( $services )
+					->getServiceBySourceAndType( EntityTypeDefinitions::PREFETCHING_TERM_LOOKUP_CALLBACK )
+			),
+			WikibaseRepo::getEntitySourceLookup( $services )
 		);
+	},
+
+	'WikibaseRepo.PropertyDataTypeLookup' => function ( MediaWikiServices $services ): PropertyDataTypeLookup {
+		$entitySourceDefinitions = WikibaseRepo::getEntitySourceDefinitions( $services );
+
+		return new SourceDispatchingPropertyDataTypeLookup(
+			new EntitySourceLookup(
+				$entitySourceDefinitions,
+				new SubEntityTypesMapper( WikibaseRepo::getEntityTypeDefinitions( $services )
+				->get( EntityTypeDefinitions::SUB_ENTITY_TYPES ) )
+			),
+			( new PropertyServices(
+				$entitySourceDefinitions,
+				PropertyServices::getServiceDefinitions()
+			) )->get( PropertyServices::PROPERTY_DATA_TYPE_LOOKUP_CALLBACK )
+		);
+	},
+
+	'WikibaseRepo.PropertyHandler' => function ( MediaWikiServices $services ): PropertyHandler {
+		return new PropertyHandler(
+			WikibaseRepo::getPropertyTermStoreWriter( $services ),
+			WikibaseRepo::getEntityContentDataCodec( $services ),
+			WikibaseRepo::getEntityConstraintProvider( $services ),
+			WikibaseRepo::getValidatorErrorLocalizer( $services ),
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getEntityIdLookup( $services ),
+			WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory( $services ),
+			WikibaseRepo::getStore( $services )
+				->getPropertyInfoStore(),
+			WikibaseRepo::getPropertyInfoBuilder( $services ),
+			WikibaseRepo::getFieldDefinitionsFactory( $services )
+				->getFieldDefinitionsByType( Property::ENTITY_TYPE ),
+			WikibaseRepo::getLegacyFormatDetectorCallback( $services )
+		);
+	},
+
+	'WikibaseRepo.PropertyInfoBuilder' => function ( MediaWikiServices $services ): PropertyInfoBuilder {
+		$settings = WikibaseRepo::getSettings( $services );
+		$propertyIdMap = [];
+
+		$formatterUrlProperty = $settings->getSetting( 'formatterUrlProperty' );
+		if ( $formatterUrlProperty !== null ) {
+			$propertyIdMap[PropertyInfoLookup::KEY_FORMATTER_URL] =
+				new NumericPropertyId( $formatterUrlProperty );
+		}
+
+		$canonicalUriProperty = $settings->getSetting( 'canonicalUriProperty' );
+		if ( $canonicalUriProperty !== null ) {
+			$propertyIdMap[PropertyInfoStore::KEY_CANONICAL_URI] =
+				new NumericPropertyId( $canonicalUriProperty );
+		}
+
+		return new PropertyInfoBuilder( $propertyIdMap );
 	},
 
 	'WikibaseRepo.PropertyTermsCollisionDetector' => function ( MediaWikiServices $services ): TermsCollisionDetector {
@@ -810,6 +1604,16 @@ return [
 
 	'WikibaseRepo.PropertyValueExpertsModule' => function ( MediaWikiServices $services ): PropertyValueExpertsModule {
 		return new PropertyValueExpertsModule( WikibaseRepo::getDataTypeDefinitions( $services ) );
+	},
+
+	'WikibaseRepo.RdfBuilderFactory' => function ( MediaWikiServices $services ): RdfBuilderFactory {
+		return new RdfBuilderFactory(
+			WikibaseRepo::getRdfVocabulary( $services ),
+			WikibaseRepo::getEntityRdfBuilderFactory( $services ),
+			WikibaseRepo::getEntityContentFactory( $services ),
+			WikibaseRepo::getEntityStubRdfBuilderFactory( $services ),
+			WikibaseRepo::getEntityRevisionLookup( $services )
+		);
 	},
 
 	'WikibaseRepo.RdfVocabulary' => function ( MediaWikiServices $services ): RdfVocabulary {
@@ -839,12 +1643,26 @@ return [
 		);
 	},
 
+	'WikibaseRepo.ReferenceNormalizer' => function ( MediaWikiServices $services ): ReferenceNormalizer {
+		return new ReferenceNormalizer( WikibaseRepo::getSnakNormalizer( $services ) );
+	},
+
+	'WikibaseRepo.RepoDomainDbFactory' => function ( MediaWikiServices $services ): RepoDomainDbFactory {
+		$lbFactory = $services->getDBLoadBalancerFactory();
+
+		return new RepoDomainDbFactory(
+			$lbFactory,
+			$lbFactory->getLocalDomainID(),
+			[ DomainDb::LOAD_GROUP_FROM_REPO ]
+		);
+	},
+
 	'WikibaseRepo.Settings' => function ( MediaWikiServices $services ): SettingsArray {
 		return WikibaseSettings::getRepoSettings();
 	},
 
 	// TODO: This service is just a convenience service to simplify the transition away from SingleEntitySourceServices,
-	// 		 and thus should eventually be removed. See T277731.
+	//       and thus should eventually be removed. See T277731.
 	'WikibaseRepo.SingleEntitySourceServicesFactory' => function (
 		MediaWikiServices $services
 	): SingleEntitySourceServicesFactory {
@@ -857,7 +1675,8 @@ return [
 			WikibaseRepo::getDataAccessSettings( $services ),
 			WikibaseRepo::getLanguageFallbackChainFactory( $services ),
 			WikibaseRepo::getStorageEntitySerializer( $services ),
-			$entityTypeDefinitions
+			$entityTypeDefinitions,
+			WikibaseRepo::getRepoDomainDbFactory( $services )
 		);
 	},
 
@@ -873,12 +1692,69 @@ return [
 		);
 	},
 
+	'WikibaseRepo.SiteLinkGlobalIdentifiersProvider' => function (
+		MediaWikiServices $services
+	): SiteLinkGlobalIdentifiersProvider {
+		$cacheSecret = hash( 'sha256', $services->getMainConfig()->get( 'SecretKey' ) );
+		return new SiteLinkGlobalIdentifiersProvider(
+			WikibaseRepo::getSiteLinkTargetProvider( $services ),
+			new SimpleCacheWithBagOStuff(
+				$services->getLocalServerObjectCache(),
+				'wikibase.siteLinkGlobalIdentifiersProvider.',
+				$cacheSecret
+			)
+		);
+	},
+
+	'WikibaseRepo.SiteLinkTargetProvider' => function (
+		MediaWikiServices $services
+	): SiteLinkTargetProvider {
+		return new SiteLinkTargetProvider(
+			$services->getSiteLookup(),
+			WikibaseRepo::getSettings( $services )->getSetting( 'specialSiteLinkGroups' )
+		);
+	},
+
+	'WikibaseRepo.SnakFactory' => function ( MediaWikiServices $services ): SnakFactory {
+		return new SnakFactory(
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getDataTypeFactory( $services ),
+			WikibaseRepo::getDataValueFactory( $services )
+		);
+	},
+
+	'WikibaseRepo.SnakFormatterFactory' => function ( MediaWikiServices $services ): OutputFormatSnakFormatterFactory {
+		return new OutputFormatSnakFormatterFactory(
+			WikibaseRepo::getDataTypeDefinitions( $services )->getSnakFormatterFactoryCallbacks(),
+			WikibaseRepo::getValueFormatterFactory( $services ),
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getDataTypeFactory( $services ),
+			WikibaseRepo::getMessageInLanguageProvider( $services )
+		);
+	},
+
+	'WikibaseRepo.SnakNormalizer' => function ( MediaWikiServices $services ): SnakNormalizer {
+		return new SnakNormalizer(
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getLogger( $services ),
+			WikibaseRepo::getDataTypeDefinitions( $services )
+				->getNormalizerFactoryCallbacks()
+		);
+	},
+
 	'WikibaseRepo.StatementGuidParser' => function ( MediaWikiServices $services ): StatementGuidParser {
 		return new StatementGuidParser( WikibaseRepo::getEntityIdParser( $services ) );
 	},
 
 	'WikibaseRepo.StatementGuidValidator' => function ( MediaWikiServices $services ): StatementGuidValidator {
 		return new StatementGuidValidator( WikibaseRepo::getEntityIdParser( $services ) );
+	},
+
+	'WikibaseRepo.StatementNormalizer' => function ( MediaWikiServices $services ): StatementNormalizer {
+		return new StatementNormalizer(
+			WikibaseRepo::getSnakNormalizer( $services ),
+			WikibaseRepo::getReferenceNormalizer( $services )
+		);
 	},
 
 	'WikibaseRepo.StorageEntitySerializer' => function ( MediaWikiServices $services ): Serializer {
@@ -916,6 +1792,77 @@ return [
 		return new StringNormalizer();
 	},
 
+	'WikibaseRepo.StringValueNormalizer' => function ( MediaWikiServices $services ): StringValueNormalizer {
+		return new StringValueNormalizer(
+			WikibaseRepo::getStringNormalizer( $services ),
+			WikibaseRepo::getLogger( $services )
+		);
+	},
+
+	'WikibaseRepo.SubEntityTypesMapper' => function ( MediaWikiServices $services ): SubEntityTypesMapper {
+		return new SubEntityTypesMapper( WikibaseRepo::getEntityTypeDefinitions( $services )
+			->get( EntityTypeDefinitions::SUB_ENTITY_TYPES ) );
+	},
+
+	'WikibaseRepo.SummaryFormatter' => function ( MediaWikiServices $services ): SummaryFormatter {
+		// This needs to use an EntityIdPlainLinkFormatter as we want to mangle
+		// the links created in HtmlPageLinkRendererEndHookHandler afterwards (the links must not
+		// contain a display text: [[Item:Q1]] is fine but [[Item:Q1|Q1]] isn't).
+		$idFormatter = new EntityIdPlainLinkFormatter( WikibaseRepo::getEntityTitleLookup( $services ) );
+
+		$formatterFactoryCBs = WikibaseRepo::getDataTypeDefinitions( $services )
+			->getFormatterFactoryCallbacks( DataTypeDefinitions::PREFIXED_MODE );
+
+		// Iterate through all defined entity types and override the formatter for entity IDs.
+		foreach ( WikibaseRepo::getEntityTypeDefinitions( $services )->getEntityTypes() as $entityType ) {
+			$formatterFactoryCBs[ "PT:wikibase-$entityType" ] = function (
+				$format,
+				FormatterOptions $options ) use ( $idFormatter ) {
+				if ( $format === SnakFormatter::FORMAT_PLAIN ) {
+					return new EntityIdValueFormatter( $idFormatter );
+				} else {
+					return null;
+				}
+			};
+		}
+
+		$contentLanguage = $services->getContentLanguage();
+
+		// Create a new ValueFormatterFactory from entity definition overrides.
+		$valueFormatterFactory = new OutputFormatValueFormatterFactory(
+			$formatterFactoryCBs,
+			$contentLanguage,
+			WikibaseRepo::getLanguageFallbackChainFactory( $services )
+		);
+
+		// Create a new SnakFormatterFactory based on the specialized ValueFormatterFactory.
+		$snakFormatterFactory = new OutputFormatSnakFormatterFactory(
+			[], // XXX: do we want DataTypeDefinitions::getSnakFormatterFactoryCallbacks()
+			$valueFormatterFactory,
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getDataTypeFactory( $services ),
+			WikibaseRepo::getMessageInLanguageProvider( $services )
+		);
+
+		$options = new FormatterOptions();
+		$snakFormatter = $snakFormatterFactory->getSnakFormatter(
+			SnakFormatter::FORMAT_PLAIN,
+			$options
+		);
+		$valueFormatter = $valueFormatterFactory->getValueFormatter(
+			SnakFormatter::FORMAT_PLAIN,
+			$options
+		);
+
+		return new SummaryFormatter(
+			$idFormatter,
+			$valueFormatter,
+			$snakFormatter,
+			$contentLanguage,
+			WikibaseRepo::getEntityIdParser( $services )
+		);
+	},
+
 	'WikibaseRepo.TermBuffer' => function ( MediaWikiServices $services ): TermBuffer {
 		return WikibaseRepo::getPrefetchingTermLookup( $services );
 	},
@@ -939,13 +1886,23 @@ return [
 		);
 	},
 
+	'WikibaseRepo.TermInLangIdsResolverFactory' => function (
+		MediaWikiServices $services
+	): TermInLangIdsResolverFactory {
+		return new TermInLangIdsResolverFactory(
+			WikibaseRepo::getRepoDomainDbFactory( $services ),
+			WikibaseRepo::getLogger( $services ),
+			$services->getMainWANObjectCache()
+		);
+	},
+
 	'WikibaseRepo.TermLookup' => function ( MediaWikiServices $services ): TermLookup {
 		return WikibaseRepo::getPrefetchingTermLookup( $services );
 	},
 
 	'WikibaseRepo.TermsCollisionDetectorFactory' => function ( MediaWikiServices $services ): TermsCollisionDetectorFactory {
 		return new TermsCollisionDetectorFactory(
-			$services->getDBLoadBalancer(),
+			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
 			WikibaseRepo::getTypeIdsLookup( $services )
 		);
 	},
@@ -962,7 +1919,7 @@ return [
 			WikibaseRepo::getTypeIdsAcquirer( $services ),
 			WikibaseRepo::getTypeIdsLookup( $services ),
 			WikibaseRepo::getTypeIdsResolver( $services ),
-			$services->getDBLoadBalancerFactory(),
+			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
 			$services->getMainWANObjectCache(),
 			JobQueueGroup::singleton(),
 			WikibaseRepo::getLogger( $services )
@@ -992,6 +1949,10 @@ return [
 		);
 	},
 
+	'WikibaseRepo.TokenCheckInteractor' => function ( MediaWikiServices $services ): TokenCheckInteractor {
+		return new TokenCheckInteractor();
+	},
+
 	'WikibaseRepo.TypeIdsAcquirer' => function ( MediaWikiServices $services ): TypeIdsAcquirer {
 		return WikibaseRepo::getDatabaseTypeIdsStore( $services );
 	},
@@ -1016,7 +1977,7 @@ return [
 			wfWarn( "Bad unit storage configuration, ignoring" );
 			return null;
 		}
-		return new UnitConverter( $unitStorage, $settings->getSetting( 'conceptBaseUri' ) );
+		return new UnitConverter( $unitStorage, WikibaseRepo::getItemVocabularyBaseUri( $services ) );
 	},
 
 	'WikibaseRepo.UserLanguage' => function ( MediaWikiServices $services ): Language {
@@ -1032,6 +1993,11 @@ return [
 
 		StubObject::unstub( $wgLang );
 		return $wgLang;
+	},
+
+	'WikibaseRepo.ValidatorErrorLocalizer' => function ( MediaWikiServices $services ): ValidatorErrorLocalizer {
+		$formatter = WikibaseRepo::getMessageParameterFormatter( $services );
+		return new ValidatorErrorLocalizer( $formatter );
 	},
 
 	'WikibaseRepo.ValueFormatterFactory' => function ( MediaWikiServices $services ): OutputFormatValueFormatterFactory {
@@ -1071,7 +2037,47 @@ return [
 	'WikibaseRepo.ValueSnakRdfBuilderFactory' => function ( MediaWikiServices $services ): ValueSnakRdfBuilderFactory {
 		return new ValueSnakRdfBuilderFactory(
 			WikibaseRepo::getDataTypeDefinitions( $services )
-				->getRdfBuilderFactoryCallbacks( DataTypeDefinitions::PREFIXED_MODE )
+				->getRdfBuilderFactoryCallbacks( DataTypeDefinitions::PREFIXED_MODE ),
+			WikibaseRepo::getLogger( $services )
+		);
+	},
+
+	'WikibaseRepo.ViewFactory' => function ( MediaWikiServices $services ): ViewFactory {
+		$settings = WikibaseRepo::getSettings( $services );
+
+		$statementGrouperBuilder = new StatementGrouperBuilder(
+			$settings->getSetting( 'statementSections' ),
+			WikibaseRepo::getPropertyDataTypeLookup( $services ),
+			WikibaseRepo::getStatementGuidParser( $services )
+		);
+
+		$propertyOrderProvider = new CachingPropertyOrderProvider(
+			new WikiPagePropertyOrderProvider(
+				$services->getTitleFactory()
+					->newFromText( 'MediaWiki:Wikibase-SortedProperties' )
+			),
+			ObjectCache::getLocalClusterInstance()
+		);
+
+		return new ViewFactory(
+			WikibaseRepo::getEntityIdHtmlLinkFormatterFactory( $services ),
+			new EntityIdLabelFormatterFactory(),
+			new WikibaseHtmlSnakFormatterFactory(
+				WikibaseRepo::getSnakFormatterFactory( $services )
+			),
+			$statementGrouperBuilder->getStatementGrouper(),
+			$propertyOrderProvider,
+			$services->getSiteLookup(),
+			WikibaseRepo::getDataTypeFactory( $services ),
+			TemplateFactory::getDefaultInstance(),
+			WikibaseRepo::getLanguageNameLookupFactory( $services ),
+			new MediaWikiLanguageDirectionalityLookup(),
+			WikibaseRepo::getNumberLocalizerFactory( $services ),
+			$settings->getSetting( 'siteLinkGroups' ),
+			$settings->getSetting( 'specialSiteLinkGroups' ),
+			$settings->getSetting( 'badgeItems' ),
+			WikibaseRepo::getLocalizedTextProviderFactory( $services ),
+			new RepoSpecialPageLinker()
 		);
 	},
 
@@ -1087,7 +2093,11 @@ return [
 		$singleEntitySourceServicesFactory = WikibaseRepo::getSingleEntitySourceServicesFactory( $services );
 
 		$singleSourceServices = [];
+
 		foreach ( $entitySourceDefinitions->getSources() as $source ) {
+			if ( $source->getType() === ApiEntitySource::TYPE ) {
+				continue;
+			}
 			$singleSourceServices[$source->getSourceName()] = $singleEntitySourceServicesFactory
 				->getServicesForSource( $source );
 		}

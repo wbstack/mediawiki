@@ -5,10 +5,21 @@
  * and repo-specific functionality have been split to separate extensions.
  */
 
-return call_user_func( function () {
+use Wikibase\Repo\WikibaseRepo;
+
+return call_user_func( static function () {
 	$moduleTemplate = [
 		'localBasePath' => __DIR__ . '/resources',
 		'remoteExtPath' => 'WikibaseLexeme/resources',
+	];
+
+	$defaultViewConfigFile = [
+		"name" => "view/config.json",
+		"callback" => static function () {
+			return [
+				'tags' => WikibaseRepo::getSettings()->getSetting( 'viewUiTags' ),
+			];
+		}
 	];
 
 	return [
@@ -53,6 +64,7 @@ return call_user_func( function () {
 					'name' => 'widgets/languages.json',
 					'callback' => 'Wikibase\Lexeme\WikibaseLexemeHooks::getLexemeViewLanguages'
 				],
+				$defaultViewConfigFile
 
 			],
 			"dependencies" => [
@@ -193,7 +205,8 @@ return call_user_func( function () {
 				"entityChangers/SenseChanger.js",
 				"entityChangers/LexemeRevisionStore.js",
 				"serialization/FormSerializer.js",
-				"serialization/SenseSerializer.js"
+				"serialization/SenseSerializer.js",
+				$defaultViewConfigFile,
 			],
 			"dependencies" => [
 				"util.inherit",

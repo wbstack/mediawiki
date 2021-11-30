@@ -14,7 +14,7 @@
 	"type": "other",
 	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.37.0"
 	},
 	"config": {
 		"TwoColConflictBetaFeature": {
@@ -40,7 +40,7 @@
 		"GetBetaFeaturePreferences": "TwoColConflict\\Hooks\\TwoColConflictHooks::onGetBetaFeaturePreferences",
 		"GetPreferences": "TwoColConflict\\Hooks\\TwoColConflictHooks::onGetPreferences",
 		"UserGetDefaultOptions": "TwoColConflict\\Hooks\\TwoColConflictHooks::onUserGetDefaultOptions",
-		"UserLoadOptions": "TwoColConflict\\Hooks\\TwoColConflictHooks::onUserLoadOptions",
+		"LoadUserOptions": "TwoColConflict\\Hooks\\TwoColConflictHooks::onLoadUserOptions",
 		"AlternateEdit": "TwoColConflict\\Hooks\\TwoColConflictHooks::onAlternateEdit",
 		"EditPage::importFormData": "TwoColConflict\\Hooks\\EditPageImportFormDataHookHandler::onEditPageImportFormData",
 		"EditPageBeforeConflictDiff": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageBeforeConflictDiff",

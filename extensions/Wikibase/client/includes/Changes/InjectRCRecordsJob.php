@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\Changes;
 
 use InvalidArgumentException;
@@ -14,11 +16,12 @@ use TitleFactory;
 use Wikibase\Client\RecentChanges\RecentChangeFactory;
 use Wikibase\Client\RecentChanges\RecentChangesFinder;
 use Wikibase\Client\WikibaseClient;
+use Wikibase\Lib\Changes\ChangeRow;
 use Wikibase\Lib\Changes\EntityChange;
 use Wikibase\Lib\Changes\EntityChangeFactory;
+use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Store\Sql\EntityChangeLookup;
 use Wikimedia\Assert\Assert;
-use Wikimedia\Rdbms\ILBFactory;
 
 /**
  * Job for injecting RecentChange records representing changes on the Wikibase repository.
@@ -31,9 +34,9 @@ use Wikimedia\Rdbms\ILBFactory;
 class InjectRCRecordsJob extends Job {
 
 	/**
-	 * @var ILBFactory
+	 * @var ClientDomainDb
 	 */
-	private $lbFactory;
+	private $db;
 
 	/**
 	 * @var EntityChangeLookup
@@ -71,6 +74,11 @@ class InjectRCRecordsJob extends Job {
 	private $stats = null;
 
 	/**
+	 * @var StatsdDataFactoryInterface
+	 */
+	private $perWikiStats = null;
+
+	/**
 	 * @param Title[] $titles
 	 * @param EntityChange $change
 	 * @param array $rootJobParams
@@ -81,7 +89,7 @@ class InjectRCRecordsJob extends Job {
 		array $titles,
 		EntityChange $change,
 		array $rootJobParams = []
-	) {
+	): JobSpecification {
 		$pages = [];
 
 		foreach ( $titles as $t ) {
@@ -92,7 +100,7 @@ class InjectRCRecordsJob extends Job {
 		// Note: Avoid serializing Change objects. Original changes can be restored
 		// from $changeData['info']['change-ids'], see getChange().
 		$changeData = $change->getFields();
-		$changeData['info'] = $change->getSerializedInfo( [ 'changes' ] );
+		$changeData[ChangeRow::INFO] = $change->getSerializedInfo( [ 'changes' ] );
 
 		// See JobQueueChangeNotificationSender::getJobSpecification for relevant root job parameters.
 		$params = array_merge( $rootJobParams, [
@@ -110,7 +118,7 @@ class InjectRCRecordsJob extends Job {
 	 * Constructs an InjectRCRecordsJob for injecting a change into the recentchanges feed
 	 * for the given pages.
 	 *
-	 * @param ILBFactory $lbFactory
+	 * @param ClientDomainDb $domainDb
 	 * @param EntityChangeLookup $changeLookup
 	 * @param EntityChangeFactory $changeFactory
 	 * @param RecentChangeFactory $rcFactory
@@ -121,7 +129,7 @@ class InjectRCRecordsJob extends Job {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct(
-		ILBFactory $lbFactory,
+		ClientDomainDb $domainDb,
 		EntityChangeLookup $changeLookup,
 		EntityChangeFactory $changeFactory,
 		RecentChangeFactory $rcFactory,
@@ -154,7 +162,7 @@ class InjectRCRecordsJob extends Job {
 			'$params[\'pages\']'
 		);
 
-		$this->lbFactory = $lbFactory;
+		$this->db = $domainDb;
 		$this->changeLookup = $changeLookup;
 		$this->changeFactory = $changeFactory;
 		$this->rcFactory = $rcFactory;
@@ -162,15 +170,14 @@ class InjectRCRecordsJob extends Job {
 		$this->logger = new NullLogger();
 	}
 
-	public static function newFromGlobalState( Title $unused, array $params ) {
+	public static function newFromGlobalState( Title $unused, array $params ): self {
 		$mwServices = MediaWikiServices::getInstance();
-		$wbServices = WikibaseClient::getDefaultInstance();
 
 		$store = WikibaseClient::getStore( $mwServices );
 
 		$job = new self(
-			$mwServices->getDBLoadBalancerFactory(),
-			$store->getEntityChangeLookup(),
+			WikibaseClient::getClientDomainDbFactory( $mwServices )->newLocalDb(),
+			WikibaseClient::getEntityChangeLookup( $mwServices ),
 			WikibaseClient::getEntityChangeFactory( $mwServices ),
 			WikibaseClient::getRecentChangeFactory( $mwServices ),
 			$mwServices->getTitleFactory(),
@@ -180,21 +187,22 @@ class InjectRCRecordsJob extends Job {
 		$job->setRecentChangesFinder( $store->getRecentChangesFinder() );
 
 		$job->setLogger( WikibaseClient::getLogger( $mwServices ) );
-		$job->setStats( $mwServices->getStatsdDataFactory() );
+		$job->setStats( $mwServices->getStatsdDataFactory(), $mwServices->getPerDbNameStatsdDataFactory() );
 
 		return $job;
 	}
 
-	public function setRecentChangesFinder( RecentChangesFinder $rcDuplicateDetector ) {
+	public function setRecentChangesFinder( RecentChangesFinder $rcDuplicateDetector ): void {
 		$this->rcDuplicateDetector = $rcDuplicateDetector;
 	}
 
-	public function setLogger( LoggerInterface $logger ) {
+	public function setLogger( LoggerInterface $logger ): void {
 		$this->logger = $logger;
 	}
 
-	public function setStats( StatsdDataFactoryInterface $stats ) {
+	public function setStats( StatsdDataFactoryInterface $stats, StatsdDataFactoryInterface $perWikiStats = null ): void {
 		$this->stats = $stats;
+		$this->perWikiStats = $perWikiStats;
 	}
 
 	/**
@@ -204,7 +212,7 @@ class InjectRCRecordsJob extends Job {
 	 *
 	 * @return EntityChange|null the change to process (or none).
 	 */
-	private function getChange() {
+	private function getChange(): ?EntityChange {
 		$params = $this->getParams();
 		$changeData = $params['change'];
 
@@ -229,7 +237,7 @@ class InjectRCRecordsJob extends Job {
 			if ( isset( $info['change-ids'] ) && !isset( $info['changes'] ) ) {
 				$children = $this->changeLookup->loadByChangeIds( $info['change-ids'] );
 				$info['changes'] = $children;
-				$change->setField( 'info', $info );
+				$change->setField( ChangeRow::INFO, $info );
 			}
 		}
 
@@ -239,7 +247,7 @@ class InjectRCRecordsJob extends Job {
 	/**
 	 * @return Title[] List of Titles to inject RC entries for, indexed by page ID
 	 */
-	private function getTitles() {
+	private function getTitles(): array {
 		$params = $this->getParams();
 		$pages = $params['pages'];
 
@@ -255,7 +263,7 @@ class InjectRCRecordsJob extends Job {
 	/**
 	 * @return bool success
 	 */
-	public function run() {
+	public function run(): bool {
 		$change = $this->getChange();
 		$titles = $this->getTitles();
 
@@ -265,7 +273,9 @@ class InjectRCRecordsJob extends Job {
 
 		$rcAttribs = $this->rcFactory->prepareChangeAttributes( $change );
 
-		$trxToken = $this->lbFactory->getEmptyTransactionTicket( __METHOD__ );
+		$dbw = $this->db->connections()->getWriteConnection();
+
+		$dbw->startAtomic( __METHOD__ );
 
 		foreach ( $titles as $title ) {
 			if ( !$title->exists() ) {
@@ -284,11 +294,11 @@ class InjectRCRecordsJob extends Job {
 			}
 		}
 
-		// Wait for all database replicas to be updated, but only for the affected client wiki. The
-		// "domain" argument is documented at ILBFactory::waitForReplication.
-		$this->lbFactory->commitAndWaitForReplication( __METHOD__, $trxToken, [ 'domain' => wfWikiID() ] );
-
+		$dbw->endAtomic( __METHOD__ );
 		$this->incrementStats( 'InjectRCRecords.run.titles', count( $titles ) );
+		$this->recordDelay( $change->getAge() );
+
+		$this->db->connections()->releaseConnection( $dbw );
 
 		return true;
 	}
@@ -297,10 +307,18 @@ class InjectRCRecordsJob extends Job {
 	 * @param string $updateType
 	 * @param int $delta
 	 */
-	private function incrementStats( $updateType, $delta ) {
+	private function incrementStats( string $updateType, int $delta ): void {
 		if ( $this->stats ) {
 			$this->stats->updateCount( 'wikibase.client.pageupdates.' . $updateType, $delta );
 		}
 	}
 
+	private function recordDelay( int $delay ): void {
+		if ( $this->stats ) {
+			$this->stats->timing( 'wikibase.client.pageupdates.InjectRCRecords.delay', $delay );
+		}
+		if ( $this->perWikiStats ) {
+			$this->perWikiStats->timing( 'wikibase.client.pageupdates.InjectRCRecords.delay', $delay );
+		}
+	}
 }

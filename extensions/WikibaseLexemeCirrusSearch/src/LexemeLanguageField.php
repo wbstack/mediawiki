@@ -7,7 +7,7 @@ use DataValues\StringValue;
 use SearchEngine;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
-use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Statement\StatementListProvider;
@@ -25,13 +25,13 @@ class LexemeLanguageField extends LexemeKeywordField {
 	private $entityLookup;
 
 	/**
-	 * @var PropertyId|null
+	 * @var NumericPropertyId|null
 	 */
 	private $lexemeLanguageCodePropertyId;
 
 	public function __construct(
 		EntityLookup $entityLookup,
-		PropertyId $lexemeLanguageCodePropertyId = null
+		NumericPropertyId $lexemeLanguageCodePropertyId = null
 	) {
 		parent::__construct();
 		$this->lexemeLanguageCodePropertyId = $lexemeLanguageCodePropertyId;

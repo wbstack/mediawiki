@@ -14,7 +14,7 @@ use MediaWiki\MediaWikiServices;
 use Wikibase\Repo\WikibaseRepo;
 
 return [
-	WbManifest::WIKIBASE_MANIFEST_GENERATOR => function ( MediaWikiServices $services ) {
+	WbManifest::WIKIBASE_MANIFEST_GENERATOR => static function ( MediaWikiServices $services ) {
 		$mainPageUrl =
 			$services->getService( WbManifest::WIKIBASE_MANIFEST_TITLE_FACTORY_MAIN_PAGE_URL );
 
@@ -42,27 +42,26 @@ return [
 			$oauthUrlFactory
 		);
 	},
-	WbManifest::WIKIBASE_MANIFEST_CONFIG_EQUIV_ENTITIES_FACTORY => function ( MediaWikiServices $services ) {
+	WbManifest::WIKIBASE_MANIFEST_CONFIG_EQUIV_ENTITIES_FACTORY => static function ( MediaWikiServices $services ) {
 		return new ConfigEquivEntitiesFactory(
 			$services->getMainConfig(), WbManifest::ENTITY_MAPPING_CONFIG
 		);
 	},
-	WbManifest::WIKIBASE_MANIFEST_CONFIG_EXTERNAL_SERVICES_FACTORY => function ( MediaWikiServices $services ) {
+	WbManifest::WIKIBASE_MANIFEST_CONFIG_EXTERNAL_SERVICES_FACTORY => static function ( MediaWikiServices $services ) {
 		return new ConfigExternalServicesFactory(
 			$services->getMainConfig(), WbManifest::EXTERNAL_SERVICES_CONFIG
 		);
 	},
-	WbManifest::WIKIBASE_MANIFEST_CONCEPT_NAMESPACES => function ( MediaWikiServices $services ) {
-		$repo = WikibaseRepo::getDefaultInstance();
-		$rdfVocabulary = $repo->getRdfVocabulary();
+	WbManifest::WIKIBASE_MANIFEST_CONCEPT_NAMESPACES => static function ( MediaWikiServices $services ) {
+		$rdfVocabulary = WikibaseRepo::getRdfVocabulary( $services );
 		$localEntitySource = WikibaseRepo::getLocalEntitySource( $services );
 		// TODO: Get Canonical Document URLS from a service not straight from remote
 		return new ConceptNamespaces( $localEntitySource, $rdfVocabulary );
 	},
-	WbManifest::EMPTY_VALUE_CLEANER => function () {
+	WbManifest::EMPTY_VALUE_CLEANER => static function () {
 		return new EmptyValueCleaner();
 	},
-	WbManifest::WIKIBASE_MANIFEST_LOCAL_SOURCE_ENTITY_NAMESPACES_FACTORY => function ( MediaWikiServices $services
+	WbManifest::WIKIBASE_MANIFEST_LOCAL_SOURCE_ENTITY_NAMESPACES_FACTORY => static function ( MediaWikiServices $services
 	) {
 		$localEntitySource = WikibaseRepo::getLocalEntitySource( $services );
 
@@ -70,15 +69,15 @@ return [
 			$localEntitySource, $services->getNamespaceInfo()
 		);
 	},
-	WbManifest::WIKIBASE_MANIFEST_TITLE_FACTORY_MAIN_PAGE_URL => function ( MediaWikiServices $services ) {
+	WbManifest::WIKIBASE_MANIFEST_TITLE_FACTORY_MAIN_PAGE_URL => static function ( MediaWikiServices $services ) {
 		return new TitleFactoryMainPageUrl( $services->getTitleFactory() );
 	},
-	WbManifest::WIKIBASE_MANIFEST_CONFIG_MAX_LAG_FACTORY => function ( MediaWikiServices $services ) {
+	WbManifest::WIKIBASE_MANIFEST_CONFIG_MAX_LAG_FACTORY => static function ( MediaWikiServices $services ) {
 		return new ConfigMaxLagFactory(
 			$services->getMainConfig(), WbManifest::MAX_LAG_CONFIG
 		);
 	},
-	WbManifest::OAUTH_URL_FACTORY => function ( MediaWikiServices $services ) {
+	WbManifest::OAUTH_URL_FACTORY => static function ( MediaWikiServices $services ) {
 		return new OAuthUrlFactory(
 			ExtensionRegistry::getInstance(),
 			$services->getSpecialPageFactory()

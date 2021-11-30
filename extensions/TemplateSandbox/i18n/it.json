@@ -36,7 +36,5 @@
 	"templatesandbox-editform-need-title": "Per visualizzare l'anteprima di un'altra pagina con questo template, devi specificare il titolo di una pagina.",
 	"templatesandbox-editform-invalid-template": "Il nome del template specificato non è valido.",
 	"templatesandbox-editform-invalid-title": "Il titolo che hai specificato per l'anteprima non è valido.",
-	"templatesandbox-editform-title-not-exists": "Il titolo che hai specificato per l'anteprima non esiste.",
-	"templatesandbox-apihelp-contentmodel": "Modello contenuto di <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Formato contenuto di <var>$1templatesandboxtext</var>."
+	"templatesandbox-editform-title-not-exists": "Il titolo che hai specificato per l'anteprima non esiste."
 }

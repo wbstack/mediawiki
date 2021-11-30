@@ -2,12 +2,10 @@
 
 namespace Wikibase\Repo\Maintenance;
 
-use Hooks;
 use Maintenance;
 use MWException;
 use OrderedStreamingForkController;
 use Wikibase\Repo\Api\EntitySearchHelper;
-use Wikibase\Repo\Api\TypeDispatchingEntitySearchHelper;
 use Wikibase\Repo\WikibaseRepo;
 
 $basePath = getenv( 'MW_INSTALL_PATH' ) !== false ? getenv( 'MW_INSTALL_PATH' ) : __DIR__ . '/../../../..';
@@ -26,11 +24,6 @@ require_once $basePath . '/maintenance/Maintenance.php';
  * @author Stas Malyshev
  */
 class SearchEntities extends Maintenance {
-
-	/**
-	 * @var WikibaseRepo
-	 */
-	private $repo;
 
 	/**
 	 * @var EntitySearchHelper
@@ -55,19 +48,10 @@ class SearchEntities extends Maintenance {
 	}
 
 	/**
-	 * Set wikibase repo to be used, e.g. for testing.
-	 * @param WikibaseRepo $repo
-	 */
-	public function setRepo( WikibaseRepo $repo ) {
-		$this->repo = $repo;
-	}
-
-	/**
 	 * Do the actual work. All child classes will need to implement this
 	 */
 	public function execute() {
 		$engine = $this->getOption( 'engine', 'sql' );
-		$this->repo = WikibaseRepo::getDefaultInstance();
 		$this->searchHelper = $this->getSearchHelper( $engine );
 
 		$callback = [ $this, 'doSearch' ];
@@ -155,22 +139,13 @@ class SearchEntities extends Maintenance {
 	private function getSearchHelper( $engine ) {
 		$engines = [
 			'sql' => function() {
-				return new TypeDispatchingEntitySearchHelper(
-					$this->repo->getEntitySearchHelperCallbacks(),
-					new \FauxRequest()
-				);
+				return WikibaseRepo::getEntitySearchHelper();
 			}
 		];
-
-		Hooks::run( 'WikibaseSearchEntitiesEngines', [ $this->repo, &$engines ] );
 
 		if ( !isset( $engines[$engine] ) ) {
 			throw new MWException( "Unknown engine: $engine, valid values: "
 				. implode( ", ", array_keys( $engines ) ) );
-		}
-
-		if ( !is_callable( $engines[$engine] ) ) {
-			throw new MWException( "Bad engine callback for $engine" );
 		}
 
 		return $engines[$engine]();

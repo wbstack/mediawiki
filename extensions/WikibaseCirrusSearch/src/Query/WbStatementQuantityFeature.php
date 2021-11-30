@@ -46,18 +46,6 @@ use Wikibase\Search\Elastic\Fields\StatementsField;
 class WbStatementQuantityFeature extends SimpleKeywordFeature implements FilterQueryFeature {
 
 	/**
-	 * @var string[] Names of foreign repos from $wgWBRepoSettings
-	 */
-	private $foreignRepoNames;
-
-	/**
-	 * @param string[] $foreignRepoNames Array of names of foreign repos from $wgWBRepoSettings
-	 */
-	public function __construct( array $foreignRepoNames ) {
-		$this->foreignRepoNames = $foreignRepoNames;
-	}
-
-	/**
 	 * @return string[]
 	 */
 	protected function getKeywords() {
@@ -136,7 +124,7 @@ class WbStatementQuantityFeature extends SimpleKeywordFeature implements FilterQ
 
 		if ( count( $statements ) == 0 ) {
 			$warningCollector->addWarning(
-				'cirrussearch-wbstatementquantity-feature-no-valid-statements',
+				'wikibasecirrus-wbstatementquantity-feature-no-valid-statements',
 				$key
 			);
 		}
@@ -144,25 +132,7 @@ class WbStatementQuantityFeature extends SimpleKeywordFeature implements FilterQ
 	}
 
 	private function getQueryStrings( $value ) {
-		if ( count( $this->foreignRepoNames ) == 0 ) {
-			return explode( '|', $value );
-		}
-		//Handle the case where foreign repo names contain the '|' character
-		$hashedForeignRepoNames = [];
-		foreach ( $this->foreignRepoNames as $foreignRepoName ) {
-			$hash = md5( $foreignRepoName );
-			$hashedForeignRepoNames[ $foreignRepoName ] = $hash;
-		}
-		$value = str_replace( $this->foreignRepoNames, $hashedForeignRepoNames, $value );
-		$queryStrings = explode( '|', $value );
-		foreach ( $queryStrings as $index => $queryString ) {
-			$queryStrings[$index] = str_replace(
-				$hashedForeignRepoNames,
-				$this->foreignRepoNames,
-				$queryString
-			);
-		}
-		return $queryStrings;
+		return explode( '|', $value );
 	}
 
 	/**
@@ -173,14 +143,6 @@ class WbStatementQuantityFeature extends SimpleKeywordFeature implements FilterQ
 	 */
 	private function getPattern() {
 		$statementPattern = '(?<statement>';
-		if ( count( $this->foreignRepoNames ) > 0 ) {
-			$statementPattern .= '((' .
-				implode( '|', array_map(
-					'preg_quote',
-					$this->foreignRepoNames
-				) )
-				. '):)?';
-		}
 		$statementPattern .= 'P[1-9]\d{0,9}' .
 			preg_quote( StatementsField::STATEMENT_SEPARATOR, '/' ) .
 			'.+)';

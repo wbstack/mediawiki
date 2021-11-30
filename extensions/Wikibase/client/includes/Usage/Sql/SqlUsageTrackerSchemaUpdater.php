@@ -1,10 +1,11 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Wikibase\Client\Usage\Sql;
 
 use DatabaseUpdater;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
-use MediaWiki\MediaWikiServices;
 use MWException;
 use Onoi\MessageReporter\CallbackMessageReporter;
 use Wikibase\Client\WikibaseClient;
@@ -21,7 +22,7 @@ class SqlUsageTrackerSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 	 *
 	 * @param DatabaseUpdater $updater DatabaseUpdater subclass
 	 */
-	public function onLoadExtensionSchemaUpdates( $updater ) {
+	public function onLoadExtensionSchemaUpdates( $updater ): void {
 		$table = EntityUsageTable::DEFAULT_TABLE_NAME;
 		$db = $updater->getDB();
 
@@ -36,15 +37,6 @@ class SqlUsageTrackerSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 				[ __CLASS__, 'fillUsageTable' ],
 			] );
 		} else {
-			// This update is neither needed nor does it work on SQLite or Postgres.
-			if ( $db->getType() === 'mysql' ) {
-				$script = $this->getUpdateScriptPath( 'entity_usage-alter-aspect-varbinary-37', $db->getType() );
-				$updater->modifyExtensionField( $table, 'eu_aspect', $script );
-			}
-
-			$script = $this->getUpdateScriptPath( 'entity_usage-drop-entity_type', $db->getType() );
-			$updater->dropExtensionField( $table, 'eu_entity_type', $script );
-
 			$script = $this->getUpdateScriptPath( 'entity_usage-drop-touched', $db->getType() );
 			$updater->dropExtensionField( $table, 'eu_touched', $script );
 		}
@@ -52,16 +44,14 @@ class SqlUsageTrackerSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 
 	/**
 	 * Static wrapper for EntityUsageTableBuilder::fillUsageTable
-	 *
-	 * @param DatabaseUpdater $dbUpdater
 	 */
-	public static function fillUsageTable( DatabaseUpdater $dbUpdater ) {
+	public static function fillUsageTable( DatabaseUpdater $dbUpdater ): void {
 		$idParser = WikibaseClient::getEntityIdParser();
 
 		$primer = new EntityUsageTableBuilder(
 			$idParser,
 			// TODO: Would be nice to pass in $dbUpdater->getDB().
-			MediaWikiServices::getInstance()->getDBLoadBalancerFactory()
+			WikibaseClient::getClientDomainDbFactory()->newLocalDb()
 		);
 
 		$primer->setProgressReporter(
@@ -75,11 +65,11 @@ class SqlUsageTrackerSchemaUpdater implements LoadExtensionSchemaUpdatesHook {
 		$primer->fillUsageTable();
 	}
 
-	private function getUpdateScriptPath( $name, $type ) {
+	private function getUpdateScriptPath( string $name, string $type ): string {
 		return $this->getScriptPath( 'archives/' . $name, $type );
 	}
 
-	private function getScriptPath( $name, $type ) {
+	private function getScriptPath( string $name, string $type ): string {
 		$types = [
 			$type,
 			'mysql'

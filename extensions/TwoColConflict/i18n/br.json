@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adriendelucca",
 			"Fulup",
 			"Y-M D"
 		]
@@ -11,7 +12,7 @@
 	"twocolconflict-split-tour-dialog-header-single-column-view": "Skoulmoù etre embannadurioù",
 	"twocolconflict-split-tour-dialog-message-single-column-view": "Siwazh, unan bennak all en deus embannet un dra bennak rik d'ar memes koulz ha c'hwi. Gwiriit an evezhiadennoù war ar bajenn da-heul. Diouzh an dro e c'hallot kemmañ ho re ha cheñch an urzh ziwezhañ",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Diskoulmañ an draen",
-	"twocolconflict-talk-your": "Ho tegasadenn",
+	"twocolconflict-talk-your": "Hoc'h evezhiadenn",
 	"twocolconflict-talk-conflicting": "Dizemglev gant an degasadenn",
 	"twocolconflict-talk-reorder-prompt": "Lec'hiañ ho moned e-keñver ar moned kudennek :",
 	"twocolconflict-talk-same-order": "Mirout goude",

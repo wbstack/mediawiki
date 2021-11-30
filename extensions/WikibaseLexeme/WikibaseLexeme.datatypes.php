@@ -29,6 +29,7 @@ use Wikibase\Lexeme\Presentation\Formatters\RedirectedLexemeSubEntityIdHtmlForma
 use Wikibase\Lexeme\Presentation\Formatters\SenseIdHtmlFormatter;
 use Wikibase\Lexeme\Presentation\Formatters\SenseIdTextFormatter;
 use Wikibase\Lib\Formatters\EntityIdValueFormatter;
+use Wikibase\Lib\Formatters\NonExistingEntityIdHtmlFormatter;
 use Wikibase\Lib\Formatters\SnakFormat;
 use Wikibase\Lib\Formatters\SnakFormatter;
 use Wikibase\Lib\LanguageFallbackIndicator;
@@ -39,11 +40,11 @@ use Wikibase\Repo\WikibaseRepo;
 return [
 	'PT:wikibase-lexeme' => [
 		'expert-module' => 'wikibase.experts.Lexeme',
-		'validator-factory-callback' => function () {
+		'validator-factory-callback' => static function () {
 			$factory = WikibaseRepo::getDefaultValidatorBuilders();
 			return $factory->getEntityValidators( Lexeme::ENTITY_TYPE );
 		},
-		'formatter-factory-callback' => function ( $format, FormatterOptions $options ) {
+		'formatter-factory-callback' => static function ( $format, FormatterOptions $options ) {
 			$snakFormat = new SnakFormat();
 
 			if ( $snakFormat->getBaseFormat( $format ) === SnakFormatter::FORMAT_HTML ) {
@@ -61,7 +62,10 @@ return [
 						WikibaseRepo::getEntityLookup(),
 						$labelDescriptionLookup,
 						WikibaseRepo::getEntityTitleLookup(),
-						new MediaWikiLocalizedTextProvider( $userLanguage )
+						new MediaWikiLocalizedTextProvider( $userLanguage ),
+						new NonExistingEntityIdHtmlFormatter(
+							'wikibaselexeme-deletedentity-'
+						)
 					)
 				);
 			}
@@ -73,15 +77,14 @@ return [
 	],
 	'PT:wikibase-form' => [
 		'expert-module' => 'wikibase.experts.Form',
-		'validator-factory-callback' => function () {
+		'validator-factory-callback' => static function () {
 			$factory = WikibaseRepo::getDefaultValidatorBuilders();
 			return $factory->getEntityValidators( Form::ENTITY_TYPE );
 		},
-		'formatter-factory-callback' => function ( $format, FormatterOptions $options ) {
+		'formatter-factory-callback' => static function ( $format, FormatterOptions $options ) {
 			$mwServices = MediaWikiServices::getInstance();
-			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 			$userLanguage = WikibaseRepo::getUserLanguage( $mwServices );
-			$revisionLookup = $wikibaseRepo->getEntityRevisionLookup();
+			$revisionLookup = WikibaseRepo::getEntityRevisionLookup( $mwServices );
 			$textProvider = new MediaWikiLocalizedTextProvider( $userLanguage );
 			$snakFormat = new SnakFormat();
 
@@ -112,14 +115,13 @@ return [
 	],
 	'PT:wikibase-sense' => [
 		'expert-module' => 'wikibase.experts.Sense',
-		'validator-factory-callback' => function () {
+		'validator-factory-callback' => static function () {
 			$factory = WikibaseRepo::getDefaultValidatorBuilders();
 			return $factory->getEntityValidators( Sense::ENTITY_TYPE );
 		},
-		'formatter-factory-callback' => function ( $format, FormatterOptions $options ) {
+		'formatter-factory-callback' => static function ( $format, FormatterOptions $options ) {
 			$mwServices = MediaWikiServices::getInstance();
-			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-			$revisionLookup = $wikibaseRepo->getEntityRevisionLookup();
+			$revisionLookup = WikibaseRepo::getEntityRevisionLookup( $mwServices );
 			$language = WikibaseRepo::getUserLanguage( $mwServices );
 
 			$localizedTextProvider = new MediaWikiLocalizedTextProvider( $language );
@@ -137,7 +139,7 @@ return [
 						$revisionLookup,
 						$localizedTextProvider,
 						$fallbackChain,
-						new LanguageFallbackIndicator( $wikibaseRepo->getLanguageNameLookup() ),
+						new LanguageFallbackIndicator( WikibaseRepo::getLanguageNameLookup( $mwServices ) ),
 						$mwServices->getLanguageFactory()
 					)
 				);

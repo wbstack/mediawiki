@@ -56,6 +56,8 @@ The entity types repository is an associative array mapping entity type identifi
   * A callable that returns a [ChangeOpDeserializer] instance for change requests to the entity of this type
 * rdf-builder-factory-callback (repo only)
   * A callable that returns a [EntityRdfBuilder] instance. See [EntityRdfBuilderFactory::getEntityRdfBuilders] for arguments in the callback
+* rdf-builder-stub-factory-callback (repo only)
+  * A callable that returns a [EntityStubRdfBuilder] instance. See [EntityStubRdfBuilderFactory::getEntityStubRdfBuilders] for arguments in the callback
 * rdf-builder-label-predicates (repo only)
   * List on pairs [ns,local] specifying predicates for RDF export of labels for this entity.
 * entity-search-callback (repo only)
@@ -96,6 +98,8 @@ The entity types repository is an associative array mapping entity type identifi
   * A callable for creating an [EntityExistenceChecker] for entities of this type, called without arguments.
 * redirect-checker-callback (repo only)
   * A callable for creating an [EntityRedirectChecker] for entities of this type, called without arguments.
+* property-data-type-lookup-callback (repo only)
+  * A callable for creating an [PropertyDataTypeLookup] for entities of the property type, called without arguments.
 
 Extensions that wish to register an entity type should use the [WikibaseRepoEntityTypes] and/or [WikibaseClientEntityTypes] hooks to provide additional entity type definitions. (See @ref md_docs_topics_hooks-php)
 

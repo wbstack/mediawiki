@@ -194,7 +194,8 @@
 	"wikibase-parse-error-entity-id": "Няправільны ідэнтыфікатар сутнасці.",
 	"wikibase-parse-error-quantity": "Значэнне колькасці мае няправільны фармат.",
 	"wikibase-parse-error-time": "Значэнне часу мае няправільны фармат.",
-	"wikibase-conflict-patched": "Ваша праўка было выпраўлена ў апошняй версіі.",
+	"wikibase-api-failed-save": "Памылка пры захаванні.",
+	"wikibase-conflict-patched": "Ваша праўка ўнесена ў апошнюю версію.",
 	"wikibase-restoreold": "аднавіць",
 	"wikibase-entity-summary-restore": "Адноўлена версія $3 з дапамогай [[Special:Contributions/$4|{{GENDER:$4|$4}}]]",
 	"wikibase-no-direct-editing": "У прасторы назваў «$1» адключана прамое рэдагаванне",
@@ -206,6 +207,8 @@
 	"wikibase-listdatatypes-multilingualtext-head": "Шматмоўны тэкст",
 	"wikibase-listdatatypes-string-head": "Радок",
 	"wikibase-listdatatypes-time-head": "Час",
+	"wikibase-concept-uri": "URI канцэпта",
+	"wikibase-concept-uri-tooltip": "URI, які ідэнтыфікуе канцэпт, што апісваецца гэтым элементам",
 	"datatypes-type-url": "URL",
 	"content-model-wikibase-item": "Элемент рэпазітара Wikibase",
 	"content-model-wikibase-property": "Уласцівасць элемента Wikibase",
@@ -218,5 +221,6 @@
 	"wikibase-tainted-ref-popper-title": "Магчымая неадпаведнасць зноскі значэнню",
 	"wikibase-tainted-ref-popper-help-link-title": "Старонка даведкі для гэтага тыпу абмежавання",
 	"wikibase-tainted-ref-popper-help-link-text": "Даведка",
-	"wikibase-tainted-ref-popper-remove-warning": "Прыбраць папярэджанне"
+	"wikibase-tainted-ref-popper-remove-warning": "Прыбраць папярэджанне",
+	"special-setlabeldescriptionaliases-parameterized": "Дадаць метку, апісанне і сінонімы — $1"
 }

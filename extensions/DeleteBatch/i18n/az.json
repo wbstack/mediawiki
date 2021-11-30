@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Cekli829",
+			"NMW03",
 			"Vago",
 			"Vugar 1981"
 		]
@@ -16,8 +17,8 @@
 	"deletebatch-or": "<strong>və ya</strong>",
 	"deletebatch-delete": "Sil",
 	"deletebatch-page": "Silinəcək səhifələr",
-	"deletebatch-processing-from-file": "səhifələrin fayl siyahısından silinməsi",
-	"deletebatch-processing-from-form": "səhifələrin formadan silinməsi",
+	"deletebatch-processing-from-file": "faylda göstərilən səhifələrin silinməsi",
+	"deletebatch-processing-from-form": "formada göstərilən səhifələrin silinməsi",
 	"deletebatch-omitting-nonexistent": "Mövcud olmayan $1 səhifəsindən başqa.",
 	"deletebatch-omitting-invalid": "Yanlış $1 səhifəsindən başqa.",
 	"deletebatch-file-bad-format": "Faylın sadə mətni olmalıdır",

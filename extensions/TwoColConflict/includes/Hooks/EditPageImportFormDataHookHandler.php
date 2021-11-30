@@ -3,6 +3,7 @@
 namespace TwoColConflict\Hooks;
 
 use EditPage;
+use MediaWiki\MediaWikiServices;
 use TwoColConflict\ConflictFormValidator;
 use TwoColConflict\SplitConflictMerger;
 use TwoColConflict\TwoColConflictContext;
@@ -50,14 +51,15 @@ class EditPageImportFormDataHookHandler {
 
 		if ( $request->getBool( 'mw-twocolconflict-disable-core-hint' ) ) {
 			$user = $editPage->getContext()->getUser();
-			if ( !$user->isAnon() ) {
-				$user->setOption( TwoColConflictContext::HIDE_CORE_HINT_PREFERENCE, '1' );
-				$user->saveSettings();
+			if ( $user->isRegistered() ) {
+				$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
+				$userOptionsManager->setOption( $user, TwoColConflictContext::HIDE_CORE_HINT_PREFERENCE, '1' );
+				$userOptionsManager->saveOptions( $user );
 			}
 		}
 	}
 
-	private static function swapTalkComments( array $contentRows, array $extraLineFeeds ) : array {
+	private static function swapTalkComments( array $contentRows, array $extraLineFeeds ): array {
 		for ( $i = 0; $i < count( $contentRows ) - 1; $i++ ) {
 			if ( isset( $contentRows[$i]['other'] ) && isset( $contentRows[$i + 1]['your'] ) ) {
 				[ $contentRows[$i], $contentRows[$i + 1] ] =

@@ -12,9 +12,11 @@
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store
 	 * @param {Object} config
+	 * @cfg {string} name
 	 */
 	mw.libs.advancedSearch.ui.FormState = function ( store, config ) {
 		this.store = store;
+		this.name = config.name;
 		mw.libs.advancedSearch.ui.FormState.parent.call( this, config );
 
 		this.store.connect( this, { update: 'onStoreUpdate' } );
@@ -29,7 +31,9 @@
 	};
 
 	mw.libs.advancedSearch.ui.FormState.prototype.populateFromStore = function () {
-		this.$element.val( this.store.toJSON() );
+		var json = this.store.toJSON();
+		// To avoid noise (empty query parameters) in the URL, temporarily remove the name
+		this.$element.attr( 'name', json ? this.name : null ).val( json );
 	};
 
 }() );

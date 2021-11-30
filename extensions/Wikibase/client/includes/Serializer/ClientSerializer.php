@@ -3,6 +3,7 @@
 namespace Wikibase\Client\Serializer;
 
 use Serializers\Serializer;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\Lib\Serialization\CallbackFactory;
 use Wikibase\Lib\Serialization\SerializationModifier;
@@ -28,8 +29,14 @@ abstract class ClientSerializer implements Serializer {
 	 */
 	private $callbackFactory;
 
-	public function __construct( PropertyDataTypeLookup $dataTypeLookup ) {
+	/**
+	 * @var EntityIdParser
+	 */
+	private $entityIdParser;
+
+	public function __construct( PropertyDataTypeLookup $dataTypeLookup, EntityIdParser $entityIdParser ) {
 		$this->dataTypeLookup = $dataTypeLookup;
+		$this->entityIdParser = $entityIdParser;
 
 		$this->modifier = new SerializationModifier();
 		$this->callbackFactory = new CallbackFactory();
@@ -58,35 +65,19 @@ abstract class ClientSerializer implements Serializer {
 	 * @return array
 	 */
 	protected function injectSerializationWithDataTypes( array $serialization, $pathPrefix ) {
-		$serialization = $this->modifier->modifyUsingCallback(
-			$serialization,
-			"$pathPrefix*/*/mainsnak",
-			$this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup )
+		$callback = $this->callbackFactory->getCallbackToAddDataTypeToSnak( $this->dataTypeLookup, $this->entityIdParser );
+		$groupedCallback = $this->callbackFactory->getCallbackToAddDataTypeToSnaksGroupedByProperty(
+			$this->dataTypeLookup,
+			$this->entityIdParser
 		);
-		$serialization = $this->getArrayWithDataTypesInGroupedSnakListAtPath(
-			$serialization,
-			"$pathPrefix*/*/qualifiers"
-		);
-		$serialization = $this->getArrayWithDataTypesInGroupedSnakListAtPath(
-			$serialization,
-			"$pathPrefix*/*/references/*/snaks"
-		);
-		return $serialization;
-	}
 
-	/**
-	 * @param array $array
-	 * @param string $path
-	 *
-	 * @todo FIXME duplicated / similar code in Repo ResultBuilder
-	 *
-	 * @return array
-	 */
-	private function getArrayWithDataTypesInGroupedSnakListAtPath( array $array, $path ) {
-		return $this->modifier->modifyUsingCallback(
-			$array,
-			$path,
-			$this->callbackFactory->getCallbackToAddDataTypeToSnaksGroupedByProperty( $this->dataTypeLookup )
+		return $this->modifier->modifyUsingCallbacks(
+			$serialization,
+			[
+				"$pathPrefix*/*/mainsnak" => $callback,
+				"$pathPrefix*/*/qualifiers" => $groupedCallback,
+				"$pathPrefix*/*/references/*/snaks" => $groupedCallback,
+			]
 		);
 	}
 

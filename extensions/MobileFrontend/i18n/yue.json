@@ -8,12 +8,11 @@
 			"Obonggi",
 			"Roy17",
 			"SCP-2000",
+			"Sun8908",
 			"Waihorace",
 			"Yueman"
 		]
 	},
-	"mobile-frontend-categories-heading": "<strong>類</strong>",
-	"mobile-frontend-categories-search": "搵類",
 	"mobile-frontend-changeslist-nocomment": "冇編輯摘要",
 	"mobile-frontend-clear-search": "清除",
 	"mobile-frontend-copyright": "除非另外講明，響呢版度嘅內容係根據$1嘅條款發佈。",
@@ -101,6 +100,8 @@
 	"mobile-frontend-watchlist-more": "多啲",
 	"mobile-frontend-user-page-create-user-page-link-label": "開一個新版嗌$1",
 	"tag-mobile_edit": "流動修改",
+	"tag-advanced_mobile_edit": "進階手提版編輯",
+	"tag-advanced_mobile_edit-description": "用家用進階模式改嘅編輯",
 	"tag-mobile_web_edit": "流動網上修改",
 	"mobile-frontend-loading-message": "撈緊…",
 	"mobile-frontend-search-feedback-link-text": "畀意見我哋",

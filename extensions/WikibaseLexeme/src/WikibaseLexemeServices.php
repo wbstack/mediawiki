@@ -6,23 +6,20 @@ use MediaWiki\MediaWikiServices;
 use RequestContext;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeAuthorizer;
-use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRedirector;
-use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRepository;
+use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRedirectorFactory;
+use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRepositoryFactory;
 use Wikibase\Lexeme\Domain\Authorization\LexemeAuthorizer;
 use Wikibase\Lexeme\Domain\EntityReferenceExtractors\FormsStatementEntityReferenceExtractor;
 use Wikibase\Lexeme\Domain\EntityReferenceExtractors\LexemeStatementEntityReferenceExtractor;
 use Wikibase\Lexeme\Domain\EntityReferenceExtractors\SensesStatementEntityReferenceExtractor;
-use Wikibase\Lexeme\Domain\LexemeRedirector;
 use Wikibase\Lexeme\Domain\Merge\LexemeFormsMerger;
 use Wikibase\Lexeme\Domain\Merge\LexemeMerger;
 use Wikibase\Lexeme\Domain\Merge\LexemeSensesMerger;
 use Wikibase\Lexeme\Domain\Merge\NoCrossReferencingLexemeStatements;
-use Wikibase\Lexeme\Domain\Storage\LexemeRepository;
 use Wikibase\Lexeme\Interactors\MergeLexemes\MergeLexemesInteractor;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeLanguageNameLookup;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeTermLanguages;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\EditFormChangeOpDeserializer;
-use Wikibase\Repo\EditEntity\MediawikiEditFilterHookRunner;
 use Wikibase\Repo\EntityReferenceExtractors\StatementEntityReferenceExtractor;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
@@ -34,15 +31,8 @@ class WikibaseLexemeServices {
 
 	private static $globalInstance;
 
-	/**
-	 * @param bool $botEditRequested Whether the user has requested that edits be marked as bot edits.
-	 * @return WikibaseLexemeServices
-	 */
-	public static function createGlobalInstance( $botEditRequested ): self {
-		self::$globalInstance = new self(
-			RequestContext::getMain(),
-			$botEditRequested
-		);
+	public static function createGlobalInstance(): self {
+		self::$globalInstance = new self();
 
 		return self::$globalInstance;
 	}
@@ -61,18 +51,10 @@ class WikibaseLexemeServices {
 				'Cannot get newTestInstance during regular operation.'
 			);
 		}
-		return new self( RequestContext::getMain(), false );
+		return new self();
 	}
 
 	private $container = [];
-
-	private $mediaWikiContext;
-	private $botEditRequested = false;
-
-	private function __construct( RequestContext $mediaWikiContext, /* bool */$botEditRequested ) {
-		$this->mediaWikiContext = $mediaWikiContext;
-		$this->botEditRequested = $botEditRequested;
-	}
 
 	/**
 	 * @return mixed
@@ -90,23 +72,21 @@ class WikibaseLexemeServices {
 		return new MergeLexemesInteractor(
 			$this->newLexemeMerger(),
 			$this->getLexemeAuthorizer(),
-			$this->getWikibaseRepo()->getSummaryFormatter(),
-			$this->newLexemeRedirector(),
+			WikibaseRepo::getSummaryFormatter( $mwServices ),
+			$this->newLexemeRedirectorFactory(),
 			WikibaseRepo::getEntityTitleStoreLookup( $mwServices ),
 			$mwServices->getWatchedItemStore(),
-			$this->getLexemeRepository()
+			$this->getLexemeRepositoryFactory()
 		);
 	}
 
-	private function getLexemeRepository(): LexemeRepository {
+	private function getLexemeRepositoryFactory(): MediaWikiLexemeRepositoryFactory {
 		return $this->getSharedService(
-			LexemeRepository::class,
-			function () {
-				return new MediaWikiLexemeRepository(
-					RequestContext::getMain()->getUser(),
-					$this->botEditRequested,
+			MediaWikiLexemeRepositoryFactory::class,
+			static function () {
+				return new MediaWikiLexemeRepositoryFactory(
 					WikibaseRepo::getEntityStore(),
-					$this->getWikibaseRepo()->getEntityRevisionLookup(),
+					WikibaseRepo::getEntityRevisionLookup(),
 					MediaWikiServices::getInstance()->getPermissionManager()
 				);
 			}
@@ -114,8 +94,7 @@ class WikibaseLexemeServices {
 	}
 
 	private function newLexemeMerger(): LexemeMerger {
-		$statementsMerger = $this->getWikibaseRepo()
-			->getChangeOpFactoryProvider()
+		$statementsMerger = WikibaseRepo::getChangeOpFactoryProvider()
 			->getMergeFactory()
 			->getStatementsMerger();
 
@@ -151,7 +130,7 @@ class WikibaseLexemeServices {
 	private function getLexemeAuthorizer(): LexemeAuthorizer {
 		return $this->getSharedService(
 			LexemeAuthorizer::class,
-			function () {
+			static function () {
 				return new MediaWikiLexemeAuthorizer(
 					RequestContext::getMain()->getUser(),
 					WikibaseRepo::getEntityPermissionChecker()
@@ -160,27 +139,16 @@ class WikibaseLexemeServices {
 		);
 	}
 
-	private function newLexemeRedirector(): LexemeRedirector {
-		return new MediaWikiLexemeRedirector(
-			$this->getWikibaseRepo()->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+	private function newLexemeRedirectorFactory(): MediaWikiLexemeRedirectorFactory {
+		return new MediaWikiLexemeRedirectorFactory(
+			WikibaseRepo::getStore()->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			WikibaseRepo::getEntityStore(),
 			WikibaseRepo::getEntityPermissionChecker(),
-			$this->getWikibaseRepo()->getSummaryFormatter(),
-			RequestContext::getMain()->getUser(),
-			new MediawikiEditFilterHookRunner(
-				WikibaseRepo::getEntityNamespaceLookup(),
-				WikibaseRepo::getEntityTitleStoreLookup(),
-				WikibaseRepo::getEntityContentFactory(),
-				RequestContext::getMain()
-			),
+			WikibaseRepo::getSummaryFormatter(),
+			WikibaseRepo::getEditFilterHookRunner(),
 			WikibaseRepo::getStore()->getEntityRedirectLookup(),
-			WikibaseRepo::getEntityTitleStoreLookup(),
-			$this->botEditRequested
+			WikibaseRepo::getEntityTitleStoreLookup()
 		);
-	}
-
-	private function getWikibaseRepo(): WikibaseRepo {
-		return WikibaseRepo::getDefaultInstance();
 	}
 
 	public static function getTermLanguages(): LexemeTermLanguages {

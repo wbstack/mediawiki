@@ -4,6 +4,7 @@
 			"Amire80",
 			"Guycn2",
 			"IKhitron",
+			"YaronSh",
 			"ערן",
 			"פוילישער",
 			"קיפודנחש"
@@ -40,10 +41,5 @@
 	"templatesandbox-editform-invalid-template": "השם של התבנית שציינת אינו חוקי.",
 	"templatesandbox-editform-invalid-title": "הכותרת שציינת לתצוגה מקדימה אינה תקינה.",
 	"templatesandbox-editform-title-not-exists": "הכותרת שציינת לתצוגה מקדימה אינה קיימת.",
-	"templatesandbox-apihelp-prefix": "תחילית ארגז חול של תבניות, כמו עם [[Special:TemplateSandbox]].",
-	"templatesandbox-apihelp-title": "לפענח את הדף באמצעות <var>$1templatesandboxtext</var> במקום של התוכן של הדף שרשום כאן.",
-	"templatesandbox-apihelp-text": "לפענח את הדף באמצעות תוכן הדף הזה במקום של הדף ששמו מופיע ב־<var>$1templatesandboxtitle</var>.",
-	"templatesandbox-apihelp-contentmodel": "מודל התוכן של <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "תסדיר התוכן של <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apierror-titleandtext": "הפרמטרים <var>$1templatesandboxtitle</var> ו־<var>$1templatesandboxtext</var> צריכים להיות שניהם מוגדרים או מושמטים."
+	"templatesandbox-failed-replace-section": "נכשלה החלפת פרק בדף הקיים."
 }

@@ -3,7 +3,7 @@
 declare( strict_types = 1 );
 namespace Wikibase\Repo\FederatedProperties;
 
-use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\Lib\FederatedProperties\FederatedPropertyId;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -30,13 +30,13 @@ class ApiEntityLookup {
 
 	/**
 	 * Fetches entities from the source and stores the result in cache.
-	 * @param EntityId[] $entityIds
+	 * @param FederatedPropertyId[] $ids
 	 */
-	public function fetchEntities( array $entityIds ): void {
-		Assert::parameterElementType( EntityId::class, $entityIds, '$entityIds' );
+	public function fetchEntities( array $ids ): void {
+		Assert::parameterElementType( FederatedPropertyId::class, $ids, '$entityIds' );
 
 		// Fetch up to 50 entities each time
-		$entityIdBatches = array_chunk( $entityIds, 50 );
+		$entityIdBatches = array_chunk( $ids, 50 );
 		foreach ( $entityIdBatches as $entityIdBatch ) {
 			$this->lookupCache = array_merge(
 				$this->lookupCache,
@@ -46,24 +46,26 @@ class ApiEntityLookup {
 	}
 
 	/**
-	 * @param EntityId[] $entityIds
-	 * @return EntityId[]
+	 * @param FederatedPropertyId[] $entityIds
+	 * @return FederatedPropertyId[]
 	 */
 	private function getEntitiesToFetch( array $entityIds ): array {
 		return array_filter( $entityIds, function ( $id ) {
-			return !array_key_exists( $id->getSerialization(), $this->lookupCache );
+			return !array_key_exists( $id->getRemoteIdSerialization(), $this->lookupCache );
 		} );
 	}
 
 	/**
-	 * @param EntityId[] $entityIds
+	 * @param FederatedPropertyId[] $ids
 	 * @return array the json_decoded part of the wbgetentities API response for the entity.
 	 */
-	private function getEntities( array $entityIds ) {
-		if ( empty( $entityIds ) ) {
+	private function getEntities( array $ids ) {
+		if ( empty( $ids ) ) {
 			return [];
 		}
-		Assert::parameterElementType( EntityId::class, $entityIds, '$entityIds' );
+		Assert::parameterElementType( FederatedPropertyId::class, $ids, '$entityIds' );
+
+		$entityIds = $this->getFederatedEntityIdsWithoutPrefix( $ids );
 
 		$response = $this->api->get( [
 			'action' => 'wbgetentities',
@@ -77,18 +79,28 @@ class ApiEntityLookup {
 	}
 
 	/**
-	 * Getter for the the federated entity result data.
+	 * Getter for the federated entity result data.
 	 * If not currently in cache it will make a new request.
-	 * @param EntityId $entityId
+	 * @param FederatedPropertyId $id
 	 * @return array containing the part of the wbgetentities response for the given entity id
 	 */
-	public function getResultPartForId( EntityId $entityId ): array {
-		if ( !array_key_exists( $entityId->getSerialization(), $this->lookupCache ) ) {
-			wfDebugLog( 'Wikibase', 'Entity ' . $entityId->getSerialization() . ' not prefetched.' );
-			$this->fetchEntities( [ $entityId ] );
+	public function getResultPartForId( FederatedPropertyId $id ): array {
+		if ( !array_key_exists( $id->getRemoteIdSerialization(), $this->lookupCache ) ) {
+			wfDebugLog( 'Wikibase', 'Entity ' . $id->getSerialization() . ' not prefetched.' );
+			$this->fetchEntities( [ $id ] );
 		}
 
-		return $this->lookupCache[ $entityId->getSerialization() ];
+		return $this->lookupCache[ $id->getRemoteIdSerialization() ];
+	}
+
+	/**
+	 * @param FederatedPropertyId[] $federatedEntityIds
+	 * @return string[]
+	 */
+	public function getFederatedEntityIdsWithoutPrefix( array $federatedEntityIds ): array {
+		return array_map( function ( FederatedPropertyId $id ): string {
+			return $id->getRemoteIdSerialization();
+		}, $federatedEntityIds );
 	}
 
 }

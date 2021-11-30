@@ -5,7 +5,6 @@
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
-use Wikibase\Client\Hooks\EchoNotificationsHandlers;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
@@ -224,12 +223,10 @@ class GenerateSampleNotifications extends Maintenance {
 				$previousContent = $content->getText();
 			}
 		}
-		$status = $page->doEditContent(
+		$status = $page->doUserEditContent(
 			new WikitextContent( $contentText . $previousContent ),
-			'generating sample notifications',
-			0,
-			false,
-			$agent
+			$agent,
+			'generating sample notifications'
 		);
 
 		if ( !$status->isGood() ) {
@@ -246,7 +243,7 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->output( "{$agent->getName()} is mentioning {$user->getName()} on {$title->getTalkPage()->getPrefixedText()}\n" );
 		$this->addToPageContent( $title->getTalkPage(), $agent, $mention );
 
-		// agent tak
+		// agent talk
 		$this->output( "{$agent->getName()} is mentioning {$user->getName()} on {$agent->getTalkPage()->getPrefixedText()}\n" );
 		$this->addToPageContent( $agent->getTalkPage(), $agent, $mention );
 
@@ -291,6 +288,16 @@ class GenerateSampleNotifications extends Maintenance {
 		$undoContent = $undoRev->getContent( SlotRecord::MAIN );
 		$previousContent = $previous->getContent( SlotRecord::MAIN );
 
+		if ( !$undoContent ) {
+			$this->error( "Failed to undo {$moai->getPrefixedText()}: undoContent is null." );
+			return;
+		}
+
+		if ( !$previousContent ) {
+			$this->error( "Failed to undo {$moai->getPrefixedText()}: previousContent is null." );
+			return;
+		}
+
 		$content = $handler->getUndoContent(
 			$undoContent,
 			$undoContent,
@@ -298,7 +305,16 @@ class GenerateSampleNotifications extends Maintenance {
 			true // undoIsLatest
 		);
 
-		$status = $page->doEditContent( $content, 'undo', 0, false, $agent, null, [], $undoRev->getId() );
+		$status = $page->doUserEditContent(
+			$content,
+			$agent,
+			'undo',
+			0, // $flags
+			false, // $originalRevId
+			[], // $tags
+			$undoRev->getId()
+		);
+
 		if ( !$status->isGood() ) {
 			$this->error( "Failed to undo {$moai->getPrefixedText()}: {$status->getMessage()->text()}" );
 		}
@@ -536,9 +552,7 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function generateWikibase( User $user, User $agent ) {
-		// @phan-suppress-next-line PhanUndeclaredClassReference
-		if ( !class_exists( EchoNotificationsHandlers::class ) ) {
-			// should use !ExtensionRegistry::getInstance()->isLoaded( 'Wikibase' ) when possible
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'WikibaseClient' ) ) {
 			$this->output( "Skipping Wikibase. Extension not installed.\n" );
 			return;
 		}

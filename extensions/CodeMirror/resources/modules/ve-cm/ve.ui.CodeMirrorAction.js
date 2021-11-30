@@ -33,17 +33,30 @@ ve.ui.CodeMirrorAction.static.methods = [ 'toggle' ];
 /* Methods */
 
 /**
+ * @return {boolean}
+ */
+ve.ui.CodeMirrorAction.static.isLineNumbering = function () {
+	// T285660: Backspace related bug on Android browsers as of 2021
+	if ( /Android\b/.test( navigator.userAgent ) ) {
+		return false;
+	}
+
+	var namespaces = mw.config.get( 'wgCodeMirrorLineNumberingNamespaces' );
+	// Set to [] to disable everywhere, or null to enable everywhere
+	return !namespaces ||
+		namespaces.indexOf( mw.config.get( 'wgNamespaceNumber' ) ) !== -1;
+};
+
+/**
  * @method
  * @param {boolean} [enable] State to force toggle to, inverts current state if undefined
  * @return {boolean} Action was executed
  */
 ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
-	var profile, supportsTransparentText, mirrorElement, tabSizeValue,
-		action = this,
+	var action = this,
 		surface = this.surface,
 		surfaceView = surface.getView(),
-		doc = surface.getModel().getDocument(),
-		updateGutter;
+		doc = surface.getModel().getDocument();
 
 	if ( !surface.mirror && enable !== false ) {
 		surface.mirror = true;
@@ -60,26 +73,17 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 				return;
 			}
 			mw.loader.using( config.pluginModules, function () {
-				var cmOptions;
 				if ( !surface.mirror ) {
 					// Action was toggled to false since promise started
 					return;
 				}
-				tabSizeValue = surfaceView.documentView.documentNode.$element.css( 'tab-size' );
-				cmOptions = {
+				var tabSizeValue = surfaceView.documentView.documentNode.$element.css( 'tab-size' );
+				var cmOptions = {
 					value: surface.getDom(),
 					mwConfig: config,
 					readOnly: 'nocursor',
 					lineWrapping: true,
-					// Set up a special "padding" gutter to create space between the line numbers
-					// and page content.  The first column name is a magic constant which causes
-					// the built-in line number gutter to appear in the desired, leftmost position.
-					gutters: [
-						'CodeMirror-linenumbers',
-						'CodeMirror-linenumber-padding'
-					],
 					scrollbarStyle: 'null',
-					lineNumbers: true,
 					specialChars: /^$/,
 					viewportMargin: 5,
 					tabSize: tabSizeValue ? +tabSizeValue : 8,
@@ -98,6 +102,19 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 					};
 				}
 
+				if ( ve.ui.CodeMirrorAction.static.isLineNumbering() ) {
+					$.extend( cmOptions, {
+						// Set up a special "padding" gutter to create space between the line numbers
+						// and page content.  The first column name is a magic constant which causes
+						// the built-in line number gutter to appear in the desired, leftmost position.
+						gutters: [
+							'CodeMirror-linenumbers',
+							'CodeMirror-linenumber-padding'
+						],
+						lineNumbers: true
+					} );
+				}
+
 				surface.mirror = CodeMirror( surfaceView.$element[ 0 ], cmOptions );
 
 				// The VE/CM overlay technique only works with monospace fonts (as we use width-changing bold as a highlight)
@@ -108,8 +125,8 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 					surfaceView.$element.addClass( 'cm-mw-accessible-colors' );
 				}
 
-				profile = $.client.profile();
-				supportsTransparentText = 'WebkitTextFillColor' in document.body.style &&
+				var profile = $.client.profile();
+				var supportsTransparentText = 'WebkitTextFillColor' in document.body.style &&
 					// Disable on Firefox+OSX (T175223)
 					!( profile.layout === 'gecko' && profile.platform === 'mac' );
 
@@ -121,7 +138,7 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 
 				if ( cmOptions.lineNumbers ) {
 					// Transfer gutter width to VE overlay.
-					updateGutter = function ( cmDisplay ) {
+					var updateGutter = function ( cmDisplay ) {
 						surfaceView.$documentNode.css( 'margin-left', cmDisplay.gutters.offsetWidth );
 					};
 					CodeMirror.on( surface.mirror.display, 'updateGutter', updateGutter );
@@ -165,7 +182,7 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 			// Reset gutter.
 			surfaceView.$documentNode.css( 'margin-left', '' );
 
-			mirrorElement = surface.mirror.getWrapperElement();
+			var mirrorElement = surface.mirror.getWrapperElement();
 			mirrorElement.parentNode.removeChild( mirrorElement );
 		}
 
@@ -210,8 +227,7 @@ ve.ui.CodeMirrorAction.prototype.onLangChange = function () {
  * @param {ve.dm.Transaction} tx
  */
 ve.ui.CodeMirrorAction.prototype.onDocumentPrecommit = function ( tx ) {
-	var i,
-		offset = 0,
+	var offset = 0,
 		replacements = [],
 		action = this,
 		store = this.surface.getModel().getDocument().getStore(),
@@ -232,7 +248,7 @@ ve.ui.CodeMirrorAction.prototype.onDocumentPrecommit = function ( tx ) {
 	} );
 
 	// Apply replacements in reverse to avoid having to shift offsets
-	for ( i = replacements.length - 1; i >= 0; i-- ) {
+	for ( var i = replacements.length - 1; i >= 0; i-- ) {
 		mirror.replaceRange(
 			replacements[ i ].data,
 			replacements[ i ].start,

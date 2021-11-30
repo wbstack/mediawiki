@@ -3,7 +3,7 @@
 namespace Wikibase\Lib\Store;
 
 use MediaWiki\Linker\LinkTarget;
-use Wikibase\DataAccess\EntitySource;
+use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -33,7 +33,7 @@ class EntityLinkTargetEntityIdLookup implements LinkTargetEntityIdLookup {
 	 */
 	private $entitySourceDefinitions;
 	/**
-	 * @var EntitySource
+	 * @var DatabaseEntitySource
 	 */
 	private $localSource;
 
@@ -41,7 +41,7 @@ class EntityLinkTargetEntityIdLookup implements LinkTargetEntityIdLookup {
 		EntityNamespaceLookup $namespaceLookup,
 		EntityIdParser $entityIdParser,
 		EntitySourceDefinitions $entitySourceDefinitions,
-		EntitySource $localSource
+		DatabaseEntitySource $localSource
 	) {
 		$this->namespaceLookup = $namespaceLookup;
 		$this->entityIdParser = $entityIdParser;
@@ -69,7 +69,7 @@ class EntityLinkTargetEntityIdLookup implements LinkTargetEntityIdLookup {
 			return null;
 		}
 
-		$source = $this->entitySourceDefinitions->getSourceForEntityType( $id->getEntityType() );
+		$source = $this->entitySourceDefinitions->getDatabaseSourceForEntityType( $id->getEntityType() );
 		return $source && $source->getInterwikiPrefix() === $linkTarget->getInterwiki() ? $id : null;
 	}
 

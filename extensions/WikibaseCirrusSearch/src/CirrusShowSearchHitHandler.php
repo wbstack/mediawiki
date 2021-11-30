@@ -50,11 +50,10 @@ class CirrusShowSearchHitHandler {
 	 * @return self
 	 */
 	private static function newFromGlobalState( IContextSource $context ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 		return new self(
 			WikibaseRepo::getEntityIdLookup(),
-			$wikibaseRepo->getEntityLinkFormatterFactory( $context->getLanguage() )->getDefaultLinkFormatter()
+			WikibaseRepo::getEntityLinkFormatterFactory()
+				->getDefaultLinkFormatter( $context->getLanguage() )
 		);
 	}
 

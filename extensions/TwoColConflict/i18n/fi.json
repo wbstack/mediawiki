@@ -3,6 +3,7 @@
 		"authors": [
 			"01miki10",
 			"4shadoww",
+			"MITO",
 			"Moj",
 			"Nike",
 			"Pyscowicz",
@@ -15,6 +16,7 @@
 	"twocolconflict-desc": "Näyttää rinnakkaisen muokkaustenyhdistämisnäytön päällekkäisten muokkausten ratkaisemiseksi.",
 	"twocolconflict-beta-feature-message": "Kaksisarakkeinen muokkausristiriita",
 	"twocolconflict-beta-feature-description": "Näytä muokkausristiriitanäkymä käyttäen kehittyneempää kaksisarakkeista näkymää.",
+	"twocolconflict-preference-enabled": "Ota [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|kaksisarakkeinen muokkausristiriita]] käyttöön ratkaistaksesi päällekkäiset muokkaukset.",
 	"twocolconflict-special-malformed-title": "Puuttuva tai virheellinen otsikko.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Ratkaise ongelma"
 }

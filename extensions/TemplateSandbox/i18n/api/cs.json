@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dvorapa"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Předpona pískoviště šablon, jako u [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-contentmodel": "Model obsahu <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Formát obsahu <var>$1templatesandboxtext</var>."
+}

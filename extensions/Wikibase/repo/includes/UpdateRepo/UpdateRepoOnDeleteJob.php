@@ -1,8 +1,11 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\UpdateRepo;
 
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use OutOfBoundsException;
 use Psr\Log\LoggerInterface;
 use SiteLookup;
@@ -10,6 +13,8 @@ use Title;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\SiteLink;
+use Wikibase\Lib\FormatableSummary;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Summary;
@@ -52,19 +57,20 @@ class UpdateRepoOnDeleteJob extends UpdateRepoJob {
 		$this->initRepoJobServicesFromGlobalState();
 	}
 
-	protected function initRepoJobServicesFromGlobalState() {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
+	protected function initRepoJobServicesFromGlobalState(): void {
+		$services = MediaWikiServices::getInstance();
 
 		$this->initServices(
-			WikibaseRepo::getStore()->getEntityLookup(
+			WikibaseRepo::getStore( $services )->getEntityLookup(
 				Store::LOOKUP_CACHING_DISABLED,
 				LookupConstants::LATEST_FROM_MASTER
 			),
-			WikibaseRepo::getEntityStore(),
-			$wikibaseRepo->getSummaryFormatter(),
+			WikibaseRepo::getEntityStore( $services ),
+			WikibaseRepo::getSummaryFormatter( $services ),
 			LoggerFactory::getInstance( 'UpdateRepo' ),
-			$wikibaseRepo->getSiteLookup(),
-			$wikibaseRepo->newEditEntityFactory()
+			$services->getSiteLookup(),
+			WikibaseRepo::getEditEntityFactory( $services ),
+			WikibaseRepo::getSettings( $services )
 		);
 	}
 
@@ -74,27 +80,24 @@ class UpdateRepoOnDeleteJob extends UpdateRepoJob {
 		SummaryFormatter $summaryFormatter,
 		LoggerInterface $logger,
 		SiteLookup $siteLookup,
-		MediawikiEditEntityFactory $editEntityFactory
-	) {
+		MediawikiEditEntityFactory $editEntityFactory,
+		SettingsArray $settings
+	): void {
 		$this->initRepoJobServices(
 			$entityLookup,
 			$entityStore,
 			$summaryFormatter,
 			$logger,
-			$editEntityFactory
+			$editEntityFactory,
+			$settings
 		);
 		$this->siteLookup = $siteLookup;
 	}
 
 	/**
 	 * Get a SiteLink for a specific item and site
-	 *
-	 * @param Item $item
-	 * @param string $globalId
-	 *
-	 * @return SiteLink|null
 	 */
-	private function getSiteLink( Item $item, $globalId ) {
+	private function getSiteLink( Item $item, string $globalId ): ?SiteLink {
 		try {
 			return $item->getSiteLinkList()->getBySiteId( $globalId );
 		} catch ( OutOfBoundsException $e ) {
@@ -104,10 +107,8 @@ class UpdateRepoOnDeleteJob extends UpdateRepoJob {
 
 	/**
 	 * Get a Summary object for the edit
-	 *
-	 * @return Summary
 	 */
-	public function getSummary() {
+	public function getSummary(): FormatableSummary {
 		$params = $this->getParams();
 		$siteId = $params['siteId'];
 		$page = $params['title'];
@@ -123,12 +124,8 @@ class UpdateRepoOnDeleteJob extends UpdateRepoJob {
 
 	/**
 	 * Whether the propagated update is valid (and thus should be applied)
-	 *
-	 * @param Item $item
-	 *
-	 * @return bool
 	 */
-	protected function verifyValid( Item $item ) {
+	protected function verifyValid( Item $item ): bool {
 		$params = $this->getParams();
 		$siteId = $params['siteId'];
 		$page = $params['title'];
@@ -164,10 +161,7 @@ class UpdateRepoOnDeleteJob extends UpdateRepoJob {
 		return true;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
-	protected function applyChanges( Item $item ) {
+	protected function applyChanges( Item $item ): bool {
 		$params = $this->getParams();
 		$siteId = $params['siteId'];
 

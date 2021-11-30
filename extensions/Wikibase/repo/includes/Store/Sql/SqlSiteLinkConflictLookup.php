@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\Store\Sql;
 
-use DBAccessBase;
+use InvalidArgumentException;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
-use Wikibase\DataModel\SiteLink;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Repo\Store\SiteLinkConflictLookup;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * @license GPL-2.0-or-later
@@ -15,16 +15,21 @@ use Wikimedia\Rdbms\IDatabase;
  * @author Daniel Kinzler
  * @author Katie Filbert < aude.wiki@gmail.com >
  */
-class SqlSiteLinkConflictLookup extends DBAccessBase implements SiteLinkConflictLookup {
+class SqlSiteLinkConflictLookup implements SiteLinkConflictLookup {
+
+	/** @var RepoDomainDb */
+	private $db;
 
 	/**
 	 * @var EntityIdComposer
 	 */
 	private $entityIdComposer;
 
-	public function __construct( EntityIdComposer $entityIdComposer ) {
-		parent::__construct();
-
+	public function __construct(
+		RepoDomainDb $db,
+		EntityIdComposer $entityIdComposer
+	) {
+		$this->db = $db;
 		$this->entityIdComposer = $entityIdComposer;
 	}
 
@@ -32,39 +37,37 @@ class SqlSiteLinkConflictLookup extends DBAccessBase implements SiteLinkConflict
 	 * @see SiteLinkConflictLookup::getConflictsForItem
 	 *
 	 * @param Item $item
-	 * @param IDatabase|null $db
+	 * @param int|null $db
 	 *
 	 * @return array[] An array of arrays, each with the keys "siteId", "itemId" and "sitePage".
 	 */
-	public function getConflictsForItem( Item $item, IDatabase $db = null ) {
+	public function getConflictsForItem( Item $item, int $db = null ) {
 		$siteLinks = $item->getSiteLinkList();
 
 		if ( $siteLinks->isEmpty() ) {
 			return [];
 		}
 
-		if ( $db ) {
-			$dbr = $db;
+		if ( !$db || $db === DB_REPLICA ) {
+			$dbr = $this->db->connections()->getReadConnection();
+		} elseif ( $db === DB_PRIMARY ) {
+			// CONN_TRX_AUTOCOMMIT: ensure we can read rows (i.e. get conflicts)
+			// that were committed after the main transaction started (T291377)
+			$dbr = $this->db->connections()->getWriteConnection( ILoadBalancer::CONN_TRX_AUTOCOMMIT );
 		} else {
-			$dbr = $this->getConnection( DB_REPLICA );
+			throw new InvalidArgumentException( '$db must be either DB_REPLICA or DB_PRIMARY' );
 		}
 
-		$anyOfTheLinks = '';
+		$linkConds = [];
 
-		/** @var SiteLink $siteLink */
 		foreach ( $siteLinks as $siteLink ) {
-			if ( $anyOfTheLinks !== '' ) {
-				$anyOfTheLinks .= "\nOR ";
-			}
-
-			$anyOfTheLinks .= '(';
-			$anyOfTheLinks .= 'ips_site_id=' . $dbr->addQuotes( $siteLink->getSiteId() );
-			$anyOfTheLinks .= ' AND ';
-			$anyOfTheLinks .= 'ips_site_page=' . $dbr->addQuotes( $siteLink->getPageName() );
-			$anyOfTheLinks .= ')';
+			$linkConds[] = $dbr->makeList( [
+				'ips_site_id' => $siteLink->getSiteId(),
+				'ips_site_page' => $siteLink->getPageName(),
+			], $dbr::LIST_AND );
 		}
 
-		// TODO: $anyOfTheLinks might get very large and hit some size limit imposed
+		// TODO: $linkConds might get very large and hit some size limit imposed
 		//       by the database. We could chop it up of we know that size limit.
 		//       For MySQL, it's select @@max_allowed_packet.
 
@@ -75,9 +78,14 @@ class SqlSiteLinkConflictLookup extends DBAccessBase implements SiteLinkConflict
 				'ips_site_page',
 				'ips_item_id',
 			],
-			"($anyOfTheLinks) AND ips_item_id != " . (int)$item->getId()->getNumericId(),
+			$dbr->makeList( [
+				$dbr->makeList( $linkConds, $dbr::LIST_OR ),
+				'ips_item_id != ' . (int)$item->getId()->getNumericId(),
+			], $dbr::LIST_AND ),
 			__METHOD__
 		);
+
+		$this->db->connections()->releaseConnection( $dbr );
 
 		$conflicts = [];
 
@@ -91,10 +99,6 @@ class SqlSiteLinkConflictLookup extends DBAccessBase implements SiteLinkConflict
 				),
 				'sitePage' => $link->ips_site_page,
 			];
-		}
-
-		if ( !$db ) {
-			$this->releaseConnection( $dbr );
 		}
 
 		return $conflicts;

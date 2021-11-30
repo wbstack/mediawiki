@@ -50,15 +50,15 @@ export function createThumbnail( rawThumbnail, useCSSClipPath ) {
 		return null;
 	}
 
-	const tall = rawThumbnail.width < rawThumbnail.height;
 	const thumbWidth = rawThumbnail.width / devicePixelRatio;
 	const thumbHeight = rawThumbnail.height / devicePixelRatio;
+	// For images less than 320 wide, try to display a 250 high vertical slice instead
+	const tall = rawThumbnail.height > rawThumbnail.width || thumbWidth < SIZES.landscapeImage.w;
 
 	if (
-		// Image too small for landscape display
-		( !tall && thumbWidth < SIZES.landscapeImage.w ) ||
 		// Image too small for portrait display
-		( tall && thumbHeight < SIZES.portraitImage.h ) ||
+		( tall && thumbHeight < SIZES.portraitImage.h &&
+			rawThumbnail.height < SIZES.portraitImage.h ) ||
 		// These characters in URL that could inject CSS and thus JS
 		(
 			rawThumbnail.source.indexOf( '\\' ) > -1 ||
@@ -68,6 +68,9 @@ export function createThumbnail( rawThumbnail, useCSSClipPath ) {
 	) {
 		return null;
 	}
+
+	const aspectRatio = thumbWidth / thumbHeight;
+	const isSquare = aspectRatio > 0.7 && aspectRatio < 1.3;
 
 	let x, y, width, height;
 	if ( tall ) {
@@ -108,7 +111,7 @@ export function createThumbnail( rawThumbnail, useCSSClipPath ) {
 
 	return {
 		el,
-		isTall: tall,
+		isTall: tall || isSquare,
 		isNarrow,
 		offset: isNarrow ? SIZES.portraitImage.w - thumbWidth : 0,
 		width: thumbWidth,
@@ -161,7 +164,9 @@ export function createThumbnailSVG(
 
 	const $thumbnailSVGImage = $( document.createElementNS( nsSvg, 'image' ) );
 	$thumbnailSVGImage[ 0 ].setAttributeNS( nsXlink, 'href', url );
-	// eslint-disable-next-line mediawiki/class-doc
+	// The following classes are used here:
+	// * mwe-popups-is-not-tall
+	// * mwe-popups-is-tall
 	$thumbnailSVGImage
 		.addClass( className )
 		.attr( {

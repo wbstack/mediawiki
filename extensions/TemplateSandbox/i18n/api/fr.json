@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Gomoko",
+			"Wladek92"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Préfixe du bac à sable des modèles, comme avec [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Analyser la page en utilisant <var>$1templatesandboxtext</var> au lieu du contenu de la page nommée ici.",
+	"templatesandbox-apihelp-text": "Analyser la page en utilisant le contenu de cette page au lieu de celle désignée par <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Modèle de contenu de  <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Format du contenu de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Les paramètres <var>$1templatesandboxtitle</var> et <var>$1templatesandboxtext</var> doivent être tous les deux spécifiés ou omis."
+}

@@ -3,7 +3,6 @@
 
 module.exports = function ( grunt ) {
 	grunt.loadNpmTasks( 'grunt-eslint' );
-	grunt.loadNpmTasks( 'grunt-jsonlint' );
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-karma' );
 
@@ -24,13 +23,6 @@ module.exports = function ( grunt ) {
 			},
 			all: 'i18n/'
 		},
-		jsonlint: {
-			all: [
-				'*.json',
-				'**/*.json',
-				'!node_modules/**'
-			]
-		},
 		karma: {
 			options: {
 				files: [
@@ -39,7 +31,6 @@ module.exports = function ( grunt ) {
 					'node_modules/jquery-ui/ui/jquery.ui.widget.js',
 					'node_modules/jquery-ui/ui/jquery.ui.position.js',
 					'node_modules/jquery-ui/ui/jquery.ui.menu.js',
-					'node_modules/jquery-client/jquery.client.js',
 					'node_modules/jquery-migrate/dist/jquery-migrate.js',
 
 					'node_modules/sinon/pkg/sinon.js',
@@ -112,7 +103,7 @@ module.exports = function ( grunt ) {
 		}
 	} );
 
-	grunt.registerTask( 'test', [ 'eslint', 'jsonlint', 'banana', 'qunit' ] );
+	grunt.registerTask( 'test', [ 'eslint', 'banana', 'qunit' ] );
 	grunt.registerTask( 'qunit', 'karma' );
 	grunt.registerTask( 'default', 'test' );
 };

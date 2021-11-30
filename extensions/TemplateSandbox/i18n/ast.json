@@ -35,11 +35,5 @@
 	"templatesandbox-editform-need-title": "Pa la vista previa d'otra páxina con esta plantía, tienes de conseñar un títulu de páxina.",
 	"templatesandbox-editform-invalid-template": "El nome de plantía qu'especificó nun ye válidu.",
 	"templatesandbox-editform-invalid-title": "El títulu que conseñasti pa la vista previa ye inválidu.",
-	"templatesandbox-editform-title-not-exists": "El títulu que conseñasti pa la vista previa nun esiste",
-	"templatesandbox-apihelp-prefix": "Prefixu de la zona de pruebes de les plantíes, como con [[Special:TemplateSandbox]].",
-	"templatesandbox-apihelp-title": "Analizar la páxina usando <var>$1templatesandboxtext</var> en llugar de los conteníos de la páxina qu'apaez equí.",
-	"templatesandbox-apihelp-text": "Analizar la páxina usando'l conteníu d'esta páxina en llugar de la páxina nomada por <var>$1templatesandboxtitle</var>.",
-	"templatesandbox-apihelp-contentmodel": "Modelu de conteníu de <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Formatu de conteníu de <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apierror-titleandtext": "Los parámetros <var>$1templatesandboxtitle</var> y <var>$1templatesandboxtext</var> tienen d'especificase dambos o omitise dambos."
+	"templatesandbox-editform-title-not-exists": "El títulu que conseñasti pa la vista previa nun esiste"
 }

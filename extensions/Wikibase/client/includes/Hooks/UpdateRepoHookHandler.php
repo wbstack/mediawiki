@@ -7,6 +7,7 @@ namespace Wikibase\Client\Hooks;
 use Content;
 use JobQueueGroup;
 use MediaWiki\Hook\PageMoveCompleteHook;
+use MediaWiki\JobQueue\JobQueueGroupFactory;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\Page\Hook\ArticleDeleteCompleteHook;
@@ -21,7 +22,9 @@ use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\UpdateRepo\UpdateRepo;
 use Wikibase\Client\UpdateRepo\UpdateRepoOnDelete;
 use Wikibase\Client\UpdateRepo\UpdateRepoOnMove;
-use Wikibase\DataAccess\EntitySource;
+use Wikibase\DataAccess\DatabaseEntitySource;
+use Wikibase\Lib\Rdbms\ClientDomainDb;
+use Wikibase\Lib\Rdbms\ClientDomainDbFactory;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\SiteLinkLookup;
 use WikiPage;
@@ -57,9 +60,9 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 	private $logger;
 
 	/**
-	 * @var string
+	 * @var ClientDomainDb
 	 */
-	private $repoDatabase;
+	private $clientDb;
 
 	/**
 	 * @var string
@@ -72,26 +75,23 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 	private $propagateChangesToRepo;
 
 	public static function factory(
-		EntitySource $entitySource,
+		JobQueueGroupFactory $jobQueueGroupFactory,
+		ClientDomainDbFactory $clientDomainDbFactory,
+		DatabaseEntitySource $entitySource,
 		NamespaceChecker $namespaceChecker,
 		SettingsArray $clientSettings,
 		ClientStore $store
 	): ?self {
 
 		$repoDB = $entitySource->getDatabaseName();
-		$jobQueueGroup = JobQueueGroup::singleton( $repoDB );
-
-		if ( !$jobQueueGroup ) {
-			wfLogWarning( "Failed to acquire a JobQueueGroup for $repoDB" );
-			return null;
-		}
+		$jobQueueGroup = $jobQueueGroupFactory->makeJobQueueGroup( $repoDB );
 
 		return new self(
 			$namespaceChecker,
 			$jobQueueGroup,
 			$store->getSiteLinkLookup(),
 			LoggerFactory::getInstance( 'UpdateRepo' ),
-			$repoDB,
+			$clientDomainDbFactory->newLocalDb(),
 			$clientSettings->getSetting( 'siteGlobalID' ),
 			$clientSettings->getSetting( 'propagateChangesToRepo' )
 		);
@@ -102,7 +102,6 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 	 * @param JobQueueGroup $jobQueueGroup
 	 * @param SiteLinkLookup $siteLinkLookup
 	 * @param LoggerInterface $logger
-	 * @param string $repoDatabase
 	 * @param string $siteGlobalID
 	 * @param bool $propagateChangesToRepo
 	 */
@@ -111,7 +110,7 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		JobQueueGroup $jobQueueGroup,
 		SiteLinkLookup $siteLinkLookup,
 		LoggerInterface $logger,
-		$repoDatabase,
+		ClientDomainDb $clientDb,
 		$siteGlobalID,
 		$propagateChangesToRepo
 	) {
@@ -119,8 +118,8 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		$this->jobQueueGroup = $jobQueueGroup;
 		$this->siteLinkLookup = $siteLinkLookup;
 		$this->logger = $logger;
+		$this->clientDb = $clientDb;
 
-		$this->repoDatabase = $repoDatabase;
 		$this->siteGlobalID = $siteGlobalID;
 		$this->propagateChangesToRepo = $propagateChangesToRepo;
 	}
@@ -141,9 +140,9 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		LinkTarget $title
 	): UpdateRepoOnDelete {
 		return new UpdateRepoOnDelete(
-			$this->repoDatabase,
 			$this->siteLinkLookup,
 			$this->logger,
+			$this->clientDb,
 			$user,
 			$this->siteGlobalID,
 			Title::newFromLinkTarget( $title )
@@ -156,9 +155,9 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		Linktarget $new
 	): UpdateRepoOnMove {
 		return new UpdateRepoOnMove(
-			$this->repoDatabase,
 			$this->siteLinkLookup,
 			$this->logger,
+			$this->clientDb,
 			$user,
 			$this->siteGlobalID,
 			Title::newFromLinkTarget( $old ),
@@ -175,7 +174,7 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 	private function applyUpdateRepo(
 		UpdateRepo $updateRepo,
 		LinkTarget $title,
-		string $titleProperty
+		string $titleProperty = null
 	): void {
 		if ( !$updateRepo->isApplicable() ) {
 			return;
@@ -185,8 +184,10 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 			$updateRepo->injectJob( $this->jobQueueGroup );
 
 			// To be able to find out about this in the ArticleDeleteAfter
-			// or SpecialMovepageAfterMove hook (but see T268135)
-			$title->$titleProperty = true;
+			// hook (but see T268135)
+			if ( $titleProperty ) {
+				$title->$titleProperty = true;
+			}
 		} catch ( MWException $e ) {
 			// This is not a reason to let an exception bubble up, we just
 			// show a message to the user that the Wikibase item needs to be
@@ -285,11 +286,7 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 			}
 		}
 
-		$this->applyUpdateRepo(
-			$updateRepo,
-			$newLinkTarget,
-			'wikibasePushedMoveToRepo'
-		);
+		$this->applyUpdateRepo( $updateRepo, $newLinkTarget );
 
 		return true;
 	}

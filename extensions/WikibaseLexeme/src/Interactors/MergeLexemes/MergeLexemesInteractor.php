@@ -2,10 +2,12 @@
 
 namespace Wikibase\Lexeme\Interactors\MergeLexemes;
 
+use IContextSource;
 use WatchedItemStoreInterface;
 use Wikibase\DataModel\Entity\EntityDocument;
+use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRedirectorFactory;
+use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRepositoryFactory;
 use Wikibase\Lexeme\Domain\Authorization\LexemeAuthorizer;
-use Wikibase\Lexeme\Domain\LexemeRedirector;
 use Wikibase\Lexeme\Domain\Merge\Exceptions\LexemeLoadingException;
 use Wikibase\Lexeme\Domain\Merge\Exceptions\LexemeNotFoundException;
 use Wikibase\Lexeme\Domain\Merge\Exceptions\LexemeSaveFailedException;
@@ -39,14 +41,14 @@ class MergeLexemesInteractor {
 	private $summaryFormatter;
 
 	/**
-	 * @var LexemeRepository
+	 * @var MediaWikiLexemeRepositoryFactory
 	 */
-	private $repo;
+	private $repoFactory;
 
 	/**
-	 * @var LexemeRedirector
+	 * @var MediaWikiLexemeRedirectorFactory
 	 */
-	private $lexemeRedirector;
+	private $lexemeRedirectorFactory;
 
 	/**
 	 * @var EntityTitleStoreLookup
@@ -67,55 +69,63 @@ class MergeLexemesInteractor {
 		LexemeMerger $lexemeMerger,
 		LexemeAuthorizer $authorizer,
 		SummaryFormatter $summaryFormatter,
-		LexemeRedirector $lexemeRedirector,
+		MediaWikiLexemeRedirectorFactory $lexemeRedirectorFactory,
 		EntityTitleStoreLookup $entityTitleLookup,
 		WatchedItemStoreInterface $watchedItemStore,
-		LexemeRepository $repo
+		MediaWikiLexemeRepositoryFactory $repoFactory
 	) {
 		$this->lexemeMerger = $lexemeMerger;
 		$this->authorizer = $authorizer;
 		$this->summaryFormatter = $summaryFormatter;
-		$this->lexemeRedirector = $lexemeRedirector;
+		$this->lexemeRedirectorFactory = $lexemeRedirectorFactory;
 		$this->entityTitleLookup = $entityTitleLookup;
 		$this->watchedItemStore = $watchedItemStore;
-		$this->repo = $repo;
+		$this->repoFactory = $repoFactory;
 	}
 
 	/**
 	 * @param LexemeId $sourceId
 	 * @param LexemeId $targetId
 	 * @param string|null $summary - only relevant when called through the API
+	 * @param string[] $tags
 	 *
 	 * @throws MergingException
 	 */
 	public function mergeLexemes(
 		LexemeId $sourceId,
 		LexemeId $targetId,
-		$summary = null
+		IContextSource $context,
+		?string $summary = null,
+		bool $botEditRequested = false,
+		array $tags = []
 	) {
 		if ( !$this->authorizer->canMerge( $sourceId, $targetId ) ) {
 			throw new PermissionDeniedException();
 		}
 
-		$source = $this->getLexeme( $sourceId );
-		$target = $this->getLexeme( $targetId );
+		$repo = $this->repoFactory->newFromContext( $context, $botEditRequested, $tags );
+
+		$source = $this->getLexeme( $repo, $sourceId );
+		$target = $this->getLexeme( $repo, $targetId );
 
 		$this->validateEntities( $source, $target );
 
 		$this->lexemeMerger->merge( $source, $target );
 
-		$this->attemptSaveMerge( $source, $target, $summary );
+		$this->attemptSaveMerge( $repo, $source, $target, $summary );
 		$this->updateWatchlistEntries( $sourceId, $targetId );
 
-		$this->lexemeRedirector->redirect( $sourceId, $targetId );
+		$this->lexemeRedirectorFactory
+			->newFromContext( $context, $botEditRequested, $tags )
+			->redirect( $sourceId, $targetId );
 	}
 
 	/**
 	 * @throws MergingException
 	 */
-	private function getLexeme( LexemeId $lexemeId ): Lexeme {
+	private function getLexeme( LexemeRepository $repo, LexemeId $lexemeId ): Lexeme {
 		try {
-			$lexeme = $this->repo->getLexemeById( $lexemeId );
+			$lexeme = $repo->getLexemeById( $lexemeId );
 		} catch ( GetLexemeException $ex ) {
 			throw new LexemeLoadingException();
 		}
@@ -153,27 +163,33 @@ class MergeLexemesInteractor {
 		return $summary;
 	}
 
-	/**
-	 * @param Lexeme $source
-	 * @param Lexeme $target
-	 * @param string|null $summary
-	 */
-	private function attemptSaveMerge( Lexeme $source, Lexeme $target, $summary ) {
+	private function attemptSaveMerge(
+		LexemeRepository $repo,
+		Lexeme $source,
+		Lexeme $target,
+		?string $summary
+	) {
 		$this->saveLexeme(
+			$repo,
 			$source,
 			$this->getSummary( 'to', $target->getId(), $summary )
 		);
 
 		$this->saveLexeme(
+			$repo,
 			$target,
 			$this->getSummary( 'from', $source->getId(), $summary )
 		);
 	}
 
-	private function saveLexeme( Lexeme $lexeme, FormatableSummary $summary ) {
+	private function saveLexeme(
+		LexemeRepository $repo,
+		Lexeme $lexeme,
+		FormatableSummary $summary
+	) {
 
 		try {
-			$this->repo->updateLexeme(
+			$repo->updateLexeme(
 				$lexeme,
 				$this->summaryFormatter->formatSummary( $summary )
 			);

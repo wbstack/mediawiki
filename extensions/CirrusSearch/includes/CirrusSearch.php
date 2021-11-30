@@ -76,7 +76,7 @@ class CirrusSearch extends SearchEngine {
 	 * Name of the feature to extract more fields during a fulltext search request.
 	 * Expected value is a list of strings identifying the fields to extract out
 	 * of the source document.
-	 * @see SearchEngine::supports() anf SearchEngine::setFeatureData()
+	 * @see SearchEngine::supports() and SearchEngine::setFeatureData()
 	 */
 	public const EXTRA_FIELDS_TO_EXTRACT = 'extra-fields-to-extract';
 
@@ -164,7 +164,7 @@ class CirrusSearch extends SearchEngine {
 	) {
 		// Initialize UserTesting before we create a Connection
 		// This is useful to do tests across multiple clusters
-		UserTesting::getInstance();
+		UserTestingStatus::getInstance();
 		$this->config = $config ?? MediaWikiServices::getInstance()
 			->getConfigFactory()
 			->makeConfig( 'CirrusSearch' );
@@ -184,7 +184,7 @@ class CirrusSearch extends SearchEngine {
 		$this->features['show-multimedia-search-results'] = $this->config->get( 'CirrusSearchCrossProjectShowMultimedia' ) == true;
 		$this->debugOptions = $debugOptions ?? CirrusDebugOptions::fromRequest( $this->request );
 		$this->titleHelper = $titleHelper ?: new TitleHelper( wfWikiID(), $interwikiResolver,
-			function ( $v ) {
+			static function ( $v ) {
 				return \Sanitizer::escapeIdForLink( $v );
 			}
 		);
@@ -247,6 +247,7 @@ class CirrusSearch extends SearchEngine {
 			->setLimit( $this->limit )
 			->setOffset( $this->offset )
 			->setSort( $this->getSort() )
+			->setRandomSeed( $this->getFeatureData( 'random_seed' ) )
 			->setExtraIndicesSearch( true )
 			->setCrossProjectSearch( $this->isFeatureEnabled( 'interwiki' ) )
 			->setWithDYMSuggestion( $this->showSuggestion )
@@ -376,7 +377,7 @@ class CirrusSearch extends SearchEngine {
 			'incoming_links_asc', 'incoming_links_desc',
 			'last_edit_asc', 'last_edit_desc',
 			'create_timestamp_asc', 'create_timestamp_desc',
-			'random',
+			'random', 'user_random',
 		];
 	}
 
@@ -633,13 +634,8 @@ class CirrusSearch extends SearchEngine {
 			}
 		}
 
-		// This will cause unnecessary indexing load, but for a temporary BC fix that will be removed in a few
-		// weeks dual writes seems preferable over a refactoring.
-		$fields = [ WeightedTagsHooks::FIELD_NAME, 'ores_articletopics' ];
-		foreach ( $fields as $tagField ) {
-			$this->getUpdater()->updateWeightedTags( $page,
-				$tagField, $tagPrefix, $tagNames, $tagWeights );
-		}
+		$this->getUpdater()->updateWeightedTags( $page,
+			WeightedTagsHooks::FIELD_NAME, $tagPrefix, $tagNames, $tagWeights );
 	}
 
 	/**
@@ -649,12 +645,7 @@ class CirrusSearch extends SearchEngine {
 	 * @param string $tagPrefix
 	 */
 	public function resetWeightedTags( ProperPageIdentity $page, string $tagPrefix ): void {
-		// This will cause unnecessary indexing load, but for a temporary BC fix that will be removed in a few
-		// weeks dual writes seems preferable over a refactoring.
-		$fields = [ WeightedTagsHooks::FIELD_NAME, 'ores_articletopics' ];
-		foreach ( $fields as $tagField ) {
-			$this->getUpdater()->resetWeightedTags( $page, $tagField, $tagPrefix );
-		}
+		$this->getUpdater()->resetWeightedTags( $page, WeightedTagsHooks::FIELD_NAME, $tagPrefix );
 	}
 
 	/**

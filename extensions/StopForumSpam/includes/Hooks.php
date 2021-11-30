@@ -21,7 +21,6 @@
 namespace MediaWiki\StopForumSpam;
 
 use AbuseFilterVariableHolder;
-use DeferredUpdates;
 use Html;
 use MediaWiki\Block\DatabaseBlock;
 use MediaWiki\Logger\LoggerFactory;
@@ -43,8 +42,11 @@ class Hooks {
 	public static function abuseFilterComputeVariable( $method, $vars, $parameters, &$result ) {
 		if ( $method == 'sfs-blocked' ) {
 			$ip = self::getIPFromUser( $parameters['user'] );
-			$result = $ip !== false ?
-				DenyListManager::isDenyListed( $ip ) : false;
+			if ( $ip === false ) {
+				$result = false;
+			} else {
+				$result = DenyListManager::singleton()->isIpDenyListed( $ip );
+			}
 
 			return false;
 		}
@@ -60,6 +62,7 @@ class Hooks {
 	 */
 	public static function abuseFilterGenerateUserVars( $vars, $user ) {
 		global $wgSFSIPListLocation;
+
 		if ( $wgSFSIPListLocation ) {
 			$vars->setLazyLoadVar( 'sfs_blocked', 'sfs-blocked', [ 'user' => $user ] );
 		}
@@ -74,6 +77,7 @@ class Hooks {
 	 */
 	public static function abuseFilterBuilder( &$builderValues ) {
 		global $wgSFSIPListLocation;
+
 		if ( $wgSFSIPListLocation ) {
 			// Uses: 'abusefilter-edit-builder-vars-sfs-blocked'
 			$builderValues['vars']['sfs_blocked'] = 'sfs-blocked';
@@ -113,8 +117,8 @@ class Hooks {
 	 * @return bool
 	 */
 	public static function onGetUserPermissionsErrorsExpensive( &$title, &$user, $action, &$result ) {
-		global $wgSFSIPListLocation, $wgSFSEnableDeferredUpdates,
-			$wgBlockAllowsUTEdit, $wgSFSReportOnly;
+		global $wgSFSIPListLocation, $wgBlockAllowsUTEdit, $wgSFSReportOnly;
+
 		if ( !$wgSFSIPListLocation ) {
 			// Not configured
 			return true;
@@ -133,13 +137,8 @@ class Hooks {
 			return true;
 		}
 
-		if ( $wgSFSEnableDeferredUpdates && !DenyListManager::isDenyListUpToDate() ) {
-			// Note that this doesn't necessarily mean our denylist
-			// is out of date, just that it needs updating.
-			DeferredUpdates::addUpdate( new DenyListUpdate() );
-		}
-
-		if ( DenyListManager::isDenyListed( $ip ) ) {
+		$denyListManager = DenyListManager::singleton();
+		if ( $denyListManager->isIpDenyListed( $ip ) ) {
 			$logger = LoggerFactory::getInstance( 'StopForumSpam' );
 
 			$logger->info(
@@ -207,10 +206,13 @@ class Hooks {
 	 */
 	public static function onOtherBlockLogLink( &$msg, $ip ) {
 		global $wgSFSIPListLocation;
+
 		if ( !$wgSFSIPListLocation ) {
 			return true;
 		}
-		if ( IPUtils::isIPAddress( $ip ) && DenyListManager::isDenyListed( $ip ) ) {
+
+		$denyListManager = DenyListManager::singleton();
+		if ( IPUtils::isIPAddress( $ip ) && $denyListManager->isIpDenyListed( $ip ) ) {
 			$msg[] = Html::rawElement(
 				'span',
 				[ 'class' => 'mw-stopforumspam-denylisted' ],

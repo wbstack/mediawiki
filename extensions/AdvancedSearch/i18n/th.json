@@ -58,6 +58,7 @@
 	"advancedsearch-filesize-greater-than": "มากกว่า",
 	"advancedsearch-filesize-smaller-than": "น้อยกว่า",
 	"advancedsearch-sort-relevance": "ความเกี่ยวข้อง",
+	"advancedsearch-sort-last-edit-asc": "วันที่แก้ไข – เก่าสุดอยู่บน",
 	"advancedsearch-sort-last-edit-desc": "วันที่แก้ไข – ปัจจุบันอยู่บนสุด",
 	"advancedsearch-sort-create-timestamp-asc": "วันที่สร้าง – เก่าอยู่บน",
 	"advancedsearch-sort-create-timestamp-desc": "วันที่สร้าง – ปัจจุบันอยู่บนสุด",

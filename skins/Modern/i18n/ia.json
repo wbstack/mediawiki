@@ -5,7 +5,7 @@
 		]
 	},
 	"skinname-modern": "Moderne",
-	"modern.css": "/* Le CSS placiate hic afficera le usatores del apparentia Moderne */",
-	"modern.js": "/* Omne JavaScript hic se executara pro le usatores del apparentia Moderne */",
+	"modern.css": "/* Tote CSS hic essera cargate pro le usatores del apparentia Moderne */",
+	"modern.js": "/* Tote JavaScript hic essera cargate pro le usatores del apparentia Moderne */",
 	"modern-desc": "Apparentia blau/gris con barra lateral e barra superior. Derivate de MonoBook."
 }

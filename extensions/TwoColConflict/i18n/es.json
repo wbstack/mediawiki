@@ -17,6 +17,7 @@
 			"MarcoAurelio",
 			"RicardoSGZ",
 			"Rodney Araujo",
+			"Suecarmol",
 			"Whytheonlyone"
 		]
 	},
@@ -73,7 +74,9 @@
 	"twocolconflict-split-selected-other-tooltip": "Otra versión está seleccionada",
 	"twocolconflict-split-selected-your-tooltip": "La versión está seleccionada",
 	"twocolconflict-split-help-tooltip": "Mostrar la ayuda",
+	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Resolver incidencia",
 	"twocolconflict-talk-your": "Tu comentario",
 	"twocolconflict-talk-conflicting": "Comentario en conflicto",
-	"twocolconflict-talk-reorder-prompt": "Coloque su entrada en relación con la entrada en conflicto:"
+	"twocolconflict-talk-switch-tooltip": "Cambiar orden",
+	"twocolconflict-talk-reorder-prompt": "Coloque su comentario en relación con el comentario en conflicto:"
 }

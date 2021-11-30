@@ -18,7 +18,7 @@
     "service-runner": "git+https://github.com/cscott/service-runner.git#npm-audit-fix",
     "simplediff": "^0.1.1",
     "wikimedia-langconv": "^0.1.0",
-    "wikipeg": "^2.0.5",
+    "wikipeg": "^2.0.6",
     "yargs": "^13.2.4"
   },
   "devDependencies": {
@@ -37,7 +37,7 @@
     "regen-php-tokenizer-trace": "bin/inspectTokenizer.js --source --php -o src/Wt2Html/Grammar.php --trace",
     "regen-php-tests-tokenizer": "node_modules/wikipeg/bin/wikipeg --php --class-name Grammar src/ParserTests/Grammar.pegphp src/ParserTests/Grammar.php",
     "api-testing": "mocha tests/api-testing",
-    "test": "npm audit && npm run eslint"
+    "test": "npm run eslint"
   },
   "repository": {
     "type": "git",

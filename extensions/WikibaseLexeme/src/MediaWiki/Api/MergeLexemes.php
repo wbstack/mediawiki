@@ -11,7 +11,7 @@ use Wikibase\Lexeme\Domain\Merge\Exceptions\MergingException;
 use Wikibase\Lexeme\Domain\Model\LexemeId;
 use Wikibase\Lexeme\WikibaseLexemeServices;
 use Wikibase\Repo\Api\ApiErrorReporter;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\Repo\Api\ApiHelperFactory;
 
 /**
  * WikibaseLexeme API endpoint wblmergelexemes
@@ -39,13 +39,15 @@ class MergeLexemes extends ApiBase {
 		$this->errorReporter = $errorReporterCallback( $this );
 	}
 
-	public static function factory( ApiMain $mainModule, string $moduleName ): self {
-		$repo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $repo->getApiHelperFactory( $mainModule->getContext() );
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		ApiHelperFactory $apiHelperFactory
+	): self {
 		return new self(
 			$mainModule,
 			$moduleName,
-			function ( $module ) use ( $apiHelperFactory ) {
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			}
 		);
@@ -58,7 +60,7 @@ class MergeLexemes extends ApiBase {
 	 */
 	public function execute() {
 		$params = $this->extractRequestParams();
-		$services = WikibaseLexemeServices::createGlobalInstance( $params[self::BOT_PARAM] );
+		$services = WikibaseLexemeServices::createGlobalInstance();
 
 		$sourceId = $this->getLexemeIdFromParamOrDie( $params[self::SOURCE_ID_PARAM] );
 		$targetId = $this->getLexemeIdFromParamOrDie( $params[self::TARGET_ID_PARAM] );
@@ -67,7 +69,10 @@ class MergeLexemes extends ApiBase {
 			$services->newMergeLexemesInteractor()->mergeLexemes(
 				$sourceId,
 				$targetId,
-				$params[self::SUMMARY_PARAM]
+				$this->getContext(),
+				$params[self::SUMMARY_PARAM],
+				$params[self::BOT_PARAM],
+				$params['tags'] ?: []
 			);
 		} catch ( MergingException $e ) {
 			$this->errorReporter->dieException(
@@ -108,10 +113,14 @@ class MergeLexemes extends ApiBase {
 			self::SUMMARY_PARAM => [
 				self::PARAM_TYPE => 'string',
 			],
+			'tags' => [
+				self::PARAM_TYPE => 'tags',
+				self::PARAM_ISMULTI => true,
+			],
 			self::BOT_PARAM => [
 				self::PARAM_TYPE => 'boolean',
 				self::PARAM_DFLT => false,
-			],
+			]
 		];
 	}
 

@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"MITO",
 			"Majavah",
 			"Nike",
 			"Pyscowicz",
@@ -52,7 +53,9 @@
 	"advancedsearch-sort-create-timestamp-asc": "Luontipäivä – tuorein ylhäällä",
 	"advancedsearch-sort-create-timestamp-desc": "Luontipäivä – tuorein ylhäällä",
 	"advancedsearch-sort-preview-relevance": "osuvin",
+	"advancedsearch-sort-preview-last-edit-asc": "viimeksi muokattu",
 	"advancedsearch-sort-preview-last-edit-desc": "muokkauspäivä",
+	"advancedsearch-sort-preview-create-timestamp-asc": "viimeksi luotu",
 	"advancedsearch-sort-preview-create-timestamp-desc": "luontipäivä",
 	"advancedsearch-namespaces-search-in": "Hae nimiavaruuksista:",
 	"advancedsearch-namespaces-remember": "Muista valintani tulevia hakuja varten",

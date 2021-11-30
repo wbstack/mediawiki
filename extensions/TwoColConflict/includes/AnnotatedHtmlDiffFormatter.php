@@ -26,7 +26,7 @@ class AnnotatedHtmlDiffFormatter {
 		array $oldLines,
 		array $newLines,
 		array $preSaveTransformedLines
-	) : array {
+	): array {
 		$changes = [];
 		$oldLine = 0;
 		$newLine = 0;
@@ -38,7 +38,7 @@ class AnnotatedHtmlDiffFormatter {
 					$changes[] = [
 						'action' => 'add',
 						'oldhtml' => "\u{00A0}",
-						'oldtext' => '',
+						'oldtext' => null,
 						'newhtml' => '<ins class="mw-twocolconflict-diffchange">' .
 							$this->composeHtml( $edit->getClosing() ) . '</ins>',
 						'newtext' => implode( "\n",
@@ -53,7 +53,7 @@ class AnnotatedHtmlDiffFormatter {
 							$this->composeHtml( $edit->getOrig() ) . '</del>',
 						'oldtext' => implode( "\n", $edit->getOrig() ),
 						'newhtml' => "\u{00A0}",
-						'newtext' => '',
+						'newtext' => null,
 					];
 					break;
 
@@ -119,7 +119,7 @@ class AnnotatedHtmlDiffFormatter {
 	 *
 	 * @return WordLevelDiff
 	 */
-	private function rTrimmedWordLevelDiff( array $before, array $after ) : WordLevelDiff {
+	private function rTrimmedWordLevelDiff( array $before, array $after ): WordLevelDiff {
 		end( $before );
 		end( $after );
 		$this->commonRTrim( $before[key( $before )], $after[key( $after )] );
@@ -154,7 +154,7 @@ class AnnotatedHtmlDiffFormatter {
 	 *
 	 * @return string Composed HTML string with inline markup
 	 */
-	private function getOriginalInlineDiff( WordLevelDiff $diff ) : string {
+	private function getOriginalInlineDiff( WordLevelDiff $diff ): string {
 		$wordAccumulator = $this->getWordAccumulator();
 
 		foreach ( $diff->getEdits() as $edit ) {
@@ -174,7 +174,7 @@ class AnnotatedHtmlDiffFormatter {
 	 *
 	 * @return string Composed HTML string with inline markup
 	 */
-	private function getClosingInlineDiff( WordLevelDiff $diff ) : string {
+	private function getClosingInlineDiff( WordLevelDiff $diff ): string {
 		$wordAccumulator = $this->getWordAccumulator();
 
 		foreach ( $diff->getEdits() as $edit ) {
@@ -190,7 +190,7 @@ class AnnotatedHtmlDiffFormatter {
 	/**
 	 * @return WordAccumulator
 	 */
-	private function getWordAccumulator() : WordAccumulator {
+	private function getWordAccumulator(): WordAccumulator {
 		$wordAccumulator = new WordAccumulator();
 		$wordAccumulator->insClass = ' class="mw-twocolconflict-diffchange"';
 		$wordAccumulator->delClass = ' class="mw-twocolconflict-diffchange"';
@@ -202,9 +202,9 @@ class AnnotatedHtmlDiffFormatter {
 	 *
 	 * @return string HTML without <br>, relying on `white-space: pre-line` being set
 	 */
-	private function composeHtml( array $lines ) : string {
+	private function composeHtml( array $lines ): string {
 		return htmlspecialchars( implode( "\n", array_map(
-			function ( string $line ) : string {
+			static function ( string $line ): string {
 				// Replace empty lines with a non-breaking space
 				return $line === '' ? "\u{00A0}" : $line;
 			},

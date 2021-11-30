@@ -8,11 +8,12 @@ use ApiMain;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Term\DescriptionsProvider;
 use Wikibase\Lib\EntityFactory;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOp;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\ChangeOp\FingerprintChangeOpFactory;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * API module for the language attributes for a Wikibase entity.
@@ -34,32 +35,41 @@ class SetDescription extends ModifyTerm {
 	 */
 	private $entityFactory;
 
+	/**
+	 * @var string[]
+	 */
+	private $sandboxEntityIds;
+
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
 		FingerprintChangeOpFactory $termChangeOpFactory,
 		bool $federatedPropertiesEnabled,
-		EntityFactory $entityFactory
+		EntityFactory $entityFactory,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName, $federatedPropertiesEnabled );
 
 		$this->termChangeOpFactory = $termChangeOpFactory;
 		$this->entityFactory = $entityFactory;
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
-		EntityFactory $entityFactory
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
+		EntityFactory $entityFactory,
+		SettingsArray $repoSettings
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		return new self(
 			$mainModule,
 			$moduleName,
-			$wikibaseRepo->getChangeOpFactoryProvider()
+			$changeOpFactoryProvider
 				->getFingerprintChangeOpFactory(),
-			$wikibaseRepo->inFederatedPropertyMode(),
-			$entityFactory
+			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
+			$entityFactory,
+			$repoSettings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -125,9 +135,11 @@ class SetDescription extends ModifyTerm {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$id = $this->sandboxEntityIds[ 'mainItem' ];
+
 		return [
-			'action=wbsetdescription&id=Q42&language=en&value=An%20encyclopedia%20that%20everyone%20can%20edit'
-				=> 'apihelp-wbsetdescription-example-1',
+			'action=wbsetdescription&id=' . $id . '&language=en&value=An%20encyclopedia%20that%20everyone%20can%20edit'
+				=> [ 'apihelp-wbsetdescription-example-1', $id ],
 			'action=wbsetdescription&site=enwiki&title=Wikipedia&language=en&value=An%20encyclopedia%20that%20everyone%20can%20edit'
 				=> 'apihelp-wbsetdescription-example-2',
 		];

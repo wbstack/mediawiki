@@ -2,7 +2,9 @@
 
 namespace JsonConfig;
 
+use Content;
 use FormatJson;
+use MediaWiki\Content\Transform\PreSaveTransformParams;
 use TextContentHandler;
 
 /**
@@ -133,5 +135,25 @@ class JCContentHandler extends TextContentHandler {
 		// Each model could have its own default JSON value
 		// null notifies that default should be used
 		return $this->unserializeContent( null );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function preSaveTransform(
+		Content $content,
+		PreSaveTransformParams $pstParams
+	): Content {
+		'@phan-var JCContent $content';
+
+		$contentClass = $this->getContentClass();
+		if ( !$content->isValidJson() ) {
+			return $content; // Invalid JSON - can't do anything with it
+		}
+		$formatted = FormatJson::encode( $content->getData(), false, FormatJson::ALL_OK );
+		if ( $content->getText() !== $formatted ) {
+			return new $contentClass( $formatted, $content->getModel(), $content->thorough() );
+		}
+		return $content;
 	}
 }

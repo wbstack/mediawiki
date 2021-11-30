@@ -4,9 +4,9 @@ namespace Wikibase\Repo\Maintenance;
 
 use ExtensionRegistry;
 use Maintenance;
-use MediaWiki\MediaWikiServices;
 use Onoi\MessageReporter\CallbackMessageReporter;
 use Onoi\MessageReporter\MessageReporter;
+use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\LegacyAdapterItemLookup;
 use Wikibase\Repo\RangeTraversable;
@@ -22,11 +22,6 @@ require_once $basePath . '/maintenance/Maintenance.php';
  * @license GPL-2.0-or-later
  */
 class RebuildItemTerms extends Maintenance {
-
-	/**
-	 * @var WikibaseRepo
-	 */
-	private $wikibaseRepo;
 
 	public function __construct() {
 		parent::__construct();
@@ -77,8 +72,13 @@ class RebuildItemTerms extends Maintenance {
 				1
 			);
 		}
+		if ( !in_array( Item::ENTITY_TYPE, WikibaseRepo::getLocalEntitySource()->getEntityTypes() ) ) {
+			$this->fatalError(
+				"You can't run this maintenance script on foreign items!",
+				1
+			);
+		}
 
-		$this->wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		if (
 			$this->getOption( 'from-id' ) === null &&
 			$this->getOption( 'to-id' ) === null &&
@@ -94,7 +94,7 @@ class RebuildItemTerms extends Maintenance {
 			$iterator,
 			$this->getReporter(),
 			$this->getErrorReporter(),
-			MediaWikiServices::getInstance()->getDBLoadBalancerFactory(),
+			WikibaseRepo::getRepoDomainDbFactory()->newRepoDb(),
 			new LegacyAdapterItemLookup(
 				WikibaseRepo::getStore()->getEntityLookup( Store::LOOKUP_CACHING_RETRIEVE_ONLY )
 			),
@@ -136,9 +136,10 @@ class RebuildItemTerms extends Maintenance {
 			return (int)$this->getOption( 'to-id' );
 		}
 
-		$highestId = MediaWikiServices::getInstance()
-			->getDBLoadBalancer()
-			->getConnection( DB_REPLICA )
+		$highestId = WikibaseRepo::getRepoDomainDbFactory()
+			->newRepoDb()
+			->connections()
+			->getReadConnectionRef()
 			->selectRow(
 			'wb_id_counters',
 			'id_value',

@@ -33,7 +33,7 @@ abstract class JCDataContent extends JCObjContent {
 	 * @return callable
 	 */
 	public static function isValidLicense() {
-		return function ( JCValue $v, array $path ) {
+		return static function ( JCValue $v, array $path ) {
 			global $wgJsonConfigAllowedLicenses, $wgLang;
 			if ( !in_array( $v->getValue(), $wgJsonConfigAllowedLicenses, true ) ) {
 				$v->error( 'jsonconfig-err-license', $path,

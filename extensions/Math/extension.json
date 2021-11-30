@@ -13,7 +13,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"AutoloadClasses": {
 		"MathDataUpdater": "src/MathDataUpdater.php",
@@ -33,9 +33,8 @@
 		"MediaWiki\\Extension\\Math\\": "src/"
 	},
 	"TestAutoloadClasses": {
-		"MathMLHttpRequestTester": "tests/phpunit/MathMLHttpRequestTester.php",
-		"MathMLTestStatus": "tests/phpunit/MathMLTestStatus.php",
-		"DummyPropertyDataTypeLookup": "tests/phpunit/DummyPropertyDataTypeLookup.php"
+		"DummyPropertyDataTypeLookup": "tests/phpunit/DummyPropertyDataTypeLookup.php",
+		"MediaWiki\\Extension\\Math\\Tests\\MathMockHttpTrait": "tests/phpunit/MathMockHttpTrait.php"
 	},
 	"DefaultUserOptions": {
 		"math": "mathml"
@@ -44,16 +43,24 @@
 		"MathAlias": "Math.alias.php",
 		"MathAliasNoTranslate": "Math.alias.noTranslate.php"
 	},
+	"HookHandlers": {
+		"ParserHooksHandler": {
+			"class": "MediaWiki\\Extension\\Math\\HookHandlers\\ParserHooksHandler",
+			"services": [
+				"Math.RendererFactory",
+				"UserOptionsLookup"
+			]
+		}
+	},
 	"Hooks": {
-		"ParserFirstCallInit": "MediaWiki\\Extension\\Math\\Hooks::onParserFirstCallInit",
+		"ParserFirstCallInit": "ParserHooksHandler",
+		"ParserAfterTidy": "ParserHooksHandler",
 		"GetPreferences": "MediaWiki\\Extension\\Math\\Hooks::onGetPreferences",
 		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\Math\\Hooks::onLoadExtensionSchemaUpdates",
-		"ParserTestTables": "MediaWiki\\Extension\\Math\\Hooks::onParserTestTables",
 		"PageRenderingHash": "MediaWiki\\Extension\\Math\\Hooks::onPageRenderingHash",
 		"WikibaseClientDataTypes": "MediaWiki\\Extension\\Math\\WikibaseHook::onWikibaseClientDataTypes",
 		"WikibaseRepoDataTypes": "MediaWiki\\Extension\\Math\\WikibaseHook::onWikibaseRepoDataTypes",
-		"ParserAfterTidy": "MediaWiki\\Extension\\Math\\Hooks::onParserAfterTidy",
-		"SpecialPage_initList": "MediaWiki\\Extension\\Math\\Hooks::onSpecialPage_initList",
+		"SpecialPage_initList": "MediaWiki\\Extension\\Math\\Hooks::onSpecialPageInitList",
 		"MaintenanceRefreshLinksInit": "MediaWiki\\Extension\\Math\\Hooks::onMaintenanceRefreshLinksInit"
 	},
 	"config": {
@@ -111,9 +118,6 @@
 		"MathoidCli": {
 			"value": false
 		},
-		"MathUseRestBase": {
-			"value": true
-		},
 		"MathValidModes": {
 			"description": "To access this at run-time, use MathRenderer::getValidModes(). Do not use the non-normalized configuration directly.",
 			"value": [
@@ -149,6 +153,17 @@
 		"Math": [
 			"i18n",
 			"i18n/api"
+		]
+	},
+	"QUnitTestModule": {
+		"localBasePath": "modules/ve-math/tests",
+		"remoteExtPath": "Math/modules/tests",
+		"scripts": [
+			"ve.dm.Autocomplete.test.js"
+		],
+		"dependencies": [
+			"ext.math.visualEditor",
+			"test.VisualEditor"
 		]
 	},
 	"ResourceModules": {
@@ -289,8 +304,18 @@
 		"remoteExtPath": "Math/modules"
 	},
 	"SpecialPages": {
-		"MathShowImage": "MediaWiki\\Extension\\Math\\SpecialMathShowImage",
-		"MathStatus": "MediaWiki\\Extension\\Math\\SpecialMathStatus",
+		"MathShowImage": {
+			"class": "MediaWiki\\Extension\\Math\\SpecialMathShowImage",
+			"services": [
+				"Math.RendererFactory"
+			]
+		},
+		"MathStatus": {
+			"class": "MediaWiki\\Extension\\Math\\SpecialMathStatus",
+			"services": [
+				"Math.RendererFactory"
+			]
+		},
 		"MathWikibase": "MediaWiki\\Extension\\Math\\SpecialMathWikibase"
 	},
 	"TrackingCategories": [

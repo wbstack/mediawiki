@@ -41,10 +41,5 @@
 	"templatesandbox-editform-invalid-template": "Error message displayed when the template name specified for the editpage form is invalid.",
 	"templatesandbox-editform-invalid-title": "Error message displayed when the title specified for the editpage form is invalid.",
 	"templatesandbox-editform-title-not-exists": "Error message displayed when the title specified for the editpage form does not exist.",
-	"templatesandbox-apihelp-prefix": "{{doc-apihelp-param|description=the \"templatesandboxprefix\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-title": "{{doc-apihelp-param|description=the \"templatesandboxtitle\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-text": "{{doc-apihelp-param|description=the \"templatesandboxtext\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-contentmodel": "{{doc-apihelp-param|description=the \"templatesandboxcontentmodel\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-contentformat": "{{doc-apihelp-param|description=the \"templatesandboxcontentformat\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apierror-titleandtext": "\n\nParameters:\n* $1 - Module parameter prefix, e.g. \"bl\"."
+	"templatesandbox-failed-replace-section": "Error message displayed when replacing a section of existing page failed."
 }

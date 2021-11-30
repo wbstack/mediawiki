@@ -3,8 +3,8 @@
 declare( strict_types=1 );
 namespace Wikibase\Lib\Store\Sql\Terms;
 
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\Property;
-use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Term\PropertyTermStoreWriter;
 use Wikibase\DataModel\Term\Fingerprint;
 
@@ -18,12 +18,12 @@ use Wikibase\DataModel\Term\Fingerprint;
  */
 class DatabasePropertyTermStoreWriter extends DatabaseTermStoreWriterBase implements PropertyTermStoreWriter {
 
-	public function storeTerms( PropertyId $propertyId, Fingerprint $fingerprint ) {
+	public function storeTerms( NumericPropertyId $propertyId, Fingerprint $fingerprint ) {
 		$this->incrementForQuery( 'PropertyTermStore_storeTerms' );
 		$this->store( $propertyId, $fingerprint );
 	}
 
-	public function deleteTerms( PropertyId $propertyId ) {
+	public function deleteTerms( NumericPropertyId $propertyId ) {
 		$this->incrementForQuery( 'PropertyTermStore_deleteTerms' );
 		$this->delete( $propertyId );
 	}

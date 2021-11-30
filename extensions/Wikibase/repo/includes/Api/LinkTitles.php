@@ -8,7 +8,6 @@ use ApiBase;
 use ApiMain;
 use Site;
 use SiteList;
-use SiteLookup;
 use Status;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\SiteLink;
@@ -18,9 +17,9 @@ use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\SiteLinkStore;
 use Wikibase\Lib\Summary;
+use Wikibase\Repo\SiteLinkGlobalIdentifiersProvider;
 use Wikibase\Repo\SiteLinkTargetProvider;
 use Wikibase\Repo\Store\Store;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * API module to associate two pages on two different sites with a Wikibase item.
@@ -39,6 +38,11 @@ class LinkTitles extends ApiBase {
 	 * @var SiteLinkTargetProvider
 	 */
 	private $siteLinkTargetProvider;
+
+	/**
+	 * @var SiteLinkGlobalIdentifiersProvider
+	 */
+	private $siteLinkGlobalIdentifiersProvider;
 
 	/**
 	 * @var ApiErrorReporter
@@ -69,6 +73,7 @@ class LinkTitles extends ApiBase {
 		ApiMain $mainModule,
 		string $moduleName,
 		SiteLinkStore $siteLinkStore,
+		SiteLinkGlobalIdentifiersProvider $siteLinkGlobalIdentifiersProvider,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
 		ApiErrorReporter $errorReporter,
 		array $siteLinkGroups,
@@ -80,6 +85,7 @@ class LinkTitles extends ApiBase {
 
 		$this->siteLinkStore = $siteLinkStore;
 		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
+		$this->siteLinkGlobalIdentifiersProvider = $siteLinkGlobalIdentifiersProvider;
 		$this->errorReporter = $errorReporter;
 		$this->siteLinkGroups = $siteLinkGroups;
 		$this->revisionLookup = $revisionLookup;
@@ -90,27 +96,23 @@ class LinkTitles extends ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
-		SiteLookup $siteLookup,
+		ApiHelperFactory $apiHelperFactory,
 		SettingsArray $repoSettings,
+		SiteLinkGlobalIdentifiersProvider $siteLinkGlobalIdentifiersProvider,
+		SiteLinkTargetProvider $siteLinkTargetProvider,
 		Store $store
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
-		$siteLinkTargetProvider = new SiteLinkTargetProvider(
-			$siteLookup,
-			$repoSettings->getSetting( 'specialSiteLinkGroups' )
-		);
 
 		return new self(
 			$mainModule,
 			$moduleName,
 			// TODO move SiteLinkStore to service container and inject it directly
 			$store->newSiteLinkStore(),
+			$siteLinkGlobalIdentifiersProvider,
 			$siteLinkTargetProvider,
 			$apiHelperFactory->getErrorReporter( $mainModule ),
 			$repoSettings->getSetting( 'siteLinkGroups' ),
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getResultBuilder( $module );
 			},
@@ -232,7 +234,13 @@ class LinkTitles extends ApiBase {
 			return Status::newGood( true );
 		} else {
 			// Do the actual save, or if it don't exist yet create it.
-			return $this->entitySavingHelper->attemptSaveEntity( $item, $summary, $flags );
+			return $this->entitySavingHelper->attemptSaveEntity(
+				$item,
+				$summary,
+				$this->extractRequestParams(),
+				$this->getContext(),
+				$flags
+			);
 		}
 	}
 
@@ -276,11 +284,11 @@ class LinkTitles extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getAllowedParams(): array {
-		$sites = $this->siteLinkTargetProvider->getSiteList( $this->siteLinkGroups );
+		$siteIds = $this->siteLinkGlobalIdentifiersProvider->getList( $this->siteLinkGroups );
 
 		return array_merge( parent::getAllowedParams(), [
 			'tosite' => [
-				self::PARAM_TYPE => $sites->getGlobalIdentifiers(),
+				self::PARAM_TYPE => $siteIds,
 				self::PARAM_REQUIRED => true,
 			],
 			'totitle' => [
@@ -288,7 +296,7 @@ class LinkTitles extends ApiBase {
 				self::PARAM_REQUIRED => true,
 			],
 			'fromsite' => [
-				self::PARAM_TYPE => $sites->getGlobalIdentifiers(),
+				self::PARAM_TYPE => $siteIds,
 				self::PARAM_REQUIRED => true,
 			],
 			'fromtitle' => [

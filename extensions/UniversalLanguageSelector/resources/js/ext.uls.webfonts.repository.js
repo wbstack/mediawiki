@@ -5,7 +5,7 @@
 	"base": "../data/fontrepo/fonts/",
 	"languages": {
 		"adx": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"af": [
 			"system",
@@ -51,10 +51,10 @@
 			"Siyam Rupali"
 		],
 		"bo": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"bod": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"bpy": [
 			"Siyam Rupali"
@@ -104,13 +104,13 @@
 			"OpenDyslexic"
 		],
 		"dre": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"dv": [
 			"FreeFont-Thaana"
 		],
 		"dz": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"en": [
 			"system",
@@ -169,7 +169,7 @@
 			"OpenDyslexic"
 		],
 		"goe": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"got": [
 			"system",
@@ -198,7 +198,7 @@
 			"OpenDyslexic"
 		],
 		"hut": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"id": [
 			"system",
@@ -238,10 +238,10 @@
 			"Pustaka Bali"
 		],
 		"kbg": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"khg": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"km": [
 			"KhmerOSbattambang",
@@ -251,17 +251,17 @@
 			"Suwannaphum"
 		],
 		"kte": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"lb": [
 			"system",
 			"OpenDyslexic"
 		],
 		"lbj": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"lhm": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"li": [
 			"system",
@@ -271,13 +271,13 @@
 			"Phetsarath"
 		],
 		"loy": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"luk": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"lya": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"mak": [
 			"Saweri"
@@ -297,7 +297,7 @@
 			"Pustaka Bali"
 		],
 		"muk": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"my": [
 			"TharLon",
@@ -323,10 +323,10 @@
 			"OpenDyslexic"
 		],
 		"ola": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"otb": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"pal": [
 			"Shapour"
@@ -385,10 +385,10 @@
 			"SertoUrhoy"
 		],
 		"tcn": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"thw": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"ti": [
 			"AbyssinicaSIL"
@@ -406,7 +406,7 @@
 			"OpenDyslexic"
 		],
 		"tsk": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"ur": [
 			"system",
@@ -418,14 +418,14 @@
 			"OpenDyslexic"
 		],
 		"xct": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		],
 		"yi": [
 			"system",
 			"Alef"
 		],
 		"zau": [
-			"Jomolhari"
+			"BabelStoneTibetanSlim"
 		]
 	},
 	"fonts": {
@@ -477,6 +477,10 @@
 		"Artaxerxes": {
 			"woff": "Artaxerxes/Artaxerxes.woff?c1ed7",
 			"woff2": "Artaxerxes/Artaxerxes.woff2?7a96e"
+		},
+		"BabelStoneTibetanSlim": {
+			"woff": "BabelStoneTibetanSlim/BabelStoneTibetanSlim.woff?c48ba",
+			"woff2": "BabelStoneTibetanSlim/BabelStoneTibetanSlim.woff2?46398"
 		},
 		"Boyo Gagrai": {
 			"woff2": "BoyoGagrai/BoyoGagrai.woff2?d1060"
@@ -579,13 +583,9 @@
 			"woff": "IranianSerif/irseri.woff?d153b",
 			"woff2": "IranianSerif/irseri.woff2?2e4dd"
 		},
-		"Jomolhari": {
-			"woff": "Jomolhari/Jomolhari.woff?3a60b",
-			"woff2": "Jomolhari/Jomolhari.woff2?f448a"
-		},
 		"Junicode": {
-			"woff": "Junicode/Junicode.woff?dc7ef",
-			"woff2": "Junicode/Junicode.woff2?7e6d6",
+			"woff": "Junicode/Junicode.woff?19f4e",
+			"woff2": "Junicode/Junicode.woff2?1a244",
 			"variants": {
 				"bold": "Junicode Bold",
 				"bolditalic": "Junicode Bold Italic",
@@ -594,19 +594,19 @@
 		},
 		"Junicode Bold": {
 			"fontweight": "bold",
-			"woff": "Junicode/Junicode-Bold.woff?f7ef4",
-			"woff2": "Junicode/Junicode-Bold.woff2?d5d04"
+			"woff": "Junicode/Junicode-Bold.woff?c77c1",
+			"woff2": "Junicode/Junicode-Bold.woff2?94fed"
 		},
 		"Junicode Bold Italic": {
 			"fontweight": "bold",
 			"fontstyle": "italic",
-			"woff": "Junicode/Junicode-BoldItalic.woff?3cec9",
-			"woff2": "Junicode/Junicode-BoldItalic.woff2?80351"
+			"woff": "Junicode/Junicode-BoldItalic.woff?23d9c",
+			"woff2": "Junicode/Junicode-BoldItalic.woff2?4f1cd"
 		},
 		"Junicode Italic": {
 			"fontstyle": "italic",
-			"woff": "Junicode/Junicode-Italic.woff?c458b",
-			"woff2": "Junicode/Junicode-Italic.woff2?3fe39"
+			"woff": "Junicode/Junicode-Italic.woff?66b80",
+			"woff2": "Junicode/Junicode-Italic.woff2?b2597"
 		},
 		"Kadiri": {
 			"woff": "Kadiri/Kadiri.woff?98297",

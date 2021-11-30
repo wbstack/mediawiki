@@ -2,7 +2,7 @@
 	<div id="mw-mf-page-center">
 		<a class="mw-mf-page-center__mask" href="#"></a>
 		<header class="header-container header-chrome">
-			<form class="header" action="{{wgScript}}" method="get">
+			<form class="minerva-header" action="{{wgScript}}" method="get">
 				<nav class="navigation-drawer toggle-list view-border-box">
 					<input type="checkbox" id="main-menu-input" class="toggle-list__checkbox" role="button" aria-labelledby="mw-mf-main-menu-button">
 					<label for="main-menu-input" id="mw-mf-main-menu-button"
@@ -39,7 +39,6 @@
 			{{>banners}}
 			</div>
 			{{#hasheadingholder}}
-			{{{prebodyhtml}}}
 			<div class="pre-content heading-holder">
 				<div class="page-heading">
 					{{{headinghtml}}}
@@ -54,14 +53,16 @@
 				{{/tabs}}
 				{{{pageactionshtml}}}
 				{{{postheadinghtml}}}
-				{{{internalBanner}}}
-				<div class="minerva__subtitle">{{{subtitle}}}</div>
+				<div class="minerva__subtitle">{{{html-subtitle}}}</div>
 			</div>
 			{{/hasheadingholder}}
 			{{{contenthtml}}}
 			<div class="post-content" id="page-secondary-actions">
 			{{{secondaryactionshtml}}}
 			</div>
+			{{#html-categories}}
+			<div class="post-content">{{{.}}}</div>
+			{{/html-categories}}
 		</main>
 		{{>footer}}
 	</div>

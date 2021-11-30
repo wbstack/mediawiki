@@ -487,10 +487,9 @@ $wgMusicalNotationEnableWikibaseDataType = true;
 #######################################
 ## ---          Wikibase         --- ##
 #######################################
-// TODO use wfLoadExtension
-require_once "$IP/extensions/Wikibase/repo/Wikibase.php";
+wfLoadExtension( 'WikibaseRepository', "$IP/extensions/Wikibase/extension-repo.json" );
 require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
-require_once "$IP/extensions/Wikibase/client/WikibaseClient.php";
+wfLoadExtension( 'WikibaseClient', "$IP/extensions/Wikibase/extension-client.json" );
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
 
 // Force the concept URIs to be http (as this has always been the way on wbstack)

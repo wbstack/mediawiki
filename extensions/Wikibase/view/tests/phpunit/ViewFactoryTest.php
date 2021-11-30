@@ -5,22 +5,23 @@ namespace Wikibase\View\Tests;
 use HashSiteStore;
 use InvalidArgumentException;
 use Language;
-use ValueFormatters\BasicNumberLocalizer;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
 use Wikibase\DataModel\Services\Statement\Grouper\NullStatementGrouper;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\DataTypeFactory;
+use Wikibase\Lib\Formatters\NumberLocalizerFactory;
 use Wikibase\Lib\Formatters\SnakFormatter;
 use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\LanguageNameLookupFactory;
 use Wikibase\Lib\Store\PropertyOrderProvider;
 use Wikibase\Lib\TermLanguageFallbackChain;
+use Wikibase\Repo\LocalizedTextProviderFactory;
 use Wikibase\View\CacheableEntityTermsView;
 use Wikibase\View\EditSectionGenerator;
 use Wikibase\View\EntityIdFormatterFactory;
 use Wikibase\View\HtmlSnakFormatterFactory;
 use Wikibase\View\ItemView;
 use Wikibase\View\LanguageDirectionalityLookup;
-use Wikibase\View\LocalizedTextProvider;
 use Wikibase\View\PropertyView;
 use Wikibase\View\SpecialPageLinker;
 use Wikibase\View\StatementSectionsView;
@@ -64,6 +65,9 @@ class ViewFactoryTest extends \PHPUnit\Framework\TestCase {
 		$languageNameLookup = $this->createMock( LanguageNameLookup::class );
 		$languageNameLookup->expects( $this->never() )
 			->method( 'getName' );
+		$languageNameLookupFactory = $this->createMock( LanguageNameLookupFactory::class );
+		$languageNameLookupFactory->method( 'getForLanguage' )
+			->willReturn( $languageNameLookup );
 
 		return new ViewFactory(
 			$htmlFactory ?: $this->getEntityIdFormatterFactory( SnakFormatter::FORMAT_HTML ),
@@ -74,13 +78,13 @@ class ViewFactoryTest extends \PHPUnit\Framework\TestCase {
 			new HashSiteStore(),
 			new DataTypeFactory( [] ),
 			$templateFactory,
-			$languageNameLookup,
+			$languageNameLookupFactory,
 			$this->createMock( LanguageDirectionalityLookup::class ),
-			new BasicNumberLocalizer(),
+			$this->createMock( NumberLocalizerFactory::class ),
 			[],
 			[],
 			[],
-			$this->createMock( LocalizedTextProvider::class ),
+			$this->createMock( LocalizedTextProviderFactory::class ),
 			$this->createMock( SpecialPageLinker::class )
 		);
 	}

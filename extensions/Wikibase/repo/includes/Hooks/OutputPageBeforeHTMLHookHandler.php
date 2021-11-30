@@ -35,7 +35,6 @@ use Wikibase\Repo\ParserOutput\PlaceholderExpander\TermboxRequestInspector;
 use Wikibase\Repo\ParserOutput\TermboxFlag;
 use Wikibase\Repo\ParserOutput\TextInjector;
 use Wikibase\Repo\View\RepoSpecialPageLinker;
-use Wikibase\Repo\WikibaseRepo;
 use Wikibase\View\Template\TemplateFactory;
 use Wikibase\View\Termbox\Renderer\TermboxRemoteRenderer;
 use Wikibase\View\ToolbarEditSectionGenerator;
@@ -171,6 +170,7 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 		EntityContentFactory $entityContentFactory,
 		EntityFactory $entityFactory,
 		EntityIdParser $entityIdParser,
+		EntityRevisionLookup $entityRevisionLookup,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
 		LoggerInterface $logger,
 		SettingsArray $settings,
@@ -178,7 +178,6 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 	): self {
 		global $wgLang, $wgCookiePrefix;
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 		$babelUserLanguageLookup = new BabelUserLanguageLookup();
 		$entityViewChecker = new OutputPageEntityViewChecker( $entityContentFactory );
 
@@ -189,7 +188,7 @@ class OutputPageBeforeHTMLHookHandler implements OutputPageBeforeHTMLHook {
 			TemplateFactory::getDefaultInstance(),
 			$babelUserLanguageLookup,
 			$termsLanguages,
-			$wikibaseRepo->getEntityRevisionLookup(),
+			$entityRevisionLookup,
 			new LanguageNameLookup( $wgLang->getCode() ),
 			new OutputPageEntityIdReader(
 				$entityViewChecker,

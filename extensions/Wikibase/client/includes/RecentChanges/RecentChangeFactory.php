@@ -9,6 +9,7 @@ use Message;
 use MWException;
 use RecentChange;
 use Title;
+use Wikibase\Lib\Changes\ChangeRow;
 use Wikibase\Lib\Changes\EntityChange;
 use Wikibase\Lib\Changes\ItemChange;
 use Wikimedia\Assert\Assert;
@@ -51,7 +52,7 @@ class RecentChangeFactory {
 	 * @param SiteLinkCommentCreator $siteLinkCommentCreator
 	 * @param CentralIdLookup|null $centralIdLookup CentralIdLookup, or null if
 	 *   this repository is not connected to a central user system (see
-	 *   CentralIdLookup::factoryNonLocal).
+	 *   CentralIdLookupFactory::getNonLocalLookup).
 	 * @param ExternalUserNames|null $externalUsernames
 	 */
 	public function __construct(
@@ -114,7 +115,7 @@ class RecentChangeFactory {
 		$fields = $change->getFields();
 		$fields['entity_type'] = $change->getEntityId()->getEntityType();
 
-		unset( $fields['info'] );
+		unset( $fields[ChangeRow::INFO] );
 		$metadata = array_merge( $fields, $rcinfo );
 
 		$isBot = false;

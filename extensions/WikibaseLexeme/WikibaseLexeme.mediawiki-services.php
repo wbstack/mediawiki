@@ -18,17 +18,19 @@ use Wikibase\Repo\WikibaseRepo;
 // TODO Replace by framework-agnostic DI container.
 // Pimple e.g. is well known in the free world and yet part of mediawiki-vendor
 // Challenge: Dedicated API endpoints (e.g. AddForm) need to have it passed w/o singletons/globals
-return call_user_func( function () {
+return call_user_func( static function () {
 	// TODO Problem when removing a code after such an item exists in DB
 	$additionalLanguages = [
 		'az-cyrl', // T265906
 		'bas', // T277619
+		'bfi', // T279557
 		'cak', // T277622
 		'ccp', // T272442
 		'ccp-beng', // T272442
 		'cnh', // T277625
 		'ctg', // T271589
 		'de-1901', // T250559
+		'enm', // T279557
 		'eo-hsistemo', // T257422
 		'eo-xsistemo', // T257422
 		'fon', // T223648
@@ -36,12 +38,14 @@ return call_user_func( function () {
 		'fro', // T268332
 		'gmh', // T278027
 		'goh', // T278027
+		'gsg', // T282512
+		'ha-arab', // T282512
 		'ja-hira', // T262330
 		'ja-kana', // T262330
 		'ja-hrkt', // T262330
 		'lij-mc', // T254968
 		'mis',
-		'ms-arab', // T270059
+		'mvf', // T282512
 		'nn-hognorsk', // T235344
 		'non', // T265782
 		'non-runr', // T265782
@@ -62,30 +66,32 @@ return call_user_func( function () {
 		'sat-latn', // T262967
 		'sat-beng', // T262967
 		'sat-orya', // T262967
-		'syl-beng' // T267480
+		'sux-latn', // T282512
+		'sux-xsux', // T282512
+		'syl-beng', // T267480
+		'tlh-piqd', // T282512
+		'tlh-latn' // T282512
 	];
 
 	return [
 		'WikibaseLexemeTermLanguages' =>
-			function ( MediaWikiServices $mediawikiServices ) use ( $additionalLanguages ) {
+			static function ( MediaWikiServices $mediawikiServices ) use ( $additionalLanguages ) {
 				return new LexemeTermLanguages(
 					$additionalLanguages,
 					$mediawikiServices->getLanguageNameUtils()
 				);
 			},
 		'WikibaseLexemeLanguageNameLookup' =>
-			function ( MediaWikiServices $mediawikiServices ) use ( $additionalLanguages ) {
+			static function ( MediaWikiServices $mediawikiServices ) use ( $additionalLanguages ) {
 				return new LexemeLanguageNameLookup(
 					RequestContext::getMain(),
 					$additionalLanguages,
-					WikibaseRepo::getDefaultInstance()->getLanguageNameLookup()
+					WikibaseRepo::getLanguageNameLookup( $mediawikiServices )
 				);
 			},
-		'WikibaseLexemeEditFormChangeOpDeserializer' => function (
+		'WikibaseLexemeEditFormChangeOpDeserializer' => static function (
 			MediaWikiServices $mediaWikiServices
 		) {
-			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 			return new EditFormChangeOpDeserializer(
 				new RepresentationsChangeOpDeserializer(
 					new TermDeserializer(),
@@ -97,7 +103,8 @@ return call_user_func( function () {
 				new ItemIdListDeserializer( new ItemIdParser() ),
 				new ClaimsChangeOpDeserializer(
 					WikibaseRepo::getExternalFormatStatementDeserializer( $mediaWikiServices ),
-					$wikibaseRepo->getChangeOpFactoryProvider()->getStatementChangeOpFactory()
+					WikibaseRepo::getChangeOpFactoryProvider( $mediaWikiServices )
+						->getStatementChangeOpFactory()
 				),
 				new EntityExistsValidator( WikibaseRepo::getEntityLookup( $mediaWikiServices ), 'item' )
 			);

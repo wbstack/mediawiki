@@ -8,10 +8,10 @@ import { createSettingsDialog } from './settingsDialog';
  * Creates a render function that will create the settings dialog and return
  * a set of methods to operate on it
  *
- * @param {mw.Map} config
+ * @param {boolean} referencePreviewsAvaliable
  * @return {Function} render function
  */
-export default function createSettingsDialogRenderer( config ) {
+export default function createSettingsDialogRenderer( referencePreviewsAvaliable ) {
 	/**
 	 * Cached settings dialog
 	 *
@@ -33,18 +33,16 @@ export default function createSettingsDialogRenderer( config ) {
 	 */
 	return ( boundActions ) => {
 		if ( !$dialog ) {
-			$dialog = createSettingsDialog( isNavPopupsEnabled(), config.get( 'wgPopupsReferencePreviewsBeta' ) );
+			$dialog = createSettingsDialog( referencePreviewsAvaliable );
 			$overlay = $( '<div>' ).addClass( 'mwe-popups-overlay' );
 
 			// Setup event bindings
 
 			$dialog.find( '.save' ).on( 'click', () => {
-				// Find the selected value (simple|advanced|off)
-				const selected = getSelectedSetting( $dialog ),
-					// Only simple means enabled, advanced is disabled in favor of
-					// NavPops and off means disabled.
-					enabled = selected === 'simple';
-
+				const enabled = {};
+				$dialog.find( 'input' ).each( ( index, el ) => {
+					enabled[ el.value ] = $( el ).is( ':checked' );
+				} );
 				boundActions.saveSettings( enabled );
 			} );
 			$dialog.find( '.close, .okay' ).on( 'click', boundActions.hideSettings );
@@ -55,7 +53,6 @@ export default function createSettingsDialogRenderer( config ) {
 			 * Append the dialog and overlay to a DOM element
 			 *
 			 * @param {HTMLElement} el
-			 * @return {void}
 			 */
 			appendTo( el ) {
 				$overlay.appendTo( el );
@@ -64,8 +61,6 @@ export default function createSettingsDialogRenderer( config ) {
 
 			/**
 			 * Show the settings element and position it correctly
-			 *
-			 * @return {void}
 			 */
 			show() {
 				$overlay.show();
@@ -73,8 +68,6 @@ export default function createSettingsDialogRenderer( config ) {
 
 			/**
 			 * Hide the settings dialog.
-			 *
-			 * @return {void}
 			 */
 			hide() {
 				$overlay.hide();
@@ -84,7 +77,6 @@ export default function createSettingsDialogRenderer( config ) {
 			 * Toggle the help dialog on or off
 			 *
 			 * @param {boolean} visible if you want to show or hide the help dialog
-			 * @return {void}
 			 */
 			toggleHelp( visible ) {
 				toggleHelp( $dialog, visible );
@@ -93,39 +85,16 @@ export default function createSettingsDialogRenderer( config ) {
 			/**
 			 * Update the form depending on the enabled flag
 			 *
-			 * If false and no navpops, then checks 'off'
-			 * If true, then checks 'on'
-			 * If false, and there are navpops, then checks 'advanced'
-			 *
-			 * @param {boolean} enabled if page previews are enabled
-			 * @return {void}
+			 * @param {Object} enabled Mapping preview type identifiers to boolean flags
 			 */
 			setEnabled( enabled ) {
-				let name = 'off';
-				if ( enabled ) {
-					name = 'simple';
-				} else if ( isNavPopupsEnabled() ) {
-					name = 'advanced';
-				}
-
-				// Check the appropriate radio button
-				$dialog.find( `#mwe-popups-settings-${name}` )
-					.prop( 'checked', true );
+				Object.keys( enabled ).forEach( ( type ) => {
+					$dialog.find( '#mwe-popups-settings-' + type )
+						.prop( 'checked', enabled[ type ] );
+				} );
 			}
 		};
 	};
-}
-
-/**
- * Get the selected value on the radio button
- *
- * @param {JQuery.Object} $el the element to extract the setting from
- * @return {string} Which should be (simple|advanced|off)
- */
-function getSelectedSetting( $el ) {
-	return $el.find(
-		'input[name=mwe-popups-setting]:checked, #mwe-popups-settings'
-	).val();
 }
 
 /**
@@ -133,7 +102,6 @@ function getSelectedSetting( $el ) {
  *
  * @param {JQuery.Object} $el element that contains form and help
  * @param {boolean} visible if the help should be visible, or the form
- * @return {void}
  */
 function toggleHelp( $el, visible ) {
 	// eslint-disable-next-line no-jquery/no-global-selector
@@ -148,15 +116,4 @@ function toggleHelp( $el, visible ) {
 		$dialog.find( formSelectors ).show();
 		$dialog.find( helpSelectors ).hide();
 	}
-}
-
-/**
- * Checks if the NavigationPopups gadget is enabled by looking at the global
- * variables
- *
- * @return {boolean} if navpops was found to be enabled
- */
-function isNavPopupsEnabled() {
-	/* global pg */
-	return typeof pg !== 'undefined' && pg.fn.disablePopups !== undefined;
 }

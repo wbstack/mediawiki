@@ -424,11 +424,11 @@ class RequestAccountPage extends SpecialPage {
 			if ( is_object( $user ) ) {
 				$user->confirmEmail();
 				$user->saveSettings();
-				$message = $reqUser->isLoggedIn()
+				$message = $reqUser->isRegistered()
 					? 'confirmemail_loggedin'
 					: 'confirmemail_success';
 				$out->addWikiMsg( $message );
-				if ( !$reqUser->isLoggedIn() ) {
+				if ( !$reqUser->isRegistered() ) {
 					$title = SpecialPage::getTitleFor( 'Userlogin' );
 					$out->returnToMain( true, $title );
 				}

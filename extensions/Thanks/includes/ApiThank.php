@@ -2,7 +2,6 @@
 
 namespace MediaWiki\Extension\Thanks;
 
-use ActorMigration;
 use ApiBase;
 use ExtensionRegistry;
 use ManualLogEntry;
@@ -38,9 +37,11 @@ abstract class ApiThank extends ApiBase {
 	 * @param User $user
 	 * @param Title $title
 	 */
-	protected function dieOnBlockedUser( User $user, Title $title ) {
+	protected function dieOnUserBlockedFromTitle( User $user, Title $title ) {
 		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
 		if ( $permissionManager->isBlockedFrom( $user, $title ) ) {
+			// Block should definitely exist
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
 			$this->dieBlocked( $user->getBlock() );
 		}
 	}
@@ -48,14 +49,17 @@ abstract class ApiThank extends ApiBase {
 	/**
 	 * Check whether the user is sitewide blocked.
 	 *
-	 * This is separate from dieOnBlockedUser because we need to know if the thank
-	 * is related to a revision. (If it is, then use dieOnBlockedUser instead.)
+	 * This is separate from dieOnUserBlockedFromTitle because we need to know if the thank
+	 * is related to a revision. (If it is, then use dieOnUserBlockedFromTitle instead.)
 	 *
 	 * @param User $user
 	 */
-	protected function dieOnSitewideBlockedUser( User $user ) {
+	protected function dieOnUserBlockedFromThanks( User $user ) {
 		$block = $user->getBlock();
-		if ( $block && $block->isSitewide() ) {
+		if (
+			$block &&
+			( $block->isSitewide() || $block->appliesToRight( 'thanks' ) )
+		) {
 			$this->dieBlocked( $block );
 		}
 	}
@@ -83,19 +87,20 @@ abstract class ApiThank extends ApiBase {
 	 * @return bool Whether thanks has already been sent
 	 */
 	protected function haveAlreadyThanked( User $thanker, $uniqueId ) {
-		$dbw = wfGetDB( DB_MASTER );
-		$logWhere = ActorMigration::newMigration()->getWhere( $dbw, 'log_user', $thanker );
+		$dbw = wfGetDB( DB_PRIMARY );
+		$thankerActor = MediaWikiServices::getInstance()->getActorNormalization()
+			->acquireActorId( $thanker, $dbw );
 		return (bool)$dbw->selectRow(
-			[ 'log_search', 'logging' ] + $logWhere['tables'],
+			[ 'log_search', 'logging' ],
 			[ 'ls_value' ],
 			[
-				$logWhere['conds'],
+				'log_actor' => $thankerActor,
 				'ls_field' => 'thankid',
 				'ls_value' => $uniqueId,
 			],
 			__METHOD__,
 			[],
-			[ 'logging' => [ 'INNER JOIN', 'ls_log_id=log_id' ] ] + $logWhere['joins']
+			[ 'logging' => [ 'INNER JOIN', 'ls_log_id=log_id' ] ]
 		);
 	}
 

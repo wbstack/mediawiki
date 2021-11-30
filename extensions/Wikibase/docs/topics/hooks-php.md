@@ -51,7 +51,8 @@ Parameters:
   * An associative array mapping Entity types to content model ids.
 
 #### WikibaseRepoEntityNamespaces {#WikibaseRepoEntityNamespaces}
-Called by [WikibaseRepo::getEntityNamespaceLookup()] to allow additional mappings between Entity types and namespace IDs to be defined.
+Called in the example settings to allow additional mappings between Entity types and namespace IDs to be defined.
+Only used if no custom entity sources are defined.
 
 Parameters:
 * &$map
@@ -105,12 +106,6 @@ Allows extensions to add custom EntityByLinkedTitleLookup services.
 
 Parameters:
 * &$lookup
-
-#### WikibaseSearchEntitiesEngines {#WikibaseSearchEntitiesEngines}
-
-Parameters:
-* $repo
-* &$engines
 
 Client
 ------------------------------------------------------------
@@ -169,13 +164,6 @@ Parameters:
   * Array containing the site links to display indexed by site ID.
 * $usageAccumulator
   * A [UsageAccumulator] to track the usages of Wikibase entities done by the hook handlers.
-
-#### WikibaseClientEntityNamespaces {#WikibaseClientEntityNamespaces}
-Called by [WikibaseClient::getEntityNamespaceLookup()] to allow additional mappings between Entity types and namespace IDs to be defined.
-
-Parameters:
-* &$map
-  * An associative array mapping Entity types to namespace ids.
 
 [WikibaseClient]: @ref Wikibase::Client::WikibaseClient
 [WikibaseClient::getEntityNamespaceLookup()]: @ref Wikibase::Client::WikibaseClient::getEntityNamespaceLookup()

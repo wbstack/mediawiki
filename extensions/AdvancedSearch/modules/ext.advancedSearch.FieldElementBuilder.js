@@ -47,15 +47,14 @@
 
 		/**
 		 * @param {mw.libs.advancedSearch.SearchField} field
-		 * @return {mw.libs.advancedSearch.ui.TextInput}
+		 * @return {OO.ui.Widget}
 		 * @private
 		 */
 		createWidget: function ( field ) {
-			var widgetDefaultConfig = {
-					fieldId: field.id,
-					id: 'advancedSearchField-' + field.id
-				},
-				widget = field.init( this.state, widgetDefaultConfig );
+			var widget = field.init( this.state, {
+				fieldId: field.id,
+				id: 'advancedSearchField-' + field.id
+			} );
 
 			if ( !field.customEventHandling ) {
 				widget.on( 'change', this.createMultiSelectChangeHandler( field.id ) );
@@ -94,7 +93,7 @@
 				}
 
 				fieldSets[ group ].addItems( [
-					field.layout( self.createWidget( field ), field, self.state )
+					field.layout( self.createWidget( field ), field.id, self.state )
 				] );
 			} );
 

@@ -75,11 +75,14 @@ class CreateOAuthConsumer extends \Maintenance {
 			'grants' => '["' . implode( '","', $this->getOption( 'grants' ) ) . '"]',
 			'granttype' => 'normal',
 			'ownerOnly' => false,
-			'oauth2IsConfidential' => false, // only support OAuth 1 for now
-			'oauth2GrantTypes' => null, // only support OAuth 1 for now
+			// only support OAuth 1 for now
+			'oauth2IsConfidential' => false,
+			'oauth2GrantTypes' => null,
 			'email' => $user->getEmail(),
-			'wiki' => '*', // All wikis
-			'rsaKey' => '', // Generate a key
+			// All wikis
+			'wiki' => '*',
+			// Generate a key
+			'rsaKey' => '',
 			'agreement' => true,
 			'restrictions' => \MWRestrictions::newDefault(),
 		];
@@ -87,7 +90,7 @@ class CreateOAuthConsumer extends \Maintenance {
 		$context = \RequestContext::getMain();
 		$context->setUser( $user );
 
-		$dbw = Utils::getCentralDB( DB_MASTER );
+		$dbw = Utils::getCentralDB( DB_PRIMARY );
 		$control = new ConsumerSubmitControl( $context, $data, $dbw );
 		$status = $control->submit();
 

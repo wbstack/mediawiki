@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"NoiX180"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Ater-ater bak wedhi cithakan, kaya déné [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-contentmodel": "Modhèl isi <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Format isi <var>$1templatesandboxtext</var>."
+}

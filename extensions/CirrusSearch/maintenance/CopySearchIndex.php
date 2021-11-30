@@ -63,7 +63,6 @@ class CopySearchIndex extends Maintenance {
 			'singles works then lower this number.  Defaults to 100.', false, true );
 		$this->addOption( 'reindexSlices', 'Number of pieces to slice the scan into, roughly ' .
 			'equivilent to concurrency. Defaults to the number of shards', false, true );
-		$this->requireExtension( 'CirrusSearch' );
 	}
 
 	public function execute() {
@@ -98,29 +97,12 @@ class CopySearchIndex extends Maintenance {
 				->getType( Connection::PAGE_TYPE_NAME ),
 			// Source Index
 			$this->getConnection()->getPageType( $this->indexBaseName, $this->indexType ),
-			$clusterSettings->getShardCount( $this->indexType ),
-			$clusterSettings->getReplicaCount( $this->indexType ),
-			$this->getMergeSettings(),
 			$this
 		);
 		$reindexer->reindex( $slices, 1, $reindexChunkSize );
-		$reindexer->waitForShards();
+		$reindexer->waitForGreen();
 
 		return true;
-	}
-
-	/**
-	 * Get the merge settings for this index.
-	 * @return array
-	 */
-	private function getMergeSettings() {
-		global $wgCirrusSearchMergeSettings;
-
-		if ( isset( $wgCirrusSearchMergeSettings[ $this->indexType ] ) ) {
-			return $wgCirrusSearchMergeSettings[ $this->indexType ];
-		}
-		// If there aren't configured merge settings for this index type default to the content type.
-		return $wgCirrusSearchMergeSettings[ 'content' ];
 	}
 }
 

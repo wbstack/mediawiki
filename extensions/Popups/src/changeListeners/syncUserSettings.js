@@ -2,6 +2,8 @@
  * @module changeListeners/syncUserSettings
  */
 
+import { previewTypes } from '../preview/model';
+
 /**
  * Creates an instance of the user settings sync change listener.
  *
@@ -19,14 +21,18 @@
  * @return {ext.popups.ChangeListener}
  */
 export default function syncUserSettings( userSettings ) {
-	return ( prevState, state ) => {
+	return ( oldState, newState ) => {
 		syncIfChanged(
-			prevState, state, 'eventLogging.previewCount',
+			oldState, newState, 'eventLogging.previewCount',
 			userSettings.storePreviewCount
 		);
 		syncIfChanged(
-			prevState, state, 'preview.enabled',
+			oldState, newState, 'preview.enabled.' + previewTypes.TYPE_PAGE,
 			userSettings.storePagePreviewsEnabled
+		);
+		syncIfChanged(
+			oldState, newState, 'preview.enabled.' + previewTypes.TYPE_REFERENCE,
+			userSettings.storeReferencePreviewsEnabled
 		);
 	};
 }
@@ -40,25 +46,26 @@ export default function syncUserSettings( userSettings ) {
  * @return {*}
  */
 function get( state, path ) {
-	return path.split( '.' ).reduce( function ( element, key ) {
-		return element && element[ key ];
-	}, state );
+	return path.split( '.' ).reduce(
+		( element, key ) => element && element[ key ],
+		state
+	);
 }
 
 /**
  * Calls a sync function if the property prop on the property reducer on
  * the state trees has changed value.
  *
- * @param {Object} prevState
- * @param {Object} state
+ * @param {Object} oldState
+ * @param {Object} newState
  * @param {string} path dot-separated path in the state tree
  * @param {Function} sync function to be called with the newest value if
  * changed
  * @return {void}
  */
-function syncIfChanged( prevState, state, path, sync ) {
-	const current = get( state, path );
-	if ( prevState && ( get( prevState, path ) !== current ) ) {
+function syncIfChanged( oldState, newState, path, sync ) {
+	const current = get( newState, path );
+	if ( oldState && ( get( oldState, path ) !== current ) ) {
 		sync( current );
 	}
 }

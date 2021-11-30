@@ -15,12 +15,17 @@
 // The subtracting-triangles method results in a line that
 // is ~0.7px wide, so make it slightly darker to compensate.
 @borderColorPopupPointerNoImage: rgba( 0, 0, 0, 0.07 );
+@previewFooterCogIconInteractionAreaSize: 34px;
+@previewFooterHeight: @popupPadding + @previewFooterCogIconInteractionAreaSize;
+
+// Same as the --pointer-height in popup.less
+@previewPointerHeight: 8px;
 
 .mwe-popups {
 	background: #fff;
 	position: absolute;
 	z-index: @zIndexPopup;
-	.box-shadow( 0 30px 90px -20px rgba( 0, 0, 0, 0.3 ), 0 0 1px 1px @borderColorPopup; );
+	box-shadow: 0 30px 90px -20px rgba( 0, 0, 0, 0.3 ), 0 0 1px 1px @borderColorPopup;
 	padding: 0;
 	display: none;
 	font-size: 14px;
@@ -28,22 +33,15 @@
 	min-width: 300px;
 	border-radius: @borderRadius;
 
-	.mw-ui-icon {
-		// mw-ui-icon assumes a font size of 16px so we must declare it here
-		// FIXME: This should be in `em` for user scalability and skin specific or with overrides.
-		font-size: 16px;
-	}
-
 	// icons positioned at the top of the popup
 	.mw-ui-icon-preview-disambiguation,
 	.mw-ui-icon-preview-generic {
-		margin: 21px 0 8px 0;
 		opacity: 0.25;
 	}
 
 	.mwe-popups-container {
 		color: @colorText;
-		margin-top: -9px;
+		margin-top: -@previewPointerHeight;
 		padding-top: 9px;
 		text-decoration: none;
 
@@ -52,7 +50,6 @@
 			// of the footer covering content
 			padding: 0 @popupPadding @popupPadding;
 			margin: 0;
-			font-size: 10px;
 			position: absolute;
 			bottom: 0;
 			left: 0;
@@ -61,14 +58,7 @@
 
 	.mwe-popups-settings-icon {
 		display: block;
-		overflow: hidden;
-		font-size: 16px; // should be equal to .mwe-popups .mw-ui-icon { font-size: 16px; }
-		width: @iconSize;
-		height: @iconSize;
-		padding: 3px; // enlarges icon box (visible on hover)
 		float: right; // positions icon near bottom right corner
-		margin: 4px 4px 2px 4px; // adjusts position
-		text-indent: -1em; // offsets .mw-ui-icon-element:before { margin: 0 1em; }
 		border-radius: @borderRadius;
 		opacity: 0.67;
 		.transition( ~'background-color 100ms, opacity 100ms' );
@@ -97,7 +87,8 @@
 			text-decoration: none;
 		}
 
-		&:after {
+		&:after,
+		blockquote:after {
 			content: ' ';
 			position: absolute;
 			bottom: 0;
@@ -125,6 +116,17 @@
 			background-image: -webkit-linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
 			/* @noflip */
 			background-image: linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+		}
+
+		blockquote:after {
+			width: 100%;
+			height: @lineHeight + 5px;
+			/* @noflip */
+			bottom: 0;
+			/* @noflip */
+			background-image: -webkit-linear-gradient( to bottom, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 75% );
+			/* @noflip */
+			background-image: linear-gradient( to bottom, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 75% );
 		}
 		/* stylelint-enable function-linear-gradient-no-nonstandard-direction */
 
@@ -157,14 +159,20 @@
 
 		.mwe-popups-extract {
 			width: @popupTallWidth;
-			height: 9 * @lineHeight;
+			height: ( 9 * @lineHeight ) - 4px;
 			overflow: hidden;
 			float: left;
 		}
 
-		footer {
-			width: @popupTallWidth;
+		.mwe-popups-extract + footer {
 			left: 0;
+			right: @popupLandscapeThumbnailWidth;
+
+			.rtl & {
+				/* @noflip */
+				right: -12px;
+				width: @popupTallWidth;
+			}
 		}
 	}
 
@@ -172,31 +180,34 @@
 		width: @popupWidth;
 
 		.mwe-popups-extract {
-			@minHeight: 2 * @lineHeight;
+			@minHeight: @previewFooterHeight + @previewPointerHeight;
 			// On short summaries, we want to avoid an overlap with the gradient.
 			min-height: @minHeight;
-			max-height: 7 * @lineHeight;
+			max-height: 202px - @previewFooterHeight - @popupPadding;
 			overflow: hidden;
-			margin-bottom: @minHeight + 7px;
+			margin-bottom: @minHeight;
 			padding-bottom: 0;
 		}
 
 		footer {
-			width: @popupWidth - @cogIconSize;
+			// 2px = border
+			width: @popupWidth - @cogIconSize - 2;
 		}
 	}
 
-	// T276200
-	.mwe-popups-container.footer-empty {
-		.mwe-popups-extract {
-			margin-bottom: @popupPadding;
+	// TODO: Remove when not in Beta any more (T276200)
+	.mwe-popups-container.footer-empty .mwe-popups-extract {
+		margin-bottom: @popupPadding;
 
-			.mwe-popups-scroll {
-				// Same as the --pointer-height in popup.less
-				@pointerHeight: 8px;
-				max-height: 403px - 2 * @popupPadding + @pointerHeight;
-			}
+		.mwe-popups-scroll {
+			max-height: 403px - 2 * @popupPadding + @previewPointerHeight;
 		}
+	}
+
+	// TODO: Remove when not in Beta any more (T276200)
+	&.flipped-y .mwe-popups-container.footer-empty .mwe-popups-extract,
+	&.flipped-x-y .mwe-popups-container.footer-empty .mwe-popups-extract {
+		margin-bottom: @popupPadding + @previewPointerHeight;
 	}
 
 	&.mwe-popups-type-generic,
@@ -204,8 +215,9 @@
 		.mwe-popups-extract {
 			min-height: auto;
 			padding-top: 4px;
-			margin-bottom: 60px;
 			margin-top: 0;
+			margin-bottom: var( --margin-bottom );
+			--margin-bottom: 60px;
 		}
 
 		.mwe-popups-read-link {
@@ -295,6 +307,10 @@
 			z-index: @zIndexThumbnailMask;
 			right: 0;
 		}
+
+		.mwe-popups-extract {
+			margin-top: 8px;
+		}
 	}
 
 	&.flipped-x-y {
@@ -380,19 +396,20 @@
 @supports ( clip-path: polygon( 1px 1px ) ) {
 	.mwe-popups {
 		.mwe-popups-thumbnail {
+			// Remove whitespace below image.
+			display: block;
 			object-fit: cover;
 			outline: 1px solid rgba( 0, 0, 0, 0.1 );
 		}
 
-		.mwe-popups-discreet {
-			margin-bottom: -9px;
-		}
-
 		.mwe-popups-extract[ dir='rtl' ] + footer {
+			/* @noflip */
 			left: unset;
+			/* @noflip */
 			right: 0;
 
 			.mwe-popups-settings-icon {
+				/* @noflip */
 				float: left;
 			}
 		}
@@ -444,7 +461,8 @@
 		&.mwe-popups-is-tall {
 			.mwe-popups-discreet {
 				.mwe-popups-thumbnail {
-					width: @popupTallWidth;
+					width: @popupLandscapeThumbnailWidth;
+					box-sizing: border-box;
 					height: 250px;
 				}
 				order: 1;
@@ -455,7 +473,8 @@
 		&.mwe-popups-is-not-tall {
 			.mwe-popups-thumbnail {
 				width: @popupWidth;
-				min-height: 200px;
+				// should never exceed this value per https://phabricator.wikimedia.org/T255549#7296087
+				height: @popupPortraitThumbnailHeight;
 			}
 
 			.mwe-popups-container {
@@ -472,8 +491,33 @@
 		}
 
 		&.mwe-popups-image-pointer {
+			.mwe-popups-discreet {
+				// Override the negative margin on element which undesirably pulls
+				// mwe-popups-extract up.
+				margin-bottom: 0;
+			}
+
 			.mwe-popups-extract {
 				margin-top: 0;
+			}
+		}
+
+		// Add top padding the same size as the pokey height to account for
+		// clip-path cutting off the .mwe-popups-extract's margin. We don't want
+		// this to apply to elements with the .mwe-popups-image-pointer class
+		// because the pokey is on the image.
+		&:not( .flipped-y ):not( .flipped-x-y ):not( .mwe-popups-image-pointer ):not( .mwe-popups-type-disambiguation ) .mwe-popups-extract {
+			padding-top: var( --pointer-height );
+		}
+
+		&.mwe-popups-type-generic:not( .flipped-y ):not( .flipped-x-y ),
+		&.mwe-popups-type-disambiguation:not( .flipped-y ):not( .flipped-x-y ) {
+			.mwe-popups-container {
+				padding-top: var( --pointer-height );
+
+				.mwe-popups-extract {
+					margin-bottom: ~'calc( var( --margin-bottom ) - var( --pointer-height ) )';
+				}
 			}
 		}
 	}

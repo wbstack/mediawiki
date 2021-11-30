@@ -3,8 +3,6 @@
 namespace Wikibase\Lexeme\MediaWiki\Scribunto;
 
 use Scribunto_LuaLibraryBase;
-use Wikibase\Client\Usage\EntityUsageFactory;
-use Wikibase\Client\Usage\ParserOutputUsageAccumulator;
 use Wikibase\Client\Usage\UsageAccumulator;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -30,10 +28,8 @@ class Scribunto_LuaWikibaseLexemeLibrary extends Scribunto_LuaLibraryBase {
 	public function getUsageAccumulator(): UsageAccumulator {
 		if ( $this->usageAccumulator === null ) {
 			$parserOutput = $this->getParser()->getOutput();
-			$this->usageAccumulator = new ParserOutputUsageAccumulator(
-				$parserOutput,
-				new EntityUsageFactory( $this->getEntityIdParser() )
-			);
+			$this->usageAccumulator = WikibaseClient::getUsageAccumulatorFactory()
+				->newFromParserOutput( $parserOutput );
 		}
 
 		return $this->usageAccumulator;
@@ -48,8 +44,7 @@ class Scribunto_LuaWikibaseLexemeLibrary extends Scribunto_LuaLibraryBase {
 
 	private function getEntityLookup(): EntityLookup {
 		if ( $this->entityLookup === null ) {
-			$this->entityLookup = WikibaseClient::getDefaultInstance()
-				->getRestrictedEntityLookup();
+			$this->entityLookup = WikibaseClient::getRestrictedEntityLookup();
 		}
 		return $this->entityLookup;
 	}

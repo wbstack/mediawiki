@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"AJBot2",
 			"Bagas Chrisara",
 			"Daud I.F. Argana",
 			"Davis Hardiansyah",
@@ -12,12 +13,9 @@
 	},
 	"popups-message": "Pratayang",
 	"popups-desc": "Tampilkan ''popup'' pratayang isi halaman apabila pengguna melakukan hover dengan mouse di atas sebuah pranala",
-	"popups-settings-title": "Pratayang halaman",
-	"popups-settings-option-simple": "Aktifkan",
-	"popups-settings-option-simple-description": "Menampilkan pratayang singkat dari suatu topik ketika membaca sebuah halaman.",
-	"popups-settings-option-advanced": "Lanjutan",
-	"popups-settings-option-advanced-description": "Lihat pranala pratayang dan akses menu fungsi penyuntingan. Cara ini digunakan oleh banyak kontributor",
-	"popups-settings-option-off": "Matikan",
+	"popups-settings-title": "Pratinjau",
+	"popups-settings-option-page": "Pratinjau halaman",
+	"popups-settings-option-page-description": "Menampilkan pratayang singkat dari suatu topik ketika membaca sebuah halaman.",
 	"popups-settings-save": "Simpan",
 	"popups-settings-help-ok": "Selesai",
 	"popups-settings-cancel": "Batalkan",

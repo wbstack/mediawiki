@@ -5,7 +5,7 @@
 		]
 	},
 	"skinname-modern": "Moderne",
-	"modern.css": "/* 'U CSS ca se iacchie aqquà 'u 'ndrucane le utinde d'a masckere Moderne */",
-	"modern.js": "/* Ogne JavaScript aqquà avène carecate pe le utinde ca ausane 'a masckere Moderne */",
+	"modern.css": "/* Tutte le CSS aqquà avène carecate pe le utinde ca ausane 'a masckere Moderne */",
+	"modern.js": "/* Tutte le JavaScript aqquà avène carecate pe le utinde ca ausane 'a masckere Moderne */",
 	"modern-desc": "'Nu skin blu/grigge cu le barre laterale e de sus. Derivate da MonoBook"
 }

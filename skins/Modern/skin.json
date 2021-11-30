@@ -10,7 +10,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "skin",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"ValidSkinNames": {
 		"modern": {
@@ -18,7 +18,6 @@
 			"args": [
 				{
 					"name": "modern",
-					"templateDirectory": "skins/Modern/templates/",
 					"scripts": [],
 					"styles": [ "skins.modern" ],
 					"messages": [
@@ -45,7 +44,14 @@
 		"skins.modern": {
 			"class": "ResourceLoaderSkinModule",
 			"features": {
-				"legacy": true
+				"content-links": true,
+				"content-thumbnails": true,
+				"interface-message-box": true,
+				"interface-category": true,
+				"content-tables": true,
+				"i18n-ordered-lists": true,
+				"i18n-all-lists-margins": true,
+				"i18n-headings": true
 			},
 			"styles": {
 				"resources/main.css": {

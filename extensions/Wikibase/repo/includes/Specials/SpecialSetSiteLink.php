@@ -16,12 +16,12 @@ use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\SiteLinkChangeOpFactory;
 use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\SiteLinkTargetProvider;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Special page for setting the sitepage of a Wikibase entity.
@@ -83,6 +83,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	private $badges;
 
 	/**
+	 * @param string[] $tags List of tags to add to edits
 	 * @param SpecialPageCopyrightView $copyrightView
 	 * @param SummaryFormatter $summaryFormatter
 	 * @param EntityTitleLookup $entityTitleLookup
@@ -95,6 +96,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	 * @param SiteLinkChangeOpFactory $siteLinkChangeOpFactory
 	 */
 	public function __construct(
+		array $tags,
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
@@ -108,6 +110,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	) {
 		parent::__construct(
 			'SetSiteLink',
+			$tags,
 			$copyrightView,
 			$summaryFormatter,
 			$entityTitleLookup,
@@ -123,14 +126,15 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	}
 
 	public static function factory(
+		SiteLookup $siteLookup,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityTitleLookup $entityTitleLookup,
 		LanguageFallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
-		SettingsArray $repoSettings
+		SettingsArray $repoSettings,
+		SummaryFormatter $summaryFormatter
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$siteLookup = $wikibaseRepo->getSiteLookup();
-
-		$siteLinkChangeOpFactory = $wikibaseRepo->getChangeOpFactoryProvider()->getSiteLinkChangeOpFactory();
+		$siteLinkChangeOpFactory = $changeOpFactoryProvider->getSiteLinkChangeOpFactory();
 		$siteLinkTargetProvider = new SiteLinkTargetProvider(
 			$siteLookup,
 			$repoSettings->getSetting( 'specialSiteLinkGroups' )
@@ -143,10 +147,11 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 		);
 
 		return new self(
+			$repoSettings->getSetting( 'specialPageTags' ),
 			$copyrightView,
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$entityTitleLookup,
-			$wikibaseRepo->newEditEntityFactory(),
+			$editEntityFactory,
 			$siteLookup,
 			$siteLinkTargetProvider,
 			$repoSettings->getSetting( 'siteLinkGroups' ),

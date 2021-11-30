@@ -5,9 +5,11 @@ declare( strict_types = 1 );
 namespace Wikibase\Client\Hooks;
 
 use EnhancedChangesList;
+use Language;
 use MediaWiki\Hook\EnhancedChangesListModifyBlockLineDataHook;
 use MediaWiki\Hook\EnhancedChangesListModifyLineDataHook;
 use MediaWiki\Hook\OldChangesListRecentChangesLineHook;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserNameUtils;
 use OldChangesList;
 use RecentChange;
@@ -16,7 +18,6 @@ use Wikibase\Client\RecentChanges\ChangeLineFormatter;
 use Wikibase\Client\RecentChanges\ExternalChangeFactory;
 use Wikibase\Client\RecentChanges\RecentChangeFactory;
 use Wikibase\Client\RepoLinker;
-use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\SettingsArray;
 
@@ -49,20 +50,21 @@ class ChangesListLinesHandler implements
 	}
 
 	public static function factory(
+		Language $contentLanguage,
 		UserNameUtils $userNameUtils,
 		EntityIdParser $entityIdParser,
 		RepoLinker $repoLinker,
 		SettingsArray $clientSettings
 	): self {
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
 		$changeFactory = new ExternalChangeFactory(
 			$clientSettings->getSetting( 'repoSiteId' ),
-			$wikibaseClient->getContentLanguage(),
+			$contentLanguage,
 			$entityIdParser
 		);
 		$formatter = new ChangeLineFormatter(
 			$repoLinker,
-			$userNameUtils
+			$userNameUtils,
+			MediaWikiServices::getInstance()->getLinkRenderer()
 		);
 
 		return new self( $changeFactory, $formatter );
@@ -100,7 +102,8 @@ class ChangesListLinesHandler implements
 			);
 			$lang = $changesList->getLanguage();
 			$user = $changesList->getUser();
-			$line = $this->formatter->format( $externalChange, $rc->getTitle(), $rc->counter, $flag, $lang, $user );
+			$title = $rc->getTitle();
+			$line = $this->formatter->format( $externalChange, $title, $rc->counter, $flag, $lang, $user );
 
 			$s = $line;
 		}

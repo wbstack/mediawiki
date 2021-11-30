@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\Store\Sql;
 
 use HashBagOStuff;
@@ -17,23 +19,22 @@ use Wikibase\Client\Usage\UsageLookup;
 use Wikibase\Client\Usage\UsageTracker;
 use Wikibase\DataAccess\WikibaseServices;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
+use Wikibase\DataModel\Services\Entity\EntityPrefetcher;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\RedirectResolvingEntityLookup;
-use Wikibase\Lib\Changes\EntityChangeFactory;
+use Wikibase\DataModel\Services\Term\TermBuffer;
+use Wikibase\Lib\Rdbms\ClientDomainDb;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\CachingEntityRevisionLookup;
 use Wikibase\Lib\Store\CachingPropertyInfoLookup;
 use Wikibase\Lib\Store\CachingSiteLinkLookup;
 use Wikibase\Lib\Store\EntityIdLookup;
-use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityRevisionCache;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\PropertyInfoLookup;
 use Wikibase\Lib\Store\RevisionBasedEntityLookup;
 use Wikibase\Lib\Store\SiteLinkLookup;
-use Wikibase\Lib\Store\Sql\EntityChangeLookup;
-use Wikibase\Lib\Store\Sql\PrefetchingWikiPageEntityMetaDataAccessor;
 use Wikibase\Lib\Store\Sql\SiteLinkTable;
 use Wikimedia\Rdbms\SessionConsistentConnectionManager;
 
@@ -48,39 +49,19 @@ use Wikimedia\Rdbms\SessionConsistentConnectionManager;
 class DirectSqlStore implements ClientStore {
 
 	/**
-	 * @var EntityChangeFactory
-	 */
-	private $entityChangeFactory;
-
-	/**
 	 * @var EntityIdParser
 	 */
 	private $entityIdParser;
 
 	/**
-	 * @var EntityIdComposer
+	 * @var RepoDomainDb
 	 */
-	private $entityIdComposer;
+	private $repoDb;
 
 	/**
-	 * @var string|bool The symbolic database name of the repo wiki or false for the local wiki.
+	 * @var ClientDomainDb
 	 */
-	private $repoWiki;
-
-	/**
-	 * @var SessionConsistentConnectionManager|null
-	 */
-	private $repoConnectionManager = null;
-
-	/**
-	 * @var SessionConsistentConnectionManager|null
-	 */
-	private $localConnectionManager = null;
-
-	/**
-	 * @var string
-	 */
-	private $languageCode;
+	private $clientDb;
 
 	/**
 	 * @var string
@@ -91,11 +72,6 @@ class DirectSqlStore implements ClientStore {
 	 * @var string
 	 */
 	private $cacheKeyGroup;
-
-	/**
-	 * @var int|string
-	 */
-	private $cacheType;
 
 	/**
 	 * @var int
@@ -116,11 +92,6 @@ class DirectSqlStore implements ClientStore {
 	 * @var EntityIdLookup
 	 */
 	private $entityIdLookup;
-
-	/**
-	 * @var EntityNamespaceLookup
-	 */
-	private $entityNamespaceLookup = null;
 
 	/**
 	 * @var PropertyInfoLookup|null
@@ -174,40 +145,29 @@ class DirectSqlStore implements ClientStore {
 	private $allowLocalShortDesc;
 
 	/**
-	 * @param EntityChangeFactory $entityChangeFactory
-	 * @param EntityIdParser $entityIdParser
-	 * @param EntityIdComposer $entityIdComposer
-	 * @param EntityNamespaceLookup $entityNamespaceLookup
-	 * @param WikibaseServices $wikibaseServices
-	 * @param SettingsArray $settings
-	 * @param string|bool $repoWiki The symbolic database name of the repo wiki or false for the
-	 * local wiki.
-	 * @param string $languageCode
+	 * @var TermBuffer
 	 */
+	private $termBuffer;
+
 	public function __construct(
-		EntityChangeFactory $entityChangeFactory,
 		EntityIdParser $entityIdParser,
-		EntityIdComposer $entityIdComposer,
 		EntityIdLookup $entityIdLookup,
-		EntityNamespaceLookup $entityNamespaceLookup,
 		WikibaseServices $wikibaseServices,
 		SettingsArray $settings,
-		$repoWiki,
-		$languageCode
+		TermBuffer $termBuffer,
+		RepoDomainDb $repoDb,
+		ClientDomainDb $clientDb
 	) {
-		$this->entityChangeFactory = $entityChangeFactory;
 		$this->entityIdParser = $entityIdParser;
-		$this->entityIdComposer = $entityIdComposer;
 		$this->entityIdLookup = $entityIdLookup;
-		$this->entityNamespaceLookup = $entityNamespaceLookup;
 		$this->wikibaseServices = $wikibaseServices;
-		$this->repoWiki = $repoWiki;
-		$this->languageCode = $languageCode;
+		$this->termBuffer = $termBuffer;
+		$this->repoDb = $repoDb;
+		$this->clientDb = $clientDb;
 
 		// @TODO: split the class so it needs less injection
 		$this->cacheKeyPrefix = $settings->getSetting( 'sharedCacheKeyPrefix' );
 		$this->cacheKeyGroup = $settings->getSetting( 'sharedCacheKeyGroup' );
-		$this->cacheType = $settings->getSetting( 'sharedCacheType' );
 		$this->cacheDuration = $settings->getSetting( 'sharedCacheDuration' );
 		$this->siteId = $settings->getSetting( 'siteGlobalID' );
 		$this->disabledUsageAspects = $settings->getSetting( 'disabledUsageAspects' );
@@ -217,12 +177,7 @@ class DirectSqlStore implements ClientStore {
 		$this->allowLocalShortDesc = $settings->getSetting( 'allowLocalShortDesc' );
 	}
 
-	/**
-	 * @see ClientStore::getSubscriptionManager
-	 *
-	 * @return SubscriptionManager
-	 */
-	public function getSubscriptionManager() {
+	public function getSubscriptionManager(): SubscriptionManager {
 		if ( $this->subscriptionManager === null ) {
 			$connectionManager = $this->getRepoConnectionManager();
 			$this->subscriptionManager = new SqlSubscriptionManager( $connectionManager );
@@ -232,54 +187,26 @@ class DirectSqlStore implements ClientStore {
 	}
 
 	/**
-	 * Returns a LoadBalancer that acts as a factory for connections to the repo wiki's
-	 * database.
-	 *
-	 * @return SessionConsistentConnectionManager
+	 * Returns a factory for connections to the repo wiki's database.
 	 */
-	private function getRepoConnectionManager() {
-		if ( $this->repoConnectionManager === null ) {
-			$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-			$this->repoConnectionManager = new SessionConsistentConnectionManager(
-				$lbFactory->getMainLB( $this->repoWiki ),
-				$this->repoWiki
-			);
-		}
-
-		return $this->repoConnectionManager;
+	private function getRepoConnectionManager(): SessionConsistentConnectionManager {
+		return $this->repoDb->sessionConsistentConnections();
 	}
 
 	/**
-	 * Returns a LoadBalancer that acts as a factory for connections to the local (client) wiki's
-	 * database.
-	 *
-	 * @return SessionConsistentConnectionManager
+	 * Returns a factory for connections to the client wiki's database.
 	 */
-	private function getLocalConnectionManager() {
-		if ( $this->localConnectionManager === null ) {
-			$this->localConnectionManager = new SessionConsistentConnectionManager(
-				MediaWikiServices::getInstance()->getDBLoadBalancer()
-			);
-		}
-
-		return $this->localConnectionManager;
+	private function getClientConnectionManager(): SessionConsistentConnectionManager {
+		return $this->clientDb->sessionConsistentConnections();
 	}
 
-	/**
-	 * @return RecentChangesFinder
-	 */
-	public function getRecentChangesFinder() {
+	public function getRecentChangesFinder(): RecentChangesFinder {
 		return new RecentChangesFinder(
-			$this->getLocalConnectionManager()
+			$this->getClientConnectionManager()
 		);
 	}
 
-	/**
-	 * @see ClientStore::getUsageLookup
-	 *
-	 * @return UsageLookup
-	 */
-	public function getUsageLookup() {
+	public function getUsageLookup(): UsageLookup {
 		if ( $this->usageLookup === null ) {
 			$this->usageLookup = $this->getUsageTracker();
 			if ( $this->enableImplicitDescriptionUsage ) {
@@ -290,7 +217,7 @@ class DirectSqlStore implements ClientStore {
 					$this->allowLocalShortDesc,
 					new DescriptionLookup(
 						$this->entityIdLookup,
-						$this->wikibaseServices->getTermBuffer(),
+						$this->termBuffer,
 						$services->getPageProps()
 					),
 					$services->getLinkBatchFactory(),
@@ -303,14 +230,9 @@ class DirectSqlStore implements ClientStore {
 		return $this->usageLookup;
 	}
 
-	/**
-	 * @see ClientStore::getUsageTracker
-	 *
-	 * @return SqlUsageTracker
-	 */
-	public function getUsageTracker() {
+	public function getUsageTracker(): SqlUsageTracker {
 		if ( $this->usageTracker === null ) {
-			$connectionManager = $this->getLocalConnectionManager();
+			$connectionManager = $this->getClientConnectionManager();
 			$this->usageTracker = new SqlUsageTracker(
 				$this->entityIdParser,
 				$connectionManager,
@@ -323,15 +245,14 @@ class DirectSqlStore implements ClientStore {
 		return $this->usageTracker;
 	}
 
-	/**
-	 * @see ClientStore::getSiteLinkLookup
-	 *
-	 * @return SiteLinkLookup
-	 */
-	public function getSiteLinkLookup() {
+	public function getSiteLinkLookup(): SiteLinkLookup {
 		if ( $this->siteLinkLookup === null ) {
 			$this->siteLinkLookup = new CachingSiteLinkLookup(
-				new SiteLinkTable( 'wb_items_per_site', true, $this->repoWiki ),
+				new SiteLinkTable(
+					'wb_items_per_site',
+					true,
+					$this->repoDb
+				),
 				new HashBagOStuff()
 			);
 		}
@@ -340,25 +261,16 @@ class DirectSqlStore implements ClientStore {
 	}
 
 	/**
-	 * @see ClientStore::getEntityLookup
-	 *
 	 * The EntityLookup returned by this method will resolve redirects.
-	 *
-	 * @return EntityLookup
 	 */
-	public function getEntityLookup() {
+	public function getEntityLookup(): EntityLookup {
 		$revisionLookup = $this->getEntityRevisionLookup();
 		$revisionBasedLookup = new RevisionBasedEntityLookup( $revisionLookup );
 		$resolvingLookup = new RedirectResolvingEntityLookup( $revisionBasedLookup );
 		return $resolvingLookup;
 	}
 
-	/**
-	 * @see ClientStore::getEntityRevisionLookup
-	 *
-	 * @return EntityRevisionLookup
-	 */
-	public function getEntityRevisionLookup() {
+	public function getEntityRevisionLookup(): EntityRevisionLookup {
 		if ( $this->entityRevisionLookup === null ) {
 			$this->entityRevisionLookup = $this->newEntityRevisionLookup();
 		}
@@ -366,10 +278,7 @@ class DirectSqlStore implements ClientStore {
 		return $this->entityRevisionLookup;
 	}
 
-	/**
-	 * @return EntityRevisionLookup
-	 */
-	private function newEntityRevisionLookup() {
+	private function newEntityRevisionLookup(): EntityRevisionLookup {
 		// NOTE: Keep cache key in sync with SqlStore::newEntityRevisionLookup in WikibaseRepo
 		$cacheKeyPrefix = $this->cacheKeyPrefix . ':WikiPageEntityRevisionLookup';
 
@@ -401,18 +310,12 @@ class DirectSqlStore implements ClientStore {
 
 	/**
 	 * @deprecated use WikibaseClient::getEntityLookup instead
-	 * @return EntityIdLookup
 	 */
-	public function getEntityIdLookup() {
+	public function getEntityIdLookup(): EntityIdLookup {
 		return $this->entityIdLookup;
 	}
 
-	/**
-	 * @see ClientStore::getPropertyInfoLookup
-	 *
-	 * @return PropertyInfoLookup
-	 */
-	public function getPropertyInfoLookup() {
+	public function getPropertyInfoLookup(): PropertyInfoLookup {
 		if ( $this->propertyInfoLookup === null ) {
 			$propertyInfoLookup = $this->wikibaseServices->getPropertyInfoLookup();
 
@@ -434,30 +337,17 @@ class DirectSqlStore implements ClientStore {
 		return $this->propertyInfoLookup;
 	}
 
-	/**
-	 * @return PrefetchingWikiPageEntityMetaDataAccessor
-	 */
-	public function getEntityPrefetcher() {
+	public function getEntityPrefetcher(): EntityPrefetcher {
 		return $this->wikibaseServices->getEntityPrefetcher();
 	}
 
-	/**
-	 * @return UsageUpdater
-	 */
-	public function getUsageUpdater() {
+	public function getUsageUpdater(): UsageUpdater {
 		return new UsageUpdater(
 			$this->siteId,
 			$this->getUsageTracker(),
 			$this->getUsageLookup(),
 			$this->getSubscriptionManager()
 		);
-	}
-
-	/**
-	 * @return EntityChangeLookup
-	 */
-	public function getEntityChangeLookup() {
-		return new EntityChangeLookup( $this->entityChangeFactory, $this->entityIdParser, $this->repoWiki );
 	}
 
 }

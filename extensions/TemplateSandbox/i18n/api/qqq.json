@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Brad Jorsch",
+			"Liuxinyu970226",
+			"Raymond",
+			"Shirayuki",
+			"Umherirrender"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "{{doc-apihelp-param|description=the \"templatesandboxprefix\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
+	"templatesandbox-apihelp-title": "{{doc-apihelp-param|description=the \"templatesandboxtitle\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
+	"templatesandbox-apihelp-text": "{{doc-apihelp-param|description=the \"templatesandboxtext\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
+	"templatesandbox-apihelp-contentmodel": "{{doc-apihelp-param|description=the \"templatesandboxcontentmodel\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
+	"templatesandbox-apihelp-contentformat": "{{doc-apihelp-param|description=the \"templatesandboxcontentformat\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
+	"templatesandbox-apierror-titleandtext": "\n\nParameters:\n* $1 - Module parameter prefix, e.g. \"bl\"."
+}

@@ -57,7 +57,9 @@
 	"advancedsearch-filesize-greater-than": "большае за",
 	"advancedsearch-filesize-smaller-than": "меншае за",
 	"advancedsearch-sort-relevance": "Адпаведнасьць",
+	"advancedsearch-sort-last-edit-asc": "Дата рэдагаваньня – старэйшая зьверху",
 	"advancedsearch-sort-last-edit-desc": "Дата рэдагаваньня — найпазьнейшыя зьверху",
+	"advancedsearch-sort-create-timestamp-asc": "Дата стварэньня – старэйшая зьверху",
 	"advancedsearch-sort-create-timestamp-desc": "Дата стварэньня — найпазьнейшыя зьверху",
 	"advancedsearch-sort-preview-relevance": "адпаведнасьць",
 	"advancedsearch-sort-preview-last-edit-asc": "найменш рэдагаваныя апошнім часам",
@@ -73,5 +75,5 @@
 	"advancedsearch-namespaces-placeholder": "Дадаць прасторы назваў…",
 	"prefs-advancedsearch": "Пашыраны пошук",
 	"advancedsearch-preference-help": "Пашыраны пошук дадае форму на старонку Спэцыяльныя:Пошук. Гэта дазваляе вам выконваць спэцыялізаваныя пошукі, нават ня ведаючы адмысловага сынтаксу. Ён таксама зьмяняе спосаб выбару прасторы назваў.",
-	"advancedsearch-preference-disable": "Не паказваць інтэрфэйс Пашыранага пошуку"
+	"advancedsearch-preference-disable": "Не паказваць інтэрфэйс Пашыранага пошуку пры выкарыстаньні Спэцыяльныя:Пошук"
 }

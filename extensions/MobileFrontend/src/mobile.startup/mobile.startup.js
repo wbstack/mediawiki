@@ -35,7 +35,6 @@ module.exports = {
 	// For Minerva compatibility (access deprecated)
 	toast: require( './showOnPageReload' ),
 	Watchstar: require( './watchstar/watchstar' ),
-	categoryOverlay: require( './categoryOverlay' ),
 	eventBusSingleton: require( './eventBusSingleton' ),
 	promisedView: require( './promisedView' ),
 	Toggler: require( './Toggler' ),
@@ -51,7 +50,6 @@ module.exports = {
 	references: require( './references/references' ),
 	search: {
 		SearchOverlay: require( './search/SearchOverlay' ),
-		MobileWebSearchLogger: require( './search/MobileWebSearchLogger' ),
 		SearchGateway: require( './search/SearchGateway' )
 	},
 	lazyImages: {

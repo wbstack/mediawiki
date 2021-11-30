@@ -21,7 +21,7 @@ class ConfigEquivEntitiesFactory implements EquivEntitiesFactory {
 		$this->configMappingName = $configMappingName;
 	}
 
-	public function getEquivEntities() : EquivEntities {
+	public function getEquivEntities(): EquivEntities {
 		return new EquivEntities( $this->config->get( $this->configMappingName ) );
 	}
 

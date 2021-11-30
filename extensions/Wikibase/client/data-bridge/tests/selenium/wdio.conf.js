@@ -56,6 +56,7 @@ exports.config = {
 	// from the same test should run tests.
 	//
 	maxInstances: 1,
+	services: [ 'devtools' ],
 
 	capabilities: [ {
 		// maxInstances can get overwritten per capability. So if you have an in-house Selenium
@@ -91,6 +92,9 @@ exports.config = {
 
 	// Default timeout for all waitFor* commands.
 	waitforTimeout: 20000,
+
+	// custom config to be used for waitFor* timeouts where we're not waiting for an API call or such
+	nonApiTimeout: 10000,
 
 	// Default timeout in milliseconds for request
 	// if Selenium Grid doesn't send response

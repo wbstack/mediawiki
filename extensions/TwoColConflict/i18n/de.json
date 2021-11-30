@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Johanna Strodt (WMDE)",
+			"Kghbln",
 			"McDutchie",
 			"Metalhead64",
 			"TMg",
@@ -20,7 +21,7 @@
 	"twocolconflict-copy-tooltip": "Kopiere den vollständigen Wikitext deiner Version in die Zwischenablage (unten vorgenommene Änderungen sind nicht enthalten)",
 	"twocolconflict-core-ui-hint": "Eine aktualisierte Schnittstelle zur Lösung von Bearbeitungskonflikten ist jetzt verfügbar. Aktiviere die abschnittsbasierte Oberfläche zum Bearbeiten von Konflikten in deinen [[Special:Preferences#mw-prefsection-editing|Benutzereinstellungen]], um sie auszuprobieren.",
 	"twocolconflict-core-ui-hint-close": "Nie wieder anzeigen",
-	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Absatzbasierte Bearbeitungskonflikt-Oberfläche]] aktivieren, um Bearbeitungskonflikte zu lösen",
+	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Spezialoberfläche bei Bearbeitungskonflikten]] aktivieren, um Bearbeitungskonflikte abschnittsweise lösen zu können",
 	"twocolconflict-special-footer-hint": "Schließe die aktuelle Seite, um zur Schnittstelle zum Bearbeiten von Konflikten zurückzukehren.",
 	"twocolconflict-special-header-overview": "Während du bearbeitest, hat ein anderer Benutzer dieselbe Seite bearbeitet und vor dir veröffentlicht. Eine reine Ansichtskopie deiner Version wird unten aufbewahrt. Alle Änderungen, die in der Konfliktbearbeitungsoberfläche vorgenommen wurden, werden nicht wiedergegeben. Kehre zur vorherigen Registerkarte zurück, um Änderungen zusammenzuführen und das Problem mit Hilfe der Konfliktbearbeitungsoberfläche zu lösen.",
 	"twocolconflict-special-not-saved": "Nicht veröffentlicht",

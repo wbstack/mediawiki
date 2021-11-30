@@ -33,15 +33,12 @@
 	"templatesandbox-invalid-prefix": "El prefijo de zona de pruebas que has especificado no es válido.",
 	"templatesandbox-prefix-not-local": "El prefijo de zona de pruebas que has especificado no es local.",
 	"templatesandbox-page-or-revid": "Debes indicar el título de la página o el número identificador de revisión.",
-	"templatesandbox-fail-post": "<em>A causa de una pérdida de los datos de la sesión, la previsualización se ha ocultado para evitar ataques a través de JavaScript.</em>\n\n<strong>Si se trata de un intento legítimo de previsualización, inténtalo otra vez.</strong>\nSi sigue sin funcionar, prueba a [[Special:UserLogout|salir de tu cuenta]] y acceder de nuevo.",
+	"templatesandbox-fail-post": "<em>A causa de una pérdida de los datos de la sesión, la previsualización se ha ocultado para evitar ataques a través de JavaScript.</em>\n\n<strong>Si se trata de un intento legítimo de previsualización, por favor inténtalo otra vez.</strong>\nSi sigue sin funcionar, prueba a [[Special:UserLogout|salir de tu cuenta]] y acceder de nuevo.",
 	"templatesandbox-fail-post-anon": "<em>Siendo que no has iniciado sesión, la vista preliminar se encuentra oculta como medida de prevención de ataques a través de JavaScript.</em>\n\n<strong>Si se trata de un intento legítimo de previsualización, por favor[[Special:UserLogin|inicia sesión]] e intenta de nuevo.</strong>",
-	"templatesandbox-anon-limited-preview": "La previsualización de cambios al código JavaScript y CSS está desactivada al no acceder. Si necesitas previsualizarlos, [[Special:UserLogin|accede a tu cuenta]] e intenta la acción de nuevo.",
+	"templatesandbox-anon-limited-preview": "La previsualización de cambios al código JavaScript y CSS está desactivada al no acceder. Si necesitas previsualizarlos, por favor [[Special:UserLogin|accede a tu cuenta]] e intenta la acción de nuevo.",
 	"templatesandbox-editform-need-template": "Para previsualizar otra página con esta plantilla, se debe especificar un nombre de plantilla.",
 	"templatesandbox-editform-need-title": "Para obtener una vista previa de otra página con esta plantilla, se debe especificar un título de página.",
 	"templatesandbox-editform-invalid-template": "El nombre de la plantilla que has especificado no es válido.",
 	"templatesandbox-editform-invalid-title": "El título especificado para la vista previa no es válido.",
-	"templatesandbox-editform-title-not-exists": "El título especificado para la vista previa no existe.",
-	"templatesandbox-apihelp-contentmodel": "Modelo de contenido de <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Formato de contenido de <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apierror-titleandtext": "Los parámetros <var>$1templatesandboxtitle</var> y <var>$1templatesandboxtext</var> deben especificarse ambos u omitirse ambos."
+	"templatesandbox-editform-title-not-exists": "El título especificado para la vista previa no existe."
 }

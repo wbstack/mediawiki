@@ -5,20 +5,15 @@ namespace Wikibase\Repo\Specials;
 use HtmlCacheUpdater;
 use HttpError;
 use Psr\Log\LoggerInterface;
-use Serializers\Serializer;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\DataModel\SerializerFactory;
 use Wikibase\Lib\SettingsArray;
-use Wikibase\Repo\Content\EntityContentFactory;
+use Wikibase\Lib\Store\EntityRevisionLookup;
+use Wikibase\Lib\SubEntityTypesMapper;
 use Wikibase\Repo\LinkedData\EntityDataFormatProvider;
 use Wikibase\Repo\LinkedData\EntityDataRequestHandler;
 use Wikibase\Repo\LinkedData\EntityDataSerializationService;
-use Wikibase\Repo\Rdf\EntityRdfBuilderFactory;
-use Wikibase\Repo\Rdf\RdfVocabulary;
-use Wikibase\Repo\Rdf\ValueSnakRdfBuilderFactory;
-use Wikibase\Repo\Store\EntityTitleStoreLookup;
+use Wikibase\Repo\LinkedData\EntityDataUriManager;
 use Wikibase\Repo\Store\Store;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Special page to act as a data endpoint for the linked data web.
@@ -59,42 +54,20 @@ class SpecialEntityData extends SpecialWikibasePage {
 
 	public static function factory(
 		HtmlCacheUpdater $htmlCacheUpdater,
-		SerializerFactory $compactBaseDataModelSerializerFactory,
-		Serializer $compactEntitySerializer,
-		EntityContentFactory $entityContentFactory,
+		EntityDataFormatProvider $entityDataFormatProvider,
+		EntityDataSerializationService $serializationService,
+		EntityDataUriManager $entityDataUriManager,
 		EntityIdParser $entityIdParser,
-		EntityRdfBuilderFactory $entityRdfBuilderFactory,
-		EntityTitleStoreLookup $entityTitleLookup,
+		EntityRevisionLookup $entityRevisionLookup,
 		LoggerInterface $logger,
-		RdfVocabulary $rdfVocabulary,
 		SettingsArray $repoSettings,
 		Store $store,
-		ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory
+		SubEntityTypesMapper $subEntityTypesMapper
 	): self {
 		global $wgUseCdn, $wgApiFrameOptions;
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
-		$entityDataFormatProvider = $wikibaseRepo->getEntityDataFormatProvider();
-
-		$entityRevisionLookup = $wikibaseRepo->getEntityRevisionLookup();
 		// TODO move EntityRedirectLookup to service container and inject it directly
 		$entityRedirectLookup = $store->getEntityRedirectLookup();
-
-		$serializationService = new EntityDataSerializationService(
-			// TODO move EntityLookup to service container and inject it directly
-			$store->getEntityLookup(),
-			$entityTitleLookup,
-			$entityContentFactory,
-			$wikibaseRepo->getPropertyDataTypeLookup(),
-			$valueSnakRdfBuilderFactory,
-			$entityRdfBuilderFactory,
-			$entityDataFormatProvider,
-			$compactBaseDataModelSerializerFactory,
-			$compactEntitySerializer,
-			$wikibaseRepo->getSiteLookup(),
-			$rdfVocabulary
-		);
 
 		$maxAge = $repoSettings->getSetting( 'dataCdnMaxAge' );
 		$formats = $entityDataFormatProvider->getAllowedFormats();
@@ -102,7 +75,7 @@ class SpecialEntityData extends SpecialWikibasePage {
 		$defaultFormat = empty( $formats ) ? 'html' : $formats[0];
 
 		$entityDataRequestHandler = new EntityDataRequestHandler(
-			$wikibaseRepo->getEntityDataUriManager(),
+			$entityDataUriManager,
 			$htmlCacheUpdater,
 			$entityIdParser,
 			$entityRevisionLookup,
@@ -114,7 +87,8 @@ class SpecialEntityData extends SpecialWikibasePage {
 			$defaultFormat,
 			$maxAge,
 			$wgUseCdn,
-			$wgApiFrameOptions
+			$wgApiFrameOptions,
+			$subEntityTypesMapper
 		);
 
 		return new self( $entityDataRequestHandler, $entityDataFormatProvider );

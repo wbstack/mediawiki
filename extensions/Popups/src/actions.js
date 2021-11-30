@@ -57,7 +57,8 @@ function timedAction( baseAction ) {
  * [`mw.requestIdleCallback`](https://developer.mozilla.org/en-US/docs/Web/API/Window/requestIdleCallback))
  * so as not to impact latency-critical events.
  *
- * @param {boolean} initiallyEnabled Disables all popup types while still showing the footer link
+ * @param {Object} initiallyEnabled Allows to disable individual popup types while still showing the
+ *  footer link
  * @param {mw.user} user
  * @param {ext.popups.UserSettings} userSettings
  * @param {mw.Map} config The config of the MediaWiki client-side application,
@@ -72,8 +73,7 @@ export function boot(
 	config,
 	url
 ) {
-	const editCount = config.get( 'wgUserEditCount' ),
-		previewCount = userSettings.getPreviewCount();
+	const editCount = config.get( 'wgUserEditCount' );
 
 	return {
 		type: types.BOOT,
@@ -90,8 +90,7 @@ export function boot(
 		},
 		user: {
 			isAnon: user.isAnon(),
-			editCount,
-			previewCount
+			editCount
 		}
 	};
 }
@@ -118,10 +117,10 @@ function getDwellDelay( type ) {
  *
  * @param {Gateway} gateway
  * @param {mw.Title} title
- * @param {Element} el
+ * @param {HTMLAnchorElement} el
  * @param {string} token The unique token representing the link interaction that
  *  triggered the fetch
- * @param {string} type
+ * @param {string} type One of the previewTypes.TYPE_… constants
  * @return {Redux.Thunk}
  */
 export function fetch( gateway, title, el, token, type ) {
@@ -215,11 +214,11 @@ export function fetch( gateway, title, el, token, type ) {
  * their mouse or by focussing it using their keyboard or an assistive device.
  *
  * @param {mw.Title} title
- * @param {Element} el
+ * @param {HTMLAnchorElement} el
  * @param {ext.popups.Measures} measures
  * @param {Gateway} gateway
  * @param {Function} generateToken
- * @param {string} type
+ * @param {string} type One of the previewTypes.TYPE_… constants
  * @return {Redux.Thunk}
  */
 export function linkDwell( title, el, measures, gateway, generateToken, type ) {
@@ -232,6 +231,7 @@ export function linkDwell( title, el, measures, gateway, generateToken, type ) {
 		const action = timedAction( {
 			type: types.LINK_DWELL,
 			el,
+			previewType: type,
 			measures,
 			token,
 			title: titleText,
@@ -253,10 +253,10 @@ export function linkDwell( title, el, measures, gateway, generateToken, type ) {
 		return promise.then( () => {
 			const previewState = getState().preview;
 
-			// The `enabled` flag allows to disable all popup types while still showing the footer
-			// link. This comes from the boot() action (called `initiallyEnabled` there) and the
-			// preview() reducer.
-			if ( previewState.enabled && isNewInteraction() ) {
+			// The `enabled` flags allow to disable individual popup types while still showing the
+			// footer link. This comes from the boot() action (called `initiallyEnabled` there) and
+			// the preview() reducer.
+			if ( previewState.enabled[ type ] && isNewInteraction() ) {
 				return dispatch( fetch( gateway, title, el, token, type ) );
 			}
 		} );
@@ -303,7 +303,7 @@ export function abandon() {
  * Represents the user clicking on a link with their mouse, keyboard, or an
  * assistive device.
  *
- * @param {Element} el
+ * @param {HTMLAnchorElement} el
  * @return {Object}
  */
 export function linkClick( el ) {
@@ -421,7 +421,7 @@ export function hideSettings() {
  * See docs/adr/0003-keep-enabled-state-only-in-preview-reducer.md for more
  * details.
  *
- * @param {boolean} enabled if previews are enabled or not
+ * @param {Object} enabled Mapping preview type identifiers to boolean flags
  * @return {Redux.Thunk}
  */
 export function saveSettings( enabled ) {
@@ -431,20 +431,6 @@ export function saveSettings( enabled ) {
 			oldValue: getState().preview.enabled,
 			newValue: enabled
 		} );
-	};
-}
-
-/**
- * Represents the queued event being logged `changeListeners/eventLogging.js`
- * change listener.
- *
- * @param {Object} event
- * @return {Object}
- */
-export function eventLogged( event ) {
-	return {
-		type: types.EVENT_LOGGED,
-		event
 	};
 }
 

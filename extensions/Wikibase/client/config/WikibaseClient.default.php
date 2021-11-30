@@ -3,6 +3,7 @@
 use MediaWiki\MediaWikiServices;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikibase\Client\WikibaseClient;
+use Wikibase\DataAccess\ApiEntitySource;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\WikibaseSettings;
 use Wikibase\Repo\WikibaseRepo;
@@ -31,6 +32,7 @@ return call_user_func( function() {
 		// but we will need to make sure the caching works good enough
 		'siteLocalID' => $wgLanguageCode,
 		'languageLinkSiteGroup' => null,
+		'languageLinkAllowedSiteGroups' => null,
 		'injectRecentChanges' => true,
 		'showExternalRecentChanges' => true,
 		'sendEchoNotification' => false,
@@ -96,8 +98,6 @@ return call_user_func( function() {
 
 		'disabledUsageAspects' => [],
 
-		'fineGrainedLuaTracking' => true,
-
 		// The type of object cache to use. Use CACHE_XXX constants.
 		// This is both a repo and client setting, and should be set to the same value in
 		// repo and clients for multiwiki setups.
@@ -124,8 +124,6 @@ return call_user_func( function() {
 		'trackLuaFunctionCallsPerSiteGroup' => false,
 		'trackLuaFunctionCallsPerWiki' => false,
 		'trackLuaFunctionCallsSampleRate' => 1,
-		'itemAndPropertySourceName' => 'local',
-		'entitySources' => [],
 
 		'dataBridgeEnabled' => false, # if true, the next setting must also be specified
 		# 'dataBridgeHrefRegExp' => '^http://localhost/index\.php/(Item:(Q[1-9][0-9]*)).*#(P[1-9][0-9]*)$',
@@ -148,6 +146,9 @@ return call_user_func( function() {
 
 		// enable implicit usage on the description of a page in its content language (T191831)
 		'enableImplicitDescriptionUsage' => false,
+
+		// tags for edits made via the linkitem feature
+		'linkItemTags' => [],
 	];
 
 	// Some defaults depend on information not available at this time.
@@ -166,28 +167,46 @@ return call_user_func( function() {
 		return WikibaseSettings::isRepoEnabled();
 	};
 
-	$defaults['repositories'] = function ( SettingsArray $settings ) {
-		// XXX: Default to having Items in the main namespace, and properties in NS 120.
-		// That is the live setup at wikidata.org, it is NOT consistent with the example settings!
-		// FIXME: throw an exception, instead of making assumptions that may brak the site in strange ways!
-		$entityNamespaces = [
-			'item' => 0,
-			'property' => 120
-		];
+	$defaults['entitySources'] = function ( SettingsArray $settings ) {
 		if ( $settings->getSetting( 'thisWikiIsTheRepo' ) ) {
-			$entityNamespaces = WikibaseRepo::getSettings()->getSetting( 'entityNamespaces' );
+			// copy the repo’s effective entitySources setting
+			$entitySourceDefinitions = WikibaseRepo::getEntitySourceDefinitions();
+			$entitySources = [];
+
+			foreach ( $entitySourceDefinitions->getSources() as $source ) {
+				if ( $source->getType() === ApiEntitySource::TYPE ) {
+					// WikibaseClient.EntitySourceAndTypeDefinitions service wiring can’t parse other types yet
+					continue;
+				}
+
+				$entityNamespaces = [];
+				foreach ( $source->getEntityTypes() as $entityType ) {
+					$entityNamespaces[$entityType] = $source->getEntityNamespaceIds()[$entityType]
+						. '/' . $source->getEntitySlotNames()[$entityType];
+				}
+
+				$entitySources[$source->getSourceName()] = [
+					'repoDatabase' => $source->getDatabaseName(),
+					'entityNamespaces' => $entityNamespaces,
+					'baseUri' => $source->getConceptBaseUri(),
+					'rdfNodeNamespacePrefix' => $source->getRdfNodeNamespacePrefix(),
+					'rdfPredicateNamespacePrefix' => $source->getRdfPredicateNamespacePrefix(),
+					'interwikiPrefix' => $source->getInterwikiPrefix(),
+				];
+			}
+
+			return $entitySources;
 		}
 
-		return [
-			'' => [
-				// Use false (meaning the local wiki's database) if this wiki is the repo,
-				// otherwise default to null (meaning we can't access the repo's DB directly).
-				'repoDatabase' => $settings->getSetting( 'thisWikiIsTheRepo' ) ? false : null,
-				'baseUri' => $settings->getSetting( 'repoUrl' ) . '/entity/',
-				'entityNamespaces' => $entityNamespaces,
-				'prefixMapping' => [ '' => '' ],
-			]
-		];
+		throw new Exception( 'entitySources must be configured for non-repo client wikis' );
+	};
+
+	$defaults['itemAndPropertySourceName'] = function ( SettingsArray $settings ) {
+		if ( $settings->getSetting( 'thisWikiIsTheRepo' ) ) {
+			return WikibaseRepo::getSettings()->getSetting( 'localEntitySourceName' );
+		}
+
+		return 'local';
 	};
 
 	$defaults['repoSiteName'] = function ( SettingsArray $settings ) {
@@ -212,36 +231,6 @@ return call_user_func( function() {
 		return $settings->getSetting( 'thisWikiIsTheRepo' ) ? $GLOBALS['wgScriptPath'] : '/w';
 	};
 
-	$defaults['repoNamespaces'] = function ( SettingsArray $settings ) {
-		if ( $settings->getSetting( 'thisWikiIsTheRepo' ) ) {
-			// if this is the repo wiki, look up the namespace names based on the entityNamespaces setting
-			$namespaceNames = array_map(
-				[ MWNamespace::class, 'getCanonicalName' ],
-				WikibaseRepo::getSettings()->getSetting( 'entityNamespaces' )
-			);
-			return $namespaceNames;
-		} else {
-			// XXX: Default to having Items in the main namespace, and properties in the 'Property' namespace.
-			// That is the live setup at wikidata.org, it is NOT consistent with the example settings!
-			// FIXME: throw an exception, instead of making assumptions that may brak the site in strange ways!
-			return [
-				'item' => '',
-				'property' => 'Property'
-			];
-		}
-	};
-
-	$defaults['changesDatabase'] = function ( SettingsArray $settings ) {
-		// Per default, the database for tracking changes is the local repo's database.
-		// Note that the value for the repoDatabase setting may be calculated dynamically,
-		// see above in 'repositories' setting.
-		if ( $settings->hasSetting( 'repoDatabase' ) ) {
-			return $settings->getSetting( 'repoDatabase' );
-		}
-		$repositorySettings = $settings->getSetting( 'repositories' );
-		return $repositorySettings['']['repoDatabase'];
-	};
-
 	$defaults['siteGlobalID'] = function ( SettingsArray $settings ) {
 		// The database name is a sane default for the site ID.
 		// On Wikimedia sites, this is always correct.
@@ -249,14 +238,9 @@ return call_user_func( function() {
 	};
 
 	$defaults['repoSiteId'] = function( SettingsArray $settings ) {
-		// If repoDatabase is set, then default is same as repoDatabase
-		// otherwise, defaults to siteGlobalID
-		if ( $settings->hasSetting( 'repoDatabase' ) ) {
-			$repoDatabase = $settings->getSetting( 'repoDatabase' );
-		} else {
-			$repositorySettings = $settings->getSetting( 'repositories' );
-			$repoDatabase = $repositorySettings['']['repoDatabase'];
-		}
+		$entitySources = $settings->getSetting( 'entitySources' );
+		$itemAndPropertySourceName = $settings->getSetting( 'itemAndPropertySourceName' );
+		$repoDatabase = $entitySources[$itemAndPropertySourceName]['repoDatabase'];
 
 		return ( $repoDatabase === false )
 			? $settings->getSetting( 'siteGlobalID' )

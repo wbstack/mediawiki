@@ -1,18 +1,17 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Maintenance;
 
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Services\Entity\EntityPrefetcher;
 use Wikibase\DataModel\Services\EntityId\EntityIdPager;
-use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
-use Wikibase\Repo\Content\EntityContentFactory;
 use Wikibase\Repo\Dumpers\DumpGenerator;
 use Wikibase\Repo\Dumpers\RdfDumpGenerator;
-use Wikibase\Repo\Rdf\EntityRdfBuilderFactory;
-use Wikibase\Repo\Rdf\RdfVocabulary;
-use Wikibase\Repo\Rdf\ValueSnakRdfBuilderFactory;
+use Wikibase\Repo\Rdf\RdfBuilderFactory;
+use Wikibase\Repo\Rdf\UnknownFlavorException;
 use Wikibase\Repo\Store\Sql\SqlEntityIdPagerFactory;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\Purtle\BNodeLabeler;
@@ -37,32 +36,14 @@ class DumpRdf extends DumpEntities {
 	private $entityPrefetcher;
 
 	/**
-	 * @var PropertyDataTypeLookup
-	 */
-	private $propertyDatatypeLookup;
-
-	/**
-	 * @var ValueSnakRdfBuilderFactory
-	 */
-	private $valueSnakRdfBuilderFactory;
-
-	/**
-	 * @var EntityRdfBuilderFactory
-	 */
-	private $entityRdfBuilderFactory;
-
-	/**
-	 * @var RdfVocabulary
-	 */
-	private $rdfVocabulary;
-
-	/**
 	 * @var bool
 	 */
 	private $hasHadServicesSet = false;
 
-	/** @var EntityContentFactory */
-	private $entityContentFactory;
+	/**
+	 * @var RdfBuilderFactory
+	 */
+	private $rdfBuilderFactory;
 
 	public function __construct() {
 		parent::__construct();
@@ -82,51 +63,40 @@ class DumpRdf extends DumpEntities {
 		array $existingEntityTypes,
 		array $entityTypesWithoutRdfOutput,
 		EntityPrefetcher $entityPrefetcher,
-		PropertyDataTypeLookup $propertyDataTypeLookup,
-		ValueSnakRdfBuilderFactory $valueSnakRdfBuilderFactory,
-		EntityRdfBuilderFactory $entityRdfBuilderFactory,
 		EntityRevisionLookup $entityRevisionLookup,
-		RdfVocabulary $rdfVocabulary,
-		EntityContentFactory $entityContentFactory
-	) {
+		RdfBuilderFactory $rdfBuilderFactory
+	): void {
 		parent::setDumpEntitiesServices(
 			$sqlEntityIdPagerFactory,
 			$existingEntityTypes,
 			$entityTypesWithoutRdfOutput
 		);
 		$this->entityPrefetcher = $entityPrefetcher;
-		$this->propertyDatatypeLookup = $propertyDataTypeLookup;
-		$this->valueSnakRdfBuilderFactory = $valueSnakRdfBuilderFactory;
-		$this->entityRdfBuilderFactory = $entityRdfBuilderFactory;
 		$this->revisionLookup = $entityRevisionLookup;
-		$this->rdfVocabulary = $rdfVocabulary;
-		$this->entityContentFactory = $entityContentFactory;
 		$this->hasHadServicesSet = true;
+		$this->rdfBuilderFactory = $rdfBuilderFactory;
 	}
 
-	public function execute() {
+	public function execute(): void {
 		if ( !$this->hasHadServicesSet ) {
-			$wikibaseRepo = WikibaseRepo::getDefaultInstance();
 			$mwServices = MediaWikiServices::getInstance();
 
 			$sqlEntityIdPagerFactory = new SqlEntityIdPagerFactory(
 				WikibaseRepo::getEntityNamespaceLookup( $mwServices ),
 				WikibaseRepo::getEntityIdLookup( $mwServices ),
+				WikibaseRepo::getRepoDomainDbFactory( $mwServices )->newRepoDb(),
 				$mwServices->getLinkCache()
 			);
+			$store = WikibaseRepo::getStore( $mwServices );
 
 			$this->setServices(
 				$sqlEntityIdPagerFactory,
-				$wikibaseRepo->getEnabledEntityTypes(),
+				WikibaseRepo::getEnabledEntityTypes( $mwServices ),
 				WikibaseRepo::getSettings( $mwServices )
 					->getSetting( 'entityTypesWithoutRdfOutput' ),
-				WikibaseRepo::getStore( $mwServices )->getEntityPrefetcher(),
-				$wikibaseRepo->getPropertyDataTypeLookup(),
-				WikibaseRepo::getValueSnakRdfBuilderFactory( $mwServices ),
-				WikibaseRepo::getEntityRdfBuilderFactory( $mwServices ),
-				$wikibaseRepo->getEntityRevisionLookup( $this->getEntityRevisionLookupCacheMode() ),
-				WikibaseRepo::getRdfVocabulary( $mwServices ),
-				WikibaseRepo::getEntityContentFactory( $mwServices )
+				$store->getEntityPrefetcher(),
+				$store->getEntityRevisionLookup( $this->getEntityRevisionLookupCacheMode() ),
+				WikibaseRepo::getRdfBuilderFactory( $mwServices )
 			);
 		}
 		parent::execute();
@@ -151,14 +121,9 @@ class DumpRdf extends DumpEntities {
 	 * Create concrete dumper instance
 	 *
 	 * @param resource $output
-	 *
-	 * @return DumpGenerator
 	 */
-	protected function createDumper( $output ) {
+	protected function createDumper( $output ): DumpGenerator {
 		$flavor = $this->getOption( 'flavor', 'full-dump' );
-		if ( !in_array( $flavor, [ 'full-dump', 'truthy-dump' ] ) ) {
-			$this->fatalError( 'Invalid flavor: ' . $flavor );
-		}
 
 		$labeler = null;
 		$partId = $this->getOption( 'part-id' );
@@ -174,19 +139,19 @@ class DumpRdf extends DumpEntities {
 			}
 		}
 
-		return RdfDumpGenerator::createDumpGenerator(
-			$this->getOption( 'format', 'ttl' ),
-			$output,
-			$flavor,
-			$this->revisionLookup,
-			$this->propertyDatatypeLookup,
-			$this->valueSnakRdfBuilderFactory,
-			$this->entityRdfBuilderFactory,
-			$this->entityPrefetcher,
-			$this->rdfVocabulary,
-			$this->entityContentFactory,
-			$labeler
-		);
+		try {
+			return RdfDumpGenerator::createDumpGenerator(
+				$this->getOption( 'format', 'ttl' ),
+				$output,
+				$flavor,
+				$this->revisionLookup,
+				$this->entityPrefetcher,
+				$labeler,
+				$this->rdfBuilderFactory
+			);
+		} catch ( UnknownFlavorException $e ) {
+			$this->fatalError( $e->getMessage() );
+		}
 	}
 
 	protected function getDumpType(): string {

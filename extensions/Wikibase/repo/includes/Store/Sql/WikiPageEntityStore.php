@@ -8,17 +8,18 @@ use InvalidArgumentException;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
+use MediaWiki\Watchlist\WatchlistManager;
 use MWException;
 use RecentChange;
 use Status;
 use Title;
 use User;
-use WatchAction;
-use Wikibase\DataAccess\EntitySource;
+use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\EntityStoreWatcher;
@@ -26,6 +27,7 @@ use Wikibase\Lib\Store\StorageException;
 use Wikibase\Repo\Content\EntityContent;
 use Wikibase\Repo\Content\EntityContentFactory;
 use Wikibase\Repo\GenericEventDispatcher;
+use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\Store\IdGenerator;
 use WikiPage;
 
@@ -44,6 +46,11 @@ class WikiPageEntityStore implements EntityStore {
 	 * @var EntityContentFactory
 	 */
 	private $contentFactory;
+
+	/**
+	 * @var EntityTitleStoreLookup
+	 */
+	private $entityTitleStoreLookup;
 
 	/**
 	 * @var IdGenerator
@@ -65,7 +72,7 @@ class WikiPageEntityStore implements EntityStore {
 	 */
 	private $revisionStore;
 
-	/** @var EntitySource */
+	/** @var DatabaseEntitySource */
 	private $entitySource;
 
 	/**
@@ -74,22 +81,39 @@ class WikiPageEntityStore implements EntityStore {
 	private $permissionManager;
 
 	/**
+	 * @var WatchlistManager
+	 */
+	private $watchlistManager;
+
+	/**
+	 * @var RepoDomainDb
+	 */
+	private $db;
+
+	/**
 	 * @param EntityContentFactory $contentFactory
+	 * @param EntityTitleStoreLookup $entityTitleStoreLookup
 	 * @param IdGenerator $idGenerator
 	 * @param EntityIdComposer $entityIdComposer
 	 * @param RevisionStore $revisionStore A RevisionStore for the local database.
-	 * @param EntitySource $entitySource
+	 * @param DatabaseEntitySource $entitySource
 	 * @param PermissionManager $permissionManager
+	 * @param WatchlistManager $watchlistManager
+	 * @param RepoDomainDb $repoDomainDb
 	 */
 	public function __construct(
 		EntityContentFactory $contentFactory,
+		EntityTitleStoreLookup $entityTitleStoreLookup,
 		IdGenerator $idGenerator,
 		EntityIdComposer $entityIdComposer,
 		RevisionStore $revisionStore,
-		EntitySource $entitySource,
-		PermissionManager $permissionManager
+		DatabaseEntitySource $entitySource,
+		PermissionManager $permissionManager,
+		WatchlistManager $watchlistManager,
+		RepoDomainDb $repoDomainDb
 	) {
 		$this->contentFactory = $contentFactory;
+		$this->entityTitleStoreLookup = $entityTitleStoreLookup;
 		$this->idGenerator = $idGenerator;
 
 		$this->dispatcher = new GenericEventDispatcher( EntityStoreWatcher::class );
@@ -100,6 +124,9 @@ class WikiPageEntityStore implements EntityStore {
 		$this->entitySource = $entitySource;
 
 		$this->permissionManager = $permissionManager;
+
+		$this->watchlistManager = $watchlistManager;
+		$this->db = $repoDomainDb;
 	}
 
 	private function assertCanStoreEntity( EntityId $id ) {
@@ -254,6 +281,7 @@ class WikiPageEntityStore implements EntityStore {
 	 * @param User $user
 	 * @param int $flags
 	 * @param int|bool $baseRevId
+	 * @param string[] $tags
 	 *
 	 * @throws InvalidArgumentException
 	 * @throws StorageException
@@ -264,7 +292,8 @@ class WikiPageEntityStore implements EntityStore {
 		$summary,
 		User $user,
 		$flags = 0,
-		$baseRevId = false
+		$baseRevId = false,
+		array $tags = []
 	) {
 		$this->assertCanStoreEntity( $redirect->getEntityId() );
 		$this->assertCanStoreEntity( $redirect->getTargetId() );
@@ -276,8 +305,7 @@ class WikiPageEntityStore implements EntityStore {
 				' to ' . $redirect->getTargetId()->getSerialization() );
 		}
 
-		// TODO pass $tags into saveEntityContent()
-		$revision = $this->saveEntityContent( $content, $user, $summary, $flags, $baseRevId );
+		$revision = $this->saveEntityContent( $content, $user, $summary, $flags, $baseRevId, $tags );
 
 		$this->dispatcher->dispatch( 'redirectUpdated', $redirect, $revision->getId() );
 
@@ -438,7 +466,7 @@ class WikiPageEntityStore implements EntityStore {
 	 * @return Title|null
 	 */
 	private function getTitleForEntity( EntityId $entityId ) {
-		$title = $this->contentFactory->getTitleForId( $entityId );
+		$title = $this->entityTitleStoreLookup->getTitleForId( $entityId );
 		return $title;
 	}
 
@@ -488,7 +516,7 @@ class WikiPageEntityStore implements EntityStore {
 		}
 
 		// Scan through the revision table
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = $this->db->connections()->getWriteConnectionRef();
 		$revWhere = ActorMigration::newMigration()->getWhere( $dbw, 'rev_user', $user );
 		$res = $dbw->select(
 			[ 'revision' ] + $revWhere['tables'],
@@ -527,14 +555,14 @@ class WikiPageEntityStore implements EntityStore {
 		if (
 			$user->isRegistered() &&
 			$title &&
-			( $watch != $user->isWatched( $title, User::IGNORE_USER_RIGHTS ) )
+			( $watch != $this->watchlistManager->isWatchedIgnoringRights( $user, $title ) )
 		) {
 			if ( $watch ) {
 				// Allow adding to watchlist even if user('s session) lacks 'editmywatchlist'
 				// (e.g. due to bot password or OAuth grants)
-				WatchAction::doWatch( $title, $user, User::IGNORE_USER_RIGHTS );
+				$this->watchlistManager->addWatchIgnoringRights( $user, $title );
 			} else {
-				WatchAction::doUnwatch( $title, $user );
+				$this->watchlistManager->removeWatch( $user, $title );
 			}
 		}
 	}
@@ -554,7 +582,7 @@ class WikiPageEntityStore implements EntityStore {
 		$this->assertCanStoreEntity( $id );
 
 		$title = $this->getTitleForEntity( $id );
-		return ( $title && $user->isWatched( $title, User::IGNORE_USER_RIGHTS ) );
+		return ( $title && $this->watchlistManager->isWatchedIgnoringRights( $user, $title ) );
 	}
 
 }

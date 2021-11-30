@@ -6,7 +6,7 @@ namespace Wikibase\Repo\Api;
 
 use ApiBase;
 use ApiMain;
-use Wikibase\DataAccess\EntitySourceDefinitions;
+use Wikibase\DataAccess\EntitySourceLookup;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Interactors\TermSearchResult;
@@ -34,9 +34,9 @@ class SearchEntities extends ApiBase {
 	private $termsLanguages;
 
 	/**
-	 * @var EntitySourceDefinitions
+	 * @var EntitySourceLookup
 	 */
-	private $entitySourceDefinitions;
+	private $entitySourceLookup;
 
 	/**
 	 * @var EntityTitleTextLookup
@@ -59,64 +59,63 @@ class SearchEntities extends ApiBase {
 	private $errorReporter;
 
 	/**
+	 * @var array
+	 */
+	private $enabledEntityTypes;
+
+	/**
 	 * @see ApiBase::__construct
 	 */
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
 		EntitySearchHelper $entitySearchHelper,
-		$unused, // backwards compat, removed later
 		ContentLanguages $termLanguages,
-		EntitySourceDefinitions $entitySourceDefinitions,
+		EntitySourceLookup $entitySourceLookup,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		EntityArticleIdLookup $entityArticleIdLookup,
-		ApiErrorReporter $errorReporter
+		ApiErrorReporter $errorReporter,
+		array $enabledEntityTypes
 	) {
 		parent::__construct( $mainModule, $moduleName, '' );
 
 		// Always try to add a conceptUri to results if not already set
-		$entitySearchHelper = new ConceptUriSearchHelper(
-			$entitySearchHelper,
-			$entitySourceDefinitions
-		);
+		$this->entitySearchHelper = new ConceptUriSearchHelper( $entitySearchHelper, $entitySourceLookup );
 
-		$this->entitySearchHelper = $entitySearchHelper;
 		$this->termsLanguages = $termLanguages;
-		$this->entitySourceDefinitions = $entitySourceDefinitions;
+		$this->entitySourceLookup = $entitySourceLookup;
 		$this->entityTitleTextLookup = $entityTitleTextLookup;
 		$this->entityUrlLookup = $entityUrlLookup;
 		$this->entityArticleIdLookup = $entityArticleIdLookup;
 		$this->errorReporter = $errorReporter;
+		$this->enabledEntityTypes = $enabledEntityTypes;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
+		array $enabledEntityTypes,
 		EntityArticleIdLookup $entityArticleIdLookup,
-		EntitySourceDefinitions $entitySourceDefinitions,
+		EntitySearchHelper $entitySearchHelper,
+		EntitySourceLookup $entitySourceLookup,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		ContentLanguages $termsLanguages
 	): self {
-		$repo = WikibaseRepo::getDefaultInstance();
-		$entitySearchHelper = new TypeDispatchingEntitySearchHelper(
-			$repo->getEntitySearchHelperCallbacks(),
-			$mainModule->getRequest()
-		);
-		$apiHelperFactory = $repo->getApiHelperFactory( $mainModule->getContext() );
 
 		return new self(
 			$mainModule,
 			$moduleName,
 			$entitySearchHelper,
-			null,
 			$termsLanguages,
-			$entitySourceDefinitions,
+			$entitySourceLookup,
 			$entityTitleTextLookup,
 			$entityUrlLookup,
 			$entityArticleIdLookup,
-			$apiHelperFactory->getErrorReporter( $mainModule )
+			$apiHelperFactory->getErrorReporter( $mainModule ),
+			$enabledEntityTypes
 		);
 	}
 
@@ -217,11 +216,7 @@ class SearchEntities extends ApiBase {
 	}
 
 	private function getRepositoryOrEntitySourceName( EntityId $entityId ): string {
-		$source = $this->entitySourceDefinitions->getSourceForEntityType( $entityId->getEntityType() );
-		if ( $source === null ) {
-			return '';
-		}
-		return $source->getSourceName();
+		return $this->entitySourceLookup->getEntitySourceById( $entityId )->getSourceName();
 	}
 
 	/**
@@ -312,7 +307,7 @@ class SearchEntities extends ApiBase {
 				self::PARAM_DFLT => false
 			],
 			'type' => [
-				self::PARAM_TYPE => array_keys( $this->entitySourceDefinitions->getEntityTypeToSourceMapping() ),
+				self::PARAM_TYPE => $this->enabledEntityTypes,
 				self::PARAM_DFLT => 'item',
 			],
 			'limit' => [

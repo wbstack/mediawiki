@@ -6,7 +6,6 @@ use Exception;
 use Html;
 use HTMLForm;
 use Message;
-use RequestContext;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\ItemId;
@@ -18,7 +17,6 @@ use Wikibase\Repo\Interactors\ItemMergeException;
 use Wikibase\Repo\Interactors\ItemMergeInteractor;
 use Wikibase\Repo\Interactors\TokenCheckInteractor;
 use Wikibase\Repo\Localizer\ExceptionLocalizer;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Special page for merging one item to another.
@@ -45,44 +43,29 @@ class SpecialMergeItems extends SpecialWikibasePage {
 	private $interactor;
 
 	/**
-	 * @var TokenCheckInteractor
-	 */
-	private $tokenCheck;
-
-	/**
 	 * @var EntityTitleLookup
 	 */
 	private $titleLookup;
 
+	/**
+	 * @var TokenCheckInteractor
+	 */
+	private $tokenCheck;
+
 	public function __construct(
 		EntityIdParser $idParser,
+		EntityTitleLookup $titleLookup,
 		ExceptionLocalizer $exceptionLocalizer,
-		TokenCheckInteractor $tokenCheck,
 		ItemMergeInteractor $interactor,
-		EntityTitleLookup $titleLookup
+		TokenCheckInteractor $tokenCheck
 	) {
 		parent::__construct( 'MergeItems', 'item-merge' );
 
 		$this->idParser = $idParser;
 		$this->exceptionLocalizer = $exceptionLocalizer;
-		$this->tokenCheck = $tokenCheck;
 		$this->interactor = $interactor;
 		$this->titleLookup = $titleLookup;
-	}
-
-	public static function factory(
-		EntityIdParser $entityIdParser,
-		EntityTitleLookup $entityTitleLookup
-	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
-		return new self(
-			$entityIdParser,
-			$wikibaseRepo->getExceptionLocalizer(),
-			new TokenCheckInteractor( RequestContext::getMain()->getUser() ),
-			$wikibaseRepo->newItemMergeInteractor( RequestContext::getMain() ),
-			$entityTitleLookup
-		);
+		$this->tokenCheck = $tokenCheck;
 	}
 
 	public function doesWrites() {
@@ -189,14 +172,14 @@ class SpecialMergeItems extends SpecialWikibasePage {
 	 * @param string $summary
 	 */
 	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, $summary ) {
-		$this->tokenCheck->checkRequestToken( $this->getRequest(), 'wpEditToken' );
+		$this->tokenCheck->checkRequestToken( $this->getContext(), 'wpEditToken' );
 		$fromTitle = $this->titleLookup->getTitleForId( $fromId );
 		$toTitle = $this->titleLookup->getTitleForId( $toId );
 
 		/** @var EntityRevision $newRevisionFrom */
 		/** @var EntityRevision $newRevisionTo */
 		list( $newRevisionFrom, $newRevisionTo, )
-			= $this->interactor->mergeItems( $fromId, $toId, $ignoreConflicts, $summary );
+			= $this->interactor->mergeItems( $fromId, $toId, $this->getContext(), $ignoreConflicts, $summary );
 
 		$linkRenderer = $this->getLinkRenderer();
 		$this->getOutput()->addWikiMsg(

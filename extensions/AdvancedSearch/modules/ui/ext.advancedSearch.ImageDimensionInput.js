@@ -44,9 +44,7 @@
 		this.valueInput.connect( this, { change: 'onValueInputChange' } );
 
 		this.$element.append(
-			$( '<div>' ).addClass( 'operator-container' ).append( this.operatorInput.$element )
-		);
-		this.$element.append(
+			$( '<div>' ).addClass( 'operator-container' ).append( this.operatorInput.$element ),
 			$( '<div>' ).addClass( 'value-container' ).append( this.valueInput.$element )
 		);
 
@@ -77,7 +75,7 @@
 	};
 
 	/**
-	 * @return {Array}
+	 * @return {string[]}
 	 */
 	mw.libs.advancedSearch.ui.ImageDimensionInput.prototype.getValue = function () {
 		return this.data;

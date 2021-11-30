@@ -28,7 +28,7 @@ class ConfirmAccountUIHooks {
 		array &$personal_urls, Title $title, SkinTemplate $skin
 	) {
 		# Add a link to Special:RequestAccount if a link exists for login
-		if ( isset( $personal_urls['login'] ) ) {
+		if ( isset( $personal_urls['login'] ) || isset( $personal_urls['login-private'] ) ) {
 			$personal_urls['createaccount'] = [
 				'text' => wfMessage( 'requestaccount-login' )->text(),
 				'href' => SpecialPage::getTitleFor( 'RequestAccount' )->getLocalUrl()
@@ -120,7 +120,7 @@ class ConfirmAccountUIHooks {
 		$formDescriptor['mailpassword']['default'] = 1;
 		$formDescriptor['mailpassword']['checked'] = true;
 		$formDescriptor['mailpassword']['readonly'] = true;
-		$formDescriptor['mailpassword']['validation-callback'] = function ( $v ) use ( $accReq ) {
+		$formDescriptor['mailpassword']['validation-callback'] = static function ( $v ) use ( $accReq ) {
 			return ( $v === true )
 				? true
 				: wfMessage( 'confirmaccount-mismatched' );
@@ -131,7 +131,7 @@ class ConfirmAccountUIHooks {
 
 		$formDescriptor['email']['default'] = $accReq->getEmail();
 		$formDescriptor['email']['readonly'] = true;
-		$formDescriptor['email']['validation-callback'] = function ( $v ) use ( $accReq ) {
+		$formDescriptor['email']['validation-callback'] = static function ( $v ) use ( $accReq ) {
 			return ( $v === $accReq->getEmail() )
 				? true
 				: wfMessage( 'confirmaccount-mismatched' );
@@ -139,7 +139,7 @@ class ConfirmAccountUIHooks {
 
 		$formDescriptor['realname']['default'] = $accReq->getRealName();
 		$formDescriptor['realname']['readonly'] = true;
-		$formDescriptor['realname']['validation-callback'] = function ( $v ) use ( $accReq ) {
+		$formDescriptor['realname']['validation-callback'] = static function ( $v ) use ( $accReq ) {
 			return ( $v === $accReq->getRealName() )
 				? true
 				: wfMessage( 'confirmaccount-mismatched' );

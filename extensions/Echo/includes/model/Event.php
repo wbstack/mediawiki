@@ -124,7 +124,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 
 		// Do not create event and notifications if write access is locked
 		if ( wfReadOnly()
-			|| MWEchoDbFactory::newFromDefault()->getEchoDb( DB_MASTER )->isReadOnly()
+			|| MWEchoDbFactory::newFromDefault()->getEchoDb( DB_PRIMARY )->isReadOnly()
 		) {
 			return false;
 		}
@@ -285,7 +285,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		foreach ( $targetPageIds as $targetPageId ) {
 			// Make sure the target-page id is a valid id
 			$title = Title::newFromID( $targetPageId );
-			// Try master if there is no match
+			// Try primary database if there is no match
 			if ( !$title ) {
 				$title = Title::newFromID( $targetPageId, Title::GAID_FOR_UPDATE );
 			}
@@ -363,12 +363,12 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	/**
 	 * Loads data from the database into this object, given the event ID.
 	 * @param int $id Event ID
-	 * @param bool $fromMaster
+	 * @param bool $fromPrimary
 	 * @return bool Whether it loaded successfully
 	 */
-	public function loadFromID( $id, $fromMaster = false ) {
+	public function loadFromID( $id, $fromPrimary = false ) {
 		$eventMapper = new EchoEventMapper();
-		$event = $eventMapper->fetchById( $id, $fromMaster );
+		$event = $eventMapper->fetchById( $id, $fromPrimary );
 		if ( !$event ) {
 			return false;
 		}
@@ -462,7 +462,8 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 			} else {
 				// Use User::isHidden()
 				$permManager = MediaWikiServices::getInstance()->getPermissionManager();
-				return $permManager->userHasAnyRight( $user, 'viewsuppressed', 'hideuser' ) || !$agent->isHidden();
+				return $permManager->userHasAnyRight( $user, 'viewsuppressed', 'hideuser' )
+					|| !$agent->isHidden();
 			}
 		} elseif ( $revision ) {
 			// A revision is set, use rev_deleted
@@ -537,10 +538,10 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	}
 
 	/**
-	 * @param bool $fromMaster
+	 * @param bool $fromPrimary
 	 * @return null|Title
 	 */
-	public function getTitle( $fromMaster = false ) {
+	public function getTitle( $fromPrimary = false ) {
 		if ( $this->title ) {
 			return $this->title;
 		} elseif ( $this->pageId ) {
@@ -551,7 +552,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 				return $this->title;
 			}
 
-			$this->title = Title::newFromID( $this->pageId, $fromMaster ? Title::GAID_FOR_UPDATE : 0 );
+			$this->title = Title::newFromID( $this->pageId, $fromPrimary ? Title::GAID_FOR_UPDATE : 0 );
 			return $this->title;
 		} elseif ( isset( $this->extra['page_title'] ) && isset( $this->extra['page_namespace'] ) ) {
 			$this->title = Title::makeTitleSafe(

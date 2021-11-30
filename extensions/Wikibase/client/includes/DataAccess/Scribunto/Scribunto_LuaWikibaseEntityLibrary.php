@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\DataAccess\Scribunto;
 
 use InvalidArgumentException;
@@ -12,8 +14,7 @@ use Wikibase\Client\DataAccess\PropertyIdResolver;
 use Wikibase\Client\DataAccess\SnaksFinder;
 use Wikibase\Client\DataAccess\StatementTransclusionInteractor;
 use Wikibase\Client\PropertyLabelNotResolvedException;
-use Wikibase\Client\Usage\EntityUsageFactory;
-use Wikibase\Client\Usage\ParserOutputUsageAccumulator;
+use Wikibase\Client\Usage\UsageAccumulator;
 use Wikibase\Client\WikibaseClient;
 
 /**
@@ -35,7 +36,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 */
 	private $luaFunctionCallTracker = null;
 
-	private function getImplementation() {
+	private function getImplementation(): WikibaseLuaEntityBindings {
 		if ( !$this->wbLibrary ) {
 			$this->wbLibrary = $this->newImplementation();
 		}
@@ -43,11 +44,9 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 		return $this->wbLibrary;
 	}
 
-	private function newImplementation() {
+	private function newImplementation(): WikibaseLuaEntityBindings {
 		$lang = $this->getLanguage();
-
-		$wikibaseClient = WikibaseClient::getDefaultInstance();
-		$snakFormatterFactory = $wikibaseClient->getDataAccessSnakFormatterFactory();
+		$snakFormatterFactory = WikibaseClient::getDataAccessSnakFormatterFactory();
 		$plainTextSnakFormatter = $snakFormatterFactory->newWikitextSnakFormatter(
 			$lang,
 			$this->getUsageAccumulator()
@@ -57,7 +56,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 			$lang
 		);
 
-		$entityLookup = $wikibaseClient->getRestrictedEntityLookup();
+		$entityLookup = WikibaseClient::getRestrictedEntityLookup();
 
 		$propertyIdResolver = new PropertyIdResolver(
 			$entityLookup,
@@ -86,22 +85,17 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 			$plainTextTransclusionInteractor,
 			$richWikitextTransclusionInteractor,
 			WikibaseClient::getEntityIdParser(),
+			WikibaseClient::getTermsLanguages(),
 			$lang,
 			$this->getUsageAccumulator(),
 			WikibaseClient::getSettings()->getSetting( 'siteGlobalID' )
 		);
 	}
 
-	/**
-	 * @param DataAccessSnakFormatterFactory $snakFormatterFactory
-	 * @param Language $lang
-	 *
-	 * @return WikitextPreprocessingSnakFormatter
-	 */
 	private function newRichWikitextSnakFormatter(
 		DataAccessSnakFormatterFactory $snakFormatterFactory,
 		Language $lang
-	) {
+	): WikitextPreprocessingSnakFormatter {
 		$innerFormatter = $snakFormatterFactory->newWikitextSnakFormatter(
 			$lang,
 			$this->getUsageAccumulator(),
@@ -116,10 +110,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 		);
 	}
 
-	/**
-	 * @return LuaFunctionCallTracker
-	 */
-	private function getLuaFunctionCallTracker() {
+	private function getLuaFunctionCallTracker(): LuaFunctionCallTracker {
 		if ( !$this->luaFunctionCallTracker ) {
 			$mwServices = MediaWikiServices::getInstance();
 			$settings = WikibaseClient::getSettings( $mwServices );
@@ -147,34 +138,24 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 *
 	 * Please note, that this splits the parser cache by user language, if
 	 * allowDataAccessInUserLanguage is true.
-	 *
-	 * @return Language
 	 */
-	private function getLanguage() {
-		if ( $this->allowDataAccessInUserLanguage() ) {
+	private function getLanguage(): Language {
+		if ( $this->allowDataAccessInUserLanguage() && $this->getParser() ) {
 			return $this->getParserOptions()->getUserLangObj();
 		}
 
 		return MediaWikiServices::getInstance()->getContentLanguage();
 	}
 
-	/**
-	 * @return bool
-	 */
-	private function allowDataAccessInUserLanguage() {
+	private function allowDataAccessInUserLanguage(): bool {
 		$settings = WikibaseClient::getSettings();
 
 		return $settings->getSetting( 'allowDataAccessInUserLanguage' );
 	}
 
-	/**
-	 * @return ParserOutputUsageAccumulator
-	 */
-	public function getUsageAccumulator() {
-		return new ParserOutputUsageAccumulator(
-			$this->getParser()->getOutput(),
-			new EntityUsageFactory( WikibaseClient::getEntityIdParser() )
-		);
+	public function getUsageAccumulator(): UsageAccumulator {
+		return WikibaseClient::getUsageAccumulatorFactory()
+			->newFromParserOutput( $this->getParser()->getOutput() );
 	}
 
 	/**
@@ -183,7 +164,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 * @param string $entityId The Entity from which the statements were accessed.
 	 * @param string $propertyId Property id of the statements accessed.
 	 */
-	public function addStatementUsage( $entityId, $propertyId ) {
+	public function addStatementUsage( string $entityId, string $propertyId ): void {
 		$this->getImplementation()->addStatementUsage( $entityId, $propertyId );
 	}
 
@@ -191,9 +172,9 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 * Add a label usage (called once specific labels are accessed).
 	 *
 	 * @param string $entityId The Entity from which the labels were accessed.
-	 * @param string $langCode Language code of the labels accessed.
+	 * @param string|null $langCode Language code of the labels accessed.
 	 */
-	public function addLabelUsage( $entityId, $langCode ) {
+	public function addLabelUsage( string $entityId, ?string $langCode ): void {
 		$this->getImplementation()->addLabelUsage( $entityId, $langCode );
 	}
 
@@ -201,9 +182,9 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 * Add a description usage (called once specific descriptions are accessed).
 	 *
 	 * @param string $entityId The Entity from which the descriptions were accessed.
-	 * @param string $langCode Language code of the descriptions accessed.
+	 * @param string|null $langCode Language code of the descriptions accessed.
 	 */
-	public function addDescriptionUsage( $entityId, $langCode ) {
+	public function addDescriptionUsage( string $entityId, ?string $langCode ): void {
 		$this->getImplementation()->addDescriptionUsage( $entityId, $langCode );
 	}
 
@@ -212,7 +193,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 *
 	 * @param string $entityId The Entity from which the sitelinks were accessed.
 	 */
-	public function addSiteLinksUsage( $entityId ) {
+	public function addSiteLinksUsage( string $entityId ): void {
 		$this->getImplementation()->addSiteLinksUsage( $entityId );
 	}
 
@@ -221,7 +202,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 *
 	 * @param string $entityId The Entity from which something was accessed.
 	 */
-	public function addOtherUsage( $entityId ) {
+	public function addOtherUsage( string $entityId ): void {
 		$this->getImplementation()->addOtherUsage( $entityId );
 	}
 
@@ -235,8 +216,6 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 		// They are member functions on a Lua table which is private to the module, thus
 		// these can't be called from user code, unless explicitly exposed in Lua.
 		$lib = [
-			'getGlobalSiteId' => [ $this, 'getGlobalSiteId' ],
-			'getLanguageCode' => [ $this, 'getLanguageCode' ],
 			'formatStatements' => [ $this, 'formatStatements' ],
 			'formatPropertyValues' => [ $this, 'formatPropertyValues' ],
 			'addStatementUsage' => [ $this, 'addStatementUsage' ],
@@ -250,8 +229,9 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 		$settings = WikibaseClient::getSettings();
 		// These settings will be exposed to the Lua module.
 		$options = [
-			'fineGrainedLuaTracking' => $settings->getSetting( 'fineGrainedLuaTracking' ),
 			'trackLuaFunctionCallsSampleRate' => $settings->getSetting( 'trackLuaFunctionCallsSampleRate' ),
+			'languageCode' => $this->getLanguage()->getCode(),
+			'globalSiteId' => $settings->getSetting( 'siteGlobalID' ),
 		];
 
 		return $this->getEngine()->registerInterface(
@@ -260,25 +240,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	}
 
 	/**
-	 * Wrapper for getGlobalSiteId in WikibaseLuaEntityBindings
-	 *
-	 * @return string[]
-	 */
-	public function getGlobalSiteId() {
-		return [ $this->getImplementation()->getGlobalSiteId() ];
-	}
-
-	/**
-	 * Wrapper for getLanguageCode in WikibaseLuaEntityBindings
-	 *
-	 * @return string[]
-	 */
-	public function getLanguageCode() {
-		return [ $this->getImplementation()->getLanguageCode() ];
-	}
-
-	/**
-	 * Format the main Snaks belonging to a Statement (which is identified by a PropertyId
+	 * Format the main Snaks belonging to a Statement (which is identified by a NumericPropertyId
 	 * or the label of a Property) as wikitext escaped plain text.
 	 *
 	 * @param string $entityId
@@ -288,7 +250,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 * @throws ScribuntoException
 	 * @return string[]|null[]
 	 */
-	public function formatPropertyValues( $entityId, $propertyLabelOrId, array $acceptableRanks = null ) {
+	public function formatPropertyValues( string $entityId, string $propertyLabelOrId, array $acceptableRanks = null ): array {
 		$this->checkType( 'formatPropertyValues', 0, $entityId, 'string' );
 		// Use 1 as index for the property id, as the first parameter comes from
 		// internals of mw.wikibase.entity (an index of 2 might confuse users
@@ -314,7 +276,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	}
 
 	/**
-	 * Format the main Snaks belonging to a Statement (which is identified by a PropertyId
+	 * Format the main Snaks belonging to a Statement (which is identified by a NumericPropertyId
 	 * or the label of a Property) as rich wikitext.
 	 *
 	 * @param string $entityId
@@ -324,7 +286,7 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 	 * @throws ScribuntoException
 	 * @return string[]|null[]
 	 */
-	public function formatStatements( $entityId, $propertyLabelOrId, array $acceptableRanks = null ) {
+	public function formatStatements( string $entityId, string $propertyLabelOrId, array $acceptableRanks = null ): array {
 		$this->checkType( 'formatStatements', 0, $entityId, 'string' );
 		// Use 1 as index for the property id, as the first parameter comes from
 		// internals of mw.wikibase.entity (an index of 2 might confuse users
@@ -351,10 +313,8 @@ class Scribunto_LuaWikibaseEntityLibrary extends Scribunto_LuaLibraryBase {
 
 	/**
 	 * Increment the given stats key.
-	 *
-	 * @param string $key
 	 */
-	public function incrementStatsKey( $key ) {
+	public function incrementStatsKey( string $key ): void {
 		$this->getLuaFunctionCallTracker()->incrementKey( $key );
 	}
 

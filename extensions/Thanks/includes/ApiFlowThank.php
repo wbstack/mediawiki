@@ -27,6 +27,7 @@ class ApiFlowThank extends ApiThank {
 	public function execute() {
 		$user = $this->getUser();
 		$this->dieOnBadUser( $user );
+		$this->dieOnUserBlockedFromThanks( $user );
 
 		$params = $this->extractRequestParams();
 
@@ -54,7 +55,7 @@ class ApiFlowThank extends ApiThank {
 		// Truncate the title text to prevent issues with database storage.
 		$topicTitleText = $this->getLanguage()->truncateForDatabase( $rawTopicTitleText, 200 );
 		$pageTitle = $this->getPageTitleFromRootPost( $rootPost );
-		$this->dieOnBlockedUser( $user, $pageTitle );
+		$this->dieOnUserBlockedFromTitle( $user, $pageTitle );
 
 		/** @var PostRevision $post */
 		$post = $data['post'];

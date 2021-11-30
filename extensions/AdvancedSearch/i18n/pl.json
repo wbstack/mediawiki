@@ -81,5 +81,5 @@
 	"advancedsearch-namespaces-placeholder": "Dodaj przestrzenie nazw...",
 	"prefs-advancedsearch": "Wyszukiwanie zaawansowane",
 	"advancedsearch-preference-help": "Zaawansowane Wyszukiwanie to rozbudowany formularz na stronie Specjalna:Szukaj. Pozwala na łatwiejsze dokonywanie wyspecjalizowanego wyszukiwania bez konieczności znajomości składni wyszukiwania. Zmienia również sposób wybierania przeszukiwanych przestrzeni nazw.",
-	"advancedsearch-preference-disable": "Wyłącz zaawansowany interfejs wyszukiwania"
+	"advancedsearch-preference-disable": "Wyłącz zaawansowany interfejs wyszukiwania na stronie Specjalna:Szukaj"
 }

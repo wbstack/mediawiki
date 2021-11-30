@@ -12,9 +12,9 @@ use MediaWiki\Permissions\PermissionManager;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Repo\Interactors\ItemRedirectCreationInteractor;
 use Wikibase\Repo\Interactors\RedirectCreationException;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * API module for creating entity redirects.
@@ -44,6 +44,9 @@ class CreateRedirect extends ApiBase {
 	 */
 	private $permissionManager;
 
+	/** @var string[] */
+	private $sandboxEntityIds;
+
 	/**
 	 * @see ApiBase::__construct
 	 *
@@ -60,7 +63,8 @@ class CreateRedirect extends ApiBase {
 		EntityIdParser $idParser,
 		ApiErrorReporter $errorReporter,
 		ItemRedirectCreationInteractor $interactor,
-		PermissionManager $permissionManager
+		PermissionManager $permissionManager,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
@@ -68,23 +72,26 @@ class CreateRedirect extends ApiBase {
 		$this->errorReporter = $errorReporter;
 		$this->interactor = $interactor;
 		$this->permissionManager = $permissionManager;
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $apiMain,
 		string $moduleName,
 		PermissionManager $permissionManager,
-		EntityIdParser $entityIdParser
+		ApiHelperFactory $apiHelperFactory,
+		EntityIdParser $entityIdParser,
+		ItemRedirectCreationInteractor $interactor,
+		SettingsArray $settings
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $apiMain->getContext() );
 		return new self(
 			$apiMain,
 			$moduleName,
 			$entityIdParser,
 			$apiHelperFactory->getErrorReporter( $apiMain ),
-			$wikibaseRepo->newItemRedirectCreationInteractor( $apiMain->getUser(), $apiMain->getContext() ),
-			$permissionManager
+			$interactor,
+			$permissionManager,
+			$settings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -117,7 +124,7 @@ class CreateRedirect extends ApiBase {
 	 * @throws RedirectCreationException
 	 */
 	private function createRedirect( EntityId $fromId, EntityId $toId, bool $bot, ApiResult $result ): void {
-		$this->interactor->createRedirect( $fromId, $toId, $bot );
+		$this->interactor->createRedirect( $fromId, $toId, $bot, [], $this->getContext() ); // TODO pass through $tags (T229918)
 
 		$result->addValue( null, 'success', 1 );
 		$result->addValue( null, 'redirect', $toId->getSerialization() );
@@ -187,9 +194,12 @@ class CreateRedirect extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$from = $this->sandboxEntityIds['mainItem'];
+		$to = $this->sandboxEntityIds['auxItem'];
+
 		return [
-			'action=wbcreateredirect&from=Q11&to=Q12'
-				=> 'apihelp-wbcreateredirect-example-1',
+			'action=wbcreateredirect&from=' . $from . '&to=' . $to
+				=> [ 'apihelp-wbcreateredirect-example-1', $from, $to ],
 		];
 	}
 

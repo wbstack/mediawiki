@@ -117,7 +117,6 @@ class EntityResult extends Result implements ExtendedResult {
 			if ( $key && preg_match( '/^(\w+)\.([^.]+)\.plain$/', $key, $match ) ) {
 				$this->extraDisplay = [
 					'language' => $match[2],
-					// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
 					'value' => new HtmlArmor( $this->processHighlighting( $highlightData[$key][0],
 						$match[1] === 'labels' ) )
 				];
@@ -155,7 +154,6 @@ class EntityResult extends Result implements ExtendedResult {
 			$this->haveMatch = true;
 			return [
 				'language' => $source['language'],
-				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
 				'value' => new HtmlArmor( $this->processHighlighting( $highlightData["{$field}.{$source['language']}.plain"][0],
 					$useOffsets ) )
 			];

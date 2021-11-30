@@ -30,7 +30,6 @@ use Wikibase\Lib\Store\EntityUrlLookup;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
 use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
 use Wikibase\Lib\TermFallbackCache\TermFallbackCacheFacade;
-use Wikimedia\Assert\Assert;
 
 /**
  * Low level factory for ValueFormatters for well known data types.
@@ -112,11 +111,6 @@ class WikibaseValueFormatterBuilders {
 	private $kartographerEmbeddingHandler;
 
 	/**
-	 * @var int
-	 */
-	private $cacheTtlInSeconds;
-
-	/**
 	 * @var bool
 	 */
 	private $useKartographerMaplinkInWikitext;
@@ -158,7 +152,6 @@ class WikibaseValueFormatterBuilders {
 		string $geoShapeStorageBaseUrl,
 		string $tabularDataStorageBaseUrl,
 		TermFallbackCacheFacade $termFallbackCacheFacade,
-		int $cacheTtlInSeconds,
 		EntityLookup $entityLookup,
 		EntityRevisionLookup $entityRevisionLookup,
 		int $entitySchemaNamespace,
@@ -171,12 +164,6 @@ class WikibaseValueFormatterBuilders {
 		bool $useKartographerMaplinkInWikitext = false,
 		array $thumbLimits = []
 	) {
-		Assert::parameter(
-			$cacheTtlInSeconds >= 0,
-			'$cacheTtlInSeconds',
-			"should be non-negative"
-		);
-
 		$this->labelDescriptionLookupFactory = $labelDescriptionLookupFactory;
 		$this->languageNameLookup = $languageNameLookup;
 		$this->itemUriParser = $itemUriParser;
@@ -187,7 +174,6 @@ class WikibaseValueFormatterBuilders {
 		$this->entityLookup = $entityLookup;
 		$this->cache = $termFallbackCacheFacade;
 		$this->snakFormat = new SnakFormat();
-		$this->cacheTtlInSeconds = $cacheTtlInSeconds;
 		$this->kartographerEmbeddingHandler = $kartographerEmbeddingHandler;
 		$this->useKartographerMaplinkInWikitext = $useKartographerMaplinkInWikitext;
 		$this->entitySchemaNamespace = $entitySchemaNamespace;
@@ -298,12 +284,11 @@ class WikibaseValueFormatterBuilders {
 
 	/**
 	 * @param string $format The desired target format, see SnakFormatter::FORMAT_XXX
-	 * @param FormatterOptions $options
 	 *
 	 * @return ValueFormatter
 	 */
-	public function newStringFormatter( $format, FormatterOptions $options ) {
-		return $this->escapeValueFormatter( $format, new StringFormatter( $options ) );
+	public function newStringFormatter( $format ) {
+		return $this->escapeValueFormatter( $format, new StringFormatter() );
 	}
 
 	/**
@@ -328,9 +313,9 @@ class WikibaseValueFormatterBuilders {
 				return new HtmlUrlFormatter( $options );
 			case SnakFormatter::FORMAT_WIKI:
 				// Use the string formatter without escaping!
-				return new StringFormatter( $options );
+				return new StringFormatter();
 			default:
-				return $this->newStringFormatter( $format, $options );
+				return $this->newStringFormatter( $format );
 		}
 	}
 
@@ -355,24 +340,23 @@ class WikibaseValueFormatterBuilders {
 			case SnakFormatter::FORMAT_WIKI:
 				return new CommonsThumbnailFormatter();
 			default:
-				return $this->newStringFormatter( $format, $options );
+				return $this->newStringFormatter( $format );
 		}
 	}
 
 	/**
 	 * @param string $format The desired target format, see SnakFormatter::FORMAT_XXX
-	 * @param FormatterOptions $options
 	 *
 	 * @return ValueFormatter
 	 */
-	public function newGeoShapeFormatter( $format, FormatterOptions $options ) {
+	public function newGeoShapeFormatter( $format ) {
 		switch ( $this->snakFormat->getBaseFormat( $format ) ) {
 			case SnakFormatter::FORMAT_HTML:
 				return new InterWikiLinkHtmlFormatter( $this->geoShapeStorageBaseUrl );
 			case SnakFormatter::FORMAT_WIKI:
 				return new InterWikiLinkWikitextFormatter( $this->geoShapeStorageBaseUrl );
 			default:
-				return $this->newStringFormatter( $format, $options );
+				return $this->newStringFormatter( $format );
 		}
 	}
 
@@ -389,7 +373,7 @@ class WikibaseValueFormatterBuilders {
 			case SnakFormatter::FORMAT_WIKI:
 				return new InterWikiLinkWikitextFormatter( $this->tabularDataStorageBaseUrl );
 			default:
-				return $this->newStringFormatter( $format, $options );
+				return $this->newStringFormatter( $format );
 		}
 	}
 
@@ -406,7 +390,7 @@ class WikibaseValueFormatterBuilders {
 			case SnakFormatter::FORMAT_WIKI:
 				return new WikiLinkWikitextFormatter( $this->entitySchemaNamespace );
 			default:
-				return $this->newStringFormatter( $format, $options );
+				return $this->newStringFormatter( $format );
 		}
 	}
 

@@ -20,6 +20,7 @@
 			"Putnik",
 			"Stjn",
 			"Sunpriat",
+			"Thothsum",
 			"Vlad5250",
 			"Wirbel78"
 		]
@@ -80,7 +81,9 @@
 	"advancedsearch-sort-create-timestamp-asc": "Дата создания — старые сверху",
 	"advancedsearch-sort-create-timestamp-desc": "Дата создания — новые сверху",
 	"advancedsearch-sort-preview-relevance": "релевантности",
+	"advancedsearch-sort-preview-last-edit-asc": "минимальные последние правки",
 	"advancedsearch-sort-preview-last-edit-desc": "дате изменения",
+	"advancedsearch-sort-preview-create-timestamp-asc": "минимальные последние созданные",
 	"advancedsearch-sort-preview-create-timestamp-desc": "дате создания",
 	"advancedsearch-namespaces-search-in": "Поиск по:",
 	"advancedsearch-namespaces-remember": "Запомнить выбор для поиска в будущем",
@@ -91,5 +94,5 @@
 	"advancedsearch-namespaces-placeholder": "Добавить пространства имён…",
 	"prefs-advancedsearch": "Расширенный поиск",
 	"advancedsearch-preference-help": "Расширенный поиск добавляет на страницу Служебная:Поиск форму с дополнительными полями. Это позволяет выполнять специализированный поиск, даже если вы не знаете поискового синтаксиса. Он также изменяет способ выбора пространств имён.",
-	"advancedsearch-preference-disable": "Не показывать интерфейс расширенного поиска"
+	"advancedsearch-preference-disable": "Не показывать интерфейс расширенного поиска при использовании Special:Search"
 }

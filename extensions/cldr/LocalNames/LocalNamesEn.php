@@ -1,5 +1,6 @@
 <?php
 
+/** @phpcs-require-sorted-array */
 $languageNames = [
 	# Not in CLDR 34. Used for MediaWiki localisation
 	'abe' => 'Western Abenaki',
@@ -20,6 +21,8 @@ $languageNames = [
 	'bat-smg' => 'Samogitian',
 	'bbc-latn' => 'Batak Toba (Latin script)',
 	'bcc' => 'Southern Balochi',
+	# Added to Core, not part of CLDR, T287345
+	'bci' => 'Baoulé',
 	'bcl' => 'Central Bikol',
 	# used by Wikidata, T234330
 	'bdr' => 'West Coast Bajau',
@@ -42,14 +45,16 @@ $languageNames = [
 	'cal' => 'Carolinian',
 	'cbk-zam' => 'Chavacano',
 	'cdo' => 'Min Dong Chinese',
+	# used by Wikidata, T180771
+	'cdo-hani' => 'Min Dong Chinese (Hanji)',
 	'cja' => 'Western Cham',
+	'cja-arab' => 'Western Cham (Arabic script)',
 	'cja-cham' => 'Western Cham (Cham script)',
 	'cja-latn' => 'Western Cham (Latin script)',
-	'cja-arab' => 'Western Cham (Arabic script)',
 	'cjm' => 'Eastern Cham',
+	'cjm-arab' => 'Eastern Cham (Arabic script)',
 	'cjm-cham' => 'Eastern Cham (Cham script)',
 	'cjm-latn' => 'Eastern Cham (Latin script)',
-	'cjm-arab' => 'Eastern Cham (Arabic script)',
 	'cjy' => 'Jinyu',
 	'cjy-hans' => 'Jinyu (Simplified)',
 	'cjy-hant' => 'Jinyu (Traditional)',
@@ -62,6 +67,7 @@ $languageNames = [
 	'cnr' => 'Montenegrin',
 	# used by Wikidata, T220284
 	'crb' => 'Island Carib',
+	'crh' => 'Crimean Tatar',
 	'crh-cyrl' => 'Crimean Tatar (Cyrillic script)',
 	'crh-latn' => 'Crimean Tatar (Latin script)',
 	# used by Wikidata, T264532
@@ -76,6 +82,8 @@ $languageNames = [
 	# used by Wikidata, T198674
 	'el-cy' => 'Cypriot Greek',
 	'eml' => 'Emiliano-Romagnolo',
+	# Missing en translation T256649
+	'es-formal' => 'Spanish (formal address)',
 	# used by Wikidata, T263946
 	'eto' => 'Eton',
 	'ett' => 'Etruscian',
@@ -95,12 +103,22 @@ $languageNames = [
 	'gmy' => 'Mycenaean Greek',
 	'gom-deva' => 'Goan Konkani (Devanagari script)',
 	'gom-latn' => 'Goan Konkani (Latin script)',
+	# used by Wikidata, T262922
+	'gsw-fr' => 'Alsatian',
+	# Added to core, T286460
+	'guw' => 'Gun',
 	# used by Wikidata, T263946
 	'gya' => 'Gbaya',
+	# used by Wikidata, T180771
+	'hak-hans' => 'Hakka (Simplified)',
+	# used by Wikidata, T180771
+	'hak-hant' => 'Hakka (Traditional)',
 	'haz' => 'Hazaragi',
 	# used by Wikidata, T155368
 	'hbo' => 'Biblical Hebrew',
 	'hif-latn' => 'Fiji Hindi (Latin script)',
+	# Missing en translation T256649
+	'hu-formal' => 'Hungarian (formal address)',
 	'hyw' => 'Western Armenian',
 	'ike-cans' => 'Eastern Canadian (Aboriginal syllabics)',
 	'ike-latn' => 'Eastern Canadian (Latin script)',
@@ -120,12 +138,12 @@ $languageNames = [
 	'ker' => 'Kera',
 	'kjh' => 'Khakas',
 	'kjp' => 'Eastern Pwo',
-	'kk-cn' => 'Kazakh (China)',
-	'kk-kz' => 'Kazakh (Kazakhstan)',
-	'kk-tr' => 'Kazakh (Turkey)',
 	'kk-arab' => 'Kazakh (Arabic script)',
+	'kk-cn' => 'Kazakh (China)',
 	'kk-cyrl' => 'Kazakh (Cyrillic script)',
+	'kk-kz' => 'Kazakh (Kazakhstan)',
 	'kk-latn' => 'Kazakh (Latin script)',
+	'kk-tr' => 'Kazakh (Turkey)',
 	# used by Wikidata, T198366
 	'kld' => 'Gamilaraay',
 	'knn' => 'Maharashtrian Konkani',
@@ -153,17 +171,25 @@ $languageNames = [
 	'mfa' => 'Kelantan-Pattani Malay',
 	'mhr' => 'Eastern Mari',
 	'mid' => 'Mandaic',
-	'mis' => 'Unsupported language',
+	'mis' => 'unsupported language',
+	# used by Wikidata T155419
+	'mix' => 'Mixtec',
+	'mnw' => 'Mon',
 	'mo' => 'Moldovan',
 	'moe' => 'Innu',
-	'mnw' => 'Mon',
 	# used by Wikidata, T270059
 	'ms-arab' => 'Malay (Jawi script)',
 	'mui' => 'Musi',
+	/* Upper case in CLDR, but should be lower case
+	 * https://unicode-org.atlassian.net/browse/CLDR-9664
+	 */
+	'mul' => 'multiple languages',
 	# used by Wikidata, T180771
 	'nan-hani' => 'Min Nan (Hanji)',
 	# used by Wikidata, T263946
 	'nge' => 'Ngémba',
+	# Missing en translation T256649
+	'nl-informal' => 'Dutch (informal address)',
 	# used by Wikidata, T263946
 	'nla' => 'Ngombala',
 	# used by Wikidata, T263946
@@ -181,6 +207,8 @@ $languageNames = [
 	'nxm' => 'Numidian',
 	# used by Wikidata, added in InitialiseSettings.php
 	'nys' => 'Nyungar',
+	# Added to Core, T283053
+	'ojb' => 'Northwestern Ojibwe',
 	# used by Wikidata, T195816
 	'ojp' => 'Old Japanese',
 	# used by Wikidata, T195816
@@ -188,7 +216,11 @@ $languageNames = [
 	# used by Wikidata, T195816
 	'ojp-hira' => 'Old Japanese (Hiragana script)',
 	'olo' => 'Livvi-Karelian',
+	# used by Wikidata T265296
+	'oma' => 'Omaha-Ponca',
 	'ood' => "O'odham",
+	# used by Wikidata T265297
+	'osa-latn' => 'Osage (Latin script)',
 	'otk' => 'Old Turkish',
 	# used by Wikidata T275682
 	'pap-aw' => 'Papiamento (Aruba)',
@@ -201,9 +233,9 @@ $languageNames = [
 	'pjt' => 'Pitjantjatjara',
 	'pnb' => 'Western Punjabi',
 	'ppu' => 'Papora-Hoanya',
+	'prs' => 'Dari',
 	'pwn' => 'Paiwan',
 	'pyu' => 'Puyuma',
-	'prs' => 'Dari',
 	# used by Wikidata, T185194
 	'qya' => 'Quenya',
 	# used by Wikidata, T267479
@@ -241,14 +273,14 @@ $languageNames = [
 	'ryu' => 'Okinawan',
 	# used by Wikidata T230881
 	'sa-sidd' => 'Sanskrit (Siddham script)',
-	# used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
-	'sia' => 'Akkala Sámi',
 	'shi-latn' => 'Tachelhit (Latin script)',
 	'shi-tfng' => 'Tachelhit (Tifinagh script)',
 	'shy' => 'Shawiya',
 	'shy-arab' => 'Shawiya (Arabic script)',
 	'shy-latn' => 'Shawiya (Latin script)',
 	'shy-tfng' => 'Shawiya (Tifinagh script)',
+	# used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
+	'sia' => 'Akkala Sámi',
 	'sjd' => 'Kildin Sami',
 	'sje' => 'Pite Sami',
 	# used by Wikidata Change-Id: Iba40776d7f96445ae7dc2631438a6c07ac79ce9d
@@ -265,19 +297,26 @@ $languageNames = [
 	# used by Wikidata, added in InitialiseSettings.php
 	'srq' => 'Sirionó',
 	'ssf' => 'Thao',
+	# Missing en translation T256649
+	'sty' => 'Siberian Tatar',
 	'tg-cyrl' => 'Tajik (Cyrillic script)',
 	'tg-latn' => 'Tajik (Latin script)',
 	'tlb' => 'Tobelo',
-	'tt-cyrl' => 'Tatar (Cyrillic script)',
-	'tt-latn' => 'Tatar (Latin script)',
 	# used by Wikidata T220284
 	'tnq' => 'Taíno',
+	'tt-cyrl' => 'Tatar (Cyrillic script)',
+	'tt-latn' => 'Tatar (Latin script)',
 	# used by Wikidata, T263946
 	'tvu' => 'Tunen',
 	'tzl' => 'Talossan',
 	'ug-arab' => 'Uyghur (Arabic script)',
 	'ug-latn' => 'Uyghur (Latin script)',
 	'umu' => 'Munsee',
+	/* Upper case in CLDR, but should be lower case
+	 * https://unicode-org.atlassian.net/browse/CLDR-9664
+	 */
+	'und' => 'undetermined language',
+	# used by Wikidata, T265468
 	'uun' => 'Pazeh',
 	'uz-cyrl' => 'Uzbek (Cyrillic script)',
 	'uz-latn' => 'Uzbek (Latin script)',
@@ -287,6 +326,8 @@ $languageNames = [
 	'wes' => 'Pidgin',
 	# used by Wikidata, T239411
 	'wls' => 'Wallisian',
+	# used by Wikidata, T283364
+	'wya' => 'Wyandot',
 	'xpu' => 'Punic',
 	'xsy' => 'Saisiyat',
 	# used by Wikidata, T263946
@@ -294,6 +335,8 @@ $languageNames = [
 	# used by Wikidata, T263946
 	'yat' => 'Yambeta',
 	'ydd' => 'Eastern Yiddish',
+	# used by Wikidata, T252198
+	'ykg' => 'Tundra Yukaghir',
 	'zh-classical' => 'Classical Chinese',
 	'zh-cn' => 'Chinese (China)',
 	'zh-hk' => 'Chinese (Hong Kong)',
@@ -304,11 +347,8 @@ $languageNames = [
 	'zh-tw' => 'Chinese (Taiwan)',
 	# language redirect
 	'zh-yue' => 'Cantonese',
-
 	/* Upper case in CLDR, but should be lower case
 	 * https://unicode-org.atlassian.net/browse/CLDR-9664
 	 */
-	'mul' => 'multiple languages',
-	'und' => 'unknown language',
 	'zxx' => 'no linguistic content',
 ];

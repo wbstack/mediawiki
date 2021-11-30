@@ -9,7 +9,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Sparql\SparqlClient;
 use Title;
 use Wikibase\DataAccess\EntitySourceDefinitions;
-use Wikibase\Lib\EntityTypeDefinitions;
+use Wikibase\Lib\SubEntityTypesMapper;
 use Wikibase\Lib\Units\JsonUnitStorage;
 use Wikibase\Lib\Units\UnitConverter;
 use Wikibase\Repo\Rdf\RdfVocabulary;
@@ -141,8 +141,7 @@ class AddUnitConversions extends Maintenance {
 			$this->fatalError( 'SPARQL endpoint should be supplied in config or parameters' );
 		}
 
-		$baseUri = $this->getOption( 'base-uri',
-				$settings->getSetting( 'conceptBaseUri' ) );
+		$baseUri = $this->getOption( 'base-uri', WikibaseRepo::getItemVocabularyBaseUri() );
 
 		$this->client = new SparqlClient( $endPoint, MediaWikiServices::getInstance()->getHttpRequestFactory() );
 		$this->client->appendUserAgent( __CLASS__ );
@@ -355,7 +354,7 @@ QUERY;
 		return new RdfVocabulary(
 			[ '' => $baseUri ],
 			[ '' => $entityDataTitle->getCanonicalURL() . '/' ],
-			new EntitySourceDefinitions( [], new EntityTypeDefinitions( [] ) ),
+			new EntitySourceDefinitions( [], new SubEntityTypesMapper( [] ) ),
 			[ '' => 'wd' ],
 			[ '' => '' ],
 			[],

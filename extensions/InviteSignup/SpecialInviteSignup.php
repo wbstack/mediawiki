@@ -30,7 +30,7 @@ class SpecialInviteSignup extends SpecialPage {
 
 	protected function getStore() {
 		if ( $this->store === null ) {
-			$this->store = new InviteStore( wfGetDB( DB_MASTER ), 'invitesignup' );
+			$this->store = new InviteStore( wfGetDB( DB_PRIMARY ), 'invitesignup' );
 		}
 
 		return $this->store;

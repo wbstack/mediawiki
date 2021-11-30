@@ -17,13 +17,13 @@ use Wikibase\Lib\Summary;
 use Wikibase\Lib\UserInputException;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\ChangeOp\FingerprintChangeOpFactory;
 use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Special page for setting label, description and aliases of a Wikibase entity that features
@@ -72,6 +72,7 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	private $aliases = [];
 
 	public function __construct(
+		array $tags,
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
@@ -82,6 +83,7 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	) {
 		parent::__construct(
 			'SetLabelDescriptionAliases',
+			$tags,
 			$copyrightView,
 			$summaryFormatter,
 			$entityTitleLookup,
@@ -94,13 +96,14 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	}
 
 	public static function factory(
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
+		MediawikiEditEntityFactory $editEntityFactory,
 		EntityPermissionChecker $entityPermissionChecker,
 		EntityTitleLookup $entityTitleLookup,
 		SettingsArray $repoSettings,
+		SummaryFormatter $summaryFormatter,
 		ContentLanguages $termsLanguages
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
 			$repoSettings->getSetting( 'dataRightsUrl' ),
@@ -108,11 +111,12 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 		);
 
 		return new self(
+			$repoSettings->getSetting( 'specialPageTags' ),
 			$copyrightView,
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$entityTitleLookup,
-			$wikibaseRepo->newEditEntityFactory(),
-			$wikibaseRepo->getChangeOpFactoryProvider()->getFingerprintChangeOpFactory(),
+			$editEntityFactory,
+			$changeOpFactoryProvider->getFingerprintChangeOpFactory(),
 			$termsLanguages,
 			$entityPermissionChecker
 		);

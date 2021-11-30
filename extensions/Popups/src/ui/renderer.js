@@ -15,6 +15,8 @@ const landscapePopupWidth = 450,
 	pointerSize = 8, // Height of the pointer.
 	maxLinkWidthForCenteredPointer = 28; // Link with roughly < 4 chars.
 
+export { pointerSize, landscapePopupWidth, portraitPopupWidth }; // for use in storybook
+
 /**
  * @typedef {Object} ext.popups.Measures
  * @property {number} pageX
@@ -160,9 +162,11 @@ export function createPreviewWithType( model ) {
 }
 
 function supportsCSSClipPath() {
+	/* eslint-disable compat/compat */
 	return window.CSS &&
 		typeof CSS.supports === 'function' &&
 		CSS.supports( 'clip-path', 'polygon(1px 1px)' );
+	/* eslint-enable compat/compat */
 }
 
 /**
@@ -439,6 +443,29 @@ export function createLayout(
 }
 
 /**
+ * is there a pointer on the image of the preview?
+ *
+ * @param {ext.popups.Preview} preview
+ * @param {ext.popups.PreviewLayout} layout
+ * @return {boolean}
+ */
+export function hasPointerOnImage( preview, layout ) {
+	if ( ( !preview.hasThumbnail || preview.isTall && !layout.flippedX ) &&
+		!layout.flippedY ) {
+		return false;
+	}
+	if ( preview.hasThumbnail ) {
+		if (
+			( !preview.isTall && !layout.flippedY ) ||
+			( preview.isTall && layout.flippedX )
+		) {
+			return true;
+		}
+	}
+	return false;
+}
+
+/**
  * Generates a list of declarative CSS classes that represent the layout of
  * the preview.
  *
@@ -463,14 +490,10 @@ export function getClasses( preview, layout ) {
 		classes.push( 'flipped-x' );
 	}
 
-	if ( ( !preview.hasThumbnail || preview.isTall && !layout.flippedX ) &&
-		!layout.flippedY ) {
-		classes.push( 'mwe-popups-no-image-pointer' );
-	}
-
-	if ( preview.hasThumbnail && !preview.isTall && !layout.flippedY ) {
-		classes.push( 'mwe-popups-image-pointer' );
-	}
+	classes.push(
+		hasPointerOnImage( preview, layout ) ?
+			'mwe-popups-image-pointer' : 'mwe-popups-no-image-pointer'
+	);
 
 	if ( preview.isTall ) {
 		classes.push( 'mwe-popups-is-tall' );
@@ -515,7 +538,16 @@ export function layoutPreview(
 		);
 	}
 
-	// eslint-disable-next-line mediawiki/class-doc
+	// The following classes are used here:
+	// * flipped-x
+	// * flipped-x-y
+	// * flipped-y
+	// * mwe-popups-fade-in-down
+	// * mwe-popups-fade-in-up
+	// * mwe-popups-image-pointer
+	// * mwe-popups-is-not-tall
+	// * mwe-popups-is-tall
+	// * mwe-popups-no-image-pointer
 	popup.addClass( classes.join( ' ' ) );
 
 	popup.css( {

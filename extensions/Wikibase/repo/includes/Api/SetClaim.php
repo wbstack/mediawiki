@@ -22,12 +22,14 @@ use Wikibase\DataModel\Services\Statement\StatementGuidParsingException;
 use Wikibase\DataModel\Services\Statement\StatementGuidValidator;
 use Wikibase\DataModel\Statement\Statement;
 use Wikibase\DataModel\Statement\StatementList;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Summary;
+use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\StatementChangeOpFactory;
 use Wikibase\Repo\ClaimSummaryBuilder;
 use Wikibase\Repo\Diff\ClaimDiffer;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
-use Wikibase\Repo\WikibaseRepo;
+use Wikibase\Repo\SnakFactory;
 
 /**
  * API module for creating or updating an entire Claim.
@@ -79,6 +81,11 @@ class SetClaim extends ApiBase {
 	/** @var IBufferingStatsdDataFactory */
 	private $stats;
 
+	/**
+	 * @var string[]
+	 */
+	private $sandboxEntityIds;
+
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
@@ -90,7 +97,8 @@ class SetClaim extends ApiBase {
 		callable $resultBuilderInstantiator,
 		callable $entitySavingHelperInstantiator,
 		IBufferingStatsdDataFactory $stats,
-		bool $federatedPropertiesEnabled
+		bool $federatedPropertiesEnabled,
+		array $sandboxEntityIds
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
@@ -103,23 +111,24 @@ class SetClaim extends ApiBase {
 		$this->entitySavingHelper = $entitySavingHelperInstantiator( $this );
 		$this->stats = $stats;
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
+		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
 		IBufferingStatsdDataFactory $stats,
+		ApiHelperFactory $apiHelperFactory,
+		ChangeOpFactoryProvider $changeOpFactoryProvider,
 		EntityIdParser $entityIdParser,
 		Deserializer $externalFormatStatementDeserializer,
+		SettingsArray $repoSettings,
+		SnakFactory $snakFactory,
 		StatementGuidParser $statementGuidParser,
 		StatementGuidValidator $statementGuidValidator
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-		$changeOpFactoryProvider = $wikibaseRepo->getChangeOpFactoryProvider();
-
 		$modificationHelper = new StatementModificationHelper(
-			$wikibaseRepo->getSnakFactory(),
+			$snakFactory,
 			$entityIdParser,
 			$statementGuidValidator,
 			$apiHelperFactory->getErrorReporter( $mainModule )
@@ -140,7 +149,8 @@ class SetClaim extends ApiBase {
 				return $apiHelperFactory->getEntitySavingHelper( $module );
 			},
 			$stats,
-			$wikibaseRepo->inFederatedPropertyMode()
+			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
+			$repoSettings->getSetting( 'sandboxEntityIds' )
 		);
 	}
 
@@ -176,7 +186,7 @@ class SetClaim extends ApiBase {
 
 		$entityId = $statementGuid->getEntityId();
 		$this->validateAlteringEntityById( $entityId );
-		$entity = $this->entitySavingHelper->loadEntity( $entityId );
+		$entity = $this->entitySavingHelper->loadEntity( $params, $entityId );
 
 		if ( !( $entity instanceof StatementListProvidingEntity ) ) {
 			$this->errorReporter->dieError( 'The given entity cannot contain statements', 'not-supported' );
@@ -194,8 +204,9 @@ class SetClaim extends ApiBase {
 		$index = $params['index'] ?? null;
 		$changeop = $this->statementChangeOpFactory->newSetStatementOp( $statement, $index );
 		$this->modificationHelper->applyChangeOp( $changeop, $entity, $summary );
+		$statement = $entity->getStatements()->getFirstStatementWithGuid( $guid );
 
-		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary );
+		$status = $this->entitySavingHelper->attemptSaveEntity( $entity, $summary, $params, $this->getContext() );
 		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'pageinfo' );
 		$this->resultBuilder->markSuccess();
 		$this->resultBuilder->addStatement( $statement );
@@ -336,16 +347,18 @@ class SetClaim extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getExamplesMessages(): array {
+		$guid = $this->sandboxEntityIds[ 'mainItem' ] . '$5627445f-43cb-ed6d-3adb-760e85bd17ee';
+
 		return [
-			'action=wbsetclaim&claim={"id":"Q2$5627445f-43cb-ed6d-3adb-760e85bd17ee",'
+			'action=wbsetclaim&claim={"id":"' . $guid . '",'
 				. '"type":"claim","mainsnak":{"snaktype":"value","property":"P1",'
 				. '"datavalue":{"value":"City","type":"string"}}}'
 				=> 'apihelp-wbsetclaim-example-1',
-			'action=wbsetclaim&claim={"id":"Q2$5627445f-43cb-ed6d-3adb-760e85bd17ee",'
+			'action=wbsetclaim&claim={"id":"' . $guid . '",'
 				. '"type":"claim","mainsnak":{"snaktype":"value","property":"P1",'
 				. '"datavalue":{"value":"City","type":"string"}}}&index=0'
 				=> 'apihelp-wbsetclaim-example-2',
-			'action=wbsetclaim&claim={"id":"Q2$5627445f-43cb-ed6d-3adb-760e85bd17ee",'
+			'action=wbsetclaim&claim={"id":"' . $guid . '",'
 				. '"type":"statement","mainsnak":{"snaktype":"value","property":"P1",'
 				. '"datavalue":{"value":"City","type":"string"}},'
 				. '"references":[{"snaks":{"P2":[{"snaktype":"value","property":"P2",'

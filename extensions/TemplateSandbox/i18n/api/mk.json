@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Претставка за песочник на предлошка, како кај [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Расчлени ја страницата со <var>$1templatesandboxtext</var> наместо содржините на тука наведената страница.",
+	"templatesandbox-apihelp-text": "Расчлени ја страницата со оваа содржина на страницата наместо страницата наведена од <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Содржински модел на <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Содржински формат на <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Обата параметра <var>$1templatesandboxtitle</var> и <var>$1templatesandboxtext</var> мора да бидат или укажани или изоставени."
+}

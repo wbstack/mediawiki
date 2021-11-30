@@ -2,14 +2,17 @@
 
 namespace Wikibase\Lib\Store\Sql;
 
-use DBAccessBase;
 use InvalidArgumentException;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\PropertyInfoLookup;
 use Wikibase\Lib\Store\PropertyInfoStore;
+use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\DBError;
+use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -19,39 +22,38 @@ use Wikimedia\Rdbms\IResultWrapper;
  * @author Daniel Kinzler
  * @author Bene* < benestar.wikimedia@gmail.com >
  */
-class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, PropertyInfoStore {
+class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 
-	/**
-	 * @var string
-	 */
-	private $tableName;
-
-	/**
-	 * @var EntityIdComposer
-	 */
+	/** @var EntityIdComposer */
 	private $entityIdComposer;
 
 	/**
-	 * @var bool
+	 * @var RepoDomainDb
 	 */
+	private $db;
+
+	/** @var string */
+	private $tableName;
+
+	/** @var bool */
 	private $allowWrites;
 
 	/**
 	 * @param EntityIdComposer $entityIdComposer
-	 * @param string|bool $databaseName For the property source
+	 * @param RepoDomainDb $db
 	 * @param bool $allowWrites Should writes be allowed to the table? false in cases that a remote property source is being used.
 	 *
 	 * TODO split this more cleanly into a lookup and a writer, and then $allowWrites would not be needed?
 	 */
 	public function __construct(
 		EntityIdComposer $entityIdComposer,
-		$databaseName,
+		RepoDomainDb $db,
 		bool $allowWrites
 	) {
-		parent::__construct( $databaseName );
-		$this->allowWrites = $allowWrites;
-		$this->tableName = 'wb_property_info';
 		$this->entityIdComposer = $entityIdComposer;
+		$this->db = $db;
+		$this->tableName = 'wb_property_info';
+		$this->allowWrites = $allowWrites;
 	}
 
 	/**
@@ -116,7 +118,11 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 	 * @throws DBError
 	 */
 	public function getPropertyInfo( PropertyId $propertyId ) {
-		$dbr = $this->getConnection( DB_REPLICA );
+		Assert::parameterType( NumericPropertyId::class, $propertyId, '$propertyId' );
+		/** @var NumericPropertyId $propertyId */
+		'@phan-var NumericPropertyId $propertyId';
+
+		$dbr = $this->getReadConnection();
 
 		$res = $dbr->selectField(
 			$this->tableName,
@@ -124,8 +130,6 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 			[ 'pi_property_id' => $propertyId->getNumericId() ],
 			__METHOD__
 		);
-
-		$this->releaseConnection( $dbr );
 
 		if ( $res === false ) {
 			$info = null;
@@ -149,7 +153,7 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 	 * @throws DBError
 	 */
 	public function getPropertyInfoForDataType( $dataType ) {
-		$dbr = $this->getConnection( DB_REPLICA );
+		$dbr = $this->getReadConnection();
 
 		$res = $dbr->select(
 			$this->tableName,
@@ -159,8 +163,6 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 		);
 
 		$infos = $this->decodeResult( $res );
-
-		$this->releaseConnection( $dbr );
 
 		return $infos;
 	}
@@ -172,7 +174,7 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 	 * @throws DBError
 	 */
 	public function getAllPropertyInfo() {
-		$dbr = $this->getConnection( DB_REPLICA );
+		$dbr = $this->getReadConnection();
 
 		$res = $dbr->select(
 			$this->tableName,
@@ -183,21 +185,19 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 
 		$infos = $this->decodeResult( $res );
 
-		$this->releaseConnection( $dbr );
-
 		return $infos;
 	}
 
 	/**
 	 * @see PropertyInfoStore::setPropertyInfo
 	 *
-	 * @param PropertyId $propertyId
+	 * @param NumericPropertyId $propertyId
 	 * @param array $info
 	 *
 	 * @throws DBError
 	 * @throws InvalidArgumentException
 	 */
-	public function setPropertyInfo( PropertyId $propertyId, array $info ) {
+	public function setPropertyInfo( NumericPropertyId $propertyId, array $info ) {
 		if ( !isset( $info[ PropertyInfoLookup::KEY_DATA_TYPE ] ) ) {
 			throw new InvalidArgumentException( 'Missing required info field: ' . PropertyInfoLookup::KEY_DATA_TYPE );
 		}
@@ -207,7 +207,7 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 		$type = $info[ PropertyInfoLookup::KEY_DATA_TYPE ];
 		$json = json_encode( $info );
 
-		$dbw = $this->getConnection( DB_MASTER );
+		$dbw = $this->getWriteConnection();
 
 		$dbw->replace(
 			$this->tableName,
@@ -219,23 +219,21 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 			],
 			__METHOD__
 		);
-
-		$this->releaseConnection( $dbw );
 	}
 
 	/**
 	 * @see PropertyInfoStore::removePropertyInfo
 	 *
-	 * @param PropertyId $propertyId
+	 * @param NumericPropertyId $propertyId
 	 *
 	 * @throws DBError
 	 * @throws InvalidArgumentException
 	 * @return bool
 	 */
-	public function removePropertyInfo( PropertyId $propertyId ) {
+	public function removePropertyInfo( NumericPropertyId $propertyId ) {
 		$this->assertCanWritePropertyInfo();
 
-		$dbw = $this->getConnection( DB_MASTER );
+		$dbw = $this->getWriteConnection();
 
 		$dbw->delete(
 			$this->tableName,
@@ -244,7 +242,6 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 		);
 
 		$c = $dbw->affectedRows();
-		$this->releaseConnection( $dbw );
 
 		return $c > 0;
 	}
@@ -257,15 +254,23 @@ class PropertyInfoTable extends DBAccessBase implements PropertyInfoLookup, Prop
 		}
 	}
 
+	private function getWriteConnection(): IDatabase {
+		return $this->db->connections()->getWriteConnectionRef();
+	}
+
+	private function getReadConnection(): IDatabase {
+		return $this->db->connections()->getReadConnectionRef();
+	}
+
 	/**
-	 * Returns a database connection suitable for writing to the database that
+	 * Returns a database wrapper suitable for working with the database that
 	 * contains the property info table.
 	 *
-	 * This is for use for closely related classes that want to operate directly
+	 * This is for use by closely related classes that want to operate directly
 	 * on the database table.
 	 */
-	public function getWriteConnection() {
-		return $this->getConnection( DB_MASTER );
+	public function getDomainDb(): RepoDomainDb {
+		return $this->db;
 	}
 
 	/**

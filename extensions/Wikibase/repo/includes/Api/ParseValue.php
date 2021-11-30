@@ -20,7 +20,7 @@ use ValueParsers\ParserOptions;
 use ValueParsers\ValueParser;
 use ValueValidators\Error;
 use ValueValidators\ValueValidator;
-use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
 use Wikibase\Lib\DataTypeFactory;
@@ -29,7 +29,6 @@ use Wikibase\Repo\Localizer\ExceptionLocalizer;
 use Wikibase\Repo\Validators\CompositeValidator;
 use Wikibase\Repo\Validators\ValidatorErrorLocalizer;
 use Wikibase\Repo\ValueParserFactory;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * API module for using value parsers.
@@ -120,22 +119,23 @@ class ParseValue extends ApiBase {
 		ApiMain $mainModule,
 		string $moduleName,
 		IBufferingStatsdDataFactory $stats,
+		ApiHelperFactory $apiHelperFactory,
 		DataTypeFactory $dataTypeFactory,
 		DataTypeValidatorFactory $dataTypeValidatorFactory,
+		ExceptionLocalizer $exceptionLocalizer,
+		PropertyDataTypeLookup $propertyDataTypeLookup,
+		ValidatorErrorLocalizer $validatorErrorLocalizer,
 		ValueParserFactory $valueParserFactory
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
 		return new self(
 			$mainModule,
 			$moduleName,
 			$dataTypeFactory,
 			$valueParserFactory,
 			$dataTypeValidatorFactory,
-			$wikibaseRepo->getExceptionLocalizer(),
-			$wikibaseRepo->getValidatorErrorLocalizer(),
-			$wikibaseRepo->getPropertyDataTypeLookup(),
+			$exceptionLocalizer,
+			$validatorErrorLocalizer,
+			$propertyDataTypeLookup,
 			$apiHelperFactory->getErrorReporter( $mainModule ),
 			$stats
 		);
@@ -179,7 +179,7 @@ class ParseValue extends ApiBase {
 
 		if ( empty( $name ) && isset( $params['property'] ) ) {
 			try {
-				$propertyId = new PropertyId( $params['property'] );
+				$propertyId = new NumericPropertyId( $params['property'] );
 			} catch ( InvalidArgumentException $ex ) {
 				$this->errorReporter->dieWithError(
 					'wikibase-api-invalid-property-id',
@@ -222,7 +222,7 @@ class ParseValue extends ApiBase {
 		$name = $params['datatype'];
 
 		if ( empty( $name ) && isset( $params['property'] ) ) {
-			$propertyId = new PropertyId( $params['property'] );
+			$propertyId = new NumericPropertyId( $params['property'] );
 			$name = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $propertyId );
 		}
 

@@ -87,7 +87,7 @@ final class EntitySearchUtils {
 		if ( is_array( $first ) ) {
 			// If we have multiple, like for labels, extract the first one
 			$labels_data = array_map(
-				function ( $data ) {
+				static function ( $data ) {
 					return $data[0] ?? null;
 				},
 				$data

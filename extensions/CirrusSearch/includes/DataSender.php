@@ -310,7 +310,8 @@ class DataSender extends ElasticsearchIntermediary {
 			$services->getDBLoadBalancer()->getConnection( DB_REPLICA ),
 			$services->getParserCache(),
 			$services->getRevisionStore(),
-			new CirrusSearchHookRunner( $services->getHookContainer() )
+			new CirrusSearchHookRunner( $services->getHookContainer() ),
+			$services->getBacklinkCacheFactory()
 		);
 		foreach ( $documents as $i => $doc ) {
 			if ( !$builder->finalize( $doc ) ) {
@@ -407,7 +408,7 @@ class DataSender extends ElasticsearchIntermediary {
 			return Status::newGood();
 		} else {
 			$this->failure( $exception );
-			$documentIds = array_map( function ( $d ) {
+			$documentIds = array_map( static function ( $d ) {
 				return $d->getId();
 			}, $documents );
 			$logContext = [ 'docId' => implode( ', ', $documentIds ) ];

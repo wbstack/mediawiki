@@ -2,18 +2,18 @@
 
 namespace Wikibase\Lib\Store\Sql\Terms;
 
-use FakeResultWrapper;
 use InvalidArgumentException;
 use MediaWiki\Storage\NameTableAccessException;
 use Psr\Log\LoggerInterface;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\EntityId\EntityIdComposer;
+use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\MatchingTermsLookup;
 use Wikibase\Lib\Store\Sql\Terms\Util\StatsdMonitoring;
 use Wikibase\Lib\Store\TermIndexSearchCriteria;
 use Wikibase\Lib\TermIndexEntry;
+use Wikimedia\Rdbms\FakeResultWrapper;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -26,10 +26,8 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 
 	use StatsdMonitoring;
 
-	/** @var ILoadBalancer */
-	private $lb;
-	/** @var bool|string */
-	private $databaseDomain;
+	/** @var RepoDomainDb */
+	private $repoDb;
 
 	/** @var LoggerInterface */
 	private $logger;
@@ -44,15 +42,13 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 	private $entityIdComposer;
 
 	public function __construct(
-		ILoadBalancer $lb,
+		RepoDomainDb $repoDb,
 		TypeIdsAcquirer $typeIdsAcquirer,
 		TypeIdsResolver $typeIdsResolver,
 		EntityIdComposer $entityIdComposer,
-		LoggerInterface $logger,
-		$databaseDomain = false
+		LoggerInterface $logger
 	) {
-		$this->lb = $lb;
-		$this->databaseDomain = $databaseDomain;
+		$this->repoDb = $repoDb;
 		$this->typeIdsAcquirer = $typeIdsAcquirer;
 		$this->typeIdsResolver = $typeIdsResolver;
 		$this->entityIdComposer = $entityIdComposer;
@@ -260,6 +256,6 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 	}
 
 	private function getDbr() {
-		return $this->lb->getConnection( ILoadBalancer::DB_REPLICA, [], $this->databaseDomain );
+		return $this->repoDb->connections()->getReadConnection();
 	}
 }

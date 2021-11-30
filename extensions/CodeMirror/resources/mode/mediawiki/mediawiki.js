@@ -200,6 +200,9 @@
 					state.tokenize = state.stack.pop();
 					return makeLocalStyle( 'mw-template-bracket', state, 'nTemplate' );
 				}
+				if ( stream.match( /^[\s\u00a0]*<!--.*?-->/ ) ) {
+					return makeLocalStyle( 'mw-comment', state );
+				}
 				if ( haveAte && stream.sol() ) {
 					// @todo error message
 					state.nTemplate--;
@@ -422,7 +425,7 @@
 
 		function eatHtmlTagAttribute( name ) {
 			return function ( stream, state ) {
-				if ( stream.match( /^[^>/<{&~]+/ ) ) {
+				if ( stream.match( /^(?:"[^"]*"|'[^']*'|[^>/<{&~])+/ ) ) {
 					return makeLocalStyle( 'mw-htmltag-attribute', state );
 				}
 				if ( stream.eat( '>' ) ) {
@@ -442,7 +445,7 @@
 
 		function eatExtTagAttribute( name ) {
 			return function ( stream, state ) {
-				if ( stream.match( /^[^>/<{&~]+/ ) ) {
+				if ( stream.match( /^(?:"[^"]*"|'[^']*'|[^>/<{&~])+/ ) ) {
 					return makeLocalStyle( 'mw-exttag-attribute mw-ext-' + name, state );
 				}
 				if ( stream.eat( '>' ) ) {

@@ -13,7 +13,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.37.0"
 	},
 	"ExtensionFunctions": [
 		"MediaWiki\\Extensions\\OAuth\\Backend\\Hooks::onExtensionFunctions"
@@ -123,7 +123,7 @@
 		},
 		"MWOAuthSharedUserSource": {
 			"value": null,
-			"description": "Source of shared user IDs, if enabled. If CentralIdLookup is available, this is the $providerId for CentralIdLookup::factory(). Generally null would be what you want, to use the default provider. If that class is not available or the named provider is not found, this is\n * passed to the 'OAuthGetUserNamesFromCentralIds', 'OAuthGetLocalUserFromCentralId', 'OAuthGetCentralIdFromLocalUser', and 'OAuthGetCentralIdFromUserName' hooks. This has no effect if $wgMWOAuthSharedUserIDs is set to false."
+			"description": "Source of shared user IDs, if enabled. If CentralIdLookup is available, this is the $providerId for CentralIdLookupFactory::getLookup(). Generally null would be what you want, to use the default provider. If that class is not available or the named provider is not found, this is\n * passed to the 'OAuthGetUserNamesFromCentralIds', 'OAuthGetLocalUserFromCentralId', 'OAuthGetCentralIdFromLocalUser', and 'OAuthGetCentralIdFromUserName' hooks. This has no effect if $wgMWOAuthSharedUserIDs is set to false."
 		},
 		"MWOAuthRequestExpirationAge": {
 			"value": 2592000,

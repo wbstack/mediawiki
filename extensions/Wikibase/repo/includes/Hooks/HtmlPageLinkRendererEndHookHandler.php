@@ -15,6 +15,7 @@ use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Entity\SerializableEntityId;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookupException;
 use Wikibase\DataModel\Services\Lookup\TermLookup;
@@ -28,7 +29,6 @@ use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
 use Wikibase\Lib\Store\LinkTargetEntityIdLookup;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
 use Wikibase\Repo\Hooks\Formatters\EntityLinkFormatterFactory;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Handler for the HtmlPageLinkRendererEnd hook, used to change the default link text of links to
@@ -72,9 +72,9 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 	private $interwikiLookup;
 
 	/**
-	 * @var callable
+	 * @var EntityLinkFormatterFactory
 	 */
-	private $linkFormatterFactoryCallback;
+	private $linkFormatterFactory;
 
 	/**
 	 * @var SpecialPageFactory
@@ -116,6 +116,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		SpecialPageFactory $specialPageFactory,
 		EntityExistenceChecker $entityExistenceChecker,
 		EntityIdParser $entityIdParser,
+		EntityLinkFormatterFactory $entityLinkFormatterFactory,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityUrlLookup $entityUrlLookup,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
@@ -123,19 +124,13 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		SettingsArray $repoSettings,
 		TermLookup $termLookup
 	): self {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		// NOTE: keep in sync with fallback chain construction in LabelPrefetchHookHandler::factory
-		$context = RequestContext::getMain();
-
 		return new self(
 			$entityExistenceChecker,
 			$entityIdParser,
 			$termLookup,
 			$entityNamespaceLookup,
 			$interwikiLookup,
-			function ( $language ) use ( $wikibaseRepo ) {
-				return $wikibaseRepo->getEntityLinkFormatterFactory( $language );
-			},
+			$entityLinkFormatterFactory,
 			$specialPageFactory,
 			$languageFallbackChainFactory,
 			$entityUrlLookup,
@@ -190,7 +185,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		TermLookup $termLookup,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		InterwikiLookup $interwikiLookup,
-		callable $linkFormatterFactoryCallback,
+		EntityLinkFormatterFactory $linkFormatterFactory,
 		SpecialPageFactory $specialPageFactory,
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
 		EntityUrlLookup $entityUrlLookup,
@@ -203,7 +198,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		$this->termLookup = $termLookup;
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
 		$this->interwikiLookup = $interwikiLookup;
-		$this->linkFormatterFactoryCallback = $linkFormatterFactoryCallback;
+		$this->linkFormatterFactory = $linkFormatterFactory;
 		$this->specialPageFactory = $specialPageFactory;
 		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
 		$this->entityUrlLookup = $entityUrlLookup;
@@ -231,7 +226,6 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		&$html = null
 	) {
 		$outTitle = $context->getOutput()->getTitle();
-		$linkFormatterFactory = call_user_func( $this->linkFormatterFactoryCallback, $context->getLanguage() );
 
 		// For good measure: Don't do anything in case the OutputPage has no Title set.
 		if ( !$outTitle ) {
@@ -252,8 +246,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		}
 
 		try {
-			return $this->internalDoHtmlPageLinkRendererEnd(
-				$linkRenderer, $target, $text, $customAttribs, $context, $linkFormatterFactory, $html );
+			return $this->internalDoHtmlPageLinkRendererEnd( $linkRenderer, $target, $text, $customAttribs, $context, $html );
 		} catch ( FederatedPropertiesException $ex ) {
 			$this->federatedPropsDegradedDoHtmlPageLinkRendererEnd( $target, $text, $customAttribs );
 
@@ -296,7 +289,6 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 	 * @param HtmlArmor|string|null &$text
 	 * @param array &$customAttribs
 	 * @param RequestContext $context
-	 * @param EntityLinkFormatterFactory $linkFormatterFactory
 	 * @param string|null &$html
 	 *
 	 * @return bool true to continue processing the link, false to use $html directly for the link
@@ -307,7 +299,6 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		&$text,
 		array &$customAttribs,
 		RequestContext $context,
-		EntityLinkFormatterFactory $linkFormatterFactory,
 		&$html = null
 	) {
 		$out = $context->getOutput();
@@ -361,7 +352,11 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		$labelData = $this->termFallbackToTermData( $label );
 		$descriptionData = $this->termFallbackToTermData( $description );
 
-		$linkFormatter = $linkFormatterFactory->getLinkFormatter( $entityId->getEntityType() );
+		$linkFormatter = $this->linkFormatterFactory->getLinkFormatter(
+			$entityId->getEntityType(),
+			$context->getLanguage()
+		);
+
 		$text = new HtmlArmor( $linkFormatter->getHtml( $entityId, $labelData ) );
 
 		$customAttribs['title'] = $linkFormatter->getTitleAttribute(
@@ -432,7 +427,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 			try {
 				// FIXME: This assumes repository name is equal to interwiki. This assumption might
 				// become invalid
-				return $this->entityIdParser->parse( EntityId::joinSerialization( [ $idPrefix, '', $idPart ] ) );
+				return $this->entityIdParser->parse( SerializableEntityId::joinSerialization( [ $idPrefix, '', $idPart ] ) );
 			} catch ( EntityIdParsingException $ex ) {
 			}
 		}

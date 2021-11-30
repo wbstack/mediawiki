@@ -158,7 +158,6 @@ class UpdateSuggesterIndex extends Maintenance {
 			'Set index.routing.allocation.exclude.tag on the created index. Useful if you want ' .
 			'to force the suggester index not to be allocated on a specific set of nodes.',
 			false, true );
-		$this->requireExtension( 'CirrusSearch' );
 	}
 
 	public function execute() {
@@ -167,6 +166,7 @@ class UpdateSuggesterIndex extends Maintenance {
 			$wgCirrusSearchMasterTimeout;
 
 		$this->disablePoolCountersAndLogging();
+		$this->workAroundBrokenMessageCache();
 		$this->masterTimeout = $this->getOption( 'masterTimeout', $wgCirrusSearchMasterTimeout );
 		$this->indexTypeName = Connection::TITLE_SUGGEST_TYPE;
 
@@ -245,6 +245,20 @@ class UpdateSuggesterIndex extends Maintenance {
 		}
 
 		return true;
+	}
+
+	private function workAroundBrokenMessageCache() {
+		// Under some configurations (T288233) the i18n cache fails to
+		// initialize. After failing, at least in this particular deployment,
+		// it will fallback to local CDB files and ignore on-wiki overrides
+		// which is acceptable for this script.
+		try {
+			wfMessage( 'ok' )->text();
+		} catch ( \LogicException $e ) {
+			// The first failure should trigger the fallback mode, this second
+			// try should work (and not throw the LogicException deep in the updates).
+			wfMessage( 'ok' )->text();
+		}
 	}
 
 	/**
@@ -570,7 +584,7 @@ class UpdateSuggesterIndex extends Maintenance {
 				}
 				$this->outputProgress( $docsDumped, $totalDocsToDump );
 				MWElasticUtils::withRetry( $this->indexRetryAttempts,
-					function () use ( $destinationType, $suggestDocs ) {
+					static function () use ( $destinationType, $suggestDocs ) {
 						$destinationType->addDocuments( $suggestDocs );
 					}
 				);

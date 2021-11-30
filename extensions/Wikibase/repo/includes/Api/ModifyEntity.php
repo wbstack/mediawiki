@@ -15,13 +15,14 @@ use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\LookupConstants;
+use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
 use Wikibase\Lib\StringNormalizer;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpResult;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
-use Wikibase\Repo\SiteLinkTargetProvider;
+use Wikibase\Repo\SiteLinkGlobalIdentifiersProvider;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\Store\Store;
@@ -45,9 +46,9 @@ abstract class ModifyEntity extends ApiBase {
 	protected $stringNormalizer;
 
 	/**
-	 * @var SiteLinkTargetProvider
+	 * @var SiteLinkGlobalIdentifiersProvider
 	 */
-	protected $siteLinkTargetProvider;
+	protected $siteLinkGlobalIdentifiersProvider;
 
 	/**
 	 * @var EntityTitleStoreLookup
@@ -95,6 +96,11 @@ abstract class ModifyEntity extends ApiBase {
 	protected $enabledEntityTypes;
 
 	/**
+	 * @var bool
+	 */
+	private $isFreshIdAssigned;
+
+	/**
 	 * @param ApiMain $mainModule
 	 * @param string $moduleName
 	 * @param bool $federatedPropertiesEnabled
@@ -105,8 +111,7 @@ abstract class ModifyEntity extends ApiBase {
 	public function __construct( ApiMain $mainModule, string $moduleName, bool $federatedPropertiesEnabled, string $modulePrefix = '' ) {
 		parent::__construct( $mainModule, $moduleName, $modulePrefix );
 
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $this->getContext() );
+		$apiHelperFactory = WikibaseRepo::getApiHelperFactory();
 		$settings = WikibaseRepo::getSettings();
 
 		//TODO: provide a mechanism to override the services
@@ -118,23 +123,21 @@ abstract class ModifyEntity extends ApiBase {
 
 		$this->entitySavingHelper->setEntityIdParam( 'id' );
 
-		$this->setServices( new SiteLinkTargetProvider(
-			$wikibaseRepo->getSiteLookup(),
-			$settings->getSetting( 'specialSiteLinkGroups' )
-		) );
+		$this->setServices( WikibaseRepo::getSiteLinkGlobalIdentifiersProvider() );
 
 		// TODO: use the EntitySavingHelper to load the entity, instead of an EntityRevisionLookup.
-		$this->revisionLookup = $wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED );
+		$this->revisionLookup = WikibaseRepo::getStore()->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED );
 		$this->permissionChecker = WikibaseRepo::getEntityPermissionChecker();
 		$this->titleLookup = WikibaseRepo::getEntityTitleStoreLookup();
 		$this->siteLinkGroups = $settings->getSetting( 'siteLinkGroups' );
 		$this->badgeItems = $settings->getSetting( 'badgeItems' );
 
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
+		$this->isFreshIdAssigned = false;
 	}
 
-	public function setServices( SiteLinkTargetProvider $siteLinkTargetProvider ): void {
-		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
+	public function setServices( SiteLinkGlobalIdentifiersProvider $siteLinkGlobalIdentifiersProvider ): void {
+		$this->siteLinkGlobalIdentifiersProvider = $siteLinkGlobalIdentifiersProvider;
 	}
 
 	protected function getTitleLookup(): EntityTitleStoreLookup {
@@ -192,11 +195,16 @@ abstract class ModifyEntity extends ApiBase {
 			// TODO: use the EntitySavingHelper to load the entity, instead of an EntityRevisionLookup.
 			// TODO: consolidate with StatementModificationHelper::applyChangeOp
 			// FIXME: this EntityRevisionLookup is uncached, we may be loading the Entity several times!
-			$currentEntityRevision = $this->revisionLookup->getEntityRevision(
-				$entity->getId(),
-				0,
-				 LookupConstants::LATEST_FROM_REPLICA_WITH_FALLBACK
-			);
+			try {
+				$currentEntityRevision = $this->revisionLookup->getEntityRevision(
+					$entity->getId(),
+					0,
+					LookupConstants::LATEST_FROM_REPLICA_WITH_FALLBACK
+				);
+			} catch ( RevisionedUnresolvedRedirectException $ex ) {
+				$this->errorReporter->dieException( $ex, 'unresolved-redirect' );
+			}
+
 			if ( $currentEntityRevision ) {
 				$currentEntityResult = $changeOp->validate( $currentEntityRevision->getEntity() );
 				if ( !$currentEntityResult->isValid() ) {
@@ -326,7 +334,9 @@ abstract class ModifyEntity extends ApiBase {
 		try {
 			$status = $this->entitySavingHelper->attemptSaveEntity(
 				$entity,
-				$summary
+				$summary,
+				$this->extractRequestParams(),
+				$this->getContext()
 			);
 		} catch ( MWContentSerializationException $ex ) {
 			// This happens if the $entity created via modifyEntity() above (possibly cleared
@@ -354,7 +364,8 @@ abstract class ModifyEntity extends ApiBase {
 	 * @throws ApiUsageException
 	 */
 	private function loadEntityFromSavingHelper( ?EntityId $entityId ): EntityDocument {
-		$entity = $this->entitySavingHelper->loadEntity( $entityId, EntitySavingHelper::NO_FRESH_ID );
+		$params = $this->extractRequestParams();
+		$entity = $this->entitySavingHelper->loadEntity( $params, $entityId, EntitySavingHelper::NO_FRESH_ID );
 
 		if ( $entity->getId() === null ) {
 			// Make sure the user is allowed to create an entity before attempting to assign an id
@@ -367,10 +378,20 @@ abstract class ModifyEntity extends ApiBase {
 				$this->errorReporter->dieStatus( $permStatus, 'permissiondenied' );
 			}
 
-			$entity = $this->entitySavingHelper->loadEntity( $entityId, EntitySavingHelper::ASSIGN_FRESH_ID );
+			$entity = $this->entitySavingHelper->loadEntity( $params, $entityId, EntitySavingHelper::ASSIGN_FRESH_ID );
+			$this->isFreshIdAssigned = true;
 		}
 
 		return $entity;
+	}
+
+	/**
+	 * Return whether a fresh id is assigned or not.
+	 *
+	 * @return bool false if fresh id is not assigned, true otherwise
+	 */
+	public function isFreshIdAssigned(): bool {
+		return $this->isFreshIdAssigned;
 	}
 
 	/**
@@ -445,11 +466,11 @@ abstract class ModifyEntity extends ApiBase {
 	 * @return array[]
 	 */
 	private function getAllowedParamsForSiteLink(): array {
-		$sites = $this->siteLinkTargetProvider->getSiteList( $this->siteLinkGroups );
+		$siteIds = $this->siteLinkGlobalIdentifiersProvider->getList( $this->siteLinkGroups );
 
 		return [
 			'site' => [
-				self::PARAM_TYPE => $sites->getGlobalIdentifiers(),
+				self::PARAM_TYPE => $siteIds,
 			],
 			'title' => [
 				self::PARAM_TYPE => 'string',
