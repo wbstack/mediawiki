@@ -59,10 +59,9 @@
 ./wbstack/sync/dwnthing.sh extensions/Popups https://codeload.github.com/wikimedia/mediawiki-extensions-Popups/zip/7cfb5a5e13f94e669616ce704bb0ca9b3bcb0936 & \
 ./wbstack/sync/dwnthing.sh extensions/EntitySchema https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/74c4040f1903c2bbc5e059367e806a134d172e75 & \
 
-# Using local archive
-# path of this script
-SCRIPTPATH="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
-./wbstack/sync/dwnthing.sh extensions/Wikibase "file://$SCRIPTPATH/../artifacts/wikibase-feddy-props-1668.tar.gz" & \
+# Using our own archive repo temporarily for our Federated Properties endeavour 
+# discussion: https://github.com/wbstack/mediawiki/pull/155
+./wbstack/sync/dwnthing.sh extensions/Wikibase https://github.com/wbstack/mediawiki-tars/raw/main/wikibase-feddy-props-1668.tar.gz & \
 
 # Custom wbstack
 ./wbstack/sync/dwnthing.sh extensions/WikibaseInWikitext https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9 & \
