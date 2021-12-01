@@ -367,7 +367,8 @@ wfLoadExtension( 'WikiHiero' );
 
 # ConfirmAccount (only loaded when the setting is on)
 if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
-    require_once "$IP/extensions/ConfirmAccount/ConfirmAccount.php";
+    wfLoadExtension( 'ConfirmAccount' );
+
     $wgMakeUserPageFromBio = false;
     $wgAutoWelcomeNewUsers = false;
     $wgConfirmAccountRequestFormItems = [
