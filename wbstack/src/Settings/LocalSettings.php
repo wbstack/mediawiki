@@ -494,6 +494,7 @@ wfLoadExtension( 'WikibaseClient', "$IP/extensions/Wikibase/extension-client.jso
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
 
 // Force the concept URIs to be http (as this has always been the way on wbstack)
+// TODO (repo) (T287486) conceptBaseUri has been removed.
 $wgWBRepoSettings['conceptBaseUri'] = 'http://' . $wikiInfo->domain . '/entity/';
 
 $wwWikibaseStringLengthString = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
@@ -516,6 +517,8 @@ $wgWBClientSettings['siteGroup'] = null;
 $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
+
+// TODO (client) (T285471) repositories has been removed.
 $wgWBClientSettings['repositories'] = [
     '' => [
         // Use false (meaning the local wiki's database) if this wiki is the repo,
@@ -529,6 +532,8 @@ $wgWBClientSettings['repositories'] = [
         'prefixMapping' => [ '' => '' ],
     ]
 ];
+
+// TODO (repo+client) (T257262) The entitySources setting is no longer optional, but required.
 
 // TODO below setting will be empty by default in the future and we could remove them
 $wgWBRepoSettings['siteLinkGroups'] = [];
