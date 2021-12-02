@@ -511,38 +511,38 @@ $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
 
 $localConceptBaseUri = 'http://' . $wikiInfo->domain . '/entity/';
 
-$wgWBRepoSettings['entitySources'] = array (
+$wgWBRepoSettings['entitySources'] = [
     'local' => 
-    array (
+    [
       'entityNamespaces' => 
-      array (
+      [
         'item' => '120/main',
         'property' => '122/main',
         'lexeme' => '146/main',
-      ),
+      ],
       'repoDatabase' => false,
       'baseUri' => $localConceptBaseUri,
       'rdfNodeNamespacePrefix' => 'wd',
       'rdfPredicateNamespacePrefix' => '',
       'interwikiPrefix' => '',
-    ),
-  );
+    ],
+];
   
-  $wgWBClientSettings['entitySources'] = array (
+$wgWBClientSettings['entitySources'] = [
     'local' => 
-    array (
+    [
       'entityNamespaces' => 
-      array (
+      [
         'item' => '120/main',
         'property' => '122/main',
-      ),
+      ],
       'repoDatabase' => false,
       'baseUri' => $localConceptBaseUri,
       'rdfNodeNamespacePrefix' => 'wd',
       'rdfPredicateNamespacePrefix' => '',
       'interwikiPrefix' => '',
-    ),
-  );
+    ],
+];
 
 // TODO below setting will be empty by default in the future and we could remove them
 $wgWBRepoSettings['siteLinkGroups'] = [];
