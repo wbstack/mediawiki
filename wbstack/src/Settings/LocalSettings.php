@@ -235,11 +235,6 @@ if (getenv('MW_SMTP_ENABLED') === 'yes') {
     ];
 }
 
-// Output compression needs to be disabled in 1.35 until the below phab task is fixed...
-// TODO dig more to see if there is something else to do here...
-// https://phabricator.wikimedia.org/T235554
-$wgDisableOutputCompression  = true;
-
 ## Keys
 $wgSecretKey = $wikiInfo->getSetting('wgSecretKey');
 $wgAuthenticationTokenVersion = "1";
