@@ -488,9 +488,6 @@ require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
 wfLoadExtension( 'WikibaseClient', "$IP/extensions/Wikibase/extension-client.json" );
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
 
-// Force the concept URIs to be http (as this has always been the way on wbstack)
-$wgWBBaseUri = 'http://' . $wikiInfo->domain . '/entity/';
-
 $wwWikibaseStringLengthString = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
 if($wwWikibaseStringLengthString) {
     $wgWBRepoSettings['string-limits']['VT:string']['length'] = (int)$wwWikibaseStringLengthString;
@@ -512,6 +509,8 @@ $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
 
+$localConceptBaseUri = 'http://' . $wikiInfo->domain . '/entity/';
+
 $wgWBRepoSettings['entitySources'] = array (
     'local' => 
     array (
@@ -522,7 +521,7 @@ $wgWBRepoSettings['entitySources'] = array (
         'lexeme' => '146/main',
       ),
       'repoDatabase' => false,
-      'baseUri' => $wgWBBaseUri,
+      'baseUri' => $localConceptBaseUri,
       'rdfNodeNamespacePrefix' => 'wd',
       'rdfPredicateNamespacePrefix' => '',
       'interwikiPrefix' => '',
@@ -538,7 +537,7 @@ $wgWBRepoSettings['entitySources'] = array (
         'property' => '122/main',
       ),
       'repoDatabase' => false,
-      'baseUri' => $wgWBBaseUri,
+      'baseUri' => $localConceptBaseUri,
       'rdfNodeNamespacePrefix' => 'wd',
       'rdfPredicateNamespacePrefix' => '',
       'interwikiPrefix' => '',
