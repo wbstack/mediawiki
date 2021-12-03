@@ -518,7 +518,6 @@ $wgWBRepoSettings['entitySources'] = [
       [
         'item' => '120/main',
         'property' => '122/main',
-        'lexeme' => '146/main',
       ],
       'repoDatabase' => false,
       'baseUri' => $localConceptBaseUri,
@@ -558,6 +557,8 @@ $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
     $wgLexemeEnableDataTransclusion = true;
+
+    $wgWBRepoSettings['entitySources']['local']['entityNamespaces']['lexeme'] = '146/main';
 }
 # Federated Properties, By default not enabled, not enabled in maint mode
 if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {
