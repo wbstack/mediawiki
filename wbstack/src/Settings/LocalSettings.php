@@ -235,11 +235,6 @@ if (getenv('MW_SMTP_ENABLED') === 'yes') {
     ];
 }
 
-// Output compression needs to be disabled in 1.35 until the below phab task is fixed...
-// TODO dig more to see if there is something else to do here...
-// https://phabricator.wikimedia.org/T235554
-$wgDisableOutputCompression  = true;
-
 ## Keys
 $wgSecretKey = $wikiInfo->getSetting('wgSecretKey');
 $wgAuthenticationTokenVersion = "1";
@@ -367,7 +362,8 @@ wfLoadExtension( 'WikiHiero' );
 
 # ConfirmAccount (only loaded when the setting is on)
 if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
-    require_once "$IP/extensions/ConfirmAccount/ConfirmAccount.php";
+    wfLoadExtension( 'ConfirmAccount' );
+
     $wgMakeUserPageFromBio = false;
     $wgAutoWelcomeNewUsers = false;
     $wgConfirmAccountRequestFormItems = [
@@ -492,9 +488,6 @@ require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
 wfLoadExtension( 'WikibaseClient', "$IP/extensions/Wikibase/extension-client.json" );
 require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
 
-// Force the concept URIs to be http (as this has always been the way on wbstack)
-$wgWBRepoSettings['conceptBaseUri'] = 'http://' . $wikiInfo->domain . '/entity/';
-
 $wwWikibaseStringLengthString = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
 if($wwWikibaseStringLengthString) {
     $wgWBRepoSettings['string-limits']['VT:string']['length'] = (int)$wwWikibaseStringLengthString;
@@ -515,18 +508,40 @@ $wgWBClientSettings['siteGroup'] = null;
 $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
-$wgWBClientSettings['repositories'] = [
-    '' => [
-        // Use false (meaning the local wiki's database) if this wiki is the repo,
-        // otherwise default to null (meaning we can't access the repo's DB directly).
-        'repoDatabase' => false,
-        'baseUri' => $wgWBRepoSettings['conceptBaseUri'],
-        'entityNamespaces' => [
-            'item' => 120,
-            'property' => 122,
-        ],
-        'prefixMapping' => [ '' => '' ],
-    ]
+
+$localConceptBaseUri = 'http://' . $wikiInfo->domain . '/entity/';
+
+$wgWBRepoSettings['entitySources'] = [
+    'local' => 
+    [
+      'entityNamespaces' => 
+      [
+        'item' => '120/main',
+        'property' => '122/main',
+        'lexeme' => '146/main',
+      ],
+      'repoDatabase' => false,
+      'baseUri' => $localConceptBaseUri,
+      'rdfNodeNamespacePrefix' => 'wd',
+      'rdfPredicateNamespacePrefix' => '',
+      'interwikiPrefix' => '',
+    ],
+];
+  
+$wgWBClientSettings['entitySources'] = [
+    'local' => 
+    [
+      'entityNamespaces' => 
+      [
+        'item' => '120/main',
+        'property' => '122/main',
+      ],
+      'repoDatabase' => false,
+      'baseUri' => $localConceptBaseUri,
+      'rdfNodeNamespacePrefix' => 'wd',
+      'rdfPredicateNamespacePrefix' => '',
+      'interwikiPrefix' => '',
+    ],
 ];
 
 // TODO below setting will be empty by default in the future and we could remove them
