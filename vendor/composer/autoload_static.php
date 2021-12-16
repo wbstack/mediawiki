@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67
+class ComposerStaticInita249b1adf372b49317b01ef997ed998a
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -592,6 +592,7 @@ class ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67
         'CLDRPluralRuleParser\\Evaluator' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Evaluator.php',
         'CLDRPluralRuleParser\\Range' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Range.php',
         'CSSJanus' => __DIR__ . '/..' . '/cssjanus/cssjanus/src/CSSJanus.php',
+        'Carbon\\AbstractTranslator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/AbstractTranslator.php',
         'Carbon\\Carbon' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Carbon.php',
         'Carbon\\CarbonConverterInterface' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonConverterInterface.php',
         'Carbon\\CarbonImmutable' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonImmutable.php',
@@ -648,6 +649,7 @@ class ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67
         'Carbon\\Traits\\Converter' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Converter.php',
         'Carbon\\Traits\\Creator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Creator.php',
         'Carbon\\Traits\\Date' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Date.php',
+        'Carbon\\Traits\\DeprecatedProperties' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/DeprecatedProperties.php',
         'Carbon\\Traits\\Difference' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Difference.php',
         'Carbon\\Traits\\IntervalRounding' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/IntervalRounding.php',
         'Carbon\\Traits\\IntervalStep' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/IntervalStep.php',
@@ -665,6 +667,7 @@ class ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67
         'Carbon\\Traits\\Units' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Units.php',
         'Carbon\\Traits\\Week' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Traits/Week.php',
         'Carbon\\Translator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Translator.php',
+        'Carbon\\TranslatorStrongTypeInterface' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/TranslatorStrongTypeInterface.php',
         'Cdb\\Exception' => __DIR__ . '/..' . '/wikimedia/cdb/src/Exception.php',
         'Cdb\\Reader' => __DIR__ . '/..' . '/wikimedia/cdb/src/Reader.php',
         'Cdb\\Reader\\DBA' => __DIR__ . '/..' . '/wikimedia/cdb/src/Reader/DBA.php',
@@ -3894,11 +3897,11 @@ class ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitc6fe8f0d50df4da244fd07510de75a67::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInita249b1adf372b49317b01ef997ed998a::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInita249b1adf372b49317b01ef997ed998a::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInita249b1adf372b49317b01ef997ed998a::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInita249b1adf372b49317b01ef997ed998a::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInita249b1adf372b49317b01ef997ed998a::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -19,7 +19,7 @@ fi
 echo "Fetching $THING"
 mkdir -p "$DIR"
 # Files are always downloaded with a .compressed extension. bsdtar really doesn't care...
-curl -s "$URL" -o "$THING.compressed"
+wget "$URL" -O "$THING.compressed"
 bsdtar --strip-components=1 -xf "$THING".compressed -C "$DIR"
 rm "$THING".compressed
 
