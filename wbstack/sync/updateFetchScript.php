@@ -3,16 +3,26 @@
 // Updates the Dockerfile with newer hashes
 
 // Config
-$releaseBranch = 'REL1_35';
+$releaseBranch = 'REL1_37';
+$overrideBranches = [
+    'mediawiki-extensions-WikibaseCirrusSearch' => 'wmf/1.38.0-wmf.3',
+    'mediawiki-extensions-WikibaseLexemeCirrusSearch' => 'wmf/1.38.0-wmf.3',
+    'mediawiki-extensions-WikibaseLexeme' => 'wmf/1.38.0-wmf.3',
+    'mediawiki-extensions-EntitySchema' => 'wmf/1.38.0-wmf.3',
+];
 
 /////////////////
 
 // A github access token is needed to access the github API
 if( !file_exists( __DIR__ . '/.github' ) ) {
     echo '.github file with personal access token for public_repo must exist. eg. eu21yh0fj10f';
+    echo 'You can retrieve a token from https://github.com/settings/tokens';
     die(1);
 }
-$getGithubApiUrl = function ( $repoName ) use ( $releaseBranch ) {
+$getGithubApiUrl = function ( $repoName ) use ( $releaseBranch, $overrideBranches ) {
+    if ( array_key_exists( $repoName, $overrideBranches ) ) {
+        return 'https://api.github.com/repos/wikimedia/' . $repoName . '/commits/' . $overrideBranches[ $repoName ];
+    }
     return 'https://api.github.com/repos/wikimedia/' . $repoName . '/commits/' . $releaseBranch;
 };
 
@@ -69,10 +79,6 @@ preg_match_all( $regexMatchingAllRepos, $fetchScript, $matches );
 $repoNames = $matches[2];
 
 foreach( $repoNames as $repoName ) {
-    if( $repoName === 'mediawiki-extensions-EntitySchema' ) {
-        echo "Skipping " .  $repoName . PHP_EOL;
-        continue;
-    }
     echo "Updating for {$repoName}" . PHP_EOL;
     $fetchScript = $updateCommitInDockerfile( $repoName, $fetchScript );
 }
