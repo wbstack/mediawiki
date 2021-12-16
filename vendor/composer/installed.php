@@ -5,7 +5,7 @@
         'type' => 'mediawiki-core',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => 'c8c94a165d36a676584cade7d5582d1511cd839d',
+        'reference' => 'a370996f1127ae3d6f3532eeede38f378e6bd9d0',
         'name' => 'mediawiki/core',
         'dev' => false,
     ),
@@ -273,7 +273,7 @@
             'type' => 'mediawiki-core',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => 'c8c94a165d36a676584cade7d5582d1511cd839d',
+            'reference' => 'a370996f1127ae3d6f3532eeede38f378e6bd9d0',
             'dev_requirement' => false,
         ),
         'mediawiki/data-values' => array(
@@ -285,7 +285,7 @@
         'mediawiki/mediawiki' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.37.0',
+                0 => '1.37.1',
             ),
         ),
         'monolog/monolog' => array(
@@ -298,12 +298,12 @@
             'dev_requirement' => false,
         ),
         'nesbot/carbon' => array(
-            'pretty_version' => '2.54.0',
-            'version' => '2.54.0.0',
+            'pretty_version' => '2.55.2',
+            'version' => '2.55.2.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nesbot/carbon',
             'aliases' => array(),
-            'reference' => 'eed83939f1aed3eee517d03a33f5ec587ac529b5',
+            'reference' => '8c2a18ce3e67c34efc1b29f64fe61304368259a2',
             'dev_requirement' => false,
         ),
         'nyholm/psr7' => array(
@@ -415,12 +415,12 @@
             'dev_requirement' => false,
         ),
         'php-http/client-common' => array(
-            'pretty_version' => '2.4.0',
-            'version' => '2.4.0.0',
+            'pretty_version' => '2.5.0',
+            'version' => '2.5.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../php-http/client-common',
             'aliases' => array(),
-            'reference' => '29e0c60d982f04017069483e832b92074d0a90b2',
+            'reference' => 'd135751167d57e27c74de674d6a30cef2dc8e054',
             'dev_requirement' => false,
         ),
         'php-http/discovery' => array(
@@ -649,12 +649,12 @@
             'dev_requirement' => false,
         ),
         'symfony/options-resolver' => array(
-            'pretty_version' => 'v5.3.7',
-            'version' => '5.3.7.0',
+            'pretty_version' => 'v5.4.0',
+            'version' => '5.4.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/options-resolver',
             'aliases' => array(),
-            'reference' => '4b78e55b179003a42523a362cc0e8327f7a69b5e',
+            'reference' => 'b0fb78576487af19c500aaddb269fd36701d4847',
             'dev_requirement' => false,
         ),
         'symfony/polyfill-ctype' => array(
@@ -688,12 +688,12 @@
             'dev_requirement' => false,
         ),
         'symfony/translation' => array(
-            'pretty_version' => 'v5.3.11',
-            'version' => '5.3.11.0',
+            'pretty_version' => 'v5.4.1',
+            'version' => '5.4.1.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/translation',
             'aliases' => array(),
-            'reference' => '17a965c8f3b1b348cf15d903ac53942984561f8a',
+            'reference' => '8c82cd35ed861236138d5ae1c78c0c7ebcd62107',
             'dev_requirement' => false,
         ),
         'symfony/translation-contracts' => array(
