@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Narazeni"
+		]
+	},
+	"advancedsearch-optgroup-text": "ხასჷლაშ ტექსტის გორუა",
+	"advancedsearch-optgroup-structure": "სტრუქტურა",
+	"advancedsearch-optgroup-files": "ფაილეფი დო გჷმოხანტუალეფი",
+	"advancedsearch-optgroup-sort": "გიშახელუაშ რანწკი",
+	"advancedsearch-field-plain": "თე ზიტყვეფი",
+	"advancedsearch-field-phrase": "ზუსტას თე ტექსტი",
+	"advancedsearch-field-or": "ათე ზიტყვეფიშე ართი",
+	"advancedsearch-field-not": "თე ზიტყვეფი ვარი",
+	"advancedsearch-field-subpageof": "ათე ხასჷლაშ გიმენხასჷლეფი",
+	"advancedsearch-field-intitle": "ხასჷლა მორჩილი ოღვენობათ",
+	"advancedsearch-field-deepcategory": "ხასჷლეფი ათე კატეგორიეფს",
+	"advancedsearch-field-hastemplate": "ხასჷლეფი ათე თანგეფით",
+	"advancedsearch-field-inlanguage": "ხასჷლეფი ათე ნინაშა",
+	"advancedsearch-field-filetype": "ფაილიშ ტიპი",
+	"advancedsearch-field-filew": "ფაილიშ სიგანა პიქსელეფს",
+	"advancedsearch-field-fileh": "ფაილიშ სიმაღალა პიქსელეფს",
+	"advancedsearch-field-sort": "გიშახელუაშ რანწკი",
+	"advancedsearch-field-preview-sort": "ხელუა $1-თ",
+	"advancedsearch-inlanguage-default": "გეგშაგორით ნინა",
+	"advancedsearch-filetype-section-image": "სურათიშ ფორმატეფი",
+	"advancedsearch-filetype-section-video": "ვიდეო ფორმატეფი",
+	"advancedsearch-filetype-section-audio": "აუდიო ფორმატეფი",
+	"advancedsearch-filetype-section-document": "დოკუმენტიშ ფორმატეფი",
+	"advancedsearch-filetype-section-other": "შხვა ფორმატეფი",
+	"advancedsearch-filetype-default": "გეგშაგორით ფაილიშ ტიპი",
+	"advancedsearch-filetype-bitmap": "სურათი",
+	"advancedsearch-filetype-drawing": "ნახანტი",
+	"advancedsearch-filetype-audio": "აუდიო",
+	"advancedsearch-filetype-video": "ვიდეო",
+	"advancedsearch-filetype-office": "ოფისი"
+}

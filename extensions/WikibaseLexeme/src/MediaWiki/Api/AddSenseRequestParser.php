@@ -16,8 +16,8 @@ use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\ValidationContext;
  */
 class AddSenseRequestParser {
 
-	const PARAM_DATA = 'data';
-	const PARAM_LEXEME_ID = 'lexemeId';
+	public const PARAM_DATA = 'data';
+	public const PARAM_LEXEME_ID = 'lexemeId';
 	/**
 	 * @var EntityIdParser
 	 */
@@ -87,8 +87,9 @@ class AddSenseRequestParser {
 		}
 
 		/**
-		 * @var $lexemeId LexemeId
+		 * @var LexemeId $lexemeId
 		 */
+		'@phan-var LexemeId $lexemeId';
 
 		return $lexemeId;
 	}

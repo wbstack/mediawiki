@@ -17,7 +17,7 @@ use Wikimedia\Assert\Assert;
  */
 class ChangeOpFormAdd extends ChangeOpBase {
 
-	const SUMMARY_ACTION_ADD = 'add-form';
+	private const SUMMARY_ACTION_ADD = 'add-form';
 
 	/**
 	 * @var ChangeOp
@@ -31,7 +31,7 @@ class ChangeOpFormAdd extends ChangeOpBase {
 		$this->changeOpForm = $changeOpForm;
 	}
 
-	public function validate( EntityDocument $entity ) : Result {
+	public function validate( EntityDocument $entity ): Result {
 		Assert::parameterType( Lexeme::class, $entity, '$entity' );
 
 		return Result::newSuccess();

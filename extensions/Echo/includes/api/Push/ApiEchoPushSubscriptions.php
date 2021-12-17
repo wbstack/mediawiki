@@ -41,7 +41,7 @@ class ApiEchoPushSubscriptions extends ApiBase {
 	/** @inheritDoc */
 	public function getModuleManager(): ApiModuleManager {
 		if ( !$this->moduleManager ) {
-			$submodules = array_map( function ( $class ) {
+			$submodules = array_map( static function ( $class ) {
 				return [
 					'class' => $class,
 					'factory' => "$class::factory",
@@ -71,7 +71,7 @@ class ApiEchoPushSubscriptions extends ApiBase {
 	 * @throws ApiUsageException
 	 */
 	private function checkLoginState(): void {
-		if ( $this->getUser()->isAnon() ) {
+		if ( !$this->getUser()->isRegistered() ) {
 			$this->dieWithError(
 				[ 'apierror-mustbeloggedin', $this->msg( 'action-editmyprivateinfo' ) ],
 				'notloggedin'

@@ -5,6 +5,8 @@ namespace MediaWiki\Extensions\OAuth\Frontend\Pagers;
 use MediaWiki\Extensions\OAuth\Backend\Utils;
 use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthListConsumers;
 
+use Mediawiki\MediaWikiServices;
+
 /**
  * (c) Aaron Schulz 2013, GPL
  *
@@ -26,8 +28,6 @@ use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthListConsumers
 
 /**
  * Query to list out consumers
- *
- * @TODO: use UserCache
  */
 class ListConsumersPager extends \AlphabeticPager {
 	/** @var SpecialMWOAuthListConsumers */
@@ -59,7 +59,8 @@ class ListConsumersPager extends \AlphabeticPager {
 			$this->mIndexField = 'oarc_id';
 		}
 
-		if ( !$this->getUser()->isAllowed( 'mwoauthviewsuppressed' ) ) {
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+		if ( !$permissionManager->userHasRight( $this->getUser(), 'mwoauthviewsuppressed' ) ) {
 			$this->mConds['oarc_deleted'] = 0;
 		}
 

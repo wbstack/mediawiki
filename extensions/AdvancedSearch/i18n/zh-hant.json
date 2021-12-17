@@ -10,6 +10,7 @@
 			"Laundry Machine",
 			"Liuxinyu970226",
 			"NHC",
+			"Wmr",
 			"Xiplus",
 			"予弦",
 			"神樂坂秀吉"
@@ -66,19 +67,23 @@
 	"advancedsearch-filesize-greater-than": "大於",
 	"advancedsearch-filesize-smaller-than": "小於",
 	"advancedsearch-sort-relevance": "相關性",
+	"advancedsearch-sort-last-edit-asc": "編輯日期 – 最舊的在頂端",
 	"advancedsearch-sort-last-edit-desc": "編輯日期 – 目前的在頂端",
+	"advancedsearch-sort-create-timestamp-asc": "建立日期 – 最舊的在頂端",
 	"advancedsearch-sort-create-timestamp-desc": "建立日期 – 目前的在頂端",
 	"advancedsearch-sort-preview-relevance": "相關性",
+	"advancedsearch-sort-preview-last-edit-asc": "最少近期編輯",
 	"advancedsearch-sort-preview-last-edit-desc": "編輯日期",
+	"advancedsearch-sort-preview-create-timestamp-asc": "最少近期建立",
 	"advancedsearch-sort-preview-create-timestamp-desc": "建立日期",
 	"advancedsearch-namespaces-search-in": "在此命名空間中搜尋：",
 	"advancedsearch-namespaces-remember": "記住選項用於往後的搜尋",
 	"advancedsearch-namespaces-preset-all": "全部",
 	"advancedsearch-namespaces-preset-default": "預設",
-	"advancedsearch-namespaces-preset-general-help": "一般說明",
+	"advancedsearch-namespaces-preset-general-help": "綜合幫助",
 	"advancedsearch-namespaces-preset-discussion": "討論",
 	"advancedsearch-namespaces-placeholder": "加入命名空間…",
 	"prefs-advancedsearch": "進階搜尋",
 	"advancedsearch-preference-help": "進階搜尋可添加表單至 Special:Search page。這能讓您即使不瞭解搜尋語法，也能執行特定搜尋。這也會變更命名空間選擇的方式。",
-	"advancedsearch-preference-disable": "不要顯示進階搜尋介面"
+	"advancedsearch-preference-disable": "當使用 Special:Search 時不要顯示進階搜尋介面"
 }

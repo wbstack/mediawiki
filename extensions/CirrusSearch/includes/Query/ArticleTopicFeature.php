@@ -4,7 +4,7 @@ namespace CirrusSearch\Query;
 
 use CirrusSearch\Search\SearchContext;
 use CirrusSearch\WarningCollector;
-use CirrusSearch\Wikimedia\ORESArticleTopicsHooks;
+use CirrusSearch\Wikimedia\WeightedTagsHooks;
 use Elastica\Query\DisMax;
 use Elastica\Query\Term;
 use Message;
@@ -13,10 +13,17 @@ use Message;
  * Finds pages based on how well they match a given topic, based on scores provided by the
  * (Wikimedia-specific) articletopic ORES model.
  * @package CirrusSearch\Wikimedia
- * @see ORESArticleTopicsHooks
+ * @see WeightedTagsHooks
  * @see https://www.mediawiki.org/wiki/Help:CirrusSearch#Articletopic
  */
 class ArticleTopicFeature extends SimpleKeywordFeature {
+	public const ARTICLE_TOPIC_TAG_PREFIX = 'classification.ores.articletopic';
+	public const DRAFT_TOPIC_TAG_PREFIX = 'classification.ores.drafttopic';
+
+	private const PREFIX_PER_KEYWORD = [
+		'articletopic' => self::ARTICLE_TOPIC_TAG_PREFIX,
+		'drafttopic' => self::DRAFT_TOPIC_TAG_PREFIX
+	];
 
 	public const TERMS_TO_LABELS = [
 		'biography' => 'Culture.Biography.Biography*',
@@ -88,7 +95,7 @@ class ArticleTopicFeature extends SimpleKeywordFeature {
 	/**
 	 * Helper method for turning raw ORES score data (as stored in the Cirrus document) into
 	 * search terms, for analytics/debugging.
-	 * @param array $rawTopicData The contents of the document's ores_articletopics field
+	 * @param array $rawTopicData The unprefixed content of the document's weighted_tags field
 	 * @return array corresponding search term => ORES score (rounded to three decimals)
 	 */
 	public static function getTopicScores( array $rawTopicData ): array {
@@ -104,14 +111,14 @@ class ArticleTopicFeature extends SimpleKeywordFeature {
 
 	/**
 	 * @inheritDoc
-	 * @phan-return array{topics:string[]}
+	 * @phan-return array{topics:string[],tag_prefix:string}
 	 */
 	public function parseValue(
 		$key, $value, $quotedValue, $valueDelimiter, $suffix, WarningCollector $warningCollector
 	) {
 		$topics = explode( '|', $value );
 		$invalidTopics = array_diff( $topics, array_keys( self::TERMS_TO_LABELS ) );
-		$validTopics = array_filter( array_map( function ( $topic ) {
+		$validTopics = array_filter( array_map( static function ( $topic ) {
 			return self::TERMS_TO_LABELS[$topic];
 		}, array_diff( $topics, $invalidTopics ) ) );
 
@@ -119,17 +126,19 @@ class ArticleTopicFeature extends SimpleKeywordFeature {
 			$warningCollector->addWarning( 'cirrussearch-articletopic-invalid-topic',
 				Message::listParam( $invalidTopics, 'comma' ), count( $invalidTopics ) );
 		}
-		return [ 'topics' => $validTopics ];
+		return [ 'topics' => $validTopics, 'tag_prefix' => self::PREFIX_PER_KEYWORD[$key] ];
 	}
 
 	/** @inheritDoc */
 	protected function getKeywords() {
-		return [ 'articletopic' ];
+		return array_keys( self::PREFIX_PER_KEYWORD );
 	}
 
 	/** @inheritDoc */
 	protected function doApply( SearchContext $context, $key, $value, $quotedValue, $negated ) {
-		$topics = $this->parseValue( $key, $value, $quotedValue, '', '', $context )['topics'];
+		$parsed = $this->parseValue( $key, $value, $quotedValue, '', '', $context );
+		$topics = $parsed['topics'];
+		$tagPrefix = $parsed['tag_prefix'];
 		if ( $topics === [] ) {
 			$context->setResultsPossible( false );
 			return [ null, true ];
@@ -138,7 +147,7 @@ class ArticleTopicFeature extends SimpleKeywordFeature {
 		$query = new DisMax();
 		foreach ( $topics as $topic ) {
 			$topicQuery = new Term();
-			$topicQuery->setTerm( ORESArticleTopicsHooks::FIELD_NAME, $topic );
+			$topicQuery->setTerm( WeightedTagsHooks::FIELD_NAME, $tagPrefix . '/' . $topic );
 			$query->addQuery( $topicQuery );
 		}
 

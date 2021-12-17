@@ -15,6 +15,7 @@ use Wikibase\Lexeme\Domain\Model\Sense;
 
 /**
  * @license GPL-2.0-or-later
+ * @phan-file-suppress PhanPluginNeverReturnMethod
  */
 class SenseDiffer implements EntityDifferStrategy {
 
@@ -86,7 +87,7 @@ class SenseDiffer implements EntityDifferStrategy {
 	 * @return ChangeSenseDiffOp
 	 */
 	private function diff( Sense $old, Sense $new ) {
-		//TODO: Assert same ID
+		// TODO: Assert same ID
 		$diffOps = $this->recursiveMapDiffer->doDiff(
 			$this->toSenseDiffArray( $old ),
 			$this->toSenseDiffArray( $new )

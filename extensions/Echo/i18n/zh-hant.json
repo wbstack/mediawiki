@@ -20,6 +20,7 @@
 			"Shirayuki",
 			"Shizhao",
 			"Simon Shek",
+			"Sunny00217",
 			"Waihorace",
 			"Wehwei",
 			"Winstonyin",
@@ -58,7 +59,7 @@
 	"echo-pref-notifications-page-linked-title-muted-list": "不要顯示這些頁面的「頁面連結」通知。\n（[[mw:Special:MyLanguage/Help:Notifications#mute|了解更多]]）",
 	"echo-pref-dont-email-read-notifications": "不要在摘要電子郵件裡包含已讀通知",
 	"echo-learn-more": "瞭解更多",
-	"echo-log": "公共日誌",
+	"echo-log": "日誌",
 	"echo-new-messages": "您有新訊息",
 	"echo-category-title-edit-user-talk": "對話頁面{{PLURAL:$1|訊息}}",
 	"echo-category-title-article-linked": "頁面{{PLURAL:$1|連結}}",
@@ -159,7 +160,7 @@
 	"notification-header-mention-other-nosection": "$1在「<strong>$4</strong>」中{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
 	"notification-header-mention-user-talkpage-v2": "$1在<strong>$4{{GENDER:$5|的}}使用者對話頁</strong>上的「<strong>$6</strong>」{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
 	"notification-header-mention-user-talkpage-nosection": "$1在<strong>$4{{GENDER:$5|的}}使用者對話頁</strong>上{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
-	"notification-header-mention-agent-talkpage": "$1在<strong>{{GENDER:$2|他|她|他}}對話頁</strong>上的「<strong>$4</strong>」{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
+	"notification-header-mention-agent-talkpage": "$1在<strong>{{GENDER:$2|他|她|他}}的對話頁</strong>上的「<strong>$4</strong>」{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
 	"notification-header-mention-agent-talkpage-nosection": "$1在<strong>{{GENDER:$2|他|她|他}}的對話頁</strong>上{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
 	"notification-header-mention-article-talkpage": "$1在<strong>$4</strong>討論頁上的「<strong>$5</strong>」{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
 	"notification-header-mention-article-talkpage-nosection": "$1在<strong>$4</strong>的討論頁上{{GENDER:$2|提到}}了{{GENDER:$3|您}}。",
@@ -243,5 +244,10 @@
 	"echo-email-batch-link-text-view-all-notifications": "檢視所有通知",
 	"notification-header-foreign-alert": "來自{{PLURAL:$5|另一個 wiki|其他 $5 個 wiki}} 的更多通知",
 	"notification-header-foreign-notice": "來自{{PLURAL:$5|另一個 wiki|其他 $5 個 wiki}} 的更多一般通知",
-	"notification-header-foreign-all": "來自 {{PLURAL:$5|其他 wiki| $5 個其他 wiki}} 的更多通知"
+	"notification-header-foreign-all": "來自 {{PLURAL:$5|其他 wiki| $5 個其他 wiki}} 的更多通知",
+	"right-manage-all-push-subscriptions": "管理所有推送訂閱",
+	"action-manage-all-push-subscriptions": "管理所有推送訂閱",
+	"group-push-subscription-manager": "推送訂閱管理",
+	"group-push-subscription-manager-member": "{{GENDER:$1|推送訂閱管理員}}",
+	"grouppage-push-subscription-manager": "{{ns:project}}:推送訂閱管理員"
 }

@@ -15,7 +15,7 @@ class TitleFactoryMainPageUrl {
 		$this->titleFactory = $titleFactory;
 	}
 
-	public function getValue() : string {
+	public function getValue(): string {
 		$mainPageTitle = $this->titleFactory->newMainPage();
 
 		return $mainPageTitle->getFullURL();

@@ -6,39 +6,32 @@
  * @return {ext.popups.ChangeListener}
  */
 export default function settings( boundActions, render ) {
-	let settings;
+	let settingsObj;
 
-	return ( prevState, state ) => {
-		if ( !prevState ) {
+	return ( oldState, newState ) => {
+		if ( !oldState ) {
 			// Nothing to do on initialization
 			return;
 		}
 
 		// Update global modal visibility
-		if (
-			prevState.settings.shouldShow === false &&
-			state.settings.shouldShow === true
-		) {
+		if ( oldState.settings.shouldShow === false && newState.settings.shouldShow ) {
 			// Lazily instantiate the settings UI
-			if ( !settings ) {
-				settings = render( boundActions );
-				settings.appendTo( document.body );
+			if ( !settingsObj ) {
+				settingsObj = render( boundActions );
+				settingsObj.appendTo( document.body );
 			}
 
 			// Update the UI settings with the current settings
-			settings.setEnabled( state.preview.enabled );
-
-			settings.show();
-		} else if (
-			prevState.settings.shouldShow === true &&
-			state.settings.shouldShow === false
-		) {
-			settings.hide();
+			settingsObj.setEnabled( newState.preview.enabled );
+			settingsObj.show();
+		} else if ( oldState.settings.shouldShow && newState.settings.shouldShow === false ) {
+			settingsObj.hide();
 		}
 
 		// Update help visibility
-		if ( prevState.settings.showHelp !== state.settings.showHelp ) {
-			settings.toggleHelp( state.settings.showHelp );
+		if ( oldState.settings.showHelp !== newState.settings.showHelp ) {
+			settingsObj.toggleHelp( newState.settings.showHelp );
 		}
 	};
 }

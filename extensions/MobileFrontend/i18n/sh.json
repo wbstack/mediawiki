@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"BadDog",
 			"Conquistador",
 			"OC Ripper",
 			"Vlad5250"
@@ -8,17 +9,6 @@
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Uređuje li korisnikot od mobilnoga sučelja",
 	"mobile-frontend-account-create-captcha-placeholder": "Unesite kôd za potvrdu",
-	"mobile-frontend-categories-heading": "<strong>Kategorije</strong>",
-	"mobile-frontend-categories-subheading": "Stranica pripada sljedećim kategorijama:",
-	"mobile-frontend-categories-nocat": "Ova stranica za sad ne pripada nijednoj kategoriji.",
-	"mobile-frontend-categories-add": "Stavi u kategoriju",
-	"mobile-frontend-categories-search": "Pretraži kategorije",
-	"mobile-frontend-categories-nodata": "Došlo je do greške. Jeste li dodali kategorije za sačuvanje?",
-	"mobile-frontend-categories-summary": "Stavljeno u kategorije",
-	"mobile-frontend-categories-add-heading": "<strong>Stavljena<span> $1</span> u nove kategorije</strong>",
-	"mobile-frontend-categories-add-wait": "Spremanje kategorija, molimo pričekajte.",
-	"mobile-frontend-categories-normal": "Sadržinske",
-	"mobile-frontend-categories-hidden": "Organizacijske",
 	"mobile-frontend-changeslist-nocomment": "nema sažetka uređivanja",
 	"mobile-frontend-cite-error": "Pojavio se problem pri pokušaju da učitam citate zbog neispravne naznake izmjenete.",
 	"mobile-frontend-cite-none-available": "Na ovoj stranici nema citata.",
@@ -133,6 +123,6 @@
 	"mobile-frontend-watchlist-filter-other": "Ostale",
 	"mobile-frontend-watchlist-filter-talk": "Razgovor",
 	"mobile-frontend-watchlist-more": "više",
-	"tag-mobile_edit": "Mobilno uređivanje",
-	"tag-mobile_web_edit": "Web izmjena mobilnim uređajem"
+	"tag-mobile_edit": "mobilno uređivanje",
+	"tag-mobile_web_edit": "mobilno veb-uređivanje"
 }

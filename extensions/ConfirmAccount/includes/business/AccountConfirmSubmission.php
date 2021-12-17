@@ -78,7 +78,7 @@ class AccountConfirmSubmission {
 	 * @return array
 	 */
 	protected function spamRequest( IContextSource $context ) {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$dbw->startAtomic( __METHOD__ );
 
 		$ok = $this->accountReq->markRejected( $this->admin, wfTimestampNow(), '' );
@@ -98,7 +98,7 @@ class AccountConfirmSubmission {
 	 */
 	protected function rejectRequest( IContextSource $context ) {
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$dbw = $lbFactory->getMainLB()->getConnection( DB_MASTER );
+		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
 		$dbw->startAtomic( __METHOD__ );
 
 		$ok = $this->accountReq->markRejected( $this->admin, wfTimestampNow(), $this->reason );
@@ -119,7 +119,7 @@ class AccountConfirmSubmission {
 				$emailBody
 			);
 			if ( !$result->isOk() ) {
-				$lbFactory->rollbackMasterChanges( __METHOD__ );
+				$lbFactory->rollbackPrimaryChanges( __METHOD__ );
 				return [
 					'accountconf_mailerror',
 					$context->msg( 'mailerror' )->rawParams(
@@ -156,13 +156,13 @@ class AccountConfirmSubmission {
 		}
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$dbw = $lbFactory->getMainLB()->getConnection( DB_MASTER );
+		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
 		$dbw->startAtomic( __METHOD__ );
 
 		# If not already held or deleted, mark as held
 		$ok = $this->accountReq->markHeld( $this->admin, wfTimestampNow(), $this->reason );
 		if ( !$ok ) { // already held or deleted?
-			$lbFactory->rollbackMasterChanges( __METHOD__ );
+			$lbFactory->rollbackPrimaryChanges( __METHOD__ );
 			return [
 				'accountconf_canthold',
 				$context->msg( 'confirmaccount-canthold' )->escaped(),
@@ -178,7 +178,7 @@ class AccountConfirmSubmission {
 			)->inContentLanguage()->text()
 		);
 		if ( !$result->isOk() ) {
-			$lbFactory->rollbackMasterChanges( __METHOD__ );
+			$lbFactory->rollbackPrimaryChanges( __METHOD__ );
 			return [
 				'accountconf_mailerror',
 				$context->msg( 'mailerror' )->rawParams(
@@ -225,7 +225,7 @@ class AccountConfirmSubmission {
 		$user = User::newFromName( $this->userName, false );
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-		$dbw = $lbFactory->getMainLB()->getConnection( DB_MASTER );
+		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
 		$dbw->startAtomic( __METHOD__ );
 
 		# Grant any necessary rights (exclude blank or dummy groups)
@@ -249,7 +249,7 @@ class AccountConfirmSubmission {
 				$triplet = [ $oldPath, 'public', $pathRel ];
 				$status = $repoNew->storeBatch( [ $triplet ] ); // copy!
 				if ( !$status->isOK() ) {
-					$lbFactory->rollbackMasterChanges( __METHOD__ );
+					$lbFactory->rollbackPrimaryChanges( __METHOD__ );
 					return [
 						'accountconf_copyfailed',
 						$context->getOutput()->parseAsInterface( $status->getWikiText() ),
@@ -293,10 +293,9 @@ class AccountConfirmSubmission {
 		# email, which we cannot take back...
 		$dbw->endAtomic( __METHOD__ );
 
-		$that = $this;
 		DeferredUpdates::addCallableUpdate(
-			function () use ( $that, $user, $context, $group, $accReq ) {
-				$that->doPostCommitNewUserUpdates( $user, $context, $group, $accReq );
+			function () use ( $user, $context, $group, $accReq ) {
+				$this->doPostCommitNewUserUpdates( $user, $context, $group, $accReq );
 			}
 		);
 
@@ -358,7 +357,7 @@ class AccountConfirmSubmission {
 
 	protected function createUserPage( User $user ) {
 		global $wgMakeUserPageFromBio, $wgAutoUserBioText;
-		global $wgConfirmAccountSortkey, $wgContLang;
+		global $wgConfirmAccountSortkey;
 
 		$body = ''; // page text
 
@@ -403,7 +402,7 @@ class AccountConfirmSubmission {
 			);
 			$body .= "\n{{DEFAULTSORT:{$sortKey}}}";
 			# Clean up any other categories...
-			$catNS = $wgContLang->getNSText( NS_CATEGORY );
+			$catNS = MediaWikiServices::getInstance()->getContentLanguage()->getNSText( NS_CATEGORY );
 			$replace = '/\[\[' . preg_quote( $catNS ) . ':([^\]]+)\]\]/i'; // [[Category:x]]
 			$with = "[[{$catNS}:$1|" . str_replace( '$', '\$', $sortKey ) . "]]"; // [[Category:x|sortkey]]
 			$body = preg_replace( $replace, $with, $body );

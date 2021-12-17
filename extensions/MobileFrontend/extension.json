@@ -1,6 +1,6 @@
 {
 	"name": "MobileFrontend",
-	"version": "2.3.0",
+	"version": "2.4.0",
 	"author": [
 		"Patrick Reilly",
 		"Max Semenik",
@@ -18,7 +18,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"ConfigRegistry": {
 		"mobilefrontend": "GlobalVarConfig::newInstance"
@@ -27,12 +27,18 @@
 		"History": "SpecialMobileHistory",
 		"MobileDiff": "SpecialMobileDiff",
 		"MobileOptions": "SpecialMobileOptions",
-		"MobileLanguages": "SpecialMobileLanguages",
+		"MobileLanguages": {
+			"class": "SpecialMobileLanguages",
+			"services": [
+				"LanguageConverterFactory",
+				"LanguageNameUtils"
+			]
+		},
 		"Uploads": "SpecialUploads"
 	},
 	"APIModules": {
-		"mobileview": "ApiMobileView",
-		"webapp-manifest": "ApiWebappManifest"
+		"mobileview": "MobileFrontend\\Api\\ApiMobileView",
+		"webapp-manifest": "MobileFrontend\\Api\\ApiWebappManifest"
 	},
 	"MessagesDirs": {
 		"MobileFrontend": [
@@ -70,14 +76,7 @@
 		"MobileFrontendSkinHooks": "includes/MobileFrontendSkinHooks.php",
 		"MobileContext": "includes/MobileContext.php",
 		"MobileFormatter": "includes/MobileFormatter.php",
-		"MobileCollection": "includes/models/MobileCollection.php",
-		"MobilePage": "includes/models/MobilePage.php",
 		"MobileUI": "includes/MobileUI.php",
-		"ApiMobileView": "includes/api/ApiMobileView.php",
-		"ApiParseExtender": "includes/api/ApiParseExtender.php",
-		"ApiWebappManifest": "includes/api/ApiWebappManifest.php",
-		"InlineDiffFormatter": "includes/diff/InlineDiffFormatter.php",
-		"InlineDifferenceEngine": "includes/diff/InlineDifferenceEngine.php",
 		"SpecialUploads": "includes/specials/SpecialUploads.php",
 		"SpecialMobileHistory": "includes/specials/SpecialMobileHistory.php",
 		"SpecialMobileDiff": "includes/specials/SpecialMobileDiff.php",
@@ -111,15 +110,6 @@
 			],
 			"styles": [
 				"resources/mobile.pagesummary.styles/pagesummary.less"
-			]
-		},
-		"mobile.messageBox.styles": {
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"styles": [
-				"resources/mobile.messageBox.styles/messageBox.less"
 			]
 		},
 		"mobile.placeholder.images": {
@@ -279,14 +269,10 @@
 				"user.options",
 				"mediawiki.util",
 				"mediawiki.api",
-				"mediawiki.viewport",
 				"mediawiki.router",
-				"jquery.throttle-debounce",
-				"mobile.messageBox.styles"
+				"jquery.throttle-debounce"
 			],
 			"messages": [
-				"mobile-frontend-categories-heading",
-				"mobile-frontend-categories-add",
 				"echo-mark-all-as-read",
 				"echo-overlay-link",
 				"mobile-frontend-talk-add-overlay-submit",
@@ -403,10 +389,20 @@
 				"mobile-frontend-editor-switch-editor",
 				"mobile-frontend-editor-switch-visual-editor",
 				"mobile-frontend-editor-anonwarning",
-				"ok",
 				"mobile-frontend-editor-editing",
+				"mobile-frontend-editor-blocked-drawer-action-login",
+				"mobile-frontend-editor-blocked-drawer-action-ok",
+				"mobile-frontend-editor-blocked-drawer-action-randompage",
 				"mobile-frontend-editor-blocked-drawer-title",
 				"mobile-frontend-editor-blocked-drawer-title-partial",
+				"mobile-frontend-editor-blocked-drawer-title-ip",
+				"mobile-frontend-editor-blocked-drawer-title-ip-partial",
+				"mobile-frontend-editor-blocked-drawer-body-partial",
+				"mobile-frontend-editor-blocked-drawer-body-login",
+				"mobile-frontend-editor-blocked-drawer-body-login-partial",
+				"mobile-frontend-editor-blocked-drawer-body-login-createaccount",
+				"mobile-frontend-editor-blocked-drawer-body-login-createaccount-partial",
+				"mobile-frontend-editor-blocked-drawer-body-link",
 				"mobile-frontend-editor-blocked-drawer-reason-header",
 				"mobile-frontend-editor-blocked-drawer-creator-header",
 				"mobile-frontend-editor-blocked-drawer-expiry-header",
@@ -421,7 +417,7 @@
 			"class": "ResourceLoaderOOUIIconPackModule",
 			"selectorWithVariant": ".mw-ui-icon-mf-{name}-{variant}:before",
 			"icons": [
-				"stopHand"
+				"block"
 			],
 			"variants": {
 				"destructive": {
@@ -488,38 +484,6 @@
 				"mobile-frontend-media-load-fail-retry"
 			]
 		},
-		"mobile.categories.overlays": {
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"dependencies": [
-				"mediawiki.Title",
-				"mediawiki.router",
-				"mobile.startup",
-				"mobile.editor.overlay",
-				"oojs-ui.styles.icons-interactions",
-				"oojs-ui"
-			],
-			"scripts": [
-				"resources/dist/mobile.categories.overlays.js"
-			],
-			"styles": [
-				"resources/mobile.categories.overlays/categories.less"
-			],
-			"messages": [
-				"mobile-frontend-categories-subheading",
-				"mobile-frontend-categories-notification",
-				"mobile-frontend-categories-nocat",
-				"mobile-frontend-categories-search",
-				"mobile-frontend-categories-nodata",
-				"mobile-frontend-categories-summary",
-				"mobile-frontend-categories-add-heading",
-				"mobile-frontend-categories-add-wait",
-				"mobile-frontend-categories-normal",
-				"mobile-frontend-categories-hidden"
-			]
-		},
 		"mobile.languages.structured": {
 			"targets": [
 				"mobile",
@@ -538,7 +502,9 @@
 			"messages": [
 				"mobile-frontend-languages-structured-overlay-suggested-languages-header",
 				"mobile-frontend-languages-structured-overlay-all-languages-header",
-				"mobile-frontend-languages-structured-overlay-search-input-placeholder"
+				"mobile-frontend-languages-structured-overlay-search-input-placeholder",
+				"mobile-frontend-languages-structured-overlay-no-results",
+				"mobile-frontend-languages-structured-overlay-no-results-body"
 			]
 		},
 		"mobile.site": {
@@ -697,16 +663,9 @@
 		"localBasePath": "",
 		"remoteExtPath": "MobileFrontend"
 	},
-	"attributes": {
-		"EventLogging": {
-			"Schemas": {
-				"MobileWebSearch": 12054448
-			}
-		}
-	},
 	"Hooks": {
-		"APIGetAllowedParams": "ApiParseExtender::onAPIGetAllowedParams",
-		"APIAfterExecute": "ApiParseExtender::onAPIAfterExecute",
+		"APIGetAllowedParams": "MobileFrontend\\Api\\ApiParseExtender::onAPIGetAllowedParams",
+		"APIAfterExecute": "MobileFrontend\\Api\\ApiParseExtender::onAPIAfterExecute",
 		"APIQuerySiteInfoGeneralInfo": "MobileFrontendHooks::onAPIQuerySiteInfoGeneralInfo",
 		"AuthChangeFormFields": "MobileFrontendHooks::onAuthChangeFormFields",
 		"RequestContextCreateSkin": "MobileFrontendHooks::onRequestContextCreateSkin",
@@ -723,15 +682,15 @@
 		"SpecialPage_initList": "MobileFrontendHooks::onSpecialPageInitList",
 		"ListDefinedTags": [
 			"MobileFrontendHooks::onListDefinedTags",
-			"MobileFrontend\\AMC\\Hooks::onListDefinedTags"
+			"MobileFrontend\\Amc\\Hooks::onListDefinedTags"
 		],
 		"ChangeTagsListActive": [
 			"MobileFrontendHooks::onListDefinedTags",
-			"MobileFrontend\\AMC\\Hooks::onListDefinedTags"
+			"MobileFrontend\\Amc\\Hooks::onListDefinedTags"
 		],
 		"RecentChange_save": [
 			"MobileFrontendHooks::onTaggableObjectCreation",
-			"MobileFrontend\\AMC\\Hooks::onRecentChangeSave"
+			"MobileFrontend\\Amc\\Hooks::onRecentChangeSave"
 		],
 		"AbuseFilter-generateUserVars": "MobileFrontendHooks::onAbuseFilterGenerateUserVars",
 		"AbuseFilter-builder": "MobileFrontendHooks::onAbuseFilterBuilder",
@@ -740,13 +699,12 @@
 		"BeforePageDisplay": "MobileFrontendHooks::onBeforePageDisplay",
 		"GetPreferences": [
 			"MobileFrontendHooks::onGetPreferences",
-			"MobileFrontend\\AMC\\Hooks::onGetPreferences"
+			"MobileFrontend\\Amc\\Hooks::onGetPreferences"
 		],
 		"Gadgets::allowLegacy": "MobileFrontendHooks::onAllowLegacyGadgets",
 		"CentralAuthLoginRedirectData": "MobileFrontendHooks::onCentralAuthLoginRedirectData",
 		"CentralAuthSilentLoginRedirect": "MobileFrontendHooks::onCentralAuthSilentLoginRedirect",
 		"ResourceLoaderRegisterModules": "MobileFrontendEditorHooks::onResourceLoaderRegisterModules",
-		"ResourceLoaderTestModules": "MobileFrontendHooks::onResourceLoaderTestModules",
 		"OutputPageParserOutput": "MobileFrontendHooks::onOutputPageParserOutput",
 		"HTMLFileCache::useFileCache": "MobileFrontendHooks::onHTMLFileCacheUseFileCache",
 		"LoginFormValidErrorMessages": "MobileFrontendHooks::onLoginFormValidErrorMessages",
@@ -760,10 +718,10 @@
 		"TitleSquidURLs": "MobileFrontendHooks::onTitleSquidURLs",
 		"UserGetDefaultOptions": [
 			"MobileFrontendHooks::onUserGetDefaultOptions",
-			"MobileFrontend\\AMC\\Hooks::onUserGetDefaultOptions"
+			"MobileFrontend\\Amc\\Hooks::onUserGetDefaultOptions"
 		],
 		"ManualLogEntryBeforePublish": [
-			"MobileFrontend\\AMC\\Hooks::onManualLogEntryBeforePublish",
+			"MobileFrontend\\Amc\\Hooks::onManualLogEntryBeforePublish",
 			"MobileFrontendHooks::onTaggableObjectCreation"
 		]
 	},
@@ -791,35 +749,33 @@
 				"amc": true
 			}
 		},
-		"MFContentProviderTryLocalContentFirst": {
-			"value": true
+		"MFUseDesktopContributionsPage": {
+			"value": {
+				"base": false,
+				"beta": false,
+				"amc": true
+			}
 		},
-		"MFContentProviderClass": {
-			"value": "MobileFrontend\\ContentProviders\\DefaultContentProvider"
-		},
-		"MFMwApiContentProviderBaseUri": {
-			"value": "https://en.wikipedia.org/w/api.php"
-		},
-		"MFContentProviderScriptPath": {
+		"wgMFScriptPath": {
+			"description": "Reroute search queries to a different host",
 			"value": ""
-		},
-		"MFMcsContentProviderBaseUri": {
-			"value": "https://en.wikipedia.org/api/rest_v1"
 		},
 		"MFEnableXAnalyticsLogging": {
 			"value": false
 		},
 		"MFDefaultEditor": {
-			"value": "source"
+			"description": "Default editor when there is no user preference set (mobile-editor). One of 'source', 'visual', or 'preference' (inherit desktop editor preference).",
+			"value": "preference"
 		},
 		"MFEnableJSConsoleRecruitment": {
 			"value": false
 		},
-		"MFAlwaysUseContentProvider": {
-			"value": false
-		},
 		"MFMobileFormatterOptions": {
 			"value": {
+				"excludeNamespaces": [
+					10,
+					-1
+				],
 				"maxImages": 1000,
 				"maxHeadings": 4000,
 				"headings": [
@@ -832,9 +788,6 @@
 				]
 			}
 		},
-		"MFSpecialCaseMainPage": {
-			"value": false
-		},
 		"MFMobileHeader": {
 			"value": "X-Subdomain"
 		},
@@ -843,6 +796,7 @@
 				"beta": [],
 				"base": [
 					".navbox",
+					".vertical-navbox",
 					".nomobile"
 				]
 			}
@@ -866,18 +820,6 @@
 		},
 		"MFLazyLoadSkipSmallImages": {
 			"value": false
-		},
-		"MFMobileFormatterNamespaceBlacklist": {
-			"value": [
-				10,
-				-1
-			]
-		},
-		"MFNoMobileCategory": {
-			"value": false
-		},
-		"MFNoMobilePages": {
-			"value": []
 		},
 		"MFSpecialPageTaglines": {
 			"value": []
@@ -968,9 +910,6 @@
 		"MFRSSFeedLink": {
 			"value": false
 		},
-		"MFSchemaSearchSampleRate": {
-			"value": 0.001
-		},
 		"MFStripResponsiveImages": {
 			"value": true
 		},
@@ -1009,9 +948,15 @@
 		"MFSchemaEditAttemptStepOversample": {
 			"value": false
 		},
+		"MFTrackBlockNotices": {
+			"value": false
+		},
 		"MFStopMobileRedirectCookieSecureValue": {
 			"value": true
 		}
+	},
+	"DefaultUserOptions": {
+		"mobile-editor": ""
 	},
 	"ServiceWiringFiles": [
 		"includes/ServiceWiring.php"

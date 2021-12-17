@@ -15,17 +15,26 @@
 	"license-name": "MIT",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.37.0"
 	},
 	"APIMetaModules": {
-		"notifications": "ApiEchoNotifications",
+		"notifications": {
+			"class": "ApiEchoNotifications",
+			"services": [ "MainConfig" ]
+		},
 		"unreadnotificationpages": "ApiEchoUnreadNotificationPages"
 	},
 	"APIModules": {
 		"echomarkread": "ApiEchoMarkRead",
 		"echomarkseen": "ApiEchoMarkSeen",
 		"echoarticlereminder": "ApiEchoArticleReminder",
-		"echomute": "ApiEchoMute"
+		"echomute": {
+			"class": "ApiEchoMute",
+			"services": [
+				"CentralIdLookup",
+				"UserOptionsManager"
+			]
+		}
 	},
 	"DefaultUserOptions": {
 		"echo-email-frequency": 0,
@@ -41,8 +50,22 @@
 	},
 	"SpecialPages": {
 		"Notifications": "SpecialNotifications",
-		"DisplayNotificationsConfiguration": "SpecialDisplayNotificationsConfiguration",
+		"DisplayNotificationsConfiguration": {
+			"class": "SpecialDisplayNotificationsConfiguration",
+			"services": [
+				"EchoAttributeManager",
+				"UserOptionsManager"
+			]
+		},
 		"NotificationsMarkRead": "SpecialNotificationsMarkRead"
+	},
+	"AvailableRights": [
+		"manage-all-push-subscriptions"
+	],
+	"GroupPermissions": {
+		"push-subscription-manager": {
+			"manage-all-push-subscriptions": true
+		}
 	},
 	"MessagesDirs": {
 		"Echo": [
@@ -60,9 +83,19 @@
 			"NotificationBadge.mustache": "modules/mobile/NotificationBadge.mustache"
 		},
 		"packageFiles": [
-			"tests/qunit/mobile/index.js",
+			"tests/qunit/index.js",
 			"tests/qunit/mobile/test_NotificationBadge.js",
-			"modules/mobile/NotificationBadge.js"
+			"modules/mobile/NotificationBadge.js",
+			"tests/qunit/model/test_mw.echo.dm.BundleNotificationItem.js",
+			"tests/qunit/model/test_mw.echo.dm.CrossWikiNotificationItem.js",
+			"tests/qunit/model/test_mw.echo.dm.FiltersModel.js",
+			"tests/qunit/model/test_mw.echo.dm.NotificationGroupsList.js",
+			"tests/qunit/model/test_mw.echo.dm.NotificationItem.js",
+			"tests/qunit/model/test_mw.echo.dm.NotificationsList.js",
+			"tests/qunit/model/test_mw.echo.dm.PaginationModel.js",
+			"tests/qunit/model/test_mw.echo.dm.SeenTimeModel.js",
+			"tests/qunit/model/test_mw.echo.dm.SourcePagesModel.js",
+			"tests/qunit/model/test_mw.echo.dm.UnreadNotificationCounter.js"
 		]
 	},
 	"ResourceModules": {
@@ -147,6 +180,9 @@
 				],
 				"minerva": [
 					"styles/mw.echo.ui.overlay.minerva.less"
+				],
+				"wikimediaapiportal": [
+					"styles/mw.echo.ui.overlay.wikimediaapiportal.less"
 				]
 			},
 			"dependencies": [
@@ -388,6 +424,11 @@
 				"styles/mw.echo.ui.CrossWikiUnreadFilterWidget.less",
 				"styles/mw.echo.ui.SpecialHelpMenuWidget.less"
 			],
+			"skinStyles": {
+				"minerva": [
+					"styles/mw.echo.ui.NotificationsInboxWidget.minerva.less"
+				]
+			},
 			"dependencies": [
 				"ext.echo.ui",
 				"mediawiki.Uri",
@@ -406,7 +447,8 @@
 				"echo-learn-more",
 				"mypreferences",
 				"echo-specialpage-section-markread",
-				"echo-specialpage-pagefilterwidget-aria-label"
+				"echo-specialpage-pagefilterwidget-aria-label",
+				"echo-specialpage-special-help-menu-widget-aria-label"
 			],
 			"targets": [
 				"desktop",
@@ -431,16 +473,13 @@
 		"SkinMinervaReplaceNotificationsBadge": "EchoHooks::onSkinMinervaReplaceNotificationsBadge",
 		"LoadExtensionSchemaUpdates": "EchoHooks::onLoadExtensionSchemaUpdates",
 		"GetPreferences": "EchoHooks::getPreferences",
-		"PersonalUrls": "EchoHooks::onPersonalUrls",
 		"BeforePageDisplay": "EchoHooks::beforePageDisplay",
 		"ResourceLoaderRegisterModules": "EchoHooks::onResourceLoaderRegisterModules",
-		"ResourceLoaderTestModules": "EchoHooks::onResourceLoaderTestModules",
 		"UserGroupsChanged": "EchoHooks::onUserGroupsChanged",
-		"UserLoadOptions": "EchoHooks::onUserLoadOptions",
-		"UserSaveOptions": "EchoHooks::onUserSaveOptions",
+		"LoadUserOptions": "EchoHooks::onLoadUserOptions",
+		"SaveUserOptions": "EchoHooks::onSaveUserOptions",
 		"UserGetDefaultOptions": "EchoHooks::onUserGetDefaultOptions",
 		"UserClearNewTalkNotification": "EchoHooks::onUserClearNewTalkNotification",
-		"ParserTestTables": "EchoHooks::onParserTestTables",
 		"EmailUserComplete": "EchoHooks::onEmailUserComplete",
 		"LoginFormValidErrorMessages": "EchoHooks::onLoginFormValidErrorMessages",
 		"OutputPageCheckLastModified": "EchoHooks::onOutputPageCheckLastModified",
@@ -461,7 +500,8 @@
 		"LinksUpdateAfterInsert": "EchoHooks::onLinksUpdateAfterInsert",
 		"SpecialMuteModifyFormFields": "EchoHooks::onSpecialMuteModifyFormFields",
 		"RecentChange_save": "main",
-		"ApiMain::moduleManager": "EchoHooks::onApiMainModuleManager"
+		"ApiMain::moduleManager": "EchoHooks::onApiMainModuleManager",
+		"SkinTemplateNavigation::Universal": "EchoHooks::onSkinTemplateNavigationUniversal"
 	},
 	"HookHandlers": {
 		"main": {
@@ -999,12 +1039,17 @@
 		"EchoPushServiceBaseUrl": {
 			"value": false,
 			"description": "Request endpoint URL for the push notification service"
+		},
+		"EchoPushMaxSubscriptionsPerUser": {
+			"value": 0,
+			"description": "Maximum number of push subscriptions that may be stored in the DB at any given time for a single central user ID."
 		}
 	},
 	"attributes": {
 		"EventLogging": {
 			"Schemas": {
-				"EchoInteraction": 15823738
+				"EchoInteraction": "/analytics/legacy/echointeraction/1.0.0",
+				"EchoMail": "/analytics/legacy/echomail/1.0.0"
 			}
 		}
 	},

@@ -36,13 +36,7 @@ for the page.
 Controls whether site notices should be shown.
 See <https://www.mediawiki.org/wiki/Manual:$wgSiteNotice>.
 
-#### $wgMinervaCountErrors
-* Type: `Boolean`
-* Default: `false`
-
-Whether to count client side errors in statsv.
-
-#### $wgMinervaShowCategoriesButton
+#### $wgMinervaShowCategories
 
 * Type: `Array`
 * Default:

@@ -3,6 +3,7 @@
 		"authors": [
 			"HanV",
 			"Mar(c)",
+			"McDutchie",
 			"Nemo bis",
 			"Siebrand"
 		]
@@ -17,9 +18,9 @@
 	"requestaccount-agree": "Je moet bevestigen dat je naam juist is en dat je akkoord gaat met de Gebruiksvoorwaarden.",
 	"requestaccount-tooshort": "Je biografie moet ten minste {{PLURAL:$1|één woord|$1 woorden}} bevatten.",
 	"requestaccount-resub": "Je CV-bestand moet opnieuw geselecteerd worden om veiligheidsredenen.\nLaat het veld leeg als je geen bestand meer wilt bijvoegen.",
-	"requestaccount-sent": "Je gebruikersaanvraag is verstuurd en wacht om nagekeken te worden.\nEr is ter bevestiging een e-mail naar je e-mailadres gezonden.",
+	"requestaccount-sent": "Je accountaanvraag is verstuurd en is nu in afwachting van beoordeling.\nEr is een bevestigingsmail naar jouw e-mailadres gezonden.",
 	"requestaccount-econf": "Je e-mailadres is bevestigd en wordt in je gebruikersaanvraag opgenomen.",
 	"requestaccount-email-body": "Iemand, waarschijnlijk jij, heeft vanaf IP-adres $1 op {{SITENAME}} een aanvraag gedaan\nvoor het aanmaken van account \"$2\" met dit e-mailadres.\n\nKlik op de onderstaande koppeling om te bevestigen dat dit account op {{SITENAME}} daadwerkelijk bij jou hoort:\n\n$3\n\nWanneer het account is aangemaakt, krijg alleen jij een e-mail met het wachtwoord.\nAls jij dit *niet* bent, gebruik de koppeling dan niet. \nDoe de bevestiging voor $4.",
-	"requestaccount-email-body-admin": "\"$1\" heeft een gebruiker aangevraagd en wacht op bevestiging.\nHet e-mailadres is bevestigd.\nJe kunt de aanvraag hier \"$2\" bevestigen.",
+	"requestaccount-email-body-admin": "$1 heeft een account aangevraagd en wacht op bevestiging.\nHet e-mailadres is bevestigd.\nJe kunt de aanvraag hier bevestigen:\n\n$2",
 	"acct_request_throttle_hit": "Je hebt al $1 {{PLURAL:$1|gebruikersaanvraag|gebruikersaanvragen}} gedaan.\nJe kunt geen nieuwe aanvragen meer uitbrengen."
 }

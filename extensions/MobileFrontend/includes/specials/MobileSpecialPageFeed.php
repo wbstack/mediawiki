@@ -10,6 +10,7 @@ use Wikimedia\IPUtils;
 abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 	/** @var bool Whether to show the username in results or not */
 	protected $showUsername = true;
+	/** @var string */
 	protected $lastDate;
 	/** @var Title|null */
 	protected $title;
@@ -34,7 +35,6 @@ abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 	 * @param string $comment The raw comment text
 	 * @param Title $title The title of the page that was edited
 	 * @fixme Duplication with SpecialMobileWatchlist
-	 * @suppress SecurityCheck-DoubleEscaped phan false positive
 	 *
 	 * @return string HTML code
 	 */

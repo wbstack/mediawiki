@@ -1,8 +1,20 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
+namespace MediaWiki\Extension\TemplateSandbox;
+
+use Content;
+use EditPage;
+use Html;
+use HTMLForm;
+use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\Page\WikiPageFactory;
+use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use ParserOutput;
+use SpecialPage;
+use Status;
+use Title;
 
 class SpecialTemplateSandbox extends SpecialPage {
 	private $prefixes = [];
@@ -17,8 +29,29 @@ class SpecialTemplateSandbox extends SpecialPage {
 	 */
 	private $output = null;
 
-	public function __construct() {
+	/** @var RevisionLookup */
+	private $revisionLookup;
+
+	/** @var IContentHandlerFactory */
+	private $contentHandlerFactory;
+
+	/** @var WikiPageFactory */
+	private $wikiPageFactory;
+
+	/**
+	 * @param RevisionLookup $revisionLookup
+	 * @param IContentHandlerFactory $contentHandlerFactory
+	 * @param WikiPageFactory $wikiPageFactory
+	 */
+	public function __construct(
+		RevisionLookup $revisionLookup,
+		IContentHandlerFactory $contentHandlerFactory,
+		WikiPageFactory $wikiPageFactory
+	) {
 		parent::__construct( 'TemplateSandbox' );
+		$this->revisionLookup = $revisionLookup;
+		$this->contentHandlerFactory = $contentHandlerFactory;
+		$this->wikiPageFactory = $wikiPageFactory;
 	}
 
 	protected function getGroupName() {
@@ -108,11 +141,10 @@ class SpecialTemplateSandbox extends SpecialPage {
 					"<div class='previewnote warningbox'>\n$1\n</div>", 'templatesandbox-anon-limited-preview'
 				);
 			} else {
-				TemplateSandboxLogic::addSubpageHandlerToOutput( $this->prefixes, $output );
+				Logic::addSubpageHandlerToOutput( $this->prefixes, $output );
 			}
 			$output->addParserOutput( $this->output );
 
-			// @phan-suppress-next-line SecurityCheck-XSS
 			$output->addHTML( Html::rawElement(
 				'div',
 				[ 'class' => 'limitreport', 'style' => 'clear:both' ],
@@ -130,7 +162,7 @@ class SpecialTemplateSandbox extends SpecialPage {
 	/**
 	 * @param string|null $value
 	 * @param array $allData
-	 * @return bool|String
+	 * @return bool|string
 	 */
 	public function validatePageParam( $value, $allData ) {
 		if ( $value === '' || $value === null ) {
@@ -149,16 +181,14 @@ class SpecialTemplateSandbox extends SpecialPage {
 	/**
 	 * @param string|null $value
 	 * @param array $allData
-	 * @return bool|String
+	 * @return bool|string
 	 */
 	public function validateRevidParam( $value, $allData ) {
 		if ( $value === '' || $value === null ) {
 			return true;
 		}
 
-		$revisionRecord = MediaWikiServices::getInstance()
-			->getRevisionLookup()
-			->getRevisionById( $value );
+		$revisionRecord = $this->revisionLookup->getRevisionById( $value );
 		if ( $revisionRecord === null ) {
 			return $this->msg( 'templatesandbox-revision-not-exists' )->parseAsBlock();
 		}
@@ -178,7 +208,7 @@ class SpecialTemplateSandbox extends SpecialPage {
 	/**
 	 * @param string|null $value
 	 * @param array $allData
-	 * @return bool|String
+	 * @return bool|string
 	 */
 	public function validatePrefixParam( $value, $allData ) {
 		if ( $value === '' || $value === null ) {
@@ -204,20 +234,18 @@ class SpecialTemplateSandbox extends SpecialPage {
 	 * @return Status
 	 */
 	public function onSubmit( $data, $form ) {
-		$services = MediaWikiServices::getInstance();
-		$revisionLookup = $services->getRevisionLookup();
 		if ( $data['revid'] !== '' && $data['revid'] !== null ) {
-			$rev = $revisionLookup->getRevisionById( $data['revid'] );
+			$rev = $this->revisionLookup->getRevisionById( $data['revid'] );
 			$title = Title::newFromLinkTarget( $rev->getPageAsLinkTarget() );
 		} elseif ( $data['page'] !== '' && $data['page'] !== null ) {
 			$title = Title::newFromText( $data['page'] );
-			$rev = $revisionLookup->getRevisionByTitle( $title );
+			$rev = $this->revisionLookup->getRevisionByTitle( $title );
 		} else {
 			return Status::newFatal( 'templatesandbox-page-or-revid' );
 		}
 
 		if ( $data['text'] !== '' && $data['text'] !== null ) {
-			$content = $services->getContentHandlerFactory()
+			$content = $this->contentHandlerFactory
 				->getContentHandler( $rev->getSlot( SlotRecord::MAIN )->getModel() )
 				->unserializeContent( $data['text'] );
 		} else {
@@ -232,11 +260,11 @@ class SpecialTemplateSandbox extends SpecialPage {
 		'@phan-var Title $title';
 		'@phan-var Content $content';
 
-		$page = WikiPage::factory( $title );
+		$page = $this->wikiPageFactory->newFromTitle( $title );
 		$popts = $page->makeParserOptions( $this->getContext() );
 		$popts->setIsPreview( true );
 		$popts->setIsSectionPreview( false );
-		$logic = new TemplateSandboxLogic( $this->prefixes, null, null );
+		$logic = new Logic( $this->prefixes, null, null );
 		$reset = $logic->setupForParse( $popts );
 		$this->title = $title;
 		$this->output = $content->getParserOutput( $title, $rev->getId(), $popts );

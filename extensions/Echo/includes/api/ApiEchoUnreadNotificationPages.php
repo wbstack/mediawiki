@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\Logger\LoggerFactory;
+
 class ApiEchoUnreadNotificationPages extends ApiQueryBase {
 	use ApiCrossWiki;
 
@@ -23,7 +25,7 @@ class ApiEchoUnreadNotificationPages extends ApiQueryBase {
 		// To avoid API warning, register the parameter used to bust browser cache
 		$this->getMain()->getVal( '_' );
 
-		if ( $this->getUser()->isAnon() ) {
+		if ( !$this->getUser()->isRegistered() ) {
 			$this->dieWithError( 'apierror-mustbeloggedin-generic', 'login-required' );
 		}
 
@@ -54,7 +56,7 @@ class ApiEchoUnreadNotificationPages extends ApiQueryBase {
 	 * @phan-return array{pages:array[],totalCount:int}
 	 */
 	protected function getFromLocal( $limit, $groupPages ) {
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
 		$enabledTypes = $attributeManager->getUserEnabledEvents( $this->getUser(), 'web' );
 
 		$dbr = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_REPLICA );
@@ -88,14 +90,12 @@ class ApiEchoUnreadNotificationPages extends ApiQueryBase {
 		$pageCounts = [];
 		foreach ( $rows as $row ) {
 			if ( $row->event_page_id !== null ) {
-				// @phan-suppress-next-line PhanTypeMismatchDimAssignment
-				$pageCounts[$row->event_page_id] = intval( $row->count );
+				$pageCounts[(int)$row->event_page_id] = intval( $row->count );
 			} else {
 				$nullCount = intval( $row->count );
 			}
 		}
 
-		// @phan-suppress-next-line PhanTypeMismatchArgument
 		$titles = Title::newFromIDs( array_keys( $pageCounts ) );
 
 		$groupCounts = [];
@@ -107,8 +107,7 @@ class ApiEchoUnreadNotificationPages extends ApiQueryBase {
 				$pageName = $title->getPrefixedText();
 			}
 
-			// @phan-suppress-next-line PhanTypeMismatchDimFetch
-			$count = $pageCounts[$title->getArticleID()];
+			$count = $pageCounts[$title->getArticleID()] ?? 0;
 			if ( isset( $groupCounts[$pageName] ) ) {
 				$groupCounts[$pageName] += $count;
 			} else {
@@ -174,7 +173,19 @@ class ApiEchoUnreadNotificationPages extends ApiQueryBase {
 	protected function getUnreadNotificationPagesFromForeign() {
 		$result = [];
 		foreach ( $this->getFromForeign() as $wiki => $data ) {
-			$result[$wiki] = $data['query'][$this->getModuleName()][$wiki];
+			if ( isset( $data['query'][$this->getModuleName()][$wiki] ) ) {
+				$result[$wiki] = $data['query'][$this->getModuleName()][$wiki];
+			} else {
+				# Usually an error or it is some malformed response
+				# T273479
+				LoggerFactory::getInstance( 'Echo' )->warning(
+					__METHOD__ . ': Unexpected API response from {wiki}',
+					[
+						'wiki' => $wiki,
+						'data' => $data,
+					]
+				);
+			}
 		}
 
 		return $result;

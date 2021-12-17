@@ -1,21 +1,38 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use MediaWiki\Extension\Math\Render\RendererFactory;
+use SpecialPage;
+
 /**
  * Description of SpecialMathShowSVG
  *
  * @author Moritz Schubotz (Physikerwelt)
  */
 class SpecialMathShowImage extends SpecialPage {
+	/** @var bool */
 	private $noRender = false;
+	/** @var MathRenderer|null */
 	private $renderer = null;
+	/** @var string */
 	private $mode = 'mathml';
 
-	public function __construct() {
+	/** @var RendererFactory */
+	private $rendererFactory;
+
+	/**
+	 * @param RendererFactory $rendererFactory
+	 */
+	public function __construct(
+		RendererFactory $rendererFactory
+	) {
 		parent::__construct(
 			'MathShowImage',
 			'', // Don't restrict
 			false // Don't show on Special:SpecialPages - it's not useful interactively
 		);
+		$this->rendererFactory = $rendererFactory;
 	}
 
 	/**
@@ -53,7 +70,7 @@ class SpecialMathShowImage extends SpecialPage {
 			$asciimath = '';
 		}
 		$mode = $request->getText( 'mode' );
-		$this->mode = MathHooks::mathModeToString( $mode, 'mathml' );
+		$this->mode = Hooks::mathModeToString( $mode, 'mathml' );
 
 		if ( !in_array( $this->mode, MathRenderer::getValidModes() ) ) {
 			// Fallback to the default if an invalid mode was specified
@@ -65,9 +82,9 @@ class SpecialMathShowImage extends SpecialPage {
 		} else {
 			if ( $tex === '' && $asciimath === '' ) {
 				if ( $wgMathoidCli && $this->mode === 'png' ) {
-					$this->renderer = MathRenderer::getRenderer( '', [], 'mathml' );
+					$this->renderer = $this->rendererFactory->getRenderer( '', [], 'mathml' );
 				} else {
-					$this->renderer = MathRenderer::getRenderer( '', [], $this->mode );
+					$this->renderer = $this->rendererFactory->getRenderer( '', [], $this->mode );
 				}
 				$this->renderer->setMd5( $hash );
 				$this->noRender = $request->getBool( 'noRender', false );
@@ -80,7 +97,7 @@ class SpecialMathShowImage extends SpecialPage {
 						// and render the conventional way
 						$mmlRenderer = MathMathML::newFromMd5( $hash );
 						$mmlRenderer->readFromDatabase();
-						$this->renderer = MathRenderer::getRenderer(
+						$this->renderer = $this->rendererFactory->getRenderer(
 							$mmlRenderer->getUserInputTex(), [], 'png'
 						);
 						$this->renderer->setMathStyle( $mmlRenderer->getMathStyle() );
@@ -88,10 +105,10 @@ class SpecialMathShowImage extends SpecialPage {
 					$success = $this->renderer->render();
 				}
 			} elseif ( $asciimath === '' ) {
-				$this->renderer = MathRenderer::getRenderer( $tex, [], $this->mode );
+				$this->renderer = $this->rendererFactory->getRenderer( $tex, [], $this->mode );
 				$success = $this->renderer->render();
 			} else {
-				$this->renderer = MathRenderer::getRenderer(
+				$this->renderer = $this->rendererFactory->getRenderer(
 					$asciimath, [ 'type' => 'ascii' ], $this->mode
 				);
 				$success = $this->renderer->render();

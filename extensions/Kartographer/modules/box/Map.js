@@ -39,6 +39,10 @@ function bracketDevicePixelRatio() {
 	return brackets[ brackets.length - 1 ];
 }
 
+if ( !mapServer ) {
+	throw new Error( 'wgKartographerMapServer must be configured.' );
+}
+
 scale = bracketDevicePixelRatio();
 scale = ( scale === 1 ) ? '' : ( '@' + scale + 'x' );
 urlFormat = '/{z}/{x}/{y}' + scale + '.png';
@@ -54,7 +58,7 @@ L.Map.mergeOptions( {
 	sleepOpacity: 1,
 	// the default zoom applied when `longitude` and `latitude` were
 	// specified, but zoom was not.
-	fallbackZoom: 13
+	fallbackZoom: mw.config.get( 'wgKartographerFallbackZoom' )
 } );
 
 L.Popup.mergeOptions( {
@@ -128,8 +132,8 @@ KartographerMap = L.Map.extend( {
 	 *   add to the map.**
 	 * @param {boolean} [options.alwaysInteractive=false] Prevents the map
 	 *   from becoming static when the screen is too small.
-	 * @param {Array|L.LatLng} [options.center] **Initial map center.**
-	 * @param {number} [options.zoom] **Initial map zoom.**
+	 * @param {Array|L.LatLng|string} [options.center] **Initial map center.**
+	 * @param {number|string} [options.zoom] **Initial map zoom.**
 	 * @param {string} [options.lang] Language for map labels
 	 * @param {string} [options.style] Map style. _Defaults to
 	 *  `mw.config.get( 'wgKartographerDfltStyle' )`, or `'osm-intl'`._
@@ -297,8 +301,16 @@ KartographerMap = L.Map.extend( {
 			this._invalidateInteractive();
 		}
 
+		// The `ready` function has not fired yet so there is no center or zoom defined.
+		// Disable panning and zooming until that has happened.
+		// See T257872.
+		map.dragging.disable();
+		map.touchZoom.disable();
+
 		function ready() {
 			map.initView( options.center, options.zoom );
+			map.dragging.enable();
+			map.touchZoom.enable();
 			map.fire(
 				/**
 				 * @event
@@ -310,8 +322,7 @@ KartographerMap = L.Map.extend( {
 		if ( this.parentMap ) {
 			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( this.parentMap.dataLayers, function ( groupId, layer ) {
-				var newLayer = map.addGeoJSONLayer( groupId, layer.getGeoJSON(), layer.options );
-				newLayer.dataGroup = layer.group;
+				map.addGeoJSONLayer( groupId, layer.getGeoJSON(), layer.options );
 			} );
 			ready();
 			return;
@@ -325,6 +336,10 @@ KartographerMap = L.Map.extend( {
 			} else {
 				ready();
 			}
+		}, function () {
+			// T25787
+			ready();
+			mw.log.error( 'Unable to add datalayers to map.' );
 		} );
 	},
 
@@ -396,15 +411,13 @@ KartographerMap = L.Map.extend( {
 			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( dataGroups, function ( key, group ) {
 				var layerOptions = {
-						attribution: group.attribution
-					},
-					layer;
+					attribution: group.attribution
+				};
 				if ( group.isExternal ) {
 					layerOptions.name = group.attribution;
 				}
 				if ( !$.isEmptyObject( group.getGeoJSON() ) ) {
-					layer = map.addGeoJSONLayer( group.id, group.getGeoJSON(), layerOptions );
-					layer.dataGroup = group;
+					map.addGeoJSONLayer( group.id, group.getGeoJSON(), layerOptions );
 				} else {
 					mw.log.warn( 'Layer not found or contains no data: "' + group.id + '"' );
 				}
@@ -429,14 +442,12 @@ KartographerMap = L.Map.extend( {
 				var groupId = inlineDataLayerKey + inlineDataLayerId++,
 					layerOptions = {
 						attribution: group.attribution || options.attribution
-					},
-					layer;
+					};
 				if ( group.isExternal ) {
 					layerOptions.name = group.attribution;
 				}
 				if ( !$.isEmptyObject( group.getGeoJSON() ) ) {
-					layer = map.addGeoJSONLayer( groupId, group.getGeoJSON(), layerOptions );
-					layer.dataGroup = layer;
+					map.addGeoJSONLayer( groupId, group.getGeoJSON(), layerOptions );
 				} else {
 					mw.log.warn( 'Layer not found or contains no data: "' + groupId + '"' );
 				}
@@ -451,7 +462,8 @@ KartographerMap = L.Map.extend( {
 	 *   characters or spaces).
 	 * @param {Object} geoJson Features
 	 * @param {Object} [options] Layer options
-	 * @return {L.mapbox.FeatureLayer} Added layer
+	 * @return {L.mapbox.FeatureLayer|undefined} Added layer, or undefined in case e.g. the GeoJSON
+	 *   was invalid
 	 */
 	addGeoJSONLayer: function ( groupName, geoJson, options ) {
 		var layer;
@@ -462,6 +474,7 @@ KartographerMap = L.Map.extend( {
 			};
 			this.attributionControl.addAttribution( layer.getAttribution() );
 			this.dataLayers[ groupName ] = layer;
+			layer.dataGroup = groupName;
 			return layer;
 		} catch ( e ) {
 			mw.log( e );
@@ -583,7 +596,6 @@ KartographerMap = L.Map.extend( {
 			return this.fullScreenRoute;
 		}
 
-		// eslint-disable-next-line vars-on-top
 		var hash = this.fullScreenRoute,
 			currentPosition = this.getMapPosition(),
 			initialPosition = this._initialPosition,

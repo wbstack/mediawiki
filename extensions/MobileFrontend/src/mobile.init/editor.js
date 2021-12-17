@@ -8,8 +8,6 @@ var M = require( '../mobile.startup/moduleLoaderSingleton' ),
 	$allEditLinks = $( '#ca-edit, .mw-editsection a, .edit-link' ),
 	user = mw.user,
 	CtaDrawer = require( '../mobile.startup/CtaDrawer' ),
-	// FIXME: Disable on IE < 10 for time being
-	blacklisted = /MSIE \d\./.test( navigator.userAgent ),
 	contentModel = mw.config.get( 'wgPageContentModel' ),
 	veConfig = mw.config.get( 'wgVisualEditorConfig' ),
 	editCount = mw.config.get( 'wgUserEditCount' ),
@@ -58,7 +56,7 @@ function onEditLinkClick( elem, ev, router ) {
  */
 function getPreferredEditor() {
 	var defaultEditor, tokenData, anonid,
-		preferredEditor = mw.storage.get( 'preferredEditor' );
+		preferredEditor = mw.user.options.get( 'mobile-editor' ) || mw.storage.get( 'preferredEditor' );
 	if ( preferredEditor ) {
 		return preferredEditor;
 	}
@@ -89,7 +87,7 @@ function getPreferredEditor() {
 			defaultEditor = mw.user.getId() % 2 === 0 ? 'source' : 'visual';
 			mw.config.set( 'wgMFSchemaEditAttemptStepBucket', 'default-' + defaultEditor );
 		} else {
-			defaultEditor = 'source';
+			defaultEditor = 'preference';
 		}
 	}
 	switch ( defaultEditor ) {
@@ -98,7 +96,16 @@ function getPreferredEditor() {
 		case 'visual':
 			return 'VisualEditor';
 		case 'preference':
-			return mw.user.options.get( 'visualeditor-editor' ) === 'visualeditor' ? 'VisualEditor' : 'SourceEditor';
+			// First check if the user has actually used the desktop editor.
+			// This is done hackily by checking if they have the preference
+			// set to suppress the welcome dialog or user education popups. (T261423)
+			if ( mw.user.options.get( 'visualeditor-hidebetawelcome' ) || mw.user.options.get( 'visualeditor-hideusered' ) ) {
+				return mw.user.options.get( 'visualeditor-editor' ) === 'visualeditor' ? 'VisualEditor' : 'SourceEditor';
+			} else {
+				// We don't know what their preference is.
+				// For now, continue to give them the source editor.
+				return 'SourceEditor';
+			}
 	}
 	// In the event of misconfiguration, fall back to source
 	return 'SourceEditor';
@@ -384,11 +391,16 @@ function setupEditor( page, skin, currentPageHTMLParser, router ) {
 	} );
 
 	$( '#ca-edit a' ).prop( 'href', function ( i, href ) {
-		var uri = new mw.Uri( href );
-		// By default the editor opens section 0 (lead section), rather than the whole article.
-		// This might be changed in the future (T210659).
-		uri.query.section = '0';
-		return uri.toString();
+		try {
+			var uri = new mw.Uri( href );
+			// By default the editor opens section 0 (lead section), rather than the whole article.
+			// This might be changed in the future (T210659).
+			uri.query.section = '0';
+			return uri.toString();
+		} catch ( e ) {
+			// T106244 - the href couldn't be parsed likely due to invalid UTF-8
+			return href;
+		}
 	} );
 
 	if ( !router.getPath() && ( mw.util.getParamValue( 'veaction' ) || mw.util.getParamValue( 'action' ) === 'edit' ) ) {
@@ -482,7 +494,8 @@ function init( currentPage, currentPageHTMLParser, skin, router ) {
 		if ( mw.user.isAnon() && Array.isArray( editRestrictions ) && editRestrictions.indexOf( '*' ) !== -1 ) {
 			bindEditLinksLoginDrawer( router );
 		} else {
-			editErrorMessage = isReadOnly ? mw.msg( 'apierror-readonly' ) : mw.msg( 'mobile-frontend-editor-disabled' );
+			var $link = $( '<a>' ).attr( 'href', '/wiki/' + mw.config.get( 'wgPageName' ) + '?action=edit' );
+			editErrorMessage = isReadOnly ? mw.msg( 'apierror-readonly' ) : mw.message( 'mobile-frontend-editor-disabled', $link ).parseDom();
 			bindEditLinksSorryToast( editErrorMessage, router );
 		}
 	}
@@ -512,7 +525,7 @@ function bindEditLinksSorryToast( msg, router ) {
 module.exports = function ( currentPage, currentPageHTMLParser, skin ) {
 	var isMissing = currentPage.id === 0,
 		router = mw.loader.require( 'mediawiki.router' ),
-		isEditingSupported = router.isSupported() && !blacklisted;
+		isEditingSupported = router.isSupported();
 
 	if ( contentModel !== 'wikitext' ) {
 		// Only load the wikitext editor on wikitext. Otherwise we'll rely on the fallback behaviour
@@ -526,7 +539,7 @@ module.exports = function ( currentPage, currentPageHTMLParser, skin ) {
 	}
 
 	if ( !isEditingSupported ) {
-		// Browser doesn't support mobile editor (or is blacklisted), use the fallback editor.
+		// Browser doesn't support mobile editor use the fallback editor.
 		return;
 	}
 

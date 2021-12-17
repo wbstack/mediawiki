@@ -2,6 +2,10 @@
 
 namespace MediaWiki\Extension\Math\InputCheck;
 
+use MediaWiki\Extension\Math\Hooks;
+use Message;
+use stdClass;
+
 /**
  * MediaWiki math extension
  *
@@ -11,10 +15,12 @@ namespace MediaWiki\Extension\Math\InputCheck;
  * @author Moritz Schubotz
  */
 abstract class BaseChecker {
+	/** @var string */
 	protected $inputTeX;
+	/** @var string|null */
 	protected $validTeX;
+	/** @var bool */
 	protected $isValid = false;
-	protected $lastError = null;
 
 	/**
 	 * @param string $tex the TeX InputString to be checked
@@ -34,11 +40,9 @@ abstract class BaseChecker {
 
 	/**
 	 * Returns the string of the last error.
-	 * @return string
+	 * @return ?Message
 	 */
-	public function getError() {
-		return $this->lastError;
-	}
+	abstract public function getError(): ?Message;
 
 	/**
 	 * Some TeX checking programs may return
@@ -48,5 +52,29 @@ abstract class BaseChecker {
 	 */
 	public function getValidTex() {
 		return $this->validTeX;
+	}
+
+	/**
+	 * @see https://phabricator.wikimedia.org/T119300
+	 * @param stdClass $e
+	 * @param string $host
+	 * @return Message
+	 */
+	protected function errorObjectToMessage( stdClass $e, $host = 'invalid' ): Message {
+		if ( isset( $e->error->message ) ) {
+			if ( $e->error->message === 'Illegal TeX function' ) {
+				return Message::newFromKey( 'math_unknown_function', $e->error->found );
+			} elseif ( preg_match( '/Math extension/', $e->error->message ) ) {
+				$names = Hooks::getMathNames();
+				$mode = $names['mathml'];
+				$msg = $e->error->message;
+
+				return Message::newFromKey( 'math_invalidresponse', $mode, $host, $msg );
+			}
+
+			return Message::newFromKey( 'math_syntax_error' );
+		}
+
+		return Message::newFromKey( 'math_unknown_error' );
 	}
 }

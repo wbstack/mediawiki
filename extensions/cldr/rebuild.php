@@ -11,6 +11,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
+
 // Standard boilerplate to define $IP
 if ( getenv( 'MW_INSTALL_PATH' ) !== false ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
@@ -46,11 +48,13 @@ class CLDRRebuild extends Maintenance {
 		$OUTPUT = $this->getOption( 'outputdir', $dir );
 
 		if ( !file_exists( $DATA ) ) {
-			$this->error( "CLDR data not found at $DATA\n", 1 );
+			$this->fatalError( "CLDR data not found at $DATA\n" );
 		}
 
+		$langNameUtils = MediaWikiServices::getInstance()->getLanguageNameUtils();
+
 		// Get an array of all MediaWiki languages ( $wgLanguageNames + $wgExtraLanguageNames )
-		$languages = Language::fetchLanguageNames();
+		$languages = $langNameUtils->getLanguageNames();
 		# hack to get pt-pt too
 		$languages['pt-pt'] = 'Foo';
 		ksort( $languages );
@@ -80,7 +84,11 @@ class CLDRRebuild extends Maintenance {
 
 			// If the file exists, parse it, otherwise display an error
 			if ( file_exists( $input ) ) {
-				$outputFileName = Language::getFileName( 'CldrNames', getRealCode( $code ), '.php' );
+				$outputFileName = $langNameUtils->getFileName(
+					'CldrNames',
+					$this->getRealCode( $code ),
+					'.php'
+				);
 				$p = new CLDRParser();
 				$p->parse( $input, "$OUTPUT/CldrNames/$outputFileName" );
 			} else {
@@ -106,36 +114,36 @@ class CLDRRebuild extends Maintenance {
 		$p->parse_currency_symbols( $DATA, "$OUTPUT/CldrCurrency/Symbols.php" );
 		$this->output( "Done parsing currency symbols.\n" );
 	}
-}
 
-/**
- * Get the code for the MediaWiki localisation,
- * these are same as the fallback.
- *
- * @param string $code
- * @return string
- */
-function getRealCode( $code ) {
-	$realCode = $code;
-	if ( !strcmp( $code, 'kk' ) ) {
-		$realCode = 'kk-cyrl';
-	} elseif ( !strcmp( $code, 'ku' ) ) {
-		$realCode = 'ku-latn';
-	} elseif ( !strcmp( $code, 'sr' ) ) {
-		$realCode = 'sr-ec';
-	} elseif ( !strcmp( $code, 'tg' ) ) {
-		$realCode = 'tg-cyrl';
-	} elseif ( !strcmp( $code, 'zh' ) ) {
-		$realCode = 'zh-hans';
-	} elseif ( !strcmp( $code, 'pt' ) ) {
-		$realCode = 'pt-br';
-	} elseif ( !strcmp( $code, 'pt-pt' ) ) {
-		$realCode = 'pt';
-	} elseif ( !strcmp( $code, 'az-arab' ) ) {
-		$realCode = 'azb';
+	/**
+	 * Get the code for the MediaWiki localisation,
+	 * these are same as the fallback.
+	 *
+	 * @param string $code
+	 * @return string
+	 */
+	private function getRealCode( $code ) {
+		$realCode = $code;
+		if ( !strcmp( $code, 'kk' ) ) {
+			$realCode = 'kk-cyrl';
+		} elseif ( !strcmp( $code, 'ku' ) ) {
+			$realCode = 'ku-latn';
+		} elseif ( !strcmp( $code, 'sr' ) ) {
+			$realCode = 'sr-ec';
+		} elseif ( !strcmp( $code, 'tg' ) ) {
+			$realCode = 'tg-cyrl';
+		} elseif ( !strcmp( $code, 'zh' ) ) {
+			$realCode = 'zh-hans';
+		} elseif ( !strcmp( $code, 'pt' ) ) {
+			$realCode = 'pt-br';
+		} elseif ( !strcmp( $code, 'pt-pt' ) ) {
+			$realCode = 'pt';
+		} elseif ( !strcmp( $code, 'az-arab' ) ) {
+			$realCode = 'azb';
+		}
+
+		return $realCode;
 	}
-
-	return $realCode;
 }
 
 $maintClass = CLDRRebuild::class;

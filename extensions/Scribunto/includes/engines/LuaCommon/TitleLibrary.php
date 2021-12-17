@@ -10,7 +10,9 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 	// $wgExpensiveParserFunctionLimit + 1 actual Title objects because any
 	// addition besides the one for the current page calls
 	// incrementExpensiveFunctionCount()
+	/** @var Title[] */
 	private $titleCache = [];
+	/** @var (Title|null)[] */
 	private $idCache = [ 0 => null ];
 
 	public function register() {
@@ -44,7 +46,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 			$arg = $default;
 		} elseif ( is_numeric( $arg ) ) {
 			$arg = (int)$arg;
-			if ( !MWNamespace::exists( $arg ) ) {
+			if ( !MediaWikiServices::getInstance()->getNamespaceInfo()->exists( $arg ) ) {
 				throw new Scribunto_LuaError(
 					"bad argument #$argIdx to '$name' (unrecognized namespace number '$arg')"
 				);
@@ -372,6 +374,7 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 			'width' => $file->getWidth(),
 			'height' => $file->getHeight(),
 			'mimeType' => $file->getMimeType(),
+			'length' => $file->getLength(),
 			'size' => $file->getSize(),
 			'pages' => $pages
 		] ];
@@ -402,11 +405,14 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 			return [ null ];
 		}
 
-		if ( !$title->areRestrictionsLoaded() ) {
+		$restrictionStore = MediaWikiServices::getInstance()->getRestrictionStore();
+
+		if ( !$restrictionStore->areRestrictionsLoaded( $title ) ) {
 			$this->incrementExpensiveFunctionCount();
 		}
 		return [ array_map(
-			'Scribunto_LuaTitleLibrary::makeArrayOneBased', $title->getAllRestrictions()
+			'Scribunto_LuaTitleLibrary::makeArrayOneBased',
+			$restrictionStore->getAllRestrictions( $title )
 		) ];
 	}
 
@@ -423,17 +429,25 @@ class Scribunto_LuaTitleLibrary extends Scribunto_LuaLibraryBase {
 			return [ null ];
 		}
 
-		if ( !$title->areCascadeProtectionSourcesLoaded() ) {
+		$restrictionStore = MediaWikiServices::getInstance()->getRestrictionStore();
+		$titleFormatter = MediaWikiServices::getInstance()->getTitleFormatter();
+
+		if ( !$restrictionStore->areCascadeProtectionSourcesLoaded( $title ) ) {
 			$this->incrementExpensiveFunctionCount();
 		}
-		list( $sources, $restrictions ) = $title->getCascadeProtectionSources();
+
+		list( $sources, $restrictions ) = $restrictionStore->getCascadeProtectionSources( $title );
+
 		return [ [
 			'sources' => self::makeArrayOneBased( array_map(
-				function ( $t ) {
-					return $t->getPrefixedText();
+				static function ( $t ) use ( $titleFormatter ) {
+					return $titleFormatter->getPrefixedText( $t );
 				},
 				$sources ) ),
-			'restrictions' => array_map( 'Scribunto_LuaTitleLibrary::makeArrayOneBased', $restrictions )
+			'restrictions' => array_map(
+				'Scribunto_LuaTitleLibrary::makeArrayOneBased',
+				$restrictions
+			)
 		] ];
 	}
 

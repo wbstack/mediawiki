@@ -210,7 +210,7 @@ class SpecialEntitiesWithoutPage extends SpecialWikibaseQueryPage {
 			->setMethod( 'get' )
 			->setWrapperLegendMsg( $this->legendMsg )
 			->suppressDefaultSubmit()
-			->setSubmitCallback( function () {
+			->setSubmitCallback( static function () {
 				// no-op
 			} )
 			->show();

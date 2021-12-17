@@ -2,14 +2,6 @@
 
 namespace EntitySchema\MediaWiki\Actions;
 
-use FormAction;
-use HTMLForm;
-use IContextSource;
-use MediaWiki\MediaWikiServices;
-use MediaWiki\Revision\SlotRecord;
-use Page;
-use RuntimeException;
-use Status;
 use EntitySchema\DataAccess\EditConflict;
 use EntitySchema\DataAccess\MediaWikiPageUpdaterFactory;
 use EntitySchema\DataAccess\MediaWikiRevisionSchemaUpdater;
@@ -18,30 +10,41 @@ use EntitySchema\Domain\Model\SchemaId;
 use EntitySchema\MediaWiki\Content\EntitySchemaContent;
 use EntitySchema\Presentation\InputValidator;
 use EntitySchema\Services\SchemaConverter\SchemaConverter;
+use FormAction;
+use HTMLForm;
+use IContextSource;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\SlotRecord;
+use Page;
+use RuntimeException;
+use Status;
 
 /**
  * Edit a EntitySchema via the mediawiki editing action
+ *
+ * @license GPL-2.0-or-later
  */
 class SchemaEditAction extends FormAction {
 
-	/* public */ const FIELD_SCHEMA_TEXT = 'schema-text';
-	/* public */ const FIELD_BASE_REV = 'base-rev';
-	/* public */ const FIELD_EDIT_SUMMARY = 'edit-summary';
-	/* public */ const FIELD_IGNORE_EMPTY_SUMMARY = 'ignore-blank-summary';
+	public const FIELD_SCHEMA_TEXT = 'schema-text';
+	public const FIELD_BASE_REV = 'base-rev';
+	public const FIELD_EDIT_SUMMARY = 'edit-summary';
+	public const FIELD_IGNORE_EMPTY_SUMMARY = 'ignore-blank-summary';
 
+	/** @var InputValidator */
 	private $inputValidator;
+	/** @var string */
 	private $submitMsgKey;
-	private $summaryWarned;
 
 	public function __construct(
 		Page $page,
 		InputValidator $inputValidator,
-		$wgEditSubmitButtonLabelPublish,
+		bool $editSubmitButtonLabelPublish,
 		IContextSource $context = null
 	) {
 		$this->inputValidator = $inputValidator;
 		parent::__construct( $page, $context );
-		$this->submitMsgKey = $wgEditSubmitButtonLabelPublish ? 'publishchanges' : 'savechanges';
+		$this->submitMsgKey = $editSubmitButtonLabelPublish ? 'publishchanges' : 'savechanges';
 	}
 
 	public function show() {
@@ -79,8 +82,14 @@ class SchemaEditAction extends FormAction {
 		 */
 		$request = $this->getContext()->getRequest();
 		$output = $this->getOutput();
+		$context = $this->getContext();
+		$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$currentRevision = $revisionStore->getKnownCurrentRevision( $context->getTitle() );
+		if ( !$currentRevision ) {
+			return Status::newFatal( $this->msg( 'entityschema-error-schemadeleted' ) );
+		}
 
-		$content = $this->getContext()->getWikiPage()->getContent();
+		$content = $currentRevision->getContent( SlotRecord::MAIN );
 		if ( !$content instanceof EntitySchemaContent ) {
 			return Status::newFatal( $this->msg( 'entityschema-error-schemadeleted' ) );
 		}
@@ -138,7 +147,9 @@ class SchemaEditAction extends FormAction {
 	}
 
 	protected function getFormFields() {
-		$currentRevRecord = $this->getContext()->getWikiPage()->getRevisionRecord();
+		$context = $this->getContext();
+		$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
+		$currentRevRecord = $revisionStore->getKnownCurrentRevision( $context->getTitle() );
 		if ( !$currentRevRecord ) {
 			throw new RuntimeException( $this->msg( 'entityschema-error-schemadeleted' )->text() );
 		}

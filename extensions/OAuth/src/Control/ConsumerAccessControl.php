@@ -106,8 +106,9 @@ class ConsumerAccessControl extends DAOAccessControl {
 	/**
 	 * Date of verifying the email, in TS_MW format. In practice this will be the same as
 	 * getRegistration().
+	 * Returns null if the timestamp is not set.
 	 * Returns a Message when the user does not have permission to see this field.
-	 * @return string|\Message
+	 * @return string|null|\Message
 	 */
 	public function getEmailAuthenticated() {
 		return $this->get( 'emailAuthenticated' );
@@ -164,7 +165,7 @@ class ConsumerAccessControl extends DAOAccessControl {
 
 	/**
 	 * Secret key used to derive the consumer secret for HMAC-SHA1 signed OAuth requests.
-	 * The actual consumer secret will be calculated via MWOAuthUtils::hmacDBSecret() to mitigate
+	 * The actual consumer secret will be calculated via Utils::hmacDBSecret() to mitigate
 	 * DB leaks.
 	 * Returns a Message when the user does not have permission to see this field.
 	 * @return string|\Message
@@ -174,7 +175,7 @@ class ConsumerAccessControl extends DAOAccessControl {
 	}
 
 	/**
-	 * Public RSA key for RSA-SHA1 signerd OAuth requests.
+	 * Public RSA key for RSA-SHA1 signed OAuth requests.
 	 * Returns a Message when the user does not have permission to see this field.
 	 * @return string|\Message
 	 */
@@ -228,7 +229,7 @@ class ConsumerAccessControl extends DAOAccessControl {
 	 * @return string|\Message
 	 */
 	public function getUserName( $audience = false ) {
-		return $this->get( 'userId', function ( $id ) use ( $audience ) {
+		return $this->get( 'userId', static function ( $id ) use ( $audience ) {
 			return Utils::getCentralUserNameFromId( $id, $audience );
 		} );
 	}
@@ -238,7 +239,7 @@ class ConsumerAccessControl extends DAOAccessControl {
 	 * @return string|\Message
 	 */
 	public function getWikiName() {
-		return $this->get( 'wiki', function ( $wikiId ) {
+		return $this->get( 'wiki', static function ( $wikiId ) {
 			return Utils::getWikiIdName( $wikiId );
 		} );
 	}
@@ -257,6 +258,7 @@ class ConsumerAccessControl extends DAOAccessControl {
 	 * @return Consumer|ClientEntity
 	 */
 	public function getDAO() {
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $this->dao;
 	}
 }

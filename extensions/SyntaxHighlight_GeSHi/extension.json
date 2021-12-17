@@ -14,7 +14,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.34",
+		"MediaWiki": ">= 1.36",
 		"platform": {
 			"ability-shell": true
 		}
@@ -23,6 +23,9 @@
 		"SyntaxHighlight_GeSHi": [
 			"i18n"
 		]
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\SyntaxHighlight\\": "includes/"
 	},
 	"AutoloadClasses": {
 		"SyntaxHighlight": "includes/SyntaxHighlight.php",
@@ -36,14 +39,57 @@
 	},
 	"ResourceModules": {
 		"ext.pygments": {
+			"class": "MediaWiki\\SyntaxHighlight\\ResourceLoaderPygmentsModule",
 			"targets": [
 				"desktop",
 				"mobile"
 			],
 			"styles": [
-				"pygments.generated.css",
-				"pygments.wrapper.css"
+				"pygments.wrapper.less"
 			]
+		},
+		"ext.pygments.linenumbers": {
+			"targets": [
+				"desktop",
+				"mobile"
+			],
+			"scripts": [
+				"pygments.linenumbers.js"
+			]
+		},
+		"ext.geshi.visualEditor": {
+			"class": "ResourceLoaderSyntaxHighlightVisualEditorModule",
+			"scripts": [
+				"ve-syntaxhighlight/ve.dm.MWSyntaxHighlightNode.js",
+				"ve-syntaxhighlight/ve.dm.MWBlockSyntaxHighlightNode.js",
+				"ve-syntaxhighlight/ve.dm.MWInlineSyntaxHighlightNode.js",
+				"ve-syntaxhighlight/ve.ce.MWSyntaxHighlightNode.js",
+				"ve-syntaxhighlight/ve.ce.MWBlockSyntaxHighlightNode.js",
+				"ve-syntaxhighlight/ve.ce.MWInlineSyntaxHighlightNode.js",
+				"ve-syntaxhighlight/ve.ui.MWSyntaxHighlightWindow.js",
+				"ve-syntaxhighlight/ve.ui.MWSyntaxHighlightDialog.js",
+				"ve-syntaxhighlight/ve.ui.MWSyntaxHighlightDialogTool.js",
+				"ve-syntaxhighlight/ve.ui.MWSyntaxHighlightInspector.js",
+				"ve-syntaxhighlight/ve.ui.MWSyntaxHighlightInspectorTool.js"
+			],
+			"styles": [
+				"ve-syntaxhighlight/ve.ce.MWSyntaxHighlightNode.css",
+				"ve-syntaxhighlight/ve.ui.MWSyntaxHighlightDialog.css",
+				"ve-syntaxhighlight/ve.ui.MWSyntaxHighlightInspector.css"
+			],
+			"dependencies": [
+				"ext.visualEditor.mwcore",
+				"oojs-ui.styles.icons-editing-advanced"
+			],
+			"messages": [
+				"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-code",
+				"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-language",
+				"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-none",
+				"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-showlines",
+				"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-startingline",
+				"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-title"
+			],
+			"targets": [ "desktop", "mobile" ]
 		}
 	},
 	"Hooks": {
@@ -56,16 +102,11 @@
 		"ApiFormatHighlight": [
 			"SyntaxHighlight::onApiFormatHighlight"
 		],
-		"ResourceLoaderRegisterModules": [
-			"SyntaxHighlight::onResourceLoaderRegisterModules"
-		]
+		"SoftwareInfo": "SyntaxHighlight::onSoftwareInfo"
 	},
 	"attributes": {
 		"SyntaxHighlight": {
-			"Models" : {
-				"css": "css",
-				"javascript": "javascript"
-			}
+			"Models": {}
 		},
 		"VisualEditor": {
 			"PluginModules": [

@@ -20,14 +20,22 @@
 
 namespace MediaWiki\Minerva\Skins;
 
+use IContextSource;
+use MediaWiki\User\UserNameUtils;
 use Title;
 use User;
 
 class SkinUserPageHelper {
 	/**
+	 * @var UserNameUtils
+	 */
+	private $userNameUtils;
+
+	/**
 	 * @var Title|null
 	 */
 	private $title;
+
 	/**
 	 * @var bool
 	 */
@@ -39,10 +47,19 @@ class SkinUserPageHelper {
 	private $pageUser;
 
 	/**
-	 * @param Title|null $title
+	 * @var IContextSource|null
 	 */
-	public function __construct( Title $title = null ) {
+	private $context;
+
+	/**
+	 * @param UserNameUtils $userNameUtils
+	 * @param Title|null $title
+	 * @param IContextSource|null $context
+	 */
+	public function __construct( UserNameUtils $userNameUtils, Title $title = null, IContextSource $context = null ) {
+		$this->userNameUtils = $userNameUtils;
 		$this->title = $title;
+		$this->context = $context;
 	}
 
 	/**
@@ -68,7 +85,7 @@ class SkinUserPageHelper {
 	private function buildPageUserObject( Title $title ) {
 		$titleText = $title->getText();
 
-		if ( User::isIP( $titleText ) ) {
+		if ( $this->userNameUtils->isIP( $titleText ) ) {
 			return User::newFromAnyId( null, $titleText, null );
 		}
 
@@ -92,5 +109,15 @@ class SkinUserPageHelper {
 	 */
 	public function isUserPage() {
 		return $this->fetchData() !== null;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isUserPageAccessibleToCurrentUser() {
+		$pageUser = $this->fetchData();
+		$isHidden = $pageUser && $pageUser->isHidden();
+		$canViewHidden = $this->context && $this->context->getAuthority()->isAllowed( 'hideuser' );
+		return !$isHidden || $canViewHidden;
 	}
 }

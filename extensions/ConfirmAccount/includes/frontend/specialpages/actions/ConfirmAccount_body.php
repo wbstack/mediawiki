@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 class ConfirmAccountsPage extends SpecialPage {
 	protected $queueType = -1;
 	protected $acrID = 0;
@@ -506,20 +508,20 @@ class ConfirmAccountsPage extends SpecialPage {
 		$form .= "<p>" . Xml::submitButton( $this->msg( 'confirmaccount-submit' )->text() ) . "</p>\n";
 		$form .= '</fieldset>';
 
-		$form .= Html::Hidden( 'title', $titleObj->getPrefixedDBKey() ) . "\n";
-		$form .= Html::Hidden( 'action', 'reject' );
-		$form .= Html::Hidden( 'acrid', $accountReq->getId() );
-		$form .= Html::Hidden( 'wpShowRejects', $this->showRejects );
-		$form .= Html::Hidden( 'wpEditToken', $reqUser->getEditToken( $accountReq->getId() ) ) . "\n";
+		$form .= Html::hidden( 'title', $titleObj->getPrefixedDBKey() ) . "\n";
+		$form .= Html::hidden( 'action', 'reject' );
+		$form .= Html::hidden( 'acrid', $accountReq->getId() );
+		$form .= Html::hidden( 'wpShowRejects', $this->showRejects );
+		$form .= Html::hidden( 'wpEditToken', $reqUser->getEditToken( $accountReq->getId() ) ) . "\n";
 		$form .= Xml::closeElement( 'form' );
 
 		$out->addHTML( $form );
 
-		global $wgMemc;
 		# Set a key to who is looking at this request.
 		# Have it expire in 10 minutes...
-		$key = $wgMemc->makeKey( 'acctrequest', 'view', $accountReq->getId() );
-		$wgMemc->set( $key, $reqUser->getID(), 60 * 10 );
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$key = $cache->makeKey( 'acctrequest', 'view', $accountReq->getId() );
+		$cache->set( $key, $reqUser->getID(), 60 * 10 );
 	}
 
 	protected function hasItem( $name ) {
@@ -604,7 +606,7 @@ class ConfirmAccountsPage extends SpecialPage {
 	 * @param bool $wasPosted
 	 */
 	protected function loadAccountRequest( $id, $wasPosted ) {
-		$from = $wasPosted ? 'dbmaster' : 'dbslave';
+		$from = $wasPosted ? 'dbmaster' : 'dbreplica';
 		$this->accountReq = UserAccountRequest::newFromId( $id, $from );
 		# Check if parameters are to be overridden
 		if ( $this->accountReq ) {
@@ -732,8 +734,6 @@ class ConfirmAccountsPage extends SpecialPage {
 	 * @return string
 	 */
 	public function formatRow( $row ) {
-		global $wgMemc;
-
 		$linkRenderer = $this->getLinkRenderer();
 
 		if ( $this->showRejects || $this->showStale ) {
@@ -771,8 +771,9 @@ class ConfirmAccountsPage extends SpecialPage {
 			)->parse() . '</b>';
 		}
 		# Check if someone is viewing this request
-		$key = $wgMemc->makeKey( 'acctrequest', 'view', $row->acr_id );
-		$value = $wgMemc->get( $key );
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$key = $cache->makeKey( 'acctrequest', 'view', $row->acr_id );
+		$value = $cache->get( $key );
 		if ( $value ) {
 			$r .= ' <b>' . $this->msg( 'confirmaccount-viewing', User::whoIs( $value ) )->parse() . '</b>';
 		}

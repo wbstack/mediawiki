@@ -1,7 +1,14 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use ExtensionRegistry;
+use MediaWiki\Extension\Math\Render\RendererFactory;
 use MediaWiki\Logger\LoggerFactory;
+use MWException;
+use PermissionsError;
 use Psr\Log\LoggerInterface;
+use SpecialPage;
 
 /**
  * MediaWiki math extension
@@ -15,9 +22,15 @@ class SpecialMathStatus extends SpecialPage {
 	/** @var LoggerInterface */
 	private $logger;
 
-	public function __construct( $name = 'MathStatus' ) {
-		parent::__construct( $name, 'purge' );
+	/** @var RendererFactory */
+	private $rendererFactory;
 
+	public function __construct(
+		RendererFactory $rendererFactory
+	) {
+		parent::__construct( 'MathStatus', 'purge' );
+
+		$this->rendererFactory = $rendererFactory;
 		$this->logger = LoggerFactory::getInstance( 'Math' );
 	}
 
@@ -31,7 +44,7 @@ class SpecialMathStatus extends SpecialPage {
 		$this->setHeaders();
 
 		$out = $this->getOutput();
-		$enabledMathModes = MathHooks::getMathNames();
+		$enabledMathModes = Hooks::getMathNames();
 		$out->addWikiMsg( 'math-status-introduction', count( $enabledMathModes ) );
 
 		foreach ( $enabledMathModes as $modeNr => $modeName ) {
@@ -47,22 +60,22 @@ class SpecialMathStatus extends SpecialPage {
 	}
 
 	private function runMathMLTest( $modeName ) {
-		$this->getOutput()->addWikiMsgArray( 'math-test-start', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-start', [ $modeName ] );
 		$this->testSpecialCaseText();
 		$this->testMathMLIntegration();
 		$this->testPmmlInput();
-		$this->getOutput()->addWikiMsgArray( 'math-test-end', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-end', [ $modeName ] );
 	}
 
 	private function runMathLaTeXMLTest( $modeName ) {
-		$this->getOutput()->addWikiMsgArray( 'math-test-start', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-start', [ $modeName ] );
 		$this->testLaTeXMLIntegration();
 		$this->testLaTeXMLLinebreak();
-		$this->getOutput()->addWikiMsgArray( 'math-test-end', $modeName );
+		$this->getOutput()->addWikiMsgArray( 'math-test-end', [ $modeName ] );
 	}
 
 	public function testSpecialCaseText() {
-		$renderer = MathRenderer::getRenderer( 'x^2+\text{a sample Text}', [], 'mathml' );
+		$renderer = $this->rendererFactory->getRenderer( 'x^2+\text{a sample Text}', [], 'mathml' );
 		$expected = 'a sample Text</mtext>';
 		$this->assertTrue( $renderer->render(), 'Rendering the input "x^2+\text{a sample Text}"' );
 		$this->assertContains(
@@ -77,7 +90,7 @@ class SpecialMathStatus extends SpecialPage {
 	public function testMathMLIntegration() {
 		$svgRef = file_get_contents( __DIR__ . '/../images/reference.svg' );
 		$svgRefNoSpeech = file_get_contents( __DIR__ . '/../images/reference-nospeech.svg' );
-		$renderer = MathRenderer::getRenderer( "a+b", [], 'mathml' );
+		$renderer = $this->rendererFactory->getRenderer( "a+b", [], 'mathml' );
 		$this->assertTrue( $renderer->render(), "Rendering of a+b in plain MathML mode" );
 		$real = str_replace( "\n", '', $renderer->getHtmlOutput() );
 		$expected = '<mo>+</mo>';
@@ -111,7 +124,7 @@ class SpecialMathStatus extends SpecialPage {
 	 * i.e. if the span element is generated right.
 	 */
 	public function testLaTeXMLIntegration() {
-		$renderer = MathRenderer::getRenderer( "a+b", [], 'latexml' );
+		$renderer = $this->rendererFactory->getRenderer( "a+b", [], 'latexml' );
 		$this->assertTrue( $renderer->render(), "Rendering of a+b in LaTeXML mode" );
 		// phpcs:ignore Generic.Files.LineLength.TooLong
 		$expected = '<math xmlns="http://www.w3.org/1998/Math/MathML" id="p1.m1" class="ltx_Math" alttext="{\displaystyle a+b}" ><semantics><mrow id="p1.m1.4" xref="p1.m1.4.cmml"><mi id="p1.m1.1" xref="p1.m1.1.cmml">a</mi><mo id="p1.m1.2" xref="p1.m1.2.cmml">+</mo><mi id="p1.m1.3" xref="p1.m1.3.cmml">b</mi></mrow><annotation-xml encoding="MathML-Content"><apply id="p1.m1.4.cmml" xref="p1.m1.4"><plus id="p1.m1.2.cmml" xref="p1.m1.2"/><ci id="p1.m1.1.cmml" xref="p1.m1.1">a</ci><ci id="p1.m1.3.cmml" xref="p1.m1.3">b</ci></apply></annotation-xml><annotation encoding="application/x-tex">{\displaystyle a+b}</annotation></semantics></math>';

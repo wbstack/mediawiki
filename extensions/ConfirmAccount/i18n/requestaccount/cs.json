@@ -7,10 +7,12 @@
 			"Matěj Grabovský",
 			"Matěj Suchánek",
 			"Mormegil",
-			"MrJaroslavik"
+			"MrJaroslavik",
+			"Slepi"
 		]
 	},
 	"requestaccount": "Vyžádat účet",
+	"requestaccount-login": "Požádat o účet",
 	"requestaccount-page": "{{ns:project}}:Podmínky použití",
 	"requestaccount-dup": "'''Poznámka: Už jste přihlášen jako registrovaný uživatel.'''",
 	"requestaccount-leg-user": "Uživatelský účet",

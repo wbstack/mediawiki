@@ -3,7 +3,9 @@
 		"authors": [
 			"Amire80",
 			"Guycn2",
+			"MuratTheTurkish",
 			"Steeve815",
+			"דגש",
 			"דגש חזק"
 		]
 	},
@@ -24,9 +26,11 @@
 	"twocolconflict-special-header-overview": "בזמן שערכת, משתמש אחר ערך את אותו הדף ופרסם אותו לפניך. עותק לתצוגה בלבד שמור למטה. כל השינויים שנעשו בממשק התנגשות העריכה אינם מוצגים. כדי למזג שינויים ולפתור את העניין באמצעות ממשק התנגשויות עריכה, נא לחזור ללשונית הקודמת.",
 	"twocolconflict-special-not-saved": "לא פורסם",
 	"twocolconflict-special-textarea-hint": "באפשרותך להציג ולהעתיק את קוד המקור של הגרסה שלך:",
+	"twocolconflict-special-malformed-title": "כותרת חסרה או בלתי־תקינה.",
+	"twocolconflict-special-expired": "אין מה לראות פה. ייתכן שנתקלת בהתנגשות עריכה קודם, אבל זה היה מזמן, והטקסט שלך, שנשמר באופן זמני, הספיק לפוג בינתיים.",
 	"twocolconflict-split-header-hint": "אתם יכולים לעזור לשפר את האפשרות הזאת עוד, אם תשאירו משוב [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface בדף הזה].",
 	"twocolconflict-split-header-hint-beta": "תודה על השימוש באפשרות הבטא הזאת. {{GENDER:|אתה יכול|את יכולה}} עזור לשפר אותה עוד יותר באמצעות שליחת משוב [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface לדף הזה].",
-	"twocolconflict-split-header-overview": "בזמן שערכת, משתמש אחר ערך את אותו הדף ופרסם {{GENDER|לפניך|לפנייך}}. נא לסקור את שתי הגרסאות ולמזג אותן. רק הטקסט בתיבות שנבחרו יישמר בעת לחיצה על \"{{int:publishchanges}}\".",
+	"twocolconflict-split-header-overview": "בזמן שערכת, משתמש אחר ערך את אותו הדף ופרסם {{GENDER:|לפניך|לפנייך}}. נא לסקור את שתי הגרסאות ולמזג אותן. רק הטקסט בתיבות שנבחרו יישמר בעת לחיצה על \"{{int:publishchanges}}\".",
 	"twocolconflict-split-your-version-header": "הגרסה שלך",
 	"twocolconflict-split-current-version-header": "גרסה אחרונה מ־$1",
 	"twocolconflict-split-not-saved-at": "עדיין לא פורסמה",
@@ -66,10 +70,10 @@
 	"twocolconflict-split-tour-dialog-message-single-column-view": "למרבה הצער, מישהו אחר כתב באותו זמן כמוך. נא לסקור את ההערות בדף הבא. אם זה נחוץ, {{GENDER:|אתה יכול|את יכולה}} לערוך את שלך ולשנות את הסדר הסופי.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "פתרון הבעיה",
 	"twocolconflict-talk-header-overview": "מישהו אחר שלח הודעה באותו זמן כמוך. נא לסקור את ההערות להלן ולבחור באיזו סדר לפרסם. אם זה נחוץ, {{GENDER:|אתה יכול|את יכולה}} לערוך את הטקסט שלך.",
-	"twocolconflict-talk-your": "ההצעה שלך",
-	"twocolconflict-talk-conflicting": "ההצעה המתנגשת",
+	"twocolconflict-talk-your": "התגובה שלך",
+	"twocolconflict-talk-conflicting": "התגובה המתנגשת",
 	"twocolconflict-talk-switch-tooltip": "שינוי סדר",
-	"twocolconflict-talk-reorder-prompt": "{{GENDER:|מקם|מקמי}} את מה שכתבת יחסית למה שנכתב בגרסה המתנגשת:",
+	"twocolconflict-talk-reorder-prompt": "{{GENDER:|מקם|מקמי}} את התגובה שלך יחסית למה שנכתב בתגובה המתנגשת:",
 	"twocolconflict-talk-same-order": "להשאיר אחרי זה",
 	"twocolconflict-talk-reverse-order": "להעביר לפני זה"
 }

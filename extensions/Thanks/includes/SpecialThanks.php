@@ -1,23 +1,34 @@
 <?php
 
+namespace MediaWiki\Extension\Thanks;
+
+use ApiMain;
+use ApiUsageException;
+use DerivativeRequest;
+use FormSpecialPage;
+use HTMLForm;
+use Linker;
+use Status;
+use User;
+
 class SpecialThanks extends FormSpecialPage {
 
 	/**
 	 * API result
-	 * @var array $result
+	 * @var array
 	 */
 	protected $result;
 
 	/**
 	 * 'rev' for revision, 'log' for log entry, or 'flow' for Flow comment,
 	 * null if no ID is specified
-	 * @var string|null $type
+	 * @var string|null
 	 */
 	protected $type;
 
 	/**
 	 * Revision or Log ID ('0' = invalid) or Flow UUID
-	 * @var string $id
+	 * @var string
 	 */
 	protected $id;
 

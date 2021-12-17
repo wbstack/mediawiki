@@ -37,7 +37,7 @@ class CheckerJob extends CirrusGenericJob {
 	 * @const int max number of retries, 3 means that the job can be run at
 	 * most 4 times.
 	 */
-	const JOB_MAX_RETRIES = 3;
+	private const JOB_MAX_RETRIES = 3;
 
 	/**
 	 * Construct a new CherckerJob.
@@ -256,7 +256,7 @@ class CheckerJob extends CirrusGenericJob {
 	 */
 	private static function makeIsOldClosure( $loopId, $numCycles ) {
 		$loopMod = $loopId % $numCycles;
-		return function ( \WikiPage $page ) use ( $numCycles, $loopMod ) {
+		return static function ( \WikiPage $page ) use ( $numCycles, $loopMod ) {
 			$pageIdMod = $page->getId() % $numCycles;
 			return $pageIdMod == $loopMod;
 		};

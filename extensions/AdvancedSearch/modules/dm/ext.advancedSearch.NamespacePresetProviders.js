@@ -15,7 +15,7 @@
 	 */
 
 	/**
-	 * @param {Array} namespaces
+	 * @param {Object} namespaces Mapping namespace IDs to localized names
 	 * @constructor
 	 */
 	mw.libs.advancedSearch.dm.NamespacePresetProviders = function ( namespaces ) {

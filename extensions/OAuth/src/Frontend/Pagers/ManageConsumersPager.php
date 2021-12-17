@@ -24,10 +24,10 @@ use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageConsume
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+use MediaWiki\MediaWikiServices;
+
 /**
  * Query to list out consumers
- *
- * @TODO: use UserCache
  */
 class ManageConsumersPager extends \ReverseChronologicalPager {
 	/** @var SpecialMWOAuthManageConsumers */
@@ -40,7 +40,9 @@ class ManageConsumersPager extends \ReverseChronologicalPager {
 		$this->mForm = $form;
 		$this->mConds = $conds;
 		$this->mConds['oarc_stage'] = $stage;
-		if ( !$this->getUser()->isAllowed( 'mwoauthviewsuppressed' ) ) {
+
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+		if ( !$permissionManager->userHasRight( $this->getUser(), 'mwoauthviewsuppressed' ) ) {
 			$this->mConds['oarc_deleted'] = 0;
 		}
 

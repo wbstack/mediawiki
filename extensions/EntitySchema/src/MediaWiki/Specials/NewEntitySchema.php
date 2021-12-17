@@ -2,6 +2,11 @@
 
 namespace EntitySchema\MediaWiki\Specials;
 
+use EntitySchema\DataAccess\MediaWikiPageUpdaterFactory;
+use EntitySchema\DataAccess\MediaWikiRevisionSchemaInserter;
+use EntitySchema\DataAccess\SqlIdGenerator;
+use EntitySchema\DataAccess\WatchlistUpdater;
+use EntitySchema\Presentation\InputValidator;
 use Html;
 use HTMLForm;
 use Language;
@@ -11,11 +16,6 @@ use SpecialPage;
 use Status;
 use Title;
 use UserBlockedError;
-use EntitySchema\DataAccess\MediaWikiPageUpdaterFactory;
-use EntitySchema\DataAccess\MediaWikiRevisionSchemaInserter;
-use EntitySchema\DataAccess\SqlIdGenerator;
-use EntitySchema\DataAccess\WatchlistUpdater;
-use EntitySchema\Presentation\InputValidator;
 
 /**
  * Page for creating a new EntitySchema.
@@ -24,16 +24,15 @@ use EntitySchema\Presentation\InputValidator;
  */
 class NewEntitySchema extends SpecialPage {
 
-	/* public */
-	const FIELD_DESCRIPTION = 'description';
-	/* public */
-	const FIELD_LABEL = 'label';
-	/* public */
-	const FIELD_ALIASES = 'aliases';
-	/* public */
-	const FIELD_SCHEMA_TEXT = 'schema-text';
-	/* public */
-	const FIELD_LANGUAGE = 'languagecode';
+	public const FIELD_DESCRIPTION = 'description';
+
+	public const FIELD_LABEL = 'label';
+
+	public const FIELD_ALIASES = 'aliases';
+
+	public const FIELD_SCHEMA_TEXT = 'schema-text';
+
+	public const FIELD_LANGUAGE = 'languagecode';
 
 	public function __construct() {
 		parent::__construct(
@@ -232,8 +231,13 @@ class NewEntitySchema extends SpecialPage {
 	 * @throws UserBlockedError
 	 */
 	protected function checkBlocked( $subPage ) {
+		$checkReplica = !$this->getRequest()->wasPosted();
 		if ( MediaWikiServices::getInstance()->getPermissionManager()
-			->isBlockedFrom( $this->getUser(), $this->getPageTitle( $subPage ) )
+			->isBlockedFrom(
+				$this->getUser(),
+				$this->getPageTitle( $subPage ),
+				$checkReplica
+			)
 		) {
 			throw new UserBlockedError( $this->getUser()->getBlock() );
 		}

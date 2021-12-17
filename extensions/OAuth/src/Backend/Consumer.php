@@ -22,8 +22,15 @@
 namespace MediaWiki\Extensions\OAuth\Backend;
 
 use FormatJson;
+use IContextSource;
+use Linker;
+use LogicException;
 use MediaWiki\Extensions\OAuth\Entity\ClientEntity as OAuth2Client;
+use MediaWiki\MediaWikiServices;
+use Message;
 use MWException;
+use MWRestrictions;
+use SpecialPage;
 use User;
 use Wikimedia\Rdbms\DBConnRef;
 
@@ -31,8 +38,8 @@ use Wikimedia\Rdbms\DBConnRef;
  * Representation of an OAuth consumer.
  */
 abstract class Consumer extends MWOAuthDAO {
-	const OAUTH_VERSION_1 = 1;
-	const OAUTH_VERSION_2 = 2;
+	public const OAUTH_VERSION_1 = 1;
+	public const OAUTH_VERSION_2 = 2;
 
 	/** @var array Backwards-compatibility grant mappings */
 	public static $mapBackCompatGrants = [
@@ -64,7 +71,7 @@ abstract class Consumer extends MWOAuthDAO {
 	protected $description;
 	/** @var string Publisher email address */
 	protected $email;
-	/** @var string TS_MW timestamp of when email address was confirmed */
+	/** @var string|null TS_MW timestamp of when email address was confirmed */
 	protected $emailAuthenticated;
 	/** @var int User accepted the developer agreement */
 	protected $developerAgreement;
@@ -96,11 +103,11 @@ abstract class Consumer extends MWOAuthDAO {
 	protected $oauth2GrantTypes;
 
 	/* Stages that registered consumer takes (stored in DB) */
-	const STAGE_PROPOSED = 0;
-	const STAGE_APPROVED = 1;
-	const STAGE_REJECTED = 2;
-	const STAGE_EXPIRED  = 3;
-	const STAGE_DISABLED = 4;
+	public const STAGE_PROPOSED = 0;
+	public const STAGE_APPROVED = 1;
+	public const STAGE_REJECTED = 2;
+	public const STAGE_EXPIRED  = 3;
+	public const STAGE_DISABLED = 4;
 
 	/**
 	 * Maps stage ids to human-readable names which describe them as a state
@@ -323,9 +330,10 @@ abstract class Consumer extends MWOAuthDAO {
 	}
 
 	/**
-	 * When true, getCallbackUrl() returns a prefix; the callback URL can be provided by the caller
-	 * as long as the prefix matches. When false, the callback URL will be determined by
-	 * getCallbackUrl().
+	 * When false, the callback URL will be determined by getCallbackUrl(). When true,
+	 * getCallbackUrl() returns a prefix; the callback URL must be provided by the caller
+	 * and must match the prefix. For the exact definition of "match", see
+	 * MWOAuthServer::checkCallback().
 	 * @return bool
 	 */
 	public function getCallbackIsPrefix() {
@@ -352,7 +360,7 @@ abstract class Consumer extends MWOAuthDAO {
 	/**
 	 * Date of verifying the email, in TS_MW format. In practice this will be the same as
 	 * getRegistration().
-	 * @return string
+	 * @return string|null
 	 */
 	public function getEmailAuthenticated() {
 		return $this->get( 'emailAuthenticated' );
@@ -409,7 +417,7 @@ abstract class Consumer extends MWOAuthDAO {
 
 	/**
 	 * Secret key used to derive the consumer secret for HMAC-SHA1 signed OAuth requests.
-	 * The actual consumer secret will be calculated via MWOAuthUtils::hmacDBSecret() to mitigate
+	 * The actual consumer secret will be calculated via Utils::hmacDBSecret() to mitigate
 	 * DB leaks.
 	 * @return string
 	 */
@@ -418,7 +426,7 @@ abstract class Consumer extends MWOAuthDAO {
 	}
 
 	/**
-	 * Public RSA key for RSA-SHA1 signerd OAuth requests.
+	 * Public RSA key for RSA-SHA1 signed OAuth requests.
 	 * @return string
 	 */
 	public function getRsaKey() {
@@ -427,7 +435,7 @@ abstract class Consumer extends MWOAuthDAO {
 
 	/**
 	 * Application restrictions (such as allowed IPs).
-	 * @return \MWRestrictions
+	 * @return MWRestrictions
 	 */
 	public function getRestrictions() {
 		return $this->get( 'restrictions' );
@@ -503,8 +511,8 @@ abstract class Consumer extends MWOAuthDAO {
 				'mwoauthserver-invalid-user',
 				[
 					$this->getName(),
-					\Message::rawParam(
-						\Linker::makeExternalLink(
+					Message::rawParam(
+						Linker::makeExternalLink(
 							'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E008',
 							'E008',
 							true
@@ -559,7 +567,7 @@ abstract class Consumer extends MWOAuthDAO {
 		// Check that user and consumer are in good standing
 		if ( $mwUser->isLocked() || $wgBlockDisablesLogin && $mwUser->isBlocked() ) {
 			throw new MWOAuthException( 'mwoauthserver-insufficient-rights', [
-				\Message::rawParam( \Linker::makeExternalLink(
+				Message::rawParam( Linker::makeExternalLink(
 					'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E007',
 					'E007',
 					true
@@ -569,7 +577,7 @@ abstract class Consumer extends MWOAuthDAO {
 
 		if ( $this->getDeleted() ) {
 			throw new MWOAuthException( 'mwoauthserver-bad-consumer-key', [
-				\Message::rawParam( \Linker::makeExternalLink(
+				Message::rawParam( Linker::makeExternalLink(
 					'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E006',
 					'E006',
 					true
@@ -582,8 +590,8 @@ abstract class Consumer extends MWOAuthDAO {
 			);
 			throw new MWOAuthException(
 				'mwoauthserver-bad-consumer',
-				[ $this->getName(), Utils::getCentralUserTalk( $owner ), \Message::rawParam(
-					\Linker::makeExternalLink(
+				[ $this->getName(), Utils::getCentralUserTalk( $owner ), Message::rawParam(
+					Linker::makeExternalLink(
 						'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E005',
 						'E005',
 						true
@@ -593,10 +601,10 @@ abstract class Consumer extends MWOAuthDAO {
 		} elseif ( $this->getOwnerOnly() ) {
 			throw new MWOAuthException( 'mwoauthserver-consumer-owner-only', [
 				$this->getName(),
-				\SpecialPage::getTitleFor(
+				SpecialPage::getTitleFor(
 					'OAuthConsumerRegistration', 'update/' . $this->getConsumerKey()
 				),
-				\Message::rawParam( \Linker::makeExternalLink(
+				Message::rawParam( Linker::makeExternalLink(
 					'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E010',
 					'E010',
 					true
@@ -621,8 +629,8 @@ abstract class Consumer extends MWOAuthDAO {
 				'mwoauthserver-invalid-user',
 				[
 					$this->getName(),
-					\Message::rawParam(
-						\Linker::makeExternalLink(
+					Message::rawParam(
+						Linker::makeExternalLink(
 							'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E008',
 							'E008',
 							true
@@ -632,7 +640,7 @@ abstract class Consumer extends MWOAuthDAO {
 			);
 		}
 
-		$dbw = Utils::getCentralDB( DB_MASTER );
+		$dbw = Utils::getCentralDB( DB_PRIMARY );
 		// Check if this authorization exists
 		$cmra = $this->getCurrentAuthorization( $mwUser, wfWikiID() );
 
@@ -675,10 +683,10 @@ abstract class Consumer extends MWOAuthDAO {
 	 * - Approved for owner-only use and is owned by $user
 	 * - Still pending approval and is owned by $user
 	 *
-	 * @param \User $user
+	 * @param User $user
 	 * @return bool
 	 */
-	public function isUsableBy( \User $user ) {
+	public function isUsableBy( User $user ) {
 		if ( $this->stage === self::STAGE_APPROVED && !$this->getOwnerOnly() ) {
 			return true;
 		} elseif ( $this->stage === self::STAGE_PROPOSED || $this->stage === self::STAGE_APPROVED ) {
@@ -696,8 +704,8 @@ abstract class Consumer extends MWOAuthDAO {
 		$this->registration = wfTimestamp( TS_MW, $this->registration );
 		$this->stage = (int)$this->stage;
 		$this->stageTimestamp = wfTimestamp( TS_MW, $this->stageTimestamp );
-		$this->emailAuthenticated = wfTimestamp( TS_MW, $this->emailAuthenticated );
-		$this->grants = (array)$this->grants; // sanity
+		$this->emailAuthenticated = wfTimestampOrNull( TS_MW, $this->emailAuthenticated );
+		$this->grants = (array)$this->grants;
 		$this->callbackIsPrefix = (bool)$this->callbackIsPrefix;
 		$this->ownerOnly = (bool)$this->ownerOnly;
 		$this->oauthVersion = (int)$this->oauthVersion;
@@ -717,7 +725,7 @@ abstract class Consumer extends MWOAuthDAO {
 		$row['oarc_registration'] = $db->timestamp( $row['oarc_registration'] );
 		$row['oarc_stage_timestamp'] = $db->timestamp( $row['oarc_stage_timestamp'] );
 		$row['oarc_restrictions'] = $row['oarc_restrictions']->toJson();
-		$row['oarc_grants'] = \FormatJson::encode( $row['oarc_grants'] );
+		$row['oarc_grants'] = FormatJson::encode( $row['oarc_grants'] );
 		$row['oarc_email_authenticated'] =
 			$db->timestampOrNull( $row['oarc_email_authenticated'] );
 		$row['oarc_oauth2_allowed_grants'] = FormatJson::encode(
@@ -730,8 +738,8 @@ abstract class Consumer extends MWOAuthDAO {
 		$row['oarc_registration'] = wfTimestamp( TS_MW, $row['oarc_registration'] );
 		$row['oarc_stage'] = (int)$row['oarc_stage'];
 		$row['oarc_stage_timestamp'] = wfTimestamp( TS_MW, $row['oarc_stage_timestamp'] );
-		$row['oarc_restrictions'] = \MWRestrictions::newFromJson( $row['oarc_restrictions'] );
-		$row['oarc_grants'] = \FormatJson::decode( $row['oarc_grants'], true );
+		$row['oarc_restrictions'] = MWRestrictions::newFromJson( $row['oarc_restrictions'] );
+		$row['oarc_grants'] = FormatJson::decode( $row['oarc_grants'], true );
 		$row['oarc_user_id'] = (int)$row['oarc_user_id'];
 		$row['oarc_email_authenticated'] =
 			wfTimestampOrNull( TS_MW, $row['oarc_email_authenticated'] );
@@ -764,13 +772,15 @@ abstract class Consumer extends MWOAuthDAO {
 		} elseif ( $prop === 'callback_url' ) {
 			return $this->callbackUrl;
 		} else {
-			throw new \LogicException( 'Direct property access attempt: ' . $prop );
+			throw new LogicException( 'Direct property access attempt: ' . $prop );
 		}
 	}
 
-	protected function userCanSee( $name, \IContextSource $context ) {
+	protected function userCanSee( $name, IContextSource $context ) {
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
 		if ( $this->getDeleted()
-			&& !$context->getUser()->isAllowed( 'mwoauthviewsuppressed' )
+			&& !$permissionManager->userHasRight( $context->getUser(), 'mwoauthviewsuppressed' )
 		) {
 			return $context->msg( 'mwoauth-field-hidden' );
 		} else {
@@ -778,23 +788,27 @@ abstract class Consumer extends MWOAuthDAO {
 		}
 	}
 
-	protected function userCanSeePrivate( $name, \IContextSource $context ) {
-		if ( !$context->getUser()->isAllowed( 'mwoauthviewprivate' ) ) {
+	protected function userCanSeePrivate( $name, IContextSource $context ) {
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
+		if ( !$permissionManager->userHasRight( $context->getUser(), 'mwoauthviewprivate' ) ) {
 			return $context->msg( 'mwoauth-field-private' );
 		} else {
 			return $this->userCanSee( $name, $context );
 		}
 	}
 
-	protected function userCanSeeEmail( $name, \IContextSource $context ) {
-		if ( !$context->getUser()->isAllowed( 'mwoauthmanageconsumer' ) ) {
+	protected function userCanSeeEmail( $name, IContextSource $context ) {
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
+		if ( !$permissionManager->userHasRight( $context->getUser(), 'mwoauthmanageconsumer' ) ) {
 			return $context->msg( 'mwoauth-field-private' );
 		} else {
 			return $this->userCanSee( $name, $context );
 		}
 	}
 
-	protected function userCanSeeSecret( $name, \IContextSource $context ) {
+	protected function userCanSeeSecret( $name, IContextSource $context ) {
 		return $context->msg( 'mwoauth-field-private' );
 	}
 }

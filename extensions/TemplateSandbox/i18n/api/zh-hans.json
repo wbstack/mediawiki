@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "模板沙盒前缀，与[[Special:TemplateSandbox]]一样。",
+	"templatesandbox-apihelp-title": "解析使用<var>$1templatesandboxtext</var>代替此处命名的页面内容的页面。",
+	"templatesandbox-apihelp-text": "解析使用此页面内容代替由<var>$1templatesandboxtitle</var>命名页面的页面。",
+	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var>的内容模型。",
+	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var>的内容格式。",
+	"templatesandbox-apierror-titleandtext": "参数<var>$1templatesandboxtitle</var>和<var>$1templatesandboxtext</var>必须都被指定，或都被忽略。"
+}

@@ -23,7 +23,7 @@ use Wikimedia\Assert\Assert;
  */
 class Form implements StatementListProvidingEntity, ClearableEntity {
 
-	/* public */ const ENTITY_TYPE = 'form';
+	public const ENTITY_TYPE = 'form';
 
 	/**
 	 * @var FormId
@@ -126,7 +126,7 @@ class Form implements StatementListProvidingEntity, ClearableEntity {
 			}
 		}
 
-		usort( $result, function ( ItemId $a, ItemId $b ) {
+		usort( $result, static function ( ItemId $a, ItemId $b ) {
 			return strcmp( $a->getSerialization(), $b->getSerialization() );
 		} );
 

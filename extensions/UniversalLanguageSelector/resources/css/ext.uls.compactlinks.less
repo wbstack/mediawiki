@@ -7,28 +7,30 @@
 	background-image: none;
 	padding: 0;
 }
-/* stylelint-enable selector-max-id */
 
-.mw-interlanguage-selector,
-.mw-interlanguage-selector:active {
-	cursor: pointer;
-	padding: 4px 6px 4px 25px;
+#p-lang .mw-interlanguage-selector,
+#p-lang .mw-interlanguage-selector:active {
+	background-image: url( ../images/language-base20.svg );
+	background-position: left 4px center;
+	background-repeat: no-repeat;
+	background-size: 16px;
+	margin: 4px 0 8px;
+	padding: 4px 8px 4px 26px;
 	font-size: 13px;
 	font-weight: normal;
-	background-image: url( ../images/compact-links-trigger.svg );
-	background-size: 18px;
-	background-repeat: no-repeat;
-	background-position: left 4px center;
-	margin: 4px 0;
 	text-align: left;
+	cursor: pointer;
 }
+/* stylelint-enable selector-max-id */
 
-.mw-interlanguage-selector:active,
 .mw-interlanguage-selector.selector-open {
 	background-color: #c8ccd1;
-	color: #54595d;
 }
 
+/*
+ * Add caret to the ULS dialog when using the cog in the sidebar.
+ * This works together with selector-left and selector-right classes.
+ */
 .interlanguage-uls-menu {
 	.caret();
 }

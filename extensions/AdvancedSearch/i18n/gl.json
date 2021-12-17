@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"ArenaL5",
 			"Athena in Wonderland",
 			"Banjo",
 			"Elisardojm",
@@ -13,6 +14,7 @@
 	"advancedsearch-optgroup-text": "Procurar no texto da páxina",
 	"advancedsearch-optgroup-structure": "Estrutura",
 	"advancedsearch-optgroup-files": "Ficheiros e imaxes",
+	"advancedsearch-optgroup-sort": "Orde",
 	"advancedsearch-field-plain": "Estas palabras",
 	"advancedsearch-field-phrase": "Exactamente este texto",
 	"advancedsearch-field-or": "Unha destas palabras",
@@ -25,9 +27,12 @@
 	"advancedsearch-field-filetype": "Tipo de ficheiro",
 	"advancedsearch-field-filew": "Ancho do ficheiro en pixels",
 	"advancedsearch-field-fileh": "Alto do ficheiro en pixels",
-	"advancedsearch-help-plain": ";Descrición\n:Procura estas palabras no título ou no texto.\n;Teña en conta o seguinte\n:* Poden indicarse múltiples palabras\n:* Ignóranse as marcas de puntuación e outros caracteres non alfanuméricos (exceptuando a coma e os dous puntos).\n:* Poden darse resultados que non conteñan un ou máis dos elementos de procura indicados.\n:* Aplícase a derivación de palabras. Por exemplo: Cando se introduce \"coche\", a procura tamén considera \"coches\". A derivación de palabras e específica de cada lingua.\n;Páxina de axuda\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#Full_text_search Full text search]",
-	"advancedsearch-help-filetype": ";Descrición\n:Procura só ficheiros do tipo seleccionado.\n;Teña en conta o seguinte\n:* Só pode procurar un tipo de ficheiro.\n:* Só pode seleccionar os tipos de ficheiro presentados no menú despregable.\n;Páxinas de axuda\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#filetype Filetype] e [https://www.mediawiki.org/wiki/Help:CirrusSearch#filemime filemime]\n;Equivalente sintáctico na procura normal\n:Palabras precedidas de <code>filetype:</code> como <code>filetype:ogg</code>",
-	"advancedsearch-placeholder-exact-text": "\"o gato ama a cabra\"",
+	"advancedsearch-field-sort": "Orde",
+	"advancedsearch-field-preview-sort": "Ordenar por $1",
+	"advancedsearch-help-plain": ";Descrición\n:Procura estas palabras no título ou no texto.\n;Teña en conta o seguinte\n:* Poden indicarse múltiples palabras\n:* Ignóranse as marcas de puntuación e outros caracteres non alfanuméricos (exceptuando a coma e os dous puntos).\n:* Poden darse resultados que non conteñan un ou máis dos elementos de procura indicados.\n:* Aplícase a derivación de palabras. Por exemplo: Cando se introduce \"coche\", a procura tamén considera \"coches\". A derivación de palabras é específica de cada lingua.\n;Páxina de axuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Full text search]\n;Sintaxe equivalente na procura simple\n:<code>cabaliño do demo</code>",
+	"advancedsearch-help-phrase": "\n;Descrición\n:Procura unha cadea de caracteres específica. Non ten en conta os signos de puntuación.\n;Teña en conta o seguinte \n:(só se aplica cando se usan as comiñas, véxase o exemplo máis abaixo) \n:* Separe as frases de procura por medio de coma ou espazo, por exemplo<code>\"bo día\"</code>, <code>\"ola, mundo!\"</code>.\n:* Ignoraranse os signos de puntuación e outros caracteres alfanuméricos (agás o a coma e os dous puntos)\n:* A procura non distingue o uso de maiúsculas e minúsculas.\n:* Non se aplica a dereivación de palabras (stemming).\n;Páxina de axuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;Sintaxe equivalente na busca normal\n:Palabras dentre comiñas, por exemplo<code>\"Marcho que teño que marchar\"</code>",
+	"advancedsearch-help-filetype": ";Descrición\n:Procura só ficheiros do tipo seleccionado.\n;Teña en conta o seguinte\n:* Só pode procurar un tipo de ficheiro.\n:* Só pode seleccionar os tipos de ficheiro presentados no menú despregable.\n;Páxinas de axuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filetype Filetype] e [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filemime filemime]\n;Equivalente sintáctico na procura normal\n:Palabras precedidas de <code>filetype:</code> como <code>filetype:ogg</code>",
+	"advancedsearch-placeholder-exact-text": "\"cabalo do demo\"",
 	"advancedsearch-inlanguage-default": "Escoller unha lingua",
 	"advancedsearch-filetype-section-types": "Tipos de ficheiro xenéricos",
 	"advancedsearch-filetype-section-image": "Formatos de imaxe",

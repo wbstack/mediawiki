@@ -220,7 +220,7 @@ abstract class JCObjContent extends JCContent {
 				}
 				foreach ( array_keys( $container ) as $k ) {
 					$path[$lastIdx] = $k;
-					$isOk &= $this->testInt( $path, $vld );
+					$isOk = $this->testInt( $path, $vld ) && $isOk;
 				}
 			}
 		}
@@ -307,7 +307,7 @@ abstract class JCObjContent extends JCContent {
 			} elseif ( $subJcv === false ) {
 				// field does not exist
 				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
-				$initValue = !$path ? null : ( is_string( $path[0] ) ? new stdClass() : [] );
+				$initValue = !$path ? null : ( is_string( $path[0] ) ? (object)[] : [] );
 				$subJcv = new JCValue( JCValue::MISSING, $initValue );
 			}
 		}
@@ -403,7 +403,7 @@ abstract class JCObjContent extends JCContent {
 						$subVal = new JCValue( JCValue::UNCHECKED, $subVal );
 					}
 					if ( $result === null ) {
-						$result = $isObject ? new stdClass() : [];
+						$result = $isObject ? (object)[] : [];
 					}
 					if ( $isObject ) {
 						$result->$key = $subVal;
@@ -494,7 +494,7 @@ abstract class JCObjContent extends JCContent {
 		$foundFld = false;
 		$isError = false;
 		foreach ( $valueRef as $k => $v ) {
-			if ( 0 === strcasecmp( $k, $fld ) ) {
+			if ( strcasecmp( $k, $fld ) === 0 ) {
 				if ( $foundFld !== false ) {
 					$isError = true;
 					break;
@@ -508,7 +508,7 @@ abstract class JCObjContent extends JCContent {
 			if ( $this->thorough() ) {
 				// Mark all duplicate fields as errors
 				foreach ( $valueRef as $k => $v ) {
-					if ( 0 === strcasecmp( $k, $fld ) ) {
+					if ( strcasecmp( $k, $fld ) === 0 ) {
 						if ( !is_a( $v, JCValue::class ) ) {
 							$v = new JCValue( JCValue::UNCHECKED, $v );
 							$jcv->setField( $k, $v );

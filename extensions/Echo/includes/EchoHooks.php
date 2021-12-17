@@ -11,10 +11,6 @@ use MediaWiki\User\UserIdentity;
 
 class EchoHooks implements RecentChange_saveHook {
 	/**
-	 * @var RevisionRecord
-	 */
-	private static $lastRevertedRevision = null;
-	/**
 	 * @var Config
 	 */
 	private $config;
@@ -27,7 +23,7 @@ class EchoHooks implements RecentChange_saveHook {
 	 * @param array &$defaults
 	 */
 	public static function onUserGetDefaultOptions( array &$defaults ) {
-		global $wgAllowHTMLEmail, $wgEchoNotificationCategories;
+		global $wgAllowHTMLEmail, $wgEchoNotificationCategories, $wgEchoEnablePush;
 
 		if ( $wgAllowHTMLEmail ) {
 			$defaults['echo-email-format'] = 'html'; /*EchoHooks::EMAIL_FORMAT_HTML*/
@@ -65,6 +61,14 @@ class EchoHooks implements RecentChange_saveHook {
 				'web' => false,
 			],
 		];
+		if ( $wgEchoEnablePush ) {
+			$presets['default']['push'] = true;
+			$presets['article-linked']['push'] = false;
+			$presets['mention-failure']['push'] = false;
+			$presets['mention-success']['push'] = false;
+			$presets['watchlist']['push'] = false;
+			$presets['minor-watchlist']['push'] = false;
+		}
 
 		foreach ( $wgEchoNotificationCategories as $category => $categoryData ) {
 			if ( !isset( $defaults["echo-subscriptions-email-{$category}"] ) ) {
@@ -74,6 +78,11 @@ class EchoHooks implements RecentChange_saveHook {
 			if ( !isset( $defaults["echo-subscriptions-web-{$category}"] ) ) {
 				$defaults["echo-subscriptions-web-{$category}"] = $presets[$category]['web']
 					?? $presets['default']['web'];
+			}
+			if ( $wgEchoEnablePush && !isset( $defaults["echo-subscriptions-push-{$category}"] ) ) {
+				$defaults["echo-subscriptions-push-{$category}"] = $presets[$category]['push']
+					// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
+					?? $presets['default']['push'];
 			}
 		}
 	}
@@ -85,7 +94,8 @@ class EchoHooks implements RecentChange_saveHook {
 	public static function initEchoExtension() {
 		global $wgEchoNotifications, $wgEchoNotificationCategories, $wgEchoNotificationIcons,
 			$wgEchoMentionStatusNotifications, $wgAllowArticleReminderNotification, $wgAPIModules,
-			$wgEchoWatchlistNotifications, $wgEchoSeenTimeCacheType, $wgMainStash;
+			$wgEchoWatchlistNotifications, $wgEchoSeenTimeCacheType, $wgMainStash, $wgEnableEmail,
+			$wgEnableUserEmail;
 
 		// allow extensions to define their own event
 		Hooks::run( 'BeforeCreateEchoEvent',
@@ -109,49 +119,14 @@ class EchoHooks implements RecentChange_saveHook {
 			unset( $wgEchoNotificationCategories['minor-watchlist'] );
 		}
 
+		// Only allow user email notifications when enabled
+		if ( !$wgEnableEmail || !$wgEnableUserEmail ) {
+			unset( $wgEchoNotificationCategories['emailuser'] );
+		}
+
 		// Default $wgEchoSeenTimeCacheType to $wgMainStash
 		if ( $wgEchoSeenTimeCacheType === null ) {
 			$wgEchoSeenTimeCacheType = $wgMainStash;
-		}
-	}
-
-	/**
-	 * ResourceLoaderTestModules hook handler
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ResourceLoaderTestModules
-	 *
-	 * @param array &$testModules
-	 * @param ResourceLoader $resourceLoader
-	 */
-	public static function onResourceLoaderTestModules( array &$testModules,
-		ResourceLoader $resourceLoader
-	) {
-		global $wgResourceModules;
-
-		$testModuleBoilerplate = [
-			'localBasePath' => dirname( __DIR__ ),
-			'remoteExtPath' => 'Echo',
-		];
-
-		// find test files for every RL module
-		$prefix = 'ext.echo';
-		foreach ( $wgResourceModules as $key => $module ) {
-			if ( substr( $key, 0, strlen( $prefix ) ) === $prefix && isset( $module['scripts'] ) ) {
-				$testFiles = [];
-				foreach ( $module['scripts'] as $script ) {
-					$testFile = 'tests/qunit/' . dirname( $script ) . '/test_' . basename( $script );
-					// if a test file exists for a given JS file, add it
-					if ( file_exists( $testModuleBoilerplate['localBasePath'] . '/' . $testFile ) ) {
-						$testFiles[] = $testFile;
-					}
-				}
-				// if test files exist for given module, create a corresponding test module
-				if ( $testFiles !== [] ) {
-					$testModules['qunit']["$key.tests"] = $testModuleBoilerplate + [
-						'dependencies' => [ $key ],
-						'scripts' => $testFiles,
-					];
-				}
-			}
 		}
 	}
 
@@ -162,14 +137,14 @@ class EchoHooks implements RecentChange_saveHook {
 	public static function onResourceLoaderRegisterModules( ResourceLoader $resourceLoader ) {
 		global $wgExtensionDirectory, $wgEchoNotificationIcons, $wgEchoSecondaryIcons;
 		$resourceLoader->register( 'ext.echo.emailicons', [
-			'class' => 'ResourceLoaderEchoImageModule',
+			'class' => ResourceLoaderEchoImageModule::class,
 			'icons' => $wgEchoNotificationIcons,
 			'selector' => '.mw-echo-icon-{name}',
 			'localBasePath' => $wgExtensionDirectory,
 			'remoteExtPath' => 'Echo/modules'
 		] );
 		$resourceLoader->register( 'ext.echo.secondaryicons', [
-			'class' => 'ResourceLoaderEchoImageModule',
+			'class' => ResourceLoaderEchoImageModule::class,
 			'icons' => $wgEchoSecondaryIcons,
 			'selector' => '.mw-echo-icon-{name}',
 			'localBasePath' => $wgExtensionDirectory,
@@ -186,61 +161,17 @@ class EchoHooks implements RecentChange_saveHook {
 			// DatabaseUpdater does not support other databases, so skip
 			return;
 		}
+
+		$dbType = $updater->getDB()->getType();
+
 		$dir = dirname( __DIR__ );
-		$baseSQLFile = "$dir/echo.sql";
-		$updater->addExtensionTable( 'echo_event', $baseSQLFile );
-		$updater->addExtensionTable( 'echo_email_batch', "$dir/db_patches/echo_email_batch.sql" );
-		$updater->addExtensionTable( 'echo_target_page', "$dir/db_patches/echo_target_page.sql" );
 
-		if ( $updater->getDB()->getType() === 'sqlite' ) {
-			$updater->modifyExtensionField( 'echo_event', 'event_agent',
-				"$dir/db_patches/patch-event_agent-split.sqlite.sql" );
-			$updater->modifyExtensionField( 'echo_event', 'event_variant',
-				"$dir/db_patches/patch-event_variant_nullability.sqlite.sql" );
-			$updater->addExtensionField( 'echo_target_page', 'etp_id',
-				"$dir/db_patches/patch-multiple_target_pages.sqlite.sql" );
-			$updater->dropExtensionField( 'echo_target_page', 'etp_user',
-				"$dir/db_patches/patch-drop-echo_target_page-etp_user.sqlite.sql" );
-			// There is no need to run the patch-event_extra-size or patch-event_agent_ip-size because
-			// sqlite ignores numeric arguments in parentheses that follow the type name (ex: VARCHAR(255))
-			// see http://www.sqlite.org/datatype3.html Section 2.2 for more info
-		} else {
-			$updater->modifyExtensionField( 'echo_event', 'event_agent',
-				"$dir/db_patches/patch-event_agent-split.sql" );
-			$updater->modifyExtensionField( 'echo_event', 'event_variant',
-				"$dir/db_patches/patch-event_variant_nullability.sql" );
-			$updater->modifyExtensionField( 'echo_event', 'event_extra',
-				"$dir/db_patches/patch-event_extra-size.sql" );
-			$updater->modifyExtensionField( 'echo_event', 'event_agent_ip',
-				"$dir/db_patches/patch-event_agent_ip-size.sql" );
-			$updater->addExtensionField( 'echo_target_page', 'etp_id',
-				"$dir/db_patches/patch-multiple_target_pages.sql" );
-			$updater->dropExtensionField( 'echo_target_page', 'etp_user',
-				"$dir/db_patches/patch-drop-echo_target_page-etp_user.sql" );
-		}
+		$updater->addExtensionTable( 'echo_event', "$dir/echo.sql" );
 
-		$updater->addExtensionField( 'echo_notification', 'notification_bundle_hash',
-			"$dir/db_patches/patch-notification-bundling-field.sql" );
-		// This index was renamed twice, first from type_page to event_type and
-		// later from event_type to echo_event_type
-		if ( $updater->getDB()->indexExists( 'echo_event', 'type_page', __METHOD__ ) ) {
-			$updater->addExtensionIndex( 'echo_event', 'event_type',
-				"$dir/db_patches/patch-alter-type_page-index.sql" );
-		}
-		$updater->dropExtensionTable( 'echo_subscription',
-			"$dir/db_patches/patch-drop-echo_subscription.sql" );
-		if ( $updater->getDB()->getType() !== 'sqlite' ) {
-			$updater->dropExtensionField( 'echo_event', 'event_timestamp',
-				"$dir/db_patches/patch-drop-echo_event-event_timestamp.sql" );
-		}
-		$updater->addExtensionField( 'echo_email_batch', 'eeb_event_hash',
-			"$dir/db_patches/patch-email_batch-new-field.sql" );
-		$updater->addExtensionField( 'echo_event', 'event_page_id',
-			"$dir/db_patches/patch-add-echo_event-event_page_id.sql" );
-		$updater->addExtensionIndex( 'echo_event', 'echo_event_type',
-			"$dir/db_patches/patch-alter-event_type-index.sql" );
-		$updater->addExtensionIndex( 'echo_notification', 'echo_user_timestamp',
-			"$dir/db_patches/patch-alter-user_timestamp-index.sql" );
+		// Added in REL1_28
+		$updater->dropExtensionField( 'echo_target_page', 'etp_user',
+			"$dir/db_patches/{$dbType}/patch-drop-echo_target_page-etp_user.sql" );
+
 		$updater->addExtensionIndex( 'echo_notification', 'echo_notification_event',
 			"$dir/db_patches/patch-add-notification_event-index.sql" );
 		$updater->addPostDatabaseUpdateMaintenance( RemoveOrphanedEvents::class );
@@ -262,16 +193,17 @@ class EchoHooks implements RecentChange_saveHook {
 			"$dir/db_patches/patch-drop-echo_event-event_page_namespace.sql" );
 		$updater->dropExtensionField( 'echo_event', 'event_page_title',
 			"$dir/db_patches/patch-drop-echo_event-event_page_title.sql" );
-		if ( $updater->getDB()->getType() !== 'sqlite' ) {
+		if ( $dbType === 'mysql' ) {
 			$updater->dropExtensionField( 'echo_notification', 'notification_bundle_base',
-				"$dir/db_patches/patch-drop-notification_bundle_base.sql" );
+				"$dir/db_patches/mysql/patch-drop-notification_bundle_base.sql" );
 			$updater->dropExtensionField( 'echo_notification', 'notification_bundle_display_hash',
-				"$dir/db_patches/patch-drop-notification_bundle_display_hash.sql" );
+				"$dir/db_patches/mysql/patch-drop-notification_bundle_display_hash.sql" );
 		}
 		$updater->dropExtensionIndex( 'echo_notification', 'echo_notification_user_hash_timestamp',
 			"$dir/db_patches/patch-drop-user-hash-timestamp-index.sql" );
 
 		$updater->addExtensionTable( 'echo_push_provider', "$dir/db_patches/echo_push_provider.sql" );
+		$updater->addExtensionTable( 'echo_push_topic', "$dir/db_patches/echo_push_topic.sql" );
 		$updater->addExtensionTable( 'echo_push_subscription', "$dir/db_patches/echo_push_subscription.sql" );
 
 		$updater->modifyExtensionField( 'echo_unread_wikis', 'euw_wiki',
@@ -335,7 +267,7 @@ class EchoHooks implements RecentChange_saveHook {
 			$wgEchoCrossWikiNotifications, $wgEchoPerUserBlacklist,
 			$wgEchoWatchlistNotifications;
 
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
 
 		// Show email frequency options
 		$freqOptions = [
@@ -423,7 +355,7 @@ class EchoHooks implements RecentChange_saveHook {
 		// Show subscription options.  IMPORTANT: 'echo-subscriptions-email-edit-user-talk',
 		// 'echo-subscriptions-email-watchlist', and 'echo-subscriptions-email-minor-watchlist' are
 		// virtual options, their values are saved to existing notification options 'enotifusertalkpages',
-		// 'enotifwatchlistpages', and 'enotifminoredits', see onUserLoadOptions() and onUserSaveOptions()
+		// 'enotifwatchlistpages', and 'enotifminoredits', see onUserLoadOptions() and onSaveUserOptions()
 		// for more information on how it is handled. Doing it in this way, we can avoid keeping running
 		// massive data migration script to keep these two options synced when echo is enabled on
 		// new wikis or Echo is disabled and re-enabled for some reason.  We can update the name
@@ -470,7 +402,7 @@ class EchoHooks implements RecentChange_saveHook {
 			) );
 		}
 		$preferences['echo-subscriptions'] = [
-			'class' => 'HTMLCheckMatrix',
+			'class' => HTMLCheckMatrix::class,
 			'section' => 'echo/echosubscriptions',
 			'rows' => $rows,
 			'columns' => $columns,
@@ -522,12 +454,14 @@ class EchoHooks implements RecentChange_saveHook {
 				'section' => 'echo/blocknotificationslist',
 				'filter' => MultiUsernameFilter::class,
 			];
+			// TODO inject
+			$titleFactory = MediaWikiServices::getInstance()->getTitleFactory();
 			$preferences['echo-notifications-page-linked-title-muted-list'] = [
 				'type' => 'titlesmultiselect',
 				'label-message' => 'echo-pref-notifications-page-linked-title-muted-list',
 				'section' => 'echo/mutedpageslist',
 				'showMissing' => false,
-				'filter' => ( new MultiTitleFilter( new TitleFactory() ) )
+				'filter' => ( new MultiTitleFilter( $titleFactory ) )
 			];
 		}
 	}
@@ -560,22 +494,16 @@ class EchoHooks implements RecentChange_saveHook {
 		RevisionRecord $revisionRecord,
 		EditResult $editResult
 	) {
-		global $wgEchoNotifications;
-
 		if ( $editResult->isNullEdit() ) {
 			return;
 		}
 
 		$title = $wikiPage->getTitle();
-		$undidRevId = $editResult->getUndidRevId();
+		$isRevert = $editResult->getRevertMethod() === EditResult::REVERT_UNDO ||
+			$editResult->getRevertMethod() === EditResult::REVERT_ROLLBACK;
 
 		// Try to do this after the HTTP response
-		DeferredUpdates::addCallableUpdate( function () use ( $revisionRecord, $undidRevId ) {
-			// This check has to happen during deferred processing, otherwise $lastRevertedRevision
-			// will not be initialized.
-			$isRevert = $undidRevId > 0 ||
-				( self::$lastRevertedRevision &&
-				self::$lastRevertedRevision->getId() === $revisionRecord->getId() );
+		DeferredUpdates::addCallableUpdate( static function () use ( $revisionRecord, $isRevert ) {
 			EchoDiscussionParser::generateEventsForRevision( $revisionRecord, $isRevert );
 		} );
 
@@ -583,10 +511,10 @@ class EchoHooks implements RecentChange_saveHook {
 		// If the user is not an IP and this is not a null edit,
 		// test for them reaching a congratulatory threshold
 		$thresholds = [ 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000 ];
-		if ( $user->isLoggedIn() ) {
+		if ( $user->isRegistered() ) {
 			$thresholdCount = self::getEditCount( $user );
 			if ( in_array( $thresholdCount, $thresholds ) ) {
-				DeferredUpdates::addCallableUpdate( function () use ( $user, $title, $thresholdCount ) {
+				DeferredUpdates::addCallableUpdate( static function () use ( $user, $title, $thresholdCount ) {
 					$notificationMapper = new EchoNotificationMapper();
 					$notifications = $notificationMapper->fetchByUser( $user, 10, null, [ 'thank-you-edit' ] );
 					/** @var EchoNotification $notification */
@@ -620,21 +548,25 @@ class EchoHooks implements RecentChange_saveHook {
 
 		// Handle the case of someone undoing an edit, either through the
 		// 'undo' link in the article history or via the API.
-		if ( isset( $wgEchoNotifications['reverted'] ) && $undidRevId ) {
+		// Reverts through the 'rollback' link (EditResult::REVERT_ROLLBACK)
+		// are handled in ::onRollbackComplete().
+		if ( $editResult->getRevertMethod() === EditResult::REVERT_UNDO ) {
 			$store = MediaWikiServices::getInstance()->getRevisionStore();
+			$undidRevId = $editResult->getUndidRevId();
 			$undidRevision = $store->getRevisionById( $undidRevId );
 			if (
 				$undidRevision &&
 				Title::newFromLinkTarget( $undidRevision->getPageAsLinkTarget() )->equals( $title )
 			) {
-				$victimId = $undidRevision->getUser();
-				if ( $victimId ) { // No notifications for anonymous users
+				$revertedUser = $undidRevision->getUser();
+				// No notifications for anonymous users
+				if ( $revertedUser && $revertedUser->getId() ) {
 					EchoEvent::create( [
 						'type' => 'reverted',
 						'title' => $title,
 						'extra' => [
 							'revid' => $revisionRecord->getId(),
-							'reverted-user-id' => $victimId,
+							'reverted-user-id' => $revertedUser->getId(),
 							'reverted-revision-id' => $undidRevId,
 							'method' => 'undo',
 							'summary' => $summary,
@@ -723,8 +655,9 @@ class EchoHooks implements RecentChange_saveHook {
 	public static function onLocalUserCreated( $user, $autocreated ) {
 		if ( !$autocreated ) {
 			$overrides = self::getNewUserPreferenceOverrides();
+			$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
 			foreach ( $overrides as $prefKey => $value ) {
-				$user->setOption( $prefKey, $value );
+				$userOptionsManager->setOption( $user, $prefKey, $value );
 			}
 			$user->saveSettings();
 			EchoEvent::create( [
@@ -884,15 +817,24 @@ class EchoHooks implements RecentChange_saveHook {
 	 * @param Skin $skin Skin being used.
 	 */
 	public static function beforePageDisplay( $out, $skin ) {
-		if ( $out->getUser()->isLoggedIn() ) {
-			// Load the module for the Notifications flyout
-			$out->addModules( [ 'ext.echo.init' ] );
-			// Load the styles for the Notifications badge
-			$out->addModuleStyles( [
-				'ext.echo.styles.badge',
-				'oojs-ui.styles.icons-alerts'
-			] );
+		$user = $out->getUser();
+
+		if ( !$user->isRegistered() ) {
+			return;
 		}
+
+		if ( self::shouldDisplayTalkAlert( $user, $out->getTitle() ) ) {
+			// Load the module for the Orange alert
+			$out->addModuleStyles( 'ext.echo.styles.alert' );
+		}
+
+		// Load the module for the Notifications flyout
+		$out->addModules( [ 'ext.echo.init' ] );
+		// Load the styles for the Notifications badge
+		$out->addModuleStyles( [
+			'ext.echo.styles.badge',
+			'oojs-ui.styles.icons-alerts'
+		] );
 	}
 
 	private static function processMarkAsRead( User $user, WebRequest $request, Title $title ) {
@@ -951,7 +893,7 @@ class EchoHooks implements RecentChange_saveHook {
 				}
 
 				// Schedule a deferred update to mark these notifications as read on the foreign wiki
-				DeferredUpdates::addCallableUpdate( function () use ( $user, $markAsReadIds, $markAsReadWiki ) {
+				DeferredUpdates::addCallableUpdate( static function () use ( $user, $markAsReadIds, $markAsReadWiki ) {
 					$notifUser = MWEchoNotifUser::newFromUser( $user );
 					$notifUser->markReadForeign( $markAsReadIds, $markAsReadWiki );
 				} );
@@ -960,7 +902,7 @@ class EchoHooks implements RecentChange_saveHook {
 
 		// Schedule a deferred update to mark local target_page and ?markasread= notifications as read
 		if ( $eventIds ) {
-			DeferredUpdates::addCallableUpdate( function () use ( $user, $eventIds ) {
+			DeferredUpdates::addCallableUpdate( static function () use ( $user, $eventIds ) {
 				$notifUser = MWEchoNotifUser::newFromUser( $user );
 				$notifUser->markRead( $eventIds );
 			} );
@@ -1037,20 +979,42 @@ class EchoHooks implements RecentChange_saveHook {
 	}
 
 	/**
-	 * Handler for PersonalUrls hook.
-	 * Add a "Notifications" item to the user toolbar ('personal URLs').
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/PersonalUrls
-	 * @param array &$personal_urls Array of URLs to append to.
-	 * @param Title &$title Title of page being visited.
-	 * @param SkinTemplate $sk
+	 * Determine if a talk page alert should be displayed.
+	 * We need to check:
+	 * - User actually has new messages
+	 * - User is not viewing their user talk page, as user_newtalk will not have been cleared yet.
+	 *   (bug T107655).
+	 *
+	 * @param User $user
+	 * @param Title $title
+	 * @return bool
 	 */
-	public static function onPersonalUrls( &$personal_urls, &$title, $sk ) {
-		$user = $sk->getUser();
-		if ( $user->isAnon() ) {
+	private static function shouldDisplayTalkAlert( $user, $title ) {
+		$userHasNewMessages = MediaWikiServices::getInstance()
+			->getTalkPageNotificationManager()
+			->userHasNewMessages( $user );
+
+		return $userHasNewMessages && !$user->getTalkPage()->equals( $title );
+	}
+
+	/**
+	 * Handler for SkinTemplateNavigation::Universal hook.
+	 * Adds "Notifications" items to the notifications content navigation.
+	 * SkinTemplate automatically merges these into the personal tools for older skins.
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/SkinTemplateNavigation::Universal
+	 * @param SkinTemplate $skinTemplate
+	 * @param array &$links Array of URLs to append to.
+	 */
+	public static function onSkinTemplateNavigationUniversal( $skinTemplate, &$links ) {
+		$user = $skinTemplate->getUser();
+		if ( !$user->isRegistered() ) {
 			return;
 		}
 
-		$subtractions = self::processMarkAsRead( $user, $sk->getOutput()->getRequest(), $title );
+		$title = $skinTemplate->getTitle();
+		$out = $skinTemplate->getOutput();
+
+		$subtractions = self::processMarkAsRead( $user, $out->getRequest(), $title );
 
 		// Add a "My notifications" item to personal URLs
 		$notifUser = MWEchoNotifUser::newFromUser( $user );
@@ -1071,7 +1035,7 @@ class EchoHooks implements RecentChange_saveHook {
 		$seenAlertTime = $seenTime->getTime( 'alert', TS_ISO_8601 );
 		$seenMsgTime = $seenTime->getTime( 'message', TS_ISO_8601 );
 
-		$sk->getOutput()->addJsConfigVars( 'wgEchoSeenTime', [
+		$out->addJsConfigVars( 'wgEchoSeenTime', [
 			'alert' => $seenAlertTime,
 			'notice' => $seenMsgTime,
 		] );
@@ -1079,15 +1043,11 @@ class EchoHooks implements RecentChange_saveHook {
 		$msgFormattedCount = EchoNotificationController::formatNotificationCount( $msgCount );
 		$alertFormattedCount = EchoNotificationController::formatNotificationCount( $alertCount );
 
-		$msgText = wfMessage( 'echo-notification-notice', $msgCount );
-		$alertText = wfMessage( 'echo-notification-alert', $alertCount );
-
 		$url = SpecialPage::getTitleFor( 'Notifications' )->getLocalURL();
 
 		// HACK: inverted icons only work in the "MediaWiki" OOUI theme
 		// Avoid flashes in skins that don't use it (T111821)
-		$sk->getOutput()->setupOOUI(
-			strtolower( $sk->getSkinName() ), $sk->getOutput()->getLanguage()->getDir() );
+		$out::setupOOUI( strtolower( $skinTemplate->getSkinName() ), $out->getLanguage()->getDir() );
 
 		$msgLinkClasses = [ "mw-echo-notifications-badge", "mw-echo-notification-badge-nojs","oo-ui-icon-tray" ];
 		$alertLinkClasses = [ "mw-echo-notifications-badge", "mw-echo-notification-badge-nojs", "oo-ui-icon-bell" ];
@@ -1127,56 +1087,73 @@ class EchoHooks implements RecentChange_saveHook {
 			$alertLinkClasses[] = 'mw-echo-notifications-badge-long-label';
 		}
 
-		$alertLink = [
+		$mytalk = $links['user-menu']['mytalk'] ?? false;
+		if (
+			$mytalk &&
+			self::shouldDisplayTalkAlert( $user, $title ) &&
+			MediaWikiServices::getInstance()
+				->getHookContainer()->run( 'BeforeDisplayOrangeAlert', [ $user, $title ] )
+		) {
+			// Create new talk alert inheriting from the talk link data.
+			$links['notifications']['talk-alert'] = array_merge(
+				$links['user-menu']['mytalk'],
+				[
+					// Hardcode id, which is needed to dismiss the talk alert notification
+					'id' => 'pt-talk-alert',
+					// If Vector hook ran anicon will have  been copied to the link class.
+					// We must reset it.
+					'link-class' => [],
+					'text' => $skinTemplate->msg( 'echo-new-messages' )->text(),
+					'class' => [ 'mw-echo-alert' ],
+					// unset icon
+					'icon' => '',
+				]
+			);
+
+			// If there's exactly one new user talk message, then link directly to it from the alert.
+			$notificationMapper = new EchoNotificationMapper();
+			$notifications = $notificationMapper->fetchUnreadByUser( $user, 2, null, [ 'edit-user-talk' ] );
+			if ( count( $notifications ) === 1 ) {
+				$presModel = EchoEventPresentationModel::factory(
+					current( $notifications )->getEvent(),
+					$out->getLanguage(),
+					$user
+				);
+				$links['notifications']['talk-alert']['href'] = $presModel->getPrimaryLink()['url'];
+			}
+		}
+
+		$links['notifications']['notifications-alert'] = [
 			'href' => $url,
-			'text' => $alertText,
+			'text' => $skinTemplate->msg( 'echo-notification-alert', $alertCount )->text(),
 			'active' => ( $url == $title->getLocalURL() ),
-			'class' => $alertLinkClasses,
+			'link-class' => $alertLinkClasses,
 			'data' => [
 				'counter-num' => $alertCount,
 				'counter-text' => $alertFormattedCount,
 			],
+			// This item used to be part of personal tools, and much CSS relies on it using this id.
+			'id' => 'pt-notifications-alert',
 		];
 
-		$insertUrls = [
-			'notifications-alert' => $alertLink,
-		];
-
-		$msgLink = [
+		$links['notifications']['notifications-notice'] = [
 			'href' => $url,
-			'text' => $msgText,
+			'text' => $skinTemplate->msg( 'echo-notification-notice', $msgCount )->text(),
 			'active' => ( $url == $title->getLocalURL() ),
-			'class' => $msgLinkClasses,
+			'link-class' => $msgLinkClasses,
 			'data' => [
 				'counter-num' => $msgCount,
 				'counter-text' => $msgFormattedCount,
 			],
+			// This item used to be part of personal tools, and much CSS relies on it using this id.
+			'id' => 'pt-notifications-notice',
 		];
-
-		$insertUrls['notifications-notice'] = $msgLink;
-
-		$personal_urls = wfArrayInsertAfter( $personal_urls, $insertUrls, 'userpage' );
 
 		if ( $hasUnseen ) {
 			// Record that the user is going to see an indicator that they have unseen notifications
 			// This is part of tracking how likely users are to click a badge with unseen notifications.
 			// The other part is the 'echo.unseen.click' counter, see ext.echo.init.js.
 			MediaWikiServices::getInstance()->getStatsdDataFactory()->increment( 'echo.unseen' );
-		}
-
-		// If the user has new messages, display a talk page alert
-		// We need to check:
-		// * User actually has new messages
-		// * User is not viewing their user talk page, as user_newtalk
-		// will not have been cleared yet. (bug T107655).
-		$userHasNewMessages = MediaWikiServices::getInstance()
-			->getTalkPageNotificationManager()->userHasNewMessages( $user );
-		if ( $userHasNewMessages && !$user->getTalkPage()->equals( $title ) ) {
-			if ( Hooks::run( 'BeforeDisplayOrangeAlert', [ $user, $title ] ) ) {
-				$personal_urls['mytalk']['text'] = $sk->msg( 'echo-new-messages' )->text();
-				$personal_urls['mytalk']['class'] = [ 'mw-echo-alert' ];
-				$sk->getOutput()->addModuleStyles( 'ext.echo.styles.alert' );
-			}
 		}
 	}
 
@@ -1219,7 +1196,7 @@ class EchoHooks implements RecentChange_saveHook {
 		// If a user is watching his/her own talk page, do not send talk page watchlist
 		// email notification if the user is receiving Echo talk page notification
 		if ( $title->isTalkPage() && $targetUser->getTalkPage()->equals( $title ) ) {
-			$attributeManager = EchoAttributeManager::newFromGlobalVars();
+			$attributeManager = EchoServices::getInstance()->getAttributeManager();
 			$events = $attributeManager->getUserEnabledEvents( $targetUser, 'email' );
 			if ( in_array( 'edit-user-talk', $events ) ) {
 				// Do not send watchlist email notification, the user will receive an Echo notification
@@ -1239,7 +1216,7 @@ class EchoHooks implements RecentChange_saveHook {
 		}
 
 		$user = $out->getUser();
-		if ( $user->isLoggedIn() ) {
+		if ( $user->isRegistered() ) {
 			$notifUser = MWEchoNotifUser::newFromUser( $user );
 			$lastUpdate = $notifUser->getGlobalUpdateTime();
 			if ( $lastUpdate !== false ) {
@@ -1271,7 +1248,7 @@ class EchoHooks implements RecentChange_saveHook {
 
 		// If the user has the notifications flyout turned on and is receiving
 		// notifications for talk page messages, disable the new messages alert.
-		if ( $user->isLoggedIn()
+		if ( $user->isRegistered()
 			&& isset( $wgEchoNotifications['edit-user-talk'] )
 			&& Hooks::run( 'EchoCanAbortNewMessagesAlert' )
 		) {
@@ -1298,12 +1275,12 @@ class EchoHooks implements RecentChange_saveHook {
 		RevisionRecord $newRevision,
 		RevisionRecord $oldRevision
 	) {
-		$victimId = $oldRevision->getUser();
+		$revertedUser = $oldRevision->getUser();
 		$latestRevision = $wikiPage->getRevisionRecord();
-		self::$lastRevertedRevision = $latestRevision;
 
 		if (
-			$victimId && // No notifications for anonymous users
+			$revertedUser &&
+			$revertedUser->getId() && // No notifications for anonymous users
 			!$oldRevision->hasSameContent( $newRevision ) // No notifications for null rollbacks
 		) {
 			EchoEvent::create( [
@@ -1311,7 +1288,7 @@ class EchoHooks implements RecentChange_saveHook {
 				'title' => $wikiPage->getTitle(),
 				'extra' => [
 					'revid' => $latestRevision->getId(),
-					'reverted-user-id' => $victimId,
+					'reverted-user-id' => $revertedUser->getId(),
 					'reverted-revision-id' => $oldRevision->getId(),
 					'method' => 'rollback',
 				],
@@ -1332,59 +1309,56 @@ class EchoHooks implements RecentChange_saveHook {
 			// Reset the notification count since it may have changed due to user
 			// option changes. This covers both explicit changes in the preferences
 			// and changes made through the options API (since both call this hook).
-			DeferredUpdates::addCallableUpdate( function () use ( $user ) {
+			DeferredUpdates::addCallableUpdate( static function () use ( $user ) {
 				MWEchoNotifUser::newFromUser( $user )->resetNotificationCount();
 			} );
 		}
 	}
 
 	/**
+	 * Some of Echo's subscription user preferences are mapped to existing user preferences defined in
+	 * core MediaWiki. This returns the map of Echo preference names to core preference names.
+	 *
+	 * @return array
+	 */
+	public static function getVirtualUserOptions() {
+		global $wgEchoWatchlistNotifications;
+		$options = [];
+		$options['echo-subscriptions-email-edit-user-talk'] = 'enotifusertalkpages';
+		if ( $wgEchoWatchlistNotifications ) {
+			$options['echo-subscriptions-email-watchlist'] = 'enotifwatchlistpages';
+			$options['echo-subscriptions-email-minor-watchlist'] = 'enotifminoredits';
+		}
+		return $options;
+	}
+
+	/**
 	 * Handler for UserLoadOptions hook.
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/UserLoadOptions
-	 * @param User $user User whose options were loaded
+	 * @param UserIdentity $user User whose options were loaded
 	 * @param array &$options Options can be modified
 	 */
-	public static function onUserLoadOptions( $user, &$options ) {
-		global $wgEchoWatchlistNotifications;
-		// Use existing enotifusertalkpages option for echo-subscriptions-email-edit-user-talk
-		if ( isset( $options['enotifusertalkpages'] ) ) {
-			$options['echo-subscriptions-email-edit-user-talk'] = $options['enotifusertalkpages'];
-		}
-
-		if ( $wgEchoWatchlistNotifications ) {
-			// Use existing enotifwatchlistpages option for echo-subscriptions-email-watchlist
-			if ( isset( $options['enotifwatchlistpages'] ) ) {
-				$options['echo-subscriptions-email-watchlist'] = $options['enotifwatchlistpages'];
-			}
-
-			// Use existing enotifminoredits option for echo-subscriptions-email-minor-watchlist
-			if ( isset( $options['enotifminoredits'] ) ) {
-				$options['echo-subscriptions-email-minor-watchlist'] = $options['enotifminoredits'];
+	public static function onLoadUserOptions( UserIdentity $user, &$options ) {
+		foreach ( self::getVirtualUserOptions() as $echoPref => $mwPref ) {
+			// Use the existing core option's value for the Echo option
+			if ( isset( $options[ $mwPref ] ) ) {
+				$options[ $echoPref ] = $options[ $mwPref ];
 			}
 		}
 	}
 
 	/**
-	 * Handler for UserSaveOptions hook.
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/UserSaveOptions
-	 * @param User $user User whose options are being saved
-	 * @param array &$options Options can be modified
+	 * Handler for SaveUserOptions hook.
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/SaveUserOptions
+	 * @param UserIdentity $user User whose options are being saved
+	 * @param array &$modifiedOptions Options can be modified
 	 */
-	public static function onUserSaveOptions( $user, &$options ) {
-		global $wgEchoWatchlistNotifications;
-		// save virtual option values in corresponding real option values
-		if ( isset( $options['echo-subscriptions-email-edit-user-talk'] ) ) {
-			$options['enotifusertalkpages'] = $options['echo-subscriptions-email-edit-user-talk'];
-			unset( $options['echo-subscriptions-email-edit-user-talk'] );
-		}
-		if ( $wgEchoWatchlistNotifications ) {
-			if ( isset( $options['echo-subscriptions-email-watchlist'] ) ) {
-				$options['enotifwatchlistpages'] = $options['echo-subscriptions-email-watchlist'];
-				unset( $options['echo-subscriptions-email-watchlist'] );
-			}
-			if ( isset( $options['echo-subscriptions-email-minor-watchlist'] ) ) {
-				$options['enotifminoredits'] = $options['echo-subscriptions-email-minor-watchlist'];
-				unset( $options['echo-subscriptions-email-minor-watchlist'] );
+	public static function onSaveUserOptions( UserIdentity $user, array &$modifiedOptions ) {
+		foreach ( self::getVirtualUserOptions() as $echoPref => $mwPref ) {
+			// Save virtual option values in corresponding real option values
+			if ( isset( $modifiedOptions[ $echoPref ] ) ) {
+				$modifiedOptions[ $mwPref ] = $modifiedOptions[ $echoPref ];
+				unset( $modifiedOptions[ $echoPref ] );
 			}
 		}
 	}
@@ -1418,21 +1392,10 @@ class EchoHooks implements RecentChange_saveHook {
 	public static function onUserClearNewTalkNotification( UserIdentity $user ) {
 		if ( $user->isRegistered() ) {
 			$userObj = User::newFromIdentity( $user );
-			DeferredUpdates::addCallableUpdate( function () use ( $userObj ) {
+			DeferredUpdates::addCallableUpdate( static function () use ( $userObj ) {
 				MWEchoNotifUser::newFromUser( $userObj )->clearUserTalkNotifications();
 			} );
 		}
-	}
-
-	/**
-	 * Handler for ParserTestTables hook, makes sure that Echo's tables are present during tests
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ParserTestTables
-	 * @param array &$tables List of DB tables to be used for parser tests
-	 */
-	public static function onParserTestTables( &$tables ) {
-		$tables[] = 'echo_event';
-		$tables[] = 'echo_notification';
-		$tables[] = 'echo_email_batch';
 	}
 
 	/**
@@ -1479,7 +1442,7 @@ class EchoHooks implements RecentChange_saveHook {
 	 */
 	public static function onUserMergeAccountFields( &$updateFields ) {
 		// array( tableName, idField, textField )
-		$dbw = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_MASTER );
+		$dbw = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_PRIMARY );
 		$updateFields[] = [ 'echo_event', 'event_agent_id', 'db' => $dbw ];
 		$updateFields[] = [ 'echo_notification', 'notification_user', 'db' => $dbw, 'options' => [ 'IGNORE' ] ];
 		$updateFields[] = [ 'echo_email_batch', 'eeb_user_id', 'db' => $dbw, 'options' => [ 'IGNORE' ] ];
@@ -1487,11 +1450,11 @@ class EchoHooks implements RecentChange_saveHook {
 
 	public static function onMergeAccountFromTo( User &$oldUser, User &$newUser ) {
 		$method = __METHOD__;
-		DeferredUpdates::addCallableUpdate( function () use ( $oldUser, $newUser, $method ) {
-			if ( !$newUser->isAnon() ) {
+		DeferredUpdates::addCallableUpdate( static function () use ( $oldUser, $newUser, $method ) {
+			if ( $newUser->isRegistered() ) {
 				// Select notifications that are now sent to the same user
-				$dbw = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_MASTER );
-				$attributeManager = EchoAttributeManager::newFromGlobalVars();
+				$dbw = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_PRIMARY );
+				$attributeManager = EchoServices::getInstance()->getAttributeManager();
 				$selfIds = $dbw->selectFieldValues(
 					[ 'echo_notification', 'echo_event' ],
 					'event_id',
@@ -1548,7 +1511,6 @@ class EchoHooks implements RecentChange_saveHook {
 
 				// Delete notifications
 				$ids = array_merge( $selfIds, $welcomeIds, $thankYouIds );
-				// @phan-suppress-next-line PhanImpossibleTypeComparison Each array in the merge may be empty
 				if ( $ids !== [] ) {
 					$dbw->delete(
 						'echo_notification',
@@ -1562,14 +1524,14 @@ class EchoHooks implements RecentChange_saveHook {
 			}
 
 			MWEchoNotifUser::newFromUser( $oldUser )->resetNotificationCount();
-			if ( !$newUser->isAnon() ) {
+			if ( $newUser->isRegistered() ) {
 				MWEchoNotifUser::newFromUser( $newUser )->resetNotificationCount();
 			}
 		} );
 	}
 
 	public static function onUserMergeAccountDeleteTables( &$tables ) {
-		$dbw = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_MASTER );
+		$dbw = MWEchoDbFactory::newFromDefault()->getEchoDb( DB_PRIMARY );
 		$tables['echo_notification'] = [ 'notification_user', 'db' => $dbw ];
 		$tables['echo_email_batch'] = [ 'eeb_user_id', 'db' => $dbw ];
 	}
@@ -1615,7 +1577,7 @@ class EchoHooks implements RecentChange_saveHook {
 		?Content $content,
 		LogEntry $logEntry
 	) {
-		\DeferredUpdates::addCallableUpdate( function () use ( $articleId ) {
+		\DeferredUpdates::addCallableUpdate( static function () use ( $articleId ) {
 			$eventMapper = new EchoEventMapper();
 			$eventIds = $eventMapper->fetchIdsByPage( $articleId );
 			EchoModerationController::moderate( $eventIds, true );
@@ -1624,7 +1586,7 @@ class EchoHooks implements RecentChange_saveHook {
 
 	public static function onArticleUndelete( Title $title, $create, $comment, $oldPageId ) {
 		if ( $create ) {
-			\DeferredUpdates::addCallableUpdate( function () use ( $oldPageId ) {
+			\DeferredUpdates::addCallableUpdate( static function () use ( $oldPageId ) {
 				$eventMapper = new EchoEventMapper();
 				$eventIds = $eventMapper->fetchIdsByPage( $oldPageId );
 				EchoModerationController::moderate( $eventIds, false );
@@ -1635,20 +1597,24 @@ class EchoHooks implements RecentChange_saveHook {
 	/**
 	 * Handler for SpecialMuteModifyFormFields hook
 	 *
-	 * @param SpecialMute $specialMute
+	 * @param UserIdentity|null $target
+	 * @param User $user
 	 * @param array &$fields
 	 */
-	public static function onSpecialMuteModifyFormFields( SpecialMute $specialMute, &$fields ) {
+	public static function onSpecialMuteModifyFormFields( $target, $user, &$fields ) {
 		$echoPerUserBlacklist = MediaWikiServices::getInstance()->getMainConfig()->get( 'EchoPerUserBlacklist' );
 		if ( $echoPerUserBlacklist ) {
-			$target = $specialMute->getTarget();
+			$id = $target ? MediaWikiServices::getInstance()
+				->getCentralIdLookup()
+				->centralIdFromLocalUser( $target ) : 0;
+			$list = MultiUsernameFilter::splitIds( $user->getOption( 'echo-notifications-blacklist' ) );
 			$fields[ 'echo-notifications-blacklist'] = [
 				'type' => 'check',
 				'label-message' => [
 					'echo-specialmute-label-mute-notifications',
 					$target ? $target->getName() : ''
 				],
-				'default' => $specialMute->isTargetBlacklisted( 'echo-notifications-blacklist' ),
+				'default' => in_array( $id, $list, true ),
 			];
 		}
 	}
@@ -1667,6 +1633,7 @@ class EchoHooks implements RecentChange_saveHook {
 		} else {
 			$type = 'watchlist-change';
 		}
+		$user = User::newFromIdentity( $change->getPerformerIdentity() );
 		EchoEvent::create( [
 			'type' => $type,
 			'title' => $change->getTitle(),
@@ -1676,7 +1643,7 @@ class EchoHooks implements RecentChange_saveHook {
 				'status' => $change->mExtra["pageStatus"],
 				'timestamp' => $change->getAttribute( "rc_timestamp" )
 			],
-			'agent' => $change->getPerformer()
+			'agent' => $user
 		] );
 	}
 

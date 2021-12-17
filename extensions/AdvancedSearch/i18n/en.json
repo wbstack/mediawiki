@@ -64,10 +64,14 @@
 	"advancedsearch-filesize-smaller-than-symbol": "<",
 
 	"advancedsearch-sort-relevance": "Relevance",
+	"advancedsearch-sort-last-edit-asc": "Edit date – oldest on top",
 	"advancedsearch-sort-last-edit-desc": "Edit date – current on top",
+	"advancedsearch-sort-create-timestamp-asc": "Creation date – oldest on top",
 	"advancedsearch-sort-create-timestamp-desc": "Creation date – current on top",
 	"advancedsearch-sort-preview-relevance": "relevance",
+	"advancedsearch-sort-preview-last-edit-asc": "least recently edited",
 	"advancedsearch-sort-preview-last-edit-desc": "edit date",
+	"advancedsearch-sort-preview-create-timestamp-asc": "least recently created",
 	"advancedsearch-sort-preview-create-timestamp-desc": "creation date",
 
 	"advancedsearch-namespaces-search-in": "Search in:",
@@ -80,5 +84,5 @@
 
 	"prefs-advancedsearch": "Advanced Search",
 	"advancedsearch-preference-help": "Advanced Search adds a form to the Special:Search page. This allows you to perform specialized searches, even if you don't know any search syntax. It also changes the way namespaces can be selected.",
-	"advancedsearch-preference-disable": "Don’t show the Advanced Search interface"
+	"advancedsearch-preference-disable": "Don’t show the Advanced Search interface when using Special:Search"
 }

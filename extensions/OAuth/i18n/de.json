@@ -2,12 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"ChrisiPK",
+			"Gebu",
 			"Kghbln",
 			"Killarnee",
+			"McDutchie",
 			"Metalhead64",
+			"Robby",
 			"Se4598",
 			"Umherirrender",
-			"Wnme"
+			"Wnme",
+			"Zabe"
 		]
 	},
 	"mwoauth-desc": "Ermöglicht die Nutzung von OAuth 1.0a und OAuth 2.0 zur API-Autorisierung",
@@ -33,6 +37,7 @@
 	"mwoauth-consumer-owner-only-help": "Die Auswahl dieser Option verursacht die automatische Bestätigung und Akzeptierung des Verbrauchers für die Verwendung durch $1. Er wird für andere Benutzer nicht nutzbar sein und der übliche Autorisierungsablauf wird nicht funktionieren. Aufgenommene Aktionen mit diesem Verbraucher werden nicht markiert.",
 	"mwoauth-consumer-description": "Anwendungsbeschreibung:",
 	"mwoauth-consumer-callbackurl": "OAuth-Callback-URL:",
+	"mwoauth-consumer-callbackurl-warning": "(Wildcard-Port)",
 	"mwoauth-consumer-callbackisprefix": "Dem Verbraucher die Angabe eines Callbacks in Anfragen ermöglichen und die obige Callback-URL als ein erforderliches Präfix verwenden.",
 	"mwoauth-consumer-granttypes": "Typen der angefragten Berechtigungen:",
 	"mwoauth-consumer-grantsneeded": "Anwendbare Berechtigungen:",
@@ -165,6 +170,7 @@
 	"mwoauthlistconsumers-status-rejected": "abgelehnt",
 	"mwoauthlistconsumers-status-expired": "abgelaufen",
 	"mwoauthlistconsumers-navigation": "Navigation:",
+	"mwoauthlistconsumers-update-link": "Verbraucher aktualisieren",
 	"mwoauthlistconsumers-grants-link": "Rechte verwalten",
 	"mwoauthlistconsumers-rclink": "Letzte Änderungen durch diese Anwendung",
 	"oauthmanagemygrants": "Verbundene Anwendungen verwalten",
@@ -248,6 +254,7 @@
 	"mwoauth-form-button-approve": "Erlauben",
 	"mwoauth-form-button-cancel": "Abbrechen",
 	"mwoauth-error": "Anwendungsverbindungsfehler",
+	"mwoauth-error-missing-callback-url-non-owner": "callback_url ist für Nicht-Eigentümer-Clients erforderlich",
 	"mwoauth-grants-heading": "Angeforderte Berechtigungen:",
 	"mwoauth-grants-nogrants": "Die Anwendung hat keine Berechtigungen beantragt.",
 	"mwoauth-acceptance-cancelled": "Du hast dich entschieden, dass $1 nicht auf dein Benutzerkonto zugreifen darf. $1 wird nicht laufen, bis du den Zugriff erlaubt hast. Du kannst zu $1 zurückgehen oder deine verbundenen Anwendungen [[Special:OAuthManageMyGrants|verwalten]].",
@@ -298,5 +305,8 @@
 	"notification-oauth-app-disable-primary-link": "Anwendung ansehen",
 	"notification-oauth-app-reenable-primary-link": "Anwendung ansehen",
 	"notification-oauth-app-body": "Grund: $1",
-	"mwoauth-oauth2-granttype-auth-code": "Autorisierungscode"
+	"mwoauth-oauth-version": "OAuth-Protokoll-Version",
+	"mwoauth-oauth2-granttype-auth-code": "Autorisierungscode",
+	"mwoauth-login-required-reason": "Dir musst Iech an Äre(n) {{SITENAME}}-Benotzerkont alogge fir d'Applikatioune z'autoriséieren fir dorop zou ze gräifen.",
+	"mwoauthconsumer-application-view": "Dës Ufro weisen"
 }

@@ -13,7 +13,7 @@ class SplitConflictUtils {
 	 *
 	 * @return string[]
 	 */
-	public static function splitText( string $text ) : array {
+	public static function splitText( string $text ): array {
 		return explode( "\n", str_replace( [ "\r\n", "\r" ], "\n", $text ) );
 	}
 
@@ -22,7 +22,7 @@ class SplitConflictUtils {
 	 *
 	 * @return string
 	 */
-	public static function mergeTextLines( array $textLines ) : string {
+	public static function mergeTextLines( array $textLines ): string {
 		return str_replace( [ "\r\n", "\r" ], "\n", implode( "\r\n", $textLines ) );
 	}
 
@@ -31,7 +31,7 @@ class SplitConflictUtils {
 	 *
 	 * @return string
 	 */
-	public static function addTargetBlankToLinks( string $html ) : string {
+	public static function addTargetBlankToLinks( string $html ): string {
 		return preg_replace( '/<a\b(?![^<>]*\starget=)/', '<a target="_blank"', $html );
 	}
 

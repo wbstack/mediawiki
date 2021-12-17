@@ -27,7 +27,7 @@ class FormChangeOpDeserializer implements ChangeOpDeserializer {
 	/**
 	 * In 'data' when creating 'new' => 'form' through wbeditentity
 	 */
-	const PARAM_LEXEME_ID = 'lexemeId';
+	private const PARAM_LEXEME_ID = 'lexemeId';
 
 	/**
 	 * @var EntityLookup
@@ -119,6 +119,7 @@ class FormChangeOpDeserializer implements ChangeOpDeserializer {
 			return null;
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $lexemeId;
 	}
 

@@ -1,0 +1,29 @@
+{
+	"@metadata": {
+		"authors": [
+			"Olve Utne"
+		]
+	},
+	"advancedsearch-optgroup-text": "Åtså bielletiekstan",
+	"advancedsearch-optgroup-structure": "Struktuvvra",
+	"advancedsearch-optgroup-files": "Fijlajt ja gåvåjt",
+	"advancedsearch-field-inlanguage": "Biele dán gielan",
+	"advancedsearch-placeholder-exact-text": "\"gáhtto gájtsav ähttsá\"",
+	"advancedsearch-inlanguage-default": "Vällji gielav",
+	"advancedsearch-filetype-section-image": "Gåvvåformáhta",
+	"advancedsearch-filetype-section-video": "Videoformáhta",
+	"advancedsearch-filetype-section-audio": "Jiednaformáhta",
+	"advancedsearch-filetype-section-document": "Dokumänntaformáhta",
+	"advancedsearch-filetype-section-other": "Ietjá formáhta",
+	"advancedsearch-filetype-default": "Vällji fijjlasårtåv",
+	"advancedsearch-filetype-bitmap": "Gåvvå",
+	"advancedsearch-filetype-audio": "Jiedna",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Office",
+	"advancedsearch-filesize-equals": "sämmá gu",
+	"advancedsearch-filesize-greater-than": "stuoráp gu",
+	"advancedsearch-filesize-smaller-than": "unnep gu",
+	"advancedsearch-namespaces-search-in": "Åtså dán sinne:",
+	"advancedsearch-namespaces-preset-all": "Gájjka",
+	"advancedsearch-namespaces-preset-discussion": "Ságastallam"
+}

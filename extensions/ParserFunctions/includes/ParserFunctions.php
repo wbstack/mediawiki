@@ -39,7 +39,7 @@ class ParserFunctions {
 		static $done = false;
 		if ( !$done ) {
 			global $wgHooks;
-			$wgHooks['ParserClearState'][] = function () {
+			$wgHooks['ParserClearState'][] = static function () {
 				self::$mTimeChars = 0;
 			};
 			$done = true;
@@ -352,9 +352,11 @@ class ParserFunctions {
 				}
 				$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $title );
 				if ( !$file ) {
+					$parser->getOutput()->addImage(
+						$title->getDBKey(), false, false );
 					return $else;
 				}
-				$parser->mOutput->addImage(
+				$parser->getOutput()->addImage(
 					$file->getName(), $file->getTimestamp(), $file->getSha1() );
 				return $file->exists() ? $then : $else;
 			} elseif ( $title->isSpecialPage() ) {
@@ -375,17 +377,17 @@ class ParserFunctions {
 				$lc = MediaWikiServices::getInstance()->getLinkCache();
 				$id = $lc->getGoodLinkID( $pdbk );
 				if ( $id !== 0 ) {
-					$parser->mOutput->addLink( $title, $id );
+					$parser->getOutput()->addLink( $title, $id );
 					return $then;
 				} elseif ( $lc->isBadLink( $pdbk ) ) {
-					$parser->mOutput->addLink( $title, 0 );
+					$parser->getOutput()->addLink( $title, 0 );
 					return $else;
 				}
 				if ( !$parser->incrementExpensiveFunctionCount() ) {
 					return $else;
 				}
 				$id = $title->getArticleID();
-				$parser->mOutput->addLink( $title, $id );
+				$parser->getOutput()->addLink( $title, $id );
 
 				// bug 70495: don't just check whether the ID != 0
 				if ( $title->exists() ) {
@@ -926,7 +928,7 @@ class ParserFunctions {
 	 * @param Language $language
 	 * @return ILanguageConverter
 	 */
-	private static function getLanguageConverter( Language $language ) : ILanguageConverter {
+	private static function getLanguageConverter( Language $language ): ILanguageConverter {
 		return MediaWikiServices::getInstance()
 			->getLanguageConverterFactory()
 			->getLanguageConverter( $language );

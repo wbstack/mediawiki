@@ -21,7 +21,7 @@
  * @author Tony Thomas <01tonythomas@gmail.com>
  * @license GPL-2.0-or-later
  * @ingroup Extensions
-*/
+ */
 
 class MailgunHooks {
 	/**
@@ -43,29 +43,75 @@ class MailgunHooks {
 		$body
 	) {
 		$conf = RequestContext::getMain()->getConfig();
-		$client = new \Http\Adapter\Guzzle6\Client();
 
 		$mailgunAPIKey = $conf->get( 'MailgunAPIKey' );
 		$mailgunDomain = $conf->get( 'MailgunDomain' );
-		if ( $mailgunAPIKey == "" or $mailgunDomain == "" ) {
+
+		$mailgunEndpoint = "";
+		if ( $conf->has( 'MailgunEndpoint' ) ) {
+			$mailgunEndpoint = $conf->get( 'MailgunEndpoint' );
+		}
+
+		if ( $mailgunAPIKey == "" || $mailgunDomain == "" ) {
 			throw new MWException( "Please update your LocalSettings.php with the correct Mailgun API configurations" );
 		}
 
-		$mailgunTransport = new \Mailgun\Mailgun( $mailgunAPIKey, $client );
-		$message = $mailgunTransport->BatchMessage( $mailgunDomain );
+		$mailgunConfigurator = new \Mailgun\HttpClient\HttpClientConfigurator();
+		$mailgunConfigurator->setApiKey( $mailgunAPIKey );
+
+		if ( !empty( $mailgunEndpoint ) ) {
+			$mailgunConfigurator->setEndpoint( $mailgunEndpoint );
+		}
+
+		$mailgunTransport = new \Mailgun\Mailgun( $mailgunConfigurator );
+
+		return self::sendBatchMessage( $mailgunTransport, $mailgunDomain, $headers, $to, $from, $subject, $body );
+	}
+
+	/**
+	 * Submit a batch message using Mailgun API
+	 *
+	 * @param \Mailgun\Mailgun $mailgunTransport
+	 * @param string $mailgunDomain
+	 * @param array $headers
+	 * @param array $to
+	 * @param MailAddress $from
+	 * @param string $subject
+	 * @param string $body
+	 * @return false|string
+	 * @throws Exception
+	 */
+	public static function sendBatchMessage(
+		\Mailgun\Mailgun $mailgunTransport,
+		$mailgunDomain,
+		array $headers,
+		array $to,
+		MailAddress $from,
+		$subject,
+		$body
+	) {
+		$message = $mailgunTransport->messages()->getBatchMessage( $mailgunDomain );
 
 		$message->setFromAddress( $from );
 		$message->setSubject( $subject );
 		$message->setTextBody( $body );
-		$message->setReplyToAddress( $headers['Return-Path'] );
 
-		$message->addCustomHeader( "X-Mailer", $headers['X-Mailer'] );
-		$message->addCustomHeader( "List-Unsubscribe", $headers['List-Unsubscribe'] );
+		if ( isset( $headers['Return-Path'] ) ) {
+			$message->setReplyToAddress( $headers['Return-Path'] );
+		}
 
-		foreach( $to as $recip ) {
+		if ( isset( $headers['X-Mailer'] ) ) {
+			$message->addCustomHeader( "X-Mailer", $headers['X-Mailer'] );
+		}
+
+		if ( isset( $headers['List-Unsubscribe'] ) ) {
+			$message->addCustomHeader( "List-Unsubscribe", $headers['List-Unsubscribe'] );
+		}
+
+		foreach ( $to as $recip ) {
 			try {
 				$message->addToRecipient( $recip, [] );
-			} catch( Exception $e ) {
+			} catch ( Exception $e ) {
 				return $e->getMessage();
 			}
 		}

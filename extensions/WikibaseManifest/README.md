@@ -3,7 +3,7 @@
 WikibaseManifest is an extension that combines metadata about a Wikibase installation exposing it as a simple API.
 The goal is to help toolmakers write tools that can target any Wikibase.
 
-The manifest will be exposed at an endpoint such as https://www.wikidata.org/w/rest.php/wikibase/manifest/v0/manifest
+The manifest will be exposed at an endpoint such as https://www.wikidata.org/w/rest.php/wikibase-manifest/v0/manifest
 
 More about the format of the manifest and how it came to be can be found [here](/docs/manifest_output_format.md).
 
@@ -37,7 +37,7 @@ $wgWbManifestMaxLag = 7;
 We recommend using `mediawiki-docker-dev` for development.
 
 You can test the development endpoint at:
-http://default.web.mw.localhost:8080/mediawiki/rest.php/wikibase/manifest/v0/manifest
+http://default.web.mw.localhost:8080/mediawiki/rest.php/wikibase-manifest/v0/manifest
 
 **PHP**
 

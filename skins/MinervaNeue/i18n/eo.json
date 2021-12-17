@@ -2,9 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Fitoschido",
+			"Jakub Fabijan",
 			"KuboF",
 			"Lucas",
 			"Mirin",
+			"NMaia",
 			"Robin van der Vliet",
 			"Yekrats",
 			"YvesNevelsteen"
@@ -56,13 +58,16 @@
 	"minerva-page-actions-permalink": "Konstanta ligilo",
 	"minerva-page-actions-backlinks": "Kio enhavas ligilojn ĉi tien",
 	"minerva-page-actions-cite": "Citi paĝon",
+	"minerva-page-actions-delete": "Forigi",
+	"minerva-page-actions-protect": "Protekti",
 	"minerva-page-actions-logs": "Protokoloj",
 	"minerva-page-actions-wikibase": "ero de {{WBREPONAME}}",
 	"minerva-page-actions-language-switcher": "Lingvoj",
+	"minerva-page-actions-history": "Historio",
 	"minerva-skin-desc": "Respondema etoso por poŝaparatoj",
 	"skin-minerva-issue-learn-more": "Ekscii pli",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton": "Kategorioj",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton-description": "Vidi kategoriojn aŭ paĝojn",
+	"skin-minerva-mobile-option-MinervaShowCategories": "Kategorioj",
+	"skin-minerva-mobile-option-MinervaShowCategories-description": "Vidi kategoriojn aŭ paĝojn",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "Pli bona traktado de paĝaj problemoj",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "Paĝaj problemoj (Ŝablono:ambox) estos enkorpigitaj en la artikolon.",
 	"skin-minerva-recentchanges-warning-enhanced-not-supported": "Bedaŭrinde, grupigado de rezultoj laŭ paĝo ne estas havebla je poŝaparata retpaĝo. Se vi volas uzi tiun funkcion, bonvolu uzi la retpaĝon por surtablaj komputiloj."

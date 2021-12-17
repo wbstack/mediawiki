@@ -10,7 +10,7 @@
 	"descriptionmsg": "popups-desc",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.31.0"
+		"MediaWiki": ">= 1.34.0"
 	},
 	"AutoloadNamespaces": {
 		"Popups\\": "includes/"
@@ -22,7 +22,6 @@
 		"BeforePageDisplay": "Popups\\PopupsHooks::onBeforePageDisplay",
 		"ResourceLoaderGetConfigVars": "Popups\\PopupsHooks::onResourceLoaderGetConfigVars",
 		"GetPreferences": "Popups\\PopupsHooks::onGetPreferences",
-		"PreferencesFormPreSave": "Popups\\UserPreferencesChangeHandler::onPreferencesFormPreSave",
 		"UserGetDefaultOptions": "Popups\\PopupsHooks::onUserGetDefaultOptions",
 		"MakeGlobalVariablesScript": "Popups\\PopupsHooks::onMakeGlobalVariablesScript",
 		"LocalUserCreated": "Popups\\PopupsHooks::onLocalUserCreated",
@@ -36,9 +35,8 @@
 	"attributes": {
 		"EventLogging": {
 			"Schemas": {
-				"Popups": 18904225,
-				"ReferencePreviewsPopups": 19489344,
-				"VirtualPageView": 17780078
+				"ReferencePreviewsPopups": "/analytics/legacy/referencepreviewspopups/1.0.0",
+				"VirtualPageView": "/analytics/legacy/virtualpageview/1.0.0"
 			}
 		}
 	},
@@ -63,6 +61,10 @@
 			"description": "@var string: Navigation popups gadget name",
 			"value": "Navigation_popups"
 		},
+		"PopupsConflictingRefTooltipsGadgetName": {
+			"description": "@var string: Name of a gadget that would cause duplicate reference preview popups. Known conflicting gadgets include \"ReferenceTooltips\", \"CiteTooltip\" alias \"RefTooltip\", \"ReferencePopups\", and \"tooltipRef\" (see T274353).",
+			"value": "ReferenceTooltips"
+		},
 		"PopupsGateway": {
 			"description": "Which gateway to use for fetching Popups data. Available options: [mwApiPlain|restbasePlain|restbaseHTML]. Full and always up to date list is available in src/gateway/index.js",
 			"value": "mwApiPlain"
@@ -78,10 +80,6 @@
 		"PopupsReferencePreviewsBetaFeature": {
 			"description": "Make Reference Previews a Beta feature.",
 			"value": true
-		},
-		"PopupsEventLogging": {
-			"description": "Whether we should log events. Note if this is enabled without using that variable events will be logged for all users without any sampling! Be careful!",
-			"value": false
 		},
 		"PopupsStatsvSamplingRate": {
 			"description": "Sampling rate for logging performance data to statsv.",
@@ -109,14 +107,24 @@
 				"Special:MostLinkedFiles",
 				"Special:Book"
 			]
+		},
+		"PopupsTextExtractsIntroOnly": {
+			"description": "Whether we should extract intro text only or full page text. This is only applicable when using PopupsGateway=mwApiPlain.",
+			"value": true
 		}
 	},
 	"ResourceModules": {
+		"ext.popups.icons": {
+			"class": "ResourceLoaderOOUIIconPackModule",
+			"icons": [
+				"infoFilled",
+				"settings"
+			]
+		},
 		"ext.popups.images": {
 			"selector": ".mw-ui-icon-{name}:before",
 			"class": "ResourceLoaderImageModule",
 			"images": {
-				"popups-settings": "resources/ext.popups.images/cog.svg",
 				"popups-close": "resources/ext.popups.images/close.svg",
 				"preview-generic": {
 					"file": {
@@ -179,14 +187,14 @@
 			],
 			"messages": [
 				"popups-settings-title",
-				"popups-settings-option-simple",
-				"popups-settings-option-simple-description",
-				"popups-settings-option-advanced",
-				"popups-settings-option-advanced-description",
-				"popups-settings-option-off",
+				"popups-settings-option-page",
+				"popups-settings-option-page-description",
+				"popups-settings-option-reference",
+				"popups-settings-option-reference-description",
 				"popups-settings-save",
 				"popups-settings-cancel",
 				"popups-settings-enable",
+				"popups-settings-icon-gear-title",
 				"popups-settings-help",
 				"popups-settings-help-ok",
 				"popups-preview-no-preview",
@@ -197,16 +205,19 @@
 				"popups-refpreview-book",
 				"popups-refpreview-journal",
 				"popups-refpreview-news",
+				"popups-refpreview-note",
 				"popups-refpreview-web",
-				"popups-refpreview-jump-to-reference"
+				"popups-refpreview-collapsible-placeholder"
 			],
 			"dependencies": [
+				"ext.popups.icons",
 				"ext.popups.images",
 				"mediawiki.experiments",
 				"mediawiki.jqueryMsg",
 				"mediawiki.storage",
 				"mediawiki.Title",
 				"mediawiki.ui.button",
+				"mediawiki.ui.checkbox",
 				"mediawiki.ui.icon",
 				"mediawiki.Uri",
 				"mediawiki.user",

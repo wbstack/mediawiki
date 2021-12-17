@@ -6,7 +6,7 @@ use MediaWiki\Extensions\OAuth\Backend\ConsumerAcceptance;
 use MediaWiki\Extensions\OAuth\Backend\Utils;
 
 class ConsumerAcceptanceAccessControl extends DAOAccessControl {
-	// accessor fields copied from MWOAuthConsumerAcceptance, except they can return a Message
+	// accessor fields copied from ConsumerAcceptance, except they can return a Message
 	// on access error
 
 	/**
@@ -57,7 +57,7 @@ class ConsumerAcceptanceAccessControl extends DAOAccessControl {
 
 	/**
 	 * Secret key used to derive the access secret for the OAuth protocol.
-	 * The actual access secret will be calculated via MWOAuthUtils::hmacDBSecret() to mitigate
+	 * The actual access secret will be calculated via Utils::hmacDBSecret() to mitigate
 	 * DB leaks.
 	 * Returns a Message when the user does not have permission to see this field.
 	 * @return string|\Message
@@ -91,7 +91,7 @@ class ConsumerAcceptanceAccessControl extends DAOAccessControl {
 	 * @return string|\Message
 	 */
 	public function getWikiName() {
-		return $this->get( 'wiki', function ( $wikiId ) {
+		return $this->get( 'wiki', static function ( $wikiId ) {
 			return Utils::getWikiIdName( $wikiId );
 		} );
 	}
@@ -100,6 +100,7 @@ class ConsumerAcceptanceAccessControl extends DAOAccessControl {
 	 * @return ConsumerAcceptance
 	 */
 	public function getDAO() {
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $this->dao;
 	}
 }

@@ -4,6 +4,7 @@
 			"BaRaN6161 TURK",
 			"Joseph",
 			"Mach",
+			"MuratTheTurkish",
 			"Vito Genovese"
 		]
 	},
@@ -23,15 +24,15 @@
 	"deletebatch-processing-from-form": "formda listelenen sayfaları silme",
 	"deletebatch-omitting-nonexistent": "Mevcut olmayan $1 sayfası atlanıyor.",
 	"deletebatch-omitting-invalid": "Geçersiz olan $1 sayfası atlanıyor.",
-	"deletebatch-file-bad-format": "Dosya düz metin olmalı",
-	"deletebatch-file-missing": "Verilen dosya okunamıyor",
+	"deletebatch-file-bad-format": "Dosya düz metin olmalı.",
+	"deletebatch-file-missing": "Verilen dosya okunamıyor.",
 	"deletebatch-select-script": "Sayfa betiğini sil",
 	"deletebatch-select-yourself": "Siz",
 	"deletebatch-no-page": "Sayfa listesini içeren bir sayfayı silmek ya da seçmek için lütfen en az bir sayfa belirtin.",
 	"deletebatch-system-username": "Betik sayfasını sil",
 	"action-deletebatch": "toplu sayfaları sil",
-	"right-deletebatch": "Sayfaları toplu siler",
+	"right-deletebatch": "Toplu sayfaları sil",
 	"action-deletebatch-spoof": "toplu sayfaları \"Betik sayfasını sil\" olarak sil",
-	"right-deletebatch-spoof": "toplu sayfaları \"Betik sayfasını sil\" olarak sil",
-	"deletebatch-deleting-file-only": "Dosya açıklaması sayfası $1 mevcut değil; sadece gerçek dosyayı silmek\nBu işlem kaydedilmeyecek."
+	"right-deletebatch-spoof": "Toplu sayfaları \"Betik sayfasını sil\" olarak sil",
+	"deletebatch-deleting-file-only": "Dosya açıklaması sayfası $1 mevcut değil; yalnızca gerçek dosyayı silmek\nBu işlem kaydedilmeyecek."
 }

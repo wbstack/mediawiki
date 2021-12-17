@@ -9,6 +9,7 @@ use MediaWiki\Extensions\OAuth\Control\ConsumerAccessControl;
 use MediaWiki\Extensions\OAuth\Control\ConsumerSubmitControl;
 use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthConsumerRegistration;
 use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageConsumers;
+use MediaWiki\MediaWikiServices;
 use SpecialPage;
 
 /**
@@ -28,7 +29,9 @@ class UIHooks {
 			'oaac_consumer_id = oarc_id',
 			'oaac_user_id' => Utils::getCentralIdFromLocalUser( $user ),
 		];
-		if ( !$user->isAllowed( 'mwoauthviewsuppressed' ) ) {
+
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+		if ( !$permissionManager->userHasRight( $user, 'mwoauthviewsuppressed' ) ) {
 			$conds['oarc_deleted'] = 0;
 		}
 		$count = $dbr->selectField(
@@ -136,7 +139,7 @@ class UIHooks {
 
 		foreach ( $grants as $grant => $rights ) {
 			$descs = [];
-			$rights = array_filter( $rights ); // remove ones with 'false'
+			$rights = array_filter( $rights );
 			foreach ( $rights as $permission => $granted ) {
 				$descs[] = $special->msg(
 					'listgrouprights-right-display',
@@ -178,7 +181,8 @@ class UIHooks {
 			} else {
 				$url = \WikiMap::getForeignURL(
 					$wgMWOAuthCentralWiki,
-					'Special:OAuthConsumerRegistration' // Cross-wiki, so don't localize
+					// Cross-wiki, so don't localize
+					'Special:OAuthConsumerRegistration'
 				);
 			}
 			$form->addPreText( $form->msg( 'mwoauth-botpasswords-note', $url )->parseAsBlock() );

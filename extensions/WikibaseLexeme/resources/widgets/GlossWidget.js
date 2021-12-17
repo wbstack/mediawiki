@@ -5,7 +5,9 @@ module.exports = ( function ( require, wb, Vuex ) {
 		RedundantLanguageIndicator = require( './RedundantLanguageIndicator.js' ),
 		InvalidLanguageIndicator = require( './InvalidLanguageIndicator.js' ),
 		LanguageSelectorWrapper = require( './LanguageSelectorWrapper.js' ),
-		focusElement = require( '../focusElement.js' );
+		focusElement = require( '../focusElement.js' ),
+		// languages.json is a dynamic ResourceLoader source file
+		lexemeTermLanguages = require( './languages.json' ).lexemeTermLanguages;
 
 	Vue.use( Vuex );
 
@@ -16,7 +18,7 @@ module.exports = ( function ( require, wb, Vuex ) {
 	}
 
 	function applyGlossWidget( widgetElement, glosses, beforeUpdate, mw, getDirectionality ) {
-		var template = '#gloss-widget-vue-template';
+		var template = mw.template.get( 'wikibase.lexeme.lexemeview', 'glossWidget.vue' ).getSource();
 		var messages = mw.messages;
 
 		return new Vue( newGlossWidget( messages, widgetElement, template, glosses, beforeUpdate, getDirectionality ) );
@@ -33,15 +35,17 @@ module.exports = ( function ( require, wb, Vuex ) {
 	 * @return {Object}
 	 */
 	function newGlossWidget( messages, widgetElement, template, glosses, beforeUpdate, getDirectionality ) {
-		var invalidLanguageIndicator = InvalidLanguageIndicator( 'glosses' );
 		return {
 			el: widgetElement,
 			template: template,
 
-			mixins: [ RedundantLanguageIndicator( 'glosses' ), invalidLanguageIndicator ],
+			mixins: [
+				RedundantLanguageIndicator( 'glosses' ),
+				InvalidLanguageIndicator( 'glosses', lexemeTermLanguages )
+			],
 
 			components: {
-				'language-selector': LanguageSelectorWrapper( new wikibase.WikibaseContentLanguages() )
+				'language-selector': LanguageSelectorWrapper( lexemeTermLanguages )
 			},
 
 			beforeUpdate: beforeUpdate,
@@ -60,7 +64,6 @@ module.exports = ( function ( require, wb, Vuex ) {
 					this.glosses.splice( index, 1 );
 				},
 				edit: function () {
-					invalidLanguageIndicator.methods.getValidLanguagesPromise();
 					this.inEditMode = true;
 					if ( this.glosses.length === 0 ) {
 						this.add();

@@ -32,13 +32,13 @@ class RequestLogger {
 	/**
 	 * @const int max number of results to store in cirrussearch-request logs (per request)
 	 */
-	const LOG_MAX_RESULTS = 50;
+	private const LOG_MAX_RESULTS = 50;
 
 	// If a title hit was given to the user, but the hit was not
 	// obtained via ElasticSearch, we won't really know where it came from.
 	// We still want to log the fact that the request set generated a hit
 	// for this title.  When this happens, the hit index field value will be this.
-	const UNKNOWN_HIT_INDEX = '_UNKNOWN_';
+	private const UNKNOWN_HIT_INDEX = '_UNKNOWN_';
 
 	/**
 	 * @var RequestLog[] Set of requests made
@@ -221,14 +221,14 @@ class RequestLogger {
 				Util::setIfDefined(
 					$requestContext, 'index', $requestEntry, 'indices',
 					// Use list for search indices, not csv string.
-					function ( $v ) {
+					static function ( $v ) {
 						return explode( ',', $v );
 					}
 				);
 				Util::setIfDefined(
 					$requestContext, 'namespaces', $requestEntry, 'namespaces',
 					// Make sure namespace values are all integers.
-					function ( $v ) {
+					static function ( $v ) {
 						if ( empty( $v ) ) {
 							return $v;
 						} else {
@@ -355,9 +355,16 @@ class RequestLogger {
 		if ( !empty( $elasticSearchRequests ) ) {
 			$requestEvent['elasticsearch_requests'] = $elasticSearchRequests;
 		}
-		$activeTestNames = UserTesting::getInstance()->getActiveTestNamesWithBucket();
-		if ( !empty( $activeTestNames ) ) {
-			$requestEvent['backend_user_tests'] = $activeTestNames;
+		// Should always be true, but don't accidently instantiate user testing if somehow
+		// it wasn't done previously.
+		if ( UserTestingStatus::hasInstance() ) {
+			$ut = UserTestingStatus::getInstance();
+			if ( $ut->isActive() ) {
+				// Wrap into an array. UserTesting does not support multiple
+				// concurrent tests in one request, but the schema was written
+				// when that was a possibility.
+				$requestEvent['backend_user_tests'] = [ $ut->getTrigger() ];
+			}
 		}
 
 		// If in webrequests, log these request headers in http.headers.

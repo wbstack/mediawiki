@@ -9,6 +9,7 @@ namespace Kartographer\Projection;
  * Converted to PHP from L.Transformation (leaflet.js)
  */
 class Transformation {
+
 	// @fixme: cleanup
 	private const A = 0.159154943; // 0.5 * pi()
 	private const C = -0.159154943; // -0.5 * pi()
@@ -20,7 +21,7 @@ class Transformation {
 	 * @param int $scale
 	 * @return float[]
 	 */
-	public static function transform( $point, $scale = 1 ) {
+	public static function transform( $point, $scale ) {
 		$x = $point[0];
 		$y = $point[1];
 
@@ -36,7 +37,7 @@ class Transformation {
 	 *
 	 * @return float[]
 	 */
-	public static function untransform( $point, $scale = 1 ) {
+	public static function untransform( $point, $scale ) {
 		$x = $point[0];
 		$y = $point[1];
 

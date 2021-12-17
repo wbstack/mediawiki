@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+
 class CodeMirrorHooks {
 
 	/**
@@ -45,6 +47,27 @@ class CodeMirrorHooks {
 	}
 
 	/**
+	 * Hook handler for enabling bracket matching.
+	 *
+	 * TODO: restrict to pages where codemirror might be enabled.
+	 *
+	 * @param array &$vars Array of variables to be added into the output of the startup module
+	 */
+	public static function onResourceLoaderGetConfigVars( array &$vars ) {
+		/** @var Config $config */
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+
+		$vars['wgCodeMirrorEnableBracketMatching'] = $config->get( 'CodeMirrorEnableBracketMatching' )
+			// Allows tests to override the configuration.
+			|| RequestContext::getMain()->getRequest()
+				->getCookie( '-codemirror-bracket-matching-test', 'mw' );
+
+		$vars['wgCodeMirrorAccessibilityColors'] = $config->get( 'CodeMirrorAccessibilityColors' );
+
+		$vars['wgCodeMirrorLineNumberingNamespaces'] = $config->get( 'CodeMirrorLineNumberingNamespaces' );
+	}
+
+	/**
 	 * GetPreferences hook handler
 	 *
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/GetPreferences
@@ -53,11 +76,10 @@ class CodeMirrorHooks {
 	 * @param array &$defaultPreferences
 	 */
 	public static function onGetPreferences( User $user, array &$defaultPreferences ) {
-		// CodeMirror is enabled by default for users. It can
-		// be changed by adding '$wgDefaultUserOptions['usecodemirror'] = 0;' into LocalSettings.php
+		// CodeMirror is disabled by default for all users. It can enabled for everyone
+		// by default by adding '$wgDefaultUserOptions['usecodemirror'] = 1;' into LocalSettings.php
 		$defaultPreferences['usecodemirror'] = [
 			'type' => 'api',
-			'default' => '1',
 		];
 	}
 

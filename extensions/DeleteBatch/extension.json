@@ -9,6 +9,9 @@
 	"descriptionmsg": "deletebatch-desc",
 	"namemsg": "deletebatch-extensionname",
 	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.37.0"
+	},
 	"type": "specialpage",
 	"ReservedUsernames": [
 		"msg:deletebatch-system-username"

@@ -9,14 +9,18 @@ require_once "$IP/maintenance/Maintenance.php";
  * Purges all pages that use <maplink> or <mapframe>, using the tracking category.
  */
 class PurgeMapPages extends Maintenance {
+
 	public function __construct() {
 		parent::__construct();
 		$this->addDescription( 'Purge all pages that use <maplink> or <mapframe>.' );
-		$this->addOption( 'dry-run', 'Only print page names, do not purge them', false, false );
+		$this->addOption( 'dry-run', 'Only print page names, do not purge them' );
 		$this->setBatchSize( 100 );
 		$this->requireExtension( 'Kartographer' );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function execute() {
 		$categoryMessage = wfMessage( 'kartographer-tracking-category' );
 		if ( $categoryMessage->isDisabled() ) {
@@ -34,6 +38,7 @@ class PurgeMapPages extends Maintenance {
 		$iterator->addConditions( [ 'cl_to' => $categoryTitle->getDBkey() ] );
 		$iterator->addJoinConditions( [ 'page' => [ 'INNER JOIN', [ 'page_id=cl_from' ] ] ] );
 		$iterator->setFetchColumns( [ 'page_id', 'page_namespace', 'page_title' ] );
+		$iterator->setCaller( __METHOD__ );
 
 		$pages = 0;
 		$failures = 0;

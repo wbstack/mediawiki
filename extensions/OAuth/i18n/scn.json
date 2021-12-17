@@ -1,9 +1,21 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ajeje Brazorf",
 			"Sarvaturi"
 		]
 	},
+	"mwoauth-consumer-reason": "Mutivu:",
+	"mwoauthconsumerregistration-main": "Principali",
+	"mwoauthconsumerregistration-description": "Discrizzioni",
+	"mwoauthconsumerregistration-stage": "Statu",
+	"mwoauthmanageconsumers-main": "Principali",
+	"mwoauthmanageconsumers-description": "Discrizzioni",
+	"mwoauthmanageconsumers-reason": "Mutivu:",
 	"oauthlistconsumers": "Elencu di l'applicazzioni OAuth",
-	"oauthmanagemygrants": "Gistioni di l'applicazzioni cunnessi"
+	"mwoauthlistconsumers-description": "Discrizzioni",
+	"mwoauthlistconsumers-status": "Statu",
+	"oauthmanagemygrants": "Gistioni di l'applicazzioni cunnessi",
+	"mwoauthmanagemygrants-description": "Discrizzioni",
+	"notification-oauth-app-body": "Mutivu: $1"
 }

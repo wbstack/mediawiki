@@ -12,7 +12,6 @@ use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
 use Wikibase\Lexeme\MediaWiki\Api\Error\ParameterIsNotLexemeId;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpDeserializer;
-use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\ChangeOp\Deserialization\ChangeOpDeserializationException;
 use Wikibase\Repo\ChangeOp\NullChangeOp;
 
@@ -28,7 +27,7 @@ class SenseChangeOpDeserializer implements ChangeOpDeserializer {
 	/**
 	 * In 'data' when creating 'new' => 'sense' through wbeditentity
 	 */
-	const PARAM_LEXEME_ID = 'lexemeId';
+	private const PARAM_LEXEME_ID = 'lexemeId';
 
 	/**
 	 * @var EntityLookup
@@ -96,10 +95,7 @@ class SenseChangeOpDeserializer implements ChangeOpDeserializer {
 				return new NullChangeOp();
 			}
 			// TODO Use ChangeOp that sets summary
-			return new ChangeOps( [
-				new AddSenseToLexemeChangeOp( $lexeme ),
-				$editSenseChangeOp
-			] );
+			return new AddSenseToLexemeChangeOp( $lexeme, $editSenseChangeOp );
 		}
 
 		return $editSenseChangeOp;
@@ -120,6 +116,7 @@ class SenseChangeOpDeserializer implements ChangeOpDeserializer {
 			return null;
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $lexemeId;
 	}
 

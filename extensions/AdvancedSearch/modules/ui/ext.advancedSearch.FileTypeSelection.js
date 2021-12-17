@@ -13,7 +13,7 @@
 
 	/**
 	 * @class
-	 * @extends {OO.ui.DropdownInputWidget}
+	 * @extends OO.ui.DropdownInputWidget
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store

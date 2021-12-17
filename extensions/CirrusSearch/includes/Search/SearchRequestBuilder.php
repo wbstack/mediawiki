@@ -3,6 +3,7 @@
 namespace CirrusSearch\Search;
 
 use CirrusSearch\Connection;
+use CirrusSearch\Util;
 use Elastica\Query;
 use Elastica\Type;
 use MediaWiki\Logger\LoggerFactory;
@@ -20,10 +21,10 @@ class SearchRequestBuilder {
 	/** @var string */
 	private $indexBaseName;
 
-	/** @var  int */
+	/** @var int */
 	private $offset = 0;
 
-	/** @var  int */
+	/** @var int */
 	private $limit = 20;
 
 	/** @var string search timeout, string with time and unit, e.g. 20s for 20 seconds */
@@ -129,10 +130,13 @@ class SearchRequestBuilder {
 				$query->setSort( [ '_doc' ] );
 				break;
 			case 'random':
-				if ( $this->offset !== 0 ) {
+				$randomSeed = $this->searchContext->getSearchQuery()->getRandomSeed();
+				if ( $randomSeed === null && $this->offset !== 0 ) {
 					$this->searchContext->addWarning( 'cirrussearch-offset-not-allowed-with-random-sort' );
 					$this->offset = 0;
 				}
+				// Can't use an empty array, it would JSONify to [] instead of {}.
+				$scoreParams = ( $randomSeed === null ) ? (object)[] : [ 'seed' => $randomSeed, 'field' => '_seq_no' ];
 				// Instead of setting a sort field wrap the whole query in a
 				// bool filter and add a must clause for the random score. This
 				// could alternatively be a rescore over a limited document
@@ -142,9 +146,21 @@ class SearchRequestBuilder {
 					->addFilter( $mainQuery )
 					->addMust( ( new Query\FunctionScore() )
 						->setQuery( new Query\MatchAll() )
-						/** @phan-suppress-next-line PhanTypeMismatchArgument empty array isn't jsonified to {} properly */
-						->addFunction( 'random_score', (object)[] ) ) );
+						->addFunction( 'random_score', $scoreParams ) ) );
+
 				break;
+			case 'user_random':
+				// Randomly ordered, but consistent for a single user
+				$query->setQuery( ( new Query\BoolQuery() )
+					->addFilter( $mainQuery )
+					->addMust( ( new Query\FunctionScore() )
+						->setQuery( new Query\MatchAll() )
+						->addFunction( 'random_score', [
+							'seed' => Util::generateIdentToken(),
+							'field' => '_seq_no',
+						] ) ) );
+				break;
+
 			default:
 				// Same as just_match. No user warning since an invalid sort
 				// getting this far as a bug in the calling code which should

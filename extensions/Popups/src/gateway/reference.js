@@ -21,40 +21,32 @@ export default function createReferenceGateway() {
 	}
 
 	/**
-	 * This extracts the type (e.g. "web") from one or more <cite> elements class name lists, as
-	 * long as these don't conflict. A "citation" class is always ignored. <cite> elements without
-	 * another class (other than "citation") are ignored as well.
-	 *
-	 * Note this might return multiple types, e.g. <cite class="web citation paywalled"> will be
-	 * returned as "web paywalled". Validation must be done in the code consuming this.
-	 *
-	 * This duplicates the strict type detection from
-	 *
-	 * @see https://phabricator.wikimedia.org/diffusion/GMOA/browse/master/lib/transformations/references/structureReferenceListContent.js$93
+	 * Attempts to find a single reference type identifier, limited to a list of known types.
+	 * - When a `class="…"` attribute mentions multiple known types, the last one is used, following
+	 *   CSS semantics.
+	 * - When there are multiple <cite> tags, the first with a known type is used.
 	 *
 	 * @param {JQuery} $referenceText
 	 * @return {string|null}
 	 */
 	function scrapeReferenceType( $referenceText ) {
+		const KNOWN_TYPES = [ 'book', 'journal', 'news', 'note', 'web' ];
 		let type = null;
-
-		$referenceText.find( 'cite[class]' ).each( function ( index, el ) {
-			const nextType = el.className.replace( /\bcitation\b\s*/g, '' ).trim();
-
-			if ( !type ) {
-				type = nextType;
-			} else if ( nextType && nextType !== type ) {
-				type = null;
-				return false;
+		$referenceText.find( 'cite[class]' ).each( ( index, element ) => {
+			const classNames = element.className.split( /\s+/ );
+			for ( let i = classNames.length; i--; ) {
+				if ( KNOWN_TYPES.indexOf( classNames[ i ] ) !== -1 ) {
+					type = classNames[ i ];
+					return false;
+				}
 			}
 		} );
-
 		return type;
 	}
 
 	/**
 	 * @param {mw.Title} title
-	 * @param {Element} el
+	 * @param {HTMLAnchorElement} el
 	 * @return {AbortPromise<ReferencePreviewModel>}
 	 */
 	function fetchPreviewForTitle( title, el ) {
@@ -62,9 +54,12 @@ export default function createReferenceGateway() {
 		const id = title.getFragment().replace( / /g, '_' ),
 			$referenceText = scrapeReferenceText( id );
 
-		if ( !$referenceText.length ) {
+		if ( !$referenceText.length ||
+			// Skip references that don't contain anything but whitespace, e.g. a single &nbsp;
+			( !$referenceText.text().trim() && !$referenceText.children().length )
+		) {
 			return $.Deferred().reject(
-				'Footnote not found',
+				'Footnote not found or empty',
 				// Required to set `showNullPreview` to false and not open an error popup
 				{ textStatus: 'abort', xhr: { readyState: 0 } }
 			).promise( { abort() {} } );
@@ -75,7 +70,8 @@ export default function createReferenceGateway() {
 			extract: $referenceText.html(),
 			type: previewTypes.TYPE_REFERENCE,
 			referenceType: scrapeReferenceType( $referenceText ),
-			sourceElementId: el && el.parentNode && el.parentNode.id
+			// Note: Even the top-most HTMLHtmlElement is guaranteed to have a parent.
+			sourceElementId: el.parentNode.id
 		};
 
 		return $.Deferred().resolve( model ).promise( { abort() {} } );

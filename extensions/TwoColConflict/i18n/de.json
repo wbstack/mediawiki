@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Johanna Strodt (WMDE)",
+			"Kghbln",
 			"McDutchie",
 			"Metalhead64",
 			"TMg",
@@ -20,11 +21,13 @@
 	"twocolconflict-copy-tooltip": "Kopiere den vollständigen Wikitext deiner Version in die Zwischenablage (unten vorgenommene Änderungen sind nicht enthalten)",
 	"twocolconflict-core-ui-hint": "Eine aktualisierte Schnittstelle zur Lösung von Bearbeitungskonflikten ist jetzt verfügbar. Aktiviere die abschnittsbasierte Oberfläche zum Bearbeiten von Konflikten in deinen [[Special:Preferences#mw-prefsection-editing|Benutzereinstellungen]], um sie auszuprobieren.",
 	"twocolconflict-core-ui-hint-close": "Nie wieder anzeigen",
-	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Absatzbasierte Bearbeitungskonflikt-Oberfläche]] aktivieren, um Bearbeitungskonflikte zu lösen",
+	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Spezialoberfläche bei Bearbeitungskonflikten]] aktivieren, um Bearbeitungskonflikte abschnittsweise lösen zu können",
 	"twocolconflict-special-footer-hint": "Schließe die aktuelle Seite, um zur Schnittstelle zum Bearbeiten von Konflikten zurückzukehren.",
 	"twocolconflict-special-header-overview": "Während du bearbeitest, hat ein anderer Benutzer dieselbe Seite bearbeitet und vor dir veröffentlicht. Eine reine Ansichtskopie deiner Version wird unten aufbewahrt. Alle Änderungen, die in der Konfliktbearbeitungsoberfläche vorgenommen wurden, werden nicht wiedergegeben. Kehre zur vorherigen Registerkarte zurück, um Änderungen zusammenzuführen und das Problem mit Hilfe der Konfliktbearbeitungsoberfläche zu lösen.",
 	"twocolconflict-special-not-saved": "Nicht veröffentlicht",
 	"twocolconflict-special-textarea-hint": "Du kannst dein Quelltext deiner Version einsehen und kopieren:",
+	"twocolconflict-special-malformed-title": "Fehlender oder ungültiger Titel.",
+	"twocolconflict-special-expired": "Hier gibt es nichts zu sehen. Das bedeutet wahrscheinlich, dass du schon einmal in einen Bearbeitungskonflikt geraten sind, aber das ist schon eine Weile her, und dein zwischengespeicherter Text ist inzwischen abgelaufen.",
 	"twocolconflict-split-header-hint": "Du kannst mithelfen, diese Funktion zu verbessern, wenn du dein Feedback [//de.wikipedia.org/wiki/Wikipedia_Diskussion:Technische_Wünsche/Topwünsche/Bearbeitungskonflikte auf diese Seite] schreibst.",
 	"twocolconflict-split-header-hint-beta": "Vielen Dank für die Benutzung dieser Betafunktion. Du kannst weiterhin bei ihrer Verbesserung helfen, indem du [//de.wikipedia.org/wiki/Wikipedia_Diskussion:Technische_Wünsche/Topwünsche/Bearbeitungskonflikte auf dieser Seite] deine Rückmeldung hinterlässt.",
 	"twocolconflict-split-header-overview": "Während du bearbeitest, hat ein anderer Benutzer dieselbe Seite bearbeitet und vor deiner veröffentlicht. Bitte überprüfe beide Versionen und führe sie zusammen. Nur der Text in den ausgewählten Feldern wird gespeichert, wenn du auf \"{{int:publishchanges}}\" klickst.",
@@ -67,10 +70,10 @@
 	"twocolconflict-split-tour-dialog-message-single-column-view": "Leider hat jemand anderes zur gleichen Zeit wie du gepostet. Lies dir bitte die Kommentare auf der nächsten Seite durch. Falls nötig, kannst du deine Bearbeitungen und die endgültige Reihenfolge ändern.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Problem lösen",
 	"twocolconflict-talk-header-overview": "Jemand anderes hat zur gleichen Zeit wie du gepostet. Bitte überprüfe die untenstehenden Kommentare und wähle die Reihenfolge, in der sie veröffentlicht werden sollen. Falls nötig, kannst du deinen Text bearbeiten.",
-	"twocolconflict-talk-your": "Dein Eintrag",
-	"twocolconflict-talk-conflicting": "Kollidierender Eintrag",
+	"twocolconflict-talk-your": "Dein Kommentar",
+	"twocolconflict-talk-conflicting": "Kollidierender Kommentar",
 	"twocolconflict-talk-switch-tooltip": "Reihenfolge wechseln",
-	"twocolconflict-talk-reorder-prompt": "Positioniere deinen Eintrag in Bezug auf den sich widersprechenden Eintrag:",
+	"twocolconflict-talk-reorder-prompt": "Positioniere deinen Kommentar in Bezug auf den sich widersprechenden Kommentar:",
 	"twocolconflict-talk-same-order": "Dahinter halten",
 	"twocolconflict-talk-reverse-order": "Nach davor verschieben"
 }

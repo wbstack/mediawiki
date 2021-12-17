@@ -31,6 +31,7 @@ require_once "$IP/maintenance/Maintenance.php";
 require_once __DIR__ . '/../includes/Maintenance/Maintenance.php';
 
 class IndexNamespaces extends Maintenance {
+
 	public function execute() {
 		$store = $this->maybeCreateMetastore()->namespaceStore();
 		$this->outputIndented( "Indexing namespaces..." );

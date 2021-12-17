@@ -20,7 +20,7 @@ use Elastica\Query\AbstractQuery;
  * Selects only files of these specified features.
  */
 class FileTypeFeature extends SimpleKeywordFeature implements FilterQueryFeature {
-	const MAX_CONDITIONS = 20;
+	public const MAX_CONDITIONS = 20;
 
 	/** @var string[] Map of aliases from user provided term to term to search for */
 	private $aliases;
@@ -106,12 +106,12 @@ class FileTypeFeature extends SimpleKeywordFeature implements FilterQueryFeature
 
 	/**
 	 * @param string[] $types
-	 * @return Query\BoolQuery|Query\Match|null
+	 * @return Query\BoolQuery|Query\MatchQuery|null
 	 */
 	protected function matchFileType( $types ) {
 		$queries = [];
 		foreach ( $types as $type ) {
-			$queries[] = new Query\Match( 'file_media_type', [ 'query' => $type ] );
+			$queries[] = new Query\MatchQuery( 'file_media_type', [ 'query' => $type ] );
 		}
 
 		return Filters::booleanOr( $queries, false );

@@ -9,13 +9,19 @@ mw.echo.config.maxPrioritizedActions = 2;
  */
 function initDesktop() {
 	'use strict';
+	var uri;
 
 	// Remove ?markasread=XYZ from the URL
-	var uri = new mw.Uri();
-	if ( uri.query.markasread !== undefined ) {
-		delete uri.query.markasread;
-		delete uri.query.markasreadwiki;
-		window.history.replaceState( null, document.title, uri );
+	try {
+		uri = new mw.Uri();
+		if ( uri.query.markasread !== undefined ) {
+			delete uri.query.markasread;
+			delete uri.query.markasreadwiki;
+			window.history.replaceState( null, document.title, uri );
+		}
+	} catch ( e ) {
+		// Catch problems when the URI is malformed (T261799)
+		// e.g. #/media/Fitxer:Campbells_Soup_Cans_MOMA_reduced_80%.jpg
 	}
 
 	// Activate ooui
@@ -163,9 +169,7 @@ function initDesktop() {
 
 				alertModelManager.on( 'allTalkRead', function () {
 					// If there was a talk page notification, get rid of it
-					$( '#pt-mytalk a' )
-						.removeClass( 'mw-echo-alert' )
-						.text( mw.msg( 'mytalk' ) );
+					$( '#pt-talk-alert' ).remove();
 				} );
 
 				// listen to event countChange and change title only if polling rate is non-zero
@@ -259,7 +263,7 @@ function initDesktop() {
 				if ( hasUnseenAlerts || hasUnseenMessages ) {
 					// Clicked on the flyout due to having unread notifications
 					// This is part of tracking how likely users are to click a badge with unseen notifications.
-					// The other part is the 'echo.unseen' counter, see EchoHooks::onPersonalUrls().
+					// The other part is the 'echo.unseen' counter, see EchoHooks::onSkinTemplateNavigationUniversal().
 					mw.track( 'counter.MediaWiki.echo.unseen.click' );
 				}
 			}, function () {

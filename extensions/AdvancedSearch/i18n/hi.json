@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Abijeet Patro",
 			"Bhatakati aatma",
 			"Rajatkatiyar10",
 			"Sachinkatiyar",
@@ -19,6 +20,7 @@
 	"advancedsearch-filetype-office": "कार्यालय",
 	"advancedsearch-namespaces-remember": "चुनाव को भविष्य की खोजों के लिए याद रखें",
 	"advancedsearch-namespaces-preset-all": "सभी",
+	"advancedsearch-namespaces-preset-default": "डिफ़ॉल्ट",
 	"advancedsearch-namespaces-preset-general-help": "सामान्य मदद",
 	"advancedsearch-namespaces-preset-discussion": "चर्चा",
 	"advancedsearch-namespaces-placeholder": "नामस्थान जोड़ें"

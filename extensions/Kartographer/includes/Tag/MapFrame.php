@@ -10,12 +10,33 @@ use Kartographer\SpecialMap;
  * The <mapframe> tag inserts a map into wiki page
  */
 class MapFrame extends TagHandler {
+
+	private const ALIGN_CLASSES = [
+		'left' => 'floatleft',
+		'center' => 'center',
+		'right' => 'floatright',
+		'none' => '',
+	];
+	private const THUMB_ALIGN_CLASSES = [
+		'left' => 'tleft',
+		'center' => 'tnone center',
+		'right' => 'tright',
+		'none' => 'tnone',
+	];
+
+	/** @inheritDoc */
 	protected $tag = 'mapframe';
 
+	/** @var int|string either a number of pixels, a percentage (e.g. "100%"), or "full" */
 	private $width;
+	/** @var int */
 	private $height;
+	/** @var string One of "left", "center", "right", or "none" */
 	private $align;
 
+	/**
+	 * @inheritDoc
+	 */
 	protected function parseArgs() {
 		parent::parseArgs();
 		$this->state->useMapframe();
@@ -35,20 +56,6 @@ class MapFrame extends TagHandler {
 			$wgServerName,
 			$wgKartographerSrcsetScales,
 			$wgKartographerStaticMapframe;
-
-		$alignClasses = [
-			'left' => 'floatleft',
-			'center' => 'center',
-			'right' => 'floatright',
-			'none' => '',
-		];
-
-		$thumbAlignClasses = [
-			'left' => 'tleft',
-			'center' => 'tnone center',
-			'right' => 'tright',
-			'none' => 'tnone',
-		];
 
 		$caption = $this->getText( 'text', null );
 		$framed = $caption !== null || $this->getText( 'frameless', null ) === null;
@@ -169,11 +176,11 @@ class MapFrame extends TagHandler {
 		}
 
 		if ( !$framed ) {
-			$attrs[ 'class' ] .= " {$containerClass} {$alignClasses[$this->align]}";
+			$attrs['class'] .= ' ' . $containerClass . ' ' . self::ALIGN_CLASSES[$this->align];
 			return Html::rawElement( 'a', $attrs, Html::rawElement( 'img', $imgAttrs ) );
 		}
 
-		$containerClass .= " thumb {$thumbAlignClasses[$this->align]}";
+		$containerClass .= ' thumb ' . self::THUMB_ALIGN_CLASSES[$this->align];
 
 		$captionFrame = Html::rawElement( 'div', [ 'class' => 'thumbcaption' ],
 			$caption ? $this->parser->recursiveTagParse( $caption ) : '' );

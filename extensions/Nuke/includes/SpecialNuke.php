@@ -1,6 +1,21 @@
 <?php
 
+namespace MediaWiki\Extension\Nuke;
+
+use DeletePageJob;
+use FileDeleteForm;
+use Html;
+use HTMLForm;
+use ListToggle;
+use MediaWiki\Extension\Nuke\Hooks\NukeHookRunner;
 use MediaWiki\MediaWikiServices;
+use PermissionsError;
+use SpecialPage;
+use Title;
+use User;
+use UserBlockedError;
+use UserNamePrefixSearch;
+use Xml;
 
 class SpecialNuke extends SpecialPage {
 
@@ -27,8 +42,14 @@ class SpecialNuke extends SpecialPage {
 		$this->addHelpLink( 'Help:Extension:Nuke' );
 
 		$currentUser = $this->getUser();
-		if ( $currentUser->isBlocked() ) {
-			$block = $currentUser->getBlock();
+		$block = $currentUser->getBlock();
+
+		// appliesToRight is presently a no-op, since there is no handling for `delete`,
+		// and so will return `null`. `true` will be returned if the block actively
+		// applies to `delete`, and both `null` and `true` should result in an error
+		if ( $block && ( $block->isSitewide() ||
+			( $block->appliesToRight( 'delete' ) !== false ) )
+		) {
 			throw new UserBlockedError( $block );
 		}
 
@@ -259,22 +280,10 @@ class SpecialNuke extends SpecialPage {
 
 		$where = [ "(rc_new = 1) OR (rc_log_type = 'upload' AND rc_log_action = 'upload')" ];
 
-		if ( class_exists( ActorMigration::class ) ) {
-			if ( $username === '' ) {
-				$actorQuery = ActorMigration::newMigration()->getJoin( 'rc_user' );
-				$what['rc_user_text'] = $actorQuery['fields']['rc_user_text'];
-			} else {
-				$actorQuery = ActorMigration::newMigration()
-					->getWhere( $dbr, 'rc_user', User::newFromName( $username, false ) );
-				$where[] = $actorQuery['conds'];
-			}
+		if ( $username === '' ) {
+			$what['rc_user_text'] = 'actor_name';
 		} else {
-			$actorQuery = [ 'tables' => [], 'joins' => [] ];
-			if ( $username === '' ) {
-				$what[] = 'rc_user_text';
-			} else {
-				$where['rc_user_text'] = $username;
-			}
+			$where['actor_name'] = $username;
 		}
 
 		if ( $namespace !== null ) {
@@ -290,7 +299,7 @@ class SpecialNuke extends SpecialPage {
 		$group = implode( ', ', $what );
 
 		$result = $dbr->select(
-			[ 'recentchanges' ] + $actorQuery['tables'],
+			[ 'recentchanges', 'actor' ],
 			$what,
 			$where,
 			__METHOD__,
@@ -299,7 +308,7 @@ class SpecialNuke extends SpecialPage {
 				'GROUP BY' => $group,
 				'LIMIT' => $limit
 			],
-			$actorQuery['joins']
+			[ 'actor' => [ 'JOIN', 'actor_id=rc_actor' ] ]
 		);
 
 		$pages = [];
@@ -334,6 +343,8 @@ class SpecialNuke extends SpecialPage {
 	 */
 	protected function doDelete( array $pages, $reason ) {
 		$res = [];
+		$jobs = [];
+		$user = $this->getUser();
 
 		$services = MediaWikiServices::getInstance();
 		$localRepo = $services->getRepoGroup()->getLocalRepo();
@@ -351,14 +362,13 @@ class SpecialNuke extends SpecialPage {
 				continue;
 			}
 
-			$user = $this->getUser();
-			$file = $title->getNamespace() === NS_FILE ? $localRepo->newFile( $title ) : false;
 			$permission_errors = $permissionManager->getPermissionErrors( 'delete', $user, $title );
 
 			if ( $permission_errors !== [] ) {
 				throw new PermissionsError( 'delete', $permission_errors );
 			}
 
+			$file = $title->getNamespace() === NS_FILE ? $localRepo->newFile( $title ) : false;
 			if ( $file ) {
 				$oldimage = null; // Must be passed by reference
 				$status = FileDeleteForm::doDelete(
@@ -370,19 +380,38 @@ class SpecialNuke extends SpecialPage {
 					$user
 				);
 			} else {
-				$status = WikiPage::factory( $title )
-					->doDeleteArticleReal( $reason, $user );
+				$job = new DeletePageJob( [
+					'namespace' => $title->getNamespace(),
+					'title' => $title->getDBKey(),
+					'reason' => $reason,
+					'userId' => $user->getId(),
+					'wikiPageId' => $title->getId(),
+					'suppress' => false,
+					'tags' => '[]',
+					'logsubtype' => 'delete',
+				] );
+				$jobs[] = $job;
+				$status = 'job';
 			}
 
-			if ( $status->isOK() ) {
+			if ( $status == 'job' ) {
+				$res[] = $this->msg( 'nuke-deletion-queued', $title->getPrefixedText() )->parse();
+			} elseif ( $status->isOK() ) {
 				$res[] = $this->msg( 'nuke-deleted', $title->getPrefixedText() )->parse();
 			} else {
 				$res[] = $this->msg( 'nuke-not-deleted', $title->getPrefixedText() )->parse();
 			}
 		}
 
-		$this->getOutput()->addHTML( "<ul>\n<li>" . implode( "</li>\n<li>", $res ) .
-			"</li>\n</ul>\n" );
+		if ( $jobs ) {
+			MediaWikiServices::getInstance()->getJobQueueGroup()->push( $jobs );
+		}
+
+		$this->getOutput()->addHTML(
+			"<ul>\n<li>" .
+			implode( "</li>\n<li>", $res ) .
+			"</li>\n</ul>\n"
+		);
 		$this->getOutput()->addWikiMsg( 'nuke-delete-more' );
 	}
 

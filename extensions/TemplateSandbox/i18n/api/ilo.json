@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lam-ang"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Pasakbay ti pagipadasan ti plantilia, ka iti [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Waswasen ti panid iti panagusar ti <var>$1templatesandboxtext</var> a mangsukat kadagiti linaon iti panid a nanaganan ditoy.",
+	"templatesandbox-apihelp-text": "Waswasen ti panid iti panagusar iti daytoy a linaon ti panid a mangsukat ti nanaganan a panid babaen ti <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Modelo ti linaon ti <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Pormat ti linaon ti <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Dagiti parametro ti <var>$1templatesandboxtitle</var> ken <var>$1templatesandboxtext</var> ket nasken isuda a dua a mainaganan wenno isuda a dua a  maikkat."
+}

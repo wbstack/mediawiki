@@ -71,7 +71,7 @@
 	"confirmaccount-withcv": "(CV joint)",
 	"confirmaccount-reject": "({{GENDER:$1|rejeté}} par [[User:$1|$1]] le $3 à $4)",
 	"confirmaccount-rational": "Motif donné au candidat",
-	"confirmaccount-noreason": "(néant)",
+	"confirmaccount-noreason": "(aucun)",
 	"confirmaccount-autorej": "(cette requête a été abandonnée automatiquement pour cause d’inactivité)",
 	"confirmaccount-held": "({{GENDER:$1|marqué}} \"réservé\" par [[User:$1|$1]] le $3 à $4)",
 	"confirmaccount-blockip": "Bloquer l’adresse IP",

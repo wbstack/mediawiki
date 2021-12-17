@@ -13,7 +13,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "editor",
 	"requires": {
-		"MediaWiki": ">= 1.34.1"
+		"MediaWiki": ">= 1.37"
 	},
 	"MessagesDirs": {
 		"WikiEditor": [
@@ -256,6 +256,9 @@
 				"wikieditor-toolbar-tool-file-title",
 				"wikieditor-toolbar-file-target",
 				"wikieditor-toolbar-file-caption",
+				"wikieditor-toolbar-file-alt",
+				"wikieditor-toolbar-file-alt-help",
+				"wikieditor-toolbar-file-alt-help-label",
 				"wikieditor-toolbar-file-size",
 				"wikieditor-toolbar-file-float",
 				"wikieditor-toolbar-file-default",

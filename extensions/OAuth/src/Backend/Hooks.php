@@ -100,7 +100,7 @@ EOK;
 	}
 
 	protected static function doUserIdMerge( $oldid, $newid ) {
-		$dbw = Utils::getCentralDB( DB_MASTER );
+		$dbw = Utils::getCentralDB( DB_PRIMARY );
 		// Merge any consumers register to this user
 		$dbw->update( 'oauth_registered_consumer',
 			[ 'oarc_user_id' => $newid ],
@@ -201,7 +201,7 @@ EOK;
 
 		if ( $wgMWOAuthCentralWiki === false ) {
 			// Treat each wiki as its own "central wiki" as there is no actual one
-			$wgMWOAuthCentralWiki = wfWikiId(); // default
+			$wgMWOAuthCentralWiki = wfWikiId();
 		} else {
 			// There is actually a central wiki, requiring global user IDs via hook
 			$wgMWOAuthSharedUserIDs = true;

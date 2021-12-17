@@ -36,7 +36,6 @@ class SpecialGadgetUsage extends QueryPage {
 		parent::__construct( $name );
 		$this->limit = 1000; // Show all gadgets
 		$this->shownavigation = false;
-		$this->activeUsers = $this->getConfig()->get( 'SpecialGadgetUsageActiveUsers' );
 	}
 
 	/**
@@ -48,11 +47,13 @@ class SpecialGadgetUsage extends QueryPage {
 	}
 
 	/**
-	 * Flag for holding the value of config variable SpecialGadgetUsageActiveUsers
+	 * Get value of config variable SpecialGadgetUsageActiveUsers
 	 *
-	 * @var bool $activeUsers
+	 * @return bool
 	 */
-	public $activeUsers;
+	private function isActiveUsersEnabled() {
+		return $this->getConfig()->get( 'SpecialGadgetUsageActiveUsers' );
+	}
 
 	public function isExpensive() {
 		return true;
@@ -79,7 +80,7 @@ class SpecialGadgetUsage extends QueryPage {
 	 */
 	public function getQueryInfo() {
 		$dbr = wfGetDB( DB_REPLICA );
-		if ( !$this->activeUsers ) {
+		if ( !$this->isActiveUsersEnabled() ) {
 			return [
 				'tables' => [ 'user_properties' ],
 				'fields' => [
@@ -141,7 +142,7 @@ class SpecialGadgetUsage extends QueryPage {
 		$html .= Html::openElement( 'thead', [] );
 		$html .= Html::openElement( 'tr', [] );
 		$headers = [ 'gadgetusage-gadget', 'gadgetusage-usercount' ];
-		if ( $this->activeUsers ) {
+		if ( $this->isActiveUsersEnabled() ) {
 			$headers[] = 'gadgetusage-activeusers';
 		}
 		foreach ( $headers as $h ) {
@@ -173,7 +174,7 @@ class SpecialGadgetUsage extends QueryPage {
 
 	/**
 	 * @param Skin $skin
-	 * @param object $result Result row
+	 * @param stdClass $result Result row
 	 * @return string|bool String of HTML
 	 */
 	public function formatResult( $skin, $result ) {
@@ -183,7 +184,7 @@ class SpecialGadgetUsage extends QueryPage {
 			$html = Html::openElement( 'tr', [] );
 			$html .= Html::element( 'td', [], $gadgetTitle );
 			$html .= Html::element( 'td', [], $gadgetUserCount );
-			if ( $this->activeUsers == true ) {
+			if ( $this->getConfig()->get( 'SpecialGadgetUsageActiveUsers' ) ) {
 				$activeUserCount = $this->getLanguage()->formatNum( $result->namespace );
 				$html .= Html::element( 'td', [], $activeUserCount );
 			}
@@ -226,7 +227,7 @@ class SpecialGadgetUsage extends QueryPage {
 		$gadgetRepo = GadgetRepo::singleton();
 		$gadgetIds = $gadgetRepo->getGadgetIds();
 		$defaultGadgets = $this->getDefaultGadgets( $gadgetRepo, $gadgetIds );
-		if ( $this->activeUsers ) {
+		if ( $this->isActiveUsersEnabled() ) {
 			$out->addHtml(
 				$this->msg( 'gadgetusage-intro' )
 					->numParams( $this->getConfig()->get( 'ActiveUserDays' ) )->parseAsBlock()
@@ -244,7 +245,7 @@ class SpecialGadgetUsage extends QueryPage {
 				$html .= Html::element( 'td', [], $default );
 				$html .= Html::element( 'td', [ 'data-sort-value' => 'Infinity' ],
 					$this->msg( 'gadgetusage-default' )->text() );
-				if ( $this->activeUsers ) {
+				if ( $this->isActiveUsersEnabled() ) {
 					$html .= Html::element( 'td', [ 'data-sort-value' => 'Infinity' ],
 						$this->msg( 'gadgetusage-default' )->text() );
 				}
@@ -273,6 +274,9 @@ class SpecialGadgetUsage extends QueryPage {
 		}
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	protected function getGroupName() {
 		return 'wiki';
 	}

@@ -2,6 +2,7 @@
 
 namespace CirrusSearch\Fallbacks;
 
+use CirrusSearch\CirrusSearchHookRunner;
 use CirrusSearch\InterwikiResolver;
 use CirrusSearch\Parser\NamespacePrefixParser;
 use CirrusSearch\Profile\SearchProfileException;
@@ -105,17 +106,19 @@ class FallbackRunner implements SearchMetricsProvider {
 	 * @param CirrusSearchResultSet $initialResult
 	 * @param MSearchResponses $responses
 	 * @param NamespacePrefixParser $namespacePrefixParser
+	 * @param CirrusSearchHookRunner $cirrusSearchHookRunner
 	 * @return CirrusSearchResultSet
 	 */
 	public function run(
 		SearcherFactory $factory,
 		CirrusSearchResultSet $initialResult,
 		MSearchResponses $responses,
-		NamespacePrefixParser $namespacePrefixParser
+		NamespacePrefixParser $namespacePrefixParser,
+		CirrusSearchHookRunner $cirrusSearchHookRunner
 	) {
 		$methods = [];
 		$position = 0;
-		$context = new FallbackRunnerContextImpl( $initialResult, $factory, $namespacePrefixParser );
+		$context = new FallbackRunnerContextImpl( $initialResult, $factory, $namespacePrefixParser, $cirrusSearchHookRunner );
 		foreach ( $this->fallbackMethods as $name => $fallback ) {
 			$position++;
 			$context->resetSuggestResponse();
@@ -141,7 +144,7 @@ class FallbackRunner implements SearchMetricsProvider {
 			];
 		}
 
-		usort( $methods, function ( $a, $b ) {
+		usort( $methods, static function ( $a, $b ) {
 			return $b['score'] <=> $a['score'] ?: $a['position'] <=> $b['position'];
 		} );
 		foreach ( $methods as $fallbackArray ) {

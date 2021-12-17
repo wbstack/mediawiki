@@ -3,32 +3,35 @@
 namespace EntitySchema\DataAccess;
 
 use CommentStoreComment;
-use InvalidArgumentException;
-use Language;
-use MediaWiki\Revision\RevisionRecord;
-use MediaWiki\Revision\RevisionLookup;
-use MediaWiki\Revision\SlotRecord;
-use RuntimeException;
 use EntitySchema\Domain\Model\SchemaId;
 use EntitySchema\MediaWiki\Content\EntitySchemaContent;
 use EntitySchema\Services\SchemaConverter\FullArraySchemaData;
 use EntitySchema\Services\SchemaConverter\SchemaConverter;
+use InvalidArgumentException;
+use Language;
+use MediaWiki\Revision\RevisionLookup;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Revision\SlotRecord;
+use RuntimeException;
 
 /**
  * @license GPL-2.0-or-later
  */
 class MediaWikiRevisionSchemaUpdater implements SchemaUpdater {
 
-	const AUTOCOMMENT_UPDATED_SCHEMATEXT = 'entityschema-summary-update-schema-text';
-	const AUTOCOMMENT_UPDATED_NAMEBADGE = 'entityschema-summary-update-schema-namebadge';
-	const AUTOCOMMENT_UPDATED_LABEL = 'entityschema-summary-update-schema-label';
-	const AUTOCOMMENT_UPDATED_DESCRIPTION = 'entityschema-summary-update-schema-description';
-	const AUTOCOMMENT_UPDATED_ALIASES = 'entityschema-summary-update-schema-aliases';
-	/* public */ const AUTOCOMMENT_RESTORE = 'entityschema-summary-restore';
-	/* public */ const AUTOCOMMENT_UNDO = 'entityschema-summary-undo';
+	public const AUTOCOMMENT_UPDATED_SCHEMATEXT = 'entityschema-summary-update-schema-text';
+	public const AUTOCOMMENT_UPDATED_NAMEBADGE = 'entityschema-summary-update-schema-namebadge';
+	public const AUTOCOMMENT_UPDATED_LABEL = 'entityschema-summary-update-schema-label';
+	public const AUTOCOMMENT_UPDATED_DESCRIPTION = 'entityschema-summary-update-schema-description';
+	public const AUTOCOMMENT_UPDATED_ALIASES = 'entityschema-summary-update-schema-aliases';
+	public const AUTOCOMMENT_RESTORE = 'entityschema-summary-restore';
+	public const AUTOCOMMENT_UNDO = 'entityschema-summary-undo';
 
+	/** @var MediaWikiPageUpdaterFactory */
 	private $pageUpdaterFactory;
+	/** @var WatchlistUpdater */
 	private $watchListUpdater;
+	/** @var RevisionLookup */
 	private $revisionLookup;
 
 	public function __construct(
@@ -52,7 +55,7 @@ class MediaWikiRevisionSchemaUpdater implements SchemaUpdater {
 	 * @param SchemaId $id
 	 * @param string[] $labels
 	 * @param string[] $descriptions
-	 * @param string[] $aliasGroups
+	 * @param string[][] $aliasGroups
 	 * @param string $schemaText
 	 * @param int $baseRevId
 	 * @param CommentStoreComment $summary
@@ -118,7 +121,7 @@ class MediaWikiRevisionSchemaUpdater implements SchemaUpdater {
 		$schemaData = $updateGuard->guardSchemaUpdate(
 			$baseRevision,
 			$parentRevision,
-			function ( FullArraySchemaData $schemaData ) use ( $langCode, $label, $description, $aliases ) {
+			static function ( FullArraySchemaData $schemaData ) use ( $langCode, $label, $description, $aliases ) {
 				$schemaData->data['labels'][$langCode] = $label;
 				$schemaData->data['descriptions'][$langCode] = $description;
 				$schemaData->data['aliases'][$langCode] = $aliases;
@@ -240,7 +243,7 @@ class MediaWikiRevisionSchemaUpdater implements SchemaUpdater {
 		$schemaData = $updateGuard->guardSchemaUpdate(
 			$baseRevision,
 			$parentRevision,
-			function ( FullArraySchemaData $schemaData ) use ( $schemaText ) {
+			static function ( FullArraySchemaData $schemaData ) use ( $schemaText ) {
 				$schemaData->data['schemaText'] = $schemaText;
 			}
 		);

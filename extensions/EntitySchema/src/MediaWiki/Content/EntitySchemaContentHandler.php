@@ -6,17 +6,6 @@ use Action;
 use Article;
 use Content;
 use DifferenceEngine;
-use IContextSource;
-use JsonContentHandler;
-use Language;
-use LogicException;
-use MediaWiki\MediaWikiServices;
-use Page;
-use RequestContext;
-use Revision;
-use SlotDiffRenderer;
-use Title;
-use WikiPage;
 use EntitySchema\DataAccess\SchemaEncoder;
 use EntitySchema\MediaWiki\Actions\RestoreSubmitAction;
 use EntitySchema\MediaWiki\Actions\RestoreViewAction;
@@ -26,9 +15,21 @@ use EntitySchema\MediaWiki\Actions\UndoSubmitAction;
 use EntitySchema\MediaWiki\Actions\UndoViewAction;
 use EntitySchema\MediaWiki\UndoHandler;
 use EntitySchema\Presentation\InputValidator;
+use IContextSource;
+use JsonContentHandler;
+use Language;
+use LogicException;
+use MediaWiki\MediaWikiServices;
+use Page;
+use RequestContext;
+use SlotDiffRenderer;
+use Title;
+use WikiPage;
 
 /**
  * Content handler for the EntitySchema content
+ *
+ * @license GPL-2.0-or-later
  */
 class EntitySchemaContentHandler extends JsonContentHandler {
 
@@ -192,22 +193,32 @@ class EntitySchemaContentHandler extends JsonContentHandler {
 	 *
 	 * @since 1.32 accepts Content objects for all parameters instead of Revision objects.
 	 *  Passing Revision objects is deprecated.
+	 * @since 1.37 only accepts Content objects
 	 *
-	 * @param Revision|Content $base The current text
-	 * @param Revision|Content $undoFrom The content of the revision to undo
-	 * @param Revision|Content $undoTo Must be from an earlier revision than $undo
+	 * @param Content $baseContent The current text
+	 * @param Content $undoFromContent The content of the revision to undo
+	 * @param Content $undoToContent Must be from an earlier revision than $undo
 	 * @param bool $undoIsLatest Set true if $undo is from the current revision (since 1.32)
 	 *
 	 * @return Content|false
 	 */
-	public function getUndoContent( $base, $undoFrom, $undoTo, $undoIsLatest = false ) {
-		$undoToContent = ( $undoTo instanceof Revision ) ? $undoTo->getContent() : $undoTo;
+	public function getUndoContent(
+		Content $baseContent,
+		Content $undoFromContent,
+		Content $undoToContent,
+		$undoIsLatest = false
+	) {
 		if ( $undoIsLatest ) {
 			return $undoToContent;
 		}
 
-		$baseContent = ( $base instanceof Revision ) ? $base->getContent() : $base;
-		$undoFromContent = ( $undoFrom instanceof Revision ) ? $undoFrom->getContent() : $undoFrom;
+		// Make sure correct subclass
+		if ( !$baseContent instanceof EntitySchemaContent ||
+			!$undoFromContent instanceof EntitySchemaContent ||
+			!$undoToContent instanceof EntitySchemaContent
+		) {
+			return false;
+		}
 
 		$undoHandler = new UndoHandler();
 		try {

@@ -6,10 +6,12 @@
 			"Fitoschido",
 			"GabiBil",
 			"Minisarm",
+			"NGC 54",
 			"Strainu"
 		]
 	},
 	"minerva-last-modified-date": "Ultima modificare pe $1, la $2",
+	"minerva-watchlist-cta": "Urmăriți această pagină și toate schimbările asupra sa.",
 	"minerva-talk-add-topic": "Adăugare discuție",
 	"mobile-frontend-cookies-required": "Sunt necesare module cookie pentru a comuta între modurile de vizualizare. Activați-le și încercați din nou.",
 	"mobile-frontend-editor-edit": "Modificare",
@@ -45,8 +47,9 @@
 	"mobile-frontend-user-button-tooltip": "Arată-mi notificările",
 	"mobile-frontend-user-newmessages": "Aveți mesaje noi pe pagina dumneavoastră de discuție",
 	"mobile-frontend-user-page-contributions": "Contribuții",
-	"mobile-frontend-user-page-member-since": "{{GENDER:$2|S-a înscris}} în $1",
+	"mobile-frontend-user-page-member-since": "{{GENDER:$2|Alăturat|Alăturată|Alăturat}} în $1",
 	"mobile-frontend-user-page-talk": "Discuție",
 	"minerva-page-actions-overflow": "Mai mult",
+	"minerva-page-actions-info": "Informații despre pagină",
 	"minerva-page-actions-user-groups": "Grupuri de utilizatori"
 }

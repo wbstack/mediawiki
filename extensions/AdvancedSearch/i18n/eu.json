@@ -49,8 +49,13 @@
 	"advancedsearch-sort-relevance": "garrantzi",
 	"advancedsearch-sort-last-edit-desc": "data editatu - egungoa goran",
 	"advancedsearch-sort-preview-last-edit-desc": "Data editatu",
+	"advancedsearch-sort-preview-create-timestamp-desc": "sorrera data",
 	"advancedsearch-namespaces-search-in": "Non bilatu:",
 	"advancedsearch-namespaces-preset-all": "Denak",
+	"advancedsearch-namespaces-preset-default": "Lehenetsia",
+	"advancedsearch-namespaces-preset-general-help": "Laguntza Orokorra",
+	"advancedsearch-namespaces-preset-discussion": "Eztabaida",
 	"advancedsearch-namespaces-placeholder": "Izen-eremuak gehitu...",
+	"prefs-advancedsearch": "Bilaketa Aurreratua",
 	"advancedsearch-preference-disable": "Ez erakutsi bilaketa aurreratuaren interfazea"
 }

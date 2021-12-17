@@ -119,7 +119,7 @@ class EchoSeenTime {
 		$key = $this->getMemcKey( $type );
 		$cache = self::cache();
 		$cache->set( $key, $time, $cache::TTL_YEAR, BagOStuff::WRITE_CACHE_ONLY );
-		DeferredUpdates::addCallableUpdate( function () use ( $key, $time, $cache ) {
+		DeferredUpdates::addCallableUpdate( static function () use ( $key, $time, $cache ) {
 			$cache->set( $key, $time, $cache::TTL_YEAR );
 		} );
 	}
@@ -149,8 +149,9 @@ class EchoSeenTime {
 			return $localKey;
 		}
 
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser( $this->user, CentralIdLookup::AUDIENCE_RAW );
+		$globalId = MediaWikiServices::getInstance()
+			->getCentralIdLookup()
+			->centralIdFromLocalUser( $this->user, CentralIdLookup::AUDIENCE_RAW );
 
 		if ( !$globalId ) {
 			return $localKey;

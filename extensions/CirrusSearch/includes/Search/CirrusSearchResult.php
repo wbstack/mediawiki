@@ -25,12 +25,11 @@ abstract class CirrusSearchResult extends SearchResult {
 	private $file;
 
 	/**
-	 * CirrusSearchResult constructor.
 	 * @param Title $title
 	 */
 	public function __construct( Title $title ) {
 		$this->title = $title;
-		if ( $this->getTitle()->getNamespace() == NS_FILE ) {
+		if ( $this->getTitle()->getNamespace() === NS_FILE ) {
 			$this->file = MediaWikiServices::getInstance()->getRepoGroup()
 				->findFile( $this->title );
 		}
@@ -68,7 +67,7 @@ abstract class CirrusSearchResult extends SearchResult {
 	final public function isMissingRevision() {
 		global $wgCirrusSearchDevelOptions;
 		if ( isset( $wgCirrusSearchDevelOptions['ignore_missing_rev'] ) ) {
-			return true;
+			return false;
 		}
 		return !$this->getTitle()->isKnown();
 	}
@@ -90,6 +89,7 @@ abstract class CirrusSearchResult extends SearchResult {
 
 	/**
 	 * Lazy initialization of article text from DB
+	 * @return never
 	 */
 	final protected function initText() {
 		throw new \Exception( "initText() should not be called on CirrusSearchResult, " .

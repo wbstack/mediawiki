@@ -8,7 +8,6 @@ use Html;
 use MediaWiki\MediaWikiServices;
 use Message;
 use OOUI\ButtonWidget;
-use RequestContext;
 use User;
 
 /**
@@ -21,27 +20,15 @@ use User;
 class RevisionSliderHooks {
 
 	/**
-	 * @var Config
+	 * @return Config The RevisionSlider extensions config
 	 */
-	private static $config;
-
-	/**
-	 * Returns the RevisionSlider extensions config.
-	 *
-	 * @return Config
-	 */
-	private static function getConfig() {
-		if ( self::$config === null ) {
-			self::$config = MediaWikiServices::getInstance()
-				->getConfigFactory()
-				->makeConfig( 'revisionslider' );
-		}
-		return self::$config;
+	private static function getConfig(): Config {
+		return MediaWikiServices::getInstance()->getConfigFactory()
+			->makeConfig( 'revisionslider' );
 	}
 
 	/**
 	 * @param DifferenceEngine $diff
-	 * @suppress SecurityCheck-XSS Issue with OOUI, see T193837 for more information
 	 */
 	public static function onDifferenceEngineViewHeader( DifferenceEngine $diff ) {
 		$oldRevRecord = $diff->getOldRevision();
@@ -54,17 +41,19 @@ class RevisionSliderHooks {
 		}
 
 		// do not show on MobileDiff page
-		if ( $diff->getTitle()->isSpecial( 'MobileDiff' ) ) {
+		// Note: Since T245172, DifferenceEngine::getTitle() is the title of the page being diffed.
+		if ( $diff->getOutput()->getTitle()->isSpecial( 'MobileDiff' ) ) {
 			return;
 		}
 
-		$config = self::getConfig();
+		$services = MediaWikiServices::getInstance();
+		$userOptionsLookup = $services->getUserOptionsLookup();
 
 		/**
 		 * If the user is logged in and has explictly requested to disable the extension don't load.
 		 */
 		$user = $diff->getUser();
-		if ( !$user->isAnon() && $user->getBoolOption( 'revisionslider-disable' ) ) {
+		if ( $user->isRegistered() && $userOptionsLookup->getBoolOption( $user, 'revisionslider-disable' ) ) {
 			return;
 		}
 
@@ -82,9 +71,10 @@ class RevisionSliderHooks {
 			return;
 		}
 
-		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
+		$stats = $services->getStatsdDataFactory();
 		$stats->increment( 'RevisionSlider.event.hookinit' );
 
+		$config = self::getConfig();
 		$timeOffset = $config->get( 'LocalTZoffset' );
 		if ( $config->get( 'Localtimezone' ) === null ) {
 			$timeOffset = 0;
@@ -92,9 +82,9 @@ class RevisionSliderHooks {
 			$timeOffset = 0;
 		}
 
-		$autoExpand = $user->getBoolOption( 'userjs-revslider-autoexpand' );
+		$autoExpand = $userOptionsLookup->getBoolOption( $user, 'userjs-revslider-autoexpand' );
 
-		$out = RequestContext::getMain()->getOutput();
+		$out = $diff->getOutput();
 		// Load styles on page load to avoid FOUC
 		$out->addModuleStyles( 'ext.RevisionSlider.lazyCss' );
 		if ( $autoExpand ) {
@@ -157,7 +147,6 @@ class RevisionSliderHooks {
 			'type' => 'toggle',
 			'label-message' => 'revisionslider-preference-disable',
 			'section' => 'rendering/diffs',
-			'default' => $user->getBoolOption( 'revisionslider-disable' ),
 		];
 	}
 

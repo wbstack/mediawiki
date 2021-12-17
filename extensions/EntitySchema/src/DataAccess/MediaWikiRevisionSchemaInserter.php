@@ -3,28 +3,31 @@
 namespace EntitySchema\DataAccess;
 
 use CommentStoreComment;
-use Language;
-use MediaWiki\Revision\SlotRecord;
-use RuntimeException;
 use EntitySchema\Domain\Model\SchemaId;
 use EntitySchema\Domain\Storage\IdGenerator;
 use EntitySchema\MediaWiki\Content\EntitySchemaContent;
 use EntitySchema\Services\SchemaConverter\SchemaConverter;
+use Language;
+use MediaWiki\Revision\SlotRecord;
+use RuntimeException;
 
 /**
  * @license GPL-2.0-or-later
  */
 class MediaWikiRevisionSchemaInserter implements SchemaInserter {
-	const AUTOCOMMENT_NEWSCHEMA = 'entityschema-summary-newschema-nolabel';
+	public const AUTOCOMMENT_NEWSCHEMA = 'entityschema-summary-newschema-nolabel';
 
+	/** @var MediaWikiPageUpdaterFactory */
 	private $pageUpdaterFactory;
+	/** @var IdGenerator */
 	private $idGenerator;
+	/** @var WatchlistUpdater */
 	private $watchListUpdater;
 
 	public function __construct(
 		MediaWikiPageUpdaterFactory $pageUpdaterFactory,
 		WatchlistUpdater $watchListUpdater,
-		IdGenerator $idGenerator = null
+		IdGenerator $idGenerator
 	) {
 		$this->idGenerator = $idGenerator;
 		$this->pageUpdaterFactory = $pageUpdaterFactory;

@@ -19,6 +19,8 @@
 	"wikibasecirrus-search-bad-entity-type": "Неисправен тип на единица: $1",
 	"wikibasecirrus-search-bad-profile-name": "Неисправно пребарувачко профилно име: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Клучниот збор haswbstatement не содржи важечки искази",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Клучниот збор haslicense не содржи важечки аргументи",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Клучниот збор wbstatementquantity не содржи важечки искзи",
 	"special-entitieswithoutdescription": "Единици без опис",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Дава список на единици без опис",
 	"special-entitieswithoutlabel": "Единици без натпис",

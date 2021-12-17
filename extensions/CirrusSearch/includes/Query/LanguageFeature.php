@@ -24,7 +24,7 @@ class LanguageFeature extends SimpleKeywordFeature implements FilterQueryFeature
 	 * Limit search to 20 languages. Arbitrarily chosen, but should be more
 	 * than enough and some sort of limit has to be enforced.
 	 */
-	const QUERY_LIMIT = 20;
+	public const QUERY_LIMIT = 20;
 
 	/**
 	 * @return string[]
@@ -67,7 +67,12 @@ class LanguageFeature extends SimpleKeywordFeature implements FilterQueryFeature
 	 * @return array|false|null
 	 */
 	public function parseValue( $key, $value, $quotedValue, $valueDelimiter, $suffix, WarningCollector $warningCollector ) {
-		$langs = explode( ',', $value );
+		if ( strpos( $value, ',' ) !== false ) {
+			$langs = explode( ',', $value );
+			$warningCollector->addWarning( 'cirrussearch-inlanguage-deprecate-comma' );
+		} else {
+			$langs = explode( '|', $value );
+		}
 		if ( count( $langs ) > self::QUERY_LIMIT ) {
 			$warningCollector->addWarning(
 				'cirrussearch-feature-too-many-conditions',
@@ -81,13 +86,13 @@ class LanguageFeature extends SimpleKeywordFeature implements FilterQueryFeature
 
 	/**
 	 * @param array[] $parsedValue
-	 * @return \Elastica\Query\AbstractQuery|\Elastica\Query\Match|null
+	 * @return \Elastica\Query\AbstractQuery|\Elastica\Query\MatchQuery|null
 	 */
 	private function doGetFilterQuery( $parsedValue ) {
 		$queries = [];
 		foreach ( $parsedValue['langs'] as $lang ) {
 			if ( strlen( trim( $lang ) ) > 0 ) {
-				$query = new \Elastica\Query\Match();
+				$query = new \Elastica\Query\MatchQuery();
 				$query->setFieldQuery( 'language', $lang );
 				$queries[] = $query;
 			}

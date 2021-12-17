@@ -5,7 +5,7 @@
 	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
 
 	/**
-	 * @param {Array} searchFields
+	 * @param {mw.libs.advancedSearch.SearchField[]} searchFields
 	 * @class
 	 * @constructor
 	 */
@@ -19,27 +19,16 @@
 	 * @return {string[]}
 	 */
 	mw.libs.advancedSearch.QueryCompiler.prototype.formatSearchFields = function ( state ) {
-		var queryElements = [],
-			greedyQuery = null;
+		var queryElements = [];
 
 		this.fields.forEach( function ( field ) {
 			var val = state.getField( field.id ),
 				formattedQueryElement = val ? field.formatter( val ) : '';
 
-			if ( !formattedQueryElement ) {
-				return;
-			}
-
-			// FIXME: Should fail if there is more than one greedy field!
-			if ( field.greedy && !greedyQuery ) {
-				greedyQuery = field.formatter( val );
-			} else {
+			if ( formattedQueryElement ) {
 				queryElements.push( formattedQueryElement );
 			}
 		} );
-		if ( greedyQuery ) {
-			queryElements.push( greedyQuery );
-		}
 
 		return queryElements;
 	};

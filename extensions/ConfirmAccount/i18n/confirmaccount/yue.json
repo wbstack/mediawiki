@@ -1,13 +1,15 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"Hello903hello"
+		]
 	},
 	"confirmaccounts": "確認戶口請求",
 	"confirmaccount-list": "下面係等緊批准嘅用戶請求一覽。\n\t已經批准嘅戶口將會建立同埋響呢個表度拎走。拒絕咗嘅用戶將會就噉響呢個表度拎走。",
 	"confirmaccount-list2": "下面係一個先前拒絕過嘅戶口請求，可能會響幾日之後刪除。\n\t佢哋仍舊可以批准去開一個戶口，但係響你做之前請問吓拒絕嘅管理員先。",
 	"confirmaccount-text": "呢個係響'''{{SITENAME}}'''度等候請求戶口嘅一版。\n\t請小心去睇過，有需要嘅話，就要確認埋佢下面全部嘅資料。\n\t要留意嘅係你可以用另一個用戶名去開一個戶口。只係同其他嘅名有衝突嗰陣先至去做。\n\n\t如果你無確認或者拒絕呢個請求，就噉留低呢版嘅話，佢就會維持等候狀態。",
 	"confirmaccount-review": "批准/拒絕",
-	"confirmaccount-badid": "提供嘅ID係無未決定嘅請求。佢可能已經被處理咗。",
+	"confirmaccount-badid": "提供嘅ID係無對應嘅未決定請求。\n佢可能已經被處理咗。",
 	"confirmaccount-name": "用戶名",
 	"confirmaccount-real": "名",
 	"confirmaccount-email": "電郵",

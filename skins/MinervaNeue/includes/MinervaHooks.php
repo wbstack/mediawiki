@@ -91,9 +91,9 @@ class MinervaHooks {
 		try {
 			$featureManager->registerFeature(
 				new MobileFrontend\Features\Feature(
-					'MinervaShowCategoriesButton',
+					'MinervaShowCategories',
 					'skin-minerva',
-					$config->get( 'MinervaShowCategoriesButton' )
+					$config->get( 'MinervaShowCategories' )
 				)
 			);
 			$featureManager->registerFeature(
@@ -171,14 +171,10 @@ class MinervaHooks {
 
 		if ( $skin instanceof SkinMinerva ) {
 			switch ( $name ) {
-				case 'MobileMenu':
-					$out->addModuleStyles( [
-						'skins.minerva.mainMenu.icons',
-						'skins.minerva.mainMenu.styles',
-					] );
-					break;
 				case 'Recentchanges':
-					$isEnhancedDefaultForUser = $special->getUser()->getBoolOption( 'usenewrc' );
+					$isEnhancedDefaultForUser = MediaWikiServices::getInstance()
+						->getUserOptionsLookup()
+						->getBoolOption( $special->getUser(), 'usenewrc' );
 					$enhanced = $request->getBool( 'enhanced', $isEnhancedDefaultForUser );
 					if ( $enhanced ) {
 						$out->addHTML( Html::warningBox(
@@ -192,7 +188,7 @@ class MinervaHooks {
 					// if no warning message set.
 					if (
 						!$request->getVal( 'warning' ) &&
-						!$special->getUser()->isLoggedIn() &&
+						!$special->getUser()->isRegistered() &&
 						!$request->wasPosted()
 					) {
 						$request->setVal( 'warning', 'mobile-frontend-generic-login-new' );
@@ -232,9 +228,14 @@ class MinervaHooks {
 				// here results in a circular dependency error which is why
 				// SkinUserPageHelper is being instantiated instead.
 				$relevantUserPageHelper = new SkinUserPageHelper(
-					$title->inNamespace( NS_USER_TALK ) ? $title->getSubjectPage() : $title
+					$services->getUserNameUtils(),
+					$title->inNamespace( NS_USER_TALK ) ? $title->getSubjectPage() : $title,
+					$mobileContext
 				);
-				$isUserPageOrUserTalkPage = $relevantUserPageHelper->isUserPage();
+
+				$isUserPage = $relevantUserPageHelper->isUserPage();
+				$isUserPageAccessible = $relevantUserPageHelper->isUserPageAccessibleToCurrentUser();
+				$isUserPageOrUserTalkPage = $isUserPage && $isUserPageAccessible;
 			} else {
 				// If no title this must be false
 				$isUserPageOrUserTalkPage = false;
@@ -248,7 +249,7 @@ class MinervaHooks {
 				SkinOptions::BETA_MODE
 					=> $isBeta,
 				SkinOptions::CATEGORIES
-					=> $featureManager->isFeatureAvailableForCurrentUser( 'MinervaShowCategoriesButton' ),
+					=> $featureManager->isFeatureAvailableForCurrentUser( 'MinervaShowCategories' ),
 				SkinOptions::PAGE_ISSUES
 					=> $featureManager->isFeatureAvailableForCurrentUser( 'MinervaPageIssuesNewTreatment' ),
 				SkinOptions::MOBILE_OPTIONS => true,
@@ -336,9 +337,53 @@ class MinervaHooks {
 			$roConf = MediaWikiServices::getInstance()->getConfiguredReadOnlyMode();
 			$vars += [
 				'wgMinervaABSamplingRate' => $config->get( 'MinervaABSamplingRate' ),
-				'wgMinervaCountErrors' => $config->get( 'MinervaCountErrors' ),
 				'wgMinervaReadOnly' => $roConf->isReadOnly(),
 			];
+		}
+	}
+
+	/**
+	 * The Minerva skin loads message box styles differently from core, to
+	 * reduce the amount of styles on the critical path.
+	 * This adds message box styles to pages that need it, to avoid loading them
+	 * on pages where they are not.
+	 *
+	 * @param OutputPage $out
+	 * @param Skin $skin
+	 */
+	public static function onBeforePageDisplay( OutputPage $out, Skin $skin ) {
+		if ( $skin->getSkinName() === 'minerva' ) {
+			self::addMessageBoxStylesToPage( $out );
+		}
+	}
+
+	/**
+	 * The Minerva skin loads message box styles differently from core, to
+	 * reduce the amount of styles on the critical path.
+	 * This adds message box styles to pages that need it, to avoid loading them
+	 * on pages where they are not.
+	 * The pages where they are needed are:
+	 * - special pages
+	 * - edit workflow (action=edit and action=submit)
+	 * - when viewing old revisions
+	 *
+	 * @param OutputPage $out
+	 */
+	private static function addMessageBoxStylesToPage( OutputPage $out ) {
+		$request = $out->getRequest();
+		// Warning box styles are needed when reviewing old revisions
+		// and inside the fallback editor styles to action=edit page.
+		$requestAction = $request->getVal( 'action' );
+		$viewAction = $requestAction === null || $requestAction === 'view';
+
+		if (
+			$out->getTitle()->isSpecialPage() ||
+			$request->getText( 'oldid' ) ||
+			!$viewAction
+		) {
+			$out->addModuleStyles( [
+				'skins.minerva.messageBox.styles'
+			] );
 		}
 	}
 
@@ -355,22 +400,42 @@ class MinervaHooks {
 	public static function onOutputPageBodyAttributes( OutputPage $out, Skin $skin, &$bodyAttrs ) {
 		$classes = $out->getProperty( 'bodyClassName' );
 		$skinOptions = MediaWikiServices::getInstance()->getService( 'Minerva.SkinOptions' );
+		$isMinerva = $skin instanceof SkinMinerva;
 
-		if ( $skinOptions->get( SkinOptions::HISTORY_IN_PAGE_ACTIONS ) ) {
+		if ( $isMinerva && $skinOptions->get( SkinOptions::HISTORY_IN_PAGE_ACTIONS ) ) {
 			// Class is used when page actions is modified to contain more elements
 			$classes .= ' minerva--history-page-action-enabled';
-
 		}
 
-		$isSimplifiedTalk = false;
-		if ( $skin instanceof SkinMinerva ) {
-			$isSimplifiedTalk = $skin->isSimplifiedTalkPageEnabled();
-		}
+		if ( $isMinerva ) {
+			// phan doesn't realize that $skin can only be an instance of SkinMinerva without this:
+			'@phan-var SkinMinerva $skin';
+			if ( $skin->isSimplifiedTalkPageEnabled() ) {
+				$classes .= ' skin-minerva--talk-simplified';
+			}
 
-		if ( $isSimplifiedTalk ) {
-			$classes .= ' skin-minerva--talk-simplified';
+			$bodyAttrs['class'] .= ' ' . $classes;
 		}
+	}
 
-		$bodyAttrs[ 'class' ] .= ' ' . $classes;
+	/**
+	 * SkinPageReadyConfig hook handler
+	 *
+	 * Disable collapsible and sortable on page load
+	 *
+	 * @param ResourceLoaderContext $context
+	 * @param mixed[] &$config Associative array of configurable options
+	 * @return void This hook must not abort, it must return no value
+	 */
+	public static function onSkinPageReadyConfig(
+		ResourceLoaderContext $context,
+		array &$config
+	) {
+		if ( $context->getSkin() === 'minerva' ) {
+			$config['search'] = false;
+			$config['collapsible'] = false;
+			$config['sortable'] = false;
+			$config['selectorLogoutLink'] = 'a.menu__item--logout[data-mw="interface"]';
+		}
 	}
 }

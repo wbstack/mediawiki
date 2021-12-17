@@ -10,5 +10,8 @@
 	"twocolconflict-beta-feature-message": "Dviejų stulpelių redagavimo konfliktas",
 	"twocolconflict-beta-feature-description": "Rodyti redagavimo konflikto puslapį naudojant tobulesnį dviejų stulpelių rodinį.",
 	"twocolconflict-split-collapse-tooltip": "Suskleisti nepakeistą tekstą",
-	"twocolconflict-split-expand-tooltip": "Išskleisti nepakeistą tekstą"
+	"twocolconflict-split-expand-tooltip": "Išskleisti nepakeistą tekstą",
+	"twocolconflict-talk-your": "Jūsų komentaras",
+	"twocolconflict-talk-conflicting": "Persikertantis komentaras",
+	"twocolconflict-talk-reorder-prompt": "Nurodykite savo komentaro santykį su persikertančiu komentaru:"
 }

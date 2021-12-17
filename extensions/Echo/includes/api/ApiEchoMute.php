@@ -1,11 +1,17 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserOptionsManager;
 
 class ApiEchoMute extends ApiBase {
 
-	private $centralIdLookup = null;
+	/** @var CentralIdLookup */
+	private $centralIdLookup;
 
+	/** @var UserOptionsManager */
+	private $userOptionsManager;
+
+	/** @var string[][] */
 	private static $muteLists = [
 		'user' => [
 			'pref' => 'echo-notifications-blacklist',
@@ -17,9 +23,27 @@ class ApiEchoMute extends ApiBase {
 		],
 	];
 
+	/**
+	 * @param ApiMain $main
+	 * @param string $action
+	 * @param CentralIdLookup $centralIdLookup
+	 * @param UserOptionsManager $userOptionsManager
+	 */
+	public function __construct(
+		ApiMain $main,
+		$action,
+		CentralIdLookup $centralIdLookup,
+		UserOptionsManager $userOptionsManager
+	) {
+		parent::__construct( $main, $action );
+
+		$this->centralIdLookup = $centralIdLookup;
+		$this->userOptionsManager = $userOptionsManager;
+	}
+
 	public function execute() {
 		$user = $this->getUser()->getInstanceForUpdate();
-		if ( !$user || $user->isAnon() ) {
+		if ( !$user || !$user->isRegistered() ) {
 			$this->dieWithError(
 				[ 'apierror-mustbeloggedin', $this->msg( 'action-editmyoptions' ) ],
 				'notloggedin'
@@ -53,18 +77,15 @@ class ApiEchoMute extends ApiBase {
 		}
 
 		if ( $changed ) {
-			$user->setOption( $mutelistInfo['pref'], $this->serializePref( $ids, $mutelistInfo['type'] ) );
+			$this->userOptionsManager->setOption(
+				$user,
+				$mutelistInfo['pref'],
+				$this->serializePref( $ids, $mutelistInfo['type'] )
+			);
 			$user->saveSettings();
 		}
 
 		$this->getResult()->addValue( null, $this->getModuleName(), 'success' );
-	}
-
-	private function getCentralIdLookup() {
-		if ( $this->centralIdLookup === null ) {
-			$this->centralIdLookup = CentralIdLookup::factory();
-		}
-		return $this->centralIdLookup;
 	}
 
 	private function lookupIds( $names, $type ) {
@@ -84,7 +105,7 @@ class ApiEchoMute extends ApiBase {
 			}
 			return $ids;
 		} elseif ( $type === 'user' ) {
-			return $this->getCentralIdLookup()->centralIdsFromNames( $names, CentralIdLookup::AUDIENCE_PUBLIC );
+			return $this->centralIdLookup->centralIdsFromNames( $names, CentralIdLookup::AUDIENCE_PUBLIC );
 		}
 	}
 
@@ -113,10 +134,6 @@ class ApiEchoMute extends ApiBase {
 
 	public function needsToken() {
 		return 'csrf';
-	}
-
-	public function getTokenSalt() {
-		return '';
 	}
 
 	public function mustBePosted() {

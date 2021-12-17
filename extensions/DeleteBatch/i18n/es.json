@@ -38,5 +38,7 @@
 	"deletebatch-no-page": "Por favor especifique al menos una página a borrar O escoja un archivo conteniendo una lista de páginas.",
 	"action-deletebatch": "borrar páginas en lote",
 	"right-deletebatch": "Borrar páginas en lote",
+	"action-deletebatch-spoof": "borrar páginas en lote usando la cuenta \"Delete page script\"",
+	"right-deletebatch-spoof": "Borrar páginas en lote usando la cuenta \"Delete page script\"",
 	"deletebatch-deleting-file-only": "La página de descripción del archivo $1 no existe; eliminando sólo el archivo real.\nEsta acción no se registrará."
 }

@@ -2,6 +2,7 @@
 
 namespace CirrusSearch\Search\Rescore;
 
+use CirrusSearch\CirrusSearchHookRunner;
 use CirrusSearch\Elastica\LtrQuery;
 use CirrusSearch\Profile\SearchProfileService;
 use CirrusSearch\Search\SearchContext;
@@ -34,13 +35,13 @@ class RescoreBuilder {
 	/**
 	 * @var int Maximum number of rescore profile fallbacks
 	 */
-	const FALLBACK_LIMIT = 4;
+	private const FALLBACK_LIMIT = 4;
 
 	/**
 	 * List of allowed rescore params
 	 * @todo: refactor to const with php 5.6
 	 *
-	 * @var string[] $rescoreMainParams
+	 * @var string[]
 	 */
 	private static $rescoreMainParams = [
 		'query_weight',
@@ -48,9 +49,9 @@ class RescoreBuilder {
 		'score_mode'
 	];
 
-	const FUNCTION_SCORE_TYPE = "function_score";
-	const LTR_TYPE = "ltr";
-	const PHRASE = "phrase";
+	private const FUNCTION_SCORE_TYPE = "function_score";
+	private const LTR_TYPE = "ltr";
+	private const PHRASE = "phrase";
 
 	/**
 	 * @var SearchContext
@@ -61,17 +62,24 @@ class RescoreBuilder {
 	 * @var array|string a rescore profile
 	 */
 	private $profile;
+	/**
+	 * @var CirrusSearchHookRunner
+	 */
+	private $cirrusSearchHookRunner;
 
 	/**
 	 * @param SearchContext $context
+	 * @param CirrusSearchHookRunner $cirrusSearchHookRunner
 	 * @param string|null $profile
+	 * @throws InvalidRescoreProfileException
 	 */
-	public function __construct( SearchContext $context, $profile = null ) {
+	public function __construct( SearchContext $context, CirrusSearchHookRunner $cirrusSearchHookRunner, $profile = null ) {
 		$this->context = $context;
 		if ( $profile === null ) {
 			$profile = $context->getRescoreProfile();
 		}
 		$this->profile = $this->getSupportedProfile( $profile );
+		$this->cirrusSearchHookRunner = $cirrusSearchHookRunner;
 	}
 
 	/**
@@ -110,7 +118,7 @@ class RescoreBuilder {
 		switch ( $rescoreDef['type'] ) {
 		case self::FUNCTION_SCORE_TYPE:
 			$funcChain = new FunctionScoreChain( $this->context, $rescoreDef['function_chain'],
-				$rescoreDef['function_chain_overrides'] ?? [] );
+				$rescoreDef['function_chain_overrides'] ?? [], $this->cirrusSearchHookRunner );
 			return $funcChain->buildRescoreQuery();
 		case self::LTR_TYPE:
 			return $this->buildLtrQuery( $rescoreDef['model'] );
@@ -140,13 +148,12 @@ class RescoreBuilder {
 		// the ltr query can return negative scores, which mucks with elasticsearch
 		// sorting as that will put these results below documents set to 0. Fix
 		// that up by adding a large constant boost.
+		// NOTE if you choose 'score_mode' = 'max' in the rescore profile this means that the
+		// LTR scores (almost always) completely override the other scores
 		$constant = new \Elastica\Query\ConstantScore( new \Elastica\Query\MatchAll );
 		$constant->setBoost( 100000 );
 		$bool->addShould( $constant );
-		$bool->addShould( new LtrQuery( $model, [
-				// TODO: These params probably shouldn't be hard coded
-				'query_string' => $this->context->getCleanedSearchTerm(),
-			] ) );
+		$bool->addShould( new LtrQuery( $model, $this->context->getLtrParamsForModel( $model ) ) );
 
 		return $bool;
 	}
@@ -300,13 +307,23 @@ class RescoreBuilder {
 	 * @return bool
 	 */
 	private function isProfileSyntaxSupported( array $profile ) {
-		if ( !isset( $profile['unsupported_syntax'] ) ) {
-			return true;
-		}
-
-		foreach ( $profile['unsupported_syntax'] as $reject ) {
-			if ( $this->context->isSyntaxUsed( $reject ) ) {
+		if ( ( $profile['supported_syntax'] ?? [] ) !== [] ) {
+			$supportedSyntax = false;
+			foreach ( $profile['supported_syntax'] as $supported ) {
+				if ( $this->context->isSyntaxUsed( $supported ) ) {
+					$supportedSyntax = true;
+					break;
+				}
+			}
+			if ( !$supportedSyntax ) {
 				return false;
+			}
+		}
+		if ( ( $profile['unsupported_syntax'] ?? [] ) !== [] ) {
+			foreach ( $profile['unsupported_syntax'] as $reject ) {
+				if ( $this->context->isSyntaxUsed( $reject ) ) {
+					return false;
+				}
 			}
 		}
 

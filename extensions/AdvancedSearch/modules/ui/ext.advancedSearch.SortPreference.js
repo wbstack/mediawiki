@@ -5,16 +5,32 @@
 	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
 	mw.libs.advancedSearch.ui = mw.libs.advancedSearch.ui || {};
 
-	var getOptions = function () {
-		return mw.libs.advancedSearch.dm.getSortMethods().map( function ( searchOption ) {
-			return { data: searchOption.name, label: searchOption.label };
+	var getOptions = function ( selected ) {
+		var options = mw.libs.advancedSearch.dm.getSortMethods().map( function ( name ) {
+			// The currently active sort method already appears in the list, don't add it again
+			if ( name === selected ) {
+				selected = undefined;
+			}
+			// The following messages are used here:
+			// * advancedsearch-sort-relevance
+			// * advancedsearch-sort-*
+			var msg = mw.message( 'advancedsearch-sort-' + name.replace( /_/g, '-' ) );
+			return { data: name, label: msg.exists() ? msg.text() : name };
 		} );
+		if ( selected ) {
+			// The following messages are used here:
+			// * advancedsearch-sort-relevance
+			// * advancedsearch-sort-*
+			var msg = mw.message( 'advancedsearch-sort-' + selected.replace( /_/g, '-' ) );
+			options.push( { data: selected, label: msg.exists() ? msg.text() : selected } );
+		}
+		return options;
 	};
 
 	mw.libs.advancedSearch.ui.SortPreference = function ( store, config ) {
 		this.store = store;
 		config = $.extend( {
-			options: getOptions()
+			options: getOptions( store.getSortMethod() )
 		}, config );
 		this.className = 'mw-advancedSearch-sort-';
 

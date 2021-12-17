@@ -15,6 +15,7 @@ use Wikibase\Lexeme\Domain\Model\Form;
 
 /**
  * @license GPL-2.0-or-later
+ * @phan-file-suppress PhanPluginNeverReturnMethod
  */
 class FormDiffer implements EntityDifferStrategy {
 
@@ -86,7 +87,7 @@ class FormDiffer implements EntityDifferStrategy {
 	 * @return ChangeFormDiffOp
 	 */
 	public function diff( Form $old, Form $new ) {
-		//TODO: Assert same ID
+		// TODO: Assert same ID
 		$diffOps = $this->recursiveMapDiffer->doDiff(
 			$this->toFormDiffArray( $old ),
 			$this->toFormDiffArray( $new )

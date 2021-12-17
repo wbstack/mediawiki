@@ -11,10 +11,10 @@ class MWOAuthDataStore extends OAuthDataStore {
 	/** @var DBConnRef DB for the consumer/grant registry */
 	protected $centralReplica;
 
-	/** @var DBConnRef|null Master DB for repeated lookup in case of replication lag problems;
-	 *    null if there is no separate master and replica DB
+	/** @var DBConnRef|null Primary DB for repeated lookup in case of replication lag problems;
+	 *    null if there is no separate primary DB and replica DB
 	 */
-	protected $centralMaster;
+	protected $centralPrimary;
 
 	/** @var \BagOStuff Cache for Tokens and Nonces */
 	protected $cache;
@@ -24,17 +24,17 @@ class MWOAuthDataStore extends OAuthDataStore {
 
 	/**
 	 * @param DBConnRef $centralReplica Central DB replica
-	 * @param DBConnRef|null $centralMaster Central DB master (if different)
+	 * @param DBConnRef|null $centralPrimary Central DB primary (if different)
 	 * @param \BagOStuff $cache
 	 */
-	public function __construct( DBConnRef $centralReplica, $centralMaster, \BagOStuff $cache ) {
-		if ( $centralMaster !== null && !( $centralMaster instanceof DBConnRef ) ) {
+	public function __construct( DBConnRef $centralReplica, $centralPrimary, \BagOStuff $cache ) {
+		if ( $centralPrimary !== null && !( $centralPrimary instanceof DBConnRef ) ) {
 			throw new \InvalidArgumentException(
-				__METHOD__ . ': $centralMaster must be a DB or null'
+				__METHOD__ . ': $centralPrimary must be a DB or null'
 			);
 		}
 		$this->centralReplica = $centralReplica;
-		$this->centralMaster = $centralMaster;
+		$this->centralPrimary = $centralPrimary;
 		$this->cache = $cache;
 		$this->logger = LoggerFactory::getInstance( 'OAuth' );
 	}
@@ -88,9 +88,9 @@ class MWOAuthDataStore extends OAuthDataStore {
 			}
 		} elseif ( $token_type === 'access' ) {
 			$cmra = ConsumerAcceptance::newFromToken( $this->centralReplica, $token );
-			if ( !$cmra && $this->centralMaster ) {
-				// try master in case there is replication lag T124942
-				$cmra = ConsumerAcceptance::newFromToken( $this->centralMaster, $token );
+			if ( !$cmra && $this->centralPrimary ) {
+				// try primary database in case there is replication lag T124942
+				$cmra = ConsumerAcceptance::newFromToken( $this->centralPrimary, $token );
 			}
 			if ( !$cmra ) {
 				throw new MWOAuthException( 'mwoauthdatastore-access-token-not-found' );
@@ -163,9 +163,11 @@ class MWOAuthDataStore extends OAuthDataStore {
 		$cacheCallbackKey = Utils::getCacheKey(
 			'callback', $consumer->key, 'request', $token->key
 		);
-		$this->cache->add( $cacheConsumerKey, $consumer->key, 600 ); // 10 minutes. Kindof arbitray.
-		$this->cache->add( $cacheTokenKey, $token, 600 ); // 10 minutes. Kindof arbitray.
-		$this->cache->add( $cacheCallbackKey, $callback, 600 ); // 10 minutes. Kindof arbitray.
+
+		// 600s == 10 minutes. Kind of arbitrary.
+		$this->cache->add( $cacheConsumerKey, $consumer->key, 600 );
+		$this->cache->add( $cacheTokenKey, $token, 600 );
+		$this->cache->add( $cacheCallbackKey, $callback, 600 );
 		$this->logger->debug( __METHOD__ .
 			": New request token {$token->key} for {$consumer->key} with callback {$callback}" );
 		return $token;
@@ -241,7 +243,8 @@ class MWOAuthDataStore extends OAuthDataStore {
 	 */
 	public function updateRequestToken( $token, $consumer ) {
 		$cacheKey = Utils::getCacheKey( 'token', $consumer->key, 'request', $token->key );
-		$this->cache->set( $cacheKey, $token, 600 ); // 10 more minutes. Kindof arbitray.
+		// 10 more minutes. Kind of arbitrary.
+		$this->cache->set( $cacheKey, $token, 600 );
 	}
 
 	/**

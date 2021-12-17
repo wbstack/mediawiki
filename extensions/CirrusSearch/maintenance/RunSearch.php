@@ -62,6 +62,7 @@ class RunSearch extends Maintenance {
 		$this->addOption( 'decode', 'urldecode() queries before running them', false, false );
 		$this->addOption( 'explain', 'Include lucene explanation in the results', false, false );
 		$this->addOption( 'limit', 'Set the max number of results returned by query (defaults to 10)', false, true );
+		$this->addOption( 'i-know-what-im-doing', 'Allow setting unknown options from --options', false, false );
 	}
 
 	public function finalSetup() {
@@ -90,17 +91,18 @@ class RunSearch extends Maintenance {
 	 * @return array Changeable global variables represented as the keys for an array, for
 	 *  use with isset().
 	 */
-	private function loadGlobalsWhitelist(): array {
+	private function loadChangeableConfigVars(): array {
 		// WARNING: The autoloader isn't available yet, you can't use any mw/cirrus classes
 		$config = json_decode( file_get_contents( __DIR__ . '/../extension.json' ), true );
 		if ( !is_array( $config ) ) {
-			throw new \RuntimeException( 'Could not load extension.json for whitelist' );
+			throw new \RuntimeException( 'Could not load extension.json for gathering the '
+				. 'list of changeable config vars' );
 		}
-		$whitelist = [];
+		$changeable = [];
 		foreach ( array_keys( $config['config'] ) as $key ) {
-			$whitelist['wg' . $key] = true;
+			$changeable['wg' . $key] = true;
 		}
-		return $whitelist;
+		return $changeable;
 	}
 
 	/**
@@ -113,15 +115,24 @@ class RunSearch extends Maintenance {
 			$optionsData = base64_decode( substr( $optionsData, strlen( 'B64://' ) ) );
 		}
 		$options = json_decode( $optionsData, true );
-		$whitelist = $this->loadGlobalsWhitelist();
+		$changeable = $this->loadChangeableConfigVars();
 
 		if ( $options ) {
+			// TODO: This function needs to be called from Maintenance::finalSetup, otherwise the
+			// config changes are applied too late to make it into various structures created on
+			// initialization. This is particularly a problem with wikidata integration. Or at
+			// least it was in Sept 2018. See ce3cf5fc52e4fade6e35fa38093180ae7397fee2.
+			// Unfortunately, as of March 2020, default values from extension.json are *not*
+			// available when Maintenance::finalSetup is called. This means you can only modify
+			// explicitly configured values, anything that still has default values cannot be
+			// changed.
+			$forceChange = $this->getOption( 'i-know-what-im-doing', false );
 			foreach ( $options as $key => $value ) {
 				if ( strpos( $key, '.' ) !== false ) {
 					// key path
 					$path = explode( '.', $key );
-					if ( !isset( $whitelist[$path[0]] ) ) {
-						$this->error( "\nERROR: $key is not a whitelisted global variable\n" );
+					if ( !isset( $changeable[$path[0]] ) ) {
+						$this->error( "\nERROR: $key is not a globally changeable variable\n" );
 					}
 
 					$cur =& $GLOBALS;
@@ -133,7 +144,7 @@ class RunSearch extends Maintenance {
 						$cur =& $cur[$pathel];
 					}
 					$cur = $value;
-				} elseif ( isset( $whitelist[$key] ) ) {
+				} elseif ( $forceChange || isset( $changeable[$key] ) ) {
 					// This is different from the keypath case above in that this can set
 					// variables that haven't been loaded yet. In particular at this point
 					// in the MW load process explicitly configured variables are
@@ -141,7 +152,7 @@ class RunSearch extends Maintenance {
 					// loaded.
 					$GLOBALS[$key] = $value;
 				} else {
-					$this->error( "\nERROR: $key is not a whitelisted global variable\n" );
+					$this->error( "\nERROR: $key is not a globally changeable variable\n" );
 					exit();
 				}
 			}

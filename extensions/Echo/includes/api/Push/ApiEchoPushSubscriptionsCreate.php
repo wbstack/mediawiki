@@ -5,6 +5,7 @@ namespace EchoPush\Api;
 use ApiBase;
 use ApiMain;
 use EchoPush\SubscriptionManager;
+use EchoPush\Utils;
 use EchoServices;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -29,8 +30,7 @@ class ApiEchoPushSubscriptionsCreate extends ApiBase {
 	 * @param string $name Module name
 	 * @return ApiEchoPushSubscriptionsCreate
 	 */
-	public static function factory( ApiBase $parent, string $name ):
-	ApiEchoPushSubscriptionsCreate {
+	public static function factory( ApiBase $parent, string $name ): ApiEchoPushSubscriptionsCreate {
 		$subscriptionManger = EchoServices::getInstance()->getPushSubscriptionManager();
 		$module = new self( $parent->getMain(), $name, $subscriptionManger );
 		$module->parent = $parent;
@@ -58,7 +58,16 @@ class ApiEchoPushSubscriptionsCreate extends ApiBase {
 	public function execute(): void {
 		$provider = $this->getParameter( 'provider' );
 		$token = $this->getParameter( 'providertoken' );
-		$success = $this->subscriptionManager->create( $this->getUser(), $provider, $token );
+		$topic = null;
+		// check if metadata is a JSON string correctly encoded
+		if ( $provider === 'apns' ) {
+			$topic = $this->getParameter( 'topic' );
+			if ( !$topic ) {
+				$this->dieWithError( 'apierror-echo-push-topic-required' );
+			}
+		}
+		$userId = Utils::getPushUserId( $this->getUser() );
+		$success = $this->subscriptionManager->create( $provider, $token, $userId, $topic );
 		if ( !$success ) {
 			$this->dieWithError( 'apierror-echo-push-token-exists' );
 		}
@@ -82,6 +91,10 @@ class ApiEchoPushSubscriptionsCreate extends ApiBase {
 			'providertoken' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
+			],
+			'topic' => [
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => false,
 			],
 		];
 	}

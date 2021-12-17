@@ -21,9 +21,8 @@
 namespace MediaWiki\StopForumSpam;
 
 use AbuseFilterVariableHolder;
-use Block;
-use DeferredUpdates;
 use Html;
+use MediaWiki\Block\DatabaseBlock;
 use MediaWiki\Logger\LoggerFactory;
 use RequestContext;
 use Title;
@@ -43,7 +42,11 @@ class Hooks {
 	public static function abuseFilterComputeVariable( $method, $vars, $parameters, &$result ) {
 		if ( $method == 'sfs-blocked' ) {
 			$ip = self::getIPFromUser( $parameters['user'] );
-			$result = $ip !== false ? BlacklistManager::isBlacklisted( $ip ) : false;
+			if ( $ip === false ) {
+				$result = false;
+			} else {
+				$result = DenyListManager::singleton()->isIpDenyListed( $ip );
+			}
 
 			return false;
 		}
@@ -59,6 +62,7 @@ class Hooks {
 	 */
 	public static function abuseFilterGenerateUserVars( $vars, $user ) {
 		global $wgSFSIPListLocation;
+
 		if ( $wgSFSIPListLocation ) {
 			$vars->setLazyLoadVar( 'sfs_blocked', 'sfs-blocked', [ 'user' => $user ] );
 		}
@@ -73,6 +77,7 @@ class Hooks {
 	 */
 	public static function abuseFilterBuilder( &$builderValues ) {
 		global $wgSFSIPListLocation;
+
 		if ( $wgSFSIPListLocation ) {
 			// Uses: 'abusefilter-edit-builder-vars-sfs-blocked'
 			$builderValues['vars']['sfs_blocked'] = 'sfs-blocked';
@@ -103,7 +108,7 @@ class Hooks {
 	}
 
 	/**
-	 * If an IP address is blacklisted, don't let them edit.
+	 * If an IP address is denylisted, don't let them edit.
 	 *
 	 * @param Title &$title Title being acted upon
 	 * @param User &$user User performing the action
@@ -112,8 +117,8 @@ class Hooks {
 	 * @return bool
 	 */
 	public static function onGetUserPermissionsErrorsExpensive( &$title, &$user, $action, &$result ) {
-		global $wgSFSIPListLocation, $wgSFSEnableDeferredUpdates,
-			$wgBlockAllowsUTEdit, $wgSFSReportOnly;
+		global $wgSFSIPListLocation, $wgBlockAllowsUTEdit, $wgSFSReportOnly;
+
 		if ( !$wgSFSIPListLocation ) {
 			// Not configured
 			return true;
@@ -132,17 +137,12 @@ class Hooks {
 			return true;
 		}
 
-		if ( $wgSFSEnableDeferredUpdates && !BlacklistManager::isBlacklistUpToDate() ) {
-			// Note that this doesn't necessarily mean our blacklist
-			// is out of date, that it just needs updating.
-			DeferredUpdates::addUpdate( new BlacklistUpdate() );
-		}
-
-		if ( BlacklistManager::isBlacklisted( $ip ) ) {
+		$denyListManager = DenyListManager::singleton();
+		if ( $denyListManager->isIpDenyListed( $ip ) ) {
 			$logger = LoggerFactory::getInstance( 'StopForumSpam' );
 
 			$logger->info(
-				"{user} tripped blacklist doing {action} "
+				"{user} tripped SFS deny list doing {action} "
 				. "by using {clientip} on \"{title}\".",
 				[
 					'action' => $action,
@@ -165,9 +165,9 @@ class Hooks {
 				return true;
 			}
 			// I just copied this from TorBlock, not sure if it actually makes sense.
-			if ( Block::isWhitelistedFromAutoblocks( $ip ) ) {
+			if ( DatabaseBlock::isExemptedFromAutoblocks( $ip ) ) {
 				$logger->info(
-					"{clientip} is in autoblock whitelist. Exempting from SFS blocks.",
+					"{clientip} is in autoblock exemption list. Exempting from SFS blocks.",
 					[ 'clientip' => $ip, 'reportonly' => $wgSFSReportOnly ]
 				);
 
@@ -181,7 +181,7 @@ class Hooks {
 
 			// log info when action blocked
 			$logger->info(
-				"{user} was blocked from doing {action} "
+				"{user} was blocked by SFS from doing {action} "
 				. "by using {clientip} on \"{title}\".",
 				[
 					'action' => $action,
@@ -206,13 +206,16 @@ class Hooks {
 	 */
 	public static function onOtherBlockLogLink( &$msg, $ip ) {
 		global $wgSFSIPListLocation;
+
 		if ( !$wgSFSIPListLocation ) {
 			return true;
 		}
-		if ( IPUtils::isIPAddress( $ip ) && BlacklistManager::isBlacklisted( $ip ) ) {
+
+		$denyListManager = DenyListManager::singleton();
+		if ( IPUtils::isIPAddress( $ip ) && $denyListManager->isIpDenyListed( $ip ) ) {
 			$msg[] = Html::rawElement(
 				'span',
-				[ 'class' => 'mw-stopforumspam-blacklisted' ],
+				[ 'class' => 'mw-stopforumspam-denylisted' ],
 				wfMessage( 'stopforumspam-is-blocked', $ip )->parse()
 			);
 		}

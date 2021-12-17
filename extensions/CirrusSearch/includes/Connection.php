@@ -4,7 +4,7 @@ namespace CirrusSearch;
 
 use ElasticaConnection;
 use Exception;
-use MWNamespace;
+use MediaWiki\MediaWikiServices;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -31,43 +31,42 @@ class Connection extends ElasticaConnection {
 	/**
 	 * Name of the index that holds content articles.
 	 */
-	const CONTENT_INDEX_TYPE = 'content';
+	public const CONTENT_INDEX_TYPE = 'content';
 
 	/**
 	 * Name of the index that holds non-content articles.
 	 */
-	const GENERAL_INDEX_TYPE = 'general';
+	public const GENERAL_INDEX_TYPE = 'general';
 
 	/**
 	 * Name of the index that hosts content title suggestions
 	 */
-	const TITLE_SUGGEST_TYPE = 'titlesuggest';
+	public const TITLE_SUGGEST_TYPE = 'titlesuggest';
 
 	/**
 	 * Name of the index that hosts archive data
 	 */
-	const ARCHIVE_INDEX_TYPE = 'archive';
+	public const ARCHIVE_INDEX_TYPE = 'archive';
 
 	/**
 	 * Name of the page type.
 	 */
-	const PAGE_TYPE_NAME = 'page';
+	public const PAGE_TYPE_NAME = 'page';
 
 	/**
 	 * Name of the title suggest type
 	 */
-	const TITLE_SUGGEST_TYPE_NAME = 'titlesuggest';
+	public const TITLE_SUGGEST_TYPE_NAME = 'titlesuggest';
 
 	/**
 	 * Name of the archive type
 	 */
-	const ARCHIVE_TYPE_NAME = 'archive';
+	public const ARCHIVE_TYPE_NAME = 'archive';
 
 	/**
-	 * string[] Map of index types (suffix names)
-	 * indexed by mapping type.
+	 * Map of index types (suffix names) indexed by mapping type.
 	 */
-	private static $TYPE_MAPPING = [
+	private const TYPE_MAPPING = [
 		self::PAGE_TYPE_NAME => [
 			self::CONTENT_INDEX_TYPE,
 			self::GENERAL_INDEX_TYPE,
@@ -139,6 +138,9 @@ class Connection extends ElasticaConnection {
 		self::$pool[$config->getWikiId()][$clusterId] = $this;
 	}
 
+	/**
+	 * @return never
+	 */
 	public function __sleep() {
 		throw new \RuntimeException( 'Attempting to serialize ES connection' );
 	}
@@ -218,12 +220,12 @@ class Connection extends ElasticaConnection {
 	 * @return string[]
 	 */
 	public function getAllIndexTypes( $mappingType = self::PAGE_TYPE_NAME ) {
-		Assert::parameter( $mappingType === null || isset( self::$TYPE_MAPPING[$mappingType] ),
+		Assert::parameter( $mappingType === null || isset( self::TYPE_MAPPING[$mappingType] ),
 			'$mappingType', "Unknown mapping type $mappingType" );
 		$indexTypes = [];
 
 		if ( $mappingType === null ) {
-			foreach ( self::$TYPE_MAPPING as $types ) {
+			foreach ( self::TYPE_MAPPING as $types ) {
 				$indexTypes = array_merge( $indexTypes, $types );
 			}
 			$indexTypes = array_merge(
@@ -233,14 +235,14 @@ class Connection extends ElasticaConnection {
 		} else {
 			$indexTypes = array_merge(
 				$indexTypes,
-				self::$TYPE_MAPPING[$mappingType],
+				self::TYPE_MAPPING[$mappingType],
 				$mappingType === self::PAGE_TYPE_NAME ?
 					array_values( $this->config->get( 'CirrusSearchNamespaceMappings' ) ) : []
 			);
 		}
 
 		if ( !$this->getSettings()->isPrivateCluster() ) {
-			$indexTypes = array_filter( $indexTypes, function ( $type ) {
+			$indexTypes = array_filter( $indexTypes, static function ( $type ) {
 				return $type !== self::ARCHIVE_INDEX_TYPE;
 			} );
 		}
@@ -278,7 +280,7 @@ class Connection extends ElasticaConnection {
 			return self::CONTENT_INDEX_TYPE;
 		}
 
-		return MWNamespace::isContent( $namespace ) ?
+		return MediaWikiServices::getInstance()->getNamespaceInfo()->isContent( $namespace ) ?
 			self::CONTENT_INDEX_TYPE : self::GENERAL_INDEX_TYPE;
 	}
 
@@ -316,7 +318,7 @@ class Connection extends ElasticaConnection {
 		}
 		// If no namespaces provided all indices are needed
 		$mappings = $this->config->get( 'CirrusSearchNamespaceMappings' );
-		return array_merge( self::$TYPE_MAPPING[self::PAGE_TYPE_NAME],
+		return array_merge( self::TYPE_MAPPING[self::PAGE_TYPE_NAME],
 			array_values( $mappings ) );
 	}
 

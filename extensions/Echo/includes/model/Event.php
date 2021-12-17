@@ -3,6 +3,7 @@
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\User\UserIdentity;
 
 /**
  * Immutable class to represent an event.
@@ -101,7 +102,19 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 * variant: A variant of the type;
 	 * agent: The user who caused the event;
 	 * title: The page on which the event was triggered;
-	 * extra: Event-specific extra information (e.g. post content)
+	 * extra: Event-specific extra information (e.g. post content, delay time, root job params).
+	 *
+	 * Delayed jobs extra params:
+	 * delay: Amount of time in seconds for the notification to be delayed
+	 *
+	 * Job deduplication extra params:
+	 * rootJobSignature: The sha1 signature of the job
+	 * rootJobTimestamp: The timestamp when the job gets submitted
+	 *
+	 * For example to enqueue a new `example` root job or make a parent job
+	 * no-op when submitting a new notification you need to pass this extra params:
+	 *
+	 * [ 'extra' => Job::newRootJobParams('example') ]
 	 *
 	 * @throws MWException
 	 * @return EchoEvent|false False if aborted via hook or Echo DB is read-only
@@ -111,7 +124,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 
 		// Do not create event and notifications if write access is locked
 		if ( wfReadOnly()
-			|| MWEchoDbFactory::newFromDefault()->getEchoDb( DB_MASTER )->isReadOnly()
+			|| MWEchoDbFactory::newFromDefault()->getEchoDb( DB_PRIMARY )->isReadOnly()
 		) {
 			return false;
 		}
@@ -157,8 +170,15 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 			$obj->setTitle( $obj->title );
 		}
 
-		if ( $obj->agent && !$obj->agent instanceof User ) {
-			throw new InvalidArgumentException( "Invalid user parameter" );
+		if ( $obj->agent ) {
+			if ( !$obj->agent instanceof UserIdentity ) {
+				throw new InvalidArgumentException( "Invalid user parameter" );
+			}
+
+			// RevisionStore returns UserIdentityValue now, convert to User for passing to hooks.
+			if ( !$obj->agent instanceof User ) {
+				$obj->agent = MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $obj->agent );
+			}
 		}
 
 		if ( !Hooks::run( 'BeforeEchoEventInsert', [ $obj ] ) ) {
@@ -173,6 +193,11 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		global $wgEchoUseJobQueue;
 
 		EchoNotificationController::notify( $obj, $wgEchoUseJobQueue );
+
+		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
+		$type = $info['type'];
+		$stats->increment( 'echo.event.all' );
+		$stats->increment( "echo.event.$type" );
 
 		return $obj;
 	}
@@ -192,7 +217,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 			$data['event_id'] = $this->id;
 		}
 		if ( $this->agent ) {
-			if ( $this->agent->isAnon() ) {
+			if ( !$this->agent->isRegistered() ) {
 				$data['event_agent_ip'] = $this->agent->getName();
 			} else {
 				$data['event_agent_id'] = $this->agent->getId();
@@ -260,7 +285,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		foreach ( $targetPageIds as $targetPageId ) {
 			// Make sure the target-page id is a valid id
 			$title = Title::newFromID( $targetPageId );
-			// Try master if there is no match
+			// Try primary database if there is no match
 			if ( !$title ) {
 				$title = Title::newFromID( $targetPageId, Title::GAID_FOR_UPDATE );
 			}
@@ -308,10 +333,9 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		$this->deleted = $row->event_deleted;
 
 		if ( $row->event_agent_id ) {
-			$this->agent = User::newFromId( $row->event_agent_id );
+			$this->agent = User::newFromId( (int)$row->event_agent_id );
 		} elseif ( $row->event_agent_ip ) {
-			// @phan-suppress-next-line PhanTypeMismatchArgument Not null here
-			$this->agent = User::newFromName( $row->event_agent_ip, false );
+			$this->agent = User::newFromName( (string)$row->event_agent_ip, false );
 		}
 
 		// Lazy load the title from getTitle() so that we can do a batch-load
@@ -326,8 +350,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 		}
 		if ( $row->event_page_id ) {
 			$titleCache = EchoTitleLocalCache::create();
-			// @phan-suppress-next-line PhanTypeMismatchArgument Not null here
-			$titleCache->add( $row->event_page_id );
+			$titleCache->add( (int)$row->event_page_id );
 		}
 		if ( isset( $this->extra['revid'] ) && $this->extra['revid'] ) {
 			$revisionCache = EchoRevisionLocalCache::create();
@@ -340,12 +363,12 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	/**
 	 * Loads data from the database into this object, given the event ID.
 	 * @param int $id Event ID
-	 * @param bool $fromMaster
+	 * @param bool $fromPrimary
 	 * @return bool Whether it loaded successfully
 	 */
-	public function loadFromID( $id, $fromMaster = false ) {
+	public function loadFromID( $id, $fromPrimary = false ) {
 		$eventMapper = new EchoEventMapper();
-		$event = $eventMapper->fetchById( $id, $fromMaster );
+		$event = $eventMapper->fetchById( $id, $fromPrimary );
 		if ( !$event ) {
 			return false;
 		}
@@ -439,7 +462,8 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 			} else {
 				// Use User::isHidden()
 				$permManager = MediaWikiServices::getInstance()->getPermissionManager();
-				return $permManager->userHasAnyRight( $user, 'viewsuppressed', 'hideuser' ) || !$agent->isHidden();
+				return $permManager->userHasAnyRight( $user, 'viewsuppressed', 'hideuser' )
+					|| !$agent->isHidden();
 			}
 		} elseif ( $revision ) {
 			// A revision is set, use rev_deleted
@@ -514,10 +538,10 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	}
 
 	/**
-	 * @param bool $fromMaster
+	 * @param bool $fromPrimary
 	 * @return null|Title
 	 */
-	public function getTitle( $fromMaster = false ) {
+	public function getTitle( $fromPrimary = false ) {
 		if ( $this->title ) {
 			return $this->title;
 		} elseif ( $this->pageId ) {
@@ -528,7 +552,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 				return $this->title;
 			}
 
-			$this->title = Title::newFromID( $this->pageId, $fromMaster ? Title::GAID_FOR_UPDATE : 0 );
+			$this->title = Title::newFromID( $this->pageId, $fromPrimary ? Title::GAID_FOR_UPDATE : 0 );
 			return $this->title;
 		} elseif ( isset( $this->extra['page_title'] ) && isset( $this->extra['page_namespace'] ) ) {
 			$this->title = Title::makeTitleSafe(
@@ -570,7 +594,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 * @return string
 	 */
 	public function getCategory() {
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
 
 		return $attributeManager->getNotificationCategory( $this->type );
 	}
@@ -580,7 +604,7 @@ class EchoEvent extends EchoAbstractEntity implements Bundleable {
 	 * @return string
 	 */
 	public function getSection() {
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
 
 		return $attributeManager->getNotificationSection( $this->type );
 	}

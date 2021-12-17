@@ -4,7 +4,7 @@
 // Code adapted from Yair Rand's NavPopupsRestyled.js
 // https://en.wikipedia.org/wiki/User:Yair_rand/NavPopupsRestyled.js
 //
-// "Tall" terminology, although applied to the popup, refers only to the
+// 'Tall' terminology, although applied to the popup, refers only to the
 // thumbnail and not the popup itself:
 //   Class     Thumbnail  Popup
 //   Tall      Portrait   Landscape
@@ -15,12 +15,17 @@
 // The subtracting-triangles method results in a line that
 // is ~0.7px wide, so make it slightly darker to compensate.
 @borderColorPopupPointerNoImage: rgba( 0, 0, 0, 0.07 );
+@previewFooterCogIconInteractionAreaSize: 34px;
+@previewFooterHeight: @popupPadding + @previewFooterCogIconInteractionAreaSize;
+
+// Same as the --pointer-height in popup.less
+@previewPointerHeight: 8px;
 
 .mwe-popups {
 	background: #fff;
 	position: absolute;
 	z-index: @zIndexPopup;
-	.box-shadow( 0 30px 90px -20px rgba( 0, 0, 0, 0.3 ), 0 0 1px 1px @borderColorPopup; );
+	box-shadow: 0 30px 90px -20px rgba( 0, 0, 0, 0.3 ), 0 0 1px 1px @borderColorPopup;
 	padding: 0;
 	display: none;
 	font-size: 14px;
@@ -28,43 +33,48 @@
 	min-width: 300px;
 	border-radius: @borderRadius;
 
-	.mw-ui-icon {
-		// mw-ui-icon assumes a font size of 16px so we must declare it here
-		// FIXME: This should be in `em` for user scalability and skin specific or with overrides.
-		font-size: 16px;
-
-		&:before {
-			// Use fixed size to prevent icon blur.
-			background-size: 20px;
-			min-height: 20px;
-		}
-	}
-
 	// icons positioned at the top of the popup
 	.mw-ui-icon-preview-disambiguation,
 	.mw-ui-icon-preview-generic {
-		margin: 21px 0 8px 0;
 		opacity: 0.25;
 	}
 
 	.mwe-popups-container {
 		color: @colorText;
-		margin-top: -9px;
+		margin-top: -@previewPointerHeight;
 		padding-top: 9px;
 		text-decoration: none;
 
 		footer {
-			padding: @popupPadding;
+			// T277364: The top padding doesn't have a visible effect anyway; this reduces the risk
+			// of the footer covering content
+			padding: 0 @popupPadding @popupPadding;
 			margin: 0;
-			font-size: 10px;
 			position: absolute;
 			bottom: 0;
 			left: 0;
 		}
 	}
 
+	.mwe-popups-settings-icon {
+		display: block;
+		float: right; // positions icon near bottom right corner
+		border-radius: @borderRadius;
+		opacity: 0.67;
+		.transition( ~'background-color 100ms, opacity 100ms' );
+
+		&:hover {
+			background-color: @colorGray14;
+		}
+
+		&:active {
+			background-color: @colorGray12;
+			opacity: 1;
+		}
+	}
+
 	.mwe-popups-extract {
-		// T156800, T139297: "Pad" the extract horizontally using a margin so the
+		// T156800, T139297: 'Pad' the extract horizontally using a margin so the
 		// SVG element is forced not to occlude the truncating pseudo-element and
 		// the settings cog in IE9-11.
 		margin: @popupPadding;
@@ -77,14 +87,15 @@
 			text-decoration: none;
 		}
 
-		&:after {
+		&:after,
+		blockquote:after {
 			content: ' ';
 			position: absolute;
 			bottom: 0;
 			width: 25%;
 			height: @lineHeight;
 			background-color: transparent;
-			pointer-events: none; // Allows clicking "through" the element
+			pointer-events: none; // Allows clicking 'through' the element
 		}
 
 		/* Stylelint rule broken for vendor prefixes: https://github.com/stylelint/stylelint/issues/1939 */
@@ -95,8 +106,6 @@
 			/* @noflip */
 			background-image: -webkit-linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
 			/* @noflip */
-			background-image: -moz-linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
-			/* @noflip */
 			background-image: linear-gradient( to right, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
 		}
 
@@ -106,9 +115,18 @@
 			/* @noflip */
 			background-image: -webkit-linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
 			/* @noflip */
-			background-image: -moz-linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
-			/* @noflip */
 			background-image: linear-gradient( to left, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 50% );
+		}
+
+		blockquote:after {
+			width: 100%;
+			height: @lineHeight + 5px;
+			/* @noflip */
+			bottom: 0;
+			/* @noflip */
+			background-image: -webkit-linear-gradient( to bottom, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 75% );
+			/* @noflip */
+			background-image: linear-gradient( to bottom, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) 75% );
 		}
 		/* stylelint-enable function-linear-gradient-no-nonstandard-direction */
 
@@ -141,14 +159,20 @@
 
 		.mwe-popups-extract {
 			width: @popupTallWidth;
-			height: 9 * @lineHeight;
+			height: ( 9 * @lineHeight ) - 4px;
 			overflow: hidden;
 			float: left;
 		}
 
-		footer {
-			width: @popupTallWidth;
+		.mwe-popups-extract + footer {
 			left: 0;
+			right: @popupLandscapeThumbnailWidth;
+
+			.rtl & {
+				/* @noflip */
+				right: -12px;
+				width: @popupTallWidth;
+			}
 		}
 	}
 
@@ -156,18 +180,34 @@
 		width: @popupWidth;
 
 		.mwe-popups-extract {
-			@minHeight: 2 * @lineHeight;
+			@minHeight: @previewFooterHeight + @previewPointerHeight;
 			// On short summaries, we want to avoid an overlap with the gradient.
 			min-height: @minHeight;
-			max-height: 7 * @lineHeight;
+			max-height: 202px - @previewFooterHeight - @popupPadding;
 			overflow: hidden;
-			margin-bottom: @minHeight + 7px;
+			margin-bottom: @minHeight;
 			padding-bottom: 0;
 		}
 
 		footer {
-			width: @popupWidth - @cogIconSize;
+			// 2px = border
+			width: @popupWidth - @cogIconSize - 2;
 		}
+	}
+
+	// TODO: Remove when not in Beta any more (T276200)
+	.mwe-popups-container.footer-empty .mwe-popups-extract {
+		margin-bottom: @popupPadding;
+
+		.mwe-popups-scroll {
+			max-height: 403px - 2 * @popupPadding + @previewPointerHeight;
+		}
+	}
+
+	// TODO: Remove when not in Beta any more (T276200)
+	&.flipped-y .mwe-popups-container.footer-empty .mwe-popups-extract,
+	&.flipped-x-y .mwe-popups-container.footer-empty .mwe-popups-extract {
+		margin-bottom: @popupPadding + @previewPointerHeight;
 	}
 
 	&.mwe-popups-type-generic,
@@ -175,8 +215,9 @@
 		.mwe-popups-extract {
 			min-height: auto;
 			padding-top: 4px;
-			margin-bottom: 60px;
 			margin-top: 0;
+			margin-bottom: var( --margin-bottom );
+			--margin-bottom: 60px;
 		}
 
 		.mwe-popups-read-link {
@@ -184,8 +225,8 @@
 			font-size: 12px;
 		}
 
-		// When the user dwells on the "There was an issue displaying this preview"
-		// text, which is a link to the page, then highlight the "Go to this page"
+		// When the user dwells on the 'There was an issue displaying this preview'
+		// text, which is a link to the page, then highlight the 'Go to this page'
 		// link too.
 		.mwe-popups-extract:hover + footer .mwe-popups-read-link {
 			text-decoration: underline;
@@ -266,6 +307,10 @@
 			z-index: @zIndexThumbnailMask;
 			right: 0;
 		}
+
+		.mwe-popups-extract {
+			margin-top: 8px;
+		}
 	}
 
 	&.flipped-x-y {
@@ -344,6 +389,148 @@
 	&.flipped-x {
 		polyline {
 			.mwe-popups-translate( -100%, 8px );
+		}
+	}
+}
+
+@supports ( clip-path: polygon( 1px 1px ) ) {
+	.mwe-popups {
+		.mwe-popups-thumbnail {
+			// Remove whitespace below image.
+			display: block;
+			object-fit: cover;
+			outline: 1px solid rgba( 0, 0, 0, 0.1 );
+		}
+
+		.mwe-popups-extract[ dir='rtl' ] + footer {
+			/* @noflip */
+			left: unset;
+			/* @noflip */
+			right: 0;
+
+			.mwe-popups-settings-icon {
+				/* @noflip */
+				float: left;
+			}
+		}
+
+		&.flipped-y,
+		&.flipped-x-y {
+			.mwe-popups-discreet {
+				margin-bottom: 0;
+			}
+
+			.mwe-popups-container {
+				--y1: 100%;
+				--y2: ~'calc(100% - var(--pointer-height))';
+				--y3: ~'calc(100% - var(--pointer-height) - var(--pseudo-radius))';
+				--y4: ~'var(--pseudo-radius)';
+				--y5: 0;
+				margin-bottom: -9px;
+				margin-top: 0;
+			}
+		}
+
+		.mwe-popups-container {
+			--x1: 0;
+			--x2: var( --pseudo-radius );
+			--x3: ~'calc( var(--pointer-offset) - ( var( --pointer-width ) / 2 ) )';
+			--x4: var( --pointer-offset );
+			--x5: ~'calc( var(--pointer-offset) + ( var( --pointer-width ) / 2 ) )';
+			--x6: ~'calc( 100% - var( --pseudo-radius ) )';
+			--x7: 100%;
+			--y1: 0;
+			--y2: var( --pointer-height );
+			--y3: ~'calc(var(--pointer-height) + var(--pseudo-radius))';
+			--y4: ~'calc(100% - var(--pseudo-radius))';
+			--y5: 100%;
+			padding-top: 0;
+			display: flex;
+			background: #fff;
+			--pseudo-radius: 2px;
+			--pointer-height: 8px;
+			--pointer-width: 16px;
+			--pointer-offset: 26px;
+
+			// Using straight-lines instead of rounded corners,
+			// until shape() syntax (https://github.com/w3c/csswg-drafts/pull/5711) is resolved
+			//
+			clip-path: ~'polygon( var( --x2 ) var( --y2 ), var( --x3) var(--y2), var(--x4) var(--y1), var(--x5) var(--y2), var(--x6) var(--y2), var(--x7) var(--y3), var(--x7) var(--y4), var(--x6) var(--y5), var(--x2) var(--y5), var(--x1) var(--y4), var(--x1) var(--y3) )';
+		}
+
+		&.mwe-popups-is-tall {
+			.mwe-popups-discreet {
+				.mwe-popups-thumbnail {
+					width: @popupLandscapeThumbnailWidth;
+					box-sizing: border-box;
+					height: 250px;
+				}
+				order: 1;
+			}
+			flex-direction: row;
+		}
+
+		&.mwe-popups-is-not-tall {
+			.mwe-popups-thumbnail {
+				width: @popupWidth;
+				// should never exceed this value per https://phabricator.wikimedia.org/T255549#7296087
+				height: @popupPortraitThumbnailHeight;
+			}
+
+			.mwe-popups-container {
+				flex-direction: column;
+			}
+		}
+
+		&:before {
+			display: none;
+		}
+
+		&:after {
+			display: none;
+		}
+
+		&.mwe-popups-image-pointer {
+			.mwe-popups-discreet {
+				// Override the negative margin on element which undesirably pulls
+				// mwe-popups-extract up.
+				margin-bottom: 0;
+			}
+
+			.mwe-popups-extract {
+				margin-top: 0;
+			}
+		}
+
+		// Add top padding the same size as the pokey height to account for
+		// clip-path cutting off the .mwe-popups-extract's margin. We don't want
+		// this to apply to elements with the .mwe-popups-image-pointer class
+		// because the pokey is on the image.
+		&:not( .flipped-y ):not( .flipped-x-y ):not( .mwe-popups-image-pointer ):not( .mwe-popups-type-disambiguation ) .mwe-popups-extract {
+			padding-top: var( --pointer-height );
+		}
+
+		&.mwe-popups-type-generic:not( .flipped-y ):not( .flipped-x-y ),
+		&.mwe-popups-type-disambiguation:not( .flipped-y ):not( .flipped-x-y ) {
+			.mwe-popups-container {
+				padding-top: var( --pointer-height );
+
+				.mwe-popups-extract {
+					margin-bottom: ~'calc( var( --margin-bottom ) - var( --pointer-height ) )';
+				}
+			}
+		}
+	}
+
+	body {
+		&.ltr .mwe-popups.flipped-x,
+		&.ltr .mwe-popups.flipped-x-y,
+		&.rtl .mwe-popups:not( .flipped-x ):not( .flipped-x-y ) {
+			.mwe-popups-container {
+				--x3: ~'calc(100% - var(--pointer-offset) - (var(--pointer-width) / 2))';
+				--x4: ~'calc(100% - var(--pointer-offset))';
+				--x5: ~'calc(100% - var(--pointer-offset) + (var(--pointer-width) / 2))';
+			}
 		}
 	}
 }

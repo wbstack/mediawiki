@@ -10,7 +10,7 @@ class ConfirmAccount {
 	public static function runAutoMaintenance() {
 		global $wgRejectedAccountMaxAge, $wgConfirmAccountRejectAge, $wgConfirmAccountFSRepos;
 
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$repo = self::getFileRepo( $wgConfirmAccountFSRepos['accountreqs'] );
 
 		# Select all items older than time $encCutoff
@@ -58,7 +58,7 @@ class ConfirmAccount {
 	 * @param string $name
 	 */
 	public static function confirmEmail( $name ) {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$dbw->update( 'account_requests',
 			[ 'acr_email_authenticated' => $dbw->timestamp() ],
 			[ 'acr_name' => $name ],
@@ -108,19 +108,18 @@ class ConfirmAccount {
 	 * @return true|Status True on success, a Status object on failure.
 	 */
 	public static function sendConfirmationMail( User $user, $ip, $token, $expiration ) {
-		global $wgContLang;
-
 		$url = self::confirmationTokenUrl( $token );
 		$lang = $user->getOption( 'language' );
+		$contentLanguage = MediaWikiServices::getInstance()->getContentLanguage();
 		return $user->sendMail(
 			wfMessage( 'requestaccount-email-subj' )->inLanguage( $lang )->text(),
 			wfMessage( 'requestaccount-email-body',
 				$ip,
 				$user->getName(),
 				$url,
-				$wgContLang->timeanddate( $expiration, false ),
-				$wgContLang->date( $expiration, false ),
-				$wgContLang->time( $expiration, false )
+				$contentLanguage->timeanddate( $expiration, false ),
+				$contentLanguage->date( $expiration, false ),
+				$contentLanguage->time( $expiration, false )
 			)->inLanguage( $lang )->text()
 		);
 	}
@@ -135,7 +134,7 @@ class ConfirmAccount {
 		global $wgConfirmAdminEmailExtraFields;
 		$dbr = wfGetDB( DB_REPLICA );
 		# Create updated array with acr_ prepended because of database names
-		$acrAdminEmailFields = array_merge( array_map( function ( $fieldName ) {
+		$acrAdminEmailFields = array_merge( array_map( static function ( $fieldName ) {
 			return ( 'acr_' . $fieldName );
 		}, $wgConfirmAdminEmailExtraFields ), [ 'acr_name', 'acr_email_authenticated' ] );
 		# Get all specified user information from database
@@ -182,11 +181,10 @@ class ConfirmAccount {
 	 * @return int
 	 */
 	public static function getOpenEmailConfirmedCount( $type = '*' ) {
-		global $wgMemc;
-
 		# Check cached results
-		$key = $wgMemc->makeKey( 'confirmaccount', 'econfopencount', $type );
-		$count = $wgMemc->get( $key );
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$key = $cache->makeKey( 'confirmaccount', 'econfopencount', $type );
+		$count = $cache->get( $key );
 		# Only show message if there are any such requests
 		if ( $count === false ) {
 			$conds = [
@@ -196,10 +194,10 @@ class ConfirmAccount {
 			if ( $type !== '*' ) {
 				$conds['acr_type'] = (int)$type;
 			}
-			$dbw = wfGetDB( DB_MASTER );
+			$dbw = wfGetDB( DB_PRIMARY );
 			$count = (int)$dbw->selectField( 'account_requests', 'COUNT(*)', $conds, __METHOD__ );
 			# Cache results (invalidated on change )
-			$wgMemc->set( $key, $count, 3600 * 24 * 7 );
+			$cache->set( $key, $count, 3600 * 24 * 7 );
 		}
 		return $count;
 	}
@@ -209,13 +207,14 @@ class ConfirmAccount {
 	 * @return void
 	 */
 	public static function clearAccountRequestCountCache() {
-		global $wgAccountRequestTypes, $wgMemc;
+		global $wgAccountRequestTypes;
 
 		$types = array_keys( $wgAccountRequestTypes );
 		$types[] = '*'; // "all" types count
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		foreach ( $types as $type ) {
-			$key = $wgMemc->makeKey( 'confirmaccount', 'econfopencount', $type );
-			$wgMemc->delete( $key );
+			$key = $cache->makeKey( 'confirmaccount', 'econfopencount', $type );
+			$cache->delete( $key );
 		}
 	}
 
@@ -338,7 +337,12 @@ class ConfirmAccount {
 			[ '*' ],
 			[ 'EXISTS (' .
 				$dbr->selectSqlText( 'user_groups', '1',
-					[ 'ug_user = user_id', 'ug_group' => $groups ] ) .
+					[
+						'ug_user = user_id',
+						'ug_group' => $groups,
+						'ug_expiry IS NULL OR ug_expiry >= ' . $dbr->addQuotes( $dbr->timestamp() )
+					]
+				) .
 				')' ],
 			__METHOD__,
 			[ 'LIMIT' => 200 ] // sanity

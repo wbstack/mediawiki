@@ -3,10 +3,24 @@
  */
 
 import { renderPopup } from '../popup/popup';
-import { escapeHTML } from '../templateUtil';
+import { createNodeFromTemplate, escapeHTML } from '../templateUtil';
 
-// Known citation type strings currently supported with icons and messages.
-const KNOWN_TYPES = [ 'book', 'journal', 'news', 'web' ];
+const templateHTML = `
+<div class="mwe-popups-container">
+    <div class="mwe-popups-extract">
+        <div class="mwe-popups-scroll">
+            <strong class="mwe-popups-title">
+                <span class="mw-ui-icon mw-ui-icon-element"></span>
+                <span class="mwe-popups-title-placeholder"></span>
+            </strong>
+            <div class="mw-parser-output"></div>
+        </div>
+        <div class="mwe-popups-fade"></div>
+    </div>
+	<footer>
+		<div class="mwe-popups-settings"></div>
+	</footer>
+</div>`;
 
 const LOGGING_SCHEMA = 'event.ReferencePreviewsPopups';
 let isTracking = false;
@@ -28,53 +42,70 @@ $( () => {
 export function renderReferencePreview(
 	model
 ) {
-	const type = KNOWN_TYPES.indexOf( model.referenceType ) < 0 ? 'generic' : model.referenceType,
-		titleMsg = `popups-refpreview-${type === 'generic' ? 'reference' : type}`,
-		// The following messages are used here:
-		// * popups-refpreview-book
-		// * popups-refpreview-journal
-		// * popups-refpreview-news
-		// * popups-refpreview-reference
-		// * popups-refpreview-web
-		title = escapeHTML( mw.msg( titleMsg ) ),
-		url = escapeHTML( model.url ),
-		linkMsg = escapeHTML( mw.msg( 'popups-refpreview-jump-to-reference' ) );
+	const type = model.referenceType || 'generic';
+	// The following messages are used here:
+	// * popups-refpreview-book
+	// * popups-refpreview-journal
+	// * popups-refpreview-news
+	// * popups-refpreview-note
+	// * popups-refpreview-web
+	let titleMsg = mw.message( `popups-refpreview-${type}` );
+	if ( !titleMsg.exists() ) {
+		titleMsg = mw.message( 'popups-refpreview-reference' );
+	}
 
-	const $el = renderPopup( model.type,
-		`
-			<strong class='mwe-popups-title'>
-				<span class='mw-ui-icon mw-ui-icon-element mw-ui-icon-reference-${type}'></span>
-				${title}
-			</strong>
-			<div class='mwe-popups-extract'>
-				<div class='mw-parser-output'>${model.extract}</div>
-				<div class='mwe-popups-fade' />
-			</div>
-			<footer>
-				<a href='${url}' class='mwe-popups-read-link'>${linkMsg}</a>
-			</footer>
-		`
-	);
+	const $el = renderPopup( model.type, createNodeFromTemplate( templateHTML ) );
+	$el.find( '.mwe-popups-title-placeholder' )
+		.replaceWith( escapeHTML( titleMsg.text() ) );
+	// The following classes are used here:
+	// * mw-ui-icon-reference-generic
+	// * mw-ui-icon-reference-book
+	// * mw-ui-icon-reference-journal
+	// * mw-ui-icon-reference-news
+	// * mw-ui-icon-reference-note
+	// * mw-ui-icon-reference-web
+	$el.find( '.mwe-popups-title .mw-ui-icon' )
+		.addClass( `mw-ui-icon-reference-${type}` );
+	$el.find( '.mw-parser-output' )
+		.html( model.extract );
 
 	// Make sure to not destroy existing targets, if any
-	$el.find( '.mwe-popups-extract a[href]:not([target])' ).each( ( i, a ) => {
+	$el.find( '.mwe-popups-extract a[href][class~="external"]:not([target])' ).each( ( i, a ) => {
 		a.target = '_blank';
 		// Don't let the external site access and possibly manipulate window.opener.location
 		a.rel = `${a.rel ? `${a.rel} ` : ''}noopener`;
 	} );
 
-	if ( model.sourceElementId ) {
-		$el.find( 'a.mwe-popups-read-link' ).on( 'click', ( event ) => {
-			event.stopPropagation();
+	// We assume elements that benefit from being collapsible are to large for the popup
+	$el.find( '.mw-collapsible' ).replaceWith( $( '<div>' )
+		.addClass( 'mwe-collapsible-placeholder' )
+		.append(
+			$( '<span>' )
+				.addClass( 'mw-ui-icon mw-ui-icon-element mw-ui-icon-infoFilled' ),
+			$( '<div>' )
+				.addClass( 'mwe-collapsible-placeholder-label' )
+				.text( mw.msg( 'popups-refpreview-collapsible-placeholder' ) )
+		)
+	);
 
-			if ( isTracking ) {
-				mw.track( LOGGING_SCHEMA, {
-					action: 'clickedGoToReferences'
-				} );
-			}
+	// Undo remaining effects from the jquery.tablesorter.js plugin
+	$el.find( 'table.sortable' ).removeClass( 'sortable jquery-tablesorter' )
+		.find( '.headerSort' ).removeClass( 'headerSort' ).attr( { tabindex: null, title: null } );
 
-			$( `#${$.escapeSelector( model.sourceElementId )} > a:first-child` ).trigger( 'click' );
-		} );
+	// TODO: Remove when not in Beta any more
+	if ( !mw.config.get( 'wgPopupsReferencePreviewsBetaFeature' ) ) {
+		// TODO: Do not remove this but move it up into the templateHTML constant!
+		$el.find( '.mwe-popups-settings' ).append(
+			$( '<a>' )
+				.addClass( 'mwe-popups-settings-icon' )
+				.append(
+					$( '<span>' )
+						.addClass( 'mw-ui-icon mw-ui-icon-element mw-ui-icon-small mw-ui-icon-settings' )
+				)
+		);
+	} else {
+		// Change the styling when there is no content in the footer (to prevent empty space)
+		$el.find( '.mwe-popups-container' ).addClass( 'footer-empty' );
 	}
 
 	if ( isTracking ) {
@@ -85,7 +116,7 @@ export function renderReferencePreview(
 		} );
 	}
 
-	$el.find( '.mw-parser-output' ).on( 'scroll', function ( e ) {
+	$el.find( '.mwe-popups-scroll' ).on( 'scroll', function ( e ) {
 		const element = e.target,
 			// We are dealing with floating point numbers here when the page is zoomed!
 			scrolledToBottom = element.scrollTop >= element.scrollHeight - element.clientHeight - 1;

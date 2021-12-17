@@ -2,6 +2,7 @@
 
 namespace CirrusSearch;
 
+use Elastica\Multi\ResultSet;
 use Elastica\Multi\Search as MultiSearch;
 use MediaWiki\Logger\LoggerFactory;
 use Title;
@@ -60,10 +61,7 @@ class OtherIndexesUpdater extends Updater {
 		$namespace = $title->getNamespace();
 		$indices = [];
 		foreach ( $config->get( 'CirrusSearchExtraIndexes' )[$namespace] ?? [] as $indexName ) {
-			$ei = new ExternalIndex( $config, $indexName );
-			if ( $cluster === null || !$ei->isClusterBlacklisted( $cluster ) ) {
-				$indices[] = $ei;
-			}
+			$indices[] = new ExternalIndex( $config, $indexName );
 		}
 		return $indices;
 	}
@@ -110,7 +108,7 @@ class OtherIndexesUpdater extends Updater {
 				$query = $this->queryForTitle( $title );
 				$search = $type->createSearch( $query );
 				$findIdsMultiSearch->addSearch( $search );
-				$findIdsClosures[] = function ( $docId ) use ( $otherIndex, &$updates, $title ) {
+				$findIdsClosures[] = static function ( $docId ) use ( $otherIndex, &$updates, $title ) {
 					// The searchIndex, including the cluster specified, is needed
 					// as this gets passed to the ExternalIndex constructor in
 					// the created jobs.
@@ -132,27 +130,26 @@ class OtherIndexesUpdater extends Updater {
 		}
 
 		// Look up the ids and run all closures to build the list of updates
-		$this->start( new MultiSearchRequestLog(
-			$this->connection->getClient(),
-			'searching for {numIds} ids in other indexes',
-			'other_idx_lookup',
-			[ 'numIds' => $findIdsClosuresCount ]
-		) );
-		$findIdsMultiSearchResult = $findIdsMultiSearch->search();
-		try {
-			$this->success();
+		$result = $this->runMSearch(
+			$findIdsMultiSearch,
+			new MultiSearchRequestLog(
+				$this->connection->getClient(),
+				'searching for {numIds} ids in other indexes',
+				'other_idx_lookup',
+				[ 'numIds' => $findIdsClosuresCount ]
+			)
+		);
+		if ( $result->isGood() ) {
+			/** @var ResultSet $findIdsMultiSearchResult */
+			$findIdsMultiSearchResult = $result->getValue();
 			foreach ( $findIdsClosures as $i => $closure ) {
 				$results = $findIdsMultiSearchResult[$i]->getResults();
 				if ( count( $results ) ) {
 					$closure( $results[0]->getId() );
 				}
 			}
-		} catch ( \Elastica\Exception\ExceptionInterface $e ) {
-			$this->failure( $e );
-			return;
+			$this->runUpdates( reset( $titles ), $updates );
 		}
-
-		$this->runUpdates( reset( $titles ), $updates );
 	}
 
 	protected function runUpdates( Title $title, array $updates ) {
@@ -183,7 +180,7 @@ class OtherIndexesUpdater extends Updater {
 	 * @param string $reason
 	 */
 	private function logFailure( array $titles, $reason = '' ) {
-		$articleIDs = array_map( function ( Title $title ) {
+		$articleIDs = array_map( static function ( Title $title ) {
 			return $title->getArticleID();
 		}, $titles );
 		if ( $reason ) {

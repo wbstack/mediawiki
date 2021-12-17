@@ -3,6 +3,7 @@
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Session\SessionManager;
+use MediaWiki\User\UserIdentity;
 
 class EchoForeignWikiRequest {
 
@@ -15,7 +16,7 @@ class EchoForeignWikiRequest {
 	/** @var array */
 	protected $wikis;
 
-	/** @varstring|null */
+	/** @var string|null */
 	protected $wikiParam;
 
 	/** @var string */
@@ -59,17 +60,21 @@ class EchoForeignWikiRequest {
 		return $this->doRequests( $reqs );
 	}
 
+	/**
+	 * @param UserIdentity $user
+	 * @return int
+	 */
 	protected function getCentralId( $user ) {
-		$lookup = CentralIdLookup::factory();
-		$id = $lookup->centralIdFromLocalUser( $user, CentralIdLookup::AUDIENCE_RAW );
-		return $id;
+		return MediaWikiServices::getInstance()
+			->getCentralIdLookup()
+			->centralIdFromLocalUser( $user, CentralIdLookup::AUDIENCE_RAW );
 	}
 
 	protected function canUseCentralAuth() {
-		global $wgFullyInitialised, $wgUser;
+		global $wgFullyInitialised;
 
 		return $wgFullyInitialised &&
-			$wgUser->isSafeToLoad() &&
+			RequestContext::getMain()->getUser()->isSafeToLoad() &&
 			$this->user->isSafeToLoad() &&
 			SessionManager::getGlobalSession()->getProvider() instanceof CentralAuthSessionProvider &&
 			$this->getCentralId( $this->user ) !== 0;
@@ -117,7 +122,7 @@ class EchoForeignWikiRequest {
 	 *
 	 * @param string $wiki Name of the wiki to get a token for
 	 * @suppress PhanTypeInvalidCallableArraySize getRequestParams can take an array, too (phan bug)
-	 * @return string Token
+	 * @return string Token, or empty string if an unable to retrieve the token.
 	 */
 	protected function getCsrfToken( $wiki ) {
 		if ( $this->csrfTokens === null ) {
@@ -131,10 +136,20 @@ class EchoForeignWikiRequest {
 			] );
 			$responses = $this->doRequests( $reqs );
 			foreach ( $responses as $w => $response ) {
-				$this->csrfTokens[$w] = $response['query']['tokens']['csrftoken'];
+				if ( isset( $response['query']['tokens']['csrftoken'] ) ) {
+					$this->csrfTokens[$w] = $response['query']['tokens']['csrftoken'];
+				} else {
+					LoggerFactory::getInstance( 'Echo' )->warning(
+						__METHOD__ . ': Unexpected CSRF token API response from {wiki}',
+						[
+							'wiki' => $wiki,
+							'response' => $response,
+						]
+					);
+				}
 			}
 		}
-		return $this->csrfTokens[$wiki];
+		return $this->csrfTokens[$wiki] ?? '';
 	}
 
 	/**

@@ -11,11 +11,11 @@ module.exports = function () {
 		// eslint-disable-next-line no-restricted-properties
 		mobile = mw.mobileFrontend.require( 'mobile.startup' ),
 		PageGateway = mobile.PageGateway,
+		LanguageInfo = mobile.LanguageInfo,
 		permissions = mw.config.get( 'wgMinervaPermissions' ) || {},
 		toast = mobile.toast,
 		Icon = mobile.Icon,
 		time = mobile.time,
-		errorLogging = require( './errorLogging.js' ),
 		preInit = require( './preInit.js' ),
 		mobileRedirect = require( './mobileRedirect.js' ),
 		search = require( './search.js' ),
@@ -107,19 +107,26 @@ module.exports = function () {
 	 * @method
 	 * @ignore
 	 * @param {string} title the title of the image
-	 * @return {jQuery.Deferred|Overlay}
+	 * @return {void|Overlay} note must return void if the overlay should not show (see T262703)
+	 *  otherwise an Overlay is expected and this can lead to e.on/off is not a function
 	 */
 	function makeMediaViewerOverlayIfNeeded( title ) {
 		if ( mw.loader.getState( 'mmv.bootstrap' ) === 'ready' ) {
 			// This means MultimediaViewer has been installed and is loaded.
 			// Avoid loading it (T169622)
-			return $.Deferred().reject();
+			return;
+		}
+		try {
+			title = decodeURIComponent( title );
+		} catch ( e ) {
+			// e.g. https://ro.m.wikipedia.org/wiki/Elisabeta_I_a_Angliei#/media/Fi%C8%18ier:Elizabeth_I_Rainbow_Portrait.jpg
+			return;
 		}
 
 		return mobile.mediaViewer.overlay( {
 			api: api,
 			thumbnails: currentPageHTMLParser.getThumbnails(),
-			title: decodeURIComponent( title ),
+			title: title,
 			eventBus: eventBus
 		} );
 	}
@@ -128,6 +135,16 @@ module.exports = function () {
 	overlayManager.add( /^\/media\/(.+)$/, makeMediaViewerOverlayIfNeeded );
 	overlayManager.add( /^\/languages$/, function () {
 		return mobile.languageOverlay( new PageGateway( api ) );
+	} );
+	// Register a LanguageInfo overlay which has no built-in functionality;
+	// a hook is fired when a language is selected, and extensions can respond
+	// to that hook. See GrowthExperiments WelcomeSurvey feature (in gerrit
+	// Ib558dc7c46cc56ff667957f9126bbe0471d25b8e for example usage).
+	overlayManager.add( /^\/languages\/all$/, function () {
+		return mobile.languageInfoOverlay( new LanguageInfo( api ), true );
+	} );
+	overlayManager.add( /^\/languages\/all\/no-suggestions$/, function () {
+		return mobile.languageInfoOverlay( new LanguageInfo( api ), false );
 	} );
 
 	// Setup
@@ -249,37 +266,6 @@ module.exports = function () {
 			msg = time.getRegistrationMessage( ts, $tagline.data( 'userpage-gender' ) );
 			$tagline.text( msg );
 		}
-	}
-
-	/**
-	 * For logout links do the API logout first so system do not show interstitial step,
-	 * and then redirect to LogoutPage (when user is already logged out) to show information
-	 * about successful logout and information about caching.
-	 *
-	 * @param {string} selector Logout links selector
-	 */
-	function initSmartLogout( selector ) {
-		// Turn logout to a POST action
-		$( selector ).on( 'click', function ( e ) {
-			mw.notify(
-				mw.message( 'logging-out-notify' ).text(), {
-					tag: 'logout',
-					autoHide: false
-				}
-			);
-			api.postWithToken( 'csrf', {
-				action: 'logout'
-			} ).then(
-				function () {
-					location.reload();
-				},
-				function () {
-					toast.showOnPageReload( mw.message( 'logout-failed' ).text() );
-					location.reload();
-				}
-			);
-			e.preventDefault();
-		} );
 	}
 
 	/**
@@ -405,7 +391,6 @@ module.exports = function () {
 			issues.init( overlayManager, currentPageHTMLParser );
 		}
 
-		mw.requestIdleCallback( errorLogging );
 		// deprecation notices
 		mw.log.deprecate( router, 'navigate', router.navigate, 'use navigateTo instead' );
 
@@ -437,7 +422,6 @@ module.exports = function () {
 				return !isUserUri( element.href );
 			} )
 		);
-		initSmartLogout( '.menu__item--logout' );
 		initUserRedLinks();
 	} );
 };

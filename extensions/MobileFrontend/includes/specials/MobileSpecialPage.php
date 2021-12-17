@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserGroupManager;
 use MediaWiki\User\UserOptionsLookup;
 
@@ -28,6 +29,8 @@ class MobileSpecialPage extends SpecialPage {
 	protected $userOptionsLookup;
 	/** @var UserGroupManager */
 	protected $userGroupManager;
+	/** @var UserFactory */
+	protected $userFactory;
 
 	/**
 	 * @param string $page
@@ -40,6 +43,7 @@ class MobileSpecialPage extends SpecialPage {
 		$this->mobileContext = $services->getService( 'MobileFrontend.Context' );
 		$this->userOptionsLookup = $services->getUserOptionsLookup();
 		$this->userGroupManager = $services->getUserGroupManager();
+		$this->userFactory = $services->getUserFactory();
 	}
 
 	/**
@@ -158,7 +162,7 @@ class MobileSpecialPage extends SpecialPage {
 	 * Get a user options lookup object.
 	 * @return UserOptionsLookup
 	 */
-	protected function getUserOptionsLookup() : UserOptionsLookup {
+	protected function getUserOptionsLookup(): UserOptionsLookup {
 		return $this->userOptionsLookup;
 	}
 
@@ -166,7 +170,15 @@ class MobileSpecialPage extends SpecialPage {
 	 * Get a user group manager object.
 	 * @return UserGroupManager
 	 */
-	protected function getUserGroupManager() : UserGroupManager {
+	protected function getUserGroupManager(): UserGroupManager {
 		return $this->userGroupManager;
+	}
+
+	/**
+	 * Get a user factory object for creating UserIdentify object.
+	 * @return UserFactory
+	 */
+	protected function getUserFactory(): UserFactory {
+		return $this->userFactory;
 	}
 }

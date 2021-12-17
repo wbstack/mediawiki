@@ -30,19 +30,11 @@
 		return /^file[hw]$/.test( fieldId );
 	};
 
-	/**
-	 * @param {string} fieldId
-	 * @return {boolean}
-	 */
-	var fieldIsSortMethod = function ( fieldId ) {
-		return fieldId === 'sort';
-	};
-
-	var lookupTranslationForSortMethod = function ( sortMethodName ) {
-		var foundSortMethod = mw.libs.advancedSearch.dm.getSortMethods().filter( function ( sortMethod ) {
-			return sortMethod.name === sortMethodName;
-		} );
-		return foundSortMethod.length > 0 ? foundSortMethod[ 0 ].previewLabel : mw.msg( 'advancedsearch-sort-unknown' );
+	var lookupTranslationForSortMethod = function ( name ) {
+		// The following messages are used here:
+		// * advancedsearch-sort-preview-*
+		var msg = mw.message( 'advancedsearch-sort-preview-' + name.replace( /_/g, '-' ) );
+		return msg.exists() ? msg.text() : name;
 	};
 
 	var lookupTranslationForLabel = function ( fieldId ) {
@@ -65,7 +57,7 @@
 
 	/**
 	 * @class
-	 * @extends {OO.ui.Widget}
+	 * @extends OO.ui.Widget
 	 * @constructor
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store
@@ -127,32 +119,28 @@
 	 * Decide if an field-value-combination should be listed in the preview
 	 *
 	 * @param {string} fieldId
-	 * @param {string|Array} value
+	 * @param {string|string[]} value
 	 * @return {boolean}
 	 */
 	mw.libs.advancedSearch.ui.SearchPreview.prototype.skipFieldInPreview = function ( fieldId, value ) {
-		if ( !value ) {
+		// No point in previewing empty fields
+		if ( !value || ( Array.isArray( value ) && !value.length ) ) {
 			return true;
 		}
-		if ( Array.isArray( value ) && value.length === 0 ) {
-			return true;
-		}
+
 		if ( fieldIsImageDimension( fieldId ) && Array.isArray( value ) && !value[ 1 ] ) {
 			return true;
 		}
 
-		if ( fieldIsSortMethod( fieldId ) ) {
-			return true;
-		}
-
-		return false;
+		// We have special handling for sort in #updatePreview
+		return fieldId === 'sort';
 	};
 
 	/**
 	 * Create a tag item that represents the preview for a single field-value-combination
 	 *
 	 * @param {string} fieldId
-	 * @param {string} value
+	 * @param {string|string[]} value
 	 * @return {OO.ui.TagItemWidget}
 	 */
 	mw.libs.advancedSearch.ui.SearchPreview.prototype.generateTag = function ( fieldId, value ) {
@@ -208,7 +196,7 @@
 	 * Format a value to be used in the preview
 	 *
 	 * @param {string} fieldId
-	 * @param {string|Array} value
+	 * @param {string|string[]} value
 	 * @return {string}
 	 */
 	mw.libs.advancedSearch.ui.SearchPreview.prototype.formatValue = function ( fieldId, value ) {
@@ -216,7 +204,7 @@
 			return fileComparatorToMessage( value[ 0 ] ) + ' ' + value[ 1 ];
 		}
 
-		if ( fieldIsSortMethod( fieldId ) ) {
+		if ( fieldId === 'sort' ) {
 			return lookupTranslationForSortMethod( value );
 		}
 

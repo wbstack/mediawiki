@@ -3,6 +3,7 @@
 		"authors": [
 			"Arnaugir",
 			"Loupeter",
+			"Mguix",
 			"Paucabot",
 			"Pitort",
 			"SMP",
@@ -48,7 +49,7 @@
 	"confirmaccount-noreason": "(cap)",
 	"confirmaccount-hold": "En espera",
 	"confirmaccount-spam": "Spam (no enviar correu electrònic)",
-	"confirmaccount-reason": "Comentari (s'inclourà en el correu electrònic):",
+	"confirmaccount-reason": "Comentari (inclòs en els correus electrònics de rebuig i retenció):",
 	"confirmaccount-ip": "Adreça IP:",
 	"confirmaccount-agent": "User-Agent:",
 	"confirmaccount-legend": "Confirma o rebutja aquest compte",

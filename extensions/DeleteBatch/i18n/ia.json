@@ -8,6 +8,7 @@
 	"deletebatch-desc": "[[Special:DeleteBatch|Deler un lot de paginas]]",
 	"deletebatch-help": "Deler un lot de paginas. Tu pote executar un deletion singule, o deler paginas listate in un file.\nSelige le usator que essera monstrate in le registro de deletiones.\nLe file incargate debe continer in cata linea un nomine de pagina e un motivo facultative separate per un character \"|\" in cata linea.",
 	"deletebatch-caption": "Lista de paginas:",
+	"deletebatch-default-reason": "Motivo predefinite de deletion:",
 	"deletebatch-title": "Deler in lot",
 	"deletebatch-link-back": "Retornar al pagina special",
 	"deletebatch-as": "Executar le script como:",
@@ -24,6 +25,10 @@
 	"deletebatch-select-script": "script pro deler paginas",
 	"deletebatch-select-yourself": "tu",
 	"deletebatch-no-page": "Per favor, o specifica al minus un pagina a deler, o selige un file continente un lista de paginas.",
+	"deletebatch-system-username": "Script pro deler paginas",
+	"action-deletebatch": "deler paginas in lot",
 	"right-deletebatch": "Deler paginas in lot",
+	"action-deletebatch-spoof": "deler paginas in lot como \"Script pro deler paginas\"",
+	"right-deletebatch-spoof": "Deler paginas in lot como \"Script pro deler paginas\"",
 	"deletebatch-deleting-file-only": "Le pagina de description de file $1 non existe; solmente le file mesme es delite. Iste action non essera includite in le registro."
 }

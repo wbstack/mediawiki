@@ -2,15 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Fitoschido",
+			"Jmarchn",
 			"Ssola",
 			"Vriullop"
 		]
 	},
-	"twocolconflict": "TwoColConflict",
+	"twocolconflict": "Conflicte d'edició basat en paràgrafs",
 	"twocolconflict-desc": "Mostra una pantalla de versions en paral·lel per a la resolució d'un conflicte d'edicions",
-	"twocolconflict-beta-feature-message": "Conflicte d'edicions en dues columnes",
-	"twocolconflict-beta-feature-description": "Mostra el conflicte d'edicions amb una versió més avançada del visor en dues columnes.",
+	"twocolconflict-beta-feature-message": "Conflicte d'edició basat en paràgrafs",
+	"twocolconflict-beta-feature-description": "Mostra el conflicte d'edicions amb una versió més avançada del visor basat en paràgrafs.",
 	"twocolconflict-split-other-version-chosen": "Una altra versió",
 	"twocolconflict-split-your-version-chosen": "La vostra versió",
-	"twocolconflict-talk-your": "La vostra entrada"
+	"twocolconflict-talk-your": "El vostre comentari"
 }

@@ -3,30 +3,34 @@
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
 use ApiMain;
+use Status;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\Lexeme\Domain\Model\Form;
 use Wikibase\Lexeme\MediaWiki\Api\Error\FormNotFound;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\FormIdDeserializer;
 use Wikibase\Lexeme\Serialization\FormSerializer;
 use Wikibase\Lexeme\WikibaseLexemeServices;
+use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
  */
 class EditFormElements extends \ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var EntityRevisionLookup
@@ -63,32 +67,37 @@ class EditFormElements extends \ApiBase {
 	 */
 	private $entityStore;
 
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
-		$serializerFactory = $wikibaseRepo->getBaseDataModelSerializerFactory();
-
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
+		SerializerFactory $baseDataModelSerializerFactory,
+		MediawikiEditEntityFactory $editEntityFactory,
+		EntityIdParser $entityIdParser,
+		EntityStore $entityStore,
+		Store $store,
+		SummaryFormatter $summaryFormatter
+	): self {
 		$formSerializer = new FormSerializer(
-			$serializerFactory->newTermListSerializer(),
-			$serializerFactory->newStatementListSerializer()
+			$baseDataModelSerializerFactory->newTermListSerializer(),
+			$baseDataModelSerializerFactory->newStatementListSerializer()
 		);
 
 		return new self(
 			$mainModule,
 			$moduleName,
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
 			new EditFormElementsRequestParser(
-				new FormIdDeserializer( $wikibaseRepo->getEntityIdParser() ),
+				new FormIdDeserializer( $entityIdParser ),
 				WikibaseLexemeServices::getEditFormChangeOpDeserializer()
 			),
-			$wikibaseRepo->getSummaryFormatter(),
+			$summaryFormatter,
 			$formSerializer,
-			function ( $module ) use ( $apiHelperFactory ) {
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			},
-			$wikibaseRepo->getEntityStore()
+			$entityStore
 		);
 	}
 
@@ -173,7 +182,7 @@ class EditFormElements extends \ApiBase {
 			$this->dieStatus( $status );
 		}
 
-		$this->generateResponse( $form );
+		$this->generateResponse( $form, $status );
 	}
 
 	/**
@@ -190,7 +199,7 @@ class EditFormElements extends \ApiBase {
 		array $params
 	) {
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$form->getId(),
 			$baseRevisionId
 		);
@@ -208,17 +217,26 @@ class EditFormElements extends \ApiBase {
 			$form,
 			$summary,
 			$flags,
-			$tokenThatDoesNotNeedChecking
+			$tokenThatDoesNotNeedChecking,
+			null,
+			$params['tags'] ?: []
 		);
 	}
 
 	/**
 	 * @param Form $form
+	 * @param Status $status
 	 */
-	private function generateResponse( Form $form ) {
+	private function generateResponse( Form $form, Status $status ) {
 		$apiResult = $this->getResult();
 
 		$serializedForm = $this->formSerializer->serialize( $form );
+
+		/** @var EntityRevision $entityRevision */
+		$entityRevision = $status->getValue()['revision'];
+		$revisionId = $entityRevision->getRevisionId();
+
+		$apiResult->addValue( null, 'lastrevid', $revisionId );
 
 		// TODO: Do we really need `success` property in response?
 		$apiResult->addValue( null, 'success', 1 );
@@ -238,12 +256,16 @@ class EditFormElements extends \ApiBase {
 				self::PARAM_TYPE => 'text',
 				self::PARAM_REQUIRED => true,
 			],
+			EditFormElementsRequestParser::PARAM_BASEREVID => [
+				self::PARAM_TYPE => 'integer',
+			],
+			'tags' => [
+				self::PARAM_TYPE => 'tags',
+				self::PARAM_ISMULTI => true,
+			],
 			'bot' => [
 				self::PARAM_TYPE => 'boolean',
 				self::PARAM_DFLT => false,
-			],
-			EditFormElementsRequestParser::PARAM_BASEREVID => [
-				self::PARAM_TYPE => 'integer',
 			]
 		];
 	}
@@ -295,10 +317,10 @@ class EditFormElements extends \ApiBase {
 			EditFormElementsRequestParser::PARAM_DATA => json_encode( $exampleData )
 		] );
 
-		$languages = array_map( function ( $r ) {
+		$languages = array_map( static function ( $r ) {
 			return $r['language'];
 		}, $exampleData['representations'] );
-		$representations = array_map( function ( $r ) {
+		$representations = array_map( static function ( $r ) {
 			return $r['value'];
 		}, $exampleData['representations'] );
 

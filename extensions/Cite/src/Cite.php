@@ -47,11 +47,6 @@ class Cite {
 	/**
 	 * @var bool
 	 */
-	private $isPagePreview;
-
-	/**
-	 * @var bool
-	 */
 	private $isSectionPreview;
 
 	/**
@@ -99,7 +94,6 @@ class Cite {
 	 * @param Parser $parser
 	 */
 	public function __construct( Parser $parser ) {
-		$this->isPagePreview = $parser->getOptions()->getIsPreview();
 		$this->isSectionPreview = $parser->getOptions()->getIsSectionPreview();
 		$messageLocalizer = new ReferenceMessageLocalizer( $parser->getContentLanguage() );
 		$this->errorReporter = new ErrorReporter( $messageLocalizer );
@@ -155,7 +149,7 @@ class Cite {
 		?string $extends,
 		?string $follow,
 		?string $dir
-	) : StatusValue {
+	): StatusValue {
 		if ( ctype_digit( (string)$name )
 			|| ctype_digit( (string)$extends )
 			|| ctype_digit( (string)$follow )
@@ -208,7 +202,7 @@ class Cite {
 	private function validateRefOutsideOfReferences(
 		?string $text,
 		?string $name
-	) : StatusValue {
+	): StatusValue {
 		if ( !$name ) {
 			if ( $text === null ) {
 				// Completely empty ref like <ref /> is forbidden.
@@ -250,7 +244,7 @@ class Cite {
 		?string $text,
 		string $group,
 		?string $name
-	) : StatusValue {
+	): StatusValue {
 		if ( $group !== $this->inReferencesGroup ) {
 			// <ref> and <references> have conflicting group attributes.
 			return StatusValue::newFatal( 'cite_error_references_group_mismatch',
@@ -301,7 +295,7 @@ class Cite {
 		Parser $parser,
 		?string $text,
 		array $argv
-	) : string {
+	): string {
 		// Tag every page where Book Referencing has been used, whether or not the ref tag is valid.
 		// This code and the page property will be removed once the feature is stable.  See T237531.
 		if ( array_key_exists( self::BOOK_REF_ATTRIBUTE, $argv ) ) {
@@ -339,8 +333,7 @@ class Cite {
 
 		if ( $this->inReferencesGroup !== null ) {
 			$groupRefs = $this->referenceStack->getGroupRefs( $group );
-			// In preview mode, it's possible to reach this with the ref *not* being known
-			if ( $text === null || !isset( $groupRefs[$name] ) ) {
+			if ( $text === null ) {
 				return '';
 			}
 
@@ -388,7 +381,7 @@ class Cite {
 	 * @return StatusValue Either an error, or has a value with the dictionary of field names and
 	 * parsed or default values.  Missing attributes will be `null`.
 	 */
-	private function parseArguments( array $argv, array $allowedAttributes ) : StatusValue {
+	private function parseArguments( array $argv, array $allowedAttributes ): StatusValue {
 		$maxCount = count( $allowedAttributes );
 		$allValues = array_merge( array_fill_keys( $allowedAttributes, null ), $argv );
 		$status = StatusValue::newGood( array_slice( $allValues, 0, $maxCount ) );
@@ -437,7 +430,7 @@ class Cite {
 		Parser $parser,
 		?string $text,
 		array $argv
-	) : string {
+	): string {
 		$status = $this->parseArguments( $argv, [ 'group', 'responsive' ] );
 		[ 'group' => $group, 'responsive' => $responsive ] = $status->getValue();
 		$this->inReferencesGroup = $group ?? self::DEFAULT_GROUP;
@@ -492,7 +485,7 @@ class Cite {
 		Parser $parser,
 		string $group,
 		string $responsive = null
-	) : string {
+	): string {
 		global $wgCiteResponsiveReferences;
 
 		return $this->referencesFormatter->formatReferences(
@@ -516,13 +509,13 @@ class Cite {
 	 *
 	 * @return string HTML
 	 */
-	public function checkRefsNoReferences( Parser $parser, bool $isSectionPreview ) : string {
+	public function checkRefsNoReferences( Parser $parser, bool $isSectionPreview ): string {
 		$s = '';
 		foreach ( $this->referenceStack->getGroups() as $group ) {
 			if ( $group === self::DEFAULT_GROUP || $isSectionPreview ) {
-				$s .= "\n" . $this->formatReferences( $parser, $group );
+				$s .= $this->formatReferences( $parser, $group );
 			} else {
-				$s .= "\n<br />" . $this->errorReporter->halfParsed(
+				$s .= '<br />' . $this->errorReporter->halfParsed(
 					$parser,
 					'cite_error_group_refs_without_references',
 					Sanitizer::safeEncodeAttribute( $group )
@@ -539,17 +532,18 @@ class Cite {
 				) . $s;
 			}
 			// provide a preview of references in its own section
-			$s = "\n" . Html::rawElement(
+			$s = Html::rawElement(
 				'div',
 				[ 'class' => 'mw-ext-cite-cite_section_preview_references' ],
 				$s
 			);
 		}
-		return $s;
+		return $s !== '' ? "\n" . $s : '';
 	}
 
 	/**
 	 * @see https://phabricator.wikimedia.org/T240248
+	 * @return never
 	 */
 	public function __clone() {
 		throw new LogicException( 'Create a new instance please' );

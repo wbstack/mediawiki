@@ -21,38 +21,39 @@ use Wikibase\Search\Elastic\Fields\StatementProviderFieldDefinitions;
 
 return [
 	'item' => [
-		Def::ENTITY_SEARCH_CALLBACK => function ( WebRequest $request ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
+			$entityIdParser = WikibaseRepo::getEntityIdParser();
+			$languageFallbackChainFactory = WikibaseRepo::getLanguageFallbackChainFactory();
+
 			return new CombinedEntitySearchHelper(
 				[
 					new EntityIdSearchHelper(
-						$repo->getEntityLookup(),
-						$repo->getEntityIdParser(),
+						WikibaseRepo::getEntityLookup(),
+						$entityIdParser,
 						new LanguageFallbackLabelDescriptionLookup(
-							$repo->getTermLookup(),
-							$repo->getLanguageFallbackChainFactory()->newFromLanguage( $repo->getUserLanguage() )
+							WikibaseRepo::getTermLookup(),
+							$languageFallbackChainFactory->newFromLanguage( WikibaseRepo::getUserLanguage() )
 						),
-						$repo->getEntityTypeToRepositoryMapping()
+						WikibaseRepo::getEntityTypeToRepositoryMapping()
 					),
 					new EntitySearchElastic(
-						$repo->getLanguageFallbackChainFactory(),
-						$repo->getEntityIdParser(),
-						$repo->getUserLanguage(),
-						$repo->getContentModelMappings(),
+						$languageFallbackChainFactory,
+						$entityIdParser,
+						WikibaseRepo::getUserLanguage(),
+						WikibaseRepo::getContentModelMappings(),
 						$request
 					)
 				]
 			);
 		},
-		Def::SEARCH_FIELD_DEFINITIONS => function ( array $languageCodes, SettingsArray $searchSettings ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::SEARCH_FIELD_DEFINITIONS => static function ( array $languageCodes, SettingsArray $searchSettings ) {
 			$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
 			return new ItemFieldDefinitions( [
 				new LabelsProviderFieldDefinitions( $languageCodes ),
 				new DescriptionsProviderFieldDefinitions( $languageCodes, $config->get( 'UseStemming' ) ),
 				StatementProviderFieldDefinitions::newFromSettings(
-					new InProcessCachingDataTypeLookup( $repo->getPropertyDataTypeLookup() ),
-					$repo->getDataTypeDefinitions()->getSearchIndexDataFormatterCallbacks(),
+					new InProcessCachingDataTypeLookup( WikibaseRepo::getPropertyDataTypeLookup() ),
+					WikibaseRepo::getDataTypeDefinitions()->getSearchIndexDataFormatterCallbacks(),
 					$searchSettings
 				)
 			] );
@@ -60,43 +61,47 @@ return [
 		Def::FULLTEXT_SEARCH_CONTEXT => EntitySearchElastic::CONTEXT_WIKIBASE_FULLTEXT,
 	],
 	'property' => [
-		Def::SEARCH_FIELD_DEFINITIONS => function ( array $languageCodes, SettingsArray $searchSettings ) {
-			$repo = WikibaseRepo::getDefaultInstance();
-			$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
+		Def::SEARCH_FIELD_DEFINITIONS => static function ( array $languageCodes, SettingsArray $searchSettings ) {
+			$services = MediaWikiServices::getInstance();
+			$config = $services->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
 			return new PropertyFieldDefinitions( [
 				new LabelsProviderFieldDefinitions( $languageCodes ),
 				new DescriptionsProviderFieldDefinitions( $languageCodes, $config->get( 'UseStemming' ) ),
 				StatementProviderFieldDefinitions::newFromSettings(
-					new InProcessCachingDataTypeLookup( $repo->getPropertyDataTypeLookup() ),
-					$repo->getDataTypeDefinitions()->getSearchIndexDataFormatterCallbacks(),
+					new InProcessCachingDataTypeLookup(
+						WikibaseRepo::getPropertyDataTypeLookup( $services ) ),
+					WikibaseRepo::getDataTypeDefinitions( $services )
+						->getSearchIndexDataFormatterCallbacks(),
 					$searchSettings
 				)
 			] );
 		},
-		Def::ENTITY_SEARCH_CALLBACK => function ( WebRequest $request ) {
-			$repo = WikibaseRepo::getDefaultInstance();
+		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
+			$entityIdParser = WikibaseRepo::getEntityIdParser();
+			$languageFallbackChainFactory = WikibaseRepo::getLanguageFallbackChainFactory();
+
 			return new \Wikibase\Repo\Api\PropertyDataTypeSearchHelper(
 				new CombinedEntitySearchHelper(
 					[
 						new EntityIdSearchHelper(
-							$repo->getEntityLookup(),
-							$repo->getEntityIdParser(),
+							WikibaseRepo::getEntityLookup(),
+							$entityIdParser,
 							new LanguageFallbackLabelDescriptionLookup(
-								$repo->getTermLookup(),
-								$repo->getLanguageFallbackChainFactory()->newFromLanguage( $repo->getUserLanguage() )
+								WikibaseRepo::getTermLookup(),
+								$languageFallbackChainFactory->newFromLanguage( WikibaseRepo::getUserLanguage() )
 							),
-							$repo->getEntityTypeToRepositoryMapping()
+							WikibaseRepo::getEntityTypeToRepositoryMapping()
 						),
 						new EntitySearchElastic(
-							$repo->getLanguageFallbackChainFactory(),
-							$repo->getEntityIdParser(),
-							$repo->getUserLanguage(),
-							$repo->getContentModelMappings(),
+							$languageFallbackChainFactory,
+							$entityIdParser,
+							WikibaseRepo::getUserLanguage(),
+							WikibaseRepo::getContentModelMappings(),
 							$request
 						)
 					]
 				),
-				$repo->getPropertyDataTypeLookup()
+				WikibaseRepo::getPropertyDataTypeLookup()
 			);
 		},
 		Def::FULLTEXT_SEARCH_CONTEXT => EntitySearchElastic::CONTEXT_WIKIBASE_FULLTEXT,

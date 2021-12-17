@@ -259,10 +259,10 @@ class RequestAccountPage extends SpecialPage {
 			$form .= $formInformation['html'];
 			$form .= '</fieldset>';
 		}
-		$form .= Html::Hidden( 'title', $this->getPageTitle()->getPrefixedDBKey() ) . "\n";
-		$form .= Html::Hidden( 'wpEditToken', $reqUser->getEditToken() ) . "\n";
-		$form .= Html::Hidden( 'attachment', $this->mPrevAttachment ) . "\n";
-		$form .= Html::Hidden( 'forgotAttachment', $this->mForgotAttachment ) . "\n";
+		$form .= Html::hidden( 'title', $this->getPageTitle()->getPrefixedDBKey() ) . "\n";
+		$form .= Html::hidden( 'wpEditToken', $reqUser->getEditToken() ) . "\n";
+		$form .= Html::hidden( 'attachment', $this->mPrevAttachment ) . "\n";
+		$form .= Html::hidden( 'forgotAttachment', $this->mForgotAttachment ) . "\n";
 		$form .= "<p>" . Xml::submitButton( $this->msg( 'requestaccount-submit' )->text() ) . "</p>";
 		$form .= Xml::closeElement( 'form' );
 
@@ -424,11 +424,11 @@ class RequestAccountPage extends SpecialPage {
 			if ( is_object( $user ) ) {
 				$user->confirmEmail();
 				$user->saveSettings();
-				$message = $reqUser->isLoggedIn()
+				$message = $reqUser->isRegistered()
 					? 'confirmemail_loggedin'
 					: 'confirmemail_success';
 				$out->addWikiMsg( $message );
-				if ( !$reqUser->isLoggedIn() ) {
+				if ( !$reqUser->isRegistered() ) {
 					$title = SpecialPage::getTitleFor( 'Userlogin' );
 					$out->returnToMain( true, $title );
 				}

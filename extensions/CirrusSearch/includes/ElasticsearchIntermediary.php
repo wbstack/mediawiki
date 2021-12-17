@@ -3,6 +3,9 @@
 namespace CirrusSearch;
 
 use CirrusSearch\Search\SearchMetricsProvider;
+use Elastica\Exception\ExceptionInterface;
+use Elastica\Multi\ResultSet as MultiResultSet;
+use Elastica\Multi\Search;
 use ISearchResultSet;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\User\UserIdentity;
@@ -93,7 +96,7 @@ abstract class ElasticsearchIntermediary {
 		// This isn't explicitly used, but we need to make sure it is
 		// instantiated so it has the opportunity to override global
 		// configuration for test buckets.
-		UserTesting::getInstance();
+		UserTestingStatus::getInstance();
 	}
 
 	/**
@@ -191,49 +194,16 @@ abstract class ElasticsearchIntermediary {
 	}
 
 	/**
-	 * Returns a failure if the top-level response has failed or if any of the responses present in
-	 * the resultsets has have failed (in which case the status is initialized with the error
-	 * message of first failed response)
-	 * @param \Elastica\Multi\ResultSet $multiResultSet
-	 * @param Connection|null $connection
-	 * @return Status
-	 */
-	public function multiFailure( \Elastica\Multi\ResultSet $multiResultSet, Connection $connection = null ) {
-		if ( $connection === null ) {
-			$connection = $this->connection;
-		}
-		$status = $multiResultSet->getResponse()->getStatus();
-		if ( $status < 200 || $status >= 300 ) {
-			// bad response from server. Should elastica be throwing an exception for this?
-			return $this->failure( new \Elastica\Exception\ResponseException(
-				$connection->getClient()->getLastRequest(),
-				$multiResultSet->getResponse()
-			), $connection );
-		}
-		foreach ( $multiResultSet->getResultSets() as $resultSet ) {
-			if ( $resultSet->getResponse()->hasError() ) {
-				return $this->failure( new \Elastica\Exception\ResponseException(
-					$connection->getClient()->getLastRequest(),
-					$resultSet->getResponse()
-				), $connection );
-			}
-		}
-
-		// Should never get here
-		return $this->success( $multiResultSet, $connection );
-	}
-
-	/**
 	 * Log a failure and return an appropriate status.  Public so it can be
 	 * called from pool counter methods.
 	 *
-	 * @param \Elastica\Exception\ExceptionInterface|null $exception if the request failed
+	 * @param ExceptionInterface|null $exception if the request failed
 	 * @param Connection|null $connection The connection that the failed
 	 *  request was performed against. Will use $this->connection when not
 	 *  provided.
 	 * @return Status representing a backend failure
 	 */
-	public function failure( \Elastica\Exception\ExceptionInterface $exception = null, Connection $connection = null ) {
+	public function failure( ExceptionInterface $exception = null, Connection $connection = null ) {
 		if ( $connection === null ) {
 			$connection = $this->connection;
 		}
@@ -378,5 +348,57 @@ abstract class ElasticsearchIntermediary {
 	 */
 	protected function appendMetrics( SearchMetricsProvider $provider ) {
 		$this->searchMetrics += $provider->getMetrics();
+	}
+
+	/**
+	 * check validity of the multisearch response
+	 *
+	 * @param MultiResultSet $multiResultSet
+	 * @return bool
+	 */
+	public static function isMSearchResultSetOK( MultiResultSet $multiResultSet ): bool {
+		return !$multiResultSet->hasError() &&
+			   // Catches HTTP errors (ex: 5xx) not reported
+			   // by hasError()
+			   $multiResultSet->getResponse()->isOk();
+	}
+
+	/**
+	 * @param Search $search
+	 * @param RequestLog $log
+	 * @param Connection|null $connection
+	 * @param callable|null $resultsTransformer that accepts a Multi/ResultSets
+	 * @return Status
+	 */
+	protected function runMSearch(
+		Search $search,
+		RequestLog $log,
+		Connection $connection = null,
+		callable $resultsTransformer = null
+	): Status {
+		$connection = $connection ?: $this->connection;
+		$this->start( $log );
+		try {
+			$multiResultSet = $search->search();
+			if ( !$multiResultSet->getResponse()->isOk() ) {
+				// bad response from server. Should elastica be throwing an exception for this?
+				return $this->failure( new \Elastica\Exception\ResponseException(
+					$connection->getClient()->getLastRequest(),
+					$multiResultSet->getResponse()
+				), $connection );
+			}
+			foreach ( $multiResultSet->getResultSets() as $resultSet ) {
+				if ( $resultSet->getResponse()->hasError() ) {
+					return $this->failure( new \Elastica\Exception\ResponseException(
+						$connection->getClient()->getLastRequest(),
+						$resultSet->getResponse()
+					), $connection );
+				}
+			}
+
+			return $this->success( $resultsTransformer !== null ? $resultsTransformer( $multiResultSet ) : $multiResultSet, $connection );
+		} catch ( ExceptionInterface $e ) {
+			return $this->failure( $e, $connection );
+		}
 	}
 }

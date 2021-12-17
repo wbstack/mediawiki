@@ -33,13 +33,27 @@ ve.ui.CodeMirrorAction.static.methods = [ 'toggle' ];
 /* Methods */
 
 /**
+ * @return {boolean}
+ */
+ve.ui.CodeMirrorAction.static.isLineNumbering = function () {
+	// T285660: Backspace related bug on Android browsers as of 2021
+	if ( /Android\b/.test( navigator.userAgent ) ) {
+		return false;
+	}
+
+	var namespaces = mw.config.get( 'wgCodeMirrorLineNumberingNamespaces' );
+	// Set to [] to disable everywhere, or null to enable everywhere
+	return !namespaces ||
+		namespaces.indexOf( mw.config.get( 'wgNamespaceNumber' ) ) !== -1;
+};
+
+/**
  * @method
  * @param {boolean} [enable] State to force toggle to, inverts current state if undefined
  * @return {boolean} Action was executed
  */
 ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
-	var profile, supportsTransparentText, mirrorElement, tabSizeValue,
-		action = this,
+	var action = this,
 		surface = this.surface,
 		surfaceView = surface.getView(),
 		doc = surface.getModel().getDocument();
@@ -63,8 +77,8 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 					// Action was toggled to false since promise started
 					return;
 				}
-				tabSizeValue = surfaceView.documentView.documentNode.$element.css( 'tab-size' );
-				surface.mirror = CodeMirror( surfaceView.$element[ 0 ], {
+				var tabSizeValue = surfaceView.documentView.documentNode.$element.css( 'tab-size' );
+				var cmOptions = {
 					value: surface.getDom(),
 					mwConfig: config,
 					readOnly: 'nocursor',
@@ -79,14 +93,40 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 						Tab: false,
 						'Shift-Tab': false
 					}
-				} );
+				};
+
+				if ( mw.config.get( 'wgCodeMirrorEnableBracketMatching' ) ) {
+					cmOptions.matchBrackets = {
+						highlightNonMatching: false,
+						maxHighlightLineLength: 10000
+					};
+				}
+
+				if ( ve.ui.CodeMirrorAction.static.isLineNumbering() ) {
+					$.extend( cmOptions, {
+						// Set up a special "padding" gutter to create space between the line numbers
+						// and page content.  The first column name is a magic constant which causes
+						// the built-in line number gutter to appear in the desired, leftmost position.
+						gutters: [
+							'CodeMirror-linenumbers',
+							'CodeMirror-linenumber-padding'
+						],
+						lineNumbers: true
+					} );
+				}
+
+				surface.mirror = CodeMirror( surfaceView.$element[ 0 ], cmOptions );
 
 				// The VE/CM overlay technique only works with monospace fonts (as we use width-changing bold as a highlight)
 				// so revert any editfont user preference
 				surfaceView.$element.removeClass( 'mw-editfont-sans-serif mw-editfont-serif' ).addClass( 'mw-editfont-monospace' );
 
-				profile = $.client.profile();
-				supportsTransparentText = 'WebkitTextFillColor' in document.body.style &&
+				if ( mw.config.get( 'wgCodeMirrorAccessibilityColors' ) ) {
+					surfaceView.$element.addClass( 'cm-mw-accessible-colors' );
+				}
+
+				var profile = $.client.profile();
+				var supportsTransparentText = 'WebkitTextFillColor' in document.body.style &&
 					// Disable on Firefox+OSX (T175223)
 					!( profile.layout === 'gecko' && profile.platform === 'mac' );
 
@@ -96,15 +136,26 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 						've-ce-documentNode-codeEditor-hide'
 				);
 
+				if ( cmOptions.lineNumbers ) {
+					// Transfer gutter width to VE overlay.
+					var updateGutter = function ( cmDisplay ) {
+						surfaceView.$documentNode.css( 'margin-left', cmDisplay.gutters.offsetWidth );
+					};
+					CodeMirror.on( surface.mirror.display, 'updateGutter', updateGutter );
+					updateGutter( surface.mirror.display );
+				}
+
 				/* Events */
 
 				// As the action is regenerated each time, we need to store bound listeners
 				// in the mirror for later disconnection.
 				surface.mirror.veTransactionListener = action.onDocumentPrecommit.bind( action );
 				surface.mirror.veLangChangeListener = action.onLangChange.bind( action );
+				surface.mirror.veSelectListener = action.onSelect.bind( action );
 
 				doc.on( 'precommit', surface.mirror.veTransactionListener );
 				surfaceView.getDocument().on( 'langChange', surface.mirror.veLangChangeListener );
+				surface.getModel().on( 'select', surface.mirror.veSelectListener );
 
 				action.onLangChange();
 
@@ -119,6 +170,7 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 		if ( surface.mirror !== true ) {
 			doc.off( 'precommit', surface.mirror.veTransactionListener );
 			surfaceView.getDocument().off( 'langChange', surface.mirror.veLangChangeListener );
+			surface.getModel().off( 'select', surface.mirror.veSelectListener );
 
 			// Restore edit-font
 			// eslint-disable-next-line mediawiki/class-doc
@@ -127,8 +179,10 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 			surfaceView.$documentNode.removeClass(
 				've-ce-documentNode-codeEditor-webkit-hide ve-ce-documentNode-codeEditor-hide'
 			);
+			// Reset gutter.
+			surfaceView.$documentNode.css( 'margin-left', '' );
 
-			mirrorElement = surface.mirror.getWrapperElement();
+			var mirrorElement = surface.mirror.getWrapperElement();
 			mirrorElement.parentNode.removeChild( mirrorElement );
 		}
 
@@ -136,6 +190,22 @@ ve.ui.CodeMirrorAction.prototype.toggle = function ( enable ) {
 	}
 
 	return true;
+};
+
+/**
+ * Handle select events from the surface model
+ *
+ * @param {ve.dm.Selection} selection
+ */
+ve.ui.CodeMirrorAction.prototype.onSelect = function ( selection ) {
+	var range = selection.getCoveringRange();
+
+	// Do not re-trigger bracket matching as long as something is selected
+	if ( !range || !range.isCollapsed() ) {
+		return;
+	}
+
+	this.surface.mirror.setSelection( this.getPosFromOffset( range.from ) );
 };
 
 /**
@@ -154,36 +224,23 @@ ve.ui.CodeMirrorAction.prototype.onLangChange = function () {
  * The document is still in it's 'old' state before the transaction
  * has been applied at this point.
  *
- * @param {ve.dm.Transaction} tx [description]
+ * @param {ve.dm.Transaction} tx
  */
 ve.ui.CodeMirrorAction.prototype.onDocumentPrecommit = function ( tx ) {
-	var i,
-		offset = 0,
+	var offset = 0,
 		replacements = [],
-		linearData = this.surface.getModel().getDocument().data,
-		store = linearData.getStore(),
+		action = this,
+		store = this.surface.getModel().getDocument().getStore(),
 		mirror = this.surface.mirror;
-
-	/**
-	 * Convert a VE offset to a 2D CodeMirror position
-	 *
-	 * @private
-	 * @param {number} veOffset VE linear model offset
-	 * @return {Object} Code mirror position, containing 'line' and 'ch'
-	 */
-	function convertOffset( veOffset ) {
-		var cmOffset = linearData.getSourceText( new ve.Range( 0, veOffset ) ).length;
-		return mirror.posFromIndex( cmOffset );
-	}
 
 	tx.operations.forEach( function ( op ) {
 		if ( op.type === 'retain' ) {
 			offset += op.length;
 		} else if ( op.type === 'replace' ) {
 			replacements.push( {
-				start: convertOffset( offset ),
+				start: action.getPosFromOffset( offset ),
 				// Don't bother recalculating end offset if not a removal, replaceRange works with just one arg
-				end: op.remove.length ? convertOffset( offset + op.remove.length ) : undefined,
+				end: op.remove.length ? action.getPosFromOffset( offset + op.remove.length ) : undefined,
 				data: new ve.dm.ElementLinearData( store, op.insert ).getSourceText()
 			} );
 			offset += op.remove.length;
@@ -191,7 +248,7 @@ ve.ui.CodeMirrorAction.prototype.onDocumentPrecommit = function ( tx ) {
 	} );
 
 	// Apply replacements in reverse to avoid having to shift offsets
-	for ( i = replacements.length - 1; i >= 0; i-- ) {
+	for ( var i = replacements.length - 1; i >= 0; i-- ) {
 		mirror.replaceRange(
 			replacements[ i ].data,
 			replacements[ i ].start,
@@ -205,6 +262,18 @@ ve.ui.CodeMirrorAction.prototype.onDocumentPrecommit = function ( tx ) {
 		mirror.refresh();
 	}
 	this.lastHeight = mirror.display.sizer.style.minHeight;
+};
+
+/**
+ * Convert a VE offset to a 2D CodeMirror position
+ *
+ * @param {number} veOffset VE linear model offset
+ * @return {Object} Code mirror position, containing 'line' and 'ch' numbers
+ */
+ve.ui.CodeMirrorAction.prototype.getPosFromOffset = function ( veOffset ) {
+	return this.surface.mirror.posFromIndex(
+		this.surface.getModel().getSourceOffsetFromOffset( veOffset )
+	);
 };
 
 /* Registration */

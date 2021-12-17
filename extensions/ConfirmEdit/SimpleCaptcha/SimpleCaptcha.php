@@ -5,6 +5,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionAccessException;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\User\UserNameUtils;
 use Wikimedia\IPUtils;
 
 /**
@@ -13,7 +14,7 @@ use Wikimedia\IPUtils;
 class SimpleCaptcha {
 	protected static $messagePrefix = 'captcha-';
 
-	/** @var boolean|null Was the CAPTCHA already passed and if yes, with which result? */
+	/** @var bool|null Was the CAPTCHA already passed and if yes, with which result? */
 	private $captchaSolved = null;
 
 	/**
@@ -472,7 +473,8 @@ class SimpleCaptcha {
 	 * @return string
 	 */
 	private function badLoginPerUserKey( $username, BagOStuff $cache ) {
-		$username = User::getCanonicalName( $username, 'usable' ) ?: $username;
+		$userNameUtils = MediaWikiServices::getInstance()->getUserNameUtils();
+		$username = $userNameUtils->getCanonical( $username, UserNameUtils::RIGOR_USABLE ) ?: $username;
 
 		return $cache->makeGlobalKey(
 			'captcha', 'badlogin', 'user', md5( $username )
@@ -611,7 +613,7 @@ class SimpleCaptcha {
 				// Get links from the database
 				$oldLinks = $this->getLinksFromTracker( $title );
 				// Share a parse operation with Article::doEdit()
-				$editInfo = $page->prepareContentForEdit( $content );
+				$editInfo = $page->prepareContentForEdit( $content, null, $user );
 				if ( $editInfo->output ) {
 					$newLinks = array_keys( $editInfo->output->getExternalLinks() );
 				} else {
@@ -1133,7 +1135,7 @@ class SimpleCaptcha {
 			return '';
 		}
 
-		$text = ContentHandler::getContentText( $content );
+		$text = ( $content instanceof TextContent ) ? $content->getText() : null;
 		if ( $section !== '' ) {
 			return MediaWikiServices::getInstance()->getParser()
 				->getSection( $text, $section );
@@ -1150,7 +1152,7 @@ class SimpleCaptcha {
 	 */
 	private function findLinks( $title, $text ) {
 		$parser = MediaWikiServices::getInstance()->getParser();
-		$user = $parser->getUser();
+		$user = $parser->getUserIdentity();
 		$options = new ParserOptions( $user );
 		$text = $parser->preSaveTransform( $text, $title, $user, $options );
 		$out = $parser->parse( $text, $title, $options );

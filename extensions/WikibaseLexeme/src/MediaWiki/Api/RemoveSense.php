@@ -6,6 +6,7 @@ use ApiBase;
 use ApiMain;
 use LogicException;
 use Message;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
 use Wikibase\Lexeme\MediaWiki\Api\Error\SenseNotFound;
@@ -16,18 +17,18 @@ use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
  */
 class RemoveSense extends ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var RemoveSenseRequestParser
@@ -54,25 +55,25 @@ class RemoveSense extends ApiBase {
 	 */
 	private $entityRevisionLookup;
 
-	/**
-	 * @return self
-	 */
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
+		MediawikiEditEntityFactory $editEntityFactory,
+		EntityIdParser $entityIdParser,
+		Store $store,
+		SummaryFormatter $summaryFormatter
+	): self {
 		return new self(
 			$mainModule,
 			$moduleName,
 			new RemoveSenseRequestParser(
-				new SenseIdDeserializer(
-					$wikibaseRepo->getEntityIdParser()
-				)
+				new SenseIdDeserializer( $entityIdParser )
 			),
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
-			$wikibaseRepo->getSummaryFormatter(),
-			function ( $module ) use ( $apiHelperFactory ) {
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
+			$summaryFormatter,
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			}
 		);
@@ -135,7 +136,7 @@ class RemoveSense extends ApiBase {
 				$this->dieWithError( $error->asApiMessage( RemoveSenseRequestParser::PARAM_SENSE_ID, [] ) );
 			}
 		} catch ( StorageException $e ) {
-			//TODO Test it
+			// TODO Test it
 			if ( $e->getStatus() ) {
 				$this->dieStatus( $e->getStatus() );
 			} else {
@@ -161,7 +162,7 @@ class RemoveSense extends ApiBase {
 		$changeOp->apply( $lexeme, $summary );
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$lexemeId,
 			$baseRevId
 		);
@@ -173,12 +174,14 @@ class RemoveSense extends ApiBase {
 		}
 
 		$tokenThatDoesNotNeedChecking = false;
-		//FIXME: Handle failure
+		// FIXME: Handle failure
 		$status = $editEntity->attemptSave(
 			$lexeme,
 			$this->summaryFormatter->formatSummary( $summary ),
 			$flags,
-			$tokenThatDoesNotNeedChecking
+			$tokenThatDoesNotNeedChecking,
+			null,
+			$params['tags'] ?: []
 		);
 
 		if ( !$status->isOK() ) {
@@ -207,10 +210,14 @@ class RemoveSense extends ApiBase {
 				AddFormRequestParser::PARAM_BASEREVID => [
 					self::PARAM_TYPE => 'integer',
 				],
+				'tags' => [
+					self::PARAM_TYPE => 'tags',
+					self::PARAM_ISMULTI => true,
+				],
 				'bot' => [
 					self::PARAM_TYPE => 'boolean',
 					self::PARAM_DFLT => false,
-				],
+				]
 			]
 		);
 	}

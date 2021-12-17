@@ -175,6 +175,7 @@ abstract class ScribuntoEngineBase {
 				$this->modules[$finalKey] = $this->newModule( $text, $finalKey );
 			}
 			// Almost certainly $key === $finalKey, but just in case...
+			// @phan-suppress-next-line PhanTypeMismatchProperty
 			$this->modules[$key] = $this->modules[$finalKey];
 		}
 		return $this->modules[$key];
@@ -269,7 +270,6 @@ abstract class ScribuntoEngineBase {
 	 * Add limit report data to a ParserOutput object
 	 *
 	 * @param ParserOutput $output ParserOutput object in which to add limit data
-	 * @return null
 	 */
 	public function reportLimitData( ParserOutput $output ) {
 	}

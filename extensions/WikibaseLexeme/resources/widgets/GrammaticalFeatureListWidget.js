@@ -97,6 +97,7 @@ module.exports = ( function () {
 		},
 
 		/**
+		 * @param response
 		 * @protected
 		 */
 		getRequestCacheDataFromResponse: function ( response ) {
@@ -104,6 +105,7 @@ module.exports = ( function () {
 		},
 
 		/**
+		 * @param term
 		 * @private
 		 */
 		updateMenu: function updateMenu( term ) {
@@ -146,6 +148,7 @@ module.exports = ( function () {
 		},
 
 		/**
+		 * @param menuItem
 		 * @protected
 		 */
 		onMenuChoose: function onMenuChoose( menuItem ) {
@@ -167,6 +170,8 @@ module.exports = ( function () {
 		 */
 		onChangeTags: function () {
 			this.updateInputPlaceHolder();
+			GrammaticalFeatureListWidget.super.prototype.onChangeTags.call( this );
+
 		},
 
 		/**

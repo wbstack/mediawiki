@@ -28,6 +28,7 @@ use MediaWiki\Extensions\OAuth\Backend\Utils;
 use MediaWiki\Extensions\OAuth\Lib\OAuthException;
 use MediaWiki\Extensions\OAuth\Repository\AccessTokenRepository;
 use MediaWiki\Logger\LoggerFactory;
+use Mediawiki\MediaWikiServices;
 use Wikimedia\Rdbms\DBConnRef;
 
 /**
@@ -48,7 +49,7 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 	/**
 	 * @param \IContextSource $context
 	 * @param array $params
-	 * @param DBConnRef $dbw Result of MWOAuthUtils::getCentralDB( DB_MASTER )
+	 * @param DBConnRef $dbw Result of Utils::getCentralDB( DB_PRIMARY )
 	 * @param int $oauthVersion
 	 */
 	public function __construct(
@@ -63,7 +64,7 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 		$required = [
 			'update'   => [
 				'acceptanceId' => '/^\d+$/',
-				'grants'      => function ( $s ) {
+				'grants'      => static function ( $s ) {
 					$grants = \FormatJson::decode( $s, true );
 					return is_array( $grants ) && Utils::grantsAreValid( $grants );
 				}
@@ -90,9 +91,11 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 
 	protected function checkBasePermissions() {
 		$user = $this->getUser();
+		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
+
 		if ( !$user->getID() ) {
 			return $this->failure( 'not_logged_in', 'badaccess-group0' );
-		} elseif ( !$user->isAllowed( 'mwoauthmanagemygrants' ) ) {
+		} elseif ( !$permissionManager->userHasRight( $user, 'mwoauthmanagemygrants' ) ) {
 			return $this->failure( 'permission_denied', 'badaccess-group0' );
 		} elseif ( wfReadOnly() ) {
 			return $this->failure( 'readonly', 'readonlytext', wfReadOnlyReason() );
@@ -101,11 +104,12 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 	}
 
 	protected function processAction( $action ) {
-		$user = $this->getUser(); // proposer or admin
-		$dbw = $this->dbw; // convenience
+		// proposer or admin
+		$user = $this->getUser();
+		$dbw = $this->dbw;
 
 		$centralUserId = Utils::getCentralIdFromLocalUser( $user );
-		if ( !$centralUserId ) { // sanity
+		if ( !$centralUserId ) {
 			return $this->failure( 'permission_denied', 'badaccess-group0' );
 		}
 
@@ -161,13 +165,16 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 			}
 			$cmr = Consumer::newFromId( $dbw, $cmra->getConsumerId() );
 
-			$grants = \FormatJson::decode( $this->vals['grants'], true ); // requested grants
+			// requested grants
+			$grants = \FormatJson::decode( $this->vals['grants'], true );
 			$grants = array_unique( array_intersect(
 				array_merge(
-					\MWGrants::getHiddenGrants(), // implied grants
-					$grants // requested grants
+					// implied grants
+					\MWGrants::getHiddenGrants(),
+					$grants
 				),
-				 $cmr->getGrants() // Only keep the applicable ones
+				// Only keep the applicable ones
+				$cmr->getGrants()
 			) );
 
 			LoggerFactory::getInstance( 'OAuth' )->info(
@@ -181,7 +188,7 @@ class ConsumerAcceptanceSubmitControl extends SubmitControl {
 				]
 			);
 			$cmra->setFields( [
-				'grants' => array_intersect( $grants, $cmr->getGrants() ) // sanity
+				'grants' => array_intersect( $grants, $cmr->getGrants() )
 			] );
 			$cmra->save( $dbw );
 

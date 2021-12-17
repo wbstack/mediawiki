@@ -1,6 +1,9 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
 use DataValues\StringValue;
+use Html;
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Formatters\SnakFormatter;
@@ -142,9 +145,6 @@ class MathWikibaseInfo {
 	 * @return bool true if there are elements otherwise false
 	 */
 	public function hasParts() {
-		if ( !$this->hasParts ) {
-			return false;
-		}
 		return $this->hasParts !== [];
 	}
 

@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Dr Lotus Black"
+			"Dr Lotus Black",
+			"Ninjastrikers"
 		]
 	},
 	"advancedsearch-desc": "အဆင့်မြင့် ရှာဖွေရေး လုပ်ဆောင်နိုင်စွမ်းများကို [[Special:Search]] တွင် အလွယ်တကူ ရယူနိုင်သည်။",
@@ -52,5 +53,5 @@
 	"advancedsearch-namespaces-preset-discussion": "ဆွေးနွေးချက်",
 	"advancedsearch-namespaces-placeholder": "အမည်ညွှန်းများ ပေါင်းထည့်ရန်...",
 	"prefs-advancedsearch": "အဆင့်မြင့် ရှာဖွေခြင်း",
-	"advancedsearch-preference-disable": "အဆင့်မြင့်ရှာဖွေရေး မြင်ကွင်းကို မပြပါနှင့်"
+	"advancedsearch-preference-disable": "အထူး:ရှာဖွေရန်အား အသုံးပြုနေစဉ် အဆင့်မြင့်ရှာဖွေရေး မြင်ကွင်းကို မပြပါနှင့်"
 }

@@ -10,8 +10,8 @@ use Wikimedia\Rdbms\IResultWrapper;
 class SpecialMobileHistory extends MobileSpecialPageFeed {
 	/** @var bool Whether the mobile special page has a desktop special page */
 	protected $hasDesktopVersion = true;
-	const LIMIT = 50;
-	const DB_REVISIONS_TABLE = 'revision';
+	protected const LIMIT = 50;
+	private const DB_REVISIONS_TABLE = 'revision';
 	/** @var string|null Timestamp to offset results from */
 	protected $offset;
 
@@ -53,9 +53,14 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 	 * @return string HTML representing the link in the header bar
 	 */
 	protected function getHeaderBarLink( $title ) {
-		return Html::element( 'a',
-			[ 'href' => $title->getLocalURL() ],
-			$title->getText() );
+		return Html::element(
+			'a',
+			[
+				'href' => $title->getLocalURL(),
+				'class' => 'pre-content mw-mf-history-wrap-link',
+			],
+			$title->getText()
+		);
 	}
 
 	/**

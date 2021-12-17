@@ -30,7 +30,7 @@ class Scribunto_LuaTextLibrary extends Scribunto_LuaLibraryBase {
 				// To convert the protocol into a case-insensitive Lua pattern,
 				// we need to replace letters with a character class like [Xx]
 				// and insert a '%' before various punctuation.
-				$prot = preg_replace_callback( '/([a-zA-Z])|([()^$%.\[\]*+?-])/', function ( $m ) {
+				$prot = preg_replace_callback( '/([a-zA-Z])|([()^$%.\[\]*+?-])/', static function ( $m ) {
 					if ( $m[1] ) {
 						return '[' . strtoupper( $m[1] ) . strtolower( $m[1] ) . ']';
 					} else {
@@ -52,7 +52,7 @@ class Scribunto_LuaTextLibrary extends Scribunto_LuaLibraryBase {
 	 */
 	public function textUnstrip( $s ) {
 		$this->checkType( 'unstrip', 1, $s, 'string' );
-		$stripState = $this->getParser()->mStripState;
+		$stripState = $this->getParser()->getStripState();
 		return [ $stripState->killMarkers( $stripState->unstripNoWiki( $s ) ) ];
 	}
 
@@ -64,7 +64,7 @@ class Scribunto_LuaTextLibrary extends Scribunto_LuaLibraryBase {
 	 */
 	public function textUnstripNoWiki( $s ) {
 		$this->checkType( 'unstripNoWiki', 1, $s, 'string' );
-		return [ $this->getParser()->mStripState->unstripNoWiki( $s ) ];
+		return [ $this->getParser()->getStripState()->unstripNoWiki( $s ) ];
 	}
 
 	/**
@@ -75,7 +75,7 @@ class Scribunto_LuaTextLibrary extends Scribunto_LuaLibraryBase {
 	 */
 	public function killMarkers( $s ) {
 		$this->checkType( 'killMarkers', 1, $s, 'string' );
-		return [ $this->getParser()->mStripState->killMarkers( $s ) ];
+		return [ $this->getParser()->getStripState()->killMarkers( $s ) ];
 	}
 
 	/**

@@ -6,7 +6,7 @@
  * @file
  */
 
-use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\MediaWikiServices;
 
 /**
  * @ingroup API
@@ -45,7 +45,11 @@ class ApiTemplateData extends ApiBase {
 		return $this->mPageSet;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function execute() {
+		$services = MediaWikiServices::getInstance();
 		$params = $this->extractRequestParams();
 		$result = $this->getResult();
 
@@ -54,9 +58,8 @@ class ApiTemplateData extends ApiBase {
 
 		if ( $params['lang'] === null ) {
 			$langCode = false;
-		} elseif ( !Language::isValidCode( $params['lang'] ) ) {
+		} elseif ( !$services->getLanguageNameUtils()->isValidCode( $params['lang'] ) ) {
 			$this->dieWithError( [ 'apierror-invalidlang', 'lang' ] );
-			throw new LogicException();
 		} else {
 			$langCode = $params['lang'];
 		}
@@ -74,7 +77,7 @@ class ApiTemplateData extends ApiBase {
 
 		if ( !$titles && ( !$includeMissingTitles || !$missingTitles ) ) {
 			$result->addValue( null, 'pages', (object)[] );
-			$this->setContinuationManager( null );
+			$this->setContinuationManager();
 			$continuationManager->setContinuationIntoResult( $this->getResult() );
 			return;
 		}
@@ -99,7 +102,7 @@ class ApiTemplateData extends ApiBase {
 					'pp_propname' => 'templatedata'
 				],
 				__METHOD__,
-				[ 'ORDER BY', 'pp_page' ]
+				[ 'ORDER BY' => 'pp_page' ]
 			);
 
 			foreach ( $res as $row ) {
@@ -121,10 +124,9 @@ class ApiTemplateData extends ApiBase {
 
 				// HACK: don't let ApiResult's formatversion=1 compatibility layer mangle our booleans
 				// to empty strings / absent properties
-				foreach ( $data->params as &$param ) {
+				foreach ( $data->params as $param ) {
 					$param->{ApiResult::META_BC_BOOLS} = [ 'required', 'suggested', 'deprecated' ];
 				}
-				unset( $param );
 
 				$data->params->{ApiResult::META_TYPE} = 'kvp';
 				$data->params->{ApiResult::META_KVP_KEY_NAME} = 'key';
@@ -142,6 +144,8 @@ class ApiTemplateData extends ApiBase {
 			}
 		}
 
+		$wikiPageFactory = $services->getWikiPageFactory();
+
 		// Now go through all the titles again, and attempt to extract parameter names from the
 		// wikitext for templates with no templatedata.
 		if ( $includeMissingTitles ) {
@@ -150,13 +154,32 @@ class ApiTemplateData extends ApiBase {
 					// Ignore pages that already have templatedata or that don't exist.
 					continue;
 				}
-				$content = WikiPage::factory( $pageInfo['title'] )
-					->getContent( RevisionRecord::FOR_PUBLIC )
-					->getNativeData();
-				$resp[ $pageId ][ 'params' ] = TemplateDataBlob::getRawParams( $content );
+
+				$content = $wikiPageFactory->newFromTitle( $pageInfo['title'] )->getContent();
+				$text = $content instanceof TextContent
+					? $content->getText()
+					: $content->getTextForSearchIndex();
+				$resp[ $pageId ][ 'params' ] = TemplateDataBlob::getRawParams( $text );
 			}
 		}
 
+		// TODO tracking will only be implemented temporarily to answer questions on
+		// template usage for the Technical Wishes topic area see T258917
+		if ( ExtensionRegistry::getInstance()->isLoaded( 'EventLogging' ) ) {
+			foreach ( $resp as $pageInfo ) {
+				EventLogging::logEvent(
+					'TemplateDataApi',
+					-1,
+					[
+						'template_name' => $wikiPageFactory->newFromTitle( $pageInfo['title'] )
+							->getTitle()->getDBkey(),
+						'has_template_data' => !isset( $pageInfo['notemplatedata'] ),
+					]
+				);
+			}
+		}
+
+		$pageSet->populateGeneratorData( $resp );
 		ApiResult::setArrayType( $resp, 'kvp', 'id' );
 		ApiResult::setIndexedTagName( $resp, 'page' );
 
@@ -172,10 +195,13 @@ class ApiTemplateData extends ApiBase {
 			$result->addValue( null, 'redirects', $redirects );
 		}
 
-		$this->setContinuationManager( null );
+		$this->setContinuationManager();
 		$continuationManager->setContinuationIntoResult( $this->getResult() );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function getAllowedParams( $flags = 0 ) {
 		$result = [
 			'includeMissingTitles' => [
@@ -196,8 +222,7 @@ class ApiTemplateData extends ApiBase {
 	}
 
 	/**
-	 * @see ApiBase::getExamplesMessages()
-	 * @return array
+	 * @inheritDoc
 	 */
 	protected function getExamplesMessages() {
 		return [
@@ -208,6 +233,9 @@ class ApiTemplateData extends ApiBase {
 		];
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function getHelpUrls() {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:TemplateData';
 	}

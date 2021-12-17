@@ -2,12 +2,11 @@
 
 ## Living Standard
 
-<dl>
-  <dt>This version</dt>
-  <dd><a href="https://phabricator.wikimedia.org/diffusion/ETDA/browse/master/Specification.md">https://phabricator.wikimedia.org/diffusion/ETDA/browse/master/Specification.md</a></dd>
-  <dt>Editors</dt>
-  <dd>Timo Tijhof, Trevor Parscal, James D. Forrester, Marielle Volz, Moriel Schottlender, C.Scott Ananian, eranroz</dd>
-</dl>
+**This version**  
+https://phabricator.wikimedia.org/diffusion/ETDA/browse/master/Specification.md
+
+**Editors**  
+Timo Tijhof, Trevor Parscal, James D. Forrester, Marielle Volz, Moriel Schottlender, C.Scott Ananian, eranroz, Adam Wight
 
 ***
 
@@ -200,7 +199,17 @@ The default value in wikitext (or description thereof) of a parameter as assumed
 
 Consumers SHOULD indicate this default value to the user when inserting or editing a template.
 
-#### 3.2.11 `example`
+#### 3.2.11 `suggestedvalues`
+* Value: `Array`
+* Default: `[]`
+
+A list of commonly used, suggested values.
+
+Consumers SHOULD provide this list to the user when filling out the field, but MAY implement suggested values only for some field types.
+
+Consumers MUST allow the user to enter free-form values not on this list.
+
+#### 3.2.12 `example`
 * Value: `null` or `InterfaceText`
 
 An example text for the parameter, to help users fill in the proper value.
@@ -363,7 +372,7 @@ Inline style with more spaces, must be at start of line: `\n{{_ | _ = _}}`
 
 ### 4.1 The "Unsigned" template
 
-<pre lang="json">
+```json
 {
 	"description": "Label unsigned comments in a conversation.",
 	"params": {
@@ -418,11 +427,11 @@ Inline style with more spaces, must be at start of line: `\n{{_ | _ = _}}`
 		}
 	}
 }
-</pre>
+```
 
 Example transclusions
-<pre>
+```
 {{unsigned|JohnDoe|2012-10-18}}
 
 {{unsigned|user=JohnDoe|year=2012|month=10|day=18|comment=blabla}}
-</pre>
+```

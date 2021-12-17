@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
 			"Felipe L. Ewald",
 			"Jhonnatanricardo",
 			"McDutchie",
@@ -20,11 +21,13 @@
 	"twocolconflict-copy-tooltip": "Copiar o wikitexto completo da sua revisão para a área de transferência (as edições feitas abaixo não estão incluídas)",
 	"twocolconflict-core-ui-hint": "Uma interface atualizada para resolver conflitos de edição está agora disponível. Ative a Interface de conflito de edição baseada em parágrafos nas suas [[Special:Preferences#mw-prefsection-editing|preferências]] para experimentar.",
 	"twocolconflict-core-ui-hint-close": "Nunca mostrar novamente",
-	"twocolconflict-preference-enabled": "Ative o [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Interface de conflitos de edição baseada em parágrafos]] para resolver conflitos de edição",
+	"twocolconflict-preference-enabled": "Ative a [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|interface de conflitos de edição baseada em parágrafos]] para resolver conflitos de edição",
 	"twocolconflict-special-footer-hint": "Feche a página atual para retornar à interface de conflito de edição.",
 	"twocolconflict-special-header-overview": "Enquanto você editava, outro usuário editou a mesma página e publicou antes de você. Uma cópia somente de visualização da sua revisão é preservada abaixo. Quaisquer alterações feitas na interface de conflito de edição não são refletidas. Para mesclar alterações e resolver o problema usando a interface de conflito de edição, retorne à guia anterior.",
 	"twocolconflict-special-not-saved": "Não publicado",
 	"twocolconflict-special-textarea-hint": "Você pode visualizar e copiar a fonte da sua revisão:",
+	"twocolconflict-special-malformed-title": "Título ausente ou inválido.",
+	"twocolconflict-special-expired": "Nada para ver aqui. Isso provavelmente significa que você já teve um conflito de edição antes, mas isso foi há um tempo atrás e seu texto armazenado temporariamente expirou a essa altura.",
 	"twocolconflict-split-header-hint": "Você pode ajudar a melhorar ainda mais esta funcionalidade, se você deixar comentários [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface nessa página].",
 	"twocolconflict-split-header-hint-beta": "Obrigado por usar esta funcionalidade beta. Pode ajudar a melhorá-la, deixando um comentário [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface nesta página].",
 	"twocolconflict-split-header-overview": "Enquanto você editava, outro usuário editou a mesma página e publicou antes de você. Revise as duas versões e mescle-as. Somente o texto nas caixas selecionadas será salvo quando você clicar em \"{{int:publishchanges}}\".",
@@ -67,10 +70,10 @@
 	"twocolconflict-split-tour-dialog-message-single-column-view": "Infelizmente, alguém postou ao mesmo tempo que você. Por favor, revise os comentários na próxima página. Se necessário, você pode editar o seu e alterar o pedido final.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Resolver problema",
 	"twocolconflict-talk-header-overview": "Alguém postou ao mesmo tempo que você. Revise os comentários abaixo e escolha o pedido a ser publicado. Se necessário, você pode editar seu texto.",
-	"twocolconflict-talk-your": "Sua entrada",
-	"twocolconflict-talk-conflicting": "Entrada conflitante",
+	"twocolconflict-talk-your": "Seu comentário",
+	"twocolconflict-talk-conflicting": "Comentário conflitante",
 	"twocolconflict-talk-switch-tooltip": "Ordem de troca",
-	"twocolconflict-talk-reorder-prompt": "Posicione sua entrada em relação à entrada conflitante:",
+	"twocolconflict-talk-reorder-prompt": "Posicione seu comentário em relação ao comentário conflitante:",
 	"twocolconflict-talk-same-order": "Manter depois",
 	"twocolconflict-talk-reverse-order": "Mover antes"
 }

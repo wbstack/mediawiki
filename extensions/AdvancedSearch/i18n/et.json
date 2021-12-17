@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adeliine",
 			"Pikne"
 		]
 	},
@@ -68,5 +69,5 @@
 	"advancedsearch-namespaces-placeholder": "Lisa nimeruume...",
 	"prefs-advancedsearch": "Täpsem otsing",
 	"advancedsearch-preference-help": "Täpsema otsinguga lisatakse otsimise erileheküljele vorm, mis võimaldab otsida eri moel ka siis, kui otsisüntaksit ei tunta. Samuti muudab see nimeruumide valimise viisi.",
-	"advancedsearch-preference-disable": "Ära näita täpsema otsingu liidest"
+	"advancedsearch-preference-disable": "Ära näita otsingu erilehe kasutamisel täpsema otsingu liidest"
 }

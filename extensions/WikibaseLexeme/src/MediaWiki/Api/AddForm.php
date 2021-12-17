@@ -8,6 +8,8 @@ use LogicException;
 use RuntimeException;
 use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
+use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\Lexeme\Domain\Model\Exceptions\ConflictException;
 use Wikibase\Lexeme\Domain\Model\FormId;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
@@ -21,18 +23,18 @@ use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
  */
 class AddForm extends ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var AddFormRequestParser
@@ -64,32 +66,33 @@ class AddForm extends ApiBase {
 	 */
 	private $entityRevisionLookup;
 
-	/**
-	 * @return self
-	 */
-	public static function newFromGlobalState( \ApiMain $mainModule, $moduleName ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
-		$serializerFactory = $wikibaseRepo->getBaseDataModelSerializerFactory();
-
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
+		SerializerFactory $baseDataModelSerializerFactory,
+		MediawikiEditEntityFactory $editEntityFactory,
+		EntityIdParser $entityIdParser,
+		Store $store,
+		SummaryFormatter $summaryFormatter
+	): self {
 		$formSerializer = new FormSerializer(
-			$serializerFactory->newTermListSerializer(),
-			$serializerFactory->newStatementListSerializer()
+			$baseDataModelSerializerFactory->newTermListSerializer(),
+			$baseDataModelSerializerFactory->newStatementListSerializer()
 		);
 
 		return new self(
 			$mainModule,
 			$moduleName,
 			new AddFormRequestParser(
-				$wikibaseRepo->getEntityIdParser(),
+				$entityIdParser,
 				WikibaseLexemeServices::getEditFormChangeOpDeserializer()
 			),
 			$formSerializer,
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
-			$wikibaseRepo->getSummaryFormatter(),
-			function ( $module ) use ( $apiHelperFactory ) {
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
+			$summaryFormatter,
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			}
 		);
@@ -169,10 +172,10 @@ class AddForm extends ApiBase {
 		}
 
 		$flags = $this->buildSaveFlags( $params );
-		$status = $this->saveNewLexemeRevision( $lexeme, $baseRevId, $summary, $flags );
+		$status = $this->saveNewLexemeRevision( $lexeme, $baseRevId, $summary, $flags, $params['tags'] ?: [] );
 
 		if ( !$status->isGood() ) {
-			$this->dieStatus( $status ); //Seems like it is good enough
+			$this->dieStatus( $status ); // Seems like it is good enough
 		}
 
 		$this->fillApiResultFromStatus( $status );
@@ -194,6 +197,10 @@ class AddForm extends ApiBase {
 				],
 				AddFormRequestParser::PARAM_BASEREVID => [
 					self::PARAM_TYPE => 'integer',
+				],
+				'tags' => [
+					self::PARAM_TYPE => 'tags',
+					self::PARAM_ISMULTI => true,
 				],
 				'bot' => [
 					self::PARAM_TYPE => 'boolean',
@@ -250,10 +257,10 @@ class AddForm extends ApiBase {
 			AddFormRequestParser::PARAM_DATA => json_encode( $exampleData )
 		] );
 
-		$languages = array_map( function ( $r ) {
+		$languages = array_map( static function ( $r ) {
 			return $r['language'];
 		}, $exampleData['representations'] );
-		$representations = array_map( function ( $r ) {
+		$representations = array_map( static function ( $r ) {
 			return $r['value'];
 		}, $exampleData['representations'] );
 
@@ -296,7 +303,7 @@ class AddForm extends ApiBase {
 				LookupConstants::LATEST_FROM_MASTER
 			);
 		} catch ( StorageException $e ) {
-			//TODO Test it
+			// TODO Test it
 			if ( $e->getStatus() ) {
 				$this->dieStatus( $e->getStatus() );
 			} else {
@@ -311,9 +318,9 @@ class AddForm extends ApiBase {
 		if ( !$lexemeRevision ) {
 			$error = new LexemeNotFound( $lexemeId );
 			$this->dieWithError( $error->asApiMessage( AddFormRequestParser::PARAM_LEXEME_ID, [] ) );
-			throw new LogicException( 'ApiUsageException not thrown' );
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnNullable
 		return $lexemeRevision;
 	}
 
@@ -334,10 +341,11 @@ class AddForm extends ApiBase {
 		EntityDocument $lexeme,
 		?int $baseRevId,
 		FormatableSummary $summary,
-		$flags
+		$flags,
+		array $tags
 	): Status {
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$lexeme->getId(),
 			$baseRevId
 		);
@@ -346,13 +354,15 @@ class AddForm extends ApiBase {
 		);
 
 		$tokenThatDoesNotNeedChecking = false;
-		//FIXME: Handle failure
+		// FIXME: Handle failure
 		try {
 			$status = $editEntity->attemptSave(
 				$lexeme,
 				$summaryString,
 				$flags,
-				$tokenThatDoesNotNeedChecking
+				$tokenThatDoesNotNeedChecking,
+				null,
+				$tags
 			);
 		} catch ( ConflictException $exception ) {
 			$this->dieWithException( new RuntimeException( 'Edit conflict: ' . $exception->getMessage() ) );

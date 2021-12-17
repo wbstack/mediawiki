@@ -30,36 +30,66 @@ ve.ui.CodeMirrorTool.static.group = 'codeMirror';
 ve.ui.CodeMirrorTool.static.commandName = 'codeMirror';
 ve.ui.CodeMirrorTool.static.deactivateOnSelect = false;
 
+// TODO: consolidate with code in ext.CodeMirror.js, see T272035
+ve.ui.CodeMirrorTool.prototype.logUsage = function ( data ) {
+	/* eslint-disable camelcase */
+	var event = $.extend( {
+		session_token: mw.user.sessionId(),
+		user_id: mw.user.getId()
+	}, data );
+	var editCountBucket = mw.config.get( 'wgUserEditCountBucket' );
+	if ( editCountBucket !== null ) {
+		event.user_edit_count_bucket = editCountBucket;
+	}
+	/* eslint-enable camelcase */
+	mw.track( 'event.CodeMirrorUsage', event );
+};
+
 /**
  * @inheritdoc
  */
 ve.ui.CodeMirrorTool.prototype.onSelect = function () {
-	var useCodeMirror;
-
 	// Parent method
 	ve.ui.CodeMirrorTool.super.prototype.onSelect.apply( this, arguments );
 
-	useCodeMirror = !!this.toolbar.surface.mirror;
+	var useCodeMirror = !!this.toolbar.surface.mirror;
 	this.setActive( useCodeMirror );
 
 	new mw.Api().saveOption( 'usecodemirror', useCodeMirror ? 1 : 0 );
 	mw.user.options.set( 'usecodemirror', useCodeMirror ? 1 : 0 );
+
+	this.logUsage( {
+		editor: 'wikitext-2017',
+		enabled: useCodeMirror,
+		toggled: true,
+		// eslint-disable-next-line camelcase
+		edit_start_ts_ms: ( this.toolbar.target.startTimeStamp * 1000 ) || 0
+	} );
 };
 
 /**
  * @inheritdoc
  */
 ve.ui.CodeMirrorTool.prototype.onSurfaceChange = function ( oldSurface, newSurface ) {
-	var useCodeMirror,
-		isDisabled = newSurface.getMode() !== 'source',
-		command = this.getCommand(),
-		surface = this.toolbar.getSurface();
+	var isDisabled = newSurface.getMode() !== 'source';
 
 	this.setDisabled( isDisabled );
 	if ( !isDisabled ) {
-		useCodeMirror = mw.user.options.get( 'usecodemirror' ) > 0;
+		var command = this.getCommand();
+		var surface = this.toolbar.getSurface();
+		var useCodeMirror = mw.user.options.get( 'usecodemirror' ) > 0;
 		command.execute( surface, [ useCodeMirror ] );
 		this.setActive( useCodeMirror );
+
+		if ( this.toolbar.target.startTimeStamp ) {
+			this.logUsage( {
+				editor: 'wikitext-2017',
+				enabled: useCodeMirror,
+				toggled: false,
+				// eslint-disable-next-line camelcase
+				edit_start_ts_ms: ( this.toolbar.target.startTimeStamp * 1000 ) || 0
+			} );
+		}
 	}
 };
 

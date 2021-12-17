@@ -5,34 +5,41 @@
 
 .mwe-popups.mwe-popups-type-reference {
 	.mwe-popups-title {
-		margin-top: @popupPadding;
+		// align icon with outer padding
+		margin: 0 0 12px 0;
 
 		.mw-ui-icon {
-			vertical-align: middle;
+			padding: 0 8px 0 0;
 
-			&.mw-ui-icon-element {
-				min-width: @iconSize;
-				width: @iconSize;
-
-				&:before {
-					margin: 0;
-				}
+			&:hover {
+				/* stylelint-disable-next-line declaration-no-important */
+				background-color: transparent !important;
 			}
+		}
 
-			&.mw-ui-icon-reference-generic {
-				/* align narrow icon with the text */
-				margin-left: -2px;
-			}
+		// There is currently no "reference-note" icon specified in extension.json
+		.mw-ui-icon-reference-note {
+			display: none;
 		}
 	}
 
 	.mwe-popups-extract {
-		margin-bottom: 2.75 * @lineHeight;
-		// Reference previews should have a "lighter" appearence than page previews, where the
-		// maximum is 7 lines.
-		max-height: 5 * @lineHeight;
-		// Reference previews can be smaller than page previews, where the minimum is 2 lines.
-		min-height: @lineHeight;
+		margin-right: 0;
+		max-height: inherit;
+
+		.mwe-popups-scroll {
+			// This is how the `margin-bottom: 47px` in popup.less is calculated
+			@marginBottom: 2 * @lineHeight + 7px;
+			// Same as the --pointer-height in popup.less
+			@pointerHeight: 8px;
+			max-height: 403px - @popupPadding - @marginBottom + @pointerHeight;
+			overflow: auto;
+			padding-right: @popupPadding;
+		}
+
+		.mw-parser-output {
+			overflow-wrap: break-word;
+		}
 
 		// Remove the default fade-out effect set by popup.less
 		&:after {
@@ -45,7 +52,6 @@
 			height: @lineHeight;
 			background-color: transparent;
 			background-image: -webkit-linear-gradient( top, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) );
-			background-image: -moz-linear-gradient( top, rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) );
 			background-image: linear-gradient( rgba( 255, 255, 255, 0 ), rgba( 255, 255, 255, 1 ) );
 			opacity: 0;
 			pointer-events: none; // Allows clicking "through" the element
@@ -55,15 +61,20 @@
 		&.mwe-popups-fade-out .mwe-popups-fade {
 			opacity: 1;
 		}
-
-		.mw-parser-output {
-			max-height: inherit;
-			overflow: auto;
-		}
 	}
 
-	.mwe-popups-read-link {
-		// Same font size as the read link in disambiguation popups
-		font-size: 12px;
+	.mwe-collapsible-placeholder {
+		font-weight: bold;
+		margin: 1em 0;
+		position: relative;
+
+		.mw-ui-icon {
+			margin-left: -0.78em;
+			position: absolute;
+		}
+
+		.mwe-collapsible-placeholder-label {
+			margin-left: 2.5em;
+		}
 	}
 }

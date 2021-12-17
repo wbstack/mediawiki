@@ -213,7 +213,7 @@ class JCUtils {
 		if ( is_a( $data, JCValue::class ) ) {
 			$value = $data->getValue();
 			if ( $skipDefaults && $data->defaultUsed() ) {
-				return is_array( $value ) ? [] : ( is_object( $value ) ? new stdClass() : null );
+				return is_array( $value ) ? [] : ( is_object( $value ) ? (object)[] : null );
 			}
 		} else {
 			$value = $data;
@@ -240,7 +240,7 @@ class JCUtils {
 			}
 			return $data;
 		}
-		$result = new stdClass();
+		$result = (object)[];
 		foreach ( $data as $fld => $val ) {
 			if ( is_a( $val, JCValue::class ) ) {
 				/** @var JCValue $val */
@@ -261,7 +261,7 @@ class JCUtils {
 	 * @return bool
 	 */
 	public static function isListOfLangs( $arr ) {
-		return count( $arr ) === count( array_filter( $arr, function ( $v ) {
+		return count( $arr ) === count( array_filter( $arr, static function ( $v ) {
 			return is_string( $v ) && Language::isValidBuiltInCode( $v );
 		} ) );
 	}
@@ -291,7 +291,7 @@ class JCUtils {
 	 * Find a message in a dictionary for the given language,
 	 * or use language fallbacks if message is not defined.
 	 * @param stdClass $map Dictionary of languageCode => string
-	 * @param Language|StubUserLang $lang language object
+	 * @param Language|StubUserLang $lang
 	 * @param bool|string $defaultValue if non-false, use this value in case no fallback and no 'en'
 	 * @return string message from the dictionary or "" if nothing found
 	 */

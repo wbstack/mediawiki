@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adriendelucca",
 			"Dishual",
 			"Fulup"
 		]
 	},
-	"advancedsearch-options-pane-head": "Arventennoù araokaet",
+	"advancedsearch-options-pane-head": "Klask araokaet:",
 	"advancedsearch-optgroup-text": "Klask er bajenn destenn",
 	"advancedsearch-optgroup-structure": "Framm",
 	"advancedsearch-optgroup-files": "Siloù ha skeudennoù",
@@ -45,5 +46,5 @@
 	"advancedsearch-namespaces-preset-discussion": "Kaozeadenn",
 	"advancedsearch-namespaces-placeholder": "Ouzhpennañ esaouennoù anv...",
 	"prefs-advancedsearch": "Klask araokaet",
-	"advancedsearch-preference-disable": "Na ziskouez etrefas ar c'hlask araokaet"
+	"advancedsearch-preference-disable": "Arabat diskouez etrefas ar c'hlask araokaet pa implijer Special:Search"
 }

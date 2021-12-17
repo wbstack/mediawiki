@@ -10,6 +10,11 @@
  * @file
  */
 
+namespace MediaWiki\Extension\Math;
+
+use Exception;
+use Html;
+
 /**
  * Takes LaTeX fragments and outputs the source directly to the browser
  *
@@ -55,6 +60,10 @@ class MathSource extends MathRenderer {
 		);
 	}
 
+	/**
+	 * @throws Exception always
+	 * @return never
+	 */
 	protected function getMathTableName() {
 		throw new Exception( 'in math source mode no database caching should happen' );
 	}

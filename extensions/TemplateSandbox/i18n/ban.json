@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chinamoonroll"
+		]
+	},
+	"templatesandbox": "Bak bias mal",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Ngasilang kaca]] sané ngatransklusi mal saking bak bias",
+	"templatesandbox-suffix": "Bak bias",
+	"templatesandbox-legend": "Mal bak bias",
+	"templatesandbox-text": "Ida prasida milih pupulan mal sané kasimpen ring genah bak bias Ida antuk nganggén pangater bak bias sané patut.\nSekadi, pinaka Ida jagi nyingakin pracingak vérsi {{ns:Template}}:Uji napiké Ida sampun nyimpen manados \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Uji\", nganggén \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" manadoa pangater.",
+	"templatesandbox-prefix-label": "Pangater bak bias:",
+	"templatesandbox-page-label": "Kaca olahan:",
+	"templatesandbox-revid-label": "Révisi olahan:",
+	"templatesandbox-text-label": "Téks wiki olahan:",
+	"templatesandbox-submit": "Cingak",
+	"templatesandbox-title-output": "Mal bak bias:$1",
+	"templatesandbox-editform-legend": "Pracingak kaca antuk mal puniki",
+	"templatesandbox-editform-page-label": "Murda kaca",
+	"templatesandbox-editform-view-label": "Sinahang pracingak",
+	"templatesandbox-preview": "Pracingak $2",
+	"templatesandbox-previewnote": "'''Élingang puniki wantah pracingak [[:$1]].'''\nUahan sané Ida kardi durung kasimpen!",
+	"templatesandbox-invalid-title": "Murda sané Ida manjingang tan patut.",
+	"templatesandbox-title-not-exists": "Murda sané Ida manjingang durung kasedia.",
+	"templatesandbox-revision-not-exists": "Révisi sané Ida tunas tan kasedia."
+}

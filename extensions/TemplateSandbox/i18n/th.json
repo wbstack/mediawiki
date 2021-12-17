@@ -3,12 +3,13 @@
 		"authors": [
 			"Ans",
 			"Horus",
-			"Macofe"
+			"Macofe",
+			"Patsagorn Y."
 		]
 	},
 	"templatesandbox": "หน้าทดลองแม่แบบ",
 	"templatesandbox-desc": "[[Special:TemplateSandbox|ให้หน้า]]ที่ดึงแม่แบบนี้จากหน้าทดลอง",
-	"templatesandbox-suffix": "หน้าทดลอง",
+	"templatesandbox-suffix": "ทดลองเขียน",
 	"templatesandbox-legend": "หน้าทดลองแม่แบบ",
 	"templatesandbox-prefix-label": "คำนำหน้าหน้าทดลอง:",
 	"templatesandbox-page-label": "แสดงผลสำหรับหน้า:",

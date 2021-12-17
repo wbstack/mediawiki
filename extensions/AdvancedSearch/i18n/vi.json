@@ -7,7 +7,8 @@
 			"Nhatminh01",
 			"Phjtieudoc",
 			"Trần Nguyễn Minh Huy",
-			"Vinhtantran"
+			"Vinhtantran",
+			"Ioe2015"
 		]
 	},
 	"advancedsearch-desc": "Truy cập các chức năng tìm kiếm nâng cao một cách dễ dàng tại [[Special:Search]]",
@@ -39,7 +40,7 @@
 	"advancedsearch-help-deepcategory": ";Mô tả\n:Tìm những trang thuộc thể loại hoặc thể loại con này.\n;Chú ý những điều sau\n:* Mỗi lần tìm chỉ có 5 thể loại con đầu tiên được tính.\n:* Giới hạn 256 thể loại.\n:* Bạn có thể tìm trang thuộc nhiều thể loại.\n;Trang trợ giúp\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Deepcategory Sâu trong thể loại]\n;Cấu trúc tương đương khi tìm kiếm thông thường\n:<code>deepcategory:</code> theo sau là tên thể loại, ví dụ <code>deepcategory:Năm</code>. Dùng cặp dấu nháy chép nếu tên có chứa khoảng trắng: <code>deepcategory:\"Thể loại ẩn\"</code>.",
 	"advancedsearch-help-hastemplate": ";Mô tả\n:Tìm những trang có chứa chính xác các bản mẫu này.\n;Chú ý những điều sau\n:* Bạn có thể tìm các bản mẫu được nhúng (bản mẫu sử dụng bản mẫu khác).\n:* Chức năng \"gợi ý\" chỉ có thể tìm bản mẫu có phần đầu giống với những chữ bạn đang gõ vào, ví dụ tìm <code>\"com...\"</code> sẽ hiện ra gợi ý ''\"commons\"'' chứ không thể là ''\"nowcommons\"''.\n:* Bạn có thể tìm trang thuộc nhiều thể loại.\n;Trang trợ giúp\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Hastemplate Có bản mẫu]\n;Cấu trúc tương đương khi tìm kiếm thông thường\n:Những từ đặt bên trong cặp dấu nháy kép và kèm theo <code>hastemplate:</code> ở phía trước, ví dụ như <code>hastemplate:\"thông tin\"</code>.",
 	"advancedsearch-help-inlanguage": ";Mô tả\n:Chỉ tìm trong ngôn ngữ bạn chọn.\n;Chú ý những điều sau\n:* Bạn chỉ có thể tìm trang trong một ngôn ngữ.\n:* Ô này chỉ hiện ra trong các wiki có kích hoạt bộ mở rộng translatewiki.\n;Trang trợ giúp\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Inlanguage Trong ngôn ngữ]\n;Cấu trúc tương đương khi tìm kiếm thông thường\n:<code>inlanguage:</code> theo sau là mã ngôn ngữ như <code>inlanguage:vi</code>. Bạn có thể loại trừ ngôn ngữ bằng cách thêm dấu <code>-</code> vào phía trước từ khóa, ví dụ <code>-inlanguage:vi</code>.",
-	"advancedsearch-help-filetype": ";Mô tả\n:Chỉ tìm những tập tin thuộc về một kiểu tập tin đã chọn.\n;Chú ý những điều sau\n:* Bạn chỉ có tìm một kiểu tập tin.\n:* Bạn chỉ có thể chọn các kiểu tập tin cho trước trong trình đơn thả xuống.\n;Trang trợ giúp\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filetype Kiểu tập tin] và [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filemime Mime tập tin]\n;Cấu trúc tương đương khi tìm kiếm thông thường\n:Những từ có <code>filetype:</code> phía trước, ví dụ <code>filetype:ogg</code>.",
+	"advancedsearch-help-filetype": ";Mô tả\n:Chỉ tìm những tập tin thuộc về một kiểu tập tin đã chọn.\n;Chú ý những điều sau\n:* Bạn chỉ có tìm một kiểu tập tin.\n:* Bạn chỉ có thể chọn các kiểu tập tin cho trước trong bảng chọn thả xuống.\n;Trang trợ giúp\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filetype Kiểu tập tin] và [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filemime Mime tập tin]\n;Cấu trúc tương đương khi tìm kiếm thông thường\n:Những từ có <code>filetype:</code> phía trước, ví dụ <code>filetype:ogg</code>.",
 	"advancedsearch-help-filew": ";Mô tả\n:Những ô này cho phép bạn chỉ định chiều rộng khi hiển thị của tập tin.\n;Chú ý những điều sau\n:* Chỉ áp dụng được cho những tập tin có chiều rộng và chiều cao khi hiển thị, như phim hay hình ảnh\n;Trang trợ giúp\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Kích thước tập tin]\n;Cấu trúc tương đương khi tìm kiếm thông thường\n:Số với <code>filew:</code> đặt phía trước, ví dụ <code>filew:>800</code>.",
 	"advancedsearch-help-fileh": ";Mô tả\n:Những ô này cho phép bạn chỉ định chiều cao khi hiển thị của tập tin.\n;Chú ý những điều sau\n:* Chỉ áp dụng được cho những tập tin có chiều rộng và chiều cao khi hiển thị, như phim hay hình ảnh\n;Trang trợ giúp\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Kích thước tập tin]\n;Cấu trúc tương đương khi tìm kiếm thông thường\n:Số với <code>fileh:</code> đặt phía trước, ví dụ <code>fileh:>600</code>.",
 	"advancedsearch-placeholder-exact-text": "\"tiền nào của đấy\"",
@@ -59,9 +60,15 @@
 	"advancedsearch-filesize-equals": "bằng",
 	"advancedsearch-filesize-greater-than": "lớn hơn",
 	"advancedsearch-filesize-smaller-than": "nhỏ hơn",
+	"advancedsearch-sort-relevance": "Độ phù hợp",
+	"advancedsearch-sort-last-edit-asc": "Ngày sửa đổi – cũ nhất lên đầu",
 	"advancedsearch-sort-last-edit-desc": "Ngày sửa đổi - gần nhất lên đầu",
+	"advancedsearch-sort-create-timestamp-asc": "Ngày tạo – cũ nhất lên đầu",
 	"advancedsearch-sort-create-timestamp-desc": "Ngày tạo - gần nhất lên đầu",
+	"advancedsearch-sort-preview-relevance": "độ phù hợp",
+	"advancedsearch-sort-preview-last-edit-asc": "sửa đổi lâu ngày nhất",
 	"advancedsearch-sort-preview-last-edit-desc": "ngày sửa đổi",
+	"advancedsearch-sort-preview-create-timestamp-asc": "tạo lâu ngày nhất",
 	"advancedsearch-sort-preview-create-timestamp-desc": "ngày tạo",
 	"advancedsearch-namespaces-search-in": "Tìm trong:",
 	"advancedsearch-namespaces-remember": "Nhớ lựa chọn cho lần tìm kiếm sau",
@@ -72,5 +79,5 @@
 	"advancedsearch-namespaces-placeholder": "Thêm không gian tên…",
 	"prefs-advancedsearch": "Tìm kiếm nâng cao",
 	"advancedsearch-preference-help": "Tìm kiếm nâng cao thêm một mẫu vào trang Đặc biệt:Tìm kiếm. Nó cho phép bạn thực hiện các tìm kiếm đặc biệt, ngay cả khi bạn không biết cú pháp tìm kiếm nào. Nó cũng thay đổi cách bạn chọn vùng tên.",
-	"advancedsearch-preference-disable": "Không hiển thị giao diện Tìm kiếm nâng cao"
+	"advancedsearch-preference-disable": "Ẩn giao diện Tìm kiếm nâng cao khi sử dụng Đặc biệt:Tìm kiếm"
 }

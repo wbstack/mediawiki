@@ -61,7 +61,7 @@ class EchoUserNotificationGateway {
 			return false;
 		}
 
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = $this->getDB( DB_PRIMARY );
 		if ( $dbw->isReadOnly() ) {
 			return false;
 		}
@@ -96,7 +96,7 @@ class EchoUserNotificationGateway {
 			return false;
 		}
 
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = $this->getDB( DB_PRIMARY );
 		if ( $dbw->isReadOnly() ) {
 			return false;
 		}
@@ -125,7 +125,7 @@ class EchoUserNotificationGateway {
 	 * have updateJoin()
 	 */
 	public function markAllRead() {
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = $this->getDB( DB_PRIMARY );
 		if ( $dbw->isReadOnly() ) {
 			return false;
 		}
@@ -145,7 +145,7 @@ class EchoUserNotificationGateway {
 
 	/**
 	 * Get notification count for the types specified
-	 * @param int $dbSource use master or replica storage to pull count
+	 * @param int $dbSource use primary database or replica storage to pull count
 	 * @param array $eventTypesToLoad event types to retrieve
 	 * @param int $cap Max count
 	 * @return int
@@ -156,7 +156,7 @@ class EchoUserNotificationGateway {
 		$cap = MWEchoNotifUser::MAX_BADGE_COUNT
 	) {
 		// double check
-		if ( !in_array( $dbSource, [ DB_REPLICA, DB_MASTER ] ) ) {
+		if ( !in_array( $dbSource, [ DB_REPLICA, DB_PRIMARY ] ) ) {
 			$dbSource = DB_REPLICA;
 		}
 

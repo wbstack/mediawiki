@@ -4,6 +4,14 @@
 	mw.libs = mw.libs || {};
 	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
 
+	/**
+	 * @class mw.libs.advancedSearch.FieldCollection
+	 * @constructor
+	 *
+	 * @property {mw.libs.advancedSearch.SearchField[]} fields
+	 * @property {Object} groupLookup Field ID => group name
+	 * @property {string[]} frozenGroups
+	 */
 	mw.libs.advancedSearch.FieldCollection = function () {
 		this.fields = [];
 		this.groupLookup = {};
@@ -16,9 +24,9 @@
 	 */
 	mw.libs.advancedSearch.FieldCollection.prototype.add = function ( field, group ) {
 		if ( field.id in this.groupLookup ) {
-			throw new Error( 'A field with this ID (' + field.id + ') has already been added.' );
+			throw new Error( 'Field "' + field.id + '" has already been added.' );
 		}
-		if ( this.frozenGroups.indexOf( group ) > -1 ) {
+		if ( this.frozenGroups.indexOf( group ) !== -1 ) {
 			throw new Error( 'Group "' + group + '" is frozen and does not accept more fields.' );
 		}
 		this.fields.push( field );

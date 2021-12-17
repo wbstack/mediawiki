@@ -65,11 +65,11 @@ class MWEchoNotifUser {
 
 	// WARNING: If you change this, you should also change all references in the
 	// i18n messages (100 and 99) in all repositories using Echo.
-	const MAX_BADGE_COUNT = 99;
+	public const MAX_BADGE_COUNT = 99;
 
-	const CACHE_TTL = 86400;
-	const CACHE_KEY = 'echo-notification-counts';
-	const CHECK_KEY = 'echo-notification-updated';
+	private const CACHE_TTL = 86400;
+	private const CACHE_KEY = 'echo-notification-counts';
+	private const CHECK_KEY = 'echo-notification-updated';
 
 	/**
 	 * Usually client code doesn't need to initialize the object directly
@@ -101,7 +101,7 @@ class MWEchoNotifUser {
 	 * @return MWEchoNotifUser
 	 */
 	public static function newFromUser( User $user ) {
-		if ( $user->isAnon() ) {
+		if ( !$user->isRegistered() ) {
 			throw new MWException( 'User must be logged in to view notification!' );
 		}
 
@@ -170,7 +170,7 @@ class MWEchoNotifUser {
 	 * @return int
 	 */
 	public function getNotificationCount( $section = EchoAttributeManager::ALL, $global = 'preference' ) {
-		if ( $this->mUser->isAnon() ) {
+		if ( !$this->mUser->isRegistered() ) {
 			return 0;
 		}
 
@@ -218,7 +218,7 @@ class MWEchoNotifUser {
 	 * @return bool|MWTimestamp Timestamp of latest unread message, or false if there are no unread messages.
 	 */
 	public function getLastUnreadNotificationTime( $section = EchoAttributeManager::ALL, $global = 'preference' ) {
-		if ( $this->mUser->isAnon() ) {
+		if ( !$this->mUser->isRegistered() ) {
 			return false;
 		}
 
@@ -259,7 +259,7 @@ class MWEchoNotifUser {
 			$talkPageNotificationManager = MediaWikiServices::getInstance()
 				->getTalkPageNotificationManager();
 			if ( $talkPageNotificationManager->userHasNewMessages( $this->mUser ) ) {
-				$attributeManager = EchoAttributeManager::newFromGlobalVars();
+				$attributeManager = EchoServices::getInstance()->getAttributeManager();
 				$categoryMap = $attributeManager->getEventsByCategory();
 				$usertalkTypes = $categoryMap['edit-user-talk'];
 				$unreadEditUserTalk = $this->notifMapper->fetchUnreadByUser(
@@ -268,7 +268,7 @@ class MWEchoNotifUser {
 					null,
 					$usertalkTypes,
 					null,
-					DB_MASTER
+					DB_PRIMARY
 				);
 				if ( $unreadEditUserTalk === [] ) {
 					$talkPageNotificationManager->removeUserHasNewMessages( $this->mUser );
@@ -301,7 +301,7 @@ class MWEchoNotifUser {
 			$talkPageNotificationManager = MediaWikiServices::getInstance()
 				->getTalkPageNotificationManager();
 			if ( !$talkPageNotificationManager->userHasNewMessages( $this->mUser ) ) {
-				$attributeManager = EchoAttributeManager::newFromGlobalVars();
+				$attributeManager = EchoServices::getInstance()->getAttributeManager();
 				$categoryMap = $attributeManager->getEventsByCategory();
 				$usertalkTypes = $categoryMap['edit-user-talk'];
 				$unreadEditUserTalk = $this->notifMapper->fetchUnreadByUser(
@@ -310,7 +310,7 @@ class MWEchoNotifUser {
 					null,
 					$usertalkTypes,
 					null,
-					DB_MASTER
+					DB_PRIMARY
 				);
 				if ( $unreadEditUserTalk !== [] ) {
 					$talkPageNotificationManager->setUserHasNewMessages( $this->mUser );
@@ -343,13 +343,13 @@ class MWEchoNotifUser {
 			$sections = EchoAttributeManager::$sections;
 		}
 
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
-		$eventTypes = $attributeManager->getUserEnabledEventsbySections( $this->mUser, 'web', $sections );
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
+		$eventTypes = $attributeManager->getUserEnabledEventsBySections( $this->mUser, 'web', $sections );
 
 		$notifs = $this->notifMapper->fetchUnreadByUser( $this->mUser, $wgEchoMaxUpdateCount, null, $eventTypes );
 
 		$eventIds = array_filter(
-			array_map( function ( EchoNotification $notif ) {
+			array_map( static function ( EchoNotification $notif ) {
 				// This should not happen at all, but use 0 in
 				// such case so to keep the code running
 				if ( $notif->getEvent() ) {
@@ -429,7 +429,7 @@ class MWEchoNotifUser {
 	 * This updates the user's touched timestamp, as well as the value returned by getGlobalUpdateTime().
 	 *
 	 * NOTE: Consider calling this function from a deferred update, since it will read from and write to
-	 * the master DB if cross-wiki notifications are enabled.
+	 * the primary DB if cross-wiki notifications are enabled.
 	 */
 	public function resetNotificationCount() {
 		global $wgEchoCrossWikiNotifications;
@@ -451,7 +451,7 @@ class MWEchoNotifUser {
 			$uw = EchoUnreadWikis::newFromUser( $this->mUser );
 			if ( $uw ) {
 				// Immediately compute new local counts and timestamps
-				$newLocalData = $this->computeLocalCountsAndTimestamps( DB_MASTER );
+				$newLocalData = $this->computeLocalCountsAndTimestamps( DB_PRIMARY );
 				// Write the new values to the echo_unread_wikis table
 				$alertTs = $newLocalData[EchoAttributeManager::ALERT]['timestamp'];
 				$messageTs = $newLocalData[EchoAttributeManager::MESSAGE]['timestamp'];
@@ -553,16 +553,16 @@ class MWEchoNotifUser {
 
 	/**
 	 * Compute the counts and timestamps for the local notifications in each section.
-	 * @param int $dbSource DB_REPLICA or DB_MASTER
+	 * @param int $dbSource DB_REPLICA or DB_PRIMARY
 	 * @return array[] [ 'alert' => [ 'count' => N, 'timestamp' => TS ], ... ]
 	 */
 	protected function computeLocalCountsAndTimestamps( $dbSource = DB_REPLICA ) {
-		$attributeManager = EchoAttributeManager::newFromGlobalVars();
+		$attributeManager = EchoServices::getInstance()->getAttributeManager();
 		$result = [];
 		$totals = [ 'count' => 0, 'timestamp' => -1 ];
 
 		foreach ( EchoAttributeManager::$sections as $section ) {
-			$eventTypesToLoad = $attributeManager->getUserEnabledEventsbySections(
+			$eventTypesToLoad = $attributeManager->getUserEnabledEventsBySections(
 				$this->mUser,
 				'web',
 				[ $section ]
@@ -662,8 +662,9 @@ class MWEchoNotifUser {
 	 */
 	protected function getGlobalMemcKey( $key ) {
 		global $wgEchoCacheVersion;
-		$lookup = CentralIdLookup::factory();
-		$globalId = $lookup->centralIdFromLocalUser( $this->mUser, CentralIdLookup::AUDIENCE_RAW );
+		$globalId = MediaWikiServices::getInstance()
+			->getCentralIdLookup()
+			->centralIdFromLocalUser( $this->mUser, CentralIdLookup::AUDIENCE_RAW );
 		if ( !$globalId ) {
 			return false;
 		}

@@ -1,15 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kizule",
 			"Milicevic01",
 			"Obsuser",
 			"Srdjan m",
+			"Srđan",
 			"Zoranzoki21",
 			"Сербијана"
 		]
 	},
 	"mobile-frontend-account-create-captcha-placeholder": "Unesite tekst koji vidite iznad",
-	"mobile-frontend-categories-heading": "<strong>Kategorije</strong>",
 	"mobile-frontend-changeslist-nocomment": "nema opisa izmene",
 	"mobile-frontend-clear-search": "Očisti",
 	"mobile-frontend-copyright": "Sadržaj je dostupan pod licencom $1 osim ako je drugačije navedeno.",

@@ -23,12 +23,12 @@ class CldrCurrency {
 
 		$value = [];
 		switch ( $data ) {
-			case 'symbols' :
+			case 'symbols':
 				$filename = __DIR__ . '/CldrCurrency/Symbols.php';
 				$value['symbols'] = 'currencySymbols';
 				break;
-			case 'fractions' :
-			case 'locale' :
+			case 'fractions':
+			case 'locale':
 				$filename = __DIR__ . '/CldrSupplemental/Supplemental.php';
 				$value['fractions'] = 'currencyFractions';
 				$value['locale'] = 'localeCurrencies';
@@ -69,7 +69,8 @@ class CldrCurrency {
 			if ( $country_code !== null ) {
 				$country_code = strtoupper( $country_code );
 				if ( $country_code === 'UK' ) {
-					$country_code = 'GB'; // dang iso overlap...
+					// dang iso overlap...
+					$country_code = 'GB';
 				}
 			}
 
@@ -119,7 +120,8 @@ class CldrCurrency {
 		self::loadData( 'locale' );
 		$country_code = strtoupper( $country_code );
 		if ( $country_code === 'UK' ) {
-			$country_code = 'GB'; // iso overlap again
+			// iso overlap again
+			$country_code = 'GB';
 		}
 		return self::$cache['locale'][$country_code] ?? [];
 	}

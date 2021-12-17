@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"BrennodAloisi",
 			"Cedric31",
 			"Macofe"
 		]
@@ -14,7 +15,7 @@
 	"templatesandbox-text-label": "Rendut del wikitèxte :",
 	"templatesandbox-submit": "Afichar",
 	"templatesandbox-editform-page-label": "Títol de la pagina",
-	"templatesandbox-editform-view-label": "Afichar l'apercebut",
-	"templatesandbox-preview": "Apercebut de $2",
+	"templatesandbox-editform-view-label": "Mostrar previsualizacion",
+	"templatesandbox-preview": "Previsualizacion de $2",
 	"templatesandbox-editform-need-template": "Per aver un apercebut d’una autra pagina amb aqueste modèl, un nom de modèl deu èsser especificat."
 }

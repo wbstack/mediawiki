@@ -21,6 +21,7 @@ use CirrusSearch\Query\KeywordFeature;
 use CirrusSearch\Query\PrefixFeature;
 use CirrusSearch\Search\Escaper;
 use CirrusSearch\Util;
+use Message;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -55,28 +56,20 @@ class QueryStringRegexParser implements QueryParser {
 	/**
 	 * Whitespace regex including unicode and some control chars
 	 */
-	const WHITESPACE_REGEX = '/\G[\pZ\pC]+/u';
+	private const WHITESPACE_REGEX = '/\G[\pZ\pC]+/u';
 
-	const QUERY_LEN_HARD_LIMIT = 2048;
+	public const QUERY_LEN_HARD_LIMIT = 4096;
 
 	/**
 	 * see T66350
 	 */
-	const GERSHAYIM_REGEX = '/(\p{L}{2,})(?:")(\p{L})(?=[^\p{L}]|$)/u';
+	private const GERSHAYIM_REGEX = '/(\p{L}{2,})(?:")(\p{L})(?=[^\p{L}]|$)/u';
 
 	/**
 	 * Supported explicit boolean operator
 	 *
 	 */
-	const EXPLICIT_BOOLEAN_OPERATOR = '/\G(?:(?<AND>AND|&&)|(?<OR>OR|\|\|)|(?<NOT>NOT))(?![^\pZ\pC"])/u';
-
-	/**
-	 * Keywords which do not count when measuring the length of the the query
-	 */
-	const UNLIMITED_KEYWORDS = [
-		'incategory' => true, // T111694
-		'articletopic' => true // T242560
-	];
+	private const EXPLICIT_BOOLEAN_OPERATOR = '/\G(?:(?<AND>AND|&&)|(?<OR>OR|\|\|)|(?<NOT>NOT))(?![^\pZ\pC"])/u';
 
 	/**
 	 * @var \CirrusSearch\Parser\KeywordRegistry
@@ -176,7 +169,7 @@ class QueryStringRegexParser implements QueryParser {
 	/**
 	 * Default
 	 */
-	const DEFAULT_OCCUR = BooleanClause::MUST;
+	private const DEFAULT_OCCUR = BooleanClause::MUST;
 
 	/**
 	 * @var int
@@ -312,7 +305,7 @@ class QueryStringRegexParser implements QueryParser {
 		$this->warnings = array_merge( $this->warnings, $this->keywordParser->getWarnings() );
 		// All parsed keywords have their offsets marked in $this->keywordOffsetsTracker
 		// We then reparse the query from the beginning finding holes between keyword offsets
-		uasort( $this->preTaggedNodes, function ( ParsedNode $a, ParsedNode $b ) {
+		uasort( $this->preTaggedNodes, static function ( ParsedNode $a, ParsedNode $b ) {
 			if ( $a->getStartOffset() < $b->getStartOffset() ) {
 				return -1;
 			} else {
@@ -382,7 +375,7 @@ class QueryStringRegexParser implements QueryParser {
 			// The last boolean operator seen before the last one, -1 means none
 			// used to know if the node was attached explicitly by the user
 			$beforeLastBoolType = $lastBoolType;
-			$lastBoolType = - 1;
+			$lastBoolType = -1;
 			switch ( $this->token->getType() ) {
 				case Token::NOT:
 					// NOT something
@@ -459,7 +452,7 @@ class QueryStringRegexParser implements QueryParser {
 			return new EmptyQueryNode( 0, strlen( $this->query ) );
 		}
 		if ( $clauses !== [] ) {
-			if ( $lastBoolType !== - 1 ) {
+			if ( $lastBoolType !== -1 ) {
 				$occur = $this->boolToOccur( $lastBoolType );
 				$clauses[] = $this->createClause( $left, true, $occur );
 			} else {
@@ -638,7 +631,7 @@ class QueryStringRegexParser implements QueryParser {
 			return true;
 		}
 
-		if ( $this->consumeWord() ) {
+		if ( $this->consumeWord( $maxOffset ) ) {
 			return true;
 		}
 
@@ -698,10 +691,11 @@ class QueryStringRegexParser implements QueryParser {
 	}
 
 	/**
+	 * @param int $maxOffset
 	 * @return bool
 	 */
-	private function consumeWord() {
-		$node = $this->nonPhraseParser->parse( $this->query, $this->offset );
+	private function consumeWord( int $maxOffset ) {
+		$node = $this->nonPhraseParser->parse( $this->query, $this->offset, $maxOffset );
 		if ( $node !== null ) {
 			$this->token->node( $node );
 			return true;
@@ -820,25 +814,27 @@ class QueryStringRegexParser implements QueryParser {
 	private function checkQueryLen(): void {
 		Assert::precondition( $this->query !== null, "Query must be set" );
 		$maxLen = $this->maxQueryLen;
-		// don't limit incategory
-		foreach ( $this->preTaggedNodes as $n ) {
-			if ( $n instanceof KeywordFeatureNode && $this->unlimitedKeywords( $n->getKey() ) ) {
-				$maxLen += mb_strlen( substr( $this->query, $n->getStartOffset(), $n->getEndOffset() ) );
+		$exemptKeywords = [];
+		foreach ( $this->preTaggedNodes as $node ) {
+			$realNode = $node;
+			if ( $node instanceof NegatedNode ) {
+				$realNode = $node->getChild();
+			}
+			if ( $realNode instanceof KeywordFeatureNode ) {
+				$maxLen += mb_strlen( substr( $this->query, $node->getStartOffset(), $node->getEndOffset() ) );
+				$exemptKeywords[] = $realNode->getKey();
 			}
 		}
 		$queryLen = mb_strlen( $this->query );
 		if ( $queryLen > $maxLen ) {
-			throw new SearchQueryParseException( 'cirrussearch-query-too-long',
-				$queryLen, $maxLen );
+			if ( $exemptKeywords ) {
+				sort( $exemptKeywords );
+				throw new SearchQueryParseException( 'cirrussearch-query-too-long-with-exemptions',
+					$queryLen, $this->maxQueryLen, Message::listParam( array_unique( $exemptKeywords ), 'comma' ) );
+			} else {
+				throw new SearchQueryParseException( 'cirrussearch-query-too-long', $queryLen,
+					$this->maxQueryLen );
+			}
 		}
-	}
-
-	/**
-	 * @param string $keyword
-	 * @return bool true if this keyword name should not be taken into account
-	 * when calculating the query length
-	 */
-	private function unlimitedKeywords( string $keyword ): bool {
-		return self::UNLIMITED_KEYWORDS[$keyword] ?? false;
 	}
 }

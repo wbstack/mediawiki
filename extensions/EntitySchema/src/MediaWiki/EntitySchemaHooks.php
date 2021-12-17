@@ -4,6 +4,8 @@ namespace EntitySchema\MediaWiki;
 
 use Article;
 use DatabaseUpdater;
+use EntitySchema\MediaWiki\Content\EntitySchemaContent;
+use EntitySchema\Presentation\AutocommentFormatter;
 use HistoryPager;
 use Html;
 use MediaWiki\MediaWikiServices;
@@ -11,12 +13,12 @@ use MediaWiki\Revision\RevisionRecord;
 use MWException;
 use SkinTemplate;
 use Title;
-use EntitySchema\MediaWiki\Content\EntitySchemaContent;
-use EntitySchema\Presentation\AutocommentFormatter;
 use WikiImporter;
 
 /**
  * Hooks utilized by the EntitySchema extension
+ *
+ * @license GPL-2.0-or-later
  */
 final class EntitySchemaHooks {
 
@@ -26,7 +28,7 @@ final class EntitySchemaHooks {
 	public static function onCreateDBSchema( DatabaseUpdater $updater ) {
 		$updater->addExtensionTable(
 			'entityschema_id_counter',
-			__DIR__ . '/../../sql/EntitySchema.sql'
+			dirname( __DIR__, 2 ) . "/sql/{$updater->getDB()->getType()}/tables-generated.sql"
 		);
 	}
 
@@ -92,19 +94,21 @@ final class EntitySchemaHooks {
 		&$html,
 		array &$classes
 	) {
-		$pm = MediaWikiServices::getInstance()->getPermissionManager();
-		$rev = MediaWikiServices::getInstance()->getRevisionStore()->newRevisionFromRow( $row );
+		$services = MediaWikiServices::getInstance();
+		$pm = $services->getPermissionManager();
+		$rev = $services->getRevisionStore()->newRevisionFromRow( $row );
+		$title = $history->getTitle();
+		$contentModel = $title->getContentModel();
+		$latestRevId = $title->getLatestRevID();
 
-		$wikiPage = $history->getWikiPage();
-
-		if ( $wikiPage->getContentModel() === EntitySchemaContent::CONTENT_MODEL_ID
-			&& $wikiPage->getLatest() !== $rev->getId()
-			&& $pm->quickUserCan( 'edit', $history->getUser(), $wikiPage->getTitle() )
+		if ( $contentModel === EntitySchemaContent::CONTENT_MODEL_ID
+			&& $latestRevId !== $rev->getId()
+			&& $pm->quickUserCan( 'edit', $history->getUser(), $title )
 			&& !$rev->isDeleted( RevisionRecord::DELETED_TEXT )
 		) {
-			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+			$linkRenderer = $services->getLinkRenderer();
 			$link = $linkRenderer->makeKnownLink(
-				$wikiPage->getTitle(),
+				$title,
 				$history->msg( 'entityschema-restoreold' )->text(),
 				[],
 				[
@@ -199,25 +203,6 @@ final class EntitySchemaHooks {
 				'To avoid ID conflicts, the import of Schemas is not supported.'
 			);
 		}
-	}
-
-	/**
-	 * @see MWNamespace::isMovable()
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/NamespaceIsMovable
-	 *
-	 * @param int $index
-	 * @param bool &$result
-	 * @return null|false
-	 */
-	public static function onNamespaceIsMovable( $index, &$result ) {
-		if ( MediaWikiServices::getInstance()->getNamespaceInfo()
-			->equals( $index, NS_ENTITYSCHEMA_JSON )
-		) {
-			$result = false;
-			return false; // skip other hooks
-		}
-
-		return null;
 	}
 
 	/**

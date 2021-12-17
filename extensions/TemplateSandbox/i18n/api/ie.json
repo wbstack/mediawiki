@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Renan"
+		]
+	},
+	"templatesandbox-apihelp-contentformat": "Formate de contenete de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Li parametres <var>$1templatesandboxtitle</var> e <var>$1templatesandboxtext</var> deve ambi esser specificat o ambi esser omisset."
+}

@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Abanima",
+			"Dr. Mohammed",
 			"Hiba Alshawi",
 			"Maroen1990",
 			"Meno25",
@@ -62,6 +63,9 @@
 	"minerva-page-actions-permalink": "وصلة دائمة",
 	"minerva-page-actions-backlinks": "ماذا يصل هنا",
 	"minerva-page-actions-cite": "استشهد بالصفحة",
+	"minerva-page-actions-move": "انقل",
+	"minerva-page-actions-delete": "احذف",
+	"minerva-page-actions-unprotect": "رفع الحماية",
 	"minerva-page-actions-user-groups": "مجموعات المستخدم",
 	"minerva-page-actions-logs": "سجلات",
 	"minerva-page-actions-wikibase": "{{WBREPONAME}} عنصر",
@@ -75,8 +79,8 @@
 	"skinname-minerva": "منيرفانيو",
 	"minerva-skin-desc": "واجهة أولى ذات تصميم مستجيب للمحمول",
 	"skin-minerva-issue-learn-more": "معرفة المزيد",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton": "التصنيفات",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton-description": "عرض تصنيفات الصفحات",
+	"skin-minerva-mobile-option-MinervaShowCategories": "التصنيفات",
+	"skin-minerva-mobile-option-MinervaShowCategories-description": "عرض تصنيفات الصفحات",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "تم تحسين معالجة مشاكل الصفحة",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "سيتم تضمين موضوعات الصفحة (قالب:صندوق رسالة مقالة) في المقالة.",
 	"skin-minerva-recentchanges-warning-enhanced-not-supported": "لسوء الحظ، تجميع النتائج حسب الصفحة غير متاح على الجوال، إذا كنت ترغب في استخدام ميزة المجموعة حسب الصفحة فتُرجَى زيارة موقع سطح المكتب."

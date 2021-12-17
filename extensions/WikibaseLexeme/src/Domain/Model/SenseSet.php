@@ -2,7 +2,6 @@
 
 namespace Wikibase\Lexeme\Domain\Model;
 
-use Comparable;
 use Countable;
 use InvalidArgumentException;
 use Wikibase\Lexeme\Domain\Model\Exceptions\ConflictException;
@@ -13,7 +12,7 @@ use Wikibase\Lexeme\Domain\Model\Exceptions\ConflictException;
  *
  * @license GPL-2.0-or-later
  */
-class SenseSet implements Countable, Comparable {
+class SenseSet implements Countable {
 
 	/**
 	 * @var Sense[] indexed by serialization of SenseId
@@ -39,6 +38,19 @@ class SenseSet implements Countable, Comparable {
 	public function toArray() {
 		$senses = $this->sortSenses( $this->senses );
 		return array_values( $senses );
+	}
+
+	/**
+	 * Return the individual Senses in arbitrary order.
+	 *
+	 * Only use this method if the order is certainly insignificant,
+	 * e.g. because the Senses will be summarized or reduced in some way.
+	 * Otherwise, use {@link toArray()}.
+	 *
+	 * @return Sense[]
+	 */
+	public function toArrayUnordered(): array {
+		return array_values( $this->senses );
 	}
 
 	/**
@@ -142,9 +154,6 @@ class SenseSet implements Countable, Comparable {
 		return $this->senses === [];
 	}
 
-	/**
-	 * @see Comparable::equals()
-	 */
 	public function equals( $other ) {
 		if ( $this === $other ) {
 			return true;
@@ -155,6 +164,10 @@ class SenseSet implements Countable, Comparable {
 		}
 
 		return $this->sameSenses( $other );
+	}
+
+	public function hasSenseWithId( SenseId $id ): bool {
+		return $this->getById( $id ) !== null;
 	}
 
 	/**

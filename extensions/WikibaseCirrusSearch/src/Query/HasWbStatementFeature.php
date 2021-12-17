@@ -13,7 +13,7 @@ use Elastica\Query\BoolQuery;
 use Elastica\Query\Exists;
 use Elastica\Query\Match;
 use Elastica\Query\Prefix;
-use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\Search\Elastic\Fields\StatementsField;
 
 /**
@@ -22,22 +22,22 @@ use Wikibase\Search\Elastic\Fields\StatementsField;
  * Allows the user to search for pages/items that have wikibase properties or statements associated
  * with them.
  *
- * If a file page has ANY statement about property 'wikidata:P180' ('depicts') then it can be found
- * by including 'haswbstatement:wikidata:P180' in the search query.
+ * If a file page has ANY statement about property 'P180' ('depicts') then it can be found
+ * by including 'haswbstatement:P180' in the search query.
  *
- * If a file page has the statement 'wikidata:P180=wikidata:Q527' (meaning 'depicts sky') associated
- * with it then it can be found by including 'haswbstatement:wikidata:P180=wikidata:Q527' in the
+ * If a file page has the statement 'P180=Q527' (meaning 'depicts sky') associated
+ * with it then it can be found by including 'haswbstatement:P180=Q527' in the
  * search query.
  *
- * If a file page has the statement 'wikidata:P2014=79802' (meaning 'MoMA artwork id 79802')
- * associated with it then it can be found by including 'haswbstatement:wikidata:P2014=79802' in the
+ * If a file page has the statement 'P2014=79802' (meaning 'MoMA artwork id 79802')
+ * associated with it then it can be found by including 'haswbstatement:P2014=79802' in the
  * search query.
  *
  * A '*' at the end of a 'haswbstatement' string triggers a prefix search. If different file pages
  * have the statements:
- *	- wikidata:P180=wikidata:Q146[wikidata:P462=wikidata:Q23445] ('depicts cat, color black')
- * 	- wikidata:P180=wikidata:Q146[wikidata:P462=wikidata:Q23444] ('depicts cat, color white')
- * ... then both those pages will be found if 'wikidata:P180=wikidata:Q146[wikidata:P462=*' is
+ *	- P180=Q146[P462=Q23445] ('depicts cat, color black')
+ * 	- P180=Q146[P462=Q23444] ('depicts cat, color white')
+ * ... then both those pages will be found if 'P180=Q146[P462=*' is
  * included in the search query.
  *
  * A '*' as the statement triggers existence search. Any page containing any statement will
@@ -57,18 +57,6 @@ use Wikibase\Search\Elastic\Fields\StatementsField;
  * @see https://phabricator.wikimedia.org/T190022
  */
 class HasWbStatementFeature extends SimpleKeywordFeature implements FilterQueryFeature {
-
-	/**
-	 * @var array Names of foreign repos from $wgWBRepoSettings
-	 */
-	private $foreignRepoNames;
-
-	/**
-	 * @param array $foreignRepoNames Array of names of foreign repos from $wgWBRepoSettings
-	 */
-	public function __construct( array $foreignRepoNames ) {
-		$this->foreignRepoNames = $foreignRepoNames;
-	}
 
 	/**
 	 * @return string[]
@@ -207,15 +195,14 @@ class HasWbStatementFeature extends SimpleKeywordFeature implements FilterQueryF
 
 	/**
 	 * Check that a statement string is valid. A valid string is a P-id
-	 * optionally suffixed with a foreign repo name followed by a colon
+	 * optionally suffixed with an equals sign.
 	 *
 	 * The following strings are valid:
-	 * Wikidata:P180=Wikidata:Q537 (assuming 'Wikidata' is a valid foreign repo name)
 	 * P2014=79802
 	 * P999
 	 *
 	 * The following strings are invalid:
-	 * NON_EXISTENT_FOREIGN_REPO_NAME:P123=Wikidata:Q537
+	 * PrefixedId:P123=Q537
 	 * PA=Q888
 	 * PF=1234567
 	 *
@@ -228,14 +215,13 @@ class HasWbStatementFeature extends SimpleKeywordFeature implements FilterQueryF
 			return true;
 		}
 
-		//Strip delimiters, anchors and pattern modifiers from PropertyId::PATTERN
+		//Strip delimiters, anchors and pattern modifiers from NumericPropertyId::PATTERN
 		$propertyIdPattern = preg_replace(
 			'/([^\sa-zA-Z0-9\\\])(\^|\\\A)?(.*?)(\$|\\\z|\\\Z)?\\1[a-zA-Z]*/',
 			'$3',
-			PropertyId::PATTERN
+			NumericPropertyId::PATTERN
 		);
 		$validStatementStringPattern = '/^' .
-			'((' . implode( '|', $this->foreignRepoNames ) . '):)?' .
 			$propertyIdPattern .
 			'(' . StatementsField::STATEMENT_SEPARATOR . '|$)' .
 			'/i';

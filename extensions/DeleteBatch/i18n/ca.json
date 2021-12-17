@@ -3,12 +3,13 @@
 		"authors": [
 			"Aleator",
 			"Arnaugir",
+			"Mguix",
 			"SMP"
 		]
 	},
 	"deletebatch": "Esborra un lot de pàgines",
 	"deletebatch-desc": "[[Special:DeleteBatch|Esborreu un lot de pàgines]]",
-	"deletebatch-help": "Esborreu un lot de pàgines. Podeu fer esborraments senzills o esborrar les pàgines llistades en un fitxer.\nEscolliu l'usuari que es mostrarà en el registre d'esborrament.\nEl fitxer indicat només pot contenir el títol de la pàgina i el motiu per a esborrar-la separats per una barra vertical | a cada línia.",
+	"deletebatch-help": "Suprimeix un lot de pàgines.\nPodeu realitzar una sola eliminació o suprimir pàgines llistades en un fitxer.\nTrieu un usuari que es mostrarà als registres de supressió.\nEls arxius pujats han de contenir el nom de la pàgina i el motiu, separats per una barra vertical \"|\".",
 	"deletebatch-caption": "Llista de pàgines:",
 	"deletebatch-title": "Esborra lot",
 	"deletebatch-link-back": "Torna a la pàgina especial",
@@ -17,8 +18,8 @@
 	"deletebatch-or": "<strong>o</strong>",
 	"deletebatch-delete": "Esborra",
 	"deletebatch-page": "Pàgines a esborrar:",
-	"deletebatch-processing-from-file": "s'estan suprimint les pàgines de la llista d'arxius",
-	"deletebatch-processing-from-form": "s'estan suprimint les pàgines des del formulari",
+	"deletebatch-processing-from-file": "s'estan suprimint les pàgines llistades al fitxer",
+	"deletebatch-processing-from-form": "s'estan suprimint les pàgines llistades al formulari",
 	"deletebatch-omitting-nonexistent": "S'ha omès la pàgina inexistent $1.",
 	"deletebatch-omitting-invalid": "S'ha omès la pàgina no vàlida $1.",
 	"deletebatch-file-bad-format": "El fitxer ha de ser de text pla",

@@ -1,7 +1,17 @@
 <?php
 
+namespace MediaWiki\Extension\Thanks;
+
+use ApiBase;
+use DatabaseLogEntry;
+use EchoDiscussionParser;
+use EchoEvent;
+use LogEntry;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\User\UserIdentity;
+use Title;
+use User;
 
 /**
  * API module to send thanks notifications for revisions and log entries.
@@ -20,6 +30,7 @@ class ApiCoreThank extends ApiThank {
 		// Initial setup.
 		$user = $this->getUser();
 		$this->dieOnBadUser( $user );
+		$this->dieOnUserBlockedFromThanks( $user );
 		$params = $this->extractRequestParams();
 		$revcreation = false;
 
@@ -34,7 +45,6 @@ class ApiCoreThank extends ApiThank {
 			$id = $params['log'];
 		} else {
 			$this->dieWithError( 'thanks-error-api-params', 'thanks-error-api-params' );
-			throw new LogicException();
 		}
 
 		$recipientUsername = null;
@@ -47,7 +57,6 @@ class ApiCoreThank extends ApiThank {
 				$id = $logEntry->getAssociatedRevId();
 			} else {
 				// If there's no associated revision, die if the user is sitewide blocked
-				$this->dieOnSitewideBlockedUser( $user );
 				$excerpt = '';
 				$title = $logEntry->getTarget();
 				$recipient = $this->getUserFromLog( $logEntry );
@@ -58,7 +67,7 @@ class ApiCoreThank extends ApiThank {
 			$revision = $this->getRevisionFromId( $id );
 			$excerpt = EchoDiscussionParser::getEditExcerpt( $revision, $this->getLanguage() );
 			$title = $this->getTitleFromRevision( $revision );
-			$this->dieOnBlockedUser( $user, $title );
+			$this->dieOnUserBlockedFromTitle( $user, $title );
 
 			$recipient = $this->getUserFromRevision( $revision );
 			$recipientUsername = $revision->getUser()->getName();
@@ -127,9 +136,9 @@ class ApiCoreThank extends ApiThank {
 			$this->dieWithError( 'thanks-error-invalid-log-id', 'thanks-error-invalid-log-id' );
 		}
 
-		// Make sure this log type is whitelisted.
-		$logTypeWhitelist = $this->getConfig()->get( 'ThanksLogTypeWhitelist' );
-		if ( !in_array( $logEntry->getType(), $logTypeWhitelist ) ) {
+		// Make sure this log type is allowed.
+		$allowedLogTypes = $this->getConfig()->get( 'ThanksAllowedLogTypes' );
+		if ( !in_array( $logEntry->getType(), $allowedLogTypes ) ) {
 			$err = $this->msg( 'thanks-error-invalid-log-type', $logEntry->getType() );
 			$this->dieWithError( $err, 'thanks-error-invalid-log-type' );
 		}
@@ -178,15 +187,11 @@ class ApiCoreThank extends ApiThank {
 
 	/**
 	 * @param LogEntry $logEntry
-	 * @return User
+	 * @return UserIdentity
 	 */
 	private function getUserFromLog( LogEntry $logEntry ) {
-		$recipient = $logEntry->getPerformer();
-		if ( !$recipient ) {
-			$this->dieWithError( 'thanks-error-invalidrecipient', 'invalidrecipient' );
-		}
-		// @phan-suppress-next-line PhanTypeMismatchReturnNullable T240141
-		return $recipient;
+		$recipient = $logEntry->getPerformerIdentity();
+		return MediaWikiServices::getInstance()->getUserFactory()->newFromUserIdentity( $recipient );
 	}
 
 	/**

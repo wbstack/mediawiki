@@ -62,7 +62,7 @@ class ReferencesFormatter {
 		array $groupRefs,
 		bool $responsive,
 		bool $isSectionPreview
-	) : string {
+	): string {
 		if ( !$groupRefs ) {
 			return '';
 		}
@@ -96,12 +96,12 @@ class ReferencesFormatter {
 		Parser $parser,
 		array $groupRefs,
 		bool $isSectionPreview
-	) : string {
+	): string {
 		// After sorting the list, we can assume that references are in the same order as their
 		// numbering.  Subreferences will come immediately after their parent.
 		uasort(
 			$groupRefs,
-			function ( array $a, array $b ) : int {
+			static function ( array $a, array $b ): int {
 				$cmp = ( $a['number'] ?? 0 ) - ( $b['number'] ?? 0 );
 				return $cmp ?: ( $a['extendsIndex'] ?? 0 ) - ( $b['extendsIndex'] ?? 0 );
 			}
@@ -137,7 +137,7 @@ class ReferencesFormatter {
 			$parserInput .= $this->formatListItem( $parser, $key, $value, $isSectionPreview ) . "\n";
 		}
 		$parserInput .= $this->closeIndention( $indented );
-		return Html::rawElement( 'ol', [ 'class' => [ 'references' ] ], $parserInput );
+		return Html::rawElement( 'ol', [ 'class' => 'references' ], $parserInput );
 	}
 
 	/**
@@ -145,7 +145,7 @@ class ReferencesFormatter {
 	 *
 	 * @return string
 	 */
-	private function closeIndention( $closingLi ) : string {
+	private function closeIndention( $closingLi ): string {
 		if ( !$closingLi ) {
 			return '';
 		}
@@ -163,7 +163,7 @@ class ReferencesFormatter {
 	 */
 	private function formatListItem(
 		Parser $parser, $key, array $val, bool $isSectionPreview
-	) : string {
+	): string {
 		$text = $this->referenceText( $parser, $key, $val['text'] ?? null, $isSectionPreview );
 		$error = '';
 		$extraAttributes = '';
@@ -237,7 +237,7 @@ class ReferencesFormatter {
 	 */
 	private function referenceText(
 		Parser $parser, $key, ?string $text, bool $isSectionPreview
-	) : string {
+	): string {
 		if ( $text === null ) {
 			return $this->errorReporter->plain( $parser,
 				$isSectionPreview
@@ -263,9 +263,9 @@ class ReferencesFormatter {
 		$base,
 		int $offset,
 		int $max
-	) : string {
+	): string {
 		return $this->messageLocalizer->localizeDigits( $base ) .
-			$this->messageLocalizer->formatNum( '.' ) .
+			$this->messageLocalizer->localizeSeparators( '.' ) .
 			$this->messageLocalizer->localizeDigits(
 				str_pad( (string)$offset, strlen( (string)$max ), '0', STR_PAD_LEFT )
 			);
@@ -284,7 +284,7 @@ class ReferencesFormatter {
 	 */
 	private function referencesFormatEntryAlternateBacklinkLabel(
 		Parser $parser, int $offset
-	) : string {
+	): string {
 		if ( $this->backlinkLabels === null ) {
 			$this->backlinkLabels = preg_split(
 				'/\s+/',
@@ -308,7 +308,7 @@ class ReferencesFormatter {
 	 *
 	 * @return string
 	 */
-	private function listToText( array $arr ) : string {
+	private function listToText( array $arr ): string {
 		$lastElement = array_pop( $arr );
 
 		if ( $arr === [] ) {

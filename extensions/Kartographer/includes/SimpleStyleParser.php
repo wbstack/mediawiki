@@ -18,13 +18,12 @@ use stdClass;
  */
 class SimpleStyleParser {
 
-	/** @var string[] */
-	private static $parsedProps = [ 'title', 'description' ];
+	private const PARSED_PROPS = [ 'title', 'description' ];
 
 	/** @var Parser */
 	private $parser;
 
-	/** @var PPFrame */
+	/** @var PPFrame|null */
 	private $frame;
 
 	/** @var array */
@@ -34,8 +33,6 @@ class SimpleStyleParser {
 	private $mapService;
 
 	/**
-	 * Constructor
-	 *
 	 * @param Parser $parser Parser used for wikitext processing
 	 * @param PPFrame|null $frame
 	 * @param array $options Set ['saveUnparsed' => true] to back up the original values of title
@@ -75,7 +72,7 @@ class SimpleStyleParser {
 	/**
 	 * Validate and sanitize a parsed GeoJSON data object
 	 *
-	 * @param array|object &$data
+	 * @param array|\stdClass &$data
 	 * @return Status
 	 */
 	public function parseObject( &$data ) {
@@ -92,7 +89,7 @@ class SimpleStyleParser {
 	/**
 	 * Normalize an object
 	 *
-	 * @param stdClass[] &$data
+	 * @param stdClass[]|stdClass &$data
 	 * @return Status
 	 */
 	public function normalizeAndSanitize( &$data ) {
@@ -102,11 +99,11 @@ class SimpleStyleParser {
 	}
 
 	/**
-	 * @param stdClass[] &$values
-	 * @param stdClass &$counters counter-name -> integer
+	 * @param stdClass[] $values
+	 * @param stdClass $counters counter-name -> integer
 	 * @return bool|array [ marker, marker properties ]
 	 */
-	public static function doCountersRecursive( array &$values, &$counters ) {
+	public static function doCountersRecursive( array $values, $counters ) {
 		$firstMarker = false;
 		foreach ( $values as $item ) {
 			if ( property_exists( $item, 'properties' ) &&
@@ -154,13 +151,17 @@ class SimpleStyleParser {
 	 * @param mixed $json
 	 * @return Status
 	 */
-	protected function validateContent( $json ) {
+	private function validateContent( $json ) {
 		$schema = self::loadSchema();
 		$validator = new Validator();
 		$validator->check( $json, $schema );
 
 		if ( !$validator->isValid() ) {
-			return Status::newFatal( 'kartographer-error-bad_data' );
+			return Status::newFatal(
+				'kartographer-error-bad_data',
+				$validator->getErrors()[0]['pointer'] ?? '',
+				$validator->getErrors()[0]['message'] ?? ''
+			);
 		}
 
 		return Status::newGood();
@@ -171,7 +172,7 @@ class SimpleStyleParser {
 	 * Does not attempt to be smart, just recurses through everything that can be dangerous even
 	 * if not a valid GeoJSON.
 	 *
-	 * @param object|array &$json
+	 * @param stdClass[]|stdClass &$json
 	 */
 	protected function sanitize( &$json ) {
 		if ( is_array( $json ) ) {
@@ -197,15 +198,17 @@ class SimpleStyleParser {
 	/**
 	 * Normalizes JSON
 	 *
-	 * @param array &$json
+	 * @param stdClass[]|stdClass &$json
 	 * @return Status
 	 */
-	protected function normalize( array &$json ) {
+	protected function normalize( &$json ) {
 		$status = Status::newGood();
-		foreach ( $json as &$object ) {
-			if ( $object->type === 'ExternalData' ) {
-				$status->merge( $this->normalizeExternalData( $object ) );
+		if ( is_array( $json ) ) {
+			foreach ( $json as &$element ) {
+				$this->normalize( $element );
 			}
+		} elseif ( is_object( $json ) && $json->type === 'ExternalData' ) {
+			$status->merge( $this->normalizeExternalData( $json ) );
 		}
 		$status->value = $json;
 
@@ -215,7 +218,7 @@ class SimpleStyleParser {
 	/**
 	 * Canonicalizes an ExternalData object
 	 *
-	 * @param object &$object
+	 * @param \stdClass &$object
 	 * @return Status
 	 */
 	private function normalizeExternalData( &$object ) {
@@ -276,11 +279,11 @@ class SimpleStyleParser {
 	 *
 	 * HACK: this function supports JsonConfig-style localization that doesn't pass validation
 	 *
-	 * @param object &$properties
+	 * @param \stdClass $properties
 	 */
-	private function sanitizeProperties( &$properties ) {
+	private function sanitizeProperties( $properties ) {
 		$saveUnparsed = $this->options['saveUnparsed'] ?? false;
-		foreach ( self::$parsedProps as $prop ) {
+		foreach ( self::PARSED_PROPS as $prop ) {
 			if ( property_exists( $properties, $prop ) ) {
 				$property = &$properties->$prop;
 
@@ -319,10 +322,13 @@ class SimpleStyleParser {
 	 * @return string
 	 */
 	private function parseText( $text ) {
-		$text = $this->parser->recursiveTagParseFully( $text, $this->frame );
+		$text = $this->parser->recursiveTagParseFully( $text, $this->frame ?: false );
 		return trim( Parser::stripOuterParagraph( $text ) );
 	}
 
+	/**
+	 * @return stdClass
+	 */
 	private static function loadSchema() {
 		static $schema;
 

@@ -16,6 +16,7 @@
 	"twocolconflictprovidesubmittedtext": "تضارب التحرير:",
 	"twocolconflict-beta-feature-message": "دمج التعديلات",
 	"twocolconflict-beta-feature-description": "إظهار تضارب التحرير باستخدام عرض العمودين المتقدم.",
+	"twocolconflict-copy-action": "نسخ كامل النص",
 	"twocolconflict-copy-tab-action": "عرض النص الكامل",
 	"twocolconflict-core-ui-hint-close": "لا تعرض هذا مجددا",
 	"twocolconflict-preference-enabled": "تفعيل [[mw:Special:MyLanguage/Help:Two_Column_Edit_Conflict_View|دمج التعديلات]] لحل تضاربات التحرير",
@@ -55,5 +56,5 @@
 	"twocolconflict-split-tour-dialog-message-single-column-view": "لسوء الحظ قام شخص آخر بنشر في نفس الوقت التي نشرت فيه أنت. الرجاء مراجعة التعليقات في الصفحة التالية. ويمكنك تعديل صفحتك بعده إن أردت",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "حل المشكلة",
 	"twocolconflict-talk-your": "دخولك",
-	"twocolconflict-talk-conflicting": "دخول متضارب"
+	"twocolconflict-talk-conflicting": "تعليقات متضاربة"
 }

@@ -6,20 +6,36 @@
  * @license GPL-2.0-or-later
  */
 
+namespace MediaWiki\Extension\Math;
+
+use Exception;
+use Hooks;
+use Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
+use SpecialPage;
+use StatusValue;
+use stdClass;
+use Title;
+use Xml;
+use XmlTypeCheck;
 
 /**
  * Converts LaTeX to MathML using the mathoid-server
  */
 class MathMathML extends MathRenderer {
 
+	/** @var string[] */
 	protected $defaultAllowedRootElements = [ 'math' ];
+	/** @var string[] */
 	protected $restbaseInputTypes = [ 'tex', 'inline-tex', 'chem' ];
+	/** @var string[] */
 	protected $restbaseRenderingModes = [ 'mathml', 'png' ];
+	/** @var string[] */
 	protected $allowedRootElements = [];
-	protected $hosts;
+	/** @var string */
+	protected $host;
 
 	/** @var LoggerInterface */
 	private $logger;
@@ -32,7 +48,7 @@ class MathMathML extends MathRenderer {
 	 */
 	private $svgPath = false;
 
-	/** @var string|bool */
+	/** @var string|false */
 	private $pngPath = false;
 
 	/** @var string|null */
@@ -42,7 +58,7 @@ class MathMathML extends MathRenderer {
 		global $wgMathMathMLUrl;
 		parent::__construct( $tex, $params );
 		$this->setMode( 'mathml' );
-		$this->hosts = $wgMathMathMLUrl;
+		$this->host = $wgMathMathMLUrl;
 		if ( isset( $params['type'] ) ) {
 			$allowedTypes = [ 'pmml', 'ascii', 'chem' ];
 			if ( in_array( $params['type'], $allowedTypes ) ) {
@@ -80,13 +96,11 @@ class MathMathML extends MathRenderer {
 	}
 
 	/**
-	 * @param array[] $tags
+	 * @param MathRenderer[] $renderers
 	 */
-	public static function batchEvaluate( array $tags ) {
+	public static function batchEvaluate( array $renderers ) {
 		$rbis = [];
-		foreach ( $tags as $key => $tag ) {
-			/** @var MathRenderer $renderer */
-			$renderer = $tag[0];
+		foreach ( $renderers as $key => $renderer ) {
 			$rbi = new MathRestbaseInterface( $renderer->getTex(), $renderer->getInputType() );
 			$renderer->setRestbaseInterface( $rbi );
 			$rbis[] = $rbi;
@@ -97,7 +111,7 @@ class MathMathML extends MathRenderer {
 	/**
 	 * Gets the allowed root elements the rendered math tag might have.
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public function getAllowedRootElements() {
 		if ( $this->allowedRootElements ) {
@@ -119,7 +133,7 @@ class MathMathML extends MathRenderer {
 	/**
 	 * Sets the allowed root elements the rendered math tag might have.
 	 * An empty value indicates to use the default settings.
-	 * @param array $settings
+	 * @param string[] $settings
 	 */
 	public function setAllowedRootElements( $settings ) {
 		$this->allowedRootElements = $settings;
@@ -158,7 +172,13 @@ class MathMathML extends MathRenderer {
 				return $rbi->getSuccess();
 			}
 			if ( $this->renderingRequired() ) {
-				return $this->doRender();
+				$renderResult = $this->doRender();
+				if ( !$renderResult->isGood() ) {
+					// TODO: this is a hacky hack, lastError will not exist soon.
+					$renderError = $renderResult->getErrors()[0];
+					$this->lastError = $this->getError( $renderError['message'], ...$renderError['params'] );
+				}
+				return $renderResult->isGood();
 			}
 			return true;
 		} catch ( Exception $e ) {
@@ -177,112 +197,74 @@ class MathMathML extends MathRenderer {
 		if ( $this->isPurge() ) {
 			$this->logger->debug( 'Rerendering was requested.' );
 			return true;
-		} else {
-			$dbres = $this->isInDatabase();
-			if ( $dbres ) {
-				if ( $this->isValidMathML( $this->getMathml() ) ) {
-					$this->logger->debug( 'Valid MathML entry found in database.' );
-					if ( $this->getSvg( 'cached' ) ) {
-						$this->logger->debug( 'SVG-fallback found in database.' );
-						return false;
-					} else {
-						$this->logger->debug( 'SVG-fallback missing.' );
-						return true;
-					}
+		}
+
+		$dbres = $this->isInDatabase();
+		if ( $dbres ) {
+			if ( $this->isValidMathML( $this->getMathml() ) ) {
+				$this->logger->debug( 'Valid MathML entry found in database.' );
+				if ( $this->getSvg( 'cached' ) ) {
+					$this->logger->debug( 'SVG-fallback found in database.' );
+					return false;
 				} else {
-					$this->logger->debug( 'Malformatted entry found in database' );
+					$this->logger->debug( 'SVG-fallback missing.' );
 					return true;
 				}
 			} else {
-				$this->logger->debug( 'No entry found in database.' );
+				$this->logger->debug( 'Malformatted entry found in database' );
 				return true;
 			}
+		} else {
+			$this->logger->debug( 'No entry found in database.' );
+			return true;
 		}
 	}
 
 	/**
 	 * Performs a HTTP Post request to the given host.
 	 * Uses $wgMathLaTeXMLTimeout as timeout.
-	 * Generates error messages on failure
-	 * @see Http::post()
 	 *
-	 * @param string $host
-	 * @param string $post the encoded post request
-	 * @param mixed &$res the result
-	 * @param mixed &$error the formatted error message or null
-	 * @param string $httpRequestClass class name of MWHttpRequest (needed for testing only)
-	 * @return bool success
+	 * @return StatusValue result with response body as a value
 	 */
-	public function makeRequest(
-			$host, $post, &$res, &$error = '', $httpRequestClass = 'MWHttpRequest'
-		) {
+	public function makeRequest() {
 		// TODO: Change the timeout mechanism.
 		global $wgMathLaTeXMLTimeout;
-
-		$error = '';
-		$res = null;
-		if ( !$host ) {
-			$host = $this->pickHost();
-		}
-		if ( !$post ) {
-			$this->getPostData();
-		}
+		$post = $this->getPostData();
 		$options = [ 'method' => 'POST', 'postData' => $post, 'timeout' => $wgMathLaTeXMLTimeout ];
-		/** @var CurlHttpRequest|PhpHttpRequest $req the request object */
-		$req = $httpRequestClass::factory( $host, $options );
+		$req = MediaWikiServices::getInstance()->getHttpRequestFactory()->create( $this->host, $options );
 		$status = $req->execute();
 		if ( $status->isGood() ) {
-			$res = $req->getContent();
-			return true;
+			return StatusValue::newGood( $req->getContent() );
 		} else {
 			if ( $status->hasMessage( 'http-timed-out' ) ) {
-				$error = $this->getError( 'math_timeout', $this->getModeStr(), $host );
-				$res = false;
-				$this->logger->warning( 'Timeout:' . var_export( [
-						'post' => $post,
-						'host' => $host,
-						'timeout' => $wgMathLaTeXMLTimeout
-					], true ) );
+				$this->logger->warning( 'Math service request timeout', [
+					'post' => $post,
+					'host' => $this->host,
+					'timeout' => $wgMathLaTeXMLTimeout
+				] );
+				return StatusValue::newFatal( 'math_timeout', $this->getModeStr(), $this->host );
 			} else {
-				// for any other unkonwn http error
-				$errormsg = $status->getHtml();
-				$error =
-					$this->getError( 'math_invalidresponse', $this->getModeStr(), $host, $errormsg,
-						$this->getModeStr() );
-				$this->logger->warning( 'NoResponse:' . var_export( [
-						'post' => $post,
-						'host' => $host,
-						'errormsg' => $errormsg
-					], true ) );
+				$errormsg = $req->getContent();
+				$this->logger->warning( 'Math service request failed', [
+					'post' => $post,
+					'host' => $this->host,
+					'errormsg' => $errormsg
+				] );
+				return StatusValue::newFatal(
+					'math_invalidresponse',
+					$this->getModeStr(),
+					$this->host,
+					$errormsg,
+					$this->getModeStr()
+				);
 			}
-			return false;
 		}
-	}
-
-	/**
-	 * Return a MathML daemon host.
-	 *
-	 * If more than one demon is available, one is chosen at random.
-	 *
-	 * @return string
-	 * @deprecated
-	 */
-	protected function pickHost() {
-		if ( is_array( $this->hosts ) ) {
-			$host = $this->hosts[array_rand( $this->hosts )];
-			$this->hosts = $host; // Use the same host for this class instance
-		} else {
-			$host = $this->hosts;
-		}
-		$this->logger->debug( 'Picking host ' . $host );
-		return $host;
 	}
 
 	/**
 	 * Calculates the HTTP POST Data for the request. Depends on the settings
 	 * and the input string only.
 	 * @return string HTTP POST data
-	 * @throws MWException
 	 */
 	public function getPostData() {
 		$input = $this->getTex();
@@ -292,7 +274,14 @@ class MathMathML extends MathRenderer {
 		} elseif ( $this->inputType == 'ascii' ) {
 			$out = 'type=asciimath&q=' . rawurlencode( $input );
 		} else {
-			throw new MWException( 'Internal error: Restbase should be used for tex rendering' );
+			if ( $this->getMathStyle() === 'inlineDisplaystyle' ) {
+				// default preserve the (broken) layout as it was
+				$out = 'type=inline-TeX&q=' . rawurlencode( '{\\displaystyle ' . $input . '}' );
+			} elseif ( $this->getMathStyle() === 'inline' ) {
+				$out = 'type=inline-TeX&q=' . rawurlencode( $input );
+			} else {
+				$out = 'type=tex&q=' . rawurlencode( $input );
+			}
 		}
 		$this->logger->debug( 'Get post data: ' . $out );
 		return $out;
@@ -300,51 +289,42 @@ class MathMathML extends MathRenderer {
 
 	/**
 	 * Does the actual web request to convert TeX to MathML.
-	 * @return bool
+	 *
+	 * @return StatusValue
 	 */
-	protected function doRender() {
+	protected function doRender(): StatusValue {
 		if ( $this->isEmpty() ) {
-			return false;
+			$this->logger->debug( 'Rendering was requested, but no TeX string is specified.' );
+			return StatusValue::newFatal( 'math_empty_tex' );
 		}
-		$res = '';
-		$host = $this->pickHost();
-		$post = $this->getPostData();
-		$this->lastError = '';
-		$requestResult = $this->makeRequest( $host, $post, $res, $this->lastError );
-		if ( $requestResult ) {
-			// @phan-suppress-next-line PhanTypeMismatchArgumentInternal
-			$jsonResult = json_decode( $res );
+		$requestStatus = $this->makeRequest();
+		if ( $requestStatus->isGood() ) {
+			$jsonResult = json_decode( $requestStatus->getValue() );
 			if ( $jsonResult && json_last_error() === JSON_ERROR_NONE ) {
 				if ( $jsonResult->success ) {
-					return $this->processJsonResult( $jsonResult, $host );
+					return $this->processJsonResult( $jsonResult, $this->host );
 				} else {
-					if ( property_exists( $jsonResult, 'log' ) ) {
-						$log = $jsonResult->log;
-					} else {
-						$log = wfMessage( 'math_unknown_error' )->inContentLanguage()->escaped();
-					}
-					$this->lastError = $this->getError( 'math_mathoid_error', $host, $log );
-					$this->logger->warning(
-						'Mathoid conversion error:' . var_export( [
-							'post' => $post,
-							'host' => $host,
-							'result' => $res
-						], true ) );
-					return false;
+					$serviceLog = $jsonResult->log ?? wfMessage( 'math_unknown_error' )
+							->inContentLanguage()
+							->escaped();
+					$this->logger->warning( 'Mathoid conversion error', [
+						'post' => $this->getPostData(),
+						'host' => $this->host,
+						'result' => $requestStatus->getValue(),
+						'service_log' => $serviceLog
+					] );
+					return StatusValue::newFatal( 'math_mathoid_error', $this->host, $serviceLog );
 				}
 			} else {
-				$this->lastError = $this->getError( 'math_invalidjson', $host );
-				$this->logger->error(
-					'MathML InvalidJSON:' . var_export( [
-						'post' => $post,
-						'host' => $host,
-						'res' => $res
-					], true ) );
-				return false;
+				$this->logger->error( 'MathML invalid JSON', [
+					'post' => $this->getPostData(),
+					'host' => $this->host,
+					'res' => $requestStatus->getValue(),
+				] );
+				return StatusValue::newFatal( 'math_invalidjson', $this->host );
 			}
 		} else {
-			// Error message has already been set.
-			return false;
+			return $requestStatus;
 		}
 	}
 
@@ -382,7 +362,7 @@ class MathMathML extends MathRenderer {
 	 * @return Title|string
 	 */
 	private function getFallbackImageUrl( $noRender = false ) {
-		if ( 'png' === $this->getMode() && $this->pngPath ) {
+		if ( $this->getMode() === 'png' && $this->pngPath ) {
 			return $this->pngPath;
 		}
 		if ( $this->svgPath ) {
@@ -429,7 +409,7 @@ class MathMathML extends MathRenderer {
 	 * Gets img tag for math image
 	 * @param bool $noRender if true no rendering will be performed
 	 * if the image is not stored in the database
-	 * @param bool|string $classOverride if classOverride
+	 * @param false|string $classOverride if classOverride
 	 * is false the class name will be calculated by getClassName
 	 * @return string XML the image html tag
 	 */
@@ -456,6 +436,9 @@ class MathMathML extends MathRenderer {
 		] ) );
 	}
 
+	/**
+	 * @return string
+	 */
 	protected function getMathTableName() {
 		return 'mathoid';
 	}
@@ -535,6 +518,7 @@ class MathMathML extends MathRenderer {
 		if ( $this->getMathTableName() == 'mathoid' ) {
 			$out['math_input'] = $out['math_inputtex'];
 			unset( $out['math_inputtex'] );
+			$out['math_png'] = $this->png;
 		}
 		return $out;
 	}
@@ -558,26 +542,24 @@ class MathMathML extends MathRenderer {
 	}
 
 	/**
-	 * @param object $jsonResult json result
+	 * @param stdClass $jsonResult json result
 	 * @param string $host name
 	 *
-	 * @return bool
+	 * @return StatusValue
 	 */
-	protected function processJsonResult( $jsonResult, $host ) {
+	protected function processJsonResult( $jsonResult, $host ): StatusValue {
 		if ( $this->getMode() == 'latexml' || $this->inputType == 'pmml' ||
 			 $this->isValidMathML( $jsonResult->mml )
 		) {
 			if ( isset( $jsonResult->svg ) ) {
 				$xmlObject = new XmlTypeCheck( $jsonResult->svg, null, false );
 				if ( !$xmlObject->wellFormed ) {
-					$this->lastError = $this->getError( 'math_invalidxml', $host );
-					return false;
+					return StatusValue::newFatal( 'math_invalidxml', $host );
 				} else {
 					$this->setSvg( $jsonResult->svg );
 				}
 			} else {
-				$this->logger->error(
-					'Missing SVG property in JSON result.' );
+				$this->logger->error( 'Missing SVG property in JSON result.' );
 			}
 			if ( $this->getMode() != 'latexml' && $this->inputType != 'pmml' ) {
 				$this->setMathml( $jsonResult->mml );
@@ -585,11 +567,11 @@ class MathMathML extends MathRenderer {
 			// Avoid PHP 7.1 warning from passing $this by reference
 			$renderer = $this;
 			Hooks::run( 'MathRenderingResultRetrieved',
-				[ &$renderer, &$jsonResult ] ); // Enables debugging of server results
-			return true;
+				[ &$renderer, &$jsonResult ]
+			); // Enables debugging of server results
+			return StatusValue::newGood(); // FIXME: empty?
 		} else {
-			$this->lastError = $this->getError( 'math_unknown_error', $host );
-			return false;
+			return StatusValue::newFatal( 'math_unknown_error', $host );
 		}
 	}
 
@@ -597,11 +579,8 @@ class MathMathML extends MathRenderer {
 	 * @return bool
 	 */
 	protected function isEmpty() {
-		if ( $this->userInputTex === '' ) {
-			$this->logger->debug( 'Rendering was requested, but no TeX string is specified.' );
-			$this->lastError = $this->getError( 'math_empty_tex' );
-			return true;
-		}
-		return false;
+		return $this->userInputTex === '';
 	}
 }
+
+class_alias( MathMathML::class, 'MathMathML' );

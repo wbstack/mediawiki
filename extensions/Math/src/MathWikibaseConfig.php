@@ -1,7 +1,11 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MWException;
+use Site;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -85,28 +89,28 @@ class MathWikibaseConfig {
 	/**
 	 * @return EntityIdParser
 	 */
-	public function getIdParser() : EntityIdParser {
+	public function getIdParser(): EntityIdParser {
 		return $this->idParser;
 	}
 
 	/**
 	 * @return EntityRevisionLookup
 	 */
-	public function getEntityRevisionLookup() : EntityRevisionLookup {
+	public function getEntityRevisionLookup(): EntityRevisionLookup {
 		return $this->entityRevisionLookup;
 	}
 
 	/**
 	 * @return LanguageFallbackLabelDescriptionLookupFactory
 	 */
-	public function getLabelLookupFactory() : LanguageFallbackLabelDescriptionLookupFactory {
+	public function getLabelLookupFactory(): LanguageFallbackLabelDescriptionLookupFactory {
 		return $this->labelLookupFactory;
 	}
 
 	/**
 	 * @return Site
 	 */
-	public function getSite() : Site {
+	public function getSite(): Site {
 		return $this->site;
 	}
 
@@ -122,43 +126,41 @@ class MathWikibaseConfig {
 	/**
 	 * @return PropertyId
 	 */
-	public function getPropertyIdHasPart() : PropertyId {
+	public function getPropertyIdHasPart(): PropertyId {
 		return $this->propertyIdHasPart;
 	}
 
 	/**
 	 * @return PropertyId
 	 */
-	public function getPropertyIdQuantitySymbol() : PropertyId {
+	public function getPropertyIdQuantitySymbol(): PropertyId {
 		return $this->propertyIdQuantitySymbol;
 	}
 
 	/**
 	 * @return PropertyId
 	 */
-	public function getPropertyIdDefiningFormula() : PropertyId {
+	public function getPropertyIdDefiningFormula(): PropertyId {
 		return $this->propertyIdDefiningFormula;
 	}
 
 	/**
 	 * @return MathWikibaseConfig default config
 	 */
-	public static function getDefaultMathWikibaseConfig() : MathWikibaseConfig {
+	public static function getDefaultMathWikibaseConfig(): MathWikibaseConfig {
 		if ( !self::$defaultConfig ) {
-			$wikibaseClient = WikibaseClient::getDefaultInstance();
-
 			$site = null;
 			try {
-				$site = $wikibaseClient->getSite();
+				$site = WikibaseClient::getSite();
 			} catch ( MWException $e ) {
 				$logger = LoggerFactory::getInstance( 'Math' );
 				$logger->warning( "Cannot get Site handler: " . $e->getMessage() );
 			}
 
 			self::$defaultConfig = new MathWikibaseConfig(
-				$wikibaseClient->getEntityIdParser(),
-				$wikibaseClient->getStore()->getEntityRevisionLookup(),
-				$wikibaseClient->getLanguageFallbackLabelDescriptionLookupFactory(),
+				WikibaseClient::getEntityIdParser(),
+				WikibaseClient::getStore()->getEntityRevisionLookup(),
+				WikibaseClient::getLanguageFallbackLabelDescriptionLookupFactory(),
 				$site
 			);
 		}

@@ -116,6 +116,7 @@
 			if ( form instanceof wb.lexeme.datamodel.Form ) {
 				this.option( 'value', form );
 				this._grammaticalFeatureView.value( form.getGrammaticalFeatures() );
+				this._representationsWidget.replaceAllRepresentations( termMapToArray( form.getRepresentations() ) );
 				if ( this.deferredFormWithId && form.getId() ) {
 					this.deferredFormWithId.resolve( form );
 					this.deferredFormWithId = null;
@@ -198,6 +199,8 @@
 			var representations = termMapToArray( form.getRepresentations() ),
 				lemmas = termMapToArray( this.options.lexeme.getLemmas() );
 
+			var template = mw.template.get( 'wikibase.lexeme.lexemeview', 'representations.vue' ).getSource();
+
 			this._representationsWidget = RepresentationWidget.create(
 				getStore(
 					lemmas,
@@ -207,7 +210,7 @@
 				),
 				getFormIndex(),
 				this.$representations[ 0 ],
-				'#representation-widget-vue-template',
+				template,
 				function () {
 					this._trigger( 'change' );
 				}.bind( this ),
@@ -283,6 +286,11 @@
 	/**
 	 * Creates a separate store per form - with all resulting limitations
 	 * TODO Continue refactoring by moving store creation upstream (ControllerViewFactory)
+	 *
+	 * @param lemmas
+	 * @param formIndex
+	 * @param formId
+	 * @param representations
 	 */
 	function getStore( lemmas, formIndex, formId, representations ) {
 		var forms = {};

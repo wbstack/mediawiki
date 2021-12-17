@@ -34,11 +34,5 @@
 	"templatesandbox-editform-need-title": "Ti mangipadas iti sabali a panid iti daytoy a plantilia, nasken a mainaganan ti titulo ti panid.",
 	"templatesandbox-editform-invalid-template": "Imbalido ti nainaganam a nagan ti plantilia.",
 	"templatesandbox-editform-invalid-title": "Imbalido ti nainaganam a titulo para iti panagipadas.",
-	"templatesandbox-editform-title-not-exists": "Awan ti nainaganam a titulo para iti panagipadas.",
-	"templatesandbox-apihelp-prefix": "Pasakbay ti pagipadasan ti plantilia, ka iti [[Special:TemplateSandbox]].",
-	"templatesandbox-apihelp-title": "Waswasen ti panid iti panagusar ti <var>$1templatesandboxtext</var> a mangsukat kadagiti linaon iti panid a nanaganan ditoy.",
-	"templatesandbox-apihelp-text": "Waswasen ti panid iti panagusar iti daytoy a linaon ti panid a mangsukat ti nanaganan a panid babaen ti <var>$1templatesandboxtitle</var>.",
-	"templatesandbox-apihelp-contentmodel": "Modelo ti linaon ti <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Pormat ti linaon ti <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apierror-titleandtext": "Dagiti parametro ti <var>$1templatesandboxtitle</var> ken <var>$1templatesandboxtext</var> ket nasken isuda a dua a mainaganan wenno isuda a dua a  maikkat."
+	"templatesandbox-editform-title-not-exists": "Awan ti nainaganam a titulo para iti panagipadas."
 }

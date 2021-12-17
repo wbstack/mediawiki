@@ -5,6 +5,7 @@
 			"Geraki",
 			"Glavkos",
 			"KATRINE1993",
+			"NikosLikomitros",
 			"Nikosgranturismogt",
 			"Nikosguard",
 			"SucreRouge",
@@ -22,7 +23,7 @@
 	"mobile-frontend-editor-redlink-leave": "Όχι, ευχαριστώ",
 	"mobile-frontend-history": "Προβολή ιστορικού επεξεργασιών αυτή της σελίδας.",
 	"mobile-frontend-home-button": "Αρχική σελίδα",
-	"mobile-frontend-language-article-heading": "Διαβάστε σε άλλη γλώσσα",
+	"mobile-frontend-language-article-heading": "Γλώσσα",
 	"mobile-frontend-languages-not-available": "Αυτή η σελίδα δεν είναι διαθέσιμη σε άλλες γλώσσες.",
 	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Καλώς ορίσατε}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Άνοιγμα κυρίου μενού",
@@ -54,8 +55,8 @@
 	"minerva-page-actions-info": "Πληροφορίες σελίδας",
 	"minerva-skin-desc": "Ένα υπεύθυνο πρώτο θέμα κινητού",
 	"skin-minerva-issue-learn-more": "Μάθετε περισσότερα",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton": "Κατηγορίες",
-	"skin-minerva-mobile-option-MinervaShowCategoriesButton-description": "Προβολή κατηγοριών των σελίδων",
+	"skin-minerva-mobile-option-MinervaShowCategories": "Κατηγορίες",
+	"skin-minerva-mobile-option-MinervaShowCategories-description": "Προβολή κατηγοριών των σελίδων",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "Προβλήματα διαχείρησης για βελτίωση σελίδας",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "Τυχόν προβλήματα με την σελίδα (Template:ambox) θα υπογραμμιστούν στο άρθρο."
 }

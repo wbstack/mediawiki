@@ -23,7 +23,7 @@ namespace CirrusSearch\Maintenance;
  */
 
 class SuggesterAnalysisConfigBuilder extends AnalysisConfigBuilder {
-	const VERSION = "1.4";
+	public const VERSION = "1.4";
 
 	/**
 	 * Build an analysis config with sane defaults
@@ -273,7 +273,7 @@ class SuggesterAnalysisConfigBuilder extends AnalysisConfigBuilder {
 				if ( !isset( $analyzer[ 'filter'  ] ) ) {
 					continue;
 				}
-				$analyzer[ 'filter' ] = array_map( function ( $filter ) {
+				$analyzer[ 'filter' ] = array_map( static function ( $filter ) {
 					if ( $filter === 'lowercase' ) {
 						return 'icu_normalizer';
 					}

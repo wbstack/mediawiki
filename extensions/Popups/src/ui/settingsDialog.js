@@ -3,34 +3,31 @@
  */
 
 import { renderSettingsDialog } from './templates/settingsDialog/settingsDialog';
+import { previewTypes } from '../preview/model';
 
 /**
  * Create the settings dialog shown to anonymous users.
  *
- * @param {boolean} navPopupsEnabled
+ * @param {boolean} referencePreviewsAvaliable
  * @return {JQuery} settings dialog
  */
-export function createSettingsDialog( navPopupsEnabled ) {
+export function createSettingsDialog( referencePreviewsAvaliable ) {
 	const choices = [
 		{
-			id: 'simple',
-			name: mw.msg( 'popups-settings-option-simple' ),
-			description: mw.msg( 'popups-settings-option-simple-description' ),
-			isChecked: true
+			id: previewTypes.TYPE_PAGE,
+			name: mw.msg( 'popups-settings-option-page' ),
+			description: mw.msg( 'popups-settings-option-page-description' )
 		},
 		{
-			id: 'advanced',
-			name: mw.msg( 'popups-settings-option-advanced' ),
-			description: mw.msg( 'popups-settings-option-advanced-description' )
-		},
-		{
-			id: 'off',
-			name: mw.msg( 'popups-settings-option-off' )
+			id: previewTypes.TYPE_REFERENCE,
+			name: mw.msg( 'popups-settings-option-reference' ),
+			description: mw.msg( 'popups-settings-option-reference-description' )
 		}
 	];
 
-	if ( !navPopupsEnabled ) {
-		// remove the advanced option
+	// TODO: Remove when not in Beta any more
+	if ( !referencePreviewsAvaliable ) {
+		// Anonymous users can't access reference previews as long as they are in beta
 		choices.splice( 1, 1 );
 	}
 

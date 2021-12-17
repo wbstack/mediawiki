@@ -28,7 +28,7 @@ class CoreUiHintHtml {
 	/**
 	 * @return string
 	 */
-	public function getHtml() : string {
+	public function getHtml(): string {
 		$closeIcon = new IconWidget( [
 			'icon' => 'close',
 			'title' => $this->messageLocalizer->msg( 'twocolconflict-core-ui-hint-close' )->text(),

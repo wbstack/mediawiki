@@ -13,6 +13,7 @@ use Wikibase\DataModel\Services\Diff\EntityDiff;
  *
  * @license GPL-2.0-or-later
  * @author Amir Sarabadani <ladsgroup@gmail.com>
+ * @phan-file-suppress PhanPluginNeverReturnMethod
  */
 class LexemeDiff extends EntityDiff {
 
@@ -20,7 +21,7 @@ class LexemeDiff extends EntityDiff {
 	 * @param DiffOp[] $operations
 	 */
 	public function __construct( array $operations = [] ) {
-		//TODO Probably can be removed. Does it do anything useful?
+		// TODO Probably can be removed. Does it do anything useful?
 		$this->fixSubstructureDiff( $operations, 'lemmas' );
 		$this->fixSubstructureDiff( $operations, 'lexicalCategory' );
 		$this->fixSubstructureDiff( $operations, 'language' );
@@ -79,7 +80,7 @@ class LexemeDiff extends EntityDiff {
 	 * @return bool
 	 */
 	public function isEmpty(): bool {
-		//FIXME: Needs to be fixed, otherwise conflict resolution may lead to unexpected results
+		// FIXME: Needs to be fixed, otherwise conflict resolution may lead to unexpected results
 		return $this->getLemmasDiff()->isEmpty()
 			&& $this->getLexicalCategoryDiff()->isEmpty()
 			&& $this->getLanguageDiff()->isEmpty()

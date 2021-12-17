@@ -2,6 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Geraki",
+			"Giannaras99",
+			"NikosLikomitros",
 			"Nikosgranturismogt",
 			"Thodoris"
 		]
@@ -13,7 +15,7 @@
 	"kartographer-error-context-multi": "&lt;$1&gt; προβλήματα:\n$2",
 	"kartographer-error-missing-attr": "Η παράμετρος \"$1\" λείπει",
 	"kartographer-error-bad_attr": "Η παράμετρος \"$1\" έχει μια μη έγκυρη τιμή",
-	"kartographer-error-bad_data": "Το περιεχόμενο JSON δεν είναι έγκυρο GeoJSON+simplestyle",
+	"kartographer-error-bad_data": "Το περιεχόμενο JSON δεν είναι έγκυρο GeoJSON+simplestyle. Το πρώτο σφάλμα επικύρωσης είναι στο «$1»: «$2»",
 	"kartographer-error-latlon": "Είτε και οι δύο παράμετροι \"γεωγραφικό πλάτος\" και \"γεωγραφικό μήκος\" θα πρέπει να παρέχεται ή καμία από αυτές",
 	"kartographer-error-title": "Ο τίτλος \"$1\" δεν είναι μια έγκυρη σελίδα δεδομένων χάρτη",
 	"kartographer-tracking-category": "Σελίδες με χάρτες",
@@ -64,10 +66,10 @@
 	"leafletdraw-edit-toolbar-actions-save-text": "Αποθήκευση",
 	"leafletdraw-edit-toolbar-actions-save-title": "Αποθήκευση αλλαγών",
 	"leafletdraw-edit-toolbar-actions-clearall-text": "Καθάρισμα όλων",
-	"leafletdraw-edit-toolbar-buttons-edit": "Επεξεργαστείτε στρώματα",
-	"leafletdraw-edit-toolbar-buttons-editdisabled": "Δεν υπάρχουν στρώματα για επεξεργασία",
-	"leafletdraw-edit-toolbar-buttons-remove": "Διαγραφή στρωμάτων",
-	"leafletdraw-edit-toolbar-buttons-removedisabled": "Δεν υπάρχουν στρώματα για διαγραφή",
+	"leafletdraw-edit-toolbar-buttons-edit": "Επεξεργασία αντικειμένων",
+	"leafletdraw-edit-toolbar-buttons-editdisabled": "Δεν υπάρχουν αντικείμενα προς επεξεργασία",
+	"leafletdraw-edit-toolbar-buttons-remove": "Διαγραφή αντικειμένων",
+	"leafletdraw-edit-toolbar-buttons-removedisabled": "Δεν υπάρχουν αντικείμενα προς διαγραφή",
 	"leafletdraw-draw-toolbar-finish-text": "Πλήρης",
 	"map": "Πληροφορίες συντεταγμένες",
 	"mapbox-control-zoomin-title": "Μεγέθυνση",

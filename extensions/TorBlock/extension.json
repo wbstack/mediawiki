@@ -7,9 +7,9 @@
 	"type": "antispam",
 	"version": "1.1.0",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
-	"callback": "TorBlockHooks::registerExtension",
+	"callback": "MediaWiki\\Extension\\TorBlock\\Hooks::registerExtension",
 	"GroupPermissions": {
 		"user": {
 			"torunblocked": true
@@ -28,47 +28,51 @@
 			"i18n"
 		]
 	},
-	"AutoloadClasses": {
-		"TorBlockHooks": "includes/TorBlockHooks.php",
-		"TorExitNodes": "includes/TorExitNodes.php"
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\TorBlock\\": "includes/"
+	},
+	"HookHandlers": {
+		"TorBlockHooks": {
+			"class": "MediaWiki\\Extension\\TorBlock\\Hooks"
+		}
 	},
 	"Hooks": {
-		"getUserPermissionsErrorsExpensive": [
-			"TorBlockHooks::onGetUserPermissionsErrorsExpensive"
-		],
-		"AbortAutoblock": [
-			"TorBlockHooks::onAbortAutoblock"
-		],
-		"GetAutoPromoteGroups": [
-			"TorBlockHooks::onGetAutoPromoteGroups"
-		],
-		"GetUserBlock": [
-			"TorBlockHooks::onGetUserBlock"
-		],
-		"AutopromoteCondition": [
-			"TorBlockHooks::onAutopromoteCondition"
-		],
-		"RecentChange_save": [
-			"TorBlockHooks::onRecentChangeSave"
-		],
-		"ListDefinedTags": [
-			"TorBlockHooks::onListDefinedTags"
-		],
-		"ChangeTagsListActive": [
-			"TorBlockHooks::onListDefinedTags"
-		],
+		"getUserPermissionsErrorsExpensive": {
+			"handler": "TorBlockHooks"
+		},
+		"AbortAutoblock": {
+			"handler": "TorBlockHooks"
+		},
+		"GetAutoPromoteGroups": {
+			"handler": "TorBlockHooks"
+		},
+		"GetUserBlock": {
+			"handler": "TorBlockHooks"
+		},
+		"AutopromoteCondition": {
+			"handler": "TorBlockHooks"
+		},
+		"RecentChange_save": {
+			"handler": "TorBlockHooks"
+		},
+		"ListDefinedTags": {
+			"handler": "TorBlockHooks"
+		},
+		"ChangeTagsListActive": {
+			"handler": "TorBlockHooks"
+		},
 		"AbuseFilter-filterAction": [
-			"TorBlockHooks::onAbuseFilterFilterAction"
+			"MediaWiki\\Extension\\TorBlock\\Hooks::onAbuseFilterFilterAction"
 		],
 		"AbuseFilter-builder": [
-			"TorBlockHooks::onAbuseFilterBuilder"
+			"MediaWiki\\Extension\\TorBlock\\Hooks::onAbuseFilterBuilder"
 		],
-		"EmailUserPermissionsErrors": [
-			"TorBlockHooks::onEmailUserPermissionsErrors"
-		],
-		"OtherBlockLogLink": [
-			"TorBlockHooks::onOtherBlockLogLink"
-		]
+		"EmailUserPermissionsErrors": {
+			"handler": "TorBlockHooks"
+		},
+		"OtherBlockLogLink": {
+			"handler": "TorBlockHooks"
+		}
 	},
 	"config": {
 		"TorBypassPermissions": {
@@ -84,7 +88,7 @@
 		"TorAutoConfirmAge": {
 			"value": 0
 		},
-		"TorAutoConfirmCount":  {
+		"TorAutoConfirmCount": {
 			"value": 0
 		},
 		"TorIPs": {

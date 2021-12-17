@@ -6,6 +6,7 @@ use ApiBase;
 use ApiMain;
 use LogicException;
 use Message;
+use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\MediaWiki\Api\Error\FormNotFound;
 use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
@@ -16,18 +17,18 @@ use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
+use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
-use Wikibase\Repo\WikibaseRepo;
 
 /**
  * @license GPL-2.0-or-later
  */
 class RemoveForm extends ApiBase {
 
-	const LATEST_REVISION = 0;
+	private const LATEST_REVISION = 0;
 
 	/**
 	 * @var RemoveFormRequestParser
@@ -54,25 +55,25 @@ class RemoveForm extends ApiBase {
 	 */
 	private $entityRevisionLookup;
 
-	/**
-	 * @return self
-	 */
-	public static function newFromGlobalState( ApiMain $mainModule, $moduleName ) {
-		$wikibaseRepo = WikibaseRepo::getDefaultInstance();
-		$apiHelperFactory = $wikibaseRepo->getApiHelperFactory( $mainModule->getContext() );
-
+	public static function factory(
+		ApiMain $mainModule,
+		string $moduleName,
+		ApiHelperFactory $apiHelperFactory,
+		MediawikiEditEntityFactory $editEntityFactory,
+		EntityIdParser $entityIdParser,
+		Store $store,
+		SummaryFormatter $summaryFormatter
+	): self {
 		return new self(
 			$mainModule,
 			$moduleName,
 			new RemoveFormRequestParser(
-				new FormIdDeserializer(
-					$wikibaseRepo->getEntityIdParser()
-				)
+				new FormIdDeserializer( $entityIdParser )
 			),
-			$wikibaseRepo->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
-			$wikibaseRepo->newEditEntityFactory( $mainModule->getContext() ),
-			$wikibaseRepo->getSummaryFormatter(),
-			function ( $module ) use ( $apiHelperFactory ) {
+			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
+			$editEntityFactory,
+			$summaryFormatter,
+			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
 			}
 		);
@@ -129,7 +130,7 @@ class RemoveForm extends ApiBase {
 				$this->dieWithError( $error->asApiMessage( RemoveFormRequestParser::PARAM_FORM_ID, [] ) );
 			}
 		} catch ( StorageException $e ) {
-			//TODO Test it
+			// TODO Test it
 			if ( $e->getStatus() ) {
 				$this->dieStatus( $e->getStatus() );
 			} else {
@@ -155,7 +156,7 @@ class RemoveForm extends ApiBase {
 		$changeOp->apply( $lexeme, $summary );
 
 		$editEntity = $this->editEntityFactory->newEditEntity(
-			$this->getUser(),
+			$this->getContext(),
 			$lexemeId,
 			$lexemeRevision->getRevisionId()
 		);
@@ -167,12 +168,14 @@ class RemoveForm extends ApiBase {
 		}
 
 		$tokenThatDoesNotNeedChecking = false;
-		//FIXME: Handle failure
+		// FIXME: Handle failure
 		$status = $editEntity->attemptSave(
 			$lexeme,
 			$this->summaryFormatter->formatSummary( $summary ),
 			$flags,
-			$tokenThatDoesNotNeedChecking
+			$tokenThatDoesNotNeedChecking,
+			null,
+			$params['tags'] ?: []
 		);
 
 		if ( !$status->isGood() ) {
@@ -197,6 +200,10 @@ class RemoveForm extends ApiBase {
 				RemoveFormRequestParser::PARAM_FORM_ID => [
 					self::PARAM_TYPE => 'string',
 					self::PARAM_REQUIRED => true,
+				],
+				'tags' => [
+					self::PARAM_TYPE => 'tags',
+					self::PARAM_ISMULTI => true,
 				],
 				'bot' => [
 					self::PARAM_TYPE => 'boolean',

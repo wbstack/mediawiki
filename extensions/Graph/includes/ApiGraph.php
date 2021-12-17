@@ -49,6 +49,9 @@ class ApiGraph extends ApiBase {
 		$this->getResult()->addValue( null, $this->getModuleName(), $graph );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function getAllowedParams() {
 		return [
 			'hash' => [
@@ -67,6 +70,9 @@ class ApiGraph extends ApiBase {
 		];
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	protected function getExamplesMessages() {
 		return [
 			'formatversion=2&action=graph&title=Extension%3AGraph%2FDemo' .
@@ -125,7 +131,7 @@ class ApiGraph extends ApiBase {
 		$graph = $cache->getWithSetCallback(
 			$cache->makeKey( 'graph-data', $hash, $page->getTouched() ),
 			$cache::TTL_DAY,
-			function ( $oldValue, &$ttl ) use ( $page, $revId, $hash ) {
+			static function ( $oldValue, &$ttl ) use ( $page, $revId, $hash ) {
 				$value = false;
 				$parserOptions = ParserOptions::newCanonical( 'canonical' );
 				$parserOutput = $page->getParserOutput( $parserOptions, $revId );

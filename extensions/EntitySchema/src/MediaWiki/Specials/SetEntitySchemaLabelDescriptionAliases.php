@@ -2,6 +2,14 @@
 
 namespace EntitySchema\MediaWiki\Specials;
 
+use EntitySchema\DataAccess\EditConflict;
+use EntitySchema\DataAccess\MediaWikiPageUpdaterFactory;
+use EntitySchema\DataAccess\MediaWikiRevisionSchemaUpdater;
+use EntitySchema\DataAccess\WatchlistUpdater;
+use EntitySchema\Domain\Model\SchemaId;
+use EntitySchema\Presentation\InputValidator;
+use EntitySchema\Services\SchemaConverter\NameBadge;
+use EntitySchema\Services\SchemaConverter\SchemaConverter;
 use Html;
 use HTMLForm;
 use InvalidArgumentException;
@@ -17,14 +25,6 @@ use Status;
 use Title;
 use UserBlockedError;
 use WebRequest;
-use EntitySchema\DataAccess\EditConflict;
-use EntitySchema\DataAccess\MediaWikiPageUpdaterFactory;
-use EntitySchema\DataAccess\MediaWikiRevisionSchemaUpdater;
-use EntitySchema\DataAccess\WatchlistUpdater;
-use EntitySchema\Domain\Model\SchemaId;
-use EntitySchema\Presentation\InputValidator;
-use EntitySchema\Services\SchemaConverter\NameBadge;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
 use WikiPage;
 
 /**
@@ -34,15 +34,16 @@ use WikiPage;
  */
 class SetEntitySchemaLabelDescriptionAliases extends SpecialPage {
 
-	const FIELD_ID = 'ID';
-	const FIELD_LANGUAGE = 'languagecode';
-	const FIELD_DESCRIPTION = 'description';
-	const FIELD_LABEL = 'label';
-	const FIELD_ALIASES = 'aliases';
-	const FIELD_BASE_REV = 'base-rev';
-	const SUBMIT_SELECTION_NAME = 'submit-selection';
-	const SUBMIT_EDIT_NAME = 'submit-edit';
+	public const FIELD_ID = 'ID';
+	public const FIELD_LANGUAGE = 'languagecode';
+	public const FIELD_DESCRIPTION = 'description';
+	public const FIELD_LABEL = 'label';
+	public const FIELD_ALIASES = 'aliases';
+	public const FIELD_BASE_REV = 'base-rev';
+	private const SUBMIT_SELECTION_NAME = 'submit-selection';
+	private const SUBMIT_EDIT_NAME = 'submit-edit';
 
+	/** @var string */
 	private $htmlFormProvider;
 
 	public function __construct( $htmlFormProvider = HTMLForm::class ) {
@@ -128,8 +129,7 @@ class SetEntitySchemaLabelDescriptionAliases extends SpecialPage {
 	private function displaySchemaLanguageSelectionForm( $defaultId, $defaultLanguage ) {
 		$formDescriptor = $this->getSchemaSelectionFormFields( $defaultId, $defaultLanguage );
 
-		$formProvider = $this->htmlFormProvider; // FIXME: PHP7: inline this variable!
-		$form = $formProvider::factory( 'ooui', $formDescriptor, $this->getContext() )
+		$form = $this->htmlFormProvider::factory( 'ooui', $formDescriptor, $this->getContext() )
 			->setSubmitName( self::SUBMIT_SELECTION_NAME )
 			->setSubmitID( 'entityschema-special-schema-id-submit' )
 			->setSubmitTextMsg( 'entityschema-special-id-submit' )
@@ -145,8 +145,7 @@ class SetEntitySchemaLabelDescriptionAliases extends SpecialPage {
 		$schemaNameBadge = $this->getSchemaNameBadge( $title, $langCode, $baseRevId );
 		$formDescriptor = $this->getEditFormFields( $id, $langCode, $schemaNameBadge, $baseRevId );
 
-		$formProvider = $this->htmlFormProvider; // FIXME: PHP7: inline this variable!
-		$form = $formProvider::factory( 'ooui', $formDescriptor, $this->getContext() )
+		$form = $this->htmlFormProvider::factory( 'ooui', $formDescriptor, $this->getContext() )
 			->setSubmitName( self::SUBMIT_EDIT_NAME )
 			->setSubmitID( 'entityschema-special-schema-id-submit' )
 			->setSubmitTextMsg( 'entityschema-special-id-submit' )

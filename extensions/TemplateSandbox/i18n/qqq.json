@@ -20,10 +20,10 @@
 	"templatesandbox-submit": "Label for the submit button on the special page.\n{{Identical|View}}",
 	"templatesandbox-title-output": "Message used when displaying the parsed page title. $1 is the parsed page title.",
 	"templatesandbox-editform-legend": "Text used for the legend on the editpage form.",
-	"templatesandbox-editform-text": "Text displayed in the form on the editpage.",
+	"templatesandbox-editform-text": "{{notranslate}}\nText displayed in the form on the editpage.",
 	"templatesandbox-editform-page-label": "Label for the \"page\" input field on the editpage form.\n{{Identical|Page title}}",
 	"templatesandbox-editform-view-label": "Label for the submit button on the editpage form.\n{{Identical|Show preview}}",
-	"templatesandbox-editform-helptext": "Text displayed after the submit button on the editpage form.",
+	"templatesandbox-editform-helptext": "{{notranslate}}\nText displayed after the submit button on the editpage form.",
 	"templatesandbox-preview": "Title of preview section when previewing another page using this template. Parameters:\n* $1 - (Unused) the page being previewed\n* $2 - the title set by the DISPLAYTITLE magic word",
 	"templatesandbox-previewnote": "Message displayed when previewing another page using this template. Parameters:\n* $1 - the page being previewed",
 	"templatesandbox-invalid-title": "Error message displayed when the title specified in the special page is invalid.",
@@ -41,10 +41,5 @@
 	"templatesandbox-editform-invalid-template": "Error message displayed when the template name specified for the editpage form is invalid.",
 	"templatesandbox-editform-invalid-title": "Error message displayed when the title specified for the editpage form is invalid.",
 	"templatesandbox-editform-title-not-exists": "Error message displayed when the title specified for the editpage form does not exist.",
-	"templatesandbox-apihelp-prefix": "{{doc-apihelp-param|description=the \"templatesandboxprefix\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-title": "{{doc-apihelp-param|description=the \"templatesandboxtitle\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-text": "{{doc-apihelp-param|description=the \"templatesandboxtext\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-contentmodel": "{{doc-apihelp-param|description=the \"templatesandboxcontentmodel\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apihelp-contentformat": "{{doc-apihelp-param|description=the \"templatesandboxcontentformat\" parameter for the \"parse\" and \"expandtemplates\" modules}}",
-	"templatesandbox-apierror-titleandtext": "\n\nParameters:\n* $1 - Module parameter prefix, e.g. \"bl\"."
+	"templatesandbox-failed-replace-section": "Error message displayed when replacing a section of existing page failed."
 }

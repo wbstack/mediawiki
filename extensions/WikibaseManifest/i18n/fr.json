@@ -5,5 +5,6 @@
 			"Verdy p"
 		]
 	},
+	"wikibasemanifest": "WikibaseManifest",
 	"wikibasemanifest-desc": "Combine les métadonnées d’une installation de Wikibase pour les exposer dans une API simple"
 }

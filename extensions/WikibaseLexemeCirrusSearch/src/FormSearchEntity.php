@@ -6,8 +6,8 @@ use CirrusSearch\Search\SearchContext;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\DisMax;
-use Elastica\Query\Match;
 use Elastica\Query\MatchNone;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeContent;
 use Wikibase\Lib\Interactors\TermSearchResult;
@@ -54,7 +54,7 @@ class FormSearchEntity extends LexemeSearchEntity {
 		$textExact = ltrim( $text );
 		$text = trim( $text );
 
-		$labelsFilter = new Match( 'lexeme_forms.representation.prefix', $text );
+		$labelsFilter = new MatchQuery( 'lexeme_forms.representation.prefix', $text );
 
 		$profile = $context->getConfig()
 			->getProfileService()
@@ -109,7 +109,7 @@ class FormSearchEntity extends LexemeSearchEntity {
 		$labelsQuery->addFilter( $labelsFilter );
 		$labelsQuery->addShould( $dismax );
 		// lexeme_forms.id is a lowercase_keyword so use Match to apply the analyzer
-		$titleMatch = new Match( 'lexeme_forms.id',
+		$titleMatch = new MatchQuery( 'lexeme_forms.id',
 			EntitySearchUtils::normalizeId( $text, $this->idParser ) );
 
 		$query = new BoolQuery();

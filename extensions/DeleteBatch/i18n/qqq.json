@@ -19,7 +19,7 @@
 	"deletebatch-help": "This message is help message for the \"Delete batch\" form.\n\nThe message indicates \"(This form enables to) delete a batch of pages\".",
 	"deletebatch-caption": "Used as label for \"Select a file\" button.",
 	"deletebatch-default-reason": "Label for the \"Default deletion reason\" text field. Default deletion reason is the deletion summary which will be used for all pages to be deleted '''unless''' a different deletion reason has been specified in the input box or uploadable file by suffixing the page name with a | character, followed by the non-default deletion reason.",
-	"deletebatch-extensionname": "{{notranslate}}\nName of the extension as it should be displayed.",
+	"deletebatch-extensionname": "{{name}}",
 	"deletebatch-title": "Used as page title in [[Special:DeleteBatch]].",
 	"deletebatch-link-back": "Used as link text in \"Result of delete batch\" page.\n\nThe link points to the special page [[Special:DeleteBatch]].",
 	"deletebatch-as": "Used as label for the \"Mode\" select box.\n\nThe select box has the following performers:\n* {{msg-mw|Deletebatch-select-script}}\n* {{msg-mw|Deletebatch-select-yourself}}",

@@ -76,14 +76,20 @@ module.exports = ( function () {
 			},
 			mutations: {
 				updateLemmas: function ( state, newLemmas ) {
-					// TODO: newLemmas is array of Lemma objects when coming from lexeme.lemmas
-					// but would be a generic object when passed from the API response
-					state.lemmas = new LemmaList( newLemmas.map( function ( x ) {
-						if ( x instanceof Lemma ) {
-							return x.copy();
+					// newLemmas can be an array of Lemma objects when coming from lexeme.lemmas
+					// or a plain object when coming from the API response
+					var lemmaList = new LemmaList( [] ),
+						index,
+						lemma;
+					for ( index in newLemmas ) {
+						lemma = newLemmas[ index ];
+						if ( lemma instanceof Lemma ) {
+							lemmaList.add( lemma.copy() );
+						} else {
+							lemmaList.add( new Lemma( lemma.value, lemma.language ) );
 						}
-						return new Lemma( x.value, x.language );
-					} ) );
+					}
+					state.lemmas = lemmaList;
 				},
 				updateRevisionId: function ( state, revisionId ) {
 					state.baseRevId = revisionId;
@@ -104,16 +110,16 @@ module.exports = ( function () {
 				}
 			},
 			actions: {
-				save: function ( context, lexeme ) {
+				save: function ( context, saveLexeme ) {
 					if ( context.state.isSaving ) {
 						throw new Error( 'Already saving!' );
 					}
 					context.commit( 'startSaving' );
 
 					var data = {
-							lemmas: getRequestLemmas( context.state.lemmas.getLemmas(), lexeme.lemmas ),
-							language: lexeme.language,
-							lexicalCategory: lexeme.lexicalCategory
+							lemmas: getRequestLemmas( context.state.lemmas.getLemmas(), saveLexeme.lemmas ),
+							language: saveLexeme.language,
+							lexicalCategory: saveLexeme.lexicalCategory
 						},
 						saveRequest = $.Deferred( function ( deferred ) {
 							repoApi.editEntity(
@@ -126,22 +132,36 @@ module.exports = ( function () {
 									deferred.resolve( response );
 								} )
 								.catch( function ( code, response ) {
-									deferred.reject( response && response.error );
+									var error = response && ( response.error || response.errors[ 0 ] );
+									deferred.reject( error );
 								} );
 						} );
 
 					return $.when(
 						saveRequest,
-						formatEntityId( repoApi, lexeme.language ),
-						formatEntityId( repoApi, lexeme.lexicalCategory )
+						formatEntityId( repoApi, saveLexeme.language ),
+						formatEntityId( repoApi, saveLexeme.lexicalCategory )
 					).then( function ( response, formattedLanguage, formattedLexicalCategory ) {
 						context.commit( 'updateRevisionId', response.entity.lastrevid );
-						// TODO: Update state of lemmas, language and lexicalCategory if needed.
-						// Note: API response does not contain lemma.
-						context.commit( 'updateLemmas', response.entity.lemmas || lexeme.lemmas );
-						context.commit( 'updateLanguage', { id: lexeme.language, link: formattedLanguage } );
+						context.commit( 'updateLemmas', response.entity.lemmas );
+						return $.when(
+							response,
+							// re-format entity IDs if they changed server-side
+							// (but they probably didn't)
+							saveLexeme.language === response.entity.language
+								? formattedLanguage
+								: formatEntityId( repoApi, response.entity.language ),
+							saveLexeme.lexicalCategory === response.entity.lexicalCategory
+								? formattedLexicalCategory
+								: formatEntityId( repoApi, response.entity.lexicalCategory )
+						);
+					} ).then( function ( response, formattedLanguage, formattedLexicalCategory ) {
+						context.commit( 'updateLanguage', {
+							id: response.entity.language,
+							link: formattedLanguage
+						} );
 						context.commit( 'updateLexicalCategory', {
-							id: lexeme.lexicalCategory,
+							id: response.entity.lexicalCategory,
 							link: formattedLexicalCategory
 						} );
 

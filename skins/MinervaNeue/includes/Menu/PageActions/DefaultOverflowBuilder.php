@@ -24,6 +24,7 @@ use Hooks;
 use MediaWiki\Minerva\Menu\Entries\IMenuEntry;
 use MediaWiki\Minerva\Menu\Entries\SingleMenuEntry;
 use MediaWiki\Minerva\Menu\Group;
+use MediaWiki\Minerva\Permissions\IMinervaPagePermissions;
 use MessageLocalizer;
 
 class DefaultOverflowBuilder implements IOverflowBuilder {
@@ -34,30 +35,52 @@ class DefaultOverflowBuilder implements IOverflowBuilder {
 	private $messageLocalizer;
 
 	/**
+	 * @var IMinervaPagePermissions
+	 */
+	private $permissions;
+
+	/**
 	 * Initialize Default overflow menu Group
 	 *
 	 * @param MessageLocalizer $messageLocalizer
+	 * @param IMinervaPagePermissions $permissions Minerva permissions system
 	 */
-	public function __construct( MessageLocalizer $messageLocalizer ) {
+	public function __construct(
+		MessageLocalizer $messageLocalizer,
+		IMinervaPagePermissions $permissions
+	) {
 		$this->messageLocalizer = $messageLocalizer;
+		$this->permissions = $permissions;
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function getGroup( array $toolbox ): Group {
+	public function getGroup( array $toolbox, array $actions ): Group {
 		$group = new Group( 'p-tb' );
+		// T285567: Make sure admins can unprotect the page afterwards
+		$permissionChangeAction = array_key_exists( 'unprotect', $actions ) ?
+			$this->build( 'unprotect', 'unLock', 'unprotect', $actions ) :
+			$this->build( 'protect', 'lock', 'protect', $actions );
+
 		$possibleEntries = array_filter( [
 			$this->build( 'info', 'infoFilled', 'info', $toolbox ),
 			$this->build( 'permalink', 'link', 'permalink', $toolbox ),
 			$this->build( 'backlinks', 'articleRedirect', 'whatlinkshere', $toolbox ),
 			$this->build( 'wikibase', 'logoWikidata', 'wikibase', $toolbox ),
-			$this->build( 'cite', 'quotes', 'citethispage', $toolbox )
+			$this->build( 'cite', 'quotes', 'citethispage', $toolbox ),
+			$this->permissions->isAllowed( IMinervaPagePermissions::MOVE ) ?
+				$this->build( 'move', 'move', 'move', $actions ) : null,
+			$this->permissions->isAllowed( IMinervaPagePermissions::DELETE ) ?
+				$this->build( 'delete', 'trash', 'delete', $actions ) : null,
+			$this->permissions->isAllowed( IMinervaPagePermissions::PROTECT ) ?
+				$permissionChangeAction : null
 		] );
 
 		foreach ( $possibleEntries as $menuEntry ) {
 			$group->insertEntry( $menuEntry );
 		}
+
 		Hooks::run( 'MobileMenu', [ 'pageactions.overflow', &$group ] );
 		return $group;
 	}

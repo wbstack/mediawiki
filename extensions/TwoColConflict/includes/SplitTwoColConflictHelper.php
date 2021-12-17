@@ -6,6 +6,8 @@ use Html;
 use IBufferingStatsdDataFactory;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\EditPage\TextConflictHelper;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserOptionsLookup;
 use ObjectCache;
 use OutputPage;
 use ParserOptions;
@@ -42,6 +44,11 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	private $resolutionSuggester;
 
 	/**
+	 * @var UserOptionsLookup
+	 */
+	private $userOptionsLookup;
+
+	/**
 	 * @param Title $title
 	 * @param OutputPage $out
 	 * @param IBufferingStatsdDataFactory $stats
@@ -50,6 +57,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	 * @param IContentHandlerFactory $contentHandlerFactory
 	 * @param TwoColConflictContext $twoColContext
 	 * @param ResolutionSuggester $resolutionSuggester
+	 * @param UserOptionsLookup $userOptionsLookup
 	 */
 	public function __construct(
 		Title $title,
@@ -59,13 +67,15 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 		string $newEditSummary,
 		IContentHandlerFactory $contentHandlerFactory,
 		TwoColConflictContext $twoColContext,
-		ResolutionSuggester $resolutionSuggester
+		ResolutionSuggester $resolutionSuggester,
+		UserOptionsLookup $userOptionsLookup
 	) {
 		parent::__construct( $title, $out, $stats, $submitLabel, $contentHandlerFactory );
 
 		$this->newEditSummary = $newEditSummary;
 		$this->twoColContext = $twoColContext;
 		$this->resolutionSuggester = $resolutionSuggester;
+		$this->userOptionsLookup = $userOptionsLookup;
 
 		$this->out->enableOOUI();
 		$this->out->addModuleStyles( [
@@ -189,8 +199,16 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 
 		$content = new WikitextContent( $this->yourtext );
 		$parserOptions = new ParserOptions( $user, $this->out->getLanguage() );
+		$contentTransformer = MediaWikiServices::getInstance()->getContentTransformer();
+		$content = $contentTransformer->preSaveTransform(
+			$content,
+			$this->title,
+			$user,
+			$parserOptions
+		);
 		// @phan-suppress-next-line PhanUndeclaredMethod
-		$previewWikitext = $content->preSaveTransform( $this->title, $user, $parserOptions )->getText();
+		$previewWikitext = $content->getText();
+
 		return SplitConflictUtils::splitText( $previewWikitext );
 	}
 
@@ -202,7 +220,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	 *
 	 * @return string
 	 */
-	private function buildEditConflictView( array $storedLines, array $yourLines ) : string {
+	private function buildEditConflictView( array $storedLines, array $yourLines ): string {
 		$user = $this->out->getUser();
 		$language = $this->out->getLanguage();
 		$formatter = new AnnotatedHtmlDiffFormatter();
@@ -215,11 +233,12 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 			$language,
 			$this->out->getContext()
 		) )->getHtml( $this->twoColContext->isUsedAsBetaFeature() );
+		// @phan-suppress-next-line SecurityCheck-DoubleEscaped
 		$out .= ( new HtmlSplitConflictView(
 			new HtmlEditableTextComponent(
 				$this->out->getContext(),
 				$language,
-				$user->getOption( 'editfont' )
+				$this->userOptionsLookup->getOption( $user, 'editfont' )
 			),
 			$this->out->getContext()
 		) )->getHtml(
@@ -230,12 +249,13 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 		return $out;
 	}
 
-	private function buildResolutionSuggestionView( TalkPageResolution $suggestion ) : string {
+	private function buildResolutionSuggestionView( TalkPageResolution $suggestion ): string {
+		// @phan-suppress-next-line SecurityCheck-DoubleEscaped
 		return ( new HtmlTalkPageResolutionView(
 			new HtmlEditableTextComponent(
 				$this->out->getContext(),
 				$this->out->getLanguage(),
-				$this->out->getUser()->getOption( 'editfont' )
+				$this->userOptionsLookup->getOption( $this->out->getUser(), 'editfont' )
 			),
 			$this->out->getContext()
 		) )->getHtml(
@@ -251,7 +271,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	 *
 	 * @return string
 	 */
-	private function buildRawTextsHiddenFields() : string {
+	private function buildRawTextsHiddenFields(): string {
 		return Html::textarea(
 				'mw-twocolconflict-your-text',
 				$this->yourtext,

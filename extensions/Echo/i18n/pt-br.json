@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Albertoleoncio",
 			"Almondega",
 			"Anderson Costa",
 			"Cainamarques",
@@ -8,6 +9,7 @@
 			"Cristofer Alves",
 			"Dianakc",
 			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
 			"Felipe L. Ewald",
 			"Hamilton Abreu",
 			"He7d3r",
@@ -54,9 +56,9 @@
 	"echo-pref-notifications-page-linked-title-muted-list": "Não exibir notificações \"Link da página\" para essas páginas. ([[mw:Special:MyLanguage/Help:Notifications#mute|Saber mais]])",
 	"echo-pref-dont-email-read-notifications": "Não inclua notificações de leitura em emails de resumo",
 	"echo-learn-more": "Saiba mais",
-	"echo-log": "Registro Público",
+	"echo-log": "Registo público",
 	"echo-new-messages": "Você tem novas mensagens",
-	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Mensagem|Mensagens}} na página de discussão",
+	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Comentário|Comentários}} na minha página de discussão do usuário",
 	"echo-category-title-article-linked": "{{PLURAL:$1|Ligação|Ligações}} para a página",
 	"echo-category-title-reverted": "{{PLURAL:$1|Edição revertida|Edições revertidas}}",
 	"echo-category-title-mention": "{{PLURAL:$1|Menção|Menções}}",
@@ -72,7 +74,7 @@
 	"echo-category-title-thank-you-edit": "{{PLURAL:$1|marco|marcos}} de edição",
 	"echo-category-title-watchlist": "Editar na página vigiadas",
 	"echo-category-title-minor-watchlist": "Edição menores na página vigiadas",
-	"echo-pref-tooltip-edit-user-talk": "Notifique-me quando alguém publicar uma mensagem ou respostas na minha página de discussão.",
+	"echo-pref-tooltip-edit-user-talk": "Notifique-me quando alguém postar uma mensagem ou responder na minha página de discussão do usuário.",
 	"echo-pref-tooltip-article-linked": "Notifique-me quando alguém criar um link para uma página que criei a partir de uma página de artigo.",
 	"echo-pref-tooltip-reverted": "Notifique-me quando alguém reverter uma edição que fiz usando desfazer ou a ferramenta de reversão.",
 	"echo-pref-tooltip-mention": "Notificar-me quando alguém criar links para a minha página de usuário.",
@@ -191,7 +193,7 @@
 	"notification-header-thank-you-1-edit": "{{GENDER:$2|Você}} acaba de fez {{GENDER:$2|sua}} primeira edição; {{GENDER:$2|Obrigado e seja bem-vindo!|Obrigada e seja bem-vinda!}}",
 	"notification-header-thank-you-10-edit": "{{GENDER:$2|Você}} acaba de fez {{GENDER:$2|sua}} décima edição; {{GENDER:$2|Obrigado|Obrigada}} e continue por aí!",
 	"notification-header-thank-you-100-edit": "{{GENDER:$2|Você}} acabou de fazer {{GENDER:$2|sua}} centésima edição. {{GENDER:$2|Muito obrigado!}}",
-	"notification-header-thank-you-1000-edit": "{{GENDER:$2|Você}} acaba de fez {{GENDER:$2|sua}} milésima edição; {{GENDER:$2|Muito obrigado por ser um grande contribuidor!|Muito obrigada por ser uma grande contribuidora!}}",
+	"notification-header-thank-you-1000-edit": "{{GENDER:$2|Você}} acaba de salvar {{GENDER:$2|sua}} milésima edição, muito obrigado por ser {{GENDER:$2|um grande contribuidor|uma grande contribuidora|um(a) grande contribuidor(a)}}!",
 	"notification-header-thank-you-10000-edit": "{{GENDER:$2|Você}} acaba de fez {{GENDER:$2|sua}} décima milésima edição; {{GENDER:$2|Muito obrigado!|Muito obrigada!}}",
 	"notification-header-thank-you-100000-edit": "{{GENDER:$2|Você}} acaba de fez {{GENDER:$2|sua}} centésima milésima edição; {{GENDER:$2|Muito obrigado|Muito obrigada}} por uma incrível contribuição!",
 	"notification-header-thank-you-1000000-edit": "{{GENDER:$2|Você}} acaba de fez {{GENDER:$2|sua}} milionésima edição; {{GENDER:$2|Muito obrigado|Muito obrigada}} por uma contribuição surpreendente!",
@@ -200,7 +202,6 @@
 	"notification-link-text-view-edit": "Ver edição",
 	"notification-link-article-reminder": "Ver página",
 	"notification-header-reverted": "{{PLURAL:$4|Sua edição em <strong>$3</strong> foi {{GENDER:$2|revertida}}|Suas edições em <strong>$3</strong> foram {{GENDER:$2|revertidas}}}}.",
-	"notification-body-reverted": "$1",
 	"notification-header-emailuser": "$1 {{GENDER:$2|enviou}} um e-mail para você.",
 	"notification-edit-talk-page-email-subject2": "$1 {{GENDER:$2|deixou}} uma mensagem para você em {{SITENAME}}",
 	"notification-page-linked-email-subject": "A pagina que {{GENDER:$3|você}} criou foi lincada em {{SITENAME}}",
@@ -245,5 +246,10 @@
 	"notification-header-foreign-notice": "Mais notificações de {{PLURAL:$5|outra wiki|$5 outras wikis}}",
 	"notification-header-foreign-all": "Mais notificações de {{PLURAL:$5|outra wiki|$5 outras wikis}}",
 	"echo-foreign-wiki-lang": "$1 - $2",
-	"echo-badge-count": "{{PLURAL:$1|$1|100={{formatnum:99}}+}}"
+	"echo-badge-count": "{{PLURAL:$1|$1|100={{formatnum:99}}+}}",
+	"right-manage-all-push-subscriptions": "Gerenciar todas as inscrições push",
+	"action-manage-all-push-subscriptions": "gerenciar todas as inscrições push",
+	"group-push-subscription-manager": "Gerenciar inscrições push",
+	"group-push-subscription-manager-member": "{{GENDER:$1|gerente de inscrições push}}",
+	"grouppage-push-subscription-manager": "{{ns:project}}:Gerenciar inscrições push"
 }

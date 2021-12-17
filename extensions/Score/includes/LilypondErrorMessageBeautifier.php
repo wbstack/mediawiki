@@ -31,7 +31,7 @@ class LilypondErrorMessageBeautifier {
 	private const BEAUTIFIED_ERR_SEPARATOR = "\n--------\n";
 
 	/**
-	 * @var int $scoreFirstLineOffset
+	 * @var int
 	 *
 	 * The line number where user's score input is inserted, within the final
 	 * lilypond file that is passed to lilypond executable.
@@ -48,7 +48,7 @@ class LilypondErrorMessageBeautifier {
 	}
 
 	/**
-	 * Beautifies lilypond executale error messages by:
+	 * Beautifies lilypond executable error messages by:
 	 * - adjusting line numbers fit the user's input
 	 * - stripping out all echoed erroneous code
 	 * - stripping out unnecessary keywords

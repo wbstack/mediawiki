@@ -4,12 +4,13 @@
 			"Joetaras"
 		]
 	},
-	"twocolconflict": "TwoColConflict",
+	"twocolconflict": "Cangiamende de le conflitte ca se basabe sus a 'u paragrafe",
 	"twocolconflict-desc": "Fà 'ndrucà 'na schermate de aunione affiangate pe cangià 'a resoluzione de le conflitte",
-	"twocolconflict-beta-feature-message": "Conflitte de cangiamende sus a doje culonne",
-	"twocolconflict-beta-feature-description": "Fà 'ndrucà 'u 'ndrucamende d'u conflitte d'u cangiamende ausanne 'nu 'ndrucamende cchiù avanzate a doje culonne",
+	"twocolconflictprovidesubmittedtext": "Cange 'u conflitte:",
+	"twocolconflict-beta-feature-message": "Cangiamende de le conflitte ca se basabe sus a 'u paragrafe",
+	"twocolconflict-beta-feature-description": "Fà 'ndrucà 'u 'ndrucamende d'u conflitte d'u cangiamende ausanne 'nu 'ndrucamende cchiù avanzate sus a base d'u paragrafe",
 	"twocolconflict-core-ui-hint-close": "No fà 'ndrucà cchiù",
-	"twocolconflict-split-header-hint-beta": "Grazie pe avè pruvate sta funzione beta. Puè darne 'na màne a farla megghie lassanne 'u parere tune [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View sus a sta pàgene].",
+	"twocolconflict-split-header-hint-beta": "Grazie pe avè pruvate sta funzione beta. Puè darne 'na màne a farla megghie lassanne 'u parere tune [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface sus a sta pàgene].",
 	"twocolconflict-split-your-version-header": "'A revisiona toje",
 	"twocolconflict-split-current-version-header": "Revisiona corrende de $1",
 	"twocolconflict-split-not-saved-at": "Angore none pubblecate",

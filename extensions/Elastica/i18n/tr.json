@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"BaRaN6161 TURK"
+			"BaRaN6161 TURK",
+			"MuratTheTurkish"
 		]
 	},
-	"elastica-desc": "Bölge [http://www.elasticsearch.org/ Elasticsearch] [http://elastica.io/ Elastica] kütüphanesi sağlayarak diğer uzantılar için işlevselliği"
+	"elastica-desc": "[http://elastica.io/ Elastica] kitaplığı sağlayarak diğer uzantılar için temel [http://www.elasticsearch.org/ Elasticsearch] işlevi"
 }

@@ -4,6 +4,7 @@
 			"Araceletorres",
 			"Cainamarques",
 			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
 			"Felipe L. Ewald",
 			"Luckas",
 			"Macofe",
@@ -41,10 +42,5 @@
 	"templatesandbox-editform-invalid-template": "O nome do modelo que você especificou é inválido.",
 	"templatesandbox-editform-invalid-title": "O título que você especificou para a pré-visualização é inválido.",
 	"templatesandbox-editform-title-not-exists": "O título que você especificou para a pré-visualização não existe.",
-	"templatesandbox-apihelp-prefix": "Prefixo da predefinição da página de testes, como em [[Special:TemplateSandbox]].",
-	"templatesandbox-apihelp-title": "Analise a página usando <var>$1templatesandboxtext</var> no lugar do conteúdo da página chamada aqui.",
-	"templatesandbox-apihelp-text": "Analise a página usando este conteúdo da página no lugar da página denominada <var>$1templatesandboxtitle</var>.",
-	"templatesandbox-apihelp-contentmodel": "Modelo de conteúdo de <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Formato de conteúdo de <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apierror-titleandtext": "Os parâmetros <var>$1templatesandboxtitle</var> e <var>$1templatesandboxtext</var> devem ser especificados ou ambos serem omitidos."
+	"templatesandbox-failed-replace-section": "Falha ao substituir seção da página existente."
 }

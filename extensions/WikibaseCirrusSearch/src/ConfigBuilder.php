@@ -43,7 +43,7 @@ class ConfigBuilder {
 		$stemmingSettings = $this->searchSettings->get( 'UseStemming' );
 
 		$stemmedLanguages = array_filter( $this->languageList,
-			function ( $lang ) use ( $stemmingSettings ) {
+			static function ( $lang ) use ( $stemmingSettings ) {
 				return !empty( $stemmingSettings[$lang]['index'] );
 			}
 		);

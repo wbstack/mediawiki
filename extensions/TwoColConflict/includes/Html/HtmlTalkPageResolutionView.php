@@ -53,7 +53,7 @@ class HtmlTalkPageResolutionView {
 		int $otherIndex,
 		int $yourIndex,
 		bool $isBetaFeature
-	) : string {
+	): string {
 		$out = $this->getMessageBox(
 			'twocolconflict-talk-header-overview', 'error', 'mw-twocolconflict-overview' );
 		$hintMsg = $isBetaFeature ?
@@ -121,15 +121,12 @@ class HtmlTalkPageResolutionView {
 		);
 	}
 
-	private function wrapRow( string $html, $isConflicting = false ) : string {
-		return Html::rawElement(
-			'div',
-			[
-				'class' => 'mw-twocolconflict-single-row' .
-					( $isConflicting ? ' mw-twocolconflict-conflicting-talk-row' : '' )
-			],
-			$html
-		);
+	private function wrapRow( string $html, bool $isConflicting = false ): string {
+		$class = [ 'mw-twocolconflict-single-row' ];
+		if ( $isConflicting ) {
+			$class[] = 'mw-twocolconflict-conflicting-talk-row';
+		}
+		return Html::rawElement( 'div', [ 'class' => $class ], $html );
 	}
 
 	private function buildOrderSelector() {
@@ -176,7 +173,7 @@ class HtmlTalkPageResolutionView {
 		string $changeType,
 		bool $isDisabled,
 		string $conflictingTalkLabel
-	) : string {
+	): string {
 		$out = Html::rawElement(
 			'div',
 			[ 'class' => 'mw-twocolconflict-conflicting-talk-label' ],
@@ -203,7 +200,7 @@ class HtmlTalkPageResolutionView {
 	private function buildCopyRow(
 		string $rawText,
 		int $rowNum
-	) : string {
+	): string {
 		$out = Html::rawElement(
 			'div',
 			[ 'class' => 'mw-twocolconflict-split-copy mw-twocolconflict-single-column' ],
@@ -213,7 +210,7 @@ class HtmlTalkPageResolutionView {
 		return $this->wrapRow( $out );
 	}
 
-	private function getMessageBox( string $messageKey, string $type, $classes = [] ) : string {
+	private function getMessageBox( string $messageKey, string $type, $classes = [] ): string {
 		$html = $this->messageLocalizer->msg( $messageKey )->parse();
 		// Force feedback links to be opened in a new tab, and not lose the edit
 		$html = SplitConflictUtils::addTargetBlankToLinks( $html );

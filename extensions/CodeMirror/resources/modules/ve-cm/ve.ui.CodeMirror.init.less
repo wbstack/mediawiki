@@ -1,3 +1,5 @@
+@import 'resources/lib/ooui/wikimedia-ui-base.less';
+
 .ve-init-mw-desktopArticleTarget {
 	.CodeMirror {
 		height: auto;
@@ -49,6 +51,10 @@
 		border-right: 0;
 	}
 
+	.CodeMirror-selected {
+		display: none;
+	}
+
 	.CodeMirror pre.cm-mw-section-1,
 	.CodeMirror pre.cm-mw-section-2 {
 		font-size: inherit;
@@ -75,10 +81,28 @@
 		// stylelint-disable-next-line declaration-no-important
 		font-weight: normal !important;
 	}
+
+	.CodeMirror-gutters {
+		background-color: transparent;
+		border-right: 0;
+	}
+	.CodeMirror-linenumber {
+		color: @wmui-color-base30;
+		padding-left: 0;
+	}
+	.CodeMirror-linenumber-padding {
+		// Create a 12px padding between the line numbers and content.
+		width: 8px;
+	}
 }
 
 .ve-ce-documentNode-codeEditor-hide {
 	opacity: 0.4;
+
+	&::selection,
+	& *::selection {
+		background: #6da9f7 !important; /* stylelint-disable-line declaration-no-important */
+	}
 }
 
 .ve-ce-documentNode-codeEditor-webkit-hide {

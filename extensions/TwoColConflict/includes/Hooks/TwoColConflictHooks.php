@@ -6,6 +6,7 @@ use EditPage;
 use ExtensionRegistry;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\User\UserIdentity;
 use OOUI\ButtonInputWidget;
 use OutputPage;
 use TwoColConflict\ConflictFormValidator;
@@ -60,21 +61,25 @@ class TwoColConflictHooks {
 		}
 
 		$editPage->setEditConflictHelperFactory( function ( $submitButtonLabel ) use ( $editPage ) {
+			$services = MediaWikiServices::getInstance();
 			$context = $editPage->getContext();
 			$baseRevision = $editPage->getExpectedParentRevision();
+			$title = $context->getTitle();
+			$wikiPage = $services->getWikiPageFactory()->newFromTitle( $title );
 
 			return new SplitTwoColConflictHelper(
-				$context->getTitle(),
+				$title,
 				$context->getOutput(),
-				MediaWikiServices::getInstance()->getStatsdDataFactory(),
+				$services->getStatsdDataFactory(),
 				$submitButtonLabel,
 				$editPage->summary,
-				MediaWikiServices::getInstance()->getContentHandlerFactory(),
+				$services->getContentHandlerFactory(),
 				$this->twoColContext,
 				new ResolutionSuggester(
 					$baseRevision,
-					$context->getWikiPage()->getContentHandler()->getDefaultFormat()
-				)
+					$wikiPage->getContentHandler()->getDefaultFormat()
+				),
+				$services->getUserOptionsLookup()
 			);
 		} );
 
@@ -155,6 +160,7 @@ class TwoColConflictHooks {
 	 */
 	public function doEditPageBeforeConflictDiff( EditPage $editPage, OutputPage $outputPage ) {
 		$context = $editPage->getContext();
+		$title = $context->getTitle();
 		$request = $context->getRequest();
 		if ( $context->getConfig()->get( 'TwoColConflictTrackingOversample' ) ) {
 			$request->setVal( 'editingStatsOversample', true );
@@ -163,36 +169,40 @@ class TwoColConflictHooks {
 		if ( ExtensionRegistry::getInstance()->isLoaded( 'EventLogging' ) ) {
 			$user = $outputPage->getUser();
 			$baseRevision = $editPage->getExpectedParentRevision();
-			$latestRevision = $context->getWikiPage()->getRevisionRecord();
+			$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
+			$latestRevision = $revisionStore->getKnownCurrentRevision( $title );
 
 			$conflictChunks = 0;
 			$conflictChars = 0;
 			if ( $baseRevision && $latestRevision ) {
-				// Attempt the automatic merge, to measure the number of actual conflicts.
-				/** @var ThreeWayMerge $merge */
-				$merge = MediaWikiServices::getInstance()->getService( 'TwoColConflictThreeWayMerge' );
-				$result = $merge->merge3(
-					$baseRevision->getContent( SlotRecord::MAIN )->serialize(),
-					$latestRevision->getContent( SlotRecord::MAIN )->serialize(),
-					$editPage->textbox2
-				);
+				$baseContent = $baseRevision->getContent( SlotRecord::MAIN );
+				$latestContent = $latestRevision->getContent( SlotRecord::MAIN );
+				if ( $baseContent && $latestContent ) {
+					// Attempt the automatic merge, to measure the number of actual conflicts.
+					/** @var ThreeWayMerge $merge */
+					$merge = MediaWikiServices::getInstance()->getService( 'TwoColConflictThreeWayMerge' );
+					$result = $merge->merge3(
+						$baseContent->serialize(),
+						$latestContent->serialize(),
+						$editPage->textbox2
+					);
 
-				if ( !$result->isCleanMerge() ) {
-					$conflictChunks = $result->getOverlappingChunkCount();
-					$conflictChars = $result->getOverlappingChunkSize();
+					if ( !$result->isCleanMerge() ) {
+						$conflictChunks = $result->getOverlappingChunkCount();
+						$conflictChars = $result->getOverlappingChunkSize();
+					}
 				}
 			}
 
-			// https://meta.wikimedia.org/w/index.php?title=Schema:TwoColConflictConflict&oldid=19872073
 			\EventLogging::logEvent(
 				'TwoColConflictConflict',
-				19950885,
+				-1,
 				[
 					'twoColConflictShown' => $this->twoColContext->shouldTwoColConflictBeShown(
 						$user,
 						$context->getTitle()
 					),
-					'isAnon' => $user->isAnon(),
+					'isAnon' => !$user->isRegistered(),
 					'editCount' => (int)$user->getEditCount(),
 					'pageNs' => $context->getTitle()->getNamespace(),
 					'baseRevisionId' => $baseRevision ? $baseRevision->getId() : 0,
@@ -309,11 +319,11 @@ class TwoColConflictHooks {
 	}
 
 	/**
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @param array &$options
 	 */
-	public static function onUserLoadOptions( User $user, array &$options ) {
-		self::newFromGlobalState()->doUserLoadOptions( $options );
+	public static function onLoadUserOptions( UserIdentity $user, array &$options ) {
+		self::newFromGlobalState()->doLoadUserOptions( $options );
 	}
 
 	/**
@@ -326,7 +336,7 @@ class TwoColConflictHooks {
 	 *
 	 * @param array &$options
 	 */
-	public function doUserLoadOptions( array &$options ) {
+	public function doLoadUserOptions( array &$options ) {
 		if ( $this->twoColContext->isUsedAsBetaFeature() ) {
 			return;
 		}

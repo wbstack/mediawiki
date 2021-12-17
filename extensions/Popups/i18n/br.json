@@ -1,16 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adriendelucca",
 			"Fohanno",
 			"Fulup",
 			"Y-M D"
 		]
 	},
-	"popups-settings-option-simple": "Eeun",
+	"popups-settings-option-page": "Eeun",
 	"popups-settings-save": "Enrollañ",
 	"popups-settings-cancel": "Nullañ",
-	"popups-preview-footer-read": "Lenn",
-	"prefs-reading": "Penndibaboù lenn",
-	"popups-prefs-optin-enabled-label": "Gweredekaat",
-	"popups-prefs-optin-disabled-label": "Diweredekaat"
+	"popups-preview-footer-read": "Mont d'ar bajenn-mañ",
+	"prefs-reading": "Penndibaboù lenn"
 }

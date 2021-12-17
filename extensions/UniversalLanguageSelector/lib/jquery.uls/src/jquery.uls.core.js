@@ -13,9 +13,8 @@
  * header is left intact. See files GPL-LICENSE and MIT-LICENSE for details.
  *
  * @file
- * @ingroup Extensions
- * @licence GNU General Public Licence 2.0 or later
- * @licence MIT License
+ * @license GNU General Public Licence 2.0 or later
+ * @license MIT License
  */
 
 ( function ( $ ) {
@@ -47,6 +46,7 @@
 
 	/**
 	 * ULS Public class definition
+	 *
 	 * @param {Element} element
 	 * @param {Object} options
 	 */
@@ -112,6 +112,7 @@
 		/**
 		 * Calculate the position of ULS
 		 * Returns an object with top and left properties.
+		 *
 		 * @return {Object}
 		 */
 		position: function () {
@@ -119,6 +120,11 @@
 				top = this.top,
 				left = this.left;
 
+			if ( this.options.onPosition ) {
+				return this.options.onPosition.call( this );
+			}
+
+			// Default implementation (middle of the screen under the trigger)
 			if ( top === undefined ) {
 				pos = $.extend( {}, this.$element.offset(), {
 					height: this.$element[ 0 ].offsetHeight
@@ -287,6 +293,7 @@
 
 		/**
 		 * On select handler for search results
+		 *
 		 * @param {string} langCode
 		 * @param {Object} event The jQuery click event
 		 */
@@ -299,6 +306,7 @@
 
 		/**
 		 * On cancel handler for the uls menu
+		 *
 		 * @param {Event} e
 		 */
 		cancel: function ( e ) {
@@ -332,6 +340,7 @@
 
 		/**
 		 * Get the panel menu width parameter
+		 *
 		 * @return {string}
 		 */
 		getMenuWidth: function () {
@@ -380,9 +389,9 @@
 	};
 
 	$.fn.uls.defaults = {
-		// CSS top position for the dialog
+		// DEPRECATED: CSS top position for the dialog
 		top: undefined,
-		// CSS left position for the dialog
+		// DEPRECATED: CSS left position for the dialog
 		left: undefined,
 		// Callback function when user selects a language
 		onSelect: undefined,
@@ -392,6 +401,8 @@
 		onReady: undefined,
 		// Callback function when ULS dialog is shown
 		onVisible: undefined,
+		// Callback function when ULS dialog is ready to be shown
+		onPosition: undefined,
 		// Languages to be used for ULS, default is all languages
 		languages: $.uls.data.getAutonyms(),
 		// The options are wide (4 columns), medium (2 columns), and narrow (1 column).

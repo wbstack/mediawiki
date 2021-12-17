@@ -9,19 +9,19 @@ use Wikimedia\IPUtils;
  * Provide various request-dependant methods to use in mobile context
  */
 class MobileContext extends ContextSource {
-	const MODE_BETA = 'beta';
-	const MODE_STABLE = 'stable';
-	const OPTIN_COOKIE_NAME = 'optin';
-	const STOP_MOBILE_REDIRECT_COOKIE_NAME = 'stopMobileRedirect';
-	const USEFORMAT_COOKIE_NAME = 'mf_useformat';
-	const USER_MODE_PREFERENCE_NAME = 'mfMode';
-	const LOGGER_CHANNEL = 'mobile';
+	public const MODE_BETA = 'beta';
+	public const MODE_STABLE = 'stable';
+	public const OPTIN_COOKIE_NAME = 'optin';
+	public const STOP_MOBILE_REDIRECT_COOKIE_NAME = 'stopMobileRedirect';
+	public const USEFORMAT_COOKIE_NAME = 'mf_useformat';
+	public const USER_MODE_PREFERENCE_NAME = 'mfMode';
+	public const LOGGER_CHANNEL = 'mobile';
 
 	// Keep in sync with https://wikitech.wikimedia.org/wiki/X-Analytics.
-	const ANALYTICS_HEADER_KEY = 'mf-m';
-	const ANALYTICS_HEADER_DELIMITER = ',';
-	const ANALYTICS_HEADER_VALUE_BETA = 'b';
-	const ANALYTICS_HEADER_VALUE_AMC = 'amc';
+	private const ANALYTICS_HEADER_KEY = 'mf-m';
+	private const ANALYTICS_HEADER_DELIMITER = ',';
+	private const ANALYTICS_HEADER_VALUE_BETA = 'b';
+	private const ANALYTICS_HEADER_VALUE_AMC = 'amc';
 
 	/**
 	 * Saves the testing mode user has opted in: 'beta' or 'stable'
@@ -34,12 +34,6 @@ class MobileContext extends ContextSource {
 	 * @var string|null
 	 */
 	protected $useFormat = null;
-
-	/**
-	 * Save whether current page is blacklisted from displaying in mobile view
-	 * @var bool|null
-	 */
-	protected $blacklistedPage = null;
 
 	/**
 	 * Key/value pairs of things to add to X-Analytics response header for analytics
@@ -70,12 +64,6 @@ class MobileContext extends ContextSource {
 	 * @var bool
 	 */
 	private $forceMobileView = false;
-
-	/**
-	 * Save whether content should be transformed to better suit mobile devices
-	 * @var bool
-	 */
-	private $contentTransformations = true;
 
 	/**
 	 * Save whether or not we should display the mobile view
@@ -190,22 +178,6 @@ class MobileContext extends ContextSource {
 	}
 
 	/**
-	 * Whether content should be transformed to better suit mobile devices
-	 * @param bool $value should content be transformed?
-	 */
-	public function setContentTransformations( $value ) {
-		$this->contentTransformations = $value;
-	}
-
-	/**
-	 * Whether content should be transformed to better suit mobile devices
-	 * @return bool is content being transformed?
-	 */
-	public function getContentTransformations() {
-		return $this->contentTransformations;
-	}
-
-	/**
 	 * Sets the value of $this->mobileMode property to the value of the 'optin' cookie.
 	 * If the cookie is not set the value will be an empty string.
 	 */
@@ -249,6 +221,11 @@ class MobileContext extends ContextSource {
 
 	/**
 	 * Sets testing group membership, both cookie and this class variables
+	 *
+	 * WARNING: Does not persist the updated user preference to the database.
+	 * The caller must handle this by calling User::saveSettings() after all
+	 * preference updates associated with this web request are made.
+	 *
 	 * @param string $mode Mode to set
 	 */
 	public function setMobileMode( $mode ) {
@@ -274,20 +251,6 @@ class MobileContext extends ContextSource {
 				self::USER_MODE_PREFERENCE_NAME,
 				$mode
 			);
-			DeferredUpdates::addCallableUpdate( function () use ( $user, $mode, $userOptionsManager ) {
-				if ( wfReadOnly() ) {
-					return;
-				}
-
-				$latestUser = $user->getInstanceForUpdate();
-
-				$userOptionsManager->setOption(
-					$latestUser,
-					self::USER_MODE_PREFERENCE_NAME,
-					$mode
-				);
-				$latestUser->saveSettings();
-			}, DeferredUpdates::PRESEND );
 		}
 
 		$this->getRequest()->response()->setCookie( self::OPTIN_COOKIE_NAME, $mode, 0, [
@@ -432,48 +395,6 @@ class MobileContext extends ContextSource {
 			return true;
 		}
 
-		return false;
-	}
-
-	/**
-	 * Checks whether current page is blacklisted from displaying mobile view
-	 * @return bool
-	 */
-	public function isBlacklistedPage() {
-		if ( $this->blacklistedPage === null ) {
-			$this->blacklistedPage = $this->isBlacklistedPageInternal();
-		}
-
-		return $this->blacklistedPage;
-	}
-
-	/**
-	 * Value for isBlacklistedPage()
-	 * @return bool
-	 */
-	private function isBlacklistedPageInternal() {
-		$noMobilePages = $this->config->get( 'MFNoMobilePages' );
-		$noMobileCategory = $this->config->get( 'MFNoMobileCategory' );
-
-		// Check for blacklisted category membership
-		$title = $this->getTitle();
-		if ( $noMobileCategory && $title ) {
-			$id = $title->getArticleID();
-			if ( $id ) {
-				$dbr = wfGetDB( DB_REPLICA );
-				if ( $dbr->selectField( 'categorylinks',
-					'cl_from',
-					[ 'cl_from' => $id, 'cl_to' => $noMobileCategory ],
-					__METHOD__
-				) ) {
-					return true;
-				}
-			}
-		}
-		// ...and individual page blacklisting
-		if ( $noMobilePages && $title && in_array( $title->getPrefixedText(), $noMobilePages ) ) {
-			return true;
-		}
 		return false;
 	}
 
@@ -789,6 +710,7 @@ class MobileContext extends ContextSource {
 		foreach ( $templateHostParts as $key => $templateHostPart ) {
 			if ( strstr( $templateHostPart, '%h' ) ) {
 				$parsedHostPartKey = substr( $templateHostPart, 2 );
+				// @phan-suppress-next-line PhanImpossibleTypeComparisonInLoop
 				if ( !array_key_exists( $parsedHostPartKey, $parsedHostParts ) ) {
 					// invalid pattern for this host, ignore
 					return;
@@ -1012,7 +934,7 @@ class MobileContext extends ContextSource {
 	 */
 	public function getAnalyticsLogItems() {
 		return array_map(
-			function ( $val ) {
+			static function ( $val ) {
 				return implode( self::ANALYTICS_HEADER_DELIMITER, $val );
 			},
 			$this->analyticsLogItems
@@ -1074,6 +996,7 @@ class MobileContext extends ContextSource {
 	/**
 	 * Process-local override for MFStripResponsiveImages, used by
 	 * the mobileview API request.
+	 * @var bool|null
 	 */
 	private $stripResponsiveImagesOverride = null;
 

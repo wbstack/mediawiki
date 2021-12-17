@@ -7,23 +7,29 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.37.0"
 	},
 	"SpecialPages": {
-		"TemplateSandbox": "SpecialTemplateSandbox"
+		"TemplateSandbox": {
+			"class": "MediaWiki\\Extension\\TemplateSandbox\\SpecialTemplateSandbox",
+			"services": [
+				"RevisionLookup",
+				"ContentHandlerFactory",
+				"WikiPageFactory"
+			]
+		}
 	},
 	"MessagesDirs": {
 		"TemplateSandbox": [
-			"i18n"
+			"i18n",
+			"i18n/api"
 		]
 	},
 	"ExtensionMessagesFiles": {
 		"TemplateSandboxAlias": "TemplateSandbox.alias.php"
 	},
-	"AutoloadClasses": {
-		"TemplateSandboxHooks": "includes/TemplateSandboxHooks.php",
-		"SpecialTemplateSandbox": "includes/SpecialTemplateSandbox.php",
-		"TemplateSandboxLogic": "includes/TemplateSandboxLogic.php"
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\TemplateSandbox\\": "includes/"
 	},
 	"ResourceModules": {
 		"ext.TemplateSandbox.top": {
@@ -32,6 +38,32 @@
 		"ext.TemplateSandbox": {
 			"scripts": "ext.TemplateSandbox.js",
 			"dependencies": "ext.TemplateSandbox.top"
+		},
+		"ext.TemplateSandbox.visualeditor": {
+			"messages": [
+				"templatesandbox-editform-view-label",
+				"templatesandbox-editform-page-label",
+				"templatesandbox-editform-legend",
+				"templatesandbox-editform-invalid-title",
+				"templatesandbox-editform-title-not-exists",
+				"templatesandbox-editform-view-label",
+				"templatesandbox-preview"
+			],
+			"targets": [
+				"desktop"
+			],
+			"packageFiles": [
+				"ext.TemplateSandbox.VisualEditor.js",
+				{
+					"name": "namespaces.json",
+					"callback": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::getResourceLoaderData"
+				}
+			],
+			"dependencies": [
+				"oojs-ui",
+				"mediawiki.jqueryMsg",
+				"mediawiki.widgets"
+			]
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -39,24 +71,22 @@
 		"remoteExtPath": "TemplateSandbox/modules"
 	},
 	"Hooks": {
-		"EditPage::importFormData": [
-			"TemplateSandboxHooks::importFormData"
-		],
-		"EditPage::showStandardInputs:options": [
-			"TemplateSandboxHooks::injectOptions"
-		],
-		"AlternateEditPreview": [
-			"TemplateSandboxHooks::templateSandboxPreview"
-		],
-		"APIGetAllowedParams": [
-			"TemplateSandboxHooks::onAPIGetAllowedParams"
-		],
-		"ApiMakeParserOptions": [
-			"TemplateSandboxHooks::onApiMakeParserOptions"
-		]
+		"EditPage::importFormData": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::importFormData",
+		"EditPage::showStandardInputs:options": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::injectOptions",
+		"AlternateEditPreview": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::templateSandboxPreview",
+		"APIGetAllowedParams": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::onAPIGetAllowedParams",
+		"ApiMakeParserOptions": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::onApiMakeParserOptions"
+	},
+	"attributes": {
+		"VisualEditor": {
+			"PluginModules": [
+				"ext.TemplateSandbox.visualeditor"
+			]
+		}
 	},
 	"config": {
 		"TemplateSandboxEditNamespaces": {
+			"description": "Namespaces to show a page preview box for in edit mode",
 			"value": [
 				10
 			]

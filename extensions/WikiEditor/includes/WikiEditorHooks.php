@@ -17,6 +17,22 @@ class WikiEditorHooks {
 	/* Static Methods */
 
 	/**
+	 * Should the current session be sampled for EventLogging?
+	 *
+	 * @param string $sessionId
+	 * @return bool Whether to sample the session
+	 */
+	protected static function inEventSample( $sessionId ) {
+		global $wgWMESchemaEditAttemptStepSamplingRate;
+		// Sample 6.25%
+		$samplingRate = $wgWMESchemaEditAttemptStepSamplingRate ?? 0.0625;
+		$inSample = EventLogging::sessionInSample(
+			(int)( 1 / $samplingRate ), $sessionId
+		);
+		return $inSample;
+	}
+
+	/**
 	 * Log stuff to EventLogging's Schema:EditAttemptStep -
 	 * see https://meta.wikimedia.org/wiki/Schema:EditAttemptStep
 	 * If you don't have EventLogging installed, does nothing.
@@ -27,16 +43,11 @@ class WikiEditorHooks {
 	 * @return bool Whether the event was logged or not.
 	 */
 	public static function doEventLogging( $action, $article, $data = [] ) {
-		global $wgWMESchemaEditAttemptStepSamplingRate;
 		$extensionRegistry = ExtensionRegistry::getInstance();
 		if ( !$extensionRegistry->isLoaded( 'EventLogging' ) ) {
 			return false;
 		}
-		// Sample 6.25%
-		$samplingRate = $wgWMESchemaEditAttemptStepSamplingRate ?? 0.0625;
-		$inSample = EventLogging::sessionInSample(
-			(int)( 1 / $samplingRate ), $data['editing_session_id']
-		);
+		$inSample = self::inEventSample( $data['editing_session_id'] );
 		$shouldOversample = $extensionRegistry->isLoaded( 'WikimediaEvents' ) &&
 			WikimediaEventsHooks::shouldSchemaEditAttemptStepOversample( $article->getContext() );
 		if ( !$inSample && !$shouldOversample ) {
@@ -64,11 +75,58 @@ class WikiEditorHooks {
 			'mw_version' => MW_VERSION,
 		] + $data;
 
+		if ( $user->getOption( 'discussiontools-abtest' ) ) {
+			$data['bucket'] = $user->getOption( 'discussiontools-abtest' );
+		}
+
 		if ( $user->isAnon() ) {
 			$data['user_class'] = 'IP';
 		}
 
 		return EventLogging::logEvent( 'EditAttemptStep', 18530416, $data );
+	}
+
+	/**
+	 * Log stuff to EventLogging's Schema:VisualEditorFeatureUse -
+	 * see https://meta.wikimedia.org/wiki/Schema:VisualEditorFeatureUse
+	 * If you don't have EventLogging installed, does nothing.
+	 *
+	 * @param string $feature
+	 * @param string $action
+	 * @param Article $article Which article (with full context, page, title, etc.)
+	 * @param string $sessionId Session identifier
+	 * @return bool Whether the event was logged or not.
+	 */
+	public static function doVisualEditorFeatureUseLogging( $feature, $action, $article, $sessionId ) {
+		$extensionRegistry = ExtensionRegistry::getInstance();
+		if ( !$extensionRegistry->isLoaded( 'EventLogging' ) ) {
+			return false;
+		}
+		$inSample = self::inEventSample( $sessionId );
+		$shouldOversample = $extensionRegistry->isLoaded( 'WikimediaEvents' ) &&
+			WikimediaEventsHooks::shouldSchemaEditAttemptStepOversample( $article->getContext() );
+		if ( !$inSample && !$shouldOversample ) {
+			return false;
+		}
+
+		$user = $article->getContext()->getUser();
+
+		$data = [
+			'feature' => $feature,
+			'action' => $action,
+			'editingSessionId' => $sessionId,
+			'platform' => 'desktop', // FIXME T249944
+			'integration' => 'page',
+			'editor_interface' => 'wikitext',
+			'user_id' => $user->getId(),
+			'user_editcount' => $user->getEditCount() ?: 0,
+		];
+
+		if ( $user->getOption( 'discussiontools-abtest' ) ) {
+			$data['bucket'] = $user->getOption( 'discussiontools-abtest' );
+		}
+
+		return EventLogging::logEvent( 'VisualEditorFeatureUse', 21199762, $data );
 	}
 
 	/**
@@ -115,7 +173,14 @@ class WikiEditorHooks {
 					$data['init_mechanism'] = 'click';
 				}
 			} else {
-				$data['init_mechanism'] = 'url';
+				if (
+					$request->getVal( 'section' ) === 'new'
+					|| !$article->getPage()->exists()
+				) {
+					$data['init_mechanism'] = 'url-new';
+				} else {
+					$data['init_mechanism'] = 'url';
+				}
 			}
 
 			self::doEventLogging( 'init', $article, $data );
@@ -166,6 +231,18 @@ class WikiEditorHooks {
 				)
 			);
 		}
+
+		$outputPage->addHTML(
+			Xml::element(
+				'input',
+				[
+					'type' => 'hidden',
+					'name' => 'wikieditorJavascriptSupport',
+					'id' => 'wikieditorJavascriptSupport',
+					'value' => ''
+				]
+			)
+		);
 	}
 
 	/**
@@ -218,11 +295,12 @@ class WikiEditorHooks {
 
 	/**
 	 * Expose useful magic words which are used by the wikieditor toolbar
-	 * @return string[]
+	 * @return string[][]
 	 */
 	private static function getMagicWords() {
 		$requiredMagicWords = [
 			'redirect',
+			'img_alt',
 			'img_right',
 			'img_left',
 			'img_none',
@@ -234,7 +312,7 @@ class WikiEditorHooks {
 		$magicWords = [];
 		$factory = MediaWikiServices::getInstance()->getMagicWordFactory();
 		foreach ( $requiredMagicWords as $name ) {
-			$magicWords[$name] = $factory->get( $name )->getSynonym( 0 );
+			$magicWords[$name] = $factory->get( $name )->getSynonyms();
 		}
 		return $magicWords;
 	}
@@ -287,32 +365,49 @@ class WikiEditorHooks {
 
 			if ( $status->isOK() ) {
 				$action = 'saveSuccess';
+
+				if ( $request->getVal( 'wikieditorJavascriptSupport' ) === 'yes' ) {
+					self::doVisualEditorFeatureUseLogging(
+						'mwSave', 'source-has-js', $article, $request->getVal( 'editingStatsId' )
+					);
+				}
 			} else {
 				$action = 'saveFailure';
-				$errors = $status->getErrorsArray();
 
-				if ( isset( $errors[0][0] ) ) {
-					$data['save_failure_message'] = $errors[0][0];
+				// Compare to ve.init.mw.ArticleTargetEvents.js in VisualEditor.
+				$typeMap = [
+					'badtoken' => 'userBadToken',
+					'assertanonfailed' => 'userNewUser',
+					'assertuserfailed' => 'userNewUser',
+					'assertnameduserfailed' => 'userNewUser',
+					'abusefilter-disallowed' => 'extensionAbuseFilter',
+					'abusefilter-warning' => 'extensionAbuseFilter',
+					'captcha' => 'extensionCaptcha',
+					'spamblacklist' => 'extensionSpamBlacklist',
+					'titleblacklist-forbidden' => 'extensionTitleBlacklist',
+					'pagedeleted' => 'editPageDeleted',
+					'editconflict' => 'editConflict'
+				];
+
+				$errors = $status->getErrorsArray();
+				// Replicate how the API generates error codes, in order to log data that is consistent with
+				// all other tools (which save changes via the API)
+				if ( isset( $errors[0] ) ) {
+					$code = ApiMessage::create( $errors[0] )->getApiCode();
+				} else {
+					$code = 'unknown';
 				}
 
 				$wikiPage = $editPage->getArticle()->getPage();
-				if ( $status->value === EditPage::AS_CONFLICT_DETECTED ) {
-					$data['save_failure_type'] = 'editConflict';
-				} elseif ( $status->value === EditPage::AS_ARTICLE_WAS_DELETED ) {
-					$data['save_failure_type'] = 'editPageDeleted';
-				} elseif ( isset( $errors[0][0] ) && $errors[0][0] === 'abusefilter-disallowed' ) {
-					$data['save_failure_type'] = 'extensionAbuseFilter';
-				} elseif ( isset( $wikiPage->ConfirmEdit_ActivateCaptcha ) ) {
+				if ( isset( $wikiPage->ConfirmEdit_ActivateCaptcha ) ) {
 					// TODO: :(
-					$data['save_failure_type'] = 'extensionCaptcha';
-				} elseif ( isset( $errors[0][0] ) && $errors[0][0] === 'spam-blacklisted-link' ) {
-					$data['save_failure_type'] = 'extensionSpamBlacklist';
-				} else {
-					// Catch everything else... We don't seem to get userBadToken or
-					// userNewUser through this hook.
-					$data['save_failure_type'] = 'responseUnknown';
+					$code = 'captcha';
 				}
+
+				$data['save_failure_message'] = $code;
+				$data['save_failure_type'] = $typeMap[ $code ] ?? 'responseUnknown';
 			}
+
 			self::doEventLogging( $action, $article, $data );
 		}
 	}

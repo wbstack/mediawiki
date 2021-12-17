@@ -19,7 +19,7 @@
 	}
 
 	/**
-	 * @desc It is possible for the namespace field to be completely empty
+	 * @description It is possible for the namespace field to be completely empty
 	 and at the same time have the file type option selected.
 	 This would lead to an empty search result in most cases,
 	 as the default namespaces (which are used when no namespaces are selected) do not contain files.
@@ -62,15 +62,17 @@
 				$compiledSearchField = $( '<input>' ).prop( {
 					name: $searchField.prop( 'name' ),
 					type: 'hidden'
-				} ).val( compiledQuery ),
-				$sortField = $( '<input>' ).prop( {
+				} ).val( compiledQuery );
+			$searchField.prop( 'name', '' )
+				.after( $compiledSearchField );
+
+			// Skip the default to avoid noise in the user's address bar
+			if ( state.getSortMethod() !== 'relevance' ) {
+				$searchField.after( $( '<input>' ).prop( {
 					name: 'sort',
 					type: 'hidden'
-				} ).val( state.getSortMethod() );
-			$searchField.prop( 'name', '' )
-				.after( $compiledSearchField )
-				.after( $sortField );
-
+				} ).val( state.getSortMethod() ) );
+			}
 		} );
 	}
 
@@ -78,9 +80,23 @@
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} currentState
 	 */
 	function updateSearchResultLinks( currentState ) {
-		$( '.mw-prevlink, .mw-nextlink, .mw-numlink' ).attr( 'href', function ( i, href ) {
-			return href + '&advancedSearch-current=' + currentState.toJSON();
-		} );
+		var extraParams = '',
+			sort = currentState.getSortMethod(),
+			json = currentState.toJSON();
+
+		// Skip the default to avoid noise in the user's address bar
+		if ( sort !== 'relevance' ) {
+			extraParams += '&sort=' + sort;
+		}
+		if ( json ) {
+			extraParams += '&advancedSearch-current=' + json;
+		}
+
+		if ( extraParams ) {
+			$( '.mw-prevlink, .mw-nextlink, .mw-numlink' ).attr( 'href', function ( i, href ) {
+				return href + extraParams;
+			} );
+		}
 	}
 
 	/**
@@ -138,7 +154,7 @@
 	 * @param {jQuery} header
 	 * @param {mw.libs.advancedSearch.ui.NamespacePresets} presets
 	 * @param {mw.libs.advancedSearch.ui.NamespaceFilters} selection
-	 * @param {mw.libs.advancedSearch.dm.SearchableNamespaces} searchableNamespaces
+	 * @param {Object} searchableNamespaces Mapping namespace IDs to localized names
 	 * @return {jQuery}
 	 */
 	function buildNamespacesPaneElement( state, header, presets, selection, searchableNamespaces ) {
@@ -168,7 +184,7 @@
 	}
 
 	/**
-	 * @param {Array} searchableNamespaces
+	 * @param {Object} searchableNamespaces Mapping namespace IDs to localized names
 	 * @return {string[]}
 	 */
 	function getNamespacesFromUrl( searchableNamespaces ) {
@@ -195,7 +211,7 @@
 	}
 
 	/**
-	 * @param {Object} searchableNamespaces
+	 * @param {Object} searchableNamespaces Mapping namespace IDs to localized names
 	 * @param {mw.libs.advancedSearch.FieldCollection} fieldCollection
 	 * @return {mw.libs.advancedSearch.dm.SearchModel}
 	 */
@@ -234,6 +250,11 @@
 			$advancedSearch = $( '<div>' ).addClass( 'mw-advancedSearch-container' ),
 			$searchField = $search.find( 'input[name="search"]' ),
 			$profileField = $search.find( 'input[name="profile"]' );
+
+		// There is possibly no form, e.g. when the special page failed (T266163)
+		if ( !$searchField.length ) {
+			return;
+		}
 
 		$search.append( $advancedSearch );
 

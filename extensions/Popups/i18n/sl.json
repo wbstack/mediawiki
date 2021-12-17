@@ -2,29 +2,28 @@
 	"@metadata": {
 		"authors": [
 			"Dbc334",
+			"Eleassar",
 			"HairyFotr",
 			"Janezdrilc"
 		]
 	},
 	"popups-message": "Povzetki",
 	"popups-desc": "Prikaže okna s povzetki, ko uporabnik z miško obstane na povezavi",
-	"popups-settings-title": "Povzetek strani",
-	"popups-settings-option-simple": "Vključi",
-	"popups-settings-option-simple-description": "Oglej si kratke povzetke teme, medtem ko bereš članek.",
-	"popups-settings-option-advanced": "Napredno",
-	"popups-settings-option-advanced-description": "Poglej si povzetke povezav in dostopaj do urejevalskih funkcij. Uporabljeno pri mnogih uporabnikih.",
-	"popups-settings-option-off": "Izključi",
+	"popups-settings-title": "Predogledi",
+	"popups-settings-option-page": "Vključi",
+	"popups-settings-option-page-description": "Oglej si kratke povzetke teme, medtem ko bereš članek.",
 	"popups-settings-save": "Shrani",
 	"popups-settings-help-ok": "Končano",
 	"popups-settings-cancel": "Prekliči",
 	"popups-settings-help": "Povzetke lahko ponovno vključiš na povezavi na dnu strani.",
-	"popups-settings-enable": "Vključi povzetke",
+	"popups-settings-enable": "Uredi nastavitve predogleda",
 	"popups-preview-no-preview": "Pri prikazu predogleda je prišlo do težave",
 	"popups-preview-footer-read": "Pojdi na stran",
 	"prefs-reading": "Nastavitve za branje",
-	"popups-prefs-optin-title": "Povzetki strani (oglej si kratke povzetke teme, medtem ko prebiraš članek):",
-	"popups-prefs-optin-enabled-label": "Vključi",
-	"popups-prefs-optin-disabled-label": "Izključi",
-	"popups-prefs-disable-nav-gadgets-info": "Če želiš vključiti povzetke strani, moraš [[$1 | izključiti Navigacijske izskokce]] na zavihku Vtičniki",
-	"popups-prefs-conflicting-gadgets-info": "Nekateri vtičniki in druge nastavitve lahko vplivajo na delovanje te funkcije. Če naletiš na težavo, prosimo, da preveriš vtičnike in uporabniške skripte, vključno z globalnimi."
+	"popups-prefs-optin": "Omogoči povzetke strani (prikaže hitre predoglede teme med prebiranjem članka)",
+	"popups-prefs-disable-nav-gadgets-info": "Če želiš vključiti povzetke strani, moraš [[$1|izključiti Navigacijske izskokce]] na nastavitvah svojih Vtičnikov",
+	"popups-prefs-conflicting-gadgets-info": "Nekateri vtičniki in druge nastavitve lahko vplivajo na delovanje te funkcije. Če naletiš na težavo, prosimo, da preveriš vtičnike in uporabniške skripte, vključno z globalnimi.",
+	"popups-refpreview-user-preference-label": "Omogoči predoglede sklicev (prikaže hitre predoglede sklicev med branjem strani)",
+	"popups-refpreview-beta-feature-message": "Predogledi sklicev",
+	"popups-refpreview-beta-feature-description": "Ob postavitvi kazalca nad oznako sprotne opombe prikaže predogled sklica.\n\nOpomba: Če uporabljate vtičnik [//en.wikipedia.org/wiki/Wikipedia:Tools/Navigation_popups Navigacijski izskokci] (Navigation Popups) ali vtičnik [[mw:Special:MyLanguage/Reference Tooltips|Zaslonski namigi za sklice]] (Reference Tooltips), Predogledov sklicev ne boste videli."
 }

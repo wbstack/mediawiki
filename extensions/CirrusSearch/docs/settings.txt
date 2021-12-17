@@ -80,10 +80,10 @@ Default:
     $wgCirrusSearchPrivateClusters = null
 
 List of cluster names that are allowed to contain private indices. This
-provides an additional whitelist on top of $wgCirrusSearchWriteClusters
-for the archive index which should not be written to clusters that will
-be publicly readable. When set to the default value of null all clusters
-are allowed to contain private data.
+provides an additional list on top of $wgCirrusSearchWriteClusters for the
+archive index which should not be written to clusters that will be publicly
+readable. When set to the default value of null all clusters are allowed to
+contain private data.
 
 ; $wgCirrusSearchReplicaGroup
 
@@ -330,22 +330,6 @@ Example:
     $wgCirrusSearchExtraIndexes = [
         NS_FILE => [ 'other_index' ]
     ]
-
-; $wgCirrusSearchExtraIndexClusterBlacklist
-
-Default:
-    $wgCirrusSearchExtraIndexClusterBlacklist = [];
-
-Define a blacklist of clusters (as seen in $wgCirrusSearchWriteClusters) to not
-write to. When an update triggers an Extra index update it is sometime useful
-to not write to a particular cluster.
-
-Example:
-  $wgCirrusSearchExtraIndexClusterBlacklist = [
-      'other_index' => [
-          'wmsc-temp-replica' => true,
-      ]
- ];
 
 ; $wgCirrusSearchExtraIndexBoostTemplates
 
@@ -1220,10 +1204,10 @@ Crossproject works by seaching on so-called sister wikis: same language, sister
 project.
 NOTE: Experimental
 
-; $wgCirrusSearchCrossProjectSearchBlackList
+; $wgCirrusSearchCrossProjectSearchBlockList
 
 Default:
-    $wgCirrusSearchCrossProjectSearchBlackList = [];
+    $wgCirrusSearchCrossProjectSearchBlockList = [];
 
 List of crossproject interwiki prefix to ignore when running crossproject
 search.
@@ -1231,7 +1215,7 @@ search.
 extension)
 
 Example :
-    $wgCirrusSearchCrossProjectSearchBlackList = [ 'n', 'v' ];
+    $wgCirrusSearchCrossProjectSearchBlockList = [ 'n', 'v' ];
 
 In WMF context this would remove wikinews and wikiversity from the list of
 crossproject displayed in the sidebar
@@ -1246,7 +1230,7 @@ SiteMatrix. In some cases a specific wiki may want to override the convention us
 by SiteMatrix. E.g. on WMF infrastructure this is used to override the
 interwiki prefix 's' to 'src' on swedish wikipedia.
 
-NOTE: overrides are applied before reading $wgCirrusSearchCrossProjectSearchBlackList
+NOTE: overrides are applied before reading $wgCirrusSearchCrossProjectSearchBlockList
 and $wgCirrusSearchCrossProjectProfiles.
 
 Example:
@@ -1483,6 +1467,19 @@ Example:
         'document' => 'office',
     ];
 
+; $wgCirrusSearchMaxFileTextLength
+
+Default:
+    $wgCirrusSearchMaxFileTextLength = -1;
+
+Set maximum length allowed to be sent to the index from the content of media files (generally PDF/DejaVu files).
+Content whose size exceeds this value will be truncated and the first N bytes of the content will be kept where N
+is equal to $wgCirrusSearchMaxFileTextLength.
+
+Values:
+ - strictly negative value to keep the full content and disable this feature (default)
+ - positive value to truncate the content the expected size (0 will remove everything)
+
 ; $wgCirrusSearchElasticQuirks
 
 Default:
@@ -1575,3 +1572,27 @@ Method to use for namespace name resolution, can be:
 - 'naive': using ICU naive case/accent folding
 - 'utr30': using a more aggressive folding technique
    based on the UTR30 specs (specs used but lucene but withdrawn by Unicode)
+
+; $wgCirrusSearchAutomationUserAgentRegex
+
+Default:
+  $wgCirrusSearchAutomationUserAgentRegex = null;
+
+A regular expression to be applied against an http user agent. When matching
+the related request will be considered an automated request and use the
+appropriate pool counter to limit concurrency.
+
+Example:
+  $wgCirrusSearchAutomationUserAgentRegex = '/HeadlessChrome/';
+
+; $wgCirrusSearchAutomationCIDRs
+
+Default:
+  $wgCirrusSearchAutomationCIDRs = [];
+
+List of CIDRs as strings. If an incoming request has an IP matching one of these CIDRs
+it will be consider an automated request and use the appropriate pool counter to limit
+concurrency.
+
+Example:
+  $wgCirrusSearchAutomationCIDRs = ['1.2.3.0/24', '1:2::/32'];

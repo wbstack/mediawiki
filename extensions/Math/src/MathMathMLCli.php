@@ -1,7 +1,12 @@
 <?php
 
+namespace MediaWiki\Extension\Math;
+
+use Exception;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MWException;
+use stdClass;
 
 /**
  * @author Moritz Schubotz
@@ -9,15 +14,14 @@ use MediaWiki\MediaWikiServices;
 class MathMathMLCli extends MathMathML {
 
 	/**
-	 * @param array[] $tags math tags
+	 * @param MathRenderer[] $renderers
 	 * @return bool
 	 * @throws MWException
 	 */
-	public static function batchEvaluate( array $tags ) {
+	public static function batchEvaluate( array $renderers ) {
 		$req = [];
-		foreach ( $tags as $key => $tag ) {
-			/** @var MathMathMLCli $renderer */
-			$renderer = $tag[0];
+		foreach ( $renderers as $key => $renderer ) {
+			'@phan-var MathMathMLCli $renderer';
 			// checking if the rendering is in the database is no security issue since only the md5
 			// hash of the user input string will be sent to the database
 			if ( !$renderer->isInDatabase() ) {
@@ -29,9 +33,8 @@ class MathMathMLCli extends MathMathML {
 		}
 		$exitCode = 1;
 		$res = self::evaluateWithCli( $req, $exitCode );
-		foreach ( $tags as $key => $tag ) {
-			/** @var MathMathMLCli $renderer */
-			$renderer = $tag[0];
+		foreach ( $renderers as $key => $renderer ) {
+			'@phan-var MathMathMLCli $renderer';
 			if ( !$renderer->isInDatabase() ) {
 				$renderer->initializeFromCliResponse( $res );
 			}
@@ -41,7 +44,7 @@ class MathMathMLCli extends MathMathML {
 	}
 
 	/**
-	 * @param Object $res
+	 * @param stdClass $res
 	 * @return bool
 	 */
 	private function initializeFromCliResponse( $res ) {
@@ -53,6 +56,7 @@ class MathMathMLCli extends MathMathML {
 			return false;
 		}
 		if ( $this->isEmpty() ) {
+			$this->lastError = $this->getError( 'math_empty_tex' );
 			return false;
 		}
 		$response = $res->{$this->getMd5()};

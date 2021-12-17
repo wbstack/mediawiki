@@ -48,7 +48,11 @@ wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
 	 * @param {{lemmas: Lemma[], lexicalCategory: string|null, language: string|null, id: string}} lexeme
 	 */
 	function init( lexeme ) {
-		var repoApi = new wb.api.RepoApi( new mw.Api(), mw.config.get( 'wgUserLanguage' ) );
+		var repoApi = new wb.api.RepoApi(
+			new mw.Api(),
+			mw.config.get( 'wgUserLanguage' ),
+			require( '../view/config.json' ).tags
+		);
 
 		var baseRevId = mw.config.get( 'wgCurRevisionId' );
 
@@ -60,9 +64,15 @@ wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
 			$( '.language-lexical-category-widget_lexical-category' ).html()
 		) );
 
-		var lemmaWidget = newLemmaWidget( '#lemma-widget-vue-template', mw.messages );
+		var templates = {
+			lemma: mw.template.get( 'wikibase.lexeme.lexemeview', 'lemma.vue' ).getSource(),
+			language: mw.template.get( 'wikibase.lexeme.lexemeview', 'languageAndLexicalCategoryWidget.vue' ).getSource(),
+			header: mw.template.get( 'wikibase.lexeme.lexemeview', 'lexemeHeader.vue' ).renderSaveMessage()
+		};
+
+		var lemmaWidget = newLemmaWidget( templates.lemma, mw.messages );
 		var languageAndLexicalCategoryWidget = newLanguageAndLexicalCategoryWidget(
-			'#language-and-lexical-category-widget-vue-template',
+			templates.language,
 			repoApi,
 			mw.messages
 		);
@@ -70,7 +80,7 @@ wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
 		var header = newLexemeHeader(
 			store,
 			'#wb-lexeme-header',
-			'#lexeme-header-widget-vue-template',
+			templates.header,
 			lemmaWidget,
 			languageAndLexicalCategoryWidget,
 			mw.messages
@@ -82,7 +92,7 @@ wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
 			$saveButton.wbtooltip( {
 				content: {
 					code: error.code,
-					message: error.info
+					message: error.info || error.text || error[ '*' ]
 				},
 				permanent: true
 			} );

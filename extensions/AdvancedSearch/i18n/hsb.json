@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"J budissin"
+			"J budissin",
+			"Michawiki"
 		]
 	},
 	"advancedsearch-desc": "Lochki přistup k rozšěrjenym pytanskim móžnosćam na [[Special:Search]]",
@@ -55,5 +56,5 @@
 	"advancedsearch-namespaces-preset-discussion": "Diskusija",
 	"advancedsearch-namespaces-placeholder": "Mjenowe rumy dodać...",
 	"prefs-advancedsearch": "Rozšěrjene pytanje",
-	"advancedsearch-preference-disable": "Rozšěrjeny pytanski powjerch njepokazać"
+	"advancedsearch-preference-disable": "Rozšěrjeny pytanski powjerch njepokazać, hdyž so Special:Search wužiwa"
 }

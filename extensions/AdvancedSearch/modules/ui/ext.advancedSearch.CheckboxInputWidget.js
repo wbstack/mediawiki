@@ -5,12 +5,10 @@
 	 * @extends OO.ui.CheckboxInputWidget
 	 *
 	 * @constructor
-	 * @param {Object} config Configuration object
+	 * @param {Object} [config]
 	 */
 	mw.libs.advancedSearch.ui.CheckboxInputWidget = function ( config ) {
-		config = config || {};
-
-		mw.libs.advancedSearch.ui.CheckboxInputWidget.parent.call( this, config );
+		mw.libs.advancedSearch.ui.CheckboxInputWidget.parent.call( this, config || {} );
 		// This checkbox is fake and used only for visual purposes.
 		// Event handling is done for the entire menu item element in mw.libs.advancedSearch.ui.NamespaceFilters
 		this.$input

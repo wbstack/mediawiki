@@ -71,15 +71,21 @@ class DeleteOldScoreFiles extends Maintenance {
 
 		$this->output( "$count old score files to be deleted.\n" );
 
-		$ret = $backend->doQuickOperations( $filesToDelete );
+		$deletedCount = 0;
+		foreach ( array_chunk( $filesToDelete, 1000 ) as $chunk ) {
+			$ret = $backend->doQuickOperations( $chunk );
 
-		if ( $ret->isOK() ) {
-			$this->output( "$count old score files deleted.\n" );
-		} else {
-			$status = Status::wrap( $ret );
-			$this->output( "Deleting old score files errored.\n" );
-			$this->output( $status->getWikiText( false, false, 'en' ) );
+			if ( $ret->isOK() ) {
+				$deletedCount += count( $chunk );
+				$this->output( "$deletedCount...\n" );
+			} else {
+				$status = Status::wrap( $ret );
+				$this->output( "Deleting old score files errored.\n" );
+				$this->error( $status->getWikiText( false, false, 'en' ) );
+			}
 		}
+
+		$this->output( "$deletedCount old score files deleted.\n" );
 	}
 }
 

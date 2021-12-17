@@ -122,12 +122,12 @@ class UserAccountRequest {
 
 	/**
 	 * @param int $id
-	 * @param string|null $from 'dbmaster' to use DB master
+	 * @param string|null $from 'dbmaster' to use primary DB
 	 * @return UserAccountRequest|null
 	 */
 	public static function newFromId( $id, $from = null ) {
 		$db = ( $from == 'dbmaster' )
-			? wfGetDB( DB_MASTER )
+			? wfGetDB( DB_PRIMARY )
 			: wfGetDB( DB_REPLICA );
 		$row = $db->selectRow( 'account_requests', '*', [ 'acr_id' => $id ], __METHOD__ );
 		if ( !$row ) {
@@ -138,12 +138,12 @@ class UserAccountRequest {
 
 	/**
 	 * @param string $name
-	 * @param string|null $from 'dbmaster' to use DB master
+	 * @param string|null $from 'dbmaster' to use primary DB
 	 * @return UserAccountRequest|null
 	 */
 	public static function newFromName( $name, $from = null ) {
 		$db = ( $from == 'dbmaster' )
-			? wfGetDB( DB_MASTER )
+			? wfGetDB( DB_PRIMARY )
 			: wfGetDB( DB_REPLICA );
 		$row = $db->selectRow( 'account_requests', '*', [ 'acr_name' => $name ], __METHOD__ );
 		if ( !$row ) {
@@ -324,7 +324,7 @@ class UserAccountRequest {
 	 * @return int
 	 */
 	public function insertOn() {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		# Allow for some fields to be handled automatically...
 		$acr_id = $this->id !== null
 			? $this->id
@@ -371,7 +371,7 @@ class UserAccountRequest {
 	 * @return bool Success
 	 */
 	public function markRejected( User $admin, $timestamp, $reason = '' ) {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$dbw->update( 'account_requests',
 			[
 				'acr_rejected' => $dbw->timestamp( $timestamp ),
@@ -392,7 +392,7 @@ class UserAccountRequest {
 	 * @return bool Success
 	 */
 	public function markHeld( User $admin, $timestamp, $reason = '' ) {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$dbw->update( 'account_requests',
 			[
 				'acr_held'    => $dbw->timestamp( $timestamp ),
@@ -412,7 +412,7 @@ class UserAccountRequest {
 		if ( !$this->id ) {
 			throw new MWException( "Account request ID is not set." );
 		}
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$dbw->delete( 'account_requests', [ 'acr_id' => $this->id ], __METHOD__ );
 
 		return ( $dbw->affectedRows() > 0 );
@@ -424,7 +424,7 @@ class UserAccountRequest {
 	 * @return bool
 	 */
 	public static function acquireUsername( $name ) {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$conds = [ 'acr_name' => $name ];
 		if ( $dbw->selectField( 'account_requests', '1', $conds, __METHOD__ ) ) {
 			return false; // already in use
@@ -439,7 +439,7 @@ class UserAccountRequest {
 	 * @return bool
 	 */
 	public static function acquireEmail( $email ) {
-		$dbw = wfGetDB( DB_MASTER );
+		$dbw = wfGetDB( DB_PRIMARY );
 		$conds = [ 'acr_email' => $email ];
 		if ( $dbw->selectField( 'account_requests', '1', $conds, __METHOD__ ) ) {
 			return false; // already in use

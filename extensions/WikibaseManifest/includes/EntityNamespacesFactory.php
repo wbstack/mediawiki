@@ -4,6 +4,6 @@ namespace MediaWiki\Extension\WikibaseManifest;
 
 interface EntityNamespacesFactory {
 
-	public function getEntityNamespaces() : EntityNamespaces;
+	public function getEntityNamespaces(): EntityNamespaces;
 
 }

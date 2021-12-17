@@ -23,6 +23,8 @@ use Config;
 use ConfigException;
 use ContentHandler;
 use IContextSource;
+use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Minerva\LanguagesHelper;
 use MediaWiki\Minerva\SkinOptions;
 use MediaWiki\Permissions\PermissionManager;
@@ -63,40 +65,49 @@ final class MinervaPagePermissions implements IMinervaPagePermissions {
 	 */
 	private $languagesHelper;
 
-  /**
-   * @var PermissionManager MediaWiki Core PermissionManager
-   */
-  private $permissionManager;
+	/**
+	 * @var PermissionManager MediaWiki Core PermissionManager
+	 */
+	private $permissionManager;
+
+	/**
+	 * @var IContentHandlerFactory
+	 */
+	private $contentHandlerFactory;
 
 	/**
 	 * Initialize internal Minerva Permissions system
 	 * @param SkinOptions $skinOptions Skin options`
 	 * @param LanguagesHelper $languagesHelper
 	 * @param PermissionManager $permissionManager
+	 * @param IContentHandlerFactory $contentHandlerFactory
 	 */
 	public function __construct(
 		SkinOptions $skinOptions,
 		LanguagesHelper $languagesHelper,
-		PermissionManager $permissionManager
+		PermissionManager $permissionManager,
+		IContentHandlerFactory $contentHandlerFactory
 	) {
 		$this->skinOptions = $skinOptions;
 		$this->languagesHelper = $languagesHelper;
 		$this->permissionManager = $permissionManager;
+		$this->contentHandlerFactory = $contentHandlerFactory;
 	}
 
 	/**
 	 * @param IContextSource $context
-	 * @param ContentHandler|null $contentHandler (for unit tests only)
 	 * @return $this
 	 */
-	public function setContext( IContextSource $context, ContentHandler $contentHandler = null ) {
+	public function setContext( IContextSource $context ) {
 		$this->title = $context->getTitle();
 		$this->config = $context->getConfig();
 		$this->user = $context->getUser();
 		// Title may be undefined in certain contexts (T179833)
 		// TODO: Check if this is still true if we always pass a context instead of using global one
 		if ( $this->title ) {
-			$this->contentHandler = $contentHandler ?: ContentHandler::getForTitle( $this->title );
+			$this->contentHandler = $this->contentHandlerFactory->getContentHandler(
+				$this->title->getContentModel()
+			);
 		}
 		return $this;
 	}
@@ -162,7 +173,7 @@ final class MinervaPagePermissions implements IMinervaPagePermissions {
 		}
 
 		if ( $action === self::WATCH ) {
-			return $this->title->isWatchable()
+			return MediaWikiServices::getInstance()->getWatchlistManager()->isWatchable( $this->title )
 				? $this->user->isAllowedAll( 'viewmywatchlist', 'editmywatchlist' )
 				: false;
 		}
@@ -174,6 +185,19 @@ final class MinervaPagePermissions implements IMinervaPagePermissions {
 			return $this->languagesHelper->doesTitleHasLanguagesOrVariants( $this->title ) ||
 				$this->config->get( 'MinervaAlwaysShowLanguageButton' );
 		}
+
+		if ( $action === self::MOVE ) {
+			return $this->canMove();
+		}
+
+		if ( $action === self::DELETE ) {
+			return $this->canDelete();
+		}
+
+		if ( $action === self::PROTECT ) {
+			return $this->canProtect();
+		}
+
 		return true;
 	}
 
@@ -187,7 +211,7 @@ final class MinervaPagePermissions implements IMinervaPagePermissions {
 
 		return $this->isAllowed( self::TALK ) &&
 			   ( $this->title->isTalkPage() || $this->title->canHaveTalkPage() ) &&
-			   $this->user->isLoggedIn();
+			   $this->user->isRegistered();
 	}
 
 	/**
@@ -224,5 +248,47 @@ final class MinervaPagePermissions implements IMinervaPagePermissions {
 			$this->user, $this->title, true
 		);
 		return $this->isCurrentPageContentModelEditable() && $userQuickEditCheck && !$blocked;
+	}
+
+	/**
+	 * Checks whether the user has the permissions to move the current page.
+	 *
+	 * @return bool
+	 */
+	private function canMove() {
+		if ( !$this->title ) {
+			return false;
+		}
+
+		return $this->permissionManager->quickUserCan( 'move', $this->user, $this->title )
+			&& $this->title->exists();
+	}
+
+	/**
+	 * Checks whether the user has the permissions to delete the current page.
+	 *
+	 * @return bool
+	 */
+	private function canDelete() {
+		if ( !$this->title ) {
+			return false;
+		}
+
+		return $this->permissionManager->quickUserCan( 'delete', $this->user, $this->title )
+			&& $this->title->exists();
+	}
+
+	/**
+	 * Checks whether the user has the permissions to change the protections status of the current page.
+	 *
+	 * @return bool
+	 */
+	private function canProtect() {
+		if ( !$this->title ) {
+			return false;
+		}
+
+		return $this->permissionManager->quickUserCan( 'protect', $this->user, $this->title )
+			&& $this->title->exists();
 	}
 }

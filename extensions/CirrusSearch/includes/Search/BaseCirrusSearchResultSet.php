@@ -87,7 +87,7 @@ abstract class BaseCirrusSearchResultSet extends BaseSearchResultSet implements 
 	 *
 	 * @param \Elastica\ResultSet $resultSet Result set from which the titles come
 	 */
-	final private function preCacheContainedTitles( \Elastica\ResultSet $resultSet ) {
+	private function preCacheContainedTitles( \Elastica\ResultSet $resultSet ) {
 		// We can only pull in information about the local wiki
 		$lb = new LinkBatch;
 		foreach ( $resultSet->getResults() as $result ) {
@@ -124,6 +124,7 @@ abstract class BaseCirrusSearchResultSet extends BaseSearchResultSet implements 
 			 * @inheritDoc
 			 */
 			protected function transformOneResult( \Elastica\Result $result ) {
+				// @phan-suppress-previous-line PhanPluginNeverReturnMethod
 				throw new Exception( "An empty ResultSet has nothing to transform" );
 			}
 
@@ -182,7 +183,7 @@ abstract class BaseCirrusSearchResultSet extends BaseSearchResultSet implements 
 	 */
 	final public function extractTitles() {
 		return array_map(
-			function ( SearchResult $result ) {
+			static function ( SearchResult $result ) {
 				return $result->getTitle();
 			},
 			$this->extractResults() );

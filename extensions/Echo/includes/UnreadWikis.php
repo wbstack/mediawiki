@@ -1,11 +1,14 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserIdentity;
+
 /**
  * Manages what wikis a user has unread notifications on
  */
 class EchoUnreadWikis {
 
-	const DEFAULT_TS = '00000000000000';
+	private const DEFAULT_TS = '00000000000000';
 
 	/**
 	 * @var int
@@ -28,12 +31,13 @@ class EchoUnreadWikis {
 	/**
 	 * Use the user id provided by the CentralIdLookup
 	 *
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @return EchoUnreadWikis|false
 	 */
-	public static function newFromUser( User $user ) {
-		$lookup = CentralIdLookup::factory();
-		$id = $lookup->centralIdFromLocalUser( $user, CentralIdLookup::AUDIENCE_RAW );
+	public static function newFromUser( UserIdentity $user ) {
+		$id = MediaWikiServices::getInstance()
+			->getCentralIdLookup()
+			->centralIdFromLocalUser( $user, CentralIdLookup::AUDIENCE_RAW );
 		if ( !$id ) {
 			return false;
 		}
@@ -100,7 +104,7 @@ class EchoUnreadWikis {
 	 *   false meaning no timestamp because there are no unread messages.
 	 */
 	public function updateCount( $wiki, $alertCount, $alertTime, $msgCount, $msgTime ) {
-		$dbw = $this->getDB( DB_MASTER );
+		$dbw = $this->getDB( DB_PRIMARY );
 		if ( $dbw === false || $dbw->isReadOnly() ) {
 			return;
 		}

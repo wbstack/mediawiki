@@ -76,7 +76,7 @@ class NearMatchPicker {
 		}
 
 		$transformers = [
-			function ( $term ) {
+			static function ( $term ) {
 				return $term;
 			},
 			[ $this->language, 'lc' ],
@@ -89,6 +89,7 @@ class NearMatchPicker {
 			foreach ( $this->titles as $title ) {
 				$match = $this->checkAllMatches( $transformer, $transformedTerm, $title );
 				if ( $match ) {
+					// @phan-suppress-next-line PhanSuspiciousValueComparisonInLoop
 					if ( $found === null ) {
 						$found = $match;
 					} else {

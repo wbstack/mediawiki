@@ -17,22 +17,22 @@ class Hooks {
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/SpecialPageBeforeExecute
 	 *
 	 * @param SpecialPage $special
-	 * @param string $subpage
+	 * @param string|null $subpage
+	 * @return false|void false to abort the execution of the special page, "void" otherwise
 	 */
 	public static function onSpecialPageBeforeExecute( SpecialPage $special, $subpage ) {
-		$services = MediaWikiServices::getInstance();
-		$mainConfig = $special->getConfig();
-
 		if ( $special->getName() !== 'Search' ) {
 			return;
 		}
+
+		$services = MediaWikiServices::getInstance();
 
 		/**
 		 * If the user is logged in and has explicitly requested to disable the extension, don't load.
 		 * Ensure namespaces are always part of search URLs
 		 */
-		if ( !$special->getUser()->isAnon() &&
-			$special->getUser()->getBoolOption( 'advancedsearch-disable' )
+		if ( $special->getUser()->isRegistered() &&
+			$services->getUserOptionsLookup()->getBoolOption( $special->getUser(), 'advancedsearch-disable' )
 		) {
 			return;
 		}
@@ -40,10 +40,14 @@ class Hooks {
 		/**
 		 * Ensure the current URL is specifying the namespaces which are to be used
 		 */
-		self::redirectToNamespacedRequest( $special );
-		if ( $special->getOutput()->getRedirect() ) {
-			return;
+		$redirect = self::redirectToNamespacedRequest( $special );
+		if ( $redirect !== null ) {
+			$special->getOutput()->redirect( $redirect );
+			// Abort execution of the SpecialPage by returning false since we are redirecting
+			return false;
 		}
+
+		$mainConfig = $special->getConfig();
 
 		$special->getOutput()->addModules( [
 			'ext.advancedSearch.init',
@@ -57,7 +61,7 @@ class Hooks {
 				( new MimeTypeConfigurator( $services->getMimeAnalyzer() ) )->getMimeTypes(
 					$mainConfig->get( 'FileExtensions' )
 				),
-			'advancedSearch.tooltips' => TooltipGenerator::generateToolTips(),
+			'advancedSearch.tooltips' => ( new TooltipGenerator( $special->getContext() ) )->generateTooltips(),
 			'advancedSearch.namespacePresets' => $mainConfig->get( 'AdvancedSearchNamespacePresets' ),
 			'advancedSearch.deepcategoryEnabled' => $mainConfig->get( 'AdvancedSearchDeepcatEnabled' ),
 			'advancedSearch.searchableNamespaces' =>
@@ -85,17 +89,18 @@ class Hooks {
 	/**
 	 * If the request does not contain any namespaces, redirect to URL with user default namespaces
 	 * @param \SpecialPage $special
+	 * @return string|null the URL to redirect to or null if not needed
 	 */
-	private static function redirectToNamespacedRequest( \SpecialPage $special ) {
+	private static function redirectToNamespacedRequest( \SpecialPage $special ): ?string {
 		if ( !self::isNamespacedSearch( $special->getRequest() ) ) {
 			$namespacedSearchUrl = $special->getRequest()->getFullRequestURL();
 			$queryParts = [];
 			foreach ( self::getDefaultNamespaces( $special->getUser() ) as $ns ) {
 				$queryParts['ns' . $ns] = '1';
 			}
-			$namespacedSearchUrl = wfAppendQuery( $namespacedSearchUrl, $queryParts );
-			$special->getOutput()->redirect( $namespacedSearchUrl );
+			return wfAppendQuery( $namespacedSearchUrl, $queryParts );
 		}
+		return null;
 	}
 
 	/**
@@ -156,7 +161,6 @@ class Hooks {
 			'type' => 'toggle',
 			'label-message' => 'advancedsearch-preference-disable',
 			'section' => 'searchoptions/advancedsearch',
-			'default' => $user->getBoolOption( 'advancedsearch-disable' ),
 			'help-message' => 'advancedsearch-preference-help',
 		];
 	}

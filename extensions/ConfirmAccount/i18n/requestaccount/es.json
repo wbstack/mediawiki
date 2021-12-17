@@ -10,6 +10,7 @@
 			"Lin linao",
 			"Locos epraix",
 			"Macofe",
+			"MarcoAurelio",
 			"Matiia",
 			"Pertile",
 			"Sanbec",
@@ -28,7 +29,7 @@
 	"requestaccount-leg-tos": "Términos del servicio",
 	"requestaccount-acc-text": "Un mensaje de confirmación será enviado a tu dirección de correo electrónico después de enviar esta solicitud. La dirección no se hará pública.\nPor favor, responde haciendo clic en el vínculo de confirmación proporcionado en el correo electrónico.\nFinalmente, se te enviará una contraseña por correo electrónico cuando se haya creado tu cuenta.",
 	"requestaccount-areas-text": "Seleccione las áreas en las que tiene experiencia formal o que le interesa colaborar.",
-	"requestaccount-ext-text": "La siguiente información se mantiene privada y sólo será usada para esta solicitud.\nUsted puede desear enlistar contactos como un número telefónico para ayudar en la confirmación de la identidad.",
+	"requestaccount-ext-text": "La siguiente información se mantiene privada y sólo será usada para esta solicitud.\nPuede listar contactos como un número de teléfono para ayudar en la confirmación de la identidad.",
 	"requestaccount-bio-text": "Trata de incluir alguna credencial relevante en tu biografía abajo.",
 	"requestaccount-bio-text-i": "'''Su biografía se establecerá como el contenido inicial de tu página de usuario.'''\nAsegúrate de estar cómodo con la publicación de dicha información.",
 	"requestaccount-real": "Nombre real:",
@@ -51,9 +52,9 @@
 	"requestaccount-submit": "Solicitar cuenta",
 	"requestaccount-sent": "Tu solicitud de cuenta ha sido enviada y está ahora pendiente de revisión.\nUn correo electrónico de confirmación ha sido enviado a tu dirección de correo electrónico.",
 	"requestaccount-econf": "Tu correo electrónico ha sido confirmado y será listado como tal en tu solicitud de cuenta.",
-	"requestaccount-email-subj": "{{SITENAME}} confirmación de dirección de correo electrónico",
+	"requestaccount-email-subj": "Confirmación de la dirección de correo en {{SITENAME}}",
 	"requestaccount-email-body": "Alguien, probablemente tú con la dirección de IP $1, ha solicitado una cuenta \"$2\" con esta dirección de correo electrónico en {{SITENAME}}.\n\nAbre el siguiente vínculo en tu navegador para confirmar que realmente esta es tu cuenta en {{SITENAME}}:\n\n$3\n\nSi se crea la cuenta, se te enviará la contraseña sólo a ti.\nSi esta *no* es tu cuenta, no abras el vínculo.\nEste código de confirmación caducará el $4.",
-	"requestaccount-email-subj-admin": "{{SITENAME}} solicitud de cuenta",
+	"requestaccount-email-subj-admin": "Solicitud de cuenta en {{SITENAME}}",
 	"requestaccount-email-body-admin": "$1 ha solicitado una cuenta y está esperando por su confirmación.\nLa dirección de correo electrónico ha sido confirmada. Puedes confirmar la solicitud aquí:\n\n$2",
 	"acct_request_throttle_hit": "Perdón, ya has solicitado {{PLURAL:$1|1 cuenta|$1 cuentas}}.\nNo puedes hacer ninguna otra solicitud."
 }

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"BaRaN6161 TURK"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "[[Special:TemplateSandbox]] ile olduğu gibi şablon deneme tahtası öneki.",
+	"templatesandbox-apihelp-title": "Burada adlandırılan sayfanın içeriği yerine <var>$1templatesandboxtext</var> kullanarak sayfayı ayrıştırın.",
+	"templatesandbox-apihelp-text": "<var>$1templatesandboxtitle</var> adlı sayfanın yerine bu sayfa içeriğini kullanarak sayfayı ayrıştırın.",
+	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var> içeriğin modeli.",
+	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var> içeriğin biçimi.",
+	"templatesandbox-apierror-titleandtext": "<var>$1templatesandboxtitle</var> ve <var>$1templatesandboxtext</var> parametrelerinin her ikisi de belirtilmelidir veya her ikisi de atlanmalıdır."
+}

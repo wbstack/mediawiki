@@ -25,6 +25,9 @@ use Title;
  */
 class ApiSanitizeMapData extends ApiBase {
 
+	/**
+	 * @inheritDoc
+	 */
 	public function execute() {
 		$params = $this->extractRequestParams();
 
@@ -34,13 +37,15 @@ class ApiSanitizeMapData extends ApiBase {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['title'] ) ] );
 		}
 
-		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable T240141
 		$this->checkTitleUserPermissions( $title, 'read' );
 
-		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable T240141
 		$this->sanitizeJson( $title, $params['text'] );
 	}
 
+	/**
+	 * @param Title $title
+	 * @param string $text
+	 */
 	private function sanitizeJson( Title $title, $text ) {
 		$parser = MediaWikiServices::getInstance()->getParser();
 		$parserOptions = new ParserOptions( $this->getUser() );
@@ -80,6 +85,9 @@ class ApiSanitizeMapData extends ApiBase {
 		];
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function mustBePosted() {
 		return true;
 	}

@@ -2,6 +2,8 @@
  * @module changeListeners/syncUserSettings
  */
 
+import { previewTypes } from '../preview/model';
+
 /**
  * Creates an instance of the user settings sync change listener.
  *
@@ -19,16 +21,19 @@
  * @return {ext.popups.ChangeListener}
  */
 export default function syncUserSettings( userSettings ) {
-	return ( prevState, state ) => {
+	return ( oldState, newState ) => {
 		syncIfChanged(
-			prevState, state, 'eventLogging', 'previewCount',
-			userSettings.setPreviewCount
+			oldState, newState, 'eventLogging.previewCount',
+			userSettings.storePreviewCount
 		);
 		syncIfChanged(
-			prevState, state, 'preview', 'enabled',
-			userSettings.setIsEnabled
+			oldState, newState, 'preview.enabled.' + previewTypes.TYPE_PAGE,
+			userSettings.storePagePreviewsEnabled
 		);
-
+		syncIfChanged(
+			oldState, newState, 'preview.enabled.' + previewTypes.TYPE_REFERENCE,
+			userSettings.storeReferencePreviewsEnabled
+		);
 	};
 }
 
@@ -37,29 +42,30 @@ export default function syncUserSettings( userSettings ) {
  * property if the reducer and property exist
  *
  * @param {Object} state tree
- * @param {string} reducer key to access on the state tree
- * @param {string} prop key to access on the reducer key of the state tree
+ * @param {string} path dot-separated path in the state tree
  * @return {*}
  */
-function get( state, reducer, prop ) {
-	return state[ reducer ] && state[ reducer ][ prop ];
+function get( state, path ) {
+	return path.split( '.' ).reduce(
+		( element, key ) => element && element[ key ],
+		state
+	);
 }
 
 /**
  * Calls a sync function if the property prop on the property reducer on
  * the state trees has changed value.
  *
- * @param {Object} prevState
- * @param {Object} state
- * @param {string} reducer key to access on the state tree
- * @param {string} prop key to access on the reducer key of the state tree
+ * @param {Object} oldState
+ * @param {Object} newState
+ * @param {string} path dot-separated path in the state tree
  * @param {Function} sync function to be called with the newest value if
  * changed
  * @return {void}
  */
-function syncIfChanged( prevState, state, reducer, prop, sync ) {
-	const current = get( state, reducer, prop );
-	if ( prevState && ( get( prevState, reducer, prop ) !== current ) ) {
+function syncIfChanged( oldState, newState, path, sync ) {
+	const current = get( newState, path );
+	if ( oldState && ( get( oldState, path ) !== current ) ) {
 		sync( current );
 	}
 }

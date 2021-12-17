@@ -95,7 +95,7 @@ class FormStore implements EntityStore {
 
 		$lexeme->addOrUpdateForm( $form );
 
-		//Unset EDIT_NEW flag if present (forms don't have their own pages, thus EDIT_NEW is never needed)
+		// Unset EDIT_NEW flag if present (forms don't have their own pages, thus EDIT_NEW is never needed)
 		$flags &= ~EDIT_NEW;
 
 		return $this->store->saveEntity( $lexeme, $summary, $user, $flags, $baseRevId, $tags );
@@ -111,14 +111,15 @@ class FormStore implements EntityStore {
 	 * @param int|bool $baseRevId
 	 *
 	 * @throws \DomainException always
-	 * @return int
+	 * @return never
 	 */
 	public function saveRedirect(
 		EntityRedirect $redirect,
 		$summary,
 		User $user,
 		$flags = 0,
-		$baseRevId = false
+		$baseRevId = false,
+		array $tags = []
 	) {
 		throw new \DomainException( 'Forms currently don\'t support redirects' );
 	}
