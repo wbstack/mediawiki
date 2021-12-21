@@ -15,4 +15,4 @@ jobs:
     - name: run sync
       run: ./wbstack/sync.sh
     - name: Check only composer autoloaders changed
-      run: diff -Z ./.github/workflows/wbstack.sync.txt <(git status --porcelain=v1)
+      run: diff -Z ./.github/workflows/wbstack.sync.expect.txt <(git status --porcelain=v1)
