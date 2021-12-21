@@ -1,0 +1,4 @@
+ M vendor/autoload.php
+ M vendor/composer/autoload_real.php
+ M vendor/composer/autoload_static.php
+ M vendor/composer/installed.php
