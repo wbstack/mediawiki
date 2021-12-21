@@ -5,7 +5,7 @@
 ###########
 # core
 ###########
-./wbstack/sync/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/923676858a9521c96b7051641010d920796bb408
+./wbstack/sync/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/8b874ff6c6ed5f209dfd0c825c5b310ef1ecca2f
 
 ###########
 # extensions
