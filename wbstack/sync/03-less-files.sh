@@ -5,6 +5,7 @@ echo "Deleting a bunch of not needed files...."
 
 # Core specific
 find ./ -mindepth 1 -regex '^./\(tests\|docs\)\(/.*\)?' -delete
+find ./ -mindepth 1 -path './extensions/README' -delete -o -path './skins/README' -delete
 
 # General stuff
 find ./ -mindepth 1 -regex '^./\(extensions\|skins\)/\w+/\(tests\|.phan\|.storybook\|.vscode\|.gitignore\|.eslintrc.json\|.gitreview\|.phpcs.xml\|Gruntfile.js\|Doxyfile\|.stylelintrc.json\|.rubocop\(_todo\)?.yml\)\(/.*\)?' -delete
