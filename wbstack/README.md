@@ -50,8 +50,6 @@ TODO decide if this is even needed any more since we commit everything in git in
 
 This script will resync the WHOLE git repo based on repo hashes that are maintained in the sync/02-fetch.sh file.
 
-Gotchas: Must be run from the "mediawiki" directory.
-
 ## MediaWiki Loading
 
 MediaWiki loads this code in 2 ways.
