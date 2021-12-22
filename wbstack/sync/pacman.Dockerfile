@@ -1,3 +1,9 @@
-FROM bash:5
+FROM alpine:3.15
 
-RUN apk add jq yq
+RUN apk add \
+  bash \
+  jq \
+  libarchive-tools \
+  yq
+
+ENTRYPOINT bash
