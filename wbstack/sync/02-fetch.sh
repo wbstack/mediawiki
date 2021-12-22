@@ -1,11 +1,6 @@
 #!/usr/bin/env sh
-# This script very simply and quickly downloads core, extensions and skins for the deployment.
+# This script very simply and quickly downloads extensions and skins for the deployment.
 # Nothing is faster :)
-
-###########
-# core
-###########
-./wbstack/sync/dwnthing.sh core https://codeload.github.com/wikimedia/mediawiki/zip/e1239b16705b192252f795698629d62ed9b2b93a
 
 ###########
 # extensions

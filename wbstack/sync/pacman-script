@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+YAMLFILE="./wbstack/sync/pacman.yaml"
+REPO_DIR="./"
+TEMPORARY_DIR="./wbstack/sync/.tmp/"
+
+# TODO make downloading async
+for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
+    name=$(echo $codebase | jq -r '.name' -)
+    artifactUrl=$(echo $codebase | jq -r '.artifactUrl' -)
+    artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
+    temporaryFile="${TEMPORARY_DIR}${name}"
+    temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
+    echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
+    wget "$artifactUrl" -O "${temporaryFile}"
+    mkdir -p ${temporaryExtraction}
+    bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
+done
+
+for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
+    name=$(echo $codebase | jq -r '.name' -)
+    destination=$(echo $codebase | jq -r '.destination' -)
+    temporaryExtraction="${TEMPORARY_DIR}${name}-extracted/."
+    targetDestination="${REPO_DIR}${destination}"
+    echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
+    cp -fa "${temporaryExtraction}" "${REPO_DIR}${targetDestination}"
+done
