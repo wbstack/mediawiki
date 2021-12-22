@@ -16,6 +16,7 @@ fi;
 $BASEDIR/sync/01-clear.sh
 
 # Fetches things from the web
+$BASEDIR/sync/nufetch.sh
 $BASEDIR/sync/02-docker-fetch.sh
 
 # Removes some not needed things from the things fetched

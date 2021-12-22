@@ -48,8 +48,9 @@ $temporaryDirectory = __DIR__ . '/.tmp/';
 foreach( $codebases as $codebase ) {
     $name = $codebase['name'];
     $temporaryFile = $temporaryDirectory . $name;
-    downloadFile($codebase['artifactUrl'], $temporaryFile);
     $temporaryExtraction = $temporaryDirectory . $name . '-extracted';
+    echo "Downloading and extracting '$name' from '$codebase[artifactUrl]' to '$temporaryExtraction'\n";
+    downloadFile($codebase['artifactUrl'], $temporaryFile);
     extractFileOfUnknownType($temporaryFile, $temporaryExtraction);
 }
 
@@ -61,5 +62,7 @@ foreach( $codebases as $codebase ) {
     $artifactLevel = $codebase['artifactLevel'];
     $temporaryExtraction = $temporaryDirectory . $name . '-extracted';
     $source = $temporaryExtraction . '/' . str_repeat('*/', $artifactLevel);
-    recursiveCopy($source, $repoRoot);
+    $destination = realpath($repoRoot . '/' . $codebase['destination']);
+    echo "Moving '$name' from '$source' to '$destination'\n";
+    recursiveCopy($source, $destination);
 }
