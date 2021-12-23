@@ -1,9 +1,0 @@
----
-- name: mediawiki
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki/zip/e1239b16705b192252f795698629d62ed9b2b93a
-  artifactLevel: 1
-  destination: "./"
-- name: RevisionSlider
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/b5b3a68a8c69ce261b70c177e4983806c1173eff
-  artifactLevel: 1
-  destination: "./extensions/RevisionSlider"

@@ -6,15 +6,17 @@ REPO_DIR="${BASEDIR}/../../"
 TEMPORARY_DIR="${BASEDIR}/.tmp/"
 
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
-    name=$(echo $codebase | jq -r '.name' -)
-    artifactUrl=$(echo $codebase | jq -r '.artifactUrl' -)
-    artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
-    temporaryFile="${TEMPORARY_DIR}${name}"
-    temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
     # download and extract each artifact asynchronously
+    # the brackets create a subshell
     (
+        name=$(echo $codebase | jq -r '.name' -)
+        artifactUrl=$(echo $codebase | jq -r '.artifactUrl' -)
+        artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
+        temporaryFile="${TEMPORARY_DIR}${name}"
+        temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
         echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
         wget "$artifactUrl" -O "${temporaryFile}"
+        rm -r ${temporaryExtraction}
         mkdir -p ${temporaryExtraction}
         bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
     ) &

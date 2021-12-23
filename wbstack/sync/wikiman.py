@@ -7,7 +7,7 @@ import yaml
 
 BASEDIR = os.path.dirname(os.path.realpath(__file__))
 SOURCE_YAMLFILE = f"{BASEDIR}/wikiman.yaml"
-DESTINATION_YAMLFILE = f"{BASEDIR}/pacman.lock.yaml"
+DESTINATION_YAMLFILE = f"{BASEDIR}/pacman.yaml"
 GITHUB_TOKEN = f"{BASEDIR}/.github"
 
 codebases = {}
@@ -49,7 +49,7 @@ def make_artifact_entry(name: str, repoName: str, destination: str, ref: str) ->
     }
 
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
-output: List[Dict] = [make_artifact_entry('mediawiki', 'mediawiki', "./", default_branch)]
+output: List[Dict] = [make_artifact_entry('mediawiki', 'mediawiki', "./", codebases.get('mediawikiRepoRef', default_branch))]
 
 output += [
     make_artifact_entry(name := ext['name'], ext['repoName'], f"./extensions/{name}", ext.get('repoRef', default_branch))
