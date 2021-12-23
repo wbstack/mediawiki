@@ -7,7 +7,7 @@ import yaml
 
 BASEDIR = os.path.dirname(os.path.realpath(__file__))
 SOURCE_YAMLFILE = f"{BASEDIR}/wikiman.yaml"
-DESTINATION_YAMLFILE = f"{BASEDIR}/test.yaml"
+DESTINATION_YAMLFILE = f"{BASEDIR}/pacman.lock.yaml"
 GITHUB_TOKEN = f"{BASEDIR}/.github"
 
 codebases = {}
