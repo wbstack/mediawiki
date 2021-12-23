@@ -37,27 +37,43 @@ def get_github_url_from_ref(github: Github, ref: str, repository: str):
 
     return f"https://codeload.github.com/{repository}/zip/{commit.sha}"
 
-def make_artifact_entry(name: str, repoName: str, destination: str, ref: str) -> Dict[str, Any]:
-    # TODO: remove hardcoded wikimedia in repository
-    artifactURL = get_github_url_from_ref(github, ref, repoName)
+def make_artifact_entry(details: Dict[str, str]) -> Dict[str, Any]:
+    name = details['name']
+
+    if "repoName" in details.keys():
+        artifactURL = get_github_url_from_ref(github, details['repoRef'], details['repoName'])
+    elif "url" in details.keys():
+        artifactURL = details['url']
+    else:
+        raise ValueError(f"'repoName' or 'url' key not specified for '{name}' in '{SOURCE_YAMLFILE}'")
 
     return {
         'name': name,
         'artifactUrl': artifactURL,
         'artifactLevel': 1,
-        'destination': destination,
+        'destination': details['destination'],
     }
 
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
-output: List[Dict] = [make_artifact_entry('mediawiki', 'wikimedia/mediawiki', "./", codebases.get('mediawikiRepoRef', default_branch))]
+output: List[Dict] = [make_artifact_entry({
+    'name': 'mediawiki',
+    'repoName': 'wikimedia/mediawiki',
+    'repoRef': codebases.get('mediawikiRepoRef', default_branch),
+    'destination': './'
+    })]
+
+def merge_dicts(a: Dict, b: Dict) -> Dict:
+    c = dict(a)
+    c.update(b)
+    return c
 
 output += [
-    make_artifact_entry(name := ext['name'], ext['repoName'], f"./extensions/{name}", ext.get('repoRef', default_branch))
+    make_artifact_entry( merge_dicts(ext,{'destination': f"./extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}) )
     for ext in extensions
     ]
-    
+
 output += [
-    make_artifact_entry(name := skin['name'], skin['repoName'], f"./skins/{name}", skin.get('repoRef', default_branch))
+    make_artifact_entry( merge_dicts(skin,{'destination': f"./skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)}) )
     for skin in skins
     ]
 

@@ -210,6 +210,14 @@
   artifactUrl: https://codeload.github.com/nyurik/ThatSrc/zip/3e039311504eb82f8c5c488a457b9e376b5cf7e3
   artifactLevel: 1
   destination: ./extensions/ThatSrc
+- name: Wikibase
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/main/wikibase-feddy-props-1668.tar.gz
+  artifactLevel: 1
+  destination: ./extensions/Wikibase
+- name: EmbedVideo
+  artifactUrl: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
+  artifactLevel: 1
+  destination: ./extensions/EmbedVideo
 - name: Vector
   artifactUrl: https://codeload.github.com/wikimedia/Vector/zip/a2721bf9c3772b45bb13520755034edda52a3e4e
   artifactLevel: 1
