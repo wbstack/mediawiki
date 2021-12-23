@@ -146,5 +146,16 @@ extensions:
   - name: EntitySchema
     repoName: mediawiki-extensions-EntitySchema
     repoRef: wmf/1.38.0-wmf.3
-skins: []
-#   - 
+skins:
+  - name: Vector
+    repoName: Vector
+    repoRef: a2721bf9c3772b45bb13520755034edda52a3e4e
+  - name: Timeless
+    repoName: mediawiki-skins-Timeless
+    repoRef: 90e079694efbd34bd5b7725823583238fb546eea
+  - name: Modern
+    repoName: mediawiki-skins-Modern
+    repoRef: 57c685aa4d6ebd786ce85fdb97aba5850961931e
+  - name: MinervaNeue
+    repoName: mediawiki-skins-MinervaNeue
+    repoRef: 92533535bfaba4e0a3f06eee39f375e2259c6f90

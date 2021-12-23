@@ -194,3 +194,19 @@
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/74c4040f1903c2bbc5e059367e806a134d172e75
   artifactLevel: 1
   destination: ./extensions/EntitySchema
+- name: Vector
+  artifactUrl: https://codeload.github.com/wikimedia/Vector/zip/a2721bf9c3772b45bb13520755034edda52a3e4e
+  artifactLevel: 1
+  destination: ./skins/Vector
+- name: Timeless
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Timeless/zip/90e079694efbd34bd5b7725823583238fb546eea
+  artifactLevel: 1
+  destination: ./skins/Timeless
+- name: Modern
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Modern/zip/57c685aa4d6ebd786ce85fdb97aba5850961931e
+  artifactLevel: 1
+  destination: ./skins/Modern
+- name: MinervaNeue
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/92533535bfaba4e0a3f06eee39f375e2259c6f90
+  artifactLevel: 1
+  destination: ./skins/MinervaNeue
