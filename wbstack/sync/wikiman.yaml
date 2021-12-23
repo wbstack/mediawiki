@@ -1,161 +1,176 @@
 ---
 mediawikiVersion: "1.37"
 mediawikiRepoRef: e1239b16705b192252f795698629d62ed9b2b93a
+
 extensions:
   - name: RevisionSlider
     repoRef: b5b3a68a8c69ce261b70c177e4983806c1173eff
-    repoName: mediawiki-extensions-RevisionSlider
+    repoName: wikimedia/mediawiki-extensions-RevisionSlider
   - name: Mailgun
     repoRef: 37108dab96582a730df9e3a2fafaeb5e69120bd4
-    repoName: mediawiki-extensions-Mailgun
+    repoName: wikimedia/mediawiki-extensions-Mailgun
   - name: StopForumSpam
     repoRef: 3dff0ffc72ae784d9e3521be2347fb4f4af827b4
-    repoName: mediawiki-extensions-StopForumSpam
+    repoName: wikimedia/mediawiki-extensions-StopForumSpam
   - name: SpamBlacklist
     repoRef: bed58ae25964a02089406db10939c83dda5cdb02
-    repoName: mediawiki-extensions-SpamBlacklist
+    repoName: wikimedia/mediawiki-extensions-SpamBlacklist
   - name: ConfirmEdit
     repoRef: e9c0201b4924398c1fc4ac9ed2a28a1cc51da746
-    repoName: mediawiki-extensions-ConfirmEdit
+    repoName: wikimedia/mediawiki-extensions-ConfirmEdit
   - name: ConfirmAccount
     repoRef: f40450c269ab628223ca705bf94711032cb5252b
-    repoName: mediawiki-extensions-ConfirmAccount
+    repoName: wikimedia/mediawiki-extensions-ConfirmAccount
   - name: Nuke
     repoRef: 942c5a35bc8aba319b801ace71746245d228ab4d
-    repoName: mediawiki-extensions-Nuke
+    repoName: wikimedia/mediawiki-extensions-Nuke
   - name: InviteSignup
     repoRef: 6218d64c4cfb94e372310a9bd6365b9120088435
-    repoName: mediawiki-extensions-InviteSignup
+    repoName: wikimedia/mediawiki-extensions-InviteSignup
   - name: TorBlock
     repoRef: 97629e4fbbd5036c1f9e82a1c8f52b0c2724c621
-    repoName: mediawiki-extensions-TorBlock
+    repoName: wikimedia/mediawiki-extensions-TorBlock
   - name: Elastica
     repoRef: acbf559ff28d144d34b318473c2b42da1cf9e86b
-    repoName: mediawiki-extensions-Elastica
+    repoName: wikimedia/mediawiki-extensions-Elastica
   - name: CirrusSearch
     repoRef: 69c9be81a7784a822c6284a3599944b3c5d89eaf
-    repoName: mediawiki-extensions-CirrusSearch
+    repoName: wikimedia/mediawiki-extensions-CirrusSearch
   - name: WikibaseCirrusSearch
-    repoName: mediawiki-extensions-WikibaseCirrusSearch
+    repoName: wikimedia/mediawiki-extensions-WikibaseCirrusSearch
     repoRef: wmf/1.38.0-wmf.3
   - name: WikibaseLexemeCirrusSearch
-    repoName: mediawiki-extensions-WikibaseLexemeCirrusSearch
+    repoName: wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch
     repoRef: wmf/1.38.0-wmf.3
   - name: UniversalLanguageSelector
     repoRef: f3813dab69f5f2d8cfe0313bde108e029979c670
-    repoName: mediawiki-extensions-UniversalLanguageSelector
+    repoName: wikimedia/mediawiki-extensions-UniversalLanguageSelector
   - name: cldr
     repoRef: d79493d9cb80977f3cfca6a5960dcd13f79b643b
-    repoName: mediawiki-extensions-cldr
+    repoName: wikimedia/mediawiki-extensions-cldr
   - name: Gadgets
     repoRef: 6df6b800fae8c161fed0ed04d3aeaf6fb999317a
-    repoName: mediawiki-extensions-Gadgets
+    repoName: wikimedia/mediawiki-extensions-Gadgets
   - name: Thanks
     repoRef: f15f4305760750b141f2591e5a9a17e973a4cd1c
-    repoName: mediawiki-extensions-Thanks
+    repoName: wikimedia/mediawiki-extensions-Thanks
   - name: TwoColConflict
     repoRef: 9b4e43fb526a8ce368c94346b957475916ed4514
-    repoName: mediawiki-extensions-TwoColConflict
+    repoName: wikimedia/mediawiki-extensions-TwoColConflict
   - name: OAuth
     repoRef: 0031940800688566ff23c91c4e041733975dbac6
-    repoName: mediawiki-extensions-OAuth
+    repoName: wikimedia/mediawiki-extensions-OAuth
   - name: WikibaseLexeme
-    repoName: mediawiki-extensions-WikibaseLexeme
+    repoName: wikimedia/mediawiki-extensions-WikibaseLexeme
     repoRef: wmf/1.38.0-wmf.3
   - name: SyntaxHighlight_GeSHi
     repoRef: 8181186f932bf1a93d57b663cfd7a6bd9db3059a
-    repoName: mediawiki-extensions-SyntaxHighlight_GeSHi
+    repoName: wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi
   - name: JsonConfig
     repoRef: fd0a3c368849318813ebc44d91275503c3ccbc08
-    repoName: mediawiki-extensions-JsonConfig
+    repoName: wikimedia/mediawiki-extensions-JsonConfig
   - name: Kartographer
     repoRef: 915734d7775bd765f7e08cefc5c6ee4777fa6e0a
-    repoName: mediawiki-extensions-Kartographer
+    repoName: wikimedia/mediawiki-extensions-Kartographer
   - name: Math
     repoRef: 39bf030832e70b5dbb8e1e3ac8f7bc0736a28318
-    repoName: mediawiki-extensions-Math
+    repoName: wikimedia/mediawiki-extensions-Math
   - name: Score
     repoRef: cd4f72339b54ebca82fd3a33890fbe50c271944b
-    repoName: mediawiki-extensions-Score
+    repoName: wikimedia/mediawiki-extensions-Score
   - name: PageImages
     repoRef: 130e0ae9eba8d33a3fcaade4fa87f24939528166
-    repoName: mediawiki-extensions-PageImages
+    repoName: wikimedia/mediawiki-extensions-PageImages
   - name: Scribunto
     repoRef: cbfceb5d19f1ff13362545db186fb1bafb36a7aa
-    repoName: mediawiki-extensions-Scribunto
+    repoName: wikimedia/mediawiki-extensions-Scribunto
   - name: Cite
     repoRef: 838e4fda79dbf707c8538045c86250b66965a08d
-    repoName: mediawiki-extensions-Cite
+    repoName: wikimedia/mediawiki-extensions-Cite
   - name: TemplateSandbox
     repoRef: c6f81c6175c43a17cd5f6e64b3a50e425f1e807f
-    repoName: mediawiki-extensions-TemplateSandbox
+    repoName: wikimedia/mediawiki-extensions-TemplateSandbox
   - name: CodeEditor
     repoRef: 719f578d787be1fce76db8bf0ee104920be0b97e
-    repoName: mediawiki-extensions-CodeEditor
+    repoName: wikimedia/mediawiki-extensions-CodeEditor
   - name: CodeMirror
     repoRef: 9680a9e2ecd92ae2651985a1e4d06f56c346f4b3
-    repoName: mediawiki-extensions-CodeMirror
+    repoName: wikimedia/mediawiki-extensions-CodeMirror
   - name: WikiEditor
     repoRef: 59dceed2ecb70df97be904e56a52b801cb6033cd
-    repoName: mediawiki-extensions-WikiEditor
+    repoName: wikimedia/mediawiki-extensions-WikiEditor
   - name: SecureLinkFixer
     repoRef: c351e14c3aa49610998f500855c60b506502b0bb
-    repoName: mediawiki-extensions-SecureLinkFixer
+    repoName: wikimedia/mediawiki-extensions-SecureLinkFixer
   - name: Echo
     repoRef: 97cc760dd5f1ad9b6547cdcfc537fc778a7b2621
-    repoName: mediawiki-extensions-Echo
+    repoName: wikimedia/mediawiki-extensions-Echo
   - name: Graph
     repoRef: dfca6181babd9200169b36fa6dddaf8bd3197fb4
-    repoName: mediawiki-extensions-Graph
+    repoName: wikimedia/mediawiki-extensions-Graph
   - name: Poem
     repoRef: 5cd20a362d227ac2448e9c0395444c272ee70736
-    repoName: mediawiki-extensions-Poem
+    repoName: wikimedia/mediawiki-extensions-Poem
   - name: TemplateData
     repoRef: 97edad799900f37286be5c2ec3d230699d4011e5
-    repoName: mediawiki-extensions-TemplateData
+    repoName: wikimedia/mediawiki-extensions-TemplateData
   - name: AdvancedSearch
     repoRef: 8c8c37b092d431b91e1ea24f08d948c446c95cb7
-    repoName: mediawiki-extensions-AdvancedSearch
+    repoName: wikimedia/mediawiki-extensions-AdvancedSearch
   - name: ParserFunctions
     repoRef: 8a6c06537b0e238681f031621b54e2d64202447a
-    repoName: mediawiki-extensions-ParserFunctions
+    repoName: wikimedia/mediawiki-extensions-ParserFunctions
   - name: MobileFrontend
     repoRef: ac7c29c55c251a03ffe85de8fb442fe3bf65f839
-    repoName: mediawiki-extensions-MobileFrontend
+    repoName: wikimedia/mediawiki-extensions-MobileFrontend
   - name: DeleteBatch
     repoRef: ce8b6df87e96c7100565c63c8056dfeadb33f5c5
-    repoName: mediawiki-extensions-DeleteBatch
+    repoName: wikimedia/mediawiki-extensions-DeleteBatch
   - name: MultimediaViewer
     repoRef: 11b7afdfa673b53fc42625a556c7976c3f58b3f6
-    repoName: mediawiki-extensions-MultimediaViewer
+    repoName: wikimedia/mediawiki-extensions-MultimediaViewer
   - name: Auth_remoteuser
     repoRef: 267291a73535032710ebfd4504f0cb6e0538b135
-    repoName: mediawiki-extensions-Auth_remoteuser
+    repoName: wikimedia/mediawiki-extensions-Auth_remoteuser
   - name: WikibaseManifest
     repoRef: e47f11b91597a9f4599cb2dfcc9bdef94a9f0a13
-    repoName: mediawiki-extensions-WikibaseManifest
+    repoName: wikimedia/mediawiki-extensions-WikibaseManifest
   - name: WikiHiero
     repoRef: 4297f947cd8564637948b955f284dc7b63c1d75d
-    repoName: mediawiki-extensions-WikiHiero
+    repoName: wikimedia/mediawiki-extensions-WikiHiero
   - name: TextExtracts
     repoRef: 4bf31cf343542ed827237babd5c0709c14d5cb11
-    repoName: mediawiki-extensions-TextExtracts
+    repoName: wikimedia/mediawiki-extensions-TextExtracts
   - name: Popups
     repoRef: 7cfb5a5e13f94e669616ce704bb0ca9b3bcb0936
-    repoName: mediawiki-extensions-Popups
+    repoName: wikimedia/mediawiki-extensions-Popups
   - name: EntitySchema
-    repoName: mediawiki-extensions-EntitySchema
+    repoName: wikimedia/mediawiki-extensions-EntitySchema
     repoRef: wmf/1.38.0-wmf.3
+  # These extensions should not currently use the mediawikiVersion
+  - name: WikibaseInWikitext
+    repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
+    repoRef: 445c7efaa145fa7c31b0caca7400ef6a87cac7d9
+  - name: WikibaseExampleData
+    repoName: wmde/WikibaseExampleData
+    repoRef: c129f0b759bf4602aa9b09e2bb9b694682784320
+  - name: WikibaseEdtf
+    repoName: ProfessionalWiki/WikibaseEdtf
+    repoRef: "1.2.0"
+  - name: ThatSrc
+    repoName: nyurik/ThatSrc
+    repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
+
 skins:
   - name: Vector
-    repoName: Vector
+    repoName: wikimedia/Vector
     repoRef: a2721bf9c3772b45bb13520755034edda52a3e4e
   - name: Timeless
-    repoName: mediawiki-skins-Timeless
+    repoName: wikimedia/mediawiki-skins-Timeless
     repoRef: 90e079694efbd34bd5b7725823583238fb546eea
   - name: Modern
-    repoName: mediawiki-skins-Modern
+    repoName: wikimedia/mediawiki-skins-Modern
     repoRef: 57c685aa4d6ebd786ce85fdb97aba5850961931e
   - name: MinervaNeue
-    repoName: mediawiki-skins-MinervaNeue
+    repoName: wikimedia/mediawiki-skins-MinervaNeue
     repoRef: 92533535bfaba4e0a3f06eee39f375e2259c6f90

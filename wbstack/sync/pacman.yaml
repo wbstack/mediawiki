@@ -194,6 +194,22 @@
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/74c4040f1903c2bbc5e059367e806a134d172e75
   artifactLevel: 1
   destination: ./extensions/EntitySchema
+- name: WikibaseInWikitext
+  artifactUrl: https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9
+  artifactLevel: 1
+  destination: ./extensions/WikibaseInWikitext
+- name: WikibaseExampleData
+  artifactUrl: https://codeload.github.com/wmde/WikibaseExampleData/zip/c129f0b759bf4602aa9b09e2bb9b694682784320
+  artifactLevel: 1
+  destination: ./extensions/WikibaseExampleData
+- name: WikibaseEdtf
+  artifactUrl: https://codeload.github.com/ProfessionalWiki/WikibaseEdtf/zip/38b94853d1ece0e2dd742aa5aa925d51916a0a28
+  artifactLevel: 1
+  destination: ./extensions/WikibaseEdtf
+- name: ThatSrc
+  artifactUrl: https://codeload.github.com/nyurik/ThatSrc/zip/3e039311504eb82f8c5c488a457b9e376b5cf7e3
+  artifactLevel: 1
+  destination: ./extensions/ThatSrc
 - name: Vector
   artifactUrl: https://codeload.github.com/wikimedia/Vector/zip/a2721bf9c3772b45bb13520755034edda52a3e4e
   artifactLevel: 1

@@ -39,7 +39,7 @@ def get_github_url_from_ref(github: Github, ref: str, repository: str):
 
 def make_artifact_entry(name: str, repoName: str, destination: str, ref: str) -> Dict[str, Any]:
     # TODO: remove hardcoded wikimedia in repository
-    artifactURL = get_github_url_from_ref(github, ref, f"wikimedia/{repoName}")
+    artifactURL = get_github_url_from_ref(github, ref, repoName)
 
     return {
         'name': name,
@@ -49,7 +49,7 @@ def make_artifact_entry(name: str, repoName: str, destination: str, ref: str) ->
     }
 
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
-output: List[Dict] = [make_artifact_entry('mediawiki', 'mediawiki', "./", codebases.get('mediawikiRepoRef', default_branch))]
+output: List[Dict] = [make_artifact_entry('mediawiki', 'wikimedia/mediawiki', "./", codebases.get('mediawikiRepoRef', default_branch))]
 
 output += [
     make_artifact_entry(name := ext['name'], ext['repoName'], f"./extensions/{name}", ext.get('repoRef', default_branch))
