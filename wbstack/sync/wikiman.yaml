@@ -1,0 +1,105 @@
+---
+mediawikiVersion: "1.37"
+extensions:
+  - name: RevisionSlider
+    repoName: mediawiki-extensions-RevisionSlider
+  # - name: Mailgun
+  #   repoName: mediawiki-extensions-Mailgun
+  # - name: StopForumSpam
+  #   repoName: mediawiki-extensions-StopForumSpam
+  # - name: SpamBlacklist
+  #   repoName: mediawiki-extensions-SpamBlacklist
+  # - name: ConfirmEdit
+  #   repoName: mediawiki-extensions-ConfirmEdit
+  # - name: ConfirmAccount
+  #   repoName: mediawiki-extensions-ConfirmAccount
+  # - name: Nuke
+  #   repoName: mediawiki-extensions-Nuke
+  # - name: InviteSignup
+  #   repoName: mediawiki-extensions-InviteSignup
+  # - name: TorBlock
+  #   repoName: mediawiki-extensions-TorBlock
+  # - name: Elastica
+  #   repoName: mediawiki-extensions-Elastica
+  # - name: CirrusSearch
+  #   repoName: mediawiki-extensions-CirrusSearch
+  - name: WikibaseCirrusSearch
+    repoName: mediawiki-extensions-WikibaseCirrusSearch
+    repoRef: wmf/1.38.0-wmf.3
+  #   # TODO WikibaseLexemeCirrusSearch wmf/1.38.0-wmf.3
+  # - name: WikibaseLexemeCirrusSearch
+  #   repoName: mediawiki-extensions-WikibaseLexemeCirrusSearch
+  # - name: UniversalLanguageSelector
+  #   repoName: mediawiki-extensions-UniversalLanguageSelector
+  # - name: cldr
+  #   repoName: mediawiki-extensions-cldr
+  # - name: Gadgets
+  #   repoName: mediawiki-extensions-Gadgets
+  # - name: Thanks
+  #   repoName: mediawiki-extensions-Thanks
+  # - name: TwoColConflict
+  #   repoName: mediawiki-extensions-TwoColConflict
+  # - name: OAuth
+  #   repoName: mediawiki-extensions-OAuth
+  #   # TODO WikibaseCirrusSearch wmf/1.38.0-wmf.3
+  # - name: WikibaseLexeme
+  #   repoName: mediawiki-extensions-WikibaseLexeme
+  # - name: SyntaxHighlight_GeSHi
+  #   repoName: mediawiki-extensions-SyntaxHighlight_GeSHi
+  # - name: JsonConfig
+  #   repoName: mediawiki-extensions-JsonConfig
+  # - name: Kartographer
+  #   repoName: mediawiki-extensions-Kartographer
+  # - name: Math
+  #   repoName: mediawiki-extensions-Math
+  # - name: Score
+  #   repoName: mediawiki-extensions-Score
+  # - name: PageImages
+  #   repoName: mediawiki-extensions-PageImages
+  # - name: Scribunto
+  #   repoName: mediawiki-extensions-Scribunto
+  # - name: Cite
+  #   repoName: mediawiki-extensions-Cite
+  # - name: TemplateSandbox
+  #   repoName: mediawiki-extensions-TemplateSandbox
+  # - name: CodeEditor
+  #   repoName: mediawiki-extensions-CodeEditor
+  # - name: CodeMirror
+  #   repoName: mediawiki-extensions-CodeMirror
+  # - name: WikiEditor
+  #   repoName: mediawiki-extensions-WikiEditor
+  # - name: SecureLinkFixer
+  #   repoName: mediawiki-extensions-SecureLinkFixer
+  # - name: Echo
+  #   repoName: mediawiki-extensions-Echo
+  # - name: Graph
+  #   repoName: mediawiki-extensions-Graph
+  # - name: Poem
+  #   repoName: mediawiki-extensions-Poem
+  # - name: TemplateData
+  #   repoName: mediawiki-extensions-TemplateData
+  # - name: AdvancedSearch
+  #   repoName: mediawiki-extensions-AdvancedSearch
+  # - name: ParserFunctions
+  #   repoName: mediawiki-extensions-ParserFunctions
+  # - name: MobileFrontend
+  #   repoName: mediawiki-extensions-MobileFrontend
+  # - name: DeleteBatch
+  #   repoName: mediawiki-extensions-DeleteBatch
+  # - name: MultimediaViewer
+  #   repoName: mediawiki-extensions-MultimediaViewer
+  # - name: Auth_remoteuser
+  #   repoName: mediawiki-extensions-Auth_remoteuser
+  # - name: WikibaseManifest
+  #   repoName: mediawiki-extensions-WikibaseManifest
+  # - name: WikiHiero
+  #   repoName: mediawiki-extensions-WikiHiero
+  # - name: TextExtracts
+  #   repoName: mediawiki-extensions-TextExtracts
+  # - name: Popups
+  #   repoName: mediawiki-extensions-Popups
+  #   # TODO WikibaseCirrusSearch wmf/1.38.0-wmf.3
+  # - name: EntitySchema
+  #   repoName: mediawiki-extensions-EntitySchema
+skins: []
+#   - 

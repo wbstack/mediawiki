@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+BASEDIR=$(cd `dirname "$0"` && pwd)
+SOURCE_YAMLFILE="${BASEDIR}/wikiman.yaml"
+DESTINATION_YAMLFILE="${BASEDIR}/test.yaml"
+
+MEDIAWIKI_VERSION=$(yq e .mediawikiVersion $SOURCE_YAMLFILE)
+echo $MEDIAWIKI_VERSION
+
+touch SOURCE_YAMLFILE
+
+for codebase in $(yq eval -o=j $SOURCE_YAMLFILE | jq -cr '.extensions[]'); do
+    # echo $codebase
+    name=$(echo $codebase | jq -r '.name' -)
+    yq e ". += ['{$name}']" $DESTINATION_YAMLFILE
+    # artifactUrl=$(echo $codebase | jq -r '.artifactUrl' -)
+    # artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
+    # temporaryFile="${TEMPORARY_DIR}${name}"
+    # temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
+done
