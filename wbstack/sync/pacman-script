@@ -16,7 +16,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
         echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
         wget "$artifactUrl" -O "${temporaryFile}"
-        rm -r ${temporaryExtraction}
+        rm -rf ${temporaryExtraction}
         mkdir -p ${temporaryExtraction}
         bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
     ) &
