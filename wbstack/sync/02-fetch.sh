@@ -1,11 +1,7 @@
 #!/usr/bin/env sh
-# This script very simply and quickly downloads extensions and skins for the deployment.
-# Nothing is faster :)
-
 ###########
 # extensions
 ###########
-./wbstack/sync/dwnthing.sh extensions/RevisionSlider https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/b5b3a68a8c69ce261b70c177e4983806c1173eff & \
 ./wbstack/sync/dwnthing.sh extensions/Mailgun https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/37108dab96582a730df9e3a2fafaeb5e69120bd4 & \
 ./wbstack/sync/dwnthing.sh extensions/StopForumSpam https://codeload.github.com/wikimedia/mediawiki-extensions-StopForumSpam/zip/3dff0ffc72ae784d9e3521be2347fb4f4af827b4 & \
 ./wbstack/sync/dwnthing.sh extensions/SpamBlacklist https://codeload.github.com/wikimedia/mediawiki-extensions-SpamBlacklist/zip/bed58ae25964a02089406db10939c83dda5cdb02 & \
