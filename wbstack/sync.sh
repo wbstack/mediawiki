@@ -2,15 +2,9 @@
 # Syncs the whole git repo in the correct way
 # This is probably the file that you want to run..
 
-# This script should only be run from the mediawiki directory
-# as I didn't make the paths nice in the shell scripts...
 BASEDIR=$(cd `dirname "$0"` && pwd)
-if [ "${BASEDIR#$PWD}" = "/wbstack" ]; then
-    echo "Running from the mediawiki directory, can continue :)"
-else
-    echo "ERROR: this script must be run from the mediawiki directory :("
-    exit
-fi;
+
+cd $BASEDIR/..
 
 Help()
 {
