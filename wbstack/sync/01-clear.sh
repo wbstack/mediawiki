@@ -3,6 +3,7 @@
 echo "Clearing most of the git repo (except the files we want to keep)"
 
 find ./ -mindepth 1 \
+    -not -path "./composer.lock" \
     -not -path "./.dockerignore" \
     -not -path "./.hadolint.yml" \
     -not -path "./docker-compose.yml" \
