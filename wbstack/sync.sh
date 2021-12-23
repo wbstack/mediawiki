@@ -40,7 +40,7 @@ export ALSO_COMPOSER_UPDATE=${ALSO_COMPOSER_UPDATE}
 $BASEDIR/sync/01-clear.sh
 
 # Fetches things from the web
-$BASEDIR/sync/02-docker-fetch.sh
+$BASEDIR/sync/pacman
 
 # Removes some not needed things from the things fetched
 $BASEDIR/sync/03-less-files.sh

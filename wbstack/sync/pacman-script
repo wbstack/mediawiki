@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+BASEDIR=$(cd `dirname "$0"` && pwd)
+YAMLFILE="${BASEDIR}/pacman.yaml"
+REPO_DIR="${BASEDIR}/../../"
+TEMPORARY_DIR="${BASEDIR}/.tmp/"
+
+for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
+    # download and extract each artifact asynchronously
+    # the brackets create a subshell
+    (
+        name=$(echo $codebase | jq -r '.name' -)
+        artifactUrl=$(echo $codebase | jq -r '.artifactUrl' -)
+        artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
+        temporaryFile="${TEMPORARY_DIR}${name}"
+        temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
+        echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
+        wget --quiet "$artifactUrl" -O "${temporaryFile}"
+        rm -rf ${temporaryExtraction}
+        mkdir -p ${temporaryExtraction}
+        bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
+    ) &
+done
+
+# wait for the artifcats to download and extract 
+wait
+
+for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
+    name=$(echo $codebase | jq -r '.name' -)
+    destination=$(echo $codebase | jq -r '.destination' -)
+    temporaryExtraction="${TEMPORARY_DIR}${name}-extracted/."
+    targetDestination="${REPO_DIR}${destination}"
+    echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
+    cp -fa "${temporaryExtraction}" "${targetDestination}"
+done

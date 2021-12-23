@@ -38,17 +38,25 @@ These can be found in the `src/Internal` directory.
 
 ## Build scripts
 
-### sync/updateFetchScript.sh
+### wikiman & pacman
 
-This script can be used to update lots (but not all) of the component hashes in `02-fetch.sh` to the latest versions for the branch.
+`wikiman` is a MediaWiki specific yaml generator for pacman.
+This needs to be run by developers when updating component versions in `wikiman.yaml`
 
-Gotchas: Must be run from the "sync" directory.
-
-TODO decide if this is even needed any more since we commit everything in git instead of just building in a Dockerfile...
+`pacman` is a generic tool using yaml to fetch a series of codebases and place them on disk.
+This is run as a step in `sync.sh`
 
 ### sync.sh
 
-This script will resync the WHOLE git repo based on repo hashes that are maintained in the sync/02-fetch.sh file.
+This script will resync the WHOLE git repo.
+
+This is made up of a series of steps:
+
+- `01-clear`: Remove all MediaWiki code
+- `pacman`: Retrieive and build MediaWiki code
+- `03-less-files`: Remove not needed things from MediaWiki code
+- `04-docker-compose`: Perform a composer install
+- `05-docker-entrypoint-overrides`: Add the WBStack shims to MediaWiki entrypoints
 
 ## MediaWiki Loading
 
