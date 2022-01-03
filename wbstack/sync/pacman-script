@@ -10,7 +10,8 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     # the brackets create a subshell
     (   
         # extract name, artifactUrl, and artifactLevel from json into bash variables
-        read -d ' ' name artifactUrl artifactLevel <<< $(jq -r '.name,.artifactUrl,.artifactLevel' <<< "$codebase")
+        extractedVars=$(jq -r '.name,.artifactUrl,.artifactLevel' <<< "$codebase")
+        IFS=$'\n' read -rd $'\0' name artifactUrl artifactLevel < <(printf "$extractedVars\0")
         temporaryFile="${TEMPORARY_DIR}${name}"
         temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
 
@@ -27,7 +28,8 @@ wait
 
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     # extract name, and destination from json into bash variables
-    read -d ' ' name destination <<< $(jq -r '.name,.destination' <<< "$codebase")
+    extractedVars=$(jq -r '.name,.destination' <<< "$codebase")
+    IFS=$'\n' read -rd $'\0' name destination < <(printf "$extractedVars\0")
     temporaryExtraction="${TEMPORARY_DIR}${name}-extracted/."
     targetDestination="${REPO_DIR}${destination}"
     
