@@ -1,11 +1,11 @@
 <?php return array(
     'root' => array(
-        'pretty_version' => 'dev-main',
-        'version' => 'dev-main',
+        'pretty_version' => '1.0.0+no-version-set',
+        'version' => '1.0.0.0',
         'type' => 'mediawiki-core',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
-        'reference' => '89bf62e988022da410bf6ed0fd047da5fbaa8d4c',
+        'reference' => NULL,
         'name' => 'mediawiki/core',
         'dev' => false,
     ),
@@ -268,12 +268,12 @@
             'dev_requirement' => false,
         ),
         'mediawiki/core' => array(
-            'pretty_version' => 'dev-main',
-            'version' => 'dev-main',
+            'pretty_version' => '1.0.0+no-version-set',
+            'version' => '1.0.0.0',
             'type' => 'mediawiki-core',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
-            'reference' => '89bf62e988022da410bf6ed0fd047da5fbaa8d4c',
+            'reference' => NULL,
             'dev_requirement' => false,
         ),
         'mediawiki/data-values' => array(

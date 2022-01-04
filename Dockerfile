@@ -99,7 +99,7 @@ RUN set -eux; \
 	a2enconf mediawiki
 
 # Copy the code!
-COPY --chown=www-data:www-data ./ /var/www/html/w
+COPY --chown=www-data:www-data ./dist/ /var/www/html/w
 
 # Generate localization cache files
 # TODO could run mediawiki builds on a bigger machine and make use of more threads

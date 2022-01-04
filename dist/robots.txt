@@ -1,0 +1,24 @@
+# Observed as one of the heaviest crawlers when looking in logs
+# Also in Wikimedia robots.txt
+# http://mj12bot.com/
+User-agent: MJ12bot
+Disallow: /
+
+# Allow the Internet Archiver to index action=raw and thereby store the raw wikitext of pages
+# https://www.mediawiki.org/wiki/Manual:Robots.txt#Allow_indexing_of_raw_pages_by_the_Internet_Archiver
+User-agent: ia_archiver
+Allow: /*&action=raw
+
+# Allow
+User-agent: *
+Allow: /w/api.php?action=mobileview&
+Allow: /w/load.php?
+Disallow: /w/
+Disallow: /api/
+Disallow: /trap/
+Disallow: /wiki/Special:
+Disallow: /wiki/Spezial:
+Disallow: /wiki/Spesial:
+Disallow: /wiki/Special%3A
+Disallow: /wiki/Spezial%3A
+Disallow: /wiki/Spesial%3A
