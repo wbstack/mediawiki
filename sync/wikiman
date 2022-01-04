@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+docker build --tag wbstack/mediawiki/wikiman:0.0.1 --file ./sync/wikiman.Dockerfile ./sync/
+docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app wbstack/mediawiki/wikiman:0.0.1 python /app/sync/wikiman.py
