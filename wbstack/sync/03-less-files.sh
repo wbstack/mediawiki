@@ -4,15 +4,15 @@
 echo "Deleting a bunch of not needed files...."
 
 # Core specific
-find ./ -mindepth 1 -regex '^./\(tests\|docs\)\(/.*\)?' -delete
-find ./ -mindepth 1 -path './extensions/README' -delete -o -path './skins/README' -delete
+find ./dist -mindepth 1 -regex '^./dist/\(tests\|docs\)\(/.*\)?' -delete
+find ./dist -mindepth 1 -path './dist/extensions/README' -delete -o -path './dist/skins/README' -delete
 
 # General stuff
-find ./ -mindepth 1 -regex '^./\(extensions\|skins\)/\w+/\(tests\|.phan\|.storybook\|.vscode\|.gitignore\|.eslintrc.json\|.gitreview\|.phpcs.xml\|Gruntfile.js\|Doxyfile\|.stylelintrc.json\|.rubocop\(_todo\)?.yml\)\(/.*\)?' -delete
+find ./dist -mindepth 1 -regex '^./dist/\(extensions\|skins\)/\w+/\(tests\|.phan\|.storybook\|.vscode\|.gitignore\|.eslintrc.json\|.gitreview\|.phpcs.xml\|Gruntfile.js\|Doxyfile\|.stylelintrc.json\|.rubocop\(_todo\)?.yml\)\(/.*\)?' -delete
 
 # Wikibase packaged vendor and composer lock (TODO do this for all skins and extensions?)
-find ./ -mindepth 1 -regex '^./extensions/Wikibase/\(vendor\|composer.lock\)\(/.*\)?' -delete
+find ./dist -mindepth 1 -regex '^./dist/extensions/Wikibase/\(vendor\|composer.lock\)\(/.*\)?' -delete
 
 # Extension specific
-find ./ -mindepth 1 -regex '^./extensions/Wikibase/\(\(data-access\|repo\|client\|lib\)/\)?\(build\|tests\|.phan\|.storybook\|.vscode\)\(/.*\)?' -delete
-find ./ -mindepth 1 -regex '^./extensions/WikibaseManifest/\(infrastructure\)\(/.*\)?' -delete
+find ./dist -mindepth 1 -regex '^./dist/extensions/Wikibase/\(\(data-access\|repo\|client\|lib\)/\)?\(build\|tests\|.phan\|.storybook\|.vscode\)\(/.*\)?' -delete
+find ./dist -mindepth 1 -regex '^./dist/extensions/WikibaseManifest/\(infrastructure\)\(/.*\)?' -delete
