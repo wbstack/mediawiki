@@ -24,4 +24,5 @@ jobs:
         pip install pylint
 
     - name: Lint wbstack directory
-      run: find ./wbstack -type f -name "*.py" -not -path "./wbstack/sync/.tmp/*" | xargs pylint
+      working-directory: ./wbstack
+      run: find ./ -type f -name "*.py" -not -path "./sync/.tmp/*" | xargs pylint

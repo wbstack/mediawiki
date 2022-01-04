@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
-from github import Github
 import os
 from typing import Any, Dict, List
+from github import Github
 import yaml
 
 BASEDIR = os.path.dirname(os.path.realpath(__file__))
 SOURCE_YAMLFILE = f"{BASEDIR}/wikiman.yaml"
 DESTINATION_YAMLFILE = f"{BASEDIR}/pacman.yaml"
-GITHUB_TOKEN = f"{BASEDIR}/.github"
+GITHUB_TOKEN_FILE = f"{BASEDIR}/.github"
 
 codebases = {}
 with open(SOURCE_YAMLFILE, "r") as filehandler:
@@ -21,11 +21,11 @@ mediawiki_version = codebases['mediawikiVersion']
 extensions = codebases['extensions']
 skins = codebases['skins']
 
-token = None
-with open(GITHUB_TOKEN, "r") as filehandler:
-    token = filehandler.readline().strip()
+TOKEN = None
+with open(GITHUB_TOKEN_FILE, "r") as filehandler:
+    TOKEN = filehandler.readline().strip()
 
-github = Github(token)
+githubClient = Github(TOKEN)
 
 def get_mediawiki_branch_from_version(version: str) -> str:
     return f"REL{version.replace('.', '_')}"
@@ -41,15 +41,15 @@ def make_artifact_entry(details: Dict[str, str]) -> Dict[str, Any]:
     name = details['name']
 
     if "repoName" in details.keys():
-        artifactURL = get_github_url_from_ref(github, details['repoRef'], details['repoName'])
+        artifact_url = get_github_url_from_ref(githubClient, details['repoRef'], details['repoName'])
     elif "url" in details.keys():
-        artifactURL = details['url']
+        artifact_url = details['url']
     else:
         raise ValueError(f"'repoName' or 'url' key not specified for '{name}' in '{SOURCE_YAMLFILE}'")
 
     return {
         'name': name,
-        'artifactUrl': artifactURL,
+        'artifactUrl': artifact_url,
         'artifactLevel': 1,
         'destination': details['destination'],
     }
@@ -62,10 +62,10 @@ output: List[Dict] = [make_artifact_entry({
     'destination': './'
     })]
 
-def merge_dicts(a: Dict, b: Dict) -> Dict:
-    c = dict(a)
-    c.update(b)
-    return c
+def merge_dicts(dict_a: Dict, dict_b: Dict) -> Dict:
+    to_return = dict(dict_a)
+    to_return.update(dict_b)
+    return to_return
 
 output += [
     make_artifact_entry( merge_dicts(ext,{'destination': f"./extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}) )
