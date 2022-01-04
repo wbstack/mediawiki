@@ -3,7 +3,12 @@
 BASEDIR=$(cd `dirname "$0"` && pwd)
 YAMLFILE="${BASEDIR}/pacman.yaml"
 REPO_DIR="${BASEDIR}/../../"
-TEMPORARY_DIR="${BASEDIR}/.tmp/"
+TEMPORARY_DIR=$(mktemp -d)/
+
+# .tmp was removed so that the files in the repo dir were cleaner.
+# This was changed in January 2022, we could remove this cleanup in the future.
+OLD_TEMPORARY_DIR="${BASEDIR}/.tmp"
+rm -rf $OLD_TEMPORARY_DIR
 
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     # download and extract each artifact asynchronously
