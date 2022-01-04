@@ -46,7 +46,7 @@ $BASEDIR/sync/pacman
 $BASEDIR/sync/03-less-files.sh
 
 echo "Copy required files into the 'dist' dir"
-cp -r dist-persist/* ./dist/
+cp -v -r ./dist-persist/* ./dist/
 
 # Does a composer install
 $BASEDIR/sync/04-docker-composer.sh
