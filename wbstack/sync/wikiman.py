@@ -62,18 +62,13 @@ output: List[Dict] = [make_artifact_entry({
     'destination': './dist'
     })]
 
-def merge_dicts(dict_a: Dict, dict_b: Dict) -> Dict:
-    to_return = dict(dict_a)
-    to_return.update(dict_b)
-    return to_return
-
 output += [
-    make_artifact_entry( merge_dicts(ext,{'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}) )
+    make_artifact_entry( {**ext,'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)} )
     for ext in extensions
     ]
 
 output += [
-    make_artifact_entry( merge_dicts(skin,{'destination': f"./dist/skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)}) )
+    make_artifact_entry( {**skin,'destination': f"./dist/skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)} )
     for skin in skins
     ]
 
