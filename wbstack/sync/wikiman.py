@@ -59,7 +59,7 @@ output: List[Dict] = [make_artifact_entry({
     'name': 'mediawiki',
     'repoName': 'wikimedia/mediawiki',
     'repoRef': codebases.get('mediawikiRepoRef', default_branch),
-    'destination': './'
+    'destination': './dist'
     })]
 
 def merge_dicts(a: Dict, b: Dict) -> Dict:
@@ -68,12 +68,12 @@ def merge_dicts(a: Dict, b: Dict) -> Dict:
     return c
 
 output += [
-    make_artifact_entry( merge_dicts(ext,{'destination': f"./extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}) )
+    make_artifact_entry( merge_dicts(ext,{'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}) )
     for ext in extensions
     ]
 
 output += [
-    make_artifact_entry( merge_dicts(skin,{'destination': f"./skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)}) )
+    make_artifact_entry( merge_dicts(skin,{'destination': f"./dist/skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)}) )
     for skin in skins
     ]
 
