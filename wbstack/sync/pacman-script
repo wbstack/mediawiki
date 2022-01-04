@@ -29,7 +29,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
     temporaryExtraction="${TEMPORARY_DIR}${name}-extracted/."
-    targetDestination="$(realpath ${REPO_DIR}${destination})"
+    targetDestination="$(realpath -m ${REPO_DIR}${destination})"
     echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
     cp -fa "${temporaryExtraction}" "${targetDestination}"
 done
