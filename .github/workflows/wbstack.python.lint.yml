@@ -23,8 +23,8 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
 
-    - name: Install wbstack Requirements
-      working-directory: ./wbstack
+    - name: Install wbstack/sync Requirements
+      working-directory: ./wbstack/sync
       run: python -m pip install --no-cache-dir -r requirements.txt
 
     - name: Lint wbstack directory
