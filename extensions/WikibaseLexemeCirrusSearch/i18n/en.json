@@ -1,7 +1,0 @@
-{
-	"@metadata": {
-		"authors": []
-	},
-	"wikibaselexemecirrus-desc": "WikibaseLexeme extension for using CirrusSearch functionality",
-	"wikibaselexemecirrus-rescore-profile-prefix": "Rescore profile for prefix (completion) search"
-}

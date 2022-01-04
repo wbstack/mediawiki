@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"WikiPhoenix"
-		]
-	},
-	"templatesandbox-apihelp-contentmodel": "Innehållsmodell för <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Innehållsformat för <var>$1templatesandboxtext</var>."
-}

@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Умар"
-		]
-	},
-	"apierror-cirrus-requesttoolong": "Лахаран дехар максимум магийначул деха ду. ($1 > $2)"
-}

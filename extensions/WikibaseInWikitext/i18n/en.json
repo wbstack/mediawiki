@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Addshore"
-		]
-	},
-	"wikibaseInWikitext-desc": "Extension allowing use of <sparql> in wikitext for SPARQL queries."
-}

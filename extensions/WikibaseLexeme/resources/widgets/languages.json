@@ -1,4 +1,0 @@
-{
-	"//": "This file is only used by tests. In production `languages.json` is created dynamically by ResourceLoader",
-	"lexemeTermLanguages": [ "en" ]
-}

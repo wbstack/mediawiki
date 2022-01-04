@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"BaRaN6161 TURK",
-			"Dinhxuanduyet"
-		]
-	},
-	"is-emailbody": "Xin chào,\n\n{{GENDER:$1|$1}} đã mời bạn đăng ký với {{SITENAME}}.\nBạn có thể đăng ký tại $2"
-}

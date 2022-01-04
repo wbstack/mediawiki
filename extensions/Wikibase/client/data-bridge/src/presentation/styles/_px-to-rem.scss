@@ -1,4 +1,0 @@
-@function px-to-rem( $size-px ) {
-	// 16px is the reference font size
-	@return ( $size-px / 16px ) * 1rem;
-}

@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Artsiom91"
-		]
-	},
-	"codemirror-desc": "Забяспечвае вылучэнне колерам сінтаксісу ў рэдактары вікі-тэкста",
-	"codemirror-toggle-label": "Выдзяленне сінтаксісу"
-}

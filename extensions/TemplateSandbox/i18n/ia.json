@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"McDutchie"
-		]
-	},
-	"templatesandbox-fail-post": "<em>A causa de un perdita de datos de session, le previsualisation es celate como precaution contra attaccos con JavaScript.</em>\n\n<strong>Si isto es un tentativa de previsualisation legitime, per favor essaya lo de novo.</strong>\nSi illo ancora non functiona, essaya [[Special:UserLogout|clauder le session]] e aperir un nove session.",
-	"templatesandbox-fail-post-anon": "<em>Perque tu non ha aperite session, le previsualisation es celate como precaution contra attaccos con JavaScript.</em>\n\n<strong>Si isto es un tentativa de previsualisation legitime, per favor [[Special:UserLogin|aperi session]] e essaya lo de novo.</strong>"
-}

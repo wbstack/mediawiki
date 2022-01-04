@@ -1,7 +1,0 @@
-{
-	"@metadata": {
-		"authors": []
-	},
-	"wikibaselexemecirrus-desc": "{{desc|name=WikibaseLexemeCirrusSearch|url=https://www.mediawiki.org/wiki/Extension:WikibaseLexemeCirrusSearch}}",
-	"wikibaselexemecirrus-rescore-profile-prefix": "Rescoring profile for prefix (completion) search"
-}

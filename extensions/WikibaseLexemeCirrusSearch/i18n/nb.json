@@ -1,9 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Jon Harald Søby"
-		]
-	},
-	"wikibaselexemecirrus-desc": "WikibaseLexeme-utvidelse for å bruke CirrusSearch-funksjonalitet",
-	"wikibaselexemecirrus-rescore-profile-prefix": "Roscore-profil for prefikssøk (fullføring)"
-}
