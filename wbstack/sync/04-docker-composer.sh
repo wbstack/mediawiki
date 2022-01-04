@@ -18,6 +18,7 @@ if [ "${ALSO_COMPOSER_UPDATE}" = "1" ]; then
       --volume $SCRIPT_COMPOSER_CACHE:/tmp/cache \
       --entrypoint composer -w /app \
       docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 update --no-dev --no-progress --optimize-autoloader
+    cp dist/composer.lock dist-persist/
 else
     echo "SKIPPING: composer update (As you didn't request it)"
 fi;

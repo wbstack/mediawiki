@@ -47,7 +47,7 @@ $BASEDIR/sync/03-less-files.sh
 
 # TODO: Do this better / decide where these files should live and how they should be copied into 'dist'
 echo "Copy required files into the 'dist' dir"
-cp -t ./dist/ composer.*.json composer.lock health.php LocalSettings.php robots.txt
+cp dist-persist/* ./dist/
 mkdir -p ./dist/wbstack
 cp -r -t ./dist/wbstack/ ./wbstack/data ./wbstack/src
 
