@@ -28,4 +28,4 @@ jobs:
       run: python -m pip install --no-cache-dir -r requirements.txt
 
     - name: Lint all python files
-      run: find ./ -type f -name "*.py" | xargs pylint
+      run: find ./ -type f -name "*.py" -not -path "./dist/*" | xargs pylint
