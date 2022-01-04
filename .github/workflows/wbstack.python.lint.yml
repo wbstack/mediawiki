@@ -29,4 +29,4 @@ jobs:
 
     - name: Lint wbstack directory
       working-directory: ./wbstack
-      run: find ./ -type f -name "*.py" -not -path "./sync/.tmp/*" | xargs pylint
+      run: find ./ -type f -name "*.py" | xargs pylint
