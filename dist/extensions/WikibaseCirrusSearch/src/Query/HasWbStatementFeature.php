@@ -1,0 +1,266 @@
+<?php
+
+namespace Wikibase\Search\Elastic\Query;
+
+use CirrusSearch\Parser\AST\KeywordFeatureNode;
+use CirrusSearch\Query\Builder\QueryBuildingContext;
+use CirrusSearch\Query\FilterQueryFeature;
+use CirrusSearch\Query\SimpleKeywordFeature;
+use CirrusSearch\Search\SearchContext;
+use CirrusSearch\WarningCollector;
+use Elastica\Query\AbstractQuery;
+use Elastica\Query\BoolQuery;
+use Elastica\Query\Exists;
+use Elastica\Query\Match;
+use Elastica\Query\Prefix;
+use Wikibase\DataModel\Entity\NumericPropertyId;
+use Wikibase\Search\Elastic\Fields\StatementsField;
+
+/**
+ * Handles the search keyword 'haswbstatement:'
+ *
+ * Allows the user to search for pages/items that have wikibase properties or statements associated
+ * with them.
+ *
+ * If a file page has ANY statement about property 'P180' ('depicts') then it can be found
+ * by including 'haswbstatement:P180' in the search query.
+ *
+ * If a file page has the statement 'P180=Q527' (meaning 'depicts sky') associated
+ * with it then it can be found by including 'haswbstatement:P180=Q527' in the
+ * search query.
+ *
+ * If a file page has the statement 'P2014=79802' (meaning 'MoMA artwork id 79802')
+ * associated with it then it can be found by including 'haswbstatement:P2014=79802' in the
+ * search query.
+ *
+ * A '*' at the end of a 'haswbstatement' string triggers a prefix search. If different file pages
+ * have the statements:
+ *	- P180=Q146[P462=Q23445] ('depicts cat, color black')
+ * 	- P180=Q146[P462=Q23444] ('depicts cat, color white')
+ * ... then both those pages will be found if 'P180=Q146[P462=*' is
+ * included in the search query.
+ *
+ * A '*' as the statement triggers existence search. Any page containing any statement will
+ * be returned.
+ *
+ * Statements can be combined using logical OR by separating them with a | character in a single
+ * haswbstatement query e.g. 'haswbstatement:P999=Q888|P999=Q777'
+ *
+ * Statements can be combined using logical AND by using two separate haswbstatement queries e.g.
+ * 'haswbstatement:P999=Q888 haswbstatement:P999=Q777'
+ *
+ *
+ * Note that NOT ALL STATEMENTS ARE INDEXED. Searching for a statement about a property that has
+ * not been indexed will give an empty result set.
+ *
+ * @uses CirrusSearch
+ * @see https://phabricator.wikimedia.org/T190022
+ */
+class HasWbStatementFeature extends SimpleKeywordFeature implements FilterQueryFeature {
+
+	/**
+	 * @return string[]
+	 */
+	protected function getKeywords() {
+		return [ 'haswbstatement' ];
+	}
+
+	/**
+	 * @param SearchContext $context
+	 * @param string $key The keyword
+	 * @param string $value The value attached to the keyword with quotes stripped
+	 * @param string $quotedValue The original value in the search string, including quotes if used
+	 * @param bool $negated Is the search negated? Not used to generate the returned AbstractQuery,
+	 *  that will be negated as necessary. Used for any other building/context necessary.
+	 * @return array Two element array, first an AbstractQuery or null to apply to the
+	 *  query. Second a boolean indicating if the quotedValue should be kept in the search
+	 *  string.
+	 */
+	protected function doApply( SearchContext $context, $key, $value, $quotedValue, $negated ) {
+		$queries = $this->parseValue(
+			$key,
+			$value,
+			$quotedValue,
+			'',
+			'',
+			$context
+		);
+		if ( count( $queries ) == 0 ) {
+			$context->setResultsPossible( false );
+			return [ null, false ];
+		}
+
+		return [ $this->combineQueries( $queries ), false ];
+	}
+
+	/**
+	 * Builds an OR between many statements about the wikibase item
+	 *
+	 * @param string[][] $queries queries to combine. See parseValue() for fields.
+	 * @return \Elastica\Query\AbstractQuery
+	 */
+	private function combineQueries( array $queries ) {
+		$return = new BoolQuery();
+		foreach ( $queries as $query ) {
+			if ( $query['class'] === Prefix::class ) {
+				$return->addShould( new Prefix( [
+					$query['field'] =>
+						[
+							'value' => $query['string'],
+							'rewrite' => 'top_terms_1024'
+						]
+				] ) );
+			} elseif ( $query['class'] === Match::class ) {
+				$return->addShould( new Match(
+					$query['field'],
+					[ 'query' => $query['string'] ]
+				) );
+			} elseif ( $query['class'] === Exists::class ) {
+				// In a boolean 'OR' having an existence check negates the
+				// need for the remaining queries.
+				return new Exists( $query['field'] );
+			}
+		}
+		return $return;
+	}
+
+	/**
+	 * @param string $key
+	 * @param string $value
+	 * @param string $quotedValue
+	 * @param string $valueDelimiter
+	 * @param string $suffix
+	 * @param WarningCollector $warningCollector
+	 * @return array [
+	 * 		[
+	 * 			'class' => \Elastica\Query class name to be used to construct the query,
+	 * 			'field' => document field to run the query against,
+	 * 			'string' => string to search for
+	 * 		],
+	 * 		...
+	 * 	]
+	 */
+	public function parseValue(
+		$key,
+		$value,
+		$quotedValue,
+		$valueDelimiter,
+		$suffix,
+		WarningCollector $warningCollector
+	) {
+		$queries = [];
+		$statementStrings = explode( '|', $value );
+		foreach ( $statementStrings as $statementString ) {
+			if ( !$this->isStatementStringValid( $statementString ) ) {
+				// TODO: Add warning to avoid unexpected behaviour
+				continue;
+			}
+			if ( $this->statementContainsOnlyWildcard( $statementString ) ) {
+				$queries[] = [
+					'class' => Exists::class,
+					'field' => StatementsField::NAME
+				];
+				continue;
+			}
+			if ( $this->statementContainsPropertyOnly( $statementString ) ) {
+				$queries[] = [
+					'class' => Match::class,
+					'field' => StatementsField::NAME . '.property',
+					'string' => $statementString,
+				];
+				continue;
+			}
+			if ( $this->statementEndsWithWildcard( $statementString ) ) {
+				$queries[] = [
+					'class' => Prefix::class,
+					'field' => StatementsField::NAME,
+					'string' => substr( $statementString, 0, strlen( $statementString ) - 1 ),
+				];
+				continue;
+			}
+			$queries[] = [
+				'class' => Match::class,
+				'field' => StatementsField::NAME,
+				'string' => $statementString,
+			];
+		}
+		if ( count( $queries ) == 0 ) {
+			$warningCollector->addWarning(
+				'wikibasecirrus-haswbstatement-feature-no-valid-statements',
+				$key
+			);
+		}
+		return $queries;
+	}
+
+	/**
+	 * Check that a statement string is valid. A valid string is a P-id
+	 * optionally suffixed with an equals sign.
+	 *
+	 * The following strings are valid:
+	 * P2014=79802
+	 * P999
+	 *
+	 * The following strings are invalid:
+	 * PrefixedId:P123=Q537
+	 * PA=Q888
+	 * PF=1234567
+	 *
+	 * @param string $statementString
+	 * @return bool
+	 */
+	private function isStatementStringValid( $statementString ) {
+		if ( $this->statementContainsOnlyWildcard( $statementString ) ) {
+			// Simpler than integrating into basically unrelated regex
+			return true;
+		}
+
+		//Strip delimiters, anchors and pattern modifiers from NumericPropertyId::PATTERN
+		$propertyIdPattern = preg_replace(
+			'/([^\sa-zA-Z0-9\\\])(\^|\\\A)?(.*?)(\$|\\\z|\\\Z)?\\1[a-zA-Z]*/',
+			'$3',
+			NumericPropertyId::PATTERN
+		);
+		$validStatementStringPattern = '/^' .
+			$propertyIdPattern .
+			'(' . StatementsField::STATEMENT_SEPARATOR . '|$)' .
+			'/i';
+
+		return (bool)preg_match(
+			$validStatementStringPattern,
+			$statementString
+		);
+	}
+
+	private function statementContainsPropertyOnly( $statementString ) {
+		if ( strpos( $statementString, '=' ) === false ) {
+			return true;
+		}
+		return false;
+	}
+
+	private function statementEndsWithWildcard( $statementString ) {
+		if ( substr( $statementString, -1 ) == '*' ) {
+			return true;
+		}
+		return false;
+	}
+
+	private function statementContainsOnlyWildcard( $statementString ) {
+		return $statementString === '*';
+	}
+
+	/**
+	 * @param KeywordFeatureNode $node
+	 * @param QueryBuildingContext $context
+	 * @return AbstractQuery|null
+	 */
+	public function getFilterQuery( KeywordFeatureNode $node, QueryBuildingContext $context ) {
+		$statements = $node->getParsedValue();
+		if ( $statements === [] ) {
+			return null;
+		}
+		return $this->combineQueries( $statements );
+	}
+
+}

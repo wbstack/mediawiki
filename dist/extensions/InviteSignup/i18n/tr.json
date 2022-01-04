@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"BaRaN6161 TURK",
+			"MuratTheTurkish"
+		]
+	},
+	"invitesignup": "İnsanları bu vikiye davet et",
+	"is-desc": "E-posta davetleri gönderin",
+	"is-tableth-date": "Tarih",
+	"is-tableth-email": "E-posta",
+	"is-tableth-inviter": "Davetçi",
+	"is-tableth-signup": "Kaydoldu",
+	"is-tableth-groups": "Gruplar",
+	"is-add": "Ekle",
+	"is-delete": "Sil",
+	"is-invalidemail": "<b>$1</b> geçerli bir e-posta adresi değil.",
+	"is-emailsubj": "{{SITENAME}} topluluğuna davet edildiniz",
+	"is-emailbody": "Merhaba,\n\n{{GENDER:$1|$1}} sizi {{SITENAME}} sitesine kaydolmaya davet etti.\n$2 adresinde kaydolabilirsiniz",
+	"right-invitesignup": "Kullanıcıları kaydolmaya davet et",
+	"action-invitesignup": "kullanıcıları bu siteye kaydolmaya davet et"
+}

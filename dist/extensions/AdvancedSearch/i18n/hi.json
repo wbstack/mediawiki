@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Abijeet Patro",
+			"Bhatakati aatma",
+			"Rajatkatiyar10",
+			"Sachinkatiyar",
+			"Sfic",
+			"Smtchahal"
+		]
+	},
+	"advancedsearch-field-filetype": "फ़ाइल का प्रकार:",
+	"advancedsearch-placeholder-exact-text": "\nसटीक शब्दों को उद्धरण में रखें: \"बिल्ली बकरी को प्यार करती है\"",
+	"advancedsearch-inlanguage-default": "भाषा चुनें",
+	"advancedsearch-filetype-section-video": "वीडियो का फ़ारमैट",
+	"advancedsearch-filetype-section-document": "दस्तावेज़ का फ़ारमैट",
+	"advancedsearch-filetype-bitmap": "छवि",
+	"advancedsearch-filetype-audio": "ऑडियो",
+	"advancedsearch-filetype-video": "वीडियो",
+	"advancedsearch-filetype-office": "कार्यालय",
+	"advancedsearch-namespaces-remember": "चुनाव को भविष्य की खोजों के लिए याद रखें",
+	"advancedsearch-namespaces-preset-all": "सभी",
+	"advancedsearch-namespaces-preset-default": "डिफ़ॉल्ट",
+	"advancedsearch-namespaces-preset-general-help": "सामान्य मदद",
+	"advancedsearch-namespaces-preset-discussion": "चर्चा",
+	"advancedsearch-namespaces-placeholder": "नामस्थान जोड़ें"
+}

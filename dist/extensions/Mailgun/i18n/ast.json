@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"mailgun-desc": "Unviar correos electrónicos per aciu del serviciu API Mailgun dende Mediawiki"
+}

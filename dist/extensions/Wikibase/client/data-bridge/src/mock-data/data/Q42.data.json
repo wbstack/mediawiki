@@ -1,0 +1,174 @@
+{
+	"entities": {
+		"Q42": {
+			"pageid": 138,
+			"ns": 0,
+			"title": "Q42",
+			"lastrevid": 984899757,
+			"modified": "2019-07-24T13:56:29Z",
+			"type": "item",
+			"id": "Q42",
+			"labels": {
+				"en": {
+					"language": "en",
+					"value": "Douglas Adams"
+				}
+			},
+			"descriptions": {
+				"en": {
+					"language": "en",
+					"value": "British author and humorist"
+				}
+			},
+			"aliases": {
+				"en": [
+					{
+						"language": "en",
+						"value": "Douglas Noel Adams"
+					},
+					{
+						"language": "en",
+						"value": "Douglas Noël Adams"
+					},
+					{
+						"language": "en",
+						"value": "Douglas N. Adams"
+					}
+				]
+			},
+			"claims": {
+				"P373": [
+					{
+						"mainsnak": {
+							"snaktype": "value",
+							"property": "P373",
+							"datavalue": {
+								"value": "initialValue",
+								"type": "string"
+							},
+							"datatype": "string"
+						},
+						"type": "statement",
+						"id": "Q42$ebd08d4c-4d75-9ef2-5f33-17025cfa31d8",
+						"rank": "normal",
+						"references": [
+							{
+								"hash": "fbcee7c67a5b160380de28ef83a92399c0fdf264",
+								"snaks": {
+									"P373": [
+										{
+											"snaktype": "value",
+											"property": "P373",
+											"datavalue": {
+												"value": "string ref 1",
+												"type": "string"
+											},
+											"datatype": "string"
+										}
+									]
+								},
+								"snaks-order": [
+									"P373"
+								]
+							},
+							{
+								"hash": "3b0f0882a9dce40f8934cf29610f831a08466af1",
+								"snaks": {
+									"P373": [
+										{
+											"snaktype": "value",
+											"property": "P373",
+											"datavalue": {
+												"value": "string ref 2",
+												"type": "string"
+											},
+											"datatype": "string"
+										}
+									],
+									"P9": [
+										{
+											"snaktype": "value",
+											"property": "P9",
+											"datavalue": {
+												"value": {
+													"entity-type": "item",
+													"numeric-id": 23,
+													"id": "Q23"
+												},
+												"type": "wikibase-entityid"
+											},
+											"datatype": "wikibase-item"
+										}
+									]
+								},
+								"snaks-order": [
+									"P373",
+									"P9"
+								]
+							}
+						]
+					}
+				],
+				"P25": [
+					{
+						"mainsnak": {
+							"snaktype": "value",
+							"property": "P25",
+							"datavalue": {
+								"value": "https://example.com",
+								"type": "string"
+							},
+							"datatype": "url"
+						},
+						"type": "statement",
+						"id": "Q42$0be0afef-4ae9-6b38-86db-953a58192d08",
+						"rank": "normal"
+					}
+				],
+				"P21": [
+					{
+						"mainsnak": {
+							"snaktype": "novalue",
+							"property": "P21",
+							"datatype": "string"
+						},
+						"type": "statement",
+						"id": "Q42$e373086c-46ff-b4ab-25c1-2666a2847eb5",
+						"rank": "normal"
+					}
+				],
+				"P22": [
+					{
+						"mainsnak": {
+							"snaktype": "value",
+							"property": "P22",
+							"datavalue": {
+								"value": "foo",
+								"type": "string"
+							},
+							"datatype": "string"
+						},
+						"type": "statement",
+						"id": "Q42$abd58935-403f-d1f6-cc1e-d931fef2fc59",
+						"rank": "normal"
+					},
+					{
+						"mainsnak": {
+							"snaktype": "value",
+							"property": "P22",
+							"datavalue": {
+								"value": "bar",
+								"type": "string"
+							},
+							"datatype": "string"
+						},
+						"type": "statement",
+						"id": "Q42$b0947a79-4a77-c392-67e7-04a430d4a759",
+						"rank": "normal"
+					}
+				]
+			},
+			"sitelinks": {}
+		}
+	}
+}

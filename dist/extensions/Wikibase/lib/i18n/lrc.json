@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beyronvan",
+			"Bonevarluri",
+			"Mogoeilor"
+		]
+	},
+	"wikibase-deletedentity-item": "چی پاکسا بیه",
+	"wikibase-deletedentity-query": "پرس و جور پاکسا بیه",
+	"wikibase-error-unexpected": "خطا:$1.",
+	"wikibase-quantitydetails-amount": "انازه",
+	"wikibase-timedetails-time": "گات",
+	"wikibase-timedetails-timezone": "راساگه گاتی",
+	"wikibase-timedetails-calendar": "تقویم",
+	"wikibase-timedetails-before": "دما",
+	"wikibase-timedetails-after": "نها",
+	"wikibase-globedetails-longitude": "درازا ولاتشناسی",
+	"wikibase-globedetails-latitude": "پئنا ولاتشناسی",
+	"wikibase-sitelinks-wikipedia": "ڤیکی پدیا",
+	"wikibase-snakview-snaktypeselector-somevalue": "ارزایشت نادیار",
+	"wikibase-snakview-snaktypeselector-novalue": "بی ارزشت",
+	"datatypes-type-wikibase-item": "قلم",
+	"datatypes-type-commonsMedia": "فایل پرنمون رسانه",
+	"wikibase-time-precision-Gannum": "د $1 بیلیون سال",
+	"wikibase-time-precision-Mannum": "د $1 میلیون سال",
+	"wikibase-time-precision-annum": "د سالیا $1",
+	"wikibase-entity-summary-wbsetitem": "یه گل قلم تازه دروس بیه",
+	"wikibase-entity-summary-wbcreateredirect": "واگردونی د $4 انجوم گرت",
+	"wikibase-entity-summary-wbsetreference": "میزونکاری یه گل سرچشمه",
+	"wikibase-entity-summary-clientsitelink-update": "بلگه د[$3] تا [$4] جا وه جا بیه",
+	"wikibase-item-summary-wbcreate-new": "یه گل قلم تازه دروس بیه",
+	"wikibase-item-summary-wbeditentity": "یه گل قلم تازه دروس بیه",
+	"wikibase-item-summary-wbeditentity-create": "یه گل قلم تازه دروس بیه",
+	"wikibase-item-summary-wbeditentity-update": "یه گل قلم آلشت دئه بیه",
+	"wikibase-item-summary-wbeditentity-override": "یه گل قلم پاک بیه"
+}

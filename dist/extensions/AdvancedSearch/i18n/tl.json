@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Brazal.dang",
+			"Emem.calist",
+			"Jojit fb",
+			"Leeheonjin"
+		]
+	},
+	"advancedsearch-optgroup-structure": "Kayarian",
+	"advancedsearch-field-plain": "Ang salitang ito:",
+	"advancedsearch-field-or": "Isa sa mga salitang iyon:",
+	"advancedsearch-field-not": "Hindi ang salitang ito:",
+	"advancedsearch-field-subpageof": "Mga subpahina ng pahinang ito:",
+	"advancedsearch-field-intitle": "Naglalaman ang pamagat pampahina ng:",
+	"advancedsearch-field-deepcategory": "Pahina sa kategoriyang ito:",
+	"advancedsearch-field-hastemplate": "Tanging mga pahina lang na may ganitong padron/suleras:",
+	"advancedsearch-field-filetype": "Uri ng file:",
+	"advancedsearch-field-filew": "Lapad ng talaksan sa piksel:",
+	"advancedsearch-field-fileh": "Taas ng talaksan sa piksel:",
+	"advancedsearch-sort-preview-last-edit-desc": "Baguhin ang petsa",
+	"advancedsearch-sort-preview-create-timestamp-desc": "Petsa ng paggawa"
+}

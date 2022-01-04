@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nuevo Paso",
+			"Priviet",
+			"Ykhwong",
+			"관인생략",
+			"렌즈",
+			"아라"
+		]
+	},
+	"templatesandbox": "틀 연습장",
+	"templatesandbox-desc": "연습장에서 틀을 포함하여 [[Special:TemplateSandbox|문서를 렌더합니다]]",
+	"templatesandbox-suffix": "연습장",
+	"templatesandbox-legend": "틀 연습장",
+	"templatesandbox-text": "적절한 연습장 접두어를 사용해 내 연습장 공간에 저장한 틀의 집합을 설정할 수 있습니다.\n예를 들어 {{ns:Template}}:테스트를 \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:테스트\"로 저장하고 미리 보려면 접두어로 \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\"를 사용하세요.",
+	"templatesandbox-prefix-label": "연습장 접두어:",
+	"templatesandbox-page-label": "문서 렌더:",
+	"templatesandbox-revid-label": "판 렌더:",
+	"templatesandbox-text-label": "위키텍스트 렌더:",
+	"templatesandbox-submit": "보기",
+	"templatesandbox-title-output": "틀 연습장: $1",
+	"templatesandbox-editform-legend": "이 틀과 함께 문서 미리 보기",
+	"templatesandbox-editform-page-label": "문서 제목",
+	"templatesandbox-editform-view-label": "미리 보기",
+	"templatesandbox-preview": "$2의 미리 보기",
+	"templatesandbox-previewnote": "'''이 화면은 [[:$1]]의 미리 보기입니다.'''\n편집한 내용은 아직 저장하지 않았습니다!",
+	"templatesandbox-invalid-title": "지정한 제목이 잘못되었습니다.",
+	"templatesandbox-title-not-exists": "지정한 제목이 존재하지 않습니다.",
+	"templatesandbox-revision-not-exists": "지정한 판이 존재하지 않습니다.",
+	"templatesandbox-invalid-prefix": "지정한 연습장 접두어가 잘못되었습니다.",
+	"templatesandbox-prefix-not-local": "지정한 연습장 접두어가 로컬이 아닙니다.",
+	"templatesandbox-page-or-revid": "문서 제목이나 판 ID 번호 중 하나를 입력해야 합니다.",
+	"templatesandbox-editform-need-template": "이 틀로 다른 문서를 미리 보려면 틀 이름을 지정해야 합니다.",
+	"templatesandbox-editform-need-title": "이 틀로 다른 문서를 미리 보려면 문서 제목을 지정해야 합니다.",
+	"templatesandbox-editform-invalid-template": "지정한 틀 이름이 유효하지 않습니다.",
+	"templatesandbox-editform-invalid-title": "미리 보기 위해 지정한 제목이 잘못되었습니다.",
+	"templatesandbox-editform-title-not-exists": "미리 보기 위해 지정한 제목이 존재하지 않습니다."
+}

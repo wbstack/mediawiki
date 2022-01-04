@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lam-ang",
+			"Macofe"
+		]
+	},
+	"templatesandbox": "Pagipadasan ti plantilia",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Agipaay ti panid]] a mangilak-am kadagiti plantilia manipud iti pagipadasan",
+	"templatesandbox-suffix": "pagipadasan",
+	"templatesandbox-legend": "Pagipadasan ti plantilia",
+	"templatesandbox-text": "Mabalinmo ti agpili kadagiti agasmang ti plantilia a naidulin iti pagipadasam babaen ti panagusar iti maitunos a pasakbay ti pagipadasan.\nKas pagarigan, no kayatmo a pagdasen ti bersion iti {{ns:Template}}:Subokan a naidulinmo a kas ti \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Subokan\", usaren ti \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" a kas ti pasakbay.",
+	"templatesandbox-prefix-label": "Pasakbay ti pagipadasan:",
+	"templatesandbox-page-label": "Ipaay ti panid:",
+	"templatesandbox-revid-label": "Ipaay ti rebision:",
+	"templatesandbox-text-label": "Ipaay ti teksto ti wiki:",
+	"templatesandbox-submit": "Kitaen",
+	"templatesandbox-title-output": "Pagipadasan ti plantilia: $1",
+	"templatesandbox-editform-legend": "Ipadas ti panid iti daytoy a plantilia",
+	"templatesandbox-editform-page-label": "Titulo ti panid",
+	"templatesandbox-editform-view-label": "Ipakita ti ipadas",
+	"templatesandbox-preview": "Pannakaipadas ti $2",
+	"templatesandbox-previewnote": "'''Laglagipem a daytoy ket panagipadas laeng ti [[:$1]].'''\nDagiti binalbaliwam ket saan pay a naidulin!",
+	"templatesandbox-invalid-title": "Imbalido ti nainaganan a titulo.",
+	"templatesandbox-title-not-exists": "Awan ti nainaganam a titulo.",
+	"templatesandbox-revision-not-exists": "Awan ti nainaganam a rebision.",
+	"templatesandbox-invalid-prefix": "Imbalido ti nainaganam a pasakbay ti pagipadasan.",
+	"templatesandbox-prefix-not-local": "Saan a lokal ti nainaganam a pasakbay ti pagipadasan.",
+	"templatesandbox-page-or-revid": "Nasken nga agikabilka ti titulo ti panid wenno numero ti ID ti rebision.",
+	"templatesandbox-fail-post": "<em>Gapu ti pannakapukaw ti datos ti sesion, nailemmeng ti panangipadas a kas panagaluad kadagiti panagraut iti JavaScript.</em>\n\n<strong>No daytoy ket lehitimado a panagipadas, pangngaasi a padasem manen.</strong>\nNo saan pay laeng a mabalin daytoy, padasem ti [[Special:UserLogout|rummuar]] ken sumrekka manen.",
+	"templatesandbox-fail-post-anon": "<em>Gapu ta saanka a nakastrek, nailemmeng ti panangipadas a kas panagaluad kadagiti panagraut iti JavaScript.</em>\n\n<strong>No daytoy ket lehitimado a panagipadas, pangngaasi a padasem manen, pangngaasi a [[Special:UserLogin|sumrek]] ken padasen manen.</strong>",
+	"templatesandbox-anon-limited-preview": "Nabaldado ti panangipadas dagiti panagbaliw iti JavaScript ken CSS no saan a nakastrek. No kayatmo ti mangipadas kadagiti kasta a panagbaliw, pangngaasi a [[Special:UserLogin|sumrek]] ken padasen manen.",
+	"templatesandbox-editform-need-template": "Ti mangipadas iti sabali a panid iti daytoy a plantilia, nasken a mainaganan ti nagan ti plantilia.",
+	"templatesandbox-editform-need-title": "Ti mangipadas iti sabali a panid iti daytoy a plantilia, nasken a mainaganan ti titulo ti panid.",
+	"templatesandbox-editform-invalid-template": "Imbalido ti nainaganam a nagan ti plantilia.",
+	"templatesandbox-editform-invalid-title": "Imbalido ti nainaganam a titulo para iti panagipadas.",
+	"templatesandbox-editform-title-not-exists": "Awan ti nainaganam a titulo para iti panagipadas."
+}

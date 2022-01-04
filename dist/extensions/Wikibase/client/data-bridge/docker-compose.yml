@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+  node:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: wmde/data-bridge-node
+    volumes:
+      - '~/.npm:/.npm'
+      - './../..:/src:ro' # grant read access to allow e.g. jest watch to detect changes
+      - '.:/src/client/data-bridge'
+    working_dir: /src/client/data-bridge
+    environment:
+      - NODE_ENV
+      - NODE_DEBUG
+      - DEBUG
+    security_opt:
+      - label=disable
+
+  csr:
+    extends:
+      service: node
+    ports:
+      - '${CSR_PORT}:8080'
+    command: 'npm run-script serve'
+
+  storybook:
+    extends:
+      service: node
+    ports:
+      - '${STORYBOOK_PORT}:${STORYBOOK_PORT}'
+    command: 'npm run storybook -- -p ${STORYBOOK_PORT} --ci'

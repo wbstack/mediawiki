@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Reptilien.19831209BE1",
+			"Srtxg"
+		]
+	},
+	"tooltip-t-wikibase": "Loyén eviè l’élément di référince des dnêyes raloyeyes",
+	"wikibase-comment-update": "Cayet {{WBREPONAME}} candjî",
+	"wikibase-dataitem": "Cayet di {{WBREPONAME}}",
+	"wikibase-editlinks": "Candjî les loyéns",
+	"wikibase-editlinkstitle": "Candjî les loyéns eturlingaedje",
+	"wikibase-linkitem-addlinks": "Radjouter des hårdêyes",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Catchî",
+	"wikibase-rc-hide-wikidata-show": "Mostrer",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "Candjmint so {{WBREPONAME}}",
+	"wikibase-otherprojects": "Dins d’&nbsp;ôtes pordjets"
+}

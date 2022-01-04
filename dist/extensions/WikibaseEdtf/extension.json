@@ -1,0 +1,69 @@
+{
+	"name": "Wikibase EDTF",
+	"type": "wikibase",
+
+	"version": "1.2.0",
+
+	"author": [
+		"[https://www.EntropyWins.wtf/mediawiki Jeroen De Dauw]",
+		"[https://Professional.Wiki/ Professional.Wiki]"
+	],
+
+	"license-name": "GPL-2.0-or-later",
+
+	"url": "https://github.com/ProfessionalWiki/WikibaseEdtf",
+
+	"descriptionmsg": "wbedtf-desc",
+
+	"requires": {
+		"MediaWiki": ">= 1.35.0",
+		"extensions": {
+			"WikibaseRepository": "*"
+		}
+	},
+
+	"MessagesDirs": {
+		"WikibaseEDTF": [
+			"i18n"
+		]
+	},
+
+	"AutoloadNamespaces": {
+		"Wikibase\\EDTF\\": "src/",
+		"Wikibase\\EDTF\\Tests\\": "tests/php/"
+	},
+
+	"callback": "Wikibase\\EDTF\\HookHandlers::onExtensionRegistration",
+
+	"Hooks": {
+		"WikibaseRepoDataTypes": "Wikibase\\EDTF\\HookHandlers::onWikibaseRepoDataTypes",
+		"WikibaseClientDataTypes": "Wikibase\\EDTF\\HookHandlers::onWikibaseClientDataTypes"
+	},
+
+	"config": {
+	},
+
+	"ResourceFileModulePaths": {
+		"localBasePath": "resources",
+		"remoteExtPath": "WikibaseEdtf/resources"
+	},
+
+	"ResourceModules": {
+		"jquery.valueview.experts.edtf": {
+			"styles": [
+				"EDTF.css"
+			],
+			"scripts": [
+				"EDTF.expert.js"
+			],
+			"dependencies": [
+				"jquery.event.special.eachchange",
+				"jquery.valueview.experts.StringValue",
+				"jquery.valueview.Expert"
+			],
+			"targets": [ "desktop", "mobile" ]
+		}
+	},
+
+	"manifest_version": 2
+}

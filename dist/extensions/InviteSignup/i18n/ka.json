@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"David1010"
+		]
+	},
+	"invitesignup": "ხალხის მოწვევა ამ ვიკიში",
+	"is-desc": "მოსაწვევების გაგზავნა ელ. ფოსტით",
+	"is-tableth-date": "თარიღი",
+	"is-tableth-email": "ელ. ფოსტა",
+	"is-tableth-inviter": "მომწვევი",
+	"is-tableth-signup": "რეგისტრირებული",
+	"is-tableth-groups": "ჯგუფები",
+	"is-add": "დამატება",
+	"is-delete": "წაშლა",
+	"is-invalidemail": "<b>$1</b> არ არის სწორი ელ. ფოსტის მისამართი.",
+	"is-emailsubj": "თქვენ ხართ მოწვეული შეუერთდეთ პროექტს {{SITENAME}}",
+	"right-invitesignup": "ახალი მოხმარებლების მოწვევა",
+	"action-invitesignup": "მოსაწვევების გაგზავნა ახალი მოხმარებლებისათვის"
+}

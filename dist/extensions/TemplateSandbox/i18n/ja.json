@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kkairri",
+			"Macofe",
+			"Shirayuki",
+			"Yusuke1109"
+		]
+	},
+	"templatesandbox": "テンプレートのサンドボックス",
+	"templatesandbox-desc": "テンプレートを参照読み込みして[[Special:TemplateSandbox|ページをレンダリング]]できるサンドボックス",
+	"templatesandbox-suffix": "サンドボックス",
+	"templatesandbox-legend": "テンプレートのサンドボックス",
+	"templatesandbox-text": "テンプレートを自分の利用者サンドボックスにサンドボックスの接頭辞付きで保存している場合は、それらを指定できます。\n例えば、{{ns:Template}}:Test を「{{ns:User}}:Hoge/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test」として保存していてそれをプレビューする場合は、接頭辞として「{{ns:User}}:Hoge/{{int:templatesandbox-suffix}}」を使用してください。",
+	"templatesandbox-prefix-label": "サンドボックスの接頭辞:",
+	"templatesandbox-page-label": "使用するページ:",
+	"templatesandbox-revid-label": "使用する版:",
+	"templatesandbox-text-label": "使用するウィキテキスト:",
+	"templatesandbox-submit": "表示",
+	"templatesandbox-title-output": "テンプレートのサンドボックス: $1",
+	"templatesandbox-editform-legend": "このテンプレートでページをプレビュー",
+	"templatesandbox-editform-page-label": "ページ名",
+	"templatesandbox-editform-view-label": "プレビューを表示",
+	"templatesandbox-preview": "$2 のプレビュー",
+	"templatesandbox-previewnote": "'''これは [[:$1]] のプレビューです。'''\n変更内容はまだ保存されていません!",
+	"templatesandbox-invalid-title": "指定したページ名は無効です。",
+	"templatesandbox-title-not-exists": "指定したページは存在しません。",
+	"templatesandbox-revision-not-exists": "指定した版は存在しません。",
+	"templatesandbox-invalid-prefix": "指定したサンドボックス接頭辞は無効です。",
+	"templatesandbox-prefix-not-local": "指定したサンドボックス接頭辞はローカルではありません。",
+	"templatesandbox-page-or-revid": "ページ名または版 ID を入力してください。",
+	"templatesandbox-editform-need-template": "このテンプレートを使用して別のページのプレビューを表示するには、テンプレート名を指定してください。",
+	"templatesandbox-editform-need-title": "このテンプレートで別のページのプレビューを表示するには、ページ名を指定してください。",
+	"templatesandbox-editform-invalid-template": "指定したテンプレート名は無効です。",
+	"templatesandbox-editform-invalid-title": "プレビューに指定したページ名は無効です。",
+	"templatesandbox-editform-title-not-exists": "プレビューに指定したページは存在しません。"
+}

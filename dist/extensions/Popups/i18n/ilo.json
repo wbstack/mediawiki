@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lam-ang"
+		]
+	},
+	"popups-message": "Dagiti panangipadas ti panid",
+	"popups-desc": "Agiparang kadagiti panangipadas no agkallautang ti agar-aramat iti rabaw ti silpo ti panid.",
+	"popups-settings-title": "Panangipadas ti panid",
+	"popups-settings-option-page": "Pakabaelan",
+	"popups-settings-option-page-description": "Agala kadagiti nadaras a panangipadas iti topiko bayat nga agbasbasa iti maysa a panid.",
+	"popups-settings-save": "Idulin",
+	"popups-settings-help-ok": "Nalpasen",
+	"popups-settings-cancel": "Ukasen",
+	"popups-settings-help": "Mabalinmo a maipasubli dagiti panangipadas babaen ti panagusar ti silpo iti sakaanan ti panid.",
+	"popups-settings-enable": "Pakabaelan dagiti panangipadas",
+	"popups-preview-no-preview": "Adda idi maysa a parikut iti panangipakita daytoy a panangipadas",
+	"popups-preview-footer-read": "Mapan iti daytoy a panid",
+	"popups-preview-disambiguation": "Daytoy a titulo ket mainaig iti ad-adu ngem maysa a panid",
+	"popups-preview-disambiguation-link": "Kitaen dagiti kapada a panid",
+	"prefs-reading": "Dagiti kakaykayatan ti panagbasa",
+	"popups-prefs-optin": "Dagiti panangipadas ti panid\n\n<em>Agala kadagiti nadaras a panangipadas iti topiko bayat nga agbasbasa iti maysa a panid</em>",
+	"popups-prefs-disable-nav-gadgets-info": "Nasken nga [[$1 | ibaldadom ti Navigation Popups Gadget]] manipud iti etiketa dagiti Gadget tapno mapakabaelan ti Page Previews",
+	"popups-prefs-conflicting-gadgets-info": "Adda dagiti dadduma a gadget ken dagiti sabali a panangiduma a mabalin a makaapekto iti panagpataray daytoy a langa. No makasanayka kadagiti problema pangngaasi nga irepasom dagiti gadgetmo ken dagiti script ti agar-aramat, ken mairaman dagiti global."
+}

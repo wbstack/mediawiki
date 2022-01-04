@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Muhammad Shuaib"
+		]
+	},
+	"templatesandbox": "سانچوں کا تختہ مشق",
+	"templatesandbox-suffix": "تختہ مشق",
+	"templatesandbox-legend": "سانچوں کا تختہ مشق",
+	"templatesandbox-prefix-label": "تختہ مشق کا سابقہ:",
+	"templatesandbox-submit": "دیکھیں",
+	"templatesandbox-title-output": "سانچوں کا تختہ مشق: $1",
+	"templatesandbox-editform-legend": "اس سانچہ کے ذریعہ صفحہ کی نمائش",
+	"templatesandbox-editform-page-label": "صفحہ کا عنوان",
+	"templatesandbox-editform-view-label": "نمائش دکھاییں",
+	"templatesandbox-preview": "$2 کی نمائش",
+	"templatesandbox-previewnote": "'''یاد رہے کہ یہ محض [[:$1]] کی نمائش ہے۔'''\nآپ کی تبدیلیاں ابھی محفوظ نہیں ہوئی ہیں!",
+	"templatesandbox-invalid-title": "آپ کا درج کردہ عنوان نادرست ہے۔",
+	"templatesandbox-title-not-exists": "آپ کا درج کردہ عنوان موجود نہیں ہے۔",
+	"templatesandbox-revision-not-exists": "آپ کا درج کردہ نسخہ موجود نہیں ہے۔",
+	"templatesandbox-invalid-prefix": "آپ کا درج کردہ تختہ مشق کا سابقہ درست نہیں ہے۔",
+	"templatesandbox-prefix-not-local": "آپ کا درج کردہ تختہ مشق کا سابقہ مقامی نہیں ہے۔",
+	"templatesandbox-page-or-revid": "کسی صفحے کا عنوان یا کسی نسخے کا شناختی نمبر درج کرنا لازمی ہے۔",
+	"templatesandbox-editform-need-template": "کسی دوسرے صفحے میں اس سانچے کے استعمال کی جھلک دیکھنے کے لیے سانچہ کا نام لازماً درج کریں۔",
+	"templatesandbox-editform-need-title": "کسی دوسرے صفحے میں اس سانچے کے استعمال کی جھلک دیکھنے کے لیے صفحے کا عنوان لازماً درج کریں۔",
+	"templatesandbox-editform-invalid-template": "آپ کے درج کردہ سانچے کا نام درست نہیں ہے۔",
+	"templatesandbox-editform-invalid-title": "نمائش کے لیے آپ کا درج کردہ عنوان درست نہيں ہے۔",
+	"templatesandbox-editform-title-not-exists": "نمائش کے لیے آپ کا درج کردہ عنوان موجود نہیں پے۔"
+}

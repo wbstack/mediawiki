@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kikumoron",
+			"Mogoeilor"
+		]
+	},
+	"tooltip-t-wikibase": "هومپاٛیڤٱند سی اْمایاْجا رسیناْیٱل",
+	"wikibase-comment-update": "{{WBREPONAME}} قٱلٱم آلشد ڤابی",
+	"wikibase-dataitem": "{{WBREPONAME}} آیتم",
+	"wikibase-editlinks": "آلشدکاری هومپاٛیڤٱندٱل",
+	"wikibase-editlinkstitle": "آلشدکاری هومپاٛیڤٱندا میٛن زڤونی",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "قام کردن",
+	"wikibase-rc-hide-wikidata-show": "نشوݩ دائن",
+	"wikibase-rc-wikibase-edit-letter": "د",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} آلشدکاری",
+	"wikibase-otherprojects": "میٛن پورجاْیٱل دیٱ"
+}

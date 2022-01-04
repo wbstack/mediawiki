@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bjankuloski06"
+		]
+	},
+	"mailgun-desc": "Испраќање е-пошта од МедијаВики преку приложната служба Mailgun"
+}

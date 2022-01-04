@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Khanmarat",
+			"Sorbat"
+		]
+	},
+	"wikibase-edit": "төсәткәле",
+	"wikibase-add": "өстәгәле",
+	"wikibase-label-empty": "Тамға (исем) йуҡ",
+	"wikibase-description-empty": "Сүрәтләмә тултырылмаған",
+	"wikibase-diffview-link-name": "исем",
+	"wikibase-sitelinks-special": "Пашҡа сайтлар",
+	"wikibase-statementview-rank-normal": "Нормаль ранг"
+}

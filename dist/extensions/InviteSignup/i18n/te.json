@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Veeven"
+		]
+	},
+	"is-tableth-date": "తేదీ",
+	"is-tableth-groups": "గుంపులు",
+	"is-delete": "తొలగించు",
+	"is-invalidemail": "<b>$1</b> అనేది సరైన ఈమెయిలు చిరునామా కాదు."
+}

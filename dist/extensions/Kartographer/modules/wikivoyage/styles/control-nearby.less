@@ -1,0 +1,20 @@
+/* == Nearby articles icon == */
+
+@import '../../../lib/external/wikimedia-ui-base';
+
+.leaflet-control-container .leaflet-control {
+	.mw-kartographer-icon-nearby {
+		/* @embed */
+		background-image: url( ../images/icon-nearby.svg );
+		background-position: center;
+		background-size: 20px;
+
+		&.mapbox-icon-nearby-active,
+		&.mapbox-icon-nearby-active:hover {
+			background-color: @color-primary--active;
+			/* @embed */
+			background-image: url( ../images/icon-nearby-invert.svg );
+			border-color: @color-primary--active;
+		}
+	}
+}

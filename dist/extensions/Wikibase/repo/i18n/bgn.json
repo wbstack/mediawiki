@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Baloch Afghanistan",
+			"Ibrahim khashrowdi",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "ایڈیٹ",
+	"wikibase-add": "اڈ کورتین",
+	"wikibase-label-empty": "تا انون نامی تعریف نه‌بوته.",
+	"wikibase-description-empty": "تا انون شرح تعریف نه بوته.",
+	"wikibase-statementsection-statements": "اظهارهان",
+	"wikibase-sitelinks-special": "دیگرین سایٹ ئان",
+	"wikibase-statementview-rank-normal": "نورمالین رتبه",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|منشا|منشائان}}",
+	"wikibase-mylanguagefallbackchain-babel": "گۆ ایشی <nowiki>{{#babel: }}</nowiki> قرار داتین به ائ  {{GENDER:$1|قسمت}} [[Special:MyPage|شه وتي کار زوروکین تاکدیما]] توانێت ایشیرا ایڈیٹ بکنێت."
+}

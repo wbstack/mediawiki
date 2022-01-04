@@ -1,0 +1,7 @@
+@mixin inputFieldLabel() {
+	margin: 0;
+	padding-right: 3rem;
+	width: 100%;
+
+	@include h5();
+}

@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Athena in Wonderland",
+			"MokaAkashiyaPT"
+		]
+	},
+	"templatesandbox": "Testes de modelos",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Porcessa ua páigina]] al trascluir modelos dua páigina de testes",
+	"templatesandbox-suffix": "Testes",
+	"templatesandbox-legend": "Testes de modelos",
+	"templatesandbox-text": "Puode scuolher un cunjunto de modelos grabados na sue ária de testes, outelizando l prefixo de la páigina de testes.\nPor eisemplo, se zeia anteber ua berson de l modelo {{ns:Template}}:Teste, que grabou cul títalo \"{{ns:User}}:Eisemplo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Teste\", outelize \"{{ns:User}}:Eisemplo/{{int:templatesandbox-suffix}}\" cumo prefixo.",
+	"templatesandbox-prefix-label": "Prefixo de la páigina de testes:",
+	"templatesandbox-page-label": "Porcessar la páigina:",
+	"templatesandbox-revid-label": "Porcessar la rebison:",
+	"templatesandbox-text-label": "Porcessar l testo wiki:",
+	"templatesandbox-title-output": "Teste de l modelo: $1",
+	"templatesandbox-editform-legend": "Antebison de la páigina cun este modelo",
+	"templatesandbox-editform-view-label": "Amostrar antebison",
+	"templatesandbox-preview": "Antebison de $2",
+	"templatesandbox-invalid-prefix": "L prefixo de la páigina de testes que specifecou nun ye bálido.",
+	"templatesandbox-prefix-not-local": "L prefixo de la páigina de testes que specifecou nun ye lhocal.",
+	"templatesandbox-editform-need-title": "Pa anteber outra páigina cun este modelo, ye perciso specifecar un títalo."
+}

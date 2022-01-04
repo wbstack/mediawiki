@@ -1,0 +1,43 @@
+{
+	"@metadata": {
+		"authors": [
+			"BadDog",
+			"Milicevic01"
+		]
+	},
+	"graph-desc": "Омогућава ознаке &lt;graph&gt; или да целе странице постану графикони засновани на [http://vega.github.io/ Vega-и]",
+	"graphsandbox": "Песак за графиконе",
+	"graph-tracking-category": "Странице са графиконима",
+	"graph-tracking-category-desc": "Странице које укључују ознаку <code><nowiki><graph></nowiki></code>.",
+	"graph-broken-category": "Странице са поквареним графиконима",
+	"graph-broken-category-desc": "Странице које укључују ознаку <code><nowiki><graph></nowiki></code> са невалидном употребом.",
+	"graph-obsolete-category": "Странице са застарелим Вега 1.0 графиконима",
+	"graph-obsolete-category-desc": "Странице које укључују ознаку <code><nowiki><graph></nowiki></code> коју треба ажурирати на верзију 2.",
+	"graph-error-empty-json": "Празни подаци о графикону, ништа за приказ",
+	"graph-error-not-vega": "Пружен JSON није валидан Вега JSON",
+	"graph-ve-dialog-button-tooltip": "Графикон",
+	"graph-ve-dialog-edit-field-graph-type": "Тип графикона",
+	"graph-ve-dialog-edit-field-raw-json": "Сирова JSON спецификација",
+	"graph-ve-dialog-edit-height": "Висина",
+	"graph-ve-dialog-edit-json-invalid": "Неважећи JSON стринг",
+	"graph-ve-dialog-edit-padding-auto": "Аутоматске маргине",
+	"graph-ve-dialog-edit-padding-bottom": "Доња",
+	"graph-ve-dialog-edit-padding-left": "Лева",
+	"graph-ve-dialog-edit-padding-right": "Десна",
+	"graph-ve-dialog-edit-padding-top": "Горња",
+	"graph-ve-dialog-edit-page-data": "Подаци",
+	"graph-ve-dialog-edit-page-general": "Опште",
+	"graph-ve-dialog-edit-page-raw": "Сирови подаци",
+	"graph-ve-dialog-edit-size-field": "Величина",
+	"graph-ve-dialog-edit-size-table-unit": "Пиксели",
+	"graph-ve-dialog-edit-title": "Уређивање графикона",
+	"graph-ve-dialog-edit-type-area": "Површински графикон",
+	"graph-ve-dialog-edit-type-bar": "Тракасти графикон",
+	"graph-ve-dialog-edit-type-line": "Линијски графикон",
+	"graph-ve-dialog-edit-type-unknown": "Непозната врста графикона",
+	"graph-ve-dialog-edit-width": "Ширина",
+	"graph-ve-empty-graph": "Празан графикон",
+	"graph-ve-no-spec": "Није пронађена спецификација графикона",
+	"graph-ve-vega-error": "Вега је наишла на грешку при рендеровању овог графикона",
+	"graph-ve-vega-error-no-render": "Вега није могла да рендерује овај графикон"
+}

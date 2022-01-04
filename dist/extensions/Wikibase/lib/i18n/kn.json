@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"Omshivaprakash",
+			"VASANTH S.N.",
+			"ಮಲ್ನಾಡಾಚ್ ಕೊಂಕ್ಣೊ"
+		]
+	},
+	"wikibase-error-unexpected": "ದೋಷ: $1.",
+	"wikibase-quantitydetails-amount": "ಮೊತ್ತ",
+	"wikibase-timedetails-time": "ಸಮಯ",
+	"wikibase-timedetails-timezone": "ಸಮಯ ವಲಯ",
+	"wikibase-timedetails-calendar": "ಪಂಚಾಂಗ",
+	"wikibase-globedetails-longitude": "ರೇಖಾಂಶ",
+	"wikibase-globedetails-latitude": "ಅಕ್ಷಾಂಶ",
+	"wikibase-sitelinks-wikipedia": "ವಿಕಿಪೀಡಿಯ"
+}

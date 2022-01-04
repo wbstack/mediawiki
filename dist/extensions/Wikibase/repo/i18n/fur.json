@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ladsgroup",
+			"Tocaibon"
+		]
+	},
+	"wikibase-edit": "Cambie",
+	"wikibase-add": "Zonte",
+	"wikibase-label-empty": "Nissune etichete definide",
+	"wikibase-description-empty": "Nissune descrizion definide",
+	"wikibase-sitelinks-special": "Altris sîts",
+	"wikibase-statementview-rank-normal": "Classificât come normâl",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|riferiment|riferiments}}"
+}

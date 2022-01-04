@@ -1,0 +1,15 @@
+@mixin errorBailout() {
+	&__message {
+		@include marginForCenterColumn();
+	}
+
+	&__head {
+		margin-bottom: $base-spacing-unit;
+
+		@include body-responsive-bold();
+	}
+
+	&__body {
+		@include body-responsive();
+	}
+}

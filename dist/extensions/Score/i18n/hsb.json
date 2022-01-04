@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michawiki"
+		]
+	},
+	"score-abcconversionerr": "ABC-dataja njeda so do formata LilyPond konwertować: $1",
+	"score-compilererr": "Zapodawanska dataja LilyPond njeda so kompilować:\n$1",
+	"score-nooutput": "Wudawanski zapis $1 njeda so wutworić.",
+	"score-page": "Strona $1",
+	"score-readerr": "Dataja $1 njeda so čitać.",
+	"score-versionerr": "Wersija LilyPond njeda so zwěsćić:\n$1"
+}

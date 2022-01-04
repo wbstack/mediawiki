@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Исмаил Садуев",
+			"Умар"
+		]
+	},
+	"popups-message": "Хьалххе хьажар",
+	"popups-desc": "Лелочо агӀона хьажорган тӀе курсор хӀоттайича агӀона чулацамах лаьцна хаам болу кораш гучу долу",
+	"popups-settings-title": "АгӀоне хьалххе хьажар",
+	"popups-settings-option-page": "Латайе",
+	"popups-settings-save": "Ӏалашйан",
+	"popups-settings-help-ok": "Кийчча йу",
+	"popups-settings-cancel": "Йухайаккхар",
+	"popups-settings-enable": "Латтаде хьалххе хьажар",
+	"popups-preview-footer-read": "АгӀонга дехьагӀо",
+	"prefs-reading": "Йешаран гӀирс",
+	"popups-prefs-optin": "АгӀонашка хьалххе хьажар (агӀонаш йоьшушехь гойту хьалххе хьажар):",
+	"popups-prefs-conflicting-gadgets-info": "Цхьайолу гаджеташ а, нисдаран гӀирсаш а хӀокху функцин халонаш йан мега. Хьайна халонаш хиллехь дехар до гаджеташка а, долара скрипташка а хьажа.",
+	"popups-refpreview-beta-feature-message": "ТӀетовжамашка хьалххе хьажар",
+	"popups-refpreview-beta-feature-description": "''' ХӀокху функцега болхбайта дӀайайъа гаджет «{{int:gadget-referenceTooltips}}» [[Белхан:Нисдаран гӀирс#mw-prefsection-gadgets|гаджетийн агӀонгахь]].'''\n\nТӀетовжаман лоьмар тӀе цамза хьажича билгаодахаршца хаам гучубоккху. Хьан [[Wikipedia:Tools/Navigation popups|навигацин корийн гаджет]] латина йелахь, хӀокху функцено болхбира бац"
+}

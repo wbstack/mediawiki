@@ -1,0 +1,60 @@
+{
+	"name": "StopForumSpam",
+	"version": "0.4.0",
+	"author": [
+		"Kunal Mehta",
+		"Ryan Schmidt",
+		"Scott Bassett"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:StopForumSpam",
+	"descriptionmsg": "stopforumspam-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "antispam",
+	"requires": {
+		"MediaWiki": ">= 1.36.0"
+	},
+	"AvailableRights": [
+		"sfsblock-bypass"
+	],
+	"GroupPermissions": {
+		"sysop": {
+			"sfsblock-bypass": true
+		}
+	},
+	"MessagesDirs": {
+		"StopForumSpam": [
+			"i18n"
+		]
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\StopForumSpam\\": "includes/"
+	},
+	"Hooks": {
+		"AbuseFilter-computeVariable": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterComputeVariable",
+		"AbuseFilter-generateUserVars": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterGenerateUserVars",
+		"AbuseFilter-builder": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterBuilder",
+		"getUserPermissionsErrorsExpensive": "MediaWiki\\StopForumSpam\\Hooks::onGetUserPermissionsErrorsExpensive",
+		"OtherBlockLogLink": "MediaWiki\\StopForumSpam\\Hooks::onOtherBlockLogLink"
+	},
+	"config": {
+		"SFSReportOnly": {
+			"value": false
+		},
+		"SFSIPListLocation": {
+			"value": "https://www.stopforumspam.com/downloads/listed_ip_90_ipv46_all.gz"
+		},
+		"SFSValidateIPListLocationMD5": {
+			"value": false
+		},
+		"SFSIPThreshold": {
+			"value": 5
+		},
+		"SFSDenyListCacheDuration": {
+			"value": 432000
+		},
+		"SFSProxy": {
+			"value": false
+		}
+	},
+	"manifest_version": 2
+}

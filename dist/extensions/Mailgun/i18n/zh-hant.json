@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kly"
+		]
+	},
+	"mailgun-desc": "透過 Mailgun API 服務來從 Mediawiki 寄送電子郵件"
+}

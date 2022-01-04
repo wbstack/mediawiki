@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"NMW03",
+			"Wertuose"
+		]
+	},
+	"templatesandbox-editform-legend": "Bu şablonu istifadə etməklə səhifəyə ilkin baxış",
+	"templatesandbox-editform-page-label": "Səhifənin adı",
+	"templatesandbox-editform-view-label": "İlkin baxış",
+	"templatesandbox-previewnote": "Bunun \"[[:$1]]\" səhifəsinin sınaq görüntüsü olduğunu unutmayın.\nDəyişiklikləriniz hələ yayımlanmayıb!"
+}

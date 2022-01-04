@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hugo.arg",
+			"Macofe"
+		]
+	},
+	"templatesandbox-editform-legend": "Išankstinė pasirinkto puslapio su šiuo šablonu peržiūra",
+	"templatesandbox-editform-page-label": "Puslapio pavadinimas",
+	"templatesandbox-editform-view-label": "Rodyti išankstinę peržiūrą"
+}

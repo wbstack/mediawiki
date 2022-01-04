@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dgstranz"
+		]
+	},
+	"templatesandbox-apihelp-contentmodel": "Modelo de contenido de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Formato de contenido de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Los parámetros <var>$1templatesandboxtitle</var> y <var>$1templatesandboxtext</var> deben especificarse ambos u omitirse ambos."
+}

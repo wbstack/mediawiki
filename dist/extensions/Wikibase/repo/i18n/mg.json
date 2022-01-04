@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jagwar",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "hanova",
+	"wikibase-add": "ampiana",
+	"wikibase-label-empty": "Tsy misy marika voafaritra",
+	"wikibase-description-empty": "Tsy misy famisavisana voafaritra",
+	"wikibase-statementsection-statements": "Filazana",
+	"wikibase-sitelinks-special": "Tranonkala hafa",
+	"wikibase-statementview-rank-normal": "Filaharana tsotra",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|tsiahy}}"
+}

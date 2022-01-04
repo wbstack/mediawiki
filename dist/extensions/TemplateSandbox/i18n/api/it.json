@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"templatesandbox-apihelp-contentmodel": "Modello contenuto di <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Formato contenuto di <var>$1templatesandboxtext</var>."
+}

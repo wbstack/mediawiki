@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Agilight"
+		]
+	},
+	"advancedsearch-optgroup-sort": "Чыскаар аайы",
+	"advancedsearch-field-preview-sort": "Чыскаар аайы:",
+	"advancedsearch-sort-preview-last-edit-desc": "эдилгениң ай-хүнү",
+	"advancedsearch-sort-preview-create-timestamp-desc": "чаяаткан ай-хүнү"
+}

@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hosseinblue",
+			"Lakzon"
+		]
+	},
+	"specialpages-group-wikibase": "ویکی‌بیس",
+	"wikibase-deletedentity-item": "آیتم حذف‌شده",
+	"wikibase-deletedentity-property": "خصوصیات حذف شده",
+	"wikibase-deletedentity-query": "پرس و جور پاک بیه",
+	"wikibase-error-unexpected": "خطا: $1.",
+	"wikibase-quantitydetails-amount": "مبلغ",
+	"wikibase-quantitydetails-upperbound": "حد بالا",
+	"wikibase-quantitydetails-lowerbound": "حد پایین",
+	"wikibase-quantitydetails-unit": "واحد",
+	"wikibase-timedetails-time": "وةخت",
+	"wikibase-timedetails-isotime": "برچسب زمان",
+	"wikibase-timedetails-timezone": "منطقهٔ/راساگة زمان",
+	"wikibase-timedetails-calendar": "تقویم",
+	"wikibase-timedetails-precision": "وضوح",
+	"wikibase-timedetails-before": "قبل از",
+	"wikibase-timedetails-after": "پس از",
+	"wikibase-globedetails-longitude": "طول جغرافیایی",
+	"wikibase-globedetails-latitude": "عرض جغرافیایی",
+	"wikibase-globedetails-precision": "وضوح",
+	"wikibase-globedetails-globe": "جهان/دؤنیا",
+	"wikibase-sitelinks-wikipedia": "ویکی پدیا",
+	"wikibase-snakview-snaktypeselector-somevalue": "مقدار ناشناخته/نادیاری",
+	"wikibase-snakview-snaktypeselector-novalue": "بی ارزش",
+	"datatypes-type-wikibase-item": "آیتم",
+	"datatypes-type-wikibase-property": "خاصیت",
+	"datatypes-type-commonsMedia": "پرونده‌های ویکی‌انبار",
+	"version-wikibase": "ویکی‌بیس",
+	"wikibase-entity-summary-wbsetdescription-add": "توضیحات [$2] افزوده شد",
+	"wikibase-entity-summary-wbsetdescription-set": "گؤەڕانن/تغییر توضیحات [$2]",
+	"wikibase-entity-summary-wbsetdescription-remove": "حذف توضیحات [$2]",
+	"wikibase-entity-summary-wbsetlabeldescriptionaliases": "[$2] برچسب، شرح و نام‌های مستعار تغییر یافت"
+}

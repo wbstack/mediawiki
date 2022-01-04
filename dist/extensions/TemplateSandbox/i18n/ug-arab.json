@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Sahran"
+		]
+	},
+	"templatesandbox-submit": "كۆرۈنۈش",
+	"templatesandbox-editform-page-label": "بەت ماۋزۇسى",
+	"templatesandbox-editform-view-label": "ئالدىن كۆزىتىشنى كۆرسەت",
+	"templatesandbox-invalid-title": "سىز بەلگىلىگەن تېما ئىناۋەتسىز.",
+	"templatesandbox-title-not-exists": "سىز بەلگىلىگەن تېما مەۋجۇت ئەمەس.",
+	"templatesandbox-revision-not-exists": "سىز بەلگىلىگەن تۈزىتىلگەن نەشرى مەۋجۇت ئەمەس."
+}

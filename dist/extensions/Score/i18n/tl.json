@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"AnakngAraw"
+		]
+	},
+	"score-abc2lynotexecutable": "Hindi maisakatuparan ang pampalit ng ABC upang maging LilyPond: Ang $1 ay hindi isang talaksang maisasakatuparan. Tiyakin na nakatakda nang tama ang <code>$wgScoreAbc2Ly</code>.",
+	"score-abcconversionerr": "Hindi nagawang palitan ang talaksan ng ABC upang maging nasa anyo ng LilyPond:\n$1",
+	"score-compilererr": "Hindi nagawang tipunin ang talaksan ng pagpapasok ng LilyPond:\n$1",
+	"score-desc": "Nagdaragdag ng isang tatak para sa paghaharap ng mga iskor na pangtutugtugin sa pamamagitan ng LilyPond",
+	"score-invalidlang": "Hindi katanggap-tanggap na wika ng iskor=\"<nowiki>$1</nowiki>\". Ang pangkasalukuyang nakikilalang mga wika ay ang wika=\"lilypond\" (ang likas na katakdaan) at wika=\"ABC\".",
+	"score-midioverridenotfound": "Hindi matagpuan ang talaksang \"<nowiki>$1</nowiki>\" tinukoy mo na mayroong override_midi. Paki tukuyin ang pangalan ng talaksan lamang, huwag isama ang <nowiki>[[…]]</nowiki> at ang unlaping \"{{ns:file}}:\".",
+	"score-noimages": "Walang malikha na mga imahe ng iskor. Paki siyasatin ang iyong kodigo ng iskor.",
+	"score-nomidi": "Walang nalikha na talaksan ng MIDI kahit na hinihiling. Kung nagtatrabaho ka na nasa gawi ng hilaw na LilyPond, paki tiyakin na makapagbigay ka ng isang naaangkop na tipak ng \\midi.",
+	"score-nooutput": "Nabigo sa paglikha ng direktoryo ng kinalabasan na $1.",
+	"score-notexecutable": "Hindi maisakatuparan ang LilyPond: Ang $1 ay isang hindi naisasakatuparang talaksan. Paki tiyakin na nakatakda nang tama ang <code>$wgScoreLilyPond</code>",
+	"score-page": "Pahinang $1",
+	"score-pregreplaceerr": "Nabigo ang pagpapalit ng karaniwang pagsasaad ng PCRE",
+	"score-readerr": "Hindi nagawang basahin ang talaksang $1.",
+	"score-trimerr": "Hindi magupitan ang imahe:\n$1\nItakda ang <code>$wgScoreTrim=false</code> kapag nagtagal ang suliraning ito.",
+	"score-versionerr": "Hindi nagawang makamtan ang bersiyon ng LilyPond: $1"
+}

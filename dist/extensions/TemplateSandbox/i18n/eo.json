@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"ArnoLagrange",
+			"Macofe",
+			"Mirin",
+			"Robin van der Vliet"
+		]
+	},
+	"templatesandbox": "Ŝablona provejo",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Montru paĝon]] uzante ŝablonojn el provejo",
+	"templatesandbox-suffix": "Provejo",
+	"templatesandbox-legend": "Ŝablona provejo",
+	"templatesandbox-text": "Vi povas elekti aron da ŝablonoj konservitaj en via proveja spaco uzante taŭgan provejan prefikson.\n\nEkzemple, se vi volas antaŭvidi version de {{ns:Template}}:provo kiun vi konservis kiel \"{{ns:User}}:uzantnomo/{{int:templatesandbox-suffix}}/{{ns:Template}}:provo\", uzu \"{{ns:User}}:uzantnomo/{{int:templatesandbox-suffix}}\" kiel prefikso.",
+	"templatesandbox-prefix-label": "Proveja prefikso:",
+	"templatesandbox-page-label": "Paĝaspekto:",
+	"templatesandbox-revid-label": "Aspekto de la versio:",
+	"templatesandbox-text-label": "Aspekto de la vikisintakso:",
+	"templatesandbox-submit": "Vidi",
+	"templatesandbox-title-output": "Ŝablona provejo: $1",
+	"templatesandbox-editform-legend": "Antaŭvido de la paĝo kun tiu ŝablono",
+	"templatesandbox-editform-page-label": "Titolo de la paĝo",
+	"templatesandbox-editform-view-label": "Montri antaŭrigardon",
+	"templatesandbox-preview": "Antaŭvido de $2",
+	"templatesandbox-previewnote": "'''Memoru, ke ĉi tio estas nur antaŭrigardo de [[:$1]].''' \nViaj ŝanĝoj ne ankoraŭ estas konservitaj!",
+	"templatesandbox-invalid-title": "La titolo kiun vi enmetis estas nevalida.",
+	"templatesandbox-title-not-exists": "La titolo kiun vi menciis ne ekzistas.",
+	"templatesandbox-revision-not-exists": "La versio kiun vi menciis ne ekzistas.",
+	"templatesandbox-invalid-prefix": "La proveja prefikso kiun vi menciis estas nevalida.",
+	"templatesandbox-prefix-not-local": "La proveja prefikso kiun vi menciis ne estas loka.",
+	"templatesandbox-page-or-revid": "Vi nepre enigu ĉu paĝtitolon, ĉu identigan numeron.",
+	"templatesandbox-editform-need-title": "Por antaŭvidi alian paĝon kun ĉi tiu ŝablono, paĝtitolo nepre estu precizigita.",
+	"templatesandbox-editform-invalid-title": "La titolo kiun vi menciis por antaŭrigardo estas nevalida.",
+	"templatesandbox-editform-title-not-exists": "La titolo kiun vi menciis por antaŭrigardo ne ekzistas."
+}

@@ -1,0 +1,8 @@
+version: '2'
+
+services:
+  js-build:
+    image: digitallyseamless/nodejs-bower-grunt
+    volumes:
+      - ./:/code
+    working_dir: /code

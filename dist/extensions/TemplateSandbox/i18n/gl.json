@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm",
+			"Iváns",
+			"Toliño"
+		]
+	},
+	"templatesandbox": "Zona de probas para os modelos",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Renderiza unha páxina]] coa transclusión dun ou varios modelos desde unha zona de probas",
+	"templatesandbox-suffix": "zona de probas",
+	"templatesandbox-legend": "Zona de probas para o modelo",
+	"templatesandbox-text": "Pode elixir un conxunto de modelos gardados na súa zona de probas utilizando o prefixo axeitado.\nPor exemplo, se quere ver unha vista previa dunha versión de \"{{ns:Template}}:Proba\" que gardou como \"{{ns:User}}:Exemplo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Proba\", empregue \"{{ns:User}}:Exemplo/{{int:templatesandbox-suffix}}\" como prefixo.",
+	"templatesandbox-prefix-label": "Prefixo da zona de probas:",
+	"templatesandbox-page-label": "Páxina de renderización:",
+	"templatesandbox-revid-label": "Revisión de renderización:",
+	"templatesandbox-text-label": "Texto wiki de renderización:",
+	"templatesandbox-submit": "Ver",
+	"templatesandbox-title-output": "Zona de probas para os modelos: $1",
+	"templatesandbox-editform-legend": "Vista previa da páxina con este modelo",
+	"templatesandbox-editform-page-label": "Título da páxina",
+	"templatesandbox-editform-view-label": "Amosar a vista previa",
+	"templatesandbox-preview": "Vista previa de \"$2\"",
+	"templatesandbox-previewnote": "'''Lembre que esta é só unha vista previa de \"[[:$1]]\".'''\nAínda non gardou os seus cambios!",
+	"templatesandbox-invalid-title": "O título que especificou non é válido.",
+	"templatesandbox-title-not-exists": "O título que especificou non existe.",
+	"templatesandbox-revision-not-exists": "A revisión que especificou non existe.",
+	"templatesandbox-invalid-prefix": "O prefixo da zona de probas que especificou non é válido.",
+	"templatesandbox-prefix-not-local": "O prefixo da zona de probas que especificou non é local.",
+	"templatesandbox-page-or-revid": "Cómpre indicar un título de páxina ou ben un número de identificación de revisión.",
+	"templatesandbox-fail-post": "<em>Dado que o código HTML puro está activado en {{SITENAME}} e produciuse unha perda dos datos da sesión, a vista previa está oculta como precaución contra ataques mediante código JavaScript.</em>\n\n<strong>Se este é un intento lexítimo de acceso á vista previa, inténteo de novo.</strong>\nSe segue sen funcionar, probe a [[Special:UserLogout|saír]] e volver a entrar coa súa conta.",
+	"templatesandbox-fail-post-anon": "<em>Dado que o código HTML puro está activado en {{SITENAME}} e produciuse unha perda dos datos da sesión, a vista previa está oculta como precaución contra ataques mediante código JavaScript.</em>\n\n<strong>Se este é un intento lexítimo de acceso á vista previa, probe a [[Special:UserLogin|saír]] e volver a entrar coa súa conta.</strong>",
+	"templatesandbox-editform-need-template": "Para ollar a vista previa doutra páxina con este modelo, cómpre especificar o nome dun modelo.",
+	"templatesandbox-editform-need-title": "Para ollar a vista previa doutra páxina con este modelo, cómpre especificar un título de páxina.",
+	"templatesandbox-editform-invalid-template": "O nome de modelo especificado non é válido.",
+	"templatesandbox-editform-invalid-title": "O título que especificou para a vista previa non é válido.",
+	"templatesandbox-editform-title-not-exists": "O título que especificou para a vista previa non existe."
+}

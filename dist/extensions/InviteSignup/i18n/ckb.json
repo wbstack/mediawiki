@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Calak",
+			"Muhammed taha",
+			"Sarchia"
+		]
+	},
+	"invitesignup": "خەڵک بۆ ئەم ویکییە بانگھێشت بکە",
+	"is-tableth-date": "ڕێکەوت",
+	"is-tableth-email": "ئیمەیڵ",
+	"is-tableth-inviter": "بانگھێشتکەر",
+	"is-tableth-signup": "تۆماربوون",
+	"is-tableth-groups": "گرووپەکان",
+	"is-add": "زیادی بکە",
+	"is-delete": "سڕینەوە",
+	"is-invalidemail": "<b>$1</b> ئیمەیڵەکەی دروست نییە.",
+	"is-emailsubj": "تۆ بانگھێشت کراویت بۆ بەشداریکردن لە {{SITENAME}}",
+	"is-emailbody": "سڵاو...\n\n{{GENDER:$1|$1}} تۆی بانگھێشت کردووە بۆ بەشداریکردنت لە{{SITENAME}}.\nدەتوانیت تۆماربیت لە $2",
+	"right-invitesignup": "بەکارھێنەران بۆ بەشداریکردن بانگھێشت بکە",
+	"action-invitesignup": "بەکارھێنەران بۆ بەشداریکردن لەم ماڵپەڕە بانگھێشت بکە"
+}

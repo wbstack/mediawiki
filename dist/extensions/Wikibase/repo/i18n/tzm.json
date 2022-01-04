@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hakim1bal",
+			"Mohamed Belarhzali",
+			"Tifinaghes"
+		]
+	},
+	"wikibase-edit": "senfel",
+	"wikibase-save": "ⵣⵎⵎⴻⵎ",
+	"wikibase-cancel": "ⵓⴽⵓⵙ",
+	"wikibase-add": "rnu",
+	"wikibase-remove-inprogress": "ⵓⴽⵓⵙ...",
+	"wikibase-sitelink-site-edit-placeholder": "ⴰⵣⴷⴰⵢ",
+	"wikibase-sitelink-page-edit-placeholder": "ⴰⵎⴳⵔⴰⴷ"
+}

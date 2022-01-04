@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cheers!",
+			"Ladsgroup",
+			"Leduyquang753",
+			"Minh Nguyen",
+			"Shirayuki",
+			"Trần Nguyễn Minh Huy",
+			"Vinhtantran",
+			"Zolo",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"wikibasecirrus-search-bad-entity-type": "Kiểu thực thể hỏng: $1",
+	"wikibasecirrus-search-bad-profile-name": "Tên kiểu tìm kiếm hỏng: $1",
+	"special-entitieswithoutdescription": "Thực thể không có miêu tả",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Lấy danh sách các thực thể không có miêu tả",
+	"special-entitieswithoutlabel": "Thực thể không có nhãn",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Lấy danh sách thực thể không có nhãn",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Mã ngôn ngữ:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Kiểu:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Tìm",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "“$1” không phải là mã ngôn ngữ hợp lệ.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "“$1” không phải là kiểu thực thể hợp lệ."
+}

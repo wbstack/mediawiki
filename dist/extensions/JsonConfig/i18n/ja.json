@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Akki-102525",
+			"Kkairri",
+			"Object＊tofu",
+			"Otokoume",
+			"Shirayuki",
+			"Suyama",
+			"Thibaut120094",
+			"Yurik",
+			"Yusuke1109",
+			"つぶあん派"
+		]
+	},
+	"jsonconfig-desc": "JSON設定をwikiに保存できるようにする",
+	"jsonconfig-edit-action-cancel": "キャンセル",
+	"jsonconfig-err-array": "パラメーター「$1」はリストでなければなりません。例: <kbd>[\"値1\", \"値2\", ...]</kbd>",
+	"jsonconfig-err-assoc-array": "パラメーター「$1」は連想配列 (辞書) でなければなりません。<kbd>例: {\"キー\": \"値\", ...}</kbd>",
+	"jsonconfig-err-bool": "パラメーター「$1」には true または false を設定しなければなりません",
+	"jsonconfig-err-integer": "パラメーター「$1」は整数でなければなりません",
+	"jsonconfig-err-number": "パラメーター「$1」は数値でなければなりません",
+	"jsonconfig-err-string": "パラメーター「$1」は文字列でなければなりません",
+	"jsonconfig-err-url": "引数「$1」には有効な URL を指定してください",
+	"jsonconfig-optional-field": "(省略可能)",
+	"jsonconfig-type-name-invalid": "無効",
+	"jsonconfig-type-name-string": "文字列",
+	"jsonconfig-type-name-number": "数値",
+	"jsonconfig-type-name-boolean": "ブール型",
+	"jsonconfig-license": "データは$1の下で利用できます。",
+	"jsonconfig-license-name-CC0-1.0": "クリエイティブ・コモンズ・ゼロ",
+	"right-jsonconfig-flush": "API を経由して JsonConfig を操作",
+	"action-jsonconfig-flush": "API 経由での JsonConfig の操作"
+}

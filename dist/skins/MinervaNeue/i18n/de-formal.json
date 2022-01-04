@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Killarnee",
+			"Tiin",
+			"Zabe"
+		]
+	},
+	"mobile-frontend-language-article-heading": "Sprache",
+	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Willkommen}}, $1!",
+	"mobile-frontend-pageaction-edit-tooltip": "Bearbeiten Sie den Einführungsabschnitt für diese Seite.",
+	"mobile-frontend-placeholder": "{{SITENAME}} durchsuchen",
+	"minerva-page-actions-unprotect": "Schutz aufheben"
+}

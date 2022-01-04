@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"1AnuraagPandey",
+			"1PandeyAnurag",
+			"Ajeetsinghawadhi"
+		]
+	},
+	"tooltip-t-wikibase": "सम्बद्ध डाटा भण्डार प्रविष्टि की कड़ी",
+	"wikibase-comment-update": "{{WBREPONAME}} आइटम परिवर्तित",
+	"wikibase-dataitem": "{{WBREPONAME}} प्रविष्टि",
+	"wikibase-editlinks": "कड़ी संपादित करैं",
+	"wikibase-editlinkstitle": "अन्तरभाषा कड़ी संपादित करें",
+	"wikibase-linkitem-addlinks": "लिंक जोड़ा जाय",
+	"wikibase-linkitem-input-site": "भाषा",
+	"wikibase-linkitem-input-page": "पन्ना:",
+	"wikibase-linkitem-not-loggedin-title": "आप कय लॉग इन करेक परि",
+	"wikibase-linkitem-not-loggedin": "इ सुविधा उपयोग करय खर्तिन आप कय इ विकि औ [$1 केन्द्रीय डेटा रिपोज़िटरी] पय लॉग करेक परि ।",
+	"wikibase-rc-hide-wikidata": "विकिडेटा $1",
+	"wikibase-rc-hide-wikidata-hide": "लुकुआवा जाय",
+	"wikibase-rc-hide-wikidata-show": "देखावा जाय",
+	"wikibase-rc-wikibase-edit-letter": "डा",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} सम्पादन",
+	"wikibase-rcfilters-hide-wikibase-label": "{{WBREPONAME}} सम्पादन",
+	"wikibase-otherprojects": "अउर प्रोजेक्ट"
+}

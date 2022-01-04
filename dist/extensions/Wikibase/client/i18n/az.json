@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dağlı95",
+			"Interfase",
+			"NMW03",
+			"Neriman2003",
+			"Serkanland",
+			"Toghrul Rahimli",
+			"Wertuose"
+		]
+	},
+	"tooltip-t-wikibase": "Bağlanan məlumatların saxlanması elementinə keçid",
+	"wikibase-after-page-move": "Addəyişməniz [$1 {{WBREPONAME}} elementində] əks olunmalıdır. Bunun olub-olmamasını yoxlamağınızı xahiş edirik.",
+	"wikibase-after-page-delete": "Bu səhifənin [$1 {{WBREPONAME}} elementi] ilə əlaqəsi kəsilmişdir. Bunun həyata keçib-keçməməsini təsdiqləməyinizi xahiş edirik.",
+	"wikibase-comment-update": "{{WBREPONAME}} elementi dəyişdirildi",
+	"wikibase-dataitem": "{{WBREPONAME}} elementi",
+	"wikibase-editlinks": "Keçidlərin redaktəsi",
+	"wikibase-editlinkstitle": "Dillərarası keçidləri redaktə et",
+	"wikibase-linkitem-addlinks": "Keçid əlavə et",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Gizlə",
+	"wikibase-rc-hide-wikidata-show": "Göstər",
+	"wikibase-rc-show-wikidata-pref": "Son dəyişikliklərdə {{WBREPONAME}} dəyişikliklərini göstər",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} redaktəsi",
+	"wikibase-rcfilters-hide-wikibase-label": "{{WBREPONAME}} redaktələri",
+	"wikibase-watchlist-show-changes-pref": "İzləmə siyahısında {{WBREPONAME}} redaktələrini göstər",
+	"wikibase-pageinfo-entity-id": "Elementin {{WBREPONAME}} identifikatoru",
+	"wikibase-pageinfo-entity-usage": "Bu səhifədə istifadə edilən {{WBREPONAME}} vahidləri",
+	"wikibase-otherprojects": "Digər layihələrdə",
+	"echo-category-title-wikibase-action": "{{WBREPONAME}} ilə {{PLURAL:$1|əlaqələndirmə|əlaqələndirmələr}}",
+	"echo-pref-tooltip-wikibase-action": "Yaratdığım səhifəni kimsə {{WBREPONAME}} elementi ilə əlaqələndirdikdə mənə bildiriş göndər.",
+	"notification-header-page-connection": "<strong>$3</strong> səhifəsi əlaqəli məlumatların toplandığı {{PLURAL:$4|-1={{WBREPONAME}} elementi|$4 nömrəli {{WBREPONAME}} elementi}} ilə {{GENDER:$2|əlaqələndirildi}}.",
+	"connected-redirect-category": "{{WBREPONAME}} elementinə bağlı olan yönləndirmələr",
+	"connected-redirect-category-desc": "Bu kateqoriya {{WBREPONAME}} elementinə bağlı olan yönləndirmə səhifələrini özündə birləşdirir.",
+	"wikibase-client-data-bridge-blocked-on-repo-head": "<strong>{{WBREPONAME}} layihəsində istifadəçi adınız və ya IP-adresiniz bloklanmışdır.</strong>",
+	"wikibase-client-data-bridge-blocked-on-client-head": "<strong>Bu vikidə istifadəçi adınız və ya IP-adresiniz bloklanmışdır.</strong>"
+}

@@ -1,0 +1,18 @@
+@mixin inputFieldStandalone() {
+	border: 1px solid $border-color-base;
+	border-radius: 2px;
+	padding: 5px $base-spacing-unit-fixed 4px $base-spacing-unit-fixed;
+	line-height: $line-height-text;
+
+	&:focus,
+	&:focus-within,
+	&--focus-within {
+		outline: 0;
+		border-color: $color-primary--focus;
+		box-shadow: inset 0 0 0 1px $color-primary--focus;
+	}
+
+	@media ( max-width: $breakpoint ) {
+		padding: 7px $base-spacing-unit-fixed;
+	}
+}

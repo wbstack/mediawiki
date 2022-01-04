@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Michawiki"
+		]
+	},
+	"special-entitieswithoutdescription": "Entity bjez wopisanja",
+	"special-entitieswithoutlabel": "Entity bjez pomjenowanja",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Lisćinu entitow bjez pomjenowanja wotwołać",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Rěčny kod:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Typ:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Pytać",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" płaćiwy rěčny kod njeje.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" płaćiwy entitowy typ njeje."
+}

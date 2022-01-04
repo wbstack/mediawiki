@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Исмаил Садуев",
+			"Умар"
+		]
+	},
+	"templatesandbox": "Кепийн ловзаран майда",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|АгӀо бӀаьран йо]], кепаш а ловзаран майда а цхьан",
+	"templatesandbox-suffix": "ловзаран майда",
+	"templatesandbox-legend": "Кепийн ловзаран майда",
+	"templatesandbox-text": "Хьан йиш йу хьайн цӀерийн меттигехь Ӏалашбина болу кепийн гулам харжа.\nМасала, хьайна {{ns:Template}}:Зеран версега хьажа лууш делахь, Ӏалашйина йолу «{{ns:User}}:Вася Пупкин/Кечйан Ӏамо меттиг/{{ns:Template}}:Зеран», лелайе «{{ns:User}}:Вася Пупкин/Ловзаран майда» префиксан метта.",
+	"templatesandbox-prefix-label": "АгӀонан цӀе:",
+	"templatesandbox-page-label": "Гайта агӀо:",
+	"templatesandbox-revid-label": "Гойту верси:",
+	"templatesandbox-text-label": "Гойту вики-йоза:",
+	"templatesandbox-submit": "Хьажа",
+	"templatesandbox-title-output": "Кепийн ловзаран майда: $1",
+	"templatesandbox-editform-legend": "Кеп лелош йолучу агӀоне хьалххе хьажар",
+	"templatesandbox-editform-page-label": "АгӀонан цӀе",
+	"templatesandbox-editform-view-label": "Хьалххе хьажар",
+	"templatesandbox-preview": "Хьалххе хьажар $2",
+	"templatesandbox-previewnote": "'''ХӀара хьлха хьажар ду [[:$1]].''' Ахьа кепан бина хийцамаш хӀинца дӀайазбина бац!",
+	"templatesandbox-invalid-title": "Ахьа йазйина йолу цӀе ца магайо.",
+	"templatesandbox-title-not-exists": "Ахьа йазйина коьрта цӀе, йан а йац.",
+	"templatesandbox-revision-not-exists": "Ахьа билгалйина верси йац.",
+	"templatesandbox-page-or-revid": "Ахьа йазйан йеза агӀонан цӀе йа версин лоьмар.",
+	"templatesandbox-editform-need-template": "ХӀара кеп лелош йолу кхечу агӀоне хьажа, агӀонан цӀе йазйан йеза.",
+	"templatesandbox-editform-need-title": "ХӀара кеп лелош йолу кхечу агӀоне хьажа, агӀонан цӀе йазйан йеза."
+}

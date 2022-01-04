@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"NikosLikomitros",
+			"Nikosgranturismogt"
+		]
+	},
+	"invitesignup": "Πρόσκληση ανθρώπων σε αυτό το βίκι",
+	"is-desc": "Στέλνει προσκλήσεις ηλ. ταχυδρομείου",
+	"is-tableth-date": "Ημερομηνία",
+	"is-tableth-email": "Διεύθυνση ηλ. ταχυδρομείου",
+	"is-tableth-inviter": "Προσκλητής",
+	"is-tableth-signup": "Εγγεγραμμένος",
+	"is-tableth-groups": "Ομάδες",
+	"is-add": "Προσθήκη",
+	"is-delete": "Διαγραφή",
+	"is-invalidemail": "η <b>$1</b> δεν είναι έγκυρη διεύθυνση ηλ. ταχυδρομείου.",
+	"is-emailsubj": "Είστε προσκεκλημμένοι να γίνετε μέλος του {{SITENAME}}",
+	"is-emailbody": "Γεια, \n\nο {{GENDER:$1|$1}} σας έχει προσκαλέσει να εγγραφείτε στο {{SITENAME}}.\nΜπορείτε να εγγραφείτε στο $2",
+	"right-invitesignup": "Προσκαλέστε χρήστες να εγγραφούν",
+	"action-invitesignup": "Προσκαλέστε χρήστες να εγγραφούν σε αυτή τη σελίδα"
+}

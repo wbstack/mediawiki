@@ -1,0 +1,209 @@
+{
+	"MediaWikiInfo": {
+		"type": "object",
+		"example": {
+			"name": "Wikidata",
+			"root_script_url": "https://www.wikidata.org/wiki",
+			"main_page_url": "https://www.wikidata.org/wiki/Wikidata:Main_Page",
+			"api": {
+				"action": "https://www.wikidata.org/w/api.php",
+				"rest": "https://www.wikidata.org/w/rest.php"
+			}
+		},
+		"properties": {
+			"name": {
+				"type": "string"
+			},
+			"root_script_url": {
+				"type": "string"
+			},
+			"main_page_url": {
+				"type": "string"
+			},
+			"api": {
+				"type": "object",
+				"properties": {
+					"action": {
+						"type": "string"
+					},
+					"rest": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"action",
+					"rest"
+				]
+			}
+		},
+		"required": [
+			"name",
+			"root_script_url",
+			"main_page_url",
+			"api"
+		]
+	},
+	"EquivEntities": {
+		"type": "object",
+		"example": {
+			"equiv_entities": {
+				"wikidata.org": {
+					"properties": {
+						"P31": "P1"
+					},
+					"items": {
+						"Q5": "Q15"
+					}
+				}
+			}
+		},
+		"properties": {
+			"equiv_entities": {
+				"type": "object",
+				"properties": {
+					"wikidata.org": {
+						"type": "object",
+						"properties": {
+							"properties": {
+								"type": "object"
+							},
+							"items": {
+								"type": "object"
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"LocalRdfNamespaces": {
+		"type": "object",
+		"example": {
+			"local_rdf_namespaces": {
+				"": "http://www.wikidata.org/entity/",
+				"data": "https://wikidata.org/wiki/Special:EntityData/",
+				"s": "https://wikidata.org/entity/statement/",
+				"ref": "https://wikidata.org/reference/",
+				"v": "https://wikidata.org/value/"
+			}
+		},
+		"properties": {
+			"local_rdf_namespaces": {
+				"type": "object"
+			}
+		},
+		"required": [
+			"local_rdf_namespaces"
+		]
+	},
+	"ExternalServices": {
+		"type": "object",
+		"example": {
+			"external_services": {
+				"queryservice": "https://wikibase-query-testing.wmflabs.org/proxy/wdqs/bigdata/#namespaces/wdq/sparql",
+				"queryservice_ui": "https://wikibase-query-testing.wmflabs.org/",
+				"quickstatements": "https://quickstatements.toolforge.org/",
+				"openrefine_reconcile": "https://www.example.org/api"
+			}
+		},
+		"properties": {
+			"external_services": {
+				"type": "object"
+			}
+		}
+	},
+	"LocalEntities": {
+		"type": "object",
+		"example": {
+			"local_entities": {
+				"item": {
+					"namespace_id": 120,
+					"namespace_name": "Item"
+				},
+				"property": {
+					"namespace_id": 122,
+					"namespace_name": "Property"
+				}
+			}
+		},
+		"properties": {
+			"local_entities": {
+				"type": "object",
+				"properties": {
+					"item": {
+						"type": "object",
+						"properties": {
+							"namespace_id": {
+								"type": "integer"
+							},
+							"namespace_name": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"namespace_id",
+							"namespace_name"
+						]
+					},
+					"property": {
+						"type": "object",
+						"properties": {
+							"namespace_id": {
+								"type": "integer"
+							},
+							"namespace_name": {
+								"type": "string"
+							}
+						},
+						"required": [
+							"namespace_id",
+							"namespace_name"
+						]
+					}
+				},
+				"required": [
+					"item",
+					"property"
+				]
+			}
+		},
+		"required": [
+			"local_entities"
+		]
+	},
+	"OAuth": {
+		"type": "object",
+		"example": {
+			"oauth": {
+				"registration_page": "https://meta.wikimedia.org/wiki/Special:OAuthConsumerRegistration/propose"
+			}
+		},
+		"properties": {
+			"oauth": {
+				"type": "object",
+				"properties": {
+					"registration_page": {
+						"type": "string"
+					}
+				},
+				"required": [
+					"registration_page"
+				]
+			}
+		}
+	},
+	"Other": {
+		"type": "object",
+		"example": {
+			"max_lag": "5"
+		},
+		"properties": {
+			"max_lag": {
+				"type": "integer"
+			}
+		},
+		"required": [
+			"max_lag"
+		]
+	}
+}

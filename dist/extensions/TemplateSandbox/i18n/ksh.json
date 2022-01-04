@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Purodha"
+		]
+	},
+	"templatesandbox": "Schablohne ußprobehre",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Zeijsch en Sigg aan]] un donn derbei Schablohne ußprobehre. Di kumme uss_ene Aat päsönlejje Sandkeß.",
+	"templatesandbox-suffix": "Sandkeß",
+	"templatesandbox-legend": "Schablohne en de „Sandkeß“ ußprobehre",
+	"templatesandbox-text": "Do kanns ene Pöngel Schablohne ußsöhke, di en Dinge „Sandkeß“ parraht schtonn.\nFör e Beijschpell wann de lohre wells, wadd en Väsjohn vun „<code>{{ns:Template}}:Täß</code>“ deiht, di De als „<code>{{ns:User}}:Metmaacher/{{int:templatesandbox-suffix}}/{{ns:Template}}:Täß</code>“ en et Wikki jedonn häs, dann nemm als der Vörsaz för et Ußprobehre: „<code>{{ns:User}}:Metmaacher/{{int:templatesandbox-suffix}}</code>“.",
+	"templatesandbox-prefix-label": "Der Vörsaz för et Schablohne Ußprobehre:",
+	"templatesandbox-page-label": "De Sigg, för Schablohne met ußzeprobehre:",
+	"templatesandbox-revid-label": "De Väsjohn för et Schablohne ußprobehre:",
+	"templatesandbox-text-label": "Dä Wikkitäx, för Schablohne med ußzeprobehre:",
+	"templatesandbox-submit": "Lohß jonn!",
+	"templatesandbox-title-output": "Schablohne ußprobehre för di Sigg: „$1“",
+	"templatesandbox-editform-legend": "En Sigg met dä {{ns:Template}} belohre",
+	"templatesandbox-editform-page-label": "Dä Sigg ier Övverschreff",
+	"templatesandbox-editform-view-label": "Lohß jonn!",
+	"templatesandbox-preview": "„$2“ vöraff belohre",
+	"templatesandbox-previewnote": "'''Heh kütt blohß en Aanseesch vöraff met dä Sigg „[[:$1]]“ — Ding Änderonge sin ävver noch nidd em Wikki faßjehallde!'''",
+	"templatesandbox-invalid-title": "De aanjejovve Övverschrevv es nit jöltesch.",
+	"templatesandbox-title-not-exists": "De aanjejovve Övverschrevv jidd_et nit.",
+	"templatesandbox-revision-not-exists": "De aanjejovve Väsjohn jidd_et nit.",
+	"templatesandbox-invalid-prefix": "Dä aanjejovve Vörsaz för et Schablohne Ußprobehre es nit jöltesch.",
+	"templatesandbox-prefix-not-local": "Dä Vörsaz för et Schablohne Ußprobehre zeijsch noh ußerhallef vum Wikki.",
+	"templatesandbox-page-or-revid": "Doh moss en Övverschreff för en Sigg aanjävve, udder de Kännong för en Väsjohn.",
+	"templatesandbox-fail-post": "Weil mer heh em Wikki rüh <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"HyperText Markup Language\">HTML</i> zohjohße un de Sezongsdahte verschött jejange sin, jidd_et kein Aanseesch vöraff.\nDadd ess ene Schoz jähje Aanjreffe met JavaSkrep.\n\nWann dadd en Ohdenong es, wat De wells, donn et norr_ens probehre.\n\nWann dat nit hellef, versöhg ens [[Special:UserLogout|ußzelogge]] un wider enzelogge, ävver pass op, dat De ding onjesescherte Änderonge derwihl om eije Rääschner faßhälls.",
+	"templatesandbox-fail-post-anon": "Weil mer heh em Wikki rüh <i lang=\"en\" xml:lang=\"en\" dir=\"ltr\" title=\"HyperText Markup Language\">HTML</i> zohjohße un de nidd ennjelogg bes, jidd_et kein Aanseesch vöraff.\nDadd ess ene Schoz jähje Aanjreffe met JavaSkrep.\n\nWann dadd en Ohdenong es, wat De wells, donn [[Special:UserLogin|enlogge]], un donn et dann norr_ens probehre.",
+	"templatesandbox-editform-need-template": "Öm norr_en Sigg met dä Schablohn dren ze belohre, moß ene Nahme för di Schablohn aanjejovve sin.",
+	"templatesandbox-editform-need-title": "Öm norr_en Sigg met dä Schablohn dren ze belohre, moß ene Nahme för di Sigg aanjejovve sin.",
+	"templatesandbox-editform-invalid-template": "Dä aanjejovve Nahme för di Schablohn es onjöltesch.",
+	"templatesandbox-editform-invalid-title": "Di aanjejovve Övverschreff för et Schablohne Ußprobehre es onjöltesch.",
+	"templatesandbox-editform-title-not-exists": "Di aanjejovve Övverschreff för et Schablohne Ußprobehre jidd_et nit."
+}

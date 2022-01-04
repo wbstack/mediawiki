@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Srdjan m",
+			"Srđan"
+		]
+	},
+	"templatesandbox-editform-legend": "Prikaži stranicu s ovim šablonom",
+	"templatesandbox-editform-page-label": "Naziv stranice",
+	"templatesandbox-editform-view-label": "Prikaži izgled",
+	"templatesandbox-preview": "Pregled $2",
+	"templatesandbox-previewnote": "'''Ne zaboravite da je ovo samo pregled [[:$1]].'''\nVaše izmjene još nisu sačuvane!",
+	"templatesandbox-editform-title-not-exists": "Stranica koju ste naveli ne postoji."
+}

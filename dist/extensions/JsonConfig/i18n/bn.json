@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftab1995",
+			"Aftabuzzaman",
+			"আফতাবুজ্জামান"
+		]
+	},
+	"nstab-data": "উপাত্ত",
+	"tooltip-ca-nstab-data": "উপাত্ত পাতাটি দেখুন",
+	"jsonconfig-duplicate-field": "একের অধিক \"$1\" মান পাওয়া গেছে",
+	"jsonconfig-edit-action-apply": "প্রয়োগ করুন",
+	"jsonconfig-edit-action-cancel": "বাতিল",
+	"jsonconfig-edit-button-label": "ছক হিসেবে সম্পাদনা করুন",
+	"jsonconfig-edit-dialog-title": "JSON সম্পাদনা করুন",
+	"jsonconfig-err-array": "প্যারামিটার \"$1\" অবশ্যই একটি তালিকা হতে হবে, উদাহরণ <kbd>[\"মান১\", \"মান২\", ...]</kbd>",
+	"jsonconfig-err-bool": "প্যারামিটার \"$1\" ট্রু বা ফলস হতে হবে",
+	"jsonconfig-err-integer": "প্যারামিটার \"$1\" অবশ্যই একটি পূর্ণসংখ্যা হতে হবে",
+	"jsonconfig-err-number": "প্যারামিটার \"$1\" অবশ্যই একটি নম্বর হতে হবে",
+	"jsonconfig-err-string": "প্যারামিটার \"$1\" একটি স্ট্রিং হতে হবে",
+	"jsonconfig-err-url": "প্যারামিটার \"$1\" অবশ্যই একটি বৈধ URL হতে হবে",
+	"jsonconfig-optional-field": "(ঐচ্ছিক)",
+	"jsonconfig-type-name-invalid": "অবৈধ",
+	"jsonconfig-type-name-string": "স্ট্রিং",
+	"jsonconfig-type-name-localized": "স্থানীয়কৃত",
+	"jsonconfig-type-name-number": "নম্বর",
+	"jsonconfig-type-name-boolean": "বুলিয়ান",
+	"jsonconfig-license": "উপাত্ত $1 লাইসেন্সের অধীনে উপলব্ধ।",
+	"jsonconfig-license-name-CC0-1.0": "ক্রিয়েটিভ কমন্স জিরো"
+}

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Okras"
+		]
+	},
+	"mailgun-desc": "Отправка писем из Mediawiki через API-сервис"
+}

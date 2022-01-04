@@ -1,0 +1,40 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16",
+			"Codicorumus",
+			"Nemo bis",
+			"Sarah Bernabei"
+		]
+	},
+	"templatesandbox": "Pagina di prova Template",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Visualizza una pagina]] includendovi le versioni dei template contenute in una sandbox",
+	"templatesandbox-suffix": "sandbox",
+	"templatesandbox-legend": "Pagina di prova Template",
+	"templatesandbox-text": "Indicando un prefisso per la sandbox, puoi selezionare un gruppo di template salvati nel tuo spazio sandbox.\nPer esempio, se vuoi fare l'anteprima di una versione di {{ns:Template}}:Test che hai salvato come \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", usa come prefisso \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\".",
+	"templatesandbox-prefix-label": "Prefisso delle sandbox:",
+	"templatesandbox-page-label": "Pagina da visualizzare:",
+	"templatesandbox-revid-label": "Versione da visualizzare:",
+	"templatesandbox-text-label": "Wikicodice da visualizzare:",
+	"templatesandbox-submit": "Visualizza",
+	"templatesandbox-title-output": "Prova template su: $1",
+	"templatesandbox-editform-legend": "Anteprima di una pagina con questo template",
+	"templatesandbox-editform-page-label": "Titolo della pagina",
+	"templatesandbox-editform-view-label": "Visualizza anteprima",
+	"templatesandbox-preview": "Anteprima di $2",
+	"templatesandbox-previewnote": "'''Ricorda che questa è solo un'anteprima di [[:$1]].'''\nLe tue modifiche NON sono ancora state salvate!",
+	"templatesandbox-invalid-title": "Il titolo che hai specificato non è valido.",
+	"templatesandbox-title-not-exists": "Il titolo che hai specificato non esiste.",
+	"templatesandbox-revision-not-exists": "La versione che hai specificato non esiste.",
+	"templatesandbox-invalid-prefix": "Il prefisso di sandbox che hai indicato non è valido.",
+	"templatesandbox-prefix-not-local": "Il prefisso di sandbox che hai indicato non è locale.",
+	"templatesandbox-page-or-revid": "Devi inserire il titolo di una pagina oppure un numero di versione.",
+	"templatesandbox-fail-post": "<em>A causa della perdita dei dati della sessione, l'anteprima è nascosta come precauzione contro gli attacchi JavaScript.</em>\n\n<strong>Se si tratta di un normale tentativo d'anteprima, riprova.</strong> \nSe comunque non dovesse funzionare, prova ad [[Special:UserLogout|uscire]] ed a rientrare.",
+	"templatesandbox-fail-post-anon": "<em>Poiché non hai effettuato l'accesso, l'anteprima è nascosta come precauzione contro gli attacchi JavaScript.</em>\n\n<strong>Se si tratta di un normale tentativo d'anteprima, [[Special:UserLogin|entra]] e riprova.</strong>",
+	"templatesandbox-anon-limited-preview": "L'anteprima delle modifiche a JavaScript e CSS è disattivata quando non si è eseguito l'accesso. Se hai bisogno di vedere l'anteprima di queste modifiche, per favore [[Special:UserLogin|accedi]] e riprova.",
+	"templatesandbox-editform-need-template": "Per visualizzare l'anteprima di un'altra pagina con questo template, devi specificare il nome di un template.",
+	"templatesandbox-editform-need-title": "Per visualizzare l'anteprima di un'altra pagina con questo template, devi specificare il titolo di una pagina.",
+	"templatesandbox-editform-invalid-template": "Il nome del template specificato non è valido.",
+	"templatesandbox-editform-invalid-title": "Il titolo che hai specificato per l'anteprima non è valido.",
+	"templatesandbox-editform-title-not-exists": "Il titolo che hai specificato per l'anteprima non esiste."
+}

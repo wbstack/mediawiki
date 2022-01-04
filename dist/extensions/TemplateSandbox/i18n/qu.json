@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"AlimanRuna",
+			"Macofe"
+		]
+	},
+	"templatesandbox": "Pukllana plantilla",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|P'anqata rikch'achin]] pukllanamanta plantillakunata ch'aqtaspa",
+	"templatesandbox-suffix": "pukllana",
+	"templatesandbox-legend": "Pukllana plantilla",
+	"templatesandbox-text": "Pukllana k'itiykipi waqaychasqa plantillakunamanta akllaytam atinki, pukllanapaq allin qallarina k'askaqninta llamk'achispa.\nAhinataq, \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\" sutiwan waqaychasqayki {{ns:Template}}:Test nisqamanta musuqchasqata ñawpaqta qhawayta munaspaykiqa, \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" nisqata qallarina k'askaqnin hinata llamk'achiy.",
+	"templatesandbox-prefix-label": "Pukllanap qallarina k'askaqnin",
+	"templatesandbox-page-label": "P'anqata rikch'achiy:",
+	"templatesandbox-revid-label": "Musuqchasqata rikch'achiy:",
+	"templatesandbox-text-label": "Wiki qillqata rikch'achiy:",
+	"templatesandbox-submit": "Qhaway",
+	"templatesandbox-title-output": "Pukllana plantilla: $1",
+	"templatesandbox-editform-legend": "P'anqata ñawpaqta kay plantillawan qhaway",
+	"templatesandbox-editform-page-label": "P'anqap sutin",
+	"templatesandbox-editform-view-label": "Ñawpaqta qhawallay",
+	"templatesandbox-preview": "$2-ta ñawpaqta qhawallay",
+	"templatesandbox-previewnote": "'''Yuyaykuy: Kayqa [[:$1]]-manta qhawariyllam.'''\nLlamk'apusqaykiqa manaraqmi waqaychasqachu!",
+	"templatesandbox-invalid-title": "Qusqayki p'anqap sutinqa manam allinchu.",
+	"templatesandbox-title-not-exists": "Qusqayki p'anqap sutinqa manam kanchu.",
+	"templatesandbox-revision-not-exists": "Qusqayki p'anqa musuqchasqaqa manam kanchu.",
+	"templatesandbox-invalid-prefix": "Qusqayki pukllanap qallarina k'askaqninqa manam allinchu.",
+	"templatesandbox-prefix-not-local": "Qusqayki pukllanap qallarina k'askaqninqa manam tiyanallapaqchu.",
+	"templatesandbox-page-or-revid": "P'anqap sutinta icha musuqchasqapaq ID huchhata yaykuchinaykim tiyan.",
+	"templatesandbox-editform-need-title": "Kay plantillawan huk p'anqata ñawpaqta qhawanaykipaqqa,  p'anqap sutinta qunaykim tiyan.",
+	"templatesandbox-editform-invalid-title": "Qusqayki ñawpaqta qhawanapaq sutiqa manam allinchu.",
+	"templatesandbox-editform-title-not-exists": "Qusqayki ñawpaqta qhawanapaq sutiqa manam kanchu."
+}

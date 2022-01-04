@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hedda"
+		]
+	},
+	"wikibaselexemecirrus-desc": "CirrusSearch işlevselliğini kullanmak için WikibaseLexeme uzantısı",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Önek (tamamlama) araması için tekrar arama profili"
+}

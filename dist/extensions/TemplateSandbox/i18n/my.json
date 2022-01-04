@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dr Lotus Black",
+			"Ninjastrikers"
+		]
+	},
+	"templatesandbox": "တမ်းပလိတ် သဲပုံး",
+	"templatesandbox-legend": "တမ်းပလိတ် သဲပုံး",
+	"templatesandbox-submit": "ကြည့်ရန်",
+	"templatesandbox-title-output": "တမ်းပလိတ် သဲပုံး: $1",
+	"templatesandbox-editform-legend": "စာမျက်နှာအား ဤတမ်းပလိတ်ဖြင့် နမူနာကြည့်ရန်",
+	"templatesandbox-editform-page-label": "စာမျက်နှာ ခေါင်းစဉ်",
+	"templatesandbox-editform-view-label": "န​မူ​နာ​ပြ​ရန်",
+	"templatesandbox-preview": "$2 ၏ အကြိုမြင်ကွင်း",
+	"templatesandbox-previewnote": "'''ဤသည်မှာ [[:$1]]၏ အကြိုမြင်ကွင်းမျှသာဖြစ်သည်ကို အမှတ်ရပါ။'''\nသင်၏ ပြောင်းလဲမှုများမှာ မသိမ်းဆည်းရသေးပါ။",
+	"templatesandbox-invalid-title": "သတ်မှတ်လိုက်သောခေါင်းစဉ်သည် မဆီလျော်ပါ။",
+	"templatesandbox-editform-need-template": "အခြားစာမျက်နှာအား ဤတမ်းပလိတ်ဖြင့် နမူနာကြည့်ရှုနိုင်ရန် တမ်းပလိတ်အမည်တစ်ခုကို ထည့်သွင်းပေးရမည်။",
+	"templatesandbox-editform-need-title": "အခြားစာမျက်နှာကို ဤတမ်းပလိတ်ဖြင့် နမူနာကြည့်ရှုနိုင်ရန် စာမျက်နှာခေါင်းစဉ်တစ်ခုကို ထည့်သွင်းပေးရမည်။"
+}

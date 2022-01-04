@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Strainu"
+		]
+	},
+	"codemirror-desc": "Oferă evidențierea sintaxei în editorul wikitext",
+	"codemirror-toggle-label": "Evidențierea sintaxei"
+}

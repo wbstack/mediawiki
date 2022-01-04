@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck"
+		]
+	},
+	"mailgun-desc": "Дасылае лісты электроннай пошты праз службу Mailgun API з Mediawiki"
+}

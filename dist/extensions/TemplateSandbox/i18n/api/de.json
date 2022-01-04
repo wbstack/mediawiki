@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Metalhead64"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Vorlagenspielwiesenpräfix, so wie bei [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Parst die Seite mithilfe <var>$1templatesandboxtext</var> an Stelle der Inhalte der hier benannten Seite.",
+	"templatesandbox-apihelp-text": "Parst die Seite mithilfe dieses Seiteninhalts an Stelle der durch <var>$1templatesandboxtitle</var> benannten Seite.",
+	"templatesandbox-apihelp-contentmodel": "Inhaltsmodell von <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Inhaltsmodell von <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Die beiden Parameter <var>$1templatesandboxtitle</var> und <var>$1templatesandboxtext</var> müssen angegeben oder übersprungen werden."
+}

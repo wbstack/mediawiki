@@ -1,0 +1,17 @@
+{
+	"@metadata": {
+		"authors": [
+			"ShockD",
+			"StanProg",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"templatesandbox": "Пясъчник за шаблони",
+	"templatesandbox-legend": "Пясъчник за шаблони",
+	"templatesandbox-submit": "Изглед",
+	"templatesandbox-title-output": "Пясъчник за шаблони: $1",
+	"templatesandbox-editform-legend": "Предварителен преглед на страницата с този шаблон",
+	"templatesandbox-editform-page-label": "Заглавие на страницата",
+	"templatesandbox-editform-view-label": "Предварителен преглед",
+	"templatesandbox-editform-need-title": "За да прегледате друга страница с този шаблон, трябва да укажете заглавието на страницата."
+}

@@ -1,0 +1,31 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ladsgroup",
+			"Macofe",
+			"ОйЛ"
+		]
+	},
+	"wikibase-edit": "исправлѥниѥ",
+	"wikibase-save": "съхранѥниѥ",
+	"wikibase-add": "доложєниѥ",
+	"wikibase-save-inprogress": "съхранѥниѥ···",
+	"wikibase-remove-inprogress": "поничьжєниѥ···",
+	"wikibase-entitytermsforlanguagelistview-language": "ѩꙁꙑкъ",
+	"wikibase-description-empty": "опьсаниꙗ ѥщє нѣстъ",
+	"wikibase-diffview-link": "съвѧꙁи",
+	"wikibase-sitelink-site-edit-placeholder": "вики",
+	"wikibase-sitelink-page-edit-placeholder": "страница",
+	"wikibase-sitelinks-special": "инꙑ мєждоусѣтьнꙑ мѣста",
+	"wikibase-remove": "поничьжєниѥ",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|кладѧꙃь|кладѧꙃꙗ|кладаꙃь}}",
+	"wikibase-entityselector-more": "вѧщє",
+	"wikibase-itembytitle-lookup-site": "мѣсто :",
+	"wikibase-itembytitle-lookup-page": "страница :",
+	"wikibase-itembytitle-submit": "ищи",
+	"wikibase-itemdisambiguation-lookup-language": "ѩꙁꙑчьнъ кодъ :",
+	"wikibase-itemdisambiguation-submit": "ищи",
+	"wikibase-newentity-submit": "сътворѥниѥ",
+	"wikibase-modifyterm-language": "ѩꙁꙑчьнъ кодъ :",
+	"wikibase-listdatatypes-time-head": "врѣмѧ"
+}

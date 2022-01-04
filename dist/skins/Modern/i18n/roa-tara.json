@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"skinname-modern": "Moderne",
+	"modern.css": "/* Tutte le CSS aqquà avène carecate pe le utinde ca ausane 'a masckere Moderne */",
+	"modern.js": "/* Tutte le JavaScript aqquà avène carecate pe le utinde ca ausane 'a masckere Moderne */",
+	"modern-desc": "'Nu skin blu/grigge cu le barre laterale e de sus. Derivate da MonoBook"
+}

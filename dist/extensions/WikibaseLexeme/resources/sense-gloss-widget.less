@@ -1,0 +1,90 @@
+@import 'mediawiki.mixins';
+@import 'mediawiki.ui/variables';
+
+.wikibase-lexeme-sense-glosses {
+	margin-right: 252px;
+}
+
+.wikibase-lexeme-sense-glosses-table {
+	max-width: 65rem;
+	border-left: 5px solid @colorGray12;
+	padding-left: 9px;
+}
+
+.wikibase-lexeme-sense-gloss-table-header {
+	color: @colorGray2;
+}
+
+.wikibase-lexeme-sense-glosses-table td {
+	vertical-align: top;
+}
+
+.wikibase-lexeme-sense-glosses-sense-id {
+	display: none;
+}
+
+.wikibase-lexeme-sense-gloss:first-of-type .wikibase-lexeme-sense-glosses-sense-id {
+	display: inline;
+}
+
+.wikibase-lexeme-sense-gloss-language {
+	padding: 0 2px;
+	width: 200px;
+	padding-left: 1em;
+	text-indent: -1em;
+}
+
+.wikibase-lexeme-sense-gloss-value-cell {
+	.hyphens( auto );
+	width: auto;
+}
+
+.wikibase-lexeme-sense-gloss-actions-cell {
+	width: 0.01%;
+}
+
+.wikibase-lexeme-sense-gloss-language-input,
+.wikibase-lexeme-sense-gloss-value-input {
+	resize: horizontal;
+	width: 100%;
+	direction: inherit;
+}
+
+.wikibase-lexeme-sense-glosses-control {
+	text-transform: capitalize;
+	background: transparent;
+	border: 0;
+
+	&:enabled {
+		color: @colorProgressive;
+		cursor: pointer;
+
+		&:hover {
+			text-decoration: underline;
+		}
+	}
+
+	&:disabled { // stylelint-disable-line no-descending-specificity
+		color: @colorGray7;
+	}
+}
+
+.wikibase-lexeme-sense-gloss-language-input_invalid-language,
+.wikibase-lexeme-sense-gloss_invalid-language-warning {
+	background-color: @warning-background;
+	border-color: @warning-color;
+}
+
+.wikibase-lexeme-sense-gloss_invalid-language-warning p {
+	padding: 0.5em 0.5em;
+}
+
+.wikibase-lexeme-sense-gloss-language-input_redundant-language,
+.wikibase-lexeme-sense-gloss_redundant-language-warning {
+	background-color: @warning-background;
+	border-color: @warning-color;
+}
+
+.wikibase-lexeme-sense-gloss_redundant-language-warning p {
+	padding: 0.5em 0.5em;
+}

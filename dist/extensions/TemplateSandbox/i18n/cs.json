@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Danny B.",
+			"Dvorapa",
+			"Matěj Suchánek",
+			"Mormegil"
+		]
+	},
+	"templatesandbox": "Pískoviště šablon",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Vykreslování stránek]], které aplikuje šablony z pískoviště",
+	"templatesandbox-suffix": "Pískoviště",
+	"templatesandbox-legend": "Pískoviště šablon",
+	"templatesandbox-text": "Můžete si vybrat sadu šablon uložených ve vašem pískovišti, když použijete vhodný prefix pískoviště.\nPokud například chcete zobrazit náhled verze {{ns:Template}}:Test, kterou jste si {{GENDER:|uložil|uložila|uložili}} jako „{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test“, použijte jako prefix „{{ns:User}}:Foo/{{int:templatesandbox-suffix}}“.",
+	"templatesandbox-prefix-label": "Prefix pískoviště:",
+	"templatesandbox-page-label": "Vykreslit stránku:",
+	"templatesandbox-revid-label": "Vykreslit revizi:",
+	"templatesandbox-text-label": "Vykreslit wikitext:",
+	"templatesandbox-submit": "Zobrazit",
+	"templatesandbox-title-output": "Pískoviště šablon: $1",
+	"templatesandbox-editform-legend": "Náhled stránky s touto šablonou",
+	"templatesandbox-editform-page-label": "Název stránky",
+	"templatesandbox-editform-view-label": "Ukázat náhled",
+	"templatesandbox-preview": "Náhled stránky $2",
+	"templatesandbox-previewnote": "'''Pamatujte, že toto je pouze náhled stránky [[:$1]].'''\nZměny zatím nebyly uloženy!",
+	"templatesandbox-invalid-title": "Zadaný název je neplatný.",
+	"templatesandbox-title-not-exists": "Zadaný název neexistuje.",
+	"templatesandbox-revision-not-exists": "Zadaná revize neexistuje.",
+	"templatesandbox-revision-no-content": "Uvedená revize nemá žádný obsah, nebo nejste oprávněni si ho prohlédnout.",
+	"templatesandbox-invalid-prefix": "Zadaný prefix pískoviště je neplatný.",
+	"templatesandbox-prefix-not-local": "Zadaný prefix pískoviště není místní.",
+	"templatesandbox-page-or-revid": "Musíte zadat název stránky nebo číslo revize.",
+	"templatesandbox-fail-post": "<em>Protože došlo ke ztrátě dat relace, je náhled skryt kvůli ochraně před JavaScriptovými útoky.</em>\n\n<strong>Pokud to byl legitimní pokus o náhled, zkuste to znovu.</strong>\nPokud to stále nebude fungovat, zkuste se [[Special:UserLogout|odhlásit]] a znovu přihlásit.",
+	"templatesandbox-fail-post-anon": "<em>Protože nejste přihlášeni, je náhled skryt kvůli ochraně před JavaScriptovými útoky.</em>\n\n<strong>Pokud to byl legitimní pokus o náhled, [[Special:UserLogin|přihlaste se]] a zkuste to znovu.</strong>",
+	"templatesandbox-anon-limited-preview": "Náhled změn JavaScriptu a CSS je vypnutý, pokud nejste přihlášeni. Pokud si chcete zobrazit náhled těchto změn, [[Special:UserLogin|přihlaste se]] a zkuste to znovu.",
+	"templatesandbox-editform-need-template": "Pokud chcete zobrazit náhled jiné stránky s využitím této šablony, musíte zadat název šablony.",
+	"templatesandbox-editform-need-title": "Pokud chcete zobrazit náhled jiné stránky s využitím této šablony, musíte zadat název stránky.",
+	"templatesandbox-editform-invalid-template": "Zadaný název šablony je neplatný.",
+	"templatesandbox-editform-invalid-title": "Zadaný název stránky pro náhled je neplatný.",
+	"templatesandbox-editform-title-not-exists": "Zadaný název stránky pro náhled neexistuje."
+}

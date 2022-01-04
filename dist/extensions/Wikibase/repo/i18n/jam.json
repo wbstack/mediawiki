@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dentonius",
+			"Katxis",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "change up",
+	"wikibase-add": "ad",
+	"wikibase-label-empty": "No liebl no difain‎",
+	"wikibase-description-empty": "No diskripshan no difain‎",
+	"wikibase-sitelinks-special": "Adaels sait‎",
+	"wikibase-statementview-rank-normal": "Naamal rangk‎",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|refrans|refransdem}}‎"
+}

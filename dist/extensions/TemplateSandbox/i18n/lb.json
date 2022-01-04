@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby"
+		]
+	},
+	"templatesandbox": "Schabloun-Sandkëscht",
+	"templatesandbox-desc": "[[Special:TemplateSandbox| Generéiert eng Säit]] mat agebonnene Schablounen aus enger Sandkësch",
+	"templatesandbox-suffix": "Sandkëscht",
+	"templatesandbox-legend": "Schabloun vun der Sandkëscht",
+	"templatesandbox-revid-label": "Versioun generéieren:",
+	"templatesandbox-submit": "Weisen",
+	"templatesandbox-title-output": "Sandkëscht-Schabloun$: $1",
+	"templatesandbox-editform-legend": "Säit mat dëser Schabloun weisen ouni ze späicheren",
+	"templatesandbox-editform-page-label": "Titel vun der Säit",
+	"templatesandbox-editform-view-label": "Kucken ouni ofzespäicheren",
+	"templatesandbox-preview": "$2 kucken ouni ze späicheren",
+	"templatesandbox-previewnote": "'''Denkt drun datt dëst nëmmen eng net gespäichert Versioun vun [[:$1]] ass.'''\nÄr Ännerunge sinn nach net gespäichert!",
+	"templatesandbox-invalid-title": "Den Titel deen Dir uginn hutt ass net valabel.",
+	"templatesandbox-title-not-exists": "Den Titel deen Dir uginn hutt gëtt et net.",
+	"templatesandbox-revision-not-exists": "D'Versioun déi Dir uginn hutt gëtt et net.",
+	"templatesandbox-editform-need-template": "Fir eng aner Säit mat dëser Schabloun ze kucken (ouni ze späicheren), musst Dir den Numm vun enger Schabloun uginn.",
+	"templatesandbox-editform-need-title": "Fir eng aner Säit mat dëser Schabloun ze kucken (ouni ze späicheren), musst Dir den Titel vun enger Säit uginn,",
+	"templatesandbox-editform-invalid-template": "Den Numm vun der Schabloun deen Dir uginn hutt ass net valabel.",
+	"templatesandbox-editform-invalid-title": "Den Titel deen Dir uginn hutt fir ze kucken ass net valabel.",
+	"templatesandbox-editform-title-not-exists": "Den Titel deen Dir uginn hutt fir ze kucke gëtt et net."
+}

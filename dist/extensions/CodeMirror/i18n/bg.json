@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"ShockD",
+			"StanProg"
+		]
+	},
+	"codemirror-desc": "Осигурява оцветяване на синтаксиса в редактора на уикитекст",
+	"codemirror-toggle-label": "Оцветяване на синтаксиса"
+}

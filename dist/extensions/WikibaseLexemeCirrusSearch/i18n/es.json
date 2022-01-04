@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Fitoschido"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Extensión de WikibaseLexeme para aprovechar la funcionalidad de CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Perfil de revaloración para búsqueda por prefijos (de compleción)"
+}

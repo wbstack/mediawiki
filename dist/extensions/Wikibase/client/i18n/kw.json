@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"GwikorFrank",
+			"Kw-Moon",
+			"MinecraftAustralia",
+			"Nrowe"
+		]
+	},
+	"tooltip-t-wikibase": "Kevrenna dhe elven kovskrifva dhata junyes",
+	"wikibase-comment-update": "Elven {{WBREPONAME}} chanjyes",
+	"wikibase-dataitem": "Elven {{WBREPONAME}}",
+	"wikibase-editlinks": "Golegi kevrennow",
+	"wikibase-editlinkstitle": "Golegi kevrennow treusyethek",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Kudha",
+	"wikibase-rc-hide-wikidata-show": "Diskwedhes",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "Golegi {{WBREPONAME}}",
+	"wikibase-pageinfo-entity-usage": "Elvennow {{WBREPONAME}} usys y'n folen ma",
+	"wikibase-otherprojects": "Yn ragdresow erel"
+}

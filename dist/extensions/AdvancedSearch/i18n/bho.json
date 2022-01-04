@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"SatyamMishra"
+		]
+	},
+	"advancedsearch-options-pane-head": "एडवांस खोज:",
+	"advancedsearch-optgroup-text": "पन्ना के टेक्स्ट में खोजीं",
+	"advancedsearch-optgroup-structure": "स्ट्रक्चर",
+	"advancedsearch-optgroup-files": "फाइल आ फोटो सभ",
+	"advancedsearch-optgroup-sort": "सरियावे के क्रम",
+	"advancedsearch-field-plain": "हई शब्द सभ",
+	"advancedsearch-field-phrase": "एकदम्मे इहे टेक्स्ट",
+	"advancedsearch-field-or": "एह सभ में से कौनों शब्द",
+	"advancedsearch-field-not": "हई शब्द ना होखे",
+	"advancedsearch-field-subpageof": "एह पन्ना के उपपन्ना",
+	"advancedsearch-field-intitle": "पन्ना के टाइटिल में होखे",
+	"advancedsearch-field-deepcategory": "एह श्रेणी में के पन्ना",
+	"advancedsearch-field-hastemplate": "एह टेम्पलेट वाला पन्ना",
+	"advancedsearch-field-inlanguage": "एह भाषा के पन्ना",
+	"advancedsearch-field-filetype": "फाइल के प्रकार",
+	"advancedsearch-field-filew": "फाइल के चौड़ाई पिक्सेल में",
+	"advancedsearch-field-fileh": "फाइल के हाइट पिक्सेल में",
+	"advancedsearch-field-sort": "सरियावे के क्रम",
+	"advancedsearch-field-preview-sort": "$1 अनुसार सरियाईं"
+}

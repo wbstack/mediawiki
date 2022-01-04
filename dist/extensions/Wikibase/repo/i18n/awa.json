@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"1AnuraagPandey",
+			"Ajeetsinghawadh",
+			"Ajeetsinghawadhi",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "सम्पादन",
+	"wikibase-add": "जोड़ा जाय",
+	"wikibase-label-empty": "कोई नामपत्र परिभाषित नहीं",
+	"wikibase-description-empty": "कवनो विवरण परिभाषित नाइ है।",
+	"wikibase-statementsection-statements": "कथन",
+	"wikibase-sitelinks-special": "अउर वेबसाइट",
+	"wikibase-referenceview-tabs-manual": "गाइड",
+	"wikibase-statementview-rank-normal": "साधारण पद",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|स्रोत}}"
+}

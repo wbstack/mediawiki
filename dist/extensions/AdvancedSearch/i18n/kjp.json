@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rul1902"
+		]
+	},
+	"advancedsearch-optgroup-files": "ဃွှာန့်လ်ု ၯင်သယ်",
+	"advancedsearch-field-plain": "လိက်ဖၠုံး အ်ုယိုဝ်သယ်",
+	"advancedsearch-field-or": "လိက်ဖၠုံးယိုဝ်ဝယ် လ်ုဖၠုံး",
+	"advancedsearch-field-not": "မွာဲနာန်ဖၠုံးအေး",
+	"advancedsearch-field-filetype": "အးမိင်အးစိင် ဃွှာန့်",
+	"advancedsearch-filetype-default": "လုဲႋဃွှာန့်အးမိင်အးစိင်",
+	"advancedsearch-filetype-bitmap": "ၯင်",
+	"advancedsearch-filetype-audio": "အ်ုလူႋ",
+	"advancedsearch-filetype-video": "ပ်ုတ်ုယိုဝ်",
+	"advancedsearch-filetype-office": "ရုံႋ",
+	"advancedsearch-filesize-equals": "ဆ်ုၰိုဲ့ၯံင်",
+	"advancedsearch-filesize-greater-than": "ဍောဟ်ဝေ့လ်ု",
+	"advancedsearch-namespaces-search-in": "ဝယ်မ်ုအင်းၰူ့:",
+	"advancedsearch-namespaces-preset-all": "လုက်ဆိုင်",
+	"advancedsearch-namespaces-preset-default": "အှ်သိုဝ်",
+	"advancedsearch-namespaces-preset-discussion": "လဝ်ထါင်ကါင်ကါ"
+}

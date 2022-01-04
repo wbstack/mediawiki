@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"jsonconfig-err-bool": "Le valor del parametro \"$1\" debe esser <code>true</code> o <code>false</code>",
+	"jsonconfig-err-string": "Parametro \"$1\" debe esser un catena de characteres",
+	"jsonconfig-optional-field": "(optional)"
+}

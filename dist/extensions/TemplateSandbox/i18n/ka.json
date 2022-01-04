@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"David1010",
+			"Macofe",
+			"Გიო ოქრო",
+			"Იო ოქრო"
+		]
+	},
+	"templatesandbox": "თარგის სავარჯიშო",
+	"templatesandbox-suffix": "სავარჯიშო",
+	"templatesandbox-legend": "თარგის სავარჯიშო",
+	"templatesandbox-prefix-label": "სავარჯიშოს პრეფიქსი:",
+	"templatesandbox-submit": "ხილვა",
+	"templatesandbox-title-output": "თარგის სავარჯიშო: $1",
+	"templatesandbox-editform-legend": "გვერდის წინასწარი გადახედვა ამ თარგით",
+	"templatesandbox-editform-page-label": "გვერდის სათაური",
+	"templatesandbox-editform-view-label": "წინასწარი გადახედვა",
+	"templatesandbox-preview": "$2-ის წინასწარი გადახედვა",
+	"templatesandbox-previewnote": "'''დაიმახსოვრეთ, ეს მხოლოდ [[:$1]]-ის წინასწარი გადახედვაა.'''\nთქვენი ცვლილებები ჯერ არ შენახულა!",
+	"templatesandbox-editform-title-not-exists": "გვერდი, რომელიც თქვენ აირჩიეთ წინასწარ გადასახედად, არ არსებობს."
+}

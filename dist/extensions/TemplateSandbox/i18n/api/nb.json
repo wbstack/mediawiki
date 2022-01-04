@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Malsandkasseprefiks, som på [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Parse siden med <var>$1templatesandboxtext</var> i stedet for innholdet i siden som nevnes her.",
+	"templatesandbox-apihelp-text": "Parse siden med dette sideinnholdet i stedet for siden som nevnes av <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Innholdsmodell for <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Innholdsformat for <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Parameterne <var>$1templatesandboxtitle</var> og <var>$1templatesandboxtext</var> må enten begge angis, eller ikke angis."
+}

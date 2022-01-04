@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"محک"
+		]
+	},
+	"echo-new-messages": "شمه وسه نو پغوم بی‌یشتنه",
+	"tooltip-pt-notifications-alert": "{{GENDER:|شمه}} هشدارون"
+}

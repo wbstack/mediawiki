@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"פוילישער"
+		]
+	},
+	"popups-message": "בלטעטר־פֿאראויסשטעלונגען",
+	"popups-desc": "ווייזט פֿאראויסשטעלונגען ווען דער באניצער פֿירט דס מייזל איבער א בלאטלינק",
+	"popups-settings-title": "בלאַט פאראויסשטעלונג",
+	"popups-settings-option-page": "אַקטיווירן",
+	"popups-settings-option-page-description": "באקומען גיכע פֿאראויסשטעלונגען פֿון א טעמע ביים לייענען א בלאט.",
+	"popups-settings-save": "אויפֿהיטן",
+	"popups-settings-help-ok": "פארטיג",
+	"popups-settings-cancel": "אַנולירן",
+	"popups-settings-help": "איר קענט אקטיווירן פֿאראויסשטעלונגען ווידעראמאל מיט א לינק אין בלאט־פיסל.",
+	"popups-settings-enable": "אנשטעלן פֿאראויסשטעלונגען",
+	"popups-preview-no-preview": "האט זיך געמאכט א פראבלעם מיט ווייזן די אנשטעלונג",
+	"popups-preview-footer-read": "גיין צו דעם בלאט",
+	"popups-preview-disambiguation": "דער דאזיקער טיטל באציט זיך אויף מער ווי איין בלאט",
+	"popups-preview-disambiguation-link": "באקוקן ענלעכע בלעטער",
+	"prefs-reading": "ליין־פרעפֿערענצן",
+	"popups-prefs-optin": "דערמעגלעכן בלעטער־פאראויסשטעלונגען (גיכע פאראויסשטעלונגען פון א טעמע בשעת ליינען א בלאט)",
+	"popups-prefs-disable-nav-gadgets-info": "איר דארפֿט [[$1 | אפשטעלן דעם נאוויגאציע־פֿענצטערס דזשימדשיק]] פון דעם דזשימזשיקעס צונגל כדי אנצושטען בלעטער־פֿאראויסשטעלונגען"
+}

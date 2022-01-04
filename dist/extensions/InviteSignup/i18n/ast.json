@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Xuacu"
+		]
+	},
+	"invitesignup": "Convidar persones a esta wiki",
+	"is-desc": "Unviar invitaciones per corréu",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "Corréu",
+	"is-tableth-inviter": "Convidador",
+	"is-tableth-signup": "Rexistráu",
+	"is-tableth-groups": "Grupos",
+	"is-add": "Amestar",
+	"is-delete": "Desaniciar",
+	"is-invalidemail": "<b>$1</b> nun ye una dirección de corréu electrónicu válida.",
+	"is-emailsubj": "Convidáronte a xunite a {{SITENAME}}",
+	"is-emailbody": "Hola,\n\n{{GENDER:$1|$1}} te convidó a rexistrate'n {{SITENAME}}.\nPuedes faelo en $2",
+	"right-invitesignup": "Convidar usuarios a rexistrase",
+	"action-invitesignup": "convidar a usuarios a rexistrase nesti sitiu"
+}

@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joedalton",
+			"Saederup92"
+		]
+	},
+	"twocolconflict-beta-feature-message": "Tokolonners redigeringskonflikt",
+	"twocolconflict-core-ui-hint-close": "Vis aldrig igen",
+	"twocolconflict-split-your-version-header": "Din revision",
+	"twocolconflict-split-not-saved-at": "Endnu ikke offentliggjort",
+	"twocolconflict-split-choose-version": "Vælg venligst en version",
+	"twocolconflict-split-other-version-chosen": "Anden version",
+	"twocolconflict-split-your-version-chosen": "Din version",
+	"twocolconflict-split-select-all": "Vælg alle",
+	"twocolconflict-split-tour-popup-btn-text": "Okay, modtaget.",
+	"twocolconflict-split-edit-tooltip": "Tryk for at redigere denne tekst",
+	"twocolconflict-split-reset-tooltip": "Nulstil tekst",
+	"twocolconflict-split-reset-warning-cancel": "Annullér",
+	"twocolconflict-split-reset-warning-accept": "Kasser",
+	"twocolconflict-split-collapse-tooltip": "Sammenfold uændret tekst",
+	"twocolconflict-split-expand-tooltip": "Udvid uændret tekst",
+	"twocolconflict-talk-your": "Din kommentar"
+}

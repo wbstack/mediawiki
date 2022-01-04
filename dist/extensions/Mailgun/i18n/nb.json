@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Jon Harald Søby"
+		]
+	},
+	"mailgun-desc": "Sender epost via Mailgun-API-tjenesten fra MediaWiki"
+}

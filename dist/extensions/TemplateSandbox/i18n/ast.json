@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Xuacu"
+		]
+	},
+	"templatesandbox": "Zona de prueba pa les plantíes",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Amuesa una páxina]] cola tresclusión de plantíes d'una zona de pruebes",
+	"templatesandbox-suffix": "zona de pruebes",
+	"templatesandbox-legend": "Zona de prueba pa les plantíes",
+	"templatesandbox-text": "Pue esbillar un conxuntu de plantíes guardaes nel so espaciu de pruebes usando un prefixu apropiáu pa la zona de pruebes.\nPor exemplu, si quier ver la vista previa d'una versión de \"{{ns:Template}}:Prueba\" que guardó como \"{{ns:User}}:Exemplu/{{int:templatesandbox-suffix}}/{{ns:Template}}:Prueba\", utilice \"{{ns:User}}:Exemplu/{{int:templatesandbox-suffix}}\" como prefixu.",
+	"templatesandbox-prefix-label": "Prefixu de la zona de pruebes:",
+	"templatesandbox-page-label": "Representar la páxina:",
+	"templatesandbox-revid-label": "Representar la revisión:",
+	"templatesandbox-text-label": "Representar el testu wiki:",
+	"templatesandbox-submit": "Ver",
+	"templatesandbox-title-output": "Zona de prueba pa les plantíes: $1",
+	"templatesandbox-editform-legend": "Vista previa de páxina con esta plantía",
+	"templatesandbox-editform-page-label": "Títulu de la páxina",
+	"templatesandbox-editform-view-label": "Amosar vista previa",
+	"templatesandbox-preview": "Vista previa de $2",
+	"templatesandbox-previewnote": "'''Alcuerdate de qu'esto ye sólo una vista previa de [[:$1]].'''\n¡Los cambios entá nun se guardaron!",
+	"templatesandbox-invalid-title": "El títulu que conseñasti nun ye válidu.",
+	"templatesandbox-title-not-exists": "El títulu que conseñasti nun esiste.",
+	"templatesandbox-revision-not-exists": "La revisión que conseñasti nun esiste.",
+	"templatesandbox-revision-no-content": "La revisión qu'especificasti nun tien conteníu, o nun tienes permisu pa velu.",
+	"templatesandbox-invalid-prefix": "El prefixu de zona de pruebes que conseñasti ye inválidu.",
+	"templatesandbox-prefix-not-local": "El prefixu de zona de pruebes que conseñasti nun ye llocal.",
+	"templatesandbox-page-or-revid": "Tienes d'escribir o'l títulu d'una páxina o un númberu ID de revisión.",
+	"templatesandbox-fail-post": "<em>Por una perda de datos de la sesión, la vista previa ta tapecida como precaución escontra ataques de JavaScript.</em>\n\n<strong>Si esti ye un intentu llexítimu d'accesu a la vista previa, vuelvi a intentalo.</strong>\nSi inda nun funciona, intenta [[Special:UserLogout|salir]] y volver a entrar na to cuenta.",
+	"templatesandbox-fail-post-anon": "<em>Como nun aniciasti sesión, la vista previa ta tapecida como precaución escontra ataques de JavaScript.</em>\n\n<strong>Si esti ye un intentu llexítimu d'accesu a la vista previa, intenta [[Special:UserLogin|entrar]] y vuelvi a intentalo.</strong>",
+	"templatesandbox-anon-limited-preview": "La vista previa de cambeos al códigu JavaScript y CSS ta desactivada por nun tener sesión aniciada. Si precises una vista previa de los cambios, [[Special:UserLogin|anicia sesión]] y tenta l'aición nuevamente.",
+	"templatesandbox-editform-need-template": "Pa la vista previa d'otra páxina con esta plantía, tien de conseñar un nome de plantía.",
+	"templatesandbox-editform-need-title": "Pa la vista previa d'otra páxina con esta plantía, tienes de conseñar un títulu de páxina.",
+	"templatesandbox-editform-invalid-template": "El nome de plantía qu'especificó nun ye válidu.",
+	"templatesandbox-editform-invalid-title": "El títulu que conseñasti pa la vista previa ye inválidu.",
+	"templatesandbox-editform-title-not-exists": "El títulu que conseñasti pa la vista previa nun esiste"
+}

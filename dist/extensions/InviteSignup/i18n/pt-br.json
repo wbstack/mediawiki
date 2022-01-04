@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eduardo Addad de Oliveira",
+			"Eduardoaddad"
+		]
+	},
+	"invitesignup": "Convidar pessoas para esta wiki",
+	"is-desc": "Enviar convites por correio eletrónico",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "E-mail",
+	"is-tableth-inviter": "Convidado(a) por",
+	"is-tableth-signup": "Registo",
+	"is-tableth-groups": "Grupos da wiki",
+	"is-add": "Adicionar",
+	"is-delete": "Deletar",
+	"is-invalidemail": "<b>$1</b> não é um endereço de correio eletrónico válido.",
+	"is-emailsubj": "Está convidado a juntar-se à wiki {{SITENAME}}",
+	"is-emailbody": "Olá,\n\n{{GENDER:$1|$1}} convidou-o para se registar na wiki {{SITENAME}}.\nPode fazê-lo em $2",
+	"right-invitesignup": "Convidar usuários a registarem-se",
+	"action-invitesignup": "convidar usuários para registarem-se neste site"
+}

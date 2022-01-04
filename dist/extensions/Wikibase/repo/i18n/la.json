@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Demetrius Talpa",
+			"Tacsipacsi",
+			"UV"
+		]
+	},
+	"wikibase-edit": "recensere",
+	"wikibase-save": "servare",
+	"wikibase-add": "addere",
+	"wikibase-entitytermsforlanguagelistview-description": "Descriptio",
+	"wikibase-entitytermsforlanguagelistview-language": "Lingua",
+	"wikibase-sitelinks-special": "Situs alii"
+}

@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ibou",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "soppi",
+	"wikibase-add": "yokk",
+	"wikibase-label-empty": "Xamaleesufi genn tafaan.",
+	"wikibase-description-empty": "Amul genn faramfàcce gees fi xamale",
+	"wikibase-statementsection-statements": "Kàddu",
+	"wikibase-sitelinks-special": "Yeneeni dal",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|delluwaay}}"
+}

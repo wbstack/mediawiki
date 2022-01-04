@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps",
+			"Matma Rex",
+			"Woytecr"
+		]
+	},
+	"invitesignup": "Zaproś ludzi na tę wiki",
+	"is-desc": "Wysyła zaproszenia e-mail",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "E-mail",
+	"is-tableth-inviter": "Zapraszający",
+	"is-tableth-signup": "Data rejestracji",
+	"is-tableth-groups": "Grupy",
+	"is-add": "Dodaj",
+	"is-delete": "Usuń",
+	"is-invalidemail": "<b>$1</b> nie jest prawidłowym adresem e-mail.",
+	"is-emailsubj": "Zostałeś zaproszony do dołączenia na {{SITENAME}}",
+	"is-emailbody": "Witaj,\n\n$1 {{GENDER:$1|zaprosił|zaprosiła}} Cię do rejestracji na stronie {{SITENAME}}.\nMożesz zarejestrować się tutaj: $2",
+	"right-invitesignup": "Zapraszanie użytkowników do rejestracji",
+	"action-invitesignup": "zaproś użytkowników do rejestracji na tę stronę"
+}

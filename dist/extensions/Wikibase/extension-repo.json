@@ -1,0 +1,957 @@
+{
+	"name": "WikibaseRepository",
+	"type": "wikibase",
+	"author": [
+		"The Wikidata team"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Wikibase_Repository",
+	"descriptionmsg": "wikibase-desc",
+	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.37"
+	},
+	"APIModules": {
+		"wbavailablebadges": {
+			"class": "\\Wikibase\\Repo\\Api\\AvailableBadges",
+			"services": [
+				"WikibaseRepo.Settings"
+			]
+		},
+		"wbcreateclaim": {
+			"class": "\\Wikibase\\Repo\\Api\\CreateClaim",
+			"factory": "\\Wikibase\\Repo\\Api\\CreateClaim::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbeditentity": {
+			"class": "\\Wikibase\\Repo\\Api\\EditEntity",
+			"factory": "\\Wikibase\\Repo\\Api\\EditEntity::factory",
+			"services": [
+				"WikibaseRepo.DataTypeDefinitions",
+				"WikibaseRepo.EntityChangeOpProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.Store",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"wbcreateredirect": {
+			"class": "\\Wikibase\\Repo\\Api\\CreateRedirect",
+			"factory": "\\Wikibase\\Repo\\Api\\CreateRedirect::factory",
+			"services": [
+				"PermissionManager",
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.ItemRedirectCreationInteractor",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"wbformatentities": {
+			"class": "\\Wikibase\\Repo\\Api\\FormatEntities",
+			"factory": "\\Wikibase\\Repo\\Api\\FormatEntities::factory",
+			"services": [
+				"StatsdDataFactory",
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.EntityIdHtmlLinkFormatterFactory",
+				"WikibaseRepo.EntityIdParser"
+			]
+		},
+		"wbformatvalue": {
+			"class": "\\Wikibase\\Repo\\Api\\FormatSnakValue",
+			"factory": "\\Wikibase\\Repo\\Api\\FormatSnakValue::factory",
+			"services": [
+				"StatsdDataFactory",
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.DataTypeFactory",
+				"WikibaseRepo.DataValueFactory",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.SnakFormatterFactory",
+				"WikibaseRepo.ValueFormatterFactory"
+			]
+		},
+		"wbgetclaims": {
+			"class": "\\Wikibase\\Repo\\Api\\GetClaims",
+			"factory": "\\Wikibase\\Repo\\Api\\GetClaims::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbgetentities": {
+			"class": "\\Wikibase\\Repo\\Api\\GetEntities",
+			"factory": "\\Wikibase\\Repo\\Api\\GetEntities::factory",
+			"services": [
+				"SiteLookup",
+				"StatsdDataFactory",
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.EntityRevisionLookup",
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SiteLinkGlobalIdentifiersProvider",
+				"WikibaseRepo.Store",
+				"WikibaseRepo.StringNormalizer"
+			]
+		},
+		"wblinktitles": {
+			"class": "\\Wikibase\\Repo\\Api\\LinkTitles",
+			"factory": "\\Wikibase\\Repo\\Api\\LinkTitles::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SiteLinkGlobalIdentifiersProvider",
+				"WikibaseRepo.SiteLinkTargetProvider",
+				"WikibaseRepo.Store"
+			]
+		},
+		"wbmergeitems": {
+			"class": "\\Wikibase\\Repo\\Api\\MergeItems",
+			"factory": "\\Wikibase\\Repo\\Api\\MergeItems::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ItemMergeInteractor",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"wbparsevalue": {
+			"class": "\\Wikibase\\Repo\\Api\\ParseValue",
+			"factory": "\\Wikibase\\Repo\\Api\\ParseValue::factory",
+			"services": [
+				"StatsdDataFactory",
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.DataTypeFactory",
+				"WikibaseRepo.DataTypeValidatorFactory",
+				"WikibaseRepo.ExceptionLocalizer",
+				"WikibaseRepo.PropertyDataTypeLookup",
+				"WikibaseRepo.ValidatorErrorLocalizer",
+				"WikibaseRepo.ValueParserFactory"
+			]
+		},
+		"wbremoveclaims": {
+			"class": "\\Wikibase\\Repo\\Api\\RemoveClaims",
+			"factory": "\\Wikibase\\Repo\\Api\\RemoveClaims::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbremovequalifiers": {
+			"class": "\\Wikibase\\Repo\\Api\\RemoveQualifiers",
+			"factory": "\\Wikibase\\Repo\\Api\\RemoveQualifiers::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbremovereferences": {
+			"class": "\\Wikibase\\Repo\\Api\\RemoveReferences",
+			"factory": "\\Wikibase\\Repo\\Api\\RemoveReferences::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbsearchentities": {
+			"class": "\\Wikibase\\Repo\\Api\\SearchEntities",
+			"factory": "\\Wikibase\\Repo\\Api\\SearchEntities::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.EnabledEntityTypes",
+				"WikibaseRepo.EntityArticleIdLookup",
+				"WikibaseRepo.EntitySearchHelper",
+				"WikibaseRepo.EntitySourceLookup",
+				"WikibaseRepo.EntityTitleTextLookup",
+				"WikibaseRepo.EntityUrlLookup",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"wbsetaliases": {
+			"class": "\\Wikibase\\Repo\\Api\\SetAliases",
+			"factory": "\\Wikibase\\Repo\\Api\\SetAliases::factory",
+			"services": [
+				"StatsdDataFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityFactory",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"wbsetclaim": {
+			"class": "\\Wikibase\\Repo\\Api\\SetClaim",
+			"factory": "\\Wikibase\\Repo\\Api\\SetClaim::factory",
+			"services": [
+				"StatsdDataFactory",
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.ExternalFormatStatementDeserializer",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbsetclaimvalue": {
+			"class": "\\Wikibase\\Repo\\Api\\SetClaimValue",
+			"factory": "\\Wikibase\\Repo\\Api\\SetClaimValue::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbsetdescription": {
+			"class": "\\Wikibase\\Repo\\Api\\SetDescription",
+			"factory": "\\Wikibase\\Repo\\Api\\SetDescription::factory",
+			"services": [
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityFactory",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"wbsetlabel": {
+			"class": "\\Wikibase\\Repo\\Api\\SetLabel",
+			"factory": "\\Wikibase\\Repo\\Api\\SetLabel::factory",
+			"services": [
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityFactory",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"wbsetqualifier": {
+			"class": "\\Wikibase\\Repo\\Api\\SetQualifier",
+			"factory": "\\Wikibase\\Repo\\Api\\SetQualifier::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbsetreference": {
+			"class": "\\Wikibase\\Repo\\Api\\SetReference",
+			"factory": "\\Wikibase\\Repo\\Api\\SetReference::factory",
+			"services": [
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.BaseDataModelDeserializerFactory",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.Logger",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SnakFactory",
+				"WikibaseRepo.StatementGuidParser",
+				"WikibaseRepo.StatementGuidValidator"
+			]
+		},
+		"wbsetsitelink": {
+			"class": "\\Wikibase\\Repo\\Api\\SetSiteLink",
+			"factory": "\\Wikibase\\Repo\\Api\\SetSiteLink::factory",
+			"services": [
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SiteLinkBadgeChangeOpSerializationValidator",
+				"WikibaseRepo.SiteLinkTargetProvider"
+			]
+		}
+	},
+	"APIListModules": {
+		"wbsearch": {
+			"class": "\\Wikibase\\Repo\\Api\\QuerySearchEntities",
+			"factory": "\\Wikibase\\Repo\\Api\\QuerySearchEntities::factory",
+			"services": [
+				"WikibaseRepo.EnabledEntityTypes",
+				"WikibaseRepo.EntitySearchHelperCallbacks",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"wbsubscribers": {
+			"class": "\\Wikibase\\Repo\\Api\\ListSubscribers",
+			"factory": "\\Wikibase\\Repo\\Api\\ListSubscribers::factory",
+			"services": [
+				"SiteLookup",
+				"WikibaseRepo.ApiHelperFactory",
+				"WikibaseRepo.EntityIdParser"
+			]
+		}
+	},
+	"APIMetaModules": {
+		"wbcontentlanguages": {
+			"class": "\\Wikibase\\Repo\\Api\\MetaContentLanguages",
+			"factory": "\\Wikibase\\Repo\\Api\\MetaContentLanguages::factory",
+			"services": [
+				"LanguageNameUtils",
+				"WikibaseRepo.WikibaseContentLanguages"
+			]
+		}
+	},
+	"APIPropModules": {
+		"entityterms": {
+			"class": "\\Wikibase\\Repo\\Api\\EntityTerms",
+			"services": [
+				"WikibaseRepo.AliasTermBuffer",
+				"WikibaseRepo.EntityIdLookup",
+				"WikibaseRepo.TermBuffer",
+				"WikibaseRepo.TermsLanguages"
+			]
+		}
+	},
+	"SpecialPages": {
+		"NewItem": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialNewItem",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialNewItem::factory",
+			"services": [
+				"SiteLookup",
+				"WikibaseRepo.EditEntityFactory",
+				"WikibaseRepo.EntityNamespaceLookup",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.ItemTermsCollisionDetector",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SummaryFormatter",
+				"WikibaseRepo.TermValidatorFactory"
+			]
+		},
+		"NewProperty": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialNewProperty",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialNewProperty::factory",
+			"services": [
+				"WikibaseRepo.DataTypeFactory",
+				"WikibaseRepo.EditEntityFactory",
+				"WikibaseRepo.EntityNamespaceLookup",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.PropertyTermsCollisionDetector",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SummaryFormatter"
+			]
+		},
+		"ItemByTitle": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialItemByTitle",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialItemByTitle::factory",
+			"services": [
+				"SiteLookup",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.Logger",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.Store"
+			]
+		},
+		"GoToLinkedPage": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialGoToLinkedPage",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialGoToLinkedPage::factory",
+			"services": [
+				"SiteLookup",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.EntityLookup",
+				"WikibaseRepo.Store"
+			]
+		},
+		"ItemDisambiguation": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialItemDisambiguation",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialItemDisambiguation::factory",
+			"services": [
+				"WikibaseRepo.EntitySearchHelperCallbacks",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"ItemsWithoutSitelinks": "Wikibase\\Repo\\Specials\\SpecialItemsWithoutSitelinks",
+		"SetLabel": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialSetLabel",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialSetLabel::factory",
+			"services": [
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EditEntityFactory",
+				"WikibaseRepo.EntityPermissionChecker",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SummaryFormatter",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"SetDescription": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialSetDescription",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialSetDescription::factory",
+			"services": [
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EditEntityFactory",
+				"WikibaseRepo.EntityPermissionChecker",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SummaryFormatter",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"SetAliases": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialSetAliases",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialSetAliases::factory",
+			"services": [
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EditEntityFactory",
+				"WikibaseRepo.EntityPermissionChecker",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SummaryFormatter",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"SetLabelDescriptionAliases": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialSetLabelDescriptionAliases",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialSetLabelDescriptionAliases::factory",
+			"services": [
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EditEntityFactory",
+				"WikibaseRepo.EntityPermissionChecker",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SummaryFormatter",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"SetSiteLink": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialSetSiteLink",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialSetSiteLink::factory",
+			"services": [
+				"SiteLookup",
+				"WikibaseRepo.ChangeOpFactoryProvider",
+				"WikibaseRepo.EditEntityFactory",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.LanguageFallbackLabelDescriptionLookupFactory",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.SummaryFormatter"
+			]
+		},
+		"ListDatatypes": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialListDatatypes",
+			"services": [
+				"WikibaseRepo.DataTypeDefinitions"
+			]
+		},
+		"DispatchStats": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialDispatchStats",
+			"services": [
+				"WikibaseRepo.RepoDomainDbFactory"
+			]
+		},
+		"EntityData": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialEntityData",
+			"factory": "Wikibase\\Repo\\Specials\\SpecialEntityData::factory",
+			"services": [
+				"HtmlCacheUpdater",
+				"WikibaseRepo.EntityDataFormatProvider",
+				"WikibaseRepo.EntityDataSerializationService",
+				"WikibaseRepo.EntityDataUriManager",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.EntityRevisionLookup",
+				"WikibaseRepo.Logger",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.Store",
+				"WikibaseRepo.SubEntityTypesMapper"
+			]
+		},
+		"EntityPage": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialEntityPage",
+			"services": [
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.EntityTitleLookup"
+			]
+		},
+		"MyLanguageFallbackChain": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialMyLanguageFallbackChain",
+			"services": [
+				"WikibaseRepo.LanguageFallbackChainFactory"
+			]
+		},
+		"MergeItems": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialMergeItems",
+			"services": [
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.ExceptionLocalizer",
+				"WikibaseRepo.ItemMergeInteractor",
+				"WikibaseRepo.TokenCheckInteractor"
+			]
+		},
+		"RedirectEntity": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialRedirectEntity",
+			"services": [
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.ExceptionLocalizer",
+				"WikibaseRepo.ItemRedirectCreationInteractor",
+				"WikibaseRepo.TokenCheckInteractor"
+			]
+		},
+		"AvailableBadges": {
+			"class": "Wikibase\\Repo\\Specials\\SpecialAvailableBadges",
+			"services": [
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.PrefetchingTermLookup",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"ListProperties": {
+			"factory": "Wikibase\\Repo\\Specials\\SpecialListPropertiesDispatchingFactory::factory",
+			"services": [
+				"WikibaseRepo.DataTypeFactory",
+				"WikibaseRepo.EntityIdHtmlLinkFormatterFactory",
+				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.LanguageFallbackLabelDescriptionLookupFactory",
+				"WikibaseRepo.PrefetchingTermLookup",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.Store"
+			]
+		}
+	},
+	"GroupPermissions": {
+		"*": {
+			"item-term": true,
+			"property-term": true,
+			"item-merge": true,
+			"item-redirect": true,
+			"property-create": true
+		}
+	},
+	"AvailableRights": [
+		"item-term",
+		"property-term",
+		"item-merge",
+		"item-redirect",
+		"property-create"
+	],
+	"GrantPermissions": {
+		"editpage": {
+			"item-term": true,
+			"property-term": true,
+			"item-merge": true,
+			"item-redirect": true
+		},
+		"createeditmovepage": {
+			"property-create": true
+		}
+	},
+	"JobClasses": {
+		"CleanTermsIfUnused": "Wikibase\\Lib\\Store\\Sql\\Terms\\CleanTermsIfUnusedJob::getJobSpecification",
+		"PurgeEntityData": "Wikibase\\Repo\\PurgeEntityDataJob::newFromGlobalState",
+		"UpdateRepoOnMove": "Wikibase\\Repo\\UpdateRepo\\UpdateRepoOnMoveJob",
+		"UpdateRepoOnDelete": "Wikibase\\Repo\\UpdateRepo\\UpdateRepoOnDeleteJob",
+		"DispatchChanges": "Wikibase\\Repo\\ChangeModification\\DispatchChangesJob::newFromGlobalState",
+		"DispatchChangeDeletionNotification": "Wikibase\\Repo\\ChangeModification\\DispatchChangeDeletionNotificationJob",
+		"DispatchChangeVisibilityNotification": "Wikibase\\Repo\\ChangeModification\\DispatchChangeVisibilityNotificationJob"
+	},
+	"AutoloadNamespaces": {
+		"Wikibase\\Repo\\": "repo/includes/",
+		"Wikibase\\Lib\\": "lib/includes/",
+		"Wikibase\\Lib\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/src/",
+		"Wikibase\\Lib\\Changes\\": "lib/packages/wikibase/changes/src/",
+		"Wikibase\\DataModel\\": "lib/packages/wikibase/data-model/src/",
+		"Wikibase\\DataModel\\Deserializers\\": "lib/packages/wikibase/data-model-serialization/src/Deserializers/",
+		"Wikibase\\DataModel\\Serializers\\": "lib/packages/wikibase/data-model-serialization/src/Serializers/",
+		"Wikibase\\DataModel\\Services\\": "lib/packages/wikibase/data-model-services/src/",
+		"Wikibase\\InternalSerialization\\": "lib/packages/wikibase/internal-serialization/src/",
+		"Wikibase\\DataAccess\\": "data-access/src/",
+		"Wikibase\\View\\": "view/src/"
+	},
+	"TestAutoloadNamespaces": {
+		"Wikibase\\Repo\\Tests\\": "repo/tests/phpunit/includes/",
+		"Wikibase\\Repo\\Tests\\Maintenance\\": "repo/tests/phpunit/maintenance/",
+		"Wikibase\\Repo\\Tests\\Unit\\": "repo/tests/phpunit/unit/",
+		"Wikibase\\Lib\\Tests\\": "lib/tests/phpunit/",
+		"Wikibase\\Lib\\Tests\\Changes\\": "lib/packages/wikibase/changes/tests/",
+		"Wikibase\\DataModel\\Fixtures\\": "lib/packages/wikibase/data-model/tests/fixtures/",
+		"Wikibase\\DataModel\\Services\\Fixtures\\": "lib/packages/wikibase/data-model-services/tests/fixtures/",
+		"Wikibase\\Lib\\Tests\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/tests/",
+		"Tests\\Integration\\Wikibase\\InternalSerialization\\": "lib/packages/wikibase/internal-serialization/tests/integration/",
+		"Wikibase\\DataAccess\\Tests\\": "data-access/tests/phpunit/",
+		"Wikibase\\View\\Tests\\": "view/tests/phpunit/"
+	},
+	"attributes": {
+		"EventLogging": {
+			"Schemas": {
+				"WikibaseTermboxInteraction": 18726648
+			}
+		}
+	},
+	"MessagesDirs": {
+		"Wikibase": "repo/i18n",
+		"WikibaseApi": "repo/i18n/api",
+		"WikibaseLib": "lib/i18n",
+		"WikibaseView": "view/lib/wikibase-data-values-value-view/i18n"
+	},
+	"ExtensionMessagesFiles": {
+		"WikibaseAlias": "repo/Wikibase.i18n.alias.php",
+		"WikibaseNS": "repo/Wikibase.i18n.namespaces.php",
+		"wikibaserepomagic": "repo/WikibaseRepo.i18n.magic.php"
+	},
+	"ServiceWiringFiles": [
+		"repo/WikibaseRepo.ServiceWiring.php"
+	],
+	"QUnitTestModule": {
+		"remoteExtPath": "Wikibase",
+		"localBasePath": "",
+		"packageFiles": [
+			"repo/tests/qunit/index.js",
+			"view/tests/qunit/wikibase/wikibase.tests.js",
+			"view/tests/qunit/getMockListItemAdapter.js",
+			"view/lib/wikibase-data-values-value-view/tests/src/jquery.valueview.tests.testExpert.js",
+			"view/lib/wikibase-data-values-value-view/tests/src/jquery.valueview.tests.MockViewState.js",
+			"lib/tests/qunit/wikibase.Site.tests.js",
+			"view/tests/qunit/experts/wikibase.experts.modules.tests.js",
+			"view/tests/qunit/jquery/ui/jquery.ui.closeable.tests.js",
+			"view/tests/qunit/jquery/ui/jquery.ui.tagadata.tests.js",
+			"view/tests/qunit/jquery/ui/jquery.ui.EditableTemplatedWidget.tests.js",
+			"view/tests/qunit/jquery/ui/jquery.ui.TemplatedWidget.tests.js",
+			"view/tests/qunit/jquery/wikibase/snakview/snakview.tests.js",
+			"view/tests/qunit/jquery/wikibase/toolbar/jquery.wikibase.addtoolbar.tests.js",
+			"view/tests/qunit/jquery/wikibase/toolbar/jquery.wikibase.edittoolbar.tests.js",
+			"view/tests/qunit/jquery/wikibase/toolbar/jquery.wikibase.removetoolbar.tests.js",
+			"view/tests/qunit/jquery/wikibase/toolbar/jquery.wikibase.singlebuttontoolbar.tests.js",
+			"view/tests/qunit/jquery/wikibase/toolbar/jquery.wikibase.toolbar.tests.js",
+			"view/tests/qunit/jquery/wikibase/toolbar/jquery.wikibase.toolbarbutton.tests.js",
+			"view/tests/qunit/jquery/wikibase/toolbar/jquery.wikibase.toolbaritem.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.aliasesview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.badgeselector.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.statementgrouplistview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.statementgroupview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.statementlistview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.descriptionview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.entityselector.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.entityview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.entitytermsview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.entitytermsforlanguagelistview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.entitytermsforlanguageview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.itemview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.labelview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.listview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.pagesuggester.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.propertyview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.referenceview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.referenceview.tabsenabled.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.sitelinkgrouplistview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.sitelinkgroupview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.sitelinklistview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.sitelinkview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.snaklistview.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.statementview.RankSelector.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.statementview.tests.js",
+			"view/tests/qunit/jquery/jquery.removeClassByRegex.tests.js",
+			"view/tests/qunit/jquery/jquery.util.getDirectionality.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/AliasesChanger.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/StatementsChanger.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/StatementsChangerState.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/DescriptionsChanger.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/EntityTermsChanger.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/LabelsChanger.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/SiteLinksChanger.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/SiteLinkSetsChanger.tests.js",
+			"view/tests/qunit/wikibase/utilities/ClaimGuidGenerator.tests.js",
+			"view/tests/qunit/wikibase/view/testViewController.js",
+			"view/tests/qunit/wikibase/wikibase.WikibaseContentLanguages.tests.js",
+			"view/tests/qunit/wikibase/wikibase.getUserLanguages.tests.js",
+			"view/tests/qunit/wikibase/wikibase.getLanguageNameByCode.tests.js",
+			"view/tests/qunit/wikibase/templates.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.wbtooltip.tests.js",
+			"view/tests/qunit/jquery/wikibase/jquery.wikibase.siteselector.tests.js",
+			"repo/tests/qunit/wikibase.sites.tests.js",
+			"repo/tests/qunit/wikibase.EntityInitializer.tests.js",
+			"repo/tests/qunit/experts/Property.tests.js",
+			"repo/tests/qunit/experts/Item.tests.js",
+			"repo/tests/qunit/jquery.wikibase/jquery.wikibase.entitysearch.tests.js",
+			"repo/resources/jquery.wikibase/jquery.wikibase.entitysearch.js",
+			"repo/tests/qunit/dataTypes/DataType.tests.js",
+			"repo/resources/dataTypes/DataType.js",
+			"repo/tests/qunit/dataTypes/DataTypeStore.tests.js",
+			"repo/resources/dataTypes/DataTypeStore.js",
+			"repo/tests/qunit/wikibase.PropertyDataTypeStore.tests.js",
+			"repo/resources/wikibase.PropertyDataTypeStore.js",
+			"view/tests/qunit/wikibase/view/ViewFactoryFactory.tests.js",
+			"view/resources/wikibase/view/ViewFactoryFactory.js",
+			"view/tests/qunit/wikibase/store/store.CachingEntityStore.tests.js",
+			"view/resources/wikibase/store/store.CachingEntityStore.js",
+			"view/resources/wikibase/store/store.EntityStore.js",
+			"view/tests/qunit/wikibase/store/store.CombiningEntityStore.tests.js",
+			"view/resources/wikibase/store/store.CombiningEntityStore.js",
+			"view/tests/qunit/wikibase/entityIdFormatter/DataValueBasedEntityIdHtmlFormatter.tests.js",
+			"view/resources/wikibase/entityIdFormatter/DataValueBasedEntityIdHtmlFormatter.js",
+			"view/resources/wikibase/entityIdFormatter/EntityIdHtmlFormatter.js",
+			"view/tests/qunit/wikibase/entityIdFormatter/testEntityIdHtmlFormatter.js",
+			"view/tests/qunit/wikibase/entityIdFormatter/DataValueBasedEntityIdPlainFormatter.tests.js",
+			"view/resources/wikibase/entityIdFormatter/DataValueBasedEntityIdPlainFormatter.js",
+			"view/resources/wikibase/entityIdFormatter/EntityIdPlainFormatter.js",
+			"view/tests/qunit/jquery/jquery.util.EventSingletonManager.tests.js",
+			"view/resources/jquery/jquery.util.EventSingletonManager.js",
+			"view/tests/qunit/wikibase/wikibase.ValueViewBuilder.tests.js",
+			"view/resources/wikibase/wikibase.ValueViewBuilder.js",
+			"view/tests/qunit/wikibase/view/ViewFactory.tests.js",
+			"view/tests/qunit/wikibase/view/ToolbarViewController.tests.js",
+			"view/resources/wikibase/view/ToolbarViewController.js",
+			"view/resources/wikibase/view/ViewController.js",
+			"view/tests/qunit/wikibase/utilities/GuidGenerator.tests.js",
+			"view/resources/wikibase/utilities/wikibase.utilities.GuidGenerator.js",
+			"view/tests/qunit/wikibase/view/ToolbarFactory.tests.js",
+			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.toolbaritem.js",
+			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.toolbarbutton.js",
+			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.toolbar.js",
+			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.singlebuttontoolbar.js",
+			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.addtoolbar.js",
+			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.edittoolbar.js",
+			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.removetoolbar.js",
+			"view/resources/wikibase/view/ToolbarFactory.js"
+		],
+		"dependencies": [
+			"wikibase.EntityInitializer",
+			"wikibase.Site",
+			"wikibase.sites",
+			"dataValues.values",
+			"jquery.util.getDirectionality",
+			"jquery.valueview.Expert",
+			"jquery.wikibase.entityselector",
+			"jquery.wikibase.wbtooltip",
+			"util.inherit",
+			"util.Notifier",
+			"wikibase",
+			"wikibase.api.RepoApi",
+			"wikibase.datamodel",
+			"wikibase.entityChangers.EntityChangersFactory",
+			"wikibase.experts.modules",
+			"wikibase.experts.Item",
+			"wikibase.experts.Property",
+			"wikibase.getLanguageNameByCode",
+			"wikibase.serialization",
+			"wikibase.templates",
+			"wikibase.utilities.ClaimGuidGenerator",
+			"wikibase.ui.entityViewInit",
+			"wikibase.view.__namespace",
+			"wikibase.view.ControllerViewFactory",
+			"wikibase.view.ReadModeViewFactory",
+			"wikibase.WikibaseContentLanguages",
+			"wikibase.getUserLanguages"
+		]
+	},
+	"HookHandlers": {
+		"ArticleRevisionVisibilitySet": {
+			"class": "\\Wikibase\\Repo\\Hooks\\ArticleRevisionVisibilitySetHookHandler",
+			"services": [
+				"WikibaseRepo.LocalEntityNamespaceLookup"
+			]
+		},
+		"DatabaseSchemaUpdater": {
+			"class": "\\Wikibase\\Repo\\Store\\Sql\\DatabaseSchemaUpdater"
+		},
+		"DifferenceEngineViewHeaderHookHandler": {
+			"class": "\\Wikibase\\Repo\\Hooks\\DifferenceEngineViewHeaderHookHandler",
+			"factory": "\\Wikibase\\Repo\\Hooks\\DifferenceEngineViewHeaderHookHandler::factory",
+			"services": [
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.LinkTargetEntityIdLookup",
+				"WikibaseRepo.PrefetchingTermLookup",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"DeleteDispatcher": {
+			"class": "\\Wikibase\\Repo\\Hooks\\DeleteDispatcher",
+			"factory": "\\Wikibase\\Repo\\Hooks\\DeleteDispatcher::factory",
+			"services": [
+				"WikibaseRepo.EntityIdLookup",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"EntityDataPurger": {
+			"class": "\\Wikibase\\Repo\\Hooks\\EntityDataPurger",
+			"factory": "\\Wikibase\\Repo\\Hooks\\EntityDataPurger::factory",
+			"services": [
+				"HtmlCacheUpdater",
+				"WikibaseRepo.EntityDataUriManager",
+				"WikibaseRepo.EntityIdLookup"
+			]
+		},
+		"HtmlPageLinkRendererEnd": {
+			"class": "\\Wikibase\\Repo\\Hooks\\HtmlPageLinkRendererEndHookHandler",
+			"factory": "\\Wikibase\\Repo\\Hooks\\HtmlPageLinkRendererEndHookHandler::factory",
+			"services": [
+				"InterwikiLookup",
+				"SpecialPageFactory",
+				"WikibaseRepo.EntityExistenceChecker",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.EntityLinkFormatterFactory",
+				"WikibaseRepo.EntityNamespaceLookup",
+				"WikibaseRepo.EntityUrlLookup",
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.LinkTargetEntityIdLookup",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.TermLookup"
+			]
+		},
+		"LabelPrefetch": {
+			"class": "\\Wikibase\\Repo\\Hooks\\LabelPrefetchHookHandler",
+			"factory": "\\Wikibase\\Repo\\Hooks\\LabelPrefetchHookHandler::factory",
+			"services": [
+				"TitleFactory",
+				"WikibaseRepo.EntityIdLookup",
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.PrefetchingTermLookup",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.TermBuffer"
+			]
+		},
+		"LibHooks": {
+			"class": "\\Wikibase\\Lib\\LibHooks"
+		},
+		"OutputPageBeforeHTML": {
+			"class": "Wikibase\\Repo\\Hooks\\OutputPageBeforeHTMLHookHandler",
+			"factory": "Wikibase\\Repo\\Hooks\\OutputPageBeforeHTMLHookHandler::factory",
+			"services": [
+				"ContentLanguage",
+				"HttpRequestFactory",
+				"StatsdDataFactory",
+				"WikibaseRepo.EntityContentFactory",
+				"WikibaseRepo.EntityFactory",
+				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.EntityRevisionLookup",
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.Logger",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.TermsLanguages"
+			]
+		},
+		"OutputPageJsConfig": {
+			"class": "\\Wikibase\\Repo\\Hooks\\OutputPageJsConfigHookHandler",
+			"factory": "\\Wikibase\\Repo\\Hooks\\OutputPageJsConfigHookHandler::factory",
+			"services": [
+				"WikibaseRepo.EntityNamespaceLookup",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"PageHistoryPagerHookHandler": {
+			"class": "\\Wikibase\\Repo\\Hooks\\PageHistoryPagerHookHandler",
+			"factory": "\\Wikibase\\Repo\\Hooks\\PageHistoryPagerHookHandler::factory",
+			"services": [
+				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.LinkTargetEntityIdLookup",
+				"WikibaseRepo.PrefetchingTermLookup",
+				"WikibaseRepo.Settings"
+			]
+		},
+		"RecentChangeSave": {
+			"class": "\\Wikibase\\Repo\\Hooks\\RecentChangeSaveHookHandler",
+			"factory": "\\Wikibase\\Repo\\Hooks\\RecentChangeSaveHookHandler::factory",
+			"services": [
+				"CentralIdLookupFactory",
+				"WikibaseRepo.ChangeHolder",
+				"WikibaseRepo.RepoDomainDbFactory",
+				"WikibaseRepo.Store"
+			]
+		},
+		"ShowSearchHit": {
+			"class": "\\Wikibase\\Repo\\Hooks\\ShowSearchHitHandler",
+			"services": [
+				"WikibaseRepo.EntityContentFactory",
+				"WikibaseRepo.EntityIdLookup",
+				"WikibaseRepo.EntityLookup",
+				"WikibaseRepo.LanguageFallbackChainFactory"
+			]
+		},
+		"ViewHooks": {
+			"class": "\\Wikibase\\View\\ViewHooks"
+		}
+	},
+	"Hooks": {
+		"APIQuerySiteInfoGeneralInfo": "\\Wikibase\\Repo\\RepoHooks::onAPIQuerySiteInfoGeneralInfo",
+		"APIQuerySiteInfoStatisticsInfo": "\\Wikibase\\Repo\\RepoHooks::onAPIQuerySiteInfoStatisticsInfo",
+		"AbuseFilter-contentToString": "\\Wikibase\\Repo\\RepoHooks::onAbuseFilterContentToString",
+		"ApiCheckCanExecute": "\\Wikibase\\Repo\\RepoHooks::onApiCheckCanExecute",
+		"ApiMain::onException": "\\Wikibase\\Repo\\RepoHooks::onApiMainOnException",
+		"ApiMaxLagInfo": "\\Wikibase\\Repo\\RepoHooks::onApiMaxLagInfo",
+		"ApiQuery::moduleManager": "\\Wikibase\\Repo\\RepoHooks::onApiQueryModuleManager",
+		"ArticleDeleteComplete": [
+			"DeleteDispatcher",
+			"EntityDataPurger",
+			"\\Wikibase\\Repo\\RepoHooks::onArticleDeleteComplete"
+		],
+		"ArticleRevisionVisibilitySet": [
+			"ArticleRevisionVisibilitySet",
+			"EntityDataPurger"
+		],
+		"ArticleUndelete": "\\Wikibase\\Repo\\RepoHooks::onArticleUndelete",
+		"BeforeDisplayNoArticleText": "\\Wikibase\\Repo\\Actions\\ViewEntityAction::onBeforeDisplayNoArticleText",
+		"BeforePageDisplay": "\\Wikibase\\Repo\\RepoHooks::onBeforePageDisplay",
+		"BeforePageDisplayMobile": "\\Wikibase\\Repo\\RepoHooks::onBeforePageDisplayMobile",
+		"ChangesListInitRows": "LabelPrefetch",
+		"ContentModelCanBeUsedOn": "\\Wikibase\\Repo\\RepoHooks::onContentModelCanBeUsedOn",
+		"DifferenceEngineViewHeader": "DifferenceEngineViewHeaderHookHandler",
+		"ExtensionTypes": "LibHooks",
+		"FormatAutocomments": "\\Wikibase\\Repo\\RepoHooks::onFormat",
+		"GetPreferences": "\\Wikibase\\Repo\\RepoHooks::onGetPreferences",
+		"HtmlPageLinkRendererEnd": "HtmlPageLinkRendererEnd",
+		"ImportHandleRevisionXMLTag": "\\Wikibase\\Repo\\RepoHooks::onImportHandleRevisionXMLTag",
+		"InfoAction": "\\Wikibase\\Repo\\RepoHooks::onInfoAction",
+		"LoadExtensionSchemaUpdates": "DatabaseSchemaUpdater",
+		"NamespaceIsMovable": "\\Wikibase\\Repo\\RepoHooks::onNamespaceIsMovable",
+		"OutputPageBeforeHTML": [
+			"OutputPageBeforeHTML",
+			"OutputPageJsConfig"
+		],
+		"OutputPageBodyAttributes": "\\Wikibase\\Repo\\RepoHooks::onOutputPageBodyAttributes",
+		"OutputPageParserOutput": "\\Wikibase\\Repo\\RepoHooks::onOutputPageParserOutput",
+		"PageHistoryLineEnding": "\\Wikibase\\Repo\\RepoHooks::onPageHistoryLineEnding",
+		"PageHistoryPager::doBatchLookups": "PageHistoryPagerHookHandler",
+		"ParserFirstCallInit": "\\Wikibase\\Repo\\RepoHooks::onParserFirstCallInit",
+		"ParserOptionsRegister": "\\Wikibase\\Repo\\RepoHooks::onParserOptionsRegister",
+		"RecentChange_save": "RecentChangeSave",
+		"RejectParserCacheValue": "\\Wikibase\\Repo\\RepoHooks::onRejectParserCacheValue",
+		"ResourceLoaderRegisterModules": [
+			"\\Wikibase\\Repo\\RepoHooks::onResourceLoaderRegisterModules",
+			"LibHooks",
+			"ViewHooks"
+		],
+		"RevisionFromEditComplete": "\\Wikibase\\Repo\\RepoHooks::onRevisionFromEditComplete",
+		"SetupAfterCache": "\\Wikibase\\Repo\\RepoHooks::onSetupAfterCache",
+		"ShowSearchHit": "ShowSearchHit",
+		"ShowSearchHitTitle": "ShowSearchHit",
+		"SidebarBeforeOutput": "\\Wikibase\\Repo\\RepoHooks::onSidebarBeforeOutput",
+		"SkinTemplateNavigation::Universal": "\\Wikibase\\Repo\\RepoHooks::onSkinTemplateNavigationUniversal",
+		"SpecialPage_reorderPages": "\\Wikibase\\Repo\\RepoHooks::onSpecialPageReorderPages",
+		"TitleGetRestrictionTypes": "\\Wikibase\\Repo\\RepoHooks::onTitleGetRestrictionTypes",
+		"UnitTestsList": [
+			"\\Wikibase\\Repo\\RepoHooks::registerUnitTests",
+			"LibHooks",
+			"ViewHooks"
+		]
+	},
+	"RateLimits": {
+		"wikibase-idgenerator": {
+			"&inherit-create-edit": "This marker value tells RepoHooks::onRegistration to copy the rate limits from 'create' or 'edit'."
+		}
+	},
+	"callback": "\\Wikibase\\Repo\\RepoHooks::onRegistration",
+	"manifest_version": 2
+}

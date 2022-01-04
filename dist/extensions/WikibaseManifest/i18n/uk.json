@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"DDPAT"
+		]
+	},
+	"wikibasemanifest": "ВікібазаМаніфест",
+	"wikibasemanifest-desc": "Поєднує метадані про встановлення Вікібази, демонструючи його як простий API"
+}

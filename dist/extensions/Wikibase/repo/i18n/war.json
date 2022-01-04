@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"JinJian",
+			"Ladsgroup"
+		]
+	},
+	"wikibase-edit": "Igliwat",
+	"wikibase-add": "dugngi",
+	"wikibase-label-empty": "Waray label nga gin-define",
+	"wikibase-description-empty": "Waray description nga gin-define",
+	"wikibase-statementsection-statements": "Mga pamulong",
+	"wikibase-sitelinks-special": "Iba nga mga sityo",
+	"wikibase-statementview-rank-normal": "Normal nga ranggo",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|binasaran|pinanbasaran}}"
+}

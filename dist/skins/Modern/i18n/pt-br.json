@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cainamarques",
+			"Diego Queiroz",
+			"Eduardo Addad de Oliveira",
+			"Eduardoaddad",
+			"Felipe L. Ewald",
+			"Jaideraf"
+		]
+	},
+	"skinname-modern": "Moderno",
+	"modern.css": "/* Todos os CSS colocado aqui serão carregados para usuários do tema Modern */",
+	"modern.js": "/* Todos os JavaScript aqui colocado será carregado para usuários do tema Modern */",
+	"modern-desc": "Um tema azul/cinza com barra lateral e de topo. Derivado do MonoBook"
+}

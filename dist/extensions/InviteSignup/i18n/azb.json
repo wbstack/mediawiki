@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mousa"
+		]
+	},
+	"invitesignup": "ایستیفاده‌چیلری بو ویکی‌یه چاغیر",
+	"is-desc": "ایمیل چاغیرمالاری گؤندر",
+	"is-tableth-date": "تاریخ",
+	"is-tableth-email": "ایمیل",
+	"is-tableth-inviter": "چاغیران",
+	"is-tableth-signup": "آد یازدیر",
+	"is-tableth-groups": "قروپلار",
+	"is-add": "آرتیر",
+	"is-delete": "سیل",
+	"is-invalidemail": "<b>$1</b> بیر گئچرلی ایمیل آدرسی دئییل.",
+	"is-emailsubj": "سیز {{SITENAME}}-ه قوشولماغا چاغیریلمیسینیز",
+	"is-emailbody": "سلام،\n\n{{GENDER:$1|$1}} سیزی {{SITENAME}}-ه آد یازدیماغا چاغیریب‌دیر.\nسیز $2-ده آد یازدیرابیلرسینیز.",
+	"right-invitesignup": "ایستیفاده‌چیلری آد یازدیماغا چاغیر",
+	"action-invitesignup": "ایستیفاده‌چیلری بو سایتا آد یازدیرماغا چاغیر"
+}

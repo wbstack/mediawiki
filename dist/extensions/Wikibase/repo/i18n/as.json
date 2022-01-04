@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dibya Dutta",
+			"Gitartha.bordoloi",
+			"IKHazarika",
+			"Ladsgroup",
+			"Psneog",
+			"Simbu123"
+		]
+	},
+	"wikibase-edit": "সম্পাদনা",
+	"wikibase-add": "যোগ কৰক",
+	"wikibase-label-empty": "কোনো লেবেলৰ সংজ্ঞা প্ৰদান কৰা হোৱা নাই",
+	"wikibase-description-empty": "কোনো বিবৰণৰ সংজ্ঞা প্ৰদান কৰা হোৱা নাই",
+	"wikibase-statementsection-statements": "বিবৃতিসমূহ",
+	"wikibase-sitelinks-special": "আন চাইটসমূহ",
+	"wikibase-statementview-rank-normal": "সাধাৰণ ৰেংক",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|টা তথ্যসূত্ৰ}}",
+	"wikibase-validator-no-such-media": "এই ফাইলটো \"$1\" [https://commons.wikimedia.org/ ৱিকিমিডিয়া কমন্সত] নাই।",
+	"wikibase-itemdisambiguation-submit": "সন্ধান কৰক",
+	"wikibase-listdatatypes-globe-coordinate-head": "ভৌগোলিক স্থানাংক"
+}

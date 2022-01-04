@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Arystanbek"
+		]
+	},
+	"templatesandbox": "Үлгі зертханасы",
+	"templatesandbox-suffix": "зертхана",
+	"templatesandbox-legend": "Үлгі зертханасы",
+	"templatesandbox-prefix-label": "Зертхана префиксі",
+	"templatesandbox-page-label": "Бетті көрсету:",
+	"templatesandbox-revid-label": "Нұсқаны көрсету:",
+	"templatesandbox-text-label": "Уикимәтінді көрсету:",
+	"templatesandbox-submit": "Қарау",
+	"templatesandbox-title-output": "Үлгі зертханасы: $1",
+	"templatesandbox-editform-legend": "Бұл үлгімен бетті қарап шығу",
+	"templatesandbox-editform-page-label": "Бет тақырып аты",
+	"templatesandbox-editform-view-label": "Алдын-ала қарау",
+	"templatesandbox-preview": "$2 бетінде алдын-ала қарау",
+	"templatesandbox-previewnote": "'''Бұл тек [[:$1]] бетінде алдын-ала қарап шығу екенін ұмытпаңыз.'''\nӨзгерістеріңіз сақталған жоқ!",
+	"templatesandbox-invalid-title": "Cіз көрсеткен атау жарамды емес",
+	"templatesandbox-title-not-exists": "Cіз көрсеткен атау жоқ.",
+	"templatesandbox-revision-not-exists": "Cіз көрсеткен нұсқа жоқ.",
+	"templatesandbox-invalid-prefix": "Cіз көрсеткен префикс жарамды емес",
+	"templatesandbox-prefix-not-local": "Cіз көрсеткен үлгі префиксі жергілікті емес",
+	"templatesandbox-page-or-revid": "Сіз бет атауын немесе нұсқа ID нөмірі екеуінің бірін енгізуіңіз керек.",
+	"templatesandbox-editform-need-template": "Бұл үлгіні басқа беттен қарап шығу үшін үлгі атауын көрсету керек.",
+	"templatesandbox-editform-need-title": "Бұл үлгіні басқа беттен қарап шығу үшін бет атауын көрсету керек.",
+	"templatesandbox-editform-invalid-template": "Сіз көрсеткен үлгі атауы жарамды емес.",
+	"templatesandbox-editform-invalid-title": "Қарап шығу үшін көрсеткен атауыңыз жарамды емес.",
+	"templatesandbox-editform-title-not-exists": "Қарап шығу үшін көрсеткен атауыңыз жоқ."
+}

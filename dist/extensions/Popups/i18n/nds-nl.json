@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Servien"
+		]
+	},
+	"popups-message": "Floepviensters",
+	"popups-desc": "Laot floepviensters zien mit wat der op die zied steet a'j langes verwiezingen heer gaon.",
+	"popups-settings-title": "Ziedveurbeeld",
+	"popups-settings-option-page": "Eenvoudig",
+	"popups-settings-option-page-description": "Bekiek de inleidende zinne van n zied mit n aofbeelding derbie. Dit is anbeveulen veur lezers",
+	"popups-settings-save": "Opslaon",
+	"popups-settings-cancel": "Afbreaken",
+	"popups-settings-enable": "Veurbeeldviensters anzetten",
+	"popups-preview-no-preview": "Der güng yts faut by et weadergeaven van dit vöärbealdvinster",
+	"popups-preview-footer-read": "Gå nå disse syde",
+	"popups-preview-disambiguation": "Disse titel hevt meyrere beteykenissen",
+	"popups-preview-disambiguation-link": "Vergelykbåre syden bekyken",
+	"popups-refpreview-beta-feature-message": "Vöärbeald van referensys",
+	"popups-refpreview-beta-feature-description": "Givt een vöärbeald van een referensy weader as jy mid de muus oaver de vootnote gån.\n\nWårt ju: as jy de [https://en.wikipedia.org/wiki/Wikipedia:Tools/Navigation_popups navigatyfluupvinsteruutbreiding] gebruket, dan sül jy de referensyvöärbealden neet seen. As jy de [[mw:Special:MyLanguage/Reference Tooltips|referensyhülpwenkuutbreiding]] gebruket, wörden sowel de fluupvinsters van de referensyhülpwenken as de referensyvöärbealden weadergeaven."
+}

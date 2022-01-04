@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lloffiwr",
+			"Macofe"
+		]
+	},
+	"templatesandbox": "Pwll tywod y nodiadau",
+	"templatesandbox-suffix": "pwll tywod",
+	"templatesandbox-legend": "Pwll tywod y nodiadau",
+	"templatesandbox-page-label": "Cynhyrchu'r dudalen:",
+	"templatesandbox-revid-label": "Cynhyrchu'r diwygiad:",
+	"templatesandbox-text-label": "Cynhyrchu'r cystrawen wici:",
+	"templatesandbox-submit": "Gweler",
+	"templatesandbox-title-output": "Pwll tywod y nodyn $1",
+	"templatesandbox-editform-page-label": "Teitl y dudalen",
+	"templatesandbox-editform-view-label": "Dangos rhagolwg",
+	"templatesandbox-preview": "Rhagolwg $2",
+	"templatesandbox-invalid-title": "Ysgrifennwyd teitl annilys.",
+	"templatesandbox-title-not-exists": "Nid yw'r teitl a enwyd ar gael.",
+	"templatesandbox-revision-not-exists": "Nid yw'r diwygiad a enwyd ar gael."
+}

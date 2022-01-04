@@ -1,0 +1,79 @@
+{
+	"name": "Modern",
+	"author": [
+		"River Tarnell",
+		"..."
+	],
+	"url": "https://www.mediawiki.org/wiki/Skin:Modern",
+	"descriptionmsg": "modern-desc",
+	"namemsg": "skinname-modern",
+	"license-name": "GPL-2.0-or-later",
+	"type": "skin",
+	"requires": {
+		"MediaWiki": ">= 1.36.0"
+	},
+	"ValidSkinNames": {
+		"modern": {
+			"class": "SkinMustache",
+			"args": [
+				{
+					"name": "modern",
+					"scripts": [],
+					"styles": [ "skins.modern" ],
+					"messages": [
+						"navigation-heading",
+						"comma-separator",
+						"jumpto",
+						"jumptonavigation",
+						"jumptosearch",
+						"personaltools",
+						"powersearch-legend",
+						"tagline",
+						"views"
+					]
+				}
+			]
+		}
+	},
+	"MessagesDirs": {
+		"Modern": [
+			"i18n"
+		]
+	},
+	"ResourceModules": {
+		"skins.modern": {
+			"class": "ResourceLoaderSkinModule",
+			"features": {
+				"content-links": true,
+				"content-thumbnails": true,
+				"interface-message-box": true,
+				"interface-category": true,
+				"content-tables": true,
+				"i18n-ordered-lists": true,
+				"i18n-all-lists-margins": true,
+				"i18n-headings": true
+			},
+			"styles": {
+				"resources/main.css": {
+					"media": "screen"
+				},
+				"resources/print.css": {
+					"media": "print"
+				}
+			}
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "",
+		"remoteSkinPath": "Modern"
+	},
+	"ResourceModuleSkinStyles": {
+		"modern": {
+			"+oojs-ui-core.styles": "skinStyles/ooui.less",
+			"+mediawiki.action.view.redirectPage": "skinStyles/mediawiki.action.view.redirectPage.css",
+			"+mediawiki.notification": "skinStyles/mediawiki.notification.less",
+			"+ext.echo.styles.badge": "skinStyles/ext.echo.styles.badge.less"
+		}
+	},
+	"manifest_version": 2
+}

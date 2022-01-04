@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joachim Mos",
+			"Servien"
+		]
+	},
+	"wikibase-sitelinks-wikipedia": "Wikipedia",
+	"datatypes-type-boolean": "Boolean",
+	"datatypes-type-time": "Tied"
+}

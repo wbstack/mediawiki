@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Tacsipacsi",
+			"Teemeah",
+			"Tgr"
+		]
+	},
+	"templatesandbox": "Sablonhomokozó",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Feldolgoz egy lapot]] úgy, hogy a sablonokat egy homokozóból illeszti be",
+	"templatesandbox-suffix": "homokozó",
+	"templatesandbox-legend": "Sablonhomokozó",
+	"templatesandbox-prefix-label": "Homokozó előtagja:",
+	"templatesandbox-page-label": "Feldolgozandó lap:",
+	"templatesandbox-revid-label": "Feldolgozandó lapváltozat:",
+	"templatesandbox-text-label": "Feldolgozandó wikiszöveg:",
+	"templatesandbox-submit": "Megtekintés",
+	"templatesandbox-title-output": "Sablonhomokozó: $1",
+	"templatesandbox-editform-legend": "Lap előnézetének megtekintése ezzel a sablonnal",
+	"templatesandbox-editform-page-label": "Lap címe",
+	"templatesandbox-editform-view-label": "Előnézet megtekintése",
+	"templatesandbox-preview": "$2 előnézete",
+	"templatesandbox-previewnote": "'''Ne feledd, hogy ez csak [[:$1]] előnézete.''' A változtatásaid még nincsenek elmentve!",
+	"templatesandbox-invalid-title": "Az általad megadott cím érvénytelen.",
+	"templatesandbox-title-not-exists": "Az általad megadott lap nem létezik.",
+	"templatesandbox-revision-not-exists": "Az általad megadott változat nem létezik.",
+	"templatesandbox-invalid-prefix": "A megadott homokozóelőtag érvénytelen.",
+	"templatesandbox-prefix-not-local": "A megadott homokozóelőtag nem helyi.",
+	"templatesandbox-page-or-revid": "Kötelező megadni egy lapcímet vagy lapváltozat-azonosítót.",
+	"templatesandbox-fail-post": "<em>Az elveszett munkamenetadatok miatt az előnézet nem jelenik meg a JavaScript-támadások megelőzésére.</em>\n\n<strong>Ha tényleg meg akarod nézni az előnézetet, próbáld újra.</strong>\nHa továbbra sem működik, próbálj meg [[Special:UserLogout|kijelentkezni]] és újra bejelentkezni.",
+	"templatesandbox-fail-post-anon": "<em>Mivel nem vagy bejelentkezve, az előnézet nem jelenik meg a JavaScript-támadások megelőzésére.</em>\n\n<strong>Ha tényleg meg akarod nézni az előnézetet, [[Special:UserLogin|jelentkezz be]] és próbáld újra.</strong>",
+	"templatesandbox-editform-need-template": "Ha meg akarod nézni egy másik lap előnézetét ezzel a sablonnal, meg kell adnod a sablon nevét.",
+	"templatesandbox-editform-need-title": "Ha meg akarod nézni egy másik lap előnézetét ezzel a sablonnal, meg kell adnod a lap címét.",
+	"templatesandbox-editform-invalid-template": "A megadott sablonnév érvénytelen.",
+	"templatesandbox-editform-invalid-title": "A megadott lapcím érvénytelen.",
+	"templatesandbox-editform-title-not-exists": "A megadott lap nem létezik."
+}

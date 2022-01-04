@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"V6rg",
+			"شیخ"
+		]
+	},
+	"wikibase-comment-update": "{{WBREPONAME}} تغىير بۊده",
+	"wikibase-dataitem": "آىتم {{WBREPONAME}}",
+	"wikibase-editlinks": "خالؤنˇ دچينواچين",
+	"wikibase-editlinkstitle": "مئن ويکي خالؤنˇ دچينواچين",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "دۊخۊسان",
+	"wikibase-rc-hide-wikidata-show": "نۊشؤن دأن",
+	"wikibase-rc-wikibase-edit-letter": "د",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} دچينواچين گۊدن",
+	"wikibase-otherprojects": "باخيˇ پؤرؤژه'نˇ ميئن"
+}

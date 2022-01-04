@@ -1,0 +1,30 @@
+{
+	"@metadata": {
+		"authors": [
+			"Michaello",
+			"Srdjan m",
+			"Srđan"
+		]
+	},
+	"hieroglyphs": "Isprobajte pisanje hijeroglifima",
+	"wikihiero-category-A": "A: Muškarac i njegova zanimanja",
+	"wikihiero-category-Aa": "Aa: Neklasifikovano",
+	"wikihiero-category-B": "B: Žena i njena zanimanja",
+	"wikihiero-category-C": "C: Čovekolika božanstva",
+	"wikihiero-category-D": "D: Delovi ljudskog tela",
+	"wikihiero-category-E": "E: Sisari",
+	"wikihiero-category-F": "F: Delovi tela sisara",
+	"wikihiero-category-G": "G: Ptice",
+	"wikihiero-category-H": "H: Delovi tela ptica",
+	"wikihiero-category-I": "I: Vodozemci, gmizavci i t. d.",
+	"wikihiero-category-K": "K: Ribe i delovi riba",
+	"wikihiero-category-L": "L: Beskičmenjaci",
+	"wikihiero-category-Z": "Z: Linije, geometrijske figure",
+	"wikihiero-desc": "Dodaje <code>&lt;hiero&gt;</code> oznaku za prikaz [[Special:Hieroglyphs|hijeroglifa]].",
+	"wikihiero-eol": "Kraj reda",
+	"wikihiero-juxtaposition": "Prirašćivanje",
+	"wikihiero-separator": "Razdvajač",
+	"wikihiero-superposition": "Premetanje",
+	"wikihiero-syntax": "Sintaksa",
+	"wikihiero-visualeditor-mwhieroinspector-title": "Hijeroglifi"
+}

@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"BanKris",
+			"Bencemac",
+			"Csigabi",
+			"Dj",
+			"Tacsipacsi",
+			"Urbalazs"
+		]
+	},
+	"twocolconflict": "Bekezdésalapú szerkesztési ütközés",
+	"twocolconflict-desc": "Kétoszlopos nézet a szerkesztési konfliktusok feloldására",
+	"twocolconflict-beta-feature-message": "Bekezdésalapú szerkesztési ütközés",
+	"twocolconflict-beta-feature-description": "Szerkesztési ütközés esetén egy fejlettebb, bekezdésalapú nézet megjelenítése.",
+	"twocolconflict-split-header-hint-beta": "Köszönjük, hogy használod ezt a béta funkciót. Te is segíthetsz a tökéletesítésében, ha visszajelzéssel szolgálsz [https://www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface ezen a lapon].",
+	"twocolconflict-split-your-version-header": "A te változtatásod",
+	"twocolconflict-split-current-version-header": "Aktuális változat: $1",
+	"twocolconflict-split-not-saved-at": "Még nem közzétett",
+	"twocolconflict-split-choose-version": "Kérlek válassz ki egy változatot",
+	"twocolconflict-split-tour-dialog-header": "Szerkesztési ütközések feloldása",
+	"twocolconflict-split-tour-dialog-message": "Sajnos szerkesztési ütközésbe futottál: szerkesztésed közben egy másik felhasználó is szerkesztette, illetve elmentette a lapot. A te változatod ezért elavult, mert nem tartalmazza a másik felhasználó szerkesztéseit. Kérlek egyesítsd szerkesztéseidet a következő oldalon.",
+	"twocolconflict-split-tour-dialog-btn-text": "Összevonás kezdése",
+	"twocolconflict-split-tour-popup-btn-text": "Rendben, értettem.",
+	"twocolconflict-split-tour-popup1-header": "Eltérő változtatások soronként vannak jelölve.",
+	"twocolconflict-split-tour-popup1-message": "Amennyiben különbség van a másik felhasználó és a te változatod között, a két változat egymás mellett fog megjelenni: a másik felhasználó változata sárga dobozban bal oldalt, míg a tiéd kék dobozban jobb oldalt.<br /><br />Amennyiben nincs különbség a két változat között, a sorok szürke dobozban jelennek meg. Ezek szükség esetén kinyithatók és összecsukhatók, valamint szerkeszthetők.",
+	"twocolconflict-split-tour-popup2-header": "Válaszd ki, mely változtatásokat akarod megtartani.",
+	"twocolconflict-split-tour-popup2-message": "A sorok közti gombokkal válaszd ki, a szöveg melyik változatát szeretnéd megtartani. Amikor kiválasztottál egy változatot, a ceruza ikonra való kattintással tudod szerkeszteni. Lehetséges továbbá átmásolnod szöveget a másik változatból is a klaviatúrád másolás és beillesztés funkciójával vagy a jobb egérgombbal.<br /><br />Az összevont szöveg elmentéséhez minden sorból kell választanod egy változatot.",
+	"twocolconflict-split-tour-popup3-header": "Kiemelt szöveg",
+	"twocolconflict-split-tour-popup3-message": "Bármely változat sorában a megváltozott szöveg ki van emelve. Miután szerkeszted a szöveget, a kiemelés eltűnik.",
+	"twocolconflict-split-edit-tooltip": "Kattints a szöveg szerkesztéséhez",
+	"twocolconflict-split-save-tooltip": "A változtatásaid alkalmazása erre a szövegre",
+	"twocolconflict-split-reset-tooltip": "A változtatásaid elvetése a szövegben",
+	"twocolconflict-split-reset-warning": "Biztos elveted a változtatásokat? A dobozban lévő szöveg a szerkesztési konfliktuskori állapotra fog visszaállni.",
+	"twocolconflict-split-reset-warning-cancel": "Mégse",
+	"twocolconflict-split-reset-warning-accept": "Elvetés",
+	"twocolconflict-split-collapse-tooltip": "Nem változott szöveg összecsukása",
+	"twocolconflict-split-expand-tooltip": "Nem változott szöveg kinyitása"
+}

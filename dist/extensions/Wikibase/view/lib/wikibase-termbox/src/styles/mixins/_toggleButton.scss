@@ -1,0 +1,41 @@
+@mixin toggle-button($svg) {
+	display: flex;
+	height: 48px;
+	align-items: center;
+	justify-content: flex-start;
+	position: relative;
+	text-decoration: none;
+
+	> span {
+		position: relative;
+		color: $wmui-color-base20;
+		font-weight: bold;
+		font-family: $font-family-sans;
+		margin-left: 1em;
+	}
+
+	&:before {
+		background: $svg 50% 50% no-repeat;
+		width: 20px;
+		height: 20px;
+		content: '';
+		transform: scaleY( -1 );
+	}
+
+	&--expanded:before {
+		transform: scaleY( 1 );
+	}
+
+	&--unclickable {
+		pointer-events: none;
+		cursor: default;
+
+		&:before {
+			content: none;
+		}
+	}
+
+	@include media-breakpoint-up(md) {
+		justify-content: inherit;
+	}
+}

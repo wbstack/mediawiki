@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Guycn2",
+			"YaronSh",
+			"Yona b"
+		]
+	},
+	"invitesignup": "להזמין אנשים לוויקי זה",
+	"is-desc": "שליחת הזמנות בדוא״ל",
+	"is-tableth-date": "תאריך",
+	"is-tableth-email": "דוא״ל",
+	"is-tableth-inviter": "מזמין",
+	"is-tableth-signup": "נרשם",
+	"is-tableth-groups": "קבוצות",
+	"is-add": "הוספה",
+	"is-delete": "מחיקה",
+	"is-invalidemail": "<b>$1</b> אינה כתובת דוא״ל תקנית.",
+	"is-emailsubj": "הוזמנת להצטרף אל {{SITENAME}}",
+	"is-emailbody": "שלום,\n\n$1 {{GENDER:$1|הזמין|הזמינה}} אותך להירשם ל־{{SITENAME}}.\nניתן להירשם ב־$2",
+	"right-invitesignup": "הזמנת משתמשים להירשם",
+	"action-invitesignup": "להזמין משתמשים להירשם לאתר"
+}

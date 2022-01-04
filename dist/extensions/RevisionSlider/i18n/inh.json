@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Adam-Yourist"
+		]
+	},
+	"revisionslider-preference-disable": "Ма гойта RevisionSlider",
+	"revisionslider-toggle-label": "Исторен навигаци",
+	"revisionslider-label-username": "{{GENDER:$1|Доакъашхо}}"
+}

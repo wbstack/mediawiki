@@ -1,0 +1,13 @@
+/**
+ * @license GNU GPL v2+
+ * @author H. Snater < mediawiki@snater.com >
+ */
+.wikibase-sitelinkgrouplistview {
+	float: left;
+}
+
+@media screen and ( min-width: 1570px ) {
+	.wikibase-sitelinkgrouplistview {
+		width: 26em;
+	}
+}

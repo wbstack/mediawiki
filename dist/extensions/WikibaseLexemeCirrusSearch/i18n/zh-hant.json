@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kly",
+			"Liuxinyu970226",
+			"Mutolisp"
+		]
+	},
+	"wikibaselexemecirrus-desc": "用於使用在 CirrusSearch 功能的 WikibaseLexeme 擴充",
+	"wikibaselexemecirrus-rescore-profile-prefix": "前綴（完成）搜尋的重新計數表示"
+}

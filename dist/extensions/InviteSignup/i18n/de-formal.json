@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kghbln"
+		]
+	},
+	"is-emailsubj": "Sie sind eingeladen, {{SITENAME}} beizutreten",
+	"is-emailbody": "Hallo,\n\n{{GENDER:$1|$1}} hat Sie zur Registrierung auf {{SITENAME}} eingeladen.\nSie können sich auf $2 registrieren."
+}

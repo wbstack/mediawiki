@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joao Xavier"
+		]
+	},
+	"advancedsearch-options-pane-head": "Avancata parametri:",
+	"advancedsearch-optgroup-text": "Serchar en la texto di la pagino",
+	"advancedsearch-optgroup-files": "Arkivi ed imaji",
+	"advancedsearch-optgroup-sort": "Organizo-ordeno",
+	"advancedsearch-field-plain": "Ca vorti",
+	"advancedsearch-field-phrase": "Exakte ca texto",
+	"advancedsearch-field-or": "Un ek ca vorti",
+	"advancedsearch-field-not": "Sen ica vorti",
+	"advancedsearch-field-subpageof": "Quanto di subpagini en ica pagino",
+	"advancedsearch-field-intitle": "Titulo di la pagino kontenas",
+	"advancedsearch-field-deepcategory": "Pagini en ica kategorii",
+	"advancedsearch-field-hastemplate": "Pagini kun ca shabloni",
+	"advancedsearch-field-filetype": "Tipo di arkivo",
+	"advancedsearch-field-sort": "Quale organizar",
+	"advancedsearch-field-preview-sort": "Ordenar segun $1",
+	"advancedsearch-filetype-section-video": "Formati di video",
+	"advancedsearch-filetype-section-audio": "Formati di audio",
+	"advancedsearch-filetype-section-document": "Formati di dokumenti",
+	"advancedsearch-filetype-default": "Selektez tipo di arkivo",
+	"advancedsearch-filetype-drawing": "Desegnuro",
+	"advancedsearch-filetype-video": "Filmeto",
+	"advancedsearch-sort-relevance": "Importo",
+	"advancedsearch-sort-preview-relevance": "importo",
+	"advancedsearch-namespaces-search-in": "Serchar en:",
+	"advancedsearch-namespaces-remember": "Memorez la selektajo por futura serchi",
+	"advancedsearch-namespaces-preset-all": "Omna",
+	"advancedsearch-namespaces-preset-default": "''Default''",
+	"advancedsearch-namespaces-preset-general-help": "Generala helpo",
+	"advancedsearch-namespaces-placeholder": "Adjuntar nomala spaci...",
+	"prefs-advancedsearch": "Specala serchado",
+	"advancedsearch-preference-help": "La \"Specala Serchado\" kreas formulario en la pagino \"Special:Search\". To permisas facar specala serchadi, mem se vu konocas nula sintaxo pri serchado. To anke modifikas quale selektar la 'namespaces'.",
+	"advancedsearch-preference-disable": "Ne montrez l'interfacio* pri Specala Serchado"
+}

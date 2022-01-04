@@ -1,0 +1,32 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iwan Novirion",
+			"Macofe"
+		]
+	},
+	"templatesandbox": "Bak kasiak templat",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Marender laman]] transklusi templat dari bak kasiak",
+	"templatesandbox-suffix": "bak kasiak",
+	"templatesandbox-legend": "Bak kasiak templat",
+	"templatesandbox-prefix-label": "Awalan bak kasiak:",
+	"templatesandbox-page-label": "Laman render:",
+	"templatesandbox-revid-label": "Parubahan render:",
+	"templatesandbox-text-label": "Teks wiki render:",
+	"templatesandbox-submit": "Baco",
+	"templatesandbox-title-output": "Templat bak kasiak: $1",
+	"templatesandbox-editform-legend": "Pratinjau laman jo templat ko",
+	"templatesandbox-editform-page-label": "Judul laman",
+	"templatesandbox-editform-view-label": "Caliak pratinjau",
+	"templatesandbox-preview": "Pratinjau dari laman $2",
+	"templatesandbox-previewnote": "'''Ingek iko hanyolah pratinjau dari laman [[:$1]].'''\nParubahan nan Sanak buek alun disimpan!",
+	"templatesandbox-invalid-title": "Judul nan Sanak agiah indak sah.",
+	"templatesandbox-title-not-exists": "Judul nan dituju indak basobok.",
+	"templatesandbox-revision-not-exists": "Revisi nan dituju indak basobok.",
+	"templatesandbox-invalid-prefix": "Awalan bak kasiak nan dituju indak sah.",
+	"templatesandbox-prefix-not-local": "Awalan bak kasiak nan dituju indak ad di wiki ko.",
+	"templatesandbox-page-or-revid": "Sanak harus masuakan judul laman atau nomor ID parubahan.",
+	"templatesandbox-editform-need-title": "Untuak mancaliak pratinjau laman nan manggunoan templat ko, judul lamannyo harus ado.",
+	"templatesandbox-editform-invalid-title": "Judul nan dituju untuak pratinjau indak sah.",
+	"templatesandbox-editform-title-not-exists": "Judul nan dituju untuak pratinjau indak basobok."
+}

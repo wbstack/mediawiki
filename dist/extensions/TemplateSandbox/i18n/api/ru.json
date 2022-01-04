@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Facenapalm"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Префикс песочницы шаблонов, например,  [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-contentmodel": "Модель содержимого <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Формат содержимого <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Параметры <var>$1templatesandboxtitle</var> и <var>$1templatesandboxtext</var> должны быть либо одновременно заданы, либо одновременно опущены."
+}

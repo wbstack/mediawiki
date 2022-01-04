@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UserLink inserts only the user name if given a zero user ID 1`] = `
+<span>
+  <bdi>
+    Example User
+  </bdi>
+</span>
+`;
+
+exports[`UserLink links to the user page if given a positive user ID 1`] = `
+<span>
+  <a
+    href="https://wiki.example/wiki/Special:Redirect/user/1234"
+  >
+    <bdi>
+      Example User
+    </bdi>
+  </a>
+</span>
+`;

@@ -1,0 +1,45 @@
+{
+	"name": "InviteSignup",
+	"version": "1.0.0+2021-09-01",
+	"author": [
+		"Niklas Laxström"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:InviteSignup",
+	"descriptionmsg": "is-desc",
+	"license-name": "GPL-2.0-or-later",
+	"type": "specialpage",
+	"requires": {
+		"MediaWiki": ">= 1.36.0"
+	},
+	"AutoloadClasses": {
+		"InviteSignupHooks": "InviteSignupHooks.php",
+		"InviteStore": "InviteStore.php",
+		"SpecialInviteSignup": "SpecialInviteSignup.php"
+	},
+	"AvailableRights": [
+		"invitesignup"
+	],
+	"ExtensionMessagesFiles": {
+		"InviteSignupAlias": "InviteSignup.alias.php"
+	},
+	"Hooks": {
+		"AddNewAccount": "InviteSignupHooks::onAddNewAccount",
+		"BeforeInitialize": "InviteSignupHooks::onBeforeInitialize",
+		"LoadExtensionSchemaUpdates": "InviteSignupHooks::onLoadExtensionSchemaUpdates",
+		"UserCreateForm": "InviteSignupHooks::onUserCreateForm",
+		"UserGetRights": "InviteSignupHooks::onUserGetRights"
+	},
+	"config": {
+		"ISGroups": [],
+		"InviteSignupHash": null
+	},
+	"MessagesDirs": {
+		"InviteSignup": [
+			"i18n"
+		]
+	},
+	"SpecialPages": {
+		"InviteSignup": "SpecialInviteSignup"
+	},
+	"manifest_version": 1
+}

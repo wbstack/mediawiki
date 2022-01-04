@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Teslaton",
+			"TomášPolonec"
+		]
+	},
+	"templatesandbox": "Šablónové pieskovisko",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Zobrazenie stránky]] s použitím šablóny z pieskoviska",
+	"templatesandbox-suffix": "pieskovisko",
+	"templatesandbox-legend": "Šablónové pieskovisko",
+	"templatesandbox-text": "Zadaním prefixu pieskoviska si zvolíte sadu šablón, uložených v priestore pieskoviska. \nAk chcete použiť napr. šablónu {{ns:Template}}:Test, ktorej verziu ste si {{GENDER:|uložil|uložila|uložili}} ako „{{ns:User}}:Príklad/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test“, použite ako prefix „{{ns:User}}:Príklad/{{int:templatesandbox-suffix}}“.",
+	"templatesandbox-prefix-label": "Prefix pieskoviska:",
+	"templatesandbox-page-label": "Zobraziť stránku:",
+	"templatesandbox-revid-label": "Zobraziť revíziu:",
+	"templatesandbox-text-label": "Zobraziť wikitext",
+	"templatesandbox-submit": "Zobraziť",
+	"templatesandbox-title-output": "Šablónové pieskovisko: $1",
+	"templatesandbox-editform-legend": "Náhľad stránky s touto šablónou",
+	"templatesandbox-editform-page-label": "Názov stránky",
+	"templatesandbox-editform-view-label": "Zobraziť náhľad",
+	"templatesandbox-preview": "Náhľad stránky $2",
+	"templatesandbox-previewnote": "'''Nezabudnite, toto je iba náhľad stránky [[:$1]].'''\nZmeny zatiaľ nie sú uložené!",
+	"templatesandbox-invalid-title": "Zadaný názov je neplatný.",
+	"templatesandbox-title-not-exists": "Zadaný názov neexistuje.",
+	"templatesandbox-revision-not-exists": "Zadaná revízia neexistuje.",
+	"templatesandbox-invalid-prefix": "Zadaný prefix pieskoviska je neplatný.",
+	"templatesandbox-prefix-not-local": "Zadaný prefix pieskoviska nie je lokálny.",
+	"templatesandbox-page-or-revid": "Musíte zadať názov stránky alebo číslo revízie.",
+	"templatesandbox-fail-post": "<em>Keďže došlo k strate dát relácie, je náhľad kvôli ochrane pred JavaScriptovými útokmi skrytý.</em>\n\n<strong>Pokiaľ šlo o legitímny pokus o náhľad, skúste to znova.</strong>\nAk sa náhľad ani potom nezobrazí, skúste sa [[Special:UserLogout|odhlásiť]] a znova prihlásiť.",
+	"templatesandbox-fail-post-anon": "<em>Keďže nie ste prihlásení, je náhľad kvôli ochrane pred JavaScriptovými útokmi skrytý.</em>\n\n<strong>Pokiaľ šlo o legitímny pokus o náhľad, [[Special:UserLogin|prihláste sa]] a skúste to znova.</strong>",
+	"templatesandbox-editform-need-template": "Ak chcete zobraziť náhľad inej stránky s využitím tejto šablóny, musíte zadať názov šablóny.",
+	"templatesandbox-editform-need-title": "Ak chcete zobraziť náhľad inej stránky s využitím tejto šablóny, musíte zadať názov stránky.",
+	"templatesandbox-editform-invalid-template": "Zadaný názov šablóny je neplatný.",
+	"templatesandbox-editform-invalid-title": "Zadaný názov stránky pre náhľad je neplatný.",
+	"templatesandbox-editform-title-not-exists": "Zadaný názov stránky pre náhľad neexistuje."
+}

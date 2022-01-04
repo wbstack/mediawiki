@@ -1,0 +1,171 @@
+{
+	"name": "JsonConfig",
+	"version": "1.1.1",
+	"author": [
+		"Yuri Astrakhan",
+		"Eranroz"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:JsonConfig",
+	"descriptionmsg": "jsonconfig-desc",
+	"type": "other",
+	"license-name": "GPL-2.0-or-later",
+	"requires": {
+		"MediaWiki": ">= 1.37.0"
+	},
+	"namespaces": [
+		{
+			"id": 482,
+			"constant": "NS_CONFIG",
+			"name": "Config",
+			"conditional": true
+		},
+		{
+			"id": 483,
+			"constant": "NS_CONFIG_TALK",
+			"name": "Config_talk",
+			"conditional": true
+		},
+		{
+			"id": 486,
+			"constant": "NS_DATA",
+			"name": "Data",
+			"conditional": true
+		},
+		{
+			"id": 487,
+			"constant": "NS_DATA_TALK",
+			"name": "Data_talk",
+			"conditional": true
+		}
+	],
+	"MessagesDirs": {
+		"JsonConfig": [
+			"i18n",
+			"i18n/api"
+		]
+	},
+	"ExtensionMessagesFiles": {
+		"JsonConfigNamespaces": "JsonConfig.namespaces.php"
+	},
+	"RawHtmlMessages": [
+		"jsonconfig-license"
+	],
+	"AutoloadNamespaces": {
+		"JsonConfig\\": "includes/"
+	},
+	"TestAutoloadClasses": {
+		"JsonConfig\\Tests\\ObjContent": "tests/phpunit/unit/ObjContent.php"
+	},
+	"APIModules": {
+		"jsonconfig": "JsonConfig\\JCApi"
+	},
+	"ResourceModules": {
+		"ext.jsonConfig": {
+			"styles": [
+				"JsonConfig.less",
+				"tabular-general.less",
+				"tabular-table.less"
+			]
+		},
+		"ext.jsonConfig.edit": {
+			"scripts": [
+				"ext.jsonConfig.init.js",
+				"ext.jsonConfig.JsonEditDialog.js",
+				"ext.jsonConfig.edit.js"
+			],
+			"dependencies": [
+				"jquery.textSelection",
+				"mediawiki.widgets.Table",
+				"oojs-ui-widgets",
+				"oojs-ui-windows"
+			],
+			"messages": [
+				"jsonconfig-edit-action-apply",
+				"jsonconfig-edit-action-cancel",
+				"jsonconfig-edit-button-label",
+				"jsonconfig-edit-dialog-error",
+				"jsonconfig-edit-dialog-error-data-inavlid",
+				"jsonconfig-edit-dialog-error-data-missing",
+				"jsonconfig-edit-dialog-error-data-too-large",
+				"jsonconfig-edit-dialog-error-field-name-missing",
+				"jsonconfig-edit-dialog-error-field-type-invalid",
+				"jsonconfig-edit-dialog-error-fields-missing",
+				"jsonconfig-edit-dialog-error-schema-missing",
+				"jsonconfig-edit-dialog-title"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "JsonConfig/modules"
+	},
+	"Hooks": {
+		"ApiMain::moduleManager": "JsonConfig\\JCSingleton::onApiMainModuleManager",
+		"ArticleDeleteComplete": "JsonConfig\\JCSingleton::onArticleDeleteComplete",
+		"ArticleUndelete": "JsonConfig\\JCSingleton::onArticleUndelete",
+		"BeforePageDisplay": "JsonConfig\\JCSingleton::onBeforePageDisplay",
+		"CanonicalNamespaces": "JsonConfig\\JCSingleton::onCanonicalNamespaces",
+		"CodeEditorGetPageLanguage": "JsonConfig\\JCSingleton::onCodeEditorGetPageLanguage",
+		"ContentHandlerDefaultModelFor": "JsonConfig\\JCSingleton::onContentHandlerDefaultModelFor",
+		"ContentHandlerForModelID": "JsonConfig\\JCSingleton::onContentHandlerForModelID",
+		"GetContentModels": "JsonConfig\\JCSingleton::onGetContentModels",
+		"AlternateEdit": "JsonConfig\\JCSingleton::onAlternateEdit",
+		"EditPage::showEditForm:initial": "JsonConfig\\JCSingleton::onEditPage",
+		"EditFilterMergedContent": "JsonConfig\\JCSingleton::onEditFilterMergedContent",
+		"EditPageCopyrightWarning": "JsonConfig\\JCSingleton::onEditPageCopyrightWarning",
+		"MovePageIsValidMove": "JsonConfig\\JCSingleton::onMovePageIsValidMove",
+		"PageSaveComplete": "JsonConfig\\JCSingleton::onPageSaveComplete",
+		"ScribuntoExternalLibraries": "JsonConfig\\JCLuaLibrary::onScribuntoExternalLibraries",
+		"SkinCopyrightFooter": "JsonConfig\\JCSingleton::onSkinCopyrightFooter",
+		"TitleGetEditNotices": "JsonConfig\\JCSingleton::onTitleGetEditNotices",
+		"PageMoveComplete": "JsonConfig\\JCSingleton::onPageMoveComplete",
+		"getUserPermissionsErrors": "JsonConfig\\JCSingleton::onGetUserPermissionsErrors"
+	},
+	"config": {
+		"JsonConfigs": {
+			"merge_strategy": "array_replace_recursive",
+			"value": {}
+		},
+		"JsonConfigModels": {
+			"merge_strategy": "array_replace_recursive",
+			"value": {}
+		},
+		"JsonConfigDisableCache": {
+			"value": false
+		},
+		"JsonConfigCacheKeyPrefix": {
+			"value": "1"
+		},
+		"JsonConfigEnableLuaSupport": {
+			"value": false
+		},
+		"JsonConfigAllowedLicenses": {
+			"value": [
+				"CC0-1.0",
+				"CC-BY-1.0",
+				"CC-BY-2.0",
+				"CC-BY-2.5",
+				"CC-BY-3.0",
+				"CC-BY-4.0",
+				"CC-BY-4.0+",
+				"CC-BY-SA-1.0",
+				"CC-BY-SA-2.0",
+				"CC-BY-SA-2.5",
+				"CC-BY-SA-3.0",
+				"CC-BY-SA-4.0",
+				"CC-BY-SA-4.0+",
+				"ODbL-1.0",
+				"dl-de-zero-2.0",
+				"dl-de-by-1.0",
+				"dl-de-by-2.0"
+			]
+		},
+		"JsonConfigInterwikiPrefix": {
+			"value": "commons"
+		},
+		"JsonConfigUseGUI": {
+			"value": true
+		}
+	},
+	"manifest_version": 2
+}

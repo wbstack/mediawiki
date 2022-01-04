@@ -1,0 +1,25 @@
+@import 'mediawiki.mixins.less';
+
+/**
+ * @license GNU GPL v2+
+ * @author H. Snater < mediawiki@snater.com >
+ */
+.wikibase-entityview {
+	.mixin-clearfix();
+}
+
+@media screen and ( min-width: 1570px ) {
+	.wikibase-entityview {
+		width: 100%;
+	}
+}
+
+.wikibase-entityview > * {
+	float: left;
+}
+
+.wikibase-entityview .wikibase-entityview-main {
+	margin: 0 2em 2em 0;
+	max-width: 65em;
+	width: 100%; /* required because it's a floating block element now */
+}

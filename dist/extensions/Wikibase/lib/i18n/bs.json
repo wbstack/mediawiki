@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"CERminator",
+			"Edinwiki",
+			"KWiki",
+			"Palapa",
+			"Semso98",
+			"Srdjan m",
+			"Srđan"
+		]
+	},
+	"specialpages-group-wikibase": "Wikibase",
+	"wikibase-error-unexpected": "Greška: $1.",
+	"wikibase-error-save-generic": "Ne mogu sačuvati zbog greške.",
+	"wikibase-error-remove-generic": "Ne mogu ukloniti zbog greške.",
+	"wikibase-error-save-timeout": "Trenutno imamo tehničkih poteškoća. Pokušajte ponovo.",
+	"wikibase-error-remove-timeout": "Trenutno imamo tehničkih poteškoća. Pokušajte ponovo.",
+	"wikibase-error-ui-no-external-page": "Stranica \"$2\" nije pronađena na \"$1\".",
+	"wikibase-error-ui-edit-conflict": "Došlo je do sukoba između izmjena. Osvježite stranicu i pokušajte ponovo sačuvati vaše izmjene.",
+	"wikibase-sitelinks-wikipedia": "Wikipedia",
+	"wikibase-snakview-snaktypeselector-novalue": "nema vrijednosti",
+	"datatypes-type-quantity": "Količina",
+	"datatypes-type-monolingualtext": "Jednojezički tekst",
+	"datatypes-type-multilingualtext": "Višejezički tekst",
+	"datatypes-type-number": "Broj",
+	"datatypes-type-globe-coordinate": "Geografski koordinati",
+	"datatypes-type-time": "Tačka u vremenu",
+	"datatypes-type-wikibase-item": "Stavka",
+	"datatypes-type-commonsMedia": "Commons medijska datoteka",
+	"version-wikibase": "Wikibase",
+	"wikibase-entity-summary-wbsetsitelink-remove": "Uklonjen link ka [$2]"
+}

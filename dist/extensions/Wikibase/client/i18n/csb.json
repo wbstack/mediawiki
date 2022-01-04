@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kaszeba",
+			"Kirsan"
+		]
+	},
+	"tooltip-t-wikibase": "Lënk do sparłączonegò elementu w repòzytorëjach pòdôwków",
+	"wikibase-comment-update": "Zmieniono element w Wikipòdôwkach",
+	"wikibase-dataitem": "Element Wikipòdôwków",
+	"wikibase-editlinks": "Editëjë lënczi",
+	"wikibase-editlinkstitle": "Editëjë lënczi midzy jãzëkòwima wersëjama",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Zatacë",
+	"wikibase-rc-hide-wikidata-show": "Pòkôżë",
+	"wikibase-rc-wikibase-edit-letter": "d",
+	"wikibase-rc-wikibase-edit-title": "Edicëjô w Wikipòdôwkach",
+	"wikibase-rcfilters-hide-wikibase-label": "Edicje w Wikipòdôwkach",
+	"wikibase-pageinfo-entity-usage": "Òbiektë z Wikipòdôwków ùżëté na ti starnie",
+	"wikibase-otherprojects": "W jinnych ùdbach"
+}

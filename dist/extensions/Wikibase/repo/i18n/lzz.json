@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cem Rize",
+			"Velg"
+		]
+	},
+	"wikibase-edit": "doktiri",
+	"wikibase-add": "ekle",
+	"wikibase-label-empty": "Hiçbir etiket tanımlanmamış",
+	"wikibase-description-empty": "Tanım bulunamadı",
+	"wikibase-sitelinks-special": "Diğer siteler",
+	"wikibase-statementview-rank-normal": "Normal sıralama"
+}

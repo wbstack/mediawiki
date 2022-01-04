@@ -1,0 +1,40 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"twocolconflict": "Cangiamende de le conflitte ca se basabe sus a 'u paragrafe",
+	"twocolconflict-desc": "Fà 'ndrucà 'na schermate de aunione affiangate pe cangià 'a resoluzione de le conflitte",
+	"twocolconflictprovidesubmittedtext": "Cange 'u conflitte:",
+	"twocolconflict-beta-feature-message": "Cangiamende de le conflitte ca se basabe sus a 'u paragrafe",
+	"twocolconflict-beta-feature-description": "Fà 'ndrucà 'u 'ndrucamende d'u conflitte d'u cangiamende ausanne 'nu 'ndrucamende cchiù avanzate sus a base d'u paragrafe",
+	"twocolconflict-core-ui-hint-close": "No fà 'ndrucà cchiù",
+	"twocolconflict-split-header-hint-beta": "Grazie pe avè pruvate sta funzione beta. Puè darne 'na màne a farla megghie lassanne 'u parere tune [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface sus a sta pàgene].",
+	"twocolconflict-split-your-version-header": "'A revisiona toje",
+	"twocolconflict-split-current-version-header": "Revisiona corrende de $1",
+	"twocolconflict-split-not-saved-at": "Angore none pubblecate",
+	"twocolconflict-split-choose-version": "Pe piacere scacchie 'na versione",
+	"twocolconflict-split-other-version-chosen": "Otre versione",
+	"twocolconflict-split-your-version-chosen": "'A versiona toje",
+	"twocolconflict-split-tour-dialog-header": "Scuagghie le conflitte de versiune",
+	"twocolconflict-split-tour-dialog-message": "Sfortunamatamende, mendre ca ste facive le cangiaminde, 'n'otre utende ave cangiate 'a stessa pàgene e pubblecate apprime de te.\n\nNo te sce preoccupanne, le cangiaminde tune non g'onne state perse! Pe piacere revide tutte e doje le versiune e scagghiale 'nzieme. Ce tìne abbesogne, puè cangià 'u teste scacchiate. Sulamende 'u teste jndrìà le buatte scacchiate avène reggistrate quanne cazze \"{{int:publishchanges}}.\"",
+	"twocolconflict-split-tour-dialog-btn-text": "Accumenze l'aunione",
+	"twocolconflict-split-tour-popup-btn-text": "Apposte, pigghiate.",
+	"twocolconflict-split-tour-popup1-header": "Le cangiaminde diverse avènene 'ndrucate linèe pe linèe",
+	"twocolconflict-split-tour-popup1-message": "Quanne ste 'na differenze 'mbrà 'u teste de l'otre utende e 'u tune, le doje versiune avènene 'ndrucate une affianghe a l'otre: 'a versione de mò ste jndr'à sckatela gialle sus 'a sinistre e 'a toje jndr'à sckatela blu a destre.<br /><br />Quanne non ge ste differenze 'mbrà le doje versiune, le linèe avènene 'ndrucate jndr'à le sckatele grigge. Ste urteme ponne essere spannute o scunnute e cangiate ce ne ste d'abbesogne.",
+	"twocolconflict-split-tour-popup2-header": "Scacchie ce cangiaminde vuè ccu mandine",
+	"twocolconflict-split-tour-popup2-message": "Scacchie 'a versione d'u teste ca vuè stipà cazzanne sus a une de le doje buttune 'mbrà ogne coppie de righe. Apprisse ca è scacchiate 'na versione, jè possibbele cangiarle cazzanne sus a l'icone d'a penne. Jè pure possibbele copià 'u teste d'a versione ca non g'ha state scacchiate ausanne 'a funzione copie e 'ngolle sus 'a tastiere o cu 'nu cazzamende destre d'u mouse. <br /><br />E' abbesogne de scacchià 'na versione pe ogne righe cangiate pe reggistrà 'u teste aunite.",
+	"twocolconflict-split-tour-popup3-header": "Teste evidenziate",
+	"twocolconflict-split-tour-popup3-message": "'U teste ha state cangiate jndr'à totte e doje le versine de 'na linèe evidenziate. Apprisse ca è cangiate 'u teste, l'evidenziamende se ne vè.",
+	"twocolconflict-split-edit-tooltip": "Cazze pe cangià stu teste",
+	"twocolconflict-split-save-tooltip": "Appleche le cnagiaminde tune a stu teste",
+	"twocolconflict-split-reset-tooltip": "Scitte tutte le cangiaminde a stu teste",
+	"twocolconflict-split-reset-warning": "Scitte le cangiaminde? 'U teste jndr'à sta sckatole avène azzerate accume stave quanne 'u conflitte d'u cangiamende ave assute.",
+	"twocolconflict-split-reset-warning-cancel": "Annulle",
+	"twocolconflict-split-reset-warning-accept": "Scitte",
+	"twocolconflict-split-collapse-tooltip": "Scunne 'u teste non cangiate",
+	"twocolconflict-split-expand-tooltip": "Spanne 'u teste non cangiate",
+	"twocolconflict-split-help-tooltip": "'Ndruche l'aijute",
+	"twocolconflict-split-tour-dialog-header-single-column-view": "Messàgge in conflitte"
+}

@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eitvys200",
+			"Manvydasz",
+			"Nersip",
+			"Tomasdd",
+			"Zygimantus"
+		]
+	},
+	"popups-message": "Peržiūros",
+	"popups-desc": "Rodo puslapio peržiūros korteles, kai naudotojas užveda pelę ant nuorodos",
+	"popups-settings-title": "Peržiūros",
+	"popups-settings-option-page": "Įgalinti",
+	"popups-settings-option-page-description": "Rodyti trumpas puslapių nuorodų santraukas, kai skaitote straipsnį.",
+	"popups-settings-save": "Išsaugoti",
+	"popups-settings-help-ok": "Atlikta",
+	"popups-settings-cancel": "Atšaukti",
+	"popups-settings-enable": "Išjungti puslapio peržiūrą",
+	"popups-preview-no-preview": "Puslapio peržiūros klaida",
+	"popups-preview-footer-read": "Eiti į šį puslapį",
+	"popups-preview-disambiguation": "Šis pavadinimas susietas su daugiau nei vienu puslapiu",
+	"popups-preview-disambiguation-link": "Peržiūrėti panašius puslapius",
+	"prefs-reading": "Skaitymo nustatymai",
+	"popups-prefs-optin": "Įjungti puslapių peržiūras (trumpas puslapių nuorodų santraukas, kai skaitote straipsnį)",
+	"popups-prefs-disable-nav-gadgets-info": "Jūs turite [[$1 | išjungti Peržiūros išlendančius langus]] Priemonių skirtuke (nustatymuose), jei norite įjungti Puslapių peržiūras",
+	"popups-refpreview-reference": "Išnaša",
+	"popups-refpreview-book": "Knygos išnaša",
+	"popups-refpreview-journal": "Žurnalo išnaša",
+	"popups-refpreview-news": "Naujienų išnaša",
+	"popups-refpreview-web": "Internetinė išnaša",
+	"popups-refpreview-collapsible-placeholder": "Šioje išnašoje per daug elementų, kurie netelpa į peržiūrą.",
+	"popups-refpreview-user-preference-label": "Išnašų peržiūros (rodyti trumpas išnašų santraukų peržiūras)",
+	"popups-refpreview-beta-feature-message": "Išnašų peržiūra"
+}

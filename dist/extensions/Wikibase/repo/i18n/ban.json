@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"Carma citrawati",
+			"Chinamoonroll",
+			"Joseagush",
+			"Luh Gede Krismayanti",
+			"NoiX180"
+		]
+	},
+	"wikibase-edit": "uah",
+	"wikibase-add": "weweh",
+	"wikibase-entitytermsforlanguagelistview-language": "Basa",
+	"wikibase-label-empty": "nenten wénten label",
+	"wikibase-description-empty": "Nénten madué daging",
+	"wikibase-content-language-edit-label": "Basa:",
+	"wikibase-sitelinks-special": "Situs lianan",
+	"wikibase-referenceview-tabs-manual": "Manual",
+	"wikibase-statementview-rank-normal": "Tincapan sane sedeng",
+	"wikibase-snakview-variations-novalue-label": "tan paaji",
+	"wikibase-itembytitle-submit": "Rereh",
+	"wikibase-itemdisambiguation-submit": "Rereh",
+	"wikibase-newentity-language": "Basa:",
+	"wikibase-modifyterm-language": "Kode basa:"
+}

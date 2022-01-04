@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`root/getters reportIssueTemplateBody builds a string matching the snapshot 1`] = `
+"The error happened on: https://bg.client.example.com/wiki/Дъглас_Адамс
+Item title: Item:Q42
+Property: P23
+Error message: APPLICATION_LOGIC_ERROR
+Approximate time of request: 2021-01-18T17:58:35.298Z
+Debug information:
+\`\`\`
+[
+    {
+        \\"type\\": \\"APPLICATION_LOGIC_ERROR\\",
+        \\"info\\": {
+            \\"stack\\": \\"test\\"
+        }
+    }
+]
+\`\`\`"
+`;

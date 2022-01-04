@@ -1,0 +1,36 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ans",
+			"Horus",
+			"Macofe",
+			"Patsagorn Y."
+		]
+	},
+	"templatesandbox": "หน้าทดลองแม่แบบ",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|ให้หน้า]]ที่ดึงแม่แบบนี้จากหน้าทดลอง",
+	"templatesandbox-suffix": "ทดลองเขียน",
+	"templatesandbox-legend": "หน้าทดลองแม่แบบ",
+	"templatesandbox-prefix-label": "คำนำหน้าหน้าทดลอง:",
+	"templatesandbox-page-label": "แสดงผลสำหรับหน้า:",
+	"templatesandbox-revid-label": "แสดงผลสำหรับรุ่นปรับปรุง:",
+	"templatesandbox-text-label": "แสดงผลข้อความวิกิ:",
+	"templatesandbox-submit": "ดู",
+	"templatesandbox-title-output": "หน้าทดลองแม่แบบ: $1",
+	"templatesandbox-editform-legend": "ดูตัวอย่างหน้าพร้อมแม่แบบนี้",
+	"templatesandbox-editform-page-label": "ชื่อเรื่องหน้า",
+	"templatesandbox-editform-view-label": "แสดงตัวอย่าง",
+	"templatesandbox-preview": "ตัวอย่างของ $2",
+	"templatesandbox-previewnote": "'''ระลึกว่านี่เป็นเพียงตัวอย่างของ [[:$1]]'''\nยังไม่ได้บันทึกการเปลี่ยนแปลงของคุณ!",
+	"templatesandbox-invalid-title": "ชื่อเรื่องที่คุณระบุไม่ถูกต้อง",
+	"templatesandbox-title-not-exists": "ชื่อเรื่องที่คุณระบุไม่มีอยู่",
+	"templatesandbox-revision-not-exists": "รุ่นที่คุณระบุไม่มีอยู่",
+	"templatesandbox-invalid-prefix": "คำนำหน้าหน้าทดลองที่คุณระบุไม่ถูกต้อง",
+	"templatesandbox-prefix-not-local": "คำนำหน้าหน้าทดลองที่คุณระบุไม่เป็นท้องถิ่น",
+	"templatesandbox-page-or-revid": "คุณต้องกรอกชื่อเรื่องหน้าหรือหมายเลขประจำรุ่น",
+	"templatesandbox-editform-need-template": "เพื่อดูตัวอย่างอีกหน้าพร้อมแม่แบบนี้ ต้องระบุชื่อแม่แบบ",
+	"templatesandbox-editform-need-title": "เพื่อดูตัวอย่างอีกหน้าพร้อมแม่แบบนี้ ต้องระบุชื่อเรื่องหน้า",
+	"templatesandbox-editform-invalid-template": "ชื่อแม่แบบที่คุณระบุไม่ถูกต้อง",
+	"templatesandbox-editform-invalid-title": "ชื่อเรื่องที่คุณระบุเพื่อดูตัวอย่างไม่ถูกต้อง",
+	"templatesandbox-editform-title-not-exists": "ชื่อเรื่องที่คุณระบุเพื่อดูตัวอย่างไม่มีอยู่"
+}

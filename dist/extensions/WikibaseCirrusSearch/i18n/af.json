@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Naudefj"
+		]
+	},
+	"special-entitieswithoutlabel": "Entiteite sonder etiket",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Lys van entiteite sonder 'n etiket",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Taalkode:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipe:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Vind",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" is nie 'n geldige taalkode nie.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" is nie 'n geldig entiteitstipe nie."
+}

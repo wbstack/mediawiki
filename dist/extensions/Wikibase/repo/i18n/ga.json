@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kwekubo",
+			"MinecraftAustralia",
+			"Tem",
+			"පසිඳු කාවින්ද"
+		]
+	},
+	"wikibase-edit": "cuir in eagar",
+	"wikibase-save": "Sábháil",
+	"wikibase-cancel": "Cealaigh",
+	"wikibase-sitelinks-special": "Suíomhanna eile",
+	"wikibase-itembytitle-lookup-page": "Leathanach:",
+	"wikibase-itembytitle-submit": "Cuardaigh",
+	"wikibase-itemdisambiguation-lookup-language": "Teanga:",
+	"wikibase-itemdisambiguation-submit": "Cuardaigh"
+}

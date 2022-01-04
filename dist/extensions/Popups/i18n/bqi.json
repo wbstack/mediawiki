@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mogoeilor"
+		]
+	},
+	"popups-message": "پیش ساٛیل بٱلگاْ",
+	"popups-settings-title": "پیش ساٛیل بٱلگاْ",
+	"popups-settings-option-page": "کونشتگٱر کردن",
+	"popups-settings-save": "کۊ کردن",
+	"popups-settings-help-ok": "ٱنجوم ڤابی",
+	"popups-settings-cancel": "ٱنجومشیڤ کردن",
+	"popups-settings-enable": "کونشتکار کردن پیش ساٛیل",
+	"popups-preview-footer-read": "رۉ ای بٱلگاْ",
+	"popups-preview-disambiguation-link": "دیڌن بٱلگاْیٱل چی یٱک",
+	"popups-refpreview-reference": "سرچشمٱ",
+	"popups-refpreview-book": "سرچشماْ کتاوی",
+	"popups-refpreview-journal": "سرچشماْ جۊرنالی",
+	"popups-refpreview-news": "سرچشماْ هٱڤالی",
+	"popups-refpreview-web": "سرچشماْ دیارگاْ",
+	"popups-refpreview-beta-feature-message": "پیش ساٛیل سرچشمٱ"
+}

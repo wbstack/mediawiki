@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mar(c)",
+			"McDutchie",
+			"SPQRobin",
+			"Siebrand"
+		]
+	},
+	"invitesignup": "Mensen uitnodigen voor deze wiki",
+	"is-desc": "Uitnodigingen via e-mail verzenden",
+	"is-tableth-date": "Datum",
+	"is-tableth-email": "E-mailadres",
+	"is-tableth-inviter": "Uitgenodigd door",
+	"is-tableth-signup": "Geregistreerd",
+	"is-tableth-groups": "Groepen",
+	"is-add": "Toevoegen",
+	"is-delete": "Verwijderen",
+	"is-invalidemail": "<b>$1</b> is geen geldig e-mailadres.",
+	"is-emailsubj": "U bent uitgenodigd om lid te worden van {{SITENAME}}",
+	"is-emailbody": "Hallo,\n\n{{GENDER:$1|$1}} heeft u uitgenodigd om u aan te melden bij {{SITENAME}}.\nU kunt zich aanmelden via $2",
+	"right-invitesignup": "Mensen uitnodigen om zich aan te melden",
+	"action-invitesignup": "mensen uit te nodigen om zich aan te melden bij deze site"
+}

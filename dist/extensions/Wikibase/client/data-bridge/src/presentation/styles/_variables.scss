@@ -1,0 +1,67 @@
+@import '~wikimedia-ui-base/wikimedia-ui-base';
+
+/**
+ * Many variables are inspired, in naming and value, by the ones found in
+ * https://phabricator.wikimedia.org/diffusion/GOJU/browse/master/src/themes/wikimediaui/common.less
+ */
+
+$base-spacing-unit: px-to-rem( 8px );
+$base-spacing-unit-fixed: 8px;
+$line-height-text: 1.5; // wikimedia-ui-base has $line-height-base but its value (1.6) is "a bug"
+$font-size-bodyS: px-to-rem( 14px );
+$font-size-bodyM: px-to-rem( 16px );
+$font-size-normal: px-to-rem( 16px );
+$size-icon: px-to-rem( 20px );
+
+$header-border-width: 1px;
+$header-content-size--desktop: calc( #{ px-to-rem( 38px ) } + 2px ); // <EventEmittingButton size="L"> height
+$header-content-size--mobile: calc( #{ px-to-rem( 46px ) } + 2px ); // <EventEmittingButton size="XL"> height
+// $size-dialog-bar--* = $header-content-size--* + (2 *) $header-border-width, but IE doesn’t support nested calc()
+$size-dialog-bar--desktop: calc( #{ px-to-rem( 38px ) } + 2px + #{$header-border-width} );
+$size-dialog-bar--mobile: calc( #{ px-to-rem( 46px ) } + 2px + 2 * #{$header-border-width} );
+
+$heading-margin-top: 3 * $base-spacing-unit;
+$heading-margin-bottom: $base-spacing-unit-fixed;
+
+$padding-panel-form: 2 * $base-spacing-unit-fixed;
+$margin-center-column-side: 3 * $base-spacing-unit-fixed;
+$binary-input-inter-component-spacing: $base-spacing-unit-fixed;
+$inter-button-spacing: 2 * $base-spacing-unit-fixed;
+$bold-font-weight: 600;
+
+// TODO taken from: https://gerrit.wikimedia.org/r/plugins/gitiles/wikibase/termbox/+/master/src/styles/_variables.scss
+$color-placeholder: $wmui-color-base30;
+
+$border-color-base--disabled: $wmui-color-base70;
+
+$padding-vertical-base: px-to-rem( 6px );
+$padding-horizontal-base: px-to-rem( 12px );
+$button-icon-size: px-to-rem( 20px );
+
+$message-padding-vertical: 1.5 * $base-spacing-unit;
+$message-padding-horizontal: 3 * $base-spacing-unit;
+$error-message-background: $wmui-color-red90;
+$error-message-border: $wmui-color-red50;
+$warning-message-background: $wmui-color-yellow90;
+$warning-message-border: $wmui-color-yellow50;
+$notice-message-background: $wmui-color-base80;
+$notice-message-border: $wmui-color-base50;
+
+// generic HTML styling
+$margin-top-li: 0.5 * $base-spacing-unit;
+
+// project specific
+$breakpoint: 499px;
+$stacking-height-default: 0;
+$stacking-height-overlay: 10;
+$stacking-height-license: 20;
+$stacking-height-loading-bar: 20;
+
+$svg-close: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/close.svg );
+$svg-error: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/error-error.svg );
+$svg-warning: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/alert-warning.svg );
+$svg-notice: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/notice.svg );
+$svg-info: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/infoFilled.svg );
+$svg-collapse: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/collapse-progressive.svg );
+$svg-expand: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/expand-progressive.svg );
+$svg-back: url( ~oojs-ui/dist/themes/wikimediaui/images/icons/previous-ltr.svg );

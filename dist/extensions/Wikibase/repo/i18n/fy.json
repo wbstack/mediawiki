@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kening Aldgilles",
+			"Ladsgroup",
+			"Macofe",
+			"PiefPafPier",
+			"Robin van der Vliet",
+			"Robin0van0der0vliet"
+		]
+	},
+	"wikibase-entity": "entiteit",
+	"wikibase-entity-property": "eigenskip",
+	"wikibase-edit": "bewurkje",
+	"wikibase-save": "bewarje",
+	"wikibase-cancel": "Annulearje",
+	"wikibase-add": "tafoegje",
+	"wikibase-addqualifier": "kwalifikaasje tafoegje",
+	"wikibase-setting-entitytermsview-showEntitytermslistview": "Lebels, aliassen en beskriuwings werjaan yn al myn talen by it laden fan 'e side",
+	"wikibase-setting-entitytermsview-showEntitytermslistview-help": "Persoanlike talen, oanfoljend op de taal fan it meidoggersoerflak, kinne ynsteld wurde mei de syntaks fan 'e [[mw:Special:MyLanguage/Extension:Babel|Babel-útwreiding]] op de meidoggerside.",
+	"wikibase-label-empty": "Gjin label definearre",
+	"wikibase-description-empty": "Gjin beskriuwing opjûn",
+	"wikibase-diffview-qualifier": "kwalifikaasje",
+	"wikibase-statementsection-statements": "Ferklearringen",
+	"wikibase-sitelinks-special": "Oare webstees",
+	"wikibase-referenceview-tabs-manual": "Hânmjittich",
+	"wikibase-statementview-rank-normal": "Normale rang",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|boarne|boarnen}}",
+	"wikibase-snakview-property-input-placeholder": "eigenskip",
+	"wikibase-entityselector-more": "mear",
+	"wikibase-itembytitle-submit": "Sykje",
+	"wikibase-itemdisambiguation-lookup-language": "Taalkoade:",
+	"wikibase-itemdisambiguation-submit": "Sykje",
+	"wikibase-newentity-submit": "Oanmeitsje",
+	"wikibase-modifyterm-language": "Taalkoade:",
+	"wikibase-entity-summary-undo": "Weromsetten fan ferzje $3 fan [[Special:Contributions/$4|{{GENDER:$4|$4}}]] ([[User talk:$4|oerlis]])",
+	"wikibase-listdatatypes-wikibase-property-head": "Eigenskip",
+	"wikibase-listdatatypes-time-head": "Tiid",
+	"wikibase-listdatatypes-url-head": "URL",
+	"datatypes-type-url": "URL"
+}

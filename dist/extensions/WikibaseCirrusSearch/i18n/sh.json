@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"OC Ripper"
+		]
+	},
+	"special-entitieswithoutlabel": "Popis entiteta bez oznake",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Pokaži popis entiteta bez oznake",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Kod jezika:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Pronađite",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" nije valjani jezički kod."
+}

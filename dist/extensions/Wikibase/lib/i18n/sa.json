@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"NehalDaveND",
+			"Shubha"
+		]
+	},
+	"wikibase-error-unexpected": "दोषः: $1",
+	"wikibase-quantitydetails-amount": "धनराशिः",
+	"wikibase-timedetails-time": "समयः",
+	"wikibase-timedetails-isotime": "समयमुद्रा",
+	"wikibase-timedetails-timezone": "समयवलयः (time zone)",
+	"wikibase-timedetails-calendar": "दिनदर्शिका",
+	"wikibase-timedetails-before": "पुरा",
+	"wikibase-timedetails-after": "पश्चात्",
+	"wikibase-globedetails-longitude": "रेखांशः",
+	"wikibase-globedetails-latitude": "अक्षांशः",
+	"wikibase-sitelinks-wikipedia": "विकिपीडिया",
+	"datatypes-type-wikibase-item": "वस्तु",
+	"wikibase-entity-summary-wbcreateclaim-create": "याच्ञा सृज्यताम्"
+}

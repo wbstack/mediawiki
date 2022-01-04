@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Borichèt",
+			"Dragonòt"
+		]
+	},
+	"invitesignup": "Anvité dla gent su sta wiki",
+	"is-desc": "Mandé dij mëssagi d'anvit",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "Pòsta eletrònica",
+	"is-tableth-inviter": "Anvitant",
+	"is-tableth-signup": "Ch'as anscriva",
+	"is-tableth-groups": "Partìe",
+	"is-add": "Gionta",
+	"is-delete": "Scancela",
+	"is-invalidemail": "<b>$1</b> a l'é n'adrëssa ëd pòsta eletrònica pa bon-a.",
+	"is-emailsubj": "It ses anvità a vnì dzor {{SITENAME}}",
+	"is-emailbody": "Cerea,\n\n{{GENDER:$1|$1}} a l'ha anvitate a registrete dzor {{SITENAME}}.\nIt peule registrete a $2",
+	"right-invitesignup": "Anvité j'utent a registresse",
+	"action-invitesignup": "anvité j'utent a registresse dzora a 's sit"
+}

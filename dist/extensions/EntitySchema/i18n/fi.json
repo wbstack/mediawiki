@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Pyscowicz"
+		]
+	},
+	"entityschema-newschema-submit": "Luo",
+	"entityschema-namebadge-header-language-code": "kielikoodi",
+	"entityschema-summary-undo-autocomment": "Kumottu muokkaus $1, jonka teki [[Special:Contributions/$2|{{GENDER:$2|$2}}]] ([[User talk:$2|keskustelu]])",
+	"entityschema-special-language-inputlabel": "Kielikoodi",
+	"entityschema-special-description": "Kuvaus:"
+}

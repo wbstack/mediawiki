@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mainframe98",
+			"Sjoerddebruin"
+		]
+	},
+	"apihelp-query+wbentityusage-param-prop": "Eigenschappen om aan het resultaat toe te voegen.",
+	"apihelp-query+pageterms-example-label-en": "Labels en aliassen van de pagina 'London' in het Engels opvragen."
+}

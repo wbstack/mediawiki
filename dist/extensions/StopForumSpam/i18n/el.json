@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"KATRINE1992"
+		]
+	},
+	"stopforumspam-desc": "Ενσωμάτωση με [https://stopforumspam.com/ stopforumspam.com]",
+	"stopforumspam-is-blocked": "Η διεύθυνση IP  <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> έχει μπλοκαριστεί λόγω spamming."
+}

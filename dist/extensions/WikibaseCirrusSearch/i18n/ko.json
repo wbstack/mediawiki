@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Alex00728",
+			"ChongDae",
+			"Ellif",
+			"Garam",
+			"Hwangjy9",
+			"Hym411",
+			"Jerrykim306",
+			"Kwj2772",
+			"Macofe",
+			"Nuevo Paso",
+			"Priviet",
+			"Revi",
+			"SeoJeongHo",
+			"Ykhwong",
+			"고솜",
+			"아라"
+		]
+	},
+	"wikibasecirrus-search-bad-entity-type": "잘못된 엔티티 유형: $1",
+	"wikibasecirrus-search-bad-profile-name": "잘못된 검색 프로파일 이름: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement 키워드에 유효한 문장이 포함되어 있지 않습니다",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity 키워드에 유효한 문장이 포함되어 있지 않습니다",
+	"special-entitieswithoutdescription": "설명이 없는 개체",
+	"wikibasecirrus-entitieswithoutdescription-legend": "설명이 없는 개체 목록 얻기",
+	"special-entitieswithoutlabel": "레이블이 없는 항목",
+	"wikibasecirrus-entitieswithoutlabel-legend": "레이블이 없는 항목 목록 가져오기",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "언어 코드:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "유형:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "찾기",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\"은(는) 올바른 언어 코드가 아닙니다.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\"(은)은 올바른 개체 유형이 아닙니다."
+}

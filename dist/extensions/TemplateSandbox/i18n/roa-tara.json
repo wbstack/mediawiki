@@ -1,0 +1,38 @@
+{
+	"@metadata": {
+		"authors": [
+			"Joetaras"
+		]
+	},
+	"templatesandbox": "Template d'a sandbox",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Face 'ndrucà 'na pàgene]] 'ngludenne le versiune de le template ca stonne jndr'à 'na sandbox",
+	"templatesandbox-suffix": "buatte de rene",
+	"templatesandbox-legend": "Template d'a buatte de rene",
+	"templatesandbox-text": "'Ndicanne 'nu prefisse pa sandbox, puè scacchià 'nu gruppe de template reggistrate jndr'à 'u spazie sandbox tune.\nPe esembie, ce vuè ccu 'ndruche l'andeprime de 'na versione de {{ns:Template}}:Test ca è reggistrate cumme \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", ause cumme prefisse \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\".",
+	"templatesandbox-prefix-label": "Preffise d'a buatte de rene:",
+	"templatesandbox-page-label": "Pàgene da 'ndrucà:",
+	"templatesandbox-revid-label": "Versione da 'ndrucà:",
+	"templatesandbox-text-label": "Uicchiteste da 'ndrucà:",
+	"templatesandbox-submit": "'Ndruche",
+	"templatesandbox-title-output": "Template d'a sandbox: $1",
+	"templatesandbox-editform-legend": "Andeprime d'a pàgene cu stu template",
+	"templatesandbox-editform-page-label": "Titole d'a pàgene",
+	"templatesandbox-editform-view-label": "Vide l'andeprime",
+	"templatesandbox-preview": "Andeprime de $2",
+	"templatesandbox-previewnote": "'''Arrecuerdete queste jè sole 'n'andeprime de [[:$1]].'''\nLe cangiaminde tune non g'onne state angore reggistrate!",
+	"templatesandbox-invalid-title": "'U titole ca è specificate jè invalide.",
+	"templatesandbox-title-not-exists": "'U titole ca è specificate non g'esiste.",
+	"templatesandbox-revision-not-exists": "'A revisione ca è specificate non g'esiste.",
+	"templatesandbox-revision-no-content": "'A versione ca è specificate non ge tène condenute, o non ge tìne le permesse pe 'ndrucarle.",
+	"templatesandbox-invalid-prefix": "'U prefisse d'a sandbox ca è specificate non g'è valide.",
+	"templatesandbox-prefix-not-local": "'U prefisse d'a sandbox ca è specificate non g'è locale.",
+	"templatesandbox-page-or-revid": "A mettere 'u titole d'a pàgene o 'nu numere ID de versione.",
+	"templatesandbox-fail-post": "<em>Pe colpe d'a perdite de date d'a sessione, l'andeprime jè scunnute cumme precauzione condre a le attacche JavaScript.</em>\n\n<strong>Ce se tratte de 'nu normale tendative d'andeprime, pruève arrete.</strong> \nCe comungue non g'avessa funzionà, pruève a [[Special:UserLogout|assè]] e trasè arrete.",
+	"templatesandbox-fail-post-anon": "<em>Purcé non g'è trasute, l'andeprime avène scunnute pe precauzione condre a attacche JavaScript.</em>\n\n<strong>Ce quiste jè 'nu tendative de andeprime leggittime, [[Special:UserLogin|tràse]] e pruéve arrete.</strong>",
+	"templatesandbox-anon-limited-preview": "L'andeprime de le cangiaminde a JavaScript e CSS jè disabbilitate quanne non ge s'ha trasute. Ce tìne abbesogne de 'ndrucà l'andeprime de ste cangiaminde, pe piacere [[Special:UserLogin|tràse]] e pruève arrete.",
+	"templatesandbox-editform-need-template": "Pe 'ndrucà l'andeprime de 'n'otra pàgene cu stu template, a specificà 'u nome de 'nu template.",
+	"templatesandbox-editform-need-title": "Pe 'ndrucà l'andeprime de 'n'otra pàgene cu stu template, a specificà 'u titole de 'na pàgene.",
+	"templatesandbox-editform-invalid-template": "'U nome d'u template ca è specificate non g'è valide.",
+	"templatesandbox-editform-invalid-title": "'U titole ca è specificate pe l'andeprime non g'è valide.",
+	"templatesandbox-editform-title-not-exists": "'U titole ca è specificate pe l'andeprime non g'esiste."
+}

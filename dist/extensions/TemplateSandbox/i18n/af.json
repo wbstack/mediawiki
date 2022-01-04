@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Naudefj"
+		]
+	},
+	"templatesandbox": "Sjabloonsandput",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Vertoon 'n bladsy]] met sjablone vanaf 'n sandput af",
+	"templatesandbox-suffix": "sandput",
+	"templatesandbox-legend": "Sjabloonsandput",
+	"templatesandbox-text": "U kan 'n versameling sjablone wat in u sandput gestoor is kies deur van 'n voorvoegsel gebruik te maak. \nAs u byvoorbeeld 'n voorskou wil sien van {{ns:Template}}:Toets wat u gestoor het as \"{{ns:User}}:Gebruikersnaam/sandput/{{ns:Template}}:Toets\", gebruik dan \"{{ns:User}}:Gebruikersnaam/sandput\" as die voorvoegsel.",
+	"templatesandbox-prefix-label": "Voorvoegsel vir sandput:",
+	"templatesandbox-page-label": "Vertoon bladsy:",
+	"templatesandbox-revid-label": "Vertoon weergawe:",
+	"templatesandbox-text-label": "Vertoon wikiteks:",
+	"templatesandbox-submit": "Wys",
+	"templatesandbox-title-output": "Sjabloonsandput: $1",
+	"templatesandbox-editform-legend": "Wys voorskou van hierdie sjabloon",
+	"templatesandbox-editform-page-label": "Bladsynaam",
+	"templatesandbox-editform-view-label": "Wys voorskou",
+	"templatesandbox-preview": "Voorskou van $2",
+	"templatesandbox-previewnote": "'''Onthou dat hierdie slegs 'n voorskou van [[:$1]] is.'''\nU wysigings is nog nie gestoor nie!",
+	"templatesandbox-invalid-title": "Die titel wat u verskaf het is ongeldig.",
+	"templatesandbox-title-not-exists": "Die titel wat u verskaf het bestaan ​​nie.",
+	"templatesandbox-revision-not-exists": "Die hersiening wat u verskaf het bestaan ​​nie.",
+	"templatesandbox-invalid-prefix": "Die voorvoegsel wat u vir die sandput verskaf het is ongeldig.",
+	"templatesandbox-prefix-not-local": "Die voorvoegsel wat u vir die sandput verskaf het is nie plaaslik nie.",
+	"templatesandbox-page-or-revid": "U moet 'n bladsynaam of weergawenommer verskaf.",
+	"templatesandbox-editform-need-title": "Om 'n ander voorskou van die sjabloon te sien moet 'n titel verskaf word.",
+	"templatesandbox-editform-invalid-title": "Die titel waarvan u 'n voorskou wil sien is ongeldig.",
+	"templatesandbox-editform-title-not-exists": "Die titel waarvan u 'n voorskou wil sien bestaan nie."
+}

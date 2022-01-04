@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Meno25",
+			"ديفيد"
+		]
+	},
+	"invitesignup": "دعوة الناس لهذه الويكي",
+	"is-desc": "إرسال دعوات عبر البريد الإلكتروني",
+	"is-tableth-date": "التاريخ",
+	"is-tableth-email": "البريد الإلكتروني",
+	"is-tableth-inviter": "الداعي",
+	"is-tableth-signup": "الموقع",
+	"is-tableth-groups": "المجموعات",
+	"is-add": "إضافة",
+	"is-delete": "حذف",
+	"is-invalidemail": "<b>$1</b> ليس عنوان بريد إلكتروني صالحا.",
+	"is-emailsubj": "أنت مدعو للانضمام إلى {{SITENAME}}",
+	"is-emailbody": "مرحبا،\n\nلقد دعاك {{GENDER:$1|$1}} إلى الاشتراك في {{SITENAME}};\nيمكنك الاشتراك في $2",
+	"right-invitesignup": "دعوة المستخدمين للتسجيل",
+	"action-invitesignup": "دعوة المستخدمين للتسجيل"
+}

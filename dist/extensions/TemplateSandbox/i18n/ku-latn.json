@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": [
+			"Balyozxane",
+			"Calak",
+			"Ghybu",
+			"Gomada",
+			"Macofe"
+		]
+	},
+	"templatesandbox-editform-legend": "Pêşdîtina rûpelê bi vê şablonê",
+	"templatesandbox-editform-page-label": "Sernavê rûpelê",
+	"templatesandbox-editform-view-label": "Pêşdîtinê nîşan bide",
+	"templatesandbox-preview": "Pêşdîtina $2",
+	"templatesandbox-previewnote": "'''Ji bîr neke ku ev tenê pêşdîtineke [[:$1]] (y)e.'''\nGuhartinên te hê nehatine tomarkirin!",
+	"templatesandbox-editform-need-title": "Ji bo pêşdîtina rûpeleke din a bi vê şablonê, divê sernavê rûpelê were destnîşankirin.",
+	"templatesandbox-editform-invalid-title": "Sernavê ku te ji bo pêşdîtinê nivîsandî nederbasdar e.",
+	"templatesandbox-editform-title-not-exists": "Sernavê ku te ji bo pêşdîtinê nivîsandî, nîne."
+}

@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kandar",
+			"Ladsgroup",
+			"Uchup19"
+		]
+	},
+	"wikibase-edit": "édit",
+	"wikibase-cancel": "bolay",
+	"wikibase-add": "tambah",
+	"wikibase-label-empty": "Taya labélan",
+	"wikibase-description-empty": "Taya déskripsian",
+	"wikibase-sitelinks-special": "Loka lianna",
+	"wikibase-remove": "pupus",
+	"wikibase-statementview-rank-normal": "Urutan normal",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|rujukan}}",
+	"wikibase-setsitelink-submit": "Atur tutumbu loka",
+	"wikibase-setsitelink-remove-failed": "Tutumbu loka teu bisa disingkahkeun."
+}

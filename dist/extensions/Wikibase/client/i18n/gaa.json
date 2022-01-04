@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amire80",
+			"Flixtey",
+			"Mybluberet",
+			"Owula kpakpo",
+			"Zimosa"
+		]
+	},
+	"tooltip-t-wikibase": "Gbɛtsɔɔmɔ kɛboteɔ saji atoohe",
+	"wikibase-comment-update": "{{WBREPONAME}} atsake nii lɛ",
+	"wikibase-dataitem": "{{WBREPONAME}} nii",
+	"wikibase-editlinks": "Tsakemɔ tsalɔi",
+	"wikibase-editlinkstitle": "Tsakemɔ wiemɔisrɔtoi agbɛtsɔɔmɔ",
+	"wikibase-linkitem-addlinks": "Kɛ tsalɔi afata he",
+	"wikibase-rc-hide-wikidata-hide": "Kɛto",
+	"wikibase-rc-hide-wikidata-show": "Tsɔɔmɔ",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} tsakemɔ",
+	"wikibase-otherprojects": "Yɛ gbɛjianɔtoi krokomɛi"
+}

@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ooswesthoesbes",
+			"Pahles",
+			"Robin van der Vliet",
+			"Robin0van0der0vliet"
+		]
+	},
+	"tooltip-t-wikibase": "Link nao item inne verbónje gegaevesvergaoring",
+	"wikibase-comment-update": "Item van {{WBREPONAME}} biegewirk",
+	"wikibase-dataitem": "{{WBREPONAME}}-item",
+	"wikibase-editlinks": "Bewirk links",
+	"wikibase-editlinkstitle": "Bewirk interwiki's",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Versjtaek",
+	"wikibase-rc-hide-wikidata-show": "Tuin",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}}-bewirking",
+	"wikibase-otherprojects": "In anger projekte"
+}

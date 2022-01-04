@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Oby Ezeilo"
+		]
+	},
+	"advancedsearch-desc": "Ụzọ dị mfe iji mee nchọpụta [[Special:Search]]",
+	"advancedsearch-options-pane-head": "Ọchịchọ na adighị mfe",
+	"advancedsearch-optgroup-text": "Chọọ n'ihu akwụkwọ ederede",
+	"advancedsearch-optgroup-structure": "Nzube",
+	"advancedsearch-optgroup-files": "Failụ na ihe oyiri di iche iche",
+	"advancedsearch-optgroup-sort": "Usoro nhazi",
+	"advancedsearch-field-plain": "Mkpụrụokwu ndia",
+	"advancedsearch-field-phrase": "Ọ bụ ederede nke a",
+	"advancedsearch-field-or": "Otu n'ime mkpụrụokwu ndia",
+	"advancedsearch-field-not": "Ọ bughị mkpụrụokwu ndị a",
+	"advancedsearch-field-subpageof": "Nkeji ihu akwụkwọ dị n'okpuru ihu akwụkwọ a.",
+	"advancedsearch-field-intitle": "Isikwọ ihuakwụkwọ a gụnyere",
+	"advancedsearch-field-deepcategory": "Ihu akwụkwọ dị na katigori ndi a",
+	"advancedsearch-field-hastemplate": "Ihu akwụkwọ nwere templeti ndị a",
+	"advancedsearch-field-inlanguage": "Ihu akwụkwọ di n'asụsụ a",
+	"advancedsearch-field-filetype": "Ụdiri failụ"
+}

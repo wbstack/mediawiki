@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Kly"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "模板沙盒的字首，如同 [[Special:TemplateSandbox]]。",
+	"templatesandbox-apihelp-title": "使用 <var>$1templatesandboxtext</var> 來解析頁面，以取代在此命名頁面的內容。",
+	"templatesandbox-apihelp-text": "使用此頁面內容來解析頁面，以取代由 <var>$1templatesandboxtitle</var> 命名的頁面。",
+	"templatesandbox-apihelp-contentmodel": "<var>$1templatesandboxtext</var> 的內容模組。",
+	"templatesandbox-apihelp-contentformat": "<var>$1templatesandboxtext</var>  的內容格式。",
+	"templatesandbox-apierror-titleandtext": "參數 <var>$1templatesandboxtitle</var> 與 <var>$1templatesandboxtext</var> 必須一同指定或一同省略。"
+}

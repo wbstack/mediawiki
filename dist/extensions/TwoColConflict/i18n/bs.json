@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Srdjan m",
+			"Srđan",
+			"Zoranzoki21"
+		]
+	},
+	"twocolconflict": "TwoColConflict",
+	"twocolconflict-desc": "Uporedo prikazuje ekran za rješavanje sukoba izmjena",
+	"twocolconflict-beta-feature-message": "Sukob izmjena u dvije kolone",
+	"twocolconflict-beta-feature-description": "Prikaži sukob izmjena u naprednijem režimu s dvije kolone.",
+	"twocolconflict-split-choose-version": "Izaberite verziju"
+}

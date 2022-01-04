@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe"
+		]
+	},
+	"mailgun-desc": "Enviar correos electrónicos a través del servicio API Mailgun desde Mediawiki"
+}

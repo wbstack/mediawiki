@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Rachitrali"
+		]
+	},
+	"advancedsearch-options-pane-head": "ایڈوانس سرچ",
+	"advancedsearch-optgroup-structure": "ساخت",
+	"advancedsearch-optgroup-files": "فائل اوچے ھوٹو",
+	"advancedsearch-field-plain": "ھمو لوظ",
+	"advancedsearch-field-phrase": "ہو بہو ھیہ متن",
+	"advancedsearch-field-or": "ھمو لوظاری ای",
+	"advancedsearch-field-not": "ھمو لوظ نو",
+	"advancedsearch-field-subpageof": "ھیہ صفحو ذیلی صفحات",
+	"advancedsearch-field-deepcategory": "ھمی زمرا صفحات",
+	"advancedsearch-field-filetype": "فائلو قسم",
+	"advancedsearch-field-filew": "پکسلزا فائلو بیروغنی",
+	"advancedsearch-field-fileh": "پکسلزا فائلو درونگاری",
+	"advancedsearch-placeholder-exact-text": "\"پوشیو اوچے پایو محبت\"",
+	"advancedsearch-inlanguage-default": "زبانو انتخابو کورے",
+	"advancedsearch-filetype-section-types": "عمومی فائلان قسم",
+	"advancedsearch-filetype-section-image": "تصویرو فارمیٹ",
+	"advancedsearch-filetype-section-video": "وڈیو فارمیٹ",
+	"advancedsearch-filetype-section-audio": "آڈیو فارمیٹ",
+	"advancedsearch-filetype-section-document": "دستاویز فارمیٹ",
+	"advancedsearch-filetype-section-other": "دیگر فارمیٹ",
+	"advancedsearch-filetype-default": "فائلو قسمو منتخب کورے",
+	"advancedsearch-filetype-bitmap": "ھوٹو",
+	"advancedsearch-filetype-drawing": "نقاشی",
+	"advancedsearch-filetype-audio": "آڈیو",
+	"advancedsearch-filetype-video": "وڈیو",
+	"advancedsearch-filetype-office": "دفتری",
+	"advancedsearch-filesize-equals": "و برابار",
+	"advancedsearch-filesize-greater-than": "ار لوٹ",
+	"advancedsearch-filesize-smaller-than": "ار کم تر",
+	"advancedsearch-namespaces-search-in": "$1 ھیہ صفحا تلاش",
+	"advancedsearch-namespaces-preset-all": "سف",
+	"advancedsearch-namespaces-preset-default": "طے شدہ",
+	"advancedsearch-namespaces-preset-discussion": "تبادلۂ خیال",
+	"prefs-advancedsearch": "ایڈوانس سرچ"
+}

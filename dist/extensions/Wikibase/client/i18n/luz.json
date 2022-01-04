@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bluehamed",
+			"Shahriar.dehghani24",
+			"علی ساکی لرستانی"
+		]
+	},
+	"tooltip-t-wikibase": "لینک مۉتأصل ڤە دادھ مۉرد مأخزأن",
+	"wikibase-comment-update": "{{WBREPONAME}} مۉرد تأغییر ڤابیدھ",
+	"wikibase-dataitem": "{{WBREPONAME}} مۉرد",
+	"wikibase-editlinks": "ئیصلاح لینکل",
+	"wikibase-editlinkstitle": "ئیصلاح لینکل زوٙوٙنل بین المللی",
+	"wikibase-linkitem-addlinks": "اْزاف کاٛردٱن لینکٱل",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "قائم کردن",
+	"wikibase-rc-hide-wikidata-show": "نشۊناڌٱن",
+	"wikibase-rc-wikibase-edit-letter": "ڤدا",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} ئیصلاح",
+	"wikibase-otherprojects": "من باقی پرژیٱل"
+}

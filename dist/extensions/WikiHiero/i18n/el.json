@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dead3y3",
+			"NikosLikomitros",
+			"Nikosgranturismogt",
+			"ZaDiak"
+		]
+	},
+	"hieroglyphs": "Δοκιμή επισήμανσης με ιερογλυφικά",
+	"wikihiero-desc": "Προσθέτει την ετικέτα <code>&lt;hiero&gt;</code> για την εμφάνιση [[Special:Hieroglyphs|ιερογλυφικών]]",
+	"wikihiero-input": "Κείμενο εισόδου",
+	"wikihiero-load-error": "Σφάλμα φόρτωσης!",
+	"wikihiero-result": "Αποτέλεσμα",
+	"wikihiero-visualeditor-mwhieroinspector-title": "Ιερογλυφικά"
+}

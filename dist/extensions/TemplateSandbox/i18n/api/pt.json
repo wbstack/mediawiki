@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hamilton Abreu",
+			"Vitorvicentevalente"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Prefixo da página de testes para predefinições, como especificado em [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Analisar a página usando <var>$1templatesandboxtext</var> em vez do conteúdo da página referida aqui.",
+	"templatesandbox-apihelp-text": "Analisar a página usando o conteúdo desta página, em vez da página referida na variável <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentmodel": "Modelo de conteúdo de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Formato de conteúdo de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Os parâmetros <var>$1templatesandboxtitle</var> e <var>$1templatesandboxtext</var> têm de ser ambos especificados ou ambos omitidos."
+}

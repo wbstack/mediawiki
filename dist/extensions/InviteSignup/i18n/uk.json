@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Piramidion",
+			"Ата"
+		]
+	},
+	"invitesignup": "Запрошення користувачів до цієї вікі",
+	"is-desc": "Надіслати запрошення електронною поштою",
+	"is-tableth-date": "Дата",
+	"is-tableth-email": "Електронна пошта",
+	"is-tableth-inviter": "Запрошує",
+	"is-tableth-signup": "Зареєструвалися",
+	"is-tableth-groups": "Групи",
+	"is-add": "Додати",
+	"is-delete": "Видалити",
+	"is-invalidemail": "<b>$1</b> — некоректна адреса електронної пошти.",
+	"is-emailsubj": "Вас запрошують приєднатися до {{SITENAME}}",
+	"is-emailbody": "Привіт,\n\n{{GENDER:$1|$1}} запрошує Вас приєднатись до {{SITENAME}}.\nВи можете зареєструватись за посиланням $2",
+	"right-invitesignup": "Надсилання запрошень новим користувачам",
+	"action-invitesignup": "надсилання запрошень новим користувачам"
+}

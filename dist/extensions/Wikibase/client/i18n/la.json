@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Amahoney",
+			"Andrew Dalby",
+			"Autokrator",
+			"Demetrius Talpa",
+			"Laurentianus",
+			"Lesgles",
+			"UV"
+		]
+	},
+	"tooltip-t-wikibase": "Nexus ad rem repositorii Vicibasis",
+	"wikibase-comment-update": "Res {{WBREPONAME}} mutata",
+	"wikibase-dataitem": "Res {{WBREPONAME}}",
+	"wikibase-editlinks": "Nexus recensere",
+	"wikibase-editlinkstitle": "Nexus inter linguas recensere",
+	"wikibase-linkitem-addlinks": "Nexus addere",
+	"wikibase-rc-hide-wikidata": "$1 Vicidata",
+	"wikibase-rc-hide-wikidata-hide": "Celare",
+	"wikibase-rc-hide-wikidata-show": "Monstrare",
+	"wikibase-rc-show-wikidata-pref": "Recensiones apud {{WBREPONAME}} factas in nuper mutatorum indice ostendere",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "Recensio apud Vicidata facta",
+	"wikibase-watchlist-show-changes-pref": "Mutationes apud {{WBREPONAME}} factas, siquas paginas observandas afficiant, in earum indice ostendere",
+	"wikibase-otherprojects": "Inceptis aliis"
+}

@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"NoiX180"
+		]
+	},
+	"templatesandbox": "Bak wedhi cithakan",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Ngolah kaca]] sing transklusi cithakan saka bak wedhi",
+	"templatesandbox-suffix": "bak wedhi",
+	"templatesandbox-legend": "Bak wedhi cithakan",
+	"templatesandbox-text": "Panjenengan bisa milih saprangkat cithakan sing disimpen ing bak wedhimu kanthi sarana ater-ater bak wedhi sing pener.\nContoné, menawa sampéyan péngin mratuduh sawijining vèrsi {{ns:Template}}:Test sing koksimpen dadi \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", anggota ater-ater \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\".",
+	"templatesandbox-prefix-label": "Ater-ater bak wedhi:",
+	"templatesandbox-page-label": "Kaca olahan:",
+	"templatesandbox-revid-label": "Olah révisi:",
+	"templatesandbox-text-label": "Tèkswiki olahan:",
+	"templatesandbox-submit": "Deleng",
+	"templatesandbox-title-output": "Bak wedhi cithakan: $1",
+	"templatesandbox-editform-legend": "Pratuduh kaca mawa cithakan iki",
+	"templatesandbox-editform-page-label": "Sesirah kaca",
+	"templatesandbox-editform-view-label": "Deleng pratuduh",
+	"templatesandbox-preview": "Pratuduh $2",
+	"templatesandbox-previewnote": "'''Élinga yèn iki mung pratuduh [[:$1]].'''\nOwahanmu durung kasimpen!",
+	"templatesandbox-invalid-title": "Sesirah sing kokwènèh ora sah.",
+	"templatesandbox-title-not-exists": "Sesirah sing kokwènèh ora ana.",
+	"templatesandbox-revision-not-exists": "Révisi sing panjenengan karepaké ora ana.",
+	"templatesandbox-invalid-prefix": "Ater-ater bak wedhi sing kokwènèh ora sah.",
+	"templatesandbox-prefix-not-local": "Ater-ater bak wedhi sing kokwènèh ora lokal.",
+	"templatesandbox-page-or-revid": "Panjenengan kudu ngisèkaké sesirahing kaca utawa nomer ID révisi.",
+	"templatesandbox-editform-need-template": "Saperlu mratuduh kaca liya mawa cithakan iki, jeneng cithakan kudu ana.",
+	"templatesandbox-editform-need-title": "Saperlu mratuduh kaca liya mawa cithakan iki, sesirah kaca kudu ana.",
+	"templatesandbox-editform-invalid-template": "Jeneng cithakan kang panjenengan lebokaké ora trep.",
+	"templatesandbox-editform-invalid-title": "Sesirah sing kokwènèh kanggo mratuduh ora sah.",
+	"templatesandbox-editform-title-not-exists": "Sesirah sing kokwènèh kanggo mratuduh ora ana."
+}

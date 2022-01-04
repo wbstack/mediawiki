@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Liuxinyu970226",
+			"Nemo bis",
+			"Shirayuki",
+			"Umherirrender"
+		]
+	},
+	"invitesignup": "{{doc-special|InviteSignup|unlisted=1}}",
+	"is-desc": "{{desc|name=Invite Signup|url=https://www.mediawiki.org/wiki/Extension:InviteSignup}}",
+	"is-tableth-date": "Table header.\n\"Date\" stands for \"date and time\".\n{{Identical|Date}}",
+	"is-tableth-email": "Table header\n{{Identical|E-mail}}",
+	"is-tableth-inviter": "Table header",
+	"is-tableth-signup": "Table header for the date in which the user accepted the invite and created an account, if that happened.\n{{Identical|Signed up}}",
+	"is-tableth-groups": "Table header\n{{Identical|Group}}",
+	"is-add": "Submit button text\n{{Identical|Add}}",
+	"is-delete": "Submit button text\n{{Identical|Delete}}",
+	"is-invalidemail": "Used as error message. Parameters:\n* $1 - email address",
+	"is-emailsubj": "e-mail title",
+	"is-emailbody": "Used as email body. Parameters:\n* $1 - username\n* $2 - URL",
+	"right-invitesignup": "{{doc-right|invitesignup}}",
+	"action-invitesignup": "{{doc-action|invitesignup}}"
+}

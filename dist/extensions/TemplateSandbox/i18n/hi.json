@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Siddhartha Ghai"
+		]
+	},
+	"templatesandbox": "साँचा प्रयोगस्थल",
+	"templatesandbox-desc": "एक प्रयोगस्थल से साँचे ट्रांसक्लूड कर के [[Special:TemplateSandbox|पृष्ठ रेंडर करता है]]।",
+	"templatesandbox-suffix": "प्रयोगस्थल",
+	"templatesandbox-legend": "साँचा प्रयोगस्थल",
+	"templatesandbox-text": "आप उपयुक्त प्रयोगस्थल उपसर्ग चुन कर अपने प्रयोग स्थलों में सहेजे हुए साँचे चुन सकते हैं।\nउदाहरण के तौर पे यदि आप आप {{ns:Template}}:Test का कोई अवतरण देखना चाहते हैं जो आपने \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\" नाम से सहेजा है तो उपसर्ग की जगह \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" का प्रयोग करें।",
+	"templatesandbox-prefix-label": "प्रयोगस्थल उपसर्ग:",
+	"templatesandbox-page-label": "रेंडर करने हेतु पृष्ठ:",
+	"templatesandbox-revid-label": "रेंडर करने हेतु अवतरण:",
+	"templatesandbox-text-label": "रेंडर करने हेतु विकिपाठ:",
+	"templatesandbox-submit": "देखें",
+	"templatesandbox-title-output": "साँचा प्रयोगस्थल: $1",
+	"templatesandbox-editform-legend": "पृष्ठ की झलक इस साँचे के साथ देखें",
+	"templatesandbox-editform-page-label": "पृष्ठ शीर्षक",
+	"templatesandbox-editform-view-label": "झलक दिखाएँ",
+	"templatesandbox-preview": "$2 की झलक",
+	"templatesandbox-previewnote": "'''ध्यान रखें कि यह केवल [[:$1]] की एक झलक है।'''\nआपके बदलाव अभी सहेजे नहीं गए हैं!",
+	"templatesandbox-invalid-title": "आपके द्वारा निर्दिष्ट शीर्षक अमान्य है।",
+	"templatesandbox-title-not-exists": "आपके द्वारा निर्दिष्ट शीर्षक मौजूद नहीं है।",
+	"templatesandbox-revision-not-exists": "आपके द्वारा निर्दिष्ट अवतरण मौजूद नहीं है।",
+	"templatesandbox-invalid-prefix": "आपके द्वारा निर्दिष्ट प्रयोगस्थल उपसर्ग अमान्य है।",
+	"templatesandbox-prefix-not-local": "आपके द्वारा निर्दिष्ट प्रयोगस्थल उपसर्ग स्थानीय नहीं है।",
+	"templatesandbox-page-or-revid": "आपको पृष्ठ शीर्षक अथवा अवतरण आई॰डी संख्या प्रदान करनी होगी।",
+	"templatesandbox-editform-need-title": "इस साँचे के साथ किसी अन्य पृष्ठ की झलक देखने के लिए पृष्ठ शीर्षक निर्दिष्ट करना अनिवार्य है।",
+	"templatesandbox-editform-invalid-template": "आपके द्वारा निर्दिष्ट साँचा नाम अमान्य है।",
+	"templatesandbox-editform-invalid-title": "झलक देखने हेतु आपके द्वारा निर्दिष्ट शीर्षक अमान्य है।",
+	"templatesandbox-editform-title-not-exists": "झलक देखने हेतु आपके द्वारा निर्दिष्ट शीर्षक मौजूद नहीं है।"
+}

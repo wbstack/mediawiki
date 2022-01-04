@@ -1,0 +1,48 @@
+/**
+ * Styles accompanying wb.utilities.ui.js
+ *
+ * @license GNU GPL v2+
+ * @author Daniel Werner < daniel.a.r.werner@gmail.com >
+ */
+
+/****** TOGGLE: wb.utilities.ui.buildToggle ******/
+
+.wb-toggle {
+	display: block;
+	margin-top: 0.5em;
+	white-space: nowrap;
+}
+
+.wb-toggle > span.ui-icon,
+.wb-toggle-label {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.wb-toggle span.ui-icon.wb-toggle-icon3dtrans {
+	-webkit-transition: 0.25s ease-out;
+	transition: 0.25s ease-out;
+}
+
+/** rotate toggle icon in ltr languages */
+.wb-toggle-collapsed span.ui-icon.wb-toggle-icon3dtrans {
+	-webkit-transition: 0.25s ease-out;
+	transition: 0.25s ease-out;
+	-webkit-transform: rotate( -90deg );
+	-ms-transform: rotate( -90deg );
+	transform: rotate( -90deg );
+}
+
+/** rotate toggle icon in rtl languages (overwrite above) */
+body.rtl .wb-toggle-collapsed span.ui-icon.wb-toggle-icon3dtrans {
+	-webkit-transform: rotate( 90deg );
+	-ms-transform: rotate( 90deg );
+	transform: rotate( 90deg );
+}
+
+/****** /TOGGLE ******/
+
+/* TODO: Legacy name kept for compatibility reasons. It's not "pending" any more. */
+.wb-ui-pendingcounter {
+	white-space: nowrap;
+}

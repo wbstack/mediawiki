@@ -1,0 +1,144 @@
+{
+    "type": "item",
+    "id": "Q6273015",
+    "labels": {
+        "en": {
+            "language": "en",
+            "value": "Heinemann"
+        },
+        "nb": {
+            "language": "nb",
+            "value": "Heinemann"
+        },
+        "ro": {
+            "language": "ro",
+            "value": "Editura Heinemann"
+        },
+        "fr": {
+            "language": "fr",
+            "value": "Heinemann"
+        },
+        "de": {
+            "language": "de",
+            "value": "Heinemann"
+        },
+        "ru": {
+            "language": "ru",
+            "value": "Heinemann"
+        },
+        "it": {
+            "language": "it",
+            "value": "Heinemann"
+        },
+        "es": {
+            "language": "es",
+            "value": "Heinemann"
+        },
+        "nl": {
+            "language": "nl",
+            "value": "Heinemann"
+        },
+        "hy": {
+            "language": "hy",
+            "value": "Heinemann"
+        },
+        "ar": {
+            "language": "ar",
+            "value": "\u0647\u064a\u0646\u0645\u0627\u0646"
+        },
+        "ja": {
+            "language": "ja",
+            "value": "\u30b1\u30a4\uff06\u30ef\u30fc\u30c9"
+        },
+        "he": {
+            "language": "he",
+            "value": "\u05d4\u05d9\u05d9\u05e0\u05de\u05d0\u05df"
+        },
+        "eo": {
+            "language": "eo",
+            "value": "Heinemann"
+        },
+        "id": {
+            "language": "id",
+            "value": "Heinemann"
+        },
+        "mr": {
+            "language": "mr",
+            "value": "\u0939\u0947\u0907\u0928\u092e\u0928"
+        },
+        "ms": {
+            "language": "ms",
+            "value": "Heinemann"
+        },
+        "ur": {
+            "language": "ur",
+            "value": "\u06c1\u06cc\u0646\u0645\u0627\u0646"
+        },
+        "zh": {
+            "language": "zh",
+            "value": "\u6d77\u5c3c\u66fc\u51fa\u7248\u793e"
+        }
+    },
+    "descriptions": {
+        "en": {
+            "language": "en",
+            "value": "publishing house"
+        },
+        "de": {
+            "language": "de",
+            "value": "Verlag"
+        },
+        "it": {
+            "language": "it",
+            "value": "casa editrice britannica"
+        },
+        "nl": {
+            "language": "nl",
+            "value": "uitgever"
+        },
+        "fr": {
+            "language": "fr",
+            "value": "\u00e9diteur britannique fond\u00e9 en 1890"
+        },
+        "he": {
+            "language": "he",
+            "value": "\u05d1\u05d9\u05ea \u05d4\u05d5\u05e6\u05d0\u05d4"
+        },
+        "eo": {
+            "language": "eo",
+            "value": "eldonejo"
+        },
+        "ar": {
+            "language": "ar",
+            "value": "\u0634\u0631\u0643\u0629 \u0623\u0645\u0631\u064a\u0643\u064a\u0629"
+        }
+    },
+    "aliases": {
+        "ja": [
+            {
+                "language": "ja",
+                "value": "\u30cf\u30a4\u30cd\u30de\u30f3 (\u51fa\u7248\u793e)"
+            },
+            {
+                "language": "ja",
+                "value": "\u30a6\u30a3\u30ea\u30a2\u30e0\u30fb\u30cf\u30a4\u30cd\u30de\u30f3\u793e"
+            },
+            {
+                "language": "ja",
+                "value": "\u30cf\u30a4\u30cd\u30de\u30f3\u793e"
+            }
+        ],
+        "zh": [
+            {
+                "language": "zh",
+                "value": "\u6d77\u6d85\u66fc"
+            },
+            {
+                "language": "zh",
+                "value": "\u5a01\u5ec9\u00b7\u6d77\u6d85\u66fc\u6709\u9650\u516c\u53f8"
+            }
+        ]
+    },
+    "claims": [],
+    "sitelinks": []
+}

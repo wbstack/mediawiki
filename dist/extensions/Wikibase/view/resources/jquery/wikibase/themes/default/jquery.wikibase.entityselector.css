@@ -1,0 +1,82 @@
+/**
+ * @license GNU GPL v2+
+ * @author H. Snater < mediawiki@snater.com >
+ */
+
+.ui-entityselector-list {
+	overflow-x: hidden;
+	padding: 0;
+	position: absolute;
+	z-index: 4; /* needed for MonoBook, #p-search is at 3 */
+}
+
+.ui-entityselector-list li,
+.ui-entityselector-list li.ui-state-hover {
+	border-top: 1px dotted #c8ccd1;
+}
+
+.ui-entityselector-list li:first-child {
+	border-top: 0;
+}
+
+.ui-entityselector-list .ui-entityselector-label,
+.ui-entityselector-list .ui-entityselector-description,
+.ui-entityselector-list .ui-entityselector-aliases {
+	display: block;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.ui-entityselector-list .ui-entityselector-section-container {
+	line-height: 1.3;
+}
+
+.ui-entityselector-list .ui-ooMenu-item a {
+	padding: 0.4em 0.2em;
+}
+
+.ui-entityselector-label {
+	font-weight: bold;
+}
+
+.ui-entityselector-list .ui-entityselector-aliases {
+	font-style: italic;
+	display: inline;
+}
+
+.ui-entityselector-list .ui-entityselector-notfound,
+.ui-entityselector-list .ui-entityselector-error {
+	/* Common bright red .wb-error color */
+	background-color: #fee7e6;
+}
+
+.ui-entityselector-list .ui-entityselector-notfound.ui-state-hover a,
+.ui-entityselector-list .ui-entityselector-error.ui-state-hover a {
+	color: #000;
+}
+
+.ui-entityselector-list .ui-entityselector-more {
+	border-top-style: solid;
+	background-color: #f8f9fa;
+}
+
+.ui-entityselector-list .ui-entityselector-more.ui-state-hover {
+	border-top-style: solid;
+	background-color: #4c59a6;
+}
+
+.ui-entityselector-list .ui-entityselector-more a {
+	text-align: right;
+	padding-right: 1.2em;
+}
+
+/* Specificity must be a little higher because of a valueview selector */
+.ui-suggester-input.ui-entityselector-input.ui-entityselector-input-recognized {
+	border-color: #14866d;
+}
+
+.ui-suggester-input.ui-entityselector-input.ui-entityselector-input-unrecognized {
+	background-color: #fee7e6;
+	border-color: #b32424;
+}

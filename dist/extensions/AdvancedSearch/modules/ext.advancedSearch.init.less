@@ -1,0 +1,111 @@
+@import 'mediawiki.ui/variables';
+@import 'mediawiki.mixins.animation';
+
+@mw-search-spinner-size: 12px;
+
+.client-js {
+	.mw-search-form-wrapper {
+		min-height: 122.6px;
+	}
+
+	/* stylelint-disable-next-line selector-max-id */
+	#mw-content-text {
+		position: relative;
+	}
+
+	.mw-search-spinner {
+		position: absolute;
+		left: 25em;
+		top: 7em;
+		margin-left: -3 * @mw-search-spinner-size / 2;
+		white-space: nowrap;
+		.animation( mw-search-fadein 1500ms cubic-bezier(1, -0.5, 1, 1); );
+
+		&:before,
+		&:after,
+		& .mw-search-spinner-bounce {
+			content: '';
+			background-color: @colorGray7;
+			display: block;
+			float: left;
+			width: @mw-search-spinner-size;
+			height: @mw-search-spinner-size;
+			border-radius: 100%;
+			.animation( mw-search-bounceDelay 1600ms ease-in-out -160ms infinite both );
+		}
+
+		&:before {
+			margin-right: 4px;
+			.animation-delay( -330ms );
+		}
+
+		&:after {
+			margin-left: 4px;
+			.animation-delay( 0s );
+		}
+	}
+
+	.mw-search-profile-tabs {
+		display: none;
+	}
+
+	/* stylelint-disable-next-line selector-max-id */
+	#mw-searchoptions {
+		display: none;
+		height: 0;
+		padding: 0;
+		visibility: hidden;
+
+		/* This won't be the last element any more when `.mw-advancedSearch-container` is added */
+		/* stylelint-disable-next-line selector-max-id */
+		&:last-child {
+			display: block;
+		}
+	}
+
+	@-webkit-keyframes mw-search-bounceDelay {
+		0%,
+		50%,
+		100% {
+			-webkit-transform: scale( 0.625 );
+		}
+
+		20% {
+			opacity: 0.87;
+			-webkit-transform: scale( 1 );
+		}
+	}
+
+	@keyframes mw-search-bounceDelay {
+		0%,
+		50%,
+		100% {
+			transform: scale( 0.625 );
+		}
+
+		20% { // equals 320ms
+			opacity: 0.87;
+			transform: scale( 1 );
+		}
+	}
+
+	@-webkit-keyframes mw-search-fadein {
+		from {
+			opacity: 0;
+		}
+
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes mw-search-fadein {
+		from {
+			opacity: 0;
+		}
+
+		to {
+			opacity: 1;
+		}
+	}
+}

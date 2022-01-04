@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Movses",
+			"Piramidion",
+			"Renamerr",
+			"Vlad5250",
+			"Ата"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Розширення WikibaseLexeme для використання функціоналу CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Профіль переоцінювання для пошуку через префікс (шляхом доповнення)"
+}

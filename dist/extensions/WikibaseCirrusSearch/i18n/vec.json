@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Candalua",
+			"Fierodelveneto",
+			"Macofe"
+		]
+	},
+	"special-entitieswithoutlabel": "Entità sensa targheta",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Recuperar la lista de le entità sensa eticheta",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Còdese lengoa:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipo:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Cata",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" no xe un còdese de lengua valido.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" no'l xe un tipo de entità valido"
+}

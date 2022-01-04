@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ianbu",
+			"Ripunn",
+			"唐吉訶德的侍從"
+		]
+	},
+	"tooltip-t-wikibase": "liân khì chu-liāu chhng-khò͘ --ê hāng-bo̍k",
+	"wikibase-comment-update": "已經改 {{WBREPONAME}} 項目",
+	"wikibase-dataitem": "{{WBREPONAME}} hāng-bo̍k",
+	"wikibase-editlinks": "Kái liân-kiat",
+	"wikibase-editlinkstitle": "Kái kî-thaⁿ gú-giân ê liân-kiat",
+	"wikibase-addlinkstitle": "Ka-thiam kî-thaⁿ gú-giân ê liân-kiat",
+	"wikibase-linkitem-addlinks": "Ka-thiam liân-kiat",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Om khí-lâi",
+	"wikibase-rc-hide-wikidata-show": "hiàn",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} siu-kái",
+	"wikibase-otherprojects": "Chí-mōe kè-ōe"
+}

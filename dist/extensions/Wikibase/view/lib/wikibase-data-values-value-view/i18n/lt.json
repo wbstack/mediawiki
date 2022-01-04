@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eitvys200"
+		]
+	},
+	"valueview-expert-emptyvalue-empty": "tuščia",
+	"valueview-expert-globecoordinateinput-precision": "Tikslumas:",
+	"valueview-expert-globecoordinateinput-nullprecision": "nenurodyta",
+	"valueview-expert-globecoordinateinput-customprecision": "specialius ($1)",
+	"valueview-expert-timevalue-calendar-gregorian": "Grigaliaus",
+	"valueview-expert-timevalue-calendar-julian": "Julijaus",
+	"valueview-expert-timeinput-precision": "Tikslumas:",
+	"valueview-expert-timeinput-calendar": "Kalendorius:",
+	"valueview-expertextender-languageselector-languagetemplate": "$1 ($2)",
+	"valueview-expertextender-languageselector-label": "Kalba (privaloma):",
+	"valueview-expertextender-unitsuggester-label": "Matavimo vienetas (neprivaloma):",
+	"valueview-preview-label": "bus rodoma kaip:",
+	"valueview-preview-novalue": "neatpažinta jokia galiojanti reikšmė",
+	"valueview-listrotator-manually": "nustatyti rankiniu būdu"
+}

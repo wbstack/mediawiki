@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Iñaki LL",
+			"Joseba",
+			"Mikel Ibaiba",
+			"Subi"
+		]
+	},
+	"twocolconflict": "BiZutGatazka",
+	"twocolconflict-desc": "Ondoz ondoko aldaketen bateratze pantaila erakusten gatazka konpontzeko",
+	"twocolconflict-beta-feature-message": "Bi zutabeko aldaketa gatazka",
+	"twocolconflict-beta-feature-description": "Erakutsi aldaketa gatazka ikuspegia bi zutabeko ikuspegi aurreratuago bat erabiliz.<br/><br/>Jakizu ezaugarri honetan [https://phabricator.wikimedia.org/T195711 aldaketa batzuk] egiten ari garela. 2018ko bigarren erdialderako interfaze berri baterako asmoa dago.",
+	"twocolconflict-split-header-hint-beta": "Eskerrik asko beta ezaugarri hau erabiltzearren. Hura gehiago hobetzen lagun dezakezu, zure iruzkina [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View orri honetan] adieraziz.",
+	"twocolconflict-split-your-version-header": "Zure berrikusketa",
+	"twocolconflict-split-current-version-header": "$1ekin (une honetan erabilgarri) gatazkan den bertsioa",
+	"twocolconflict-split-not-saved-at": "$1, $2 gorde gabe",
+	"twocolconflict-split-choose-version": "Aukeratu mesedez bertsio bat",
+	"twocolconflict-split-tour-dialog-message-single-column-view": "Zoritxarrez, norbaitek zure une berean argitaratu du. Mesedez birpasatu hurrengo orrialdeko iruzkinak. Behar izanez gero, zurea edita dezakegu eta amaierako ordena aldatu"
+}

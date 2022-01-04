@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Robby",
+			"Soued031"
+		]
+	},
+	"twocolconflict": "TwoColConflict",
+	"twocolconflict-desc": "Weist en Ecran wou op 2 Säiten zwou Versioune gewise gi fir en Ännerungskonflikt ze léisen",
+	"twocolconflictprovidesubmittedtext": "Ännerungskonflikt:",
+	"twocolconflict-beta-feature-message": "Ännerungskonflikt op Basis vum Abschnitt",
+	"twocolconflict-copy-tab-action": "ganzen Text weisen",
+	"twocolconflict-core-ui-hint-close": "Ni méi weisen",
+	"twocolconflict-preference-enabled": "Den [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Änneurngskonflikt-Interface op der Basis vum Abschnitt]] aktivéiere fir Ännerungskonflikter ze léisen",
+	"twocolconflict-special-not-saved": "Net publizéiert",
+	"twocolconflict-split-your-version-header": "Är Versioun",
+	"twocolconflict-split-current-version-header": "Aktuell Versioun $1",
+	"twocolconflict-split-not-saved-at": "Nach net verëffentlecht",
+	"twocolconflict-split-choose-version": "Sicht wgl. eng Versioun eraus",
+	"twocolconflict-split-other-version-chosen": "Aner Versioun",
+	"twocolconflict-split-your-version-chosen": "Är Versioun",
+	"twocolconflict-split-select-all": "Alles uwielen",
+	"twocolconflict-split-tour-dialog-header": "Versiounen am Konflikt fusionéieren",
+	"twocolconflict-split-tour-popup-btn-text": "OK, verstanen.",
+	"twocolconflict-split-edit-tooltip": "Klickt fir dësen Text z'änneren",
+	"twocolconflict-split-reset-tooltip": "All Är Ännerungen an dësem Text ignoréieren",
+	"twocolconflict-split-reset-warning-cancel": "Ofbriechen",
+	"twocolconflict-split-collapse-tooltip": "Text zesummeklappen",
+	"twocolconflict-split-expand-tooltip": "Text opklappen",
+	"twocolconflict-split-help-tooltip": "Hëllef weisen",
+	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Probleem léisen",
+	"twocolconflict-talk-your": "Är Bemierkung"
+}

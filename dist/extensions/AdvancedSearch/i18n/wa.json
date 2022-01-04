@@ -1,0 +1,37 @@
+{
+	"@metadata": {
+		"authors": [
+			"Reptilien.19831209BE1"
+		]
+	},
+	"advancedsearch-options-pane-head": "Pus spepieus rcweraedjes&nbsp;:",
+	"advancedsearch-optgroup-text": "Cweri divins l’&nbsp;tecse del pådje",
+	"advancedsearch-field-plain": "Ces mots ci",
+	"advancedsearch-field-phrase": "Pår ci tecse ci",
+	"advancedsearch-field-or": "Onk di ces mots ci",
+	"advancedsearch-field-not": "Sins ces mots ci",
+	"advancedsearch-field-subpageof": "Dizo-pådjes di cisse pådje ci",
+	"advancedsearch-field-intitle": "El tite del pådje contént",
+	"advancedsearch-field-deepcategory": "Pådjes divins ces categoreyes ci",
+	"advancedsearch-field-hastemplate": "Pådjes avou ces modeles ci",
+	"advancedsearch-field-inlanguage": "Pådjes divins ci lingaedje ci",
+	"advancedsearch-field-filetype": "Sôre di fitchî",
+	"advancedsearch-field-filew": "Lårdjeur e picsels",
+	"advancedsearch-field-fileh": "Hôteur e picsels",
+	"advancedsearch-field-sort": "Ôre di relijhaedje",
+	"advancedsearch-field-preview-sort": "Rindjî pa $1",
+	"advancedsearch-placeholder-exact-text": "''bondjoû mes djins''",
+	"advancedsearch-inlanguage-default": "Tchoezixhoz l’&nbsp;lingaedje&nbsp;:",
+	"advancedsearch-filetype-video": "Videyo",
+	"advancedsearch-filesize-equals": "ewal a",
+	"advancedsearch-filesize-greater-than": "pus grand ki",
+	"advancedsearch-filesize-smaller-than": "pus ptit ki",
+	"advancedsearch-sort-preview-last-edit-desc": "date di candjmint",
+	"advancedsearch-sort-preview-create-timestamp-desc": "date d’&nbsp;ahivaedje",
+	"advancedsearch-namespaces-search-in": "Cweri dins&nbsp;:",
+	"advancedsearch-namespaces-preset-all": "Tos",
+	"advancedsearch-namespaces-preset-default": "prémetou",
+	"advancedsearch-namespaces-preset-general-help": "Mwaisse aidance",
+	"advancedsearch-namespaces-placeholder": "Radjouter des espåces di lomaedje…",
+	"prefs-advancedsearch": "Pus spepieus rcweraedjes"
+}

@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Cocu",
+			"Jeblad",
+			"Jon Harald Søby",
+			"Macofe"
+		]
+	},
+	"templatesandbox": "Mal-sandkasse",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Viser en side]] og transkluderer maler fra en sandkasse",
+	"templatesandbox-suffix": "sandkasse",
+	"templatesandbox-legend": "Alternativ for mal-sandkasse",
+	"templatesandbox-text": "Du kan velge et sett med maler som er lagret i din sandkasse ved hjelp av et passende sandbox-prefiks. For eksempel, hvis du vil forhåndsvise en versjon av {{ns:Template}}:Test som du har lagret som «{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test», så bruk \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" som prefiks.",
+	"templatesandbox-prefix-label": "Prefiks for sandkasse:",
+	"templatesandbox-page-label": "Vis side:",
+	"templatesandbox-revid-label": "Tegn ut revisjonen:",
+	"templatesandbox-text-label": "Tegn ut wikitekst:",
+	"templatesandbox-submit": "Vis",
+	"templatesandbox-title-output": "Mal-sandkasse: $1",
+	"templatesandbox-editform-legend": "Forhåndsvis siden med denne malen",
+	"templatesandbox-editform-page-label": "Sidetittel",
+	"templatesandbox-editform-view-label": "Forhåndsvisning",
+	"templatesandbox-preview": "Forhåndsvisning av $2",
+	"templatesandbox-previewnote": "'''Husk at dette er bare en forhåndsvisning av [[:$1]].'''\nEndringene er ikke lagret ennå!",
+	"templatesandbox-invalid-title": "Tittelen du oppga er ugyldig.",
+	"templatesandbox-title-not-exists": "Tittelen du oppga eksisterer ikke.",
+	"templatesandbox-revision-not-exists": "Versjonen du oppga eksisterer ikke.",
+	"templatesandbox-revision-no-content": "Revisjonen du anga har ikke noe innhold, eller du har ikke tillatelse til å vise det.",
+	"templatesandbox-invalid-prefix": "Sandkasse-prefikset du oppga er ugyldig.",
+	"templatesandbox-prefix-not-local": "Sandboks-prefikset du oppga er ikke lokalt.",
+	"templatesandbox-page-or-revid": "Du må angi enten en sidetittel eller et revisjonsnummer.",
+	"templatesandbox-fail-post": "<em>På grunn av tap av sesjonsdata, er forhåndsvisningen skjult for å forhindre JavaScript-angrep.</em>\n\n<strong>Om dette er et legitimt forsøk på å forhåndsvise, prøv igjen.</strong>\nOm det fortsatt ikke virker, prøv å [[Special:UserLogout|logge ut]] og logge inn igjen.",
+	"templatesandbox-fail-post-anon": "<em>Fordi du ikke er innlogget, så er forhåndsvisningen skjult for å forhindre JavaScript-angrep.</em>\n\n<strong>Om dette er et legitimt forsøk på å forhåndsvise, [[Special:UserLogin|logg inn]] og prøv igjen.</strong>",
+	"templatesandbox-anon-limited-preview": "Forhåndsvisning av Javascript og CSS-endringer er avslått når du ikke er logget inn. Om du trenger å forhåndsvise endringer, så [[Special:UserLogin|logg inn]]  og prøv på nytt.",
+	"templatesandbox-editform-need-template": "For å forhåndsvise en annen side med denne malen må et malnavn oppgis.",
+	"templatesandbox-editform-need-title": "For å forhåndsvise en annen side med denne malen, må du angi en sidetittel.",
+	"templatesandbox-editform-invalid-template": "Navnet på malen da anga er ugyldig.",
+	"templatesandbox-editform-invalid-title": "Tittelen du har angitt for forhåndsvisning er ugyldig.",
+	"templatesandbox-editform-title-not-exists": "Tittelen du har angitt for forhåndsvisning finnes ikke."
+}

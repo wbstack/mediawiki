@@ -1,0 +1,375 @@
+{
+    "type": "item",
+    "id": "Q374204",
+    "labels": {
+        "zh": {
+            "language": "zh",
+            "value": "\u5c11\u5e74\u6d3e\u7684\u5947\u5e7b\u6f02\u6d41"
+        },
+        "ar": {
+            "language": "ar",
+            "value": "\u062d\u064a\u0627\u0629 \u0628\u0627\u064a"
+        },
+        "cs": {
+            "language": "cs",
+            "value": "P\u00ed a jeho \u017eivot"
+        },
+        "da": {
+            "language": "da",
+            "value": "Pi's liv"
+        },
+        "de": {
+            "language": "de",
+            "value": "Schiffbruch mit Tiger"
+        },
+        "de-ch": {
+            "language": "de-ch",
+            "value": "Schiffbruch mit Tiger"
+        },
+        "en": {
+            "language": "en",
+            "value": "Life of Pi"
+        },
+        "en-ca": {
+            "language": "en-ca",
+            "value": "Life of Pi"
+        },
+        "en-gb": {
+            "language": "en-gb",
+            "value": "Life of Pi"
+        },
+        "eo": {
+            "language": "eo",
+            "value": "Life of Pi"
+        },
+        "es": {
+            "language": "es",
+            "value": "La vida de Pi"
+        },
+        "et": {
+            "language": "et",
+            "value": "Pii elu"
+        },
+        "fa": {
+            "language": "fa",
+            "value": "\u0632\u0646\u062f\u06af\u06cc \u067e\u06cc"
+        },
+        "fi": {
+            "language": "fi",
+            "value": "Piin el\u00e4m\u00e4"
+        },
+        "fr": {
+            "language": "fr",
+            "value": "Histoire de Pi"
+        },
+        "he": {
+            "language": "he",
+            "value": "\u05d7\u05d9\u05d9 \u05e4\u05d9\u05d9"
+        },
+        "is": {
+            "language": "is",
+            "value": "Sagan af P\u00ed"
+        },
+        "it": {
+            "language": "it",
+            "value": "Vita di Pi"
+        },
+        "ja": {
+            "language": "ja",
+            "value": "\u30d1\u30a4\u306e\u7269\u8a9e"
+        },
+        "ko": {
+            "language": "ko",
+            "value": "\ud30c\uc774 \uc774\uc57c\uae30"
+        },
+        "nl": {
+            "language": "nl",
+            "value": "Het leven van Pi"
+        },
+        "pl": {
+            "language": "pl",
+            "value": "\u017bycie Pi"
+        },
+        "pt": {
+            "language": "pt",
+            "value": "Life of Pi"
+        },
+        "pt-br": {
+            "language": "pt-br",
+            "value": "Life of Pi"
+        },
+        "ru": {
+            "language": "ru",
+            "value": "\u0416\u0438\u0437\u043d\u044c \u041f\u0438"
+        },
+        "sv": {
+            "language": "sv",
+            "value": "Ber\u00e4ttelsen om Pi"
+        },
+        "th": {
+            "language": "th",
+            "value": "\u0e01\u0e32\u0e23\u0e40\u0e14\u0e34\u0e19\u0e17\u0e32\u0e07\u0e02\u0e2d\u0e07\u0e1e\u0e32\u0e22 \u0e1e\u0e32\u0e40\u0e17\u0e25"
+        },
+        "vi": {
+            "language": "vi",
+            "value": "Cu\u1ed9c \u0111\u1eddi c\u1ee7a Pi"
+        },
+        "mt": {
+            "language": "mt",
+            "value": "Life of Pi"
+        },
+        "ka": {
+            "language": "ka",
+            "value": "\u10de\u10d8\u10e1 \u10ea\u10ee\u10dd\u10d5\u10e0\u10d4\u10d1\u10d0"
+        },
+        "id": {
+            "language": "id",
+            "value": "Life of Pi"
+        },
+        "ml": {
+            "language": "ml",
+            "value": "\u0d32\u0d48\u0d2b\u0d4d \u0d13\u0d2b\u0d4d \u0d2a\u0d48"
+        },
+        "ca": {
+            "language": "ca",
+            "value": "La vida de Pi"
+        },
+        "hi": {
+            "language": "hi",
+            "value": "\u092a\u093e\u0908 \u0915\u093e \u091c\u093f\u0935\u0928"
+        },
+        "nb": {
+            "language": "nb",
+            "value": "Historien om Pi"
+        },
+        "af": {
+            "language": "af",
+            "value": "Life of Pi"
+        },
+        "bs": {
+            "language": "bs",
+            "value": "Pijev \u017eivot"
+        },
+        "hu": {
+            "language": "hu",
+            "value": "Pi \u00e9lete"
+        },
+        "uk": {
+            "language": "uk",
+            "value": "\u0416\u0438\u0442\u0442\u044f \u041f\u0456"
+        },
+        "ky": {
+            "language": "ky",
+            "value": "\u041f\u0438\u043d\u0438\u043d \u0436\u0430\u0448\u043e\u043e\u0441\u0443"
+        },
+        "ast": {
+            "language": "ast",
+            "value": "Life of Pi"
+        },
+        "ms": {
+            "language": "ms",
+            "value": "Life of Pi"
+        },
+        "hy": {
+            "language": "hy",
+            "value": "\u054a\u056b\u056b \u056f\u0575\u0561\u0576\u0584\u0568"
+        },
+        "ga": {
+            "language": "ga",
+            "value": "Beatha Ph\u00ed"
+        }
+    },
+    "descriptions": {
+        "it": {
+            "language": "it",
+            "value": "romanzo scritto da Yann Martel"
+        },
+        "de": {
+            "language": "de",
+            "value": "Buch von Yann Martel"
+        },
+        "nl": {
+            "language": "nl",
+            "value": "boek van Yann Martel"
+        },
+        "cs": {
+            "language": "cs",
+            "value": "rom\u00e1n Yanna Martela"
+        },
+        "en": {
+            "language": "en",
+            "value": "novel by Yann Martel"
+        },
+        "uk": {
+            "language": "uk",
+            "value": "\u043f\u0440\u0438\u0433\u043e\u0434\u043d\u0438\u0446\u044c\u043a\u0438\u0439 \u0440\u043e\u043c\u0430\u043d-\u043f\u0440\u0438\u0442\u0447\u0430 \u043a\u0430\u043d\u0430\u0434\u0441\u044c\u043a\u043e\u0433\u043e \u043f\u0438\u0441\u044c\u043c\u0435\u043d\u043d\u0438\u043a\u0430 \u042f\u043d\u043d\u0430 \u041c\u0430\u0440\u0442\u0435\u043b\u044f"
+        },
+        "he": {
+            "language": "he",
+            "value": "\u05e1\u05e4\u05e8 \u05de\u05d0\u05ea \u05d9\u05d0\u05df \u05de\u05e8\u05d8\u05dc"
+        },
+        "ar": {
+            "language": "ar",
+            "value": "\u0631\u0648\u0627\u064a\u0629 \u0645\u0646 \u062a\u0623\u0644\u064a\u0641 \u064a\u0627\u0646 \u0645\u0627\u0631\u062a\u0644"
+        },
+        "hu": {
+            "language": "hu",
+            "value": "k\u00f6nyv"
+        },
+        "fr": {
+            "language": "fr",
+            "value": "livre de Yann Martel"
+        },
+        "es": {
+            "language": "es",
+            "value": "libro de Yann Martel"
+        },
+        "ru": {
+            "language": "ru",
+            "value": "\u0420\u043e\u043c\u0430\u043d \u043a\u0430\u043d\u0430\u0434\u0441\u043a\u043e\u0433\u043e \u043f\u0438\u0441\u0430\u0442\u0435\u043b\u044f \u042f\u043d\u043d\u0430 \u041c\u0430\u0440\u0442\u0435\u043d\u0430"
+        },
+        "br": {
+            "language": "br",
+            "value": "romant"
+        },
+        "zh": {
+            "language": "zh",
+            "value": "\u63da\u00b7\u99ac\u7279\u723e\u7684\u5c0f\u8aaa"
+        },
+        "ast": {
+            "language": "ast",
+            "value": "llibru de Yann Martel"
+        },
+        "fi": {
+            "language": "fi",
+            "value": "Yann Martelin romaani"
+        }
+    },
+    "aliases": {
+        "zh": [
+            {
+                "language": "zh",
+                "value": "\u5c11\u5e74Pi\u7684\u5947\u5e7b\u6f02\u6d41"
+            },
+            {
+                "language": "zh",
+                "value": "\u5947\u5e7b\u6f02\u6d41"
+            }
+        ]
+    },
+    "claims": {
+        "P31": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P31",
+                    "hash": "9358071e4839edc966f3bf8fbc8e480b283d1efd",
+                    "datavalue": {
+                        "value": {
+                            "entity-type": "item",
+                            "numeric-id": 8261,
+                            "id": "Q8261"
+                        },
+                        "type": "wikibase-entityid"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P50": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P50",
+                    "hash": "c8323e780e399c76053c6f7c3018beb6ab5ff45b",
+                    "datavalue": {
+                        "value": {
+                            "entity-type": "item",
+                            "numeric-id": 13914,
+                            "id": "Q13914"
+                        },
+                        "type": "wikibase-entityid"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P123": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P123",
+                    "hash": "c8b1ebfa12cb990fbffd4ec13dd134ff18d041b3",
+                    "datavalue": {
+                        "value": {
+                            "entity-type": "item",
+                            "numeric-id": 7291941,
+                            "id": "Q7291941"
+                        },
+                        "type": "wikibase-entityid"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P577": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P577",
+                    "hash": "1e0ed079e54df1262ae5968b324ba0b1e45ba74f",
+                    "datavalue": {
+                        "value": {
+                            "time": "+2001-09-00T00:00:00Z",
+                            "timezone": 0,
+                            "before": 0,
+                            "after": 0,
+                            "precision": 10,
+                            "calendarmodel": "http:\/\/www.wikidata.org\/entity\/Q1985727"
+                        },
+                        "type": "time"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P1476": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P1476",
+                    "hash": "fc889f08086856116b28d035040182cb751d0f89",
+                    "datavalue": {
+                        "value": {
+                            "text": "Life of Pi",
+                            "language": "en"
+                        },
+                        "type": "monolingualtext"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ],
+        "P5331": [
+            {
+                "mainsnak": {
+                    "snaktype": "value",
+                    "property": "P5331",
+                    "hash": "68e3c92906b9cca5c6f21b0a628dfe9033edc2ac",
+                    "datavalue": {
+                        "value": "54357685",
+                        "type": "string"
+                    }
+                },
+                "type": "statement",
+                "rank": "normal"
+            }
+        ]
+    },
+    "sitelinks": []
+}

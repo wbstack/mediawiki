@@ -1,0 +1,28 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mjälten",
+			"WikiPhoenix"
+		]
+	},
+	"entityschema-error-invalid-id": "Detta ID är ogiligt.",
+	"entityschema-namebadge-header-language-code": "språkkod",
+	"entityschema-namebadge-header-label": "etikett",
+	"entityschema-namebadge-header-description": "beskrivning",
+	"entityschema-namebadge-header-aliases": "alias",
+	"entityschema-namebadge-header-edit": "redigera",
+	"entityschema-edit": "redigera",
+	"entityschema-summary-newschema-nolabel": "Skapade ett nytt schema",
+	"entityschema-summary-update": "Uppdaterat schema",
+	"entityschema-summary-undo-autocomment": "Ångra sidversion $1 av [[Special:Contributions/$2|{{GENDER:$2|$2}}]] ([[User talk:$2|diskussion]])",
+	"entityschema-summary-restore-autocomment": "Återställ sidversion $1 av [[Special:Contributions/$2|{{GENDER:$2|$2}}]]",
+	"entityschema-undo-heading": "Ångra redigering till $1",
+	"entityschema-undo-heading-failed": "Misslyckades att ångra",
+	"entityschema-undo-old-revision": "Sidversion att ångra",
+	"entityschema-restore-heading-failed": "Återställning misslyckades",
+	"entityschema-restoreold": "återställ",
+	"entityschema-special-id-inputlabel": "ID",
+	"entityschema-special-language-inputlabel": "Språkkod",
+	"entityschema-special-label": "Etikett:",
+	"entityschema-special-description": "Beskrivning:"
+}

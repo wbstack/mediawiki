@@ -1,0 +1,35 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bugoslav",
+			"Ivi104",
+			"Macofe",
+			"SpeedyGonsales"
+		]
+	},
+	"templatesandbox": "Testiranje predložaka",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Prikazuje stranicu]] s testnim predloškom",
+	"templatesandbox-suffix": "stranica za testiranje",
+	"templatesandbox-legend": "Stranica za testiranje predložaka",
+	"templatesandbox-text": "Možete odabrati skup predložaka spremljenih kao podstranice u vašem suradničkom imenskom prostoru koristeći prikladni prefiks.\nNa primjer, ako želite pregledati inačicu {{ns:Template}}:Pokus koji ste spremili kao \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Pokus\", koristite \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" kao prefiks.",
+	"templatesandbox-prefix-label": "Prefiks:",
+	"templatesandbox-page-label": "Testna stranica:",
+	"templatesandbox-revid-label": "Uređivanje:",
+	"templatesandbox-text-label": "Prikaži wikitekst:",
+	"templatesandbox-submit": "Vidi",
+	"templatesandbox-title-output": "Stranica za testiranje predložaka: $1",
+	"templatesandbox-editform-legend": "Vidi stranicu s ovim predloškom",
+	"templatesandbox-editform-page-label": "Ime stranice",
+	"templatesandbox-editform-view-label": "Prikaži kako će izgledati",
+	"templatesandbox-preview": "Pregled predloška $2",
+	"templatesandbox-previewnote": "'''Ne zaboravite da je ovo samo pregled predloška na stranici [[:$1]].'''\nVaše uređivanje još nije snimljeno!",
+	"templatesandbox-invalid-title": "Naslov koji ste naveli nije valjan.",
+	"templatesandbox-title-not-exists": "Naslov koji ste naveli ne postoji.",
+	"templatesandbox-revision-not-exists": "Uređivanje koje ste naveli ne postoji.",
+	"templatesandbox-invalid-prefix": "Prefiks testne stranice nije valjan.",
+	"templatesandbox-prefix-not-local": "Prefiks testne stranice koji ste naveli ne nalazi se ovdje.",
+	"templatesandbox-page-or-revid": "Navedite ime stranice odnosno članka ili ID broj uređivanja.",
+	"templatesandbox-editform-need-title": "Kako bi vidjeli neku drugu stranicu s ovim predloškom, navedite ime stranice.",
+	"templatesandbox-editform-invalid-title": "Specificirano ime nije valjano.",
+	"templatesandbox-editform-title-not-exists": "Stranica koju ste naveli ne postoji."
+}

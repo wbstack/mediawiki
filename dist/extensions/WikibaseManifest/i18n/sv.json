@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sabelöga"
+		]
+	},
+	"wikibasemanifest-desc": "Kombinerar metadata om en Wikibase-installation och visar upp det som en enkel API"
+}

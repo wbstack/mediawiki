@@ -1,0 +1,42 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chrumps",
+			"Matma Rex",
+			"Odie2",
+			"Peter Bowman",
+			"Rail",
+			"Tar Lócesilion",
+			"WTM",
+			"Woytecr"
+		]
+	},
+	"templatesandbox": "Brudnopis do szablonów",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Renderuje stronę]] z wykorzystaniem szablonów z brudnopisu",
+	"templatesandbox-suffix": "brudnopis",
+	"templatesandbox-legend": "Brudnopis do szablonów",
+	"templatesandbox-text": "Możesz wybrać zestaw szablonów zapisanych w Twoim brudnopisie, korzystając z odpowiedniego prefiksu.\nNa przykład, jeżeli chcesz zobaczyć podgląd wersji strony „{{ns:Template}}:Test”, którą {{GENDER:|zapisałeś|zapisałaś}} jako „{{ns:User}}:Przykład/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test”, użyj prefiksu „{{ns:User}}:Przykład/{{int:templatesandbox-suffix}}”.",
+	"templatesandbox-prefix-label": "Prefiks do brudnopisu:",
+	"templatesandbox-page-label": "Przetestuj stronę:",
+	"templatesandbox-revid-label": "Przetestuj wersję:",
+	"templatesandbox-text-label": "Przetestuj wikitekst:",
+	"templatesandbox-submit": "Podgląd",
+	"templatesandbox-title-output": "Brudnopis do szablonów: $1",
+	"templatesandbox-editform-legend": "Podgląd strony z tym szablonem",
+	"templatesandbox-editform-page-label": "Tytuł strony",
+	"templatesandbox-editform-view-label": "Pokaż podgląd",
+	"templatesandbox-preview": "Podgląd strony $2",
+	"templatesandbox-previewnote": "'''To jest tylko podgląd strony [[:$1]].'''\nZmiany nie zostały jeszcze zapisane!",
+	"templatesandbox-invalid-title": "Wprowadzony tytuł jest nieprawidłowy.",
+	"templatesandbox-title-not-exists": "Podany tytuł nie istnieje.",
+	"templatesandbox-revision-not-exists": "Wybrana wersja nie istnieje.",
+	"templatesandbox-revision-no-content": "Podana przez ciebie wersja nie zawiera żadnej treści, lub nie posiadasz uprawnień do jej przeglądania.",
+	"templatesandbox-invalid-prefix": "Podany prefiks do brudnopisu nie istnieje.",
+	"templatesandbox-prefix-not-local": "Podany prefiks do brudnopisu nie jest lokalny.",
+	"templatesandbox-page-or-revid": "Musisz wpisać nazwę strony albo numer ID wersji.",
+	"templatesandbox-editform-need-template": "Aby obejrzeć podgląd innej strony z tym szablonem, musi zostać określona nazwa szablonu.",
+	"templatesandbox-editform-need-title": "Aby obejrzeć podgląd innej strony z tym szablonem, musi zostać określony tytuł strony.",
+	"templatesandbox-editform-invalid-template": "Nazwa podanego szablonu jest nieprawidłowa.",
+	"templatesandbox-editform-invalid-title": "Tytuł strony określony do podglądu jest nieprawidłowy.",
+	"templatesandbox-editform-title-not-exists": "Strona, którą chcesz podejrzeć, nie istnieje."
+}

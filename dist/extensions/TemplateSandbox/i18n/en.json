@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Brad Jorsch"
+		]
+	},
+	"templatesandbox": "Template sandbox",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Renders a page]] transcluding templates from a sandbox",
+	"templatesandbox-suffix": "sandbox",
+	"templatesandbox-legend": "Template sandbox",
+	"templatesandbox-text": "You can choose a set of templates saved in your sandbox space by using an appropriate sandbox prefix.\nFor example, if you want to preview a version of {{ns:Template}}:Test that you have saved as \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", use \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" as the prefix.",
+	"templatesandbox-prefix-label": "Sandbox prefix:",
+	"templatesandbox-page-label": "Render page:",
+	"templatesandbox-revid-label": "Render revision:",
+	"templatesandbox-text-label": "Render wikitext:",
+	"templatesandbox-submit": "View",
+	"templatesandbox-title-output": "Template sandbox: $1",
+	"templatesandbox-editform-legend": "Preview page with this template",
+	"templatesandbox-editform-text": "",
+	"templatesandbox-editform-page-label": "Page title",
+	"templatesandbox-editform-view-label": "Show preview",
+	"templatesandbox-editform-helptext": "",
+	"templatesandbox-preview": "Preview of $2",
+	"templatesandbox-previewnote": "'''Remember that this is only a preview of [[:$1]].'''\nYour changes have not yet been saved!",
+	"templatesandbox-invalid-title": "The title you specified is invalid.",
+	"templatesandbox-title-not-exists": "The title you specified does not exist.",
+	"templatesandbox-revision-not-exists": "The revision you specified does not exist.",
+	"templatesandbox-revision-no-content": "The revision you specified has no content, or you do not have permission to view it.",
+	"templatesandbox-invalid-prefix": "The sandbox prefix you specified is invalid.",
+	"templatesandbox-prefix-not-local": "The sandbox prefix you specified is not local.",
+	"templatesandbox-page-or-revid": "You must enter either a page title or a revision ID number.",
+	"templatesandbox-fail-post": "<em>Due to a loss of session data, the preview is hidden as a precaution against JavaScript attacks.</em>\n\n<strong>If this is a legitimate preview attempt, please try again.</strong>\nIf it still does not work, try [[Special:UserLogout|logging out]] and logging back in.",
+	"templatesandbox-fail-post-anon": "<em>Because you are not logged in, the preview is hidden as a precaution against JavaScript attacks.</em>\n\n<strong>If this is a legitimate preview attempt, please [[Special:UserLogin|log in]] and try again.</strong>",
+	"templatesandbox-anon-limited-preview": "Preview of JavaScript and CSS changes is disabled when not logged in. If you need to preview such changes, please [[Special:UserLogin|log in]] and try again.",
+	"templatesandbox-editform-need-template": "To preview another page with this template, a template name must be specified.",
+	"templatesandbox-editform-need-title": "To preview another page with this template, a page title must be specified.",
+	"templatesandbox-editform-invalid-template": "The name of the template you specified is invalid.",
+	"templatesandbox-editform-invalid-title": "The title you specified for previewing is invalid.",
+	"templatesandbox-editform-title-not-exists": "The title you specified for previewing does not exist.",
+	"templatesandbox-failed-replace-section": "Failed to replace section of the existing page."
+}

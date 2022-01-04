@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Macofe",
+			"Shanmugamp7"
+		]
+	},
+	"templatesandbox-suffix": "மணல்தொட்டி",
+	"templatesandbox-legend": "வார்ப்புரு மணல்தொட்டி",
+	"templatesandbox-prefix-label": "மணல்தொட்டி முன்னொட்டு:",
+	"templatesandbox-submit": "காண்",
+	"templatesandbox-title-output": "வார்ப்புரு மணல்தொட்டி :  $1",
+	"templatesandbox-editform-legend": "இந்த வார்ப்புருவுடன் பக்கத்தின் முன்தோற்றம் காட்டு",
+	"templatesandbox-editform-page-label": "பக்கத்தின் தலைப்பு",
+	"templatesandbox-editform-view-label": "முன்தோற்றம் காட்டு"
+}

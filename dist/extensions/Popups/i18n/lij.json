@@ -1,0 +1,33 @@
+{
+	"@metadata": {
+		"authors": [
+			"Giromin Cangiaxo"
+		]
+	},
+	"popups-message": "Anteprimme",
+	"popups-desc": "A mostra 'n barconetto d'anteprimma quande l'utente o passa o puntatô de d'ato a 'n ingancio",
+	"popups-settings-title": "Anteprimma da paggina",
+	"popups-settings-option-page": "Abillita",
+	"popups-settings-option-page-description": "Otegni 'na rappida anteprimma de 'n argomento mentre ti lezi 'na paggina.",
+	"popups-settings-save": "Sarva",
+	"popups-settings-help-ok": "Fæto",
+	"popups-settings-cancel": "Anulla",
+	"popups-settings-help": "Ti poeu riattivâ e anteprimme doeuviando 'n ingancio into pê de paggina.",
+	"popups-settings-enable": "Abillita e anteprimme",
+	"popups-preview-no-preview": "Gh'è stæt'in problema inta vixoalizassion de quest'anteprimma",
+	"popups-preview-footer-read": "Vanni a sta paggina",
+	"popups-preview-disambiguation": "Sto tittolo o se riferisce a ciù de 'na paggina",
+	"popups-preview-disambiguation-link": "Amia paggine scimmile",
+	"prefs-reading": "Preferense de lettua",
+	"popups-prefs-optin": "Anteprimma de paggine (otegni 'na rappida anteprimma de 'n argomento mentre ti lezi 'na paggina):",
+	"popups-prefs-disable-nav-gadgets-info": "Ti devi [[$1 |dizabilitâ o Navigation Popups Gadget]] da-a scheda Angæxi pe abilitâ e Anteprimme de paggine",
+	"popups-prefs-conflicting-gadgets-info": "Serti angæxi e di atre personalizassioin porieivan intacâ e prestassioin de questa fonsionalitæ. Se ti g'hæ di problemi controlla i to angæxi e i script utente, compreixi quelli globæ.",
+	"popups-refpreview-reference": "Referensa",
+	"popups-refpreview-book": "Rifeimento a libbro",
+	"popups-refpreview-journal": "Notte da revista",
+	"popups-refpreview-news": "Notte a-e notissie",
+	"popups-refpreview-web": "Rifeimenti web",
+	"popups-refpreview-user-preference-label": "Anteprimma di rifeimenti (otegni 'na rappida anteprimma de notte a pê de paggina)",
+	"popups-refpreview-beta-feature-message": "Anteprimma de Notte",
+	"popups-refpreview-beta-feature-description": "A mostra l'anteprimma de 'na notta quande se passa o pontatô in sciô segno de rimando a pê de paggina.\n\nDanni amente: se ti g'hæ l'angæzo [https://en.wikipedia.org/wiki/Wikipedia:Tools/Navigation_popups Navigation popups] abilitou, i anteprimme de notte no se veddan. Se invece ti g'hæ abilitou l'angæzo  [[mw:Special:MyLanguage/Reference Tooltips|Reference Tooltips]], ti vediæ tanto l'anteprimma de Reference Tooltipsche quella de Reference Previews."
+}

@@ -1,0 +1,23 @@
+{
+	"@metadata": {
+		"authors": [
+			"Aftab1995",
+			"Aftabuzzaman",
+			"Macofe",
+			"আফতাবুজ্জামান"
+		]
+	},
+	"templatesandbox": "টেমপ্লেট খেলাঘর",
+	"templatesandbox-suffix": "খেলাঘর",
+	"templatesandbox-legend": "টেমপ্লেট খেলাঘর",
+	"templatesandbox-submit": "দেখান",
+	"templatesandbox-title-output": "টেমপ্লেট খেলাঘর: $1",
+	"templatesandbox-editform-legend": "এই টেমপ্লেট দিয়ে পাতার প্রাকদর্শন",
+	"templatesandbox-editform-page-label": "পাতার শিরোনাম",
+	"templatesandbox-editform-view-label": "প্রাকদর্শন দেখান",
+	"templatesandbox-preview": "$2 এর প্রাকদর্শন",
+	"templatesandbox-previewnote": "'''মনে রাখবেন যে এটি শুধুমাত্র [[:$1]] এর একটি প্রাকদর্শন।'''\nআপনার পরিবর্তনসমূহ এখনো সংরক্ষণ করা হয় নি!",
+	"templatesandbox-invalid-title": "আপনার নির্দিষ্ট করা শিরোনাম অবৈধ।",
+	"templatesandbox-title-not-exists": "আপনার নির্দিষ্ট করা শিরোনামটি বিদ্যমান নয়।",
+	"templatesandbox-editform-need-title": "এই টেমপ্লেটসহ অন্য একটি পাতার প্রাকদর্শন দেখতে, একটি পাতার শিরোনাম অবশ্যই নির্দিষ্ট করতে হবে।"
+}

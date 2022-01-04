@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tony Thomas",
+			"Alangi Derick"
+		]
+	},
+	"mailgun-desc": "Send emails through Mailgun API service from MediaWiki"
+}

@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Besnik b",
+			"Bjakupi",
+			"Fanjiayi"
+		]
+	},
+	"advancedsearch-optgroup-structure": "Struktura",
+	"advancedsearch-help-deepcategory": ";Përshkrim\n: Kërkon për faqe që janë pjesë e këtyre kategorive dhe nënkategorive.\n;Kini parasysh sa vijon\n:* Në kërkimin tuaj do të përfshihen vetëm 5 shkallët e para të nënkategorive.\n:* Numri i kategorive është i kufizuar në 256.\n:* Mund të shihni për faqe në disa kategori.\n;Faqe ndihme\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Deepcategory Deepcategory]\n;Ekuivalenti sintaksor në kërkim normal: <code>deepcategory:</code> ndjekur nga një emër kategorie, bie fjala <code>deepcategory:Help</code>. Përdorni thonjëza dyshe, nëse emri përmban hapësira: <code>deepcategory:\"Kategori të fshehura\"</code>.",
+	"advancedsearch-filetype-audio": "Audio",
+	"advancedsearch-namespaces-preset-all": "Krejt"
+}

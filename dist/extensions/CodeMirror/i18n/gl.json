@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Banjo",
+			"Elisardojm",
+			"Toliño"
+		]
+	},
+	"codemirror-desc": "Proporciona un resalte da sintaxe no editor de texto wiki",
+	"codemirror-toggle-label": "Resaltado de sintaxe"
+}

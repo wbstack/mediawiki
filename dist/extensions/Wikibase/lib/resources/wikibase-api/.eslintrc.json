@@ -1,0 +1,21 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/client-es5",
+		"wikimedia/mediawiki",
+		"wikimedia/jquery"
+	],
+	"globals": {
+		"wikibase": "readonly"
+	},
+	"rules": {
+		"max-len": "off",
+		"no-underscore-dangle": "off",
+		"no-use-before-define": [ "error", "nofunc" ],
+		"operator-linebreak": "off",
+		"jsdoc/check-alignment": "off",
+		"jsdoc/newline-after-description": "off",
+		"jsdoc/require-returns": "off",
+		"jsdoc/require-returns-check": "off"
+	}
+}

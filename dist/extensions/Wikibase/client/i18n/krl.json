@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ilja.mos",
+			"Likopiän tyttö",
+			"Mashoi7",
+			"Varvana"
+		]
+	},
+	"tooltip-t-wikibase": "Linkki yhissettyh keškuštietovaraštoh",
+	"wikibase-comment-update": "{{WBREPONAME}} on muutettu",
+	"wikibase-dataitem": "{{WBREPONAME}}-elementti",
+	"wikibase-editlinks": "Kohentele linkit",
+	"wikibase-editlinkstitle": "Kohentele kielienvälisie linkkijä",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Peitä",
+	"wikibase-rc-hide-wikidata-show": "Näytä",
+	"wikibase-rc-wikibase-edit-letter": "D",
+	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} kohennuš",
+	"wikibase-otherprojects": "Toisissa projektiloissa"
+}

@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"skinname-modern": "Moderne",
+	"modern.css": "/* Tote CSS hic essera cargate pro le usatores del apparentia Moderne */",
+	"modern.js": "/* Tote JavaScript hic essera cargate pro le usatores del apparentia Moderne */",
+	"modern-desc": "Apparentia blau/gris con barra lateral e barra superior. Derivate de MonoBook."
+}

@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Sagan",
+			"Азат Хәлилов",
+			"Айсар",
+			"Вильданова Гюзель",
+			"Ләйсән",
+			"Рустам Нурыев"
+		]
+	},
+	"wikibase-edit": "үҙгәртергә",
+	"wikibase-add": "өҫтәргә",
+	"wikibase-label-empty": "Тамға (исем) юҡ",
+	"wikibase-description-empty": "Тасуирлама тултырылмаған",
+	"wikibase-statementsection-statements": "Раҫлауҙар",
+	"wikibase-sitelinks-special": "Башҡа сайттар",
+	"wikibase-statementview-rank-normal": "Нормаль ранг",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|сығанаҡ}}",
+	"wikibase-redirectentity-success": "$1 $2 битенә кире йүнәлтелгән."
+}

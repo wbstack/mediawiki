@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Beta16"
+		]
+	},
+	"mailgun-desc": "Invia email attraverso il servizio API Mailgun da Mediawiki"
+}

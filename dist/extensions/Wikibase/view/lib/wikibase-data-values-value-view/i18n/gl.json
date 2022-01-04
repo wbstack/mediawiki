@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elisardojm",
+			"Toliño"
+		]
+	},
+	"valueview-expert-unsupportedvalue-unsupporteddatavalue": "A manipulación de valores \"$1\" aínda non está soportada.",
+	"valueview-expert-unsupportedvalue-unsupporteddatatype": "A manipulación de valores para o tipo de datos \"$1\" aínda non está soportada.",
+	"valueview-expert-emptyvalue-empty": "baleiro",
+	"valueview-expert-globecoordinateinput-precision": "Precisión:",
+	"valueview-expert-globecoordinateinput-nullprecision": "non especificado",
+	"valueview-expert-globecoordinateinput-customprecision": "especial ($1)",
+	"valueview-expert-timevalue-calendar-gregorian": "Gregoriano",
+	"valueview-expert-timevalue-calendar-julian": "Xuliano",
+	"valueview-expert-timeinput-precision": "Precisión:",
+	"valueview-expert-timeinput-calendar": "Calendario:",
+	"valueview-expertextender-languageselector-languagetemplate": "$1 ($2)",
+	"valueview-expertextender-languageselector-label": "Lingua (obligatorio):",
+	"valueview-expertextender-unitsuggester-label": "Unidade (opcional):",
+	"valueview-preview-label": "vaise amosar así:",
+	"valueview-preview-novalue": "non se recoñeceu ningún valor válido",
+	"valueview-listrotator-manually": "definir manualmente"
+}
