@@ -4,7 +4,7 @@
 
 BASEDIR=$(cd `dirname "$0"` && pwd)
 
-cd $BASEDIR/..
+cd $BASEDIR
 
 Help()
 {
@@ -45,11 +45,8 @@ $BASEDIR/sync/pacman
 # Removes some not needed things from the things fetched
 $BASEDIR/sync/03-less-files.sh
 
-# TODO: Do this better / decide where these files should live and how they should be copied into 'dist'
 echo "Copy required files into the 'dist' dir"
-cp dist-persist/* ./dist/
-mkdir -p ./dist/wbstack
-cp -r -t ./dist/wbstack/ ./wbstack/data ./wbstack/src
+cp -v -r ./dist-persist/* ./dist/
 
 # Does a composer install
 $BASEDIR/sync/04-docker-composer.sh

@@ -36,11 +36,12 @@ services:
     volumes:
       - "./dist:/var/www/html/w:cached"
       # TODO: is this still what we want?
-      - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
+      - ./dist-persist/wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   api:
     build:
-      context: wbstack/test/
+      # TODO maybe this directory shouldn't be called a "test"
+      context: test/
       dockerfile: Dockerfile
     networks:
       default:
@@ -49,9 +50,9 @@ services:
     ports:
       - "8002:80"
     volumes:
-      - ./wbstack/test/server.php:/var/www/html/index.php
-      - ./wbstack/data/:/var/www/data/
-      - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
+      - ./test/server.php:/var/www/html/index.php
+      - ./dist-persist/wbstack/data/:/var/www/data/
+      - ./dist-persist/wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   mysql:
     image: mariadb:10.5
@@ -60,9 +61,9 @@ services:
       - mysql-configure-replication
     volumes:
       - mediawiki-mysql-data:/var/lib/mysql
-      - ./wbstack/docker-compose/mysql/main:/mwdd-custom
-      - ./wbstack/docker-compose/mysql/write-db-template.sh:/write-db-template.sh
-      - ./wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
+      - ./docker-compose/mysql/main:/mwdd-custom
+      - ./docker-compose/mysql/write-db-template.sh:/write-db-template.sh
+      - ./dist-persist/wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
 
@@ -91,9 +92,9 @@ services:
       - mysql-replica-configure-replication
     volumes:
       - mysql-replica-data:/var/lib/mysql
-      - ./wbstack/docker-compose/mysql/replica:/mwdd-custom
-      - ./wbstack/docker-compose/mysql/write-db-template.sh:/write-db-template.sh
-      - ./wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
+      - ./docker-compose/mysql/replica:/mwdd-custom
+      - ./docker-compose/mysql/write-db-template.sh:/write-db-template.sh
+      - ./dist-persist/wbstack/data/mw1.35-wbs1.sql:/template/schema.sql
     entrypoint: "/mwdd-custom/entrypoint.sh"
     command: "mysqld"
     networks:
@@ -111,8 +112,8 @@ services:
       - "MYSQL_REPLICATION_USER=repl"
       - "MYSQL_REPLICATION_PASSWORD=repl"
     volumes:
-      - ./wbstack/docker-compose/wait-for-it.sh:/wait-for-it.sh:ro
-      - ./wbstack/docker-compose/mysql/main:/mwdd-custom
+      - ./docker-compose/wait-for-it.sh:/wait-for-it.sh:ro
+      - ./docker-compose/mysql/main:/mwdd-custom
       - mysql-configure-replication-data:/mwdd-connector
     command: /bin/bash -x /mwdd-custom/mysql_connector_main.sh
 
@@ -125,8 +126,8 @@ services:
       - "MYSQL_REPLICATION_USER=repl"
       - "MYSQL_REPLICATION_PASSWORD=repl"
     volumes:
-      - ./wbstack/docker-compose/wait-for-it.sh:/wait-for-it.sh:ro
-      - ./wbstack/docker-compose/mysql/replica:/mwdd-custom
+      - ./docker-compose/wait-for-it.sh:/wait-for-it.sh:ro
+      - ./docker-compose/mysql/replica:/mwdd-custom
       - mysql-configure-replication-data:/mwdd-connector
     command: /bin/bash -x /mwdd-custom/mysql_connector_replica.sh
 

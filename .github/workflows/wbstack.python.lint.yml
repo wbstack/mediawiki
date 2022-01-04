@@ -23,10 +23,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install pylint
 
-    - name: Install wbstack/sync Requirements
-      working-directory: ./wbstack/sync
+    - name: Install sync Requirements
+      working-directory: ./sync
       run: python -m pip install --no-cache-dir -r requirements.txt
 
-    - name: Lint wbstack directory
-      working-directory: ./wbstack
-      run: find ./ -type f -name "*.py" | xargs pylint
+    - name: Lint all python files
+      run: find ./ -type f -name "*.py" -not -path "./dist/*" | xargs pylint

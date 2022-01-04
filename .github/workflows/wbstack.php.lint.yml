@@ -18,9 +18,7 @@ jobs:
         php-version: 7.4
 
     - name: Install wbstack dev Composer Dependencies
-      working-directory: ./wbstack
       run: composer install --prefer-dist
 
     - name: Lint wbstack directory
-      working-directory: ./wbstack
       run: composer lint

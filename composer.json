@@ -1,0 +1,12 @@
+{
+    "require-dev": {
+        "php-parallel-lint/php-parallel-lint": "^1.2",
+        "seld/jsonlint": "^1.8"
+    },
+    "scripts": {
+        "lint": [
+            "parallel-lint --exclude ./dist --exclude ./sync/.tmp .",
+            "rc=0 && for x in `find . -not -path './sync/.tmp/*' -not -path './dist/*' -name \"*.json\" -type f`; do vendor/bin/jsonlint \"$x\" || rc=$?; done && exit $rc"
+            ]
+    }
+}

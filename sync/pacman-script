@@ -2,7 +2,7 @@
 
 BASEDIR=$(cd `dirname "$0"` && pwd)
 YAMLFILE="${BASEDIR}/pacman.yaml"
-REPO_DIR="${BASEDIR}/../../"
+REPO_DIR="${BASEDIR}/../"
 TEMPORARY_DIR=$(mktemp -d)/
 
 # .tmp was removed so that the files in the repo dir were cleaner.
