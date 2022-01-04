@@ -34,7 +34,8 @@ services:
       - MW_REDIS_PASSWORD=
 
     volumes:
-      - ".:/var/www/html/w:cached"
+      - "./dist:/var/www/html/w:cached"
+      # TODO: is this still what we want?
       - ./wbstack/data/php.ini:/usr/local/etc/php/php.ini
 
   api:
