@@ -46,8 +46,10 @@ $BASEDIR/sync/pacman
 $BASEDIR/sync/03-less-files.sh
 
 # TODO: Do this better / decide where these files should live and how they should be copied into 'dist'
-echo "Copy composer files into the 'dist' dir"
-cp -t ./dist/ composer.*.json composer.lock
+echo "Copy required files into the 'dist' dir"
+cp -t ./dist/ composer.*.json composer.lock health.php LocalSettings.php robots.txt
+mkdir -p ./dist/wbstack
+cp -r -t ./dist/wbstack/ ./wbstack/data ./wbstack/src
 
 # Does a composer install
 $BASEDIR/sync/04-docker-composer.sh

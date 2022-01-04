@@ -25,7 +25,7 @@ $mapOfChanges = [
 
 foreach ( $mapOfChanges as $file => $change ) {
     echo "Overriding $file\n";
-    $location = __DIR__ . '/../../' . $file;
+    $location = __DIR__ . '/../../dist/' . $file;
     $content = file_get_contents( $location );
     $content = str_replace( "<?php", "<?php\n\n" . $change . "\n\n", $content );
     file_put_contents( $location, $content );
