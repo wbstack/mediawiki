@@ -1,0 +1,6 @@
+[FORMAT]
+max-line-length=240
+disable=
+    C0114, # missing-module-docstring
+    C0116, # missing-module-docstring
+    W1514, # unspecified-encoding
