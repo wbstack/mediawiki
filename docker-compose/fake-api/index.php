@@ -16,7 +16,7 @@ if( !$domainIsLocalHost ){
 // subdomain is 1 element
 $subdomain = $matches[1];
 
-$file = __DIR__ . '/../data/WikiInfo-'.$subdomain.'.json';
+$file = __DIR__ . '/WikiInfo-'.$subdomain.'.json';
 if ( !file_exists($file) ) {
     echo 'Requested subdomain does not exist in test data';
     die(1);
