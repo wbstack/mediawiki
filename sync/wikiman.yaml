@@ -1,6 +1,25 @@
 ---
 mediawikiVersion: "1.37"
 mediawikiRepoRef: e1239b16705b192252f795698629d62ed9b2b93a
+mediawikiRemove:
+- docs
+- extensions/README
+- skins/README
+
+removeFromAll:
+- tests
+- .phan
+- .storybook
+- .vscode
+- .gitignore
+- .eslintrc.json
+- .gitreview
+- .phpcs.xml
+- .stylelintrc.json
+- .rubocop.yml
+- .rubocop_todo.yaml
+- Gruntfile.js
+- Doxyfile
 
 extensions:
   - name: RevisionSlider

@@ -2,221 +2,978 @@
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki/zip/e1239b16705b192252f795698629d62ed9b2b93a
   artifactLevel: 1
   destination: ./dist
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
+  - docs
+  - extensions/README
+  - skins/README
 - name: RevisionSlider
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/2e38ae34d401781738edd4f842ce7de1afc6ab94
   artifactLevel: 1
   destination: ./dist/extensions/RevisionSlider
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Mailgun
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/37108dab96582a730df9e3a2fafaeb5e69120bd4
   artifactLevel: 1
   destination: ./dist/extensions/Mailgun
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: StopForumSpam
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-StopForumSpam/zip/7ae91bb08f6a192c67a6a0047464a27378032c33
   artifactLevel: 1
   destination: ./dist/extensions/StopForumSpam
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: SpamBlacklist
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SpamBlacklist/zip/1191db0fa58103ac654308d1aec2c886857c21e7
   artifactLevel: 1
   destination: ./dist/extensions/SpamBlacklist
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: ConfirmEdit
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/a591b21d28e5c061b13490e9f805482f3ce5dd9f
   artifactLevel: 1
   destination: ./dist/extensions/ConfirmEdit
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: ConfirmAccount
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmAccount/zip/2973d2c5aa14069130998ac72f480166101395ca
   artifactLevel: 1
   destination: ./dist/extensions/ConfirmAccount
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Nuke
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Nuke/zip/e32cd494d891ecbc91466fe1a8254ff463c09203
   artifactLevel: 1
   destination: ./dist/extensions/Nuke
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: InviteSignup
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-InviteSignup/zip/e452047d1d903ca7ad142fea4165e46051f47f82
   artifactLevel: 1
   destination: ./dist/extensions/InviteSignup
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: TorBlock
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TorBlock/zip/f7a42214c1f7bfbf25b181853e35c90b52541e6d
   artifactLevel: 1
   destination: ./dist/extensions/TorBlock
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Elastica
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Elastica/zip/eafed1a8168b1619557ed222459ad26aaaa2f509
   artifactLevel: 1
   destination: ./dist/extensions/Elastica
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: CirrusSearch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CirrusSearch/zip/6471419c30d2cbb4618fb87d2b08edf182821baa
   artifactLevel: 1
   destination: ./dist/extensions/CirrusSearch
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikibaseCirrusSearch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch/zip/40d889fdf96f879c1f25e397e3463a1cb9986fc1
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseCirrusSearch
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikibaseLexemeCirrusSearch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch/zip/56c1880acf1fc33e249c9a2f582626455d70156f
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseLexemeCirrusSearch
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: UniversalLanguageSelector
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/zip/66e3ab2ece65f40ad5e2d790a787e489ca1ca012
   artifactLevel: 1
   destination: ./dist/extensions/UniversalLanguageSelector
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: cldr
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-cldr/zip/de40986a586b06f585f70cd524f03ef2baf1514c
   artifactLevel: 1
   destination: ./dist/extensions/cldr
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Gadgets
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Gadgets/zip/4979fe1df8f88941100e4446c849a49d41b9f2b5
   artifactLevel: 1
   destination: ./dist/extensions/Gadgets
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Thanks
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Thanks/zip/9421bd52e3cb7067b5a0847ffc2ebcc650c52d81
   artifactLevel: 1
   destination: ./dist/extensions/Thanks
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: TwoColConflict
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TwoColConflict/zip/eff532d4be8b9673fe8113ca13938e2e3ff60d06
   artifactLevel: 1
   destination: ./dist/extensions/TwoColConflict
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: OAuth
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-OAuth/zip/5e71c4798ce12962ec28c9a8250a8a5fe4948e45
   artifactLevel: 1
   destination: ./dist/extensions/OAuth
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikibaseLexeme
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexeme/zip/db4b024d3fb19a7c29219cc013396b4aca7fd7f5
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseLexeme
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: SyntaxHighlight_GeSHi
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi/zip/0ca322de786c4c17a73ef4459f1dd39be5fb568b
   artifactLevel: 1
   destination: ./dist/extensions/SyntaxHighlight_GeSHi
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: JsonConfig
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-JsonConfig/zip/20a48c3c322d963cc08cabf6fba65ce3f6711dbe
   artifactLevel: 1
   destination: ./dist/extensions/JsonConfig
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Kartographer
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Kartographer/zip/3ba56a90dc17a982348258f4ab065e71b60546e5
   artifactLevel: 1
   destination: ./dist/extensions/Kartographer
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Math
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Math/zip/4cf0a3a2231828ffd6ab69f974179e8a2ffa5ba2
   artifactLevel: 1
   destination: ./dist/extensions/Math
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Score
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Score/zip/932fe9e50fade0fc719e8936e1e3099c4ba98cb4
   artifactLevel: 1
   destination: ./dist/extensions/Score
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: PageImages
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-PageImages/zip/c4f13bdccbb58b6a8924c23653ed97e60bdb2629
   artifactLevel: 1
   destination: ./dist/extensions/PageImages
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Scribunto
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Scribunto/zip/a96762625b9e474c62de0c86733c584bed523ff6
   artifactLevel: 1
   destination: ./dist/extensions/Scribunto
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Cite
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Cite/zip/797d179ce70be9d2123a82c9e7e25c0e6b2eebaa
   artifactLevel: 1
   destination: ./dist/extensions/Cite
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: TemplateSandbox
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TemplateSandbox/zip/d7ac52017e751886241fdfe72a18c09129de4d05
   artifactLevel: 1
   destination: ./dist/extensions/TemplateSandbox
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: CodeEditor
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CodeEditor/zip/0dbb11bf95d18dd655efa47f995e44cb8478609e
   artifactLevel: 1
   destination: ./dist/extensions/CodeEditor
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: CodeMirror
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-CodeMirror/zip/6a641830d91e4a758dfdbed98211cfaa3e672e67
   artifactLevel: 1
   destination: ./dist/extensions/CodeMirror
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikiEditor
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikiEditor/zip/f99f4826dbdb6d7e40233e4bb081935ec145eb61
   artifactLevel: 1
   destination: ./dist/extensions/WikiEditor
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: SecureLinkFixer
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-SecureLinkFixer/zip/093695252888e9d2eac1bc07bb0cdc1307b7c770
   artifactLevel: 1
   destination: ./dist/extensions/SecureLinkFixer
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Echo
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Echo/zip/34677a03012c61e25de6d50595df587a8e7cadc5
   artifactLevel: 1
   destination: ./dist/extensions/Echo
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Graph
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Graph/zip/fc4eb2fe8755cdbdcf5371306e083fa1545a9f1e
   artifactLevel: 1
   destination: ./dist/extensions/Graph
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Poem
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Poem/zip/168c1d0be6ae4df3b54e950e1e307d72296c94e5
   artifactLevel: 1
   destination: ./dist/extensions/Poem
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: TemplateData
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TemplateData/zip/2896aeb91ed3d6c17511711b19d075a0469cfb1d
   artifactLevel: 1
   destination: ./dist/extensions/TemplateData
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: AdvancedSearch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-AdvancedSearch/zip/e9bc7c86f3d810f7755d39310405fc1893ccf6ac
   artifactLevel: 1
   destination: ./dist/extensions/AdvancedSearch
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: ParserFunctions
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ParserFunctions/zip/4c8f825769fbe13ff6305c755f228ad7f52c0517
   artifactLevel: 1
   destination: ./dist/extensions/ParserFunctions
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: MobileFrontend
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MobileFrontend/zip/aa6fd30b780337d1b2ad9fd1f905f3cc6195d475
   artifactLevel: 1
   destination: ./dist/extensions/MobileFrontend
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: DeleteBatch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-DeleteBatch/zip/9053d326afafc6473666185f4be4e834ab6e0d55
   artifactLevel: 1
   destination: ./dist/extensions/DeleteBatch
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: MultimediaViewer
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MultimediaViewer/zip/6b8717731ab79458e9c7c3e67eb58102124d5c1a
   artifactLevel: 1
   destination: ./dist/extensions/MultimediaViewer
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Auth_remoteuser
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Auth_remoteuser/zip/267291a73535032710ebfd4504f0cb6e0538b135
   artifactLevel: 1
   destination: ./dist/extensions/Auth_remoteuser
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikibaseManifest
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseManifest/zip/e47f11b91597a9f4599cb2dfcc9bdef94a9f0a13
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseManifest
   remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
   - infrastructure
 - name: WikiHiero
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikiHiero/zip/f8c1e38a0ab02a14a635ba28ae9cc10181ccdd25
   artifactLevel: 1
   destination: ./dist/extensions/WikiHiero
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: TextExtracts
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-TextExtracts/zip/3f080bc34538ed4f4fbc60fa81407b73574f6364
   artifactLevel: 1
   destination: ./dist/extensions/TextExtracts
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Popups
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Popups/zip/669cc183d450ed665c6d18e5184c9f9245e3cc32
   artifactLevel: 1
   destination: ./dist/extensions/Popups
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: EntitySchema
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/74c4040f1903c2bbc5e059367e806a134d172e75
   artifactLevel: 1
   destination: ./dist/extensions/EntitySchema
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikibaseInWikitext
   artifactUrl: https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseInWikitext
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikibaseExampleData
   artifactUrl: https://codeload.github.com/wmde/WikibaseExampleData/zip/c129f0b759bf4602aa9b09e2bb9b694682784320
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseExampleData
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: WikibaseEdtf
   artifactUrl: https://codeload.github.com/ProfessionalWiki/WikibaseEdtf/zip/38b94853d1ece0e2dd742aa5aa925d51916a0a28
   artifactLevel: 1
   destination: ./dist/extensions/WikibaseEdtf
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: ThatSrc
   artifactUrl: https://codeload.github.com/nyurik/ThatSrc/zip/3e039311504eb82f8c5c488a457b9e376b5cf7e3
   artifactLevel: 1
   destination: ./dist/extensions/ThatSrc
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Wikibase
   artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/main/wikibase-feddy-props-1668.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/Wikibase
   remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
   - vendor
   - composer.lock
   - data-access/build
@@ -243,19 +1000,89 @@
   artifactUrl: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
   artifactLevel: 1
   destination: ./dist/extensions/EmbedVideo
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Vector
   artifactUrl: https://codeload.github.com/wikimedia/Vector/zip/e826214a773cdd95175fef3021276a2a211e71f6
   artifactLevel: 1
   destination: ./dist/skins/Vector
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Timeless
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Timeless/zip/12e3dd1c5ad8abf1545c87582fabad90709f9a35
   artifactLevel: 1
   destination: ./dist/skins/Timeless
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: Modern
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-Modern/zip/cc9490ebc0eb25a5ab9b5a00918cb210610ae04d
   artifactLevel: 1
   destination: ./dist/skins/Modern
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile
 - name: MinervaNeue
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-skins-MinervaNeue/zip/15047cd45ea4ce93745a21a6d8cf2ef86c479cd1
   artifactLevel: 1
   destination: ./dist/skins/MinervaNeue
+  remove:
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yaml
+  - Gruntfile.js
+  - Doxyfile

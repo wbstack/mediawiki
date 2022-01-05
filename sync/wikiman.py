@@ -52,17 +52,18 @@ def make_artifact_entry(details: Dict[str, str]) -> Dict[str, Any]:
         'artifactUrl': artifact_url,
         'artifactLevel': 1,
         'destination': details['destination'],
+        'remove' : remove_from_all + details.get('remove', []),
     }
-    if 'remove' in details.keys():
-        entry['remove'] = details['remove']
     return entry
 
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
+remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
     'name': 'mediawiki',
     'repoName': 'wikimedia/mediawiki',
     'repoRef': codebases.get('mediawikiRepoRef', default_branch),
-    'destination': './dist'
+    'destination': './dist',
+    'remove': codebases.get('mediawikiRemove', [])
     })]
 
 output += [
