@@ -94,6 +94,8 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-Auth_remoteuser
   - name: WikibaseManifest
     repoName: wikimedia/mediawiki-extensions-WikibaseManifest
+    remove:
+    - infrastructure
   - name: WikiHiero
     repoName: wikimedia/mediawiki-extensions-WikiHiero
   - name: TextExtracts
@@ -121,6 +123,29 @@ extensions:
   # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
     url: https://github.com/wbstack/mediawiki-tars/raw/main/wikibase-feddy-props-1668.tar.gz
+    remove:
+    - vendor
+    - composer.lock
+    - data-access/build
+    - data-access/tests
+    - data-access/.phan
+    - data-access/.storybook
+    - data-access/.vscode
+    - repo/build
+    - repo/tests
+    - repo/.phan
+    - repo/.storybook
+    - repo/.vscode
+    - client/build
+    - client/tests
+    - client/.phan
+    - client/.storybook
+    - client/.vscode
+    - lib/build
+    - lib/tests
+    - lib/.phan
+    - lib/.storybook
+    - lib/.vscode
   # EmbedVideo is currently broken in releases due to deprecated warnings https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/issues/4784
   # There was a MR up for fixing that https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/merge_requests/148 so lets directly use that commit?
   # We were using v2.9.0 before this

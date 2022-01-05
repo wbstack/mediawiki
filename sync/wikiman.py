@@ -47,12 +47,15 @@ def make_artifact_entry(details: Dict[str, str]) -> Dict[str, Any]:
     else:
         raise ValueError(f"'repoName' or 'url' key not specified for '{name}' in '{SOURCE_YAMLFILE}'")
 
-    return {
+    entry = {
         'name': name,
         'artifactUrl': artifact_url,
         'artifactLevel': 1,
         'destination': details['destination'],
     }
+    if 'remove' in details.keys():
+        entry['remove'] = details['remove']
+    return entry
 
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
 output: List[Dict] = [make_artifact_entry({
