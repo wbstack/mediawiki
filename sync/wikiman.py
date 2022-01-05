@@ -37,7 +37,7 @@ def get_github_url_from_ref(github: Github, ref: str, repository: str):
 
     return f"https://codeload.github.com/{repository}/zip/{commit.sha}"
 
-def make_artifact_entry(details: Dict[str, str], extraRemove: List[str]) -> Dict[str, Any]:
+def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dict[str, Any]:
     name = details['name']
 
     if "repoName" in details.keys():
@@ -52,7 +52,7 @@ def make_artifact_entry(details: Dict[str, str], extraRemove: List[str]) -> Dict
         'artifactUrl': artifact_url,
         'artifactLevel': 1,
         'destination': details['destination'],
-        'remove' : extraRemove + details.get('remove', []),
+        'remove' : extra_remove + details.get('remove', []),
     }
     return entry
 
