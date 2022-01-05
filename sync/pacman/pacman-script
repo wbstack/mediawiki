@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
+# pacman takes a directory as an argument
+# this directory must include a pacman.yml
+# pacman will populate a dist folder in the same directory, from the pacman.yml
 
-BASEDIR=$(cd `dirname "$0"` && pwd)
-YAMLFILE="${BASEDIR}/pacman.yaml"
-REPO_DIR="${BASEDIR}/../"
+if [ -z "$1" ]; then
+    echo "Usage: $0 <target>"
+    exit 1
+fi
+
+REPO_DIR="${1}"
+YAMLFILE="${1}/pacman.yaml"
 TEMPORARY_DIR=$(mktemp -d)/
 
 # .tmp was removed so that the files in the repo dir were cleaner.

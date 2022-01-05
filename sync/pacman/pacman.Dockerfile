@@ -8,4 +8,6 @@ RUN apk add \
   libarchive-tools \
   yq
 
-ENTRYPOINT bash
+COPY pacman-script /usr/bin/pacman-script
+
+ENTRYPOINT ["pacman-script"]

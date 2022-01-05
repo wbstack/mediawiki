@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 from typing import Any, Dict, List
 from github import Github
 import yaml
 
-BASEDIR = os.path.dirname(os.path.realpath(__file__))
-SOURCE_YAMLFILE = f"{BASEDIR}/wikiman.yaml"
-DESTINATION_YAMLFILE = f"{BASEDIR}/pacman.yaml"
-GITHUB_TOKEN_FILE = f"{BASEDIR}/.github"
+TARGET_DIR = sys.argv[1]
+SOURCE_YAMLFILE = f"{TARGET_DIR}/wikiman.yaml"
+DESTINATION_YAMLFILE = f"{TARGET_DIR}/pacman.yaml"
+# TODO this .github token should move to to top level
+GITHUB_TOKEN_FILE = f"{TARGET_DIR}/sync/.github"
 
 codebases = {}
 with open(SOURCE_YAMLFILE, "r") as filehandler:

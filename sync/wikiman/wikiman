@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 <target>"
+    exit 1
+fi
+
+BASEDIR=$(cd `dirname "$0"` && pwd)
+TARGETDIR=$(realpath "$1")
+cd "${BASEDIR}"
+
+docker build --tag wbstack/mediawiki/wikiman:0.0.1 --file wikiman.Dockerfile .
+docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v $TARGETDIR:$TARGETDIR wbstack/mediawiki/wikiman:0.0.1 ${TARGETDIR}
