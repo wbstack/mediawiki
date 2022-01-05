@@ -40,7 +40,7 @@ export ALSO_COMPOSER_UPDATE=${ALSO_COMPOSER_UPDATE}
 $BASEDIR/sync/01-clear.sh
 
 # Fetches things from the web
-$BASEDIR/sync/pacman
+$BASEDIR/sync/pacman/pacman $BASEDIR
 
 echo "Copy required files into the 'dist' dir"
 cp -v -r ./dist-persist/* ./dist/
