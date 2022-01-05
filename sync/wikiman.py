@@ -57,15 +57,14 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
     return entry
 
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
+remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
     'name': 'mediawiki',
     'repoName': 'wikimedia/mediawiki',
     'repoRef': codebases.get('mediawikiRepoRef', default_branch),
     'destination': './dist',
     'remove': codebases.get('mediawikiRemove', [])
-    })]
-
-remove_from_all = codebases.get('removeFromAll', [])
+    }, remove_from_all)]
 
 output += [
     make_artifact_entry( {**ext,'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}, remove_from_all )
