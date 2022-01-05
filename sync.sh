@@ -37,7 +37,8 @@ done
 export ALSO_COMPOSER_UPDATE=${ALSO_COMPOSER_UPDATE}
 
 # Clears everything in the repo
-$BASEDIR/sync/01-clear.sh
+echo "Delete the contents of the dist folder"
+rm -r ./dist/*
 
 # Fetches things from the web
 $BASEDIR/sync/pacman
