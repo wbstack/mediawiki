@@ -4,6 +4,7 @@
 			"Narazeni"
 		]
 	},
+	"advancedsearch-options-pane-head": "გაუჯგუშებული გორუა:",
 	"advancedsearch-optgroup-text": "ხასჷლაშ ტექსტის გორუა",
 	"advancedsearch-optgroup-structure": "სტრუქტურა",
 	"advancedsearch-optgroup-files": "ფაილეფი დო გჷმოხანტუალეფი",
@@ -22,6 +23,7 @@
 	"advancedsearch-field-fileh": "ფაილიშ სიმაღალა პიქსელეფს",
 	"advancedsearch-field-sort": "გიშახელუაშ რანწკი",
 	"advancedsearch-field-preview-sort": "ხელუა $1-თ",
+	"advancedsearch-placeholder-exact-text": "„კატუს უჸორს რინტუ“",
 	"advancedsearch-inlanguage-default": "გეგშაგორით ნინა",
 	"advancedsearch-filetype-section-image": "სურათიშ ფორმატეფი",
 	"advancedsearch-filetype-section-video": "ვიდეო ფორმატეფი",

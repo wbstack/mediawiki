@@ -135,9 +135,9 @@
 	"notification-header-mention-success-bundle": "{{PLURAL:$3|Mainimine|$3 mainimist}}, mille {{GENDER:$2|lisasid}} aruteluleheküljele \"<strong>$4</strong>\", on saadetud.",
 	"notification-compact-header-mention-success": "<strong>{{GENDER:$2|Mainisid}}:</strong> $3",
 	"notification-header-mention-status-bundle": "{{PLURAL:$3|Teavitus|$3 teavitust}} mainimistest, mille {{GENDER:$2|lisasid}} aruteluleheküljele \"<strong>$4</strong>\": {{PLURAL:$5|$5 saatmata}}, {{PLURAL:$6|$6 saadetud}}.",
-	"notification-header-user-rights-add-only": "{{GENDER:$4|Sinu}} kasutajaõigusi {{GENDER:$1|muudeti}}. Sind lisati rühma: $2.",
-	"notification-header-user-rights-remove-only": "{{GENDER:$4|Sinu}} kasutajaõigusi {{GENDER:$1|muudeti}}. Sa ei kuulu enam rühma: $2.",
-	"notification-header-user-rights-add-and-remove": "{{GENDER:$6|Sinu}} kasutajaõigused {{GENDER:$1|muudeti}}. Kuulud nüüd järgmistesse rühmadesse: $2. Sa ei kuulu enam järgmistesse rühmadesse: $4.",
+	"notification-header-user-rights-add-only": "{{GENDER:$4|Sinu}} kasutajaõigusi {{GENDER:$1|muudeti}}. Sind lisati {{PLURAL:$3|järgmisesse rühma|järgmistesse rühmadesse}}: $2.",
+	"notification-header-user-rights-remove-only": "{{GENDER:$4|Sinu}} kasutajaõigusi {{GENDER:$1|muudeti}}. Sa ei kuulu enam {{PLURAL:$3|järgmisesse rühma|järgmistesse rühmadesse}}: $2.",
+	"notification-header-user-rights-add-and-remove": "{{GENDER:$6|Sinu}} kasutajaõigused {{GENDER:$1|muudeti}}. Kuulud nüüd {{PLURAL:$3|järgmisesse rühma|järgmistesse rühmadesse}}: $2. Sa ei kuulu enam {{PLURAL:$5|järgmisesse rühma|järgmistesse rühmadesse}}: $4.",
 	"notification-header-user-rights-expiry-change": "{{GENDER:$4|Sinu}} liikmesuse aegumistähtaeg {{PLURAL:$3|järgmises rühmas|järgmistes rühmades}} on {{GENDER:$1|muudetud}}: $2.",
 	"notification-header-welcome": "{{GENDER:$2|Tere}} tulemast saidile {{SITENAME}}, $1! Meil on hea meel, et siin oled.",
 	"notification-header-mention-summary": "$1 {{GENDER:$2|mainis}} {{GENDER:$3|sind}} lehekülje \"<strong>$4</strong>\" muudatuse resümees.",
@@ -195,5 +195,6 @@
 	"echo-email-batch-link-text-view-all-notifications": "Vaata kõiki teavitusi",
 	"notification-header-foreign-alert": "Veel märguandeid {{PLURAL:$5|teisest|$5 teisest}} vikist",
 	"notification-header-foreign-notice": "Veel märkusi {{PLURAL:$5|teisest|$5 teisest}} vikist",
-	"notification-header-foreign-all": "Veel teavitusi {{PLURAL:$5|teisest|$5 teisest}} vikist"
+	"notification-header-foreign-all": "Veel teavitusi {{PLURAL:$5|teisest|$5 teisest}} vikist",
+	"echo-foreign-wiki-lang": "$1 – $2"
 }

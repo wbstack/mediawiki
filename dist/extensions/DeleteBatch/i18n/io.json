@@ -4,5 +4,7 @@
 			"Joao Xavier"
 		]
 	},
-	"deletebatch-delete": "Efacez"
+	"deletebatch-delete": "Efacez",
+	"action-deletebatch": "efacar grupo di pagini",
+	"right-deletebatch": "Efacar grupo di pagini"
 }

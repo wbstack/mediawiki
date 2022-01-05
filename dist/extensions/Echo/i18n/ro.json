@@ -11,7 +11,8 @@
 			"Reception123",
 			"Stelistcristi",
 			"Strainu",
-			"Wintereu"
+			"Wintereu",
+			"WebSourceContentRO"
 		]
 	},
 	"echo-desc": "Sistem de notificare a utilizatorilor cu privire la evenimente și mesaje",
@@ -36,9 +37,9 @@
 	"echo-pref-email-frequency-weekly": "Un rezumat săptămânal al notificărilor",
 	"echo-pref-email-format-html": "HTML",
 	"echo-pref-email-format-plain-text": "Text brut",
-	"echo-pref-cross-wiki-notifications": "Arată notificări de la alte wikiuri",
+	"echo-pref-cross-wiki-notifications": "Arată notificări de la alte wiki-uri",
 	"echo-pref-notifications-blacklist": "Nu arăta notificări de la acești utilizatori. ([[mw:Special:MyLanguage/Help:Notifications#mute|află mai multe]])",
-	"echo-pref-notifications-page-linked-title-muted-list": "Nu arăta notificări „de legare ale paginilor” pentru aceste pagini. ([[mw:Special:MyLanguage/Help:Notifications#mute|află mai multe]])",
+	"echo-pref-notifications-page-linked-title-muted-list": "Nu arăta notificări de „legare ale paginilor” pentru aceste pagini. ([[mw:Special:MyLanguage/Help:Notifications#mute|află mai multe]])",
 	"echo-learn-more": "Aflați mai multe",
 	"echo-log": "Jurnal public",
 	"echo-new-messages": "Aveți mesaje noi",
@@ -61,8 +62,8 @@
 	"echo-pref-tooltip-mention": "Notifică-mă când cineva face referire la pagina mea de utilizator.",
 	"echo-pref-tooltip-mention-failure": "Notifică-mă când nu am reușit să trimit cuiva o menționare.",
 	"echo-pref-tooltip-mention-success": "Notifică-mă când am reușit să trimit cuiva o menționare.",
-	"echo-pref-tooltip-user-rights": "Anunță-mă când cineva îmi schimbă drepturile de utilizator.",
-	"echo-pref-tooltip-emailuser": "Anunță-mă când cineva îmi trimite un e-mail.",
+	"echo-pref-tooltip-user-rights": "Notifică-mă când cineva îmi schimbă drepturile de utilizator.",
+	"echo-pref-tooltip-emailuser": "Notifică-mă când cineva îmi trimite un e-mail.",
 	"echo-pref-tooltip-thank-you-edit": "Notifică-mă când ajung la prima, a zecea, a o suta... modificare.",
 	"echo-pref-tooltip-watchlist": "Notifică-mă când cineva face o editare (non-minoră) la o pagină din lista mea de pagini urmărite.",
 	"echo-pref-tooltip-minor-watchlist": "Notifică-mă când cineva face o editare minoră la o pagină din lista mea de pagini urmărite.",

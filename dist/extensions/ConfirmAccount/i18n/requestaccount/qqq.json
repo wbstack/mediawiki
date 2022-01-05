@@ -55,6 +55,6 @@
 	"requestaccount-email-subj": "{{Identical|SITENAME e-mail address confirmation}}",
 	"requestaccount-email-body": "This text is sent in an email. Parameters:\n* $1 - an IP address\n* $2 - a requested user name (no GENDER support)\n* $3 - a URL\n* $4 - a date/time\n* $5 - (Optional) a date\n* $6 - (Optional) a time",
 	"requestaccount-email-subj-admin": "{{Identical|SITENAME account request}}",
-	"requestaccount-email-body-admin": "This message is the email body text send to a site admin whenever someone has requested a new account.\nMore parameters can be added in ConfirmAccount.php by adjusting $wgConfirmAdminEmailExtraFields.\n\nParameters:\n* $1 - username\n* $2 - URL",
+	"requestaccount-email-body-admin": "This message is the email body text send to a site admin whenever someone has requested a new account.\nMore parameters can be added by adjusting $wgConfirmAdminEmailExtraFields.\n\nParameters:\n* $1 - username\n* $2 - URL",
 	"acct_request_throttle_hit": "Used as error message. Parameters:\n* $1 - number of accounts. value of <code>$wgAccountRequestThrottle</code>."
 }

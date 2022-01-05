@@ -18,7 +18,8 @@
 			"RicardoSGZ",
 			"Rodney Araujo",
 			"Suecarmol",
-			"Whytheonlyone"
+			"Whytheonlyone",
+			"DDPAT"
 		]
 	},
 	"twocolconflict": "Conflicto de edición basado en párrafos",
@@ -38,8 +39,8 @@
 	"twocolconflict-special-not-saved": "Sin publicar",
 	"twocolconflict-special-textarea-hint": "Puedes ver y copiar el código fuente de tu revisión:",
 	"twocolconflict-special-malformed-title": "Falta el título o este no es válido.",
-	"twocolconflict-split-header-hint": "Puedes ayudar a mejorar más esta función si dejas comentarios [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View en esta página].",
-	"twocolconflict-split-header-hint-beta": "Gracias por usar esta funcionalidad beta. Puedes ayudar a mejorarla dejando un comentario [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View en esta página].",
+	"twocolconflict-split-header-hint": "Puedes ayudar a mejorar más esta función si dejas comentarios [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface en esta página].",
+	"twocolconflict-split-header-hint-beta": "Gracias por usar esta funcionalidad beta. Puedes ayudar a mejorarla dejando un comentario [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface en esta página].",
 	"twocolconflict-split-your-version-header": "Tu revisión",
 	"twocolconflict-split-current-version-header": "Última revisión de $1",
 	"twocolconflict-split-not-saved-at": "Aún sin publicar",

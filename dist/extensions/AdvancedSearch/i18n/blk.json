@@ -24,6 +24,7 @@
 	"advancedsearch-field-filetype": "ဖုဲင်အစွိုးအမျိုꩻ",
 	"advancedsearch-field-sort": "စီႏစဲဥ်ႏမုꩻစနိစ်",
 	"advancedsearch-field-preview-sort": "စီႏစဲဉ်ႏတွမ်ႏ $1",
+	"advancedsearch-placeholder-exact-text": "\"ညဝ်ႏနဝ်ꩻ ဟွုန်ရက်ပဲင်ꩻဒျာႏ ဗဲးနဝ်ꩻသွူ\"",
 	"advancedsearch-inlanguage-default": "လွိုက်ရွေꩻ ဘာႏသာႏငဝ်းငွါ",
 	"advancedsearch-filetype-section-types": "ကဲဉ်းအာ ဖုဲင်အစွိုးအမျိုꩻဖုံႏ",
 	"advancedsearch-filetype-section-image": "ပွုံႏ ဖော့မတ်ဖုံႏ",
@@ -52,5 +53,6 @@
 	"advancedsearch-namespaces-preset-general-help": "ကဲဉ်းအာ အကူႏညီႏ",
 	"advancedsearch-namespaces-preset-discussion": "အုံကွံချက်",
 	"advancedsearch-namespaces-placeholder": "ထဲမ်သော့ꩻ ယီးနယ်မိဥ်ꩻဖုံႏ…",
-	"prefs-advancedsearch": "အရန်းထို ထိုမ်ႏထွားမုꩻ"
+	"prefs-advancedsearch": "အရန်းထို ထိုမ်ႏထွားမုꩻ",
+	"advancedsearch-preference-disable": "တဲးဝါး:အဝ်ႏထူႏသုင်ꩻ ထိုမ်ႏထွားမုꩻကျာꩻနဝ်ꩻ တောမ်ႏအွောန်ႏနယ်မွုန်း အရန်းထိုထိုမ်ႏထွားရေꩻ ထာꩻထီႏသြ"
 }

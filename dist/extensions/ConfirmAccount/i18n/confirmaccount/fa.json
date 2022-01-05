@@ -8,7 +8,8 @@
 			"FarsiNevis",
 			"Mjbmr",
 			"Reza1615",
-			"Taha"
+			"Taha",
+			"Jeeputer"
 		]
 	},
 	"confirmaccounts": "تأیید درخواست اشتراک",
@@ -69,7 +70,7 @@
 	"confirmaccount-deny": "رد (حذف از فهرست)",
 	"confirmaccount-hold": "نگهدار",
 	"confirmaccount-spam": "هرزنامه (ایمیل را ارسال نکن)",
-	"confirmaccount-reason": "نظر (در ایمیل خواهد بود):",
+	"confirmaccount-reason": "نظر (در ایمیل‌های رد یا نگهداری گنجانده می‌شود):",
 	"confirmaccount-ip": "نشانی آی‌پی:",
 	"confirmaccount-xff": "X-فرستاده شده برای:",
 	"confirmaccount-agent": "یوزر ایجنت:",
@@ -78,7 +79,7 @@
 	"confirmaccount-needreason": "شما باید یک دلیل در جعبهٔ نظر زیر ارائه دهید.",
 	"confirmaccount-canthold": "این درخواست پیش از این یا نگه داشته شده یا حذف شده.",
 	"confirmaccount-badaction": "یک عمل معتبر (قبول،رد،نگه‌داشتن) باید به منظور ادامه دادن، تعیین شود.",
-	"confirmaccount-acc": "درخواست حساب با موفقیت تأیید شد؛\n\tایجاد حساب کاربری تازه [[User:$1|$1]].",
+	"confirmaccount-acc": "درخواست حساب تأیید شد؛\n\tایجاد حساب کاربری تازهٔ [[User:$1|$1]].",
 	"confirmaccount-rej": "درخواست حساب، رد شد.",
 	"confirmaccount-viewing": "(currently {{GENDER:$1|being}} مشاهده شده توسط [[User:$1|$1]])",
 	"confirmaccount-summary": "ایجاد صفحه کاربری برای کاربر جدید.",

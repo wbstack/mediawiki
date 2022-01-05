@@ -3,7 +3,8 @@
 		"authors": [
 			"BaRaN6161 TURK",
 			"Cobija",
-			"MuratTheTurkish"
+			"MuratTheTurkish",
+			"SaldırganSincap"
 		]
 	},
 	"nstab-data": "Veri",
@@ -48,7 +49,7 @@
 	"jsonconfig-type-name-invalid": "geçersiz",
 	"jsonconfig-type-name-string": "dize",
 	"jsonconfig-type-name-localized": "yerelleştirilmiş",
-	"jsonconfig-type-name-number": "numara",
+	"jsonconfig-type-name-number": "sayı",
 	"jsonconfig-type-name-boolean": "boole",
 	"jsonconfig-license": "$1 altındaki veriler.",
 	"jsonconfig-license-not-set": "Bu sayfayı düzenlediğinizde, katkınızı <code>licence</code> alanında belirtilen lisansa göre bırakmayı kabul edersiniz.",

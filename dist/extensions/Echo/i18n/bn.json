@@ -10,14 +10,15 @@
 			"Macofe",
 			"Nasir8891",
 			"Sayak Sarkar",
-			"আফতাবুজ্জামান"
+			"আফতাবুজ্জামান",
+			"Yahya"
 		]
 	},
 	"echo-desc": "ঘটনা এবং বার্তা সম্পর্কে ব্যবহারকারীদের বিজ্ঞপ্তি দেয়ার জন্য ব্যবস্থা",
 	"prefs-echo": "বিজ্ঞপ্তি",
 	"prefs-emailsettings": "ইমেইল বিকল্প",
 	"prefs-echosubscriptions": "এই ঘটনা সম্পর্কে আমাকে অবহিত করুন",
-	"prefs-echocrosswiki": "আন্তঃ-উইকি বিজ্ঞপ্তি",
+	"prefs-echocrosswiki": "আন্তঃউইকি বিজ্ঞপ্তি",
 	"prefs-blocknotificationslist": "নিঃশব্দকৃত ব্যবহারকারী",
 	"prefs-echopollupdates": "সরাসরি বিজ্ঞপ্তি",
 	"echo-mobile-notifications-filter-title": "বিজ্ঞপ্তি ছাঁকুন",

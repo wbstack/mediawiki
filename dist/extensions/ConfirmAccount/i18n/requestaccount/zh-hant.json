@@ -10,7 +10,8 @@
 			"Mark85296341",
 			"Suchichi02",
 			"Waihorace",
-			"Xiplus"
+			"Xiplus",
+			"Winston Sung"
 		]
 	},
 	"requestaccount": "請求帳號",
@@ -48,9 +49,9 @@
 	"requestaccount-submit": "請求帳號",
 	"requestaccount-sent": "您的帳戶請求已經發出，現正等候複審。\n一個確認電郵已傳送至您的電郵。",
 	"requestaccount-econf": "您的電郵位址已經確認，將會在您的帳戶口請求中列示。",
-	"requestaccount-email-subj": "{{SITENAME}} Email 地址確認",
+	"requestaccount-email-subj": "{{SITENAME}}電子郵件地址確認",
 	"requestaccount-email-body": "有人，可能是您，由 IP 位址 $1 ，在{{SITENAME}}中用這個電郵地址請求一個名叫 「$2」 的帳號。\n\n要確認在{{SITENAME}}上的這個帳號真的屬於您，請在您的瀏覽器中開啟這個連結：\n\n$3\n\n如果該帳號已經建立，只有您才會收到該電郵密碼。\n如果這個帳號*不是*屬於您的話，不要點這個連結。\n這個確認碼將會在 $4 過期。",
-	"requestaccount-email-subj-admin": "{{SITENAME}} 帳號請求",
+	"requestaccount-email-subj-admin": "{{SITENAME}}帳號申請",
 	"requestaccount-email-body-admin": "$1 請求了一個帳號並正在等待核准。\n電子郵件地址已確認。要核准帳號，請點選：\n\n$2",
 	"acct_request_throttle_hit": "抱歉，您已經請求了 {{PLURAL:$1|1 個|$1 個}} 帳號。\n您不可以請求更多帳號。"
 }

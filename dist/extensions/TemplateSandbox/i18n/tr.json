@@ -11,7 +11,7 @@
 		]
 	},
 	"templatesandbox": "Şablon deneme tahtası",
-	"templatesandbox-desc": "[[Special:TemplateSandbox|Deneme tahtası şablonlar]] içeren bir sayfa oluşturur",
+	"templatesandbox-desc": "Deneme tahtasından şablonlar yansıtan [[Special:TemplateSandbox|bir sayfa oluşturur]]",
 	"templatesandbox-suffix": "deneme tahtası",
 	"templatesandbox-legend": "Şablon deneme tahtası",
 	"templatesandbox-text": "Uygun bir deneme tahtası önekini kullanarak deneme tahtasına kaydedilmiş bir dizi şablon seçebilirsiniz.\nÖrneğin, {{ns:Template}}:Test sürümünün bir önizlemesini görüntülemek istiyorsanız: \"{{ns:User}}:Örnek/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\", öneki \"{{ns:User}}:Örnek/{{int:templatesandbox-suffix}}\" olarak kullanın.",

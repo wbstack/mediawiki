@@ -34,5 +34,6 @@
 	"templatesandbox-editform-need-title": "Pe 'ndrucà l'andeprime de 'n'otra pàgene cu stu template, a specificà 'u titole de 'na pàgene.",
 	"templatesandbox-editform-invalid-template": "'U nome d'u template ca è specificate non g'è valide.",
 	"templatesandbox-editform-invalid-title": "'U titole ca è specificate pe l'andeprime non g'è valide.",
-	"templatesandbox-editform-title-not-exists": "'U titole ca è specificate pe l'andeprime non g'esiste."
+	"templatesandbox-editform-title-not-exists": "'U titole ca è specificate pe l'andeprime non g'esiste.",
+	"templatesandbox-failed-replace-section": "Sostituzione d'a sezione d'a pàgene esistende sciute a male."
 }

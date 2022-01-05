@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.37-7.4-20220105-fp-beta-0
+
+- Update extensions and skins to include latest REL1_37 changes
+
 ## 1.37-7.4-20211203-fp-beta-1
 
 - Conditionally set lexeme in entity source
@@ -22,7 +26,7 @@ Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build numb
 - Update deprecated usages of `AuthManager` in wbstack code
 - Add (conditional) SMTP configuration
 
-## 1.36-7.4-20211104-0 
+## 1.36-7.4-20211104-0
 
 - Move internal update API outside of MediaWiki
 

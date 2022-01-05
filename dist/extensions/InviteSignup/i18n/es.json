@@ -2,10 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Fitoschido",
-			"Macofe"
+			"Macofe",
+			"Jakeukalane"
 		]
 	},
-	"invitesignup": "Invitar personas a este wiki",
+	"invitesignup": "Invitar personas a esta wiki",
 	"is-desc": "Enviar invitaciones por correo",
 	"is-tableth-date": "Fecha",
 	"is-tableth-email": "Correo electrónico",

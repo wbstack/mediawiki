@@ -76,5 +76,5 @@
 	"advancedsearch-namespaces-placeholder": "이름공간 추가...",
 	"prefs-advancedsearch": "고급 검색",
 	"advancedsearch-preference-help": "고급 검색은 특수:검색 문서에 폼을 하나 추가합니다. 검색 문법을 모르더라도 전문화된 검색을 수행할 수 있습니다. 또, 이름공간을 선택할 수 있는 방식을 변경합니다.",
-	"advancedsearch-preference-disable": "특수:검을 사용할 때 고급 검색 인터페이스를 표시하지 않음"
+	"advancedsearch-preference-disable": "특수:검색을 사용할 때 고급 검색 인터페이스를 표시하지 않음"
 }

@@ -2,9 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Artsiom91",
-			"Тест"
+			"Тест",
+			"ZlyiLev"
 		]
 	},
+	"confirmaccount-showexp": "састарэлыя запыты",
 	"confirmaccount-name": "Імя ўдзельніка",
 	"confirmaccount-pos-0": "аўтар",
 	"confirmaccount-submit": "Пацвердзіць",

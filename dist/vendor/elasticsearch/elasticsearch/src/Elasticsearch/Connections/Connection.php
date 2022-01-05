@@ -1,4 +1,18 @@
 <?php
+/**
+ * Elasticsearch PHP client
+ *
+ * @link      https://github.com/elastic/elasticsearch-php/
+ * @copyright Copyright (c) Elasticsearch B.V (https://www.elastic.co)
+ * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
+ * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1 
+ * 
+ * Licensed to Elasticsearch B.V under one or more agreements.
+ * Elasticsearch B.V licenses this file to you under the Apache 2.0 License or
+ * the GNU Lesser General Public License, Version 2.1, at your option.
+ * See the LICENSE file in the project root for more information.
+ */
+
 
 declare(strict_types = 1);
 
@@ -31,11 +45,6 @@ use Psr\Log\LoggerInterface;
 /**
  * Class AbstractConnection
  *
- * @category Elasticsearch
- * @package  Elasticsearch\Connections
- * @author   Zachary Tong <zach@elastic.co>
- * @license  http://www.apache.org/licenses/LICENSE-2.0 Apache2
- * @link     http://elastic.co
  */
 class Connection implements ConnectionInterface
 {
@@ -136,6 +145,11 @@ class Connection implements ConnectionInterface
             phpversion()
         )];
 
+        // Add x-elastic-client-meta header, if enabled
+        if (isset($connectionParams['client']['x-elastic-client-meta']) && $connectionParams['client']['x-elastic-client-meta']) {
+            $this->headers['x-elastic-client-meta'] = [$this->getElasticMetaHeader($connectionParams)];
+        }
+
         $host = $hostDetails['host'].':'.$hostDetails['port'];
         $path = null;
         if (isset($hostDetails['path']) === true) {
@@ -162,8 +176,13 @@ class Connection implements ConnectionInterface
      */
     public function performRequest($method, $uri, $params = null, $body = null, $options = [], Transport $transport = null)
     {
-        if (isset($body) === true) {
+        if ($body !== null) {
             $body = $this->serializer->serialize($body);
+        }
+
+        $headers = $this->headers;
+        if (isset($options['client']['headers']) && is_array($options['client']['headers'])) {
+            $headers = array_merge($this->headers, $options['client']['headers']);
         }
 
         $request = [
@@ -171,9 +190,7 @@ class Connection implements ConnectionInterface
             'scheme'      => $this->transportSchema,
             'uri'         => $this->getURI($uri, $params),
             'body'        => $body,
-            'headers'     => array_merge([
-                'Host'  => [$this->host]
-            ], $this->headers)
+            'headers'     => array_merge(['Host' => [$this->host]], $headers)
         ];
 
         $request = array_replace_recursive($request, $this->connectionParams, $options);
@@ -324,16 +341,20 @@ class Connection implements ConnectionInterface
      *
      * @return string
      */
-    private function getURI($uri, $params)
+    private function getURI(string $uri, ?array $params): string
     {
         if (isset($params) === true && !empty($params)) {
-            array_walk($params, function (&$value, &$key) {
-                if ($value === true) {
-                    $value = 'true';
-                } elseif ($value === false) {
-                    $value = 'false';
-                }
-            });
+            $params = array_map(
+                function ($value) {
+                    if ($value === true) {
+                        return 'true';
+                    } elseif ($value === false) {
+                        return 'false';
+                    }
+                    return $value;
+                },
+                $params
+            );
 
             $uri .= '?' . http_build_query($params);
         }
@@ -342,7 +363,7 @@ class Connection implements ConnectionInterface
             $uri = $this->path . $uri;
         }
 
-        return $uri;
+        return $uri ?? '';
     }
 
     /**
@@ -579,7 +600,7 @@ class Connection implements ConnectionInterface
      *
      * @return string
      */
-    private function buildCurlCommand($method, $uri, $body)
+    private function buildCurlCommand(string $method, string $uri, ?string $body): string
     {
         if (strpos($uri, '?') === false) {
             $uri .= '?pretty=true';
@@ -745,5 +766,29 @@ class Connection implements ConnectionInterface
 
         // <2.0 "i just blew up" nonstructured exception
         return new $errorClass($responseBody);
+    }
+
+    /**
+     * Get the x-elastic-client-meta header
+     */
+    private function getElasticMetaHeader(array $connectionParams): string
+    {
+        $phpSemVersion = sprintf("%d.%d.%d", PHP_MAJOR_VERSION, PHP_MINOR_VERSION, PHP_RELEASE_VERSION);
+        // Reduce the size in case of '-snapshot' version (using 'p' as pre-release)
+        $clientVersion = str_replace('-snapshot', '-p', strtolower(Client::VERSION)); 
+        $clientMeta = sprintf(
+            "es=%s,php=%s,t=%s,a=%d",
+            $clientVersion,
+            $phpSemVersion,
+            $clientVersion,
+            isset($connectionParams['client']['future']) && $connectionParams['client']['future'] === 'lazy' ? 1 : 0
+        );
+        if (function_exists('curl_version')) {
+            $curlVersion = curl_version();
+            if (isset($curlVersion['version'])) {
+                $clientMeta .= sprintf(",cu=%s", $curlVersion['version']); // cu = curl library
+            }
+        }
+        return $clientMeta;
     }
 }

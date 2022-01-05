@@ -7,13 +7,15 @@
 			"McDutchie",
 			"Optilete",
 			"PonkoSasuke",
-			"Sjoerddebruin"
+			"Sjoerddebruin",
+			"Romaine"
 		]
 	},
 	"twocolconflict": "Bewerkingsconflict op basis van alinea's",
 	"twocolconflict-desc": "Laat een zij-aan-zij-overzicht zien tijdens een bewerkingsconflict",
 	"twocolconflict-beta-feature-message": "Bewerkingsconflict op basis van alinea's",
 	"twocolconflict-beta-feature-description": "Laat het scherm voor bewerkingsconflicten zien als een verbeterd, op alinea's gebaseerd overzicht.",
+	"twocolconflict-special-not-saved": "Niet gepubliceerd",
 	"twocolconflict-split-your-version-header": "Uw versie",
 	"twocolconflict-split-current-version-header": "Laatste versie van $1",
 	"twocolconflict-split-not-saved-at": "Nog niet gepubliceerd",
@@ -32,6 +34,7 @@
 	"twocolconflict-split-reset-warning-cancel": "Annuleren",
 	"twocolconflict-split-collapse-tooltip": "Ongewijzigde tekst samenvouwen",
 	"twocolconflict-split-expand-tooltip": "Ongewijzigde tekst uitvouwen",
+	"twocolconflict-split-help-tooltip": "Hulp weergeven",
 	"twocolconflict-split-tour-dialog-header-single-column-view": "Tegenstrijdige Posts",
 	"twocolconflict-split-tour-dialog-message-single-column-view": "Jammer genoeg heeft er iemand tegelijkertijd met jou gepost. Bekijk de commentaar op de volgende pagina. Indien nodig kan je jouw commentaar aanpassen en de definitieve volgorde veranderen.",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Melding oplossen"

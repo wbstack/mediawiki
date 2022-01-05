@@ -6,7 +6,8 @@
 			"Halibutt",
 			"Kocio",
 			"Rail",
-			"Railfail536"
+			"Railfail536",
+			"Matma Rex"
 		]
 	},
 	"kartographer-attribution": "[https://foundation.wikimedia.org/wiki/Maps_Terms_of_Use Mapy Wikimedia] | Dane kartograficzne © [https://www.openstreetmap.org/copyright Twórcy projektu OpenStreetMap]",
@@ -17,7 +18,7 @@
 	"kartographer-error-json": "Nie udało się przeanalizować JSON: $1",
 	"kartographer-error-missing-attr": "Brak atrybutu „$1”",
 	"kartographer-error-bad_attr": "Atrybut '$1' ma niepoprawną wartość",
-	"kartographer-error-bad_data": "Zawartość JSON nie jest poprawnym GeoJSON+simplestyle",
+	"kartographer-error-bad_data": "Zawartość JSON nie jest poprawnym GeoJSON+simplestyle. Pierwszy błąd walidacji w elemencie \"$1\": \"$2\".",
 	"kartographer-error-latlon": "Podaj zarówno \"długość\" jak i \"szerokość\", albo żaden z parametrów",
 	"kartographer-error-title": "Tytuł „$1” nie jest prawidłową stroną danych mapy",
 	"kartographer-tracking-category": "Strony z mapami",

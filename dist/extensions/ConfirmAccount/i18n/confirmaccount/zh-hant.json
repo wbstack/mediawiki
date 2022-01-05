@@ -16,7 +16,8 @@
 			"Waihorace",
 			"Xiaomingyan",
 			"Xiplus",
-			"飞舞回堂前"
+			"飞舞回堂前",
+			"Winston Sung"
 		]
 	},
 	"confirmaccounts": "確認帳號請求",
@@ -94,7 +95,7 @@
 	"confirmaccount-summary": "建立新使用者的使用者頁面。",
 	"confirmaccount-welc": "'''歡迎來到''{{SITENAME}}''！'''\n我們希望您會作出更多更好的貢獻。\n您可能想先閱讀一下[{{MediaWiki:Helppage}} 說明頁面]。\n再次歡迎您，祝您愉快！",
 	"confirmaccount-wsum": "歡迎！",
-	"confirmaccount-email-subj": "{{SITENAME}} 帳號請求",
+	"confirmaccount-email-subj": "{{SITENAME}}帳號申請",
 	"confirmaccount-email-body": "您請求的帳戶已經在{{SITENAME}}中批准。\n\n帳戶名稱: $1\n\n密碼: $2\n\n為了安全性的原故，您需要在一次登入時更改密碼。要登入，請前往{{fullurl:Special:Userlogin}}。",
 	"confirmaccount-email-body2": "您請求的帳戶已經在{{SITENAME}}中批准。\n\n帳戶名稱: $1\n\n密碼: $2\n\n$3\n\n為了安全性的原故，您需要在一次登入時更改密碼。要登入，請前往{{fullurl:Special:Userlogin}}。",
 	"confirmaccount-email-body3": "抱歉，你在{{SITENAME}}請求的帳戶\"$1\"已經遭到拒絕。\n\n當中可能會有很多原因，會令到您嘅請求被拒絕。您可能沒有正確地填上整個表格，可能在您的回應中沒有足夠的長度，又可能未能符合到一些政策的條件。在這個網站中度提供了聯絡人列表，您可以用去知道更多用戶帳戶方針的資料。",
