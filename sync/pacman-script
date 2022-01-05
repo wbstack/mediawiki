@@ -29,9 +29,10 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     ) &
 done
 
-# wait for the artifcats to download and extract 
+# wait for the artifacts to download
 wait
 
+# move them into place
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
@@ -39,4 +40,19 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     targetDestination="$(realpath -m ${REPO_DIR}${destination})"
     echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
     cp -fa "${temporaryExtraction}" "${targetDestination}"
+done
+
+# remove any not needed files
+for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
+    name=$(echo $codebase | jq -r '.name' -)
+    destination=$(echo $codebase | jq -r '.destination' -)
+    remove=$(echo $codebase | jq -r '.remove' -)
+    if [ "$remove" = "null" ]; then
+        continue
+    fi
+    echo $remove | jq -c -r '.[]' | while read removeEntry; do
+        toRemove="$(realpath -m ${REPO_DIR}${destination}/${removeEntry})"
+        echo "Removing '${toRemove}'"
+        rm -rf "${toRemove}"
+    done
 done

@@ -34,7 +34,7 @@ def get_github_url_from_ref(github: Github, ref: str, repository: str):
 
     return f"https://codeload.github.com/{repository}/zip/{commit.sha}"
 
-def make_artifact_entry(details: Dict[str, str]) -> Dict[str, Any]:
+def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dict[str, Any]:
     name = details['name']
 
     if "repoName" in details.keys():
@@ -44,28 +44,32 @@ def make_artifact_entry(details: Dict[str, str]) -> Dict[str, Any]:
     else:
         raise ValueError(f"'repoName' or 'url' key not specified for '{name}' in '{SOURCE_YAMLFILE}'")
 
-    return {
+    entry = {
         'name': name,
         'artifactUrl': artifact_url,
         'artifactLevel': 1,
         'destination': details['destination'],
+        'remove' : extra_remove + details.get('remove', []),
     }
+    return entry
 
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
+remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
     'name': 'mediawiki',
     'repoName': 'wikimedia/mediawiki',
     'repoRef': codebases.get('mediawikiRepoRef', default_branch),
-    'destination': './dist'
-    })]
+    'destination': './dist',
+    'remove': codebases.get('mediawikiRemove', [])
+    }, remove_from_all)]
 
 output += [
-    make_artifact_entry( {**ext,'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)} )
+    make_artifact_entry( {**ext,'destination': f"./dist/extensions/{ext['name']}", 'repoRef': ext.get('repoRef', default_branch)}, remove_from_all )
     for ext in extensions
     ]
 
 output += [
-    make_artifact_entry( {**skin,'destination': f"./dist/skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)} )
+    make_artifact_entry( {**skin,'destination': f"./dist/skins/{skin['name']}", 'repoRef': skin.get('repoRef', default_branch)}, remove_from_all )
     for skin in skins
     ]
 

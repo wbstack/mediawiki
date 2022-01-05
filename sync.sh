@@ -42,9 +42,6 @@ $BASEDIR/sync/01-clear.sh
 # Fetches things from the web
 $BASEDIR/sync/pacman
 
-# Removes some not needed things from the things fetched
-$BASEDIR/sync/03-less-files.sh
-
 echo "Copy required files into the 'dist' dir"
 cp -v -r ./dist-persist/* ./dist/
 
