@@ -1,0 +1,17 @@
+name: wikiman
+
+on:
+  schedule:
+    - cron:  '6 12 * * *'
+  workflow_dispatch:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.3.4
+    - name: run wikiman
+      run: ./sync/wikiman ci-tmp.yaml
+    - name: Show diff of current pacman.yaml
+      run: diff ./sync/pacman.yaml ./sync/ci-tmp.yaml
