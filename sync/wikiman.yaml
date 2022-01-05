@@ -17,7 +17,7 @@ removeFromAll:
 - .phpcs.xml
 - .stylelintrc.json
 - .rubocop.yml
-- .rubocop_todo.yaml
+- .rubocop_todo.yml
 - Gruntfile.js
 - Doxyfile
 
@@ -143,6 +143,7 @@ extensions:
   - name: Wikibase
     url: https://github.com/wbstack/mediawiki-tars/raw/main/wikibase-feddy-props-1668.tar.gz
     remove:
+    - build
     - vendor
     - composer.lock
     - data-access/build

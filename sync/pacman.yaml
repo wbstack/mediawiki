@@ -13,7 +13,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
   - docs
@@ -34,7 +34,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Mailgun
@@ -52,7 +52,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: StopForumSpam
@@ -70,7 +70,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: SpamBlacklist
@@ -88,7 +88,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: ConfirmEdit
@@ -106,7 +106,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: ConfirmAccount
@@ -124,7 +124,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Nuke
@@ -142,7 +142,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: InviteSignup
@@ -160,7 +160,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: TorBlock
@@ -178,7 +178,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Elastica
@@ -196,7 +196,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: CirrusSearch
@@ -214,7 +214,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikibaseCirrusSearch
@@ -232,7 +232,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikibaseLexemeCirrusSearch
@@ -250,7 +250,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: UniversalLanguageSelector
@@ -268,7 +268,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: cldr
@@ -286,7 +286,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Gadgets
@@ -304,7 +304,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Thanks
@@ -322,7 +322,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: TwoColConflict
@@ -340,7 +340,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: OAuth
@@ -358,7 +358,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikibaseLexeme
@@ -376,7 +376,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: SyntaxHighlight_GeSHi
@@ -394,7 +394,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: JsonConfig
@@ -412,7 +412,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Kartographer
@@ -430,7 +430,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Math
@@ -448,7 +448,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Score
@@ -466,7 +466,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: PageImages
@@ -484,7 +484,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Scribunto
@@ -502,7 +502,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Cite
@@ -520,7 +520,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: TemplateSandbox
@@ -538,7 +538,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: CodeEditor
@@ -556,7 +556,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: CodeMirror
@@ -574,7 +574,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikiEditor
@@ -592,7 +592,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: SecureLinkFixer
@@ -610,7 +610,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Echo
@@ -628,7 +628,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Graph
@@ -646,7 +646,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Poem
@@ -664,7 +664,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: TemplateData
@@ -682,7 +682,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: AdvancedSearch
@@ -700,7 +700,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: ParserFunctions
@@ -718,7 +718,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: MobileFrontend
@@ -736,7 +736,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: DeleteBatch
@@ -754,7 +754,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: MultimediaViewer
@@ -772,7 +772,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Auth_remoteuser
@@ -790,7 +790,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikibaseManifest
@@ -808,7 +808,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
   - infrastructure
@@ -827,7 +827,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: TextExtracts
@@ -845,7 +845,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Popups
@@ -863,7 +863,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: EntitySchema
@@ -881,7 +881,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikibaseInWikitext
@@ -899,7 +899,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikibaseExampleData
@@ -917,7 +917,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: WikibaseEdtf
@@ -935,7 +935,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: ThatSrc
@@ -953,7 +953,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Wikibase
@@ -971,9 +971,10 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
+  - build
   - vendor
   - composer.lock
   - data-access/build
@@ -1011,7 +1012,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Vector
@@ -1029,7 +1030,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Timeless
@@ -1047,7 +1048,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: Modern
@@ -1065,7 +1066,7 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
 - name: MinervaNeue
@@ -1083,6 +1084,6 @@
   - .phpcs.xml
   - .stylelintrc.json
   - .rubocop.yml
-  - .rubocop_todo.yaml
+  - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
