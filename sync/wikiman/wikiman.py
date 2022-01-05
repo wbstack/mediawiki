@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import os
 import sys
 from typing import Any, Dict, List
 from github import Github
@@ -9,7 +8,7 @@ import yaml
 TARGET_DIR = sys.argv[1]
 SOURCE_YAMLFILE = f"{TARGET_DIR}/wikiman.yaml"
 DESTINATION_YAMLFILE = f"{TARGET_DIR}/pacman.yaml"
-# TODO this .github token should move to to top level
+# TODO: This .github token should move to to top level
 GITHUB_TOKEN_FILE = f"{TARGET_DIR}/sync/.github"
 
 codebases = {}
