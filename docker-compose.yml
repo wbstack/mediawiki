@@ -35,13 +35,11 @@ services:
 
     volumes:
       - "./dist:/var/www/html/w:cached"
-      # TODO: is this still what we want?
-      - ./dist-persist/wbstack/data/php.ini:/usr/local/etc/php/php.ini
+      - ./docker-compose/php.ini:/usr/local/etc/php/php.ini
 
   api:
     build:
-      # TODO maybe this directory shouldn't be called a "test"
-      context: test/
+      context: docker-compose/fake-api/
       dockerfile: Dockerfile
     networks:
       default:
@@ -50,9 +48,8 @@ services:
     ports:
       - "8002:80"
     volumes:
-      - ./test/server.php:/var/www/html/index.php
-      - ./dist-persist/wbstack/data/:/var/www/data/
-      - ./dist-persist/wbstack/data/php.ini:/usr/local/etc/php/php.ini
+      - ./docker-compose/fake-api:/var/www/html
+      - ./docker-compose/php.ini:/usr/local/etc/php/php.ini
 
   mysql:
     image: mariadb:10.5
