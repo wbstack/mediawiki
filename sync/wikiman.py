@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import os
-import sys
 from typing import Any, Dict, List
 from github import Github
 import yaml
@@ -73,11 +72,6 @@ output += [
     for skin in skins
     ]
 
-if len(sys.argv) > 1:
-    if len(sys.argv[1]) > 0:
-        DESTINATION_YAMLFILE = f"{BASEDIR}/{sys.argv[1]}"
-
-print(f"Destination YAML file: '{DESTINATION_YAMLFILE}'")
 # write out to the lock.yaml file
 with open(DESTINATION_YAMLFILE, 'w') as outfile:
     yaml.dump(output, outfile, sort_keys=False)
