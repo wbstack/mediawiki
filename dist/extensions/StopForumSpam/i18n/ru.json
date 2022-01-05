@@ -4,11 +4,12 @@
 			"Facenapalm",
 			"Okras",
 			"Vlad5250",
-			"Wileyfoxyx"
+			"Wileyfoxyx",
+			"DDPAT"
 		]
 	},
 	"abusefilter-edit-builder-vars-sfs-blocked": "Заблокирован ли IP-адрес в списке stopforumspam.com",
-	"action-sfsblock-bypass": "обход блокировок IP-адресов в чёрном списке, выдаваемых расширением StopForumSpam",
+	"action-sfsblock-bypass": "обход блокировок IP-адресов запрещён, выдаваемых расширением StopForumSpam",
 	"right-sfsblock-bypass": "Обходить блокировки IP-адресов, выдаваемых расширением StopForumSpam",
 	"stopforumspam-blocked": "Внесение правок с вашего IP-адреса ($1) было заблокировано, так как он недавно был использован для спама веб-сайтов.",
 	"stopforumspam-desc": "Интеграция с [https://stopforumspam.com/ stopforumspam.com]",

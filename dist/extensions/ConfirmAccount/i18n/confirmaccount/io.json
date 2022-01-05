@@ -2,16 +2,21 @@
 	"@metadata": {
 		"authors": [
 			"Joao Xavier",
-			"Malafaya"
+			"Malafaya",
+			"JSantos"
 		]
 	},
+	"confirmaccount-real-q": "Nomo",
+	"confirmaccount-email-q": "E-posto",
 	"confirmaccount-review": "Revizar",
 	"confirmaccount-real": "Nomo:",
+	"confirmaccount-email": "E-postoː",
 	"confirmaccount-reqtype": "Poziciono:",
 	"confirmaccount-pos-0": "autoro",
 	"confirmaccount-pos-1": "redaktero",
 	"confirmaccount-noreason": "(nulo)",
 	"confirmaccount-ip": "IP-adreso:",
+	"confirmaccount-agent": "Uzero-aganto:",
 	"confirmaccount-submit": "Konfirmez",
 	"confirmaccount-summary": "Kreo di nova pagino por nova uzero.",
 	"confirmaccount-wsum": "Bonveno!"

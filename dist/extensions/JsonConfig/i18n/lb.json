@@ -1,14 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Robby"
+			"Robby",
+			"Soued031"
 		]
 	},
 	"nstab-data": "Donnéeën",
 	"jsonconfig-duplicate-field": "Méi wéi ee Wäert \"$1\" fonnt",
 	"jsonconfig-edit-action-cancel": "Ofbriechen",
 	"jsonconfig-edit-button-label": "Als Tabell änneren",
-	"jsonconfig-err-array": "Parameter \"$1\" muss eng Lëscht sinn, z.&nbsp;Bsp. [\"Wäert1\", \"Wäert2\", …]",
+	"jsonconfig-err-array": "Parameter \"$1\" muss eng Lëscht sinn, z.&nbsp;B. [\"Wäert1\", \"Wäert2\", …]",
 	"jsonconfig-err-bool": "Parameter \"$1\" muss entweder wouer oder falsch sinn",
 	"jsonconfig-err-integer": "De Parameter \"$1\" muss eng ganz Zuel sinn",
 	"jsonconfig-err-number": "De Parameter \"$1\" muss eng Zuel sinn",

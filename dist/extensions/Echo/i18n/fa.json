@@ -188,7 +188,7 @@
 	"notification-header-watchlist-restored": "$1 صفحهٔ <strong>$3</strong> که در فهرست پی‌گیری‌های {{GENDER:$4|شما}} موجود است را {{GENDER:$2|{{PLURAL:$5|احیا کرد|$5 دفعه احیا کرد}}}}.",
 	"notification-header-watchlist-multiuser-changed": "صفحهٔ <strong>$1</strong> که در فهرست پی‌گیری‌های {{GENDER:$2|شما}} موجود است، $3{{PLURAL:$3|دفعه}} تغییر یافت.",
 	"notification-header-watchlist-multiuser-created": "صفحهٔ <strong>$1</strong> که در فهرست پی‌گیری‌های {{GENDER:$2|شما}} موجود است، $3 {{PLURAL:$3|دفعه}} ایجاد شد.",
-	"notification-header-watchlist-multiuser-deleted": "صفحهٔ <strong>$1</strong> که در فهرست پی‌گیری‌های شما موجود است، $3 {{PLURAL:$3|دفعه}} حذف شد.",
+	"notification-header-watchlist-multiuser-deleted": "صفحهٔ <strong>$1</strong> که در فهرست پی‌گیری‌های {{GENDER:$2|شما}} موجود است، $3 {{PLURAL:$3|دفعه}} حذف شد.",
 	"notification-header-watchlist-multiuser-moved": "صفحهٔ <strong>$1</strong> که در فهرست پیگیری‌های {{GENDER:$2|شما}} حضور دارد، $3 {{PLURAL:$3|بار|بار}} منتقل شده است.",
 	"notification-header-watchlist-multiuser-restored": "صفحهٔ <strong>$1</strong> که در فهرست پیگیری‌های {{GENDER:$2|شما}} حضور دارد، $3 {{PLURAL:$3|بار|بار}} بازیابی شده است.",
 	"notification-welcome-linktext": "خوش آمدید",

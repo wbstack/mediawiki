@@ -1,9 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"WikiPhoenix"
+			"WikiPhoenix",
+			"Felba"
 		]
 	},
+	"templatesandbox-apihelp-prefix": "Sandbox-prefixmallen, som med [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Parsa sidan med <var>$1templatesandboxtext</var> på stället med sidinnehållet som nämns här.",
+	"templatesandbox-apihelp-text": "Parsa sidan med detta sidinnehållet på platsen för sidan som nämnes av <var>$1templatesandboxtitle</var>.",
 	"templatesandbox-apihelp-contentmodel": "Innehållsmodell för <var>$1templatesandboxtext</var>.",
-	"templatesandbox-apihelp-contentformat": "Innehållsformat för <var>$1templatesandboxtext</var>."
+	"templatesandbox-apihelp-contentformat": "Innehållsformat för <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Parametrarna <var>$1templatesandboxtitle</var> och <var>$1templatesandboxtext</var> måste båda anges eller båda utelämnas."
 }

@@ -4,11 +4,21 @@
 			"Ajeje Brazorf"
 		]
 	},
+	"advancedsearch-field-plain": "Sti palori",
+	"advancedsearch-field-or": "Una di sti palori",
+	"advancedsearch-field-not": "Nun sti palori",
+	"advancedsearch-field-subpageof": "Suttapàggini di sta pàggina",
+	"advancedsearch-field-deepcategory": "Pàggini n sti catigurìi",
+	"advancedsearch-field-hastemplate": "Pàggini cu sti template",
+	"advancedsearch-field-inlanguage": "Pàggini n sta lingua",
 	"advancedsearch-field-filetype": "Tipu di file",
+	"advancedsearch-filetype-section-types": "Tipi di file ginirali",
 	"advancedsearch-filetype-bitmap": "Mmàggini",
 	"advancedsearch-filetype-audio": "Àudiu",
+	"advancedsearch-filesize-equals": "aguali a",
 	"advancedsearch-namespaces-preset-all": "Tutti",
 	"advancedsearch-namespaces-preset-default": "Pridifinutu",
+	"advancedsearch-namespaces-preset-general-help": "Aiutu ginirali",
 	"advancedsearch-namespaces-preset-discussion": "Discussioni",
 	"advancedsearch-namespaces-placeholder": "Agghiunci namespace..."
 }

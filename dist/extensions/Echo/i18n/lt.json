@@ -34,7 +34,7 @@
 	"echo-pref-notifications-blacklist": "Nerodyti pranešimų iš šių naudotojų. ([[mw:Special:MyLanguage/Help:Notifications#mute|sužinoti daugiau]])",
 	"echo-learn-more": "Sužinokite daugiau",
 	"echo-log": "Viešas žurnalas",
-	"echo-new-messages": "Turite naujų žinučių",
+	"echo-new-messages": "Turite naujų žinučių Aptarimo puslapyje",
 	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Pranešimas|Pranešimai}} aptarimų puslapyje",
 	"echo-category-title-article-linked": "Puslapio {{PLURAL:$1|nuoroda|nuorodos}}",
 	"echo-category-title-reverted": "Pakeitimų {{PLURAL:$1|atmetimas|atmetimai}}",

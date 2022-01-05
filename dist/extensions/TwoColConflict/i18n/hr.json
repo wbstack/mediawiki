@@ -5,7 +5,8 @@
 			"MaGa",
 			"Neptune, the Mystic",
 			"Wumbolo",
-			"Zoranzoki21"
+			"Zoranzoki21",
+			"Ponor"
 		]
 	},
 	"twocolconflict": "Dvostupačni sukob uređivanja",
@@ -44,7 +45,7 @@
 	"twocolconflict-split-tour-popup1-header": "Različite izmjene prikazane su red po red.",
 	"twocolconflict-split-tour-popup1-message": "Kada postoji razlika između teksta drugog suradnika i Vašeg teksta, dvije inačice prikazane su jedna do druge: inačica drugog suradnika je u žutom okviru s lijeve strane, a Vaša je u plavom okviru s desne strane.<br /><br />Onda kada nema razlike između ovih dviju inačica, linije su prikazane u sivim okvirima. Ovo je moguće proširiti ili sažeti i uređivati ako je potrebno.",
 	"twocolconflict-split-tour-popup2-header": "Izaberite koje izmjene želite zadržati",
-	"twocolconflict-split-tour-popup2-message": "Klikom na jedan od dva gumba između svakog para redaka označite inačicu teksta koju želite zadržati. Kada odaberete inačicu, možete je urediti klikom na ikonu olovke. Moguće je i kopirati tekst iz inačice koju niste odabrali pomoću funkcije kopiranja i lijepljenja na tipkovnici ili desnim klikom.<br /> <br />Za svaku promijenjenu liniju morate odabrati jednu inačicu da biste spremili spojeni tekst.",
+	"twocolconflict-split-tour-popup2-message": "U svakom retku označite inačicu teksta koju želite zadržati. Izabranu inačicu možete urediti pritiskom na sličicu olovke. Tekst iz inačice koju niste odabrali možete kopirati s pomoću uobičajenih tipkovničkih prečaca ili desnim klikom.<br /> <br />Da biste spremili sjedinjene izmjene morate za svaku promijenjenu liniju odabrati jednu inačicu.",
 	"twocolconflict-split-tour-popup3-header": "Označeni tekst",
 	"twocolconflict-split-tour-popup3-message": "Tekst koji je mijenjan u obje inačice je označen. Nakon uređivanja teksta isticanje će nestati.",
 	"twocolconflict-split-edit-tooltip": "Pritisnite da biste uredili ovaj tekst",

@@ -8,10 +8,20 @@
 	"confirmaccount-real-q": "Nomu",
 	"confirmaccount-email-q": "Nnirizzu email",
 	"confirmaccount-bio-q": "Biografìa",
+	"confirmaccount-all": "(ammustra tutti li cudi)",
+	"confirmaccount-type": "Cuda:",
+	"confirmaccount-leg-person": "Nfurmazzioni pirsunali",
+	"confirmaccount-leg-other": "Àutri nfurmazzioni",
 	"confirmaccount-name": "Nomu utenti",
 	"confirmaccount-real": "Nomu:",
 	"confirmaccount-email": "Nnirizzu email:",
+	"confirmaccount-reqtype": "Pusizzioni:",
+	"confirmaccount-pos-0": "auturi",
 	"confirmaccount-bio": "Biografìa:",
+	"confirmaccount-notes": "Àutri noti:",
+	"confirmaccount-urls": "Elencu dî siti web:",
 	"confirmaccount-noreason": "(nuddu)",
-	"confirmaccount-ip": "Nnirizzu IP:"
+	"confirmaccount-ip": "Nnirizzu IP:",
+	"confirmaccount-submit": "Cunferma",
+	"confirmaccount-wsum": "Bimminutu!"
 }

@@ -41,7 +41,8 @@
 			"Tusca",
 			"VegaDark",
 			"Vivaelcelta",
-			"WikiiiTranslator"
+			"WikiiiTranslator",
+			"-jem-"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Si un usuario está editando a través de la interfaz móvil",
@@ -70,9 +71,9 @@
 	"mobile-frontend-editor-blocked-drawer-action-login": "Acceder",
 	"mobile-frontend-editor-blocked-drawer-action-ok": "Aceptar",
 	"mobile-frontend-editor-blocked-drawer-action-randompage": "Llévame a otra página",
-	"mobile-frontend-editor-blocked-drawer-title": "Te han bloqueado para impedir que edites {{SITENAME}}.",
+	"mobile-frontend-editor-blocked-drawer-title": "Estás bloqueado y no puedes editar {{SITENAME}}.",
 	"mobile-frontend-editor-blocked-drawer-title-partial": "Estás bloqueado y no puedes editar esta página.",
-	"mobile-frontend-editor-blocked-drawer-title-ip": "Tu dirección IP ha sido bloqueado para impedir que edites {{SITENAME}}.",
+	"mobile-frontend-editor-blocked-drawer-title-ip": "Tu dirección IP está bloqueada y no puedes editar {{SITENAME}}.",
 	"mobile-frontend-editor-blocked-drawer-title-ip-partial": "Tu dirección IP está bloqueada y no puedes editar esta página.",
 	"mobile-frontend-editor-blocked-drawer-body-partial": "Prueba editar otra página.",
 	"mobile-frontend-editor-blocked-drawer-body-login": "Prueba a iniciar sesión si tienes una cuenta.",
@@ -152,6 +153,8 @@
 	"mobile-frontend-languages-structured-overlay-suggested-languages-header": "Idiomas sugeridos",
 	"mobile-frontend-languages-structured-overlay-all-languages-header": "Otros idiomas",
 	"mobile-frontend-languages-structured-overlay-search-input-placeholder": "Buscar un idioma",
+	"mobile-frontend-languages-structured-overlay-no-results": "Idioma no disponible",
+	"mobile-frontend-languages-structured-overlay-no-results-body": "El idioma que estás buscando no está disponible.",
 	"mobile-frontend-last-modified-date": "Última modificación el $1, a las $2",
 	"mobile-frontend-last-modified-with-user-days": "[$4 Última {{GENDER:$1|edición}} hace {{PLURAL:$3|$3 día|$3 días}}] por {{PLURAL:$5|[$6 $2]|0=un usuario anónimo}}",
 	"mobile-frontend-last-modified-with-user-hours": "[$4 Última {{GENDER:$1|edición}} hace {{PLURAL:$3|$3 hora|$3 horas}}] por {{PLURAL:$5|[$6 $2]|0=un usuario anónimo}}",

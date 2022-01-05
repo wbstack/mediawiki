@@ -3,7 +3,8 @@
 		"authors": [
 			"Iwan Novirion",
 			"Macofe",
-			"William Surya Permana"
+			"William Surya Permana",
+			"Daud I.F. Argana"
 		]
 	},
 	"templatesandbox": "Bak pasir templat",
@@ -25,14 +26,17 @@
 	"templatesandbox-invalid-title": "Judul yang Anda masukkan tidak sah.",
 	"templatesandbox-title-not-exists": "Judul yang Anda masukkan belum tersedia.",
 	"templatesandbox-revision-not-exists": "Revisi yang Anda masukkan belum tersedia.",
+	"templatesandbox-revision-no-content": "Revisi yang Anda berikan tidak memiliki isi, atau Anda tidak punya izin untuk membukanya.",
 	"templatesandbox-invalid-prefix": "Awalan bak pasir yang Anda masukkan tidak sah.",
 	"templatesandbox-prefix-not-local": "Awalan bak pasir yang Anda masukkan tidak berasal dari lokal.",
 	"templatesandbox-page-or-revid": "Anda harus memasukkan judul halaman atau nomor ID revisi.",
-	"templatesandbox-fail-post": "<em>Karena {{SITENAME}} mengaktifkan HTML mentah dan adanya data sesi yang hilang, pratayang ini disembunyikan sebagai tindakan pencegahan terhadap serangan Javascript.</em>\n\n<strong>Jika ini adalah percobaan pratayang yang sah, silakan coba lagi.</strong>\nJika masih tidak berfungsi, coba [[Special:UserLogout|log keluar]] dan masuk log kembali.",
-	"templatesandbox-fail-post-anon": "<em>Karena {{SITENAME}} mengaktifkan HTML mentah dan Anda tidak sedang masuk log, pratayang ini disembunyikan sebagai tindakan pencegahan terhadap serangan Javascript.</em>\n\n<strong>Jika ini adalah percobaan pratayang yang sah, silakan [[Special:UserLogin|log masuk]] dan coba lagi.</strong>",
+	"templatesandbox-fail-post": "<em>Dikarenakan data sesi yang hilang, pratayang ini disembunyikan sebagai tindakan pencegahan terhadap serangan Javascript.</em>\n\n<strong>Jika ini adalah percobaan pratayang yang sah, silakan coba lagi.</strong>\nJika masih tidak berfungsi, coba [[Special:UserLogout|log keluar]] dan masuk log kembali.",
+	"templatesandbox-fail-post-anon": "<em>Karena Anda tidak sedang masuk log, pratayang ini disembunyikan sebagai tindakan pencegahan terhadap serangan Javascript.</em>\n\n<strong>Jika ini adalah percobaan pratayang yang sah, silakan [[Special:UserLogin|log masuk]] dan coba lagi.</strong>",
+	"templatesandbox-anon-limited-preview": "Pratayang perubahan JavaScript dan CSS dimatikan apabila sedang tidak masuk log. Jika Anda perlu melihat pratayang perubahan tersebut, silakan [[Special:UserLogin|masuk log]] dan coba lagi.",
 	"templatesandbox-editform-need-template": "Untuk melihat pratayang halaman dengan templat ini, Anda harus memasukkan nama templat.",
 	"templatesandbox-editform-need-title": "Untuk melihat pratayang halaman dengan templat ini, Anda harus memasukkan judul halaman.",
 	"templatesandbox-editform-invalid-template": "Nama templat yang Anda masukkan tidak sah.",
 	"templatesandbox-editform-invalid-title": "Judul yang Anda masukkan untuk melihat pratayang tidak sah.",
-	"templatesandbox-editform-title-not-exists": "Judul Anda yang Anda masukkan untuk melihat pratayang belum tersedia."
+	"templatesandbox-editform-title-not-exists": "Judul Anda yang Anda masukkan untuk melihat pratayang belum tersedia.",
+	"templatesandbox-failed-replace-section": "Gagal mengganti bagian dari halaman yang sudah ada."
 }

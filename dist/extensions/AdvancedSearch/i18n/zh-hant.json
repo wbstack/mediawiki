@@ -13,10 +13,11 @@
 			"Wmr",
 			"Xiplus",
 			"予弦",
-			"神樂坂秀吉"
+			"神樂坂秀吉",
+			"Winston Sung"
 		]
 	},
-	"advancedsearch-desc": "在[[Special:Search]]提供高級搜尋功能的輕鬆存取",
+	"advancedsearch-desc": "在 [[Special:Search]] 提供進階搜尋功能的輕鬆存取",
 	"advancedsearch-options-pane-head": "進階搜尋：",
 	"advancedsearch-optgroup-text": "在頁面文字中搜尋",
 	"advancedsearch-optgroup-structure": "結構",

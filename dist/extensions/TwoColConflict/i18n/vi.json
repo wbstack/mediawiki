@@ -3,13 +3,16 @@
 		"authors": [
 			"Minh Nguyen",
 			"Nhatminh01",
-			"Quenhitran"
+			"Quenhitran",
+			"NguoiDungKhongDinhDanh"
 		]
 	},
 	"twocolconflict": "TwoColConflict",
 	"twocolconflict-desc": "Hiển thị màn hình trộn sửa đổi song song để giải quyết mâu thuẫn sửa đổi.",
+	"twocolconflictprovidesubmittedtext": "Mâu thuẫn sửa đổi:",
 	"twocolconflict-beta-feature-message": "Giao diện sửa đổi mâu thuẫn hai cột",
 	"twocolconflict-beta-feature-description": "Hiển thị trang sửa đổi mâu thuẫn với một giao diện hai cột nâng cao.<br/><br/>Xin lưu ý: Tính năng này đang [https://phabricator.wikimedia.org/T195711 được thay đổi]. Giao diện mới được dự định cho nửa cuối năm 2018.",
+	"twocolconflict-special-malformed-title": "Tựa đề thiếu hoặc không hợp lệ.",
 	"twocolconflict-split-your-version-header": "Phiên bản của bạn",
 	"twocolconflict-split-tour-popup-btn-text": "Hiểu rồi",
 	"twocolconflict-split-tour-popup3-header": "Văn bản tô đậm",

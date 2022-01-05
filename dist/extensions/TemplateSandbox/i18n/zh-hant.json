@@ -9,11 +9,12 @@
 			"Macofe",
 			"Simon Shek",
 			"Zhxy 519",
-			"飞舞回堂前"
+			"飞舞回堂前",
+			"Winston Sung"
 		]
 	},
 	"templatesandbox": "模板沙盒",
-	"templatesandbox-desc": "[[Special:TemplateSandbox|在頁面]]套用沙盒的模版",
+	"templatesandbox-desc": "從沙盒調用模板[[Special:TemplateSandbox|轉譯（render）頁面]]",
 	"templatesandbox-suffix": "沙盒",
 	"templatesandbox-legend": "模板沙盒",
 	"templatesandbox-text": "您可以使用適當的沙盒字首來選擇已儲存在您沙盒中的一系列模板。\n舉例而言，若您想要預覽已儲存在 \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Test\" 的模板 {{ns:Template}}:Test ，您可以使用 \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" 做為字首。",
@@ -42,5 +43,6 @@
 	"templatesandbox-editform-need-title": "要使用此模板預覽其他頁面，必須指定頁面標題。",
 	"templatesandbox-editform-invalid-template": "指定的模板名稱無效。",
 	"templatesandbox-editform-invalid-title": "指定用來預覽的標題無效。",
-	"templatesandbox-editform-title-not-exists": "指定用來預覽的標題不存在。"
+	"templatesandbox-editform-title-not-exists": "指定用來預覽的標題不存在。",
+	"templatesandbox-failed-replace-section": "替換現有頁面的段落失敗。"
 }
