@@ -44,7 +44,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
     temporaryExtraction="${TEMPORARY_DIR}${name}-extracted/."
-    targetDestination="$(realpath -m ${REPO_DIR}${destination})"
+    targetDestination="$(realpath -m ${REPO_DIR}/${destination})"
     echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
     cp -fa "${temporaryExtraction}" "${targetDestination}"
 done
@@ -58,7 +58,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         continue
     fi
     echo $remove | jq -c -r '.[]' | while read removeEntry; do
-        toRemove="$(realpath -m ${REPO_DIR}${destination}/${removeEntry})"
+        toRemove="$(realpath -m ${REPO_DIR}/${destination}/${removeEntry})"
         echo "Removing '${toRemove}'"
         rm -rf "${toRemove}"
     done
