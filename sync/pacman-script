@@ -32,7 +32,7 @@ done
 # wait for the artifacts to download
 wait
 
-# extract the artifacts
+# move them into place
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
