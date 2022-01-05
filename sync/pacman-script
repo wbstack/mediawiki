@@ -50,9 +50,9 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     if [ "$remove" = "null" ]; then
         continue
     fi
-    echo $remove | jq -c -r '.[]' | while read removeentry; do
-        toremove="$(realpath -m ${REPO_DIR}${destination}/${removeentry})"
-        echo "Removing '${toremove}'"
-        rm -rf "${toremove}"
+    echo $remove | jq -c -r '.[]' | while read removeEntry; do
+        toRemove="$(realpath -m ${REPO_DIR}${destination}/${removeEntry})"
+        echo "Removing '${toRemove}'"
+        rm -rf "${toRemove}"
     done
 done
