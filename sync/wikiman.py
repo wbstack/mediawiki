@@ -12,10 +12,7 @@ GITHUB_TOKEN_FILE = f"{BASEDIR}/.github"
 
 codebases = {}
 with open(SOURCE_YAMLFILE, "r") as filehandler:
-    try:
-        codebases = yaml.safe_load(filehandler)
-    except yaml.YAMLError as exc:
-        print(exc)
+    codebases = yaml.safe_load(filehandler)
 
 mediawiki_version = codebases['mediawikiVersion']
 extensions = codebases['extensions']
