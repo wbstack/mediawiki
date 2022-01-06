@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "Schema for validating wikiman.yaml",
+  "type": "object",
+  "properties": {
+    "mediawikiVersion": {
+      "description": "The mediawiki version, e.g. '1.37'",
+      "type": "string"
+    },
+    "mediawikiRepoRef": {
+      "description": "Ref or commit hash to use for mediawiki core",
+      "type": "string"
+    },
+    "mediawikiRemove": {
+      "$ref": "#/$defs/RemoveList"
+    },
+    "removeFromAll": {
+      "description": "Files to remove from all repos",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "extensions": {
+      "description": "List of extensions",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ExtensionOrSkin"
+      }
+    },
+    "skins": {
+      "description": "List of skins",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ExtensionOrSkin"
+      }
+    }
+  },
+  "required": [
+    "mediawikiVersion",
+    "extensions",
+    "skins"
+  ],
+  "$defs": {
+    "ExtensionOrSkin": {
+      "oneOf": [
+        { "$ref": "#/$defs/GitSource" },
+        { "$ref": "#/$defs/UrlSource" }
+      ]
+    },
+    "GitSource": {
+      "description": "An extension or skin that is downloaded from a git repository",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the skin/extension. Also the name of the directory to write to",
+          "type": "string"
+        },
+        "repoName": {
+          "description": "Name of the repository on GitHub including the org, e.g. 'wikmedia/Wikibase'",
+          "type": "string"
+        },
+        "repoRef": {
+          "description": "Ref or commit hash to use",
+          "type": "string"
+        },
+        "remove": {
+          "$ref": "#/$defs/RemoveList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "repoName"
+      ]
+    },
+    "UrlSource": {
+      "description": "An extension or skin that is downloaded from a URL",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Name of the skin/extension. Also the name of the directory to write to",
+          "type": "string"
+        },
+        "url": {
+          "description": "URL to download from",
+          "type": "string"
+        },
+        "remove": {
+          "$ref": "#/$defs/RemoveList"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "url"
+      ]
+    },
+    "RemoveList": {
+      "description": "Files to remove from the repo",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
