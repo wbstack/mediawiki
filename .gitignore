@@ -1,4 +1,4 @@
-sync/.github
+/sync/.github
 /vendor
 /composer.lock
 sync/.tmp/*
