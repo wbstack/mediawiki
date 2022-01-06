@@ -1,0 +1,12 @@
+extends: default
+
+rules:
+  brackets:
+    min-spaces-inside: 1
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0
+  line-length: disable # pacman.yaml has long lines and we don't want to fix them by hand
+  document-start: disable
+ignore: |
+  /dist/
