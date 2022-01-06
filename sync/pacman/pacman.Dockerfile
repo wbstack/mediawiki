@@ -6,6 +6,7 @@ RUN apk add \
   coreutils \
   jq \
   libarchive-tools \
+  rsync \
   yq
 
 COPY pacman-script /usr/bin/pacman-script

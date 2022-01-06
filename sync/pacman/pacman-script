@@ -13,7 +13,11 @@ fi
 
 REPO_DIR="${1}"
 YAMLFILE="${1}/pacman.yaml"
-TEMPORARY_DIR=$(mktemp -d)/
+TEMPORARY_DIR="${REPO_DIR}/.tmp"
+
+echo "Make sure temporary dir is created and empty (${TEMPORARY_DIR})"
+rm -rf "${TEMPORARY_DIR}"
+mkdir -p "$TEMPORARY_DIR"
 
 # .tmp was removed so that the files in the repo dir were cleaner.
 # The contents of the wbstack directory was moved so can also been cleaned up.
@@ -32,11 +36,12 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         name=$(echo $codebase | jq -r '.name' -)
         artifactUrl=$(echo $codebase | jq -r '.artifactUrl' -)
         artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
-        temporaryFile="${TEMPORARY_DIR}${name}"
-        temporaryExtraction="${TEMPORARY_DIR}${name}-extracted"
+        temporaryFile="${TEMPORARY_DIR}/${name}"
+        temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted"
         echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
         wget --quiet "$artifactUrl" -O "${temporaryFile}"
-        rm -rf ${temporaryExtraction}
+        # TODO: remove?
+        # rm -rf ${temporaryExtraction}
         mkdir -p ${temporaryExtraction}
         bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
     ) &
@@ -45,15 +50,21 @@ done
 # wait for the artifacts to download
 wait
 
+shopt -s dotglob
+
 # move them into place
+time (
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
-    temporaryExtraction="${TEMPORARY_DIR}${name}-extracted/."
+    temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted"
     targetDestination="$(realpath -m ${REPO_DIR}/${destination})"
     echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
-    cp -fa "${temporaryExtraction}" "${targetDestination}"
+    mkdir -p "${targetDestination}"
+    mv -f "${temporaryExtraction}"/* "${targetDestination}"
 done
+)
+echo
 
 # remove any not needed files
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
