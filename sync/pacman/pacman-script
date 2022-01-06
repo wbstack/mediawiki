@@ -19,7 +19,7 @@ echo "Make sure temporary dir is created and empty (${TEMPORARY_DIR})"
 rm -rf "${TEMPORARY_DIR}"
 mkdir -p "$TEMPORARY_DIR"
 
-# .tmp was removed so that the files in the repo dir were cleaner.
+# .tmp was moved so that the files in the repo dir were cleaner.
 # The contents of the wbstack directory was moved so can also been cleaned up.
 # This was changed in January 2022, we could remove this cleanup in the future.
 OLD_TEMPORARY_DIR="$(realpath ${REPO_DIR}/wbstack)"
@@ -40,8 +40,6 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted"
         echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
         wget --quiet "$artifactUrl" -O "${temporaryFile}"
-        # TODO: remove?
-        # rm -rf ${temporaryExtraction}
         mkdir -p ${temporaryExtraction}
         bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
     ) &
@@ -50,18 +48,19 @@ done
 # wait for the artifacts to download
 wait
 
+# includes filenames beginning with a '.' in the results of filename expansion (/*)
+shopt -s dotglob
+
 # move them into place
-time (
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
-    temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted/"
+    temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted"
     targetDestination="$(realpath -m ${REPO_DIR}/${destination})"
     echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
-    rsync --archive --checksum --delete --one-file-system "${temporaryExtraction}" "${targetDestination}"
+    mkdir -p "${targetDestination}"
+    mv -f "${temporaryExtraction}"/* "${targetDestination}"
 done
-)
-echo
 
 # remove any not needed files
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
@@ -73,8 +72,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     fi
     echo $remove | jq -c -r '.[]' | while read removeEntry; do
         toRemove="$(realpath -m ${REPO_DIR}/${destination}/${removeEntry})"
-        # TODO: commented out while testing - uncomment before merging
-        # echo "Removing '${toRemove}'"
+        echo "Removing '${toRemove}'"
         rm -rf "${toRemove}"
     done
 done
