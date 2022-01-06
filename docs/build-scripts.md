@@ -14,8 +14,7 @@ This script will resync the WHOLE git repo.
 
 This is made up of a series of steps:
 
-- `01-clear`: Remove all MediaWiki code
-- `pacman`: Retrieive and build MediaWiki code
-- `03-less-files`: Remove not needed things from MediaWiki code
+- `pacman`: Retrieive and build MediaWiki code, remove any not needed file
+- `sync.sh`: Sync the whole git repo in the correct way
 - `04-docker-compose`: Perform a composer install
 - `05-docker-entrypoint-overrides`: Add the WBStack shims to MediaWiki entrypoints
