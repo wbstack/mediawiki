@@ -1,3 +1,0 @@
-#!/usr/bin/env sh
-docker build --tag wbstack/mediawiki/pacman:0.0.1 --file ./sync/pacman.Dockerfile ./sync/
-docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD:/app --entrypoint bash wbstack/mediawiki/pacman:0.0.1 /app/sync/pacman-script

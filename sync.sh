@@ -41,7 +41,7 @@ echo "Delete the contents of the dist folder"
 rm -r ./dist/*
 
 # Fetches things from the web
-$BASEDIR/sync/pacman
+$BASEDIR/sync/pacman/pacman $BASEDIR
 
 echo "Copy required files into the 'dist' dir"
 cp -v -r ./dist-persist/* ./dist/

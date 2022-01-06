@@ -4,3 +4,4 @@ disable=
     C0114, # missing-module-docstring
     C0116, # missing-module-docstring
     W1514, # unspecified-encoding
+    W0511, # fixme

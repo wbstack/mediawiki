@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
+# pacman takes a directory as an argument
+# this directory must include a pacman.yml
+# pacman will populate a dist folder in the same directory, from the pacman.yml
 
-BASEDIR=$(cd `dirname "$0"` && pwd)
-YAMLFILE="${BASEDIR}/pacman.yaml"
-REPO_DIR="${BASEDIR}/../"
+if [ -z "$1" ]; then
+    echo "Usage: $0 <target>"
+    exit 1
+fi
+
+REPO_DIR="${1}"
+YAMLFILE="${1}/pacman.yaml"
 TEMPORARY_DIR=$(mktemp -d)/
 
 # .tmp was removed so that the files in the repo dir were cleaner.
@@ -37,7 +44,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
     temporaryExtraction="${TEMPORARY_DIR}${name}-extracted/."
-    targetDestination="$(realpath -m ${REPO_DIR}${destination})"
+    targetDestination="$(realpath -m ${REPO_DIR}/${destination})"
     echo "Moving '${name}' from '${temporaryExtraction}' to '${targetDestination}'";
     cp -fa "${temporaryExtraction}" "${targetDestination}"
 done
@@ -51,7 +58,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         continue
     fi
     echo $remove | jq -c -r '.[]' | while read removeEntry; do
-        toRemove="$(realpath -m ${REPO_DIR}${destination}/${removeEntry})"
+        toRemove="$(realpath -m ${REPO_DIR}/${destination}/${removeEntry})"
         echo "Removing '${toRemove}'"
         rm -rf "${toRemove}"
     done
