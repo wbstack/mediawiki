@@ -2,24 +2,24 @@
 mediawikiVersion: "1.37"
 mediawikiRepoRef: e1239b16705b192252f795698629d62ed9b2b93a
 mediawikiRemove:
-- docs
-- extensions/README
-- skins/README
+  - docs
+  - extensions/README
+  - skins/README
 
 removeFromAll:
-- tests
-- .phan
-- .storybook
-- .vscode
-- .gitignore
-- .eslintrc.json
-- .gitreview
-- .phpcs.xml
-- .stylelintrc.json
-- .rubocop.yml
-- .rubocop_todo.yml
-- Gruntfile.js
-- Doxyfile
+  - tests
+  - .phan
+  - .storybook
+  - .vscode
+  - .gitignore
+  - .eslintrc.json
+  - .gitreview
+  - .phpcs.xml
+  - .stylelintrc.json
+  - .rubocop.yml
+  - .rubocop_todo.yml
+  - Gruntfile.js
+  - Doxyfile
 
 extensions:
   - name: RevisionSlider
@@ -114,7 +114,7 @@ extensions:
   - name: WikibaseManifest
     repoName: wikimedia/mediawiki-extensions-WikibaseManifest
     remove:
-    - infrastructure
+      - infrastructure
   - name: WikiHiero
     repoName: wikimedia/mediawiki-extensions-WikiHiero
   - name: TextExtracts
@@ -143,29 +143,29 @@ extensions:
   - name: Wikibase
     url: https://github.com/wbstack/mediawiki-tars/raw/main/wikibase-feddy-props-1668.tar.gz
     remove:
-    - build
-    - vendor
-    - composer.lock
-    - data-access/build
-    - data-access/tests
-    - data-access/.phan
-    - data-access/.storybook
-    - data-access/.vscode
-    - repo/build
-    - repo/tests
-    - repo/.phan
-    - repo/.storybook
-    - repo/.vscode
-    - client/build
-    - client/tests
-    - client/.phan
-    - client/.storybook
-    - client/.vscode
-    - lib/build
-    - lib/tests
-    - lib/.phan
-    - lib/.storybook
-    - lib/.vscode
+      - build
+      - vendor
+      - composer.lock
+      - data-access/build
+      - data-access/tests
+      - data-access/.phan
+      - data-access/.storybook
+      - data-access/.vscode
+      - repo/build
+      - repo/tests
+      - repo/.phan
+      - repo/.storybook
+      - repo/.vscode
+      - client/build
+      - client/tests
+      - client/.phan
+      - client/.storybook
+      - client/.vscode
+      - lib/build
+      - lib/tests
+      - lib/.phan
+      - lib/.storybook
+      - lib/.vscode
   # EmbedVideo is currently broken in releases due to deprecated warnings https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/issues/4784
   # There was a MR up for fixing that https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/merge_requests/148 so lets directly use that commit?
   # We were using v2.9.0 before this

@@ -10,25 +10,25 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2.3.4
-    - name: build docker
-      run: docker-compose up -d
-    - name: Wait for server to accept connections
-      uses: nick-invision/retry@v2
-      with:
-        timeout_minutes: 5
-        max_attempts: 100
-        retry_wait_seconds: 5
-        warning_on_retry: false
-        command: docker-compose logs mysql | grep "ready for connections" | wc -l | grep 2
+      - name: Checkout
+        uses: actions/checkout@v2.3.4
+      - name: build docker
+        run: docker-compose up -d
+      - name: Wait for server to accept connections
+        uses: nick-invision/retry@v2
+        with:
+          timeout_minutes: 5
+          max_attempts: 100
+          retry_wait_seconds: 5
+          warning_on_retry: false
+          command: docker-compose logs mysql | grep "ready for connections" | wc -l | grep 2
 
-    - run: curl -L -s -N "http://site1.localhost:8001/wiki/Main_Page" | grep -q "Main Page"
-    - run: curl -L -s -N "http://site1.localhost:8001/w/api.php" | grep -q "Main module"
-    - run: curl -L -s -N "http://site1.localhost:8001/w/load.php" | grep -q "no modules were requested"
-    - run: curl -L -s -N "http://site1.localhost:8001/w/rest.php" | grep -q "did not match any known handler"
+      - run: curl -L -s -N "http://site1.localhost:8001/wiki/Main_Page" | grep -q "Main Page"
+      - run: curl -L -s -N "http://site1.localhost:8001/w/api.php" | grep -q "Main module"
+      - run: curl -L -s -N "http://site1.localhost:8001/w/load.php" | grep -q "no modules were requested"
+      - run: curl -L -s -N "http://site1.localhost:8001/w/rest.php" | grep -q "did not match any known handler"
 
-    - run: curl -L -s -N "http://site2.localhost:8001/wiki/Main_Page" | grep -q "Main Page"
-    - run: curl -L -s -N "http://site2.localhost:8001/w/api.php" | grep -q "Main module"
-    - run: curl -L -s -N "http://site2.localhost:8001/w/load.php" | grep -q "no modules were requested"
-    - run: curl -L -s -N "http://site2.localhost:8001/w/rest.php" | grep -q "did not match any known handler"
+      - run: curl -L -s -N "http://site2.localhost:8001/wiki/Main_Page" | grep -q "Main Page"
+      - run: curl -L -s -N "http://site2.localhost:8001/w/api.php" | grep -q "Main module"
+      - run: curl -L -s -N "http://site2.localhost:8001/w/load.php" | grep -q "no modules were requested"
+      - run: curl -L -s -N "http://site2.localhost:8001/w/rest.php" | grep -q "did not match any known handler"

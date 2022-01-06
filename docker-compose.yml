@@ -3,8 +3,8 @@ version: '2.2'
 services:
   mediawiki:
     build:
-        context: .
-        dockerfile: Dockerfile
+      context: .
+      dockerfile: Dockerfile
     links:
       - mysql
       - redis
@@ -17,7 +17,7 @@ services:
     networks:
       default:
         aliases:
-         - mediawiki.svc
+          - mediawiki.svc
     environment:
 
       - WBSTACK_LOAD_MW_INTERNAL=yes # THIS is normally hidden
@@ -44,7 +44,7 @@ services:
     networks:
       default:
         aliases:
-         - api.svc
+          - api.svc
     ports:
       - "8002:80"
     volumes:
@@ -73,8 +73,8 @@ services:
     networks:
       default:
         aliases:
-         - mysql
-         - mysql.svc
+          - mysql
+          - mysql.svc
 
   mysql-replica:
     image: mariadb:10.5
@@ -97,8 +97,8 @@ services:
     networks:
       default:
         aliases:
-         - mysql-replica
-         - mysql-replica.svc
+          - mysql-replica
+          - mysql-replica.svc
 
   mysql-configure-replication:
     image: mariadb:10.5
@@ -146,7 +146,7 @@ services:
     networks:
       default:
         aliases:
-         - elasticsearch.svc
+          - elasticsearch.svc
     environment:
       discovery.type: single-node
       ES_JAVA_OPTS: "-Xms512m -Xmx512m"
