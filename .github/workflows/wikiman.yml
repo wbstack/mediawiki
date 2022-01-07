@@ -1,6 +1,7 @@
 name: wikiman
 
 on:
+  # Non hour start chosen deliberately https://docs.github.com/en/actions/learn-github-actions/events-that-trigger-workflows#scheduled-events
   schedule:
     - cron:  '6 12 * * *'
   workflow_dispatch:
