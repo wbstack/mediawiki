@@ -4,6 +4,10 @@
   destination: ./dist
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -25,6 +29,10 @@
   destination: ./dist/extensions/RevisionSlider
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -43,6 +51,10 @@
   destination: ./dist/extensions/Mailgun
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -61,6 +73,10 @@
   destination: ./dist/extensions/StopForumSpam
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -79,6 +95,10 @@
   destination: ./dist/extensions/SpamBlacklist
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -97,6 +117,10 @@
   destination: ./dist/extensions/ConfirmEdit
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -115,6 +139,10 @@
   destination: ./dist/extensions/ConfirmAccount
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -133,6 +161,10 @@
   destination: ./dist/extensions/Nuke
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -151,6 +183,10 @@
   destination: ./dist/extensions/InviteSignup
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -169,6 +205,10 @@
   destination: ./dist/extensions/TorBlock
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -187,6 +227,10 @@
   destination: ./dist/extensions/Elastica
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -205,6 +249,10 @@
   destination: ./dist/extensions/CirrusSearch
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -223,6 +271,10 @@
   destination: ./dist/extensions/WikibaseCirrusSearch
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -241,6 +293,10 @@
   destination: ./dist/extensions/WikibaseLexemeCirrusSearch
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -259,6 +315,10 @@
   destination: ./dist/extensions/UniversalLanguageSelector
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -277,6 +337,10 @@
   destination: ./dist/extensions/cldr
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -295,6 +359,10 @@
   destination: ./dist/extensions/Gadgets
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -313,6 +381,10 @@
   destination: ./dist/extensions/Thanks
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -331,6 +403,10 @@
   destination: ./dist/extensions/TwoColConflict
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -349,6 +425,10 @@
   destination: ./dist/extensions/OAuth
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -367,6 +447,10 @@
   destination: ./dist/extensions/WikibaseLexeme
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -385,6 +469,10 @@
   destination: ./dist/extensions/SyntaxHighlight_GeSHi
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -403,6 +491,10 @@
   destination: ./dist/extensions/JsonConfig
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -421,6 +513,10 @@
   destination: ./dist/extensions/Kartographer
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -439,6 +535,10 @@
   destination: ./dist/extensions/Math
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -457,6 +557,10 @@
   destination: ./dist/extensions/Score
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -475,6 +579,10 @@
   destination: ./dist/extensions/PageImages
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -493,6 +601,10 @@
   destination: ./dist/extensions/Scribunto
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -511,6 +623,10 @@
   destination: ./dist/extensions/Cite
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -529,6 +645,10 @@
   destination: ./dist/extensions/TemplateSandbox
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -547,6 +667,10 @@
   destination: ./dist/extensions/CodeEditor
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -565,6 +689,10 @@
   destination: ./dist/extensions/CodeMirror
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -583,6 +711,10 @@
   destination: ./dist/extensions/WikiEditor
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -601,6 +733,10 @@
   destination: ./dist/extensions/SecureLinkFixer
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -619,6 +755,10 @@
   destination: ./dist/extensions/Echo
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -637,6 +777,10 @@
   destination: ./dist/extensions/Graph
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -655,6 +799,10 @@
   destination: ./dist/extensions/Poem
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -673,6 +821,10 @@
   destination: ./dist/extensions/TemplateData
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -691,6 +843,10 @@
   destination: ./dist/extensions/AdvancedSearch
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -709,6 +865,10 @@
   destination: ./dist/extensions/ParserFunctions
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -722,11 +882,15 @@
   - Gruntfile.js
   - Doxyfile
 - name: MobileFrontend
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MobileFrontend/zip/aa6fd30b780337d1b2ad9fd1f905f3cc6195d475
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-MobileFrontend/zip/f83e725c1099c02cd6038ae6602ef181954627c0
   artifactLevel: 1
   destination: ./dist/extensions/MobileFrontend
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -745,6 +909,10 @@
   destination: ./dist/extensions/DeleteBatch
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -763,6 +931,10 @@
   destination: ./dist/extensions/MultimediaViewer
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -781,6 +953,10 @@
   destination: ./dist/extensions/Auth_remoteuser
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -799,6 +975,10 @@
   destination: ./dist/extensions/WikibaseManifest
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -818,6 +998,10 @@
   destination: ./dist/extensions/WikiHiero
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -836,6 +1020,10 @@
   destination: ./dist/extensions/TextExtracts
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -854,6 +1042,10 @@
   destination: ./dist/extensions/Popups
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -872,6 +1064,10 @@
   destination: ./dist/extensions/EntitySchema
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -890,6 +1086,10 @@
   destination: ./dist/extensions/WikibaseInWikitext
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -908,6 +1108,10 @@
   destination: ./dist/extensions/WikibaseExampleData
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -926,6 +1130,10 @@
   destination: ./dist/extensions/WikibaseEdtf
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -944,6 +1152,10 @@
   destination: ./dist/extensions/ThatSrc
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -962,6 +1174,10 @@
   destination: ./dist/extensions/Wikibase
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -1003,6 +1219,10 @@
   destination: ./dist/extensions/EmbedVideo
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -1021,6 +1241,10 @@
   destination: ./dist/skins/Vector
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -1039,6 +1263,10 @@
   destination: ./dist/skins/Timeless
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -1057,6 +1285,10 @@
   destination: ./dist/skins/Modern
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
@@ -1075,6 +1307,10 @@
   destination: ./dist/skins/MinervaNeue
   remove:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode

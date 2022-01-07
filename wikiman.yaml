@@ -8,6 +8,10 @@ mediawikiRemove:
 
 removeFromAll:
   - tests
+  - .github
+  - .stylelintignore
+  - .nvmrc
+  - .eslintignore
   - .phan
   - .storybook
   - .vscode
