@@ -19,12 +19,11 @@ echo "Make sure temporary dir is created and empty (${TEMPORARY_DIR})"
 rm -rf "${TEMPORARY_DIR}"
 mkdir -p "$TEMPORARY_DIR"
 
-# .tmp was moved so that the files in the repo dir were cleaner.
-# The contents of the wbstack directory was moved so can also been cleaned up.
+# The contents of the wbstack directory was moved so can been cleaned up.
 # This was changed in January 2022, we could remove this cleanup in the future.
-OLD_TEMPORARY_DIR="$(realpath ${REPO_DIR}/wbstack)"
-echo "Removing old wbstack directory (${OLD_TEMPORARY_DIR})"
-rm -rf $OLD_TEMPORARY_DIR
+OLD_WBSTACK_DIR="$(realpath ${REPO_DIR}/wbstack)"
+echo "Removing old wbstack directory (${OLD_WBSTACK_DIR})"
+rm -rf $OLD_WBSTACK_DIR
 
 # exit the script if Ctrl+C pressed; this is needed once subshells are created.
 trap 'exit 130' INT
