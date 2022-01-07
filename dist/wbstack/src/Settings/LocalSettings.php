@@ -180,6 +180,9 @@ if( $wgFavicon === null ) {
     $wgFavicon = "/favicon.ico";
 }
 
+// Readonly: null, or a string message for readonly mode & reason.
+$wgReadOnly = $wikiInfo->getSetting('wgReadOnly');
+
 // https://www.mediawiki.org/wiki/Manual:$wgFooterIcons
 // Add the custom powered by icons....
 // TODO the Wikibase one should be in Wikibase..
