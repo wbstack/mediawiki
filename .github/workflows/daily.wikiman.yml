@@ -16,10 +16,10 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2.3.4
     - name: copy pacman.yaml
-      run: cp ./sync/pacman.yaml ./sync/current-pacman.yaml 
+      run: cp pacman.yaml current-pacman.yaml 
     - name: write GH action token to file
       run: echo ${{ secrets.GITHUB_TOKEN }} > ./sync/.github
     - name: run wikiman
-      run: ./sync/wikiman
+      run: ./sync/wikiman/wikiman .
     - name: Show diff of current pacman.yaml
-      run: diff ./sync/pacman.yaml ./sync/current-pacman.yaml
+      run: diff pacman.yaml current-pacman.yaml
