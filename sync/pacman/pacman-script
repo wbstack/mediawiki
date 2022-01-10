@@ -3,6 +3,9 @@
 # this directory must include a pacman.yml
 # pacman will populate a dist folder in the same directory, from the pacman.yml
 
+# exit when any command fails
+set -e
+
 if [ -z "$1" ]; then
     echo "Usage: $0 <target>"
     exit 1

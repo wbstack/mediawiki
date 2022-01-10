@@ -2,6 +2,9 @@
 # Syncs the whole git repo in the correct way
 # This is probably the file that you want to run..
 
+# exit when any command fails
+set -e
+
 BASEDIR=$(cd `dirname "$0"` && pwd)
 
 cd $BASEDIR
