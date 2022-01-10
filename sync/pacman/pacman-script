@@ -68,7 +68,7 @@ while [ $pid_count -gt 0 ] || [ ! -z "$subshell_output" ] ; do
     pid_count=${#subshell_pids[@]}
 
     # read any output from the subprocesses via the $FIFO
-    read -t 1 subshell_output
+    read -t 1 subshell_output || true  # don't exit the script if read returns an error code
     if [ ! -z "$subshell_output" ]; then  # if $subshell_output is not empty
         echo -en "\033[A\033[K"  # delete the previous line in the terminal
         echo "$subshell_output"
