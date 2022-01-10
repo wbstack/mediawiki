@@ -75,3 +75,6 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         rm -rf "${toRemove}"
     done
 done
+
+echo "Removing the temporary directory '${TEMPORARY_DIR}'"
+rm -rf "${TEMPORARY_DIR}"
