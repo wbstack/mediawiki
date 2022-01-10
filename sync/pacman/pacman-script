@@ -22,6 +22,9 @@ OLD_TEMPORARY_DIR="$(realpath ${REPO_DIR}/wbstack)"
 echo "Removing old wbstack directory (${OLD_TEMPORARY_DIR})"
 rm -rf $OLD_TEMPORARY_DIR
 
+# exit the script if Ctrl+C pressed; this is needed once subshells are created.
+trap 'exit 130' INT
+
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     # download and extract each artifact asynchronously
     # the brackets create a subshell
