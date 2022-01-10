@@ -28,6 +28,9 @@ rm -rf $OLD_WBSTACK_DIR
 # exit the script if Ctrl+C pressed; this is needed once subshells are created.
 trap 'exit 130' INT
 
+FIFO="/tmp/pacman_fifo"
+mkfifo $FIFO
+subshell_pids=()
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     # download and extract each artifact asynchronously
     # the brackets create a subshell
@@ -37,15 +40,47 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
         temporaryFile="${TEMPORARY_DIR}/${name}"
         temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted"
-        echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
+        echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'"
         wget --quiet "$artifactUrl" -O "${temporaryFile}"
         mkdir -p ${temporaryExtraction}
         bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
-    ) &
+        echo "Downloading and extracting '${name}' COMPLETE"
+    ) &>$FIFO &
+
+    # add each subshell's pid to an array
+    subshell_pids+=( $! )
 done
 
-# wait for the artifacts to download
-wait
+# wait for the artifacts to download while printing progress
+pid_count=${#subshell_pids[@]}
+total_pids=$pid_count
+echo
+while [ $pid_count -gt 0 ] || [ ! -z "$subshell_output" ] ; do
+    for (( i=0; i<$pid_count; i++ )); do
+        pid=${subshell_pids[$i]}
+        if ! kill -0 $pid 2> /dev/null; then
+            # process has finished, remove it from the array
+            # echo "process $pid has finished, remove it from the array"
+            unset subshell_pids[$i]
+        fi
+    done
+    subshell_pids=( ${subshell_pids[@]} )
+    pid_count=${#subshell_pids[@]}
+
+    # read any output from the subprocesses via the $FIFO
+    read -t 1 subshell_output
+    if [ ! -z "$subshell_output" ]; then  # if $subshell_output is not empty
+        echo -en "\033[A\033[K"  # delete the previous line in the terminal
+        echo "$subshell_output"
+        echo
+    fi
+
+    # calculate and print the progress
+    pids_remaining=$(( total_pids - pid_count ))
+    progress="$(( pids_remaining * 100 / total_pids ))% (${pids_remaining}/${total_pids})"
+    echo -en "\033[A\033[K"  # delete the previous line in the terminal
+    echo "Downloading and extracting codebases: ${progress}"
+done <> $FIFO
 
 # includes filenames beginning with a '.' in the results of filename expansion (/*)
 shopt -s dotglob
