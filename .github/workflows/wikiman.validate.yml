@@ -14,4 +14,4 @@ jobs:
         run: npm i -g ajv-cli
 
       - name: Validate wikiman.yaml
-        run: ajv validate --spec=draft2020 -s wikiman-schema.json -d wikiman.yaml
+        run: ajv validate --spec=draft2020 -s sync/wikiman/wikiman-schema.json -d wikiman.yaml
