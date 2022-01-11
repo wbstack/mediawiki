@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # Syncs the whole git repo in the correct way
 # This is probably the file that you want to run..
 
@@ -39,15 +39,18 @@ done
 # Export vars for other scripts
 export ALSO_COMPOSER_UPDATE=${ALSO_COMPOSER_UPDATE}
 
+# includes filenames beginning with a '.' in the results of filename expansion (/*)
+shopt -s dotglob
+
 # Clears everything in the repo
 echo "Delete the contents of the dist folder"
-rm -r ./dist/*
+rm -rf ./dist/*
 
 # Fetches things from the web
 $BASEDIR/sync/pacman/pacman $BASEDIR
 
 echo "Copy required files into the 'dist' dir"
-cp -v -r ./dist-persist/* ./dist/
+cp -rv ./dist-persist/* ./dist/
 
 # Does a composer install
 $BASEDIR/sync/04-docker-composer.sh
