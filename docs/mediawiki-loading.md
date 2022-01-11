@@ -1,4 +1,4 @@
-## MediaWiki Loading
+## How MediaWiki loads WBStack custom code
 
 MediaWiki loads WBStack custom code in 2 ways.
 
