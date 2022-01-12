@@ -22,4 +22,10 @@ jobs:
       - name: run wikiman
         run: ./sync/wikiman/wikiman .
       - name: Show diff of current pacman.yaml
+        id: diff
         run: diff pacman.yaml current-pacman.yaml
+        continue-on-error: true
+      # Only fail in CI when there is diff content NOT on a pull request
+      - name: Check diff status
+        if: steps.diff.outcome  != 'success' && github.event_name != 'pull_request'
+        run: exit 1
