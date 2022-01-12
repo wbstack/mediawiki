@@ -4,6 +4,7 @@ GRANT ALL ON `<<REPLACE_DATABASE>>`.* TO 'mwu_someuser'@'%';
 USE <<REPLACE_DATABASE>>;
 
 -- Adminer 4.6.3 MySQL dump
+
 CREATE TABLE `<<REPLACE_PREFIX>>_account_credentials` (
   `acd_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `acd_user_id` int(10) unsigned NOT NULL,
@@ -73,7 +74,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_archive` (
   `ar_title` varbinary(255) NOT NULL DEFAULT '',
   `ar_comment_id` bigint(20) unsigned NOT NULL,
   `ar_actor` bigint(20) unsigned NOT NULL,
-  `ar_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `ar_timestamp` binary(14) NOT NULL,
   `ar_minor_edit` tinyint(4) NOT NULL DEFAULT 0,
   `ar_rev_id` int(10) unsigned NOT NULL,
   `ar_deleted` tinyint(3) unsigned NOT NULL DEFAULT 0,
@@ -83,7 +84,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_archive` (
   `ar_sha1` varbinary(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`ar_id`),
   UNIQUE KEY `ar_revid_uniq` (`ar_rev_id`),
-  KEY `name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`),
+  KEY `ar_name_title_timestamp` (`ar_namespace`,`ar_title`,`ar_timestamp`),
   KEY `ar_actor_timestamp` (`ar_actor`,`ar_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
@@ -124,16 +125,16 @@ CREATE TABLE `<<REPLACE_PREFIX>>_categorylinks` (
 
 CREATE TABLE `<<REPLACE_PREFIX>>_change_tag` (
   `ct_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `ct_rc_id` int(11) DEFAULT NULL,
+  `ct_rc_id` int(10) unsigned DEFAULT NULL,
   `ct_log_id` int(10) unsigned DEFAULT NULL,
   `ct_rev_id` int(10) unsigned DEFAULT NULL,
   `ct_params` blob DEFAULT NULL,
   `ct_tag_id` int(10) unsigned NOT NULL,
   PRIMARY KEY (`ct_id`),
-  UNIQUE KEY `change_tag_rc_tag_id` (`ct_rc_id`,`ct_tag_id`),
-  UNIQUE KEY `change_tag_log_tag_id` (`ct_log_id`,`ct_tag_id`),
-  UNIQUE KEY `change_tag_rev_tag_id` (`ct_rev_id`,`ct_tag_id`),
-  KEY `change_tag_tag_id_id` (`ct_tag_id`,`ct_rc_id`,`ct_rev_id`,`ct_log_id`)
+  UNIQUE KEY `ct_rc_tag_id` (`ct_rc_id`,`ct_tag_id`),
+  UNIQUE KEY `ct_log_tag_id` (`ct_log_id`,`ct_tag_id`),
+  UNIQUE KEY `ct_rev_tag_id` (`ct_rev_id`,`ct_tag_id`),
+  KEY `ct_tag_id_id` (`ct_tag_id`,`ct_rc_id`,`ct_rev_id`,`ct_log_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_change_tag_def` (
@@ -166,7 +167,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_content` (
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_content_models` (
-  `model_id` smallint(6) NOT NULL AUTO_INCREMENT,
+  `model_id` int(11) NOT NULL AUTO_INCREMENT,
   `model_name` varbinary(64) NOT NULL,
   PRIMARY KEY (`model_id`),
   UNIQUE KEY `model_name` (`model_name`)
@@ -213,9 +214,17 @@ CREATE TABLE `<<REPLACE_PREFIX>>_echo_notification` (
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_echo_push_provider` (
-  `epp_id` tinyint(3) unsigned NOT NULL,
+  `epp_id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
   `epp_name` tinyblob NOT NULL,
   PRIMARY KEY (`epp_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=binary;
+
+-- this table needs to exist before the foreign key constraint below
+
+CREATE TABLE `<<REPLACE_PREFIX>>_echo_push_topic` (
+  `ept_id` tinyint(3) unsigned NOT NULL AUTO_INCREMENT,
+  `ept_text` tinyblob NOT NULL,
+  PRIMARY KEY (`ept_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_echo_push_subscription` (
@@ -226,11 +235,15 @@ CREATE TABLE `<<REPLACE_PREFIX>>_echo_push_subscription` (
   `eps_provider` tinyint(3) unsigned NOT NULL,
   `eps_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `eps_data` blob DEFAULT NULL,
+  `eps_topic` tinyint(3) unsigned DEFAULT NULL,
   PRIMARY KEY (`eps_id`),
   UNIQUE KEY `eps_token_sha256` (`eps_token_sha256`),
   KEY `eps_provider` (`eps_provider`),
+  KEY `eps_topic` (`eps_topic`),
   KEY `echo_push_subscription_user_id` (`eps_user`),
-  CONSTRAINT `echo_push_subscription_ibfk_1` FOREIGN KEY (`eps_provider`) REFERENCES `<<REPLACE_PREFIX>>_echo_push_provider` (`epp_id`)
+  KEY `echo_push_subscription_token` (`eps_token`(10)),
+  CONSTRAINT `echo_push_subscription_ibfk_1` FOREIGN KEY (`eps_provider`) REFERENCES `<<REPLACE_PREFIX>>_echo_push_provider` (`epp_id`),
+  CONSTRAINT `echo_push_subscription_ibfk_2` FOREIGN KEY (`eps_topic`) REFERENCES `<<REPLACE_PREFIX>>_echo_push_topic` (`ept_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_echo_target_page` (
@@ -267,7 +280,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_filearchive` (
   `fa_storage_group` varbinary(16) DEFAULT NULL,
   `fa_storage_key` varbinary(64) DEFAULT '',
   `fa_deleted_user` int(11) DEFAULT NULL,
-  `fa_deleted_timestamp` binary(14) DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `fa_deleted_timestamp` binary(14),
   `fa_deleted_reason_id` bigint(20) unsigned NOT NULL,
   `fa_size` int(10) unsigned DEFAULT 0,
   `fa_width` int(11) DEFAULT 0,
@@ -279,7 +292,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_filearchive` (
   `fa_minor_mime` varbinary(100) DEFAULT 'unknown',
   `fa_description_id` bigint(20) unsigned NOT NULL,
   `fa_actor` bigint(20) unsigned NOT NULL,
-  `fa_timestamp` binary(14) DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `fa_timestamp` binary(14),
   `fa_deleted` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `fa_sha1` varbinary(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`fa_id`),
@@ -302,7 +315,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_image` (
   `img_minor_mime` varbinary(100) NOT NULL DEFAULT 'unknown',
   `img_description_id` bigint(20) unsigned NOT NULL,
   `img_actor` bigint(20) unsigned NOT NULL,
-  `img_timestamp` varbinary(14) NOT NULL DEFAULT '',
+  `img_timestamp` binary(14) NOT NULL,
   `img_sha1` varbinary(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`img_name`),
   KEY `img_actor_timestamp` (`img_actor`,`img_timestamp`),
@@ -314,8 +327,8 @@ CREATE TABLE `<<REPLACE_PREFIX>>_image` (
 
 CREATE TABLE `<<REPLACE_PREFIX>>_imagelinks` (
   `il_from` int(10) unsigned NOT NULL DEFAULT 0,
-  `il_from_namespace` int(11) NOT NULL DEFAULT 0,
   `il_to` varbinary(255) NOT NULL DEFAULT '',
+  `il_from_namespace` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`il_from`,`il_to`),
   KEY `il_to` (`il_to`,`il_from`),
   KEY `il_backlinks_namespace` (`il_from_namespace`,`il_to`,`il_from`)
@@ -357,7 +370,7 @@ INSERT INTO `<<REPLACE_PREFIX>>_interwiki` (`iw_prefix`, `iw_url`, `iw_api`, `iw
 (UNHEX('6C696E757877696B69'),	'http://linuxwiki.de/$1',	'',	UNHEX(''),	0,	0),
 (UNHEX('6C6F6A62616E'),	'https://mw.lojban.org/papri/$1',	'',	UNHEX(''),	0,	0),
 (UNHEX('6C7177696B69'),	'http://wiki.linuxquestions.org/wiki/$1',	'',	UNHEX(''),	0,	0),
-(UNHEX('6D65617462616C6C'),	'http://www.usemod.com/cgi-bin/mb.pl?$1',	'',	UNHEX(''),	0,	0),
+(UNHEX('6D65617462616C6C'),	'http://meatballwiki.org/wiki/$1',	'',	UNHEX(''),	0,	0),
 (UNHEX('6D6564696177696B6977696B69'),	'https://www.mediawiki.org/wiki/$1',	'https://www.mediawiki.org/w/api.php',	UNHEX(''),	0,	0),
 (UNHEX('6D656D6F7279616C706861'),	'http://en.memory-alpha.org/wiki/$1',	'http://en.memory-alpha.org/api.php',	UNHEX(''),	0,	0),
 (UNHEX('6D65746177696B69'),	'http://sunir.org/apps/meta.pl?$1',	'',	UNHEX(''),	0,	0),
@@ -416,12 +429,12 @@ CREATE TABLE `<<REPLACE_PREFIX>>_ipblocks` (
   `ipb_user` int(10) unsigned NOT NULL DEFAULT 0,
   `ipb_by_actor` bigint(20) unsigned NOT NULL,
   `ipb_reason_id` bigint(20) unsigned NOT NULL,
-  `ipb_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `ipb_timestamp` binary(14) NOT NULL,
   `ipb_auto` tinyint(1) NOT NULL DEFAULT 0,
   `ipb_anon_only` tinyint(1) NOT NULL DEFAULT 0,
   `ipb_create_account` tinyint(1) NOT NULL DEFAULT 1,
   `ipb_enable_autoblock` tinyint(1) NOT NULL DEFAULT 1,
-  `ipb_expiry` varbinary(14) NOT NULL DEFAULT '',
+  `ipb_expiry` varbinary(14) NOT NULL,
   `ipb_range_start` tinyblob NOT NULL,
   `ipb_range_end` tinyblob NOT NULL,
   `ipb_deleted` tinyint(1) NOT NULL DEFAULT 0,
@@ -440,7 +453,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_ipblocks` (
 
 CREATE TABLE `<<REPLACE_PREFIX>>_ipblocks_restrictions` (
   `ir_ipb_id` int(11) NOT NULL,
-  `ir_type` tinyint(1) NOT NULL,
+  `ir_type` tinyint(4) NOT NULL,
   `ir_value` int(11) NOT NULL,
   PRIMARY KEY (`ir_ipb_id`,`ir_type`,`ir_value`),
   KEY `ir_type_value` (`ir_type`,`ir_value`)
@@ -448,7 +461,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_ipblocks_restrictions` (
 
 CREATE TABLE `<<REPLACE_PREFIX>>_ip_changes` (
   `ipc_rev_id` int(10) unsigned NOT NULL DEFAULT 0,
-  `ipc_rev_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `ipc_rev_timestamp` binary(14) NOT NULL,
   `ipc_hex` varbinary(35) NOT NULL DEFAULT '',
   PRIMARY KEY (`ipc_rev_id`),
   KEY `ipc_rev_timestamp` (`ipc_rev_timestamp`),
@@ -457,7 +470,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_ip_changes` (
 
 CREATE TABLE `<<REPLACE_PREFIX>>_iwlinks` (
   `iwl_from` int(10) unsigned NOT NULL DEFAULT 0,
-  `iwl_prefix` varbinary(20) NOT NULL DEFAULT '',
+  `iwl_prefix` varbinary(32) NOT NULL DEFAULT '',
   `iwl_title` varbinary(255) NOT NULL DEFAULT '',
   PRIMARY KEY (`iwl_from`,`iwl_prefix`,`iwl_title`),
   KEY `iwl_prefix_title_from` (`iwl_prefix`,`iwl_title`,`iwl_from`),
@@ -469,12 +482,12 @@ CREATE TABLE `<<REPLACE_PREFIX>>_job` (
   `job_cmd` varbinary(60) NOT NULL DEFAULT '',
   `job_namespace` int(11) NOT NULL,
   `job_title` varbinary(255) NOT NULL,
-  `job_timestamp` varbinary(14) DEFAULT NULL,
+  `job_timestamp` binary(14) DEFAULT NULL,
   `job_params` mediumblob NOT NULL,
   `job_random` int(10) unsigned NOT NULL DEFAULT 0,
   `job_attempts` int(10) unsigned NOT NULL DEFAULT 0,
   `job_token` varbinary(32) NOT NULL DEFAULT '',
-  `job_token_timestamp` varbinary(14) DEFAULT NULL,
+  `job_token_timestamp` binary(14) DEFAULT NULL,
   `job_sha1` varbinary(32) NOT NULL DEFAULT '',
   PRIMARY KEY (`job_id`),
   KEY `job_sha1` (`job_sha1`),
@@ -512,10 +525,10 @@ CREATE TABLE `<<REPLACE_PREFIX>>_logging` (
   `log_params` blob NOT NULL,
   `log_deleted` tinyint(3) unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`log_id`),
-  KEY `type_time` (`log_type`,`log_timestamp`),
-  KEY `actor_time` (`log_actor`,`log_timestamp`),
-  KEY `page_time` (`log_namespace`,`log_title`,`log_timestamp`),
-  KEY `times` (`log_timestamp`),
+  KEY `log_type_time` (`log_type`,`log_timestamp`),
+  KEY `log_actor_time` (`log_actor`,`log_timestamp`),
+  KEY `log_page_time` (`log_namespace`,`log_title`,`log_timestamp`),
+  KEY `log_times` (`log_timestamp`),
   KEY `log_actor_type_time` (`log_actor`,`log_type`,`log_timestamp`),
   KEY `log_page_id_time` (`log_page`,`log_timestamp`),
   KEY `log_type_action` (`log_type`,`log_action`,`log_timestamp`)
@@ -611,7 +624,9 @@ CREATE TABLE `<<REPLACE_PREFIX>>_oauth_registered_consumer` (
 CREATE TABLE `<<REPLACE_PREFIX>>_objectcache` (
   `keyname` varbinary(255) NOT NULL DEFAULT '',
   `value` mediumblob DEFAULT NULL,
-  `exptime` datetime DEFAULT NULL,
+  `exptime` binary(14) NOT NULL,
+  `modtoken` varbinary(17) NOT NULL DEFAULT '00000000000000000',
+  `flags` int(10) unsigned DEFAULT NULL,
   PRIMARY KEY (`keyname`),
   KEY `exptime` (`exptime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
@@ -625,7 +640,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_oldimage` (
   `oi_bits` int(11) NOT NULL DEFAULT 0,
   `oi_description_id` bigint(20) unsigned NOT NULL,
   `oi_actor` bigint(20) unsigned NOT NULL,
-  `oi_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `oi_timestamp` binary(14) NOT NULL,
   `oi_metadata` mediumblob NOT NULL,
   `oi_media_type` enum('UNKNOWN','BITMAP','DRAWING','AUDIO','VIDEO','MULTIMEDIA','OFFICE','TEXT','EXECUTABLE','ARCHIVE','3D') DEFAULT NULL,
   `oi_major_mime` enum('unknown','application','audio','image','text','video','message','model','multipart','chemical') NOT NULL DEFAULT 'unknown',
@@ -635,7 +650,8 @@ CREATE TABLE `<<REPLACE_PREFIX>>_oldimage` (
   KEY `oi_actor_timestamp` (`oi_actor`,`oi_timestamp`),
   KEY `oi_name_timestamp` (`oi_name`,`oi_timestamp`),
   KEY `oi_name_archive_name` (`oi_name`,`oi_archive_name`(14)),
-  KEY `oi_sha1` (`oi_sha1`(10))
+  KEY `oi_sha1` (`oi_sha1`(10)),
+  KEY `oi_timestamp` (`oi_timestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_page` (
@@ -646,14 +662,14 @@ CREATE TABLE `<<REPLACE_PREFIX>>_page` (
   `page_is_redirect` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `page_is_new` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `page_random` double unsigned NOT NULL,
-  `page_touched` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `page_touched` binary(14) NOT NULL,
   `page_links_updated` varbinary(14) DEFAULT NULL,
   `page_latest` int(10) unsigned NOT NULL,
   `page_len` int(10) unsigned NOT NULL,
   `page_content_model` varbinary(32) DEFAULT NULL,
   `page_lang` varbinary(35) DEFAULT NULL,
   PRIMARY KEY (`page_id`),
-  UNIQUE KEY `name_title` (`page_namespace`,`page_title`),
+  UNIQUE KEY `page_name_title` (`page_namespace`,`page_title`),
   KEY `page_random` (`page_random`),
   KEY `page_len` (`page_len`),
   KEY `page_redirect_namespace_len` (`page_is_redirect`,`page_namespace`,`page_len`)
@@ -661,9 +677,9 @@ CREATE TABLE `<<REPLACE_PREFIX>>_page` (
 
 CREATE TABLE `<<REPLACE_PREFIX>>_pagelinks` (
   `pl_from` int(10) unsigned NOT NULL DEFAULT 0,
-  `pl_from_namespace` int(11) NOT NULL DEFAULT 0,
   `pl_namespace` int(11) NOT NULL DEFAULT 0,
   `pl_title` varbinary(255) NOT NULL DEFAULT '',
+  `pl_from_namespace` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`pl_from`,`pl_namespace`,`pl_title`),
   KEY `pl_namespace` (`pl_namespace`,`pl_title`,`pl_from`),
   KEY `pl_backlinks_namespace` (`pl_from_namespace`,`pl_namespace`,`pl_title`,`pl_from`)
@@ -700,7 +716,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_protected_titles` (
   `pt_user` int(10) unsigned NOT NULL,
   `pt_reason_id` bigint(20) unsigned NOT NULL,
   `pt_timestamp` binary(14) NOT NULL,
-  `pt_expiry` varbinary(14) NOT NULL DEFAULT '',
+  `pt_expiry` varbinary(14) NOT NULL,
   `pt_create_perm` varbinary(60) NOT NULL,
   PRIMARY KEY (`pt_namespace`,`pt_title`),
   KEY `pt_timestamp` (`pt_timestamp`)
@@ -733,8 +749,8 @@ CREATE TABLE `<<REPLACE_PREFIX>>_querycache_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_recentchanges` (
-  `rc_id` int(11) NOT NULL AUTO_INCREMENT,
-  `rc_timestamp` varbinary(14) NOT NULL DEFAULT '',
+  `rc_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `rc_timestamp` binary(14) NOT NULL,
   `rc_actor` bigint(20) unsigned NOT NULL,
   `rc_namespace` int(11) NOT NULL DEFAULT 0,
   `rc_title` varbinary(255) NOT NULL DEFAULT '',
@@ -760,7 +776,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_recentchanges` (
   KEY `rc_timestamp` (`rc_timestamp`),
   KEY `rc_namespace_title_timestamp` (`rc_namespace`,`rc_title`,`rc_timestamp`),
   KEY `rc_cur_id` (`rc_cur_id`),
-  KEY `new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
+  KEY `rc_new_name_timestamp` (`rc_new`,`rc_namespace`,`rc_timestamp`),
   KEY `rc_ip` (`rc_ip`),
   KEY `rc_ns_actor` (`rc_namespace`,`rc_actor`),
   KEY `rc_actor` (`rc_actor`,`rc_timestamp`),
@@ -783,7 +799,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_revision` (
   `rev_page` int(10) unsigned NOT NULL,
   `rev_comment_id` bigint(20) unsigned NOT NULL DEFAULT 0,
   `rev_actor` bigint(20) unsigned NOT NULL DEFAULT 0,
-  `rev_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `rev_timestamp` binary(14) NOT NULL,
   `rev_minor_edit` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `rev_deleted` tinyint(3) unsigned NOT NULL DEFAULT 0,
   `rev_len` int(10) unsigned DEFAULT NULL,
@@ -792,15 +808,15 @@ CREATE TABLE `<<REPLACE_PREFIX>>_revision` (
   PRIMARY KEY (`rev_id`),
   KEY `rev_page_id` (`rev_page`,`rev_id`),
   KEY `rev_timestamp` (`rev_timestamp`),
-  KEY `page_timestamp` (`rev_page`,`rev_timestamp`),
+  KEY `rev_page_timestamp` (`rev_page`,`rev_timestamp`),
   KEY `rev_actor_timestamp` (`rev_actor`,`rev_timestamp`,`rev_id`),
   KEY `rev_page_actor_timestamp` (`rev_page`,`rev_actor`,`rev_timestamp`)
-) ENGINE=InnoDB DEFAULT CHARSET=binary MAX_ROWS=10000000 AVG_ROW_LENGTH=1024;
+) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_revision_actor_temp` (
   `revactor_rev` int(10) unsigned NOT NULL,
   `revactor_actor` bigint(20) unsigned NOT NULL,
-  `revactor_timestamp` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `revactor_timestamp` binary(14) NOT NULL,
   `revactor_page` int(10) unsigned NOT NULL,
   PRIMARY KEY (`revactor_rev`,`revactor_actor`),
   UNIQUE KEY `revactor_rev` (`revactor_rev`),
@@ -822,7 +838,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_searchindex` (
   UNIQUE KEY `si_page` (`si_page`),
   FULLTEXT KEY `si_title` (`si_title`),
   FULLTEXT KEY `si_text` (`si_text`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb3;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_sites` (
   `site_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -837,14 +853,14 @@ CREATE TABLE `<<REPLACE_PREFIX>>_sites` (
   `site_forward` tinyint(1) NOT NULL,
   `site_config` blob NOT NULL,
   PRIMARY KEY (`site_id`),
-  UNIQUE KEY `sites_global_key` (`site_global_key`),
-  KEY `sites_type` (`site_type`),
-  KEY `sites_group` (`site_group`),
-  KEY `sites_source` (`site_source`),
-  KEY `sites_language` (`site_language`),
-  KEY `sites_protocol` (`site_protocol`),
-  KEY `sites_domain` (`site_domain`),
-  KEY `sites_forward` (`site_forward`)
+  UNIQUE KEY `site_global_key` (`site_global_key`),
+  KEY `site_type` (`site_type`),
+  KEY `site_group` (`site_group`),
+  KEY `site_source` (`site_source`),
+  KEY `site_language` (`site_language`),
+  KEY `site_protocol` (`site_protocol`),
+  KEY `site_domain` (`site_domain`),
+  KEY `site_forward` (`site_forward`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_site_identifiers` (
@@ -852,8 +868,8 @@ CREATE TABLE `<<REPLACE_PREFIX>>_site_identifiers` (
   `si_key` varbinary(32) NOT NULL,
   `si_site` int(10) unsigned NOT NULL,
   PRIMARY KEY (`si_type`,`si_key`),
-  KEY `site_ids_site` (`si_site`),
-  KEY `site_ids_key` (`si_key`)
+  KEY `si_site` (`si_site`),
+  KEY `si_key` (`si_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_site_stats` (
@@ -877,7 +893,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_slots` (
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_slot_roles` (
-  `role_id` smallint(6) NOT NULL AUTO_INCREMENT,
+  `role_id` int(11) NOT NULL AUTO_INCREMENT,
   `role_name` varbinary(64) NOT NULL,
   PRIMARY KEY (`role_id`),
   UNIQUE KEY `role_name` (`role_name`)
@@ -888,9 +904,9 @@ INSERT INTO `<<REPLACE_PREFIX>>_slot_roles` (`role_id`, `role_name`) VALUES
 
 CREATE TABLE `<<REPLACE_PREFIX>>_templatelinks` (
   `tl_from` int(10) unsigned NOT NULL DEFAULT 0,
-  `tl_from_namespace` int(11) NOT NULL DEFAULT 0,
   `tl_namespace` int(11) NOT NULL DEFAULT 0,
   `tl_title` varbinary(255) NOT NULL DEFAULT '',
+  `tl_from_namespace` int(11) NOT NULL DEFAULT 0,
   PRIMARY KEY (`tl_from`,`tl_namespace`,`tl_title`),
   KEY `tl_namespace` (`tl_namespace`,`tl_title`,`tl_from`),
   KEY `tl_backlinks_namespace` (`tl_from_namespace`,`tl_namespace`,`tl_title`,`tl_from`)
@@ -901,7 +917,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_text` (
   `old_text` mediumblob NOT NULL,
   `old_flags` tinyblob NOT NULL,
   PRIMARY KEY (`old_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=binary MAX_ROWS=10000000 AVG_ROW_LENGTH=10240;
+) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_updatelog` (
   `ul_key` varbinary(255) NOT NULL,
@@ -911,7 +927,6 @@ CREATE TABLE `<<REPLACE_PREFIX>>_updatelog` (
 
 INSERT INTO `<<REPLACE_PREFIX>>_updatelog` (`ul_key`, `ul_value`) VALUES
 (UNHEX('416464524643616E64504D4944496E74657277696B69'),	NULL),
-(UNHEX('4368616E67654368616E67654F626A65637449642E73716C'),	NULL),
 (UNHEX('44656475706C6963617465417263686976655265764964'),	NULL),
 (UNHEX('44656C65746544656661756C744D65737361676573'),	NULL),
 (UNHEX('46697844656661756C744A736F6E436F6E74656E745061676573'),	NULL),
@@ -922,46 +937,82 @@ INSERT INTO `<<REPLACE_PREFIX>>_updatelog` (`ul_key`, `ul_value`) VALUES
 (UNHEX('5265667265736845787465726E616C6C696E6B73496E6465782076312B49444E'),	NULL),
 (UNHEX('52656D6F76654F727068616E65644576656E7473'),	NULL),
 (UNHEX('5570646174654563686F536368656D61466F725375707072657373696F6E'),	NULL),
-(UNHEX('57696B69626173655C52656275696C645465726D735365617263684B6579'),	NULL),
-(UNHEX('57696B69626173655C5265706F5C4D61696E74656E616E63655C506F70756C6174655465726D46756C6C456E746974794964'),	NULL),
 (UNHEX('57696B69626173655C5265706F5C53746F72655C53716C5C4461746162617365536368656D61557064617465723A3A72656275696C6450726F70657274795465726D73'),	NULL),
 (UNHEX('6163636F756E745F72657175657374732D6163725F656D61696C2D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F436F6E6669726D4163636F756E742F696E636C756465732F6261636B656E642F736368656D612F6D7973716C2F70617463682D6163725F656D61696C2D766172636861722E73716C'),	NULL),
 (UNHEX('6163746F722D6163746F725F6E616D652D70617463682D6163746F722D6163746F725F6E616D652D76617262696E6172792E73716C'),	NULL),
-(UNHEX('636C5F6669656C64735F757064617465'),	NULL),
+(UNHEX('617263686976652D61725F74696D657374616D702D64726F7044656661756C74'),	NULL),
+(UNHEX('617263686976652D61725F7469746C652D70617463682D617263686976652D61725F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('63617465676F72792D6361745F7469746C652D70617463682D63617465676F72792D6361745F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('63617465676F72796C696E6B732D636C5F746F2D70617463682D63617465676F72796C696E6B732D636C5F746F2D76617262696E6172792E73716C'),	NULL),
 (UNHEX('636C65616E757020656D7074792063617465676F72696573'),	NULL),
-(UNHEX('6563686F5F6576656E742D6576656E745F6167656E745F69702D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F4563686F2F64625F706174636865732F70617463682D6576656E745F6167656E745F69702D73697A652E73716C'),	NULL),
-(UNHEX('6563686F5F6576656E742D6576656E745F65787472612D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F4563686F2F64625F706174636865732F70617463682D6576656E745F65787472612D73697A652E73716C'),	NULL),
-(UNHEX('6563686F5F6576656E742D6576656E745F76617269616E742D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F4563686F2F64625F706174636865732F70617463682D6576656E745F76617269616E745F6E756C6C6162696C6974792E73716C'),	NULL),
-(UNHEX('65787465726E616C6C696E6B732D656C5F696E6465785F36302D70617463682D65787465726E616C6C696E6B732D656C5F696E6465785F36302D64726F702D64656661756C742E73716C'),	NULL),
+(UNHEX('636F6E74656E745F6D6F64656C732D6D6F64656C5F69642D70617463682D636F6E74656E745F6D6F64656C732D6D6F64656C5F69642E73716C'),	NULL),
+(UNHEX('65787465726E616C6C696E6B732D656C5F696E6465785F36302D64726F7044656661756C74'),	NULL),
+(UNHEX('66696C65617263686976652D66615F64656C657465645F74696D657374616D702D64726F7044656661756C74'),	NULL),
 (UNHEX('66696C65617263686976652D66615F6D616A6F725F6D696D652D70617463682D66615F6D616A6F725F6D696D652D6368656D6963616C2E73716C'),	NULL),
+(UNHEX('66696C65617263686976652D66615F6E616D652D70617463682D66696C65617263686976652D66615F6E616D652E73716C'),	NULL),
+(UNHEX('66696C65617263686976652D66615F74696D657374616D702D64726F7044656661756C74'),	NULL),
 (UNHEX('6669782070726F746F636F6C2D72656C61746976652055524C7320696E2065787465726E616C6C696E6B73'),	NULL),
 (UNHEX('696D6167652D696D675F6D616A6F725F6D696D652D70617463682D696D675F6D616A6F725F6D696D652D6368656D6963616C2E73716C'),	NULL),
 (UNHEX('696D6167652D696D675F6D656469615F747970652D70617463682D6164642D33642E73716C'),	NULL),
+(UNHEX('696D6167652D696D675F6E616D652D70617463682D696D6167652D696D675F6E616D652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('696D6167652D696D675F74696D657374616D702D64726F7044656661756C74'),	NULL),
+(UNHEX('696D6167652D696D675F74696D657374616D702D70617463682D696D6167652D696D675F74696D657374616D702E73716C'),	NULL),
+(UNHEX('696D6167656C696E6B732D696C5F746F2D70617463682D696D6167656C696E6B732D696C5F746F2D76617262696E6172792E73716C'),	NULL),
+(UNHEX('69705F6368616E6765732D6970635F7265765F74696D657374616D702D64726F7044656661756C74'),	NULL),
+(UNHEX('6970626C6F636B732D6970625F6578706972792D64726F7044656661756C74'),	NULL),
+(UNHEX('6970626C6F636B732D6970625F74696D657374616D702D64726F7044656661756C74'),	NULL),
+(UNHEX('6970626C6F636B735F7265737472696374696F6E732D69725F747970652D70617463682D6970626C6F636B735F7265737472696374696F6E732D69725F747970652E73716C'),	NULL),
+(UNHEX('69776C696E6B732D69776C5F7072656669782D70617463682D657874656E642D69776C696E6B732D69776C5F7072656669782E73716C'),	NULL),
+(UNHEX('69776C696E6B732D69776C5F7469746C652D70617463682D69776C696E6B732D69776C5F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('6A6F622D6A6F625F74696D657374616D702D70617463682D6A6F625F6A6F625F74696D657374616D702E73716C'),	NULL),
+(UNHEX('6A6F622D6A6F625F7469746C652D70617463682D6A6F622D6A6F625F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('6A6F622D6A6F625F746F6B656E5F74696D657374616D702D70617463682D6A6F625F6A6F625F746F6B656E5F74696D657374616D702E73716C'),	NULL),
 (UNHEX('6A6F622D70617463682D6A6F622D706172616D732D6D656469756D626C6F622E73716C'),	NULL),
-(UNHEX('6D696D655F6D696E6F725F6C656E677468'),	NULL),
+(UNHEX('6C616E676C696E6B732D6C6C5F7469746C652D70617463682D6C616E676C696E6B732D6C6C5F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('6C6F6767696E672D6C6F675F7469746C652D70617463682D6C6F6767696E672D6C6F675F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('6F626A65637463616368652D65787074696D652D70617463682D6F626A65637463616368652D65787074696D652D6E6F746E756C6C2E73716C'),	NULL),
 (UNHEX('6F6C64696D6167652D6F695F6D616A6F725F6D696D652D70617463682D6F695F6D616A6F725F6D696D652D6368656D6963616C2E73716C'),	NULL),
+(UNHEX('6F6C64696D6167652D6F695F6E616D652D70617463682D6F6C64696D6167652D6F695F6E616D652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('6F6C64696D6167652D6F695F74696D657374616D702D64726F7044656661756C74'),	NULL),
 (UNHEX('706167652D706167655F7265737472696374696F6E732D70617463682D706167655F7265737472696374696F6E732D6E756C6C2E73716C'),	NULL),
+(UNHEX('706167652D706167655F7469746C652D70617463682D706167652D706167655F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('706167652D706167655F746F75636865642D64726F7044656661756C74'),	NULL),
+(UNHEX('706167656C696E6B732D706C5F7469746C652D70617463682D706167656C696E6B732D706C5F7469746C652D76617262696E6172792E73716C'),	NULL),
 (UNHEX('706F70756C617465202A5F66726F6D5F6E616D657370616365'),	NULL),
-(UNHEX('706F70756C6174652063617465676F7279'),	NULL),
 (UNHEX('706F70756C6174652065787465726E616C6C696E6B732E656C5F696E6465785F3630'),	NULL),
 (UNHEX('706F70756C6174652066615F73686131'),	NULL),
 (UNHEX('706F70756C61746520696D675F73686131'),	NULL),
 (UNHEX('706F70756C6174652069705F6368616E676573'),	NULL),
-(UNHEX('706F70756C617465206C6F675F736561726368'),	NULL),
 (UNHEX('706F70756C6174652070705F736F72746B6579'),	NULL),
 (UNHEX('706F70756C617465207265765F6C656E20616E642061725F6C656E'),	NULL),
-(UNHEX('706F70756C617465207265765F706172656E745F6964'),	NULL),
 (UNHEX('706F70756C617465207265765F73686131'),	NULL),
+(UNHEX('70726F7465637465645F7469746C65732D70745F6578706972792D64726F7044656661756C74'),	NULL),
+(UNHEX('70726F7465637465645F7469746C65732D70745F7469746C652D70617463682D70726F7465637465645F7469746C65732D70745F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('717565727963616368652D71635F7469746C652D70617463682D717565727963616368652D71635F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('7175657279636163686574776F2D7163635F7469746C652D70617463682D7175657279636163686574776F2D7163635F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('726563656E746368616E6765732D72635F69642D70617463682D726563656E746368616E6765732D72635F69642E73716C'),	NULL),
 (UNHEX('726563656E746368616E6765732D72635F69702D70617463682D72635F69705F6D6F646966792E73716C'),	NULL),
+(UNHEX('726563656E746368616E6765732D72635F74696D657374616D702D64726F7044656661756C74'),	NULL),
+(UNHEX('726563656E746368616E6765732D72635F74696D657374616D702D70617463682D726563656E746368616E6765732D72635F74696D657374616D702E73716C'),	NULL),
+(UNHEX('726563656E746368616E6765732D72635F7469746C652D70617463682D726563656E746368616E6765732D72635F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('72656469726563742D72645F7469746C652D70617463682D72656469726563742D72645F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('7265766973696F6E2D7265765F74696D657374616D702D64726F7044656661756C74'),	NULL),
+(UNHEX('7265766973696F6E5F6163746F725F74656D702D7265766163746F725F74696D657374616D702D64726F7044656661756C74'),	NULL),
 (UNHEX('736974655F73746174732D70617463682D736974655F73746174732D6D6F646966792E73716C'),	NULL),
 (UNHEX('73697465732D736974655F676C6F62616C5F6B65792D70617463682D73697465732D736974655F676C6F62616C5F6B65792E73716C'),	NULL),
+(UNHEX('736C6F745F726F6C65732D726F6C655F69642D70617463682D736C6F745F726F6C65732D726F6C655F69642E73716C'),	NULL),
+(UNHEX('74656D706C6174656C696E6B732D746C5F7469746C652D70617463682D74656D706C6174656C696E6B732D746C5F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('75706C6F616473746173682D75735F74696D657374616D702D70617463682D75706C6F616473746173682D75735F74696D657374616D702E73716C'),	NULL),
+(UNHEX('757365722D757365725F6E616D652D70617463682D757365725F7461626C652D757064617465732E73716C'),	NULL),
 (UNHEX('757365725F666F726D65725F67726F7570732D7566675F67726F75702D70617463682D7566675F67726F75702D6C656E6774682D696E6372656173652D3235352E73716C'),	NULL),
 (UNHEX('757365725F67726F7570732D75675F67726F75702D70617463682D75675F67726F75702D6C656E6774682D696E6372656173652D3235352E73716C'),	NULL),
+(UNHEX('757365725F6E657774616C6B2D757365725F6C6173745F74696D657374616D702D70617463682D757365725F6E657774616C6B2D757365725F6C6173745F74696D657374616D702D62696E6172792E73716C'),	NULL),
 (UNHEX('757365725F70726F706572746965732D75705F70726F70657274792D70617463682D75705F70726F70657274792E73716C'),	NULL),
-(UNHEX('77625F6368616E6765732D6368616E67655F696E666F2D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F7265706F2F696E636C756465732F53746F72652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F4D616B654368616E6765496E666F4C61726765722E73716C'),	NULL),
-(UNHEX('77625F6974656D735F7065725F736974652D6970735F736974655F706167652D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F7265706F2F696E636C756465732F53746F72652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F4D616B6549707353697465506167654C61726765722E73716C'),	NULL),
-(UNHEX('77625F7465726D732D7465726D5F726F775F69642D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F7265706F2F696E636C756465732F53746F72652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F4D616B65526F774944734269672E73716C'),	NULL),
-(UNHEX('7762635F656E746974795F75736167652D65755F6173706563742D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F636C69656E742F696E636C756465732F55736167652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F656E746974795F75736167652D616C7465722D6173706563742D76617262696E6172792D33372E73716C'),	NULL);
+(UNHEX('77617463686C6973742D776C5F6E6F74696669636174696F6E74696D657374616D702D70617463682D77617463686C6973742D776C5F6E6F74696669636174696F6E74696D657374616D702E73716C'),	NULL),
+(UNHEX('77617463686C6973742D776C5F7469746C652D70617463682D77617463686C6973742D776C5F7469746C652D76617262696E6172792E73716C'),	NULL),
+(UNHEX('77625F6368616E6765732D6368616E67655F696E666F2D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F7265706F2F696E636C756465732F53746F72652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F6D7973716C2F61726368697665732F4D616B654368616E6765496E666F4C61726765722E73716C'),	NULL),
+(UNHEX('77625F6368616E6765735F64697370617463682D6368645F7365656E2D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F7265706F2F696E636C756465732F53746F72652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F6D7973716C2F61726368697665732F70617463682D77625F6368616E6765735F64697370617463682D6D616B652D6368645F7365656E2D756E7369676E65642E73716C'),	NULL),
+(UNHEX('77625F6974656D735F7065725F736974652D6970735F736974655F706167652D2F7661722F7777772F68746D6C2F772F657874656E73696F6E732F57696B69626173652F7265706F2F696E636C756465732F53746F72652F53716C2F2E2E2F2E2E2F2E2E2F73716C2F6D7973716C2F61726368697665732F4D616B6549707353697465506167654C61726765722E73716C'),	NULL);
 
 CREATE TABLE `<<REPLACE_PREFIX>>_uploadstash` (
   `us_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
@@ -970,7 +1021,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_uploadstash` (
   `us_orig_path` varbinary(255) NOT NULL,
   `us_path` varbinary(255) NOT NULL,
   `us_source_type` varbinary(50) DEFAULT NULL,
-  `us_timestamp` varbinary(14) NOT NULL,
+  `us_timestamp` binary(14) NOT NULL,
   `us_status` varbinary(50) NOT NULL,
   `us_chunk_inx` int(10) unsigned DEFAULT NULL,
   `us_props` blob DEFAULT NULL,
@@ -995,7 +1046,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_user` (
   `user_newpassword` tinyblob NOT NULL,
   `user_newpass_time` binary(14) DEFAULT NULL,
   `user_email` tinyblob NOT NULL,
-  `user_touched` binary(14) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
+  `user_touched` binary(14) NOT NULL,
   `user_token` binary(32) NOT NULL DEFAULT '\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0',
   `user_email_authenticated` binary(14) DEFAULT NULL,
   `user_email_token` binary(32) DEFAULT NULL,
@@ -1027,7 +1078,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_user_groups` (
 CREATE TABLE `<<REPLACE_PREFIX>>_user_newtalk` (
   `user_id` int(10) unsigned NOT NULL DEFAULT 0,
   `user_ip` varbinary(40) NOT NULL DEFAULT '',
-  `user_last_timestamp` varbinary(14) DEFAULT NULL,
+  `user_last_timestamp` binary(14) DEFAULT NULL,
   KEY `un_user_id` (`user_id`),
   KEY `un_user_ip` (`user_ip`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
@@ -1037,7 +1088,7 @@ CREATE TABLE `<<REPLACE_PREFIX>>_user_properties` (
   `up_property` varbinary(255) NOT NULL,
   `up_value` blob DEFAULT NULL,
   PRIMARY KEY (`up_user`,`up_property`),
-  KEY `user_properties_property` (`up_property`)
+  KEY `up_property` (`up_property`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_watchlist` (
@@ -1045,10 +1096,10 @@ CREATE TABLE `<<REPLACE_PREFIX>>_watchlist` (
   `wl_user` int(10) unsigned NOT NULL,
   `wl_namespace` int(11) NOT NULL DEFAULT 0,
   `wl_title` varbinary(255) NOT NULL DEFAULT '',
-  `wl_notificationtimestamp` varbinary(14) DEFAULT NULL,
+  `wl_notificationtimestamp` binary(14) DEFAULT NULL,
   PRIMARY KEY (`wl_id`),
   UNIQUE KEY `wl_user` (`wl_user`,`wl_namespace`,`wl_title`),
-  KEY `namespace_title` (`wl_namespace`,`wl_title`),
+  KEY `wl_namespace_title` (`wl_namespace`,`wl_title`),
   KEY `wl_user_notificationtimestamp` (`wl_user`,`wl_notificationtimestamp`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
@@ -1128,17 +1179,15 @@ CREATE TABLE `<<REPLACE_PREFIX>>_wb_changes` (
   `change_user_id` int(10) unsigned NOT NULL,
   `change_info` mediumblob NOT NULL,
   PRIMARY KEY (`change_id`),
-  KEY `wb_changes_change_type` (`change_type`),
   KEY `wb_changes_change_time` (`change_time`),
-  KEY `wb_changes_change_object_id` (`change_object_id`),
-  KEY `wb_changes_change_user_id` (`change_user_id`),
-  KEY `wb_changes_change_revision_id` (`change_revision_id`)
+  KEY `wb_changes_change_revision_id` (`change_revision_id`),
+  KEY `change_object_id` (`change_object_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `<<REPLACE_PREFIX>>_wb_changes_dispatch` (
   `chd_site` varbinary(32) NOT NULL,
   `chd_db` varbinary(32) NOT NULL,
-  `chd_seen` int(11) NOT NULL DEFAULT 0,
+  `chd_seen` int(10) unsigned NOT NULL DEFAULT 0,
   `chd_touched` varbinary(14) NOT NULL DEFAULT '00000000000000',
   `chd_lock` varbinary(64) DEFAULT NULL,
   `chd_disabled` tinyint(3) unsigned NOT NULL DEFAULT 0,
@@ -1179,23 +1228,4 @@ CREATE TABLE `<<REPLACE_PREFIX>>_wb_property_info` (
   PRIMARY KEY (`pi_property_id`),
   KEY `pi_type` (`pi_type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
-
-CREATE TABLE `<<REPLACE_PREFIX>>_wb_terms` (
-  `term_row_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `term_entity_id` int(10) unsigned NOT NULL,
-  `term_full_entity_id` varbinary(32) DEFAULT NULL,
-  `term_entity_type` varbinary(32) NOT NULL,
-  `term_language` varbinary(32) NOT NULL,
-  `term_type` varbinary(32) NOT NULL,
-  `term_text` varbinary(255) NOT NULL,
-  `term_search_key` varbinary(255) NOT NULL,
-  `term_weight` float unsigned NOT NULL DEFAULT 0,
-  PRIMARY KEY (`term_row_id`),
-  KEY `term_full_entity` (`term_full_entity_id`),
-  KEY `wb_terms_text` (`term_text`),
-  KEY `wb_terms_search_key` (`term_search_key`),
-  KEY `term_search_full` (`term_language`,`term_full_entity_id`,`term_type`,`term_search_key`(16)),
-  KEY `tmp1` (`term_language`,`term_type`,`term_entity_type`,`term_search_key`),
-  KEY `wb_terms_entity_id` (`term_entity_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=binary;
--- 2020-11-12 17:50:56
+-- 2021-11-29 12:34:02
