@@ -1,0 +1,21 @@
+name: wikiman.yaml validation
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+
+      - name: Install ajv validator
+        run: npm i -g ajv-cli
+
+      - name: Validate wikiman.yaml
+        run: ajv validate --spec=draft2020 -s sync/wikiman/wikiman-schema.json -d wikiman.yaml
