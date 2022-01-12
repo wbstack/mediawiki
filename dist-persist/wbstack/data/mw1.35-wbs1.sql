@@ -1,5 +1,9 @@
 CREATE DATABASE IF NOT EXISTS `<<REPLACE_DATABASE>>`;
+-- General permissions for the user to the DB
 GRANT ALL ON `<<REPLACE_DATABASE>>`.* TO 'mwu_someuser'@'%';
+-- The user also needs access to these things for replication monitoring
+-- https://github.com/wbstack/api/blob/0fd1e00bc6793d76a00a8a914e54c1201498a11e/app/Jobs/ProvisionWikiDbJob.php#L167-L179
+GRANT REPLICA MONITOR, BINLOG MONITOR ON *.* TO 'mwu_someuser'@'%';
 
 USE <<REPLACE_DATABASE>>;
 

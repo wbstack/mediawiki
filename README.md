@@ -96,7 +96,6 @@ These are currently not using the real api but rather gets their settings from t
 
 The fake api is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
 
-
 ### Start the dev environment
 
 ```sh
