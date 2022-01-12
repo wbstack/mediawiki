@@ -53,5 +53,5 @@ These documents below will explain how the docker image is built:
 
 - [Build scripts](./docs/build-scripts.md): How `dist` directory is synced with `pacman` and `wikiman`
 - [How MediaWiki loads WBStack custom code](./docs/mediawiki-loading.md): How WBStack custom code is loaded into MediaWiki via `LocalSetting.php` or entry point shims
-- [Secondary setup](./dist-persist/secondary-setup.md): A detail about how the WBStack custom code works
+- [Secondary setup](./docs/secondary-setup.md): A detail about how the WBStack custom code works
 - [Development Environment](./docs/dev-environment.md): How to use this repo on your local development Environment
