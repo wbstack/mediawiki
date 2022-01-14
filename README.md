@@ -1,4 +1,4 @@
-# Deploy MediaWiki image to WBStack 
+# WBStack MediaWiki modifications
 
 The purposes and features of this repository are:
 - Update the references to code you want to build MediaWiki from
