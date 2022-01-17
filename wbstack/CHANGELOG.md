@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.35-7.4-20211221-0-bp1
+
+- Set $wgReadOnly from the api
+
 ## 1.35-7.4-20211221-0
 
 - MediaWiki 1.35.5
