@@ -19,14 +19,14 @@ TEMPORARY_DIR="${REPO_DIR}/.tmp"
 source "${REPO_DIR}/sync/pacman/pacman-utils"
 
 echo "Make sure temporary dir is created and empty (${TEMPORARY_DIR})"
-rm -rf $TEMPORARY_DIR
-mkdir -p $TEMPORARY_DIR
+rm -rf "${TEMPORARY_DIR}"
+mkdir -p "${TEMPORARY_DIR}"
 
 # The contents of the wbstack directory was moved so can been cleaned up.
 # This was changed in January 2022, we could remove this cleanup in the future.
 OLD_WBSTACK_DIR="$(realpath ${REPO_DIR}/wbstack)"
 echo "Removing old wbstack directory (${OLD_WBSTACK_DIR})"
-rm -rf $OLD_WBSTACK_DIR
+rm -rf "${OLD_WBSTACK_DIR}"
 
 # exit the script if Ctrl+C pressed; this is needed once subshells are created.
 trap 'exit 130' INT
