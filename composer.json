@@ -1,7 +1,8 @@
 {
     "require-dev": {
         "php-parallel-lint/php-parallel-lint": "^1.2",
-        "seld/jsonlint": "^1.8"
+        "seld/jsonlint": "^1.8",
+        "phpunit/phpunit": "^9"
     },
     "scripts": {
         "lint": [
