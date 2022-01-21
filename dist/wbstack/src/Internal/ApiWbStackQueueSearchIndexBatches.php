@@ -3,7 +3,7 @@
 namespace WBStack\Internal;
 
 /**
- * This should create the index for the requested wiki
+ * This should queue ForceSearchIndex.php runs on the requested wiki
  */
 class ApiWbStackQueueSearchIndexBatches extends \ApiBase {
     public function mustBePosted() {return true;}
@@ -15,7 +15,7 @@ class ApiWbStackQueueSearchIndexBatches extends \ApiBase {
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 		
-        $parameters = "--queue --skipLinks --indexOnSkip --buildChunks 10000";
+        $parameters = "--skipLinks --indexOnSkip --buildChunks 10000";
 		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters;
 		exec($cmd, $out, $return);
 

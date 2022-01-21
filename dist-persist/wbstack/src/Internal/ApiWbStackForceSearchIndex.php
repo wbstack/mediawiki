@@ -3,7 +3,7 @@
 namespace WBStack\Internal;
 
 /**
- * This should create the index for the requested wiki
+ * This should populate the ElasticSearch index for the requested wiki
  */
 class ApiWbStackForceSearchIndex extends \ApiBase {
     public function mustBePosted() {return true;}
