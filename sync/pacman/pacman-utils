@@ -3,8 +3,8 @@
 subshell_wait()
 {
     # assign arguments to variables
-    subshell_pids=$1
-    FIFO=$2
+    FIFO=$1
+    subshell_pids="${@:2}"
     
     # get subshell counts
     pid_count=${#subshell_pids[@]}
@@ -13,8 +13,8 @@ subshell_wait()
     # add an empty newline so that the previous line isn't deleted
     echo
 
-    while [ $pid_count -gt 0 ] || [ ! -z "$subshell_output" ] ; do
-        for (( i=0; i<$pid_count; i++ )); do
+    while [ $pid_count -gt 0 ] || [ -n "$subshell_output" ] ; do
+        for (( i=0; i<pid_count; i++ )); do
             pid=${subshell_pids[$i]}
             if ! kill -0 $pid 2> /dev/null; then
                 # process has finished, remove it from the array
@@ -29,9 +29,9 @@ subshell_wait()
         # `-t 1` to timeout if no output to read after 1 second
         # `|| true` to prevent the script from exiting if read returns an error code (due to timeout)
         read -t 1 subshell_output || true
-        
-        # if $subshell_output is not empty
-        if [ ! -z "${subshell_output}" ]; then  
+
+        # if $subshell_output has a value
+        if [ -n "${subshell_output}" ]; then  
             # delete the previous line in the terminal
             echo -en "\033[A\033[K"
             echo "$subshell_output"

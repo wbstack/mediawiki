@@ -58,7 +58,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
 done
 
 # wait for the subshells to finish while printing their output
-subshell_wait $subshell_pids $FIFO
+subshell_wait "$FIFO" "${subshell_pids[@]}"
 
 # includes filenames beginning with a '.' in the results of filename expansion (/*)
 shopt -s dotglob
