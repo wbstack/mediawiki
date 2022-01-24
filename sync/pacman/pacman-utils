@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-wait_for_subshells_with_progress_and_output()
+subshell_wait()
 {
     # assign arguments to variables
     subshell_pids=$1
@@ -18,7 +18,6 @@ wait_for_subshells_with_progress_and_output()
             pid=${subshell_pids[$i]}
             if ! kill -0 $pid 2> /dev/null; then
                 # process has finished, remove it from the array
-                # echo "process $pid has finished, remove it from the array"
                 unset subshell_pids[$i]
             fi
         done
@@ -41,7 +40,7 @@ wait_for_subshells_with_progress_and_output()
 
         # calculate and print the progress
         pids_remaining=$(( total_pids - pid_count ))
-        progress="$(( pids_remaining * 100 / total_pids ))% (${pids_remaining}/${total_pids})"
+        progress="$(( pids_remaining * 100 / total_pids ))%, pids remaining: (${pids_remaining}/${total_pids})"
         # delete the previous line in the terminal
         echo -en "\033[A\033[K"
         echo "Downloading and extracting codebases: ${progress}"

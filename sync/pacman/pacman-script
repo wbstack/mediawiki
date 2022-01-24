@@ -57,7 +57,8 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     subshell_pids+=( $! )
 done
 
-wait_for_subshells_with_progress_and_output $subshell_pids $FIFO
+# wait for the subshells to finish while printing their output
+subshell_wait $subshell_pids $FIFO
 
 # includes filenames beginning with a '.' in the results of filename expansion (/*)
 shopt -s dotglob
@@ -89,4 +90,4 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
 done
 
 echo "Removing the temporary directory '${TEMPORARY_DIR}'"
-rm -rf $TEMPORARY_DIR
+rm -rf "${TEMPORARY_DIR}"
