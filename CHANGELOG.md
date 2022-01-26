@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.37-7.4-20220126-fp-beta-0
+
+- Add internal api modules for updating ElasticSearch
+
 ## 1.37-7.4-20220118-fp-beta-0
 - Set $wgReadOnly from the api
 
