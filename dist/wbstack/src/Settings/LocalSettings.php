@@ -181,7 +181,8 @@ if( $wgFavicon === null ) {
 }
 
 // Readonly: null, or a string message for readonly mode & reason.
-$wgReadOnly = $wikiInfo->getSetting('wgReadOnly');
+// Always writable via CLI
+$wgReadOnly = ( PHP_SAPI === 'cli' ) ? false : $wikiInfo->getSetting('wgReadOnly');
 
 // https://www.mediawiki.org/wiki/Manual:$wgFooterIcons
 // Add the custom powered by icons....
