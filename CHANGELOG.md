@@ -1,6 +1,9 @@
 # mediawiki
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
+## 1.37-7.4-20220131-fp-beta-0
+
+- Don't set $wgReadOnly in CLIs
 
 ## 1.37-7.4-20220126-fp-beta-0
 
