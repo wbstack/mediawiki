@@ -12,7 +12,8 @@
 			"Stelistcristi",
 			"Strainu",
 			"Wintereu",
-			"WebSourceContentRO"
+			"WebSourceContentRO",
+			"Rsocol"
 		]
 	},
 	"echo-desc": "Sistem de notificare a utilizatorilor cu privire la evenimente și mesaje",
@@ -42,7 +43,7 @@
 	"echo-pref-notifications-page-linked-title-muted-list": "Nu arăta notificări de „legare ale paginilor” pentru aceste pagini. ([[mw:Special:MyLanguage/Help:Notifications#mute|află mai multe]])",
 	"echo-learn-more": "Aflați mai multe",
 	"echo-log": "Jurnal public",
-	"echo-new-messages": "Aveți mesaje noi",
+	"echo-new-messages": "Aveți un mesaj nou în pagina de discuții",
 	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Mesaj|Mesaje}} în pagina de discuții",
 	"echo-category-title-article-linked": "{{PLURAL:$1|Legătură|Legături}} către pagină",
 	"echo-category-title-reverted": "{{PLURAL:$1|Revenire|Reveniri}} asupra modificărilor",
@@ -176,6 +177,7 @@
 	"notification-inbox-filter-read": "Citite",
 	"notification-inbox-filter-unread": "Necitite",
 	"notification-inbox-filter-all": "Toate",
+	"echo-specialmute-label-mute-notifications": "Nu arăta notificări de la {{GENDER:$1|acest utilizator|această utilizatoare}}",
 	"echo-email-plain-footer": "Pentru a avea controlul asupra e-mailurilor pe care {{GENDER:$1|vi}} le trimitem, {{GENDER:$1|verificați-vă}} preferințele:",
 	"echo-email-html-footer-preference-link-text": "{{GENDER:$1verificați-vă}} preferințele",
 	"echo-email-html-footer-with-link": "Pentru a avea controlul asupra e-mailurilor pe care {{GENDER:$2vi}} le trimitem, $1.",

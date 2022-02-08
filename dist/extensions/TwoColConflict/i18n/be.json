@@ -1,10 +1,31 @@
 {
 	"@metadata": {
 		"authors": [
-			"Artsiom91"
+			"Artsiom91",
+			"Chadyka"
 		]
 	},
+	"twocolconflict": "Канфлікт правак па абзацах",
+	"twocolconflict-desc": "Паказвае экран з версіямі побач для рашэння канфліктаў правак",
+	"twocolconflictprovidesubmittedtext": "Канфлікт правак:",
 	"twocolconflict-beta-feature-message": "Двухслупковы канфлікт рэдагавання",
 	"twocolconflict-beta-feature-description": "Паказваць канфлікт рэдагавання ў больш сучасным, двухслупковым выглядзе.",
-	"twocolconflict-split-tour-popup-btn-text": "Так, зразумела."
+	"twocolconflict-copy-action": "капіраваць поўны тэкст",
+	"twocolconflict-copy-notice": "Поўны вікітэкст вашай версіі быў скапіраваны ў буфер абмену (праўкі, зробленыя ніжэй, не ўключаны).",
+	"twocolconflict-copy-tab-action": "паказаць поўны тэкст",
+	"twocolconflict-copy-tab-tooltip": "Паказаць поўны вікітэкст вашай версіі (праўкі, зробленыя ніжэй, не ўключаны). Адкрываецца ў новай укладцы.",
+	"twocolconflict-copy-tooltip": "Капіраваць поўны вікітэкст вашай версіі ў буфер абмену (праўкі, зробленыя ніжэй, не ўключаны)",
+	"twocolconflict-core-ui-hint-close": "Ніколі больш не паказваць",
+	"twocolconflict-special-not-saved": "Неапублікаваны",
+	"twocolconflict-split-your-version-header": "Ваша версія",
+	"twocolconflict-split-not-saved-at": "Яшчэ неапублікаваны",
+	"twocolconflict-split-choose-version": "Калі ласка, выберыце версію",
+	"twocolconflict-split-other-version-chosen": "Іншая версія",
+	"twocolconflict-split-your-version-chosen": "Ваша версія",
+	"twocolconflict-split-select-all": "Выбраць увесь",
+	"twocolconflict-split-tour-dialog-dot-message": "Каб атрымаць карысныя падказкі, націсніце на мігатлівыя сінія кропкі.",
+	"twocolconflict-split-tour-dialog-btn-text": "Пачаць аб'яднанне",
+	"twocolconflict-split-tour-popup-btn-text": "Так, зразумела.",
+	"twocolconflict-split-reset-warning-cancel": "Адмена",
+	"twocolconflict-split-help-tooltip": "Паказаць дапамогу"
 }

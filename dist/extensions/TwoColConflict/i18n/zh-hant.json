@@ -6,7 +6,8 @@
 			"Kly",
 			"LNDDYL",
 			"Liuxinyu970226",
-			"烈羽"
+			"烈羽",
+			"Tranve"
 		]
 	},
 	"twocolconflict": "基於段落編輯衝突",
@@ -17,8 +18,8 @@
 	"twocolconflict-copy-action": "複製全文",
 	"twocolconflict-copy-notice": "您修訂裡的 wiki 語法已複製到剪貼簿（不包含以下做出的編輯內容）",
 	"twocolconflict-copy-tab-action": "檢視全文",
-	"twocolconflict-copy-tab-tooltip": "檢視您的修訂的完整 wiki 語法（不包含以下做出的編輯）。在新分頁開啟。",
-	"twocolconflict-copy-tooltip": "複製您修訂裡的 wiki 語法到剪貼簿（不包含以下做出的編輯內容）",
+	"twocolconflict-copy-tab-tooltip": "檢視您的修訂的完整 wikitext（不包含以下做出的編輯）。在新分頁開啟。",
+	"twocolconflict-copy-tooltip": "複製您修訂裡的 wikitext 到剪貼簿（不包含以下做出的編輯內容）",
 	"twocolconflict-core-ui-hint": "用於解決編輯衝突的更新介面現已可用。請在您的[[Special:Preferences#mw-prefsection-editing|偏好設定]]裡啟用基於段落編輯衝突介面來試試。",
 	"twocolconflict-core-ui-hint-close": "永遠不再顯示",
 	"twocolconflict-preference-enabled": "啟用[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|基於段落的編輯衝突介面]]來解決編輯衝突",

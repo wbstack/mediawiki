@@ -14,7 +14,8 @@
 			"Okras",
 			"Pacha Tchernof",
 			"Vlad5250",
-			"Yurik"
+			"Yurik",
+			"Stjn"
 		]
 	},
 	"jsonconfig-desc": "Позволяет хранить настройки JSON в вики-проекте",
@@ -58,7 +59,7 @@
 	"jsonconfig-license-not-set": "Когда вы редактируете эту страницу, вы соглашаетесь публикацией вашего вклада согласно с лицензией, указанной в поле «<code>лицензия</code>».",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
 	"jsonconfig-license-copyrightwarning": "Сохраняя изменения, вы соглашаетесь с [https://foundation.wikimedia.org/wiki/Terms_of_Use/ru Условиями использования], и неотзывно соглашаетесь публиковать ваш вклад под лицензией [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Сохраняя изменения, вы соглашаетесь с [https://foundation.wikimedia.org/wiki/Terms_of_Use/ru Условиями использования], и неотзывно соглашаетесь публиковать ваш вклад под лицензией, указанной в поле <code>лицензия</code>.",
+	"jsonconfig-license-copyrightwarning-license-unset": "Сохраняя изменения, вы соглашаетесь с [https://foundation.wikimedia.org/wiki/Terms_of_Use/ru Условиями использования] и соглашаетесь на безотзывную публикацию своего вклада под лицензией, указанной в поле <code>licence</code>.",
 	"jsonconfig-license-notice": "'''Замечание:''' Редактируя страницу, вы соглашаетесь с тем, что публикуете свой вклад по лицензии [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Замечание:''' Редактируя страницу, вы соглашаетесь с тем, что публикуете свой вклад по лицензии, указанной в поле <code>лицензия</code>.",
 	"right-jsonconfig-flush": "Управление JsonConfig через API",

@@ -10,15 +10,6 @@
         'dev' => false,
     ),
     'versions' => array(
-        'clue/stream-filter' => array(
-            'pretty_version' => 'v1.5.0',
-            'version' => '1.5.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../clue/stream-filter',
-            'aliases' => array(),
-            'reference' => 'aeb7d8ea49c7963d3b581378955dbf5bc49aa320',
-            'dev_requirement' => false,
-        ),
         'composer/installers' => array(
             'pretty_version' => 'v1.12.0',
             'version' => '1.12.0.0',
@@ -264,15 +255,6 @@
                 0 => '*',
             ),
         ),
-        'mailgun/mailgun-php' => array(
-            'pretty_version' => 'v3.5.1',
-            'version' => '3.5.1.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../mailgun/mailgun-php',
-            'aliases' => array(),
-            'reference' => '4ec42cdaf0b77fe9c4fb92c4236dc9e84e1989c5',
-            'dev_requirement' => false,
-        ),
         'mediawiki/core' => array(
             'pretty_version' => '1.0.0+no-version-set',
             'version' => '1.0.0.0',
@@ -310,15 +292,6 @@
             'install_path' => __DIR__ . '/../nesbot/carbon',
             'aliases' => array(),
             'reference' => '8c2a18ce3e67c34efc1b29f64fe61304368259a2',
-            'dev_requirement' => false,
-        ),
-        'nyholm/psr7' => array(
-            'pretty_version' => '1.4.1',
-            'version' => '1.4.1.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../nyholm/psr7',
-            'aliases' => array(),
-            'reference' => '2212385b47153ea71b1c1b1374f8cb5e4f7892ec',
             'dev_requirement' => false,
         ),
         'onoi/message-reporter' => array(
@@ -420,75 +393,6 @@
             'reference' => 'b14fbe2ddb0b9f94f5b24cf08783d599f776fff0',
             'dev_requirement' => false,
         ),
-        'php-http/client-common' => array(
-            'pretty_version' => '2.5.0',
-            'version' => '2.5.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/client-common',
-            'aliases' => array(),
-            'reference' => 'd135751167d57e27c74de674d6a30cef2dc8e054',
-            'dev_requirement' => false,
-        ),
-        'php-http/discovery' => array(
-            'pretty_version' => '1.14.1',
-            'version' => '1.14.1.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/discovery',
-            'aliases' => array(),
-            'reference' => 'de90ab2b41d7d61609f504e031339776bc8c7223',
-            'dev_requirement' => false,
-        ),
-        'php-http/httplug' => array(
-            'pretty_version' => '2.2.0',
-            'version' => '2.2.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/httplug',
-            'aliases' => array(),
-            'reference' => '191a0a1b41ed026b717421931f8d3bd2514ffbf9',
-            'dev_requirement' => false,
-        ),
-        'php-http/message' => array(
-            'pretty_version' => '1.12.0',
-            'version' => '1.12.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/message',
-            'aliases' => array(),
-            'reference' => '39eb7548be982a81085fe5a6e2a44268cd586291',
-            'dev_requirement' => false,
-        ),
-        'php-http/message-factory' => array(
-            'pretty_version' => 'v1.0.2',
-            'version' => '1.0.2.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/message-factory',
-            'aliases' => array(),
-            'reference' => 'a478cb11f66a6ac48d8954216cfed9aa06a501a1',
-            'dev_requirement' => false,
-        ),
-        'php-http/message-factory-implementation' => array(
-            'dev_requirement' => false,
-            'provided' => array(
-                0 => '1.0',
-            ),
-        ),
-        'php-http/multipart-stream-builder' => array(
-            'pretty_version' => '1.2.0',
-            'version' => '1.2.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/multipart-stream-builder',
-            'aliases' => array(),
-            'reference' => '11c1d31f72e01c738bbce9e27649a7cca829c30e',
-            'dev_requirement' => false,
-        ),
-        'php-http/promise' => array(
-            'pretty_version' => '1.1.0',
-            'version' => '1.1.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../php-http/promise',
-            'aliases' => array(),
-            'reference' => '4c4c1f9b7289a2ec57cde7f1e9762a5789506f88',
-            'dev_requirement' => false,
-        ),
         'pleonasm/bloom-filter' => array(
             'pretty_version' => '1.0.2',
             'version' => '1.0.2.0',
@@ -532,21 +436,6 @@
             'dev_requirement' => false,
         ),
         'psr/http-client-implementation' => array(
-            'dev_requirement' => false,
-            'provided' => array(
-                0 => '1.0',
-            ),
-        ),
-        'psr/http-factory' => array(
-            'pretty_version' => '1.0.1',
-            'version' => '1.0.1.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../psr/http-factory',
-            'aliases' => array(),
-            'reference' => '12ac7fcd07e5b077433f5f2bee95b3a771bf61be',
-            'dev_requirement' => false,
-        ),
-        'psr/http-factory-implementation' => array(
             'dev_requirement' => false,
             'provided' => array(
                 0 => '1.0',
@@ -654,15 +543,6 @@
             'reference' => '6f981ee24cf69ee7ce9736146d1c57c2780598a8',
             'dev_requirement' => false,
         ),
-        'symfony/options-resolver' => array(
-            'pretty_version' => 'v5.4.0',
-            'version' => '5.4.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../symfony/options-resolver',
-            'aliases' => array(),
-            'reference' => 'b0fb78576487af19c500aaddb269fd36701d4847',
-            'dev_requirement' => false,
-        ),
         'symfony/polyfill-ctype' => array(
             'dev_requirement' => false,
             'replaced' => array(
@@ -674,15 +554,6 @@
             'replaced' => array(
                 0 => '1.99',
             ),
-        ),
-        'symfony/polyfill-php73' => array(
-            'pretty_version' => 'v1.24.0',
-            'version' => '1.24.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../symfony/polyfill-php73',
-            'aliases' => array(),
-            'reference' => 'cc5db0e22b3cb4111010e48785a97f670b350ca5',
-            'dev_requirement' => false,
         ),
         'symfony/polyfill-php80' => array(
             'pretty_version' => 'v1.23.1',
@@ -716,15 +587,6 @@
             'provided' => array(
                 0 => '2.3',
             ),
-        ),
-        'webmozart/assert' => array(
-            'pretty_version' => '1.10.0',
-            'version' => '1.10.0.0',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../webmozart/assert',
-            'aliases' => array(),
-            'reference' => '6964c76c7804814a842473e0c8fd15bab0f18e25',
-            'dev_requirement' => false,
         ),
         'wikimedia/assert' => array(
             'pretty_version' => 'v0.5.0',

@@ -3,7 +3,8 @@
 		"authors": [
 			"Artsiom91",
 			"Da voli",
-			"Maksim L."
+			"Maksim L.",
+			"Chadyka"
 		]
 	},
 	"advancedsearch-desc": "Лёгкі доступ да пашыраных магчымасцей пошуку ў [[Special:Search]]",
@@ -57,10 +58,14 @@
 	"advancedsearch-filesize-greater-than": "больш за",
 	"advancedsearch-filesize-smaller-than": "менш за",
 	"advancedsearch-sort-relevance": "Рэлевантнасць",
+	"advancedsearch-sort-last-edit-asc": "Дата змянення — старыя зверху",
 	"advancedsearch-sort-last-edit-desc": "Дата змянення — новыя зверху",
+	"advancedsearch-sort-create-timestamp-asc": "Дата стварэння — старыя зверху",
 	"advancedsearch-sort-create-timestamp-desc": "Дата стварэння — новыя зверху",
 	"advancedsearch-sort-preview-relevance": "рэлевантнасці",
+	"advancedsearch-sort-preview-last-edit-asc": "праўленыя найменш апошнім часам",
 	"advancedsearch-sort-preview-last-edit-desc": "даты змянення",
+	"advancedsearch-sort-preview-create-timestamp-asc": "створаныя найменш апошнім часам",
 	"advancedsearch-sort-preview-create-timestamp-desc": "даты стварэння",
 	"advancedsearch-namespaces-search-in": "Пошук у:",
 	"advancedsearch-namespaces-remember": "Запомніць выбар для наступных пошукаў",
