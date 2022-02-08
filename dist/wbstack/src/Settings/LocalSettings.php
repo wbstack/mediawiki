@@ -27,11 +27,6 @@ $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
 
-$wwUseMailgunExtension = true; // default for wbstack
-if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
-    $wwUseMailgunExtension = false;
-}
-
 #######################################
 ## ---  Base MediaWiki Settings  --- ##
 #######################################
@@ -466,15 +461,6 @@ $wgCaptchaClass = 'ReCaptchaNoCaptcha';
 $wgReCaptchaSendRemoteIP = true;
 $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
 $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
-
-# Mailgun
-if ($wwUseMailgunExtension) {
-    wfLoadExtension( 'Mailgun' );
-    $wgMailgunAPIKey = getenv('MW_MAILGUN_API_KEY');
-    $wgMailgunDomain = getenv('MW_MAILGUN_DOMAIN');
-    // Example Endpoint "https://api.mailgun.net"
-    $wgMailgunEndpoint = getenv('MW_MAILGUN_ENDPOINT');
-}
 
 # MobileFrontend
 wfLoadExtension( 'MobileFrontend' );
