@@ -45,28 +45,6 @@
   - .rubocop_todo.yml
   - Gruntfile.js
   - Doxyfile
-- name: Mailgun
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Mailgun/zip/37108dab96582a730df9e3a2fafaeb5e69120bd4
-  artifactLevel: 1
-  destination: ./dist/extensions/Mailgun
-  remove:
-  - tests
-  - .github
-  - .stylelintignore
-  - .nvmrc
-  - .eslintignore
-  - .phan
-  - .storybook
-  - .vscode
-  - .gitignore
-  - .eslintrc.json
-  - .gitreview
-  - .phpcs.xml
-  - .stylelintrc.json
-  - .rubocop.yml
-  - .rubocop_todo.yml
-  - Gruntfile.js
-  - Doxyfile
 - name: StopForumSpam
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-StopForumSpam/zip/7ae91bb08f6a192c67a6a0047464a27378032c33
   artifactLevel: 1
