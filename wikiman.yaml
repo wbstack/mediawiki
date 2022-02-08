@@ -28,8 +28,6 @@ removeFromAll:
 extensions:
   - name: RevisionSlider
     repoName: wikimedia/mediawiki-extensions-RevisionSlider
-  - name: Mailgun
-    repoName: wikimedia/mediawiki-extensions-Mailgun
   - name: StopForumSpam
     repoName: wikimedia/mediawiki-extensions-StopForumSpam
   - name: SpamBlacklist
