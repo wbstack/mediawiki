@@ -240,7 +240,7 @@
             'aliases' => array(
                 0 => '9999999-dev',
             ),
-            'reference' => '61d770dc284898ea2905d66e12f8f7e5f6664092',
+            'reference' => '58fdace1b2b33b0d6c40f426658a898a7566bd25',
             'dev_requirement' => false,
         ),
         'league/oauth2server' => array(
@@ -313,12 +313,12 @@
             'dev_requirement' => false,
         ),
         'nyholm/psr7' => array(
-            'pretty_version' => '1.4.1',
-            'version' => '1.4.1.0',
+            'pretty_version' => '1.5.0',
+            'version' => '1.5.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nyholm/psr7',
             'aliases' => array(),
-            'reference' => '2212385b47153ea71b1c1b1374f8cb5e4f7892ec',
+            'reference' => '1461e07a0f2a975a52082ca3b769ca912b816226',
             'dev_requirement' => false,
         ),
         'onoi/message-reporter' => array(
@@ -439,12 +439,12 @@
             'dev_requirement' => false,
         ),
         'php-http/httplug' => array(
-            'pretty_version' => '2.2.0',
-            'version' => '2.2.0.0',
+            'pretty_version' => '2.3.0',
+            'version' => '2.3.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../php-http/httplug',
             'aliases' => array(),
-            'reference' => '191a0a1b41ed026b717421931f8d3bd2514ffbf9',
+            'reference' => 'f640739f80dfa1152533976e3c112477f69274eb',
             'dev_requirement' => false,
         ),
         'php-http/message' => array(
@@ -499,12 +499,12 @@
             'dev_requirement' => false,
         ),
         'professional-wiki/edtf' => array(
-            'pretty_version' => '2.0.0',
-            'version' => '2.0.0.0',
+            'pretty_version' => '2.0.1',
+            'version' => '2.0.1.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../professional-wiki/edtf',
             'aliases' => array(),
-            'reference' => '070d4be1a1a2dfbabfacc7d8f5e47092415e78e4',
+            'reference' => 'f858a0767877df2d218f1ab5d4562e95d4e9456f',
             'dev_requirement' => false,
         ),
         'psr/container' => array(

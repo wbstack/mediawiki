@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit83779e49d800a00a578767f96cf7b174
+class ComposerStaticInitad06ba0f5a3343ff11e878c5124be5a1
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -1931,6 +1931,8 @@ class ComposerStaticInit83779e49d800a00a578767f96cf7b174
         'League\\OAuth2\\Server\\Grant\\RefreshTokenGrant' => __DIR__ . '/..' . '/league/oauth2-server/src/Grant/RefreshTokenGrant.php',
         'League\\OAuth2\\Server\\Middleware\\AuthorizationServerMiddleware' => __DIR__ . '/..' . '/league/oauth2-server/src/Middleware/AuthorizationServerMiddleware.php',
         'League\\OAuth2\\Server\\Middleware\\ResourceServerMiddleware' => __DIR__ . '/..' . '/league/oauth2-server/src/Middleware/ResourceServerMiddleware.php',
+        'League\\OAuth2\\Server\\RedirectUriValidators\\RedirectUriValidator' => __DIR__ . '/..' . '/league/oauth2-server/src/RedirectUriValidators/RedirectUriValidator.php',
+        'League\\OAuth2\\Server\\RedirectUriValidators\\RedirectUriValidatorInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/RedirectUriValidators/RedirectUriValidatorInterface.php',
         'League\\OAuth2\\Server\\Repositories\\AccessTokenRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/AccessTokenRepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\AuthCodeRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/AuthCodeRepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\ClaimRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/ClaimRepositoryInterface.php',
@@ -1939,7 +1941,9 @@ class ComposerStaticInit83779e49d800a00a578767f96cf7b174
         'League\\OAuth2\\Server\\Repositories\\RepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/RepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\ScopeRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/ScopeRepositoryInterface.php',
         'League\\OAuth2\\Server\\Repositories\\UserRepositoryInterface' => __DIR__ . '/..' . '/league/oauth2-server/src/Repositories/UserRepositoryInterface.php',
+        'League\\OAuth2\\Server\\RequestAccessTokenEvent' => __DIR__ . '/..' . '/league/oauth2-server/src/RequestAccessTokenEvent.php',
         'League\\OAuth2\\Server\\RequestEvent' => __DIR__ . '/..' . '/league/oauth2-server/src/RequestEvent.php',
+        'League\\OAuth2\\Server\\RequestRefreshTokenEvent' => __DIR__ . '/..' . '/league/oauth2-server/src/RequestRefreshTokenEvent.php',
         'League\\OAuth2\\Server\\RequestTypes\\AuthorizationRequest' => __DIR__ . '/..' . '/league/oauth2-server/src/RequestTypes/AuthorizationRequest.php',
         'League\\OAuth2\\Server\\ResourceServer' => __DIR__ . '/..' . '/league/oauth2-server/src/ResourceServer.php',
         'League\\OAuth2\\Server\\ResponseTypes\\AbstractResponseType' => __DIR__ . '/..' . '/league/oauth2-server/src/ResponseTypes/AbstractResponseType.php',
@@ -4028,11 +4032,11 @@ class ComposerStaticInit83779e49d800a00a578767f96cf7b174
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit83779e49d800a00a578767f96cf7b174::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit83779e49d800a00a578767f96cf7b174::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit83779e49d800a00a578767f96cf7b174::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit83779e49d800a00a578767f96cf7b174::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit83779e49d800a00a578767f96cf7b174::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitad06ba0f5a3343ff11e878c5124be5a1::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitad06ba0f5a3343ff11e878c5124be5a1::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitad06ba0f5a3343ff11e878c5124be5a1::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitad06ba0f5a3343ff11e878c5124be5a1::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitad06ba0f5a3343ff11e878c5124be5a1::$classMap;
 
         }, null, ClassLoader::class);
     }
