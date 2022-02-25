@@ -513,7 +513,7 @@ $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
 
-$localConceptBaseUri = getenv('MW_WIKIBASE_CONCEPTURI_SCHEME') . $wikiInfo->domain . '/entity/';
+$localConceptBaseUri = 'https://' . $wikiInfo->domain . '/entity/';
 
 $wgWBRepoSettings['entitySources'] = [
     'local' => 
