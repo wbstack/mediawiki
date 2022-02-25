@@ -107,6 +107,4 @@ COPY --chown=www-data:www-data ./dist/ /var/www/html/w
 # or cache the output of the cache rebuild and then try to grab that during buildss!!! :D
 RUN WBS_DOMAIN=maint php ./w/maintenance/rebuildLocalisationCache.php
 
-ENV MW_WIKIBASE_CONCEPTURI_SCHEME='http://'
-
 LABEL org.opencontainers.image.source="https://github.com/wbstack/mediawiki"
