@@ -4,6 +4,25 @@ SCRIPT_COMPOSER_CACHE=${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 
 mkdir -p ${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 
+
+## T302558 Pre-installing composer-merge-plugin
+#
+# Because of https://github.com/wikimedia/composer-merge-plugin/issues/202
+# We are required to install the composer-merge plugin separately
+# This avoids the unwanted update that happens on a fresh install
+#
+# This means for now, the wikimedia/composer-merge-plugin version needs to be defined here
+COMPOSER_MERGE_PLUGIN_VERSION=v2.0.1
+
+WORK_DIR=$(mktemp -d -p "$DIR")
+docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v "$WORK_DIR":/app \
+  --volume "$SCRIPT_COMPOSER_CACHE":/tmp/cache \
+  --entrypoint composer -w /app \
+  docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 require wikimedia/composer-merge-plugin:$COMPOSER_MERGE_PLUGIN_VERSION
+
+# Copy the temporary vendor folder to clean dist/
+cp -r "$WORK_DIR"/vendor "$PWD"/dist
+
 # composer install
 echo "Performing needed composer installations"
 docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v $PWD/dist:/app \
