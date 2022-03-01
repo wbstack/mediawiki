@@ -49,8 +49,7 @@ rm -rf ./dist/*
 # Fetches things from the web
 $BASEDIR/sync/pacman/pacman $BASEDIR
 
-echo "Copy required files into the 'dist' dir"
-cp -rv ./dist-persist/* ./dist/
+./sync_dist-persist.sh
 
 # Does a composer install
 $BASEDIR/sync/04-docker-composer.sh
