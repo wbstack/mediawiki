@@ -18,7 +18,7 @@ jobs:
         run: git diff
       - name: Check only composer changed
         run: |
-          NUM_CHANGES=$(git status --porcelain=v1 -- ':!dist/vendor/composer' ':!dist/vendor/autoload.php')
-          if [[ $NUM_CHANGES ]]; then
+          GIT_CHANGES=$(git status --porcelain=v1 -- ':!dist/vendor/composer' ':!dist/vendor/autoload.php')
+          if [[ $GIT_CHANGES ]]; then
               exit 1
           fi
