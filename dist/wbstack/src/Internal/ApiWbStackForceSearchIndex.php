@@ -18,7 +18,7 @@ class ApiWbStackForceSearchIndex extends \ApiBase {
         $fromId = $this->getParameter('fromId');
         $toId = $this->getParameter('toId');
 
-        $parameters = "--skipLinks 1 --indexOnSkip 1 --fromId ${fromId}  --toId ${toId}";
+        $parameters = "--skipLinks 1 --indexOnSkip 1 --fromId " . escapeshellarg( $fromId ) . " --toId " . escapeshellarg( $toId );
 		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters;
 		exec($cmd, $out, $return);
 
