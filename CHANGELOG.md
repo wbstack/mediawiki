@@ -1,6 +1,12 @@
 # mediawiki
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
+## 1.37-7.4-20220304-fp-beta-0
+
+- Hardcode $localConceptBaseUri to HTTPS
+- Use escapeshellarg in WbStackForceSearchIndex
+- Some changes to sync.sh
+- dependabot updates to github actions
 ## 1.37-7.4-20220131-fp-beta-0
 
 - Don't set $wgReadOnly in CLIs
