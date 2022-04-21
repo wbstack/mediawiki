@@ -16,7 +16,7 @@ class ApiWbStackQueueSearchIndexBatches extends \ApiBase {
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 		
         $parameters = "--skipLinks --indexOnSkip --buildChunks 10000";
-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters;
+		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters . ' 2>&1';
 		exec($cmd, $out, $return);
 
 		// Return appropriate result
