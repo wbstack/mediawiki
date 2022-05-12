@@ -1,6 +1,13 @@
 # mediawiki
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
+
+## 1.37-7.4-20220512-fp-beta-0
+
+- Update CirrusSearch sharding configuration. This action requires re-indexing of ElasticSearch.
+## 1.37-7.4-20220429-fp-beta-0
+
+- Catch fatal error output from ForceSearchIndex job
 ## 1.37-7.4-20220304-fp-beta-0
 
 - Hardcode $localConceptBaseUri to HTTPS
