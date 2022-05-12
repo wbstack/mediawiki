@@ -102,9 +102,10 @@ RUN set -eux; \
 COPY --chown=www-data:www-data ./dist/ /var/www/html/w
 
 # Generate localization cache files
-# TODO could run mediawiki builds on a bigger machine and make use of more threads
 # TODO it would be much better to ADD / COPY files after this? urgff.
 # or cache the output of the cache rebuild and then try to grab that during buildss!!! :D
-RUN WBS_DOMAIN=maint php ./w/maintenance/rebuildLocalisationCache.php
+ARG LOCALIZATION_CACHE_THREAD_COUNT=1
+ARG LOCALIZATION_CACHE_ADDITIONAL_PARAMS
+RUN WBS_DOMAIN=maint php ./w/maintenance/rebuildLocalisationCache.php --threads=${LOCALIZATION_CACHE_THREAD_COUNT} ${LOCALIZATION_CACHE_ADDITIONAL_PARAMS}
 
 LABEL org.opencontainers.image.source="https://github.com/wbstack/mediawiki"
