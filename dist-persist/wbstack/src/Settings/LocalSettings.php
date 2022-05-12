@@ -46,7 +46,7 @@ if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild || $wwDom
 
 // profiling
 // requires docker image to be built with dependencies
-if( isset ( $_SERVER['HTTP_X_WBSTACK_MW_PROFILING'] ) ) {
+if( getenv('MW_ENABLE_PROFILING_HEADER') === '1' && isset ( $_SERVER['HTTP_X_WBSTACK_MW_PROFILING'] ) ) {
     $wgProfiler['class'] = 'ProfilerXhprof';
     $wgProfiler['output'] = [ 'ProfilerOutputText', 'ProfilerOutputDump' ];
     $wgProfiler['outputDir'] = "/tmp/";

@@ -99,6 +99,7 @@ RUN set -eux; \
 	a2enconf mediawiki
 
 ARG INSTALL_PROFILING_DEPS=0
+ENV MW_ENABLE_PROFILING_HEADER=${INSTALL_PROFILING_DEPS}
 COPY install_profiling.sh /install_profiling.sh
 RUN if [ "$INSTALL_PROFILING_DEPS" = "1" ] ; then bash /install_profiling.sh ; else echo "skipping profiling dependencies ..." ; fi
 
