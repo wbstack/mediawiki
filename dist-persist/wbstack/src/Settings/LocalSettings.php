@@ -44,6 +44,16 @@ if( $wwDomainIsMaintenance || $wwIsPhpUnit || $wwIsLocalisationRebuild || $wwDom
     $wgShowExceptionDetails = true;
 }
 
+// profiling
+// requires docker image to be built with dependencies
+if( isset ( $_SERVER['HTTP_X_WBSTACK_MW_PROFILING'] ) ) {
+    $wgProfiler['class'] = 'ProfilerXhprof';
+    $wgProfiler['output'] = [ 'ProfilerOutputText', 'ProfilerOutputDump' ];
+    $wgProfiler['outputDir'] = "/tmp/";
+    $wgProfiler['visible'] = true;
+}
+
+
 // Load Logging when not in phpunit or doing l10n rebuild
 if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
     $wgMWLoggerDefaultSpi = [

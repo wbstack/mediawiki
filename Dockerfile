@@ -98,6 +98,10 @@ RUN set -eux; \
 	} > "$APACHE_CONFDIR/conf-available/mediawiki.conf"; \
 	a2enconf mediawiki
 
+ARG INSTALL_PROFILING_DEPS=0
+COPY install_profiling.sh /install_profiling.sh
+RUN if [ "$INSTALL_PROFILING_DEPS" = "1" ] ; then bash /install_profiling.sh ; else echo "skipping profiling dependencies ..." ; fi
+
 # Copy the code!
 COPY --chown=www-data:www-data ./dist/ /var/www/html/w
 
