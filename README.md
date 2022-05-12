@@ -46,6 +46,10 @@ This part describes the Docker image that this repo is designed to build. People
 - `MW_ELASTICSEARCH_PORT`: elasticsearch port
 - `MW_LOG_TO_STDERR`: set to "yes" to redirect all mediawiki logging to stderr (so it ends up in the kubernetes pod logs)
 
+## Dockerfile build arguments
+
+- `LOCALIZATION_CACHE_THREAD_COUNT`: Number of threads to use when rebuildLocalisationCache.php runs, defaults to 1
+- `LOCALIZATION_CACHE_ADDITIONAL_PARAMS` Additional parameters to pass to rebuildLocalisationCache.php, can for example be used to reduce the number of languages built.
 
 ## Instructions
 
