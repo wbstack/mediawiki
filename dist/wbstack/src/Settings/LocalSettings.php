@@ -644,7 +644,7 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchDefaultCluster = 'default';
     // T308115
-    $wgCirrusSearchShardCount = [ 'content' => 1, 'general' => 1, 'titlesuggest' => 1 ];
+    $wgCirrusSearchShardCount = [ 'archive' => 1, 'content' => 1, 'general' => 1, 'titlesuggest' => 1 ];
     $wgCirrusSearchClusters = [
         'default' => [
             [ 'host' => getenv('MW_ELASTICSEARCH_HOST'), 'port' => getenv('MW_ELASTICSEARCH_PORT') ],
