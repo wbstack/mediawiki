@@ -649,7 +649,7 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
 
     // T309379
     $wgCirrusSearchEnableArchive = false;
-    $wgCirrusSearchPrivateClusters = [];
+    $wgCirrusSearchPrivateClusters = [ 'non-existing-cluster' ];
     
     $wgCirrusSearchClusters = [
         'default' => [
