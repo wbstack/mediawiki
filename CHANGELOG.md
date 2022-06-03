@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.37-7.4-20220603-fp-beta-0
+- Disables creation of CirrusSearch archive indices.
+
 ## 1.37-7.4-20220512-fp-beta-0
 
 - Update CirrusSearch sharding configuration. This action requires re-indexing of ElasticSearch.
