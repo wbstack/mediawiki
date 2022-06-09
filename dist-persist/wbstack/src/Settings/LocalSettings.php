@@ -557,6 +557,9 @@ $wgWBRepoSettings['dataRightsText'] = 'None yet set.';
 // Until we can scale redis memory we don't want to do this - https://github.com/addshore/wbstack/issues/37
 $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
 
+// disable termbox
+$wgWBRepoSettings['termboxEnabled'] = false;
+
 # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );
