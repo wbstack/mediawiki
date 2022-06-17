@@ -2,8 +2,7 @@
 
 // Know about proxies... so that we get the real IP..
 $wgCdnServersNoPurge = [
-    # IP range matches current kubernetes pod IPs for GKE
-    '10.0.0.0/8'
+    getenv('MW_ALLOWED_PROXY_CIDR')
 ];
 
 // This one is needed prior to 1.34
