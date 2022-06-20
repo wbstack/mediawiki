@@ -45,6 +45,7 @@ This part describes the Docker image that this repo is designed to build. People
 - `MW_ELASTICSEARCH_HOST`: elasticsearch hostname
 - `MW_ELASTICSEARCH_PORT`: elasticsearch port
 - `MW_LOG_TO_STDERR`: set to "yes" to redirect all mediawiki logging to stderr (so it ends up in the kubernetes pod logs)
+- `MW_ALLOWED_PROXY_CIDR`: CIDR block where any IP address in the range is considered a proxy server
 
 ## Dockerfile build arguments
 
