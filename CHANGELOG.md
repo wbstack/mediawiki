@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+
+## 1.37-7.4-20220621-fp-beta-0
+- MW_ALLOWED_PROXY_CIDR added and read into $wgCdnServersNoPurge.
+
 ## 1.37-7.4-20220603-fp-beta-0
 - Disables creation of CirrusSearch archive indices.
 
