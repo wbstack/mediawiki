@@ -98,6 +98,10 @@ RUN set -eux; \
 	} > "$APACHE_CONFDIR/conf-available/mediawiki.conf"; \
 	a2enconf mediawiki
 
+ARG INSTALL_XDEBUG=0
+COPY install_xdebug.sh /install_xdebug.sh
+RUN if [ "$INSTALL_XDEBUG" = "1" ] ; then bash /install_xdebug.sh ; else echo "skipping xdebug ..." ; fi
+
 # Copy the code!
 COPY --chown=www-data:www-data ./dist/ /var/www/html/w
 
