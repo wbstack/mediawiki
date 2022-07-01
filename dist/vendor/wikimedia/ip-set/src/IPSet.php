@@ -144,6 +144,7 @@ class IPSet {
 		// successful match (and thus can be set to true)
 		$snode =& $node;
 		$curBit = 0;
+
 		while ( 1 ) {
 			if ( $node === true ) {
 				// already added a larger supernet, no need to go deeper
@@ -215,6 +216,7 @@ class IPSet {
 
 		$curBit = 0;
 		while ( $node !== true && $node !== false ) {
+			wfDebugLog("WBSTACK", "hello");
 			if ( isset( $node['comp'] ) ) {
 				// compressed node, matches 1 whole byte on a byte boundary
 				if ( $rawOrd[$curBit >> 3] != $node['comp'] ) {

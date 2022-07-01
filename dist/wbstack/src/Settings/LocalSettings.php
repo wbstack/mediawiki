@@ -36,6 +36,8 @@ if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
 ## ---  Base MediaWiki Settings  --- ##
 #######################################
 
+$wgDebugLogGroups['StopForumSpam'] = '/var/log/mediawiki/stopforumspam.log';
+
 // No error output or debugging in production
 ini_set( 'display_errors', 0 );
 $wgShowExceptionDetails = false;
@@ -437,8 +439,9 @@ wfLoadExtension( 'TwoColConflict' );
 // Enable the feature by default
 $wgTwoColConflictBetaFeature = false;
 
-# StopForumSpam
+// # StopForumSpam
 wfLoadExtension( 'StopForumSpam' );
+$wgSFSIPListLocation = "/var/stop_forum_ip_list.txt";
 
 # SpamBlacklist
 wfLoadExtension( 'SpamBlacklist' );

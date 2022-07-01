@@ -88,6 +88,7 @@ RUN set -eux; \
 	a2enmod rewrite; \
 	{ \
 		echo '<Directory /var/www/html>'; \
+		echo '	LogLevel trace8 '; \
 		echo '  RewriteEngine On'; \
 		# Enable Short URLs
 		echo '  RewriteRule ^/*$ %{DOCUMENT_ROOT}/w/index.php [L]'; \
@@ -105,7 +106,7 @@ RUN if [ "$INSTALL_PROFILING_DEPS" = "1" ] ; then bash /install_profiling.sh ; e
 
 # Copy the code!
 COPY --chown=www-data:www-data ./dist/ /var/www/html/w
-
+COPY listed_ip_30.txt /var/stop_forum_ip_list.txt
 # Generate localization cache files
 # TODO it would be much better to ADD / COPY files after this? urgff.
 # or cache the output of the cache rebuild and then try to grab that during buildss!!! :D

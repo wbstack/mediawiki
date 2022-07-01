@@ -119,6 +119,7 @@ class Hooks {
 	public static function onGetUserPermissionsErrorsExpensive( &$title, &$user, $action, &$result ) {
 		global $wgSFSIPListLocation, $wgBlockAllowsUTEdit, $wgSFSReportOnly;
 
+		wfDebugLog("WBSTACK", "start coolstuff");
 		if ( !$wgSFSIPListLocation ) {
 			// Not configured
 			return true;
@@ -127,15 +128,21 @@ class Hooks {
 			return true;
 		}
 
+		wfDebugLog("WBSTACK", "coolstuff - get ip");
+
 		$ip = self::getIPFromUser( $user );
 		if ( $ip === false ) {
 			return true;
 		}
 
+		wfDebugLog("WBSTACK", "coolstuff - got ip {$ip}");
+
 		if ( $wgBlockAllowsUTEdit && $title->equals( $user->getTalkPage() ) ) {
 			// Let a user edit their talk page
 			return true;
 		}
+
+		wfDebugLog("WBSTACK", "coolstuff - checking ip block");
 
 		$denyListManager = DenyListManager::singleton();
 		if ( $denyListManager->isIpDenyListed( $ip ) ) {
@@ -192,9 +199,11 @@ class Hooks {
 			);
 
 			$result = [ 'stopforumspam-blocked', $ip ];
-
+			wfDebugLog("WBSTACK", "end coolstuff inner");
 			return false;
 		}
+
+		wfDebugLog("WBSTACK", "end coolstuff");
 
 		return true;
 	}

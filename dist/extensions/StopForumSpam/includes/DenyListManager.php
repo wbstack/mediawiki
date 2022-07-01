@@ -179,7 +179,9 @@ class DenyListManager {
 	 */
 	private function getIpDenyListSet() {
 		if ( $this->denyListIPSet === null ) {
+			wfDebugLog("WBSTACK", "creating new cool stuff!");
 			$this->denyListIPSet = new IPSet( $this->getIpDenyList() );
+			wfDebugLog("WBSTACK", "created new cool stuff!");
 		}
 
 		return $this->denyListIPSet;
