@@ -51,6 +51,7 @@ This part describes the Docker image that this repo is designed to build. People
 
 - `LOCALIZATION_CACHE_THREAD_COUNT`: Number of threads to use when rebuildLocalisationCache.php runs, defaults to 1
 - `LOCALIZATION_CACHE_ADDITIONAL_PARAMS` Additional parameters to pass to rebuildLocalisationCache.php, can for example be used to reduce the number of languages built.
+- `INSTALL_XDEBUG`: Installs and configures the php extension xdebug
 
 ## Instructions
 
