@@ -16,6 +16,7 @@ require_once __DIR__ . '/Internal/ApiWbStackOauthGet.php';
 require_once __DIR__ . '/Internal/ApiWbStackElasticSearchInit.php';
 require_once __DIR__ . '/Internal/ApiWbStackForceSearchIndex.php';
 require_once __DIR__ . '/Internal/ApiWbStackQueueSearchIndexBatches.php';
+require_once __DIR__ . '/Internal/ApiWbStackSiteStatsUpdate.php';
 
 
 // Register the internal MediaWiki API modules
@@ -24,6 +25,7 @@ $wgAPIModules['wbstackPlatformOauthGet'] = \WBStack\Internal\ApiWbStackOauthGet:
 $wgAPIModules['wbstackElasticSearchInit'] = \WBStack\Internal\ApiWbStackElasticSearchInit::class;
 $wgAPIModules['wbstackForceSearchIndex'] = \WBStack\Internal\ApiWbStackForceSearchIndex::class;
 $wgAPIModules['wbstackQueueSearchIndexBatches'] = \WBStack\Internal\ApiWbStackQueueSearchIndexBatches::class;
+$wgAPIModules['wbstackSiteStatsUpdate'] = \WBStack\Internal\ApiWbStackSiteStatsUpdate::class;
 
 // This is needed for Sandbox sites to have their Example data loaded via API
 wfLoadExtension( 'WikibaseExampleData' );
