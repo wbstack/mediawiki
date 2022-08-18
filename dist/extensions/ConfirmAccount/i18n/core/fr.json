@@ -17,16 +17,17 @@
 			"Sherbrooke",
 			"Urhixidur",
 			"Wladek92",
-			"Zetud"
+			"Zetud",
+			"Verdy p"
 		]
 	},
-	"confirmaccount-newrequests": "Il y a actuellement '''$1''' [[Special:ConfirmAccounts|demande{{PLURAL:$1||s}} de compte]] en cours. '''Votre attention est nécessaire !'''",
+	"confirmaccount-newrequests": "'''$1''' [[Special:ConfirmAccounts|demande{{PLURAL:$1||s}} ouverte{{PLURAL:$1||s}} de confirmation de compte par courriel]] {{PLURAL:$1|es|son}}t en attente. '''Votre attention est nécessaire !'''",
 	"requestaccount-loginnotice": "Pour obtenir un compte utilisateur, vous devez en faire '''[[Special:RequestAccount|la demande]]'''.",
-	"action-confirmaccount": "vérifier et accepter les comptes",
+	"action-confirmaccount": "passer en revue et accepter des comptes",
 	"right-confirmaccount": "Voir la [[Special:ConfirmAccounts|file des demandes de compte]]",
 	"right-confirmaccount-notify": "Être notifié par courriel des demandes de compte nouvellement approuvées",
 	"action-requestips": "voir les adresses IP des demandeurs lors du traitement des demandes de nouveau compte",
 	"right-requestips": "Voir les adresses IP des demandeurs lors du traitement des demandes de nouveau compte",
-	"action-lookupcredentials": "voir les identifiants des utilisateurs",
-	"right-lookupcredentials": "Voir les [[Special:UserCredentials|références des utilisateurs]]"
+	"action-lookupcredentials": "voir les identifiants d’accès des utilisateurs",
+	"right-lookupcredentials": "Voir les [[Special:UserCredentials|identifiants d’accès des utilisateurs]]"
 }

@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Dalibor Bosits",
-			"Ex13"
+			"Ex13",
+			"Ponor"
 		]
 	},
 	"deletebatch": "Izbriši skupinu stranica",
@@ -12,7 +13,7 @@
 	"deletebatch-title": "Skupno brisanje",
 	"deletebatch-link-back": "Vrati se na posebnu stranicu",
 	"deletebatch-as": "Pokreni skriptu kao:",
-	"deletebatch-both-modes": "Molimo vas odaberiti ili jednu određenu stranicu ili popis stranica.",
+	"deletebatch-both-modes": "Odaberiti ili jednu određenu stranicu ili popis stranica.",
 	"deletebatch-or": "<strong>ili</strong>",
 	"deletebatch-page": "Stranice za brisanje:",
 	"deletebatch-omitting-nonexistent": "Izostavljanje nepostojeće stranice $1.",

@@ -6,7 +6,8 @@
 			"IvanLanin",
 			"Iwan Novirion",
 			"Mahali syarifuddin",
-			"Rex"
+			"Rex",
+			"Daud I.F. Argana"
 		]
 	},
 	"usercredentials": "Kredensial pengguna",
@@ -25,6 +26,7 @@
 	"usercredentials-notes": "Catatan tambahan:",
 	"usercredentials-urls": "Daftar situs web:",
 	"usercredentials-ip": "Alamat IP asal:",
+	"usercredentials-agent": "Agen-Pengguna asal:",
 	"usercredentials-member": "Hak:",
 	"usercredentials-badid": "Tidak ditemukan Kredensial untuk pengguna ini,\nPeriksa! apakah nama dieja dengan benar."
 }

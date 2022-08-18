@@ -73,6 +73,7 @@
 	"confirmaccount-reason": "Komentar (akan dimasukkan dalam surel penolakan dan penundaan):",
 	"confirmaccount-ip": "Alamat IP:",
 	"confirmaccount-xff": "X-Forwarded-For:",
+	"confirmaccount-agent": "Agen-Pengguna:",
 	"confirmaccount-legend": "Konfirmasi/menolak akun ini",
 	"confirmaccount-submit": "Konfirmasi",
 	"confirmaccount-needreason": "Anda harus memberikan sebuah alasan dalam kotak komentar berikut.",

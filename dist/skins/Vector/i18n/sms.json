@@ -5,6 +5,8 @@
 		]
 	},
 	"vector-language-button-label": "{{PLURAL:$1|$1 ǩiõll|$1 ǩiõl|$1 ǩiõllâd}}",
+	"vector-action-addsection": "Lââʹzzet teeʹm",
+	"vector-action-delete": "Jaukkâd",
 	"vector-action-move": "Seeʹrd",
 	"vector-action-protect": "Suõjjâd",
 	"vector-view-create": "Raaj",
@@ -12,5 +14,7 @@
 	"vector-view-history": "Čuäʹjet historia",
 	"vector-view-view": "Looǥǥ",
 	"vector-view-viewsource": "Čuäʹjet käivvkood",
-	"vector-more-actions": "Lââʹzz"
+	"vector-more-actions": "Lââʹzz",
+	"vector-anon-user-menu-pages-learn": "lââʹssteâđ",
+	"vector-main-menu-tooltip": "Väʹlddvaʹlljõk"
 }

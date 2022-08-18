@@ -40,7 +40,7 @@
 	"advancedsearch-help-fileh": ";Opis\n:Ta polja omogočajo določitev višine datoteke.\n;Opombe\n:* Uporaba je možna samo pri datotekah, ki imajo širino in višino, na primer slike in filmi.\n;Pomoč\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Filemeasures]\n;Običajni iskalni niz\n:Števila s <code>fileh</code> pred njimi, na primer <code>filew:>600</code>.</code></code>",
 	"advancedsearch-help-sort": ";Opis\n:Spremeni vrstni red rezultatov. Običajno so najustreznejše strani navedene na začetku.\n;Pomoč\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Explicit_sort_orders Neposredni vrstni redi]\n;Skladnja običajnega iskanja\n:Ta funkcija nima posebne ključne besede, saj je določena s parametrom v spletnem naslovu.",
 	"advancedsearch-placeholder-exact-text": "\"maček lovi miši\"",
-	"advancedsearch-inlanguage-default": "Izberite jezik",
+	"advancedsearch-inlanguage-default": "Izberi jezik",
 	"advancedsearch-filetype-section-types": "Običajne vrste datotek",
 	"advancedsearch-filetype-section-image": "Formati slik",
 	"advancedsearch-filetype-section-video": "Formati filmov",

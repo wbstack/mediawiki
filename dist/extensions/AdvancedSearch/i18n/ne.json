@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bada Kaji"
+		]
+	},
+	"advancedsearch-optgroup-structure": "संरचना",
+	"advancedsearch-field-plain": "यी शब्दहरु",
+	"advancedsearch-field-or": "यी शब्दहरू मध्ये एउटा",
+	"advancedsearch-field-not": "यी शब्दहरू होइनन्",
+	"advancedsearch-inlanguage-default": "भाषा छान्नुहाेस्",
+	"advancedsearch-filetype-bitmap": "चित्र",
+	"advancedsearch-filetype-drawing": "रेखाचित्र",
+	"advancedsearch-filetype-office": "कार्यलय",
+	"advancedsearch-filesize-equals": "बराबर",
+	"advancedsearch-filesize-greater-than": "भन्दा ठुलो",
+	"advancedsearch-filesize-smaller-than": "भन्दा कम",
+	"advancedsearch-sort-relevance": "प्रासङ्गिकता",
+	"advancedsearch-namespaces-preset-all": "सबै",
+	"advancedsearch-namespaces-preset-general-help": "सामान्य सहायता",
+	"advancedsearch-namespaces-preset-discussion": "वार्तालाप"
+}

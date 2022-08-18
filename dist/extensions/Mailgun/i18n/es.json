@@ -4,5 +4,5 @@
 			"Macofe"
 		]
 	},
-	"mailgun-desc": "Enviar correos electrónicos a través del servicio API Mailgun desde Mediawiki"
+	"mailgun-desc": "Enviar correos electrónicos a través del servicio API Mailgun desde MediaWiki"
 }

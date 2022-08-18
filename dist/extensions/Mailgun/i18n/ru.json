@@ -4,5 +4,5 @@
 			"Okras"
 		]
 	},
-	"mailgun-desc": "Отправка писем из Mediawiki через API-сервис"
+	"mailgun-desc": "Отправка писем из MediaWiki через API-сервис"
 }

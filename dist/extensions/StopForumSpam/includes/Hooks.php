@@ -103,7 +103,7 @@ class Hooks {
 			return $context->getRequest()->getIP();
 		}
 
-		// Couln't figure out an IP address
+		// Couldn't figure out an IP address
 		return false;
 	}
 

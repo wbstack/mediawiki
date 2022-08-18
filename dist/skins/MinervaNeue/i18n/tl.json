@@ -6,7 +6,8 @@
 			"GinawaSaHapon",
 			"Jojit fb",
 			"Rodney Araujo",
-			"Sky Harbor"
+			"Sky Harbor",
+			"Ianlopez1115"
 		]
 	},
 	"minerva-last-modified-date": "Huling binago noong $1, sa oras na $2.",
@@ -15,6 +16,7 @@
 	"mobile-frontend-editor-redlink-create": "Lumikha ng pahina",
 	"mobile-frontend-editor-redlink-explain": "Hindi pa nilikha ang pahinang ito.",
 	"mobile-frontend-editor-redlink-leave": "Hindi, salamat.",
+	"mobile-frontend-history": "Tingnan ang mga nakaraang edit sa pahinang ito.",
 	"mobile-frontend-home-button": "Tahanan",
 	"mobile-frontend-language-article-heading": "Wika",
 	"mobile-frontend-logged-in-homepage-notification": "Kamusta, $1!",
@@ -23,7 +25,7 @@
 	"mobile-frontend-main-menu-login": "Mag-login",
 	"mobile-frontend-main-menu-logout": "Mag-logout",
 	"mobile-frontend-main-menu-nearby": "Kalapit",
-	"mobile-frontend-main-menu-settings": "Mga kagustuhan",
+	"mobile-frontend-main-menu-settings": "Pagsasaayos",
 	"mobile-frontend-main-menu-watchlist": "Talaan ng mga binabantayan",
 	"mobile-frontend-meta-data-issues": "Isyu sa pahina",
 	"mobile-frontend-meta-data-issues-header": "Isyu sa pahina",
@@ -32,7 +34,7 @@
 	"mobile-frontend-notifications-filter": "Pansala",
 	"mobile-frontend-pageaction-edit-tooltip": "Baguhin ang unang seksiyon ng pahinang ito",
 	"mobile-frontend-placeholder": "Maghanap sa {{SITENAME}}",
-	"mobile-frontend-random-button": "Alin man",
+	"mobile-frontend-random-button": "Alinman",
 	"mobile-frontend-user-button-tooltip": "Ipakita ang aking mga notipikasyon.",
 	"mobile-frontend-user-page-contributions": "Mga ambag",
 	"mobile-frontend-user-page-talk": "Usapan",
@@ -44,6 +46,7 @@
 	"minerva-page-actions-move": "Ilipat",
 	"minerva-page-actions-delete": "Burahin",
 	"minerva-page-actions-protect": "Protektahan",
+	"minerva-page-actions-logs": "Mga talaan",
 	"minerva-page-actions-wikibase": "Item na {{WBREPONAME}}",
 	"minerva-page-actions-language-switcher": "Mga wika",
 	"minerva-page-actions-history": "Kasaysayan",

@@ -22,7 +22,7 @@
 	"deletebatch-processing-from-file": "מתבצעת מחיקת דפים מהרשימה בקובץ",
 	"deletebatch-processing-from-form": "מחיקת דפים שרשומים בטופס הזה",
 	"deletebatch-omitting-nonexistent": "השמטת דף שאינו קיים $1.",
-	"deletebatch-omitting-invalid": "השמטת דף בלתי תקין $1.",
+	"deletebatch-omitting-invalid": "השמטת דף בלתי־תקין $1.",
 	"deletebatch-file-bad-format": "הקובץ אמור להיות קובץ טקסט פשוט.",
 	"deletebatch-file-missing": "לא ניתן לקרוא את הקובץ הנתון.",
 	"deletebatch-select-script": "סקריפט מחיקת דפים",
@@ -31,5 +31,5 @@
 	"action-deletebatch": "למחוק מספר דפים בו־זמנית",
 	"right-deletebatch": "מחיקת מספר דפים בו־זמנית",
 	"right-deletebatch-spoof": "מחיקת מספר דפים בו־זמנית בתור \"סקריפט מחיקת דפים\"",
-	"deletebatch-deleting-file-only": "דך תיאור הקובץ $1 אינו קיים; יימחק רק הקובץ.\nהפעולה הזאת לא תירשם ביומן."
+	"deletebatch-deleting-file-only": "דף תיאור הקובץ $1 אינו קיים; יימחק רק הקובץ.\nהפעולה הזאת לא תירשם ביומן."
 }

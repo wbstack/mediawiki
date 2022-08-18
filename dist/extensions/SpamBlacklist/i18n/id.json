@@ -19,5 +19,6 @@
 	"spam-invalid-lines": "{{PLURAL:$1|Baris|Baris-baris}} daftar hitam spam berikut adalah {{PLURAL:$1|ekspresi|ekspresi}} regular yang tak valid dan {{PLURAL:$1|perlu|perlu}} dikoreksi sebelum disimpan:",
 	"spam-blacklist-desc": "Perkakas anti-spam berbasis regex membolehkan melarang keberadaan URL tertentu di halaman dan penggunaan alamat surel tertentu untuk pengguna terdaftar",
 	"log-name-spamblacklist": "Catatan daftar hitam spam",
-	"right-spamblacklistlog": "Lihat catatan daftar hitam spam"
+	"right-spamblacklistlog": "Melihat catatan daftar hitam spam",
+	"action-spamblacklistlog": "melihat catatan daftar hitam spam"
 }

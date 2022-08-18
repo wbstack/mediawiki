@@ -13326,11 +13326,8 @@ module.exports={
       "path": "./node_modules/cz-conventional-changelog"
     }
   }
-
-,"_resolved": "https://registry.npmjs.org/mapbox.js/-/mapbox.js-3.1.1.tgz"
-,"_integrity": "sha1-Tr5BvYm1M/UH+zRV9PSQ5BfqHo8="
-,"_from": "mapbox.js@3.1.1"
 }
+
 },{}],6:[function(require,module,exports){
 'use strict';
 

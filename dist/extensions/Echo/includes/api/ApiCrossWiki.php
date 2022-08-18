@@ -36,7 +36,7 @@ trait ApiCrossWiki {
 			$this->getModulePrefix() . 'wikis',
 			$tokenType !== false ? $tokenType : null
 		);
-		return $foreignReq->execute();
+		return $foreignReq->execute( $this->getRequest() );
 	}
 
 	/**

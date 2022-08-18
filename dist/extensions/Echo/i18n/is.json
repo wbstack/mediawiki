@@ -6,7 +6,8 @@
 			"Snævar",
 			"Sveinki",
 			"Sveinn í Felli",
-			"පසිඳු කාවින්ද"
+			"පසිඳු කාවින්ද",
+			"LoveIceLang"
 		]
 	},
 	"echo-desc": "Kerfi til að tilkynna notendum um viðburði og skilaboð",
@@ -26,7 +27,7 @@
 	"echo-pref-email-format-plain-text": "óstílfærður texti",
 	"echo-pref-cross-wiki-notifications": "Sýna tilkynningar frá öðrum wiki",
 	"echo-learn-more": "Vita meira",
-	"echo-new-messages": "Þú hefur ný skilaboð",
+	"echo-new-messages": "Þú hefur ný spjallsíðu skilaboð",
 	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Skilaboð}} á spjallsíðu",
 	"echo-category-title-article-linked": "{{PLURAL:$1|Tengil|Tengla}} á síðum",
 	"echo-category-title-reverted": "{{PLURAL:$1|Breyting tekin|Breytingar teknar}} aftur",
@@ -39,7 +40,7 @@
 	"echo-pref-tooltip-edit-user-talk": "Tilkynntu mér um þegar einhver skilur eftir skilaboð eða svarar skilaboðum á spjallsíðunni minni.",
 	"echo-pref-tooltip-article-linked": "Gefðu mér tilkynningu þegar einhver tengir í síðu sem ég bjó til úr annari síðu.",
 	"echo-pref-tooltip-reverted": "Gefðu mér tilkynningu þegar einhver tekur aftur breytingu sem ég gerði.",
-	"echo-pref-tooltip-mention": "Tilkynntu mér þegar einhver tengir í notendasíðuna mína.",
+	"echo-pref-tooltip-mention": "Tilkynntu mér þegar einhver tengir í notandasíðuna mína.",
 	"echo-pref-tooltip-user-rights": "Tilkynntu mér þegar einhver breytir notendaréttendum mínum.",
 	"echo-pref-tooltip-emailuser": "Tilkynntu mér um þegar einhver sendir mér tölvupóst.",
 	"notifications": "Tilkynningar",
@@ -81,7 +82,7 @@
 	"notification-header-emailuser": "$1 {{GENDER:$2|sendi}} þér tölvupóst.",
 	"notification-edit-talk-page-email-subject2": "$1 {{GENDER:$2|skildi}} eftir skilaboð handa þér á {{SITENAME}}",
 	"notification-page-linked-email-subject": "Tengt var í síðu sem {{GENDER:$3|þú}} bjóst til á {{SITENAME}}",
-	"notification-reverted-email-subject2": "{{PLURAL:$4|Breytingin þín var tekin aftur|Breytingarnar þínar voru teknar}} {{GENDER:$2|aftur}} á {{SITENAME}}",
+	"notification-reverted-email-subject2": "{{PLURAL:$4|Breytingin {{GENDER:$3|þín}} var tekin aftur|Breytingarnar {{GENDER:$3|þínar}} voru teknar}} {{GENDER:$2|aftur}} á {{SITENAME}} $3",
 	"notification-mention-email-subject": "$1 {{GENDER:$2|minntist}} á {{GENDER:$3|þig}} á {{SITENAME}}",
 	"notification-user-rights-email-subject": "Notandaréttindi {{GENDER:$3|þín}} hafa breyst á {{SITENAME}}",
 	"notification-timestamp-ago-seconds": "{{PLURAL:$1|$1sek}}",

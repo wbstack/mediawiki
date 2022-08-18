@@ -12,7 +12,8 @@
 			"Verdy p",
 			"Wladek92",
 			"Yasten",
-			"Yurik"
+			"Yurik",
+			"McDutchie"
 		]
 	},
 	"nstab-data": "Données",
@@ -34,7 +35,7 @@
 	"jsonconfig-err-array": "Le paramètre « $1 » doit être une liste, c'est à dire  <kbd>[\"valeur1\", \"valeur2\", …]</kbd>",
 	"jsonconfig-err-array-count": "La liste « $1 » a $2 {{PLURAL:$2|valeur|valeurs}}, mais doit en avoir {{PLURAL:$3|$3}}, le même nombre de valeurs que « $4 »",
 	"jsonconfig-err-array-expected": "La valeur en « $1 » était censée être une liste entourée de crochets […]",
-	"jsonconfig-err-assoc-array": "Le paramètre « $1 » doit être un tableau associatif (dictionnaire), par ex. <code>schema</code>",
+	"jsonconfig-err-assoc-array": "Le paramètre « $1 » doit être un tableau associatif (dictionnaire), par ex. <kbd>{\"clé\": \"valeur\", ...}</kbd>",
 	"jsonconfig-err-bad-header-string": "L’entête « $1 » doit être constituée uniquement de lettres, chiffres et caractères souligné, et ne doit pas commencer par un chiffre",
 	"jsonconfig-err-bad-geojson": "Le paramètre « $1 » doit être une donnée GeoJSON valide, ou un tableau d’objets GeoJSON. Si le champ <code>properties</code> contient <code>title</code> ou <code>description</code>, ils doivent être des chaînes sur une seule ligne sans tabulations ni espaces à la fin, ou des objets multilingues de ce genre de chaînes, par ex. <kbd>{ \"en\":\"String in English\", ... }</kbd>",
 	"jsonconfig-err-bad-type": "Le paramètre « $1 » doit être un type valide, comme <code>string</code>, <code>number</code> ou <code>boolean</code>",
