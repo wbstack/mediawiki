@@ -4,6 +4,10 @@
 			"Yupik"
 		]
 	},
+	"requestaccount-page": "{{ns:project}}:Ââʹnnem-määin",
+	"requestaccount-leg-user": "Õõʹnnitobdldõk",
+	"requestaccount-leg-other": "Jeeʹres teâđ",
 	"requestaccount-leg-tos": "Ââʹnnem-määin",
-	"requestaccount-email": "E-pååʹštaddrõs:"
+	"requestaccount-email": "E-pååʹštaddrõs:",
+	"requestaccount-attach": "Merittloǥstõk leʹbe CV (vaʹlljeemnallšem):"
 }

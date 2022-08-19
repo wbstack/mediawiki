@@ -6,7 +6,9 @@
 			"McDutchie",
 			"Metalhead64",
 			"TMg",
-			"ThePiscin"
+			"ThePiscin",
+			"Brettchenweber",
+			"Umherirrender"
 		]
 	},
 	"twocolconflict": "Abschnitts-basierter Bearbeitungskonflikt",
@@ -30,7 +32,7 @@
 	"twocolconflict-special-expired": "Hier gibt es nichts zu sehen. Das bedeutet wahrscheinlich, dass du schon einmal in einen Bearbeitungskonflikt geraten sind, aber das ist schon eine Weile her, und dein zwischengespeicherter Text ist inzwischen abgelaufen.",
 	"twocolconflict-split-header-hint": "Du kannst mithelfen, diese Funktion zu verbessern, wenn du dein Feedback [//de.wikipedia.org/wiki/Wikipedia_Diskussion:Technische_Wünsche/Topwünsche/Bearbeitungskonflikte auf diese Seite] schreibst.",
 	"twocolconflict-split-header-hint-beta": "Vielen Dank für die Benutzung dieser Betafunktion. Du kannst weiterhin bei ihrer Verbesserung helfen, indem du [//de.wikipedia.org/wiki/Wikipedia_Diskussion:Technische_Wünsche/Topwünsche/Bearbeitungskonflikte auf dieser Seite] deine Rückmeldung hinterlässt.",
-	"twocolconflict-split-header-overview": "Während du bearbeitest, hat ein anderer Benutzer dieselbe Seite bearbeitet und vor deiner veröffentlicht. Bitte überprüfe beide Versionen und führe sie zusammen. Nur der Text in den ausgewählten Feldern wird gespeichert, wenn du auf \"{{int:publishchanges}}\" klickst.",
+	"twocolconflict-split-header-overview": "Während deiner Bearbeitung hat ein anderer Benutzer dieselbe Seite bearbeitet und vor deiner veröffentlicht. Bitte überprüfe beide Versionen und führe sie zusammen. Nur der Text in den ausgewählten Feldern wird gespeichert, wenn du auf „{{int:publishchanges}}“ klickst.",
 	"twocolconflict-split-your-version-header": "Deine Version",
 	"twocolconflict-split-current-version-header": "Aktuelle Version von $1",
 	"twocolconflict-split-not-saved-at": "Noch nicht veröffentlicht",
@@ -61,7 +63,7 @@
 	"twocolconflict-split-select-all-your-tooltip": "Klicke, um alle Änderungen deiner Version auszuwählen",
 	"twocolconflict-split-selected-all-other-tooltip": "Alle anderen Änderungen der Version sind ausgewählt",
 	"twocolconflict-split-selected-all-your-tooltip": "Alle Änderungen deiner Version sind ausgewählt",
-	"twocolconflict-split-select-other-tooltip": "Klicke zur Auswahl der anderen Version.",
+	"twocolconflict-split-select-other-tooltip": "Klicke zur Auswahl der anderen Version",
 	"twocolconflict-split-select-your-tooltip": "Klicke zum wählen deiner Version",
 	"twocolconflict-split-selected-other-tooltip": "Andere Version ist ausgewählt",
 	"twocolconflict-split-selected-your-tooltip": "Deine Version ist ausgewählt",

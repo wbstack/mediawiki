@@ -10,5 +10,6 @@
 	"confirmaccount-name": "Uporabniško ime",
 	"confirmaccount-real": "Ime:",
 	"confirmaccount-pos-0": "avtor",
-	"confirmaccount-agent": "User-Agent:"
+	"confirmaccount-agent": "User-Agent:",
+	"confirmaccount-wsum": "Pozdravljeni!"
 }

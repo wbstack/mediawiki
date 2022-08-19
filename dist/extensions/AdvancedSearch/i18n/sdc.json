@@ -1,11 +1,38 @@
 {
 	"@metadata": {
 		"authors": [
-			"Jun Misugi"
+			"Jun Misugi",
+			"F Samaritani"
 		]
 	},
+	"advancedsearch-options-pane-head": "Zercha abanzadda:",
+	"advancedsearch-optgroup-text": "Zirchà i' lu testhu di la pàgina",
+	"advancedsearch-optgroup-structure": "Sthruttura",
+	"advancedsearch-optgroup-files": "Ischedàrii ed immàgini",
+	"advancedsearch-optgroup-sort": "Urdhinamentu",
 	"advancedsearch-field-plain": "Chisthi paràuri",
 	"advancedsearch-field-or": "Una di chisthi paràuri",
 	"advancedsearch-field-not": "No chisthi paràuri",
-	"advancedsearch-filetype-video": "Vìdeo"
+	"advancedsearch-field-subpageof": "Sottupàgini di chista pàgina",
+	"advancedsearch-field-intitle": "Tìturu di pàgina cunteni",
+	"advancedsearch-field-deepcategory": "Pàgini in chisthi categurì",
+	"advancedsearch-field-hastemplate": "Pàgini cun chisthi mudelli",
+	"advancedsearch-field-inlanguage": "Pàgini in chistha linga",
+	"advancedsearch-field-filetype": "Tipu di file",
+	"advancedsearch-field-sort": "Urdhinamentu",
+	"advancedsearch-inlanguage-default": "Isciubarà linga",
+	"advancedsearch-filetype-section-image": "Fuimmaddi immàgina",
+	"advancedsearch-filetype-section-video": "Fuimmaddi vìdeo",
+	"advancedsearch-filetype-section-audio": "Fuimmaddi àudiu",
+	"advancedsearch-filetype-section-document": "Fuimmaddi documentu",
+	"advancedsearch-filetype-section-other": "Althri fuimmaddi",
+	"advancedsearch-filetype-bitmap": "Immàgina",
+	"advancedsearch-filetype-drawing": "Dissegnu",
+	"advancedsearch-filetype-audio": "Àudiu",
+	"advancedsearch-filetype-video": "Vìdeo",
+	"advancedsearch-namespaces-search-in": "Zercha in:",
+	"advancedsearch-namespaces-preset-all": "Tutti",
+	"advancedsearch-namespaces-preset-default": "Pridifiniddu",
+	"advancedsearch-namespaces-preset-discussion": "Cuntierra",
+	"prefs-advancedsearch": "Zercha abanzadda"
 }

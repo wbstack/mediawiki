@@ -3,7 +3,8 @@
 		"authors": [
 			"Muhammed taha",
 			"Épine",
-			"ئارام بکر"
+			"ئارام بکر",
+			"Aram"
 		]
 	},
 	"advancedsearch-options-pane-head": "گەڕانی پێشکەوتوو:",
@@ -51,7 +52,7 @@
 	"advancedsearch-sort-preview-last-edit-desc": "ڕێکەوتی دەستکاریکردن",
 	"advancedsearch-sort-preview-create-timestamp-desc": "ڕێکەوتی دروستکردن",
 	"advancedsearch-namespaces-search-in": "بگەڕێ لە:",
-	"advancedsearch-namespaces-remember": "بەبیرھێناوەی ھەڵبژاردەکان بۆ گەڕانەکانی داھاتوو",
+	"advancedsearch-namespaces-remember": "بەبیرھێنانەوەی ھەڵبژاردەکان بۆ گەڕانەکانی داھاتوو",
 	"advancedsearch-namespaces-preset-all": "ھەموو",
 	"advancedsearch-namespaces-preset-default": "بنچینەیی",
 	"advancedsearch-namespaces-preset-general-help": "یارمەتیی گشتی",

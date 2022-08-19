@@ -9,12 +9,13 @@
 			"Jeeputer",
 			"Macofe",
 			"Mjbmr",
-			"ZxxZxxZ"
+			"ZxxZxxZ",
+			"Beginneruser"
 		]
 	},
 	"templatesandbox": "صفحهٔ تمرین الگو",
 	"templatesandbox-desc": "[[Special:TemplateSandbox|پردازش یک صفحه]] تراگنجانش الگوها از یک صفحهٔ تمرین",
-	"templatesandbox-suffix": "صفحه تمرین",
+	"templatesandbox-suffix": "صفحهٔ تمرین",
 	"templatesandbox-legend": "الگو صفحهٔ تمرین",
 	"templatesandbox-text": "شما می‌توانید مجموعه‌ای از الگوهایی که در فضای تمرین شما ذخیره‌شده‌اند را با استفاده از پیشوندی مناسب انتخاب کنید.\nبرای مثال اگر شما می‌خواهید پیش‌نمایشی از یک نسخهٔ {{ns:Template}}:آزمایشی که شما به عنوان «{{ns:User}}:فلان/{{int:templatesandbox-suffix}}/{{ns:Template}}:آزمایشی» داشته باشید، «{{ns:User}}:فلانی/{{int:templatesandbox-suffix}}» را به عنوان پیشوندی استفاده کنید.",
 	"templatesandbox-prefix-label": "پیشوند صفحهٔ تمرین:",

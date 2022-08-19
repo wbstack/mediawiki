@@ -294,3 +294,5 @@ class MWElasticUtils {
 		return $resp->count() > 0;
 	}
 }
+
+class_alias( MWElasticUtils::class, 'MediaWiki\\Extension\\Elastica\\MWElasticUtils' );

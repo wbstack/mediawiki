@@ -43,10 +43,14 @@
 	"advancedsearch-filesize-greater-than": "کان وڌيڪ هجي",
 	"advancedsearch-filesize-smaller-than": "کان گهٽ هجي",
 	"advancedsearch-sort-relevance": "مناسبت",
+	"advancedsearch-sort-last-edit-asc": "سنوار تاريخ – پراڻي مٿان",
 	"advancedsearch-sort-last-edit-desc": "سنوار تاريخ – ھاڻوڪي مٿان",
+	"advancedsearch-sort-create-timestamp-asc": "سرجڻ تاريخ – پراڻي مٿان",
 	"advancedsearch-sort-create-timestamp-desc": "سرجڻ تاريخ – ھاڻوڪي مٿان",
 	"advancedsearch-sort-preview-relevance": "مناسبت",
+	"advancedsearch-sort-preview-last-edit-asc": "سڀ کان گهٽ ھاڻي سنواريل",
 	"advancedsearch-sort-preview-last-edit-desc": "سنوار تاريخ",
+	"advancedsearch-sort-preview-create-timestamp-asc": "سڀ کان گهٽ ھاڻي سرجيل",
 	"advancedsearch-sort-preview-create-timestamp-desc": "سرجڻ تاريخ",
 	"advancedsearch-namespaces-search-in": "ڳولا ڪريو:",
 	"advancedsearch-namespaces-remember": "چونڊ مستقبل ڳولائن لاءِ ياد رکو",
@@ -56,5 +60,6 @@
 	"advancedsearch-namespaces-preset-discussion": "گفتگو",
 	"advancedsearch-namespaces-placeholder": "نانءَپولار وجهو…",
 	"prefs-advancedsearch": "متقدم ڳولا",
+	"advancedsearch-preference-help": "متقدم ڳولا خاص:ڳولا صفحي ۾ ھڪ فارم شامل ڪري ٿي. ھي خاص ڳولائون ڪرڻ جي اجازت ڏي ٿو، توڙي جو توھان ڪو ڳولا سينٽيڪس بہ نہ ڄاڻندا ھجو. اھو نانءُپولارن کي چونڊڻ جي طريقي کي بہ بدلائي ٿو.",
 	"advancedsearch-preference-disable": "جڏھن خاص:ڳولا استعمال ڪريو تہ متقدم ڳولا جو انٽرفيس نہ ڏيکاريو"
 }

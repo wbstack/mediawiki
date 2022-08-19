@@ -1,10 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Fluence"
+			"Fluence",
+			"Languaeditor"
 		]
 	},
-	"requestaccount-leg-user": "Tlatequitiltilīlli cuentah",
+	"requestaccount-leg-user": "Tekitiketl kwentah",
 	"requestaccount-real": "Melāhuac motōcā:",
 	"requestaccount-level-0": "chīhualōni"
 }

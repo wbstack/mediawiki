@@ -41,7 +41,7 @@
 			"value": false
 		},
 		"SFSIPListLocation": {
-			"value": "https://www.stopforumspam.com/downloads/listed_ip_90_ipv46_all.gz"
+			"value": "https://www.stopforumspam.com/downloads/listed_ip_30_ipv46_all.gz"
 		},
 		"SFSValidateIPListLocationMD5": {
 			"value": false

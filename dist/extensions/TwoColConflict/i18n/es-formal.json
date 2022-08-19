@@ -5,6 +5,7 @@
 		]
 	},
 	"twocolconflict-split-header-hint": "Puede ayudar a mejorar más esta función si deja comentarios [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View en esta página].",
+	"twocolconflict-split-choose-version": "Elija una versión",
 	"twocolconflict-split-your-version-chosen": "Su versión",
 	"twocolconflict-split-edit-tooltip": "Pulse para editar este texto",
 	"twocolconflict-talk-your": "Su comentario"

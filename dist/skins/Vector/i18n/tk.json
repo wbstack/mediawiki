@@ -1,10 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Hanberke"
+			"Hanberke",
+			"TayfunEt.",
+			"Amire80"
 		]
 	},
-	"vector-action-addsection": "Tema goş",
+	"vector-language-button-label": "{{PLURAL:$1|$1 Dil}}",
+	"vector-action-addsection": "Mowzuk goş",
 	"vector-action-delete": "Öçür",
 	"vector-action-move": "Adyny üýtget",
 	"vector-action-protect": "Goraga al",

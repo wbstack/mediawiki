@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Artsiom91"
+			"Artsiom91",
+			"Chadyka",
+			"No Sleep till Krupki"
 		]
 	},
 	"multimediaviewer-desc": "Пашырае эскізы ў большы памер на ўвесь экран.",
@@ -62,10 +64,11 @@
 	"multimediaviewer-download-small-button-name": "Спампаваць у малым памеры",
 	"multimediaviewer-download-medium-button-name": "Спампаваць у сярэднім памеры",
 	"multimediaviewer-download-large-button-name": "Спампаваць ў большым памеры",
+	"multimediaviewer-download-xl-button-name": "Спампаваць у вельмі вялікім памеры",
 	"multimediaviewer-link-to-page": "Спасылка на старонку апісання файла",
 	"multimediaviewer-link-to-file": "Спасылка на арыгінальны файл",
 	"multimediaviewer-share-explanation": "Скапіруйце і свабодна дзяліцеся спасылкай",
-	"multimediaviewer-embed-wt": "Вікітэкст",
+	"multimediaviewer-embed-wt": "Вікі-тэкст",
 	"multimediaviewer-embed-html": "HTML",
 	"multimediaviewer-embed-explanation": "Выкарыстоўвайце гэты код для ўстаўкі файла",
 	"multimediaviewer-text-embed-credit-text-bl": "Аўтар: $1, $2, $3",
@@ -78,6 +81,7 @@
 	"multimediaviewer-embed-via": "З дапамогай $1.",
 	"multimediaviewer-default-embed-dimensions": "Памер эскізу па змоўчанні",
 	"multimediaviewer-original-embed-dimensions": "Арыгінальны файл $1",
+	"multimediaviewer-xl-embed-dimensions": "Вельмі вялікі $1",
 	"multimediaviewer-large-embed-dimensions": "Вялікі памер $1",
 	"multimediaviewer-medium-embed-dimensions": "Сярэдні памер $1",
 	"multimediaviewer-small-embed-dimensions": "Малы памер $1",

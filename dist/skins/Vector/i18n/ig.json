@@ -3,9 +3,15 @@
 		"authors": [
 			"Tochiprecious",
 			"Ukabia",
-			"Uzoma Ozurumba"
+			"Uzoma Ozurumba",
+			"Edith Nwobu",
+			"Pasjoesscc",
+			"Oby Ezeilo",
+			"Amire80",
+			"Ifexin"
 		]
 	},
+	"vector-language-button-label": "{{PLURAL:$1|$1 asụsụ|asụsụ}}",
 	"vector-action-addsection": "Tinyé Okwu",
 	"vector-action-delete": "Kàcha",
 	"vector-action-move": "Papụ̀",
@@ -14,8 +20,8 @@
 	"vector-action-unprotect": "Nchẹdo mgbanwe",
 	"vector-view-create": "Kèe",
 	"vector-view-edit": "Mèzi",
-	"vector-view-history": "Lèe ị̀ta",
+	"vector-view-history": "Lèe onye rụrụ ọrụ a",
 	"vector-view-view": "Gụ̀ọ",
-	"vector-view-viewsource": "Zi mkpurụ",
+	"vector-view-viewsource": "Lee ebeosi",
 	"vector-more-actions": "Ọzọ"
 }

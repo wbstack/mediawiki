@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vlad5250"
+		]
+	},
+	"action-sfsblock-bypass": "заобикаляне на IP блокове, издадени от разширението StopForumSpam",
+	"right-sfsblock-bypass": "Заобикаляне на IP блокове, издадени от разширението StopForumSpam"
+}

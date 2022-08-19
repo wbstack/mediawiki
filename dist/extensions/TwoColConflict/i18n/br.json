@@ -3,9 +3,11 @@
 		"authors": [
 			"Adriendelucca",
 			"Fulup",
-			"Y-M D"
+			"Y-M D",
+			"Huñvreüs"
 		]
 	},
+	"twocolconflictprovidesubmittedtext": "Tabut kemmañ :",
 	"twocolconflict-core-ui-hint-close": "Arabat diskouez se ken",
 	"twocolconflict-split-tour-dialog-dot-message": "Evit bezañ skoazellet evel m'eo dleet, klikañ war ar pikoù glas lugernus",
 	"twocolconflict-split-tour-dialog-header": "Kendeuziñ ar stummoù gant dizemglev",

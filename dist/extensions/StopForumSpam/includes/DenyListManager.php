@@ -37,6 +37,9 @@ use Wikimedia\IPUtils;
  * @internal
  */
 class DenyListManager {
+
+	private const CACHE_VERSION = 1;
+
 	/** @var HttpRequestFactory */
 	private $http;
 	/** @var BagOStuff */
@@ -48,6 +51,9 @@ class DenyListManager {
 
 	/** @var IPSet|null */
 	private $denyListIPSet;
+
+	/** @var self */
+	private static $instance = null;
 
 	/**
 	 * @param HttpRequestFactory $http
@@ -72,14 +78,18 @@ class DenyListManager {
 	 * @return DenyListManager
 	 */
 	public static function singleton() {
-		$services = MediaWikiServices::getInstance();
+		if ( self::$instance == null ) {
+			$services = MediaWikiServices::getInstance();
 
-		$srvCache = $services->getLocalServerObjectCache();
-		$wanCache = $services->getMainWANObjectCache();
-		$http = $services->getHttpRequestFactory();
-		$logger = LoggerFactory::getInstance( 'DenyList' );
+			$srvCache = $services->getLocalServerObjectCache();
+			$wanCache = $services->getMainWANObjectCache();
+			$http = $services->getHttpRequestFactory();
+			$logger = LoggerFactory::getInstance( 'DenyList' );
 
-		return new self( $http, $srvCache, $wanCache, $logger );
+			self::$instance = new self( $http, $srvCache, $wanCache, $logger );
+		}
+
+		return self::$instance;
 	}
 
 	/**
@@ -190,7 +200,7 @@ class DenyListManager {
 	 * @return string Cache key for primary deny list
 	 */
 	private function getDenyListKey( IStoreKeyEncoder $cache ) {
-		return $cache->makeGlobalKey( 'sfs-denylist-set' );
+		return $cache->makeGlobalKey( 'sfs-denylist-set', self::CACHE_VERSION );
 	}
 
 	/**

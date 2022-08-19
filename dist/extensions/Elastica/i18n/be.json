@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chadyka"
+		]
+	},
+	"elastica-desc": "Базавая функцыянальнасць [http://www.elasticsearch.org/ Elasticsearch] для іншых пашырэнняў, падаючы бібліятэку [http://elastica.io/ Elastica]"
+}

@@ -9,8 +9,8 @@
 			"Stefano-c"
 		]
 	},
-	"requestaccount": "Richiesta account",
-	"requestaccount-login": "Richiesta account",
+	"requestaccount": "Richiedi utenza",
+	"requestaccount-login": "Richiedi utenza",
 	"requestaccount-text": "'''Completa e invia il seguente modulo per richiedere un account utente'''.\n\nAssicurarsi di aver prima letto i [[{{MediaWiki:Requestaccount-page}}|Termini del Servizio]] prima di richiedere un account.\n\nQuando l'account sarà stato approvato, ti verrà inviato via e-mail un messaggio di notifica e l'account sarà utilizzabile al [[Special:UserLogin|login]].",
 	"requestaccount-page": "{{ns:project}}:Termini del Servizio",
 	"requestaccount-dup": "'''Nota: hai già effettuato l'accesso con un account registrato.'''",
@@ -41,7 +41,7 @@
 	"requestaccount-exts": "Tipo di file allegato non permesso.",
 	"requestaccount-resub": "Il file del tuo curriculum deve essere ri-selezionato per motivi di sicurezza.\nLascia il campo vuoto se non desideri più includerne uno.",
 	"requestaccount-tos": "Ho letto e accetto di rispettare i [[{{MediaWiki:Requestaccount-page}}|Termini del Servizio]] di {{SITENAME}}.\nIl nome che ho specificato come \"Vero nome\" è infatti il mio vero nome.",
-	"requestaccount-submit": "Richiesta account",
+	"requestaccount-submit": "Richiedi utenza",
 	"requestaccount-sent": "La tua richiesta utenza è stata inviata ed è ora in attesa di verifica.\n\tUna email di conferma è stata inviata al tuo indirizzo di posta elettronica",
 	"requestaccount-econf": "Il tuo indirizzo e-mail è stato confermato e sarà indicato come tale nella tua richiesta.",
 	"requestaccount-email-subj": "{{SITENAME}} conferma indirizzo email",

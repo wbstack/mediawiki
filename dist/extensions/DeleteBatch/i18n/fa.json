@@ -3,23 +3,24 @@
 		"authors": [
 			"Armin1392",
 			"Mjbmr",
-			"Jeeputer"
+			"Jeeputer",
+			"Beginneruser"
 		]
 	},
-	"deletebatch": "حذف گروهی از صفحات",
+	"deletebatch": "حذف گروهی از صفحه‌ها",
 	"deletebatch-desc": "[[Special:DeleteBatch|Delete a batch of pages]]",
 	"deletebatch-help": "حذف دسته‌جمعی صفحه‌ها.\nشما می توانید یا تنها یک حذف انجام دهید، یا صفحات فهرست شده در یک پرونده را حذف کنید.\nکاربری را برای نمایش در سیاهه‌های حذف انتخاب کنید.\nپرونده‌های بارگذاری‌شده باید حاوی نام صفحه و دلیل اختیاری باشند که توسط یک نویسهٔ \"|\" از یکدیگر جدا شده‌اند.",
 	"deletebatch-caption": "فهرست صفحه:",
 	"deletebatch-default-reason": "دلیل پیش‌فرض برای حذف:",
 	"deletebatch-title": "حذف انبوه",
-	"deletebatch-link-back": "بازگشت به صفحه ویژه",
+	"deletebatch-link-back": "بازگشت به صفحهٔ ویژه",
 	"deletebatch-as": "اجرای متن به عنوان:",
 	"deletebatch-both-modes": "لطفاً یا یک صفحهٔ تعیین شده یا فهرست صفحات داده شده را انتخاب کنید.",
 	"deletebatch-or": "<strong>یا</strong>",
 	"deletebatch-delete": "حذف",
 	"deletebatch-page": "صفحه‌هایی که باید حذف شوند:",
-	"deletebatch-processing-from-file": "حذف صفحات فهرست شده در پوشه",
-	"deletebatch-processing-from-form": "حذف صفحات فهرست شده در فرم",
+	"deletebatch-processing-from-file": "حذف صفحه‌های فهرست شده در پوشه",
+	"deletebatch-processing-from-form": "حذف صفحه‌های فهرست شده در فرم",
 	"deletebatch-omitting-nonexistent": "حذف صفحهٔ غیر‌موجود $1",
 	"deletebatch-omitting-invalid": "حذف صفحهٔ نامعتبر $1",
 	"deletebatch-file-bad-format": "پوشه باید متن واضح باشد.",
@@ -28,6 +29,6 @@
 	"deletebatch-select-yourself": "شما",
 	"deletebatch-no-page": "لطفاً حداقل یک صفحه برای حذف کردن تعیین کنید یا یک پوشه شامل فهرست صفحه انتخاب کنید.",
 	"action-deletebatch": "حذف دسته‌جمعی صفحه‌ها",
-	"right-deletebatch": "گروه صفحات حذفی",
+	"right-deletebatch": "صفحه‌های حذف گروهی",
 	"deletebatch-deleting-file-only": "صفحهٔ توصیف پوشهٔ $1 وجود ندارد؛ فقط حذف پوشهٔ حقیقی وجود دارد.\nاین عمل وارد نخواهد شد."
 }

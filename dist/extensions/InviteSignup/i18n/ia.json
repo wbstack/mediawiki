@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"invitesignup": "Invitar personas a iste wiki",
+	"is-desc": "Inviar invitationes per e-mail",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "E-mail",
+	"is-tableth-inviter": "Invitator",
+	"is-tableth-signup": "Conto create",
+	"is-tableth-groups": "Gruppos",
+	"is-add": "Adder",
+	"is-delete": "Deler",
+	"is-invalidemail": "<b>$1</b> non es un adresse de e-mail valide.",
+	"is-emailsubj": "Tu es invitate a adherer a {{SITENAME}}",
+	"is-emailbody": "Salute,\n\n{{GENDER:$1|$1}} te ha invitate a crear un conto sur {{SITENAME}}.\nTu pote crear un conto a $2",
+	"right-invitesignup": "Invitar usatores a crear un conto",
+	"action-invitesignup": "invitar usatores a crear un conto sur iste sito"
+}

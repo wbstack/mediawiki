@@ -2,11 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Macofe",
-			"बिप्लब आनन्द"
+			"बिप्लब आनन्द",
+			"Bada Kaji"
 		]
 	},
 	"templatesandbox": "ढाँचा प्रयोगस्थल",
-	"templatesandbox-suffix": "प्रयोगस्थल",
+	"templatesandbox-suffix": "मेरो प्रयोगस्थल",
 	"templatesandbox-legend": "ढाँचा प्रयोगस्थल",
 	"templatesandbox-prefix-label": "प्रयोगस्थल उपसर्ग:",
 	"templatesandbox-page-label": "पृष्ठ प्रतिपादन:",
