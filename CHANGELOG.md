@@ -2,6 +2,41 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.37-7.4-20220818-fp-beta-0
+
+- Update extensions and skins to include latest REL1_37 changes
+## 1.37-7.4-20220812-fp-beta-0
+- Add ApiWbStackSiteStatsUpdate
+
+## 1.37-7.4-20220621-fp-beta-0
+- MW_ALLOWED_PROXY_CIDR added and read into $wgCdnServersNoPurge.
+
+## 1.37-7.4-20220603-fp-beta-0
+- Disables creation of CirrusSearch archive indices.
+
+## 1.37-7.4-20220512-fp-beta-0
+
+- Update CirrusSearch sharding configuration. This action requires re-indexing of ElasticSearch.
+## 1.37-7.4-20220429-fp-beta-0
+
+- Catch fatal error output from ForceSearchIndex job
+## 1.37-7.4-20220304-fp-beta-0
+
+- Hardcode $localConceptBaseUri to HTTPS
+- Use escapeshellarg in WbStackForceSearchIndex
+- Some changes to sync.sh
+- dependabot updates to github actions
+## 1.37-7.4-20220131-fp-beta-0
+
+- Don't set $wgReadOnly in CLIs
+
+## 1.37-7.4-20220126-fp-beta-0
+
+- Add internal api modules for updating ElasticSearch
+
+## 1.37-7.4-20220118-fp-beta-0
+- Set $wgReadOnly from the api
+
 ## 1.37-7.4-20220105-fp-beta-0
 
 - Update extensions and skins to include latest REL1_37 changes
@@ -59,6 +94,14 @@ Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build numb
 
 - Mailgun code updates
 - LocalSettings: `$wgMailgunEndpoint = getenv('MW_MAILGUN_ENDPOINT');`
+
+## 1.35-7.4-20211221-0-bp1
+
+- Set $wgReadOnly from the api
+
+## 1.35-7.4-20211221-0
+
+- MediaWiki 1.35.5
 
 ## 1.35-7.4-20211013-0
 

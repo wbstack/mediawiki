@@ -6,7 +6,8 @@
 			"Ex13",
 			"Macofe",
 			"Nemo bis",
-			"SpeedyGonsales"
+			"SpeedyGonsales",
+			"Ponor"
 		]
 	},
 	"requestaccount": "Zatraži suradnički račun",
@@ -32,7 +33,7 @@
 	"requestaccount-attach": "Rezime ili CV (po želji):",
 	"requestaccount-notes": "Dodatne bilješke:",
 	"requestaccount-urls": "Popis web stranica, ako ih ima (odvojite ih redom):",
-	"requestaccount-agree": "Morate potvrditi da je vaše pravo ime točno i da pristajete na naše Uvjete korištenja.",
+	"requestaccount-agree": "Morate potvrditi da je Vaše pravo ime točno i da pristajete na naše Uvjete upotrebe.",
 	"requestaccount-inuse": "Suradničko ime je već u upotrebi u otvorenom zahtjevu.",
 	"requestaccount-tooshort": "Vaš životopis mora biti dug najmanje $1 {{PLURAL:$1|riječ|riječi}}.",
 	"requestaccount-emaildup": "Drugi otvoreni zahtjev ima istu e-mail adresu.",
@@ -43,7 +44,7 @@
 	"requestaccount-sent": "Vaš zahtjev je uspješno poslan i sada čeka potvrdu.",
 	"requestaccount-econf": "Vaša e-mail adresa je potvrđena i bit će tako označena u vašem zahtjevu.",
 	"requestaccount-email-subj": "{{SITENAME}} potvrda e-mail adrese",
-	"requestaccount-email-body": "Netko, vjerojatno s vaše IP adrese $1, je zatražio račun \"$2\" s ovom e-mail adresom na {{SITENAME}}.\n\nKako biste potvrdili da ovaj račun zaista pripada vama na {{SITENAME}}, otvorite sljedeću poveznicu u svom internetskom pregledniku:\n\n$3\n\nAko se račun otvori, samo vama će biti poslana zaporka.\nAko ovo *niste* vi, nemojte otvarati poveznicu.\nOvaj potvrdni kod će isteći $4.",
+	"requestaccount-email-body": "Netko je (vjerojatno Vi) s internetske adrese $1 zatražio otvaranje računa »$2« pridruženog ovoj adresi e-pošte na projektu {{SITENAME}}.\n\nKako biste potvrdili da ovaj račun zaista pripada Vama, otvorite sljedeću poveznicu u svom internetskom pregledniku:\n\n$3\n\nAko se račun otvori, samo će Vama biti poslana zaporka.\nAko Vi ovo *niste* zatražili, nemojte otvarati poveznicu.\nOvaj potvrdni kôd istječe $4.",
 	"requestaccount-email-subj-admin": "{{SITENAME}} zahtjev suradničkog računa",
 	"requestaccount-email-body-admin": "$1 je zatražio suradnički račun i čeka potvrdu.\nE-mail adresa je potvrđena. Možete potvrditi zahtjev ovdje:\n\n$2",
 	"acct_request_throttle_hit": "Žao nam je, već ste zatražili {{PLURAL:$1|1 suradnički račun|$1 suradničke račune}}. Ne možete postaviti nove zahtjeve."

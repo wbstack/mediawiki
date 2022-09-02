@@ -2,10 +2,29 @@
 	"@metadata": {
 		"authors": [
 			"Matrafox",
-			"NGC 54"
+			"NGC 54",
+			"Dan Mihai Pitea"
 		]
 	},
+	"twocolconflict": "Conflict de modificare bazat pe paragrafe",
+	"twocolconflict-desc": "Afișează un ecran de contopire a editărilor una lângă alta pentru rezolvarea conflictelor de modificare",
+	"twocolconflictprovidesubmittedtext": "Conflict de editare:",
 	"twocolconflict-beta-feature-message": "Conflict de modificare bazat pe paragrafe",
 	"twocolconflict-beta-feature-description": "Afișează vizualizarea conflictului de modificare utilizând o vizualizare mai avansată bazată pe paragrafe.",
-	"twocolconflict-talk-your": "Comentariul dvs."
+	"twocolconflict-copy-action": "copiază tot textul",
+	"twocolconflict-copy-tab-action": "afișare text complet",
+	"twocolconflict-core-ui-hint-close": "Nu mai afișa din nou",
+	"twocolconflict-special-not-saved": "Nepublicat",
+	"twocolconflict-special-malformed-title": "Titlu lipsă sau invalid.",
+	"twocolconflict-split-your-version-header": "Revizia dumneavoastră",
+	"twocolconflict-split-other-version-chosen": "Altă versiune",
+	"twocolconflict-split-your-version-chosen": "Versiunea dumneavoastră",
+	"twocolconflict-split-select-all": "Selectează tot",
+	"twocolconflict-split-tour-popup-btn-text": "Bine, am înțeles.",
+	"twocolconflict-split-tour-popup2-header": "Alegeți modificările care doriți să fie păstrate",
+	"twocolconflict-split-selected-other-tooltip": "Altă versiune este selectată",
+	"twocolconflict-split-help-tooltip": "Arată pagina de ajutor",
+	"twocolconflict-talk-your": "Comentariul dvs.",
+	"twocolconflict-talk-switch-tooltip": "Inversare ordine",
+	"twocolconflict-talk-same-order": "Păstrează după"
 }

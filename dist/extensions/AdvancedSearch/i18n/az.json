@@ -59,5 +59,7 @@
 	"advancedsearch-namespaces-preset-general-help": "Kömək",
 	"advancedsearch-namespaces-preset-discussion": "Müzakirə",
 	"advancedsearch-namespaces-placeholder": "Adlar fəzası əlavə et...",
-	"prefs-advancedsearch": "Ətraflı axtarış:"
+	"prefs-advancedsearch": "Ətraflı axtarış:",
+	"advancedsearch-preference-help": "Qabaqcıl axtarış \"Xüsusi:Axtar\" səhifəsinə forma əlavə edir. Bu, heç bir axtarış sintaksisini bilməsəniz belə, xüsusi axtarışlar aparmağa imkan verir. Həmçinin ad fəzalarının seçilmə üsulunu dəyişir.",
+	"advancedsearch-preference-disable": "\"Xüsusi:Axtar\"-dan istifadə edərkən qabaqcıl axtarış interfeysini göstərmə"
 }

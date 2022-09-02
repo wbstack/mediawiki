@@ -181,7 +181,8 @@ if( $wgFavicon === null ) {
 }
 
 // Readonly: null, or a string message for readonly mode & reason.
-$wgReadOnly = $wikiInfo->getSetting('wgReadOnly');
+// Always writable via CLI
+$wgReadOnly = ( PHP_SAPI === 'cli' ) ? false : $wikiInfo->getSetting('wgReadOnly');
 
 // https://www.mediawiki.org/wiki/Manual:$wgFooterIcons
 // Add the custom powered by icons....
@@ -512,7 +513,7 @@ $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
 
-$localConceptBaseUri = 'http://' . $wikiInfo->domain . '/entity/';
+$localConceptBaseUri = 'https://' . $wikiInfo->domain . '/entity/';
 
 $wgWBRepoSettings['entitySources'] = [
     'local' => 
@@ -642,6 +643,14 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
 
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchDefaultCluster = 'default';
+    
+    // T308115
+    $wgCirrusSearchShardCount = [ 'content' => 1, 'general' => 1 ];
+
+    // T309379
+    $wgCirrusSearchEnableArchive = false;
+    $wgCirrusSearchPrivateClusters = [ 'non-existing-cluster' ];
+    
     $wgCirrusSearchClusters = [
         'default' => [
             [ 'host' => getenv('MW_ELASTICSEARCH_HOST'), 'port' => getenv('MW_ELASTICSEARCH_PORT') ],

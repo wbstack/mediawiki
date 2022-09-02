@@ -4,9 +4,20 @@
 			"CptViraj"
 		]
 	},
+	"advancedsearch-field-plain": "આ શબ્દો",
+	"advancedsearch-field-phrase": "બરાબર આ જ લખાણ",
+	"advancedsearch-field-not": "આ શબ્દો નહીં",
+	"advancedsearch-field-subpageof": "આ પાનાના ઉપપાના",
+	"advancedsearch-field-deepcategory": "આ શ્રેણીઓમાં પાનાઓ",
+	"advancedsearch-field-hastemplate": "આ ઢાંચાઓ ધરાવતા પાનાઓ",
+	"advancedsearch-field-inlanguage": "આ ભાષામાં પાનાઓ",
 	"advancedsearch-field-filetype": "ફાઈલનો પ્રકાર",
+	"advancedsearch-inlanguage-default": "ભાષા પસંદ કરો",
 	"advancedsearch-filetype-bitmap": "છબી",
 	"advancedsearch-filetype-drawing": "ચિત્ર",
 	"advancedsearch-filetype-audio": "ધ્વનિ",
-	"advancedsearch-filetype-video": "ચલચિત્ર"
+	"advancedsearch-filetype-video": "ચલચિત્ર",
+	"advancedsearch-filesize-greater-than": "થી વધારે",
+	"advancedsearch-filesize-smaller-than": "થી ઓછી",
+	"advancedsearch-namespaces-placeholder": "નામસ્થળો ઉમેરો..."
 }

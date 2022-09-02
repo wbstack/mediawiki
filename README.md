@@ -1,8 +1,15 @@
 # WBStack MediaWiki modifications
 
-This directory contains the code around MediaWiki to make it work for the WBStack usecase.
+The purposes and features of this repository are:
+- Update the references to code you want to build MediaWiki from
+- Download the code you want to build MediaWiki from
+- Store and then copy in the custom WBStack code
+- Adjust some MediawWiki code to load custom WBStack code
+- Build the Docker image from the code in the `dist` directory
+- Test the image
+- Build the image automatically on Github Actions platform then push it.
 
-This ultimately repackages MediaWiki, extensions, skins, and the WBStack code into a new "application" with a much tighter external interface (particularly around configuration).
+This ultimately repackages MediaWiki together with its extensions, skins, and the WBStack code into `dist` and `dist-persist` folders, then creates a new "application" with a much tighter external interface (particularly around configuration).
 
 This application reaches out to some API (currently the WBStack api) to get the "wiki info" for a given domain.
 
@@ -19,7 +26,10 @@ This response is then used to configure MediaWiki.
 An internal flavour of this application also exists that loads some internal only API modules.
 These can be found in the `src/Internal` directory.
 
+
 ## Environment variables
+
+This part describes the Docker image that this repo is designed to build. People, who are only interested in using the image rather than changing/adjusting it, may find this useful.
 
 - `MW_DB_SERVER_MASTER`: points to a writable mysql service
 - `MW_DB_SERVER_REPLICA`: points to a readable mysql service
@@ -35,102 +45,18 @@ These can be found in the `src/Internal` directory.
 - `MW_ELASTICSEARCH_HOST`: elasticsearch hostname
 - `MW_ELASTICSEARCH_PORT`: elasticsearch port
 - `MW_LOG_TO_STDERR`: set to "yes" to redirect all mediawiki logging to stderr (so it ends up in the kubernetes pod logs)
+- `MW_ALLOWED_PROXY_CIDR`: CIDR block where any IP address in the range is considered a proxy server
 
-## Build scripts
+## Dockerfile build arguments
 
-### wikiman & pacman
+- `LOCALIZATION_CACHE_THREAD_COUNT`: Number of threads to use when rebuildLocalisationCache.php runs, defaults to 1
+- `LOCALIZATION_CACHE_ADDITIONAL_PARAMS` Additional parameters to pass to rebuildLocalisationCache.php, can for example be used to reduce the number of languages built.
+- `INSTALL_XDEBUG`: Installs and configures the php extension xdebug
 
-`wikiman` is a MediaWiki specific yaml generator for pacman.
-This needs to be run by developers when updating component versions in `wikiman.yaml`
+## Instructions
 
-`pacman` is a generic tool using yaml to fetch a series of codebases and place them on disk.
-This is run as a step in `sync.sh`
+These documents below will explain how the docker image is built:
 
-### sync.sh
-
-This script will resync the WHOLE git repo.
-
-This is made up of a series of steps:
-
-- `01-clear`: Remove all MediaWiki code
-- `pacman`: Retrieive and build MediaWiki code
-- `03-less-files`: Remove not needed things from MediaWiki code
-- `04-docker-compose`: Perform a composer install
-- `05-docker-entrypoint-overrides`: Add the WBStack shims to MediaWiki entrypoints
-
-## MediaWiki Loading
-
-MediaWiki loads this code in 2 ways.
-
-Firstly through entry point shims:
-
-- **(index|load|api|rest).php** - MediaWiki entry points
-  - src/Shim/*.php - These files are loaded at the start of the MediaWiki entry points
-    - src/loadShim.php
-      - src/Info/WBStackInfo.php - Main code for fetching things from the platform API
-      - src/Logging/WikWikiSpi.php
-      - src/Logging/WikWikiLogger.php
-
-And secondly via LocalSettings.php
-
-- **LocalSettings.php** - The actual MediaWiki settings file
-  - src/Settings/LocalSettings.php - Is loaded from the MediaWiki LocalSettings.php (where it normally would be)
-    - src/loadAll.php
-    - src/Settings/Cache.php
-    - src/loadInternal.php - Only loaded for the INTERNAL flavour of the app.
-      - src/Internal/*
-    - src/Settings/Hooks.php
-
-## Secondary setup
-
-### ElasticSearch index configuration
-
-In order to enable elasticsearch the `UpdateSearchIndexConfig.php` needs to be executed for that wiki.
-On wiki creation through the API this is done by the `ApiWbStackElasticSearchInit` job.
-
-## Development Environment
-
-There is a [docker-compose file](../docker-compose.yml) in the root directory that allows for serving multiple development sites locally.
-
-These are currently not using the real api but rather gets their settings from the static json files included in the data folder.
-
-The fake api is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
-
-
-### Start the dev environment
-
-```sh
-docker-compose up
-```
-
-Wait until both sites are accessible:
-
- - http://site1.localhost:8001/wiki/Main_Page
- - http://site2.localhost:8001/wiki/Main_Page
-
- You may need to add an entry to your `hosts` file:
-
- ```
- 127.0.0.1 site1.localhost site2.localhost
- ```
-
- Once the sites are accessible you can perform secondary setup (_The request takes a while to execute_):
-
- ```sh
-curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
-curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
-```
-
-### Debugging Elastic
-
-General overview of the cluster
-
-```
-http://localhost:9200/_stats
-```
-
-Entries in the content index (Items, Lexemes) for `site1.localhost` can be found by going to the following url
-
-```
-http://localhost:9200/site1.localhost_content_first/_search
-```
+- [Build scripts](./docs/build-scripts.md): How `dist` directory is synced with `pacman` and `wikiman`
+- [How MediaWiki loads WBStack custom code](./docs/mediawiki-loading.md): How WBStack custom code is loaded into MediaWiki via `LocalSetting.php` or entry point shims
+- [Development Environment](./docs/dev-environment.md): How to use this repo on your local development Environment

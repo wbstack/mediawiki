@@ -23,7 +23,9 @@
 	"AutoloadClasses": {
 		"ElasticaConnection": "includes/ElasticaConnection.php",
 		"ElasticaHttpTransportCloser": "includes/ElasticaHttpTransportCloser.php",
-		"MWElasticUtils": "includes/MWElasticUtils.php"
+		"MWElasticUtils": "includes/MWElasticUtils.php",
+		"MediaWiki\\Extension\\Elastica\\ElasticaConnection": "includes/ElasticaConnection.php",
+		"MediaWiki\\Extension\\Elastica\\MWElasticUtils": "includes/MWElasticUtils.php"
 	},
 	"load_composer_autoloader": true,
 	"manifest_version": 2

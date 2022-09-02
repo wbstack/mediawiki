@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"mailgun-desc": "Inviar e-mail per le servicio API Mailgun de MediaWiki"
+}

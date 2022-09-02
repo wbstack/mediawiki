@@ -15,19 +15,27 @@ REPO_DIR="${1}"
 YAMLFILE="${1}/pacman.yaml"
 TEMPORARY_DIR="${REPO_DIR}/.tmp"
 
+# import functions from pacman-utils script
+source "${REPO_DIR}/sync/pacman/pacman-utils"
+
 echo "Make sure temporary dir is created and empty (${TEMPORARY_DIR})"
 rm -rf "${TEMPORARY_DIR}"
-mkdir -p "$TEMPORARY_DIR"
+mkdir -p "${TEMPORARY_DIR}"
 
 # The contents of the wbstack directory was moved so can been cleaned up.
 # This was changed in January 2022, we could remove this cleanup in the future.
 OLD_WBSTACK_DIR="$(realpath ${REPO_DIR}/wbstack)"
 echo "Removing old wbstack directory (${OLD_WBSTACK_DIR})"
-rm -rf $OLD_WBSTACK_DIR
+rm -rf "${OLD_WBSTACK_DIR}"
 
 # exit the script if Ctrl+C pressed; this is needed once subshells are created.
 trap 'exit 130' INT
 
+# create a named pipe to redirect the output of the subshells to
+FIFO="/tmp/pacman_fifo"
+mkfifo $FIFO
+
+subshell_pids=()
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     # download and extract each artifact asynchronously
     # the brackets create a subshell
@@ -37,15 +45,20 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         artifactLevel=$(echo $codebase | jq -r '.artifactLevel' -)
         temporaryFile="${TEMPORARY_DIR}/${name}"
         temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted"
-        echo "Downloading and extracting '${name}' from '${artifactUrl}' to '${temporaryExtraction}'";
+        echo "Downloading '${name}' from '${artifactUrl}'"
         wget --quiet "$artifactUrl" -O "${temporaryFile}"
+        echo "Extracting '${name}' to '${temporaryExtraction}'"
         mkdir -p ${temporaryExtraction}
         bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
-    ) &
+        echo "Downloading and extracting '${name}' COMPLETE"
+    ) &>$FIFO &
+
+    # add each subshell's pid to an array
+    subshell_pids+=( $! )
 done
 
-# wait for the artifacts to download
-wait
+# wait for the subshells to finish while printing their output
+subshell_wait "$FIFO" "${subshell_pids[@]}"
 
 # includes filenames beginning with a '.' in the results of filename expansion (/*)
 shopt -s dotglob

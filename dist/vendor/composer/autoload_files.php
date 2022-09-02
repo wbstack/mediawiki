@@ -8,8 +8,8 @@ $baseDir = dirname($vendorDir);
 return array(
     '7b11c4dc42b3b3023073cb14e519683c' => $vendorDir . '/ralouphie/getallheaders/src/getallheaders.php',
     'a0edc8309cc5e1d60e3047b5df6b7052' => $vendorDir . '/guzzlehttp/psr7/src/functions_include.php',
-    'ad155f8f1cf0d418fe49e248db8c661b' => $vendorDir . '/react/promise/src/functions_include.php',
     'a4a119a56e50fbb293281d9a48007e0e' => $vendorDir . '/symfony/polyfill-php80/bootstrap.php',
+    'ad155f8f1cf0d418fe49e248db8c661b' => $vendorDir . '/react/promise/src/functions_include.php',
     '8592c7b0947d8a0965a9e8c3d16f9c24' => $vendorDir . '/elasticsearch/elasticsearch/src/autoload.php',
     'c964ee0ededf28c96ebd9db5099ef910' => $vendorDir . '/guzzlehttp/promises/src/functions_include.php',
     '37a3dc5111fe8f707ab4c132ef1dbc62' => $vendorDir . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -23,6 +23,6 @@ return array(
     'c50606d667a3fde2b80a955639479d3d' => $vendorDir . '/wikimedia/timestamp/src/defines.php',
     'c15f8000750e4e04ba559d9745044427' => $vendorDir . '/data-values/number/Number.php',
     '3ef87127dc6892a0a78f223558a0b940' => $vendorDir . '/diff/diff/Diff.php',
-    'db89166205707d49719c395c26d4e52d' => $vendorDir . '/wikimedia/parsoid/DomImpl.php',
     '6513700b70192b7dfd0e5e9fc8082cf3' => $vendorDir . '/wikimedia/relpath/src/Wikimedia/RelPath.php',
+    'db89166205707d49719c395c26d4e52d' => $vendorDir . '/wikimedia/parsoid/DomImpl.php',
 );

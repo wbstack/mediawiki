@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"এম আবু সাঈদ"
+		]
+	},
+	"advancedsearch-optgroup-structure": "ꠉꠐꠘ",
+	"advancedsearch-optgroup-files": "ꠚꠣꠁꠟ ꠀꠞ ꠍꠛꠤꠘ",
+	"advancedsearch-field-plain": "ꠅꠃ ꠡꠛ꠆ꠖꠣꠁꠘ",
+	"advancedsearch-field-phrase": "ꠅꠃ ꠟꠦꠈꠣꠐꠣꠃ",
+	"advancedsearch-field-or": "ꠅꠃ ꠡꠛ꠆ꠖꠣꠘ꠆ꠔꠞ ꠄꠉꠥ",
+	"advancedsearch-field-not": "ꠁꠔꠣ ꠡꠛ꠆ꠖꠣꠁꠘ ꠘꠣꠄ",
+	"advancedsearch-field-inlanguage": "ꠅꠃ ꠜꠣꠡꠣꠞ ꠚꠣꠔꠣꠁꠘ",
+	"advancedsearch-field-filetype": "ꠚꠣꠁꠟꠞ ꠗꠞꠘ"
+}

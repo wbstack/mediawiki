@@ -15,5 +15,6 @@
 	"twocolconflict-split-tour-dialog-message": "Samatempe kam vu redaktabis, ul altra uzero anke redaktis ca pagino, e publikigis ol ante ke vu.\n\nNe suciez! Vua redakturi ne perdabis! Voluntez revizar amba versioni e kunfuzar li. Se vu bezonos, vu povos redaktar la texto selektata. Nur la texto en la selekto-buxi salvesos kande vu kliktos \"{{int:publishchanges}}.\"",
 	"twocolconflict-split-tour-dialog-btn-text": "Komencez mixar",
 	"twocolconflict-split-tour-popup-btn-text": "O.K., me komprenas.",
-	"twocolconflict-split-tour-popup2-header": "Selektez la modifikuri quon vu deziras mantenar"
+	"twocolconflict-split-tour-popup2-header": "Selektez la modifikuri quon vu deziras mantenar",
+	"twocolconflict-split-reset-warning-cancel": "Nuligar"
 }

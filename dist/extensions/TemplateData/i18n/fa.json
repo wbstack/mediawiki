@@ -15,7 +15,8 @@
 			"Ladsgroup",
 			"Reza1615",
 			"Saadat",
-			"Sunfyre"
+			"Sunfyre",
+			"Beginneruser"
 		]
 	},
 	"templatedata-desc": "پیاده‌سازی ذخیره‌سازی داده‌های پارامترهای الگو (با استفاده از جی‌سن)",
@@ -61,7 +62,7 @@
 	"templatedata-invalid-format": "انتظار می‌رود که ویژگی «$1» برابر با «inline»، «block» یا یک رشتهٔ قالب‌بندی معتبر باشد.",
 	"templatedata-invalid-length": "داده‌ها برای ذخیره‌سازی بسیار بزرگ هستند ({{formatnum:$1}} {{PLURAL:$1|بایت|بایت}}، {{formatnum:$2}} {{PLURAL:$2|حداکثر طول مجاز است}})",
 	"templatedata-invalid-missing": "ویژگی مورد نیاز «$1» پیدا نشد.",
-	"templatedata-invalid-param": "پارامتر «$1» برای خاصیت «$2» نامعتبر است.",
+	"templatedata-invalid-param": "پارامتر «$1» برای ویژگی «$2» نامعتبر است.",
 	"templatedata-invalid-parse": "خطای نحوی در جی‌سن.",
 	"templatedata-invalid-type": "انتظار می‌رود ویژگی «$1» از نوع «$2» باشد.",
 	"templatedata-invalid-unknown": "ویژگی «$1» غیرمنتظره است.",
@@ -76,7 +77,7 @@
 	"templatedata-modal-button-delparam": "حذف اطلاعات پارامتر",
 	"templatedata-modal-button-done": "انجام شد",
 	"templatedata-modal-button-map": "ویرایش نقشه‌ها",
-	"templatedata-modal-button-importParams": "واردکردن پارامترها",
+	"templatedata-modal-button-importParams": "درون‌ریزی پارامترها",
 	"templatedata-modal-button-removemap": "حذف نقشه",
 	"templatedata-modal-button-restoreparam": "بازگرداندن پارامتر",
 	"templatedata-modal-button-saveparam": "ذخیره",
@@ -84,7 +85,7 @@
 	"templatedata-modal-current-language": "زبان کنونی: $1",
 	"templatedata-modal-errormsg": "خطاهایی پیدا شدند. لطفاً مطمئن شوید که هیچ نام پارامتری خالی یا تکراری نیست، و اینکه نام پارامتر شامل «$1»، «$2» یا «$3» نیست.",
 	"templatedata-modal-errormsg-duplicate-name": "خطا یافت شد. نان منتخب از پیش توسط پارامتر دیگری استفاده شده.",
-	"templatedata-modal-errormsg-import-noparams": "هیچ پارامتر تازه‌ای طی واردکردن پیدا نشد.",
+	"templatedata-modal-errormsg-import-noparams": "هیچ پارامتر جدید در طی درون‌ریزی پیدا نشد.",
 	"templatedata-modal-format-block": "بستن",
 	"templatedata-modal-format-custom": "سفارشی",
 	"templatedata-modal-format-inline": "درخط",

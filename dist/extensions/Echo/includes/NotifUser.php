@@ -376,8 +376,9 @@ class MWEchoNotifUser {
 	 *
 	 * @param int[] $eventIds Event IDs to mark as read
 	 * @param string $wiki Wiki name
+	 * @param WebRequest|null $originalRequest Original request data to be sent with these requests
 	 */
-	public function markReadForeign( array $eventIds, $wiki ) {
+	public function markReadForeign( array $eventIds, $wiki, ?WebRequest $originalRequest = null ) {
 		$foreignReq = new EchoForeignWikiRequest(
 			$this->mUser,
 			[
@@ -388,7 +389,7 @@ class MWEchoNotifUser {
 			'wikis',
 			'csrf'
 		);
-		$foreignReq->execute();
+		$foreignReq->execute( $originalRequest );
 	}
 
 	/**
@@ -396,9 +397,10 @@ class MWEchoNotifUser {
 	 *
 	 * @param int[] $eventIds Event IDs to look up. Only unread notifications can be found.
 	 * @param string $wiki Wiki name
+	 * @param WebRequest|null $originalRequest Original request data to be sent with these requests
 	 * @return array[] Array of notification data as returned by api.php, keyed by event ID
 	 */
-	public function getForeignNotificationInfo( array $eventIds, $wiki ) {
+	public function getForeignNotificationInfo( array $eventIds, $wiki, ?WebRequest $originalRequest = null ) {
 		$foreignReq = new EchoForeignWikiRequest(
 			$this->mUser,
 			[
@@ -411,7 +413,7 @@ class MWEchoNotifUser {
 			[ $wiki ],
 			'notwikis'
 		);
-		$foreignResults = $foreignReq->execute();
+		$foreignResults = $foreignReq->execute( $originalRequest );
 		$list = $foreignResults[$wiki]['query']['notifications']['list'] ?? [];
 
 		$result = [];

@@ -3,7 +3,8 @@
 		"authors": [
 			"Fohanno",
 			"Fulup",
-			"Y-M D"
+			"Y-M D",
+			"Huñvreüs"
 		]
 	},
 	"confirmaccounts": "Kadarnaat ar goulennoù kont",
@@ -71,9 +72,9 @@
 	"confirmaccount-submit": "Kadarnaat",
 	"confirmaccount-needreason": "Ret eo deoc'h pourchas un abeg er voest amañ dindan.",
 	"confirmaccount-canthold": "Ar reked-mañ a zo pe kemeret e kont dija, pe dilamet.",
-	"confirmaccount-acc": "Kardarnaet eo bet ar goulenn kont ;\nkrouet eo bet ar gont implijer nevez [[User:$1|$1]].",
+	"confirmaccount-acc": "Kardarnaet eo bet ar goulenn kont ;\n\tkrouet eo bet ar gont implijer nevez [[User:$1|$1]].",
 	"confirmaccount-rej": "Distaolet eo bet ar goulenn kont.",
-	"confirmaccount-viewing": "(gwelet gant [[User:$1|$1]] evit bremañ)",
+	"confirmaccount-viewing": "(o vezañ gwelet gant {{GENDER:$1|}}[[User:$1|$1]])",
 	"confirmaccount-summary": "O krouiñ pajenn implijer un implijer nevez.",
 	"confirmaccount-welc": "'''Degemer mat e ''{{SITENAME}}''!'''\nSpi hon eus e kemerot perzh da vat ha mat.\nMarteze hoc'h eus c'hoant da lenn ar [{{MediaWiki:Helppage}} pajennoù skoazell].\nAdarre, degemer mat ha plijadur deoc'h !",
 	"confirmaccount-wsum": "Degemer mat !",

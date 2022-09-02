@@ -16,7 +16,8 @@
 			"Pertile",
 			"Sanbec",
 			"Translationista",
-			"VegaDark"
+			"VegaDark",
+			"DiegoAmbrocio"
 		]
 	},
 	"confirmaccounts": "Confirmar solicitudes de cuenta",
@@ -86,6 +87,8 @@
 	"confirmaccount-needreason": "Debes proveer una razón en el cuadro de comentario a continuación.",
 	"confirmaccount-canthold": "Esta solicitud ya se encuentra retenida o eliminada.",
 	"confirmaccount-badaction": "Una acción válida (aceptar, rechazar, retener) debe especificarse para poder continuar.",
+	"confirmaccount-mismatched": "Este campo debe coincidir con el de la solicitud de cuenta original.",
+	"confirmaccount-mismatched-general": "Se ha solicitado una anulación en un campo de la solicitud de cuenta original que no está permitido o no se ha establecido la opción \"contraseña de correo\".",
 	"confirmaccount-acc": "Solicitud de cuenta confirmada;\ncreada nueva cuenta de usuario [[User:$1|$1]].",
 	"confirmaccount-rej": "Solicitud de cuenta rechazada.",
 	"confirmaccount-viewing": "(actualmente {{GENDER:$1|siendo}} visto por [[User:$1|$1]])",

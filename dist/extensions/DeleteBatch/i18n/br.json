@@ -3,12 +3,13 @@
 		"authors": [
 			"Fohanno",
 			"Fulup",
-			"Y-M D"
+			"Y-M D",
+			"Huñvreüs"
 		]
 	},
 	"deletebatch": "Dilemel ur strollad pajennoù",
 	"deletebatch-desc": "[[Special:DeleteBatch|Dilemel ur strollad pajennoù]]",
-	"deletebatch-help": "Dilemel ur strollad pajennoù.\nGellout a rit lañsañ un dilammadenn eeun pe dilemel pajennoù listennet en ur restr.\nDibabit un implijer a vo lakaet e marilh an dilammadennoù.\nUr restr enporzhiet a c'hello bezañ ennañ : anv ur bajenn hag un abeg (diret) evit he dilemel, rankout a raio bezañ dispartiet gant ur \"|\" evit pep linenn.",
+	"deletebatch-help": "Diverkañ ur strollad pajennoù.\nGellout a rit lañsañ un diverkadenn eeun pe diverkañ pajennoù listennet en ur restr.\nDibabit un implijer a vo lakaet e marilh an dilammadennoù.\nUr restr enporzhiet a c'hello bezañ ennañ : anv ur bajenn hag un abeg (diret) evit he diverkañ, dispartiet gant ur \"|\".",
 	"deletebatch-caption": "Roll ar pajennoù :",
 	"deletebatch-title": "Dilemel ur strollad",
 	"deletebatch-link-back": "Distreiñ d'ar bajenn dibar",

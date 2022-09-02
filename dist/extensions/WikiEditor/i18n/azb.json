@@ -7,7 +7,8 @@
 			"Ebrahimi-amir",
 			"Ilğım",
 			"Koroğlu",
-			"Mousa"
+			"Mousa",
+			"Amire80"
 		]
 	},
 	"wikieditor-wikitext-tab": "ویکی‌متن",
@@ -79,7 +80,7 @@
 	"wikieditor-toolbar-tool-nowiki": "ویکی ‌فورمتینده دئییل",
 	"wikieditor-toolbar-tool-nowiki-example": "فورمت‌لشدیریلمه‌میش یازی‌نی بورا داخیل ائدین",
 	"wikieditor-toolbar-tool-redirect": "یؤنلندیرمه",
-	"wikieditor-toolbar-tool-redirect-example": "صحیفه آدینی علاوه ائت",
+	"wikieditor-toolbar-tool-redirect-example": "صفحه آدینی آرتیر",
 	"wikieditor-toolbar-tool-big": "بویوک",
 	"wikieditor-toolbar-tool-big-example": "بؤیوک متن",
 	"wikieditor-toolbar-tool-small": "کیچیک",
@@ -89,7 +90,7 @@
 	"wikieditor-toolbar-tool-subscript": "آلت یازی",
 	"wikieditor-toolbar-tool-subscript-example": "آلت‌ یازی‌سی",
 	"wikieditor-toolbar-group-insert": "یاراشدیرماق",
-	"wikieditor-toolbar-tool-gallery": "شکیل قالئرئیاسی",
+	"wikieditor-toolbar-tool-gallery": "عکس قالری‌سی",
 	"wikieditor-toolbar-tool-gallery-example": "اؤرنک.jpg|باشلیق۱\nاؤرنک.jpg|باشلیق۲",
 	"wikieditor-toolbar-tool-newline": "یئنی خط",
 	"wikieditor-toolbar-tool-table": "جدول",
@@ -145,8 +146,8 @@
 	"wikieditor-toolbar-help-content-bolditalic-syntax": "'''''قالین و مورب متن'''''",
 	"wikieditor-toolbar-help-content-bolditalic-result": "<strong><em>قالین و مورب متن</em></strong>",
 	"wikieditor-toolbar-help-content-ilink-description": "ایچری باغلانتی‌سی",
-	"wikieditor-toolbar-help-content-ilink-syntax": "[[صحیفه‌نین آدی|کئچیدین آدی]]<br />[[صحیفه‌نین آدی]]",
-	"wikieditor-toolbar-help-content-ilink-result": "<a href='#'>کئچیدین آدی</a><br /><a href='#'>سهیفه‌نین آدی</a>",
+	"wikieditor-toolbar-help-content-ilink-syntax": "[[صحیفه‌نین آدی]]<br />[[صحیفه‌نین آدی|کئچیدین آدی]]",
+	"wikieditor-toolbar-help-content-ilink-result": "<a href='#'>سهیفه‌نین آدی</a><br /><a href='#'>کئچیدین آدی</a>",
 	"wikieditor-toolbar-help-content-xlink-description": "خاریجی باغلانتی‌سی",
 	"wikieditor-toolbar-help-content-xlink-syntax": "[http://www.example.org باغلانتی باشلیقی]<br />[http://www.example.org]<br />http://www.example.org",
 	"wikieditor-toolbar-help-content-xlink-result": "</a><br /><a href='#' class='external autonumber'>[1]</a><br /><a href='#' class='external'>http://www.example.org</a>",

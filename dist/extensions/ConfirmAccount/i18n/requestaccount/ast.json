@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Macofe",
-			"Xuacu"
+			"Xuacu",
+			"Fitoschido"
 		]
 	},
 	"requestaccount": "Solicitar una cuenta",
@@ -22,7 +23,7 @@
 	"requestaccount-bio-text-i": "'''La so biografía quedará configurada como'l conteníu inicial de la so páxina d'usuariu.'''\nAsegúrese de que nun tien problema en publicar esa información.",
 	"requestaccount-real": "Nome real:",
 	"requestaccount-same": "(el mesmu que'l nome real d'abaxo)",
-	"requestaccount-email": "Direición de corréu electrónicu:",
+	"requestaccount-email": "Señes electróniques:",
 	"requestaccount-reqtype": "Cargu:",
 	"requestaccount-level-0": "autor",
 	"requestaccount-level-1": "editor",

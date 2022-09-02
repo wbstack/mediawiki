@@ -3,7 +3,8 @@
 		"authors": [
 			"Adriendelucca",
 			"Dishual",
-			"Fulup"
+			"Fulup",
+			"Huñvreüs"
 		]
 	},
 	"advancedsearch-options-pane-head": "Klask araokaet:",
@@ -22,6 +23,8 @@
 	"advancedsearch-field-filetype": "Seurt restr",
 	"advancedsearch-field-filew": "Ledander ar restr e piksel",
 	"advancedsearch-field-fileh": "Uhelder ar restr e piksel",
+	"advancedsearch-field-preview-sort": "Urzhiañ dre $1",
+	"advancedsearch-placeholder-exact-text": "\"tri martolod yaouank\"",
 	"advancedsearch-inlanguage-default": "Dibab ar yezh",
 	"advancedsearch-filetype-section-types": "Seurtoù hollek ar restroù",
 	"advancedsearch-filetype-section-image": "Furmadoù ar skeudenn",
@@ -38,6 +41,9 @@
 	"advancedsearch-filesize-equals": "par da",
 	"advancedsearch-filesize-greater-than": "brasoc'h eget",
 	"advancedsearch-filesize-smaller-than": "bihanoc'h eget",
+	"advancedsearch-sort-preview-relevance": "reizhidigezh",
+	"advancedsearch-sort-preview-last-edit-desc": "deiziad kemm",
+	"advancedsearch-sort-preview-create-timestamp-desc": "deiziad krouidigezh",
 	"advancedsearch-namespaces-search-in": "Klask e :",
 	"advancedsearch-namespaces-remember": "Derc'hel soñj eus an diuzadenn evit klaskoù da zont",
 	"advancedsearch-namespaces-preset-all": "An holl",

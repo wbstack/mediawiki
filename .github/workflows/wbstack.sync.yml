@@ -1,4 +1,4 @@
-name: wbstack sync
+name: wbstack sync diff
 
 on:
   push:
@@ -7,14 +7,18 @@ on:
   pull_request:
 
 jobs:
-  checks:
+  check_only_expected_sync_changes:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3.0.2
       - name: run sync
         run: ./sync.sh
       - name: Show `git diff`` output
         run: git diff
-      - name: Check only composer autoloaders changed
-        run: diff -Z ./.github/workflows/wbstack.sync.expect.txt <(git status --porcelain=v1)
+      - name: Check only composer changed
+        run: |
+          GIT_CHANGES=$(git status --porcelain=v1 -- ':!dist/vendor/composer' ':!dist/vendor/autoload.php')
+          if [[ $GIT_CHANGES ]]; then
+              exit 1
+          fi

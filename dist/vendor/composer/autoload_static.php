@@ -4,13 +4,13 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
+class ComposerStaticInitcaa98657d744543fb963672146b9911d
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
-        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
+        'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         '8592c7b0947d8a0965a9e8c3d16f9c24' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/autoload.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -24,8 +24,8 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
         'c50606d667a3fde2b80a955639479d3d' => __DIR__ . '/..' . '/wikimedia/timestamp/src/defines.php',
         'c15f8000750e4e04ba559d9745044427' => __DIR__ . '/..' . '/data-values/number/Number.php',
         '3ef87127dc6892a0a78f223558a0b940' => __DIR__ . '/..' . '/diff/diff/Diff.php',
-        'db89166205707d49719c395c26d4e52d' => __DIR__ . '/..' . '/wikimedia/parsoid/DomImpl.php',
         '6513700b70192b7dfd0e5e9fc8082cf3' => __DIR__ . '/..' . '/wikimedia/relpath/src/Wikimedia/RelPath.php',
+        'db89166205707d49719c395c26d4e52d' => __DIR__ . '/..' . '/wikimedia/parsoid/DomImpl.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -236,9 +236,9 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
         'Wikimedia\\' => 
         array (
             0 => __DIR__ . '/..' . '/wikimedia/ip-set/src',
-            1 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
+            1 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
             2 => __DIR__ . '/..' . '/wikimedia/object-factory/src',
-            3 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
+            3 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
             4 => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src',
             5 => __DIR__ . '/..' . '/wikimedia/wrappedstring/src',
         ),
@@ -268,13 +268,13 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
         ),
         'ValueParsers\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
         ),
         'ValueFormatters\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
         ),
         'Symfony\\Polyfill\\Php80\\' => 
         array (
@@ -322,8 +322,8 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
+            1 => __DIR__ . '/..' . '/psr/http-factory/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -391,8 +391,8 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
         ),
         'Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/php-http/message/src',
-            1 => __DIR__ . '/..' . '/php-http/message-factory/src',
+            0 => __DIR__ . '/..' . '/php-http/message-factory/src',
+            1 => __DIR__ . '/..' . '/php-http/message/src',
         ),
         'Http\\Discovery\\' => 
         array (
@@ -472,8 +472,8 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
         ),
         'DataValues\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
-            1 => __DIR__ . '/..' . '/data-values/data-values/src',
+            0 => __DIR__ . '/..' . '/data-values/data-values/src',
+            1 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
         ),
         'Composer\\Semver\\' => 
         array (
@@ -522,8 +522,8 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
         array (
             'Net' => 
             array (
-                0 => __DIR__ . '/..' . '/pear/net_smtp',
-                1 => __DIR__ . '/..' . '/pear/net_socket',
+                0 => __DIR__ . '/..' . '/pear/net_socket',
+                1 => __DIR__ . '/..' . '/pear/net_smtp',
             ),
         ),
         'M' => 
@@ -4028,11 +4028,11 @@ class ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit9a92d51db7c75350d2b8e846ced28f4b::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitcaa98657d744543fb963672146b9911d::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitcaa98657d744543fb963672146b9911d::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitcaa98657d744543fb963672146b9911d::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitcaa98657d744543fb963672146b9911d::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitcaa98657d744543fb963672146b9911d::$classMap;
 
         }, null, ClassLoader::class);
     }

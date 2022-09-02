@@ -66,7 +66,7 @@
 	"mobile-frontend-editor-switch-editor": "Preklopi urejevalnik",
 	"mobile-frontend-editor-switch-visual-editor": "Preklopi na vizualno urejanje",
 	"mobile-frontend-editor-viewing-source-page": "<strong>Izvorna koda strani</strong><span> $1</span>",
-	"mobile-frontend-editor-wait": "Shranjujem urejanje, prosimo, počakajte.",
+	"mobile-frontend-editor-wait": "Shranjujem urejanje. Prosimo, počakajte.",
 	"mobile-frontend-editor-loading": "Nalaganje urejevalnika …",
 	"mobile-frontend-expand-sections-description": "Privzeto vedno razširi razdelke vseh strani.",
 	"mobile-frontend-expand-sections-status": "Razširi vse razdelke",
@@ -126,6 +126,9 @@
 	"mobile-frontend-return-to-page": "Vrnitev na stran",
 	"mobile-frontend-save-error": "Napaka pri shranjevanju nastavitev. Prosimo, preverite, ali imate omogočene piškotke.",
 	"mobile-frontend-save-settings": "Shrani",
+	"mobile-frontend-search-content": "Iščite znotraj strani",
+	"mobile-frontend-search-content-no-results": "<b>{{int:mobile-frontend-search-content}}, da preverite, ali se ta fraza kje pojavi.",
+	"mobile-frontend-search-no-results": "Stran s takim naslovom ne obstaja.",
 	"mobile-frontend-settings-beta": "{{SITENAME}} βeta",
 	"mobile-frontend-settings-save": "Nastavitve so shranjene.",
 	"mobile-frontend-talk-add-overlay-content-placeholder": "O čem trenutno razmišljate?",
@@ -133,6 +136,7 @@
 	"mobile-frontend-talk-add-overlay-submit": "Dodaj pogovor",
 	"mobile-frontend-talk-reply": "Odgovor",
 	"mobile-frontend-talk-reply-info": "Vaš odgovor bo samodejno podpisan z vašim uporabniškim imenom.",
+	"mobile-frontend-talk-topic-wait": "Shranjujem vašo novo temo. Prosimo, počakajte.",
 	"mobile-frontend-terms-text": "Pogoji uporabe",
 	"mobile-frontend-view": "Mobilni prikaz",
 	"mobile-frontend-view-desktop": "Namizno",
@@ -169,5 +173,6 @@
 	"mobile-frontend-amc-outreach-intro": "Predstavljamo napredni način",
 	"mobile-frontend-amc-outreach-description": "Napredni način omogoča razširjeno funkcionalnost strani z zgodovino, spiskom nadzorov, zadnjimi spremembami in drugimi orodji za mobilno urejanje.",
 	"mobile-frontend-amc-outreach-enable": "Omogoči napredni način",
+	"mobile-frontend-amc-outreach-no-thanks": "Ne, hvala",
 	"mobile-frontend-amc-outreach-enabled-message": "Zdaj je omogočen napredni način. Izklopite ga lahko v svojih nastavitvah."
 }
