@@ -1,0 +1,28 @@
+name: wbstack sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'The branch name to run against'
+        required: true
+        default: 'not-main'
+
+jobs:
+  check_only_expected_sync_changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - name: run sync
+        run: ./sync.sh
+      - name: Show `git diff`` output
+        run: git diff
+      - name: Make a commit
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Run sync
+          committer_name: GitHub Actions
+          committer_email: 41898282+github-actions[bot]@users.noreply.github.com
