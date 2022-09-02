@@ -2,11 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Armin1392",
-			"Mjbmr"
+			"Mjbmr",
+			"Beginneruser"
 		]
 	},
-	"confirmaccount-newrequests": "'''$1''' ایمیل باز تأیید شد [[Special:ConfirmAccounts|account {{PLURAL:$1|request is pending|requests are pending}}]]. '''توجه شما نیازمند شده است!'''",
-	"requestaccount-loginnotice": "برای به دست آوردن یک حساب کاربری، شما باید '''[[Special:RequestAccount|request one]]'''.",
+	"confirmaccount-newrequests": "'''$1''' ایمیل باز [[Special:ConfirmAccounts|[[Special:ConfirmAccounts|account {{PLURAL:$1|درخواست در حال انتظار}}]] حساب]] تأیید شده است.\n'''توجه شما نیازمند شده است!'''",
+	"requestaccount-loginnotice": "برای دستیابی یک حساب کاربری، شما باید '''[[Special:RequestAccount|یک درخواست دهید]]'''.",
 	"right-confirmaccount": "مشاهدهٔ [[Special:ConfirmAccounts|queue with requested accounts]]",
 	"right-requestips": "مشاهدهٔ متقاضیان آدرس‌های آی‌پی زمان پردازش حساب‌های درخواست شده",
 	"right-lookupcredentials": "مشاهدهٔ [[Special:UserCredentials|user credentials]]"

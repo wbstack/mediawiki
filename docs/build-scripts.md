@@ -6,8 +6,9 @@ This script will resync the `dist` directory.
 
 This is made up of a series of steps:
 
-- `pacman`: Retrieive and build MediaWiki code, remove any not needed files
-- `sync.sh`: Sync the `dist` directory in the correct way
+- Empty the `dist` directory entirely
+- `pacman`: Retrieive and build MediaWiki code, remove any bloat files that are not needed
+- `sync_dist-persist.sh`: Sync the `dist-persist` directory into `dist` (Custom & extra wbstack hooks, config, and files)
 - `04-docker-compose`: Perform a composer install
 - `05-docker-entrypoint-overrides`: Add the WBStack shims to MediaWiki entrypoints
 

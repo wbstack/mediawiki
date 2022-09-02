@@ -31,6 +31,7 @@
 	"twocolconflict-split-save-tooltip": "Pri tem besedilu uporabite svoje spremembe",
 	"twocolconflict-split-reset-tooltip": "Zavrzite vse svoje spremembe tega besedila",
 	"twocolconflict-split-reset-warning": "Zavržem spremembe? Besedilo v tem polju bo ponastavljeno na tako, kakršno je bilo pred pojavom navzkrižja urejanj.",
+	"twocolconflict-split-reset-warning-cancel": "Prekliči",
 	"twocolconflict-split-collapse-tooltip": "Skrči nespremenjeno besedilo",
 	"twocolconflict-split-expand-tooltip": "Razširi nespremenjeno besedilo",
 	"twocolconflict-split-select-all-other-tooltip": "Kliknite, da izberete vse spremembe drugega uporabnika",

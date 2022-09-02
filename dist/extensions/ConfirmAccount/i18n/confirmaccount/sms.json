@@ -5,9 +5,12 @@
 		]
 	},
 	"confirmaccount-real-q": "Nõmm",
-	"confirmaccount-email-q": "E-pååʹšt",
+	"confirmaccount-email-q": "E-pååʹštaddrõs",
+	"confirmaccount-leg-user": "Õõʹnnitobdldõk",
+	"confirmaccount-leg-other": "Jeeʹres teâđ",
 	"confirmaccount-name": "Õõʹnninõmm",
 	"confirmaccount-real": "Nõmm:",
 	"confirmaccount-email": "E-pååʹštaddrõs:",
-	"confirmaccount-create": "Priim (raaj tobdldõõǥǥ)"
+	"confirmaccount-create": "Priim (raaj tobdldõõǥǥ)",
+	"confirmaccount-ip": "IP-addrõs:"
 }

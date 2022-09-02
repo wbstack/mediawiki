@@ -46,7 +46,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		$this->addHelpLink( 'Help:OAuth' );
 
 		// Format is Special:OAuthListConsumers[/list|/view/[<consumer key>]]
-		$navigation = explode( '/', $par );
+		$navigation = $par !== null ? explode( '/', $par ) : [];
 		$type = $navigation[0] ?? null;
 		$consumerKey = $navigation[1] ?? null;
 
@@ -237,7 +237,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 			[],
 			$this->getRequest()->getValues( 'name', 'publisher', 'stage' )
 		);
-		if ( !$permMgr->userHasRight( $this->getUser(), 'mwoauthmanageconsumer' ) ) {
+		if ( $permMgr->userHasRight( $this->getUser(), 'mwoauthmanageconsumer' ) ) {
 			$links[] = $this->getLinkRenderer()->makeKnownLink(
 				SpecialPage::getTitleFor( 'OAuthManageConsumers', $cmrKey ),
 				$this->msg( 'mwoauthmanageconsumers-review' )->text()

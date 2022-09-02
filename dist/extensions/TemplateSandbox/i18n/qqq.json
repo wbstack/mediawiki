@@ -5,12 +5,13 @@
 			"Liuxinyu970226",
 			"Raymond",
 			"Shirayuki",
-			"Umherirrender"
+			"Umherirrender",
+			"Amire80"
 		]
 	},
 	"templatesandbox": "{{doc-special|TemplateSandbox}}\nThe name of the [[mw:Extension:TemplateSandbox|TemplateSandbox extension]].",
 	"templatesandbox-desc": "{{desc|name=Template Sandbox|url=https://www.mediawiki.org/wiki/Extension:TemplateSandbox}}",
-	"templatesandbox-suffix": "Suffix added to the current user's userpage for the default sandbox prefix.\n\nUsed in:\n* {{msg-mw|Templatesandbox-text}}.\n{{Identical|Sandbox}}",
+	"templatesandbox-suffix": "Suffix added to the current user's user page for the default sandbox prefix.\n\nUsed in:\n* {{msg-mw|Templatesandbox-text}}.\n{{Identical|Sandbox}}",
 	"templatesandbox-legend": "Legend displayed on the input form.",
 	"templatesandbox-text": "Used as header message of the form.\n\nThe form has fieldset label {{msg-mw|Templatesandbox-legend}}.\n\nRefers to {{msg-mw|Templatesandbox-suffix}}.",
 	"templatesandbox-prefix-label": "Label for the \"prefix\" input field.",

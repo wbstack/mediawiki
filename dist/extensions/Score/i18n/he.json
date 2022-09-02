@@ -3,15 +3,16 @@
 		"authors": [
 			"Amire80",
 			"Guycn1",
-			"Guycn2"
+			"Guycn2",
+			"Eli"
 		]
 	},
 	"score-abc2lynotexecutable": "המרה מ־ABC ל־LilyPond לא יכלה להתבצע: $1 אינו קובץ בר־הרצה. נא לוודא שהמשתנה <code>$wgScoreAbc2Ly</code> מוגדר נכון.",
 	"score-abcconversionerr": "לא ניתן להמיר את קובץ ה־ABC לתסדיר LilyPond:\n$1",
 	"score-audioconversionerr": "לא ניתן להמיר MIDI ל־MP3:\n$1",
 	"score-audiooverridenotfound": "הקובץ \"<nowiki>$1</nowiki>\", שציינת עם override_audio, אינו קיים.",
-	"score-audio-alt": "ניגון אודיו אינו נתמך בדפדפן שלך. באפשרותך $1.",
-	"score-audio-alt-link": "להוריד את קובץ האודיו",
+	"score-audio-alt": "השמעת צלילים אינה נתמכת בדפדפן שלך. אפשר $1.",
+	"score-audio-alt-link": "להוריד את קובץ השמע",
 	"score-backend-error": "לא ניתן להעתיק את הקבצים שנוצרו ליעדם הסופי:\n$1",
 	"score-compilererr": "לא ניתן להדר קובץ קלט של LilyPond:\n$1",
 	"score-convertoverrideaudio": "לא ניתן לבקש תיצוג שמע ולציין override_audio באותו זמן.",
@@ -33,7 +34,7 @@
 	"score-midioverridenotfound": "הקובץ \"<nowiki>$1</nowiki>\" שציינת עם override_midi אינו תקין. נא לציין את שם הקובץ בלבד, להשמיט את <nowiki>[[…]]</nowiki> ואת התחילית \"{{ns:file}}:\".",
 	"score-nocontent": "טעינת הקובץ $1 מהשרת לא הצליחה.",
 	"score-noimages": "לא נוצרו תמונות של תווים. נא לבדוק את קוד התווים שלך.",
-	"score-nomidi": "לא נוצר שום קובץ MIDI, למקות ש התבקש כזה. אם זה מצב LilyPond טהור, יש לספק גוש <span dir=\"ltr\">\\midi</span> מתאים.",
+	"score-nomidi": "לא נוצר שום קובץ MIDI, למרות שהתבקש כזה. אם זה מצב LilyPond גולמי, יש לספק גוש <span dir=\"ltr\">\\midi</span> מתאים.",
 	"score-nooutput": "לא ניתן היה ליצור את תיקיית הפלט $1.",
 	"score-nops": "LilyPond לא ייצר שום קובץ פלט. נא לבדוק את קוד התווים שלך.",
 	"score-notelanguagewithraw": "המאפיין \"note-language\" אינו יכול לשמש לגיליונות תווים גולמיים",

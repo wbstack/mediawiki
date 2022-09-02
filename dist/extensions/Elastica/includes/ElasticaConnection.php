@@ -174,3 +174,5 @@ abstract class ElasticaConnection {
 		ElasticaHttpTransportCloser::destroySingleton();
 	}
 }
+
+class_alias( ElasticaConnection::class, 'MediaWiki\\Extension\\Elastica\\ElasticaConnection' );

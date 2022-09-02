@@ -103,6 +103,10 @@ ENV MW_ENABLE_PROFILING_HEADER=${INSTALL_PROFILING_DEPS}
 COPY install_profiling.sh /install_profiling.sh
 RUN if [ "$INSTALL_PROFILING_DEPS" = "1" ] ; then bash /install_profiling.sh ; else echo "skipping profiling dependencies ..." ; fi
 
+ARG INSTALL_XDEBUG=0
+COPY install_xdebug.sh /install_xdebug.sh
+RUN if [ "$INSTALL_XDEBUG" = "1" ] ; then bash /install_xdebug.sh ; else echo "skipping xdebug ..." ; fi
+
 # Copy the code!
 COPY --chown=www-data:www-data ./dist/ /var/www/html/w
 

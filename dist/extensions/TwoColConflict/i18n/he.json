@@ -51,7 +51,7 @@
 	"twocolconflict-split-tour-popup3-message": "הטקסט ששוּנה באחת מהגרסאות מודגש. אחרי עריכת הטקסט ההדגשה תיעלם.",
 	"twocolconflict-split-edit-tooltip": "{{GENDER:|לחץ|לחצי}} כאן כדי לערוך את הטקסט",
 	"twocolconflict-split-save-tooltip": "החלת השינויים שלך על הטקסט הזה",
-	"twocolconflict-split-reset-tooltip": "מחיקת כל השינויים שלך לטקסט הזה",
+	"twocolconflict-split-reset-tooltip": "זריקת כל השינויים שלך לטקסט הזה",
 	"twocolconflict-split-reset-warning": "לזרוק את השינויים? הטקסט בתיבה הזאת יאופס למה שהוא היה לפני שאירעה התנגשות העריכה.",
 	"twocolconflict-split-reset-warning-cancel": "ביטול",
 	"twocolconflict-split-reset-warning-accept": "לזרוק",

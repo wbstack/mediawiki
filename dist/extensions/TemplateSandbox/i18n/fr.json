@@ -8,7 +8,8 @@
 			"Od1n",
 			"Seb35",
 			"Thibaut120094",
-			"Wladek92"
+			"Wladek92",
+			"Verdy p"
 		]
 	},
 	"templatesandbox": "Bac à sable de modèle",
@@ -19,7 +20,7 @@
 	"templatesandbox-prefix-label": "Préfixe de bac à sable :",
 	"templatesandbox-page-label": "Rendu de la page :",
 	"templatesandbox-revid-label": "Rendu de la révision :",
-	"templatesandbox-text-label": "Rendu du wikitexte :",
+	"templatesandbox-text-label": "Rendu du wikicode :",
 	"templatesandbox-submit": "Afficher",
 	"templatesandbox-title-output": "TemplateSandbox: $1",
 	"templatesandbox-editform-legend": "Aperçu de la page avec ce modèle",

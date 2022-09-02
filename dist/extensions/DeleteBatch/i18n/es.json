@@ -12,7 +12,8 @@
 			"Od1n",
 			"Sanbec",
 			"Sophivorus",
-			"Translationista"
+			"Translationista",
+			"DiegoAmbrocio"
 		]
 	},
 	"deletebatch": "Eliminar lote de páginas",
@@ -36,6 +37,7 @@
 	"deletebatch-select-script": "Borrar el script de la página",
 	"deletebatch-select-yourself": "Tú",
 	"deletebatch-no-page": "Por favor especifique al menos una página a borrar O escoja un archivo conteniendo una lista de páginas.",
+	"deletebatch-system-username": "Borrar el script de la página",
 	"action-deletebatch": "borrar páginas en lote",
 	"right-deletebatch": "Borrar páginas en lote",
 	"action-deletebatch-spoof": "borrar páginas en lote usando la cuenta \"Delete page script\"",

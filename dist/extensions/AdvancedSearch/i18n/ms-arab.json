@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tofeiku"
+		]
+	},
+	"advancedsearch-field-filetype": "جنيس فاءيل",
+	"advancedsearch-filetype-default": "ڤيليه جنيس فاءيل",
+	"advancedsearch-filetype-bitmap": "ايميج",
+	"advancedsearch-filetype-audio": "اءوديو",
+	"advancedsearch-filetype-video": "ۏيديو",
+	"advancedsearch-sort-relevance": "کاءيتن",
+	"advancedsearch-sort-preview-relevance": "کاءيتن",
+	"advancedsearch-namespaces-preset-all": "سموا"
+}

@@ -8,7 +8,7 @@
 	},
 	"deletebatch": "Xóa một nhóm trang",
 	"deletebatch-desc": "[[Special:DeleteBatch|Xóa một nhóm trang]]",
-	"deletebatch-help": "Xóa một nhóm trang. Bạn có thể thực hiện việc xóa từng trang, hoặc xóa các trang liệt kê trong một tập tin.\nChọn một thành viên sẽ hiện ra trong nhật trình xóa.\nTập tin đã tải nên có chứa tên trang và lý do tùy chọn phân tách bằng ký tự \"|\" tại mỗi dòng.",
+	"deletebatch-help": "Xóa một nhóm trang. Bạn có thể thực hiện việc xóa từng trang, hoặc xóa các trang liệt kê trong một tập tin.\nChọn một thành viên sẽ hiện ra trong nhật trình xóa.\nTập tin đã tải nên có chứa tên trang và lý do tùy chọn phân tách bằng ký tự “|”.",
 	"deletebatch-caption": "Danh sách trang:",
 	"deletebatch-title": "Xóa nhóm",
 	"deletebatch-link-back": "Trở lại trang đặc biệt",

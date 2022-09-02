@@ -5,14 +5,17 @@
 			"Soued031"
 		]
 	},
-	"twocolconflict": "TwoColConflict",
+	"twocolconflict": "Ännerungskonflikt op Basis vum Abschnitt",
 	"twocolconflict-desc": "Weist en Ecran wou op 2 Säiten zwou Versioune gewise gi fir en Ännerungskonflikt ze léisen",
 	"twocolconflictprovidesubmittedtext": "Ännerungskonflikt:",
 	"twocolconflict-beta-feature-message": "Ännerungskonflikt op Basis vum Abschnitt",
+	"twocolconflict-beta-feature-description": "Weist de Konflikt vun der Ännerung baséiert op den Abschnitt mat enger neier Versioun vun der Software.",
+	"twocolconflict-copy-action": "kompletten Text kopéieren",
 	"twocolconflict-copy-tab-action": "ganzen Text weisen",
 	"twocolconflict-core-ui-hint-close": "Ni méi weisen",
 	"twocolconflict-preference-enabled": "Den [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Änneurngskonflikt-Interface op der Basis vum Abschnitt]] aktivéiere fir Ännerungskonflikter ze léisen",
 	"twocolconflict-special-not-saved": "Net publizéiert",
+	"twocolconflict-special-malformed-title": "Titel feelt oder ass net valabel.",
 	"twocolconflict-split-your-version-header": "Är Versioun",
 	"twocolconflict-split-current-version-header": "Aktuell Versioun $1",
 	"twocolconflict-split-not-saved-at": "Nach net verëffentlecht",
