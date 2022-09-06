@@ -20,9 +20,13 @@ jobs:
         run: ./sync.sh
       - name: Show `git diff`` output
         run: git diff
-      - name: Make a commit
-        uses: EndBug/add-and-commit@v9
+        # For this action to work you must explicitly allow GitHub Actions to create pull requests.
+        # This setting can be found in a repository's settings under Actions > General > Workflow permissions.
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
         with:
-          message: Run sync
-          committer_name: GitHub Actions
-          committer_email: 41898282+github-actions[bot]@users.noreply.github.com
+          title: wbstack sync for branch ${{ github.event.inputs.branch }}
+          commit-message: wbstack sync
+          branch: wbstack-sync/${{ github.event.inputs.branch }}
+          assignees: ${{ github.actor }}
+          delete-branch: true
