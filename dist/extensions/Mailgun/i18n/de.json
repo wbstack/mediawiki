@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Metalhead64"
-		]
-	},
-	"mailgun-desc": "Sendet E-Mails mithilfe des Mailgun-API-Dienstes von MediaWiki"
-}
