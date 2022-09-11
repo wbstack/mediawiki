@@ -7,6 +7,11 @@ on:
         description: 'The branch name to run against'
         required: true
         default: 'not-main'
+      composer:
+        description: 'Also do a composer update (true/false)'
+        type: boolean
+        required: true
+        default: true
 
 jobs:
   check_only_expected_sync_changes:
@@ -17,7 +22,11 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
       - name: run sync
+        if: ${{ !inputs.composer_update }}
         run: ./sync.sh
+      - name: run sync with composer update
+        if: ${{ inputs.composer_update }}
+        run: ./sync.sh -u
       - name: Show `git diff`` output
         run: git diff
         # For this action to work you must explicitly allow GitHub Actions to create pull requests.
