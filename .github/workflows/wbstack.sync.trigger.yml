@@ -1,0 +1,32 @@
+name: wbstack sync
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'The branch name to run against'
+        required: true
+        default: 'not-main'
+
+jobs:
+  check_only_expected_sync_changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3.0.2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - name: run sync
+        run: ./sync.sh
+      - name: Show `git diff`` output
+        run: git diff
+        # For this action to work you must explicitly allow GitHub Actions to create pull requests.
+        # This setting can be found in a repository's settings under Actions > General > Workflow permissions.
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          title: wbstack sync for branch ${{ github.event.inputs.branch }}
+          commit-message: wbstack sync
+          branch: wbstack-sync/${{ github.event.inputs.branch }}
+          assignees: ${{ github.actor }}
+          delete-branch: true
