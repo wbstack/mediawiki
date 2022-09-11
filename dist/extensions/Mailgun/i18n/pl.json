@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Expert3222"
-		]
-	},
-	"mailgun-desc": "Wysyłaj emaile przez usługę Mailgun API od MediaWiki"
-}

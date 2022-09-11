@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"BaRaN6161 TURK"
-		]
-	},
-	"mailgun-desc": "MediaWiki'den Mailgun API servisi üzerinden e-posta gönder"
-}

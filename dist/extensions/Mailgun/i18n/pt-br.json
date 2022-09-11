@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"!Silent"
-		]
-	},
-	"mailgun-desc": "Enviar email a partir do MediaWiki através do serviço da API Mailgun"
-}
