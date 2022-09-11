@@ -9,7 +9,7 @@ on:
         default: 'not-main'
 
 jobs:
-  check_only_expected_sync_changes:
+  sync_and_pr:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
