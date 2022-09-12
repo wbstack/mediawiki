@@ -7,11 +7,11 @@ on:
         description: 'The branch name to run against'
         required: true
         default: 'not-main'
-      composer:
+      composer_update:
         description: 'Also do a composer update (true/false)'
         type: boolean
         required: true
-        default: true
+        default: false
 
 jobs:
   check_only_expected_sync_changes:
