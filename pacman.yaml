@@ -1213,6 +1213,8 @@
   - lib/.phan
   - lib/.storybook
   - lib/.vscode
+  patchUrls:
+   - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/15/patch?download
 - name: EmbedVideo
   artifactUrl: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
   artifactLevel: 1
