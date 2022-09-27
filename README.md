@@ -36,8 +36,6 @@ This part describes the Docker image that this repo is designed to build. People
 - `MW_REDIS_SERVER_WRITE`: points to a writable redis service
 - `MW_REDIS_SERVER_READ`: points to a readable redis service
 - `MW_REDIS_PASSWORD`
-- `MW_MAILGUN_API_KEY`
-- `MW_MAILGUN_DOMAIN`
 - `MW_EMAIL_DOMAIN`
 - `MW_RECAPTCHA_SITEKEY`
 - `MW_RECAPTCHA_SECRETKEY`

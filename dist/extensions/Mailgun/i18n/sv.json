@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Sabelöga"
-		]
-	},
-	"mailgun-desc": "Skicka e-post via MediaWikis API-tjänst Mailgun"
-}

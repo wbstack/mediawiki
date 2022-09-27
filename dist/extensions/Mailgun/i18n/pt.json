@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Hamilton Abreu"
-		]
-	},
-	"mailgun-desc": "Enviar correio eletrónico a partir do MediaWiki através do serviço API Mailgun"
-}
