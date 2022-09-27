@@ -1,6 +1,24 @@
 # Change Log
 
 The change log describes what is "Added", "Removed", "Changed" or "Fixed" between each release.
+## 3.5.4
+
+### Added
+- Added ability to make own API request to needed endpoint
+
+## 3.5.3
+
+### Added
+
+- Ability to update web_scheme for domain
+- `http` or `https` - set your open, click and unsubscribe URLs to use http or https. The default is http
+
+## 3.5.1
+
+### Fixed
+
+- Error with empty array for param recipient-variables. Fix was suggested by @deviarte
+- Use null coalescing operator in IndexResponse.php when. Fix proposed by @TWithers
 
 ## 3.5.0
 
