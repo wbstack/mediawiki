@@ -159,6 +159,21 @@ trait Converter
     }
 
     /**
+     * Format the instance with the day, and a readable date
+     *
+     * @example
+     * ```
+     * echo Carbon::now()->toFormattedDayDateString();
+     * ```
+     *
+     * @return string
+     */
+    public function toFormattedDayDateString(): string
+    {
+        return $this->rawFormat('D, M j, Y');
+    }
+
+    /**
      * Format the instance as time
      *
      * @example
@@ -628,7 +643,7 @@ trait Converter
             $period->setDateInterval($interval);
         }
 
-        if (\is_int($end) || \is_string($end) && ctype_digit($end)) {
+        if (\is_int($end) || (\is_string($end) && ctype_digit($end))) {
             $period->setRecurrences($end);
         } elseif ($end) {
             $period->setEndDate($end);

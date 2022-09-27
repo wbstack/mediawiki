@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Mailgun\Api;
 
+use Exception;
 use Mailgun\Assert;
 use Mailgun\Model\Domain\ConnectionResponse;
 use Mailgun\Model\Domain\CreateCredentialResponse;
@@ -27,19 +28,24 @@ use Mailgun\Model\Domain\UpdateCredentialResponse;
 use Mailgun\Model\Domain\UpdateOpenTrackingResponse;
 use Mailgun\Model\Domain\UpdateUnsubscribeTrackingResponse;
 use Mailgun\Model\Domain\VerifyResponse;
+use Mailgun\Model\Domain\WebSchemeResponse;
+use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * @see https://documentation.mailgun.com/api-domains.html
+ * @see    https://documentation.mailgun.com/api-domains.html
  *
  * @author Sean Johnson <sean@mailgun.com>
  */
 class Domain extends HttpApi
 {
+    private const DKIM_SIZES = ['1024', '2048'];
+
     /**
      * Returns a list of domains on the account.
      *
      * @return IndexResponse
+     * @throws ClientExceptionInterface
      */
     public function index(int $limit = 100, int $skip = 0)
     {
@@ -61,6 +67,7 @@ class Domain extends HttpApi
      * @param string $domain name of the domain
      *
      * @return ShowResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function show(string $domain)
     {
@@ -84,10 +91,14 @@ class Domain extends HttpApi
      * @param bool     $wildcard           domain will accept email for subdomains
      * @param bool     $forceDkimAuthority force DKIM authority
      * @param string[] $ips                an array of ips to be assigned to the domain
+     * @param ?string  $pool_id            pool id to assign to the domain
+     * @param string   $webScheme          `http` or `https` - set your open, click and unsubscribe URLs to use http or https. The default is http
+     * @param string   $dkimKeySize        Set length of your domain’s generated DKIM key
      *
      * @return CreateResponse|array|ResponseInterface
+     * @throws Exception
      */
-    public function create(string $domain, string $smtpPass = null, string $spamAction = null, bool $wildcard = null, bool $forceDkimAuthority = null, ?array $ips = null)
+    public function create(string $domain, string $smtpPass = null, string $spamAction = null, bool $wildcard = null, bool $forceDkimAuthority = null, ?array $ips = null, ?string $pool_id = null, string $webScheme = 'http', string $dkimKeySize = '1024')
     {
         Assert::stringNotEmpty($domain);
 
@@ -125,6 +136,26 @@ class Domain extends HttpApi
             $params['ips'] = join(',', $ips);
         }
 
+        if (!empty($webScheme)) {
+            Assert::stringNotEmpty($webScheme);
+            Assert::oneOf($webScheme, ['https', 'http']);
+            $params['web_scheme'] = $webScheme;
+        }
+
+        if (null !== $pool_id) {
+            Assert::stringNotEmpty($pool_id);
+
+            $params['pool_id'] = $pool_id;
+        }
+        if (!empty($dkimKeySize)) {
+            Assert::oneOf(
+                $dkimKeySize,
+                self::DKIM_SIZES,
+                'Length of your domain’s generated DKIM key must be 1024 or 2048'
+            );
+            $params['dkim_key_size'] = $dkimKeySize;
+        }
+
         $response = $this->httpPost('/v3/domains', $params);
 
         return $this->hydrateResponse($response, CreateResponse::class);
@@ -137,6 +168,7 @@ class Domain extends HttpApi
      * @param string $domain name of the domain
      *
      * @return DeleteResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function delete(string $domain)
     {
@@ -155,6 +187,7 @@ class Domain extends HttpApi
      * @param int    $skip   Number of credentials to omit from the list
      *
      * @return CredentialResponse
+     * @throws ClientExceptionInterface
      */
     public function credentials(string $domain, int $limit = 100, int $skip = 0)
     {
@@ -177,6 +210,7 @@ class Domain extends HttpApi
      * @param string $password SMTP Password. Length min 5, max 32.
      *
      * @return CreateCredentialResponse|array|ResponseInterface
+     * @throws Exception
      */
     public function createCredential(string $domain, string $login, string $password)
     {
@@ -203,6 +237,7 @@ class Domain extends HttpApi
      * @param string $pass   New SMTP Password. Length min 5, max 32.
      *
      * @return UpdateCredentialResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function updateCredential(string $domain, string $login, string $pass)
     {
@@ -227,6 +262,7 @@ class Domain extends HttpApi
      * @param string $login  SMTP Username
      *
      * @return DeleteCredentialResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function deleteCredential(string $domain, string $login)
     {
@@ -250,6 +286,7 @@ class Domain extends HttpApi
      * @param string $domain name of the domain
      *
      * @return ConnectionResponse|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function connection(string $domain)
     {
@@ -269,6 +306,7 @@ class Domain extends HttpApi
      * @param bool|null $noVerify   disables TLS certificate and hostname verification
      *
      * @return UpdateConnectionResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function updateConnection(string $domain, ?bool $requireTLS, ?bool $noVerify)
     {
@@ -289,11 +327,39 @@ class Domain extends HttpApi
     }
 
     /**
+     * Update webScheme for existing domain
+     * See below for spam filtering parameter information.
+     * {@link https://documentation.mailgun.com/user_manual.html#um-spam-filter}.
+     *
+     * @see https://documentation.mailgun.com/en/latest/api-domains.html#domains
+     *
+     * @param  string                                    $domain    name of the domain
+     * @param  string                                    $webScheme `http` or `https` - set your open, click and unsubscribe URLs to use http or https. The default is http
+     * @return WebSchemeResponse|array|ResponseInterface
+     * @throws Exception
+     * @throws ClientExceptionInterface
+     */
+    public function updateWebScheme(string $domain, string $webScheme = 'http')
+    {
+        $params = [];
+        Assert::stringNotEmpty($domain);
+        Assert::stringNotEmpty($webScheme);
+        Assert::oneOf($webScheme, ['https', 'http']);
+
+        $params['web_scheme'] = $webScheme;
+
+        $response = $this->httpPut(sprintf('/v3/domains/%s', $domain), $params);
+
+        return $this->hydrateResponse($response, WebSchemeResponse::class);
+    }
+
+    /**
      * Returns a single domain.
      *
      * @param string $domain name of the domain
      *
      * @return VerifyResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function verify(string $domain)
     {
@@ -310,6 +376,7 @@ class Domain extends HttpApi
      * @param string $domain name of the domain
      *
      * @return TrackingResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function tracking(string $domain)
     {
@@ -328,7 +395,7 @@ class Domain extends HttpApi
      *
      * @return UpdateClickTrackingResponse|array|ResponseInterface
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateClickTracking(string $domain, string $active)
     {
@@ -352,6 +419,7 @@ class Domain extends HttpApi
      * @param string $active The status for this tracking (one of: yes, no)
      *
      * @return UpdateOpenTrackingResponse|array|ResponseInterface
+     * @throws ClientExceptionInterface
      */
     public function updateOpenTracking(string $domain, string $active)
     {
@@ -378,7 +446,7 @@ class Domain extends HttpApi
      *
      * @return UpdateUnsubscribeTrackingResponse|array|ResponseInterface
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateUnsubscribeTracking(string $domain, string $active, string $htmlFooter, string $textFooter)
     {
