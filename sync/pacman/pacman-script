@@ -4,7 +4,7 @@
 # pacman will populate a dist folder in the same directory, from the pacman.yml
 
 # exit when any command fails
-set -e
+set -euo pipefail
 
 if [ -z "$1" ]; then
     echo "Usage: $0 <target>"
@@ -86,6 +86,23 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         toRemove="$(realpath -m ${REPO_DIR}/${destination}/${removeEntry})"
         echo "Removing '${toRemove}'"
         rm -rf "${toRemove}"
+    done
+done
+
+# apply any final patches
+for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
+    name=$(echo $codebase | jq -r '.name' -)
+    destination=$(echo $codebase | jq -r '.destination' -)
+    patch=$(echo $codebase | jq -r '.patchUrls' -)
+    if [ "$patch" = "null" ]; then
+        continue
+    fi
+    echo $patch | jq -c -r '.[]' | while read patchEntry; do
+        echo "Applying ${patchEntry} to ${destination}"
+        curl -s --output - ${patchEntry} |\
+         base64 -d |\
+         git apply -v --unsafe-paths --directory=${destination}
+
     done
 done
 
