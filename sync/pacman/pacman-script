@@ -93,6 +93,7 @@ done
 for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     name=$(echo $codebase | jq -r '.name' -)
     destination=$(echo $codebase | jq -r '.destination' -)
+    targetDestination="$(realpath -m ${REPO_DIR}/${destination})"
     patch=$(echo $codebase | jq -r '.patchUrls' -)
     if [ "$patch" = "null" ]; then
         continue
@@ -101,7 +102,7 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
         echo "Applying ${patchEntry} to ${destination}"
         curl -s --output - ${patchEntry} |\
          base64 -d |\
-         git apply -v --unsafe-paths --directory=${destination}
+         git apply -v --unsafe-paths --directory=${targetDestination}
 
     done
 done
