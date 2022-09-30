@@ -4,6 +4,7 @@ Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build numb
 
 ## 1.37-7.4-20220930-fp-beta-0
 - Add option to add mediawiki patches with pacman
+- Add maintenance script for rebuilding quantity units
 
 ## 1.37-7.4-20220818-fp-beta-0
 
