@@ -396,6 +396,9 @@ if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
         }
         return true;
     }
+    // fix known issue for mediawiki newer than 1.35 to prevent unapproved creation
+    $wgGroupPermissions['*']['createaccount'] = false;
+    $wgGroupPermissions['bureaucrat']['createaccount'] = true;
 }
 
 # InviteSignup (only loaded when the setting is on)
