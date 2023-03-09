@@ -1,15 +1,16 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth;
+namespace MediaWiki\Extension\OAuth;
 
 use ApiMessage;
 use GuzzleHttp\Psr7\ServerRequest;
-use MediaWiki\Extensions\OAuth\Backend\Consumer;
-use MediaWiki\Extensions\OAuth\Backend\ConsumerAcceptance;
-use MediaWiki\Extensions\OAuth\Backend\MWOAuthException;
-use MediaWiki\Extensions\OAuth\Backend\MWOAuthRequest;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Repository\AccessTokenRepository;
+use MediaWiki\Extension\OAuth\Backend\Consumer;
+use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
+use MediaWiki\Extension\OAuth\Backend\MWOAuthException;
+use MediaWiki\Extension\OAuth\Backend\MWOAuthRequest;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Repository\AccessTokenRepository;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Session\SessionBackend;
 use MediaWiki\Session\SessionInfo;
 use MediaWiki\Session\SessionManager;
@@ -17,6 +18,7 @@ use MediaWiki\Session\UserInfo;
 use MediaWiki\User\UserIdentity;
 use User;
 use WebRequest;
+use WikiMap;
 use Wikimedia\Rdbms\DBError;
 
 /**
@@ -146,7 +148,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 
 		$logData['user'] = Utils::getCentralUserNameFromId( $access->getUserId(), 'raw' );
 
-		$wiki = wfWikiID();
+		$wiki = WikiMap::getCurrentWikiId();
 		// Access token is for this wiki
 		if ( $access->getWiki() !== '*' && $access->getWiki() !== $wiki ) {
 			$this->logger->debug( 'OAuth request for wrong wiki from user {user}', $logData );
@@ -170,7 +172,7 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 			);
 		}
 		if ( $localUser->isLocked() ||
-			( $this->config->get( 'BlockDisablesLogin' ) && $localUser->isBlocked() )
+			( $this->config->get( 'BlockDisablesLogin' ) && $localUser->getBlock() )
 		) {
 			$this->logger->debug( 'OAuth request for blocked user {user}', $logData );
 			return $this->makeException( 'mwoauth-invalid-authorization-blocked-user' );
@@ -222,7 +224,9 @@ class SessionProvider extends \MediaWiki\Session\ImmutableSessionProviderWithCoo
 				'oauthVersion' => $oauthVersion,
 				'consumerId' => $consumer->getOwnerOnly() ? null : $consumer->getId(),
 				'key' => $accessTokenKey,
-				'rights' => \MWGrants::getGrantRights( $access->getGrants() ),
+				'rights' => MediaWikiServices::getInstance()
+					->getGrantsInfo()
+					->getGrantRights( $access->getGrants() ),
 			],
 		] );
 	}

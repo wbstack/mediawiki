@@ -1,7 +1,9 @@
 import PropertyLabel from '@/presentation/components/PropertyLabel.vue';
 import StringDataValue from '@/presentation/components/StringDataValue.vue';
-import { ResizingTextField } from '@wmde/wikibase-vuejs-components';
+import ResizingTextField from '@/presentation/components/ResizingTextField.vue';
 import { shallowMount } from '@vue/test-utils';
+
+const defaultLabel = { value: 'dont assert me!', language: 'zxx' };
 
 describe( 'StringDataValue', () => {
 	describe( 'label and editfield', () => {
@@ -15,20 +17,20 @@ describe( 'StringDataValue', () => {
 				},
 			} );
 
-			expect( wrapper.find( PropertyLabel ).props( 'term' ) ).toBe( label );
+			expect( wrapper.findComponent( PropertyLabel ).props( 'term' ) ).toStrictEqual( label );
 		} );
 
 		it( 'passes the DataValue down', () => {
 			const dataValue = { type: 'string', value: 'Töfften' };
 			const wrapper = shallowMount( StringDataValue, {
 				propsData: {
-					label: '',
+					label: defaultLabel,
 					dataValue,
 					setDataValue: () => {},
 				},
 			} );
 
-			expect( wrapper.find( ResizingTextField ).props( 'value' ) ).toBe( dataValue.value );
+			expect( wrapper.findComponent( ResizingTextField ).props( 'value' ) ).toBe( dataValue.value );
 		} );
 
 		it( 'triggers the setter with the new value when it is edited', () => {
@@ -36,14 +38,14 @@ describe( 'StringDataValue', () => {
 			const mockSetter = jest.fn();
 			const wrapper = shallowMount( StringDataValue, {
 				propsData: {
-					label: '',
+					label: defaultLabel,
 					dataValue,
 					setDataValue: mockSetter,
 				},
 			} );
 			const testString = 'newString';
 
-			wrapper.find( ResizingTextField ).vm.$emit( 'input', testString );
+			wrapper.findComponent( ResizingTextField ).vm.$emit( 'input', testString );
 
 			expect( mockSetter ).toHaveBeenCalledWith( { type: 'string', value: testString } );
 		} );
@@ -51,16 +53,16 @@ describe( 'StringDataValue', () => {
 		it( 'binds label and editField', () => {
 			const wrapper = shallowMount( StringDataValue, {
 				propsData: {
-					label: '',
+					label: defaultLabel,
 					dataValue: null,
 					setDataValue: () => {},
 				},
 			} );
 
 			expect(
-				wrapper.find( PropertyLabel ).props( 'htmlFor' ),
+				wrapper.findComponent( PropertyLabel ).props( 'htmlFor' ),
 			).toBe(
-				wrapper.find( ResizingTextField ).attributes( 'id' ),
+				wrapper.findComponent( ResizingTextField ).attributes( 'id' ),
 			);
 		} );
 	} );
@@ -69,14 +71,14 @@ describe( 'StringDataValue', () => {
 		const placeholder = 'a placeholder',
 			wrapper = shallowMount( StringDataValue, {
 				propsData: {
-					label: '',
+					label: defaultLabel,
 					dataValue: null,
 					placeholder,
 					setDataValue: () => {},
 				},
 			} );
 
-		expect( wrapper.find( ResizingTextField ).attributes( 'placeholder' ) )
+		expect( wrapper.findComponent( ResizingTextField ).attributes( 'placeholder' ) )
 			.toBe( placeholder );
 	} );
 
@@ -85,7 +87,7 @@ describe( 'StringDataValue', () => {
 			const maxlength = 12345;
 			const wrapper = shallowMount( StringDataValue, {
 				propsData: {
-					label: null,
+					label: defaultLabel,
 					dataValue: null,
 					setDataValue: () => {},
 					maxlength,
@@ -93,20 +95,20 @@ describe( 'StringDataValue', () => {
 			} );
 
 			expect(
-				wrapper.find( ResizingTextField ).attributes( 'maxlength' ),
+				wrapper.findComponent( ResizingTextField ).attributes( 'maxlength' ),
 			).toBe( maxlength.toString() );
 		} );
 
 		it( 'is unset by default', () => {
 			const wrapper = shallowMount( StringDataValue, {
 				propsData: {
-					label: null,
+					label: defaultLabel,
 					dataValue: null,
 					setDataValue: () => {},
 				},
 			} );
 
-			expect( wrapper.find( ResizingTextField ).attributes( 'maxlength' ) )
+			expect( wrapper.findComponent( ResizingTextField ).attributes( 'maxlength' ) )
 				.toBeUndefined();
 		} );
 	} );

@@ -1,5 +1,9 @@
 <?php
 
+namespace MediaWiki\Extension\Elastica;
+
+use Elastica\Client;
+use Elastica\Index;
 use MediaWiki\Logger\LoggerFactory;
 
 /**
@@ -23,7 +27,7 @@ use MediaWiki\Logger\LoggerFactory;
  */
 abstract class ElasticaConnection {
 	/**
-	 * @var ?\Elastica\Client
+	 * @var ?Client
 	 */
 	protected $client;
 
@@ -69,7 +73,7 @@ abstract class ElasticaConnection {
 
 	/**
 	 * Fetch a connection.
-	 * @return \Elastica\Client
+	 * @return Client
 	 */
 	public function getClient() {
 		if ( $this->client === null ) {
@@ -87,7 +91,7 @@ abstract class ElasticaConnection {
 				}
 			}
 
-			$this->client = new \Elastica\Client( [ 'servers' => $servers ],
+			$this->client = new Client( [ 'servers' => $servers ],
 				/**
 				 * Callback for \Elastica\Client on request failures.
 				 * @param \Elastica\Connection $connection The current connection to elasticasearch
@@ -146,7 +150,7 @@ abstract class ElasticaConnection {
 	 * @param string $name get the index(es) with this basename
 	 * @param string|bool $type type of index (named type or false to get all)
 	 * @param mixed $identifier if specified get the named identifier of the index
-	 * @return \Elastica\Index
+	 * @return Index
 	 */
 	public function getIndex( $name, $type = false, $identifier = false ) {
 		return $this->getClient()->getIndex( $this->getIndexName( $name, $type, $identifier ) );
@@ -175,4 +179,4 @@ abstract class ElasticaConnection {
 	}
 }
 
-class_alias( ElasticaConnection::class, 'MediaWiki\\Extension\\Elastica\\ElasticaConnection' );
+class_alias( ElasticaConnection::class, 'ElasticaConnection' );

@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Robertjamal12",
 			"AC Krah",
-			"Amire80"
+			"Amire80",
+			"Robertjamal12"
 		]
 	},
 	"minerva-last-modified-date": "Nsesae a ɛtwa mu da $1, bere $2",
@@ -18,7 +18,6 @@
 	"mobile-frontend-home-button": "Fie",
 	"mobile-frontend-language-article-heading": "Kasa",
 	"mobile-frontend-languages-not-available": "Saa kratafa yi nni kasa ahorow mu.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Akwaaba}}, $1!",
 	"mobile-frontend-main-menu-contributions": "Mmoa",
 	"mobile-frontend-main-menu-login": "Kɔ mu",
 	"mobile-frontend-main-menu-logout": "Pue",

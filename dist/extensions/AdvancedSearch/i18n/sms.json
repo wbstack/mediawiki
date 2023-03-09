@@ -4,13 +4,16 @@
 			"Yupik"
 		]
 	},
+	"advancedsearch-options-pane-head": "Tääʹrǩab ooccmõš:",
 	"advancedsearch-optgroup-files": "Teâttõõzz da kaart",
 	"advancedsearch-field-subpageof": "Tän seeid vueʹllseeid",
 	"advancedsearch-field-filew": "Teâttõõzz kobddâdvuõtt pikseleeʹlen",
 	"advancedsearch-field-fileh": "Teâttõõzz õllâdvuõtt pikseleeʹlen",
+	"advancedsearch-field-preview-sort": "Šlajjâd: $1",
 	"advancedsearch-inlanguage-default": "Vaʹlljed ǩiõl",
 	"advancedsearch-filetype-bitmap": "Kartt leʼbe snimldõk",
 	"advancedsearch-filetype-audio": "Jiõnn",
 	"advancedsearch-filetype-video": "Video",
-	"advancedsearch-namespaces-preset-discussion": "Saǥstõõllmõš"
+	"advancedsearch-namespaces-preset-discussion": "Saǥstõõllmõš",
+	"prefs-advancedsearch": "Tääʹrǩab ooccmõš"
 }

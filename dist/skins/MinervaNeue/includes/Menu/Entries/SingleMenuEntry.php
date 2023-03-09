@@ -17,8 +17,8 @@
 
 namespace MediaWiki\Minerva\Menu\Entries;
 
+use MediaWiki\Minerva\MinervaUI;
 use Message;
-use MinervaUI;
 
 /**
  * Model for a simple menu entries with label and icon
@@ -43,20 +43,42 @@ class SingleMenuEntry implements IMenuEntry {
 	 * @param string $name An unique menu element identifier
 	 * @param string $text Text to show on menu element
 	 * @param string $url URL menu element points to
-	 * @param string $className Additional CSS class names.
+	 * @param string|array $className Additional CSS class names.
 	 */
 	public function __construct( $name, $text, $url, $className = '' ) {
 		$this->name = $name;
-		if ( $className ) {
-			$className .= ' ';
-		}
-		$className .= 'menu__item--' . $name;
+		$menuClass = 'menu__item--' . $name;
 
 		$this->attributes = [
+			'icon' => null,
 			'text' => $text,
 			'href' => $url,
-			'class' => $className
+			'class' => is_array( $className ) ?
+				implode( ' ', $className + [ $menuClass ] ) :
+					ltrim( $className . ' ' . $menuClass ),
 		];
+	}
+
+	/**
+	 * Override the icon used in the home menu entry.
+	 *
+	 * @param string $icon
+	 * @return $this
+	 */
+	public function overrideIcon( $icon ) {
+		$this->setIcon( str_replace( 'minerva-', '', $icon ) );
+		return $this;
+	}
+
+	/**
+	 * Override the text used in the home menu entry.
+	 *
+	 * @param string $text
+	 * @return $this
+	 */
+	public function overrideText( $text ) {
+		$this->attributes['text'] = $text;
+		return $this;
 	}
 
 	/**
@@ -66,12 +88,16 @@ class SingleMenuEntry implements IMenuEntry {
 	 * @param string $text Entry label
 	 * @param string $url The URL entry points to
 	 * @param string $className Optional HTML classes
+	 * @param string|null $icon defaults to $name if not specified
 	 * @return static
 	 */
-	public static function create( $name, $text, $url, $className = '' ) {
+	public static function create( $name, $text, $url, $className = '', $icon = null ) {
 		$entry = new static( $name, $text, $url, $className );
 		$entry->trackClicks( $name );
-		$entry->setIcon( $name );
+		if ( $icon === null ) {
+			$icon = $name;
+		}
+		$entry->setIcon( $icon );
 		return $entry;
 	}
 
@@ -108,8 +134,8 @@ class SingleMenuEntry implements IMenuEntry {
 
 	/**
 	 * Set the Menu entry icon
-	 * @param string|null $iconName Icon name
-	 * @param string $iconType Icon type
+	 * @param string|null $iconName
+	 * @param string $iconType
 	 * @param string $additionalClassNames Additional classes
 	 * @param string $iconPrefix either `wikimedia` or `minerva`
 	 * @return $this
@@ -117,8 +143,13 @@ class SingleMenuEntry implements IMenuEntry {
 	public function setIcon( $iconName, $iconType = 'before',
 		$additionalClassNames = '', $iconPrefix = 'minerva'
 	) {
-		$this->attributes['class'] .= ' '
-			. MinervaUI::iconClass( $iconName, $iconType, $additionalClassNames, $iconPrefix );
+		if ( $iconType === 'before' ) {
+			$this->attributes['icon'] = $iconPrefix . '-' . $iconName;
+		} else {
+			$this->attributes['class'] .= ' ' . MinervaUI::iconClass(
+				$iconName, $iconType, $additionalClassNames, $iconPrefix
+			);
+		}
 		return $this;
 	}
 

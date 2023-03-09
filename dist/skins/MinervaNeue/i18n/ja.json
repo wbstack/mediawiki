@@ -16,12 +16,14 @@
 			"Yusuke1109",
 			"そらたこ",
 			"神樂坂秀吉",
-			"組曲師"
+			"組曲師",
+			"Funa-enpitu",
+			"Marine-Blue"
 		]
 	},
 	"minerva-last-modified-date": "最終更新: $1 $2",
 	"minerva-watchlist-cta": "このページのすべての変更を追跡しましょう。",
-	"minerva-talk-add-topic": "議論を追加",
+	"minerva-talk-add-topic": "話題を追加",
 	"mobile-frontend-cookies-required": "表示モードを切り替えるには Cookie が必要です。有効にしてからもう一度お試しください。",
 	"mobile-frontend-editor-edit": "編集",
 	"minerva-download": "PDFをダウンロード",
@@ -32,7 +34,6 @@
 	"mobile-frontend-home-button": "ホーム",
 	"mobile-frontend-language-article-heading": "言語",
 	"mobile-frontend-languages-not-available": "このページに他の言語版はありません。",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|ようこそ}}、$1さん!",
 	"mobile-frontend-main-menu-button-tooltip": "メインメニューを開く",
 	"mobile-frontend-main-menu-contributions": "投稿記録",
 	"mobile-frontend-main-menu-login": "ログイン",
@@ -87,5 +88,7 @@
 	"skin-minerva-mobile-option-MinervaShowCategories-description": "ページが属するカテゴリを表示",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "ページの問題処理の改良",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "ページの問題 (Template:ambox) は記事上でリンク表示します。",
-	"skin-minerva-recentchanges-warning-enhanced-not-supported": "残念ながら、モバイルビューでは複数の変更をページごとにまとめて表示することはできません。ページごとにまとめて表示する機能を利用したい場合はデスクトップサイトにアクセスしてください。"
+	"skin-minerva-recentchanges-warning-enhanced-not-supported": "残念ながら、モバイルビューでは複数の変更をページごとにまとめて表示することはできません。ページごとにまとめて表示する機能を利用したい場合はデスクトップサイトにアクセスしてください。",
+	"minerva.css": "/* ここに記述したCSSは、全てのミネルバスキン利用者に読み込まれます　*/",
+	"minerva.js": "/* ここに記述したJavaScriptは、全てのミネルバスキン利用者に読み込まれます　*/"
 }

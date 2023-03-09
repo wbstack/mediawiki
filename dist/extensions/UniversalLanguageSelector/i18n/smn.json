@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yupik",
-			"Seipinne"
+			"Seipinne",
+			"Yupik"
 		]
 	},
 	"uls-plang-title-languages": "Kielah",
@@ -10,10 +10,13 @@
 	"uls-betafeature-label": "Kielâliiŋkah lavvâ",
 	"ext-uls-display-settings-language-tab": "Kielâ",
 	"ext-uls-language-settings-title": "Kielâasâttâsah",
+	"ext-uls-language-settings-cancel": "Jooskâ",
+	"ext-uls-webfonts-settings-info-link": "Lasetiäđuh",
 	"jquery-ime-other-languages": "Eres kielah",
 	"jquery-ime-help": "Iše",
 	"ext-uls-compact-link-count": "$1 {{PLURAL:$1|eres kielâ|eres kielâ|eres kielâ|eres kiellâd}}",
 	"prefs-languages": "Kielah",
 	"ext-uls-compact-language-links-preference": "Keevti [[$1|kompakt kielâlisto]], mii čáittá tunjin merhâšittee kielâid.",
-	"ext-uls-setlang-unknown-error": "Tubdâmettum feilâ"
+	"ext-uls-setlang-unknown-error": "Tubdâmettum feilâ",
+	"ext-uls-setlang-heading": "Halijdah-uv tun molsođ kevttimloovtâ kielâ?"
 }

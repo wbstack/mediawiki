@@ -8,11 +8,12 @@ use CirrusSearch\Iterator\CallbackIterator;
 use CirrusSearch\Job;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\Updater;
-use JobQueueGroup;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use MWException;
 use MWTimestamp;
 use Title;
+use WikiMap;
 use Wikimedia\Rdbms\IDatabase;
 use WikiPage;
 
@@ -135,7 +136,7 @@ class ForceSearchIndex extends Maintenance {
 
 	public function execute() {
 		$this->disablePoolCountersAndLogging();
-		$wiki = sprintf( "[%20s]", wfWikiID() );
+		$wiki = sprintf( "[%20s]", WikiMap::getCurrentWikiId() );
 
 		// Make sure we've actually got indices to populate
 		if ( !$this->simpleCheckIndexes() ) {
@@ -209,6 +210,7 @@ class ForceSearchIndex extends Maintenance {
 		} else {
 			$it = $this->getDeletesIterator();
 		}
+		$jobQueueGroup = MediaWikiServices::getInstance()->getJobQueueGroup();
 
 		foreach ( $it as $batch ) {
 			if ( $this->indexUpdates ) {
@@ -216,7 +218,7 @@ class ForceSearchIndex extends Maintenance {
 				$updates = array_filter( $batch['updates'] );
 				if ( $this->queue ) {
 					$this->waitForQueueToShrink( $wiki );
-					JobQueueGroup::singleton()->push( Job\MassIndex::build(
+					$jobQueueGroup->push( Job\MassIndex::build(
 						$updates, $updateFlags, $this->getOption( 'cluster' )
 					) );
 				} else {
@@ -545,10 +547,11 @@ class ForceSearchIndex extends Maintenance {
 			$updater = $this->createUpdater();
 
 			$pages = [];
+			$wikiPageFactory = MediaWikiServices::getInstance()->getWikiPageFactory();
 			foreach ( $batch as $row ) {
 				// No need to call Updater::traceRedirects here because we know this is a valid page
 				// because it is in the database.
-				$page = WikiPage::newFromRow( $row, WikiPage::READ_LATEST );
+				$page = $wikiPageFactory->newFromRow( $row, WikiPage::READ_LATEST );
 
 				// null pages still get attached to keep the counts the same. They will be filtered
 				// later on.
@@ -668,7 +671,7 @@ class ForceSearchIndex extends Maintenance {
 	 * @return int length
 	 */
 	private function getUpdatesInQueue() {
-		return JobQueueGroup::singleton()->get( 'cirrusSearchMassIndex' )->getSize();
+		return MediaWikiServices::getInstance()->getJobQueueGroup()->get( 'cirrusSearchMassIndex' )->getSize();
 	}
 
 	/**

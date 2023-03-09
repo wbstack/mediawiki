@@ -18,16 +18,16 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import { defineComponent } from 'vue';
 
 /**
  * A component to be used as header of dialogs in which users make their
  * way through a process - i.e. there is a primary action "forward" and
  * an alternative second one.
  */
-@Component
-export default class ProcessDialogHeader extends Vue {}
+export default defineComponent( {
+	name: 'ProcessDialogHeader',
+} );
 </script>
 
 <style lang="scss">

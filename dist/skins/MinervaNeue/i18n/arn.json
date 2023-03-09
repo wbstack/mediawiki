@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Fiestoforo",
-			"Ndołkah",
-			"Manke ruLpa"
+			"Manke ruLpa",
+			"Ndołkah"
 		]
 	},
 	"mobile-frontend-editor-edit": "Kümeelün",
@@ -11,7 +11,6 @@
 	"mobile-frontend-history": "Pengepe fachi tapülh ñi kümeeltun tukulpan",
 	"mobile-frontend-home-button": "Tuwül",
 	"mobile-frontend-language-article-heading": "Kewünh",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Küme akukonpaymi}}, $1!",
 	"mobile-frontend-main-menu-login": "Konkülen",
 	"mobile-frontend-main-menu-settings": "Trürümün",
 	"mobile-frontend-pageaction-edit-tooltip": "Kümeelün tüfachi tapülh ñi wünengechi trokiñ.",

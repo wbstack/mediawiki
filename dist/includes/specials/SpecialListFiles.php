@@ -80,7 +80,7 @@ class SpecialListFiles extends IncludableSpecialPage {
 			$search = '';
 			$showAll = false;
 		} else {
-			$userName = $this->getRequest()->getText( 'user', $par );
+			$userName = $this->getRequest()->getText( 'user', $par ?? '' );
 			$search = $this->getRequest()->getText( 'ilsearch', '' );
 			$showAll = $this->getRequest()->getBool( 'ilshowall', false );
 		}
@@ -98,16 +98,16 @@ class SpecialListFiles extends IncludableSpecialPage {
 
 		$pager = new ImageListPager(
 			$this->getContext(),
+			$this->commentStore,
+			$this->getLinkRenderer(),
+			$this->loadBalancer,
+			$this->repoGroup,
+			$this->userCache,
+			$this->userNameUtils,
 			$userName,
 			$search,
 			$this->including(),
-			$showAll,
-			$this->getLinkRenderer(),
-			$this->repoGroup,
-			$this->loadBalancer,
-			$this->commentStore,
-			$this->userCache,
-			$this->userNameUtils
+			$showAll
 		);
 
 		$out = $this->getOutput();

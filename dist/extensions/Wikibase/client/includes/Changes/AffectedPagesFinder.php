@@ -7,6 +7,8 @@ namespace Wikibase\Client\Changes;
 use ArrayIterator;
 use InvalidArgumentException;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Page\PageRecord;
+use MediaWiki\Page\PageStore;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Title;
@@ -39,6 +41,9 @@ class AffectedPagesFinder {
 	 */
 	private $titleFactory;
 
+	/** @var PageStore */
+	private $pageStore;
+
 	/** @var LinkBatchFactory */
 	private $linkBatchFactory;
 
@@ -53,35 +58,29 @@ class AffectedPagesFinder {
 	private $logger;
 
 	/**
-	 * @var bool
-	 */
-	private $checkPageExistence;
-
-	/**
 	 * @param UsageLookup $usageLookup
 	 * @param TitleFactory $titleFactory
+	 * @param PageStore $pageStore
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param string $siteId
 	 * @param LoggerInterface|null $logger
-	 * @param bool $checkPageExistence To disable slow filtering that is not relevant in test
-	 *  scenarios. Not meant to be used in production!
 	 *
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct(
 		UsageLookup $usageLookup,
 		TitleFactory $titleFactory,
+		PageStore $pageStore,
 		LinkBatchFactory $linkBatchFactory,
 		string $siteId,
-		?LoggerInterface $logger = null,
-		bool $checkPageExistence = true
+		?LoggerInterface $logger = null
 	) {
 		$this->usageLookup = $usageLookup;
 		$this->titleFactory = $titleFactory;
+		$this->pageStore = $pageStore;
 		$this->linkBatchFactory = $linkBatchFactory;
 		$this->siteId = $siteId;
 		$this->logger = $logger ?: new NullLogger();
-		$this->checkPageExistence = $checkPageExistence;
 	}
 
 	/**
@@ -298,12 +297,15 @@ class AffectedPagesFinder {
 
 		$titlesToUpdate = [];
 
-		foreach ( $this->titleFactory->newFromIDs( array_keys( $usagesByPageId ) ) as $title ) {
-			if ( $this->checkPageExistence && !$title->exists() ) {
-				continue;
-			}
+		$pageRecords = $this->pageStore
+			->newSelectQueryBuilder()
+			->wherePageIds( array_keys( $usagesByPageId ) )
+			->caller( __METHOD__ )
+			->fetchPageRecords();
 
-			$pageId = $title->getArticleID();
+		/** @var PageRecord $pageRecord */
+		foreach ( $pageRecords as $pageRecord ) {
+			$pageId = $pageRecord->getId();
 			$titlesToUpdate[$pageId] = $usagesByPageId[$pageId];
 		}
 
@@ -343,7 +345,9 @@ class AffectedPagesFinder {
 		}
 
 		// bulk-load the page IDs into the LinkCache
-		$this->linkBatchFactory->newLinkBatch( $titles )->execute();
+		$linkBatch = $this->linkBatchFactory->newLinkBatch( $titles );
+		$linkBatch->setCaller( __METHOD__ );
+		$linkBatch->execute();
 
 		$usagesPerPage = [];
 		foreach ( $titles as $title ) {

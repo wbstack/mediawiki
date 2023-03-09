@@ -21,6 +21,8 @@
 	"wikibasecirrus-search-bad-entity-type": "Ugyldig entitetstype: $1",
 	"wikibasecirrus-search-bad-profile-name": "Ugyldig søkeprofilnavn: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Nøkkelordet haswbstatement inneholder ingen gyldige påstander",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Nøkkelordet haslicense har ingen gyldige argumenter",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Nøkkelordet wbstatementquantity inneholder ingen gyldige påstander",
 	"special-entitieswithoutdescription": "Elementer uten beskrivelse",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Hent liste over elementer uten beskrivelse",
 	"special-entitieswithoutlabel": "Entiteter uten etikett",

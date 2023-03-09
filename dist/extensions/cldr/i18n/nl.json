@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Krinkle",
 			"SPQRobin",
-			"Siebrand",
-			"Krinkle"
+			"Siebrand"
 		]
 	},
 	"cldr-desc": "Vertaalde namen van talen aanbieden gebaseerd op [http://cldr.unicode.org/index/downloads CLDR-gegevens]"

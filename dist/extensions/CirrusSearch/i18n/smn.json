@@ -1,8 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yupik"
+			"Yupik",
+			"Seipinne"
 		]
 	},
-	"cirrussearch-explore-similar-languages": "Kielah"
+	"cirrussearch-pref-label": "Uđđâ uuccâm",
+	"cirrussearch-give-feedback": "Addel macâttâs",
+	"cirrussearch-explore-similar-languages": "Kielah",
+	"cirrussearch-article-words": "Säänih puoh siskáldâssiijđoin"
 }

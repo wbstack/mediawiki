@@ -19,19 +19,20 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-namespace MediaWiki\Extensions\OAuth\Backend;
+namespace MediaWiki\Extension\OAuth\Backend;
 
 use FormatJson;
 use IContextSource;
 use Linker;
 use LogicException;
-use MediaWiki\Extensions\OAuth\Entity\ClientEntity as OAuth2Client;
+use MediaWiki\Extension\OAuth\Entity\ClientEntity as OAuth2Client;
 use MediaWiki\MediaWikiServices;
 use Message;
 use MWException;
 use MWRestrictions;
 use SpecialPage;
 use User;
+use WikiMap;
 use Wikimedia\Rdbms\DBConnRef;
 
 /**
@@ -210,9 +211,9 @@ abstract class Consumer extends MWOAuthDAO {
 
 	/**
 	 * @param DBConnRef $db
-	 * @param string $key
+	 * @param string|null $key
 	 * @param int $flags MWOAuthConsumer::READ_* bitfield
-	 * @return Consumer|bool
+	 * @return Consumer|false
 	 */
 	public static function newFromKey( DBConnRef $db, $key, $flags = 0 ) {
 		$row = $db->selectRow( static::getTable(),
@@ -565,7 +566,7 @@ abstract class Consumer extends MWOAuthDAO {
 		global $wgBlockDisablesLogin;
 
 		// Check that user and consumer are in good standing
-		if ( $mwUser->isLocked() || $wgBlockDisablesLogin && $mwUser->isBlocked() ) {
+		if ( $mwUser->isLocked() || $wgBlockDisablesLogin && $mwUser->getBlock() ) {
 			throw new MWOAuthException( 'mwoauthserver-insufficient-rights', [
 				Message::rawParam( Linker::makeExternalLink(
 					'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E007',
@@ -642,7 +643,7 @@ abstract class Consumer extends MWOAuthDAO {
 
 		$dbw = Utils::getCentralDB( DB_PRIMARY );
 		// Check if this authorization exists
-		$cmra = $this->getCurrentAuthorization( $mwUser, wfWikiID() );
+		$cmra = $this->getCurrentAuthorization( $mwUser, WikiMap::getCurrentWikiId() );
 
 		if ( $update ) {
 			// This should be an update to an existing authorization
@@ -744,7 +745,7 @@ abstract class Consumer extends MWOAuthDAO {
 		$row['oarc_email_authenticated'] =
 			wfTimestampOrNull( TS_MW, $row['oarc_email_authenticated'] );
 		$row['oarc_oauth2_allowed_grants'] = FormatJson::decode(
-			$row['oarc_oauth2_allowed_grants'], true
+			$row['oarc_oauth2_allowed_grants'] ?? 'null', true
 		);
 
 		// For backwards compatibility, remap some grants

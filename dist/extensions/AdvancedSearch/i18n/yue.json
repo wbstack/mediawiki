@@ -54,5 +54,7 @@
 	"advancedsearch-namespaces-preset-default": "預設",
 	"advancedsearch-namespaces-preset-general-help": "一般幫手",
 	"advancedsearch-namespaces-preset-discussion": "討論",
-	"advancedsearch-namespaces-placeholder": "加名空間……"
+	"advancedsearch-namespaces-placeholder": "加名空間……",
+	"prefs-advancedsearch": "進階搜尋",
+	"advancedsearch-preference-disable": "用 Special:Search 嘅時候唔好顯示進階搜尋界面"
 }

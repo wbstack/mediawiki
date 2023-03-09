@@ -18,6 +18,7 @@
 			"Yamagata Yusuke"
 		]
 	},
+	"apierror-kartographer-conflicting-revids": "同一のページから1回のリクエストで複数の変更版に対応するメタデータを検索する機能はまだ導入されていません。",
 	"kartographer-attribution": "[https://foundation.wikimedia.org/wiki/Maps_Terms_of_Use Wikimedia maps] | Map data © [https://www.openstreetmap.org/copyright OpenStreetMap contributors]",
 	"kartographer-broken-category": "破損した地図があるページ",
 	"kartographer-broken-category-desc": "そのページは無効なマップ使用法を含んでいます",

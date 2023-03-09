@@ -23,9 +23,22 @@
 
  */
 
+namespace MediaWiki\Extension\Score;
+
+use Exception;
+use FileBackend;
+use FormatJson;
+use FSFileBackend;
+use Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use Message;
+use NullLockManager;
+use Parser;
+use PPFrame;
 use Shellbox\Command\BoxedCommand;
+use Title;
+use WikiMap;
 use Wikimedia\ScopedCallback;
 
 /**
@@ -230,13 +243,14 @@ class Score {
 		if ( !self::$backend ) {
 			global $wgScoreDirectory, $wgUploadDirectory;
 			if ( $wgScoreDirectory === false ) {
+				// @phan-suppress-next-line PhanPossiblyUndeclaredVariable
 				$dir = "{$wgUploadDirectory}/lilypond";
 			} else {
 				$dir = $wgScoreDirectory;
 			}
 			self::$backend = new FSFileBackend( [
 				'name'           => 'score-backend',
-				'wikiId'         => wfWikiID(),
+				'wikiId'         => WikiMap::getCurrentWikiId(),
 				'lockManager'    => new NullLockManager( [] ),
 				'containerPaths' => [ 'score-render' => $dir ],
 				'fileMode'       => 0777,
@@ -294,7 +308,6 @@ class Score {
 
 			/* temporary working directory to use */
 			$fuzz = md5( (string)mt_rand() );
-			// @phan-suppress-next-line PhanTypeSuspiciousStringExpression
 			$options['factory_directory'] = $wgTmpDirectory . "/MWLP.$fuzz";
 
 			/* Score language selection */
@@ -396,7 +409,7 @@ class Score {
 			];
 
 			/* image file path and URL prefixes */
-			$imageCacheName = Wikimedia\base_convert( sha1( serialize( $cacheOptions ) ), 16, 36, 31 );
+			$imageCacheName = \Wikimedia\base_convert( sha1( serialize( $cacheOptions ) ), 16, 36, 31 );
 			$imagePrefixEnd = "{$imageCacheName[0]}/" .
 				"{$imageCacheName[1]}/$imageCacheName";
 			$options['dest_storage_path'] = "$baseStoragePath/$imagePrefixEnd";
@@ -406,7 +419,7 @@ class Score {
 			$html = self::generateHTML( $parser, $code, $options );
 		} catch ( ScoreException $e ) {
 			if ( $parser->getOutput() !== null ) {
-				$parser->getOutput()->addModules( 'ext.score.errors' );
+				$parser->getOutput()->addModules( [ 'ext.score.errors' ] );
 				if ( $e->isTracked() ) {
 					$parser->addTrackingCategory( 'score-error-category' );
 				}
@@ -418,8 +431,8 @@ class Score {
 		// Mark the page as using the score extension, it makes easier
 		// to track all those pages.
 		if ( $parser->getOutput() !== null ) {
-			$scoreNum = $parser->getOutput()->getProperty( 'score' );
-			$parser->getOutput()->setProperty( 'score', $scoreNum += 1 );
+			$scoreNum = $parser->getOutput()->getPageProperty( 'score' ) ?? 0;
+			$parser->getOutput()->setPageProperty( 'score', $scoreNum += 1 );
 		}
 
 		return $html;
@@ -475,7 +488,7 @@ class Score {
 			self::eraseDirectory( $options['factory_directory'] );
 		} );
 		if ( $parser->getOutput() !== null ) {
-			$parser->getOutput()->addModules( 'ext.score.popup' );
+			$parser->getOutput()->addModules( [ 'ext.score.popup' ] );
 		}
 
 		$backend = self::getBackend();

@@ -18,10 +18,8 @@
 		]
 	},
 	"wikieditor-wikitext-tab": "Vikimətn",
-	"wikieditor-loading": "Yüklənir...",
 	"wikieditor-toolbar-preference": "Redaktə panelini aktivləşdir",
 	"wikieditor-toolbar-preference-help": "Bu funksiya bəzən \"2010 vikimətn redaktoru\" da adlanır.",
-	"wikieditor-toolbar-loading": "Yüklənir…",
 	"wikieditor-toolbar-tool-bold": "Qalın",
 	"wikieditor-toolbar-tool-bold-example": "Qalın mətn",
 	"wikieditor-toolbar-tool-italic": "Kursiv",
@@ -161,5 +159,6 @@
 	"wikieditor-toolbar-help-content-signature-result": "<a href='#' title='$1:Username'>İstifadəçi adı</a> (<a href='#' title='$2:Username'>müzakirə</a>)",
 	"wikieditor-toolbar-help-content-indent-description": "Abzas",
 	"wikieditor-toolbar-help-content-indent-syntax": "Normal mətn<br />:Abzasla mətn<br />::Abzasla mətn",
-	"wikieditor-toolbar-help-content-indent-result": "Normal mətn<dl><dd>Abzasla mətn<dl><dd>Abzasla mətn</dd></dl></dd></dl>"
+	"wikieditor-toolbar-help-content-indent-result": "Normal mətn<dl><dd>Abzasla mətn<dl><dd>Abzasla mətn</dd></dl></dd></dl>",
+	"wikieditor-realtimepreview-preview": "Sınaq göstərişi"
 }

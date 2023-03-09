@@ -212,10 +212,6 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 * @var CirrusSearchHookRunner|null
 	 */
 	private $cirrusSearchHookRunner;
-	/**
-	 * @var array
-	 */
-	private $ltrModelParams = [];
 
 	/**
 	 * @param SearchConfig $config
@@ -538,6 +534,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 			$rescore['query']['rescore_query'] = $rescore['query']['rescore_query']->toArray();
 			$result[] = $rescore;
 		}
+
 		return $result;
 	}
 
@@ -644,7 +641,6 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	}
 
 	/**
-	 * Set the original search term
 	 * @param string $term
 	 */
 	public function setOriginalSearchTerm( $term ) {
@@ -738,7 +734,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	}
 
 	/**
-	 * @return ResultsType $resultsType results type to return
+	 * @return ResultsType
 	 */
 	public function getResultsType() {
 		Assert::precondition( $this->resultsType !== null, "resultsType unset" );
@@ -772,7 +768,6 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	}
 
 	/**
-	 * Set the phrase rescore query
 	 * @param AbstractQuery|null $phraseRescoreQuery
 	 */
 	public function setPhraseRescoreQuery( $phraseRescoreQuery ) {
@@ -901,14 +896,5 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 */
 	public function getFallbackRunner(): FallbackRunner {
 		return $this->fallbackRunner;
-	}
-
-	public function setLtrParamsForModel( string $modelName, array $params ) {
-		$this->ltrModelParams[$modelName] = $params;
-	}
-
-	public function getLtrParamsForModel( string $modelName ): array {
-		return $this->ltrModelParams[$modelName] ??
-			[ 'query_string' => $this->getCleanedSearchTerm() ];
 	}
 }

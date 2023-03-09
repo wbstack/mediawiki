@@ -1,7 +1,7 @@
 ( function ( M ) {
 	var
 		mobile = M.require( 'mobile.startup' ),
-		ToggleList = require( '../../components/ToggleList/ToggleList.js' ),
+		ToggleList = require( '../../includes/Skins/ToggleList/ToggleList.js' ),
 		Icon = mobile.Icon,
 		page = mobile.currentPage(),
 		/** The top level menu. */
@@ -88,12 +88,6 @@
 				mw.config.get( 'wgMinervaDownloadNamespaces', [] ), window, !!overflowList );
 
 		if ( $downloadAction ) {
-			if ( overflowList ) {
-				$downloadAction.appendTo( overflowList );
-			} else {
-				$downloadAction.insertAfter( '.page-actions-menu__list-item:first-child' );
-			}
-
 			mw.track( 'minerva.downloadAsPDF', {
 				action: 'buttonVisible'
 			} );

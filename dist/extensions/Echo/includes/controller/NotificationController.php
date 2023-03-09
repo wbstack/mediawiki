@@ -112,6 +112,7 @@ class EchoNotificationController {
 		$notifyTypes = self::getEventNotifyTypes( $type );
 		$userIds = [];
 		$userIdsCount = 0;
+		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		/** @var User $user */
 		foreach ( self::getUsersToNotifyForEvent( $event ) as $user ) {
 			$userIds[$user->getId()] = $user->getId();
@@ -119,7 +120,7 @@ class EchoNotificationController {
 			// Respect the enotifminoredits preference
 			// @todo should this be checked somewhere else?
 			if (
-				!$user->getOption( 'enotifminoredits' ) &&
+				!$userOptionsLookup->getOption( $user, 'enotifminoredits' ) &&
 				self::hasMinorRevision( $event )
 			) {
 				$userNotifyTypes = array_diff( $userNotifyTypes, [ 'email' ] );
@@ -197,7 +198,7 @@ class EchoNotificationController {
 				'userIds' => $userIds
 			]
 		);
-		JobQueueGroup::singleton()->push( $job );
+		MediaWikiServices::getInstance()->getJobQueueGroup()->push( $job );
 	}
 
 	/**
@@ -239,7 +240,7 @@ class EchoNotificationController {
 	 * @param EchoEvent $event
 	 */
 	public static function enqueueEvent( EchoEvent $event ) {
-		$queue = JobQueueGroup::singleton();
+		$queue = MediaWikiServices::getInstance()->getJobQueueGroup();
 		$params = self::getEventParams( $event );
 
 		$job = new EchoNotificationJob(

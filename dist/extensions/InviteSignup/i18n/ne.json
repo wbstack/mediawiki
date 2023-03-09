@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Bada Kaji"
+			"Bada Kaji",
+			"पर्वत सुबेदी",
+			"बडा काजी"
 		]
 	},
-	"is-add": "थप्नुहोस्"
+	"is-add": "थप्नुहोस्",
+	"is-delete": "मेट्ने"
 }

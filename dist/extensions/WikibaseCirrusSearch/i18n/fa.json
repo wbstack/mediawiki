@@ -24,14 +24,15 @@
 			"Taha",
 			"Zolo",
 			"ZxxZxxZ",
-			"درفش کاویانی"
+			"درفش کاویانی",
+			"Beginneruser"
 		]
 	},
 	"wikibasecirrus-search-bad-entity-type": "نوع موجود بد: $1",
-	"special-entitieswithoutdescription": "جوهره‌های بدون توضیحات",
-	"wikibasecirrus-entitieswithoutdescription-legend": "فهرست جوهره‌های بدون توضیحات را دریافت کنید",
-	"special-entitieswithoutlabel": "جوهره‌های بدون برچسب",
-	"wikibasecirrus-entitieswithoutlabel-legend": "گرفتن فهرستی از موضوع‌های بدون نام",
+	"special-entitieswithoutdescription": "هستارهای بدون توصیف",
+	"wikibasecirrus-entitieswithoutdescription-legend": "دریافت فهرست هستارهای بدون توصیف",
+	"special-entitieswithoutlabel": "هستارهای بدون برچسب",
+	"wikibasecirrus-entitieswithoutlabel-legend": "دریافت فهرست هستارهای بدون برچسب",
 	"wikibasecirrus-entitieswithoutlabel-label-language": "کد زبان:",
 	"wikibasecirrus-entitieswithoutlabel-label-type": "نوع:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "یافتن",

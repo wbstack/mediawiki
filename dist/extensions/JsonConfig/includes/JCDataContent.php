@@ -4,10 +4,10 @@ namespace JsonConfig;
 
 use Html;
 use Language;
+use MediaWiki\Page\PageReference;
 use Parser;
 use ParserOptions;
 use stdClass;
-use Title;
 
 /**
  * @package JsonConfig
@@ -138,13 +138,13 @@ abstract class JCDataContent extends JCObjContent {
 		return false;
 	}
 
-	public function renderSources( Parser $parser, Title $title, $revId, ParserOptions $options ) {
+	public function renderSources( Parser $parser, PageReference $page, $revId, ParserOptions $options ) {
 		$sources = $this->getField( 'sources' );
 
 		if ( $sources && !$sources->error() ) {
 			$markup = $sources->getValue();
 			$html = Html::rawElement( 'p', [ 'class' => 'mw-jsonconfig-sources' ],
-				$parser->parse( $markup, $title, $options, true, true, $revId )->getRawText() );
+				$parser->parse( $markup, $page, $options, true, true, $revId )->getRawText() );
 		} else {
 			$html = '';
 		}

@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"ANukuma",
 			"Bennylin",
 			"Gombang",
 			"Hidayatsrf",
@@ -8,8 +9,7 @@
 			"Iwan Novirion",
 			"Rachmat.Wahidi",
 			"Rachmat04",
-			"William Surya Permana",
-			"ANukuma"
+			"William Surya Permana"
 		]
 	},
 	"math-desc": "Menghasilkan rumus matematika di antara tag <code>&lt;math&gt;</code> ... <code>&lt;/math&gt;</code>",

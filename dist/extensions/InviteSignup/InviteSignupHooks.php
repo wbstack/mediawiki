@@ -79,8 +79,9 @@ class InviteSignupHooks {
 
 		$user->setEmail( $invite['email'] );
 		$user->confirmEmail();
+		$userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
 		foreach ( $invite['groups'] as $group ) {
-			$user->addGroup( $group );
+			$userGroupManager->addUserToGroup( $user, $group );
 		}
 		$user->saveSettings();
 		$store->addSignupDate( $user, $wgInviteSignupHash );

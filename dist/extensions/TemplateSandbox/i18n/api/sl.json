@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eleassar"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Predpona peskovnika predloge, kot pri [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Razčleni stran z <var>$1templatesandboxtext</var> namesto vsebine tu navedene strani.",
+	"templatesandbox-apihelp-text": "Razčleni stran z uporabo vsebine te strani namesto strani z imenom <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Vsebinski model <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Oblika vsebine <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Navedena ali izpuščena morata biti tako parameter <var>$1templatesandboxtitle</var> kot tudi parameter <var>$1 templatesandboxtext</var>."
+}

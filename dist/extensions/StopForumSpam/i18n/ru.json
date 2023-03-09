@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"DDPAT",
 			"Facenapalm",
+			"Ice bulldog",
 			"Okras",
 			"Vlad5250",
-			"Wileyfoxyx",
-			"DDPAT"
+			"Wileyfoxyx"
 		]
 	},
 	"abusefilter-edit-builder-vars-sfs-blocked": "Заблокирован ли IP-адрес в списке stopforumspam.com",

@@ -96,7 +96,8 @@ class CookieSessionProvider extends SessionProvider {
 				$this->getConfig()->get( 'SessionName' ) ?: $this->getConfig()->get( 'CookiePrefix' ) . '_session',
 		];
 
-		$this->useCrossSiteCookies = strcasecmp( $this->getConfig()->get( 'CookieSameSite' ), 'none' ) === 0;
+		$sameSite = $this->getConfig()->get( 'CookieSameSite' );
+		$this->useCrossSiteCookies = $sameSite !== null && strcasecmp( $sameSite, 'none' ) === 0;
 
 		// @codeCoverageIgnoreStart
 		$this->cookieOptions += [
@@ -106,7 +107,7 @@ class CookieSessionProvider extends SessionProvider {
 			'domain' => $this->getConfig()->get( 'CookieDomain' ),
 			'secure' => $this->getConfig()->get( 'CookieSecure' ) || $this->getConfig()->get( 'ForceHTTPS' ),
 			'httpOnly' => $this->getConfig()->get( 'CookieHttpOnly' ),
-			'sameSite' => $this->getConfig()->get( 'CookieSameSite' ),
+			'sameSite' => $sameSite
 		];
 	}
 
@@ -129,7 +130,6 @@ class CookieSessionProvider extends SessionProvider {
 				return null;
 			}
 
-			// Sanity check
 			if ( $userName !== null && $userInfo->getName() !== $userName ) {
 				$this->logger->warning(
 					'Session "{session}" requested with mismatched UserID and UserName cookies.',
@@ -304,7 +304,7 @@ class CookieSessionProvider extends SessionProvider {
 		if ( $loggedOut + 86400 > time() &&
 			$loggedOut !== (int)$this->getCookie( $request, 'LoggedOut', $this->cookieOptions['prefix'] )
 		) {
-			$request->response()->setCookie( 'LoggedOut', $loggedOut, $loggedOut + 86400,
+			$request->response()->setCookie( 'LoggedOut', (string)$loggedOut, $loggedOut + 86400,
 				$this->cookieOptions );
 		}
 	}

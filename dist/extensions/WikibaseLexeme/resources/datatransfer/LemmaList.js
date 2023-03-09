@@ -1,7 +1,3 @@
-/**
- * @external Lemma
- * @external LemmaList
- */
 ( function () {
 	'use strict';
 
@@ -95,4 +91,4 @@
 	}
 
 	module.exports = LemmaList;
-} )();
+}() );

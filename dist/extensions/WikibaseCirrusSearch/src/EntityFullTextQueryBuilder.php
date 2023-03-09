@@ -8,8 +8,8 @@ use CirrusSearch\Search\SearchContext;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\DisMax;
-use Elastica\Query\Match;
 use Elastica\Query\MatchNone;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\MultiMatch;
 use Elastica\Query\Term;
 use MediaWiki\MediaWikiServices;
@@ -253,7 +253,7 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 		// - Depending on languages it may lack stopwords,
 		// A dedicated field used for filtering would be nice
 		foreach ( [ 'all', 'all.plain' ] as $field ) {
-			$m = new Match();
+			$m = new MatchQuery();
 			$m->setFieldQuery( $field, $query );
 			$m->setFieldOperator( $field, $operator );
 			if ( $boost ) {
@@ -269,10 +269,10 @@ class EntityFullTextQueryBuilder implements FullTextQueryBuilder {
 	 * @param string $field
 	 * @param string $term
 	 * @param string|null $operator
-	 * @return Match
+	 * @return MatchQuery
 	 */
 	private function buildFieldMatch( $field, $term, $operator = null ) {
-		$m = new Match();
+		$m = new MatchQuery();
 		$m->setFieldQuery( $field, $term );
 		if ( $operator ) {
 			$m->setFieldOperator( $field, $operator );

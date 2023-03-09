@@ -63,7 +63,7 @@
 	"templatedata-modal-placeholder-prompt-map-name": "Unos naziva zemljovida",
 	"templatedata-modal-search-input-placeholder": "Pretraga po jeziku ili njegovom kodu",
 	"templatedata-modal-table-param-actions": "Radnje",
-	"templatedata-modal-table-param-aliases": "Istoznačnice (odvojene zarezima)",
+	"templatedata-modal-table-param-aliases": "Istoznačnice",
 	"templatedata-modal-table-param-autovalue": "Autovrijednost",
 	"templatedata-modal-table-param-default": "Predodređeno ($1)",
 	"templatedata-modal-table-param-deprecated": "Zastarjel",

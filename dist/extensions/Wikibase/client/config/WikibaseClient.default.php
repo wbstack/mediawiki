@@ -149,6 +149,16 @@ return call_user_func( function() {
 
 		// tags for edits made via the linkitem feature
 		'linkItemTags' => [],
+
+		/**
+		 * @note This config options is primarily added for Wikidata transition use-case and can be
+		 * considered temporary. It could be removed in the future with no warning.
+		 *
+		 * @var bool Whether to enable the 'mul' language code,
+		 * adding it to the term language codes and falling back to it before the implicit 'en' fallback
+		 * @see https://phabricator.wikimedia.org/T297393
+		 */
+		'tmpEnableMulLanguageCode' => false,
 	];
 
 	// Some defaults depend on information not available at this time.
@@ -285,6 +295,18 @@ return call_user_func( function() {
 
 	// Batch size for adding entity usage records
 	$defaults['addEntityUsagesBatchSize'] = 500;
+
+	/**
+	 * @note This config options is primarily added for the Wikimedia transition use-case and can be
+	 * considered temporary. It could be removed in the future with no warning.
+	 *
+	 * (tmp) Migration stage (one of the MIGRATION_* constants) indicating, whether the
+	 * "unexpectedUnconnectedPage" page prop should be written or read.
+	 *
+	 * MIGRATION_WRITE_BOTH (and up): Write the "unexpectedUnconnectedPage" page property.
+	 * MIGRATION_WRITE_NEW: Read the "unexpectedUnconnectedPage" page prop in SpecialUnconnectedPages.
+	 */
+	$defaults['tmpUnconnectedPagePagePropMigrationStage'] = MIGRATION_OLD;
 
 	return $defaults;
 } );

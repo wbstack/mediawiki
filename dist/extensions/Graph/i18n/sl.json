@@ -4,7 +4,7 @@
 			"Eleassar"
 		]
 	},
-	"graph-desc": "Omogoča pretvorbo oznak &lt;graph&gt; ali celotnih strani v grafikone [http://vega.github.io/ Vega]",
+	"graph-desc": "Omogoča pretvorbo značk &lt;graph&gt; ali celotnih strani v grafikone [http://vega.github.io/ Vega]",
 	"graphsandbox": "Peskovnik za grafikone",
 	"graph-tracking-category": "Strani z grafikoni",
 	"graph-tracking-category-desc": "Stran vključuje značko <code><nowiki><graph></nowiki></code>.",
@@ -28,7 +28,7 @@
 	"graph-ve-dialog-edit-page-general": "Splošno",
 	"graph-ve-dialog-edit-page-raw": "Neobdelani podatki",
 	"graph-ve-dialog-edit-size-field": "Velikost",
-	"graph-ve-dialog-edit-size-table-unit": "Slikovne pike",
+	"graph-ve-dialog-edit-size-table-unit": "Piksli",
 	"graph-ve-dialog-edit-title": "Uredi grafikon",
 	"graph-ve-dialog-edit-type-area": "Površina grafikona",
 	"graph-ve-dialog-edit-type-bar": "Palični grafikon",

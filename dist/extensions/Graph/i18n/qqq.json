@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Jon Harald Søby",
 			"Liuxinyu970226",
 			"Mormegil",
 			"Raimond Spekking",
 			"Raymond",
-			"Robby",
-			"Jon Harald Søby"
+			"Robby"
 		]
 	},
 	"graph-desc": "{{desc|name=Graph|url=https://www.mediawiki.org/wiki/Extension:Graph}}",

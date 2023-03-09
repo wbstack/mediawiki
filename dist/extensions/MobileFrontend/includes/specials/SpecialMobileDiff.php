@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 
@@ -19,19 +20,16 @@ class SpecialMobileDiff extends MobileSpecialPage {
 	/** @var Title Saves the title of the actual revision */
 	private $targetTitle;
 
-	public function __construct() {
-		parent::__construct( 'MobileDiff' );
-	}
+	/** @var RevisionLookup */
+	private $revisionLookup;
 
 	/**
-	 * Get the revision object from ID
-	 * @param int $id ID of the wanted revision
-	 * @return RevisionRecord|null
+	 * @param RevisionLookup $revLookup
 	 */
-	private static function getRevisionRecord( $id ) {
-		return MediaWikiServices::getInstance()
-			->getRevisionLookup()
-			->getRevisionById( $id );
+	public function __construct( RevisionLookup $revLookup ) {
+		parent::__construct( 'MobileDiff' );
+
+		$this->revisionLookup = $revLookup;
 	}
 
 	/**
@@ -61,12 +59,12 @@ class SpecialMobileDiff extends MobileSpecialPage {
 			$id = (int)$revids[1];
 			$prevId = (int)$revids[0];
 			if ( $id && $prevId ) {
-				$revRecord = static::getRevisionRecord( $id );
+				$revRecord = $this->revisionLookup->getRevisionById( $id );
 				// deal with identical ids
 				if ( $id === $prevId ) {
 					$revRecord = null;
 				} elseif ( $revRecord ) {
-					$prevRecord = static::getRevisionRecord( $prevId );
+					$prevRecord = $this->revisionLookup->getRevisionById( $prevId );
 					if ( !$prevRecord ) {
 						$revRecord = null;
 					}
@@ -77,11 +75,9 @@ class SpecialMobileDiff extends MobileSpecialPage {
 		} elseif ( count( $revids ) === 1 ) {
 			$id = (int)$revids[0];
 			if ( $id ) {
-				$revRecord = static::getRevisionRecord( $id );
+				$revRecord = $this->revisionLookup->getRevisionById( $id );
 				if ( $revRecord ) {
-					$prevRecord = MediaWikiServices::getInstance()
-						->getRevisionLookup()
-						->getPreviousRevision( $revRecord );
+					$prevRecord = $this->revisionLookup->getPreviousRevision( $revRecord );
 				}
 			}
 		}
@@ -99,6 +95,7 @@ class SpecialMobileDiff extends MobileSpecialPage {
 		$output = $this->getOutput();
 
 		// @FIXME add full support for git-style notation (eg ...123, 123...)
+		// @phan-suppress-next-line PhanTypeMismatchArgument
 		$revisions = $this->getRevisionsToCompare( explode( '...', $par, 2 ) );
 		list( $prev, $rev ) = $revisions;
 
@@ -305,9 +302,8 @@ class SpecialMobileDiff extends MobileSpecialPage {
 	 * @return string built HTML for Revision navigation links
 	 */
 	private function getRevisionNavigationLinksHTML() {
-		$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
-		$prev = $revLookup->getPreviousRevision( $this->rev );
-		$next = $revLookup->getNextRevision( $this->rev );
+		$prev = $this->revisionLookup->getPreviousRevision( $this->rev );
+		$next = $this->revisionLookup->getNextRevision( $this->rev );
 		$history = '';
 
 		if ( $prev || $next ) {
@@ -315,14 +311,14 @@ class SpecialMobileDiff extends MobileSpecialPage {
 			if ( $prev ) {
 				$history .= Html::openElement( 'li', [ 'class' => 'revision-history-prev' ] )
 					. Html::element( 'a', [
-						'href' => SpecialPage::getTitleFor( 'MobileDiff', $prev->getId() )
+						'href' => SpecialPage::getTitleFor( 'MobileDiff', (string)$prev->getId() )
 							->getLocalURL()
 					], $this->msg( 'previousdiff' )->text() ) . Html::closeElement( 'li' );
 			}
 			if ( $next ) {
 				$history .= Html::openElement( 'li', [ 'class' => 'revision-history-next' ] )
 					. Html::element( 'a', [
-						'href' => SpecialPage::getTitleFor( 'MobileDiff', $next->getId() )
+						'href' => SpecialPage::getTitleFor( 'MobileDiff', (string)$next->getId() )
 							->getLocalURL()
 					], $this->msg( 'nextdiff' )->text() ) . Html::closeElement( 'li' );
 			}
@@ -352,6 +348,7 @@ class SpecialMobileDiff extends MobileSpecialPage {
 
 		// Note $userId will be 0 and $ipAddr an empty string if the current audience cannot see it.
 		if ( $userId ) {
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable
 			$user = $this->getUserFactory()->newFromUserIdentity( $user );
 			$edits = $user->getEditCount();
 			$attrs = [
@@ -446,9 +443,9 @@ class SpecialMobileDiff extends MobileSpecialPage {
 		}
 
 		if ( $rev1 ) {
-			$revRecord = static::getRevisionRecord( $rev1 );
+			$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
+			$revRecord = $revLookup->getRevisionById( (int)$rev1 );
 			if ( $revRecord ) {
-				$revLookup = MediaWikiServices::getInstance()->getRevisionLookup();
 				// the diff parameter could be the string prev or next - deal with these cases
 				if ( $rev2 === 'prev' ) {
 					$prevRecord = $revLookup->getPreviousRevision( $revRecord );
@@ -459,7 +456,7 @@ class SpecialMobileDiff extends MobileSpecialPage {
 					$nextRecord = $revLookup->getNextRevision( $revRecord );
 					$rev2 = $nextRecord ? $nextRecord->getId() : '';
 				} else {
-					$rev2Record = static::getRevisionRecord( $rev2 );
+					$rev2Record = $revLookup->getRevisionById( (int)$rev2 );
 					$rev2 = $rev2Record ? $rev2Record->getId() : '';
 				}
 			} else {

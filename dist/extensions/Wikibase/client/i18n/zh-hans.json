@@ -28,12 +28,13 @@
 			"乌拉跨氪",
 			"予弦",
 			"神樂坂秀吉",
-			"铁桶"
+			"铁桶",
+			"Stang"
 		]
 	},
 	"wikibase-client-desc": "Wikibase扩展的客户端",
 	"tooltip-t-wikibase": "链接到连接的数据仓库项目",
-	"wikibase-after-page-move": "您的移动现在应当[$1 体现在{{WBREPONAME}}项目]的语言链接中。我们要求您检查是否发生了这种情况。",
+	"wikibase-after-page-move": "您的移动现在应当[$1 体现在{{WBREPONAME}}项目]的语言链接中。请检查对语言链接的改动是否生效。",
 	"wikibase-after-page-delete": "至该页面的链接应当已从[$1 相关的{{WBREPONAME}}项目]中移除。我们要求您检查这是否发生。",
 	"wikibase-after-page-delete-queued": "与此页面相关联的[$1 {{WBREPONAME}}项目]将自动更新。请注意这可能不会立刻发生。",
 	"wikibase-comment-add": "{{WBREPONAME}}项目已创建。",
@@ -91,7 +92,6 @@
 	"wikibase-error-exceeded-referenced-entity-id-limit": "调用了太多次“mw.wikibase.getReferencedEntityId”，只{{PLURAL:$2|允许}}最多$2次。",
 	"unconnectedpages": "未连接项目的页面",
 	"unconnectedpages-summary": "此页面列出了没有连接数据项的页面（在支持连接项的命名空间中）。该列表按页面ID降序排序，以便首先列出较新的页面。",
-	"wikibase-unconnectedpages-format-row": "（该页面有$1个{{PLURAL:$1|跨语言链接}}）",
 	"wikibase-unconnectedpages-submit": "显示页面",
 	"pageswithbadges": "有徽章的页面",
 	"pageswithbadges-summary": "此页面列举了有徽章（例如优良条目或典范条目）的页面。列表按页面ID递减排序，这样最新页面会首先列出。",
@@ -187,7 +187,7 @@
 	"wikibase-client-data-bridge-unknown-error-message": "发生错误，此时无法编辑所选值。请尝试重新加载。",
 	"wikibase-client-data-bridge-error-report": "<p>如果错误仍然存在，请[$1 报告此问题]描述您的操作并提供以下信息：</p>\n<ul>\n<li>$2</li>\n<li>$4的$3</li>\n<li>错误代码：$5</li>\n</ul>",
 	"wikibase-client-data-bridge-error-reload-bridge": "重新加载",
-	"wikibase-client-data-bridge-error-reload-page": "重新载入页面",
+	"wikibase-client-data-bridge-error-reload-page": "重新加载页面",
 	"wikibase-client-data-bridge-error-go-back": "返回",
 	"wikibase-client-data-bridge-error-retry-save": "重试保存",
 	"wikibase-client-data-bridge-login-warning": "登录后，<strong>请关闭此标签页并返回原始标签页</strong>以重新尝试保存。",

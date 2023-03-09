@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Prefixo de sabliera de patrono, como in [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Analysar le syntaxe del pagina usante <var>$1templatesandboxtext</var> in loco del contento del pagina nominate hic.",
+	"templatesandbox-apihelp-text": "Analysar le syntaxe del pagina usante le contento de iste pagina in loco del pagina nominate per <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Modello de contento de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Formato de contento de <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Le parametros <var>$1templatesandboxtitle</var> e <var>$1templatesandboxtext</var> debe esser ambes specificate o ambes omittite."
+}

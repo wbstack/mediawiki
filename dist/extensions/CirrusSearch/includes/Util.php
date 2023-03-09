@@ -12,6 +12,7 @@ use Status;
 use Title;
 use UIDGenerator;
 use WebRequest;
+use WikiMap;
 use Wikimedia\Assert\Assert;
 use Wikimedia\IPUtils;
 
@@ -130,7 +131,7 @@ class Util {
 	 * that Cirrus always uses.
 	 *
 	 * @param string $type same as type parameter on PoolCounter::factory
-	 * @param UserIdentity|null $user the user
+	 * @param UserIdentity|null $user
 	 * @param callable $workCallback callback when pool counter is acquired.  Called with
 	 *  no parameters.
 	 * @param string|null $busyErrorMsg The i18n key to return when the queue
@@ -302,7 +303,7 @@ class Util {
 	private static function getOnWikiBoostTemplates( SearchConfig $config ) {
 		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$cacheKey = $cache->makeGlobalKey( 'cirrussearch-boost-templates', $config->getWikiId() );
-		if ( $config->getWikiId() == wfWikiID() ) {
+		if ( $config->getWikiId() == WikiMap::getCurrentWikiId() ) {
 			// Local wiki we can fetch boost templates from system
 			// message
 			if ( self::$defaultBoostTemplates !== null ) {
@@ -343,18 +344,15 @@ class Util {
 	 * level, defined by $wgCirrusSearchStripQuestionMarks. Strip all ?s, those
 	 * at word breaks, or only string-final. Ignore queries that are all
 	 * punctuation or use insource. Don't remove escaped \?s, but unescape them.
-	 * ¿ is not :punct:, hence $more_punct.
 	 *
 	 * @param string $term
-	 * @param string $strippingLevel
+	 * @param string $strippingLevel Either "all", "break", or "final"
 	 * @return string modified term, based on strippingLevel
 	 */
 	public static function stripQuestionMarks( $term, $strippingLevel ) {
-		// strip question marks
-		$more_punct = "[¿]";
 		if ( strpos( $term, 'insource:/' ) === false &&
 			 strpos( $term, 'intitle:/' ) === false &&
-			preg_match( "/^([[:punct:]]|\s|$more_punct)+$/", $term ) === 0
+			!preg_match( '/^[\p{P}\p{Z}]+$/u', $term )
 		) {
 			// FIXME: get rid of negative lookbehinds on (?<!\\\\)
 			// it may improperly transform \\? into \? instead of \\ and destroy properly escaped \
@@ -364,11 +362,11 @@ class Util {
 				$term = preg_replace( '/\\\\\?/', '?', $term );
 			} elseif ( $strippingLevel === 'break' ) {
 				// strip question marks at word boundaries
-				$term = preg_replace( '/(?<!\\\\)(\?)+(\PL|$)/', '$2', $term );
+				$term = preg_replace( '/(?<!\\\\)\?+(\PL|$)/', '$1', $term );
 				$term = preg_replace( '/\\\\\?/', '?', $term );
 			} elseif ( $strippingLevel === 'all' ) {
 				// strip all unescaped question marks
-				$term = preg_replace( '/(?<!\\\\)(\?)+/', ' ', $term );
+				$term = preg_replace( '/(?<!\\\\)\?+/', ' ', $term );
 				$term = preg_replace( '/\\\\\?/', '?', $term );
 			}
 		}
@@ -546,7 +544,7 @@ class Util {
 	 * @param bool $checkEmpty If false, emptyiness of result after $mapFn is called will not be
 	 * 				checked before setting on $destArray.  If true, it will, using Util::isEmpty.
 	 * 				Default: true
-	 * @return array $destArray
+	 * @return array
 	 */
 	public static function setIfDefined(
 		array $sourceArray,

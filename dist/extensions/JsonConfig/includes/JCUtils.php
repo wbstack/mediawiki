@@ -210,7 +210,7 @@ class JCUtils {
 	 * @return mixed
 	 */
 	public static function sanitize( $data, $skipDefaults = false ) {
-		if ( is_a( $data, JCValue::class ) ) {
+		if ( $data instanceof JCValue ) {
 			$value = $data->getValue();
 			if ( $skipDefaults && $data->defaultUsed() ) {
 				return is_array( $value ) ? [] : ( is_object( $value ) ? (object)[] : null );
@@ -233,7 +233,7 @@ class JCUtils {
 		if ( is_array( $data ) ) {
 			// do not filter lists - only subelements if they were checked
 			foreach ( $data as &$valRef ) {
-				if ( is_a( $valRef, JCValue::class ) ) {
+				if ( $valRef instanceof JCValue ) {
 					/** @var JCValue $valRef */
 					$valRef = self::sanitizeRecursive( $valRef->getValue(), $skipDefaults );
 				}
@@ -242,7 +242,7 @@ class JCUtils {
 		}
 		$result = (object)[];
 		foreach ( $data as $fld => $val ) {
-			if ( is_a( $val, JCValue::class ) ) {
+			if ( $val instanceof JCValue ) {
 				/** @var JCValue $val */
 				if ( $skipDefaults === true && $val->defaultUsed() ) {
 					continue;

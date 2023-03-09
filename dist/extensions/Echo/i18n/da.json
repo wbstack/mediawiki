@@ -4,6 +4,7 @@
 			"Byrial",
 			"Cgtdk",
 			"Christian List",
+			"Dipsacus fullonum",
 			"EeveeSylveon",
 			"Macofe",
 			"Palnatoke",
@@ -13,8 +14,7 @@
 			"SimmeD",
 			"Thomsen",
 			"Tjernobyl",
-			"Weblars",
-			"Dipsacus fullonum"
+			"Weblars"
 		]
 	},
 	"echo-desc": "System til at give brugere besked om handlinger og meddelelser",

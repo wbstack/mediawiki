@@ -10,6 +10,7 @@
 			"Armin1392",
 			"Baloch Khan",
 			"Baqeri",
+			"Beginneruser",
 			"Bersam",
 			"Calak",
 			"Dalba",
@@ -38,8 +39,7 @@
 			"Sahim",
 			"Sunfyre",
 			"ZxxZxxZ",
-			"پسر یاس",
-			"Beginneruser"
+			"پسر یاس"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "اینکه کاربر از میانای تلفن همراه استفاده می‌کند یا نه",
@@ -49,8 +49,6 @@
 	"mobile-frontend-cite-error": "خطا در بارگیری یادکردها به دلیل شناسهٔ ویرایش نادرست.",
 	"mobile-frontend-cite-none-available": "یادکردی برای این صفحه در دست نیست.",
 	"mobile-frontend-clear-search": "پاک‌کردن",
-	"mobile-frontend-contributions-404-desc": "نمی‌توان برای مشارکت‌‌های کاربری که وجود ندارد، جستجو کرد.",
-	"mobile-frontend-contributions-404-title": "نام کاربری نامناسب داده شد",
 	"mobile-frontend-copyright": "محتوا تحت $1 در دسترس است، مگر اینکه خلافش ذکر شده باشد.",
 	"mobile-frontend-desc": "ظاهر تلفن همراه",
 	"mobile-frontend-diffview-404-desc": "شناسهٔ نسخهٔ درخواستی شما وجود ندارد.<br/> این معمولاً به دلیل دنبال‌کردن یک پیوند تفاوت منقضی‌شده به صفحه‌ای حذف‌شده یا پیوند تفاوت حاوی نویسه‌های نامعتبر اتفاق می‌افتد.",
@@ -81,7 +79,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "مشاهدهٔ بیشتر",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "دلیل",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|بسته شده}} توسط",
-	"mobile-frontend-editor-blocked-drawer-expiry-header": "بستن در ... پایان می‌یابد",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "بستن دسترسی منقضی خواهد شد",
 	"mobile-frontend-editor-blocked-drawer-help": "نمایش جزئیات",
 	"mobile-frontend-editor-generic-block-reason": "علت ناشناخته",
 	"mobile-frontend-editor-cancel": "انصراف",
@@ -191,7 +189,6 @@
 	"mobile-frontend-references-citation-error": "خطایی رخ داد و امکان بارگیری این نوشته میسر نشد.",
 	"mobile-frontend-references-list": "مشاهده فهرست کامل ارجاع‌ها",
 	"mobile-frontend-requires-mobile": "این صفحه بر روی دسکتاپ در دسترس نیست. لطفاً پیوند مشاهده گوشی همراه در پایین صفحه را کلیک کنید.",
-	"mobile-frontend-requires-optin": "این صفحه موجود نخواهد بود مگر اینکه شما واردشده حالت آزمایشی ما باشید. [[Special:MobileOptions|صفحهٔ تنظیمات]] را برای واردشدن مشاهده کنید.",
 	"mobile-frontend-requires-title": "عدم دسترسی به صفحه",
 	"mobile-frontend-return-to-page": "برگشت به صفحه",
 	"mobile-frontend-save-error": "خطا در ذخیرهٔ تنظیمات. خواهشمندیم مطمئن شوید کوکی‌هایتان کار می‌کنند.",

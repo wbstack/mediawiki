@@ -64,7 +64,7 @@
 	"echo-learn-more": "Daha fazla bilgi",
 	"echo-log": "Genel günlük",
 	"echo-new-messages": "Yeni bir mesajınız var",
-	"echo-category-title-edit-user-talk": "Mesaj sayfamdaki {{PLURAL:$1|yorum|yorumlar}}",
+	"echo-category-title-edit-user-talk": "Mesaj sayfama {{PLURAL:$1|düzenleme|düzenlemeler}}",
 	"echo-category-title-article-linked": "Sayfa {{PLURAL:$1|bağlantısı|bağlantıları}}",
 	"echo-category-title-reverted": "Değişiklik {{PLURAL:$1|iptali|iptalleri}}",
 	"echo-category-title-mention": "{{PLURAL:$1|Bahsetme|Bahsetmeler}}",
@@ -80,7 +80,7 @@
 	"echo-category-title-thank-you-edit": "{{PLURAL:$1|Kilometre taşı|Kilometre taşları}} düzenlemesi",
 	"echo-category-title-watchlist": "İzlenen sayfada düzenleme",
 	"echo-category-title-minor-watchlist": "İzlenen sayfada küçük düzenleme",
-	"echo-pref-tooltip-edit-user-talk": "Bir kullanıcı mesaj sayfamı değiştirdiğinde bana bildirim gönder.",
+	"echo-pref-tooltip-edit-user-talk": "Birisi kullanıcı mesaj sayfamı düzenlediğinde bana bildir.",
 	"echo-pref-tooltip-article-linked": "Bir kullanıcı, bir sayfadan benim oluşturduğum bir sayfaya bağlantı verdiğinde bana bildirim gönder.",
 	"echo-pref-tooltip-reverted": "Yaptığım bir değişiklik geri alındığı takdirde bana bildirim gönder.",
 	"echo-pref-tooltip-mention": "Kullanıcı sayfama bağlantı verildiğinde bana bildirim gönder.",
@@ -250,7 +250,7 @@
 	"notification-header-foreign-all": "{{PLURAL:$5|Başka bir viki|$5 diğer vikiler}} tarafından gönderilen diğer bildirimler",
 	"right-manage-all-push-subscriptions": "Tüm push aboneliklerini yönet",
 	"action-manage-all-push-subscriptions": "tüm push aboneliklerini yönet",
-	"group-push-subscription-manager": "Abonelik yöneticilerini push yap",
+	"group-push-subscription-manager": "Push abonelik yöneticileri",
 	"group-push-subscription-manager-member": "{{GENDER:$1|push abonelik yöneticisi}}",
 	"grouppage-push-subscription-manager": "{{ns:project}}:Push abonelik yöneticileri"
 }

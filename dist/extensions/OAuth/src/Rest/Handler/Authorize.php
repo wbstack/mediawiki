@@ -1,23 +1,24 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Rest\Handler;
+namespace MediaWiki\Extension\OAuth\Rest\Handler;
 
 use Exception;
 use GuzzleHttp\Psr7\ServerRequest;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Exception\OAuthServerException;
 use League\OAuth2\Server\RequestTypes\AuthorizationRequest;
-use MediaWiki\Extensions\OAuth\AuthorizationProvider\Grant\AuthorizationCodeAuthorization;
-use MediaWiki\Extensions\OAuth\Entity\ClientEntity;
-use MediaWiki\Extensions\OAuth\Entity\UserEntity;
-use MediaWiki\Extensions\OAuth\Exception\ClientApprovalDenyException;
-use MediaWiki\Extensions\OAuth\Response;
+use MediaWiki\Extension\OAuth\AuthorizationProvider\Grant\AuthorizationCodeAuthorization;
+use MediaWiki\Extension\OAuth\Entity\ClientEntity;
+use MediaWiki\Extension\OAuth\Entity\UserEntity;
+use MediaWiki\Extension\OAuth\Exception\ClientApprovalDenyException;
+use MediaWiki\Extension\OAuth\Response;
 use MediaWiki\Rest\Response as RestResponse;
 use MWException;
 use MWExceptionHandler;
 use SpecialPage;
 use Throwable;
 use User;
+use WikiMap;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -186,8 +187,8 @@ class Authorize extends AuthenticationHandler {
 		return $this->getResponseFactory()->createTemporaryRedirect(
 			SpecialPage::getTitleFor( 'Userlogin' )->getFullURL( [
 				'returnto' => SpecialPage::getTitleFor( 'OAuth', 'rest_redirect' ),
-				'returntoquery' => $this->getQueryParamsCgi( [
-					'rest_url' => $this->getRequest()->getUri()->getPath()
+				'returntoquery' => wfArrayToCgi( [
+					'rest_url' => $this->getRequest()->getUri()->__toString(),
 				] ),
 			] )
 		);
@@ -231,7 +232,7 @@ class Authorize extends AuthenticationHandler {
 		try {
 			$approval = $client->getCurrentAuthorization(
 				$userEntity->getMwUser(),
-				wfWikiID()
+				WikiMap::getCurrentWikiId()
 			);
 		} catch ( Exception $ex ) {
 			return false;

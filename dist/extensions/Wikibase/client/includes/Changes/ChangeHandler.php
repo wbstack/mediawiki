@@ -4,10 +4,11 @@ declare( strict_types = 1 );
 namespace Wikibase\Client\Changes;
 
 use InvalidArgumentException;
-use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Page\PageStore;
 use Psr\Log\LoggerInterface;
 use Title;
 use TitleFactory;
+use Wikibase\Client\Hooks\WikibaseClientHookRunner;
 use Wikibase\Client\Usage\PageEntityUsages;
 use Wikibase\Lib\Changes\Change;
 use Wikibase\Lib\Changes\ChangeRow;
@@ -35,6 +36,11 @@ class ChangeHandler {
 	private $titleFactory;
 
 	/**
+	 * @var PageStore
+	 */
+	private $pageStore;
+
+	/**
 	 * @var PageUpdater
 	 */
 	private $updater;
@@ -50,9 +56,9 @@ class ChangeHandler {
 	private $logger;
 
 	/**
-	 * @var HookContainer
+	 * @var WikibaseClientHookRunner
 	 */
-	private $hookContainer;
+	private $hookRunner;
 
 	/**
 	 * @var bool
@@ -62,10 +68,11 @@ class ChangeHandler {
 	/**
 	 * @param AffectedPagesFinder $affectedPagesFinder
 	 * @param TitleFactory $titleFactory
+	 * @param PageStore $pageStore
 	 * @param PageUpdater $updater
 	 * @param ChangeRunCoalescer $changeRunCoalescer
 	 * @param LoggerInterface $logger
-	 * @param HookContainer $hookContainer
+	 * @param WikibaseClientHookRunner $hookRunner
 	 * @param bool $injectRecentChanges
 	 *
 	 * @throws InvalidArgumentException
@@ -73,19 +80,21 @@ class ChangeHandler {
 	public function __construct(
 		AffectedPagesFinder $affectedPagesFinder,
 		TitleFactory $titleFactory,
+		PageStore $pageStore,
 		PageUpdater $updater,
 		ChangeRunCoalescer $changeRunCoalescer,
 		LoggerInterface $logger,
-		HookContainer $hookContainer,
+		WikibaseClientHookRunner $hookRunner,
 		bool $injectRecentChanges = true
 
 	) {
 		$this->affectedPagesFinder = $affectedPagesFinder;
 		$this->titleFactory = $titleFactory;
+		$this->pageStore = $pageStore;
 		$this->updater = $updater;
 		$this->changeRunCoalescer = $changeRunCoalescer;
 		$this->logger = $logger;
-		$this->hookContainer = $hookContainer;
+		$this->hookRunner = $hookRunner;
 		$this->injectRecentChanges = $injectRecentChanges;
 	}
 
@@ -96,12 +105,12 @@ class ChangeHandler {
 	public function handleChanges( array $changes, array $rootJobParams = [] ) {
 		$changes = $this->changeRunCoalescer->transformChangeList( $changes );
 
-		if ( !$this->hookContainer->run( 'WikibaseHandleChanges', [ $changes, $rootJobParams ] ) ) {
+		if ( !$this->hookRunner->onWikibaseHandleChanges( $changes, $rootJobParams ) ) {
 			return;
 		}
 
 		foreach ( $changes as $change ) {
-			if ( !$this->hookContainer->run( 'WikibaseHandleChange', [ $change, $rootJobParams ] ) ) {
+			if ( !$this->hookRunner->onWikibaseHandleChange( $change, $rootJobParams ) ) {
 				continue;
 			}
 
@@ -240,7 +249,19 @@ class ChangeHandler {
 			$pageIds[] = $usages->getPageId();
 		}
 
-		return $this->titleFactory->newFromIDs( $pageIds );
+		$pageRecords = $this->pageStore
+			->newSelectQueryBuilder()
+			->wherePageIds( $pageIds )
+			->caller( __METHOD__ )
+			->fetchPageRecords();
+
+		return array_map(
+			function ( $pageRecord ) {
+				return $this->titleFactory
+					->castFromPageIdentity( $pageRecord );
+			},
+			iterator_to_array( $pageRecords )
+		);
 	}
 
 	/**

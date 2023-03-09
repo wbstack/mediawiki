@@ -23,8 +23,11 @@ namespace MediaWiki\Minerva\Menu\Main;
 use FatalError;
 use Hooks;
 use MediaWiki\Minerva\Menu\Definitions;
+use MediaWiki\Minerva\Menu\Entries\SingleMenuEntry;
 use MediaWiki\Minerva\Menu\Group;
 use MWException;
+use SpecialPage;
+use Title;
 
 /**
  * Group generators shared between menu builders.
@@ -35,32 +38,86 @@ final class BuilderUtil {
 	/**
 	 * Prepares donate group if available
 	 * @param Definitions $definitions A menu items definitions set
-	 * @return Group|null if not available
+	 * @param bool $includeDonateLink whether to include it or not.
+	 * @return Group
 	 * @throws FatalError
 	 * @throws MWException
 	 */
-	public static function getDonateGroup( Definitions $definitions ) {
+	public static function getDonateGroup( Definitions $definitions, $includeDonateLink ): Group {
 		$group = new Group( 'p-donation' );
-		$definitions->insertDonateItem( $group );
-		return $group->hasEntries() ? $group : null;
+		if ( $includeDonateLink ) {
+			$definitions->insertDonateItem( $group );
+		}
+		return $group;
 	}
 
 	/**
 	 * Prepares a list of links that have the purpose of discovery in the main navigation menu
 	 * @param Definitions $definitions A menu items definitions set
+	 * @param array $navigationTools
 	 * @return Group
 	 * @throws FatalError
 	 * @throws MWException
 	 */
-	public static function getDiscoveryTools( Definitions $definitions ): Group {
+	public static function getDiscoveryTools(
+		Definitions $definitions,
+		array $navigationTools
+	): Group {
 		$group = new Group( 'p-navigation' );
 
-		$definitions->insertHomeItem( $group );
-		$definitions->insertRandomItem( $group );
+		$entryDefinitions = [
+			'n-mainpage-description' => [
+				'name' => 'home',
+				'text' => $definitions->msg( 'mobile-frontend-home-button' ),
+				'icon' => 'home',
+				'class' => '',
+				'href' => Title::newMainPage()->getLocalURL(),
+			],
+			'n-randompage' => [
+				'name' => 'random',
+				'text' => $definitions->msg( 'mobile-frontend-random-button' ),
+				'icon' => 'die',
+				'class' => '',
+				'href' => SpecialPage::getTitleFor( 'Randompage' )->getLocalURL(),
+			],
+		];
+		// Run through navigation tools and update if needed.
+		foreach ( $navigationTools as $item ) {
+			$id = $item['id'] ?? null;
+			if ( $id && isset( $entryDefinitions[ $id ] ) ) {
+				foreach ( [ 'icon', 'class', 'href', 'msg' ] as $overridableKey ) {
+					$override = $item[ $overridableKey ] ?? null;
+					if ( $override ) {
+						$entryDefinitions[$id][$overridableKey] = $override;
+					}
+				}
+			}
+		}
+		// Build the menu
+		foreach ( $entryDefinitions as $definition ) {
+			$msgKey = $definition['msg'] ?? null;
+			$text = null;
+			if ( $msgKey ) {
+				$msg = $definitions->msg( $msgKey );
+				$text = $msg->exists() ? $msg->text() : null;
+			}
+			if ( !$text ) {
+				$text = $definition['text'];
+			}
+
+			$entry = SingleMenuEntry::create(
+				$definition['name'],
+				$text,
+				$definition['href'],
+				$definition['class'],
+				$definition['icon']
+			);
+			$group->insertEntry( $entry );
+		}
 		$definitions->insertNearbyIfSupported( $group );
 
 		// Allow other extensions to add or override tools
-		Hooks::run( 'MobileMenu', [ 'discovery', &$group ] );
+		Hooks::run( 'MobileMenu', [ 'discovery', &$group ], '1.38' );
 		return $group;
 	}
 
@@ -97,7 +154,7 @@ final class BuilderUtil {
 		$definitions->insertAboutItem( $group );
 		$definitions->insertDisclaimersItem( $group );
 		// Allow other extensions to add or override tools
-		Hooks::run( 'MobileMenu', [ 'sitelinks', &$group ] );
+		Hooks::run( 'MobileMenu', [ 'sitelinks', &$group ], '1.38' );
 		return $group;
 	}
 }

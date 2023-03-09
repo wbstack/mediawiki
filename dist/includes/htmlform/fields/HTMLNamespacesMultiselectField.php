@@ -17,7 +17,7 @@ use MediaWiki\Widget\NamespacesMultiselectWidget;
  */
 class HTMLNamespacesMultiselectField extends HTMLSelectNamespace {
 	public function loadDataFromRequest( $request ) {
-		$value = $request->getText( $this->mName, $this->getDefault() );
+		$value = $request->getText( $this->mName, $this->getDefault() ?? '' );
 
 		$namespaces = explode( "\n", $value );
 		// Remove empty lines
@@ -47,7 +47,7 @@ class HTMLNamespacesMultiselectField extends HTMLSelectNamespace {
 		foreach ( $namespaces as $namespace ) {
 			if (
 				$namespace < 0 ||
-				!MediaWikiServices::getInstance()->getNamespaceInfo()->exists( $namespace )
+				!MediaWikiServices::getInstance()->getNamespaceInfo()->exists( (int)$namespace )
 			) {
 				return $this->msg( 'htmlform-select-badoption' );
 			}

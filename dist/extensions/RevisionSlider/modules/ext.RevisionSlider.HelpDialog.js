@@ -178,8 +178,7 @@ $.extend( HelpDialog.prototype, {
  * Initializes the help dialog
  */
 HelpDialog.init = function () {
-	var windowManager = new OO.ui.WindowManager(),
-		dialogue;
+	var windowManager = new OO.ui.WindowManager();
 
 	$( 'body' )
 		.append( windowManager.$element )
@@ -189,20 +188,18 @@ HelpDialog.init = function () {
 			}
 		} );
 
+	var dialog;
 	HelpDialog.show = function () {
-		dialogue = new HelpDialog( { size: 'medium', classes: [ 'mw-revslider-help-dialog' ] } );
-		windowManager.addWindows( [ dialogue ] );
-		windowManager.openWindow( dialogue );
+		dialog = new HelpDialog( { size: 'medium', classes: [ 'mw-revslider-help-dialog' ] } );
+		windowManager.addWindows( [ dialog ] );
+		windowManager.openWindow( dialog );
 	};
 
 	HelpDialog.hide = function () {
-		if ( windowManager.hasWindow( dialogue ) ) {
-			windowManager.closeWindow( dialogue );
+		if ( windowManager.hasWindow( dialog ) ) {
+			windowManager.closeWindow( dialog );
 		}
 	};
 };
 
-module.exports = {
-	HelpButtonView: require( './ext.RevisionSlider.HelpButtonView.js' ),
-	HelpDialog: HelpDialog
-};
+module.exports = HelpDialog;

@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\WikibaseManifest;
 
 use ExtensionRegistry;
-use MediaWiki\Special\SpecialPageFactory;
+use MediaWiki\SpecialPage\SpecialPageFactory;
 
 class OAuthUrlFactory {
 

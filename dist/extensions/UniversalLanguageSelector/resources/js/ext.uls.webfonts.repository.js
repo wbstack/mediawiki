@@ -250,6 +250,10 @@
 			"Nokora Regular",
 			"Suwannaphum"
 		],
+		"ks": [
+			"system",
+			"AwamiNastaliq"
+		],
 		"kte": [
 			"BabelStoneTibetanSlim"
 		],
@@ -410,6 +414,7 @@
 		],
 		"ur": [
 			"system",
+			"AwamiNastaliq",
 			"Hussaini Nastaleeq",
 			"NafeesWeb"
 		],
@@ -478,6 +483,10 @@
 			"woff": "Artaxerxes/Artaxerxes.woff?c1ed7",
 			"woff2": "Artaxerxes/Artaxerxes.woff2?7a96e"
 		},
+		"AwamiNastaliq": {
+			"woff": "AwamiNastaliq/AwamiNastaliq-Regular.woff?84ee4",
+			"woff2": "AwamiNastaliq/AwamiNastaliq-Regular.woff2?226c1"
+		},
 		"BabelStoneTibetanSlim": {
 			"woff": "BabelStoneTibetanSlim/BabelStoneTibetanSlim.woff?c48ba",
 			"woff2": "BabelStoneTibetanSlim/BabelStoneTibetanSlim.woff2?46398"
@@ -536,16 +545,29 @@
 			"woff2": "FreeFontThana/FreeFont-Thaana-Bold.woff2?eaf55"
 		},
 		"GentiumPlus": {
-			"woff": "GentiumPlus/GentiumPlus-R.woff?1abc3",
-			"woff2": "GentiumPlus/GentiumPlus-R.woff2?aa576",
+			"woff": "GentiumPlus/GentiumPlus-Regular.woff?7a020",
+			"woff2": "GentiumPlus/GentiumPlus-Regular.woff2?b04c9",
 			"variants": {
+				"bold": "GentiumPlus Bold",
+				"bolditalic": "GentiumPlus Bold Italic",
 				"italic": "GentiumPlus Italic"
 			}
 		},
+		"GentiumPlus Bold": {
+			"fontweight": "bold",
+			"woff": "GentiumPlus/GentiumPlus-Bold.woff?2d222",
+			"woff2": "GentiumPlus/GentiumPlus-Bold.woff2?264f1"
+		},
+		"GentiumPlus Bold Italic": {
+			"fontweight": "bold",
+			"fontstyle": "italic",
+			"woff": "GentiumPlus/GentiumPlus-BoldItalic.woff?e8674",
+			"woff2": "GentiumPlus/GentiumPlus-BoldItalic.woff2?191d0"
+		},
 		"GentiumPlus Italic": {
 			"fontstyle": "italic",
-			"woff": "GentiumPlus/GentiumPlus-I.woff?ab550",
-			"woff2": "GentiumPlus/GentiumPlus-I.woff2?35b11"
+			"woff": "GentiumPlus/GentiumPlus-Italic.woff?14b0e",
+			"woff2": "GentiumPlus/GentiumPlus-Italic.woff2?8cd7c"
 		},
 		"GochiHand": {
 			"woff": "GochiHand/GochiHand-Regular.woff?310cc",
@@ -702,8 +724,8 @@
 			"woff2": "NuosuSIL/NuosuSIL.woff2?223bb"
 		},
 		"OpenDyslexic": {
-			"woff": "OpenDyslexic/OpenDyslexic-Regular.woff?7a21f",
-			"woff2": "OpenDyslexic/OpenDyslexic-Regular.woff2?104a3",
+			"woff": "OpenDyslexic/OpenDyslexic-Regular.woff?e7081",
+			"woff2": "OpenDyslexic/OpenDyslexic-Regular.woff2?209dd",
 			"variants": {
 				"bold": "OpenDyslexic Bold",
 				"bolditalic": "OpenDyslexic BoldItalic",
@@ -712,19 +734,19 @@
 		},
 		"OpenDyslexic Bold": {
 			"fontweight": "bold",
-			"woff": "OpenDyslexic/OpenDyslexic-Bold.woff?75b90",
-			"woff2": "OpenDyslexic/OpenDyslexic-Bold.woff2?42307"
+			"woff": "OpenDyslexic/OpenDyslexic-Bold.woff?cfd3b",
+			"woff2": "OpenDyslexic/OpenDyslexic-Bold.woff2?df553"
 		},
 		"OpenDyslexic BoldItalic": {
 			"fontweight": "bold",
 			"fontstyle": "italic",
-			"woff": "OpenDyslexic/OpenDyslexic-BoldItalic.woff?570d3",
-			"woff2": "OpenDyslexic/OpenDyslexic-BoldItalic.woff2?12f7e"
+			"woff": "OpenDyslexic/OpenDyslexic-BoldI-talic.woff",
+			"woff2": "OpenDyslexic/OpenDyslexic-Bold-Italic.woff2?b08af"
 		},
 		"OpenDyslexic Italic": {
 			"fontstyle": "italic",
-			"woff": "OpenDyslexic/OpenDyslexic-Italic.woff?9fa06",
-			"woff2": "OpenDyslexic/OpenDyslexic-Italic.woff2?14d96"
+			"woff": "OpenDyslexic/OpenDyslexic-Italic.woff?999a0",
+			"woff2": "OpenDyslexic/OpenDyslexic-Italic.woff2?7415e"
 		},
 		"OskiEast": {
 			"woff": "OskiEast/oskie.woff?10d59",

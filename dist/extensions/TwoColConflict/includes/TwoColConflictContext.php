@@ -2,9 +2,9 @@
 
 namespace TwoColConflict;
 
-use BetaFeatures;
 use Config;
 use ExtensionRegistry;
+use MediaWiki\Extension\BetaFeatures\BetaFeatures;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserOptionsLookup;
 use MobileContext;

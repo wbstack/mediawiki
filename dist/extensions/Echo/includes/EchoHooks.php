@@ -15,6 +15,9 @@ class EchoHooks implements RecentChange_saveHook {
 	 */
 	private $config;
 
+	/** @var array */
+	private static $revertedRevIds = [];
+
 	public function __construct( Config $config ) {
 		$this->config = $config;
 	}
@@ -355,7 +358,7 @@ class EchoHooks implements RecentChange_saveHook {
 		// Show subscription options.  IMPORTANT: 'echo-subscriptions-email-edit-user-talk',
 		// 'echo-subscriptions-email-watchlist', and 'echo-subscriptions-email-minor-watchlist' are
 		// virtual options, their values are saved to existing notification options 'enotifusertalkpages',
-		// 'enotifwatchlistpages', and 'enotifminoredits', see onUserLoadOptions() and onSaveUserOptions()
+		// 'enotifwatchlistpages', and 'enotifminoredits', see onLoadUserOptions() and onSaveUserOptions()
 		// for more information on how it is handled. Doing it in this way, we can avoid keeping running
 		// massive data migration script to keep these two options synced when echo is enabled on
 		// new wikis or Echo is disabled and re-enabled for some reason.  We can update the name
@@ -454,14 +457,13 @@ class EchoHooks implements RecentChange_saveHook {
 				'section' => 'echo/blocknotificationslist',
 				'filter' => MultiUsernameFilter::class,
 			];
-			// TODO inject
-			$titleFactory = MediaWikiServices::getInstance()->getTitleFactory();
 			$preferences['echo-notifications-page-linked-title-muted-list'] = [
 				'type' => 'titlesmultiselect',
 				'label-message' => 'echo-pref-notifications-page-linked-title-muted-list',
 				'section' => 'echo/mutedpageslist',
 				'showMissing' => false,
-				'filter' => ( new MultiTitleFilter( $titleFactory ) )
+				'excludeDynamicNamespaces' => true,
+				'filter' => new MultiTitleFilter()
 			];
 		}
 	}
@@ -502,29 +504,33 @@ class EchoHooks implements RecentChange_saveHook {
 		$isRevert = $editResult->getRevertMethod() === EditResult::REVERT_UNDO ||
 			$editResult->getRevertMethod() === EditResult::REVERT_ROLLBACK;
 
+		// Save the revert status for the LinksUpdateComplete hook
+		if ( $isRevert ) {
+			self::$revertedRevIds[$revisionRecord->getId()] = true;
+		}
+
 		// Try to do this after the HTTP response
 		DeferredUpdates::addCallableUpdate( static function () use ( $revisionRecord, $isRevert ) {
 			EchoDiscussionParser::generateEventsForRevision( $revisionRecord, $isRevert );
 		} );
 
-		$user = User::newFromIdentity( $userIdentity );
 		// If the user is not an IP and this is not a null edit,
 		// test for them reaching a congratulatory threshold
 		$thresholds = [ 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000 ];
-		if ( $user->isRegistered() ) {
-			$thresholdCount = self::getEditCount( $user );
+		if ( $userIdentity->isRegistered() ) {
+			$thresholdCount = self::getEditCount( $userIdentity );
 			if ( in_array( $thresholdCount, $thresholds ) ) {
-				DeferredUpdates::addCallableUpdate( static function () use ( $user, $title, $thresholdCount ) {
+				DeferredUpdates::addCallableUpdate( static function () use ( $userIdentity, $title, $thresholdCount ) {
 					$notificationMapper = new EchoNotificationMapper();
-					$notifications = $notificationMapper->fetchByUser( $user, 10, null, [ 'thank-you-edit' ] );
+					$notifications = $notificationMapper->fetchByUser( $userIdentity, 10, null, [ 'thank-you-edit' ] );
 					/** @var EchoNotification $notification */
 					foreach ( $notifications as $notification ) {
 						if ( $notification->getEvent()->getExtraParam( 'editCount' ) === $thresholdCount ) {
 							LoggerFactory::getInstance( 'Echo' )->debug(
 								'{user} (id: {id}) has already been thanked for their {count} edit',
 								[
-									'user' => $user->getName(),
-									'id' => $user->getId(),
+									'user' => $userIdentity->getName(),
+									'id' => $userIdentity->getId(),
 									'count' => $thresholdCount,
 								]
 							);
@@ -535,7 +541,7 @@ class EchoHooks implements RecentChange_saveHook {
 					EchoEvent::create( [
 							'type' => 'thank-you-edit',
 							'title' => $title,
-							'agent' => $user,
+							'agent' => $userIdentity,
 							// Edit threshold notifications are sent to the agent
 							'extra' => [
 								'editCount' => $thresholdCount,
@@ -571,7 +577,7 @@ class EchoHooks implements RecentChange_saveHook {
 							'method' => 'undo',
 							'summary' => $summary,
 						],
-						'agent' => $user,
+						'agent' => $userIdentity,
 					] );
 				}
 			}
@@ -579,17 +585,19 @@ class EchoHooks implements RecentChange_saveHook {
 	}
 
 	/**
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @return int
 	 */
-	private static function getEditCount( User $user ) {
+	private static function getEditCount( UserIdentity $user ) {
+		$editCount = MediaWikiServices::getInstance()->getUserEditTracker()
+			->getUserEditCount( $user ) ?: 0;
 		// When this code runs from a maintenance script or unit tests
 		// the deferred update incrementing edit count runs right away
 		// so the edit count is right. Otherwise it lags by one.
 		if ( wfIsCLI() ) {
-			return $user->getEditCount();
+			return $editCount;
 		}
-		return $user->getEditCount() + 1;
+		return $editCount + 1;
 	}
 
 	/**
@@ -605,7 +613,8 @@ class EchoHooks implements RecentChange_saveHook {
 			$extra = $event->getExtra();
 			if ( !empty( $extra['minoredit'] ) ) {
 				global $wgEnotifMinorEdits;
-				if ( !$wgEnotifMinorEdits || !$user->getOption( 'enotifminoredits' ) ) {
+				$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+				if ( !$wgEnotifMinorEdits || !$userOptionsLookup->getOption( $user, 'enotifminoredits' ) ) {
 					// Do not send talk page notification email
 					return false;
 				}
@@ -659,7 +668,6 @@ class EchoHooks implements RecentChange_saveHook {
 			foreach ( $overrides as $prefKey => $value ) {
 				$userOptionsManager->setOption( $user, $prefKey, $value );
 			}
-			$user->saveSettings();
 			EchoEvent::create( [
 				'type' => 'welcome',
 				'agent' => $user,
@@ -746,30 +754,28 @@ class EchoHooks implements RecentChange_saveHook {
 	}
 
 	/**
-	 * Handler for LinksUpdateAfterInsert hook.
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/LinksUpdateAfterInsert
+	 * Handler for LinksUpdateComplete hook.
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/LinksUpdateComplete
 	 * @param LinksUpdate $linksUpdate
-	 * @param string $table
-	 * @param array[] $insertions
+	 * @param mixed $ticket
 	 */
-	public static function onLinksUpdateAfterInsert( $linksUpdate, $table, $insertions ) {
-		global $wgRequest;
-
-		// FIXME: This doesn't work in 1.27+
+	public static function onLinksUpdateComplete( $linksUpdate, $ticket ) {
 		// Rollback or undo should not trigger link notification
-		// @Todo Implement a better solution so it doesn't depend on the checking of
-		// a specific set of request variables
-		if ( $wgRequest->getVal( 'wpUndidRevision' ) || $wgRequest->getVal( 'action' ) == 'rollback' ) {
-			return;
+		if ( $linksUpdate->getRevisionRecord() ) {
+			$revId = $linksUpdate->getRevisionRecord()->getId();
+			if ( isset( self::$revertedRevIds[$revId] ) ) {
+				return;
+			}
 		}
 
+		$namespaceInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
+
 		// Handle only
-		// 1. inserts to pagelinks table &&
-		// 2. content namespace pages &&
-		// 3. non-transcluding pages &&
-		// 4. non-redirect pages
-		if ( $table !== 'pagelinks' || !MWNamespace::isContent( $linksUpdate->mTitle->getNamespace() )
-			|| !$linksUpdate->mRecursive || $linksUpdate->mTitle->isRedirect()
+		// 1. content namespace pages &&
+		// 2. non-transcluding pages &&
+		// 3. non-redirect pages
+		if ( !$namespaceInfo->isContent( $linksUpdate->getTitle()->getNamespace() )
+			|| !$linksUpdate->isRecursive() || $linksUpdate->getTitle()->isRedirect()
 		) {
 			return;
 		}
@@ -784,14 +790,13 @@ class EchoHooks implements RecentChange_saveHook {
 		$max = 10;
 		// Only create notifications for links to content namespace pages
 		// @Todo - use one big insert instead of individual insert inside foreach loop
-		foreach ( $insertions as $page ) {
-			if ( MWNamespace::isContent( $page['pl_namespace'] ) ) {
-				$title = Title::makeTitle( $page['pl_namespace'], $page['pl_title'] );
+		foreach ( $linksUpdate->getAddedLinks() as $title ) {
+			if ( $namespaceInfo->isContent( $title->getNamespace() ) ) {
 				if ( $title->isRedirect() ) {
 					continue;
 				}
 
-				$linkFromPageId = $linksUpdate->mTitle->getArticleID();
+				$linkFromPageId = $linksUpdate->getTitle()->getArticleID();
 				EchoEvent::create( [
 					'type' => 'page-linked',
 					'title' => $title,
@@ -857,9 +862,9 @@ class EchoHooks implements RecentChange_saveHook {
 		}
 
 		// Attempt to mark as read the event IDs in the ?markasread= parameter, if present
-		$markAsReadIds = explode( '|', $request->getText( 'markasread' ) );
-		$markAsReadWiki = $request->getText( 'markasreadwiki', wfWikiID() );
-		$markAsReadLocal = !$wgEchoCrossWikiNotifications || $markAsReadWiki === wfWikiID();
+		$markAsReadIds = array_filter( explode( '|', $request->getText( 'markasread' ) ) );
+		$markAsReadWiki = $request->getText( 'markasreadwiki', WikiMap::getCurrentWikiId() );
+		$markAsReadLocal = !$wgEchoCrossWikiNotifications || $markAsReadWiki === WikiMap::getCurrentWikiId();
 		if ( $markAsReadIds ) {
 			if ( $markAsReadLocal ) {
 				// gather the IDs that we didn't already find with target_pages
@@ -1294,7 +1299,7 @@ class EchoHooks implements RecentChange_saveHook {
 					'reverted-revision-id' => $oldRevision->getId(),
 					'method' => 'rollback',
 				],
-				'agent' => User::newFromIdentity( $agent ),
+				'agent' => $agent,
 			] );
 		}
 	}
@@ -1335,8 +1340,8 @@ class EchoHooks implements RecentChange_saveHook {
 	}
 
 	/**
-	 * Handler for UserLoadOptions hook.
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/UserLoadOptions
+	 * Handler for LoadUserOptions hook.
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/LoadUserOptions
 	 * @param UserIdentity $user User whose options were loaded
 	 * @param array &$options Options can be modified
 	 */
@@ -1393,9 +1398,8 @@ class EchoHooks implements RecentChange_saveHook {
 	 */
 	public static function onUserClearNewTalkNotification( UserIdentity $user ) {
 		if ( $user->isRegistered() ) {
-			$userObj = User::newFromIdentity( $user );
-			DeferredUpdates::addCallableUpdate( static function () use ( $userObj ) {
-				MWEchoNotifUser::newFromUser( $userObj )->clearUserTalkNotifications();
+			DeferredUpdates::addCallableUpdate( static function () use ( $user ) {
+				MWEchoNotifUser::newFromUser( $user )->clearUserTalkNotifications();
 			} );
 		}
 	}
@@ -1604,12 +1608,13 @@ class EchoHooks implements RecentChange_saveHook {
 	 * @param array &$fields
 	 */
 	public static function onSpecialMuteModifyFormFields( $target, $user, &$fields ) {
-		$echoPerUserBlacklist = MediaWikiServices::getInstance()->getMainConfig()->get( 'EchoPerUserBlacklist' );
+		$services = MediaWikiServices::getInstance();
+		$echoPerUserBlacklist = $services->getMainConfig()->get( 'EchoPerUserBlacklist' );
 		if ( $echoPerUserBlacklist ) {
-			$id = $target ? MediaWikiServices::getInstance()
-				->getCentralIdLookup()
-				->centralIdFromLocalUser( $target ) : 0;
-			$list = MultiUsernameFilter::splitIds( $user->getOption( 'echo-notifications-blacklist' ) );
+			$id = $target ? $services->getCentralIdLookup()->centralIdFromLocalUser( $target ) : 0;
+			$list = MultiUsernameFilter::splitIds(
+				$services->getUserOptionsLookup()->getOption( $user, 'echo-notifications-blacklist' )
+			);
 			$fields[ 'echo-notifications-blacklist'] = [
 				'type' => 'check',
 				'label-message' => [
@@ -1635,17 +1640,19 @@ class EchoHooks implements RecentChange_saveHook {
 		} else {
 			$type = 'watchlist-change';
 		}
-		$user = User::newFromIdentity( $change->getPerformerIdentity() );
 		EchoEvent::create( [
 			'type' => $type,
 			'title' => $change->getTitle(),
 			'extra' => [
+				'page_title' => $change->getPage()->getDBkey(),
+				'page_namespace' => $change->getPage()->getNamespace(),
 				'revid' => $change->getAttribute( "rc_this_oldid" ),
 				'logid' => $change->getAttribute( "rc_logid" ),
 				'status' => $change->mExtra["pageStatus"],
-				'timestamp' => $change->getAttribute( "rc_timestamp" )
+				'timestamp' => $change->getAttribute( "rc_timestamp" ),
+				'emailonce' => $this->config->get( 'EchoWatchlistEmailOncePerPage' )
 			],
-			'agent' => $user
+			'agent' => $change->getPerformerIdentity(),
 		] );
 	}
 

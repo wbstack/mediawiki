@@ -1,18 +1,14 @@
-/**
- * @external Lemma
- */
 require( './__namespace.js' );
-wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
+wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb ) {
 	'use strict';
 
 	var Vue = require( 'vue' );
+	var Vuex = require( 'vuex' );
 	var newLexemeHeaderStore = require( './LexemeHeader.newLexemeHeaderStore.js' );
 	var newLemmaWidget = require( './LemmaWidget.newLemmaWidget.js' );
 	var newLanguageAndLexicalCategoryWidget = require( './LanguageAndLexicalCategoryWidget.js' );
 	var newLexemeHeader = require( './LexemeHeader.newLexemeHeader.js' );
 	var Lemma = require( '../datamodel/Lemma.js' );
-
-	Vue.use( Vuex );
 
 	/**
 	 * @param {Object} wbEntity
@@ -79,7 +75,6 @@ wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
 
 		var header = newLexemeHeader(
 			store,
-			'#wb-lexeme-header',
 			templates.header,
 			lemmaWidget,
 			languageAndLexicalCategoryWidget,
@@ -99,8 +94,11 @@ wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
 			$saveButton.data( 'wbtooltip' ).show();
 		};
 
-		// eslint-disable-next-line no-unused-vars
-		var app = new Vue( header );
+		// make the app replace the existing #wb-lexeme-header (like in Vue 2) instead of appending to it (Vue 3 mount behavior)
+		var fragment = document.createDocumentFragment();
+		Vue.createMwApp( $.extend( { store: store }, header ) )
+			.mount( fragment );
+		document.getElementById( 'wb-lexeme-header' ).replaceWith( fragment );
 	}
 
 	return function () {
@@ -116,4 +114,4 @@ wikibase.lexeme.widgets.buildLexemeHeader = ( function ( wb, Vuex ) {
 			} );
 	};
 
-} )( wikibase, Vuex );
+}( wikibase ) );

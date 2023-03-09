@@ -5,11 +5,12 @@
 			"Eleassar"
 		]
 	},
-	"torblock-desc": "Omogoča blokiranje izhodnih vozlišč tor pred urejanjem wikija",
+	"torblock-desc": "Omogoča blokiranje izhodnih vozlišč tor pred urejanjem vikija",
 	"torblock-blocked": "Vaš IP-naslov, <strong>$1</strong>, je bil samodejno prepoznan kot Torovo izhodno vozlišče.\nUrejanje skozi Tor je zaradi preprečevanja zlorab blokirano.",
 	"torblock-isexitnode": "IP-naslov <strong>$1</strong> je blokiran kot izhodno vozlišče tor.",
-	"right-torunblocked": "Izogne se samodejnim blokadam izhodnih vozlišč tor",
+	"action-torunblocked": "obhod samodejnega blokiranja izhodnih vozlišč Tora",
+	"right-torunblocked": "Izognitev samodejnemu blokiranju izhodnih vozlišč tor",
 	"tag-tor-description": "Če je ta določena ta oznaka, je bilo urejanje opravljeno iz izhodnega vozlišča omrežja Tor.",
-	"tag-tor": "opravljeno prek tora",
+	"tag-tor": "opravljeno prek Tora",
 	"abusefilter-edit-builder-vars-tor-exit-node": "Ali je ali ni bila sprememba storjena skozi izhodno vozlišče tor"
 }

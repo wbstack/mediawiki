@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Boivie",
-			"Lejonel",
-			"Dhallin"
+			"Dhallin",
+			"Lejonel"
 		]
 	},
 	"torblock-desc": "Gör det möjligt att blockera Tors utgångsnoder från att redigera en wiki",

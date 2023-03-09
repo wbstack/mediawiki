@@ -4,11 +4,14 @@
 			"Yupik"
 		]
 	},
+	"vector-languages": "Ǩiõl",
 	"vector-language-button-label": "{{PLURAL:$1|$1 ǩiõll|$1 ǩiõl|$1 ǩiõllâd}}",
 	"vector-action-addsection": "Lââʹzzet teeʹm",
 	"vector-action-delete": "Jaukkâd",
 	"vector-action-move": "Seeʹrd",
 	"vector-action-protect": "Suõjjâd",
+	"vector-action-undelete": "Maaccât",
+	"vector-action-unprotect": "Muuʹtt suõjjeemtääʹzz",
 	"vector-view-create": "Raaj",
 	"vector-view-edit": "Muuʹtt",
 	"vector-view-history": "Čuäʹjet historia",

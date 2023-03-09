@@ -57,15 +57,23 @@
 			"merge_strategy": "array_plus_2d"
 		}
 	},
+	"HookHandlers": {
+		"main": {
+			"class": "AdvancedSearch\\Hooks"
+		}
+	},
 	"Hooks": {
-		"GetPreferences": "AdvancedSearch\\Hooks::onGetPreferences",
-		"SpecialPageBeforeExecute": "AdvancedSearch\\Hooks::onSpecialPageBeforeExecute",
-		"SpecialSearchResultsPrepend": "AdvancedSearch\\Hooks::onSpecialSearchResultsPrepend"
+		"GetPreferences": "main",
+		"SpecialPageBeforeExecute": "main",
+		"SpecialSearchResultsPrepend": "main"
 	},
 	"MessagesDirs": {
 		"AdvancedSearch": [
 			"i18n"
 		]
+	},
+	"DefaultUserOptions": {
+		"advancedsearch-disable": false
 	},
 	"ResourceModules": {
 		"ext.advancedSearch.initialstyles": {

@@ -45,6 +45,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "మరిన్ని చూడండి",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "కారణం",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|నిరోధించినవారు}}",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "నిరోధం ముగిసే సమయం",
 	"mobile-frontend-editor-blocked-drawer-help": "వివరాలు చూడండి",
 	"mobile-frontend-editor-generic-block-reason": "తెలియని కారణం",
 	"mobile-frontend-editor-cancel": "రద్దుచేయి",

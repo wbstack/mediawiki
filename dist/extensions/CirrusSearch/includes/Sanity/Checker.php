@@ -307,7 +307,7 @@ class Checker {
 	}
 
 	/**
-	 * @param int[] $pageIds page ids
+	 * @param int[] $pageIds
 	 * @return WikiPage[] the list of wiki pages indexed in page id
 	 */
 	private function loadPagesFromDB( array $pageIds ) {
@@ -332,8 +332,9 @@ class Checker {
 			[],
 			$pageQuery['joins']
 		);
+		$wikiPageFactory = MediaWikiServices::getInstance()->getWikiPageFactory();
 		foreach ( $res as $row ) {
-			$page = WikiPage::newFromRow( $row );
+			$page = $wikiPageFactory->newFromRow( $row );
 			if ( Title::newFromDBkey( $page->getTitle()->getPrefixedDBkey() ) === null ) {
 				// The DB may contain invalid titles, make sure we try to sanitize only valid titles
 				// invalid titles like this may have to wait for a dedicated clean up action

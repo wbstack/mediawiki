@@ -1,8 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Atabek"
+			"Atabek",
+			"Inabat Allanova",
+			"Ajiniyaz Nurniyazov"
 		]
 	},
-	"fancycaptcha-accountcreate": "Jan'a akkauntlardın' avtomatik jaratılıwının' aldın alıw ushın, to'mendegi\nko'rsetilgen so'zlerdi kiritin'([[{{ns:special}}:Captcha/help|ko'birek mag'lıwmat]]):"
+	"fancycaptcha-captcha": "Qáwipsizlik tekseriwi",
+	"fancycaptcha-accountcreate": "Wikidi avtomatlastırılǵan esap jaratıwdan qorǵaw ushın sizden tómendegi maydanǵa ([[Special:Captcha/help|Tolıq  maǵlıwmat]]) sózlerin kirgiziwińizdi soraymız:",
+	"fancycaptcha-imgcaptcha-ph": "Súwrette kórgen tekstti kiritiń",
+	"fancycaptcha-reload-text": "Jańalaw"
 }

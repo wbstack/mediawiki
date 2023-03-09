@@ -1,6 +1,6 @@
 <?php
 /**
- * Deletes fancy score files from storage
+ * Deletes score files from storage
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,9 @@
  * @file
  * @ingroup Maintenance
  */
+
+use MediaWiki\Extension\Score\Score;
+
 if ( getenv( 'MW_INSTALL_PATH' ) ) {
 	$IP = getenv( 'MW_INSTALL_PATH' );
 } else {

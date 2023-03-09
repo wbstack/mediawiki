@@ -1,0 +1,22 @@
+{
+	"@metadata": {
+		"authors": [
+			"Keresturec"
+		]
+	},
+	"wikibase-client-desc": "Клиєнт за преширенє Wikibase",
+	"tooltip-t-wikibase": "Вяза ґу повязаней ставки складзиска податкох",
+	"wikibase-after-page-move": "Вашо премесцанє би ше тераз требало [$1 одражиц на язичну вязу ставки на Википодаткох]. Модлїме ва, преверце чи ше то збуло.",
+	"wikibase-dataitem": "{{WBREPONAME}} Елемент",
+	"wikibase-editlinks": "Ушор вязи",
+	"wikibase-linkitem-addlinks": "Додай вязи",
+	"wikibase-linkitem-title": "Вяза зоз боком",
+	"wikibase-linkitem-linkpage": "Повяь зоз боком",
+	"wikibase-linkitem-selectlink": "Виберце сайт и бок зоз хторим жадаце повязац тот ту бок",
+	"wikibase-linkitem-input-site": "Язик:",
+	"wikibase-linkitem-input-page": "Бок:",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Скриц",
+	"wikibase-rc-hide-wikidata-show": "Укаж",
+	"wikibase-otherprojects": "У других проєктох"
+}

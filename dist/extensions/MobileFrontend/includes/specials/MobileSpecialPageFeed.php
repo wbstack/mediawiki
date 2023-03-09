@@ -26,7 +26,6 @@ abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 			'mobile.user.icons'
 		] );
 		$this->setHeaders();
-		$out->setProperty( 'unstyledContent', true );
 		parent::execute( $par );
 	}
 
@@ -34,7 +33,6 @@ abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 	 * Formats an edit comment
 	 * @param string $comment The raw comment text
 	 * @param Title $title The title of the page that was edited
-	 * @fixme Duplication with SpecialMobileWatchlist
 	 *
 	 * @return string HTML code
 	 */
@@ -42,7 +40,7 @@ abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 		if ( $comment === '' ) {
 			$comment = $this->msg( 'mobile-frontend-changeslist-nocomment' )->plain();
 		} else {
-			$comment = Linker::formatComment( $comment, $title );
+			$comment = $this->commentFormatter->format( $comment, $title );
 			// flatten back to text
 			$comment = htmlspecialchars( Sanitizer::stripAllTags( $comment ) );
 		}
@@ -131,30 +129,36 @@ abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 		) {
 			$username = $this->msg( 'rev-deleted-user' )->text();
 		}
+		// @phan-suppress-next-line PhanTypeMismatchReturnNullable Null is documented on IPUtils::prettifyIP
 		return $username;
 	}
 
 	/**
 	 * Renders an item in the feed
-	 * @param MWTimestamp $ts The time the edit occurred
-	 * @param string $diffLink url to the diff for the edit
-	 * @param string $username The username of the user that made the edit (absent if anonymous)
-	 * @param string $comment The edit summary, HTML escaped
-	 * @param Title|null $title The title of the page that was edited
-	 * @param bool $isAnon Is the edit anonymous?
-	 * @param int|null $bytes Net number of bytes changed or null if not applicable
-	 * @param bool $isMinor Is the edit minor?
 	 *
-	 * @todo FIXME: use an array as an argument?
+	 * @param array $options An array of various options for
+	 *    rendering the feed item's HTML e.g.
+	 *
+	 *    [
+	 *        'ts'       => MWTimestamp - The time the edit occurred
+	 *        'diffLink' => string      - The URL to the diff for the edit
+	 *        'username' => string      - The username of the user that made
+	 *                                    the edit (absent if anonymous)
+	 *        'comment'  => string      - The edit summary, HTML escaped
+	 *        'title'    => Title|null  - The title of the page that was edited
+	 *        'isAnon'   => bool        - Is the edit anonymous?
+	 *        'bytes'    => int|null    - Net number of bytes changed or null
+	 *                                    if not applicable
+	 *        'isMinor'  => bool        - Is the edit minor?
+	 *   ];
+	 *
 	 */
-	protected function renderFeedItemHtml( $ts, $diffLink = '', $username = '', $comment = '',
-		$title = null, $isAnon = false, $bytes = 0, $isMinor = false
-	) {
+	protected function renderFeedItemHtml( array $options ): void {
 		$output = $this->getOutput();
 		$user = $this->getUser();
 		$lang = $this->getLanguage();
 
-		if ( $isAnon ) {
+		if ( (bool)( $options[ 'isAnon' ] ?? false ) ) {
 			$usernameClass = MobileUI::iconClass( 'userAnonymous', 'before', 'mw-mf-user mw-mf-anon' );
 		} else {
 			$usernameClass = MobileUI::iconClass( 'userAvatar', 'before', 'mw-mf-user' );
@@ -162,34 +166,37 @@ abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 
 		$html = Html::openElement( 'li', [ 'class' => 'page-summary' ] );
 
-		if ( $diffLink ) {
-			$html .= Html::openElement( 'a', [ 'href' => $diffLink, 'class' => 'title' ] );
+		if ( isset( $options[ 'diffLink' ] ) && $options[ 'diffLink' ] ) {
+			$html .= Html::openElement( 'a', [ 'href' => $options[ 'diffLink' ], 'class' => 'title' ] );
 		} else {
 			$html .= Html::openElement( 'div', [ 'class' => 'title' ] );
 		}
 
-		if ( $title ) {
-			$html .= Html::element( 'h3', [], $title->getPrefixedText() );
+		if ( isset( $options[ 'title' ] ) && $options[ 'title' ] ) {
+			$html .= Html::element( 'h3', [], $options[ 'title' ]->getPrefixedText() );
 		}
 
-		if ( $username && $this->showUsername ) {
+		if ( isset( $options[ 'username' ] ) && $options[ 'username' ] && $this->showUsername ) {
 			$html .= Html::rawElement( 'p', [ 'class' => $usernameClass ],
-				Html::element( 'span', [], $username )
+				Html::element( 'span', [], $options[ 'username' ] )
 			);
 		}
 
 		$html .= Html::rawElement(
-			'p', [ 'class' => 'edit-summary component truncated-text multi-line two-line' ], $comment
+			'p',
+			[ 'class' => 'edit-summary component truncated-text multi-line two-line' ],
+			$options[ 'comment' ] ?? ''
 		);
 
-		if ( $isMinor ) {
+		if ( (bool)( $options[ 'isMinor' ] ?? false ) ) {
 			$html .= ChangesList::flag( 'minor' );
 		}
 
 		$html .= Html::openElement( 'div', [ 'class' => 'list-thumb' ] ) .
-			Html::element( 'p', [ 'class' => 'timestamp' ], $lang->userTime( $ts, $user ) );
+			Html::element( 'p', [ 'class' => 'timestamp' ], $lang->userTime( $options[ 'ts' ], $user ) );
 
-		if ( $bytes ) {
+		if ( isset( $options[ 'bytes' ] ) && $options[ 'bytes' ] ) {
+			$bytes = $options[ 'bytes' ];
 			$formattedBytes = $lang->formatNum( $bytes );
 			if ( $bytes > 0 ) {
 				$formattedBytes = '+' . $formattedBytes;
@@ -209,7 +216,7 @@ abstract class MobileSpecialPageFeed extends MobileSpecialPage {
 
 		$html .= Html::closeElement( 'div' );
 
-		if ( $diffLink ) {
+		if ( isset( $options[ 'diffLink' ] ) && $options[ 'diffLink' ] ) {
 			$html .= Html::closeElement( 'a' );
 		} else {
 			$html .= Html::closeElement( 'div' );

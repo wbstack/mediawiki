@@ -33,11 +33,16 @@ use MediaWiki\Minerva\Menu\User\UserMenuDirector;
 use MediaWiki\Minerva\Permissions\IMinervaPagePermissions;
 use MediaWiki\Minerva\Permissions\MinervaPagePermissions;
 use MediaWiki\Minerva\SkinOptions;
+use MediaWiki\Minerva\Skins\SkinMinerva;
 use MediaWiki\Minerva\Skins\SkinUserPageHelper;
 
 return [
 	'Minerva.Menu.Definitions' => static function ( MediaWikiServices $services ): Definitions {
-		return new Definitions( RequestContext::getMain(), $services->getSpecialPageFactory() );
+		return new Definitions(
+			RequestContext::getMain(),
+			$services->getSpecialPageFactory(),
+			$services->getUserOptionsLookup()
+		);
 	},
 	'Minerva.Menu.UserMenuDirector' => static function ( MediaWikiServices $services ): UserMenuDirector {
 		$options = $services->getService( 'Minerva.SkinOptions' );
@@ -67,7 +72,7 @@ return [
 		// Add a donate link (see https://phabricator.wikimedia.org/T219793)
 		$showDonateLink = $options->get( SkinOptions::SHOW_DONATE );
 		$builder = $options->get( SkinOptions::MAIN_MENU_EXPANDED ) ?
-			new AdvancedMainMenuBuilder( $showMobileOptions, $showDonateLink, $user, $definitions ) :
+			new AdvancedMainMenuBuilder( $showMobileOptions, $showDonateLink, $definitions ) :
 			new DefaultMainMenuBuilder( $showMobileOptions, $showDonateLink, $user, $definitions );
 
 		return new MainMenuDirector( $builder, $context, $services->getSpecialPageFactory() );
@@ -80,8 +85,12 @@ return [
 			 * @var SkinUserPageHelper $userPageHelper
 			 */
 			$skinOptions = $services->getService( 'Minerva.SkinOptions' );
+			// FIXME: RequestContext should not be accessed in service container.
 			$context = RequestContext::getMain();
 			$title = $context->getTitle();
+			if ( !$title ) {
+				$title = SpecialPage::getTitleFor( 'Badtitle' );
+			}
 			$user = $context->getUser();
 			$userPageHelper = $services->getService( 'Minerva.SkinUserPageHelper' );
 			$languagesHelper = $services->getService( 'Minerva.LanguagesHelper' );

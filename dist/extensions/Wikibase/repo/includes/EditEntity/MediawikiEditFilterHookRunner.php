@@ -6,6 +6,7 @@ use DerivativeContext;
 use Hooks;
 use IContextSource;
 use InvalidArgumentException;
+use MediaWiki\Page\WikiPageFactory;
 use RuntimeException;
 use Status;
 use Title;
@@ -15,7 +16,6 @@ use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Repo\Content\EntityContentFactory;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
-use WikiPage;
 
 /**
  * Class to run the Mediawiki EditFilterMergedContent hook.
@@ -24,6 +24,9 @@ use WikiPage;
  * @author Addshore
  */
 class MediawikiEditFilterHookRunner implements EditFilterHookRunner {
+
+	/** @var WikiPageFactory */
+	private $wikiPageFactory;
 
 	/**
 	 * @var EntityNamespaceLookup
@@ -41,10 +44,12 @@ class MediawikiEditFilterHookRunner implements EditFilterHookRunner {
 	private $entityContentFactory;
 
 	public function __construct(
+		WikiPageFactory $wikiPageFactory,
 		EntityNamespaceLookup $namespaceLookup,
 		EntityTitleStoreLookup $titleLookup,
 		EntityContentFactory $entityContentFactory
 	) {
+		$this->wikiPageFactory = $wikiPageFactory;
 		$this->namespaceLookup = $namespaceLookup;
 		$this->titleLookup = $titleLookup;
 		$this->entityContentFactory = $entityContentFactory;
@@ -123,7 +128,7 @@ class MediawikiEditFilterHookRunner implements EditFilterHookRunner {
 			// This constructs a "fake" title of the form Property:NewProperty,
 			// where the title text is assumed to be name of the special page used
 			// to create entities of the given type. This is used by the
-			// HtmlPageLinkRendererEndHookHandler::doHtmlPageLinkRendererBegin to replace
+			// HtmlPageLinkRendererEndHookHandler::internalDoHtmlPageLinkRendererEnd to replace
 			// the link to the fake title with a link to the respective special page.
 			// The effect is that e.g. the AbuseFilter log will show a link to
 			// "Special:NewProperty" instead of "Property:NewProperty", while
@@ -134,7 +139,7 @@ class MediawikiEditFilterHookRunner implements EditFilterHookRunner {
 		}
 
 		$context->setTitle( $title );
-		$context->setWikiPage( WikiPage::factory( $title ) );
+		$context->setWikiPage( $this->wikiPageFactory->newFromTitle( $title ) );
 
 		return $context;
 	}

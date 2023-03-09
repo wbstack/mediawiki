@@ -18,6 +18,10 @@
  * @file
  */
 
+namespace MediaWiki\Minerva;
+
+use RuntimeException;
+
 /**
  * FIXME: Use OOUI when available
  *
@@ -41,6 +45,11 @@ class MinervaUI {
 		$modifiers = 'mw-ui-icon-' . $iconType;
 		if ( $iconName ) {
 			$modifiers .= ' mw-ui-icon-' . $iconPrefix . '-' . $iconName;
+		}
+		if ( $iconType === 'element' ) {
+			$additionalClassNames .= ' mw-ui-button mw-ui-quiet';
+		} elseif ( $iconType === 'before' ) {
+			throw new RuntimeException( 'iconClass before type is no longer supported.' );
 		}
 		return $base . ' ' . $modifiers . ' ' . $additionalClassNames;
 	}

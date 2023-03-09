@@ -1,7 +1,4 @@
 /**
- * @external SliderView
- */
-/**
  * Module containing presentation logic for the arrow buttons
  *
  * @class SliderArroView
@@ -25,10 +22,7 @@ $.extend( SliderArrowView.prototype, {
 	 * @return {OO.ui.ButtonWidget}
 	 */
 	renderBackwardArrow: function () {
-		var backwardArrowButton,
-			backwardArrowPopup;
-
-		backwardArrowButton = new OO.ui.ButtonWidget( {
+		var backwardArrowButton = new OO.ui.ButtonWidget( {
 			icon: 'previous',
 			width: 20,
 			height: 140,
@@ -36,7 +30,7 @@ $.extend( SliderArrowView.prototype, {
 			classes: [ 'mw-revslider-arrow', 'mw-revslider-arrow-backwards' ]
 		} );
 
-		backwardArrowPopup = new OO.ui.PopupWidget( {
+		var backwardArrowPopup = new OO.ui.PopupWidget( {
 			$content: $( '<p>' ).text( mw.msg( 'revisionslider-arrow-tooltip-older' ) ),
 			$floatableContainer: backwardArrowButton.$element,
 			width: 200,
@@ -66,10 +60,7 @@ $.extend( SliderArrowView.prototype, {
 	 * @return {OO.ui.ButtonWidget}
 	 */
 	renderForwardArrow: function () {
-		var forwardArrowButton,
-			forwardArrowPopup;
-
-		forwardArrowButton = new OO.ui.ButtonWidget( {
+		var forwardArrowButton = new OO.ui.ButtonWidget( {
 			icon: 'next',
 			width: 20,
 			height: 140,
@@ -77,7 +68,7 @@ $.extend( SliderArrowView.prototype, {
 			classes: [ 'mw-revslider-arrow', 'mw-revslider-arrow-forwards' ]
 		} );
 
-		forwardArrowPopup = new OO.ui.PopupWidget( {
+		var forwardArrowPopup = new OO.ui.PopupWidget( {
 			$content: $( '<p>' ).text( mw.msg( 'revisionslider-arrow-tooltip-newer' ) ),
 			$floatableContainer: forwardArrowButton.$element,
 			width: 200,

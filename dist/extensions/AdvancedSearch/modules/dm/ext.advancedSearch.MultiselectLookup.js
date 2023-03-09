@@ -75,7 +75,6 @@
 	};
 
 	mw.libs.advancedSearch.dm.MultiselectLookup.prototype.populateFromStore = function () {
-
 		if ( this.store.hasFieldChanged( this.fieldId, this.getValue() ) ) {
 			this.setValue( this.store.getField( this.fieldId ) );
 		}

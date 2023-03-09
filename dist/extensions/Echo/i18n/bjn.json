@@ -42,6 +42,7 @@
 	"echo-category-title-thank-you-edit": "{{PLURAL:$1|riwayat}} babakan",
 	"echo-category-title-watchlist": "Babakan pada laman itihan",
 	"echo-category-title-minor-watchlist": "Babakan sapalih pada laman itihan",
+	"echo-pref-tooltip-edit-user-talk": "Padahi ulun wayah sasaurang mambabak laman pamandiran ulun.",
 	"echo-pref-tooltip-article-linked": "Padahi ulun wayah sasaurang maulah tautan di laman artikal ka sabuting laman nang suah ulun rintis.",
 	"echo-pref-tooltip-reverted": "Padahi ulun wayah sasaurang mambulikakan babakan nang suah ulun ulah, mamakai pakakas pasahakan atawa bulikakan.",
 	"echo-pref-tooltip-mention": "Padahi ulun wayah sasaurang manautakan ka laman pamakai ulun.",

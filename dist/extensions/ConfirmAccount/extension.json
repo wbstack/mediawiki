@@ -13,9 +13,19 @@
 		"ConfirmAccountHooks::onExtensionFunctions"
 	],
 	"SpecialPages": {
-		"RequestAccount": "RequestAccountPage",
+		"RequestAccount": {
+			"class": "RequestAccountPage",
+			"services": [
+				"UserFactory"
+			]
+		},
 		"ConfirmAccounts": "ConfirmAccountsPage",
-		"UserCredentials": "UserCredentialsPage"
+		"UserCredentials": {
+			"class": "UserCredentialsPage",
+			"services": [
+				"UserGroupManager"
+			]
+		}
 	},
 	"MessagesDirs": {
 		"ConfirmAccount": [

@@ -1,10 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yupik",
-			"Seipinne"
+			"Seipinne",
+			"Yupik"
 		]
 	},
+	"leafletdraw-draw-toolbar-actions-text": "Jooskâ",
+	"leafletdraw-edit-toolbar-actions-cancel-text": "Jooskâ",
 	"leafletdraw-edit-toolbar-actions-save-text": "Vuorkkii",
 	"kartographer-fullscreen-close": "Toopâ",
 	"visualeditor-mwmapsdialog-language": "Kielâ"

@@ -3,12 +3,13 @@
 		"authors": [
 			"Kly",
 			"Laundry Machine",
-			"列维劳德"
+			"列维劳德",
+			"SunAfterRain"
 		]
 	},
 	"abusefilter-edit-builder-vars-sfs-blocked": "IP 位址是否已經透過 stopforumspam.com 列表封禁",
 	"action-sfsblock-bypass": "透過 StopForumSpam 擴充功能來繞過列入拒接清單的 IP 區塊",
-	"right-sfsblock-bypass": "透過 StopForumSpam 擴充功能來繞過 IP 區塊",
+	"right-sfsblock-bypass": "繞過來自StopForumSpam擴充功能的IP封鎖",
 	"stopforumspam-blocked": "您的 IP 位址（$1）已被封禁無法編輯，原因是此 IP 最近用於發布垃圾信息。",
 	"stopforumspam-desc": "整合 [https://stopforumspam.com/ stopforumspam.com]",
 	"stopforumspam-is-blocked": "這個 IP 位址 <strong>[https://stopforumspam.com/ipcheck/$1 $1]</strong> 已被封禁，原因為發布垃圾訊息。"

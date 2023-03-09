@@ -19,6 +19,7 @@
  *
  * @file
  */
+
 use MediaWiki\ChangeTags\Taggable;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
@@ -30,6 +31,7 @@ use MediaWiki\Storage\EditResult;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserIdentityValue;
 use Wikimedia\Assert\Assert;
+use Wikimedia\AtEase\AtEase;
 use Wikimedia\IPUtils;
 
 /**
@@ -256,6 +258,8 @@ class RecentChange implements Taggable {
 	 */
 	public static function getQueryInfo() {
 		$commentQuery = CommentStore::getStore()->getJoin( 'rc_comment' );
+		// Optimizer sometimes refuses to pick up the correct join order (T311360)
+		$commentQuery['joins']['comment_rc_comment'][0] = 'STRAIGHT_JOIN';
 		return [
 			'tables' => [
 				'recentchanges',
@@ -288,7 +292,7 @@ class RecentChange implements Taggable {
 				'rc_user_text' => 'recentchanges_actor.actor_name',
 			] + $commentQuery['fields'],
 			'joins' => [
-				'recentchanges_actor' => [ 'JOIN', 'actor_id=rc_actor' ]
+				'recentchanges_actor' => [ 'STRAIGHT_JOIN', 'actor_id=rc_actor' ]
 			] + $commentQuery['joins'],
 		];
 	}
@@ -403,14 +407,16 @@ class RecentChange implements Taggable {
 	 * @param bool $send self::SEND_FEED or self::SEND_NONE
 	 */
 	public function save( $send = self::SEND_FEED ) {
-		global $wgPutIPinRC, $wgUseEnotif, $wgShowUpdatedMarker;
-
+		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
+		$putIPinRC = $mainConfig->get( 'PutIPinRC' );
+		$useEnotif = $mainConfig->get( 'UseEnotif' );
+		$showUpdatedMarker = $mainConfig->get( 'ShowUpdatedMarker' );
 		$dbw = wfGetDB( DB_PRIMARY );
 		if ( !is_array( $this->mExtra ) ) {
 			$this->mExtra = [];
 		}
 
-		if ( !$wgPutIPinRC ) {
+		if ( !$putIPinRC ) {
 			$this->mAttribs['rc_ip'] = '';
 		}
 
@@ -434,7 +440,7 @@ class RecentChange implements Taggable {
 		$row = $this->mAttribs;
 
 		# Trim spaces on user supplied text
-		$row['rc_comment'] = trim( $row['rc_comment'] );
+		$row['rc_comment'] = trim( $row['rc_comment'] ?? '' );
 
 		# Fixup database timestamps
 		$row['rc_timestamp'] = $dbw->timestamp( $row['rc_timestamp'] );
@@ -499,7 +505,7 @@ class RecentChange implements Taggable {
 		}
 
 		# E-mail notifications
-		if ( $wgUseEnotif || $wgShowUpdatedMarker ) {
+		if ( $useEnotif || $showUpdatedMarker ) {
 			$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 			$editor = $userFactory->newFromUserIdentity( $this->getPerformerIdentity() );
 			$page = $this->getPage();
@@ -540,7 +546,7 @@ class RecentChange implements Taggable {
 		if ( $this->mAttribs['rc_user'] > 0 ) {
 			$jobs[] = RecentChangesUpdateJob::newCacheUpdateJob();
 		}
-		JobQueueGroup::singleton()->lazyPush( $jobs );
+		MediaWikiServices::getInstance()->getJobQueueGroup()->lazyPush( $jobs );
 	}
 
 	/**
@@ -548,9 +554,9 @@ class RecentChange implements Taggable {
 	 * @param array|null $feeds Optional feeds to send to, defaults to $wgRCFeeds
 	 */
 	public function notifyRCFeeds( array $feeds = null ) {
-		global $wgRCFeeds;
+		$rcFeeds = MediaWikiServices::getInstance()->getMainConfig()->get( 'RCFeeds' );
 		if ( $feeds === null ) {
-			$feeds = $wgRCFeeds;
+			$feeds = $rcFeeds;
 		}
 
 		$performer = $this->getPerformerIdentity();
@@ -584,28 +590,27 @@ class RecentChange implements Taggable {
 
 	/**
 	 * @since 1.22
-	 * @deprecated since 1.29 Use RCFeed::factory() instead
+	 * @codeCoverageIgnore
+	 * @deprecated since 1.29 Use RCFeed::factory() instead. Hard deprecated since 1.38.
 	 * @param string $uri URI to get the engine object for
 	 * @param array $params
-	 * @return RCFeedEngine The engine object
+	 * @return FormattedRCFeed
 	 * @throws MWException
 	 */
 	public static function getEngine( $uri, $params = [] ) {
-		// TODO: Merge into RCFeed::factory().
-		global $wgRCEngines;
+		wfDeprecated( __METHOD__, '1.29' );
+		$rcEngines = MediaWikiServices::getInstance()->getMainConfig()->get( 'RCEngines' );
 		$scheme = parse_url( $uri, PHP_URL_SCHEME );
 		if ( !$scheme ) {
 			throw new MWException( "Invalid RCFeed uri: '$uri'" );
 		}
-		if ( !isset( $wgRCEngines[$scheme] ) ) {
-			throw new MWException( "Unknown RCFeedEngine scheme: '$scheme'" );
+		if ( !isset( $rcEngines[$scheme] ) ) {
+			throw new MWException( "Unknown RCFeed engine: '$scheme'" );
 		}
-		if ( defined( 'MW_PHPUNIT_TEST' ) && is_object( $wgRCEngines[$scheme] ) ) {
-			return $wgRCEngines[$scheme];
+		if ( defined( 'MW_PHPUNIT_TEST' ) && is_object( $rcEngines[$scheme] ) ) {
+			return $rcEngines[$scheme];
 		}
-		// TODO For non test a object could be here?
-		// @phan-suppress-next-line PhanTypeExpectedObjectOrClassName
-		return new $wgRCEngines[$scheme]( $params );
+		return new $rcEngines[$scheme]( $params );
 	}
 
 	/**
@@ -620,8 +625,10 @@ class RecentChange implements Taggable {
 	 * @return array[] Array of permissions errors, see PermissionManager::getPermissionErrors()
 	 */
 	public function doMarkPatrolled( Authority $performer, $auto = false, $tags = null ) {
-		global $wgUseRCPatrol, $wgUseNPPatrol, $wgUseFilePatrol;
-
+		$mainConfig = MediaWikiServices::getInstance()->getMainConfig();
+		$useRCPatrol = $mainConfig->get( 'UseRCPatrol' );
+		$useNPPatrol = $mainConfig->get( 'UseNPPatrol' );
+		$useFilePatrol = $mainConfig->get( 'UseFilePatrol' );
 		// Fix up $tags so that the MarkPatrolled hook below always gets an array
 		if ( $tags === null ) {
 			$tags = [];
@@ -632,8 +639,8 @@ class RecentChange implements Taggable {
 		$status = PermissionStatus::newEmpty();
 		// If recentchanges patrol is disabled, only new pages or new file versions
 		// can be patrolled, provided the appropriate config variable is set
-		if ( !$wgUseRCPatrol && ( !$wgUseNPPatrol || $this->getAttribute( 'rc_type' ) != RC_NEW ) &&
-			( !$wgUseFilePatrol || !( $this->getAttribute( 'rc_type' ) == RC_LOG &&
+		if ( !$useRCPatrol && ( !$useNPPatrol || $this->getAttribute( 'rc_type' ) != RC_NEW ) &&
+			( !$useFilePatrol || !( $this->getAttribute( 'rc_type' ) == RC_LOG &&
 			$this->getAttribute( 'rc_log_type' ) == 'upload' ) ) ) {
 			$status->fatal( 'rcpatroldisabled' );
 		}
@@ -886,10 +893,10 @@ class RecentChange implements Taggable {
 		$logPage, $user, $actionComment, $ip, $type,
 		$action, $target, $logComment, $params, $newId = 0, $actionCommentIRC = ''
 	) {
-		global $wgLogRestrictions;
+		$logRestrictions = MediaWikiServices::getInstance()->getMainConfig()->get( 'LogRestrictions' );
 
 		# Don't add private logs to RC!
-		if ( isset( $wgLogRestrictions[$type] ) && $wgLogRestrictions[$type] != '*' ) {
+		if ( isset( $logRestrictions[$type] ) && $logRestrictions[$type] != '*' ) {
 			return false;
 		}
 		$rc = self::newLogEntry( $timestamp,
@@ -1270,9 +1277,9 @@ class RecentChange implements Taggable {
 	 * @return bool
 	 */
 	public static function isInRCLifespan( $timestamp, $tolerance = 0 ) {
-		global $wgRCMaxAge;
+		$rcMaxAge = MediaWikiServices::getInstance()->getMainConfig()->get( 'RCMaxAge' );
 
-		return wfTimestamp( TS_UNIX, $timestamp ) > time() - $tolerance - $wgRCMaxAge;
+		return (int)wfTimestamp( TS_UNIX, $timestamp ) > time() - $tolerance - $rcMaxAge;
 	}
 
 	/**
@@ -1285,9 +1292,9 @@ class RecentChange implements Taggable {
 	public function parseParams() {
 		$rcParams = $this->getAttribute( 'rc_params' );
 
-		Wikimedia\suppressWarnings();
+		AtEase::suppressWarnings();
 		$unserializedParams = unserialize( $rcParams );
-		Wikimedia\restoreWarnings();
+		AtEase::restoreWarnings();
 
 		return $unserializedParams;
 	}

@@ -5,7 +5,10 @@
 			"Zoranzoki21"
 		]
 	},
-	"twocolconflict-beta-feature-description": "Prikaz sukoba uređivanja uz pomoć naprednog dvostupčanog pregleda.",
+	"twocolconflictprovidesubmittedtext": "Sukob izmjena:",
+	"twocolconflict-beta-feature-description": "Prikaz sukoba uređivanja u naprednom pasusnom dvostupčanom pregledu.",
+	"twocolconflict-copy-action": "kopiraj sav tekst",
+	"twocolconflict-copy-notice": "Cijeli wikitekst Vaše izmjene prekopiran je u međuspremnik (uređivanja ispod nisu uključena).",
 	"twocolconflict-split-your-version-header": "Vaša izmjena",
 	"twocolconflict-split-current-version-header": "Posljednja izmjena dana $1",
 	"twocolconflict-split-not-saved-at": "Još uvijek neobjavljeno",

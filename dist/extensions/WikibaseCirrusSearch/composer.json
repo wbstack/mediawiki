@@ -24,7 +24,7 @@
 		"irc": "irc://irc.libera.chat/wikimedia-discovery"
 	},
 	"require-dev": {
-		"mediawiki/mediawiki-codesniffer": "37.0.0",
+		"mediawiki/mediawiki-codesniffer": "38.0.0",
 		"mediawiki/mediawiki-phan-config": "0.11.0",
 		"mediawiki/minus-x": "1.1.1",
 		"php-coveralls/php-coveralls": "^2.0.0",
@@ -39,9 +39,15 @@
 		"test": [
 			"composer validate --no-interaction",
 			"parallel-lint . --exclude vendor --exclude node_modules",
-			"phpcs -p -s",
+			"@phpcs",
 			"minus-x check ."
 		],
-		"phan": "phan -d . --long-progress-bar"
+		"phan": "phan -d . --long-progress-bar",
+		"phpcs": "phpcs -sp --cache"
+	},
+	"config": {
+		"allow-plugins": {
+			"composer/installers": true
+		}
 	}
 }

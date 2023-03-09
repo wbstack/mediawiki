@@ -3,6 +3,7 @@
 use MediaWiki\Auth\AuthenticationRequest;
 use MediaWiki\Auth\AuthManager;
 use MediaWiki\ChangeTags\Taggable;
+use MediaWiki\Extension\AbuseFilter\Variables\VariableHolder;
 use MediaWiki\MediaWikiServices;
 use MobileFrontend\ContentProviders\DefaultContentProvider;
 use MobileFrontend\Models\MobilePage;
@@ -313,6 +314,26 @@ class MobileFrontendHooks {
 	}
 
 	/**
+	 * Modifies the `<body>` element's attributes.
+	 *
+	 * By default, the `class` attribute is set to the output's "bodyClassName"
+	 * property.
+	 *
+	 * @param OutputPage $out
+	 * @param Skin $skin
+	 * @param string[] &$bodyAttrs
+	 */
+	public static function onOutputPageBodyAttributes( OutputPage $out, Skin $skin, &$bodyAttrs ) {
+		$userMode = MediaWikiServices::getInstance()->getService( 'MobileFrontend.AMC.UserMode' );
+		$context = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Context' );
+		$isMobile = $context->shouldDisplayMobileView();
+
+		if ( $isMobile && !$userMode->isEnabled() ) {
+			$bodyAttrs['class'] .= ' mw-mf-amc-disabled';
+		}
+	}
+
+	/**
 	 * BeforePageRedirect hook handler
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/BeforePageRedirect
 	 *
@@ -366,7 +387,7 @@ class MobileFrontendHooks {
 			unset( $otherParams['title'] );
 			unset( $otherParams['curid'] );
 
-			$redirectUrl = SpecialPage::getTitleFor( 'MobileDiff', $newRevId )->getFullURL( $otherParams );
+			$redirectUrl = SpecialPage::getTitleFor( 'MobileDiff', (string)$newRevId )->getFullURL( $otherParams );
 
 			// The MobileDiff page currently only supports showing a single revision, so
 			// only redirect to MobileDiff if we are sure this isn't a multi-revision diff.
@@ -455,9 +476,6 @@ class MobileFrontendHooks {
 			// beta cookie
 			$cookies[] = MobileContext::OPTIN_COOKIE_NAME;
 		}
-		// Redirect people who want so from HTTP to HTTPS. Ideally, should be
-		// only for HTTP but we don't vary on protocol.
-		$cookies[] = 'forceHTTPS';
 	}
 
 	/**
@@ -521,8 +539,6 @@ class MobileFrontendHooks {
 				'tiny' => MobilePage::TINY_IMAGE_WIDTH,
 				'small' => MobilePage::SMALL_IMAGE_WIDTH,
 			],
-			// Skin.js
-			'wgMFLicense' => MobileFrontendSkinHooks::getLicense( 'editor' ),
 			'wgMFEnableJSConsoleRecruitment' => $config->get( 'MFEnableJSConsoleRecruitment' ),
 			// Browser.js
 			'wgMFDeviceWidthTablet' => self::DEVICE_WIDTH_TABLET,
@@ -617,21 +633,6 @@ class MobileFrontendHooks {
 				$list['Watchlist'] = 'SpecialMobileWatchlist';
 				$list['EditWatchlist'] = 'SpecialMobileEditWatchlist';
 			}
-
-			// Only override contributions page if AMC is disabled
-			if ( $user->isSafeToLoad() &&
-				!$userMode->isEnabled() &&
-				!$featureManager->isFeatureAvailableForCurrentUser( 'MFUseDesktopContributionsPage' )
-			) {
-				/* Special:MobileContributions redefines Special:History in
-				 * such a way that for Special:Contributions/Foo, Foo is a
-				 * username (in Special:History/Foo, Foo is a page name).
-				 * Redirect people here as this is essential
-				 * Special:Contributions without the bells and whistles.
-				 */
-				$list['Contributions'] = 'SpecialMobileContributions';
-			}
-
 		}
 		// Add Special:Nearby only, if Nearby is activated and Extension:NearbyPages is not (T66316)!
 		if ( !ExtensionRegistry::getInstance()->isLoaded( 'NearbyPages' ) &&
@@ -679,7 +680,7 @@ class MobileFrontendHooks {
 	 * Altering the variables generated for a specific user
 	 *
 	 * @see hooks.txt in AbuseFilter extension
-	 * @param AbuseFilterVariableHolder $vars object to add vars to
+	 * @param VariableHolder $vars object to add vars to
 	 * @param User $user
 	 * @param RecentChange|null $rc If the variables should be generated for an RC entry, this
 	 *  is the entry. Null if it's for the current action being filtered.
@@ -934,7 +935,7 @@ class MobileFrontendHooks {
 	 * Saves mobile host so that the CentralAuth wiki could redirect back properly
 	 *
 	 * @see CentralAuthHooks::doCentralLoginRedirect in CentralAuth extension
-	 * @param CentralAuthUser $centralUser
+	 * @param \MediaWiki\Extension\CentralAuth\User\CentralAuthUser $centralUser
 	 * @param array &$data Redirect data
 	 */
 	public static function onCentralAuthLoginRedirectData( $centralUser, &$data ) {
@@ -949,7 +950,7 @@ class MobileFrontendHooks {
 	 * CentralAuthSilentLoginRedirect hook handler
 	 * Points redirects from CentralAuth wiki to mobile domain if user has logged in from it
 	 * @see SpecialCentralLogin in CentralAuth extension
-	 * @param CentralAuthUser $centralUser
+	 * @param \MediaWiki\Extension\CentralAuth\User\CentralAuthUser $centralUser
 	 * @param string &$url to redirect to
 	 * @param array $info token information
 	 */
@@ -978,12 +979,12 @@ class MobileFrontendHooks {
 	 * @param ParserOutput $po
 	 * @param callable $fallbackWikibaseDescriptionFunc A fallback to provide Wikibase description.
 	 * Function takes wikibase_item as a first and only argument
-	 * @return string
+	 * @return ?string the tagline as a string, or else null if none is found
 	 */
 	public static function findTagline( ParserOutput $po, $fallbackWikibaseDescriptionFunc ) {
-		$desc = $po->getProperty( 'wikibase-shortdesc' );
-		$item = $po->getProperty( 'wikibase_item' );
-		if ( $desc === false && $item && $fallbackWikibaseDescriptionFunc ) {
+		$desc = $po->getPageProperty( 'wikibase-shortdesc' );
+		$item = $po->getPageProperty( 'wikibase_item' );
+		if ( $desc === null && $item && $fallbackWikibaseDescriptionFunc ) {
 			return $fallbackWikibaseDescriptionFunc( $item );
 		}
 		return $desc;

@@ -22,19 +22,14 @@ namespace MediaWiki\Minerva\Menu;
 
 use IContextSource;
 use MediaWiki\Minerva\Menu\Entries\AuthMenuEntry;
-use MediaWiki\Minerva\Menu\Entries\HomeMenuEntry;
-use MediaWiki\Minerva\Menu\Entries\LogInMenuEntry;
-use MediaWiki\Minerva\Menu\Entries\LogOutMenuEntry;
 use MediaWiki\Minerva\Menu\Entries\SingleMenuEntry;
-use MediaWiki\Special\SpecialPageFactory;
+use MediaWiki\SpecialPage\SpecialPageFactory;
+use MediaWiki\User\UserIdentity;
+use MediaWiki\User\UserOptionsLookup;
 use Message;
-use MinervaUI;
 use MWException;
-use MWHttpRequest;
-use SpecialMobileWatchlist;
 use SpecialPage;
 use Title;
-use User;
 
 /**
  * Set of all know menu items for easier building
@@ -42,7 +37,7 @@ use User;
 final class Definitions {
 
 	/**
-	 * @var User
+	 * @var UserIdentity
 	 */
 	private $user;
 
@@ -57,84 +52,26 @@ final class Definitions {
 	private $specialPageFactory;
 
 	/**
+	 * @var UserOptionsLookup
+	 */
+	private $userOptionsLookup;
+
+	/**
 	 * Initialize definitions helper class
 	 *
 	 * @param IContextSource $context
 	 * @param SpecialPageFactory $factory
+	 * @param UserOptionsLookup $userOptionsLookup
 	 */
-	public function __construct( IContextSource $context, SpecialPageFactory $factory ) {
+	public function __construct(
+		IContextSource $context,
+		SpecialPageFactory $factory,
+		UserOptionsLookup $userOptionsLookup
+	) {
 		$this->user = $context->getUser();
 		$this->context = $context;
 		$this->specialPageFactory = $factory;
-	}
-
-	/**
-	 * Inserts the Contributions menu item into the menu.
-	 *
-	 * @param Group $group
-	 * @throws MWException
-	 */
-	public function insertContributionsMenuItem( Group $group ) {
-		$group->insertEntry( SingleMenuEntry::create(
-			'userContributions',
-			$this->context->msg( 'mobile-frontend-main-menu-contributions' )->text(),
-			SpecialPage::getTitleFor( 'Contributions', $this->user->getName() )->getLocalURL()
-		)->trackClicks( 'contributions' ) );
-	}
-
-	/**
-	 * Inserts the Watchlist menu item into the menu for a logged in user
-	 *
-	 * @param Group $group
-	 * @throws MWException
-	 */
-	public function insertWatchlistMenuItem( Group $group ) {
-		$watchTitle = SpecialPage::getTitleFor( 'Watchlist' );
-
-		// Watchlist link
-		$watchlistQuery = [];
-		// Avoid fatal when MobileFrontend not available (T171241)
-		if ( class_exists( SpecialMobileWatchlist::class ) ) {
-			$view = $this->user->getOption( SpecialMobileWatchlist::VIEW_OPTION_NAME, false );
-			$filter = $this->user->getOption( SpecialMobileWatchlist::FILTER_OPTION_NAME, false );
-			if ( $view ) {
-				$watchlistQuery['watchlistview'] = $view;
-			}
-			if ( $filter && $view === 'feed' ) {
-				$watchlistQuery['filter'] = $filter;
-			}
-		}
-		$group->insertEntry( SingleMenuEntry::create(
-			'unStar',
-			$this->context->msg( 'mobile-frontend-main-menu-watchlist' )->text(),
-			$watchTitle->getLocalURL( $watchlistQuery )
-		) );
-	}
-
-	/**
-	 * Creates a log in or log out button.
-	 *
-	 * @param Group $group
-	 * @throws MWException
-	 */
-	public function insertLogInMenuItem( Group $group ) {
-		$group->insertEntry( new LogInMenuEntry(
-			$this->context,
-			$this->newLogInOutQuery( $this->newReturnToQuery() )
-		) );
-	}
-
-	/**
-	 * Creates a log in or log out button.
-	 *
-	 * @param Group $group
-	 * @throws MWException
-	 */
-	public function insertLogOutMenuItem( Group $group ) {
-		$group->insertEntry( new LogOutMenuEntry(
-			$this->context,
-			$this->newLogInOutQuery( $this->newReturnToQuery() )
-		) );
+		$this->userOptionsLookup = $userOptionsLookup;
 	}
 
 	/**
@@ -145,41 +82,19 @@ final class Definitions {
 	 */
 	public function insertAuthMenuItem( Group $group ) {
 		$group->insertEntry( new AuthMenuEntry(
-			$this->user,
-			$this->context,
-			$this->newLogInOutQuery( $this->newReturnToQuery() )
+				$this->user,
+				$this->context,
+				$this->newLogInOutQuery( $this->newReturnToQuery() )
 		) );
 	}
 
 	/**
-	 * Build and insert Home link
-	 * @param Group $group
+	 * Perform message localization
+	 * @param string $key to localize
+	 * @return Message
 	 */
-	public function insertHomeItem( Group $group ) {
-		$group->insertEntry( new HomeMenuEntry(
-			'home',
-			$this->context->msg( 'mobile-frontend-home-button' )->text(),
-			Title::newMainPage()->getLocalURL()
-		) );
-	}
-
-	/**
-	 * Build and insert Random link
-	 * @param Group $group
-	 * @throws MWException
-	 */
-	public function insertRandomItem( Group $group ) {
-		$pageMsg = new Message( 'randompage-url' );
-		if ( !$pageMsg->exists() ) {
-			return;
-		}
-		$group->insert( 'random' )
-			->addComponent( $this->context->msg( 'mobile-frontend-random-button' )->text(),
-				Title::newFromText( $pageMsg->escaped() )->getLocalURL() . '#/random',
-				MinervaUI::iconClass( 'die', 'before' ), [
-					'id' => 'randomButton',
-					'data-event-name' => 'menu.random',
-				] );
+	public function msg( string $key ) {
+		return $this->context->msg( $key );
 	}
 
 	/**
@@ -190,12 +105,13 @@ final class Definitions {
 	public function insertNearbyIfSupported( Group $group ) {
 		// Nearby link (if supported)
 		if ( $this->specialPageFactory->exists( 'Nearby' ) ) {
-			$group->insert( 'nearby', $isJSOnly = true )
+			$group->insert( 'nearby', /* $isJSOnly = */ true )
 				->addComponent(
 					$this->context->msg( 'mobile-frontend-main-menu-nearby' )->text(),
 					SpecialPage::getTitleFor( 'Nearby' )->getLocalURL(),
-					MinervaUI::iconClass( 'mapPin', 'before', 'nearby' ),
-					[ 'data-event-name' => 'menu.nearby' ]
+					'',
+					[ 'data-event-name' => 'menu.nearby' ],
+					'minerva-mapPin'
 				);
 		}
 	}
@@ -217,8 +133,8 @@ final class Definitions {
 		 * - user is logged out and beta is disabled (beta is the only thing a non-js user can do)
 		 * In future we might want to make this a static function on Special:MobileOptions.
 		 */
-		$jsonly = ( $user->isAnon() && !$betaEnabled ) ||
-			( !$user->isAnon() && !$config->get( 'MFAdvancedMobileContributions' ) &&
+		$jsonly = ( !$user->isRegistered() && !$betaEnabled ) ||
+			( $user->isRegistered() && !$config->get( 'MFAdvancedMobileContributions' ) &&
 				!$betaEnabled
 			);
 
@@ -254,12 +170,16 @@ final class Definitions {
 	 * @param Group $group
 	 */
 	public function insertAboutItem( Group $group ) {
-		$title = Title::newFromText( $this->context->msg( 'aboutpage' )->inContentLanguage()->text() );
 		$msg = $this->context->msg( 'aboutsite' );
-		if ( $title && !$msg->isDisabled() ) {
-			$group->insert( 'about' )
-				->addComponent( $msg->text(), $title->getLocalURL() );
+		if ( $msg->isDisabled() ) {
+			return;
 		}
+		$title = Title::newFromText( $this->context->msg( 'aboutpage' )->inContentLanguage()->text() );
+		if ( !$title ) {
+			return;
+		}
+		$group->insert( 'about' )
+			->addComponent( $msg->text(), $title->getLocalURL() );
 	}
 
 	/**
@@ -267,13 +187,17 @@ final class Definitions {
 	 * @param Group $group
 	 */
 	public function insertDisclaimersItem( Group $group ) {
+		$msg = $this->context->msg( 'disclaimers' );
+		if ( $msg->isDisabled() ) {
+			return;
+		}
 		$title = Title::newFromText( $this->context->msg( 'disclaimerpage' )
 			->inContentLanguage()->text() );
-		$msg = $this->context->msg( 'disclaimers' );
-		if ( $title && !$msg->isDisabled() ) {
-			$group->insert( 'disclaimers' )
-				->addComponent( $msg->text(), $title->getLocalURL() );
+		if ( !$title ) {
+			return;
 		}
+		$group->insert( 'disclaimers' )
+			->addComponent( $msg->text(), $title->getLocalURL() );
 	}
 
 	/**
@@ -288,8 +212,9 @@ final class Definitions {
 			->addComponent(
 				$this->context->msg( 'recentchanges' )->escaped(),
 				$title->getLocalURL(),
-				MinervaUI::iconClass( 'recentChanges', 'before' ),
-				[ 'data-event-name' => 'menu.recentchanges' ]
+				'',
+				[ 'data-event-name' => 'menu.recentchanges' ],
+				'minerva-recentChanges'
 			);
 	}
 
@@ -314,23 +239,18 @@ final class Definitions {
 	 * @throws MWException
 	 */
 	public function insertCommunityPortal( Group $group ) {
-		$message = new Message( 'Portal-url' );
-		if ( !$message->exists() ) {
+		$msg = $this->context->msg( 'portal' );
+		if ( $msg->isDisabled() ) {
 			return;
 		}
-		$inContentLang = $message->inContentLanguage();
-		$titleName = $inContentLang->plain();
-		if ( $inContentLang->isDisabled() || MWHttpRequest::isValidURI( $titleName ) ) {
+		$title = Title::newFromText( $this->context->msg( 'portal-url' )
+			->inContentLanguage()->text() );
+		if ( !$title ) {
 			return;
 		}
-		$title = Title::newFromText( $titleName );
-		if ( $title === null || !$title->exists() ) {
-			return;
-		}
-
 		$group->insertEntry( SingleMenuEntry::create(
 			'speechBubbles',
-			$title->getText(),
+			$msg->text(),
 			$title->getLocalURL()
 		) );
 	}
@@ -345,7 +265,7 @@ final class Definitions {
 		if ( $title && !$title->isSpecial( 'Userlogin' ) ) {
 			$ret[ 'returnto' ] = $title->getPrefixedText();
 		}
-		if ( $this->user && $this->user->isAnon() ) {
+		if ( $this->user && !$this->user->isRegistered() ) {
 			// unset campaign on login link so as not to interfere with A/B tests
 			unset( $returnToQuery['campaign'] );
 		}
@@ -364,8 +284,9 @@ final class Definitions {
 	 */
 	private function newReturnToQuery(): array {
 		$returnToQuery = [];
-		if ( !$this->context->getRequest()->wasPosted() ) {
-			$returnToQuery = $this->context->getRequest()->getValues();
+		$request = $this->context->getRequest();
+		if ( !$request->wasPosted() ) {
+			$returnToQuery = $request->getValues();
 			unset( $returnToQuery['title'] );
 			unset( $returnToQuery['returnto'] );
 			unset( $returnToQuery['returntoquery'] );
@@ -379,29 +300,29 @@ final class Definitions {
 	 * @param Group $group
 	 * @throws MWException
 	 */
-	 public function insertDonateItem( Group $group ) {
-		 $ctx = $this->context;
-		 if ( !$ctx->msg( 'sitesupport-url' )->exists() ||
-			$ctx->msg( 'sitesupport' )->isDisabled()
-		) {
+	public function insertDonateItem( Group $group ) {
+		$labelMsg = $this->context->msg( 'sitesupport' );
+		$urlMsg = $this->context->msg( 'sitesupport-url' );
+		if ( !$urlMsg->exists() || $labelMsg->isDisabled() ) {
 			return;
-		 }
-		 // Add term field to allow distinguishing from other sidebars.
-		 // https://www.mediawiki.org/wiki/Wikimedia_Product/Analytics_Infrastructure/Schema_fragments#Campaign_Attribution
-		 $url = wfAppendQuery(
-			$ctx->msg( 'sitesupport-url' )->text(),
+		}
+		// Add term field to allow distinguishing from other sidebars.
+		// https://www.mediawiki.org/wiki/Wikimedia_Product/Analytics_Infrastructure/Schema_fragments#Campaign_Attribution
+		$url = wfAppendQuery(
+			$urlMsg->text(),
 			[ 'utm_key' => 'minerva' ]
 		);
 
 		 $group->insert( 'donate' )->addComponent(
-			$ctx->msg( 'sitesupport' )->text(),
+			$labelMsg->text(),
 			$url,
-			MinervaUI::iconClass( 'heart', 'before' ),
+			'',
 			[
 				// for consistency with desktop
 				'id' => 'n-sitesupport',
 				'data-event-name' => 'menu.donate',
-			]
-		 );
-	 }
+			],
+			'minerva-heart'
+		);
+	}
 }

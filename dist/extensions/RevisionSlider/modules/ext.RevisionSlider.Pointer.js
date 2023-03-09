@@ -1,7 +1,3 @@
-/**
- * @external PointerLine
- * @external PointerView
- */
 var PointerLine = require( './ext.RevisionSlider.PointerLine.js' ),
 	PointerView = require( './ext.RevisionSlider.PointerView.js' );
 
@@ -63,8 +59,4 @@ $.extend( Pointer.prototype, {
 	}
 } );
 
-module.exports = {
-	Pointer: Pointer,
-	PointerLine: PointerLine,
-	PointerView: PointerView
-};
+module.exports = Pointer;

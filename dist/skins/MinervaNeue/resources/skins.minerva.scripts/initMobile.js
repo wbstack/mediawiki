@@ -6,6 +6,8 @@
  * framework or upstreamed from MobileFrotend to core) should be and moved into ./setup.js
  * @todo anything left should be moved to MobileFrontend extension and removed from here.
  */
+var HISTORY_ICON_CLASS = 'mw-ui-icon-wikimedia-history-base20';
+var HISTORY_ARROW_CLASS = 'mw-ui-icon-mf-expand-gray';
 module.exports = function () {
 	var
 		// eslint-disable-next-line no-restricted-properties
@@ -23,7 +25,7 @@ module.exports = function () {
 		TitleUtil = require( './TitleUtil.js' ),
 		issues = require( './page-issues/index.js' ),
 		Toolbar = require( './Toolbar.js' ),
-		ToggleList = require( '../../components/ToggleList/ToggleList.js' ),
+		ToggleList = require( '../../includes/Skins/ToggleList/ToggleList.js' ),
 		TabScroll = require( './TabScroll.js' ),
 		router = require( 'mediawiki.router' ),
 		ctaDrawers = require( './ctaDrawers.js' ),
@@ -168,10 +170,9 @@ module.exports = function () {
 	 * @param {jQuery.Object} $lastModifiedLink
 	 */
 	function initHistoryLink( $lastModifiedLink ) {
-		var delta, historyUrl, $msg, $bar,
+		var delta, $msg, $bar,
 			ts, username, gender;
 
-		historyUrl = $lastModifiedLink.attr( 'href' );
 		ts = $lastModifiedLink.data( 'timestamp' );
 		username = $lastModifiedLink.data( 'user-name' ) || false;
 		gender = $lastModifiedLink.data( 'user-gender' );
@@ -181,15 +182,22 @@ module.exports = function () {
 			if ( time.isRecent( delta ) ) {
 				$bar = $lastModifiedLink.closest( '.last-modified-bar' );
 				$bar.addClass( 'active' );
-				$bar.find( '.mw-ui-icon-wikimedia-history-base20' ).addClass( 'mw-ui-icon-wikimedia-history-invert' );
-				$bar.find( '.mw-ui-icon-mf-expand-gray' ).addClass( 'mw-ui-icon-mf-expand-invert' );
+				$bar.find( '.' + HISTORY_ICON_CLASS )
+					.addClass( HISTORY_ICON_CLASS.replace( '-base20', '-invert' ) )
+					.removeClass( HISTORY_ICON_CLASS );
+				$bar.find( '.' + HISTORY_ARROW_CLASS )
+					.addClass( HISTORY_ARROW_CLASS.replace( '-gray', '-invert' ) )
+					.removeClass( HISTORY_ARROW_CLASS );
 			}
 
 			$msg = $( '<span>' )
 				// The new element should maintain the non-js element's CSS classes.
 				.attr( 'class', $lastModifiedLink.attr( 'class' ) )
 				.html(
-					time.getLastModifiedMessage( ts, username, gender, historyUrl )
+					time.getLastModifiedMessage( ts, username, gender,
+						// For cached HTML
+						$lastModifiedLink.attr( 'href' )
+					)
 				);
 			$lastModifiedLink.replaceWith( $msg );
 		}
@@ -251,7 +259,7 @@ module.exports = function () {
 	 * Initialisation function for user creation module.
 	 *
 	 * Enhances an element representing a time
-	 + to show a human friendly date in seconds, minutes, hours, days
+	 * to show a human friendly date in seconds, minutes, hours, days
 	 * months or years
 	 *
 	 * @ignore
@@ -339,7 +347,8 @@ module.exports = function () {
 			// eslint-disable-next-line no-jquery/no-global-selector
 			$watch = $( '#page-actions-watch' ),
 			toolbarElement = document.querySelector( Toolbar.selector ),
-			userMenu = document.querySelector( '.minerva-user-menu' ); // See UserMenuDirector.
+			userMenu = document.querySelector( '.minerva-user-menu' ), // See UserMenuDirector.
+			navigationDrawer = document.querySelector( '.navigation-drawer' );
 
 		// The `minerva-animations-ready` class can be used by clients to prevent unwanted
 		// CSS transitions from firing on page load in some browsers (see
@@ -383,6 +392,14 @@ module.exports = function () {
 		}
 		if ( userMenu ) {
 			ToggleList.bind( window, userMenu );
+		}
+		if ( navigationDrawer ) {
+			ToggleList.bind( window, navigationDrawer );
+			var navigationDrawerMask = navigationDrawer.querySelector( '.main-menu-mask' );
+			// The 'for' attribute is used to close the drawer when the mask is clicked without JS
+			// Since we are using JS to enhance the drawer behavior, we need to
+			// remove the attribute to prevent the drawer from being toggled twice
+			navigationDrawerMask.removeAttribute( 'for' );
 		}
 		TabScroll.initTabsScrollPosition();
 		// Setup the issues banner on the page

@@ -30,6 +30,7 @@ use Wikibase\Client\Hooks\LangLinkHandlerFactory;
 use Wikibase\Client\Hooks\LanguageLinkBadgeDisplay;
 use Wikibase\Client\Hooks\OtherProjectsSidebarGeneratorFactory;
 use Wikibase\Client\Hooks\SidebarLinkBadgeDisplay;
+use Wikibase\Client\Hooks\WikibaseClientHookRunner;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\OtherProjectsSitesGenerator;
 use Wikibase\Client\OtherProjectsSitesProvider;
@@ -136,6 +137,7 @@ return [
 		return new AffectedPagesFinder(
 			WikibaseClient::getStore( $services )->getUsageLookup(),
 			$services->getTitleFactory(),
+			$services->getPageStore(),
 			$services->getLinkBatchFactory(),
 			WikibaseClient::getSettings( $services )->getSetting( 'siteGlobalID' ),
 			WikibaseClient::getLogger( $services )
@@ -157,7 +159,7 @@ return [
 		$logger = WikibaseClient::getLogger( $services );
 
 		$pageUpdater = new WikiPageUpdater(
-			JobQueueGroup::singleton(),
+			$services->getJobQueueGroup(),
 			$logger,
 			$services->getStatsdDataFactory()
 		);
@@ -177,10 +179,11 @@ return [
 		return new ChangeHandler(
 			WikibaseClient::getAffectedPagesFinder( $services ),
 			$services->getTitleFactory(),
+			$services->getPageStore(),
 			$pageUpdater,
 			$changeListTransformer,
 			$logger,
-			$services->getHookContainer(),
+			WikibaseClient::getHookRunner( $services ),
 			$settings->getSetting( 'injectRecentChanges' )
 		);
 	},
@@ -445,19 +448,43 @@ return [
 	},
 
 	'WikibaseClient.ExternalUserNames' => function ( MediaWikiServices $services ): ?ExternalUserNames {
-		$siteLookup = $services->getSiteLookup();
-		$repoSite = $siteLookup->getSite(
-			WikibaseClient::getItemAndPropertySource( $services )->getDatabaseName()
-		);
-		if ( $repoSite === null ) {
-			return null;
+		$databaseName = WikibaseClient::getItemAndPropertySource( $services )->getDatabaseName();
+		if ( $databaseName !== false ) {
+			$siteLookup = $services->getSiteLookup();
+			$repoSite = $siteLookup->getSite( $databaseName );
+			if ( $repoSite === null ) {
+				WikibaseClient::getLogger( $services )
+					->warning(
+						'WikibaseClient.ExternalUserNames service wiring: ' .
+						'itemAndPropertySource databaseName {databaseName} is not known as a global site ID',
+						[ 'databaseName' => $databaseName ]
+					);
+				return null;
+			}
+		} else {
+			$repoSite = WikibaseClient::getSite( $services );
 		}
 		$interwikiPrefixes = $repoSite->getInterwikiIds();
 		if ( $interwikiPrefixes === [] ) {
+			WikibaseClient::getLogger( $services )
+				->warning(
+					'WikibaseClient.ExternalUserNames service wiring: ' .
+					'repo site {siteInternalId}/{siteGlobalId} has no interwiki IDs/prefixes',
+					[
+						'siteInternalId' => $repoSite->getInternalId(),
+						'siteGlobalId' => $repoSite->getGlobalId(),
+					]
+				);
 			return null;
 		}
 		$interwikiPrefix = $interwikiPrefixes[0];
 		return new ExternalUserNames( $interwikiPrefix, false );
+	},
+
+	'WikibaseClient.HookRunner' => function ( MediaWikiServices $services ): WikibaseClientHookRunner {
+		return new WikibaseClientHookRunner(
+			$services->getHookContainer()
+		);
 	},
 
 	'WikibaseClient.ItemAndPropertySource' => function ( MediaWikiServices $services ): EntitySource {
@@ -539,6 +566,7 @@ return [
 
 	'WikibaseClient.LanguageFallbackChainFactory' => function ( MediaWikiServices $services ): LanguageFallbackChainFactory {
 		return new LanguageFallbackChainFactory(
+			WikibaseClient::getTermsLanguages( $services ),
 			$services->getLanguageFactory(),
 			$services->getLanguageConverterFactory(),
 			$services->getLanguageFallback()
@@ -609,12 +637,15 @@ return [
 	},
 
 	'WikibaseClient.ParserOutputDataUpdater' => function ( MediaWikiServices $services ): ClientParserOutputDataUpdater {
+		$settings = WikibaseClient::getSettings( $services );
+
 		return new ClientParserOutputDataUpdater(
 			WikibaseClient::getOtherProjectsSidebarGeneratorFactory( $services ),
 			WikibaseClient::getStore( $services )->getSiteLinkLookup(),
 			WikibaseClient::getEntityLookup( $services ),
 			WikibaseClient::getUsageAccumulatorFactory( $services ),
-			WikibaseClient::getSettings( $services )->getSetting( 'siteGlobalID' ),
+			$settings->getSetting( 'siteGlobalID' ),
+			$settings->getSetting( 'tmpUnconnectedPagePagePropMigrationStage' ),
 			WikibaseClient::getLogger( $services )
 		);
 	},
@@ -683,7 +714,7 @@ return [
 
 	'WikibaseClient.PropertyOrderProvider' => function ( MediaWikiServices $services ): CachingPropertyOrderProvider {
 		$title = $services->getTitleFactory()->newFromTextThrow( 'MediaWiki:Wikibase-SortedProperties' );
-		$innerProvider = new WikiPagePropertyOrderProvider( $title );
+		$innerProvider = new WikiPagePropertyOrderProvider( $services->getWikiPageFactory(), $title );
 
 		$url = WikibaseClient::getSettings( $services )->getSetting( 'propertyOrderUrl' );
 
@@ -738,6 +769,8 @@ return [
 				$siteLookup,
 				WikibaseClient::getSettings( $services )->getSetting( 'siteGlobalID' )
 			),
+			WikibaseClient::getEntitySourceDefinitions( $services ),
+			WikibaseClient::getClientDomainDbFactory( $services )->newLocalDb(),
 			$services->getCentralIdLookupFactory()->getNonLocalLookup(),
 			WikibaseClient::getExternalUserNames( $services )
 		);

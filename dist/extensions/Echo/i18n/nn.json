@@ -4,7 +4,8 @@
 			"Amire80",
 			"Jon Harald Søby",
 			"Njardarlogar",
-			"Ranveig"
+			"Ranveig",
+			"EdoAug"
 		]
 	},
 	"echo-desc": "Meldingssystem",
@@ -47,6 +48,7 @@
 	"notifications": "Meldingar og varsel",
 	"tooltip-pt-notifications-alert": "Varsla {{GENDER:|dine}}",
 	"tooltip-pt-notifications-notice": "Notisane {{GENDER:|dine}}",
+	"echo-displaynotificationsconfiguration-enabled-default-new-users-legend": "Nye brukarar",
 	"echo-specialpage": "Meldingar og varsel",
 	"echo-specialpage-section-markread": "Merk gruppa som lesen",
 	"echo-specialpage-pagination-numnotifications": "{{PLURAL:$1|éin notis eller eitt varsel|$1 notisar og varsel}}",
@@ -73,6 +75,7 @@
 	"notification-link-text-view-page": "Sjå side",
 	"notification-header-edit-user-talk": "$1 {{GENDER:$2|la att}} ei melding på <strong>diskusjonssida</strong> {{GENDER:$3|di}}.",
 	"notification-header-edit-user-talk-with-section": "$1 {{GENDER:$2|la att}} ei melding på <strong>diskusjonssida</strong> {{GENDER:$3|di}} under «<strong>$4</strong>».",
+	"notification-compact-header-edit-user-talk": "$1 {{GENDER:$2|la}} att ei melding til {{GENDER:$3|deg}}.",
 	"notification-header-page-linked": "Ei lenkje vart oppretta frå <strong>$4</strong> til <strong>$3</strong>.",
 	"notification-compact-header-page-linked": "Lenkja frå <strong>$1</strong>.",
 	"notification-bundle-header-page-linked": "Det vart oppretta lenkjer frå {{PLURAL:$5||$5 sider|100=meir enn 99 sider}} til <strong>$3</strong>.",
@@ -112,7 +115,7 @@
 	"notification-timestamp-ago-minutes": "{{PLURAL:$1|$1 min.}}",
 	"notification-timestamp-ago-hours": "{{PLURAL:$1|$1 t.}}",
 	"notification-timestamp-ago-days": "{{PLURAL:$1|$1 d.}}",
-	"notification-timestamp-ago-months": "{{PLURAL:$1|$1 mnd.}}",
+	"notification-timestamp-ago-months": "{{PLURAL:$1|$1 md.}}",
 	"notification-timestamp-ago-years": "{{PLURAL:$1|$1 år}}",
 	"notification-timestamp-today": "I dag",
 	"notification-timestamp-yesterday": "I går",

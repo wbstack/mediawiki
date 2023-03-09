@@ -29,14 +29,18 @@ use SkinTemplate;
 use StubUserLang;
 use Throwable;
 use Title;
+use UnexpectedValueException;
 use User;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\Property;
+use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Formatters\AutoCommentFormatter;
 use Wikibase\Lib\LibHooks;
 use Wikibase\Lib\ParserFunctions\CommaSeparatedList;
 use Wikibase\Lib\SettingsArray;
+use Wikibase\Lib\StaticContentLanguages;
 use Wikibase\Lib\Store\EntityRevision;
+use Wikibase\Lib\UnionContentLanguages;
 use Wikibase\Lib\WikibaseContentLanguages;
 use Wikibase\Repo\Api\MetaDataBridgeConfig;
 use Wikibase\Repo\Api\ModifyEntity;
@@ -51,7 +55,6 @@ use Wikibase\Repo\ParserOutput\TermboxFlag;
 use Wikibase\Repo\ParserOutput\TermboxVersionParserCacheValueRejector;
 use Wikibase\Repo\ParserOutput\TermboxView;
 use Wikibase\Repo\Store\RateLimitingIdGenerator;
-use Wikibase\Repo\Store\Sql\DispatchStats;
 use Wikibase\Repo\Store\Sql\SqlSubscriptionLookup;
 use Wikibase\View\ViewHooks;
 use WikiPage;
@@ -121,6 +124,10 @@ final class RepoHooks {
 		global $wgContentHandlers,
 			$wgNamespaceContentModels;
 
+		if ( WikibaseRepo::getSettings()->getSetting( 'defaultEntityNamespaces' ) ) {
+			self::defaultEntityNamespaces();
+		}
+
 		$namespaces = WikibaseRepo::getLocalEntitySource()->getEntityNamespaceIds();
 		$namespaceLookup = WikibaseRepo::getEntityNamespaceLookup();
 
@@ -153,6 +160,42 @@ final class RepoHooks {
 	}
 
 	/**
+	 * @suppress PhanUndeclaredConstant
+	 */
+	private static function defaultEntityNamespaces(): void {
+		global $wgExtraNamespaces, $wgNamespacesToBeSearchedDefault;
+
+		$baseNs = 120;
+
+		self::ensureConstant( 'WB_NS_ITEM', $baseNs );
+		self::ensureConstant( 'WB_NS_ITEM_TALK', $baseNs + 1 );
+		self::ensureConstant( 'WB_NS_PROPERTY', $baseNs + 2 );
+		self::ensureConstant( 'WB_NS_PROPERTY_TALK', $baseNs + 3 );
+
+		$wgExtraNamespaces[WB_NS_ITEM] = 'Item';
+		$wgExtraNamespaces[WB_NS_ITEM_TALK] = 'Item_talk';
+		$wgExtraNamespaces[WB_NS_PROPERTY] = 'Property';
+		$wgExtraNamespaces[WB_NS_PROPERTY_TALK] = 'Property_talk';
+
+		$wgNamespacesToBeSearchedDefault[WB_NS_ITEM] = true;
+	}
+
+	/**
+	 * Ensure that a constant is set to a certain (integer) value,
+	 * defining it or checking its value if it was already defined.
+	 */
+	private static function ensureConstant( string $name, int $value ): void {
+		if ( !defined( $name ) ) {
+			define( $name, $value );
+		} elseif ( constant( $name ) !== $value ) {
+			$actual = constant( $name );
+			throw new UnexpectedValueException(
+				"Expecting constant $name to be set to $value instead of $actual"
+			);
+		}
+	}
+
+	/**
 	 * Hook to add PHPUnit test cases.
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/UnitTestsList
 	 *
@@ -160,6 +203,7 @@ final class RepoHooks {
 	 */
 	public static function registerUnitTests( array &$paths ) {
 		$paths[] = __DIR__ . '/../tests/phpunit/';
+		$paths[] = __DIR__ . '/../rest-api/tests/phpunit/';
 	}
 
 	/**
@@ -703,20 +747,20 @@ final class RepoHooks {
 	 * Called when pushing meta-info from the ParserOutput into OutputPage.
 	 * Used to transfer 'wikibase-view-chunks' and entity data from ParserOutput to OutputPage.
 	 *
-	 * @param OutputPage $out
+	 * @param OutputPage $outputPage
 	 * @param ParserOutput $parserOutput
 	 */
-	public static function onOutputPageParserOutput( OutputPage $out, ParserOutput $parserOutput ) {
+	public static function onOutputPageParserOutput( OutputPage $outputPage, ParserOutput $parserOutput ) {
 		// Set in EntityParserOutputGenerator.
 		$placeholders = $parserOutput->getExtensionData( 'wikibase-view-chunks' );
 		if ( $placeholders !== null ) {
-			$out->setProperty( 'wikibase-view-chunks', $placeholders );
+			$outputPage->setProperty( 'wikibase-view-chunks', $placeholders );
 		}
 
 		// Set in EntityParserOutputGenerator.
 		$termsListItems = $parserOutput->getExtensionData( 'wikibase-terms-list-items' );
 		if ( $termsListItems !== null ) {
-			$out->setProperty( 'wikibase-terms-list-items', $termsListItems );
+			$outputPage->setProperty( 'wikibase-terms-list-items', $termsListItems );
 		}
 
 		// Used in ViewEntityAction and EditEntityAction to override the page HTML title
@@ -724,9 +768,9 @@ final class RepoHooks {
 		// and output page to save overhead of fetching content and accessing an entity
 		// on page view.
 		$meta = $parserOutput->getExtensionData( 'wikibase-meta-tags' );
-		$out->setProperty( 'wikibase-meta-tags', $meta );
+		$outputPage->setProperty( 'wikibase-meta-tags', $meta );
 
-		$out->setProperty(
+		$outputPage->setProperty(
 			TermboxView::TERMBOX_MARKUP,
 			$parserOutput->getExtensionData( TermboxView::TERMBOX_MARKUP )
 		);
@@ -735,7 +779,7 @@ final class RepoHooks {
 		$alternateLinks = $parserOutput->getExtensionData( 'wikibase-alternate-links' );
 		if ( $alternateLinks !== null ) {
 			foreach ( $alternateLinks as $link ) {
-				$out->addLink( $link );
+				$outputPage->addLink( $link );
 			}
 		}
 	}
@@ -816,56 +860,6 @@ final class RepoHooks {
 		$sparqlEndpoint = $repoSettings->getSetting( 'sparqlEndpoint' );
 		if ( is_string( $sparqlEndpoint ) ) {
 			$data['wikibase-sparql'] = $sparqlEndpoint;
-		}
-	}
-
-	/**
-	 * Helper for onAPIQuerySiteInfoStatisticsInfo
-	 *
-	 * @param object $row
-	 * @return array
-	 */
-	private static function formatDispatchRow( $row ) {
-		$data = [
-			'pending' => $row->chd_pending,
-			'lag' => $row->chd_lag,
-		];
-		if ( isset( $row->chd_site ) ) {
-			$data['site'] = $row->chd_site;
-		}
-		if ( isset( $row->chd_seen ) ) {
-			$data['position'] = $row->chd_seen;
-		}
-		if ( isset( $row->chd_touched ) ) {
-			$data['touched'] = wfTimestamp( TS_ISO_8601, $row->chd_touched );
-		}
-
-		return $data;
-	}
-
-	/**
-	 * Adds DispatchStats info to the API
-	 *
-	 * @param array[] &$data
-	 */
-	public static function onAPIQuerySiteInfoStatisticsInfo( array &$data ) {
-		$stats = new DispatchStats( WikibaseRepo::getRepoDomainDbFactory()->newRepoDb() );
-		$stats->load();
-		if ( $stats->hasStats() ) {
-			$data['dispatch'] = [
-				'oldest' => [
-					'id' => $stats->getMinChangeId(),
-					'timestamp' => $stats->getMinChangeTimestamp(),
-				],
-				'newest' => [
-					'id' => $stats->getMaxChangeId(),
-					'timestamp' => $stats->getMaxChangeTimestamp(),
-				],
-				'freshest' => self::formatDispatchRow( $stats->getFreshest() ),
-				'median' => self::formatDispatchRow( $stats->getMedian() ),
-				'stalest' => self::formatDispatchRow( $stats->getStalest() ),
-				'average' => self::formatDispatchRow( $stats->getAverage() ),
-			];
 		}
 	}
 
@@ -1021,40 +1015,6 @@ final class RepoHooks {
 	}
 
 	/**
-	 * Handler for the ApiMaxLagInfo to add dispatching lag stats
-	 *
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ApiMaxLagInfo
-	 *
-	 * @param array &$lagInfo
-	 */
-	public static function onApiMaxLagInfo( array &$lagInfo ) {
-
-		$dispatchLagToMaxLagFactor = WikibaseRepo::getSettings()->getSetting(
-			'dispatchLagToMaxLagFactor'
-		);
-
-		if ( $dispatchLagToMaxLagFactor <= 0 ) {
-			return;
-		}
-
-		$stats = new DispatchStats( WikibaseRepo::getRepoDomainDbFactory()->newRepoDb() );
-		$stats->load();
-		$median = $stats->getMedian();
-
-		if ( $median ) {
-			$maxDispatchLag = $median->chd_lag / (float)$dispatchLagToMaxLagFactor;
-			if ( $maxDispatchLag > $lagInfo['lag'] ) {
-				$lagInfo = [
-					'host' => $median->chd_site,
-					'lag' => $maxDispatchLag,
-					'type' => 'wikibase-dispatching',
-					'dispatchLag' => $median->chd_lag,
-				];
-			}
-		}
-	}
-
-	/**
 	 * Handler for the ParserOptionsRegister hook to add a "wb" option for cache-splitting
 	 *
 	 * This registers a lazy-loaded parser option with its value being the EntityHandler
@@ -1181,5 +1141,25 @@ final class RepoHooks {
 			return;
 		}
 		$apiMain->getUser()->pingLimiter( RateLimitingIdGenerator::RATELIMIT_NAME, $idGeneratorInErrorPingLimiterValue );
+	}
+
+	/** @param ContentLanguages[] $contentLanguages */
+	public static function onWikibaseContentLanguages( array &$contentLanguages ): void {
+		if ( !WikibaseRepo::getSettings()->getSetting( 'tmpEnableMulLanguageCode' ) ) {
+			return;
+		}
+
+		if ( $contentLanguages[WikibaseContentLanguages::CONTEXT_TERM]->hasLanguage( 'mul' ) ) {
+			return;
+		}
+
+		$contentLanguages[WikibaseContentLanguages::CONTEXT_TERM] = new UnionContentLanguages(
+			$contentLanguages[WikibaseContentLanguages::CONTEXT_TERM],
+			new StaticContentLanguages( [ 'mul' ] )
+		);
+	}
+
+	public static function onMaintenanceShellStart(): void {
+		require_once __DIR__ . '/MaintenanceShellStart.php';
 	}
 }

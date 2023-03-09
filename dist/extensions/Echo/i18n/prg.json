@@ -5,5 +5,6 @@
 			"Tīgelika"
 		]
 	},
-	"prefs-echo": "Pawakīsenei"
+	"prefs-echo": "Pawakīsenei",
+	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Redigisnā|Redigīsnas}} na majjan diskusiōnis pāusan"
 }

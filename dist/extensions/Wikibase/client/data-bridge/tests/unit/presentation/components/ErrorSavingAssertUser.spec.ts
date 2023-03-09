@@ -1,11 +1,14 @@
 import MessageKeys from '@/definitions/MessageKeys';
 import ErrorSavingAssertUser from '@/presentation/components/ErrorSavingAssertUser.vue';
-import Vuex from 'vuex';
 import {
-	createLocalVue,
+	config,
 	shallowMount,
 } from '@vue/test-utils';
 import { createTestStore } from '../../../util/store';
+import { BridgeConfig } from '@/store/Application';
+import { nextTick } from 'vue';
+
+config.renderStubDefaultSlot = true;
 
 describe( 'ErrorSavingAssertUser', () => {
 	const stopAssertingUserWhenSaving = jest.fn();
@@ -17,10 +20,10 @@ describe( 'ErrorSavingAssertUser', () => {
 			retrySave,
 			goBackFromErrorToReady,
 		},
+		state: {
+			config: { usePublish: false } as BridgeConfig,
+		},
 	} );
-
-	const localVue = createLocalVue();
-	localVue.use( Vuex );
 
 	it( 'matches the snapshot', () => {
 		const $messages = {
@@ -32,7 +35,10 @@ describe( 'ErrorSavingAssertUser', () => {
 			propsData: {
 				loginUrl: 'https://data-bridge.test/Login',
 			},
-			mocks: { $messages },
+			global: {
+				mocks: { $messages },
+				plugins: [ store ],
+			},
 		} );
 
 		expect( wrapper.element ).toMatchSnapshot();
@@ -48,13 +54,15 @@ describe( 'ErrorSavingAssertUser', () => {
 			propsData: {
 				loginUrl: 'https://data-bridge.test/Login',
 			},
-			mocks: { $messages },
-			store,
-			localVue,
+			global: {
+				mocks: { $messages },
+				plugins: [ store ],
+			},
 		} );
-		const button = wrapper.find( '.wb-db-error-saving-assertuser__proceed' );
-		button.vm.$emit( 'click' );
-		await localVue.nextTick();
+
+		const button = wrapper.findComponent( '.wb-db-error-saving-assertuser__proceed' );
+		await button.vm.$emit( 'click' );
+		await nextTick();
 
 		expect( stopAssertingUserWhenSaving ).toHaveBeenCalledTimes( 1 );
 		expect( retrySave ).toHaveBeenCalledTimes( 1 );
@@ -74,13 +82,14 @@ describe( 'ErrorSavingAssertUser', () => {
 			propsData: {
 				loginUrl: 'https://data-bridge.test/Login',
 			},
-			mocks: { $messages },
-			store,
-			localVue,
+			global: {
+				mocks: { $messages },
+				plugins: [ store ],
+			},
 		} );
-		const button = wrapper.find( `.wb-db-error-saving-assertuser__${buttonName}` );
+		// @ts-ignore
+		const button = wrapper.findComponent( `.wb-db-error-saving-assertuser__${buttonName}` );
 		button.vm.$emit( 'click' );
-		await localVue.nextTick();
 
 		expect( goBackFromErrorToReady ).toHaveBeenCalledTimes( 1 );
 	} );
@@ -101,17 +110,19 @@ describe( 'ErrorSavingAssertUser', () => {
 			propsData: {
 				loginUrl: 'https://data-bridge.test/Login',
 			},
-			mocks: {
-				$bridgeConfig: { usePublish: false },
-				$messages: {
-					KEYS: MessageKeys,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$bridgeConfig: { usePublish: false },
+					$messages: {
+						KEYS: MessageKeys,
+						getText: messageGet,
+					},
 				},
+				plugins: [ store ],
 			},
-			store,
-			localVue,
 		} );
-		const button = wrapper.find( '.wb-db-error-saving-assertuser__proceed' );
+		// @ts-ignore
+		const button = wrapper.findComponent( '.wb-db-error-saving-assertuser__proceed' );
 
 		expect( messageGet ).toHaveBeenCalledWith( MessageKeys.SAVING_ERROR_ASSERTUSER_SAVE );
 		expect( button.props( 'message' ) ).toBe( saveMessage );
@@ -128,22 +139,33 @@ describe( 'ErrorSavingAssertUser', () => {
 				return '';
 			},
 		);
+		const localStore = createTestStore( {
+			actions: {
+				stopAssertingUserWhenSaving,
+				retrySave,
+				goBackFromErrorToReady,
+			},
+			state: {
+				config: { usePublish: true } as BridgeConfig,
+			},
+		} );
 
 		const wrapper = shallowMount( ErrorSavingAssertUser, {
 			propsData: {
 				loginUrl: 'https://data-bridge.test/Login',
 			},
-			mocks: {
-				$bridgeConfig: { usePublish: true },
-				$messages: {
-					KEYS: MessageKeys,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						getText: messageGet,
+					},
 				},
+				plugins: [ localStore ],
 			},
-			store,
-			localVue,
 		} );
-		const button = wrapper.find( '.wb-db-error-saving-assertuser__proceed' );
+		// @ts-ignore
+		const button = wrapper.findComponent( '.wb-db-error-saving-assertuser__proceed' );
 
 		expect( messageGet ).toHaveBeenCalledWith( MessageKeys.SAVING_ERROR_ASSERTUSER_PUBLISH );
 		expect( button.props( 'message' ) ).toBe( publishMessage );

@@ -26,7 +26,7 @@ class MathLaTeXML extends MathMathML {
 		global $wgMathLaTeXMLUrl;
 		parent::__construct( $tex, $params );
 		$this->host = $wgMathLaTeXMLUrl;
-		$this->setMode( 'latexml' );
+		$this->setMode( MathConfig::MODE_LATEXML );
 	}
 
 	/**
@@ -137,7 +137,7 @@ class MathLaTeXML extends MathMathML {
 						'host' => $this->host,
 						'result' => $requestStatus->getValue()
 					] );
-				return StatusValue::newFatal( 'math_invalidxml', $this->getModeStr(), $this->host );
+				return StatusValue::newFatal( 'math_invalidxml', $this->getModeName(), $this->host );
 			}
 			LoggerFactory::getInstance( 'Math' )
 				->warning( 'LaTeXML invalid JSON', [
@@ -146,7 +146,7 @@ class MathLaTeXML extends MathMathML {
 					'res' => $requestStatus->getValue()
 				] );
 
-			return StatusValue::newFatal( $this->getError( 'math_invalidjson', $this->getModeStr(), $this->host ) );
+			return StatusValue::newFatal( $this->getError( 'math_invalidjson', $this->getModeName(), $this->host ) );
 		} else {
 			return $requestStatus;
 		}
@@ -162,8 +162,8 @@ class MathLaTeXML extends MathMathML {
 
 	/**
 	 * Embeds the MathML-XML element in a HTML span element with class tex
-	 * @param string $mml : the MathML string
-	 * @param string $tagId : optional tagID for references like (pagename#equation2)
+	 * @param string $mml the MathML string
+	 * @param string $tagId optional tagID for references like (pagename#equation2)
 	 * @param array|false $attribs
 	 * @return string html element with rendered math
 	 */
@@ -187,7 +187,7 @@ class MathLaTeXML extends MathMathML {
 	public function calculateSvg() {
 		$renderer = new MathMathML( $this->getTex() );
 		$renderer->setMathml( $this->getMathml() );
-		$renderer->setMode( 'latexml' );
+		$renderer->setMode( MathConfig::MODE_LATEXML );
 		$res = $renderer->render( true );
 		if ( $res == true ) {
 			$this->setSvg( $renderer->getSvg() );
@@ -223,5 +223,3 @@ class MathLaTeXML extends MathMathML {
 		return 'mathlatexml';
 	}
 }
-
-class_alias( MathLaTeXML::class, 'MathLaTeXML' );

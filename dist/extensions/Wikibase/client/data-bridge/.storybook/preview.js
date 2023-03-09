@@ -1,11 +1,7 @@
 import extendVueEnvironment from '@/presentation/extendVueEnvironment';
 import './storybook-global.scss';
-import Vue from 'vue';
+import { app } from '@storybook/vue3';
 import messages from '@/mock-data/messages';
-
-Vue.config.warnHandler = ( err, _vm, trace ) => {
-	throw new Error( err + trace );
-};
 
 export const decorators = [
 	() => ( {
@@ -20,6 +16,7 @@ export const parameters = {
 };
 
 extendVueEnvironment(
+	app,
 	{
 		resolve( languageCode ) {
 			switch ( languageCode ) {
@@ -39,10 +36,6 @@ extendVueEnvironment(
 		getText: ( messageKey ) => {
 			return messages[ messageKey ] || `⧼${messageKey}⧽`;
 		},
-	},
-	{
-		usePublish: true,
-		issueReportingLink: 'https://example.com/issue/new?title=Bridge+error&description=<body>&tags=Wikidata-Bridge',
 	},
 	{
 		getPageUrl( title, params ) {

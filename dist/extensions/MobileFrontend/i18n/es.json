@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"-jem-",
 			"Amitie 10g",
 			"Armando-Martin",
 			"Awesomecat5",
@@ -42,7 +43,7 @@
 			"VegaDark",
 			"Vivaelcelta",
 			"WikiiiTranslator",
-			"-jem-"
+			"Francodiaz7"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Si un usuario está editando a través de la interfaz móvil",
@@ -52,8 +53,6 @@
 	"mobile-frontend-cite-error": "Ocurrió un error al intentar cargar las citas debido a un identificador de revisión incorrecto.",
 	"mobile-frontend-cite-none-available": "No hay citas disponibles para esta página.",
 	"mobile-frontend-clear-search": "Limpiar",
-	"mobile-frontend-contributions-404-desc": "No se pueden buscar contribuciones sin usuario o con un usuario que no existe",
-	"mobile-frontend-contributions-404-title": "Usuario incorrecto",
 	"mobile-frontend-copyright": "El contenido está disponible bajo la licencia $1, salvo que se indique lo contrario.",
 	"mobile-frontend-desc": "Interfaz móvil",
 	"mobile-frontend-diffview-404-desc": "El identificador de la revisión solicitada no existe. <br/> Esto generalmente se debe a que sigue un enlace de diff desactualizado a una página que ha sido eliminada o un enlace de diffs que contiene caracteres no válidos.",
@@ -83,7 +82,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "Ver más",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Razón",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|Bloqueado|Bloqueada}} por",
-	"mobile-frontend-editor-blocked-drawer-expiry-header": "El bloqueo caducará el",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "El bloqueo caducará",
 	"mobile-frontend-editor-blocked-drawer-help": "Ver detalles",
 	"mobile-frontend-editor-generic-block-reason": "Motivo desconocido",
 	"mobile-frontend-editor-cancel": "Cancelar",
@@ -193,7 +192,6 @@
 	"mobile-frontend-references-citation-error": "Ocurrió un error y no se pudo cargar esta cita.",
 	"mobile-frontend-references-list": "Ver la lista completa de citas",
 	"mobile-frontend-requires-mobile": "Esta página solo está disponible para dispositivos móviles. Por favor, haz clic en el enlace de versión para móviles en la parte inferior de la página.",
-	"mobile-frontend-requires-optin": "Esta página no está disponible a menos que actives nuestro modo beta. Visita la [[Special:MobileOptions|página de configuración]] para activarlo.",
 	"mobile-frontend-requires-title": "Página no disponible",
 	"mobile-frontend-return-to-page": "Volver a la página",
 	"mobile-frontend-save-error": "Error al guardar la configuración. Asegúrate de que las «cookies» estén activadas.",

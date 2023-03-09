@@ -1,6 +1,5 @@
 ---
-mediawikiVersion: "1.37"
-mediawikiRepoRef: e1239b16705b192252f795698629d62ed9b2b93a
+mediawikiVersion: "1.38"
 mediawikiRemove:
   - docs
   - extensions/README
@@ -50,10 +49,8 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-CirrusSearch
   - name: WikibaseCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseCirrusSearch
-    repoRef: wmf/1.38.0-wmf.3
   - name: WikibaseLexemeCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch
-    repoRef: wmf/1.38.0-wmf.3
   - name: UniversalLanguageSelector
     repoName: wikimedia/mediawiki-extensions-UniversalLanguageSelector
   - name: cldr
@@ -68,7 +65,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-OAuth
   - name: WikibaseLexeme
     repoName: wikimedia/mediawiki-extensions-WikibaseLexeme
-    repoRef: wmf/1.38.0-wmf.3
   - name: SyntaxHighlight_GeSHi
     repoName: wikimedia/mediawiki-extensions-SyntaxHighlight_GeSHi
   - name: JsonConfig
@@ -127,7 +123,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-Popups
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
-    repoRef: wmf/1.38.0-wmf.3
   ## These extensions should not currently use the mediawikiVersion
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
@@ -145,7 +140,7 @@ extensions:
   # Using our own archive repo temporarily for our Federated Properties endeavour
   # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/main/wikibase-feddy-props-1668.tar.gz
+    repoName: wikimedia/mediawiki-extensions-Wikibase
     remove:
       - build
       - vendor

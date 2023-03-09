@@ -47,7 +47,7 @@ class AccountConfirmSubmission {
 				$context->msg( 'badaccess-group0' )->escaped(),
 				null
 			];
-		} elseif ( wfReadOnly() ) {
+		} elseif ( MediaWikiServices::getInstance()->getReadOnlyMode()->isReadOnly() ) {
 			return [
 				'accountconf_readonly',
 				$context->msg( 'badaccess-group0' )->escaped(),
@@ -231,7 +231,7 @@ class AccountConfirmSubmission {
 		# Grant any necessary rights (exclude blank or dummy groups)
 		$group = self::getGroupFromType( $this->type );
 		if ( $group != '' && $group != 'user' && $group != '*' ) {
-			$user->addGroup( $group );
+			MediaWikiServices::getInstance()->getUserGroupManager()->addUserToGroup( $user, $group );
 		}
 
 		$acd_id = null; // used for rollback cleanup

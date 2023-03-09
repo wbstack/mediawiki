@@ -31,7 +31,6 @@
 
 namespace MediaWiki\Extension\TorBlock;
 
-use AbuseFilterVariableHolder;
 use Html;
 use MediaWiki\Block\AbstractBlock;
 use MediaWiki\Block\CompositeBlock;
@@ -164,31 +163,6 @@ class Hooks implements
 			return false;
 		}
 
-		return true;
-	}
-
-	/**
-	 * Set a variable for Extension:AbuseFilter indicating whether the
-	 * user is operating from a tor exit node or not.
-	 *
-	 * @param AbuseFilterVariableHolder &$vars Variable holder for AbuseFilter
-	 * @param Title $title Title being viewed
-	 * @return bool
-	 */
-	public static function onAbuseFilterFilterAction( &$vars, $title ) {
-		$vars->setVar( 'tor_exit_node', TorExitNodes::isExitNode() );
-		return true;
-	}
-
-	/**
-	 * Set a variable for Extension:AbuseFilter indicating whether the
-	 * user is operating from a tor exit node or not.
-	 *
-	 * @param array &$builder Array of builder values
-	 * @return bool
-	 */
-	public static function onAbuseFilterBuilder( array &$builder ) {
-		$builder['vars']['tor_exit_node'] = 'tor-exit-node';
 		return true;
 	}
 

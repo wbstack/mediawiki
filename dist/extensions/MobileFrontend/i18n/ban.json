@@ -3,8 +3,8 @@
 		"authors": [
 			"Carma citrawati",
 			"Chinamoonroll",
-			"NoiX180",
-			"Joseagush"
+			"Joseagush",
+			"NoiX180"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Nentuang napiké sang anganggé nguahin saking tampilan sélulér utawi nénten",
@@ -14,8 +14,6 @@
 	"mobile-frontend-cite-error": "Kawéntenan pikobet rikala ngamuat pustaka mawinan wénten ID répisi sané iwang",
 	"mobile-frontend-cite-none-available": "Nénten wénten pustaka kasedia antuk kaca puniki.",
 	"mobile-frontend-clear-search": "Resikin",
-	"mobile-frontend-contributions-404-desc": "Nénten prasida ngarereh punia tanpa sang anganggé utawi saking sang anganggé sané nénten wénten.",
-	"mobile-frontend-contributions-404-title": "Wastan sang anganggé sané kaicayang iwang",
 	"mobile-frontend-copyright": "Daging kasayagayang ring sor $1 ritatkala nénten wénten uahan.",
 	"mobile-frontend-desc": "Muka untat Mobile",
 	"mobile-frontend-diffview-404-desc": "ID antuk répisi sané ida tunas nénten wénten.<br />Ketah ipun mawinan olih pranala diff sané sampun kuna ring kaca sané sampun kaapus utawi pranala diff sané kawéntenang aksara nénten patut.",
@@ -46,7 +44,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "Cingak malih",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Hawanan",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|Kablokir}} olih",
-	"mobile-frontend-editor-blocked-drawer-expiry-header": "Blokir pacang kedaluwarsa ring",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "Blokir pacang kadaluwarsa",
 	"mobile-frontend-editor-blocked-drawer-help": "Cingak rerincian",
 	"mobile-frontend-editor-generic-block-reason": "Hawanan nénten kauningin",
 	"mobile-frontend-editor-cancel": "Wangdé",
@@ -156,7 +154,6 @@
 	"mobile-frontend-references-citation-error": "Kawénten galat punika nénten prasida ngamuat pustaka puniki.",
 	"mobile-frontend-references-list": "Cingak lis pustaka jangkep",
 	"mobile-frontend-requires-mobile": "Kaca puniki nénten kasedia ring tampilan PC. Durusang klik pranala tampilan HP ring wagian metén kaca.",
-	"mobile-frontend-requires-optin": "Kaca puniki tan kasedia tiosan Ida sareng ring  mode béta iraga. Rauhin [[Special:MobileOptions|kaca setélan]] antuk nyarengin mode beta.",
 	"mobile-frontend-requires-title": "Kaca nénten kasedia",
 	"mobile-frontend-return-to-page": "Walik nuju kaca",
 	"mobile-frontend-save-error": "Galat nyimpen pangaturan. Pastika ida sampun nguripang kuki.",

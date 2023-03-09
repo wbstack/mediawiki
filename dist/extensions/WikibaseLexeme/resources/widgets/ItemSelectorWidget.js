@@ -1,6 +1,3 @@
-/**
- * @external LexemeLanguageFieldObserver
- */
 ( function ( wb ) {
 	'use strict';
 
@@ -89,7 +86,7 @@
 		},
 
 		/**
-		 * @see OO.ui.mixin.LookupElement.prototype.getLookupRequest
+		 * @inheritdoc OO.ui.mixin.LookupElement
 		 */
 		getLookupRequest: function () {
 			var term = this.getValue(),
@@ -124,16 +121,14 @@
 		},
 
 		/**
-		 * @param response
-		 * @see OO.ui.mixin.LookupElement.prototype.getLookupCacheDataFromResponse
+		 * @inheritdoc OO.ui.mixin.LookupElement
 		 */
 		getLookupCacheDataFromResponse: function ( response ) {
 			return response || [];
 		},
 
 		/**
-		 * @param data
-		 * @see OO.ui.mixin.LookupElement.prototype.getLookupMenuOptionsFromData
+		 * @inheritdoc OO.ui.mixin.LookupElement
 		 */
 		getLookupMenuOptionsFromData: function ( data ) {
 			var items = [],
@@ -163,8 +158,7 @@
 		},
 
 		/**
-		 * @param item
-		 * @see OO.ui.mixin.LookupElement.prototype.onLookupMenuChoose
+		 * @inheritdoc OO.ui.mixin.LookupElement
 		 */
 		onLookupMenuChoose: function ( item ) {
 			this.setValue( item.getLabel() );
@@ -176,7 +170,7 @@
 		},
 
 		/**
-		 * @see OO.ui.TextInputWidget.prototype.onChange
+		 * @inheritdoc OO.ui.TextInputWidget
 		 */
 		onChange: function () {
 			if ( this.$valueField.val() !== '' ) {

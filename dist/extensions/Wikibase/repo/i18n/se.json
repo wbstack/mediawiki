@@ -1,12 +1,40 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yupik"
+			"Yupik",
+			"Trondtr",
+			"Kimberli Mäkäräinen (WMNO)"
 		]
 	},
+	"wikibase-entity-property": "Iešvuohta",
+	"wikibase-edit": "rievdat",
+	"wikibase-save": "vurke",
+	"wikibase-cancel": "šluhtte",
+	"wikibase-add": "lasit",
+	"wikibase-addreference": "lasit gáldu",
 	"wikibase-entitytermsview-entitytermsforlanguagelistview-toggler": "Eará gielaide",
+	"wikibase-entitytermsforlanguagelistview-description": "Govvádus",
+	"wikibase-entitytermsforlanguagelistview-label": "Namma",
 	"wikibase-entitytermsforlanguagelistview-language": "Giella",
 	"wikibase-content-language-edit-label": "Giella:",
+	"wikibase-diffview-reference": "gáldu",
+	"wikibase-diffview-label": "namma",
 	"wikibase-diffview-link": "liŋkkat",
-	"wikibase-newentity-language": "Giella:"
+	"wikibase-remove": "sihko",
+	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|gáldu}}",
+	"wikibase-snakview-property-input-placeholder": "Iešvuohta",
+	"wikibase-snakview-variations-somevalue-label": "dovdameahttun árvu",
+	"wikibase-itembytitle-submit": "Oza",
+	"wikibase-itemdisambiguation-lookup-language": "Giellakoda:",
+	"wikibase-itemdisambiguation-lookup-label": "Namma:",
+	"wikibase-itemdisambiguation-submit": "Oza",
+	"wikibase-newentity-language": "Giella:",
+	"wikibase-newentity-label": "Namma:",
+	"wikibase-setlabel-label": "Namma:",
+	"wikibase-setlabeldescriptionaliases-label-label": "Namma:",
+	"wikibase-modifyterm-language": "Giellakoda:",
+	"wikibase-listdatatypes-wikibase-property-head": "Iešvuohta",
+	"wikibase-federated-properties-leaving-site-notice-cancel": "Šluhtte",
+	"wikibase-federated-properties-leaving-site-notice-checkbox-label": "Ale čájet dán dieđu fas",
+	"wikibase-federated-properties-edit-request-failed-notice-try-again": "Geahččal fas"
 }

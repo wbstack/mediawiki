@@ -35,26 +35,28 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { defineComponent } from 'vue';
 import EventEmittingButton from '@/presentation/components/EventEmittingButton.vue';
 import IconMessageBox from '@/presentation/components/IconMessageBox.vue';
 
-@Component( {
+export default defineComponent( {
+	name: 'WarningAnonymousEdit',
 	components: {
 		EventEmittingButton,
 		IconMessageBox,
 	},
-} )
-export default class WarningAnonymousEdit extends Vue {
-	@Prop( { required: true, type: String } )
-	public loginUrl!: string;
-
-	private proceed(): void {
-		this.$emit( 'proceed' );
-	}
-}
+	props: {
+		loginUrl: {
+			type: String,
+			required: true,
+		},
+	},
+	methods: {
+		proceed(): void {
+			this.$emit( 'proceed' );
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

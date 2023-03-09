@@ -28,9 +28,9 @@ describe( 'PropertyLabel', () => {
 			},
 		} );
 
-		const termLabelWrapper = wrapper.find( 'label' ).find( TermLabel );
+		const termLabelWrapper = wrapper.find( 'label' ).findComponent( TermLabel );
 		expect( termLabelWrapper.exists() ).toBe( true );
-		expect( termLabelWrapper.props( 'term' ) ).toBe( enTerm );
+		expect( termLabelWrapper.props( 'term' ) ).toStrictEqual( enTerm );
 	} );
 
 	it( 'sets the for attribute', () => {

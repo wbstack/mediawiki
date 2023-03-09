@@ -20,6 +20,7 @@
  * @file
  */
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserIdentity;
 
 /**
@@ -137,7 +138,9 @@ class UploadStash {
 			$this->initFile( $key );
 
 			// fetch fileprops
-			if ( strlen( $this->fileMetadata[$key]['us_props'] ) ) {
+			if (
+				isset( $this->fileMetadata[$key]['us_props'] ) && strlen( $this->fileMetadata[$key]['us_props'] )
+			) {
 				$this->fileProps[$key] = unserialize( $this->fileMetadata[$key]['us_props'] );
 			} else { // b/c for rows with no us_props
 				wfDebug( __METHOD__ . " fetched props for $key from file" );
@@ -207,7 +210,7 @@ class UploadStash {
 			);
 		}
 
-		$mwProps = new MWFileProps( MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer() );
+		$mwProps = new MWFileProps( MediaWikiServices::getInstance()->getMimeAnalyzer() );
 		$fileProps = $mwProps->getPropsFromPath( $path, true );
 		wfDebug( __METHOD__ . " stashing file at '$path'" );
 
@@ -228,7 +231,7 @@ class UploadStash {
 		list( $usec, $sec ) = explode( ' ', microtime() );
 		$usec = substr( $usec, 2 );
 		$key = Wikimedia\base_convert( $sec . $usec, 10, 36 ) . '.' .
-			Wikimedia\base_convert( mt_rand(), 10, 36 ) . '.' .
+			Wikimedia\base_convert( (string)mt_rand(), 10, 36 ) . '.' .
 			$this->user->getId() . '.' .
 			$extension;
 
@@ -472,7 +475,8 @@ class UploadStash {
 	 * @return string
 	 */
 	public static function getExtensionForPath( $path ) {
-		global $wgProhibitedFileExtensions;
+		$prohibitedFileExtensions = MediaWikiServices::getInstance()
+			->getMainConfig()->get( 'ProhibitedFileExtensions' );
 		// Does this have an extension?
 		$n = strrpos( $path, '.' );
 
@@ -480,13 +484,13 @@ class UploadStash {
 			$extension = $n ? substr( $path, $n + 1 ) : '';
 		} else {
 			// If not, assume that it should be related to the MIME type of the original file.
-			$magic = MediaWiki\MediaWikiServices::getInstance()->getMimeAnalyzer();
+			$magic = MediaWikiServices::getInstance()->getMimeAnalyzer();
 			$mimeType = $magic->guessMimeType( $path );
-			$extension = $magic->getExtensionFromMimeTypeOrNull( $mimeType );
+			$extension = $magic->getExtensionFromMimeTypeOrNull( $mimeType ) ?? '';
 		}
 
 		$extension = File::normalizeExtension( $extension );
-		if ( in_array( $extension, $wgProhibitedFileExtensions ) ) {
+		if ( in_array( $extension, $prohibitedFileExtensions ) ) {
 			// The file should already be checked for being evil.
 			// However, if somehow we got here, we definitely
 			// don't want to give it an extension of .php and

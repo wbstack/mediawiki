@@ -1,9 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Vickylin77s"
+			"Vickylin77s",
+			"Amire80"
 		]
 	},
 	"advancedsearch-namespaces-preset-all": "Maemin/po:long",
-	"advancedsearch-namespaces-preset-discussion": " malalicay"
+	"advancedsearch-namespaces-preset-discussion": "malalicay"
 }

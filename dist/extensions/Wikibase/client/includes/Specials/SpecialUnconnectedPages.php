@@ -6,13 +6,12 @@ use Html;
 use NamespaceInfo;
 use QueryPage;
 use Skin;
-use Title;
 use TitleFactory;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Rdbms\ClientDomainDbFactory;
+use Wikibase\Lib\SettingsArray;
 use Wikimedia\Rdbms\FakeResultWrapper;
-use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -42,11 +41,15 @@ class SpecialUnconnectedPages extends QueryPage {
 	/** @var ClientDomainDb */
 	private $db;
 
+	/** @var int */
+	private $unconnectedPagePagePropMigrationStage;
+
 	public function __construct(
 		NamespaceInfo $namespaceInfo,
 		TitleFactory $titleFactory,
 		ClientDomainDbFactory $db,
-		NamespaceChecker $namespaceChecker
+		NamespaceChecker $namespaceChecker,
+		SettingsArray $settings
 	) {
 		parent::__construct( 'UnconnectedPages' );
 		$this->namespaceInfo = $namespaceInfo;
@@ -54,6 +57,7 @@ class SpecialUnconnectedPages extends QueryPage {
 		$this->namespaceChecker = $namespaceChecker;
 		$this->db = $db->newLocalDb();
 		$this->setDBLoadBalancer( $this->db->loadBalancer() );
+		$this->unconnectedPagePagePropMigrationStage = $settings->getSetting( 'tmpUnconnectedPagePagePropMigrationStage' );
 	}
 
 	/**
@@ -76,25 +80,26 @@ class SpecialUnconnectedPages extends QueryPage {
 
 	/**
 	 * Build conditionals for namespace
-	 *
-	 * @param IDatabase $dbr
-	 * @param Title|null $title
-	 *
-	 * @return string[]
 	 */
-	public function buildConditionals( IDatabase $dbr, Title $title = null ) {
+	public function buildNamespaceConditionals(): array {
 		$conds = [];
 
-		if ( $title !== null ) {
-			$conds[] = 'page_title >= ' . $dbr->addQuotes( $title->getDBkey() );
-			$conds[] = 'page_namespace = ' . $title->getNamespace();
-		}
 		$wbNamespaces = $this->namespaceChecker->getWikibaseNamespaces();
 		$ns = $this->getRequest()->getIntOrNull( 'namespace' );
-		if ( $ns !== null && in_array( $ns, $wbNamespaces ) ) {
-			$conds[] = 'page_namespace = ' . $ns;
+
+		if ( $this->unconnectedPagePagePropMigrationStage >= MIGRATION_NEW ) {
+			if ( $ns !== null && in_array( $ns, $wbNamespaces ) ) {
+				$conds['pp_sortkey'] = $ns;
+			} else {
+				$conds['pp_sortkey'] = $wbNamespaces;
+			}
 		} else {
-			$conds[] = 'page_namespace IN (' . implode( ',', $wbNamespaces ) . ')';
+			// b/c: We can't yet use the new "unexpectedUnconnectedPage" page property.
+			if ( $ns !== null && in_array( $ns, $wbNamespaces ) ) {
+				$conds['page_namespace'] = $ns;
+			} else {
+				$conds['page_namespace'] = $wbNamespaces;
+			}
 		}
 
 		return $conds;
@@ -106,11 +111,26 @@ class SpecialUnconnectedPages extends QueryPage {
 	 * @return array[]
 	 */
 	public function getQueryInfo() {
-		$dbr = $this->db->connections()->getReadConnectionRef();
+		$conds = $this->buildNamespaceConditionals();
 
-		$conds = $this->buildConditionals( $dbr );
-		$conds['page_is_redirect'] = 0;
-		$conds[] = 'pp_propname IS NULL';
+		$joinConds = [
+			'page_props' => [
+				'INNER JOIN',
+				[ 'page_id = pp_page', 'pp_propname' => 'unexpectedUnconnectedPage' ]
+			],
+		];
+
+		if ( $this->unconnectedPagePagePropMigrationStage < MIGRATION_NEW ) {
+			// b/c: We can't yet use the new "unexpectedUnconnectedPage" page property.
+			$conds['page_is_redirect'] = 0;
+			$conds['pp_propname'] = null;
+			$joinConds = [
+				'page_props' => [
+					'LEFT JOIN',
+					[ 'page_id = pp_page', 'pp_propname' => [ 'wikibase_item', 'expectedUnconnectedPage' ] ]
+				],
+			];
+		}
 
 		return [
 			'tables' => [
@@ -121,20 +141,11 @@ class SpecialUnconnectedPages extends QueryPage {
 				'value' => 'page_id',
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
-				// Placeholder, we'll get this from page_props in the future.
-				'page_num_iwlinks' => '0',
 			],
 			'conds' => $conds,
 			// Sorting is determined getOrderFields(), which returns [ 'value' ] per default.
 			'options' => [],
-			'join_conds' => [
-				// TODO Also get explicit_langlink_count from page_props once that is populated.
-				// Could even filter or sort by it via pp_sortkey.
-				'page_props' => [
-					'LEFT JOIN',
-					[ 'page_id = pp_page', 'pp_propname' => [ 'wikibase_item', 'expectedUnconnectedPage' ] ]
-				],
-			]
+			'join_conds' => $joinConds,
 		];
 	}
 
@@ -168,14 +179,7 @@ class SpecialUnconnectedPages extends QueryPage {
 			return false;
 		}
 
-		$out = $this->getLinkRenderer()->makeKnownLink( $title );
-
-		if ( $result->page_num_iwlinks > 0 ) {
-			$out .= ' ' . $this->msg( 'wikibase-unconnectedpages-format-row' )
-				->numParams( $result->page_num_iwlinks )->text();
-		}
-
-		return $out;
+		return $this->getLinkRenderer()->makeKnownLink( $title );
 	}
 
 	/**
@@ -192,12 +196,20 @@ class SpecialUnconnectedPages extends QueryPage {
 		$limit = $this->getRequest()->getIntOrNull( 'limit' );
 		$ns = $this->getRequest()->getIntOrNull( 'namespace' );
 
+		$titleInputHtml = '';
+		$articlePath = $this->getConfig()->get( 'ArticlePath' );
+		if ( strpos( $articlePath, '?' ) !== false ) {
+			// Adopted from HTMLForm::getHiddenFields
+			$titleInputHtml = Html::hidden( 'title', $this->getFullTitle()->getPrefixedText() ) . "\n";
+		}
+
 		return Html::openElement(
 			'form',
 			[
 				'action' => $this->getPageTitle()->getLocalURL()
 			]
 		) .
+		$titleInputHtml .
 		( $limit === null ? '' : Html::hidden( 'limit', $limit ) ) .
 		Html::namespaceSelector( [
 			'selected' => $ns === null ? '' : $ns,

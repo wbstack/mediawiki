@@ -30,7 +30,7 @@
 	"twocolconflict-split-tour-dialog-header": "競合している版を統合する",
 	"twocolconflict-split-tour-dialog-message": "あいにく、あなたの編集作業中にほかの利用者も同時に編集をして、先に保存したようです。\nご心配は無用です、あなたの編集内容は消えていません。2つの版を読み比べて統合してください。必要に応じて、文を選択し編集ができます。「{{int:publishchanges}}」を押すと、選択したボックス内の文のみ保存されます。",
 	"twocolconflict-split-tour-dialog-btn-text": "統合作業を開始する",
-	"twocolconflict-split-tour-popup-btn-text": "了承ました。",
+	"twocolconflict-split-tour-popup-btn-text": "了解しました。",
 	"twocolconflict-split-tour-popup1-header": "差分は行ごとに表示されます。",
 	"twocolconflict-split-tour-popup1-message": "ほかの利用者の文があなたの文と異なる部分は、それぞれの版を左右に対照して表示します。左側の黄色い枠線内がほかの利用者の版で、あなたの版は右側の青い枠線内に表示されます。<br /><br />枠線がグレーの部分は、両者の文の間に変更がありません。必要に応じて、枠を展開したり折りたたんだり、編集したりできます。",
 	"twocolconflict-split-tour-popup2-header": "どちらの版を残したいか選ぶ",

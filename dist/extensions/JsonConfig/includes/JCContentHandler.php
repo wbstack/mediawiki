@@ -4,7 +4,9 @@ namespace JsonConfig;
 
 use Content;
 use FormatJson;
+use MediaWiki\Content\Renderer\ContentParseParams;
 use MediaWiki\Content\Transform\PreSaveTransformParams;
+use ParserOutput;
 use TextContentHandler;
 
 /**
@@ -155,5 +157,42 @@ class JCContentHandler extends TextContentHandler {
 			return new $contentClass( $formatted, $content->getModel(), $content->thorough() );
 		}
 		return $content;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function fillParserOutput(
+		Content $content,
+		ContentParseParams $cpoParams,
+		ParserOutput &$output
+	) {
+		'@phan-var JCContent $content';
+		$page = $cpoParams->getPage();
+		$generateHtml = $cpoParams->getGenerateHtml();
+		$revId = $cpoParams->getRevId();
+		$parserOptions = $cpoParams->getParserOptions();
+		if ( !$generateHtml ) {
+			return;
+		}
+
+		$status = $content->getStatus();
+		if ( !$status->isGood() ) {
+			// Use user's language, and split parser cache.  This should not have a big
+			// impact because data namespace is rarely viewed, but viewing it localized
+			// will be valuable
+			$lang = $parserOptions->getUserLangObj();
+			$html = $status->getHTML( false, false, $lang );
+		} else {
+			$html = '';
+		}
+
+		if ( $status->isOK() ) {
+			$html .= $content
+				->getView( $content->getModel() )
+				->valueToHtml( $content, $page, $revId, $parserOptions, $generateHtml, $output );
+		}
+
+		$output->setText( $html );
 	}
 }

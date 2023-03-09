@@ -15,20 +15,6 @@
 	"requires": {
 		"MediaWiki": ">= 1.36.0"
 	},
-	"AutoloadClasses": {
-		"MathDataUpdater": "src/MathDataUpdater.php",
-		"MathHooks": "src/Hooks.php",
-		"MathLaTeXML": "src/MathLaTeXML.php",
-		"MathMathML": "src/MathMathML.php",
-		"MathRenderer": "src/MathRenderer.php",
-		"MathRestbaseInterface": "src/MathRestbaseInterface.php",
-		"MediaWiki\\Extension\\Math\\MathDataUpdater": "src/MathDataUpdater.php",
-		"MediaWiki\\Extension\\Math\\Hooks": "src/Hooks.php",
-		"MediaWiki\\Extension\\Math\\MathLaTeXML": "src/MathLaTeXML.php",
-		"MediaWiki\\Extension\\Math\\MathMathML": "src/MathMathML.php",
-		"MediaWiki\\Extension\\Math\\MathRenderer": "src/MathRenderer.php",
-		"MediaWiki\\Extension\\Math\\MathRestbaseInterface": "src/MathRestbaseInterface.php"
-	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\Math\\": "src/"
 	},
@@ -50,14 +36,21 @@
 				"Math.RendererFactory",
 				"UserOptionsLookup"
 			]
+		},
+		"PreferencesHooksHandler": {
+			"class": "MediaWiki\\Extension\\Math\\HookHandlers\\PreferencesHooksHandler",
+			"services": [
+				"Math.Config"
+			]
 		}
 	},
 	"Hooks": {
 		"ParserFirstCallInit": "ParserHooksHandler",
 		"ParserAfterTidy": "ParserHooksHandler",
-		"GetPreferences": "MediaWiki\\Extension\\Math\\Hooks::onGetPreferences",
+		"ParserOptionsRegister": "ParserHooksHandler",
+		"GetPreferences": "PreferencesHooksHandler",
+		"UserGetDefaultOptions": "PreferencesHooksHandler",
 		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\Math\\Hooks::onLoadExtensionSchemaUpdates",
-		"PageRenderingHash": "MediaWiki\\Extension\\Math\\Hooks::onPageRenderingHash",
 		"WikibaseClientDataTypes": "MediaWiki\\Extension\\Math\\WikibaseHook::onWikibaseClientDataTypes",
 		"WikibaseRepoDataTypes": "MediaWiki\\Extension\\Math\\WikibaseHook::onWikibaseRepoDataTypes",
 		"SpecialPage_initList": "MediaWiki\\Extension\\Math\\Hooks::onSpecialPageInitList",
@@ -91,7 +84,7 @@
 			}
 		},
 		"MathDisableTexFilter": {
-			"description": "To access this at run-time, use MathRenderer::getDisableTexFilter(). Do not use the non-normalized configuration directly.",
+			"description": "To access this at run-time, use MathConfig::texCheckDisabled(). Do not use the non-normalized configuration directly.",
 			"value": "new"
 		},
 		"MathEnableExperimentalInputFormats": {
@@ -119,7 +112,7 @@
 			"value": false
 		},
 		"MathValidModes": {
-			"description": "To access this at run-time, use MathRenderer::getValidModes(). Do not use the non-normalized configuration directly.",
+			"description": "To access this at run-time, use MathConfig::getValidRenderingModes(). Do not use the non-normalized configuration directly.",
 			"value": [
 				"png",
 				"source",
@@ -307,12 +300,14 @@
 		"MathShowImage": {
 			"class": "MediaWiki\\Extension\\Math\\SpecialMathShowImage",
 			"services": [
+				"Math.Config",
 				"Math.RendererFactory"
 			]
 		},
 		"MathStatus": {
 			"class": "MediaWiki\\Extension\\Math\\SpecialMathStatus",
 			"services": [
+				"Math.Config",
 				"Math.RendererFactory"
 			]
 		},

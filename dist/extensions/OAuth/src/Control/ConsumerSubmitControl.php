@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Control;
+namespace MediaWiki\Extension\OAuth\Control;
 
 use Composer\Semver\VersionParser;
 use EchoEvent;
@@ -10,16 +10,15 @@ use FormatJson;
 use IContextSource;
 use LogicException;
 use ManualLogEntry;
-use MediaWiki\Extensions\OAuth\Backend\Consumer;
-use MediaWiki\Extensions\OAuth\Backend\ConsumerAcceptance;
-use MediaWiki\Extensions\OAuth\Backend\MWOAuthDataStore;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Entity\ClientEntity;
+use MediaWiki\Extension\OAuth\Backend\Consumer;
+use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
+use MediaWiki\Extension\OAuth\Backend\MWOAuthDataStore;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Entity\ClientEntity;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use MWCryptRand;
 use MWException;
-use MWGrants;
 use Sanitizer;
 use SpecialPage;
 use Title;
@@ -107,7 +106,7 @@ class ConsumerSubmitControl extends SubmitControl {
 		];
 
 		$validateBlobSize = static function ( $s ) {
-			return strlen( $s ) < self::BLOB_SIZE;
+			return strlen( $s ?? '' ) < self::BLOB_SIZE;
 		};
 
 		return [
@@ -127,7 +126,7 @@ class ConsumerSubmitControl extends SubmitControl {
 					}
 				},
 				'callbackUrl' => static function ( $s, $vals ) {
-					if ( strlen( $s ) > 2000 ) {
+					if ( strlen( $s ?? '' ) > 2000 ) {
 						return false;
 					}
 					return $vals['ownerOnly'] || wfParseUrl( $s ) !== false;
@@ -175,12 +174,13 @@ class ConsumerSubmitControl extends SubmitControl {
 	protected function checkBasePermissions() {
 		global $wgBlockDisablesLogin;
 		$user = $this->getUser();
+		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
 		if ( !$user->getId() ) {
 			return $this->failure( 'not_logged_in', 'badaccess-group0' );
 		} elseif ( $user->isLocked() || $wgBlockDisablesLogin && $user->getBlock() ) {
 			return $this->failure( 'user_blocked', 'badaccess-group0' );
-		} elseif ( wfReadOnly() ) {
-			return $this->failure( 'readonly', 'readonlytext', wfReadOnlyReason() );
+		} elseif ( $readOnlyMode->isReadOnly() ) {
+			return $this->failure( 'readonly', 'readonlytext', $readOnlyMode->getReason() );
 		} elseif ( !Utils::isCentralWiki() ) {
 			// This logs consumer changes to the local logging table on the central wiki
 			throw new LogicException( "This can only be used from the OAuth management wiki." );
@@ -257,7 +257,9 @@ class ConsumerSubmitControl extends SubmitControl {
 				case 'normal':
 					$grants = array_unique( array_merge(
 						// implied grants
-						MWGrants::getHiddenGrants(),
+						MediaWikiServices::getInstance()
+							->getGrantsInfo()
+							->getHiddenGrants(),
 						FormatJson::decode( $this->vals['grants'], true )
 					) );
 					break;

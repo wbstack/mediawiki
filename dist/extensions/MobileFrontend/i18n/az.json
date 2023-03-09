@@ -42,6 +42,7 @@
 	"mobile-frontend-editor-summary-request": "Məqalədə hansı dəyişiklikləri etdiniz?",
 	"mobile-frontend-editor-summary": "Dəyişikliyin xülasəsi:",
 	"mobile-frontend-editor-viewing-source-page": "<span>$1 </span><strong>səhifəsinin mənbəsinə bax</strong>",
+	"mobile-frontend-editor-loading": "Redaktor yüklənir…",
 	"mobile-frontend-expand-sections-description": "Susmaya görə hər zaman bütün səhifələrin bölmələrini genişlət.",
 	"mobile-frontend-expand-sections-status": "Bütün bölmələri genişlət",
 	"mobile-frontend-fontchanger-link": "Şrift ölçüsü",
@@ -86,6 +87,9 @@
 	"mobile-frontend-privacy-link-text": "Məxfilik",
 	"mobile-frontend-references-citation": "İstinad",
 	"mobile-frontend-return-to-page": "Səhifəyə qayıt",
+	"mobile-frontend-search-content": "Səhifələr arasından axtar",
+	"mobile-frontend-search-content-no-results": "Bu ifadənin başqa hansısa səhifədə olub-olmadığını görmək üçün <b>{{lcfirst:{{int:mobile-frontend-search-content}}}}</b>.",
+	"mobile-frontend-search-no-results": "Bu adda səhifə yoxdur.",
 	"mobile-frontend-settings-tagline": "Oxu seçimləri",
 	"mobile-frontend-settings-save": "Nizamlamalar yadda saxlanıldı.",
 	"mobile-frontend-talk-add-overlay-content-placeholder": "Nə düşünürsən?",
@@ -116,5 +120,6 @@
 	"mobile-frontend-mobile-option-MFEnableFontChanger": "Şrift ölçüsü",
 	"mobile-frontend-mobile-option-amc": "Təkmilləşdirilmiş rejim",
 	"mobile-frontend-mobile-option-amc-experiment-description": "Təkmilləşdirilmiş rejim müzakirə səhifələrinə, səhifə tarixçələrinə, istifadəçi alətlərinə və digər redaktə vasitələrinə asanlıqla girişi təmin edir.",
-	"mobile-frontend-mobile-option-amc-learn-more": "Daha ətraflı"
+	"mobile-frontend-mobile-option-amc-learn-more": "Daha ətraflı",
+	"mobile-frontend-mobile-option-amc-send-feedback": "Rəy bildirin"
 }

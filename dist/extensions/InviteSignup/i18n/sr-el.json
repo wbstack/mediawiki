@@ -1,0 +1,19 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"invitesignup": "Pozovite ljude na viki",
+	"is-desc": "Šaljite pozivnice preko imejla",
+	"is-tableth-date": "Datum",
+	"is-tableth-email": "Imejl",
+	"is-tableth-inviter": "Pozivalac",
+	"is-tableth-signup": "Registrovan",
+	"is-tableth-groups": "Grupe",
+	"is-add": "Dodaj",
+	"is-delete": "Obriši",
+	"is-invalidemail": "<b>$1</b> nije važeća imejl adresa.",
+	"is-emailsubj": "Pozvani ste da se pridružite sajtu {{SITENAME}}",
+	"is-emailbody": "Zdravo,\n\n$1 {{GENDER:$1|vas je pozvao|vas je pozvala|vas je pozvao}} da se pridružite sajtu {{SITENAME}}.\nNalog možete otvoriti na $2",
+	"right-invitesignup": "pozivanje korisnika da otvore nalog",
+	"action-invitesignup": "pozivate korisnike da otvore nalog na ovom sajtu"
+}

@@ -40,6 +40,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "Дознайце вецей",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Причина",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|Заблокировал|Заблокировала}} вас",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "Блокированє ше закончи",
 	"mobile-frontend-editor-blocked-drawer-help": "Опатри деталї",
 	"mobile-frontend-editor-generic-block-reason": "Нєпозната причина",
 	"mobile-frontend-editor-cancel": "Одкаж",

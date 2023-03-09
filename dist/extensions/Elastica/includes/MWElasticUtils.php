@@ -1,7 +1,18 @@
 <?php
 
+namespace MediaWiki\Extension\Elastica;
+
 use Elastica\Client;
+use Elastica\Index;
+use Elastica\Query;
+use Elastica\Query\Ids;
+use Elastica\Task;
+use Elasticsearch\Endpoints\Cluster\Health;
+use Exception;
+use FormatJson;
+use Generator;
 use MediaWiki\Logger\LoggerFactory;
+use MWTimestamp;
 
 /**
  * This program is free software; you can redistribute it and/or modify
@@ -47,7 +58,7 @@ class MWElasticUtils {
 				try {
 					return $func();
 				} catch ( Exception $e ) {
-					$errors += 1;
+					$errors++;
 					if ( $beforeRetry ) {
 						$beforeRetry( $e, $errors );
 					} else {
@@ -80,7 +91,7 @@ class MWElasticUtils {
 	 * @return array the index health status
 	 */
 	public static function getIndexHealth( Client $client, $indexName ) {
-		$endpoint = new \Elasticsearch\Endpoints\Cluster\Health;
+		$endpoint = new Health;
 		$endpoint->setIndex( $indexName );
 		$response = $client->requestEndpoint( $endpoint );
 		if ( $response->hasError() ) {
@@ -95,7 +106,7 @@ class MWElasticUtils {
 	 * @param Client $client
 	 * @param string $indexName Name of index to wait for
 	 * @param int $timeout In seconds
-	 * @return \Generator|string[]|bool Returns a generator. Generator yields
+	 * @return Generator|string[]|bool Returns a generator. Generator yields
 	 *  string status messages. Generator return value is true if the index is
 	 *  green false otherwise.
 	 */
@@ -121,20 +132,20 @@ class MWElasticUtils {
 	/**
 	 * Delete docs by query and wait for it to complete via tasks api.
 	 *
-	 * @param \Elastica\Index $index the source index
-	 * @param \Elastica\Query $query the query
+	 * @param Index $index the source index
+	 * @param Query $query the query
 	 * @param bool $allowConflicts When true documents updated since starting
 	 *  the query will not be deleted, and will not fail the delete-by-query. When
 	 *  false (default) the updated document will not be deleted and the delete-by-query
 	 *  will abort. Deletes are not transactional, some subset of matching documents
 	 *  will have been deleted.
 	 * @param int $reportEveryNumSec Log task status on this interval of seconds
-	 * @return \Elastica\Task Generator returns the Task instance on completion.
+	 * @return Task Generator returns the Task instance on completion.
 	 * @throws Exception when task reports failures
 	 */
 	public static function deleteByQuery(
-		\Elastica\Index $index,
-		\Elastica\Query $query,
+		Index $index,
+		Query $query,
 		$allowConflicts = false,
 		$reportEveryNumSec = 300
 	) {
@@ -173,8 +184,8 @@ class MWElasticUtils {
 	 * and then throw away the generator. Note that logging about how long the task
 	 * has been running will not be logged if the generator is not iterated.
 	 *
-	 * @param \Elastica\Index $index the source index
-	 * @param \Elastica\Query $query the query
+	 * @param Index $index the source index
+	 * @param Query $query the query
 	 * @param bool $allowConflicts When true documents updated since starting
 	 *  the query will not be deleted, and will not fail the delete-by-query. When
 	 *  false (default) the updated document will not be deleted and the delete-by-query
@@ -187,8 +198,8 @@ class MWElasticUtils {
 	 * @throws Exception when task reports failures
 	 */
 	public static function deleteByQueryWithStatus(
-		\Elastica\Index $index,
-		\Elastica\Query $query,
+		Index $index,
+		Query $query,
 		$allowConflicts = false,
 		$reportEveryNumSec = 300
 	) {
@@ -269,7 +280,7 @@ class MWElasticUtils {
 	public static function fetchClusterName( Client $client ) {
 		$response = $client->requestEndpoint( new \Elasticsearch\Endpoints\Info );
 		if ( $response->getStatus() !== 200 ) {
-			throw new \Exception(
+			throw new Exception(
 				"Failed requesting cluster name, got status code [{$response->getStatus()}]" );
 		}
 		return $response->getData()['cluster_name'];
@@ -285,14 +296,14 @@ class MWElasticUtils {
 	public static function isFrozen( Client $client ) {
 		// TODO: This should be a hook that cirrus implements to tell
 		// others to not try to write to a cluster.
-		$ids = ( new \Elastica\Query\Ids() )
+		$ids = ( new Ids() )
 			->addId( self::ALL_INDEXES_FROZEN_NAME );
 		$resp = $client
 			->getIndex( self::METASTORE_INDEX_NAME )
-			->search( \Elastica\Query::create( $ids ) );
+			->search( Query::create( $ids ) );
 
 		return $resp->count() > 0;
 	}
 }
 
-class_alias( MWElasticUtils::class, 'MediaWiki\\Extension\\Elastica\\MWElasticUtils' );
+class_alias( MWElasticUtils::class, 'MWElasticUtils' );

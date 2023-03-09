@@ -9,7 +9,8 @@
 			"Octahedron80",
 			"Patsagorn Y.",
 			"กิ๊ฟ เลิกล่ะ สายแข็ง",
-			"Geonuch"
+			"Geonuch",
+			"Ekminarin"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "เลือกว่าจะให้ผู้ใช้แก้ไขผ่านอินเทอร์เฟซสำหรับอุปกรณ์เคลื่อนที่หรือไม่",
@@ -19,8 +20,6 @@
 	"mobile-frontend-cite-error": "เกิดปัญหาขณะพยายามโหลดการอ้างอิงเนื่องจากตัวระบุรุ่นไม่ถูกต้อง",
 	"mobile-frontend-cite-none-available": "ไม่มีการอ้างอิงในหน้านี้",
 	"mobile-frontend-clear-search": "ล้าง",
-	"mobile-frontend-contributions-404-desc": "ไม่สามารถค้นดูเรื่องที่มีส่วนร่วมโดยไม่ระบุผู้ใช้หรือโดยระบุผู้ใช้ที่ไม่มีอยู่ได้",
-	"mobile-frontend-contributions-404-title": "ระบุชื่อผู้ใช้ไม่ถูกต้อง",
 	"mobile-frontend-copyright": "เนื้อหาอนุญาตให้เผยแพร่ภายใต้ $1 เว้นแต่ระบุไว้เป็นอื่น",
 	"mobile-frontend-desc": "ฟรอนต์เอนด์สำหรับอุปกรณ์เคลื่อนที่",
 	"mobile-frontend-diffview-404-desc": "ไอดีสำหรับรุ่นที่คุณร้องขอไม่มีอยู่<br>นี่มักเกิดขึ้นเมื่อคุณตามลิงก์ความแตกต่างของรุ่นที่ไม่มีอยู่ เช่นถูกลบหรือในลิงก์ประกอบไปด้วยตัวอักษรที่ไม่ถูกต้อง",
@@ -29,6 +28,7 @@
 	"mobile-frontend-diffview-bytesadded": "เพิ่มขึ้น $1 {{PLURAL:$1|ไบต์}}",
 	"mobile-frontend-diffview-bytesnochange": "ไม่มีการเปลี่ยนแปลงขนาด",
 	"mobile-frontend-diffview-bytesremoved": "ลดลง $1 {{PLURAL:$1|ไบต์}}",
+	"mobile-frontend-diffview-comma": "$1, $2",
 	"mobile-frontend-diffview-editcount": "<div>$1</div> {{PLURAL:$1|การแก้ไข}}",
 	"mobile-frontend-diffview-title": "ความเปลี่ยนแปลง",
 	"mobile-frontend-edit-login-action": "<strong>ร่วมปรับปรุง {{SITENAME}}</strong><br />เข้าสู่ระบบเพื่อแก้ไข",
@@ -158,7 +158,6 @@
 	"mobile-frontend-references-citation-error": "เกิดข้อผิดพลาดและไม่สามารถโหลดการอ้างอิงนี้ได้",
 	"mobile-frontend-references-list": "ดูรายการอ้างอิงแบบเต็ม",
 	"mobile-frontend-requires-mobile": "หน้านี้ไม่พร้อมใช้งานในรุ่นคอมพิวเตอร์ตั้งโต๊ะ กรุณาคลิกลิงก์ มุมมองสำหรับอุปกรณ์เคลื่อนที่ ที่อยู่ด้านล่างหน้านี้",
-	"mobile-frontend-requires-optin": "หน้านี้ไม่พร้อมใช้งานนอกจากคุณจะเข้าร่วมโหมดเบต้าของเรา ไปที่[[Special:MobileOptions|หน้าการตั้งค่า]]เพื่อเข้าร่วม",
 	"mobile-frontend-requires-title": "หน้าไม่พร้อมใช้งาน",
 	"mobile-frontend-return-to-page": "กลับไปหน้า",
 	"mobile-frontend-save-error": "เกิดข้อผิดพลาดในการบันทึกการตั้งค่า กรุณาตรวจให้แน่ใจว่าคุณได้เปิดใช้งานคุกกี้",
@@ -215,7 +214,7 @@
 	"nearby": "หน้าในหัวข้อใกล้เคียงคุณ",
 	"tag-mobile_edit": "แก้ไขจากอุปกรณ์เคลื่อนที่",
 	"tag-mobile_edit-description": "แก้ไขจากอุปกรณ์เคลื่อนที่ (เว็บหรือแอป)",
-	"tag-advanced_mobile_edit": "แก้ไขขั้นสูงด้วยมือถือ",
+	"tag-advanced_mobile_edit": "แก้ไขขั้นสูงด้วยอุปกรณ์เคลื่อนที่",
 	"tag-advanced_mobile_edit-description": "แก้ไขโดยผู้ใช้ด้วยโหมดขั้นสูง",
 	"tag-mobile_web_edit": "แก้ไขจากเว็บสำหรับอุปกรณ์เคลื่อนที่",
 	"tag-mobile_web_edit-description": "แก้ไขจากเว็บไซต์สำหรับอุปกรณ์เคลื่อนที่",
@@ -230,7 +229,13 @@
 	"mobile-frontend-mobile-option-MFShowFirstParagraphBeforeInfobox": "ย่อหน้าแรก",
 	"mobile-frontend-mobile-option-MFShowFirstParagraphBeforeInfobox-description": "ข้อความจะแสดงเหนือกล่องข้อมูลเสมอ เพิ่มประสิทธิภาพในการอ่านและความสะดวกในการเข้าถึง",
 	"mobile-frontend-mobile-option-MFEnableFontChanger": "ขนาดอักษร",
-	"mobile-frontend-mobile-option-amc": "การมีส่วนร่วมทางมือถือขั้นสูง",
+	"mobile-frontend-mobile-option-amc": "โหมดขั้นสูง",
+	"mobile-frontend-mobile-option-amc-experiment-description": "โหมดขั้นสูงช่วยให้เข้าถึงหน้าพูดคุย หน้าประวัติ เครื่องมือผู้ใช้ และเครื่องมือการแก้ไขอื่น ๆ ได้อย่างง่าย",
 	"mobile-frontend-mobile-option-amc-learn-more": "เรียนรู้เพิ่มเติม",
-	"mobile-frontend-mobile-option-amc-send-feedback": "ส่งคำติชม"
+	"mobile-frontend-mobile-option-amc-send-feedback": "ส่งคำติชม",
+	"mobile-frontend-amc-outreach-enable": "เปิดใช้งานโหมดขั้นสูง",
+	"mobile-frontend-amc-outreach-no-thanks": "ไม่ขอบคุณ",
+	"mobile-frontend-amc-outreach-enabled-message": "เปิดใช้งานโหมดขั้นสูงแล้ว คุณสามารถปิดใช้งานในการตั้งค่าของคุณ",
+	"mobile-frontend-amc-outreach-dismissed-message": "คุณสามารถเปิดใช้งานโหมดขั้นสูงตอนไหนก็ได้ในการตั้งค่าของคุณ",
+	"prefs-mobile": "การตั้งค่ามือถือ"
 }

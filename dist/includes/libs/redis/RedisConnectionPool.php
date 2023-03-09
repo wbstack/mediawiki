@@ -39,7 +39,7 @@ use Psr\Log\NullLogger;
  * @since 1.21
  */
 class RedisConnectionPool implements LoggerAwareInterface {
-	/** @var string Connection timeout in seconds */
+	/** @var int Connection timeout in seconds */
 	protected $connectTimeout;
 	/** @var string Read timeout in seconds */
 	protected $readTimeout;
@@ -97,8 +97,6 @@ class RedisConnectionPool implements LoggerAwareInterface {
 				throw new InvalidArgumentException(
 					__CLASS__ . ': configured serializer "igbinary" not available' );
 			}
-			// (T282133) Phan CI image's php-redis has lost IGBINARY support somehow
-			// @phan-suppress-next-line PhanUndeclaredConstantOfClass
 			$this->serializer = Redis::SERIALIZER_IGBINARY;
 		} elseif ( $options['serializer'] === 'none' ) {
 			$this->serializer = Redis::SERIALIZER_NONE;
@@ -174,7 +172,7 @@ class RedisConnectionPool implements LoggerAwareInterface {
 	 *
 	 * @param string $server A hostname/port combination or the absolute path of a UNIX socket.
 	 *                       If a hostname is specified but no port, port 6379 will be used.
-	 * @param LoggerInterface|null $logger PSR-3 logger intance. [optional]
+	 * @param LoggerInterface|null $logger PSR-3 logger instance. [optional]
 	 * @return RedisConnRef|Redis|bool Returns false on failure
 	 * @throws InvalidArgumentException
 	 */
@@ -390,7 +388,7 @@ class RedisConnectionPool implements LoggerAwareInterface {
 	}
 
 	/**
-	 * Make sure connections are closed for sanity
+	 * Make sure connections are closed
 	 */
 	public function __destruct() {
 		foreach ( $this->connections as $server => &$serverConnections ) {

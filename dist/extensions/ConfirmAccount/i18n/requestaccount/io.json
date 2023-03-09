@@ -4,8 +4,11 @@
 			"Joao Xavier"
 		]
 	},
+	"requestaccount": "Demandez konto",
+	"requestaccount-login": "Demandez konto",
 	"requestaccount-email": "E-postal adreso:",
 	"requestaccount-reqtype": "Poziciono:",
 	"requestaccount-level-0": "autoro",
-	"requestaccount-level-1": "redaktero"
+	"requestaccount-level-1": "redaktero",
+	"requestaccount-submit": "Demandez konto"
 }

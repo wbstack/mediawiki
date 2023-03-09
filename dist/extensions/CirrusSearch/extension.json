@@ -28,7 +28,7 @@
 	"APIPropModules": {
 		"cirrusbuilddoc": "CirrusSearch\\Api\\QueryBuildDocument",
 		"cirrusdoc": "CirrusSearch\\Api\\QueryCirrusDoc",
-		"cirruscompsuggestbuilddoc": "\\CirrusSearch\\Api\\QueryCompSuggestBuildDoc"
+		"cirruscompsuggestbuilddoc": "CirrusSearch\\Api\\QueryCompSuggestBuildDoc"
 	},
 	"ConfigRegistry": {
 		"CirrusSearch": "CirrusSearch\\SearchConfig::newFromGlobals"
@@ -123,7 +123,7 @@
 		"CirrusSearchAddQueryFeatures": "CirrusSearch\\Wikimedia\\WeightedTagsHooks::onCirrusSearchAddQueryFeatures",
 		"CirrusSearchAnalysisConfig": "CirrusSearch\\Wikimedia\\WeightedTagsHooks::onCirrusSearchAnalysisConfig",
 		"CirrusSearchSimilarityConfig": "CirrusSearch\\Wikimedia\\WeightedTagsHooks::onCirrusSearchSimilarityConfig",
-		"GetPreferences": "CirrusSearch\\Hooks::onGetPreferences",
+		"GetPreferences": "default",
 		"LinksUpdateComplete": "CirrusSearch\\Hooks::onLinksUpdateCompleted",
 		"MediaWikiServices": "CirrusSearch\\Hooks::onMediaWikiServices",
 		"PrefixSearchExtractNamespace": "CirrusSearch\\Hooks::onPrefixSearchExtractNamespace",
@@ -138,7 +138,13 @@
 		"TitleMove": "CirrusSearch\\Hooks::onTitleMove",
 		"PageMoveComplete": "CirrusSearch\\Hooks::onPageMoveComplete",
 		"UploadComplete": "CirrusSearch\\Hooks::onUploadComplete",
-		"UserGetDefaultOptions": "CirrusSearch\\Hooks::onUserGetDefaultOptions"
+		"UserGetDefaultOptions": "default"
+	},
+	"HookHandlers": {
+		"default": {
+			"class": "CirrusSearch\\Hooks",
+			"services": [ "ConfigFactory" ]
+		}
 	},
 	"config": {
 		"CirrusSearchDefaultCluster": {
@@ -155,6 +161,9 @@
 			}
 		},
 		"CirrusSearchWriteClusters": {
+			"value": null
+		},
+		"CirrusSearchWriteIsolateClusters": {
 			"value": null
 		},
 		"CirrusSearchPrivateClusters": {

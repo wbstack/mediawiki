@@ -1,6 +1,3 @@
-/**
- * @external Lemma
- */
 module.exports = ( function () {
 	'use strict';
 
@@ -60,6 +57,7 @@ module.exports = ( function () {
 	 * @param {number} baseRevId
 	 * @param {string} languageLink HTML
 	 * @param {string} lexicalCategoryLink HTML
+	 * @return {Object}
 	 */
 	return function ( repoApi, lexeme, baseRevId, languageLink, lexicalCategoryLink ) {
 		return {
@@ -173,4 +171,4 @@ module.exports = ( function () {
 			}
 		};
 	};
-} )();
+}() );

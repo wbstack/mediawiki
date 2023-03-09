@@ -30,7 +30,7 @@ class BackfillUnreadWikis extends Maintenance {
 				'euw_user',
 				$this->getBatchSize()
 			);
-			$iterator->addConditions( [ 'euw_wiki' => wfWikiID() ] );
+			$iterator->addConditions( [ 'euw_wiki' => WikiMap::getCurrentWikiId() ] );
 		} else {
 			$userQuery = User::getQueryInfo();
 			$iterator = new BatchRowIterator(
@@ -43,18 +43,16 @@ class BackfillUnreadWikis extends Maintenance {
 		$iterator->setCaller( __METHOD__ );
 
 		$processed = 0;
-		$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 		foreach ( $iterator as $batch ) {
 			foreach ( $batch as $row ) {
 				if ( $rebuild ) {
-					$userIdentity = $lookup->localUserFromCentralId(
+					$user = $lookup->localUserFromCentralId(
 						$row->euw_user,
 						CentralIdLookup::AUDIENCE_RAW
 					);
-					if ( !$userIdentity ) {
+					if ( !$user ) {
 						continue;
 					}
-					$user = $userFactory->newFromUserIdentity( $userIdentity );
 				} else {
 					$user = User::newFromRow( $row );
 				}
@@ -78,7 +76,7 @@ class BackfillUnreadWikis extends Maintenance {
 						continue;
 					}
 
-					$uw->updateCount( wfWikiID(), $alertCount, $alertUnread, $msgCount, $msgUnread );
+					$uw->updateCount( WikiMap::getCurrentWikiId(), $alertCount, $alertUnread, $msgCount, $msgUnread );
 				}
 			}
 

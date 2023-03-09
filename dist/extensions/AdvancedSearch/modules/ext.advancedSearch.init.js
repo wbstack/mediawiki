@@ -19,12 +19,13 @@
 	}
 
 	/**
-	 * @description It is possible for the namespace field to be completely empty
-	 and at the same time have the file type option selected.
-	 This would lead to an empty search result in most cases,
-	 as the default namespaces (which are used when no namespaces are selected) do not contain files.
-	 As a courtesy to the user, we're forcefully re-adding the file namespace.
-	 When the search result page loads the file namespace will show up in the selected namespace list.
+	 * It is possible for the namespace field to be completely empty
+	 * and at the same time have the file type option selected.
+	 * This would lead to an empty search result in most cases,
+	 * as the default namespaces (which are used when no namespaces are selected) do not contain files.
+	 * As a courtesy to the user, we're forcefully re-adding the file namespace.
+	 * When the search result page loads the file namespace will show up in the selected namespace list.
+	 *
 	 * @param {jQuery} $searchField The search fields inside the forms
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} state
 	 */

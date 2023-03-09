@@ -748,7 +748,7 @@ class JCSingleton {
 			return true;
 		}
 
-		if ( is_a( $content, JCContent::class ) ) {
+		if ( $content instanceof JCContent ) {
 			$status->merge( $content->getStatus() );
 			if ( !$status->isGood() ) {
 				// @todo Use $status->setOK() instead after this extension
@@ -1020,7 +1020,7 @@ class JCSingleton {
 			return true;
 		}
 
-		if ( $value && ( !$content || is_a( $content, JCContent::class ) ) ) {
+		if ( $value && ( !$content || $content instanceof JCContent ) ) {
 			if ( method_exists( $value, 'getTitle' ) ) {
 				$value = $value->getTitle();
 			}

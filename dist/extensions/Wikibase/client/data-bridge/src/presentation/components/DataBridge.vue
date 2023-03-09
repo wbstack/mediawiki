@@ -4,7 +4,7 @@
 			:label="targetLabel"
 			:data-value="targetValue"
 			:set-data-value="setDataValue"
-			:maxlength="this.$bridgeConfig.stringMaxLength"
+			:maxlength="valueMaxLength"
 			class="wb-db-bridge__target-value"
 		/>
 		<ReferenceSection
@@ -15,39 +15,43 @@
 </template>
 
 <script lang="ts">
+import { defineComponent } from 'vue';
 import { DataValue } from '@wmde/wikibase-datamodel-types';
 import StateMixin from '@/presentation/StateMixin';
 import EditDecision from '@/presentation/components/EditDecision.vue';
-import Component, { mixins } from 'vue-class-component';
 import Term from '@/datamodel/Term';
 import StringDataValue from '@/presentation/components/StringDataValue.vue';
 import ReferenceSection from '@/presentation/components/ReferenceSection.vue';
 
-@Component( {
+export default defineComponent( {
+	mixins: [ StateMixin ],
+	name: 'DataBridge',
 	components: {
 		EditDecision,
 		StringDataValue,
 		ReferenceSection,
 	},
-} )
-export default class DataBridge extends mixins( StateMixin ) {
-	public get targetValue(): DataValue {
-		const targetValue = this.rootModule.state.targetValue;
-		if ( targetValue === null ) {
-			throw new Error( 'not yet ready!' );
-		}
-		return targetValue;
-	}
-
-	public get targetLabel(): Term {
-		return this.rootModule.getters.targetLabel;
-	}
-
-	public setDataValue( dataValue: DataValue ): void {
-		this.rootModule.dispatch( 'setTargetValue', dataValue );
-	}
-
-}
+	computed: {
+		targetValue(): DataValue {
+			const targetValue = this.rootModule.state.targetValue;
+			if ( targetValue === null ) {
+				throw new Error( 'not yet ready!' );
+			}
+			return targetValue;
+		},
+		targetLabel(): Term {
+			return this.rootModule.getters.targetLabel;
+		},
+		valueMaxLength(): number | null {
+			return this.rootModule.getters.config.stringMaxLength;
+		},
+	},
+	methods: {
+		setDataValue( dataValue: DataValue ): void {
+			this.rootModule.dispatch( 'setTargetValue', dataValue );
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

@@ -1,10 +1,21 @@
 <?php
 
+use MediaWiki\User\UserGroupManager;
+
 class UserCredentialsPage extends SpecialPage {
 	protected $target, $file;
 
-	function __construct() {
+	/**
+	 * @var UserGroupManager
+	 */
+	private $userGroupManager;
+
+	/**
+	 * @param UserGroupManager $userGroupManager
+	 */
+	function __construct( UserGroupManager $userGroupManager ) {
 		parent::__construct( 'UserCredentials', 'lookupcredentials' );
+		$this->userGroupManager = $userGroupManager;
 	}
 
 	public function userCanExecute( User $user ) {
@@ -82,7 +93,7 @@ class UserCredentialsPage extends SpecialPage {
 		$user = User::newFromName( $this->target );
 
 		$list = [];
-		foreach ( $user->getGroups() as $group ) {
+		foreach ( $this->userGroupManager->getUserGroups( $user ) as $group ) {
 			$list[] = UserGroupMembership::getLink(
 				$group, $this->getContext(), 'html', $user->getName() );
 		}

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb
+class ComposerStaticInitc22812106f3164ba59ec021239278ef2
 {
     public static $files = array (
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
@@ -2849,13 +2849,17 @@ class ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb
         'Wikibase\\Lexeme\\MediaWiki\\EntityLinkFormatters\\FormLinkFormatter' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/EntityLinkFormatters/FormLinkFormatter.php',
         'Wikibase\\Lexeme\\MediaWiki\\EntityLinkFormatters\\LexemeLinkFormatter' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/EntityLinkFormatters/LexemeLinkFormatter.php',
         'Wikibase\\Lexeme\\MediaWiki\\ParserOutput\\LexemeParserOutputUpdater' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/ParserOutput/LexemeParserOutputUpdater.php',
+        'Wikibase\\Lexeme\\MediaWiki\\Scribunto\\Scribunto_LuaWikibaseLexemeAbstractEntityLibrary' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Scribunto/Scribunto_LuaWikibaseLexemeAbstractEntityLibrary.php',
+        'Wikibase\\Lexeme\\MediaWiki\\Scribunto\\Scribunto_LuaWikibaseLexemeEntityFormLibrary' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Scribunto/Scribunto_LuaWikibaseLexemeEntityFormLibrary.php',
         'Wikibase\\Lexeme\\MediaWiki\\Scribunto\\Scribunto_LuaWikibaseLexemeEntityLexemeLibrary' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Scribunto/Scribunto_LuaWikibaseLexemeEntityLexemeLibrary.php',
+        'Wikibase\\Lexeme\\MediaWiki\\Scribunto\\Scribunto_LuaWikibaseLexemeEntitySenseLibrary' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Scribunto/Scribunto_LuaWikibaseLexemeEntitySenseLibrary.php',
         'Wikibase\\Lexeme\\MediaWiki\\Scribunto\\Scribunto_LuaWikibaseLexemeLibrary' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Scribunto/Scribunto_LuaWikibaseLexemeLibrary.php',
         'Wikibase\\Lexeme\\MediaWiki\\Specials\\HTMLForm\\ItemSelectorWidget' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Specials/HTMLForm/ItemSelectorWidget.php',
         'Wikibase\\Lexeme\\MediaWiki\\Specials\\HTMLForm\\ItemSelectorWidgetField' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Specials/HTMLForm/ItemSelectorWidgetField.php',
         'Wikibase\\Lexeme\\MediaWiki\\Specials\\HTMLForm\\LemmaLanguageField' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Specials/HTMLForm/LemmaLanguageField.php',
         'Wikibase\\Lexeme\\MediaWiki\\Specials\\SpecialMergeLexemes' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Specials/SpecialMergeLexemes.php',
         'Wikibase\\Lexeme\\MediaWiki\\Specials\\SpecialNewLexeme' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Specials/SpecialNewLexeme.php',
+        'Wikibase\\Lexeme\\MediaWiki\\Specials\\SpecialNewLexemeAlpha' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/MediaWiki/Specials/SpecialNewLexemeAlpha.php',
         'Wikibase\\Lexeme\\Presentation\\ChangeOp\\Deserialization\\EditFormChangeOpDeserializer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/ChangeOp/Deserialization/EditFormChangeOpDeserializer.php',
         'Wikibase\\Lexeme\\Presentation\\ChangeOp\\Deserialization\\EditSenseChangeOpDeserializer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/ChangeOp/Deserialization/EditSenseChangeOpDeserializer.php',
         'Wikibase\\Lexeme\\Presentation\\ChangeOp\\Deserialization\\FormChangeOpDeserializer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Presentation/ChangeOp/Deserialization/FormChangeOpDeserializer.php',
@@ -4028,11 +4032,11 @@ class ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit41c6f98fc3e1e6ce11bde879fe2b12fb::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitc22812106f3164ba59ec021239278ef2::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitc22812106f3164ba59ec021239278ef2::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInitc22812106f3164ba59ec021239278ef2::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInitc22812106f3164ba59ec021239278ef2::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInitc22812106f3164ba59ec021239278ef2::$classMap;
 
         }, null, ClassLoader::class);
     }

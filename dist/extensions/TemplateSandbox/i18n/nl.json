@@ -7,7 +7,8 @@
 			"Romaine",
 			"Siebrand",
 			"Sjoerddebruin",
-			"Southparkfan"
+			"Southparkfan",
+			"McDutchie"
 		]
 	},
 	"templatesandbox": "Sjabloonzandbak",
@@ -25,7 +26,7 @@
 	"templatesandbox-editform-page-label": "Paginanaam",
 	"templatesandbox-editform-view-label": "Voorvertoning weergeven",
 	"templatesandbox-preview": "Voorvertoning van $2",
-	"templatesandbox-previewnote": "'''Dit is een voorvertoning van [[:$1]].'''\nUw wijzigingen zijn nog niet opgeslagen!",
+	"templatesandbox-previewnote": "'''Vergeet niet dat dit slechts een voorvertoning is van [[:$1]].'''\nUw wijzigingen zijn nog niet opgeslagen!",
 	"templatesandbox-invalid-title": "De opgegeven pagina is ongeldig.",
 	"templatesandbox-title-not-exists": "De titel die u hebt opgegeven bestaat niet.",
 	"templatesandbox-revision-not-exists": "De versie die u hebt opgegeven bestaat niet.",

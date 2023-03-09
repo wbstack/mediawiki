@@ -10,6 +10,7 @@
 			"Xbaked potatox"
 		]
 	},
+	"apierror-kartographer-conflicting-revids": "Het opvragen van kaartgegevens van meerdere revisies van dezelfde pagina in één verzoek wordt nog niet ondersteund.",
 	"kartographer-attribution": "[https://foundation.wikimedia.org/wiki/Maps_Terms_of_Use Wikimedia-kaarten] | Kaartgegevens © [https://www.openstreetmap.org/copyright OpenStreetMap-bijdragers]",
 	"kartographer-broken-category": "Pagina's met niet-werkende kaarten",
 	"kartographer-broken-category-desc": "De pagina bevat een ongeldig gebruik van een kaart",

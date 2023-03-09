@@ -1,9 +1,7 @@
 import { DataValue } from '@wmde/wikibase-datamodel-types';
 import ApiErrors from '@/data-access/error/ApiErrors';
 import SavingError from '@/data-access/error/SavingError';
-import Vue from 'vue';
 import { Store } from 'vuex';
-import BridgeConfig from '@/presentation/plugins/BridgeConfigPlugin';
 import Application, { InitializedApplicationState, SavingState } from '@/store/Application';
 import ApplicationStatus from '@/definitions/ApplicationStatus';
 import AppInformation from '@/definitions/AppInformation';
@@ -43,7 +41,7 @@ RootActions
 		this.statementMutationFactory = statementMutationFactory;
 	}
 
-	public relaunchBridge( information: AppInformation ): Promise<void> {
+	public relaunchBridge( information: AppInformation ): Promise<unknown> {
 		this.commit( 'reset' );
 		this.entityModule.commit( 'reset' );
 		this.statementModule.commit( 'reset' );
@@ -60,6 +58,7 @@ RootActions
 		this.commit( 'setOriginalHref', information.originalHref );
 		this.commit( 'setPageTitle', information.pageTitle );
 		this.commit( 'setPageUrl', information.pageUrl );
+		this.commit( 'setClientConfig', information.client );
 		this.commit( 'setShowWarningAnonymousEdit', information.userName === null );
 
 		this.dispatch( 'requestAndSetTargetLabel', information.propertyId );
@@ -76,7 +75,7 @@ RootActions
 			} );
 		};
 
-		const getRemoteData = (): Promise<[WikibaseRepoConfiguration, MissingPermissionsError[], string, void]> => {
+		const getRemoteData = (): Promise<[WikibaseRepoConfiguration, MissingPermissionsError[], string, unknown]> => {
 			return Promise.all( [
 				this.store.$services.get( 'wikibaseRepoConfigRepository' ).getRepoConfiguration(),
 				this.store.$services.get( 'editAuthorizationChecker' ).canUseBridgeForItemAndPage(
@@ -104,7 +103,7 @@ RootActions
 					} );
 			} )
 			.then(
-				( results ) => this.dispatch( 'initBridgeWithRemoteData', { information, results } ),
+				( results ) => this.dispatch( 'initBridgeWithRemoteData', { results } ),
 				( error ) => {
 					const type = hasCentralauthBadtokenError( error )
 						? ErrorTypes.CENTRALAUTH_BADTOKEN
@@ -121,7 +120,6 @@ RootActions
 	}
 
 	public async initBridgeWithRemoteData( {
-		information,
 		results: [
 			wikibaseRepoConfiguration,
 			permissionErrors,
@@ -129,9 +127,8 @@ RootActions
 			_entityInit,
 		],
 	}: {
-		information: AppInformation;
 		results: [ WikibaseRepoConfiguration, readonly MissingPermissionsError[], string, unknown ];
-	} ): Promise<void> {
+	} ): Promise<unknown> {
 		if ( permissionErrors.length ) {
 			this.commit( 'addApplicationErrors', permissionErrors );
 			return;
@@ -145,7 +142,7 @@ RootActions
 			this.store.$services.get( 'tracker' ).trackError( 'render_references' );
 		}
 
-		BridgeConfig( Vue, { ...wikibaseRepoConfiguration, ...information.client } );
+		this.commit( 'setRepoConfig', wikibaseRepoConfiguration );
 
 		return this.dispatch( 'postEntityLoad' );
 	}
@@ -186,7 +183,7 @@ RootActions
 
 	public validateEntityState(
 		path: MainSnakPath,
-	): Promise<void> {
+	): Promise<unknown> {
 		if ( !this.statementModule.getters.propertyExists( path ) ) {
 			this.commit( 'addApplicationErrors', [ { type: ErrorTypes.INVALID_ENTITY_STATE_ERROR } ] );
 			return Promise.resolve();
@@ -197,7 +194,7 @@ RootActions
 
 	public validateBridgeApplicability(
 		path: MainSnakPath,
-	): Promise<void> {
+	): Promise<unknown> {
 		if ( this.state.applicationStatus === ApplicationStatus.SAVED ) {
 			// saving edits can transition us from applicable to inapplicable states, but that should not be an error
 			return Promise.resolve();
@@ -260,7 +257,7 @@ RootActions
 		return Promise.resolve();
 	}
 
-	public async saveBridge(): Promise<void> {
+	public async saveBridge(): Promise<unknown> {
 		if ( this.state.applicationStatus !== ApplicationStatus.READY ) {
 			this.commit( 'addApplicationErrors', [ {
 				type: ErrorTypes.APPLICATION_LOGIC_ERROR,
@@ -292,7 +289,7 @@ RootActions
 			this.commit( 'addApplicationErrors', [ {
 				type: ErrorTypes.APPLICATION_LOGIC_ERROR,
 				info: error,
-			} ] );
+			} as ApplicationError ] );
 			throw error;
 		}
 
@@ -333,7 +330,7 @@ RootActions
 			} );
 	}
 
-	public async retrySave(): Promise<void> {
+	public async retrySave(): Promise<unknown> {
 		await this.dispatch( 'goBackFromErrorToReady' );
 		return this.dispatch( 'saveBridge' );
 	}

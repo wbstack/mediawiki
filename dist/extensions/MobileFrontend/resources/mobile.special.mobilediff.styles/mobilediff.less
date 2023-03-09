@@ -34,6 +34,15 @@ footer {
 }
 
 .diff {
+	// Make sure the contents of our layout table do not overflow viewport
+	display: block;
+
+	// doubled up .dif for specificity to override
+	// .content table tbody { display: table-row-group; } in Minerva repo.
+	&.diff tbody, tr, td {
+		display: block;
+	}
+
 	.diff-title {
 		display: none;
 	}
@@ -86,8 +95,10 @@ footer {
 	.mw-diff-inline-deleted del,
 	.mw-diff-inline-changed del {
 		color: #000;
-		word-break: break-all;
 		text-decoration: none;
+		// these are styled as inline-blocks
+		// word-wrap and overflow-wrap only apply to inline elements
+		word-break: break-word;
 	}
 
 	> span {

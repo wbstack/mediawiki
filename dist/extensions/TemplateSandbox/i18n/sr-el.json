@@ -10,8 +10,9 @@
 		]
 	},
 	"templatesandbox": "Pesak za šablone",
-	"templatesandbox-suffix": "pijesak",
-	"templatesandbox-editform-legend": "Vidi stranicu sa ovim šablonom",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Renderuje stranicu]] sa šablonom iz peska",
+	"templatesandbox-suffix": "pesak",
+	"templatesandbox-editform-legend": "Pretpregled stranice sa ovim šablonom",
 	"templatesandbox-editform-page-label": "Naslov stranice",
 	"templatesandbox-editform-view-label": "Pretpregled",
 	"templatesandbox-preview": "Pregled $2",

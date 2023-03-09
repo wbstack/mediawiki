@@ -4,6 +4,7 @@ namespace TwoColConflict\Hooks;
 
 use EditPage;
 use ExtensionRegistry;
+use MediaWiki\Extension\EventLogging\EventLogging;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\User\UserIdentity;
@@ -72,14 +73,15 @@ class TwoColConflictHooks {
 				$context->getOutput(),
 				$services->getStatsdDataFactory(),
 				$submitButtonLabel,
-				$editPage->summary,
 				$services->getContentHandlerFactory(),
 				$this->twoColContext,
 				new ResolutionSuggester(
 					$baseRevision,
 					$wikiPage->getContentHandler()->getDefaultFormat()
 				),
-				$services->getUserOptionsLookup()
+				$services->getMainObjectStash(),
+				$editPage->summary,
+				$services->getUserOptionsLookup()->getOption( $context->getUser(), 'editfont' )
 			);
 		} );
 
@@ -194,7 +196,7 @@ class TwoColConflictHooks {
 				}
 			}
 
-			\EventLogging::logEvent(
+			EventLogging::logEvent(
 				'TwoColConflictConflict',
 				-1,
 				[
@@ -307,15 +309,6 @@ class TwoColConflictHooks {
 			'label-message' => 'twocolconflict-preference-enabled',
 			'section' => 'editing/advancedediting',
 		];
-	}
-
-	/**
-	 * Anonymous users and those without a preference will get the default: enabled.
-	 *
-	 * @param array &$defaultOptions
-	 */
-	public static function onUserGetDefaultOptions( array &$defaultOptions ) {
-		$defaultOptions[TwoColConflictContext::ENABLED_PREFERENCE] = 1;
 	}
 
 	/**

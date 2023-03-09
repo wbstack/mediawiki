@@ -1,8 +1,4 @@
 /**
- * @external LexemeDeserializer
- */
-
-/**
  * @license GPL-2.0-or-later
  */
 ( function ( wb ) {
@@ -184,8 +180,9 @@
 
 		getRepresentationDataForApiRequest: function ( oldRepresentations, newRepresentations ) {
 			var result = {};
+			var language;
 
-			for ( var language in newRepresentations ) {
+			for ( language in newRepresentations ) {
 				var newRepresentation = newRepresentations[ language ].value;
 
 				if ( ( !( language in oldRepresentations ) )

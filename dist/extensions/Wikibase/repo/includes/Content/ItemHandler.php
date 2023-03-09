@@ -6,6 +6,7 @@ use Content;
 use IContextSource;
 use MediaWiki\Revision\SlotRenderingProvider;
 use Page;
+use ParserOptions;
 use Title;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
@@ -72,6 +73,9 @@ class ItemHandler extends EntityHandler {
 	/** @var RepoDomainDb */
 	private $db;
 
+	/** @var bool[] */
+	private $isExternalIdByPropertyId;
+
 	public function __construct(
 		EntityTermStoreWriter $entityTermStoreWriter,
 		EntityContentDataCodec $contentCodec,
@@ -112,7 +116,7 @@ class ItemHandler extends EntityHandler {
 	 */
 	public function getActionOverrides() {
 		return [
-			'history' => function( Page $page, IContextSource $context ) {
+			'history' => function ( Page $page, IContextSource $context ) {
 				return new HistoryEntityAction(
 					$page,
 					$context,
@@ -266,21 +270,40 @@ class ItemHandler extends EntityHandler {
 	 * @param StatementList $statementList
 	 * @return int
 	 */
-	public function getIdentifiersCount( StatementList $statementList ) {
+	public function getIdentifiersCount( StatementList $statementList ): int {
 		$identifiers = 0;
-		foreach ( $statementList->getPropertyIds() as $propertyIdSerialization => $propertyId ) {
-			try {
-				$dataType = $this->dataTypeLookup->getDataTypeIdForProperty( $propertyId );
-			} catch ( PropertyDataTypeLookupException $e ) {
-				continue;
+		foreach ( $statementList as $statement ) {
+			$propertyId = $statement->getPropertyId();
+			$propertyIdSerialization = $propertyId->getSerialization();
+			if ( !isset( $this->isExternalIdByPropertyId[$propertyIdSerialization] ) ) {
+				try {
+					$this->isExternalIdByPropertyId[$propertyIdSerialization] =
+						$this->dataTypeLookup->getDataTypeIdForProperty( $propertyId ) === 'external-id';
+				} catch ( PropertyDataTypeLookupException $e ) {
+					$this->isExternalIdByPropertyId[$propertyIdSerialization] = false;
+					continue;
+				}
 			}
 
-			if ( $dataType === 'external-id' ) {
-				$identifiers += $statementList->getByPropertyId( $propertyId )->count();
+			if ( $this->isExternalIdByPropertyId[$propertyIdSerialization] ) {
+				$identifiers++;
 			}
 		}
 
 		return $identifiers;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
+	protected function getParserOutputFromEntityView(
+		EntityContent $content,
+		$revisionId,
+		ParserOptions $options,
+		$generateHtml = true
+	) {
+		$parserOutput = parent::getParserOutputFromEntityView( $content, $revisionId, $options, $generateHtml );
+		$parserOutput->recordOption( 'termboxVersion' );
+		return $parserOutput;
+	}
 }

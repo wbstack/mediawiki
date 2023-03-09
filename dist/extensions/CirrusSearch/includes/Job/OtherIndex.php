@@ -4,8 +4,9 @@ namespace CirrusSearch\Job;
 
 use CirrusSearch\OtherIndexesUpdater;
 use CirrusSearch\SearchConfig;
-use JobQueueGroup;
+use MediaWiki\MediaWikiServices;
 use Title;
+use WikiMap;
 
 /**
  * Job wrapper around OtherIndexes. Used during page updates.
@@ -44,7 +45,7 @@ class OtherIndex extends CirrusGenericJob {
 		if ( $titlesToUpdate ) {
 			// Note that we're updating a bunch of titles but we have to pick one to
 			// attach to the job so we pick the first one.
-			JobQueueGroup::singleton()->push(
+			MediaWikiServices::getInstance()->getJobQueueGroup()->push(
 				new self( [
 					'titles' => $titlesToUpdate,
 					'cluster' => $cluster,
@@ -58,11 +59,14 @@ class OtherIndex extends CirrusGenericJob {
 	 */
 	protected function doJob() {
 		$titles = [];
-		foreach ( $this->params['titles'] as $titleArr ) {
-			list( $namespace, $title ) = $titleArr;
+		foreach ( $this->params['titles'] as [ $namespace, $title ] ) {
 			$titles[] = Title::makeTitle( $namespace, $title );
 		}
-		$otherIdx = OtherIndexesUpdater::buildOtherIndexesUpdater( $this->searchConfig, $this->params['cluster'], wfWikiID() );
+		$otherIdx = OtherIndexesUpdater::buildOtherIndexesUpdater(
+			$this->searchConfig,
+			$this->params['cluster'],
+			WikiMap::getCurrentWikiId()
+		);
 		$otherIdx->updateOtherIndex( $titles );
 
 		return true;

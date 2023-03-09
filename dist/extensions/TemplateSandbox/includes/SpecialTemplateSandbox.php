@@ -7,6 +7,7 @@ use EditPage;
 use Html;
 use HTMLForm;
 use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\Content\Renderer\ContentRenderer;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
@@ -38,20 +39,26 @@ class SpecialTemplateSandbox extends SpecialPage {
 	/** @var WikiPageFactory */
 	private $wikiPageFactory;
 
+	/** @var ContentRenderer */
+	private $contentRenderer;
+
 	/**
 	 * @param RevisionLookup $revisionLookup
 	 * @param IContentHandlerFactory $contentHandlerFactory
 	 * @param WikiPageFactory $wikiPageFactory
+	 * @param ContentRenderer $contentRenderer
 	 */
 	public function __construct(
 		RevisionLookup $revisionLookup,
 		IContentHandlerFactory $contentHandlerFactory,
-		WikiPageFactory $wikiPageFactory
+		WikiPageFactory $wikiPageFactory,
+		ContentRenderer $contentRenderer
 	) {
 		parent::__construct( 'TemplateSandbox' );
 		$this->revisionLookup = $revisionLookup;
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->wikiPageFactory = $wikiPageFactory;
+		$this->contentRenderer = $contentRenderer;
 	}
 
 	protected function getGroupName() {
@@ -188,7 +195,7 @@ class SpecialTemplateSandbox extends SpecialPage {
 			return true;
 		}
 
-		$revisionRecord = $this->revisionLookup->getRevisionById( $value );
+		$revisionRecord = $this->revisionLookup->getRevisionById( (int)$value );
 		if ( $revisionRecord === null ) {
 			return $this->msg( 'templatesandbox-revision-not-exists' )->parseAsBlock();
 		}
@@ -267,7 +274,7 @@ class SpecialTemplateSandbox extends SpecialPage {
 		$logic = new Logic( $this->prefixes, null, null );
 		$reset = $logic->setupForParse( $popts );
 		$this->title = $title;
-		$this->output = $content->getParserOutput( $title, $rev->getId(), $popts );
+		$this->output = $this->contentRenderer->getParserOutput( $content, $title, $rev->getId(), $popts );
 
 		return Status::newGood();
 	}

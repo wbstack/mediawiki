@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\WikibaseManifest;
 
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthConsumerRegistration;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthConsumerRegistration;
 use WikiMap;
 
 class SpecialPageOAuthUrl implements OAuthUrl {

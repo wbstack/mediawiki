@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"26agcp"
+		]
+	},
+	"wikibase-linkitem-input-site": "T'aanil:",
+	"wikibase-linkitem-input-page": "Wáal:",
+	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
+	"wikibase-rc-hide-wikidata-hide": "Ta'ak",
+	"wikibase-rc-hide-wikidata-show": "E'es"
+}

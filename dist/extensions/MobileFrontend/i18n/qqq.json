@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ajeje Brazorf",
 			"Amire80",
 			"Arthur2e5",
 			"Asmen",
@@ -39,8 +40,7 @@
 			"Wellwisher",
 			"Yekrats",
 			"Ата",
-			"아라",
-			"Ajeje Brazorf"
+			"아라"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "AbuseFilter extension rule variable that allows distinguishing edits based on if they have been made using the editor of MobileFrontend or not.",
@@ -50,8 +50,6 @@
 	"mobile-frontend-cite-error": "Error message shown to user when citations fail to load which should only happen if a bad revision identifier is given.",
 	"mobile-frontend-cite-none-available": "Error message shown when no citations are available for a page.",
 	"mobile-frontend-clear-search": "Tooltip for clear button that appears when you type into search box.\n{{Identical|Clear}}",
-	"mobile-frontend-contributions-404-desc": "Explain the reasons why the user may have arrived on {{msg-mw|mobile-frontend-contributions-404-title}}",
-	"mobile-frontend-contributions-404-title": "Title of the 404 error page shown when navigate to [[Special:Contributions/Title of username that does not exist]]",
 	"mobile-frontend-copyright": "A short sentence explaining that the content of the page is available under a particular license. Parameters:\n* $1 - license name\n{{Identical|Content is available under}}",
 	"mobile-frontend-desc": "{{desc|name=Mobile Frontend|url=https://www.mediawiki.org/wiki/Extension:MobileFrontend}}",
 	"mobile-frontend-diffview-404-desc": "Text for 404 page when bad revision id parameter is passed",
@@ -66,7 +64,7 @@
 	"mobile-frontend-edit-login-action": "Message shown above the login form when it is reached from a link in the editor.",
 	"mobile-frontend-edit-signup-action": "Message shown above the signup form when it is reached from a link in the editor.",
 	"mobile-frontend-editor-anon": "Title for link to edit a page without logging in.",
-	"mobile-frontend-editor-anonwarning": "Warning message, when user want to edit without logging in.",
+	"mobile-frontend-editor-anonwarning": "A warning message, when user tries to edit without logging in.",
 	"mobile-frontend-editor-blocked-drawer-action-login": "Label for a button in the mobile block message drawer.\n{{identical|Log in}}",
 	"mobile-frontend-editor-blocked-drawer-action-ok": "Label for a button in the mobile block message drawer.",
 	"mobile-frontend-editor-blocked-drawer-action-randompage": "Label for a button in the mobile block message drawer. The button links to [[Special:RandomPage]].",
@@ -98,6 +96,7 @@
 	"mobile-frontend-editor-error-loading": "Text that displays when there have been errors when loading a page section in the editor.\n\nUsed as \"toast\" error message.",
 	"mobile-frontend-editor-error-preview": "Error message for when a preview fails to load for an unknown reason",
 	"mobile-frontend-editor-keep-editing": "Caption for a button that takes you back to editing from edit preview screen.",
+	"mobile-frontend-license-links": "{{notranslate}}\nOverriden by {{msg-mw|wikimedia-mobile-license-links}} or set on wiki.",
 	"mobile-frontend-editor-licensing": "Text notifying user of license that text will be published under.\nParameters:\n* $1 - link to license\n* $2 - If $1 contains more than one license (1 -> one license; 2 -> more licenses)",
 	"mobile-frontend-editor-licensing-with-terms": "Text notifying user of license that text will be published under.\nParameters:\n* $1 - link to terms of service, see {{msg-mw|Mobile-frontend-editor-terms-link}}\n* $2 - link to license\n* $3 - If $1 contains more than one license (1 -> one license; 2 -> more licenses)",
 	"mobile-frontend-editor-terms-link": "Terms of Use link used in {{msg-mw|Mobile-frontend-editor-licensing-with-terms}}.\nParameters:\n* $1 - URL, link target",
@@ -192,7 +191,6 @@
 	"mobile-frontend-references-citation-error": "Error message body that shows when a citation fails to load via the API.",
 	"mobile-frontend-references-list": "Label for a link to the list of the citations in the article.",
 	"mobile-frontend-requires-mobile": "Message that shows when a special page does not have a desktop equivalent.\n\nPoints user to mobile view link at bottom of page to switch to mobile.\n\nThis should be consistent with {{msg-mw|Mobile-frontend-view}}.",
-	"mobile-frontend-requires-optin": "Message that shows when a page requires beta mode to work. Wikitext that links to [[Special:MobileOptions]] page.",
 	"mobile-frontend-requires-title": "Title shown on page when the page is not available to the user. Currently used for special pages that have no mobile/desktop equivalent or that are only available as experimental features.",
 	"mobile-frontend-return-to-page": "The text of the link that takes the user back to the article",
 	"mobile-frontend-save-error": "Error message shown when a user tries to save settings form without cookies present.",

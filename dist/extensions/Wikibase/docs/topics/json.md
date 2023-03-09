@@ -237,7 +237,7 @@ A Statement record uses the following fields:
 * qualifiers
   * Qualifiers provide a context for the primary value, such as the point in time of measurement. Qualifiers are given as lists of snaks, each associated with one property. See @ref #json_qualifiers below.
 * references
-  * References record provenance information for the data in the main Snak and qualifiers. They are given as a list of reference records; see @ref #json_referneces below.
+  * References record provenance information for the data in the main Snak and qualifiers. They are given as a list of reference records; see @ref #json_references below.
 
 (Historically, there was a distinction between Claims, which had only a main snak and qualifiers, and Statements, which also had references.
 Traces of this distinction may still be found in the serialization or in outdated documentation.)
@@ -598,10 +598,10 @@ using the property IDs as keys. By *snaks-order* the order of those snaks is sho
 }
 ```
 
-Sitelinks are given as records for each site identifier. Each such record contains the following fields:
+Sitelinks are given as records for each site global ID. Each such record contains the following fields:
 
 * site
-  * The site ID.
+  * The site global ID.
 * title
   * The page title.
 * badges

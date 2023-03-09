@@ -2,13 +2,12 @@
 
 namespace TwoColConflict;
 
+use BagOStuff;
 use Html;
 use IBufferingStatsdDataFactory;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\EditPage\TextConflictHelper;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\User\UserOptionsLookup;
-use ObjectCache;
 use OutputPage;
 use ParserOptions;
 use Title;
@@ -28,54 +27,52 @@ use WikitextContent;
  */
 class SplitTwoColConflictHelper extends TextConflictHelper {
 
-	/**
-	 * @var string
-	 */
-	private $newEditSummary;
-
-	/**
-	 * @var TwoColConflictContext
-	 */
+	/** @var TwoColConflictContext */
 	private $twoColContext;
 
-	/**
-	 * @var ResolutionSuggester
-	 */
+	/** @var ResolutionSuggester */
 	private $resolutionSuggester;
 
-	/**
-	 * @var UserOptionsLookup
-	 */
-	private $userOptionsLookup;
+	/** @var SubmittedTextCache|null */
+	private $textCache;
+
+	/** @var string */
+	private $newEditSummary;
+
+	/** @var string|null */
+	private $editFontOption;
 
 	/**
 	 * @param Title $title
 	 * @param OutputPage $out
 	 * @param IBufferingStatsdDataFactory $stats
-	 * @param string $submitLabel
-	 * @param string $newEditSummary
+	 * @param string $submitLabel Message key for submit button's label
 	 * @param IContentHandlerFactory $contentHandlerFactory
 	 * @param TwoColConflictContext $twoColContext
 	 * @param ResolutionSuggester $resolutionSuggester
-	 * @param UserOptionsLookup $userOptionsLookup
+	 * @param BagOStuff|null $textCache
+	 * @param string $newEditSummary
+	 * @param string|null $editFontOption
 	 */
 	public function __construct(
 		Title $title,
 		OutputPage $out,
 		IBufferingStatsdDataFactory $stats,
 		string $submitLabel,
-		string $newEditSummary,
 		IContentHandlerFactory $contentHandlerFactory,
 		TwoColConflictContext $twoColContext,
 		ResolutionSuggester $resolutionSuggester,
-		UserOptionsLookup $userOptionsLookup
+		BagOStuff $textCache = null,
+		string $newEditSummary = '',
+		string $editFontOption = null
 	) {
 		parent::__construct( $title, $out, $stats, $submitLabel, $contentHandlerFactory );
 
-		$this->newEditSummary = $newEditSummary;
 		$this->twoColContext = $twoColContext;
 		$this->resolutionSuggester = $resolutionSuggester;
-		$this->userOptionsLookup = $userOptionsLookup;
+		$this->textCache = $textCache ? new SubmittedTextCache( $textCache ) : null;
+		$this->newEditSummary = $newEditSummary;
+		$this->editFontOption = $editFontOption;
 
 		$this->out->enableOOUI();
 		$this->out->addModuleStyles( [
@@ -238,7 +235,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 			new HtmlEditableTextComponent(
 				$this->out->getContext(),
 				$language,
-				$this->userOptionsLookup->getOption( $user, 'editfont' )
+				$this->editFontOption
 			),
 			$this->out->getContext()
 		) )->getHtml(
@@ -255,7 +252,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 			new HtmlEditableTextComponent(
 				$this->out->getContext(),
 				$this->out->getLanguage(),
-				$this->userOptionsLookup->getOption( $this->out->getUser(), 'editfont' )
+				$this->editFontOption
 			),
 			$this->out->getContext()
 		) )->getHtml(
@@ -284,8 +281,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	}
 
 	private function setSubmittedTextCache() {
-		$textCache = new SubmittedTextCache( ObjectCache::getInstance( 'db-replicated' ) );
-		if ( !$textCache->stashText(
+		if ( $this->textCache && !$this->textCache->stashText(
 			$this->title->getPrefixedDBkey(),
 			$this->out->getUser(),
 			$this->out->getRequest()->getSessionId(),

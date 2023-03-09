@@ -13,12 +13,13 @@
 			"Winston Sung",
 			"Wwycheuk",
 			"Xiplus",
-			"一個正常人"
+			"一個正常人",
+			"捍粵者"
 		]
 	},
 	"minerva-last-modified-date": "最後編輯於 $1 $2",
 	"minerva-watchlist-cta": "保持追蹤此頁面以及對此的所有修改。",
-	"minerva-talk-add-topic": "新增討論",
+	"minerva-talk-add-topic": "新增話題",
 	"mobile-frontend-cookies-required": "切換檢視模式需要開啟 Cookies，請先開啟後再重試。",
 	"mobile-frontend-editor-edit": "編輯",
 	"minerva-download": "下載 PDF",
@@ -29,7 +30,6 @@
 	"mobile-frontend-home-button": "首頁",
 	"mobile-frontend-language-article-heading": "語言",
 	"mobile-frontend-languages-not-available": "此頁面沒有其它可用的語言版本。",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|歡迎}}，$1！",
 	"mobile-frontend-main-menu-button-tooltip": "開啟主選單",
 	"mobile-frontend-main-menu-contributions": "貢獻",
 	"mobile-frontend-main-menu-login": "登入",
@@ -73,7 +73,7 @@
 	"minerva-page-actions-wikibase": "{{WBREPONAME}}項目",
 	"minerva-page-actions-language-switcher": "語言",
 	"minerva-page-actions-history": "歷史",
-	"minerva-talk-explained": "進行的討論",
+	"minerva-talk-explained": "活躍討論串",
 	"minerva-talk-explained-empty": "此頁面上沒有任何討論。",
 	"minerva-talk-full-page": "作為 wiki 頁面閱讀",
 	"minerva-talk-topic-feedback": "已加入新的話題至對話頁面！",

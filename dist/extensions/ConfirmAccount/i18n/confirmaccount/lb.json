@@ -3,7 +3,8 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"confirmaccounts": "Ufroe vu Benotzerkonte confirméieren",
@@ -20,7 +21,7 @@
 	"confirmaccount-bio-q": "Biographie",
 	"confirmaccount-showopen": "Ufroen déi nach opstinn",
 	"confirmaccount-showrej": "Refuséiert Ufroen",
-	"confirmaccount-showheld": "Ufroen déi 'en-cours' sinn",
+	"confirmaccount-showheld": "Ufroen, déi \"en-cours\" sinn",
 	"confirmaccount-showexp": "ofgelafen Ufroen",
 	"confirmaccount-review": "Nokucken",
 	"confirmaccount-types": "Sicht eng Waardelëscht vun de Benotzerkonteconfirmatiounen hei ënnendrënner eraus:",
@@ -29,7 +30,7 @@
 	"confirmaccount-type-0": "eventuell Auteuren",
 	"confirmaccount-type-1": "eventuell Auteuren",
 	"confirmaccount-q-open": "Ufroen déi nach opstinn",
-	"confirmaccount-q-held": "Ufroen déi 'en-cours' sinn",
+	"confirmaccount-q-held": "Ufroen, déi \"en-cours\" sinn",
 	"confirmaccount-q-rej": "rezent refuséiert Ufroen",
 	"confirmaccount-q-stale": "ofgelafen Ufroen",
 	"confirmaccount-badid": "Et gëtt keng oppe Benotzerufro mat der ID déi dir uginn hutt.\nSe gouf eventuell scho behandelt.",

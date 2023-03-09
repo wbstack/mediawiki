@@ -16,6 +16,7 @@
 }
 
 .overlay-header-container {
+	// Overrides padding added by .header-container
 	padding: 0;
 }
 
@@ -27,7 +28,7 @@
 	}
 
 	.mw-ui-anchor,
-	.mw-ui-button {
+	.mw-ui-button:not( .mw-ui-icon ) {
 		height: @overlayHeaderHeight;
 
 		.header-chrome & {

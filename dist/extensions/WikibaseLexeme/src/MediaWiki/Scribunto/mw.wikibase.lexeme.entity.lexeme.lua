@@ -7,8 +7,10 @@ mw_interface = nil
 local wikibaseLexemeEntityLexeme = {}
 local methodtable = {}
 local wikibaseEntity = require 'mw.wikibase.entity'
+local util = require 'libraryUtil'
+local checkType = util.checkType
 
-wikibaseLexemeEntityLexeme.create = function( data )
+function wikibaseLexemeEntityLexeme.create( data )
 	if type( data ) ~= 'table' then
 		error( 'Expected a table obtained via mw.wikibase.getEntity, got ' .. type( data ) .. ' instead' )
 	end
@@ -54,7 +56,7 @@ wikibaseLexemeEntityLexeme.create = function( data )
 	return entity
 end
 
-methodtable.getLemmas = function( entity )
+function methodtable.getLemmas( entity )
 	local lemmas = {}
 	for lang, lemma in pairs( entity.lemmas ) do
 		table.insert( lemmas, { lemma.value, lemma.language } )
@@ -62,12 +64,41 @@ methodtable.getLemmas = function( entity )
 	return lemmas
 end
 
-methodtable.getLanguage = function( entity )
+function methodtable.getLemma( entity, language )
+	checkType( 'getLemma', 1, language, 'string', true )
+	language = language or mw.language.getContentLanguage():getCode()
+	lemma = entity.lemmas[ language ]
+	if lemma then
+		return lemma.value, lemma.language
+	else
+		return nil
+	end
+end
+
+function methodtable.getLanguage( entity )
 	return entity.language
 end
 
-methodtable.getLexicalCategory = function( entity )
+function methodtable.getLexicalCategory( entity )
 	return entity.lexicalCategory
+end
+
+function methodtable.getForms( entity )
+	local wikibaseLexemeEntityForm = require 'mw.wikibase.lexeme.entity.form'
+	local forms = {}
+	for i, form in pairs( entity.forms or {} ) do
+		table.insert( forms, wikibaseLexemeEntityForm.create( form ) )
+	end
+	return forms
+end
+
+function methodtable.getSenses( entity )
+	local wikibaseLexemeEntitySense = require 'mw.wikibase.lexeme.entity.sense'
+	local senses = {}
+	for i, sense in pairs( entity.senses or {} ) do
+		table.insert( senses, wikibaseLexemeEntitySense.create( sense ) )
+	end
+	return senses
 end
 
 package.loaded['mw.wikibase.lexeme.entity.lexeme'] = wikibaseLexemeEntityLexeme

@@ -26,8 +26,8 @@
 	 * @class
 	 * @constructor
 	 * @mixes OO.EventEmitter
-	 * @param {string[]} [defaultNamespaces] The namespaces selected by default (for new searches)
-	 * @param {Object} defaultFieldValues Defaults for search field values
+	 * @param {string[]} [defaultNamespaces=[]] The namespaces selected by default (for new searches)
+	 * @param {Object} [defaultFieldValues={}] Defaults for search field values
 	 */
 	mw.libs.advancedSearch.dm.SearchModel = function ( defaultNamespaces, defaultFieldValues ) {
 		this.searchFields = {};

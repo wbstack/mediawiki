@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chinneeb"
+		]
+	},
+	"advancedsearch-options-pane-head": "Нарийвчилсан хайлт:",
+	"advancedsearch-optgroup-text": "Хуудаснаас хайх",
+	"advancedsearch-optgroup-structure": "Бүтэц",
+	"advancedsearch-optgroup-files": "Файл ба зураг",
+	"advancedsearch-optgroup-sort": "Эрэмбэлэх дараалал",
+	"advancedsearch-field-plain": "Эдгээр үгс",
+	"advancedsearch-field-phrase": "Энэ бичигнээс",
+	"advancedsearch-field-or": "Эдгээр үгсээс",
+	"advancedsearch-field-not": "Эдгээрээс өөр үгс",
+	"advancedsearch-field-filetype": "Файлын төрөл",
+	"advancedsearch-field-filew": "Файлын өргөн пикселээр"
+}

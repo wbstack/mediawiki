@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Abijeet Patro",
 			"Anamdas",
+			"AnupamM",
 			"Innocentbunny",
 			"Jayprakash12345",
 			"NehalDaveND",
@@ -9,18 +11,16 @@
 			"Nitin1485",
 			"Rajat11",
 			"Sachinkatiyar",
+			"Saurmandal",
 			"Sfic",
 			"Siddhartha Ghai",
 			"Smtchahal",
-			"ThisIsACreeper0101",
-			"Abijeet Patro",
-			"AnupamM",
-			"Saurmandal"
+			"ThisIsACreeper0101"
 		]
 	},
 	"minerva-last-modified-date": "अंतिम बार $1 को $2 बजे संपादित किया गया",
 	"minerva-watchlist-cta": "इस पृष्ठ और इसपर सभी बदलावों पर ध्यान रखें।",
-	"minerva-talk-add-topic": "चर्चा जोड़ें",
+	"minerva-talk-add-topic": "विषय जोड़ें",
 	"mobile-frontend-cookies-required": "दृश्य मोड को स्विच करने के लिए कुकीज़ की आवश्यकता है कृपया उन्हें सक्षम करें और पुनः प्रयास करें।",
 	"mobile-frontend-editor-edit": "संपादित करें",
 	"minerva-download": "PDF डाउनलोड करें",
@@ -31,7 +31,6 @@
 	"mobile-frontend-home-button": "घर",
 	"mobile-frontend-language-article-heading": "भाषा",
 	"mobile-frontend-languages-not-available": "यह पृष्ठ अन्य भाषाओं में उपलब्ध नहीं है।",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|स्वागत है}}, $1 जी!",
 	"mobile-frontend-main-menu-button-tooltip": "मुख्य मेनू खोलें",
 	"mobile-frontend-main-menu-contributions": "योगदान",
 	"mobile-frontend-main-menu-login": "लॉग-इन करें",

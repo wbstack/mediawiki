@@ -23,9 +23,8 @@ module.exports = ( function ( mw, wikibase ) {
 					).text();
 				};
 
+				var _labels = {};
 				if ( languageCodes !== null ) {
-
-					var _labels = {};
 					languageCodes.forEach( function ( code ) {
 						_labels[ code ] = getLanguageLabel( code );
 					} );
@@ -70,4 +69,4 @@ module.exports = ( function ( mw, wikibase ) {
 		};
 	};
 
-} )( mw, wikibase );
+}( mw, wikibase ) );

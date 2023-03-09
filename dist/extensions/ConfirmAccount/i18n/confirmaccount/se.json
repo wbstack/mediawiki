@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Yupik",
+			"Kimberli Mäkäräinen (WMNO)"
+		]
+	},
+	"confirmaccount-email-q": "E-poastačujuhus",
+	"confirmaccount-email": "E-poastačujuhus:",
+	"confirmaccount-ip": "IP-čujuhus:",
+	"confirmaccount-wsum": "Bures boahtin!"
+}

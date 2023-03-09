@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bgo eiu"
+		]
+	},
+	"special-entitieswithoutdescription": "تفصیلاں بنھا چیزاں",
+	"wikibasecirrus-entitieswithoutdescription-legend": "تفصیلاں بنھا چیزاں دی لسٹ لیلو",
+	"special-entitieswithoutlabel": "چیپیاں بنھا چیزاں",
+	"wikibasecirrus-entitieswithoutlabel-legend": "چیپی بنھا چیزاں دی لسٹ لیلو",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "بولی دا کوڈ:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "قسم:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "لبھو:",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" نہیں درستی بولی دا کوڈ اے۔",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" نہیں درستی چیز دی قسم اے۔"
+}

@@ -1,16 +1,17 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Repository;
+namespace MediaWiki\Extension\OAuth\Repository;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Repositories\ScopeRepositoryInterface;
-use MediaWiki\Extensions\OAuth\Backend\MWOAuthException;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Entity\ClientEntity;
-use MediaWiki\Extensions\OAuth\Entity\ScopeEntity;
-use MediaWiki\Extensions\OAuth\Entity\UserEntity;
-use MWGrants;
+use MediaWiki\Extension\OAuth\Backend\MWOAuthException;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Entity\ClientEntity;
+use MediaWiki\Extension\OAuth\Entity\ScopeEntity;
+use MediaWiki\Extension\OAuth\Entity\UserEntity;
+use MediaWiki\MediaWikiServices;
+use WikiMap;
 
 class ScopeRepository implements ScopeRepositoryInterface {
 	/**
@@ -23,7 +24,8 @@ class ScopeRepository implements ScopeRepositoryInterface {
 	];
 
 	public function __construct() {
-		$this->allowedScopes = array_merge( $this->allowedScopes, MWGrants::getValidGrants() );
+		$grantsInfo = MediaWikiServices::getInstance()->getGrantsInfo();
+		$this->allowedScopes = array_merge( $this->allowedScopes, $grantsInfo->getValidGrants() );
 	}
 
 	public function getAllowedScopes() {
@@ -83,7 +85,7 @@ class ScopeRepository implements ScopeRepositoryInterface {
 
 		// Filter out not approved scopes
 		try {
-			$approval = $clientEntity->getCurrentAuthorization( $mwUser, wfWikiID() );
+			$approval = $clientEntity->getCurrentAuthorization( $mwUser, WikiMap::getCurrentWikiId() );
 			$approvedScopeIds = $approval->getGrants();
 		} catch ( MWOAuthException $ex ) {
 			$approvedScopeIds = [];

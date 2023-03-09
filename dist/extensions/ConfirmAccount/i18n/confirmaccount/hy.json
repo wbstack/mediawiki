@@ -1,9 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kareyac"
+			"Kareyac",
+			"Սերգեյ Սաֆարյան"
 		]
 	},
+	"confirmaccount-name": "Օգտանուն",
 	"confirmaccount-pos-0": "հեղինակ",
 	"confirmaccount-submit": "Հաստատել"
 }

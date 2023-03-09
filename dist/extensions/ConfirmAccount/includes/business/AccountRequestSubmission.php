@@ -84,7 +84,7 @@ class AccountRequestSubmission {
 				'accountreq_permission_denied',
 				$context->msg( 'badaccess-group0' )->escaped()
 			];
-		} elseif ( wfReadOnly() ) {
+		} elseif ( MediaWikiServices::getInstance()->getReadOnlyMode()->isReadOnly() ) {
 			return [ 'accountreq_readonly', $context->msg( 'badaccess-group0' )->escaped() ];
 		}
 

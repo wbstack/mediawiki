@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Chadyka"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Пашырэнне WikibaseLexeme для ўжывання функцыянальнасцяў CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Профіль пераацэнкі для пошуку прэфіксаў (запаўняльнага)"
+}

@@ -368,6 +368,12 @@ class MediaWikiTitleCodec implements TitleFormatter, TitleParser {
 		# override chars get included in list displays.
 		$dbkey = preg_replace( '/[\x{200E}\x{200F}\x{202A}-\x{202E}]+/u', '', $dbkey );
 
+		if ( $dbkey === null ) {
+			# Regex had an error. Most likely this is caused by invalid UTF-8
+			$exception = ( $this->createMalformedTitleException )( 'title-invalid-utf8', $text );
+			throw $exception;
+		}
+
 		# Clean up whitespace
 		# Note: use of the /u option on preg_replace here will cause
 		# input with invalid UTF-8 sequences to be nullified out in PHP 5.2.x,
@@ -561,7 +567,7 @@ class MediaWikiTitleCodec implements TitleFormatter, TitleParser {
 		// Fill fields
 		$parts['dbkey'] = $dbkey;
 
-		// Sanity check to ensure that the return value can be used to construct a TitleValue.
+		// Check to ensure that the return value can be used to construct a TitleValue.
 		// All issues should in theory be caught above, this is here to enforce consistency.
 		try {
 			TitleValue::assertValidSpec(
@@ -599,8 +605,6 @@ class MediaWikiTitleCodec implements TitleFormatter, TitleParser {
 				'|%[0-9A-Fa-f]{2}' .
 				# XML/HTML character references produce similar issues.
 				'|&[A-Za-z0-9\x80-\xff]+;' .
-				'|&#[0-9]+;' .
-				'|&#x[0-9A-Fa-f]+;' .
 				'/S';
 		}
 

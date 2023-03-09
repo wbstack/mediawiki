@@ -28,6 +28,7 @@
 	"templatesandbox-invalid-title": "العنوان الذي حددته غير صالح.",
 	"templatesandbox-title-not-exists": "العنوان الذي حددته غير موجود.",
 	"templatesandbox-revision-not-exists": "المراجعة التي حددتها غير موجودة.",
+	"templatesandbox-revision-no-content": "المراجعة التي حددتها ليس لها محتوى ، أو ليس لديك الإذن لعرضها.",
 	"templatesandbox-invalid-prefix": "بادئة الملعب التي حددتها غير صالحة.",
 	"templatesandbox-prefix-not-local": "بادئة الملعب التي حددتها ليست محلية.",
 	"templatesandbox-page-or-revid": "يجب عليك إدخال إما عنوان صفحة أو رقم معرف مراجعة.",
@@ -38,5 +39,6 @@
 	"templatesandbox-editform-need-title": "يجب تعيين اسم الصفحة المراد معاينتها مع هذا القالب.",
 	"templatesandbox-editform-invalid-template": "اسم القالب الذي حددته غير صالح.",
 	"templatesandbox-editform-invalid-title": "العنوان الذي حددته للمعاينة غير صالح.",
-	"templatesandbox-editform-title-not-exists": "العنوان الذي حددته للمعاينة غير موجود."
+	"templatesandbox-editform-title-not-exists": "العنوان الذي حددته للمعاينة غير موجود.",
+	"templatesandbox-failed-replace-section": "فشل استبدال قسم من الصفحة الحالية."
 }

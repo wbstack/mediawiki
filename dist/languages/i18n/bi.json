@@ -4,7 +4,8 @@
 			"Iketsi",
 			"MinecraftAustralia",
 			"Sotiale",
-			"Ushanka"
+			"Ushanka",
+			"Amire80"
 		]
 	},
 	"underline-always": "Oltaem",
@@ -53,16 +54,18 @@
 	"aug": "Ogis",
 	"oct": "Okt",
 	"dec": "Des",
-	"pagecategories": "{{PLURAL:$1|Grup|Grups}}",
 	"mypage": "Pej blong mi",
 	"mytalk": "Tingting blong",
 	"and": "&#32;mo",
 	"search": "Faenem samting",
+	"view-history": "Lukluk histri",
 	"history": "Pej histri",
 	"history_short": "Histri",
+	"view-view": "Rid",
 	"edit": "Jenisim hem",
+	"view-edit": "Jenisim hem",
 	"newpage": "Mekem niu pej",
-	"talkpagelinktext": "Toktok",
+	"talkpagelinktext": "toktok",
 	"specialpage": "Spesel Pej",
 	"talk": "Tingting",
 	"otherlanguages": "In other toktoks",
@@ -78,7 +81,6 @@
 	"nstab-main": "Atikel",
 	"nstab-special": "Spesel pej",
 	"nstab-project": "Projek pej",
-	"nstab-category": "Grup",
 	"mainpage-nstab": "Nambawan Pej",
 	"createacct-benefit-body2": "{{PLURAL:$1|pej|pejs}}",
 	"loginlanguagelabel": "Toktok: $1",
@@ -87,6 +89,7 @@
 	"searchresults-title": "Search results from \"$1\"",
 	"searchall": "olgeta",
 	"servertime": "Taem blong server",
+	"action-move": "Muv",
 	"recentchanges": "Niu jenis",
 	"listfiles_name": "Nem",
 	"randompage": "Random pej",
@@ -122,5 +125,7 @@
 	"redirect-page": "Pej ID",
 	"specialpages": "Spesel pej",
 	"tags-active-yes": "Yes",
-	"tags-active-no": "No"
+	"tags-active-no": "No",
+	"nstab-mainpage": "Nambawan Pej",
+	"skin-action-move": "Muv"
 }

@@ -16,9 +16,13 @@
  *
  */
 
-class ElasticaHttpTransportCloser extends \Elastica\Transport\Http {
+namespace MediaWiki\Extension\Elastica;
+
+use Elastica\Transport\Http;
+
+class ElasticaHttpTransportCloser extends Http {
 	public static function destroySingleton() {
 		// @phan-suppress-next-line PhanTypeMismatchPropertyProbablyReal
-		\Elastica\Transport\Http::$_curlConnection = null;
+		Http::$_curlConnection = null;
 	}
 }

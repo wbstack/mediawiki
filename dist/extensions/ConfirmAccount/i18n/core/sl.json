@@ -1,0 +1,16 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eleassar"
+		]
+	},
+	"confirmaccount-newrequests": "Na pregled {{PLURAL:$1|čaka|čakata|čakajo|čaka}} '''$1''' {{PLURAL:$1|odprt zahtevek|odprta zahtevka|odprti zahtevki|odprtih zahtevkov}} za [[Special:ConfirmAccounts|račun]]. '''Potrebna je vaša pozornost!'''",
+	"requestaccount-loginnotice": "Če želite pridobiti uporabniški račun, morate '''[[Special:RequestAccount|zaprositi zanj]]'''.",
+	"action-confirmaccount": "pregledovanje in sprejemanje računov",
+	"right-confirmaccount": "Ogledovanje [[Special:ConfirmAccounts|vrste s prošnjami za račun]]",
+	"right-confirmaccount-notify": "Prejemanje obvestil po e-poštni o novih odobrenih prošnjah za račun",
+	"action-requestips": "ogledovanje IP-naslovov prosilcev pri obdelavi prošenj za račun",
+	"right-requestips": "Ogledovanje IP-naslovov prosilcev pri obdelavi prošenj za račun",
+	"action-lookupcredentials": "ogledovanje uporabniških poverilnic",
+	"right-lookupcredentials": "Ogledovanje [[Special:UserCredentials|uporabniških poverilnic]]"
+}

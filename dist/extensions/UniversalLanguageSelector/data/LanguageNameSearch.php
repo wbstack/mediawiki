@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 /**
  * Cross-Language Language name search
  *
@@ -29,7 +32,7 @@ class LanguageNameSearch {
 	 * The returned language name for autocompletion is the first one that
 	 * matches in this list:
 	 * 1: exact match in [user, autonym, any other language]
-	 * 2: prefix match in [user, autonum, any other language]
+	 * 2: prefix match in [user, autonym, any other language]
 	 * 3: inline match in [user, autonym, any other language]
 	 *
 	 * @param string $searchKey
@@ -46,9 +49,11 @@ class LanguageNameSearch {
 			return [];
 		}
 
+		$languageNameUtils = MediaWikiServices::getInstance()->getLanguageNameUtils();
+
 		// Always prefer exact language code match
-		if ( Language::isKnownLanguageTag( $searchKey ) ) {
-			$name = mb_strtolower( Language::fetchLanguageName( $searchKey, $userLanguage ) );
+		if ( $languageNameUtils->isKnownLanguageTag( $searchKey ) ) {
+			$name = mb_strtolower( $languageNameUtils->getLanguageName( $searchKey, $userLanguage ) );
 			// Check if language code is a prefix of the name
 			if ( strpos( $name, $searchKey ) === 0 ) {
 				$results[$searchKey] = $name;
@@ -58,13 +63,10 @@ class LanguageNameSearch {
 		}
 
 		$index = self::getIndex( $searchKey );
-		$bucketsForIndex = [];
-		if ( isset( LanguageNameSearchData::$buckets[$index] ) ) {
-			$bucketsForIndex = LanguageNameSearchData::$buckets[$index];
-		}
+		$bucketsForIndex = LanguageNameSearchData::$buckets[$index] ?? [];
 
 		// types are 'prefix', 'infix' (in this order!)
-		foreach ( $bucketsForIndex as $bucketType => $bucket ) {
+		foreach ( $bucketsForIndex as $bucket ) {
 			foreach ( $bucket as $name => $code ) {
 				// We can skip checking languages we already have in the list
 				if ( isset( $results[ $code ] ) ) {
@@ -79,8 +81,8 @@ class LanguageNameSearch {
 				// Once we find a match, figure out the best name to display to the user
 				// If $userLanguage is not provided (null), it is the same as autonym
 				$candidates = [
-					mb_strtolower( Language::fetchLanguageName( $code, $userLanguage ) ),
-					mb_strtolower( Language::fetchLanguageName( $code, null ) ),
+					mb_strtolower( $languageNameUtils->getLanguageName( $code, $userLanguage ) ),
+					mb_strtolower( $languageNameUtils->getLanguageName( $code, null ) ),
 					$name
 				];
 
@@ -114,10 +116,10 @@ class LanguageNameSearch {
 		if ( $codepoint < 4000 ) {
 			// For latin etc. we need smaller buckets for speed
 			return $codepoint;
-		} else {
-			// Try to group names of same script together
-			return $codepoint - ( $codepoint % 1000 );
 		}
+
+		// Try to group names of same script together
+		return $codepoint - ( $codepoint % 1000 );
 	}
 
 	/**
@@ -138,27 +140,27 @@ class LanguageNameSearch {
 				$number = $thisValue;
 
 				break;
-			} else {
-				// Codepoints larger than 127 are represented by multi-byte sequences
-				if ( $values === [] ) {
-					// 224 is the lowest non-overlong-encoded codepoint.
-					$lookingFor = ( $thisValue < 224 ) ? 2 : 3;
+			}
+
+			// Codepoints larger than 127 are represented by multi-byte sequences
+			if ( $values === [] ) {
+				// 224 is the lowest non-overlong-encoded codepoint.
+				$lookingFor = ( $thisValue < 224 ) ? 2 : 3;
+			}
+
+			$values[] = $thisValue;
+			if ( count( $values ) === $lookingFor ) {
+				// Refer http://en.wikipedia.org/wiki/UTF-8#Description
+				if ( $lookingFor === 3 ) {
+					$number = ( $values[0] % 16 ) * 4096;
+					$number += ( $values[1] % 64 ) * 64;
+					$number += $values[2] % 64;
+				} else {
+					$number = ( $values[0] % 32 ) * 64;
+					$number += $values[1] % 64;
 				}
 
-				$values[] = $thisValue;
-				if ( count( $values ) === $lookingFor ) {
-					// Refer http://en.wikipedia.org/wiki/UTF-8#Description
-					if ( $lookingFor === 3 ) {
-						$number = ( $values[0] % 16 ) * 4096;
-						$number += ( $values[1] % 64 ) * 64;
-						$number += $values[2] % 64;
-					} else {
-						$number = ( $values[0] % 32 ) * 64;
-						$number += $values[1] % 64;
-					}
-
-					break;
-				}
+				break;
 			}
 		}
 

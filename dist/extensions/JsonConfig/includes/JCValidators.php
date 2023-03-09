@@ -258,7 +258,7 @@ class JCValidators {
 			$value = $v->getValue();
 			if ( is_object( $value ) ) {
 				foreach ( $value as $key => $subVal ) {
-					if ( !is_a( $subVal, JCValue::class ) ) {
+					if ( !( $subVal instanceof JCValue ) ) {
 						$v->error( 'jsonconfig-err-unexpected-key', $path, $key );
 						return false;
 					}

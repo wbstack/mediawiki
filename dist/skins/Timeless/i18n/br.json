@@ -14,11 +14,14 @@
 	"timeless-more": "Muioc'h",
 	"timeless-sitetools": "Ostilhoù wiki",
 	"timeless-pageactions": "Ostilhoù evit ar pajennoù",
+	"timeless-userpagetools": "Ostilhoù evit ar bajenn implijer",
 	"timeless-action-addsection": "Kaoz nevez",
 	"timeless-view-view": "Lenn",
 	"timeless-pagemisc": "Muioc'h",
 	"timeless-namespaces": "Esaouennoù anv",
 	"timeless-pagetools": "Oberoù pajenn",
 	"timeless-languages": "Yezhoù",
-	"timeless-projects": "Raktresoù all"
+	"timeless-projects": "Raktresoù all",
+	"timeless-view-history": "Istor",
+	"timeless-action-undelete": "Diziverkañ {{PLURAL:$1|ur c'hemm|$1 kemm}}"
 }

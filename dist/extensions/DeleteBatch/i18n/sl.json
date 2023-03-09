@@ -4,6 +4,32 @@
 			"Eleassar"
 		]
 	},
+	"deletebatch": "Izbris paketa strani",
+	"deletebatch-desc": "Razširi viki s [[Special:DeleteBatch|posebno stranjo]] za paketni izbris predhodno določenih strani.",
+	"deletebatch-help": "Izbrišite paket strani.\nIzvedete lahko eno samo brisanje ali izbrišete strani, navedene v datoteki.\nIzberite uporabnika, ki bo naveden v dnevniških zapisih izbrisa.\nNaložene datoteke, ločene z »|«, morajo vsebovati ime strani in (izbirno) razlog za izbris.",
+	"deletebatch-caption": "Seznam strani:",
+	"deletebatch-default-reason": "Privzeti razlog za izbris:",
+	"deletebatch-extensionname": "Izbriši paket",
+	"deletebatch-title": "Izbriši paket",
+	"deletebatch-link-back": "Vrnitev na posebno stran",
+	"deletebatch-as": "Izvedi skript kot:",
+	"deletebatch-both-modes": "Izberite eno določeno stran ali dani seznam strani.",
+	"deletebatch-or": "<strong>ali</strong>",
 	"deletebatch-delete": "Izbriši",
-	"deletebatch-select-script": "Skript za brisanje strani"
+	"deletebatch-page": "Strani za izbris:",
+	"deletebatch-processing-from-file": "brisanje strani, navedenih v datoteki",
+	"deletebatch-processing-from-form": "brisanje strani, navedenih v obrazcu",
+	"deletebatch-omitting-nonexistent": "Izpustitev neobstoječe strani $1.",
+	"deletebatch-omitting-invalid": "Izpustitev neveljavne strani $1.",
+	"deletebatch-file-bad-format": "Datoteka mora biti golo besedilo.",
+	"deletebatch-file-missing": "Predložene datotek ni mogoče prebrati.",
+	"deletebatch-select-script": "Skript za brisanje strani",
+	"deletebatch-select-yourself": "Vi",
+	"deletebatch-no-page": "Določite vsaj eno stran za izbris ali izberite datoteko s seznamom strani.",
+	"deletebatch-system-username": "Skript za brisanje strani",
+	"action-deletebatch": "paketno brisanje strani",
+	"right-deletebatch": "Paketno brisanje strani",
+	"action-deletebatch-spoof": "paketno brisanje strani kot »Skript za brisanje strani«",
+	"right-deletebatch-spoof": "Paketno brisanje strani kot »Skript za brisanje strani«",
+	"deletebatch-deleting-file-only": "Opisna stran datoteke $1 ne obstaja; brisanje samo dejanske datoteke.\nTo dejanje ne bo zabeleženo."
 }

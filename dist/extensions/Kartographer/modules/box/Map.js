@@ -121,6 +121,12 @@ function getValidBounds( layer ) {
 
 KartographerMap = L.Map.extend( {
 	/**
+	 * Create a map within options.container
+	 *
+	 * options.container has to be visible before constructing the map
+	 * or call invalidateSizeAndSetInitialView when it becomes visible.
+	 * See also phab:T151524 and https://github.com/Leaflet/Leaflet/issues/4200
+	 *
 	 * @constructor
 	 * @param {Object} options **Configuration and options:**
 	 * @param {HTMLElement} options.container **Map container.**
@@ -136,7 +142,7 @@ KartographerMap = L.Map.extend( {
 	 * @param {number|string} [options.zoom] **Initial map zoom.**
 	 * @param {string} [options.lang] Language for map labels
 	 * @param {string} [options.style] Map style. _Defaults to
-	 *  `mw.config.get( 'wgKartographerDfltStyle' )`, or `'osm-intl'`._
+	 *  `mw.config.get( 'wgKartographerDfltStyle' )`._
 	 * @param {Kartographer.Box.MapClass} [options.parentMap] Parent map
 	 *   _(internal, used by the full screen map to refer its parent map)_.
 	 * @param {boolean} [options.fullscreen=false] Whether the map is a map
@@ -147,9 +153,9 @@ KartographerMap = L.Map.extend( {
 	 * @member Kartographer.Box.MapClass
 	 */
 	initialize: function ( options ) {
-
 		var args,
-			style = options.style || mw.config.get( 'wgKartographerDfltStyle' ) || 'osm-intl',
+			defaultStyle = mw.config.get( 'wgKartographerDfltStyle' ),
+			style = options.style || defaultStyle,
 			map = this;
 
 		if ( options.center === 'auto' ) {
@@ -246,7 +252,7 @@ KartographerMap = L.Map.extend( {
 		 * @property {string} layerUrl Base URL for the tile layer
 		 * @protected
 		 */
-		this.layerUrl = mapServer + '/' + style + urlFormat;
+		this.layerUrl = mapServer + ( style ? '/' + style : '' ) + urlFormat;
 
 		/**
 		 * @property {L.TileLayer} wikimediaLayer Reference to `Wikimedia`
@@ -371,8 +377,6 @@ KartographerMap = L.Map.extend( {
 	 * @chainable
 	 */
 	initView: function ( center, zoom, setView ) {
-		setView = setView !== false;
-
 		if ( Array.isArray( center ) ) {
 			if ( !isNaN( center[ 0 ] ) && !isNaN( center[ 1 ] ) ) {
 				center = L.latLng( center );
@@ -386,7 +390,7 @@ KartographerMap = L.Map.extend( {
 			center: center,
 			zoom: zoom
 		};
-		if ( setView ) {
+		if ( setView !== false ) {
 			this.setView( center, zoom, null, true );
 		}
 		return this;
@@ -458,14 +462,13 @@ KartographerMap = L.Map.extend( {
 	/**
 	 * Creates a new GeoJSON layer and adds it to the map.
 	 *
-	 * @param {string} groupName The layer name (id without special
-	 *   characters or spaces).
+	 * @param {string} groupId
 	 * @param {Object} geoJson Features
 	 * @param {Object} [options] Layer options
 	 * @return {L.mapbox.FeatureLayer|undefined} Added layer, or undefined in case e.g. the GeoJSON
 	 *   was invalid
 	 */
-	addGeoJSONLayer: function ( groupName, geoJson, options ) {
+	addGeoJSONLayer: function ( groupId, geoJson, options ) {
 		var layer;
 		try {
 			layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).addTo( this );
@@ -473,8 +476,8 @@ KartographerMap = L.Map.extend( {
 				return this.options.attribution;
 			};
 			this.attributionControl.addAttribution( layer.getAttribution() );
-			this.dataLayers[ groupName ] = layer;
-			layer.dataGroup = groupName;
+			this.dataLayers[ groupId ] = layer;
+			layer.dataGroup = groupId;
 			return layer;
 		} catch ( e ) {
 			mw.log( e );
@@ -489,26 +492,12 @@ KartographerMap = L.Map.extend( {
 	 * @param {Object} [position] Map `center` and `zoom`.
 	 */
 	openFullScreen: function ( position ) {
-
 		this.doWhenReady( function () {
 
 			var map = this.options.link ? this : this.fullScreenMap;
 			position = position || this.getMapPosition();
 
-			if ( map && map._updatingHash ) {
-				// Skip - there is nothing to do.
-				map._updatingHash = false;
-				return;
-
-			} else if ( map ) {
-
-				this.doWhenReady( function () {
-					map.setView(
-						position.center,
-						position.zoom
-					);
-				} );
-			} else {
+			if ( !map ) {
 				map = this.fullScreenMap = new KartographerMap( {
 					container: L.DomUtil.create( 'div', 'mw-kartographer-mapDialog-map' ),
 					center: position.center,
@@ -526,6 +515,17 @@ KartographerMap = L.Map.extend( {
 					this._initialPosition.zoom,
 					false
 				);
+			} else if ( map._updatingHash ) {
+				// Skip - there is nothing to do.
+				delete map._updatingHash;
+				return;
+			} else {
+				this.doWhenReady( function () {
+					map.setView(
+						position.center,
+						position.zoom
+					);
+				} );
 			}
 
 			mw.loader.using( 'ext.kartographer.dialog' ).then( function () {
@@ -571,9 +571,7 @@ KartographerMap = L.Map.extend( {
 		var center = this.getCenter().wrap(),
 			zoom = this.getZoom();
 
-		options = options || {};
-
-		if ( options.scaled ) {
+		if ( options && options.scaled ) {
 			center = L.latLng( this.getScaleLatLng( center.lat, center.lng, zoom ) );
 		}
 		return {

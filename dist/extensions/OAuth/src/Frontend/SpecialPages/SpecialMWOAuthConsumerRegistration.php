@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Frontend\SpecialPages;
+namespace MediaWiki\Extension\OAuth\Frontend\SpecialPages;
 
 /**
  * (c) Aaron Schulz 2013, GPL
@@ -21,23 +21,40 @@ namespace MediaWiki\Extensions\OAuth\Frontend\SpecialPages;
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-use MediaWiki\Extensions\OAuth\Backend\Consumer;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Control\ConsumerAccessControl;
-use MediaWiki\Extensions\OAuth\Control\ConsumerSubmitControl;
-use MediaWiki\Extensions\OAuth\Frontend\Pagers\ListMyConsumersPager;
-use MediaWiki\Extensions\OAuth\Frontend\UIUtils;
+use MediaWiki\Extension\OAuth\Backend\Consumer;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Control\ConsumerAccessControl;
+use MediaWiki\Extension\OAuth\Control\ConsumerSubmitControl;
+use MediaWiki\Extension\OAuth\Frontend\Pagers\ListMyConsumersPager;
+use MediaWiki\Extension\OAuth\Frontend\UIUtils;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Permissions\GrantsInfo;
+use MediaWiki\Permissions\GrantsLocalization;
 use User;
+use WikiMap;
 use Wikimedia\Rdbms\DBConnRef;
 
 /**
  * Page that has registration request form and consumer update form
  */
 class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
+	/** @var GrantsInfo */
+	private $grantsInfo;
 
-	public function __construct() {
+	/** @var GrantsLocalization */
+	private $grantsLocalization;
+
+	/**
+	 * @param GrantsInfo $grantsInfo
+	 * @param GrantsLocalization $grantsLocalization
+	 */
+	public function __construct(
+		GrantsInfo $grantsInfo,
+		GrantsLocalization $grantsLocalization
+	) {
 		parent::__construct( 'OAuthConsumerRegistration' );
+		$this->grantsInfo = $grantsInfo;
+		$this->grantsLocalization = $grantsLocalization;
 	}
 
 	public function doesWrites() {
@@ -88,8 +105,8 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 
 		// Format is Special:OAuthConsumerRegistration[/propose|/list|/update/<consumer key>]
 		$navigation = $par !== null ? explode( '/', $par ) : [];
-		$action = $navigation[0] ?? null;
-		$consumerKey = $navigation[1] ?? null;
+		$action = $navigation[0] ?? '';
+		$consumerKey = $navigation[1] ?? '';
 
 		if ( $this->getConfig()->get( 'MWOAuthReadOnly' ) && $action !== 'list' ) {
 			throw new \ErrorPageError( 'mwoauth-error', 'mwoauth-db-readonly' );
@@ -105,8 +122,8 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 
 			$allWikis = Utils::getAllWikiNames();
 
-			$showGrants = \MWGrants::getValidGrants();
-			$grantLinks = array_map( 'MWGrants::getGrantsLink', $showGrants );
+			$showGrants = $this->grantsInfo->getValidGrants();
+			$grantLinks = array_map( [ $this->grantsLocalization, 'getGrantsLink' ], $showGrants );
 
 			$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'mwoauth' );
 
@@ -176,8 +193,8 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 						'type' => $allWikis ? 'combobox' : 'select',
 						'options' => [
 							$this->msg( 'mwoauth-consumer-allwikis' )->escaped() => '*',
-							$this->msg( 'mwoauth-consumer-wiki-thiswiki', wfWikiID() )
-								->escaped() => wfWikiID()
+							$this->msg( 'mwoauth-consumer-wiki-thiswiki', WikiMap::getCurrentWikiId() )
+								->escaped() => WikiMap::getCurrentWikiId()
 						] + array_flip( $allWikis ),
 						'label-message' => 'mwoauth-consumer-wiki',
 						'required' => true,
@@ -241,7 +258,7 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 										'\User::getRightDescription', $rights ) );
 								},
 								array_intersect_key(
-									\MWGrants::getRightsByGrant(), array_flip( $showGrants )
+									$this->grantsInfo->getRightsByGrant(), array_flip( $showGrants )
 								)
 							)
 						),
@@ -249,7 +266,7 @@ class SpecialMWOAuthConsumerRegistration extends \SpecialPage {
 							static function ( $g ) {
 								return "grant-$g";
 							},
-							\MWGrants::getHiddenGrants()
+							$this->grantsInfo->getHiddenGrants()
 						),
 						// different format
 						'validation-callback' => null,

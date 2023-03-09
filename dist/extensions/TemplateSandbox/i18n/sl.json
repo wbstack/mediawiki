@@ -14,7 +14,7 @@
 	"templatesandbox-prefix-label": "Predpona peskovnika:",
 	"templatesandbox-page-label": "Prikazana stran:",
 	"templatesandbox-revid-label": "Prikazana redakcija:",
-	"templatesandbox-text-label": "Prikazano wikibesedilo:",
+	"templatesandbox-text-label": "Prikazano vikibesedilo:",
 	"templatesandbox-submit": "Ogled",
 	"templatesandbox-title-output": "Peskovnik za predloge: $1",
 	"templatesandbox-editform-legend": "Predogled strani s to predlogo",
@@ -25,14 +25,17 @@
 	"templatesandbox-invalid-title": "Navedeni naslov ni veljaven.",
 	"templatesandbox-title-not-exists": "Navedeni naslov ne obstaja.",
 	"templatesandbox-revision-not-exists": "Navedena redakcija ne obstaja.",
+	"templatesandbox-revision-no-content": "Redakcija, ki ste jo določili, nima vsebine, ali pa nimate dovoljenja za njen ogled.",
 	"templatesandbox-invalid-prefix": "Navedena predpona peskovnika ni veljavna.",
 	"templatesandbox-prefix-not-local": "Navedena predpona peskovnika ni lokalna.",
 	"templatesandbox-page-or-revid": "Navesti morate naslov strani ali ID-številko redakcije.",
 	"templatesandbox-fail-post": "<em>Ker je prišlo do izgube podatkov o seji, smo predogled zaradi preprečevanja napadov z JavaScriptom skrili.</em>\n\n<strong>Če je to veljaven poskus predogleda, poskusite znova.</strong>\nČe dejanje še vedno ne bo mogoče, se poskusite [[Special:UserLogout|odjaviti]] in znova prijaviti.",
 	"templatesandbox-fail-post-anon": "<em>Ker niste prijavljeni, smo predogled skrili kot previdnostni ukrep pred napadi z JavaScriptom.</em>\n\n<strong>Če je to veljaven poskus predogleda, se [[Special:UserLogin|prijavite]] in poskusite znova.</strong>",
+	"templatesandbox-anon-limited-preview": "Predogled sprememb JavaScript in CSS ni mogoč, če niste prijavljeni. Če si želite predogledati takšne spremembe, se [[Special:UserLogin|prijavite]] in poskusite znova.",
 	"templatesandbox-editform-need-template": "Za predogled še ene strani s to predlogo morate določiti ime predloge.",
 	"templatesandbox-editform-need-title": "Za predogled druge strani s to predlogo morate navesti naslov strani.",
 	"templatesandbox-editform-invalid-template": "Ime predloge, ki ste jo določili, ni veljavno.",
 	"templatesandbox-editform-invalid-title": "Naslov, ki ste ga navedli za predogled, ni veljaven.",
-	"templatesandbox-editform-title-not-exists": "Naslov, ki ste ga navedli za predogled, ne obstaja."
+	"templatesandbox-editform-title-not-exists": "Naslov, ki ste ga navedli za predogled, ne obstaja.",
+	"templatesandbox-failed-replace-section": "Zamenjava razdelka obstoječe strani ni uspela."
 }

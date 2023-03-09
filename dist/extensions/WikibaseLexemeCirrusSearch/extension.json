@@ -14,7 +14,7 @@
 			"WikibaseCirrusSearch": "*",
 			"WikibaseLexeme": "*"
 		},
-		"MediaWiki": ">= 1.33.0"
+		"MediaWiki": ">= 1.34.0"
 	},
 	"AutoloadNamespaces": {
 		"Wikibase\\Lexeme\\Search\\Elastic\\": "src/"

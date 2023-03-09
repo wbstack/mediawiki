@@ -3,7 +3,8 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"deletebatch": "Rei vu Säite läschen",
@@ -17,8 +18,8 @@
 	"deletebatch-or": "<strong>oder</strong>",
 	"deletebatch-delete": "Läschen",
 	"deletebatch-page": "Säite fir ze läschen:",
-	"deletebatch-processing-from-file": "Säite läschen déi am Fichier drastinn",
-	"deletebatch-processing-from-form": "Säite läschen déi am Formulaire drastinn",
+	"deletebatch-processing-from-file": "Säite läschen, déi am Fichier drastinn",
+	"deletebatch-processing-from-form": "Säite läschen, déi am Formulaire drastinn",
 	"deletebatch-omitting-nonexistent": "D'Säit $1 déi et net gëtt iwwersprangen.",
 	"deletebatch-omitting-invalid": "Déi ongëlteg Säit $1 iwwersprangen.",
 	"deletebatch-file-bad-format": "De Fichier sollt als textfile virleien",

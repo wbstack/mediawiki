@@ -47,7 +47,7 @@
 	"twocolconflict-split-tour-popup-btn-text": "Okay, verstanden.",
 	"twocolconflict-split-tour-popup1-header": "Unterschiedliche Änderungen werden Zeile für Zeile angezeigt.",
 	"twocolconflict-split-tour-popup1-message": "Wenn es einen Unterschied zwischen dem Text des anderen und von dir gibt, werden die zwei Versionen nebeneinander angezeigt: Die Version des anderen im linken gelben Kasten und deine im rechten blauen Kasten.<br /><br />Falls es keinen Unterschied zwischen den beiden Versionen gibt, werden die Zeilen in grauen Kästen angezeigt. Diese können aus- oder eingeklappt und gegebenenfalls bearbeitet werden.",
-	"twocolconflict-split-tour-popup2-header": "Wähle aus, welche Änderungen du behalten möchtest.",
+	"twocolconflict-split-tour-popup2-header": "Wähle aus, welche Änderungen du behalten möchtest",
 	"twocolconflict-split-tour-popup2-message": "Wähle aus, welche Textversion du behalten möchtest, indem du eine der zwei Schaltflächen zwischen jedem Zeilenpaar anklickst. Wenn du eine Version ausgewählt hast, kannst du sie mit Klick auf das Stiftsymbol bearbeiten. Es ist auch möglich, Text von der Version zu kopieren, die du nicht ausgewählt hast, indem du die Kopieren-und-einfügen-Funktion auf deiner Tastatur oder einen Rechtsklick benutzt.<br /><br />Du musst eine Version für jede geänderte Zeile auswählen, um den zusammengeführten Text zu speichern.",
 	"twocolconflict-split-tour-popup3-header": "Hervorgehobener Text",
 	"twocolconflict-split-tour-popup3-message": "Der in beiden Versionen einer Zeile geänderte Text wurde hervorgehoben. Nachdem du den Text bearbeitet hast, verschwindet die Hervorhebung.",

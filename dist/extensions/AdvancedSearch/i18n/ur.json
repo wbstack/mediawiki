@@ -4,14 +4,16 @@
 			"Abdulq",
 			"BukhariSaeed",
 			"Muhammad Shuaib",
-			"Zainab Meher"
+			"Zainab Meher",
+			"Obaid Raza"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]] میں مفصل تلاش کا استعمال",
-	"advancedsearch-options-pane-head": "اضافی اختیارات:",
+	"advancedsearch-options-pane-head": "اضافی تلاش:",
 	"advancedsearch-optgroup-text": "صفحے کے متن میں تلاش",
 	"advancedsearch-optgroup-structure": "ساخت",
 	"advancedsearch-optgroup-files": "فائلیں اور تصاویر",
+	"advancedsearch-optgroup-sort": "طرز ترتیب",
 	"advancedsearch-field-plain": "یہ الفاظ",
 	"advancedsearch-field-phrase": "ہو بہو یہی متن",
 	"advancedsearch-field-or": "ان الفاظ میں سے ایک",
@@ -24,7 +26,10 @@
 	"advancedsearch-field-filetype": "فائل کی قسم",
 	"advancedsearch-field-filew": "پکسلز میں فائل کی چوڑائی",
 	"advancedsearch-field-fileh": "پکسلز میں فائل کی لمبائی",
+	"advancedsearch-field-sort": "طرز ترتیب",
+	"advancedsearch-field-preview-sort": "ترتیب بلحاظ $1",
 	"advancedsearch-help-plain": ";وضاحت\n:عنوان یا متن میں ان الفاظ کی تلاش کے نتائج۔\n;درج ذیل امور کا خیال رکھیں\n:* تلاش میں متعدد الفاظ درج کیے جا سکتے ہیں۔\n:* رموز اوقاف اور دوسرے غیر حرفی ہندسی نشانات (سوائے وقف توضیحی اور وقفہ کے) نظر انداز کر دیے جائیں گے۔\n:* ممکن ہے کہ آپ کی تلاش سے ایسے نتائج سامنے آئیں جن میں آپ کے تلاش کردہ ایک یا زائد الفاظ نہ ہوں۔\n;صفحہ معاونت\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#Full_text_search مکمل متن کی تلاش]\n;سادہ تلاش میں نحوی متبادل\n:<code>کالی بلی</code>",
+	"advancedsearch-help-phrase": ";وضاحت\n:عنوان یا متن میں ان الفاظ کی تلاش کے نتائج۔\n;درج ذیل امور کا خیال رکھیں\n:* تلاش میں متعدد الفاظ درج کیے جا سکتے ہیں۔\n:* رموز اوقاف اور دوسرے غیر حرفی ہندسی نشانات (سوائے وقف توضیحی اور وقفہ کے) نظر انداز کر دیے جائیں گے۔\n:* ممکن ہے کہ آپ کی تلاش سے ایسے نتائج سامنے آئیں جن میں آپ کے تلاش کردہ ایک یا زائد الفاظ نہ ہوں۔\n;صفحہ معاونت\n:[hthttps://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers الفاظ، جملے، پیرے]\n;سادہ تلاش میں نحوی متبادل\n:کوٹیشن مارکس میں الفاظ، مثال کے طور پر <code>\"شروع سے شروع کریں\"</code>۔",
 	"advancedsearch-placeholder-exact-text": "\"بلی اور بکری کی محبت\"",
 	"advancedsearch-inlanguage-default": "زبان منتخب کریں",
 	"advancedsearch-filetype-section-types": "عمومی فائل کی اقسام",
@@ -42,6 +47,16 @@
 	"advancedsearch-filesize-equals": "کے برابر",
 	"advancedsearch-filesize-greater-than": "سے برتر",
 	"advancedsearch-filesize-smaller-than": "سے کم تر",
+	"advancedsearch-sort-relevance": "مطابقت",
+	"advancedsearch-sort-last-edit-asc": "تاریخ میں ترمیم کریں - قدیم ترین؛ پہلے",
+	"advancedsearch-sort-last-edit-desc": "تاریخ میں ترمیم کریں - حالیہ ترین؛ پہلے",
+	"advancedsearch-sort-create-timestamp-asc": "تاریخ تخلیق - قدیم ترین پہلے",
+	"advancedsearch-sort-create-timestamp-desc": "تخلیق کی تاریخ - حالیہ ترین پہلے",
+	"advancedsearch-sort-preview-relevance": "مطابقت",
+	"advancedsearch-sort-preview-last-edit-asc": "حالیہ ترمیم شدہ",
+	"advancedsearch-sort-preview-last-edit-desc": "تاریخ ترمیم",
+	"advancedsearch-sort-preview-create-timestamp-asc": "حالیہ تخلق شدہ",
+	"advancedsearch-sort-preview-create-timestamp-desc": "تاریخ تخلیق",
 	"advancedsearch-namespaces-search-in": "تلاش در:",
 	"advancedsearch-namespaces-remember": "اس انتخاب کو مستقبل کی تلاشوں کے لیے باقی رکھیں",
 	"advancedsearch-namespaces-preset-all": "تمام",
@@ -51,5 +66,5 @@
 	"advancedsearch-namespaces-placeholder": "نامہائے فضا کا اضافہ کریں۔۔۔",
 	"prefs-advancedsearch": "مفصل تلاش",
 	"advancedsearch-preference-help": "مفصل تلاش کی سہولت فعال کرنے کے بعد خاص:تلاش کے صفحہ پر ایک فارم دکھائی دے گا جس کی مدد سے آپ ویکیپیڈیا کے متن میں حسب مرضی اور مفصل تلاش کر سکتے ہیں اور اس کے لیے تلاش کے مخصوص الفاظ کا علم بھی ضروری نہیں ہے۔ نیز اس میں نام فضا کا طریقہ انتخاب بھی مختلف نظر آئے گا۔",
-	"advancedsearch-preference-disable": "مفصل تلاش کا انٹرفیس نہ دکھائیں"
+	"advancedsearch-preference-disable": "خاص:تلاش استعمال کرتے وقت ایڈوانسڈ سرچ انٹرفیس نہ دکھائیں۔"
 }

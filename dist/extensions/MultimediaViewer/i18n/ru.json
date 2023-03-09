@@ -15,11 +15,11 @@
 			"Smigles",
 			"Stjn",
 			"Striking Blue",
+			"Tanzun",
 			"Toghrul Rahimli",
 			"Tucvbif",
 			"Wizardist",
-			"Pacha Tchernof",
-			"Tanzun"
+			"Pacha Tchernof"
 		]
 	},
 	"multimediaviewer-desc": "Раскрывает эскизы в большие изображения на весь экран.",
@@ -59,9 +59,7 @@
 	"multimediaviewer-restriction-trademarked": "Это изображение содержит материал, который может быть объектом законов о товарном знаке.",
 	"multimediaviewer-restriction-default": "Это изображение может быть ограничено правовыми положениями вне закона об авторском праве. Смотрите страницу описания файла для деталей.",
 	"multimediaviewer-restriction-default-and-others": "Это изображение может быть дополнительно ограничено другими правовыми положениями вне закона об авторском праве. Смотрите страницу описания файла для деталей.",
-	"multimediaviewer-about-mmv": "О просмотрщике",
-	"multimediaviewer-discuss-mmv": "Обсуждение",
-	"multimediaviewer-help-mmv": "Справка",
+	"multimediaviewer-about-mmv": "О Медиа-просмотрщике",
 	"multimediaviewer-optout-mmv": "Отключить Медиа-просмотрщик",
 	"multimediaviewer-optin-mmv": "Включить Медиа-просмотрщик",
 	"multimediaviewer-optout-pending-mmv": "Отключение Медиа-просмотрщика",

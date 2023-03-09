@@ -9,6 +9,7 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\MediaWikiServices;
 use Wikibase\Lib\SettingsArray;
 
 global $wgCdnMaxAge;
@@ -24,14 +25,17 @@ return [
 	// feature flag for tainted references
 	'taintedReferencesEnabled' => false,
 
+	// feature flag for the Wikibase REST API
+	'restApiEnabled' => false,
+
 	// url of (termbox) ssr-server
-	'ssrServerUrl' => '',
+	'ssrServerUrl' => null,
 
 	// Timeout for SSR-Server in seconds
 	'ssrServerTimeout' => 3,
 
 	// feature flag for termbox
-	'termboxEnabled' => false,
+	'termboxEnabled' => true,
 
 	// debug flag for termbox ssr
 	'termboxUserSpecificSsrEnabled' => true,
@@ -73,19 +77,6 @@ return [
 	// list of logical database names of local client wikis.
 	// may contain mappings from site-id to db-name.
 	'localClientDatabases' => [],
-
-	// Settings for change dispatching
-	'dispatchMaxTime' => 60 * 60,
-	'dispatchIdleDelay' => 10,
-	'dispatchBatchChunkFactor' => 3,
-	'dispatchBatchCacheFactor' => 3,
-	'dispatchDefaultBatchSize' => 1000,
-	'dispatchDefaultMaxChunks' => 15,
-	'dispatchDefaultDispatchInterval' => 60,
-	'dispatchDefaultDispatchRandomness' => 15,
-	'dispatchViaJobsEnabled' => false,
-	'dispatchViaJobsAllowedClients' => [],
-	'dispatchViaJobsPruneChangesTableInJobEnabled' => false,
 
 	// Formats that shall be available via Special:EntityData.
 	// The first format will be used as the default.
@@ -272,9 +263,6 @@ return [
 	// characters (e.g. space, percent, etc.) should NOT be encoded.
 	'tabularDataStorageBaseUrl' => 'https://commons.wikimedia.org/wiki/',
 
-	// Name of the lock manager for dispatch changes coordinator
-	'dispatchingLockManager' => null,
-
 	// List of properties to be indexed
 	'searchIndexProperties' => [],
 	// List of property types to be indexed
@@ -283,9 +271,6 @@ return [
 	'searchIndexPropertiesExclude' => [],
 	// List of properties that, if in a qualifier, will be used for indexing quantities
 	'searchIndexQualifierPropertiesForQuantity' => [],
-
-	// Change it to a positive number so it becomes effective
-	'dispatchLagToMaxLagFactor' => 0,
 
 	// DB group to use in dump maintenance scripts. Defaults to "dump", per T147169.
 	'dumpDBDefaultGroup' => 'dump',
@@ -302,7 +287,7 @@ return [
 	 * generator as the 'upsert' generator only supports MySQL currently.
 	 *
 	 * @var string 'original' or 'mysql-upsert' depending on what implementation of IdGenerator
-	 * you wish to use.
+	 * you wish to use, or 'auto' to pick one depending on the database type.
 	 */
 	'idGenerator' => 'original',
 
@@ -324,7 +309,40 @@ return [
 
 	'entityTypesWithoutRdfOutput' => [],
 
+	'defaultEntityNamespaces' => false,
+
 	'entitySources' => function ( SettingsArray $settings ) {
+		if ( $settings->getSetting( 'defaultEntityNamespaces' ) ) {
+			global $wgServer;
+
+			if ( !defined( 'WB_NS_ITEM' ) ) {
+				throw new Exception( 'Constant WB_NS_ITEM is not defined' );
+			}
+
+			if ( !defined( 'WB_NS_PROPERTY' ) ) {
+				throw new Exception( 'Constant WB_NS_PROPERTY is not defined' );
+			}
+
+			$entityNamespaces = [
+				'item' => WB_NS_ITEM,
+				'property' => WB_NS_PROPERTY,
+			];
+
+			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
+			$hookContainer->run( 'WikibaseRepoEntityNamespaces', [ &$entityNamespaces ] );
+
+			return [
+				$settings->getSetting( 'localEntitySourceName' ) => [
+					'entityNamespaces' => $entityNamespaces,
+					'repoDatabase' => false,
+					'baseUri' => $wgServer . '/entity/',
+					'rdfNodeNamespacePrefix' => 'wd',
+					'rdfPredicateNamespacePrefix' => '',
+					'interwikiPrefix' => '',
+				],
+			];
+		}
+
 		throw new Exception( 'entitySources must be configured manually (or use the example settings)' );
 	},
 
@@ -410,4 +428,14 @@ return [
 	 * @see https://phabricator.wikimedia.org/T251480
 	 */
 	'tmpNormalizeDataValues' => false,
+
+	/**
+	 * @note This config options is primarily added for Wikidata transition use-case and can be
+	 * considered temporary. It could be removed in the future with no warning.
+	 *
+	 * @var bool Whether to enable the 'mul' language code,
+	 * adding it to the term language codes and falling back to it before the implicit 'en' fallback
+	 * @see https://phabricator.wikimedia.org/T297393
+	 */
+	'tmpEnableMulLanguageCode' => false,
 ];

@@ -343,7 +343,7 @@ mfExtend( EditorOverlayBase, Overlay, {
 	 */
 	reportError: function ( text ) {
 		var errorNotice = new MessageBox( {
-			className: 'errorbox',
+			className: 'mw-message-box-error',
 			msg: text,
 			heading: mw.msg( 'mobile-frontend-editor-error' )
 		} );
@@ -560,15 +560,16 @@ mfExtend( EditorOverlayBase, Overlay, {
 		var $actions = $( '<div>' ).addClass( 'actions' ),
 			$anonWarning = $( '<div>' ).addClass( 'anonwarning content' ).append(
 				new MessageBox( {
-					className: 'warningbox anon-msg',
+					className: 'mw-message-box-notice anon-msg',
 					msg: mw.msg( 'mobile-frontend-editor-anonwarning' )
 				} ).$el,
 				$actions
 			),
 			params = util.extend( {
-			// use wgPageName as this includes the namespace if outside Main
-				returnto: options.returnTo || mw.config.get( 'wgPageName' ),
-				returntoquery: 'action=edit&section=' + options.sectionId,
+				returnto: options.returnTo || (
+					// use wgPageName as this includes the namespace if outside Main
+					mw.config.get( 'wgPageName' ) + '#/editor/' + ( options.sectionId || 'all' )
+				),
 				warning: 'mobile-frontend-edit-login-action'
 			}, options.queryParams ),
 			signupParams = util.extend( {
@@ -602,7 +603,16 @@ mfExtend( EditorOverlayBase, Overlay, {
 
 		return $anonWarning;
 	},
-
+	/**
+	 * Creates and returns a copy of the anon talk message warning
+	 *
+	 * @memberof EditorOverlayBase
+	 * @instance
+	 * @return {jQuery.Element}
+	 */
+	createAnonTalkWarning: function () {
+		return $( '.minerva-anon-talk-message' ).clone();
+	},
 	/**
 	 * Get an options object not containing any defaults or editor
 	 * specific options, so that it can be used to construct a
@@ -653,13 +663,9 @@ mfExtend( EditorOverlayBase, Overlay, {
 		return this.dataPromise.then( function ( result ) {
 			// check if user is blocked
 			if ( result && result.blockinfo ) {
-				// Lazy-load moment only if it's needed, it's somewhat large (it is already used on
-				// mobile by Echo's notifications panel, where it's also lazy-loaded)
-				return mw.loader.using( 'moment' ).then( function () {
-					var block = parseBlockInfo( result.blockinfo ),
-						message = blockMessageDrawer( block );
-					return util.Deferred().reject( message );
-				} );
+				var block = parseBlockInfo( result.blockinfo ),
+					message = blockMessageDrawer( block );
+				return util.Deferred().reject( message );
 			}
 			return result;
 		} );

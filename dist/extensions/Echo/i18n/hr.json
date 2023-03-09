@@ -6,10 +6,10 @@
 			"Bugoslav",
 			"Ex13",
 			"MaGa",
-			"Roberta F.",
-			"Wumbolo",
 			"Neptune, the Mystic",
-			"Ponor"
+			"Ponor",
+			"Roberta F.",
+			"Wumbolo"
 		]
 	},
 	"echo-desc": "Sustav obavješćivanja suradnika o događajima i porukama",
@@ -41,7 +41,7 @@
 	"echo-learn-more": "Saznajte više",
 	"echo-log": "Javna evidencija",
 	"echo-new-messages": "Imate nove poruke na stranici za razgovor",
-	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Poruka|Poruke|Poruka}} na stranici za razgovor",
+	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Izmjena|Izmjene}} na mojoj stranici za razgovor",
 	"echo-category-title-article-linked": "Stavljanja {{PLURAL:$1|poveznica|poveznice|poveznica}} na stranicu",
 	"echo-category-title-reverted": "Uklanjanje {{PLURAL:$1|uređivanja}}",
 	"echo-category-title-mention": "{{PLURAL:$1|Spominjanje|Spominjanja}}",
@@ -57,7 +57,7 @@
 	"echo-category-title-thank-you-edit": "{{PLURAL:$1|Miljokaz|Miljokazi}} uređivanja",
 	"echo-category-title-watchlist": "Uređivanje praćene stranice",
 	"echo-category-title-minor-watchlist": "Manje uređivanje praćene stranice",
-	"echo-pref-tooltip-edit-user-talk": "Obavijesti me kad netko snimi poruku ili odgovori na mojoj stranici za razgovor.",
+	"echo-pref-tooltip-edit-user-talk": "Obavijesti me kad netko napravi uređivanje na mojoj stranici za razgovor.",
 	"echo-pref-tooltip-article-linked": "Obavijesti me kad netko doda poveznicu na stranicu koju sam započeo s druge stranice.",
 	"echo-pref-tooltip-reverted": "Obavijesti me kad netko ukloni moje uređivanje.",
 	"echo-pref-tooltip-mention": "Obavijesti me kad netko doda poveznicu prema mojoj suradničkoj stranici.",

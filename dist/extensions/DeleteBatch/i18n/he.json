@@ -26,10 +26,12 @@
 	"deletebatch-file-bad-format": "הקובץ אמור להיות קובץ טקסט פשוט.",
 	"deletebatch-file-missing": "לא ניתן לקרוא את הקובץ הנתון.",
 	"deletebatch-select-script": "סקריפט מחיקת דפים",
-	"deletebatch-select-yourself": "אתם",
+	"deletebatch-select-yourself": "עצמך",
 	"deletebatch-no-page": "אנא ציינו לפחות דף אחד למחיקה או בחרו קובץ המכיל רשימת דפים.",
-	"action-deletebatch": "למחוק מספר דפים בו־זמנית",
-	"right-deletebatch": "מחיקת מספר דפים בו־זמנית",
-	"right-deletebatch-spoof": "מחיקת מספר דפים בו־זמנית בתור \"סקריפט מחיקת דפים\"",
+	"deletebatch-system-username": "סקריפט מחיקת דפים",
+	"action-deletebatch": "למחוק כמה דפים בו־זמנית",
+	"right-deletebatch": "מחיקת כמה דפים בו־זמנית",
+	"action-deletebatch-spoof": "למחוק כמה דפים בו־זמנית בתור \"סקריפט מחיקת דפים\"",
+	"right-deletebatch-spoof": "מחיקת כמה דפים בו־זמנית בתור \"סקריפט מחיקת דפים\"",
 	"deletebatch-deleting-file-only": "דף תיאור הקובץ $1 אינו קיים; יימחק רק הקובץ.\nהפעולה הזאת לא תירשם ביומן."
 }

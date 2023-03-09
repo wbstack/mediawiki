@@ -12,11 +12,9 @@
 		]
 	},
 	"wikieditor-wikitext-tab": "Վիքիտեքստ",
-	"wikieditor-loading": "Բեռնվում է…",
 	"wikieditor-toolbar": "Խմբագրման վահանակ",
 	"wikieditor-toolbar-desc": "Բարձրացրած հարմարավետությամբ խմբագրման վահանակ",
 	"wikieditor-toolbar-preference": "Ակտիվացնել բարելավված խմբագրման վահանակը",
-	"wikieditor-toolbar-loading": "Բեռնում…",
 	"wikieditor-toolbar-tool-bold": "Թավատառ",
 	"wikieditor-toolbar-tool-bold-example": "Թավատառ տեքստ",
 	"wikieditor-toolbar-tool-italic": "Շեղատառ",
@@ -38,7 +36,7 @@
 	"wikieditor-toolbar-tool-link-insert": "Ավելացնել հղում",
 	"wikieditor-toolbar-tool-link-cancel": "Չեղարկել",
 	"wikieditor-toolbar-tool-link-int-target-status-exists": "Էջը գոյություն ունի",
-	"wikieditor-toolbar-tool-link-int-target-status-notexists": "Էջը գոյություն չունի",
+	"wikieditor-toolbar-tool-link-int-target-status-notexists": "{{SITENAME}}ում Էջը գոյություն չունի",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "Սխալ վերնագիր",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "Արտաքին հղում",
 	"wikieditor-toolbar-tool-link-int-target-status-loading": "Էջի գոյության ստուգում…",
@@ -47,7 +45,6 @@
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "Ձեր նշած URL-ը նման է վիքիի այլ էջին հղմանը։\nԴուք ուզո՞ւմ եք այս հղումը սարքել ներքին։",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-int": "Ներքին հղում",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-ext": "Արտաքին հղում",
-	"wikieditor-toolbar-tool-link-empty": "Դուք հղվելու որևէ բան չեք նշել։",
 	"wikieditor-toolbar-tool-file": "Պատկերներ և մեդիա նիշքեր",
 	"wikieditor-toolbar-tool-file-example": "Օրինակ.jpg",
 	"wikieditor-toolbar-tool-file-title": "Ավելացնել նիշք",
@@ -61,6 +58,7 @@
 	"wikieditor-toolbar-file-format-none": "ոչ մի",
 	"wikieditor-toolbar-tool-file-insert": "Ավելացնել",
 	"wikieditor-toolbar-tool-file-cancel": "Չեղարկել",
+	"wikieditor-toolbar-tool-file-upload": "Վերբեռնել",
 	"wikieditor-toolbar-tool-reference": "Ծանոթագրություն",
 	"wikieditor-toolbar-tool-reference-example": "Գրեք այստեղ ծանոթագրության տեքստը",
 	"wikieditor-toolbar-tool-reference-cancel": "Չեղարկել",
@@ -188,5 +186,6 @@
 	"wikieditor-toolbar-help-content-signature-result": "<a href='#' title='$1:Username'>Մասնակցի Անուն</a> (<a href='#' title='$2:Username'>քննարկում</a>)",
 	"wikieditor-toolbar-help-content-indent-description": "Խորքից",
 	"wikieditor-toolbar-help-content-indent-syntax": "Սովորական տեքստ<br />:Խորքից գրված տեքստ<br />::Խորքից գրված տեքստ",
-	"wikieditor-toolbar-help-content-indent-result": "Սովորական տեքստ<dl><dd>Խորքից գրված տեքստ<dl><dd>Խորքից գրված տեքստ</dd></dl></dd></dl>"
+	"wikieditor-toolbar-help-content-indent-result": "Սովորական տեքստ<dl><dd>Խորքից գրված տեքստ<dl><dd>Խորքից գրված տեքստ</dd></dl></dd></dl>",
+	"wikieditor-realtimepreview-preview": "Նախադիտում"
 }

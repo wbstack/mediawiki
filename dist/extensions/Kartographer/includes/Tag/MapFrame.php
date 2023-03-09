@@ -24,8 +24,7 @@ class MapFrame extends TagHandler {
 		'none' => 'tnone',
 	];
 
-	/** @inheritDoc */
-	protected $tag = 'mapframe';
+	public const TAG = 'mapframe';
 
 	/** @var int|string either a number of pixels, a percentage (e.g. "100%"), or "full" */
 	private $width;
@@ -37,7 +36,7 @@ class MapFrame extends TagHandler {
 	/**
 	 * @inheritDoc
 	 */
-	protected function parseArgs() {
+	protected function parseArgs(): void {
 		parent::parseArgs();
 		$this->state->useMapframe();
 		// @todo: should these have defaults?
@@ -50,17 +49,13 @@ class MapFrame extends TagHandler {
 	/**
 	 * @return string
 	 */
-	protected function render() {
-		global $wgKartographerMapServer,
-			$wgResponsiveImages,
-			$wgServerName,
-			$wgKartographerSrcsetScales,
-			$wgKartographerStaticMapframe;
+	protected function render(): string {
+		$mapServer = $this->config->get( 'KartographerMapServer' );
 
 		$caption = $this->getText( 'text', null );
 		$framed = $caption !== null || $this->getText( 'frameless', null ) === null;
 
-		$output = $this->parser->getOutput();
+		$parserOutput = $this->parser->getOutput();
 		$options = $this->parser->getOptions();
 
 		$width = is_numeric( $this->width ) ? "{$this->width}px" : $this->width;
@@ -88,12 +83,12 @@ class MapFrame extends TagHandler {
 		// Should be fixed, especially considering VE in page editing etc...
 
 		$useSnapshot =
-			$wgKartographerStaticMapframe && !$options->getIsPreview() &&
+			$this->config->get( 'KartographerStaticMapframe' ) && !$options->getIsPreview() &&
 			!$options->getIsSectionPreview();
 
-		$output->addModules( $useSnapshot
+		$parserOutput->addModules( [ $useSnapshot
 			? 'ext.kartographer.staticframe'
-			: 'ext.kartographer.frame' );
+			: 'ext.kartographer.frame' ] );
 
 		$attrs = [
 			'class' => 'mw-kartographer-map',
@@ -144,14 +139,24 @@ class MapFrame extends TagHandler {
 		$imgUrlParams = [
 			'lang' => $this->resolvedLangCode,
 		];
-		if ( $this->showGroups ) {
+		if ( $this->showGroups && !$options->getIsPreview() &&
+			!$options->getIsSectionPreview()
+		) {
+			// Groups are not available to the static map renderer
+			// before the page was saved, can only be applied via JS
 			$imgUrlParams += [
-				'domain' => $wgServerName,
+				'domain' => $this->config->get( 'ServerName' ),
 				'title' => $this->parser->getTitle()->getPrefixedText(),
+				'revid' => $this->parser->getRevisionId(),
 				'groups' => implode( ',', $this->showGroups ),
 			];
+
+			// Temporary feature flag to control whether static map thumbnails include the revision ID.
+			if ( !$this->config->get( 'KartographerVersionedStaticMaps' ) ) {
+				unset( $imgUrlParams['revid'] );
+			}
 		}
-		$imgUrl = "{$wgKartographerMapServer}/img/{$this->mapStyle},{$staticZoom},{$staticLat}," .
+		$imgUrl = "{$mapServer}/img/{$this->mapStyle},{$staticZoom},{$staticLat}," .
 		"{$staticLon},{$staticWidth}x{$this->height}.png";
 		$imgUrl .= '?' . wfArrayToCgi( $imgUrlParams );
 		$imgAttrs = [
@@ -162,12 +167,13 @@ class MapFrame extends TagHandler {
 			'decoding' => 'async'
 		];
 
-		if ( $wgResponsiveImages && $wgKartographerSrcsetScales ) {
+		$srcSetScalesConfig = $this->config->get( 'KartographerSrcsetScales' );
+		if ( $this->config->get( 'ResponsiveImages' ) && $srcSetScalesConfig ) {
 			// For now only support 2x, not 1.5. Saves some bytes...
-			$srcSetScales = array_intersect( $wgKartographerSrcsetScales, [ 2 ] );
+			$srcSetScales = array_intersect( $srcSetScalesConfig, [ 2 ] );
 			$srcSets = [];
 			foreach ( $srcSetScales as $srcSetScale ) {
-				$scaledImgUrl = "{$wgKartographerMapServer}/img/{$this->mapStyle},{$staticZoom},{$staticLat}," .
+				$scaledImgUrl = "{$mapServer}/img/{$this->mapStyle},{$staticZoom},{$staticLat}," .
 				"{$staticLon},{$staticWidth}x{$this->height}@{$srcSetScale}x.png";
 				$scaledImgUrl .= '?' . wfArrayToCgi( $imgUrlParams );
 				$srcSets[] = "{$scaledImgUrl} {$srcSetScale}x";

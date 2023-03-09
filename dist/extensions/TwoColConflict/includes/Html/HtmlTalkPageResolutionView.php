@@ -15,6 +15,8 @@ use TwoColConflict\SplitConflictUtils;
 /**
  * TODO: Clean up, maybe CSS class names should match change type, and "split" replaced with
  *  "single" where appropriate.
+ *
+ * @license GPL-2.0-or-later
  */
 class HtmlTalkPageResolutionView {
 

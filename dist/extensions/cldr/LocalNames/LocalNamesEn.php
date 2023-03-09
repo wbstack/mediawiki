@@ -35,6 +35,7 @@ $languageNames = [
 	'bkc' => 'Baka',
 	# used by Wikidata, T263946
 	'bkh' => 'Bakako',
+	'blk' => 'Pa\'O',
 	'bnn' => 'Bunun',
 	# used by Wikidata, T263946
 	'bqz' => 'Mka\'a',
@@ -98,6 +99,7 @@ $languageNames = [
 	'gan-hans' => 'Gan (Simplified)',
 	'gan-hant' => 'Gan (Traditional)',
 	'gcr' => 'Guianan Creole',
+	'gld' => 'Nanai',
 	# used by Wikidata T217131
 	'gml' => 'Middle Low German',
 	'gmy' => 'Mycenaean Greek',
@@ -151,6 +153,7 @@ $languageNames = [
 	'koy' => 'Koyukon',
 	'ks-arab' => 'Kashmiri (Arabic script)',
 	'ks-deva' => 'Kashmiri (Devanagari script)',
+	'ksw' => 'S\'gaw Karen',
 	'ku-arab' => 'Kurdish (Arabic script)',
 	'ku-latn' => 'Kurdish (Latin script)',
 	'lbe' => 'Lak',
@@ -165,6 +168,8 @@ $languageNames = [
 	# used by Wikidata, T263946
 	'lns' => 'Lamnso\'',
 	'luz' => 'Southern Luri',
+	# used by Wikidata,  T293884
+	'mcn' => 'Massa',
 	# used by Wikidata, T263946
 	'mcp' => 'Maka',
 	# used by Wikidata, T235468
@@ -192,6 +197,7 @@ $languageNames = [
 	'nl-informal' => 'Dutch (informal address)',
 	# used by Wikidata, T263946
 	'nla' => 'Ngombala',
+	'nmz' => 'Nawdm',
 	# used by Wikidata, T263946
 	'nnz' => 'Nda\'Nda\'',
 	'nod' => 'Northern Thai',
@@ -302,6 +308,10 @@ $languageNames = [
 	'tg-cyrl' => 'Tajik (Cyrillic script)',
 	'tg-latn' => 'Tajik (Latin script)',
 	'tlb' => 'Tobelo',
+	# used by Wikidata T286239
+	'tlh-latn' => 'Klingon (Latin script)',
+	# used by Wikidata T286239
+	'tlh-piqd' => 'Klingon (Klingon script)',
 	# used by Wikidata T220284
 	'tnq' => 'Taíno',
 	'tt-cyrl' => 'Tatar (Cyrillic script)',
@@ -320,10 +330,11 @@ $languageNames = [
 	'uun' => 'Pazeh',
 	'uz-cyrl' => 'Uzbek (Cyrillic script)',
 	'uz-latn' => 'Uzbek (Latin script)',
+	'vmw' => 'Makhuwa',
 	# used by Wikidata, T263946
 	'vut' => 'Vute',
 	# used by Wikidata, T263946
-	'wes' => 'Pidgin',
+	'wes' => 'Pidgin (Cameroon)',
 	# used by Wikidata, T239411
 	'wls' => 'Wallisian',
 	# used by Wikidata, T283364

@@ -4,6 +4,8 @@ namespace TwoColConflict\Logging;
 
 /**
  * Provides a testable wrapper for MediaWiki core diff3 services.
+ *
+ * @license GPL-2.0-or-later
  */
 class ThreeWayMerge {
 

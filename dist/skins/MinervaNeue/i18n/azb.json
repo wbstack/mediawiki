@@ -3,17 +3,16 @@
 		"authors": [
 			"Alp Er Tunqa",
 			"Amir a57",
+			"Bir morty",
 			"Koroğlu",
-			"Mousa",
-			"Bir morty"
+			"Mousa"
 		]
 	},
-	"minerva-talk-add-topic": "دانیشیق آرتیر",
+	"minerva-talk-add-topic": "مؤوضوعو آرتیر",
 	"mobile-frontend-editor-edit": "دَییشدیر",
 	"mobile-frontend-history": "بو صفحه‌نین گئچمیشینی گؤر",
 	"mobile-frontend-home-button": "ائو",
 	"mobile-frontend-language-article-heading": "دیل",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|خوش گلمیسینیز}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "آنامِنونو آچ",
 	"mobile-frontend-main-menu-contributions": "چالیشمالار",
 	"mobile-frontend-main-menu-login": "گیریش",

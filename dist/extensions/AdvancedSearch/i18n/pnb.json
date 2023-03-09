@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Abbas dhothar"
+			"Abbas dhothar",
+			"Bgo eiu"
 		]
 	},
 	"advancedsearch-options-pane-head": "ہور اختیار:",
@@ -12,7 +13,7 @@
 	"advancedsearch-field-plain": "ایہی شبد",
 	"advancedsearch-field-phrase": "ہوبہو ایہو ای متن",
 	"advancedsearch-field-or": "انہاں وچوں اک شبد",
-	"advancedsearch-field-not": "ایہ شبد نئیں",
+	"advancedsearch-field-not": "ایہہ لفظ نہیں",
 	"advancedsearch-field-subpageof": "اس صفحے دے ذیلی صفحے",
 	"advancedsearch-field-intitle": "صفحہ دا عنوان مشتمل اے",
 	"advancedsearch-field-deepcategory": "انہاں کیٹیگریاں وچ صفحے",
@@ -22,7 +23,7 @@
 	"advancedsearch-field-preview-sort": "چُنو $1",
 	"advancedsearch-help-plain": ";وضاحت\n:عنوان یا متن وچ انہاں لفظاں د‏‏ی تلاش دے نتائج۔\n;درج ذیل امور دا خیال رکھو\n:* تلاش وچ متعدد لفظاں درج کیتے جا سکدے نيں۔\n:* رموز اوقاف تے دوسرے غیر حرفی ہندسی نشانات (سوائے وقف توضیحی تے وقفہ کے) نظر انداز کر دتے جان گے۔\n:* ممکن اے کہ آپ د‏‏ی تلاش تو‏ں ایداں دے نتائج سامنے آئیاں جنہاں وچ آپ دے تلاش کردہ اک یا ودھ لفظاں نہ ہون۔\n;صفحہ معاونت\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch#Full_text_search مکمل متن د‏‏ی تلاش]\n;سادہ تلاش وچ نحوی متبادل\n:<code>کالی بلی</code>",
 	"advancedsearch-help-phrase": ";تفصیل\n: حروف د‏‏ی اک مخصوص ترتیب دے لئی تلاش. اوقاف دے نشانات نو‏‏ں نظرانداز کردتا جاندا ا‏‏ے۔\n;درج ذیل تو‏ں آگاہ رہو\n: (صرف کوٹیشن نشانات استعمال کردے وقت درست ، ذیل وچ مثال دیکھو)\n: * تلاش دے جملے کوما یا اسپیس دے ذریعہ وکھ کرو جداں۔ <code>\"صبح بخیر\"</code>, <code>\"سلام دوست!\"</code>.۔\n: * اوقاف دے نشانات تے دوسرے غیر الف - حروف (وڈی آنت تے کوما دے علاوہ) نو‏‏ں نظرانداز کيتا جائے گا۔\n: * تلاش معاملے تو‏ں حساس نئيں ا‏‏ے۔\n: * ورڈ اسٹیمنگ دا اطلاق نئيں ہُندا ا‏‏ے۔\n;مدد دا صفحہ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers لفظ ، فقرے تے ترمیم کنندہ]\n;عام تلاش وچ نحو دے برابر\n: کوٹیشن نشانات دے لفظ ، مثال دے طور اُتے <code> \"شروع تو‏ں شروع کرو\" </code>۔",
-	"advancedsearch-help-or": ";تفصیل\n: تلاش وچ گھٹ تو‏ں گھٹ اک شرط نو‏‏ں صفحہ وچ شامل کرنا ہوئے گا۔\n;مدد دا صفحہ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers لفظ ، فقرے تے اصلاح کنندہ]\n;عام تلاش وچ نحو دے برابر\n: انہاں دے درمیان <code>یا</code> والے لفظ <code>لیپ ٹاپ یا نوٹ بک</code> ورگے نيں۔",
+	"advancedsearch-help-or": ";تفصیل\n: تلاش وچ گھٹ تو‏ں گھٹ اک شرط نو‏‏ں صفحہ وچ شامل کرنا ہوئے گا۔\n;مدد دا صفحہ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers لفظ، فقرے تے اصلاح کنندہ]\n;عام تلاش وچ نحو دے برابر\n: انہاں دے درمیان <code>یا</code> والے لفظ <code>لیپ ٹاپ یا نوٹ بک</code> ورگے نيں۔",
 	"advancedsearch-help-not": ";تفصیل\n: انہاں لفظاں اُتے مشتمل صفحات نو‏‏ں تلاش تو‏ں خارج کردیؤ\n;درج ذیل تو‏ں آگاہ رہو\n: * ورڈ اسٹیمنگ لگائی گئی ا‏‏ے۔ مثال: جے '' کار '' درج کيتی گئی اے تاں ، تلاش وچ '' کاراں '' اُتے وی غور کيتا جائے گا۔ اسٹیمنگ دا لفظ بولی تو‏ں مخصوص ا‏‏ے۔\n;مدد دا صفحہ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers لفظ ، فقرے تے اصلاح کنندہ]\n;عام تلاش وچ نحو دے برابر\n: انہاں تو‏ں پہلے <code>-</code> والے لفظاں ، مثال دے طور اُتے <code>-ہاتھی</code>۔",
 	"advancedsearch-help-intitle": ";تفصیل\n: ایداں دے لفظاں والے صفحات د‏‏ی تلاش اے جنہاں وچ ایہ لفظ اے \n;درج ذیل تو‏ں آگاہ رہو\n: * تلاش وچ ری ڈائریکٹس وی شامل نيں۔\n: * ورڈ اسٹیمنگ لگائی گئی ا‏‏ے۔ مثال: جے '' کار '' درج کيتی گئی اے تاں ، تلاش وچ '' کاراں '' اُتے وی غور کيتا جائے گا۔ اسٹیمنگ دا لفظ بولی تو‏ں مخصوص ا‏‏ے۔\n;مدد دا صفحہ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Intitle_and_incategory عنوان تے کیٹیگری]\n;عام تلاش وچ نحو دے برابر\n:لفظ <code>عنوان:</code>نال یا جداں <code>عنوان:ملکہ</code>۔",
 	"advancedsearch-help-subpageof": ";تفصیل\n: انہاں صفحےآں د‏‏یاں تلاشاں جو اس صفحے دے ذیلی صفحات نيں۔\n;درج ذیل تو‏ں آگاہ رہو\n: * تسیں اک وقت وچ صرف اک صفحے دے ذیلی صفحے تلاش کرسکدے نيں۔\n: * ناں د‏‏ی جگہاں نو‏‏ں چالو کرنا مت بھلو جس نو‏‏ں تسیں ناں د‏‏ی جگہ دے فلٹر وچ اپنی تلاش نو‏‏ں محدود کرنا چاہندے نيں۔\n: * صفحے دے ناں دے سامنے ناں د‏‏ی جگہ اس طرح شامل نہ کرو: <del><code>{{ns:project}}: مڑجوڑ</code> </del>۔\n;مدد دا صفحہ\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#subpageof ذیلی صفحے]\n;عام تلاش وچ نحو دے برابر\n: <code> ذیلی صفحہ: </code> دے بعد صفحے دا ناں <code> ذیلی صفحہ: ری ڈائریکٹ </code>۔ جے پیرنٹ پیج وچ خالی جگہاں اُتے مشتمل ہوئے تاں ڈبل قیمتاں استعمال کرو: <code> ذیلی صفحہ: \"تبصرہ دے لئی درخواستاں\" </code>۔",

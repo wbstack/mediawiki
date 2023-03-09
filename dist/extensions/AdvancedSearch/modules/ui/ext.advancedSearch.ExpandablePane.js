@@ -16,6 +16,7 @@
 	 * @constructor
 	 *
 	 * @param {Object} config
+	 * @param {string} config.suffix
 	 * @param {jQuery} config.$buttonLabel
 	 * @param {number} [config.tabIndex]
 	 * @param {Function} config.dependentPaneContentBuilder

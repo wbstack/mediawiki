@@ -284,12 +284,12 @@ class ApiQuerySiteinfo extends ApiQueryBase {
 		$data['fixarabicunicode'] = true; // Config removed in 1.35, always true
 		$data['fixmalayalamunicode'] = true; // Config removed in 1.35, always true
 
-		global $IP;
-		$git = SpecialVersion::getGitHeadSha1( $IP );
+		$baseDir = $this->getConfig()->get( 'BaseDirectory' );
+		$git = SpecialVersion::getGitHeadSha1( $baseDir );
 		if ( $git ) {
 			$data['git-hash'] = $git;
 			$data['git-branch'] =
-				SpecialVersion::getGitCurrentBranch( $GLOBALS['IP'] );
+				SpecialVersion::getGitCurrentBranch( $baseDir );
 		}
 
 		// 'case-insensitive' option is reserved for future
@@ -359,10 +359,9 @@ class ApiQuerySiteinfo extends ApiQueryBase {
 		}
 
 		$favicon = $config->get( 'Favicon' );
-		if ( !empty( $favicon ) ) {
-			// wgFavicon can either be a relative or an absolute path
-			// make sure we always return an absolute path
-			$data['favicon'] = wfExpandUrl( $favicon, PROTO_RELATIVE );
+		if ( $favicon ) {
+			// Expand any local path to full URL to improve API usability (T77093).
+			$data['favicon'] = wfExpandUrl( $favicon );
 		}
 
 		$data['centralidlookupprovider'] = $config->get( 'CentralIdLookupProvider' );
@@ -485,9 +484,9 @@ class ApiQuerySiteinfo extends ApiQueryBase {
 
 	protected function appendInterwikiMap( $property, $filter ) {
 		if ( $filter === 'local' ) {
-			$local = 1;
+			$local = true;
 		} elseif ( $filter === '!local' ) {
-			$local = 0;
+			$local = false;
 		} else {
 			// $filter === null
 			$local = null;
@@ -665,8 +664,8 @@ class ApiQuerySiteinfo extends ApiQueryBase {
 	}
 
 	protected function appendInstalledLibraries( $property ) {
-		global $IP;
-		$path = "$IP/vendor/composer/installed.json";
+		$baseDir = $this->getConfig()->get( 'BaseDirectory' );
+		$path = "$baseDir/vendor/composer/installed.json";
 		if ( !file_exists( $path ) ) {
 			return true;
 		}
@@ -770,7 +769,7 @@ class ApiQuerySiteinfo extends ApiQueryBase {
 		$config = $this->getConfig();
 		$rightsPage = $config->get( 'RightsPage' );
 		// The default value is null, but the installer sets it to empty string
-		if ( strlen( $rightsPage ) ) {
+		if ( strlen( (string)$rightsPage ) ) {
 			$title = Title::newFromText( $rightsPage );
 			$url = wfExpandUrl( $title->getLinkURL(), PROTO_CURRENT );
 		} else {
@@ -778,7 +777,7 @@ class ApiQuerySiteinfo extends ApiQueryBase {
 			$url = $config->get( 'RightsUrl' );
 		}
 		$text = $config->get( 'RightsText' );
-		if ( $title && !strlen( $text ) ) {
+		if ( $title && !strlen( (string)$text ) ) {
 			$text = $title->getPrefixedText();
 		}
 
@@ -879,7 +878,7 @@ class ApiQuerySiteinfo extends ApiQueryBase {
 		$data = [];
 		$allowed = $this->skinFactory->getAllowedSkins();
 		$default = Skin::normalizeKey( 'default' );
-		$skinNames = $this->skinFactory->getSkinNames();
+		$skinNames = $this->skinFactory->getInstalledSkins();
 
 		foreach ( $skinNames as $name => $displayName ) {
 			$msg = $this->msg( "skinname-{$name}" );

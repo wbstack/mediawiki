@@ -9,9 +9,11 @@
 			"Liangent",
 			"Liuxinyu970226",
 			"Simon Shek",
+			"Tranve",
 			"Winston Sung",
 			"Xiplus",
-			"Tranve"
+			"列维劳德",
+			"Diskdance"
 		]
 	},
 	"multimediaviewer-desc": "使用全螢幕介面以較大尺寸的方式顯示展開後的縮圖",
@@ -56,9 +58,7 @@
 	"multimediaviewer-restriction-trademarked": "此圖片包含受商標法限制的內容。",
 	"multimediaviewer-restriction-default": "此圖片可能受到版權法以外的法律規範所限制。請查看檔案描述頁面來獲得詳情內容。",
 	"multimediaviewer-restriction-default-and-others": "此圖片可能受到版權法以外的法律規範進一步限制。請查看檔案描述頁面來獲得詳情內容。",
-	"multimediaviewer-about-mmv": "關於此介面：",
-	"multimediaviewer-discuss-mmv": "討論",
-	"multimediaviewer-help-mmv": "說明",
+	"multimediaviewer-about-mmv": "關於 Media Viewer：",
 	"multimediaviewer-optout-mmv": "停用媒體檢視器",
 	"multimediaviewer-optin-mmv": "開啟媒體檢視器",
 	"multimediaviewer-optout-pending-mmv": "正在停用媒體檢視器",
@@ -82,7 +82,7 @@
 	"multimediaviewer-link-to-page": "連結至檔案描述頁面",
 	"multimediaviewer-link-to-file": "連結至原始檔案",
 	"multimediaviewer-share-explanation": "複製並自由的分享該連結",
-	"multimediaviewer-embed-wt": "Wikitext",
+	"multimediaviewer-embed-wt": "wikitext",
 	"multimediaviewer-embed-html": "HTML",
 	"multimediaviewer-embed-explanation": "使用此程式碼內嵌該檔案",
 	"multimediaviewer-text-embed-credit-text-bl": "由 $1, $2, $3",

@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Daud I.F. Argana",
 			"Kenrick95",
 			"Rachmat.Wahidi",
 			"Rachmat04",
-			"William Surya Permana",
-			"Daud I.F. Argana"
+			"William Surya Permana"
 		]
 	},
 	"apihelp-echomarkread-description": "Tandai pemberitahuan dari pengguna ini sebagai telah dibaca.",

@@ -1,7 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Arystanbek"
+			"Arystanbek",
+			"СеніңШешең",
+			"Ajiniyaz Nurniyazov",
+			"Batyrbek.kz"
 		]
 	},
 	"templatesandbox": "Үлгі зертханасы",
@@ -11,12 +14,12 @@
 	"templatesandbox-page-label": "Бетті көрсету:",
 	"templatesandbox-revid-label": "Нұсқаны көрсету:",
 	"templatesandbox-text-label": "Уикимәтінді көрсету:",
-	"templatesandbox-submit": "Қарау",
+	"templatesandbox-submit": "Көру",
 	"templatesandbox-title-output": "Үлгі зертханасы: $1",
-	"templatesandbox-editform-legend": "Бұл үлгімен бетті қарап шығу",
+	"templatesandbox-editform-legend": "Осы үлгіні пайдаланатын бетті алдын ала қарап көру",
 	"templatesandbox-editform-page-label": "Бет тақырып аты",
-	"templatesandbox-editform-view-label": "Алдын-ала қарау",
-	"templatesandbox-preview": "$2 бетінде алдын-ала қарау",
+	"templatesandbox-editform-view-label": "Алдын ала қарау",
+	"templatesandbox-preview": "$2: алдын ала көру",
 	"templatesandbox-previewnote": "'''Бұл тек [[:$1]] бетінде алдын-ала қарап шығу екенін ұмытпаңыз.'''\nӨзгерістеріңіз сақталған жоқ!",
 	"templatesandbox-invalid-title": "Cіз көрсеткен атау жарамды емес",
 	"templatesandbox-title-not-exists": "Cіз көрсеткен атау жоқ.",

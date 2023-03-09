@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import EditFlow from '@/definitions/EditFlow';
 import init from '@/mediawiki/init';
 import { launch } from '@/main';
@@ -22,8 +21,7 @@ import {
 	selectRadioInput,
 } from '../util/e2e';
 import Entities from '@/mock-data/data/Q42.data.json';
-
-Vue.config.devtools = false;
+import { createApp } from 'vue';
 
 const manager = {
 	on: jest.fn(),
@@ -56,7 +54,9 @@ function prepareTestEnv( options: {
 	const clientPageTitle = 'Client_page';
 
 	const app = { launch, createServices };
-	const require = jest.fn().mockResolvedValue( app );
+	const require = jest.fn().mockResolvedValueOnce( app );
+	const vue = { createMwApp: createApp };
+	require.mockReturnValueOnce( vue );
 	const using = jest.fn().mockResolvedValue( require );
 
 	mockMwEnv(

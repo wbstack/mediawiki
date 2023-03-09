@@ -7,13 +7,13 @@ use CirrusSearch\Search\SearchContext;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\DisMax;
-use Elastica\Query\Match;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Language;
 use WebRequest;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\Lib\Interactors\TermSearchResult;
 use Wikibase\Lib\LanguageFallbackChainFactory;
+use Wikibase\Repo\Api\EntitySearchException;
 use Wikibase\Repo\Api\EntitySearchHelper;
 
 /**
@@ -202,7 +202,7 @@ class EntitySearchElastic implements EntitySearchHelper {
 			return $query;
 		}
 
-		$labelsFilter = new Match( 'labels_all.prefix', $text );
+		$labelsFilter = new MatchQuery( 'labels_all.prefix', $text );
 
 		$profile = $this->loadProfile( $context, $languageCode );
 		$this->searchLanguageCodes = $profile['language-chain'];
@@ -283,13 +283,7 @@ class EntitySearchElastic implements EntitySearchHelper {
 	}
 
 	/**
-	 * @param string $text
-	 * @param string $languageCode
-	 * @param string $entityType
-	 * @param int $limit
-	 * @param bool $strictLanguage
-	 *
-	 * @return TermSearchResult[]
+	 * @inheritDoc
 	 */
 	public function getRankedSearchResults(
 		$text,
@@ -316,9 +310,7 @@ class EntitySearchElastic implements EntitySearchHelper {
 		if ( $result->isOK() ) {
 			$result = $result->getValue();
 		} else {
-			// FIXME: $result->getErrors() contains error messages for the
-			// end user, but we don't have any way to pass them on.
-			$result = [];
+			throw new EntitySearchException( $result );
 		}
 
 		if ( $searcher->isReturnRaw() ) {

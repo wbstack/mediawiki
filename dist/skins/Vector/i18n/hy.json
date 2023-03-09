@@ -5,21 +5,33 @@
 			"Kareyac",
 			"Teak",
 			"Vadgt",
-			"Xelgen"
+			"Xelgen",
+			"Սերգեյ Սաֆարյան",
+			"Armenoid",
+			"Դավիթ Սարոյան"
 		]
 	},
 	"skinname-vector": "Սովորական",
+	"skinname-vector-2022": "Վեկտոր (2022)",
+	"vector-opt-out": "Անցնել հին տեսքին",
+	"vector-languages": "Լեզուներ",
+	"vector-language-button-label": "{{PLURAL:$1|$1 լեզու}}",
+	"vector-language-redirect-to-top": "Այս կայքում լեզվական հղումները գտնվում են էջի վերևում՝ հոդվածի վերնագրի դիմաց։ [[#p-lang-btn|Անցնել վերև]]։",
 	"vector-action-addsection": "Ավելացնել քննարկում",
 	"vector-action-delete": "Ջնջել",
-	"vector-action-move": "Տեղափոխել այս էջը",
+	"vector-action-move": "Վերանվանել",
 	"vector-action-protect": "Պաշտպանել",
 	"vector-action-undelete": "Վերականգնել",
 	"vector-action-unprotect": "Փոխել պաշտպանումը",
 	"vector-view-create": "Ստեղծել",
 	"vector-view-edit": "Խմբագրել",
-	"vector-view-history": "Դիտել պատմությունը",
+	"vector-view-history": "Պատմություն",
 	"vector-view-view": "Կարդալ",
 	"vector-view-viewsource": "Դիտել ելատեքստը",
 	"vector-more-actions": "Ավելին",
-	"vector-anon-user-menu-pages-learn": "իմանալ ավելին"
+	"vector-intro-page": "Օգնություն:Գլխացանկ",
+	"vector-anon-user-menu-pages": "Էջեր չգրանցված խմբագիրների համար",
+	"vector-anon-user-menu-pages-learn": "իմանալ ավելին",
+	"vector-main-menu-tooltip": "Հիմնական ընտրացանկ",
+	"tooltip-vector-anon-user-menu-title": "Այլ ընտրանքներ"
 }

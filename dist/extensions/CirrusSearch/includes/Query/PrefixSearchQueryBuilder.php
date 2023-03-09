@@ -9,14 +9,13 @@ use Elastica\Query\MatchQuery;
 use Elastica\Query\MultiMatch;
 
 /**
- *
  * Build a query suited for autocomplete on titles+redirects
  */
 class PrefixSearchQueryBuilder {
 	use QueryBuilderTraits;
 
 	/**
-	 * @param SearchContext $searchContext the search context
+	 * @param SearchContext $searchContext
 	 * @param string $term the original search term
 	 * @param array|null $variants list of variants
 	 */
