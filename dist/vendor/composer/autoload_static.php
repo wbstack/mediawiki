@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit5ef76537d8d904434b621262feb234e2
+class ComposerStaticInit84514bf220dba9a6f620289040f9df89
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -14,16 +14,16 @@ class ComposerStaticInit5ef76537d8d904434b621262feb234e2
         '8592c7b0947d8a0965a9e8c3d16f9c24' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/autoload.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-        'eccc0347283a01e62f5536bcf76b6e62' => __DIR__ . '/..' . '/wikimedia/at-ease/src/Wikimedia/Functions.php',
         '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
+        'eccc0347283a01e62f5536bcf76b6e62' => __DIR__ . '/..' . '/wikimedia/at-ease/src/Wikimedia/Functions.php',
         '8cff32064859f4559445b89279f3199c' => __DIR__ . '/..' . '/php-http/message/src/filters.php',
         '0d59ee240a4cd96ddbb4ff164fccea4d' => __DIR__ . '/..' . '/symfony/polyfill-php73/bootstrap.php',
-        'c3f7f0e81464740a933532e81fa26cc7' => __DIR__ . '/..' . '/wikimedia/base-convert/src/Functions.php',
         'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
+        'c3f7f0e81464740a933532e81fa26cc7' => __DIR__ . '/..' . '/wikimedia/base-convert/src/Functions.php',
         'c50606d667a3fde2b80a955639479d3d' => __DIR__ . '/..' . '/wikimedia/timestamp/src/defines.php',
         'c15f8000750e4e04ba559d9745044427' => __DIR__ . '/..' . '/data-values/number/Number.php',
-        '6513700b70192b7dfd0e5e9fc8082cf3' => __DIR__ . '/..' . '/wikimedia/relpath/src/Wikimedia/RelPath.php',
         '3ef87127dc6892a0a78f223558a0b940' => __DIR__ . '/..' . '/diff/diff/Diff.php',
+        '6513700b70192b7dfd0e5e9fc8082cf3' => __DIR__ . '/..' . '/wikimedia/relpath/src/Wikimedia/RelPath.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -241,8 +241,8 @@ class ComposerStaticInit5ef76537d8d904434b621262feb234e2
         array (
             0 => __DIR__ . '/..' . '/wikimedia/ip-set/src',
             1 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
-            2 => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src',
-            3 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
+            2 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
+            3 => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src',
             4 => __DIR__ . '/..' . '/wikimedia/wrappedstring/src',
         ),
         'Wikibase\\Lexeme\\Tests\\' => 
@@ -271,13 +271,13 @@ class ComposerStaticInit5ef76537d8d904434b621262feb234e2
         ),
         'ValueParsers\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
         ),
         'ValueFormatters\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
         ),
         'Symfony\\Polyfill\\Php80\\' => 
         array (
@@ -325,8 +325,8 @@ class ComposerStaticInit5ef76537d8d904434b621262feb234e2
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
+            1 => __DIR__ . '/..' . '/psr/http-factory/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -480,8 +480,8 @@ class ComposerStaticInit5ef76537d8d904434b621262feb234e2
         ),
         'DataValues\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
-            1 => __DIR__ . '/..' . '/data-values/data-values/src',
+            0 => __DIR__ . '/..' . '/data-values/data-values/src',
+            1 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
         ),
         'Composer\\Semver\\' => 
         array (
@@ -4131,11 +4131,11 @@ class ComposerStaticInit5ef76537d8d904434b621262feb234e2
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit5ef76537d8d904434b621262feb234e2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit5ef76537d8d904434b621262feb234e2::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit5ef76537d8d904434b621262feb234e2::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit5ef76537d8d904434b621262feb234e2::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit5ef76537d8d904434b621262feb234e2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit84514bf220dba9a6f620289040f9df89::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit84514bf220dba9a6f620289040f9df89::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit84514bf220dba9a6f620289040f9df89::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit84514bf220dba9a6f620289040f9df89::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit84514bf220dba9a6f620289040f9df89::$classMap;
 
         }, null, ClassLoader::class);
     }
