@@ -54,6 +54,12 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
     }
     return entry
 
+# pylint: disable=too-many-ancestors
+class FixedIndentingDumper(yaml.Dumper):
+    """Fix for making yaml list output pass linting https://stackoverflow.com/a/39681672"""
+    def increase_indent(self, flow=False, indentless=False):
+        return super().increase_indent(flow, False)
+
 default_branch = get_mediawiki_branch_from_version(mediawiki_version)
 remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
@@ -76,4 +82,4 @@ output += [
 
 # write out to the lock.yaml file
 with open(DESTINATION_YAMLFILE, 'w') as outfile:
-    yaml.dump(output, outfile, sort_keys=False)
+    yaml.dump(output, outfile, sort_keys=False, Dumper=FixedIndentingDumper, default_flow_style=False)
