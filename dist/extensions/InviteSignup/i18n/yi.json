@@ -1,11 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"פוילישער"
+			"פוילישער",
+			"Pacha Tchernof"
 		]
 	},
 	"is-desc": "שיקן ע־פאסט איינלאדונגען",
-	"is-tableth-email": "ע-פאסט",
+	"is-tableth-date": "דאַטע",
+	"is-tableth-email": "בליצפּאָסט",
 	"is-add": "צולייגן",
 	"is-invalidemail": "<b>$1</b> איז נישט קיין גילטיקער בליצפאסט אדרעס."
 }

@@ -20,7 +20,7 @@
 	"deletebatch-page": "Säite fir ze läschen:",
 	"deletebatch-processing-from-file": "Säite läschen, déi am Fichier drastinn",
 	"deletebatch-processing-from-form": "Säite läschen, déi am Formulaire drastinn",
-	"deletebatch-omitting-nonexistent": "D'Säit $1 déi et net gëtt iwwersprangen.",
+	"deletebatch-omitting-nonexistent": "D'Säit, $1 déi et net gëtt, iwwersprangen.",
 	"deletebatch-omitting-invalid": "Déi ongëlteg Säit $1 iwwersprangen.",
 	"deletebatch-file-bad-format": "De Fichier sollt als textfile virleien",
 	"deletebatch-file-missing": "De Fichier deen ukoum konnt net gelies ginn",

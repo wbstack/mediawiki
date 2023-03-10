@@ -3,7 +3,8 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"requestaccount": "Benotzerkont ufroen",
@@ -31,7 +32,7 @@
 	"requestaccount-attach": "Liewenslaf oder CV (optional):",
 	"requestaccount-notes": "Zousätzlech Bemierkungen:",
 	"requestaccount-urls": "Lëscht vu Websäiten (all Säit an enger neier Zeil)",
-	"requestaccount-agree": "Dir musst confirméieren datt är E-Mailadress richteg ass and datt dir mat den Allgemenge Konditiounen d'Accord sitt.",
+	"requestaccount-agree": "Dir musst confirméieren, datt Är E-Mailadress richteg ass an datt Dir mat den Allgemenge Konditiounen d'Accord sidd.",
 	"requestaccount-inuse": "De Benotzernumm ass scho bei enger anerer Benotzerufro a Gebrauch.",
 	"requestaccount-tooshort": "Är Biographie muss mindestens $1 {{PLURAL:$1|Wuert|Wierder}} hunn.",
 	"requestaccount-emaildup": "En anere Benotzerkont deen ugefrot gouf benotzt déi selwecht E-Mailadress.",

@@ -15,7 +15,7 @@
 	"twocolconflict-copy-tab-tooltip": "Vider le wikitexto complete de tu version (le modificationes facite hic infra non es includite). Se aperi in un nove scheda.",
 	"twocolconflict-copy-tooltip": "Copiar le wikitexto complete de tu version al area de transferentia (le modificationes facite hic infra non es includite).",
 	"twocolconflict-core-ui-hint": "Un interfacie actualisate pro le resolution de conflictos de modification es ora disponibile. Activa le Interfacie de Conflictos de Modification a base de Paragraphos in tu [[Special:Preferences#mw-prefsection-editing|preferentias]] pro provar lo.",
-	"twocolconflict-core-ui-hint-close": "Non plus monstrar",
+	"twocolconflict-core-ui-hint-close": "Nunquam monstrar de novo",
 	"twocolconflict-preference-enabled": "Activa lee [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|Interfacie de Conflictos de Modification a base de Paragraphos]] pro resolver conflictos de modification",
 	"twocolconflict-special-footer-hint": "Claude le pagina actual pro retornar al interfacie de conflictos de modification.",
 	"twocolconflict-special-header-overview": "Durante que tu modificava, un altere usator ha modificate le mesme pagina e lo ha publicate ante te. Un copia de lectura sol de tu version se ha conservate hic infra. Tote le modificationes facite in le interfacie de conflictos de modification dunque non es reflectite. Pro fusionar le cambiamentos e resolver le problema con le interfacie de conflictos de modification, retorna al scheda precedente.",
