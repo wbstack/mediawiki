@@ -22,6 +22,7 @@ class ForeignAttributes implements Attributes {
 
 	/**
 	 * Adjustment tables for the case of attributes on MathML and SVG elements
+	 * @var array
 	 */
 	private static $adjustmentTables = [
 		'math' => [
@@ -93,6 +94,8 @@ class ForeignAttributes implements Attributes {
 	/**
 	 * The potentially namespaced attributes, and the namespaces they belong to.
 	 * Excepting xmlns since it is very special.
+	 *
+	 * @var array
 	 */
 	private static $namespaceMap = [
 		'xlink:actuate' => HTMLData::NS_XLINK,
@@ -116,22 +119,24 @@ class ForeignAttributes implements Attributes {
 		$this->table = self::$adjustmentTables[$type];
 	}
 
-	public function offsetExists( $offset ) {
+	public function offsetExists( $offset ): bool {
 		$offset = $this->table[$offset] ?? $offset;
 		return $this->unadjusted->offsetExists( $offset );
 	}
 
-	public function &offsetGet( $offset ) {
+	public function &offsetGet( $offset ): string {
 		$offset = $this->table[$offset] ?? $offset;
 		$value = &$this->unadjusted->offsetGet( $offset );
 		return $value;
 	}
 
-	public function offsetSet( $offset, $value ) {
+	public function offsetSet( $offset, $value ): void {
+		// @phan-suppress-previous-line PhanPluginNeverReturnMethod
 		throw new TreeBuilderError( "Setting foreign attributes is not supported" );
 	}
 
-	public function offsetUnset( $offset ) {
+	public function offsetUnset( $offset ): void {
+		// @phan-suppress-previous-line PhanPluginNeverReturnMethod
 		throw new TreeBuilderError( "Setting foreign attributes is not supported" );
 	}
 
@@ -144,11 +149,11 @@ class ForeignAttributes implements Attributes {
 		return $result;
 	}
 
-	public function count() {
+	public function count(): int {
 		return $this->unadjusted->count();
 	}
 
-	public function getIterator() {
+	public function getIterator(): \ArrayIterator {
 		return new \ArrayIterator( $this->getValues() );
 	}
 
@@ -179,9 +184,11 @@ class ForeignAttributes implements Attributes {
 	}
 
 	public function merge( Attributes $other ) {
+		// @phan-suppress-previous-line PhanPluginNeverReturnMethod
 		throw new TreeBuilderError( __METHOD__ . ': unimplemented' );
 	}
-}
 
-// Retain the old namespace for backwards compatibility.
-class_alias( ForeignAttributes::class, 'RemexHtml\TreeBuilder\ForeignAttributes' );
+	public function clone() {
+		return $this;
+	}
+}

@@ -13,6 +13,8 @@ class Initial extends InsertionMode {
 	 * The doctypes listed in the spec which are allowed without generating a
 	 * parse error. A 2-d array where each row gives the doctype name, the
 	 * public identifier and the system identifier.
+	 *
+	 * @var array
 	 */
 	private static $allowedDoctypes = [
 		[ 'html', '-//W3C//DTD HTML 4.0//EN', null ],
@@ -109,6 +111,3 @@ class Initial extends InsertionMode {
 			->endDocument( $pos );
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( Initial::class, 'RemexHtml\TreeBuilder\Initial' );

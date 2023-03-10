@@ -192,7 +192,7 @@ class DmsCoordinateParser extends DmCoordinateParser {
 			$coordinateSegment *= -1;
 		}
 
-		return $coordinateSegment;
+		return (float)$coordinateSegment;
 	}
 
 }

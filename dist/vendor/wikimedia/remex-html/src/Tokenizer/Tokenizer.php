@@ -75,7 +75,11 @@ class Tokenizer {
 	protected const REPLACEMENT_CHAR = "\xef\xbf\xbd";
 	protected const BYTE_ORDER_MARK = "\xef\xbb\xbf";
 
-	// A list of "common well-behaved entities", used to optimize fast paths
+	/**
+	 * A list of "common well-behaved entities", used to optimize fast paths
+	 *
+	 * @var array<string,string>
+	 */
 	private static $commonEntities = [
 		'&amp;' => '&',
 		'&apos;' => "'",
@@ -1027,7 +1031,8 @@ class Tokenizer {
 				continue;
 			} else {
 				$this->fatal( 'unable to identify char ref submatch' );
-				$codepoint = 0; // re-assure phan $codepoint will be defined
+				// @phan-suppress-next-line PhanPluginUnreachableCode False positive that var is not defined
+				$codepoint = 0;
 			}
 
 			// Interpret $codepoint
@@ -1297,7 +1302,8 @@ class Tokenizer {
 			PREG_SET_ORDER | PREG_OFFSET_CAPTURE, $this->pos );
 		if ( $count === false ) {
 			$this->throwPregError();
-			$attribs = new PlainAttributes(); // reassure phan
+			// @phan-suppress-next-line PhanPluginUnreachableCode False positive that var is not defined
+			$attribs = new PlainAttributes();
 		} elseif ( $count ) {
 			$this->pos = $m[$count - 1][0][1] + strlen( $m[$count - 1][0][0] );
 			$attribs = new LazyAttributes( $m, function ( $m ) {
@@ -1380,7 +1386,8 @@ class Tokenizer {
 				}
 			} else {
 				$value = '';
-				$pos = -1; // reassure phan
+				// reassure phan
+				$pos = -1;
 			}
 			if ( $additionalAllowedChar && !$this->ignoreErrors ) {
 				// After attribute value (quoted) state
@@ -1458,7 +1465,8 @@ class Tokenizer {
 			return $state;
 		} else {
 			$this->fatal( 'failed to find an already-matched ">"' );
-			$selfClose = false; // reassure phan
+			// @phan-suppress-next-line PhanPluginUnreachableCode False positive that var is not defined
+			$selfClose = false;
 		}
 		$this->pos = $pos;
 		if ( $isEndTag ) {
@@ -1589,9 +1597,10 @@ REGEX;
 
 	/**
 	 * Throw an exception for a specified reason. This is used for API errors
-	 * and assertion-like sanity checks.
+	 * and assertion-like checks.
 	 * @param string $text The error message
 	 * @throws TokenizerError
+	 * @return never
 	 */
 	protected function fatal( $text ) {
 		throw new TokenizerError( __CLASS__ . ": " . $text );
@@ -1609,6 +1618,8 @@ REGEX;
 	 * - pcre.backtrack_limit exhausted: The backtrack limit should be at least
 	 *   double the input size, the defaults are way too small. Increase it in
 	 *   configuration.
+	 *
+	 * @return never
 	 */
 	protected function throwPregError() {
 		if ( defined( 'PREG_JIT_STACKLIMIT_ERROR' ) ) {
@@ -1646,6 +1657,3 @@ REGEX;
 		throw new TokenizerError( __CLASS__ . ": $msg" );
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( Tokenizer::class, 'RemexHtml\Tokenizer\Tokenizer' );

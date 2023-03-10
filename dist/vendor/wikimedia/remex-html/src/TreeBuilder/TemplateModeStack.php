@@ -17,6 +17,8 @@ class TemplateModeStack {
 
 	/**
 	 * The remainder of the stack
+	 *
+	 * @var array
 	 */
 	private $nonCurrentModes = [];
 
@@ -44,6 +46,3 @@ class TemplateModeStack {
 		return $this->current === null;
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( TemplateModeStack::class, 'RemexHtml\TreeBuilder\TemplateModeStack' );
