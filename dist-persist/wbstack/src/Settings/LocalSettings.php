@@ -256,14 +256,6 @@ $wgCacheDirectory = '/tmp/mw-cache';
 //$wgUploadPath = "{$wgScriptPath}/images/docker/{$dockerDb}";
 //$wgTmpDirectory = "{$wgUploadDirectory}/tmp";
 
-## Locale
-/**
- * The docker image only has C.UTF-8 currently.
- * This is the default for https://www.mediawiki.org/wiki/Manual:$wgShellLocale for core as of 1.30
- * But explicitly set it here as it is all the image has!
- */
-$wgShellLocale = "C.UTF-8";
-
 #######################################
 ## ---   Default Permissions     --- ##
 #######################################
