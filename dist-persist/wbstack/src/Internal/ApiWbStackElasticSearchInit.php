@@ -10,12 +10,12 @@ class ApiWbStackElasticSearchInit extends \ApiBase {
     public function isWriteMode() {return true;}
     public function isInternal() {return true;}
     public function execute() {
-        global $IP;
+        global $wgBaseDirectory;
 
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 		
-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/extensions/CirrusSearch/maintenance/UpdateSearchIndexConfig.php';
+		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/UpdateSearchIndexConfig.php';
 		exec($cmd, $out, $return);
 
 		// Return appropriate result
