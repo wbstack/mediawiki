@@ -92,7 +92,7 @@ abstract class GenericArrayObject extends ArrayObject {
 	 *
 	 * @param mixed $value
 	 */
-	public function append( $value ) {
+	public function append( $value ): void {
 		$this->setElement( null, $value );
 	}
 
@@ -104,7 +104,7 @@ abstract class GenericArrayObject extends ArrayObject {
 	 * @param mixed $index
 	 * @param mixed $value
 	 */
-	public function offsetSet( $index, $value ) {
+	public function offsetSet( $index, $value ): void {
 		$this->setElement( $index, $value );
 	}
 
@@ -183,8 +183,19 @@ abstract class GenericArrayObject extends ArrayObject {
 	 *
 	 * @return string
 	 */
-	public function serialize() {
-		return serialize( $this->getSerializationData() );
+	public function serialize(): string {
+		return serialize( $this->__serialize() );
+	}
+
+	/**
+	 * @see Serializable::serialize
+	 *
+	 * @since 1.38
+	 *
+	 * @return array
+	 */
+	public function __serialize(): array {
+		return $this->getSerializationData();
 	}
 
 	/**
@@ -209,13 +220,19 @@ abstract class GenericArrayObject extends ArrayObject {
 	 * @since 1.20
 	 *
 	 * @param string $serialization
-	 *
-	 * @return array
-	 * @suppress PhanParamSignatureMismatchInternal The stub appears to be wrong
 	 */
-	public function unserialize( $serialization ) {
-		$serializationData = unserialize( $serialization );
+	public function unserialize( $serialization ): void {
+		$this->__unserialize( unserialize( $serialization ) );
+	}
 
+	/**
+	 * @see Serializable::unserialize
+	 *
+	 * @since 1.38
+	 *
+	 * @param array $serializationData
+	 */
+	public function __unserialize( $serializationData ): void {
 		foreach ( $serializationData['data'] as $offset => $value ) {
 			// Just set the element, bypassing checks and offset resolving,
 			// as these elements have already gone through this.
@@ -223,8 +240,6 @@ abstract class GenericArrayObject extends ArrayObject {
 		}
 
 		$this->indexOffset = $serializationData['index'];
-
-		return $serializationData;
 	}
 
 	/**

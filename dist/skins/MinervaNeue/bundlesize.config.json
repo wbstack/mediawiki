@@ -21,7 +21,7 @@
 	},
 	{
 		"resourceModule": "skins.minerva.icons.wikimedia",
-		"maxSize": "0.8KB"
+		"maxSize": "1.0KB"
 	},
 	{
 		"resourceModule": "skins.minerva.mainMenu.icons",
@@ -33,6 +33,6 @@
 	},
 	{
 		"resourceModule": "skins.minerva.scripts",
-		"maxSize": "11.8KB"
+		"maxSize": "11.9KB"
 	}
 ]

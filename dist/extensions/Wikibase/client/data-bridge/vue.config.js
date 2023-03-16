@@ -20,12 +20,13 @@ function externals() {
 }
 
 module.exports = {
+	publicPath: '.',
 	productionSourceMap: false,
 	configureWebpack: () => ( {
 		output: {
-			filename: `${filePrefix}[name]${process.env.VUE_CLI_MODERN_BUILD ? '.modern' : ''}.js`,
+			filename: `${filePrefix}[name].js`,
 			libraryTarget: DEV_MODE ? undefined : 'commonjs2',
-			chunkFilename: `vendor-chunks${process.env.VUE_CLI_MODERN_BUILD ? '.modern' : ''}.js`,
+			chunkFilename: 'vendor-chunks.js',
 		},
 		entry: {
 			app: './src/main.ts',
@@ -60,11 +61,26 @@ module.exports = {
 					...args,
 				] );
 		}
+		config.resolve.alias.set( 'vue', '@vue/compat' );
+
+		config.module
+			.rule( 'vue' )
+			.use( 'vue-loader' )
+			.tap( ( options ) => {
+				return {
+					...options,
+					compilerOptions: {
+						compatConfig: {
+							MODE: 2,
+						},
+					},
+				};
+			} );
 	},
 	css: {
 		loaderOptions: {
 			sass: {
-				prependData: '@import "@/presentation/styles/_main.scss";',
+				additionalData: '@import "@/presentation/styles/_main.scss";',
 			},
 		},
 	},

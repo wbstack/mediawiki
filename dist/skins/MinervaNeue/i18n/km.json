@@ -2,11 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Evannak",
-			"គីមស៊្រុន"
+			"គីមស៊្រុន",
+			"Sovichet"
 		]
 	},
 	"minerva-last-modified-date": "កែប្រែចុងក្រោយនៅ $1 $2",
-	"minerva-talk-add-topic": "បន្ថែមការពិភាក្សា",
+	"minerva-talk-add-topic": "បន្ថែម​ប្រធានបទ​",
 	"mobile-frontend-editor-edit": "កែប្រែ",
 	"minerva-download": "ទាញយកជាPDF",
 	"mobile-frontend-editor-redlink-create": "បង្កើតទំព័រ",
@@ -16,7 +17,6 @@
 	"mobile-frontend-home-button": "ទំព័រដើម",
 	"mobile-frontend-language-article-heading": "​ភាសា​",
 	"mobile-frontend-languages-not-available": "ទំព័រ​នេះ​មិនអាចអានជា​ភាសាដទៃ​ទៀត​ទេ។",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|សូមស្វាគមន៍}} $1!",
 	"mobile-frontend-main-menu-button-tooltip": "បើកបញ្ជីមេ",
 	"mobile-frontend-main-menu-contributions": "ការរួមចំណែក",
 	"mobile-frontend-main-menu-login": "កត់ឈ្មោះចូល",

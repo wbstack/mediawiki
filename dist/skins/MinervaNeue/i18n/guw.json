@@ -1,16 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Gadarawamo",
-			"Misteld",
-			"Samatics",
 			"Amire80",
-			"Joshateji"
+			"Gadarawamo",
+			"Joshateji",
+			"Misteld",
+			"Samatics"
 		]
 	},
 	"minerva-last-modified-date": "Eyin vivọjlado gbọn godo to $1, to $2",
 	"minerva-watchlist-cta": "Doayi weda ehe po diọdo he wa eji lẹ po go.",
-	"minerva-talk-add-topic": "Gọ hodọdopọ towe na",
+	"minerva-talk-add-topic": "Yi hosọ dogọ",
 	"mobile-frontend-cookies-required": "Dandannu wẹ e yin nado hùn (cookies) whẹpo awusọhia nado yin didiọ.\nJaale bo hùn in bo vọ tẹnpọn.",
 	"mobile-frontend-editor-edit": "Jlado",
 	"minerva-download": "Mọ PDF yi",
@@ -21,7 +21,6 @@
 	"mobile-frontend-home-button": "Bẹjẹeji",
 	"mobile-frontend-language-article-heading": "Ogbè",
 	"mobile-frontend-languages-not-available": "Weda ehe ma tin to ogbe devo lẹ mẹ.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Mì kuavọ}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Hùn weda tangan",
 	"mobile-frontend-main-menu-contributions": "Yidogọ lẹ",
 	"mobile-frontend-main-menu-login": "Hùn adà towe",
@@ -62,7 +61,7 @@
 	"minerva-page-actions-unprotect": "E ma yin hihọ basina",
 	"minerva-page-actions-user-groups": "Hagbẹ zinzantọ lẹ tọn",
 	"minerva-page-actions-logs": "Kandai lẹ",
-	"minerva-page-actions-wikibase": "{{WBREPONAME}} nuzinzan",
+	"minerva-page-actions-wikibase": "Onú {{WBREPONAME}}",
 	"minerva-page-actions-language-switcher": "Ogbè lẹ",
 	"minerva-page-actions-history": "Kandai",
 	"minerva-talk-explained": "Hodọdopọ he to alọnu lẹ",

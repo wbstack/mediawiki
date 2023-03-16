@@ -112,7 +112,8 @@
 			var $codeMirror, cmOptions,
 				selectionStart = $textbox1.prop( 'selectionStart' ),
 				selectionEnd = $textbox1.prop( 'selectionEnd' ),
-				scrollTop = $textbox1.scrollTop();
+				scrollTop = $textbox1.scrollTop(),
+				hasFocus = $textbox1.is( ':focus' );
 
 			// If CodeMirror is already loaded or wikEd gadget is enabled, abort. See T178348.
 			// FIXME: Would be good to replace the wikEd check with something more generic.
@@ -154,6 +155,13 @@
 			codeMirror = CodeMirror.fromTextArea( $textbox1[ 0 ], cmOptions );
 			$codeMirror = $( codeMirror.getWrapperElement() );
 
+			codeMirror.on( 'focus', function () {
+				$textbox1.triggerHandler( 'focus' );
+			} );
+			codeMirror.on( 'blur', function () {
+				$textbox1.triggerHandler( 'blur' );
+			} );
+
 			// Allow textSelection() functions to work with CodeMirror editing field.
 			$codeMirror.textSelection( 'register', cmTextSelection );
 			// Also override textSelection() functions for the "real" hidden textarea to route to
@@ -168,6 +176,9 @@
 				}
 			} );
 
+			if ( hasFocus ) {
+				codeMirror.focus();
+			}
 			codeMirror.doc.setSelection( codeMirror.doc.posFromIndex( selectionEnd ), codeMirror.doc.posFromIndex( selectionStart ) );
 			codeMirror.scrollTo( null, scrollTop );
 

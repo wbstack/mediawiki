@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Ainali",
+			"Dhallin",
 			"Eihpossophie",
 			"Jkl",
 			"Jopparn",
@@ -9,8 +10,7 @@
 			"Mjälten",
 			"Sabelöga",
 			"Skalman",
-			"WikiPhoenix",
-			"Dhallin"
+			"WikiPhoenix"
 		]
 	},
 	"mwoauth-desc": "Tillåter användning av OAuth 1.0a och OAuth 2.0 för API-tillstånd",

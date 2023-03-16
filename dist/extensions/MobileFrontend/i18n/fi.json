@@ -14,6 +14,7 @@
 			"MITO",
 			"McSalama",
 			"Moj",
+			"Moottori",
 			"MrTapsa",
 			"Nedergard",
 			"Nike",
@@ -27,8 +28,7 @@
 			"Surjection",
 			"Syreeni",
 			"Valtlait",
-			"VezonThunder",
-			"Moottori"
+			"VezonThunder"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Muokkaako käyttäjä mobiilikäyttöliittymän kautta",
@@ -37,8 +37,6 @@
 	"mobile-frontend-cite-error-title": "Virhe ladatessa viitteitä",
 	"mobile-frontend-cite-none-available": "Viitteitä ei ole saatavana tälle sivulle.",
 	"mobile-frontend-clear-search": "Tyhjennä",
-	"mobile-frontend-contributions-404-desc": "Muokkauksia ei voi katsoa ilman käyttäjää tai käyttäjällä jota ei ole olemassa.",
-	"mobile-frontend-contributions-404-title": "Annettu virheellinen käyttäjänimi",
 	"mobile-frontend-copyright": "Sisältö on käytettävissä lisenssillä $1, ellei toisin mainita.",
 	"mobile-frontend-desc": "Mobiilikäyttöliittymä",
 	"mobile-frontend-diffview-404-desc": "Pyytämälläsi tunnisteella ei ole olemassa versiota.<br/>Tämä johtuu yleensä seuratusta vanhentuneesta diff-linkistä joka on poistettu tai diff-linkki sisältää virheellisiä merkkejä.",
@@ -176,7 +174,6 @@
 	"mobile-frontend-references-citation": "Viittaus",
 	"mobile-frontend-references-list": "Näytä täysi lista viitteistä.",
 	"mobile-frontend-requires-mobile": "Sivua ei ole saatavilla työpöytänäkymänä. Valitse sivun alalaidasta mobiilinäkymä.",
-	"mobile-frontend-requires-optin": "Sivu ei ole käytettävissä kuin beetaversiossa. Voit vaihtaa beetaversioon [[Special:MobileOptions|asetukset sivulla]].",
 	"mobile-frontend-requires-title": "Sivu ei ole saatavissa",
 	"mobile-frontend-return-to-page": "Palaa sivulle",
 	"mobile-frontend-save-error": "Asetuksien tallentaminen epäonnistui. Varmista, että selaimen evästeet ovat käytössä.",

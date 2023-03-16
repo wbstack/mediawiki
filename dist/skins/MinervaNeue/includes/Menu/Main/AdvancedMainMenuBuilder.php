@@ -25,7 +25,6 @@ use Hooks;
 use MediaWiki\Minerva\Menu\Definitions;
 use MediaWiki\Minerva\Menu\Group;
 use MWException;
-use User;
 
 /**
  * A menu builder that provides additional menu entries that match
@@ -46,12 +45,6 @@ final class AdvancedMainMenuBuilder implements IMainMenuBuilder {
 	private $showDonateLink;
 
 	/**
-	 * Currently logged in user
-	 * @var User
-	 */
-	private $user;
-
-	/**
 	 * @var Definitions
 	 */
 	private $definitions;
@@ -61,36 +54,33 @@ final class AdvancedMainMenuBuilder implements IMainMenuBuilder {
 	 *
 	 * @param bool $showMobileOptions Show MobileOptions instead of Preferences
 	 * @param bool $showDonateLink whether to show the donate link
-	 * @param User $user The current user
 	 * @param Definitions $definitions A menu items definitions set
 	 */
-	public function __construct( $showMobileOptions, $showDonateLink, User $user, Definitions $definitions ) {
+	public function __construct( $showMobileOptions, $showDonateLink, Definitions $definitions ) {
 		$this->showMobileOptions = $showMobileOptions;
 		$this->showDonateLink = $showDonateLink;
-		$this->user = $user;
 		$this->definitions = $definitions;
 	}
 
 	/**
 	 * @inheritDoc
-	 * @return Group[]
-	 * @throws FatalError
-	 * @throws MWException
 	 */
-	public function getGroups(): array {
-		$donate = $this->showDonateLink ?
-			BuilderUtil::getDonateGroup( $this->definitions ) : null;
+	public function getPersonalToolsGroup( array $personalTools ): Group {
+		return BuilderUtil::getConfigurationTools( $this->definitions, $this->showMobileOptions );
+	}
 
-		$groups = [
-			BuilderUtil::getDiscoveryTools( $this->definitions ),
-			$this->getSiteTools(),
-			BuilderUtil::getConfigurationTools( $this->definitions, $this->showMobileOptions ),
-		];
+	/**
+	 * @inheritDoc
+	 */
+	public function getDiscoveryGroup( array $navigationTools ): Group {
+		return BuilderUtil::getDiscoveryTools( $this->definitions, $navigationTools );
+	}
 
-		if ( $donate ) {
-			$groups[] = $donate;
-		}
-		return $groups;
+	/**
+	 * @inheritDoc
+	 */
+	public function getDonateGroup(): Group {
+		return BuilderUtil::getDonateGroup( $this->definitions, $this->showDonateLink );
 	}
 
 	/**
@@ -108,7 +98,7 @@ final class AdvancedMainMenuBuilder implements IMainMenuBuilder {
 	 * @throws FatalError
 	 * @throws MWException
 	 */
-	private function getSiteTools(): Group {
+	public function getInteractionToolsGroup(): Group {
 		$group = new Group( 'p-interaction' );
 
 		$this->definitions->insertRecentChanges( $group );
@@ -116,7 +106,7 @@ final class AdvancedMainMenuBuilder implements IMainMenuBuilder {
 		$this->definitions->insertCommunityPortal( $group );
 
 		// Allow other extensions to add or override tools
-		Hooks::run( 'MobileMenu', [ 'sitetools', &$group ] );
+		Hooks::run( 'MobileMenu', [ 'sitetools', &$group ], '1.38' );
 		return $group;
 	}
 }

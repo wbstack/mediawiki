@@ -20,9 +20,9 @@
 
 namespace MediaWiki\StopForumSpam;
 
-use AbuseFilterVariableHolder;
 use Html;
 use MediaWiki\Block\DatabaseBlock;
+use MediaWiki\Extension\AbuseFilter\Variables\VariableHolder;
 use MediaWiki\Logger\LoggerFactory;
 use RequestContext;
 use Title;
@@ -34,7 +34,7 @@ class Hooks {
 	/**
 	 * Computes the sfs-blocked variable
 	 * @param string $method
-	 * @param AbuseFilterVariableHolder $vars
+	 * @param VariableHolder $vars
 	 * @param array $parameters
 	 * @param null &$result
 	 * @return bool
@@ -56,7 +56,7 @@ class Hooks {
 
 	/**
 	 * Load our blocked variable
-	 * @param AbuseFilterVariableHolder $vars
+	 * @param VariableHolder $vars
 	 * @param User $user
 	 * @return bool
 	 */

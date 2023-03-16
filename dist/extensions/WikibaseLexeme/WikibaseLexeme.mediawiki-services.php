@@ -11,7 +11,11 @@ use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\EditFormChangeOpDeseri
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\ItemIdListDeserializer;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\RepresentationsChangeOpDeserializer;
 use Wikibase\Lexeme\WikibaseLexemeServices;
+use Wikibase\Lib\Store\CachingItemOrderProvider;
+use Wikibase\Lib\Store\LookupConstants;
+use Wikibase\Lib\Store\WikiPageItemOrderProvider;
 use Wikibase\Repo\ChangeOp\Deserialization\ClaimsChangeOpDeserializer;
+use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\Validators\EntityExistsValidator;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -92,6 +96,10 @@ return call_user_func( static function () {
 		'WikibaseLexemeEditFormChangeOpDeserializer' => static function (
 			MediaWikiServices $mediaWikiServices
 		) {
+			$entityLookup = WikibaseRepo::getStore( $mediaWikiServices )->getEntityLookup(
+				Store::LOOKUP_CACHING_DISABLED,
+				LookupConstants::LATEST_FROM_MASTER
+			);
 			return new EditFormChangeOpDeserializer(
 				new RepresentationsChangeOpDeserializer(
 					new TermDeserializer(),
@@ -106,8 +114,23 @@ return call_user_func( static function () {
 					WikibaseRepo::getChangeOpFactoryProvider( $mediaWikiServices )
 						->getStatementChangeOpFactory()
 				),
-				new EntityExistsValidator( WikibaseRepo::getEntityLookup( $mediaWikiServices ), 'item' )
+				new EntityExistsValidator( $entityLookup, 'item' )
 			);
+		},
+		'WikibaseLexemeGrammaticalFeaturesOrderProvider' => static function (
+			MediaWikiServices $mediaWikiServices
+		) {
+			$grammaticalFeaturesOrderProvider = new CachingItemOrderProvider(
+			new WikiPageItemOrderProvider(
+				$mediaWikiServices->getWikiPageFactory(),
+				$mediaWikiServices->getTitleFactory()
+					->newFromTextThrow( 'MediaWiki:WikibaseLexeme-SortedGrammaticalFeatures' )
+			),
+			ObjectCache::getLocalClusterInstance(),
+			'wikibaseLexeme-grammaticalFeaturesOrderProvider'
+		);
+
+			return $grammaticalFeaturesOrderProvider;
 		},
 	];
 } );

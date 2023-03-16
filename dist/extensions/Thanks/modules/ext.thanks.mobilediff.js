@@ -72,7 +72,7 @@
 		new Icon( {
 			name: 'userTalk',
 			glyphPrefix: 'thanks',
-			hasText: true,
+			type: 'before',
 			label: mw.msg( 'thanks-button-thank', mw.user, gender )
 		} ).$el.appendTo( $button );
 

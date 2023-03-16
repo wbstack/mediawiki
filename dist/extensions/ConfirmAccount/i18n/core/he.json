@@ -13,6 +13,7 @@
 	"requestaccount-loginnotice": "כדי לקבל חשבון משתמש, עליכם '''[[Special:RequestAccount|לבקש אחד כזה]]'''.",
 	"action-confirmaccount": "לסקור ולאשר חשבונות",
 	"right-confirmaccount": "צפייה ב[[Special:ConfirmAccounts|תור של החשבונות המבוקשים]]",
+	"right-confirmaccount-notify": "קבלת הודעה בדוא\"ל על בקשות חשבון שאושרו לאחרונה",
 	"action-requestips": "לצפות בכתובות ה־IP של המבקשים בזמן עיבוד בקשות לפתיחת חשבון",
 	"right-requestips": "צפייה בכתובות ה־IP של המבקשים בזמן עיבוד בקשות לפתיחת חשבון",
 	"action-lookupcredentials": "לצפות בהסמכות",

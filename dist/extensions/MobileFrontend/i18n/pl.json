@@ -38,7 +38,8 @@
 			"VerMa",
 			"Vuh",
 			"WTM",
-			"Woytecr"
+			"Woytecr",
+			"Msz2001"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Czy użytkownik edytuje lub nie za pomocą interfejsu mobilnego",
@@ -48,8 +49,6 @@
 	"mobile-frontend-cite-error": "Podczas ładowania przypisu wystąpił błąd związany z błędnym identyfikatorem wersji.",
 	"mobile-frontend-cite-none-available": "Brak przypisów dostępnych dla tej strony.",
 	"mobile-frontend-clear-search": "Wyczyść",
-	"mobile-frontend-contributions-404-desc": "Nie możesz sprawdzić wkładu bez podania użytkownika lub podając nazwę użytkownika, który nie istnieje.",
-	"mobile-frontend-contributions-404-title": "Wybrano złą nazwę użytkownika",
 	"mobile-frontend-copyright": "Treść udostępniana na licencji $1, jeśli nie podano inaczej.",
 	"mobile-frontend-desc": "Mobilny interfejs użytkownika",
 	"mobile-frontend-diffview-404-desc": "ID wersji, które zostało podane nie istnieje.<br/>Przyczyną zazwyczaj jest użycie starego linku do różnicy w stronie, która została usunięta lub linku do różnicy zawierającego nieprawidłowe znaki.",
@@ -189,7 +188,6 @@
 	"mobile-frontend-references-citation-error": "Podczas wczytywania przypisu wystąpił błąd.",
 	"mobile-frontend-references-list": "Zobacz pełną listę przypisów",
 	"mobile-frontend-requires-mobile": "Ta strona nie jest dostępna w wersji standardowej. Kliknij link „wersja mobilna” na dole strony.",
-	"mobile-frontend-requires-optin": "Ta strona nie jest dostępna, jeżeli nie włączysz trybu beta. Odwiedź [[Special:MobileOptions|ustawienia]], aby go włączyć.",
 	"mobile-frontend-requires-title": "Strona niedostępna",
 	"mobile-frontend-return-to-page": "Powróć do strony",
 	"mobile-frontend-save-error": "Wystąpił błąd podczas zapisywania ustawień. Upewnij się, że masz włączoną obsługę plików cookie.",
@@ -244,7 +242,7 @@
 	"mobile.css": "/* Umieszczony tutaj kod CSS zostanie załadowany u wszystkich użytkowników korzystających z wersji mobilnej */",
 	"mobile.js": "/* Umieszczony tutaj kod JavaScript zostanie załadowany u wszystkich użytkowników korzystających z wersji mobilnej */",
 	"nearby": "Strony na temat obiektów znajdujących się w pobliżu",
-	"tag-mobile_edit": "Z internetu mobilnego",
+	"tag-mobile_edit": "Z urządzenia mobilnego",
 	"tag-mobile_edit-description": "Edycja dokonana z wersji dla urządzeń mobilnych lub za pomocą aplikacji mobilnej",
 	"tag-advanced_mobile_edit": "Zaawansowana edycja mobilna",
 	"tag-advanced_mobile_edit-description": "Edycja wykonana przez użytkownika w trybie zaawansowanym",

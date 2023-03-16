@@ -30,7 +30,6 @@ use ResourceLoaderContext;
 use Title;
 use WebRequest;
 use Wikimedia\ScopedCallback;
-use WikiPage;
 use Xml;
 
 class Hooks {
@@ -159,9 +158,10 @@ class Hooks {
 			$popts = $editpage->getArticle()->getPage()->makeParserOptions(
 				$context
 			);
+			$services = MediaWikiServices::getInstance();
 			$popts->setIsPreview( true );
 			$popts->setIsSectionPreview( false );
-			$contentTransformer = MediaWikiServices::getInstance()->getContentTransformer();
+			$contentTransformer = $services->getContentTransformer();
 			$content = $contentTransformer->preSaveTransform(
 				$content,
 				$templatetitle,
@@ -173,7 +173,7 @@ class Hooks {
 				' [[#' . EditPage::EDITFORM_ID . '|' . $lang->getArrow() . ' ' .
 				$context->msg( 'continue-editing' )->text() . ']]';
 
-			$page = WikiPage::factory( $title );
+			$page = $services->getWikiPageFactory()->newFromTitle( $title );
 			$popts = $page->makeParserOptions( $context );
 			$popts->setIsPreview( true );
 			$popts->setIsSectionPreview( false );
@@ -191,7 +191,8 @@ class Hooks {
 				RevisionRecord::FOR_THIS_USER,
 				$user
 			);
-			$parserOutput = $pageContent->getParserOutput( $title, $revRecord->getId(), $popts );
+			$contentRenderer = $services->getContentRenderer();
+			$parserOutput = $contentRenderer->getParserOutput( $pageContent, $title, $revRecord->getId(), $popts );
 
 			$output->addParserOutputMetadata( $parserOutput );
 			if ( $output->userCanPreview() ) {

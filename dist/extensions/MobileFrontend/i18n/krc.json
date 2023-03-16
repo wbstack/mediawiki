@@ -2,7 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Ernác",
-			"Iltever"
+			"Iltever",
+			"TayfunEt.",
+			"Къарачайлы"
 		]
 	},
 	"mobile-frontend-changeslist-nocomment": "Тюрлендириуню ачыкълауу джокъду",
@@ -10,13 +12,14 @@
 	"mobile-frontend-copyright": "Ичиндегиси,  $1 лицензиягъа кёре бериледи (башха белгиленмеген эсе).",
 	"mobile-frontend-desc": "Мобил интерфейс",
 	"mobile-frontend-diffview-anonymous": "Аноним",
+	"mobile-frontend-editor-blocked-drawer-action-login": "Кириу",
 	"mobile-frontend-featured-article": "Бюгюннгю сайланнган материал",
 	"mobile-frontend-last-modified-date": "Ахыр тюрлениуле $2 $1 этилгендиле",
 	"mobile-frontend-main-menu-settings-heading": "Сайтны мобил версиясыны джарашдырыўлары",
 	"mobile-frontend-missing-image": "Сурат",
 	"mobile-frontend-news-items": "Джангылыкълада",
 	"mobile-frontend-opt-in-explain": "Бета-тест этиўге къошулсагъыз, талай экспериментал функцияны хайырландырыргъа эркинлик берилликди, алай а халатха неда проблемагъа тюберге къоркъуў ёсерикди.",
-	"mobile-frontend-privacy-link-text": "Конфиденциаллыкъ",
+	"mobile-frontend-privacy-link-text": "Ташалыкъ",
 	"mobile-frontend-save-settings": "Джарашдырыўланы сакъла",
 	"mobile-frontend-settings-beta": "Бета-версия",
 	"mobile-frontend-terms-text": "Хайырланыу шартла",

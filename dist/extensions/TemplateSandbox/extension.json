@@ -7,7 +7,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.37.0"
+		"MediaWiki": ">= 1.38.0"
 	},
 	"SpecialPages": {
 		"TemplateSandbox": {
@@ -15,7 +15,8 @@
 			"services": [
 				"RevisionLookup",
 				"ContentHandlerFactory",
-				"WikiPageFactory"
+				"WikiPageFactory",
+				"ContentRenderer"
 			]
 		}
 	},

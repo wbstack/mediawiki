@@ -326,18 +326,25 @@ class MySQLPrimaryPos implements DBPrimaryPos {
 			: false;
 	}
 
-	public function serialize() {
-		return serialize( [
+	public function serialize(): string {
+		return serialize( $this->__serialize() );
+	}
+
+	public function __serialize() {
+		return [
 			'position' => $this->__toString(),
 			'activeDomain' => $this->activeDomain,
 			'activeServerId' => $this->activeServerId,
 			'activeServerUUID' => $this->activeServerUUID,
 			'asOfTime' => $this->asOfTime
-		] );
+		];
 	}
 
-	public function unserialize( $serialized ) {
-		$data = unserialize( $serialized );
+	public function unserialize( $serialized ): void {
+		$this->__unserialize( unserialize( $serialized ) );
+	}
+
+	public function __unserialize( $data ) {
 		if ( !is_array( $data ) ) {
 			throw new UnexpectedValueException( __METHOD__ . ": cannot unserialize position" );
 		}

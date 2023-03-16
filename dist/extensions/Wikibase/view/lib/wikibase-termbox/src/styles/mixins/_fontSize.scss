@@ -1,4 +1,0 @@
-@mixin fontSize( $size ) {
-	font-size: $size; // Fallback in px
-	font-size: calculate-rem( $size );
-}

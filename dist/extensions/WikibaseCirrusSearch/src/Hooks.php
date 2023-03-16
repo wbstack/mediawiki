@@ -11,7 +11,6 @@ use Language;
 use MediaWiki\MediaWikiServices;
 use RequestContext;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
-use Wikibase\Lib\WikibaseContentLanguages;
 use Wikibase\Repo\WikibaseRepo;
 use Wikibase\Search\Elastic\Fields\StatementsField;
 use Wikibase\Search\Elastic\Query\HasDataForLangFeature;
@@ -295,8 +294,7 @@ class Hooks {
 		$licenseMapping = HasLicenseFeature::getConfiguredLicenseMap( $searchConfig );
 		$extraFeatures[] = new HasLicenseFeature( $licenseMapping );
 
-		$languageCodes = WikibaseContentLanguages::getDefaultInstance()
-			->getContentLanguages( 'term' )->getLanguages();
+		$languageCodes = WikibaseRepo::getTermsLanguages()->getLanguages();
 		$extraFeatures[] = new InLabelFeature( WikibaseRepo::getLanguageFallbackChainFactory(), $languageCodes );
 
 		$extraFeatures[] = new HasDataForLangFeature( $languageCodes );

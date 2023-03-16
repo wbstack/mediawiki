@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Changes;
 
+use CannotCreateActorException;
 use InvalidArgumentException;
 use Job;
 use JobSpecification;
@@ -214,31 +215,15 @@ class InjectRCRecordsJob extends Job {
 	 */
 	private function getChange(): ?EntityChange {
 		$params = $this->getParams();
-		$changeData = $params['change'];
+		$change = $this->changeFactory->newFromFieldData( $params['change'] );
 
-		if ( is_int( $changeData ) ) {
-			// TODO: this can be removed once T172394 has been deployed
-			//       and old jobs have cleared the queue.
-			$this->logger->debug( __FUNCTION__ . ": loading change $changeData." );
-
-			$changes = $this->changeLookup->loadByChangeIds( [ $changeData ] );
-
-			$change = reset( $changes );
-
-			if ( !$change ) {
-				$this->logger->error( __FUNCTION__ . ": failed to load change $changeData." );
-			}
-		} else {
-			$change = $this->changeFactory->newFromFieldData( $params['change'] );
-
-			// If the current change was composed of other child changes, restore the
-			// child objects.
-			$info = $change->getInfo();
-			if ( isset( $info['change-ids'] ) && !isset( $info['changes'] ) ) {
-				$children = $this->changeLookup->loadByChangeIds( $info['change-ids'] );
-				$info['changes'] = $children;
-				$change->setField( ChangeRow::INFO, $info );
-			}
+		// If the current change was composed of other child changes, restore the
+		// child objects.
+		$info = $change->getInfo();
+		if ( isset( $info['change-ids'] ) && !isset( $info['changes'] ) ) {
+			$children = $this->changeLookup->loadByChangeIds( $info['change-ids'] );
+			$info['changes'] = $children;
+			$change->setField( ChangeRow::INFO, $info );
 		}
 
 		return $change;
@@ -287,10 +272,22 @@ class InjectRCRecordsJob extends Job {
 			if ( $this->rcDuplicateDetector
 				&& $this->rcDuplicateDetector->getRecentChangeId( $rc ) !== null
 			) {
-				$this->logger->debug( __FUNCTION__ . ": skipping duplicate RC entry for " . $title->getFullText() );
+				$this->logger->debug( __METHOD__ . ": skipping duplicate RC entry for " . $title->getFullText() );
 			} else {
-				$this->logger->debug( __FUNCTION__ . ": saving RC entry for " . $title->getFullText() );
-				$rc->save();
+				$this->logger->debug( __METHOD__ . ": saving RC entry for " . $title->getFullText() );
+				try {
+					$rc->save();
+				} catch ( CannotCreateActorException $e ) {
+					$this->logger->error(
+						__METHOD__ . ': cannot create actor {rc_user_text} for RC entry for {title}, skipping;'
+						. ' misconfigured ExternalUserNames?',
+						[
+							'exception' => $e,
+							'rc_user_text' => $rc->getAttribute( 'rc_user_text' ),
+							'title' => $title->getFullText(),
+						]
+					);
+				}
 			}
 		}
 

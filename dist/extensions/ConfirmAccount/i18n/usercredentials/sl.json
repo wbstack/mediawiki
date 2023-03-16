@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Dbc334"
+			"Dbc334",
+			"Eleassar"
 		]
 	},
 	"usercredentials": "Uporabniške poverilnice",
@@ -10,8 +11,8 @@
 	"usercredentials-text": "Spodaj so navedene potrjene poverilnice izbranega uporabniškega računa.",
 	"usercredentials-leg-user": "Uporabniški račun",
 	"usercredentials-leg-areas": "Glavna področja zanimanja",
-	"usercredentials-leg-person": "Osebne informacije",
-	"usercredentials-leg-other": "Druge informacije",
+	"usercredentials-leg-person": "Osebni podatki",
+	"usercredentials-leg-other": "Drugi podatki",
 	"usercredentials-leg-ip": "Podatki IP-naslova",
 	"usercredentials-email": "E-pošta:",
 	"usercredentials-real": "Pravo ime:",
@@ -19,9 +20,9 @@
 	"usercredentials-attach": "Življenjepis/CV:",
 	"usercredentials-notes": "Dodatne opombe:",
 	"usercredentials-urls": "Seznam spletnih strani:",
-	"usercredentials-ip": "Izvirni IP-naslov:",
-	"usercredentials-xff": "Izvirni X-Forwarded-For:",
-	"usercredentials-agent": "Izvirni User-Agent:",
+	"usercredentials-ip": "Izvorni IP-naslov:",
+	"usercredentials-xff": "Izvorni X-Forwarded-For:",
+	"usercredentials-agent": "Izvorni uporabniški agent:",
 	"usercredentials-member": "Pravice:",
 	"usercredentials-badid": "Za uporabnika nisem našel nobenih poverilnic.\nPreverite, ali ste ime pravilno črkovali."
 }

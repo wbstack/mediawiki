@@ -44,7 +44,7 @@ class SubmittedTextCache {
 	 * @param UserIdentity $user
 	 * @param SessionId|null $sessionId
 	 *
-	 * @return string
+	 * @return string|false Returns false when the cache expired
 	 */
 	public function fetchText( string $titleDbKey, UserIdentity $user, ?SessionId $sessionId ) {
 		$key = $this->makeCacheKey( $titleDbKey, $user, $sessionId );

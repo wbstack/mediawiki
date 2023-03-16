@@ -181,7 +181,7 @@ class Scribunto_LuaStandaloneInterpreter extends Scribunto_LuaInterpreter {
 			if ( PHP_OS == 'Linux' ) {
 				return 'Lua 5.1.5';
 			} elseif ( PHP_OS == 'Windows' || PHP_OS == 'WINNT' || PHP_OS == 'Win32' ) {
-				return 'Lua 5.1.4';
+				return 'Lua 5.1.5';
 			} elseif ( PHP_OS == 'Darwin' ) {
 				return 'Lua 5.1.5';
 			} else {
@@ -406,6 +406,14 @@ class Scribunto_LuaStandaloneInterpreter extends Scribunto_LuaInterpreter {
 			$message['value'] = $m[3];
 		}
 		if ( isset( $message['trace'] ) ) {
+			foreach ( $message['trace'] as &$val ) {
+				$val = array_map( static function ( $val ) {
+					if ( is_string( $val ) ) {
+						$val = Validator::cleanUp( $val );
+					}
+					return $val;
+				}, $val );
+			}
 			$opts['trace'] = array_values( $message['trace'] );
 		}
 		throw $this->engine->newLuaError( $message['value'], $opts );

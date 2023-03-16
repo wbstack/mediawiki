@@ -43,6 +43,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "Moh hluh via",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Achhâpa",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|Dâtaipa}}",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "Block cha a noh chhâ bâ aw",
 	"mobile-frontend-editor-blocked-drawer-help": "Diadiahpazy moh",
 	"mobile-frontend-editor-generic-block-reason": "Achhâpa pahno leipa",
 	"mobile-frontend-editor-cancel": "Châvei",

@@ -1,5 +1,7 @@
 <?php
 
+use Wikimedia\RequestTimeout\TimeoutException;
+
 /**
  * A field that will contain a date and/or time
  *
@@ -120,7 +122,7 @@ class HTMLDateTimeField extends HTMLTextField {
 	}
 
 	protected function parseDate( $value ) {
-		$value = trim( $value );
+		$value = trim( $value ?? '' );
 		if ( $value === '' ) {
 			return false;
 		}
@@ -135,6 +137,8 @@ class HTMLDateTimeField extends HTMLTextField {
 		try {
 			$date = new DateTime( $value, new DateTimeZone( 'GMT' ) );
 			return $date->getTimestamp();
+		} catch ( TimeoutException $e ) {
+			throw $e;
 		} catch ( Exception $ex ) {
 			return false;
 		}

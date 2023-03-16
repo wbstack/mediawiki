@@ -44,6 +44,10 @@ class ExtensionLoadHandler {
 
 		$wgHooks = array_merge_recursive( $wgHooks, $handler->getHooks() );
 
+		if ( $wgWBClientSettings === null ) {
+			$wgWBClientSettings = [];
+		}
+
 		$apiFormatReferenceSpec = $handler->getApiFormatReferenceSpec( $wgWBClientSettings );
 		if ( $apiFormatReferenceSpec !== null ) {
 			$wgAPIModules['wbformatreference'] = $apiFormatReferenceSpec;

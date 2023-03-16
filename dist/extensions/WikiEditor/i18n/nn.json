@@ -11,11 +11,9 @@
 	},
 	"wikieditor": "Avansert grensesnitt for endring av wikitekst",
 	"wikieditor-wikitext-tab": "Wikitekst",
-	"wikieditor-loading": "Lastar",
 	"wikieditor-toolbar": "Verktøyline for redigering",
 	"wikieditor-toolbar-desc": "Ei meir brukarvenleg verktøylinje for redigering",
 	"wikieditor-toolbar-preference": "Ta i bruk utvida verktøylinje for redigering",
-	"wikieditor-toolbar-loading": "Lastar …",
 	"wikieditor-toolbar-tool-bold": "Feit",
 	"wikieditor-toolbar-tool-bold-example": "Feit tekst",
 	"wikieditor-toolbar-tool-italic": "Kursiv",
@@ -46,7 +44,6 @@
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "URL-en du oppgav ser ut til å vera meint som ei lenkje til ei anna wikiside. Ynskjer du å gjera han til ei intern lenkje?",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-int": "Intern lenkje",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-ext": "Ekstern lenkje",
-	"wikieditor-toolbar-tool-link-empty": "Du skreiv ikkje inn noko å lenkja til.",
 	"wikieditor-toolbar-tool-file": "Fil",
 	"wikieditor-toolbar-tool-file-example": "Døme.jpg",
 	"wikieditor-toolbar-tool-file-title": "Set inn fil",
@@ -188,5 +185,6 @@
 	"wikieditor-toolbar-help-content-signature-result": "<a href='#' title='$1:Username'>Brukarnamn</a> (<a href='#' title='$2:Username'>diskusjon</a>)",
 	"wikieditor-toolbar-help-content-indent-description": "Innrykk",
 	"wikieditor-toolbar-help-content-indent-syntax": "Normal tekst<br />:Tekst med innrykk<br />::Tekst med innrykk",
-	"wikieditor-toolbar-help-content-indent-result": "Normal tekst<dl><dd>Tekst med innrykk<dl><dd>Tekst med innrykk</dd></dl></dd></dl>"
+	"wikieditor-toolbar-help-content-indent-result": "Normal tekst<dl><dd>Tekst med innrykk<dl><dd>Tekst med innrykk</dd></dl></dd></dl>",
+	"wikieditor-realtimepreview-preview": "Førehandsvising"
 }

@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ajeje Brazorf",
 			"Benjozork",
 			"Boniface",
 			"Brenloch56",
@@ -22,8 +23,7 @@
 			"Urhixidur",
 			"Verdy p",
 			"Weft",
-			"Wladek92",
-			"Ajeje Brazorf"
+			"Wladek92"
 		]
 	},
 	"templatedata-desc": "Met en place un stockage de données pour les paramètres des modèles (en utilisant JSON)",
@@ -67,7 +67,7 @@
 	"templatedata-invalid-duplicate-value": "La propriété « $1 » (« $3 ») est un doublon de « $2 ».",
 	"templatedata-invalid-empty-array": "La propriété « $1 » doit avoir au moins une valeur dans son tableau.",
 	"templatedata-invalid-format": "La propriété « $1 » doit être « inline », « block » ou une chaîne de format valide.",
-	"templatedata-invalid-length": "Données trop grosses pour être enregistrées ({{formatnum:$1}} {{PLURAL:$1|octet|octets}}, {{PLURAL:$2|la limite est}} {{formatnum:$2}})",
+	"templatedata-invalid-length": "Données trop grosses pour être enregistrées ({{formatnum:$1}} octet{{PLURAL:$1||s}}, la limite est {{PLURAL:$2|}}{{formatnum:$2}})",
 	"templatedata-invalid-missing": "Propriété « $1 » obligatoire non trouvée.",
 	"templatedata-invalid-param": "« $1 »  est un paramètre non valide pour la propriété « $2 ».",
 	"templatedata-invalid-parse": "Erreur de syntaxe dans JSON.",
@@ -88,7 +88,7 @@
 	"templatedata-modal-button-removemap": "Supprimer la correspondance",
 	"templatedata-modal-button-restoreparam": "Restaurer les paramètres",
 	"templatedata-modal-button-saveparam": "Enregistrer",
-	"templatedata-modal-confirmcancel": "Êtes-vous sûr de vouloir annuler vos modifications ?",
+	"templatedata-modal-confirmcancel": "Êtes-vous sûr{{GENDER:||e}} de vouloir annuler vos modifications ?",
 	"templatedata-modal-current-language": "Langue actuelle : $1",
 	"templatedata-modal-errormsg": "Des erreurs ont été trouvées. Assurez-vous qu’il n’y a pas de noms de paramètre vides ou dupliqués, et que les noms de paramètres ne comprennent aucun « $1 », « $2 » ou « $3 ».",
 	"templatedata-modal-errormsg-duplicate-name": "Erreur trouvée. Le nom choisi est déjà utilisé par un autre paramètre.",
@@ -106,7 +106,7 @@
 	"templatedata-modal-placeholder-prompt-map-name": "Saisir le nom de la carte",
 	"templatedata-modal-search-input-placeholder": "Rechercher par nom ou code de langue",
 	"templatedata-modal-table-param-actions": "Actions",
-	"templatedata-modal-table-param-aliases": "Alias (séparés par des virgules)",
+	"templatedata-modal-table-param-aliases": "Alias",
 	"templatedata-modal-table-param-autovalue": "Valeur automatique",
 	"templatedata-modal-table-param-default": "Par défaut ($1)",
 	"templatedata-modal-table-param-deprecated": "Obsolète",

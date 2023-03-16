@@ -359,13 +359,13 @@ class ConfirmAccount {
 		if ( method_exists( MediaWikiServices::class, 'getLockManagerGroupFactory' ) ) {
 			// MediaWiki 1.34+
 			$lockManagerGroup = MediaWikiServices::getInstance()->getLockManagerGroupFactory()
-				->getLockManagerGroup( wfWikiID() );
+				->getLockManagerGroup( WikiMap::getCurrentWikiId() );
 		} else {
-			$lockManagerGroup = LockManagerGroup::singleton( wfWikiID() );
+			$lockManagerGroup = LockManagerGroup::singleton( WikiMap::getCurrentWikiId() );
 		}
 		$info['backend'] = new FSFileBackend( [
 				'name' => $repoName . '-backend',
-				'wikiId' => wfWikiID(),
+				'wikiId' => WikiMap::getCurrentWikiId(),
 				'lockManager' => $lockManagerGroup->get( 'fsLockManager' ),
 				'containerPaths' => [
 					"{$repoName}-public" => "{$directory}",

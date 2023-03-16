@@ -31,7 +31,7 @@ class MathMathML extends MathRenderer {
 	/** @var string[] */
 	protected $restbaseInputTypes = [ 'tex', 'inline-tex', 'chem' ];
 	/** @var string[] */
-	protected $restbaseRenderingModes = [ 'mathml', 'png' ];
+	protected $restbaseRenderingModes = [ MathConfig::MODE_MATHML, MathConfig::MODE_PNG ];
 	/** @var string[] */
 	protected $allowedRootElements = [];
 	/** @var string */
@@ -57,7 +57,7 @@ class MathMathML extends MathRenderer {
 	public function __construct( $tex = '', $params = [] ) {
 		global $wgMathMathMLUrl;
 		parent::__construct( $tex, $params );
-		$this->setMode( 'mathml' );
+		$this->setMode( MathConfig::MODE_MATHML );
 		$this->host = $wgMathMathMLUrl;
 		if ( isset( $params['type'] ) ) {
 			$allowedTypes = [ 'pmml', 'ascii', 'chem' ];
@@ -242,7 +242,7 @@ class MathMathML extends MathRenderer {
 					'host' => $this->host,
 					'timeout' => $wgMathLaTeXMLTimeout
 				] );
-				return StatusValue::newFatal( 'math_timeout', $this->getModeStr(), $this->host );
+				return StatusValue::newFatal( 'math_timeout', $this->getModeName(), $this->host );
 			} else {
 				$errormsg = $req->getContent();
 				$this->logger->warning( 'Math service request failed', [
@@ -252,10 +252,10 @@ class MathMathML extends MathRenderer {
 				] );
 				return StatusValue::newFatal(
 					'math_invalidresponse',
-					$this->getModeStr(),
+					$this->getModeName(),
 					$this->host,
 					$errormsg,
-					$this->getModeStr()
+					$this->getModeName()
 				);
 			}
 		}
@@ -269,7 +269,7 @@ class MathMathML extends MathRenderer {
 	public function getPostData() {
 		$input = $this->getTex();
 		if ( $this->inputType == 'pmml' ||
-			 $this->getMode() == 'latexml' && $this->getMathml() ) {
+			 $this->getMode() == MathConfig::MODE_LATEXML && $this->getMathml() ) {
 			$out = 'type=mml&q=' . rawurlencode( $this->getMathml() );
 		} elseif ( $this->inputType == 'ascii' ) {
 			$out = 'type=asciimath&q=' . rawurlencode( $input );
@@ -362,7 +362,7 @@ class MathMathML extends MathRenderer {
 	 * @return Title|string
 	 */
 	private function getFallbackImageUrl( $noRender = false ) {
-		if ( $this->getMode() === 'png' && $this->pngPath ) {
+		if ( $this->getMode() === MathConfig::MODE_PNG && $this->pngPath ) {
 			return $this->pngPath;
 		}
 		if ( $this->svgPath ) {
@@ -548,7 +548,7 @@ class MathMathML extends MathRenderer {
 	 * @return StatusValue
 	 */
 	protected function processJsonResult( $jsonResult, $host ): StatusValue {
-		if ( $this->getMode() == 'latexml' || $this->inputType == 'pmml' ||
+		if ( $this->getMode() == MathConfig::MODE_LATEXML || $this->inputType == 'pmml' ||
 			 $this->isValidMathML( $jsonResult->mml )
 		) {
 			if ( isset( $jsonResult->svg ) ) {
@@ -561,7 +561,7 @@ class MathMathML extends MathRenderer {
 			} else {
 				$this->logger->error( 'Missing SVG property in JSON result.' );
 			}
-			if ( $this->getMode() != 'latexml' && $this->inputType != 'pmml' ) {
+			if ( $this->getMode() != MathConfig::MODE_LATEXML && $this->inputType != 'pmml' ) {
 				$this->setMathml( $jsonResult->mml );
 			}
 			// Avoid PHP 7.1 warning from passing $this by reference
@@ -582,5 +582,3 @@ class MathMathML extends MathRenderer {
 		return $this->userInputTex === '';
 	}
 }
-
-class_alias( MathMathML::class, 'MathMathML' );

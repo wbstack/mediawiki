@@ -7,15 +7,17 @@ use ApiMain;
 use ApiOpenSearch;
 use CirrusSearch\Profile\SearchProfileServiceFactory;
 use CirrusSearch\Search\FancyTitleResultsType;
+use ConfigFactory;
 use DeferredUpdates;
 use Html;
 use ISearchResultSet;
-use JobQueueGroup;
 use LinksUpdate;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Preferences\Hook\GetPreferencesHook;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\User\Hook\UserGetDefaultOptionsHook;
 use MediaWiki\User\UserIdentity;
 use OutputPage;
 use RequestContext;
@@ -44,11 +46,21 @@ use Xml;
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  */
-class Hooks {
+class Hooks implements UserGetDefaultOptionsHook, GetPreferencesHook {
 	/**
 	 * @var string[] Destination of titles being moved (the ->getPrefixedDBkey() form).
 	 */
 	private static $movingTitles = [];
+
+	/** @var ConfigFactory */
+	private $configFactory;
+
+	/**
+	 * @param ConfigFactory $configFactory
+	 */
+	public function __construct( ConfigFactory $configFactory ) {
+		$this->configFactory = $configFactory;
+	}
 
 	/**
 	 * Hooked to call initialize after the user is set up.
@@ -312,7 +324,7 @@ class Hooks {
 		if ( $target ) {
 			// DeferredUpdate so we don't end up racing our own page deletion
 			DeferredUpdates::addCallableUpdate( static function () use ( $target ) {
-				JobQueueGroup::singleton()->push(
+				MediaWikiServices::getInstance()->getJobQueueGroup()->push(
 					new Job\LinksUpdate( $target, [
 						'addedLinks' => [],
 						'removedLinks' => [],
@@ -332,7 +344,7 @@ class Hooks {
 	public static function onArticleDeleteComplete( $page, $user, $reason, $pageId ) {
 		// Note that we must use the article id provided or it'll be lost in the ether.  The job can't
 		// load it from the title because the page row has already been deleted.
-		JobQueueGroup::singleton()->push(
+		MediaWikiServices::getInstance()->getJobQueueGroup()->push(
 			new Job\DeletePages( $page->getTitle(), [
 				'docId' => self::getConfig()->makeId( $pageId )
 			] )
@@ -348,7 +360,7 @@ class Hooks {
 	 * @param Title $title The page title we've had a revision deleted on
 	 */
 	public static function onRevisionDelete( $title ) {
-		JobQueueGroup::singleton()->push(
+		MediaWikiServices::getInstance()->getJobQueueGroup()->push(
 			new Job\LinksUpdate( $title, [
 				'addedLinks' => [],
 				'removedLinks' => [],
@@ -438,7 +450,7 @@ class Hooks {
 		$params += Job\LinksUpdate::buildJobDelayOptions( Job\LinksUpdate::class, $delay );
 		$job = new Job\LinksUpdate( $linksUpdate->getTitle(), $params );
 
-		JobQueueGroup::singleton()->push( $job );
+		MediaWikiServices::getInstance()->getJobQueueGroup()->lazyPush( $job );
 	}
 
 	/**
@@ -449,7 +461,7 @@ class Hooks {
 	 */
 	public static function onUploadComplete( \UploadBase $uploadBase ) {
 		if ( $uploadBase->getTitle()->exists() ) {
-			JobQueueGroup::singleton()->push(
+			MediaWikiServices::getInstance()->getJobQueueGroup()->push(
 				new Job\LinksUpdate( $uploadBase->getTitle(), [
 					'addedLinks' => [],
 					'removedLinks' => [],
@@ -555,7 +567,7 @@ class Hooks {
 	/**
 	 * Before we've moved a title from $title to $newTitle.
 	 * @param Title $title old title
-	 * @param Title $newTitle new title
+	 * @param Title $newTitle
 	 * @param User $user User who made the move
 	 */
 	public static function onTitleMove( Title $title, Title $newTitle, $user ) {
@@ -565,7 +577,7 @@ class Hooks {
 	/**
 	 * When we've moved a Title from A to B.
 	 * @param LinkTarget $title The old title
-	 * @param LinkTarget $newTitle The new title
+	 * @param LinkTarget $newTitle
 	 * @param UserIdentity $user User who made the move
 	 * @param int $oldId The page id of the old page.
 	 * @param int $redirId
@@ -599,7 +611,7 @@ class Hooks {
 			] );
 			// Push the job after DB commit but cancel on rollback
 			wfGetDB( DB_PRIMARY )->onTransactionCommitOrIdle( static function () use ( $job ) {
-				JobQueueGroup::singleton()->lazyPush( $job );
+				MediaWikiServices::getInstance()->getJobQueueGroup()->lazyPush( $job );
 			}, __METHOD__ );
 		}
 	}
@@ -762,7 +774,8 @@ class Hooks {
 		] );
 	}
 
-	public static function onGetPreferences( $user, &$prefs ) {
+	/** @inheritDoc */
+	public function onGetPreferences( $user, &$prefs ) {
 		$search = new CirrusSearch();
 		$profiles = $search->getProfiles( \SearchEngine::COMPLETION_PROFILE_TYPE, $user );
 		if ( empty( $profiles ) ) {
@@ -785,10 +798,7 @@ class Hooks {
 	 * @return string[]
 	 */
 	private static function autoCompleteOptionsForPreferences( array $profiles ): array {
-		$available = [];
-		foreach ( $profiles as $profile ) {
-			$available[] = $profile['name'];
-		}
+		$available = array_column( $profiles, 'name' );
 		// Order in which we propose comp suggest profiles
 		$preferredOrder = [
 			'fuzzy',
@@ -813,11 +823,10 @@ class Hooks {
 		return count( $messages ) >= 2 ? $messages : [];
 	}
 
-	public static function onUserGetDefaultOptions( &$defaultOptions ) {
-		$config = MediaWikiServices::getInstance()
-				->getConfigFactory()
-				->makeConfig( 'CirrusSearch' );
-		$defaultOptions['cirrussearch-pref-completion-profile'] = $config->get( 'CirrusSearchCompletionSettings' );
+	/** @inheritDoc */
+	public function onUserGetDefaultOptions( &$defaultOptions ) {
+		$defaultOptions['cirrussearch-pref-completion-profile'] =
+			$this->configFactory->makeConfig( 'CirrusSearch' )->get( 'CirrusSearchCompletionSettings' );
 	}
 
 	/**
@@ -848,7 +857,8 @@ class Hooks {
 					/** @phan-suppress-next-line PhanTypeMismatchArgumentSuperType $config is actually a SearchConfig */
 					$config,
 					$serviceContainer->getLocalServerObjectCache(),
-					new CirrusSearchHookRunner( $serviceContainer->getHookContainer() )
+					new CirrusSearchHookRunner( $serviceContainer->getHookContainer() ),
+					$serviceContainer->getUserOptionsLookup()
 				);
 			}
 		);
@@ -869,7 +879,7 @@ class Hooks {
 			// Not indexing, thus nothing to remove here.
 			return;
 		}
-		JobQueueGroup::singleton()->push(
+		MediaWikiServices::getInstance()->getJobQueueGroup()->push(
 			new Job\DeleteArchive( $title, [ 'docIds' => $restoredPages ] )
 		);
 	}

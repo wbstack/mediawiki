@@ -28,7 +28,7 @@
 				u: true, font: true, big: true, small: true, sub: true, sup: true,
 				h1: true, h2: true, h3: true, h4: true, h5: true, h6: true, cite: true,
 				code: true, em: true, s: true, strike: true, strong: true, tt: true,
-				var: true, div: true, center: true, blockquote: true, ol: true, ul: true,
+				var: true, div: true, center: true, blockquote: true, q: true, ol: true, ul: true,
 				dl: true, table: true, caption: true, pre: true, ruby: true, rb: true,
 				rp: true, rt: true, rtc: true, p: true, span: true, abbr: true, dfn: true,
 				kbd: true, samp: true, data: true, time: true, mark: true, br: true,
@@ -299,7 +299,7 @@
 				state.tokenize = state.stack.pop();
 				return makeLocalStyle( 'mw-extlink-bracket', state, 'nLink' );
 			}
-			if ( stream.match( /^[^'\]{&~]+/ ) ) {
+			if ( stream.match( /^[^'\]{&~<]+/ ) ) {
 				return makeStyle( 'mw-extlink-text', state );
 			}
 			return eatWikiText( 'mw-extlink-text', '' )( stream, state );
@@ -380,7 +380,7 @@
 				if ( linkIsItalic ) {
 					tmpstyle += ' em';
 				}
-				if ( stream.match( /^[^'\]{&~]+/ ) ) {
+				if ( stream.match( /^[^'\]{&~<]+/ ) ) {
 					return makeStyle( tmpstyle, state );
 				}
 				return eatWikiText( tmpstyle, '' )( stream, state );
@@ -394,17 +394,7 @@
 					chars--;
 					name = name + stream.next();
 				}
-				if ( stream.eol() ) {
-					// @todo error message
-					state.tokenize = state.stack.pop();
-					return makeLocalStyle( ( isHtmlTag ? 'mw-htmltag-name' : 'mw-exttag-name' ), state );
-				}
 				stream.eatSpace();
-				if ( stream.eol() ) {
-					// @todo error message
-					state.tokenize = state.stack.pop();
-					return makeLocalStyle( ( isHtmlTag ? 'mw-htmltag-name' : 'mw-exttag-name' ), state );
-				}
 
 				if ( isHtmlTag ) {
 					if ( isCloseTag && !( name in voidHtmlTags ) ) {

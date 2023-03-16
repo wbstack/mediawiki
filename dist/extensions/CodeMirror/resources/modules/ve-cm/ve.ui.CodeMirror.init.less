@@ -1,5 +1,3 @@
-@import 'resources/lib/ooui/wikimedia-ui-base.less';
-
 .ve-init-mw-desktopArticleTarget {
 	.CodeMirror {
 		height: auto;
@@ -80,6 +78,8 @@
 		// Monospace fonts can change width when bold
 		// stylelint-disable-next-line declaration-no-important
 		font-weight: normal !important;
+		// T252965
+		line-break: initial;
 	}
 
 	.CodeMirror-gutters {
@@ -87,7 +87,7 @@
 		border-right: 0;
 	}
 	.CodeMirror-linenumber {
-		color: @wmui-color-base30;
+		color: #72777d; /* @wmui-color-base30 */
 		padding-left: 0;
 	}
 	.CodeMirror-linenumber-padding {

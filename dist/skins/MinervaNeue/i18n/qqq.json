@@ -25,12 +25,10 @@
 	"mobile-frontend-editor-redlink-create": "Label for a create page button.\n{{Identical|Create page}}",
 	"mobile-frontend-editor-redlink-explain": "Question for the user, if he want to edit a page, which link he clicked and that does not exist yet, or not.",
 	"mobile-frontend-editor-redlink-leave": "Used as a label for a button which the user can click to avoid editing a page which does not exist yet (red link): the question/alternative button is {{msg-mw|mobile-frontend-editor-redlink-create}}\n----\n{{Identical|No thanks}}",
-	"mobile-frontend-footer-sitename": "{{notranslate}}\nName of site",
 	"mobile-frontend-history": "Used as label for the link which points to the \"Edit history\" page.\n\nThis is shown on the Main Page in place of a last modified label to avoid confusion caused by transclusions.\n\nIf not the Main Page, the following message is used:\n* {{msg-mw|Mobile-frontend-last-modified-date}}",
 	"mobile-frontend-home-button": "This appears in the mobile web menu, which appears when tapping the three stripes at the top corner.\n\nThis button takes the user to the home page of the wiki site.\n{{Identical|Home}}",
 	"mobile-frontend-language-article-heading": "In the secondary page menu, a short label that describes the button that displays a list of available languages\n{{Identical|Language}}",
 	"mobile-frontend-languages-not-available": "A toast message that is shown when the user taps on the language button on an article which is not available in other languages.",
-	"mobile-frontend-logged-in-homepage-notification": "Heading at top of a wiki's main page telling user they are logged in. Parameters:\n* $1 - username\n{{Identical|Welcome}}",
 	"mobile-frontend-main-menu-button-tooltip": "Tooltip for menu button",
 	"mobile-frontend-main-menu-contributions": "Contributions link in main menu\n{{Identical|Contribution}}",
 	"mobile-frontend-main-menu-login": "Text for log in link in main menu.\n{{Identical|Log in}}",
@@ -86,7 +84,7 @@
 	"skin-minerva-mobile-option-MinervaShowCategories-description": "Description label for categories mobile web beta feature.",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "Title for page issues feature flag displayed in Special:MobileOptions",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "Description shown on Special:MobileOptions for page issues beta feature.",
-	"skin-minerva-recentchanges-warning-enhanced-not-supported": "Warning message when informing about lack of '''group results by page''' feature availability on on mobile site. Message should recommend visiting desktop site to access grouping results by page.",
+	"skin-minerva-recentchanges-warning-enhanced-not-supported": "Warning message when informing about the lack of the '''group results by page''' feature availability on the mobile site. Message should recommend visiting desktop site to access grouping results by page.",
 	"minerva.css": "{{optional}}\nAll CSS here will be loaded for users of the MinervaNeue skin.",
 	"minerva.js": "{{optional}}\nAll JavaScript here will be loaded for users of the MinervaNeue skin."
 }

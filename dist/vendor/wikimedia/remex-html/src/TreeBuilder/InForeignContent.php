@@ -67,6 +67,7 @@ class InForeignContent extends InsertionMode {
 	/**
 	 * The table for correcting the tag names of SVG elements, given in the
 	 * "Any other start tag" section of the spec.
+	 * @var array<string,string>
 	 */
 	private static $svgElementCase = [
 		'altglyph' => 'altGlyph',
@@ -214,9 +215,7 @@ class InForeignContent extends InsertionMode {
 	}
 
 	public function endDocument( $pos ) {
+		// @phan-suppress-previous-line PhanPluginNeverReturnMethod
 		throw new TreeBuilderError( "unspecified, presumed unreachable" );
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( InForeignContent::class, 'RemexHtml\TreeBuilder\InForeignContent' );

@@ -7,17 +7,19 @@
 			"Умар"
 		]
 	},
-	"mobile-frontend-changeslist-nocomment": "Нийсдарах лаьца яздаьр дац",
+	"mobile-frontend-changeslist-nocomment": "Хувцамах лаьца хӀама яздаьдац",
 	"mobile-frontend-copyright": "Чударá тIакхоачилга $1  яхача лицензе бокъонашца да, нагахьа санна кхыдар белгалдаь деце.",
+	"mobile-frontend-diffview-bytesremoved": "$1 {{PLURAL:$1|байт}} дӀаяьккхай",
 	"mobile-frontend-edit-login-action": "<strong>{{SITENAME}} мáзаоагӀув дегӀайоалае гӀо де.</strong><br />Чувала чистема чу хувцамаш дергдолаш.",
 	"mobile-frontend-edit-signup-action": "<strong>ГӀо де {{SITENAME}} дегӀайоалае.</strong><br />Аккаунт хьакхолла хувцамаш дергдолаш.",
 	"mobile-frontend-editor-anon": "Системача чу ца воалаш хувцамаш де",
 	"mobile-frontend-editor-anonwarning": "<strong>Теркам!</strong> Хьо система чу ваьннавац. Хьа IP-цӀай массанена гуш хургда Ӏа оагӀонаш тӀа моллагӀа хувцамаш деча хана. Нагахьа санна хьо хьай акаунта чу гӀолла<strong>чувоале</strong> е (хьайга аккаунт хӀанза а еце) Ӏа <strong>хьай аккаунт хьакхолле</strong>, хьа хувцамаш хьа цӀераца дувзаденна хургда. Цул совгӀа, кхыйола бокъонаш а хургья хьога.",
+	"mobile-frontend-editor-blocked-drawer-body-link": "ДукхагӀа хá",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|Блок техай}}",
 	"mobile-frontend-editor-continue": "ДIахо",
 	"mobile-frontend-editor-editing": "Тоадар",
 	"mobile-frontend-editor-licensing": "Ӏайха даь дола хувцамаш дIаяздарца Хье раьза волга хьахайт Ӏа хьай къахьагам $1 яхача {{PLURAL:$2|1=лицензеца|лицензешца}} кепатоха.",
-	"mobile-frontend-editor-placeholder-new-page": "{{GENDER:$1|Шо}} {{SITENAME}} чу керда оагӀув кхолла доахк!",
+	"mobile-frontend-editor-placeholder-new-page": "{{SITENAME}} чу керда оагӀув кхолла гӀерт {{GENDER:$1|хьо}}!",
 	"mobile-frontend-editor-publish": "Кéпатóха",
 	"mobile-frontend-editor-success": "Толамца! Хьа тоадар кепатехад.",
 	"mobile-frontend-editor-success-new-page": "Геттара дика да, керда оагӀув хьакхеллар Ӏа!",
@@ -52,5 +54,6 @@
 	"tag-mobile_edit": "Мобильникаца даь нийсдар",
 	"tag-mobile_edit-description": "Мобильникаца даь нийсдараш (сайтага е приложенега гIолла)",
 	"tag-mobile_web_edit": "Мобильни эршаца баь хувцам",
+	"mobile-frontend-mobile-option-amc-learn-more": "ДукхагӀа хá",
 	"mobile-frontend-amc-outreach-no-thanks": "А, баркал"
 }

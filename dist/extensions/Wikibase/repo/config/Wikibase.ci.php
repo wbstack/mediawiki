@@ -23,11 +23,17 @@ $wgWBCSUseCirrus = false;
 // CirrusSearch should not perform any updates
 $wgCirrusSearchDisableUpdate = true;
 
+// use mysql-upsert if CI is using a MySQL database to avoid deadlocks from parallel tests
+$wgWBRepoSettings['idGenerator'] = 'auto';
+
 // enable data bridge
 $wgWBRepoSettings['dataBridgeEnabled'] = true;
 
 // enable tainted-refs
 $wgWBRepoSettings['taintedReferencesEnabled'] = true;
+
+// enable Wikibase REST API
+$wgWBRepoSettings['restApiEnabled'] = true;
 
 // enable data value normalization
 $wgWBRepoSettings['tmpNormalizeDataValues'] = true;

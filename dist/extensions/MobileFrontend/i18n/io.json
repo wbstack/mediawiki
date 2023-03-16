@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Joao Xavier",
-			"JSantos"
+			"JSantos",
+			"Joao Xavier"
 		]
 	},
 	"mobile-frontend-changeslist-nocomment": "sen rezumo pri redakturo",
@@ -23,11 +23,14 @@
 	"mobile-frontend-editor-editing-page": "<span><strong>Redaktanta</strong> $1</span>",
 	"mobile-frontend-editor-previewing-page": "<span><strong>Previdado di </strong> $1</span>",
 	"mobile-frontend-editor-save": "Konservez",
+	"mobile-frontend-editor-summary": "Rezumo:",
+	"mobile-frontend-editor-switch-editor": "Chanjez redaktilo",
 	"mobile-frontend-editor-switch-visual-editor": "Swichar a visuala redaktado",
 	"mobile-frontend-editor-viewing-source-page": "<strong>Vidanta fonto di</strong><span> $1</span>",
 	"mobile-frontend-editor-loading": "Karganta redaktilo...",
 	"mobile-frontend-generic-login-new": "<strong>{{SITENAME}} facesas da personi quale vu.</strong><br />Enirez por kontributar.",
 	"mobile-frontend-joined-minutes": "{{GENDER:$1|Eniris}} {{PLURAL:$2|$2 minuto|$2 minuti}} ante nun",
+	"mobile-frontend-joined-hours": "{{GENDER:$1|Eniris}} {{PLURAL:$2|$2 horo|$2 hori}} ante nun",
 	"mobile-frontend-joined-days": "{{GENDER:$1|Eniris}} {{PLURAL:$2|$2 dio|$2 dii}} ante nun",
 	"mobile-frontend-joined-months": "{{GENDER:$1|Eniris}} {{PLURAL:$2|$2 monato|$2 monati}} ante nun",
 	"mobile-frontend-language-heading": "<strong>Lingui</strong>",
@@ -63,6 +66,7 @@
 	"mobile-frontend-terms-text": "Kondicioni por uzado",
 	"mobile-frontend-view": "Vidado por portebla aparati",
 	"mobile-frontend-view-desktop": "Desktop",
+	"mobile-frontend-watchlist-a-z": "Listez organizita",
 	"mobile-frontend-watchlist-cta-button-login": "Enirar",
 	"mobile-frontend-watchlist-cta-button-signup": "Registragez",
 	"mobile-frontend-watchlist-feed": "Modifikita",

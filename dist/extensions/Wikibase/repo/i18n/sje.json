@@ -5,7 +5,14 @@
 			"Olve Utne"
 		]
 	},
-	"wikibase-edit": "rävvdada",
-	"wikibase-add": "laseda",
-	"wikibase-sitelinks-special": "Mubbe nähttasaje"
+	"wikibase-edit": "rävvdadä",
+	"wikibase-add": "lasedä",
+	"wikibase-entitytermsforlanguagelistview-description": "Gåvådibme",
+	"wikibase-description-empty": "Ij gävdnu gåvådibme",
+	"wikibase-description-edit-placeholder": "tjále gåvådimev",
+	"wikibase-diffview-description": "gåvådibme",
+	"wikibase-sitelinks-special": "Mubbe nähttasaje",
+	"wikibase-description-helppage": "Help:Gåvådibme",
+	"wikibase-newentity-description": "Gåvådibme:",
+	"wikibase-setlabeldescriptionaliases-description-label": "Gåvådibme:"
 }

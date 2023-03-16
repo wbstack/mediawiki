@@ -20,6 +20,7 @@ use Wikibase\Lexeme\Interactors\MergeLexemes\MergeLexemesInteractor;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeLanguageNameLookup;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeTermLanguages;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\EditFormChangeOpDeserializer;
+use Wikibase\Lib\Store\ItemOrderProvider;
 use Wikibase\Repo\EntityReferenceExtractors\StatementEntityReferenceExtractor;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
@@ -29,28 +30,7 @@ use Wikibase\Repo\WikibaseRepo;
  */
 class WikibaseLexemeServices {
 
-	private static $globalInstance;
-
-	public static function createGlobalInstance(): self {
-		self::$globalInstance = new self();
-
-		return self::$globalInstance;
-	}
-
-	public static function globalInstance(): self {
-		if ( self::$globalInstance === null ) {
-			throw new \RuntimeException( 'Cannot get global instance without first initializing it' );
-		}
-
-		return self::$globalInstance;
-	}
-
-	public static function newTestInstance(): self {
-		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
-			throw new \Exception(
-				'Cannot get newTestInstance during regular operation.'
-			);
-		}
+	public static function newInstance(): self {
 		return new self();
 	}
 
@@ -162,6 +142,12 @@ class WikibaseLexemeServices {
 	public static function getEditFormChangeOpDeserializer(): EditFormChangeOpDeserializer {
 		return MediaWikiServices::getInstance()->getService(
 			'WikibaseLexemeEditFormChangeOpDeserializer'
+		);
+	}
+
+	public static function getGrammaticalFeaturesOrderProvider(): ItemOrderProvider {
+		return MediaWikiServices::getInstance()->getService(
+			'WikibaseLexemeGrammaticalFeaturesOrderProvider'
 		);
 	}
 

@@ -1,30 +1,39 @@
 {
 	"@metadata": {
 		"authors": [
+			"Seipinne",
 			"Trondtr",
 			"Yupik"
 		]
 	},
 	"tooltip-t-wikibase": "Liŋkkâ ovtâstittum kuávdáštiätuvuárhá čuosâttâhân",
 	"wikibase-comment-update": "{{WBREPONAME}}-kohdetta muttám",
+	"wikibase-comment-multi": "$1 {{PLURAL:$1|nubástus|nubástus|nubástus|nubástussâd}}",
 	"wikibase-dataitem": "{{WBREPONAME}}-čuosâttâh",
-	"wikibase-editlinks": "Hammii liiŋkâid",
+	"wikibase-editlinks": "Mute liiŋkâid",
 	"wikibase-editlinkstitle": "Hammii kielâikoskâsijd liiŋkâid",
 	"wikibase-addlinkstitle": "Lasseet kielâikoskâsijd liiŋkâid",
 	"wikibase-linkitem-addlinks": "Lasseet liiŋkâid",
+	"wikibase-linkitem-title": "Lasseet liiŋkâ siijđon",
+	"wikibase-linkitem-linkpage": "Lasseet liiŋkâ siijđon",
+	"wikibase-linkitem-selectlink": "Valjii siijđoh já siijđo, mon liiŋkâ halijdah lasettiđ taan siijđon.",
 	"wikibase-linkitem-input-site": "Kielâ:",
 	"wikibase-linkitem-input-page": "Sijđo:",
 	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
 	"wikibase-rc-hide-wikidata-hide": "Čievâ",
 	"wikibase-rc-hide-wikidata-show": "Čääiti",
+	"wikibase-rc-show-wikidata-pref": "Čääiti {{WBREPONAME}}-hammiimijd vorâs nubástusâin",
 	"wikibase-rc-wikibase-edit-letter": "D",
 	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}}-editistem",
+	"wikibase-rcfilters-hide-wikibase-label": "{{WBREPONAME}}-hammiimeh",
 	"wikibase-unconnectedpages-submit": "Čääiti siijđoid",
 	"wikibase-entityusage-submit": "Čääiti siijđoid",
+	"wikibase-pageinfo-entity-usage-L-with-modifier": "Nommâ: $1",
+	"wikibase-pageinfo-entity-usage-D-with-modifier": "Kuvvim: $1",
 	"wikibase-otherprojects": "Eres projektijn",
 	"wikibase-sitelinks-sitename-columnheading": "Kielâ",
 	"wikibase-client-data-bridge-references-heading": "Käldeeh",
-	"wikibase-client-data-bridge-anonymous-edit-warning-heading": "Jieh lah čälittâm jieijâd siisâ",
+	"wikibase-client-data-bridge-anonymous-edit-warning-heading": "Jieh lah čáládâttâm siisâ",
 	"wikibase-client-data-bridge-anonymous-edit-warning-message": "<strong>Váruttâs:</strong> Jieh lah čälittâm jieijâd siisâ. IP-čujottâsâd uáinoo almolávt puohháid, jis hammiih. Jis <strong>čälittah jieijâd siisâ</strong> teikâ <strong>rááhtáh tubdâlduv</strong>, tuu hammim čálloo tuu kevtteetubdâlduvâi rähtim hammiimin já siämmást tun finniih kiävtun ávhálijd piergâsijd.",
-	"wikibase-client-data-bridge-saving-error-assertuser-heading": "Jieh lah čälittâm jieijâd siisâ"
+	"wikibase-client-data-bridge-saving-error-assertuser-heading": "Jieh lah čáládâttâm siisâ"
 }

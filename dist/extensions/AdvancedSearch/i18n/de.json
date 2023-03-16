@@ -3,13 +3,15 @@
 		"authors": [
 			"Gabriel Birke (WMDE)",
 			"Inkowik",
+			"Jeeputer",
 			"Johanna Strodt (WMDE)",
 			"Kghbln",
 			"Metalhead64",
-			"Sebastian Wallroth"
+			"Sebastian Wallroth",
+			"Schniggendiller"
 		]
 	},
-	"advancedsearch-desc": "Ermöglicht einen leichten Zugang zu erweiterten Suchmöglichkeiten auf Spezialseite [[Special:Search]]",
+	"advancedsearch-desc": "Ermöglicht einen leichten Zugang zu erweiterten Suchmöglichkeiten auf der Spezialseite [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Erweiterte Suche:",
 	"advancedsearch-optgroup-text": "Im Seitentext suchen",
 	"advancedsearch-optgroup-structure": "Struktur",

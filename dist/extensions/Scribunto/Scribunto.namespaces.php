@@ -16,8 +16,13 @@ $namespaceNames['en'] = [
 ];
 
 $namespaceNames['ab'] = [
-	828 => 'Амодул',
-	829 => 'Амодул_ахцәажәара',
+	828 => 'Амодуль',
+	829 => 'Амодуль_ахцәажәара',
+];
+
+$namespaceAliases['ab'] = [
+	'Амодул' => 828,
+	'Амодул_ахцәажәара' => 829,
 ];
 
 $namespaceNames['alt'] = [
@@ -468,6 +473,16 @@ $namespaceNames['sa'] = [
 $namespaceNames['sat'] = [
 	828 => 'ᱢᱳᱰᱩᱞ',
 	829 => 'ᱢᱳᱰᱩᱞ_ᱜᱟᱞᱢᱟᱨᱟᱣ',
+];
+
+$namespaceNames['scn'] = [
+	828 => 'Mòdulu',
+	829 => 'Discussioni_mòdulu',
+];
+
+$namespaceAliases['scn'] = [
+	'Modulo' => 828,
+	'Discussioni_modulo' => 829,
 ];
 
 $namespaceNames['sd'] = [

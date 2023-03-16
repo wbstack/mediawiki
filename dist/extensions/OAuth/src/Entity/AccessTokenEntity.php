@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Entity;
+namespace MediaWiki\Extension\OAuth\Entity;
 
 use InvalidArgumentException;
 use League\OAuth2\Server\CryptKey;
@@ -10,11 +10,12 @@ use League\OAuth2\Server\Entities\Traits\AccessTokenTrait;
 use League\OAuth2\Server\Entities\Traits\EntityTrait;
 use League\OAuth2\Server\Entities\Traits\TokenEntityTrait;
 use League\OAuth2\Server\Exception\OAuthServerException;
-use MediaWiki\Extensions\OAuth\Backend\ConsumerAcceptance;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
+use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\MediaWikiServices;
 use Throwable;
 use User;
+use WikiMap;
 
 class AccessTokenEntity implements AccessTokenEntityInterface {
 	use AccessTokenTrait;
@@ -119,7 +120,7 @@ class AccessTokenEntity implements AccessTokenEntityInterface {
 		}
 		try {
 			$user = Utils::getLocalUserFromCentralId( $userIdentifier );
-			$approval = $clientEntity->getCurrentAuthorization( $user, wfWikiID() );
+			$approval = $clientEntity->getCurrentAuthorization( $user, WikiMap::getCurrentWikiId() );
 		} catch ( Throwable $ex ) {
 			return false;
 		}

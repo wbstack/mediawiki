@@ -3,6 +3,7 @@
 		"authors": [
 			"Boivie",
 			"Fader",
+			"Felba",
 			"Habj",
 			"Jopparn",
 			"Lokal Profil",
@@ -11,8 +12,7 @@
 			"Mjälten",
 			"Nghtwlkr",
 			"Sannab",
-			"WikiPhoenix",
-			"Felba"
+			"WikiPhoenix"
 		]
 	},
 	"math-desc": "Rendera matematiska formler mellan <code>&lt;math&gt;</code> ... <code>&lt;/math&gt;</code>-taggar",

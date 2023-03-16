@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Frontend\SpecialPages;
+namespace MediaWiki\Extension\OAuth\Frontend\SpecialPages;
 
 /**
  * (c) Chris Steipp, Aaron Schulz 2013, GPL
@@ -22,20 +22,22 @@ namespace MediaWiki\Extensions\OAuth\Frontend\SpecialPages;
  */
 
 use Firebase\JWT\JWT;
-use MediaWiki\Extensions\OAuth\Backend\Consumer;
-use MediaWiki\Extensions\OAuth\Backend\ConsumerAcceptance;
-use MediaWiki\Extensions\OAuth\Backend\MWOAuthException;
-use MediaWiki\Extensions\OAuth\Backend\MWOAuthRequest;
-use MediaWiki\Extensions\OAuth\Backend\MWOAuthToken;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Control\ConsumerAcceptanceSubmitControl;
-use MediaWiki\Extensions\OAuth\Control\ConsumerAccessControl;
-use MediaWiki\Extensions\OAuth\Lib\OAuthException;
-use MediaWiki\Extensions\OAuth\Lib\OAuthToken;
-use MediaWiki\Extensions\OAuth\Lib\OAuthUtil;
-use MediaWiki\Extensions\OAuth\UserStatementProvider;
+use MediaWiki\Extension\OAuth\Backend\Consumer;
+use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
+use MediaWiki\Extension\OAuth\Backend\MWOAuthException;
+use MediaWiki\Extension\OAuth\Backend\MWOAuthRequest;
+use MediaWiki\Extension\OAuth\Backend\MWOAuthToken;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Control\ConsumerAcceptanceSubmitControl;
+use MediaWiki\Extension\OAuth\Control\ConsumerAccessControl;
+use MediaWiki\Extension\OAuth\Lib\OAuthException;
+use MediaWiki\Extension\OAuth\Lib\OAuthToken;
+use MediaWiki\Extension\OAuth\Lib\OAuthUtil;
+use MediaWiki\Extension\OAuth\UserStatementProvider;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Permissions\GrantsLocalization;
 use Psr\Log\LoggerInterface;
+use WikiMap;
 
 /**
  * Page that handles OAuth consumer authorization and token exchange
@@ -44,12 +46,19 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 	/** @var LoggerInterface */
 	protected $logger;
 
+	/** @var GrantsLocalization */
+	private $grantsLocalization;
+
 	/** @var int Defaults to OAuth1 */
 	protected $oauthVersion = Consumer::OAUTH_VERSION_1;
 
-	public function __construct() {
+	/**
+	 * @param GrantsLocalization $grantsLocalization
+	 */
+	public function __construct( GrantsLocalization $grantsLocalization ) {
 		parent::__construct( 'OAuth' );
 		$this->logger = LoggerFactory::getInstance( 'OAuth' );
+		$this->grantsLocalization = $grantsLocalization;
 	}
 
 	public function doesWrites() {
@@ -77,6 +86,7 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 		$config = $this->getConfig();
 
 		$format = $request->getVal( 'format', 'raw' );
+		'@phan-var string $format';
 
 		try {
 			if ( $config->get( 'MWOAuthReadOnly' ) &&
@@ -217,7 +227,7 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 					/** @var Consumer $consumer */
 					/** @var MWOAuthToken $token */
 
-					$wiki = wfWikiID();
+					$wiki = WikiMap::getCurrentWikiId();
 					$dbr = Utils::getCentralDB( DB_REPLICA );
 					$access = ConsumerAcceptance::newFromToken( $dbr, $token->key );
 					$localUser = Utils::getLocalUserFromCentralId( $access->getUserId() );
@@ -230,7 +240,7 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 							) )
 						] );
 					} elseif ( $localUser->isLocked() ||
-						$config->get( 'BlockDisablesLogin' ) && $localUser->isBlocked()
+						$config->get( 'BlockDisablesLogin' ) && $localUser->getBlock()
 					) {
 						throw new MWOAuthException( 'mwoauth-invalid-authorization-blocked-user' );
 					}
@@ -251,13 +261,17 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 
 				case 'rest_redirect':
 					$query = $this->getRequest()->getQueryValues();
+					if ( !array_key_exists( 'rest_url', $query ) ) {
+						throw new OAuthException( 'Invalid redirect' );
+					}
 					$restUrl = $query['rest_url'];
-					unset( $query['title'] );
-					unset( $query['rest_url'] );
+					// make sure there's no way to change the domain
+					if ( $restUrl[0] !== '/' ) {
+						$restUrl = '/' . $restUrl;
+					}
+					$target = wfGetServerUrl( PROTO_CURRENT ) . $restUrl;
 
-					$target = wfExpandUrl( $restUrl );
-
-					$output->redirect( wfAppendQuery( $target, $query ) );
+					$output->redirect( $target );
 					break;
 
 				case '':
@@ -267,6 +281,7 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 
 				default:
 					$format = $request->getVal( 'format', 'html' );
+					'@phan-var string $format';
 					$dbr = Utils::getCentralDB( DB_REPLICA );
 					$cmrAc = ConsumerAccessControl::wrap(
 						Consumer::newFromKey(
@@ -370,6 +385,11 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 		$this->showResponse( $JWT, $format );
 	}
 
+	/**
+	 * @param string|null $requestToken
+	 * @param string|null $consumerKey
+	 * @param bool $authenticate
+	 */
 	protected function handleAuthorizationForm( $requestToken, $consumerKey, $authenticate ) {
 		$output = $this->getOutput();
 
@@ -378,7 +398,7 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 
 		$oauthServer = Utils::newMWOAuthServer();
 
-		if ( !$consumerKey && $this->oauthVersion === Consumer::OAUTH_VERSION_1 ) {
+		if ( !$consumerKey && $requestToken && $this->oauthVersion === Consumer::OAUTH_VERSION_1 ) {
 			$consumerKey = $oauthServer->getConsumerKey( $requestToken );
 		}
 
@@ -408,7 +428,7 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 			);
 		}
 
-		$existing = $cmrAc->getDAO()->getCurrentAuthorization( $user, wfWikiID() );
+		$existing = $cmrAc->getDAO()->getCurrentAuthorization( $user, WikiMap::getCurrentWikiId() );
 
 		// If only authentication was requested, and the existing authorization
 		// matches, and the only grants are 'mwoauth-authonly' or 'mwoauth-authonlyprivate',
@@ -485,7 +505,7 @@ class SpecialMWOAuth extends \UnlistedSpecialPage {
 			$grants = $this->getRequestedGrants( $cmrAc );
 		}
 
-		$grantsText = \MWGrants::getGrantsWikiText( $grants, $this->getLanguage() );
+		$grantsText = $this->grantsLocalization->getGrantsWikiText( $grants, $this->getLanguage() );
 		if ( $grantsText === "\n" ) {
 			if ( in_array( 'mwoauth-authonlyprivate', $cmrAc->getGrants(), true ) ) {
 				$msgKey .= '-privateinfo';

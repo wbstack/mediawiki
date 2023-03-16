@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Abuluntu",
 			"Danmichaelo",
 			"Jon Harald Søby",
-			"Pmt",
-			"Abuluntu"
+			"Pmt"
 		]
 	},
 	"cirrussearch-desc": "Elasticsearch-basert søkemotor for MediaWiki",

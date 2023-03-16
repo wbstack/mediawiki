@@ -3,13 +3,14 @@
 		"authors": [
 			"AnakngAraw",
 			"GinawaSaHapon",
-			"Leeheonjin"
+			"Leeheonjin",
+			"Jojit fb"
 		]
 	},
 	"math-desc": "I-render ang mga pormulang pangmatematika sa pagitan ng mga tag na <code>&lt;math&gt;</code> ... <code>&lt;/math&gt;</code>",
 	"math-visualeditor-mwchemdialog-title": "Pormulang kemikal",
 	"math-visualeditor-mwcheminspector-title": "Pormulang kemikal",
-	"math-visualeditor-mwlatexcontextitem-quickedit": "Mabilisang edit",
+	"math-visualeditor-mwlatexcontextitem-quickedit": "Mabilisang pagbago",
 	"math-visualeditor-mwlatexdialog-card-formula": "Pormula",
 	"math-visualeditor-mwlatexdialog-card-options": "Pagsasaayos",
 	"math-visualeditor-mwlatexinspector-display": "Pagpapakita",
@@ -83,7 +84,7 @@
 	"mw_math_latexml": "LaTeXML (eksperimento; gumagamit ng MathML)",
 	"mw_math_mathml": "MathML na may SVG o PNG fallback (inirerekomenda para sa mga modernong browser at mga kagamitang pantulong)",
 	"mw_math_png": "Larawang PNG",
-	"mw_math_source": "Source ng LaTeX (para sa mga text browser)",
+	"mw_math_source": "Pinagmulan ng LaTeX (para sa mga text browser)",
 	"prefs-math": "Math",
 	"mathstatus": "Estado ng math",
 	"mathwikibase": "Impormasyon ng Pormula Pangmatematika",
@@ -96,7 +97,7 @@
 	"math-wikibase-formula-type": "Uri",
 	"math-wikibase-formula-description": "Paglalarawan",
 	"math-wikibase-formula-information": "Impormasyon ng Pormulang Pangmatematika",
-	"math-wikibase-formula-link-header": "Source ng Datos",
+	"math-wikibase-formula-link-header": "Pinagmulan ng Datos",
 	"math-wikibase-formula-elements-header": "Mga elemento ng Pormula",
 	"math-wikibase-special-form-header": "Tukuyin ang pangalan ng pormula:",
 	"math-wikibase-special-form-placeholder": "Pamagat ng pormula",

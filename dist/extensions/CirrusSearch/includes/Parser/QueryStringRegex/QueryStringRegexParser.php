@@ -92,7 +92,7 @@ class QueryStringRegexParser implements QueryParser {
 	private $query;
 
 	/**
-	 * @var string
+	 * @var string Either "all", "break", or "final"
 	 */
 	private $questionMarkStripLevel;
 
@@ -166,9 +166,7 @@ class QueryStringRegexParser implements QueryParser {
 	 * @var NamespacePrefixParser
 	 */
 	private $namespacePrefixParser;
-	/**
-	 * Default
-	 */
+
 	private const DEFAULT_OCCUR = BooleanClause::MUST;
 
 	/**
@@ -179,7 +177,8 @@ class QueryStringRegexParser implements QueryParser {
 	/**
 	 * @param \CirrusSearch\Parser\KeywordRegistry $keywordRegistry
 	 * @param Escaper $escaper
-	 * @param string $qmarkStripLevel level of question mark stripping to apply
+	 * @param string $qmarkStripLevel Level of question mark stripping to apply, either "all",
+	 *  "break", or "final"
 	 * @param ParsedQueryClassifiersRepository $classifierRepository
 	 * @param NamespacePrefixParser $namespacePrefixParser
 	 * @param int|null $maxQueryLen maximum length of the query in chars
@@ -212,7 +211,6 @@ class QueryStringRegexParser implements QueryParser {
 		$this->rawQuery = $rawQuery;
 		$this->query = null;
 		$this->keywordOffsetsTracker = new OffsetTracker();
-		$this->offset = 0;
 		$this->token = null;
 		$this->lookBehind = null;
 		$this->preTaggedNodes = [];
@@ -238,7 +236,7 @@ class QueryStringRegexParser implements QueryParser {
 			$query = $nquery;
 		}
 		if ( $this->escaper->getLanguage() === 'he' ) {
-			$nquery = preg_replace( self::GERSHAYIM_REGEX, '$1\\"$2', $query );
+			$nquery = preg_replace( self::GERSHAYIM_REGEX, '$1\"$2', $query );
 			if ( $nquery !== $query ) {
 				$this->queryCleanups[ParsedQuery::CLEANUP_GERSHAYIM_QUIRKS] = true;
 				$query = $nquery;

@@ -1,24 +1,30 @@
 <template>
 	<span
 		class="wb-db-term-label"
-		v-inlanguage="term.language"
+		v-bind="inLanguage(term.language)"
 	>{{ term.value }}</span>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
-import { Prop } from 'vue-property-decorator';
+import { defineComponent, PropType } from 'vue';
 import Term from '@/datamodel/Term';
 
 /**
  * A label for a Term in a certain language.
  */
-@Component
-export default class TermLabel extends Vue {
-	@Prop( { required: true } )
-	public term!: Term;
-}
+export default defineComponent( {
+	name: 'TermLabel',
+	props: {
+		term: {
+			type: Object as PropType<Term>,
+			required: true,
+		},
+		inLanguage: {
+			type: Function as PropType<( langCode: string ) => { lang: string; dir: string; }>,
+			required: true,
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

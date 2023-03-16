@@ -49,6 +49,8 @@ class Dispatcher implements TokenHandler {
 
 	/**
 	 * The handler class for each insertion mode
+	 *
+	 * @var array
 	 */
 	protected static $handlerClasses = [
 		self::INITIAL => Initial::class,
@@ -216,6 +218,18 @@ class Dispatcher implements TokenHandler {
 			self::IN_ROW => true,
 			self::IN_CELL => true ];
 		return isset( $tableModes[$this->mode] );
+	}
+
+	/**
+	 * If the insertion mode is "in table text", flush the pending table text.
+	 * This is a facility allowing users to insert into the DOM more cleanly.
+	 */
+	public function flushTableText() {
+		if ( $this->mode === self::IN_TABLE_TEXT
+			&& $this->handler instanceof InTableText
+		) {
+			$this->handler->flush();
+		}
 	}
 
 	/**
@@ -441,6 +455,3 @@ class Dispatcher implements TokenHandler {
 		}
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( Dispatcher::class, 'RemexHtml\TreeBuilder\Dispatcher' );

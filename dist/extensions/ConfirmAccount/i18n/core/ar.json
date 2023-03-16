@@ -13,6 +13,7 @@
 	"requestaccount-loginnotice": "للحصول على حساب، يجب عليك '''[[Special:RequestAccount|أن تطلب حسابًا]]'''.",
 	"action-confirmaccount": "مراجعة وقبول الحسابات",
 	"right-confirmaccount": "عرض [[Special:ConfirmAccounts|طابور الحسابات المطلوبة]]",
+	"right-confirmaccount-notify": "يتم إخطارك عبر البريد الإلكتروني حول طلبات الحساب المعتمدة حديثًا",
 	"action-requestips": "عرض عنوان أيبي الطالب أثناء العمل على الحسابات المطلوبة",
 	"right-requestips": "عرض عنوان أيبي الطالب أثناء العمل على الحسابات المطلوبة",
 	"action-lookupcredentials": "عرض اعتمادات المستخدم",

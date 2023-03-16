@@ -5,7 +5,6 @@ namespace Wikibase\Lib;
 use Babel;
 use ExtensionRegistry;
 use IContextSource;
-use InvalidArgumentException;
 use Language;
 use LanguageConverter;
 use MediaWiki\Languages\LanguageConverterFactory;
@@ -23,26 +22,8 @@ use User;
  */
 class LanguageFallbackChainFactory {
 
-	/**
-	 * Fallback levels
-	 */
-	public const FALLBACK_ALL = 0xff;
-
-	/**
-	 * The language itself, e.g. 'en' for 'en'.
-	 */
-	public const FALLBACK_SELF = 1;
-
-	/**
-	 * Other compatible languages that can be translated into the requested language
-	 * (and translation is automatically done), e.g. 'sr', 'sr-ec' and 'sr-el' for 'sr'.
-	 */
-	public const FALLBACK_VARIANTS = 2;
-
-	/**
-	 * All other language from the system fallback chain, e.g. 'de' and 'en' for 'de-formal'.
-	 */
-	public const FALLBACK_OTHERS = 4;
+	/** @var ContentLanguages */
+	private $termsLanguages;
 
 	/** @var LanguageFactory */
 	private $languageFactory;
@@ -54,7 +35,7 @@ class LanguageFallbackChainFactory {
 	private $languageFallback;
 
 	/**
-	 * @var array[]
+	 * @var TermLanguageFallbackChain[]
 	 */
 	private $languageCache = [];
 
@@ -64,10 +45,14 @@ class LanguageFallbackChainFactory {
 	private $userLanguageCache = [];
 
 	public function __construct(
+		?ContentLanguages $termsLanguages = null,
 		?LanguageFactory $languageFactory = null,
 		?LanguageConverterFactory $languageConverterFactory = null,
 		?LanguageFallback $languageFallback = null
 	) {
+		// note: this is lib code, so we can’t get the default term languages from the repo or client services
+		$this->termsLanguages = $termsLanguages ?:
+			WikibaseContentLanguages::getDefaultInstance()->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM );
 		// note: do not extract MediaWikiServices::getInstance() into a variable –
 		// if all three services are given, the service container should never be loaded
 		// (important in unit tests, where it isn’t set up)
@@ -80,131 +65,151 @@ class LanguageFallbackChainFactory {
 	}
 
 	/**
-	 * Get the fallback chain based a single language, and specified fallback level.
+	 * Get the fallback chain based a single language.
 	 *
 	 * @param Language $language
-	 * @param int $mode Bitfield of self::FALLBACK_*
 	 *
 	 * @return TermLanguageFallbackChain
 	 */
-	public function newFromLanguage( Language $language, $mode = self::FALLBACK_ALL ) {
+	public function newFromLanguage( Language $language ) {
 		$languageCode = $language->getCode();
 
-		if ( !isset( $this->languageCache[$languageCode][$mode] ) ) {
-			$chain = $this->buildFromLanguage( $language, $mode );
-			$this->languageCache[$languageCode][$mode] = new TermLanguageFallbackChain(
+		if ( !isset( $this->languageCache[$languageCode] ) ) {
+			$chain = $this->buildFromLanguage( $language );
+			$this->languageCache[$languageCode] = new TermLanguageFallbackChain(
 				$chain,
-				WikibaseContentLanguages::getDefaultInstance()->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM )
+				$this->termsLanguages
 			);
 		}
 
-		return $this->languageCache[$languageCode][$mode];
+		return $this->languageCache[$languageCode];
 	}
 
 	/**
-	 * Get the fallback chain based a single language code, and specified fallback level.
+	 * Get the fallback chain based a single language code.
 	 *
 	 * @param string $languageCode
-	 * @param int $mode Bitfield of self::FALLBACK_*
 	 *
 	 * @return TermLanguageFallbackChain
 	 */
-	public function newFromLanguageCode( $languageCode, $mode = self::FALLBACK_ALL ) {
+	public function newFromLanguageCode( $languageCode ) {
 		$languageCode = LanguageWithConversion::validateLanguageCode( $languageCode );
 
-		if ( !isset( $this->languageCache[$languageCode][$mode] ) ) {
-			$chain = $this->buildFromLanguage( $languageCode, $mode );
-			$this->languageCache[$languageCode][$mode] = new TermLanguageFallbackChain(
+		if ( !isset( $this->languageCache[$languageCode] ) ) {
+			$chain = $this->buildFromLanguage( $languageCode );
+			$this->languageCache[$languageCode] = new TermLanguageFallbackChain(
 				$chain,
-				WikibaseContentLanguages::getDefaultInstance()->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM )
+				$this->termsLanguages
 			);
 		}
 
-		return $this->languageCache[$languageCode][$mode];
+		return $this->languageCache[$languageCode];
 	}
 
 	/**
-	 * Build fallback chain array for a given language or validated language code.
+	 * Add the given language to the chain (if it’s not included already).
 	 *
-	 * @param Language|string $language Language object or language code as string
-	 * @param int $mode Bitfield of self::FALLBACK_*
-	 * @param TermLanguageFallbackChain[] $chain for recursive calls
-	 * @param bool[] $fetched for recursive calls
-	 *
-	 * @throws InvalidArgumentException
-	 * @return LanguageWithConversion[]
+	 * @param Language|string $language language (code)
+	 * @param LanguageWithConversion[] &$chain the resulting chain
+	 * @param bool[] &$fetched language codes (as keys) that are already in the chain
 	 */
-	private function buildFromLanguage( $language, $mode, array $chain = [], array &$fetched = [] ) {
-		if ( !is_int( $mode ) ) {
-			throw new InvalidArgumentException( '$mode must be an integer' );
+	private function addLanguageToChain( $language, array &$chain, array &$fetched ): void {
+		$languageCode = is_string( $language ) ? $language : $language->getCode();
+		if ( !isset( $fetched[$languageCode] ) ) {
+			$chain[] = LanguageWithConversion::factory( $language );
+			$fetched[$languageCode] = true;
+		}
+	}
+
+	/**
+	 * Add the given language and its variants to the chain (if not included already).
+	 *
+	 * @param Language|string $language language (code)
+	 * @param LanguageWithConversion[] &$chain the resulting chain
+	 * @param bool[] &$fetched language codes (as keys) that are already in the chain
+	 */
+	private function addLanguageAndVariantsToChain( $language, array &$chain, array &$fetched ): void {
+		$languageCode = is_string( $language ) ? $language : $language->getCode();
+
+		$this->addLanguageToChain( $language, $chain, $fetched );
+
+		$parentLanguage = null;
+		$pieces = explode( '-', $languageCode, 2 );
+
+		if ( in_array( $pieces[0], LanguageConverter::$languagesWithVariants ) ) {
+			$parentLanguage = $this->languageFactory->getParentLanguage( $languageCode );
 		}
 
-		if ( is_string( $language ) ) {
-			$languageCode = $language;
+		if ( !$parentLanguage ) {
+			return;
+		}
+
+		// It's less likely to trigger conversion mistakes by converting
+		// zh-tw to zh-hk first instead of converting zh-cn to zh-tw.
+		$parentLanguageConverter = $this->languageConverterFactory->getLanguageConverter( $parentLanguage );
+		$variantFallbacks = $parentLanguageConverter->getVariantFallbacks( $languageCode );
+		if ( is_array( $variantFallbacks ) ) {
+			$variants = array_unique( array_merge(
+				$variantFallbacks,
+				$parentLanguageConverter->getVariants()
+			) );
 		} else {
-			$languageCode = $language->getCode();
+			$variants = $parentLanguageConverter->getVariants();
 		}
 
-		if ( $mode & self::FALLBACK_SELF ) {
-			if ( !isset( $fetched[$languageCode] ) ) {
-				$chain[] = LanguageWithConversion::factory( $language );
-				$fetched[$languageCode] = true;
+		foreach ( $variants as $variant ) {
+			if ( !isset( $fetched[$variant] )
+				 && $parentLanguageConverter->hasVariant( $variant )
+			) {
+				$chain[] = LanguageWithConversion::factory( $language, $variant );
+				$fetched[$variant] = true;
 			}
 		}
+	}
 
-		if ( $mode & self::FALLBACK_VARIANTS ) {
-			$parentLanguage = null;
-			$pieces = explode( '-', $languageCode, 2 );
+	/**
+	 * Add the given language, its variants and its *explicit* fallbacks to the chain (if not included already).
+	 *
+	 * For the *implicit* (non-strict) fallbacks, see {@link addImplicitFallbacksToChain}.
+	 *
+	 * @param Language|string $language language (code)
+	 * @param LanguageWithConversion[] &$chain the resulting chain
+	 * @param bool[] &$fetched language codes (as keys) that are already in the chain
+	 */
+	private function addLanguageAndVariantsAndFallbacksToChain( $language, array &$chain, array &$fetched ): void {
+		$this->addLanguageAndVariantsToChain( $language, $chain, $fetched );
 
-			if ( in_array( $pieces[0], LanguageConverter::$languagesWithVariants ) ) {
-				if ( is_string( $language ) ) {
-					$language = $this->languageFactory->getLanguage( $language );
-				}
-				$parentLanguage = $this->languageFactory->getParentLanguage( $language->getCode() );
-			}
-
-			if ( $parentLanguage ) {
-				// It's less likely to trigger conversion mistakes by converting
-				// zh-tw to zh-hk first instead of converting zh-cn to zh-tw.
-				$parentLanguageConverter = $this->languageConverterFactory->getLanguageConverter( $parentLanguage );
-				$variantFallbacks = $parentLanguageConverter->getVariantFallbacks( $languageCode );
-				if ( is_array( $variantFallbacks ) ) {
-					$variants = array_unique( array_merge(
-						$variantFallbacks,
-						$parentLanguageConverter->getVariants()
-					) );
-				} else {
-					$variants = $parentLanguageConverter->getVariants();
-				}
-
-				foreach ( $variants as $variant ) {
-					if ( !isset( $fetched[$variant] )
-						// The self::FALLBACK_SELF mode is already responsible for self-references.
-						&& $variant !== $languageCode
-						&& $parentLanguageConverter->hasVariant( $variant )
-					) {
-						$chain[] = LanguageWithConversion::factory( $language, $variant );
-						$fetched[$variant] = true;
-					}
-				}
-			}
+		$languageCode = is_string( $language ) ? $language : $language->getCode();
+		$fallbacks = $this->languageFallback->getAll( $languageCode, LanguageFallback::STRICT );
+		foreach ( $fallbacks as $other ) {
+			$this->addLanguageAndVariantsToChain( $other, $chain, $fetched );
 		}
+	}
 
-		if ( $mode & self::FALLBACK_OTHERS ) {
-			// Regarding $mode in recursive calls:
-			// * self is a must to have the fallback item itself included;
-			// * respect the original caller about whether to include variants or not;
-			// * others should be excluded as they'll be handled here in loops.
-			$recursiveMode = $mode;
-			$recursiveMode &= self::FALLBACK_VARIANTS;
-			$recursiveMode |= self::FALLBACK_SELF;
+	/**
+	 * Add the *implicit* fallbacks for any language to the chain (if not included already).
+	 *
+	 * For the *explicit* fallbacks (of a specific language), see {@link addLanguageAndVariantsAndFallbacksToChain}.
+	 *
+	 * @param LanguageWithConversion[] &$chain the resulting chain
+	 * @param bool[] &$fetched language codes (as keys) that are already in the chain
+	 */
+	private function addImplicitFallbacksToChain( array &$chain, array &$fetched ): void {
+		$this->addLanguageToChain( 'mul', $chain, $fetched );
+		$this->addLanguageToChain( 'en', $chain, $fetched );
+	}
 
-			$fallbacks = $this->languageFallback->getAll( $languageCode );
-			foreach ( $fallbacks as $other ) {
-				$chain = $this->buildFromLanguage( $other, $recursiveMode, $chain, $fetched );
-			}
-		}
-
+	/**
+	 * Build a full fallback chain from the single given language, its variants and fallbacks.
+	 *
+	 * @param Language|string $language (code)
+	 * @return LanguageWithConversion[] the resulting chain
+	 */
+	private function buildFromLanguage( $language ): array {
+		$chain = [];
+		$fetched = [];
+		$this->addLanguageAndVariantsAndFallbacksToChain( $language, $chain, $fetched );
+		$this->addImplicitFallbacksToChain( $chain, $fetched );
 		return $chain;
 	}
 
@@ -241,7 +246,7 @@ class LanguageFallbackChainFactory {
 	 */
 	public function newFromUserAndLanguageCode( User $user, $languageCode ) {
 		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Babel' ) || $user->isAnon() ) {
-			return $this->newFromLanguageCode( $languageCode, self::FALLBACK_ALL );
+			return $this->newFromLanguageCode( $languageCode );
 		}
 
 		$languageCode = LanguageWithConversion::validateLanguageCode( $languageCode );
@@ -255,7 +260,7 @@ class LanguageFallbackChainFactory {
 		$chain = $this->buildFromBabel( $babel );
 		$languageFallbackChain = new TermLanguageFallbackChain(
 			$chain,
-			WikibaseContentLanguages::getDefaultInstance()->getContentLanguages( WikibaseContentLanguages::CONTEXT_TERM )
+			$this->termsLanguages
 		);
 
 		$this->userLanguageCache[$user->getName()][$languageCode] = $languageFallbackChain;
@@ -315,36 +320,38 @@ class LanguageFallbackChainFactory {
 		$chain = [];
 		$fetched = [];
 
+		// validate all the language codes and discard invalid ones
+		$babel = array_map( static function ( $languageCodes ) {
+			$validCodes = [];
+			foreach ( $languageCodes as $languageCode ) {
+				try {
+					$validCodes[] = LanguageWithConversion::validateLanguageCode( $languageCode );
+				} catch ( MWException $e ) {
+					continue;
+				}
+			}
+			return $validCodes;
+		}, $babel );
+
 		// First pass to get "compatible" languages (self and variants)
 		foreach ( $babel as $languageCodes ) { // Already sorted when added
-			foreach ( [ self::FALLBACK_SELF, self::FALLBACK_VARIANTS ] as $mode ) {
-				foreach ( $languageCodes as $languageCode ) {
-					try {
-						$languageCode = LanguageWithConversion::validateLanguageCode( $languageCode );
-					} catch ( MWException $e ) {
-						continue;
-					}
-					$chain = $this->buildFromLanguage( $languageCode, $mode, $chain, $fetched );
-				}
+			foreach ( $languageCodes as $languageCode ) {
+				$this->addLanguageToChain( $languageCode, $chain, $fetched );
+			}
+			foreach ( $languageCodes as $languageCode ) {
+				$this->addLanguageAndVariantsToChain( $languageCode, $chain, $fetched );
 			}
 		}
 
 		// Second pass to get other languages from system fallback chain
 		foreach ( $babel as $languageCodes ) {
 			foreach ( $languageCodes as $languageCode ) {
-				try {
-					$languageCode = LanguageWithConversion::validateLanguageCode( $languageCode );
-				} catch ( MWException $e ) {
-					continue;
-				}
-				$chain = $this->buildFromLanguage(
-					$languageCode,
-					self::FALLBACK_OTHERS | self::FALLBACK_VARIANTS,
-					$chain,
-					$fetched
-				);
+				$this->addLanguageAndVariantsAndFallbacksToChain( $languageCode, $chain, $fetched );
 			}
 		}
+
+		// Third pass to add implicit, language-independent fallbacks
+		$this->addImplicitFallbacksToChain( $chain, $fetched );
 
 		return $chain;
 	}

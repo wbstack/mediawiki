@@ -40,6 +40,7 @@ class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 
 		$user = $this->getUser();
 		$output = $this->getOutput();
+		$output->addBodyClasses( 'mw-mf-special-page' );
 		$output->addModules( 'mobile.special.watchlist.scripts' );
 		$output->addModuleStyles( [
 			'mobile.pagelist.styles',
@@ -333,9 +334,9 @@ class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 			"/MobileFrontend/images/emptywatchlist-page-actions-$dir.png";
 
 		if ( $feed ) {
-			$msg = Html::element( 'p', null, wfMessage( 'mobile-frontend-watchlist-feed-empty' )->plain() );
+			$msg = Html::element( 'p', [], wfMessage( 'mobile-frontend-watchlist-feed-empty' )->plain() );
 		} else {
-			$msg = Html::element( 'p', null,
+			$msg = Html::element( 'p', [],
 				wfMessage( 'mobile-frontend-watchlist-a-z-empty-howto' )->plain()
 			);
 			$msg .=	Html::element( 'img', [
@@ -383,29 +384,25 @@ class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 		$isMinor = $row->rc_minor != 0;
 
 		if ( $revId ) {
-			$diffTitle = SpecialPage::getTitleFor( 'MobileDiff', $revId );
+			$diffTitle = SpecialPage::getTitleFor( 'MobileDiff', (string)$revId );
 			$diffLink = $diffTitle->getLocalURL();
 		} else {
 			// hack -- use full log entry display
 			$diffLink = Title::makeTitle( $row->rc_namespace, $row->rc_title )->getLocalURL();
 		}
 
-		$this->renderFeedItemHtml( $ts, $diffLink, $username, $comment, $title, $isAnon, $bytes,
-			$isMinor );
+		$options = [
+			'ts' => $ts,
+			'diffLink' => $diffLink,
+			'username' => $username,
+			'comment' => $comment,
+			'title' => $title,
+			'isAnon' => $isAnon,
+			'bytes' => $bytes,
+			'isMinor' => $isMinor,
+		];
+		// @phan-suppress-next-line SecurityCheck-DoubleEscaped
+		$this->renderFeedItemHtml( $options );
 	}
 
-	/**
-	 * Formats a comment of revision via Linker:formatComment and Sanitizer::stripAllTags
-	 * @param string $comment
-	 * @param Title $title the title object of comments page
-	 * @return string formatted comment
-	 */
-	protected function formatComment( $comment, $title ) {
-		if ( $comment !== '' ) {
-			$comment = Linker::formatComment( $comment, $title );
-			// flatten back to text
-			$comment = htmlspecialchars( Sanitizer::stripAllTags( $comment ) );
-		}
-		return $comment;
-	}
 }

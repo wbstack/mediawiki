@@ -8,7 +8,8 @@
 			"ديفيد",
 			"زكريا",
 			"علاء",
-			"محمد أحمد عبد الفتاح"
+			"محمد أحمد عبد الفتاح",
+			"FShbib"
 		]
 	},
 	"twocolconflict": "دمج التعديلات",
@@ -19,7 +20,7 @@
 	"twocolconflict-copy-action": "نسخ كامل النص",
 	"twocolconflict-copy-tab-action": "عرض النص الكامل",
 	"twocolconflict-core-ui-hint-close": "لا تعرض هذا مجددا",
-	"twocolconflict-preference-enabled": "تفعيل [[mw:Special:MyLanguage/Help:Two_Column_Edit_Conflict_View|دمج التعديلات]] لحل تضاربات التحرير",
+	"twocolconflict-preference-enabled": "فعّل [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|واجهة تعارض التحرير المُستندة على الفقرات]] لحل تضاربات التحرير",
 	"twocolconflict-special-footer-hint": "أغلق الصفحة الحالية وعد إلى واجهة تضارب التحرير.",
 	"twocolconflict-special-not-saved": "غير منشورة",
 	"twocolconflict-split-header-hint": "ساعد في تحسين هذه الأداة بالتعليق في [//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View هذه الصفحة].",

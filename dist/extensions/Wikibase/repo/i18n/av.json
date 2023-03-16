@@ -1,11 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Gazimagomedov"
+			"Gazimagomedov",
+			"Omarov M."
 		]
 	},
 	"wikibase-edit": "хисизабизе",
-	"wikibase-add": "жубазе",
+	"wikibase-add": "тӀадежубазе",
+	"wikibase-description-empty": "Баян цӀезабун гьечӀо",
 	"wikibase-sitelinks-special": "Цогидал сайтал",
+	"wikibase-statementview-rank-normal": "Нормалияб ранг",
 	"wikibase-gotolinkedpage-submit": "Ине"
 }

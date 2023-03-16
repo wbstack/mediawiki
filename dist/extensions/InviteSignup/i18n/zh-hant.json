@@ -5,7 +5,8 @@
 			"Justincheng12345",
 			"LNDDYL",
 			"Liuxinyu970226",
-			"Winston Sung"
+			"Winston Sung",
+			"捍粵者"
 		]
 	},
 	"invitesignup": "邀請其他人加入此 Wiki",
@@ -18,7 +19,7 @@
 	"is-add": "新增",
 	"is-delete": "刪除",
 	"is-invalidemail": "<b>$1</b> 為無效的電子郵件地址。",
-	"is-emailsubj": "您被邀請加入{{SITENAME}}",
+	"is-emailsubj": "您獲邀加入{{SITENAME}}",
 	"is-emailbody": "您好，\n\n{{GENDER:$1|$1}} 邀請您註冊 {{SITENAME}}。\n您可於 $2 註冊",
 	"right-invitesignup": "邀請使用者註冊",
 	"action-invitesignup": "邀請使用者於此網站註冊"

@@ -2,11 +2,30 @@
 	"@metadata": {
 		"authors": [
 			"NehalDaveND",
-			"Sfic"
+			"Sfic",
+			"Saurmandal"
 		]
 	},
+	"wikibasecirrus-desc": "CirrusSearch कार्यक्षमता के लिए विकिबेस एक्सटेंशन",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "$1 कीवर्ड में अज्ञात भाषा कोड $2 है",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "$1 कीवर्ड में कुछ ज़्यादा ही भाषा कोड दे दिए गए। दिए गए $3 {{PLURAL:$3|भाषा|भाषाओं}} में से $2 को ढूँढ़ा जा रहा है",
+	"wikibasecirrus-inlabel-no-query-provided": "इनलेबल कीवर्ड को एक खाली खोज स्ट्रिंग दिया गया",
+	"wikibasecirrus-rescore-profile-prefix": "पूर्णता खोज के लिए डिफ़ॉल्ट रीस्कोर प्रोफ़ाइल",
+	"wikibasecirrus-rescore-profile-prefix-boost": "बयान बूस्टिंग के साथ पूर्णता खोज के लिए डिफ़ॉल्ट रीस्कोर प्रोफ़ाइल",
+	"wikibasecirrus-rescore-profile-fulltext": "फ़ुलटेक्स्ट खोज के लिए डिफ़ॉल्ट रीस्कोर प्रोफ़ाइल",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "वाक्यांश स्कोरिंग के साथ फ़ुलटेक्स्ट खोज के लिए डिफ़ॉल्ट रीस्कोर प्रोफ़ाइल",
+	"wikibasecirrus-search-bad-entity-type": "गलत सत्ता प्रकार: $1",
+	"wikibasecirrus-search-bad-profile-name": "गलत खोज प्रोफ़ाइल का नाम: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement कीवर्ड में कोई मान्य बयान नहीं है",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense कीवर्ड में कोई मान्य तर्क नहीं है",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity कीवर्ड में कोई मान्य बयान नहीं है",
+	"special-entitieswithoutdescription": "बिना विवरण के सत्ते",
+	"wikibasecirrus-entitieswithoutdescription-legend": "बिना विवरण के सत्तों की सूची पाएँ",
+	"special-entitieswithoutlabel": "बिना लेबल के सत्ते",
+	"wikibasecirrus-entitieswithoutlabel-legend": "बिना लेबल के सत्तों की सूची पाएँ",
 	"wikibasecirrus-entitieswithoutlabel-label-language": "भाषा कोड:",
 	"wikibasecirrus-entitieswithoutlabel-label-type": "प्रकार:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "खोजें",
-	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" मान्य भाषा कोड नहीं है।"
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" मान्य भाषा कोड नहीं है।",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" मान्य सत्ता प्रकार नहीं है।"
 }

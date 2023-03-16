@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Oby Ezeilo"
+			"Oby Ezeilo",
+			"Amire80",
+			"Sayvhior"
 		]
 	},
 	"advancedsearch-desc": "Ụzọ dị mfe iji mee nchọpụta [[Special:Search]]",
@@ -19,5 +21,9 @@
 	"advancedsearch-field-deepcategory": "Ihu akwụkwọ dị na katigori ndi a",
 	"advancedsearch-field-hastemplate": "Ihu akwụkwọ nwere templeti ndị a",
 	"advancedsearch-field-inlanguage": "Ihu akwụkwọ di n'asụsụ a",
-	"advancedsearch-field-filetype": "Ụdiri failụ"
+	"advancedsearch-field-filetype": "Ụdiri failụ",
+	"advancedsearch-field-filew": "Obosara faịlụ na pikselụ",
+	"advancedsearch-field-fileh": "Ogo faịlụ na pikselụ",
+	"advancedsearch-field-sort": "Usoro nhazi",
+	"advancedsearch-field-preview-sort": "Hazie site na $1"
 }

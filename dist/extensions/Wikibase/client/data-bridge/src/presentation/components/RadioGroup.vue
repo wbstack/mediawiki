@@ -5,11 +5,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import { defineComponent } from 'vue';
 
-@Component
-export default class RadioGroup extends Vue {}
+export default defineComponent( {
+	name: 'RadioGroup',
+} );
 </script>
 
 <style lang="scss">

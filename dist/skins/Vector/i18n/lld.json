@@ -14,5 +14,6 @@
 	"vector-view-edit": "Muda",
 	"vector-view-history": "Storia dl documënt",
 	"vector-view-view": "Liej",
-	"vector-more-actions": "De plu"
+	"vector-more-actions": "De plu",
+	"vector-searchsuggest-containing": "Chir les plates cun laite <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong>"
 }

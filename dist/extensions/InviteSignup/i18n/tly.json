@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Patriot Kur"
+			"Patriot Kur",
+			"Patriot Kor"
 		]
 	},
-	"is-tableth-email": "E-nomə"
+	"is-tableth-email": "E-nomə",
+	"is-add": "Əlovə"
 }

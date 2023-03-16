@@ -4,5 +4,18 @@
 			"Eleassar"
 		]
 	},
-	"is-tableth-signup": "Registracija"
+	"invitesignup": "Povabite ljudi v ta viki",
+	"is-desc": "Pošiljanje e-poštnih povabil",
+	"is-tableth-date": "Datum",
+	"is-tableth-email": "E-pošta",
+	"is-tableth-inviter": "Vabilec",
+	"is-tableth-signup": "Registracija",
+	"is-tableth-groups": "Skupine",
+	"is-add": "Dodaj",
+	"is-delete": "Izbriši",
+	"is-invalidemail": "<b>$1</b> ni veljaven e-poštni naslov.",
+	"is-emailsubj": "Vabljeni, da se pridružite projektu {{SITENAME}}",
+	"is-emailbody": "Pozdravljeni,\n\n{{GENDER:$1| $1 }} vas je povabil, da se vpišete v projekt {{SITENAME}}.\nVpišete se lahko na $2.",
+	"right-invitesignup": "Povabilo uporabnikom k registraciji",
+	"action-invitesignup": "povabiti uporabnike k registraciji v tem projektu"
 }

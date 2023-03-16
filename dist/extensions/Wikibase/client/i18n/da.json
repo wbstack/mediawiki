@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Antonla",
 			"Byrial",
 			"Christian List",
 			"Dipsacus fullonum",
@@ -28,7 +29,7 @@
 	"wikibase-comment-sitelink-change": "Sproghenvisning ændret fra $1 til $2",
 	"wikibase-comment-sitelink-remove": "Sproghenvisning fjernet: $1",
 	"wikibase-comment-multi": "{{PLURAL:$1|ændring|ændringer}}",
-	"wikibase-dataitem": "{{WBREPONAME}}-emne",
+	"wikibase-dataitem": "{{WBREPONAME}}-element",
 	"wikibase-editlinks": "Redigér links",
 	"wikibase-editlinkstitle": "Redigér sproglinks",
 	"wikibase-addlinkstitle": "Tilføj sproghenvisninger",
@@ -58,7 +59,6 @@
 	"wikibase-error-serialize-error": "Serialisering af data mislykkkedes",
 	"wikibase-error-invalid-entity-id": "Den indtastede ID \"$2\" er ukendt i systemet. Anvend venligst en gyldig ID.",
 	"unconnectedpages": "Sider, der ikke er forbundet til emner",
-	"wikibase-unconnectedpages-format-row": "($1 {{PLURAL:$1|sproghenvisning|sproghenvisninger}} på siden)",
 	"wikibase-unconnectedpages-submit": "Vis sider",
 	"pageswithbadges": "Sider med mærker",
 	"wikibase-pageswithbadges-badge": "Mærke:",
@@ -84,6 +84,8 @@
 	"wikibase-sitelinks-link-columnheading": "Linket side",
 	"echo-category-title-wikibase-action": "{{PLURAL:$1|Forbindelse|Forbindelser}} til {{WBREPONAME}}",
 	"echo-pref-tooltip-wikibase-action": "Giv mig besked, når nogen forbinder en side som {{GENDER:|jeg oprettede}} til et {{WBREPONAME}}-emne.",
+	"notification-header-page-connection": "Siden <strong>$3</strong> blev {{GENDER:$2|forbundet}} til {{PLURAL:$4|-1=et {{WBREPONAME\n}}-emne|{{WBREPONAME}}-emnet $4}}, hvor relevante data om emnet kan samles.",
+	"notification-bundle-header-page-connection": "Siden <strong>$3</strong> og {{PLURAL:$4|en anden side|$4 andre sider|100=100 eller flere andre sider}} blev {{GENDER:$2|forbundet}} til {{WBREPONAME}}-emner, hvor relevante data om emnerne kan samles.",
 	"unresolved-property-category": "Sider med uløste egenskaber",
 	"wikibase-client-data-bridge-permissions-error-info": "Flere detaljer",
 	"wikibase-client-data-bridge-references-heading": "Referencer",

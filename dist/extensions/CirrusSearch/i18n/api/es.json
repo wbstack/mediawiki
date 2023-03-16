@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bruno44101",
 			"Dgstranz",
 			"Fitoschido",
+			"Jakeukalane",
 			"Jelou",
-			"Macofe",
-			"Bruno44101",
-			"Jakeukalane"
+			"Macofe"
 		]
 	},
 	"apihelp-cirrus-config-dump-description": "Volcado de configuración de CirrusSearch.",

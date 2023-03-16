@@ -5,17 +5,21 @@
 			"Yupik"
 		]
 	},
+	"advancedsearch-options-pane-head": "Vijđedum uuccâm:",
 	"advancedsearch-optgroup-text": "Uusâ siijđo teevstâst",
 	"advancedsearch-optgroup-structure": "Rááhtus",
 	"advancedsearch-optgroup-files": "Tiätuvuárháh já koveh",
 	"advancedsearch-field-subpageof": "Taan siijđo vyelisiijđoin",
 	"advancedsearch-field-inlanguage": "Siijđoh taan kielân",
+	"advancedsearch-field-preview-sort": "Šlajâttâl: $1",
 	"advancedsearch-placeholder-exact-text": "\"kissá räähist kaaicâ\"",
 	"advancedsearch-inlanguage-default": "Valjii kielâ",
 	"advancedsearch-filetype-bitmap": "Kove",
 	"advancedsearch-filetype-drawing": "Sáárgus",
 	"advancedsearch-filetype-audio": "Audio",
 	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-namespaces-search-in": "Uusâ nommâkomovuođâst:",
 	"advancedsearch-namespaces-preset-all": "Puoh",
-	"advancedsearch-namespaces-preset-discussion": "Savâstâllâm"
+	"advancedsearch-namespaces-preset-discussion": "Savâstâllâm",
+	"prefs-advancedsearch": "Vijđedum uuccâm"
 }

@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"Vlad5250"
+		]
+	},
+	"usercredentials-user": "Korisničko ime:",
+	"usercredentials-leg-user": "Korisnički račun",
+	"usercredentials-leg-areas": "Glavna područja interesa",
+	"usercredentials-leg-person": "Lični podaci",
+	"usercredentials-leg-other": "Ostali podaci",
+	"usercredentials-email": "Adresa e-pošte:",
+	"usercredentials-real": "Pravo ime:",
+	"usercredentials-bio": "Biografija:",
+	"usercredentials-attach": "Rezime/CV:",
+	"usercredentials-notes": "Dodatne napomene:",
+	"usercredentials-urls": "Spisak web sajtova:",
+	"usercredentials-ip": "Izvorna IP adresa:",
+	"usercredentials-member": "Prava:"
+}

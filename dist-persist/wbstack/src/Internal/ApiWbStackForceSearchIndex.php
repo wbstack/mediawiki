@@ -10,7 +10,7 @@ class ApiWbStackForceSearchIndex extends \ApiBase {
     public function isWriteMode() {return true;}
     public function isInternal() {return true;}
     public function execute() {
-        global $IP;
+        global $wgBaseDirectory;
 
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
@@ -19,7 +19,7 @@ class ApiWbStackForceSearchIndex extends \ApiBase {
         $toId = $this->getParameter('toId');
 
         $parameters = "--skipLinks 1 --indexOnSkip 1 --fromId " . escapeshellarg( $fromId ) . " --toId " . escapeshellarg( $toId );
-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $IP . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters;
+		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters;
 		exec($cmd, $out, $return);
 
 		// Return appropriate result

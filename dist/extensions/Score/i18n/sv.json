@@ -2,12 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Ainali",
+			"JRyan",
 			"Jopparn",
 			"Lokal Profil",
 			"Skalman",
-			"WikiPhoenix",
-			"JRyan",
-			"Thurs"
+			"Thurs",
+			"WikiPhoenix"
 		]
 	},
 	"score-abc2lynotexecutable": "ABC-till-LilyPond-konverteraren kunde inte köras: $1 är inte en körbar fil. Kontrollera att <code>$wgScoreAbc2Ly</code> är korrekt inställd.",

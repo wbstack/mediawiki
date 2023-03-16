@@ -16,5 +16,6 @@
 	"vector-view-edit": "Owehiha",
 	"vector-view-history": "Moonelo wa ethale",
 	"vector-view-view": "Osoma",
-	"vector-more-actions": "Vanceene"
+	"vector-more-actions": "Vanceene",
+	"vector-searchsuggest-containing": "Waavya makukhu arimomo <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong>"
 }

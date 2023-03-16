@@ -14,9 +14,9 @@ use Language;
 use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeContent;
-use Wikibase\Lib\Interactors\TermSearchResult;
 use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
+use Wikibase\Repo\Api\EntitySearchException;
 use Wikibase\Repo\Api\EntitySearchHelper;
 use Wikibase\Search\Elastic\EntitySearchElastic;
 use Wikibase\Search\Elastic\EntitySearchUtils;
@@ -185,15 +185,7 @@ class LexemeSearchEntity implements EntitySearchHelper {
 	}
 
 	/**
-	 * Get entities matching the search term.
-	 *
-	 * @param string $text
-	 * @param string $languageCode
-	 * @param string $entityType
-	 * @param int $limit
-	 * @param bool $strictLanguage
-	 *
-	 * @return TermSearchResult[] Key: string Serialized EntityId
+	 * @inheritDoc
 	 */
 	public function getRankedSearchResults(
 		$text,
@@ -210,15 +202,10 @@ class LexemeSearchEntity implements EntitySearchHelper {
 		$searcher->getSearchContext()->setProfileContext( self::CONTEXT_LEXEME_PREFIX );
 		$result = $searcher->performSearch( $query );
 
-		// TODO: this is a hack, we need to return Status upstream instead
-		foreach ( $result->getErrors() as $error ) {
-			wfLogWarning( json_encode( $error ) );
-		}
-
 		if ( $result->isOK() ) {
 			$result = $result->getValue();
 		} else {
-			$result = [];
+			throw new EntitySearchException( $result );
 		}
 
 		if ( $searcher->isReturnRaw() ) {

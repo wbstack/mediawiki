@@ -1,8 +1,7 @@
 import { DataType } from '@wmde/wikibase-datamodel-types';
 import MessageKeys from '@/definitions/MessageKeys';
 import ErrorWrapper from '@/presentation/components/ErrorWrapper.vue';
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { shallowMount } from '@vue/test-utils';
 import {
 	MissingPermissionsError,
 	PageNotEditable,
@@ -20,9 +19,6 @@ import ErrorSavingEditConflict from '@/presentation/components/ErrorSavingEditCo
 import ApplicationError, { ErrorTypes, UnsupportedDatatypeError } from '@/definitions/ApplicationError';
 import { createTestStore } from '../../../util/store';
 
-const localVue = createLocalVue();
-localVue.use( Vuex );
-
 describe( 'ErrorWrapper', () => {
 	it( 'mounts ErrorUnknown on empty applicationErrors', () => {
 		const store = createTestStore( {
@@ -30,9 +26,9 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors: [],
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
-		expect( wrapper.find( ErrorUnknown ).exists() ).toBe( true );
-		expect( wrapper.find( ErrorPermission ).exists() ).toBe( false );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		expect( wrapper.findComponent( ErrorUnknown ).exists() ).toBe( true );
+		expect( wrapper.findComponent( ErrorPermission ).exists() ).toBe( false );
 	} );
 
 	it( 'mounts ErrorUnknown for unknown errors', () => {
@@ -45,9 +41,9 @@ describe( 'ErrorWrapper', () => {
 				],
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
-		expect( wrapper.find( ErrorUnknown ).exists() ).toBe( true );
-		expect( wrapper.find( ErrorPermission ).exists() ).toBe( false );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		expect( wrapper.findComponent( ErrorUnknown ).exists() ).toBe( true );
+		expect( wrapper.findComponent( ErrorPermission ).exists() ).toBe( false );
 	} );
 
 	it( 'shows ErrorPermission if a permission error is contained in the application errors', () => {
@@ -61,15 +57,12 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, {
-			localVue,
-			store,
-		} );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
 
-		const permissionErrorComponent = wrapper.find( ErrorPermission );
+		const permissionErrorComponent = wrapper.findComponent( ErrorPermission );
 		expect( permissionErrorComponent.exists() ).toBe( true );
 		expect( permissionErrorComponent.props( 'permissionErrors' ) ).toEqual( applicationErrors );
-		expect( wrapper.find( ErrorUnknown ).exists() ).toBe( false );
+		expect( wrapper.findComponent( ErrorUnknown ).exists() ).toBe( false );
 	} );
 
 	it( 'shows only ErrorPermission even if permission errors are mixed with other application errors', () => {
@@ -114,15 +107,12 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, {
-			localVue,
-			store,
-		} );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
 
-		const permissionErrorComponent = wrapper.find( ErrorPermission );
+		const permissionErrorComponent = wrapper.findComponent( ErrorPermission );
 		expect( permissionErrorComponent.exists() ).toBe( true );
 		expect( permissionErrorComponent.props( 'permissionErrors' ) ).toEqual( permissionErrors );
-		expect( wrapper.find( ErrorUnknown ).exists() ).toBe( false );
+		expect( wrapper.findComponent( ErrorUnknown ).exists() ).toBe( false );
 	} );
 
 	// eslint-disable-next-line max-len
@@ -140,8 +130,8 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
-		expect( wrapper.find( ErrorUnsupportedDatatype ).exists() ).toBe( true );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		expect( wrapper.findComponent( ErrorUnsupportedDatatype ).exists() ).toBe( true );
 	} );
 
 	// eslint-disable-next-line max-len
@@ -156,9 +146,9 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
 
-		expect( wrapper.find( ErrorDeprecatedStatement ).exists() ).toBe( true );
+		expect( wrapper.findComponent( ErrorDeprecatedStatement ).exists() ).toBe( true );
 	} );
 
 	it( 'mounts ErrorAmbiguousStatement when an ambiguous statement error is present in the application errors', () => {
@@ -172,9 +162,9 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
 
-		expect( wrapper.find( ErrorAmbiguousStatement ).exists() ).toBe( true );
+		expect( wrapper.findComponent( ErrorAmbiguousStatement ).exists() ).toBe( true );
 	} );
 
 	it( 'mounts ErrorUnsupportedSnakType on unsupported snak type application error', () => {
@@ -191,8 +181,8 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
-		expect( wrapper.find( ErrorUnsupportedSnakType ).exists() ).toBe( true );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		expect( wrapper.findComponent( ErrorUnsupportedSnakType ).exists() ).toBe( true );
 	} );
 
 	it( 'mounts ErrorSaving on saving error', () => {
@@ -206,8 +196,8 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
-		expect( wrapper.find( ErrorSaving ).exists() ).toBe( true );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		expect( wrapper.findComponent( ErrorSaving ).exists() ).toBe( true );
 	} );
 
 	it( 'mounts ErrorSavingAssertUser on assertuser error', () => {
@@ -225,15 +215,15 @@ describe( 'ErrorWrapper', () => {
 		const $clientRouter = {
 			getPageUrl: jest.fn().mockReturnValue( loginUrl ),
 		};
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store, mocks: { $clientRouter } } );
-		expect( wrapper.find( ErrorSavingAssertUser ).exists() ).toBe( true );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ], mocks: { $clientRouter } } } );
+		expect( wrapper.findComponent( ErrorSavingAssertUser ).exists() ).toBe( true );
 		expect( $clientRouter.getPageUrl ).toHaveBeenCalledWith(
 			'Special:UserLogin',
 			{
 				warning: MessageKeys.LOGIN_WARNING,
 			},
 		);
-		expect( wrapper.find( ErrorSavingAssertUser ).props( 'loginUrl' ) ).toBe( loginUrl );
+		expect( wrapper.findComponent( ErrorSavingAssertUser ).props( 'loginUrl' ) ).toBe( loginUrl );
 	} );
 
 	it( 'repeats ErrorUnknown\'s "relaunch" event', () => {
@@ -246,8 +236,8 @@ describe( 'ErrorWrapper', () => {
 				],
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { store, localVue } );
-		wrapper.find( ErrorUnknown ).vm.$emit( 'relaunch' );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		wrapper.findComponent( ErrorUnknown ).vm.$emit( 'relaunch' );
 		expect( wrapper.emitted( 'relaunch' ) ).toHaveLength( 1 );
 	} );
 
@@ -262,8 +252,8 @@ describe( 'ErrorWrapper', () => {
 				applicationErrors,
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { localVue, store } );
-		expect( wrapper.find( ErrorSavingEditConflict ).exists() ).toBe( true );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		expect( wrapper.findComponent( ErrorSavingEditConflict ).exists() ).toBe( true );
 	} );
 
 	it( 'repeats ErrorSavingEditConflict\'s "reload" event', () => {
@@ -276,8 +266,8 @@ describe( 'ErrorWrapper', () => {
 				],
 			},
 		} );
-		const wrapper = shallowMount( ErrorWrapper, { store, localVue } );
-		wrapper.find( ErrorSavingEditConflict ).vm.$emit( 'reload' );
+		const wrapper = shallowMount( ErrorWrapper, { global: { plugins: [ store ] } } );
+		wrapper.findComponent( ErrorSavingEditConflict ).vm.$emit( 'reload' );
 		expect( wrapper.emitted( 'reload' ) ).toHaveLength( 1 );
 	} );
 } );

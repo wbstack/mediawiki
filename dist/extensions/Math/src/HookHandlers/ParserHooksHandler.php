@@ -4,24 +4,27 @@ namespace MediaWiki\Extension\Math\HookHandlers;
 
 use FatalError;
 use Hooks as MWHooks;
-use MediaWiki\Extension\Math\Hooks;
+use MediaWiki\Extension\Math\MathConfig;
 use MediaWiki\Extension\Math\MathMathML;
 use MediaWiki\Extension\Math\MathMathMLCli;
 use MediaWiki\Extension\Math\MathRenderer;
 use MediaWiki\Extension\Math\Render\RendererFactory;
 use MediaWiki\Hook\ParserAfterTidyHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
+use MediaWiki\Hook\ParserOptionsRegisterHook;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\User\UserOptionsLookup;
 use MWException;
 use Parser;
+use ParserOptions;
 
 /**
  * Hook handler for Parser hooks
  */
 class ParserHooksHandler implements
 	ParserFirstCallInitHook,
-	ParserAfterTidyHook
+	ParserAfterTidyHook,
+	ParserOptionsRegisterHook
 {
 
 	/** @var int */
@@ -69,19 +72,11 @@ class ParserHooksHandler implements
 	 * @return array|string
 	 */
 	public function mathTagHook( ?string $content, array $attributes, Parser $parser ) {
-		if ( trim( $content ?? '' ) === '' ) { // bug 8372 https://phabricator.wikimedia.org/rSVN18870
-			return '';
-		}
-		$mode = Hooks::mathModeToString(
-			$this->userOptionsLookup->getOption( $parser->getUserIdentity(), 'math' )
-		);
-		// Indicate that this page uses math.
-		// This affects the page caching behavior.
-		$parser->getOptions()->optionUsed( 'math' );
+		$mode = $parser->getOptions()->getOption( 'math' );
 		$renderer = $this->rendererFactory->getRenderer( $content ?? '', $attributes, $mode );
 
 		$parser->getOutput()->addModuleStyles( [ 'ext.math.styles' ] );
-		if ( $mode == 'mathml' ) {
+		if ( $mode == MathConfig::MODE_MATHML ) {
 			$parser->getOutput()->addModules( [ 'ext.math.scripts' ] );
 			$marker = Parser::MARKER_PREFIX .
 				'-postMath-' . sprintf( '%08X', $this->mathTagCounter++ ) .
@@ -101,9 +96,6 @@ class ParserHooksHandler implements
 	 * @return array|string
 	 */
 	public function chemTagHook( ?string $content, array $attributes, Parser $parser ) {
-		if ( trim( $content ?? '' ) === '' ) {
-			return '';
-		}
 		$attributes['chem'] = true;
 		return $this->mathTagHook( '\ce{' . $content . '}', $attributes, $parser );
 	}
@@ -178,5 +170,15 @@ class ParserHooksHandler implements
 				unset( $this->mathLazyRenderBatch[ $key ] );
 			}
 		}
+	}
+
+	public function onParserOptionsRegister( &$defaults, &$inCacheKey, &$lazyLoad ) {
+		$defaults['math'] = $this->userOptionsLookup->getDefaultOption( 'math' );
+		$inCacheKey['math'] = true;
+		$lazyLoad['math'] = function ( ParserOptions $options ) {
+			return MathConfig::normalizeRenderingMode(
+				$this->userOptionsLookup->getOption( $options->getUserIdentity(), 'math' )
+			);
+		};
 	}
 }

@@ -1,12 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"ToJack"
+			"ToJack",
+			"Vashgird"
 		]
 	},
 	"wikieditor-wikitext-tab": "Викиматн",
-	"wikieditor-loading": "Дар ҳоли бор шудан…",
-	"wikieditor-toolbar-loading": "Дар ҳоли бор шудан…",
 	"wikieditor-toolbar-tool-bold": "Ғафс",
 	"wikieditor-toolbar-tool-bold-example": "Матни пурранг",
 	"wikieditor-toolbar-tool-italic": "Каҷ",
@@ -63,5 +62,5 @@
 	"wikieditor-toolbar-tool-table-cancel": "Пӯшидан",
 	"wikieditor-toolbar-tool-replace-search": "Ҷустуҷӯ барои:",
 	"wikieditor-toolbar-tool-replace-close": "Пӯшидан",
-	"wikieditor-toolbar-section-help": "Кӯмак"
+	"wikieditor-toolbar-section-help": "Кумак"
 }

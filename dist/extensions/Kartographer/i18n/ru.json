@@ -3,6 +3,8 @@
 		"authors": [
 			"Adam-Yourist",
 			"Amire80",
+			"DDPAT",
+			"Ice bulldog",
 			"Kaganer",
 			"Katunchik",
 			"MaxBioHazard",
@@ -16,9 +18,10 @@
 			"Vlad5250",
 			"Лилиә",
 			"Туллук",
-			"DDPAT"
+			"Deltaspace"
 		]
 	},
+	"apierror-kartographer-conflicting-revids": "Запрос картографических данных из нескольких версий одной и той же страницы в одном запросе пока не поддерживается.",
 	"kartographer-attribution": "[https://foundation.wikimedia.org/wiki/Maps_Terms_of_Use карты Викимедиа] | данные © [https://www.openstreetmap.org/copyright участники OpenStreetMap]",
 	"kartographer-broken-category": "{{#switch:{{NAMESPACE}}|{{ns:File}}=Файлы|#default=Страницы}} с некорректными картами",
 	"kartographer-broken-category-desc": "Эта страница содержит недопустимое использование карты",

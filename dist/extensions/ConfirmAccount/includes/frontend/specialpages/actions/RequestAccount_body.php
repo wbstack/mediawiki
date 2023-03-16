@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\User\UserFactory;
+
 class RequestAccountPage extends SpecialPage {
 	protected $mUsername; // string
 	protected $mRealName; // string
@@ -18,8 +20,15 @@ class RequestAccountPage extends SpecialPage {
 	protected $mFileSize; // integer
 	protected $mTempPath; // string
 
-	function __construct() {
+	/** @var UserFactory */
+	private $userFactory;
+
+	/**
+	 * @param UserFactory $userFactory
+	 */
+	function __construct( UserFactory $userFactory ) {
 		parent::__construct( 'RequestAccount' );
+		$this->userFactory = $userFactory;
 	}
 
 	public function doesWrites() {
@@ -420,7 +429,7 @@ class RequestAccountPage extends SpecialPage {
 			$out->returnToMain();
 		} else {
 			# Maybe the user confirmed after account was created...
-			$user = User::newFromConfirmationCode( $code, User::READ_LATEST );
+			$user = $this->userFactory->newFromConfirmationCode( $code, UserFactory::READ_LATEST );
 			if ( is_object( $user ) ) {
 				$user->confirmEmail();
 				$user->saveSettings();

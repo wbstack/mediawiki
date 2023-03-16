@@ -1,4 +1,3 @@
-import Vue from 'vue';
 import EditFlow from '@/definitions/EditFlow';
 import init from '@/mediawiki/init';
 import { launch } from '@/main';
@@ -32,8 +31,7 @@ import { ApiQueryInfoTestResponsePage, ApiQueryResponseBody } from '@/definition
 import { ApiErrorRawErrorformat } from '@/data-access/ApiPageEditPermissionErrorsRepository';
 import { SpecialPageWikibaseEntityResponse } from '@/data-access/SpecialPageReadingEntityRepository';
 import MwConfig from '@/@types/mediawiki/MwConfig';
-
-Vue.config.devtools = false;
+import { createApp } from 'vue';
 
 const on = jest.fn();
 const clearWindows = jest.fn( () => Promise.resolve() );
@@ -67,7 +65,8 @@ function prepareTestEnv( options: {
 	const editFlow = options.editFlow || EditFlow.SINGLE_BEST_VALUE;
 
 	const app = { launch, createServices };
-	const require = jest.fn().mockResolvedValue( app );
+	const require = jest.fn().mockResolvedValueOnce( app );
+	require.mockResolvedValueOnce( { createMwApp: createApp } );
 	const using = jest.fn().mockResolvedValue( require );
 
 	mockMwEnv(
@@ -111,7 +110,11 @@ function prepareTestEnv( options: {
 	window.mw.language = {
 		bcp47: jest.fn().mockReturnValue( 'de' ),
 	};
-	window.location.reload = jest.fn();
+
+	// @ts-ignore
+	delete window.location;
+	// @ts-ignore
+	window.location = { reload: jest.fn() };
 
 	const testLinkHref = `https://www.wikidata.org/wiki/${entityTitle}?uselang=en#${propertyId}`;
 	document.body.innerHTML = `

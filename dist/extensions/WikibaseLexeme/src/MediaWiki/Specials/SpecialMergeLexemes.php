@@ -66,9 +66,7 @@ class SpecialMergeLexemes extends SpecialPage {
 		$this->permissionManager = $permissionManager;
 	}
 
-	/**
-	 * @see SpecialWikibasePage::execute
-	 */
+	/** @inheritDoc */
 	public function execute( $subPage ) {
 		$this->setHeaders();
 		$this->outputHeader( 'wikibase-mergelexemes-summary' );
@@ -117,7 +115,7 @@ class SpecialMergeLexemes extends SpecialPage {
 	): self {
 		return new self(
 			$repoSettings->getSetting( 'specialPageTags' ),
-			WikibaseLexemeServices::createGlobalInstance()->newMergeLexemesInteractor(),
+			WikibaseLexemeServices::newInstance()->newMergeLexemesInteractor(),
 			$entityTitleLookup,
 			$exceptionLocalizer,
 			$permissionManager
@@ -158,7 +156,7 @@ class SpecialMergeLexemes extends SpecialPage {
 	}
 
 	private function anonymousEditWarning() {
-		if ( $this->getUser()->isAnon() ) {
+		if ( !$this->getUser()->isRegistered() ) {
 			return Html::rawElement(
 				'p',
 				[ 'class' => 'warning' ],

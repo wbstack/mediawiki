@@ -8,6 +8,7 @@ use Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use Message;
@@ -67,6 +68,11 @@ class HtmlSplitConflictHeader {
 	private $linkRenderer;
 
 	/**
+	 * @var WikiPageFactory
+	 */
+	private $wikiPageFactory;
+
+	/**
 	 * @param Title $title
 	 * @param Authority $authority
 	 * @param string $newEditSummary
@@ -86,6 +92,11 @@ class HtmlSplitConflictHeader {
 		$now = false,
 		RevisionRecord $revision = null
 	) {
+		// TODO inject?
+		$services = MediaWikiServices::getInstance();
+		$this->linkRenderer = $services->getLinkRenderer();
+		$this->wikiPageFactory = $services->getWikiPageFactory();
+
 		$this->title = $title;
 		$this->revision = $revision ?? $this->getLatestRevision();
 		$this->authority = $authority;
@@ -93,15 +104,13 @@ class HtmlSplitConflictHeader {
 		$this->messageLocalizer = $messageLocalizer;
 		$this->now = new ConvertibleTimestamp( $now );
 		$this->newEditSummary = $newEditSummary;
-		// TODO inject?
-		$this->linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
 	}
 
 	/**
 	 * @return RevisionRecord|null
 	 */
 	private function getLatestRevision(): ?RevisionRecord {
-		$wikiPage = WikiPage::factory( $this->title );
+		$wikiPage = $this->wikiPageFactory->newFromTitle( $this->title );
 		/** @see https://phabricator.wikimedia.org/T203085 */
 		$wikiPage->loadPageData( WikiPage::READ_LATEST );
 		return $wikiPage->getRevisionRecord();

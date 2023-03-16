@@ -2,8 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Dbc334",
-			"Janezdrilc"
+			"Janezdrilc",
+			"Eleassar"
 		]
 	},
+	"wikibaselexemecirrus-desc": "Razširitev WikiBaseLexeme za uporabo funkcionalnosti CirrusSearch",
 	"wikibaselexemecirrus-rescore-profile-prefix": "Profil za ponovno oceno po avtomatskem dopolnjevanju iskanih gesel"
 }

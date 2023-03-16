@@ -6,6 +6,7 @@
 			"Amire80"
 		]
 	},
+	"vector-languages": "Diller",
 	"vector-language-button-label": "{{PLURAL:$1|$1 Dil}}",
 	"vector-action-addsection": "Mowzuk goş",
 	"vector-action-delete": "Öçür",
@@ -18,5 +19,6 @@
 	"vector-view-history": "Taryhy gör",
 	"vector-view-view": "Oka",
 	"vector-view-viewsource": "Çeşmäni gör",
-	"vector-more-actions": "Has köp"
+	"vector-more-actions": "Has köp",
+	"vector-searchsuggest-containing": "Içindäki sahypalary gözläň <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong>"
 }

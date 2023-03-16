@@ -1,14 +1,10 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { mount, shallowMount } from '@vue/test-utils';
 import ErrorDeprecatedStatement from '@/presentation/components/ErrorDeprecatedStatement.vue';
 import IconMessageBox from '@/presentation/components/IconMessageBox.vue';
 import BailoutActions from '@/presentation/components/BailoutActions.vue';
 import MessageKeys from '@/definitions/MessageKeys';
-import Vuex from 'vuex';
 import { calledWithHTMLElement } from '../../../util/assertions';
 import { createTestStore } from '../../../util/store';
-
-const localVue = createLocalVue();
-localVue.use( Vuex );
 
 describe( 'ErrorDeprecatedStatement', () => {
 	const targetProperty = 'P569',
@@ -24,21 +20,23 @@ describe( 'ErrorDeprecatedStatement', () => {
 		} );
 
 	it( 'uses IconMessageBox to display the error header and body messages', () => {
-		const wrapper = shallowMount( ErrorDeprecatedStatement, {
-			localVue,
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
+		const wrapper = mount( ErrorDeprecatedStatement, {
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+					},
 				},
+				plugins: [ store ],
+				stubs: { BailoutActions: true },
 			},
-			store,
 		} );
 
 		calledWithHTMLElement( messageGet, 0, 1 );
 		calledWithHTMLElement( messageGet, 1, 1 );
 
-		expect( wrapper.find( IconMessageBox ).exists() ).toBe( true );
+		expect( wrapper.findComponent( IconMessageBox ).exists() ).toBe( true );
 		expect( messageGet ).toHaveBeenNthCalledWith(
 			1,
 			MessageKeys.DEPRECATED_STATEMENT_ERROR_HEAD,
@@ -53,18 +51,19 @@ describe( 'ErrorDeprecatedStatement', () => {
 
 	it( 'uses BailoutActions to provide a bail out path for the deprecated statement error', () => {
 		const wrapper = shallowMount( ErrorDeprecatedStatement, {
-			localVue,
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+					},
 				},
+				plugins: [ store ],
 			},
-			store,
 		} );
 
-		expect( wrapper.find( BailoutActions ).exists() ).toBe( true );
-		expect( wrapper.find( BailoutActions ).props() ).toStrictEqual( {
+		expect( wrapper.findComponent( BailoutActions ).exists() ).toBe( true );
+		expect( wrapper.findComponent( BailoutActions ).props() ).toStrictEqual( {
 			originalHref,
 			pageTitle,
 		} );

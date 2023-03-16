@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Abuluntu",
 			"AnB",
 			"Danmichaelo",
 			"Event",
@@ -17,7 +18,7 @@
 			"Nsaa",
 			"Pmt",
 			"Tarjeimo",
-			"Abuluntu"
+			"EdoAug"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Hvorvidt en bruker redigerer fra mobilgrensesnittet",
@@ -27,8 +28,6 @@
 	"mobile-frontend-cite-error": "Det oppsto et feil under lasting av referanser på grunn av et ugyldig revisjonsnummer.",
 	"mobile-frontend-cite-none-available": "Det finnes ingen referanser på denne siden.",
 	"mobile-frontend-clear-search": "Tilbakestill",
-	"mobile-frontend-contributions-404-desc": "Kan ikke lete etter bidrag uten en bruker eller med en bruker som ikke finnes.",
-	"mobile-frontend-contributions-404-title": "Ugyldig brukernavn ble oppgitt",
 	"mobile-frontend-copyright": "Innholdet er tilgjengelig under $1 hvis ikke annet er angitt.",
 	"mobile-frontend-desc": "Mobilgrensesnitt",
 	"mobile-frontend-diffview-404-desc": "Revisjons-IDen du ba om eksisterer ikke.<br />Dette kommer som regel av en utdatert difflenke til en side som har blitt slettet eller en difflenke som inneholder ugyldige tegn.",
@@ -59,7 +58,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "Se mer",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Årsak",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|Blokkert}} av",
-	"mobile-frontend-editor-blocked-drawer-expiry-header": "Blokkeringen vil opphøre om",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "Blokkeringen vil opphøre",
 	"mobile-frontend-editor-blocked-drawer-help": "Se detaljer",
 	"mobile-frontend-editor-generic-block-reason": "Ukjent årsak",
 	"mobile-frontend-editor-cancel": "Avbryt",
@@ -117,7 +116,7 @@
 	"mobile-frontend-joined-hours": "{{GENDER:$1|Registrerte}} seg for {{PLURAL:$2|én time|$2 timer}} siden",
 	"mobile-frontend-joined-days": "{{GENDER:$1|Registrerte}} seg for {{PLURAL:$2|én dag|$2 dager}} siden",
 	"mobile-frontend-joined-months": "{{GENDER:$1|Registrerte}} seg for {{PLURAL:$2|én måned|$2 måneder}} siden",
-	"mobile-frontend-joined-years": "{{GENDER:$1|Registrerte}} seg for {{PLURAL:$2|ett|$2}} år siden",
+	"mobile-frontend-joined-years": "{{GENDER:$1|Registrerte}} seg for {{PLURAL:$2|ett|$2}} år siden",
 	"mobile-frontend-language-heading": "<strong>Språk</strong>",
 	"mobile-frontend-languages-404-desc": "En gyldig tittel må angis.",
 	"mobile-frontend-languages-404-title": "Språkfeil",
@@ -169,7 +168,6 @@
 	"mobile-frontend-references-citation-error": "Det oppsto en feil og referansen kunne ikke lastes.",
 	"mobile-frontend-references-list": "Vis fullstendig liste over siteringer",
 	"mobile-frontend-requires-mobile": "Denne siden er ikke tilgjengelig for desktop. Trykk på mobilvisning-lenken nederst på siden.",
-	"mobile-frontend-requires-optin": "Denne siden er ikke tilgjengelig hvis du ikke melder deg på betatestingen vår. Besøk [[Special:MobileOptions|innstillingssiden]] for å melde deg på.",
 	"mobile-frontend-requires-title": "Siden er utilgjengelig",
 	"mobile-frontend-return-to-page": "Tilbake til siden",
 	"mobile-frontend-save-error": "Det oppstod en feil under lagring av innstillingene. Sjekk at du har aktivert informasjonskapsler (cookies).",

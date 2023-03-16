@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"wikibaselexemecirrus-desc": "Extension de WikibaseLexeme pro usar le functionalitate de CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Profilo 'rescore' pro recerca per prefixo (completamento)."
+}

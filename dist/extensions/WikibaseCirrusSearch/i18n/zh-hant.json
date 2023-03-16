@@ -41,6 +41,7 @@
 	"wikibasecirrus-search-bad-profile-name": "錯誤搜尋配置名稱：$1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement 關鍵字不包含有效陳述",
 	"wikibasecirrus-haslicense-feature-no-valid-arguments": "關鍵字 haslicense 包含無效的引數",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity 關鍵字不包含有效陳述",
 	"special-entitieswithoutdescription": "無描述的實體",
 	"wikibasecirrus-entitieswithoutdescription-legend": "取得無描述的實體清單",
 	"special-entitieswithoutlabel": "無標籤的實體",

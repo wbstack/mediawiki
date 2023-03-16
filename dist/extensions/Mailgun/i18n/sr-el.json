@@ -1,0 +1,6 @@
+{
+	"@metadata": {
+		"authors": []
+	},
+	"mailgun-desc": "Slanje imejlova putem usluge Mailgun API-ja iz Medijavikija."
+}

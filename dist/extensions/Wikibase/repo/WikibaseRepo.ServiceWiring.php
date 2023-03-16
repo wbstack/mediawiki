@@ -227,6 +227,7 @@ use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\Store\IdGenerator;
 use Wikibase\Repo\Store\RateLimitingIdGenerator;
+use Wikibase\Repo\Store\Sql\DispatchStats;
 use Wikibase\Repo\Store\Sql\SqlIdGenerator;
 use Wikibase\Repo\Store\Sql\SqlSiteLinkConflictLookup;
 use Wikibase\Repo\Store\Sql\SqlStore;
@@ -249,7 +250,7 @@ use Wikibase\Repo\WikibaseRepo;
 use Wikibase\View\EntityIdFormatterFactory;
 use Wikibase\View\Template\TemplateFactory;
 use Wikibase\View\ViewFactory;
-use Wikimedia\ObjectFactory;
+use Wikimedia\ObjectFactory\ObjectFactory;
 
 /** @phpcs-require-sorted-array */
 return [
@@ -492,7 +493,7 @@ return [
 			'monolingualtext' => MonolingualTextValue::class,
 			'quantity' => QuantityValue::class,
 			'time' => TimeValue::class,
-			'wikibase-entityid' => function ( $value ) use ( $services ) {
+			'wikibase-entityid' => static function ( $value ) use ( $services ) {
 				// TODO this should perhaps be factored out into a class
 				if ( isset( $value['id'] ) ) {
 					try {
@@ -584,6 +585,12 @@ return [
 		);
 	},
 
+	'WikibaseRepo.DispatchStats' => function ( MediaWikiServices $services ): DispatchStats {
+		return new DispatchStats(
+			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb()
+		);
+	},
+
 	'WikibaseRepo.EditEntityFactory' => function ( MediaWikiServices $services ): MediawikiEditEntityFactory {
 		return new MediawikiEditEntityFactory(
 			WikibaseRepo::getEntityTitleStoreLookup( $services ),
@@ -595,12 +602,14 @@ return [
 			WikibaseRepo::getEntityPatcher( $services ),
 			WikibaseRepo::getEditFilterHookRunner( $services ),
 			$services->getStatsdDataFactory(),
+			$services->getUserOptionsLookup(),
 			WikibaseRepo::getSettings( $services )->getSetting( 'maxSerializedEntitySize' )
 		);
 	},
 
 	'WikibaseRepo.EditFilterHookRunner' => function ( MediaWikiServices $services ): EditFilterHookRunner {
 		return new MediawikiEditFilterHookRunner(
+			$services->getWikiPageFactory(),
 			WikibaseRepo::getEntityNamespaceLookup( $services ),
 			WikibaseRepo::getEntityTitleStoreLookup( $services ),
 			WikibaseRepo::getEntityContentFactory( $services )
@@ -818,7 +827,6 @@ return [
 	},
 
 	'WikibaseRepo.EntityIdParser' => function ( MediaWikiServices $services ): EntityIdParser {
-
 		$settings = WikibaseRepo::getSettings( $services );
 		$dispatchingEntityIdParser = new DispatchingEntityIdParser(
 			WikibaseRepo::getEntityTypeDefinitions( $services )->getEntityIdBuilders()
@@ -1187,11 +1195,18 @@ return [
 
 	'WikibaseRepo.IdGenerator' => function ( MediaWikiServices $services ): IdGenerator {
 		$settings = WikibaseRepo::getSettings( $services );
+		$idGeneratorSetting = $settings->getSetting( 'idGenerator' );
+		$db = WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb();
 
-		switch ( $settings->getSetting( 'idGenerator' ) ) {
+		if ( $idGeneratorSetting === 'auto' ) {
+			$idGeneratorSetting = $db->connections()->getLazyWriteConnectionRef()->getType() === 'mysql'
+				? 'mysql-upsert' : 'original';
+		}
+
+		switch ( $idGeneratorSetting ) {
 			case 'original':
 				$idGenerator = new SqlIdGenerator(
-					WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
+					$db,
 					$settings->getSetting( 'reservedIds' ),
 					$settings->getSetting( 'idGeneratorSeparateDbConnection' )
 				);
@@ -1201,14 +1216,14 @@ return [
 				// but perhaps that is an unnecessary check? People will realize when the DB query for
 				// ID selection fails anyway...
 				$idGenerator = new UpsertSqlIdGenerator(
-					WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
+					$db,
 					$settings->getSetting( 'reservedIds' ),
 					$settings->getSetting( 'idGeneratorSeparateDbConnection' )
 				);
 				break;
 			default:
 				throw new InvalidArgumentException(
-					'idGenerator config option must be either \'original\' or \'mysql-upsert\''
+					'idGenerator config option must be \'original\', \'mysql-upsert\' or \'auto\''
 				);
 		}
 
@@ -1337,6 +1352,7 @@ return [
 
 	'WikibaseRepo.LanguageFallbackChainFactory' => function ( MediaWikiServices $services ): LanguageFallbackChainFactory {
 		return new LanguageFallbackChainFactory(
+			WikibaseRepo::getTermsLanguages( $services ),
 			$services->getLanguageFactory(),
 			$services->getLanguageConverterFactory(),
 			$services->getLanguageFallback()
@@ -1921,7 +1937,7 @@ return [
 			WikibaseRepo::getTypeIdsResolver( $services ),
 			WikibaseRepo::getRepoDomainDbFactory( $services )->newRepoDb(),
 			$services->getMainWANObjectCache(),
-			JobQueueGroup::singleton(),
+			$services->getJobQueueGroup(),
 			WikibaseRepo::getLogger( $services )
 		);
 	},
@@ -2027,7 +2043,7 @@ return [
 			$callbacks['globecoordinate'] = $prefixedCallbacks['VT:globecoordinate'];
 		}
 		// 'null' is not a datatype. Kept for backwards compatibility.
-		$callbacks['null'] = function() {
+		$callbacks['null'] = function () {
 			return new NullParser();
 		};
 
@@ -2053,6 +2069,7 @@ return [
 
 		$propertyOrderProvider = new CachingPropertyOrderProvider(
 			new WikiPagePropertyOrderProvider(
+				$services->getWikiPageFactory(),
 				$services->getTitleFactory()
 					->newFromText( 'MediaWiki:Wikibase-SortedProperties' )
 			),

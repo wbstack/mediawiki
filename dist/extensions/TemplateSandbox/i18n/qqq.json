@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Brad Jorsch",
 			"Liuxinyu970226",
 			"Raymond",
 			"Shirayuki",
-			"Umherirrender",
-			"Amire80"
+			"Umherirrender"
 		]
 	},
 	"templatesandbox": "{{doc-special|TemplateSandbox}}\nThe name of the [[mw:Extension:TemplateSandbox|TemplateSandbox extension]].",

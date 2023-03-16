@@ -11,7 +11,7 @@ use CirrusSearch\WarningCollector;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\Exists;
-use Elastica\Query\Match;
+use Elastica\Query\MatchQuery;
 use Elastica\Query\Prefix;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\Search\Elastic\Fields\StatementsField;
@@ -110,8 +110,8 @@ class HasWbStatementFeature extends SimpleKeywordFeature implements FilterQueryF
 							'rewrite' => 'top_terms_1024'
 						]
 				] ) );
-			} elseif ( $query['class'] === Match::class ) {
-				$return->addShould( new Match(
+			} elseif ( $query['class'] === MatchQuery::class ) {
+				$return->addShould( new MatchQuery(
 					$query['field'],
 					[ 'query' => $query['string'] ]
 				) );
@@ -164,7 +164,7 @@ class HasWbStatementFeature extends SimpleKeywordFeature implements FilterQueryF
 			}
 			if ( $this->statementContainsPropertyOnly( $statementString ) ) {
 				$queries[] = [
-					'class' => Match::class,
+					'class' => MatchQuery::class,
 					'field' => StatementsField::NAME . '.property',
 					'string' => $statementString,
 				];
@@ -179,7 +179,7 @@ class HasWbStatementFeature extends SimpleKeywordFeature implements FilterQueryF
 				continue;
 			}
 			$queries[] = [
-				'class' => Match::class,
+				'class' => MatchQuery::class,
 				'field' => StatementsField::NAME,
 				'string' => $statementString,
 			];

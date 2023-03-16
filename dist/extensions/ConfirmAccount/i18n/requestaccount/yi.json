@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"פוילישער"
+			"פוילישער",
+			"Pacha Tchernof"
 		]
 	},
-	"requestaccount-level-0": "מחבר"
+	"requestaccount-level-0": "מחבר",
+	"requestaccount-level-1": "רעדאַקטאָר"
 }

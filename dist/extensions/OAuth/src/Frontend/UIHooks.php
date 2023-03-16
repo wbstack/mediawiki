@@ -1,14 +1,14 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Frontend;
+namespace MediaWiki\Extension\OAuth\Frontend;
 
 use HTMLForm;
-use MediaWiki\Extensions\OAuth\Backend\Consumer;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Control\ConsumerAccessControl;
-use MediaWiki\Extensions\OAuth\Control\ConsumerSubmitControl;
-use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthConsumerRegistration;
-use MediaWiki\Extensions\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageConsumers;
+use MediaWiki\Extension\OAuth\Backend\Consumer;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Control\ConsumerAccessControl;
+use MediaWiki\Extension\OAuth\Control\ConsumerSubmitControl;
+use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthConsumerRegistration;
+use MediaWiki\Extension\OAuth\Frontend\SpecialPages\SpecialMWOAuthManageConsumers;
 use MediaWiki\MediaWikiServices;
 use SpecialPage;
 
@@ -127,8 +127,8 @@ class UIHooks {
 			\Html::openElement( 'table',
 			[ 'class' => 'wikitable mw-listgrouprights-table' ] ) .
 			'<tr>' .
-			\Html::element( 'th', null, $special->msg( 'listgrants-grant' )->text() ) .
-			\Html::element( 'th', null, $special->msg( 'listgrants-rights' )->text() ) .
+			\Html::element( 'th', [], $special->msg( 'listgrants-grant' )->text() ) .
+			\Html::element( 'th', [], $special->msg( 'listgrants-rights' )->text() ) .
 			'</tr>'
 		);
 
@@ -228,8 +228,19 @@ class UIHooks {
 	 */
 	public static function onSpecialPage_initList( array &$specialPages ) {
 		if ( Utils::isCentralWiki() ) {
-			$specialPages['OAuthConsumerRegistration'] = SpecialMWOAuthConsumerRegistration::class;
-			$specialPages['OAuthManageConsumers'] = SpecialMWOAuthManageConsumers::class;
+			$specialPages['OAuthConsumerRegistration'] = [
+				'class' => SpecialMWOAuthConsumerRegistration::class,
+				'services' => [
+					'GrantsInfo',
+					'GrantsLocalization',
+				],
+			];
+			$specialPages['OAuthManageConsumers'] = [
+				'class' => SpecialMWOAuthManageConsumers::class,
+				'services' => [
+					'GrantsLocalization',
+				],
+			];
 		}
 	}
 

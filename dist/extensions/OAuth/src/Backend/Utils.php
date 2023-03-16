@@ -1,11 +1,12 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Backend;
+namespace MediaWiki\Extension\OAuth\Backend;
 
 use EchoEvent;
-use MediaWiki\Extensions\OAuth\Lib\OAuthSignatureMethod_HMAC_SHA1;
+use MediaWiki\Extension\OAuth\Lib\OAuthSignatureMethod_HMAC_SHA1;
 use MediaWiki\MediaWikiServices;
 use User;
+use WikiMap;
 use Wikimedia\Rdbms\DBConnRef;
 use Wikimedia\Rdbms\IDatabase;
 
@@ -22,7 +23,7 @@ class Utils {
 	public static function isCentralWiki() {
 		global $wgMWOAuthCentralWiki;
 
-		return ( wfWikiId() === $wgMWOAuthCentralWiki );
+		return ( WikiMap::getCurrentWikiId() === $wgMWOAuthCentralWiki );
 	}
 
 	/**
@@ -48,7 +49,7 @@ class Utils {
 			$index = DB_PRIMARY;
 		}
 
-		$db = $lbFactory->getMainLB( $wgMWOAuthCentralWiki )->getLazyConnectionRef(
+		$db = $lbFactory->getMainLB( $wgMWOAuthCentralWiki )->getConnectionRef(
 			$index, [], $wgMWOAuthCentralWiki );
 		$db->daoReadOnly = $wgMWOAuthReadOnly;
 		return $db;
@@ -419,7 +420,9 @@ class Utils {
 	public static function grantsAreValid( array $grants ) {
 		// Remove our special grants before calling the core method
 		$grants = array_diff( $grants, [ 'mwoauth-authonly', 'mwoauth-authonlyprivate' ] );
-		return \MWGrants::grantsAreValid( $grants );
+		return MediaWikiServices::getInstance()
+			->getGrantsInfo()
+			->grantsAreValid( $grants );
 	}
 
 	/**

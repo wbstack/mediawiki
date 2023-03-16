@@ -43,14 +43,18 @@ class ConfigUtils {
 
 	public function checkElasticsearchVersion() {
 		$this->outputIndented( 'Fetching Elasticsearch version...' );
-		$result = $this->client->request( '' );
-		$result = $result->getData();
+		$response = $this->client->request( '' );
+		if ( !$response->isOK() ) {
+			$this->fatalError( "Cannot fetch elasticsearch version: "
+				. $response->getError() );
+		}
+		$result = $response->getData();
 		if ( !isset( $result['version']['number'] ) ) {
 			$this->fatalError( 'unable to determine, aborting.' );
 		}
 		$result = $result[ 'version' ][ 'number' ];
 		$this->output( "$result..." );
-		if ( !preg_match( '/^(6.|5.6.)/', $result ) ) {
+		if ( strpos( $result, '6.' ) !== 0 && strpos( $result, '5.6.' ) !== 0 ) {
 			$this->output( "Not supported!\n" );
 			$this->fatalError( "Only Elasticsearch 6.x and 5.6.x are supported.  Your version: $result." );
 		}
@@ -118,16 +122,17 @@ class ConfigUtils {
 	 * @return string[] list of modules or plugins
 	 */
 	private function scanModulesOrPlugins( $what ) {
-		$result = $this->client->request( '_nodes' );
-		$result = $result->getData();
+		$response = $this->client->request( '_nodes' );
+		if ( !$response->isOK() ) {
+			$this->fatalError( "Cannot fetch node state from cluster: "
+				. $response->getError() );
+		}
+		$result = $response->getData();
 		$availables = [];
 		$first = true;
 		foreach ( array_values( $result[ 'nodes' ] ) as $node ) {
-			$plugins = [];
 			// The plugins section may not exist, default to [] when not found.
-			foreach ( $node[$what] ?? [] as $plugin ) {
-				$plugins[] = $plugin[ 'name' ];
-			}
+			$plugins = array_column( $node[$what] ?? [], 'name' );
 			if ( $first ) {
 				$availables = $plugins;
 				$first = false;

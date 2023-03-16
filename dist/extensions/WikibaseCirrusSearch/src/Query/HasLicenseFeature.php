@@ -12,7 +12,7 @@ use CirrusSearch\WarningCollector;
 use Config;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
-use Elastica\Query\Match;
+use Elastica\Query\MatchQuery;
 use Wikibase\Search\Elastic\Fields\StatementsField;
 use Wikimedia\Assert\Assert;
 
@@ -126,12 +126,12 @@ class HasLicenseFeature extends SimpleKeywordFeature implements FilterQueryFeatu
 		$return = new BoolQuery();
 		foreach ( $queries as $query ) {
 			if ( $query['occur'] === 'must_not' ) {
-				$return->addMustNot( new Match(
+				$return->addMustNot( new MatchQuery(
 					$query['field'],
 					[ 'query' => $query['string'] ]
 				) );
 			} elseif ( $query['occur'] === 'should' ) {
-				$return->addShould( new Match( $query['field'], [ 'query' => $query['string'] ] ) );
+				$return->addShould( new MatchQuery( $query['field'], [ 'query' => $query['string'] ] ) );
 			}
 		}
 		return $return;

@@ -12,9 +12,9 @@
 			"Remux",
 			"Renardo",
 			"Robin van der Vliet",
+			"Spenĉjo",
 			"Yekrats",
-			"YvesNevelsteen",
-			"Spenĉjo"
+			"YvesNevelsteen"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Ĉu jes aŭ ne uzanto redaktas uzante poŝtelefonan interfacon",
@@ -24,8 +24,6 @@
 	"mobile-frontend-cite-error": "Problemo okazis provante ŝargi citaĵojn pro malbona revizia identigilo.",
 	"mobile-frontend-cite-none-available": "Estas neniuj citaĵoj haveblaj por ĉi tiu paĝo.",
 	"mobile-frontend-clear-search": "Malplenigi",
-	"mobile-frontend-contributions-404-desc": "Ne povas serĉi kontribuaĵojn sen uzanto aŭ kun uzanto kiu ne ekzistas.",
-	"mobile-frontend-contributions-404-title": "Malbona uzantnomo donita",
 	"mobile-frontend-copyright": "La enhavo estas disponebla laŭ $1, se ne estas alia indiko.",
 	"mobile-frontend-desc": "Poŝtelefona fasado",
 	"mobile-frontend-diffview-404-desc": "La identigilo por la revizio kiun vi petis, ne ekzistas.<br/>Tio kutime estas kaŭzita per malfermo de eksdata ligilo al redaktaj diferencoj de paĝo, kiu estis forigita aŭ la ligilo al redaktaj diferencoj enhavas malvalidajn signojn.",
@@ -163,7 +161,6 @@
 	"mobile-frontend-references-citation-error": "Okazis eraro kaj ne eblis ŝargi ĉi tiun citaĵon.",
 	"mobile-frontend-references-list": "Vidi la plenan liston de citaĵoj",
 	"mobile-frontend-requires-mobile": "Ĉi tiu paĝo ne estas havebla por labortablaj kompitiloj. Bonvolu alklaki la ligilon poŝtelefona reĝimo ĉe la malsupro de la paĝo.",
-	"mobile-frontend-requires-optin": "Ĉi tiu paĝo ne estas havebla krom se vi elektas eniri nian beta- reĝimon. Vizitu [[Special:MobileOptions|settings page]] por aliĝi.",
 	"mobile-frontend-requires-title": "Paĝo ne havebla",
 	"mobile-frontend-return-to-page": "Reiri al la paĝo",
 	"mobile-frontend-save-error": "Eraro konservante agordojn. Bonvolu certiĝi ke vi ŝaltis viajn kuketojn.",

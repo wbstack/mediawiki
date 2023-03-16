@@ -7,8 +7,8 @@
 			"McDutchie",
 			"Optilete",
 			"PonkoSasuke",
-			"Sjoerddebruin",
-			"Romaine"
+			"Romaine",
+			"Sjoerddebruin"
 		]
 	},
 	"twocolconflict": "Bewerkingsconflict op basis van alinea's",
@@ -17,9 +17,9 @@
 	"twocolconflict-beta-feature-message": "Bewerkingsconflict op basis van alinea's",
 	"twocolconflict-beta-feature-description": "Laat het scherm voor bewerkingsconflicten zien als een verbeterd, op alinea's gebaseerd overzicht.",
 	"twocolconflict-copy-action": "kopieer volledige tekst",
-	"twocolconflict-copy-notice": "De volledige wikitekst van uw revisie is naar het klembord gekopieerd (de bewerkingen die hieronder worden aangebracht zijn niet inbegrepen).",
+	"twocolconflict-copy-notice": "De volledige wikitekst van uw versie is naar het klembord gekopieerd (hieronder aangebrachte bewerkingen zijn niet inbegrepen).",
 	"twocolconflict-copy-tab-action": "toon volledige tekst",
-	"twocolconflict-copy-tab-tooltip": "Bekijk de volledige wikitekst van uw revisie (hieronder aangebrachte bewerkingen zijn niet inbegrepen). Opent in een nieuw tabblad.",
+	"twocolconflict-copy-tab-tooltip": "Bekijk de volledige wikitekst van uw versie (hieronder aangebrachte bewerkingen zijn niet inbegrepen). Wordt geopend in een nieuw tabblad.",
 	"twocolconflict-copy-tooltip": "Kopieer de volledige wikitekst van uw revisie naar het klembord (hieronder aangebrachte bewerkingen zijn niet inbegrepen)",
 	"twocolconflict-core-ui-hint": "Er is nu een bijgewerkte interface beschikbaar voor het oplossen van bewerkingsconflicten. Schakel de op alinea gebaseerde bewerkingsconflictinterface in uw [[Special:Preferences#mw-prefsection-editing|voorkeuren]] in om het uit te proberen.",
 	"twocolconflict-core-ui-hint-close": "Dit nooit meer weergeven",
@@ -76,6 +76,6 @@
 	"twocolconflict-talk-conflicting": "Conflicterende reactie",
 	"twocolconflict-talk-switch-tooltip": "Wijzig volgorde",
 	"twocolconflict-talk-reorder-prompt": "Plaats uw opmerking ten opzichte van de tegenstrijdige opmerking:",
-	"twocolconflict-talk-same-order": "Behouden na",
-	"twocolconflict-talk-reverse-order": "Verplaats voor"
+	"twocolconflict-talk-same-order": "Erna houden",
+	"twocolconflict-talk-reverse-order": "Ervoor zetten"
 }

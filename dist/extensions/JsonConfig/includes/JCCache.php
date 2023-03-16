@@ -1,7 +1,8 @@
 <?php
 namespace JsonConfig;
 
-use MWNamespace;
+use MediaWiki\MediaWikiServices;
+use ObjectCache;
 
 /**
  * Represents a json blob on a remote wiki.
@@ -32,7 +33,7 @@ class JCCache {
 		$this->titleValue = $titleValue;
 		$conf = $this->titleValue->getConfig();
 		$flRev = $conf->flaggedRevs;
-		$this->cache = wfGetCache( CACHE_ANYTHING );
+		$this->cache = ObjectCache::getInstance( CACHE_ANYTHING );
 		$keyArgs = [
 			'JsonConfig',
 			$wgJsonConfigCacheKeyPrefix,
@@ -135,8 +136,10 @@ class JCCache {
 	 */
 	private function loadLocal() {
 		// @fixme @bug handle flagged revisions
-		$title = \Title::newFromTitleValue( $this->titleValue );
-		$result = \WikiPage::factory( $title )->getContent();
+		$result = MediaWikiServices::getInstance()
+			->getWikiPageFactory()
+			->newFromLinkTarget( $this->titleValue )
+			->getContent();
 		if ( !$result ) {
 			$result = false; // Keeping consistent with other usages
 		} elseif ( !( $result instanceof JCContent ) ) {
@@ -165,7 +168,9 @@ class JCCache {
 			if ( !$req ) {
 				break;
 			}
-			$ns = $conf->nsName ?: MWNamespace::getCanonicalName( $this->titleValue->getNamespace() );
+			$ns = $conf->nsName ?: MediaWikiServices::getInstance()
+				->getNamespaceInfo()
+				->getCanonicalName( $this->titleValue->getNamespace() );
 			$articleName = $ns . ':' . $this->titleValue->getText();
 			$flrevs = $conf->flaggedRevs;
 			// if flaggedRevs is false, get wiki page directly,

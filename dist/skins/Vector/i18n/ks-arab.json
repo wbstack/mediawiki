@@ -3,9 +3,12 @@
 		"authors": [
 			"Iflaq",
 			"Rishabhbhat",
-			"Teashae"
+			"Teashae",
+			"Amire80",
+			"Tajamul9"
 		]
 	},
+	"vector-languages": "زَبانہٕ",
 	"vector-language-button-label": "{{PLURAL:$1|$1زَبان|$1 زَبانہٕ}}",
 	"vector-action-addsection": "نٔو موضوٗع",
 	"vector-action-delete": "مِٹٲیو",
@@ -15,5 +18,6 @@
 	"vector-view-edit": "اؠڈِٹ",
 	"vector-view-history": "تَوأریٖخ وُچھِو",
 	"vector-view-view": "پَرُن",
-	"vector-more-actions": "بێیہِ"
+	"vector-more-actions": "بێیہِ",
+	"vector-searchsuggest-containing": "صَفَن کٔرِو تَلاش یِمَن مَنٛز <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong> چھُ"
 }

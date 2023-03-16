@@ -4,19 +4,29 @@
 			{{ $messages.getText( $messages.KEYS.EDIT_DECISION_HEADING ) }}
 		</h2>
 		<RadioGroup>
-			<RadioInput name="editDecision" html-value="replace" v-model="editDecision">
-				<template slot="label">
+			<RadioInput
+				name="editDecision"
+				html-value="replace"
+				value="editDecision"
+				@input="editDecision = $event"
+			>
+				<template #label>
 					<span v-html="$messages.get( $messages.KEYS.EDIT_DECISION_REPLACE_LABEL )" />
 				</template>
-				<template slot="description">
+				<template #description>
 					{{ $messages.getText( $messages.KEYS.EDIT_DECISION_REPLACE_DESCRIPTION ) }}
 				</template>
 			</RadioInput>
-			<RadioInput name="editDecision" html-value="update" v-model="editDecision">
-				<template slot="label">
+			<RadioInput
+				name="editDecision"
+				html-value="update"
+				value="editDecision"
+				@input="editDecision = $event"
+			>
+				<template #label>
 					<span v-html="$messages.get( $messages.KEYS.EDIT_DECISION_UPDATE_LABEL )" />
 				</template>
-				<template slot="description">
+				<template #description>
 					{{ $messages.getText( $messages.KEYS.EDIT_DECISION_UPDATE_DESCRIPTION ) }}
 				</template>
 			</RadioInput>
@@ -25,32 +35,39 @@
 </template>
 
 <script lang="ts">
-import EditDecisionOption from '@/definitions/EditDecision';
+import { defineComponent } from 'vue';
+import { Context } from 'vuex-smart-module';
 import StateMixin from '@/presentation/StateMixin';
+import EditDecisionOption from '@/definitions/EditDecision';
 import RadioGroup from '@/presentation/components/RadioGroup.vue';
-import { RadioInput } from '@wmde/wikibase-vuejs-components';
-import Component, { mixins } from 'vue-class-component';
+import RadioInput from '@/presentation/components/RadioInput.vue';
+import { rootModule } from '@/store';
 
-@Component( {
+interface EditDecision {
+	rootModule: Context<typeof rootModule>;
+}
+
+export default defineComponent( {
+	mixins: [ StateMixin ],
+	name: 'EditDecision',
 	components: {
 		RadioGroup,
 		RadioInput,
 	},
-} )
-export default class EditDecision extends mixins( StateMixin ) {
-
-	public get editDecision(): EditDecisionOption|null {
-		return this.rootModule.state.editDecision;
-	}
-
-	public set editDecision( value: EditDecisionOption|null ) {
-		if ( value === null ) {
-			throw new Error( 'Cannot set editDecision back to null!' );
-		}
-		this.rootModule.dispatch( 'setEditDecision', value );
-	}
-
-}
+	computed: {
+		editDecision: {
+			get( this: EditDecision ): EditDecisionOption | null {
+				return this.rootModule.state.editDecision;
+			},
+			set( this: EditDecision, value: EditDecisionOption | null ): void {
+				if ( value === null ) {
+					throw new Error( 'Cannot set editDecision back to null!' );
+				}
+				this.rootModule.dispatch( 'setEditDecision', value );
+			},
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

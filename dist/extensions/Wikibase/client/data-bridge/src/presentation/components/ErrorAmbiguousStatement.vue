@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-import Component, { mixins } from 'vue-class-component';
+import { createApp, defineComponent } from 'vue';
 import StateMixin from '@/presentation/StateMixin';
 import IconMessageBox from '@/presentation/components/IconMessageBox.vue';
 import BailoutActions from '@/presentation/components/BailoutActions.vue';
@@ -30,29 +30,31 @@ import TermLabel from '@/presentation/components/TermLabel.vue';
  * A component used to illustrate an ambiguous statement error which happened when
  * the user tried to edit a statement group with more than one value.
  */
-@Component( {
+export default defineComponent( {
+	mixins: [ StateMixin ],
+	name: 'ErrorAmbiguousStatement',
 	components: {
 		IconMessageBox,
 		BailoutActions,
 	},
-} )
-export default class ErrorAmbiguousStatement extends mixins( StateMixin ) {
-	public get propertyLabel(): HTMLElement {
-		return new TermLabel( {
-			propsData: {
-				term: this.rootModule.getters.targetLabel,
-			},
-		} ).$mount().$el as HTMLElement;
-	}
-
-	public get pageTitle(): string {
-		return this.rootModule.state.pageTitle;
-	}
-
-	public get originalHref(): string {
-		return this.rootModule.state.originalHref;
-	}
-}
+	computed: {
+		propertyLabel(): HTMLElement {
+			return createApp(
+				TermLabel,
+				{
+					term: this.rootModule.getters.targetLabel,
+					inLanguage: this.$inLanguage,
+				},
+			).mount( document.createElement( 'span' ) ).$el;
+		},
+		pageTitle(): string {
+			return this.rootModule.state.pageTitle;
+		},
+		originalHref(): string {
+			return this.rootModule.state.originalHref;
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

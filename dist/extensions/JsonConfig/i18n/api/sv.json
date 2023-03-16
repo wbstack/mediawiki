@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Felba",
 			"Lokal Profil",
-			"WikiPhoenix",
-			"Felba"
+			"WikiPhoenix"
 		]
 	},
 	"apihelp-jsonconfig-description": "Ger direkt åtkomst till JsonConfig-undersystemet.",

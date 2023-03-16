@@ -5,6 +5,7 @@
 			"Omshivaprakash",
 			"Shushruth",
 			"VASANTH S.N.",
+			"~aanzx",
 			"ಮಲ್ನಾಡಾಚ್ ಕೊಂಕ್ಣೊ"
 		]
 	},
@@ -14,6 +15,11 @@
 	"wikibase-editlinks": "ಕೊಂಡಿಗಳನ್ನು ಸಂಪಾದಿಸಿ",
 	"wikibase-editlinkstitle": "ಅಂತರ್‍ಭಾಷೀಯ ಕೊಂಡಿಗಳನ್ನು ಸಂಪಾದಿಸು",
 	"wikibase-linkitem-addlinks": "ಕೊಂಡಿಗಳನ್ನು ಸೇರಿಸಿ",
+	"wikibase-linkitem-title": "ಪುಟದೊಂದಿಗೆ ಜೋಡಿಸಿ",
+	"wikibase-linkitem-linkpage": "ಪುಟದೊಂದಿಗೆ ಜೋಡಿಸಿ",
+	"wikibase-linkitem-selectlink": "ದಯವಿಟ್ಟು ನೀವು ಈ ಪುಟಕ್ಕೆ ಜೋಡಣೆ ಮಾಡಲು ಬಯಸುವ ಸೈಟ್ ಮತ್ತು ಪುಟವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
+	"wikibase-linkitem-input-site": "ಭಾಷೆ:",
+	"wikibase-linkitem-input-page": "ಪುಟ:",
 	"wikibase-linkitem-confirmitem-button": "ಧೃಡಪಡಿಸು",
 	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
 	"wikibase-rc-hide-wikidata-hide": "ಅಡಗಿಸು",
@@ -23,5 +29,7 @@
 	"wikibase-unconnectedpages-submit": "ಹೋಗು",
 	"wikibase-pageinfo-entity-id-none": "ಯಾವುದೂ ಇಲ್ಲ",
 	"wikibase-otherprojects": "ಇತರೆ ಯೋಜನೆಗಳಲ್ಲಿ",
+	"wikibase-otherprojects-beta-message": "ಇತರ ಯೋಜನೆಗಳ ಸೈಡ್‌ಬಾರ್",
+	"wikibase-otherprojects-beta-description": "ಸೈಡ್‌ಬಾರ್‌ಗೆ \"{{int:wikibase-otherprojects}}\" ವಿಭಾಗವನ್ನು ಸೇರಿಸುತ್ತದೆ ಅದು {{WBREPONAME}} ಡೇಟಾದ ಆಧಾರದ ಮೇಲೆ ಇತರ ವಿಕಿಮೀಡಿಯಾ ಯೋಜನೆಗಳಿಗೆ ಲಿಂಕ್‌ಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ.",
 	"wikibase-sitelinks-sitename-columnheading": "ಭಾಷೆ"
 }

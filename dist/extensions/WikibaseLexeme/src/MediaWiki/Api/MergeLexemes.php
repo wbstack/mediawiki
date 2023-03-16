@@ -60,7 +60,7 @@ class MergeLexemes extends ApiBase {
 	 */
 	public function execute() {
 		$params = $this->extractRequestParams();
-		$services = WikibaseLexemeServices::createGlobalInstance();
+		$services = WikibaseLexemeServices::newInstance();
 
 		$sourceId = $this->getLexemeIdFromParamOrDie( $params[self::SOURCE_ID_PARAM] );
 		$targetId = $this->getLexemeIdFromParamOrDie( $params[self::TARGET_ID_PARAM] );
@@ -97,9 +97,7 @@ class MergeLexemes extends ApiBase {
 		}
 	}
 
-	/**
-	 * @see ApiBase::getAllowedParams
-	 */
+	/** @inheritDoc */
 	protected function getAllowedParams() {
 		return [
 			self::SOURCE_ID_PARAM => [
@@ -124,9 +122,7 @@ class MergeLexemes extends ApiBase {
 		];
 	}
 
-	/**
-	 * @see ApiBase::getExamplesMessages
-	 */
+	/** @inheritDoc */
 	protected function getExamplesMessages() {
 		return [
 			'action=wblmergelexemes&source=L123&target=L321' =>
@@ -134,16 +130,12 @@ class MergeLexemes extends ApiBase {
 		];
 	}
 
-	/**
-	 * @see ApiBase::needsToken()
-	 */
+	/** @inheritDoc */
 	public function needsToken() {
 		return 'csrf';
 	}
 
-	/**
-	 * @see ApiBase::isWriteMode()
-	 */
+	/** @inheritDoc */
 	public function isWriteMode() {
 		return true;
 	}

@@ -6,7 +6,8 @@
 			"Elias Ahmmad",
 			"YahyA",
 			"Yahya",
-			"আফতাবুজ্জামান"
+			"আফতাবুজ্জামান",
+			"আজিজ"
 		]
 	},
 	"twocolconflict": "অনুচ্ছেদ ভিত্তিক সম্পাদনা দ্বন্দ্ব",
@@ -19,12 +20,17 @@
 	"twocolconflict-copy-tab-action": "পূর্ণ লেখা দেখুন",
 	"twocolconflict-copy-tab-tooltip": "আপনার সংশোধনের সম্পূর্ণ উইকিলেখা দেখুন (নিচে করা সম্পাদনাগুলি অন্তর্ভুক্ত নয়)। একটি নতুন ট্যাবে খুলবে।",
 	"twocolconflict-copy-tooltip": "আপনার সংশোধনের সম্পূর্ণ উইকিলেখা ক্লিপবোর্ডে অনুলিপি করুন (নিচে করা সম্পাদনাগুলি অন্তর্ভুক্ত নয়)",
+	"twocolconflict-core-ui-hint": "এখন সম্পাদনা দ্বন্দ্ব সমাধানের জন্য একটি হালনাগাদকৃত ইন্টারফেস উপলভ্য। এটি পরীক্ষা করার জন্য আপনার [[Special:Preferences#mw-prefsection-editing|পছন্দসমূহে]] অনুচ্ছেদ-ভিত্তিক সম্পাদনা দ্বন্দ্ব ইন্টারফেস সক্রিয় করুন।",
 	"twocolconflict-core-ui-hint-close": "কখনো দেখাবেন না",
 	"twocolconflict-preference-enabled": "সম্পাদনা দ্বন্দ্ব সমাধান করতে [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|অনুচ্ছেদ-ভিত্তিক সম্পাদনা দ্বন্দ্বের]] ইন্টারফেস সক্রিয় করুন",
+	"twocolconflict-special-footer-hint": "সম্পাদনা দ্বন্দ্ব ইন্টারফেসে ফিরে যেতে বর্তমান পাতাটি বন্ধ করুন।",
 	"twocolconflict-special-header-overview": "আপনি যখন সম্পাদনা করছিলেন, আরেকজন ব্যবহারকারী এই একই পাতাটি সম্পাদনা করেছেন ও আপনার আগে প্রকাশ করেছেন। আপনার সম্পাদিত সংস্করণের একটি অনুলিপি নিচে দেওয়া হল। সম্পাদনা দ্বন্দ্বের ইন্টারফেসে করা কোন পরিবর্তন মূল পাতায় প্রতিফলিত হয় না। পরিবর্তনগুলি একত্রিত করতে এবং সম্পাদনা দ্বন্দ্বের ইন্টারফেস ব্যবহার করে সমস্যা সমাধান করতে, পূর্ববর্তী ট্যাবে ফিরে যান।",
 	"twocolconflict-special-not-saved": "প্রকাশিত হয়নি",
 	"twocolconflict-special-textarea-hint": "আপনি আপনার সম্পাদিত সংস্করণের উৎস দেখতে পারেন ও অনুলিপি করতে পারেন:",
 	"twocolconflict-special-malformed-title": "শিরোনাম অনুপস্থিত অথবা অবৈধ।",
+	"twocolconflict-special-expired": "এখানে দেখার মতো কিছু নেই। অর্থাৎ, সম্ভবত আপনি এর আগে কোনও সম্পাদনা দ্বন্দ্বে পড়েছিলেন, কিন্তু এটি কিছুক্ষণ আগে ছিল এবং আপনার অস্থায়ীভাবে সঞ্চিত পাঠ্যের মেয়াদ শেষ হয়ে গেছে।",
+	"twocolconflict-split-header-hint": "আপনি [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface এই পাতায়] আপনার মতামত দিয়ে এই বৈশিষ্ট্যটিকে আরও উন্নত করতে সাহায্য করতে পারেন।",
+	"twocolconflict-split-header-hint-beta": "এই বেটা বৈশিষ্ট্য ব্যবহার করার জন্য আপনাকে ধন্যবাদ। আপনি এটিকে আরও উন্নত করতে সাহায্য করতে পারেন, যদি আপনি [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface এই পাতায়] মতামত দেন।",
 	"twocolconflict-split-header-overview": "আপনি যখন সম্পাদনা করছিলেন, আরেকজন ব্যবহারকারী এক‌ই পাতা সম্পাদনা করে আপনার আগে প্রকাশ করেছেন। দয়া করে দুইটি সংস্করণ‌ই পর্যবেক্ষণ করুন এবং তাদের একত্রিত করুন। শুধুমাত্র নির্বাচিত বাক্সের ভেতরের পাঠ্যগুলিই সংরক্ষিত হবে যখন আপনি \"{{int:publishchanges}}\" ক্লিক করবেন।",
 	"twocolconflict-split-your-version-header": "আপনার সংস্করণ",
 	"twocolconflict-split-current-version-header": "$1 অনুযায়ী সর্বশেষ সংস্করণ",

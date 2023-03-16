@@ -27,9 +27,10 @@
 			"Wong128hk",
 			"Xiplus",
 			"一個正常人",
+			"列维劳德",
 			"沈澄心",
 			"逆襲的天邪鬼",
-			"列维劳德"
+			"SunAfterRain"
 		]
 	},
 	"echo-desc": "用來通知使用者事件及訊息的系統",
@@ -62,7 +63,7 @@
 	"echo-learn-more": "瞭解更多",
 	"echo-log": "日誌",
 	"echo-new-messages": "您有新的討論頁訊息",
-	"echo-category-title-edit-user-talk": "對話頁面{{PLURAL:$1|訊息}}",
+	"echo-category-title-edit-user-talk": "{{PLURAL:$1|編輯}}我的使用者討論頁",
 	"echo-category-title-article-linked": "頁面{{PLURAL:$1|連結}}",
 	"echo-category-title-reverted": "編輯{{PLURAL:$1|還原}}",
 	"echo-category-title-mention": "{{PLURAL:$1|提及}}",
@@ -78,7 +79,7 @@
 	"echo-category-title-thank-you-edit": "編輯{{PLURAL:$1|里程碑}}",
 	"echo-category-title-watchlist": "監視頁面的編輯",
 	"echo-category-title-minor-watchlist": "監視頁面的小修改",
-	"echo-pref-tooltip-edit-user-talk": "當有人在我的對話頁面上留下訊息或是回覆留言時通知我。",
+	"echo-pref-tooltip-edit-user-talk": "當有人編輯我的使用者討論頁時通知我。",
 	"echo-pref-tooltip-article-linked": "當有人從另一頁面連結到我建立的頁面時通知我。",
 	"echo-pref-tooltip-reverted": "當有人使用還原或取消功能來還原我的編輯時通知我。",
 	"echo-pref-tooltip-mention": "當有人連結我的使用者頁面時通知我。",
@@ -191,6 +192,7 @@
 	"notification-header-watchlist-multiuser-deleted": "<strong>$1</strong>，一個在{{GENDER:$2|您的}}監視清單上的頁面已被刪除了 $3 {{PLURAL:$3|次}}。",
 	"notification-header-watchlist-multiuser-moved": "<strong>$1</strong>，一個在{{GENDER:$2|您的}}監視清單上的頁面已被移動了 $3 {{PLURAL:$3|次}}。",
 	"notification-header-watchlist-multiuser-restored": "<strong>$1</strong>，一個在{{GENDER:$2|您的}}監視清單上的頁面已被恢復了 $3 {{PLURAL:$3|次}}。",
+	"notification-body-watchlist-once": "除非在登入時{{GENDER:$1|您有訪問}}此頁面，否則在往後進一步活動時不會有其他電子郵件通知您。",
 	"notification-welcome-linktext": "歡迎",
 	"notification-header-thank-you-1-edit": "{{GENDER:$2|您}}剛剛作出了{{GENDER:$2|您的}}第一次編輯。謝謝您並歡迎{{GENDER:$2|您}}！",
 	"notification-header-thank-you-10-edit": "{{GENDER:$2|您}}剛剛作出了{{GENDER:$2|您的}}第十次編輯。謝謝您，請繼續努力！",

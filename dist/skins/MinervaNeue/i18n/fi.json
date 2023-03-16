@@ -8,6 +8,7 @@
 			"Jack Phoenix",
 			"Kulmalukko",
 			"Linnea",
+			"Markus Mikkonen",
 			"McSalama",
 			"MrTapsa",
 			"Nike",
@@ -15,13 +16,12 @@
 			"Stryn",
 			"Syreeni",
 			"Valtlait",
-			"Korjaus1",
-			"Markus Mikkonen"
+			"Korjaus1"
 		]
 	},
 	"minerva-last-modified-date": "Viimeksi muokattu $1 kello $2",
 	"minerva-watchlist-cta": "Seuraa tätä sivua sekä kaikkia siihen tehtäviä muutoksia.",
-	"minerva-talk-add-topic": "Lisää keskustelu",
+	"minerva-talk-add-topic": "Lisää aihe",
 	"mobile-frontend-cookies-required": "Näkymien vaihtaminen vaatii evästeitä. Ota evästeet selaimessa käyttöön ja yritä uudestaan.",
 	"mobile-frontend-editor-edit": "Muokkaa",
 	"minerva-download": "Lataa PDF",
@@ -32,7 +32,6 @@
 	"mobile-frontend-home-button": "Etusivu",
 	"mobile-frontend-language-article-heading": "Kieli",
 	"mobile-frontend-languages-not-available": "Tämä sivu ei ole saatavilla muilla kielillä.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Tervetuloa}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Avaa päävalikko",
 	"mobile-frontend-main-menu-contributions": "Muokkaukset",
 	"mobile-frontend-main-menu-login": "Kirjaudu sisään",

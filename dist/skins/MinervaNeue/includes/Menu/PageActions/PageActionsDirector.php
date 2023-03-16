@@ -19,8 +19,8 @@
  */
 namespace MediaWiki\Minerva\Menu\PageActions;
 
+use MediaWiki\Minerva\MinervaUI;
 use MessageLocalizer;
-use MinervaUI;
 use MWException;
 
 /**
@@ -47,7 +47,7 @@ final class PageActionsDirector {
 	/**
 	 * Director responsible for Page Actions menu building
 	 *
-	 * @param ToolbarBuilder $toolbarBuilder The toolbar builder
+	 * @param ToolbarBuilder $toolbarBuilder
 	 * @param IOverflowBuilder $overflowBuilder The overflow menu builder
 	 * @param MessageLocalizer $messageLocalizer Message localizer used to translate texts
 	 */
@@ -76,7 +76,7 @@ final class PageActionsDirector {
 			'toolbar' => $toolbar->getEntries()
 		];
 		if ( $overflowMenu->hasEntries() ) {
-			// See components/ToggleList.
+			// See includes/Skins/ToggleList.
 			$menu[ 'overflowMenu' ] = [
 				'item-id' => 'page-actions-overflow',
 				'checkboxID' => 'page-actions-overflow-checkbox',

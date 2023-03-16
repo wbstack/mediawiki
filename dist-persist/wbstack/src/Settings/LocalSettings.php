@@ -252,17 +252,9 @@ $wgContentNamespaces[] = 120;
 // TODO sort out directories and stuff...?
 // $wgCacheDirectory is needed at least for the l10n rebuild
 $wgCacheDirectory = '/tmp/mw-cache';
-//$wgUploadDirectory = "{$IP}/images/docker/{$dockerDb}";
+//$wgUploadDirectory = "{$wgBaseDirectory}/images/docker/{$dockerDb}";
 //$wgUploadPath = "{$wgScriptPath}/images/docker/{$dockerDb}";
 //$wgTmpDirectory = "{$wgUploadDirectory}/tmp";
-
-## Locale
-/**
- * The docker image only has C.UTF-8 currently.
- * This is the default for https://www.mediawiki.org/wiki/Manual:$wgShellLocale for core as of 1.30
- * But explicitly set it here as it is all the image has!
- */
-$wgShellLocale = "C.UTF-8";
 
 #######################################
 ## ---   Default Permissions     --- ##
@@ -490,10 +482,10 @@ $wgMusicalNotationEnableWikibaseDataType = true;
 #######################################
 ## ---          Wikibase         --- ##
 #######################################
-wfLoadExtension( 'WikibaseRepository', "$IP/extensions/Wikibase/extension-repo.json" );
-require_once "$IP/extensions/Wikibase/repo/ExampleSettings.php";
-wfLoadExtension( 'WikibaseClient', "$IP/extensions/Wikibase/extension-client.json" );
-require_once "$IP/extensions/Wikibase/client/ExampleSettings.php";
+wfLoadExtension( 'WikibaseRepository', "$wgBaseDirectory/extensions/Wikibase/extension-repo.json" );
+require_once "$wgBaseDirectory/extensions/Wikibase/repo/ExampleSettings.php";
+wfLoadExtension( 'WikibaseClient', "$wgBaseDirectory/extensions/Wikibase/extension-client.json" );
+require_once "$wgBaseDirectory/extensions/Wikibase/client/ExampleSettings.php";
 
 $wwWikibaseStringLengthString = $wikiInfo->getSetting('wwWikibaseStringLengthMonolingualText');
 if($wwWikibaseStringLengthString) {

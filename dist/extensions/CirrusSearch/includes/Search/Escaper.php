@@ -53,7 +53,7 @@ class Escaper {
 			// character (״), call a Gershayim, which mark acronyms.  Here we guess if the intent
 			// was to mark a phrase, in which case we leave the quotes alone, or to mark an
 			// acronym, in which case we escape them.
-			return preg_replace( '/(\S+)(?<!\\\\)"(\S)/u', '\1\\"\2', $text );
+			return preg_replace( '/(?<=[^\s\\\\])"(?=\S)/u', '\\"', $text );
 		}
 		return $text;
 	}
@@ -103,7 +103,9 @@ class Escaper {
 	 * @return string fixed up query string
 	 */
 	public function fixupWholeQueryString( $string ) {
-		$escapeBadSyntax = [ self::class, 'escapeBadSyntax' ];
+		$escapeBadSyntax = static function ( $matches ) {
+			return preg_replace( '/(?=[^\s\w])/', '\\', $matches[0] );
+		};
 
 		// Be careful when editing this method because the ordering of the replacements matters.
 
@@ -113,16 +115,16 @@ class Escaper {
 		// When allow leading wildcard is disabled elasticsearch will report an
 		// error if these are unescaped. Escape ? and * that don't follow a term.
 		if ( !$this->allowLeadingWildcard ) {
-			$string = preg_replace_callback( '/(?<![\w])([?*])/u', $escapeBadSyntax, $string );
+			$string = preg_replace_callback( '/(?<!\w)[?*]/u', $escapeBadSyntax, $string );
 		}
 
 		// Reduce token ranges to bare tokens without the < or >
-		$string = preg_replace( '/(?:<|>)+([^\s])/u', '$1', $string );
+		$string = preg_replace( '/[<>]+(\S)/u', '$1', $string );
 
 		// Turn bad fuzzy searches into searches that contain a ~ and set $this->fuzzyQuery for good ones.
 		$string = preg_replace_callback( '/(?<leading>\w)~(?<trailing>\S*)/u',
 			static function ( $matches ) use ( &$fuzzyQuery ) {
-				if ( preg_match( '/^(|[0-2])$/', $matches[ 'trailing' ] ) ) {
+				if ( preg_match( '/^[0-2]?$/', $matches[ 'trailing' ] ) ) {
 					return $matches[ 0 ];
 				} else {
 					return $matches[ 'leading' ] . '\\~' .
@@ -151,20 +153,12 @@ class Escaper {
 
 		// Lowercase AND and OR when not surrounded on both sides by a term.
 		// Lowercase NOT when it doesn't have a term after it.
-		$string = preg_replace_callback( '/^|(AND|OR|NOT)\s*(?:AND|OR)/u',
+		$string = preg_replace_callback( '/^\s*(?:AND|OR)\b|\b(?:AND|OR|NOT)\s*$/u',
 			[ self::class, 'lowercaseMatched' ], $string );
-		$string = preg_replace_callback( '/(?:AND|OR|NOT)\s*$/u',
+		$string = preg_replace_callback( '/\b(?:AND|OR|NOT)\s+(?=AND\b|OR\b|NOT\b)/u',
 			[ self::class, 'lowercaseMatched' ], $string );
 
 		return $string;
-	}
-
-	/**
-	 * @param string[] $matches
-	 * @return string
-	 */
-	private static function escapeBadSyntax( $matches ) {
-		return "\\" . implode( "\\", str_split( $matches[ 0 ] ) );
 	}
 
 	/**

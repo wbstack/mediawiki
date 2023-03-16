@@ -2,16 +2,26 @@
 
 namespace AdvancedSearch;
 
+use Html;
 use Language;
+use MediaWiki\Hook\SpecialSearchResultsPrependHook;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Preferences\Hook\GetPreferencesHook;
+use MediaWiki\SpecialPage\Hook\SpecialPageBeforeExecuteHook;
+use OutputPage;
 use SpecialPage;
+use SpecialSearch;
 use User;
 use WebRequest;
 
 /**
  * @license GPL-2.0-or-later
  */
-class Hooks {
+class Hooks implements
+	SpecialPageBeforeExecuteHook,
+	GetPreferencesHook,
+	SpecialSearchResultsPrependHook
+{
 
 	/**
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/SpecialPageBeforeExecute
@@ -20,7 +30,7 @@ class Hooks {
 	 * @param string|null $subpage
 	 * @return false|void false to abort the execution of the special page, "void" otherwise
 	 */
-	public static function onSpecialPageBeforeExecute( SpecialPage $special, $subpage ) {
+	public function onSpecialPageBeforeExecute( $special, $subpage ) {
 		if ( $special->getName() !== 'Search' ) {
 			return;
 		}
@@ -88,10 +98,10 @@ class Hooks {
 
 	/**
 	 * If the request does not contain any namespaces, redirect to URL with user default namespaces
-	 * @param \SpecialPage $special
+	 * @param SpecialPage $special
 	 * @return string|null the URL to redirect to or null if not needed
 	 */
-	private static function redirectToNamespacedRequest( \SpecialPage $special ): ?string {
+	private static function redirectToNamespacedRequest( SpecialPage $special ): ?string {
 		if ( !self::isNamespacedSearch( $special->getRequest() ) ) {
 			$namespacedSearchUrl = $special->getRequest()->getFullRequestURL();
 			$queryParts = [];
@@ -119,7 +129,7 @@ class Hooks {
 	 * @param WebRequest $request
 	 * @return bool
 	 */
-	private static function isNamespacedSearch( WebRequest $request ) {
+	private static function isNamespacedSearch( WebRequest $request ): bool {
 		if ( $request->getRawVal( 'search', '' ) === '' ) {
 			return true;
 		}
@@ -135,19 +145,16 @@ class Hooks {
 	/**
 	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/SpecialSearchResultsPrepend
 	 *
-	 * @param \SpecialSearch $specialSearch
-	 * @param \OutputPage $output
+	 * @param SpecialSearch $specialSearch
+	 * @param OutputPage $output
 	 * @param string $term
 	 */
-	public static function onSpecialSearchResultsPrepend(
-		\SpecialSearch $specialSearch,
-		\OutputPage $output,
-		$term ) {
+	public function onSpecialSearchResultsPrepend( $specialSearch, $output, $term ) {
 		$output->addHTML(
-			\Html::rawElement(
+			Html::rawElement(
 				'div',
 				[ 'class' => 'mw-search-spinner' ],
-				\Html::element( 'div', [ 'class' => 'mw-search-spinner-bounce' ] )
+				Html::element( 'div', [ 'class' => 'mw-search-spinner-bounce' ] )
 			)
 		);
 	}
@@ -156,7 +163,7 @@ class Hooks {
 	 * @param User $user
 	 * @param array[] &$preferences
 	 */
-	public static function onGetPreferences( User $user, array &$preferences ) {
+	public function onGetPreferences( $user, &$preferences ) {
 		$preferences['advancedsearch-disable'] = [
 			'type' => 'toggle',
 			'label-message' => 'advancedsearch-preference-disable',

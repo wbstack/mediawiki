@@ -6,7 +6,8 @@
 			"Ravichandra",
 			"Veeven",
 			"WP MANIKHANTA",
-			"రహ్మానుద్దీన్"
+			"రహ్మానుద్దీన్",
+			"Bvprasadenwiki"
 		]
 	},
 	"tooltip-t-wikibase": "ఈ పేజీకి జత చేసి ఉన్న వికీడేటా పేజీకి లంకె",
@@ -23,13 +24,15 @@
 	"wikibase-editlinkstitle": "భాషాలింకులను మార్చు",
 	"wikibase-linkitem-addlinks": "లంకెలను చేర్చండి",
 	"wikibase-linkitem-alreadylinked": "మీరు లింకు చెయ్యదలచిన పేజీ ఈసరికే కేంద్రీయ ఖజానా లోని ఒక [$1 అంశానికి] జోడించి ఉంది. అది ఈ సైటులోని [[$2]] కు లింకై ఉంది. అంశాలను ఒక్క పేజీకి మాత్రమే జోడించగలరు. వేరే పేజీని ఎంచుకుని లింకు చెయ్యండి.",
-	"wikibase-linkitem-title": "ఈ పేజీకి లంకె వెయ్యండి",
+	"wikibase-linkitem-title": "ఈ పేజీకి లింకు ఇవ్వండి",
+	"wikibase-linkitem-linkpage": "పేజీకి లింకు కలుపు",
+	"wikibase-linkitem-selectlink": "ఈ పేజీకి లింకు చెయ్యాలనుకుంటున్న సైటును, పేజీనీ ఎంచుకోండి.",
 	"wikibase-linkitem-input-site": "భాష:",
 	"wikibase-linkitem-input-page": "పేజీ:",
-	"wikibase-linkitem-confirmitem-text": "మీరు లింకు చెయ్యదలచిన పేజీ ఈసరికే [$1 కేంద్రీయ ఖజానా లోని ఒక అంశానికి] జోడించి ఉంది. మీరు లింకు చెయ్యదలచిన{{PLURAL:$2|ది|వి}} కింద చూపించిన {{PLURAL:$2|పేజీ}}{{PLURAL:$2|యే|లే}} నని నిర్ధారించండి.",
+	"wikibase-linkitem-confirmitem-text": "మీరు లింకు చెయ్యదలచిన పేజీకి ఈసరికే [$1 కేంద్రీయ ఖజానా లోని ఒక అంశానికీ] సంబంధం ఉంది. మీరు లింకు చెయ్యదలచిన{{PLURAL:$2|ది|వి}} కింద చూపించిన {{PLURAL:$2|పేజీ}}{{PLURAL:$2|యే|లే}}నని నిర్ధారించండి.",
 	"wikibase-linkitem-confirmitem-button": "నిర్థారించండి",
 	"wikibase-linkitem-success-link": "పేజీలను లింకు చేసాం. లింకులతో కూడిన ఈ అంశాన్ని మీరు మా [$1 కేంద్రీయ డేటా ఖజానా]లో చూడవచ్చు.",
-	"wikibase-rc-hide-wikidata": "{{WBREPONAME}} $1",
+	"wikibase-rc-hide-wikidata": "{{WBREPONAME}} ను $1",
 	"wikibase-rc-hide-wikidata-hide": "దాచు",
 	"wikibase-rc-hide-wikidata-show": "చూపించు",
 	"wikibase-rc-show-wikidata-pref": "{{WBREPONAME}} మార్పులను ఇటీవలి మార్పులలో చూపించు",
@@ -42,6 +45,9 @@
 	"pageswithbadges": "బ్యాడ్జీలు కలిగిన పేజీలు",
 	"pageswithbadges-summary": "ఈ పేజీ, బ్యాడ్జీలు కలిగిన పేజీల జాబితాను చూపిస్తుంది (ఉదాహరణకు మంచి వ్యాసం, విశేష వ్యాసం). పేజీ ఐడీ ల అవరోహణ క్రమంలో ఈ జాబితా ఉంటుంది. దీనివలన, సరికొత్త పేజీలు జాబితాలో పైన ఉంటాయి.",
 	"wikibase-pageswithbadges-invalid-id": "$1 అనేది సరైన అంశం ID కాదు",
+	"wikibase-pageswithbadges-legend": "ఎంచుకున్న బ్యాడ్జీ ఉన్న పేజీల జాబితా",
+	"wikibase-pageswithbadges-submit": "పేజీలను చూపించు",
+	"wikibase-entityusage-submit": "పేజీలను చూపించు",
 	"wikibase-pageinfo-entity-id": "{{WBREPONAME}} అంశం ID",
 	"wikibase-pageinfo-entity-id-none": "ఏమీలేదు",
 	"wikibase-otherprojects": "ఇతర ప్రాజెక్టులలో",
@@ -52,5 +58,6 @@
 	"notification-bundle-header-page-connection": "<strong>$3</strong> తో పాటు {{PLURAL:$4|మరొక పేజీ|మరో $4 ఇతర పేజీలు|100=99+ ఇతర పేజీలు}} {{WBREPONAME}} ఐటములకు {{GENDER:$2|కనెక్టయ్యాయి}}.",
 	"notification-subject-page-connection": "{{SITENAME}} లో మీరు {{GENDER:$3|సృష్టించిన}} ఒక పేజీని ఒక {{WBREPONAME}} ఆంశానికి {{GENDER:$2|జోడించాం}}",
 	"connected-redirect-category": "{{WBREPONAME}} అంశానికి జోడించిన దారిమార్పులు",
-	"connected-redirect-category-desc": "{{WBREPONAME}} అంశానికి జోడించిన దారిమార్పు పేజీలు ఈ వర్గంలో ఉంటాయి."
+	"connected-redirect-category-desc": "{{WBREPONAME}} అంశానికి జోడించిన దారిమార్పు పేజీలు ఈ వర్గంలో ఉంటాయి.",
+	"wikibase-client-data-bridge-anonymous-edit-warning-message": "<strong>హెచ్చరిక:</strong> మీరు లాగినవలేదు. మీరు ఏమైనా దిద్దుబాట్లు చేస్తే మీ ఐపీ చిరునామా బహిరంగంగా కనిపిస్తుంది. మీరు <strong>లాగిన్ ఐనా</strong> లేక <strong>ఖాతా సృష్టించుకున్నా</strong> మీ మార్పులు మీ పేరుతో ఉండటమే కాకుండా, మరెన్నో సదుపాయాలుంటాయి."
 }

@@ -2,11 +2,30 @@
 	"@metadata": {
 		"authors": [
 			"Dbc334",
-			"Janezdrilc"
+			"Janezdrilc",
+			"Eleassar"
 		]
 	},
-	"wikibasecirrus-entitieswithoutlabel-label-language": "Koda jezika:",
+	"wikibasecirrus-desc": "Razširitev WikiBase za uporabo funkcionalnosti CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "Ključna beseda $1 vsebuje neznano oznako jezika: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "Ključna beseda $1 je vrnila preveč oznak jezikov. Iskanje $2 med $3 {{PLURAL:$3|vrnjenim jezikom|vrnjenima jezikoma|vrnjenimi jeziki}}.",
+	"wikibasecirrus-inlabel-no-query-provided": "Ključna beseda »inlabel« je vrnila prazen iskalni niz",
+	"wikibasecirrus-rescore-profile-prefix": "Privzeti profil Rescore za iskanje dokončanja",
+	"wikibasecirrus-rescore-profile-prefix-boost": "Profil Rescore za iskanje dokončanja z izboljšanjem izjave",
+	"wikibasecirrus-rescore-profile-fulltext": "Privzeti profil Rescore za iskanje po vsem besedilu",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "Profil Rescore za iskanje po vsem besedilu s točkovanjem fraz",
+	"wikibasecirrus-search-bad-entity-type": "Neveljavna vrsta entitete: $1",
+	"wikibasecirrus-search-bad-profile-name": "Neveljavno iskalno ime profila: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Ključna beseda »haswbstatement« ne vsebuje nobene veljavne izjave",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Ključna beseda »haslicense« ne vsebuje nobenega veljavnega argumenta",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Ključna beseda »wbstatementquantity« ne vsebuje veljavnih izjav",
+	"special-entitieswithoutdescription": "Entitete brez opisa",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Pridobi seznam entitet brez opisa",
+	"special-entitieswithoutlabel": "Entitete brez oznake",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Pridobi seznam entitet brez oznake",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Oznaka jezika:",
 	"wikibasecirrus-entitieswithoutlabel-label-type": "Vrsta:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Poišči",
-	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" ni veljavna koda jezika."
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "»$1« ni veljavna oznaka jezika.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "»$1« ni veljavna vrsta entitete."
 }

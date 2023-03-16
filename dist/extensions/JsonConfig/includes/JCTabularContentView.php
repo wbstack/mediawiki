@@ -4,9 +4,9 @@ namespace JsonConfig;
 
 use Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\PageReference;
 use ParserOptions;
 use ParserOutput;
-use Title;
 
 /**
  * This class is used in case when there is no custom view defined for JCContent object
@@ -19,7 +19,7 @@ class JCTabularContentView extends JCContentView {
 	 * Called from an override of AbstractContent::fillParserOutput()
 	 *
 	 * @param JCContent|JCTabularContent $content
-	 * @param Title $pageTitle Context title for parsing
+	 * @param PageReference $page Context title for parsing
 	 * @param int|null $revId Revision ID (for {{REVISIONID}})
 	 * @param ParserOptions $options Parser options
 	 * @param bool $generateHtml Whether or not to generate HTML
@@ -27,7 +27,7 @@ class JCTabularContentView extends JCContentView {
 	 * @return string
 	 */
 	public function valueToHtml(
-		JCContent $content, Title $pageTitle, $revId,
+		JCContent $content, PageReference $page, $revId,
 		ParserOptions $options, $generateHtml, ParserOutput &$output
 	) {
 		// Use user's language, and split parser cache.  This should not have a big
@@ -152,7 +152,7 @@ class JCTabularContentView extends JCContentView {
 				] ) ) . Html::rawElement( 'tbody', [], implode( "\n", $rows ) ) ) .
 			$content->renderSources(
 				MediaWikiServices::getInstance()->getParser()->getFreshParser(),
-				$pageTitle,
+				$page,
 				$revId,
 				$options
 			) . $content->renderLicense();

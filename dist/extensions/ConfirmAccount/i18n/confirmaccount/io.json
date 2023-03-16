@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"JSantos",
 			"Joao Xavier",
-			"Malafaya",
-			"JSantos"
+			"Malafaya"
 		]
 	},
 	"confirmaccount-real-q": "Nomo",
@@ -20,5 +20,6 @@
 	"confirmaccount-agent": "Uzero-aganto:",
 	"confirmaccount-submit": "Konfirmez",
 	"confirmaccount-summary": "Kreo di nova pagino por nova uzero.",
+	"confirmaccount-welc": "'''Bonveno a ''{{SITENAME}}''!'''\nNi expektas ke vu povos kontributar multe, e bone.\nPosible vu dezirus lektar la [{{MediaWiki:Helppage}} helpo-pagini].\nItere, esez bonvenanta, e juez!",
 	"confirmaccount-wsum": "Bonveno!"
 }

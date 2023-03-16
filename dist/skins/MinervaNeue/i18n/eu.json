@@ -8,14 +8,15 @@
 			"Sator",
 			"Subi",
 			"Theklan",
-			"පසිඳු කාවින්ද"
+			"පසිඳු කාවින්ද",
+			"Xabier Armendaritz"
 		]
 	},
 	"minerva-last-modified-date": "Azken aldaketa $1(e)an, $2(e)tan",
 	"minerva-talk-add-topic": "Eztabaida gehitu",
 	"mobile-frontend-cookies-required": "Cookie-ak behar dira ikuspegi moduak aldatzeko. Gaitu itzazu eta saiatu berriro.",
 	"mobile-frontend-editor-edit": "Aldatu",
-	"minerva-download": "Jaitsi PDF gisa",
+	"minerva-download": "Deskargatu PDF formatuan",
 	"mobile-frontend-editor-redlink-create": "Orrialdea sortu",
 	"mobile-frontend-editor-redlink-explain": "Orri hau oraindik ez da sortu.",
 	"mobile-frontend-editor-redlink-leave": "Ez, eskerrik asko.",
@@ -23,7 +24,6 @@
 	"mobile-frontend-home-button": "Azala",
 	"mobile-frontend-language-article-heading": "Hizkuntza",
 	"mobile-frontend-languages-not-available": "Orrialde hau ez dago eskuragarri beste hizkuntzetan.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Ongi etorri}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Ireki menu nagusia",
 	"mobile-frontend-main-menu-contributions": "Ekarpenak",
 	"mobile-frontend-main-menu-login": "Hasi saioa",

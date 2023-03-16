@@ -2,12 +2,21 @@
 	"@metadata": {
 		"authors": [
 			"Jon Harald Søby (WMNO)",
-			"Yupik"
+			"Yupik",
+			"Trondtr",
+			"Kimberli Mäkäräinen (WMNO)"
 		]
 	},
+	"wikibase-editlinks": "Rievdat liŋkkaid",
+	"wikibase-linkitem-addlinks": "Lasit liŋkkaid",
+	"wikibase-linkitem-title": "Lasit liŋkka siidui",
+	"wikibase-linkitem-linkpage": "Lasit liŋkka siidui",
 	"wikibase-linkitem-input-site": "Giella:",
+	"wikibase-linkitem-input-page": "Siidu:",
 	"wikibase-rc-hide-wikidata-hide": "Čiega",
 	"wikibase-rc-hide-wikidata-show": "Čájet",
+	"wikibase-pageinfo-entity-usage-L-with-modifier": "Namma: $1",
 	"wikibase-otherprojects": "Eará prošeavttaide",
-	"wikibase-sitelinks-sitename-columnheading": "Giella"
+	"wikibase-sitelinks-sitename-columnheading": "Giella",
+	"wikibase-sitelinks-link-columnheading": "Liŋkejuvvon siidu"
 }

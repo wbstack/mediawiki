@@ -6,12 +6,12 @@
 			"Saosukham"
 		]
 	},
-	"wikibase-edit": "မူၼ်ႉမႄး",
+	"wikibase-edit": "မႄးထတ်း",
 	"wikibase-add": "ထႅမ်သႂ်ႇ",
 	"wikibase-label-empty": "ပႆႇလႆႈမၵ်းမၼ်ႈဝႆႉၸိုဝ်ႈ",
 	"wikibase-description-empty": "ၶေႃႈသပ်းလႅင်း ပႆႇပႃႈမၵ်းမၼ်ႈဝႆႉ",
 	"wikibase-statementsection-statements": "ၶေႃႈၸၼ်ဢွၵ်ႇ",
-	"wikibase-sitelinks-special": "sites တၢင်ႇဢၼ်",
+	"wikibase-sitelinks-special": "ဝႅပ်ႉသၢႆႉ တၢင်ႇဢၼ်",
 	"wikibase-statementview-rank-normal": "ၸၼ်ႉပူင်ႇၵၢင်",
 	"wikibase-statementview-references-counter": "$1 {{PLURAL:$1|reference|ငဝ်ႈၵုမ်းပိူင်}}",
 	"wikibase-gotolinkedpage-error-item-not-found": "ဢၼ်ၼႆႉ ဢမ်ႇႁၼ်"

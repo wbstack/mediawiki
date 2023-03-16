@@ -28,7 +28,6 @@ use MediaWiki\Minerva\Menu\Entries\SingleMenuEntry;
 use MediaWiki\Minerva\Menu\Group;
 use MediaWiki\Minerva\Permissions\IMinervaPagePermissions;
 use MessageLocalizer;
-use MinervaUI;
 use MWException;
 use Title;
 
@@ -84,24 +83,35 @@ class UserNamespaceOverflowBuilder implements IOverflowBuilder {
 				$this->title,
 				$this->languagesHelper->doesTitleHasLanguagesOrVariants( $this->title ),
 				$this->messageLocalizer,
-				MinervaUI::iconClass( 'language-base20', 'before',
-					'minerva-page-actions-language-switcher', 'wikimedia' ),
+				false,
+				// no additional classes
+				'',
 				'minerva-page-actions-language-switcher'
 			) );
 		}
+
+		$permissionChangeAction = array_key_exists( 'unprotect', $actions ) ?
+			$this->buildFromToolbox( 'unprotect', 'unLock', 'unprotect', $actions ) :
+			$this->buildFromToolbox( 'protect', 'lock', 'protect', $actions );
 
 		$possibleEntries = array_filter( [
 			$this->buildFromToolbox( 'user-groups', 'userGroup', 'userrights', $toolbox ),
 			$this->buildFromToolbox( 'logs', 'listBullet', 'log', $toolbox ),
 			$this->buildFromToolbox( 'info', 'infoFilled', 'info', $toolbox ),
 			$this->buildFromToolbox( 'permalink', 'link', 'permalink', $toolbox ),
-			$this->buildFromToolbox( 'backlinks', 'articleRedirect', 'whatlinkshere', $toolbox )
+			$this->buildFromToolbox( 'backlinks', 'articleRedirect', 'whatlinkshere', $toolbox ),
+			$this->permissions->isAllowed( IMinervaPagePermissions::MOVE ) ?
+				$this->buildFromToolbox( 'move', 'move', 'move', $actions ) : null,
+			$this->permissions->isAllowed( IMinervaPagePermissions::DELETE ) ?
+				$this->buildFromToolbox( 'delete', 'trash', 'delete', $actions ) : null,
+			$this->permissions->isAllowed( IMinervaPagePermissions::PROTECT ) ?
+				$permissionChangeAction : null
 		] );
 
 		foreach ( $possibleEntries as $menuEntry ) {
 			$group->insertEntry( $menuEntry );
 		}
-		Hooks::run( 'MobileMenu', [ 'pageactions.overflow', &$group ] );
+		Hooks::run( 'MobileMenu', [ 'pageactions.overflow', &$group ], '1.38' );
 		return $group;
 	}
 

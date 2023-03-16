@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Nirajan pant",
-			"पर्वत सुबेदी"
+			"पर्वत सुबेदी",
+			"बडा काजी"
 		]
 	},
 	"twocolconflict-beta-feature-message": "अनुच्छेद-आधारित सम्पादन द्वन्द्व",
+	"twocolconflict-beta-feature-description": "थप उन्नत अनुच्छेद-आधारित दृश्य प्रयोग गरेर सम्पादन विवाद दृश्य देखाउनुहोस्।",
 	"twocolconflict-split-edit-tooltip": "यो पाठ सम्पादन गर्नका लागि यहाँ थिच्नुहाेस्",
 	"twocolconflict-split-save-tooltip": "यस पाठमा तपाईको परिवर्तनहरू लागू गर्नुहोस्",
 	"twocolconflict-split-expand-tooltip": "अपरिवर्तित पाठ विस्तार गर्नुहोस्",
-	"twocolconflict-split-help-tooltip": "सहायता देखाउने"
+	"twocolconflict-split-help-tooltip": "सहायता देखाउनुहोस्"
 }

@@ -10,6 +10,7 @@
 			"Liuxinyu970226",
 			"Mark85296341",
 			"Mywood",
+			"Tranve",
 			"Wilsonmess",
 			"Xiaomingyan",
 			"Xiplus",
@@ -17,7 +18,8 @@
 			"乌拉跨氪",
 			"予弦",
 			"神樂坂秀吉",
-			"Tranve"
+			"Diskdance",
+			"Lakejason0"
 		]
 	},
 	"confirmaccounts": "确认帐户请求",
@@ -82,7 +84,7 @@
 	"confirmaccount-ip": "IP地址：",
 	"confirmaccount-xff": "X-Forwarded-For:",
 	"confirmaccount-agent": "User-Agent:",
-	"confirmaccount-legend": "批准/拒绝这个帐号",
+	"confirmaccount-legend": "批准/拒绝这个账号",
 	"confirmaccount-submit": "确认",
 	"confirmaccount-needreason": "您必须在下方的评论栏阐述您的理由。",
 	"confirmaccount-canthold": "该请求已挂起或被删除。",

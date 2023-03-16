@@ -247,13 +247,6 @@ class SpecialBlock extends FormSpecialPage {
 			'section' => 'target',
 		];
 
-		$a['Editing'] = [
-			'type' => 'check',
-			'label-message' => 'block-prevent-edit',
-			'default' => true,
-			'section' => 'actions',
-		];
-
 		$a['EditingRestriction'] = [
 			'type' => 'radio',
 			'cssclass' => 'mw-block-editing-restriction',
@@ -262,7 +255,7 @@ class SpecialBlock extends FormSpecialPage {
 				$this->msg( 'ipb-sitewide' )->escaped() .
 					new \OOUI\LabelWidget( [
 						'classes' => [ 'oo-ui-inline-help' ],
-						'label' => $this->msg( 'ipb-sitewide-help' )->text(),
+						'label' => new \OOUI\HtmlSnippet( $this->msg( 'ipb-sitewide-help' )->parse() ),
 					] ) => 'sitewide',
 				$this->msg( 'ipb-partial' )->escaped() .
 					new \OOUI\LabelWidget( [
@@ -278,7 +271,8 @@ class SpecialBlock extends FormSpecialPage {
 			'label' => $this->msg( 'ipb-pages-label' )->text(),
 			'exists' => true,
 			'max' => 10,
-			'cssclass' => 'mw-block-restriction',
+			'cssclass' => 'mw-block-partial-restriction',
+			'default' => '',
 			'showMissing' => false,
 			'excludeDynamicNamespaces' => true,
 			'input' => [
@@ -291,18 +285,35 @@ class SpecialBlock extends FormSpecialPage {
 			'type' => 'namespacesmultiselect',
 			'label' => $this->msg( 'ipb-namespaces-label' )->text(),
 			'exists' => true,
-			'cssclass' => 'mw-block-restriction',
+			'cssclass' => 'mw-block-partial-restriction',
+			'default' => '',
 			'input' => [
 				'autocomplete' => false
 			],
 			'section' => 'actions',
 		];
 
+		if ( $conf->get( 'EnablePartialActionBlocks' ) ) {
+			$blockActions = $this->blockActionInfo->getAllBlockActions();
+			$a['ActionRestrictions'] = [
+				'type' => 'multiselect',
+				'cssclass' => 'mw-block-partial-restriction mw-block-action-restriction',
+				'options-messages' => array_combine(
+					array_map( static function ( $action ) {
+						return "ipb-action-$action";
+					}, array_keys( $blockActions ) ),
+					$blockActions
+				),
+				'section' => 'actions',
+			];
+		}
+
 		$a['CreateAccount'] = [
 			'type' => 'check',
+			'cssclass' => 'mw-block-restriction',
 			'label-message' => 'ipbcreateaccount',
 			'default' => true,
-			'section' => 'actions',
+			'section' => 'details',
 		];
 
 		if ( $this->blockPermissionCheckerFactory
@@ -311,32 +322,19 @@ class SpecialBlock extends FormSpecialPage {
 		) {
 			$a['DisableEmail'] = [
 				'type' => 'check',
+				'cssclass' => 'mw-block-restriction',
 				'label-message' => 'ipbemailban',
-				'section' => 'actions',
+				'section' => 'details',
 			];
 		}
 
 		if ( $blockAllowsUTEdit ) {
 			$a['DisableUTEdit'] = [
 				'type' => 'check',
+				'cssclass' => 'mw-block-restriction',
 				'label-message' => 'ipb-disableusertalk',
 				'default' => false,
-				'section' => 'actions',
-			];
-		}
-
-		if ( $conf->get( 'EnablePartialActionBlocks' ) ) {
-			$blockActions = $this->blockActionInfo->getAllBlockActions();
-			$a['ActionRestrictions'] = [
-				'type' => 'multiselect',
-				'cssclass' => 'mw-block-action-restriction',
-				'options-messages' => array_combine(
-					array_map( static function ( $action ) {
-						return "ipb-action-$action";
-					}, array_keys( $blockActions ) ),
-					$blockActions
-				),
-				'section' => 'actions',
+				'section' => 'details',
 			];
 		}
 
@@ -369,7 +367,10 @@ class SpecialBlock extends FormSpecialPage {
 
 		$a['AutoBlock'] = [
 			'type' => 'check',
-			'label-message' => 'ipbenableautoblock',
+			'label-message' => [
+				'ipbenableautoblock',
+				Message::durationParam( $conf->get( 'AutoblockExpiry' ) )
+			],
 			'default' => true,
 			'section' => 'options',
 		];
@@ -512,13 +513,6 @@ class SpecialBlock extends FormSpecialPage {
 				$fields['PageRestrictions']['default'] = implode( "\n", $pageRestrictions );
 				sort( $namespaceRestrictions );
 				$fields['NamespaceRestrictions']['default'] = implode( "\n", $namespaceRestrictions );
-
-				if (
-					empty( $pageRestrictions ) &&
-					empty( $namespaceRestrictions )
-				) {
-					$fields['Editing']['default'] = false;
-				}
 
 				if ( $this->getConfig()->get( 'EnablePartialActionBlocks' ) ) {
 					$actionRestrictions = [];
@@ -712,15 +706,18 @@ class SpecialBlock extends FormSpecialPage {
 	/**
 	 * Get a user page target for things like logs.
 	 * This handles account and IP range targets.
-	 * @param UserIdentity|string $target
+	 * @param UserIdentity|string|null $target
 	 * @return PageReference|null
 	 */
 	protected static function getTargetUserTitle( $target ): ?PageReference {
 		if ( $target instanceof UserIdentity ) {
 			return PageReferenceValue::localReference( NS_USER, $target->getName() );
-		} elseif ( IPUtils::isIPAddress( $target ) ) {
+		}
+
+		if ( is_string( $target ) && IPUtils::isIPAddress( $target ) ) {
 			return PageReferenceValue::localReference( NS_USER, $target );
 		}
+
 		return null;
 	}
 
@@ -863,7 +860,7 @@ class SpecialBlock extends FormSpecialPage {
 			}
 			if ( isset( $data['NamespaceRestrictions'] ) && $data['NamespaceRestrictions'] !== '' ) {
 				$namespaceRestrictions = array_map( static function ( $id ) {
-					return new NamespaceRestriction( 0, $id );
+					return new NamespaceRestriction( 0, (int)$id );
 				}, explode( "\n", $data['NamespaceRestrictions'] ) );
 			}
 			if (
@@ -963,7 +960,7 @@ class SpecialBlock extends FormSpecialPage {
 		$a = XmlSelect::parseOptionsMessage( $msg );
 
 		if ( $a && $includeOther ) {
-			// if options exist, add other to the end instead of the begining (which
+			// if options exist, add other to the end instead of the beginning (which
 			// is what happens by default).
 			$a[ wfMessage( 'ipbother' )->text() ] = 'other';
 		}
@@ -1027,13 +1024,6 @@ class SpecialBlock extends FormSpecialPage {
 	 * @return bool|string|array|Status As documented for HTMLForm::trySubmit.
 	 */
 	public function onSubmit( array $data, HTMLForm $form = null ) {
-		// If "Editing" checkbox is unchecked, the block must be a partial block affecting
-		// actions other than editing, and there must be no restrictions.
-		if ( isset( $data['Editing'] ) && $data['Editing'] === false ) {
-			$data['EditingRestriction'] = 'partial';
-			$data['PageRestrictions'] = '';
-			$data['NamespaceRestrictions'] = '';
-		}
 		return self::processFormInternal(
 			$data,
 			$this->getAuthority(),

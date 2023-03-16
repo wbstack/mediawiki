@@ -1,12 +1,12 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Repository;
+namespace MediaWiki\Extension\OAuth\Repository;
 
 use League\OAuth2\Server\Entities\ClientEntityInterface;
 use League\OAuth2\Server\Repositories\ClaimRepositoryInterface;
 use LogicException;
-use MediaWiki\Extensions\OAuth\Entity\MWClientEntityInterface;
-use MediaWiki\Extensions\OAuth\HookRunner;
+use MediaWiki\Extension\OAuth\Entity\MWClientEntityInterface;
+use MediaWiki\Extension\OAuth\HookRunner;
 use MediaWiki\MediaWikiServices;
 
 class ClaimStore implements ClaimRepositoryInterface {

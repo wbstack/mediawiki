@@ -10,14 +10,12 @@ var HelpButtonView = {
 	 * @return {jQuery} the help button object
 	 */
 	render: function () {
-		var helpButton, helpPopup;
-
-		helpButton = new OO.ui.ButtonWidget( {
+		var helpButton = new OO.ui.ButtonWidget( {
 			icon: 'helpNotice',
 			framed: false,
 			classes: [ 'mw-revslider-show-help' ]
 		} );
-		helpPopup = new OO.ui.PopupWidget( {
+		var helpPopup = new OO.ui.PopupWidget( {
 			$content: $( '<p>' ).text( mw.msg( 'revisionslider-show-help-tooltip' ) ),
 			$floatableContainer: helpButton.$element,
 			width: 200,
@@ -44,7 +42,7 @@ var HelpButtonView = {
 	},
 
 	showDialog: function () {
-		require( 'ext.RevisionSlider.HelpDialog' ).HelpDialog.show();
+		require( './ext.RevisionSlider.HelpDialog.js' ).show();
 	}
 };
 

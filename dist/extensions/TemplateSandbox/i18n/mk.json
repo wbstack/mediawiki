@@ -37,5 +37,5 @@
 	"templatesandbox-editform-invalid-template": "Укажаното име на предлошката е неважечко.",
 	"templatesandbox-editform-invalid-title": "Наведениот наслов за преглед е неважечки.",
 	"templatesandbox-editform-title-not-exists": "Наведениот наслов за преглед не постои.",
-	"templatesandbox-failed-replace-section": "Не можев да го заменам поднасловот на постоечката страница."
+	"templatesandbox-failed-replace-section": "Не можев да го заменам одделот на постоечката страница."
 }

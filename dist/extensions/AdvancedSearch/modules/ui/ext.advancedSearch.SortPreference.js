@@ -21,8 +21,8 @@
 			// The following messages are used here:
 			// * advancedsearch-sort-relevance
 			// * advancedsearch-sort-*
-			var msg = mw.message( 'advancedsearch-sort-' + selected.replace( /_/g, '-' ) );
-			options.push( { data: selected, label: msg.exists() ? msg.text() : selected } );
+			var selectedMsg = mw.message( 'advancedsearch-sort-' + selected.replace( /_/g, '-' ) );
+			options.push( { data: selected, label: selectedMsg.exists() ? selectedMsg.text() : selected } );
 		}
 		return options;
 	};

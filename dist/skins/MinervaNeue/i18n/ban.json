@@ -1,12 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Chinamoonroll"
+			"Chinamoonroll",
+			"Joseagush"
 		]
 	},
 	"minerva-last-modified-date": "Kaping untat kauhin ring $1, galah $2",
 	"minerva-watchlist-cta": "Lacak kaca miwah sinamian pauahan ipun.",
-	"minerva-talk-add-topic": "Weweh pabligbagan",
+	"minerva-talk-add-topic": "Weweh topik",
 	"mobile-frontend-cookies-required": "Kuki karerehin antuk ngingsirang tampilan. Durus uripang kuki miwah coba malih.",
 	"mobile-frontend-editor-edit": "Uah",
 	"minerva-download": "Unduh PDF",
@@ -17,7 +18,6 @@
 	"mobile-frontend-home-button": "Umah",
 	"mobile-frontend-language-article-heading": "Basa",
 	"mobile-frontend-languages-not-available": "Kaca puniki nénten kasedia ring basa tiosan.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Rahajeng rauh}} $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Buka menu utama",
 	"mobile-frontend-main-menu-contributions": "Pituut",
 	"mobile-frontend-main-menu-login": "Manjing log",

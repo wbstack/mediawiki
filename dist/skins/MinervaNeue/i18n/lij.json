@@ -2,13 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Giromin Cangiaxo",
-			"S4b1nuz E.656",
-			"N. Longo"
+			"N. Longo",
+			"S4b1nuz E.656"
 		]
 	},
 	"minerva-last-modified-date": "Ùrtima modìfica a-i $1, a-e ôe $2",
 	"minerva-watchlist-cta": "Têgni tràccia de 'sta pàgina chi e de tùtte e sò modìfiche.",
-	"minerva-talk-add-topic": "Azónzi discusción",
+	"minerva-talk-add-topic": "Azónzi argoménto",
 	"mobile-frontend-cookies-required": "Pe cangiâ a modalitæ de vizoalizaçión ghe vêu i beschéutti. Pe piâxéi abìlitali e prêuva tórna.",
 	"mobile-frontend-editor-edit": "Modìfica",
 	"minerva-download": "Scàrega PDF",
@@ -19,7 +19,6 @@
 	"mobile-frontend-home-button": "Pàgina prinçipâ",
 	"mobile-frontend-language-article-heading": "Léngoa",
 	"mobile-frontend-languages-not-available": "'Sta pàgina chi a no l'é disponìbile in âtre léngoe.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Benvegnûo|Benvegnûa|Benvegnûo/a}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Arvi o menù prinçipâ",
 	"mobile-frontend-main-menu-contributions": "Contribûti",
 	"mobile-frontend-main-menu-login": "Intra",

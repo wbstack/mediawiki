@@ -4,7 +4,8 @@
 			"Les Meloures",
 			"Macofe",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"apihelp-main-param-assertuser": "Iwwerpréifen ob den aktuelle Benotzer de Benotzer mat deem Numm ass.",
@@ -23,6 +24,7 @@
 	"apihelp-compare-param-torev": "Zweet Versioun fir ze vergläichen.",
 	"apihelp-createaccount-summary": "En neie Benotzerkont uleeën.",
 	"apihelp-delete-summary": "Eng Säit läschen.",
+	"apihelp-delete-param-deletetalk": "D'Diskussiounssäit läsche wann et se gëtt.",
 	"apihelp-delete-param-watch": "D'Säit op dem aktuelle Benotzer seng Iwwerwaachungslëscht derbäisetzen.",
 	"apihelp-delete-param-unwatch": "D'Säit vun der Iwwerwaachungslëscht vum aktuelle Benotzer erofhuelen.",
 	"apihelp-delete-example-simple": "D'<kbd>Main Page</kbd> läschen.",
@@ -43,7 +45,7 @@
 	"apihelp-feedcontributions-param-year": "Vum Joer (a virdrun).",
 	"apihelp-feedcontributions-param-month": "Vum Mount (a virdrun).",
 	"apihelp-feedcontributions-param-deletedonly": "Nëmme geläscht Kontributioune weisen.",
-	"apihelp-feedcontributions-param-toponly": "Nëmmen Ännerunge weisen déi déi lescht Versioun sinn.",
+	"apihelp-feedcontributions-param-toponly": "Nëmmen Ännerunge weisen, déi déi lescht Versioun sinn.",
 	"apihelp-feedcontributions-param-hideminor": "Kleng Ännerunge verstoppen.",
 	"apihelp-feedrecentchanges-param-days": "Deeg, op déi d'Resultater limitéiert gi sollen",
 	"apihelp-feedrecentchanges-param-hideminor": "Kleng Ännerunge verstoppen.",
@@ -197,8 +199,10 @@
 	"api-help-license": "Lizenz: [[$1|$2]]",
 	"api-help-license-noname": "LiZenz: [[$1|Kuckt de Link]]",
 	"api-help-license-unknown": "Lizenz: <span class=\"apihelp-unknown\">onbekannt</span>",
-	"api-help-param-deprecated": "Vereelst.",
+	"api-help-param-deprecated": "Vereelzt.",
+	"api-help-param-deprecated-label": "vereelzt",
 	"api-help-param-internal": "Intern",
+	"api-help-param-internal-label": "intern",
 	"api-help-datatypes-header": "Datentypen",
 	"api-help-examples": "{{PLURAL:$1|Beispill|Beispiler}}:",
 	"api-help-permissions": "{{PLURAL:$1|Autorisatioun|Autorisatiounen}}:",

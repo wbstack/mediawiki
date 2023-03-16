@@ -155,17 +155,17 @@ class ScribuntoHooks {
 					wfMessage( 'scribunto-common-no-details' )->inContentLanguage()->text()
 				);
 			}
-			$out = $parser->getOutput();
-			$errors = $out->getExtensionData( 'ScribuntoErrors' );
+			$parserOutput = $parser->getOutput();
+			$errors = $parserOutput->getExtensionData( 'ScribuntoErrors' );
 			if ( $errors === null ) {
 				// On first hook use, set up error array and output
 				$errors = [];
 				$parser->addTrackingCategory( 'scribunto-common-error-category' );
-				$out->addModules( 'ext.scribunto.errors' );
+				$parserOutput->addModules( [ 'ext.scribunto.errors' ] );
 			}
 			$errors[] = $html;
-			$out->setExtensionData( 'ScribuntoErrors', $errors );
-			$out->addJsConfigVars( 'ScribuntoErrors', $errors );
+			$parserOutput->setExtensionData( 'ScribuntoErrors', $errors );
+			$parserOutput->addJsConfigVars( 'ScribuntoErrors', $errors );
 			$id = 'mw-scribunto-error-' . ( count( $errors ) - 1 );
 			$parserError = htmlspecialchars( $e->getMessage() );
 
@@ -230,7 +230,7 @@ class ScribuntoHooks {
 			$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
 		}
 
-		$metricKey = sprintf( 'scribunto.traces.%s__%s__%s', wfWikiId(), $moduleName, $functionName );
+		$metricKey = sprintf( 'scribunto.traces.%s__%s__%s', WikiMap::getCurrentWikiId(), $moduleName, $functionName );
 		$stats->timing( $metricKey, $timing );
 	}
 
@@ -276,13 +276,13 @@ class ScribuntoHooks {
 	 * Adds report of number of evaluations by the single wikitext page.
 	 *
 	 * @param Parser $parser
-	 * @param ParserOutput $output
+	 * @param ParserOutput $parserOutput
 	 * @return bool
 	 */
-	public static function reportLimitData( Parser $parser, ParserOutput $output ) {
+	public static function reportLimitData( Parser $parser, ParserOutput $parserOutput ) {
 		if ( Scribunto::isParserEnginePresent( $parser ) ) {
 			$engine = Scribunto::getParserEngine( $parser );
-			$engine->reportLimitData( $output );
+			$engine->reportLimitData( $parserOutput );
 		}
 		return true;
 	}
@@ -362,17 +362,20 @@ class ScribuntoHooks {
 		if ( !$content instanceof ScribuntoContent ) {
 			return true;
 		}
+		$contentHandlerFactory = MediaWikiServices::getInstance()->getContentHandlerFactory();
+		$contentHandler = $contentHandlerFactory->getContentHandler( $content->getModel() );
 
-		$validateStatus = $content->validate( $title );
+		'@phan-var ScribuntoContentHandler $contentHandler';
+		$validateStatus = $contentHandler->validate( $content, $title );
 		if ( $validateStatus->isOK() ) {
 			return true;
 		}
 
 		$status->merge( $validateStatus );
 
-		if ( isset( $validateStatus->scribunto_error->params['module'] ) ) {
-			$module = $validateStatus->scribunto_error->params['module'];
-			$line = $validateStatus->scribunto_error->params['line'];
+		if ( isset( $validateStatus->value->params['module'] ) ) {
+			$module = $validateStatus->value->params['module'];
+			$line = $validateStatus->value->params['line'];
 			if ( $module === $title->getPrefixedDBkey() && preg_match( '/^\d+$/', $line ) ) {
 				$out = $context->getOutput();
 				$out->addInlineScript( 'window.location.hash = ' . Xml::encodeJsVar( "#mw-ce-l$line" ) );

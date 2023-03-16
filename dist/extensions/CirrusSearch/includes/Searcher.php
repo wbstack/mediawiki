@@ -38,8 +38,9 @@ use Status;
 use Title;
 use User;
 use WebRequest;
+use WikiMap;
 use Wikimedia\Assert\Assert;
-use Wikimedia\ObjectFactory;
+use Wikimedia\ObjectFactory\ObjectFactory;
 
 /**
  * Performs searches using Elasticsearch.  Note that each instance of this class
@@ -178,7 +179,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		// TODO: Make these params mandatory once WBCS stops extending this class
 		$this->namespacePrefixParser = $namespacePrefixParser;
 		$this->interwikiResolver = $interwikiResolver ?: MediaWikiServices::getInstance()->getService( InterwikiResolver::SERVICE );
-		$this->titleHelper = $titleHelper ?: new TitleHelper( wfWikiID(), $this->interwikiResolver );
+		$this->titleHelper = $titleHelper ?: new TitleHelper( WikiMap::getCurrentWikiId(), $this->interwikiResolver );
 		$this->cirrusSearchHookRunner = $cirrusSearchHookRunner ?: new CirrusSearchHookRunner(
 			MediaWikiServices::getInstance()->getHookContainer() );
 		$this->searchContext = new SearchContext( $this->config, $namespaces, $options, null, null, $this->cirrusSearchHookRunner );

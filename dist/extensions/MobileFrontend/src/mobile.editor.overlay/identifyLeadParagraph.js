@@ -7,8 +7,6 @@
  * @return {Node|null} The lead paragraph
  */
 module.exports = function identifyLeadParagraph( $body ) {
-	var $paragraphs, i, node;
-
 	// Keep in sync with MoveLeadParagraphTransform::isNotEmptyNode()
 	function isNotEmptyNode( node ) {
 		// Ignore VE whitespace characters
@@ -18,19 +16,24 @@ module.exports = function identifyLeadParagraph( $body ) {
 	// Keep in sync with MoveLeadParagraphTransform::isNonLeadParagraph()
 	function isNonLeadParagraph( node ) {
 		node = node.cloneNode( true );
+		var $node = $( node );
+		// The paragraph itself can be an invisible template (T293834)
+		if ( $node.hasClass( 've-ce-focusableNode-invisible' ) ) {
+			return true;
+		}
 		// Ignore non-content nodes, TemplateStyles and coordinates
-		$( node ).find( '.ve-ce-branchNode-inlineSlug, .ve-ce-focusableNode-invisible, style, span#coordinates' ).remove();
+		$node.find( '.ve-ce-branchNode-inlineSlug, .ve-ce-focusableNode-invisible, style, span#coordinates' ).remove();
 		if ( isNotEmptyNode( node ) ) {
 			return false;
 		}
 		return true;
 	}
 
-	$paragraphs = $body.children( 'p' );
-	for ( i = 0; i < $paragraphs.length; i++ ) {
-		node = $paragraphs[ i ];
-		if ( !isNonLeadParagraph( node ) ) {
-			return node;
+	var $paragraphs = $body.children( 'p' );
+	for ( var i = 0; i < $paragraphs.length; i++ ) {
+		var p = $paragraphs[ i ];
+		if ( !isNonLeadParagraph( p ) ) {
+			return p;
 		}
 	}
 	return null;

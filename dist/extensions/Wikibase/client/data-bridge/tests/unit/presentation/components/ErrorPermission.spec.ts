@@ -10,15 +10,13 @@ import {
 } from '@/definitions/data-access/BridgePermissionsRepository';
 import MessageKeys from '@/definitions/MessageKeys';
 import MediaWikiRouter from '@/definitions/MediaWikiRouter';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import Vuex from 'vuex';
+import { config, shallowMount, mount } from '@vue/test-utils';
 import { calledWithHTMLElement } from '../../../util/assertions';
 import { createTestStore } from '../../../util/store';
 
-const localVue = createLocalVue();
-localVue.use( Vuex );
-
 const entityTitle = 'Q42';
+
+config.renderStubDefaultSlot = true;
 
 /**
  * A router that should never be called by a test.
@@ -56,23 +54,24 @@ describe( 'ErrorPermission', () => {
 		};
 		const permissionErrors: MissingPermissionsError[] = [ error ];
 		const wrapper = shallowMount( ErrorPermission, {
-			localVue,
 			propsData: {
 				permissionErrors,
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
 				},
+				plugins: [ store ],
 			},
-			store,
 		} );
 
-		expect( wrapper.find( ErrorPermissionInfo ).props( 'messageHeader' ) )
+		expect( wrapper.findComponent( ErrorPermissionInfo ).props( 'messageHeader' ) )
 			.toBe( MessageKeys.PERMISSIONS_PROTECTED_HEADING );
-		expect( wrapper.find( ErrorPermissionInfo ).props( 'messageBody' ) )
+		expect( wrapper.findComponent( ErrorPermissionInfo ).props( 'messageBody' ) )
 			.toBe( MessageKeys.PERMISSIONS_PROTECTED_BODY );
 	} );
 
@@ -92,6 +91,7 @@ describe( 'ErrorPermission', () => {
 		const errorBlockedOnRepo: BlockReason = {
 			type: PageNotEditable.BLOCKED_ON_REPO_ITEM,
 			info: {
+				blockedBy,
 				blockedById,
 				blockId,
 			} as any,
@@ -99,6 +99,7 @@ describe( 'ErrorPermission', () => {
 		const errorBlockedOnClient: BlockReason = {
 			type: PageNotEditable.BLOCKED_ON_CLIENT_PAGE,
 			info: {
+				blockedBy,
 				blockedById,
 				blockId,
 			} as any,
@@ -109,31 +110,32 @@ describe( 'ErrorPermission', () => {
 			errorBlockedOnClient,
 		];
 		const wrapper = shallowMount( ErrorPermission, {
-			localVue,
 			propsData: {
 				permissionErrors,
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
-				},
-				$repoRouter: {
-					getPageUrl( title: string, _params?: Record<string, unknown> ) {
-						return `https://repo.wiki.example/wiki/${title}`;
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter: {
+						getPageUrl( title: string, _params?: Record<string, unknown> ) {
+							return `https://repo.wiki.example/wiki/${title}`;
+						},
+					},
+					$clientRouter: {
+						getPageUrl( title: string, _params?: Record<string, unknown> ) {
+							return `https://client.wiki.example/wiki/${title}`;
+						},
 					},
 				},
-				$clientRouter: {
-					getPageUrl( title: string, _params?: Record<string, unknown> ) {
-						return `https://client.wiki.example/wiki/${title}`;
-					},
-				},
+				plugins: [ store ],
 			},
-			store,
 		} );
 
-		expect( wrapper.findAll( ErrorPermissionInfo ) ).toHaveLength( permissionErrors.length );
+		expect( wrapper.findAllComponents( ErrorPermissionInfo ) ).toHaveLength( permissionErrors.length );
 	} );
 
 	it( 'interpolates correct message for unknown error', () => {
@@ -149,20 +151,21 @@ describe( 'ErrorPermission', () => {
 		} );
 
 		shallowMount( ErrorPermission, {
-			localVue,
 			propsData: {
 				permissionErrors: [ error ],
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter: unusedRouter( 'repo' ),
+					$clientRouter: unusedRouter( 'client' ),
 				},
-				$repoRouter: unusedRouter( 'repo' ),
-				$clientRouter: unusedRouter( 'client' ),
+				plugins: [ store ],
 			},
-			store,
 		} );
 
 		expect( messageGet ).toHaveBeenNthCalledWith( 2, MessageKeys.PERMISSIONS_ERROR_UNKNOWN_HEADING );
@@ -204,20 +207,21 @@ describe( 'ErrorPermission', () => {
 		} );
 
 		shallowMount( ErrorPermission, {
-			localVue,
 			propsData: {
 				permissionErrors: [ error ],
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter,
+					$clientRouter: unusedRouter( 'client' ),
 				},
-				$repoRouter,
-				$clientRouter: unusedRouter( 'client' ),
+				plugins: [ store ],
 			},
-			store,
 		} );
 
 		expect( messageGet ).toHaveBeenNthCalledWith( 2, header, ...headerParams );
@@ -255,20 +259,21 @@ describe( 'ErrorPermission', () => {
 		} );
 
 		shallowMount( ErrorPermission, {
-			localVue,
 			propsData: {
 				permissionErrors: [ error ],
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter,
+					$clientRouter: unusedRouter( 'client' ),
 				},
-				$repoRouter,
-				$clientRouter: unusedRouter( 'client' ),
+				plugins: [ store ],
 			},
-			store,
 		} );
 
 		expect( messageGet ).toHaveBeenNthCalledWith( 2, header, ...headerParams );
@@ -313,21 +318,22 @@ describe( 'ErrorPermission', () => {
 			},
 		} );
 
-		shallowMount( ErrorPermission, {
-			localVue,
+		mount( ErrorPermission, {
 			propsData: {
 				permissionErrors: [ error ],
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter: unusedRouter( 'repo' ),
+					$clientRouter,
 				},
-				$repoRouter: unusedRouter( 'repo' ),
-				$clientRouter,
+				plugins: [ store ],
 			},
-			store,
 		} );
 
 		calledWithHTMLElement( messageGet, 2, 1 );
@@ -377,21 +383,22 @@ describe( 'ErrorPermission', () => {
 			},
 		} );
 
-		shallowMount( ErrorPermission, {
-			localVue,
+		mount( ErrorPermission, {
 			propsData: {
 				permissionErrors: [ error ],
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter,
+					$clientRouter: unusedRouter( 'client' ),
 				},
-				$repoRouter,
-				$clientRouter: unusedRouter( 'client' ),
+				plugins: [ store ],
 			},
-			store,
 		} );
 
 		calledWithHTMLElement( messageGet, 2, 1 );
@@ -401,28 +408,65 @@ describe( 'ErrorPermission', () => {
 		expect( messageGet ).toHaveBeenNthCalledWith( 3, body, ...bodyParams );
 	} );
 
-	it.each( [
-		[
-			'client',
-			PageNotEditable.PAGE_CASCADE_PROTECTED,
-			MessageKeys.PERMISSIONS_PAGE_CASCADE_PROTECTED_HEADING,
-			MessageKeys.PERMISSIONS_PAGE_CASCADE_PROTECTED_BODY,
-		] as const,
-		[
-			'repo',
-			PageNotEditable.ITEM_CASCADE_PROTECTED,
-			MessageKeys.PERMISSIONS_CASCADE_PROTECTED_HEADING,
-			MessageKeys.PERMISSIONS_CASCADE_PROTECTED_BODY,
-		] as const,
-	] )( 'interpolates correct message for page cascade-protected on %s', (
-		wiki: 'repo'|'client',
-		type: typeof PageNotEditable.ITEM_CASCADE_PROTECTED
-		| typeof PageNotEditable.PAGE_CASCADE_PROTECTED,
-		header: MessageKeys,
-		body: MessageKeys,
-	) => {
+	it( 'interpolates correct message for page cascade-protected on client', () => {
 		const error: CascadeProtectedReason = {
-			type,
+			type: PageNotEditable.PAGE_CASCADE_PROTECTED,
+			info: {
+				pages: pagesCausingCascadeProtection,
+			},
+		};
+		const messageGet = jest.fn( ( key ) => key );
+		const routerGetPageUrl = jest.fn();
+		routerGetPageUrl
+			.mockReturnValueOnce( 'http://localhost/wiki/Page_One' )
+			.mockReturnValueOnce( 'http://localhost/wiki/Page_Two' )
+			.mockReturnValueOnce( 'http://localhost/wiki/Page_Three' );
+		const $router: MediaWikiRouter = {
+			getPageUrl: routerGetPageUrl,
+		};
+
+		const store = createTestStore( {
+			state: {
+				entityTitle,
+			},
+		} );
+
+		mount( ErrorPermission, {
+			propsData: {
+				permissionErrors: [ error ],
+			},
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter: unusedRouter( 'repo' ),
+					$clientRouter: $router,
+				},
+				plugins: [ store ],
+			},
+		} );
+
+		calledWithHTMLElement( messageGet, 2, 2 );
+
+		expect( messageGet ).toHaveBeenNthCalledWith(
+			2,
+			MessageKeys.PERMISSIONS_PAGE_CASCADE_PROTECTED_HEADING,
+		);
+		expect( messageGet ).toHaveBeenNthCalledWith(
+			3,
+			MessageKeys.PERMISSIONS_PAGE_CASCADE_PROTECTED_BODY,
+			pagesCausingCascadeProtection.length.toString(),
+			// eslint-disable-next-line max-len
+			`<ul><li><a href="http://localhost/wiki/${pagesCausingCascadeProtection[ 0 ]}">${pagesCausingCascadeProtection[ 0 ]}</a></li><li><a href="http://localhost/wiki/${pagesCausingCascadeProtection[ 1 ]}">${pagesCausingCascadeProtection[ 1 ]}</a></li><li><a href="http://localhost/wiki/${pagesCausingCascadeProtection[ 2 ]}">${pagesCausingCascadeProtection[ 2 ]}</a></li></ul>`,
+		);
+	} );
+
+	it( 'interpolates correct message for page cascade-protected on repo', () => {
+		const error: CascadeProtectedReason = {
+			type: PageNotEditable.ITEM_CASCADE_PROTECTED,
 			info: {
 				pages: pagesCausingCascadeProtection,
 			},
@@ -444,35 +488,35 @@ describe( 'ErrorPermission', () => {
 			},
 		} );
 
-		shallowMount( ErrorPermission, {
-			localVue,
+		mount( ErrorPermission, {
 			propsData: {
 				permissionErrors: [ error ],
 			},
-
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter: $router,
+					$clientRouter: unusedRouter( 'client' ),
 				},
-				$repoRouter: wiki === 'repo' ? $router : unusedRouter( 'repo' ),
-				$clientRouter: wiki === 'client' ? $router : unusedRouter( 'client' ),
+				plugins: [ store ],
 			},
-			store,
 		} );
 
 		calledWithHTMLElement( messageGet, 2, 2 );
 
 		expect( messageGet ).toHaveBeenNthCalledWith(
 			2,
-			header,
+			MessageKeys.PERMISSIONS_CASCADE_PROTECTED_HEADING,
 			'',
 			'http://localhost/wiki/Project:Administrators',
 		);
 		expect( messageGet ).toHaveBeenNthCalledWith(
 			3,
-			body,
+			MessageKeys.PERMISSIONS_CASCADE_PROTECTED_BODY,
 			pagesCausingCascadeProtection.length.toString(),
 			// eslint-disable-next-line max-len
 			`<ul><li><a href="http://localhost/wiki/${pagesCausingCascadeProtection[ 0 ]}">${pagesCausingCascadeProtection[ 0 ]}</a></li><li><a href="http://localhost/wiki/${pagesCausingCascadeProtection[ 1 ]}">${pagesCausingCascadeProtection[ 1 ]}</a></li><li><a href="http://localhost/wiki/${pagesCausingCascadeProtection[ 2 ]}">${pagesCausingCascadeProtection[ 2 ]}</a></li></ul>`,
@@ -503,19 +547,20 @@ describe( 'ErrorPermission', () => {
 		};
 
 		shallowMount( ErrorPermission, {
-			localVue,
 			propsData: {
 				permissionErrors: [ error ],
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
+					$repoRouter,
 				},
-				$repoRouter,
+				plugins: [ store ],
 			},
-			store,
 		} );
 
 		expect( messageGet ).toHaveBeenNthCalledWith( 2,
@@ -547,21 +592,22 @@ describe( 'ErrorPermission', () => {
 		};
 		const permissionErrors: MissingPermissionsError[] = new Array( errorCount ).fill( error );
 		const wrapper = shallowMount( ErrorPermission, {
-			localVue,
 			propsData: {
 				permissionErrors,
 			},
-			mocks: {
-				$messages: {
-					KEYS: MessageKeys,
-					get: messageGet,
-					getText: messageGet,
+			global: {
+				mocks: {
+					$messages: {
+						KEYS: MessageKeys,
+						get: messageGet,
+						getText: messageGet,
+					},
 				},
+				plugins: [ store ],
 			},
-			store,
 		} );
 
-		for ( const errorPermissionInfo of wrapper.findAll( ErrorPermissionInfo ).wrappers ) {
+		for ( const errorPermissionInfo of wrapper.findAllComponents( ErrorPermissionInfo ) ) {
 			expect( errorPermissionInfo.props( 'expandedByDefault' ) ).toBe( expandedByDefault );
 		}
 	} );

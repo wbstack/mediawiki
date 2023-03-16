@@ -4,6 +4,21 @@
 			"Yupik"
 		]
 	},
+	"wikibase-deletedentity-query": "Jaukkuum kõjldõs",
 	"wikibase-error-unexpected": "Vââʹǩǩ: $1.",
-	"wikibase-sitelinks-wikipedia": "Wikipedia"
+	"wikibase-error-save-generic": "Ruõkkmõš ij oʹnnstam vââʹjj diõtt.",
+	"wikibase-error-remove-generic": "Jaukkummuš ij oʹnnstam vââʹjj diõtt.",
+	"wikibase-error-ui-no-external-page": "Seidd \"$2\" ij käunnʼjam seiddõõzzâst \"$1\".",
+	"wikibase-timedetails-isotime": "Äiʹǧǧštemppal",
+	"wikibase-timedetails-timezone": "Äiʹǧǧvuʹvdd",
+	"wikibase-sitelinks-wikipedia": "Wikipedia",
+	"wikibase-snakview-snaktypeselector-somevalue": "toobdteʹmes ärvv",
+	"datatypes-type-string": "Miârkkräidd",
+	"datatypes-type-quantity": "Mieʹrr",
+	"datatypes-type-monolingualtext": "Õõutǩiõllsaž teʹkstt",
+	"datatypes-type-multilingualtext": "Määŋgǩiõllsaž teʹkstt",
+	"datatypes-type-number": "Nââmar",
+	"datatypes-type-mediawiki-title": "MediaWiki nõmm",
+	"datatypes-type-commonsMedia": "Mediateâttõs (Wikimedia Commons)",
+	"wikibase-reference-formatter-snak-retrieved": "Čuäʹjtum $1"
 }

@@ -103,4 +103,5 @@ class HtmlSplitConflictView {
 			$this->editableTextComponent->getHtml( htmlspecialchars( $text ), $text, $rowNum, 'copy' )
 		);
 	}
+
 }

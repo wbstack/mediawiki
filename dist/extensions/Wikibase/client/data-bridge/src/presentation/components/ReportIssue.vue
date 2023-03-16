@@ -6,25 +6,28 @@
 </template>
 
 <script lang="ts">
-import Component, { mixins } from 'vue-class-component';
+import { defineComponent } from 'vue';
 import StateMixin from '@/presentation/StateMixin';
 
-@Component
-export default class ReportIssue extends mixins( StateMixin ) {
-	public get message(): string {
-		return this.$messages.get(
-			this.$messages.KEYS.ERROR_REPORT,
-			this.$bridgeConfig.issueReportingLink.replace(
-				/<body>/g,
-				encodeURIComponent( this.rootModule.getters.reportIssueTemplateBody ),
-			),
-			this.rootModule.state.pageUrl,
-			this.rootModule.state.targetProperty,
-			this.rootModule.state.entityTitle,
-			this.rootModule.state.applicationErrors[ 0 ].type,
-		);
-	}
-}
+export default defineComponent( {
+	mixins: [ StateMixin ],
+	name: 'ReportIssue',
+	computed: {
+		message(): string {
+			return this.$messages.get(
+				this.$messages.KEYS.ERROR_REPORT,
+				this.rootModule.getters.issueReportingLinkConfig.replace(
+					/<body>/g,
+					encodeURIComponent( this.rootModule.getters.reportIssueTemplateBody ),
+				),
+				this.rootModule.state.pageUrl,
+				this.rootModule.state.targetProperty,
+				this.rootModule.state.entityTitle,
+				this.rootModule.state.applicationErrors[ 0 ].type,
+			);
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

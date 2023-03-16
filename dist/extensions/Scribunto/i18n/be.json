@@ -5,7 +5,8 @@
 			"Wizardist",
 			"Чаховіч Уладзіслаў",
 			"No Sleep till Krupki",
-			"Chadyka"
+			"Chadyka",
+			"Maksim L."
 		]
 	},
 	"scribunto-desc": "Фрэймворк для выкарыстання скрыптавых моў на старонках MediaWiki",
@@ -28,7 +29,7 @@
 	"scribunto-common-error-category-desc": "Адбылася памылка пры апрацоўцы модуляў, уключаных у старонку.",
 	"scribunto-common-nosuchmodule": "Памылка скрыпта: модуль \"$2\" не існуе.",
 	"scribunto-common-nofunction": "Памылка скрыпта: Вы павінны пазначыць функцыю для выкліку.",
-	"scribunto-common-nosuchfunction": "Памылка скрыпта: функцыя \"$2\" не існуе.",
+	"scribunto-common-nosuchfunction": "Памылка скрыпта: функцыі \"$2\" няма.",
 	"scribunto-common-notafunction": "Памылка скрыпта: \"$2\" гэта не функцыя.",
 	"scribunto-common-timeout": "Час, адведзены пад выкананне скрыптаў, выйшаў.",
 	"scribunto-common-oom": "Перавышаная вобласць памяці, адведзенай пад выкананне скрыптаў.",
@@ -40,6 +41,7 @@
 	"scribunto-lua-error-location": "Памылка Lua $1: $2.",
 	"scribunto-lua-error": "Памылка Lua: $2.",
 	"scribunto-lua-notarrayreturn": "Памылка скрыпту: модуль вярнуў значэнне $2. Модуль мусіў вярнуць табліцу экспарту.",
+	"scribunto-lua-warning": "Папярэджанне скрыпту: $1",
 	"scribunto-luastandalone-proc-error": "Памылка Lua: немагчыма стварыць працэс.",
 	"scribunto-luastandalone-proc-error-msg": "Памылка Lua: немагчыма стварыць працэс — $2",
 	"scribunto-luastandalone-proc-error-proc-open": "Памылка Lua: немагчыма стварыць працэс — proc_open недаступны. Праверце значэнне дырэктывы «disable_functions» у наладах PHP.",
@@ -50,7 +52,7 @@
 	"scribunto-luastandalone-signal": "Памылка Lua: Унутраная памылка: інтэрпрэтатар быў спынены з сігналам «$2».",
 	"scribunto-luastandalone-exited": "Памылка Lua: Унутраная памылка: інтэрпрэтатар завяршыў працу з станам $2.",
 	"scribunto-module-with-errors-category": "Модулі Scribunto з памылкамі",
-	"scribunto-module-with-errors-category-desc": "Модуль утрымлівае памылку.",
+	"scribunto-module-with-errors-category-desc": "У модулі ёсць памылка.",
 	"scribunto-limitreport-timeusage": "Выкарыстання часу Lua",
 	"scribunto-limitreport-timeusage-value": "$1/$2 с",
 	"scribunto-limitreport-virtmemusage": "Віртуальны памер Lua",

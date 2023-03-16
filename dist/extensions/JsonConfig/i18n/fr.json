@@ -101,7 +101,7 @@
 	"jsonconfig-license-url-dl-de-zero-2.0": "https://www.govdata.de/dl-de/zero-2-0",
 	"jsonconfig-license-url-dl-de-by-1.0": "https://www.govdata.de/dl-de/by-1-0",
 	"jsonconfig-license-url-dl-de-by-2.0": "https://www.govdata.de/dl-de/by-2-0",
-	"jsonconfig-license-copyrightwarning": "En enregistrant les modifications, vous acceptez les [https://foundation.wikimedia.org/wiki/Terms_of_Use Conditions d’utilisation], et acceptez de façon irrévocable de mettre votre contribution sous [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning": "En enregistrant les modifications, vous acceptez les [https://foundation.wikimedia.org/wiki/Terms_of_Use/fr Conditions d’utilisation] et le placement irrévocable de votre contribution sous [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-copyrightwarning-license-unset": "En enregistrant les modifications, vous acceptez les [https://foundation.wikimedia.org/wiki/Terms_of_Use Conditions d’utilisation], et acceptez de façon irrévocable de mettre votre contribution en accord avec la licence spécifiée dans le champ <code>licence</code>.",
 	"jsonconfig-license-notice": "'''Note :''' Quand vous modifiez cette page, vous acceptez de mettre votre contribution sous  [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Note :''' Quand vous modifiez cette page, vous acceptez de placer votre contribution sous la licence spécifiée dans le champ <code>licence</code>.",

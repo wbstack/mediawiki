@@ -9,6 +9,9 @@ use OOUI\IconWidget;
 use OOUI\MessageWidget;
 use TwoColConflict\SplitConflictUtils;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class CoreUiHintHtml {
 
 	/**

@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Eleassar"
+		]
+	},
+	"mailgun-desc": "Pošiljanje e-pošte iz MediaWiki z API-storitvijo Mailgun"
+}

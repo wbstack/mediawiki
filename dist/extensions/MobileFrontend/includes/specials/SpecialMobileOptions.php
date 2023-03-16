@@ -34,6 +34,9 @@ class SpecialMobileOptions extends MobileSpecialPage {
 	/** @var UserOptionsManager */
 	private $userOptionsManager;
 
+	/** @var ReadOnlyMode */
+	private $readOnlyMode;
+
 	public function __construct() {
 		parent::__construct( 'MobileOptions' );
 		$this->services = MediaWikiServices::getInstance();
@@ -41,6 +44,7 @@ class SpecialMobileOptions extends MobileSpecialPage {
 		$this->featureManager = $this->services->getService( 'MobileFrontend.FeaturesManager' );
 		$this->userMode = $this->services->getService( 'MobileFrontend.AMC.UserMode' );
 		$this->userOptionsManager = $this->services->getUserOptionsManager();
+		$this->readOnlyMode = $this->services->getReadOnlyMode();
 	}
 
 	/**
@@ -296,9 +300,10 @@ class SpecialMobileOptions extends MobileSpecialPage {
 		if ( $user->isRegistered() && !$user->matchEditToken( $request->getVal( 'token' ) ) ) {
 			$errorText = __METHOD__ . '(): token mismatch';
 			wfDebugLog( 'mobile', $errorText );
-			$this->getOutput()->addHTML( '<div class="errorbox">'
-				. $this->msg( "mobile-frontend-save-error" )->parse()
-				. '</div>'
+			$this->getOutput()->addHTML(
+				Html::errorBox(
+					$this->msg( "mobile-frontend-save-error" )->parse()
+				)
 			);
 			$this->addSettingsForm();
 			return;
@@ -323,7 +328,7 @@ class SpecialMobileOptions extends MobileSpecialPage {
 			$updateSingleOption,
 			$mobileMode,
 			$enableAMC ) {
-			if ( wfReadOnly() ) {
+			if ( $this->readOnlyMode->isReadOnly() ) {
 				return;
 			}
 

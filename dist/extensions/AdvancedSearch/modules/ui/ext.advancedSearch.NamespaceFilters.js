@@ -12,8 +12,7 @@
 	 *
 	 * @param {mw.libs.advancedSearch.dm.SearchModel} store
 	 * @param {Object} config
-	 * @cfg {Object} [namespaceIcons] Namespace id => icon name
-	 * @cfg {Object} [namespaces] Namespace id => Namespace label (similar to mw.config.get( 'wgFormattedNamespaces' ) )
+	 * @cfg {Object} [namespaces={}] Namespace id => Namespace label (similar to mw.config.get( 'wgFormattedNamespaces' ) )
 	 */
 	mw.libs.advancedSearch.ui.NamespaceFilters = function ( store, config ) {
 		config = $.extend( {
@@ -70,6 +69,7 @@
 		} );
 		return namespaces;
 	};
+
 	/**
 	 * @inheritdoc
 	 */
@@ -168,6 +168,7 @@
 			}
 		} );
 	};
+
 	mw.libs.advancedSearch.ui.NamespaceFilters.prototype.removeHighlighFromTags = function () {
 		this.getItems().forEach( function ( tag ) {
 			tag.$element.removeClass( 'selected' );
@@ -185,6 +186,7 @@
 			return el !== namespace;
 		} );
 	};
+
 	/**
 	 * Add or remove a tag for the chosen menu item based on checkbox state
 	 *

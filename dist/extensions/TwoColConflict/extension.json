@@ -14,7 +14,7 @@
 	"type": "other",
 	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.37.0"
+		"MediaWiki": ">= 1.38.0"
 	},
 	"config": {
 		"TwoColConflictBetaFeature": {
@@ -39,7 +39,6 @@
 	"Hooks": {
 		"GetBetaFeaturePreferences": "TwoColConflict\\Hooks\\TwoColConflictHooks::onGetBetaFeaturePreferences",
 		"GetPreferences": "TwoColConflict\\Hooks\\TwoColConflictHooks::onGetPreferences",
-		"UserGetDefaultOptions": "TwoColConflict\\Hooks\\TwoColConflictHooks::onUserGetDefaultOptions",
 		"LoadUserOptions": "TwoColConflict\\Hooks\\TwoColConflictHooks::onLoadUserOptions",
 		"AlternateEdit": "TwoColConflict\\Hooks\\TwoColConflictHooks::onAlternateEdit",
 		"EditPage::importFormData": "TwoColConflict\\Hooks\\EditPageImportFormDataHookHandler::onEditPageImportFormData",
@@ -47,6 +46,9 @@
 		"EditPageBeforeEditButtons": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageBeforeEditButtons",
 		"EditPage::showEditForm:initial": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageShowEditFormInitial",
 		"EditPage::showEditForm:fields": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageShowEditFormFields"
+	},
+	"DefaultUserOptions": {
+		"twocolconflict-enabled": 1
 	},
 	"MessagesDirs": {
 		"TwoColConflict": [
@@ -56,24 +58,40 @@
 	"ResourceModules": {
 		"ext.TwoColConflict.SplitJs": {
 			"packageFiles": [
-				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.init.js"
+				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.init.js",
+				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Tour.js",
+				"modules/ext.TwoColConflict.Settings.js"
+			],
+			"styles": [
+				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Tour.less"
 			],
 			"dependencies": [
 				"mediawiki.api",
+				"mediawiki.cookie",
+				"mediawiki.pulsatingdot",
+				"mediawiki.storage",
+				"mediawiki.user",
 				"oojs-ui",
-				"ext.TwoColConflict.Split.Tour",
+				"oojs-ui.styles.icons-interactions",
+				"user.options",
+				"ext.TwoColConflict.Split.TourImages",
 				"ext.TwoColConflict.Util"
 			],
 			"messages": [
 				"parentheses",
 				"preview",
+				"publishchanges",
 				"twocolconflict-copy-action",
 				"twocolconflict-copy-notice",
 				"twocolconflict-copy-tooltip",
 				"twocolconflict-split-choose-version",
 				"twocolconflict-split-edit-tooltip",
+				"twocolconflict-split-help-tooltip",
 				"twocolconflict-split-other-version-chosen",
 				"twocolconflict-split-your-version-chosen",
+				"twocolconflict-split-reset-warning",
+				"twocolconflict-split-reset-warning-accept",
+				"twocolconflict-split-reset-warning-cancel",
 				"twocolconflict-split-select-all-other-tooltip",
 				"twocolconflict-split-select-all-your-tooltip",
 				"twocolconflict-split-selected-all-other-tooltip",
@@ -81,7 +99,21 @@
 				"twocolconflict-split-select-other-tooltip",
 				"twocolconflict-split-select-your-tooltip",
 				"twocolconflict-split-selected-other-tooltip",
-				"twocolconflict-split-selected-your-tooltip"
+				"twocolconflict-split-selected-your-tooltip",
+				"twocolconflict-split-tour-dialog-btn-text",
+				"twocolconflict-split-tour-dialog-btn-text-single-column-view",
+				"twocolconflict-split-tour-dialog-dot-message",
+				"twocolconflict-split-tour-dialog-header",
+				"twocolconflict-split-tour-dialog-header-single-column-view",
+				"twocolconflict-split-tour-dialog-message",
+				"twocolconflict-split-tour-dialog-message-single-column-view",
+				"twocolconflict-split-tour-popup-btn-text",
+				"twocolconflict-split-tour-popup1-header",
+				"twocolconflict-split-tour-popup1-message",
+				"twocolconflict-split-tour-popup2-header",
+				"twocolconflict-split-tour-popup2-message",
+				"twocolconflict-split-tour-popup3-header",
+				"twocolconflict-split-tour-popup3-message"
 			]
 		},
 		"ext.TwoColConflict.SplitCss": {
@@ -113,47 +145,6 @@
 				}
 			}
 		},
-		"ext.TwoColConflict.Split.Tour": {
-			"packageFiles": [
-				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Tour.js",
-				"modules/ext.TwoColConflict.Settings.js"
-			],
-			"styles": [
-				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Tour.less"
-			],
-			"dependencies": [
-				"mediawiki.pulsatingdot",
-				"oojs-ui",
-				"oojs-ui.styles.icons-interactions",
-				"ext.TwoColConflict.Split.TourImages",
-				"mediawiki.user",
-				"mediawiki.storage",
-				"mediawiki.cookie",
-				"mediawiki.api",
-				"user.options"
-			],
-			"messages": [
-				"twocolconflict-split-tour-dialog-dot-message",
-				"twocolconflict-split-tour-dialog-header",
-				"twocolconflict-split-tour-dialog-message",
-				"twocolconflict-split-tour-dialog-btn-text",
-				"twocolconflict-split-tour-popup-btn-text",
-				"twocolconflict-split-tour-popup1-header",
-				"twocolconflict-split-tour-popup1-message",
-				"twocolconflict-split-tour-popup2-header",
-				"twocolconflict-split-tour-popup2-message",
-				"twocolconflict-split-tour-popup3-header",
-				"twocolconflict-split-tour-popup3-message",
-				"twocolconflict-split-reset-warning",
-				"twocolconflict-split-reset-warning-cancel",
-				"twocolconflict-split-reset-warning-accept",
-				"twocolconflict-split-help-tooltip",
-				"twocolconflict-split-tour-dialog-header-single-column-view",
-				"twocolconflict-split-tour-dialog-message-single-column-view",
-				"twocolconflict-split-tour-dialog-btn-text-single-column-view",
-				"publishchanges"
-			]
-		},
 		"ext.TwoColConflict.Util": {
 			"packageFiles": [
 				"modules/ext.TwoColConflict.Util.js",
@@ -174,8 +165,9 @@
 		"TwoColConflictProvideSubmittedText": {
 			"class": "TwoColConflict\\ProvideSubmittedText\\SpecialProvideSubmittedText",
 			"services": [
-				"StatsdDataFactory",
-				"TwoColConflictContext"
+				"TwoColConflictContext",
+				"MainObjectStash",
+				"StatsdDataFactory"
 			]
 		}
 	},

@@ -1,6 +1,6 @@
-/*! jquery.ime - v0.2.0+20210524
+/*! jquery.ime - v0.2.0+20220307
 * https://github.com/wikimedia/jquery.ime
-* Copyright (c) 2021 Santhosh Thottingal; License: (GPL-2.0-or-later OR MIT) */
+* Copyright (c) 2022 Santhosh Thottingal; License: (GPL-2.0-or-later OR MIT) */
 ( function ( $ ) {
 	'use strict';
 
@@ -109,23 +109,25 @@
 		},
 
 		/**
-		 * Return the autonym for an available language code
+		 * Return the autonym for a language code
 		 *
 		 * @param {string} languageCode The language code
-		 * @return {string} The autonym
+		 * @return {string|undefined} The autonym, if known
 		 */
 		getAutonym: function ( languageCode ) {
-			return $.ime.languages[ languageCode ].autonym;
+			var info = $.ime.languages[ languageCode ];
+			return info && info.autonym;
 		},
 
 		/**
 		 * Return a list of available input method ids for a language
 		 *
-		 * @param {string} languageCode An available language code
+		 * @param {string} languageCode A language code
 		 * @return {string[]} Available input method ids for that language
 		 */
 		getInputMethodIds: function ( languageCode ) {
-			return $.ime.languages[ languageCode ].inputmethods;
+			var info = $.ime.languages[ languageCode ];
+			return ( info && info.inputmethods ) || [];
 		},
 
 		/**
@@ -142,7 +144,7 @@
 		/**
 		 * Return a list of input method info { id: ..., name: ... } for a language.
 		 *
-		 * @param {string} languageCode An available language code
+		 * @param {string} languageCode A language code
 		 * @return {Object[]} Info object for each available input method
 		 */
 		getInputMethods: function ( languageCode ) {
@@ -1640,6 +1642,10 @@
 			name: 'Afrikaans tilde',
 			source: 'rules/af/af-tilde.js'
 		},
+		'ajg-tilde': {
+			name: 'Aja tilde',
+			source: 'rules/ajg/ajg-tilde.js'
+		},
 		'ak-qx': {
 			name: 'Akan QX replacement',
 			source: 'rules/ak/ak-qx.js'
@@ -1749,7 +1755,7 @@
 			source: 'rules/bn/bn-inscript2.js'
 		},
 		'bn-nkb': {
-			name: 'ন্যাশনাল কিবোর্ড',
+			name: 'জাতীয় কিবোর্ড',
 			source: 'rules/bn/bn-nkb.js'
 		},
 		'bn-probhat': {
@@ -1923,6 +1929,10 @@
 		'gu-transliteration': {
 			name: 'લિપ્યંતરણ',
 			source: 'rules/gu/gu-transliteration.js'
+		},
+		'gur-tilde': {
+			name: 'Farefare tilde',
+			source: 'rules/gur/gur-tilde.js'
 		},
 		'ha-tilde': {
 			name: 'Hausa - tilde',
@@ -2166,6 +2176,10 @@
 			name: 'ইনস্ক্ৰিপ্ট ২',
 			source: 'rules/mni/mni-inscript2.js'
 		},
+		'mnw-simplified-anonta': {
+			name: 'Mon Simplified Anonta',
+			source: 'rules/mnw/mnw-simplified-anonta.js'
+		},
 		'mr-inscript': {
 			name: 'मराठी लिपी',
 			source: 'rules/mr/mr-inscript.js'
@@ -2181,6 +2195,14 @@
 		'mr-transliteration': {
 			name: 'अक्षरांतरण',
 			source: 'rules/mr/mr-transliteration.js'
+		},
+		'mul-bf': {
+			name: 'Burkina Faso tilde keyboard',
+			source: 'rules/mul-bf/mul-bf.js'
+		},
+		'mul-cm': {
+			name: 'General Alphabet of Cameroon Languages tilde keyboard',
+			source: 'rules/mul-cm/mul-cm.js'
 		},
 		'my-mm3': {
 			name: 'မြန်မာ၃ လက်ကွက်',
@@ -2221,6 +2243,10 @@
 		'nia-tilde': {
 			name: 'Li Niha tilde',
 			source: 'rules/nia/nia-tilde.js'
+		},
+		'nmz-tilde': {
+			name: 'Nawdm tilde',
+			source: 'rules/nmz/nmz-tilde.js'
 		},
 		'nqo-standard-qwerty': {
 			name: "N'Ko standard QWERTY",
@@ -2518,6 +2544,10 @@
 			autonym: 'अहिराणी',
 			inputmethods: [ 'mr-transliteration', 'mr-inscript' ]
 		},
+		ajg: {
+			autonym: 'ajagbe',
+			inputmethods: [ 'ajg-tilde' ]
+		},
 		ak: {
 			autonym: 'Akan',
 			inputmethods: [ 'ak-qx', 'ak-tilde' ]
@@ -2548,7 +2578,7 @@
 		},
 		bas: {
 			autonym: 'ɓasaá',
-			inputmethods: [ 'bas-tilde' ]
+			inputmethods: [ 'bas-tilde', 'mul-cm' ]
 		},
 		bbc: {
 			autonym: 'Batak',
@@ -2580,7 +2610,7 @@
 		},
 		bkm: {
 			autonym: 'Itaŋikom',
-			inputmethods: [ 'bkm-tilde' ]
+			inputmethods: [ 'bkm-tilde', 'mul-cm' ]
 		},
 		bm: {
 			autonym: 'Bamanankan',
@@ -2597,6 +2627,10 @@
 		brx: {
 			autonym: 'बोड़ो',
 			inputmethods: [ 'brx-inscript', 'brx-inscript2' ]
+		},
+		bum: {
+			autonym: 'bulu',
+			inputmethods: [ 'mul-cm' ]
 		},
 		byn: {
 			autonym: 'ብሊን',
@@ -2662,6 +2696,10 @@
 			autonym: 'فارسی',
 			inputmethods: [ 'fa-kbd' ]
 		},
+		fat: {
+			autonym: 'mfantse',
+			inputmethods: [ 'ak-qx', 'ak-tilde' ]
+		},
 		ff: {
 			autonym: 'Fulfulde',
 			inputmethods: [ 'ff-alt', 'ff-tilde' ]
@@ -2705,6 +2743,10 @@
 		gu: {
 			autonym: 'ગુજરાતી',
 			inputmethods: [ 'gu-transliteration', 'gu-inscript', 'gu-inscript2', 'gu-phonetic' ]
+		},
+		gur: {
+			autonym: 'farefare',
+			inputmethods: [ 'gur-tilde' ]
 		},
 		he: {
 			autonym: 'עברית',
@@ -2761,6 +2803,10 @@
 		kcg: {
 			autonym: 'Tyap',
 			inputmethods: [ 'kcg-tilde' ]
+		},
+		ken: {
+			autonym: 'kɛ́nyáŋ',
+			inputmethods: [ 'mul-cm' ]
 		},
 		ki: {
 			autonym: 'Gĩkũyũ',
@@ -2854,6 +2900,14 @@
 			autonym: 'Manipuri',
 			inputmethods: [ 'mni-inscript2' ]
 		},
+		mnw: {
+			autonym: 'ဘာသာ မန်',
+			inputmethods: [ 'mnw-simplified-anonta' ]
+		},
+		mos: {
+			autonym: 'moore',
+			inputmethods: [ 'mul-bf' ]
+		},
 		mr: {
 			autonym: 'मराठी',
 			inputmethods: [ 'mr-transliteration', 'mr-inscript2', 'mr-inscript', 'mr-phonetic' ]
@@ -2877,6 +2931,10 @@
 		nia: {
 			autonym: 'li niha',
 			inputmethods: [ 'nia-tilde' ]
+		},
+		nmz: {
+			autonym: 'nawdm',
+			inputmethods: [ 'nmz-tilde' ]
 		},
 		nn: {
 			autonym: 'Norsk (nynorsk)',

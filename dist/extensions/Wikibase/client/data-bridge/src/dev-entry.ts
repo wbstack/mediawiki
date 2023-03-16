@@ -7,13 +7,14 @@ import Entities from '@/mock-data/data/Q42.data.json';
 import EditFlow from '@/definitions/EditFlow';
 import getOrEnforceUrlParameter from '@/mock-data/getOrEnforceUrlParameter';
 import ServiceContainer from '@/services/ServiceContainer';
-import { launch } from '@/main';
 import EntityRevision from '@/datamodel/EntityRevision';
 import { initEvents } from '@/events';
 import MessageKeys from '@/definitions/MessageKeys';
 import clone from '@/store/clone';
 import messages from '@/mock-data/messages';
 import cssjanus from 'cssjanus';
+import { Component, createApp, App } from 'vue';
+import { launch } from '@/main';
 
 const services = new ServiceContainer();
 
@@ -153,6 +154,7 @@ services.set( 'purgeTitles', {
 } );
 
 launch(
+	createApp as unknown as ( rootComponent: Component, rootProps?: Record<string, unknown> | null ) => App,
 	{
 		containerSelector: '#data-bridge-container',
 	},

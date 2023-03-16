@@ -70,13 +70,14 @@ class DataUpdateHookHandler implements
 	private $logger;
 
 	public static function factory(
+		JobQueueGroup $jobQueueGroup,
 		LoggerInterface $logger,
 		ClientStore $store,
 		UsageAccumulatorFactory $usageAccumulatorFactory
 	): self {
 		return new self(
 			$store->getUsageUpdater(),
-			JobQueueGroup::singleton(),
+			$jobQueueGroup,
 			$store->getUsageLookup(),
 			$usageAccumulatorFactory,
 			$logger
@@ -137,7 +138,7 @@ class DataUpdateHookHandler implements
 	}
 
 	public function doLinksUpdateComplete( LinksUpdate $linksUpdate ): void {
-		$pageId = $linksUpdate->mId;
+		$pageId = $linksUpdate->getPageId();
 		if ( !$pageId ) {
 			$this->logger->info(
 				__METHOD__ . ': skipping page ID {pageId} for title {title} (T264929)',

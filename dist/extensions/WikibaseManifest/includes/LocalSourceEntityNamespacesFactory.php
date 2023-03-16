@@ -3,13 +3,13 @@
 namespace MediaWiki\Extension\WikibaseManifest;
 
 use NamespaceInfo;
-use Wikibase\DataAccess\EntitySource;
+use Wikibase\DataAccess\DatabaseEntitySource;
 
 class LocalSourceEntityNamespacesFactory implements EntityNamespacesFactory {
 	private $localEntitySource;
 	private $namespaceInfo;
 
-	public function __construct( EntitySource $localEntitySource, NamespaceInfo $namespaceInfo ) {
+	public function __construct( DatabaseEntitySource $localEntitySource, NamespaceInfo $namespaceInfo ) {
 		$this->localEntitySource = $localEntitySource;
 		$this->namespaceInfo = $namespaceInfo;
 	}

@@ -1,11 +1,12 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Storage\RevisionRecord;
+use MediaWiki\Revision\RevisionFactory;
+use MediaWiki\Revision\RevisionRecord;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
- * Mobile formatted history of of a page
+ * Mobile formatted history of a page
  */
 class SpecialMobileHistory extends MobileSpecialPageFeed {
 	/** @var bool Whether the mobile special page has a desktop special page */
@@ -26,7 +27,21 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 	/** @var string a message key for the error message description that should be shown on a 404 */
 	protected $errorNotFoundDescriptionMsg = 'mobile-frontend-history-404-desc';
 
-	public function __construct() {
+	/** @var NamespaceInfo */
+	private $namespaceInfo;
+
+	/** @var RevisionFactory */
+	private $revisionFactory;
+
+	/**
+	 * @param NamespaceInfo $namespaceInfo
+	 * @param RevisionFactory $revisionFactory
+	 */
+	public function __construct(
+		NamespaceInfo $namespaceInfo, RevisionFactory $revisionFactory
+	) {
+		$this->namespaceInfo = $namespaceInfo;
+		$this->revisionFactory = $revisionFactory;
 		parent::__construct( $this->specialPageName );
 	}
 
@@ -71,8 +86,7 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 		$namespaceLabel = '';
 		$headerTitle = $this->getHeaderBarLink( $title );
 
-		$isTalkNS = MediaWikiServices::getInstance()->getNamespaceInfo()
-			->isTalk( $title->getNamespace() );
+		$isTalkNS = $this->namespaceInfo->isTalk( $title->getNamespace() );
 		if ( $isTalkNS ) {
 			$namespaceLabel = Html::element( 'span',
 				[ 'class' => 'mw-mf-namespace' ],
@@ -130,7 +144,7 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 		] );
 		$this->offset = $this->getRequest()->getVal( 'offset' );
 
-		if ( $par ) {
+		if ( $par !== null ) {
 			// enter article history view
 			$this->title = Title::newFromText( $par );
 			if ( $this->title && $this->title->exists() ) {
@@ -173,7 +187,7 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 
 		$options['LIMIT'] = self::LIMIT + 1;
 
-		$revQuery = MediaWikiServices::getInstance()->getRevisionStore()->getQueryInfo();
+		$revQuery = $this->revisionFactory->getQueryInfo();
 
 		$res = $dbr->select(
 			$revQuery['tables'], $revQuery['fields'], $conds, __METHOD__, $options, $revQuery['joins']
@@ -211,7 +225,7 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 			RevisionRecord::DELETED_TEXT,
 			$user
 		) ) {
-			$diffLink = SpecialPage::getTitleFor( 'MobileDiff', $rev->getId() )->getLocalURL();
+			$diffLink = SpecialPage::getTitleFor( 'MobileDiff', (string)$rev->getId() )->getLocalURL();
 		} elseif ( $canSeeText ) {
 			$diffLink = Title::newFromLinkTarget( $rev->getPageAsLinkTarget() )
 				->getLocalURL( [ 'oldid' => $rev->getId() ] );
@@ -238,13 +252,22 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 			// Default to anonymous if unknown
 			$revIsAnon = true;
 		}
-		$this->renderFeedItemHtml( $ts, $diffLink, $username, $comment, $title,
-			$revIsAnon, $bytes, $isMinor );
+		$options = [
+			'ts' => $ts,
+			'diffLink' => $diffLink,
+			'username' => $username,
+			'comment' => $comment,
+			'title' => $title,
+			'isAnon' => $revIsAnon,
+			'bytes' => $bytes,
+			'isMinor' => $isMinor,
+		];
+		$this->renderFeedItemHtml( $options );
 	}
 
 	/**
 	 * Get a button to show more entries of history
-	 * @param int $ts The offset to start the history list from
+	 * @param string|null $ts The offset to start the history list from
 	 * @return string
 	 */
 	protected function getMoreButton( $ts ) {
@@ -272,10 +295,9 @@ class SpecialMobileHistory extends MobileSpecialPageFeed {
 		$numRows = $res->numRows();
 		$rev1 = $rev2 = null;
 		$out = $this->getOutput();
-		$revFactory = MediaWikiServices::getInstance()->getRevisionFactory();
 		if ( $numRows > 0 ) {
 			foreach ( $res as $row ) {
-				$rev1 = $revFactory->newRevisionFromRow( $row );
+				$rev1 = $this->revisionFactory->newRevisionFromRow( $row );
 				if ( $rev2 ) {
 					$this->showRow( $rev2, $rev1 );
 				}

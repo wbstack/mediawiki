@@ -61,5 +61,6 @@
 	"advancedsearch-namespaces-preset-discussion": "Megbeszélések",
 	"advancedsearch-namespaces-placeholder": "Névterek hozzáadása…",
 	"prefs-advancedsearch": "Fejlett kereső",
-	"advancedsearch-preference-disable": "A fejlett keresőfelület elrejtése"
+	"advancedsearch-preference-help": "A fejlett keresőfelület hozzáad egy űrlapot a Special:Search laphoz. Ez lehetővé teszi speciális keresések indítását anélkül, hogy fejből tudnod kellene a szintaxisukat. A névterek kiválasztásának módját is megváltoztatja.",
+	"advancedsearch-preference-disable": "A fejlett keresőfelület elrejtése a Special:Search oldalon"
 }

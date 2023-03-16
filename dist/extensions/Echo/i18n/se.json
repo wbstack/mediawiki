@@ -1,9 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Yupik"
+			"Yupik",
+			"Kimberli Mäkäräinen (WMNO)"
 		]
 	},
+	"echo-pref-email": "E-poasta",
+	"echo-learn-more": "Lassedieđut",
+	"echo-displaynotificationsconfiguration-enabled-default-new-users-legend": "Ođđa geavaheaddjit",
 	"notification-link-text-expand-all": "Čájet",
-	"notification-inbox-filter-all": "Buot"
+	"notification-link-text-collapse-all": "Čiega",
+	"notification-link-text-view-page": "Čájet siiddu",
+	"notification-welcome-linktext": "Bures boahtin",
+	"notification-timestamp-today": "Odne",
+	"notification-inbox-filter-all": "Buot",
+	"echo-date-today": "Odne"
 }

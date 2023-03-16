@@ -17,13 +17,15 @@
 
 namespace MediaWiki\Minerva\Menu\Entries;
 
-use MinervaUI;
+use MediaWiki\User\UserIdentity;
 use Title;
-use User;
 
+/**
+ * Note this is used by Extension:GrowthExperiments
+ */
 final class ProfileMenuEntry implements IProfileMenuEntry {
 	/**
-	 * @var User
+	 * @var UserIdentity
 	 */
 	private $user;
 
@@ -46,9 +48,9 @@ final class ProfileMenuEntry implements IProfileMenuEntry {
 	private $customProfileLabel = null;
 
 	/**
-	 * @param User $user Currently logged in user/anon
+	 * @param UserIdentity $user Currently logged in user/anon
 	 */
-	public function __construct( User $user ) {
+	public function __construct( UserIdentity $user ) {
 		$this->user = $user;
 	}
 
@@ -82,10 +84,10 @@ final class ProfileMenuEntry implements IProfileMenuEntry {
 	public function getComponents(): array {
 		$username = $this->user->getName();
 		return [ [
+			'icon' => 'wikimedia-userAvatar-base20',
 			'text' => $this->customProfileLabel ?? $username,
-			'href' => $this->customProfileURL ?? Title::newFromText( $username, NS_USER )->getLocalURL(),
-			'class' => MinervaUI::iconClass( 'userAvatar-base20',
-				'before', 'primary-action', 'wikimedia' ),
+			'href' => $this->customProfileURL ?? Title::makeTitle( NS_USER, $username )->getLocalURL(),
+			'class' => 'menu__item--user',
 			'data-event-name' => 'menu.' . (
 				$this->profileTrackingCode ?? self::DEFAULT_PROFILE_TRACKING_CODE )
 		] ];

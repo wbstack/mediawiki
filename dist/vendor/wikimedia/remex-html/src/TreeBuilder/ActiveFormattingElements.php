@@ -6,10 +6,18 @@ namespace Wikimedia\RemexHtml\TreeBuilder;
  * The list of active formatting elements
  */
 class ActiveFormattingElements {
-	/** The last (most recent) element in the list */
+	/**
+	 * The last (most recent) element in the list
+	 *
+	 * @var Marker|null
+	 */
 	private $tail;
 
-	/** The first (least recent) element in the list */
+	/**
+	 * The first (least recent) element in the list
+	 *
+	 * @var Marker|null
+	 */
 	private $head;
 
 	/**
@@ -332,8 +340,7 @@ class ActiveFormattingElements {
 			/** @var Element $node */
 			$s .= $node->getDebugTag();
 			if ( $node->nextNoah ) {
-				$s .= " (noah sibling: " . $node->nextNoah->getDebugTag() .
-					')';
+				$s .= " (noah sibling: " . $node->nextNoah->getDebugTag() . ')';
 			}
 			if ( $node->nextAFE && $node->nextAFE->prevAFE !== $node ) {
 				$s .= " (reverse link is wrong!)";
@@ -354,6 +361,3 @@ class ActiveFormattingElements {
 		return $this->tail;
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( ActiveFormattingElements::class, 'RemexHtml\TreeBuilder\ActiveFormattingElements' );

@@ -53,17 +53,14 @@
 	}
 
 	/**
-	 * For Vector: Check whether the classic Vector or "new" vector ([[mw:Desktop_improvements]]) is enabled based
-	 * on the contents of the page.
-	 * For other skins, check if ULSDisplayInputAndDisplaySettingsInInterlanguage contains the current skin.
+	 * For Vector, check if the language button id exists.
+	 * For other skins, check wgULSDisplaySettingsInInterlanguage for the current skin.
 	 *
 	 * @return {boolean}
 	 */
 	function isUsingStandaloneLanguageButton() {
-		var skin = mw.config.get( 'skin' );
-		// special handling for Vector.
-		return skin === 'vector' ? $( '#p-lang-btn' ).length > 0 :
-			mw.config.get( 'wgULSDisplaySettingsInInterlanguage' );
+		// Checking for the ULS language button id returns true for Vector, false for other skins.
+		return $( '#p-lang-btn' ).length > 0 || mw.config.get( 'wgULSDisplaySettingsInInterlanguage' );
 	}
 
 	/**
@@ -224,7 +221,7 @@
 	/**
 	 * Adds display and input settings to the ULS dialog after loading their code.
 	 *
-	 * @param {ULS} uls instance
+	 * @param {Object} uls The ULS instance
 	 * @return {jQuery.Promise}
 	 */
 	function loadDisplayAndInputSettings( uls ) {
@@ -320,8 +317,7 @@
 		var $trigger = $( '.uls-trigger' );
 		var clickHandler;
 
-		var anonMode = ( mw.user.isAnon() && !mw.config.get( 'wgULSAnonCanChangeLanguage' ) );
-		if ( anonMode ) {
+		if ( !userCanChangeLanguage() ) {
 			clickHandler = function ( e ) {
 				var languagesettings = $trigger.data( 'languagesettings' );
 
@@ -333,10 +329,13 @@
 					}
 				} else {
 					mw.loader.using( languageSettingsModules, function () {
-						$trigger.languagesettings();
-
-						$trigger.trigger( 'click' );
+						$trigger.languagesettings( { autoOpen: true } );
+						mw.hook( 'mw.uls.settings.open' ).fire( 'personal' );
 					} );
+					// Stop propagating the event to avoid closing the languagesettings dialog
+					// when the event propagates to the document click handler inside
+					// languagesettings
+					e.stopPropagation();
 				}
 			};
 		} else {
@@ -382,6 +381,10 @@
 		}
 
 		$trigger.on( 'click', clickHandler );
+		// Optimization: Prefetch the Resource loader modules for ULS on mouseover
+		$trigger.one( 'mouseover', function () {
+			mw.loader.load( languageSettingsModules );
+		} );
 	}
 
 	function initLanguageChangeUndoTooltip() {
@@ -431,6 +434,27 @@
 	}
 
 	/**
+	 * Special handling for checkbox hack.
+	 * Disable default checkbox behavior and bind click to "Enter" keyboard events
+	 */
+	function handleCheckboxSelector() {
+		// If the ULS button is also a checkbox, we can
+		// conclude that it's using the checkbox hack.
+		$( document ).on( 'input', 'input.mw-interlanguage-selector[type="checkbox"]', function ( ev ) {
+			var elem = ev.currentTarget;
+			elem.checked = false;
+		} );
+
+		$( document ).on( 'keydown', 'input.mw-interlanguage-selector[type="checkbox"]', function ( ev ) {
+			var elem = ev.currentTarget;
+			if ( ev.key !== 'Enter' ) {
+				return;
+			}
+			elem.click();
+		} );
+	}
+
+	/**
 	 * Load and open ULS for content language selection.
 	 *
 	 * This dialog is primarily for selecting the language of the content, but may also provide
@@ -439,28 +463,14 @@
 	 * @param {jQuery.Event} ev
 	 */
 	function loadContentLanguageSelector( ev ) {
-		var targetNode = ev.currentTarget,
-			$target = $( targetNode );
-		ev.preventDefault();
-		// Special handling for checkboxes
-		if (
-			targetNode &&
-			targetNode.tagName === 'INPUT' &&
-			targetNode.getAttribute( 'type' ) === 'checkbox'
-		) {
-			// Disabled checked status. If the ULS button is also a checkbox, we can
-			// conclude that it's using the checkbox hack.
-			// Setting checked to false disables the default behavior of that checkbox.
-			targetNode.checked = false;
-			$target.on( 'click', function () {
-				targetNode.checked = false;
-			} );
-		}
+		var $target = $( ev.currentTarget );
 
 		// Avoid reinitializing ULS multiple times for an element
 		if ( $target.attr( 'data-uls-loaded' ) ) {
 			return;
 		}
+
+		ev.preventDefault();
 
 		mw.loader.using( 'ext.uls.mediawiki' ).then( function () {
 			var parent, languageNodes, standalone, uls;
@@ -506,7 +516,8 @@
 			// module may run simultaneously. Using event delegation to avoid race conditions where
 			// the trigger may be created after this code.
 			$( document ).on( 'click', '.mw-interlanguage-selector', loadContentLanguageSelector );
-
+			// Special handling for checkbox hack.
+			handleCheckboxSelector();
 		}
 	}
 
@@ -555,6 +566,7 @@
 			initContentLanguageSelectorClickHandler();
 		} else {
 			$( '.mw-interlanguage-selector' ).removeClass( 'mw-interlanguage-selector' );
+			document.body.classList.add( 'mw-interlanguage-selector-disabled' );
 		}
 	}
 

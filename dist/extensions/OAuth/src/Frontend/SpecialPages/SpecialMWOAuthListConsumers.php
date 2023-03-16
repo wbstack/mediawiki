@@ -1,6 +1,6 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Frontend\SpecialPages;
+namespace MediaWiki\Extension\OAuth\Frontend\SpecialPages;
 
 /**
  * (c) Aaron Schulz 2013, GPL
@@ -21,15 +21,17 @@ namespace MediaWiki\Extensions\OAuth\Frontend\SpecialPages;
  * http://www.gnu.org/copyleft/gpl.html
  */
 
-use MediaWiki\Extensions\OAuth\Backend\Consumer;
-use MediaWiki\Extensions\OAuth\Backend\ConsumerAcceptance;
-use MediaWiki\Extensions\OAuth\Backend\Utils;
-use MediaWiki\Extensions\OAuth\Control\ConsumerAccessControl;
-use MediaWiki\Extensions\OAuth\Frontend\Pagers\ListConsumersPager;
-use MediaWiki\Extensions\OAuth\Frontend\UIUtils;
+use MediaWiki\Extension\OAuth\Backend\Consumer;
+use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
+use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\Extension\OAuth\Control\ConsumerAccessControl;
+use MediaWiki\Extension\OAuth\Frontend\Pagers\ListConsumersPager;
+use MediaWiki\Extension\OAuth\Frontend\UIUtils;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Permissions\GrantsLocalization;
 use OOUI\HtmlSnippet;
 use SpecialPage;
+use WikiMap;
 use Wikimedia\Rdbms\DBConnRef;
 
 /**
@@ -37,8 +39,15 @@ use Wikimedia\Rdbms\DBConnRef;
  * their approval/rejection and also for listing approved/disabled consumers
  */
 class SpecialMWOAuthListConsumers extends \SpecialPage {
-	public function __construct() {
+	/** @var GrantsLocalization */
+	private $grantsLocalization;
+
+	/**
+	 * @param GrantsLocalization $grantsLocalization
+	 */
+	public function __construct( GrantsLocalization $grantsLocalization ) {
 		parent::__construct( 'OAuthListConsumers' );
+		$this->grantsLocalization = $grantsLocalization;
 	}
 
 	public function execute( $par ) {
@@ -48,7 +57,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		// Format is Special:OAuthListConsumers[/list|/view/[<consumer key>]]
 		$navigation = $par !== null ? explode( '/', $par ) : [];
 		$type = $navigation[0] ?? null;
-		$consumerKey = $navigation[1] ?? null;
+		$consumerKey = $navigation[1] ?? '';
 
 		$this->showConsumerListForm();
 
@@ -97,7 +106,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		} elseif ( $grants === [ 'basic' ] ) {
 			$s = $this->msg( 'mwoauthlistconsumers-basicgrantsonly' )->plain();
 		} else {
-			$s = \MWGrants::getGrantsWikiText( $grants, $this->getLanguage() );
+			$s = $this->grantsLocalization->getGrantsWikiText( $grants, $this->getLanguage() );
 		}
 
 		$stageKey = Consumer::$stageNames[$cmrAc->getDAO()->getStage()];
@@ -392,7 +401,7 @@ class SpecialMWOAuthListConsumers extends \SpecialPage {
 		$dbr = Utils::getCentralDB( DB_REPLICA );
 		$wikiSpecificGrant =
 			ConsumerAcceptance::newFromUserConsumerWiki(
-				$dbr, $centralUserId, $consumer, wfWikiId() );
+				$dbr, $centralUserId, $consumer, WikiMap::getCurrentWikiId() );
 
 		$allWikiGrant = ConsumerAcceptance::newFromUserConsumerWiki(
 			$dbr, $centralUserId, $consumer, '*' );

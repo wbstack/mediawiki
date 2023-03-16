@@ -14,6 +14,7 @@
 			"Dim Grits",
 			"Gucci Mane Burrr",
 			"Gzhegozh",
+			"Ice bulldog",
 			"Kross",
 			"Microcell",
 			"Movses",
@@ -29,8 +30,7 @@
 			"Ypryima",
 			"Ата",
 			"Максим Підліснюк",
-			"Тест",
-			"Ice bulldog"
+			"Тест"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Чи користувач редагує через мобільний інтерфейс, чи ні",
@@ -40,8 +40,6 @@
 	"mobile-frontend-cite-error": "Сталася помилка під час спроби завантажити цитування, спричинена поганим ідентифікатором редагування.",
 	"mobile-frontend-cite-none-available": "Для цієї сторінки немає цитувань.",
 	"mobile-frontend-clear-search": "Очистити",
-	"mobile-frontend-contributions-404-desc": "Неможливо переглянути внесок без вказаного користувача, або з користувачем, який не існує.",
-	"mobile-frontend-contributions-404-title": "Вказане хибне ім'я користувача",
 	"mobile-frontend-copyright": "Вміст доступний на умовах $1, якщо не вказано інше.",
 	"mobile-frontend-desc": "Мобільний інтерфейс",
 	"mobile-frontend-diffview-404-desc": "Не існує версії із заданим вами ідентифікатором.<br/>Це зазвичай спричинено переходом за застарілим посиланням на різницю версій сторінки, яку було вилучено, або ж таке посилання містить хибні символи.",
@@ -182,7 +180,6 @@
 	"mobile-frontend-references-citation-error": "Сталася помилка і не вдалося завантажити цю примітку.",
 	"mobile-frontend-references-list": "Переглянути весь список приміток",
 	"mobile-frontend-requires-mobile": "Ця сторінка недоступна у стаціонарному вигляді. Будь ласка, натисніть на мобільний перегляд в нижній частині сторінки.",
-	"mobile-frontend-requires-optin": "Ця сторінка недоступна, якщо ви виберете в нашому режимі бета. Відвідайте [[Special:MobileOptions|сторінку налаштувань]], щоб відмовитися.",
 	"mobile-frontend-requires-title": "Сторінка недоступна",
 	"mobile-frontend-return-to-page": "Повернутися до сторінки",
 	"mobile-frontend-save-error": "Помилка збереження налаштувань. Будь ласка, переконайтеся, що у вас увімкнені куки.",

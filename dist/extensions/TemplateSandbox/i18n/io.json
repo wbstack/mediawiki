@@ -5,7 +5,9 @@
 		]
 	},
 	"templatesandbox": "Probilo por shabloni",
+	"templatesandbox-suffix": "probeyo",
 	"templatesandbox-legend": "Probilo por shabloni",
+	"templatesandbox-text": "Vu povas selektar grupo di shabloni en vua probeyo (''sandbox'') uzanta specifika prefixo por la probeyi.\nExemple, se vu volas previdar versiono di {{ns:Template}}:probo quan vu konservis quale \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:probo\", uzez \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" kom prefixo.",
 	"templatesandbox-title-output": "Probilo por shabloni: $1",
 	"templatesandbox-editform-legend": "Previdar pagino kun ica shablono",
 	"templatesandbox-editform-page-label": "Titulo di la pagino",

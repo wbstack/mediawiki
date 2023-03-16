@@ -17,7 +17,7 @@
 	"advancedsearch-field-deepcategory": "Stranice u ovim kategorijama",
 	"advancedsearch-field-hastemplate": "Stranice sa ovim šablonima",
 	"advancedsearch-field-inlanguage": "Stranice na ovom jeziku",
-	"advancedsearch-field-filetype": "Tip datoteke",
+	"advancedsearch-field-filetype": "Vrsta datoteke",
 	"advancedsearch-field-filew": "Širina datoteke u pikselima",
 	"advancedsearch-field-fileh": "Visina datoteke u pikselima",
 	"advancedsearch-field-sort": "Način ređanja",
@@ -40,7 +40,7 @@
 	"advancedsearch-filetype-section-audio": "Formati audio-zapisa",
 	"advancedsearch-filetype-section-document": "Formati dokumenata",
 	"advancedsearch-filetype-section-other": "Ostali formati",
-	"advancedsearch-filetype-default": "Izaberite tip datoteke",
+	"advancedsearch-filetype-default": "Izaberite vrstu datoteke",
 	"advancedsearch-filetype-bitmap": "slika",
 	"advancedsearch-filetype-drawing": "crtež",
 	"advancedsearch-filetype-audio": "audio-zapis",
@@ -64,5 +64,5 @@
 	"advancedsearch-namespaces-placeholder": "Dodajte imenske prostore…",
 	"prefs-advancedsearch": "Napredna pretraga",
 	"advancedsearch-preference-help": "Napredna pretraga dodaje obrazac na stranicu „Posebno:Pretraži”. Ovo vam omogućava da izvršite specijalizovane pretrage, čak i ako ne znate nikakvu sintaksu pretrage. Menja i način na koji se mogu izabrati imenski prostori.",
-	"advancedsearch-preference-disable": "Ne prikazuj interfejs napredne pretrage"
+	"advancedsearch-preference-disable": "Ne prikazuj interfejs napredne pretrage pri upotrebi stranice Posebno:Pretraži"
 }

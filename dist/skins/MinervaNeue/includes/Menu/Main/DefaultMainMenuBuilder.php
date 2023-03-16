@@ -20,12 +20,12 @@
 
 namespace MediaWiki\Minerva\Menu\Main;
 
-use FatalError;
 use Hooks;
 use MediaWiki\Minerva\Menu\Definitions;
+use MediaWiki\Minerva\Menu\Entries\SingleMenuEntry;
 use MediaWiki\Minerva\Menu\Group;
+use MediaWiki\User\UserIdentity;
 use MWException;
-use User;
 
 /**
  * Used to build default (available for everyone by default) main menu
@@ -44,7 +44,7 @@ final class DefaultMainMenuBuilder implements IMainMenuBuilder {
 
 	/**
 	 * Currently logged in user
-	 * @var User
+	 * @var UserIdentity
 	 */
 	private $user;
 
@@ -58,10 +58,10 @@ final class DefaultMainMenuBuilder implements IMainMenuBuilder {
 	 *
 	 * @param bool $showMobileOptions Show MobileOptions instead of Preferences
 	 * @param bool $showDonateLink whether to show the donate link
-	 * @param User $user The current user
+	 * @param UserIdentity $user The current user
 	 * @param Definitions $definitions A menu items definitions set
 	 */
-	public function __construct( $showMobileOptions, $showDonateLink, User $user, Definitions $definitions ) {
+	public function __construct( $showMobileOptions, $showDonateLink, UserIdentity $user, Definitions $definitions ) {
 		$this->showMobileOptions = $showMobileOptions;
 		$this->showDonateLink = $showDonateLink;
 		$this->user = $user;
@@ -70,22 +70,23 @@ final class DefaultMainMenuBuilder implements IMainMenuBuilder {
 
 	/**
 	 * @inheritDoc
-	 * @throws FatalError
-	 * @throws MWException
 	 */
-	public function getGroups(): array {
-		$donate = $this->showDonateLink ?
-			BuilderUtil::getDonateGroup( $this->definitions ) : null;
+	public function getDiscoveryGroup( array $navigationTools ): Group {
+		return BuilderUtil::getDiscoveryTools( $this->definitions, $navigationTools );
+	}
 
-		$groups = [
-			BuilderUtil::getDiscoveryTools( $this->definitions ),
-			$this->getPersonalTools(),
-			BuilderUtil::getConfigurationTools( $this->definitions, $this->showMobileOptions ),
-		];
-		if ( $donate ) {
-			$groups[] = $donate;
-		}
-		return $groups;
+	/**
+	 * @inheritDoc
+	 */
+	public function getDonateGroup(): Group {
+		return BuilderUtil::getDonateGroup( $this->definitions, $this->showDonateLink );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getInteractionToolsGroup(): Group {
+		return new Group( 'p-interaction' );
 	}
 
 	/**
@@ -101,22 +102,55 @@ final class DefaultMainMenuBuilder implements IMainMenuBuilder {
 	 *
 	 * ... by adding the Watchlist, Settings, and Log{in,out} menu items in the given order.
 	 *
-	 * @return Group
-	 * @throws FatalError
-	 * @throws MWException
+	 * @inheritDoc
 	 */
-	private function getPersonalTools(): Group {
+	public function getPersonalToolsGroup( array $personalTools ): Group {
 		$group = new Group( 'p-personal' );
 
-		$this->definitions->insertAuthMenuItem( $group );
+		// special casing for now to support Extension:GrowthExperiments
+		$userpage = $personalTools[ 'userpage' ] ?? null;
 
-		if ( $this->user->isRegistered() ) {
-			$this->definitions->insertWatchlistMenuItem( $group );
-			$this->definitions->insertContributionsMenuItem( $group );
+		// Check if it exists. In future Extension:GrowthExperiments can unset
+		// this and replace it with homepage key.
+		if ( $userpage ) {
+			$this->definitions->insertAuthMenuItem( $group );
+		}
+
+		// Note `homepage` is reserved for Extension:GrowthExperiments usage
+		$include = [ 'homepage', 'login', 'watchlist',
+			'mycontris', 'preferences', 'logout' ];
+		$trackingKeyOverrides = [
+			'watchlist' => 'unStar',
+			'mycontris' => 'contributions',
+		];
+
+		foreach ( $include as $key ) {
+			$item = $personalTools[ $key ] ?? null;
+			if ( $item ) {
+				// Substitute preference if $showMobileOptions is set.
+				if ( $this->showMobileOptions && $key === 'preferences' ) {
+					$this->definitions->insertMobileOptionsItem( $group );
+				} else {
+					$icon = $item['icon'] ?? null;
+					$entry = SingleMenuEntry::create(
+						$key,
+						$item['text'],
+						$item['href'],
+						$item['class'] ?? '',
+						$icon
+					);
+
+					// override tracking key where key mismatch
+					if ( array_key_exists( $key, $trackingKeyOverrides ) ) {
+						$entry->trackClicks( $trackingKeyOverrides[ $key ] );
+					}
+					$group->insertEntry( $entry );
+				}
+			}
 		}
 
 		// Allow other extensions to add or override tools
-		Hooks::run( 'MobileMenu', [ 'personal', &$group ] );
+		Hooks::run( 'MobileMenu', [ 'personal', &$group ], '1.38' );
 		return $group;
 	}
 }

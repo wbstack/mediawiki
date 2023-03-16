@@ -1,9 +1,9 @@
 <?php
 
-namespace MediaWiki\Extensions\OAuth\Backend;
+namespace MediaWiki\Extension\OAuth\Backend;
 
-use MediaWiki\Extensions\OAuth\Lib\OAuthConsumer;
-use MediaWiki\Extensions\OAuth\Lib\OAuthDataStore;
+use MediaWiki\Extension\OAuth\Lib\OAuthConsumer;
+use MediaWiki\Extension\OAuth\Lib\OAuthDataStore;
 use MediaWiki\Logger\LoggerFactory;
 use Wikimedia\Rdbms\DBConnRef;
 
@@ -128,6 +128,11 @@ class MWOAuthDataStore extends OAuthDataStore {
 		// Set timeout 5 minutes in the future of the timestamp as OAuthServer does. Use the
 		// timestamp so the client can also expire their nonce records after 5 mins.
 		if ( !$this->cache->add( $key, 1, $timestamp + 300 ) ) {
+			// T308861
+			$key = preg_replace(
+				"/(oauth_token_secret\=\w+:)/",
+				"oauth_token_secret=[REDACTED]:",
+				$key );
 			$this->logger->info( "$key exists, so nonce has been used by this consumer+token" );
 			return true;
 		}
@@ -176,7 +181,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 	/**
 	 * Return a consumer key associated with the given request token.
 	 *
-	 * @param MWOAuthToken $requestToken the request token
+	 * @param string $requestToken the request token
 	 * @return string|false the consumer key or false if nothing is stored for the request token
 	 */
 	public function getConsumerKey( $requestToken ) {

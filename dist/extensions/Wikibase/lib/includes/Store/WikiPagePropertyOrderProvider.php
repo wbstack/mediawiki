@@ -2,9 +2,9 @@
 
 namespace Wikibase\Lib\Store;
 
+use MediaWiki\Page\WikiPageFactory;
 use TextContent;
 use Title;
-use WikiPage;
 
 /**
  * Provides a list of ordered Property numbers
@@ -14,15 +14,23 @@ use WikiPage;
  */
 class WikiPagePropertyOrderProvider extends WikiTextPropertyOrderProvider implements PropertyOrderProvider {
 
+	/** @var WikiPageFactory */
+	private $wikiPageFactory;
+
 	/**
 	 * @var Title
 	 */
 	private $pageTitle;
 
 	/**
+	 * @param WikiPageFactory $wikiPageFactory
 	 * @param Title $pageTitle page name the ordered property list is on
 	 */
-	public function __construct( Title $pageTitle ) {
+	public function __construct(
+		WikiPageFactory $wikiPageFactory,
+		Title $pageTitle
+	) {
+		$this->wikiPageFactory = $wikiPageFactory;
 		$this->pageTitle = $pageTitle;
 	}
 
@@ -33,7 +41,7 @@ class WikiPagePropertyOrderProvider extends WikiTextPropertyOrderProvider implem
 	 * @throws PropertyOrderProviderException
 	 */
 	protected function getPropertyOrderWikitext() {
-		$wikiPage = WikiPage::factory( $this->pageTitle );
+		$wikiPage = $this->wikiPageFactory->newFromTitle( $this->pageTitle );
 
 		$pageContent = $wikiPage->getContent();
 
@@ -45,7 +53,7 @@ class WikiPagePropertyOrderProvider extends WikiTextPropertyOrderProvider implem
 			throw new PropertyOrderProviderException( 'The page content of ' . $this->pageTitle->getText() . ' is not TextContent' );
 		}
 
-		return strval( $pageContent->getNativeData() );
+		return strval( $pageContent->getText() );
 	}
 
 }

@@ -1,6 +1,6 @@
 {
 	"name": "UniversalLanguageSelector",
-	"version": "2021-07-26",
+	"version": "2022-01-19",
 	"author": [
 		"Alolita Sharma",
 		"Amir Aharoni",
@@ -17,26 +17,44 @@
 	"descriptionmsg": "uls-desc",
 	"license-name": "GPL-2.0-or-later OR MIT",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"Hooks": {
-		"BeforePageDisplay": "UniversalLanguageSelectorHooks::addModules",
-		"EnterMobileMode": "UniversalLanguageSelectorHooks::onEnterMobileMode",
-		"GetBetaFeaturePreferences": "UniversalLanguageSelectorHooks::onGetBetaFeaturePreferences",
-		"GetPreferences": "UniversalLanguageSelectorHooks::onGetPreferences",
-		"MakeGlobalVariablesScript": "UniversalLanguageSelectorHooks::addVariables",
-		"ResourceLoaderGetConfigVars": "UniversalLanguageSelectorHooks::addConfig",
-		"SkinAfterPortlet": "UniversalLanguageSelectorHooks::onSkinAfterPortlet",
-		"SkinTemplateNavigation::Universal": "UniversalLanguageSelectorHooks::onSkinTemplateNavigationUniversal",
-		"UserGetLanguageObject": "UniversalLanguageSelectorHooks::getLanguage"
+		"BeforePageDisplay": "main",
+		"EnterMobileMode": "main",
+		"GetBetaFeaturePreferences": "main",
+		"GetPreferences": "main",
+		"MakeGlobalVariablesScript": "main",
+		"PersonalUrls": "main",
+		"ResourceLoaderGetConfigVars": "main",
+		"SkinAfterPortlet": "main",
+		"SkinTemplateNavigation::Universal": "main",
+		"UserGetLanguageObject": "main"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "UniversalLanguageSelector\\Hooks",
+			"services": [
+				"MainConfig",
+				"UserOptionsLookup",
+				"StatsdDataFactory",
+				"LanguageNameUtils"
+			]
+		}
 	},
 	"APIModules": {
-		"languagesearch": "ApiLanguageSearch",
-		"ulslocalization": "ApiULSLocalization",
-		"ulssetlang": {
-			"class": "ApiULSSetLanguage",
+		"languagesearch": "UniversalLanguageSelector\\Api\\ApiLanguageSearch",
+		"ulslocalization": {
+			"class": "UniversalLanguageSelector\\Api\\ApiULSLocalization",
 			"services": [
-				"UserOptionsManager"
+				"LanguageNameUtils"
+			]
+		},
+		"ulssetlang": {
+			"class": "UniversalLanguageSelector\\Api\\ApiULSSetLanguage",
+			"services": [
+				"UserOptionsManager",
+				"LanguageNameUtils"
 			]
 		}
 	},
@@ -47,16 +65,11 @@
 		]
 	},
 	"AutoloadClasses": {
-		"ApiLanguageSearch": "includes/api/ApiLanguageSearch.php",
-		"ApiULSLocalization": "includes/api/ApiULSLocalization.php",
-		"ApiULSSetLanguage": "includes/api/ApiULSSetLanguage.php",
-		"FontRepoCompiler": "includes/FontRepoCompiler.php",
 		"LanguageNameSearch": "data/LanguageNameSearch.php",
-		"LanguageNameSearchData": "data/LanguageNameSearchData.php",
-		"ResourceLoaderULSJsonMessageModule": "includes/ResourceLoaderULSJsonMessageModule.php",
-		"ResourceLoaderULSModule": "includes/ResourceLoaderULSModule.php",
-		"ULSJsonMessageLoader": "includes/ULSJsonMessageLoader.php",
-		"UniversalLanguageSelectorHooks": "includes/UniversalLanguageSelectorHooks.php"
+		"LanguageNameSearchData": "data/LanguageNameSearchData.php"
+	},
+	"AutoloadNamespaces": {
+		"UniversalLanguageSelector\\": "includes/"
 	},
 	"DefaultUserOptions": {
 		"uls-preferences": "",
@@ -109,6 +122,7 @@
 			"description": "Array of jQuery selectors of elements on which IME must not be enabled. @since 2013.07",
 			"value": [
 				"#wpCaptchaWord",
+				".ace_text-input",
 				".ve-ce-surface-paste",
 				".ve-ce-surface-readOnly [contenteditable]"
 			]
@@ -128,7 +142,7 @@
 			"value": false
 		}
 	},
-	"callback": "UniversalLanguageSelectorHooks::setVersionConstant",
+	"callback": "UniversalLanguageSelector\\Hooks::setVersionConstant",
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
 		"remoteExtPath": "UniversalLanguageSelector/resources"
@@ -145,7 +159,8 @@
 			"styles": "css/ext.uls.less",
 			"skinStyles": {
 				"monobook": "css/ext.uls-monobook.css",
-				"vector": "css/ext.uls-vector.less"
+				"vector": "css/ext.uls-vector.less",
+				"vector-2022": "css/ext.uls-vector.less"
 			},
 			"dependencies": [
 				"jquery.uls.data",
@@ -249,7 +264,7 @@
 			"styles": "css/ext.uls.interlanguage.less"
 		},
 		"ext.uls.languagenames": {
-			"class": "ResourceLoaderULSModule"
+			"class": "UniversalLanguageSelector\\ResourceLoaderULSModule"
 		},
 		"ext.uls.languagesettings": {
 			"scripts": "js/ext.uls.languagesettings.js",
@@ -278,7 +293,7 @@
 			]
 		},
 		"ext.uls.messages": {
-			"class": "ResourceLoaderULSJsonMessageModule",
+			"class": "UniversalLanguageSelector\\ResourceLoaderULSJsonMessageModule",
 			"dependencies": "ext.uls.i18n"
 		},
 		"ext.uls.preferences": {
@@ -307,6 +322,9 @@
 				"vector": [
 					"css/ext.uls.pt-vector.less"
 				],
+				"vector-2022": [
+					"css/ext.uls.pt-vector.less"
+				],
 				"monobook": [
 					"css/ext.uls.pt.less",
 					"css/ext.uls.pt-default.less",
@@ -325,6 +343,7 @@
 			],
 			"dependencies": [
 				"mediawiki.api",
+				"mediawiki.jqueryMsg",
 				"mediawiki.ui.button",
 				"mediawiki.Uri"
 			],
@@ -346,24 +365,20 @@
 				"jquery.client"
 			]
 		},
-		"ext.uls.webfonts.fonts": {
-			"dependencies": [
-				"jquery.webfonts",
-				"ext.uls.webfonts.repository"
-			]
-		},
 		"ext.uls.webfonts.mobile": {
 			"scripts": "js/ext.uls.webfonts.mobile.js",
 			"targets": [
 				"mobile"
 			],
 			"dependencies": [
-				"jquery.webfonts",
 				"ext.uls.webfonts.repository"
 			]
 		},
 		"ext.uls.webfonts.repository": {
-			"scripts": "js/ext.uls.webfonts.repository.js",
+			"scripts": [
+				"../lib/jquery.webfonts/src/jquery.webfonts.js",
+				"js/ext.uls.webfonts.repository.js"
+			],
 			"targets": [
 				"desktop",
 				"mobile"
@@ -415,15 +430,6 @@
 				"mobile"
 			],
 			"styles": "jquery.uls/css/jquery.uls.grid.css",
-			"localBasePath": "lib",
-			"remoteExtPath": "UniversalLanguageSelector/lib"
-		},
-		"jquery.webfonts": {
-			"scripts": "jquery.webfonts/src/jquery.webfonts.js",
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"localBasePath": "lib",
 			"remoteExtPath": "UniversalLanguageSelector/lib"
 		},

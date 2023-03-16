@@ -516,7 +516,7 @@ class MobileContext extends ContextSource {
 	 * version of pages.
 	 *
 	 * @param string $cookieFormat should user see mobile version of pages?
-	 * @param null $expiry Expiration of cookie
+	 * @param int|null $expiry Expiration of cookie
 	 */
 	public function setUseFormatCookie( $cookieFormat = 'true', $expiry = null ) {
 		if ( $expiry === null ) {
@@ -715,6 +715,7 @@ class MobileContext extends ContextSource {
 					// invalid pattern for this host, ignore
 					return;
 				}
+				// @phan-suppress-next-line PhanTypeMismatchDimFetch
 				$targetHostParts[$key] = $parsedHostParts[$parsedHostPartKey];
 			} elseif ( isset( $parsedHostParts[$key] )
 				&& $templateHostPart == $parsedHostParts[$key] ) {
@@ -951,7 +952,7 @@ class MobileContext extends ContextSource {
 	public function getXAnalyticsHeader() {
 		$response = $this->getRequest()->response();
 		$currentHeader = method_exists( $response, 'getHeader' ) ?
-			$response->getHeader( 'X-Analytics' ) : '';
+			(string)$response->getHeader( 'X-Analytics' ) : '';
 		parse_str( preg_replace( '/; */', '&', $currentHeader ), $logItems );
 		$logItems += $this->getAnalyticsLogItems();
 		if ( count( $logItems ) ) {

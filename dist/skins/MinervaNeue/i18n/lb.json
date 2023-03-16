@@ -7,7 +7,7 @@
 		]
 	},
 	"minerva-last-modified-date": "Fir d'lescht geännert den $1 ëm $2",
-	"minerva-talk-add-topic": "Diskussioun derbäisetzen",
+	"minerva-talk-add-topic": "Thema derbäisetzen",
 	"mobile-frontend-editor-edit": "Änneren",
 	"minerva-download": "PDF eroflueden",
 	"mobile-frontend-editor-redlink-create": "Säit uleeën",
@@ -17,7 +17,6 @@
 	"mobile-frontend-home-button": "Haaptsäit",
 	"mobile-frontend-language-article-heading": "Sprooch",
 	"mobile-frontend-languages-not-available": "Dës Säit ass net an anere Sproochen disponibel.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Wëllkomm}} $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Haaptmenü opmaachen",
 	"mobile-frontend-main-menu-contributions": "Kontributiounen",
 	"mobile-frontend-main-menu-login": "Aloggen",

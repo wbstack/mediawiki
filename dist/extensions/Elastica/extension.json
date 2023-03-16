@@ -1,6 +1,6 @@
 {
 	"name": "Elastica",
-	"version": "6.1.3",
+	"version": "6.2.0",
 	"author": [
 		"Nik Everett",
 		"Chad Horohoe"
@@ -22,10 +22,12 @@
 	},
 	"AutoloadClasses": {
 		"ElasticaConnection": "includes/ElasticaConnection.php",
-		"ElasticaHttpTransportCloser": "includes/ElasticaHttpTransportCloser.php",
 		"MWElasticUtils": "includes/MWElasticUtils.php",
 		"MediaWiki\\Extension\\Elastica\\ElasticaConnection": "includes/ElasticaConnection.php",
 		"MediaWiki\\Extension\\Elastica\\MWElasticUtils": "includes/MWElasticUtils.php"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\Elastica\\": "includes/"
 	},
 	"load_composer_autoloader": true,
 	"manifest_version": 2

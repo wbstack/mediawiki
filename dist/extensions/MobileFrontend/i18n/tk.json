@@ -41,6 +41,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "Doly gör",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Sebäp",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|Blokirleýji}}",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "Blokyň möhleti gutarar",
 	"mobile-frontend-editor-blocked-drawer-help": "Jikme-jikliklere serediň",
 	"mobile-frontend-editor-generic-block-reason": "Näbelli sebäp",
 	"mobile-frontend-editor-cancel": "Goýbolsun et",

@@ -4,5 +4,26 @@
 			"McDutchie"
 		]
 	},
-	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Le parola clave wbstatementquantity non contine declarationes valide."
+	"wikibasecirrus-desc": "Extension de Wikibase pro usar le functionalitate de CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "Le parola-clave $1 contine un codice de lingua incognite: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "Le parola-clave $1 ha fornite troppo de codices de lingua. Cercante in $2 del $3 lingua{{PLURAL:$3||s}} fornite",
+	"wikibasecirrus-inlabel-no-query-provided": "Pro le parola-clave inlabel ha essite fornite un catena de recerca vacue.",
+	"wikibasecirrus-rescore-profile-prefix": "Profilo \"rescore\" predefinite pro le recerca de completamento",
+	"wikibasecirrus-rescore-profile-prefix-boost": "Profilo \"rescore\" pro recerca de completamento con reinfortiamento de declarationes",
+	"wikibasecirrus-rescore-profile-fulltext": "Profilo \"rescore\" predefinite pro le recerca de texto integral",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "Profilo \"rescore\" pro le recerca de texto integral con scores de phrases",
+	"wikibasecirrus-search-bad-entity-type": "Mal typo de entitate: $1",
+	"wikibasecirrus-search-bad-profile-name": "Mal nomine de profilo de recerca: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Le parola-clave haswbstatement non contine declarationes valide.",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Le parola-clave \"haslicense\" non contine argumentos valide",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Le parola clave wbstatementquantity non contine declarationes valide.",
+	"special-entitieswithoutdescription": "Entitates sin description",
+	"wikibasecirrus-entitieswithoutdescription-legend": "Obtener un lista de entitates sin description",
+	"special-entitieswithoutlabel": "Entitates sin etiquetta",
+	"wikibasecirrus-entitieswithoutlabel-legend": "Obtener un lista de entitates sin etiquetta",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Codice de lingua:",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Typo:",
+	"wikibasecirrus-entitieswithoutlabel-submit": "Cercar",
+	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" non es un codice de lingua valide.",
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "\"$1\" non es un typo de entitate valide."
 }

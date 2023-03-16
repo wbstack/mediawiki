@@ -36,6 +36,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "Hwɛ pii",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "Siantsir",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|osi kwan}}",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "Akwansiwdze no bɛtwam",
 	"mobile-frontend-editor-blocked-drawer-help": "Hwɛ ho nsɛm",
 	"mobile-frontend-editor-generic-block-reason": "Siantsir a yennyim",
 	"mobile-frontend-editor-cancel": "Twa mu",

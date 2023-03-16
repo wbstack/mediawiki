@@ -1,7 +1,3 @@
-/**
- * @external RevisionList
- * @external SliderView
- */
 var SliderView = require( './ext.RevisionSlider.SliderView.js' );
 
 /**
@@ -125,7 +121,18 @@ $.extend( Slider.prototype, {
 module.exports = {
 	Api: require( './ext.RevisionSlider.Api.js' ),
 	DiffPage: require( './ext.RevisionSlider.DiffPage.js' ),
+	HelpDialog: require( './ext.RevisionSlider.HelpDialog.js' ),
+	makeRevisions: require( './ext.RevisionSlider.RevisionList.js' ).makeRevisions,
+	Revision: require( './ext.RevisionSlider.Revision.js' ).Revision,
+	RevisionList: require( './ext.RevisionSlider.RevisionList.js' ).RevisionList,
+	RevisionListView: require( './ext.RevisionSlider.RevisionListView.js' ),
+	setUserOffset: require( './ext.RevisionSlider.Revision.js' ).setUserOffset,
 	Slider: Slider,
 	SliderView: SliderView,
-	utils: require( './ext.RevisionSlider.util.js' )
+	utils: require( './ext.RevisionSlider.util.js' ),
+
+	private: {
+		Pointer: require( './ext.RevisionSlider.Pointer.js' ),
+		PointerView: require( './ext.RevisionSlider.PointerView.js' )
+	}
 };

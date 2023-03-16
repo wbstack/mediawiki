@@ -143,7 +143,7 @@ class SpecialNewLexeme extends SpecialPage {
 			->setWrapperLegendMsg( $this->getLegend() )
 			->setSubmitCallback(
 				function ( $data, HTMLForm $form ) {
-					// TODO: no form data validation??
+					// $data is already validated at this point (according to the field definitions)
 
 					$entity = $this->createEntityFromFormData( $data );
 
@@ -210,7 +210,15 @@ class SpecialNewLexeme extends SpecialPage {
 				'id' => 'wb-newlexeme-lemma',
 				'required' => true,
 				'placeholder-message' => 'wikibaselexeme-lemma-edit-placeholder',
-				'label-message' => 'wikibaselexeme-newlexeme-lemma'
+				'label-message' => 'wikibaselexeme-newlexeme-lemma',
+				'validation-callback' => function ( string $lemma ) {
+					// TODO use LemmaTermValidator with ValidatorErrorLocalizer instead
+					if ( mb_strlen( $lemma ) > 1000 ) {
+						return $this->msg( 'wikibase-validator-too-long' )
+							->numParams( 1000 );
+					}
+					return true;
+				},
 			],
 			self::FIELD_LEMMA_LANGUAGE => [
 				'name' => self::FIELD_LEMMA_LANGUAGE,
@@ -315,7 +323,7 @@ class SpecialNewLexeme extends SpecialPage {
 	}
 
 	private function getWarnings(): array {
-		if ( $this->getUser()->isAnon() ) {
+		if ( !$this->getUser()->isRegistered() ) {
 			return [
 				$this->msg(
 					'wikibase-anonymouseditwarning',
@@ -336,9 +344,7 @@ class SpecialNewLexeme extends SpecialPage {
 		return true;
 	}
 
-	/**
-	 * @see SpecialPage::isListed()
-	 */
+	/** @inheritDoc */
 	public function isListed() {
 		return $this->entityNamespaceLookup->getEntityNamespace( Lexeme::ENTITY_TYPE ) !== null;
 	}

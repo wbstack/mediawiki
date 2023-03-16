@@ -2,29 +2,28 @@
 	<label
 		class="wb-db-property-label"
 		:for="htmlFor"
-	><TermLabel :term="term" /></label>
+	><TermLabel :term="term" :in-language="$inLanguage" /></label>
 </template>
 
 <script lang="ts">
+import { defineComponent, PropType } from 'vue';
 import TermLabel from '@/presentation/components/TermLabel.vue';
-import {
-	Component,
-	Prop,
-	Vue,
-} from 'vue-property-decorator';
 import Term from '@/datamodel/Term';
 
-@Component( {
+export default defineComponent( {
+	name: 'PropertyLabel',
 	components: { TermLabel },
-} )
-export default class PropertyLabel extends Vue {
-
-	@Prop( { required: true } )
-	public term!: Term;
-
-	@Prop( { required: true } )
-	public htmlFor!: string;
-}
+	props: {
+		term: {
+			type: Object as PropType<Term>,
+			required: true,
+		},
+		htmlFor: {
+			type: String,
+			required: true,
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

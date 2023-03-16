@@ -24,7 +24,6 @@
 	"mobile-frontend-home-button": "Почетна",
 	"mobile-frontend-language-article-heading": "Језик",
 	"mobile-frontend-languages-not-available": "Страница није доступна на другим језицима.",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Добро дошли}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Отворите главни мени",
 	"mobile-frontend-main-menu-contributions": "Доприноси",
 	"mobile-frontend-main-menu-login": "Пријавите се",
@@ -62,6 +61,7 @@
 	"minerva-page-actions-move": "Премести",
 	"minerva-page-actions-delete": "Избриши",
 	"minerva-page-actions-protect": "Заштити",
+	"minerva-page-actions-unprotect": "Скини заштиту",
 	"minerva-page-actions-user-groups": "Корисничке групе",
 	"minerva-page-actions-logs": "Дневници",
 	"minerva-page-actions-wikibase": "{{WBREPONAME}} ставка",
@@ -79,5 +79,7 @@
 	"skin-minerva-mobile-option-MinervaShowCategories-description": "Приказује категорије страница",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "Побољшан третман проблема са страницом",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "Проблеми са страницом (Шаблон:ambox) биће уметнути у чланак.",
-	"skin-minerva-recentchanges-warning-enhanced-not-supported": "Груписање резултата по страници није доступно на мобилним уређајима. Ако желите да користите функцију, посетите сајт за рачунаре."
+	"skin-minerva-recentchanges-warning-enhanced-not-supported": "Груписање резултата по страници није доступно на мобилним уређајима. Ако желите да користите функцију, посетите сајт за рачунаре.",
+	"minerva.css": "/* CSS постављен овде учитаће се свим корисницима Минерва (ново) теме */",
+	"minerva.js": "/* JavaScript постављен овде учитаће се свим корисницима Минерва (ново) теме */"
 }

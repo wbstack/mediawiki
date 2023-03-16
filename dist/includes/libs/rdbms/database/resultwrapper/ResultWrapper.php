@@ -45,33 +45,6 @@ abstract class ResultWrapper implements IResultWrapper {
 	private $fieldNames;
 
 	/**
-	 * Get the underlying RDBMS driver-specific result resource
-	 *
-	 * The result resource field should not be accessed from non-Database related classes.
-	 * It is database class specific and is stored here to associate iterators with queries.
-	 *
-	 * @since 1.34
-	 * @deprecated since 1.37
-	 *
-	 * @param self|mixed $res
-	 * @return mixed
-	 */
-	public static function unwrap( $res ) {
-		wfDeprecated( __METHOD__, '1.37' );
-		if ( $res instanceof MysqliResultWrapper ) {
-			return $res->getInternalResult();
-		} elseif ( $res instanceof SqliteResultWrapper ) {
-			return $res->getInternalResult();
-		} elseif ( $res instanceof PostgresResultWrapper ) {
-			return $res->getInternalResult();
-		} elseif ( $res instanceof IResultWrapper ) {
-			throw new \InvalidArgumentException( __METHOD__ . ': $res does not support unwrap()' );
-		} else {
-			return $res;
-		}
-	}
-
-	/**
 	 * Get the number of rows in the result set
 	 *
 	 * @since 1.37
@@ -122,7 +95,7 @@ abstract class ResultWrapper implements IResultWrapper {
 		return $this->doNumRows();
 	}
 
-	public function count() {
+	public function count(): int {
 		return $this->doNumRows();
 	}
 
@@ -138,7 +111,7 @@ abstract class ResultWrapper implements IResultWrapper {
 		return $this->currentRow;
 	}
 
-	public function seek( $pos ) {
+	public function seek( $pos ): void {
 		$numRows = $this->numRows();
 		// Allow seeking to zero if there are no results
 		$max = $numRows ? $numRows - 1 : 0;
@@ -158,10 +131,11 @@ abstract class ResultWrapper implements IResultWrapper {
 		$this->currentRow = false;
 	}
 
-	public function rewind() {
+	public function rewind(): void {
 		$this->seek( 0 );
 	}
 
+	#[\ReturnTypeWillChange]
 	public function current() {
 		if ( $this->currentRow === null ) {
 			$this->currentRow = $this->fetchObject();
@@ -170,7 +144,7 @@ abstract class ResultWrapper implements IResultWrapper {
 		return $this->currentRow;
 	}
 
-	public function key() {
+	public function key(): int {
 		return $this->currentPos;
 	}
 
@@ -178,7 +152,7 @@ abstract class ResultWrapper implements IResultWrapper {
 		return $this->fetchObject();
 	}
 
-	public function valid() {
+	public function valid(): bool {
 		return $this->currentPos >= 0
 			&& $this->currentPos < $this->numRows();
 	}

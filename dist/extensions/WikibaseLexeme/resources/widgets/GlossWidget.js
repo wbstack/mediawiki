@@ -1,4 +1,4 @@
-module.exports = ( function ( require, wb, Vuex ) {
+module.exports = ( function ( require, wb ) {
 	'use strict';
 
 	var Vue = require( 'vue' ),
@@ -9,8 +9,6 @@ module.exports = ( function ( require, wb, Vuex ) {
 		// languages.json is a dynamic ResourceLoader source file
 		lexemeTermLanguages = require( './languages.json' ).lexemeTermLanguages;
 
-	Vue.use( Vuex );
-
 	function deepClone( object ) {
 		return JSON.parse( JSON.stringify( object ) ).sort( function ( a, b ) {
 			return a.language > b.language;
@@ -20,23 +18,26 @@ module.exports = ( function ( require, wb, Vuex ) {
 	function applyGlossWidget( widgetElement, glosses, beforeUpdate, mw, getDirectionality ) {
 		var template = mw.template.get( 'wikibase.lexeme.lexemeview', 'glossWidget.vue' ).getSource();
 		var messages = mw.messages;
+		var fragment = document.createDocumentFragment();
 
-		return new Vue( newGlossWidget( messages, widgetElement, template, glosses, beforeUpdate, getDirectionality ) );
+		// make the app replace the widgetElement (like in Vue 2) instead of appending to it (Vue 3 mount behavior)
+		var app = Vue.createMwApp( newGlossWidget( messages, template, glosses, beforeUpdate, getDirectionality ) )
+			.mount( fragment );
+		widgetElement.replaceWith( fragment );
+
+		return app;
 	}
 
 	/**
-	 *
 	 * @param {mw.messages} messages
-	 * @param {string|HTMLElement} widgetElement
 	 * @param {string} template
 	 * @param {[{ value: string, language: string }]} glosses
 	 * @param {Function} beforeUpdate
 	 * @param {Function} getDirectionality
 	 * @return {Object}
 	 */
-	function newGlossWidget( messages, widgetElement, template, glosses, beforeUpdate, getDirectionality ) {
+	function newGlossWidget( messages, template, glosses, beforeUpdate, getDirectionality ) {
 		return {
-			el: widgetElement,
 			template: template,
 
 			mixins: [
@@ -50,9 +51,11 @@ module.exports = ( function ( require, wb, Vuex ) {
 
 			beforeUpdate: beforeUpdate,
 
-			data: {
-				inEditMode: false,
-				glosses: deepClone( glosses )
+			data: function () {
+				return {
+					inEditMode: false,
+					glosses: deepClone( glosses )
+				};
 			},
 			methods: {
 				add: function () {
@@ -96,4 +99,4 @@ module.exports = ( function ( require, wb, Vuex ) {
 		newGlossWidget: newGlossWidget
 	};
 
-} )( require, wikibase, Vuex );
+}( require, wikibase ) );

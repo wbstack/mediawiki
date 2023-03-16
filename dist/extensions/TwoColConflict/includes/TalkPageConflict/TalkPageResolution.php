@@ -7,6 +7,8 @@ namespace TwoColConflict\TalkPageConflict;
  * manipulated by editing your text or reordering your and the other text block.
  *
  * @codeCoverageIgnore Trivial, even immutable value object
+ *
+ * @license GPL-2.0-or-later
  */
 class TalkPageResolution {
 

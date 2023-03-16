@@ -12,13 +12,13 @@ use Wikibase\Lib\Changes\Change;
 use Wikibase\Lib\Changes\ChangeRow;
 use Wikibase\Lib\Changes\ChangeStore;
 use Wikibase\Lib\Changes\EntityChange;
+use Wikibase\Lib\Changes\ItemChange;
 use Wikibase\Lib\Rdbms\RepoDomainDbFactory;
 use Wikibase\Repo\ChangeModification\DispatchChangesJob;
 use Wikibase\Repo\Notifications\ChangeHolder;
 use Wikibase\Repo\Store\Sql\SqlSubscriptionLookup;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\Store\SubscriptionLookup;
-use Wikibase\Repo\WikibaseRepo;
 
 //phpcs:disable MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName
 /**
@@ -93,20 +93,21 @@ class RecentChangeSaveHookHandler {
 			return;
 		}
 
-		if ( !$this->subscriptionLookup->getSubscribers( $change->getEntityId() ) ) {
+		if ( !$this->changeNeedsDispatching( $change ) ) {
 			return;
 		}
 
 		$this->setChangeMetaData( $change, $recentChange, $centralUserId );
 		$this->changeStore->saveChange( $change );
 
-		// FIXME: inject settings instead?
-		if ( WikibaseRepo::getSettings()->getSetting( 'dispatchViaJobsEnabled' ) ) {
-			$this->enqueueDispatchChangesJob(
-				$change->getEntityId()->getSerialization(),
-				$change->getId()
-			);
-		}
+		$this->enqueueDispatchChangesJob(
+			$change->getEntityId()->getSerialization()
+		);
+	}
+
+	private function changeNeedsDispatching( EntityChange $change ) {
+		return $this->subscriptionLookup->getSubscribers( $change->getEntityId() ) ||
+			( $change instanceof ItemChange && $change->getSiteLinkDiff()->getOperations() );
 	}
 
 	private function setChangeMetaData( EntityChange $change, RecentChange $rc, int $centralUserId ): void {
@@ -130,8 +131,8 @@ class RecentChangeSaveHookHandler {
 		);
 	}
 
-	private function enqueueDispatchChangesJob( string $entityIdSerialization, int $changeId ): void {
-		$job = DispatchChangesJob::makeJobSpecification( $entityIdSerialization, $changeId );
+	private function enqueueDispatchChangesJob( string $entityIdSerialization ): void {
+		$job = DispatchChangesJob::makeJobSpecification( $entityIdSerialization );
 		$jobQueueGroup = MediaWikiServices::getInstance()->getJobQueueGroupFactory()->makeJobQueueGroup();
 		$jobQueueGroup->lazyPush( $job );
 	}

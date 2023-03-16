@@ -3,18 +3,17 @@
 		"authors": [
 			"Sasan700",
 			"Исмаил Садуев",
-			"Умар"
+			"Умар",
+			"Amire80"
 		]
 	},
 	"wikieditor": "Викийоза тадаран шоьйра интерфейс",
 	"wikieditor-desc": "Тадарш даран шуьйра интерфейс латайо кхин дукху функцеш а",
 	"wikieditor-wikitext-tab": "Викийоза",
-	"wikieditor-loading": "Чуйолуш",
 	"wikieditor-toolbar": "Тадаран меттиг",
 	"wikieditor-toolbar-desc": "Тадаран меттиг гӀоле лелорца",
 	"wikieditor-toolbar-preference": "Гайта дика кечйина панель",
 	"wikieditor-toolbar-preference-help": "Наггахь йоккху цӀе «вики-кодан редактор — 2010».",
-	"wikieditor-toolbar-loading": "Чуйолуш…",
 	"wikieditor-toolbar-tool-bold": "Ӏаьржа",
 	"wikieditor-toolbar-tool-bold-example": "Йоза Ӏаьржа къастор",
 	"wikieditor-toolbar-tool-italic": "Курсив",
@@ -45,7 +44,6 @@
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "Ахьа хоттийна URL кхечу вики-агӀонан хьажорагах тера йу. Лаьий хьуна и хьажорг чоьхьарчех йан?",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-int": "Чоьхьа хьажорг",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-ext": "Арахьара хьажорг",
-	"wikieditor-toolbar-tool-link-empty": "Ахьа ца гайтин мичхьа хьажойеза хьажорг.",
 	"wikieditor-toolbar-tool-file": "Суьрташ а, медиафайлаш а",
 	"wikieditor-toolbar-tool-file-example": "Example.jpg",
 	"wikieditor-toolbar-tool-file-title": "Файл чуйиллар",
@@ -142,7 +140,7 @@
 	"wikieditor-toolbar-help-page-list": "Могlамаш",
 	"wikieditor-toolbar-help-page-file": "Файлаш",
 	"wikieditor-toolbar-help-page-reference": "Билгалдахарш",
-	"wikieditor-toolbar-help-page-discussion": "Дийцаре",
+	"wikieditor-toolbar-help-page-discussion": "Дийцар",
 	"wikieditor-toolbar-help-content-italic-description": "Курсив",
 	"wikieditor-toolbar-help-content-italic-syntax": "''Курсиваца къастор''",
 	"wikieditor-toolbar-help-content-italic-result": "<em>Курсиваца къастор</em>",
@@ -195,5 +193,6 @@
 	"wikieditor-toolbar-help-content-signature-result": "<a href='#' title='$1:Username'>Декъашхочун цӀе</a> (<a href='#' title='$2:Username'>дийцаре</a>)",
 	"wikieditor-toolbar-help-content-indent-description": "Дlахило",
 	"wikieditor-toolbar-help-content-indent-syntax": "Гуттарлера йоза<br />:Дlахилийна йоза<br />::Дlахилийна йоза",
-	"wikieditor-toolbar-help-content-indent-result": "Гуттарлера йоза<dl><dd>Дlахилийна йоза<dl><dd>Дlахилийна йоза</dd></dl></dd></dl>"
+	"wikieditor-toolbar-help-content-indent-result": "Гуттарлера йоза<dl><dd>Дlахилийна йоза<dl><dd>Дlахилийна йоза</dd></dl></dd></dl>",
+	"wikieditor-realtimepreview-preview": "Хьалххе хьажар"
 }

@@ -1,14 +1,12 @@
 var Settings = require( 'ext.RevisionSlider.Settings' ),
 	settings = new Settings(),
-	HelpDialog = require( 'ext.RevisionSlider.HelpDialog' ).HelpDialog,
-	RevisionListModule = require( 'ext.RevisionSlider.RevisionList' ),
 	SliderModule = require( 'ext.RevisionSlider.Slider' ),
+	HelpDialog = SliderModule.HelpDialog,
 	RevisionSliderApi = SliderModule.Api,
 	Slider = SliderModule.Slider,
 	utils = SliderModule.utils,
 	autoExpand = settings.shouldAutoExpand(),
 	expanded = autoExpand,
-	autoExpandButton,
 	toggleButton = OO.ui.ButtonWidget.static.infuse( $( '.mw-revslider-toggle-button' ) );
 
 function initialize() {
@@ -22,7 +20,7 @@ function initialize() {
 	} );
 
 	mw.track( 'counter.MediaWiki.RevisionSlider.event.init' );
-	RevisionListModule.setUserOffset(
+	SliderModule.setUserOffset(
 		mw.user.options.get( 'timecorrection' ) ?
 			mw.user.options.get( 'timecorrection' ).split( '|' )[ 1 ] :
 			mw.config.get( 'extRevisionSliderTimeOffset' )
@@ -43,27 +41,22 @@ function initialize() {
 			limit: utils.calculateRevisionsPerWindow( 160, 16 ),
 			changeTags: changeTags
 		} ).then( function ( data2 ) {
-			var revs,
-				revisionList,
-				$container,
-				slider;
-
 			mw.track( 'timing.MediaWiki.RevisionSlider.timing.initFetchRevisionData', mw.now() - startTime );
 
 			try {
-				revs = data2.revisions;
+				var revs = data2.revisions;
 				revs.reverse();
 
-				$container = $( '.mw-revslider-slider-wrapper' );
+				var $container = $( '.mw-revslider-slider-wrapper' );
 				$container.attr( 'id', 'mw-revslider-slider-wrapper' );
 
-				revisionList = new RevisionListModule.RevisionList(
-					RevisionListModule.makeRevisions( revs ),
+				var revisionList = new SliderModule.RevisionList(
+					SliderModule.makeRevisions( revs ),
 					changeTags
 				);
 				revisionList.getView().setDir( $container.css( 'direction' ) || 'ltr' );
 
-				slider = new Slider( revisionList );
+				var slider = new Slider( revisionList );
 				slider.getView().render( $container );
 
 				$( window ).on( 'resize', OO.ui.throttle( function () {
@@ -111,7 +104,7 @@ function collapse() {
 	toggleButton.$element.children().attr( 'aria-expanded', 'false' );
 }
 
-autoExpandButton = new OO.ui.ToggleButtonWidget( {
+var autoExpandButton = new OO.ui.ToggleButtonWidget( {
 	icon: 'pushPin',
 	classes: [ 'mw-revslider-auto-expand-button' ],
 	title: mw.msg( autoExpand ?

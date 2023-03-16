@@ -6,12 +6,12 @@
 			"Litingatinga Silozi",
 			"Ooswesthoesbes",
 			"SF-Language",
-			"아라"
+			"아라",
+			"Amire80"
 		]
 	},
 	"tog-underline": "Tumana ling'ko:",
 	"tog-usenewrc": "Inenset petuho nca (JavaScript)",
-	"tog-numberheadings": "Auto-palo mukunguna",
 	"tog-editondblclick": "Hloli ye ng'i petulo di 'klik' dubo (JavaScript)",
 	"tog-watchcreations": "Pusize petulo a hloli di zwa mukoloko di kentezi",
 	"tog-watchdefault": "Pusize petulo a hloli ye ng'i di zwa mukoloko di kentezi",
@@ -119,7 +119,7 @@
 	"protect_change": "fetuhile bukelezi",
 	"unprotect": "bukelezi tamuhile",
 	"newpage": "Petulo hlolinu",
-	"talkpagelinktext": "Bulelezi",
+	"talkpagelinktext": "bulelezi",
 	"specialpage": "Petulo Zwenti",
 	"personaltools": "Solume sisebelisoni",
 	"talk": "Bulelezi",
@@ -499,7 +499,7 @@
 	"enotif_impersonal_salutation": "{{SITENAME}} sebelu",
 	"created": "hlolini",
 	"changed": "petuhoni",
-	"deletepage": "Afi kulobala petulo",
+	"deletepage-submit": "Afi kulobala petulo",
 	"confirm": "Afi pe",
 	"excontent": "Petulo sa ng'i: '$1'",
 	"excontentauthor": "Petulo sa ng'i: '$1' (sebelu sa ng'i '[[Special:Contributions/$2|$2]]')",
@@ -719,5 +719,6 @@
 	"watchlisttools-raw": "Hloli ye ng'i ro mukoloko di kentezi",
 	"version": "Pane",
 	"specialpages": "Petulo zwenti",
+	"deletepage": "Afi kulobala petulo",
 	"rightsnone": "(ni)"
 }

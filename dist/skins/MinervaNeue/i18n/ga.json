@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"MinecraftAustralia",
 			"Smirkybec",
 			"Tem",
 			"පසිඳු කාවින්ද",
-			"Amire80",
 			"Dowlinme"
 		]
 	},
@@ -13,7 +13,6 @@
 	"mobile-frontend-history": "Féach ar stair eagarthóireachta an leathanaigh.",
 	"mobile-frontend-home-button": "Baile",
 	"mobile-frontend-language-article-heading": "Teanga",
-	"mobile-frontend-logged-in-homepage-notification": "{{GENDER:$1|Fáilte}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Osclóidh seo an príomhroghchlár",
 	"mobile-frontend-main-menu-login": "Logáil isteach",
 	"mobile-frontend-main-menu-nearby": "In aice láimhe",

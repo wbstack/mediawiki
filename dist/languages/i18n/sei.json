@@ -8,14 +8,14 @@
 			"SeriCtam",
 			"Teak",
 			"Urhixidur",
-			"아라"
+			"아라",
+			"Amire80"
 		]
 	},
 	"tog-underline": "Squóráam linkám:",
 	"tog-hideminor": "Camaát editicúnos pac-quimáaxat camjöx cmaa iti",
 	"tog-extendwatchlist": "Expand listade cáminot zo cohuatlöx jömde quíix applicablix",
 	"tog-usenewrc": "Camjöx cmaa enhancöx (JavaScript)",
-	"tog-numberheadings": "Auto-numberom text corridór",
 	"tog-editondblclick": "Ticpatlöx páhinám 2 clickám mii (JavaScript)",
 	"tog-editsectiononrightclick": "Ton ticpatlöx seccion pok clickám mii<br /> seccion titelám iti (JavaScript)",
 	"tog-watchcreations": "Plusöx páhinám he hun he listade cáminot",
@@ -128,7 +128,7 @@
 	"protect_change": "Proteccion quiix",
 	"unprotect": "unprotectom",
 	"newpage": "Páhina quiih",
-	"talkpagelinktext": "Czaxö",
+	"talkpagelinktext": "czaxö",
 	"specialpage": "Páhina extrava",
 	"personaltools": "Cui personalui",
 	"talk": "Czaxö",
@@ -500,7 +500,6 @@
 	"license-header": "Licenciónom:",
 	"nolicense": "Seleccion coccebj hun",
 	"license-nopreview": "(Necuáxiit)",
-	"listfiles_search_for": "Yahöxde IDde ciúchan:",
 	"imgfile": "ciúchan",
 	"listfiles": "Listade ciúchán",
 	"listfiles_date": "Datum",
@@ -609,7 +608,7 @@
 	"enotif_anon_editor": "caitom anoniimom $1",
 	"created": "creacöx",
 	"changed": "quiixöx",
-	"deletepage": "Delatar páhina",
+	"deletepage-submit": "Delatar páhina",
 	"prot_1movedto2": "[[$1]] yacomöxde [[$2]]",
 	"pagesize": "(bytenám)",
 	"restriction-edit": "Ticpatlöx",
@@ -707,5 +706,6 @@
 	"autosumm-new": "Hunpáhina: $1",
 	"version": "Vercion",
 	"specialpages": "Páhinám extravám",
+	"deletepage": "Delatar páhina",
 	"rightsnone": "(zéro)"
 }

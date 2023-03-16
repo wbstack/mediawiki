@@ -10,7 +10,6 @@ use Elastica\Query\MatchNone;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeContent;
-use Wikibase\Lib\Interactors\TermSearchResult;
 use Wikibase\Search\Elastic\EntitySearchElastic;
 use Wikibase\Search\Elastic\EntitySearchUtils;
 
@@ -138,15 +137,7 @@ class FormSearchEntity extends LexemeSearchEntity {
 	}
 
 	/**
-	 * Get entities matching the search term.
-	 *
-	 * @param string $text
-	 * @param string $languageCode
-	 * @param string $entityType
-	 * @param int $limit
-	 * @param bool $strictLanguage
-	 *
-	 * @return TermSearchResult[] Key: string Serialized EntityId
+	 * @inheritDoc
 	 */
 	public function getRankedSearchResults(
 		$text,

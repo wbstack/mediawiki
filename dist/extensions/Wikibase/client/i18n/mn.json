@@ -1,13 +1,25 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Elvonudinium",
-			"MongolWiki"
+			"MongolWiki",
+			"Chinneeb"
 		]
 	},
 	"wikibase-dataitem": "Бусад хэлний холбоос",
-	"wikibase-editlinks": "Оноон холбох",
-	"wikibase-linkitem-addlinks": "Татан холбох",
+	"wikibase-editlinks": "Холбоос засах",
+	"wikibase-editlinkstitle": "Өөр хэлтэй холбосныг засах",
+	"wikibase-addlinkstitle": "Өөр хэлтэй холбох",
+	"wikibase-linkitem-addlinks": "Холбоос нэмэх",
+	"wikibase-linkitem-title": "Хуудастай холбох",
+	"wikibase-linkitem-linkpage": "Хуудастай холбох",
+	"wikibase-linkitem-input-site": "Хэл:",
+	"wikibase-linkitem-input-page": "Хуудас:",
+	"wikibase-rc-hide-wikidata": "{{WBREPONAME}} $1",
+	"wikibase-rc-hide-wikidata-hide": "Нуух",
+	"wikibase-rc-hide-wikidata-show": "Үзүүлэх",
 	"wikibase-rc-wikibase-edit-letter": "ө",
-	"wikibase-rc-wikibase-edit-title": "Вики өгөгдөл засвар"
+	"wikibase-rc-wikibase-edit-title": "Вики өгөгдөл засвар",
+	"wikibase-otherprojects": "Бусад төсөл"
 }

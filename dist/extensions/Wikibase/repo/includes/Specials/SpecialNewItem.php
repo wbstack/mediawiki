@@ -4,7 +4,7 @@ namespace Wikibase\Repo\Specials;
 
 use Message;
 use OutputPage;
-use SiteLookup;
+use Site;
 use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\Item;
@@ -15,12 +15,14 @@ use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\SiteLinkTargetProvider;
 use Wikibase\Repo\Specials\HTMLForm\HTMLAliasesField;
 use Wikibase\Repo\Specials\HTMLForm\HTMLContentLanguageField;
 use Wikibase\Repo\Specials\HTMLForm\HTMLTrimmedTextField;
 use Wikibase\Repo\Store\TermsCollisionDetector;
 use Wikibase\Repo\SummaryFormatter;
 use Wikibase\Repo\Validators\TermValidatorFactory;
+use Wikibase\Repo\Validators\ValidatorErrorLocalizer;
 
 /**
  * Page for creating new Wikibase items.
@@ -38,11 +40,6 @@ class SpecialNewItem extends SpecialNewEntity {
 	public const FIELD_PAGE = 'page';
 
 	/**
-	 * @var SiteLookup
-	 */
-	private $siteLookup;
-
-	/**
 	 * @var TermValidatorFactory
 	 */
 	private $termValidatorFactory;
@@ -52,6 +49,19 @@ class SpecialNewItem extends SpecialNewEntity {
 	 */
 	private $termsCollisionDetector;
 
+	/** @var ValidatorErrorLocalizer */
+	private $errorLocalizer;
+
+	/**
+	 * @var SiteLinkTargetProvider
+	 */
+	private $siteLinkTargetProvider;
+
+	/**
+	 * @var string[]
+	 */
+	private $siteLinkGroups;
+
 	public function __construct(
 		array $tags,
 		SpecialPageCopyrightView $copyrightView,
@@ -59,9 +69,11 @@ class SpecialNewItem extends SpecialNewEntity {
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
 		MediawikiEditEntityFactory $editEntityFactory,
-		SiteLookup $siteLookup,
 		TermValidatorFactory $termValidatorFactory,
-		TermsCollisionDetector $termsCollisionDetector
+		TermsCollisionDetector $termsCollisionDetector,
+		ValidatorErrorLocalizer $errorLocalizer,
+		SiteLinkTargetProvider $siteLinkTargetProvider,
+		array $siteLinkGroups
 	) {
 		parent::__construct(
 			'NewItem',
@@ -73,20 +85,23 @@ class SpecialNewItem extends SpecialNewEntity {
 			$entityTitleLookup,
 			$editEntityFactory
 		);
-		$this->siteLookup = $siteLookup;
 		$this->termValidatorFactory = $termValidatorFactory;
 		$this->termsCollisionDetector = $termsCollisionDetector;
+		$this->errorLocalizer = $errorLocalizer;
+		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
+		$this->siteLinkGroups = $siteLinkGroups;
 	}
 
 	public static function factory(
-		SiteLookup $siteLookup,
 		MediawikiEditEntityFactory $editEntityFactory,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityTitleLookup $entityTitleLookup,
 		TermsCollisionDetector $itemTermsCollisionDetector,
 		SettingsArray $repoSettings,
+		SiteLinkTargetProvider $siteLinkTargetProvider,
 		SummaryFormatter $summaryFormatter,
-		TermValidatorFactory $termValidatorFactory
+		TermValidatorFactory $termValidatorFactory,
+		ValidatorErrorLocalizer $errorLocalizer
 	): self {
 		$copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
@@ -101,9 +116,11 @@ class SpecialNewItem extends SpecialNewEntity {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
-			$siteLookup,
 			$termValidatorFactory,
-			$itemTermsCollisionDetector
+			$itemTermsCollisionDetector,
+			$errorLocalizer,
+			$siteLinkTargetProvider,
+			$repoSettings->getSetting( 'siteLinkGroups' )
 		);
 	}
 
@@ -133,7 +150,7 @@ class SpecialNewItem extends SpecialNewEntity {
 		$item->setAliases( $languageCode, $formData[ self::FIELD_ALIASES ] );
 
 		if ( isset( $formData[ self::FIELD_SITE ] ) ) {
-			$site = $this->siteLookup->getSite( $formData[ self::FIELD_SITE ] );
+			$site = $this->getSiteLinkTargetSite( $formData[ self::FIELD_SITE ] );
 			$normalizedPageName = $site->normalizePageName( $formData[ self::FIELD_PAGE ] );
 
 			$item->getSiteLinkList()->addNewSiteLink( $site->getGlobalId(), $normalizedPageName );
@@ -184,7 +201,7 @@ class SpecialNewItem extends SpecialNewEntity {
 				'id' => 'wb-newitem-site',
 				'readonly' => 'readonly',
 				'validation-callback' => function ( $siteId, $formData ) {
-					$site = $this->siteLookup->getSite( $siteId );
+					$site = $this->getSiteLinkTargetSite( $siteId );
 
 					if ( $site === null ) {
 						return [ $this->msg( 'wikibase-newitem-not-recognized-siteid' )->text() ];
@@ -203,7 +220,7 @@ class SpecialNewItem extends SpecialNewEntity {
 				'readonly' => 'readonly',
 				'validation-callback' => function ( $pageName, $formData ) {
 					$siteId = $formData['site'];
-					$site = $this->siteLookup->getSite( $siteId );
+					$site = $this->getSiteLinkTargetSite( $siteId );
 					if ( $site === null ) {
 						return true;
 					}
@@ -258,71 +275,70 @@ class SpecialNewItem extends SpecialNewEntity {
 	 * @return Status
 	 */
 	protected function validateFormData( array $formData ) {
+		$status = Status::newGood();
+
 		if ( $formData[ self::FIELD_LABEL ] == ''
 			 && $formData[ self::FIELD_DESCRIPTION ] == ''
 			 && $formData[ self::FIELD_ALIASES ] === []
 		) {
-			return Status::newFatal( 'wikibase-newitem-insufficient-data' );
+			$status->fatal( 'wikibase-newitem-insufficient-data' );
 		}
 
 		// Disallow the same label and description, but ignore if both are empty T100933
 		if ( $formData[ self::FIELD_LABEL ] !== '' &&
 			$formData[ self::FIELD_LABEL ] === $formData[ self::FIELD_DESCRIPTION ]
 		) {
-			return Status::newFatal( 'wikibase-newitem-same-label-and-description' );
+			$status->fatal( 'wikibase-newitem-same-label-and-description' );
 		}
 
 		if ( $formData[self::FIELD_LABEL] != '' ) {
 			$validator = $this->termValidatorFactory->getLabelValidator( $this->getEntityType() );
 			$result = $validator->validate( $formData[self::FIELD_LABEL] );
-			if ( !$result->isValid() ) {
-				return $this->createStatusFromValidatorError( $result->getErrors()[0] );
-			}
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 
 		if ( $formData[self::FIELD_DESCRIPTION] != '' ) {
 			$validator = $this->termValidatorFactory->getDescriptionValidator();
 			$result = $validator->validate( $formData[self::FIELD_DESCRIPTION] );
-			if ( !$result->isValid() ) {
-				return $this->createStatusFromValidatorError( $result->getErrors()[0] );
-			}
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 
 		if ( $formData[self::FIELD_ALIASES] !== [] ) {
 			$validator = $this->termValidatorFactory->getAliasValidator();
 			foreach ( $formData[self::FIELD_ALIASES] as $alias ) {
 				$result = $validator->validate( $alias );
-				if ( !$result->isValid() ) {
-					return $this->createStatusFromValidatorError( $result->getErrors()[0] );
-				}
+				$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 			}
 
 			$result = $validator->validate( implode( '|', $formData[self::FIELD_ALIASES] ) );
-			if ( !$result->isValid() ) {
-				return $this->createStatusFromValidatorError( $result->getErrors()[0] );
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
+		}
+
+		if ( $status->isOK() ) { // only do this more expensive check if everything else is OK
+			$collidingItemId = $this->termsCollisionDetector->detectLabelAndDescriptionCollision(
+				$formData[self::FIELD_LANG],
+				$formData[self::FIELD_LABEL],
+				$formData[self::FIELD_DESCRIPTION]
+			);
+			if ( $collidingItemId !== null ) {
+				$status->fatal(
+					'wikibase-validator-label-with-description-conflict',
+					$formData[self::FIELD_LABEL],
+					$formData[self::FIELD_LANG],
+					$collidingItemId
+				);
 			}
 		}
 
-		$collidingItemId = $this->termsCollisionDetector->detectLabelAndDescriptionCollision(
-			$formData[ self::FIELD_LANG ],
-			$formData[ self::FIELD_LABEL ],
-			$formData[ self::FIELD_DESCRIPTION ]
-		);
-		if ( $collidingItemId !== null ) {
-			return Status::newFatal(
-				'wikibase-validator-label-with-description-conflict',
-				$formData[ self::FIELD_LABEL ],
-				$formData[ self::FIELD_LANG ],
-				$collidingItemId
-			);
-		}
-
-		return Status::newGood();
+		return $status;
 	}
 
-	private function createStatusFromValidatorError( $error ) {
-		$params = array_merge( [ 'wikibase-validator-' . $error->getCode() ],  $error->getParameters() );
-		return Status::newFatal( ...$params );
+	private function getSiteLinkTargetSite( string $siteId ): ?Site {
+		$targetSites = $this->siteLinkTargetProvider->getSiteList( $this->siteLinkGroups );
+		if ( !$targetSites->hasSite( $siteId ) ) {
+			return null;
+		}
+		return $targetSites->getSite( $siteId );
 	}
 
 	/**

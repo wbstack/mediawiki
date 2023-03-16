@@ -10,9 +10,19 @@ export default {
 };
 
 const FOOTER_TEMPLATE_DATA = {
-	'msg-mobile-frontend-footer-sitename': 'Site title OR Logo',
-	'html-minerva-license': 'Content is available under <a rel="nofollow" href="#">Reading Web 3.0 License</a> unless otherwise noted.',
+	'msg-mobile-frontend-sitename': 'Site title OR Logo',
 	'html-after-content': placeholder( 'Extensions can add here e.g. Related Articles.' ),
+	'data-info': [
+		{
+			id: 'info',
+			'array-items': [
+				{
+					id: 'copyright',
+					html: 'Content is available under <a rel="nofollow" href="#">Reading Web 3.0 License</a> unless otherwise noted.'
+				}
+			]
+		}
+	],
 	'data-places': [
 		{
 			id: 'places',
@@ -37,14 +47,14 @@ const FOOTER_TEMPLATE_DATA = {
 export const footer = () =>
 	mustache.render( template, {
 		'data-footer': Object.assign( FOOTER_TEMPLATE_DATA, {
-			'html-minerva-lastmodified': lastModifiedBar()
+			'data-minerva-history-link': lastModifiedBar()
 		} )
 	} );
 
 export const footerRecentEdit = () =>
 	mustache.render( template, {
 		'data-footer': Object.assign( FOOTER_TEMPLATE_DATA, {
-			'html-minerva-lastmodified': lastModifiedBarActive()
+			'data-minerva-history-link': lastModifiedBarActive()
 		} )
 	}, {
 		footerItemList,

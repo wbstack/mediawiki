@@ -10,7 +10,7 @@
 	"license-name": "MIT",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.38.0"
 	},
 	"MessagesDirs": {
 		"Graph": [
@@ -22,7 +22,14 @@
 		"Graph\\": "includes/"
 	},
 	"APIModules": {
-		"graph": "Graph\\ApiGraph"
+		"graph": {
+			"class": "Graph\\ApiGraph",
+			"services": [
+				"Parser",
+				"MainWANObjectCache",
+				"WikiPageFactory"
+			]
+		}
 	},
 	"ResourceModules": {
 		"ext.graph.styles": {
@@ -92,13 +99,10 @@
 				"styles/sandbox.css"
 			],
 			"dependencies": [
-				"jquery.throttle-debounce",
+				"oojs-ui-core",
 				"mediawiki.confirmCloseWindow",
 				"ext.codeEditor",
 				"ext.graph.vega2"
-			],
-			"messages": [
-				"editwarning-warning"
 			],
 			"targets": [
 				"desktop"
@@ -190,9 +194,6 @@
 		},
 		"GraphDefaultVegaVer": {
 			"value": 2
-		},
-		"GraphImgServiceUrl": {
-			"value": false
 		}
 	},
 	"TrackingCategories": [

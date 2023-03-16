@@ -22,7 +22,10 @@
 			"class": "ApiEchoNotifications",
 			"services": [ "MainConfig" ]
 		},
-		"unreadnotificationpages": "ApiEchoUnreadNotificationPages"
+		"unreadnotificationpages": {
+			"class": "ApiEchoUnreadNotificationPages",
+			"services": [ "PageStore", "TitleFactory" ]
+		}
 	},
 	"APIModules": {
 		"echomarkread": "ApiEchoMarkRead",
@@ -79,13 +82,12 @@
 	"QUnitTestModule": {
 		"localBasePath": "",
 		"remoteExtPath": "Echo",
-		"templates": {
-			"NotificationBadge.mustache": "modules/mobile/NotificationBadge.mustache"
-		},
-		"packageFiles": [
-			"tests/qunit/index.js",
+		"dependencies": [
+			"ext.echo.dm",
+			"ext.echo.mobile"
+		],
+		"scripts": [
 			"tests/qunit/mobile/test_NotificationBadge.js",
-			"modules/mobile/NotificationBadge.js",
 			"tests/qunit/model/test_mw.echo.dm.BundleNotificationItem.js",
 			"tests/qunit/model/test_mw.echo.dm.CrossWikiNotificationItem.js",
 			"tests/qunit/model/test_mw.echo.dm.FiltersModel.js",
@@ -176,6 +178,9 @@
 					"styles/mw.echo.ui.overlay.monobook.less"
 				],
 				"vector": [
+					"styles/mw.echo.ui.overlay.vector.less"
+				],
+				"vector-2022": [
 					"styles/mw.echo.ui.overlay.vector.less"
 				],
 				"minerva": [
@@ -370,6 +375,9 @@
 				],
 				"vector": [
 					"nojs/mw.echo.badge.vector.less"
+				],
+				"vector-2022": [
+					"nojs/mw.echo.badge.vector.less"
 				]
 			},
 			"targets": [
@@ -497,7 +505,7 @@
 		"AbortTalkPageEmailNotification": "EchoHooks::onAbortTalkPageEmailNotification",
 		"SendWatchlistEmailNotification": "EchoHooks::onSendWatchlistEmailNotification",
 		"GetNewMessagesAlert": "EchoHooks::abortNewMessagesAlert",
-		"LinksUpdateAfterInsert": "EchoHooks::onLinksUpdateAfterInsert",
+		"LinksUpdateComplete": "EchoHooks::onLinksUpdateComplete",
 		"SpecialMuteModifyFormFields": "EchoHooks::onSpecialMuteModifyFormFields",
 		"RecentChange_save": "main",
 		"ApiMain::moduleManager": "EchoHooks::onApiMainModuleManager",

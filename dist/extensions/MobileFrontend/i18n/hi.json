@@ -64,6 +64,7 @@
 	"mobile-frontend-editor-blocked-drawer-body-link": "और देखें",
 	"mobile-frontend-editor-blocked-drawer-reason-header": "कारण",
 	"mobile-frontend-editor-blocked-drawer-creator-header": "{{GENDER:$1|अवरोधक}}",
+	"mobile-frontend-editor-blocked-drawer-expiry-header": "अवरोध का अंत",
 	"mobile-frontend-editor-blocked-drawer-help": "विस्तार देखें",
 	"mobile-frontend-editor-generic-block-reason": "अज्ञात कारण",
 	"mobile-frontend-editor-cancel": "रद्द करें",

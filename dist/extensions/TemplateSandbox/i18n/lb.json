@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Robby"
+			"Robby",
+			"Volvox"
 		]
 	},
 	"templatesandbox": "Schabloun-Sandkëscht",
@@ -15,7 +16,7 @@
 	"templatesandbox-editform-page-label": "Titel vun der Säit",
 	"templatesandbox-editform-view-label": "Kucken ouni ofzespäicheren",
 	"templatesandbox-preview": "$2 kucken ouni ze späicheren",
-	"templatesandbox-previewnote": "'''Denkt drun datt dëst nëmmen eng net gespäichert Versioun vun [[:$1]] ass.'''\nÄr Ännerunge sinn nach net gespäichert!",
+	"templatesandbox-previewnote": "'''Denkt drun, datt dëst nëmmen eng net gespäichert Versioun vun [[:$1]] ass.'''\nÄr Ännerunge sinn nach net gespäichert!",
 	"templatesandbox-invalid-title": "Den Titel deen Dir uginn hutt ass net valabel.",
 	"templatesandbox-title-not-exists": "Den Titel deen Dir uginn hutt gëtt et net.",
 	"templatesandbox-revision-not-exists": "D'Versioun déi Dir uginn hutt gëtt et net.",

@@ -8,7 +8,7 @@
 	"descriptionmsg": "wikibase-client-desc",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.37"
+		"MediaWiki": ">= 1.38"
 	},
 	"APIListModules": {
 		"wblistentityusage": {
@@ -90,6 +90,7 @@
 			"class": "\\Wikibase\\Client\\Hooks\\ChangesListSpecialPageHookHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\ChangesListSpecialPageHookHandler::factory",
 			"services": [
+				"UserOptionsLookup",
 				"WikibaseClient.ClientDomainDbFactory",
 				"WikibaseClient.Settings"
 			]
@@ -107,6 +108,7 @@
 			"class": "\\Wikibase\\Client\\Hooks\\DataUpdateHookHandler",
 			"factory": "\\Wikibase\\Client\\Hooks\\DataUpdateHookHandler::factory",
 			"services": [
+				"JobQueueGroup",
 				"WikibaseClient.Logger",
 				"WikibaseClient.Store",
 				"WikibaseClient.UsageAccumulatorFactory"
@@ -263,6 +265,7 @@
 		"LoadExtensionSchemaUpdates": "SqlUsageTrackerSchemaUpdater",
 		"LoginFormValidErrorMessages": "\\Wikibase\\Client\\Hooks\\LoginFormValidErrorMessagesHandler::handle",
 		"MagicWordwgVariableIDs": "Magic",
+		"MaintenanceShellStart": "\\Wikibase\\Client\\ClientHooks::onMaintenanceShellStart",
 		"OldChangesListRecentChangesLine": "ChangesListLines",
 		"OutputPageParserOutput": "Sidebar",
 		"ParserCacheSaveComplete": "DataUpdate",
@@ -286,7 +289,8 @@
 			"Trivial",
 			"LibHooks"
 		],
-		"wgQueryPages": "Trivial"
+		"wgQueryPages": "Trivial",
+		"WikibaseContentLanguages": "\\Wikibase\\Client\\ClientHooks::onWikibaseContentLanguages"
 	},
 	"TrackingCategories": [
 		"unresolved-property-category",
@@ -345,6 +349,10 @@
 				"vector": [
 					"wikibase.client.css",
 					"wikibase.client.vector.css"
+				],
+				"vector-2022": [
+					"wikibase.client.css",
+					"wikibase.client.vector.css"
 				]
 			}
 		},
@@ -400,6 +408,7 @@
 				"jquery.ui",
 				"jquery.tipsy",
 				"mediawiki.api",
+				"mediawiki.user",
 				"mediawiki.util",
 				"mediawiki.jqueryMsg",
 				"mw.config.values.wbRepo",
@@ -457,12 +466,6 @@
 		},
 		"wikibase.client.data-bridge.app": {
 			"factory": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules::appModule"
-		},
-		"wikibase.client.data-bridge.app.modern": {
-			"factory": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules::modernAppModule"
-		},
-		"wikibase.client.data-bridge.app.legacy": {
-			"factory": "\\Wikibase\\Client\\DataBridge\\DataBridgeResourceLoaderModules::legacyAppModule"
 		}
 	},
 	"SpecialPages": {
@@ -472,7 +475,8 @@
 				"NamespaceInfo",
 				"TitleFactory",
 				"WikibaseClient.ClientDomainDbFactory",
-				"WikibaseClient.NamespaceChecker"
+				"WikibaseClient.NamespaceChecker",
+				"WikibaseClient.Settings"
 			]
 		},
 		"PagesWithBadges": {

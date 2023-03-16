@@ -20,7 +20,9 @@
  * @ingroup Actions
  */
 
+use MediaWiki\CommentFormatter\CommentFormatter;
 use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\RollbackPageFactory;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
@@ -46,6 +48,9 @@ class RollbackAction extends FormAction {
 	/** @var WatchlistManager */
 	private $watchlistManager;
 
+	/** @var CommentFormatter */
+	private $commentFormatter;
+
 	/**
 	 * @param Page $page
 	 * @param IContextSource|null $context
@@ -53,6 +58,7 @@ class RollbackAction extends FormAction {
 	 * @param RollbackPageFactory $rollbackPageFactory
 	 * @param UserOptionsLookup $userOptionsLookup
 	 * @param WatchlistManager $watchlistManager
+	 * @param CommentFormatter $commentFormatter
 	 */
 	public function __construct(
 		Page $page,
@@ -60,13 +66,15 @@ class RollbackAction extends FormAction {
 		IContentHandlerFactory $contentHandlerFactory,
 		RollbackPageFactory $rollbackPageFactory,
 		UserOptionsLookup $userOptionsLookup,
-		WatchlistManager $watchlistManager
+		WatchlistManager $watchlistManager,
+		CommentFormatter $commentFormatter
 	) {
 		parent::__construct( $page, $context );
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->rollbackPageFactory = $rollbackPageFactory;
 		$this->userOptionsLookup = $userOptionsLookup;
 		$this->watchlistManager = $watchlistManager;
+		$this->commentFormatter = $commentFormatter;
 	}
 
 	public function getName() {
@@ -164,8 +172,14 @@ class RollbackAction extends FormAction {
 
 		// The revision has the user suppressed, so the rollback has empty 'from',
 		// so the check above would succeed in that case.
+		// T307278 - Also check if the user has rights to view suppressed usernames
 		if ( !$revUser ) {
-			$revUser = $rev->getUser( RevisionRecord::RAW );
+			if ( $user->isAllowedAny( 'suppressrevision', 'viewsuppressed' ) ) {
+				$revUser = $rev->getUser( RevisionRecord::RAW );
+			} else {
+				$userFactory = MediaWikiServices::getInstance()->getUserFactory();
+				$revUser = $userFactory->newFromName( $this->context->msg( 'rev-deleted-user' )->plain() );
+			}
 		}
 
 		$rollbackResult = $this->rollbackPageFactory
@@ -192,9 +206,8 @@ class RollbackAction extends FormAction {
 					$this->getOutput()->addWikiMsg(
 						'editcomment',
 						Message::rawParam(
-							Linker::formatComment(
-								$current->getComment()->text
-							)
+							$this->commentFormatter
+								->format( $current->getComment()->text )
 						)
 					);
 				}
@@ -250,7 +263,7 @@ class RollbackAction extends FormAction {
 				$this->getContext(),
 				$current->getId(),
 				$newId,
-				false,
+				0,
 				true
 			);
 			$de->showDiff( '', '' );

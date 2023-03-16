@@ -12,12 +12,13 @@
 			"Macofe",
 			"MarcoAurelio",
 			"Rodney Araujo",
-			"Ryo567"
+			"Ryo567",
+			"Pierpao"
 		]
 	},
 	"minerva-last-modified-date": "Última edición el $1 a las $2",
 	"minerva-watchlist-cta": "Mantén esta página en seguimiento y todos los cambios que se realicen en ella.",
-	"minerva-talk-add-topic": "Añadir discusión",
+	"minerva-talk-add-topic": "Añadir tema",
 	"mobile-frontend-cookies-required": "Las «cookies» permiten cambiar entre los modos de visualización. Actívalas e inténtalo de nuevo.",
 	"mobile-frontend-editor-edit": "Editar",
 	"minerva-download": "Descargar en PDF",
@@ -28,7 +29,6 @@
 	"mobile-frontend-home-button": "Inicio",
 	"mobile-frontend-language-article-heading": "Idioma",
 	"mobile-frontend-languages-not-available": "Esta página no está disponible en otros idiomas.",
-	"mobile-frontend-logged-in-homepage-notification": "¡{{GENDER:$1|Bienvenido|Bienvenida}}, $1!",
 	"mobile-frontend-main-menu-button-tooltip": "Abrir menú principal",
 	"mobile-frontend-main-menu-contributions": "Contribuciones",
 	"mobile-frontend-main-menu-login": "Acceder",
@@ -77,7 +77,7 @@
 	"minerva-talk-full-page": "Leer como página de wiki",
 	"minerva-talk-topic-feedback": "Se añadió un nuevo tema a la página de discusión.",
 	"minerva-talk-reply-success": "Se guardó tu respuesta en la página de discusión.",
-	"minerva-skin-desc": "La primera apariencia móvil responsiva",
+	"minerva-skin-desc": "Una apariencia mobile-first responsiva",
 	"skin-minerva-issue-learn-more": "Más información",
 	"skin-minerva-mobile-option-MinervaShowCategories": "Categorías",
 	"skin-minerva-mobile-option-MinervaShowCategories-description": "Ver categorías de páginas",

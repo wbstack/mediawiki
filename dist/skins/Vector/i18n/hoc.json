@@ -11,5 +11,6 @@
 	"vector-view-edit": "𑢩𑣚-𑣞𑣁𑣋𑣉𑣖 𑣜𑣃𑣈𑣈",
 	"vector-view-history": "𑢾𑣂𑣔𑣈𑣞𑣁𑣆 𑣓𑣈𑣚𑣈",
 	"vector-view-view": "𑢸𑣁𑣛𑣁𑣉𑣈",
-	"vector-more-actions": "𑢩𑣓𑣑𑣉𑣄 𑣚𑣁𑣁𑣄"
+	"vector-more-actions": "𑢩𑣓𑣑𑣉𑣄 𑣚𑣁𑣁𑣄",
+	"vector-searchsuggest-containing": "<strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong> 𑣖𑣈𑣓𑣁𑣄 𑣕𑣁𑣓 𑣞𑣁𑣌𑣁𑣖 𑣌𑣉 𑣓𑣈𑣚-𑣞𑣁𑣊𑣋𑣁𑣜𑣈"
 }

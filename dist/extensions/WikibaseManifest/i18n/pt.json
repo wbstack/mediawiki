@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hamilton Abreu"
+		]
+	},
+	"wikibasemanifest-desc": "Combina metadados sobre uma instalação Wikibase expondo-a como uma API simples"
+}

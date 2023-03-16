@@ -2,10 +2,11 @@
 
 namespace TwoColConflict\ProvideSubmittedText;
 
+use BagOStuff;
 use Html;
 use IBufferingStatsdDataFactory;
 use MediaWiki\EditPage\TextboxBuilder;
-use ObjectCache;
+use MediaWiki\Page\PageIdentity;
 use OOUI\HtmlSnippet;
 use OOUI\MessageWidget;
 use Title;
@@ -21,23 +22,29 @@ use UnlistedSpecialPage;
  */
 class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 
-	/** @var IBufferingStatsdDataFactory */
-	private $statsdDataFactory;
-
 	/** @var TwoColConflictContext */
 	private $twoColConflictContext;
 
+	/** @var SubmittedTextCache */
+	private $textCache;
+
+	/** @var IBufferingStatsdDataFactory */
+	private $statsdDataFactory;
+
 	/**
-	 * @param IBufferingStatsdDataFactory $statsdDataFactory
 	 * @param TwoColConflictContext $twoColConflictContext
+	 * @param BagOStuff $textCache
+	 * @param IBufferingStatsdDataFactory $statsdDataFactory
 	 */
 	public function __construct(
-		IBufferingStatsdDataFactory $statsdDataFactory,
-		TwoColConflictContext $twoColConflictContext
+		TwoColConflictContext $twoColConflictContext,
+		BagOStuff $textCache,
+		IBufferingStatsdDataFactory $statsdDataFactory
 	) {
 		parent::__construct( 'TwoColConflictProvideSubmittedText' );
-		$this->statsdDataFactory = $statsdDataFactory;
 		$this->twoColConflictContext = $twoColConflictContext;
+		$this->textCache = new SubmittedTextCache( $textCache );
+		$this->statsdDataFactory = $statsdDataFactory;
 	}
 
 	/**
@@ -65,15 +72,14 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 			$this->msg( 'editconflict', $title->getPrefixedText() )
 		);
 
-		$textCache = new SubmittedTextCache( ObjectCache::getInstance( 'db-replicated' ) );
-		$text = $textCache->fetchText(
+		$text = $this->textCache->fetchText(
 			$subPage,
 			$out->getUser(),
 			$out->getRequest()->getSessionId()
 		);
 
 		if ( !$text ) {
-			// 401 means "gone", which is quite literally what happened here
+			// 410 means "gone", which is quite literally what happened here
 			$out->setStatusCode( 410 );
 			$out->addHTML( new MessageWidget( [
 				'label' => $this->msg( 'twocolconflict-special-expired' )->text(),
@@ -86,7 +92,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 
 		$html = $this->getHeaderHintsHtml();
 		$html .= $this->getTextHeaderLabelHtml();
-		$html .= $this->getTextAreaHtml( $text );
+		$html .= $this->getTextAreaHtml( $text, $title );
 		$html .= $this->getFooterHtml();
 
 		$out->addHTML( $html );
@@ -123,7 +129,12 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 		);
 	}
 
-	private function getTextAreaHtml( $text ) {
+	/**
+	 * @param string $text
+	 * @param PageIdentity $page Used to create the lang="…" and dir="…" attributes
+	 * @return string
+	 */
+	private function getTextAreaHtml( string $text, PageIdentity $page ) {
 		$builder = new TextboxBuilder();
 		$attribs = $builder->mergeClassesIntoAttributes(
 			[ 'mw-twocolconflict-submitted-text' ],
@@ -134,7 +145,7 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 			'wpTextbox2',
 			$attribs,
 			$this->getUser(),
-			$this->getPageTitle()
+			$page
 		);
 
 		return Html::element( 'span', [], $this->msg( 'twocolconflict-special-textarea-hint' )->text() ) .
@@ -158,4 +169,5 @@ class SpecialProvideSubmittedText extends UnlistedSpecialPage {
 			->addClasses( [ 'mw-twocolconflict-messageWidget' ] )
 			->toString();
 	}
+
 }

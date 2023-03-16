@@ -1,6 +1,13 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"Yupik",
+			"Kimberli Mäkäräinen (WMNO)"
+		]
 	},
-	"wikibase-sitelinks-wikipedia": "Wikipedia"
+	"wikibase-error-unexpected": "Meattáhus: $1.",
+	"wikibase-sitelinks-wikipedia": "Wikipedia",
+	"wikibase-snakview-snaktypeselector-somevalue": "dovdameahttun árvu",
+	"datatypes-type-wikibase-property": "Iešvuohta",
+	"wikibase-reference-formatter-snak-retrieved": "Čujuhuvvon $1"
 }

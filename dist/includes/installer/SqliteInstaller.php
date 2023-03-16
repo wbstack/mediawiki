@@ -21,6 +21,7 @@
  * @ingroup Installer
  */
 
+use Wikimedia\AtEase\AtEase;
 use Wikimedia\Rdbms\Database;
 use Wikimedia\Rdbms\DatabaseSqlite;
 use Wikimedia\Rdbms\DBConnectionError;
@@ -173,9 +174,9 @@ class SqliteInstaller extends DatabaseInstaller {
 	 */
 	private static function createDataDir( $dir ): Status {
 		if ( !is_dir( $dir ) ) {
-			Wikimedia\suppressWarnings();
+			AtEase::suppressWarnings();
 			$ok = wfMkdirParents( $dir, 0700, __METHOD__ );
-			Wikimedia\restoreWarnings();
+			AtEase::restoreWarnings();
 			if ( !$ok ) {
 				return Status::newFatal( 'config-sqlite-mkdir-error', $dir );
 			}
@@ -224,11 +225,10 @@ class SqliteInstaller extends DatabaseInstaller {
 	public function setupDatabase() {
 		$dir = $this->getVar( 'wgSQLiteDataDir' );
 
-		# Sanity check (Only available in web installation). We checked this before but maybe someone
+		# Double check (Only available in web installation). We checked this before but maybe someone
 		# deleted the data dir between then and now
 		$dir_status = self::checkDataDir( $dir );
 		if ( $dir_status->isGood() ) {
-			// @phan-suppress-next-line SecurityCheck-PathTraversal
 			$res = self::createDataDir( $dir );
 			if ( !$res->isGood() ) {
 				return $res;
@@ -320,13 +320,20 @@ EOT;
 	 */
 	protected function makeStubDBFile( $dir, $db ) {
 		$file = DatabaseSqlite::generateFileName( $dir, $db );
+
 		if ( file_exists( $file ) ) {
 			if ( !is_writable( $file ) ) {
 				return Status::newFatal( 'config-sqlite-readonly', $file );
 			}
-		} elseif ( file_put_contents( $file, '' ) === false ) {
+			return Status::newGood();
+		}
+
+		$oldMask = umask( 0177 );
+		if ( file_put_contents( $file, '' ) === false ) {
+			umask( $oldMask );
 			return Status::newFatal( 'config-sqlite-cant-create-db', $file );
 		}
+		umask( $oldMask );
 
 		return Status::newGood();
 	}

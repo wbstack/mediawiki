@@ -34,7 +34,7 @@
 		'</div>' +
 
 		// Begin display language sub-panel
-		'<div class="ext-uls-sub-panel uls-display-settings-language-tab">' +
+		'<div class="uls-sub-panel uls-display-settings-language-tab">' +
 
 		// "Display language", title above the buttons row
 		'<div class="row">' +
@@ -54,7 +54,7 @@
 		'</div>' +
 
 		// Begin font settings section, hidden by default
-		'<div class="ext-uls-sub-panel uls-display-settings-fonts-tab hide">' +
+		'<div class="uls-sub-panel uls-display-settings-fonts-tab hide">' +
 
 		// "Font settings" title
 		'<div class="row">' +
@@ -119,10 +119,12 @@
 
 		/**
 		 * Loads the webfonts module sets the `webfonts` property when its safe to do so
+		 *
+		 * @return {jQuery.Promise}
 		 */
 		setupWebFonts: function () {
 			var d = $.Deferred();
-			mw.loader.using( [ 'ext.uls.webfonts.fonts' ] ).then( function () {
+			mw.loader.using( [ 'ext.uls.webfonts.repository' ] ).then( function () {
 				if ( this.isWebFontsEnabled ) {
 					mw.webfonts.setup();
 				}
@@ -133,7 +135,7 @@
 					d.resolve();
 				}.bind( this ), 1 );
 			}.bind( this ) );
-			return d;
+			return d.promise();
 		},
 		/**
 		 * Render the module into a given target
@@ -591,7 +593,7 @@
 					return;
 				}
 
-				displaySettings.$template.find( '.ext-uls-sub-panel' ).each( function () {
+				displaySettings.$template.find( '.uls-sub-panel' ).each( function () {
 					var $subPanel = $( this );
 
 					// eslint-disable-next-line no-jquery/no-class-state

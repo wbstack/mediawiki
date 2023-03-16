@@ -4,6 +4,7 @@ namespace Wikibase\Repo\Maintenance;
 
 use ExtensionRegistry;
 use Maintenance;
+use MediaWiki\Settings\SettingsBuilder;
 use MWException;
 use Onoi\MessageReporter\ObservableMessageReporter;
 use Wikibase\DataModel\Services\EntityId\EntityIdPager;
@@ -243,10 +244,10 @@ abstract class DumpEntities extends Maintenance {
 	/**
 	 * @inheritDoc
 	 */
-	public function finalSetup() {
+	public function finalSetup( SettingsBuilder $settingsBuilder = null ) {
 		global $wgHooks;
 
-		parent::finalSetup();
+		parent::finalSetup( $settingsBuilder );
 
 		if ( $this->hasOption( 'dbgroupdefault' ) ) {
 			// A group was set via cli, so no need to set the default here

@@ -9,6 +9,9 @@ use TwoColConflict\SplitConflictMerger;
 use TwoColConflict\TwoColConflictContext;
 use WebRequest;
 
+/**
+ * @license GPL-2.0-or-later
+ */
 class EditPageImportFormDataHookHandler {
 
 	/**

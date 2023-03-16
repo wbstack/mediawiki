@@ -38,7 +38,7 @@
 	"templatesandbox-anon-limited-preview": "תצוגה מקדימה של שינויים ב־JavaScript וב־CSS אינה זמינה מחוץ לחשבון. אם ברצונך לצפות בתצוגה מקדימה של שינויים כאלה, נא [[Special:UserLogin|להיכנס לחשבון]] ולנסות שוב.",
 	"templatesandbox-editform-need-template": "כדי לצפות בתצוגה מקדימה של דף עם התבנית הזאת, יש לספק שם תבנית.",
 	"templatesandbox-editform-need-title": "כדי לקבל תצוגה מקדימה של דף הכולל את התבנית, יש לציין את שם הדף.",
-	"templatesandbox-editform-invalid-template": "השם של התבנית שציינת אינו חוקי.",
+	"templatesandbox-editform-invalid-template": "השם של התבנית שציינת אינו תקין.",
 	"templatesandbox-editform-invalid-title": "הכותרת שציינת לתצוגה מקדימה אינה תקינה.",
 	"templatesandbox-editform-title-not-exists": "הכותרת שציינת לתצוגה מקדימה אינה קיימת.",
 	"templatesandbox-failed-replace-section": "נכשלה החלפת פרק בדף הקיים."

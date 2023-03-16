@@ -9,6 +9,7 @@ module.exports = ( function () {
 	 * @param {string} template - template string or selector
 	 * @param {wikibase.api.RepoApi} api
 	 * @param {Object} messages - mw.messages localization service
+	 * @return {Object}
 	 */
 	return function ( template, api, messages ) {
 		return {
@@ -33,4 +34,4 @@ module.exports = ( function () {
 			}
 		};
 	};
-} )();
+}() );

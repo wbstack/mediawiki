@@ -36,7 +36,7 @@ interface IResultWrapper extends Countable, SeekableIterator {
 	 *
 	 * @return int
 	 */
-	public function count();
+	public function count(): int;
 
 	/**
 	 * Fetch the next row from the given result object, in object form. Fields can be retrieved with
@@ -64,7 +64,7 @@ interface IResultWrapper extends Countable, SeekableIterator {
 	 * @throws OutOfBoundsException
 	 * @param int $pos
 	 */
-	public function seek( $pos );
+	public function seek( $pos ): void;
 
 	/**
 	 * Free a result object
@@ -77,17 +77,19 @@ interface IResultWrapper extends Countable, SeekableIterator {
 	/**
 	 * @return stdClass|array|bool
 	 */
+	#[\ReturnTypeWillChange]
 	public function current();
 
 	/**
 	 * @return int
 	 */
-	public function key();
+	public function key(): int;
 
 	/**
 	 * @return stdClass
 	 * @suppress PhanParamSignatureMismatchInternal
 	 */
+	#[\ReturnTypeWillChange]
 	public function next();
 
 	/**

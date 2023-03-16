@@ -13,7 +13,8 @@
 			"Vadgt",
 			"Xelgen",
 			"Աշոտ1997",
-			"Դավիթ Սարոյան"
+			"Դավիթ Սարոյան",
+			"Սերգեյ Սաֆարյան"
 		]
 	},
 	"mobile-frontend-changeslist-nocomment": "Առանց խմբագրման ամփոփման",
@@ -45,7 +46,7 @@
 	"mobile-frontend-languages-structured-overlay-all-languages-header": "Այլ լեզուներ",
 	"mobile-frontend-languages-structured-overlay-search-input-placeholder": "Լեզվի որոնում",
 	"mobile-frontend-last-modified-date": "Վերջին անգամ խմբագրվել է  $1, $2֊ին",
-	"mobile-frontend-main-menu": "Հիմնական ցանկը",
+	"mobile-frontend-main-menu": "Հիմնական ընտրացանկ",
 	"mobile-frontend-main-menu-settings-heading": "Կարգավորումներ",
 	"mobile-frontend-media-details": "Մանրամասներ",
 	"mobile-frontend-media-load-fail-retry": "Թարմացնել",
@@ -70,5 +71,6 @@
 	"mobile-frontend-watchlist-more": "Ավելին",
 	"nearby": "Էջեր մոտակա օբյեկտների մասին",
 	"tag-mobile_edit": "Խմբագրում բջջային սարքով",
-	"tag-mobile_web_edit": "Խմբագրում կայքի բջջային տարբերակից"
+	"tag-mobile_web_edit": "Խմբագրում կայքի բջջային տարբերակից",
+	"mobile-frontend-loading-message": "Բեռնվում է…"
 }

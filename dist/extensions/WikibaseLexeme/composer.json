@@ -15,7 +15,7 @@
 	},
 	"require": {
 		"serialization/serialization": "~3.2|~4.0",
-		"wikimedia/assert": "~0.2.2|~0.3.0|~0.4.0|~0.5.0",
+		"wikimedia/assert": "^0.5.0",
 		"wmde/php-vuejs-templating": "^1.0.2"
 	},
 	"require-dev": {
@@ -23,7 +23,7 @@
 		"giorgiosironi/eris": "0.10.0",
 		"hamcrest/hamcrest-php": "^2.0",
 		"icomefromthenet/reverse-regex": "^0.0.6.3",
-		"mediawiki/mediawiki-codesniffer": "37.0.0",
+		"mediawiki/mediawiki-codesniffer": "38.0.0",
 		"mediawiki/mediawiki-phan-config": "0.11.0",
 		"mediawiki/minus-x": "1.1.1",
 		"php-parallel-lint/php-console-highlighter": "0.5.0",

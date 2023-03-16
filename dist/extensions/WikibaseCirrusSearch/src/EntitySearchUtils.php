@@ -2,7 +2,7 @@
 namespace Wikibase\Search\Elastic;
 
 use Elastica\Query\ConstantScore;
-use Elastica\Query\Match;
+use Elastica\Query\MatchQuery;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Term\Term;
@@ -22,7 +22,7 @@ final class EntitySearchUtils {
 	 */
 	public static function makeConstScoreQuery( $field, $boost, $text ) {
 		$csquery = new ConstantScore();
-		$csquery->setFilter( new Match( $field, $text ) );
+		$csquery->setFilter( new MatchQuery( $field, $text ) );
 		$csquery->setBoost( $boost );
 		return $csquery;
 	}

@@ -2,12 +2,12 @@
 	"@metadata": {
 		"authors": [
 			"Ainali",
+			"Ayaibrahim",
 			"GameOn",
 			"Josve05a",
 			"Lokal Profil",
 			"MagnusA",
-			"WikiPhoenix",
-			"Ayaibrahim"
+			"WikiPhoenix"
 		]
 	},
 	"graph-desc": "Tillåter taggen &lt;graph&gt; eller hela sidor att bli [http://vega.github.io/ Vega]-baserade grafer",

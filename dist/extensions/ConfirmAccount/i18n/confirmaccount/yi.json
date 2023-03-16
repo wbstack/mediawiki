@@ -1,16 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
-			"פוילישער"
+			"פוילישער",
+			"Pacha Tchernof"
 		]
 	},
 	"confirmaccount-real-q": "נאמען",
-	"confirmaccount-email-q": "ע-פאסט",
+	"confirmaccount-email-q": "בליצפּאָסט",
 	"confirmaccount-review": "רעצענזירן",
 	"confirmaccount-leg-user": "באַניצער קאנטע",
 	"confirmaccount-name": "באַניצער נאָמען",
 	"confirmaccount-real": "נאָמען:",
-	"confirmaccount-email": "ע-פאסט:",
+	"confirmaccount-email": "בליצפּאָסט:",
 	"confirmaccount-pos-1": "רעדאַקטאָר",
 	"confirmaccount-bio": "ביאגראַפֿיע",
 	"confirmaccount-econf": "(באשטעטיקט)",

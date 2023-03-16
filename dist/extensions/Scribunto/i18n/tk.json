@@ -34,6 +34,7 @@
 	"scribunto-lua-error-location": "Lua ýalňyşlygy $1: $2.",
 	"scribunto-lua-error": "Lua ýalňyşlygy: $2.",
 	"scribunto-lua-notarrayreturn": "Skript ýalňyşlygy: Modul $2 bahasyny yzyna gaýtardy. Eksport tablisasyny yzyna gaýtarmaly.",
+	"scribunto-lua-warning": "Skript duýduryşy: $1",
 	"scribunto-luastandalone-proc-error": "Lua ýalňyşlygy: Amal döredip bolmaýar.",
 	"scribunto-luastandalone-proc-error-msg": "Lua ýalňyşlygy: Amal döredip bolmaýar: $2",
 	"scribunto-luastandalone-proc-error-proc-open": "Lua ýalňyşlygy: Prosess döredip bolmaýar: proc_open elýeterli däl. PHP-iň \"disable_functions\" konfigurasiýa görkezmesini barlaň.",

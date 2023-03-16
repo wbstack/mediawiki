@@ -11,6 +11,7 @@ use Wikimedia\RemexHtml\Tokenizer\PlainAttributes;
 class InTable extends InsertionMode {
 	/**
 	 * The tag names that are cleared when we "clear the stack back to a table context"
+	 * @var array<string,bool>
 	 */
 	private static $tableContext = [
 		'table' => true,
@@ -24,7 +25,8 @@ class InTable extends InsertionMode {
 			'tbody' => true,
 			'tfoot' => true,
 			'thead' => true,
-			'tr' => true ];
+			'tr' => true
+		];
 		if ( isset( $allowed[$this->builder->stack->current->htmlName] ) ) {
 			$this->builder->pendingTableCharacters = [];
 			$this->dispatcher->switchAndSave( Dispatcher::IN_TABLE_TEXT )
@@ -180,6 +182,3 @@ class InTable extends InsertionMode {
 		$this->dispatcher->inBody->endDocument( $pos );
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( InTable::class, 'RemexHtml\TreeBuilder\InTable' );

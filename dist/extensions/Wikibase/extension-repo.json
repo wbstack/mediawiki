@@ -8,7 +8,7 @@
 	"descriptionmsg": "wikibase-desc",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.37"
+		"MediaWiki": ">= 1.38"
 	},
 	"APIModules": {
 		"wbavailablebadges": {
@@ -330,14 +330,15 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialNewItem",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialNewItem::factory",
 			"services": [
-				"SiteLookup",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityNamespaceLookup",
 				"WikibaseRepo.EntityTitleLookup",
 				"WikibaseRepo.ItemTermsCollisionDetector",
 				"WikibaseRepo.Settings",
+				"WikibaseRepo.SiteLinkTargetProvider",
 				"WikibaseRepo.SummaryFormatter",
-				"WikibaseRepo.TermValidatorFactory"
+				"WikibaseRepo.TermValidatorFactory",
+				"WikibaseRepo.ValidatorErrorLocalizer"
 			]
 		},
 		"NewProperty": {
@@ -350,7 +351,9 @@
 				"WikibaseRepo.EntityTitleLookup",
 				"WikibaseRepo.PropertyTermsCollisionDetector",
 				"WikibaseRepo.Settings",
-				"WikibaseRepo.SummaryFormatter"
+				"WikibaseRepo.SummaryFormatter",
+				"WikibaseRepo.TermValidatorFactory",
+				"WikibaseRepo.ValidatorErrorLocalizer"
 			]
 		},
 		"ItemByTitle": {
@@ -440,12 +443,12 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialSetSiteLink",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialSetSiteLink::factory",
 			"services": [
-				"SiteLookup",
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityTitleLookup",
 				"WikibaseRepo.LanguageFallbackLabelDescriptionLookupFactory",
 				"WikibaseRepo.Settings",
+				"WikibaseRepo.SiteLinkTargetProvider",
 				"WikibaseRepo.SummaryFormatter"
 			]
 		},
@@ -458,7 +461,7 @@
 		"DispatchStats": {
 			"class": "Wikibase\\Repo\\Specials\\SpecialDispatchStats",
 			"services": [
-				"WikibaseRepo.RepoDomainDbFactory"
+				"WikibaseRepo.DispatchStats"
 			]
 		},
 		"EntityData": {
@@ -532,6 +535,13 @@
 			]
 		}
 	},
+	"RestRoutes": [
+		{
+			"path": "/wikibase/v0/entities/items/{id}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemRouteHandler::factory"
+		}
+	],
 	"GroupPermissions": {
 		"*": {
 			"item-term": true,
@@ -570,6 +580,7 @@
 	},
 	"AutoloadNamespaces": {
 		"Wikibase\\Repo\\": "repo/includes/",
+		"Wikibase\\Repo\\RestApi\\": "repo/rest-api/src/",
 		"Wikibase\\Lib\\": "lib/includes/",
 		"Wikibase\\Lib\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/src/",
 		"Wikibase\\Lib\\Changes\\": "lib/packages/wikibase/changes/src/",
@@ -585,6 +596,7 @@
 		"Wikibase\\Repo\\Tests\\": "repo/tests/phpunit/includes/",
 		"Wikibase\\Repo\\Tests\\Maintenance\\": "repo/tests/phpunit/maintenance/",
 		"Wikibase\\Repo\\Tests\\Unit\\": "repo/tests/phpunit/unit/",
+		"Wikibase\\Repo\\Tests\\RestApi\\": "repo/rest-api/tests/phpunit/",
 		"Wikibase\\Lib\\Tests\\": "lib/tests/phpunit/",
 		"Wikibase\\Lib\\Tests\\Changes\\": "lib/packages/wikibase/changes/tests/",
 		"Wikibase\\DataModel\\Fixtures\\": "lib/packages/wikibase/data-model/tests/fixtures/",
@@ -613,7 +625,8 @@
 		"wikibaserepomagic": "repo/WikibaseRepo.i18n.magic.php"
 	},
 	"ServiceWiringFiles": [
-		"repo/WikibaseRepo.ServiceWiring.php"
+		"repo/WikibaseRepo.ServiceWiring.php",
+		"repo/rest-api/src/WbRestApi.ServiceWiring.php"
 	],
 	"QUnitTestModule": {
 		"remoteExtPath": "Wikibase",
@@ -761,6 +774,7 @@
 		"ArticleRevisionVisibilitySet": {
 			"class": "\\Wikibase\\Repo\\Hooks\\ArticleRevisionVisibilitySetHookHandler",
 			"services": [
+				"JobQueueGroup",
 				"WikibaseRepo.LocalEntityNamespaceLookup"
 			]
 		},
@@ -781,6 +795,7 @@
 			"class": "\\Wikibase\\Repo\\Hooks\\DeleteDispatcher",
 			"factory": "\\Wikibase\\Repo\\Hooks\\DeleteDispatcher::factory",
 			"services": [
+				"JobQueueGroup",
 				"WikibaseRepo.EntityIdLookup",
 				"WikibaseRepo.Settings"
 			]
@@ -790,6 +805,7 @@
 			"factory": "\\Wikibase\\Repo\\Hooks\\EntityDataPurger::factory",
 			"services": [
 				"HtmlCacheUpdater",
+				"JobQueueGroup",
 				"WikibaseRepo.EntityDataUriManager",
 				"WikibaseRepo.EntityIdLookup"
 			]
@@ -803,10 +819,10 @@
 				"WikibaseRepo.EntityExistenceChecker",
 				"WikibaseRepo.EntityIdParser",
 				"WikibaseRepo.EntityLinkFormatterFactory",
-				"WikibaseRepo.EntityNamespaceLookup",
 				"WikibaseRepo.EntityUrlLookup",
 				"WikibaseRepo.LanguageFallbackChainFactory",
 				"WikibaseRepo.LinkTargetEntityIdLookup",
+				"WikibaseRepo.LocalEntityNamespaceLookup",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.TermLookup"
 			]
@@ -833,6 +849,7 @@
 				"ContentLanguage",
 				"HttpRequestFactory",
 				"StatsdDataFactory",
+				"UserOptionsLookup",
 				"WikibaseRepo.EntityContentFactory",
 				"WikibaseRepo.EntityFactory",
 				"WikibaseRepo.EntityIdParser",
@@ -886,11 +903,9 @@
 	},
 	"Hooks": {
 		"APIQuerySiteInfoGeneralInfo": "\\Wikibase\\Repo\\RepoHooks::onAPIQuerySiteInfoGeneralInfo",
-		"APIQuerySiteInfoStatisticsInfo": "\\Wikibase\\Repo\\RepoHooks::onAPIQuerySiteInfoStatisticsInfo",
 		"AbuseFilter-contentToString": "\\Wikibase\\Repo\\RepoHooks::onAbuseFilterContentToString",
 		"ApiCheckCanExecute": "\\Wikibase\\Repo\\RepoHooks::onApiCheckCanExecute",
 		"ApiMain::onException": "\\Wikibase\\Repo\\RepoHooks::onApiMainOnException",
-		"ApiMaxLagInfo": "\\Wikibase\\Repo\\RepoHooks::onApiMaxLagInfo",
 		"ApiQuery::moduleManager": "\\Wikibase\\Repo\\RepoHooks::onApiQueryModuleManager",
 		"ArticleDeleteComplete": [
 			"DeleteDispatcher",
@@ -915,6 +930,7 @@
 		"ImportHandleRevisionXMLTag": "\\Wikibase\\Repo\\RepoHooks::onImportHandleRevisionXMLTag",
 		"InfoAction": "\\Wikibase\\Repo\\RepoHooks::onInfoAction",
 		"LoadExtensionSchemaUpdates": "DatabaseSchemaUpdater",
+		"MaintenanceShellStart": "\\Wikibase\\Repo\\RepoHooks::onMaintenanceShellStart",
 		"NamespaceIsMovable": "\\Wikibase\\Repo\\RepoHooks::onNamespaceIsMovable",
 		"OutputPageBeforeHTML": [
 			"OutputPageBeforeHTML",
@@ -945,7 +961,8 @@
 			"\\Wikibase\\Repo\\RepoHooks::registerUnitTests",
 			"LibHooks",
 			"ViewHooks"
-		]
+		],
+		"WikibaseContentLanguages": "\\Wikibase\\Repo\\RepoHooks::onWikibaseContentLanguages"
 	},
 	"RateLimits": {
 		"wikibase-idgenerator": {

@@ -45,8 +45,7 @@ See @ref md_docs_topics_change-propagation
 #### useChangesTable
 Whether to record changes in the database, so they can be pushed to clients.
 
-Boolean, may be set to `false` in situations where there are no clients to notify to preserve space.
-If this is `true`, the pruneChanges.php script should run periodically to remove old changes from the database table.
+Boolean, may be set to `false` to completely disable change dispatching from this wiki.
 
 DEFAULT: ```true```
 
@@ -179,7 +178,7 @@ Allows the entity id generator to be chosen. (See @ref md_docs_storage_id-counte
 
 DEFAULT: ```original```
 
-Allows values: `original` or `mysql-upsert`
+Allows values: `original`, `mysql-upsert`, or `auto`
 
 #### idGeneratorSeparateDbConnection {#repo_idGeneratorSeparateDbConnection}
 Should a separate DB connection be used to generate entity IDs?  (See @ref md_docs_storage_id-counters)
@@ -191,6 +190,8 @@ Attempt to create an entity locks an entity id (for items, it would be Q####) an
 This config helps by adding a bigger number to ratelimit and slow them down to avoid bots wasting significant number of Q-ids by sending faulty data over and over again.
 Value of this config determines how much the user is going to be penalized for an error in creation of entities.
 Zero means no penalty. The higher value, the heavier the penalty would be.
+
+This feature depends on MediaWiki rate limits, which require a cache to be configured.
 
 DEFAULT: 0
 
@@ -239,59 +240,12 @@ EXAMPLE: On wikidata.org, this is set to `P1921`, a string property named “URI
 
 ### Dispatching
 
-#### dispatchingLockManager {#repo_dispatchingLockManager}
-If you want to use another lock mechanism for dispatching changes to clients instead of database locking (which can occupy too many connections to the master database), set its name in this config.
-
-See [$wgLockManagers] documentation in MediaWiki core for more information on configuring a locking mechanism inside core.
-
-#### dispatchLagToMaxLagFactor {#repo_dispatchLagToMaxLagFactor}
-If set to a positive number, the median dispatch lag (in seconds) will be divided by this number and passed to core like database lag (see the API maxlag parameter).
-
-DEFAULT: ```0``` (disabled)
-
-#### dispatchBatchChunkFactor
-Chunk factor used internally by the dispatchChanges.php script.
-
-If most clients are not interested in most changes, this factor can be raised to lower the number of database queries needed to fetch a batch of changes.
-
-DEFAULT: ```3```
-
-#### dispatchDefaultBatchSize
-Overrides the default value for batch-size in dispatchChanges.php
-
-DEFAULT: ```1000```
-
-#### dispatchDefaultMaxChunks
-Overrides the default value for max-chunks in dispatchChanges.php
-
-DEFAULT: ```15```
-
-#### dispatchDefaultDispatchInterval
-Overrides the default value for dispatch-interval in dispatchChanges.php in seconds.
-
-DEFAULT: ```60```
-
-#### dispatchDefaultDispatchRandomness
-Overrides the default value for randomness in dispatchChanges.php
-
-DEFAULT: ```15```
-
-#### dispatchMaxTime
-Overrides the default value for max-time in dispatchChanges.php in seconds.
-
-DEFAULT: ```3600``` (1 hour)
-
-#### dispatchIdleDelay
-Overrides the default value for idle-delay in dispatchChanges.php in seconds.
-
-DEFAULT: ```10```
-
 #### localClientDatabases {#client_localClientDatabases}
 An array of locally accessible client databases, for use by the dispatchChanges.php script.
 
 See @ref md_docs_topics_change-propagation
 This setting determines to which wikis changes are pushed directly.
-It must be given either as an associative array, mapping global site IDs to logical database names, or, of the database names are the same as the site IDs, as a list of databases.
+It must be given either as an associative array, mapping site global IDs to logical database names, or, of the database names are the same as the site global IDs, as a list of databases.
 
 DEFAULT: ```[]``` (An empty array, indicating no local client databases.)
 
@@ -393,9 +347,9 @@ Relevant only for search engines supporting it.
 ### Termbox & SSR
 
 #### termboxEnabled {#repo_termboxEnabled}
-Enable/Disable Termbox v2. Setting it to ```true``` will enable both client-side and server-side rendering functionality. In order for server-side rendering to work the respective service needs to be set up and ```ssrServerUrl``` has to be set accordingly.
+Enable/Disable Termbox v2. Setting it to ```true``` will enable both client-side and server-side rendering functionality. In order for server-side rendering to work, the respective service needs to be set up and ```ssrServerUrl``` has to be set accordingly; otherwise, users without JavaScript will not see a termbox.
 
-DEFAULT: ```false``` (so all Termbox v2 functionality is disabled)
+DEFAULT: ```true```
 
 #### ssrServerUrl
 The url to where the server-side-renderer server (for termbox) is running.
@@ -562,6 +516,11 @@ Enable/Disable the tainted reference feature.
 
 DEFAULT: ```false```
 
+#### restApiEnabled {#repo_restApiEnabled}
+Enable the Wikibase REST API.
+
+DEFAULT: ```false```
+
 #### federatedPropertiesEnabled {#repo_federatedPropertiesEnabled}
 Enable the federated properties feature. **Note that** once this feature is enable (set true), it must not be disabled (set false) again.
 The behaviour is unpredicted if it is disabled after it was enabled.
@@ -627,7 +586,7 @@ For performance reasons, it may be desirable to set this explicitly to avoid loo
 ### Repository
 
 #### repoSiteId
-Site ID of connected repository wiki
+Site global ID of connected repository wiki
 
 DEFAULT: is to assume both client and repo are the same.
 
@@ -843,6 +802,10 @@ Must match the name of the entity source as defined in [entitySources] setting.
 
 This setting is intended to be used by Wikibase installations with complex setups which have multiple repos attached.
 
+The entity source named by this setting must be a database entity source (i.e. its `type` must be `db`).
+If its `repoDatabase` is a string, that string must also be a site global ID for the repository wiki;
+otherwise, [recent changes injection][injectRecentChanges] will not work.
+
 DEFAULT: ```local```
 
 #### propagateChangesToRepo
@@ -911,7 +874,6 @@ DEFAULT: array mapping each well-known name to `null`.
 [$wgMaxArticleSize]: https://www.mediawiki.org/wiki/Manual:$wgMaxArticleSize
 [$wgRightsUrl]: https://www.mediawiki.org/wiki/Manual:$wgRightsUrl
 [$wgRightsText]: https://www.mediawiki.org/wiki/Manual:$wgRightsText
-[$wgLockManagers]: https://www.mediawiki.org/wiki/Manual:$wgLockManagers
 [$wgDBDefaultGroup]: https://www.mediawiki.org/wiki/Manual:$wgDBDefaultGroup
 [$wgLanguageCode]: https://www.mediawiki.org/wiki/Manual:$wgLanguageCode
 [$wgSitename]: https://www.mediawiki.org/wiki/Manual:$wgSitename

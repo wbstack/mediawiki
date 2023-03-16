@@ -21,33 +21,37 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import Component from 'vue-class-component';
+import { defineComponent } from 'vue';
 import EventEmittingButton from '@/presentation/components/EventEmittingButton.vue';
+import StateMixin from '@/presentation/StateMixin';
 
-@Component( {
+export default defineComponent( {
+	// eslint-disable-next-line vue/multi-word-component-names
+	name: 'License',
+	mixins: [ StateMixin ],
 	components: { EventEmittingButton },
-} )
-export default class License extends Vue {
-	public get publishOrSave(): string {
-		return this.$bridgeConfig.usePublish ?
-			this.$messages.KEYS.PUBLISH_CHANGES : this.$messages.KEYS.SAVE_CHANGES;
-	}
-
-	public get getBodyMessage(): string {
-		return this.$messages.get(
-			this.$messages.KEYS.LICENSE_BODY,
-			this.publishOrSave,
-			this.$bridgeConfig.termsOfUseUrl ?? '',
-			this.$bridgeConfig.dataRightsUrl ?? '',
-			this.$bridgeConfig.dataRightsText ?? '',
-		);
-	}
-
-	public handleCloseButtonClick( event: UIEvent ): void {
-		this.$emit( 'close', event );
-	}
-}
+	computed: {
+		publishOrSave(): string {
+			return this.rootModule.getters.config.usePublish ?
+				this.$messages.KEYS.PUBLISH_CHANGES : this.$messages.KEYS.SAVE_CHANGES;
+		},
+		getBodyMessage(): string {
+			const config = this.rootModule.getters.config;
+			return this.$messages.get(
+				this.$messages.KEYS.LICENSE_BODY,
+				this.publishOrSave,
+				config.termsOfUseUrl ?? '',
+				config.dataRightsUrl ?? '',
+				config.dataRightsText ?? '',
+			);
+		},
+	},
+	methods: {
+		handleCloseButtonClick( event: UIEvent ): void {
+			this.$emit( 'close', event );
+		},
+	},
+} );
 </script>
 
 <style lang="scss">

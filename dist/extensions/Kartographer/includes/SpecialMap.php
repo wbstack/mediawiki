@@ -49,24 +49,28 @@ class SpecialMap extends SpecialPage {
 		}
 
 		$attributions = Html::rawElement( 'div', [ 'id' => 'mw-specialMap-attributions' ],
-			$this->msg( 'kartographer-attribution' )->title( $this->getPageTitle() )->parse() );
+			$this->msg( 'kartographer-attribution' )->parse() );
 
 		$this->getOutput()->addHTML(
-			Html::openElement( 'div', [ 'id' => 'mw-specialMap-container', 'class' => 'thumb' ] )
-				. Html::openElement( 'div', [ 'class' => 'thumbinner' ] )
-					. Html::openElement( 'div', [ 'id' => 'mw-specialMap-inner' ] )
-						. Html::element( 'div', [ 'id' => 'mw-specialMap-map' ] )
-						. $markerHtml
-						. $attributions
-					. Html::closeElement( 'div' )
-					. Html::openElement( 'div',
-						[ 'id' => 'mw-specialMap-caption', 'class' => 'thumbcaption' ]
+			Html::rawElement( 'div', [ 'id' => 'mw-specialMap-container', 'class' => 'thumb' ],
+				Html::rawElement( 'div', [ 'class' => 'thumbinner' ],
+					Html::rawElement( 'div', [ 'id' => 'mw-specialMap-inner' ],
+						Html::element( 'img', [
+							'height' => 256,
+							'width' => 256,
+							'src' => $this->getWorldMapUrl(),
+							'srcset' => $this->getWorldMapSrcset()
+						] ) .
+						$markerHtml .
+						$attributions
+					) .
+					Html::rawElement( 'div',
+						[ 'id' => 'mw-specialMap-caption', 'class' => 'thumbcaption' ],
+						Html::element( 'span', [ 'id' => 'mw-specialMap-icon' ] ) .
+						Html::element( 'span', [ 'id' => 'mw-specialMap-coords' ], $coordText )
 					)
-						. Html::element( 'span', [ 'id' => 'mw-specialMap-icon' ] )
-						. Html::element( 'span', [ 'id' => 'mw-specialMap-coords' ], $coordText )
-					. Html::closeElement( 'div' )
-				. Html::closeElement( 'div' )
-			. Html::closeElement( 'div' )
+				)
+			)
 		);
 	}
 
@@ -103,6 +107,36 @@ class SpecialMap extends SpecialPage {
 	}
 
 	/**
+	 * Return the image url for a world map
+	 * @param string $factor HiDPI image factor (example: @2x)
+	 * @return string
+	 */
+	private function getWorldMapUrl( string $factor = '' ): string {
+		return $this->getConfig()->get( 'KartographerMapServer' ) . '/' .
+			$this->getConfig()->get( 'KartographerDfltStyle' ) .
+			'/0/0/0' . $factor . '.png';
+	}
+
+	/**
+	 * Return srcset attribute value for world map image url
+	 * @return string|null
+	 */
+	private function getWorldMapSrcset(): ?string {
+		$srcSetScalesConfig = $this->getConfig()->get( 'KartographerSrcsetScales' );
+		if ( $this->getConfig()->get( 'ResponsiveImages' ) && $srcSetScalesConfig ) {
+			// For now only support 2x, not 1.5. Saves some bytes...
+			$srcSetScales = array_intersect( $srcSetScalesConfig, [ 2 ] );
+			$srcSets = [];
+			foreach ( $srcSetScales as $srcSetScale ) {
+				$scaledImgUrl = $this->getWorldMapUrl( "@{$srcSetScale}x" );
+				$srcSets[] = "{$scaledImgUrl} {$srcSetScale}x";
+			}
+			return implode( ', ', $srcSets );
+		}
+		return null;
+	}
+
+	/**
 	 * Returns a Title for a link to the coordinates provided
 	 *
 	 * @param float $lat
@@ -111,7 +145,7 @@ class SpecialMap extends SpecialPage {
 	 * @param string $lang Optional language code. Defaults to 'local'
 	 * @return Title
 	 */
-	public static function link( $lat, $lon, $zoom, $lang = 'local' ) {
+	public static function link( $lat, $lon, $zoom, $lang = 'local' ): Title {
 		return SpecialPage::getTitleFor( 'Map', "$zoom/$lat/$lon/$lang" );
 	}
 }
