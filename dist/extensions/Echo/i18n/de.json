@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Brettchenweber",
 			"ChrisiPK",
 			"DerHexer",
 			"FriedhelmW",
@@ -20,8 +21,7 @@
 			"Tobi 406",
 			"Umherirrender",
 			"Vogone",
-			"Wnme",
-			"Brettchenweber"
+			"Wnme"
 		]
 	},
 	"echo-desc": "Erweitert das Wiki um ein System zur Benachrichtigung von Benutzern zu Ereignissen und Nachrichten",

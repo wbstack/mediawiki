@@ -172,6 +172,7 @@
 	"mobile-frontend-talk-reply": "Odgovor",
 	"mobile-frontend-talk-reply-info": "Vaš odgovor bo samodejno podpisan z vašim uporabniškim imenom.",
 	"mobile-frontend-talk-topic-error": "Teme ni mogoče dodati zaradi neznane napake.",
+	"mobile-frontend-talk-topic-error-protected": "Ta pogovorna stran je zaščitena. Nimate dovoljenja za dodajanje tem.",
 	"mobile-frontend-talk-topic-error-permission": "Teme ni mogoče dodati. Nimate dovoljenja za urejanje strani.",
 	"mobile-frontend-talk-topic-error-spam": "Tema je bila zavrnjena, ker je vsebovala fragment vsiljene pošte.",
 	"mobile-frontend-talk-topic-error-badtoken": "Prišlo je do napake v strežniku. Vašega urejanja ni mogoče shraniti. Poskusite to stran znova naložiti.",

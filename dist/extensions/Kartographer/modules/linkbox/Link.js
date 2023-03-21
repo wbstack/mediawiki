@@ -80,7 +80,6 @@ function Link( options ) {
  * @member Kartographer.Linkbox.LinkClass
  */
 Link.prototype.openFullScreen = function ( position ) {
-
 	var link = this,
 		map = link.fullScreenMap,
 		mapObject,
@@ -126,8 +125,8 @@ Link.prototype.openFullScreen = function ( position ) {
 		};
 
 		mw.loader.using( 'ext.kartographer.dialog' ).then( function () {
-			require( 'ext.kartographer.dialog' ).renderNewMap( mapObject ).then( function ( map ) {
-				link.fullScreenMap = map;
+			require( 'ext.kartographer.dialog' ).renderNewMap( mapObject ).then( function ( m ) {
+				link.fullScreenMap = m;
 			} );
 		} );
 	}

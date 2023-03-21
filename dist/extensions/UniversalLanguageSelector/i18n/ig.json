@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Izuchi Onyeike",
 			"Pasjoesscc",
 			"Ukabia",
-			"Uzoma Ozurumba",
-			"Izuchi Onyeike"
+			"Uzoma Ozurumba"
 		]
 	},
 	"uls-desc": "Na-enye\n onye ọrụ ọtụtụ ụzọ isi họrọ asụsụ na ịhazi ntọala asụsụ",
@@ -69,5 +69,7 @@
 	"ext-uls-setlang-heading": "Gbanwee ihu asụsụ?",
 	"ext-uls-setlang-accept": "Nabata mgbanwe",
 	"ext-uls-setlang-loading": "Itinye na ọrụ...",
-	"ext-uls-setlang-cancel": "Agbanwela"
+	"ext-uls-setlang-cancel": "Agbanwela",
+	"ext-uls-actions-menu-header": "nhọrọ ndị ọzọ",
+	"ext-uls-actions-menu-language-settings-item-label": "Mepee ntọala asụsụ"
 }

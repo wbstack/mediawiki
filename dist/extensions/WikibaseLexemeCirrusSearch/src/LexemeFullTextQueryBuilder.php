@@ -10,7 +10,7 @@ use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Language;
 use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Repo\WikibaseRepo;
 use Wikibase\Search\Elastic\EntitySearchUtils;
 
@@ -41,19 +41,19 @@ class LexemeFullTextQueryBuilder implements FullTextQueryBuilder {
 	 */
 	private $userLanguage;
 	/**
-	 * @var LanguageFallbackLabelDescriptionLookupFactory
+	 * @var FallbackLabelDescriptionLookupFactory
 	 */
 	private $lookupFactory;
 
 	/**
 	 * @param array $settings Settings from EntitySearchProfiles.php
-	 * @param LanguageFallbackLabelDescriptionLookupFactory $lookupFactory
+	 * @param FallbackLabelDescriptionLookupFactory $lookupFactory
 	 * @param EntityIdParser $entityIdParser
 	 * @param Language $userLanguage User's display language
 	 */
 	public function __construct(
 		array $settings,
-		LanguageFallbackLabelDescriptionLookupFactory $lookupFactory,
+		FallbackLabelDescriptionLookupFactory $lookupFactory,
 		EntityIdParser $entityIdParser,
 		Language $userLanguage
 	) {
@@ -72,10 +72,7 @@ class LexemeFullTextQueryBuilder implements FullTextQueryBuilder {
 	public static function newFromGlobals( array $settings ) {
 		return new static(
 			$settings,
-			new LanguageFallbackLabelDescriptionLookupFactory(
-				WikibaseRepo::getLanguageFallbackChainFactory(),
-				WikibaseRepo::getTermLookup(),
-				WikibaseRepo::getTermBuffer() ),
+			WikibaseRepo::getFallbackLabelDescriptionLookupFactory(),
 			WikibaseRepo::getEntityIdParser(),
 			WikibaseRepo::getUserLanguage()
 		);
@@ -182,7 +179,6 @@ class LexemeFullTextQueryBuilder implements FullTextQueryBuilder {
 
 		// Main query
 		$query = new BoolQuery();
-		$query->setParam( 'disable_coord', true );
 
 		// Match either labels or exact match to title
 		$query->addShould( $titleMatch );

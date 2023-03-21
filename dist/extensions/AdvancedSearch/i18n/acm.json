@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"MRidhaAJ"
+		]
+	},
+	"advancedsearch-desc": "Easy access to advanced search capabilities on [[Special:Search]]",
+	"advancedsearch-options-pane-head": "بحث متقدم:",
+	"advancedsearch-optgroup-text": "بحث بالصفحة",
+	"advancedsearch-optgroup-structure": "البنية",
+	"advancedsearch-optgroup-files": "ملفات وصور",
+	"advancedsearch-optgroup-sort": "طريقة الترتيب",
+	"advancedsearch-field-plain": "هاي الكلمات",
+	"advancedsearch-field-phrase": "هاذ النص",
+	"advancedsearch-field-or": "واحد من هذني الكلمات",
+	"advancedsearch-field-not": "مو هاي الكلمات",
+	"advancedsearch-field-subpageof": "الفرعيات المرتبطة وي هاي الصفحة",
+	"advancedsearch-field-intitle": "عنوان الصفحة بيه",
+	"advancedsearch-field-deepcategory": "الصفحات بهاي التصنيفات",
+	"advancedsearch-field-hastemplate": "الصفحات بهاي القوالب",
+	"advancedsearch-field-inlanguage": "الصفحات بهاي اللغة",
+	"advancedsearch-field-filetype": "نوع الملف",
+	"advancedsearch-field-filew": "عرض الملف بالبكسل",
+	"advancedsearch-field-fileh": "طول الملف بالبكسل",
+	"advancedsearch-field-sort": "طريقة الترتيب"
+}

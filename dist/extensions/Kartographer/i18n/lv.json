@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Papuass",
-			"Silraks"
+			"Silraks",
+			"Amire80"
 		]
 	},
 	"apierror-kartographer-conflicting-revids": "Kartes datu vaicājumi no vairākām tās pašas lapas versijām vienā pieprasījumā vēl netiek atbalstīti.",
@@ -34,6 +35,7 @@
 	"kartographer-sidebar-latitude": "Ģeogrāfiskais platums",
 	"kartographer-sidebar-longitude": "Ģeogrāfiskais garums",
 	"kartographer-sidebar-mapdetails": "Ārējās kartes",
+	"kartographer-sidebar-nearbybutton": "Parādīt tuvumā esošos rakstus",
 	"kartographer-sidebar-service": "Pakalpojums",
 	"kartographer-sidebar-togglebutton": "Ārējās kartes",
 	"leafletdraw-draw-handlers-circle-radius": "Rādiuss",
@@ -60,6 +62,7 @@
 	"leafletdraw-draw-toolbar-undo-text": "Dzēst pēdējo punktu",
 	"leafletdraw-draw-toolbar-undo-title": "Dzēst pēdējo zīmēto punktu",
 	"leafletdraw-edit-handlers-edit-tooltip-subtext": "Klikšķini atcet, lai atsauktu izmaiņas",
+	"leafletdraw-edit-handlers-edit-tooltip-text": "Velciet rokturus vai marķieri, lai labotu objektu",
 	"leafletdraw-edit-handlers-remove-tooltip-text": "Noklikšķiniet uz objekta, lai to noņemtu",
 	"leafletdraw-edit-toolbar-actions-cancel-text": "Atcelt",
 	"leafletdraw-edit-toolbar-actions-cancel-title": "Atcelt labošanu, atmet visas izmaiņas",

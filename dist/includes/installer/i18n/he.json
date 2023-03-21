@@ -224,7 +224,7 @@
 	"config-personalization-settings": "התאמה אישית",
 	"config-logo-summary": "עבור כל אחד מהשדות האלה חובה להעלות תמונה בגדול מתאים ולהזין URL בתיבות למטה. אפשר להשתמש ב־<code dir=\"ltr\">$wgStylePath</code> או ב־<code dir=\"ltr\">$wgScriptPath</code> אם הסמל שלך יחסי לנתיבים האלה. אפשר להשאיר כל אחד מהשדות האלה ריק.",
 	"config-logo-preview-main": "עמוד ראשי",
-	"config-logo-icon": "סמל (אייקון)",
+	"config-logo-icon": "סמל (אייקון):",
 	"config-logo-icon-help": "הסמל (האייקון) שלך אמור להיות בצורת ריבוע והכי טוב שיהיה גדול מ־50 פיקסלים או שיהיה SVG.",
 	"config-logo-wordmark": "סמל מילולי (לא חובה)",
 	"config-logo-wordmark-help": "שם האתר שלך. אם זה לא מוגדר, זה בדרך־כלל יציג טקסט בתור גיבוי. הכי טוב שזה יהיה SVG בגובה 30 פיקסלים או יותר.",

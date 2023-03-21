@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Anja Jentzsch",
+			"Brettchenweber",
 			"Ferdinand0101",
 			"Flow",
 			"G.Hagedorn",
@@ -31,7 +32,6 @@
 			"Vogone",
 			"Yellowcard",
 			"Zolo",
-			"Brettchenweber",
 			"Nikki"
 		]
 	},
@@ -144,7 +144,7 @@
 	"wikibase-copyrighttooltip-acknowledge": "Ich akzeptiere diese Bedingungen für meine zukünftigen Bearbeitungen. Diese Nachricht nicht mehr anzeigen.",
 	"wikibase-entityselector-more": "mehr",
 	"wikibase-entityselector-notfound": "Kein Treffer gefunden",
-	"wikibase-anonymouseditwarning": "Warnung: Du bist nicht angemeldet. Deine [https://de.wikipedia.org/wiki/IP-Adresse IP-Adresse] wird öffentlich sichtbar sein, falls du Bearbeitungen durchführst. Wenn du dich <strong>[[Special:UserLogin|anmeldest]]</strong> oder <strong>[[Special:CreateAccount|ein Benutzerkonto erstellst]]</strong>, werden deine Bearbeitungen neben anderen Vorteilen einem Benutzernamen zugeordnet.",
+	"wikibase-anonymouseditwarning": "Warnung: Du bist nicht angemeldet. Deine [https://de.wikipedia.org/wiki/IP-Adresse IP-Adresse] wird öffentlich sichtbar sein, falls du Bearbeitungen durchführst. Wenn du dich <strong>[[Special:UserLogin|anmeldest]]</strong> oder <strong>[[Special:CreateAccount|ein Benutzerkonto erstellst]]</strong>, werden neben anderen Vorteilen deine Bearbeitungen einem Benutzernamen zugeordnet.",
 	"wikibase-anonymouseditwarning-heading": "Du bist nicht angemeldet",
 	"wikibase-anonymouseditwarning-message": "Derzeit wird deine IP-Adresse öffentlich sichtbar sein, wenn du irgendwelche Bearbeitungen durchführst. Wenn du dich anmeldest oder ein Benutzerkonto erstellst, werden deine Bearbeitungen neben anderen Vorteilen deinem Benutzerkonto zugeordnet.",
 	"wikibase-anonymouseditwarning-dismiss-persist": "Warne mich immer, wenn ich nicht angemeldet bin.",
@@ -349,6 +349,7 @@
 	"wikibase-entitypage-title": "Objektseite",
 	"wikibase-entitypage-text": "Diese Seite leitet auf die Objektseite auf dem Repositorium weiter, zu der sie gehört. Bitte gib mithilfe der Unterseitensyntax die Objektkennung in der URL an.",
 	"wikibase-entitypage-bad-id": "Ungültige Kennung: $1.",
+	"wikibase-error-entity-not-local": "Objekttyp $1 kann in diesem Wiki nicht bearbeitet werden.",
 	"wikibase-error-entity-too-big": "Das Objekt ist zu groß. Die maximal erlaubte Objektgröße ist $1.",
 	"wikibase-parse-error": "Fehlerhafter Wert.",
 	"wikibase-parse-error-coordinate": "Der Koordinatenwert ist ungültig.",

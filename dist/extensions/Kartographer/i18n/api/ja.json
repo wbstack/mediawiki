@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Higa4",
+			"Omotecho",
 			"Shirayuki",
-			"Yamagata Yusuke",
-			"Omotecho"
+			"Yamagata Yusuke"
 		]
 	},
 	"apihelp-sanitize-mapdata-description": "Kartographer拡張機能用のデータ検証を実施します",

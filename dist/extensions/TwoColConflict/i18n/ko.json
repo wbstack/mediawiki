@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bluehill",
 			"Bluemersen",
 			"Codenstory",
 			"Ellif",
@@ -9,8 +10,7 @@
 			"SeoJeongHo",
 			"Ykhwong",
 			"렌즈",
-			"밝은소년",
-			"Bluehill"
+			"밝은소년"
 		]
 	},
 	"twocolconflict": "단락 기반 편집 충돌",

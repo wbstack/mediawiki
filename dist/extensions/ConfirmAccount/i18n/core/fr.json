@@ -16,9 +16,9 @@
 			"Seb35",
 			"Sherbrooke",
 			"Urhixidur",
+			"Verdy p",
 			"Wladek92",
-			"Zetud",
-			"Verdy p"
+			"Zetud"
 		]
 	},
 	"confirmaccount-newrequests": "'''$1''' [[Special:ConfirmAccounts|demande{{PLURAL:$1||s}} ouverte{{PLURAL:$1||s}} de confirmation de compte par courriel]] {{PLURAL:$1|es|son}}t en attente. '''Votre attention est nécessaire !'''",

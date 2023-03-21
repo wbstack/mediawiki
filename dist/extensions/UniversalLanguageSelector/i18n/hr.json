@@ -72,5 +72,11 @@
 	"ext-uls-setlang-heading": "Želite li promijeniti jezik sučelja?",
 	"ext-uls-setlang-accept": "Prihvati izmjenu",
 	"ext-uls-setlang-loading": "Primjenjuje se...",
-	"ext-uls-setlang-cancel": "Nemoj promijeniti"
+	"ext-uls-setlang-cancel": "Nemoj promijeniti",
+	"ext-uls-actions-menu-header": "Više mogućnosti",
+	"ext-uls-actions-menu-language-settings-item-label": "Otvori jezične postavke",
+	"ext-uls-empty-state-header": "Nema drugih jezika",
+	"ext-uls-empty-state-desc": "Trenutačno nema dostupnih jezika",
+	"ext-uls-empty-state-header-actions-available": "Još nema drugih jezika. Želite li dodati novi?",
+	"ext-uls-empty-state-desc-actions-available": "Učinite sadržaj dostupnim na više jezika."
 }

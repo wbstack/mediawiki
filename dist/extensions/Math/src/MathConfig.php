@@ -2,8 +2,10 @@
 
 namespace MediaWiki\Extension\Math;
 
+use ExtensionRegistry;
 use MediaWiki\Config\ServiceOptions;
 use Message;
+use Wikibase\Client\WikibaseClient;
 
 class MathConfig {
 
@@ -11,6 +13,7 @@ class MathConfig {
 	public const CONSTRUCTOR_OPTIONS = [
 		'MathDisableTexFilter',
 		'MathValidModes',
+		'MathEntitySelectorFallbackUrl'
 	];
 
 	/** @var string */
@@ -37,7 +40,6 @@ class MathConfig {
 	/** @var string[] a list of all supported rendering modes */
 	private const SUPPORTED_MODES = [
 		self::MODE_SOURCE,
-		self::MODE_PNG,
 		self::MODE_LATEXML,
 		self::MODE_MATHML,
 	];
@@ -46,7 +48,6 @@ class MathConfig {
 	 * @var array mapping from rendering mode to user options value
 	 */
 	private const MODES_TO_USER_OPTIONS = [
-		self::MODE_PNG => 0,
 		self::MODE_SOURCE => 3,
 		self::MODE_MATHML => 5,
 		self::MODE_LATEXML => 7,
@@ -54,15 +55,21 @@ class MathConfig {
 
 	/** @var ServiceOptions */
 	private $options;
+	/** @var ExtensionRegistry */
+	private $registry;
 
 	/**
 	 * @param ServiceOptions $options
+	 * @param ExtensionRegistry $registry
 	 */
 	public function __construct(
-		ServiceOptions $options
+		ServiceOptions $options,
+		ExtensionRegistry $registry
+
 	) {
 		$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->options = $options;
+		$this->registry = $registry;
 	}
 
 	/**
@@ -150,7 +157,7 @@ class MathConfig {
 	 * @param string $default rendering mode to use by default on unrecognized input
 	 * @return string one of the self::MODE_* constants.
 	 */
-	public static function normalizeRenderingMode( $mode, string $default = self::MODE_PNG ): string {
+	public static function normalizeRenderingMode( $mode, string $default = self::MODE_MATHML ): string {
 		if ( is_int( $mode ) ) {
 			$userOptionToMode = array_flip( self::MODES_TO_USER_OPTIONS );
 			return $userOptionToMode[$mode] ?? $default;
@@ -160,5 +167,22 @@ class MathConfig {
 			return $mode;
 		}
 		return $default;
+	}
+
+	/**
+	 * If the WikibaseClient is enabled the API url of that client is returned, otherwise the
+	 * fallback url is used.
+	 * @return string url of the Wikibase url
+	 */
+	public function getMathEntitySelectorUrl(): string {
+		// @see WikibaseSettings::isClientEnabled()
+		if ( $this->registry->isLoaded( 'WikibaseClient' ) ) {
+			$settings = WikibaseClient::getSettings();
+			return $settings->getSetting( 'repoUrl' ) .
+				$settings->getSetting( 'repoScriptPath' ) .
+				'/api.php';
+
+		}
+		return $this->options->get( 'MathEntitySelectorFallbackUrl' );
 	}
 }

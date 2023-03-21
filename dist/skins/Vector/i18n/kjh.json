@@ -7,6 +7,7 @@
 	},
 	"vector-languages": "Тіллер",
 	"vector-language-button-label": "{{PLURAL:$1|$1 тіл}}",
+	"vector-no-language-button-label": "Тіллер хос саларға",
 	"vector-action-addsection": "Тема хозыбзарға",
 	"vector-action-delete": "Тастабызарға",
 	"vector-action-move": "Адын алыстырыбызарға",
@@ -15,5 +16,6 @@
 	"vector-view-edit": "Тӱзедерге",
 	"vector-view-history": "Кӧрігтердің тархыны",
 	"vector-view-view": "Хығырарға",
-	"vector-more-actions": "Хоза"
+	"vector-more-actions": "Хоза",
+	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> страницаларны тілег"
 }

@@ -68,5 +68,10 @@
 	"ext-uls-setlang-heading": "Tiakim pian'ad laasʋgɔ?",
 	"ext-uls-setlang-accept": "Si'akim tiakir",
 	"ext-uls-setlang-loading": "Paasidi...",
-	"ext-uls-setlang-cancel": "Da tiakɛ"
+	"ext-uls-setlang-cancel": "Da tiakɛ",
+	"ext-uls-actions-menu-language-settings-item-label": "Yɔɔgim pian'ad maalʋg nam",
+	"ext-uls-empty-state-header": "Pian'ad nan kai",
+	"ext-uls-empty-state-desc": "Pian'ad nam kai nananna",
+	"ext-uls-empty-state-header-actions-available": "Pian'ad nan kai. Paasim bʋn paal",
+	"ext-uls-empty-state-desc-actions-available": "Maalim yɛzug la paalʋ pian'ad nam pamm ni"
 }

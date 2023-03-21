@@ -31,6 +31,7 @@
 	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} 修改",
 	"wikibase-rcfilters-hide-wikibase-label": "{{WBREPONAME}}改動",
 	"unconnectedpages": "未連到項目嘅版",
+	"unconnectedpages-summary": "呢一版列示咗未連到數據項目（喺支援連接咗項目嘅空間名）嘅版。",
 	"wikibase-unconnectedpages-submit": "顯示版",
 	"wikibase-pageinfo-entity-id": "{{WBREPONAME}}項目ID",
 	"wikibase-otherprojects": "第啲項目",

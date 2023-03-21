@@ -134,7 +134,13 @@ class SpecialTemplateSandbox extends SpecialPage {
 			}
 		}
 		if ( $error !== false ) {
-			$output->wrapWikiMsg( "<div class='previewnote errorbox'>\n$1\n</div>", $error );
+			$output->addHTML(
+				Html::errorBox(
+					$output->msg( $error )->parse(),
+					'',
+					'previewnote'
+				)
+			);
 		} elseif ( $this->output !== null ) {
 			// Wrap output in a div for proper language markup.
 			$pageLang = $this->title->getPageViewLanguage();
@@ -144,8 +150,11 @@ class SpecialTemplateSandbox extends SpecialPage {
 
 			// Anons have predictable edit tokens, only do the JS/CSS preview for logged-in users.
 			if ( $user->isAnon() ) {
-				$output->wrapWikiMsg(
-					"<div class='previewnote warningbox'>\n$1\n</div>", 'templatesandbox-anon-limited-preview'
+				$output->addHTML(
+					Html::warningBox(
+						$output->msg( 'templatesandbox-anon-limited-preview' )->parse(),
+						'previewnote'
+					)
 				);
 			} else {
 				Logic::addSubpageHandlerToOutput( $this->prefixes, $output );

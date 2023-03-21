@@ -64,5 +64,10 @@
 	"ext-uls-compact-language-links-preference": "మీకు సంబంధించిన భాషలు కలిగిన ఒక [[$1|సంగ్రహ భాషా జాబితా]] వాడండి.",
 	"ext-uls-compact-no-results": "మీరు వెతికిన భాషలో ఈ పేజీ లేదు.",
 	"ext-uls-setlang-error": "మీరు ఎంచుకున్న భాషను అప్ డేట్ చేసేటప్పుడు దోషం ఏర్పడింది. \nదోషం: $1",
-	"ext-uls-setlang-unknown-error": "గుర్తించలేని పొరపాటు"
+	"ext-uls-setlang-unknown-error": "గుర్తించలేని పొరపాటు",
+	"ext-uls-actions-menu-header": "మరిన్ని వికల్పాలు",
+	"ext-uls-actions-menu-language-settings-item-label": "భాషా అమరికలను తెరువు",
+	"ext-uls-empty-state-header": "ఇతర భాషల లింకులు లేవు",
+	"ext-uls-empty-state-header-actions-available": "ఇతర భాషల లింకులు లేవు. కొత్త లింకొకటి చేరుస్తారా?",
+	"ext-uls-empty-state-desc-actions-available": " ఈ పేజీ లోని సమాచారాన్ని మరిన్ని భాషల్లో అందించండి."
 }

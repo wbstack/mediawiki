@@ -2,6 +2,7 @@
 namespace JsonConfig;
 
 use ApiBase;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Allows JsonConfig to be manipulated via API
@@ -143,15 +144,15 @@ class JCApi extends ApiBase {
 	public function getAllowedParams() {
 		return [
 			'command' => [
-				ApiBase::PARAM_DFLT => 'status',
-				ApiBase::PARAM_TYPE => [
+				ParamValidator::PARAM_DEFAULT => 'status',
+				ParamValidator::PARAM_TYPE => [
 					'status',
 					'reset',
 					'reload',
 				]
 			],
 			'namespace' => [
-				ApiBase::PARAM_TYPE => 'integer',
+				ParamValidator::PARAM_TYPE => 'integer',
 			],
 			'title' => '',
 			'content' => '',

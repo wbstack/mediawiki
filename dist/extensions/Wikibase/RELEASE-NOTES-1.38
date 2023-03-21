@@ -1,5 +1,7 @@
 = Wikibase 1.38 =
 
+This is not a release yet!
+
 == Upgrading notes for 1.38 ==
 
 Don't forget to always back up your database before upgrading!
@@ -24,14 +26,15 @@ For the migration, we suggest the following procedure:
 - Run `ResubmitChanges.php`, to move remaining changes into the job queue.
 - Resume automatic job runners, if you have any (now using the new code).
 
-In this 1.38 release, there is one known regression in change dispatching, detailed in https://phabricator.wikimedia.org/T326082.
-This will be fixed in a future version of Wikibase.
-
 For a general manual to upgrade MediaWiki see:
 
 https://www.mediawiki.org/wiki/Manual:Upgrading
 
 === Configuration changes for system administrators in 1.38 ===
+
+==== New configuration ====
+
+* ...
 
 ==== Changed configuration ====
 
@@ -41,6 +44,7 @@ https://www.mediawiki.org/wiki/Manual:Upgrading
  (This was true before in some setups, but is more important now.)
  If you have a single wiki that is both a repo and a client,
  it’s recommended to set the `repoDatabase` to `false`.
+* ...
 
 ==== Removed configuration ====
 
@@ -53,6 +57,33 @@ https://www.mediawiki.org/wiki/Manual:Upgrading
 * (repo) (T292604) dispatchIdleDelay has been removed.
 * (repo) (T292604) dispatchLagToMaxLagFactor has been removed.
 * (repo) (T292604) dispatchingLockManager has been removed.
+* ...
+
+=== New user-facing features in 1.38 ===
+
+* ...
+
+=== External library changes in 1.38 ===
+
+==== New external libraries ====
+
+* ...
+
+==== Changed external libraries ====
+
+* ...
+
+==== Removed external libraries ====
+
+* (T12345) ...
+
+=== Bug fixes in 1.38 ===
+
+* (T12345) ...
+
+=== Action API changes in 1.38 ===
+
+* (T12345) ...
 
 === Languages updated in 1.38 ===
 
@@ -61,8 +92,23 @@ Below only new and removed languages are listed, as well as changes to languages
 because of Phabricator reports.
 New monolingual support:
 
-* (T288335) Aghem agq
-* (T293884) Massa mcn
+* (T12345) ...
+
+Monolingual entries removed as they are now natively supported by MediaWiki:
+
+* (T12345) ...
+
+=== Breaking changes in 1.38 ===
+
+* (T12345) ...
+
+=== Deprecations in 1.38 ===
+
+* (T12345) ...
+
+=== Other changes in 1.38 ===
+
+* (T12345) ...
 
 == Online documentation ==
 

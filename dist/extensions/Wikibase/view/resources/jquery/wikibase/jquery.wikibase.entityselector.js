@@ -488,8 +488,17 @@
 		 */
 		_createLabelFromSuggestion: function ( entityStub ) {
 			var $suggestion = $( '<span>' ).addClass( 'ui-entityselector-itemcontent' ),
-				$label = $( '<span>' ).addClass( 'ui-entityselector-label' ).text( entityStub.label || entityStub.id );
+				$label = $( '<span>' ).addClass( 'ui-entityselector-label' ),
+				$description = $();
 
+			if ( entityStub.display && entityStub.display.label ) {
+				$label.text( entityStub.display.label.value );
+				$label.attr( 'lang', entityStub.display.label.language );
+			} else {
+				$label.text( entityStub.label || entityStub.id );
+			}
+
+			// TODO use match instead of aliases
 			if ( entityStub.aliases ) {
 				$label.append(
 					$( '<span>' ).addClass( 'ui-entityselector-aliases' ).text( ' (' + entityStub.aliases.join( ', ' ) + ')' )
@@ -498,12 +507,16 @@
 
 			$suggestion.append( $label );
 
-			if ( entityStub.description ) {
-				$suggestion.append(
-					$( '<span>' ).addClass( 'ui-entityselector-description' )
-					.text( entityStub.description )
-				);
+			if ( entityStub.display && entityStub.display.description ) {
+				$description = $( '<span>' ).addClass( 'ui-entityselector-description' )
+					.text( entityStub.display.description.value )
+					.attr( 'lang', entityStub.display.description.language );
+			} else if ( entityStub.description ) {
+				$description = $( '<span>' ).addClass( 'ui-entityselector-description' )
+					.text( entityStub.description );
 			}
+
+			$suggestion.append( $description );
 
 			return $suggestion;
 		},
@@ -517,7 +530,13 @@
 		 */
 		_createMenuItemFromSuggestion: function ( entityStub ) {
 			var $label = this._createLabelFromSuggestion( entityStub ),
+				value;
+
+			if ( entityStub.display && entityStub.display.label ) {
+				value = entityStub.display.label.value;
+			} else {
 				value = entityStub.label || entityStub.id;
+			}
 
 			return new $.wikibase.entityselector.Item( $label, value, entityStub );
 		},
@@ -639,6 +658,7 @@
 				matcher = new RegExp( this._escapeRegex( term ), 'i' );
 
 			deferred.resolve( source.filter( function ( item ) {
+				// TODO use match instead of aliases
 				if ( item.aliases ) {
 					for ( var i = 0; i < item.aliases.length; i++ ) {
 						if ( matcher.test( item.aliases[ i ] ) ) {
@@ -647,7 +667,14 @@
 					}
 				}
 
-				return matcher.test( item.label ) || matcher.test( item.id );
+				var label;
+				if ( item.display && item.display.label ) {
+					label = item.display.label.value;
+				} else {
+					label = item.label || '';
+				}
+
+				return matcher.test( label ) || matcher.test( item.id );
 			} ), term );
 
 			return deferred.promise();

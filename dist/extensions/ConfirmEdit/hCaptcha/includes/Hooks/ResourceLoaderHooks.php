@@ -5,17 +5,17 @@ declare( strict_types=1 );
 namespace MediaWiki\Extension\ConfirmEdit\hCaptcha\Hooks;
 
 use Config;
-use ResourceLoaderContext;
+use MediaWiki\ResourceLoader as RL;
 
 class ResourceLoaderHooks {
 	/**
 	 * Passes config variables to ext.confirmEdit.hCaptcha.visualEditor ResourceLoader module.
-	 * @param ResourceLoaderContext $context
+	 * @param RL\Context $context
 	 * @param Config $config
 	 * @return array
 	 */
 	public static function getHCaptchaResourceLoaderConfig(
-		ResourceLoaderContext $context,
+		RL\Context $context,
 		Config $config
 	) {
 		return [

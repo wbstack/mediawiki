@@ -30,7 +30,7 @@
 	};
 
 	QUnit.module( 'jquery.wikibase.itemview', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_itemview' ).each( function () {
 				var $itemview = $( this ),
 					itemview = $itemview.data( 'itemview' );
@@ -55,7 +55,7 @@
 		var $itemview = createItemview(),
 			itemview = $itemview.data( 'itemview' );
 
-		assert.ok(
+		assert.true(
 			itemview instanceof $.wikibase.itemview,
 			'Created widget.'
 		);

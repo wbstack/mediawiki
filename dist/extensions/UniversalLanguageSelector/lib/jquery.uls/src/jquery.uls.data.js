@@ -586,7 +586,7 @@
             [
                 "AS"
             ],
-            "Bunun"
+            "bunun"
         ],
         "bo": [
             "Tibt",
@@ -666,6 +666,13 @@
                 "AF"
             ],
             "bulu"
+        ],
+        "bwr": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "bura"
         ],
         "bxr": [
             "Cyrl",
@@ -1057,6 +1064,13 @@
                 "AF"
             ],
             "eʋegbe"
+        ],
+        "efi": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "efịk"
         ],
         "egl": [
             "Latn",
@@ -1961,6 +1975,13 @@
             ],
             "Tyap"
         ],
+        "kck": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "tjikalanga"
+        ],
         "kea": [
             "Latn",
             [
@@ -2132,7 +2153,7 @@
             [
                 "AF"
             ],
-            "Kanuri"
+            "kanuri"
         ],
         "krc": [
             "Cyrl",
@@ -2151,8 +2172,7 @@
         "krj": [
             "Latn",
             [
-                "ME",
-                "EU"
+                "AS"
             ],
             "Kinaray-a"
         ],
@@ -3003,7 +3023,6 @@
         "olo": [
             "Latn",
             [
-                "AS",
                 "EU"
             ],
             "livvinkarjala"
@@ -3478,7 +3497,7 @@
             [
                 "AF"
             ],
-            "Kinyarwanda"
+            "Ikinyarwanda"
         ],
         "rwr": [
             "Deva",
@@ -3488,11 +3507,11 @@
             "मारवाड़ी"
         ],
         "ryu": [
-            "Kana",
+            "Jpan",
             [
                 "AS"
             ],
-            "ʔucināguci"
+            "うちなーぐち"
         ],
         "sa": [
             "Deva",
@@ -3870,6 +3889,13 @@
             ],
             "Sranantongo"
         ],
+        "sro": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "sardu campidanesu"
+        ],
         "ss": [
             "Latn",
             [
@@ -3968,6 +3994,13 @@
                 "AS"
             ],
             "ತುಳು"
+        ],
+        "tdd": [
+            "Tale",
+            [
+                "AS"
+            ],
+            "ᥖᥭᥰᥖᥬᥳᥑᥨᥒᥰ"
         ],
         "te": [
             "Telu",
@@ -4115,7 +4148,7 @@
             [
                 "AS"
             ],
-            "Kokborok (Tripuri)"
+            "Kokborok"
         ],
         "tru": [
             "Latn",
@@ -4373,6 +4406,13 @@
             ],
             "walon"
         ],
+        "wal": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "wolaytta"
+        ],
         "war": [
             "Latn",
             [
@@ -4430,12 +4470,7 @@
             "SaiSiyat"
         ],
         "ydd": [
-            "Hebr",
-            [
-                "AS",
-                "EU"
-            ],
-            "Eastern Yiddish"
+            "yi"
         ],
         "yi": [
             "Hebr",
@@ -4452,6 +4487,13 @@
                 "AF"
             ],
             "Yorùbá"
+        ],
+        "yoi": [
+            "Jpan",
+            [
+                "AS"
+            ],
+            "与那国物言"
         ],
         "yrk": [
             "Cyrl",
@@ -4652,7 +4694,6 @@
             "Hani",
             "Hans",
             "Hant",
-            "Kana",
             "Kore",
             "Jpan",
             "Yiii"
@@ -4666,7 +4707,8 @@
             "Laoo",
             "Lana",
             "Mymr",
-            "Thai"
+            "Thai",
+            "Tale"
         ],
         "Mongolian": [
             "Mong"
@@ -5014,6 +5056,7 @@
             "kk-arab",
             "kk-cyrl",
             "ky",
+            "tdd",
             "en",
             "ru",
             "vi",
@@ -5156,7 +5199,8 @@
             "eu",
             "ast",
             "ext",
-            "an"
+            "an",
+            "oc"
         ],
         "ET": [
             "en",
@@ -5164,6 +5208,7 @@
             "om",
             "so",
             "ti",
+            "wal",
             "aa"
         ],
         "FI": [
@@ -5783,9 +5828,11 @@
             "ha",
             "ig",
             "yo",
+            "efi",
             "ha-arab",
             "kcg",
             "ar",
+            "ann",
             "ff"
         ],
         "NI": [
@@ -5886,10 +5933,9 @@
             "brh",
             "fa",
             "bgn",
-            "tg-cyrl",
             "bft",
-            "khw",
-            "ks-arab"
+            "ks-arab",
+            "khw"
         ],
         "PL": [
             "pl",
@@ -6014,7 +6060,8 @@
             "ar"
         ],
         "SB": [
-            "en"
+            "en",
+            "pis"
         ],
         "SC": [
             "fr",
@@ -6352,6 +6399,7 @@
             "sn",
             "en",
             "nd",
+            "kck",
             "ny",
             "ve",
             "tn"

@@ -14,7 +14,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.35.0"
+		"MediaWiki": ">= 1.39.0"
 	},
 	"AutoloadNamespaces": {
 		"AdvancedSearch\\": "includes/"
@@ -114,7 +114,6 @@
 				"modules/ui/ext.advancedSearch.SearchPreview.js",
 				"modules/ui/ext.advancedSearch.NamespacesPreview.js",
 				"modules/dm/ext.advancedSearch.NamespacePresetProviders.js",
-				"modules/dm/trackingEvents/ext.advancedSearch.SearchRequest.js",
 				"modules/dm/ext.advancedSearch.getSortMethods.js",
 				"modules/ui/ext.advancedSearch.MenuSelectWidget.js",
 				"modules/ui/ext.advancedSearch.ItemMenuOptionWidget.js",
@@ -267,7 +266,6 @@
 			"dm/TitleCache.test.js",
 			"dm/LanguageOptionProvider.test.js",
 			"dm/MultiselectLookup.test.js",
-			"dm/trackingEvents/SearchRequest.test.js",
 			"util.test.js"
 		],
 		"dependencies": [
@@ -275,13 +273,6 @@
 			"ext.advancedSearch.SearchFieldUI",
 			"oojs-ui"
 		]
-	},
-	"attributes": {
-		"EventLogging": {
-			"Schemas": {
-				"AdvancedSearchRequest": 19512287
-			}
-		}
 	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "",

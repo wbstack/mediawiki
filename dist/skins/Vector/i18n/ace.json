@@ -8,6 +8,7 @@
 	"vector-opt-out": "Gantoe u rupa awai",
 	"vector-languages": "Bahsa",
 	"vector-language-button-label": "{{PLURAL:$1|$1 bahsa}}",
+	"vector-no-language-button-label": "Tamah bahsa",
 	"vector-action-addsection": "Tamah bhaih",
 	"vector-action-delete": "Sampôh",
 	"vector-action-move": "Pupinah",
@@ -20,5 +21,7 @@
 	"vector-view-view": "Beuet",
 	"vector-view-viewsource": "Eu nè",
 	"vector-more-actions": "Lom",
+	"vector-searchsuggest-containing": "Mita mieng nyang na <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Peugah haba]]",
 	"tooltip-vector-anon-user-menu-title": "Peuniléh laén"
 }

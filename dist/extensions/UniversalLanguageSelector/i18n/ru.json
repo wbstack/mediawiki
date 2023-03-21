@@ -6,6 +6,7 @@
 			"Iltever",
 			"Jack who built the house",
 			"Kaganer",
+			"Kareyac",
 			"Mailman",
 			"Mix Gerder",
 			"Mouse21",
@@ -16,8 +17,7 @@
 			"ShinePhantom",
 			"Stjn",
 			"Vlad5250",
-			"Умар",
-			"Kareyac"
+			"Умар"
 		]
 	},
 	"uls-desc": "Даёт пользователю несколько способов выбрать язык и произвести установки языка",
@@ -82,5 +82,11 @@
 	"ext-uls-setlang-heading": "Сменить язык интерфейса?",
 	"ext-uls-setlang-accept": "Подтвердить изменение",
 	"ext-uls-setlang-loading": "Применение…",
-	"ext-uls-setlang-cancel": "Не менять"
+	"ext-uls-setlang-cancel": "Не менять",
+	"ext-uls-actions-menu-header": "Больше возможностей",
+	"ext-uls-actions-menu-language-settings-item-label": "Открыть языковые настройки",
+	"ext-uls-empty-state-header": "Языков пока нет",
+	"ext-uls-empty-state-desc": "На данный момент нет доступных языков",
+	"ext-uls-empty-state-header-actions-available": "Языков пока нет. Добавить новый?",
+	"ext-uls-empty-state-desc-actions-available": "Сделайте контент доступным на большем количестве языков."
 }

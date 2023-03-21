@@ -28,7 +28,7 @@
 	}
 
 	QUnit.module( 'jquery.wikibase.wbtooltip', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_tooltip' ).each( function ( i, node ) {
 				var $node = $( node ),
 					tooltip = $node.data( 'wbtooltip' );
@@ -47,7 +47,7 @@
 			tooltip = $node.data( 'wbtooltip' ),
 			$tip;
 
-		assert.ok(
+		assert.true(
 			tooltip instanceof $.wikibase.wbtooltip,
 			'Initialized tooltip.'
 		);
@@ -78,7 +78,7 @@
 		var $node = createTestTooltip( { content: 'Text' } ),
 			tooltip = $node.data( 'wbtooltip' );
 
-		assert.ok(
+		assert.true(
 			tooltip instanceof $.wikibase.wbtooltip,
 			'Initialized tooltip.'
 		);

@@ -6,7 +6,7 @@
 	'use strict';
 
 	QUnit.module( 'jquery.wikibase.toolbar', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_toolbar' ).each( function () {
 				var $toolbar = $( this ),
 					toolbar = $toolbar.data( 'toolbar' );
@@ -34,7 +34,7 @@
 		var $toolbar = createTestToolbar(),
 			toolbar = $toolbar.data( 'toolbar' );
 
-		assert.ok(
+		assert.true(
 			toolbar instanceof $.wikibase.toolbar,
 			'Instantiated widget.'
 		);

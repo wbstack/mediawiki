@@ -1,6 +1,6 @@
 {
 	"name": "UniversalLanguageSelector",
-	"version": "2022-01-19",
+	"version": "2022-07-28",
 	"author": [
 		"Alolita Sharma",
 		"Amir Aharoni",
@@ -17,7 +17,7 @@
 	"descriptionmsg": "uls-desc",
 	"license-name": "GPL-2.0-or-later OR MIT",
 	"requires": {
-		"MediaWiki": ">= 1.36.0"
+		"MediaWiki": ">= 1.37.0"
 	},
 	"Hooks": {
 		"BeforePageDisplay": "main",
@@ -25,7 +25,6 @@
 		"GetBetaFeaturePreferences": "main",
 		"GetPreferences": "main",
 		"MakeGlobalVariablesScript": "main",
-		"PersonalUrls": "main",
 		"ResourceLoaderGetConfigVars": "main",
 		"SkinAfterPortlet": "main",
 		"SkinTemplateNavigation::Universal": "main",
@@ -243,20 +242,34 @@
 			"targets": [ "desktop", "mobile" ],
 			"packageFiles": [
 				"js/ext.uls.interface.js",
-				"js/ext.uls.launch.js"
+				"js/ext.uls.launch.js",
+				"js/ext.uls.actions.menu.js",
+				"js/ext.uls.actions.menu.item.js",
+				"js/ext.uls.actions.menu.items.registry.js"
 			],
-			"styles": "css/ext.uls.interface.less",
+			"styles": [
+				"css/ext.uls.interface.less",
+				"css/ext.uls.actions.menu.less"
+			],
 			"dependencies": [
 				"mediawiki.jqueryMsg",
 				"mediawiki.storage",
 				"mediawiki.user",
-				"ext.uls.webfonts"
+				"ext.uls.webfonts",
+				"oojs"
 			],
 			"messages": [
 				"uls-plang-title-languages",
 				"ext-uls-select-language-settings-icon-tooltip",
 				"ext-uls-undo-language-tooltip-text",
-				"ext-uls-undo-language-tooltip-text-local"
+				"ext-uls-undo-language-tooltip-text-local",
+				"ext-uls-actions-menu-language-settings-item-label",
+				"ext-uls-actions-menu-header",
+				"ext-uls-actions-menu-language-settings-item-label",
+				"ext-uls-empty-state-header",
+				"ext-uls-empty-state-desc",
+				"ext-uls-empty-state-header-actions-available",
+				"ext-uls-empty-state-desc-actions-available"
 			]
 		},
 		"ext.uls.interlanguage": {

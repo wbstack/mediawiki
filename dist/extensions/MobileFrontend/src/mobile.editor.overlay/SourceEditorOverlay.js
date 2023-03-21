@@ -6,6 +6,7 @@ var EditorOverlayBase = require( './EditorOverlayBase' ),
 	EditorGateway = require( './EditorGateway' ),
 	fakeToolbar = require( '../mobile.init/fakeToolbar' ),
 	mfExtend = require( '../mobile.startup/mfExtend' ),
+	toast = require( '../mobile.startup/showOnPageReload' ),
 	setPreferredEditor = require( './setPreferredEditor' ),
 	VisualEditorOverlay = require( './VisualEditorOverlay' );
 
@@ -296,6 +297,7 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 		function hideSpinnerAndShowPreview() {
 			self.hideSpinner();
 			self.$preview.show();
+			mw.hook( 'wikipage.content' ).fire( self.$preview );
 		}
 
 		this.gateway.getPreview( params ).then( function ( result ) {
@@ -531,6 +533,34 @@ mfExtend( SourceEditorOverlay, EditorOverlayBase, {
 			}, function ( data ) {
 				self.onSaveFailure( data );
 			} );
+	},
+
+	/**
+	 * @inheritdoc
+	 * @memberof SourceEditorOverlay
+	 * @instance
+	 */
+	onSaveComplete: function () {
+		EditorOverlayBase.prototype.onSaveComplete.apply( this, arguments );
+
+		// The parent class changes the location hash in a setTimeout, so wait
+		// for that to happen before reloading.
+		setTimeout( function () {
+			// Note the "#" may be in the URL.
+			// If so, using window.location alone will not reload the page
+			// we need to forcefully refresh
+			// eslint-disable-next-line no-restricted-properties
+			window.location.reload();
+		} );
+	},
+
+	/**
+	 * @inheritdoc
+	 * @memberof SourceEditorOverlay
+	 * @instance
+	 */
+	showSaveCompleteMsg: function ( msg ) {
+		toast.showOnPageReload( msg, { type: 'success' } );
 	},
 
 	/**

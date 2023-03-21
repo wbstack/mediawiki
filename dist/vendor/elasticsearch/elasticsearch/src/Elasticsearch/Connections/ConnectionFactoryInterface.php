@@ -5,8 +5,8 @@
  * @link      https://github.com/elastic/elasticsearch-php/
  * @copyright Copyright (c) Elasticsearch B.V (https://www.elastic.co)
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
- * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1 
- * 
+ * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1
+ *
  * Licensed to Elasticsearch B.V under one or more agreements.
  * Elasticsearch B.V licenses this file to you under the Apache 2.0 License or
  * the GNU Lesser General Public License, Version 2.1, at your option.
@@ -18,34 +18,7 @@ declare(strict_types = 1);
 
 namespace Elasticsearch\Connections;
 
-use Elasticsearch\Serializers\SerializerInterface;
-use Psr\Log\LoggerInterface;
-
-/**
- * Class AbstractConnection
- *
- */
 interface ConnectionFactoryInterface
 {
-    /**
-     * @param callable $handler
-     * @param array $connectionParams
-     * @param SerializerInterface $serializer
-     * @param LoggerInterface $logger
-     * @param LoggerInterface $tracer
-     */
-    public function __construct(
-        callable $handler,
-        array $connectionParams,
-        SerializerInterface $serializer,
-        LoggerInterface $logger,
-        LoggerInterface $tracer
-    );
-
-    /**
-     * @param array $hostDetails
-     *
-     * @return ConnectionInterface
-     */
-    public function create($hostDetails);
+    public function create(array $hostDetails): ConnectionInterface;
 }

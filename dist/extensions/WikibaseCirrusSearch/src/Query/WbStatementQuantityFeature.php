@@ -131,6 +131,10 @@ class WbStatementQuantityFeature extends SimpleKeywordFeature implements FilterQ
 		return [ 'statements' => $statements, 'operators' => $operators, 'numbers' => $numbers ];
 	}
 
+	/**
+	 * @param string $value
+	 * @return string[]
+	 */
 	private function getQueryStrings( $value ) {
 		return explode( '|', $value );
 	}

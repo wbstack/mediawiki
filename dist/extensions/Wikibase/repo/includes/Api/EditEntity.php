@@ -6,6 +6,7 @@ namespace Wikibase\Repo\Api;
 
 use ApiMain;
 use ApiUsageException;
+use IBufferingStatsdDataFactory;
 use Serializers\Exceptions\SerializationException;
 use Title;
 use Wikibase\DataModel\Entity\ClearableEntity;
@@ -13,7 +14,6 @@ use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\Property;
-use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\DataTypeDefinitions;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityRevisionLookup;
@@ -28,6 +28,7 @@ use Wikibase\Repo\ChangeOp\Deserialization\ChangeOpDeserializationException;
 use Wikibase\Repo\ChangeOp\EntityChangeOpProvider;
 use Wikibase\Repo\ChangeOp\NonLanguageBoundChangesCounter;
 use Wikibase\Repo\Store\Store;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Derived class for API modules modifying a single entity identified by id xor a combination of
@@ -42,9 +43,9 @@ class EditEntity extends ModifyEntity {
 	public const PARAM_CLEAR = 'clear';
 
 	/**
-	 * @var ContentLanguages
+	 * @var IBufferingStatsdDataFactory
 	 */
-	private $termsLanguages;
+	private $statsdDataFactory;
 
 	/**
 	 * @var EntityRevisionLookup
@@ -79,7 +80,7 @@ class EditEntity extends ModifyEntity {
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
-		ContentLanguages $termsLanguages,
+		IBufferingStatsdDataFactory $statsdDataFactory,
 		EntityRevisionLookup $revisionLookup,
 		EntityIdParser $idParser,
 		array $propertyDataTypes,
@@ -90,7 +91,7 @@ class EditEntity extends ModifyEntity {
 	) {
 		parent::__construct( $mainModule, $moduleName, $federatedPropertiesEnabled );
 
-		$this->termsLanguages = $termsLanguages;
+		$this->statsdDataFactory = $statsdDataFactory;
 		$this->revisionLookup = $revisionLookup;
 		$this->idParser = $idParser;
 		$this->propertyDataTypes = $propertyDataTypes;
@@ -103,17 +104,17 @@ class EditEntity extends ModifyEntity {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		IBufferingStatsdDataFactory $statsdDataFactory,
 		DataTypeDefinitions $dataTypeDefinitions,
 		EntityChangeOpProvider $entityChangeOpProvider,
 		EntityIdParser $entityIdParser,
 		SettingsArray $settings,
-		Store $store,
-		ContentLanguages $termsLanguages
+		Store $store
 	): self {
 		return new self(
 			$mainModule,
 			$moduleName,
-			$termsLanguages,
+			$statsdDataFactory,
 			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$entityIdParser,
 			$dataTypeDefinitions->getTypeIds(),
@@ -182,7 +183,9 @@ class EditEntity extends ModifyEntity {
 				$returnFalse = function () {
 					return false;
 				};
-				$latestRevision = $latestRevisionResult->onConcreteRevision( 'intval' )
+				$latestRevision = $latestRevisionResult->onConcreteRevision( function ( $revId ) {
+					return $revId;
+				} )
 					->onRedirect( $returnFalse )
 					->onNonexistentEntity( $returnFalse )
 					->map();
@@ -216,9 +219,9 @@ class EditEntity extends ModifyEntity {
 
 		if ( $preparedParameters[self::PARAM_CLEAR] ) {
 			$this->dieIfNotClearable( $entity );
-			$this->getStats()->increment( 'wikibase.api.EditEntity.modifyEntity.clear' );
+			$this->statsdDataFactory->increment( 'wikibase.api.EditEntity.modifyEntity.clear' );
 		} else {
-			$this->getStats()->increment( 'wikibase.api.EditEntity.modifyEntity.no-clear' );
+			$this->statsdDataFactory->increment( 'wikibase.api.EditEntity.modifyEntity.no-clear' );
 		}
 
 		if ( !$exists ) {
@@ -227,7 +230,7 @@ class EditEntity extends ModifyEntity {
 				$entity->setDataTypeId( $data['datatype'] );
 			}
 
-			$this->getStats()->increment( 'wikibase.api.EditEntity.modifyEntity.create' );
+			$this->statsdDataFactory->increment( 'wikibase.api.EditEntity.modifyEntity.create' );
 		}
 
 		if ( $preparedParameters[self::PARAM_CLEAR] ) {
@@ -299,6 +302,10 @@ class EditEntity extends ModifyEntity {
 	 */
 	protected function getChangeOp( array $preparedParameters, EntityDocument $entity ): ChangeOp {
 		$data = $preparedParameters[self::PARAM_DATA];
+
+		if ( isset( $preparedParameters['id'] ) || $entity->getId() ) {
+			$data['id'] = $preparedParameters['id'] ?? $entity->getId()->getSerialization();
+		}
 
 		try {
 			return $this->entityChangeOpProvider->newEntityChangeOp( $entity->getType(), $data );
@@ -439,12 +446,12 @@ class EditEntity extends ModifyEntity {
 			parent::getAllowedParams(),
 			[
 				self::PARAM_DATA => [
-					self::PARAM_TYPE => 'text',
-					self::PARAM_REQUIRED => true,
+					ParamValidator::PARAM_TYPE => 'text',
+					ParamValidator::PARAM_REQUIRED => true,
 				],
 				self::PARAM_CLEAR => [
-					self::PARAM_TYPE => 'boolean',
-					self::PARAM_DFLT => false
+					ParamValidator::PARAM_TYPE => 'boolean',
+					ParamValidator::PARAM_DEFAULT => false
 				],
 			]
 		);

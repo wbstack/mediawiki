@@ -184,7 +184,7 @@ class GenerateSampleNotifications extends Maintenance {
 		$username = $this->getOption( $optionName );
 		$user = User::newFromName( $username );
 		if ( !$user->isRegistered() ) {
-			$this->error( "User $username does not seem to exist in this wiki", 1 );
+			$this->fatalError( "User $username does not seem to exist in this wiki" );
 		}
 		return $user;
 	}
@@ -204,7 +204,7 @@ class GenerateSampleNotifications extends Maintenance {
 		$this->output( "Enter 'yes' if you wish to continue or any other key to exit\n" );
 		$confirm = $this->readconsole();
 		if ( $confirm !== 'yes' ) {
-			$this->error( 'Safe decision', 1 );
+			$this->fatalError( 'Safe decision' );
 		}
 	}
 
@@ -213,7 +213,7 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function addToPageContent( Title $title, User $agent, $contentText ) {
-		$page = WikiPage::factory( $title );
+		$page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
 		$previousContent = "";
 		$page->loadPageData( WikiPage::READ_LATEST );
 		$revision = $page->getRevisionRecord();
@@ -271,7 +271,7 @@ class GenerateSampleNotifications extends Maintenance {
 
 		// revert (undo)
 		$moai = Title::newFromText( 'Moai' );
-		$page = WikiPage::factory( $moai );
+		$page = $services->getWikiPageFactory()->newFromTitle( $moai );
 		$this->output( "{$agent->getName()} is reverting {$user->getName()}'s edit on {$moai->getPrefixedText()}\n" );
 		$this->addToPageContent( $moai, $agent, "\ncreating a good revision here\n" );
 		$this->addToPageContent( $moai, $user, "\nadding a line here\n" );
@@ -451,7 +451,7 @@ class GenerateSampleNotifications extends Maintenance {
 	}
 
 	private function shouldGenerate( $type, array $types ) {
-		return array_search( $type, $types ) !== false;
+		return in_array( $type, $types );
 	}
 
 	private function generateEditThanks( User $user, User $agent, User $otherUser ) {

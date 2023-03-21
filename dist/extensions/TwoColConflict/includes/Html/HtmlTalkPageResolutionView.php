@@ -63,13 +63,13 @@ class HtmlTalkPageResolutionView {
 		$out .= $this->getMessageBox( $hintMsg, 'notice' );
 
 		$rows = '';
-		foreach ( $unifiedDiff as $currRowNum => $changeSet ) {
+		foreach ( $unifiedDiff as $i => $changeSet ) {
 			$text = $changeSet['copytext'] ?? $changeSet['newtext'];
-			switch ( $currRowNum ) {
+			switch ( $i ) {
 				case $otherIndex:
 					$rows .= $this->buildConflictingTalkRow(
 						$text,
-						$currRowNum,
+						$i,
 						'delete',
 						'other',
 						true,
@@ -95,7 +95,7 @@ class HtmlTalkPageResolutionView {
 				case $yourIndex:
 					$rows .= $this->buildConflictingTalkRow(
 						$text,
-						$currRowNum,
+						$i,
 						'add',
 						'your',
 						false,
@@ -103,7 +103,7 @@ class HtmlTalkPageResolutionView {
 					);
 					break;
 				default:
-					$rows .= $this->buildCopyRow( $text, $currRowNum );
+					$rows .= $this->buildCopyRow( $text, $i );
 			}
 		}
 		// this will allow CSS formatting with :first-of-type

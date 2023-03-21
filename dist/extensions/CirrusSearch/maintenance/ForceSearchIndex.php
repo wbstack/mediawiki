@@ -381,9 +381,9 @@ class ForceSearchIndex extends Maintenance {
 		}
 
 		// Now check all index types to see if they exist
-		foreach ( $this->getConnection()->getAllIndexTypes() as $indexType ) {
+		foreach ( $this->getConnection()->getAllIndexSuffixes() as $indexSuffix ) {
 			// If the alias for this type doesn't exist, fail
-			if ( !$this->getConnection()->getIndex( $indexBaseName, $indexType )->exists() ) {
+			if ( !$this->getConnection()->getIndex( $indexBaseName, $indexSuffix )->exists() ) {
 				return false;
 			}
 		}
@@ -447,9 +447,7 @@ class ForceSearchIndex extends Maintenance {
 		$it = new BatchRowIterator( $dbr, $pageQuery['tables'], 'page_id', $this->getBatchSize() );
 		$it->setFetchColumns( $pageQuery['fields'] );
 		$it->addJoinConditions( $pageQuery['joins'] );
-		$it->addConditions( [
-			'page_id in (' . $dbr->makeList( $this->pageIds, LIST_COMMA ) . ')',
-		] );
+		$it->addConditions( [ 'page_id' => $this->pageIds ] );
 		$it->setCaller( __METHOD__ );
 		$this->attachPageConditions( $dbr, $it, 'page' );
 

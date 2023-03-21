@@ -33,12 +33,12 @@
 			"class": "\\Wikibase\\Repo\\Api\\EditEntity",
 			"factory": "\\Wikibase\\Repo\\Api\\EditEntity::factory",
 			"services": [
+				"StatsdDataFactory",
 				"WikibaseRepo.DataTypeDefinitions",
 				"WikibaseRepo.EntityChangeOpProvider",
 				"WikibaseRepo.EntityIdParser",
 				"WikibaseRepo.Settings",
-				"WikibaseRepo.Store",
-				"WikibaseRepo.TermsLanguages"
+				"WikibaseRepo.Store"
 			]
 		},
 		"wbcreateredirect": {
@@ -185,6 +185,7 @@
 				"WikibaseRepo.EntitySourceLookup",
 				"WikibaseRepo.EntityTitleTextLookup",
 				"WikibaseRepo.EntityUrlLookup",
+				"WikibaseRepo.Settings",
 				"WikibaseRepo.TermsLanguages"
 			]
 		},
@@ -279,6 +280,7 @@
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.SiteLinkBadgeChangeOpSerializationValidator",
+				"WikibaseRepo.SiteLinkPageNormalizer",
 				"WikibaseRepo.SiteLinkTargetProvider"
 			]
 		}
@@ -291,6 +293,7 @@
 				"WikibaseRepo.EnabledEntityTypes",
 				"WikibaseRepo.EntitySearchHelperCallbacks",
 				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.Settings",
 				"WikibaseRepo.TermsLanguages"
 			]
 		},
@@ -446,8 +449,9 @@
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityTitleLookup",
-				"WikibaseRepo.LanguageFallbackLabelDescriptionLookupFactory",
+				"WikibaseRepo.FallbackLabelDescriptionLookupFactory",
 				"WikibaseRepo.Settings",
+				"WikibaseRepo.SiteLinkPageNormalizer",
 				"WikibaseRepo.SiteLinkTargetProvider",
 				"WikibaseRepo.SummaryFormatter"
 			]
@@ -527,21 +531,12 @@
 				"WikibaseRepo.DataTypeFactory",
 				"WikibaseRepo.EntityIdHtmlLinkFormatterFactory",
 				"WikibaseRepo.EntityTitleLookup",
-				"WikibaseRepo.LanguageFallbackChainFactory",
-				"WikibaseRepo.LanguageFallbackLabelDescriptionLookupFactory",
-				"WikibaseRepo.PrefetchingTermLookup",
+				"WikibaseRepo.FallbackLabelDescriptionLookupFactory",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.Store"
 			]
 		}
 	},
-	"RestRoutes": [
-		{
-			"path": "/wikibase/v0/entities/items/{id}",
-			"method": "GET",
-			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemRouteHandler::factory"
-		}
-	],
 	"GroupPermissions": {
 		"*": {
 			"item-term": true,
@@ -601,6 +596,7 @@
 		"Wikibase\\Lib\\Tests\\Changes\\": "lib/packages/wikibase/changes/tests/",
 		"Wikibase\\DataModel\\Fixtures\\": "lib/packages/wikibase/data-model/tests/fixtures/",
 		"Wikibase\\DataModel\\Services\\Fixtures\\": "lib/packages/wikibase/data-model-services/tests/fixtures/",
+		"Wikibase\\DataModel\\Tests\\": "lib/packages/wikibase/data-model/tests/unit/",
 		"Wikibase\\Lib\\Tests\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/tests/",
 		"Tests\\Integration\\Wikibase\\InternalSerialization\\": "lib/packages/wikibase/internal-serialization/tests/integration/",
 		"Wikibase\\DataAccess\\Tests\\": "data-access/tests/phpunit/",
@@ -609,7 +605,7 @@
 	"attributes": {
 		"EventLogging": {
 			"Schemas": {
-				"WikibaseTermboxInteraction": 18726648
+				"WikibaseTermboxInteraction": "/analytics/legacy/wikibasetermboxinteraction/1.0.0"
 			}
 		}
 	},

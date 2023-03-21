@@ -97,6 +97,7 @@ final class CachingPrefetchingTermLookup implements PrefetchingTermLookup {
 
 	public function getPrefetchedAliases( EntityId $entityId, $languageCode ) {
 		if ( isset( $this->prefetchedTerms[$entityId->getSerialization()][TermTypes::TYPE_ALIAS][$languageCode] ) ) {
+			// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
 			return $this->prefetchedTerms[$entityId->getSerialization()][TermTypes::TYPE_ALIAS][$languageCode];
 		}
 		return $this->lookup->getPrefetchedAliases( $entityId, $languageCode );
@@ -402,12 +403,7 @@ final class CachingPrefetchingTermLookup implements PrefetchingTermLookup {
 	}
 
 	private function filterValidTermLanguages( array $languageCodes ): array {
-		return array_filter(
-			$languageCodes,
-			function ( $languageCode ) {
-				return $this->termLanguages->hasLanguage( $languageCode );
-			}
-		);
+		return array_filter( $languageCodes, [ $this->termLanguages, 'hasLanguage' ] );
 	}
 
 }

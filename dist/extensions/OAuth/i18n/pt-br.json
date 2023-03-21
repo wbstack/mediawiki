@@ -15,7 +15,6 @@
 			"Rodrigo codignoli"
 		]
 	},
-	"oauth": "OAuth",
 	"mwoauth-desc": "Permite o uso do OAuth 1.0a e OAuth 2.0 para autorização da API",
 	"mwoauth-nosubpage-explanation": "OAuth é um mecanismo que permite que aplicativos externos identifiquem um usuário do {{SITENAME}} ou atuem em seu nome, depois de receber permissão desse usuário.\n\nPara que esta página faça alguma coisa, são necessários mais parâmetros. Se você foi enviado aqui de um aplicativo externo, isso provavelmente ocorreu devido a um erro nesse aplicativo; você deve entrar em contato com o autor.",
 	"mwoauth-verified": "O aplicativo possui permissão para acessar ao MediaWiki através da sua conta.\n\nPara concluir o processo, proceda à verificação para o aplicativo através deste valor: '''$1'''",
@@ -77,7 +76,6 @@
 	"mwoauth-consumer-stage-suppressed": "suprimido",
 	"oauthconsumerregistration": "Registro do consumidor OAuth",
 	"mwoauthconsumerregistration-navigation": "Navegação:",
-	"mwoauthconsumerregistration-propose": "Propor novo consumidor",
 	"mwoauthconsumerregistration-list": "Minha lista de consumidores",
 	"mwoauthconsumerregistration-main": "Principal",
 	"mwoauthconsumerregistration-propose-text": "Os desenvolvedores devem usar a forma abaixo para propôr um novo consumidor da OAuth (veja a [//www.mediawiki.org/wiki/Extension:OAuth documentação da extensão] para obter mais detalhes). Depois de enviar esta forma você receberá um token que seu aplicativo usará para se identificar com o MediaWiki. Um administrador do OAuth precisará aprovar seu aplicativo antes que ele possa ser autorizado por outros usuários.\n\nAlgumas recomendações e observações:\n* Tente usar o mínimo possível de concessões. Evite concessões que não são realmente necessárias agora.\n* As versões são da forma \"major.minor.release\" (os últimos dois sendo opcionais) e aumentam à medida que são necessárias alterações de concessão.\n* Forneça uma chave pública RSA (em Formato PEM), se possível; Caso contrário, será necessário usar um token secreto (menos seguro). \n* Você pode usar uma ID do projeto para restringir o consumidor a um único projeto neste site (use \"*\" para todos os projetos).",

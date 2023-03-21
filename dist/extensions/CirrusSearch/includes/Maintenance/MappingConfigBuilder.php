@@ -4,7 +4,6 @@ namespace CirrusSearch\Maintenance;
 
 use CirrusSearch\CirrusSearch;
 use CirrusSearch\CirrusSearchHookRunner;
-use CirrusSearch\Connection;
 use CirrusSearch\Search\CirrusIndexField;
 use CirrusSearch\Search\CirrusSearchIndexFieldFactory;
 use CirrusSearch\Search\SourceTextIndexField;
@@ -12,7 +11,6 @@ use CirrusSearch\Search\TextIndexField;
 use CirrusSearch\SearchConfig;
 use MediaWiki\MediaWikiServices;
 use SearchIndexField;
-use Wikimedia\Assert\Assert;
 
 /**
  * Builds elasticsearch mapping configuration arrays.
@@ -268,17 +266,7 @@ class MappingConfigBuilder {
 			$page = $this->setupCopyTo( $page, $nearMatchFields, 'all_near_match' );
 		}
 
-		$mappingConfig = [ $this->getMainType() => $page ];
-
-		if ( $this->getMainType() === Connection::PAGE_TYPE_NAME ) {
-			// For now only trigger the hook on the "page" indices.
-			// It's probably that implementors don't pay attention to the new getMainType()
-			// method.
-			$this->cirrusSearchHookRunner->onCirrusSearchMappingConfig( $mappingConfig, $this );
-			Assert::postcondition( count( $mappingConfig ) === 1,
-				'CirrusSearchMappingConfig implementations must not add a new mapping type' );
-		}
-		return $mappingConfig;
+		return $page;
 	}
 
 	/**
@@ -338,14 +326,6 @@ class MappingConfigBuilder {
 		$textFieldMapping = array_merge_recursive( $stringFieldMapping, $extraFieldMapping );
 
 		return $textFieldMapping;
-	}
-
-	/**
-	 * The elastic type name used by this index
-	 * @return string
-	 */
-	public function getMainType() {
-		return Connection::PAGE_TYPE_NAME;
 	}
 
 	/**

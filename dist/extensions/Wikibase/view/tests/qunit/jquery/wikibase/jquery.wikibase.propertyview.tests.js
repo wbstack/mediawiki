@@ -29,7 +29,7 @@
 	};
 
 	QUnit.module( 'jquery.wikibase.propertyview', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_propertyview' ).each( function () {
 				var $propertyview = $( this ),
 					propertyview = $propertyview.data( 'propertyview' );
@@ -54,7 +54,7 @@
 		var $propertyview = createPropertyview(),
 			propertyview = $propertyview.data( 'propertyview' );
 
-		assert.ok(
+		assert.true(
 			propertyview instanceof $.wikibase.propertyview,
 			'Created widget.'
 		);

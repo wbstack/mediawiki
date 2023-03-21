@@ -18,29 +18,45 @@
  * @file
  */
 
+// phpcs:disable MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName
+
 namespace MediaWiki\StopForumSpam;
 
 use Html;
 use MediaWiki\Block\DatabaseBlock;
+use MediaWiki\Extension\AbuseFilter\Hooks\AbuseFilterBuilderHook;
+use MediaWiki\Extension\AbuseFilter\Hooks\AbuseFilterComputeVariableHook;
+use MediaWiki\Extension\AbuseFilter\Hooks\AbuseFilterGenerateUserVarsHook;
 use MediaWiki\Extension\AbuseFilter\Variables\VariableHolder;
+use MediaWiki\Hook\OtherBlockLogLinkHook;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsExpensiveHook;
+use RecentChange;
 use RequestContext;
 use Title;
 use User;
 use Wikimedia\IPUtils;
 
-class Hooks {
+class Hooks implements
+	AbuseFilterBuilderHook,
+	AbuseFilterComputeVariableHook,
+	AbuseFilterGenerateUserVarsHook,
+	GetUserPermissionsErrorsExpensiveHook,
+	OtherBlockLogLinkHook
+{
 
 	/**
 	 * Computes the sfs-blocked variable
 	 * @param string $method
 	 * @param VariableHolder $vars
 	 * @param array $parameters
-	 * @param null &$result
+	 * @param ?string &$result
 	 * @return bool
 	 */
-	public static function abuseFilterComputeVariable( $method, $vars, $parameters, &$result ) {
-		if ( $method == 'sfs-blocked' ) {
+	public function onAbuseFilter_computeVariable(
+		string $method, VariableHolder $vars, array $parameters, ?string &$result
+	) {
+		if ( $method === 'sfs-blocked' ) {
 			$ip = self::getIPFromUser( $parameters['user'] );
 			if ( $ip === false ) {
 				$result = false;
@@ -58,9 +74,10 @@ class Hooks {
 	 * Load our blocked variable
 	 * @param VariableHolder $vars
 	 * @param User $user
+	 * @param ?RecentChange $rc
 	 * @return bool
 	 */
-	public static function abuseFilterGenerateUserVars( $vars, $user ) {
+	public function onAbuseFilter_generateUserVars( VariableHolder $vars, User $user, ?RecentChange $rc ) {
 		global $wgSFSIPListLocation;
 
 		if ( $wgSFSIPListLocation ) {
@@ -75,7 +92,7 @@ class Hooks {
 	 * @param array &$builderValues
 	 * @return bool
 	 */
-	public static function abuseFilterBuilder( &$builderValues ) {
+	public function onAbuseFilter_builder( &$builderValues ) {
 		global $wgSFSIPListLocation;
 
 		if ( $wgSFSIPListLocation ) {
@@ -108,15 +125,15 @@ class Hooks {
 	}
 
 	/**
-	 * If an IP address is denylisted, don't let them edit.
+	 * If an IP address is deny-listed, don't let them edit.
 	 *
-	 * @param Title &$title Title being acted upon
-	 * @param User &$user User performing the action
+	 * @param Title $title Title being acted upon
+	 * @param User $user User performing the action
 	 * @param string $action Action being performed
 	 * @param array &$result Will be filled with block status if blocked
 	 * @return bool
 	 */
-	public static function onGetUserPermissionsErrorsExpensive( &$title, &$user, $action, &$result ) {
+	public function onGetUserPermissionsErrorsExpensive( $title, $user, $action, &$result ) {
 		global $wgSFSIPListLocation, $wgBlockAllowsUTEdit, $wgSFSReportOnly;
 
 		if ( !$wgSFSIPListLocation ) {
@@ -126,77 +143,81 @@ class Hooks {
 		if ( $action === 'read' ) {
 			return true;
 		}
-
-		$ip = self::getIPFromUser( $user );
-		if ( $ip === false ) {
-			return true;
-		}
-
 		if ( $wgBlockAllowsUTEdit && $title->equals( $user->getTalkPage() ) ) {
 			// Let a user edit their talk page
 			return true;
 		}
 
-		$denyListManager = DenyListManager::singleton();
-		if ( $denyListManager->isIpDenyListed( $ip ) ) {
-			$logger = LoggerFactory::getInstance( 'StopForumSpam' );
+		$logger = LoggerFactory::getInstance( 'StopForumSpam' );
+		$ip = self::getIPFromUser( $user );
 
+		// attempt to get ip from user
+		if ( $ip === false ) {
 			$logger->info(
-				"{user} tripped SFS deny list doing {action} "
-				. "by using {clientip} on \"{title}\".",
-				[
-					'action' => $action,
-					'clientip' => $ip,
-					'reportonly' => $wgSFSReportOnly,
-					'title' => $title->getPrefixedText(),
-					'user' => $user->getName()
-				]
+				"Unable to obtain IP information for {user}.",
+				[ 'user' => $user->getName() ]
 			);
-			if ( $user->isAllowed( 'sfsblock-bypass' ) ) {
-				$logger->info(
-					"{user} is exempt from SFS blocks.",
-					[
-						'clientip' => $ip,
-						'reportonly' => $wgSFSReportOnly,
-						'user' => $user->getName()
-					]
-				);
-
-				return true;
-			}
-			// I just copied this from TorBlock, not sure if it actually makes sense.
-			if ( DatabaseBlock::isExemptedFromAutoblocks( $ip ) ) {
-				$logger->info(
-					"{clientip} is in autoblock exemption list. Exempting from SFS blocks.",
-					[ 'clientip' => $ip, 'reportonly' => $wgSFSReportOnly ]
-				);
-
-				return true;
-			}
-
-			// never block in report-only mode
-			if ( $wgSFSReportOnly ) {
-				return true;
-			}
-
-			// log info when action blocked
-			$logger->info(
-				"{user} was blocked by SFS from doing {action} "
-				. "by using {clientip} on \"{title}\".",
-				[
-					'action' => $action,
-					'clientip' => $ip,
-					'title' => $title->getPrefixedText(),
-					'user' => $user->getName()
-				]
-			);
-
-			$result = [ 'stopforumspam-blocked', $ip ];
-
-			return false;
+			return true;
 		}
 
-		return true;
+		// allow if user has sfsblock-bypass
+		if ( $user->isAllowed( 'sfsblock-bypass' ) ) {
+			$logger->info(
+				"{user} is exempt from SFS blocks.",
+				[
+					'clientip' => $ip,
+					'reportonly' => $wgSFSReportOnly,
+					'user' => $user->getName()
+				]
+			);
+			return true;
+		}
+
+		// allow if user is exempted from autoblocks (borrowed from TorBlock)
+		if ( DatabaseBlock::isExemptedFromAutoblocks( $ip ) ) {
+			$logger->info(
+				"{clientip} is in autoblock exemption list. Exempting from SFS blocks.",
+				[ 'clientip' => $ip, 'reportonly' => $wgSFSReportOnly ]
+			);
+			return true;
+		}
+
+		// log "tripped" action and never block in report-only mode
+		if ( $wgSFSReportOnly ) {
+			$logger->info(
+				"Report Only: {user} tripped SFS deny list doing {action} "
+				. "by using {clientip} on \"{title}\".",
+				[
+					'action' => $action,
+					'clientip' => $ip,
+					'title' => $title->getPrefixedText(),
+					'user' => $user->getName()
+				]
+			);
+			return true;
+		}
+
+		// ip NOT in SFS deny list
+		$denyListManager = DenyListManager::singleton();
+		if ( !$denyListManager->isIpDenyListed( $ip ) ) {
+			return true;
+		}
+
+		// log action when blocked, return error msg
+		$logger->info(
+			"{user} was blocked by SFS from doing {action} "
+			. "by using {clientip} on \"{title}\".",
+			[
+				'action' => $action,
+				'clientip' => $ip,
+				'title' => $title->getPrefixedText(),
+				'user' => $user->getName()
+			]
+		);
+
+		// default: set error msg result and return false
+		$result = [ 'stopforumspam-blocked', $ip ];
+		return false;
 	}
 
 	/**
@@ -204,7 +225,7 @@ class Hooks {
 	 * @param string $ip
 	 * @return bool
 	 */
-	public static function onOtherBlockLogLink( &$msg, $ip ) {
+	public function onOtherBlockLogLink( &$msg, $ip ) {
 		global $wgSFSIPListLocation;
 
 		if ( !$wgSFSIPListLocation ) {

@@ -8,7 +8,7 @@
 	var datamodel = require( 'wikibase.datamodel' );
 
 	/**
-	 *  @return {Fingerprint}
+	 *  @return {datamodel.Fingerprint}
 	 */
 	function createFingerprint() {
 		return new datamodel.Fingerprint(
@@ -47,7 +47,7 @@
 	}
 
 	QUnit.module( 'jquery.wikibase.entitytermsview', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_entitytermsview' ).each( function () {
 				var $entitytermsview = $( this ),
 					entitytermsview = $entitytermsview.data( 'entitytermsview' );
@@ -72,14 +72,14 @@
 		var $entitytermsview = createEntitytermsview(),
 			entitytermsview = $entitytermsview.data( 'entitytermsview' );
 
-		assert.ok(
+		assert.true(
 			entitytermsview !== undefined,
 			'Created widget.'
 		);
 
 		entitytermsview.destroy();
 
-		assert.ok(
+		assert.true(
 			$entitytermsview.data( 'entitytermsview' ) === undefined,
 			'Destroyed widget.'
 		);
@@ -91,7 +91,7 @@
 
 		$entitytermsview
 		.on( 'entitytermsviewtoggleerror', function ( event, error ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "toggleerror" event.'
 			);
@@ -104,7 +104,7 @@
 		var $entitytermsview = createEntitytermsview(),
 			entitytermsview = $entitytermsview.data( 'entitytermsview' );
 
-		assert.ok(
+		assert.true(
 			entitytermsview.value().equals( createFingerprint() ),
 			'Retrieved value.'
 		);

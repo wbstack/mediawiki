@@ -6,7 +6,7 @@
 	'use strict';
 
 	QUnit.module( 'jquery.wikibase.badgeselector', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_badgeselector' ).each( function () {
 				var $node = $( this ),
 					badgeselector = $node.data( 'badgeselector' );
@@ -68,13 +68,13 @@
 
 		$badgeselector
 		.on( 'badgeselectorafterstartediting', function ( event ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Started edit mode.'
 			);
 		} )
 		.on( 'badgeselectorafterstopediting', function ( event, dropValue ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Stopped edit mode.'
 			);

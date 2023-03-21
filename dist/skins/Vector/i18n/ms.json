@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Anakmalaysia",
 			"Aurora",
 			"Izington",
@@ -22,6 +23,7 @@
 	"vector-languages": "Bahasa",
 	"vector-language-button-aria-label": "Pergi ke rencana dalam bahasa lain. Tersedia dalam {{PLURAL:$1|$1 bahasa}}",
 	"vector-language-button-label": "{{PLURAL:$1|satu bahasa|$1 bahasa}}",
+	"vector-no-language-button-label": "Tambahkan bahasa",
 	"vector-language-redirect-to-top": "Di {{SITENAME}} ini, pautan bahasa di atas laman melintang daripada tajuk rencana. [[#p-lang-btn|Pergi ke atas]].",
 	"vector-language-variant-switcher-label": "Tukar kelainan bahasa",
 	"vector-action-addsection": "Tambah topik",
@@ -40,12 +42,14 @@
 	"vector-jumptocontent": "Pergi ke kandungan",
 	"vector-more-actions": "Lain",
 	"vector-search-loader": "Memuat cadangan carian",
-	"vector-searchsuggest-containing": "Cari untuk laman yang mengandungi <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong>",
+	"vector-searchsuggest-containing": "Cari untuk laman yang mengandungi <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Help:Pengenalan",
+	"vector-toc-heading": "Kandungan",
+	"vector-toc-beginning": "Permulaan",
+	"vector-toc-toggle-button-label": "Togol subbahagian $1",
 	"vector-anon-user-menu-pages": "Laman untuk penyunting log keluar",
 	"vector-anon-user-menu-pages-learn": "Ketahui lebih lanjut",
 	"vector-anon-user-menu-pages-label": "Ketahui lebih lanjut tentang menyunting",
-	"vector-personal-more-label": "Pautan pengguna",
 	"vector-main-menu-tooltip": "Menu utama",
 	"tooltip-vector-anon-user-menu-title": "Lebih pilihan"
 }

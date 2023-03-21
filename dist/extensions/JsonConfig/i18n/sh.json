@@ -29,6 +29,7 @@
 	"jsonconfig-license-name-dl-de-zero-2.0": "Data licence Germany - Zero - Verzija 2.0",
 	"jsonconfig-license-name-dl-de-by-1.0": "Data licence Germany – attribution – Verzija 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Data licence Germany – attribution – verzija 2.0",
+	"jsonconfig-license-name-GeoNutzV": "Geo Data license Germany",
 	"jsonconfig-license-copyrightwarning": "Sačuvanjem promjena, slažete se s [https://foundation.wikimedia.org/wiki/Terms_of_Use Uslovima korištenja], i neopozivo se slažete objaviti svoj doprinos pod [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-copyrightwarning-license-unset": "Sačuvanjem promjena, slažete se s [https://foundation.wikimedia.org/wiki/Terms_of_Use Uslovima korištenja], i neopozivo se slažete objaviti svoj doprinos pod licencom naznačenom u polju <code>licence</code>.",
 	"jsonconfig-license-notice": "'''Napomena:''' Kada uredite ovu stranicu, pristajete objaviti svoj doprinos pod [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",

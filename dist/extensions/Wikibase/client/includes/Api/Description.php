@@ -6,6 +6,7 @@ use ApiQuery;
 use ApiQueryBase;
 use Wikibase\Client\Store\DescriptionLookup;
 use Wikibase\Lib\SettingsArray;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Provides a short description of the page in the content language.
@@ -138,17 +139,17 @@ class Description extends ApiQueryBase {
 		return [
 			'continue' => [
 				self::PARAM_HELP_MSG => 'api-help-param-continue',
-				self::PARAM_TYPE => 'integer',
-				self::PARAM_DFLT => 0,
+				ParamValidator::PARAM_TYPE => 'integer',
+				ParamValidator::PARAM_DEFAULT => 0,
 			],
 			'prefersource' => [
 				// Designating 'local' as the preferred source is allowed even if the wiki does
 				// not actually allow local descriptions, to make clients' life easier.
-				self::PARAM_TYPE => [
+				ParamValidator::PARAM_TYPE => [
 					DescriptionLookup::SOURCE_LOCAL,
 					DescriptionLookup::SOURCE_CENTRAL,
 				],
-				self::PARAM_DFLT => DescriptionLookup::SOURCE_LOCAL,
+				ParamValidator::PARAM_DEFAULT => DescriptionLookup::SOURCE_LOCAL,
 				self::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 		];

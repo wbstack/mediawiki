@@ -3,30 +3,57 @@
 namespace Wikibase\Repo\RestApi\UseCases\GetItem;
 
 use Wikibase\DataModel\Entity\ItemId;
-use Wikibase\Repo\RestApi\Domain\Serializers\ItemSerializer;
-use Wikibase\Repo\RestApi\Domain\Services\ItemRevisionRetriever;
+use Wikibase\Repo\RestApi\Domain\Services\ItemDataRetriever;
+use Wikibase\Repo\RestApi\Domain\Services\ItemRevisionMetadataRetriever;
+use Wikibase\Repo\RestApi\UseCases\ErrorResponse;
+use Wikibase\Repo\RestApi\UseCases\ItemRedirectResponse;
 
 /**
  * @license GPL-2.0-or-later
  */
 class GetItem {
 
-	private $itemRetriever;
-	private $itemSerializer;
+	private $revisionMetadataRetriever;
+	private $itemDataRetriever;
+	private $validator;
 
-	public function __construct( ItemRevisionRetriever $itemRetriever, ItemSerializer $itemSerializer ) {
-		$this->itemRetriever = $itemRetriever;
-		$this->itemSerializer = $itemSerializer;
+	public function __construct(
+		ItemRevisionMetadataRetriever $revisionMetadataRetriever,
+		ItemDataRetriever $itemDataRetriever,
+		GetItemValidator $validator
+	) {
+		$this->validator = $validator;
+		$this->revisionMetadataRetriever = $revisionMetadataRetriever;
+		$this->itemDataRetriever = $itemDataRetriever;
 	}
 
-	public function execute( GetItemRequest $itemRequest ): GetItemResult {
-		$itemId = new ItemId( $itemRequest->getItemId() );
-		$itemRevision = $this->itemRetriever->getItemRevision( $itemId );
+	/**
+	 * @return GetItemSuccessResponse|GetItemErrorResponse|ItemRedirectResponse
+	 */
+	public function execute( GetItemRequest $itemRequest ) {
+		$validationError = $this->validator->validate( $itemRequest );
 
-		return new GetItemResult(
-			$this->itemSerializer->serialize( $itemRevision->getItem() ),
-			$itemRevision->getLastModified(),
-			$itemRevision->getRevisionId()
+		if ( $validationError ) {
+			return GetItemErrorResponse::newFromValidationError( $validationError );
+		}
+
+		$itemId = new ItemId( $itemRequest->getItemId() );
+		$latestRevisionMetadata = $this->revisionMetadataRetriever->getLatestRevisionMetadata( $itemId );
+
+		if ( !$latestRevisionMetadata->itemExists() ) {
+			return new GetItemErrorResponse(
+				ErrorResponse::ITEM_NOT_FOUND,
+				"Could not find an item with the ID: {$itemRequest->getItemId()}"
+			);
+		} elseif ( $latestRevisionMetadata->isRedirect() ) {
+			return new ItemRedirectResponse( $latestRevisionMetadata->getRedirectTarget()->getSerialization() );
+		}
+
+		return new GetItemSuccessResponse(
+			$this->itemDataRetriever->getItemData( $itemId, $itemRequest->getFields() ),
+			$latestRevisionMetadata->getRevisionTimestamp(),
+			$latestRevisionMetadata->getRevisionId()
 		);
 	}
+
 }

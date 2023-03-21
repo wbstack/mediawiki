@@ -2,6 +2,8 @@
 
 namespace CirrusSearch;
 
+use Elastica\Index;
+use Elasticsearch\Endpoints\Indices\GetMapping;
 use IBufferingStatsdDataFactory;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
@@ -52,42 +54,11 @@ class Util {
 	 * by gender if need be (using Title::getNsText()).
 	 *
 	 * @param Title $title The page title to use
-	 * @return string
+	 * @return string|false
 	 */
 	public static function getNamespaceText( Title $title ) {
-		return strtr( $title->getNsText(), '_', ' ' );
-	}
-
-	/**
-	 * Check if too arrays are recursively the same.  Values are compared with != and arrays
-	 * are descended into.
-	 *
-	 * @param array $lhs one array
-	 * @param array $rhs the other array
-	 * @return bool are they equal
-	 */
-	public static function recursiveSame( $lhs, $rhs ) {
-		if ( array_keys( $lhs ) != array_keys( $rhs ) ) {
-			return false;
-		}
-		foreach ( $lhs as $key => $value ) {
-			if ( !isset( $rhs[ $key ] ) ) {
-				return false;
-			}
-			if ( is_array( $value ) ) {
-				if ( !is_array( $rhs[ $key ] ) ) {
-					return false;
-				}
-				if ( !self::recursiveSame( $value, $rhs[ $key ] ) ) {
-					return false;
-				}
-			} else {
-				if ( $value != $rhs[ $key ] ) {
-					return false;
-				}
-			}
-		}
-		return true;
+		$ret = $title->getNsText();
+		return is_string( $ret ) ? strtr( $ret, '_', ' ' ) : $ret;
 	}
 
 	/**
@@ -611,4 +582,70 @@ class Util {
 		return false;
 	}
 
+	/**
+	 * Recreation of Index::getMapping but with support for include_type_name.
+	 *
+	 * Should be removed once 7.x is the minimum supported version and all
+	 * callers have transitioned to includeTypeName === false.
+	 *
+	 * @param Index $index
+	 * @return array
+	 */
+	public static function getIndexMapping( Index $index ) {
+		// $index->getMapping() does not support passing include_type_name so we rely on low-level
+		// elasticsearch/elasticsearch endpoints
+		// It should be fine to remove this while we no longer support es6 which defaults this value
+		// to true.
+		$response = $index->requestEndpoint( ( new GetMapping() )->setParams( [ 'include_type_name' => 'false' ] ) );
+		$data = $response->getData();
+		// $data is single element array with the backing index name as key
+		$mapping = array_shift( $data );
+		return $mapping['mappings'] ?? [];
+	}
+
+	/**
+	 * If we're supposed to create raw result, create and return it,
+	 * or output it and finish.
+	 * @param mixed $result Search result data
+	 * @param WebRequest $request Request context
+	 * @param CirrusDebugOptions $debugOptions
+	 * @return string The new raw result.
+	 */
+	public static function processSearchRawReturn( $result, WebRequest $request,
+												   CirrusDebugOptions $debugOptions ) {
+		$output = null;
+		$header = null;
+		if ( $debugOptions->getCirrusExplainFormat() !== null ) {
+			$header = 'Content-type: text/html; charset=UTF-8';
+			$printer = new ExplainPrinter( $debugOptions->getCirrusExplainFormat() );
+			$output = $printer->format( $result );
+		}
+
+		// This should always be true, except in the case of the test suite which wants the actual
+		// objects returned.
+		if ( $debugOptions->isDumpAndDie() ) {
+			if ( $output === null ) {
+				$header = 'Content-type: application/json; charset=UTF-8';
+				if ( $result === null ) {
+					$output = '{}';
+				} else {
+					$output = json_encode( $result, JSON_PRETTY_PRINT );
+				}
+			}
+
+			// When dumping the query we skip _everything_ but echoing the query.
+			\RequestContext::getMain()->getOutput()->disable();
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable $header can't be null here
+			$request->response()->header( $header );
+			echo $output;
+			exit();
+		}
+
+		// TODO: Remove once all tests are compatible
+		if ( $debugOptions->isBackwardCompatible() && $debugOptions->getCirrusExplainFormat() === null ) {
+			$result = json_encode( $result, JSON_PRETTY_PRINT );
+		}
+
+		return $result;
+	}
 }

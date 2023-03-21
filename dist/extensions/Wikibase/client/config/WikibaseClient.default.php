@@ -15,7 +15,8 @@ require_once __DIR__ . '/../includes/Usage/EntityUsage.php';
 /**
  * This file assigns the default values to all Wikibase Client settings.
  *
- * This file is NOT an entry point the Wikibase Client extension. Use WikibaseClient.php.
+ * This file is NOT an entry point the Wikibase Client extension. Use this instead:
+ * wfLoadExtension( 'WikibaseClient', "$IP/extensions/Wikibase/extension-client.json" );
  * It should furthermore not be included from outside the extension.
  *
  * @license GPL-2.0-or-later
@@ -295,18 +296,6 @@ return call_user_func( function() {
 
 	// Batch size for adding entity usage records
 	$defaults['addEntityUsagesBatchSize'] = 500;
-
-	/**
-	 * @note This config options is primarily added for the Wikimedia transition use-case and can be
-	 * considered temporary. It could be removed in the future with no warning.
-	 *
-	 * (tmp) Migration stage (one of the MIGRATION_* constants) indicating, whether the
-	 * "unexpectedUnconnectedPage" page prop should be written or read.
-	 *
-	 * MIGRATION_WRITE_BOTH (and up): Write the "unexpectedUnconnectedPage" page property.
-	 * MIGRATION_WRITE_NEW: Read the "unexpectedUnconnectedPage" page prop in SpecialUnconnectedPages.
-	 */
-	$defaults['tmpUnconnectedPagePagePropMigrationStage'] = MIGRATION_OLD;
 
 	return $defaults;
 } );

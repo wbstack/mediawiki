@@ -15,7 +15,7 @@
 	"apihelp-delete-summary": "Rûpelekê jê bibe.",
 	"apihelp-delete-example-simple": "<kbd>Main Page</kbd>ê jê bibe.",
 	"apihelp-edit-summary": "Rûpelan çêke û biguhêre.",
-	"apihelp-edit-param-sectiontitle": "Sernavê bo beşeke nû.",
+	"apihelp-edit-param-sectiontitle": "Sernavê ji bo beşeke nû, gava <var>$1section=new</var> bi kar bînî.",
 	"apihelp-edit-param-text": "Naveroka rûpelê.",
 	"apihelp-edit-param-minor": "Vê guhartinê wekî guhartineke biçûk nîşan bide.",
 	"apihelp-edit-param-createonly": "Heke ku rûpel hebe wê neguherîne.",

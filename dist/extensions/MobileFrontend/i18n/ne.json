@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bada Kaji",
 			"Krish Dulal",
 			"NehalDaveND",
 			"Nirajan pant",
@@ -9,12 +10,11 @@
 			"RajeshPandey",
 			"Saroj Uprety",
 			"पर्वत सुबेदी",
+			"बडा काजी",
 			"बिप्लब आनन्द",
 			"राम प्रसाद जोशी",
 			"सरोज कुमार ढकाल",
 			"हिमाल सुबेदी",
-			"Bada Kaji",
-			"बडा काजी",
 			"CAPTAIN MEDUSA"
 		]
 	},
@@ -166,6 +166,7 @@
 	"mobile-frontend-talk-reply": "जवाफ दिनुहोस्",
 	"mobile-frontend-talk-reply-info": "तपाईको प्रयोगकर्ता नामको साथ स्वचालित रूपमा हस्ताक्षर हुनेछ।",
 	"mobile-frontend-talk-topic-error": "अज्ञात कारणले गर्दा विषय थप्न सकिएन।",
+	"mobile-frontend-talk-topic-error-protected": "यो वार्ता पृष्ठ सुरक्षित छ। तपाईंसँग यसमा विषयहरू थप्ने अनुमति छैन।",
 	"mobile-frontend-talk-topic-error-permission": "विषय थप्न सकिँदैन। तपाईंसँग पृष्ठहरू सम्पादन गर्ने अनुमति छैन।",
 	"mobile-frontend-talk-topic-error-badtoken": "सर्भरमा त्रुटि भयो। तपाईंको सम्पादन सुरक्षित गर्न सकिँदैन। यो पृष्ठ पुन: लोड गर्ने प्रयास गर्नुहोस्।",
 	"mobile-frontend-talk-topic-wait": "नयाँ विषय सङ्ग्रहित हुँदैछ, कृपया प्रतीक्षा गर्नुहोस्",

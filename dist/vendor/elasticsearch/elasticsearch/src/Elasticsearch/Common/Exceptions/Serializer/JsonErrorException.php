@@ -5,8 +5,8 @@
  * @link      https://github.com/elastic/elasticsearch-php/
  * @copyright Copyright (c) Elasticsearch B.V (https://www.elastic.co)
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
- * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1 
- * 
+ * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1
+ *
  * Licensed to Elasticsearch B.V under one or more agreements.
  * Elasticsearch B.V licenses this file to you under the Apache 2.0 License or
  * the GNU Lesser General Public License, Version 2.1, at your option.
@@ -22,7 +22,6 @@ use Elasticsearch\Common\Exceptions\ElasticsearchException;
 
 /**
  * Class JsonErrorException
- *
  */
 class JsonErrorException extends \Exception implements ElasticsearchException
 {
@@ -36,6 +35,9 @@ class JsonErrorException extends \Exception implements ElasticsearchException
      */
     private $result;
 
+    /**
+     * @var string[]
+     */
     private static $messages = array(
         JSON_ERROR_DEPTH => 'The maximum stack depth has been exceeded',
         JSON_ERROR_STATE_MISMATCH => 'Invalid or malformed JSON',

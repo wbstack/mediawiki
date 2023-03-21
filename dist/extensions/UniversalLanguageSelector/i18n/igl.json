@@ -67,5 +67,10 @@
 	"ext-uls-setlang-heading": "Kpaílo eju ichí í?",
 	"ext-uls-setlang-accept": "Mí enwù ma kpaílo gbà",
 	"ext-uls-setlang-loading": "Chénwu kí tò",
-	"ext-uls-setlang-cancel": "É kí kpaílo ñ"
+	"ext-uls-setlang-cancel": "É kí kpaílo ñ",
+	"ext-uls-actions-menu-language-settings-item-label": "Bí Chettins ichí",
+	"ext-uls-empty-state-header": "Íchí dó mó tañ",
+	"ext-uls-empty-state-desc": "Íchí dú dó mó abajoí tañ",
+	"ext-uls-empty-state-header-actions-available": "Íchí dò mò tañ. Dí étito manwù",
+	"ext-uls-empty-state-desc-actions-available": "Dí omí óla í té é fí amí ichí ómuné"
 }

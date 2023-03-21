@@ -4,11 +4,11 @@
 			"Artsiom91",
 			"Maksim L.",
 			"Mikalai Udodau",
+			"No Sleep till Krupki",
+			"Tomato Cream",
 			"ZlyiLev",
 			"Дзяніс Тутэйшы",
 			"Чаховіч Уладзіслаў",
-			"Tomato Cream",
-			"No Sleep till Krupki",
 			"Plaga med"
 		]
 	},
@@ -71,7 +71,7 @@
 	"wikibase-error-exceeded-entity-access-limit": "Запытана зашмат сутнасцяў {{grammar:genitive|{{WBREPONAME}}}}.",
 	"wikibase-error-exceeded-referenced-entity-id-limit": "Зашмат выклікаў «mw.wikibase.getReferencedEntityId», {{PLURAL:$2|дазволена}} толькі да $2.",
 	"unconnectedpages": "Старонкі, не звязаныя з элементамі",
-	"unconnectedpages-summary": "Гэта старонка змяшчае спіс старонак, якія не злучаны з элементамі даных (у прастарох назваў, якія падтрымліваюць злучаныя элементы). Спіс адсартаваны паводле памяншэння ID старонкі, такія чынам навейшыя старонкі паказваюцца першымі.",
+	"unconnectedpages-summary": "Гэта старонка змяшчае спіс старонак, якія не злучаны з элементамі даных (у прасторах назваў, якія падтрымліваюць злучаныя элементы).",
 	"wikibase-unconnectedpages-submit": "Паказаць старонкі",
 	"pageswithbadges": "Старонкі з адзнакамі",
 	"pageswithbadges-summary": "Гэтая старонка змяшчае спіс старонак з адзнакамі (напрыклад, Добрага або Выдатнага артыкула). Спіс адсартаваны паводле змяншэння ID старонкі, такім чынам новыя старонкі адлюстроўваюцца ў спісе першымі.",

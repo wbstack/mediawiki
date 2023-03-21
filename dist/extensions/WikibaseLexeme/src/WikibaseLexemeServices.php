@@ -3,8 +3,10 @@
 namespace Wikibase\Lexeme;
 
 use MediaWiki\MediaWikiServices;
+use Psr\Container\ContainerInterface;
 use RequestContext;
 use Wikibase\DataModel\Services\Statement\GuidGenerator;
+use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LemmaTermValidator;
 use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeAuthorizer;
 use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRedirectorFactory;
 use Wikibase\Lexeme\DataAccess\Store\MediaWikiLexemeRepositoryFactory;
@@ -17,7 +19,7 @@ use Wikibase\Lexeme\Domain\Merge\LexemeMerger;
 use Wikibase\Lexeme\Domain\Merge\LexemeSensesMerger;
 use Wikibase\Lexeme\Domain\Merge\NoCrossReferencingLexemeStatements;
 use Wikibase\Lexeme\Interactors\MergeLexemes\MergeLexemesInteractor;
-use Wikibase\Lexeme\MediaWiki\Content\LexemeLanguageNameLookup;
+use Wikibase\Lexeme\MediaWiki\Content\LexemeLanguageNameLookupFactory;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeTermLanguages;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\EditFormChangeOpDeserializer;
 use Wikibase\Lib\Store\ItemOrderProvider;
@@ -135,8 +137,16 @@ class WikibaseLexemeServices {
 		return MediaWikiServices::getInstance()->getService( 'WikibaseLexemeTermLanguages' );
 	}
 
-	public static function getLanguageNameLookup(): LexemeLanguageNameLookup {
-		return MediaWikiServices::getInstance()->getService( 'WikibaseLexemeLanguageNameLookup' );
+	public static function getLanguageNameLookupFactory(): LexemeLanguageNameLookupFactory {
+		return MediaWikiServices::getInstance()
+			->getService( 'WikibaseLexemeLanguageNameLookupFactory' );
+	}
+
+	public static function getLemmaTermValidator(
+		ContainerInterface $services = null
+	): LemmaTermValidator {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseLexemeLemmaTermValidator' );
 	}
 
 	public static function getEditFormChangeOpDeserializer(): EditFormChangeOpDeserializer {

@@ -12,6 +12,8 @@ use ApiResult;
 use Title;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Usage\EntityUsage;
+use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -211,15 +213,15 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 	public function getAllowedParams(): array {
 		return [
 			'prop' => [
-				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_TYPE => [
+				ParamValidator::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_TYPE => [
 					'url',
 				],
 				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 			'aspect' => [
-				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_TYPE => [
+				ParamValidator::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_TYPE => [
 					EntityUsage::SITELINK_USAGE,
 					EntityUsage::LABEL_USAGE,
 					EntityUsage::DESCRIPTION_USAGE,
@@ -240,15 +242,15 @@ class ApiListEntityUsage extends ApiQueryGeneratorBase {
 				],
 			],
 			'entities' => [
-				ApiBase::PARAM_ISMULTI => true,
-				ApiBase::PARAM_REQUIRED => true,
+				ParamValidator::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'limit' => [
-				ApiBase::PARAM_DFLT => 10,
-				ApiBase::PARAM_TYPE => 'limit',
-				ApiBase::PARAM_MIN => 1,
-				ApiBase::PARAM_MAX => ApiBase::LIMIT_BIG1,
-				ApiBase::PARAM_MAX2 => ApiBase::LIMIT_BIG2
+				ParamValidator::PARAM_DEFAULT => 10,
+				ParamValidator::PARAM_TYPE => 'limit',
+				IntegerDef::PARAM_MIN => 1,
+				IntegerDef::PARAM_MAX => ApiBase::LIMIT_BIG1,
+				IntegerDef::PARAM_MAX2 => ApiBase::LIMIT_BIG2
 			],
 			'continue' => [
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',

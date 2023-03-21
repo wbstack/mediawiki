@@ -13,34 +13,30 @@ var util = require( 'ext.kartographer.util' ),
 	OpenFullScreenControl = require( './openfullscreen_control.js' ),
 	dataLayerOpts = require( './dataLayerOpts.js' ),
 	ScaleControl = require( './scale_control.js' ),
-	DataManager = require( './data.js' ),
+	DataManagerFactory = require( './data.js' ),
 	scale, urlFormat,
-	mapServer = mw.config.get( 'wgKartographerMapServer' ),
 	worldLatLng = new L.LatLngBounds( [ -90, -180 ], [ 90, 180 ] ),
 	KartographerMap,
-	precisionPerZoom = [ 0, 0, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5 ],
 	inlineDataLayerKey = 'kartographer-inline-data-layer',
 	inlineDataLayerId = 0;
 
+/**
+ * @return {number}
+ */
 function bracketDevicePixelRatio() {
-	var i, scale,
-		brackets = mw.config.get( 'wgKartographerSrcsetScales' ),
+	var brackets = mw.config.get( 'wgKartographerSrcsetScales' ),
 		baseRatio = window.devicePixelRatio || 1;
 	if ( !brackets ) {
 		return 1;
 	}
 	brackets.unshift( 1 );
-	for ( i = 0; i < brackets.length; i++ ) {
-		scale = brackets[ i ];
-		if ( scale >= baseRatio || ( baseRatio - scale ) < 0.1 ) {
-			return scale;
+	for ( var i = 0; i < brackets.length; i++ ) {
+		var scl = brackets[ i ];
+		if ( scl >= baseRatio || ( baseRatio - scl ) < 0.1 ) {
+			return scl;
 		}
 	}
 	return brackets[ brackets.length - 1 ];
-}
-
-if ( !mapServer ) {
-	throw new Error( 'wgKartographerMapServer must be configured.' );
 }
 
 scale = bracketDevicePixelRatio();
@@ -153,10 +149,14 @@ KartographerMap = L.Map.extend( {
 	 * @member Kartographer.Box.MapClass
 	 */
 	initialize: function ( options ) {
-		var args,
+		var mapServer = mw.config.get( 'wgKartographerMapServer' ),
 			defaultStyle = mw.config.get( 'wgKartographerDfltStyle' ),
 			style = options.style || defaultStyle,
 			map = this;
+
+		if ( !mapServer ) {
+			throw new Error( 'wgKartographerMapServer must be configured.' );
+		}
 
 		if ( options.center === 'auto' ) {
 			options.center = undefined;
@@ -167,7 +167,7 @@ KartographerMap = L.Map.extend( {
 
 		$( options.container ).addClass( 'mw-kartographer-interactive' );
 
-		args = L.extend( {}, L.Map.prototype.options, options, {
+		var args = L.extend( {}, L.Map.prototype.options, options, {
 			// `center` and `zoom` are to undefined to avoid calling
 			// setView now. setView is called later when the data is
 			// loaded.
@@ -319,7 +319,7 @@ KartographerMap = L.Map.extend( {
 			map.touchZoom.enable();
 			map.fire(
 				/**
-				 * @event
+				 * @event kartographerisready
 				 * Fired when the Kartographer Map object is ready.
 				 */
 				'kartographerisready' );
@@ -411,9 +411,9 @@ KartographerMap = L.Map.extend( {
 			return $.Deferred().resolve().promise();
 		}
 
-		return DataManager.loadGroups( dataGroups ).then( function ( dataGroups ) {
+		return DataManagerFactory().loadGroups( dataGroups ).then( function ( groups ) {
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( dataGroups, function ( key, group ) {
+			$.each( groups, function ( key, group ) {
 				var layerOptions = {
 					attribution: group.attribution
 				};
@@ -440,7 +440,7 @@ KartographerMap = L.Map.extend( {
 		var map = this;
 		options = options || {};
 
-		return DataManager.load( groupData ).then( function ( dataGroups ) {
+		return DataManagerFactory().load( groupData ).then( function ( dataGroups ) {
 			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( dataGroups, function ( key, group ) {
 				var groupId = inlineDataLayerKey + inlineDataLayerId++,
@@ -463,15 +463,14 @@ KartographerMap = L.Map.extend( {
 	 * Creates a new GeoJSON layer and adds it to the map.
 	 *
 	 * @param {string} groupId
-	 * @param {Object} geoJson Features
+	 * @param {Object} geoJSON Features
 	 * @param {Object} [options] Layer options
 	 * @return {L.mapbox.FeatureLayer|undefined} Added layer, or undefined in case e.g. the GeoJSON
 	 *   was invalid
 	 */
-	addGeoJSONLayer: function ( groupId, geoJson, options ) {
-		var layer;
+	addGeoJSONLayer: function ( groupId, geoJSON, options ) {
 		try {
-			layer = L.mapbox.featureLayer( geoJson, $.extend( {}, dataLayerOpts, options ) ).addTo( this );
+			var layer = L.mapbox.featureLayer( geoJSON, $.extend( {}, dataLayerOpts, options ) ).addTo( this );
 			layer.getAttribution = function () {
 				return this.options.attribution;
 			};
@@ -640,8 +639,7 @@ KartographerMap = L.Map.extend( {
 	 * @chainable
 	 */
 	setView: function ( center, zoom, options, save ) {
-		var maxBounds,
-			initial = this.getInitialMapPosition();
+		var initial = this.getInitialMapPosition();
 
 		if ( Array.isArray( center ) ) {
 			if ( !isNaN( center[ 0 ] ) && !isNaN( center[ 1 ] ) ) {
@@ -658,7 +656,7 @@ KartographerMap = L.Map.extend( {
 			// Bounds calulation depends on the size of the frame
 			// If the frame is not visible, there is no point in calculating
 			// You need to call invalidateSize when it becomes available again
-			maxBounds = getValidBounds( this );
+			var maxBounds = getValidBounds( this );
 
 			if ( maxBounds.isValid() ) {
 				this.fitBounds( maxBounds );
@@ -722,16 +720,13 @@ KartographerMap = L.Map.extend( {
 	 * @param {number} lat
 	 * @param {number} lng
 	 * @param {number} [zoom]
-	 * @return {Array} Array with the zoom (number), the latitude (string) and
-	 *   the longitude (string).
+	 * @return {string[]}
 	 */
 	getScaleLatLng: function ( lat, lng, zoom ) {
-		zoom = typeof zoom === 'undefined' ? this.getZoom() : zoom;
+		zoom = zoom === undefined ? this.getZoom() : zoom;
 
-		return [
-			lat.toFixed( precisionPerZoom[ zoom ] ),
-			lng.toFixed( precisionPerZoom[ zoom ] )
-		];
+		var precision = zoom ? Math.ceil( Math.log( zoom ) / Math.LN2 ) : 0;
+		return [ lat.toFixed( precision ), lng.toFixed( precision ) ];
 	},
 
 	/**
@@ -769,8 +764,6 @@ KartographerMap = L.Map.extend( {
 	 * @protected
 	 */
 	_fixMapSize: function () {
-		var width, height, $visibleParent;
-
 		if ( this.options.fullscreen ) {
 			this._size = new L.Point(
 				window.innerWidth,
@@ -781,11 +774,11 @@ KartographerMap = L.Map.extend( {
 		}
 
 		// eslint-disable-next-line no-jquery/no-sizzle
-		$visibleParent = this.$container.closest( ':visible' );
+		var $visibleParent = this.$container.closest( ':visible' );
 
 		// Try `max` properties.
-		width = $visibleParent.css( 'max-width' );
-		height = $visibleParent.css( 'max-height' );
+		var width = $visibleParent.css( 'max-width' ),
+			height = $visibleParent.css( 'max-height' );
 		width = ( !width || width === 'none' ) ? $visibleParent.width() : width;
 		height = ( !height || height === 'none' ) ? $visibleParent.height() : height;
 
@@ -809,7 +802,6 @@ KartographerMap = L.Map.extend( {
 	 * @protected
 	 */
 	_invalidateInteractive: function () {
-
 		// add Leaflet.Sleep when the map isn't full screen.
 		this.addHandler( 'sleep', L.Map.Sleep );
 
@@ -898,11 +890,9 @@ KartographerMap = L.Map.extend( {
 	}
 } );
 
-function map( options ) {
-	return new KartographerMap( options );
-}
-
 module.exports = {
 	Map: KartographerMap,
-	map: map
+	map: function ( options ) {
+		return new KartographerMap( options );
+	}
 };

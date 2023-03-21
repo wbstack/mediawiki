@@ -8,7 +8,7 @@ use MediaWiki\Logger\LoggerFactory;
 
 /**
  * Forms and caches connection to Elasticsearch as well as client objects
- * that contain connection information like \Elastica\Index and \Elastica\Type.
+ * that contain connection information like \Elastica\Index.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

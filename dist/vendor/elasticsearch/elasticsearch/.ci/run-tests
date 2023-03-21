@@ -7,7 +7,7 @@ script_path=$(dirname $(realpath -s $0))
 source $script_path/functions/imports.sh
 set -euo pipefail
 
-echo -e "\033[1m>>> [$STACK_VERSION container] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\033[0m"
+echo -e "\033[1m>>>>> Start [$STACK_VERSION container] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>\033[0m"
 DETACH=true bash .ci/run-elasticsearch.sh
 
 if [[ -n "$RUNSCRIPTS" ]]; then

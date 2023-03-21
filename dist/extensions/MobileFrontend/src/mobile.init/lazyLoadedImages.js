@@ -4,13 +4,21 @@ const lazyImageLoader = require( '../mobile.startup/lazyImages/lazyImageLoader' 
 /**
  * Initialise lazy loading images to supplement the HTML changes inside the
  * MobileFormatter.
+ *
+ * @param {jQuery} $container
  */
-function init() {
+function init( $container ) {
+	const imagePlaceholders = lazyImageLoader.queryPlaceholders( $container[ 0 ] );
+
+	// Regardless of whether or not lazy load is turned on
+	// We need to load in all images before print
+	window.addEventListener( 'beforeprint', function () {
+		lazyImageLoader.loadImages( imagePlaceholders );
+	} );
+
 	if ( !mw.config.get( 'wgMFLazyLoadImages' ) ) {
 		return;
 	}
-
-	const imagePlaceholders = lazyImageLoader.queryPlaceholders( document.getElementById( 'mw-content-text' ) );
 
 	if ( 'IntersectionObserver' in window ) {
 		const observer = new IntersectionObserver(
@@ -61,4 +69,6 @@ function init() {
 	}
 }
 
-module.exports = init;
+module.exports = function () {
+	mw.hook( 'wikipage.content' ).add( init );
+};

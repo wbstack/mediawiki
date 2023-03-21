@@ -105,6 +105,8 @@ $languageNames = [
 	'gmy' => 'Mykenisches Griechisch',
 	'gom-deva' => 'Goa-Konkani (Devanagari)',
 	'gom-latn' => 'Goa-Konkani (lateinische Schrift)',
+	# Added to core, T311975.
+	'gpe' => 'Ghanaisches Pidgin-Englisch',
 	# used by Wikidata, T262922
 	'gsw-fr' => 'Elsässisch',
 	# Added to core, T286460. Source: http://d-nb.info/gnd/1205170707
@@ -117,6 +119,8 @@ $languageNames = [
 	'hbo' => 'Biblisches Hebräisch',
 	'hif' => 'Fidschi-Hindi',
 	'hif-latn' => 'Fidschi-Hindi (lateinische Schrift)',
+	# used by Wikispecies, T303379
+	'hts' => 'Hadza',
 	'hu-formal' => 'Ungarisch (formale Anrede)',
 	'hyw' => 'Westarmenisch',
 	'ike-cans' => 'Inuktitut (kanadische Silbenschrift)',
@@ -241,6 +245,7 @@ $languageNames = [
 	'rmy' => 'Vlax-Romani',
 	'roa-rup' => 'Aromunisch',
 	'roa-tara' => 'Tarandíne',
+	'rsk' => 'Pannonisch-Russinisch',
 	'ruq' => 'Meglenorumänisch',
 	'ruq-cyrl' => 'Meglenorumänisch (kyrillische Schrift)',
 	'ruq-grek' => 'Meglenorumänisch (griechische Schrift)',
@@ -274,9 +279,13 @@ $languageNames = [
 	'skr-arab' => 'Saraiki (arabische Schrift)',
 	'sr-ec' => 'Serbisch (kyrillische Schrift)',
 	'sr-el' => 'Serbisch (lateinische Schrift)',
+	# Added to core with T311034
+	'sro' => 'Campidanesisch',
 	# 'srq' => 'Sirionó', // German translation unassured
 	'ssf' => 'Thao',
 	'sty' => 'Sibirisches Tatarisch',
+	# Added to core with T309763
+	'tdd' => 'Tai Nüa',
 	'tg-cyrl' => 'Tadschikisch (kyrillische Schrift)',
 	'tg-latn' => 'Tadschikisch (lateinische Schrift)',
 	# 'tlb' => 'Tobelo', // German translation unassured
@@ -300,7 +309,6 @@ $languageNames = [
 	'xpu' => 'Punisch',
 	# https://d-nb.info/gnd/1075555310
 	'xsy' => 'Saisiyat',
-	'ydd' => 'Ostjiddisch',
 	'ykg' => 'Tundrajukagirisch',
 	'zh-classical' => 'klassisches Chinesisch',
 	'zh-cn' => 'Chinesisch (China)',

@@ -4,10 +4,10 @@
 			"AlimOmar",
 			"HushBeg",
 			"Sahran",
+			"TayfunEt.",
 			"Tel'et",
 			"Uzdil",
-			"چۈشكۈن",
-			"TayfunEt."
+			"چۈشكۈن"
 		]
 	},
 	"mobile-frontend-changeslist-nocomment": "تەھرىرلەش خۇلاسىسى يوق",
@@ -89,6 +89,7 @@
 	"mobile-frontend-talk-reply": "جاۋاب",
 	"mobile-frontend-talk-reply-info": "جاۋابىڭىز ئىشلەتكۈچى ئىسمىڭىز بىلەن ئاپتوماتىك ئىمزالىنىدۇ.",
 	"mobile-frontend-talk-topic-error": "نامەلۇم خاتالىق سەۋەبىدىن بۇ تېمىنى قوشقىلى بولمايدۇ.",
+	"mobile-frontend-talk-topic-error-protected": "بۇ سۆھبەت بېتى قوغدالدى. ئۇنىڭغا تېما قوشۇش ھوقۇقىڭىز يوق.",
 	"mobile-frontend-talk-topic-error-permission": "بۇ تېمىنى قوشقىلى بولمايدۇ. بەت تەھرىرلەش ھوقۇقىڭىز يوق.",
 	"mobile-frontend-talk-topic-error-spam": "بۇ تېما ئەخلەت خەتنى ئۆز ئىچىگە ئالغانلىقى ئۈچۈن رەت قىلىندى.",
 	"mobile-frontend-talk-topic-error-badtoken": "مۇلازىمېتىردا خاتالىق كۆرۈلدى. تەھرىرىڭىزنى ساقلىغىلى بولمايدۇ. بۇ بەتنى قايتا يۈكلەڭ.",

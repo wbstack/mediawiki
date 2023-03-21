@@ -214,6 +214,11 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	private $cirrusSearchHookRunner;
 
 	/**
+	 * @var bool
+	 */
+	private $trackTotalHits = true;
+
+	/**
 	 * @param SearchConfig $config
 	 * @param int[]|null $namespaces
 	 * @param CirrusDebugOptions|null $options
@@ -412,14 +417,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 */
 	public function addSyntaxUsed( $feature, $weight = null ) {
 		$this->isDirty = true;
-		if ( $weight === null ) {
-			if ( isset( self::$syntaxWeights[$feature] ) ) {
-				$weight = self::$syntaxWeights[$feature];
-			} else {
-				$weight = 1;
-			}
-		}
-		$this->syntaxUsed[$feature] = $weight;
+		$this->syntaxUsed[$feature] = $weight ?? self::$syntaxWeights[$feature] ?? 1;
 	}
 
 	/**
@@ -556,7 +554,9 @@ class SearchContext implements WarningCollector, FilterBuilder {
 		}
 		$filters = $this->filters;
 		if ( $this->getNamespaces() ) {
-			$filters[] = new \Elastica\Query\Terms( 'namespace', $this->getNamespaces() );
+			// We must take an array_values here, or it can be json-encoded into an object instead
+			// of a list which elasticsearch will interpret as terms lookup.
+			$filters[] = new \Elastica\Query\Terms( 'namespace', array_values( $this->getNamespaces() ) );
 		}
 
 		// Wrap $mainQuery in a filtered query if there are any filters
@@ -850,7 +850,11 @@ class SearchContext implements WarningCollector, FilterBuilder {
 			$query->getNamespaces(),
 			$query->getDebugOptions(),
 			$fallbackRunner,
-			new FetchPhaseConfigBuilder( $query->getSearchConfig(), $query->getSearchEngineEntryPoint() ),
+			new FetchPhaseConfigBuilder(
+				$query->getSearchConfig(),
+				$query->getSearchEngineEntryPoint(),
+				$query->shouldProvideAllSnippets()
+			),
 			$cirrusSearchHookRunner
 		);
 
@@ -896,5 +900,16 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 */
 	public function getFallbackRunner(): FallbackRunner {
 		return $this->fallbackRunner;
+	}
+
+	public function setTrackTotalHits( bool $trackTotalHits ): void {
+		if ( $trackTotalHits !== $this->trackTotalHits ) {
+			$this->isDirty = true;
+			$this->trackTotalHits = $trackTotalHits;
+		}
+	}
+
+	public function getTrackTotalHits(): bool {
+		return $this->trackTotalHits;
 	}
 }

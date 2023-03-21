@@ -88,15 +88,15 @@
 		},
 		{
 			"path": "resources/dist/mobile.init.js",
-			"maxSize": "4.7KB"
+			"maxSize": "4.8KB"
 		},
 		{
 			"path": "resources/dist/mobile.startup.js",
-			"maxSize": "6.2KB"
+			"maxSize": "6.4KB"
 		},
 		{
 			"path": "resources/dist/mobile.languages.structured.js",
-			"maxSize": "2.0KB"
+			"maxSize": "2.2KB"
 		},
 		{
 			"path": "resources/dist/mobile.mediaViewer.js",
@@ -116,7 +116,7 @@
 		},
 		{
 			"path": "resources/dist/mobile.talk.overlays.js",
-			"maxSize": "2.5KB"
+			"maxSize": "2.6KB"
 		}
 	]
 }

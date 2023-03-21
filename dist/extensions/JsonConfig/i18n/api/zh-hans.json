@@ -2,10 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Liuxinyu970226",
+			"Stang",
 			"Xiplus",
 			"坑触可",
-			"御坂美琴",
-			"Stang"
+			"御坂美琴"
 		]
 	},
 	"apihelp-jsonconfig-description": "允许直接访问JsonConfig子系统。",

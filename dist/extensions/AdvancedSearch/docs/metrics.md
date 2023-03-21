@@ -1,7 +1,3 @@
-### EventLogging
-
-* https://meta.wikimedia.org/wiki/Schema:AdvancedSearchRequest
-
 ### Graphite
 
 #### Info

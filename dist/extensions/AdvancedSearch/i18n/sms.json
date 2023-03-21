@@ -5,8 +5,12 @@
 		]
 	},
 	"advancedsearch-options-pane-head": "Tääʹrǩab ooccmõš:",
+	"advancedsearch-optgroup-text": "Ooʒʒ seeid teeʹkstest",
 	"advancedsearch-optgroup-files": "Teâttõõzz da kaart",
 	"advancedsearch-field-subpageof": "Tän seeid vueʹllseeid",
+	"advancedsearch-field-deepcategory": "Seeid täin kategoriain",
+	"advancedsearch-field-hastemplate": "Seeid, koin lie täk maall",
+	"advancedsearch-field-inlanguage": "Seeid tän ǩiõʹlle",
 	"advancedsearch-field-filew": "Teâttõõzz kobddâdvuõtt pikseleeʹlen",
 	"advancedsearch-field-fileh": "Teâttõõzz õllâdvuõtt pikseleeʹlen",
 	"advancedsearch-field-preview-sort": "Šlajjâd: $1",
@@ -14,6 +18,7 @@
 	"advancedsearch-filetype-bitmap": "Kartt leʼbe snimldõk",
 	"advancedsearch-filetype-audio": "Jiõnn",
 	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-namespaces-preset-all": "Puk",
 	"advancedsearch-namespaces-preset-discussion": "Saǥstõõllmõš",
 	"prefs-advancedsearch": "Tääʹrǩab ooccmõš"
 }

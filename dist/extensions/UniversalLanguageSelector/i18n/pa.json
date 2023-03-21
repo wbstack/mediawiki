@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Babanwalia",
+			"Bgo eiu",
 			"Jimidar",
 			"Satdeep gill",
-			"Bgo eiu",
 			"Jagseer S Sidhu"
 		]
 	},
@@ -70,5 +70,10 @@
 	"ext-uls-setlang-heading": "ਇੰਟਰਫੇਸ ਭਾਸ਼ਾ ਬਦਲਣੀ ਹੈ?",
 	"ext-uls-setlang-accept": "ਬਦਲਾਵ ਸਵੀਕਾਰ ਕਰੋ",
 	"ext-uls-setlang-loading": "ਲਾਗੂ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ...",
-	"ext-uls-setlang-cancel": "ਨਾ ਬਦਲੋ"
+	"ext-uls-setlang-cancel": "ਨਾ ਬਦਲੋ",
+	"ext-uls-actions-menu-language-settings-item-label": "ਭਾਸ਼ਾ ਸੈਟਿੰਗਾਂ ਖੋਲ੍ਹੋ",
+	"ext-uls-empty-state-header": "ਅਜੇ ਤੱਕ ਕੋਈ ਭਾਸ਼ਾਵਾਂ ਨਹੀਂ ਹਨ",
+	"ext-uls-empty-state-desc": "ਫਿਲਹਾਲ ਕੋਈ ਭਾਸ਼ਾਵਾਂ ਉਪਲਬਧ ਨਹੀਂ ਹਨ",
+	"ext-uls-empty-state-header-actions-available": "ਅਜੇ ਤੱਕ ਕੋਈ ਭਾਸ਼ਾਵਾਂ ਨਹੀਂ ਹਨ। ਕੀ ਇੱਕ ਨਵੀਂ ਜੋੜਨੀ ਹੈ?",
+	"ext-uls-empty-state-desc-actions-available": "ਸਮੱਗਰੀ ਨੂੰ ਹੋਰ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਉਪਲਬਧ ਕਰਵਾਓ।"
 }

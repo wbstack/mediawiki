@@ -4,9 +4,9 @@
 			"Afrah2000",
 			"Ama dollars",
 			"Amire80",
-			"Robertjamal12",
 			"Kwamevaughan",
-			"Merlin266"
+			"Merlin266",
+			"Robertjamal12"
 		]
 	},
 	"uls-desc": "Ma deɛ wɔde di dwuma no akwan ahorohɔ so ma no yi ne kasa na won sesa  kasa no nhyehyeɛ",
@@ -71,5 +71,7 @@
 	"ext-uls-setlang-heading": "Sesa kasa nnianim?",
 	"ext-uls-setlang-accept": "Gye nsesae no tu mu",
 	"ext-uls-setlang-loading": "Yɛre yɛ nea wo pɛ...",
-	"ext-uls-setlang-cancel": "Mɛn sesa"
+	"ext-uls-setlang-cancel": "Mɛn sesa",
+	"ext-uls-actions-menu-header": "Nneɛma pii a wobetumi apɛ",
+	"ext-uls-actions-menu-language-settings-item-label": "Bue kasa ahorow"
 }

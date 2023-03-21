@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\Usage\Sql;
 
 use ArrayIterator;
@@ -64,8 +66,8 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 		EntityIdParser $idParser,
 		SessionConsistentConnectionManager $connectionManager,
 		array $disabledUsageAspects,
-		$entityUsagePerPageLimit,
-		$addEntityUsagesBatchSize = 500
+		int $entityUsagePerPageLimit,
+		int $addEntityUsagesBatchSize = 500
 	) {
 		$this->idParser = $idParser;
 		$this->connectionManager = $connectionManager;
@@ -74,12 +76,7 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 		$this->addEntityUsagesBatchSize = $addEntityUsagesBatchSize;
 	}
 
-	/**
-	 * @param IDatabase $db
-	 *
-	 * @return EntityUsageTable
-	 */
-	private function newUsageTable( IDatabase $db ) {
+	private function newUsageTable( IDatabase $db ): EntityUsageTable {
 		$entityUsageTable = new EntityUsageTable( $this->idParser, $db );
 		$entityUsageTable->setAddUsagesBatchSize( $this->addEntityUsagesBatchSize );
 		return $entityUsageTable;
@@ -94,7 +91,7 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 * @throws InvalidArgumentException
 	 * @return EntityUsage[]
 	 */
-	private function reindexEntityUsages( array $usages ) {
+	private function reindexEntityUsages( array $usages ): array {
 		$reindexed = [];
 
 		foreach ( $usages as $usage ) {
@@ -115,7 +112,7 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 * @throws InvalidArgumentException
 	 * @return EntityUsage[]
 	 */
-	private function handleDisabledUsages( array $usages ) {
+	private function handleDisabledUsages( array $usages ): array {
 		$newUsages = [];
 
 		foreach ( $usages as $usage ) {
@@ -148,11 +145,7 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function addUsedEntities( $pageId, array $usages ) {
-		if ( !is_int( $pageId ) ) {
-			throw new InvalidArgumentException( '$pageId must be an int.' );
-		}
-
+	public function addUsedEntities( int $pageId, array $usages ): void {
 		if ( count( $usages ) > $this->entityUsagePerPageLimit ) {
 			wfLogWarning(
 				'Number of usages in page id ' . $pageId . ' is too high: ' . count( $usages )
@@ -166,7 +159,7 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 
 		// NOTE: while logically we'd like the below to be atomic, we don't wrap it in a
 		// transaction to prevent long lock retention during big updates.
-		$db = $this->connectionManager->getWriteConnection();
+		$db = $this->connectionManager->getWriteConnectionRef();
 		$usageTable = $this->newUsageTable( $db );
 		// queryUsages guarantees this to be identity string => EntityUsage
 		$oldUsages = $usageTable->queryUsages( $pageId );
@@ -177,7 +170,6 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 
 		// Actually add the new entries
 		$usageTable->addUsages( $pageId, $added );
-		$this->connectionManager->releaseConnection( $db );
 	}
 
 	/**
@@ -190,14 +182,10 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function replaceUsedEntities( $pageId, array $usages ) {
-		if ( !is_int( $pageId ) ) {
-			throw new InvalidArgumentException( '$pageId must be an int.' );
-		}
-
+	public function replaceUsedEntities( int $pageId, array $usages ): array {
 		// NOTE: while logically we'd like the below to be atomic, we don't wrap it in a
 		// transaction to prevent long lock retention during big updates.
-		$db = $this->connectionManager->getWriteConnection();
+		$db = $this->connectionManager->getWriteConnectionRef();
 		$usageTable = $this->newUsageTable( $db );
 		// queryUsages guarantees this to be identity string => EntityUsage
 		$oldUsages = $usageTable->queryUsages( $pageId );
@@ -210,7 +198,6 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 
 		$usageTable->removeUsages( $pageId, $removed );
 		$usageTable->addUsages( $pageId, $added );
-		$this->connectionManager->releaseConnection( $db );
 		return $removed;
 	}
 
@@ -221,14 +208,13 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 *
 	 * @return EntityUsage[]
 	 */
-	public function pruneUsages( $pageId ) {
+	public function pruneUsages( int $pageId ): array {
 		// NOTE: while logically we'd like the below to be atomic, we don't wrap it in a
 		// transaction to prevent long lock retention during big updates.
-		$db = $this->connectionManager->getWriteConnection();
+		$db = $this->connectionManager->getWriteConnectionRef();
 		$usageTable = $this->newUsageTable( $db );
 		$pruned = $usageTable->pruneUsages( $pageId );
 
-		$this->connectionManager->releaseConnection( $db );
 		return $pruned;
 	}
 
@@ -239,13 +225,11 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 *
 	 * @return EntityUsage[] EntityUsage identity string => EntityUsage
 	 */
-	public function getUsagesForPage( $pageId ) {
-		$db = $this->connectionManager->getReadConnection();
+	public function getUsagesForPage( int $pageId ): array {
+		$db = $this->connectionManager->getReadConnectionRef();
 
 		$usageTable = $this->newUsageTable( $db );
 		$usages = $usageTable->queryUsages( $pageId );
-
-		$this->connectionManager->releaseConnection( $db );
 
 		return $usages;
 	}
@@ -258,17 +242,15 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 *
 	 * @return Traversable A traversable over PageEntityUsages grouped by page.
 	 */
-	public function getPagesUsing( array $entityIds, array $aspects = [] ) {
+	public function getPagesUsing( array $entityIds, array $aspects = [] ): Traversable {
 		if ( empty( $entityIds ) ) {
 			return new ArrayIterator();
 		}
 
-		$db = $this->connectionManager->getReadConnection();
+		$db = $this->connectionManager->getReadConnectionRef();
 
 		$usageTable = $this->newUsageTable( $db );
 		$pages = $usageTable->getPagesUsing( $entityIds, $aspects );
-
-		$this->connectionManager->releaseConnection( $db );
 
 		return $pages;
 	}
@@ -280,17 +262,15 @@ class SqlUsageTracker implements UsageTracker, UsageLookup {
 	 *
 	 * @return EntityId[]
 	 */
-	public function getUnusedEntities( array $entityIds ) {
+	public function getUnusedEntities( array $entityIds ): array {
 		if ( empty( $entityIds ) ) {
 			return [];
 		}
 
-		$db = $this->connectionManager->getReadConnection();
+		$db = $this->connectionManager->getReadConnectionRef();
 
 		$usageTable = $this->newUsageTable( $db );
 		$unused = $usageTable->getUnusedEntities( $entityIds );
-
-		$this->connectionManager->releaseConnection( $db );
 
 		return $unused;
 	}

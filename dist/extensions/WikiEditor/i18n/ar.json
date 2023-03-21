@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Aiman titi",
+			"Asma",
 			"DRIHEM",
 			"Kassem7899",
 			"Macofe",
 			"Maroen1990",
 			"McDutchie",
 			"Meno25",
+			"Michel Bakni",
 			"Mido",
 			"OsamaK",
 			"Samer",
@@ -18,8 +20,6 @@
 			"زكريا",
 			"علاء",
 			"محمد أحمد عبد الفتاح",
-			"Asma",
-			"Michel Bakni",
 			"FShbib"
 		]
 	},
@@ -54,7 +54,6 @@
 	"wikieditor-toolbar-tool-link-int-target-status-notexists": "الصفحة غير موجودة على {{SITENAME}}",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "العنوان الذي اخترته غير صالح",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "وصلة خارجية",
-	"wikieditor-toolbar-tool-link-int-target-status-loading": "يلتمس وجود الصفحة...",
 	"wikieditor-toolbar-tool-link-int-target-status-disambig": "هذه الصفحة ليست صفحة محتوى، ولكنها قائمة بالمواضيع ذات الأسماء المُشابهة.",
 	"wikieditor-toolbar-tool-link-int-invalid": "العنوان الذي اخترته غير صالح.",
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "يبدو أن المُراد بالمسار الذي حددته وصلة إلى صفحة ويكي أخرى. أتريد أن تجعلها وصلة داخلية؟",
@@ -211,5 +210,14 @@
 	"wikieditor-toolbar-help-content-indent-syntax": "نص عادي<br />:نص مزاح<br />::نص مزاح",
 	"wikieditor-toolbar-help-content-indent-result": "نص عادي<dl><dd>نص مزاح<dl><dd>نص مزاح</dd></dl></dd></dl>",
 	"tag-wikieditor-description": "تم التعديل باستخدام [[mw:Special:MyLanguage/Extension:WikiEditor|WikiEditor]] (محرر نصوص wikitext لعام 2010)",
-	"wikieditor-realtimepreview-preview": "معاينة"
+	"wikieditor-realtimepreview-preview": "معاينة",
+	"wikieditor-realtimepreview-error": "لم تُحمَّل المعاينة",
+	"wikieditor-realtimepreview-reload": "إعادة تحميل",
+	"wikieditor-realtimepreview-beta-label": "معاينة في أثناء التعديل",
+	"wikieditor-realtimepreview-beta-desc": "شاهد كيف ستظهر تغييرات نص ويكي للقراء داخل [[mw:Special:MyLanguage/Extension:WikiEditor|2010 editor]].",
+	"wikieditor-realtimepreview-reload-title": "أعد تحميل جزء المعاينة في الوقت الفعلي",
+	"wikieditor-realtimepreview-manual": "يرجى إعادة التحميل الآن لمعاينة تعديلاتك يدويًا.",
+	"wikieditor-realtimepreview-onboarding-title": "معاينة في أثناء التعديل",
+	"wikieditor-realtimepreview-onboarding-body": "تعرف على الشكل الذي ستبدو عليه تعديلاتك للقراء من خلال معاينتها في الوقت الفعلي.",
+	"wikieditor-realtimepreview-onboarding-button": "حسنا، فهمت"
 }

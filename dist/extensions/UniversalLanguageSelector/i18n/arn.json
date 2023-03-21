@@ -26,5 +26,7 @@
 	"ext-uls-setlang-heading": "Welukünuaymi mülewe ñi zungun?",
 	"ext-uls-setlang-accept": "Kalepe may",
 	"ext-uls-setlang-loading": "Femkülepelu...",
-	"ext-uls-setlang-cancel": "Kalekilpe"
+	"ext-uls-setlang-cancel": "Kalekilpe",
+	"ext-uls-empty-state-header": "Mülelay kewünh",
+	"ext-uls-empty-state-desc": "Petu mülelay zungun"
 }

@@ -35,7 +35,6 @@
 	"wikieditor-toolbar-tool-link-int-target-status-notexists": "Questa pagina chi la gh'è no in {{SITENAME}}",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "El titol che t'hee scrivud l'è minga bon",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "Sit de foeura",
-	"wikieditor-toolbar-tool-link-int-target-status-loading": "Adree a controlà l'esistenza de la pagina...",
 	"wikieditor-toolbar-tool-link-int-target-status-disambig": "Questa chì l'è minga ona pagina de contegnud ma ona lista de argoment con di nom compagn.",
 	"wikieditor-toolbar-tool-link-int-invalid": "El titol che t'hee specificad l'è minga valid",
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "La URL che t'hee specificad el par un conligament ver un'altra pagina wiki. Te voeuret che 'l sia un conligament interno?",
@@ -192,5 +191,11 @@
 	"wikieditor-toolbar-help-content-indent-syntax": "Test normal<br />:Test cont un spazzi denanz<br />::Test cont un alter spazzi denanz",
 	"wikieditor-toolbar-help-content-indent-result": "Test normal<dl><dd>Test cont un spazzi denanz<dl><dd>Testo cont un alter spazzi denanz</dd></dl></dd></dl>",
 	"tag-wikieditor-description": "Modifega fornida cont el drovà [[mw:Special:MyLanguage/Extension:WikiEditor|WikiEditor]] (2010 editor de wiki-test )",
-	"wikieditor-realtimepreview-preview": "Anticipazzion"
+	"wikieditor-realtimepreview-preview": "Anticipazzion",
+	"wikieditor-realtimepreview-error": "Anticipazzion minga caregada",
+	"wikieditor-realtimepreview-reload": "Carega de noeuv",
+	"wikieditor-realtimepreview-beta-label": "Antecipazzion in temp real",
+	"wikieditor-realtimepreview-beta-desc": "Varda com'a l'è che i modifeghe al wiki-test i parirann per i letor dedent de l'\n[[mw:Special:MyLanguage/Extension:WikiEditor|editor 2010 ]].",
+	"wikieditor-realtimepreview-reload-title": "Carega an'mò el quader de veduda anticiapada",
+	"wikieditor-realtimepreview-manual": "Carega an'mò adess per podé vedé prima manualment i to modifeghe."
 }

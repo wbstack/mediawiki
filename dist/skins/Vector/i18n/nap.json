@@ -21,5 +21,6 @@
 	"vector-view-history": "Vide 'a cronologgia",
 	"vector-view-view": "Liegge",
 	"vector-view-viewsource": "Vire sorgente",
-	"vector-more-actions": "'E 'cchiù"
+	"vector-more-actions": "'E 'cchiù",
+	"vector-searchsuggest-containing": "Truova 'e paggene ca teneno <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>"
 }

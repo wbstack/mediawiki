@@ -17,6 +17,7 @@
 	"cirrussearch-backend-error": "لم نستطع إكمال بحثك بسبب مشكلة مؤقتة. الرجاء المحاولة لاحقاً.",
 	"cirrussearch-parse-error": "الاستعلام غير مفهوم، رجاء بسِّطْه. تم تسجيل الاستعلام لتحسين نظام البحث.",
 	"cirrussearch-too-busy-error": "البحث مشغول للغاية حالياً. من فضلك حاول في وقت لاحق.",
+	"cirrussearch-regex-empty-expression": "يتوقع $1 تعبيرًا عاديًا غير فارغ.",
 	"cirrussearch-regex-syntax-error": "خطأ صياغة التعبيرات المنتظمة في $2: $1",
 	"cirrussearch-regex-too-busy-error": "عدد كبير جدا من عمليات البحث العادية قيد التشغيل حاليا. الرجاء المحاولة مرة أخرى لاحقاً.",
 	"cirrussearch-regex-too-complex-error": "التعبيرات المنتظمة معقدة جدا. اعرف المزيد حول تبسيطها [[mw:Special:MyLanguage/Help:CirrusSearch/RegexTooComplex|هنا]].",

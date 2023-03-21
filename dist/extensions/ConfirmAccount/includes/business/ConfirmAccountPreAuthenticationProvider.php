@@ -24,7 +24,6 @@ use MediaWiki\Auth\AuthenticationRequest;
 use MediaWiki\Auth\AuthenticationResponse;
 use MediaWiki\Auth\TemporaryPasswordAuthenticationRequest;
 use MediaWiki\Auth\UserDataAuthenticationRequest;
-use MediaWiki\MediaWikiServices;
 
 class ConfirmAccountPreAuthenticationProvider extends AbstractPreAuthenticationProvider {
 	const SESSION_INFO_KEY = 'ConfirmAccountRequestInfo';
@@ -117,9 +116,6 @@ class ConfirmAccountPreAuthenticationProvider extends AbstractPreAuthenticationP
 		# Update the queue to reflect approval of this user
 		list( $status, $msg ) = $submission->submit( RequestContext::getMain() );
 		if ( $status !== true ) {
-			// ErrorPageError does not trigger rollback
-			$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-			$lbFactory->rollbackPrimaryChanges( __METHOD__ );
 			throw new ErrorPageError( 'createacct-error', new RawMessage( $msg ) );
 		}
 	}

@@ -211,6 +211,15 @@ With this class name it is possible to change the icon of a specific badge.
 
 EXAMPLE: ```[ 'Q101' => 'wb-badge-goodarticle' ]```
 
+#### redirectBadgeItems
+These item IDs are badges which can be used to mark sitelinks to redirects.
+A sitelink to a redirect may only be created when it includes one of these badges.
+Note: all listed items have to be included in `badgeItems`.
+
+This setting expects an array of serialized item IDs.
+
+EXAMPLE: ```[ 'Q102', 'Q103' ]```
+
 #### preferredPageImagesProperties
 List of image property ID strings, in order of preference, that should be considered for the `page_image` [page property].
 
@@ -343,6 +352,17 @@ Relevant only for search engines supporting it.
 Array of properties (by ID string) that, if used in a qualifier, will be used to write a value to the `'statement_quantity'` field.
 
 Relevant only for search engines supporting it.
+
+#### searchProfiles
+Array of search profiles offered by the wbsearchentities and query+wbsearch API modules.
+Keys are strings available as parameter values in the API;
+the first key will be used as the default value if the parameter is not specified,
+and it’s strongly recommended to make the first key 'default' with the value null.
+Values are strings or null, and should be understood by the `EntitySearchHelper` implementation used by the wiki;
+this may depend on other extensions, such as WikibaseCirrusSearch.
+Must be nonempty.
+
+DEFAULT: ```[ 'default' => null ]```
 
 ### Termbox & SSR
 
@@ -516,11 +536,6 @@ Enable/Disable the tainted reference feature.
 
 DEFAULT: ```false```
 
-#### restApiEnabled {#repo_restApiEnabled}
-Enable the Wikibase REST API.
-
-DEFAULT: ```false```
-
 #### federatedPropertiesEnabled {#repo_federatedPropertiesEnabled}
 Enable the federated properties feature. **Note that** once this feature is enable (set true), it must not be disabled (set false) again.
 The behaviour is unpredicted if it is disabled after it was enabled.
@@ -633,7 +648,7 @@ EXAMPLE: ```https://www.wikidata.org/w/index.php?title=MediaWiki:Wikibase-Sorted
 
 ### Transclusion & Data Access
 
-#### allowDataTransclusion
+#### allowDataTransclusion {#client_allowDataTransclusion}
 Switch to enable data transclusion features like the ```{{#property}}``` parser function and the `wikibase` [Scribunto] module.
 
 DEFAULT: ```true```

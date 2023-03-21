@@ -43,6 +43,7 @@ export default defineComponent( {
 		IconMessageBox,
 		ReportIssue,
 	},
+	emits: [ 'relaunch' ],
 	methods: {
 		relaunch(): void {
 			/**
@@ -55,6 +56,7 @@ export default defineComponent( {
 	mounted(): void {
 		this.rootModule.dispatch( 'trackErrorsFallingBackToGenericView' );
 	},
+	compatConfig: { MODE: 3 },
 } );
 </script>
 

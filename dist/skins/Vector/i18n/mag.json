@@ -13,5 +13,6 @@
 	"vector-view-edit": "सम्पादन",
 	"vector-view-history": "इतिहास देखी",
 	"vector-view-view": "पढ़ी",
-	"vector-more-actions": "आउ"
+	"vector-more-actions": "आउ",
+	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> बाला पन्ना खोजी"
 }

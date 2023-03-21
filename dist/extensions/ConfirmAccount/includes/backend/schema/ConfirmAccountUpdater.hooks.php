@@ -66,6 +66,12 @@ class ConfirmAccountUpdaterHooks {
 			$updater->addExtensionUpdate(
 				[ 'addPgField', 'account_requests', 'acr_agent', "$base/patch-acr_agent.sql", true ]
 			);
+			$updater->addExtensionUpdate(
+				[ 'dropFkey', 'account_requests', 'acr_user' ]
+			);
+			$updater->addExtensionUpdate(
+				[ 'dropFkey', 'account_credentials', 'acd_user' ]
+			);
 		}
 		return true;
 	}

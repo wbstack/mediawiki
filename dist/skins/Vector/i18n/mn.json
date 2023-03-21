@@ -26,5 +26,15 @@
 	"vector-view-view": "Унших",
 	"vector-view-viewsource": "Кодыг харах",
 	"vector-more-actions": "Дэлгэрэнгүй",
-	"vector-main-menu-tooltip": "Үндсэн цэс"
+	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> бичвэрийг агуулсан хуудсыг хайх",
+	"vector-toc-heading": "Гарчиг",
+	"vector-toc-toggle-position-sidebar": "хажуугийн цэсэнд шилжүүлэх",
+	"vector-toc-toggle-position-title": "хумих",
+	"vector-toc-beginning": "Эхлэл",
+	"vector-toc-toggle-button-label": "$1 хэсгийг нээж хаах",
+	"vector-main-menu-tooltip": "Үндсэн цэс",
+	"vector-toc-menu-tooltip": "Гарчиг",
+	"vector-toc-collapsible-button-label": "Гарчигийг нээж хаах",
+	"vector-article-tools-nav-label": "Хэрэглүүр",
+	"vector-site-nav-label": "Сайт"
 }

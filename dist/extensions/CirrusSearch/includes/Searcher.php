@@ -4,7 +4,8 @@ namespace CirrusSearch;
 
 use CirrusSearch\Fallbacks\FallbackRunner;
 use CirrusSearch\Fallbacks\SearcherFactory;
-use CirrusSearch\MetaStore\MetaNamespaceStore;
+use CirrusSearch\Maintenance\NullPrinter;
+use CirrusSearch\MetaStore\MetaStoreIndex;
 use CirrusSearch\Parser\BasicQueryClassifier;
 use CirrusSearch\Parser\FullTextKeywordRegistry;
 use CirrusSearch\Parser\NamespacePrefixParser;
@@ -119,9 +120,9 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 
 	/**
 	 * Indexing type we'll be using.
-	 * @var string|\Elastica\Type
+	 * @var string|\Elastica\Index
 	 */
-	private $pageType;
+	private $index;
 
 	/**
 	 * @var NamespacePrefixParser|null
@@ -323,7 +324,17 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		$description = "{$this->searchContext->getSearchType()} search for '{$this->searchContext->getOriginalSearchTerm()}'";
 
 		if ( !$this->searchContext->areResultsPossible() ) {
-			return $this->emptyResultSet();
+			if ( $this->searchContext->getDebugOptions()->isCirrusDumpQuery() ) {
+				// return the empty array to suggest that no query will be run
+				return Status::newGood( [] );
+			}
+			$status = $this->emptyResultSet();
+			if ( $this->searchContext->getDebugOptions()->isCirrusDumpResult() ) {
+				return Status::newGood(
+					( new MSearchResponses( [ $status->getValue() ], [] ) )->dumpResults( $description )
+				);
+			}
+			return $status;
 		}
 
 		if ( $interleaveSearcher !== null ) {
@@ -398,7 +409,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 	 */
 	public function get( array $docIds, $sourceFiltering, $usePoolCounter = true ) {
 		$connection = $this->getOverriddenConnection();
-		$indexType = $connection->pickIndexTypeForNamespaces(
+		$indexSuffix = $connection->pickIndexSuffixForNamespaces(
 			$this->searchContext->getNamespaces()
 		);
 
@@ -409,10 +420,10 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 		) );
 		$size *= count( $docIds );
 
-		$work = function () use ( $docIds, $sourceFiltering, $indexType, $size, $connection ) {
+		$work = function () use ( $docIds, $sourceFiltering, $indexSuffix, $size, $connection ) {
 			try {
-				$this->startNewLog( 'get of {indexType}.{docIds}', 'get', [
-					'indexType' => $indexType,
+				$this->startNewLog( 'get of {indexSuffix}.{docIds}', 'get', [
+					'indexSuffix' => $indexSuffix,
 					'docIds' => $docIds,
 				] );
 				// Shard timeout not supported on get requests so we just use the client side timeout
@@ -420,7 +431,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 				// We use a search query instead of _get/_mget, these methods are
 				// theorically well suited for this kind of job but they are not
 				// supported on aliases with multiple indices (content/general)
-				$pageType = $connection->getPageType( $this->indexBaseName, $indexType );
+				$index = $connection->getIndex( $this->indexBaseName, $indexSuffix );
 				$query = new \Elastica\Query( new \Elastica\Query\Ids( $docIds ) );
 				$query->setParam( '_source', $sourceFiltering );
 				$query->addParam( 'stats', 'get' );
@@ -429,7 +440,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 				// the ids requested.
 				$query->setFrom( 0 );
 				$query->setSize( $size );
-				$resultSet = $pageType->search( $query, [ 'search_type' => 'query_then_fetch' ] );
+				$resultSet = $index->search( $query, [ 'search_type' => 'query_then_fetch' ] );
 				return $this->success( $resultSet->getResults(), $connection );
 			} catch ( \Elastica\Exception\NotFoundException $e ) {
 				// NotFoundException just means the field didn't exist.
@@ -464,7 +475,11 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 					$connection = $this->getOverriddenConnection();
 					$connection->setTimeout( $this->getClientTimeout( 'namespace' ) );
 
-					$store = new MetaNamespaceStore( $connection, $this->config->getWikiId() );
+					// A bit awkward, but accepted as this is the backup
+					// implementation of namespace lookup. Deployments should
+					// prefer to install php-intl and use utr30.
+					$store = ( new MetaStoreIndex( $connection, new NullPrinter(), $this->config ) )
+						->namespaceStore();
 					$resultSet = $store->find( $name, [
 						'timeout' => $this->getTimeout( 'namespace' ),
 					] );
@@ -483,7 +498,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 			$this->searchContext, $this->getOverriddenConnection(), $this->indexBaseName );
 		return $builder->setLimit( $this->limit )
 			->setOffset( $this->offset )
-			->setPageType( $this->pageType )
+			->setIndex( $this->index )
 			->setSort( $this->sort )
 			->setTimeout( $this->getTimeout( $this->searchContext->getSearchType() ) )
 			->build();
@@ -821,29 +836,8 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 	 * @return string The new raw result.
 	 */
 	public function processRawReturn( $result, WebRequest $request ) {
-		$header = null;
-
-		if ( $this->searchContext->getDebugOptions()->getCirrusExplainFormat() !== null ) {
-			$header = 'Content-type: text/html; charset=UTF-8';
-			$printer = new ExplainPrinter( $this->searchContext->getDebugOptions()->getCirrusExplainFormat() );
-			$result = $printer->format( $result );
-		} else {
-			$header = 'Content-type: application/json; charset=UTF-8';
-			if ( $result === null ) {
-				$result = '{}';
-			} else {
-				$result = json_encode( $result, JSON_PRETTY_PRINT );
-			}
-		}
-
-		if ( $this->searchContext->getDebugOptions()->isDumpAndDie() ) {
-			// When dumping the query we skip _everything_ but echoing the query.
-			RequestContext::getMain()->getOutput()->disable();
-			$request->response()->header( $header );
-			echo $result;
-			exit();
-		}
-		return $result;
+		return Util::processSearchRawReturn( $result, $request,
+			$this->searchContext->getDebugOptions() );
 	}
 
 	/**
@@ -858,7 +852,7 @@ class Searcher extends ElasticsearchIntermediary implements SearcherFactory {
 
 		// This does not support cross-cluster search, but there is also no use case
 		// for cross-wiki archive search.
-		$this->pageType = $this->getOverriddenConnection()->getArchiveType( $this->indexBaseName );
+		$this->index = $this->getOverriddenConnection()->getArchiveIndex( $this->indexBaseName );
 
 		// Setup the search query
 		$query = new BoolQuery();

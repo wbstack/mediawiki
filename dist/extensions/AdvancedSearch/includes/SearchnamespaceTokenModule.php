@@ -2,15 +2,14 @@
 
 namespace AdvancedSearch;
 
-use ResourceLoader;
-use ResourceLoaderContext;
-use ResourceLoaderModule;
+use MediaWiki\ResourceLoader as RL;
+use MediaWiki\ResourceLoader\ResourceLoader;
 use Xml;
 
 /**
  * ResourceLoader module providing the users "searchnamespace" token.
  */
-class SearchnamespaceTokenModule extends ResourceLoaderModule {
+class SearchnamespaceTokenModule extends RL\Module {
 
 	/**
 	 * @var int
@@ -23,11 +22,11 @@ class SearchnamespaceTokenModule extends ResourceLoaderModule {
 	protected $targets = [ 'desktop', 'mobile' ];
 
 	/**
-	 * @param ResourceLoaderContext $context
+	 * @param RL\Context $context
 	 *
 	 * @return string JavaScript code
 	 */
-	public function getScript( ResourceLoaderContext $context ) {
+	public function getScript( RL\Context $context ) {
 		$user = $context->getUserObj();
 		// Use FILTER_NOMIN annotation to prevent needless minification and caching (T84960).
 		return ResourceLoader::FILTER_NOMIN .

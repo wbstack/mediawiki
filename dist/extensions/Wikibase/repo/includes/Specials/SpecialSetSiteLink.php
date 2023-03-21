@@ -13,13 +13,14 @@ use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\SiteLinkChangeOpFactory;
 use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\SiteLinkPageNormalizer;
 use Wikibase\Repo\SiteLinkTargetProvider;
 use Wikibase\Repo\SummaryFormatter;
 
@@ -30,6 +31,9 @@ use Wikibase\Repo\SummaryFormatter;
  * @author Bene* < benestar.wikimedia@googlemail.com >
  */
 class SpecialSetSiteLink extends SpecialModifyEntity {
+
+	/** @var SiteLinkPageNormalizer */
+	private $siteLinkPageNormalizer;
 
 	/**
 	 * @var SiteLinkTargetProvider
@@ -47,7 +51,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	private $badgeItems;
 
 	/**
-	 * @var LanguageFallbackLabelDescriptionLookupFactory
+	 * @var FallbackLabelDescriptionLookupFactory
 	 */
 	private $labelDescriptionLookupFactory;
 
@@ -86,7 +90,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	 * @param SiteLinkTargetProvider $siteLinkTargetProvider
 	 * @param string[] $siteLinkGroups
 	 * @param string[] $badgeItems
-	 * @param LanguageFallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory
+	 * @param FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory
 	 * @param SiteLinkChangeOpFactory $siteLinkChangeOpFactory
 	 */
 	public function __construct(
@@ -95,10 +99,11 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
 		MediawikiEditEntityFactory $editEntityFactory,
+		SiteLinkPageNormalizer $siteLinkPageNormalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
 		array $siteLinkGroups,
 		array $badgeItems,
-		LanguageFallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
+		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
 		SiteLinkChangeOpFactory $siteLinkChangeOpFactory
 	) {
 		parent::__construct(
@@ -110,6 +115,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 			$editEntityFactory
 		);
 
+		$this->siteLinkPageNormalizer = $siteLinkPageNormalizer;
 		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
 		$this->siteLinkGroups = $siteLinkGroups;
 		$this->badgeItems = $badgeItems;
@@ -121,8 +127,9 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 		ChangeOpFactoryProvider $changeOpFactoryProvider,
 		MediawikiEditEntityFactory $editEntityFactory,
 		EntityTitleLookup $entityTitleLookup,
-		LanguageFallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
+		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
 		SettingsArray $repoSettings,
+		SiteLinkPageNormalizer $siteLinkPageNormalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
 		SummaryFormatter $summaryFormatter
 	): self {
@@ -140,6 +147,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
+			$siteLinkPageNormalizer,
 			$siteLinkTargetProvider,
 			$repoSettings->getSetting( 'siteLinkGroups' ),
 			$repoSettings->getSetting( 'badgeItems' ),
@@ -228,7 +236,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	 *
 	 * @param EntityDocument $entity
 	 *
-	 * @return Summary|bool The summary or false
+	 * @return Summary|false
 	 */
 	protected function modifyEntity( EntityDocument $entity ) {
 		try {
@@ -249,7 +257,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 	/**
 	 * Checks if the site id is valid.
 	 *
-	 * @param string $siteId the site id
+	 * @param string $siteId
 	 *
 	 * @return bool
 	 */
@@ -270,6 +278,7 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 			$this->page = $this->site === null ? '' : $this->getSiteLink( $entity, $this->site );
 		}
 		if ( empty( $this->badges ) ) {
+			// @phan-suppress-next-line PhanImpossibleTypeComparison
 			$this->badges = $this->site === null ? [] : $this->getBadges( $entity, $this->site );
 		}
 		$pageinput = [
@@ -498,7 +507,8 @@ class SpecialSetSiteLink extends SpecialModifyEntity {
 				return $status;
 			}
 		} else {
-			$pageName = $site->normalizePageName( $pageName );
+			$pageName = $this->siteLinkPageNormalizer->normalize(
+				$site, $pageName, $badgeIds );
 
 			if ( $pageName === false ) {
 				$status->fatal( 'wikibase-error-ui-no-external-page', $siteId, $this->page );

@@ -2,6 +2,7 @@
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserOptionsManager;
+use Wikimedia\ParamValidator\ParamValidator;
 
 class ApiEchoMute extends ApiBase {
 
@@ -55,7 +56,7 @@ class ApiEchoMute extends ApiBase {
 		$params = $this->extractRequestParams();
 		$mutelistInfo = self::$muteLists[ $params['type'] ];
 		$prefValue = $this->userOptionsManager->getOption( $user, $mutelistInfo['pref'] );
-		$ids = $this->parsePref( $prefValue, $mutelistInfo['type'] );
+		$ids = $this->parsePref( $prefValue );
 		$targetsToMute = $params['mute'] ?? [];
 		$targetsToUnmute = $params['unmute'] ?? [];
 
@@ -80,7 +81,7 @@ class ApiEchoMute extends ApiBase {
 			$this->userOptionsManager->setOption(
 				$user,
 				$mutelistInfo['pref'],
-				$this->serializePref( $ids, $mutelistInfo['type'] )
+				$this->serializePref( $ids )
 			);
 			$user->saveSettings();
 		}
@@ -109,25 +110,25 @@ class ApiEchoMute extends ApiBase {
 		}
 	}
 
-	private function parsePref( $prefValue, $type ) {
+	private function parsePref( $prefValue ) {
 		return preg_split( '/\n/', $prefValue, -1, PREG_SPLIT_NO_EMPTY );
 	}
 
-	private function serializePref( $ids, $type ) {
+	private function serializePref( $ids ) {
 		return implode( "\n", $ids );
 	}
 
 	public function getAllowedParams( $flags = 0 ) {
 		return [
 			'type' => [
-				ApiBase::PARAM_REQUIRED => true,
-				ApiBase::PARAM_TYPE => array_keys( self::$muteLists ),
+				ParamValidator::PARAM_REQUIRED => true,
+				ParamValidator::PARAM_TYPE => array_keys( self::$muteLists ),
 			],
 			'mute' => [
-				ApiBase::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_ISMULTI => true,
 			],
 			'unmute' => [
-				ApiBase::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_ISMULTI => true,
 			]
 		];
 	}

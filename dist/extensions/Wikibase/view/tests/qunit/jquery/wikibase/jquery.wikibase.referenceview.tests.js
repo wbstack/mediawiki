@@ -57,7 +57,7 @@
 
 	QUnit.module( 'jquery.wikibase.referenceview', window.QUnit.newMwEnvironment( {
 		config: { wbRefTabsEnabled: false },
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_referenceview' ).each( function ( i, node ) {
 				var $node = $( node ),
 					referenceview = $node.data( 'referenceview' );
@@ -93,8 +93,9 @@
 			'Referenceview is not in edit mode.'
 		);
 
-		assert.ok(
+		assert.notStrictEqual(
 			referenceview.$listview.data( 'listview' ),
+			undefined,
 			'Initialized listview.'
 		);
 

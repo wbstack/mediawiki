@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lorenzoitza",
-			"Languaeditor"
+			"Languaeditor",
+			"Lorenzoitza"
 		]
 	},
 	"echo-category-title-mention-failure": "K'aschaji {{PLURAL:$1|mention|mentions}}",

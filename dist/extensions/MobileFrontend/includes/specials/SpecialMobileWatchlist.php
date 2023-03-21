@@ -143,13 +143,13 @@ class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 		}
 
 		if ( $view === self::VIEW_FEED ) {
-			$attrsList[ 'class' ] = MobileUI::buttonClass();
+			$attrsList['class'] = MobileUI::buttonClass();
 			// FIXME [MediaWiki UI] This probably be described as a different type of mediawiki ui element
-			$attrsFeed[ 'class' ] = MobileUI::buttonClass( 'progressive', 'is-on' );
+			$attrsFeed['class'] = MobileUI::buttonClass( 'progressive', 'is-on' );
 		} else {
-			$attrsFeed[ 'class' ] = MobileUI::buttonClass();
+			$attrsFeed['class'] = MobileUI::buttonClass();
 			// FIXME [MediaWiki UI] This probably be described as a different type of mediawiki ui element
-			$attrsList[ 'class' ] = MobileUI::buttonClass( 'progressive', 'is-on' );
+			$attrsList['class'] = MobileUI::buttonClass( 'progressive', 'is-on' );
 		}
 
 		$linkRenderer = $services->getLinkRenderer();
@@ -248,7 +248,7 @@ class SpecialMobileWatchlist extends MobileSpecialPageFeed {
 			'wl_user' => $user->getId(),
 			'wl_namespace=rc_namespace',
 			'wl_title=rc_title',
-			// FIXME: Filter out wikidata changes which currently show as anonymous (see bug 49315)
+			// FIXME: Filter out wikidata changes which currently show as anonymous (see T51315)
 			'rc_type!=' . $dbr->addQuotes( RC_EXTERNAL ),
 		];
 		// Filter out category membership changes if configured

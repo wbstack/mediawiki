@@ -24,6 +24,7 @@ use LogicException;
 use MediaWiki\Logger\LegacyLogger;
 use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Logger;
+use Socket;
 use UnexpectedValueException;
 
 /**
@@ -62,7 +63,7 @@ class LegacyHandler extends AbstractProcessingHandler {
 
 	/**
 	 * Log sink
-	 * @var resource|null
+	 * @var Socket|resource|null
 	 */
 	protected $sink;
 
@@ -153,6 +154,7 @@ class LegacyHandler extends AbstractProcessingHandler {
 			$this->sink = null;
 			throw new UnexpectedValueException( sprintf(
 				'The stream or file "%s" could not be opened: %s',
+				// @phan-suppress-next-line PhanTypeMismatchArgumentInternalProbablyReal Set by error handler
 				$this->uri, $this->error
 			) );
 		}
@@ -214,7 +216,12 @@ class LegacyHandler extends AbstractProcessingHandler {
 			}
 
 			socket_sendto(
-				$this->sink, $text, strlen( $text ), 0, $this->host, $this->port
+				$this->sink,
+				$text,
+				strlen( $text ),
+				0,
+				$this->host,
+				$this->port
 			);
 
 		} else {
@@ -226,7 +233,6 @@ class LegacyHandler extends AbstractProcessingHandler {
 		if ( $this->sink ) {
 			if ( $this->useUdp() ) {
 				socket_close( $this->sink );
-
 			} else {
 				fclose( $this->sink );
 			}

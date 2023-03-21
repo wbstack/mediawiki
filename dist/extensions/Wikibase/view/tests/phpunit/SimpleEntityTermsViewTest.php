@@ -43,9 +43,7 @@ class SimpleEntityTermsViewTest extends \PHPUnit\Framework\TestCase {
 
 		$textProvider = new DummyLocalizedTextProvider( 'lkt' );
 
-		$termsListView = $termsListView ?: $this->getMockBuilder( TermsListView::class )
-			->disableOriginalConstructor()
-			->getMock();
+		$termsListView = $termsListView ?: $this->createMock( TermsListView::class );
 
 		$htmlTermRenderer = $this->createMock( HtmlTermRenderer::class );
 		$htmlTermRenderer->method( 'renderTerm' )
@@ -195,16 +193,14 @@ class SimpleEntityTermsViewTest extends \PHPUnit\Framework\TestCase {
 		ItemId $entityId,
 		$languageCode
 	) {
-		$termsListView = $this->getMockBuilder( TermsListView::class )
-			->disableOriginalConstructor()
-			->getMock();
+		$termsListView = $this->createMock( TermsListView::class );
 		$termsListView->expects( $this->once() )
 			->method( 'getHtml' )
 			->with(
 				$labels,
 				$descriptions,
 				$aliases,
-				$this->equalTo( $languageCode === 'de' ? [ 'de', 'en' ] : [ 'en' ] )
+				$languageCode === 'de' ? [ 'de', 'en' ] : [ 'en' ]
 			)
 			->willReturn( '<TERMSLISTVIEW>' );
 		$entityTermsView = $this->getEntityTermsView( 1, $termsListView );

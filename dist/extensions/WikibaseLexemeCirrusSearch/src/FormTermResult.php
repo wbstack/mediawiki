@@ -8,7 +8,7 @@ use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\Lexeme\DataAccess\LexemeDescription;
 use Wikibase\Lib\Interactors\TermSearchResult;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Search\Elastic\EntitySearchUtils;
 
 /**
@@ -30,7 +30,7 @@ class FormTermResult extends BaseResultsType {
 	 */
 	private $displayLanguage;
 	/**
-	 * @var LanguageFallbackLabelDescriptionLookupFactory
+	 * @var FallbackLabelDescriptionLookupFactory
 	 */
 	private $termLookupFactory;
 	/**
@@ -42,14 +42,14 @@ class FormTermResult extends BaseResultsType {
 	/**
 	 * @param EntityIdParser $idParser
 	 * @param Language $displayLanguage User display language
-	 * @param LanguageFallbackLabelDescriptionLookupFactory $termLookupFactory
+	 * @param FallbackLabelDescriptionLookupFactory $termLookupFactory
 	 *        Lookup factory for assembling descriptions
 	 * @param int $limit How many results to produce
 	 */
 	public function __construct(
 		EntityIdParser $idParser,
 		Language $displayLanguage,
-		LanguageFallbackLabelDescriptionLookupFactory $termLookupFactory,
+		FallbackLabelDescriptionLookupFactory $termLookupFactory,
 		$limit
 	) {
 		$this->idParser = $idParser;

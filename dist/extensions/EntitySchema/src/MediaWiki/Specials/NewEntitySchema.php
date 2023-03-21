@@ -191,7 +191,7 @@ class NewEntitySchema extends SpecialPage {
 		return $this->msg( 'entityschema-newschema-copyright' )
 			->params(
 				$this->msg( 'entityschema-newschema-submit' )->text(),
-				$this->msg( 'copyrightpage' )->text(),
+				$this->msg( 'copyrightpage' )->inContentLanguage()->text(),
 				// FIXME: make license configurable
 				'[https://creativecommons.org/publicdomain/zero/1.0/ Creative Commons CC0 License]'
 			)
@@ -235,9 +235,7 @@ class NewEntitySchema extends SpecialPage {
 		$permissionErrors = $pm->getPermissionErrors(
 			$this->getRestriction(),
 			$this->getUser(),
-			// Checking with the main page as a workaround for T306358.
-			// It should ideally be checking $this->getPageTitle( $subPage ) instead.
-			Title::newMainPage(),
+			$this->getPageTitle( $subPage ),
 			$checkReplica ? $pm::RIGOR_FULL : $pm::RIGOR_SECURE,
 			[
 				'ns-specialprotected', // ignore “special pages cannot be edited”

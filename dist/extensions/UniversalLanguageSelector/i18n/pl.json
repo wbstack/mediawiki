@@ -4,6 +4,7 @@
 			"BeginaFelicysym",
 			"Chrumps",
 			"Matma Rex",
+			"Msz2001",
 			"Nemo bis",
 			"Peter Bowman",
 			"Rail",
@@ -11,8 +12,7 @@
 			"Rezonansowy",
 			"Sethakill",
 			"WTM",
-			"Woytecr",
-			"Msz2001"
+			"Woytecr"
 		]
 	},
 	"uls-desc": "Daje użytkownikowi kilka sposobów, aby wybrać język i dostosować ustawienia języka",
@@ -77,5 +77,11 @@
 	"ext-uls-setlang-heading": "Zmienić język interfejsu?",
 	"ext-uls-setlang-accept": "Zaakceptuj zmianę",
 	"ext-uls-setlang-loading": "Realizacja w toku...",
-	"ext-uls-setlang-cancel": "Nie zmieniaj"
+	"ext-uls-setlang-cancel": "Nie zmieniaj",
+	"ext-uls-actions-menu-header": "Więcej opcji",
+	"ext-uls-actions-menu-language-settings-item-label": "Otwórz ustawienia języka",
+	"ext-uls-empty-state-header": "Jeszcze nie ma języków",
+	"ext-uls-empty-state-desc": "Żadne języki nie są jeszcze dostępne",
+	"ext-uls-empty-state-header-actions-available": "Żadne języki nie są jeszcze dostępne. Dodać nowy?",
+	"ext-uls-empty-state-desc-actions-available": " Udostępnij zawartość w kolejnych językach."
 }

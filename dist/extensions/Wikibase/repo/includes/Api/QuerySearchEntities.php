@@ -9,8 +9,10 @@ use ApiQuery;
 use ApiQueryGeneratorBase;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Interactors\TermSearchResult;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikimedia\Assert\InvariantException;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * API module to search for Wikibase entities that can be used as a generator.
@@ -40,21 +42,17 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 	 */
 	private $entityTypes;
 
-	/**
-	 * @param ApiQuery $apiQuery
-	 * @param string $moduleName
-	 * @param EntitySearchHelper $entitySearchHelper
-	 * @param EntityTitleLookup $titleLookup
-	 * @param ContentLanguages $termsLanguages
-	 * @param array $entityTypes
-	 */
+	/** @var (string|null)[] */
+	private $searchProfiles;
+
 	public function __construct(
 		ApiQuery $apiQuery,
 		string $moduleName,
 		EntitySearchHelper $entitySearchHelper,
 		EntityTitleLookup $titleLookup,
 		ContentLanguages $termsLanguages,
-		array $entityTypes
+		array $entityTypes,
+		array $searchProfiles
 	) {
 		parent::__construct( $apiQuery, $moduleName, 'wbs' );
 
@@ -62,6 +60,7 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 		$this->titleLookup = $titleLookup;
 		$this->termsLanguages = $termsLanguages;
 		$this->entityTypes = $entityTypes;
+		$this->searchProfiles = $searchProfiles;
 	}
 
 	public static function factory(
@@ -70,6 +69,7 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 		array $enabledEntityTypes,
 		array $entitySearchHelperCallbacks,
 		EntityTitleLookup $entityTitleLookup,
+		SettingsArray $repoSettings,
 		ContentLanguages $termsLanguages
 	): self {
 		return new self(
@@ -81,7 +81,8 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 			),
 			$entityTitleLookup,
 			$termsLanguages,
-			$enabledEntityTypes
+			$enabledEntityTypes,
+			$repoSettings->getSetting( 'searchProfiles' )
 		);
 	}
 
@@ -141,7 +142,8 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 				$params['language'] ?: $this->getLanguage()->getCode(),
 				$params['type'],
 				$params['limit'],
-				$params['strictlanguage']
+				$params['strictlanguage'],
+				$this->searchProfiles[$params['profile']]
 			);
 		} catch ( EntitySearchException $ese ) {
 			$this->dieStatus( $ese->getStatus() );
@@ -172,26 +174,31 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 	protected function getAllowedParams(): array {
 		return [
 			'search' => [
-				self::PARAM_TYPE => 'string',
-				self::PARAM_REQUIRED => true,
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'language' => [
-				self::PARAM_TYPE => $this->termsLanguages->getLanguages(),
+				ParamValidator::PARAM_TYPE => $this->termsLanguages->getLanguages(),
 			],
 			'strictlanguage' => [
-				self::PARAM_TYPE => 'boolean',
-				self::PARAM_DFLT => false,
+				ParamValidator::PARAM_TYPE => 'boolean',
+				ParamValidator::PARAM_DEFAULT => false,
 			],
 			'type' => [
-				self::PARAM_TYPE => $this->entityTypes,
-				self::PARAM_DFLT => 'item',
+				ParamValidator::PARAM_TYPE => $this->entityTypes,
+				ParamValidator::PARAM_DEFAULT => 'item',
 			],
 			'limit' => [
-				self::PARAM_TYPE => 'limit',
-				self::PARAM_DFLT => 7,
+				ParamValidator::PARAM_TYPE => 'limit',
+				ParamValidator::PARAM_DEFAULT => 7,
 				self::PARAM_MAX => self::LIMIT_SML1,
 				self::PARAM_MAX2 => self::LIMIT_SML2,
 				self::PARAM_MIN => 0,
+			],
+			'profile' => [
+				ParamValidator::PARAM_TYPE => array_keys( $this->searchProfiles ),
+				ParamValidator::PARAM_DEFAULT => array_key_first( $this->searchProfiles ),
+				self::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 		];
 	}

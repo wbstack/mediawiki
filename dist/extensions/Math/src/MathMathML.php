@@ -31,14 +31,14 @@ class MathMathML extends MathRenderer {
 	/** @var string[] */
 	protected $restbaseInputTypes = [ 'tex', 'inline-tex', 'chem' ];
 	/** @var string[] */
-	protected $restbaseRenderingModes = [ MathConfig::MODE_MATHML, MathConfig::MODE_PNG ];
+	protected $restbaseRenderingModes = [ MathConfig::MODE_MATHML ];
 	/** @var string[] */
 	protected $allowedRootElements = [];
 	/** @var string */
 	protected $host;
 
 	/** @var LoggerInterface */
-	private $logger;
+	protected $logger;
 
 	/** @var bool if false MathML output is not validated */
 	private $XMLValidation = true;
@@ -139,17 +139,9 @@ class MathMathML extends MathRenderer {
 		$this->allowedRootElements = $settings;
 	}
 
-	/**
-	 * @see MathRenderer::render()
-	 * @param bool $forceReRendering
-	 * @return bool
-	 */
-	public function render( $forceReRendering = false ) {
+	public function render() {
 		global $wgMathFullRestbaseURL;
 		try {
-			if ( $forceReRendering ) {
-				$this->setPurge( true );
-			}
 			if ( in_array( $this->inputType, $this->restbaseInputTypes ) &&
 				 in_array( $this->mode, $this->restbaseRenderingModes )
 			) {
@@ -362,9 +354,6 @@ class MathMathML extends MathRenderer {
 	 * @return Title|string
 	 */
 	private function getFallbackImageUrl( $noRender = false ) {
-		if ( $this->getMode() === MathConfig::MODE_PNG && $this->pngPath ) {
-			return $this->pngPath;
-		}
 		if ( $this->svgPath ) {
 			return $this->svgPath;
 		}

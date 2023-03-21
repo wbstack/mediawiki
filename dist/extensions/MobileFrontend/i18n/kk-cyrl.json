@@ -6,11 +6,11 @@
 			"Eldar zh96",
 			"GaiJin",
 			"Kaztrans",
+			"TayfunEt.",
+			"U.ayaao.p",
 			"Wertuose",
 			"Wikibilim",
-			"U.ayaao.p",
-			"СеніңШешең",
-			"TayfunEt."
+			"СеніңШешең"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Пайдаланушы мобильді интерфейс арқылы өңдеп жатыр ма, өңдеп жатқан жоқ па",
@@ -160,7 +160,7 @@
 	"mobile-frontend-talk-reply": "Жауап",
 	"mobile-frontend-talk-reply-info": "Аңғарту: Жауабыңыз сіздің қатысушы есіміңізбен өздігінен қол қойылады.",
 	"mobile-frontend-talk-topic-error": "Қатеге байланысты тақырып қосылмайды.",
-	"mobile-frontend-talk-topic-error-protected": "Талқылау беті қорғанылған, сізде тақырып қосуға рұқсатыңыз жоқ.",
+	"mobile-frontend-talk-topic-error-protected": "Бұл талқылау беті қорғалған. Оған тақырыптар қосуға рұқсатыңыз жоқ.",
 	"mobile-frontend-talk-topic-error-permission": "Тақырып қосылмайды. Сізде бетті өңдеуге рұқсатыңыз жоқ.",
 	"mobile-frontend-talk-topic-wait": "Тақырыбыңыз сақталуда, күтіңіз.",
 	"mobile-frontend-terms-text": "Қолдану шарты",

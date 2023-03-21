@@ -7,10 +7,10 @@
 			"Jayprakash12345",
 			"NehalDaveND",
 			"Nitin1485",
+			"Saurmandal",
 			"Sfic",
 			"Siddhartha Ghai",
-			"बिप्लब आनन्द",
-			"Saurmandal"
+			"बिप्लब आनन्द"
 		]
 	},
 	"wikibase-client-desc": "विकिबेस एक्सटेंशन के लिए क्लाइंट",
@@ -72,6 +72,7 @@
 	"wikibase-error-exceeded-entity-access-limit": "ज़्यादा {{WBREPONAME}} सत्तों को पढ़ा गया।",
 	"wikibase-error-exceeded-referenced-entity-id-limit": "ज़्यादा \"mw.wikibase.getReferencedEntityId\" कॉल्स हो गए, अधिकतम सीमा {{PLURAL:$2|$2}} है।",
 	"unconnectedpages": "पृष्ठ जो आयटम्स से जुड़े नहीं हुए हैं",
+	"unconnectedpages-summary": "इस पृष्ठ पर वे पृष्ठ हैं जो किसी आयटम से जुड़े नहीं हुए हैं (उन नामस्थानों में जिनमें आयटम्स जोड़ने की अनुमति है)।",
 	"wikibase-unconnectedpages-submit": "पृष्ठ दिखाएँ",
 	"pageswithbadges": "बैज वाले पृष्ठ",
 	"pageswithbadges-summary": "इस पृष्ठ पर वे पृष्ठ हैं जिनपर बैज हैं (जैसे 'अच्छा लेख' या 'निर्वाचित लेख')। इस सूची को अवरोही पृष्ठ ID के अनुसार क्रमबद्ध किया जाता है, तो नए पृष्ठ पहले नज़र आते हैं।",

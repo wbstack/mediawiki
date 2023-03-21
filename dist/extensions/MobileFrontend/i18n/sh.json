@@ -155,6 +155,7 @@
 	"mobile-frontend-talk-reply": "Odgovori",
 	"mobile-frontend-talk-reply-info": "Odgovor će automatski biti potpisan Vašim suradničkim imenom.",
 	"mobile-frontend-talk-topic-error": "Tema ne može biti dodana zbog nepoznate greške.",
+	"mobile-frontend-talk-topic-error-protected": "Ova stranica za razgovor je zaštićena. Nemate dopuštenje za dodavanje tema na nju.",
 	"mobile-frontend-talk-topic-error-permission": "Ova tema se ne može dodati. Nemate dopuštenje da uređujete stranice.",
 	"mobile-frontend-talk-topic-error-spam": "Tema je odbijena jer je sadržavala neželjeni sadržaj.",
 	"mobile-frontend-talk-topic-error-badtoken": "Zbog pogreške na poslužitelju izmjena se ne može sačuvati. Ponovo učitajte stranicu.",

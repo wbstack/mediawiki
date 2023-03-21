@@ -10,6 +10,7 @@
 	"vector-opt-out": "Molso ovdebii olgoldâsháámán",
 	"vector-languages": "Kielah",
 	"vector-language-button-label": "{{PLURAL:$1|$1 kielâ|$1 kielâ|$1 kielâ|$1 kiellâd}}",
+	"vector-no-language-button-label": "Lasseet kielâid",
 	"vector-action-addsection": "Lasseet fáádá",
 	"vector-action-delete": "Siho",
 	"vector-action-move": "Sirde",
@@ -24,6 +25,7 @@
 	"vector-jumptosearch": "Njuškii ucâmân",
 	"vector-jumptocontent": "Njuškii siskáldâsân",
 	"vector-more-actions": "Eenâb",
+	"vector-searchsuggest-containing": "Uusâ siijđoid, moh siskáldeh <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-main-menu-tooltip": "Uáivivaljiittâh",
 	"tooltip-vector-anon-user-menu-title": "Lase valjiimeh"
 }

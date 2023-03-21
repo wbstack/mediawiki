@@ -31,7 +31,7 @@ class SqlEntityIdPager implements SeekableEntityIdPager {
 	/**
 	 * @var string[]
 	 */
-	private $entityTypes = [];
+	private $entityTypes;
 
 	/**
 	 * @var string
@@ -191,9 +191,7 @@ class SqlEntityIdPager implements SeekableEntityIdPager {
 		}
 
 		return array_map(
-			function ( $entityType ) {
-				return $this->entityNamespaceLookup->getEntityNamespace( $entityType );
-			},
+			[ $this->entityNamespaceLookup, 'getEntityNamespace' ],
 			$entityTypes
 		);
 	}

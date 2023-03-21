@@ -31,7 +31,6 @@ use Wikibase\DataAccess\DataAccessSettings;
 use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\DataAccess\PrefetchingTermLookup;
-use Wikibase\DataAccess\SingleEntitySourceServicesFactory;
 use Wikibase\DataAccess\WikibaseServices;
 use Wikibase\DataModel\Deserializers\DeserializerFactory;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -62,8 +61,11 @@ use Wikibase\Lib\Rdbms\RepoDomainDbFactory;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
+use Wikibase\Lib\Store\EntityRevisionLookup;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\PropertyOrderProvider;
+use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
 use Wikibase\Lib\Store\Sql\EntityChangeLookup;
 use Wikibase\Lib\Store\Sql\Terms\TermInLangIdsResolverFactory;
 use Wikibase\Lib\StringNormalizer;
@@ -143,18 +145,6 @@ final class WikibaseClient {
 			->get( 'WikibaseClient.EntityIdComposer' );
 	}
 
-	/**
-	 * @deprecated
-	 * DO NOT USE THIS SERVICE! This is just a temporary convenience placeholder until we finish migrating
-	 * SingleEntitySourceServices. Will be removed with T277731
-	 */
-	public static function getSingleEntitySourceServicesFactory(
-		ContainerInterface $services = null
-	): SingleEntitySourceServicesFactory {
-		return ( $services ?: MediaWikiServices::getInstance() )
-			->get( 'WikibaseClient.SingleEntitySourceServicesFactory' );
-	}
-
 	public static function getWikibaseServices( ContainerInterface $services = null ): WikibaseServices {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseClient.WikibaseServices' );
@@ -168,6 +158,11 @@ final class WikibaseClient {
 	public static function getEntityLookup( ContainerInterface $services = null ): EntityLookup {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseClient.EntityLookup' );
+	}
+
+	public static function getEntityRevisionLookup( ContainerInterface $services = null ): EntityRevisionLookup {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseClient.EntityRevisionLookup' );
 	}
 
 	public static function getTermBuffer( ContainerInterface $services = null ): TermBuffer {
@@ -536,6 +531,20 @@ final class WikibaseClient {
 	public static function getHookRunner( ContainerInterface $services = null ): WikibaseClientHookRunner {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseClient.HookRunner' );
+	}
+
+	public static function getRedirectResolvingLatestRevisionLookup(
+		ContainerInterface $services = null
+	): RedirectResolvingLatestRevisionLookup {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseClient.RedirectResolvingLatestRevisionLookup' );
+	}
+
+	public static function getFallbackLabelDescriptionLookupFactory(
+		ContainerInterface $services = null
+	): FallbackLabelDescriptionLookupFactory {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseClient.FallbackLabelDescriptionLookupFactory' );
 	}
 
 }

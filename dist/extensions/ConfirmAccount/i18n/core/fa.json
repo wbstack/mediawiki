@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Armin1392",
-			"Mjbmr",
-			"Beginneruser"
+			"Beginneruser",
+			"Mjbmr"
 		]
 	},
 	"confirmaccount-newrequests": "'''$1''' ایمیل باز [[Special:ConfirmAccounts|[[Special:ConfirmAccounts|account {{PLURAL:$1|درخواست در حال انتظار}}]] حساب]] تأیید شده است.\n'''توجه شما نیازمند شده است!'''",

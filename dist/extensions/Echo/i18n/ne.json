@@ -1,17 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
+			"Bada Kaji",
 			"NehalDaveND",
 			"Nirajan pant",
 			"Nirjal stha",
 			"जनक राज भट्ट",
 			"पर्वत सुबेदी",
+			"बडा काजी",
 			"बिप्लब आनन्द",
 			"राम प्रसाद जोशी",
 			"सरोज कुमार ढकाल",
-			"हिमाल सुबेदी",
-			"Bada Kaji",
-			"बडा काजी"
+			"हिमाल सुबेदी"
 		]
 	},
 	"echo-desc": "प्रयोगकर्तालाई सम्मेलन तथा सन्देश सूचना दिने जानकारी प्रणाली",
@@ -43,7 +43,7 @@
 	"echo-pref-dont-email-read-notifications": "सारांश इमेलहरूमा पढिएका सूचनाहरू समावेश नगर्नुहोस्",
 	"echo-learn-more": "थप जान्नुहोस्",
 	"echo-log": "सार्वजनिक अभिलेखहरू",
-	"echo-new-messages": "तपाईंसँग नयाँ वार्ता पृष्ठ सन्देश छ",
+	"echo-new-messages": "तपाईंले एउटा नयाँ सन्देश प्राप्त गर्नुभएको छ",
 	"echo-category-title-edit-user-talk": "मेरो प्रयोगकर्ता वार्ता पृष्ठमा {{PLURAL:$1|सम्पादन|सम्पादनहरू}}",
 	"echo-category-title-article-linked": "पृष्ठ {{PLURAL:$1|लिङ्क|लिङ्कहरू}}",
 	"echo-category-title-reverted": "सम्पादन {{PLURAL:$1|रिभर्ट|रिभर्टहरू}}",

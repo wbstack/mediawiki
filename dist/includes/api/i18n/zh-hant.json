@@ -5,6 +5,7 @@
 			"Arthur2e5",
 			"Corainn",
 			"Cwlin0416",
+			"Diskdance",
 			"EagerLin",
 			"Jasonzhuocn",
 			"Kly",
@@ -13,6 +14,7 @@
 			"Macofe",
 			"Matma Rex",
 			"Sanmosa",
+			"Sidishandsome",
 			"Tranve",
 			"Wbxshiori",
 			"WhitePhosphorus",
@@ -22,10 +24,8 @@
 			"Xiplus",
 			"Zhxy 519",
 			"列维劳德",
-			"烈羽",
 			"星海",
-			"Sidishandsome",
-			"Diskdance",
+			"烈羽",
 			"Lakejason0",
 			"Willy1018",
 			"捍粵者"
@@ -159,7 +159,7 @@
 	"apihelp-edit-param-section": "章節標籤。<kbd>0</kbd> 代表最上層章節，<kbd>new</kbd> 代表新章節。通常是正整數但也可以是非數字。",
 	"apihelp-edit-param-sectiontitle": "新章節的標題。",
 	"apihelp-edit-param-text": "頁面內容。",
-	"apihelp-edit-param-summary": "編輯摘要。 當未設定 $1section=new 與 $1sectiontitle 時也會當做章節標題。",
+	"apihelp-edit-param-summary": "編輯摘要。\n\n未提供本參數或本參數為空時，[[mw:Special:MyLanguage/Autosummary|會自動生成編輯摘要]]。\n\n使用<var>$1section=new</var>且未提供<var>$1sectiontitle</var>時，本參數的值用於填入章節標題，同時會自動生成編輯摘要。",
 	"apihelp-edit-param-tags": "更改套用到修訂的標籤。",
 	"apihelp-edit-param-minor": "標記此編輯為小編輯。",
 	"apihelp-edit-param-notminor": "不要標記此編輯為小編輯，即使有設定到「{{int:tog-minordefault}}」使用者偏好設定。",
@@ -1441,7 +1441,7 @@
 	"apihelp-undelete-param-title": "要恢復的頁面標題。",
 	"apihelp-undelete-param-reason": "還原的原因。",
 	"apihelp-undelete-param-tags": "在刪除日誌裡更改套用到項目的標籤。",
-	"apihelp-undelete-param-timestamps": "要復原的修訂時間戳記。若 <var>$1timestamps</var> 與 <var>$1fileids</var> 皆為空，則所有都會被復原。",
+	"apihelp-undelete-param-timestamps": "要恢復的修訂時間戳記。若<var>$1timestamps</var> 與 <var>$1fileids</var>皆為空，則所有修訂都會恢復。",
 	"apihelp-undelete-param-fileids": "要復原的檔案修訂 ID。若 <var>$1timestamps</var> 與 <var>$1fileids</var> 皆為空，則所有都會被復原。",
 	"apihelp-undelete-param-watchlist": "使用偏好設定無條件地將頁面加入至或移除自目前使用者的監視清單（略過機器人使用者），或不更改監視。",
 	"apihelp-undelete-param-watchlistexpiry": "監視清單期限時間戳記。忽略此參數會維持目前期限不變。",
@@ -1866,5 +1866,5 @@
 	"api-usage-mailinglist-ref": "在 &lt;https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/&gt; 的 mediawiki-api-announce 郵件清單做出訂閱，來取得 API 棄用與重大修訂的通知。",
 	"api-exception-trace": "$1位在$2的第$3行\n$4",
 	"api-credits-header": "製作群",
-	"api-credits": "API 開發人員：\n* Roan Kattouw (首席開發者 Sep 2007–2009)\n* Victor Vasiliev\n* Bryan Tong Minh\n* Sam Reed\n* Yuri Astrakhan (創立者，首席開發者 Sep 2006–Sep 2007)\n* Brad Jorsch (首席開發者 2013–present)\n\n請傳送您的評論、建議以及問題至 mediawiki-api@lists.wikimedia.org\n或者回報問題至 https://phabricator.wikimedia.org/。"
+	"api-credits": "API 開發人員：\n* Roan Kattouw (首席開發者 Sep 2007–2009)\n* Victor Vasiliev\n* Bryan Tong Minh\n* Sam Reed\n* Yuri Astrakhan (創立者，首席開發者 Sep 2006–Sep 2007)\n* Brad Jorsch (首席開發者 2013–2020)\n\n請傳送您的評論、建議以及問題至 mediawiki-api@lists.wikimedia.org\n或者回報問題至 https://phabricator.wikimedia.org/。"
 }

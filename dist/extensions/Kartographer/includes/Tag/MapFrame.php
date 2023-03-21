@@ -52,8 +52,8 @@ class MapFrame extends TagHandler {
 	protected function render(): string {
 		$mapServer = $this->config->get( 'KartographerMapServer' );
 
-		$caption = $this->getText( 'text', null );
-		$framed = $caption !== null || $this->getText( 'frameless', null ) === null;
+		$caption = (string)$this->getText( 'text', '' );
+		$framed = $caption !== '' || $this->getText( 'frameless', null ) === null;
 
 		$parserOutput = $this->parser->getOutput();
 		$options = $this->parser->getOptions();
@@ -66,7 +66,8 @@ class MapFrame extends TagHandler {
 				$staticWidth = 800;
 				$this->align = 'none';
 			} else {
-				$width = '300px'; // @todo: deprecate old syntax completely
+				// @todo: deprecate old syntax completely
+				$width = '300px';
 				$this->width = 300;
 				$staticWidth = 300;
 			}
@@ -145,7 +146,8 @@ class MapFrame extends TagHandler {
 			// Groups are not available to the static map renderer
 			// before the page was saved, can only be applied via JS
 			$imgUrlParams += [
-				'domain' => $this->config->get( 'ServerName' ),
+				'domain' => $this->config->get( 'KartographerMediaWikiInternalUrl' ) ??
+					$this->config->get( 'ServerName' ),
 				'title' => $this->parser->getTitle()->getPrefixedText(),
 				'revid' => $this->parser->getRevisionId(),
 				'groups' => implode( ',', $this->showGroups ),
@@ -188,15 +190,17 @@ class MapFrame extends TagHandler {
 
 		$containerClass .= ' thumb ' . self::THUMB_ALIGN_CLASSES[$this->align];
 
-		$captionFrame = Html::rawElement( 'div', [ 'class' => 'thumbcaption' ],
-			$caption ? $this->parser->recursiveTagParse( $caption ) : '' );
+		$html = Html::rawElement( 'a', $attrs, Html::rawElement( 'img', $imgAttrs ) );
 
-		$mapDiv = Html::rawElement( 'a', $attrs, Html::rawElement( 'img', $imgAttrs ) );
+		if ( $caption !== '' ) {
+			$html .= Html::rawElement( 'div', [ 'class' => 'thumbcaption' ],
+				$this->parser->recursiveTagParse( $caption ) );
+		}
 
 		return Html::rawElement( 'div', [ 'class' => $containerClass ],
 			Html::rawElement( 'div', [
 					'class' => 'thumbinner',
 					'style' => "width: {$width};",
-				], $mapDiv . $captionFrame ) );
+				], $html ) );
 	}
 }

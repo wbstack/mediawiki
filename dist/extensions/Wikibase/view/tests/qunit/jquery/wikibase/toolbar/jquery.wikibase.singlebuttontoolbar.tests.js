@@ -6,7 +6,7 @@
 	'use strict';
 
 	QUnit.module( 'jquery.wikibase.singlebuttontoolbar', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_singlebuttontoolbar' ).each( function () {
 				var $singlebuttontoolbar = $( this ),
 					singlebuttontoolbar = $singlebuttontoolbar.data( 'singlebuttontoolbar' );
@@ -34,15 +34,16 @@
 		var $singlebuttontoolbar = createSinglebuttontoolbar(),
 			singlebuttontoolbar = $singlebuttontoolbar.data( 'singlebuttontoolbar' );
 
-		assert.ok(
+		assert.true(
 			singlebuttontoolbar instanceof $.wikibase.singlebuttontoolbar,
 			'Instantiated widget.'
 		);
 
 		singlebuttontoolbar.destroy();
 
-		assert.notOk(
+		assert.strictEqual(
 			$singlebuttontoolbar.data( 'singlebuttontoolbar' ),
+			undefined,
 			'Destroyed widget.'
 		);
 	} );

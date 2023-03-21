@@ -10,7 +10,7 @@
 	"type": "other",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.38.0"
+		"MediaWiki": ">= 1.39.0"
 	},
 	"namespaces": [
 		{
@@ -157,7 +157,8 @@
 				"ODbL-1.0",
 				"dl-de-zero-2.0",
 				"dl-de-by-1.0",
-				"dl-de-by-2.0"
+				"dl-de-by-2.0",
+				"GeoNutzV"
 			]
 		},
 		"JsonConfigInterwikiPrefix": {

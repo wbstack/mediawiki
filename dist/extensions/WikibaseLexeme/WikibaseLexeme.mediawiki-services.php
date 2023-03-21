@@ -3,9 +3,10 @@
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
 use Wikibase\DataModel\Entity\ItemIdParser;
+use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LemmaTermValidator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermLanguageValidator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LexemeTermSerializationValidator;
-use Wikibase\Lexeme\MediaWiki\Content\LexemeLanguageNameLookup;
+use Wikibase\Lexeme\MediaWiki\Content\LexemeLanguageNameLookupFactory;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeTermLanguages;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\EditFormChangeOpDeserializer;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\ItemIdListDeserializer;
@@ -28,6 +29,7 @@ return call_user_func( static function () {
 		'az-cyrl', // T265906
 		'bas', // T277619
 		'bfi', // T279557
+		'bzs', // T286213
 		'cak', // T277622
 		'ccp', // T272442
 		'ccp-beng', // T272442
@@ -44,9 +46,11 @@ return call_user_func( static function () {
 		'goh', // T278027
 		'gsg', // T282512
 		'ha-arab', // T282512
+		'hoc', // T304133
 		'ja-hira', // T262330
 		'ja-kana', // T262330
 		'ja-hrkt', // T262330
+		'lad-hebr', // T308794
 		'lij-mc', // T254968
 		'mis',
 		'mvf', // T282512
@@ -85,14 +89,19 @@ return call_user_func( static function () {
 					$mediawikiServices->getLanguageNameUtils()
 				);
 			},
-		'WikibaseLexemeLanguageNameLookup' =>
+		'WikibaseLexemeLanguageNameLookupFactory' =>
 			static function ( MediaWikiServices $mediawikiServices ) use ( $additionalLanguages ) {
-				return new LexemeLanguageNameLookup(
-					RequestContext::getMain(),
-					$additionalLanguages,
-					WikibaseRepo::getLanguageNameLookup( $mediawikiServices )
+				return new LexemeLanguageNameLookupFactory(
+					WikibaseRepo::getLanguageNameLookupFactory( $mediawikiServices ),
+					$additionalLanguages
 				);
 			},
+		'WikibaseLexemeLemmaTermValidator' => static function (
+			MediaWikiServices $services
+		): LemmaTermValidator {
+			// TODO: move to setting
+			return new LemmaTermValidator( LemmaTermValidator::LEMMA_MAX_LENGTH );
+		},
 		'WikibaseLexemeEditFormChangeOpDeserializer' => static function (
 			MediaWikiServices $mediaWikiServices
 		) {

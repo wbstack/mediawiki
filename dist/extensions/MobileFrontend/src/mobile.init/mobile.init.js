@@ -1,5 +1,3 @@
-/* global $ */
-
 // FIXME: make this an object with a constructor to facilitate testing
 // (see https://bugzilla.wikimedia.org/show_bug.cgi?id=44264)
 /**
@@ -15,6 +13,7 @@ var skin,
 	lazyLoadedImages = require( './lazyLoadedImages' ),
 	skinName = mw.config.get( 'skin' ),
 	isPageContentModelEditable = mw.config.get( 'wgMFIsPageContentModelEditable' ),
+	editorAvailableSkins = mw.config.get( 'wgMFEditorAvailableSkins' ),
 	editor = require( './editor' ),
 	currentPage = require( '../mobile.startup/currentPage' )(),
 	currentPageHTMLParser = require( '../mobile.startup/currentPageHTMLParser' )(),
@@ -61,12 +60,12 @@ function apply2( fn1, fn2 ) {
 
 $window
 	.on( 'resize', apply2(
-		mw.util.debounce( 100, function () { eventBus.emit( 'resize' ); } ),
-		$.throttle( 200, function () { eventBus.emit( 'resize:throttled' ); } )
+		mw.util.debounce( function () { eventBus.emit( 'resize' ); }, 100 ),
+		mw.util.throttle( function () { eventBus.emit( 'resize:throttled' ); }, 200 )
 	) )
 	.on( 'scroll', apply2(
-		mw.util.debounce( 100, function () { eventBus.emit( 'scroll' ); } ),
-		$.throttle( 200, function () { eventBus.emit( 'scroll:throttled' ); } )
+		mw.util.debounce( function () { eventBus.emit( 'scroll' ); }, 100 ),
+		mw.util.throttle( function () { eventBus.emit( 'scroll:throttled' ); }, 200 )
 	) );
 
 /**
@@ -111,9 +110,10 @@ if ( window.console && window.console.log && window.console.log.apply &&
 
 // setup editor
 if ( !currentPage.inNamespace( 'special' ) && isPageContentModelEditable ) {
-	// TODO: Mobile editor doesn't work well with other skins yet (it looks horribly broken
-	// without some styles that are only defined by Minerva).
-	if ( skinName === 'minerva' ) {
+	// Mobile editor commonly doesn't work well with other skins than Minerva (it looks horribly
+	// broken without some styles that are only defined by Minerva). So we only enable it for the
+	// skin that wants it.
+	if ( editorAvailableSkins.indexOf( skinName ) !== -1 ) {
 		// TODO: This code should not even be loaded on desktop.
 		// Remove this check when that is fixed (T216537).
 		if ( mw.config.get( 'wgMFMode' ) !== null ) {

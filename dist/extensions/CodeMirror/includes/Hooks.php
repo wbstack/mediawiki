@@ -2,11 +2,9 @@
 
 namespace MediaWiki\Extension\CodeMirror;
 
-use Action;
 use Config;
 use MediaWiki\MediaWikiServices;
 use OutputPage;
-use RequestContext;
 use Skin;
 use User;
 
@@ -29,10 +27,9 @@ class Hooks {
 		if ( !$userOptionsLookup->getOption( $out->getUser(), 'usebetatoolbar' ) ) {
 			return false;
 		}
-		$context = $out->getContext();
-		return in_array( Action::getActionName( $context ), [ 'edit', 'submit' ] ) &&
+		return in_array( $out->getActionName(), [ 'edit', 'submit' ] ) &&
 			// CodeMirror on textarea wikitext editors doesn't support RTL (T170001)
-			!$context->getTitle()->getPageLanguage()->isRTL();
+			!$out->getTitle()->getPageLanguage()->isRTL();
 	}
 
 	/**
@@ -67,13 +64,6 @@ class Hooks {
 		/** @var Config $config */
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
-		$vars['wgCodeMirrorEnableBracketMatching'] = $config->get( 'CodeMirrorEnableBracketMatching' )
-			// Allows tests to override the configuration.
-			|| RequestContext::getMain()->getRequest()
-				->getCookie( '-codemirror-bracket-matching-test', 'mw' );
-
-		$vars['wgCodeMirrorAccessibilityColors'] = $config->get( 'CodeMirrorAccessibilityColors' );
-
 		$vars['wgCodeMirrorLineNumberingNamespaces'] = $config->get( 'CodeMirrorLineNumberingNamespaces' );
 	}
 
@@ -90,6 +80,13 @@ class Hooks {
 		// by default by adding '$wgDefaultUserOptions['usecodemirror'] = 1;' into LocalSettings.php
 		$defaultPreferences['usecodemirror'] = [
 			'type' => 'api',
+		];
+
+		$defaultPreferences['usecodemirror-colorblind'] = [
+			'type' => 'toggle',
+			'label-message' => 'codemirror-prefs-colorblind',
+			'help-message' => 'codemirror-prefs-colorblind-help',
+			'section' => 'editing/accessibility',
 		];
 	}
 

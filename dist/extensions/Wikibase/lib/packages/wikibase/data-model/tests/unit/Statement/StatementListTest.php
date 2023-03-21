@@ -1,11 +1,15 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace Wikibase\DataModel\Tests\Statement;
 
 use ArrayObject;
 use DataValues\StringValue;
 use InvalidArgumentException;
+use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\NumericPropertyId;
+use Wikibase\DataModel\Exception\PropertyChangedException;
+use Wikibase\DataModel\Exception\StatementGuidChangedException;
+use Wikibase\DataModel\Exception\StatementNotFoundException;
 use Wikibase\DataModel\Reference;
 use Wikibase\DataModel\ReferenceList;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
@@ -15,6 +19,7 @@ use Wikibase\DataModel\Snak\Snak;
 use Wikibase\DataModel\Snak\SnakList;
 use Wikibase\DataModel\Statement\ReferencedStatementFilter;
 use Wikibase\DataModel\Statement\Statement;
+use Wikibase\DataModel\Statement\StatementGuid;
 use Wikibase\DataModel\Statement\StatementList;
 
 /**
@@ -33,7 +38,9 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @return Statement
 	 */
-	private function getStatement( $propertyId, $guid, $rank = Statement::RANK_NORMAL ) {
+	private function getStatement(
+		string $propertyId, ?string $guid, int $rank = Statement::RANK_NORMAL
+	): Statement {
 		$statement = $this->createMock( Statement::class );
 
 		$statement->expects( $this->any() )
@@ -57,7 +64,7 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @return Statement
 	 */
-	private function getStatementWithSnak( $propertyId, $stringValue ) {
+	private function getStatementWithSnak( string $propertyId, string $stringValue ): Statement {
 		$snak = $this->newSnak( $propertyId, $stringValue );
 		$statement = new Statement( $snak );
 		$statement->setGuid( sha1( $snak->getHash() ) );
@@ -70,7 +77,7 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 	 *
 	 * @return Snak
 	 */
-	private function newSnak( $propertyId, $stringValue ) {
+	private function newSnak( string $propertyId, string $stringValue ) {
 		return new PropertyValueSnak(
 			new NumericPropertyId( $propertyId ),
 			new StringValue( $stringValue )
@@ -98,6 +105,7 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 	public function testGivenNoStatements_getPropertyIdsReturnsEmptyArray() {
 		$list = new StatementList();
 		$this->assertSame( [], $list->getPropertyIds() );
+		$this->assertSame( [], $list->toArray() );
 	}
 
 	public function testGivenStatements_getPropertyIdsReturnsArrayWithoutDuplicates() {
@@ -117,20 +125,6 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 			],
 			$list->getPropertyIds()
 		);
-	}
-
-	public function testGivenStatementsWithArrayKeys_toArrayReturnsReindexedArray() {
-		$statement = $this->getStatement( 'P1', 'guid' );
-		$list = new StatementList( [ 'ignore-me' => $statement ] );
-
-		$this->assertSame( [ 0 => $statement ], $list->toArray() );
-	}
-
-	public function testGivenSparseArray_toArrayReturnsReindexedArray() {
-		$statement = $this->getStatement( 'P1', 'guid' );
-		$list = new StatementList( [ 1 => $statement ] );
-
-		$this->assertSame( [ 0 => $statement ], $list->toArray() );
 	}
 
 	public function testCanIterate() {
@@ -287,12 +281,88 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( [ 0, 1, 2 ], array_keys( $list->toArray() ), 'array keys' );
 	}
 
+	public function testReplaceStatement() {
+		$statementGuid = new StatementGuid( new ItemId( 'Q123' ), 'AAA-BBB-CCC' );
+		$index = 2;
+		$statement1 = new Statement( new PropertyNoValueSnak( 1 ) );
+		$statement2 = new Statement( new PropertyNoValueSnak( 2 ) );
+		$statement3 = new Statement( new PropertyNoValueSnak( 3 ) );
+		$oldStatement = new Statement(
+			$this->newSnak( 'P42', 'foo' ),
+			null,
+			null,
+			(string)$statementGuid
+		);
+		$newStatement = new Statement( $this->newSnak( 'P42', 'bar' ) );
+
+		$list = new StatementList( $statement1, $statement2, $statement3 );
+		$list->addStatement( $oldStatement, $index );
+
+		$list->replaceStatement( $statementGuid, $newStatement );
+
+		$this->assertEquals( 4, $list->count() );
+		$replacedStatement = $list->toArray()[$index];
+		$this->assertEquals( $newStatement, $replacedStatement );
+		$this->assertEquals( (string)$statementGuid, $replacedStatement->getGuid() );
+	}
+
+	public function testGivenNotPresentGuid_replaceStatementThrows() {
+		$list = new StatementList();
+		$statementId = new StatementGuid( new ItemId( 'Q42' ), 'this-guid-does-not-exist' );
+
+		$this->expectException( StatementNotFoundException::class );
+		$this->expectExceptionMessageMatches( '/' . preg_quote( (string)$statementId ) . '/' );
+
+		$list->replaceStatement( $statementId, new Statement( new PropertyNoValueSnak( 42 ) ) );
+	}
+
+	public function testGivenNewStatementWithDifferentStatementId_replaceStatementThrows(): void {
+		$statementId = new StatementGuid( new ItemId( 'Q123' ), 'AAA-BBB-CCC' );
+		$originalStatement = new Statement(
+			new PropertyNoValueSnak( new NumericPropertyId( 'P123' ) ),
+			null,
+			null,
+			(string)$statementId
+		);
+		$newStatement = new Statement(
+			new PropertySomeValueSnak( new NumericPropertyId( 'P321' ) ),
+			null,
+			null,
+			'Q123$XXX-YYY-ZZZ'
+		);
+		$list = new StatementList( $originalStatement );
+
+		$this->expectException( StatementGuidChangedException::class );
+		$this->expectExceptionMessage(
+			'The new Statement must not have a different Statement GUID than the original'
+		);
+
+		$list->replaceStatement( $statementId, $newStatement );
+	}
+
+	public function testGivenNewStatementWithDifferentProperty_replaceStatementThrows(): void {
+		$statementId = new StatementGuid( new ItemId( 'Q123' ), 'AAA-BBB-CCC' );
+		$originalStatement = new Statement(
+			new PropertyNoValueSnak( new NumericPropertyId( 'P123' ) ),
+			null,
+			null,
+			(string)$statementId
+		);
+		$newStatement = new Statement( new PropertySomeValueSnak( new NumericPropertyId( 'P321' ) ) );
+		$list = new StatementList( $originalStatement );
+
+		$this->expectException( PropertyChangedException::class );
+		$this->expectExceptionMessage( 'The new Statement must not have a different Property than the original' );
+
+		$list->replaceStatement( $statementId, $newStatement );
+	}
+
 	public function testGivenGuidOfPresentStatement_statementIsRemoved() {
 		$statement1 = new Statement( $this->newSnak( 'P24', 'foo' ), null, null, 'foo' );
 		$statement2 = new Statement( $this->newSnak( 'P32', 'bar' ), null, null, 'bar' );
 		$statement3 = new Statement( $this->newSnak( 'P32', 'bar' ), null, null, 'bar' );
 
-		$list = new StatementList( [ $statement1, $statement2, $statement3 ] );
+		$list = new StatementList( $statement1, $statement2, $statement3 );
 		$list->removeStatementsWithGuid( 'foo' );
 
 		$this->assertEquals( new StatementList( $statement2, $statement3 ), $list );
@@ -303,7 +373,7 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 		$statement2 = new Statement( $this->newSnak( 'P32', 'bar' ), null, null, 'bar' );
 		$statement3 = new Statement( $this->newSnak( 'P32', 'bar' ), null, null, 'bar' );
 
-		$list = new StatementList( [ $statement1, $statement2, $statement3 ] );
+		$list = new StatementList( $statement1, $statement2, $statement3 );
 		$list->removeStatementsWithGuid( 'bar' );
 
 		$this->assertEquals( new StatementList( $statement1 ), $list );
@@ -314,7 +384,7 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 		$statement2 = new Statement( $this->newSnak( 'P32', 'bar' ), null, null, 'bar' );
 		$statement3 = new Statement( $this->newSnak( 'P32', 'bar' ), null, null, 'bar' );
 
-		$list = new StatementList( [ $statement1, $statement2, $statement3 ] );
+		$list = new StatementList( $statement1, $statement2, $statement3 );
 		$list->removeStatementsWithGuid( 'baz' );
 
 		$this->assertEquals( new StatementList( $statement1, $statement2, $statement3 ), $list );
@@ -325,20 +395,21 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 		$statement2 = new Statement( $this->newSnak( 'P32', 'bar' ) );
 		$statement3 = new Statement( $this->newSnak( 'P32', 'bar' ) );
 
-		$list = new StatementList( [ $statement1, $statement2, $statement3 ] );
+		$list = new StatementList( $statement1, $statement2, $statement3 );
 		$list->removeStatementsWithGuid( null );
 
 		$this->assertEquals( new StatementList( $statement1 ), $list );
 	}
 
-	public function testCanConstructWithTraversableContainingOnlyStatements() {
+	public function testCanConstructWithUnpackedTraversableContainingOnlyStatements() {
 		$statementArray = [
 			$this->getStatementWithSnak( 'P1', 'foo' ),
 			$this->getStatementWithSnak( 'P2', 'bar' ),
 		];
 
 		$object = new ArrayObject( $statementArray );
-		$list = new StatementList( $object );
+		/** @noinspection PhpParamsInspection */
+		$list = new StatementList( ...$object );
 
 		$this->assertSame(
 			$statementArray,
@@ -346,27 +417,11 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testGivenTraversableWithNonStatements_constructorThrowsException() {
-		$traversable = new ArrayObject( [
-			$this->getStatementWithSnak( 'P1', 'foo' ),
-			new \stdClass(),
-			$this->getStatementWithSnak( 'P2', 'bar' ),
-		] );
-
-		$this->expectException( InvalidArgumentException::class );
-		new StatementList( $traversable );
-	}
-
-	public function testGivenNonTraversableOrArgList_constructorThrowsException() {
-		$this->expectException( InvalidArgumentException::class );
-		new StatementList( null );
-	}
-
 	public function testCanConstructWithStatement() {
 		$statement = new Statement( $this->newSnak( 'P42', 'foo' ) );
 
 		$this->assertEquals(
-			new StatementList( [ $statement ] ),
+			new StatementList( $statement ),
 			new StatementList( $statement )
 		);
 	}
@@ -377,18 +432,9 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 		$statement2 = new Statement( $this->newSnak( 'P42', 'baz' ) );
 
 		$this->assertEquals(
-			new StatementList( [ $statement0, $statement1, $statement2 ] ),
+			new StatementList( $statement0, $statement1, $statement2 ),
 			new StatementList( $statement0, $statement1, $statement2 )
 		);
-	}
-
-	public function testGivenArgumentListWithNonStatement_constructorThrowsException() {
-		$statement0 = new Statement( $this->newSnak( 'P42', 'foo' ) );
-		$statement1 = new Statement( $this->newSnak( 'P42', 'bar' ) );
-		$statement2 = new Statement( $this->newSnak( 'P42', 'baz' ) );
-
-		$this->expectException( InvalidArgumentException::class );
-		new StatementList( $statement0, $statement1, [], $statement2 );
 	}
 
 	public function testCountForEmptyList() {
@@ -407,26 +453,25 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider statementArrayProvider
+	 * @dataProvider provideArrayOfStatements
 	 */
 	public function testGivenIdenticalLists_equalsReturnsTrue( array $statements ) {
-		$firstStatements = new StatementList( $statements );
-		$secondStatements = new StatementList( $statements );
+		$firstStatements = new StatementList( ...$statements );
+		$secondStatements = new StatementList( ...$statements );
 
 		$this->assertTrue( $firstStatements->equals( $secondStatements ) );
 	}
 
-	public function statementArrayProvider() {
+	public function provideArrayOfStatements(): array {
 		return [
-			[ [
-				$this->getStatementWithSnak( 'P1', 'foo' ),
-				$this->getStatementWithSnak( 'P2', 'bar' ),
-			] ],
-			[ [
-				$this->getStatementWithSnak( 'P1', 'foo' ),
-			] ],
-			[ [
-			] ],
+			"two statements" => [
+				[
+					$this->getStatementWithSnak( 'P1', 'foo' ),
+					$this->getStatementWithSnak( 'P2', 'bar' ),
+				]
+			],
+			"one statement" => [ [ $this->getStatementWithSnak( 'P1', 'foo' ), ] ],
+			"no statements (empty array)" => [ [] ],
 		];
 	}
 
@@ -676,7 +721,7 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 	public function testGivenInvalidGuid_getFirstStatementWithGuidReturnsNull() {
 		$statements = new StatementList();
 
-		$this->assertNull( $statements->getFirstStatementWithGuid( false ) );
+		$this->assertNull( $statements->getFirstStatementWithGuid( 'not-a-valid-guid' ) );
 	}
 
 	public function testFilter() {
@@ -685,13 +730,17 @@ class StatementListTest extends \PHPUnit\Framework\TestCase {
 		$statement3 = new Statement( new PropertyNoValueSnak( 3 ) );
 		$statement4 = new Statement( new PropertyNoValueSnak( 4 ) );
 
-		$statement2->setReferences( new ReferenceList( [
-			new Reference( [ new PropertyNoValueSnak( 20 ) ] )
-		] ) );
+		$statement2->setReferences(
+			new ReferenceList( [
+				new Reference( [ new PropertyNoValueSnak( 20 ) ] )
+			] )
+		);
 
-		$statement3->setReferences( new ReferenceList( [
-			new Reference( [ new PropertyNoValueSnak( 30 ) ] )
-		] ) );
+		$statement3->setReferences(
+			new ReferenceList( [
+				new Reference( [ new PropertyNoValueSnak( 30 ) ] )
+			] )
+		);
 
 		$statements = new StatementList( $statement1, $statement2, $statement3, $statement4 );
 

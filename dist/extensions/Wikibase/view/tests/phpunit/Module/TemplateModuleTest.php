@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace Wikibase\View\Tests\Module;
 
-use ResourceLoaderContext;
+use MediaWiki\ResourceLoader\Context;
 use Wikibase\View\Module\TemplateModule;
 
 /**
@@ -54,15 +54,12 @@ class TemplateModuleTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @return ResourceLoaderContext
+	 * @return Context
 	 */
 	private function getResourceLoaderContext() {
-		$context = $this->getMockBuilder( ResourceLoaderContext::class )
-			->disableOriginalConstructor()
-			->getMock();
+		$context = $this->createMock( Context::class );
 		$context->method( 'getLanguage' )
 			->willReturn( 'en' );
-
 		return $context;
 	}
 

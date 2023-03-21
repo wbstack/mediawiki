@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Niharika29",
-			"Sfic",
-			"Saurmandal"
+			"Saurmandal",
+			"Sfic"
 		]
 	},
 	"revisionslider": "RevisionSlider",
@@ -28,7 +28,7 @@
 	"revisionslider-show-help-tooltip": "सहायता टेक्स्ट दिखाएँ",
 	"revisionslider-help-dialog-slide1": "अवतरण स्लाइडर की मदद से आप अंतर पृष्ठ पर अवतरणों के बीच तुलना कर सकते हैं। यह जर्मन समुदाय की तकनीकी इच्छासूची के [//meta.wikimedia.org/wiki/WMDE_Technical_Wishes/RevisionSlider सामुदायिक इच्छा] पर आधारित है। [//www.mediawiki.org/wiki/Extension_talk:RevisionSlider यहाँ] पर प्रतिक्रिया ज़रूर दें।",
 	"revisionslider-help-dialog-slide2": "हर एक बार पृष्ठ पर किसी अवतरण है। ऊपर के बार पर पृष्ठ की बढ़ोतरी दिखाई जाती है, नीचे के बार पर घटाव। चित्र में पहले अवतरण के दौरान सामग्री जोड़ी गई थी जबकि दूसरे अवतरण के दौरान सामग्री हटाई गई थी।",
-	"revisionslider-help-dialog-slide3a": "<p>दो अवतरनो मे तुलना करने के लिये अवतरनो को पीले व नीले काँटो से चुने।</p><p>नीला काँटा नए अवतरन को निर्धारित करता है व पीला वाला पुराने वाले को।</p><p> काँटो को बार पर खींचकर और छोड़कर प्र्योग करे।</p>",
+	"revisionslider-help-dialog-slide3a": "विशिष्ट अवतरणों के बीच तुलना करने के लिए, दो रंगीन नॉब्स की मदद से अवतरण चुनें।\n\nऊपर के नॉब से नया अवतरण चुना जा सकता है, और नीचे के नॉब से पुराना अवतरण।\n\nड्रैग और ड्रॉप करके या फिर स्लाइडर की पंक्ति पर क्लिक करके नॉब्स की जगह बदलें।",
 	"revisionslider-help-dialog-slide4": "अगले व पिछले तीर के प्रयोग से अवतरण इतिहास के नए व पुराने अवतरण देखें।",
 	"revisionslider-tutorial": "अवतरण स्लाइडर का ट्यूटोरियल",
 	"revisionslider-previous-dialog": "पिछला",
