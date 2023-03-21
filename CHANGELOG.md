@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.38-7.4-20230321-0
+- Add missing Wikibase submodules
+
 ## 1.38-7.4-20230316-0
 - Update to MediaWiki 1.38
 
