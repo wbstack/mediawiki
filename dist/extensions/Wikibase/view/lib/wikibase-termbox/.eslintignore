@@ -1,0 +1,8 @@
+dist/
+node_modules/
+serverBuild/
+serverDist/
+docs/ui/
+
+!.eslintrc.js
+!/.storybook
