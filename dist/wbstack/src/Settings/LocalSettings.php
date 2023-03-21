@@ -169,7 +169,7 @@ $wgLogos = [
 if( $wgLogos["1x"] === null ) {
     // Fallback to the mediawiki logo without the wgLogo overlay
     $wgLogos = [
-        "1x" => "https://storage.googleapis.com/wbstack-static/assets/mediawiki/mediawiki.png",
+        "1x" => "/w/resources/assets/mediawiki.png",
     ];
 }
 
