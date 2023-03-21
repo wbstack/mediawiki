@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "wikibase-termbox",
+    "description": "Server side rendering for vue-based wikibase UI components.",
+    "contact": {
+      "name": "Wikimedia Deutschland - Wikidata Team"
+    },
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/_info": {
+      "get": {
+        "tags": [
+          "Service information"
+        ],
+        "description": "Gets information about the service",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {}
+          }
+        },
+        "x-amples": [
+          {
+            "title": "retrieve service info",
+            "request": {},
+            "response": {
+              "status": 200,
+              "headers": {
+                "content-type": "application/json"
+              },
+              "body": {
+                "name": "/.+/",
+                "version": "/.+/"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "/termbox": {
+      "get": {
+        "description": "Gets a rendered termbox",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "language",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[a-z]{2}[a-z0-9-]*$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "entity",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^(Q|P)[1-9]\\d{0,9}$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revision",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "editLink",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "preferredLanguages",
+            "required": true,
+            "style": "pipeDelimited",
+            "explode": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "maxLength": 20,
+                "pattern": "^[a-z]{2}[a-z0-9-]*$"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Entity not found"
+          },
+          "500": {
+            "description": "Technical Problem"
+          }
+        },
+        "x-monitor": false
+      }
+    }
+  }
+}

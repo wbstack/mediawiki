@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Red Winged Duck",
+			"Wizardist"
+		]
+	},
+	"valueview-expert-unsupportedvalue-unsupporteddatavalue": "Апрацоўка значэньняў «$1» пакуль не падтрымліваецца.",
+	"valueview-expert-unsupportedvalue-unsupporteddatatype": "Апрацоўка значэньняў тыпу «$1» яшчэ не падтрымліваецца.",
+	"valueview-expert-emptyvalue-empty": "пуста",
+	"valueview-expert-globecoordinateinput-precision": "Дакладнасьць:",
+	"valueview-expert-globecoordinateinput-nullprecision": "ня вызначана",
+	"valueview-expert-globecoordinateinput-customprecision": "спэцыяльная ($1)",
+	"valueview-expert-timevalue-calendar-gregorian": "Грэгарыянскі",
+	"valueview-expert-timevalue-calendar-julian": "Юліянскі",
+	"valueview-expert-timeinput-precision": "Дакладнасьць:",
+	"valueview-expert-timeinput-calendar": "Каляндар:",
+	"valueview-expertextender-languageselector-languagetemplate": "$1 ($2)",
+	"valueview-expertextender-languageselector-label": "Мова (абавязкова):",
+	"valueview-expertextender-unitsuggester-label": "Адзінка вымярэньня (неабавязкова):",
+	"valueview-preview-label": "будзе адлюстроўвацца як:",
+	"valueview-preview-novalue": "слушнае значэньне не распазнанае",
+	"valueview-listrotator-manually": "усталяваць уручную"
+}
