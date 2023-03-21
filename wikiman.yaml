@@ -1,5 +1,5 @@
 ---
-mediawikiVersion: "1.38"
+mediawikiVersion: "1.39"
 mediawikiRemove:
   - docs
   - extensions/README
@@ -140,7 +140,7 @@ extensions:
   # Using our own archive repo temporarily for our Federated Properties endeavour
   # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/7393f131282bde327787035d5b9dc0046573609b/wikibase-1679395384-REL1_38.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/f5be8c3e515b6c3445fdbdd6a8153ae157470250/wikibase-1679416210-REL1_39.tar.gz
     remove:
       - build
       - vendor
