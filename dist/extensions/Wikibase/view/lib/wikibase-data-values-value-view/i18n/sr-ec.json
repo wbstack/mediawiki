@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Acamicamacaraca",
+			"BadDog",
+			"Milicevic01",
+			"Obsuser",
+			"Милан Јелисавчић"
+		]
+	},
+	"valueview-expert-unsupportedvalue-unsupporteddatavalue": "Управљање вредностима „$1” још увек није подржано.",
+	"valueview-expert-unsupportedvalue-unsupporteddatatype": "Управљање вредностима за врсту података „$1” још увек није подржано.",
+	"valueview-expert-emptyvalue-empty": "празно",
+	"valueview-expert-globecoordinateinput-precision": "Прецизност:",
+	"valueview-expert-globecoordinateinput-nullprecision": "неодређено",
+	"valueview-expert-globecoordinateinput-customprecision": "посебно ($1)",
+	"valueview-expert-timevalue-calendar-gregorian": "Грегоријански",
+	"valueview-expert-timevalue-calendar-julian": "Јулијански",
+	"valueview-expert-timeinput-precision": "Прецизност:",
+	"valueview-expert-timeinput-calendar": "Календар:",
+	"valueview-expertextender-languageselector-languagetemplate": "$1 ($2)",
+	"valueview-expertextender-languageselector-label": "Језик (обавезно):",
+	"valueview-expertextender-unitsuggester-label": "Јединица (опционално):",
+	"valueview-preview-label": "приказаће се као:",
+	"valueview-preview-novalue": "није препозната ниједна валидна вредност",
+	"valueview-listrotator-manually": "подеси ручно"
+}

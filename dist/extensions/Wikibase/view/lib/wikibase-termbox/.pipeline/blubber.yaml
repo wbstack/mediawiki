@@ -1,0 +1,59 @@
+version: v4
+
+base: docker-registry.wikimedia.org/nodejs12-slim
+
+apt: {
+  packages: [
+    ca-certificates, # ability to talk to remote APIs with TLS
+  ]
+}
+
+# can't live in /srv/service as currently node_modules outside of project root is not supported
+lives:
+  in: /opt/lib
+
+variants:
+  build:
+    base: docker-registry.wikimedia.org/nodejs12-devel
+    copies: [local]
+    apt:
+      packages: [ git, build-essential, python, pkg-config ] # needed for npm install
+    node:
+      requirements: [ package.json, package-lock.json, build/ ]
+  build-server:
+    includes: [ build ]
+    builder:
+      command: [ npm, run-script, build-server ]
+      requirements: [ "." ]
+  test:
+    # build-server is needed for tests/edge-to-edge to work
+    includes: [ build-server ]
+    entrypoint: [ npm, test ]
+  install-prod:
+    includes: [ build ]
+    node:
+      env: production
+  production:
+    copies:
+      - from: build-server
+        source: /opt/lib/config.yaml
+        destination: /srv/service/config.yaml
+      - from: build-server
+        source: /opt/lib/package.json
+        destination: /srv/service/package.json
+      - from: build-server
+        source: /opt/lib/openapi.json
+        destination: /srv/service/openapi.json
+      - from: install-prod
+        source: /opt/lib/node_modules
+        destination: /srv/service/node_modules
+      - from: build-server
+        source: /opt/lib/serverBuild
+        destination: /srv/service/serverBuild
+      - from: build-server
+        source: /opt/lib/serverDist
+        destination: /srv/service/serverDist
+    lives:
+      in: /srv/service
+    node: { env: production }
+    entrypoint: [ node, "./serverBuild/src/server/service-runner-entrypoint.js" ]

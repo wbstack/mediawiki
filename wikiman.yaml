@@ -140,7 +140,7 @@ extensions:
   # Using our own archive repo temporarily for our Federated Properties endeavour
   # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
-    repoName: wikimedia/mediawiki-extensions-Wikibase
+    url: https://github.com/wbstack/mediawiki-tars/raw/7393f131282bde327787035d5b9dc0046573609b/wikibase-1679395384-REL1_38.tar.gz
     remove:
       - build
       - vendor

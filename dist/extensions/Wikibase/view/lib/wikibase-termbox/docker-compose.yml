@@ -1,0 +1,64 @@
+version: '2'
+
+services:
+  node:
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile-node
+    image: wmde/wikibase-termbox-node
+    volumes:
+      - '~/.npm:/.npm'
+      - './:/app'
+    working_dir: /app
+    environment:
+      - NODE_ENV
+      - NODE_DEBUG
+      - DEBUG
+
+  csr:
+    extends:
+      service: node
+    ports:
+      - '${CSR_PORT}:8080'
+    command: 'npm run-script serve'
+    external_links:
+      - 'nginx-proxy:default.web.mw.localhost'
+    networks:
+      mediawiki_dev_network:
+        aliases:
+          - 'node-csr'
+      default: ~
+
+  ssr:
+    extends:
+      service: node
+    ports:
+      - '${SSR_PORT}:${SSR_PORT}'
+    command: 'npm run dev-server'
+    external_links:
+      - 'nginx-proxy:default.web.mw.localhost'
+    networks:
+      mediawiki_dev_network:
+        aliases:
+          - 'node-ssr'
+      default: ~
+    environment:
+      - SSR_PORT
+      - WIKIBASE_REPO
+      - WIKIBASE_REPO_HOSTNAME_ALIAS
+      - MEDIAWIKI_REQUEST_TIMEOUT
+      - MESSAGES_CACHE_MAX_AGE
+      - LANGUAGES_CACHE_MAX_AGE
+      - HEALTHCHECK_QUERY
+
+  storybook:
+    extends:
+      service: node
+    ports:
+      - '${STORYBOOK_PORT}:${STORYBOOK_PORT}'
+    command: 'npm run storybook -- -p ${STORYBOOK_PORT} --ci'
+
+networks:
+  mediawiki_dev_network:
+    external:
+      name: '${MEDIAWIKI_NETWORK_TO_JOIN}'

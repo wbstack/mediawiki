@@ -1,0 +1,81 @@
+- hosts: ssr
+  name: Run the SSR service based on its latest (blubber-based) image
+  tasks:
+    - name: Ensure docker is installed
+      package:
+          name: docker-ce
+          state: present
+
+    - name: Ensure curl is installed
+      package:
+        name: curl
+        state: present
+
+    - name: Ensure project directory exists
+      file:
+          path: "{{ PATH }}"
+          state: directory
+
+    - name: Ensure README is in place
+      copy:
+        src: files/README.md
+        dest: "{{ PATH }}/README.md"
+        owner: "root"
+        group: "root"
+        mode: 0644
+
+    - name: Ensure updater is in place
+      template:
+          src: templates/updater.sh.j2
+          dest: "{{ PATH }}/updater.sh"
+          owner: "root"
+          group: "root"
+          mode: 0744
+
+    - name: Ensure restarter is in place
+      copy:
+          src: files/restarter.sh
+          dest: "{{ PATH }}/restarter.sh"
+          owner: "root"
+          group: "root"
+          mode: 0744
+
+
+    - name: Ensure service is configured
+      template:
+        src: templates/termbox.service.j2
+        dest: "/lib/systemd/system/termbox.service"
+        owner: "root"
+        group: "root"
+        mode: 0644
+
+    - name: Ensure service updater is configured
+      template:
+          src: templates/termbox-updater.service.js2
+          dest: "/lib/systemd/system/termbox-updater.service"
+          owner: "root"
+          group: "root"
+          mode: 0644
+
+    - name: Ensure timer for updater is set
+      template:
+          src: templates/termbox-updater.timer.js2
+          dest: "/lib/systemd/system/termbox-updater.timer"
+          owner: "root"
+          group: "root"
+          mode: 0644
+
+    - name: Ensure systemd is using latest config
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable timer for termbox update
+      systemd:
+          name: termbox-updater.timer
+          state: started
+          enabled: yes
+
+    - name: Ensure the termbox service is running with the latest config
+      systemd:
+        state: started
+        name: termbox
