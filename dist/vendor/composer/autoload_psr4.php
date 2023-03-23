@@ -24,7 +24,7 @@ return array(
     'Wikimedia\\CommonPasswords\\' => array($vendorDir . '/wikimedia/common-passwords/src/CommonPasswords'),
     'Wikimedia\\AtEase\\' => array($vendorDir . '/wikimedia/at-ease/src/Wikimedia/AtEase'),
     'Wikimedia\\Assert\\' => array($vendorDir . '/wikimedia/assert/src'),
-    'Wikimedia\\' => array($vendorDir . '/wikimedia/ip-utils/src', $vendorDir . '/wikimedia/wait-condition-loop/src', $vendorDir . '/wikimedia/wrappedstring/src', $vendorDir . '/wikimedia/ip-set/src', $vendorDir . '/wikimedia/scoped-callback/src', $vendorDir . '/wikimedia/running-stat/src'),
+    'Wikimedia\\' => array($vendorDir . '/wikimedia/ip-set/src', $vendorDir . '/wikimedia/ip-utils/src', $vendorDir . '/wikimedia/running-stat/src', $vendorDir . '/wikimedia/scoped-callback/src', $vendorDir . '/wikimedia/wait-condition-loop/src', $vendorDir . '/wikimedia/wrappedstring/src'),
     'Wikibase\\Lexeme\\Tests\\' => array($baseDir . '/extensions/WikibaseLexeme/tests/phpunit/composer'),
     'Wikibase\\Lexeme\\' => array($baseDir . '/extensions/WikibaseLexeme/src'),
     'WikiPEG\\' => array($vendorDir . '/wikimedia/wikipeg/src'),

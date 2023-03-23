@@ -11,7 +11,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "antispam",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.36.0"
 	},
 	"AvailableRights": [
 		"sfsblock-bypass"
@@ -29,17 +29,20 @@
 	"AutoloadNamespaces": {
 		"MediaWiki\\StopForumSpam\\": "includes/"
 	},
-	"Hooks": {
-		"AbuseFilter-computeVariable": "hooks",
-		"AbuseFilter-generateUserVars": "hooks",
-		"AbuseFilter-builder": "hooks",
-		"getUserPermissionsErrorsExpensive": "hooks",
-		"OtherBlockLogLink": "hooks"
-	},
 	"HookHandlers": {
+		"abusefilter": {
+			"class": "MediaWiki\\StopForumSpam\\AbuseFilterHookHandler"
+		},
 		"hooks": {
 			"class": "MediaWiki\\StopForumSpam\\Hooks"
 		}
+	},
+	"Hooks": {
+		"AbuseFilter-computeVariable": "abusefilter",
+		"AbuseFilter-generateUserVars": "abusefilter",
+		"AbuseFilter-builder": "abusefilter",
+		"getUserPermissionsErrorsExpensive": "hooks",
+		"OtherBlockLogLink": "hooks"
 	},
 	"config": {
 		"SFSReportOnly": {

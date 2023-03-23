@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac
+class ComposerStaticInite06333f08fab866f4d3b65f0aa484e1f
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -236,12 +236,12 @@ class ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac
         ),
         'Wikimedia\\' => 
         array (
-            0 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
-            1 => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src',
-            2 => __DIR__ . '/..' . '/wikimedia/wrappedstring/src',
-            3 => __DIR__ . '/..' . '/wikimedia/ip-set/src',
-            4 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
-            5 => __DIR__ . '/..' . '/wikimedia/running-stat/src',
+            0 => __DIR__ . '/..' . '/wikimedia/ip-set/src',
+            1 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
+            2 => __DIR__ . '/..' . '/wikimedia/running-stat/src',
+            3 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
+            4 => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src',
+            5 => __DIR__ . '/..' . '/wikimedia/wrappedstring/src',
         ),
         'Wikibase\\Lexeme\\Tests\\' => 
         array (
@@ -544,8 +544,8 @@ class ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac
         array (
             'Mail' => 
             array (
-                0 => __DIR__ . '/..' . '/pear/mail_mime',
-                1 => __DIR__ . '/..' . '/pear/mail',
+                0 => __DIR__ . '/..' . '/pear/mail',
+                1 => __DIR__ . '/..' . '/pear/mail_mime',
             ),
         ),
         'L' => 
@@ -593,8 +593,8 @@ class ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac
     );
 
     public static $fallbackDirsPsr0 = array (
-        0 => __DIR__ . '/..' . '/pear/pear-core-minimal/src',
-        1 => __DIR__ . '/..' . '/cssjanus/cssjanus/src',
+        0 => __DIR__ . '/..' . '/cssjanus/cssjanus/src',
+        1 => __DIR__ . '/..' . '/pear/pear-core-minimal/src',
     );
 
     public static $classMap = array (
@@ -4195,11 +4195,11 @@ class ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitd0b4bad865894d4dc512fe0ee8fab4ac::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite06333f08fab866f4d3b65f0aa484e1f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite06333f08fab866f4d3b65f0aa484e1f::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInite06333f08fab866f4d3b65f0aa484e1f::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInite06333f08fab866f4d3b65f0aa484e1f::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInite06333f08fab866f4d3b65f0aa484e1f::$classMap;
 
         }, null, ClassLoader::class);
     }
