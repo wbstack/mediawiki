@@ -12,7 +12,7 @@ namespace WBStack\Internal;
 
 class PreApiWbStackUpdate {
     public function execute() {
-        @set_time_limit( 60*5 ); // 5 mins maybe D:
+        @set_time_limit( 60*60 ); // 60 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 
 		// Run update.php
