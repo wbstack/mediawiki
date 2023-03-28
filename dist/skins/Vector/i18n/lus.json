@@ -17,5 +17,6 @@
 	"vector-view-history": "Hunhlui-chanchin",
 	"vector-view-view": "Chhiarna",
 	"vector-view-viewsource": "A hnar enna",
-	"vector-more-actions": "Belh"
+	"vector-more-actions": "Belh",
+	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> awmna phek zawng tur"
 }

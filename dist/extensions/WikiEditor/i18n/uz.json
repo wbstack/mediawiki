@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"CoderSI",
 			"Macofe",
 			"Malikxan",
 			"Sociologist",
-			"Amire80",
 			"Zafar Shamsiddinov"
 		]
 	},
@@ -40,7 +40,6 @@
 	"wikieditor-toolbar-tool-link-int-target-status-notexists": "Sahifa {{SITENAME}}da mavjud emas",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "Siz koʻrsatgan sarlavha notoʻgʻri",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "Tashqi havola",
-	"wikieditor-toolbar-tool-link-int-target-status-loading": "Sahifa mavjudligiga tekshirish",
 	"wikieditor-toolbar-tool-link-int-target-status-disambig": "Bu sahifa kontent sahifasi emas, balki oʻxshash nomli mavzular roʻyxatidir",
 	"wikieditor-toolbar-tool-link-int-invalid": "Koʻrsatilgan nom mumkin emas.",
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "Siz tomondan koʻrsatilgan URL boshqa viki-sahifaga havolaga oʻxshash. Siz mazkur havolani ichki qilishni xohlaysizmi?",
@@ -193,5 +192,14 @@
 	"wikieditor-toolbar-help-content-indent-syntax": "Odatiy matn<br />:Matn xat boshi bilan<br />::Matn xat boshi bilan",
 	"wikieditor-toolbar-help-content-indent-result": "Odatiy matn<dl><dd>Matn xat boshi bilan<dl><dd>Matn xat boshi bilan</dd></dl></dd></dl>",
 	"tag-wikieditor-description": "Tahrirlash [[mw:Special:MyLanguage/Extension:WikiEditor|WikiEditor]] (2010 vikimatn muharriri) yordamida amalga oshirildi.",
-	"wikieditor-realtimepreview-preview": "Oldindan koʻrish"
+	"wikieditor-realtimepreview-preview": "Oldindan koʻrish",
+	"wikieditor-realtimepreview-error": "Oldindan koʻrish yuklanmayapti",
+	"wikieditor-realtimepreview-reload": "Qayta yuklash",
+	"wikieditor-realtimepreview-beta-label": "Haqiqiy vaqtda oldindan koʻrish",
+	"wikieditor-realtimepreview-beta-desc": "[[mw:Special:MyLanguage/Extension:WikiEditor|2010 muharriri]] ichidagi vikimatn oʻzgarishlari oʻquvchilarga qanday koʻrinishini koʻring.",
+	"wikieditor-realtimepreview-reload-title": "Haqiqiy vaqtda oldindan koʻrish panelini qayta yuklash",
+	"wikieditor-realtimepreview-manual": "Tahrirlaringizni oʻzingiz koʻrishingiz uchun hozir qayta yuklang.",
+	"wikieditor-realtimepreview-onboarding-title": "Haqiqiy vaqtda oldindan koʻrish",
+	"wikieditor-realtimepreview-onboarding-body": "Tahrirlaringizni real vaqtda oldindan koʻrish orqali oʻquvchilarga qanday koʻrinishini koʻring.",
+	"wikieditor-realtimepreview-onboarding-button": "Tushunarli"
 }

@@ -9,7 +9,6 @@ use JsonSchema\Validator;
 use LogicException;
 use MediaWiki\MediaWikiServices;
 use Parser;
-use PPFrame;
 use Status;
 use stdClass;
 
@@ -20,11 +19,8 @@ class SimpleStyleParser {
 
 	private const PARSED_PROPS = [ 'title', 'description' ];
 
-	/** @var Parser */
+	/** @var MediaWikiWikitextParser */
 	private $parser;
-
-	/** @var PPFrame|null */
-	private $frame;
 
 	/** @var array */
 	private $options;
@@ -33,14 +29,13 @@ class SimpleStyleParser {
 	private $mapService;
 
 	/**
-	 * @param Parser $parser Parser used for wikitext processing
-	 * @param PPFrame|null $frame
+	 * @param MediaWikiWikitextParser|Parser $parser
 	 * @param array $options Set ['saveUnparsed' => true] to back up the original values of title
 	 *                       and description in _origtitle and _origdescription
 	 */
-	public function __construct( Parser $parser, PPFrame $frame = null, array $options = [] ) {
-		$this->parser = $parser;
-		$this->frame = $frame;
+	public function __construct( $parser, array $options = [] ) {
+		// TODO: Temporary compatibility, remove when not needed any more
+		$this->parser = $parser instanceof Parser ? new MediaWikiWikitextParser( $parser ) : $parser;
 		$this->options = $options;
 		// @fixme: More precise config?
 		$this->mapService = MediaWikiServices::getInstance()
@@ -160,11 +155,15 @@ class SimpleStyleParser {
 		$validator->check( $json, $schema );
 
 		if ( !$validator->isValid() ) {
-			return Status::newFatal(
-				'kartographer-error-bad_data',
-				$validator->getErrors()[0]['pointer'] ?? '',
-				$validator->getErrors()[0]['message'] ?? ''
-			);
+			$status = Status::newFatal( 'kartographer-error-bad_data' );
+			foreach ( $validator->getErrors() as $error ) {
+				$status->fatal(
+					'kartographer-error-json-schema-error',
+					wfEscapeWikiText( $error['pointer'] ?? '' ),
+					wfEscapeWikiText( $error['message'] ?? '' )
+				);
+			}
+			return $status;
 		}
 
 		return Status::newGood();
@@ -185,7 +184,7 @@ class SimpleStyleParser {
 		} elseif ( is_object( $json ) ) {
 			foreach ( array_keys( get_object_vars( $json ) ) as $prop ) {
 				// https://phabricator.wikimedia.org/T134719
-				if ( $prop[0] === '_' ) {
+				if ( str_starts_with( $prop, '_' ) ) {
 					unset( $json->$prop );
 				} else {
 					$this->sanitize( $json->$prop );
@@ -210,7 +209,7 @@ class SimpleStyleParser {
 			foreach ( $json as &$element ) {
 				$this->normalize( $element );
 			}
-		} elseif ( is_object( $json ) && $json->type === 'ExternalData' ) {
+		} elseif ( is_object( $json ) && isset( $json->type ) && $json->type === 'ExternalData' ) {
 			$status->merge( $this->normalizeExternalData( $json ) );
 		}
 		$status->value = $json;
@@ -225,13 +224,15 @@ class SimpleStyleParser {
 	 * @return Status
 	 */
 	private function normalizeExternalData( &$object ): Status {
+		$service = $object->service ?? null;
 		$ret = (object)[
 			'type' => 'ExternalData',
-			'service' => $object->service,
+			'service' => $service,
 		];
 
-		switch ( $object->service ) {
+		switch ( $service ) {
 			case 'geoshape':
+			case 'geopoint':
 			case 'geoline':
 			case 'geomask':
 				$query = [ 'getgeojson' => 1 ];
@@ -243,11 +244,11 @@ class SimpleStyleParser {
 				if ( isset( $object->query ) ) {
 					$query['query'] = $object->query;
 				}
-				// 'geomask' service is the same as inverted geoshape service
-				// Kartotherian does not support it, request it as geoshape
-				$service = $object->service === 'geomask' ? 'geoshape' : $object->service;
-
-				$ret->url = "{$this->mapService}/{$service}?" . wfArrayToCgi( $query );
+				$ret->url = $this->mapService . '/' .
+					// 'geomask' service is the same as inverted geoshape service
+					// Kartotherian does not support it, request it as geoshape
+					( $service === 'geomask' ? 'geoshape' : $service ) .
+					'?' . wfArrayToCgi( $query );
 				if ( isset( $object->properties ) ) {
 					$ret->properties = $object->properties;
 				}
@@ -270,7 +271,7 @@ class SimpleStyleParser {
 				break;
 
 			default:
-				throw new LogicException( "Unexpected service name '{$object->service}'" );
+				throw new LogicException( "Unexpected service name '$service'" );
 		}
 
 		$object = $ret;
@@ -286,47 +287,45 @@ class SimpleStyleParser {
 	 */
 	private function sanitizeProperties( $properties ) {
 		$saveUnparsed = $this->options['saveUnparsed'] ?? false;
-		foreach ( self::PARSED_PROPS as $prop ) {
-			if ( property_exists( $properties, $prop ) ) {
-				$property = &$properties->$prop;
 
-				if ( is_string( $property ) ) {
-					if ( $saveUnparsed ) {
-						$properties->{"_orig$prop"} = $property;
-					}
-					$property = $this->parseText( $property );
-				} elseif ( is_object( $property ) ) {
-					// Delete empty localizations
-					if ( !count( get_object_vars( $property ) ) ) {
-						unset( $properties->$prop );
+		foreach ( self::PARSED_PROPS as $prop ) {
+			if ( !property_exists( $properties, $prop ) ) {
+				continue;
+			}
+
+			$origProp = "_orig$prop";
+			$property = &$properties->$prop;
+
+			if ( is_string( $property ) ) {
+				if ( $saveUnparsed ) {
+					$properties->$origProp = $property;
+				}
+				$property = $this->parser->parseWikitext( $property );
+			} elseif ( is_object( $property ) ) {
+				if ( $saveUnparsed ) {
+					$properties->$origProp = (object)[];
+				}
+				foreach ( $property as $language => &$text ) {
+					if ( !is_string( $text ) ) {
+						unset( $property->$language );
 					} else {
 						if ( $saveUnparsed ) {
-							$properties->{"_orig$prop"} = $property;
+							$properties->$origProp->$language = $text;
 						}
-						foreach ( $property as $language => &$text ) {
-							if ( !is_string( $text ) ) {
-								unset( $property->$language );
-							} else {
-								$text = $this->parseText( $text );
-							}
-						}
+						$text = $this->parser->parseWikitext( $text );
 					}
-				} else {
-					unset( $properties->$prop ); // Dunno what the hell it is, ditch
 				}
+
+				// Delete empty localizations
+				if ( !get_object_vars( $property ) ) {
+					unset( $properties->$prop );
+					unset( $properties->$origProp );
+				}
+			} else {
+				// Dunno what the hell it is, ditch
+				unset( $properties->$prop );
 			}
 		}
-	}
-
-	/**
-	 * Parses property wikitext into HTML
-	 *
-	 * @param string $text
-	 * @return string
-	 */
-	private function parseText( $text ): string {
-		$text = $this->parser->recursiveTagParseFully( $text, $this->frame ?: false );
-		return trim( Parser::stripOuterParagraph( $text ) );
 	}
 
 	/**

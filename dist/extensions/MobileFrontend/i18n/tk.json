@@ -167,6 +167,7 @@
 	"mobile-frontend-talk-reply": "Jogap ber",
 	"mobile-frontend-talk-reply-info": "Jogabyňyz ulanyjy adyňyz bilen awtomatiki gol çekiler.",
 	"mobile-frontend-talk-topic-error": "Näbelli ýalňyşlyk sebäpli mowzugy goşup bolmaýar.",
+	"mobile-frontend-talk-topic-error-protected": "Bu gepleşik sahypasy goralandyr. Oňa mowzuk goşmaga rugsadyňyz ýok.",
 	"mobile-frontend-talk-topic-error-permission": "Mowzugy goşup bolmaz. Sahypalary redaktirlemäge rugsadyňyz ýok.",
 	"mobile-frontend-talk-topic-error-spam": "Spam bölegi bolany üçin mowzuk ret edildi.",
 	"mobile-frontend-talk-topic-error-badtoken": "Serwerde ýalňyşlyk bardy. Düzedişiňizi ýazdyryp bolmaz. Bu sahypany täzeden ýükläp görüň.",

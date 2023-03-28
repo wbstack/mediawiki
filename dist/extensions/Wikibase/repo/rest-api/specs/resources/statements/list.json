@@ -1,0 +1,36 @@
+{
+	"get": {
+		"tags": [ "statements" ],
+		"summary": "Retrieve statements from an Item",
+		"parameters": [
+			{ "$ref": "../../global/parameters.json#/ItemId" },
+			{ "$ref": "../../global/parameters.json#/IfNoneMatch" },
+			{ "$ref": "../../global/parameters.json#/IfModifiedSince" },
+			{ "$ref": "../../global/parameters.json#/Authorization" }
+		],
+		"responses": {
+			"200": { "$ref": "../../global/responses.json#/Statements" },
+			"304": { "$ref": "../../global/responses.json#/NotModified" },
+			"308": { "$ref": "../../global/responses.json#/Moved" },
+			"400": { "$ref": "../../global/responses.json#/InvalidStatementListInput" },
+			"404": { "$ref": "../../global/responses.json#/ItemNotFound" },
+			"500": { "$ref": "../../global/responses.json#/UnexpectedError" }
+		}
+	},
+	"post": {
+		"tags": [ "statements" ],
+		"summary": "Add a new Statement to an Item",
+		"parameters": [
+			{ "$ref": "../../global/parameters.json#/ItemId" }
+		],
+		"requestBody": { "$ref": "../../global/requests.json#/Statement" },
+		"responses": {
+			"201": { "$ref": "../../global/responses.json#/StatementCreated" },
+			"400": { "$ref": "../../global/responses.json#/InvalidNewStatementInput" },
+			"404": { "$ref": "../../global/responses.json#/ItemNotFound" },
+			"409": { "$ref": "../../global/responses.json#/ItemRedirected" },
+			"415": { "$ref": "../../global/responses.json#/InvalidMediaType" },
+			"500": { "$ref": "../../global/responses.json#/UnexpectedError" }
+		}
+	}
+}

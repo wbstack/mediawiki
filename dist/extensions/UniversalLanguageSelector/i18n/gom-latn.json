@@ -55,5 +55,10 @@
 	"ext-uls-setlang-heading": "Interfaceachi bhas bodol?",
 	"ext-uls-setlang-accept": "Bodol manun ghe",
 	"ext-uls-setlang-loading": "Lagu korta...",
-	"ext-uls-setlang-cancel": "Bodlinaka"
+	"ext-uls-setlang-cancel": "Bodlinaka",
+	"ext-uls-actions-menu-language-settings-item-label": "Bhasechi manddavoll ugodd",
+	"ext-uls-empty-state-header": "Azun bhaso nant",
+	"ext-uls-empty-state-desc": "Sodheak khoincheoch bhaso uplobdh nant",
+	"ext-uls-empty-state-header-actions-available": "Azun bhaso nant. Novi zoddchi?",
+	"ext-uls-empty-state-desc-actions-available": "Mozkur anik bhasani uplobdh kor."
 }

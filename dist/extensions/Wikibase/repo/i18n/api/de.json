@@ -159,6 +159,8 @@
 	"apihelp-query+wbsearch-param-strictlanguage": "Ob der Sprach-Fallback deaktiviert werden soll",
 	"apihelp-query+wbsearch-param-type": "Sucht nach diesem Objekttyp.",
 	"apihelp-query+wbsearch-param-limit": "Maximale Anzahl der Ergebnisse",
+	"apihelp-query+wbsearch-param-profile": "Zu verwendendes Suchprofil.",
+	"apihelp-query+wbsearch-paramvalue-profile-default": "Das Standardprofil, geeignet für die meisten Zwecke.",
 	"apihelp-query+wbsearch-example-1": "Sucht nach „abc“ in englischer Sprache, mit Standards für Typ und Limit.",
 	"apihelp-query+wbsearch-example-2": "Sucht nach „abc“ in englischer Sprache mit maximal 50",
 	"apihelp-query+wbsearch-example-3": "Sucht nach „Alphabet“ in deutscher Sprache für die Eigenschaft „Typ“",

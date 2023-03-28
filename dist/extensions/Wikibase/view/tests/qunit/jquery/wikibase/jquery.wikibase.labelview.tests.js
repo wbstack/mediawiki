@@ -27,7 +27,7 @@
 	};
 
 	QUnit.module( 'jquery.wikibase.labelview', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_labelview' ).each( function () {
 				var $labelview = $( this ),
 					labelview = $labelview.data( 'labelview' );
@@ -52,7 +52,7 @@
 		var $labelview = createLabelview(),
 			labelview = $labelview.data( 'labelview' );
 
-		assert.ok(
+		assert.true(
 			labelview instanceof $.wikibase.labelview,
 			'Created widget.'
 		);
@@ -72,13 +72,13 @@
 
 		$labelview
 		.on( 'labelviewafterstartediting', function ( event ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Started edit mode.'
 			);
 		} )
 		.on( 'labelviewafterstopediting', function ( event, dropValue ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Stopped edit mode.'
 			);
@@ -109,7 +109,7 @@
 
 		$labelview
 		.on( 'labelviewtoggleerror', function ( event, error ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "toggleerror" event.'
 			);

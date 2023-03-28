@@ -43,7 +43,7 @@ class ItemViewTest extends EntityViewTestCase {
 		$item->setLabel( 'en', "label:$id" );
 		$item->setDescription( 'en', "description:$id" );
 
-		$item->setStatements( new StatementList( $statements ) );
+		$item->setStatements( new StatementList( ...$statements ) );
 
 		return $item;
 	}
@@ -90,13 +90,9 @@ class ItemViewTest extends EntityViewTestCase {
 			$templateFactory,
 			$termsView,
 			$this->createMock( LanguageDirectionalityLookup::class ),
-			$this->getMockBuilder( StatementSectionsView::class )
-				->disableOriginalConstructor()
-				->getMock(),
+			$this->createMock( StatementSectionsView::class ),
 			'en',
-			$this->getMockBuilder( SiteLinksView::class )
-				->disableOriginalConstructor()
-				->getMock(),
+			$this->createMock( SiteLinksView::class ),
 			[],
 			$this->createMock( LocalizedTextProvider::class )
 		);

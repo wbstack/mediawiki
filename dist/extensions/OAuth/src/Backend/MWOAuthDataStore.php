@@ -2,9 +2,14 @@
 
 namespace MediaWiki\Extension\OAuth\Backend;
 
+use BagOStuff;
+use Linker;
 use MediaWiki\Extension\OAuth\Lib\OAuthConsumer;
 use MediaWiki\Extension\OAuth\Lib\OAuthDataStore;
 use MediaWiki\Logger\LoggerFactory;
+use Message;
+use MWCryptRand;
+use Psr\Log\LoggerInterface;
 use Wikimedia\Rdbms\DBConnRef;
 
 class MWOAuthDataStore extends OAuthDataStore {
@@ -16,18 +21,27 @@ class MWOAuthDataStore extends OAuthDataStore {
 	 */
 	protected $centralPrimary;
 
-	/** @var \BagOStuff Cache for Tokens and Nonces */
-	protected $cache;
+	/** @var BagOStuff Cache for tokens */
+	protected $tokenCache;
 
-	/** @var \Psr\Log\LoggerInterface */
+	/** @var BagOStuff Cache for nonces */
+	protected $nonceCache;
+
+	/** @var LoggerInterface */
 	protected $logger;
 
 	/**
 	 * @param DBConnRef $centralReplica Central DB replica
 	 * @param DBConnRef|null $centralPrimary Central DB primary (if different)
-	 * @param \BagOStuff $cache
+	 * @param BagOStuff $tokenCache
+	 * @param BagOStuff $nonceCache
 	 */
-	public function __construct( DBConnRef $centralReplica, $centralPrimary, \BagOStuff $cache ) {
+	public function __construct(
+		DBConnRef $centralReplica,
+		$centralPrimary,
+		\BagOStuff $tokenCache,
+		\BagOStuff $nonceCache
+	) {
 		if ( $centralPrimary !== null && !( $centralPrimary instanceof DBConnRef ) ) {
 			throw new \InvalidArgumentException(
 				__METHOD__ . ': $centralPrimary must be a DB or null'
@@ -35,7 +49,8 @@ class MWOAuthDataStore extends OAuthDataStore {
 		}
 		$this->centralReplica = $centralReplica;
 		$this->centralPrimary = $centralPrimary;
-		$this->cache = $cache;
+		$this->tokenCache = $tokenCache;
+		$this->nonceCache = $nonceCache;
 		$this->logger = LoggerFactory::getInstance( 'OAuth' );
 	}
 
@@ -62,7 +77,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 		$this->logger->debug( __METHOD__ . ": Looking up $token_type token '$token'" );
 
 		if ( $token_type === 'request' ) {
-			$returnToken = $this->cache->get( Utils::getCacheKey(
+			$returnToken = $this->tokenCache->get( Utils::getCacheKey(
 				'token',
 				$consumer->key,
 				$token_type,
@@ -70,7 +85,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 			) );
 			if ( $returnToken === '**USED**' ) {
 				throw new MWOAuthException( 'mwoauthdatastore-request-token-already-used', [
-					\Message::rawParam( \Linker::makeExternalLink(
+					Message::rawParam( Linker::makeExternalLink(
 						'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E009',
 						'E009',
 						true
@@ -79,7 +94,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 			}
 			if ( $token === null || !( $returnToken instanceof MWOAuthToken ) ) {
 				throw new MWOAuthException( 'mwoauthdatastore-request-token-not-found', [
-					\Message::rawParam( \Linker::makeExternalLink(
+					Message::rawParam( Linker::makeExternalLink(
 						'https://www.mediawiki.org/wiki/Help:OAuth/Errors#E004',
 						'E004',
 						true
@@ -127,7 +142,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 		// Do an add for the key associated with this nonce to check if it was already used.
 		// Set timeout 5 minutes in the future of the timestamp as OAuthServer does. Use the
 		// timestamp so the client can also expire their nonce records after 5 mins.
-		if ( !$this->cache->add( $key, 1, $timestamp + 300 ) ) {
+		if ( !$this->nonceCache->add( $key, 1, $timestamp + 300 ) ) {
 			// T308861
 			$key = preg_replace(
 				"/(oauth_token_secret\=\w+:)/",
@@ -147,8 +162,8 @@ class MWOAuthDataStore extends OAuthDataStore {
 	 */
 	public static function newToken() {
 		return new MWOAuthToken(
-			\MWCryptRand::generateHex( 32 ),
-			\MWCryptRand::generateHex( 32 )
+			MWCryptRand::generateHex( 32 ),
+			MWCryptRand::generateHex( 32 )
 		);
 	}
 
@@ -170,9 +185,9 @@ class MWOAuthDataStore extends OAuthDataStore {
 		);
 
 		// 600s == 10 minutes. Kind of arbitrary.
-		$this->cache->add( $cacheConsumerKey, $consumer->key, 600 );
-		$this->cache->add( $cacheTokenKey, $token, 600 );
-		$this->cache->add( $cacheCallbackKey, $callback, 600 );
+		$this->tokenCache->add( $cacheConsumerKey, $consumer->key, 600 );
+		$this->tokenCache->add( $cacheTokenKey, $token, 600 );
+		$this->tokenCache->add( $cacheCallbackKey, $callback, 600 );
 		$this->logger->debug( __METHOD__ .
 			": New request token {$token->key} for {$consumer->key} with callback {$callback}" );
 		return $token;
@@ -186,8 +201,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 	 */
 	public function getConsumerKey( $requestToken ) {
 		$cacheKey = Utils::getCacheKey( 'consumer', 'request', $requestToken );
-		$consumerKey = $this->cache->get( $cacheKey );
-		return $consumerKey;
+		return $this->tokenCache->get( $cacheKey );
 	}
 
 	/**
@@ -203,11 +217,11 @@ class MWOAuthDataStore extends OAuthDataStore {
 	 */
 	public function getCallbackUrl( $consumerKey, $requestKey ) {
 		$cacheKey = Utils::getCacheKey( 'callback', $consumerKey, 'request', $requestKey );
-		$callback = $this->cache->get( $cacheKey );
+		$callback = $this->tokenCache->get( $cacheKey );
 		if ( $callback === null || !is_string( $callback ) ) {
 			throw new MWOAuthException( 'mwoauthdatastore-callback-not-found' );
 		}
-		$this->cache->delete( $cacheKey );
+		$this->tokenCache->delete( $cacheKey );
 		return $callback;
 	}
 
@@ -234,7 +248,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 		$cacheKey = Utils::getCacheKey( 'token',
 			$consumer->getConsumerKey(), 'request', $token->key );
 		$accessToken = $this->lookup_token( $consumer, 'access', $token->getAccessKey() );
-		$this->cache->set( $cacheKey, '**USED**', 600 );
+		$this->tokenCache->set( $cacheKey, '**USED**', 600 );
 		$this->logger->debug( __METHOD__ .
 			": New access token {$accessToken->key} for {$consumer->key}" );
 		return $accessToken;
@@ -249,7 +263,7 @@ class MWOAuthDataStore extends OAuthDataStore {
 	public function updateRequestToken( $token, $consumer ) {
 		$cacheKey = Utils::getCacheKey( 'token', $consumer->key, 'request', $token->key );
 		// 10 more minutes. Kind of arbitrary.
-		$this->cache->set( $cacheKey, $token, 600 );
+		$this->tokenCache->set( $cacheKey, $token, 600 );
 	}
 
 	/**

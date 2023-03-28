@@ -69,5 +69,11 @@
 	"ext-uls-setlang-message": "Kiungo ulichofuata kiliomba kiolesura kionyeshwe katika <strong>$1 ( $2 )</strong>",
 	"ext-uls-setlang-heading": "Badilisha lugha ya kiolesura",
 	"ext-uls-setlang-accept": "Kubali mabadiliko",
-	"ext-uls-setlang-cancel": "Ghairi"
+	"ext-uls-setlang-cancel": "Ghairi",
+	"ext-uls-actions-menu-header": "Chaguo zaidi",
+	"ext-uls-actions-menu-language-settings-item-label": "Fungua mipangilio ya lugha",
+	"ext-uls-empty-state-header": "Hakuna lugha bado",
+	"ext-uls-empty-state-desc": "Hakuna lugha zinazopatikana kwa sasa",
+	"ext-uls-empty-state-header-actions-available": "Hakuna lugha bado. Ungependa kuongeza mpya?",
+	"ext-uls-empty-state-desc-actions-available": "Fanya maudhui yaliyomo yapatikane katika lugha zaidi."
 }

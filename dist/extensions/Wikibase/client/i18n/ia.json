@@ -63,6 +63,7 @@
 	"wikibase-error-exceeded-entity-access-limit": "Troppo de entitates de {{WBREPONAME}} accedite.",
 	"wikibase-error-exceeded-referenced-entity-id-limit": "Troppo de appellos a \"mw.wikibase.getReferencedEntityId\", solo usque a $2 {{PLURAL:$2|permittite}}.",
 	"unconnectedpages": "Paginas non connectite a elementos",
+	"unconnectedpages-summary": "Iste pagina lista paginas sin elemento de datos connectite (in spatios de nomines que supporta elementos connectite).",
 	"wikibase-unconnectedpages-submit": "Monstrar paginas",
 	"pageswithbadges": "Paginas con insignias",
 	"pageswithbadges-summary": "Iste pagina lista paginas con insignias (p.ex. bon articulo o articulo eminente). Le lista es in ordine descendente de ID de pagina, assi que le paginas plus recente appare primo.",

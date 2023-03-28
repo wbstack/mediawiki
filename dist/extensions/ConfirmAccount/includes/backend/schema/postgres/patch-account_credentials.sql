@@ -18,7 +18,7 @@ CREATE TABLE account_credentials (
   acd_storage_key          TEXT,
   acd_areas                TEXT,
   acd_accepted             TIMESTAMPTZ,
-  acd_user                 INTEGER   REFERENCES mwuser(user_id) ON DELETE SET NULL,
+  acd_user                 INTEGER,
   acd_comment              TEXT      NOT NULL DEFAULT '',
   PRIMARY KEY (acd_id, acd_user_id)
 );

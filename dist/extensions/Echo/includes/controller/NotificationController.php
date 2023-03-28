@@ -59,12 +59,8 @@ class EchoNotificationController {
 	 * @param int $count
 	 * @return int Notification count, with ceiling applied
 	 */
-	public static function getCappedNotificationCount( $count ) {
-		if ( $count <= MWEchoNotifUser::MAX_BADGE_COUNT ) {
-			return $count;
-		} else {
-			return MWEchoNotifUser::MAX_BADGE_COUNT + 1;
-		}
+	public static function getCappedNotificationCount( int $count ): int {
+		return min( $count, MWEchoNotifUser::MAX_BADGE_COUNT + 1 );
 	}
 
 	/**
@@ -113,17 +109,22 @@ class EchoNotificationController {
 		$userIds = [];
 		$userIdsCount = 0;
 		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
+		/** @var bool|null $hasMinorRevision */
+		$hasMinorRevision = null;
 		/** @var User $user */
 		foreach ( self::getUsersToNotifyForEvent( $event ) as $user ) {
 			$userIds[$user->getId()] = $user->getId();
 			$userNotifyTypes = $notifyTypes;
 			// Respect the enotifminoredits preference
 			// @todo should this be checked somewhere else?
-			if (
-				!$userOptionsLookup->getOption( $user, 'enotifminoredits' ) &&
-				self::hasMinorRevision( $event )
-			) {
-				$userNotifyTypes = array_diff( $userNotifyTypes, [ 'email' ] );
+			if ( !$userOptionsLookup->getOption( $user, 'enotifminoredits' ) ) {
+				if ( $hasMinorRevision === null ) {
+					// Do this only once per event
+					$hasMinorRevision = self::hasMinorRevision( $event );
+				}
+				if ( $hasMinorRevision ) {
+					$userNotifyTypes = array_diff( $userNotifyTypes, [ 'email' ] );
+				}
 			}
 			Hooks::run( 'EchoGetNotificationTypes', [ $user, $event, &$userNotifyTypes ] );
 
@@ -260,10 +261,6 @@ class EchoNotificationController {
 		}
 
 		$queue->push( $job );
-
-		if ( $job->hasRootJobParams() ) {
-			$queue->deduplicateRootJob( $job );
-		}
 	}
 
 	/**
@@ -497,7 +494,7 @@ class EchoNotificationController {
 		$fname = __METHOD__;
 		$notify->addFilter( static function ( $user ) use ( &$seen, $fname ) {
 			if ( !$user instanceof User ) {
-				wfDebugLog( $fname, 'Expected all User instances, received:' .
+				wfDebugLog( $fname, 'Expected all User instances, received: ' .
 					( is_object( $user ) ? get_class( $user ) : gettype( $user ) )
 				);
 

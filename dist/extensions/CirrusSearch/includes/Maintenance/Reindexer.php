@@ -13,7 +13,6 @@ use Elastica\Index;
 use Elastica\Request;
 use Elastica\Transport\Http;
 use Elastica\Transport\Https;
-use Elastica\Type;
 
 /**
  * This program is free software; you can redistribute it and/or modify
@@ -66,16 +65,6 @@ class Reindexer {
 	private $connection;
 
 	/**
-	 * @var Type
-	 */
-	private $type;
-
-	/**
-	 * @var Type
-	 */
-	private $oldType;
-
-	/**
 	 * @var Printer
 	 */
 	private $out;
@@ -89,18 +78,17 @@ class Reindexer {
 	 * @param SearchConfig $searchConfig
 	 * @param Connection $source
 	 * @param Connection $target
-	 * @param Type $type
-	 * @param Type $oldType
+	 * @param Index $index
+	 * @param Index $oldIndex
 	 * @param Printer|null $out
 	 * @param string[] $fieldsToDelete
-	 * @throws \Exception
 	 */
 	public function __construct(
 		SearchConfig $searchConfig,
 		Connection $source,
 		Connection $target,
-		Type $type,
-		Type $oldType,
+		Index $index,
+		Index $oldIndex,
 		Printer $out = null,
 		$fieldsToDelete = []
 	) {
@@ -108,12 +96,10 @@ class Reindexer {
 		$this->searchConfig = $searchConfig;
 		$this->oldConnection = $source;
 		$this->connection = $target;
-		$this->type = $type;
-		$this->oldType = $oldType;
+		$this->oldIndex = $oldIndex;
+		$this->index = $index;
 		$this->out = $out;
 		$this->fieldsToDelete = $fieldsToDelete;
-		$this->index = $type->getIndex();
-		$this->oldIndex = $oldType->getIndex();
 	}
 
 	/**
@@ -153,9 +139,9 @@ class Reindexer {
 		] );
 		$this->waitForGreen();
 
-		$request = new ReindexRequest( $this->oldType, $this->type, $chunkSize );
+		$request = new ReindexRequest( $this->oldIndex, $this->index, $chunkSize );
 		if ( $slices === null ) {
-			$request->setSlices( $this->estimateSlices( $this->oldType->getIndex() ) );
+			$request->setSlices( $this->estimateSlices( $this->oldIndex ) );
 		} else {
 			$request->setSlices( $slices );
 		}
@@ -175,11 +161,11 @@ class Reindexer {
 		}
 
 		$this->outputIndented( "Started reindex task: " . $task->getId() . "\n" );
-		$response = $this->monitorReindexTask( $task, $this->type );
+		$response = $this->monitorReindexTask( $task, $this->index );
 		$task->delete();
 		if ( !$response->isSuccessful() ) {
 			$this->fatalError(
-				"Reindex task was not successfull: " . $response->getUnsuccessfulReason()
+				"Reindex task was not successful: " . $response->getUnsuccessfulReason()
 			);
 		}
 
@@ -205,7 +191,7 @@ class Reindexer {
 	 * @param float $acceptableCountDeviation
 	 */
 	private function waitForCounts( float $acceptableCountDeviation ) {
-		$oldCount = (float)$this->oldType->count();
+		$oldCount = (float)$this->oldIndex->count();
 		$this->index->refresh();
 		// While elasticsearch should be ready immediately after a refresh, we have seen this return
 		// exceptionally low values in 2% of reindex attempts. Wait around a bit and hope the refresh
@@ -213,7 +199,7 @@ class Reindexer {
 		$start = microtime( true );
 		$timeoutAfter = $start + self::MAX_WAIT_FOR_COUNT_SEC;
 		while ( true ) {
-			$newCount = (float)$this->type->count();
+			$newCount = (float)$this->index->count();
 			$difference = $oldCount > 0 ? abs( $oldCount - $newCount ) / $oldCount : 0;
 			if ( $difference <= $acceptableCountDeviation ) {
 				break;
@@ -419,12 +405,13 @@ class Reindexer {
 
 	/**
 	 * @param ReindexTask $task
-	 * @param Type $target
+	 * @param Index $target
 	 * @return ReindexResponse
 	 */
-	private function monitorReindexTask( ReindexTask $task, Type $target ) {
+	private function monitorReindexTask( ReindexTask $task, Index $target ) {
 		$consecutiveErrors = 0;
 		$sleepSeconds = self::monitorSleepSeconds( 1, 2, self::MONITOR_SLEEP_SECONDS );
+		$completionEstimateGen = self::estimateTimeRemaining();
 		while ( !$task->isComplete() ) {
 			try {
 				$status = $task->getStatus();
@@ -435,7 +422,7 @@ class Reindexer {
 						"$e\n\n" .
 						"Lost connection to elasticsearch cluster. The reindex task "
 						. "{$task->getId()} is still running.\nThe task should be manually "
-						. "canceled, and the index {$target->getIndex()->getName()}\n"
+						. "canceled, and the index {$target->getName()}\n"
 						. "should be removed.\n" .
 						$e->getMessage()
 					);
@@ -457,12 +444,15 @@ class Reindexer {
 
 			$consecutiveErrors = 0;
 
+			$estCompletion = $completionEstimateGen->send(
+				$status->getTotal() - $status->getCreated() );
 			// What is worth reporting here?
 			$this->outputIndented(
 				"Task: {$task->getId()} "
 				. "Search Retries: {$status->getSearchRetries()} "
 				. "Bulk Retries: {$status->getBulkRetries()} "
-				. "Indexed: {$status->getCreated()} / {$status->getTotal()}\n"
+				. "Indexed: {$status->getCreated()} / {$status->getTotal()} "
+				. "Complete: $estCompletion\n"
 			);
 			// @phan-suppress-next-line PhanPluginRedundantAssignmentInLoop False positive
 			if ( !$status->isComplete() ) {
@@ -480,6 +470,35 @@ class Reindexer {
 		while ( true ) {
 			yield $val;
 			$val = min( $max, $val * $ratio );
+		}
+	}
+
+	/**
+	 * Generator returning the estimated timestamp of completion.
+	 * @return \Generator Must be provided the remaining count via Generator::send, replies
+	 *  with a unix timestamp estimating the completion time.
+	 */
+	private static function estimateTimeRemaining(): \Generator {
+		$estimatedStr = null;
+		$remain = null;
+		$prevRemain = null;
+		$now = microtime( true );
+		while ( true ) {
+			$start = $now;
+			$prevRemain = $remain;
+			$remain = yield $estimatedStr;
+			$now = microtime( true );
+			if ( $remain === null || $prevRemain === null ) {
+				continue;
+			}
+			# Very simple calc, no smoothing and will vary wildly. Could be
+			# improved if deemed useful.
+			$elapsed  = $now - $start;
+			$rate = ( $prevRemain - $remain ) / $elapsed;
+			if ( $rate > 0 ) {
+				$estimatedCompletion = $now + ( $remain / $rate );
+				$estimatedStr = \MWTimestamp::convert( TS_RFC2822, $estimatedCompletion );
+			}
 		}
 	}
 

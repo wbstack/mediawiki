@@ -6,13 +6,11 @@ use EditPage;
 use ExtensionRegistry;
 use MediaWiki\Extension\EventLogging\EventLogging;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Revision\SlotRecord;
 use MediaWiki\User\UserIdentity;
 use OOUI\ButtonInputWidget;
 use OutputPage;
 use TwoColConflict\ConflictFormValidator;
 use TwoColConflict\Html\CoreUiHintHtml;
-use TwoColConflict\Logging\ThreeWayMerge;
 use TwoColConflict\SplitTwoColConflictHelper;
 use TwoColConflict\TalkPageConflict\ResolutionSuggester;
 use TwoColConflict\TwoColConflictContext;
@@ -174,28 +172,6 @@ class TwoColConflictHooks {
 			$revisionStore = MediaWikiServices::getInstance()->getRevisionStore();
 			$latestRevision = $revisionStore->getKnownCurrentRevision( $title );
 
-			$conflictChunks = 0;
-			$conflictChars = 0;
-			if ( $baseRevision && $latestRevision ) {
-				$baseContent = $baseRevision->getContent( SlotRecord::MAIN );
-				$latestContent = $latestRevision->getContent( SlotRecord::MAIN );
-				if ( $baseContent && $latestContent ) {
-					// Attempt the automatic merge, to measure the number of actual conflicts.
-					/** @var ThreeWayMerge $merge */
-					$merge = MediaWikiServices::getInstance()->getService( 'TwoColConflictThreeWayMerge' );
-					$result = $merge->merge3(
-						$baseContent->serialize(),
-						$latestContent->serialize(),
-						$editPage->textbox2
-					);
-
-					if ( !$result->isCleanMerge() ) {
-						$conflictChunks = $result->getOverlappingChunkCount();
-						$conflictChars = $result->getOverlappingChunkSize();
-					}
-				}
-			}
-
 			EventLogging::logEvent(
 				'TwoColConflictConflict',
 				-1,
@@ -209,8 +185,10 @@ class TwoColConflictHooks {
 					'pageNs' => $context->getTitle()->getNamespace(),
 					'baseRevisionId' => $baseRevision ? $baseRevision->getId() : 0,
 					'latestRevisionId' => $latestRevision ? $latestRevision->getId() : 0,
-					'conflictChunks' => $conflictChunks,
-					'conflictChars' => $conflictChars,
+					// Previously we tried a 3-way-merge with the unsaved content and tracked some
+					// not so sensitive metrics here, but this was expensive and fragile
+					'conflictChunks' => -1,
+					'conflictChars' => -1,
 					'startTime' => $editPage->starttime ?: '',
 					'editTime' => $editPage->edittime ?: '',
 					'pageTitle' => $context->getTitle()->getText(),

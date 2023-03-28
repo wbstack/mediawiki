@@ -18,7 +18,9 @@
  * @file
  */
 
-use MediaWiki\StopForumSpam\DenyListManager;
+namespace MediaWiki\StopForumSpam;
+
+use Maintenance;
 use Wikimedia\IPUtils;
 
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
@@ -26,21 +28,23 @@ require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	: __DIR__ . '/../../../maintenance/Maintenance.php';
 
 /**
- * Reads the denylist file and sticks it in the wancache
+ * Reads the deny-list file and sticks it in the wancache
+ *
+ * @codeCoverageIgnore
  */
-class SFSDenyListUpdate extends Maintenance {
+class UpdateDenyList extends Maintenance {
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Load the list of StopForumSpam denylisted ' .
+		$this->addDescription( 'Load the list of StopForumSpam deny-listed ' .
 			'IPs when no additional arguments are passed.' );
 		$this->addOption(
 			'show',
-			'Print the current list of denylisted IPs'
+			'Print the current list of deny-listed IPs'
 		);
 		$this->addOption(
 			'purge',
-			'Delete the current list of denylisted IPs from cache'
+			'Delete the current list of deny-listed IPs from cache'
 		);
 		$this->addOption(
 			'check-ip',
@@ -64,7 +68,7 @@ class SFSDenyListUpdate extends Maintenance {
 			$this->output(
 				is_array( $ipAddresses )
 				? implode( "\n", $ipAddresses ) . "\n"
-				: "No denylisted IPs found in cache.\n"
+				: "No deny-listed IPs found in cache.\n"
 			);
 			return;
 		}
@@ -91,7 +95,7 @@ class SFSDenyListUpdate extends Maintenance {
 			return;
 		}
 
-		$this->output( "Starting update of SFS deny list in cache...\n" );
+		$this->output( "Starting update of SFS deny-list in cache...\n" );
 		$before = microtime( true );
 
 		// Where the magic happens!
@@ -109,5 +113,5 @@ class SFSDenyListUpdate extends Maintenance {
 
 }
 
-$maintClass = SFSDenyListUpdate::class;
+$maintClass = UpdateDenyList::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

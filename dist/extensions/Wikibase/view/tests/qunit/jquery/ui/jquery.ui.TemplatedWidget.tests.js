@@ -22,13 +22,13 @@
 
 		/**
 		 * @param {Object} templateShortCuts
-		 * @param {jQuery} $subject
+		 * @param {jQuery} $subj
 		 */
-		function checkShortCuts( templateShortCuts, $subject ) {
+		function checkShortCuts( templateShortCuts, $subj ) {
 			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( templateShortCuts, function ( key, selector ) {
-				assert.ok(
-					$subject.data( 'TemplatedWidget' )[ key ] instanceof $,
+				assert.true(
+					$subj.data( 'TemplatedWidget' )[ key ] instanceof $,
 					'Assigned templateShortCut: ' + key + '.'
 				);
 			} );
@@ -43,7 +43,7 @@
 				template: 'templatedWidget-test'
 			}, testSets[ i ][ 1 ] ) );
 
-			assert.ok(
+			assert.true(
 				$subject.data( 'TemplatedWidget' ) instanceof $.ui.TemplatedWidget,
 				'Test set #' + i + ': Initialized widget.'
 			);

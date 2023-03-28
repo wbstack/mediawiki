@@ -458,6 +458,7 @@ function bindEditLinksLoginDrawer( router ) {
 					warning: 'mobile-frontend-watchlist-signup-action'
 				}
 			} );
+			document.body.appendChild( drawer.$el[ 0 ] );
 		}
 		drawer.show();
 	}
@@ -493,7 +494,7 @@ function init( currentPage, currentPageHTMLParser, skin, router ) {
 	} else {
 		hideSectionEditIcons( currentPageHTMLParser );
 		editRestrictions = mw.config.get( 'wgRestrictionEdit' );
-		if ( mw.user.isAnon() && Array.isArray( editRestrictions ) && editRestrictions.indexOf( '*' ) !== -1 ) {
+		if ( mw.user.isAnon() && Array.isArray( editRestrictions ) && !editRestrictions.length ) {
 			bindEditLinksLoginDrawer( router );
 		} else {
 			var $link = $( '<a>' ).attr( 'href', '/wiki/' + mw.config.get( 'wgPageName' ) + '?action=edit' );
@@ -546,7 +547,7 @@ module.exports = function ( currentPage, currentPageHTMLParser, skin ) {
 	}
 
 	if ( currentPage.inNamespace( 'file' ) && isMissing ) {
-		// Is a new file page (enable upload image only) Bug 58311
+		// Is a new file page (enable upload image only) T60311
 		bindEditLinksSorryToast( mw.msg( 'mobile-frontend-editor-uploadenable' ), router );
 	} else {
 		// Edit button is currently hidden. A call to init() will update it as needed.

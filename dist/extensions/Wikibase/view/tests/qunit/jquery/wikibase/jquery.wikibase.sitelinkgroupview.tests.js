@@ -51,7 +51,7 @@
 	}
 
 	QUnit.module( 'jquery.wikibase.sitelinkgroupview', QUnit.newMwEnvironment( {
-		setup: function () {
+		beforeEach: function () {
 			// empty cache of wikibases site details
 			wikibase.sites._siteList = null;
 
@@ -87,7 +87,7 @@
 				}
 			} );
 		},
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_sitelinkgroupview' ).each( function () {
 				var $sitelinkgroupview = $( this ),
 					sitelinkgroupview = $sitelinkgroupview.data( 'sitelinkgroupview' );
@@ -140,13 +140,13 @@
 
 		$sitelinkgroupview
 		.on( 'sitelinkgroupviewafterstartediting', function ( event ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Started edit mode.'
 			);
 		} )
 		.on( 'sitelinkgroupviewafterstopediting', function ( event, dropValue ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Stopped edit mode.'
 			);
@@ -186,11 +186,10 @@
 		var $queue = $( {} );
 
 		/**
-		 * @param {jQuery} $queue
 		 * @param {Function} func
 		 * @param {boolean} [expectingEvent]
 		 */
-		function addToQueue( $queue, func, expectingEvent ) {
+		function addToQueue( func, expectingEvent ) {
 			if ( expectingEvent === undefined ) {
 				expectingEvent = true;
 			}
@@ -203,27 +202,27 @@
 			} );
 		}
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinkgroupview.startEditing();
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinkgroupview.startEditing();
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinkgroupview.stopEditing( true );
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinkgroupview.stopEditing( true );
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinkgroupview.stopEditing();
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinkgroupview.startEditing();
 		} );
 
@@ -240,7 +239,7 @@
 		$sitelinkgroupview
 		.addClass( 'wb-error' )
 		.on( 'sitelinkgroupviewtoggleerror', function ( event, error ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered toggleerror event.'
 			);

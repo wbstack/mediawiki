@@ -1,6 +1,7 @@
 {
 	"name": "WikibaseManifest",
 	"author": "The Wikidata team",
+	"url": "https://www.mediawiki.org/wiki/Extension:WikibaseManifest",
 	"license-name": "GPL-2.0-or-later",
 	"version": "0.0.1",
 	"namemsg": "wikibasemanifest",

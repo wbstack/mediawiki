@@ -46,7 +46,7 @@
 	};
 
 	QUnit.module( 'jquery.wikibase.statementlistview', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_statementlistview' ).each( function () {
 				var $statementlistview = $( this ),
 					statementlistview = $statementlistview.data( 'statementlistview' );
@@ -64,7 +64,7 @@
 		var $statementlistview = createStatementlistview(),
 			statementlistview = $statementlistview.data( 'statementlistview' );
 
-		assert.ok(
+		assert.true(
 			statementlistview instanceof $.wikibase.statementlistview,
 			'Created widget.'
 		);
@@ -86,7 +86,7 @@
 		} );
 		statementlistview = $statementlistview.data( 'statementlistview' );
 
-		assert.ok(
+		assert.true(
 			statementlistview instanceof $.wikibase.statementlistview,
 			'Created widget with filled datamodel.StatementList instance.'
 		);
@@ -104,14 +104,14 @@
 			} ),
 			statementlistview = $statementlistview.data( 'statementlistview' );
 
-		assert.ok(
+		assert.true(
 			statementlistview.value().equals( statementList1 ),
 			'Retrieved value.'
 		);
 
 		statementlistview.value( statementList2 );
 
-		assert.ok(
+		assert.true(
 			statementlistview.value().equals( statementList2 ),
 			'Retrieved value after setting a new value.'
 		);
@@ -128,13 +128,13 @@
 			return statement;
 		};
 
-		assert.ok(
+		assert.true(
 			statementlistview.value().equals( new datamodel.StatementList( [ statement ] ) ),
 			'Retrieved current value after setting a new value on the statementview encapsulated by '
 				+ 'the statementlistview.'
 		);
 
-		assert.ok(
+		assert.true(
 			statementlistview.option( 'value' ).equals( statementList2 ),
 			'Retrieved value still persisting via option().'
 		);

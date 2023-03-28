@@ -6,7 +6,7 @@
 			"Janezdrilc"
 		]
 	},
-	"templatedata-desc": "Uvedba shranjevanja podatkov za parametre predloge (z uporabo zapisa JSON)",
+	"templatedata-desc": "Možnost shranjevanja podatkov za parametre predloge (z uporabo zapisa JSON)",
 	"templatedata-doc-desc-empty": "Ni opisa.",
 	"templatedata-doc-format-block": "Za to predlogo je priporočljiva postavitev parametrov v bloku.",
 	"templatedata-doc-format-custom": "Za to predlogo se uporablja postavitev po meri.",

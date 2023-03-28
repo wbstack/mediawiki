@@ -25,7 +25,6 @@ use SpecialPage;
 use Status;
 use Title;
 use WebRequest;
-use WikiPage;
 
 /**
  * Page for editing label, description and aliases of a Schema
@@ -207,7 +206,7 @@ class SetEntitySchemaLabelDescriptionAliases extends SpecialPage {
 				throw new MWException( 'revision does not match title' );
 			}
 		} else {
-			$wikiPage = WikiPage::factory( $title );
+			$wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
 			$revision = $wikiPage->getRevisionRecord();
 			$revId = $revision->getId();
 		}
@@ -385,7 +384,7 @@ class SetEntitySchemaLabelDescriptionAliases extends SpecialPage {
 		return $this->msg( 'entityschema-newschema-copyright' )
 			->params(
 				$this->msg( 'entityschema-special-id-submit' )->text(),
-				$this->msg( 'copyrightpage' )->text(),
+				$this->msg( 'copyrightpage' )->inContentLanguage()->text(),
 				// FIXME: make license configurable
 				'[https://creativecommons.org/publicdomain/zero/1.0/ Creative Commons CC0 License]'
 			)->parse();

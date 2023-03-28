@@ -62,14 +62,11 @@ class HistoryEntityAction extends HistoryAction {
 
 		if ( $label !== null ) {
 			$labelText = $label->getText();
-			// Escaping HTML characters in order to retain original label that may contain HTML
-			// characters. This prevents having characters evaluated or stripped via
-			// OutputPage::setPageTitle:
 			return $this->msg( 'wikibase-history-title-with-label' )
-				->rawParams( $idSerialization, htmlspecialchars( $labelText ) )->text();
+				->plaintextParams( $idSerialization, $labelText )->parse();
 		} else {
 			return $this->msg( 'wikibase-history-title-without-label' )
-				->rawParams( $idSerialization )->text();
+				->plaintextParams( $idSerialization )->parse();
 		}
 	}
 

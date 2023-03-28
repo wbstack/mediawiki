@@ -8,7 +8,7 @@
 	var datamodel = require( 'wikibase.datamodel' );
 
 	/**
-	 *  @return {Fingerprint}
+	 *  @return {datamodel.Fingerprint}
 	 */
 	function createFingerprint() {
 		return new datamodel.Fingerprint(
@@ -51,7 +51,7 @@
 	}
 
 	QUnit.module( 'jquery.wikibase.entitytermsforlanguagelistview', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_entitytermsforlanguagelistview' ).each( function () {
 				var $entitytermsforlanguagelistview = $( this ),
 					entitytermsforlanguagelistview
@@ -102,7 +102,7 @@
 
 		$entitytermsforlanguagelistview
 		.on( 'entitytermsforlanguagelistviewtoggleerror', function ( event, error ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "toggleerror" event.'
 			);

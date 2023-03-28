@@ -13,17 +13,27 @@
 	var entityStubs = [
 		{
 			id: 1,
+			display: {
+				label: { value: 'abc', language: 'en' },
+				description: { value: 'description', language: 'en' }
+			},
 			label: 'abc',
 			description: 'description',
 			aliases: [ 'ac', 'def' ]
 		},
 		{
 			id: 2,
+			display: {
+				label: { value: 'x', language: 'en' }
+			},
 			label: 'x',
 			aliases: [ 'yz' ]
 		},
 		{
 			id: 3,
+			display: {
+				label: { value: 'g', language: 'en' }
+			},
 			label: 'g'
 		}
 	];
@@ -47,7 +57,7 @@
 	};
 
 	QUnit.module( 'jquery.wikibase.entityselector', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test-entityselector' ).remove();
 		}
 	} ) );
@@ -55,7 +65,7 @@
 	QUnit.test( 'Create', function ( assert ) {
 		var $entitySelector = newTestEntitySelector();
 
-		assert.ok(
+		assert.true(
 			$entitySelector.data( 'entityselector' ) instanceof $.wikibase.entityselector,
 			'Instantiated entityselector.'
 		);
@@ -83,11 +93,11 @@
 		var $entitySelector = newTestEntitySelector();
 		$entitySelector.data( 'entityselector' );
 
-		assert.notOk( $entitySelector.hasClass( 'ui-entityselector-input-unrecognized' ) );
+		assert.false( $entitySelector.hasClass( 'ui-entityselector-input-unrecognized' ) );
 
 		$entitySelector.val( 'does-not-exist' );
 		$entitySelector.trigger( 'blur' );
-		assert.ok( $entitySelector.hasClass( 'ui-entityselector-input-unrecognized' ) );
+		assert.true( $entitySelector.hasClass( 'ui-entityselector-input-unrecognized' ) );
 	} );
 
 	QUnit.test( 'Indicate recognized input', function ( assert ) {
@@ -95,17 +105,17 @@
 
 		var entitySelector = $entitySelector.data( 'entityselector' );
 
-		assert.notOk( $entitySelector.hasClass( 'ui-entityselector-input-recognized' ) );
+		assert.false( $entitySelector.hasClass( 'ui-entityselector-input-recognized' ) );
 		entitySelector.selectedEntity( 'abc' );
 
 		$entitySelector.trigger( 'blur' );
-		assert.ok( $entitySelector.hasClass( 'ui-entityselector-input-recognized' ) );
+		assert.true( $entitySelector.hasClass( 'ui-entityselector-input-recognized' ) );
 	} );
 
 	QUnit.test( 'Item constructor', function ( assert ) {
 		var item = new $.wikibase.entityselector.Item( 'label', 'value', entityStubs[ 0 ] );
 
-		assert.ok(
+		assert.true(
 			item instanceof $.wikibase.entityselector.Item,
 			'Instantiated default entityselector item.'
 		);
@@ -232,7 +242,15 @@
 			hookStub = sinon.stub( mw, 'hook' ),
 			hook = 'HOOK_NAME',
 			emptyValue = '',
-			suggestions = [ { id: '[ID]', label: '[LABEL]', description: '[DESCRIPTION]' } ],
+			suggestions = [ {
+				id: '[ID]',
+				display: {
+					label: { value: '[LABEL]', language: 'en' },
+					description: { value: '[DESCRIPTION]', language: 'en' }
+				},
+				label: '[LABEL]',
+				description: '[DESCRIPTION]'
+			} ],
 			promise = $.Deferred().resolve( suggestions ).promise(),
 			$entitySelector = newTestEntitySelector( { searchHookName: hook } ),
 			entitySelector = $entitySelector.data( 'entityselector' ),

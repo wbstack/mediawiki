@@ -7,8 +7,8 @@
 			"Otokoume",
 			"Schu",
 			"Shirayuki",
-			"青子守歌",
-			"春春眠眠"
+			"春春眠眠",
+			"青子守歌"
 		]
 	},
 	"confirmaccount-newrequests": "現在、'''$1個'''のメール認証済み{{PLURAL:$1|[[Special:ConfirmAccounts|アカウント申請]]}}が承認待ちになっています。'''注意が必要です!'''",

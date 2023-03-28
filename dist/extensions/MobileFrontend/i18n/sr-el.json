@@ -6,9 +6,9 @@
 			"Obsuser",
 			"Srdjan m",
 			"Srđan",
+			"Vipz",
 			"Zoranzoki21",
-			"Сербијана",
-			"Vipz"
+			"Сербијана"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Bez obzira da li korisnik uređuje preko mobilnog interfejsa",
@@ -162,6 +162,7 @@
 	"mobile-frontend-talk-reply": "Odgovori",
 	"mobile-frontend-talk-reply-info": "Imajte na umu da će vaš odgovor automatski biti potpisan.",
 	"mobile-frontend-talk-topic-error": "Nije moguće dodati temu zbog nepoznate greške.",
+	"mobile-frontend-talk-topic-error-protected": "Ova stranica za razgovor je zaštićena. Nemate dozvolu da dodajete teme na nju.",
 	"mobile-frontend-talk-topic-error-permission": "Nije moguće dodati temu. Nemate pravo da uređujete stranice.",
 	"mobile-frontend-talk-topic-error-spam": "Tema je odbijena jer je sadržavala fragment nepoželjnog sadržaja.",
 	"mobile-frontend-talk-topic-error-badtoken": "Došlo je do greške na serveru. Nije moguće sačuvati vašu izmenu. Pokušajte da ponovo učitate ovu stranicu.",

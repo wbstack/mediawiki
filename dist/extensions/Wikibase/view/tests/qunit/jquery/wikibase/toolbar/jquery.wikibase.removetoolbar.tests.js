@@ -6,7 +6,7 @@
 	'use strict';
 
 	QUnit.module( 'jquery.wikibase.removetoolbar', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_removetoolbar' ).each( function () {
 				var $removetoolbar = $( this ),
 					removetoolbar = $removetoolbar.data( 'removetoolbar' );
@@ -34,15 +34,16 @@
 		var $removetoolbar = createRemovetoolbar(),
 			removetoolbar = $removetoolbar.data( 'removetoolbar' );
 
-		assert.ok(
+		assert.true(
 			removetoolbar instanceof $.wikibase.removetoolbar,
 			'Instantiated widget.'
 		);
 
 		removetoolbar.destroy();
 
-		assert.notOk(
+		assert.strictEqual(
 			$removetoolbar.data( 'removetoolbar' ),
+			undefined,
 			'Destroyed widget.'
 		);
 	} );

@@ -7,9 +7,9 @@
 			"Homo",
 			"Hugo.arg",
 			"Matasg",
+			"Pavel1513",
 			"Perkunas",
-			"Tomasdd",
-			"Pavel1513"
+			"Tomasdd"
 		]
 	},
 	"skinname-vector": "Vektorinė",
@@ -19,6 +19,7 @@
 	"vector-action-toggle-sidebar": "Rodyti šoninę juostą",
 	"vector-languages": "Kalbos",
 	"vector-language-button-label": "{{PLURAL:$1|$1 kalba|$1 kalbų}}",
+	"vector-no-language-button-label": "Pridėti kalbas",
 	"vector-action-addsection": "Pridėti temą",
 	"vector-action-delete": "Ištrinti",
 	"vector-action-move": "Pervardyti",
@@ -34,7 +35,12 @@
 	"vector-jumptocontent": "Pereiti prie turinio",
 	"vector-more-actions": "Daugiau",
 	"vector-search-loader": "Įkeliami paieškos pasiūlymai",
+	"vector-searchsuggest-containing": "Ieškoti puslapių, turinčių <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-heading": "Turinys",
+	"vector-toc-toggle-position-title": "paslėpti",
+	"vector-toc-beginning": "Pradžia",
 	"vector-anon-user-menu-pages-learn": "sužinoti daugiau",
 	"vector-main-menu-tooltip": "Pagrindinis meniu",
+	"vector-toc-menu-tooltip": "Turinys",
 	"tooltip-vector-anon-user-menu-title": "Daugiau parametrų"
 }

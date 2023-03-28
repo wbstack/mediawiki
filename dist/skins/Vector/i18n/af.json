@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Byeboer",
 			"Naudefj",
-			"Rooiratel",
-			"Amire80"
+			"Rooiratel"
 		]
 	},
 	"prefs-vector-enable-vector-1-label": "Gebruik ou Vector-vel",
@@ -13,6 +13,8 @@
 	"vector-languages": "Tale",
 	"vector-language-button-aria-label": "Gaan na 'n artikel in 'n ander taal. Beskikbaar in {{PLURAL:$1|$1 taal|$1 tale}}",
 	"vector-language-button-label": "{{PLURAL:$1|$1 taal|$1 tale}}",
+	"vector-no-language-button-label": "Voeg tale by",
+	"vector-no-language-button-aria-label": "Hierdie artikel bestaan slegs in hierdie taal. Voeg die artikel by vir ander tale",
 	"vector-language-redirect-to-top": "Op hierdie {{SITENAME}} is die taalskakels bo-aan die bladsy oorkant die artikeltitel. [[#p-lang-btn|Gaan boontoe]].",
 	"vector-language-variant-switcher-label": "Verander taalvariant",
 	"vector-action-addsection": "Nuwe onderwerp",
@@ -31,10 +33,18 @@
 	"vector-jumptocontent": "Gaan na inhoud",
 	"vector-more-actions": "Meer",
 	"vector-search-loader": "Laai tans soekvoorstelle",
+	"vector-searchsuggest-containing": "Soek vir bladsye wat <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> bevat",
 	"vector-intro-page": "Help:Inleiding",
+	"vector-toc-heading": "Inhoud",
+	"vector-toc-toggle-position-title": "versteek",
+	"vector-toc-beginning": "Inleiding",
+	"vector-toc-toggle-button-label": "Wissel $1 subafdeling",
 	"vector-anon-user-menu-pages": "Bladsye vir uitgemelde redakteurs",
 	"vector-anon-user-menu-pages-learn": "leer meer",
 	"vector-anon-user-menu-pages-label": "Leer meer oor redigering",
 	"vector-main-menu-tooltip": "Hoofkieslys",
+	"vector-toc-menu-tooltip": "Inhoudsopgawe",
+	"vector-toc-collapsible-button-label": "Wissel die inhoudsopgawe",
+	"vector-site-nav-label": "Werf",
 	"tooltip-vector-anon-user-menu-title": "Meer opsies"
 }

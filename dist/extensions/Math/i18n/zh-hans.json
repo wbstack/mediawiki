@@ -4,6 +4,7 @@
 			"A Retired User",
 			"AYZ04",
 			"Blackteahamburger",
+			"GuoPC",
 			"Hzy980512",
 			"Liangent",
 			"Liuxinyu970226",
@@ -15,7 +16,8 @@
 			"乌拉跨氪",
 			"予弦",
 			"神樂坂秀吉",
-			"铁桶"
+			"铁桶",
+			"Lantianjialiang"
 		]
 	},
 	"math-desc": "在<code>&lt;math&gt;</code>…<code>&lt;/math&gt;</code>标签间生成数学公式",
@@ -29,6 +31,7 @@
 	"math-visualeditor-mwlatexinspector-display-default": "默认",
 	"math-visualeditor-mwlatexinspector-display-inline": "行内",
 	"math-visualeditor-mwlatexinspector-id": "链接ID（可选）",
+	"math-visualeditor-mwlatexinspector-qid": "Wikibase ID（带 Q 作为前缀）",
 	"math-visualeditor-mwmathdialog-title": "数学公式",
 	"math-visualeditor-symbol-group-chem-addition": "加合物",
 	"math-visualeditor-symbol-group-chem-aggregation": "聚合状态",
@@ -93,8 +96,7 @@
 	"math_unknown_error": "未知错误",
 	"math_unknown_function": "未知函数“$1”",
 	"mw_math_latexml": "LaTeXML（试验中，使用MathML）",
-	"mw_math_mathml": "带SVG或PNG备选的MathML（建议用于现代的浏览器和辅助工具）",
-	"mw_math_png": "PNG图片",
+	"mw_math_mathml": "SVG（MathML可通过浏览器插件启用）",
 	"mw_math_source": "LaTeX源（用于文字浏览器）",
 	"prefs-math": "数学公式",
 	"mathstatus": "公式生成器状态",

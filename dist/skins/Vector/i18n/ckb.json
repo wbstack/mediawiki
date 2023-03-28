@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Aram",
 			"Asoxor",
 			"Calak",
-			"Sarchia",
-			"ئارام بکر",
 			"Muhammed taha",
-			"Aram"
+			"Sarchia",
+			"ئارام بکر"
 		]
 	},
 	"skinname-vector": "ڤێکتۆری کۆن (٢٠١٠)",
@@ -21,6 +21,8 @@
 	"vector-languages": "زمانەکان",
 	"vector-language-button-aria-label": "بڕۆ بۆ وتارێک بە زمانێکی تر. بە $1 زمان بەردەستە",
 	"vector-language-button-label": "{{{{PLURAL:$1|$1 زمان|$1 زمان}}}}",
+	"vector-no-language-button-label": "زمانەکان زیاد بکە",
+	"vector-no-language-button-aria-label": "ئەم وتارە تەنیا بەم زمانە ھەیە. وتارەکە بۆ زمانەکانی تر زیاد بکە",
 	"vector-language-redirect-to-top": "لەسەر {{SITENAME}} بەستەرەکانی زمان لەسەرەوەی پەڕەکەدان بەرامبەر ناونیشانی وتارەکە. [[#p-lang-btn|بڕۆ بۆ سەرەوە]].",
 	"vector-action-addsection": "بابەت دابنێ",
 	"vector-action-delete": "سڕینەوە",
@@ -38,10 +40,17 @@
 	"vector-jumptocontent": "بۆ ناوەڕۆک بازبدە",
 	"vector-more-actions": "زیاتر",
 	"vector-search-loader": "پێشنیارەکانی گەڕان باردەکرێ",
+	"vector-searchsuggest-containing": "بەدوای ئەو پەڕانە بگەڕێ کە «<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>»یان تێدایە.",
 	"vector-intro-page": "ویکیپیدیا:ناساندن",
+	"vector-toc-beginning": "دەستپێک",
+	"vector-toc-toggle-button-label": "ژێربەشی $1 بگۆڕە",
 	"vector-anon-user-menu-pages": "ئەو پەڕانەی بۆ ئەو دەستکاریکەرانەن کە لەدەرەوەن",
 	"vector-anon-user-menu-pages-learn": "زیاتر فێر بە",
 	"vector-anon-user-menu-pages-label": "زیاتر لەسەر دەستکاریکردن فێر بە",
 	"vector-main-menu-tooltip": "پێڕستی سەرەکی",
+	"vector-toc-menu-tooltip": "خشتەی ناوەڕۆکەکان",
+	"vector-toc-collapsible-button-label": "خشتەی ناوەڕۆکەکان بگۆڕە",
+	"vector-site-nav-label": "پێگە",
+	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|وتووێژ]]",
 	"tooltip-vector-anon-user-menu-title": "ھەڵبژاردەی زیاتر"
 }

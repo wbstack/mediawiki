@@ -62,8 +62,7 @@ class ResolutionSuggester {
 		$diffYourLines = $formatter->format( $baseLines, $yourLines, $yourLines );
 		$diffStoredLines = $formatter->format( $baseLines, $storedLines, $storedLines );
 
-		$count = count( $diffYourLines );
-		if ( $count !== count( $diffStoredLines ) ) {
+		if ( count( $diffYourLines ) !== count( $diffStoredLines ) ) {
 			return null;
 		}
 

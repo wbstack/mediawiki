@@ -10,13 +10,15 @@
 			"Rachmat04",
 			"Sumbukompor",
 			"Veracious",
-			"Rex"
+			"Rex",
+			"Agam Riyandana"
 		]
 	},
 	"cirrussearch-desc": "Mesin pencarian yang didorong oleh Elasticsearch untuk MediaWiki",
 	"cirrussearch-backend-error": "Kami tidak dapat menyelesaikan pencarian Anda karena suatu kendala sementara. Silakan coba lagi nanti.",
 	"cirrussearch-parse-error": "Kueri tidak dipahami. Tolong sederhanakan. Kueri itu telah dicatat untuk memperbaiki sistem pencarian.",
 	"cirrussearch-too-busy-error": "Pencarian sedang terlalu sibuk. Mohon coba lagi nanti.",
+	"cirrussearch-regex-empty-expression": "$1 mengharapkan ekspresi reguler yang tidak kosong.",
 	"cirrussearch-regex-syntax-error": "Galat sintaksis ekspresi reguler di $2: $1",
 	"cirrussearch-regex-too-busy-error": "Terlalu banyak pencarian ekspresi reguler sedang dijalankan. Silakan mencoba lagi nanti.",
 	"cirrussearch-regex-too-complex-error": "Ekspresi reguler terlalu rumit. Pelajari lebih tentang cara menyederhanakannya [[mw:Special:MyLanguage/Help:CirrusSearch/RegexTooComplex|di sini]].",
@@ -51,6 +53,7 @@
 	"cirrussearch-feature-not-available": "Kata kunci pencarian '$1' belum diaktifkan di wiki ini.",
 	"cirrussearch-feature-too-many-conditions": "Terlalu banyak kondisi diberikan untuk '$1', menyingkati menjadi $2.",
 	"cirrussearch-feature-deepcat-exception": "Kueri pencarian SPARQL kategori dalam telah gagal",
+	"cirrussearch-feature-deepcat-toomany": "Kueri kategori dalam menghasilkan terlalu banyak kategori",
 	"cirrussearch-feature-deepcat-invalid-title": "Kategori yang diberikan tidak valid.",
 	"cirrussearch-feature-pageid-invalid-id": "{{PLURAL:$2|ID}} halaman tidak valid: $1",
 	"cirrussearch-incategory-feature-no-valid-categories": "Tidak ada kategori valid yang diberikan untuk '$1'.",

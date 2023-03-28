@@ -78,7 +78,7 @@
 	}
 
 	QUnit.module( 'jquery.wikibase.snaklistview', window.QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_snaklistview' ).each( function ( i, node ) {
 				var $node = $( node ),
 					snaklistview = $node.data( 'snaklistview' );
@@ -114,8 +114,9 @@
 			'Snaklistview is not in edit mode.'
 		);
 
-		assert.ok(
+		assert.notStrictEqual(
 			snaklistview.$listview.data( 'listview' ),
+			undefined,
 			'Initialized listview.'
 		);
 
@@ -246,7 +247,7 @@
 		var done = assert.async( 3 );
 
 		$node.on( 'snaklistviewafterstartediting', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "afterstartediting" event.'
 			);
@@ -266,7 +267,7 @@
 		snaklistview.startEditing();
 
 		$node.on( 'snaklistviewafterstopediting', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "afterstopediting" event.'
 			);
@@ -300,7 +301,7 @@
 		var done = assert.async( 3 );
 
 		$node.on( 'snaklistviewafterstartediting', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "afterstartediting" event.'
 			);
@@ -324,7 +325,7 @@
 		snaklistview.startEditing();
 
 		$node.on( 'snaklistviewafterstopediting', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "afterstopediting" event.'
 			);
@@ -360,7 +361,7 @@
 		var done = assert.async( 3 );
 
 		$node.on( 'snaklistviewafterstartediting', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "afterstartediting" event.'
 			);
@@ -368,7 +369,7 @@
 		} );
 
 		$node.on( 'snaklistviewchange', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "change" event.'
 			);
@@ -537,10 +538,9 @@
 		/**
 		 * Returns a string representing the state a snaklistview's snakviews are in.
 		 *
-		 * @param {jQuery.wikibase.snaklistview} snaklistview
 		 * @return {string}
 		 */
-		function getSnakviewStates( snaklistview ) {
+		function getSnakviewStates() {
 			var snakviews = snaklistview._listview.value(),
 				isDisabled = true,
 				isEnabled = true;
@@ -560,13 +560,13 @@
 		}
 
 		assert.strictEqual(
-			getSnakviewStates( snaklistview ),
+			getSnakviewStates(),
 			'enabled',
 			'snaklistview\'s snakviews are enabled.'
 		);
 
 		$node.on( 'snaklistviewdisable', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "disable" event.'
 			);
@@ -574,7 +574,7 @@
 		} );
 
 		$node.on( 'snaklistviewenable', function ( e ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "enable" event.'
 			);
@@ -584,7 +584,7 @@
 		snaklistview.disable();
 
 		assert.strictEqual(
-			getSnakviewStates( snaklistview ),
+			getSnakviewStates(),
 			'disabled',
 			'Disabled snaklistview\'s snakviews.'
 		);
@@ -592,7 +592,7 @@
 		snaklistview.enable();
 
 		assert.strictEqual(
-			getSnakviewStates( snaklistview ),
+			getSnakviewStates(),
 			'enabled',
 			'Eabled snaklistview\'s snakviews.'
 		);
@@ -604,12 +604,12 @@
 		var $node = createSnaklistview( snakLists[ 0 ], { singleProperty: true } ),
 			snaklistview = $node.data( 'snaklistview' );
 
-		assert.ok(
+		assert.true(
 			snaklistview._listview.items().length > 0,
 			'Initialized snaklistview with more than one item.'
 		);
 
-		function testPropertyLabelVisibility( assert, snaklistview ) {
+		function testPropertyLabelVisibility() {
 			// eslint-disable-next-line no-jquery/no-each-util
 			$.each( snaklistview._listview.items(), function ( i, snakviewNode ) {
 				var $snakview = $( snakviewNode ),
@@ -632,7 +632,7 @@
 			} );
 		}
 
-		testPropertyLabelVisibility( assert, snaklistview );
+		testPropertyLabelVisibility();
 	} );
 
 }( wikibase, dataValues ) );

@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Armin1392",
+			"Beginneruser",
 			"Calak",
 			"Ebraminio",
 			"FarsiNevis",
@@ -10,9 +11,8 @@
 			"Mahan",
 			"Mehran",
 			"Mjbmr",
-			"Reza1615",
-			"Beginneruser",
-			"Mojtabakd"
+			"Mojtabakd",
+			"Reza1615"
 		]
 	},
 	"uls-desc": "به کاربر راه‌های مختلفی برای انتخاب زبان و تنظیم تنظیمات زبان  می‌دهد",
@@ -75,5 +75,10 @@
 	"ext-uls-setlang-heading": "زبان رابط کاربری را تغییر می‌دهید؟",
 	"ext-uls-setlang-accept": "پذیرفتن تغییرات",
 	"ext-uls-setlang-loading": "در حال اعمال...",
-	"ext-uls-setlang-cancel": "تغییر نده"
+	"ext-uls-setlang-cancel": "تغییر نده",
+	"ext-uls-actions-menu-header": "گزینه‌های بیشتر",
+	"ext-uls-actions-menu-language-settings-item-label": "تنظیمات زبان را باز کن",
+	"ext-uls-empty-state-header": "هنوز زبانی موجود نیست",
+	"ext-uls-empty-state-header-actions-available": "هنوز زبانی موجود نیست. می‌خواهید یکی اضافه کنید؟",
+	"ext-uls-empty-state-desc-actions-available": "محتوا را به زبان‌های بیشتری در دسترس قرار دهید."
 }

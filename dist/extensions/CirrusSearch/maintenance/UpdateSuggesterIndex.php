@@ -4,18 +4,15 @@ namespace CirrusSearch\Maintenance;
 
 use CirrusSearch\BuildDocument\Completion\SuggestBuilder;
 use CirrusSearch\Connection;
-use CirrusSearch\DataSender;
 use CirrusSearch\ElasticaErrorHandler;
 use CirrusSearch\Maintenance\Validators\AnalyzersValidator;
-use CirrusSearch\MetaStore\MetaStoreIndex;
-use CirrusSearch\MetaStore\MetaVersionStore;
 use CirrusSearch\SearchConfig;
 use Elastica;
 use Elastica\Index;
 use Elastica\Query;
 use Elastica\Request;
 use Elastica\Status;
-use MWElasticUtils;
+use MediaWiki\Extension\Elastica\MWElasticUtils;
 
 /**
  * Update the search configuration on the search backend for the title
@@ -63,7 +60,7 @@ class UpdateSuggesterIndex extends Maintenance {
 	/**
 	 * @var string
 	 */
-	private $indexTypeName;
+	private $indexSuffix;
 
 	/**
 	 * @var string
@@ -158,6 +155,7 @@ class UpdateSuggesterIndex extends Maintenance {
 			'Set index.routing.allocation.exclude.tag on the created index. Useful if you want ' .
 			'to force the suggester index not to be allocated on a specific set of nodes.',
 			false, true );
+		$this->addOption( 'recreate', "Force the creation of a new index." );
 	}
 
 	public function execute() {
@@ -168,7 +166,7 @@ class UpdateSuggesterIndex extends Maintenance {
 		$this->disablePoolCountersAndLogging();
 		$this->workAroundBrokenMessageCache();
 		$this->masterTimeout = $this->getOption( 'masterTimeout', $wgCirrusSearchMasterTimeout );
-		$this->indexTypeName = Connection::TITLE_SUGGEST_TYPE;
+		$this->indexSuffix = Connection::TITLE_SUGGEST_INDEX_SUFFIX;
 
 		$useCompletion = $this->getSearchConfig()->get( 'CirrusSearchUseCompletionSuggester' );
 
@@ -207,17 +205,7 @@ class UpdateSuggesterIndex extends Maintenance {
 		$this->utils->checkElasticsearchVersion();
 
 		try {
-			// If the version does not exist it's certainly because nothing has been indexed.
-			if ( !MetaStoreIndex::cirrusReady( $this->getConnection() ) ) {
-				throw new \Exception(
-					"Cirrus meta store does not exist, you must index your data first"
-				);
-			}
-
-			if ( !$this->canWrite() ) {
-				$this->fatalError( 'Index/Cluster is frozen. Giving up.' );
-			}
-
+			$this->requireCirrusReady();
 			$this->builder = SuggestBuilder::create( $this->getConnection(),
 				$this->getOption( 'scoringMethod' ), $this->indexBaseName );
 			# check for broken indices and delete them
@@ -262,21 +250,11 @@ class UpdateSuggesterIndex extends Maintenance {
 	}
 
 	/**
-	 * Check the frozen indices
-	 * @return true if the cluster/index is not frozen, false otherwise.
-	 */
-	private function canWrite() {
-		// Reuse DataSender even if we don't send anything with it.
-		$sender = new DataSender( $this->getConnection(), $this->getSearchConfig() );
-		return $sender->isAvailableForWrites();
-	}
-
-	/**
 	 * Check for duplicate indices that may have been created
 	 * by a previous update that failed.
 	 */
 	private function checkAndDeleteBrokenIndices() {
-		$indices = $this->utils->getAllIndicesByType( $this->getIndexTypeName() );
+		$indices = $this->utils->getAllIndicesByType( $this->getIndexAliasName() );
 		if ( count( $indices ) < 2 ) {
 			return;
 		}
@@ -286,7 +264,7 @@ class UpdateSuggesterIndex extends Maintenance {
 		}
 
 		$status = new Status( $this->getClient() );
-		foreach ( $status->getIndicesWithAlias( $this->getIndexTypeName() ) as $aliased ) {
+		foreach ( $status->getIndicesWithAlias( $this->getIndexAliasName() ) as $aliased ) {
 			// do not try to delete indices that are used in aliases
 			unset( $indexByName[$aliased->getName()] );
 		}
@@ -309,13 +287,13 @@ class UpdateSuggesterIndex extends Maintenance {
 
 	private function rebuild() {
 		$oldIndexIdentifier = $this->utils->pickIndexIdentifierFromOption(
-			'current', $this->getIndexTypeName()
+			'current', $this->getIndexAliasName()
 		);
 		$this->oldIndex = $this->getConnection()->getIndex(
-			$this->indexBaseName, $this->indexTypeName, $oldIndexIdentifier
+			$this->indexBaseName, $this->indexSuffix, $oldIndexIdentifier
 		);
 		$this->indexIdentifier = $this->utils->pickIndexIdentifierFromOption(
-			'now', $this->getIndexTypeName()
+			'now', $this->getIndexAliasName()
 		);
 
 		$this->createIndex();
@@ -336,11 +314,16 @@ class UpdateSuggesterIndex extends Maintenance {
 		if ( !$wgCirrusSearchRecycleCompletionSuggesterIndex ) {
 			return false;
 		}
+
+		if ( $this->getOption( "recreate", false ) ) {
+			return false;
+		}
+
 		$oldIndexIdentifier = $this->utils->pickIndexIdentifierFromOption(
-			'current', $this->getIndexTypeName()
+			'current', $this->getIndexAliasName()
 		);
 		$oldIndex = $this->getConnection()->getIndex(
-			$this->indexBaseName, $this->indexTypeName, $oldIndexIdentifier
+			$this->indexBaseName, $this->indexSuffix, $oldIndexIdentifier
 		);
 		if ( !$oldIndex->exists() ) {
 			$this->error( 'Index does not exist yet cannot recycle.' );
@@ -363,8 +346,9 @@ class UpdateSuggesterIndex extends Maintenance {
 		$aMaj = explode( '.', SuggesterAnalysisConfigBuilder::VERSION, 2 )[0];
 
 		try {
-			$store = new MetaVersionStore( $this->getConnection() );
-			$versionDoc = $store->find( $this->indexBaseName, $this->indexTypeName );
+			$versionDoc = $this->getMetaStore()
+				->versionStore()
+				->find( $this->indexBaseName, $this->indexSuffix );
 		} catch ( \Elastica\Exception\NotFoundException $nfe ) {
 			$this->error( 'Index missing in mw_cirrus_metastore::version, cannot recycle.' );
 			return false;
@@ -440,6 +424,8 @@ class UpdateSuggesterIndex extends Maintenance {
 		$query->setSize( $this->indexChunkSize );
 		$query->setSource( false );
 		$query->setSort( [ '_doc' ] );
+		// Explicitly ask for accurate total_hits even-though we use a scroll request
+		$query->setTrackTotalHits( true );
 		$search = new \Elastica\Search( $this->getClient() );
 		$search->setQuery( $query );
 		$search->addIndex( $this->getIndex() );
@@ -451,7 +437,8 @@ class UpdateSuggesterIndex extends Maintenance {
 		$this->log( "Deleting remaining docs from previous batch\n" );
 		foreach ( $scroll as $results ) {
 			if ( $totalDocsToDump === -1 ) {
-				$totalDocsToDump = $results->getTotalHits();
+				// hack to support ES6, switch to getTotalHits
+				$totalDocsToDump = $this->getTotalHits( $results );
 				if ( $totalDocsToDump === 0 ) {
 					break;
 				}
@@ -466,9 +453,10 @@ class UpdateSuggesterIndex extends Maintenance {
 			if ( empty( $docIds ) ) {
 				continue;
 			}
+
 			MWElasticUtils::withRetry( $this->indexRetryAttempts,
 				function () use ( $docIds ) {
-					$this->getType()->deleteIds( $docIds );
+					$this->getIndex()->deleteByQuery( new Query\Ids( $docIds ) );
 				}
 			);
 		}
@@ -530,7 +518,7 @@ class UpdateSuggesterIndex extends Maintenance {
 	private function indexData() {
 		// We build the suggestions by reading CONTENT and GENERAL indices.
 		// This does not support extra indices like FILES on commons.
-		$sourceIndexTypes = [ Connection::CONTENT_INDEX_TYPE, Connection::GENERAL_INDEX_TYPE ];
+		$sourceIndexSuffixes = [ Connection::CONTENT_INDEX_SUFFIX, Connection::GENERAL_INDEX_SUFFIX ];
 
 		$query = new Query();
 		$query->setSource( [
@@ -540,15 +528,16 @@ class UpdateSuggesterIndex extends Maintenance {
 		$pageAndNs = new Elastica\Query\BoolQuery();
 		$pageAndNs->addShould( new Elastica\Query\Term( [ "namespace" => NS_MAIN ] ) );
 		$pageAndNs->addShould( new Elastica\Query\Term( [ "redirect.namespace" => NS_MAIN ] ) );
-		$pageAndNs->addMust( new Elastica\Query\Type( Connection::PAGE_TYPE_NAME ) );
 		$bool = new Elastica\Query\BoolQuery();
 		$bool->addFilter( $pageAndNs );
 
 		$query->setQuery( $bool );
 		$query->setSort( [ '_doc' ] );
+		// Explicitly ask for accurate total_hits even-though we use a scroll request
+		$query->setTrackTotalHits( true );
 
-		foreach ( $sourceIndexTypes as $sourceIndexType ) {
-			$sourceIndex = $this->getConnection()->getIndex( $this->indexBaseName, $sourceIndexType );
+		foreach ( $sourceIndexSuffixes as $sourceIndexSuffix ) {
+			$sourceIndex = $this->getConnection()->getIndex( $this->indexBaseName, $sourceIndexSuffix );
 			$search = new \Elastica\Search( $this->getClient() );
 			$search->setQuery( $query );
 			$search->addIndex( $sourceIndex );
@@ -557,16 +546,16 @@ class UpdateSuggesterIndex extends Maintenance {
 			$scroll = new \Elastica\Scroll( $search, '15m' );
 
 			$docsDumped = 0;
-			$destinationType = $this->getIndex()->getType( Connection::TITLE_SUGGEST_TYPE_NAME );
+			$destinationIndex = $this->getIndex();
 
 			foreach ( $scroll as $results ) {
 				if ( $totalDocsToDump === -1 ) {
-					$totalDocsToDump = $results->getTotalHits();
+					$totalDocsToDump = $this->getTotalHits( $results );
 					if ( $totalDocsToDump === 0 ) {
-						$this->log( "No documents to index from $sourceIndexType\n" );
+						$this->log( "No documents to index from $sourceIndexSuffix\n" );
 						break;
 					}
-					$this->log( "Indexing $totalDocsToDump documents from $sourceIndexType with " .
+					$this->log( "Indexing $totalDocsToDump documents from $sourceIndexSuffix with " .
 						"batchId: {$this->builder->getBatchId()}\n" );
 				}
 				$inputDocs = [];
@@ -584,12 +573,12 @@ class UpdateSuggesterIndex extends Maintenance {
 				}
 				$this->outputProgress( $docsDumped, $totalDocsToDump );
 				MWElasticUtils::withRetry( $this->indexRetryAttempts,
-					static function () use ( $destinationType, $suggestDocs ) {
-						$destinationType->addDocuments( $suggestDocs );
+					static function () use ( $destinationIndex, $suggestDocs ) {
+						$destinationIndex->addDocuments( $suggestDocs );
 					}
 				);
 			}
-			$this->log( "Indexing from $sourceIndexType index done.\n" );
+			$this->log( "Indexing from $sourceIndexSuffix index done.\n" );
 		}
 	}
 
@@ -598,7 +587,7 @@ class UpdateSuggesterIndex extends Maintenance {
 		// master_timeout. This is a copy of the Elastica\Index::addAlias() method
 		// $this->getIndex()->addAlias( $this->getIndexTypeName(), true );
 		$index = $this->getIndex();
-		$name = $this->getIndexTypeName();
+		$name = $this->getIndexAliasName();
 
 		$path = '_aliases';
 		$data = [ 'actions' => [] ];
@@ -630,7 +619,7 @@ class UpdateSuggesterIndex extends Maintenance {
 		}
 		$this->lastProgressPrinted = $pctDone;
 		if ( ( $pctDone % 2 ) == 0 ) {
-			$this->outputIndented( "\t$pctDone% done...\n" );
+			$this->outputIndented( "    $pctDone% done...\n" );
 		}
 	}
 
@@ -688,7 +677,7 @@ class UpdateSuggesterIndex extends Maintenance {
 		}
 
 		$args = [
-			'settings' => $settings,
+			'settings' => [ 'index' => $settings ],
 			'mappings' => $mappingConfigBuilder->buildConfig()
 		];
 		// @todo utilize $this->getIndex()->create(...) once it supports setting
@@ -697,7 +686,7 @@ class UpdateSuggesterIndex extends Maintenance {
 			'',
 			Request::PUT,
 			$args,
-			[ 'master_timeout' => $this->masterTimeout ]
+			[ 'master_timeout' => $this->masterTimeout, 'include_type_name' => 'false' ]
 		);
 
 		// Index create is async, we have to make sure that the index is ready
@@ -742,11 +731,11 @@ class UpdateSuggesterIndex extends Maintenance {
 	 * @return string Number of replicas this index should have. May be a range such as '0-2'
 	 */
 	private function getReplicaCount() {
-		return $this->getConnection()->getSettings()->getReplicaCount( $this->indexTypeName );
+		return $this->getConnection()->getSettings()->getReplicaCount( $this->indexSuffix );
 	}
 
 	private function getShardCount() {
-		return $this->getConnection()->getSettings()->getShardCount( $this->indexTypeName );
+		return $this->getConnection()->getSettings()->getShardCount( $this->indexSuffix );
 	}
 
 	/**
@@ -754,13 +743,14 @@ class UpdateSuggesterIndex extends Maintenance {
 	 *  node. -1 for unlimited.
 	 */
 	private function getMaxShardsPerNode() {
-		return $this->getConnection()->getSettings()->getMaxShardsPerNode( $this->indexTypeName );
+		return $this->getConnection()->getSettings()->getMaxShardsPerNode( $this->indexSuffix );
 	}
 
 	private function updateVersions() {
 		$this->log( "Updating tracking indexes..." );
-		$store = new MetaVersionStore( $this->getConnection() );
-		$store->update( $this->indexBaseName, $this->indexTypeName );
+		$this->getMetaStore()
+			->versionStore()
+			->update( $this->indexBaseName, $this->indexSuffix );
 		$this->output( "ok.\n" );
 	}
 
@@ -769,15 +759,8 @@ class UpdateSuggesterIndex extends Maintenance {
 	 */
 	public function getIndex() {
 		return $this->getConnection()->getIndex(
-			$this->indexBaseName, $this->indexTypeName, $this->indexIdentifier
+			$this->indexBaseName, $this->indexSuffix, $this->indexIdentifier
 		);
-	}
-
-	/**
-	 * @return \Elastica\Type
-	 */
-	public function getType() {
-		return $this->getIndex()->getType( Connection::TITLE_SUGGEST_TYPE_NAME );
 	}
 
 	/**
@@ -790,8 +773,18 @@ class UpdateSuggesterIndex extends Maintenance {
 	/**
 	 * @return string name of the index type being updated
 	 */
-	protected function getIndexTypeName() {
-		return $this->getConnection()->getIndexName( $this->indexBaseName, $this->indexTypeName );
+	protected function getIndexAliasName() {
+		return $this->getConnection()->getIndexName( $this->indexBaseName, $this->indexSuffix );
+	}
+
+	/**
+	 * @param Elastica\ResultSet $results
+	 * @return mixed|string
+	 */
+	private function getTotalHits( Elastica\ResultSet $results ) {
+		// hack to support ES6, switch to getTotalHits
+		return $results->getResponse()->getData()["hits"]["total"]["value"] ??
+			   $results->getResponse()->getData()["hits"]["total"];
 	}
 }
 

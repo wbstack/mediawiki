@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
  * @file
@@ -51,5 +50,5 @@ JAVASCRIPT;
 	}
 }
 
-$maintClass = 'UniversalLanguageSelector\CompileFontRepo';
+$maintClass = CompileFontRepo::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

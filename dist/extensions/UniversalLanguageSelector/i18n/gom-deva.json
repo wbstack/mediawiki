@@ -55,5 +55,10 @@
 	"ext-uls-setlang-heading": "इंटर्फेसची भास बदल?",
 	"ext-uls-setlang-accept": "बदल मानून घे",
 	"ext-uls-setlang-loading": "लागू करता...",
-	"ext-uls-setlang-cancel": "बदलिनाका"
+	"ext-uls-setlang-cancel": "बदलिनाका",
+	"ext-uls-actions-menu-language-settings-item-label": "भासेची मांडावळ उगड",
+	"ext-uls-empty-state-header": "अजून भासो नात",
+	"ext-uls-empty-state-desc": "सध्याक खयंच्योच भासो उपलब्ध नांत",
+	"ext-uls-empty-state-header-actions-available": "अजून भासो नात. नवी जोडची?",
+	"ext-uls-empty-state-desc-actions-available": "मजकूर आनीक भासानी उपलब्ध कर."
 }

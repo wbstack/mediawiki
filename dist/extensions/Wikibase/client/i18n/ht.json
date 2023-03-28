@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Bfpage",
 			"Tisave",
-			"Amire80",
 			"Kitanago"
 		]
 	},
@@ -40,6 +40,7 @@
 	"wikibase-rcfilters-hide-wikibase-conflicts-major-global": "Tout modifikasyon {{WBREPONAME}} yo deziyen kòm « tou piti », kidonk filt « modifikasyon {{WBREPONAME}} yo » konfli ak filt « Modifikasyon ki pa tou piti ».",
 	"wikibase-watchlist-show-changes-pref": "Montre modifikasyon {{WBREPONAME}} yo nan lis swivi ou a",
 	"unconnectedpages": "Paj ki pa konekte ak eleman yo",
+	"unconnectedpages-summary": "Paj sa a bay lis paj ki pa gen okenn eleman done konekte (nan espas non ki sipòte eleman ki konekte).",
 	"wikibase-unconnectedpages-submit": "Montre paj yo",
 	"wikibase-pageswithbadges-submit": "Montre paj yo",
 	"entityusage": "Itilizasyon antite",

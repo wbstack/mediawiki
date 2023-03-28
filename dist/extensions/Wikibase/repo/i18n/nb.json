@@ -8,7 +8,8 @@
 			"Kingu",
 			"Kjetil r",
 			"Macofe",
-			"Njardarlogar"
+			"Njardarlogar",
+			"Winston Sung"
 		]
 	},
 	"wikibase-desc": "Tjenertutvidelse for Wikibase, det strukturerte datalageret",
@@ -325,6 +326,7 @@
 	"wikibase-entitypage-title": "Entitetsside",
 	"wikibase-entitypage-text": "Denne siden omdirigerer til entitetssiden på datalageret den hører til. Oppgi entitets-ID-en i URL-en med undersidesyntaks.",
 	"wikibase-entitypage-bad-id": "Ugyldig ID: $1.",
+	"wikibase-error-entity-not-local": "Entitetstypen $1 kan ikke redigeres på denne wikien.",
 	"wikibase-error-entity-too-big": "Entiteten er for stor. Maksimal tillatt entitetsstørrelse er $1.",
 	"wikibase-parse-error": "Misformet verdi.",
 	"wikibase-parse-error-coordinate": "Koordinatverdien er feilformatert.",

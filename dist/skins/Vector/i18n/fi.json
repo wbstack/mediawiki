@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"01miki10",
+			"Amire80",
 			"Crt",
 			"MITO",
 			"Majavah",
@@ -11,9 +12,10 @@
 			"Nike",
 			"Pxos",
 			"Pyscowicz",
-			"SuperPete",
 			"Rönttönen",
-			"Amire80"
+			"SuperPete",
+			"Stryn",
+			"Yupik"
 		]
 	},
 	"skinname-vector": "Vanha Vektori (2010)",
@@ -30,6 +32,8 @@
 	"vector-languages": "Kielet",
 	"vector-language-button-aria-label": "Mene artikkeliin toisella kielellä. Saatavilla {{PLURAL:$1|$1 kielellä}}",
 	"vector-language-button-label": "{{PLURAL:$1|$1 kieli|$1 kieltä}}",
+	"vector-no-language-button-label": "Lisää kieliä",
+	"vector-no-language-button-aria-label": "Tämä artikkeli on olemassa vain tällä kielellä. Lisää artikkeli muille kielille",
 	"vector-language-redirect-to-top": "Tällä sivustolla ({{SITENAME}}) kielilinkit ovat artikkelin yläosassa otsikon vieressä. [[#p-lang-btn|Sivun yläosaan]].",
 	"vector-action-addsection": "Lisää aihe",
 	"vector-action-delete": "Poista",
@@ -47,11 +51,15 @@
 	"vector-jumptocontent": "Siirry sisältöön",
 	"vector-more-actions": "Muut",
 	"vector-search-loader": "Ladataan hakuehdotuksia",
-	"vector-searchsuggest-containing": "Hae sivuja, jotka sisältävät <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong>",
+	"vector-searchsuggest-containing": "Hae sivuja, jotka sisältävät <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-heading": "Sisällysluettelo",
+	"vector-toc-beginning": "Johdanto",
 	"vector-anon-user-menu-pages": "Sivut kirjautumattomille muokkaajille",
 	"vector-anon-user-menu-pages-learn": "lue lisää",
 	"vector-anon-user-menu-pages-label": "Lue lisää muokkaamisesta",
-	"vector-personal-more-label": "Käyttäjän linkit",
 	"vector-main-menu-tooltip": "Päävalikko",
+	"vector-toc-menu-tooltip": "Sisällysluettelo",
+	"vector-site-nav-label": "Sivusto",
+	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Keskustelu]]",
 	"tooltip-vector-anon-user-menu-title": "Lisää valintoja"
 }

@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Artsiom91",
-			"Maksim L.",
-			"Chadyka",
-			"No Sleep till Krupki",
 			"Amire80",
+			"Artsiom91",
+			"Chadyka",
+			"Maksim L.",
+			"No Sleep till Krupki",
 			"Plaga med",
 			"Tomato Cream",
 			"Tīgelika"
@@ -40,6 +40,7 @@
 	"kartographer-sidebar-latitude": "Шырата",
 	"kartographer-sidebar-longitude": "Даўгата",
 	"kartographer-sidebar-mapdetails": "Вонкавыя карты",
+	"kartographer-sidebar-nearbybutton": "Паказаць артыкулы паблізу",
 	"kartographer-sidebar-service": "Сэрвіс",
 	"kartographer-sidebar-togglebutton": "Вонкавыя карты",
 	"leafletdraw-draw-handlers-circle-radius": "Радыус",

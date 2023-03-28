@@ -37,9 +37,7 @@ class TitleHelper {
 	public function __construct( $hostWikiID = null, InterwikiResolver $interwikiResolver = null, callable $linkSanitizer = null ) {
 		$this->hostWikiID = $hostWikiID ?: WikiMap::getCurrentWikiId();
 		$this->interwikiResolver = $interwikiResolver ?: MediaWikiServices::getInstance()->getService( InterwikiResolver::SERVICE );
-		$this->linkSanitizer = $linkSanitizer ?: static function ( $v ) {
-			return \Sanitizer::escapeIdForLink( $v );
-		};
+		$this->linkSanitizer = $linkSanitizer ?: [ \Sanitizer::class, 'escapeIdForLink' ];
 	}
 
 	/**
@@ -53,8 +51,8 @@ class TitleHelper {
 	 * @return Title
 	 */
 	public function makeTitle( \Elastica\Result $r ) {
-		$iwPrefix = $this->identifyInterwikiPrefix( $r );
-		if ( empty( $iwPrefix ) ) {
+		$iwPrefix = $this->identifyInterwikiPrefix( $r ) ?? '';
+		if ( empty( $iwPrefix ) && $r->namespace !== null && $r->title !== null ) {
 			return Title::makeTitle( $r->namespace, $r->title );
 		} else {
 			$nsPrefix = $r->namespace_text ? $r->namespace_text . ':' : '';

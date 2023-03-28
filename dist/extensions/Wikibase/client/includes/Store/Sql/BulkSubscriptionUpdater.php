@@ -11,6 +11,7 @@ use Wikibase\Client\Usage\Sql\EntityUsageTable;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
+use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 use Wikimedia\Rdbms\SessionConsistentConnectionManager;
 
@@ -160,10 +161,10 @@ class BulkSubscriptionUpdater {
 	 * @return string[] A list of entity id strings.
 	 */
 	private function getUpdateBatch( array &$continuation = null ) {
-		$dbr = $this->localConnectionManager->getReadConnection();
+		$dbr = $this->localConnectionManager->getReadConnectionRef();
 
 		if ( empty( $continuation ) ) {
-			$continuationCondition = '1';
+			$continuationCondition = IDatabase::ALL_ROWS;
 		} else {
 			[ $fromEntityId ] = $continuation;
 			$continuationCondition = 'eu_entity_id > ' . $dbr->addQuotes( $fromEntityId );
@@ -171,16 +172,16 @@ class BulkSubscriptionUpdater {
 
 		$res = $dbr->select(
 			EntityUsageTable::DEFAULT_TABLE_NAME,
-			[ 'DISTINCT eu_entity_id' ],
+			[ 'eu_entity_id' ],
 			$continuationCondition,
 			__METHOD__,
 			[
 				'ORDER BY' => 'eu_entity_id',
 				'LIMIT' => $this->batchSize,
+				'DISTINCT',
 			]
 		);
 
-		$this->localConnectionManager->releaseConnection( $dbr );
 		return $this->getEntityIdsFromRows( $res, 'eu_entity_id', $continuation );
 	}
 
@@ -281,7 +282,7 @@ class BulkSubscriptionUpdater {
 	 * @return bool|string[] list( $minId, $maxId, $count ), or false if there is nothing to delete
 	 */
 	private function getDeletionRange( array &$continuation = null ) {
-		$dbr = $this->repoConnectionManager->getReadConnection();
+		$dbr = $this->repoConnectionManager->getReadConnectionRef();
 
 		$conditions = [
 			'cs_subscriber_id' => $this->subscriberWikiId,
@@ -316,7 +317,6 @@ class BulkSubscriptionUpdater {
 			]
 		);
 
-		$this->repoConnectionManager->releaseConnection( $dbr );
 		$subscriptions = $this->getEntityIdsFromRows( $res, 'cs_entity_id', $continuation );
 
 		if ( empty( $subscriptions ) ) {

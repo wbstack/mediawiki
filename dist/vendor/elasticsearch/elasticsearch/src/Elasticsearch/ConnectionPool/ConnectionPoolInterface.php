@@ -5,8 +5,8 @@
  * @link      https://github.com/elastic/elasticsearch-php/
  * @copyright Copyright (c) Elasticsearch B.V (https://www.elastic.co)
  * @license   http://www.apache.org/licenses/LICENSE-2.0 Apache License, Version 2.0
- * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1 
- * 
+ * @license   https://www.gnu.org/licenses/lgpl-2.1.html GNU Lesser General Public License, Version 2.1
+ *
  * Licensed to Elasticsearch B.V under one or more agreements.
  * Elasticsearch B.V licenses this file to you under the Apache 2.0 License or
  * the GNU Lesser General Public License, Version 2.1, at your option.
@@ -20,21 +20,9 @@ namespace Elasticsearch\ConnectionPool;
 
 use Elasticsearch\Connections\ConnectionInterface;
 
-/**
- * ConnectionPoolInterface
- *
- */
 interface ConnectionPoolInterface
 {
-    /**
-     * @param bool $force
-     *
-     * @return ConnectionInterface
-     */
-    public function nextConnection($force = false);
+    public function nextConnection(bool $force = false): ConnectionInterface;
 
-    /**
-     * @return void
-     */
-    public function scheduleCheck();
+    public function scheduleCheck(): void;
 }

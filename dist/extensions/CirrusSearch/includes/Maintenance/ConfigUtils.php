@@ -3,7 +3,8 @@
 namespace CirrusSearch\Maintenance;
 
 use Elastica\Client;
-use MWElasticUtils;
+use Elasticsearch\Endpoints;
+use MediaWiki\Extension\Elastica\MWElasticUtils;
 
 /**
  * This program is free software; you can redistribute it and/or modify
@@ -54,11 +55,17 @@ class ConfigUtils {
 		}
 		$result = $result[ 'version' ][ 'number' ];
 		$this->output( "$result..." );
-		if ( strpos( $result, '6.' ) !== 0 && strpos( $result, '5.6.' ) !== 0 ) {
-			$this->output( "Not supported!\n" );
-			$this->fatalError( "Only Elasticsearch 6.x and 5.6.x are supported.  Your version: $result." );
+		if ( strpos( $result, '7.10' ) !== 0 ) {
+			if ( strpos( $result, '6.8' ) == 0 ) {
+				$this->output( "partially supported\n" );
+				$this->error( "You use a version of elasticsearch that is partially supported, you should upgrade to 7.10.x\n" );
+			} else {
+				$this->output( "Not supported!\n" );
+				$this->fatalError( "Only Elasticsearch 7.10.x is supported.  Your version: $result." );
+			}
+		} else {
+			$this->output( "ok\n" );
 		}
-		$this->output( "ok\n" );
 	}
 
 	/**
@@ -109,7 +116,9 @@ class ConfigUtils {
 	 * @return string[] the list of indices
 	 */
 	public function getAllIndicesByType( $typeName ) {
-		$response = $this->client->request( $typeName . '*' );
+		$response = $this->client->requestEndpoint( ( new Endpoints\Indices\Get() )
+			->setIndex( $typeName . '*' )
+			->setParams( [ 'include_type_name' => 'false' ] ) );
 		if ( !$response->isOK() ) {
 			$this->fatalError( "Cannot fetch index names for $typeName: "
 				. $response->getError() );

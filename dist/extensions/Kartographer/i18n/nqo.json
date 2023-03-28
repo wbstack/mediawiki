@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Lancine.kounfantoh.fofana"
+			"Lancine.kounfantoh.fofana",
+			"Amire80"
 		]
 	},
 	"kartographer-attribution": "[Https://foundation.wikimedia.org/wiki/ߔߊ߬ߔߘߊ_ߥߞߌߡߋߘߌߦߊ ߟߊߓߊ߯ߙߊ߫_ߛߙߊߕߌ] | ߔߊ߬ߔߘߊ ߟߐ߲ߕߊ © [Https://www.openstreetmap.org/copyright ߏߔߌ߲ߛߑߙߌߕߑߡߊߔ ߓߟߏߡߊߜߍ߲ߠߊ]",
@@ -23,6 +24,7 @@
 	"kartographer-linktype-other": "ߘߏ߫ ߜߘߍ",
 	"kartographer-linktype-satellite": "ߞߐߓߌߟߊ",
 	"kartographer-linktype-terrain": "ߘߎ߰ߞߟߏ",
+	"kartographer-linktype-topo": "ߦߌߟߡߊߛߙߋߡߊ",
 	"kartographer-sidebar-coordinates": "ߘߏ߲߬ߖߟߎ߬ߡߊ߬ߟߌ",
 	"kartographer-sidebar-filterdropdown": "ߔߊ߬ߔߘߊ ߛߎ߯ߦߊ ߘߏ߫ ߓߊߕߐ߬ߡߐ߲߫",
 	"kartographer-sidebar-externalservices": "ߔߊ߬ߔߘߊ ߗߋߘߊ ߟߎ߬",
@@ -31,6 +33,7 @@
 	"kartographer-sidebar-latitude": "ߘߟߊߕߍ߮",
 	"kartographer-sidebar-longitude": "ߕߍߟߍ߲",
 	"kartographer-sidebar-mapdetails": "ߞߐߞߊ߲ߠߊ ߔߊ߬ߔߘߊ ߟߎ߬",
+	"kartographer-sidebar-nearbybutton": "ߛߌ߰ߢߐ߲߰ ߞߎߡߘߊ ߟߎ߬ ߦߌ߬ߘߊ߬",
 	"kartographer-sidebar-service": "ߗߋߘߊ",
 	"kartographer-sidebar-togglebutton": "ߞߐߞߊ߲ߠߊ ߔߊ߬ߔߘߊ ߟߎ߬",
 	"leafletdraw-draw-handlers-circle-radius": "ߥߎߢߊ߲",
@@ -57,6 +60,7 @@
 	"leafletdraw-draw-toolbar-undo-text": "ߘߌ߲߬ߞߌ߬ߙߊ߬ ߟߊ߬ߓߊ߲ ߖߏ߲߫",
 	"leafletdraw-draw-toolbar-undo-title": "ߦߙߐ߫ ߞߐ߯ߟߕߊ߫ ߛߊߥߎߙߊߣߍ߲ ߖߏ߰ߛߌ߫",
 	"leafletdraw-edit-handlers-edit-tooltip-subtext": "ߊ߬ ߘߐߛߊ߬ ߛߐ߲߬ߞߌ߲߫ ߞߊ߬ ߡߊ߬ߦߟߍ߬ߡߊ߲߬ߠߌ߲ ߓߐ߫ ߊ߬ ߡߊ߬",
+	"leafletdraw-edit-handlers-edit-tooltip-text": "ߜߊ߬ߟߌ ߛߊ߬ߡߊ߲߫ ߥߟߊ߫ ߣߐ߬ߣߐ߬ߟߊ߲ ߞߊ߬ ߗߋߘߊ ߡߊߦߟߍ߬ߡߊ߲߫",
 	"leafletdraw-edit-handlers-remove-tooltip-text": "ߟߊ߬ߓߊ߰ߙߊ߬ߟߌ ߛߐ߲߬ߞߌ߲߫ ߞߵߊ߬ ߛߋ߲߬ߓߐ߫",
 	"leafletdraw-edit-toolbar-actions-cancel-text": "ߊ߬ ߘߐߛߊ߬",
 	"leafletdraw-edit-toolbar-actions-cancel-title": "ߡߊ߬ߦߟߍ߬ߡߊ߲߬ߠߌ߲ ߘߐߛߊ߬. ߡߊߝߊ߬ߟߋ߲߬ߠߌ߲ ߠߎ߬ ߓߍ߯ ߡߊߓߌ߬ߟߊ߫",
@@ -67,6 +71,7 @@
 	"leafletdraw-edit-toolbar-buttons-edit": "ߝߋ߲ ߡߊߦߟߍ߬ߡߊ߲߫",
 	"leafletdraw-edit-toolbar-buttons-editdisabled": "ߝߋ߲߫ ߡߊߦߟߍ߬ߡߊ߲߬ߕߊ߫ ߛߌ߫ ߕߴߦߋ߲߬",
 	"leafletdraw-edit-toolbar-buttons-remove": "ߝߋ߲ ߖߏ߰ߛߌ߫",
+	"leafletdraw-edit-toolbar-buttons-removedisabled": "ߝߋ߲߫ ߖߏ߰ߛߌ߬ߕߊ߫ ߕߍ߫ ߦߊ߲߬",
 	"leafletdraw-draw-toolbar-finish-text": "ߊ߬ ߓߘߊ߫ ߓߊ߲߫",
 	"leafletdraw-draw-toolbar-finish-title": "ߊ߬ ߛߐ߲߬ߞߌ߲߫ ߞߊ߬ ߛߊߥߎߙߊ ߟߊߓߊ߲߫",
 	"map": "ߘߏ߲߬ߖߟߎ߬ߡߊ߬ߟߌ ߞߎ߲߬ߠߊ߬ߝߏߣߌ߲",

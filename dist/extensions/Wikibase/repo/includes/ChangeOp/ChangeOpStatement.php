@@ -99,7 +99,6 @@ class ChangeOpStatement extends ChangeOpBase {
 			throw new InvalidArgumentException( '$entity must be a StatementListProvider' );
 		}
 
-		// @phan-suppress-next-line PhanUndeclaredMethod Phan is confused by intersection types
 		$entityId = $entity->getId();
 
 		if ( $this->statement->getGuid() === null ) {
@@ -225,7 +224,7 @@ class ChangeOpStatement extends ChangeOpBase {
 	 * @return Result
 	 */
 	public function validate( EntityDocument $entity ) {
-		return $this->snakValidator->validateClaimSnaks( $this->statement );
+		return $this->snakValidator->validateStatementSnaks( $this->statement );
 	}
 
 }

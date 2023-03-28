@@ -218,7 +218,7 @@ class SpecialNewProperty extends SpecialNewEntity {
 	 * @return string[]
 	 */
 	protected function getWarnings() {
-		if ( $this->getUser()->isAnon() ) {
+		if ( !$this->getUser()->isRegistered() ) {
 			return [
 				$this->msg(
 					'wikibase-anonymouseditwarning',

@@ -22,7 +22,6 @@ use Elastica\Transport\Http;
 
 class ElasticaHttpTransportCloser extends Http {
 	public static function destroySingleton() {
-		// @phan-suppress-next-line PhanTypeMismatchPropertyProbablyReal
 		Http::$_curlConnection = null;
 	}
 }

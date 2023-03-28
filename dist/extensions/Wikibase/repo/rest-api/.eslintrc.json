@@ -1,0 +1,10 @@
+{
+	"root": true,
+	"extends": "wikimedia",
+	"ignorePatterns": [
+		"node_modules/",
+		"vendor",
+		"dist/",
+		"docs/"
+	]
+}

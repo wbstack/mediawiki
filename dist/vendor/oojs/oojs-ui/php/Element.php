@@ -117,7 +117,7 @@ class Element extends Tag {
 	}
 
 	/**
-	 * Toggle visiblity of an element.
+	 * Toggle visibility of an element.
 	 *
 	 * @param bool|null $show Make element visible, omit to toggle visibility
 	 * @return $this
@@ -237,6 +237,9 @@ class Element extends Tag {
 		return str_replace( 'OOUI\\', 'OO.ui.', get_class( $this ) );
 	}
 
+	/**
+	 * @return string[]
+	 */
 	protected function getGeneratedAttributes() {
 		$attributesArray = parent::getGeneratedAttributes();
 		// Add `data-ooui` attribute from serialized config array.

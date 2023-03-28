@@ -125,6 +125,9 @@ class ConsumerSubmitControl extends SubmitControl {
 						return false;
 					}
 				},
+				'oauthVersion' => static function ( $i ) {
+					return in_array( $i, [ Consumer::OAUTH_VERSION_1, Consumer::OAUTH_VERSION_2 ] );
+				},
 				'callbackUrl' => static function ( $s, $vals ) {
 					if ( strlen( $s ?? '' ) > 2000 ) {
 						return false;
@@ -141,6 +144,14 @@ class ConsumerSubmitControl extends SubmitControl {
 						|| in_array( $s, $wgConf->getLocalDatabases() )
 						|| array_search( $s, Utils::getAllWikiNames() ) !== false
 					);
+				},
+				'oauth2GrantTypes' => static function ( $a, $vals ) {
+					if ( $vals['oauthVersion'] == Consumer::OAUTH_VERSION_1 ) {
+						return true;
+					}
+
+					// OAuth 2 apps must have at least one grant type
+					return count( $a ) > 0 && strlen( FormatJson::encode( $a ) ) <= self::BLOB_SIZE;
 				},
 				'granttype' => '/^(authonly|authonlyprivate|normal)$/',
 				'grants' => static function ( $s ) {
@@ -291,7 +302,7 @@ class ConsumerSubmitControl extends SubmitControl {
 				);
 			} else {
 				$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['description'] );
-				$this->notify( $cmr, $user, $action,  null );
+				$this->notify( $cmr, $user, $action, '' );
 			}
 
 			// If it's owner-only, automatically accept it for the user too.

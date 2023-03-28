@@ -11,7 +11,7 @@
 	"license-name": "MIT",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.38.0",
+		"MediaWiki": ">= 1.39.0",
 		"extensions": {
 			"JsonConfig": "*"
 		}
@@ -240,6 +240,7 @@
 			"localBasePath": "modules/dialog",
 			"dependencies": [
 				"oojs-ui.styles.icons-interactions",
+				"oojs-ui.styles.icons-location",
 				"oojs-ui-windows",
 				"oojs-ui-widgets",
 				"mediawiki.router",
@@ -248,13 +249,15 @@
 			"packageFiles": [
 				"index.js",
 				"dialog.js",
-				"closefullscreen_control.js"
+				"closefullscreen_control.js",
+				"nearby.js"
 			],
 			"styles": [
 				"dialog.less"
 			],
 			"messages": [
 				"kartographer-fullscreen-close",
+				"kartographer-sidebar-nearbybutton",
 				"kartographer-sidebar-togglebutton"
 			],
 			"targets": [
@@ -507,6 +510,16 @@
 			]
 		}
 	},
+	"QUnitTestModule": {
+		"localBasePath": "tests/qunit",
+		"remoteExtPath": "Kartographer/tests/qunit",
+		"scripts": [
+			"nearby.test.js"
+		],
+		"dependencies": [
+			"ext.kartographer.dialog"
+		]
+	},
 	"attributes": {
 		"VisualEditor": {
 			"PluginModules": [
@@ -573,6 +586,14 @@
 		"KartographerSimpleStyleMarkers": {
 			"description": "Use an api to generate markers using the simplestyle-spec for features.",
 			"value": true
+		},
+		"KartographerNearby": {
+			"description": "Enable a beta-quality \"nearby\" feature, currently in development.  Wikivoyage already has its own implementation which this feature may conflict with.",
+			"value": false
+		},
+		"KartographerMediaWikiInternalUrl": {
+			"description": "Development setting allowing kartotherian to call back to the mapdata API on either a different MediaWiki server or via a non-standard port. Passed as a URL, e.g. \"http://dev.wiki.local.wmftest.net:8080\". Defaults to $wgServerName if not set.",
+			"value": null
 		}
 	},
 	"TrackingCategories": [

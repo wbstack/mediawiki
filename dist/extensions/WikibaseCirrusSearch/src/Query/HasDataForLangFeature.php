@@ -117,9 +117,7 @@ class HasDataForLangFeature extends SimpleKeywordFeature implements FilterQueryF
 		}
 		$langCodes = [];
 
-		$langCodeCandidates = array_unique( array_map( static function ( $elem ) {
-			return mb_strtolower( $elem );
-		}, explode( ',', $value ) ) );
+		$langCodeCandidates = array_unique( array_map( 'mb_strtolower', explode( ',', $value ) ) );
 
 		foreach ( $langCodeCandidates as $candidate ) {
 			if ( isset( $this->validLangs[$candidate] ) ) {

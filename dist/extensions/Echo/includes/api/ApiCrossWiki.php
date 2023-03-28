@@ -1,5 +1,7 @@
 <?php
 // @phan-file-suppress PhanUndeclaredMethod This is a trait, and phan is confused by $this
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * Trait that adds cross-wiki functionality to an API module. For mixing into ApiBase subclasses.
  *
@@ -71,7 +73,7 @@ trait ApiCrossWiki {
 		// available, and it'll default to current wiki
 		$wikis = $params['wikis'] ?? [ WikiMap::getCurrentWikiId() ];
 
-		if ( array_search( '*', $wikis ) !== false ) {
+		if ( in_array( '*', $wikis ) ) {
 			// expand `*` to all foreign wikis with unread notifications + local
 			$wikis = array_merge(
 				[ WikiMap::getCurrentWikiId() ],
@@ -123,11 +125,11 @@ trait ApiCrossWiki {
 			$params += [
 				// fetch notifications from multiple wikis
 				'wikis' => [
-					ApiBase::PARAM_ISMULTI => true,
-					ApiBase::PARAM_DFLT => WikiMap::getCurrentWikiId(),
+					ParamValidator::PARAM_ISMULTI => true,
+					ParamValidator::PARAM_DEFAULT => WikiMap::getCurrentWikiId(),
 					// `*` will let you immediately fetch from all wikis that have
 					// unread notifications, without having to look them up first
-					ApiBase::PARAM_TYPE => array_unique(
+					ParamValidator::PARAM_TYPE => array_unique(
 						array_merge(
 							$wgConf->wikis,
 							[ WikiMap::getCurrentWikiId(), '*' ]

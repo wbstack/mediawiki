@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Alex00728",
+			"Bluehill",
 			"Hym411",
 			"IRTC1015",
 			"Jonghaya",
@@ -9,8 +10,7 @@
 			"Priviet",
 			"Revi",
 			"Ykhwong",
-			"아라",
-			"Bluehill"
+			"아라"
 		]
 	},
 	"cirrussearch-desc": "미디어위키용 Elasticsearch 검색",

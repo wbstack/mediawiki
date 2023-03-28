@@ -5,6 +5,9 @@
  * and repo-specific functionality have been split to separate extensions.
  */
 
+use MediaWiki\MediaWikiServices;
+use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LemmaTermValidator;
+use Wikibase\Lexeme\WikibaseLexemeServices;
 use Wikibase\Repo\WikibaseRepo;
 
 return call_user_func( static function () {
@@ -69,6 +72,7 @@ return call_user_func( static function () {
 				$defaultViewConfigFile
 
 			],
+			"es6" => true,
 			"dependencies" => [
 				"jquery.util.getDirectionality",
 				"jquery.ui.languagesuggester",
@@ -262,50 +266,103 @@ return call_user_func( static function () {
 	if ( $wgLexemeEnableNewAlpha ) {
 		$modules += [
 			"wikibase.lexeme.special.NewLexemeAlpha" => $moduleTemplate + [
-					"es6" => true,
-					"packageFiles" => [
-						'special/NewLexemeAlpha.js',
-						'special/new-lexeme-dist/SpecialNewLexeme.cjs.js',
-						[
-							"name" => "special/licenseConfig.json",
-							"callback" => static function () {
-								$wbRepoSettings = WikibaseRepo::getSettings();
-								return [
-									'licenseUrl' => $wbRepoSettings->getSetting( 'dataRightsUrl' ),
-									'licenseText' => $wbRepoSettings->getSetting( 'dataRightsText' ),
-								];
-							}
-						],
+				"es6" => true,
+				"skipFunction" => 'special/SpecialNewLexemeAlphaSkipVueApp.js',
+				"targets" => [
+					'desktop',
+					'mobile',
+				],
+				"packageFiles" => [
+					'special/NewLexemeAlpha.js',
+					'special/new-lexeme-dist/SpecialNewLexeme.cjs.js',
+					[
+						"name" => "special/settings.json",
+						"callback" => static function () {
+							$wbRepoSettings = WikibaseRepo::getSettings();
+							return [
+								'licenseUrl' => $wbRepoSettings->getSetting( 'dataRightsUrl' ),
+								'licenseText' => $wbRepoSettings->getSetting( 'dataRightsText' ),
+								'tags' => $wbRepoSettings->getSetting( 'specialPageTags' ),
+								'maxLemmaLength' => LemmaTermValidator::LEMMA_MAX_LENGTH,
+							];
+						}
 					],
-					"styles" => [
-						'special/new-lexeme-dist/style.css',
-					],
-					"dependencies" => [
-						"vue", // MW core
-						"vuex", // MW core
-						"@vue/compat", // see below
-						'mediawiki.user',
-					],
-					"messages" => [
-						"wikibaselexeme-newlexeme-lemma",
-						// TODO "wikibaselexeme-newlexeme-lemma-placeholder",
-						"wikibaselexeme-newlexeme-language",
-						"wikibaselexeme-newlexeme-language-placeholder",
-						"wikibaselexeme-newlexeme-lexicalcategory",
-						"wikibaselexeme-newlexeme-lexicalcategory-placeholder",
-						// TODO "wikibaselexeme-newlexeme-submit",
-						"wikibase-shortcopyrightwarning",
-						"copyrightpage",
+					[
+						'name' => 'special/languageNames.json',
+						'callback' => static function ( ResourceLoaderContext $context ) {
+							$cache = MediaWikiServices::getInstance()->getLocalServerObjectCache();
+
+							return $cache->getWithSetCallback(
+								$cache->makeKey(
+									'wikibaseLexeme-languageNames',
+									$context->getLanguage()
+								),
+								60 * 60, // 1 hour
+								static function () use ( $context ) {
+									$termLanguages = WikibaseLexemeServices::getTermLanguages();
+									$languageNameLookup = WikibaseLexemeServices::getLanguageNameLookupFactory()
+										->getForLanguageCodeAndMessageLocalizer(
+											$context->getLanguage(),
+											$context
+										);
+									$names = [];
+									foreach ( $termLanguages->getLanguages() as $languageCode ) {
+										$names[$languageCode] = $languageNameLookup->getName( $languageCode );
+									}
+									return $names;
+								}
+							);
+						},
 					],
 				],
-			// temporary alias because SpecialNewLexeme.cjs.js has require('@vue/compat');
-			// remove when we are ready to use Vue 3 only, or when we are no longer
-			// externalizing @vue/compat because MW core moves to non-compat Vue 3
-			'@vue/compat' => [
-				'packageFiles' => [
-					[ 'name' => 'index.js', 'content' => 'module.exports = require( "vue" );' ],
+				"styles" => [
+					'special/new-lexeme-dist/style.css',
 				],
-				'dependencies' => [ 'vue' ],
+				"dependencies" => [
+					'vue',
+					'vuex',
+					'mediawiki.user',
+					'wikibase.lexeme.config.LexemeLanguageCodePropertyIdConfig',
+				],
+				"messages" => [
+					"wikibaselexeme-newlexeme-lemma",
+					"wikibaselexeme-newlexeme-lemma-placeholder-with-example",
+					"wikibaselexeme-newlexeme-lemma-empty-error",
+					"wikibaselexeme-newlexeme-lemma-too-long-error",
+					"wikibaselexeme-newlexeme-lemma-language",
+					"wikibaselexeme-newlexeme-lemma-language-empty-error",
+					"wikibaselexeme-newlexeme-lemma-language-help-link-target",
+					"wikibaselexeme-newlexeme-lemma-language-help-link-text",
+					"wikibaselexeme-newlexeme-lemma-language-invalid-error",
+					"wikibaselexeme-newlexeme-lemma-language-placeholder-with-example",
+					"wikibaselexeme-newlexeme-language",
+					"wikibaselexeme-newlexeme-language-empty-error",
+					"wikibaselexeme-newlexeme-language-invalid-error",
+					"wikibaselexeme-newlexeme-language-placeholder-with-example",
+					"wikibaselexeme-newlexeme-lexicalcategory",
+					"wikibaselexeme-newlexeme-lexicalcategory-empty-error",
+					"wikibaselexeme-newlexeme-lexicalcategory-invalid-error",
+					"wikibaselexeme-newlexeme-lexicalcategory-placeholder-with-example",
+					"wikibaselexeme-newlexeme-search-existing",
+					"wikibaselexeme-newlexeme-submit",
+					"wikibaselexeme-newlexeme-submitting",
+					"wikibase-anonymouseditwarning",
+					"wikibase-entityselector-notfound",
+					"wikibase-shortcopyrightwarning",
+					"wikibaselexeme-newlexeme-submit-error",
+					"wikibaselexeme-newlexeme-invalid-language-code-warning",
+					"wikibase-lexeme-lemma-language-option",
+					"copyrightpage",
+				],
+			],
+			"wikibase.lexeme.special.NewLexemeAlpha.styles" => $moduleTemplate + [
+				"targets" => [
+					'desktop',
+					'mobile',
+				],
+				"styles" => [
+					'special/new-lexeme-alpha.less',
+				],
 			],
 		];
 	}

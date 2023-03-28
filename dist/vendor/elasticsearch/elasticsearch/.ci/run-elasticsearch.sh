@@ -4,7 +4,7 @@
 # to form a cluster suitable for running the REST API tests.
 #
 # Export the STACK_VERSION variable, eg. '8.0.0-SNAPSHOT'.
-# Export the TEST_SUITE variable, eg. 'oss' or 'xpack' defaults to 'oss'.
+# Export the TEST_SUITE variable, eg. 'free' or 'platinum' defaults to 'free'.
 # Export the NUMBER_OF_NODES variable to start more than 1 node
 
 # Version 1.2.0
@@ -30,6 +30,8 @@ declare -a volumes
 environment=($(cat <<-END
   --env node.name=$es_node_name
   --env cluster.name=$cluster_name
+  --env cluster.initial_master_nodes=$master_node_name
+  --env discovery.seed_hosts=$master_node_name
   --env cluster.routing.allocation.disk.threshold_enabled=false
   --env bootstrap.memory_lock=true
   --env node.attr.testattr=test
@@ -37,7 +39,7 @@ environment=($(cat <<-END
   --env repositories.url.allowed_urls=http://snapshot.test*
 END
 ))
-if [[ "$TEST_SUITE" == "xpack" ]]; then
+if [[ "$TEST_SUITE" == "platinum" ]]; then
   environment+=($(cat <<-END
     --env ELASTIC_PASSWORD=$elastic_password
     --env xpack.license.self_generated.type=trial
@@ -62,7 +64,7 @@ END
 fi
 
 cert_validation_flags=""
-if [[ "$TEST_SUITE" == "xpack" ]]; then
+if [[ "$TEST_SUITE" == "platinum" ]]; then
   cert_validation_flags="--insecure --cacert /usr/share/elasticsearch/config/certs/ca.crt --resolve ${es_node_name}:443:127.0.0.1"
 fi
 

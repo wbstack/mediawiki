@@ -13,6 +13,9 @@ var tileLayerDefs = {},
 	pathToKartographerImages = mw.config.get( 'wgExtensionAssetsPath' ) +
 		'/Kartographer/modules/wikivoyage/images/';
 
+/**
+ * @return {OO.ui.WindowManager}
+ */
 function getWindowManager() {
 	if ( windowManager ) {
 		return windowManager;
@@ -24,6 +27,9 @@ function getWindowManager() {
 	return windowManager;
 }
 
+/**
+ * @return {OO.ui.WindowInstance}
+ */
 function alertExternalData() {
 	return getWindowManager().openWindow( messageDialog, {
 		title: mw.msg( 'kartographer-wv-warning-external-source-title' ),
@@ -63,6 +69,10 @@ module.exports = {
 		return this;
 	},
 
+	/**
+	 * @param {string} id
+	 * @return {{layer: L.TileLayer, name: string}}
+	 */
 	createTileLayer: function ( id ) {
 		var layerDefs = tileLayerDefs[ id ];
 		return {
@@ -71,6 +81,13 @@ module.exports = {
 		};
 	},
 
+	/**
+	 * @param {string} name
+	 * @param {Object} [options]
+	 * @param {boolean} [options.wvIsExternal]
+	 * @param {boolean} [options.wvIsWMF]
+	 * @return {string} HTML
+	 */
 	formatLayerName: function ( name, options ) {
 		var icon = '';
 		options = options || {};
@@ -106,7 +123,6 @@ module.exports = {
 	 */
 	isAllowed: function ( layer ) {
 		return mw.loader.using( 'mediawiki.storage' ).then( function () {
-
 			if ( areExternalAllowed === undefined ) {
 				areExternalAllowed = mw.storage.get( STORAGE_KEY ) === '1';
 			}
@@ -123,6 +139,5 @@ module.exports = {
 				}
 			} );
 		} );
-
 	}
 };

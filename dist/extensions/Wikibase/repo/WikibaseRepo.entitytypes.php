@@ -33,8 +33,6 @@ use Wikibase\Lib\SimpleCacheWithBagOStuff;
 use Wikibase\Lib\StaticContentLanguages;
 use Wikibase\Lib\StatsdRecordingSimpleCache;
 use Wikibase\Lib\Store\CachingPrefetchingTermLookup;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
-use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
 use Wikibase\Lib\Store\Sql\Terms\PrefetchingItemTermLookup;
 use Wikibase\Lib\Store\Sql\Terms\PrefetchingPropertyTermLookup;
 use Wikibase\Lib\Store\TitleLookupBasedEntityArticleIdLookup;
@@ -199,15 +197,11 @@ return [
 			$basicEntityDiffVisualizer = new BasicEntityDiffVisualizer(
 				$messageLocalizer,
 				$claimDiffer,
-				$claimDiffView,
-				$siteLookup,
-				$entityIdFormatter
+				$claimDiffView
 			);
 
 			return new ItemDiffVisualizer(
 				$messageLocalizer,
-				$claimDiffer,
-				$claimDiffView,
 				$siteLookup,
 				$entityIdFormatter,
 				$basicEntityDiffVisualizer
@@ -221,11 +215,8 @@ return [
 						new EntityIdSearchHelper(
 							WikibaseRepo::getEntityLookup(),
 							WikibaseRepo::getEntityIdParser(),
-							new LanguageFallbackLabelDescriptionLookup(
-								WikibaseRepo::getTermLookup(),
-								$languageFallbackChainFactory
-									->newFromLanguage( $language )
-							),
+							WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
+								->newLabelDescriptionLookup( $language ),
 							WikibaseRepo::getEntityTypeToRepositoryMapping()
 						),
 						new EntityTermSearchHelper(
@@ -249,11 +240,11 @@ return [
 			);
 		},
 		Def::ENTITY_ID_HTML_LINK_FORMATTER_CALLBACK => function( Language $language ) {
-			$languageLabelLookupFactory = WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory();
-			$languageLabelLookup = $languageLabelLookupFactory->newLabelDescriptionLookup( $language );
+			$languageLabelLookup = WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
+				->newLabelDescriptionLookup( $language );
 			return new LabelsProviderEntityIdHtmlLinkFormatter(
 				$languageLabelLookup,
-				WikibaseRepo::getLanguageNameLookup(),
+				WikibaseRepo::getLanguageNameLookupFactory()->getForLanguage( $language ),
 				WikibaseRepo::getEntityExistenceChecker(),
 				WikibaseRepo::getEntityTitleTextLookup(),
 				WikibaseRepo::getEntityUrlLookup(),
@@ -422,11 +413,9 @@ return [
 						new EntityIdSearchHelper(
 							WikibaseRepo::getEntityLookup(),
 							WikibaseRepo::getEntityIdParser(),
-							new LanguageFallbackLabelDescriptionLookup(
-								WikibaseRepo::getTermLookup(),
-								$languageFallbackChainFactory
-									->newFromLanguage( $language )
-							),
+
+							WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
+								->newLabelDescriptionLookup( $language ),
 							WikibaseRepo::getEntityTypeToRepositoryMapping()
 						),
 						new EntityTermSearchHelper(
@@ -452,11 +441,11 @@ return [
 			);
 		},
 		Def::ENTITY_ID_HTML_LINK_FORMATTER_CALLBACK => function( Language $language ) {
-			$languageLabelLookupFactory = WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory();
-			$languageLabelLookup = $languageLabelLookupFactory->newLabelDescriptionLookup( $language );
+			$languageLabelLookup = WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
+				->newLabelDescriptionLookup( $language );
 			return new LabelsProviderEntityIdHtmlLinkFormatter(
 				$languageLabelLookup,
-				WikibaseRepo::getLanguageNameLookup(),
+				WikibaseRepo::getLanguageNameLookupFactory()->getForLanguage( $language ),
 				WikibaseRepo::getEntityExistenceChecker(),
 				WikibaseRepo::getEntityTitleTextLookup(),
 				WikibaseRepo::getEntityUrlLookup(),
@@ -468,8 +457,6 @@ return [
 		},
 		Def::PREFETCHING_TERM_LOOKUP_CALLBACK => function ( DatabaseEntitySource $entitySource ) {
 			$mwServices = MediaWikiServices::getInstance();
-			$entitySourceServices = WikibaseRepo::getSingleEntitySourceServicesFactory( $mwServices )
-				->getServicesForSource( $entitySource );
 
 			$cacheSecret = hash( 'sha256', $mwServices->getMainConfig()->get( 'SecretKey' ) );
 			$bagOStuff = $mwServices->getLocalServerObjectCache();
@@ -496,14 +483,11 @@ return [
 					'hit' => 'wikibase.prefetchingPropertyTermLookupCache.hit'
 				]
 			);
-			$redirectResolvingRevisionLookup = new RedirectResolvingLatestRevisionLookup(
-				$entitySourceServices->getEntityRevisionLookup()
-			);
 
 			return new CachingPrefetchingTermLookup(
 				$cache,
 				$prefetchingPropertyTermLookup,
-				$redirectResolvingRevisionLookup,
+				WikibaseRepo::getRedirectResolvingLatestRevisionLookup( $mwServices ),
 				WikibaseRepo::getTermsLanguages( $mwServices )
 			);
 		},

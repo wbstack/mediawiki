@@ -18,7 +18,6 @@ use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\DataAccess\EntitySourceLookup;
 use Wikibase\DataAccess\PrefetchingTermLookup;
-use Wikibase\DataAccess\SingleEntitySourceServicesFactory;
 use Wikibase\DataAccess\WikibaseServices;
 use Wikibase\DataModel\Deserializers\DeserializerFactory;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -72,9 +71,11 @@ use Wikibase\Lib\Store\EntityTermStoreWriter;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\LinkTargetEntityIdLookup;
 use Wikibase\Lib\Store\MatchingTermsLookupFactory;
+use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
 use Wikibase\Lib\Store\Sql\EntityChangeLookup;
 use Wikibase\Lib\Store\Sql\Terms\DatabaseTypeIdsStore;
 use Wikibase\Lib\Store\Sql\Terms\TermInLangIdsResolverFactory;
@@ -394,6 +395,13 @@ class WikibaseRepo {
 	): SiteLinkGlobalIdentifiersProvider {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseRepo.SiteLinkGlobalIdentifiersProvider' );
+	}
+
+	public static function getSiteLinkPageNormalizer(
+		ContainerInterface $services = null
+	): SiteLinkPageNormalizer {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseRepo.SiteLinkPageNormalizer' );
 	}
 
 	public static function getSiteLinkTargetProvider(
@@ -941,16 +949,6 @@ class WikibaseRepo {
 			->get( 'WikibaseRepo.PropertyValueExpertsModule' );
 	}
 
-	/**
-	 * @deprecated
-	 * DO NOT USE THIS SERVICE! This is just a temporary convenience placeholder until we finish migrating
-	 * SingleEntitySourceServices. Will be removed with T277731
-	 */
-	public static function getSingleEntitySourceServicesFactory( ContainerInterface $services = null ): SingleEntitySourceServicesFactory {
-		return ( $services ?: MediaWikiServices::getInstance() )
-			->get( 'WikibaseRepo.SingleEntitySourceServicesFactory' );
-	}
-
 	public static function getWikibaseServices( ContainerInterface $services = null ): WikibaseServices {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseRepo.WikibaseServices' );
@@ -1079,6 +1077,20 @@ class WikibaseRepo {
 	public static function getDispatchStats( ContainerInterface $services = null ): DispatchStats {
 		return ( $services ?: MediaWikiServices::getInstance() )
 			->get( 'WikibaseRepo.DispatchStats' );
+	}
+
+	public static function getRedirectResolvingLatestRevisionLookup(
+		ContainerInterface $services = null
+	): RedirectResolvingLatestRevisionLookup {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseRepo.RedirectResolvingLatestRevisionLookup' );
+	}
+
+	public static function getFallbackLabelDescriptionLookupFactory(
+		ContainerInterface $services = null
+	): FallbackLabelDescriptionLookupFactory {
+		return ( $services ?: MediaWikiServices::getInstance() )
+			->get( 'WikibaseRepo.FallbackLabelDescriptionLookupFactory' );
 	}
 
 }

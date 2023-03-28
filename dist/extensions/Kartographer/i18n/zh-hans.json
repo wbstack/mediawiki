@@ -7,12 +7,12 @@
 			"JerryLiu",
 			"Liuxinyu970226",
 			"Shizhao",
+			"ZiqiLiang",
 			"予弦",
 			"神樂坂秀吉",
 			"铁桶",
 			"GuoPC",
-			"MangoFanFanw",
-			"ZiqiLiang"
+			"MangoFanFanw"
 		]
 	},
 	"apierror-kartographer-conflicting-revids": "尚不支持在一次请求中查询同一页面的多个修订版本的地图数据。",
@@ -53,6 +53,7 @@
 	"kartographer-sidebar-latitude": "纬度",
 	"kartographer-sidebar-longitude": "经度",
 	"kartographer-sidebar-mapdetails": "外部地图",
+	"kartographer-sidebar-nearbybutton": "显示附近条目",
 	"kartographer-sidebar-service": "服务",
 	"kartographer-sidebar-togglebutton": "外部地图",
 	"leafletdraw-draw-handlers-circle-radius": "半径",
@@ -79,7 +80,7 @@
 	"leafletdraw-draw-toolbar-undo-text": "删除最后一点",
 	"leafletdraw-draw-toolbar-undo-title": "删除最后绘制的点",
 	"leafletdraw-edit-handlers-edit-tooltip-subtext": "点击取消以撤销更改",
-	"leafletdraw-edit-handlers-edit-tooltip-text": "拖动鼠标，或标记以编辑特征",
+	"leafletdraw-edit-handlers-edit-tooltip-text": "拖动手柄或标记以编辑要素",
 	"leafletdraw-edit-handlers-remove-tooltip-text": "点击要素以移除",
 	"leafletdraw-edit-toolbar-actions-cancel-text": "取消",
 	"leafletdraw-edit-toolbar-actions-cancel-title": "取消编辑，放弃所有更改",

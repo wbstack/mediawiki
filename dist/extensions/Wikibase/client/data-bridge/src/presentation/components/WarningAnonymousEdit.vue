@@ -41,6 +41,7 @@ import IconMessageBox from '@/presentation/components/IconMessageBox.vue';
 
 export default defineComponent( {
 	name: 'WarningAnonymousEdit',
+	emits: [ 'proceed' ],
 	components: {
 		EventEmittingButton,
 		IconMessageBox,
@@ -56,6 +57,7 @@ export default defineComponent( {
 			this.$emit( 'proceed' );
 		},
 	},
+	compatConfig: { MODE: 3 },
 } );
 </script>
 

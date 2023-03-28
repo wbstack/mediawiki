@@ -1,7 +1,7 @@
 {
-	"entityId": {
+	"ItemId": {
 		"in": "path",
-		"name": "entity_id",
+		"name": "item_id",
 		"description": "The ID of the required Item",
 		"required": true,
 		"schema": {
@@ -14,5 +14,104 @@
 				"value": "Q42"
 			}
 		}
+	},
+	"StatementId": {
+		"in": "path",
+		"name": "statement_id",
+		"description": "The ID of the required Statement",
+		"required": true,
+		"schema": {
+			"type": "string",
+			"pattern": "^(Q|P)[1-9]\\d{0,9}\\$.+$"
+		},
+		"example": "Q42$F078E5B3-F9A8-480E-B7AC-D97778CBBEF9"
+	},
+	"Fields": {
+		"in": "query",
+		"name": "_fields",
+		"description": "Comma separated list of fields to include in each response object.",
+		"required": false,
+		"schema": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"enum": [ "type", "labels", "descriptions", "aliases", "statements", "sitelinks" ]
+			}
+		},
+		"explode": false,
+		"style": "form"
+	},
+	"IfNoneMatch": {
+		"name": "If-None-Match",
+		"in": "header",
+		"description": "Conditionally request a resource only if changed since the specified entity revision number",
+		"schema": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"pattern": "^(?:\".+\"|\\*)$"
+			}
+		},
+		"examples": {
+			"strong-etag": {
+				"summary": "Single ETag",
+				"value": [ "\"1276705620\"" ]
+			},
+			"multiple-etags": {
+				"summary": "Multiple ETags",
+				"value": [ "\"1276703231\"", "\"1276705620\"" ]
+			}
+		}
+	},
+	"IfModifiedSince": {
+		"name": "If-Modified-Since",
+		"in": "header",
+		"description": "Conditionally request a resource only if it changed since the specified date",
+		"schema": {
+			"type": "string",
+			"format": "http-date"
+		},
+		"example": "Sat, 06 Jun 2020 16:38:47 GMT"
+	},
+	"IfMatch": {
+		"name": "If-Match",
+		"in": "header",
+		"description": "Conditionally modify a resource only if it hasn't changed since the specified entity revision number",
+		"schema": {
+			"type": "array",
+			"items": {
+				"type": "string",
+				"pattern": "^(?:\".+\"|\\*)$"
+			}
+		},
+		"examples": {
+			"strong-etag": {
+				"summary": "Single ETag",
+				"value": [ "\"1276705620\"" ]
+			},
+			"multiple-etags": {
+				"summary": "Multiple ETags",
+				"value": [ "\"1276703231\"", "\"1276705620\"" ]
+			}
+		}
+	},
+	"IfUnmodifiedSince": {
+		"name": "If-Unmodified-Since",
+		"in": "header",
+		"description": "Conditionally modify a resource only if it hasn't changed since the specified date",
+		"schema": {
+			"type": "string",
+			"format": "http-date"
+		},
+		"example": "Sat, 06 Jun 2020 16:38:47 GMT"
+	},
+	"Authorization": {
+		"name": "Authorization",
+		"in": "header",
+		"description": "Make authenticated request using a provided bearer token",
+		"schema": {
+			"type": "string"
+		},
+		"example": "Bearer mF_9.B5f-4.1JqM"
 	}
 }

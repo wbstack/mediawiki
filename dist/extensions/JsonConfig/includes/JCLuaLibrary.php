@@ -3,6 +3,7 @@
 namespace JsonConfig;
 
 use Language;
+use MWException;
 use Scribunto_LuaError;
 use Scribunto_LuaLibraryBase;
 
@@ -42,7 +43,11 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 			$language = $this->getParser()->getTargetLanguage();
 		} elseif ( $langCode !== '_' ) {
 			$this->checkType( 'get', 2, $langCode, 'string' );
-			$language = Language::factory( $langCode );
+			try {
+				$language = Language::factory( $langCode );
+			} catch ( MWException $e ) {
+				throw new Scribunto_LuaError( 'bad argument #2 to "get" (not a valid language code)' );
+			}
 		} else {
 			$language = null;
 		}
@@ -59,8 +64,8 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 
 			$prop = 'jsonconfig_getdata';
 			$output = $this->getParser()->getOutput();
-			$prevValue = $output->getPageProperty( $prop ) ?? 0;
-			$output->setPageProperty( $prop, 1 + $prevValue );
+			$prevValue = (int)( $output->getPageProperty( $prop ) ?? 0 );
+			$output->setPageProperty( $prop, strval( 1 + $prevValue ) );
 		}
 
 		if ( !$content ) {

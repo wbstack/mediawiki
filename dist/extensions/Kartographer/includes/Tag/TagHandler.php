@@ -14,9 +14,11 @@ use Exception;
 use ExtensionRegistry;
 use FormatJson;
 use Html;
+use Kartographer\MediaWikiWikitextParser;
 use Kartographer\SimpleStyleParser;
 use Kartographer\State;
 use Language;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use Parser;
 use ParserOutput;
@@ -152,7 +154,7 @@ abstract class TagHandler {
 	 * @param PPFrame $frame
 	 */
 	private function parseGeometries( $input, Parser $parser, PPFrame $frame ) {
-		$simpleStyle = new SimpleStyleParser( $parser, $frame );
+		$simpleStyle = new SimpleStyleParser( new MediaWikiWikitextParser( $parser, $frame ) );
 
 		$this->status = $simpleStyle->parse( $input );
 		if ( $this->status->isOK() ) {
@@ -225,9 +227,8 @@ abstract class TagHandler {
 
 	/**
 	 * @param string $name
-	 * @param string|bool|null $default
-	 *
-	 * @return int|bool|null
+	 * @param string|false|null $default
+	 * @return int|false|null
 	 */
 	protected function getInt( $name, $default = false ) {
 		$value = $this->getText( $name, $default, '/^-?[0-9]+$/' );
@@ -240,8 +241,8 @@ abstract class TagHandler {
 
 	/**
 	 * @param string $name
-	 * @param string|bool|null $default
-	 * @return float|bool|null
+	 * @param string|false|null $default
+	 * @return float|false|null
 	 */
 	private function getFloat( $name, $default = false ) {
 		$value = $this->getText( $name, $default, '/^-?[0-9]*\.?[0-9]+$/' );
@@ -256,9 +257,9 @@ abstract class TagHandler {
 	 * Returns value of a named tag attribute with optional validation
 	 *
 	 * @param string $name Attribute name
-	 * @param string|bool|null $default Default value or false to trigger error if absent
+	 * @param string|false|null $default Default value or false to trigger error if absent
 	 * @param string|false $regexp Regular expression to validate against or false to not validate
-	 * @return string|bool|null
+	 * @return string|false|null
 	 */
 	protected function getText( $name, $default, $regexp = false ) {
 		if ( !isset( $this->args[$name] ) ) {
@@ -320,10 +321,10 @@ abstract class TagHandler {
 		Parser $parser
 	) {
 		if ( $state->getMaplinks() ) {
-			$parserOutput->setPageProperty( 'kartographer_links', $state->getMaplinks() );
+			$parserOutput->setPageProperty( 'kartographer_links', (string)$state->getMaplinks() );
 		}
 		if ( $state->getMapframes() ) {
-			$parserOutput->setPageProperty( 'kartographer_frames', $state->getMapframes() );
+			$parserOutput->setPageProperty( 'kartographer_frames', (string)$state->getMapframes() );
 		}
 
 		if ( $state->hasBrokenTags() ) {
@@ -388,7 +389,7 @@ abstract class TagHandler {
 		$errors = array_merge( $this->status->getErrorsByType( 'error' ),
 			$this->status->getErrorsByType( 'warning' )
 		);
-		if ( !count( $errors ) ) {
+		if ( !$errors ) {
 			throw new Exception( __METHOD__ . '(): attempt to report error when none took place' );
 		}
 		$message = count( $errors ) > 1 ? 'kartographer-error-context-multi'
@@ -416,6 +417,14 @@ abstract class TagHandler {
 	 * @return Language|StubUserLang
 	 */
 	protected function getLanguage() {
-		return $this->parser->getTargetLanguage();
+		// Log if the user language is different from the page language (T311592)
+		$pageLang = $this->parser->getTitle()->getPageLanguage();
+		$targetLanguage = $this->parser->getTargetLanguage();
+		if ( $targetLanguage->getCode() !== $pageLang->getCode() ) {
+			LoggerFactory::getInstance( 'Kartographer' )->notice( 'Target language (' .
+				$targetLanguage->getCode() . ') is different than page language (' .
+				$pageLang->getCode() . ') (T311592)' );
+		}
+		return $targetLanguage;
 	}
 }

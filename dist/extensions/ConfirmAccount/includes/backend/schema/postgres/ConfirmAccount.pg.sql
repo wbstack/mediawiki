@@ -27,7 +27,7 @@ CREATE TABLE account_requests (
   acr_deleted              INTEGER NOT NULL DEFAULT 0,
   acr_rejected             TIMESTAMPTZ,
   acr_held                 TIMESTAMPTZ,
-  acr_user                 INTEGER  REFERENCES mwuser(user_id) ON DELETE SET NULL,
+  acr_user                 INTEGER,
   acr_comment              TEXT     NOT NULL DEFAULT ''
 );
 
@@ -53,7 +53,7 @@ CREATE TABLE account_credentials (
   acd_storage_key          TEXT,
   acd_areas                TEXT,
   acd_accepted             TIMESTAMPTZ,
-  acd_user                 INTEGER   REFERENCES mwuser(user_id) ON DELETE SET NULL,
+  acd_user                 INTEGER,
   acd_comment              TEXT       NOT NULL DEFAULT '',
   PRIMARY KEY (acd_id, acd_user_id)
 );

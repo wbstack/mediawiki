@@ -19,17 +19,16 @@ class ConfirmAccountUIHooks {
 	}
 
 	/**
-	 * @param array &$personal_urls
-	 * @param Title $title
 	 * @param SkinTemplate $skin
+	 * @param array &$links
 	 * @return bool
 	 */
 	public static function setRequestLoginLinks(
-		array &$personal_urls, Title $title, SkinTemplate $skin
+		SkinTemplate $skin, array &$links
 	) {
 		# Add a link to Special:RequestAccount if a link exists for login
-		if ( isset( $personal_urls['login'] ) || isset( $personal_urls['login-private'] ) ) {
-			$personal_urls['createaccount'] = [
+		if ( isset( $links['user-menu']['login'] ) || isset( $links['user-menu']['login-private'] ) ) {
+			$links['user-menu']['createaccount'] = [
 				'text' => wfMessage( 'requestaccount-login' )->text(),
 				'href' => SpecialPage::getTitleFor( 'RequestAccount' )->getLocalUrl()
 			];

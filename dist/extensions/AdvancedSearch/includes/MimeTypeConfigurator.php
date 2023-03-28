@@ -43,10 +43,10 @@ class MimeTypeConfigurator {
 	 * Uses MimeAnalyzer to determine the mimetype of a given file extension
 	 *
 	 * @param string $fileExtension
-	 * @return string First mime type associated with the given file extension
+	 * @return string|null First mime type associated with the given file extension
 	 */
 	private function getFirstMimeTypeByFileExtension( $fileExtension ) {
-		return explode( ' ', $this->mimeAnalyzer->getTypesForExtension( $fileExtension ), 2 )[0];
+		return $this->mimeAnalyzer->getMimeTypeFromExtensionOrNull( $fileExtension );
 	}
 
 }

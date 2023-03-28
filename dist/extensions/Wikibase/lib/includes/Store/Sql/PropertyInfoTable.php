@@ -24,6 +24,8 @@ use Wikimedia\Rdbms\IResultWrapper;
  */
 class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 
+	private const TABLE_NAME = 'wb_property_info';
+
 	/** @var EntityIdComposer */
 	private $entityIdComposer;
 
@@ -31,9 +33,6 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	 * @var RepoDomainDb
 	 */
 	private $db;
-
-	/** @var string */
-	private $tableName;
 
 	/** @var bool */
 	private $allowWrites;
@@ -52,7 +51,6 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	) {
 		$this->entityIdComposer = $entityIdComposer;
 		$this->db = $db;
-		$this->tableName = 'wb_property_info';
 		$this->allowWrites = $allowWrites;
 	}
 
@@ -124,12 +122,12 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 
 		$dbr = $this->getReadConnection();
 
-		$res = $dbr->selectField(
-			$this->tableName,
-			'pi_info',
-			[ 'pi_property_id' => $propertyId->getNumericId() ],
-			__METHOD__
-		);
+		$res = $dbr->newSelectQueryBuilder()
+			->select( 'pi_info' )
+			->from( self::TABLE_NAME )
+			->where( [ 'pi_property_id' => $propertyId->getNumericId() ] )
+			->caller( __METHOD__ )
+			->fetchField();
 
 		if ( $res === false ) {
 			$info = null;
@@ -155,12 +153,12 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	public function getPropertyInfoForDataType( $dataType ) {
 		$dbr = $this->getReadConnection();
 
-		$res = $dbr->select(
-			$this->tableName,
-			[ 'pi_property_id', 'pi_info' ],
-			[ 'pi_type' => $dataType ],
-			__METHOD__
-		);
+		$res = $dbr->newSelectQueryBuilder()
+			->select( [ 'pi_property_id', 'pi_info' ] )
+			->from( self::TABLE_NAME )
+			->where( [ 'pi_type' => $dataType ] )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 
 		$infos = $this->decodeResult( $res );
 
@@ -176,12 +174,11 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	public function getAllPropertyInfo() {
 		$dbr = $this->getReadConnection();
 
-		$res = $dbr->select(
-			$this->tableName,
-			[ 'pi_property_id', 'pi_info' ],
-			[],
-			__METHOD__
-		);
+		$res = $dbr->newSelectQueryBuilder()
+			->select( [ 'pi_property_id', 'pi_info' ] )
+			->from( self::TABLE_NAME )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 
 		$infos = $this->decodeResult( $res );
 
@@ -210,7 +207,7 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 		$dbw = $this->getWriteConnection();
 
 		$dbw->replace(
-			$this->tableName,
+			self::TABLE_NAME,
 			'pi_property_id',
 			[
 				'pi_property_id' => $propertyId->getNumericId(),
@@ -236,7 +233,7 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 		$dbw = $this->getWriteConnection();
 
 		$dbw->delete(
-			$this->tableName,
+			self::TABLE_NAME,
 			[ 'pi_property_id' => $propertyId->getNumericId() ],
 			__METHOD__
 		);
@@ -282,7 +279,7 @@ class PropertyInfoTable implements PropertyInfoLookup, PropertyInfoStore {
 	 * @return string
 	 */
 	public function getTableName() {
-		return $this->tableName;
+		return self::TABLE_NAME;
 	}
 
 }

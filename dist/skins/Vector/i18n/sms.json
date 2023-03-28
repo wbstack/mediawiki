@@ -6,6 +6,7 @@
 	},
 	"vector-languages": "Ǩiõl",
 	"vector-language-button-label": "{{PLURAL:$1|$1 ǩiõll|$1 ǩiõl|$1 ǩiõllâd}}",
+	"vector-no-language-button-label": "Lââʹzzet ǩiõlid",
 	"vector-action-addsection": "Lââʹzzet teeʹm",
 	"vector-action-delete": "Jaukkâd",
 	"vector-action-move": "Seeʹrd",
@@ -18,6 +19,11 @@
 	"vector-view-view": "Looǥǥ",
 	"vector-view-viewsource": "Čuäʹjet käivvkood",
 	"vector-more-actions": "Lââʹzz",
+	"vector-searchsuggest-containing": "Ooʒʒ seeidaid, koin lij <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-heading": "Siiskâžlooǥǥtõs",
+	"vector-toc-toggle-position-title": "čiõǥǥ",
 	"vector-anon-user-menu-pages-learn": "lââʹssteâđ",
-	"vector-main-menu-tooltip": "Väʹlddvaʹlljõk"
+	"vector-main-menu-tooltip": "Väʹlddvaʹlljõk",
+	"vector-toc-menu-tooltip": "Siiskâžlooǥǥtõs",
+	"vector-site-nav-label": "Seiddõs"
 }

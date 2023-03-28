@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Lancine.kounfantoh.fofana"
+		]
+	},
+	"twocolconflict-copy-action": "ߛߓߍߟߌ߫ ߘߝߊߣߍ߲ ߓߊߓߋ߬ߟߊ߬",
+	"twocolconflict-split-your-version-header": "ߌ ߟߊ߫ ߟߢߊ߬ߟߌ",
+	"twocolconflict-split-current-version-header": "ߟߢߊ߬ߟߌ߫ ߞߐ߯ߟߕߊ $1 ߖߊ߬ߕߋ߫ ߟߊ߫",
+	"twocolconflict-split-not-saved-at": "ߊ߬ ߡߊ߫ ߟߊߥߊ߲߬ߞߊ߫ ߡߎߣߎ߲߬",
+	"twocolconflict-split-choose-version": "ߦߌߟߡߊ ߘߏ߫ ߛߎߥߊ߲ߘߌ߫ ߖߊ߰ߣߌ߲߫",
+	"twocolconflict-split-other-version-chosen": "ߦߌߟߡߊ߫ ߜߘߍ ߟߎ߫",
+	"twocolconflict-split-your-version-chosen": "ߌ ߟߊ߫ ߦߌߟߡߊ",
+	"twocolconflict-split-select-all": "ߊ߬ ߓߍ߯ ߓߊߕߐ߬ߡߐ߲߫",
+	"twocolconflict-split-tour-dialog-dot-message": "ߟߊ߬ߟߌ߰ߟߌ߫ ߘߍ߬ߡߍ߲߬ߠߌ߲߫ ߞߏ ߘߐ߫߸ ߕߏ߲ߘߋ߫ ߓߊ߯ߡߊ߫ ߡߊߦߋߙߋ߲ߣߍ߲ ߛߐ߲߬ߞߌ߲߫.",
+	"twocolconflict-split-tour-dialog-header": "ߦߌߟߡߊ߫ ߝߘߏ߬ߣߍ߲ ߠߎ߬ ߞߍ߫ ߢߐ߲߮ ߞߊ߲߬",
+	"twocolconflict-split-select-your-tooltip": "ߊ߬ ߛߐ߲߬ߞߌ߲߫ ߞߵߌ ߟߊ߫ ߦߌߟߡߊ ߟߎ߬ ߡߊߡߌ߬ߣߊ߬",
+	"twocolconflict-split-selected-other-tooltip": "ߦߌߟߡߊ߫ ߜߘߍ߫ ߓߘߊ߫ ߡߊߡߌ߬ߣߊ߬",
+	"twocolconflict-split-selected-your-tooltip": "ߌ ߟߊ߬ ߦߌߟߡߊ ߓߘߊ߫ ߡߊߡߌ߬ߣߊ߬",
+	"twocolconflict-split-help-tooltip": "ߘߍ߬ߡߍ߲߬ߠߌ߲ ߦߌ߬ߘߊ߬",
+	"twocolconflict-split-tour-dialog-header-single-column-view": "ߟߊ߬ߥߊ߲߬ߞߊ߬ߟߌ ߝߘߏ߬ߣߍ߲ ߠߎ߬",
+	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "ߝߙߋߞߋ ߢߊߓߐ߫",
+	"twocolconflict-talk-header-overview": "ߘߏߕߌ߱ ߦߋ߫ ߟߊ߬ߥߊ߲߬ߞߊ߬ߟߌ ߞߊ߲߬ ߌ ߕߊ ߕߎ߬ߡߊ ߟߊ߫. ߞߊ߲߬ߞߎߡߊ ߘߐߜߍ߫ ߘߎ߰ߟߊ߫ ߖߊ߰ߣߌ߲߫ ߞߊ߬ ߖߊ߬ߡߊߙߌ ߘߏ߫ ߛߎߥߊ߲ߘߌ߫ ߛߊ߫ ߞߵߊ߬ ߟߊߥߊ߲߬ߞߊ߫. ߣߴߊ߬ ߘߏ߲߬ ߘߌ߫ ߓߍ߲߬߸ ߌ ߘߌ߫ ߛߋ߫ ߌ ߟߊ߫ ߛߓߍߟߌ ߡߊߦߟߍ߬ߡߊ߲߫ ߠߊ߫.",
+	"twocolconflict-talk-your": "ߌ ߟߊ߫ ߞߊ߲߬ߞߎߡߊ",
+	"twocolconflict-talk-conflicting": "ߝߐߢߐ߲߯ߞߐ߫ ߞߊ߲ߞߎߡߊ",
+	"twocolconflict-talk-switch-tooltip": "ߡߝߊ߬ߟߋ߲߬ߠߌ߲ ߖߊ߬ߡߊߙߌ"
+}

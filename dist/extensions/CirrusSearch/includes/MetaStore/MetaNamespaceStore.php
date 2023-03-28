@@ -2,8 +2,8 @@
 
 namespace CirrusSearch\MetaStore;
 
-use CirrusSearch\Connection;
 use Elastica\Document;
+use Elastica\Index;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\Ids;
 use Elastica\Query\MatchQuery;
@@ -13,14 +13,14 @@ class MetaNamespaceStore implements MetaStore {
 	/** @const Value of metastore 'type' field for our documents */
 	public const METASTORE_TYPE = 'namespace';
 
+	/** @var Index */
+	private $index;
+
 	/** @var string */
 	private $wikiId;
 
-	/** @var Connection */
-	private $connection;
-
-	public function __construct( Connection $connection, $wikiId = null ) {
-		$this->connection = $connection;
+	public function __construct( Index $index, $wikiId = null ) {
+		$this->index = $index;
 		$this->wikiId = $wikiId ?? WikiMap::getCurrentWikiId();
 	}
 
@@ -61,10 +61,9 @@ class MetaNamespaceStore implements MetaStore {
 		foreach ( $documents as $doc ) {
 			$docIds[] = $doc->getId();
 		}
-		$type = $this->getType();
-		$type->deleteByQuery( \Elastica\Query::create(
+		$this->index->deleteByQuery( \Elastica\Query::create(
 			$this->queryFilter()->addMustNot( new Ids( $docIds ) ) ) );
-		$type->addDocuments( $documents );
+		$this->index->addDocuments( $documents );
 	}
 
 	/**
@@ -83,11 +82,7 @@ class MetaNamespaceStore implements MetaStore {
 			->setParam( '_source', [ 'namespace_id' ] )
 			->setParam( 'stats', [ 'namespace' ] );
 
-		return $this->getType()->search( $query, $queryOptions );
-	}
-
-	private function getType() {
-		return MetaStoreIndex::getElasticaType( $this->connection );
+		return $this->index->search( $query, $queryOptions );
 	}
 
 	private function queryFilter() {
@@ -110,7 +105,7 @@ class MetaNamespaceStore implements MetaStore {
 				'wiki' => $this->wikiId,
 				'namespace_id' => $nsId,
 				'namespace_name' => $names,
-			] );
+			], '_doc' );
 		}
 		return $documents;
 	}

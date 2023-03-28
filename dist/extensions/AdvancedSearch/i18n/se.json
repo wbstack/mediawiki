@@ -5,6 +5,12 @@
 		]
 	},
 	"advancedsearch-options-pane-head": "Aiddostahttojuvvon ohcan:",
+	"advancedsearch-optgroup-text": "Oza siiddu teavsttas",
+	"advancedsearch-field-filetype": "Fiilašládja",
 	"advancedsearch-inlanguage-default": "Vállje giela",
+	"advancedsearch-filetype-default": "Vállje fiilašlája",
+	"advancedsearch-filetype-bitmap": "Govva",
+	"advancedsearch-filetype-audio": "Jietna",
+	"advancedsearch-filetype-video": "Video",
 	"prefs-advancedsearch": "Aiddostahttojuvvon ohcan"
 }

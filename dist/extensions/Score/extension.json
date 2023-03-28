@@ -10,7 +10,7 @@
 	"license-name": "GPL-3.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.38.0"
+		"MediaWiki": ">= 1.39.0"
 	},
 	"MessagesDirs": {
 		"Score": [
@@ -26,31 +26,32 @@
 			"scripts": [
 				"ve-score/ve.dm.MWScoreNode.js",
 				"ve-score/ve.ce.MWScoreNode.js",
-				"ve-score/ve.ui.MWScoreInspector.js",
-				"ve-score/ve.ui.MWScoreInspectorTool.js"
+				"ve-score/ve.ui.MWScoreContextItem.js",
+				"ve-score/ve.ui.MWScoreDialog.js",
+				"ve-score/ve.ui.MWScoreDialogTool.js"
 			],
 			"styles": [
-				"ve-score/ve.ui.MWScoreInspector.css"
+				"ve-score/ve.ui.MWScoreContextItem.css",
+				"ve-score/ve.ui.MWScoreDialog.css"
 			],
 			"dependencies": [
 				"ext.visualEditor.mwcore",
 				"ext.score.visualEditor.icons"
 			],
 			"messages": [
-				"score-visualeditor-mwscoreinspector-card-advanced",
-				"score-visualeditor-mwscoreinspector-card-audio",
-				"score-visualeditor-mwscoreinspector-card-notation",
-				"score-visualeditor-mwscoreinspector-lang",
-				"score-visualeditor-mwscoreinspector-lang-abc",
-				"score-visualeditor-mwscoreinspector-lang-lilypond",
-				"score-visualeditor-mwscoreinspector-notelanguage",
-				"score-visualeditor-mwscoreinspector-override-midi",
-				"score-visualeditor-mwscoreinspector-override-midi-placeholder",
-				"score-visualeditor-mwscoreinspector-override-ogg",
-				"score-visualeditor-mwscoreinspector-override-ogg-placeholder",
-				"score-visualeditor-mwscoreinspector-raw",
-				"score-visualeditor-mwscoreinspector-title",
-				"score-visualeditor-mwscoreinspector-vorbis"
+				"score-visualeditor-mwscoredialog-audio",
+				"score-visualeditor-mwscoredialog-card-advanced",
+				"score-visualeditor-mwscoredialog-card-audio",
+				"score-visualeditor-mwscoredialog-lang",
+				"score-visualeditor-mwscoredialog-lang-abc",
+				"score-visualeditor-mwscoredialog-lang-lilypond",
+				"score-visualeditor-mwscoredialog-notelanguage",
+				"score-visualeditor-mwscoredialog-override-audio",
+				"score-visualeditor-mwscoredialog-override-audio-placeholder",
+				"score-visualeditor-mwscoredialog-override-midi",
+				"score-visualeditor-mwscoredialog-override-midi-placeholder",
+				"score-visualeditor-mwscoredialog-raw",
+				"score-visualeditor-mwscoredialog-title"
 			],
 			"targets": [
 				"desktop",
@@ -118,6 +119,10 @@
 			"value": null,
 			"description": "Set to false to keep margins on the generated PNG files"
 		},
+		"ScoreUseSvg": {
+			"value": false,
+			"description": "Set to true to output SVG images with PNG fallback. Requires LilyPond version >= 2.23.82 with libcairo support"
+		},
 		"ScoreShell": {
 			"value": "/bin/sh",
 			"description": "The shell to use to run the rendering script. On Windows this should be the full path to bash.exe, not git-bash.exe."
@@ -150,7 +155,7 @@
 		},
 		"ScoreSafeMode": {
 			"value": true,
-			"description": "Set to false if LilyPond inputs are trusted, sanitized, or sandboxed. This disables LilyPond's safe mode, enabling some features"
+			"description": "Must be set to false for LilyPond versions 2.23.12 or newer (safe mode was removed in 2.23.12 as it could no longer be guaranteed safe). For older versions, set this to true to enable LilyPond's safe mode (default). NOTE: if set to false, all inputs should be sanitized and/or trusted, and the LilyPond binary must be appropriately sandboxed."
 		},
 		"ScoreDisableExec": {
 			"value": false,
@@ -181,10 +186,15 @@
 		},
 		"WikibaseMusicalNotationLineWidthInches": {
 			"value": 0
+		},
+		"ScoreDebugOutput": {
+			"value": false,
+			"description": "Show the full command output when a shell command fails"
 		}
 	},
 	"TrackingCategories": [
 		"score-deprecated-category",
+		"score-use-category",
 		"score-error-category"
 	],
 	"attributes": {

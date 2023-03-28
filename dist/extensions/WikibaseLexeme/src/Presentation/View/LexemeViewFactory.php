@@ -2,7 +2,9 @@
 
 namespace Wikibase\Lexeme\Presentation\View;
 
+use DerivativeContext;
 use Language;
+use RequestContext;
 use Wikibase\Lexeme\Presentation\Formatters\LexemeTermFormatter;
 use Wikibase\Lexeme\Presentation\View\Template\LexemeTemplateFactory;
 use Wikibase\Lexeme\WikibaseLexemeServices;
@@ -49,7 +51,10 @@ class LexemeViewFactory {
 
 		$editSectionGenerator = $this->newToolbarEditSectionGenerator();
 
-		$languageNameLookup = WikibaseLexemeServices::getLanguageNameLookup();
+		$context = new DerivativeContext( RequestContext::getMain() );
+		$context->setLanguage( $this->language );
+		$languageNameLookup = WikibaseLexemeServices::getLanguageNameLookupFactory()
+			->getForContextSource( $context );
 
 		$statementSectionsView = $viewFactory->newStatementSectionsView(
 			$this->language->getCode(),

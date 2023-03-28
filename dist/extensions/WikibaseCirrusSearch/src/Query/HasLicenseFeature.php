@@ -124,6 +124,7 @@ class HasLicenseFeature extends SimpleKeywordFeature implements FilterQueryFeatu
 	 */
 	private function combineQueries( array $queries ) {
 		$return = new BoolQuery();
+		$return->setMinimumShouldMatch( 1 );
 		foreach ( $queries as $query ) {
 			if ( $query['occur'] === 'must_not' ) {
 				$return->addMustNot( new MatchQuery(

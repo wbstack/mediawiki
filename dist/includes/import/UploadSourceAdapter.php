@@ -32,6 +32,9 @@ class UploadSourceAdapter {
 	/** @var ImportSource[] */
 	public static $sourceRegistrations = [];
 
+	/** @var resource|null Must exists on stream wrapper class */
+	public $context;
+
 	/** @var ImportSource */
 	private $mSource;
 
@@ -62,6 +65,9 @@ class UploadSourceAdapter {
 	 */
 	public function stream_open( $path, $mode, $options, &$opened_path ) {
 		$url = parse_url( $path );
+		if ( !isset( $url['host'] ) ) {
+			return false;
+		}
 		$id = $url['host'];
 
 		if ( !isset( self::$sourceRegistrations[$id] ) ) {

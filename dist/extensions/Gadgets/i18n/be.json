@@ -2,10 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Artsiom91",
-			"Mikalai Udodau",
-			"ZlyiLev",
 			"Chadyka",
-			"No Sleep till Krupki"
+			"Mikalai Udodau",
+			"No Sleep till Krupki",
+			"ZlyiLev"
 		]
 	},
 	"gadgets-desc": "Дазваляе ўдзельнікам выбіраць [[Special:Gadgets|Гаджэты на мовах CSS і JavaScript]] у сваіх [[Special:Preferences#mw-prefsection-gadgets|наладах]]",

@@ -45,7 +45,7 @@ class PropertyViewTest extends EntityViewTestCase {
 		$property->setLabel( 'en', "label:$id" );
 		$property->setDescription( 'en', "description:$id" );
 
-		$property->setStatements( new StatementList( $statements ) );
+		$property->setStatements( new StatementList( ...$statements ) );
 
 		return $property;
 	}
@@ -104,9 +104,7 @@ class PropertyViewTest extends EntityViewTestCase {
 			$templateFactory,
 			$termsView,
 			$this->createMock( LanguageDirectionalityLookup::class ),
-			$this->getMockBuilder( StatementSectionsView::class )
-				->disableOriginalConstructor()
-				->getMock(),
+			$this->createMock( StatementSectionsView::class ),
 			$this->getDataTypeFactory(),
 			'en',
 			$this->createMock( LocalizedTextProvider::class )

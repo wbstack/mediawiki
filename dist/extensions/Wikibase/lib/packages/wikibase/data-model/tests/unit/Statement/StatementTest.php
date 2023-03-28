@@ -1,8 +1,9 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace Wikibase\DataModel\Tests\Statement;
 
 use DataValues\StringValue;
+use Generator;
 use InvalidArgumentException;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Reference;
@@ -32,7 +33,7 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider validConstructorArgumentsProvider
+	 * @dataProvider provideValidConstructorArguments
 	 */
 	public function testConstructorWithValidArguments(
 		Snak $mainSnak,
@@ -47,20 +48,24 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $guid, $statement->getGuid() );
 	}
 
-	public function validConstructorArgumentsProvider() {
+	/**
+	 * @return array array of arrays:
+	 * [ [ Snak $mainSnak, ?SnakList $qualifiers, ?ReferenceList $references, ?string $guid ], ... ]
+	 */
+	public function provideValidConstructorArguments(): array {
 		$snak = new PropertyNoValueSnak( 1 );
 		$qualifiers = new SnakList( [ $snak ] );
 		$references = new ReferenceList( [ new Reference( [ $snak ] ) ] );
 
 		return [
-			[ $snak, null, null, null ],
-			[ $snak, null, null, 'guid' ],
-			[ $snak, $qualifiers, $references, 'guid' ],
+			'main snak' => [ $snak, null, null, null ],
+			'main snak and guid' => [ $snak, null, null, 'guid' ],
+			'main snak, qualifiers, references, and guid' => [ $snak, $qualifiers, $references, 'guid' ],
 		];
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testSetGuid( Statement $statement ) {
 		$statement->setGuid( 'foo-bar-baz' );
@@ -68,7 +73,7 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testGetGuid( Statement $statement ) {
 		$guid = $statement->getGuid();
@@ -105,12 +110,12 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testSerialize( Statement $statement ) {
 		$copy = unserialize( serialize( $statement ) );
 
-		$this->assertSame( $statement->getHash(), $copy->getHash(), 'Serialization roundtrip should not affect hash' );
+		$this->assertSame( $statement->getHash(), $copy->getHash(), 'Serialization round-trip should not affect hash' );
 	}
 
 	public function testGuidDoesNotAffectHash() {
@@ -123,79 +128,50 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $statement0->getHash(), $statement1->getHash() );
 	}
 
-	/**
-	 * @dataProvider invalidGuidProvider
-	 */
-	public function testGivenInvalidGuid_constructorThrowsException( $guid ) {
-		$this->expectException( InvalidArgumentException::class );
-		new Statement( new PropertyNoValueSnak( 1 ), null, null, $guid );
-	}
-
-	/**
-	 * @dataProvider invalidGuidProvider
-	 */
-	public function testGivenInvalidGuid_setGuidThrowsException( $guid ) {
-		$this->expectException( InvalidArgumentException::class );
-		$statement = new Statement( new PropertyNoValueSnak( 42 ) );
-		$statement->setGuid( $guid );
-	}
-
-	public function invalidGuidProvider() {
-		$snak = new PropertyNoValueSnak( 1 );
-
-		return [
-			[ false ],
-			[ 1 ],
-			[ $snak ],
-			[ new Statement( $snak ) ],
-		];
-	}
-
-	public function instanceProvider() {
-		$instances = [];
-
+	public function provideStatement(): Generator {
 		$propertyId = new NumericPropertyId( 'P42' );
-		$baseInstance = new Statement( new PropertyNoValueSnak( $propertyId ) );
+		$baseStatement = new Statement( new PropertyNoValueSnak( $propertyId ) );
 
-		$instances[] = $baseInstance;
+		yield 'Statement with PropertyNoValueSnak' => [ $baseStatement ];
 
-		$instance = clone $baseInstance;
-		$instance->setRank( Statement::RANK_PREFERRED );
+		$statement = clone $baseStatement;
+		$statement->setRank( Statement::RANK_PREFERRED );
+		yield 'Statement with PropertyNoValueSnak and preferred rank' => [ $statement ];
 
-		$instances[] = $instance;
-
-		$newInstance = clone $instance;
-
-		$instances[] = $newInstance;
-
-		$instance = clone $baseInstance;
-
-		$instance->setReferences( new ReferenceList( [
-			new Reference( [
-				new PropertyValueSnak( new NumericPropertyId( 'P1' ), new StringValue( 'a' ) )
+		$statement = clone $statement;
+		$statement->setQualifiers(
+			new SnakList( [
+				new PropertyValueSnak(
+					new NumericPropertyId( 'P1' ),
+					new StringValue( 'Qualifier Snak StringValue' )
+				)
 			] )
-		] ) );
+		);
+		yield 'Statement with PropertyNoValueSnak, preferred rank, and Qualifier' => [ $statement ];
 
-		$instances[] = $instance;
-
-		$argLists = [];
-
-		foreach ( $instances as $instance ) {
-			$argLists[] = [ $instance ];
-		}
-
-		return $argLists;
+		$statement = clone $baseStatement;
+		$statement->setReferences(
+			new ReferenceList( [
+				new Reference( [
+					new PropertyValueSnak(
+						new NumericPropertyId( 'P2' ),
+						new StringValue( 'Reference Snak StringValue' )
+					)
+				] )
+			] )
+		);
+		yield 'Statement with PropertyNoValueSnak and Reference' => [ $statement ];
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testGetReferences( Statement $statement ) {
 		$this->assertInstanceOf( ReferenceList::class, $statement->getReferences() );
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testSetReferences( Statement $statement ) {
 		$references = new ReferenceList( [
@@ -210,7 +186,7 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testAddNewReferenceWithVariableArgumentsSyntax( Statement $statement ) {
 		$snak1 = new PropertyNoValueSnak( 256 );
@@ -222,31 +198,18 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider instanceProvider
-	 */
-	public function testAddNewReferenceWithAnArrayOfSnaks( Statement $statement ) {
-		$snaks = [
-			new PropertyNoValueSnak( 256 ),
-			new PropertySomeValueSnak( 42 ),
-		];
-		$statement->addNewReference( $snaks );
-
-		$this->assertTrue( $statement->getReferences()->hasReference( new Reference( $snaks ) ) );
-	}
-
-	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testGetRank( Statement $statement ) {
 		$rank = $statement->getRank();
 		$this->assertIsInt( $rank );
 
 		$ranks = [ Statement::RANK_DEPRECATED, Statement::RANK_NORMAL, Statement::RANK_PREFERRED ];
-		$this->assertContains( $rank, $ranks, true );
+		$this->assertContains( $rank, $ranks );
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testSetRank( Statement $statement ) {
 		$statement->setRank( Statement::RANK_DEPRECATED );
@@ -254,7 +217,7 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testSetInvalidRank( Statement $statement ) {
 		$this->expectException( InvalidArgumentException::class );
@@ -262,7 +225,7 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testGetPropertyId( Statement $statement ) {
 		$this->assertSame(
@@ -272,7 +235,7 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider instanceProvider
+	 * @dataProvider provideStatement
 	 */
 	public function testGetAllSnaks( Statement $statement ) {
 		$snaks = $statement->getAllSnaks();
@@ -377,13 +340,16 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/**
-	 * @dataProvider notEqualsProvider
+	 * @dataProvider provideNonEqualStatements
 	 */
-	public function testNotEquals( Statement $statement, Statement $target, $message ) {
-		$this->assertFalse( $statement->equals( $target ), $message );
+	public function testNotEquals( Statement $statement, Statement $target ) {
+		$this->assertFalse( $statement->equals( $target ) );
 	}
 
-	public function notEqualsProvider() {
+	/**
+	 * @return array array of arrays: [ [ Statement $statement, Statement $target ], ... ]
+	 */
+	public function provideNonEqualStatements(): array {
 		$statement = $this->newStatement();
 
 		$statementWithoutQualifiers = $this->newStatement();
@@ -399,24 +365,21 @@ class StatementTest extends \PHPUnit\Framework\TestCase {
 		$statementMainSnakNotEqual->setMainSnak( new PropertyNoValueSnak( 9000 ) );
 
 		return [
-			[ $statement, $statementWithoutQualifiers, 'qualifiers not equal' ],
-			[ $statement, $statementWithoutReferences, 'references not equal' ],
-			[ $statement, $statementWithPreferredRank, 'rank not equal' ],
-			[ $statement, $statementMainSnakNotEqual, 'main snak not equal' ]
+			'qualifiers not equal' => [ $statement, $statementWithoutQualifiers ],
+			'references not equal' => [ $statement, $statementWithoutReferences ],
+			'rank not equal' => [ $statement, $statementWithPreferredRank ],
+			'main snak not equal' => [ $statement, $statementMainSnakNotEqual ]
 		];
 	}
 
-	private function newStatement() {
-		$qualifiers = new SnakList( [ new PropertyNoValueSnak( 23 ) ] );
-
+	private function newStatement(): Statement {
 		$statement = new Statement(
 			new PropertyNoValueSnak( 42 ),
-			$qualifiers,
+			new SnakList( [ new PropertyNoValueSnak( 23 ) ] ),
 			new ReferenceList( [
 				new Reference( [ new PropertyNoValueSnak( 1337 ) ] ),
 			] )
 		);
-
 		$statement->setRank( Statement::RANK_NORMAL );
 
 		return $statement;

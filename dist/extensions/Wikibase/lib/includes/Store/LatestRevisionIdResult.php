@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace Wikibase\Lib\Store;
 
@@ -13,7 +13,7 @@ use Wikimedia\Assert\Assert;
  *
  * How to create:
  * ```php
- * $concreteRevision = LatestRevisionIdResult::concreteRevision( 123 );
+ * $concreteRevision = LatestRevisionIdResult::concreteRevision( 123, '20220101001122' );
  * $revisionRedirectsToQ7 = LatestRevisionIdResult::redirect( 123, new ItemId( 'Q7' ) );
  * $entityDoesNotExist = LatestRevisionIdResult::nonexistentEntity();
  * ```
@@ -63,6 +63,11 @@ final class LatestRevisionIdResult {
 	private $revisionId;
 
 	/**
+	 * @var string|null Revision timestamp if present
+	 */
+	private $revisionTimestamp;
+
+	/**
 	 * @var EntityId|null
 	 */
 	private $redirectsTo;
@@ -70,9 +75,8 @@ final class LatestRevisionIdResult {
 	/**
 	 * @param int $revisionId
 	 * @param EntityId $redirectsTo (could be another redirect)
-	 * @return self
 	 */
-	public static function redirect( $revisionId, EntityId $redirectsTo ) {
+	public static function redirect( int $revisionId, EntityId $redirectsTo ): self {
 		self::assertCorrectRevisionId( $revisionId );
 
 		$result = new self( self::REDIRECT );
@@ -82,22 +86,16 @@ final class LatestRevisionIdResult {
 		return $result;
 	}
 
-	/**
-	 * @return self
-	 */
-	public static function nonexistentEntity() {
+	public static function nonexistentEntity(): self {
 		return new self( self::NONEXISTENT );
 	}
 
-	/**
-	 * @param int $revisionId
-	 * @return self
-	 */
-	public static function concreteRevision( $revisionId ) {
+	public static function concreteRevision( int $revisionId, string $revisionTimestamp ): self {
 		self::assertCorrectRevisionId( $revisionId );
 
 		$result = new self( self::CONCRETE_REVISION );
 		$result->revisionId = $revisionId;
+		$result->revisionTimestamp = $revisionTimestamp;
 		return $result;
 	}
 
@@ -107,9 +105,8 @@ final class LatestRevisionIdResult {
 
 	/**
 	 * @param callable $handler Revision id will be given as a first argument
-	 * @return self
 	 */
-	public function onConcreteRevision( callable $handler ) {
+	public function onConcreteRevision( callable $handler ): self {
 		$result = clone $this;
 		$result->handlers[ self::CONCRETE_REVISION ] = $handler;
 
@@ -119,9 +116,8 @@ final class LatestRevisionIdResult {
 	/**
 	 * @param callable $handler Revision id will be given as a first argument, EntityId to which
 	 * 							revision redirects will be second argument
-	 * @return self
 	 */
-	public function onRedirect( callable $handler ) {
+	public function onRedirect( callable $handler ): self {
 		$result = clone $this;
 		$result->handlers[ self::REDIRECT] = $handler;
 
@@ -130,9 +126,8 @@ final class LatestRevisionIdResult {
 
 	/**
 	 * @param callable $handler Function with no arguments
-	 * @return self
 	 */
-	public function onNonexistentEntity( callable $handler ) {
+	public function onNonexistentEntity( callable $handler ): self {
 		$result = clone $this;
 		$result->handlers[ self::NONEXISTENT ] = $handler;
 
@@ -156,18 +151,17 @@ final class LatestRevisionIdResult {
 			case self::REDIRECT:
 				return $targetHandler( $this->revisionId, $this->redirectsTo );
 			case self::CONCRETE_REVISION:
-				return $targetHandler( $this->revisionId );
+				return $targetHandler( $this->revisionId, $this->revisionTimestamp );
 			default:
 				throw new \RuntimeException( 'Unreachable' );
 		}
 	}
 
 	/**
-	 * @param mixed $revisionId Expected positive integer
+	 * @param int $revisionId Expected positive integer
 	 * @throws \Exception
 	 */
-	private static function assertCorrectRevisionId( $revisionId ) {
-		Assert::parameterType( 'integer', $revisionId, '$revisionId' );
+	private static function assertCorrectRevisionId( int $revisionId ) {
 		Assert::parameter(
 			$revisionId > 0,
 			'$revisionId',

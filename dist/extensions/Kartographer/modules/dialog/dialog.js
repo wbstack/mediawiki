@@ -47,6 +47,9 @@ MapDialog.prototype.initialize = function () {
 	this.map = null;
 };
 
+/**
+ * @param {L.Map} map
+ */
 MapDialog.prototype.setMap = function ( map ) {
 	var dialog = this;
 	// remove older map
@@ -71,7 +74,6 @@ MapDialog.prototype.setMap = function ( map ) {
 	);
 
 	dialog.$captionContainer
-		.attr( 'title', dialog.map.captionText )
 		.text( dialog.map.captionText );
 
 	// The button exists, the sidebar was open, call `tearDown` and reopen it.
@@ -108,10 +110,16 @@ MapDialog.prototype.addFooterButton = function () {
 	if ( !dialog.mapDetailsButton ) {
 		dialog.mapDetailsButton = new OO.ui.ToggleButtonWidget( {
 			label: mw.msg( 'kartographer-sidebar-togglebutton' ),
-			icon: 'newWindow',
-			title: mw.msg( 'kartographer-sidebar-togglebutton' )
+			icon: 'newWindow'
 		} );
 		dialog.mapDetailsButton.connect( dialog, { change: 'toggleSideBar' } );
+	}
+	if ( !dialog.mapNearbyButton && mw.config.get( 'wgKartographerNearby' ) && !OO.ui.isMobile() ) {
+		dialog.mapNearbyButton = new OO.ui.ToggleButtonWidget( {
+			label: mw.msg( 'kartographer-sidebar-nearbybutton' ),
+			icon: 'mapPin'
+		} );
+		dialog.mapNearbyButton.connect( dialog, { change: 'toggleNearbyLayer' } );
 	}
 
 	if ( !dialog.$captionContainer.length ) {
@@ -123,13 +131,17 @@ MapDialog.prototype.addFooterButton = function () {
 		$buttonContainer = $( '<div>' )
 			.addClass( 'mw-kartographer-buttonfoot' );
 	}
+	if ( dialog.mapNearbyButton ) {
+		$buttonContainer.append( dialog.mapNearbyButton.$element );
+	}
+	$buttonContainer.append( dialog.mapDetailsButton.$element );
 
 	if ( !$inlineContainer.length ) {
 		$inlineContainer = $( '<div>' )
 			.addClass( 'mw-kartographer-inlinefoot' );
 	}
 	$inlineContainer.append(
-		$buttonContainer.append( dialog.mapDetailsButton.$element ),
+		$buttonContainer,
 		dialog.$captionContainer
 	);
 
@@ -138,23 +150,24 @@ MapDialog.prototype.addFooterButton = function () {
 
 	if ( dialog.map ) {
 		dialog.$captionContainer
-			.attr( 'title', dialog.map.captionText )
 			.text( dialog.map.captionText );
 	}
 };
 
+/**
+ * @param {boolean} [open] If the sidebar should be shown or not, omit to toggle
+ */
 MapDialog.prototype.toggleSideBar = function ( open ) {
 	var dialog = this;
 
 	mw.loader.using( 'ext.kartographer.dialog.sidebar' ).then( function () {
-		var SideBar;
 		if ( !dialog.sideBar ) {
-			SideBar = require( 'ext.kartographer.dialog.sidebar' );
+			var SideBar = require( 'ext.kartographer.dialog.sidebar' );
 			dialog.sideBar = new SideBar( { dialog: dialog } );
 			dialog.sideBar.toggle( true );
 		}
 
-		open = ( typeof open === 'undefined' ) ? !dialog.mapDetailsButton.value : open;
+		open = open === undefined ? !dialog.mapDetailsButton.value : open;
 
 		if ( dialog.mapDetailsButton.value !== open ) {
 			dialog.mapDetailsButton.setValue( open );
@@ -166,8 +179,16 @@ MapDialog.prototype.toggleSideBar = function ( open ) {
 		setTimeout( function () {
 			dialog.$body.toggleClass( 'mw-kartographer-mapDialog-sidebar-opened', open );
 		} );
-
 	} );
+};
+
+/**
+ * @param {boolean} showNearby
+ */
+MapDialog.prototype.toggleNearbyLayer = function ( showNearby ) {
+	if ( this.map ) {
+		require( './nearby.js' ).toggleNearbyLayer( this.map, showNearby );
+	}
 };
 
 MapDialog.prototype.getActionProcess = function ( action ) {
@@ -177,8 +198,7 @@ MapDialog.prototype.getActionProcess = function ( action ) {
 		return new OO.ui.Process( function () {
 			if ( dialog.map ) {
 				dialog.map.closeFullScreen();
-				dialog.map.remove();
-				dialog.map = null;
+				// Will be destroyed later, {@see getTeardownProcess} below
 			}
 		} );
 	}
@@ -252,7 +272,6 @@ MapDialog.prototype.getSetupProcess = function ( options ) {
 MapDialog.prototype.getReadyProcess = function ( data ) {
 	return MapDialog.super.prototype.getReadyProcess.call( this, data )
 		.next( function () {
-
 			if ( !this.map ) {
 				return;
 			}
@@ -274,6 +293,9 @@ MapDialog.prototype.getReadyProcess = function ( data ) {
 MapDialog.prototype.getTeardownProcess = function ( data ) {
 	return MapDialog.super.prototype.getTeardownProcess.call( this, data )
 		.next( function () {
+			if ( this.mapNearbyButton ) {
+				this.mapNearbyButton.setValue( false );
+			}
 			if ( this.map ) {
 				this.map.remove();
 				this.map = null;

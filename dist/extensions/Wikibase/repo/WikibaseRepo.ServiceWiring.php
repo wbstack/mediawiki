@@ -113,6 +113,7 @@ use Wikibase\Lib\Store\EntityTermStoreWriter;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\ItemTermStoreWriterAdapter;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\LinkTargetEntityIdLookup;
@@ -218,6 +219,7 @@ use Wikibase\Repo\Rdf\RdfVocabulary;
 use Wikibase\Repo\Rdf\ValueSnakRdfBuilderFactory;
 use Wikibase\Repo\Search\Fields\FieldDefinitionsFactory;
 use Wikibase\Repo\SiteLinkGlobalIdentifiersProvider;
+use Wikibase\Repo\SiteLinkPageNormalizer;
 use Wikibase\Repo\SiteLinkTargetProvider;
 use Wikibase\Repo\SnakFactory;
 use Wikibase\Repo\StatementGrouperBuilder;
@@ -371,8 +373,10 @@ return [
 			new TermChangeOpSerializationValidator( WikibaseRepo::getTermsLanguages( $services ) ),
 			WikibaseRepo::getSiteLinkBadgeChangeOpSerializationValidator( $services ),
 			WikibaseRepo::getExternalFormatStatementDeserializer( $services ),
+			WikibaseRepo::getSiteLinkPageNormalizer( $services ),
 			WikibaseRepo::getSiteLinkTargetProvider( $services ),
 			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getEntityLookup( $services ),
 			WikibaseRepo::getStringNormalizer( $services ),
 			$settings->getSetting( 'siteLinkGroups' )
 		);
@@ -557,14 +561,14 @@ return [
 		MediaWikiServices $services
 	): WikibaseValueFormatterBuilders {
 		$settings = WikibaseRepo::getSettings( $services );
-		$revisionLookup = WikibaseRepo::getEntityRevisionLookup( $services );
 		$termFallbackCache = WikibaseRepo::getTermFallbackCache( $services );
+		$redirectResolvingLatestRevisionLookup = WikibaseRepo::getRedirectResolvingLatestRevisionLookup( $services );
 
 		return new WikibaseValueFormatterBuilders(
 			new FormatterLabelDescriptionLookupFactory(
 				WikibaseRepo::getTermLookup( $services ),
 				$termFallbackCache,
-				new RedirectResolvingLatestRevisionLookup( $revisionLookup )
+				$redirectResolvingLatestRevisionLookup
 			),
 			WikibaseRepo::getLanguageNameLookup( $services ),
 			WikibaseRepo::getItemUrlParser( $services ),
@@ -572,7 +576,7 @@ return [
 			$settings->getSetting( 'tabularDataStorageBaseUrl' ),
 			$termFallbackCache,
 			WikibaseRepo::getEntityLookup( $services ),
-			$revisionLookup,
+			$redirectResolvingLatestRevisionLookup,
 			$settings->getSetting( 'entitySchemaNamespace' ),
 			WikibaseRepo::getEntityExistenceChecker( $services ),
 			WikibaseRepo::getEntityTitleTextLookup( $services ),
@@ -603,7 +607,8 @@ return [
 			WikibaseRepo::getEditFilterHookRunner( $services ),
 			$services->getStatsdDataFactory(),
 			$services->getUserOptionsLookup(),
-			WikibaseRepo::getSettings( $services )->getSetting( 'maxSerializedEntitySize' )
+			WikibaseRepo::getSettings( $services )->getSetting( 'maxSerializedEntitySize' ),
+			WikibaseRepo::getLocalEntityTypes( $services )
 		);
 	},
 
@@ -941,8 +946,7 @@ return [
 		$entityTypeDefinitions = WikibaseRepo::getEntityTypeDefinitions( $services );
 
 		return new EntityRdfBuilderFactory(
-			$entityTypeDefinitions->get( EntityTypeDefinitions::RDF_BUILDER_FACTORY_CALLBACK ),
-			$entityTypeDefinitions->get( EntityTypeDefinitions::RDF_LABEL_PREDICATES )
+			$entityTypeDefinitions->get( EntityTypeDefinitions::RDF_BUILDER_FACTORY_CALLBACK )
 		);
 	},
 
@@ -1153,6 +1157,18 @@ return [
 		return WikibaseRepo::getBaseDataModelDeserializerFactory( $services )->newStatementDeserializer();
 	},
 
+	'WikibaseRepo.FallbackLabelDescriptionLookupFactory' => function (
+		MediaWikiServices $services
+	): FallbackLabelDescriptionLookupFactory {
+		return new FallbackLabelDescriptionLookupFactory(
+			WikibaseRepo::getLanguageFallbackChainFactory( $services ),
+			WikibaseRepo::getRedirectResolvingLatestRevisionLookup( $services ),
+			WikibaseRepo::getTermFallbackCache( $services ),
+			WikibaseRepo::getTermLookup( $services ),
+			WikibaseRepo::getTermBuffer( $services )
+		);
+	},
+
 	'WikibaseRepo.FederatedPropertiesServiceFactory' => function ( MediaWikiServices $services ): ApiServiceFactory {
 		$settings = WikibaseRepo::getSettings( $services );
 
@@ -1256,7 +1272,7 @@ return [
 				->newSiteLinkStore(),
 			WikibaseRepo::getBagOStuffSiteLinkConflictLookup( $services ),
 			WikibaseRepo::getEntityIdLookup( $services ),
-			WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory( $services ),
+			WikibaseRepo::getFallbackLabelDescriptionLookupFactory( $services ),
 			WikibaseRepo::getFieldDefinitionsFactory( $services )
 				->getFieldDefinitionsByType( Item::ENTITY_TYPE ),
 			WikibaseRepo::getPropertyDataTypeLookup( $services ),
@@ -1571,7 +1587,7 @@ return [
 			WikibaseRepo::getValidatorErrorLocalizer( $services ),
 			WikibaseRepo::getEntityIdParser( $services ),
 			WikibaseRepo::getEntityIdLookup( $services ),
-			WikibaseRepo::getLanguageFallbackLabelDescriptionLookupFactory( $services ),
+			WikibaseRepo::getFallbackLabelDescriptionLookupFactory( $services ),
 			WikibaseRepo::getStore( $services )
 				->getPropertyInfoStore(),
 			WikibaseRepo::getPropertyInfoBuilder( $services ),
@@ -1659,6 +1675,12 @@ return [
 		);
 	},
 
+	'WikibaseRepo.RedirectResolvingLatestRevisionLookup' => function (
+		MediaWikiServices $services
+	): RedirectResolvingLatestRevisionLookup {
+		return new RedirectResolvingLatestRevisionLookup( WikibaseRepo::getEntityRevisionLookup( $services ) );
+	},
+
 	'WikibaseRepo.ReferenceNormalizer' => function ( MediaWikiServices $services ): ReferenceNormalizer {
 		return new ReferenceNormalizer( WikibaseRepo::getSnakNormalizer( $services ) );
 	},
@@ -1675,25 +1697,6 @@ return [
 
 	'WikibaseRepo.Settings' => function ( MediaWikiServices $services ): SettingsArray {
 		return WikibaseSettings::getRepoSettings();
-	},
-
-	// TODO: This service is just a convenience service to simplify the transition away from SingleEntitySourceServices,
-	//       and thus should eventually be removed. See T277731.
-	'WikibaseRepo.SingleEntitySourceServicesFactory' => function (
-		MediaWikiServices $services
-	): SingleEntitySourceServicesFactory {
-		$entityTypeDefinitions = WikibaseRepo::getEntityTypeDefinitions( $services );
-		return new SingleEntitySourceServicesFactory(
-			WikibaseRepo::getEntityIdParser( $services ),
-			WikibaseRepo::getEntityIdComposer( $services ),
-			WikibaseRepo::getDataValueDeserializer( $services ),
-			$services->getNameTableStoreFactory(),
-			WikibaseRepo::getDataAccessSettings( $services ),
-			WikibaseRepo::getLanguageFallbackChainFactory( $services ),
-			WikibaseRepo::getStorageEntitySerializer( $services ),
-			$entityTypeDefinitions,
-			WikibaseRepo::getRepoDomainDbFactory( $services )
-		);
 	},
 
 	'WikibaseRepo.SiteLinkBadgeChangeOpSerializationValidator' => function (
@@ -1719,6 +1722,14 @@ return [
 				'wikibase.siteLinkGlobalIdentifiersProvider.',
 				$cacheSecret
 			)
+		);
+	},
+
+	'WikibaseRepo.SiteLinkPageNormalizer' => function (
+		MediaWikiServices $services
+	): SiteLinkPageNormalizer {
+		return new SiteLinkPageNormalizer(
+			WikibaseRepo::getSettings( $services )->getSetting( 'redirectBadgeItems' )
 		);
 	},
 
@@ -2107,7 +2118,17 @@ return [
 
 	'WikibaseRepo.WikibaseServices' => function ( MediaWikiServices $services ): WikibaseServices {
 		$entitySourceDefinitions = WikibaseRepo::getEntitySourceDefinitions( $services );
-		$singleEntitySourceServicesFactory = WikibaseRepo::getSingleEntitySourceServicesFactory( $services );
+		$singleEntitySourceServicesFactory = new SingleEntitySourceServicesFactory(
+			WikibaseRepo::getEntityIdParser( $services ),
+			WikibaseRepo::getEntityIdComposer( $services ),
+			WikibaseRepo::getDataValueDeserializer( $services ),
+			$services->getNameTableStoreFactory(),
+			WikibaseRepo::getDataAccessSettings( $services ),
+			WikibaseRepo::getLanguageFallbackChainFactory( $services ),
+			WikibaseRepo::getStorageEntitySerializer( $services ),
+			WikibaseRepo::getEntityTypeDefinitions( $services ),
+			WikibaseRepo::getRepoDomainDbFactory( $services )
+		);
 
 		$singleSourceServices = [];
 

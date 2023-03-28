@@ -17,7 +17,7 @@
 	};
 
 	QUnit.module( 'jquery.wikibase.toolbaritem', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_toolbaritem' ).each( function () {
 				var $item = $( this ).data( 'toolbaritem' ),
 					item = $item.data( 'toolbaritem' );
@@ -35,15 +35,16 @@
 		var $item = createTestItem(),
 			item = $item.data( 'toolbaritem' );
 
-		assert.ok(
+		assert.true(
 			item instanceof $.wikibase.toolbaritem,
 			'Instantiated widget.'
 		);
 
 		item.destroy();
 
-		assert.notOk(
+		assert.strictEqual(
 			$item.data( 'toolbaritem' ),
+			undefined,
 			'Destroyed widget.'
 		);
 	} );

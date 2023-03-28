@@ -431,8 +431,9 @@ class Score {
 		// Mark the page as using the score extension, it makes easier
 		// to track all those pages.
 		if ( $parser->getOutput() !== null ) {
-			$scoreNum = $parser->getOutput()->getPageProperty( 'score' ) ?? 0;
-			$parser->getOutput()->setPageProperty( 'score', $scoreNum += 1 );
+			$parser->getOutput()->setPageProperty( 'score', '' );
+			// Transition to a tracking category
+			$parser->addTrackingCategory( 'score-use-category' );
 		}
 
 		return $html;
@@ -482,7 +483,7 @@ class Score {
 	 * @throws ScoreException if an error occurs.
 	 */
 	private static function generateHTML( Parser $parser, $code, $options ) {
-		global $wgScoreOfferSourceDownload;
+		global $wgScoreOfferSourceDownload, $wgScoreUseSvg;
 
 		$cleanup = new ScopedCallback( function () use ( $options ) {
 			self::eraseDirectory( $options['factory_directory'] );
@@ -502,9 +503,11 @@ class Score {
 			$existingFiles[$file] = true;
 		}
 
-		/* Generate PNG and MIDI files if necessary */
+		/* Generate SVG, PNG and MIDI files if necessary */
 		$imageFileName = "{$options['file_name_prefix']}.png";
+		$imageSvgFileName = "{$options['file_name_prefix']}.svg";
 		$multi1FileName = "{$options['file_name_prefix']}-page1.png";
+		$multi1SvgFileName = "{$options['file_name_prefix']}-1.svg";
 		$midiFileName = "{$options['file_name_prefix']}.midi";
 		$metaDataFileName = "{$options['file_name_prefix']}.json";
 		$audioUrl = '';
@@ -525,6 +528,11 @@ class Score {
 			|| (
 				!isset( $existingFiles[$imageFileName] )
 				&& !isset( $existingFiles[$multi1FileName] )
+			)
+			|| (
+				$wgScoreUseSvg
+				&& !isset( $existingFiles[$multi1SvgFileName] )
+				&& !isset( $existingFiles[$imageSvgFileName] )
 			)
 			|| (
 				!isset( $metaData[$imageFileName]['size'] )
@@ -574,12 +582,16 @@ class Score {
 		/* return output link(s) */
 		if ( isset( $existingFiles[$imageFileName] ) ) {
 			list( $width, $height ) = $metaData[$imageFileName]['size'];
-			$link = Html::rawElement( 'img', [
+			$attribs = [
 				'src' => "{$options['dest_url']}/$imageFileName",
 				'width' => $width,
 				'height' => $height,
 				'alt' => $code,
-			] );
+			];
+			if ( $wgScoreUseSvg ) {
+				$attribs['srcset'] = "{$options['dest_url']}/$imageSvgFileName 1x";
+			}
+			$link = Html::rawElement( 'img', $attribs );
 		} elseif ( isset( $existingFiles[$multi1FileName] ) ) {
 			$link = '';
 			for ( $i = 1; ; ++$i ) {
@@ -592,14 +604,19 @@ class Score {
 					->numParams( $i )
 					->plain();
 				list( $width, $height ) = $metaData[$fileName]['size'];
-				$link .= Html::rawElement( 'img', [
+				$attribs = [
 					'src' => "{$options['dest_url']}/$fileName",
 					'width' => $width,
 					'height' => $height,
 					'alt' => $pageNumb,
 					'title' => $pageNumb,
 					'style' => "margin-bottom:1em"
-				] );
+				];
+				if ( $wgScoreUseSvg ) {
+					$svgFileName = "{$options['file_name_prefix']}-$i.svg";
+					$attribs['srcset'] = "{$options['dest_url']}/$svgFileName 1x";
+				}
+				$link .= Html::rawElement( 'img', $attribs );
 			}
 		} else {
 			$link = '';
@@ -673,11 +690,17 @@ class Score {
 	 */
 	private static function generatePngAndMidi( $code, $options, &$metaData ) {
 		global $wgScoreLilyPond, $wgScoreTrim, $wgScoreSafeMode, $wgScoreDisableExec,
-			$wgScoreGhostscript, $wgScoreAbc2Ly, $wgImageMagickConvertCommand,
+			$wgScoreGhostscript, $wgScoreAbc2Ly, $wgImageMagickConvertCommand, $wgScoreUseSvg,
 			$wgScoreShell, $wgPhpCli, $wgScoreEnvironment, $wgScoreImageMagickConvert;
 
 		if ( $wgScoreDisableExec ) {
 			throw new ScoreDisabledException();
+		}
+
+		if ( $wgScoreSafeMode
+			&& version_compare( self::getLilypondVersion(), '2.23.12', '>=' )
+		) {
+			throw new ScoreException( 'score-safe-mode' );
 		}
 
 		/* Create the working environment */
@@ -691,11 +714,13 @@ class Score {
 				$wgScoreShell,
 				'scripts/generatePngAndMidi.sh' )
 			->outputFileToFile( 'file.midi', $factoryMidi )
-			->outputGlobToFile( 'file-page', 'png', $factoryDirectory )
+			->outputGlobToFile( 'file', 'png', $factoryDirectory )
+			->outputGlobToFile( 'file', 'svg', $factoryDirectory )
 			->includeStderr()
 			->environment( [
 				'SCORE_ABC2LY' => $wgScoreAbc2Ly,
 				'SCORE_LILYPOND' => $wgScoreLilyPond,
+				'SCORE_USESVG' => $wgScoreUseSvg ? 'yes' : 'no',
 				'SCORE_SAFE' => $wgScoreSafeMode ? 'yes' : 'no',
 				'SCORE_GHOSTSCRIPT' => $wgScoreGhostscript,
 				'SCORE_CONVERT' => $wgScoreImageMagickConvert ?: $wgImageMagickConvertCommand,
@@ -703,7 +728,9 @@ class Score {
 				'SCORE_PHP' => $wgPhpCli
 			] + $wgScoreEnvironment );
 		self::addScript( $command, 'generatePngAndMidi.sh' );
-		self::addScript( $command, 'extractPostScriptPageSize.php' );
+		if ( !$wgScoreUseSvg ) {
+			self::addScript( $command, 'extractPostScriptPageSize.php' );
+		}
 		if ( $options['lang'] === 'lilypond' ) {
 			if ( $options['raw'] ) {
 				$lilypondCode = $code;
@@ -742,8 +769,12 @@ class Score {
 			}
 		}
 
-		// @phan-suppress-next-line PhanImpossibleCondition
-		if ( !$numPages ) {
+		# LilyPond 2.24+ generates file.png and file.svg if there is only one page
+		if ( $wgScoreUseSvg && $result->wasReceived( 'file.svg' ) ) {
+			$numPages = 1;
+		}
+
+		if ( $numPages === 0 ) {
 			throw new ScoreException( 'score-noimages' );
 		}
 
@@ -791,23 +822,42 @@ class Score {
 			}
 		}
 
-		// Add the PNGs
+		// Add the PNG and SVG image files
 		for ( $i = 1; $i <= $numPages; ++$i ) {
-			$src = "$factoryDirectory/file-page$i.png";
+			$srcPng = "$factoryDirectory/file-page$i.png";
+			$srcSvg = "$factoryDirectory/file-$i.svg";
+			$dstPngFileName = "{$options['file_name_prefix']}-page$i.png";
+			$dstSvgFileName = "{$options['file_name_prefix']}-$i.svg";
 			if ( $numPages === 1 ) {
-				$dstFileName = "{$options['file_name_prefix']}.png";
-			} else {
-				$dstFileName = "{$options['file_name_prefix']}-page$i.png";
+				$dstPngFileName = "{$options['file_name_prefix']}.png";
+				if ( $wgScoreUseSvg ) {
+					$srcPng = "$factoryDirectory/file.png";
+					$srcSvg = "$factoryDirectory/file.svg";
+					$dstSvgFileName = "{$options['file_name_prefix']}.svg";
+				}
 			}
-			$dest = "{$options['dest_storage_path']}/$dstFileName";
+			$destPng = "{$options['dest_storage_path']}/$dstPngFileName";
 			$ops[] = [
 				'op' => 'store',
-				'src' => $src,
-				'dst' => $dest ];
+				'src' => $srcPng,
+				'dst' => $destPng
+			];
+			list( $width, $height ) = self::imageSize( $srcPng );
+			$metaData[$dstPngFileName]['size'] = [ $width, $height ];
+			$newFiles[$dstPngFileName] = true;
 
-			list( $width, $height ) = self::imageSize( $src );
-			$metaData[$dstFileName]['size'] = [ $width, $height ];
-			$newFiles[$dstFileName] = true;
+			if ( $wgScoreUseSvg ) {
+				$destSvg = "{$options['dest_storage_path']}/$dstSvgFileName";
+				$ops[] = [
+					'op' => 'store',
+					'src' => $srcSvg,
+					'dst' => $destSvg,
+					'headers' => [
+						'Content-Type' => 'image/svg+xml'
+					]
+				];
+				$newFiles[$dstSvgFileName] = true;
+			}
 		}
 
 		$dstFileName = "{$options['file_name_prefix']}.json";
@@ -847,10 +897,12 @@ class Score {
 	 * @throws ScoreException
 	 */
 	private static function throwCompileException( $stdout, $options ) {
+		global $wgScoreDebugOutput;
+
 		$message = self::extractMessage( $stdout );
 		if ( !$message ) {
 			$message = [ 'score-compilererr', [] ];
-		} elseif ( $message[0] === 'score-compilererr' ) {
+		} elseif ( !$wgScoreDebugOutput && $message[0] === 'score-compilererr' ) {
 			// when input is not raw, we build the final lilypond file content
 			// in self::embedLilypondCode. The user input then is not inserted
 			// on the first line in the file we pass to lilypond and so we need

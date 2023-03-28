@@ -2,15 +2,17 @@
 
 namespace MediaWiki\Extension\OAuth\Backend;
 
+use DatabaseUpdater;
+
 /**
  * Class containing updater functions for an OAuth environment
  */
 class UpdaterHooks {
 	/**
-	 * @param \DatabaseUpdater $updater
+	 * @param DatabaseUpdater $updater
 	 * @return bool
 	 */
-	public static function addSchemaUpdates( \DatabaseUpdater $updater ) {
+	public static function addSchemaUpdates( DatabaseUpdater $updater ) {
 		if ( !Utils::isCentralWiki() ) {
 			// no tables to add
 			return true;
@@ -18,31 +20,14 @@ class UpdaterHooks {
 
 		$dbType = $updater->getDB()->getType();
 
+		$updater->addExtensionTable(
+			'oauth_registered_consumer',
+			self::getPath( 'tables-generated.sql', $dbType )
+		);
+
 		if ( $dbType == 'mysql' || $dbType == 'sqlite' ) {
 
-			$updater->addExtensionTable(
-				'oauth_registered_consumer',
-				self::getPath( 'OAuth.sql', $dbType )
-			);
-
-			$updater->addExtensionField(
-				'oauth_registered_consumer',
-				'oarc_callback_is_prefix',
-				self::getPath( 'callback_is_prefix.sql', $dbType )
-			);
-
-			$updater->addExtensionField(
-				'oauth_registered_consumer',
-				'oarc_developer_agreement',
-				self::getPath( 'developer_agreement.sql', $dbType )
-			);
-
-			$updater->addExtensionField(
-				'oauth_registered_consumer',
-				'oarc_owner_only',
-				self::getPath( 'owner_only.sql', $dbType )
-			);
-
+			// 1.35
 			$updater->addExtensionField(
 				'oauth_registered_consumer',
 				'oarc_oauth_version',
@@ -76,6 +61,19 @@ class UpdaterHooks {
 				'oauth2_access_tokens',
 				'oaat_acceptance_id',
 				self::getPath( 'index_on_oaat_acceptance_id.sql', $dbType )
+			);
+
+			// 1.39
+			$updater->modifyExtensionField(
+				'oauth_accepted_consumer',
+				'oaac_accepted',
+				self::getPath( 'patch-oauth_accepted_consumer-timestamp.sql', $dbType )
+			);
+
+			$updater->modifyExtensionField(
+				'oauth_registered_consumer',
+				'oarc_email_authenticated',
+				self::getPath( 'patch-oauth_registered_consumer-timestamp.sql', $dbType )
 			);
 
 		}

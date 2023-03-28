@@ -1,12 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
+			"Bennylin",
 			"Naufal06",
 			"NoiX180",
 			"Pras",
-			"Sumbukompor",
-			"Amire80",
-			"Bennylin"
+			"Sumbukompor"
 		]
 	},
 	"skinname-vector": "Vèktor (2010)",
@@ -21,6 +21,8 @@
 	"vector-languages": "Basa",
 	"vector-language-button-aria-label": "Ngalih menyang artikel jroning basa liya. Ana {{PLURAL:$1|$1|$1 basa}}",
 	"vector-language-button-label": "$1 basa",
+	"vector-no-language-button-label": "Tambah basa",
+	"vector-no-language-button-aria-label": "Artikel iki mung ana ing basa iki. Pertal artikelé menyang basa liya",
 	"vector-language-redirect-to-top": "Ing {{SITENAME}} iki, pranala basa kapernah ing pérangan ndhuwur kaca nuli ing sisihing irah-irahan artikel. [[#p-lang-btn|Menyang ndhuwur]].",
 	"vector-language-variant-switcher-label": "Owahi werna basa",
 	"vector-action-addsection": "Tambah rembug",
@@ -39,10 +41,17 @@
 	"vector-jumptocontent": "Menyang kontèn",
 	"vector-more-actions": "Liyané",
 	"vector-search-loader": "Ngemot pamrayoganing panggolèk",
+	"vector-searchsuggest-containing": "Golèk kaca sing nduwèni ukara <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Wikipédia:Sugeng_rawuh",
+	"vector-toc-heading": "Pratélaning isi",
+	"vector-toc-toggle-position-title": "dhelikaké",
+	"vector-toc-beginning": "Wiwitan",
 	"vector-anon-user-menu-pages": "Kaca pambesut kang metu log",
 	"vector-anon-user-menu-pages-learn": "sinaoni candhaké",
 	"vector-anon-user-menu-pages-label": "Sinaoni luwih jangkep babagan pambesutan",
 	"vector-main-menu-tooltip": "Menu pokok",
+	"vector-toc-menu-tooltip": "Pratélan Isi",
+	"vector-site-nav-label": "Situs",
+	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Parembugan]]",
 	"tooltip-vector-anon-user-menu-title": "Pilihan liya"
 }

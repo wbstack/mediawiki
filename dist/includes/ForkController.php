@@ -167,7 +167,6 @@ class ForkController {
 	protected function prepareEnvironment() {
 		// Don't share DB, storage, or memcached connections
 		MediaWikiServices::resetChildProcessServices();
-		JobQueueGroup::destroySingletons();
 		ObjectCache::clear();
 		RedisConnectionPool::destroySingletons();
 	}
@@ -185,7 +184,7 @@ class ForkController {
 		for ( $i = 0; $i < $numProcs; $i++ ) {
 			// Do the fork
 			$pid = pcntl_fork();
-			if ( $pid === -1 || $pid === false ) {
+			if ( $pid === -1 ) {
 				echo "Error creating child processes\n";
 				exit( 1 );
 			}

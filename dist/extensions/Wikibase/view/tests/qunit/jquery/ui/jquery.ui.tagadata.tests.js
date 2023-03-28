@@ -20,7 +20,7 @@
 	}
 
 	QUnit.module( 'jquery.ui.tagadata', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_tagadata' ).each( function () {
 				var $tagadata = $( this ),
 					tagadata = $( this ).data( 'tagadata' );
@@ -103,7 +103,7 @@
 			done = assert.async( 2 );
 
 		$tagadata.one( 'tagadatatagremoved', function () {
-			assert.ok(
+			assert.true(
 				true,
 				'Removed tag.'
 			);

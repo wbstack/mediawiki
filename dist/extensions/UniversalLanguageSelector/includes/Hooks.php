@@ -29,7 +29,6 @@ use MediaWiki\Babel\Babel;
 use MediaWiki\Extension\BetaFeatures\BetaFeatures;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\MakeGlobalVariablesScriptHook;
-use MediaWiki\Hook\PersonalUrlsHook;
 use MediaWiki\Hook\UserGetLanguageObjectHook;
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\Preferences\Hook\GetPreferencesHook;
@@ -41,7 +40,6 @@ use OutputPage;
 use RequestContext;
 use Skin;
 use SkinTemplate;
-use Title;
 use User;
 
 /**
@@ -49,7 +47,6 @@ use User;
  */
 class Hooks implements
 	BeforePageDisplayHook,
-	PersonalUrlsHook,
 	UserGetLanguageObjectHook,
 	ResourceLoaderGetConfigVarsHook,
 	MakeGlobalVariablesScriptHook,
@@ -205,36 +202,12 @@ class Hooks implements
 		$this->statsdDataFactory->increment( 'uls.setlang_used' );
 
 		$user = $out->getUser();
-		if ( $user->isAnon() && !$out->getConfig()->get( 'ULSAnonCanChangeLanguage' ) ) {
+		if ( !$user->isRegistered() && !$out->getConfig()->get( 'ULSAnonCanChangeLanguage' ) ) {
 			// User is anon, and cannot change language, return.
 			return;
 		}
 
 		$out->addModules( 'ext.uls.setlang' );
-	}
-
-	/**
-	 * Add some tabs for navigation for users who do not use Ajax interface.
-	 * Hook: PersonalUrls
-	 * @param array &$personal_urls
-	 * @param Title &$title
-	 * @param SkinTemplate $skin
-	 */
-	public function onPersonalUrls( &$personal_urls, &$title, $skin ): void {
-		// For MediaWiki < 1.37, there is no `user-interface-preferences` menu. We use
-		// the PersonalUrls hook to make sure the language button is added.
-		// In MediaWiki >= 1.37, the personal urls was split out into multiple new menus,
-		// In the new format, the `user-interface-preferences` is the most relevant place to put
-		// this button. Using the SkinTemplateNavigation::Universal hook will ensure the button is
-		// added to the correct menu.
-		if ( version_compare( MW_VERSION, '1.37', '>=' ) ) {
-			return;
-		}
-
-		$personal_urls = $this->addPersonalBarTrigger(
-			$personal_urls,
-			$skin
-		);
 	}
 
 	/**
@@ -290,7 +263,7 @@ class Hooks implements
 	}
 
 	/**
-	 * @param array $preferred
+	 * @param float[] $preferred
 	 * @return string
 	 */
 	protected function getDefaultLanguage( array $preferred ) {
@@ -340,7 +313,7 @@ class Hooks implements
 
 		if (
 			// uselang can be used for temporary override of language preference
-			$request->getText( 'uselang' ) ||
+			$request->getRawVal( 'uselang' ) ||
 			// Registered user: use preferences, only when safe to load - T267445
 			( $user->isSafeToLoad() && $user->isRegistered() )
 		) {
@@ -512,7 +485,8 @@ class Hooks implements
 			return;
 		}
 
-		if ( $this->config->get( 'ULSPosition' ) !== 'interlanguage' ) {
+		// @todo: document what this block is for.
+		if ( $skin->getSkinName() !== 'vector-2022' && $this->config->get( 'ULSPosition' ) !== 'interlanguage' ) {
 			return;
 		}
 
@@ -521,7 +495,7 @@ class Hooks implements
 		}
 
 		// An empty span will force the language portal to always display in
-		// the skins that support it! e.g. Vector.
+		// the skins that support it! e.g. Vector. (T275147)
 		if ( count( $skin->getLanguages() ) === 0 ) {
 			// If no languages force it on.
 			$content .= Html::element(
@@ -550,7 +524,7 @@ class Hooks implements
 	}
 
 	private function getSetLang( OutputPage $out ): ?string {
-		$setLangCode = $out->getRequest()->getText( 'setlang' );
+		$setLangCode = $out->getRequest()->getRawVal( 'setlang' );
 		if ( $setLangCode && $this->languageNameUtils->isSupportedLanguage( $setLangCode ) ) {
 			return $setLangCode;
 		}

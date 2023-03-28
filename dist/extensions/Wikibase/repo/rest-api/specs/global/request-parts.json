@@ -1,0 +1,110 @@
+{
+	"StatementRequest": {
+		"allOf": [
+			{
+				"type": "object",
+				"properties": {
+					"statement": {
+						"allOf": [
+							{ "$ref": "./schemas.json#/Statement" },
+							{ "$ref": "#/StatementRequestRequired" }
+						]
+					}
+				},
+				"required": [ "statement" ]
+			},
+			{ "$ref": "./request-parts.json#/MediawikiEdit" }
+		]
+	},
+	"StatementPatchRequest": {
+		"allOf": [
+			{
+				"type": "object",
+				"properties": {
+					"patch": {
+						"description": "A JSON Patch document as defined by RFC 6902",
+						"type": "array",
+						"items": {
+							"properties": {
+								"op": {
+									"description": "The operation to perform",
+									"type": "string",
+									"enum": [
+										"add",
+										"copy",
+										"move",
+										"remove",
+										"replace",
+										"test"
+									]
+								},
+								"path": {
+									"description": "A JSON-Pointer for the property to manipulate",
+									"type": "string",
+									"example": "/mainsnak/datavalue/value"
+								},
+								"value": {
+									"description": "The value to be used within the operation",
+									"type": "string",
+									"example": "patched value"
+								}
+							},
+							"required": [
+								"op",
+								"path"
+							]
+						}
+					}
+				}
+			},
+			{ "$ref": "./request-parts.json#/MediawikiEdit" }
+		]
+	},
+	"MediawikiEdit": {
+		"type": "object",
+		"properties": {
+			"tags": {
+				"type": "array",
+				"items": { "type": "string" },
+				"default": [ ]
+			},
+			"bot": {
+				"type": "boolean",
+				"default": false
+			},
+			"comment": {
+				"type": "string"
+			}
+		}
+	},
+	"QualifiersRequestRequired": {
+		"additionalProperties": {
+			"items": {
+				"required": [ "snaktype", "property" ]
+			}
+		}
+	},
+	"ReferenceRequestRequired": {
+		"required": [ "snaks", "snaks-order" ],
+		"properties": {
+			"snaks": {
+				"additionalProperties": {
+					"items": {
+						"required": [ "snaktype", "property" ]
+					}
+				}
+			}
+		}
+	},
+	"ReferencesRequestRequired": {
+		"items": { "$ref": "#/ReferenceRequestRequired" }
+	},
+	"StatementRequestRequired": {
+		"required": [ "mainsnak" ],
+		"properties": {
+			"mainsnak": { "required": [ "snaktype", "property" ] },
+			"qualifiers": { "$ref": "#/QualifiersRequestRequired" },
+			"references": { "$ref": "#/ReferencesRequestRequired" }
+		}
+	}
+}

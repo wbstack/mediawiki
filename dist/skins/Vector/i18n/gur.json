@@ -3,10 +3,10 @@
 		"authors": [
 			"Akakiiri",
 			"Akandee1",
+			"Amire80",
 			"Amoramah",
 			"Ayire Adongo",
-			"Dnshitobu",
-			"Amire80"
+			"Dnshitobu"
 		]
 	},
 	"vector-language-button-label": "{{PLURAL:$1|$1 yetɔgum|$1 yetɔgum zo'e zo'e}}",
@@ -20,5 +20,6 @@
 	"vector-view-history": "Tuusum bisega",
 	"vector-view-view": "Kãalɛ",
 	"vector-more-actions": "Zo'ore",
+	"vector-searchsuggest-containing": "Ɛ pɛgesi'a n tari <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Help:Pɔsega"
 }

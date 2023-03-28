@@ -107,6 +107,8 @@ use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\CachingPropertyOrderProvider;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
+use Wikibase\Lib\Store\EntityRevisionLookup;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\FallbackPropertyOrderProvider;
 use Wikibase\Lib\Store\HttpUrlPropertyOrderProvider;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
@@ -170,7 +172,7 @@ return [
 		$pageUpdater->setRecentChangesBatchSize( $settings->getSetting( 'recentChangesBatchSize' ) );
 
 		$changeListTransformer = new ChangeRunCoalescer(
-			WikibaseClient::getStore( $services )->getEntityRevisionLookup(),
+			WikibaseClient::getEntityRevisionLookup( $services ),
 			WikibaseClient::getEntityChangeFactory( $services ),
 			$logger,
 			$settings->getSetting( 'siteGlobalID' )
@@ -230,7 +232,7 @@ return [
 			WikibaseClient::getSnakFormatterFactory( $services ),
 			WikibaseClient::getPropertyDataTypeLookup( $services ),
 			WikibaseClient::getRepoItemUriParser( $services ),
-			WikibaseClient::getLanguageFallbackLabelDescriptionLookupFactory( $services ),
+			WikibaseClient::getFallbackLabelDescriptionLookupFactory( $services ),
 			Wikibaseclient::getSettings( $services )->getSetting( 'allowDataAccessInUserLanguage' )
 		);
 	},
@@ -299,13 +301,13 @@ return [
 			$settings->getSetting( 'siteGlobalID' )
 		);
 		$termFallbackCache = WikibaseClient::getTermFallbackCache( $services );
-		$revisionLookup = $clientStore->getEntityRevisionLookup();
+		$redirectResolvingLatestRevisionLookup = WikibaseClient::getRedirectResolvingLatestRevisionLookup( $services );
 
 		return new WikibaseValueFormatterBuilders(
 			new FormatterLabelDescriptionLookupFactory(
 				WikibaseClient::getTermLookup( $services ),
 				$termFallbackCache,
-				new RedirectResolvingLatestRevisionLookup( $revisionLookup )
+				$redirectResolvingLatestRevisionLookup
 			),
 			new LanguageNameLookup( WikibaseClient::getUserLanguage( $services )->getCode() ),
 			WikibaseClient::getRepoItemUriParser( $services ),
@@ -313,7 +315,7 @@ return [
 			$settings->getSetting( 'tabularDataStorageBaseUrl' ),
 			$termFallbackCache,
 			WikibaseClient::getEntityLookup( $services ),
-			$revisionLookup,
+			$redirectResolvingLatestRevisionLookup,
 			$settings->getSetting( 'entitySchemaNamespace' ),
 			new TitleLookupBasedEntityExistenceChecker(
 				$entityTitleLookup,
@@ -414,6 +416,10 @@ return [
 		);
 	},
 
+	'WikibaseClient.EntityRevisionLookup' => function ( MediaWikiServices $services ): EntityRevisionLookup {
+		return WikibaseClient::getStore( $services )->getEntityRevisionLookup();
+	},
+
 	'WikibaseClient.EntitySourceAndTypeDefinitions' => function ( MediaWikiServices $services ): EntitySourceAndTypeDefinitions {
 		// note: when adding support for further entity source types here,
 		// also adjust the default 'entitySources' setting to copy sources of those types from the repo
@@ -479,6 +485,18 @@ return [
 		}
 		$interwikiPrefix = $interwikiPrefixes[0];
 		return new ExternalUserNames( $interwikiPrefix, false );
+	},
+
+	'WikibaseClient.FallbackLabelDescriptionLookupFactory' => function (
+		MediaWikiServices $services
+	): FallbackLabelDescriptionLookupFactory {
+		return new FallbackLabelDescriptionLookupFactory(
+			WikibaseClient::getLanguageFallbackChainFactory( $services ),
+			WikibaseClient::getRedirectResolvingLatestRevisionLookup( $services ),
+			WikibaseClient::getTermFallbackCache( $services ),
+			WikibaseClient::getTermLookup( $services ),
+			WikibaseClient::getTermBuffer( $services )
+		);
 	},
 
 	'WikibaseClient.HookRunner' => function ( MediaWikiServices $services ): WikibaseClientHookRunner {
@@ -645,7 +663,6 @@ return [
 			WikibaseClient::getEntityLookup( $services ),
 			WikibaseClient::getUsageAccumulatorFactory( $services ),
 			$settings->getSetting( 'siteGlobalID' ),
-			$settings->getSetting( 'tmpUnconnectedPagePagePropMigrationStage' ),
 			WikibaseClient::getLogger( $services )
 		);
 	},
@@ -776,6 +793,14 @@ return [
 		);
 	},
 
+	'WikibaseClient.RedirectResolvingLatestRevisionLookup' => function (
+		MediaWikiServices $services
+	): RedirectResolvingLatestRevisionLookup {
+		return new RedirectResolvingLatestRevisionLookup(
+			WikibaseClient::getEntityRevisionLookup( $services )
+		);
+	},
+
 	'WikibaseClient.ReferenceFormatterFactory' => function ( MediaWikiServices $services ): ReferenceFormatterFactory {
 		$logger = WikibaseClient::getLogger( $services );
 		return new ReferenceFormatterFactory(
@@ -838,32 +863,13 @@ return [
 
 	'WikibaseClient.SidebarLinkBadgeDisplay' => function ( MediaWikiServices $services ): SidebarLinkBadgeDisplay {
 		$badgeClassNames = WikibaseClient::getSettings( $services )->getSetting( 'badgeClassNames' );
-		$labelDescriptionLookupFactory = WikibaseClient::getLanguageFallbackLabelDescriptionLookupFactory( $services );
+		$labelDescriptionLookupFactory = WikibaseClient::getFallbackLabelDescriptionLookupFactory( $services );
 		$lang = WikibaseClient::getUserLanguage( $services );
 
 		return new SidebarLinkBadgeDisplay(
 			$labelDescriptionLookupFactory->newLabelDescriptionLookup( $lang ),
 			is_array( $badgeClassNames ) ? $badgeClassNames : [],
 			$lang
-		);
-	},
-
-	// TODO: This service is just a convenience service to simplify the transition away from SingleEntitySourceServices,
-	// 		 and thus should eventually be removed. See T277731.
-	'WikibaseClient.SingleEntitySourceServicesFactory' => function (
-		MediaWikiServices $services
-	): SingleEntitySourceServicesFactory {
-		$entityTypeDefinitions = WikibaseClient::getEntityTypeDefinitions( $services );
-		return new SingleEntitySourceServicesFactory(
-			WikibaseClient::getEntityIdParser( $services ),
-			WikibaseClient::getEntityIdComposer( $services ),
-			WikibaseClient::getDataValueDeserializer( $services ),
-			$services->getNameTableStoreFactory(),
-			WikibaseClient::getDataAccessSettings( $services ),
-			WikibaseClient::getLanguageFallbackChainFactory( $services ),
-			new ForbiddenSerializer( 'Entity serialization is not supported on the client!' ),
-			$entityTypeDefinitions,
-			WikibaseClient::getRepoDomainDbFactory( $services )
 		);
 	},
 
@@ -1016,7 +1022,7 @@ return [
 			new EntityUsageFactory( WikibaseClient::getEntityIdParser( $services ) ),
 			new UsageDeduplicator( $usageModifierLimits ),
 			new RevisionBasedEntityRedirectTargetLookup(
-				WikibaseClient::getStore( $services )->getEntityRevisionLookup()
+				WikibaseClient::getEntityRevisionLookup( $services )
 			)
 		);
 	},
@@ -1054,7 +1060,17 @@ return [
 
 	'WikibaseClient.WikibaseServices' => function ( MediaWikiServices $services ): WikibaseServices {
 		$entitySourceDefinitions = WikibaseClient::getEntitySourceDefinitions( $services );
-		$singleEntitySourceServicesFactory = WikibaseClient::getSingleEntitySourceServicesFactory( $services );
+		$singleEntitySourceServicesFactory = new SingleEntitySourceServicesFactory(
+			WikibaseClient::getEntityIdParser( $services ),
+			WikibaseClient::getEntityIdComposer( $services ),
+			WikibaseClient::getDataValueDeserializer( $services ),
+			$services->getNameTableStoreFactory(),
+			WikibaseClient::getDataAccessSettings( $services ),
+			WikibaseClient::getLanguageFallbackChainFactory( $services ),
+			new ForbiddenSerializer( 'Entity serialization is not supported on the client!' ),
+			WikibaseClient::getEntityTypeDefinitions( $services ),
+			WikibaseClient::getRepoDomainDbFactory( $services )
+		);
 
 		$singleSourceServices = [];
 		foreach ( $entitySourceDefinitions->getSources() as $source ) {

@@ -337,6 +337,7 @@
 	"wikibase-entitypage-title": "Página da Entidade",
 	"wikibase-entitypage-text": "Esta página redireciona para a página da entidade no repositório ao qual ela pertence. Forneça o identificador da entidade no URL, por favor, usando a sintaxe de subpáginas.",
 	"wikibase-entitypage-bad-id": "Identificador inválido: $1.",
+	"wikibase-error-entity-not-local": "O tipo de entidade $1 não pode ser editado nesta wiki.",
 	"wikibase-error-entity-too-big": "A entidade é demasiado grande. O tamanho máximo permitido para entidades é $1.",
 	"wikibase-parse-error": "Valor malformado.",
 	"wikibase-parse-error-coordinate": "O valor da coordenada está malformado.",

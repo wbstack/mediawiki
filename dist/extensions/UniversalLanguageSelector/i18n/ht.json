@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Xð",
-			"Amire80"
+			"Amire80",
+			"Xð"
 		]
 	},
 	"uls-plang-title-languages": "Lang yo",
@@ -40,5 +40,11 @@
 	"ext-uls-setlang-unknown-error": "Erè nou pa konnen",
 	"ext-uls-setlang-accept": "Aksepte chanjman an",
 	"ext-uls-setlang-loading": "Ap aplike...",
-	"ext-uls-setlang-cancel": "Pa chanje"
+	"ext-uls-setlang-cancel": "Pa chanje",
+	"ext-uls-actions-menu-header": "Plis opsyon",
+	"ext-uls-actions-menu-language-settings-item-label": "Louvri paramèt lang yo",
+	"ext-uls-empty-state-header": "Pa gen lang ankò",
+	"ext-uls-empty-state-desc": "Pa gen lang ki disponib pou kounye a",
+	"ext-uls-empty-state-header-actions-available": "Pa gen lang ankò. Ajoute yon nouvo ?",
+	"ext-uls-empty-state-desc-actions-available": "Fè kontni an disponib nan plis lang."
 }

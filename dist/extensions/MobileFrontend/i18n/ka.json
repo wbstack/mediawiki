@@ -175,6 +175,7 @@
 	"mobile-frontend-talk-reply": "პასუხი",
 	"mobile-frontend-talk-reply-info": "გაითვალისწინეთ, რომ თქვენს პასუხს ავტომატურად დაერთვება ხელმოწერა.",
 	"mobile-frontend-talk-topic-error": "ამ თემის დამატება უცნობი ხარვეზის გამო ვერ ხერხდება.",
+	"mobile-frontend-talk-topic-error-protected": "განხილვის ეს გვერდი დაცულია. თქვენ არ გაქვთ აქ ახალი თემის დამატების ნებართვა.",
 	"mobile-frontend-talk-topic-error-permission": "ახალი თემა ვერ დაემატება. თქვენ არ გაქვთ გვერდების რედაქტირების უფლება.",
 	"mobile-frontend-talk-topic-error-spam": "თემა უარყოფილია, რადგან ის შეიცავს სპამის ფრაგმენტებს.",
 	"mobile-frontend-talk-topic-error-badtoken": "სერვერზე ხარვეზი მოხდა. თქვენი ცვლილებები ვერ დაემატა. სცადეთ გვერდის გადატვირთვა.",

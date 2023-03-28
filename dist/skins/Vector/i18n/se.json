@@ -4,11 +4,13 @@
 			"Gálaniitoluodda",
 			"Jeblad",
 			"Trondtr",
-			"Kimberli Mäkäräinen (WMNO)"
+			"Kimberli Mäkäräinen (WMNO)",
+			"Tynnoel"
 		]
 	},
 	"vector-languages": "Gielat",
-	"vector-language-button-label": "{{PLURAL:$1|$1 gillii|$1 gielaide}}",
+	"vector-language-button-label": "{{PLURAL:$1|$1 gillii|$1 gillii}}",
+	"vector-no-language-button-label": "Lasit gielaid",
 	"vector-action-addsection": "Lasit fáttá",
 	"vector-action-delete": "Sihko",
 	"vector-action-move": "Sirdde",
@@ -24,6 +26,7 @@
 	"vector-jumptosearch": "Njuikes ohcamii",
 	"vector-jumptocontent": "Njuikes sisdollui",
 	"vector-more-actions": "Eanet",
+	"vector-searchsuggest-containing": "Oza siidduid main lea <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-anon-user-menu-pages-learn": "lassedieđut",
 	"vector-anon-user-menu-pages-label": "Lassedieđut rievdadeami birra",
 	"vector-main-menu-tooltip": "Váldofállu"

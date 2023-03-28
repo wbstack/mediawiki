@@ -9,6 +9,7 @@ use ApiQueryBase;
 use ExtensionRegistry;
 use MediaWiki\Languages\LanguageNameUtils;
 use Wikibase\Lib\WikibaseContentLanguages;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * @license GPL-2.0-or-later
@@ -130,14 +131,14 @@ class MetaContentLanguages extends ApiQueryBase {
 	protected function getAllowedParams(): array {
 		return [
 			'context' => [
-				self::PARAM_DFLT => 'term',
-				self::PARAM_TYPE => $this->wikibaseContentLanguages->getContexts(),
+				ParamValidator::PARAM_DEFAULT => 'term',
+				ParamValidator::PARAM_TYPE => $this->wikibaseContentLanguages->getContexts(),
 				self::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 			'prop' => [
-				self::PARAM_DFLT => 'code',
-				self::PARAM_ISMULTI => true,
-				self::PARAM_TYPE => [
+				ParamValidator::PARAM_DEFAULT => 'code',
+				ParamValidator::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_TYPE => [
 					'code',
 					'autonym',
 					'name',

@@ -10,7 +10,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.34",
+		"MediaWiki": ">= 1.39.0",
 		"platform": {
 			"ext-curl": "*"
 		}

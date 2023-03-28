@@ -7,6 +7,7 @@ use ApiQueryBase;
 use CirrusSearch\BuildDocument\Completion\SuggestBuilder;
 use Elastica\Document;
 use InvalidArgumentException;
+use Wikimedia\ParamValidator\ParamValidator;
 
 class QueryCompSuggestBuildDoc extends ApiQueryBase {
 	use ApiTrait;
@@ -36,8 +37,8 @@ class QueryCompSuggestBuildDoc extends ApiQueryBase {
 	protected function getAllowedParams() {
 		return [
 			'method' => [
-				self::PARAM_TYPE => 'string',
-				self::PARAM_DFLT => $this->getSearchConfig()->get( 'CirrusSearchCompletionDefaultScore' ),
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_DEFAULT => $this->getSearchConfig()->get( 'CirrusSearchCompletionDefaultScore' ),
 			],
 		];
 	}

@@ -827,16 +827,10 @@ class UserNameSessionProvider extends CookieSessionProvider {
 						}
 						break;
 					default:
-						if ( $value != $user->getOption( $option ) ) {
+						$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
+						if ( $value != $userOptionsManager->getOption( $user, $option ) ) {
 							$dirty = true;
-							$services = MediaWikiServices::getInstance();
-							if ( method_exists( $services, 'getUserOptionsManager' ) ) {
-								// MW 1.35 +
-								$services->getUserOptionsManager()
-									->setOption( $user, $option, $value );
-							} else {
-								$user->setOption( $option, $value );
-							}
+							$userOptionsManager->setOption( $user, $option, $value );
 						}
 				}
 			}

@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Abijeet Patro",
+			"AnupamM",
 			"Goelujjwal",
 			"Innocentbunny",
 			"Jayprakash12345",
@@ -10,14 +11,13 @@
 			"Pooja 1810",
 			"Rajatkatiyar10",
 			"Sachinkatiyar",
+			"Saurmandal",
 			"Sfic",
 			"Siddhartha Ghai",
 			"Upendradutt93",
 			"Vivek Rai",
 			"Wikiuser13",
 			"రహ్మానుద్దీన్",
-			"AnupamM",
-			"Saurmandal",
 			"McDutchie"
 		]
 	},
@@ -130,6 +130,7 @@
 	"wikibase-copyrighttooltip-acknowledge": "मैं भविष्य के अपने संपादनों के लिए इन शर्तों को स्वीकार करता/करती हूँ। यह संदेश मुझे फिर से न दिखाएँ।",
 	"wikibase-entityselector-more": "अधिक",
 	"wikibase-entityselector-notfound": "कोई मेल खाते परिणाम नहीं मिले",
+	"wikibase-anonymouseditwarning": "चेतावनी: आपने लॉग-इन नहीं किया है। अगर आप कोई संपादन करते हैं, आपका [https://en.wikipedia.org/wiki/IP_address IP पता] सार्वजनिक रूप से दृश्य होगा। अगर आप <strong>[[Special:UserLogin|लॉग-इन करते हैं]]</strong> या <strong>[[Special:CreateAccount|एक खाता बनाते हैं]]</strong>, आपके संपादनों को एक सदस्यनाम पर जोड़ा जाएगा, और कई दूसरी सुविधाएँ प्रदान की जाएँगी।",
 	"wikibase-anonymouseditwarning-heading": "आपने लॉग-इन नहीं किया है",
 	"wikibase-anonymouseditwarning-message": "वर्तमान में अगर आप कोई संपादन करते हैं, आपका IP पता सार्वजनिक रूप से दृश्य होगा। अगर आप लॉग-इन करते हैं या एक खाता बनाते हैं, आपके संपादनों को एक सदस्यनाम पर जोड़ा जाएगा, और कई दूसरी सुविधाएँ प्रदान की जाएँगी।",
 	"wikibase-anonymouseditwarning-dismiss-persist": "जब भी मैंने लॉग-इन न किया हो, मुझे चेतावनी दें।",
@@ -334,6 +335,7 @@
 	"wikibase-entitypage-title": "सत्ते का पृष्ठ",
 	"wikibase-entitypage-text": "यह पृष्ठ उस रिपॉज़िटरी में सत्ते के पृष्ठ पर अनुप्रेषित होता है जिसमें यह मौजूद है। कृपया उपपृष्ठ सिनटैक्स की मदद से URL में सत्ते का एक ID प्रदान करें।",
 	"wikibase-entitypage-bad-id": "अमान्य ID: $1",
+	"wikibase-error-entity-not-local": "सत्ता प्रकार $1 को इस विकि पर सम्पादित नहीं किया जा सकता।",
 	"wikibase-error-entity-too-big": "सत्ता कुछ ज़्यादा ही बड़ा है। सत्ते का अधिकतम आकार $1 हो सकता है।",
 	"wikibase-parse-error": "विकृत वैल्यू।",
 	"wikibase-parse-error-coordinate": "नियामक का वैल्यू विकृत है।",

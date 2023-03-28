@@ -6,9 +6,9 @@ use IContextSource;
 use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserOptionsLookup;
+use Message;
 use MWException;
 use ReadOnlyError;
-use RuntimeException;
 use Status;
 use Title;
 use User;
@@ -73,7 +73,7 @@ class MediawikiEditEntity implements EditEntity {
 	 *
 	 * @var EntityId|null
 	 */
-	private $entityId = null;
+	private $entityId;
 
 	/**
 	 * @var EntityRevision|null
@@ -96,9 +96,9 @@ class MediawikiEditEntity implements EditEntity {
 	private $latestRevId = 0;
 
 	/**
-	 * @var Status|null
+	 * @var Status
 	 */
-	private $status = null;
+	private $status;
 
 	/** @var IContextSource */
 	private $context;
@@ -133,6 +133,9 @@ class MediawikiEditEntity implements EditEntity {
 	 */
 	private $maxSerializedEntitySize;
 
+	/** @var string[] */
+	private $localEntityTypes;
+
 	/**
 	 * @var bool Can use a master connection or not
 	 */
@@ -151,6 +154,7 @@ class MediawikiEditEntity implements EditEntity {
 	 * @param EditFilterHookRunner $editFilterHookRunner
 	 * @param UserOptionsLookup $userOptionsLookup
 	 * @param int $maxSerializedEntitySize the maximal allowed entity size in Kilobytes
+	 * @param string[] $localEntityTypes
 	 * @param int $baseRevId the base revision ID for conflict checking.
 	 *        Use 0 to indicate that the current revision should be used as the base revision,
 	 *        effectively disabling conflict detections. true and false will be accepted for
@@ -171,6 +175,7 @@ class MediawikiEditEntity implements EditEntity {
 		EditFilterHookRunner $editFilterHookRunner,
 		UserOptionsLookup $userOptionsLookup,
 		$maxSerializedEntitySize,
+		array $localEntityTypes,
 		$baseRevId = 0,
 		$allowMasterConnection = true
 	) {
@@ -202,6 +207,7 @@ class MediawikiEditEntity implements EditEntity {
 		$this->userOptionsLookup = $userOptionsLookup;
 		$this->allowMasterConnection = $allowMasterConnection;
 		$this->maxSerializedEntitySize = $maxSerializedEntitySize;
+		$this->localEntityTypes = $localEntityTypes;
 	}
 
 	/**
@@ -275,7 +281,9 @@ class MediawikiEditEntity implements EditEntity {
 				};
 				$this->latestRevId = $result->onNonexistentEntity( $returnZero )
 					->onRedirect( $returnZero )
-					->onConcreteRevision( 'intval' )
+					->onConcreteRevision( function ( $revId ) {
+						return $revId;
+					} )
 					->map();
 			}
 		}
@@ -380,10 +388,6 @@ class MediawikiEditEntity implements EditEntity {
 	 * @return Status
 	 */
 	public function getStatus() {
-		if ( $this->status === null ) {
-			throw new RuntimeException( 'The status is undefined until attemptSave() has been called' );
-		}
-
 		return $this->status;
 	}
 
@@ -618,6 +622,21 @@ class MediawikiEditEntity implements EditEntity {
 		return in_array( $entity->getType(), $readOnlyTypes );
 	}
 
+	/** Modifies $this->status and $this->errorType. Does not throw. */
+	private function checkLocal( EntityDocument $entity ): void {
+		if ( !$this->entityTypeIsLocal( $entity ) ) {
+			$this->errorType |= EditEntity::PRECONDITION_FAILED;
+			$this->status->fatal(
+				'wikibase-error-entity-not-local',
+				Message::plaintextParam( $entity->getType() )
+			);
+		}
+	}
+
+	private function entityTypeIsLocal( EntityDocument $entity ): bool {
+		return in_array( $entity->getType(), $this->localEntityTypes );
+	}
+
 	/**
 	 * Attempts to save the given Entity object.
 	 *
@@ -647,13 +666,15 @@ class MediawikiEditEntity implements EditEntity {
 	 * @see    EntityStore::saveEntity
 	 */
 	public function attemptSave( EntityDocument $newEntity, string $summary, $flags, $token, $watch = null, array $tags = [] ) {
-		$this->checkReadOnly( $newEntity );
-		$this->checkEntityId( $newEntity->getId() );
+		$this->checkReadOnly( $newEntity ); // throws, exception formatted by MediaWiki (cf. MWExceptionRenderer::getExceptionTitle)
+		$this->checkEntityId( $newEntity->getId() ); // throws internal error (unexpected condition)
 
 		$watch = $this->getDesiredWatchState( $watch );
 
 		$this->status = Status::newGood();
 		$this->errorType = 0;
+
+		$this->checkLocal( $newEntity ); // modifies $this->status
 
 		if ( $token !== false && !$this->isTokenOK( $token ) ) {
 			//@todo: This is redundant to the error code set in isTokenOK().
@@ -661,6 +682,9 @@ class MediawikiEditEntity implements EditEntity {
 			//       and only set the correct error code, in one place, probably here.
 			$this->errorType |= EditEntity::TOKEN_ERROR;
 			$this->status->fatal( 'sessionfailure' );
+		}
+
+		if ( !$this->status->isOK() ) {
 			$this->status->setResult( false, [ 'errorFlags' => $this->errorType ] );
 			return $this->status;
 		}
@@ -716,9 +740,6 @@ class MediawikiEditEntity implements EditEntity {
 
 		if ( !$this->status->isOK() ) {
 			$this->errorType |= EditEntity::PRECONDITION_FAILED;
-		}
-
-		if ( !$this->status->isOK() ) {
 			$this->status->setResult( false, [ 'errorFlags' => $this->errorType ] );
 			return $this->status;
 		}

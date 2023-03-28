@@ -77,7 +77,10 @@ class ScopeRepository implements ScopeRepositoryInterface {
 			return [];
 		}
 
-		$mwUser = Utils::getLocalUserFromCentralId( $userIdentifier );
+		$mwUser = Utils::getLocalUserFromCentralId( (int)$userIdentifier );
+		if ( !$mwUser ) {
+			return [];
+		}
 		$userEntity = UserEntity::newFromMWUser( $mwUser );
 		if ( $userEntity === null ) {
 			return [];

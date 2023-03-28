@@ -32,7 +32,7 @@
 	};
 
 	QUnit.module( 'jquery.wikibase.entitytermsforlanguageview', QUnit.newMwEnvironment( {
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_entitytermsforlanguageview' ).each( function () {
 				var $entitytermsforlanguageview = $( this ),
 					entitytermsforlanguageview
@@ -59,14 +59,14 @@
 			entitytermsforlanguageview
 				= $entitytermsforlanguageview.data( 'entitytermsforlanguageview' );
 
-		assert.ok(
+		assert.true(
 			entitytermsforlanguageview !== undefined,
 			'Created widget.'
 		);
 
 		entitytermsforlanguageview.destroy();
 
-		assert.ok(
+		assert.true(
 			$entitytermsforlanguageview.data( 'entitytermsforlanguageview' ) === undefined,
 			'Destroyed widget.'
 		);
@@ -79,13 +79,13 @@
 
 		$entitytermsforlanguageview
 		.on( 'entitytermsforlanguageviewafterstartediting', function ( event ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Started edit mode.'
 			);
 		} )
 		.on( 'entitytermsforlanguageviewafterstopediting', function ( event, dropValue ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Stopped edit mode.'
 			);
@@ -128,11 +128,10 @@
 		var $queue = $( {} );
 
 		/**
-		 * @param {jQuery} $queue
 		 * @param {Function} func
 		 * @param {boolean} [expectingEvent]
 		 */
-		function addToQueue( $queue, func, expectingEvent ) {
+		function addToQueue( func, expectingEvent ) {
 			if ( expectingEvent === undefined ) {
 				expectingEvent = true;
 			}
@@ -145,40 +144,40 @@
 			} );
 		}
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.startEditing();
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.startEditing();
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.stopEditing( true );
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.stopEditing( true );
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.stopEditing();
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.startEditing();
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.$label.find( 'input, textarea' ).val( '' );
 			entitytermsforlanguageview.stopEditing();
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.startEditing();
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			entitytermsforlanguageview.$description.find( 'input, textarea' ).val( 'changed description' );
 			entitytermsforlanguageview.stopEditing();
 		} );
@@ -193,7 +192,7 @@
 
 		$entitytermsforlanguageview
 		.on( 'entitytermsforlanguageviewtoggleerror', function ( event, error ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered "toggleerror" event.'
 			);
@@ -224,12 +223,12 @@
 			aliases: aliases
 		} );
 
-		assert.ok(
+		assert.true(
 			entitytermsforlanguageview.value().label.equals( label ),
 			'Set new label.'
 		);
 
-		assert.ok(
+		assert.true(
 			entitytermsforlanguageview.value().description.equals( description ),
 			'Did not change description.'
 		);
@@ -244,12 +243,12 @@
 			aliases: aliases
 		} );
 
-		assert.ok(
+		assert.true(
 			entitytermsforlanguageview.value().label.equals( label ),
 			'Reset label.'
 		);
 
-		assert.ok(
+		assert.true(
 			entitytermsforlanguageview.value().description.equals( description ),
 			'Removed description.'
 		);
@@ -263,7 +262,7 @@
 			aliases: aliases
 		} );
 
-		assert.ok(
+		assert.true(
 			entitytermsforlanguageview.value().aliases.equals( aliases ),
 			'Added alias.'
 		);
@@ -277,7 +276,7 @@
 			aliases: aliases
 		} );
 
-		assert.ok(
+		assert.true(
 			entitytermsforlanguageview.value().aliases.equals( aliases ),
 			'Removed aliases.'
 		);

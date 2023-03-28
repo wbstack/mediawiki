@@ -109,7 +109,8 @@ class ConfirmAccount {
 	 */
 	public static function sendConfirmationMail( User $user, $ip, $token, $expiration ) {
 		$url = self::confirmationTokenUrl( $token );
-		$lang = $user->getOption( 'language' );
+		$lang = MediaWikiServices::getInstance()->getUserOptionsManager()
+			->getOption( $user, 'language' );
 		$contentLanguage = MediaWikiServices::getInstance()->getContentLanguage();
 		return $user->sendMail(
 			wfMessage( 'requestaccount-email-subj' )->inLanguage( $lang )->text(),

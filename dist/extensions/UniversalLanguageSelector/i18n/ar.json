@@ -5,6 +5,7 @@
 			"Asaifm",
 			"Maroen1990",
 			"Meno25",
+			"Mohanad Kh",
 			"Shbib Al-Subaie",
 			"Tarawneh",
 			"ترجمان05",
@@ -75,5 +76,11 @@
 	"ext-uls-setlang-heading": "تغيير لغة الواجهة؟",
 	"ext-uls-setlang-accept": "اقبل التغيير",
 	"ext-uls-setlang-loading": "جارٍ التطبيق...",
-	"ext-uls-setlang-cancel": "لا تغير"
+	"ext-uls-setlang-cancel": "لا تغير",
+	"ext-uls-actions-menu-header": "المزيد من الخيارات",
+	"ext-uls-actions-menu-language-settings-item-label": "افتح إعدادات اللغة",
+	"ext-uls-empty-state-header": "لا توجد لغات بعد",
+	"ext-uls-empty-state-desc": "لا توجد لغات متاحة حاليًا",
+	"ext-uls-empty-state-header-actions-available": "لا لغات أخرى حتى الآن. أضف وصلة لغة جديدة؟",
+	"ext-uls-empty-state-desc-actions-available": "اجعل المحتوى متاحًا بلغاتٍ أكثر."
 }

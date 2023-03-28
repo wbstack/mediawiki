@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Chhithai",
+			"Laitei",
 			"Teitei",
-			"Teitei Para",
-			"Laitei"
+			"Teitei Para"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Hmâhtuhpa cha mobile hmia tawh a taopathipa a châ nah châ lei",
@@ -169,6 +169,7 @@
 	"mobile-frontend-talk-reply": "Châ alei",
 	"mobile-frontend-talk-reply-info": "Châ nâ leipa cha nâma hmâhtuhpa moh ta anotata mohsaih â thu lymâ aw.",
 	"mobile-frontend-talk-topic-error": "Pahno leipa pâna sâkha vâta chôtlâhpi cha akhô thei vei.",
+	"mobile-frontend-talk-topic-error-protected": "Biepachiana hmia cha vai hawpa a châ. He lâta chôtlâhpi khô awpa padaina hnei va chi.",
 	"mobile-frontend-talk-topic-error-permission": "Chôtlâhpipa a khô thei vei. He hmia taopathi awpa ta pasaina hnei va chi.",
 	"mobile-frontend-talk-topic-error-spam": "Span tlawpaih â hlaopa vâta chôtlâhpipa dythapa a châ.",
 	"mobile-frontend-talk-topic-error-badtoken": "Server chô lia buana sâkha a y. Na taopathipa cha a pachô thei vei. He hmia he khâh pathi chhi teh.",

@@ -67,6 +67,7 @@
 	"wikibase-error-exceeded-entity-access-limit": "Dostopanih je bilo preveč entitet projekta {{WBREPONAME}}.",
 	"wikibase-error-exceeded-referenced-entity-id-limit": "Preveč klicev »mw.wikibase.getReferencedEntityId«; {{PLURAL:$2|dovoljen|dovoljena|dovoljeni|dovoljenih}} samo do $2.",
 	"unconnectedpages": "Strani, ki niso povezane s predmeti",
+	"unconnectedpages-summary": "Na tej strani so navedene spremembe brez povezanega podatkovnega predmeta (v imenskih prostorih, ki podpirajo povezane predmete).",
 	"wikibase-unconnectedpages-submit": "Prikaži strani",
 	"pageswithbadges": "Strani z značkami",
 	"pageswithbadges-summary": "Na tej strani so navedene strani z značkami (npr. dobri članki ali izbrani članki). Seznam je razvrščen padajoče po ID-oznaki strani, pri čemer so novejše strani navedene najprej.",

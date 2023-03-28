@@ -3,13 +3,13 @@
 		"authors": [
 			"Allan Aguilar",
 			"Dgstranz",
+			"DiegoAmbrocio",
 			"Fitoschido",
 			"Jackiezelaya",
 			"Jakeukalane",
 			"Jduranboger",
 			"Macofe",
-			"Tiberius1701",
-			"DiegoAmbrocio"
+			"Tiberius1701"
 		]
 	},
 	"apihelp-echomarkread-description": "Marcar notificaciones como leídas para el usuario actual.",

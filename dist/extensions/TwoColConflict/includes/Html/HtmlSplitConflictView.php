@@ -45,24 +45,24 @@ class HtmlSplitConflictView {
 	): string {
 		$out = '';
 
-		foreach ( $unifiedDiff as $currRowNum => $changeSet ) {
+		foreach ( $unifiedDiff as $i => $changeSet ) {
 			if ( $changeSet['action'] === 'copy' ) {
 				// Copy block across both columns.
-				$line = $this->buildCopiedLine( $changeSet['copytext'], $currRowNum );
+				$line = $this->buildCopiedLine( $changeSet['copytext'], $i );
 				$markAsIncomplete = false;
 			} else {
 				// Old and new split across two columns.
 				$line = $this->buildRemovedLine(
 						$changeSet['oldhtml'],
 						$changeSet['oldtext'],
-						$currRowNum
+						$i
 					) .
 					( new HtmlSideSelectorComponent( $this->messageLocalizer ) )
-						->getRowHtml( $currRowNum ) .
+						->getRowHtml( $i ) .
 					$this->buildAddedLine(
 						$changeSet['newhtml'],
 						$changeSet['newtext'],
-						$currRowNum
+						$i
 					);
 				$markAsIncomplete = $markAllAsIncomplete;
 			}
