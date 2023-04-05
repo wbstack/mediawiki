@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230405-0
+- Temporary fix to resolve Echo's migration errors
+
 ## 1.39-7.4-20230328-0
 - Update to MediaWiki 1.39
 
