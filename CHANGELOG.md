@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230411-1
+- Update to MediaWiki 1.39.3
+
 ## 1.39-7.4-20230411-0
 - Fix OAuth for QuickStatements
 
