@@ -283,12 +283,12 @@
             ),
         ),
         'mailgun/mailgun-php' => array(
-            'pretty_version' => 'v3.5.5',
-            'version' => '3.5.5.0',
+            'pretty_version' => 'v3.5.6',
+            'version' => '3.5.6.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../mailgun/mailgun-php',
             'aliases' => array(),
-            'reference' => '8c3840a1eb3e39329a17048994bfefefe8a57054',
+            'reference' => '897e799e48497c8fecc5d3142b32684a02c8aee5',
             'dev_requirement' => false,
         ),
         'mediawiki/core' => array(
@@ -309,7 +309,7 @@
         'mediawiki/mediawiki' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.39.2',
+                0 => '1.39.3',
             ),
         ),
         'monolog/monolog' => array(
@@ -340,12 +340,12 @@
             'dev_requirement' => false,
         ),
         'nyholm/psr7' => array(
-            'pretty_version' => '1.5.1',
-            'version' => '1.5.1.0',
+            'pretty_version' => '1.6.0',
+            'version' => '1.6.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../nyholm/psr7',
             'aliases' => array(),
-            'reference' => 'f734364e38a876a23be4d906a2a089e1315be18a',
+            'reference' => 'bf4aebd170fadf5fd808c70b90535de327e81a50',
             'dev_requirement' => false,
         ),
         'onoi/message-reporter' => array(
@@ -469,12 +469,12 @@
             ),
         ),
         'php-http/discovery' => array(
-            'pretty_version' => '1.15.2',
-            'version' => '1.15.2.0',
+            'pretty_version' => '1.15.3',
+            'version' => '1.15.3.0',
             'type' => 'composer-plugin',
             'install_path' => __DIR__ . '/../php-http/discovery',
             'aliases' => array(),
-            'reference' => '5cc428320191ac1d0b6520034c2dc0698628ced5',
+            'reference' => '3ccd28dd9fb34b52db946abea1b538568e34eae8',
             'dev_requirement' => false,
         ),
         'php-http/httplug' => array(
@@ -562,12 +562,12 @@
             ),
         ),
         'psr/http-client' => array(
-            'pretty_version' => '1.0.1',
-            'version' => '1.0.1.0',
+            'pretty_version' => '1.0.2',
+            'version' => '1.0.2.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../psr/http-client',
             'aliases' => array(),
-            'reference' => '2dfb5f6c5eff0e91e20e913f8c5452ed95b86621',
+            'reference' => '0955afe48220520692d2d09f7ab7e0f93ffd6a31',
             'dev_requirement' => false,
         ),
         'psr/http-client-implementation' => array(
@@ -578,12 +578,12 @@
             ),
         ),
         'psr/http-factory' => array(
-            'pretty_version' => '1.0.1',
-            'version' => '1.0.1.0',
+            'pretty_version' => '1.0.2',
+            'version' => '1.0.2.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../psr/http-factory',
             'aliases' => array(),
-            'reference' => '12ac7fcd07e5b077433f5f2bee95b3a771bf61be',
+            'reference' => 'e616d01114759c4c489f93b099585439f795fe35',
             'dev_requirement' => false,
         ),
         'psr/http-factory-implementation' => array(
@@ -594,12 +594,12 @@
             ),
         ),
         'psr/http-message' => array(
-            'pretty_version' => '1.0.1',
-            'version' => '1.0.1.0',
+            'pretty_version' => '1.1',
+            'version' => '1.1.0.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../psr/http-message',
             'aliases' => array(),
-            'reference' => 'f6561bf28d520154e4b0ec72be95418abe6d9363',
+            'reference' => 'cb6ce4845ce34a8ad9e68117c10ee90a29919eba',
             'dev_requirement' => false,
         ),
         'psr/http-message-implementation' => array(
@@ -745,12 +745,12 @@
             'dev_requirement' => false,
         ),
         'symfony/translation' => array(
-            'pretty_version' => 'v5.4.21',
-            'version' => '5.4.21.0',
+            'pretty_version' => 'v5.4.22',
+            'version' => '5.4.22.0',
             'type' => 'library',
             'install_path' => __DIR__ . '/../symfony/translation',
             'aliases' => array(),
-            'reference' => '6996affeea65705086939894b77110e9a7f80874',
+            'reference' => '9a401392f01bc385aa42760eff481d213a0cc2ba',
             'dev_requirement' => false,
         ),
         'symfony/translation-contracts' => array(

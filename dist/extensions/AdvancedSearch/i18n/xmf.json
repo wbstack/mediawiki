@@ -25,6 +25,7 @@
 	"advancedsearch-field-preview-sort": "ხელუა $1-თ",
 	"advancedsearch-placeholder-exact-text": "„კატუს უჸორს რინტუ“",
 	"advancedsearch-inlanguage-default": "გეგშაგორით ნინა",
+	"advancedsearch-filetype-section-types": "ფაილიშ თარი ტიპეფი",
 	"advancedsearch-filetype-section-image": "სურათიშ ფორმატეფი",
 	"advancedsearch-filetype-section-video": "ვიდეო ფორმატეფი",
 	"advancedsearch-filetype-section-audio": "აუდიო ფორმატეფი",
@@ -35,5 +36,13 @@
 	"advancedsearch-filetype-drawing": "ნახანტი",
 	"advancedsearch-filetype-audio": "აუდიო",
 	"advancedsearch-filetype-video": "ვიდეო",
-	"advancedsearch-filetype-office": "ოფისი"
+	"advancedsearch-filetype-office": "ოფისი",
+	"advancedsearch-filesize-equals": "ომანგჷ",
+	"advancedsearch-filesize-greater-than": "უმოსი რე ვინდარო",
+	"advancedsearch-filesize-smaller-than": "მერკე რე ვინდარო",
+	"advancedsearch-sort-relevance": "რელევანტური",
+	"advancedsearch-namespaces-preset-all": "არძა",
+	"advancedsearch-namespaces-preset-default": "სტანდარტული",
+	"advancedsearch-namespaces-preset-discussion": "სხუნუა",
+	"prefs-advancedsearch": "გაუჯგუშებული გორუა"
 }

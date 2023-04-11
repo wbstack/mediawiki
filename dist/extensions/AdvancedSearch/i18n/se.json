@@ -6,11 +6,13 @@
 	},
 	"advancedsearch-options-pane-head": "Aiddostahttojuvvon ohcan:",
 	"advancedsearch-optgroup-text": "Oza siiddu teavsttas",
+	"advancedsearch-optgroup-files": "Fiillat ja govat",
 	"advancedsearch-field-filetype": "Fiilašládja",
 	"advancedsearch-inlanguage-default": "Vállje giela",
 	"advancedsearch-filetype-default": "Vállje fiilašlája",
 	"advancedsearch-filetype-bitmap": "Govva",
 	"advancedsearch-filetype-audio": "Jietna",
 	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-namespaces-preset-all": "Buot",
 	"prefs-advancedsearch": "Aiddostahttojuvvon ohcan"
 }
