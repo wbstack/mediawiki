@@ -1,5 +1,6 @@
 ---
 mediawikiVersion: "1.39"
+mediawikiRepoRef: 2fdadd4096268cebab8fbc2f245dd441e2f05536
 mediawikiRemove:
   - docs
   - extensions/README

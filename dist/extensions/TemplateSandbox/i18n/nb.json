@@ -37,5 +37,6 @@
 	"templatesandbox-editform-need-title": "For å forhåndsvise en annen side med denne malen, må du angi en sidetittel.",
 	"templatesandbox-editform-invalid-template": "Navnet på malen da anga er ugyldig.",
 	"templatesandbox-editform-invalid-title": "Tittelen du har angitt for forhåndsvisning er ugyldig.",
-	"templatesandbox-editform-title-not-exists": "Tittelen du har angitt for forhåndsvisning finnes ikke."
+	"templatesandbox-editform-title-not-exists": "Tittelen du har angitt for forhåndsvisning finnes ikke.",
+	"templatesandbox-failed-replace-section": "Kunne ikke erstatte seksjon av eksisterende side."
 }

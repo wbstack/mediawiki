@@ -22,5 +22,9 @@
 	"advancedsearch-field-filetype": "نوع الملف",
 	"advancedsearch-field-filew": "عرض الملف بالبكسل",
 	"advancedsearch-field-fileh": "طول الملف بالبكسل",
-	"advancedsearch-field-sort": "طريقة الترتيب"
+	"advancedsearch-field-sort": "طريقة الترتيب",
+	"advancedsearch-field-preview-sort": "الترتيب حسب $1",
+	"advancedsearch-placeholder-exact-text": "\"بزونة تحب الصخل\"",
+	"advancedsearch-inlanguage-default": "إختار اللغة",
+	"advancedsearch-filetype-section-types": "أنواع الملفات العامه"
 }
