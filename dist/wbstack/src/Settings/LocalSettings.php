@@ -193,17 +193,17 @@ $wgFooterIcons = [
     ],
     "poweredby" => [
         "wbstack" => [
-            "src" => "https://storage.googleapis.com/wbstack-static/assets/Powered_by_WBStack_88x31.png",
+            "src" => "/w/resources/assets/Powered_by_WBStack_88x31.png",
             "url" => "https://wbstack.com/",
             "alt" => "Powered by WBStack",
         ],
         "wikibase" => [
-            "src" => "https://storage.googleapis.com/wbstack-static/assets/Powered_by_Wikibase_88x31.png",
+            "src" => "/w/resources/assets/Powered_by_Wikibase_88x31.png",
             "url" => "https://wikiba.se/",
             "alt" => "Powered by Wikibase",
         ],
         "mediawiki" => [
-            "src" => "https://storage.googleapis.com/wbstack-static/assets/mediawiki/poweredby_mediawiki_88x31.png",
+            "src" => "/w/resources/assets/poweredby_mediawiki_88x31.png",
             "url" => "https://www.mediawiki.org/",
             "alt" => "Powered by MediaWiki",
         ]
