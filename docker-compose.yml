@@ -139,7 +139,7 @@ services:
           - redis.svc
 
   elasticsearch:
-    image: wikibase/elasticsearch:6.5.4-wmde.1
+    image: wikibase/elasticsearch:6.8.23-wmde.6
     restart: unless-stopped
     ports:
       - 9200:9200
