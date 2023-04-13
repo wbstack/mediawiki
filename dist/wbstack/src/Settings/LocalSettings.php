@@ -193,12 +193,12 @@ $wgFooterIcons = [
     ],
     "poweredby" => [
         "wbstack" => [
-            "src" => "/w/resources/assets/Powered_by_WBStack_88x31.png",
+            "src" => "/w/resources/assets/poweredby_wbstack_88x31.png",
             "url" => "https://wbstack.com/",
             "alt" => "Powered by WBStack",
         ],
         "wikibase" => [
-            "src" => "/w/resources/assets/Powered_by_Wikibase_88x31.png",
+            "src" => "/w/resources/assets/poweredby_wikibase_88x31.png",
             "url" => "https://wikiba.se/",
             "alt" => "Powered by Wikibase",
         ],
