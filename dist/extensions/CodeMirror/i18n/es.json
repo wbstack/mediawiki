@@ -1,11 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
+			"Adamw",
+			"DiegoAmbrocio",
 			"Fitoschido",
 			"Macofe",
-			"PoLuX124"
+			"PoLuX124",
+			"MarcoAurelio"
 		]
 	},
 	"codemirror-desc": "Proporciona resalte de la sintaxis en el editor de código wiki",
-	"codemirror-toggle-label": "Resaltado de sintaxis"
+	"codemirror-toggle-label": "Resaltado de sintaxis",
+	"codemirror-prefs-colorblind": "Usar un esquema de colores accesible para daltónicos en el resaltador de sintaxis al editar código wiki",
+	"codemirror-prefs-colorblind-help": "Si utilizas un accesorio para el resaltado de sintaxis esta preferencia no funcionará.",
+	"prefs-accessibility": "Accesibilidad"
 }

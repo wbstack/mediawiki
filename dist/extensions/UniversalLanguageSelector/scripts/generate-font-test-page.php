@@ -1,6 +1,5 @@
 <?php
 /**
- *
  * @author Niklas Laxström
  * @license GPL-2.0-or-later
  * @file
@@ -102,5 +101,5 @@ HTML;
 	}
 }
 
-$maintClass = 'UniversalLanguageSelector\GenerateFontTestPage';
+$maintClass = GenerateFontTestPage::class;
 require_once RUN_MAINTENANCE_IF_MAIN;

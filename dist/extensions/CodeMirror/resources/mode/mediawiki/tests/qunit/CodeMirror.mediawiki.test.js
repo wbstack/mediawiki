@@ -17,11 +17,16 @@
 				output: '<pre><span>this is <span class="cm-mw-htmltag-bracket">&lt;</span><span class="cm-mw-htmltag-name">p</span><span class="cm-mw-htmltag-bracket">&gt;&lt;</span><span class="cm-mw-htmltag-name">div</span><span class="cm-mw-htmltag-bracket">&gt;</span>content<span class="cm-error">&lt;/p</span>&gt;<span class="cm-mw-htmltag-bracket">&lt;/</span><span class="cm-mw-htmltag-name">p</span><span class="cm-mw-htmltag-bracket">&gt;</span></span></pre>'
 			},
 			{
-				title: 'HTML and ref tag attributes',
-				input: '<span title="a>b"><ref name="a>b"/></span>',
+				title: 'HTML tag attributes',
+				input: '<span title="a<b"><b title="a>b"></b></span>',
+				output: '<pre><span><span class="cm-mw-htmltag-bracket">&lt;</span><span class="cm-mw-htmltag-name">span </span><span class="cm-mw-htmltag-attribute">title="a&lt;b"</span><span class="cm-mw-htmltag-bracket">&gt;&lt;</span><span class="cm-mw-htmltag-name">b </span><span class="cm-mw-htmltag-attribute">title="a</span><span class="cm-mw-htmltag-bracket">&gt;</span>b"&gt;<span class="cm-mw-htmltag-bracket">&lt;/</span><span class="cm-mw-htmltag-name">b</span><span class="cm-mw-htmltag-bracket">&gt;&lt;/</span><span class="cm-mw-htmltag-name">span</span><span class="cm-mw-htmltag-bracket">&gt;</span></span></pre>'
+			},
+			{
+				title: 'ref tag attributes',
+				input: '<ref name="a<b"/>',
 				output: extCiteLoaded ?
-					'<pre><span><span class="cm-mw-htmltag-bracket">&lt;</span><span class="cm-mw-htmltag-name">span </span><span class="cm-mw-htmltag-attribute">title="a&gt;b"</span><span class="cm-mw-htmltag-bracket">&gt;</span><span class="cm-mw-exttag-bracket cm-mw-ext-ref">&lt;</span><span class="cm-mw-exttag-name cm-mw-ext-ref">ref </span><span class="cm-mw-exttag-attribute cm-mw-ext-ref">name="a&gt;b"</span><span class="cm-mw-exttag-bracket cm-mw-ext-ref">/&gt;</span><span class="cm-mw-htmltag-bracket">&lt;/</span><span class="cm-mw-htmltag-name">span</span><span class="cm-mw-htmltag-bracket">&gt;</span></span></pre>' :
-					'<pre><span><span class="cm-mw-htmltag-bracket">&lt;</span><span class="cm-mw-htmltag-name">span </span><span class="cm-mw-htmltag-attribute">title="a&gt;b"</span><span class="cm-mw-htmltag-bracket">&gt;</span>&lt;ref name="a&gt;b"/&gt;<span class="cm-mw-htmltag-bracket">&lt;/</span><span class="cm-mw-htmltag-name">span</span><span class="cm-mw-htmltag-bracket">&gt;</span></span></pre>'
+					'<pre><span><span class="cm-mw-exttag-bracket cm-mw-ext-ref">&lt;</span><span class="cm-mw-exttag-name cm-mw-ext-ref">ref </span><span class="cm-mw-exttag-attribute cm-mw-ext-ref">name="a&lt;b"</span><span class="cm-mw-exttag-bracket cm-mw-ext-ref">/&gt;</span></span></pre>' :
+					'<pre><span>&lt;ref name="a&lt;b"/&gt;</span></pre>'
 			},
 			{
 				title: 'indented table with caption and inline headings',
@@ -72,8 +77,13 @@
 			},
 			{
 				title: 'section headings',
-				input: '== My section ==\nFoo bar\n=== Blah ===\nBaz',
-				output: '<pre class=" cm-mw-section-2 CodeMirror-line "><span><span class="cm-mw-section-header">==</span> My section <span class="cm-mw-section-header">==</span></span></pre><pre><span>Foo bar</span></pre><pre class=" cm-mw-section-3 CodeMirror-line "><span><span class="cm-mw-section-header">===</span> Blah <span class="cm-mw-section-header">===</span></span></pre><pre><span>Baz</span></pre>'
+				input: '== My section ==\nFoo bar\n=== Blah ===\nBaz\n= { =\nText',
+				output: '<pre class=" cm-mw-section-2 CodeMirror-line "><span><span class="cm-mw-section-header">==</span> My section <span class="cm-mw-section-header">==</span></span></pre><pre><span>Foo bar</span></pre><pre class=" cm-mw-section-3 CodeMirror-line "><span><span class="cm-mw-section-header">===</span> Blah <span class="cm-mw-section-header">===</span></span></pre><pre><span>Baz</span></pre><pre class=" cm-mw-section-1 CodeMirror-line "><span><span class="cm-mw-section-header">=</span> { <span class="cm-mw-section-header">=</span></span></pre><pre><span>Text</span></pre>'
+			},
+			{
+				title: 'section headings with trailing comments',
+				input: '== My section == <!-- comment --> \nFoo bar\n=== Blah ===<!--comment-->\nBaz\n== <i>a</i> <!-- comment --> == <!--comment-->',
+				output: '<pre class=" cm-mw-section-2 CodeMirror-line "><span><span class="cm-mw-section-header">==</span> My section <span class="cm-mw-section-header">== </span><span class="cm-mw-comment">&lt;!-- comment --&gt;</span> </span></pre><pre><span>Foo bar</span></pre><pre class=" cm-mw-section-3 CodeMirror-line "><span><span class="cm-mw-section-header">===</span> Blah <span class="cm-mw-section-header">===</span><span class="cm-mw-comment">&lt;!--comment--&gt;</span></span></pre><pre><span>Baz</span></pre><pre class=" cm-mw-section-2 CodeMirror-line "><span><span class="cm-mw-section-header">==</span> <span class="cm-mw-htmltag-bracket">&lt;</span><span class="cm-mw-htmltag-name">i</span><span class="cm-mw-htmltag-bracket">&gt;</span>a<span class="cm-mw-htmltag-bracket">&lt;/</span><span class="cm-mw-htmltag-name">i</span><span class="cm-mw-htmltag-bracket">&gt;</span> <span class="cm-mw-comment">&lt;!-- comment --&gt;</span> <span class="cm-mw-section-header">== </span><span class="cm-mw-comment">&lt;!--comment--&gt;</span></span></pre>'
 			},
 			{
 				title: 'bullets and numbering, with invalid leading spacing',

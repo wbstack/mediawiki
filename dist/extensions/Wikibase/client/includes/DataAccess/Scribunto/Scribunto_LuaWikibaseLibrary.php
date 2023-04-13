@@ -7,10 +7,10 @@ namespace Wikibase\Client\DataAccess\Scribunto;
 use Deserializers\Exceptions\DeserializationException;
 use Exception;
 use Language;
+use MediaWiki\Extension\Scribunto\ScribuntoException;
 use MediaWiki\MediaWikiServices;
 use Scribunto_LuaError;
 use Scribunto_LuaLibraryBase;
-use ScribuntoException;
 use Wikibase\Client\DataAccess\DataAccessSnakFormatterFactory;
 use Wikibase\Client\DataAccess\PropertyIdResolver;
 use Wikibase\Client\PropertyLabelNotResolvedException;
@@ -25,11 +25,7 @@ use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Services\Lookup\EntityAccessLimitException;
 use Wikibase\DataModel\Services\Lookup\EntityRetrievingClosestReferencedEntityIdLookup;
 use Wikibase\Lib\EntityTypeDefinitions;
-use Wikibase\Lib\Store\CachingFallbackLabelDescriptionLookup;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Store\PropertyOrderProvider;
-use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
 use Wikibase\Lib\Store\RevisionBasedEntityRedirectTargetLookup;
 use Wikibase\Lib\TermLanguageFallbackChain;
 
@@ -260,17 +256,8 @@ class Scribunto_LuaWikibaseLibrary extends Scribunto_LuaLibraryBase {
 	}
 
 	private function newLanguageDependentLuaBindings(): WikibaseLanguageDependentLuaBindings {
-		$nonCachingLookup = new LanguageFallbackLabelDescriptionLookup(
-			WikibaseClient::getTermLookup(),
-			$this->getLanguageFallbackChain()
-		);
-
-		$labelDescriptionLookup = new CachingFallbackLabelDescriptionLookup(
-			WikibaseClient::getTermFallbackCache(),
-			new RedirectResolvingLatestRevisionLookup( WikibaseClient::getStore()->getEntityRevisionLookup() ),
-			$nonCachingLookup,
-			$this->getLanguageFallbackChain()
-		);
+		$labelDescriptionLookup = WikibaseClient::getFallbackLabelDescriptionLookupFactory()
+			->newLabelDescriptionLookup( $this->getLanguage() );
 
 		$usageTrackingLabelDescriptionLookup = new UsageTrackingLanguageFallbackLabelDescriptionLookup(
 			$labelDescriptionLookup,
@@ -293,11 +280,9 @@ class Scribunto_LuaWikibaseLibrary extends Scribunto_LuaLibraryBase {
 
 		$termLookup = new CachingFallbackBasedTermLookup(
 			WikibaseClient::getTermFallbackCache( $mediaWikiServices ),
-			new RedirectResolvingLatestRevisionLookup( $store->getEntityRevisionLookup() ),
-			new LanguageFallbackLabelDescriptionLookupFactory(
-				WikibaseClient::getLanguageFallbackChainFactory( $mediaWikiServices ),
-				WikibaseClient::getTermLookup( $mediaWikiServices )
-			),
+			WikibaseClient::getRedirectResolvingLatestRevisionLookup( $mediaWikiServices ),
+			WikibaseClient::getLanguageFallbackChainFactory( $mediaWikiServices ),
+			WikibaseClient::getTermLookup( $mediaWikiServices ),
 			$mediaWikiServices->getLanguageFactory(),
 			$termsLanguages
 		);
@@ -319,7 +304,8 @@ class Scribunto_LuaWikibaseLibrary extends Scribunto_LuaLibraryBase {
 			$mediaWikiServices->getTitleFormatter(),
 			$mediaWikiServices->getTitleParser(),
 			$settings->getSetting( 'siteGlobalID' ),
-			new RevisionBasedEntityRedirectTargetLookup( $store->getEntityRevisionLookup() )
+			new RevisionBasedEntityRedirectTargetLookup(
+				WikibaseClient::getEntityRevisionLookup( $mediaWikiServices ) )
 		);
 	}
 
@@ -331,7 +317,7 @@ class Scribunto_LuaWikibaseLibrary extends Scribunto_LuaLibraryBase {
 	}
 
 	/**
-	 * @throws \ScribuntoException
+	 * @throws ScribuntoException
 	 */
 	private function parseUserGivenEntityId( string $idSerialization ): EntityId {
 		try {

@@ -17,5 +17,6 @@
 	"vector-view-edit": "တီးဖြတ်ပါ",
 	"vector-view-history": "သမိုင်းတိကိုကြည့်ပါ",
 	"vector-view-view": "ဖတ်ကြေ့ပါ",
-	"vector-more-actions": "ထပ်လို့"
+	"vector-more-actions": "ထပ်လို့",
+	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>ပါဝင်ရေ စာမျက်နှာတိ ယှာဖွီရန်"
 }

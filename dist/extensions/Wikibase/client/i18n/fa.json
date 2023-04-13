@@ -5,6 +5,7 @@
 			"Alireza",
 			"Alirezaaa",
 			"Armin1392",
+			"Beginneruser",
 			"Berrely",
 			"Calak",
 			"Dalba",
@@ -16,6 +17,7 @@
 			"Iriman",
 			"Jeeputer",
 			"Ladsgroup",
+			"LordProfo",
 			"Mahdy Saffar",
 			"Mehran",
 			"Mjbmr",
@@ -23,9 +25,7 @@
 			"Reza1615",
 			"Rtemis",
 			"ZxxZxxZ",
-			"درفش کاویانی",
-			"Beginneruser",
-			"LordProfo"
+			"درفش کاویانی"
 		]
 	},
 	"wikibase-client-desc": "کارخواه برای افزونهٔ ویکی‌پایه",
@@ -79,6 +79,7 @@
 	"wikibase-error-invalid-entity-id": "شناسهٔ \"$2\" برای سامانه ناشناخته است. لطفاً از یک شناسهٔ هستار معتبر استفاده کنید.",
 	"wikibase-error-exceeded-entity-access-limit": "تعداد زیادی هستارهای {{WBREPONAME}} دسترسی پیدا کردند",
 	"unconnectedpages": "صفحه‌های متصل نشده به آیتم‌ها",
+	"unconnectedpages-summary": "این صفحه، صفحه‌هایی (در فضاهای نامی که از از اتصال به آیتم پشتیبانی می‌کنند) را فهرست می‌کند که به هیچ آیتم داده‌ای متصل نیستند.",
 	"wikibase-unconnectedpages-submit": "نمایش صفحه‌ها",
 	"pageswithbadges": "صفحه‌های دارای نشان",
 	"pageswithbadges-summary": "این صفحه، صفحه‌های دارای نشان (مانند مقالهٔ خوب یا مقالهٔ برگزیده) را فهرست می‌کند. فهرست بر اساس شناسهٔ صفحه به طور نزولی مرتب‌سازی شده، به‌طوری‌که صفحه‌های جدیدتر اول فهرست می‌شوند.",

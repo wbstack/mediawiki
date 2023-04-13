@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Tumbuka Arch",
-			"Amire80"
+			"Amire80",
+			"Tumbuka Arch"
 		]
 	},
 	"uls-desc": "Chikupeleka nthowa zingapo kwa mgwiliski zakusankhila chiyowoyelo na kusintha",
@@ -62,5 +62,7 @@
 	"ext-uls-setlang-heading": "Sintha chiyowoyelo?",
 	"ext-uls-setlang-accept": "Zomela kusintha",
 	"ext-uls-setlang-loading": "Kusintha...",
-	"ext-uls-setlang-cancel": "Kusintha chala"
+	"ext-uls-setlang-cancel": "Kusintha chala",
+	"ext-uls-actions-menu-header": "Visankho vinandi",
+	"ext-uls-actions-menu-language-settings-item-label": "Jula vakunozgela chiyowoyelo"
 }

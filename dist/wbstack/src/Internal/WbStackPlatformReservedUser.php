@@ -72,8 +72,8 @@ class WbStackPlatformReservedUser{
             'agreement' => true,
             'restrictions' => \MWRestrictions::newDefault(),
             'oauthVersion' => 1,
-            'oauth2IsConfidential' => false,
-            'oauth2GrantTypes' => null
+            'oauth2IsConfidential' => true,
+            'oauth2GrantTypes' => [ 'authorization_code', 'refresh_token' ]
         ];
 
         $context = \RequestContext::getMain();

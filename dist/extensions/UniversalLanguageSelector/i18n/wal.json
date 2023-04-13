@@ -66,5 +66,10 @@
 	"ext-uls-setlang-heading": "Issippe oottiyo doonaa laammanee?",
 	"ext-uls-setlang-accept": "Laamiyaa ekka",
 	"ext-uls-setlang-loading": "Shiishiiddi de'ees...",
-	"ext-uls-setlang-cancel": "Laammoppa"
+	"ext-uls-setlang-cancel": "Laammoppa",
+	"ext-uls-actions-menu-language-settings-item-label": "Doonaa giigissota dooya",
+	"ext-uls-empty-state-header": "Hanno gaakkanawu doonati baawa",
+	"ext-uls-empty-state-desc": "Ha'issi ayba doonatikka de'okkona",
+	"ext-uls-empty-state-header-actions-available": "Hanno gaakkanawu doonati baawa. Ooratta gujjutee?",
+	"ext-uls-empty-state-desc-actions-available": "Oyqettay cora doonatun de'ana mala ootta."
 }

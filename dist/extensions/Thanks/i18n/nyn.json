@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kakonjo",
-			"Amire80"
+			"Amire80",
+			"Kakonjo"
 		]
 	},
 	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|yebaza}}}}"

@@ -25,9 +25,6 @@ return [
 	// feature flag for tainted references
 	'taintedReferencesEnabled' => false,
 
-	// feature flag for the Wikibase REST API
-	'restApiEnabled' => false,
-
 	// url of (termbox) ssr-server
 	'ssrServerUrl' => null,
 
@@ -67,8 +64,11 @@ return [
 	// URL schemes allowed for URL values. See UrlSchemeValidators for a full list.
 	'urlSchemes' => [ 'bzr', 'cvs', 'ftp', 'git', 'http', 'https', 'irc', 'mailto', 'ssh', 'svn' ],
 
-	// Items allowed to be used as badges pointing to their CSS class names
+	// Items allowed to be used as badges pointing to their CSS class names.
 	'badgeItems' => [],
+
+	// Item IDs that are redirect badges.
+	'redirectBadgeItems' => [],
 
 	// Number of seconds for which data output on Special:EntityData should be cached.
 	// Note: keep that low, because such caches cannot always be purged easily.
@@ -271,6 +271,9 @@ return [
 	'searchIndexPropertiesExclude' => [],
 	// List of properties that, if in a qualifier, will be used for indexing quantities
 	'searchIndexQualifierPropertiesForQuantity' => [],
+
+	// Search profiles available in wbsearchentities & query+wbsearch
+	'searchProfiles' => [ 'default' => null ],
 
 	// DB group to use in dump maintenance scripts. Defaults to "dump", per T147169.
 	'dumpDBDefaultGroup' => 'dump',

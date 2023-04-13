@@ -38,7 +38,6 @@
 	"wikieditor-toolbar-tool-link-int-target-status-notexists": "Ta stran v projektu {{SITENAME}} ne obstaja",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "Navedeni naslov ni veljaven",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "Zunanja povezava",
-	"wikieditor-toolbar-tool-link-int-target-status-loading": "Preverjanje obstoja strani ...",
 	"wikieditor-toolbar-tool-link-int-target-status-disambig": "Ta stran ni stran z vsebino, ampak seznam tem s podobnimi imeni",
 	"wikieditor-toolbar-tool-link-int-invalid": "Navedeni naslov ni veljaven.",
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "Navedeni URL izgleda kot povezava na drugo vikistran. Ali jo želite narediti notranjo povezavo?",
@@ -125,7 +124,7 @@
 	"wikieditor-toolbar-tool-replace-button-replace": "Zamenjaj",
 	"wikieditor-toolbar-tool-replace-button-replaceall": "Zamenjaj vse",
 	"wikieditor-toolbar-tool-replace-close": "Zapri",
-	"wikieditor-toolbar-tool-replace-nomatch": "Vaše iskanje se ne ujema z ničemer.",
+	"wikieditor-toolbar-tool-replace-nomatch": "Vaše iskanje se ne ujema z ničimer.",
 	"wikieditor-toolbar-tool-replace-success": "{{PLURAL:$1|Opravljena $1 zamenjava|Opravljeni $1 zamenjavi|Opravljene $1 zamenjave|Opravljenih $1 zamenjav}}.",
 	"wikieditor-toolbar-tool-replace-emptysearch": "Za iskanje niste vnesli ničesar.",
 	"wikieditor-toolbar-tool-replace-invalidregex": "Običajni izraz, ki ste ga vnesli, je neveljaven: $1",
@@ -196,5 +195,14 @@
 	"wikieditor-toolbar-help-content-indent-syntax": "Navadno besedilo<br />:Zamaknjeno besedilo<br />::Še bolj zamaknjeno besedilo",
 	"wikieditor-toolbar-help-content-indent-result": "Navadno besedilo <dl><dd> Zamaknjeno besedilo <dl><dd> Še bolj zamaknjeno besedilo </dd></dl></dd></dl>",
 	"tag-wikieditor-description": "Urejanje, opravljeno z [[mw:Special:MyLanguage/Extension:WikiEditor|VikiUrejevalnikom]] (urejevalnik vikibesedila 2010)",
-	"wikieditor-realtimepreview-preview": "Predogled"
+	"wikieditor-realtimepreview-preview": "Predogled",
+	"wikieditor-realtimepreview-error": "Predogled se ne nalaga",
+	"wikieditor-realtimepreview-reload": "Naloži znova",
+	"wikieditor-realtimepreview-beta-label": "Sprotni predogled",
+	"wikieditor-realtimepreview-beta-desc": "V [[mw:Special:MyLanguage/Extension:WikiEditor|Urejevalniku 2010]] si oglejte, kako bo vikibesedilo prikazano bralcem.",
+	"wikieditor-realtimepreview-reload-title": "Znova naloži podokno s sprotnim predogledom",
+	"wikieditor-realtimepreview-manual": "Za ročno predogledovanje svojih urejanj stran zdaj znova naložite.",
+	"wikieditor-realtimepreview-onboarding-title": "Sprotni predogled",
+	"wikieditor-realtimepreview-onboarding-body": "Ogledujte si sproti, kako bodo vaša urejanja prikazana bralcem.",
+	"wikieditor-realtimepreview-onboarding-button": "V redu, razumem"
 }

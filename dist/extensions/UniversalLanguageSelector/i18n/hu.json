@@ -75,5 +75,10 @@
 	"ext-uls-setlang-heading": "Felületnyelv módosítása?",
 	"ext-uls-setlang-accept": "Változtatás elfogadása",
 	"ext-uls-setlang-loading": "Alkalmazás…",
-	"ext-uls-setlang-cancel": "Elutasítás"
+	"ext-uls-setlang-cancel": "Elutasítás",
+	"ext-uls-actions-menu-language-settings-item-label": "Nyelvi beállítások megnyitása",
+	"ext-uls-empty-state-header": "Még nincsenek nyelvek",
+	"ext-uls-empty-state-desc": "Egyelőre nem állnak rendelkezésre nyelvek",
+	"ext-uls-empty-state-header-actions-available": "Még nincsenek nyelvek. Hozzáadsz egy újat?",
+	"ext-uls-empty-state-desc-actions-available": "Tedd elérhetővé a tartalmat több nyelven."
 }

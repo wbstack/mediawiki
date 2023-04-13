@@ -248,7 +248,7 @@ class SpecialNewItem extends SpecialNewEntity {
 	/**
 	 * @see SpecialNewEntity::getLegend
 	 *
-	 * @return string|Message $msg Message key or Message object
+	 * @return string|Message Message key or Message object
 	 */
 	protected function getLegend() {
 		return $this->msg( 'wikibase-newitem-fieldset' );
@@ -260,7 +260,7 @@ class SpecialNewItem extends SpecialNewEntity {
 	 * @return string[]
 	 */
 	protected function getWarnings() {
-		if ( $this->getUser()->isAnon() ) {
+		if ( !$this->getUser()->isRegistered() ) {
 			return [
 				$this->msg( 'wikibase-anonymouseditwarning', $this->msg( 'wikibase-entity-item' ) )->parse(),
 			];

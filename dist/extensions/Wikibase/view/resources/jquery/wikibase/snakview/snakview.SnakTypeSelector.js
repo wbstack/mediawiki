@@ -66,7 +66,7 @@
 			.on( 'click.' + widgetName, function ( event ) {
 				// don't show menu if selector is disabled!
 				// otherwise, simply toggle menu's visibility
-				// TODO: Store visiblity in model
+				// TODO: Store visibility in model
 				// eslint-disable-next-line no-jquery/no-sizzle
 				if ( self.options.disabled || $menu.is( ':visible' ) ) {
 					$menu.hide();
@@ -80,14 +80,14 @@
 
 				// close the menu when clicking, regardless of whether the click is performed on the
 				// menu itself or outside of it:
-				var degrade = function ( event ) {
-					if ( event.target !== self.element[ 0 ] ) {
+				var degrade = function ( ev ) {
+					if ( ev.target !== self.element[ 0 ] ) {
 						$menu.hide();
 						self.element.removeClass( 'ui-state-active' );
 					}
 					self._unbindGlobalListenersFn();
 				};
-				var repositionMenu = function ( event ) {
+				var repositionMenu = function ( ev ) {
 					self.repositionMenu();
 				};
 				// also make this available for destroy() function!

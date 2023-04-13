@@ -2,6 +2,21 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230411-1
+- Update to MediaWiki 1.39.3
+
+## 1.39-7.4-20230411-0
+- Fix OAuth for QuickStatements
+
+## 1.39-7.4-20230405-0
+- Temporary fix to resolve Echo's migration errors
+
+## 1.39-7.4-20230328-0
+- Update to MediaWiki 1.39
+
+## 1.38-7.4-20230323-0
+- Set the timeout for MediaWiki updates to 1hr
+
 ## 1.38-7.4-20230321-0
 - Add missing Wikibase submodules
 

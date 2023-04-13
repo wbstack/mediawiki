@@ -99,7 +99,7 @@ class AccountConfirmSubmission {
 	protected function rejectRequest( IContextSource $context ) {
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
-		$dbw->startAtomic( __METHOD__ );
+		$dbw->startAtomic( __METHOD__, $dbw::ATOMIC_CANCELABLE );
 
 		$ok = $this->accountReq->markRejected( $this->admin, wfTimestampNow(), $this->reason );
 		if ( $ok ) {
@@ -119,7 +119,7 @@ class AccountConfirmSubmission {
 				$emailBody
 			);
 			if ( !$result->isOk() ) {
-				$lbFactory->rollbackPrimaryChanges( __METHOD__ );
+				$dbw->cancelAtomic( __METHOD__ );
 				return [
 					'accountconf_mailerror',
 					$context->msg( 'mailerror' )->rawParams(
@@ -157,12 +157,12 @@ class AccountConfirmSubmission {
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
-		$dbw->startAtomic( __METHOD__ );
+		$dbw->startAtomic( __METHOD__, $dbw::ATOMIC_CANCELABLE );
 
 		# If not already held or deleted, mark as held
 		$ok = $this->accountReq->markHeld( $this->admin, wfTimestampNow(), $this->reason );
 		if ( !$ok ) { // already held or deleted?
-			$lbFactory->rollbackPrimaryChanges( __METHOD__ );
+			$dbw->cancelAtomic( __METHOD__ );
 			return [
 				'accountconf_canthold',
 				$context->msg( 'confirmaccount-canthold' )->escaped(),
@@ -178,7 +178,7 @@ class AccountConfirmSubmission {
 			)->inContentLanguage()->text()
 		);
 		if ( !$result->isOk() ) {
-			$lbFactory->rollbackPrimaryChanges( __METHOD__ );
+			$dbw->cancelAtomic( __METHOD__ );
 			return [
 				'accountconf_mailerror',
 				$context->msg( 'mailerror' )->rawParams(
@@ -226,7 +226,7 @@ class AccountConfirmSubmission {
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
-		$dbw->startAtomic( __METHOD__ );
+		$dbw->startAtomic( __METHOD__, $dbw::ATOMIC_CANCELABLE );
 
 		# Grant any necessary rights (exclude blank or dummy groups)
 		$group = self::getGroupFromType( $this->type );
@@ -249,7 +249,7 @@ class AccountConfirmSubmission {
 				$triplet = [ $oldPath, 'public', $pathRel ];
 				$status = $repoNew->storeBatch( [ $triplet ] ); // copy!
 				if ( !$status->isOK() ) {
-					$lbFactory->rollbackPrimaryChanges( __METHOD__ );
+					$dbw->cancelAtomic( __METHOD__ );
 					return [
 						'accountconf_copyfailed',
 						$context->getOutput()->parseAsInterface( $status->getWikiText() ),
@@ -257,7 +257,6 @@ class AccountConfirmSubmission {
 					];
 				}
 			}
-			$acd_id = $dbw->nextSequenceValue( 'account_credentials_acd_id_seq' );
 			# Move request data into a separate table
 			$dbw->insert( 'account_credentials',
 				[
@@ -278,8 +277,7 @@ class AccountConfirmSubmission {
 					'acd_registration' => $dbw->timestamp( $accReq->getRegistration() ),
 					'acd_accepted' => $dbw->timestamp(),
 					'acd_user' => $this->admin->getID(),
-					'acd_comment' => $this->reason,
-					'acd_id' => $acd_id
+					'acd_comment' => $this->reason
 				],
 				__METHOD__
 			);
@@ -410,9 +408,10 @@ class AccountConfirmSubmission {
 
 		# Create userpage!
 		if ( $body !== '' ) {
-			$article = new WikiPage( $user->getUserPage() );
-			$article->doEditContent(
+			$article = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $user->getUserPage() );
+			$article->doUserEditContent(
 				ContentHandler::makeContent( $body, $article->getTitle() ),
+				$this->admin,
 				wfMessage( 'confirmaccount-summary' )->inContentLanguage()->text(),
 				EDIT_MINOR
 			);
@@ -428,13 +427,12 @@ class AccountConfirmSubmission {
 				? wfMessage( 'confirmaccount-welc' )->text()
 				: $msgObj->text(); // custom message
 			# Add user welcome message!
-			$article = new WikiPage( $user->getTalkPage() );
-			$article->doEditContent(
+			$article = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $user->getTalkPage() );
+			$article->doUserEditContent(
 				ContentHandler::makeContent( "{$welcome} ~~~~", $article->getTitle() ),
+				$this->admin,
 				wfMessage( 'confirmaccount-wsum' )->inContentLanguage()->text(),
-				EDIT_MINOR,
-				false,
-				$this->admin
+				EDIT_MINOR
 			);
 		}
 	}

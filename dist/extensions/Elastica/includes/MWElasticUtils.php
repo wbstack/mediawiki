@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\Elastica;
 use Elastica\Client;
 use Elastica\Index;
 use Elastica\Query;
-use Elastica\Query\Ids;
 use Elastica\Task;
 use Elasticsearch\Endpoints\Cluster\Health;
 use Exception;
@@ -286,23 +285,13 @@ class MWElasticUtils {
 		return $response->getData()['cluster_name'];
 	}
 
-	private const METASTORE_INDEX_NAME = 'mw_cirrus_metastore';
-	private const ALL_INDEXES_FROZEN_NAME = 'freeze-everything';
-
 	/**
 	 * @param Client $client
 	 * @return bool True when no writes should be sent via $client
+	 * @deprecated (always returns false)
 	 */
 	public static function isFrozen( Client $client ) {
-		// TODO: This should be a hook that cirrus implements to tell
-		// others to not try to write to a cluster.
-		$ids = ( new Ids() )
-			->addId( self::ALL_INDEXES_FROZEN_NAME );
-		$resp = $client
-			->getIndex( self::METASTORE_INDEX_NAME )
-			->search( Query::create( $ids ) );
-
-		return $resp->count() > 0;
+		return false;
 	}
 }
 

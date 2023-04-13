@@ -33,6 +33,7 @@ import EventEmittingButton from '@/presentation/components/EventEmittingButton.v
 export default defineComponent( {
 	name: 'ThankYou',
 	components: { EventEmittingButton },
+	emits: [ 'opened-reference-edit-on-repo' ],
 	props: {
 		/**
 		 * The link to continue editing on the repository if desired
@@ -51,6 +52,7 @@ export default defineComponent( {
 			this.$emit( 'opened-reference-edit-on-repo' );
 		},
 	},
+	compatConfig: { MODE: 3 },
 } );
 </script>
 

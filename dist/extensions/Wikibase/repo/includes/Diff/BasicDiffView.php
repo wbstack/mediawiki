@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Diff;
 
 use Diff\DiffOp\Diff\Diff;
@@ -9,6 +11,7 @@ use Diff\DiffOp\DiffOpChange;
 use Diff\DiffOp\DiffOpRemove;
 use Html;
 use MWException;
+use WordLevelDiff;
 
 /**
  * Class for generating views of DiffOp objects.
@@ -38,10 +41,8 @@ class BasicDiffView implements DiffView {
 
 	/**
 	 * Builds and returns the HTML to represent the Diff.
-	 *
-	 * @return string
 	 */
-	public function getHtml() {
+	public function getHtml(): string {
 		return $this->generateOpHtml( $this->path, $this->diff );
 	}
 
@@ -66,15 +67,28 @@ class BasicDiffView implements DiffView {
 			if ( $op->getType() === 'add' ) {
 				/** @var DiffOpAdd $op */
 				'@phan-var DiffOpAdd $op';
-				$html .= $this->generateChangeOpHtml( null, $op->getNewValue(), $path );
+				$html .= $this->generateHtmlDiffTableRow(
+					null,
+					$this->getAddedLine( $op->getNewValue() )
+				);
 			} elseif ( $op->getType() === 'remove' ) {
 				/** @var DiffOpRemove $op */
 				'@phan-var DiffOpRemove $op';
-				$html .= $this->generateChangeOpHtml( $op->getOldValue(), null, $path );
+				$html .= $this->generateHtmlDiffTableRow(
+					$this->getDeletedLine( $op->getOldValue() ),
+					null
+				 );
 			} elseif ( $op->getType() === 'change' ) {
 				/** @var DiffOpChange $op */
 				'@phan-var DiffOpChange $op';
-				$html .= $this->generateChangeOpHtml( $op->getOldValue(), $op->getNewValue(), $path );
+				$wordLevelDiff = new WordLevelDiff(
+					[ $op->getOldValue() ],
+					[ $op->getNewValue() ]
+				);
+				$html .= $this->generateHtmlDiffTableRow(
+					$wordLevelDiff->orig()[0],
+					$wordLevelDiff->closing()[0]
+				 );
 			} else {
 				throw new MWException( 'Invalid diffOp type' );
 			}
@@ -93,74 +107,46 @@ class BasicDiffView implements DiffView {
 	}
 
 	/**
-	 * Generates HTML for an change diffOp
-	 *
-	 * @param string|null $oldValue
-	 * @param string|null $newValue
-	 * @param string[] $path
-	 *
-	 * @return string
+	 * Generates an HTML table row for a change diffOp
+	 * given HTML snippets representing old and new
+	 * sides of the Diff
 	 */
-	protected function generateChangeOpHtml( $oldValue, $newValue, array $path ) {
-		//TODO: use WordLevelDiff!
+	protected function generateHtmlDiffTableRow( ?string $oldHtml, ?string $newHtml ): string {
 		$html = Html::openElement( 'tr' );
-		if ( $oldValue !== null ) {
+		if ( $oldHtml !== null ) {
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-marker', 'data-marker' => '−' ] );
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-deletedline' ],
-				Html::rawElement( 'div', [], $this->getDeletedLine( $oldValue, $path ) ) );
+				Html::rawElement( 'div', [], $oldHtml ) );
 		}
-		if ( $newValue !== null ) {
-			if ( $oldValue === null ) {
+		if ( $newHtml !== null ) {
+			if ( $oldHtml === null ) {
 				$html .= Html::rawElement( 'td', [ 'colspan' => '2' ], '&nbsp;' );
 			}
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-marker', 'data-marker' => '+' ] );
 			$html .= Html::rawElement( 'td', [ 'class' => 'diff-addedline' ],
-				Html::rawElement( 'div', [], $this->getAddedLine( $newValue, $path ) ) );
+				Html::rawElement( 'div', [], $newHtml ) );
 		}
 		$html .= Html::closeElement( 'tr' );
 
 		return $html;
 	}
 
-	/**
-	 * @param string $value
-	 * @param string[] $path
-	 *
-	 * @return string
-	 */
-	private function getDeletedLine( $value, array $path ) {
-		return $this->getChangedLine( 'del', $value, $path );
+	private function getDeletedLine( string $value ): string {
+		return $this->getChangedLine( 'del', $value );
 	}
 
-	/**
-	 * @param string $value
-	 * @param string[] $path
-	 *
-	 * @return string
-	 */
-	private function getAddedLine( $value, array $path ) {
-		return $this->getChangedLine( 'ins', $value, $path );
+	private function getAddedLine( string $value ): string {
+		return $this->getChangedLine( 'ins', $value );
 	}
 
-	/**
-	 * @param string $tag
-	 * @param string $value
-	 * @param string[] $path
-	 *
-	 * @return string
-	 */
-	private function getChangedLine( $tag, $value, array $path ) {
+	private function getChangedLine( string $tag, string $value ): string {
 		return Html::element( $tag, [ 'class' => 'diffchange diffchange-inline' ], $value );
 	}
 
 	/**
 	 * Generates HTML for the header of the diff operation
-	 *
-	 * @param string $name
-	 *
-	 * @return string
 	 */
-	protected function generateDiffHeaderHtml( $name ) {
+	protected function generateDiffHeaderHtml( string $name ): string {
 		$html = Html::openElement( 'tr' );
 		$html .= Html::element( 'td', [ 'colspan' => '2', 'class' => 'diff-lineno' ], $name );
 		// @phan-suppress-next-line PhanPluginDuplicateAdjacentStatement

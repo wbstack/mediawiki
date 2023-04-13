@@ -1,11 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"AnakngAraw",
 			"GinawaSaHapon",
-			"Sky Harbor",
 			"Ianlopez1115",
-			"Amire80",
+			"Sky Harbor",
 			"Jojit fb"
 		]
 	},
@@ -23,6 +23,8 @@
 	"vector-languages": "Mga wika",
 	"vector-language-button-aria-label": "Pumunta sa isang artikulo na nakasulat sa ibang wika. Mayroon ito sa $1 (na) wika",
 	"vector-language-button-label": "{{PLURAL:$1|$1 wika|$1 (na) wika}}",
+	"vector-no-language-button-label": "Magdagdag ng wika",
+	"vector-no-language-button-aria-label": "Mayroon lamang ang artikulong ito sa wikang ito. Idagdag ang artikulo sa ibang mga wika",
 	"vector-language-redirect-to-top": "Sa {{SITENAME}} na ito, ang mga link ng wika ay nasa itaas ng pahina sa may bandang pamagat ng artikulo. [[#p-lang-btn|Pumunta sa itaas]].",
 	"vector-language-variant-switcher-label": "Ibahin ang baryante o variant ng wika",
 	"vector-action-addsection": "Magdagdag ng paksa",
@@ -41,11 +43,17 @@
 	"vector-jumptocontent": "Pumunta sa nilalaman",
 	"vector-more-actions": "Higit pa",
 	"vector-search-loader": "Kinakarga ang mga minunungkahing mahahanap",
-	"vector-searchsuggest-containing": "Maghanap ng mga pahina na naglalaman ng <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong>",
+	"vector-searchsuggest-containing": "Maghanap ng mga pahinang may <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Wikipedia:Maligayang pagdating!",
+	"vector-toc-beginning": "Simula",
+	"vector-toc-toggle-button-label": "Ipakita/Itago ang subseksyon na $1",
 	"vector-anon-user-menu-pages": "Mga pahina para sa naka-logout na mga patnugot o editor",
 	"vector-anon-user-menu-pages-learn": "alamin pa",
 	"vector-anon-user-menu-pages-label": "Alamin pa ang tungkol sa pagpapatnugot",
 	"vector-main-menu-tooltip": "Pangunahing pagpipilian",
+	"vector-toc-menu-tooltip": "Talaan ng mga Nilalaman",
+	"vector-toc-collapsible-button-label": "Itago/Ipakita ang talaan ng mga nilalaman",
+	"vector-site-nav-label": "Sayt",
+	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Usapan]]",
 	"tooltip-vector-anon-user-menu-title": "Marami pang pagpipilian"
 }

@@ -105,6 +105,8 @@ $languageNames = [
 	'gmy' => 'Mycenaean Greek',
 	'gom-deva' => 'Goan Konkani (Devanagari script)',
 	'gom-latn' => 'Goan Konkani (Latin script)',
+	# Added to core, T311975.
+	'gpe' => 'Ghanaian Pidgin',
 	# used by Wikidata, T262922
 	'gsw-fr' => 'Alsatian',
 	# Added to core, T286460
@@ -119,6 +121,8 @@ $languageNames = [
 	# used by Wikidata, T155368
 	'hbo' => 'Biblical Hebrew',
 	'hif-latn' => 'Fiji Hindi (Latin script)',
+	# used by Wikispecies, T303379
+	'hts' => 'Hadza',
 	# Missing en translation T256649
 	'hu-formal' => 'Hungarian (formal address)',
 	'hyw' => 'Western Armenian',
@@ -270,6 +274,7 @@ $languageNames = [
 	'rmy' => 'Vlax Romani',
 	'roa-rup' => 'Aromanian',
 	'roa-tara' => 'Tarantino',
+	'rsk' => 'Pannonian Rusyn',
 	'ruq' => 'Megleno-Romanian',
 	'ruq-cyrl' => 'Megleno-Romanian (Cyrillic script)',
 	'ruq-grek' => 'Megleno-Romanian (Greek script)',
@@ -300,11 +305,15 @@ $languageNames = [
 	'skr-arab' => 'Saraiki (Arabic script)',
 	'sr-ec' => 'Serbian (Cyrillic script)',
 	'sr-el' => 'Serbian (Latin script)',
+	# Added to core with T311034
+	'sro' => 'Campidanese Sardinian',
 	# used by Wikidata, added in InitialiseSettings.php
 	'srq' => 'Sirionó',
 	'ssf' => 'Thao',
 	# Missing en translation T256649
 	'sty' => 'Siberian Tatar',
+	# Added to core with T309763
+	'tdd' => 'Tai Nuea',
 	'tg-cyrl' => 'Tajik (Cyrillic script)',
 	'tg-latn' => 'Tajik (Latin script)',
 	'tlb' => 'Tobelo',
@@ -345,7 +354,6 @@ $languageNames = [
 	'yas' => 'Nugunu',
 	# used by Wikidata, T263946
 	'yat' => 'Yambeta',
-	'ydd' => 'Eastern Yiddish',
 	# used by Wikidata, T252198
 	'ykg' => 'Tundra Yukaghir',
 	'zh-classical' => 'Classical Chinese',

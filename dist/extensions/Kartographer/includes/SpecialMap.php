@@ -7,6 +7,7 @@ use Html;
 use Kartographer\Projection\EPSG3857;
 use SpecialPage;
 use Title;
+use UnlistedSpecialPage;
 
 /**
  * Special page that works as a fallback destination for non-JS users
@@ -14,13 +15,13 @@ use Title;
  * URL format: Special:Map/<zoom>/<lat>/<lon>
  * Zoom isn't used anywhere yet.
  */
-class SpecialMap extends SpecialPage {
+class SpecialMap extends UnlistedSpecialPage {
 
 	/**
 	 * @param string $name
 	 */
 	public function __construct( $name = 'Map' ) {
-		parent::__construct( $name, /* $restriction */ '', /* $listed */ false );
+		parent::__construct( $name );
 	}
 
 	/**
@@ -39,7 +40,7 @@ class SpecialMap extends SpecialPage {
 		} else {
 			[ 'lat' => $lat, 'lon' => $lon ] = $coord;
 			$coordText = CoordFormatter::format( $lat, $lon, $this->getLanguage() );
-			list( $x, $y ) = EPSG3857::latLonToPoint( [ $lat, $lon ], 0 );
+			list( $x, $y ) = EPSG3857::latLonToPoint( [ $lat, $lon ] );
 			$markerHtml = Html::element( 'div',
 				[
 					'id' => 'mw-specialMap-marker',

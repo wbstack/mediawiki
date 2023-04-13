@@ -77,7 +77,7 @@
 	"confirmaccount-canthold": "Denne forespørselen er allerede slettet eller på avventning.",
 	"confirmaccount-badaction": "En gyldig handling (godta, avvis, avvent) må angis for å fortsette.",
 	"confirmaccount-mismatched": "Feltet må matche feltet i den opprinnelige kontoforespørselen.",
-	"confirmaccount-mismatched-general": "Det ble bedt om en overstyring av et felt i den opprinnelige kontoforespørselen som ikke er tillatt, eller så var «send passord på epost»-valget ikke satt.",
+	"confirmaccount-mismatched-general": "Det ble bedt om en overstyring av et felt i den opprinnelige kontoforespørselen som ikke er tillatt, eller så var «send passord på e-post»-valget ikke satt.",
 	"confirmaccount-acc": "Kontoforespørsel godkjent;\nopprettet kontoen [[User:$1|$1]].",
 	"confirmaccount-rej": "Kontoforespørsel avvist.",
 	"confirmaccount-viewing": "({{GENDER:$1|undersøkes}} nå av [[User:$1|$1]])",

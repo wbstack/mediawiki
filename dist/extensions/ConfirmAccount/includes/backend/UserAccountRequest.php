@@ -325,40 +325,37 @@ class UserAccountRequest {
 	 */
 	public function insertOn() {
 		$dbw = wfGetDB( DB_PRIMARY );
+		$row = [
+			'acr_name' 			=> strval( $this->name ),
+			'acr_email' 		=> strval( $this->email ),
+			'acr_real_name' 	=> strval( $this->realName ),
+			'acr_registration' 	=> $dbw->timestamp( $this->registration ),
+			'acr_bio' 			=> strval( $this->bio ),
+			'acr_notes' 		=> strval( $this->notes ),
+			'acr_urls' 			=> strval( $this->urls ),
+			'acr_type' 			=> strval( $this->type ),
+			'acr_areas' 		=> self::flattenAreas( $this->areas ),
+			'acr_filename' 		=> isset( $this->fileName )
+				? $this->fileName
+				: null,
+			'acr_storage_key'	=> isset( $this->fileStorageKey )
+				? $this->fileStorageKey
+				: null,
+			'acr_comment' 		=> strval( $this->comment ),
+			'acr_ip' 			=> strval( $this->ip ), // for spam blocking
+			'acr_xff' 			=> strval( $this->xff ), // for spam blocking
+			'acr_agent' 		=> strval( $this->agent ), // for spam blocking
+			'acr_deleted' 		=> (int)$this->deleted,
+			'acr_email_token' 	=> strval( $this->emailToken ), // MD5 of token
+			'acr_email_token_expires' => $dbw->timestamp( $this->emailTokenExpires )
+		];
 		# Allow for some fields to be handled automatically...
-		$acr_id = $this->id !== null
-			? $this->id
-			: $dbw->nextSequenceValue( 'account_requests_acr_id_seq' );
+		if ( $this->id ) {
+			$row['acr_id'] = $this->id;
+		}
 		# Insert into pending requests...
-		$dbw->insert( 'account_requests',
-			[
-				'acr_id' 			=> $acr_id,
-				'acr_name' 			=> strval( $this->name ),
-				'acr_email' 		=> strval( $this->email ),
-				'acr_real_name' 	=> strval( $this->realName ),
-				'acr_registration' 	=> $dbw->timestamp( $this->registration ),
-				'acr_bio' 			=> strval( $this->bio ),
-				'acr_notes' 		=> strval( $this->notes ),
-				'acr_urls' 			=> strval( $this->urls ),
-				'acr_type' 			=> strval( $this->type ),
-				'acr_areas' 		=> self::flattenAreas( $this->areas ),
-				'acr_filename' 		=> isset( $this->fileName )
-					? $this->fileName
-					: null,
-				'acr_storage_key'	=> isset( $this->fileStorageKey )
-					? $this->fileStorageKey
-					: null,
-				'acr_comment' 		=> strval( $this->comment ),
-				'acr_ip' 			=> strval( $this->ip ), // for spam blocking
-				'acr_xff' 			=> strval( $this->xff ), // for spam blocking
-				'acr_agent' 		=> strval( $this->agent ), // for spam blocking
-				'acr_deleted' 		=> (int)$this->deleted,
-				'acr_email_token' 	=> strval( $this->emailToken ), // MD5 of token
-				'acr_email_token_expires' => $dbw->timestamp( $this->emailTokenExpires ),
-			],
-			__METHOD__
-		);
-		$this->id = $acr_id; // set for accessors
+		$dbw->insert( 'account_requests', $row, __METHOD__ );
+		$this->id = $this->id ?: $dbw->insertId(); // set for accessors
 
 		return $this->id;
 	}

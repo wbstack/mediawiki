@@ -29,12 +29,20 @@
 	"AutoloadNamespaces": {
 		"MediaWiki\\StopForumSpam\\": "includes/"
 	},
+	"HookHandlers": {
+		"abusefilter": {
+			"class": "MediaWiki\\StopForumSpam\\AbuseFilterHookHandler"
+		},
+		"hooks": {
+			"class": "MediaWiki\\StopForumSpam\\Hooks"
+		}
+	},
 	"Hooks": {
-		"AbuseFilter-computeVariable": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterComputeVariable",
-		"AbuseFilter-generateUserVars": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterGenerateUserVars",
-		"AbuseFilter-builder": "MediaWiki\\StopForumSpam\\Hooks::abuseFilterBuilder",
-		"getUserPermissionsErrorsExpensive": "MediaWiki\\StopForumSpam\\Hooks::onGetUserPermissionsErrorsExpensive",
-		"OtherBlockLogLink": "MediaWiki\\StopForumSpam\\Hooks::onOtherBlockLogLink"
+		"AbuseFilter-computeVariable": "abusefilter",
+		"AbuseFilter-generateUserVars": "abusefilter",
+		"AbuseFilter-builder": "abusefilter",
+		"getUserPermissionsErrorsExpensive": "hooks",
+		"OtherBlockLogLink": "hooks"
 	},
 	"config": {
 		"SFSReportOnly": {

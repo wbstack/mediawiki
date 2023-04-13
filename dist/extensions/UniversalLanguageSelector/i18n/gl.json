@@ -72,5 +72,11 @@
 	"ext-uls-setlang-heading": "Quere cambiar a lingua da interface?",
 	"ext-uls-setlang-accept": "Aceptar o cambio",
 	"ext-uls-setlang-loading": "Aplicando...",
-	"ext-uls-setlang-cancel": "Non cambiar"
+	"ext-uls-setlang-cancel": "Non cambiar",
+	"ext-uls-actions-menu-header": "Máis opcións",
+	"ext-uls-actions-menu-language-settings-item-label": "Abrir as opcións de lingua",
+	"ext-uls-empty-state-header": "Aínda non hai linguas",
+	"ext-uls-empty-state-desc": "Non hai linguas dispoñibles polo momento",
+	"ext-uls-empty-state-header-actions-available": "Aínda non hai linguas. Quere engadir unha nova?",
+	"ext-uls-empty-state-desc-actions-available": "Faga que o contido estea dispoñible en máis linguas."
 }

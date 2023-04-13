@@ -2,6 +2,7 @@
 
 namespace CirrusSearch\Job;
 
+use CirrusSearch\ClusterSettings;
 use CirrusSearch\Connection;
 use CirrusSearch\DataSender;
 use MediaWiki\Logger\LoggerFactory;
@@ -11,7 +12,8 @@ use Wikimedia\Assert\Assert;
 
 /**
  * Performs writes to elasticsearch indexes with requeuing and an
- * exponential backoff when the indexes being written to are frozen.
+ * exponential backoff (if supported by jobqueue) when the index
+ * writes fail.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,18 +42,40 @@ class ElasticaWrite extends CirrusGenericJob {
 	];
 
 	/**
-	 * @param string $cluster
+	 * @param ClusterSettings $cluster
 	 * @param string $method
 	 * @param array $arguments
 	 * @param array $params
 	 * @return ElasticaWrite
 	 */
-	public static function build( string $cluster, string $method, array $arguments, array $params = [] ) {
+	public static function build( ClusterSettings $cluster, string $method, array $arguments, array $params = [] ) {
 		return new self( [
 			'method' => $method,
 			'arguments' => self::serde( $method, $arguments ),
-			'cluster' => $cluster,
+			'cluster' => $cluster->getName(),
+			// This does not directly partition the jobs, it only provides a value
+			// to use during partitioning. The job queue must be separately
+			// configured to utilize this value.
+			'jobqueue_partition' => self::partitioningKey( $cluster ),
 		] + $params );
+	}
+
+	/**
+	 * Generate a cluster specific partitioning key
+	 *
+	 * Some job queue implementations, such as cpjobqueue, can partition the
+	 * execution of jobs based on a parameter of the job. By default we
+	 * provide one partition per cluster, but allow to configure multiple
+	 * partitions per cluster if more throughput is necessary. Within a
+	 * single cluster jobs are distributed randomly.
+	 *
+	 * @param ClusterSettings $settings
+	 * @return string A value suitable for partitioning jobs per-cluster
+	 */
+	private static function partitioningKey( ClusterSettings $settings ): string {
+		$numPartitions = $settings->getElasticaWritePartitionCount();
+		$partition = mt_rand() % $numPartitions;
+		return "{$settings->getName()}-{$partition}";
 	}
 
 	private static function serde( $method, array $arguments, $serialize = true ) {
@@ -148,55 +172,13 @@ class ElasticaWrite extends CirrusGenericJob {
 		}
 
 		$ok = true;
-		if ( $status->hasMessage( 'cirrussearch-indexes-frozen' ) ) {
-			$action = $this->requeueRetry( $conn ) ? "Requeued" : "Dropped";
-			$this->setLastError( "ElasticaWrite job delayed, cluster frozen: ${action}" );
-		} elseif ( !$status->isOK() ) {
+		if ( !$status->isOK() ) {
 			$action = $this->requeueError( $conn ) ? "Requeued" : "Dropped";
 			$this->setLastError( "ElasticaWrite job failed: ${action}" );
 			$ok = false;
 		}
 
 		return $ok;
-	}
-
-	/**
-	 * Re-queue job that is frozen, or drop the job if it has
-	 * been frozen for too long.
-	 *
-	 * @param Connection $conn
-	 * @return bool True when the job has been queued
-	 */
-	private function requeueRetry( Connection $conn ) {
-		$diff = time() - $this->params['createdAt'];
-		$dropTimeout = $conn->getSettings()->getDropDelayedJobsAfter();
-		if ( $diff > $dropTimeout ) {
-			LoggerFactory::getInstance( 'CirrusSearchChangeFailed' )->warning(
-				"Dropping delayed ElasticaWrite job for DataSender::{method} in cluster {cluster} after waiting {diff}s",
-				[
-					'method' => $this->params['method'],
-					'cluster' => $conn->getClusterName(),
-					'diff' => $diff,
-				]
-			);
-			return false;
-		} else {
-			$delay = $this->backoffDelay( $this->params['retryCount'] );
-			$params = $this->params;
-			$params['retryCount']++;
-			unset( $params['jobReleaseTimestamp'] );
-			$params += self::buildJobDelayOptions( self::class, $delay );
-			$job = new self( $params );
-			LoggerFactory::getInstance( 'CirrusSearch' )->debug(
-				"ElasticaWrite job reported frozen on cluster {cluster}. Requeueing job with delay of {delay}s",
-				[
-					'cluster' => $conn->getClusterName(),
-					'delay' => $delay
-				]
-			);
-			MediaWikiServices::getInstance()->getJobQueueGroup()->push( $job );
-			return true;
-		}
 	}
 
 	/**

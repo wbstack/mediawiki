@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"1917 Ekim Devrimi",
+			"Amire80",
 			"Asmen",
 			"Calak",
 			"Dılmıc",
@@ -12,8 +13,7 @@
 			"Kumkumuk",
 			"Mirzali",
 			"Orbot707",
-			"Velg",
-			"Amire80"
+			"Velg"
 		]
 	},
 	"skinname-vector": "Vektor",
@@ -25,6 +25,7 @@
 	"vector-action-toggle-sidebar": "Toggle sidebar",
 	"vector-languages": "Zıwani",
 	"vector-language-button-label": "{{PLURAL:$1|$1 zıwan|$1 zıwani}}",
+	"vector-no-language-button-label": "Zıwanan cı ke",
 	"vector-action-addsection": "Mewzu ake",
 	"vector-action-delete": "Bestere",
 	"vector-action-move": "Bıkırışe",
@@ -41,5 +42,5 @@
 	"vector-jumptocontent": "Ravêr zerreki",
 	"vector-more-actions": "Zêde",
 	"vector-search-loader": "Tewsiye cıgeyrayışi bar benê",
-	"vector-searchsuggest-containing": "Pelanê tede <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong> esto, cı geyre"
+	"vector-searchsuggest-containing": "Pelanê tede <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> esto, cı geyre"
 }

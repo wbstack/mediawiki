@@ -2,14 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Andria",
+			"L2212",
 			"Marzedu",
 			"Taxandru",
 			"Uharteko",
-			"Via maxima",
-			"L2212"
+			"Via maxima"
 		]
 	},
+	"vector-languages": "Limbas",
 	"vector-language-button-label": "{{PLURAL:$1|$1 limba|$1 limbas}}",
+	"vector-no-language-button-label": "Annanghe limbas",
 	"vector-action-addsection": "Agiunghe cuntierra",
 	"vector-action-delete": "Burra",
 	"vector-action-move": "Move",
@@ -20,5 +22,6 @@
 	"vector-view-history": "Càstia istòria",
 	"vector-view-view": "Leghe",
 	"vector-view-viewsource": "Càstia mitza",
-	"vector-more-actions": "Prus"
+	"vector-more-actions": "Prus",
+	"vector-searchsuggest-containing": "Chirca pàginas chi cuntèngiant <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>"
 }

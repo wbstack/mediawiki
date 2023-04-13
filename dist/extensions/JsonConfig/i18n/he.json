@@ -58,6 +58,7 @@
 	"jsonconfig-license-name-dl-de-zero-2.0": "רישיון נתונים גרמניה – אפס – גרסה 2.0",
 	"jsonconfig-license-name-dl-de-by-1.0": "רישיון נתונים גרמניה – ייחוס – גרסה 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "רישיון נתונים גרמניה – ייחוס – גרסה 2.0",
+	"jsonconfig-license-name-GeoNutzV": "רישיון נתונים גאוגרפיים של גרמניה",
 	"jsonconfig-license-copyrightwarning": "שמירת השינויים מהווה את הסכמתך ל[https://foundation.wikimedia.org/wiki/Terms_of_Use תנאי השימוש] ואת הסכמתך הבלתי־חוזרת לשחרר את תרומתך בכפוף לרישיון [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-copyrightwarning-license-unset": "שמירת השינויים מהווה את הסכמתך ל[https://foundation.wikimedia.org/wiki/Terms_of_Use תנאי השימוש] ואת הסכמתך הבלתי־חוזרת לשחרר את תרומתך בהתאם לרישיון המצוין בשדה <code>licence</code>.",
 	"jsonconfig-license-notice": "'''הערה:''' עריכת הדף הזה מהווה את הסכמתך לשחרור התרומה שלך בכפוף לרישיון [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",

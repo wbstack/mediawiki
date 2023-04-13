@@ -15,6 +15,10 @@ var wikivoyage = require( './wikivoyage.js' ),
 	articlePath = mw.config.get( 'wgArticlePath' ),
 	ControlNearby;
 
+/**
+ * @param {L.Marker} marker
+ * @param {Object} data
+ */
 function prepareMarker( marker, data ) {
 	marker.setIcon( L.mapbox.marker.icon( {
 		'marker-color': 'a2a9b1'
@@ -25,9 +29,14 @@ function prepareMarker( marker, data ) {
 	} );
 }
 
+/**
+ * @param {string} wgPageName
+ * @param {string} thumbnail
+ * @return {string} HTML
+ */
 function createPopupHtml( wgPageName, thumbnail ) {
 	var img = mw.html.element( 'img', {
-			src: NearbyArticles.getConfig( 'thumbPath' ) + thumbnail + '/120px-' + thumbnail.substring( 5 )
+			src: NearbyArticles.getConfig( 'thumbPath' ) + thumbnail + '/120px-' + thumbnail.slice( 5 )
 		} ),
 		link = mw.html.element( 'a', {
 			href: mw.format( articlePath, wgPageName ),
@@ -42,6 +51,16 @@ function createPopupHtml( wgPageName, thumbnail ) {
 	return title + description;
 }
 
+/**
+ * See https://tools.wmflabs.org/wikivoyage/w/data/en-articles.js for an example where this data
+ * comes from.
+ *
+ * @param {number} latitude
+ * @param {number} longitude
+ * @param {string} wgArticle
+ * @param {string} thumbnail
+ * @return {PruneCluster.Marker}
+ */
 function createMarker( latitude, longitude, wgArticle, thumbnail ) {
 	return new pruneClusterLib.PruneCluster.Marker(
 		latitude,

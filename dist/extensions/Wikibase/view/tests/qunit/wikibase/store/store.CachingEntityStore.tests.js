@@ -12,7 +12,7 @@
 
 	QUnit.test( 'Initialize', function ( assert ) {
 		var entityStore = new CachingEntityStore();
-		assert.ok( entityStore.get, 'Entity store has get() method.' );
+		assert.true( entityStore.get instanceof Function, 'Entity store has get() method.' );
 	} );
 
 	QUnit.test( 'get() returns a jQuery promise', function ( assert ) {
@@ -23,7 +23,7 @@
 		var entityStore = new CachingEntityStore( store ),
 			promise = entityStore.get( 'id' );
 
-		assert.ok( promise.done, 'done() method exists.' );
+		assert.true( promise.done instanceof Function, 'done() method exists.' );
 	} );
 
 	QUnit.test( 'upstream store is called', function ( assert ) {
@@ -51,9 +51,7 @@
 		var promise = entityStore.get( 'id' );
 
 		return promise.done( function ( entity ) {
-			var promise = entityStore.get( 'id' );
-
-			return promise.done( function ( entity ) {
+			return entityStore.get( 'id' ).done( function () {
 				sinon.assert.calledOnce( store.get );
 			} );
 		} );

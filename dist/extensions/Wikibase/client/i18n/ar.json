@@ -4,7 +4,9 @@
 			"Abanima",
 			"Ali1",
 			"Asaifm",
+			"Asma",
 			"Azouz.anis",
+			"BAB ZAA",
 			"Basharh",
 			"Forzagreen",
 			"Guycn2",
@@ -25,9 +27,7 @@
 			"ديفيد",
 			"زكريا",
 			"علاء",
-			"محمد أحمد عبد الفتاح",
-			"Asma",
-			"BAB ZAA"
+			"محمد أحمد عبد الفتاح"
 		]
 	},
 	"wikibase-client-desc": "عميل امتداد Wikibase",
@@ -89,7 +89,7 @@
 	"wikibase-error-exceeded-entity-access-limit": "الكثير من كيانات {{WBREPONAME}} يتم الوصول لها.",
 	"wikibase-error-exceeded-referenced-entity-id-limit": "عدد كبير جدا من ادعاءات \"mw.wikibase.getReferencedEntityId\"، فقط ما يصل إلى $2 {{PLURAL:$2|مسموح به}}.",
 	"unconnectedpages": "صفحات غير متصلة بعناصر",
-	"unconnectedpages-summary": "هذه الصفحة تعرض الصفحات التي ليست مرتبطة بعناصر بيانات (في النطاقات التي تدعم العناصر المرتبطة). القائمة مرتبة حسب رقم الصفحة تنازليا، بحيث أن الصفحات الأجدد تعرض أولا.",
+	"unconnectedpages-summary": "تسرد هذه الصفحة الصفحات التي لا تحتوي على عنصر بيانات متصل (في مساحات الأسماء التي تدعم العناصر المتصلة).",
 	"wikibase-unconnectedpages-submit": "اعرض الصفحات",
 	"pageswithbadges": "صفحات بِشارات",
 	"pageswithbadges-summary": "تعرض هذه الصفحة صفحات بِشارات (مثال مقالة جيدة أو مقالة مختارة). القائمة مرتبة حسب رقم الصفحة تنازليا، بحيث أن الصفحات الأجدد تعرض أولا.",

@@ -71,5 +71,10 @@
 	"ext-uls-setlang-heading": "Interfazearen hizkuntza aldatu?",
 	"ext-uls-setlang-accept": "Onartu aldaketa",
 	"ext-uls-setlang-loading": "Aplikatzen...",
-	"ext-uls-setlang-cancel": "Ez aldatu"
+	"ext-uls-setlang-cancel": "Ez aldatu",
+	"ext-uls-actions-menu-language-settings-item-label": "Hizkuntza hobespenak ireki",
+	"ext-uls-empty-state-header": "Oraindik ez dago hizkuntzarik",
+	"ext-uls-empty-state-desc": "Momentuz ez dago hizkuntzarik erabilgarri",
+	"ext-uls-empty-state-header-actions-available": "Oraindik ez dago hizkuntzarik. Berri bat gehitu?",
+	"ext-uls-empty-state-desc-actions-available": "Edukia hizkuntza gehiagotan eskuragarri jarri."
 }

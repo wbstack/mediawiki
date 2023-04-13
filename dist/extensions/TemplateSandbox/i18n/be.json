@@ -2,10 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Artsiom91",
+			"Chadyka",
 			"Macofe",
 			"Mikalai Udodau",
-			"Chadyka",
-			"Tomato Cream"
+			"Tomato Cream",
+			"Maksim L."
 		]
 	},
 	"templatesandbox": "Пясочніца для шаблонаў",
@@ -16,7 +17,7 @@
 	"templatesandbox-prefix-label": "Прэфікс пясочніцы:",
 	"templatesandbox-page-label": "Паказаць старонку:",
 	"templatesandbox-revid-label": "Паказаць версію:",
-	"templatesandbox-text-label": "Паказаць вікі-тэкст:",
+	"templatesandbox-text-label": "Паказаць вікіразметку:",
 	"templatesandbox-submit": "Прагляд",
 	"templatesandbox-title-output": "Пясочніца для шаблонаў: $1",
 	"templatesandbox-editform-legend": "Папярэдні прагляд старонкі з гэтым шаблонам",

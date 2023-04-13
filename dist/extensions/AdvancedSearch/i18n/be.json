@@ -5,7 +5,8 @@
 			"Chadyka",
 			"Da voli",
 			"Maksim L.",
-			"No Sleep till Krupki"
+			"No Sleep till Krupki",
+			"Plaga med"
 		]
 	},
 	"advancedsearch-desc": "Лёгкі доступ да пашыраных магчымасцей пошуку ў [[Special:Search]]",
@@ -41,7 +42,7 @@
 	"advancedsearch-help-filew": ";Апісанне\n:Гэтыя палі дазваляюць вызначыць шырыню файла.\n;Майце на ўвазе\n:* Гэта можа быць ужыта толькі да тых тыпаў файлаў, якія маюць шырыню і вышыню, напрыклад відэа і выявы.\n;Старонка даведкі\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Filemeasures]\n;Сінтаксічны эквівалент у звычайным пошуку\n:Лікі з <code>filew</code> перад імі, напрыклад <code>filew:>800</code>.",
 	"advancedsearch-help-fileh": ";Апісанне\n:Гэтыя палі дазваляюць вызначыць вышыню файла.\n;Майце на ўвазе\n:* Гэта можа быць ужыта толькі да тых тыпаў файлаў, якія маюць шырыню і вышыню, напрыклад відэа і выявы.\n;Старонка даведкі\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Filemeasures]\n;Сінтаксічны эквівалент у звычайным пошуку\n:Лікі з <code>fileh</code> перад імі, напрыклад <code>fileh:>600</code>.",
 	"advancedsearch-help-sort": ";Апісанне\n:Змяняе парадак сартавання ў выніках. Стандартна найбольш рэлевантныя старонкі знаходзіцца ўверсе вынікаў.\n;Старонка даведкі\n: [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Explicit_sort_orders Explicit sort orders]\n;Сінтаксічны эквівалент у звычайным пошуку\n:Гата функцыя не мае ключавога слова, якое можна было б увесці ў полі пошуку, бо яна задаецца праз параметр ва URL-адрасе.",
-	"advancedsearch-placeholder-exact-text": "\"кот кахае казу\"",
+	"advancedsearch-placeholder-exact-text": "\"кот любіць казу\"",
 	"advancedsearch-inlanguage-default": "Выберыце мову",
 	"advancedsearch-filetype-section-types": "Агульныя тыпы файлаў",
 	"advancedsearch-filetype-section-image": "Фарматы выяў",

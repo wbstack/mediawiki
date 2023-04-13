@@ -140,6 +140,7 @@
 	"mobile-frontend-talk-reply": "Subiza",
 	"mobile-frontend-talk-reply-info": "Menya ko igisubizo cyawe kizahita gisinywa n'izina ryawe ry'umukoresha.",
 	"mobile-frontend-talk-topic-error": "Ingingo ntishobora kongerwaho kubera ikosa ritazwi.",
+	"mobile-frontend-talk-topic-error-protected": "Uru rupapuro rwibiganiro rurarinzwe. Ntabwo ufite uburenganzira bwo kongeramo ingingo.",
 	"mobile-frontend-talk-topic-error-permission": "Ingingo ntishobora kongerwaho. Ntabwo ufite uburenganzira bwo guhindura urupapuro.",
 	"mobile-frontend-talk-topic-error-badtoken": "Hariho ikosa kuri seriveri. Guhindura kwawe ntigushoboye kubikwa. Gerageza gusubiramo uru rupapuro.",
 	"mobile-frontend-talk-topic-wait": "Harimo kubikwa ingingo yawe nshya, nyamuneka tegereza.",

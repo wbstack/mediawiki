@@ -144,12 +144,13 @@ class FormSearchEntity extends LexemeSearchEntity {
 		$languageCode,
 		$entityType,
 		$limit,
-		$strictLanguage
+		$strictLanguage,
+		?string $profileContext = null
 	) {
 		// We need to keep the limit since one document can produce several matches.
 		$this->limit = $limit;
 		return parent::getRankedSearchResults( $text, $languageCode, $entityType, $limit,
-			$strictLanguage );
+			$strictLanguage, $profileContext );
 	}
 
 }

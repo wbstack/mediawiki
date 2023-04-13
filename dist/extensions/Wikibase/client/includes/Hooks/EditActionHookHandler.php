@@ -14,11 +14,7 @@ use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikibase\Client\Usage\UsageLookup;
-use Wikibase\DataModel\Entity\EntityIdParser;
-use Wikibase\DataModel\Services\Lookup\TermLookup;
-use Wikibase\DataModel\Services\Term\TermBuffer;
-use Wikibase\Lib\LanguageFallbackChainFactory;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 
 /**
  * Adds the Entity usage data in ActionEdit.
@@ -39,47 +35,31 @@ class EditActionHookHandler implements EditPage__showStandardInputs_optionsHook 
 	private $usageLookup;
 
 	/**
-	 * @var LanguageFallbackLabelDescriptionLookupFactory
+	 * @var FallbackLabelDescriptionLookupFactory
 	 */
 	private $labelDescriptionLookupFactory;
-
-	/**
-	 * @var EntityIdParser
-	 */
-	private $idParser;
 
 	public function __construct(
 		RepoLinker $repoLinker,
 		UsageLookup $usageLookup,
-		LanguageFallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
-		EntityIdParser $idParser
+		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory
 	) {
 		$this->repoLinker = $repoLinker;
 		$this->usageLookup = $usageLookup;
 		$this->labelDescriptionLookupFactory = $labelDescriptionLookupFactory;
-		$this->idParser = $idParser;
 	}
 
 	public static function factory(
-		EntityIdParser $idParser,
-		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
 		RepoLinker $repoLinker,
-		ClientStore $store,
-		TermBuffer $termBuffer,
-		TermLookup $termLookup
+		ClientStore $store
 	): self {
 		$usageLookup = $store->getUsageLookup();
-		$labelDescriptionLookupFactory = new LanguageFallbackLabelDescriptionLookupFactory(
-			$languageFallbackChainFactory,
-			$termLookup,
-			$termBuffer
-		);
 
 		return new self(
 			$repoLinker,
 			$usageLookup,
-			$labelDescriptionLookupFactory,
-			$idParser
+			$labelDescriptionLookupFactory
 		);
 	}
 

@@ -1,4 +1,4 @@
-/*! jquery.ime - v0.2.0+20220307
+/*! jquery.ime - v0.2.0+20220805
 * https://github.com/wikimedia/jquery.ime
 * Copyright (c) 2022 Santhosh Thottingal; License: (GPL-2.0-or-later OR MIT) */
 ( function ( $ ) {
@@ -1778,6 +1778,10 @@
 			name: 'इनस्क्रिप्ट २',
 			source: 'rules/brx/brx-inscript2.js'
 		},
+		'bwr-tilde': {
+			name: 'Bura tilde',
+			source: 'rules/bwr/bwr-tilde.js'
+		},
 		'byn-geezim': {
 			name: 'ብሊን',
 			source: 'rules/byn/byn-geezim.js'
@@ -1841,6 +1845,10 @@
 		'ee-tilde': {
 			name: 'Ewe Tilde',
 			source: 'rules/ee/ee-tilde.js'
+		},
+		'efi-tilde': {
+			name: 'Efik - tilde',
+			source: 'rules/efi/efi-tilde.js'
 		},
 		'el-kbd': {
 			name: 'Τυπική πληκτρολόγιο',
@@ -2010,6 +2018,10 @@
 			name: 'Venjuleg eyðublöð',
 			source: 'rules/is/is-normforms.js'
 		},
+		'ish-tilde': {
+			name: 'Esan Awain tilde',
+			source: 'rules/ish/ish-tilde.js'
+		},
 		'jv-transliteration': {
 			name: 'Transliteration',
 			source: 'rules/jv/jv-transliteration.js'
@@ -2065,6 +2077,10 @@
 		'kn-transliteration': {
 			name: 'ಲಿಪ್ಯಂತರಣ',
 			source: 'rules/kn/kn-transliteration.js'
+		},
+		'kr-tilde': {
+			name: 'Kanuri tilde',
+			source: 'rules/kr/kr-tilde.js'
 		},
 		'ky-cyrl-alt': {
 			name: 'Кыргыз Alt',
@@ -2263,6 +2279,10 @@
 		'nus-tilde': {
 			name: 'Thok Naath tilde',
 			source: 'rules/nus/nus-tilde.js'
+		},
+		'ny-tilde': {
+			name: 'Chichewa / Nyanja tilde',
+			source: 'rules/ny/ny-tilde.js'
 		},
 		'or-inscript': {
 			name: 'ଇନସ୍କ୍ରିପ୍ଟ',
@@ -2472,6 +2492,14 @@
 			name: 'ትግረ',
 			source: 'rules/tig/tig-geezim.js'
 		},
+		'tn-tilde': {
+			name: 'Setswana tilde',
+			source: 'rules/tn/tn-tilde.js'
+		},
+		'tum-tilde': {
+			name: 'ChiTumbuka tilde',
+			source: 'rules/tum/tum-tilde.js'
+		},
 		'udm-alt': {
 			name: 'Удмурт ALT',
 			source: 'rules/udm/udm-alt.js'
@@ -2632,6 +2660,10 @@
 			autonym: 'bulu',
 			inputmethods: [ 'mul-cm' ]
 		},
+		bwr: {
+			autonym: 'bura',
+			inputmethods: [ 'bwr-tilde' ]
+		},
 		byn: {
 			autonym: 'ብሊን',
 			inputmethods: [ 'byn-geezim' ]
@@ -2683,6 +2715,10 @@
 		ee: {
 			autonym: 'Èʋegbe',
 			inputmethods: [ 'ee-tilde' ]
+		},
+		efi: {
+			autonym: 'efịk',
+			inputmethods: [ 'efi-tilde' ]
 		},
 		el: {
 			autonym: 'Ελληνικά',
@@ -2780,6 +2816,10 @@
 			autonym: 'Íslenska',
 			inputmethods: [ 'is-normforms' ]
 		},
+		ish: {
+			autonym: 'awain',
+			inputmethods: [ 'ish-tilde' ]
+		},
 		jv: {
 			autonym: 'ꦧꦱꦗꦮ',
 			inputmethods: [ 'jv-transliteration' ]
@@ -2823,6 +2863,10 @@
 		kn: {
 			autonym: 'ಕನ್ನಡ',
 			inputmethods: [ 'kn-transliteration', 'kn-inscript', 'kn-kgp', 'kn-inscript2' ]
+		},
+		kr: {
+			autonym: 'kanuri',
+			inputmethods: [ 'kr-tilde' ]
 		},
 		ks: {
 			autonym: 'कॉशुर / کٲشُر',
@@ -2952,6 +2996,10 @@
 			autonym: 'Thok Naath',
 			inputmethods: [ 'nus-tilde' ]
 		},
+		ny: {
+			autonym: 'Chichewa',
+			inputmethods: [ 'ny-tilde' ]
+		},
 		or: {
 			autonym: 'ଓଡ଼ିଆ',
 			inputmethods: [ 'or-phonetic', 'or-transliteration', 'or-inscript', 'or-inscript2', 'or-lekhani', 'or-OdiScript' ]
@@ -3063,6 +3111,14 @@
 		tkr: {
 			autonym: 'цӀаӀхна миз',
 			inputmethods: [ 'cyrl-palochka' ]
+		},
+		tn: {
+			autonym: 'Setswana',
+			inputmethods: [ 'tn-tilde' ]
+		},
+		tum: {
+			autonym: 'ChiTumbuka',
+			inputmethods: [ 'tum-tilde' ]
 		},
 		tw: {
 			autonym: 'Twi',

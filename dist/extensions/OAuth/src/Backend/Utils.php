@@ -2,10 +2,18 @@
 
 namespace MediaWiki\Extension\OAuth\Backend;
 
+use AutoCommitUpdate;
+use CentralIdLookup;
+use DeferredUpdates;
 use EchoEvent;
 use MediaWiki\Extension\OAuth\Lib\OAuthSignatureMethod_HMAC_SHA1;
 use MediaWiki\MediaWikiServices;
+use MWException;
+use ObjectCache;
+use RequestContext;
+use Title;
 use User;
+use WebRequest;
 use WikiMap;
 use Wikimedia\Rdbms\DBConnRef;
 use Wikimedia\Rdbms\IDatabase;
@@ -40,7 +48,7 @@ class Utils {
 	 * @return DBConnRef
 	 */
 	public static function getCentralDB( $index ) {
-		global $wgMWOAuthCentralWiki, $wgMWOAuthReadOnly;
+		global $wgMWOAuthReadOnly;
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
@@ -48,9 +56,13 @@ class Utils {
 		if ( $index === DB_REPLICA && $lbFactory->hasOrMadeRecentPrimaryChanges() ) {
 			$index = DB_PRIMARY;
 		}
+		$wikiId = self::getCentralWiki();
+		if ( WikiMap::isCurrentWikiId( $wikiId ) ) {
+			$wikiId = false;
+		}
 
-		$db = $lbFactory->getMainLB( $wgMWOAuthCentralWiki )->getConnectionRef(
-			$index, [], $wgMWOAuthCentralWiki );
+		$db = $lbFactory->getMainLB( $wikiId )->getConnectionRef(
+			$index, [], $wikiId );
 		$db->daoReadOnly = $wgMWOAuthReadOnly;
 		return $db;
 	}
@@ -63,7 +75,19 @@ class Utils {
 		global $wgSessionCacheType;
 
 		$sessionCacheType = $wgMWOAuthSessionCacheType ?? $wgSessionCacheType;
-		return \ObjectCache::getInstance( $sessionCacheType );
+		return ObjectCache::getInstance( $sessionCacheType );
+	}
+
+	/**
+	 * Get the cache type for OAuth 1.0 nonces
+	 * @return \BagOStuff
+	 */
+	public static function getNonceCache() {
+		global $wgMWOAuthNonceCacheType, $wgMWOAuthSessionCacheType, $wgSessionCacheType;
+
+		$cacheType = $wgMWOAuthNonceCacheType
+			?? $wgMWOAuthSessionCacheType ?? $wgSessionCacheType;
+		return ObjectCache::getInstance( $cacheType );
 	}
 
 	/**
@@ -99,7 +123,7 @@ class Utils {
 	 * @return array Header name => value
 	 */
 	public static function getHeaders() {
-		$request = \RequestContext::getMain()->getRequest();
+		$request = RequestContext::getMain()->getRequest();
 		$headers = $request->getAllHeaders();
 
 		$out = [];
@@ -116,15 +140,13 @@ class Utils {
 
 	/**
 	 * Test this request for an OAuth Authorization header
-	 * @param \WebRequest $request the MediaWiki request
+	 * @param WebRequest $request the MediaWiki request
 	 * @return bool true if a header was found
 	 */
-	public static function hasOAuthHeaders( \WebRequest $request ) {
+	public static function hasOAuthHeaders( WebRequest $request ) {
 		$header = $request->getHeader( 'Authorization' );
-		if ( $header !== false && substr( $header, 0, 6 ) == 'OAuth ' ) {
-			return true;
-		}
-		return false;
+
+		return $header !== false && strpos( $header, 'OAuth ' ) === 0;
 	}
 
 	/**
@@ -152,8 +174,8 @@ class Utils {
 
 		$cutoff = time() - $wgMWOAuthRequestExpirationAge;
 		$fname = __METHOD__;
-		\DeferredUpdates::addUpdate(
-			new \AutoCommitUpdate(
+		DeferredUpdates::addUpdate(
+			new AutoCommitUpdate(
 				$dbw,
 				__METHOD__,
 				static function ( IDatabase $dbw ) use ( $cutoff, $fname ) {
@@ -184,15 +206,15 @@ class Utils {
 	public static function getWikiIdName( $wikiId ) {
 		if ( $wikiId === '*' ) {
 			return wfMessage( 'mwoauth-consumer-allwikis' )->text();
-		} else {
-			$host = \WikiMap::getWikiName( $wikiId );
-			if ( strpos( $host, '.' ) ) {
-				// e.g. "en.wikipedia.org"
-				return $host;
-			} else {
-				return $wikiId;
-			}
 		}
+
+		$host = WikiMap::getWikiName( $wikiId );
+		if ( strpos( $host, '.' ) ) {
+			// e.g. "en.wikipedia.org"
+			return $host;
+		}
+
+		return $wikiId;
 	}
 
 	/**
@@ -230,7 +252,7 @@ class Utils {
 		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		$dbr = self::getCentralDB( DB_REPLICA );
 		$dbw = $lb->getServerCount() > 1 ? self::getCentralDB( DB_PRIMARY ) : null;
-		return new MWOAuthDataStore( $dbr, $dbw, self::getSessionCache() );
+		return new MWOAuthDataStore( $dbr, $dbw, self::getSessionCache(), self::getNonceCache() );
 	}
 
 	/**
@@ -252,20 +274,20 @@ class Utils {
 			$name = $lookup->nameFromCentralId(
 				$userId,
 				$audience === 'raw'
-					? \CentralIdLookup::AUDIENCE_RAW
-					: ( $audience ?: \CentralIdLookup::AUDIENCE_PUBLIC )
+					? CentralIdLookup::AUDIENCE_RAW
+					: ( $audience ?: CentralIdLookup::AUDIENCE_PUBLIC )
 			);
 			if ( $name === null ) {
 				$name = false;
 			}
 		} else {
 			$name = '';
-			$user = \User::newFromId( $userId );
+			$user = User::newFromId( $userId );
 			$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
 
 			if ( $audience === 'raw'
 				|| !$user->isHidden()
-				|| ( $audience instanceof \User && $permissionManager->userHasRight( $audience, 'hideuser' ) )
+				|| ( $audience instanceof User && $permissionManager->userHasRight( $audience, 'hideuser' ) )
 			) {
 				$name = $user->getName();
 			}
@@ -278,8 +300,8 @@ class Utils {
 	 * Given a central wiki user ID, get a local User object
 	 *
 	 * @param int $userId
-	 * @throws \MWException
-	 * @return \User|bool User or false if not found
+	 * @throws MWException
+	 * @return User|bool User or false if not found
 	 */
 	public static function getLocalUserFromCentralId( $userId ) {
 		global $wgMWOAuthSharedUserIDs, $wgMWOAuthSharedUserSource;
@@ -302,8 +324,8 @@ class Utils {
 	/**
 	 * Given a local User object, get the user ID for that user on the central wiki
 	 *
-	 * @param \User $user
-	 * @throws \MWException
+	 * @param User $user
+	 * @throws MWException
 	 * @return int|bool ID or false if not found
 	 */
 	public static function getCentralIdFromLocalUser( \User $user ) {
@@ -344,7 +366,7 @@ class Utils {
 	/**
 	 * Given a username, get the user ID for that user on the central wiki.
 	 * @param string $username
-	 * @throws \MWException
+	 * @throws MWException
 	 * @return int|bool ID or false if not found
 	 */
 	public static function getCentralIdFromUserName( $username ) {
@@ -361,8 +383,8 @@ class Utils {
 			}
 		} else {
 			$id = false;
-			$user = \User::newFromName( $username );
-			if ( $user instanceof \User && $user->getId() > 0 ) {
+			$user = User::newFromName( $username );
+			if ( $user instanceof User && $user->getId() > 0 ) {
 				$id = $user->getId();
 			}
 		}
@@ -403,12 +425,12 @@ class Utils {
 		global $wgMWOAuthCentralWiki, $wgMWOAuthSharedUserIDs;
 
 		if ( $wgMWOAuthSharedUserIDs ) {
-			$url = \WikiMap::getForeignURL(
+			$url = WikiMap::getForeignURL(
 				$wgMWOAuthCentralWiki,
 				"User_talk:$username"
 			);
 		} else {
-			$url = \Title::makeTitleSafe( NS_USER_TALK, $username )->getFullURL();
+			$url = Title::makeTitleSafe( NS_USER_TALK, $username )->getFullURL();
 		}
 		return $url;
 	}
@@ -476,7 +498,7 @@ class Utils {
 	 * @return bool
 	 */
 	public static function isReservedTagName( $tagName ) {
-		return strpos( strtolower( $tagName ), 'oauth cid:' ) === 0;
+		return stripos( $tagName, 'oauth cid:' ) === 0;
 	}
 
 	/**

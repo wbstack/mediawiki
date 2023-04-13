@@ -69,7 +69,8 @@ class AccountRequestSubmission {
 	 * @return array [ true or error key string, html error msg or null ]
 	 */
 	public function submit( IContextSource $context ) {
-		global $wgAccountRequestThrottle, $wgConfirmAccountRequestFormItems;
+		global $wgAccountRequestThrottle, $wgConfirmAccountRequestFormItems, $wgConfirmAccountCaptchas;
+		global $wgCaptchaClass, $wgCaptchaTriggers;
 
 		ConfirmAccount::runAutoMaintenance();
 
@@ -86,6 +87,16 @@ class AccountRequestSubmission {
 			];
 		} elseif ( MediaWikiServices::getInstance()->getReadOnlyMode()->isReadOnly() ) {
 			return [ 'accountreq_readonly', $context->msg( 'badaccess-group0' )->escaped() ];
+		}
+
+		# Check for captcha validity
+		if ( $wgConfirmAccountCaptchas && isset( $wgCaptchaClass )
+			&& $wgCaptchaTriggers['createaccount'] && !$reqUser->isAllowed( 'skipcaptcha' ) ) {
+			/** @var SimpleCaptcha $captcha */
+			$captcha = new $wgCaptchaClass;
+			if ( !$captcha->passCaptchaLimitedFromRequest( $context->getRequest(), $reqUser ) ) {
+				return [ 'accountreq_bad_captcha', $context->msg( 'captcha-createaccount-fail' )->escaped() ];
+			}
 		}
 
 		# Now create a dummy user ($u) and check if it is valid
@@ -160,7 +171,7 @@ class AccountRequestSubmission {
 
 		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 		$dbw = $lbFactory->getMainLB()->getConnection( DB_PRIMARY );
-		$dbw->startAtomic( __METHOD__ ); // ready to acquire locks
+		$dbw->startAtomic( __METHOD__, $dbw::ATOMIC_CANCELABLE ); // ready to acquire locks
 		# Check pending accounts for name use
 		if ( !UserAccountRequest::acquireUsername( $u->getName() ) ) {
 			$dbw->endAtomic( __METHOD__ );
@@ -216,7 +227,7 @@ class AccountRequestSubmission {
 			$triplet = [ $this->attachmentTempPath, 'public', $pathRel ];
 			$status = $repo->storeBatch( [ $triplet ], FileRepo::OVERWRITE_SAME ); // save!
 			if ( !$status->isOk() ) {
-				$lbFactory->rollbackPrimaryChanges( __METHOD__ );
+				$dbw->cancelAtomic( __METHOD__ );
 				return [ 'acct_request_file_store_error',
 					$context->msg( 'filecopyerror', $this->attachmentTempPath, $pathRel )->escaped() ];
 			}
@@ -250,7 +261,7 @@ class AccountRequestSubmission {
 		# Send confirmation, required!
 		$result = ConfirmAccount::sendConfirmationMail( $u, $this->ip, $token, $expires );
 		if ( !$result->isOK() ) {
-			$lbFactory->rollbackPrimaryChanges( __METHOD__ ); // nevermind
+			$dbw->cancelAtomic( __METHOD__ );
 			if ( isset( $repo ) && isset( $pathRel ) ) { // remove attachment
 				$repo->cleanupBatch( [ [ 'public', $pathRel ] ] );
 			}

@@ -50,7 +50,7 @@ function init() {
 				ev.preventDefault();
 			},
 			// eslint-disable-next-line no-jquery/no-global-selector
-			el: $( '#user-notifications.user-button' ).parent()
+			el: $( '.minerva-user-notifications ul' ).parent()
 		} );
 		overlayManager.add( /^\/notifications$/, showNotificationOverlay );
 

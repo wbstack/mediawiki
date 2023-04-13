@@ -6,16 +6,21 @@ namespace Wikibase\Repo\Api;
 
 use ApiBase;
 use ApiMain;
+use ApiResult;
 use Wikibase\DataAccess\EntitySourceLookup;
 use Wikibase\DataModel\Entity\EntityId;
+use Wikibase\DataModel\Term\Term;
+use Wikibase\DataModel\Term\TermFallback;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Interactors\TermSearchResult;
+use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityArticleIdLookup;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\Assert\InvariantException;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * API module to search for Wikibase entities.
@@ -64,6 +69,9 @@ class SearchEntities extends ApiBase {
 	 */
 	private $enabledEntityTypes;
 
+	/** @var (string|null)[] */
+	private $searchProfiles;
+
 	/**
 	 * @see ApiBase::__construct
 	 */
@@ -77,7 +85,8 @@ class SearchEntities extends ApiBase {
 		EntityUrlLookup $entityUrlLookup,
 		EntityArticleIdLookup $entityArticleIdLookup,
 		ApiErrorReporter $errorReporter,
-		array $enabledEntityTypes
+		array $enabledEntityTypes,
+		array $searchProfiles
 	) {
 		parent::__construct( $mainModule, $moduleName, '' );
 
@@ -91,6 +100,7 @@ class SearchEntities extends ApiBase {
 		$this->entityArticleIdLookup = $entityArticleIdLookup;
 		$this->errorReporter = $errorReporter;
 		$this->enabledEntityTypes = $enabledEntityTypes;
+		$this->searchProfiles = $searchProfiles;
 	}
 
 	public static function factory(
@@ -103,6 +113,7 @@ class SearchEntities extends ApiBase {
 		EntitySourceLookup $entitySourceLookup,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
+		SettingsArray $repoSettings,
 		ContentLanguages $termsLanguages
 	): self {
 
@@ -116,7 +127,8 @@ class SearchEntities extends ApiBase {
 			$entityUrlLookup,
 			$entityArticleIdLookup,
 			$apiHelperFactory->getErrorReporter( $mainModule ),
-			$enabledEntityTypes
+			$enabledEntityTypes,
+			$repoSettings->getSetting( 'searchProfiles' )
 		);
 	}
 
@@ -138,7 +150,8 @@ class SearchEntities extends ApiBase {
 				$params['language'],
 				$params['type'],
 				$params['continue'] + $params['limit'] + 1,
-				$params['strictlanguage']
+				$params['strictlanguage'],
+				$this->searchProfiles[$params['profile']]
 			);
 		} catch ( EntitySearchException $ese ) {
 			$this->dieStatus( $ese->getStatus() );
@@ -165,8 +178,10 @@ class SearchEntities extends ApiBase {
 		$entry = [
 			'id' => $entityId->getSerialization(),
 			'title' => $this->entityTitleTextLookup->getPrefixedText( $entityId ),
-			'pageid' => $this->entityArticleIdLookup->getArticleId( $entityId )
+			'pageid' => $this->entityArticleIdLookup->getArticleId( $entityId ),
+			'display' => [], // filled below
 		];
+		ApiResult::setArrayType( $entry['display'], 'assoc' );
 
 		/**
 		 * The repository key should be deprecated and removed, for now avoid adding it when using federatedProperties to avoid confusion
@@ -188,12 +203,14 @@ class SearchEntities extends ApiBase {
 		$displayLabel = $match->getDisplayLabel();
 
 		if ( $displayLabel !== null ) {
+			$entry['display']['label'] = $this->getDisplayTerm( $displayLabel );
 			$entry['label'] = $displayLabel->getText();
 		}
 
 		$displayDescription = $match->getDisplayDescription();
 
 		if ( $displayDescription !== null ) {
+			$entry['display']['description'] = $this->getDisplayTerm( $displayDescription );
 			$entry['description'] = $displayDescription->getText();
 		}
 
@@ -224,6 +241,15 @@ class SearchEntities extends ApiBase {
 
 	private function getRepositoryOrEntitySourceName( EntityId $entityId ): string {
 		return $this->entitySourceLookup->getEntitySourceById( $entityId )->getSourceName();
+	}
+
+	private function getDisplayTerm( Term $term ): array {
+		return [
+			'value' => $term->getText(),
+			'language' => $term instanceof TermFallback
+				? $term->getActualLanguageCode()
+				: $term->getLanguageCode(),
+		];
 	}
 
 	/**
@@ -306,37 +332,42 @@ class SearchEntities extends ApiBase {
 	protected function getAllowedParams(): array {
 		return [
 			'search' => [
-				self::PARAM_TYPE => 'string',
-				self::PARAM_REQUIRED => true,
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'language' => [
-				self::PARAM_TYPE => $this->termsLanguages->getLanguages(),
-				self::PARAM_REQUIRED => true,
+				ParamValidator::PARAM_TYPE => $this->termsLanguages->getLanguages(),
+				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'strictlanguage' => [
-				self::PARAM_TYPE => 'boolean',
-				self::PARAM_DFLT => false
+				ParamValidator::PARAM_TYPE => 'boolean',
+				ParamValidator::PARAM_DEFAULT => false
 			],
 			'type' => [
-				self::PARAM_TYPE => $this->enabledEntityTypes,
-				self::PARAM_DFLT => 'item',
+				ParamValidator::PARAM_TYPE => $this->enabledEntityTypes,
+				ParamValidator::PARAM_DEFAULT => 'item',
 			],
 			'limit' => [
-				self::PARAM_TYPE => 'limit',
-				self::PARAM_DFLT => 7,
+				ParamValidator::PARAM_TYPE => 'limit',
+				ParamValidator::PARAM_DEFAULT => 7,
 				self::PARAM_MAX => self::LIMIT_SML1,
 				self::PARAM_MAX2 => self::LIMIT_SML2,
 				self::PARAM_MIN => 0,
 			],
 			'continue' => [
-				self::PARAM_TYPE => 'integer',
-				self::PARAM_REQUIRED => false,
-				self::PARAM_DFLT => 0
+				ParamValidator::PARAM_TYPE => 'integer',
+				ParamValidator::PARAM_REQUIRED => false,
+				ParamValidator::PARAM_DEFAULT => 0
 			],
 			'props' => [
-				self::PARAM_TYPE => [ 'url' ],
-				ApiBase::PARAM_ISMULTI => true,
-				self::PARAM_DFLT => 'url',
+				ParamValidator::PARAM_TYPE => [ 'url' ],
+				ParamValidator::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_DEFAULT => 'url',
+			],
+			'profile' => [
+				ParamValidator::PARAM_TYPE => array_keys( $this->searchProfiles ),
+				ParamValidator::PARAM_DEFAULT => array_key_first( $this->searchProfiles ),
+				self::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 		];
 	}

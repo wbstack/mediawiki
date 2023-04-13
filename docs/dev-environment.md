@@ -10,8 +10,10 @@ The fake api is served by the [server.php](test/server.php) script and reads the
 ### Start the dev environment
 
 ```sh
-docker-compose up
+docker compose up --build
 ```
+
+> **_Note:_** It's important to include the `--build` flag after making any significant changes to `dist`. The `Dockerfile` contains important maintenance scripts (e.g., `rebuildLocalisationCache.php`) that will only run when the container image is rebuilt.
 
 Wait until both sites are accessible:
 
@@ -29,6 +31,12 @@ Wait until both sites are accessible:
  ```sh
 curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
 curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+```
+
+Removing the installation:
+
+```sh
+docker compose down --volumes
 ```
 
 ### Debugging Elastic

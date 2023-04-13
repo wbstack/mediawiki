@@ -20,7 +20,7 @@ use Wikibase\Lib\WikibaseSettings;
 class Registrar {
 
 	public static function registerExtension() {
-		global $wgLexemeEnableRepo, $wgLexemeEnableNewAlpha;
+		global $wgLexemeEnableRepo;
 
 		if ( !WikibaseSettings::isRepoEnabled() || !$wgLexemeEnableRepo ) {
 			return;
@@ -123,19 +123,34 @@ class Registrar {
 				'WikibaseRepo.EntityTitleLookup',
 				'WikibaseRepo.Settings',
 				'WikibaseRepo.SummaryFormatter',
+				'WikibaseRepo.ValidatorErrorLocalizer',
+				'WikibaseLexemeLemmaTermValidator',
 			],
 		];
+
+		global $wgLexemeEnableNewAlpha, $wgWikimediaJenkinsCI;
+		if ( $wgWikimediaJenkinsCI ?? false ) {
+			$wgLexemeEnableNewAlpha = true;
+		}
 
 		if ( $wgLexemeEnableNewAlpha ) {
 			$wgSpecialPages['NewLexemeAlpha'] = [
 				'class' => SpecialNewLexemeAlpha::class,
 				'factory' => 'Wikibase\Lexeme\MediaWiki\Specials\SpecialNewLexemeAlpha::factory',
 				'services' => [
+					'LinkRenderer',
+					'StatsdDataFactory',
 					'WikibaseRepo.EditEntityFactory',
 					'WikibaseRepo.EntityNamespaceLookup',
 					'WikibaseRepo.EntityTitleStoreLookup',
+					'WikibaseRepo.EntityLookup',
+					'WikibaseRepo.EntityIdParser',
 					'WikibaseRepo.Settings',
 					'WikibaseRepo.SummaryFormatter',
+					'WikibaseRepo.EntityIdHtmlLinkFormatterFactory',
+					'WikibaseRepo.FallbackLabelDescriptionLookupFactory',
+					'WikibaseRepo.ValidatorErrorLocalizer',
+					'WikibaseLexemeLemmaTermValidator',
 				],
 			];
 		}

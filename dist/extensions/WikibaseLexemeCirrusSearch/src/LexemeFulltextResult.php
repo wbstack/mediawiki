@@ -7,7 +7,7 @@ use Elastica\ResultSet;
 use Language;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\DataAccess\LexemeDescription;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Search\Elastic\EntitySearchUtils;
 use Wikibase\Search\Elastic\Fields\StatementCountField;
 
@@ -30,20 +30,20 @@ class LexemeFulltextResult extends BaseResultsType {
 	 */
 	private $displayLanguage;
 	/**
-	 * @var LanguageFallbackLabelDescriptionLookupFactory
+	 * @var FallbackLabelDescriptionLookupFactory
 	 */
 	private $termLookupFactory;
 
 	/**
 	 * @param EntityIdParser $idParser
 	 * @param Language $displayLanguage User display language
-	 * @param LanguageFallbackLabelDescriptionLookupFactory $termLookupFactory
+	 * @param FallbackLabelDescriptionLookupFactory $termLookupFactory
 	 *        Lookup factory for assembling descriptions
 	 */
 	public function __construct(
 		EntityIdParser $idParser,
 		Language $displayLanguage,
-		LanguageFallbackLabelDescriptionLookupFactory $termLookupFactory
+		FallbackLabelDescriptionLookupFactory $termLookupFactory
 	) {
 		$this->idParser = $idParser;
 		$this->termLookupFactory = $termLookupFactory;
@@ -62,6 +62,11 @@ class LexemeFulltextResult extends BaseResultsType {
 				LexemeCategoryField::NAME,
 				FormsField::NAME,
 				StatementCountField::NAME,
+				// The web ui for fulltext search expects this to be returned.
+				// Longer term there should probably be some concept where the UI
+				// requests additional properties instead of baking it in at these
+				// lower levels for each fulltext results type.
+				'timestamp',
 		] );
 	}
 

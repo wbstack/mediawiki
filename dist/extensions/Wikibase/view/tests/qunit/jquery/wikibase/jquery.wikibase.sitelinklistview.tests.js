@@ -51,7 +51,7 @@
 	}
 
 	QUnit.module( 'jquery.wikibase.sitelinklistview', QUnit.newMwEnvironment( {
-		setup: function () {
+		beforeEach: function () {
 			// empty cache of wikibases site details
 			wb.sites._siteList = null;
 
@@ -87,7 +87,7 @@
 				}
 			} );
 		},
-		teardown: function () {
+		afterEach: function () {
 			$( '.test_sitelinklistview' ).each( function () {
 				var $sitelinklistview = $( this ),
 					sitelinklistview = $sitelinklistview.data( 'sitelinklistview' );
@@ -105,7 +105,7 @@
 		var $sitelinklistview = createSitelinklistview(),
 			sitelinklistview = $sitelinklistview.data( 'sitelinklistview' );
 
-		assert.ok(
+		assert.true(
 			sitelinklistview instanceof $.wikibase.sitelinklistview,
 			'Created widget.'
 		);
@@ -126,7 +126,7 @@
 			} ),
 			sitelinklistview = $sitelinklistview.data( 'sitelinklistview' );
 
-		assert.ok(
+		assert.true(
 			sitelinklistview instanceof $.wikibase.sitelinklistview,
 			'Created widget.'
 		);
@@ -188,13 +188,13 @@
 
 		$sitelinklistview
 		.on( 'sitelinklistviewafterstartediting', function ( event ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Started edit mode.'
 			);
 		} )
 		.on( 'sitelinklistviewafterstopediting', function ( event, dropValue ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Stopped edit mode.'
 			);
@@ -234,11 +234,10 @@
 		var $queue = $( {} );
 
 		/**
-		 * @param {jQuery} $queue
 		 * @param {Function} func
 		 * @param {boolean} [expectingEvent]
 		 */
-		function addToQueue( $queue, func, expectingEvent ) {
+		function addToQueue( func, expectingEvent ) {
 			if ( expectingEvent === undefined ) {
 				expectingEvent = true;
 			}
@@ -251,31 +250,31 @@
 			} );
 		}
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinklistview.startEditing();
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinklistview.startEditing();
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinklistview.stopEditing( true );
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinklistview.stopEditing( true );
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinklistview.stopEditing();
 		}, false );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			sitelinklistview.startEditing();
 		} );
 
-		addToQueue( $queue, function () {
+		addToQueue( function () {
 			// Mock adding a new item:
 			var listview = sitelinklistview.$listview.data( 'listview' ),
 				lia = listview.listItemAdapter(),
@@ -294,7 +293,7 @@
 		$sitelinklistview
 		.addClass( 'wb-error' )
 		.on( 'sitelinklistviewtoggleerror', function ( event, error ) {
-			assert.ok(
+			assert.true(
 				true,
 				'Triggered toggleerror event.'
 			);
@@ -336,7 +335,7 @@
 
 		$sitelinklistview
 		.on( 'sitelinklistviewafterstartediting', function () {
-			assert.ok(
+			assert.true(
 				true,
 				'Started sitelinklistview edit mode.'
 			);

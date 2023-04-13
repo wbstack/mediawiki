@@ -205,7 +205,7 @@
 	"mobile-frontend-talk-reply": "پاسخ",
 	"mobile-frontend-talk-reply-info": "به خاطر داشته باشید پیام شما به طور خودکار با نام کاربریتان امضا خواهد شد.",
 	"mobile-frontend-talk-topic-error": "این عنوان به دلیل خطای ناشناخته‌ای نمی‌تواند افزوده شود.",
-	"mobile-frontend-talk-topic-error-protected": "این صفحهٔ بحث قفل شده‌است، شما دسترسی افزودن موضوعی به آن را ندارید.",
+	"mobile-frontend-talk-topic-error-protected": "این صفحهٔ بحث قفل شده‌است. شما دسترسی افزودن مبحث به آن را ندارید.",
 	"mobile-frontend-talk-topic-error-permission": "این عنوان نمی‌تواند افزوده شود. شما دسترسی ویرایش صفحات را ندارید.",
 	"mobile-frontend-talk-topic-error-spam": "این عنوان ردشد به این دلیل که دارای یک قسمت هرزنگاری بود.",
 	"mobile-frontend-talk-topic-error-badtoken": "خطایی در سرور وجود داشت. ویرابش شما نمی‌تواند ذخیره شود. بازکردن مجدد این صفحه را بیازمایید.",

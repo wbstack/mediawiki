@@ -1,5 +1,7 @@
 <?php
 
+use MediaWiki\Extension\Notifications\OOUI\LabelIconWidget;
+
 class SpecialNotifications extends SpecialPage {
 
 	/**
@@ -23,7 +25,7 @@ class SpecialNotifications extends SpecialPage {
 		$this->addHelpLink( 'Help:Notifications/Special:Notifications' );
 
 		$out->addJsConfigVars( 'wgNotificationsSpecialPageLinks', [
-			'preferences' => SpecialPage::getTitleFor( 'Preferences' )->getLinkURL() . '#mw-prefsection-echo',
+			'preferences' => SpecialPage::getTitleFor( 'Preferences', false, 'mw-prefsection-echo' )->getLinkURL(),
 		] );
 
 		$user = $this->getUser();
@@ -66,7 +68,6 @@ class SpecialNotifications extends SpecialPage {
 
 		// Add the notifications to the page (interspersed with date headers)
 		$dateHeader = '';
-		$unread = [];
 		$anyUnread = false;
 		$echoSeenTime = EchoSeenTime::newFromUser( $user );
 		$seenTime = $echoSeenTime->getTime();
@@ -77,13 +78,6 @@ class SpecialNotifications extends SpecialPage {
 			}
 
 			$classes = [ 'mw-echo-notification' ];
-
-			if ( !isset( $row['read'] ) ) {
-				$classes[] = 'mw-echo-notification-unread';
-				if ( !$row['targetpages'] ) {
-					$unread[] = $row['id'];
-				}
-			}
 
 			if ( $seenTime !== null && $row['timestamp']['mw'] > $seenTime ) {
 				$classes[] = 'mw-echo-notification-unseen';
@@ -100,6 +94,7 @@ class SpecialNotifications extends SpecialPage {
 
 			// Collect unread IDs
 			if ( !isset( $row['read'] ) ) {
+				$classes[] = 'mw-echo-notification-unread';
 				$anyUnread = true;
 				$notifArray[ $dateHeader ][ 'unread' ][] = $row['id'];
 			}
@@ -125,7 +120,7 @@ class SpecialNotifications extends SpecialPage {
 			$markReadSpecialPage->setContext( $this->getContext() );
 
 			$markAllAsReadText = $this->msg( 'echo-mark-all-as-read' )->text();
-			$markAllAsReadLabelIcon = new EchoOOUI\LabelIconWidget( [
+			$markAllAsReadLabelIcon = new LabelIconWidget( [
 				'label' => $markAllAsReadText,
 				'icon' => 'checkAll',
 			] );
@@ -167,7 +162,7 @@ class SpecialNotifications extends SpecialPage {
 				$out->addJsConfigVars( 'wgEchoReadState', 'unread' );
 
 				$markReadSectionText = $this->msg( 'echo-specialpage-section-markread' )->text();
-				$markAsReadLabelIcon = new EchoOOUI\LabelIconWidget( [
+				$markAsReadLabelIcon = new LabelIconWidget( [
 					'label' => $markReadSectionText,
 					'icon' => 'checkAll',
 				] );
@@ -250,7 +245,7 @@ class SpecialNotifications extends SpecialPage {
 		$subtitleLinks[] = Html::element(
 			'a',
 			[
-				'href' => SpecialPage::getTitleFor( 'Preferences' )->getLinkURL() . '#mw-prefsection-echo',
+				'href' => SpecialPage::getTitleFor( 'Preferences', false, 'mw-prefsection-echo' )->getLinkURL(),
 				'id' => 'mw-echo-pref-link',
 				'class' => 'mw-echo-special-header-link',
 				'title' => $this->msg( 'preferences' )->text()

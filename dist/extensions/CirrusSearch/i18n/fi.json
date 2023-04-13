@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kyykaarme",
 			"MITO",
 			"MrTapsa",
 			"Nike",
@@ -8,8 +9,7 @@
 			"Pyscowicz",
 			"Stryn",
 			"Valtlait",
-			"Veikk0.ma",
-			"Kyykaarme"
+			"Veikk0.ma"
 		]
 	},
 	"cirrussearch-desc": "Elasticsearch-käyttöinen haku MediaWikille",

@@ -1,9 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Nurlan"
+			"Nurlan",
+			"Ajiniyaz Nurniyazov"
 		]
 	},
+	"prefs-gadgets": "Gadjetler",
 	"gadgets": "Gadjetler",
+	"gadgetusage": "Gadjet paydalanıw statistikası",
 	"gadgets-title": "Gadjetler"
 }

@@ -72,5 +72,11 @@
 	"ext-uls-setlang-heading": "Změnit jazyk rozhraní?",
 	"ext-uls-setlang-accept": "Přijmout změnu",
 	"ext-uls-setlang-loading": "Provádí se…",
-	"ext-uls-setlang-cancel": "Neměnit"
+	"ext-uls-setlang-cancel": "Neměnit",
+	"ext-uls-actions-menu-header": "Další možnosti",
+	"ext-uls-actions-menu-language-settings-item-label": "Otevřít jazyková nastavení",
+	"ext-uls-empty-state-header": "Zatím žádné jazyky",
+	"ext-uls-empty-state-desc": "Momentálně nejsou k dispozici žádné jazyky",
+	"ext-uls-empty-state-header-actions-available": "Zatím žádné jazyky. Přidat nový?",
+	"ext-uls-empty-state-desc-actions-available": "Zpřístupněte obsah ve více jazycích."
 }

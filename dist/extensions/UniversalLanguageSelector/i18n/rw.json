@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"RebecaRwanda",
 			"Amire80",
 			"Germain92",
+			"RebecaRwanda",
 			"Rodrigue"
 		]
 	},
@@ -69,5 +69,7 @@
 	"ext-uls-setlang-heading": "Hindura imigaragarire y'ururimi?",
 	"ext-uls-setlang-accept": "Emera impinduka",
 	"ext-uls-setlang-loading": "Gusaba...",
-	"ext-uls-setlang-cancel": "Wihindura"
+	"ext-uls-setlang-cancel": "Wihindura",
+	"ext-uls-actions-menu-header": "Andi mahitamo",
+	"ext-uls-actions-menu-language-settings-item-label": "Fungura igenamiterere ry'ururimi"
 }

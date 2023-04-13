@@ -3,8 +3,8 @@
 		"authors": [
 			"Aftabuzzaman",
 			"Bodhisattwa",
-			"আফতাবুজ্জামান",
 			"Meghmollar2017",
+			"আফতাবুজ্জামান",
 			"ZI Jony"
 		]
 	},
@@ -56,6 +56,7 @@
 	"kartographer-sidebar-latitude": "অক্ষাংশ",
 	"kartographer-sidebar-longitude": "দ্রাঘিমাংশ",
 	"kartographer-sidebar-mapdetails": "বহিঃস্থ মানচিত্র",
+	"kartographer-sidebar-nearbybutton": "কাছাকাছি নিবন্ধগুলো দেখান",
 	"kartographer-sidebar-service": "পরিষেবা",
 	"kartographer-sidebar-togglebutton": "বহিঃস্থ মানচিত্র",
 	"leafletdraw-draw-handlers-circle-radius": "ব্যাসার্ধ",

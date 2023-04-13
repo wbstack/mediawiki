@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Ebenoffen1",
-			"Stephen Essoun",
 			"Kwamevaughan",
-			"Leonard Nketsia"
+			"Leonard Nketsia",
+			"Stephen Essoun"
 		]
 	},
 	"uls-desc": "Ɔma ohyia kor a ɔdze adze bi dze dwuma akwannya bɛbere ma ɔfa kasa a ɔpɛ na ɔdandan ne dwumadze nso.",
@@ -64,5 +64,7 @@
 	"ext-uls-setlang-heading": "Sesa interface kasa no?",
 	"ext-uls-setlang-accept": "Gye nsesa no tum",
 	"ext-uls-setlang-loading": "Dze ridzi dwuma...",
-	"ext-uls-setlang-cancel": "Mɛn sesa"
+	"ext-uls-setlang-cancel": "Mɛn sesa",
+	"ext-uls-actions-menu-header": "Ndzɛmba ahorow a ebɛpɛ",
+	"ext-uls-actions-menu-language-settings-item-label": "Buei kasa nhyehyɛe ahorow"
 }

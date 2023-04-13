@@ -8,7 +8,8 @@
 			"Ovruni",
 			"Rodney Araujo",
 			"Vivaelcelta",
-			"ZealousBlaze"
+			"ZealousBlaze",
+			"MarcoAurelio"
 		]
 	},
 	"templatesandbox": "Zona de pruebas para las plantillas",
@@ -30,6 +31,7 @@
 	"templatesandbox-invalid-title": "El título que has especificado no es válido.",
 	"templatesandbox-title-not-exists": "El título especificado no existe.",
 	"templatesandbox-revision-not-exists": "La revisión especificada no existe.",
+	"templatesandbox-revision-no-content": "La revisión indicada no tiene contenido o no tienes permiso para verlo.",
 	"templatesandbox-invalid-prefix": "El prefijo de zona de pruebas que has especificado no es válido.",
 	"templatesandbox-prefix-not-local": "El prefijo de zona de pruebas que has especificado no es local.",
 	"templatesandbox-page-or-revid": "Debes indicar el título de la página o el número identificador de revisión.",

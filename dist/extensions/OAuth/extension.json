@@ -13,7 +13,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.38.0"
+		"MediaWiki": ">= 1.39.0"
 	},
 	"ExtensionFunctions": [
 		"MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onExtensionFunctions"
@@ -79,14 +79,11 @@
 	"TestAutoloadNamespaces": {
 		"MediaWiki\\Extension\\OAuth\\Tests\\": "tests/phpunit/"
 	},
-	"TestAutoloadClasses": {
-		"MediaWiki\\Extension\\OAuth\\Tests\\TestHandlerFactory": "tests/TestHandlerFactory.php"
-	},
 	"ResourceModules": {
 		"ext.MWOAuth.styles": {
 			"styles": [
-				"ext.MWOAuth.BasicStyles.css",
-				"ext.MWOAuth.AuthorizeForm.css"
+				"ext.MWOAuth.BasicStyles.less",
+				"ext.MWOAuth.AuthorizeForm.less"
 			]
 		},
 		"ext.MWOAuth.AuthorizeDialog": {
@@ -94,7 +91,8 @@
 				"ext.MWOAuth.AuthorizeDialog.js"
 			],
 			"dependencies": [
-				"jquery.ui"
+				"oojs-ui-core",
+				"oojs-ui-windows"
 			],
 			"messages": [
 				"mwoauth-desc"
@@ -117,7 +115,6 @@
 		"AbuseFilter-generateUserVars": "abusefilter",
 		"ChangeTagCanCreate": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onChangeTagCanCreate",
 		"MergeAccountFromTo": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onMergeAccountFromTo",
-		"CentralAuthGlobalUserMerged": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onCentralAuthGlobalUserMerged",
 		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\OAuth\\Backend\\UpdaterHooks::addSchemaUpdates",
 		"GetPreferences": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onGetPreferences",
 		"MessagesPreLoad": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onMessagesPreLoad",
@@ -170,7 +167,12 @@
 			"description": "User groups to notify about new consumers that need to be reviewed"
 		},
 		"MWOAuthSessionCacheType": {
-			"value": null
+			"value": null,
+			"description": "The cache type used for most temporary data storage. An index into $wgObjectCaches. The default is $wgSessionCacheType."
+		},
+		"MWOAuthNonceCacheType": {
+			"value": null,
+			"description": "The cache type used for OAuth 1.0 nonces. An index into $wgObjectCaches. The default is $wgMWOAuthSessionCacheType."
 		},
 		"OAuthSecretKey": {
 			"value": null,

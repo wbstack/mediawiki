@@ -18,19 +18,16 @@ require_stack_version
 if [[ -z $es_node_name ]]; then
   # only set these once
   set -euo pipefail
-  export TEST_SUITE=${TEST_SUITE-oss}
+  export TEST_SUITE=${TEST_SUITE-free}
   export RUNSCRIPTS=${RUNSCRIPTS-}
   export DETACH=${DETACH-false}
   export CLEANUP=${CLEANUP-false}
 
-  #export es_node_name=instance
-  export es_node_name=elasticsearch
+  export es_node_name=instance
   export elastic_password=changeme
   export elasticsearch_image=elasticsearch
   export elasticsearch_url=https://elastic:${elastic_password}@${es_node_name}:9200
-  if [[ $TEST_SUITE != "xpack" ]]; then
-    export elasticsearch_image=elasticsearch-${TEST_SUITE}
-    export es_node_name=elasticsearch-oss
+  if [[ $TEST_SUITE != "platinum" ]]; then
     export elasticsearch_url=http://${es_node_name}:9200
   fi
   export external_elasticsearch_url=${elasticsearch_url/$es_node_name/localhost}

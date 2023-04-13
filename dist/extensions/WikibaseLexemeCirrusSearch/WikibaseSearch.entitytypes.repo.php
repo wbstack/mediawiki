@@ -9,7 +9,6 @@ use Wikibase\Lexeme\Search\Elastic\LexemeFullTextQueryBuilder;
 use Wikibase\Lexeme\Search\Elastic\LexemeSearchEntity;
 use Wikibase\Lib\EntityTypeDefinitions as Def;
 use Wikibase\Lib\SettingsArray;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
 use Wikibase\Repo\Api\CombinedEntitySearchHelper;
 use Wikibase\Repo\Api\EntityIdSearchHelper;
 use Wikibase\Repo\WikibaseRepo;
@@ -40,26 +39,22 @@ return [
 			);
 		},
 		Def::ENTITY_SEARCH_CALLBACK => static function ( WebRequest $request ) {
+			$fallbackTermLookupFactory = WikibaseRepo::getFallbackLabelDescriptionLookupFactory();
 			$entityIdParser = WikibaseRepo::getEntityIdParser();
-			$languageFallbackChainFactory = WikibaseRepo::getLanguageFallbackChainFactory();
 
 			return new CombinedEntitySearchHelper(
 				[
 					new EntityIdSearchHelper(
 						WikibaseRepo::getEntityLookup(),
 						$entityIdParser,
-						new LanguageFallbackLabelDescriptionLookup(
-							WikibaseRepo::getTermLookup(),
-							$languageFallbackChainFactory->newFromLanguage( WikibaseRepo::getUserLanguage() )
-						),
+						$fallbackTermLookupFactory->newLabelDescriptionLookup( WikibaseRepo::getUserLanguage() ),
 						WikibaseRepo::getEntityTypeToRepositoryMapping()
 					),
 					new LexemeSearchEntity(
 						$entityIdParser,
 						$request,
 						WikibaseRepo::getUserLanguage(),
-						$languageFallbackChainFactory,
-						WikibaseRepo::getPrefetchingTermLookup()
+						$fallbackTermLookupFactory
 					)
 				]
 			);
@@ -82,8 +77,7 @@ return [
 						$entityIdParser,
 						$request,
 						WikibaseRepo::getUserLanguage(),
-						WikibaseRepo::getLanguageFallbackChainFactory(),
-						WikibaseRepo::getPrefetchingTermLookup()
+						WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
 					),
 				]
 			);

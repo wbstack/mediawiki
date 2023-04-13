@@ -4,6 +4,9 @@
 			"Ajiniyaz Nurniyazov"
 		]
 	},
+	"templatesandbox": "Úlgi qaralamaları",
+	"templatesandbox-legend": "Úlgi qaralama beti",
+	"templatesandbox-title-output": "Úlgi qaralama beti: $1",
 	"templatesandbox-editform-legend": "Usı úlgini paydalanatuǵın betti aldın ala kóriw",
 	"templatesandbox-editform-page-label": "Bettiń ataması",
 	"templatesandbox-editform-view-label": "Aldın ala kóriw"

@@ -4,9 +4,9 @@
 			"Derslek",
 			"Don Alessandro",
 			"Rinatus",
+			"Ерней",
 			"Ильнар",
 			"Рашат Якупов",
-			"Ерней",
 			"Ильгиз"
 		]
 	},
@@ -17,6 +17,8 @@
 	"vector-opt-out": "Иске дизайнга кайту",
 	"vector-languages": "Телләр",
 	"vector-language-button-label": "{{PLURAL:$1|$1 тел}}",
+	"vector-no-language-button-label": "Телләр өстәү",
+	"vector-language-redirect-to-top": "Бу сайтта тел сылтамаларын битнең югары өлешендә, мәкалә исеме янында, табарга була. [[#p-lang-btn|Өскә кайту]].",
 	"vector-language-variant-switcher-label": "Телне алмаштыру",
 	"vector-action-addsection": "Яңа тема өстәү",
 	"vector-action-delete": "Бетерү",
@@ -33,7 +35,10 @@
 	"vector-jumptosearch": "Эзләүгә күчү",
 	"vector-jumptocontent": "Эчтәлеккә күчү",
 	"vector-more-actions": "Тагын",
+	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> ны үз эченә алган битләрне эзләү",
 	"vector-intro-page": "Help:Кереш",
+	"vector-toc-beginning": "Башы",
 	"vector-anon-user-menu-pages-learn": "күбрәк белү",
-	"vector-main-menu-tooltip": "Төп меню"
+	"vector-main-menu-tooltip": "Төп меню",
+	"vector-site-nav-label": "Сайт"
 }

@@ -4,7 +4,6 @@ namespace TwoColConflict;
 
 use ExtensionRegistry;
 use MediaWiki\MediaWikiServices;
-use TwoColConflict\Logging\ThreeWayMerge;
 
 return [
 
@@ -20,10 +19,6 @@ return [
 			$extensionRegistry,
 			$mobileContext
 		);
-	},
-
-	'TwoColConflictThreeWayMerge' => static function ( MediaWikiServices $services ) {
-		return new ThreeWayMerge();
 	},
 
 ];

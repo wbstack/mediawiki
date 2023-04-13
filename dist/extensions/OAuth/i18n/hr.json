@@ -6,8 +6,8 @@
 			"Excaliboor",
 			"MaGa",
 			"Neptune, the Mystic",
-			"Vlad5250",
-			"Ponor"
+			"Ponor",
+			"Vlad5250"
 		]
 	},
 	"mwoauth-desc": "Omogućuje upotrebu OAuth 1.0a i OAuth 2.0 za autorizaciju API-ja",
@@ -65,7 +65,6 @@
 	"mwoauth-consumer-stage-suppressed": "skriveno",
 	"oauthconsumerregistration": "Registracija trošača OAutha",
 	"mwoauthconsumerregistration-navigation": "Orijentacija:",
-	"mwoauthconsumerregistration-propose": "Predložite novog korisnika",
 	"mwoauthconsumerregistration-list": "Popis mojih korisnika",
 	"mwoauthconsumerregistration-main": "Glavna",
 	"mwoauthconsumerregistration-update-text": "Donji obrazac služi za promjenu aspekata OAuth trošača koga kontrolirate.\n\nSve ovdje navedene vrijednosti bit će prepisane preko postojećih. Ne ostavljajte prazna polja, osim ako ne želite izbrisati njihove vrijednosti.",

@@ -110,7 +110,7 @@ class AnnotatedHtmlDiffFormatter {
 			}
 		}
 
-		return $changes;
+		return array_values( $changes );
 	}
 
 	/**

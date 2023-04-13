@@ -66,7 +66,7 @@ class DenyListManager {
 		BagOStuff $srvCache,
 		WANObjectCache $wanCache,
 		?LoggerInterface $logger
-	 ) {
+	) {
 		$this->http = $http;
 		$this->srvCache = $srvCache;
 		$this->wanCache = $wanCache;
@@ -93,7 +93,7 @@ class DenyListManager {
 	}
 
 	/**
-	 * Check whether the IP address is denylisted
+	 * Check whether the IP address is deny-listed
 	 *
 	 * @param string $ip An IP address
 	 * @return bool
@@ -107,18 +107,16 @@ class DenyListManager {
 	}
 
 	/**
-	 * Get the list of denylisted IPs from cache only
+	 * Get the list of deny-listed IPs from cache only
 	 *
-	 * @return string[]|false List of denylisted IP addresses; false if uncached
+	 * @return string[]|false List of deny-listed IP addresses; false if uncached
 	 */
 	public function getCachedIpDenyList() {
-		$wanCache = $this->wanCache;
-
 		return $this->getIpDenyList();
 	}
 
 	/**
-	 * Purge cache of denylist IPs
+	 * Purge cache of deny-list IPs
 	 *
 	 * @return bool Success
 	 */
@@ -132,7 +130,7 @@ class DenyListManager {
 	 * Fetch the list of IPs from cache, regenerating the cache as needed
 	 *
 	 * @param string|null $recache Use 'recache' to force a recache
-	 * @return string[] List of denylisted IP addresses
+	 * @return string[] List of deny-listed IP addresses
 	 */
 	public function getIpDenyList( $recache = null ): array {
 		global $wgSFSDenyListCacheDuration;
@@ -151,7 +149,7 @@ class DenyListManager {
 				$this->getDenyListKey( $wanCache ),
 				$wgSFSDenyListCacheDuration,
 				function () {
-					// This uses hexidecimal IP addresses to reduce network I/O
+					// This uses hexadecimal IP addresses to reduce network I/O
 					return $this->fetchFlatDenyListHexIps();
 				},
 				[
@@ -165,14 +163,13 @@ class DenyListManager {
 
 			$ips = [];
 			for ( $hex = strtok( $flatHexIpList, "\n" ); $hex !== false; $hex = strtok( "\n" ) ) {
-				$length = strlen( $hex );
 				$ips[] = IPUtils::formatHex( $hex );
 			}
 
 			$flatIpList = implode( "\n", $ips );
 
 			// Refill the local server cache if the list is not empty nor a placeholder
-			if ( $flatIpList != '' ) {
+			if ( $flatIpList !== '' ) {
 				$srvCache->set(
 					$srvCacheKey,
 					$flatIpList,
@@ -185,11 +182,12 @@ class DenyListManager {
 	}
 
 	/**
+	 * @param string|null $recache Use 'recache' to force a recache
 	 * @return IPSet
 	 */
-	private function getIpDenyListSet() {
-		if ( $this->denyListIPSet === null ) {
-			$this->denyListIPSet = new IPSet( $this->getIpDenyList() );
+	public function getIpDenyListSet( $recache = null ) {
+		if ( $this->denyListIPSet === null || $recache === "recache" ) {
+			$this->denyListIPSet = new IPSet( $this->getIpDenyList( $recache ) );
 		}
 
 		return $this->denyListIPSet;
@@ -204,7 +202,7 @@ class DenyListManager {
 	}
 
 	/**
-	 * @return string Newline separated list of SFS denylisted IP addresses
+	 * @return string Newline separated list of SFS deny-listed IP addresses
 	 */
 	private function fetchFlatDenyListHexIps(): string {
 		global $wgSFSIPListLocation, $wgSFSValidateIPListLocationMD5;
@@ -229,7 +227,7 @@ class DenyListManager {
 	 * Fetch gunzipped/unzipped SFS deny list from local file
 	 *
 	 * @param string $listFilePath Local file path
-	 * @return string Newline separated list of SFS denylisted IP addresses
+	 * @return string Newline separated list of SFS deny-listed IP addresses
 	 */
 	private function fetchFlatDenyListHexIpsLocal( string $listFilePath ): string {
 		global $wgSFSIPThreshold;
@@ -249,7 +247,8 @@ class DenyListManager {
 
 			if ( $ipData === null || $ipData === [ null ] ) {
 				continue;
-			} elseif ( isset( $ipData[1] ) && $ipData[1] < $wgSFSIPThreshold ) {
+			}
+			if ( isset( $ipData[1] ) && $ipData[1] < $wgSFSIPThreshold ) {
 				continue;
 			}
 
@@ -272,7 +271,7 @@ class DenyListManager {
 	 *
 	 * @param string $uri SFS vendor or third-party URL to the list
 	 * @param string|null $md5uri SFS vendor URL to the MD5 of the list
-	 * @return string Newline-separted list of SFS denylisted IP addresses
+	 * @return string Newline-separated list of SFS deny-listed IP addresses
 	 */
 	private function fetchFlatDenyListHexIpsRemote( string $uri, ?string $md5uri ): string {
 		global $wgSFSProxy, $wgSFSIPThreshold;
@@ -285,7 +284,6 @@ class DenyListManager {
 		// See also: T262443, T265628.
 		if ( defined( 'MW_PHPUNIT_TEST' ) ) {
 			$filePath = dirname( __DIR__ ) . '/tests/phpunit/sample_denylist_all.txt';
-
 			return $this->fetchFlatDenyListHexIpsLocal( $filePath );
 		}
 
@@ -304,7 +302,7 @@ class DenyListManager {
 		}
 
 		$fileData = $this->fetchRemoteFile( $uri, $options );
-		if ( $fileData == '' ) {
+		if ( $fileData === '' ) {
 			$this->logger->error( __METHOD__ . ": SFS IP list could not be fetched!" );
 
 			return '';
@@ -313,13 +311,13 @@ class DenyListManager {
 		if ( is_string( $md5uri ) && $md5uri !== '' ) {
 			// check vendor-provided md5
 			$fileDataMD5 = $this->fetchRemoteFile( $md5uri, $options );
-			if ( $fileDataMD5 == '' ) {
+			if ( $fileDataMD5 === '' ) {
 				$this->logger->error( __METHOD__ . ": SFS IP list MD5 could not be fetched!" );
-
 				return '';
-			} elseif ( md5( $fileData ) !== $fileDataMD5 ) {
-				$this->logger->error( __METHOD__ . ": SFS IP list has an unexpected MD5!" );
+			}
 
+			if ( md5( $fileData ) !== $fileDataMD5 ) {
+				$this->logger->error( __METHOD__ . ": SFS IP list has an unexpected MD5!" );
 				return '';
 			}
 		}
@@ -328,18 +326,23 @@ class DenyListManager {
 		$csvTable = gzdecode( $fileData );
 		if ( $csvTable === false ) {
 			$this->logger->error( __METHOD__ . ": SFS IP file contents could not be decoded!" );
-
 			return '';
 		}
 
 		$ipList = [];
+		$scoreSkipped = 0;
+		$rows = 0;
 
 		for ( $line = strtok( $csvTable, "\n" ); $line !== false; $line = strtok( "\n" ) ) {
+
+			$rows++;
+
 			$ipData = str_getcsv( $line );
 			$ip = (string)$ipData[0];
 			$score = (int)$ipData[1];
 
 			if ( $score && ( $score < $wgSFSIPThreshold ) ) {
+				$scoreSkipped++;
 				continue;
 			}
 
@@ -350,6 +353,13 @@ class DenyListManager {
 			}
 
 			$ipList[] = $hex;
+		}
+
+		if ( $scoreSkipped > 0 ) {
+			$this->logger->info(
+				__METHOD__ . ": {$rows} rows were processed. "
+				. "{$scoreSkipped} were skipped because their score was less than {$wgSFSIPThreshold}."
+			);
 		}
 
 		return implode( "\n", $ipList );

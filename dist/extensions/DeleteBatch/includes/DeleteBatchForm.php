@@ -225,10 +225,10 @@ class DeleteBatchForm {
 				$this->deletePage( $page_data[0], $user, $dbw, $page_data[1] );
 			}
 		}
-
-		$link_back = Linker::linkKnown(
+		$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
+		$link_back = $linkRenderer->makeKnownLink(
 			$this->title,
-			$this->context->msg( 'deletebatch-link-back' )->escaped()
+			$this->context->msg( 'deletebatch-link-back' )->text()
 		);
 		$this->context->getOutput()->addHTML( '<br /><b>' . $link_back . '</b>' );
 	}
@@ -291,7 +291,7 @@ class DeleteBatchForm {
 		/* this stuff goes like articleFromTitle in Wiki.php */
 		// Delete the page; in the case of a file, this would be the File: description page
 		if ( $pageExists ) {
-			$wikipage = WikiPage::factory( $page );
+			$wikipage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $page );
 			/* what is the generic reason for page deletion?
 			   something about the content, I guess...
 			*/

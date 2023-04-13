@@ -8,11 +8,12 @@
 
 namespace Kartographer;
 
-use ResourceLoader;
-use ResourceLoaderContext;
-use ResourceLoaderModule;
+use ExtensionRegistry;
+// phpcs:disable MediaWiki.Classes.FullQualifiedClassName -- T308814
+use MediaWiki\ResourceLoader as RL;
+use MediaWiki\ResourceLoader\ResourceLoader;
 
-class DataModule extends ResourceLoaderModule {
+class DataModule extends RL\Module {
 
 	/** @inheritDoc */
 	protected $targets = [ 'desktop', 'mobile' ];
@@ -20,7 +21,7 @@ class DataModule extends ResourceLoaderModule {
 	/**
 	 * @inheritDoc
 	 */
-	public function getScript( ResourceLoaderContext $context ) {
+	public function getScript( RL\Context $context ) {
 		$config = $this->getConfig();
 		return ResourceLoader::makeConfigSetScript( [
 			'wgKartographerMapServer' => $config->get( 'KartographerMapServer' ),
@@ -32,6 +33,7 @@ class DataModule extends ResourceLoaderModule {
 			'wgKartographerUsePageLanguage' => $config->get( 'KartographerUsePageLanguage' ),
 			'wgKartographerFallbackZoom' => $config->get( 'KartographerFallbackZoom' ),
 			'wgKartographerSimpleStyleMarkers' => $config->get( 'KartographerSimpleStyleMarkers' ),
+			'wgKartographerNearby' => $this->canUseNearby(),
 		] );
 	}
 
@@ -43,12 +45,21 @@ class DataModule extends ResourceLoaderModule {
 	}
 
 	/**
-	 * @see ResourceLoaderModule::supportsURLLoading
+	 * @see RL\Module::supportsURLLoading
 	 *
 	 * @return bool
 	 */
 	public function supportsURLLoading() {
 		// always use getScript() to acquire JavaScript (even in debug mode)
 		return false;
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function canUseNearby() {
+		return $this->getConfig()->get( 'KartographerNearby' ) &&
+			ExtensionRegistry::getInstance()->isLoaded( 'GeoData' ) &&
+			ExtensionRegistry::getInstance()->isLoaded( 'CirrusSearch' );
 	}
 }

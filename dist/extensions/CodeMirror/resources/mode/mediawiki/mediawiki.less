@@ -1,0 +1,157 @@
+/* stylelint-disable block-opening-brace-newline-before, block-opening-brace-newline-after,
+	block-closing-brace-space-after, declaration-block-single-line-max-declarations,
+	declaration-block-semicolon-newline-after, selector-list-comma-newline-after */
+
+// Copied from wikimedia-ui-base.less
+@wmui-color-base30: #72777d;
+@wmui-color-red50: #d33;
+@wmui-color-yellow30: #ac6600;
+@wmui-color-green30: #14866d;
+
+@comment-color: @wmui-color-base30;
+@link-color: #000aaa;
+@parser-function-color: @wmui-color-red50;
+@table-color: #d08;
+@template-color: #80c;
+@template-variable-color: @wmui-color-yellow30;
+@wikitext-formatting-color: #0076dd;
+@xml-tag-color: @wmui-color-green30;
+
+@template-background-color: #a11;
+@ext-background-color: #70a;
+@link-background-color: #219;
+
+.ground( @template: 0, @ext: 0, @link: 0 ) {
+	@template-shade: fade( @template-background-color, 4% * @template );
+	@ext-shade: fade( @ext-background-color, 4% * @ext );
+	@link-shade: fade( @link-background-color, 4% * @link );
+	background-color: average( average( @template-shade, @ext-shade ), @link-shade );
+}
+
+.cm-mw-pagename { text-decoration: underline; }
+
+// TODO: It appears like this was never used. Remvoe?
+.cm-mw-matching { background-color: #ffd700; }
+
+.cm-mw-skipformatting { background-color: #adf; }
+.cm-mw-list,
+.cm-mw-indenting { color: @wikitext-formatting-color; font-weight: bold; }
+.cm-mw-doubleUnderscore, .cm-mw-signature, .cm-mw-hr { color: @wikitext-formatting-color; font-weight: bold; background-color: #eee; }
+.cm-mw-mnemonic { color: @xml-tag-color; }
+.cm-mw-comment { color: @comment-color; font-weight: normal; }
+.cm-mw-apostrophes-bold, .cm-mw-apostrophes-italic { color: @wikitext-formatting-color; }
+
+pre.CodeMirror-line.cm-mw-section-1,
+pre.CodeMirror-line-like.cm-mw-section-1 {
+	font-size: 1.8em;
+	line-height: 1.2em;
+}
+pre.CodeMirror-line.cm-mw-section-2,
+pre.CodeMirror-line-like.cm-mw-section-2 {
+	font-size: 1.5em;
+	line-height: 1.2em;
+}
+pre.CodeMirror-line.cm-mw-section-3,
+pre.CodeMirror-line-like.cm-mw-section-3,
+pre.CodeMirror-line.cm-mw-section-4,
+pre.CodeMirror-line-like.cm-mw-section-4,
+pre.CodeMirror-line.cm-mw-section-5,
+pre.CodeMirror-line-like.cm-mw-section-5,
+pre.CodeMirror-line.cm-mw-section-6,
+pre.CodeMirror-line-like.cm-mw-section-6 {
+	font-weight: bold;
+}
+
+.cm-mw-template { color: @template-color; font-weight: normal; }
+.cm-mw-template-name-mnemonic { font-weight: normal; }
+.cm-mw-template-name,
+.cm-mw-template-argument-name,
+.cm-mw-template-delimiter,
+.cm-mw-template-bracket { color: @template-color; font-weight: bold; }
+
+.cm-mw-templatevariable,
+.cm-mw-templatevariable-bracket { color: @template-variable-color; font-weight: normal; }
+.cm-mw-templatevariable-name,
+.cm-mw-templatevariable-delimiter { color: @template-variable-color; font-weight: bold; }
+
+.cm-mw-parserfunction { font-weight: normal; }
+.cm-mw-parserfunction-name,
+.cm-mw-parserfunction-bracket,
+.cm-mw-parserfunction-delimiter { color: @parser-function-color; font-weight: bold; }
+
+pre.CodeMirror-line.cm-mw-exttag,
+pre.CodeMirror-line-like.cm-mw-exttag {
+	.ground( @ext: 0.5 );
+}
+.cm-mw-exttag { .ground( @ext: 1 ); }
+.cm-mw-exttag-name,
+.cm-mw-htmltag-name { color: @xml-tag-color; font-weight: bold; }
+.cm-mw-exttag-bracket,
+.cm-mw-exttag-attribute,
+.cm-mw-htmltag-bracket,
+.cm-mw-htmltag-attribute { color: @xml-tag-color; font-weight: normal; }
+
+pre.CodeMirror-line.cm-mw-tag-pre,
+pre.CodeMirror-line-like.cm-mw-tag-pre,
+.cm-mw-tag-pre,
+pre.CodeMirror-line.cm-mw-tag-nowiki,
+pre.CodeMirror-line-like.cm-mw-tag-nowiki,
+.cm-mw-tag-nowiki {
+	background-color: rgba( 0, 0, 0, 0.04 );
+}
+
+.cm-mw-link,
+.cm-mw-link-tosection,
+.cm-mw-section-header { color: @wikitext-formatting-color; font-weight: normal; }
+.cm-mw-link-pagename,
+.cm-mw-link-bracket,
+.cm-mw-link-delimiter,
+.cm-mw-extlink,
+.cm-mw-free-extlink { color: @link-color; font-weight: normal; }
+.cm-mw-extlink-protocol,
+.cm-mw-free-extlink-protocol,
+.cm-mw-extlink-bracket { color: @link-color; font-weight: bold; }
+
+.cm-mw-table-bracket,
+.cm-mw-table-delimiter { color: @table-color; font-weight: bold; }
+.cm-mw-table-definition { color: @table-color; font-weight: normal; }
+.cm-mw-table-caption { font-weight: bold; }
+
+.cm-mw-template2-ground { .ground( @template: 1 ); }
+.cm-mw-template3-ground { .ground( @template: 2 ); }
+.cm-mw-ext-ground,
+.cm-mw-template-ext-ground { .ground( @ext: 1 ); }
+.cm-mw-ext2-ground,
+.cm-mw-template-ext2-ground { .ground( @ext: 2 ); }
+.cm-mw-ext3-ground,
+.cm-mw-template-ext3-ground { .ground( @ext: 3 ); }
+.cm-mw-link-ground,
+.cm-mw-ext-link-ground,
+.cm-mw-template-link-ground { .ground( @link: 1 ); }
+.cm-mw-ext2-link-ground,
+.cm-mw-template-ext-link-ground { .ground( @ext: 1, @link: 1 ); }
+.cm-mw-ext3-link-ground,
+.cm-mw-template-ext2-link-ground { .ground( @ext: 2, @link: 1 ); }
+.cm-mw-template-ext3-link-ground { .ground( @ext: 3, @link: 1 ); }
+
+.cm-mw-template2-ext-ground { .ground( @template: 1, @ext: 1 ); }
+.cm-mw-template2-ext2-ground { .ground( @template: 1, @ext: 2 ); }
+.cm-mw-template2-ext3-ground { .ground( @template: 1, @ext: 3 ); }
+.cm-mw-template2-link-ground { .ground( @template: 1, @link: 1 ); }
+.cm-mw-template2-ext-link-ground { .ground( @template: 1, @ext: 1, @link: 1 ); }
+.cm-mw-template2-ext2-link-ground { .ground( @template: 1, @ext: 2, @link: 1 ); }
+.cm-mw-template2-ext3-link-ground { .ground( @template: 1, @ext: 3, @link: 1 ); }
+
+.cm-mw-template3-ext-ground { .ground( @template: 2, @ext: 1 ); }
+.cm-mw-template3-ext2-ground { .ground( @template: 2, @ext: 2 ); }
+.cm-mw-template3-ext3-ground { .ground( @template: 2, @ext: 3 ); }
+.cm-mw-template3-link-ground { .ground( @template: 2, @link: 1 ); }
+.cm-mw-template3-ext-link-ground { .ground( @template: 2, @ext: 1, @link: 1 ); }
+.cm-mw-template3-ext2-link-ground { .ground( @template: 2, @ext: 2, @link: 1 ); }
+.cm-mw-template3-ext3-link-ground { .ground( @template: 2, @ext: 3, @link: 1 ); }
+
+.cm-mw-matchingbracket {
+	background-color: #eee;
+	box-shadow: inset 0 0 1px 1px #999;
+	font-weight: bold;
+}

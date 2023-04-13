@@ -5,7 +5,6 @@ namespace CirrusSearch\Maintenance;
 use CirrusSearch\Connection;
 use CirrusSearch\Job\CheckerJob;
 use CirrusSearch\MetaStore\MetaSaneitizeJobStore;
-use CirrusSearch\MetaStore\MetaStoreIndex;
 use CirrusSearch\Profile\SearchProfileService;
 use MediaWiki\MediaWikiServices;
 
@@ -281,22 +280,23 @@ EOD
 
 		$this->metaStores = [];
 		foreach ( $connections as $cluster => $connection ) {
-			if ( !MetaStoreIndex::cirrusReady( $connection ) ) {
+			$store = $this->getMetaStore( $connection );
+			if ( !$store->cirrusReady() ) {
 				$this->fatalError( "No metastore found in cluster $cluster" );
-			}
-			$store = new MetaStoreIndex( $connection, $this, $this->getSearchConfig() );
-			if ( !$store->versionIsAtLeast( [ 1, 0 ] ) ) {
-				$this->fatalError( 'Metastore version is too old, expected at least 1.0' );
 			}
 			$this->metaStores[$cluster] = $store->saneitizeJobStore();
 		}
 	}
 
 	private function initProfile() {
-		$res =
-			$this->getDB( DB_REPLICA )
-				->select( 'page', [ 'MIN(page_id) as min_id', 'MAX(page_id) as max_id' ], [], __METHOD__ );
-		$row = $res->next();
+		$res = $this->getDB( DB_REPLICA )
+			->newSelectQueryBuilder()
+			->select( [ 'min_id' => 'MIN(page_id)', 'max_id' => 'MAX(page_id)' ] )
+			->table( 'page' )
+			->caller( __METHOD__ )
+			->fetchResultSet();
+
+		$row = $res->fetchObject();
 		$this->minId = $row->min_id;
 		$this->maxId = $row->max_id;
 		$profiles =

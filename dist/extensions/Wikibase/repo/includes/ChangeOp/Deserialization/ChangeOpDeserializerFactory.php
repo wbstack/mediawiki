@@ -4,10 +4,12 @@ namespace Wikibase\Repo\ChangeOp\Deserialization;
 
 use Deserializers\Deserializer;
 use Wikibase\DataModel\Entity\EntityIdParser;
+use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\Lib\StringNormalizer;
 use Wikibase\Repo\ChangeOp\FingerprintChangeOpFactory;
 use Wikibase\Repo\ChangeOp\SiteLinkChangeOpFactory;
 use Wikibase\Repo\ChangeOp\StatementChangeOpFactory;
+use Wikibase\Repo\SiteLinkPageNormalizer;
 use Wikibase\Repo\SiteLinkTargetProvider;
 
 /**
@@ -48,6 +50,9 @@ class ChangeOpDeserializerFactory {
 	 */
 	private $statementDeserializer;
 
+	/** @var SiteLinkPageNormalizer */
+	private $siteLinkPageNormalizer;
+
 	/**
 	 * @var SiteLinkTargetProvider
 	 */
@@ -57,6 +62,11 @@ class ChangeOpDeserializerFactory {
 	 * @var EntityIdParser
 	 */
 	private $entityIdParser;
+
+	/**
+	 * @var EntityLookup
+	 */
+	private $entityLookup;
 
 	/**
 	 * @var StringNormalizer
@@ -75,8 +85,10 @@ class ChangeOpDeserializerFactory {
 	 * @param TermChangeOpSerializationValidator $termChangeOpSerializationValidator
 	 * @param SiteLinkBadgeChangeOpSerializationValidator $badgeChangeOpSerializationValidator
 	 * @param Deserializer $statementDeserializer
+	 * @param SiteLinkPageNormalizer $siteLinkPageNormalizer
 	 * @param SiteLinkTargetProvider $siteLinkTargetProvider
 	 * @param EntityIdParser $entityIdParser
+	 * @param EntityLookup $entityLookup
 	 * @param StringNormalizer $stringNormalizer
 	 * @param string[] $siteLinkGroups
 	 */
@@ -87,8 +99,10 @@ class ChangeOpDeserializerFactory {
 		TermChangeOpSerializationValidator $termChangeOpSerializationValidator,
 		SiteLinkBadgeChangeOpSerializationValidator $badgeChangeOpSerializationValidator,
 		Deserializer $statementDeserializer,
+		SiteLinkPageNormalizer $siteLinkPageNormalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
 		EntityIdParser $entityIdParser,
+		EntityLookup $entityLookup,
 		StringNormalizer $stringNormalizer,
 		array $siteLinkGroups
 	) {
@@ -98,8 +112,10 @@ class ChangeOpDeserializerFactory {
 		$this->termChangeOpSerializationValidator = $termChangeOpSerializationValidator;
 		$this->badgeChangeOpSerializationValidator = $badgeChangeOpSerializationValidator;
 		$this->statementDeserializer = $statementDeserializer;
+		$this->siteLinkPageNormalizer = $siteLinkPageNormalizer;
 		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
 		$this->entityIdParser = $entityIdParser;
+		$this->entityLookup = $entityLookup;
 		$this->stringNormalizer = $stringNormalizer;
 		$this->siteLinkGroups = $siteLinkGroups;
 	}
@@ -148,8 +164,10 @@ class ChangeOpDeserializerFactory {
 		return new SiteLinksChangeOpDeserializer(
 			$this->badgeChangeOpSerializationValidator,
 			$this->siteLinkChangeOpFactory,
+			$this->siteLinkPageNormalizer,
 			$this->siteLinkTargetProvider,
 			$this->entityIdParser,
+			$this->entityLookup,
 			$this->stringNormalizer,
 			$this->siteLinkGroups
 		);

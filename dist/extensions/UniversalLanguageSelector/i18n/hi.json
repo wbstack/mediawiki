@@ -2,11 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Goelujjwal",
+			"Saurmandal",
 			"Sfic",
 			"Siddhartha Ghai",
 			"Vdhatterwal",
-			"Vivek Rai",
-			"Saurmandal"
+			"Vivek Rai"
 		]
 	},
 	"uls-desc": "सदस्य को भाषा चुनने और भाषा विकल्प बदलने के कई तरीके देता है",
@@ -71,5 +71,11 @@
 	"ext-uls-setlang-heading": "इंटरफ़ेस की भाषा बदलें?",
 	"ext-uls-setlang-accept": "बदलाव स्वीकार करें",
 	"ext-uls-setlang-loading": "लागू हो रहा है...",
-	"ext-uls-setlang-cancel": "न बदलें"
+	"ext-uls-setlang-cancel": "न बदलें",
+	"ext-uls-actions-menu-header": "अधिक विकल्प",
+	"ext-uls-actions-menu-language-settings-item-label": "भाषा सेटिंग्स खोलें",
+	"ext-uls-empty-state-header": "अभी तक कोई भाषा नहीं है",
+	"ext-uls-empty-state-desc": "इस समय कोई भाषा उपलब्ध नहीं है",
+	"ext-uls-empty-state-header-actions-available": "अभी तक कोई भाषा नहीं है। एक नई भाषा जोड़ें?",
+	"ext-uls-empty-state-desc-actions-available": "सामग्री को अधिक भाषाओं में उपलब्ध कराएँ।"
 }

@@ -35,7 +35,7 @@ class Parsoid {
 	 * @see https://www.mediawiki.org/wiki/Parsoid/API#Content_Negotiation
 	 * @see https://www.mediawiki.org/wiki/Specs/HTML#Versioning
 	 */
-	public const AVAILABLE_VERSIONS = [ '2.4.0', '999.0.0' ];
+	public const AVAILABLE_VERSIONS = [ '2.6.0', '999.0.0' ];
 
 	private const DOWNGRADES = [
 		[ 'from' => '999.0.0', 'to' => '2.0.0', 'func' => 'downgrade999to2' ],
@@ -452,7 +452,7 @@ class Parsoid {
 	): void {
 		foreach ( self::DOWNGRADES as list( 'from' => $dgFrom, 'to' => $dgTo, 'func' => $dgFunc ) ) {
 			if ( $dg['from'] === $dgFrom && $dg['to'] === $dgTo ) {
-				call_user_func( [ 'self', $dgFunc ], $pageBundle );
+				call_user_func( [ self::class, $dgFunc ], $pageBundle );
 
 				// FIXME: Maybe this resolve should just be part of the $dg
 				$pageBundle->version = self::resolveContentVersion( $dg['to'] );

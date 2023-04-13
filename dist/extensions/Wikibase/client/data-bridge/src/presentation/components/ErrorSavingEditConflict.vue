@@ -36,6 +36,7 @@ export default defineComponent( {
 		EventEmittingButton,
 		IconMessageBox,
 	},
+	emits: [ 'reload' ],
 	methods: {
 		reload(): void {
 			/**
@@ -45,6 +46,7 @@ export default defineComponent( {
 			this.$emit( 'reload' );
 		},
 	},
+	compatConfig: { MODE: 3 },
 } );
 </script>
 

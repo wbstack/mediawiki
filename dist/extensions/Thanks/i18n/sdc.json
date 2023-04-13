@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Jun Misugi",
-			"F Samaritani"
+			"F Samaritani",
+			"Jun Misugi"
 		]
 	},
 	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|ringratzià}}}}",

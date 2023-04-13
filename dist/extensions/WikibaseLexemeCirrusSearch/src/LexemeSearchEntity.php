@@ -11,11 +11,9 @@ use Elastica\Query\MatchNone;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Language;
-use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeContent;
-use Wikibase\Lib\LanguageFallbackChainFactory;
-use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookupFactory;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Repo\Api\EntitySearchException;
 use Wikibase\Repo\Api\EntitySearchHelper;
 use Wikibase\Search\Elastic\EntitySearchElastic;
@@ -46,7 +44,7 @@ class LexemeSearchEntity implements EntitySearchHelper {
 	 */
 	protected $userLanguage;
 	/**
-	 * @var LanguageFallbackLabelDescriptionLookupFactory
+	 * @var FallbackLabelDescriptionLookupFactory
 	 */
 	protected $lookupFactory;
 
@@ -59,15 +57,13 @@ class LexemeSearchEntity implements EntitySearchHelper {
 		EntityIdParser $idParser,
 		\WebRequest $request,
 		Language $userLanguage,
-		LanguageFallbackChainFactory $languageFallbackChainFactory,
-		PrefetchingTermLookup $termLookup,
+		FallbackLabelDescriptionLookupFactory $lookupFactory,
 		CirrusDebugOptions $options = null
 	) {
 		$this->idParser = $idParser;
 		$this->request = $request;
 		$this->userLanguage = $userLanguage;
-		$this->lookupFactory = new LanguageFallbackLabelDescriptionLookupFactory(
-			$languageFallbackChainFactory, $termLookup, $termLookup );
+		$this->lookupFactory = $lookupFactory;
 		$this->debugOptions = $options ?? CirrusDebugOptions::fromRequest( $this->request );
 	}
 
@@ -192,14 +188,16 @@ class LexemeSearchEntity implements EntitySearchHelper {
 		$languageCode,
 		$entityType,
 		$limit,
-		$strictLanguage
+		$strictLanguage,
+		?string $profileContext = null
 	) {
+		$profileContext = $profileContext ?? self::CONTEXT_LEXEME_PREFIX;
 		$searcher = new WikibasePrefixSearcher( 0, $limit, $this->debugOptions );
+		$searcher->getSearchContext()->setProfileContext( $profileContext );
 		$query = $this->getElasticSearchQuery( $text, $entityType, $searcher->getSearchContext() );
 
 		$searcher->setResultsType( $this->makeResultType() );
 
-		$searcher->getSearchContext()->setProfileContext( self::CONTEXT_LEXEME_PREFIX );
 		$result = $searcher->performSearch( $query );
 
 		if ( $result->isOK() ) {

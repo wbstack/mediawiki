@@ -1,14 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Ammarpad",
+			"Bello Na'im",
 			"DonCamillo",
+			"Edith Nwobu",
 			"Em-em",
 			"Gwanki",
 			"Salihu aliyu",
-			"Edith Nwobu",
-			"Amire80",
-			"Bello Na'im",
 			"Moyogo"
 		]
 	},
@@ -24,6 +24,7 @@
 	"vector-view-history": "Nuna tarihin",
 	"vector-view-view": "Karanta",
 	"vector-more-actions": "Mafi",
-	"vector-searchsuggest-containing": "Duba shafukan dake dauke da <strong class=\"wvui-typeahead-search__suggestions__footer__text__query\">$1</strong>",
-	"vector-intro-page": "Taimako:Gabatarwa"
+	"vector-searchsuggest-containing": "Duba shafukan dake dauke da <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-intro-page": "Taimako:Gabatarwa",
+	"vector-toc-beginning": "Farawa"
 }

@@ -513,7 +513,7 @@ class SuggestBuilder {
 		// Indices to use for counting max_docs used by scoring functions
 		// Since we work mostly on the content namespace it seems OK to count
 		// only docs in the CONTENT index.
-		$countIndices = [ Connection::CONTENT_INDEX_TYPE ];
+		$countIndices = [ Connection::CONTENT_INDEX_SUFFIX ];
 
 		$indexBaseName = $indexBaseName ?: $connection->getConfig()->get( 'CirrusSearchIndexBaseName' );
 
@@ -521,12 +521,13 @@ class SuggestBuilder {
 		// This is needed for the scoring methods that need
 		// to normalize values against wiki size.
 		$mSearch = new MultiSearch( $connection->getClient() );
-		foreach ( $countIndices as $sourceIndexType ) {
+		foreach ( $countIndices as $sourceIndexSuffix ) {
 			$search = new Search( $connection->getClient() );
 			$search->addIndex(
-				$connection->getIndex( $indexBaseName, $sourceIndexType )
+				$connection->getIndex( $indexBaseName, $sourceIndexSuffix )
 			);
 			$search->getQuery()->setSize( 0 );
+			$search->getQuery()->setTrackTotalHits( true );
 			$mSearch->addSearch( $search );
 		}
 

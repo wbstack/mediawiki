@@ -10,7 +10,8 @@
 			"Thibaut120094",
 			"Yurik",
 			"Yusuke1109",
-			"つぶあん派"
+			"つぶあん派",
+			"春春眠眠"
 		]
 	},
 	"jsonconfig-desc": "JSON設定をwikiに保存できるようにする",
@@ -29,6 +30,7 @@
 	"jsonconfig-type-name-boolean": "ブール型",
 	"jsonconfig-license": "データは$1の下で利用できます。",
 	"jsonconfig-license-name-CC0-1.0": "クリエイティブ・コモンズ・ゼロ",
+	"jsonconfig-license-name-GeoNutzV": "地理データライセンスドイツ",
 	"right-jsonconfig-flush": "API を経由して JsonConfig を操作",
 	"action-jsonconfig-flush": "API 経由での JsonConfig の操作"
 }

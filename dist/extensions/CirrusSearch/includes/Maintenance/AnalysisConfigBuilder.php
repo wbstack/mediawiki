@@ -33,7 +33,7 @@ class AnalysisConfigBuilder {
 	 * and change the minor version when it changes but isn't
 	 * incompatible.
 	 *
-	 * You may also need to increment MetaStoreIndex::METASTORE_MAJOR_VERSION
+	 * You may also need to increment MetaStoreIndex::METASTORE_VERSION
 	 * manually as well.
 	 */
 	public const VERSION = '0.12';
@@ -690,6 +690,13 @@ class AnalysisConfigBuilder {
 			break;
 
 		// customized languages
+		case 'bengali': // Unpack Bengali analyzer T294067
+			$config = ( new AnalyzerBuilder( $langName ) )->
+				withUnpackedAnalyzer()->
+				insertFiltersBefore( 'bengali_stop',
+					[ 'decimal_digit', 'indic_normalization' ] )->
+				build( $config );
+			break;
 		case 'bosnian':
 		case 'croatian':
 		case 'serbian':
@@ -1050,6 +1057,22 @@ class AnalysisConfigBuilder {
 		case 'turkish':
 			$config[ 'filter' ][ 'lowercase' ][ 'language' ] = 'turkish';
 			break;
+		case 'nias':
+			$config[ 'char_filter' ][ 'apostrophe_norm' ] =
+				AnalyzerBuilder::mappingCharFilter( [
+					"‘=>'",
+					"’=>'",
+					"`=>'",
+					"ʼ=>'",
+					"ʿ=>'",
+					"ʾ=>'",
+				] );
+
+			$config = ( new AnalyzerBuilder( $langName ) )->
+				withFilters( [ 'lowercase' ] )->
+				withCharFilters( [ 'apostrophe_norm' ] )->
+				build( $config );
+			break;
 		default:
 			// do nothing--default config is already set up
 			break;
@@ -1178,13 +1201,7 @@ class AnalysisConfigBuilder {
 	private function resolveFilters( array &$config, array $standardFilters, array $defaultFilters, $prefix ) {
 		$resultFilters = [];
 		foreach ( $config[ 'filter' ] as $name => $filter ) {
-			$existingFilter = null;
-			if ( isset( $standardFilters[ $name ] ) ) {
-				$existingFilter = $standardFilters[ $name ];
-			} elseif ( isset( $defaultFilters[ $name ] ) ) {
-				$existingFilter = $defaultFilters[ $name ];
-			}
-
+			$existingFilter = $standardFilters[$name] ?? $defaultFilters[$name] ?? null;
 			if ( $existingFilter ) { // Filter with this name already exists
 				if ( $existingFilter != $filter ) {
 					// filter with the same name but different config - need to
@@ -1349,6 +1366,7 @@ class AnalysisConfigBuilder {
 		'ar' => 'arabic',
 		'hy' => 'armenian',
 		'eu' => 'basque',
+		'bn' => 'bengali',
 		'pt-br' => 'brazilian',
 		'bg' => 'bulgarian',
 		'ca' => 'catalan',
@@ -1376,6 +1394,7 @@ class AnalysisConfigBuilder {
 		'ms' => 'malay',
 		'mwl' => 'mirandese',
 		'nb' => 'norwegian',
+		'nia' => 'nias',
 		'nn' => 'norwegian',
 		'fa' => 'persian',
 		'pt' => 'portuguese',
@@ -1393,6 +1412,7 @@ class AnalysisConfigBuilder {
 	 * can be enabled by default
 	 */
 	private $languagesWithIcuFolding = [
+		'bn' => true,
 		'bs' => true,
 		'ca' => true,
 		'cs' => true,

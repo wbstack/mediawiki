@@ -13,6 +13,7 @@ use ExtensionRegistry;
 use Html;
 use IContextSource;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\ResourceLoader as RL;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Widget\TitleInputWidget;
@@ -26,9 +27,9 @@ use OutputPage;
 use ParserOptions;
 use ParserOutput;
 use RequestContext;
-use ResourceLoaderContext;
 use Title;
 use WebRequest;
+use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ScopedCallback;
 use Xml;
 
@@ -135,7 +136,8 @@ class Hooks {
 
 		try {
 			if ( $editpage->sectiontitle !== '' ) {
-				$sectionTitle = $editpage->sectiontitle;
+				// TODO (T314475): If sectiontitle is null this uses '' rather than summary; is that wanted?
+				$sectionTitle = $editpage->sectiontitle ?? '';
 			} else {
 				$sectionTitle = $editpage->summary;
 			}
@@ -223,7 +225,7 @@ class Hooks {
 				'h2', [ 'id' => 'mw-previewheader' ],
 				$context->msg( 'templatesandbox-preview', $title->getPrefixedText(), $dtitle )->parse()
 			) .
-			Html::rawElement( 'div', [ 'class' => 'warningbox' ],
+			Html::warningBox(
 				$output->parseAsInterface( $note )
 			)
 		);
@@ -391,24 +393,24 @@ class Hooks {
 
 		$params += [
 			'templatesandboxprefix' => [
-				ApiBase::PARAM_TYPE => 'string',
-				ApiBase::PARAM_ISMULTI => true,
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_ISMULTI => true,
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-prefix',
 			],
 			'templatesandboxtitle' => [
-				ApiBase::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_TYPE => 'string',
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-title',
 			],
 			'templatesandboxtext' => [
-				ApiBase::PARAM_TYPE => 'text',
+				ParamValidator::PARAM_TYPE => 'text',
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-text',
 			],
 			'templatesandboxcontentmodel' => [
-				ApiBase::PARAM_TYPE => ContentHandler::getContentModels(),
+				ParamValidator::PARAM_TYPE => ContentHandler::getContentModels(),
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-contentmodel',
 			],
 			'templatesandboxcontentformat' => [
-				ApiBase::PARAM_TYPE => ContentHandler::getAllContentFormats(),
+				ParamValidator::PARAM_TYPE => ContentHandler::getAllContentFormats(),
 				ApiBase::PARAM_HELP_MSG => 'templatesandbox-apihelp-contentformat',
 			],
 		];
@@ -544,7 +546,7 @@ class Hooks {
 	 * Function that returns an array of valid namespaces to show the page
 	 * preview form on for the ResourceLoader
 	 *
-	 * @param ResourceLoaderContext $context
+	 * @param RL\Context $context
 	 * @param Config $config
 	 * @return array
 	 */

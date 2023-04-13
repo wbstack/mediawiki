@@ -11,7 +11,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.37.0",
+		"MediaWiki": ">= 1.39.0",
 		"extensions": {
 			"Elastica": ">= 6.0.1"
 		}
@@ -115,6 +115,7 @@
 	"Hooks": {
 		"APIAfterExecute": "CirrusSearch\\Hooks::onAPIAfterExecute",
 		"ApiBeforeMain": "CirrusSearch\\Hooks::onApiBeforeMain",
+		"APIQuerySiteInfoStatisticsInfo": "CirrusSearch\\Hooks::onAPIQuerySiteInfoStatisticsInfo",
 		"ArticleDelete": "CirrusSearch\\Hooks::onArticleDelete",
 		"ArticleDeleteComplete": "CirrusSearch\\Hooks::onArticleDeleteComplete",
 		"ArticleRevisionVisibilitySet": "CirrusSearch\\Hooks::onRevisionDelete",
@@ -128,7 +129,10 @@
 		"MediaWikiServices": "CirrusSearch\\Hooks::onMediaWikiServices",
 		"PrefixSearchExtractNamespace": "CirrusSearch\\Hooks::onPrefixSearchExtractNamespace",
 		"ResourceLoaderGetConfigVars": "CirrusSearch\\Hooks::onResourceLoaderGetConfigVars",
-		"SearchIndexFields": "CirrusSearch\\Wikimedia\\WeightedTagsHooks::onSearchIndexFields",
+		"SearchIndexFields": [
+			"CirrusSearch\\Wikimedia\\WeightedTagsHooks::onSearchIndexFields",
+			"CirrusSearch\\Hooks\\CustomPageFields::onSearchIndexFields"
+		],
 		"SearchGetNearMatch": "CirrusSearch\\Hooks::onSearchGetNearMatch",
 		"ShowSearchHitTitle": "CirrusSearch\\Hooks::onShowSearchHitTitle",
 		"SoftwareInfo": "CirrusSearch\\Hooks::onSoftwareInfo",
@@ -143,7 +147,9 @@
 	"HookHandlers": {
 		"default": {
 			"class": "CirrusSearch\\Hooks",
-			"services": [ "ConfigFactory" ]
+			"services": [
+				"ConfigFactory"
+			]
 		}
 	},
 	"config": {
@@ -166,6 +172,10 @@
 		"CirrusSearchWriteIsolateClusters": {
 			"value": null
 		},
+		"CirrusSearchElasticaWritePartitionCounts": {
+			"description": "Mapping from writable cluster name to number of partitions. Defaults to 1 if not set.",
+			"value": []
+		},
 		"CirrusSearchPrivateClusters": {
 			"value": null
 		},
@@ -180,10 +190,10 @@
 		},
 		"CirrusSearchShardCount": {
 			"value": {
-				"content": 4,
-				"general": 4,
-				"archive": 4,
-				"titlesuggest": 4
+				"content": 1,
+				"general": 1,
+				"archive": 1,
+				"titlesuggest": 1
 			}
 		},
 		"CirrusSearchReplicas": {
@@ -212,6 +222,9 @@
 		},
 		"CirrusSearchQueryStringMaxDeterminizedStates": {
 			"value": null
+		},
+		"CirrusSearchQueryStringMaxWildcards": {
+			"value": 3
 		},
 		"CirrusSearchNamespaceMappings": {
 			"value": [],
@@ -480,9 +493,6 @@
 		"CirrusSearchFeedbackLink": {
 			"value": false
 		},
-		"CirrusSearchDropDelayedJobsAfter": {
-			"value": 172800
-		},
 		"CirrusSearchWriteBackoffExponent": {
 			"value": 6
 		},
@@ -678,6 +688,14 @@
 		},
 		"CirrusSearchAutomationCIDRs": {
 			"description": "List of CIDR strings used to identify automated requests",
+			"value": []
+		},
+		"CirrusSearchCustomPageFields": {
+			"description": "Defines additional custom fields for page indexes",
+			"value": []
+		},
+		"CirrusSearchExtraFieldsInSearchResults": {
+			"description": "Defines extra fields to add to each result",
 			"value": []
 		}
 	},

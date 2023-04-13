@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Repo\Api;
 
 use ApiMain;
+use OutOfBoundsException;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
@@ -18,7 +19,9 @@ use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\ChangeOp\Deserialization\ChangeOpDeserializationException;
 use Wikibase\Repo\ChangeOp\Deserialization\SiteLinkBadgeChangeOpSerializationValidator;
 use Wikibase\Repo\ChangeOp\SiteLinkChangeOpFactory;
+use Wikibase\Repo\SiteLinkPageNormalizer;
 use Wikibase\Repo\SiteLinkTargetProvider;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * API module to associate a page on a site with a Wikibase entity or remove an already made such association.
@@ -38,6 +41,9 @@ class SetSiteLink extends ModifyEntity {
 	 */
 	private $badgeSerializationValidator;
 
+	/** @var SiteLinkPageNormalizer */
+	private $siteLinkPageNormalizer;
+
 	/**
 	 * @var SiteLinkTargetProvider
 	 */
@@ -53,6 +59,7 @@ class SetSiteLink extends ModifyEntity {
 		string $moduleName,
 		SiteLinkChangeOpFactory $siteLinkChangeOpFactory,
 		SiteLinkBadgeChangeOpSerializationValidator $badgeSerializationValidator,
+		SiteLinkPageNormalizer $siteLinkPageNormalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
 		bool $federatedPropertiesEnabled,
 		array $sandboxEntityIds
@@ -61,6 +68,7 @@ class SetSiteLink extends ModifyEntity {
 
 		$this->siteLinkChangeOpFactory = $siteLinkChangeOpFactory;
 		$this->badgeSerializationValidator = $badgeSerializationValidator;
+		$this->siteLinkPageNormalizer = $siteLinkPageNormalizer;
 		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
 		$this->sandboxEntityIds = $sandboxEntityIds;
 	}
@@ -71,6 +79,7 @@ class SetSiteLink extends ModifyEntity {
 		ChangeOpFactoryProvider $changeOpFactoryProvider,
 		SettingsArray $repoSettings,
 		SiteLinkBadgeChangeOpSerializationValidator $siteLinkBadgeChangeOpSerializationValidator,
+		SiteLinkPageNormalizer $siteLinkPageNormalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider
 	): self {
 
@@ -80,6 +89,7 @@ class SetSiteLink extends ModifyEntity {
 			$changeOpFactoryProvider
 				->getSiteLinkChangeOpFactory(),
 			$siteLinkBadgeChangeOpSerializationValidator,
+			$siteLinkPageNormalizer,
 			$siteLinkTargetProvider,
 			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
 			$repoSettings->getSetting( 'sandboxEntityIds' )
@@ -175,17 +185,20 @@ class SetSiteLink extends ModifyEntity {
 				);
 			}
 
-			if ( isset( $preparedParameters['linktitle'] ) ) {
-				$page = $site->normalizePageName( $this->stringNormalizer->trimWhitespace( $preparedParameters['linktitle'] ) );
+			$effectiveLinkTitle = isset( $preparedParameters['linktitle'] )
+				? $this->stringNormalizer->trimWhitespace( $preparedParameters['linktitle'] )
+				: $this->getLinkTitleFromExistingSiteLink( $entity, $linksite );
+			$page = $this->siteLinkPageNormalizer->normalize(
+				$site,
+				$effectiveLinkTitle,
+				$preparedParameters['badges'] ?? []
+			);
 
-				if ( $page === false ) {
-					$this->errorReporter->dieWithError(
-						[ 'wikibase-api-no-external-page', $linksite, $preparedParameters['linktitle'] ],
-						'no-external-page'
-					);
-				}
-			} else {
-				$page = null;
+			if ( $page === false ) {
+				$this->errorReporter->dieWithError(
+					[ 'wikibase-api-no-external-page', $linksite, $effectiveLinkTitle ],
+					'no-external-page'
+				);
 			}
 
 			$badges = ( isset( $preparedParameters['badges'] ) )
@@ -194,6 +207,22 @@ class SetSiteLink extends ModifyEntity {
 
 			return $this->siteLinkChangeOpFactory->newSetSiteLinkOp( $linksite, $page, $badges );
 		}
+	}
+
+	private function getLinkTitleFromExistingSiteLink( EntityDocument $entity, string $linksite ) {
+		if ( !( $entity instanceof Item ) ) {
+			$this->errorReporter->dieWithError( "The given entity is not an item", "not-item" );
+		}
+		$item = $entity;
+		try {
+			$siteLink = $item->getSiteLinkList()->getBySiteId( $linksite );
+		} catch ( OutOfBoundsException $ex ) {
+			$this->errorReporter->dieWithError(
+				[ 'wikibase-validator-no-such-sitelink', $linksite ],
+				'no-such-sitelink'
+			);
+		}
+		return $siteLink->getPageName();
 	}
 
 	private function parseSiteLinkBadges( array $badges ): array {
@@ -222,15 +251,15 @@ class SetSiteLink extends ModifyEntity {
 			parent::getAllowedParams(),
 			[
 				'linksite' => [
-					self::PARAM_TYPE => $siteIds,
-					self::PARAM_REQUIRED => true,
+					ParamValidator::PARAM_TYPE => $siteIds,
+					ParamValidator::PARAM_REQUIRED => true,
 				],
 				'linktitle' => [
-					self::PARAM_TYPE => 'string',
+					ParamValidator::PARAM_TYPE => 'string',
 				],
 				'badges' => [
-					self::PARAM_TYPE => array_keys( $this->badgeItems ),
-					self::PARAM_ISMULTI => true,
+					ParamValidator::PARAM_TYPE => array_keys( $this->badgeItems ),
+					ParamValidator::PARAM_ISMULTI => true,
 				],
 			]
 		);

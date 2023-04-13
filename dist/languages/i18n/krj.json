@@ -1,13 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Harvzsf",
 			"Joebertj",
 			"Jose77",
 			"Oxyzen",
 			"RonaldPanaligan",
 			"TMg",
-			"Amire80",
 			"Pare Mo"
 		]
 	},
@@ -118,6 +118,7 @@
 	"printableversion": "Bersyon nga sarang ma-''print''",
 	"permalink": "Permanyente nga ''link''",
 	"print": "Printa",
+	"skin-view-foreign": "Tërëkën sa $1",
 	"edit": "Iislan",
 	"create": "Himui",
 	"create-local": "Magdugang kang lokal nga deskripsiyon",
@@ -158,7 +159,6 @@
 	"ok": "OK dun",
 	"youhavenewmessages": "May rudyan kaw nga $1 ($2).",
 	"newmessageslinkplural": "{{PLURAL:$1|ka bag·o nga mensahe|999=ka bag·o nga mensahe}}",
-	"youhavenewmessagesmulti": "May rudyan kaw nga manga bag-o nga mensahe sa $1",
 	"editsection": "iislan",
 	"editold": "iislan",
 	"viewsourceold": "tërëkën ang kodigo ''source''",
@@ -192,6 +192,7 @@
 	"filenotfound": "Indi makita ang ''file'' nga \"$1\".",
 	"badtitle": "Indî maayo nga pamunò",
 	"viewsource": "Tërëkën ang kodigo ''source''",
+	"skin-action-viewsource": "Tërëkën ang kodigo ''source''",
 	"userlogin-yourname": "Ngaran pangmanuggamit",
 	"userlogin-yourname-ph": "Isëlëd ang imo nga ngaran pangmanuggamit",
 	"yourpassword": "Kontrasenya:",
@@ -352,6 +353,8 @@
 	"nolinkshere": "Warâ’t pahina nga nagasugpon sa <strong>$2</strong>.",
 	"isredirect": "idaho ang pahina",
 	"isimage": "sugpon sa fayl",
+	"whatlinkshere-hideredirs": "Taguon ang manga redireksiyon",
+	"whatlinkshere-hidelinks": "Taguon ang manga sugpon",
 	"ipblocklist-submit": "Sagap",
 	"infiniteblock": "infinito",
 	"blocklink": "blokeara",

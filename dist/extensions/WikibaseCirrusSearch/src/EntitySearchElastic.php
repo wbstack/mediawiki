@@ -107,7 +107,6 @@ class EntitySearchElastic implements EntitySearchHelper {
 	 * @param array $contentModelMap Maps entity type => content model name
 	 * @param WebRequest|null $request Web request context
 	 * @param CirrusDebugOptions|null $options
-	 * @throws \MWException
 	 */
 	public function __construct(
 		LanguageFallbackChainFactory $languageChainFactory,
@@ -155,8 +154,8 @@ class EntitySearchElastic implements EntitySearchHelper {
 	private function loadProfile( SearchContext $context, $languageCode ) {
 		$profile = $context->getConfig()
 			->getProfileService()
-			->loadProfile( self::WIKIBASE_PREFIX_QUERY_BUILDER, self::CONTEXT_WIKIBASE_PREFIX, null, [
-				'language' => $languageCode ] );
+			->loadProfile( self::WIKIBASE_PREFIX_QUERY_BUILDER, $context->getProfileContext(), null,
+				$context->getProfileContextParams() );
 
 		// Set some bc defaults for properties that didn't always exist.
 		$profile['tie-breaker'] = $profile['tie-breaker'] ?? 0;
@@ -290,9 +289,14 @@ class EntitySearchElastic implements EntitySearchHelper {
 		$languageCode,
 		$entityType,
 		$limit,
-		$strictLanguage
+		$strictLanguage,
+		string $profileContext = null
 	) {
+		$profileContext = $profileContext ?? self::CONTEXT_WIKIBASE_PREFIX;
 		$searcher = new WikibasePrefixSearcher( 0, $limit, $this->debugOptions );
+		$searcher->getSearchContext()->setProfileContext(
+			$profileContext,
+			[ 'language' => $languageCode ] );
 		$query = $this->getElasticSearchQuery( $text, $languageCode, $entityType, $strictLanguage,
 				$searcher->getSearchContext() );
 
@@ -302,9 +306,6 @@ class EntitySearchElastic implements EntitySearchHelper {
 			$this->languageChainFactory->newFromLanguage( $this->userLang )
 		) );
 
-		$searcher->getSearchContext()->setProfileContext(
-			self::CONTEXT_WIKIBASE_PREFIX,
-			[ 'language' => $languageCode ] );
 		$result = $searcher->performSearch( $query );
 
 		if ( $result->isOK() ) {

@@ -41,7 +41,6 @@
 	"wikieditor-toolbar-tool-link-int-target-status-notexists": "ایہہ {{SITENAME}} تے صفحہ نہیں ہیگا سی۔",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "سرلیکھ وچ حسے منع ہیگے سی۔",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "باہری جوڑ",
-	"wikieditor-toolbar-tool-link-int-target-status-loading": "صفحہ ہون دی کھوج",
 	"wikieditor-toolbar-tool-link-int-invalid": "سرلیکھ وچ حسے منع ہیگے سی۔",
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "یو آر ایل تسیں دسی اے لگدا اے کسے ہور وکی نال جوڑ اے۔ کیا تسیں اینوں کسے اندرلے جوڑ نال جوڑنا چاندے او؟",
 	"wikieditor-toolbar-tool-link-lookslikeinternal-int": "اندرونی جوڑ",
@@ -190,5 +189,6 @@
 	"wikieditor-toolbar-help-content-signature-result": "<a href='#' title='$1:Username'>ورتن ناں</a> (<a href='#' title='$2:Username'>talk</a>)",
 	"wikieditor-toolbar-help-content-indent-description": "انڈنٹ",
 	"wikieditor-toolbar-help-content-indent-syntax": "نارمل لکھت<br />:ودی لکھت<br />::ودی لکھت",
-	"wikieditor-toolbar-help-content-indent-result": "نارمل لکھت<dl><dd>ودی لکھت<dl><dd>ودی لکھت</dd></dl></dd></dl>"
+	"wikieditor-toolbar-help-content-indent-result": "نارمل لکھت<dl><dd>ودی لکھت<dl><dd>ودی لکھت</dd></dl></dd></dl>",
+	"wikieditor-realtimepreview-onboarding-button": "آہو، ٹھیک اے"
 }

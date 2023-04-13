@@ -1,14 +1,16 @@
 ---
 STACK_VERSION:
-  - 6.8.16
+  - 7.11.0-SNAPSHOT
   
 PHP_VERSION:
   - 8.0-cli
   - 7.4-cli
   - 7.3-cli
+  - 7.2-cli
+  - 7.1-cli
 
 TEST_SUITE:
-  - oss
-  - xpack
+  - free
+  - platinum
 
 exclude: ~

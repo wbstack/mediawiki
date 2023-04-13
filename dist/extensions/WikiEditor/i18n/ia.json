@@ -36,7 +36,6 @@
 	"wikieditor-toolbar-tool-link-int-target-status-notexists": "Iste pagina non existe sur {{SITENAME}}",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "Le titulo que tu ha specificate es invalide",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "Ligamine externe",
-	"wikieditor-toolbar-tool-link-int-target-status-loading": "Verifica existentia del pagina...",
 	"wikieditor-toolbar-tool-link-int-target-status-disambig": "Iste pagina non es un pagina de contento, ma un lista de subjectos con nomines similar",
 	"wikieditor-toolbar-tool-link-int-invalid": "Le titulo que tu specificava es invalide.",
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "Le URL que tu specificava pare esser intendite como ligamine a un altere pagina wiki.\nVole tu facer lo un ligamine interne?",
@@ -193,5 +192,14 @@
 	"wikieditor-toolbar-help-content-indent-syntax": "Texto normal<br />:Texto indentate<br />::Texto indentate",
 	"wikieditor-toolbar-help-content-indent-result": "Texto normal<dl><dd>Texto indentate<dl><dd>Texto indentate</dd></dl></dd></dl>",
 	"tag-wikieditor-description": "Modification facite con [[mw:Special:MyLanguage/Extension:WikiEditor|WikiEditor]] (editor de wikitexto de 2010)",
-	"wikieditor-realtimepreview-preview": "Previsualisation"
+	"wikieditor-realtimepreview-preview": "Previsualisation",
+	"wikieditor-realtimepreview-error": "Le previsualisation non se carga",
+	"wikieditor-realtimepreview-reload": "Recargar",
+	"wikieditor-realtimepreview-beta-label": "Previsualisation in tempore real",
+	"wikieditor-realtimepreview-beta-desc": "Vider como le cambiamentos de wikitexto apparera al lectores in le [[mw:Special:MyLanguage/Extension:WikiEditor|editor de 2010]].",
+	"wikieditor-realtimepreview-reload-title": "Recargar le pannello de previsualisation in tempore real",
+	"wikieditor-realtimepreview-manual": "Per favor recarga ora pro previsualisar manualmente tu modificationes.",
+	"wikieditor-realtimepreview-onboarding-title": "Previsualisation in tempore real",
+	"wikieditor-realtimepreview-onboarding-body": "Vide como tu modificationes apparera al lectores, previsualisante los in tempore real.",
+	"wikieditor-realtimepreview-onboarding-button": "Ben, io comprende"
 }

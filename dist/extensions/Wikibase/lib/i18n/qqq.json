@@ -6,6 +6,7 @@
 			"Jeblad",
 			"Liuxinyu970226",
 			"Lloffiwr",
+			"Lucas Werkmeister",
 			"Metalhead64",
 			"Mormegil",
 			"Nemo bis",
@@ -15,8 +16,7 @@
 			"Siebrand",
 			"Umherirrender",
 			"Verdy p",
-			"Waldir",
-			"Lucas Werkmeister"
+			"Waldir"
 		]
 	},
 	"specialpages-group-wikibase": "{{doc-special-group|that=are related to the Wikibase extension|like=[[Special:NewItem]], [[Special:UnconnectedPages]], [[Special:NewProperty]], [[Special:ItemByTitle]], [[Special:ItemDisambiguation]], [[Special:ItemsWithoutSitelinks]], [[Special:SetLabel]], [[Special:SetDescription]], [[Special:SetAliases]], [[Special:EntitiesWithoutLabel]], [[Special:EntityData]], [[Special:ListDatatypes]], [[Special:DispatchStats]]}}\nSee example: [[d:Special:SpecialPages#mw-specialpagesgroup-wikibase|d:Special:SpecialPages]]\n{{Identical|Wikibase}}",

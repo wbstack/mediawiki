@@ -4,6 +4,8 @@ namespace CirrusSearch;
 
 use CirrusSearch\Search\SearchMetricsProvider;
 use Elastica\Exception\ExceptionInterface;
+use Elastica\Exception\ResponseException;
+use Elastica\Exception\RuntimeException;
 use Elastica\Multi\ResultSet as MultiResultSet;
 use Elastica\Multi\Search;
 use ISearchResultSet;
@@ -218,11 +220,19 @@ abstract class ElasticsearchIntermediary {
 			$logType = $log->getDescription();
 		}
 		list( $status, $message ) = ElasticaErrorHandler::extractMessageAndStatus( $exception );
-		$context['error_message'] = $message;
+		// This could be multiple MB if the failure is coming from an update
+		// script, as the whole update script is returned in the error
+		// including the parameters. Truncate to a reasonable level so
+		// downstream log processing doesn't truncate them (and then fail to
+		// parse the truncated json). Take the first 4k to leave plenty of room for
+		// whatever else.
+		$context['error_message'] = mb_substr( $message, 0, 4096 );
 
 		$stats = Util::getStatsDataFactory();
 		$type = ElasticaErrorHandler::classifyError( $exception );
 		$clusterName = $connection->getClusterName();
+		$context['cirrussearch_error_type'] = $type;
+
 		$stats->increment( "CirrusSearch.$clusterName.backend_failure.$type" );
 
 		LoggerFactory::getInstance( 'CirrusSearch' )->warning(
@@ -380,19 +390,22 @@ abstract class ElasticsearchIntermediary {
 		$this->start( $log );
 		try {
 			$multiResultSet = $search->search();
+			$lastRequest = $connection->getClient()->getLastRequest();
 			if ( !$multiResultSet->getResponse()->isOk() ) {
 				// bad response from server. Should elastica be throwing an exception for this?
-				return $this->failure( new \Elastica\Exception\ResponseException(
-					$connection->getClient()->getLastRequest(),
-					$multiResultSet->getResponse()
-				), $connection );
+				if ( $lastRequest !== null ) {
+					return $this->failure( new ResponseException( $lastRequest, $multiResultSet->getResponse() ), $connection );
+				} else {
+					return $this->failure( new RuntimeException( "Client::getLastRequest() should not be null" ), $connection );
+				}
 			}
 			foreach ( $multiResultSet->getResultSets() as $resultSet ) {
 				if ( $resultSet->getResponse()->hasError() ) {
-					return $this->failure( new \Elastica\Exception\ResponseException(
-						$connection->getClient()->getLastRequest(),
-						$resultSet->getResponse()
-					), $connection );
+					if ( $lastRequest !== null ) {
+						return $this->failure( new ResponseException( $lastRequest, $resultSet->getResponse() ), $connection );
+					} else {
+						return $this->failure( new RuntimeException( "Client::getLastRequest() should not be null" ), $connection );
+					}
 				}
 			}
 

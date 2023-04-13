@@ -5,9 +5,9 @@
 			"Fohanno",
 			"Fulup",
 			"Gwenn-Ael",
+			"Huñvreüs",
 			"Pymouss",
-			"Y-M D",
-			"Huñvreüs"
+			"Y-M D"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Hag-eñ emañ un implijer oc’h aozañ gant an etrefas hezoug",
@@ -172,6 +172,7 @@
 	"mobile-frontend-talk-reply": "Respont",
 	"mobile-frontend-talk-reply-info": "Notit e vo sinet ho respont ent emgefreek gant ho anv implijer.",
 	"mobile-frontend-talk-topic-error": "N’eo ket bet posubl ouzhpennañ an danvez abalamour d’ur fazi dianav.",
+	"mobile-frontend-talk-topic-error-protected": "Gwarazet eo ar bajenn goazel-mañ. N’oc’h ket aotreet da ouzhpennañ danvez enni.",
 	"mobile-frontend-talk-topic-error-permission": "N’eo ket bet posubl ouzhpennañ an danvez. N’oc’h ket aotreet kemmañ pajennoù.",
 	"mobile-frontend-talk-topic-error-spam": "Nac’haet eo bet an danvez peogwir ez eus un tamm strob ennañ.",
 	"mobile-frontend-talk-topic-error-badtoken": "Ur fazi e oa er servijer. Ne c’hell ket ho kemm bezañ enrollet. Klaskit askargañ ar bajenn-mañ.",

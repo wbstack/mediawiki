@@ -12,6 +12,7 @@
 	"rest-nonexistent-title-revision": "Navedena redakcija ($1) ne obstaja za izbrano stran ($2)",
 	"rest-nonexistent-revision": "Navedena redakcija ($1) ne obstaja",
 	"rest-nonexistent-user": "Navedeni uporabnik ($1) ne obstaja",
+	"rest-invalid-user": "Navedeno uporabniško ime ($1) je neveljavno",
 	"rest-permission-denied-anon": "Ni dostopno za anonimne uporabnike",
 	"rest-permission-denied-title": "Uporabnik nima pravice do branja naslova ($1)",
 	"rest-permission-denied-revision": "Uporabnik nima dostopa do zahtevane redakcije ($1).",
@@ -40,5 +41,7 @@
 	"rest-update-cannot-create-page": "Strani »$1« ni mogoče ustvariti, ker že obstaja. Za posodobitev obstoječe strani navedite ID osnovne redakcije v strukturi v telesu zahtevka pod ključem »latest« (najnovejše).",
 	"rest-extraneous-csrf-token": "Najden je bil odvečen žeton CSRF. Žetoni CSRF se pri uporabi avtentikacijskih mehanizmov, kot je OAuth, ki so varni pred napadi CSRF, ne smejo uporabljati.",
 	"rest-cannot-load-file": "Datoteke za naslov »$1« ni mogoče naložiti.",
-	"rest-cross-origin-anon-write": "Anonimni zahtevki za zapisovanje iz drugega izvora niso dovoljeni."
+	"rest-cross-origin-anon-write": "Anonimni zahtevki za zapisovanje iz drugega izvora niso dovoljeni.",
+	"rest-requires-safe-against-csrf": "Ta končna točka zahteva ponudnika, ki zagotavlja zaščito pred ugrabitvijo sej (CSRF).",
+	"rest-badtoken": "Predloženi žeton CSRF je neveljaven."
 }

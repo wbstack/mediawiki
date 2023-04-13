@@ -1,5 +1,6 @@
 ---
-mediawikiVersion: "1.38"
+mediawikiVersion: "1.39"
+mediawikiRepoRef: 2fdadd4096268cebab8fbc2f245dd441e2f05536
 mediawikiRemove:
   - docs
   - extensions/README
@@ -29,8 +30,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-RevisionSlider
   - name: Mailgun
     repoName: wikimedia/mediawiki-extensions-Mailgun
-  - name: StopForumSpam
-    repoName: wikimedia/mediawiki-extensions-StopForumSpam
   - name: SpamBlacklist
     repoName: wikimedia/mediawiki-extensions-SpamBlacklist
   - name: ConfirmEdit
@@ -140,7 +139,7 @@ extensions:
   # Using our own archive repo temporarily for our Federated Properties endeavour
   # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/7393f131282bde327787035d5b9dc0046573609b/wikibase-1679395384-REL1_38.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/f5be8c3e515b6c3445fdbdd6a8153ae157470250/wikibase-1679416210-REL1_39.tar.gz
     remove:
       - build
       - vendor
@@ -165,6 +164,11 @@ extensions:
       - lib/.phan
       - lib/.storybook
       - lib/.vscode
+  # It looks like StopForumSpam inadvertently introduced a dependency on AbuseFilter in REL1_39 (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/3639e0120d53bf5643de57dc6e94293f69680e9f)
+  # AFAIK it should be possible to run StopForumSpam without AbuseFilter installed (https://www.mediawiki.org/wiki/Extension:StopForumSpam#AbuseFilter_integration)
+  # A subsequent patch, only available in REL1_40, appears to removes this dependency again (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/5e3aab6e8be0e8effa97f9b454020230b6a70e3d)
+  - name: StopForumSpam
+    url: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
   # EmbedVideo is currently broken in releases due to deprecated warnings https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/issues/4784
   # There was a MR up for fixing that https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/merge_requests/148 so lets directly use that commit?
   # We were using v2.9.0 before this

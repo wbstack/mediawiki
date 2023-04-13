@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Amire80",
-			"Teitei Para",
 			"Laitei",
-			"Taytay"
+			"Taytay",
+			"Teitei Para"
 		]
 	},
 	"uls-desc": "Reihchâ taopathinazy paraih awpa nata reihchâ atly awpa ta hmâhtuhpa hnota lâpi hluhpi a pie",
@@ -69,5 +69,11 @@
 	"ext-uls-setlang-heading": "Chhôhhmia reihchâ pathlai?",
 	"ext-uls-setlang-accept": "Âthlaina apyh teh",
 	"ext-uls-setlang-loading": "Thla hai...",
-	"ext-uls-setlang-cancel": "Pathlai khâ"
+	"ext-uls-setlang-cancel": "Pathlai khâ",
+	"ext-uls-actions-menu-header": "Khotlyna hluhviazy",
+	"ext-uls-actions-menu-language-settings-item-label": "Reihchâ taopathinazy pahy",
+	"ext-uls-empty-state-header": "Reihchâ y tlâ mâh vei",
+	"ext-uls-empty-state-desc": "Tahmâ châta ahmôpa reihchâ y tlâ vei",
+	"ext-uls-empty-state-header-actions-available": "Reihchâ y tlâ mâh vei. Athiehpa sâkha khô teh?",
+	"ext-uls-empty-state-desc-actions-available": "Reihchâ hluhviazy lâta atlohpazy pahmôsa teh."
 }

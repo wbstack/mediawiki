@@ -38,7 +38,6 @@
 	"wikieditor-toolbar-tool-link-int-target-status-notexists": "Sida finst ikkje",
 	"wikieditor-toolbar-tool-link-int-target-status-invalid": "Ugyldig tittel",
 	"wikieditor-toolbar-tool-link-int-target-status-external": "Ekstern lenkje",
-	"wikieditor-toolbar-tool-link-int-target-status-loading": "Ser etter om sida finst...",
 	"wikieditor-toolbar-tool-link-int-target-status-disambig": "Fleirtydingsside",
 	"wikieditor-toolbar-tool-link-int-invalid": "Tittelen du oppgav er ikkje gyldig.",
 	"wikieditor-toolbar-tool-link-lookslikeinternal": "URL-en du oppgav ser ut til å vera meint som ei lenkje til ei anna wikiside. Ynskjer du å gjera han til ei intern lenkje?",
@@ -186,5 +185,11 @@
 	"wikieditor-toolbar-help-content-indent-description": "Innrykk",
 	"wikieditor-toolbar-help-content-indent-syntax": "Normal tekst<br />:Tekst med innrykk<br />::Tekst med innrykk",
 	"wikieditor-toolbar-help-content-indent-result": "Normal tekst<dl><dd>Tekst med innrykk<dl><dd>Tekst med innrykk</dd></dl></dd></dl>",
-	"wikieditor-realtimepreview-preview": "Førehandsvising"
+	"wikieditor-realtimepreview-preview": "Førehandsvising",
+	"wikieditor-realtimepreview-error": "Førehandsvisinga lastar ikkje",
+	"wikieditor-realtimepreview-beta-label": "Sanntidsførehandsvising",
+	"wikieditor-realtimepreview-reload-title": "Last panelet for sanntidsførehandsvising om att",
+	"wikieditor-realtimepreview-manual": "Last om att no for å førehandsvisa endringane dine manuelt.",
+	"wikieditor-realtimepreview-onboarding-body": "Sjå korleis endringane dine vil sjå ut for lesarar ved å førehandsvisa dei i sanntid.",
+	"wikieditor-realtimepreview-onboarding-button": "Greitt, skjøner"
 }
