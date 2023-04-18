@@ -18,7 +18,7 @@ class PreApiWbStackUpdate {
 		// Run update.php
 		$domain = $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain;
 		$mwPath = realpath( __DIR__ . '/../../../' );
-		$cmd = 'WBS_DOMAIN=' . $domain . ' php ' . $mwPath . '/maintenance/update.php --quick';
+		$cmd = 'bash ' . $mwPath . '/maintenance/testOutputOrder.sh';
 
 		$stdout = fopen( 'php://stdout', 'w' );
 		$stderr = fopen( 'php://stderr', 'w' );
