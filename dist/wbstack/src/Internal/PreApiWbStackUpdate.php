@@ -38,13 +38,13 @@ class PreApiWbStackUpdate {
 
 		while( $line = fgets( $stdoutProc ) ) {
 			$line = rtrim( $line );
-			fwrite( $stdout, $line );
+			fwrite( $stdout, $line . PHP_EOL );
 			array_push( $out, $line );
 		}
 
 		while( $line = fgets( $stderrProc ) ) {
 			$line = rtrim( $line );
-			fwrite( $stdout, $line ); // effectively redirecting stdErr to stdOut
+			fwrite( $stdout, $line . PHP_EOL ); // effectively redirecting stdErr to stdOut
 			array_push( $out, $line );
 		}
 
