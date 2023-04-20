@@ -21,7 +21,6 @@ class PreApiWbStackUpdate {
 		$cmd = 'WBS_DOMAIN=' . $domain . ' php ' . $mwPath . '/maintenance/update.php --quick';
 
 		$stdout = fopen( 'php://stdout', 'w' );
-		$stderr = fopen( 'php://stderr', 'w' );
 
 		fwrite( $stdout, "DOMAIN: " . $domain . "\n" );
 
@@ -45,7 +44,7 @@ class PreApiWbStackUpdate {
 
 		while( $line = fgets( $stderrProc ) ) {
 			$line = rtrim( $line );
-			fwrite( $stderr, $line );
+			fwrite( $stdout, $line ); // effectively redirecting stdErr to stdOut
 			array_push( $out, $line );
 		}
 
