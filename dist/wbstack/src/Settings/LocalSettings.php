@@ -659,6 +659,7 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         ]
     ];
     $wgWBCSUseCirrus = true;
+    $wgWBCSElasticErrorFailSilently = true;
 }
 
 
