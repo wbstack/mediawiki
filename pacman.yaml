@@ -23,6 +23,8 @@
     - docs
     - extensions/README
     - skins/README
+  patchUrls:
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fcore~911315/revisions/1/patch?download
 - name: RevisionSlider
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-RevisionSlider/zip/454efce255d339b426b3f3abb366b46e911b95a7
   artifactLevel: 1
