@@ -377,8 +377,8 @@ if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
     $wgGroupPermissions['bureaucrat']['lookupcredentials'] = false;
     $wgGroupPermissions['*']['requestips'] = false;
     $wgGroupPermissions['*']['lookupcredentials'] = false;
-    $wgHooks['SkinTemplateNavigation::Universal'][] = 'onPersonalUrlsConfirmAccount';
-    function onPersonalUrlsConfirmAccount( array &$links, Title $title, SkinTemplate $skin  ) {
+    $wgHooks['SkinTemplateNavigation::Universal'][] = 'onSkinTemplateNavigationUniversal';
+    function onSkinTemplateNavigationUniversal( SkinTemplate $skin, array &$links ) {
         // Add a link to Special:RequestAccount if a link exists for login
         if ( isset( $links['user-menu']['login'] ) || isset( $links['user-menu']['anonlogin'] ) ) {
             $links['user-menu']['createaccount'] = array(
