@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230426-0
+- Re-introduce the fallback to default Search when ElasticSearch is broken (T334191)
+- Replace usage of PersonalUrlsHook with SkinTemplateNavigation (T334846)
+
 ## 1.39-7.4-20230411-1
 - Update to MediaWiki 1.39.3
 
