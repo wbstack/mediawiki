@@ -637,7 +637,7 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgCirrusSearchIndexBaseName = $wgDBname;
 
     $wgSearchType = 'CirrusSearch';
-    $wgCirrusSearchDefaultCluster = 'default';
+    $wgCirrusSearchDefaultCluster = 'primary';
     
     // T308115
     $wgCirrusSearchShardCount = [ 'content' => 1, 'general' => 1 ];
@@ -645,19 +645,30 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     // T309379
     $wgCirrusSearchEnableArchive = false;
     $wgCirrusSearchPrivateClusters = [ 'non-existing-cluster' ];
-    
+
+    function getElasticClusterConfig( string $prefix ) {
+        $config = [
+            'host' => getenv( $prefix . 'HOST' ),
+            'port' => getenv( $prefix . 'PORT' )
+        ];
+
+        if ( getEnv( $prefix . 'ES6' ) ) {
+            $config[ 'transport' ] = [
+                'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
+                'wrapped_transport' => 'Http'
+            ];
+        }
+        return [ $config ];
+    }
+
     $wgCirrusSearchClusters = [
-        'default' => [
-            [
-                'transport' => [
-                    'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
-                    'wrapped_transport' => 'Http'
-                ],
-                'host' => getenv('MW_ELASTICSEARCH_HOST'),
-                'port' => getenv('MW_ELASTICSEARCH_PORT')
-            ],
-        ]
+        'primary' => getElasticClusterConfig( 'MW_PRIMARY_ELASTICSEARCH_' )
     ];
+
+    if ( getenv( 'MW_SECONDARY_ELASTICSEARCH_ENABLED' ) ) {
+        $wgCirrusSearchClusters[ 'secondary' ] = getElasticClusterConfig( 'MW_SECONDARY_ELASTICSEARCH_' );
+    }
+
     $wgWBCSUseCirrus = true;
     $wgWBCSElasticErrorFailSilently = true;
 }
