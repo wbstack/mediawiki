@@ -2,6 +2,8 @@
 
 namespace WBStack\Internal;
 
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * This should create the index for the requested wiki
  */
@@ -32,8 +34,8 @@ class ApiWbStackElasticSearchInit extends \ApiBase {
     public function getAllowedParams() {
         return [
             'cluster' => [
-                \ApiBase::PARAM_TYPE => 'string',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_REQUIRED => true
             ]
         ];
     }

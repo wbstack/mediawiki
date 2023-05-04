@@ -2,6 +2,8 @@
 
 namespace WBStack\Internal;
 
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * This should populate the ElasticSearch index for the requested wiki
  */
@@ -35,16 +37,16 @@ class ApiWbStackForceSearchIndex extends \ApiBase {
     public function getAllowedParams() {
         return [
             'fromId' => [
-                \ApiBase::PARAM_TYPE => 'integer',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'integer',
+                ParamValidator::PARAM_REQUIRED => true
             ],
             'toId' => [
-                \ApiBase::PARAM_TYPE => 'integer',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'integer',
+                ParamValidator::PARAM_REQUIRED => true
             ],
             'cluster' => [
-                \ApiBase::PARAM_TYPE => 'string',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_REQUIRED => true
             ]
         ];
     }
