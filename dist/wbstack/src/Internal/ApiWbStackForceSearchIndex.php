@@ -14,11 +14,12 @@ class ApiWbStackForceSearchIndex extends \ApiBase {
 
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
-		
+
         $fromId = $this->getParameter('fromId');
         $toId = $this->getParameter('toId');
+        $cluster = $this->getParameter('cluster');
 
-        $parameters = "--skipLinks 1 --indexOnSkip 1 --fromId " . escapeshellarg( $fromId ) . " --toId " . escapeshellarg( $toId );
+        $parameters = "--skipLinks 1 --indexOnSkip 1 --cluster " . escapeshellarg( $cluster ) . " --fromId " . escapeshellarg( $fromId ) . " --toId " . escapeshellarg( $toId );
 		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/ForceSearchIndex.php ' . $parameters;
 		exec($cmd, $out, $return);
 
@@ -41,6 +42,10 @@ class ApiWbStackForceSearchIndex extends \ApiBase {
                 \ApiBase::PARAM_TYPE => 'integer',
                 \ApiBase::PARAM_REQUIRED => true
             ],
+            'cluster' => [
+                \ApiBase::PARAM_TYPE => 'string',
+                \ApiBase::PARAM_REQUIRED => true
+            ]
         ];
     }
 }

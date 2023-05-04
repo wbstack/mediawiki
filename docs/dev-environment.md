@@ -29,8 +29,20 @@ Wait until both sites are accessible:
  Once the sites are accessible you can perform secondary setup (_The request takes a while to execute_):
 
  ```sh
-curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
-curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&format=json"
+curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&cluster=primary&format=json"
+curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackElasticSearchInit&cluster=secondary&format=json"
+
+curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&cluster=primary&format=json"
+curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackElasticSearchInit&cluster=secondary&format=json"
+```
+
+[optional] Forcing a search index update
+```sh
+curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackForceSearchIndex&cluster=primary&fromId=0&toId=1000&format=json"
+curl -l -X POST "http://site1.localhost:8001/w/api.php?action=wbstackForceSearchIndex&cluster=secondary&fromId=0&toId=1000&format=json"
+
+curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackForceSearchIndex&cluster=primary&fromId=0&toId=1000&format=json"
+curl -l -X POST "http://site2.localhost:8001/w/api.php?action=wbstackForceSearchIndex&cluster=secondary&fromId=0&toId=1000&format=json"
 ```
 
 Removing the installation:
@@ -41,14 +53,26 @@ docker compose down --volumes
 
 ### Debugging Elastic
 
+- `:9200` is Elasticsearch v6.8.23 configured as "primary"
+- `:9201` is Elasticsearch v7.10.2 configured as "secondary"
+
 General overview of the cluster
 
 ```
 http://localhost:9200/_stats
+http://localhost:9201/_stats
+```
+
+Get stats on cluster indices
+
+```
+http://localhost:9200/_cat/indices?v
+http://localhost:9201/_cat/indices?v
 ```
 
 Entries in the content index (Items, Lexemes) for `site1.localhost` can be found by going to the following url
 
 ```
 http://localhost:9200/site1.localhost_content_first/_search
+http://localhost:9201/site1.localhost_content_first/_search
 ```
