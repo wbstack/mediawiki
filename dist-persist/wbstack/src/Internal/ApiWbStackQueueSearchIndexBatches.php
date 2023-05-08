@@ -2,6 +2,8 @@
 
 namespace WBStack\Internal;
 
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * This should queue ForceSearchIndex.php runs on the requested wiki
  */
