@@ -2,6 +2,8 @@
 
 namespace WBStack\Internal;
 
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * This should queue ForceSearchIndex.php runs on the requested wiki
  */
@@ -33,8 +35,8 @@ class ApiWbStackQueueSearchIndexBatches extends \ApiBase {
     public function getAllowedParams() {
         return [
             'cluster' => [
-                \ApiBase::PARAM_TYPE => 'string',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_REQUIRED => true
             ]
         ];
     }
