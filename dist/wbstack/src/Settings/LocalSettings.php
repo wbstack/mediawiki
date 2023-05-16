@@ -638,7 +638,7 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgCirrusSearchIndexBaseName = $wgDBname;
 
     $wgSearchType = 'CirrusSearch';
-    $wgCirrusSearchDefaultCluster = 'primary';
+    $wgCirrusSearchDefaultCluster = 'default';
     
     // T308115
     $wgCirrusSearchShardCount = [ 'content' => 1, 'general' => 1 ];
@@ -663,7 +663,7 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     }
 
     $wgCirrusSearchClusters = [
-        'primary' => getElasticClusterConfig( 'MW_PRIMARY_ELASTICSEARCH_' )
+        'default' => getElasticClusterConfig( 'MW_PRIMARY_ELASTICSEARCH_' )
     ];
 
     if ( getenv( 'MW_SECONDARY_ELASTICSEARCH_ENABLED' ) ) {
