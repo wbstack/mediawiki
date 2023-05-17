@@ -291,8 +291,8 @@ $wgGroupPermissions['user']['editmyusercss'] = false;
 $wgGroupPermissions['user']['editmyuserjs'] = false;
 
 # Allow emailconfirmed to skip captcha
+$wgAutopromote['emailconfirmed'] = APCOND_EMAILCONFIRMED;
 $wgGroupPermissions['emailconfirmed']['skipcaptcha'] = true;
-$wgAllowConfirmedEmail = true;
 
 # Oauth
 $wgGroupPermissions['sysop']['mwoauthproposeconsumer'] = true;
@@ -462,7 +462,6 @@ $wgCaptchaClass = 'ReCaptchaNoCaptcha';
 $wgReCaptchaSendRemoteIP = true;
 $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
 $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
-$ceAllowConfirmedEmail = true;
 
 # Mailgun
 if ($wwUseMailgunExtension) {
