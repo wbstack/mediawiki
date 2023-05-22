@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230522-0
+- Allow email-confirmed users to add external urls (T327752)
+
 ## 1.39-7.4-20230426-0
 - Re-introduce the fallback to default Search when ElasticSearch is broken (T334191)
 - Replace usage of PersonalUrlsHook with SkinTemplateNavigation (T334846)
