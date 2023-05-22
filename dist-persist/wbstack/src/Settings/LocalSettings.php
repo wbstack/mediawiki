@@ -291,6 +291,7 @@ $wgGroupPermissions['user']['editmyusercss'] = false;
 $wgGroupPermissions['user']['editmyuserjs'] = false;
 
 # Allow emailconfirmed to skip captcha
+$wgAutopromote['emailconfirmed'] = APCOND_EMAILCONFIRMED;
 $wgGroupPermissions['emailconfirmed']['skipcaptcha'] = true;
 
 # Oauth
