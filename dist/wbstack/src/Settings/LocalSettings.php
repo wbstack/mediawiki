@@ -120,18 +120,20 @@ $wgDBservers = [
 // For example schema generation or localization cache reload
 // WBS_DOMAIN=maint php ./w/maintenance/update.php --schema sql.sql --quick
 // As in these contexts there is often no replica.... and thus one would fail...
-if( !$wwDomainIsMaintenance ){
-    $wgDBservers[] = [
-        'host' => getenv('MW_DB_SERVER_REPLICA'),
-        'dbname' => $wgDBname,
-        'user' => $wikiInfo->wiki_db->user,
-        'password' => $wikiInfo->wiki_db->password,
-        'type' => "mysql",
-        'flags' => DBO_DEFAULT,
-        'max lag' => 10,
-        'load' => 100,
-    ];
-}
+////////// DISABLED WHILE REPLICATION IS BROKEN 
+// if( !$wwDomainIsMaintenance ){
+//     $wgDBservers[] = [
+//         'host' => getenv('MW_DB_SERVER_REPLICA'),
+//         'dbname' => $wgDBname,
+//         'user' => $wikiInfo->wiki_db->user,
+//         'password' => $wikiInfo->wiki_db->password,
+//         'type' => "mysql",
+//         'flags' => DBO_DEFAULT,
+//         'max lag' => 10,
+//         'load' => 100,
+//     ];
+// }
+////////// DISABLED WHILE REPLICATION IS BROKEN
 
 // Jobs
 # For now jobs will run in the requests, this obviously isn't the ideal solution and really
