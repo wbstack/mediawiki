@@ -120,7 +120,8 @@ $wgDBservers = [
 // For example schema generation or localization cache reload
 // WBS_DOMAIN=maint php ./w/maintenance/update.php --schema sql.sql --quick
 // As in these contexts there is often no replica.... and thus one would fail...
-if( !$wwDomainIsMaintenance ){
+// Also: skip the config if host name is empty. Useful in case replication breaks and we want to disable it.
+if( !$wwDomainIsMaintenance && !empty(getenv('MW_DB_SERVER_REPLICA'))){
     $wgDBservers[] = [
         'host' => getenv('MW_DB_SERVER_REPLICA'),
         'dbname' => $wgDBname,
