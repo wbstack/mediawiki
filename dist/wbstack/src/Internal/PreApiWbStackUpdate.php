@@ -16,9 +16,45 @@ class PreApiWbStackUpdate {
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 
 		// Run update.php
+		$domain = $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain;
 		$mwPath = realpath( __DIR__ . '/../../../' );
-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $mwPath . '/maintenance/update.php --quick';
-		exec($cmd, $out, $return);
+		$cmd = 'bash ' . $mwPath . '/maintenance/testOutputOrder.sh';
+
+		$stdout = fopen( 'php://stdout', 'w' );
+		$stderr = fopen( 'php://stderr', 'w' );
+
+		fwrite( $stdout, "DOMAIN: " . $domain . "\n" );
+
+		$spec = [ [ 'pipe', 'r' ], [ 'pipe', 'w' ],[ 'pipe', 'w' ] ];
+		$proc = proc_open( $cmd, $spec, $pipes );
+
+		$stdinProc = $pipes[0];
+		$stdoutProc = $pipes[1];
+		$stderrProc = $pipes[2];
+
+		$out = [];
+
+		$pid = ( proc_get_status( $proc ) )[ 'pid' ];
+		fwrite( $stdout, "PID: " . $pid . "\n" );
+
+		while( $line = fgets( $stdoutProc ) ) {
+			$line = rtrim( $line );
+			fwrite( $stdout, $line );
+			array_push( $out, $line );
+		}
+
+		while( $line = fgets( $stderrProc ) ) {
+			$line = rtrim( $line );
+			fwrite( $stderr, $line );
+			array_push( $out, $line );
+		}
+
+		fclose( $stdinProc );
+		fclose( $stdoutProc );
+		fclose( $stderrProc );
+
+		$return = ( proc_get_status( $proc ) )[ 'exitcode' ];
+		proc_close( $proc );
 
 		// Return appropriate result
 		$res = [
