@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230524-0
+- Add condition for skipping Db replica config in case replica hostname is not set (empty string)
+
 ## 1.39-7.4-20230522-0
 - Allow email-confirmed users to add external urls (T327752)
 
