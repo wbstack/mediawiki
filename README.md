@@ -42,13 +42,15 @@ This part describes the Docker image that this repo is designed to build. People
 - `MW_RECAPTCHA_SITEKEY`
 - `MW_RECAPTCHA_SECRETKEY`
 - `PLATFORM_API_BACKEND_HOST`: points to an internal mode wbstack api service
-- `MW_PRIMARY_ELASTICSEARCH_HOST`: primary elasticsearch hostname
-- `MW_PRIMARY_ELASTICSEARCH_PORT`: primary elasticsearch port
-- `MW_PRIMARY_ELASTICSEARCH_ES6`: is primary elasticsearch running version 6
-- `MW_SECONDARY_ELASTICSEARCH_ENABLED`: is secondary elasticsearch enabled
+- `MW_ELASTICSEARCH_HOST`: DEPRECATED: elasticsearch hostname. If set "default" settings below are ignored.
+- `MW__ELASTICSEARCH_PORT`: DEPRECATED: elasticsearch hostname
+- `MW_DEFAULT_ELASTICSEARCH_HOST`: default (i.e. where data is served to users from) elasticsearch hostname
+- `MW_DEFAULT_ELASTICSEARCH_PORT`: default elasticsearch port
+- `MW_DEFAULT_ELASTICSEARCH_ES6`: use ES6 compatability layer with default cluster
+- `MW_SECONDARY_ELASTICSEARCH_ENABLED`: is secondary (i.e. where data is concurrently written but not served to users) elasticsearch enabled
 - `MW_SECONDARY_ELASTICSEARCH_HOST`: secondary elasticsearch hostname
 - `MW_SECONDARY_ELASTICSEARCH_PORT`: secondary elasticsearch port
-- `MW_SECONDARY_ELASTICSEARCH_ES6`: is secondary elasticsearch running version 6
+- `MW_SECONDARY_ELASTICSEARCH_ES6`: use ES6 compatability layer with secondary cluster
 - `MW_LOG_TO_STDERR`: set to "yes" to redirect all mediawiki logging to stderr (so it ends up in the kubernetes pod logs)
 - `MW_ALLOWED_PROXY_CIDR`: CIDR block where any IP address in the range is considered a proxy server
 

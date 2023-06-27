@@ -662,9 +662,24 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
         return [ $config ];
     }
 
-    $wgCirrusSearchClusters = [
-        'default' => getElasticClusterConfig( 'MW_PRIMARY_ELASTICSEARCH_' )
-    ];
+    if ( getenv( 'MW_ELASTICSEARCH_HOST' ) ) {
+        $wgCirrusSearchClusters = [
+            'default' => [
+                [
+                    'transport' => [
+                        'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
+                        'wrapped_transport' => 'Http'
+                    ],
+                    'host' => getenv('MW_ELASTICSEARCH_HOST'),
+                    'port' => getenv('MW_ELASTICSEARCH_PORT')
+                ],
+            ]
+        ];
+    } else {
+        $wgCirrusSearchClusters = [
+            'default' => getElasticClusterConfig( 'MW_DEFAULT_ELASTICSEARCH_' )
+        ];
+    }
 
     if ( getenv( 'MW_SECONDARY_ELASTICSEARCH_ENABLED' ) ) {
         $wgCirrusSearchClusters[ 'secondary' ] = getElasticClusterConfig( 'MW_SECONDARY_ELASTICSEARCH_' );
