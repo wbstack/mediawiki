@@ -50,7 +50,7 @@ This part describes the Docker image that this repo is designed to build. People
 - `MW_SECONDARY_ELASTICSEARCH_ENABLED`: is secondary (i.e. where data is concurrently written but not served to users) elasticsearch enabled. Set to "true" or leave unset
 - `MW_SECONDARY_ELASTICSEARCH_HOST`: secondary elasticsearch hostname
 - `MW_SECONDARY_ELASTICSEARCH_PORT`: secondary elasticsearch port
-- `MW_SECONDARY_ELASTICSEARCH_ES6`: use ES6 compatability layer with secondary cluster. Set to "true" or leave unset
+- `MW_SECONDARY_ELASTICSEARCH_ES6`: use ES6 compatibility layer with secondary cluster. Set to "true" or leave unset
 - `MW_LOG_TO_STDERR`: set to "yes" to redirect all mediawiki logging to stderr (so it ends up in the kubernetes pod logs)
 - `MW_ALLOWED_PROXY_CIDR`: CIDR block where any IP address in the range is considered a proxy server
 
