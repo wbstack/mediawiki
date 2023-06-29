@@ -46,7 +46,7 @@ This part describes the Docker image that this repo is designed to build. People
 - `MW_ELASTICSEARCH_PORT`: DEPRECATED: elasticsearch port
 - `MW_DEFAULT_ELASTICSEARCH_HOST`: default (i.e. where data is served to users from) elasticsearch hostname
 - `MW_DEFAULT_ELASTICSEARCH_PORT`: default elasticsearch port
-- `MW_DEFAULT_ELASTICSEARCH_ES6`: use ES6 compatability layer with default cluster. Set to "true" or leave unset
+- `MW_DEFAULT_ELASTICSEARCH_ES6`: use ES6 compatibility layer with default cluster. Set to "true" or leave unset
 - `MW_SECONDARY_ELASTICSEARCH_ENABLED`: is secondary (i.e. where data is concurrently written but not served to users) elasticsearch enabled. Set to "true" or leave unset
 - `MW_SECONDARY_ELASTICSEARCH_HOST`: secondary elasticsearch hostname
 - `MW_SECONDARY_ELASTICSEARCH_PORT`: secondary elasticsearch port
