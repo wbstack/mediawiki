@@ -1020,28 +1020,6 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
-- name: Popups
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Popups/zip/010237d3cf3131a93bab406f70af46d681221ef2
-  artifactLevel: 1
-  destination: ./dist/extensions/Popups
-  remove:
-    - tests
-    - .github
-    - .stylelintignore
-    - .nvmrc
-    - .eslintignore
-    - .phan
-    - .storybook
-    - .vscode
-    - .gitignore
-    - .eslintrc.json
-    - .gitreview
-    - .phpcs.xml
-    - .stylelintrc.json
-    - .rubocop.yml
-    - .rubocop_todo.yml
-    - Gruntfile.js
-    - Doxyfile
 - name: EntitySchema
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/dc9d2b02f1211b601fbc95751989399bb441556b
   artifactLevel: 1

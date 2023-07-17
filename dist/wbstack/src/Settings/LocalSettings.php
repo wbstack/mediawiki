@@ -338,7 +338,6 @@ wfLoadExtension( 'Math' );
 wfLoadExtension( 'Kartographer' );
 wfLoadExtension( 'PageImages' );
 wfLoadExtension( 'TextExtracts' );
-wfLoadExtension( 'Popups' );
 wfLoadExtension( 'Scribunto' );
 wfLoadExtension( 'Cite' );
 wfLoadExtension( 'TemplateSandbox' );
