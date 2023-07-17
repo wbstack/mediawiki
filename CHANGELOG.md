@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230717-0
+- Remove `Popups` extension
+
 ## 1.39-7.4-20230524-0
 - Add condition for skipping Db replica config in case replica hostname is not set (empty string)
 
