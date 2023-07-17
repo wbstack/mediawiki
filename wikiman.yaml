@@ -118,8 +118,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-WikiHiero
   - name: TextExtracts
     repoName: wikimedia/mediawiki-extensions-TextExtracts
-  - name: Popups
-    repoName: wikimedia/mediawiki-extensions-Popups
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
   ## These extensions should not currently use the mediawikiVersion
