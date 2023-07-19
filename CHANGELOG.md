@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230719-0
+- Add configuration for two ElasticSearch clusters
+
 ## 1.39-7.4-20230717-0
 - Remove `Popups` extension
 

@@ -646,19 +646,45 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     // T309379
     $wgCirrusSearchEnableArchive = false;
     $wgCirrusSearchPrivateClusters = [ 'non-existing-cluster' ];
-    
-    $wgCirrusSearchClusters = [
-        'default' => [
-            [
-                'transport' => [
-                    'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
-                    'wrapped_transport' => 'Http'
+
+    function getElasticClusterConfig( string $prefix ) {
+        $config = [
+            'host' => getenv( $prefix . 'HOST' ),
+            'port' => getenv( $prefix . 'PORT' )
+        ];
+
+        if ( getEnv( $prefix . 'ES6' ) === "true" ) {
+            $config[ 'transport' ] = [
+                'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
+                'wrapped_transport' => 'Http'
+            ];
+        }
+        return [ $config ];
+    }
+
+    if ( getenv( 'MW_ELASTICSEARCH_HOST' ) ) {
+        $wgCirrusSearchClusters = [
+            'default' => [
+                [
+                    'transport' => [
+                        'type' => \CirrusSearch\Elastica\ES6CompatTransportWrapper::class,
+                        'wrapped_transport' => 'Http'
+                    ],
+                    'host' => getenv('MW_ELASTICSEARCH_HOST'),
+                    'port' => getenv('MW_ELASTICSEARCH_PORT')
                 ],
-                'host' => getenv('MW_ELASTICSEARCH_HOST'),
-                'port' => getenv('MW_ELASTICSEARCH_PORT')
-            ],
-        ]
-    ];
+            ]
+        ];
+    } else {
+        $wgCirrusSearchClusters = [
+            'default' => getElasticClusterConfig( 'MW_DEFAULT_ELASTICSEARCH_' )
+        ];
+        if ( getenv( 'MW_WRITE_ONLY_ELASTICSEARCH_HOST' ) ) {
+            $wgCirrusSearchClusters[ 'write-only' ] = getElasticClusterConfig( 'MW_WRITE_ONLY_ELASTICSEARCH_' );
+        }
+    }
+
+
     $wgWBCSUseCirrus = true;
     $wgWBCSElasticErrorFailSilently = true;
 }
