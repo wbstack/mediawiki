@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230725-0
+- Update links in Wikibase item and property creation summaries
+
 ## 1.39-7.4-20230719-0
 - Add configuration for two ElasticSearch clusters
 
