@@ -15,7 +15,8 @@ class ApiWbStackElasticSearchInit extends \ApiBase {
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 		
-		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/UpdateSearchIndexConfig.php';
+        $parameters = '--cluster all';
+		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/UpdateSearchIndexConfig.php' . $parameters;
 		exec($cmd, $out, $return);
 
 		// Return appropriate result
