@@ -547,8 +547,10 @@ $wgWBClientSettings['entitySources'] = [
 $wgWBRepoSettings['siteLinkGroups'] = [];
 // TODO below setting will be empty by default in the future and we could remove them
 $wgWBRepoSettings['specialSiteLinkGroups'] = [];
-$wgWBRepoSettings['dataRightsUrl'] = null;
-$wgWBRepoSettings['dataRightsText'] = 'None yet set.';
+
+// see https://phabricator.wikimedia.org/T342001
+$wgWBRepoSettings['dataRightsUrl'] = '';
+$wgWBRepoSettings['dataRightsText'] = '';
 
 // Until we can scale redis memory we don't want to do this - https://github.com/addshore/wbstack/issues/37
 $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
