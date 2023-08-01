@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230801-0
+- CirrusSearch: run init maint script against all clusters
+
 ## 1.39-7.4-20230731-0
 - Show a reduced Wikibase copyright notice
 - Reuse Wikibase's copyright message builder in EntitySchema
