@@ -2,8 +2,6 @@
 
 namespace WBStack\Internal;
 
-use Wikimedia\ParamValidator\ParamValidator;
-
 /**
  * This should create the index for the requested wiki
  */
