@@ -2,6 +2,8 @@
 
 namespace WBStack\Internal;
 
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * This API is used by tools that need OAuth consumers.
  * Calling this API will either give you details for the spec that you ask if they already exist.
@@ -60,20 +62,20 @@ class ApiWbStackOauthGet extends \ApiBase {
     public function getAllowedParams() {
         return [
             'consumerName' => [
-                \ApiBase::PARAM_TYPE => 'string',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_REQUIRED => true
             ],
             'consumerVersion' => [
-                \ApiBase::PARAM_TYPE => 'string',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_REQUIRED => true
             ],
             'grants' => [
-                \ApiBase::PARAM_TYPE => 'string',
-                \ApiBase::PARAM_ISMULTI => true,
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_ISMULTI => true,
             ],
             'callbackUrlTail' => [
-                \ApiBase::PARAM_TYPE => 'string',
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_REQUIRED => true
             ],
         ];
     }

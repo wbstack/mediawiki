@@ -1,8 +1,10 @@
 <?php
 
 namespace WBStack\Internal;
+
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserFactory;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * This API is called when a wiki is first created.
@@ -120,19 +122,19 @@ class ApiWbStackInit extends \ApiBase {
     public function getAllowedParams() {
         return [
             'username' => [
-                \ApiBase::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_TYPE => 'string',
                 // Always require a username, always provided by default, and can be provided for sandboxes too?
-                \ApiBase::PARAM_REQUIRED => true
+                ParamValidator::PARAM_REQUIRED => true
             ],
             'email' => [
-                \ApiBase::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_TYPE => 'string',
                 // Don't require, as for sandboxes we will not have any emails...
-                \ApiBase::PARAM_REQUIRED => false
+                ParamValidator::PARAM_REQUIRED => false
             ],
             'password' => [
-                \ApiBase::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_TYPE => 'string',
                 // For sandboxes we want to specify a password, but for default behaviour we still want to do password reset emails...
-                \ApiBase::PARAM_REQUIRED => false
+                ParamValidator::PARAM_REQUIRED => false
             ],
         ];
     }
