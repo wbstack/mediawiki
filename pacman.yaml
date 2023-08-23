@@ -267,6 +267,7 @@
     - Doxyfile
   patchUrls:
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~908801/revisions/2/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~951473/revisions/1/patch?download
 - name: WikibaseLexemeCirrusSearch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch/zip/aab91971e160e0d5c133fa6a958e339f58a496dd
   artifactLevel: 1
@@ -1181,6 +1182,7 @@
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/19/patch?download
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~940955/revisions/1/patch?download
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~943530/revisions/1/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~951472/revisions/1/patch?download
 - name: StopForumSpam
   artifactUrl: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
   artifactLevel: 1
