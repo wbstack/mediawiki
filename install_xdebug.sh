@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-pecl install xdebug \
+pecl install xdebug-3.1.6 \
     && docker-php-ext-enable xdebug  
   
 echo "zend_extension=xdebug
