@@ -2,6 +2,12 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20230825-0
+- Configure Xdebug to be compatible with VSCode
+- Find entities using term search when Elasticsearch is down
+- Use a PHP 7.4 compatible version of Xdebug
+- Switch to ParamValidator::PARAM_TYPE instead of deprecated ApiBase::PARAM_TYPE
+
 ## 1.39-7.4-20230801-0
 - CirrusSearch: run init maint script against all clusters
 
