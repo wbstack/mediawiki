@@ -102,6 +102,7 @@ $wgHooks['ArticleUndelete'][] = function ( $title, $create, $comment, $oldPageId
     WBStackPageUpdateHandler::registerUpdate( $title );
 };
 
+
 //// CUSTOM User account login and creation logs
 class WBStackUserAccountLogging {
     public static function log( $type, $user ) {
@@ -119,4 +120,9 @@ $wgHooks['LocalUserCreated'][] = function ( $user, $autocreated ) {
 };
 $wgHooks['UserLoggedIn'][] = function ( $user ) {
     WBStackUserAccountLogging::log( 'login', $user );
+};
+
+// https://www.mediawiki.org/wiki/Manual:Hooks/APIQuerySiteInfoStatisticsInfo
+$wgHooks['APIQuerySiteInfoStatisticsInfo'][] = function (&$result) {
+    $result['lastEdit'] = 'does this even work?';
 };
