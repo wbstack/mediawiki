@@ -1,5 +1,8 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+use Wikimedia\Timestamp\ConvertibleTimestamp;
+
 //// CUSTOM Sidebar for WBStack
 // https://www.mediawiki.org/wiki/Manual:Hooks/SkinBuildSidebar
 $wgHooks['SkinBuildSidebar'][] = function ( $skin, &$sidebar ) use ( $wikiInfo ) {
@@ -124,5 +127,32 @@ $wgHooks['UserLoggedIn'][] = function ( $user ) {
 
 // https://www.mediawiki.org/wiki/Manual:Hooks/APIQuerySiteInfoStatisticsInfo
 $wgHooks['APIQuerySiteInfoStatisticsInfo'][] = function (&$result) {
-    $result['lastEdit'] = 'does this even work?';
+    $conn = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection(DB_REPLICA);
+
+    $lastedit = $conn->newSelectQueryBuilder()
+        ->table('revision')
+        ->select('rev_timestamp')
+        ->orderBy('rev_timestamp DESC')
+        ->limit(1)
+        ->fetchField();
+
+    $firstedit = $conn->newSelectQueryBuilder()
+        ->table('revision')
+        ->select('rev_timestamp')
+        ->orderBy('rev_timestamp ASC')
+        ->limit(1)
+        ->fetchField();
+
+    if ($lastedit) {
+        $result['lastedit'] = ConvertibleTimestamp::convert(
+            TS_ISO_8601,
+            $lastedit
+        );
+    }
+    if ($firstedit) {
+        $result['firstedit'] = ConvertibleTimestamp::convert(
+            TS_ISO_8601,
+            $firstedit
+        );
+    }
 };
