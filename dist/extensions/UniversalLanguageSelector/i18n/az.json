@@ -8,9 +8,11 @@
 			"Wertuose"
 		]
 	},
+	"uls-desc": "İstifadəçiyə dil seçmək və dil parametrlərini tənzimləmək üçün bir neçə yol təqdim edir",
 	"uls-plang-title-languages": "Dillər",
 	"ext-uls-select-language-settings-icon-tooltip": "Dilin təyin edilməsi",
 	"ext-uls-undo-language-tooltip-text": "Əvvəlki dil: $1",
+	"ext-uls-undo-language-tooltip-text-local": "Bu viki üçün dil dəyişdirilib. Bütün vikilərin dilini dəyişmək üçün [[Special:GlobalPreferences|qlobal nizamlamalarınıza]] baxın.",
 	"ext-uls-language-settings-preferences-link": "Daha çox dil parametri",
 	"ext-uls-display-settings-title": "Görünüş parametrləri",
 	"ext-uls-display-settings-language-tab": "Dil",
@@ -42,6 +44,7 @@
 	"ext-uls-compact-link-count": "Daha {{PLURAL:$1|1 dil|$1 dil}}",
 	"prefs-languages": "Dillər",
 	"ext-uls-compact-language-links-preference": "Yalnız özünüzə maraqlı olan [[$1|yığcam dil siyahısını]] istifadə etmək.",
+	"ext-uls-compact-no-results": "Bu səhifə axtardığınız dildə mövcud deyil.",
 	"ext-uls-actions-menu-header": "Daha çox",
 	"ext-uls-actions-menu-language-settings-item-label": "Dil parametrləri göstər",
 	"ext-uls-empty-state-header": "Hələ heç bir dil yoxdur",

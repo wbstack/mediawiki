@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nokeoo"
+		]
+	},
+	"elastica-desc": "Pagrindinis [http://www.elasticsearch.org/ Elasticsearch] funkcionalumas kitiems plėtiniams, pateikiant [http://elasticse.io/ Elastica] biblioteką"
+}

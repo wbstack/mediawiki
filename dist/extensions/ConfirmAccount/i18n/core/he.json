@@ -9,7 +9,7 @@
 			"YaronSh"
 		]
 	},
-	"confirmaccount-newrequests": "יש {{PLURAL:$1|[[Special:ConfirmAccounts|בקשה פתוחה ממתינה '''אחת''' לפתוח חשבון]], עם כתובת דואר אלקטרוני מאושרת שממתינה|'''$1''' [[Special:ConfirmAccounts|בקשות פתוחות לפתוח חשבונות]], עם כתובות דואר אלקטרוני מאושרות שממתינות}} לאישור. '''תשומת לבך נדרשת!'''",
+	"confirmaccount-newrequests": "יש {{PLURAL:$1|[[Special:ConfirmAccounts|בקשה פתוחה ממתינה '''אחת''' לפתוח חשבון]], עם כתובת דואר אלקטרוני מאושרת שממתינה|'''$1''' [[Special:ConfirmAccounts|בקשות פתוחות לפתוח חשבונות]], עם כתובות דואר אלקטרוני מאושרות שממתינות}} לאישור. '''תשומת ליבך נדרשת!'''",
 	"requestaccount-loginnotice": "כדי לקבל חשבון משתמש, עליכם '''[[Special:RequestAccount|לבקש אחד כזה]]'''.",
 	"action-confirmaccount": "לסקור ולאשר חשבונות",
 	"right-confirmaccount": "צפייה ב[[Special:ConfirmAccounts|תור של החשבונות המבוקשים]]",

@@ -16,7 +16,7 @@
 			"Teoo3"
 		]
 	},
-	"abusefilter-edit-builder-vars-user-mobile": "Uređuje li suradnik preko mobilnoga sučelja?",
+	"abusefilter-edit-builder-vars-user-mobile": "Suradnik uređuje iz mobilnoga sučelja",
 	"mobile-frontend-account-create-captcha-placeholder": "Unesite kôd za potvrdu",
 	"mobile-frontend-changeslist-nocomment": "bez sažetka",
 	"mobile-frontend-cite-error-title": "Pogreška pri učitavanju citata",
@@ -70,7 +70,7 @@
 	"mobile-frontend-editor-keep-editing": "Nastavi uređivanje",
 	"mobile-frontend-editor-licensing": "Spremanjem izmjena, suglasni ste da doprinose objavljujete pod {{PLURAL:$2|licencijom|licencijama}}: $1.",
 	"mobile-frontend-editor-licensing-with-terms": "Spremanjem izmjena suglasni ste s $1 i suglasni ste da doprinose objavljujete pod {{PLURAL:$3|licencijom|licencijama}}: $2.",
-	"mobile-frontend-editor-terms-link": "[$1 Uvjetima upotrebe (Terms of Use)]",
+	"mobile-frontend-editor-terms-link": "[$1 Uvjete upotrebe]",
 	"mobile-frontend-editor-new-page-confirm": "{{GENDER:$1|Jeste li sigurni da želite stvoriti}} novu stranicu na projektu {{SITENAME}}?",
 	"mobile-frontend-editor-placeholder": "Ovaj odlomak je prazan. Budite prvi koji će ga proširiti.",
 	"mobile-frontend-editor-placeholder-new-page": "{{GENDER:$1|Stvarate}} novu stranicu na projektu {{SITENAME}}!",
@@ -211,7 +211,7 @@
 	"mobile-frontend-user-page-describe-yourself": "Na Vašoj suradničkoj stranici možete se predstaviti drugim $1",
 	"mobile-frontend-user-page-describe-yourself-editors": "uređivačima",
 	"mobile-frontend-user-page-desired-action": "Ovu stranicu mogao/mogla bi napraviti i uređivati suradnica/suradnik imena $1",
-	"mobile-frontend-user-page-create-owner-page-link-label": "Stvorite Vašu vlastitu",
+	"mobile-frontend-user-page-create-owner-page-link-label": "Stvorite svoju vlastitu",
 	"mobile-frontend-user-page-create-user-page-link-label": "Stvorite stranicu pod imenom $1",
 	"nearby": "Stranice o temama u Vašoj blizini",
 	"tag-mobile_edit": "uređivanje s mobilnog uređaja",

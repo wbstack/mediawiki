@@ -8,7 +8,10 @@
 			"Quenhitran",
 			"Thienhau2003",
 			"Trần Nguyễn Minh Huy",
-			"Vinhtantran"
+			"Vinhtantran",
+			"Flyplanevn27",
+			"NguyenHung",
+			"Phjtieudoc"
 		]
 	},
 	"echo-desc": "Hệ thống thông báo cho người dùng về các sự kiện và thay đổi quan trọng",
@@ -43,7 +46,7 @@
 	"echo-new-messages": "Bạn có tin nhắn mới",
 	"echo-category-title-edit-user-talk": "{{PLURAL:$1}}Tin nhắn thảo luận",
 	"echo-category-title-article-linked": "{{PLURAL:$1}}Liên kết đến trang",
-	"echo-category-title-reverted": "{{PLURAL:$1}}Bị lùi sửa",
+	"echo-category-title-reverted": "Sửa đổi {{PLURAL:$1|lùi sửa}}",
 	"echo-category-title-mention": "{{PLURAL:$1}}Được nhắc đến",
 	"echo-category-title-mention-failure": "{{PLURAL:$1}}Lời nhắc đến thất bại",
 	"echo-category-title-mention-success": "{{PLURAL:$1}}Lời nhắc đến thành công",
@@ -202,7 +205,7 @@
 	"notification-inbox-filter-read": "Đọc",
 	"notification-inbox-filter-unread": "Chưa đọc",
 	"notification-inbox-filter-all": "Tất cả",
-	"echo-specialmute-label-mute-notifications": "Làm im thông báo từ {{GENDER:$1}}người dùng này",
+	"echo-specialmute-label-mute-notifications": "Tắt thông báo từ {{GENDER:$1}}người dùng này",
 	"echo-email-plain-footer": "Để kiểm soát các thư điện tử mà chúng tôi gửi cho {{GENDER:$1}}bạn, hãy kiểm tra tùy chọn của {{GENDER:$1}}bạn:",
 	"echo-email-html-footer-preference-link-text": "kiểm tra tùy chọn của {{GENDER:$1}}bạn",
 	"echo-email-html-footer-with-link": "Để kiểm soát các thư điện tử mà chúng tôi gửi cho {{GENDER:$2}}bạn, hãy $1.",

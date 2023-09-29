@@ -11,7 +11,8 @@
 			"Yurik",
 			"Yusuke1109",
 			"つぶあん派",
-			"春春眠眠"
+			"春春眠眠",
+			"Chqaz"
 		]
 	},
 	"jsonconfig-desc": "JSON設定をwikiに保存できるようにする",
@@ -21,6 +22,7 @@
 	"jsonconfig-err-bool": "パラメーター「$1」には true または false を設定しなければなりません",
 	"jsonconfig-err-integer": "パラメーター「$1」は整数でなければなりません",
 	"jsonconfig-err-number": "パラメーター「$1」は数値でなければなりません",
+	"jsonconfig-err-root-object-expected": "JSONデータは、{...} 中括弧で囲まれたオブジェクトである必要があります。",
 	"jsonconfig-err-string": "パラメーター「$1」は文字列でなければなりません",
 	"jsonconfig-err-url": "引数「$1」には有効な URL を指定してください",
 	"jsonconfig-optional-field": "(省略可能)",

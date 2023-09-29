@@ -11,14 +11,15 @@
 			"Shirayuki",
 			"Siebrand",
 			"The Evil IP address",
-			"Umherirrender"
+			"Umherirrender",
+			"Verdy p"
 		]
 	},
 	"requestaccount": "{{doc-special|RequestAccount}}\n{{Identical|Request account}}",
 	"requestaccount-login": "{{Identical|Request account}}",
 	"requestaccount-text": "Used as intro text in [[Special:RequestAccount]].\n\nRefers to {{msg-mw|Requestaccount-page}}.",
 	"requestaccount-footer": "{{notranslate}}",
-	"requestaccount-page": "Used as link target in the following messages:\n* {{msg-mw|Requestaccount-text}}\n* {{msg-mw|Requestaccount-tos}}",
+	"requestaccount-page": "Used as link target in the following messages:\n* {{msg-mw|Requestaccount-text}}\n* {{msg-mw|Requestaccount-tos}}\n{{Identical|Requestaccount-page}}",
 	"requestaccount-dup": "Used as notice to users that are logged in.",
 	"requestaccount-leg-user": "Used as fieldset label in the form.\n{{Identical|User account}}",
 	"requestaccount-leg-areas": "Used as fieldset label in the form.\n{{Identical|Main areas of interest}}",

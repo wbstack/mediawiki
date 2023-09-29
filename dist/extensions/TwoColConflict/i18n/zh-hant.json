@@ -8,7 +8,8 @@
 			"LNDDYL",
 			"Liuxinyu970226",
 			"Tranve",
-			"烈羽"
+			"烈羽",
+			"Winston Sung"
 		]
 	},
 	"twocolconflict": "基於段落編輯衝突",
@@ -39,7 +40,7 @@
 	"twocolconflict-split-choose-version": "請選擇一個版本",
 	"twocolconflict-split-other-version-chosen": "其它版本",
 	"twocolconflict-split-your-version-chosen": "您的版本",
-	"twocolconflict-split-select-all": "選擇全部",
+	"twocolconflict-split-select-all": "全選",
 	"twocolconflict-split-tour-dialog-dot-message": "點擊發光的藍點可看有用的提示。",
 	"twocolconflict-split-tour-dialog-header": "合併衝突版本",
 	"twocolconflict-split-tour-dialog-message": "很不巧地，在您進行編輯時，剛好也有其他編者在相同的頁面上編輯，並比您先發布內容。\n\n但別擔心，您的編輯內容還沒遺失！請預覽兩方的版本，並將它們給合併在一起。如有需要，您可以編輯所選的文字。當您點擊「{{int:publishchanges}}」時，所選框內的文字將會被儲存下來。",

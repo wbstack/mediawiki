@@ -2,27 +2,28 @@
 	"@metadata": {
 		"authors": [
 			"Sagan",
-			"Ләйсән"
+			"Ләйсән",
+			"З. ӘЙЛЕ"
 		]
 	},
-	"usercredentials": "Ҡатнашыуҙы раҫлаусы мәғлүмәт",
-	"usercredentials-leg": "Ҡатнашыусы тураһында раҫланған мәғлүмәтте эҙләү",
+	"usercredentials": "Ҡатнашыусы тураһында раҫлау мәғлүмәте",
+	"usercredentials-leg": "Ҡатнашыусы тураһында раҫлау мәғлүмәтен эҙләү",
 	"usercredentials-user": "Ҡатнашыусы исеме:",
-	"usercredentials-text": "Түбәндә ҡатнашыусының иҫәп яҙмаһы тураһында тикшерелгән мәғлүмәт бирелгән.",
+	"usercredentials-text": "Түбәндә ҡатнашыусының һайланған иҫәп яҙмаһы тураһында тикшерелгән раҫлау мәғлүмәте бирелгән.",
 	"usercredentials-leg-user": "Иҫәп яҙмаһы",
-	"usercredentials-leg-areas": "Ҡыҙыҡһындырған төп өлкәләр",
+	"usercredentials-leg-areas": "Төп ҡыҙыҡһыныу өлкәләре",
 	"usercredentials-leg-person": "Шәхси мәғлүмәттәр",
 	"usercredentials-leg-other": "Башҡа мәғлүмәт",
-	"usercredentials-leg-ip": "IP-адрес мәғлүмәтә",
-	"usercredentials-email": "Электрон почта адресы",
+	"usercredentials-leg-ip": "IP-адрес мәғлүмәте",
+	"usercredentials-email": "Электрон почта адресы:",
 	"usercredentials-real": "Ысын исем:",
-	"usercredentials-bio": "Биография",
-	"usercredentials-attach": "Резюме:",
-	"usercredentials-notes": "Өҫтәлмә иҫкәртеү",
+	"usercredentials-bio": "Биография:",
+	"usercredentials-attach": "Һығымта:",
+	"usercredentials-notes": "Өҫтәмә иҫкәртеүҙәр:",
 	"usercredentials-urls": "Веб-сайттар исемлеге:",
-	"usercredentials-ip": "IP-адрес:",
-	"usercredentials-xff": "Төп нөсхә X-Forwarded-For:",
-	"usercredentials-agent": "Оригиналь User-Agent:",
+	"usercredentials-ip": "Сығанаҡ IP-адрес:",
+	"usercredentials-xff": "Сығанаҡ X-Forwarded-For:",
+	"usercredentials-agent": "Сығанаҡ User-Agent:",
 	"usercredentials-member": "Хоҡуҡтар:",
-	"usercredentials-badid": "Ҡатнашыусы тураһында тикшерелгән мәғлүмәт табылманы. Исемдең дөрөҫ яҙылышын тикшерегеҙ."
+	"usercredentials-badid": "Ҡатнашыусы тураһында раҫлау мәғлүмәте табылманы. Исемдең дөрөҫ яҙылышын тикшерегеҙ."
 }

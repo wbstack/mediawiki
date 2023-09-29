@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mehtab ahmed"
+		]
+	},
+	"invitesignup": "ماڻھن کي هن وڪي تي دعوت ڏيو",
+	"is-desc": "ايميل دعوتون موڪليو",
+	"is-tableth-date": "تاريخ",
+	"is-tableth-email": "ايميل",
+	"is-tableth-inviter": "دعوت ڏيندڙ",
+	"is-tableth-signup": "کاتو کوليو",
+	"is-tableth-groups": "گروھَ",
+	"is-add": "وجهو",
+	"is-delete": "ڊاھيو",
+	"is-invalidemail": "<b>$1</b> قابلِڪار ايميل پتو نہ آھي.",
+	"is-emailsubj": "توهان کي {{SITENAME}} ۾ شامل ٿيڻ جي دعت ڏني وئي آھي",
+	"is-emailbody": "سلام،\n\n{{GENDER:$1|$1}} توھان کي {{SITENAME}} ۾ کاتو ٺاھڻ جي دعوت ڏني آھي.\nتوھان $2 تي کاتو کولي سگهو ٿا.",
+	"right-invitesignup": "واپرائيندڙن کي کاتو کولڻ جي دعوت ڏيو",
+	"action-invitesignup": "واپرائيندڙن کي ھن سائيٽ تي کاتو کولڻ جي دعوت ڏيو"
+}

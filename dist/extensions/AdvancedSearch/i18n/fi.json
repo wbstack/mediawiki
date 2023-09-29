@@ -8,7 +8,8 @@
 			"Pyscowicz",
 			"SMAUG",
 			"Stryn",
-			"Valtlait"
+			"Valtlait",
+			"Valtlai"
 		]
 	},
 	"advancedsearch-desc": "Helpottaa edistyneiden hakuominaisuuksien käyttöä sivulle [[Special:Search|Toiminnot:Haku]]",
@@ -80,5 +81,5 @@
 	"advancedsearch-namespaces-placeholder": "Lisää nimiavaruuksia...",
 	"prefs-advancedsearch": "Laajennettu haku",
 	"advancedsearch-preference-help": "Laajennettu haku lisää lomakkeen sivulle Special:Search. Näin voit suorittaa erikoistuneita hakuja, vaikka et tietäisi yhtään hakusyntaksia. Se myös muuttaa nimiavaruuksien valintatapaa.",
-	"advancedsearch-preference-disable": "Älä näytä laajennetun haun käyttöliittymää"
+	"advancedsearch-preference-disable": "Älä näytä laajennetun haun käyttöliittymää kun käytät Special:Search"
 }

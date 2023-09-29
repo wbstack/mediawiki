@@ -3075,6 +3075,7 @@ class OutputPage extends ContextSource {
 	 *
 	 * @deprecated since 1.36. Use ::formatPermissionStatus instead
 	 * @param array $errors Array of arrays returned by PermissionManager::getPermissionErrors
+	 * @phan-param non-empty-array[] $errors
 	 * @param string|null $action Action that was denied or null if unknown
 	 * @return string The wikitext error-messages, formatted into a list.
 	 */
@@ -3101,6 +3102,7 @@ class OutputPage extends ContextSource {
 			$text .= '</ul>';
 		} else {
 			$text .= "<div class=\"permissions-errors\">\n" .
+					// @phan-suppress-next-line PhanParamTooFewUnpack Elements of $errors already annotated as non-empty
 					$this->msg( ...reset( $errors ) )->plain() .
 					"\n</div>";
 		}
@@ -3472,10 +3474,9 @@ class OutputPage extends ContextSource {
 	 * JS stuff to put at the bottom of the `<body>`.
 	 * These are legacy scripts ($this->mScripts), and user JS.
 	 *
-	 * @param string $extraHtml (only for use by this->tailElement(); will be removed in future)
 	 * @return string|WrappedStringList HTML
 	 */
-	public function getBottomScripts( $extraHtml = '' ) {
+	public function getBottomScripts() {
 		$chunks = [];
 		$chunks[] = $this->getRlClient()->getBodyHtml();
 
@@ -3492,6 +3493,7 @@ class OutputPage extends ContextSource {
 		}
 		// Keep the hook appendage separate to preserve WrappedString objects.
 		// This enables BaseTemplate::getTrail() to merge them where possible.
+		$extraHtml = '';
 		$this->getHookRunner()->onSkinAfterBottomScripts( $this->getSkin(), $extraHtml );
 		$chunks = [ self::combineWrappedStrings( $chunks ) ];
 		if ( $extraHtml !== '' ) {
@@ -4454,14 +4456,9 @@ class OutputPage extends ContextSource {
 	 * @return string
 	 */
 	public function tailElement( $skin ) {
-		// T257704: Temporarily run skin hook here pending
-		// creation dedicated outputpage hook for this
-		$extraHtml = '';
-		$this->getHookRunner()->onSkinAfterBottomScripts( $skin, $extraHtml );
-
 		$tail = [
 			MWDebug::getDebugHTML( $skin ),
-			$this->getBottomScripts( $extraHtml ),
+			$this->getBottomScripts(),
 			wfReportTime( $this->getCSP()->getNonce() ),
 			MWDebug::getHTMLDebugLog(),
 			Html::closeElement( 'body' ),

@@ -4,7 +4,8 @@
 			"Hello903hello",
 			"Moon0319",
 			"Roy17",
-			"Z423x5c6"
+			"Z423x5c6",
+			"捍粵者"
 		]
 	},
 	"advancedsearch-options-pane-head": "進階搜尋：",
@@ -26,6 +27,7 @@
 	"advancedsearch-field-fileh": "檔高度（像素）",
 	"advancedsearch-field-sort": "排列次序",
 	"advancedsearch-field-preview-sort": "按$1嚟排",
+	"advancedsearch-help-plain": ";描述\n:喺標題或內文度搵呢啲字詞。\n;注意以下事項\n:* 呢度可以填多個字詞。\n:* 標點同其他非字母數字字符（冒號同逗號除外）會被忽略。\n:* 部分結果可能會爭噉一個搜尋關鍵詞或以上。\n:* 搜尋會應用字幹提取。例子：入「car」嘅話會搵埋「cars」。字幹提取依語言而定。\n;幫助版\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search 全文搜索]\n;正常搜尋嘅對應句法\n:<code>sesame street car</code>",
 	"advancedsearch-placeholder-exact-text": "\"貓中意山羊\"",
 	"advancedsearch-inlanguage-default": "揀語言",
 	"advancedsearch-filetype-section-types": "一般檔類型",
@@ -46,6 +48,7 @@
 	"advancedsearch-sort-relevance": "相關程度",
 	"advancedsearch-sort-last-edit-asc": "編輯日期 – 最舊嘅喺上面",
 	"advancedsearch-sort-last-edit-desc": "編輯日期 – 最近嘅喺上面",
+	"advancedsearch-sort-create-timestamp-desc": "開版日期 – 最近嘅喺上面",
 	"advancedsearch-sort-preview-relevance": "相關程度",
 	"advancedsearch-sort-preview-last-edit-desc": "編輯日期",
 	"advancedsearch-namespaces-search-in": "喺呢個名空間度搵：",
@@ -56,5 +59,5 @@
 	"advancedsearch-namespaces-preset-discussion": "討論",
 	"advancedsearch-namespaces-placeholder": "加名空間……",
 	"prefs-advancedsearch": "進階搜尋",
-	"advancedsearch-preference-disable": "用 Special:Search 嘅時候唔好顯示進階搜尋界面"
+	"advancedsearch-preference-disable": "用Special:Search嗰陣唔好顯示進階搜尋介面"
 }

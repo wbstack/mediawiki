@@ -23,7 +23,10 @@
 			"Sumbukompor",
 			"Vlad5250",
 			"לערי ריינהארט",
-			"아라"
+			"아라",
+			"Base",
+			"Bangrapip",
+			"Amire80"
 		]
 	},
 	"tog-underline": "Garis ngisori pranala:",
@@ -746,7 +749,7 @@
 	"rev-deleted-unhide-diff": "Salah siji révisi saka prabédan iki wis '''dibusak'''.\nRerincèn bisa tinemu ing [{{fullurl:{{#Special:Log}}/delete|page={{FULLPAGENAMEE}}}} log pambusakan].\nPanjenengan uga isih bisa [$1 ndeleng prabédan iki] yèn panjenengan gelem.",
 	"rev-suppressed-unhide-diff": "Salah siji révisi saka prabédan iki wis '''dibrèdèl'''.\nRerincèn bisa tinemu ing [{{fullurl:{{#Special:Log}}/delete|page={{FULLPAGENAMEE}}}} log pambrèdèlan].\nPanjenengan uga isih bisa [$1 ndeleng prabédan iki] yèn panjenengan gelem.",
 	"rev-deleted-diff-view": "Salah siji révisi saka prabédan iki wis '''dibusak'''.\nPanjenengan isih bisa ndeleng prabédan iki; rerincèn bisa tinemu ing [{{fullurl:{{#Special:Log}}/delete|page={{FULLPAGENAMEE}}}} log pambusakan].",
-	"rev-suppressed-diff-view": "Salah siji révisi saka prabédan iki wis '''dibrèdèl'''.\nPanjenengan isih bisa ndeleng prabédan iki; rerincèn bisa tinemu ing [{{fullurl:{{#Special:Log}}/delete|page={{FULLPAGENAMEE}}}} log pambrèdèlan].",
+	"rev-suppressed-diff-view": "Salah siji révisi saka prabédan iki wis '''dibrèdèl'''.\nPanjenengan isih bisa ndeleng prabédan iki; rerincèn bisa tinemu ing [{{fullurl:{{#Special:Log}}/suppress|page={{FULLPAGENAMEE}}}} log pambrèdèlan].",
 	"rev-delundel": "owah pakatonan",
 	"rev-showdeleted": "tuduhaké",
 	"revisiondelete": "Busak/wurung busak révisi",
@@ -1975,7 +1978,7 @@
 	"enotif_lastvisited": "Deleng $1 kanggo kabèh owah-owahan wiwit pungkasan panjenengan niliki.",
 	"enotif_lastdiff": "Saperlu ndeleng owahan iki, tilikana $1",
 	"enotif_anon_editor": "naraguna anonim $1",
-	"enotif_body": "Kang minulya $WATCHINGUSERNAME,\n\nKaca $PAGETITLE ing {{SITENAME}} wis $CHANGEDORCREATED ing $PAGEEDITDATE déning $PAGEEDITOR, mangga mirsani $PAGETITLE_URL kanggo vèrsi pungkasan.\n\n$NEWPAGE\n\nSajarah besutan: $PAGESUMMARY $PAGEMINOREDIT\n\nHubungana pambesut:\nlayang-èl: $PAGEEDITOR_EMAIL\nwiki: $PAGEEDITOR_WIKI\n\nKita ora bakal ngandhani manèh yèn diowahi manèh, kejaba panjenengan wis mirsani kaca iku. Panjenengan uga bisa mbusak tandha notifikasi kanggo kabèh kaca pangawasan ing pawawangané panjenengan.\n\n             Sistém notifikasi {{SITENAME}}\n\n--\nKanggo ngowahi préferènsi ing pawawangané panjenengan, mangga mirsani\n{{canonicalurl:{{#special:EditWatchlist}}}}\n\nPamrayoga lan pitulung sabanjuré:\n$HELPPAGE",
+	"enotif_body": "Kang minulya $WATCHINGUSERNAME,\n\n$PAGEINTRO $NEWPAGE\n\nSajarah besutan: $PAGESUMMARY $PAGEMINOREDIT\n\nHubungana pambesut:\nlayang-èl: $PAGEEDITOR_EMAIL\nwiki: $PAGEEDITOR_WIKI\n\nKita ora bakal ngandhani manèh yèn diowahi manèh, kejaba panjenengan wis mirsani kaca iku. Panjenengan uga bisa mbusak tandha notifikasi kanggo kabèh kaca pangawasan ing pawawangané panjenengan.\n\n             Sistém notifikasi {{SITENAME}}\n\n--\nKanggo ngowahi préferènsi ing pawawangané panjenengan, mangga mirsani\n{{canonicalurl:{{#special:EditWatchlist}}}}\n\nPamrayoga lan pitulung sabanjuré:\n$HELPPAGE",
 	"enotif_minoredit": "Iki besutan cilik",
 	"created": "kadamel",
 	"changed": "kaubah",
@@ -2348,7 +2351,7 @@
 	"semiprotectedpagemovewarning": "<strong>Cathetan:</strong> Kaca iki wis direksa saéngga mung naraguna kadhaftar kang bisa ngalihaké.\nÈntri log pungkasan cumepak ing ngisor kanggo rujukan:",
 	"move-over-sharedrepo": "[[:$1]] ana ing panyimpenan barengan. Ngalih barkas mawa sesirah iki bakal ngamblegi barkas barengan iku.",
 	"file-exists-sharedrepo": "Jeneng berkas kapilih wis ana kanggo ing panyimpenan bebarengan.\nMangga pilih jeneng liya.",
-	"export": "Èspor kaca",
+	"export": "Èkspor kaca",
 	"exporttext": "Panjenengan bisa ngèkspor tèks lan sajarah panyuntingan kaca tartamtu utawa sèt kaca awujud XML tartamtu. Banjur iki bisa diimpor ing wiki liyané nganggo MediaWiki nganggo fasilitas [[Special:Import|impor kaca]].\n\nKanggo ngèkspor kaca-kaca artikel, lebokna irah-irahan utawa judhul sajroning kothak tèks ing ngisor iki, irah-irahan utawa judhul siji per baris, lan pilihen apa panjenengan péngin ngèkspor jangkep karo vèrsi sadurungé, utawa namung vèrsi saiki mawa cathetan panyuntingan pungkasan.\n\nYèn panjenengan namun péngin ngimpor vèrsi pungkasan, panjenengan uga bisa nganggo pranala kusus, contoné [[{{#Special:Export}}/{{MediaWiki:Mainpage}}]] kanggo ngèkspor artikel \"[[{{MediaWiki:Mainpage}}]]\".",
 	"exportall": "Ngèkspor kabèh kaca",
 	"exportcuronly": "Namung èkspor révisi saiki, dudu kabèh vèrsi lawas",

@@ -12,11 +12,12 @@
 			"Valtlait"
 		]
 	},
-	"twocolconflict": "TwoColConflict",
+	"twocolconflict": "Kappalepohjainen muokkausristiriita",
 	"twocolconflict-desc": "Näyttää rinnakkaisen muokkaustenyhdistämisnäytön päällekkäisten muokkausten ratkaisemiseksi.",
-	"twocolconflict-beta-feature-message": "Kaksisarakkeinen muokkausristiriita",
-	"twocolconflict-beta-feature-description": "Näytä muokkausristiriitanäkymä käyttäen kehittyneempää kaksisarakkeista näkymää.",
+	"twocolconflict-beta-feature-message": "Kappalepohjainen muokkausristiriita",
+	"twocolconflict-beta-feature-description": "Näytä muokkausristiriitanäkymä käyttäen kehittyneempää kappalepohjaista näkymää.",
 	"twocolconflict-preference-enabled": "Ota [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|kaksisarakkeinen muokkausristiriita]] käyttöön ratkaistaksesi päällekkäiset muokkaukset.",
 	"twocolconflict-special-malformed-title": "Puuttuva tai virheellinen otsikko.",
+	"twocolconflict-split-reset-warning-cancel": "Peruuta",
 	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "Ratkaise ongelma"
 }

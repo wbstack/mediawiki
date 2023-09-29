@@ -6,7 +6,8 @@
 			"MuratTheTurkish",
 			"Steeve815",
 			"דגש",
-			"דגש חזק"
+			"דגש חזק",
+			"Neriah"
 		]
 	},
 	"twocolconflict": "התנגשות עריכה מבוססת פסקאות",
@@ -55,8 +56,8 @@
 	"twocolconflict-split-reset-warning": "לזרוק את השינויים? הטקסט בתיבה הזאת יאופס למה שהוא היה לפני שאירעה התנגשות העריכה.",
 	"twocolconflict-split-reset-warning-cancel": "ביטול",
 	"twocolconflict-split-reset-warning-accept": "לזרוק",
-	"twocolconflict-split-collapse-tooltip": "הסתרת טקסט שלא שוּנה",
-	"twocolconflict-split-expand-tooltip": "הצגת טקסט שלא שוּנה",
+	"twocolconflict-split-collapse-tooltip": "הסתרת טקסט שלא שונה",
+	"twocolconflict-split-expand-tooltip": "הצגת טקסט שלא שונה",
 	"twocolconflict-split-select-all-other-tooltip": "{{GENDER:|לחץ|לחצי}} כדי לבחור את כל השינויים של הגרסה האחרת",
 	"twocolconflict-split-select-all-your-tooltip": "{{GENDER:|לחץ|לחצי}} כדי לבחור את כל השינויים של הגרסה שלך",
 	"twocolconflict-split-selected-all-other-tooltip": "נבחרו כל השינויים של הגרסה האחרת",

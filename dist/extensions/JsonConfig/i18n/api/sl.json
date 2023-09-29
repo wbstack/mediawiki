@@ -12,7 +12,7 @@
 	"apihelp-jsonconfig-param-content": "Za $1command=reload namesto tega uporabite to vsebino.",
 	"apihelp-jsonconfig-example-1": "Prikaži konfiguracijo",
 	"apihelp-jsonconfig-example-2": "Ponastavite [[Data:Brazil/Amazonas.map]]",
-	"apihelp-jsonconfig-example-3": "Ponovno naložite [[Data:Brazil/Amazonas.map]]",
+	"apihelp-jsonconfig-example-3": "Ponovna naložitev [[Data:Brazil/Amazonas.map]]",
 	"apihelp-jsondata-description": "Pridobite lokalizirane podatke JSON.",
 	"apihelp-jsondata-summary": "Pridobi lokalizirane podatke JSON.",
 	"apihelp-jsondata-param-title": "Naslov za pridobitev. Privzeto predpostavi, da je imenski prostor »Data:«.",

@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kc kennylau"
+			"Kc kennylau",
+			"捍粵者"
 		]
 	},
 	"requestaccount": "請求戶口",
@@ -16,7 +17,7 @@
 	"requestaccount-email": "電郵地址:",
 	"requestaccount-bio": "個人傳記:",
 	"requestaccount-notes": "附加註解:",
-	"requestaccount-urls": "網站一覽，如有者 (用新行分開):",
+	"requestaccount-urls": "網站一覽，如有者（用新行分開）：",
 	"requestaccount-agree": "你一定要證明到你個真名係啱嘅，而且你同意我哋嘅服務細則。",
 	"requestaccount-inuse": "個用戶名已經用來請求緊個戶口。",
 	"requestaccount-tooshort": "你嘅傳記一定要最少有$1個字長。",

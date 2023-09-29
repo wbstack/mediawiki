@@ -3,7 +3,8 @@
 		"authors": [
 			"Conky77",
 			"Cusolotto",
-			"Fierodelveneto"
+			"Fierodelveneto",
+			"Amire80"
 		]
 	},
 	"advancedsearch-desc": "Entrada ràpida a łe funsion de reserca vansada in [[Special:Search]]",
@@ -14,7 +15,7 @@
 	"advancedsearch-optgroup-sort": "Òrdene de clasefegasion",
 	"advancedsearch-field-plain": "Ste paròle",
 	"advancedsearch-field-phrase": "Pròpio sto idéntego testo",
-	"advancedsearch-field-or": "Una de  ste paròle",
+	"advancedsearch-field-or": "Una de ste paròle",
 	"advancedsearch-field-not": "Mia ste parołe cuà",
 	"advancedsearch-field-subpageof": "Sotovoxe de sta voxe",
 	"advancedsearch-field-intitle": "El tìtoło de ła voxe ła detien",
