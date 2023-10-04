@@ -4,17 +4,31 @@
 			"Minh Nguyen",
 			"NguoiDungKhongDinhDanh",
 			"Nhatminh01",
-			"Quenhitran"
+			"Quenhitran",
+			"Phjtieudoc"
 		]
 	},
-	"twocolconflict": "TwoColConflict",
-	"twocolconflict-desc": "Hiển thị màn hình trộn sửa đổi song song để giải quyết mâu thuẫn sửa đổi.",
+	"twocolconflict": "Mâu thuẫn sửa đổi dựa trên đoạn văn",
+	"twocolconflict-desc": "Hiển thị màn hình hợp nhất sửa đổi song song để giải quyết mâu thuẫn sửa đổi",
 	"twocolconflictprovidesubmittedtext": "Mâu thuẫn sửa đổi:",
-	"twocolconflict-beta-feature-message": "Giao diện sửa đổi mâu thuẫn hai cột",
-	"twocolconflict-beta-feature-description": "Hiển thị trang sửa đổi mâu thuẫn với một giao diện hai cột nâng cao.<br/><br/>Xin lưu ý: Tính năng này đang [https://phabricator.wikimedia.org/T195711 được thay đổi]. Giao diện mới được dự định cho nửa cuối năm 2018.",
+	"twocolconflict-beta-feature-message": "Mâu thuẫn sửa đổi dựa trên đoạn văn",
+	"twocolconflict-beta-feature-description": "Hiển thị chế độ xem mâu thuẫn sửa đổi bằng cách sử dụng chế độ xem dựa trên đoạn văn nâng cao hơn.",
+	"twocolconflict-copy-action": "sao chép toàn bộ văn bản",
+	"twocolconflict-core-ui-hint-close": "Không hiển thị lại",
+	"twocolconflict-special-not-saved": "Chưa xuất bản",
+	"twocolconflict-special-textarea-hint": "Bạn có thể xem và sao chép mã nguồn bản sửa đổi của mình:",
 	"twocolconflict-special-malformed-title": "Tựa đề thiếu hoặc không hợp lệ.",
-	"twocolconflict-split-your-version-header": "Phiên bản của bạn",
+	"twocolconflict-split-your-version-header": "Bản sửa đổi của bạn",
+	"twocolconflict-split-current-version-header": "Bản sửa đổi mới nhất kể từ $1",
+	"twocolconflict-split-not-saved-at": "Chưa xuất bản",
+	"twocolconflict-split-choose-version": "Hãy chọn một phiên bản",
+	"twocolconflict-split-other-version-chosen": "Phiên bản khác",
+	"twocolconflict-split-your-version-chosen": "Phiên bản của bạn",
+	"twocolconflict-split-select-all": "Chọn tất cả",
 	"twocolconflict-split-tour-popup-btn-text": "Hiểu rồi",
 	"twocolconflict-split-tour-popup3-header": "Văn bản tô đậm",
-	"twocolconflict-split-edit-tooltip": "Sửa nội dung"
+	"twocolconflict-split-edit-tooltip": "Sửa nội dung",
+	"twocolconflict-split-reset-warning-cancel": "Huỷ bỏ",
+	"twocolconflict-split-select-other-tooltip": "Nhấn vào để chọn phiên bản khác",
+	"twocolconflict-split-help-tooltip": "Hiện trợ giúp"
 }

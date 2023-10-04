@@ -15,7 +15,8 @@
 			"Taleman",
 			"Valtlait",
 			"Varusmies",
-			"VezonThunder"
+			"VezonThunder",
+			"Valtlai"
 		]
 	},
 	"confirmaccounts": "Myönnä käyttäjätunnuksia.",
@@ -82,7 +83,7 @@
 	"confirmaccount-legend": "Vahvista tai hylkää tämä tunnus",
 	"confirmaccount-submit": "Vahvista",
 	"confirmaccount-needreason": "Alla olevaan huomautuslaatikkoon on kirjoitettava perustelu.",
-	"confirmaccount-canthold": "Tämä pyyntöf on jo joko pysäytetty tai poistettu.",
+	"confirmaccount-canthold": "Tämä pyyntö on jo joko pysäytetty tai poistettu.",
 	"confirmaccount-acc": "Pyynnön vahvistaminen onnistui.\n\tKäyttäjätunnus [[User:$1|$1]] luotiin.",
 	"confirmaccount-rej": "Pyynnön hylkääminen onnistui.",
 	"confirmaccount-viewing": "(juuri nyt {{GENDER:$1|katseltavana}} käyttäjällä [[User:$1|$1]])",

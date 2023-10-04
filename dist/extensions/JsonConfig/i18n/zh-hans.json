@@ -9,7 +9,9 @@
 			"SomeyaMako",
 			"Yurik",
 			"列维劳德",
-			"御坂美琴"
+			"御坂美琴",
+			"GuoPC",
+			"LittlePaw365"
 		]
 	},
 	"nstab-data": "数据",
@@ -54,7 +56,7 @@
 	"jsonconfig-type-name-invalid": "无效",
 	"jsonconfig-type-name-string": "字符串",
 	"jsonconfig-type-name-localized": "已本地化",
-	"jsonconfig-type-name-number": "数值",
+	"jsonconfig-type-name-number": "数字",
 	"jsonconfig-type-name-boolean": "布尔值",
 	"jsonconfig-license": "数据基于$1可用。",
 	"jsonconfig-license-not-set": "编辑此页面时，您同意根据<code>licence</code>中指定的许可证发布您的贡献。",

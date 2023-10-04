@@ -3,11 +3,13 @@
 		"authors": [
 			"Armin1392",
 			"Beginneruser",
-			"Mjbmr"
+			"Mjbmr",
+			"Jeeputer"
 		]
 	},
 	"confirmaccount-newrequests": "'''$1''' ایمیل باز [[Special:ConfirmAccounts|[[Special:ConfirmAccounts|account {{PLURAL:$1|درخواست در حال انتظار}}]] حساب]] تأیید شده است.\n'''توجه شما نیازمند شده است!'''",
 	"requestaccount-loginnotice": "برای دستیابی یک حساب کاربری، شما باید '''[[Special:RequestAccount|یک درخواست دهید]]'''.",
+	"action-confirmaccount": "بازبینی و پذیرش حساب‌ها",
 	"right-confirmaccount": "مشاهدهٔ [[Special:ConfirmAccounts|queue with requested accounts]]",
 	"right-requestips": "مشاهدهٔ متقاضیان آدرس‌های آی‌پی زمان پردازش حساب‌های درخواست شده",
 	"right-lookupcredentials": "مشاهدهٔ [[Special:UserCredentials|user credentials]]"

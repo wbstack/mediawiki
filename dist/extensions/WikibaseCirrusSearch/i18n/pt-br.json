@@ -36,6 +36,7 @@
 	"wikibasecirrus-search-bad-profile-name": "Nome do perfil de pesquisa ruim: $1",
 	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "A senha haswbstatement não contém nenhuma declaração válida",
 	"wikibasecirrus-haslicense-feature-no-valid-arguments": "a palavra-chave haslicense não contém argumentos válidos",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "A palavra-chave wbstatementquantity não contém instruções válidas",
 	"special-entitieswithoutdescription": "Entidades sem descrição",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Obter lista de entidades sem descrição",
 	"special-entitieswithoutlabel": "Entidades sem rótulo",

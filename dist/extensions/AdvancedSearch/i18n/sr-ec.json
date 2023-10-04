@@ -5,7 +5,9 @@
 			"Kizule",
 			"Obsuser",
 			"Zoranzoki21",
-			"Милан Јелисавчић"
+			"Милан Јелисавчић",
+			"Milicevic01",
+			"Zenfiric"
 		]
 	},
 	"advancedsearch-desc": "Лак приступ напредним могућностима претраге на [[Special:Search|Посебно:Претражи]]",
@@ -56,10 +58,14 @@
 	"advancedsearch-filesize-greater-than": "већа од",
 	"advancedsearch-filesize-smaller-than": "мања од",
 	"advancedsearch-sort-relevance": "важност",
+	"advancedsearch-sort-last-edit-asc": "Датум уређивања — најстарији прво",
 	"advancedsearch-sort-last-edit-desc": "датум измене — тренутни на врху",
+	"advancedsearch-sort-create-timestamp-asc": "Датум прављења — најстарији прво",
 	"advancedsearch-sort-create-timestamp-desc": "датум прављења — тренутни на врху",
 	"advancedsearch-sort-preview-relevance": "важности",
+	"advancedsearch-sort-preview-last-edit-asc": "најкасније уређивани",
 	"advancedsearch-sort-preview-last-edit-desc": "датуму измене",
+	"advancedsearch-sort-preview-create-timestamp-asc": "најкасније направљени",
 	"advancedsearch-sort-preview-create-timestamp-desc": "датуму прављења",
 	"advancedsearch-namespaces-search-in": "Претрага по именским просторима:",
 	"advancedsearch-namespaces-remember": "Запамти избор за будуће претраге",

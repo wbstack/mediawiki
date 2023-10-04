@@ -15,7 +15,8 @@
 			"Talex42",
 			"Umherirrender",
 			"Wnme",
-			"Zabe"
+			"Zabe",
+			"Justman10000"
 		]
 	},
 	"mwoauth-desc": "Ermöglicht die Nutzung von OAuth 1.0a und OAuth 2.0 zur API-Autorisierung",
@@ -41,6 +42,7 @@
 	"mwoauth-consumer-owner-only-help": "Die Auswahl dieser Option verursacht die automatische Bestätigung und Akzeptierung des Verbrauchers für die Verwendung durch $1. Er wird für andere Benutzer nicht nutzbar sein und der übliche Autorisierungsablauf wird nicht funktionieren. Aufgenommene Aktionen mit diesem Verbraucher werden nicht markiert.",
 	"mwoauth-consumer-description": "Anwendungsbeschreibung:",
 	"mwoauth-consumer-callbackurl": "OAuth-Callback-URL:",
+	"mwoauth-consumer-callbackurl-help": "Im Gegensatz zu OAuth 1.0a wird diese URL genau abgeglichen",
 	"mwoauth-consumer-callbackurl-warning": "(Wildcard-Port)",
 	"mwoauth-consumer-callbackisprefix": "Dem Verbraucher die Angabe eines Callbacks in Anfragen ermöglichen und die obige Callback-URL als ein erforderliches Präfix verwenden.",
 	"mwoauth-consumer-granttypes": "Typen der angefragten Berechtigungen:",
@@ -311,6 +313,7 @@
 	"mwoauth-oauth-version": "OAuth-Protokoll-Version",
 	"mwoauth-oauth2-granttype-auth-code": "Autorisierungscode",
 	"mwoauth-oauth2-granttype-refresh-token": "Token aktualisieren",
+	"mwoauth-oauth2-error-create-at-no-user-approval": "Das Zugriffstoken kann nicht erstellt werden, da der Benutzer die Ausstellung dieses Zugriffstokens nicht genehmigt hat",
 	"mwoauth-oauth-unsupported-version": "Dieser Endpunkt ist für OAuth-Version $1 nicht zulässig",
 	"mwoauth-oauth2-unable-to-retrieve-access-token": "Zugriffstoken konnte nicht abgerufen werden: $1",
 	"mwoauth-oauth2-error-server-error": "Der Autorisierungsserver ist auf eine unerwartete Bedingung gestoßen, die ihn daran hinderte, die Anfrage zu erfüllen.",

@@ -4,9 +4,10 @@
 			"Bosogo"
 		]
 	},
-	"advancedsearch-optgroup-structure": "Түзүлүш",
+	"advancedsearch-optgroup-structure": "Түзүм",
 	"advancedsearch-optgroup-files": "Файлдар жана сүрөттөр",
 	"advancedsearch-field-plain": "Бул сөздөр",
 	"advancedsearch-field-or": "Бул сөздөрдүн бири",
-	"advancedsearch-field-not": "Бул сөздөр эмес"
+	"advancedsearch-field-not": "Бул сөздөр эмес",
+	"advancedsearch-filetype-bitmap": "Сүрөт"
 }

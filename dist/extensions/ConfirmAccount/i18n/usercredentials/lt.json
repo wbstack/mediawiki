@@ -3,10 +3,13 @@
 		"authors": [
 			"Eitvys200",
 			"Homo",
-			"Tomasdd"
+			"Tomasdd",
+			"Nokeoo"
 		]
 	},
+	"usercredentials": "Naudotojo kredencialai",
 	"usercredentials-user": "Naudotojo vardas:",
+	"usercredentials-text": "Žemiau yra patvirtinti pasirinktos naudotojo paskyros kredencialai.",
 	"usercredentials-leg-user": "Naudotojo paskyra",
 	"usercredentials-leg-areas": "Pagrindinės interesų sritys",
 	"usercredentials-leg-person": "Asmeninė informacija",
@@ -19,5 +22,6 @@
 	"usercredentials-notes": "Papildomos pastabos:",
 	"usercredentials-urls": "Tinklapių sąrašas:",
 	"usercredentials-ip": "Originalus IP adresas:",
-	"usercredentials-member": "Teisės:"
+	"usercredentials-member": "Teisės:",
+	"usercredentials-badid": "Šio naudotojo kredencialų nerasta.\nPatikrinkite, ar vardas parašytas teisingai."
 }

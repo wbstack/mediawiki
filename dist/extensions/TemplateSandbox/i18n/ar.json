@@ -6,7 +6,8 @@
 			"Meno25",
 			"ديفيد",
 			"زكريا",
-			"محمد أحمد عبد الفتاح"
+			"محمد أحمد عبد الفتاح",
+			"Hubaishan"
 		]
 	},
 	"templatesandbox": "ملعب القوالب",
@@ -24,7 +25,7 @@
 	"templatesandbox-editform-page-label": "عنوان الصفحة",
 	"templatesandbox-editform-view-label": "أظهر المعاينة",
 	"templatesandbox-preview": "معاينة $2",
-	"templatesandbox-previewnote": "'''تذكر أن هذه مجرد معاينة لـ[[:$1]]،'''\nلم يتم حفظ تغييراتك بعد!",
+	"templatesandbox-previewnote": "'''تذكر أن هذه مجرد معاينة لـ«[[:$1]]»،'''\nلم يتم حفظ تغييراتك بعد!",
 	"templatesandbox-invalid-title": "العنوان الذي حددته غير صالح.",
 	"templatesandbox-title-not-exists": "العنوان الذي حددته غير موجود.",
 	"templatesandbox-revision-not-exists": "المراجعة التي حددتها غير موجودة.",

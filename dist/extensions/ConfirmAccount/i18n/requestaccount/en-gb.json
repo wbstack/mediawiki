@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"Piano1forte2"
+		]
+	},
+	"requestaccount-tos": "I have read and agree to abide by the [[{{MediaWiki:Requestaccount-page}}|Terms of Service]] of {{SITENAME}}.\nThe name I have specified under 'Real name' is in fact my own real name.",
+	"requestaccount-email-body": "Someone, probably you from IP address $1, has requested an account '$2' with this email address on {{SITENAME}}.\n\nTo confirm that this account really does belong to you on {{SITENAME}}, open this link in your browser:\n\n$3\n\nIf the account is created, only you will be emailed the password.\nIf this is *not* you, do not follow the link.\nThis confirmation code will expire at $4."
+}

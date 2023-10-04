@@ -1,0 +1,14 @@
+{
+	"@metadata": {
+		"authors": [
+			"Winston Sung"
+		]
+	},
+	"confirmaccount-newrequests": "'''$1''' [[Special:ConfirmAccounts|{{PLURAL:$1|otvoren zahtjev o računu je|otvorenih zahtjeva o računu su}}]] na čekanju. '''Potrebna je vaša pozornost!'''",
+	"requestaccount-loginnotice": "Da biste dobili korisnički račun, morate '''[[Special:RequestAccount|unesti zahtijev]]'''.",
+	"action-confirmaccount": "pregled i prihvatanje račune",
+	"right-confirmaccount-notify": "Primanje obavijesti putem e-pošte o novoodobrenim zahtjevima za račun",
+	"action-requestips": "pregledavanje IP adresa zahtijevatelja pri radu zahtjevanjh računa",
+	"right-requestips": "Pregledavanje IP adresa zahtijevatelja pri radu zahtjevanjh računa",
+	"action-lookupcredentials": "pregledavanje korisničkih ovlaštenja"
+}

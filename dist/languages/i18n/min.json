@@ -23,7 +23,10 @@
 			"Vlad5250",
 			"VoteITP",
 			"Zakiy",
-			"아라"
+			"아라",
+			"Af420",
+			"Base",
+			"Amire80"
 		]
 	},
 	"tog-underline": "Garih bawahi pautan:",
@@ -814,7 +817,7 @@
 	"rev-deleted-unhide-diff": "Revisi laman ko alah '''dihapuih'''.\nRinciannyo mungkin ado di [{{fullurl:{{#Special:Log}}/delete|page={{FULLPAGENAMEE}}}} log pangapuihan].\nSanak masih dapek [$1 mancaliak revisi ko] ko' amuah.",
 	"rev-suppressed-unhide-diff": "Revisi laman ko alah '''tabanam'''.\nRinciannyo mungkin ado di [{{fullurl:{{#Special:Log}}/suppress|page={{FULLPAGENAMEE}}}} log pambanaman].\nSanak masih dapek [$1 maliek revisi ko] ko' amuah.",
 	"rev-deleted-diff-view": "Laman revisi ko alah '''dihapuih'''.\nSanak dapek mancaliaknyo; rinciannyo mungkin ado di [{{fullurl:{{#Special:Log}}/delete|page={{FULLPAGENAMEE}}}} log pangapuihan].",
-	"rev-suppressed-diff-view": "Revisi laman ko alah '''tabanam'''.\nSanak dapek malieknyo; rinciannyo mungkin ado di [{{fullurl:{{#Special:Log}}/delete|page={{FULLPAGENAMEE}}}} log pambanaman]",
+	"rev-suppressed-diff-view": "Revisi laman ko alah '''tabanam'''.\nSanak dapek malieknyo; rinciannyo mungkin ado di [{{fullurl:{{#Special:Log}}/suppress|page={{FULLPAGENAMEE}}}} log pambanaman]",
 	"rev-delundel": "tunjuakan/suruakkan",
 	"rev-showdeleted": "tunjuakan",
 	"revisiondelete": "Hapuih/batal hapuih revisi",
@@ -1303,7 +1306,7 @@
 	"action-editcontentmodel": "manyuntiang model konten sabuah laman",
 	"action-managechangetags": "buek jo matikan tag",
 	"action-applychangetags": "terapkan tag basamoan jo parubahan Sanak",
-	"action-changetags": "Tambah jo apuih arbitrari pado tiok-tiok  revisi jo entri log",
+	"action-changetags": "Tambah jo apuih arbitrari pado tiok-tiok revisi jo entri log",
 	"action-deletechangetags": "apuih tag dari basisdata",
 	"action-purge": "apuih singgahan laman ko",
 	"action-apihighlimits": "manggunoan bateh labiah tinggi dalam kueri API",

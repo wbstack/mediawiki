@@ -1,0 +1,11 @@
+{
+	"@metadata": {
+		"authors": [
+			"Piano1forte2"
+		]
+	},
+	"confirmaccount-held": "({{GENDER:$1|marked}} 'on hold' by [[User:$1|$1]] on $3 at $4)",
+	"confirmaccount-mismatched-general": "An override was requested on a field of the original account request that is not allowed or the 'mail password' option was not set.",
+	"confirmaccount-email-body3": "Sorry, your request for an account '$1' has been rejected on {{SITENAME}}.\n\nThere are several ways this can happen.\nYou may not have filled out the form correctly, did not provide adequate length in your responses, or otherwise failed to meet some policy criteria.\nThere may be contact lists on site that you can use if you want to know more about user account policy.",
+	"confirmaccount-email-body4": "Sorry, your request for an account '$1' has been rejected on {{SITENAME}}.\n\n$2\n\nThere may be contact lists on site that you can use if you want to know more about user account policy."
+}

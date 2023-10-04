@@ -25,7 +25,7 @@
 	"requestaccount-bio-text": "Vaša biografija će biti postavljena kao glavni sadržaj za vašu suradničku stranicu.\nPokušajte napisati nešto o sebi.\nBudite sigurni da pišete informacije koje su vama prihvatljive.\nVaše pravo ime možete promijeniti putem [[Special:Preferences|postavki]].",
 	"requestaccount-real": "Pravo ime:",
 	"requestaccount-same": "(bit će isto kao i pravo ime)",
-	"requestaccount-email": "Adresa e-pošte (vaš ''e-mail''):",
+	"requestaccount-email": "Adresa e-pošte:",
 	"requestaccount-reqtype": "Mjesto:",
 	"requestaccount-level-0": "autor",
 	"requestaccount-level-1": "uređivač",

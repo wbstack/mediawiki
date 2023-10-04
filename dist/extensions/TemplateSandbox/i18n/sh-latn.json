@@ -1,0 +1,15 @@
+{
+	"@metadata": {
+		"authors": [
+			"Winston Sung"
+		]
+	},
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Prikazuje stranicu]] s testnim predloškom",
+	"templatesandbox-suffix": "pijesak",
+	"templatesandbox-text": "Možete odabrati skup predložaka sačuvanih u vašem suradničkom imenskom prostoru, koristeći prikladni prefiks za pijesak. Na primjer, ako želite pergledati verziju {{ns:Template}}:Pokus koji ste sačuvali kao \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Pokus\", koristite \"{{ns:User}}:Foo/{{int:templatesandbox-suffix}}\" kao prefiks.",
+	"templatesandbox-prefix-label": "Prefiks:",
+	"templatesandbox-page-label": "Testna stranica:",
+	"templatesandbox-revid-label": "Izmjena:",
+	"templatesandbox-text-label": "Prikaži wikitekst:",
+	"templatesandbox-submit": "Vidi"
+}

@@ -1,0 +1,20 @@
+{
+	"@metadata": {
+		"authors": [
+			"TerranBoy"
+		]
+	},
+	"advancedsearch-placeholder-exact-text": "\"پشی بزن دووس دێرێد\"",
+	"advancedsearch-inlanguage-default": "هەڵوژانن زوان",
+	"advancedsearch-filetype-section-image": "فۆرماتەگان وێنە",
+	"advancedsearch-filetype-section-video": "فۆرماتەگان ڤیدیۆ",
+	"advancedsearch-filetype-bitmap": "وێنە",
+	"advancedsearch-filetype-audio": "دەنگ",
+	"advancedsearch-filetype-video": "ڤیدیۆ",
+	"advancedsearch-filetype-office": "ئۆفیس",
+	"advancedsearch-sort-preview-last-edit-desc": "دەسکاری ڕێکەفت",
+	"advancedsearch-namespaces-search-in": "مینە لە:",
+	"advancedsearch-namespaces-preset-all": "گشت",
+	"advancedsearch-namespaces-preset-default": "بنچینەیی",
+	"advancedsearch-namespaces-preset-discussion": "وتووێش"
+}

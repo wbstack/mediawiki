@@ -6,6 +6,7 @@
 			"Valtlait"
 		]
 	},
+	"jsonconfig-edit-action-cancel": "Peruuta",
 	"jsonconfig-err-bad-type": "Parametrin ”$1” on oltava kelvollinen tyyppi, kuten <code>string</code>, <code>number</code> tai <code>boolean</code>",
 	"jsonconfig-optional-field": "(valinnainen)",
 	"jsonconfig-type-name-invalid": "kelpaamaton",

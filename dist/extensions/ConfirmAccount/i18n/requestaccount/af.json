@@ -3,7 +3,8 @@
 		"authors": [
 			"Arnobarnard",
 			"Naudefj",
-			"SPQRobin"
+			"SPQRobin",
+			"Rooiratel"
 		]
 	},
 	"requestaccount": "Versoek gebruikersrekening",
@@ -16,6 +17,7 @@
 	"requestaccount-level-0": "outeur",
 	"requestaccount-level-1": "redakteur",
 	"requestaccount-notes": "Addisionele notas:",
+	"requestaccount-agree": "Jy moet sertifiseer dat jou regte naam korrek is en dat jy instem tot ons diensvoorwaardes.",
 	"requestaccount-submit": "Versoek gebruikersrekening",
 	"requestaccount-email-subj-admin": "{{SITENAME}} gebruikersversoeke"
 }

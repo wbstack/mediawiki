@@ -1,8 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Growingup"
+			"Growingup",
+			"Bosogo"
 		]
 	},
-	"confirmaccount-noreason": "(жок)"
+	"confirmaccount-email-q": "Электрондук почта",
+	"confirmaccount-name": "Колдонуучунун ысымы",
+	"confirmaccount-email": "Электрондук почта:",
+	"confirmaccount-pos-0": "автор",
+	"confirmaccount-pos-1": "түзөтүүчү",
+	"confirmaccount-noreason": "(жок)",
+	"confirmaccount-submit": "Ырастоо",
+	"confirmaccount-wsum": "Кош келиңиз !"
 }
