@@ -137,7 +137,7 @@ extensions:
   # Using our own archive repo temporarily for our Federated Properties endeavour
   # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/f5be8c3e515b6c3445fdbdd6a8153ae157470250/wikibase-1679416210-REL1_39.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/dafcd25ae4bef76e04e20be54030ac904d7ca80d/wikibase-1698311415-REL1_39.tar.gz
     remove:
       - build
       - vendor

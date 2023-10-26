@@ -1022,7 +1022,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: EntitySchema
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/50d81905b97170a2c19a7914518d14184a00a4df
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-EntitySchema/zip/cecedd6def1a31eb9c19c72abf5d7a10732383f5
   artifactLevel: 1
   destination: ./dist/extensions/EntitySchema
   remove:
@@ -1134,7 +1134,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Wikibase
-  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/f5be8c3e515b6c3445fdbdd6a8153ae157470250/wikibase-1679416210-REL1_39.tar.gz
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/dafcd25ae4bef76e04e20be54030ac904d7ca80d/wikibase-1698311415-REL1_39.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/Wikibase
   remove:
