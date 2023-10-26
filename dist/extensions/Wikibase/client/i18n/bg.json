@@ -13,7 +13,7 @@
 			"Лорд Бъмбъри"
 		]
 	},
-	"tooltip-t-wikibase": "Препратка към свързаният обект от хранилището за данни",
+	"tooltip-t-wikibase": "Препратка към свързания обект от хранилището за данни",
 	"wikibase-after-page-move": "Вашето преместване трябва да е [$1 отразено в езиковата връзка на обект {{WBREPONAME}}]. Моля, проверете дали това е така.",
 	"wikibase-after-page-delete": "Препратка до тази страница следва да е била премахната от [$1 съответният обект на {{WBREPONAME}}]. Моля, проверете дали това е направено.",
 	"wikibase-after-page-delete-queued": "[$1 Обектът в {{WBREPONAME}}], свързан с тази страница, ще бъде автоматично актуализиран. Имайте предвид, че това може и да не се случи моментално.",
@@ -63,10 +63,14 @@
 	"wikibase-entityusage-submit": "Показване на страниците",
 	"wikibase-pageinfo-entity-id": "ID на обекта в {{WBREPONAME}}",
 	"wikibase-pageinfo-entity-id-none": "Няма",
+	"wikibase-pageinfo-description-local": "Локално описание",
 	"wikibase-pageinfo-description-central": "Централно описание",
 	"wikibase-pageinfo-entity-usage": "{{WBREPONAME}} обекти, използвани на страницата:",
+	"wikibase-pageinfo-entity-usage-S": "Уики връзка",
+	"wikibase-pageinfo-entity-usage-L": "Някои етикети",
 	"wikibase-pageinfo-entity-usage-L-with-modifier": "Етикет: $1",
 	"wikibase-pageinfo-entity-usage-D": "Някакви описания",
+	"wikibase-pageinfo-entity-usage-D-with-modifier": "Описание: $1",
 	"wikibase-pageinfo-entity-usage-T": "Заглавие",
 	"wikibase-pageinfo-entity-usage-O": "Разни (напр. псевдоними, съществуване на обект)",
 	"wikibase-otherprojects": "В други проекти",
@@ -77,5 +81,11 @@
 	"unresolved-property-category": "Страници с недостъпни свойства",
 	"unresolved-property-category-desc": "Тази категория обхваща страници с референции към свойства на {{WBREPONAME}}, които не могат да бъдат намерени нито чрез идентификационния номер на свойството, нито чрез етикета.",
 	"connected-redirect-category": "Пренасочвания, свързани към обект на {{WBREPONAME}}",
-	"connected-redirect-category-desc": "Тази категория обхваща пренасочващи страници, свързани към обект на {{WBREPONAME}}."
+	"connected-redirect-category-desc": "Тази категория обхваща пренасочващи страници, свързани към обект на {{WBREPONAME}}.",
+	"wikibase-client-data-bridge-error-reload-bridge": "Презареждане",
+	"wikibase-client-data-bridge-error-reload-page": "Презареждане на страницата",
+	"wikibase-client-data-bridge-error-go-back": "Назад",
+	"wikibase-client-data-bridge-error-retry-save": "Повторен опит за запазване",
+	"wikibase-client-data-bridge-thank-you-head": "Благодаря Ви за редакцията!",
+	"wikibase-client-data-bridge-saving-error-assertuser-editing": "Продължаване на редактирането"
 }
