@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20231004-0
+- Security update for mediawiki to v1.39.5 (#397)
+- Tiny refactoring of the pacman script (#396)
+
 ## 1.39-7.4-20230825-0
 - Configure Xdebug to be compatible with VSCode
 - Find entities using term search when Elasticsearch is down
