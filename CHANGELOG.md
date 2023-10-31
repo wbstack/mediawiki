@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20231031-0
+- Update Wikibase and EntitySchema to 1.39.5 (#399)
+
 ## 1.39-7.4-20231004-0
 - Security update for mediawiki to v1.39.5 (#397)
 - Tiny refactoring of the pacman script (#396)
