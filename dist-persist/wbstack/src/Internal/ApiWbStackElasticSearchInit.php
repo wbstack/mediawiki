@@ -12,7 +12,7 @@ class ApiWbStackElasticSearchInit extends \ApiBase {
     public function execute() {
         global $wgBaseDirectory;
 
-        @set_time_limit( 60*5 ); // 5 mins maybe D:
+        @set_time_limit( 60*10 );
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
 		
         $parameters = '--cluster all';
