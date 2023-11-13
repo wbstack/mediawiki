@@ -645,6 +645,9 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     // T308115
     $wgCirrusSearchShardCount = [ 'content' => 1, 'general' => 1 ];
 
+    // T350404
+    $wgCirrusSearchReplicas = "0-1";
+
     // T309379
     $wgCirrusSearchEnableArchive = false;
     $wgCirrusSearchPrivateClusters = [ 'non-existing-cluster' ];
