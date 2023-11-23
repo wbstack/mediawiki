@@ -4,6 +4,7 @@ namespace WBStack\Internal;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserFactory;
+use MediaWiki\Revision\SlotRecord;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -91,6 +92,8 @@ class ApiWbStackInit extends \ApiBase {
             // TODO check $resetStatus?
         }
 
+        $this->initMainPage();
+        
         // Update the site stats
         $ssu = \SiteStatsUpdate::factory( [ 'users' => 1 ] );
         $ssu->doUpdate();
@@ -137,5 +140,21 @@ class ApiWbStackInit extends \ApiBase {
                 ParamValidator::PARAM_REQUIRED => false
             ],
         ];
+    }
+
+    public function initMainPage() {
+        $user = WbStackPlatformReservedUser::getUser();
+        $comment = \CommentStoreComment::newUnsavedComment('(automated) add example content');
+
+		$title = \Title::newFromText('Main_Page');
+        $page = new \WikiPage($title);
+
+        $text = 'hello world!';
+        $content = \ContentHandler::makeContent( $text, $title );
+
+		$updater = $page->newPageUpdater( $user );
+        $updater->setContent( SlotRecord::MAIN, $content );
+        $updater->setRcPatrolStatus( \RecentChange::PRC_PATROLLED );
+        $newRev = $updater->saveRevision( $comment );
     }
 }
