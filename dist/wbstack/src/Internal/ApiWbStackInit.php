@@ -152,7 +152,7 @@ class ApiWbStackInit extends \ApiBase {
         = What do I need to know about how Wikibase works? =
         == Wikibase ecosystem ==
         There are many Wikibases in the ecosystem. The community around Wikibase includes Wikibase users, partners, volunteer developers and tool builders, forming the vibrant and diverse Wikibase Ecosystem. In this ecosystem, we imagine that one day all the Wikibase instances will be connected between themselves and back to Wikidata. 
-        How is information structured?
+         == How is information structured? ==
         Data is stored in Wikibase in the shape of Items. Each item is accorded its own page. Items are used to represent all the things in human knowledge, including topics, concepts, and objects. For example, the "1988 Summer Olympics", "love", "Elvis Presley", and "gorilla" can all be items. 
         Items are made up of Statements that describe detailed characteristics of an Item. A statement (graph format: Subject-Predicate-Object) is how the information we know about an item - the data we have about it - gets recorded in your Wikibase instance. 
         This happens by pairing a property with at least one value; this pair is at the heart of a statement. Statements also serve to connect items to each other, resulting in a linked data structure.
@@ -196,8 +196,8 @@ class ApiWbStackInit extends \ApiBase {
         
         
         
-        What do i need to know to prepare my data?
-        Data Import
+        == What do i need to know to prepare my data? ==
+        === Data Import ===
         Instead of inserting your data manually you can make use of more efficient ways to integrate it in bulk.
         API
         The Wikibase API allows querying, adding, removing and editing information on Wikidata or any other Wikibase instance. A new version of the API is in the works with theREST API.
