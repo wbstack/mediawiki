@@ -458,11 +458,20 @@ $wgDnsBlacklistUrls =
     ];
 
 # ConfirmEdit
-wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
-$wgCaptchaClass = 'ReCaptchaNoCaptcha';
-$wgReCaptchaSendRemoteIP = true;
-$wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
-$wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+
+# QuestyCaptcha
+$wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
+if ($wwUseQuestyCaptcha) {
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
+    $wgCaptchaClass = 'QuestyCaptcha';
+    $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
+} else {
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
+    $wgCaptchaClass = 'ReCaptchaNoCaptcha';
+    $wgReCaptchaSendRemoteIP = true;
+    $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
+    $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+}
 
 # Mailgun
 if ($wwUseMailgunExtension) {
