@@ -363,6 +363,7 @@ if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
 
     $wgMakeUserPageFromBio = false;
     $wgAutoWelcomeNewUsers = false;
+    $wgConfirmAccountCaptchas = true;
     $wgConfirmAccountRequestFormItems = [
         'UserName'        => [ 'enabled' => true ],
         'RealName'        => [ 'enabled' => false ],
