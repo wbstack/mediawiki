@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20231213-0
+- Set $wgConfirmAccountCaptchas true for ConfirmAccount Wikis
+
 ## 1.39-7.4-20231113-0
 - Do not allow more than 1 replica per Elasticsearch index (#402)
 
