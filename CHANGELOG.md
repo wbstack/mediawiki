@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240103-0
+- Add QuestyCaptcha config option
+
 ## 1.39-7.4-20231213-0
 - Set $wgConfirmAccountCaptchas true for ConfirmAccount Wikis
 
