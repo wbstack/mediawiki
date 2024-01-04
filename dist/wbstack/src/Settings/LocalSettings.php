@@ -304,6 +304,8 @@ $wgGroupPermissions['platform']['mwoauthproposeconsumer'] = true;
 $wgGroupPermissions['platform']['mwoauthmanageconsumer'] = true;
 $wgGroupPermissions['platform']['mwoauthviewprivate'] = true;
 $wgGroupPermissions['platform']['mwoauthupdateownconsumer'] = true;
+$wgOAuth2GrantExpirationInterval = 'PT24H'; // default is 1 hour
+$wgOAuth2RefreshTokenTTL = 'PT1H'; // default is 1 minute
 
 #######################################
 ## ---          Skins            --- ##
