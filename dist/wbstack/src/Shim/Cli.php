@@ -15,7 +15,9 @@ if( getenv( 'WBS_DOMAIN' ) == false ) {
 }
 
 // Try and get the wiki info (from env var) or fail with a message
-if(!\WBStack\Info\GlobalSet::forDomain( getenv( 'WBS_DOMAIN' ) )) {
+try {
+    \WBStack\Info\GlobalSet::forDomain( getenv( 'WBS_DOMAIN' ) );
+} catch (Exception $ex) {
     echo 'Failed to work for WBS_DOMAIN: ' . getenv( 'WBS_DOMAIN' );
     die(1);
 }

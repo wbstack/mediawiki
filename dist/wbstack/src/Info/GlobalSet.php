@@ -10,26 +10,26 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain A request domain, or 'maint' Example: 'addshore-alpha.wiki.opencura.com'
-     * @return bool was the global successfully set?
+     * @return void
      */
-    public static function forDomain( $requestDomain ) {
+    public static function forDomain($requestDomain) {
         // Normalize the domain by setting to lowercase
         $requestDomain = strtolower($requestDomain);
 
         // If the domain is 'maint' then set the maint settings
-        if($requestDomain === 'maint') {
+        if ($requestDomain === 'maint') {
             self::forMaint();
-            return true;
+            return;
         }
 
-        $info = self::getCachedOrFreshInfo( $requestDomain );
+        $info = self::getCachedOrFreshInfo($requestDomain);
 
         if($info === null) {
-            return false;
+            $notFound = new \Exception("No wiki was found for domain $requestDomain", 404);
+            throw $notFound;
         }
 
-        self::setGlobal( $info );
-        return true;
+        self::setGlobal($info);
     }
 
     /**
@@ -120,15 +120,19 @@ class GlobalSet {
         curl_setopt($client, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($client, CURLOPT_RETURNTRANSFER, true);
         curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WBStackInfo::getInfoFromApi" );
-
+        
         $response = curl_exec($client);
+        $responseCode = intval(curl_getinfo($client, CURLINFO_RESPONSE_CODE));
 
-        // TODO detect non 200 response here, and pass that out to the user as an error
-
-        $info = WBStackInfo::newFromJsonString($response, $requestDomain);
-        if (!$info) {
+        if ($responseCode === 404) {
             return null;
         }
+
+        if ($responseCode > 299) {
+            throw new \Exception("Unexpected status code $responseCode from Platform API for domain $requestDomain.", $responseCode);
+        }
+
+        $info = WBStackInfo::newFromJsonString($response, $requestDomain);
         return $info;
     }
 
