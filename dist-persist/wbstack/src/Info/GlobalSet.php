@@ -26,10 +26,10 @@ class GlobalSet {
         }
 
         $info = self::getCachedOrFreshInfo($requestDomain);
-
-        if ($info === null) {
+        if ($info instanceof WBStackLookupFailure) {
             throw new GlobalSetException(
-                "No wiki was found for domain $requestDomain", 404,
+                "Failure looking up wiki $requestDomain.",
+                $info->statusCode,
             );
         }
 
@@ -64,7 +64,7 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @return WBStackInfo|null
+     * @return WBStackInfo|WBStackLookupFailure
      */
     private static function getCachedOrFreshInfo( $requestDomain ) {
         $info = self::getInfoFromApcCache( $requestDomain );
@@ -74,18 +74,10 @@ class GlobalSet {
 
         // TODO create an APC lock saying this proc is going to get fresh data?
         // TODO in reality all of this needs to change...
+        $info = self::getInfoFromApi( $requestDomain );
 
-        try {
-            $info = self::getInfoFromApi( $requestDomain );
-        } catch (GlobalSetException $ex) {
-            if ($ex->getCode() !== 404) {
-                throw $ex;
-            }
-            $info = null;
-        }
-
-        // Cache positive results for 10 seconds, negative for 2
-        $ttl = $info ? 10 : 2;
+        // Cache positive results for 10 seconds, failures for 2
+        $ttl = $info instanceof WBStackInfo ? 10 : 2;
         self::writeInfoToApcCache( $requestDomain, $info, $ttl );
 
         return $info;
@@ -93,7 +85,7 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @return WBStackInfo|null|bool false if no info is cached (should check), null for cached empty data (should not check)
+     * @return WBStackInfo|WBStackLookupFailure|false false if no info is cached (should check)
      */
     private static function getInfoFromApcCache( $requestDomain ) {
         return apcu_fetch( self::cacheKey($requestDomain) );
@@ -101,10 +93,10 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @param WBStackInfo|null $info
+     * @param WBStackInfo|WBStackLookupFailure $info
      * @param int $ttl
      */
-    private static function writeInfoToApcCache( $requestDomain, ?WBStackInfo $info, $ttl ) {
+    private static function writeInfoToApcCache( $requestDomain, $info, $ttl ) {
         $result = apcu_store( self::cacheKey($requestDomain), $info, $ttl );
         if(!$result) {
             // TODO log failed stores?!
@@ -117,7 +109,7 @@ class GlobalSet {
 
     /**
      * @param string $requestDomain
-     * @return WBStackInfo|null
+     * @return WBStackInfo|WBStackLookupFailure
      */
     private static function getInfoFromApi( $requestDomain ) {
         // START generic getting of wiki info from domain
@@ -134,22 +126,15 @@ class GlobalSet {
         
         $response = curl_exec($client);
         if ($response === false) {
-            throw new GlobalSetException(
-                "Unexpected error getting wiki info from api: ".curl_error($client),
-                502,
-            );
+            return new WBStackLookupFailure(502);
         }
         $responseCode = intval(curl_getinfo($client, CURLINFO_RESPONSE_CODE));
 
-        if ($responseCode > 299) {
-            throw new GlobalSetException(
-                "Unexpected status code $responseCode from Platform API for domain $requestDomain.",
-                $responseCode,
-            );
+        if ($responseCode > 399) {
+            return new WBStackLookupFailure($responseCode);
         }
 
-        $info = WBStackInfo::newFromJsonString($response, $requestDomain);
-        return $info;
+        return WBStackInfo::newFromJsonString($response, $requestDomain);
     }
 
 }

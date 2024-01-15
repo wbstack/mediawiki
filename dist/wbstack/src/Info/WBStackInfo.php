@@ -75,3 +75,12 @@ class WBStackInfo
     }
 
 }
+
+class WBStackLookupFailure
+{
+    public $statusCode;
+
+    public function __construct($statusCode) {
+        $this->statusCode = $statusCode;
+    }
+}
