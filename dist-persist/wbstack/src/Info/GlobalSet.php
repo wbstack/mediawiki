@@ -133,6 +133,12 @@ class GlobalSet {
         curl_setopt( $client, CURLOPT_USERAGENT, "WBStack - MediaWiki - WBStackInfo::getInfoFromApi" );
         
         $response = curl_exec($client);
+        if ($response === false) {
+            throw new GlobalSetException(
+                "Unexpected error getting wiki info from api: ".curl_error($client),
+                502,
+            );
+        }
         $responseCode = intval(curl_getinfo($client, CURLINFO_RESPONSE_CODE));
 
         if ($responseCode > 299) {
