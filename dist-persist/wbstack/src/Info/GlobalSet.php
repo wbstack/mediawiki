@@ -2,10 +2,13 @@
 
 namespace WBStack\Info;
 
+class GlobalSetException extends \Exception {}
+
 /**
  * A class for setting a global holding a WBStackInfo object.
  * This includes lookup of the data for the global from cache or API.
  */
+
 class GlobalSet {
 
     /**
@@ -24,9 +27,10 @@ class GlobalSet {
 
         $info = self::getCachedOrFreshInfo($requestDomain);
 
-        if($info === null) {
-            $notFound = new \Exception("No wiki was found for domain $requestDomain", 404);
-            throw $notFound;
+        if ($info === null) {
+            throw new GlobalSetException(
+                "No wiki was found for domain $requestDomain", 404,
+            );
         }
 
         self::setGlobal($info);
@@ -71,7 +75,14 @@ class GlobalSet {
         // TODO create an APC lock saying this proc is going to get fresh data?
         // TODO in reality all of this needs to change...
 
-        $info = self::getInfoFromApi( $requestDomain );
+        try {
+            $info = self::getInfoFromApi( $requestDomain );
+        } catch (GlobalSetException $ex) {
+            if ($ex->getCode() !== 404) {
+                throw $ex;
+            }
+            $info = null;
+        }
 
         // Cache positive results for 10 seconds, negative for 2
         $ttl = $info ? 10 : 2;
@@ -124,12 +135,11 @@ class GlobalSet {
         $response = curl_exec($client);
         $responseCode = intval(curl_getinfo($client, CURLINFO_RESPONSE_CODE));
 
-        if ($responseCode === 404) {
-            return null;
-        }
-
         if ($responseCode > 299) {
-            throw new \Exception("Unexpected status code $responseCode from Platform API for domain $requestDomain.", $responseCode);
+            throw new GlobalSetException(
+                "Unexpected status code $responseCode from Platform API for domain $requestDomain.",
+                $responseCode,
+            );
         }
 
         $info = WBStackInfo::newFromJsonString($response, $requestDomain);

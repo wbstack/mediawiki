@@ -5,10 +5,15 @@ require_once __DIR__ . '/../loadShim.php';
 // Try and get the wiki info or fail
 try {
     \WBStack\Info\GlobalSet::forDomain($_SERVER['SERVER_NAME']);
-} catch (Exception $ex) {
+} catch (\WBStack\Info\GlobalSetException $ex) {
     http_response_code($ex->getCode());
-    echo "You have requested the domain: " . $_SERVER['SERVER_NAME'] . ". But that wiki can not currently be loaded.\n";
-    echo "It may never have existed, it might now be deleted, or there was a server error.\n";
+    echo "You have requested the domain: " . $_SERVER['SERVER_NAME'] . ". But that wiki can not currently be loaded.".PHP_EOL;
+    if ($ex->getCode() === 404) {
+        echo "It may never have existed or it might now be deleted.".PHP_EOL;
+    } else {
+        echo "There was a server error in the platform API.".PHP_EOL;
+    }
+    echo $ex->getMessage();
     die(1);
 }
 
