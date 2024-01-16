@@ -32,3 +32,9 @@ jobs:
       - run: curl -L -s -N "http://site2.localhost:8001/w/api.php" | grep -q "Main module"
       - run: curl -L -s -N "http://site2.localhost:8001/w/load.php" | grep -q "no modules were requested"
       - run: curl -L -s -N "http://site2.localhost:8001/w/rest.php" | grep -q "did not match any known handler"
+
+      - run: curl -L -s -N "http://notfound.localhost:8001/wiki/Main_Page" | grep -q "It may never have existed"
+
+      - run: curl -L -s -N "http://failwith500.localhost:8001/wiki/Main_Page" | grep -q "server error in the platform API"
+
+      - run: curl -L -s -N "http://broken.localhost:8001/wiki/Main_Page" | grep -q "server error in the platform API"

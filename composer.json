@@ -6,7 +6,7 @@
     "scripts": {
         "lint": [
             "parallel-lint --exclude ./dist --exclude ./sync/.tmp .",
-            "rc=0 && for x in `find . -not -path './sync/.tmp/*' -not -path './dist/*' -name \"*.json\" -type f`; do vendor/bin/jsonlint \"$x\" || rc=$?; done && exit $rc"
+            "rc=0 && for x in `find . -not -path './sync/.tmp/*' -not -path './dist/*' -name \"*.json\" ! -name \"WikiInfo-broken.json\" -type f`; do vendor/bin/jsonlint \"$x\" || rc=$?; done && exit $rc"
             ]
     }
 }
