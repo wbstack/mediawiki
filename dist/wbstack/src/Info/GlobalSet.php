@@ -134,7 +134,11 @@ class GlobalSet {
             return new WBStackLookupFailure($responseCode);
         }
 
-        return WBStackInfo::newFromJsonString($response, $requestDomain);
+        try {
+            return WBStackInfo::newFromJsonString($response, $requestDomain);
+        } catch (\Exception $ex) {
+            return new WBStackLookupFailure(502);
+        }
     }
 
 }

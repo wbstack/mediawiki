@@ -41,7 +41,7 @@ class WBStackInfo
 
         // Check if the string we were given was invalid and thus not parsed!
         if ( $data === null ) {
-            return null;
+            throw new \Exception('Unexpected malformed payload.');
         }
 
         // Get the inner data from the response
@@ -49,7 +49,7 @@ class WBStackInfo
 
         // Data from the api should always be an array with at least an id...
         if (!is_object($data) || !property_exists($data, 'id')) {
-            return null;
+            throw new \Exception('Unexpected payload shape.');
         }
 
         $info = new self($data);
