@@ -330,8 +330,7 @@ wfLoadExtension( 'Nuke' );
 wfLoadExtension( 'EntitySchema' );
 wfLoadExtension( 'UniversalLanguageSelector' );
 wfLoadExtension( 'cldr' );
-# TODO load again once there is a fix for localization cache reload without DBhttps://phabricator.wikimedia.org/T237148
-#wfLoadExtension( 'Gadgets' );
+wfLoadExtension( 'Gadgets' );
 wfLoadExtension( 'OAuth' );
 wfLoadExtension( 'JsonConfig' );
 wfLoadExtension( 'Math' );
@@ -759,7 +758,7 @@ if ($wwIsLocalisationRebuild) {
     $loadExtension( 'EntitySchema' );
     $loadExtension( 'UniversalLanguageSelector' );
     $loadExtension( 'cldr' );
-    #$loadExtension( 'Gadgets' );
+    $loadExtension( 'Gadgets' );
     $loadExtension( 'OAuth' );
     $loadExtension( 'JsonConfig' );
     $loadExtension( 'Math' );
