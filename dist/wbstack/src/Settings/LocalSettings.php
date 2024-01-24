@@ -21,11 +21,14 @@ if ( !defined( 'STDERR' ) ) {
     define( 'STDERR', fopen( 'php://stderr', 'w' ) );
 }
 
+require_once __DIR__ . '/Localization.php';
+
 // Define some conditions to switch behaviour on
 $wwDomainSaysLocal = preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
+$wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $wgBaseDirectory, $wwIsLocalisationRebuild );
 
 $wwUseMailgunExtension = true; // default for wbstack
 if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
@@ -462,10 +465,12 @@ $wgDnsBlacklistUrls =
 # QuestyCaptcha
 $wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
 if ($wwUseQuestyCaptcha) {
+    $wwLocalization->loadExtension( 'ConfirmEdit/ReCaptchaNoCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
     $wgCaptchaClass = 'QuestyCaptcha';
     $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
 } else {
+    $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
     $wgCaptchaClass = 'ReCaptchaNoCaptcha';
     $wgReCaptchaSendRemoteIP = true;
@@ -733,112 +738,6 @@ if( !$wwIsLocalisationRebuild ) {
             ]
         );
     }
-}
-
-if ($wwIsLocalisationRebuild) {
-    $extensions = [];
-
-    $loadSkin = function ($name) use (&$extensions, $wgBaseDirectory) {
-        array_push($extensions, "$wgBaseDirectory/skins/" . $name . "/skin.json");
-    };
-    $loadExtension = function ($name) use (&$extensions, $wgBaseDirectory) {
-        array_push($extensions, "$wgBaseDirectory/extensions/" . $name . "/extension.json");
-    };
-    $loadPath = function ($path) use (&$extensions) {
-        array_push($extensions, $path);
-    };
-
-    $loadSkin( 'Vector' );
-    $loadSkin( 'Timeless' );
-    $loadSkin( 'Modern' );
-    $loadSkin( 'MinervaNeue' );
-    $loadExtension( 'SyntaxHighlight_GeSHi' );
-    $loadExtension( 'RevisionSlider' );
-    $loadExtension( 'TorBlock' );
-    $loadExtension( 'Nuke' );
-    $loadExtension( 'EntitySchema' );
-    $loadExtension( 'UniversalLanguageSelector' );
-    $loadExtension( 'cldr' );
-    #$loadExtension( 'Gadgets' );
-    $loadExtension( 'OAuth' );
-    $loadExtension( 'JsonConfig' );
-    $loadExtension( 'Math' );
-    $loadExtension( 'Kartographer' );
-    $loadExtension( 'PageImages' );
-    $loadExtension( 'TextExtracts' );
-    $loadExtension( 'Scribunto' );
-    $loadExtension( 'Cite' );
-    $loadExtension( 'TemplateSandbox' );
-    $loadExtension( 'WikiEditor' );
-    $loadExtension( 'CodeEditor' );
-    $loadExtension( 'CodeMirror' );
-    $loadExtension( 'SecureLinkFixer' );
-    $loadExtension( 'Echo' );
-    $loadExtension( 'Thanks' );
-    $loadExtension( 'Graph' );
-    $loadExtension( 'Poem' );
-    $loadExtension( 'TemplateData' );
-    $loadExtension( 'AdvancedSearch' );
-    $loadExtension( 'ParserFunctions' );
-    $loadExtension( 'EmbedVideo' );
-    $loadExtension( 'DeleteBatch' );
-    $loadExtension( 'MultimediaViewer' );
-    $loadExtension( 'WikiHiero' );
-    $loadExtension( 'ConfirmAccount' );
-    $loadExtension( 'InviteSignup' );
-    $loadExtension( 'WikibaseInWikitext' );
-    $loadExtension( 'WikibaseEdtf' );
-    $loadExtension( 'ThatSrc' );
-    $loadExtension( 'TwoColConflict' );
-    $loadExtension( 'StopForumSpam' );
-    $loadExtension( 'SpamBlacklist' );
-    $loadExtension( 'ConfirmEdit' );
-    $loadPath( "$wgBaseDirectory/extensions/ConfirmEdit/QuestyCaptcha/extension.json" );
-    $loadPath( "$wgBaseDirectory/extensions/ConfirmEdit/ReCaptchaNoCaptcha/extension.json" );
-    $loadExtension( 'Mailgun' );
-    $loadExtension( 'MobileFrontend' );
-    $loadExtension( 'Score' );
-    $loadPath( "$wgBaseDirectory/extensions/Wikibase/extension-repo.json" );
-    $loadPath( "$wgBaseDirectory/extensions/Wikibase/extension-client.json" );
-    $loadExtension( 'WikibaseLexeme' );
-    $loadExtension( 'Auth_remoteuser' );
-    $loadExtension( 'WikibaseManifest' );
-    $loadExtension( 'Elastica' );
-    $loadExtension( 'CirrusSearch' );
-    $loadExtension( 'WikibaseCirrusSearch' );
-    $loadExtension( 'WikibaseLexemeCirrusSearch' );
-
-    $extensionMessagesFiles = [];
-    $messagesDirs = [];
-
-    foreach ($extensions as $extension) {
-        $settings = json_decode(file_get_contents($extension), true);
-        $path = implode('/', array_slice(explode('/', $extension), 0, -1));
-
-        $addPath = function ($file) use ($path) {
-            return $path . '/' . $file;
-        };
-
-        if (array_key_exists('ExtensionMessagesFiles', $settings)) {
-            foreach ($settings['ExtensionMessagesFiles'] as $key => $file) {
-                $extensionMessagesFiles[$key] = $addPath($file);
-            }
-        }
-
-        if (array_key_exists('MessagesDirs', $settings)) {
-            foreach ($settings['MessagesDirs'] as $extension => $dirs) {
-                if (is_array($dirs)) {
-                    $messagesDirs[$extension] = $dirs;
-                } else {
-                    $messagesDirs[$extension] = array($dirs);
-                }
-                $messagesDirs[$extension] = array_map($addPath, $messagesDirs[$extension]);
-            }
-        }
-    }
-
-    $wgLocalisationCacheConf['ExtensionMessagesFiles'] = $extensionMessagesFiles;
-    $wgLocalisationCacheConf['MessagesDirs'] = $messagesDirs;
 }
 
 require_once __DIR__ . '/Hooks.php';
