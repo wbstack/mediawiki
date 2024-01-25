@@ -44,7 +44,7 @@ docker compose down --volumes
 After modifying `i18n` files, run the following to update localization caches:
 
 ```sh
-docker compose exec -it mediawiki bash -c "WBS_DOMAIN=maint php w/maintenance/rebuildLocalisationCache.php --lang=en --force"
+docker compose run --rm -it mediawiki bash -c "WBS_DOMAIN=maint php w/maintenance/rebuildLocalisationCache.php --lang=en --force"
 ```
 
 ### Debugging Elastic
