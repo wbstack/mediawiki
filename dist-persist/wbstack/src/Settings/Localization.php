@@ -18,31 +18,20 @@ class Localization {
         $this->isLocalisationRebuild = $isLocalisationRebuild;
     }
 
-    private function addLocalization( $config ) {
-        $settings = json_decode( file_get_contents( $config ), true );
-        $path = implode( '/', array_slice( explode( '/', $config ), 0, -1 ) );
+    private function addLocalization( $path ) {
+        $processor = new ExtensionProcessor();
+        $processor->extractInfoFromFile( $path );
+        $info = $processor->getExtractedInfo();
 
-        $addPath = function ( $file ) use ( $path ) {
-            return $path . '/' . $file;
-        };
-
-        if ( array_key_exists( 'ExtensionMessagesFiles', $settings ) ) {
-            foreach ( $settings[ 'ExtensionMessagesFiles' ] as $key => $file ) {
-                $this->extensionMessagesFiles[ $key ] = $addPath( $file );
-            }
+        if ( isset( $info[ 'globals' ][ 'wgExtensionMessagesFiles' ] ) ) {
+            $this->extensionMessagesFiles = array_merge(
+                $this->extensionMessagesFiles, $info[ 'globals' ][ 'wgExtensionMessagesFiles' ]
+            );
         }
-
-        if ( array_key_exists( 'MessagesDirs', $settings ) ) {
-            foreach ( $settings[ 'MessagesDirs' ] as $extension => $dirs ) {
-                if ( is_array( $dirs ) ) {
-                    $this->messagesDirs[ $extension ] = $dirs;
-                } else {
-                    $this->messagesDirs[ $extension ] = array( $dirs );
-                }
-                $this->messagesDirs[ $extension ] = array_map(
-                    $addPath, $this->messagesDirs[ $extension ]
-                );
-            }
+        if ( isset( $info[ 'globals' ][ 'wgMessagesDirs' ] ) ) {
+            $this->messagesDirs = array_merge(
+                $this->messagesDirs, $info[ 'globals' ][ 'wgMessagesDirs' ]
+            );
         }
     }
 
