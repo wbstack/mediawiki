@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-74-20240125-0
+- Load conflicting extensions localisation at cache build time (T354953)
+
 ## 1.39-7.4-20240116-0
 - On failure, propagate status code from Platform API to clients (T343744)
 
