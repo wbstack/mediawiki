@@ -36,8 +36,34 @@ class CustomLogger extends AbstractLogger {
     }
 
     private function doLog( $level, $message, $context ) {
-        fwrite( STDERR, "[$level] " .
-            LegacyLogger::format( $this->channel, $message, $context ) );
+        $payload = false;
+
+        if ( str_contains( $this->channel, 'json' ) ) {
+            $decoded = json_decode( $message, true );
+            if ( json_last_error() === JSON_ERROR_NONE ) {
+                $payload = $decoded;
+            }
+        }
+
+        if ( !$payload ) {
+            $payload = [
+                'message' => LegacyLogger::format( $this->channel, $message, $context )
+            ];
+        }
+
+        $payload[ '@type' ] = 'type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent';
+        $payload[ 'severity' ] = $level;
+        $payload[ 'serviceContext' ] = [
+            'service' => 'WBaaS MediaWiki',
+            'version' => '1.0.0'
+        ];
+
+        $output = json_encode( $payload );
+        if ( json_last_error() !== JSON_ERROR_NONE ) {
+            $output = "[$level] " . LegacyLogger::format( $this->channel, $message, $context );
+        }
+
+        fwrite( STDERR, $output . PHP_EOL );
     }
 
 }
