@@ -1,0 +1,27 @@
+{
+	"@metadata": {
+		"authors": [
+			"Ella Lachow"
+		]
+	},
+	"advancedsearch-desc": "[[Special:Search]]iyan kawushsha gakettawu koyettaa danddayaa",
+	"advancedsearch-options-pane-head": "Lo'ida koshshaa:",
+	"advancedsearch-optgroup-text": "Sinttaa xuufiyan koyya",
+	"advancedsearch-optgroup-structure": "Maaraa",
+	"advancedsearch-optgroup-files": "Fayiletanne misileta",
+	"advancedsearch-optgroup-sort": "Maarayiyoogaa",
+	"advancedsearch-field-plain": "Ha qaalata",
+	"advancedsearch-field-phrase": "Likke ha xuufiya",
+	"advancedsearch-field-or": "Ha qaalatuppe issuwa",
+	"advancedsearch-field-not": "Ha qaalata gidenna",
+	"advancedsearch-field-subpageof": "Ha sinttaassi sima sinttata",
+	"advancedsearch-field-intitle": "Sinttaa huuphe yohoy oyqqiyoogaa",
+	"advancedsearch-field-deepcategory": "Ha moodettatun de'iya sinttata",
+	"advancedsearch-field-hastemplate": "Ha templeetiyaara de'iya sinttata",
+	"advancedsearch-field-inlanguage": "Ha doonan de'iya sinttata",
+	"advancedsearch-field-filetype": "Fayiliyaa qommuwaa",
+	"advancedsearch-field-filew": "Fayiliyaa aahotettaa pikseeliyan",
+	"advancedsearch-field-fileh": "Fayiliyaa adussatettaa pikseeliyan",
+	"advancedsearch-field-sort": "Maarayiyoogaa",
+	"advancedsearch-field-preview-sort": "$1iyan maaraya"
+}

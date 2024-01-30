@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sagan"
+			"Sagan",
+			"З. ӘЙЛЕ"
 		]
 	},
-	"elastica-desc": "Башҡа модулдәр өсөн база функционаллеге [http://www.elasticsearch.org/ Elasticsearch],  [http://elastica.io/ Elastica] китапханаһы менән эшләй"
+	"elastica-desc": "Башҡа модулдәр өсөн [http://elastica.io/ Elastica] китапханаһы тәьмин иткән [http://www.elasticsearch.org/ Elasticsearch]  база функционаллеге"
 }

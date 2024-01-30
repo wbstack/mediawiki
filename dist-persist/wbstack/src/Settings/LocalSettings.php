@@ -21,11 +21,14 @@ if ( !defined( 'STDERR' ) ) {
     define( 'STDERR', fopen( 'php://stderr', 'w' ) );
 }
 
+require_once __DIR__ . '/Localization.php';
+
 // Define some conditions to switch behaviour on
 $wwDomainSaysLocal = preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
+$wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $wgBaseDirectory, $wwIsLocalisationRebuild );
 
 $wwUseMailgunExtension = true; // default for wbstack
 if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
@@ -363,6 +366,7 @@ if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
 
     $wgMakeUserPageFromBio = false;
     $wgAutoWelcomeNewUsers = false;
+    $wgConfirmAccountCaptchas = true;
     $wgConfirmAccountRequestFormItems = [
         'UserName'        => [ 'enabled' => true ],
         'RealName'        => [ 'enabled' => false ],
@@ -457,11 +461,22 @@ $wgDnsBlacklistUrls =
     ];
 
 # ConfirmEdit
-wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
-$wgCaptchaClass = 'ReCaptchaNoCaptcha';
-$wgReCaptchaSendRemoteIP = true;
-$wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
-$wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+
+# QuestyCaptcha
+$wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
+if ($wwUseQuestyCaptcha) {
+    $wwLocalization->loadExtension( 'ConfirmEdit/ReCaptchaNoCaptcha' );
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
+    $wgCaptchaClass = 'QuestyCaptcha';
+    $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
+} else {
+    $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
+    $wgCaptchaClass = 'ReCaptchaNoCaptcha';
+    $wgReCaptchaSendRemoteIP = true;
+    $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
+    $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+}
 
 # Mailgun
 if ($wwUseMailgunExtension) {
@@ -547,8 +562,10 @@ $wgWBClientSettings['entitySources'] = [
 $wgWBRepoSettings['siteLinkGroups'] = [];
 // TODO below setting will be empty by default in the future and we could remove them
 $wgWBRepoSettings['specialSiteLinkGroups'] = [];
-$wgWBRepoSettings['dataRightsUrl'] = null;
-$wgWBRepoSettings['dataRightsText'] = 'None yet set.';
+
+// see https://phabricator.wikimedia.org/T342001
+$wgWBRepoSettings['dataRightsUrl'] = '';
+$wgWBRepoSettings['dataRightsText'] = '';
 
 // Until we can scale redis memory we don't want to do this - https://github.com/addshore/wbstack/issues/37
 $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
@@ -642,6 +659,9 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     
     // T308115
     $wgCirrusSearchShardCount = [ 'content' => 1, 'general' => 1 ];
+
+    // T350404
+    $wgCirrusSearchReplicas = "0-1";
 
     // T309379
     $wgCirrusSearchEnableArchive = false;

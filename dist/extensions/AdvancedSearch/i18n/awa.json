@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Ajeetsinghawadh",
-			"Ajeetsinghawadhi"
+			"Ajeetsinghawadhi",
+			"Amire80"
 		]
 	},
 	"advancedsearch-desc": " [[Special:Search]] पय उन्नत खोज क्षमताओं कय आसान पहुँच",
@@ -25,7 +26,7 @@
 	"advancedsearch-field-fileh": "फ़ाइल कय उंचाई पिक्सेल मा",
 	"advancedsearch-field-sort": "क्रमबद्ध करय",
 	"advancedsearch-field-preview-sort": "$1 के अधार पय छाँटैं",
-	"advancedsearch-help-plain": ";विवरण\n : शीर्षक या पाठ मा इन शब्दों के बरे खोज।\n ; नीचे लिखे के बारे मा पता अहै;\n : * हियाँ कइव शब्द डारे जाइ सकत हैं।\n : * विराम चिह्न अउर अन्य गैर-अल्फ़ान्यूमेरिक वर्ण (बृहदान्त्र और अल्पविराम के अपवाद के साथ) का अनदेखा करा जाए।\n : * एस परिणाम होइ सकत हैं जिनमा आपकय एक या अधिक खोज शब्द नाइ हँय।\n : * वर्ड स्टेमिंग लगावा जात है।  उदाहरण: अगर '' कार '' मा प्रवेश करा जाता है, तौ खोज '' कारों '' पय भी विचार करे।  शब्द उपजी भाषा विशिष्ट है।\n ; सहायता पृष्ठ\n : [https://www.mediawiki.org/wiki/Help:CirrusSearch#Full_text_search Full text search]\n ; सामान्य खोज मा सिंटेक्स-समतुल्य\n : <code>तिल स्ट्रीट कार</code>",
+	"advancedsearch-help-plain": ";विवरण\n : शीर्षक या पाठ मा इन शब्दों के बरे खोज।\n ; नीचे लिखे के बारे मा पता अहै;\n : * हियाँ कइव शब्द डारे जाइ सकत हैं।\n : * विराम चिह्न अउर अन्य गैर-अल्फ़ान्यूमेरिक वर्ण (बृहदान्त्र और अल्पविराम के अपवाद के साथ) का अनदेखा करा जाए।\n : * एस परिणाम होइ सकत हैं जिनमा आपकय एक या अधिक खोज शब्द नाइ हँय।\n : * वर्ड स्टेमिंग लगावा जात है। उदाहरण: अगर '' कार '' मा प्रवेश करा जाता है, तौ खोज '' कारों '' पय भी विचार करे। शब्द उपजी भाषा विशिष्ट है।\n ; सहायता पृष्ठ\n : [https://www.mediawiki.org/wiki/Help:CirrusSearch#Full_text_search Full text search]\n ; सामान्य खोज मा सिंटेक्स-समतुल्य\n : <code>तिल स्ट्रीट कार</code>",
 	"advancedsearch-placeholder-exact-text": "\"बिल्ली बकरी से प्यार करत है\"",
 	"advancedsearch-inlanguage-default": "भाषा चुना जाय",
 	"advancedsearch-filetype-section-types": "सामान्य फ़ाइल प्रकार",

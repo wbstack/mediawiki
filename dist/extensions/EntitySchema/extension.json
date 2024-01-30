@@ -132,7 +132,12 @@
 		}
 	},
 	"SpecialPages": {
-		"NewEntitySchema": "EntitySchema\\MediaWiki\\Specials\\NewEntitySchema",
+		"NewEntitySchema": {
+			"class": "EntitySchema\\MediaWiki\\Specials\\NewEntitySchema",
+			"services": [
+				"WikibaseRepo.Settings"
+			]
+		},
 		"EntitySchemaText": "EntitySchema\\MediaWiki\\Specials\\EntitySchemaText",
 		"SetEntitySchemaLabelDescriptionAliases": "EntitySchema\\MediaWiki\\Specials\\SetEntitySchemaLabelDescriptionAliases"
 	},

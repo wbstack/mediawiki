@@ -26,5 +26,15 @@
 	"advancedsearch-field-preview-sort": "الترتيب حسب $1",
 	"advancedsearch-placeholder-exact-text": "\"بزونة تحب الصخل\"",
 	"advancedsearch-inlanguage-default": "إختار اللغة",
-	"advancedsearch-filetype-section-types": "أنواع الملفات العامه"
+	"advancedsearch-filetype-section-types": "أنواع الملفات العامه",
+	"advancedsearch-filetype-section-image": "صيغات الصور",
+	"advancedsearch-filetype-section-video": "صيغات الفيديو",
+	"advancedsearch-filetype-section-audio": "صيغات البصمات",
+	"advancedsearch-filetype-section-document": "صيغات المستندات",
+	"advancedsearch-filetype-section-other": "صيغات ثانية",
+	"advancedsearch-filetype-default": "اختار نوع الملف",
+	"advancedsearch-filetype-bitmap": "صورة",
+	"advancedsearch-filetype-drawing": "رسمة",
+	"advancedsearch-filetype-audio": "بصمة",
+	"advancedsearch-filetype-video": "فيديو"
 }

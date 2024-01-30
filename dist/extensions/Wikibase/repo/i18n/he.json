@@ -14,7 +14,8 @@
 			"חיים",
 			"ערן",
 			"פוילישער",
-			"שמזן"
+			"שמזן",
+			"Dee"
 		]
 	},
 	"wikibase-desc": "מאגר נתונים מובְנים",
@@ -405,7 +406,7 @@
 	"wikibase-api-target-not-empty": "אפשר ליצור הפניה רק על גבי ישות ריקה או מחוקה.",
 	"wikibase-api-target-is-redirect": "אסור שיעד ההפניה יהיה בעצמו הפניה.",
 	"wikibase-api-target-is-incompatible": "ניסיון להפנות לישות מסוג אחר.",
-	"wikibase-api-cant-redirect": "לא ניתן ליצור הפניה (אולי בגלל שהפניות בין סוגים כאלה של ישויות אינן נתמכות כלל).",
+	"wikibase-api-cant-redirect": "לא ניתן ליצור הפניה (ייתכן שהפניות בין סוגי ישויות כאלה אינן נתמכות כלל).",
 	"wikibase-self-conflict-patched": "העריכה שלך נוספה כטלאי על־גבי הגרסה האחרונה ודרסה כמה ששינויי־הביניים שעשית.",
 	"wikibase-conflict-patched": "עריכה שלך נוספה כטלאי על־גבי הגרסה האחרונה.",
 	"wikibase-save-unresolved-redirect": "נמצאה הפניה בלתי־פתורה מ־$1 ל־$2 בזמן הניסוי לשמור שינוי.",
@@ -485,7 +486,7 @@
 	"wikibase-shortcopyrightwarning-heading": "ייחוס רישיון",
 	"wikibase-entity-save-error-heading": "משהו השתבש",
 	"wikibase-entity-save-error-message": "לא היה אפשר לפרסם את השינוי שלך. באפשרותך לנסות ללחוץ שוב על כפתור הפרסום.",
-	"wikibase-tainted-ref-popper-text": "הערך של הקביעה הזאת שוּנה, אבל המקור נשאר. באשפרותך להסיר את האזהרה הזאת אם המקור עדיין נכון.",
+	"wikibase-tainted-ref-popper-text": "הערך של הקביעה הזאת שוּנה, אבל המקור נשאר זהה. באשפרותך להסיר את האזהרה הזאת אם המקור עדיין נכון.",
 	"wikibase-tainted-ref-popper-title": "ייתכן שיש חוסר התאמה בין המקור לבין הערך",
 	"wikibase-tainted-ref-popper-help-link-title": "דף העזרה לסוג האילוץ הזה",
 	"wikibase-tainted-ref-popper-help-link-text": "עזרה",

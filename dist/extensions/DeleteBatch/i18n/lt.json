@@ -1,18 +1,31 @@
 {
 	"@metadata": {
 		"authors": [
-			"Eitvys200"
+			"Eitvys200",
+			"Nokeoo"
 		]
 	},
+	"deletebatch": "Ištrinti puslapių paketą",
+	"deletebatch-desc": "[[Special:DeleteBatch|Ištrinti puslapių paketą]]",
+	"deletebatch-help": "Ištrinkite puslapių paketą.\nGalite ištrinti vieną puslapį arba ištrinti puslapius, išvardytus faile.\nPasirinkite naudotoją, kuris bus rodomas ištrynimo žurnaluose.\nĮkeltuose failuose turėtų būti puslapio pavadinimas ir, pasirinktinai, priežastis, atskirta „|“.",
 	"deletebatch-caption": "Puslapių sąrašas:",
+	"deletebatch-default-reason": "Numatytoji ištrynimo priežastis:",
+	"deletebatch-title": "Ištrinti paketą",
 	"deletebatch-link-back": "Grįžti į specialų puslapį",
+	"deletebatch-as": "Vykdyti kodą kaip:",
 	"deletebatch-both-modes": "Prašome pasirinkti vieną nurodytą puslapį ar pateiktą puslapių sąrašą.",
 	"deletebatch-or": "<strong>arba</strong>",
 	"deletebatch-delete": "Ištrinti",
 	"deletebatch-page": "Puslapiai ištrynimui:",
 	"deletebatch-processing-from-file": "trinami puslapiai, esantys faile",
 	"deletebatch-processing-from-form": "trinami puslapiai, esantys formoje",
+	"deletebatch-omitting-nonexistent": "Praleidžiamas neegzistuojantis puslapis $1.",
+	"deletebatch-omitting-invalid": "Praleidžiamas negalimas puslapis $1.",
+	"deletebatch-file-bad-format": "Failas turi būti paprasto teksto.",
+	"deletebatch-file-missing": "Nepavyko perskaityti pateikto failo.",
 	"deletebatch-select-yourself": "Jūs",
 	"deletebatch-no-page": "Prašome nurodyti bent vieną puslapį trynimui arba pasirinkti failą, kuriame yra puslapių sąrašas.",
+	"action-deletebatch": "ištrinti puslapių paketu",
+	"right-deletebatch": "Ištrinti puslapius paketu",
 	"deletebatch-deleting-file-only": "Failo aprašymo puslapis $1 neegzistuoja; trinamas tik pats failas.\nŠis veiksmas nebus įrašytas į žurnalą."
 }

@@ -3,7 +3,8 @@
 		"authors": [
 			"Eitvys200",
 			"Homo",
-			"Tomasdd"
+			"Tomasdd",
+			"Nokeoo"
 		]
 	},
 	"requestaccount": "Prašyti paskyros",
@@ -19,6 +20,7 @@
 	"requestaccount-acc-text": "Jūsų el. pašto adresu bus išsiųstas patvirtinimo pranešimas po to, kai pateiksite šį prašymą. Adresas nebus skelbiamas.\nPrašome atsakyti paspaudžiant ant patvirtinimo nuorodos el. laiške.\nGaliausiai, jūsų slaptažodis jums bus atsiųstas el. paštu po paskyros sukūrimo.",
 	"requestaccount-areas-text": "Žemiau pasirinkite temines sritis, kuriose turite patirties arba norėtumėte dirbti daugiausia.",
 	"requestaccount-ext-text": "Toliau pateikta informacija yra saugoma ir bus naudojame tik dėl šio prašymo.\nJei norite galite pateikti savo kontaktus, pvz. telefono numerį, kad padėtumėte su tapatybės nustatymu.",
+	"requestaccount-bio-text": "Į toliau pateiktą biografiją pabandykite įtraukti visus susijusius kredencialus.",
 	"requestaccount-bio-text-i": "'''Jūsų biografija bus rodoma kaip pirminis turinys jūsų vartotojo puslapyje.'''\nĮsitikinkite, kad norite skelbti tokią informaciją.",
 	"requestaccount-real": "Tikrasis vardas:",
 	"requestaccount-same": "(toks kaip tikrasis vardas žemiau)",

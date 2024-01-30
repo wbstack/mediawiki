@@ -1,9 +1,49 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ayoubbouamri"
+			"Ayoubbouamri",
+			"Ideophagous"
 		]
 	},
+	"advancedsearch-desc": "تقدر توصل بسهولة ل إمكانيات التقلاب لقافز ف [[Special:Search|خاص:تقلاب]]",
+	"advancedsearch-options-pane-head": "تقلاب قافز:",
+	"advancedsearch-optgroup-text": "تقلاب ف التيكست د الصفحة",
+	"advancedsearch-optgroup-structure": "قلدة",
+	"advancedsearch-optgroup-files": "فيشيات و تصاور",
+	"advancedsearch-optgroup-sort": "طريقة د لكلاصمة",
+	"advancedsearch-field-plain": "هاد لكلمات",
+	"advancedsearch-field-phrase": "هاد التيكست براسو",
+	"advancedsearch-field-or": "وحدة من هاد لكلمات",
+	"advancedsearch-field-not": "بلا هاد لكلمات",
+	"advancedsearch-field-subpageof": "صفاحي فرعيين ديال هاد الصفحة",
+	"advancedsearch-field-intitle": "عنوان الصفحة فيه",
+	"advancedsearch-field-deepcategory": "صفاحي ف هاد التصنيفات",
+	"advancedsearch-field-hastemplate": "صفاحي ب هاد لموضيلات",
+	"advancedsearch-field-inlanguage": "صفاحي ب هاد اللوغة",
+	"advancedsearch-field-filetype": "نوع د لفيشي",
+	"advancedsearch-field-filew": "لعرض د لفيشي ب لپيكسيل",
+	"advancedsearch-field-fileh": "لعلو د لفيشي ب لپيكسيل",
+	"advancedsearch-field-sort": "طريقة د لكلاصمة",
+	"advancedsearch-field-preview-sort": "كلاصي على حساب $1",
+	"advancedsearch-placeholder-exact-text": "مشة كاتبغي معزة",
+	"advancedsearch-inlanguage-default": "ختار اللوغة",
+	"advancedsearch-filetype-section-types": "نواع عامة د لفيشيات",
+	"advancedsearch-filetype-section-image": "لفورمات د التصاور",
+	"advancedsearch-filetype-section-video": "لفورمات د لڤيديوات",
+	"advancedsearch-filetype-section-document": "لفورمات د لوتايق",
+	"advancedsearch-filetype-section-other": "فورمات خرين",
+	"advancedsearch-filetype-default": "ختار النوع د لفيشي",
+	"advancedsearch-filetype-bitmap": "تصويرة",
+	"advancedsearch-filetype-drawing": "رسمة",
+	"advancedsearch-filetype-audio": "ؤديو",
+	"advancedsearch-filetype-video": "ڤيديو",
+	"advancedsearch-filetype-office": "ؤفيس",
+	"advancedsearch-filesize-equals": "كايساوي",
+	"advancedsearch-filesize-greater-than": "كبر من",
+	"advancedsearch-filesize-smaller-than": "قل من",
+	"advancedsearch-sort-relevance": "علاقة",
 	"advancedsearch-sort-last-edit-asc": "بدّل التاريخ - لقديم لفوڭ",
-	"advancedsearch-sort-create-timestamp-asc": "ڭاد تاريخ - لقديم لفوڭ"
+	"advancedsearch-sort-create-timestamp-asc": "ڭاد تاريخ - لقديم لفوڭ",
+	"advancedsearch-namespaces-search-in": "التقلاب ف:",
+	"advancedsearch-namespaces-remember": "عقل على عاد لإختيار على ود عمليات تقلاب ف لموستقبال"
 }

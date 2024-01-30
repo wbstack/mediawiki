@@ -9,10 +9,17 @@
 	"wikibase-dataitem": "{{WBREPONAME}} ِآیتم",
 	"wikibase-editlinks": "لینکون ِدچی‌ین",
 	"wikibase-editlinkstitle": "میون‌ویکی ِلینکون ِدَچی‌ین",
+	"wikibase-linkitem-addlinks": "لینک بی‌یشتن",
+	"wikibase-linkitem-title": "صفحه‌ی کش لینک هدائن",
+	"wikibase-linkitem-linkpage": "صفحه‌ی کش لینک هدائن",
+	"wikibase-linkitem-selectlink": "اتا سایت و صفحه که خاننی وه ره اینجه لینک هادین ره نوم بَورین",
+	"wikibase-linkitem-input-site": "زوون:",
+	"wikibase-linkitem-input-page": "صفحه:",
 	"wikibase-rc-hide-wikidata": "$1 {{WBREPONAME}}",
 	"wikibase-rc-hide-wikidata-hide": "پنهون هاکن",
 	"wikibase-rc-hide-wikidata-show": "سِراق هاده",
 	"wikibase-rc-wikibase-edit-letter": "د",
 	"wikibase-rc-wikibase-edit-title": "{{WBREPONAME}} دچی‌یه",
-	"wikibase-otherprojects": "دیگه پروژه‌ئون"
+	"wikibase-otherprojects": "دیگه پروژه‌ئون",
+	"wikibase-client-data-bridge-bailout-suggestion-go-to-repo-button": "ونه پارامتر ره {{WBREPONAME}} دله دچی‌ین"
 }

@@ -14,7 +14,8 @@
 			"Paxt",
 			"Seb35",
 			"Tchoř",
-			"아라"
+			"아라",
+			"AlesFiala2002"
 		]
 	},
 	"config-desc": "Instalační program pro MediaWiki",
@@ -108,6 +109,7 @@
 	"config-db-prefix": "Prefix databázových tabulek (bez spojovníků):",
 	"config-db-prefix-help": "Pokud potřebujete sdílet jednu databázi mezi vícero wiki, případně mezi MediaWiki a další webovou aplikací, můžete přidat k názvu každé tabulky prefix, abyste se vyhnuli konfliktům.\nNepoužívejte mezery.\n\nToto pole se zpravidla ponechává prázdné.",
 	"config-mysql-old": "Je vyžadováno MySQL $1 nebo novější. Vy máte $2.",
+	"config-mariadb-old": "Je vyžadováno MariaDB $1 nebo novější. Vy máte $2.",
 	"config-db-port": "Databázový port:",
 	"config-db-schema": "Schéma pro MediaWiki (bez spojovníků):",
 	"config-db-schema-help": "Toto schéma zpravidla stačí.\nMěňte ho, jen pokud víte, že je to potřeba.",
@@ -316,6 +318,7 @@
 	"config-nofile": "Soubor „$1“ nelze nalézt. Byl smazán?",
 	"config-extension-link": "Věděli jste, že vaše wiki podporuje [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Extensions rozšíření]?\n\nMůžete si prohlédnout [https://www.mediawiki.org/wiki/Special:MyLanguage/Category:Extensions_by_category seznam rozšíření po kategoriích].",
 	"config-skins-screenshots": "$1 (snímky obrazovky: $2)",
+	"config-skins-screenshot": "$1 ($2)",
 	"config-extensions-requires": "$1 (vyžaduje $2)",
 	"config-screenshot": "snímek obrazovky",
 	"config-extension-not-found": "Nepodařilo se najít registrační soubor pro rozšíření „$1“",

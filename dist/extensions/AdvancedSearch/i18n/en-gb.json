@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Reedy"
+		]
+	},
+	"advancedsearch-preference-help": "Advanced Search adds a form to the Special:Search page. This allows you to perform specialised searches, even if you don't know any search syntax. It also changes the way namespaces can be selected."
+}

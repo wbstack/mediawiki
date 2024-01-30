@@ -16,8 +16,15 @@ if( !$domainIsLocalHost ){
 // subdomain is 1 element
 $subdomain = $matches[1];
 
+if ( $subdomain === 'failwith500' ) {
+    http_response_code(500);
+    echo "Internal server error";
+    die(1);
+}
+
 $file = __DIR__ . '/WikiInfo-'.$subdomain.'.json';
 if ( !file_exists($file) ) {
+    http_response_code(404);
     echo 'Requested subdomain does not exist in test data';
     die(1);
 }

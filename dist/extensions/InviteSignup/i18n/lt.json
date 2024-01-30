@@ -1,0 +1,21 @@
+{
+	"@metadata": {
+		"authors": [
+			"Nokeoo"
+		]
+	},
+	"invitesignup": "Kvieskite žmones į šią vikį",
+	"is-desc": "Siųskite kvietimus el. laišku",
+	"is-tableth-date": "Data",
+	"is-tableth-email": "El. paštas",
+	"is-tableth-inviter": "Kvietėjas",
+	"is-tableth-signup": "Prisijungė",
+	"is-tableth-groups": "Grupės",
+	"is-add": "Pridėti",
+	"is-delete": "Ištrinti",
+	"is-invalidemail": "<b>$1</b> nėra galimas el. pašto adresas.",
+	"is-emailsubj": "Kviečiame prisijungti prie {{SITENAME}}",
+	"is-emailbody": "Sveiki,\n\n{{GENDER:$1|$1}} pakvietė jus prisijungti prie {{SITENAME}}.\nGalite prisijungti $2",
+	"right-invitesignup": "Kviesti naudotojus užsiregistruoti",
+	"action-invitesignup": "kviesti naudotojus užsiregistruoti šioje svetainėje"
+}

@@ -2,6 +2,41 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240125-0
+- Load conflicting extensions localisation at cache build time (T354953)
+
+## 1.39-7.4-20240116-0
+- On failure, propagate status code from Platform API to clients (T343744)
+
+## 1.39-7.4-20240103-0
+- Add QuestyCaptcha config option
+
+## 1.39-7.4-20231213-0
+- Set $wgConfirmAccountCaptchas true for ConfirmAccount Wikis
+
+## 1.39-7.4-20231113-0
+- Do not allow more than 1 replica per Elasticsearch index (#402)
+
+## 1.39-7.4-20231031-0
+- Update Wikibase and EntitySchema to 1.39.5 (#399)
+
+## 1.39-7.4-20231004-0
+- Security update for mediawiki to v1.39.5 (#397)
+- Tiny refactoring of the pacman script (#396)
+
+## 1.39-7.4-20230825-0
+- Configure Xdebug to be compatible with VSCode
+- Find entities using term search when Elasticsearch is down
+- Use a PHP 7.4 compatible version of Xdebug
+- Switch to ParamValidator::PARAM_TYPE instead of deprecated ApiBase::PARAM_TYPE
+
+## 1.39-7.4-20230801-0
+- CirrusSearch: run init maint script against all clusters
+
+## 1.39-7.4-20230731-0
+- Show a reduced Wikibase copyright notice
+- Reuse Wikibase's copyright message builder in EntitySchema
+
 ## 1.39-7.4-20230725-0
 - Update links in Wikibase item and property creation summaries
 

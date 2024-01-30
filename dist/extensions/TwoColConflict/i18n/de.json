@@ -75,7 +75,7 @@
 	"twocolconflict-talk-your": "Dein Kommentar",
 	"twocolconflict-talk-conflicting": "Kollidierender Kommentar",
 	"twocolconflict-talk-switch-tooltip": "Reihenfolge wechseln",
-	"twocolconflict-talk-reorder-prompt": "Positioniere deinen Kommentar in Bezug auf den sich widersprechenden Kommentar:",
+	"twocolconflict-talk-reorder-prompt": "Positioniere deinen Kommentar in Bezug auf den anderen Kommentar:",
 	"twocolconflict-talk-same-order": "Dahinter halten",
 	"twocolconflict-talk-reverse-order": "Nach davor verschieben"
 }
