@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Eleassar"
+			"Eleassar",
+			"Upwinxp"
 		]
 	},
 	"entityschema-desc": "Omogoča shranjevanje in pogovor o shemah za entitete Wikibase",

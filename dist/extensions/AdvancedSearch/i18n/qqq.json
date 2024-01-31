@@ -34,7 +34,7 @@
 	"advancedsearch-field-filew": "Label for the field for file width in pixels",
 	"advancedsearch-field-fileh": "Label for the field for file height in pixels",
 	"advancedsearch-field-sort": "Label for the field order",
-	"advancedsearch-field-preview-sort": "Label for the field order in search preview pills.\n\n$1, type of sorting, is one of the following:\n* {{msg-mw|advancedsearch-sort-preview-relevance}}\n* {{msg-mw|advancedsearch-sort-preview-last-edit-desc}}\n* {{msg-mw|advancedsearch-sort-preview-create-timestamp-desc}}",
+	"advancedsearch-field-preview-sort": "Label for the sorting order field in the list of preview pills.\n\nParameters:\n* $1 - The specific type of sorting. Can be, for example, {{msg-mw|advancedsearch-sort-preview-relevance}}, {{msg-mw|advancedsearch-sort-preview-last-edit-desc}}, {{msg-mw|advancedsearch-sort-preview-create-timestamp-desc}}, and more.",
 	"advancedsearch-help-plain": "Help text shown in a dialog for the field for plain search",
 	"advancedsearch-help-phrase": "Help text shown in a dialog for the field for exact search",
 	"advancedsearch-help-or": "Help text shown in a dialog for the field for or search",

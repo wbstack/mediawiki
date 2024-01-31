@@ -1,0 +1,34 @@
+{
+	"@metadata": {
+		"authors": [
+			"Patsagorn Y.",
+			"RidJasper"
+		]
+	},
+	"twocolconflictprovidesubmittedtext": "แก้ไขชนกัน:",
+	"twocolconflict-beta-feature-message": "ย่อหน้าแก้ไขชนกัน",
+	"twocolconflict-beta-feature-description": "แสดงมุมมองการแก้ไขชนกันโดยใช้มุมมองแบบย่อหน้าขั้นสูง",
+	"twocolconflict-copy-action": "สําเนาข้อความเต็ม",
+	"twocolconflict-copy-tab-action": "ดูข้อความเต็ม",
+	"twocolconflict-core-ui-hint-close": "ไม่ต้องแสดงอีก",
+	"twocolconflict-special-not-saved": "ไม่ได้เผยแพร่",
+	"twocolconflict-split-your-version-header": "รุ่นของคุณ",
+	"twocolconflict-split-not-saved-at": "ยังไม่ได้เผยแพร่",
+	"twocolconflict-split-choose-version": "โปรดเลือกรุ่น",
+	"twocolconflict-split-other-version-chosen": "รุ่นของบุคคลอื่น",
+	"twocolconflict-split-your-version-chosen": "รุ่นของคุณ",
+	"twocolconflict-split-select-all": "เลือกทั้งหมด",
+	"twocolconflict-split-tour-dialog-btn-text": "เริ่มผสาน",
+	"twocolconflict-split-tour-popup-btn-text": "ตกลง เข้าใจแล้ว",
+	"twocolconflict-split-edit-tooltip": "คลิกเพื่อแก้ไขข้อความนี้",
+	"twocolconflict-split-save-tooltip": "ใช้การเปลี่ยนแปลงของคุณกับข้อความนี้",
+	"twocolconflict-split-reset-tooltip": "ทิ้งการเปลี่ยนแปลงทั้งหมดของคุณกับข้อความนี้",
+	"twocolconflict-split-reset-warning-cancel": "ยกเลิก",
+	"twocolconflict-split-reset-warning-accept": "ละทิ้ง",
+	"twocolconflict-split-select-other-tooltip": "คลิกเพื่อเลือกรุ่นของบุคคลอื่น",
+	"twocolconflict-split-select-your-tooltip": "คลิกเพื่อเลือกรุ่นของคุณ",
+	"twocolconflict-split-selected-other-tooltip": "เลือกรุ่นของบุคคลอื่นแล้ว",
+	"twocolconflict-split-selected-your-tooltip": "เลือกรุ่นของคุณแล้ว",
+	"twocolconflict-split-help-tooltip": "แสดงวิธีใช้",
+	"twocolconflict-talk-your": "ความเห็นของคุณ"
+}

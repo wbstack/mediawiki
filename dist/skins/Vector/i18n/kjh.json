@@ -2,20 +2,23 @@
 	"@metadata": {
 		"authors": [
 			"Андрей Саг.",
-			"AlexandrL714"
+			"AlexandrL714",
+			"Oxianboal",
+			"Матыр"
 		]
 	},
 	"vector-languages": "Тіллер",
-	"vector-language-button-label": "{{PLURAL:$1|$1 тіл}}",
-	"vector-no-language-button-label": "Тіллер хос саларға",
-	"vector-action-addsection": "Тема хозыбзарға",
-	"vector-action-delete": "Тастабызарға",
-	"vector-action-move": "Адын алыстырыбызарға",
-	"vector-action-protect": "Арачилирға",
-	"vector-view-create": "Идебзерге",
+	"vector-language-button-label": "{{PLURAL:$1|$1 тiл}}",
+	"vector-no-language-button-label": "Тіллер хозарға",
+	"vector-action-addsection": "Тема хозыбызарға",
+	"vector-action-delete": "Чох идерге",
+	"vector-action-move": "Адын алыстырарға",
+	"vector-action-protect": "Арачылирға",
+	"vector-view-create": "Идерге",
 	"vector-view-edit": "Тӱзедерге",
-	"vector-view-history": "Кӧрігтердің тархыны",
+	"vector-view-history": "Тархынны кӧрерге",
 	"vector-view-view": "Хығырарға",
-	"vector-more-actions": "Хоза",
-	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> страницаларны тілег"
+	"vector-more-actions": "Паза пасхазы",
+	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> пар страницаларны тілирi",
+	"vector-toc-beginning": "Пасталғаны"
 }

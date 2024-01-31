@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"Bosogo"
+		]
+	},
+	"templatesandbox-submit": "Көрүү",
+	"templatesandbox-editform-legend": "Бул калыпты камтуучу баракка кандай таасир этишин алдын ала көрүү",
+	"templatesandbox-editform-page-label": "Барактын аталышы",
+	"templatesandbox-editform-view-label": "Алдын ала көрүү",
+	"templatesandbox-preview": "«‎$2» барагынын алдын ала көрүнүшү"
+}

@@ -5,6 +5,8 @@
 			"Pikne"
 		]
 	},
+	"nstab-data": "Andmed",
+	"tooltip-ca-nstab-data": "Vaata andmete lehekülge",
 	"jsonconfig-desc": "Võimaldab JSON-i häälestust vikis talletada.",
 	"jsonconfig-duplicate-field": "Väärtust \"$1\" leiti rohkem kui üks kord",
 	"jsonconfig-edit-action-apply": "Rakenda",

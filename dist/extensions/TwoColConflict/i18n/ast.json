@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Fitoschido",
-			"Xuacu"
+			"Xuacu",
+			"YoaR"
 		]
 	},
 	"twocolconflict": "TwoColConflict",
@@ -30,7 +31,7 @@
 	"twocolconflict-split-save-tooltip": "Aplicar los cambeos a esti testu",
 	"twocolconflict-split-reset-tooltip": "Descartar tolos cambeos a esti testu",
 	"twocolconflict-split-reset-warning": "¿Descartar los cambeos? El testu d'esti cuadru va reestablecese a como taba cuando asocedió'l conflictu d'ediciones.",
-	"twocolconflict-split-reset-warning-cancel": "Encaboxar",
+	"twocolconflict-split-reset-warning-cancel": "Zarrar",
 	"twocolconflict-split-reset-warning-accept": "Descartar",
 	"twocolconflict-split-collapse-tooltip": "Replegar el testu ensin cambiar",
 	"twocolconflict-split-expand-tooltip": "Espander el testu ensin cambiar",

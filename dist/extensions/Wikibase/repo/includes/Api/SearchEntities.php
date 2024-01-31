@@ -7,6 +7,7 @@ namespace Wikibase\Repo\Api;
 use ApiBase;
 use ApiMain;
 use ApiResult;
+use MediaWiki\Cache\LinkBatchFactory;
 use Wikibase\DataAccess\EntitySourceLookup;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Term\Term;
@@ -15,6 +16,7 @@ use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Interactors\TermSearchResult;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityArticleIdLookup;
+use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesException;
@@ -28,6 +30,8 @@ use Wikimedia\ParamValidator\ParamValidator;
  * @license GPL-2.0-or-later
  */
 class SearchEntities extends ApiBase {
+
+	private LinkBatchFactory $linkBatchFactory;
 
 	/**
 	 * @var EntitySearchHelper
@@ -43,6 +47,8 @@ class SearchEntities extends ApiBase {
 	 * @var EntitySourceLookup
 	 */
 	private $entitySourceLookup;
+
+	private EntityTitleLookup $entityTitleLookup;
 
 	/**
 	 * @var EntityTitleTextLookup
@@ -78,9 +84,11 @@ class SearchEntities extends ApiBase {
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
+		LinkBatchFactory $linkBatchFactory,
 		EntitySearchHelper $entitySearchHelper,
 		ContentLanguages $termLanguages,
 		EntitySourceLookup $entitySourceLookup,
+		EntityTitleLookup $entityTitleLookup,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		EntityArticleIdLookup $entityArticleIdLookup,
@@ -93,8 +101,10 @@ class SearchEntities extends ApiBase {
 		// Always try to add a conceptUri to results if not already set
 		$this->entitySearchHelper = new ConceptUriSearchHelper( $entitySearchHelper, $entitySourceLookup );
 
+		$this->linkBatchFactory = $linkBatchFactory;
 		$this->termsLanguages = $termLanguages;
 		$this->entitySourceLookup = $entitySourceLookup;
+		$this->entityTitleLookup = $entityTitleLookup;
 		$this->entityTitleTextLookup = $entityTitleTextLookup;
 		$this->entityUrlLookup = $entityUrlLookup;
 		$this->entityArticleIdLookup = $entityArticleIdLookup;
@@ -106,11 +116,13 @@ class SearchEntities extends ApiBase {
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
+		LinkBatchFactory $linkBatchFactory,
 		ApiHelperFactory $apiHelperFactory,
 		array $enabledEntityTypes,
 		EntityArticleIdLookup $entityArticleIdLookup,
 		EntitySearchHelper $entitySearchHelper,
 		EntitySourceLookup $entitySourceLookup,
+		EntityTitleLookup $entityTitleLookup,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		SettingsArray $repoSettings,
@@ -120,9 +132,11 @@ class SearchEntities extends ApiBase {
 		return new self(
 			$mainModule,
 			$moduleName,
+			$linkBatchFactory,
 			$entitySearchHelper,
 			$termsLanguages,
 			$entitySourceLookup,
+			$entityTitleLookup,
 			$entityTitleTextLookup,
 			$entityUrlLookup,
 			$entityArticleIdLookup,
@@ -140,12 +154,12 @@ class SearchEntities extends ApiBase {
 	 *
 	 * @param array $params
 	 *
-	 * @return array[]
+	 * @return TermSearchResult[]
 	 * @throws \ApiUsageException
 	 */
-	private function getSearchEntries( array $params ): array {
+	private function getSearchResults( array $params ): array {
 		try {
-			$searchResults = $this->entitySearchHelper->getRankedSearchResults(
+			return $this->entitySearchHelper->getRankedSearchResults(
 				$params['search'],
 				$params['language'],
 				$params['type'],
@@ -157,13 +171,6 @@ class SearchEntities extends ApiBase {
 			$this->dieStatus( $ese->getStatus() );
 			throw new InvariantException( "dieStatus() must throw an exception" );
 		}
-
-		$entries = [];
-		foreach ( $searchResults as $match ) {
-			$entries[] = $this->buildTermSearchMatchEntry( $match, $params['props'] );
-		}
-
-		return $entries;
 	}
 
 	/**
@@ -275,7 +282,7 @@ class SearchEntities extends ApiBase {
 
 		$params = $this->extractRequestParams();
 
-		$entries = $this->getSearchEntries( $params );
+		$results = $this->getSearchResults( $params );
 
 		$this->getResult()->addValue(
 			null,
@@ -291,12 +298,24 @@ class SearchEntities extends ApiBase {
 			[]
 		);
 
-		// getSearchEntities returns one more item than requested in order to determine if there
+		// getSearchResults returns one more item than requested in order to determine if there
 		// would be any more results coming up.
-		$hits = count( $entries );
+		$hits = count( $results );
+
+		// slice off the extra results at the beginning that $params['continue'] "skips" over
+		$returnedResults = array_slice( $results, $params['continue'], $params['limit'] );
+
+		// prefetch page IDs
+		$this->linkBatchFactory->newLinkBatch( array_map(
+			fn ( TermSearchResult $match ) => $this->entityTitleLookup->getTitleForId( $match->getEntityId() ),
+			$returnedResults
+		) )->execute();
 
 		// Actual result set.
-		$entries = array_slice( $entries, $params['continue'], $params['limit'] );
+		$entries = [];
+		foreach ( $returnedResults as $match ) {
+			$entries[] = $this->buildTermSearchMatchEntry( $match, $params['props'] );
+		}
 
 		$nextContinuation = $params['continue'] + $params['limit'];
 

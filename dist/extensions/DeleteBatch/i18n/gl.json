@@ -30,6 +30,7 @@
 	"deletebatch-system-username": "Script de eliminación de páxinas",
 	"action-deletebatch": "Borrar conxuntos de páxinas",
 	"right-deletebatch": "Borrar conxuntos de páxinas",
-	"right-deletebatch-spoof": "Borrar conxuntos de páxinas como \"script de eliminación de páxinas\"",
+	"action-deletebatch-spoof": "borrar conxuntos de páxinas como \"Script de eliminación de páxinas\"",
+	"right-deletebatch-spoof": "Borrar conxuntos de páxinas como \"Script de eliminación de páxinas\"",
 	"deletebatch-deleting-file-only": "A páxina de descrición do ficheiro \"$1\" non existe; bórrase o ficheiro unicamente.\nEsta acción non se gardará en ningún rexistro."
 }
