@@ -754,8 +754,6 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
-  patchUrls:
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEcho~905245/revisions/1/patch?download
 - name: Graph
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Graph/zip/921d9d87185edaf2831a0394d2f789a3fd54bca3
   artifactLevel: 1
