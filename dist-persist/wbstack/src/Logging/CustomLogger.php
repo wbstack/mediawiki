@@ -8,34 +8,25 @@ use MediaWiki\Logger\LegacyLogger;
 class CustomLogger extends AbstractLogger {
 
     private $channel;
-    private $config;
+    private $ignoreChannels;
+    private $ignoreLevels;
 
-    public function __construct($channel, $config ) {
+    public function __construct( $channel, array $ignoreChannels, array $ignoreLevels ) {
         $this->channel = $channel;
-        $this->config = $config;
+        $this->ignoreChannels = $ignoreChannels;
+        $this->ignoreLevels = $ignoreLevels;
     }
 
     public function log( $level, $message, array $context = [] ) {
-        if(in_array($this->channel, $this->config['logAllInGroup'])) {
-            $this->doLog( $level, $message, $context );
-            return;
-        }
-        if(in_array($this->channel, $this->config['logAllInGroupExceptDebug']) && $level !== 'debug') {
-            $this->doLog( $level, $message, $context );
-            return;
-        }
+        $ignore = in_array( $this->channel, $this->ignoreChannels )
+            || in_array( $level, $this->ignoreLevels );
 
-        if(in_array($this->channel, $this->config['ignoreAllInGroup'])) {
-            return;
+        if ( !$ignore ) {
+            $this->doLog( $level, $message, $context );
         }
-        if(in_array($level, $this->config['ignoreLevels'])) {
-            return;
-        }
-
-        $this->doLog($level, $message, $context);
     }
 
-    private function doLog( $level, $message, $context ) {
+    private function doLog( $level, $message, array $context = [] ) {
         $payload = false;
 
         if ( str_contains( $this->channel, 'json' ) ) {
@@ -62,8 +53,6 @@ class CustomLogger extends AbstractLogger {
         if ( json_last_error() !== JSON_ERROR_NONE ) {
             $output = "[$level] " . LegacyLogger::format( $this->channel, $message, $context );
         }
-
         fwrite( STDERR, $output . PHP_EOL );
     }
-
 }

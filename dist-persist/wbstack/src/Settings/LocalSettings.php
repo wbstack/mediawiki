@@ -52,30 +52,16 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
     $wgMWLoggerDefaultSpi = [
         'class' => \WBStack\Logging\CustomSpi::class,
         'args' => [[
-            'ignoreLevels' => [
-                'debug',
-                'info',
-            ],
-            'ignoreAllInGroup' => [
-                'DBPerformance',
-                'objectcache',// ideally want to show objectcache errors, but not warnings
-            ],
-            'logAllInGroup' => [
-                'WBSTACK',
-                'HttpError',
-                'SpamBlacklistHit',
-                'security',
-                'exception-json',
-                //'error',
-                'fatal',
-                'badpass',
-                'badpass-priv',
-                'api-warning',
-            ],
-            'logAllInGroupExceptDebug' => [
-                //'Wikibase',
-                'BlockManager',// we want info https://gerrit.wikimedia.org/g/mediawiki/core/+/916c0307a06e64b49d4b7f0340808a38b6d5b9a4/includes/block/BlockManager.php#426
-            ],
+            'ignore' => [
+                'levels' => [
+                    'debug',
+                    'info'
+                ],
+                'channels' => [
+                    'DBPerformance',
+                    'objectcache'
+                ]
+            ]
         ]],
     ];
 }
@@ -83,13 +69,7 @@ if ( !$wwIsPhpUnit && !$wwIsLocalisationRebuild ) {
 // Disable logging for local dev setup so it get's redirected to stderr and therefore can be viewed in the Kubernetes dashboard
 if ( getenv('MW_LOG_TO_STDERR') === 'yes' ) {
     $wgMWLoggerDefaultSpi = [
-        'class' => \WBStack\Logging\CustomSpi::class,
-        'args' => [[
-            'ignoreLevels' => [],
-            'ignoreAllInGroup' => [],
-            'logAllInGroup' => [],
-            'logAllInGroupExceptDebug' => [],
-        ]],
+        'class' => \WBStack\Logging\CustomSpi::class
     ];
 }
 
