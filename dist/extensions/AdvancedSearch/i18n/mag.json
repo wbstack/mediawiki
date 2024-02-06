@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"ऐक्टिवेटेड्"
+		]
+	},
+	"advancedsearch-filetype-default": "सञ्चिका प्रकार चुनी",
+	"advancedsearch-filetype-bitmap": "चित्र",
+	"advancedsearch-filetype-drawing": "चित्रकला",
+	"advancedsearch-filetype-audio": "ऑडियो",
+	"advancedsearch-filetype-video": "बीडियो",
+	"advancedsearch-filetype-office": "कार्यालय",
+	"advancedsearch-filesize-equals": "बराबर",
+	"advancedsearch-filesize-greater-than": "नमहर",
+	"advancedsearch-filesize-smaller-than": "छाेट",
+	"advancedsearch-sort-relevance": "प्रासङ्गिकता",
+	"advancedsearch-sort-preview-relevance": "प्रासङ्गिकता",
+	"advancedsearch-namespaces-preset-all": "सब",
+	"advancedsearch-namespaces-preset-default": "Relevance",
+	"advancedsearch-namespaces-preset-general-help": "सामान्य सहायता",
+	"advancedsearch-namespaces-preset-discussion": "चर्चा",
+	"advancedsearch-namespaces-placeholder": "नामस्थान जोड़ी",
+	"prefs-advancedsearch": "उन्नत खोज"
+}

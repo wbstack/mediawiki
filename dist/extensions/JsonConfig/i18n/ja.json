@@ -12,11 +12,20 @@
 			"Yusuke1109",
 			"つぶあん派",
 			"春春眠眠",
-			"Chqaz"
+			"Chqaz",
+			"Tmv"
 		]
 	},
+	"nstab-data": "データ",
 	"jsonconfig-desc": "JSON設定をwikiに保存できるようにする",
+	"jsonconfig-edit-action-apply": "適用",
 	"jsonconfig-edit-action-cancel": "キャンセル",
+	"jsonconfig-edit-button-label": "テーブルとして編集",
+	"jsonconfig-edit-dialog-error": "テーブルとして編集できません：$1",
+	"jsonconfig-edit-dialog-error-data-inavlid": "データがスキーマと一致しません",
+	"jsonconfig-edit-dialog-error-data-too-large": "データセットが大きすぎるためテーブルとして編集できません",
+	"jsonconfig-edit-dialog-error-field-name-missing": "各フィールドは名前が必須です",
+	"jsonconfig-edit-dialog-title": "JSONを編集",
 	"jsonconfig-err-array": "パラメーター「$1」はリストでなければなりません。例: <kbd>[\"値1\", \"値2\", ...]</kbd>",
 	"jsonconfig-err-assoc-array": "パラメーター「$1」は連想配列 (辞書) でなければなりません。<kbd>例: {\"キー\": \"値\", ...}</kbd>",
 	"jsonconfig-err-bool": "パラメーター「$1」には true または false を設定しなければなりません",

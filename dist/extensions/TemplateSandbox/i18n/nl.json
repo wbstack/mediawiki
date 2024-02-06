@@ -12,10 +12,10 @@
 		]
 	},
 	"templatesandbox": "Sjabloonzandbak",
-	"templatesandbox-desc": "[[Special:TemplateSandbox|Rendert een pagina]] door sjablonen uit een testomgeving te transcluderen",
-	"templatesandbox-suffix": "zandbak",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Rendeert een pagina]] door sjablonen uit een testomgeving in te voegen",
+	"templatesandbox-suffix": "kladblok",
 	"templatesandbox-legend": "Sjabloonzandbak",
-	"templatesandbox-text": "U kunt een verzameling sjablonen kiezen om in uw zandbakruimte op te slaan door het bijbehorende zandbakvoorvoegsel te gebruiken.\nAls u bijvoorbeeld een voorvertoning wilt zien van {{ns:Template}}:Test dat u hebt opgeslagen als \"{{ns:User}}:Gebruikersnaam/zandbak/{{ns:Template}}:Test\", gebruik dan \"{{ns:User}}:Gebruikersnaam/zandbak\" als het voorvoegsel.",
+	"templatesandbox-text": "U kunt een verzameling sjablonen kiezen om in uw kladblok-ruimte op te slaan door het bijbehorende kladblok-voorvoegsel te gebruiken.\nAls u bijvoorbeeld een voorvertoning wilt zien van {{ns:Template}}:Test dat u hebt opgeslagen als “{{ns:User}}:Gebruikersnaam/kladblok/{{ns:Template}}:Test”, gebruik dan “{{ns:User}}:Gebruikersnaam/kladblok” als het voorvoegsel.",
 	"templatesandbox-prefix-label": "Zandbakvoorvoegsel:",
 	"templatesandbox-page-label": "Te renderen pagina:",
 	"templatesandbox-revid-label": "Te renderen versie:",
@@ -34,9 +34,13 @@
 	"templatesandbox-invalid-prefix": "Het zandbakvoorvoegsel dat u hebt opgegeven is ongeldig.",
 	"templatesandbox-prefix-not-local": "Het zandbakvoorvoegsel dat u hebt opgegeven is niet lokaal.",
 	"templatesandbox-page-or-revid": "U moet een paginanaam of versienummer opgeven.",
-	"templatesandbox-editform-need-template": "Geef een sjabloonnaam op om een voorvertoning van deze sjabloon met een andere pagina te bekijken.",
+	"templatesandbox-fail-post": "<em>Vanwege het verlies van sessiegegevens is de voorvertoning verborgen als voorzorgsmaatregel tegen JavaScript-aanvallen.</em> \n\n<strong>Als dit een legitieme poging tot voorvertoning is, probeer het dan opnieuw.</strong> \nAls het nog steeds niet werkt, probeer u dan [[Special:UserLogout|af te melden]] en u opnieuw aan te melden.",
+	"templatesandbox-fail-post-anon": "<em>Omdat u niet bent aangemeld, is de voorvertoning verborgen uit voorzorg tegen JavaScript-aanvallen.</em> \n\n<strong>Als dit een legitieme poging tot voorvertoning is, [[Special:UserLogin|meld u dan aan]] en probeer het opnieuw.</strong>",
+	"templatesandbox-anon-limited-preview": "De voorvertoning van JavaScript- en CSS-wijzigingen is niet mogelijk als u niet bent aangemeld. Als u een voorvertoning van dergelijke wijzigingen wilt bekijken, kunt u zich [[Special:UserLogin|aanmelden]] en het opnieuw proberen.",
+	"templatesandbox-editform-need-template": "Geef een sjabloonnaam op om een voorvertoning van dit sjabloon met een andere pagina te bekijken.",
 	"templatesandbox-editform-need-title": "Om een andere pagina met dit sjabloon te bekijken, moet een paginanaam opgegeven worden.",
-	"templatesandbox-editform-invalid-template": "De naam van de sjabloon die u hebt opgegeven is ongeldig.",
-	"templatesandbox-editform-invalid-title": "De opgegeven pagina voor de voorvertoning is ongeldig.",
-	"templatesandbox-editform-title-not-exists": "De opgegeven pagina voor de voorvertoning bestaat niet."
+	"templatesandbox-editform-invalid-template": "De sjabloonnaam die u hebt opgegeven is ongeldig.",
+	"templatesandbox-editform-invalid-title": "De opgegeven titel voor de voorvertoning is ongeldig.",
+	"templatesandbox-editform-title-not-exists": "De opgegeven titel voor de voorvertoning bestaat niet.",
+	"templatesandbox-failed-replace-section": "Het is niet gelukt om een sectie van de bestaande pagina te vervangen."
 }

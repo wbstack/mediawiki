@@ -3,9 +3,23 @@
 		"authors": [
 			"Macofe",
 			"SPQRobin",
-			"Siebrand"
+			"Siebrand",
+			"McDutchie"
 		]
 	},
+	"wikibasecirrus-desc": "Wikibase-uitbreiding voor het gebruik van de functionaliteit van CirrusSearch",
+	"wikibasecirrus-keywordfeature-unknown-language-code": "Het sleutelwoord $1 bevat een onbekende taalcode: $2",
+	"wikibasecirrus-keywordfeature-too-many-language-codes": "Het sleutelwoord $1 leverde te veel taalcodes op. Er wordt gezocht naar {{PLURAL:$3|de taal die is|$2 van de $3 talen die zijn}} opgegeven",
+	"wikibasecirrus-inlabel-no-query-provided": "Voor het sleutelwoord ‘inlabel’ is een lege zoektekst opgegeven.",
+	"wikibasecirrus-rescore-profile-prefix": "Standaard herschikkingsprofiel voor zoeken naar voltooiing",
+	"wikibasecirrus-rescore-profile-prefix-boost": "Herschikkingsprofiel voor zoeken naar voltooiing met voorrang voor verklaringen",
+	"wikibasecirrus-rescore-profile-fulltext": "Standaard-herschikkingprofiel voor zoeken in volledige tekst",
+	"wikibasecirrus-rescore-profile-fulltext-phrase": "Herschikkingprofiel voor zoeken in volledige tekst met rangschikking op basis van zinnen",
+	"wikibasecirrus-search-bad-entity-type": "Ongeldig entiteitstype: $1",
+	"wikibasecirrus-search-bad-profile-name": "Foute naam zoekprofiel: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "Het sleutelwoord haswbstatement bevat geen geldige verklaringen",
+	"wikibasecirrus-haslicense-feature-no-valid-arguments": "Het sleutelwoord haslicense bevat geen geldige argumenten",
+	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "Het sleutelwoord wbstatementquantity bevat geen geldige verklaringen",
 	"special-entitieswithoutdescription": "Entiteiten zonder beschrijving",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Lijst van entiteiten zonder beschrijving",
 	"special-entitieswithoutlabel": "Entiteiten zonder label",

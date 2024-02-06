@@ -2,14 +2,15 @@
 	"@metadata": {
 		"authors": [
 			"Shanmugamp7",
-			"TRYPPN"
+			"TRYPPN",
+			"Fahimrazick"
 		]
 	},
 	"deletebatch-caption": "பக்கப்பட்டியல்:",
 	"deletebatch-link-back": "சிறப்பு பக்கத்திற்குத் திரும்பு",
-	"deletebatch-both-modes": "தயவுசெய்து ஒரு குறிப்பிட்ட பக்கத்தை அல்லது கொடுக்கப்பட்ட பக்கங்களின் பட்டியலைத் தேர்ந்தெடுக்கவும்.",
+	"deletebatch-both-modes": "ஒரு குறிப்பான பக்கத்தை அல்லது கொடுக்கப்பட்ட பக்கங்களின் பட்டியலைத் தெரிவு செய்க.",
 	"deletebatch-or": "<strong>அல்லது</strong>",
-	"deletebatch-delete": "நீக்கவும்",
+	"deletebatch-delete": "நீக்கு",
 	"deletebatch-page": "நீக்க வேண்டிய பக்கங்கள்:",
 	"deletebatch-processing-from-file": "கோப்பு பட்டியலிருந்து பக்கங்கள் நீக்கப்படுகிறது",
 	"deletebatch-processing-from-form": "படிவத்திலிருந்து பக்கங்கள் நீக்கப்படுகிறது",

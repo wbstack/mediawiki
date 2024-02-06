@@ -3,7 +3,8 @@
 		"authors": [
 			"Tokvo",
 			"Xuacu",
-			"Amire80"
+			"Amire80",
+			"YoaR"
 		]
 	},
 	"advancedsearch-desc": "Accesu cenciellu a les capacidaes de gueta avanzaes de [[Special:Search]]",
@@ -17,7 +18,7 @@
 	"advancedsearch-field-or": "Una d'estes palabres",
 	"advancedsearch-field-not": "Sin estes palabres",
 	"advancedsearch-field-subpageof": "Subpáxines d'esta páxina",
-	"advancedsearch-field-intitle": "El títulu de la páxina contien",
+	"advancedsearch-field-intitle": "El títulu de la páxina contién",
 	"advancedsearch-field-deepcategory": "Páxines nestes categoríes",
 	"advancedsearch-field-hastemplate": "Páxines con estes plantíes",
 	"advancedsearch-field-inlanguage": "Páxines nesta llingua",

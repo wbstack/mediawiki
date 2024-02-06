@@ -7,7 +7,8 @@
 			"Romaine",
 			"Siebrand",
 			"Sjoerddebruin",
-			"Xbaked potatox"
+			"Xbaked potatox",
+			"Amire80"
 		]
 	},
 	"apierror-kartographer-conflicting-revids": "Het opvragen van kaartgegevens van meerdere revisies van dezelfde pagina in één verzoek wordt nog niet ondersteund.",
@@ -16,7 +17,7 @@
 	"kartographer-broken-category-desc": "De pagina bevat een ongeldig gebruik van een kaart",
 	"kartographer-desc": "Maakt het mogelijk kaarten toe te voegen aan wikipagina's",
 	"kartographer-error-context-multi": "&lt;$1&gt; problemen:\n$2",
-	"kartographer-error-json": "Kon JSON niet parsen: $1",
+	"kartographer-error-json": "Kon JSON-code niet ontleden: $1",
 	"kartographer-error-missing-attr": "Attribuut \"$1\" ontbreekt",
 	"kartographer-error-bad_attr": "Attribuut \"$1\" bevat een ongeldige waarde",
 	"kartographer-error-bad_data": "De JSON-inhoud is geen geldige GeoJSON+simplestyle. De eerste validatiefout is op het element \"$1\": \"$2\".",
@@ -43,7 +44,7 @@
 	"kartographer-sidebar-service": "Dienst",
 	"kartographer-sidebar-togglebutton": "Externe kaarten",
 	"leafletdraw-draw-handlers-circle-radius": "Straal",
-	"leafletdraw-draw-handlers-circle-tooltip-start": "Klik en sleep om en cirkel te tekenen",
+	"leafletdraw-draw-handlers-circle-tooltip-start": "Klik en sleep om een cirkel te tekenen",
 	"leafletdraw-draw-handlers-marker-tooltip-start": "Klik op de kaart om een markering te plaatsen",
 	"leafletdraw-draw-handlers-circlemarker-tooltip-start": "Klik op de kaart om de cirkelmarkering te plaatsen",
 	"leafletdraw-draw-handlers-polygon-tooltip-cont": "Klik om door te gaan met het tekenen van deze vorm",

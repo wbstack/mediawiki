@@ -9,11 +9,12 @@
 			"SMAUG",
 			"Stryn",
 			"Valtlait",
-			"Valtlai"
+			"Valtlai",
+			"Yupik"
 		]
 	},
-	"advancedsearch-desc": "Helpottaa edistyneiden hakuominaisuuksien käyttöä sivulle [[Special:Search|Toiminnot:Haku]]",
-	"advancedsearch-options-pane-head": "Edistynyt haku:",
+	"advancedsearch-desc": "Helpottaa laajennettujen hakuominaisuuksien käyttöä sivulle [[Special:Search|Toiminnot:Haku]]",
+	"advancedsearch-options-pane-head": "Laajennettu haku:",
 	"advancedsearch-optgroup-text": "Hae sivun tekstistä",
 	"advancedsearch-optgroup-structure": "Rakenne",
 	"advancedsearch-optgroup-files": "Tiedostot ja kuvat",
@@ -80,6 +81,6 @@
 	"advancedsearch-namespaces-preset-discussion": "Keskustelu",
 	"advancedsearch-namespaces-placeholder": "Lisää nimiavaruuksia...",
 	"prefs-advancedsearch": "Laajennettu haku",
-	"advancedsearch-preference-help": "Laajennettu haku lisää lomakkeen sivulle Special:Search. Näin voit suorittaa erikoistuneita hakuja, vaikka et tietäisi yhtään hakusyntaksia. Se myös muuttaa nimiavaruuksien valintatapaa.",
+	"advancedsearch-preference-help": "Laajennettu haku lisää lomakkeen sivulle Special:Search. Näin voit suorittaa erikoistuneita hakuja, vaikka et tietäisi mitään hakusyntaksista. Se myös muuttaa nimiavaruuksien valintatapaa.",
 	"advancedsearch-preference-disable": "Älä näytä laajennetun haun käyttöliittymää kun käytät Special:Search"
 }

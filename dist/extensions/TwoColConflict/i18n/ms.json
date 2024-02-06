@@ -1,9 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Tofeiku"
+			"Tofeiku",
+			"Hakimi97"
 		]
 	},
+	"twocolconflict": "Percanggahan Suntingan Berasaskan Perenggan",
+	"twocolconflict-beta-feature-message": "Percanggahan suntingan berasaskan perenggan",
 	"twocolconflict-copy-action": "salin teks penuh",
 	"twocolconflict-split-select-all": "Pilih semua",
 	"twocolconflict-split-select-all-your-tooltip": "Klik untuk pilih semua perubahan semakan anda",

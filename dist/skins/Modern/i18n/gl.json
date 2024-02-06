@@ -6,7 +6,7 @@
 		]
 	},
 	"skinname-modern": "Moderna",
-	"modern.css": "/* Todo o CSS que se coloque aquí afectará a quen use a aparencia Moderna */",
-	"modern.js": "/* Todo o JavaScript que se coloque aquí afectará que usen a aparencia Moderna */",
+	"modern.css": "/* O CSS colocado aquí afectará aos usuarios da aparencia Moderna */",
+	"modern.js": "/* O código JavaScript colocado aquí cargarase para os usuarios que utilicen a aparencia Moderna */",
 	"modern-desc": "Un tema azul e gris, con barras lateral e superior. Derivado de MonoBook."
 }

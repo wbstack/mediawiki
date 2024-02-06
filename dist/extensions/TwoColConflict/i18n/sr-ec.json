@@ -32,7 +32,7 @@
 	"twocolconflict-split-your-version-chosen": "Ваша верзија",
 	"twocolconflict-split-select-all": "Изабери све",
 	"twocolconflict-split-tour-dialog-header": "Спајање конфликтних верзија",
-	"twocolconflict-split-tour-dialog-message": "Наишли сте на сукоб измена: Током ваше измене други корисник је такође уређивао страницу и сачувао је. Ваша верзија је сада застарела јер не садржи измене другог корисника. Обједините измене на следећој страници.",
+	"twocolconflict-split-tour-dialog-message": "Током Вашег уређивања други корисник је такође уређивао страницу и сачувао је пре Вас. \n\nНе брините Ваше измене нису изгубљене! Прегледајте обе верзије и спојите их. Ако је потребно можете уредити изабрани текст. Само текст у изабраним кутицама биће сачуван када кликнете „{{int:publishchanges}}”.",
 	"twocolconflict-split-tour-dialog-btn-text": "Започни обједињавање",
 	"twocolconflict-split-tour-popup-btn-text": "У реду, разумем.",
 	"twocolconflict-split-tour-popup1-header": "Различите промене су приказане ред по ред.",
