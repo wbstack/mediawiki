@@ -3,12 +3,39 @@
 		"authors": [
 			"BrennodAloisi",
 			"Coriandre",
-			"Unuaiga"
+			"Unuaiga",
+			"Nicolas Eynaud"
 		]
 	},
+	"advancedsearch-optgroup-structure": "Estructura",
+	"advancedsearch-optgroup-files": "Fichiers e imatges",
+	"advancedsearch-field-plain": "Aquestei mòts",
+	"advancedsearch-field-phrase": "Exactament aquest tèxte",
+	"advancedsearch-field-or": "Un d'aquestei mòts",
 	"advancedsearch-field-inlanguage": "Paginas en aquesta lenga",
+	"advancedsearch-field-filetype": "Tipe de fichier",
+	"advancedsearch-filetype-bitmap": "Imatge",
+	"advancedsearch-filetype-drawing": "Dessenh",
+	"advancedsearch-filetype-audio": "Audio",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Burèu",
+	"advancedsearch-filesize-equals": "Egau a",
+	"advancedsearch-filesize-greater-than": "Superior a",
+	"advancedsearch-filesize-smaller-than": "Inferior a",
+	"advancedsearch-sort-relevance": "Pertinéncia",
+	"advancedsearch-sort-last-edit-asc": "Data de modificacion – la pus anciana en aut",
+	"advancedsearch-sort-last-edit-desc": "Data de modificacion – l'actuala en aut",
+	"advancedsearch-sort-create-timestamp-asc": "Data de creacion – la pus anciana en aut",
+	"advancedsearch-sort-create-timestamp-desc": "Data de creacion – l'actuala en aut",
+	"advancedsearch-sort-preview-relevance": "Pertinéncia",
+	"advancedsearch-sort-preview-last-edit-desc": "Data d'edicion",
+	"advancedsearch-sort-preview-create-timestamp-desc": "Data de creacion",
+	"advancedsearch-namespaces-search-in": "Cercar dins :",
 	"advancedsearch-namespaces-remember": "Se remembrar de la seleccion per las recèrcas venentas",
+	"advancedsearch-namespaces-preset-all": "Tot",
 	"advancedsearch-namespaces-preset-default": "Per defaut",
+	"advancedsearch-namespaces-preset-general-help": "Ajuda generala",
 	"advancedsearch-namespaces-preset-discussion": "Discussion",
-	"advancedsearch-namespaces-placeholder": "Apondre de noms d'espacis"
+	"advancedsearch-namespaces-placeholder": "Apondre de noms d'espacis",
+	"prefs-advancedsearch": "Cèrca avançada"
 }

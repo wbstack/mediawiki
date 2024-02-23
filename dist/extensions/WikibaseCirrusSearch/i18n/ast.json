@@ -3,12 +3,13 @@
 		"authors": [
 			"Fitoschido",
 			"Macofe",
-			"Xuacu"
+			"Xuacu",
+			"YoaR"
 		]
 	},
 	"wikibasecirrus-search-bad-entity-type": "Tipu incorreutu d'entidá $1",
 	"wikibasecirrus-search-bad-profile-name": "Nome incorreutu de perfil de gueta: $1",
-	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "La palabra clave «haswbstatement» nun contien declaraciones válides",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "La palabra clave «haswbstatement» nun contién declaraciones válides",
 	"special-entitieswithoutdescription": "Entidaes ensin descripción",
 	"wikibasecirrus-entitieswithoutdescription-legend": "Ver la llista d'entidaes ensin descripción",
 	"special-entitieswithoutlabel": "Entidaes ensin etiqueta",

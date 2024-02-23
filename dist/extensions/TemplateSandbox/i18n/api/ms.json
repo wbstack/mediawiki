@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"Hakimi97"
+		]
+	},
+	"templatesandbox-apihelp-prefix": "Awalan kotak pasir templat, seperti [[Special:TemplateSandbox]].",
+	"templatesandbox-apihelp-title": "Parsing halaman menggunakan <var>$1templatesandboxtext</var> sebagai ganti kandungan halaman yang dinamakan di sini.",
+	"templatesandbox-apihelp-text": "Parsing halaman menggunakan kandungan halaman ini sebagai ganti halaman yang dinamakan oleh <var>$1templatesandboxtitle</var>.",
+	"templatesandbox-apihelp-contentmodel": "Model kandungan <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apihelp-contentformat": "Format kandungan <var>$1templatesandboxtext</var>.",
+	"templatesandbox-apierror-titleandtext": "Parameter <var>$1templatesandboxtitle</var> dan <var>$1templatesandboxtext</var> mesti kedua-duanya dinyatakan atau kedua-duanya ditinggalkan."
+}

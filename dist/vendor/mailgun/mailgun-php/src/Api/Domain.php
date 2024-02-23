@@ -33,7 +33,7 @@ use Psr\Http\Client\ClientExceptionInterface;
 use Psr\Http\Message\ResponseInterface;
 
 /**
- * @see    https://documentation.mailgun.com/api-domains.html
+ * @see https://documentation.mailgun.com/api-domains.html
  *
  * @author Sean Johnson <sean@mailgun.com>
  */
@@ -44,8 +44,11 @@ class Domain extends HttpApi
     /**
      * Returns a list of domains on the account.
      *
-     * @return IndexResponse
+     * @param  int                      $limit
+     * @param  int                      $skip
+     * @return IndexResponse|array
      * @throws ClientExceptionInterface
+     * @throws Exception
      */
     public function index(int $limit = 100, int $skip = 0)
     {
@@ -83,18 +86,17 @@ class Domain extends HttpApi
      * See below for spam filtering parameter information.
      * {@link https://documentation.mailgun.com/user_manual.html#um-spam-filter}.
      *
-     * @see https://documentation.mailgun.com/en/latest/api-domains.html#domains
-     *
-     * @param string   $domain             name of the domain
-     * @param string   $smtpPass           password for SMTP authentication
-     * @param string   $spamAction         `disable` or `tag` - inbound spam filtering
-     * @param bool     $wildcard           domain will accept email for subdomains
-     * @param bool     $forceDkimAuthority force DKIM authority
-     * @param string[] $ips                an array of ips to be assigned to the domain
-     * @param ?string  $pool_id            pool id to assign to the domain
-     * @param string   $webScheme          `http` or `https` - set your open, click and unsubscribe URLs to use http or https. The default is http
-     * @param string   $dkimKeySize        Set length of your domain’s generated DKIM key
-     *
+     * @see    https://documentation.mailgun.com/en/latest/api-domains.html#domains
+     * @param  string                                 $domain             name of the domain
+     * @param  string|null                            $smtpPass           password for SMTP authentication
+     * @param  string|null                            $spamAction         `disable` or `tag` - inbound spam filtering
+     * @param  bool                                   $wildcard           domain will accept email for subdomains
+     * @param  bool                                   $forceDkimAuthority force DKIM authority
+     * @param  string[]                               $ips                an array of ips to be assigned to the domain
+     * @param  ?string                                $pool_id            pool id to assign to the domain
+     * @param  string                                 $webScheme          `http` or `https` - set your open, click and unsubscribe URLs to use http or https. The default is http
+     * @param  string                                 $dkimKeySize        Set length of your domain’s generated DKIM
+     *                                                                    key
      * @return CreateResponse|array|ResponseInterface
      * @throws Exception
      */

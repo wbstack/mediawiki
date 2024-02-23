@@ -21,11 +21,14 @@ if ( !defined( 'STDERR' ) ) {
     define( 'STDERR', fopen( 'php://stderr', 'w' ) );
 }
 
+require_once __DIR__ . '/Localization.php';
+
 // Define some conditions to switch behaviour on
 $wwDomainSaysLocal = preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
+$wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $wgBaseDirectory, $wwIsLocalisationRebuild );
 
 $wwUseMailgunExtension = true; // default for wbstack
 if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
@@ -462,10 +465,12 @@ $wgDnsBlacklistUrls =
 # QuestyCaptcha
 $wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
 if ($wwUseQuestyCaptcha) {
+    $wwLocalization->loadExtension( 'ConfirmEdit/ReCaptchaNoCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
     $wgCaptchaClass = 'QuestyCaptcha';
     $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
 } else {
+    $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
     $wgCaptchaClass = 'ReCaptchaNoCaptcha';
     $wgReCaptchaSendRemoteIP = true;

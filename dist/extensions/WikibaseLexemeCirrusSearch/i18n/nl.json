@@ -1,0 +1,9 @@
+{
+	"@metadata": {
+		"authors": [
+			"McDutchie"
+		]
+	},
+	"wikibaselexemecirrus-desc": "WikibaseLexeme-uitbreiding voor het gebruik van de functionaliteit van CirrusSearch",
+	"wikibaselexemecirrus-rescore-profile-prefix": "Herschikkingsprofiel voor zoeken op voorvoegsel (voltooiing)"
+}

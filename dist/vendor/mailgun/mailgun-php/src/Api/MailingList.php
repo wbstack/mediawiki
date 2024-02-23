@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Mailgun\Api;
 
+use Exception;
 use Mailgun\Api\MailingList\Member;
 use Mailgun\Assert;
 use Mailgun\Model\EmailValidation\ValidateResponse;
@@ -21,12 +22,16 @@ use Mailgun\Model\MailingList\ShowResponse;
 use Mailgun\Model\MailingList\UpdateResponse;
 use Mailgun\Model\MailingList\ValidationCancelResponse;
 use Mailgun\Model\MailingList\ValidationStatusResponse;
+use Psr\Http\Client\ClientExceptionInterface;
 
 /**
  * @see https://documentation.mailgun.com/en/latest/api-mailinglists.html
  */
 class MailingList extends HttpApi
 {
+    /**
+     * @return Member
+     */
     public function member(): Member
     {
         return new Member($this->httpClient, $this->requestBuilder, $this->hydrator);
@@ -35,11 +40,9 @@ class MailingList extends HttpApi
     /**
      * Returns a paginated list of mailing lists on the domain.
      *
-     * @param int $limit Maximum number of records to return (optional: 100 by default)
-     *
+     * @param  int                                $limit Maximum number of records to return (optional: 100 by default)
      * @return PagesResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function pages(int $limit = 100)
     {
@@ -57,15 +60,13 @@ class MailingList extends HttpApi
     /**
      * Creates a new mailing list on the current domain.
      *
-     * @param string      $address         Address for the new mailing list
-     * @param string|null $name            Name for the new mailing list (optional)
-     * @param string|null $description     Description for the new mailing list (optional)
-     * @param string      $accessLevel     List access level, one of: readonly (default), members, everyone
-     * @param string      $replyPreference Set where replies should go: list (default) | sender (optional)
-     *
+     * @param  string                             $address         Address for the new mailing list
+     * @param  string|null                        $name            Name for the new mailing list (optional)
+     * @param  string|null                        $description     Description for the new mailing list (optional)
+     * @param  string                             $accessLevel     List access level, one of: readonly (default), members, everyone
+     * @param  string                             $replyPreference Set where replies should go: list (default) | sender (optional)
      * @return CreateResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function create(string $address, ?string $name = null, ?string $description = null, string $accessLevel = 'readonly', string $replyPreference = 'list')
     {
@@ -91,11 +92,9 @@ class MailingList extends HttpApi
     /**
      * Returns a single mailing list.
      *
-     * @param string $address Address of the mailing list
-     *
+     * @param  string                             $address Address of the mailing list
      * @return ShowResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function show(string $address)
     {
@@ -109,12 +108,10 @@ class MailingList extends HttpApi
     /**
      * Updates a mailing list.
      *
-     * @param string $address    Address of the mailing list
-     * @param array  $parameters Array of field => value pairs to update
-     *
+     * @param  string                             $address    Address of the mailing list
+     * @param  array                              $parameters Array of field => value pairs to update
      * @return UpdateResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function update(string $address, array $parameters = [])
     {
@@ -144,11 +141,9 @@ class MailingList extends HttpApi
     /**
      * Removes a mailing list from the domain.
      *
-     * @param string $address Address of the mailing list
-     *
+     * @param  string                             $address Address of the mailing list
      * @return DeleteResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function delete(string $address)
     {
@@ -162,11 +157,9 @@ class MailingList extends HttpApi
     /**
      * Validates mailing list.
      *
-     * @param string $address Address of the mailing list
-     *
+     * @param  string                             $address Address of the mailing list
      * @return ValidateResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function validate(string $address)
     {
@@ -180,11 +173,9 @@ class MailingList extends HttpApi
     /**
      * Get mailing list validation status.
      *
-     * @param string $address Address of the mailing list
-     *
+     * @param  string                             $address Address of the mailing list
      * @return ValidationStatusResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function getValidationStatus(string $address)
     {
@@ -198,11 +189,9 @@ class MailingList extends HttpApi
     /**
      * Cancel mailing list validation.
      *
-     * @param string $address Address of the mailing list
-     *
+     * @param  string                             $address Address of the mailing list
      * @return ValidationCancelResponse
-     *
-     * @throws \Exception
+     * @throws Exception|ClientExceptionInterface
      */
     public function cancelValidation(string $address)
     {
