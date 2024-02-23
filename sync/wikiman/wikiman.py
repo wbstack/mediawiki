@@ -52,6 +52,12 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
         'destination': details['destination'],
         'remove' : extra_remove + details.get('remove', []),
     }
+
+    if "patchUrls" in details.keys():
+        entry['patchUrls'] = []
+        for patchUrl in details['patchUrls']:
+            entry['patchUrls'] += patchUrl
+
     return entry
 
 # pylint: disable=too-many-ancestors
