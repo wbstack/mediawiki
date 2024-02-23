@@ -24,10 +24,17 @@ Assuming neither `dist-persist` directory or `pacman.yaml` have changed then run
 There is a GitHub Action [Workflow](../.github/workflows/wbstack.sync.check.yml) running to attempt to ensure that `sync.sh` has been run on every commit so that the dist directory does not get out of sync from what it is built from.
 
 ### wikiman & pacman
+#### wikiman
+> usage: `./sync/wikiman/wikiman .`
 
 `wikiman` is a MediaWiki specific yaml generator for pacman.
 This needs to be run by developers when updating component versions in `wikiman.yaml`
 
+> In order to be able to run wikiman you need to create a GitHub token in a file called `/sync/.github`.
+> The token does not require any special permissions, and it does not matter if it's a `classic` or `fine-grained token (beta)` token.
+> You can generate a new token [here](https://github.com/settings/tokens/1118022750).
+
+#### pacman
 `pacman` is a generic tool using yaml to fetch a series of codebases and place them on disk.
 This is run as a step in `sync.sh`
 
