@@ -501,7 +501,7 @@ $wgMajorSiteNoticeID = 1;
 $wgDismissableSiteNoticeForAnons = false;
 
 // KELOD research banner campagin 2024 Q1 - https://phabricator.wikimedia.org/T357667
-// Visible until March 24th 2024 00:00:00)
+// Visible until March 24th 2024 00:00:00 UTC)
 if (time() < mktime(0, 0, 0, 3, 24, 2024)) {
     $wgSiteNotice = <<<EOF
     <div style="width:98%; border:3px solid #0566C0; overflow:hidden; background-color: #F9F9FF; padding:16px 16px 16px 16px">
