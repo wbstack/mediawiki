@@ -48,8 +48,13 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-CirrusSearch
   - name: WikibaseCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseCirrusSearch
+    patchUrls:
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~908801/revisions/2/patch?download
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~951473/revisions/1/patch?download
   - name: WikibaseLexemeCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch
+    patchUrls:
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexemeCirrusSearch~908803/revisions/1/patch?download
   - name: UniversalLanguageSelector
     repoName: wikimedia/mediawiki-extensions-UniversalLanguageSelector
   - name: cldr
@@ -120,6 +125,8 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-TextExtracts
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
+    patchUrls:
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEntitySchema~942447/revisions/2/patch?download
   ## These extensions should not currently use the mediawikiVersion
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
@@ -162,6 +169,11 @@ extensions:
       - lib/.phan
       - lib/.storybook
       - lib/.vscode
+    patchUrls:
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/19/patch?download
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~940955/revisions/1/patch?download
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~943530/revisions/1/patch?download
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~951472/revisions/1/patch?download
   # It looks like StopForumSpam inadvertently introduced a dependency on AbuseFilter in REL1_39 (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/3639e0120d53bf5643de57dc6e94293f69680e9f)
   # AFAIK it should be possible to run StopForumSpam without AbuseFilter installed (https://www.mediawiki.org/wiki/Extension:StopForumSpam#AbuseFilter_integration)
   # A subsequent patch, only available in REL1_40, appears to removes this dependency again (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/5e3aab6e8be0e8effa97f9b454020230b6a70e3d)
