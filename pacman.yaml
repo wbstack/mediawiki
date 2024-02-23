@@ -1041,8 +1041,28 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
-  patchUrls:
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEntitySchema~942447/revisions/2/patch?download
+- name: DismissableSiteNotice
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-DismissableSiteNotice/zip/7351193eb254a697200fd439529b20278c404656
+  artifactLevel: 1
+  destination: ./dist/extensions/DismissableSiteNotice
+  remove:
+    - tests
+    - .github
+    - .stylelintignore
+    - .nvmrc
+    - .eslintignore
+    - .phan
+    - .storybook
+    - .vscode
+    - .gitignore
+    - .eslintrc.json
+    - .gitreview
+    - .phpcs.xml
+    - .stylelintrc.json
+    - .rubocop.yml
+    - .rubocop_todo.yml
+    - Gruntfile.js
+    - Doxyfile
 - name: WikibaseInWikitext
   artifactUrl: https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9
   artifactLevel: 1
