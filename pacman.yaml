@@ -1041,6 +1041,8 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
+  patchUrls:
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEntitySchema~942447/revisions/2/patch?download
 - name: DismissableSiteNotice
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-DismissableSiteNotice/zip/7351193eb254a697200fd439529b20278c404656
   artifactLevel: 1
