@@ -36,12 +36,11 @@ for codebase in $(yq eval -o=j $YAMLFILE | jq -cr '.[]'); do
     temporaryFile="${TEMPORARY_DIR}/${name}"
     temporaryExtraction="${TEMPORARY_DIR}/${name}-extracted"
     echo "Downloading '${name}' from '${artifactUrl}'"
-    wget "$artifactUrl" -O "${temporaryFile}"
+    wget --progress=dot:mega --retry-on-host-error --tries 10 --retry-connrefused "$artifactUrl" -O "${temporaryFile}"
     echo "Extracting '${name}' to '${temporaryExtraction}'"
     mkdir -p ${temporaryExtraction}
     bsdtar --strip-components=${artifactLevel} -xf "${temporaryFile}" -C "${temporaryExtraction}"
     echo "Downloading and extracting '${name}' COMPLETE"
-    sleep 2
     echo
 done
 
