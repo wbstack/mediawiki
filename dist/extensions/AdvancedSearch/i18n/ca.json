@@ -8,7 +8,8 @@
 			"Jmarchn",
 			"Mguix",
 			"Leptictidium",
-			"Amire80"
+			"Amire80",
+			"SMP"
 		]
 	},
 	"advancedsearch-desc": "Accés fàcil a capacitats avançades de recerca a [[Special:Search]]",
@@ -43,6 +44,7 @@
 	"advancedsearch-help-filetype": ";Descripció\n:Solament cerca fitxers del tipus seleccionat.\n;Tingueu en compte el següent\n:* Sols podeu cercar per un tipus defitxer.\n:* Sols podeu seleccionar els tipus que apareixen en el menú desplegable.\n;Pàgina d'ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filetype filetype] i [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#filemime filemime]\n;Sintaxi equivalent en la cerca normal\n:Paraules precedides de <code>filetype:</code> com ara <code>filetype:ogg</code>.",
 	"advancedsearch-help-filew": ";Descripció\n:Aquests camps permeten especificar l'amplada del fitxer.\n;Tingueu en compte el següent\n:* Tan sols és aplicable a tipus de fitxer que tenen amplada i alçària, com els vídeos i les imatges.\n;Pàgina d'ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Mesures de fitxer]\n;Sintaxi equivalent en la cerca normal\n:Valors numèrics precedits de <code>filew</code>, com ara <code>filew:>800</code>.",
 	"advancedsearch-help-fileh": ";Descripció\n:Aquests camps permeten especificar l'alçària del fitxer.\n;Tingueu en compte el següent\n:* Tan sols és aplicable a tipus de fitxer que tenen amplada i alçària, com els vídeos i les imatges.\n;Pàgina d'ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Mesures de fitxer]\n;Sintaxi equivalent en la cerca normal\n:Valors numèrics precedits de <code>fileh</code>, com ara <code>fileh:>600</code>.",
+	"advancedsearch-help-sort": ";Descripció\n:Canvia l'ordre d'ordenació dels resultats. L'estàndard és que les pàgines més rellevants siguin els primers resultats.\n;Pàgina d'ajuda\n: [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Explicit_sort_orders Ordres d'ordenació explícites]\n;Sintaxi equivalent a la cerca normal\n: Aquesta característica no té cap paraula clau que pugueu escriure al camp d'entrada de cerca ja que la funció s'especifica mitjançant un paràmetre a l'URL.",
 	"advancedsearch-placeholder-exact-text": "\"camp de blat\"",
 	"advancedsearch-inlanguage-default": "Selecciona llengua",
 	"advancedsearch-filetype-section-types": "Tipus de fitxers generals",
@@ -63,9 +65,12 @@
 	"advancedsearch-sort-relevance": "Rellevància",
 	"advancedsearch-sort-last-edit-asc": "Data d'edició - Antic a dalt",
 	"advancedsearch-sort-last-edit-desc": "Data d'edició – descendent",
+	"advancedsearch-sort-create-timestamp-asc": "Data de creació – ascendent",
 	"advancedsearch-sort-create-timestamp-desc": "Data de creació – descendent",
 	"advancedsearch-sort-preview-relevance": "rellevància",
+	"advancedsearch-sort-preview-last-edit-asc": "editada menys recentment",
 	"advancedsearch-sort-preview-last-edit-desc": "data d’edició",
+	"advancedsearch-sort-preview-create-timestamp-asc": "creada menys recentment",
 	"advancedsearch-sort-preview-create-timestamp-desc": "data de creació",
 	"advancedsearch-namespaces-search-in": "Cerca a:",
 	"advancedsearch-namespaces-remember": "Recorda la selecció per a futures cerques",

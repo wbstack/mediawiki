@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6
+class ComposerStaticInit762f82df470316acb580ec1bc5e233d5
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -2998,7 +2998,6 @@ class ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6
         'Wikibase\\Lexeme\\DataAccess\\Store\\FormRevisionLookup' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/FormRevisionLookup.php',
         'Wikibase\\Lexeme\\DataAccess\\Store\\FormStore' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/FormStore.php',
         'Wikibase\\Lexeme\\DataAccess\\Store\\FormTitleStoreLookup' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/FormTitleStoreLookup.php',
-        'Wikibase\\Lexeme\\DataAccess\\Store\\MediaWikiLexemeAuthorizer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/MediaWikiLexemeAuthorizer.php',
         'Wikibase\\Lexeme\\DataAccess\\Store\\MediaWikiLexemeRedirector' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/MediaWikiLexemeRedirector.php',
         'Wikibase\\Lexeme\\DataAccess\\Store\\MediaWikiLexemeRedirectorFactory' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/MediaWikiLexemeRedirectorFactory.php',
         'Wikibase\\Lexeme\\DataAccess\\Store\\MediaWikiLexemeRepository' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/MediaWikiLexemeRepository.php',
@@ -3008,7 +3007,6 @@ class ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6
         'Wikibase\\Lexeme\\DataAccess\\Store\\SenseRevisionLookup' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/SenseRevisionLookup.php',
         'Wikibase\\Lexeme\\DataAccess\\Store\\SenseStore' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/SenseStore.php',
         'Wikibase\\Lexeme\\DataAccess\\Store\\SenseTitleStoreLookup' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/DataAccess/Store/SenseTitleStoreLookup.php',
-        'Wikibase\\Lexeme\\Domain\\Authorization\\LexemeAuthorizer' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Domain/Authorization/LexemeAuthorizer.php',
         'Wikibase\\Lexeme\\Domain\\Diff\\AddFormDiff' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Domain/Diff/AddFormDiff.php',
         'Wikibase\\Lexeme\\Domain\\Diff\\AddSenseDiff' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Domain/Diff/AddSenseDiff.php',
         'Wikibase\\Lexeme\\Domain\\Diff\\ChangeFormDiffOp' => __DIR__ . '/../..' . '/extensions/WikibaseLexeme/src/Domain/Diff/ChangeFormDiffOp.php',
@@ -4195,11 +4193,11 @@ class ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit8042ca0f614daa057d5dc1a9200b44e6::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit762f82df470316acb580ec1bc5e233d5::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit762f82df470316acb580ec1bc5e233d5::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit762f82df470316acb580ec1bc5e233d5::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit762f82df470316acb580ec1bc5e233d5::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit762f82df470316acb580ec1bc5e233d5::$classMap;
 
         }, null, ClassLoader::class);
     }

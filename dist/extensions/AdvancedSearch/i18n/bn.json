@@ -4,7 +4,8 @@
 			"Aftabuzzaman",
 			"Rasal Lia",
 			"আজিজ",
-			"আফতাবুজ্জামান"
+			"আফতাবুজ্জামান",
+			"Aishik Rehman"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]]-এ উচ্চতর অনুসন্ধান ক্ষমতায় সহজে প্রবেশাধিকার দেয়",
@@ -19,7 +20,7 @@
 	"advancedsearch-field-not": "এই শব্দগুলি নয়",
 	"advancedsearch-field-subpageof": "এই পাতার উপপাতাগুলি",
 	"advancedsearch-field-intitle": "পাতার শিরোনামে রয়েছে",
-	"advancedsearch-field-deepcategory": "এই বিষয়শ্রেণীগুলিতে পাতাসমূহ",
+	"advancedsearch-field-deepcategory": "এই বিষয়শ্রেণীগুলিতে থাকা পাতাসমূহ",
 	"advancedsearch-field-hastemplate": "এই টেমপ্লেটগুলিসহ পাতাগুলি",
 	"advancedsearch-field-inlanguage": "এই ভাষায় পাতাগুলি",
 	"advancedsearch-field-filetype": "ফাইলের ধরন",
@@ -62,6 +63,6 @@
 	"advancedsearch-namespaces-preset-discussion": "আলোচনা",
 	"advancedsearch-namespaces-placeholder": "নামস্থান যোগ করুন...",
 	"prefs-advancedsearch": "উচ্চতর অনুসন্ধান",
-	"advancedsearch-preference-help": "উচ্চতর অনুসন্ধান বিশেষ:অনুসন্ধান পৃষ্ঠায় একটি ফরম যুক্ত করে। এটি আপনাকে বিশেষায়িত অনুসন্ধান করার অনুমতি দিবে, এমনকি যদি আপনি অনুসন্ধানের কোন শব্দবিন্যাস নাও জানেন। এছাড়া এটি নামস্থান নির্বাচন করার পদ্ধতিও পরিবর্তন করে।",
+	"advancedsearch-preference-help": "উচ্চতর অনুসন্ধান বিশেষ:অনুসন্ধান পৃষ্ঠায় একটি ফরম যুক্ত করে। এটি আপনাকে বিশেষায়িত অনুসন্ধান করার অনুমতি দিবে, এমনকি যদি আপনি অনুসন্ধানের কোনো শব্দবিন্যাস নাও জানেন। এছাড়া এটি নামস্থান নির্বাচন করার পদ্ধতিও পরিবর্তন করে।",
 	"advancedsearch-preference-disable": "বিশেষ:অনুসন্ধান ব্যবহারের সময় উচ্চতর অনুসন্ধানের ইন্টারফেস প্রদর্শন করবেন না"
 }

@@ -9,5 +9,6 @@
 	"advancedsearch-field-plain": "Бул сөздөр",
 	"advancedsearch-field-or": "Бул сөздөрдүн бири",
 	"advancedsearch-field-not": "Бул сөздөр эмес",
-	"advancedsearch-filetype-bitmap": "Сүрөт"
+	"advancedsearch-filetype-bitmap": "Сүрөт",
+	"advancedsearch-filetype-audio": "Аудио"
 }

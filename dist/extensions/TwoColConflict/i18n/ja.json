@@ -9,7 +9,8 @@
 			"Penn Station",
 			"Shirayuki",
 			"Tmv",
-			"ネイ"
+			"ネイ",
+			"Ant176"
 		]
 	},
 	"twocolconflict": "段落に基づいた編集の競合",
@@ -18,6 +19,7 @@
 	"twocolconflict-beta-feature-message": "段落に基づいた編集の競合",
 	"twocolconflict-beta-feature-description": "進化型の段落に基づく表示により編集の競合を表示します。",
 	"twocolconflict-copy-action": "すべての文をコピー",
+	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|段落単位の編集競合インターフェイス]]を有効にして編集の競合を解決できるようにする",
 	"twocolconflict-special-not-saved": "未公開",
 	"twocolconflict-split-header-hint-beta": "このベータ機能をご使用いただきありがとうございます。さらに改善するためご協力いただけるようでしたら、ぜひフィードバックを[//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View こちらのページ]に投稿してください。",
 	"twocolconflict-split-your-version-header": "あなたが修正した版",

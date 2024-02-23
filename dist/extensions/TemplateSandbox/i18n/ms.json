@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Anakmalaysia",
-			"Macofe"
+			"Macofe",
+			"Hakimi97"
 		]
 	},
 	"templatesandbox": "Kotak pasir templat",
@@ -24,10 +25,17 @@
 	"templatesandbox-invalid-title": "Tajuk yang anda nyatakan tidak sah.",
 	"templatesandbox-title-not-exists": "Tajuk yang anda nyatakan tidak wujud.",
 	"templatesandbox-revision-not-exists": "Semakan yang anda nyatakan tidak wujud.",
+	"templatesandbox-revision-no-content": "Semakan yang anda nyatakan tidak mempunyai kandungan atau anda tidak mempunyai kebenaran untuk melihatnya.",
 	"templatesandbox-invalid-prefix": "Awalan kotak pasir yang anda nyatakan tidak sah.",
 	"templatesandbox-prefix-not-local": "Awalan kotak pasir yang anda nyatakan tidak setempat.",
 	"templatesandbox-page-or-revid": "Anda mesti memasukkan sama ada tajuk halaman atau nombor ID semakan.",
+	"templatesandbox-fail-post": "<em>Disebabkan kehilangan data sesi, pratonton disembunyikan sebagai langkah berjaga-jaga melawan serangan JavaScript.</em> \n\n <strong>Jika ini merupakan percubaan pratonton yang sah, sila cuba lagi.</strong> \nJika masih tidak berjaya, cuba [[Special:UserLogout|log keluar]] dan log masuk semula.",
+	"templatesandbox-fail-post-anon": "<em>Disebabkan anda tidak log masuk, pratonton disembunyikan sebagai langkah berjaga-jaga terhadap serangan JavaScript.</em> \n\n <strong>Jika ini merupakan percubaan pratonton yang sah, sila [[Special:UserLogin|log masuk]] dan cuba lagi.</strong>",
+	"templatesandbox-anon-limited-preview": "Pratonton perubahan JavaScript dan CSS dilumpuhkan apabila tidak log masuk. Jika anda perlu melihat perubahan tersebut, sila [[Special:UserLogin|log masuk]] dan cuba lagi.",
+	"templatesandbox-editform-need-template": "Untuk mempralihatkan satu lagi halaman dengan templat ini, tajuk halaman mesti dinyatakan.",
 	"templatesandbox-editform-need-title": "Untuk mempralihatkan satu lagi halaman dengan templat ini, tajuk halaman mesti dinyatakan.",
+	"templatesandbox-editform-invalid-template": "Nama templat yang anda nyatakan adalah tidak sah.",
 	"templatesandbox-editform-invalid-title": "Halaman yang anda nyatakan untuk pratayang adalah tidak sah.",
-	"templatesandbox-editform-title-not-exists": "Halaman yang anda nyatakan untuk pralihat tidak wujud."
+	"templatesandbox-editform-title-not-exists": "Halaman yang anda nyatakan untuk pralihat tidak wujud.",
+	"templatesandbox-failed-replace-section": "Gagal menggantikan bahagian halaman sedia ada."
 }

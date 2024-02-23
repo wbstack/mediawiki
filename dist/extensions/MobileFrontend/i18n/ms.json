@@ -9,7 +9,8 @@
 			"Kurniasan",
 			"Pizza1016",
 			"SNN95",
-			"Tofeiku"
+			"Tofeiku",
+			"Hakimi97"
 		]
 	},
 	"mobile-frontend-account-create-captcha-placeholder": "Masukkan kod pengesahan",
@@ -49,6 +50,7 @@
 	"mobile-frontend-editor-placeholder": "Bahagian ini kosong. Jadilah yang pertama untuk mengembangkannya!",
 	"mobile-frontend-editor-placeholder-new-page": "Anda sedang mencipta laman baru dalam {{SITENAME}}!",
 	"mobile-frontend-editor-previewing-page": "<span><strong>Pratayang</strong> $1</span>",
+	"mobile-frontend-editor-publish": "Terbitkan",
 	"mobile-frontend-editor-save": "Simpan",
 	"mobile-frontend-editor-success": "Berjaya! Suntingan anda telah disimpan.",
 	"mobile-frontend-editor-success-landmark-1": "Tahniah, anda telah menjadi penyunting di {{SITENAME}}!",
@@ -64,6 +66,7 @@
 	"mobile-frontend-expand-sections-status": "Kembangkan semua bahagian",
 	"mobile-frontend-fontchanger-link": "Saiz huruf",
 	"mobile-frontend-fontchanger-desc": "Besarkan atau kecilkan teks supaya mudah dibaca.",
+	"mobile-frontend-fontchanger-option-small": "Kecil",
 	"mobile-frontend-featured-article": "Kandungan pilihan hari ini",
 	"mobile-frontend-generic-404-desc": "Laman yang anda cari tidak dapat dijumpai.",
 	"mobile-frontend-generic-404-title": "Ralat - Halaman tidak dijumpai",

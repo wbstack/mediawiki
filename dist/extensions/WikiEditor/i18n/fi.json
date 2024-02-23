@@ -20,7 +20,8 @@
 			"Syreeni",
 			"VezonThunder",
 			"ZeiP",
-			"Kyykaarme"
+			"Kyykaarme",
+			"Jack Phoenix"
 		]
 	},
 	"wikieditor": "Edistynyt wikitekstin muokkauskäyttöliittymä",
@@ -115,7 +116,7 @@
 	"wikieditor-toolbar-tool-table-example-old": "-\n! otsikko 1\n! otsikko 2\n! otsikko 3\n|-\n| rivi 1, solu 1\n| rivi 1, solu 2\n| rivi 1, solu 3\n|-\n| rivi 2, solu 1\n| rivi 2, solu 2\n| rivi 2, solu 3",
 	"wikieditor-toolbar-tool-table-example-cell-text": "Solun teksti",
 	"wikieditor-toolbar-tool-table-example-header": "Otsikkoteksti",
-	"wikieditor-toolbar-tool-table-example-caption": "Kuvateksti",
+	"wikieditor-toolbar-tool-table-example-caption": "Otsikko",
 	"wikieditor-toolbar-tool-table-title": "Lisää taulukko",
 	"wikieditor-toolbar-tool-table-dimensions-rows": "Rivit",
 	"wikieditor-toolbar-tool-table-dimensions-columns": "Sarakkeet",
@@ -209,6 +210,7 @@
 	"wikieditor-toolbar-help-content-indent-description": "Sisennys",
 	"wikieditor-toolbar-help-content-indent-syntax": "Normaali teksti<br />:Sisennetty teksti<br />::Sisennetty teksti",
 	"wikieditor-toolbar-help-content-indent-result": "Normaali teksti<dl><dd>Sisennetty teksti<dl><dd>Sisennetty teksti</dd></dl></dd></dl>",
+	"tag-wikieditor-description": "[[mw:Special:MyLanguage/Extension:WikiEditor|WikiEditorilla]] (vuoden 2010 wikitekstimuokkain) tehty muokkaus",
 	"wikieditor-realtimepreview-preview": "Esikatselu",
 	"wikieditor-realtimepreview-error": "Esikatselu ei lataudu",
 	"wikieditor-realtimepreview-reload": "Lataa uudelleen",
