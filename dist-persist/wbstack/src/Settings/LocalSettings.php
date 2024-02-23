@@ -498,7 +498,7 @@ $wgMusicalNotationEnableWikibaseDataType = true;
 # DismissableSiteNotice - https://www.mediawiki.org/wiki/Extension:DismissableSiteNotice
 wfLoadExtension( 'DismissableSiteNotice' );
 $wgMajorSiteNoticeID = 1;
-$wgDismissableSiteNoticeForAnons = false;
+$wgDismissableSiteNoticeForAnons = true;
 
 // KELOD research banner campagin 2024 Q1 - https://phabricator.wikimedia.org/T357667
 // Visible until March 24th 2024 00:00:00 UTC)
