@@ -172,6 +172,8 @@ extensions:
   # We were using v2.9.0 before this
   - name: EmbedVideo
     url: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
+  - name: DismissableSiteNotice
+    repoName: wikimedia/mediawiki-extensions-DismissableSiteNotice
 
 skins:
   - name: Vector
