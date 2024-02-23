@@ -16,7 +16,7 @@
 	"twocolconflict-copy-tooltip": "Kopeeri enda redaktsiooni kogu vikitekst lõikelauale (ilma allpool tehtud muudatusteta)",
 	"twocolconflict-core-ui-hint": "Redigeerimiskonfliktide lahendamiseks on nüüd saadaval uuendatud liides. Et seda proovida, luba [[Special:Preferences#mw-prefsection-editing|eelistustes]] lõigupõhise redigeerimiskonflikti liides.",
 	"twocolconflict-core-ui-hint-close": "Ära enam näita",
-	"twocolconflict-preference-enabled": "Luba [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|lõigupõhine redigeerimiskonflikti liides]], millega redigeerimiskonflikte lahendada",
+	"twocolconflict-preference-enabled": "Kasuta [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|lõigupõhist redigeerimiskonflikti liidest]], millega redigeerimiskonflikte lahendada",
 	"twocolconflict-special-footer-hint": "Sulge see lehekülg, et naasta redigeerimiskonflikti liidesesse.",
 	"twocolconflict-special-header-overview": "Sinuga samaaegselt redigeeris lehekülge ka teine kasutaja, kes avaldas muudatused enne sind. Allpool on toodud ainult vaatamiseks mõeldud koopia sinu redaktsioonist. Redigeerimiskonflikti liideses tehtud muudatused ei kajastu siin. Selleks et muudatused liita ja probleem redigeerimiskonflikti liidese abil lahendada, naase eelmisele kaardile.",
 	"twocolconflict-special-not-saved": "Pole avaldatud",
