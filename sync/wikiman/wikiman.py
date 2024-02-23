@@ -56,7 +56,7 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
     if "patchUrls" in details.keys():
         entry['patchUrls'] = []
         for patchUrl in details['patchUrls']:
-            entry['patchUrls'] += patchUrl
+            entry['patchUrls'].append(patchUrl)
 
     return entry
 
