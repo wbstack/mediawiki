@@ -2,6 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240226-0
+- Configure Q1 KELOD research banner #423
+- Add extension DismissableSiteNotice #427
+- Sync resources via pacman #426
+
 ## 1.39-7.4-20240207-0
 - Update MediaWiki to 1.39.6 (#417)
 
