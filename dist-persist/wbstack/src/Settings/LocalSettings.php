@@ -495,20 +495,22 @@ $wgMFDefaultSkinClass = 'SkinMinerva';
 wfLoadExtension( 'Score' );
 $wgMusicalNotationEnableWikibaseDataType = true;
 
-# DismissableSiteNotice - https://www.mediawiki.org/wiki/Extension:DismissableSiteNotice
-wfLoadExtension( 'DismissableSiteNotice' );
-$wgMajorSiteNoticeID = 1;
-$wgDismissableSiteNoticeForAnons = true;
 
+// DismissableSiteNotice - https://www.mediawiki.org/wiki/Extension:DismissableSiteNotice
 // KELOD research banner campagin 2024 Q1 - https://phabricator.wikimedia.org/T357667
 // Visible until March 24th 2024 00:00:00 UTC)
 if (time() < mktime(0, 0, 0, 3, 24, 2024)) {
-    $wgSiteNotice = <<<EOF
-    <div style="width:98%; border:3px solid #0566C0; overflow:hidden; background-color: #F9F9FF; padding:16px 16px 16px 16px">
-    <div style="text-align:left; font-size:1.5em; color: #0566C0">Participants for knowledge equity project needed</div>
-    <div style="text-align:left;">Help us better understand how Wikidata, Wikibase Suite, and Wikibase Cloud support and pose barriers to knowledge equity. We would like you to participate if you hold and contribute historically marginalized knowledge, using any of these products. If interested, please '''follow the link to fill out the survey →''' [https://meta.wikimedia.org/wiki/Wikimedia_Deutschland/Knowledge_Equity_in_Linked_Open_Data_Research Knowledge Equity in Linked Open Data project]</div>
-    </div>
-    EOF;
+	wfLoadExtension( 'DismissableSiteNotice' );
+
+	$wgMajorSiteNoticeID = 1;
+	$wgDismissableSiteNoticeForAnons = true;
+
+	$wgSiteNotice = <<<EOF
+<div style="width:98%; border:3px solid #0566C0; overflow:hidden; background-color: #F9F9FF; padding:16px 16px 16px 16px">
+	<div style="text-align:left; font-size:1.5em; color: #0566C0">Participants for knowledge equity project needed</div>
+	<div style="text-align:left;">Help us better understand how Wikidata, Wikibase Suite, and Wikibase Cloud support and pose barriers to knowledge equity. We would like you to participate if you hold and contribute historically marginalized knowledge, using any of these products. If interested, please '''follow the link to fill out the survey →''' [https://meta.wikimedia.org/wiki/Wikimedia_Deutschland/Knowledge_Equity_in_Linked_Open_Data_Research Knowledge Equity in Linked Open Data project]</div>
+</div>
+EOF;
 }
 
 #######################################
