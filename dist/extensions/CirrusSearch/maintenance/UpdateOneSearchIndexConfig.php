@@ -313,16 +313,16 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 
 	private function validateIndex() {
 		$this->outputIndented( "Using shared index..." . var_export( (bool)$this->indexSharedName, true ) . "\n" );
-		$this->outputIndented( "Real index name..." . $this->getRealIndex()->getName() . "\n" );
+		$this->outputIndented( "Real index name..." . $this->getNotAliasedIndex()->getName() . "\n" );
 
 		if ( $this->startOver ) {
 			if ( $this->indexSharedName ) {
 				$this->fatalError( "Blowing away index is not supported when using a shared index." );
 			} else {
-				$this->createIndex( $this->getRealIndex(), true, "Blowing away index to start over..." );
+				$this->createIndex( $this->getNotAliasedIndex(), true, "Blowing away index to start over..." );
 			}
-		} elseif ( !$this->getRealIndex()->exists() ) {
-			$this->createIndex( $this->getRealIndex(), false, "Creating index..." );
+		} elseif ( !$this->getNotAliasedIndex()->exists() ) {
+			$this->createIndex( $this->getNotAliasedIndex(), false, "Creating index..." );
 		}
 
 		if ( $this->indexSharedName ) {
@@ -473,7 +473,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$this->getSearchConfig(),
 			$connection,
 			$connection,
-			$this->getRealIndex(),
+			$this->getNotAliasedIndex(),
 			$this->getOldIndex(),
 			$this,
 			array_filter( explode( ',', $this->getOption( 'fieldsToDelete', '' ) ) )
@@ -482,7 +482,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		$validator = new \CirrusSearch\Maintenance\Validators\SpecificAliasValidator(
 			$this->getConnection()->getClient(),
 			$this->getIndexAliasName(),
-			$this->getRealIndex()->getName(),
+			$this->getNotAliasedIndex()->getName(),
 			$this->startOver,
 			$reindexer,
 			[
@@ -504,7 +504,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		$validator = new \CirrusSearch\Maintenance\Validators\IndexAllAliasValidator(
 			$this->getConnection()->getClient(),
 			$this->getIndexName(),
-			$this->getRealIndex()->getName(),
+			$this->getNotAliasedIndex()->getName(),
 			$this->startOver,
 			$this->getIndexAliasName(),
 			$this
@@ -579,7 +579,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	/**
 	 * @return \Elastica\Index being updated
 	 */
-	public function getSharedIndex() {
+	private function getSharedIndex() {
 		return $this->getConnection()->getIndex(
 			$this->indexSharedName, $this->indexSuffix, $this->indexIdentifier );
 	}
@@ -587,7 +587,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	/**
 	 * @return \Elastica\Index being updated
 	 */
-	public function getRealIndex() {
+	private function getNotAliasedIndex() {
 		return $this->indexSharedName ? $this->getSharedIndex() : $this->getIndex();
 	}
 
