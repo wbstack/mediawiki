@@ -18,7 +18,6 @@ use WikiMap;
 class SearchConfig implements \Config {
 	// Constants for referring to various config values. Helps prevent fat-fingers
 	public const INDEX_BASE_NAME = 'CirrusSearchIndexBaseName';
-	public const INDEX_SHARED_NAME = 'CirrusSearchIndexSharedName';
 	private const PREFIX_IDS = 'CirrusSearchPrefixIds';
 	private const CIRRUS_VAR_PREFIX = 'wgCirrus';
 

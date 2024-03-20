@@ -609,9 +609,6 @@
 		"CirrusSearchIndexBaseName": {
 			"value": "__wikiid__"
 		},
-		"CirrusSearchIndexSharedName": {
-			"value": null
-		},
 		"CirrusSearchStripQuestionMarks": {
 			"value": "all"
 		},

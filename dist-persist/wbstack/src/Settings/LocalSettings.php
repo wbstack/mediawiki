@@ -672,7 +672,6 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
 
     // prepends indices with database name
     $wgCirrusSearchIndexBaseName = $wgDBname;
-    $wgCirrusSearchIndexSharedName = getenv( 'MW_ELASTICSEARCH_SHARED_INDEX_NAME' );
 
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchDefaultCluster = 'default';
