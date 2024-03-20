@@ -243,8 +243,6 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
-  patchUrls:
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FCirrusSearch~1010190/revisions/4/patch?download
 - name: WikibaseCirrusSearch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseCirrusSearch/zip/c4e1e83ee231652375a43d1558b4122278cdcb22
   artifactLevel: 1

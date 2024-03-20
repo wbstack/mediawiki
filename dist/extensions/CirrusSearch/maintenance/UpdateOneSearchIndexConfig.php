@@ -41,11 +41,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	/**
 	 * @var string
 	 */
-	private $indexSharedName;
-
-	/**
-	 * @var string
-	 */
 	private $indexSuffix;
 
 	/**
@@ -211,8 +206,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 
 		$this->indexSuffix = $this->getBackCompatOption( 'indexSuffix', 'indexType' );
 		$this->startOver = $this->getOption( 'startOver', false );
-		$this->indexSharedName = $this->getOption( 'sharedName',
-			$this->getSearchConfig()->get( SearchConfig::INDEX_SHARED_NAME ) );
 		$this->indexBaseName = $this->getOption( 'baseName',
 			$this->getSearchConfig()->get( SearchConfig::INDEX_BASE_NAME ) );
 		$this->reindexAndRemoveOk = $this->getOption( 'reindexAndRemoveOk', false );
@@ -312,36 +305,24 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	}
 
 	private function validateIndex() {
-		$this->outputIndented( "Using shared index..." . var_export( (bool)$this->indexSharedName, true ) . "\n" );
-		$this->outputIndented( "Real index name..." . $this->getNotAliasedIndex()->getName() . "\n" );
-
 		if ( $this->startOver ) {
-			if ( $this->indexSharedName ) {
-				$this->fatalError( "Blowing away index is not supported when using a shared index." );
-			} else {
-				$this->createIndex( $this->getNotAliasedIndex(), true, "Blowing away index to start over..." );
-			}
-		} elseif ( !$this->getNotAliasedIndex()->exists() ) {
-			$this->createIndex( $this->getNotAliasedIndex(), false, "Creating index..." );
-		}
-
-		if ( $this->indexSharedName ) {
-			$this->createAliases( $this->getSharedIndex() );
+			$this->createIndex( true, "Blowing away index to start over..." );
+		} elseif ( !$this->getIndex()->exists() ) {
+			$this->createIndex( false, "Creating index..." );
 		}
 
 		$this->validateIndexSettings();
 	}
 
 	/**
-	 * @param \Elastica\Index $index
 	 * @param bool $rebuild
 	 * @param string $msg
 	 */
-	private function createIndex( $index, $rebuild, $msg ) {
+	private function createIndex( $rebuild, $msg ) {
 		global $wgCirrusSearchAllFields, $wgCirrusSearchExtraIndexSettings;
 
 		$indexCreator = new \CirrusSearch\Maintenance\IndexCreator(
-			$index,
+			$this->getIndex(),
 			$this->analysisConfig,
 			$this->similarityConfig
 		);
@@ -367,39 +348,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	}
 
 	/**
-	 * @param \Elastica\Index $index
-	 */
-	private function createAliases( $index ) {
-		$this->outputIndented( "Creating aliases...\n" );
-
-		$aliases = [
-			$this->indexBaseName,
-			$this->indexBaseName . '_' . $this->indexSuffix,
-			$this->indexBaseName . '_' . $this->indexSuffix . '_' . $this->indexIdentifier
-		];
-
-		foreach ( $aliases as $alias ) {
-			$this->outputIndented( "\tMapping " . $alias . " to " . $index->getName() . "..." );
-
-			$wiki = $this->indexBaseName . '-';
-			$status = $this->getConnection()->getClient()->request(
-				$index->getName() . '/_alias/' . $alias,
-				'PUT',
-				[
-					'routing' => $alias,
-					'filter' => [ 'prefix' => [ 'wiki' => $wiki ] ]
-				]
-			);
-
-			if ( !$status->isOk() ) {
-				$this->fatalError( $status->getError() );
-			} else {
-				$this->output( "done\n" );
-			}
-		}
-	}
-
-	/**
 	 * @return \CirrusSearch\Maintenance\Validators\Validator[]
 	 */
 	private function getIndexSettingsValidators() {
@@ -415,7 +363,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	}
 
 	private function validateIndexSettings() {
-		$this->outputIndented( "Validating settings...\n" );
 		$validators = $this->getIndexSettingsValidators();
 		foreach ( $validators as $validator ) {
 			$status = $validator->validate();
@@ -473,7 +420,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 			$this->getSearchConfig(),
 			$connection,
 			$connection,
-			$this->getNotAliasedIndex(),
+			$this->getIndex(),
 			$this->getOldIndex(),
 			$this,
 			array_filter( explode( ',', $this->getOption( 'fieldsToDelete', '' ) ) )
@@ -482,7 +429,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		$validator = new \CirrusSearch\Maintenance\Validators\SpecificAliasValidator(
 			$this->getConnection()->getClient(),
 			$this->getIndexAliasName(),
-			$this->getNotAliasedIndex()->getName(),
+			$this->getSpecificIndexName(),
 			$this->startOver,
 			$reindexer,
 			[
@@ -504,7 +451,7 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 		$validator = new \CirrusSearch\Maintenance\Validators\IndexAllAliasValidator(
 			$this->getConnection()->getClient(),
 			$this->getIndexName(),
-			$this->getNotAliasedIndex()->getName(),
+			$this->getSpecificIndexName(),
 			$this->startOver,
 			$this->getIndexAliasName(),
 			$this
@@ -574,21 +521,6 @@ class UpdateOneSearchIndexConfig extends Maintenance {
 	public function getIndex() {
 		return $this->getConnection()->getIndex(
 			$this->indexBaseName, $this->indexSuffix, $this->indexIdentifier );
-	}
-
-	/**
-	 * @return \Elastica\Index being updated
-	 */
-	private function getSharedIndex() {
-		return $this->getConnection()->getIndex(
-			$this->indexSharedName, $this->indexSuffix, $this->indexIdentifier );
-	}
-
-	/**
-	 * @return \Elastica\Index being updated
-	 */
-	private function getNotAliasedIndex() {
-		return $this->indexSharedName ? $this->getSharedIndex() : $this->getIndex();
 	}
 
 	/**
