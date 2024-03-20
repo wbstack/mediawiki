@@ -2,6 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240320-0
+- Add flag to enable CirrusSearch prefixing for ids (#434)
+- Add ability to override CirrusSearch's base index name (#433)
+- Move Elasticsearch aliasing out of CirrusSearch (#432)
+
 ## 1.39-7.4-20240315-0
 - Support sharing Elasticsearch indices across multiple wikis (#430)
 
