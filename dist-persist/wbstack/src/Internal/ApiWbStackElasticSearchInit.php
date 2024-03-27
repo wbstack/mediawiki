@@ -2,6 +2,8 @@
 
 namespace WBStack\Internal;
 
+use Wikimedia\ParamValidator\ParamValidator;
+
 /**
  * This should create the index for the requested wiki
  */
@@ -14,8 +16,9 @@ class ApiWbStackElasticSearchInit extends \ApiBase {
 
         @set_time_limit( 60*5 ); // 5 mins maybe D:
 		@ini_set( 'memory_limit', '-1' ); // also try to disable the memory limit? Is this even a good idea?
-		
-        $parameters = '--cluster all';
+
+		$cluster = $this->getParameter( 'cluster' );
+		$parameters = '--cluster ' . escapeshellarg( $cluster );
 		$cmd = 'WBS_DOMAIN=' . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . ' php ' . $wgBaseDirectory . '/extensions/CirrusSearch/maintenance/UpdateSearchIndexConfig.php ' . $parameters;
 		exec($cmd, $out, $return);
 
@@ -27,7 +30,13 @@ class ApiWbStackElasticSearchInit extends \ApiBase {
 		];
 		$this->getResult()->addValue( null, $this->getModuleName(), $res );
     }
+
     public function getAllowedParams() {
-        return [];
+        return [
+            'cluster' => [
+                ParamValidator::PARAM_TYPE => 'string',
+                ParamValidator::PARAM_REQUIRED => true
+            ]
+        ];
     }
 }
