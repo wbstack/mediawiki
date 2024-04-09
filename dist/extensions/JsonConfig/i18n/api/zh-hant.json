@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Kly"
+			"Kly",
+			"SunAfterRain",
+			"Winston Sung"
 		]
 	},
 	"apihelp-jsonconfig-description": "允許直接存取 JsonConfig 子系統。",
@@ -10,7 +12,7 @@
 	"apihelp-jsonconfig-param-namespace": "要處理標題的命名空間號碼。",
 	"apihelp-jsonconfig-param-title": "要處理的不帶命名空間前綴標題。",
 	"apihelp-jsonconfig-param-content": "對於 $1command=reload 改使用此內容。",
-	"apihelp-jsonconfig-example-1": "顯示設置",
+	"apihelp-jsonconfig-example-1": "顯示組態設定",
 	"apihelp-jsonconfig-example-2": "重新設定 [[Data:Brazil/Amazonas.map]]",
 	"apihelp-jsonconfig-example-3": "重新載入 [[Data:Brazil/Amazonas.map]]",
 	"apihelp-jsondata-description": "索取在地化 JSON 資料。",

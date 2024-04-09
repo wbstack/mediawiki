@@ -71,7 +71,7 @@
 	"minerva-page-actions-wikibase": "หน้านี้ในไอเทม {{WBREPONAME}}",
 	"minerva-page-actions-language-switcher": "ภาษา",
 	"minerva-page-actions-history": "ประวัติ",
-	"minerva-prefs-talkpage": "[[mw:Talk:Moderator Tools/Content moderation on mobile web|การอภิปราย]]",
+	"minerva-prefs-talkpage": "[[mw:Talk:Moderator Tools/Content moderation on mobile web|อภิปราย]]",
 	"minerva-talk-explained": "การอภิปรายที่ยังไม่จบ",
 	"minerva-talk-explained-empty": "ยังไม่มีการอภิปรายใดที่นี่",
 	"minerva-talk-full-page": "อ่านหน้านี้ในรูปแบบวิกิ",
@@ -83,5 +83,5 @@
 	"skin-minerva-mobile-option-MinervaShowCategories-description": "ดูหมวดหมู่ของหน้า",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment": "ปรับปรุงการแสดงผลปัญหาหน้า",
 	"skin-minerva-mobile-option-MinervaPageIssuesNewTreatment-description": "ปัญหาหน้า (แม่แบบ:ambox) จะเป็นแบบในบรรทัดในบทความ",
-	"skin-minerva-recentchanges-warning-enhanced-not-supported": "น่าเสียดายที่การจัดกลุ่มผลลัพธ์ตามหน้าไม่พร้อมใช้งานบนมือถือ หากต้องการใช้คุณลักษณะนี้กรุณาใช้มุมมองแบบคอมพิวเตอร์ตั้งโต๊ะ"
+	"skin-minerva-recentchanges-warning-enhanced-not-supported": "น่าเสียดายที่การจัดกลุ่มผลลัพธ์ตามหน้าไม่พร้อมใช้งานบนอุปกรณ์เคลื่อนที่ หากต้องการใช้คุณลักษณะนี้กรุณาใช้มุมมองแบบคอมพิวเตอร์ตั้งโต๊ะ"
 }

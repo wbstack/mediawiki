@@ -2,6 +2,38 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240320-0
+- Add flag to enable CirrusSearch prefixing for ids (#434)
+- Add ability to override CirrusSearch's base index name (#433)
+- Move Elasticsearch aliasing out of CirrusSearch (#432)
+
+## 1.39-7.4-20240315-0
+- Support sharing Elasticsearch indices across multiple wikis (#430)
+
+## 1.39-7.4-20240226-0
+- Configure Q1 KELOD research banner #423
+- Add extension DismissableSiteNotice #427
+- Sync resources via pacman #426
+
+## 1.39-7.4-20240207-0
+- Update MediaWiki to 1.39.6 (#417)
+
+## 1.39-7.4-20240202-0
+- Structure logs for Google Cloud Error Reporting (#416)
+- Drop migration patch for Echo (#373)
+
+## 1.39-7.4-20240125-0
+- Load conflicting extensions localisation at cache build time (T354953)
+
+## 1.39-7.4-20240116-0
+- On failure, propagate status code from Platform API to clients (T343744)
+
+## 1.39-7.4-20240103-0
+- Add QuestyCaptcha config option
+
+## 1.39-7.4-20231213-0
+- Set $wgConfirmAccountCaptchas true for ConfirmAccount Wikis
+
 ## 1.39-7.4-20231113-0
 - Do not allow more than 1 replica per Elasticsearch index (#402)
 

@@ -1,0 +1,26 @@
+{
+	"@metadata": {
+		"authors": [
+			"Astahar"
+		]
+	},
+	"advancedsearch-options-pane-head": "Анлă шырав:",
+	"advancedsearch-optgroup-text": "Страница текстӗнче шыра",
+	"advancedsearch-optgroup-structure": "Структура",
+	"advancedsearch-optgroup-files": "Файлсемпе ӳкерчӗксем",
+	"advancedsearch-optgroup-sort": "Сортламалли йӗрке",
+	"advancedsearch-field-plain": "Ку сӑмахсем",
+	"advancedsearch-field-phrase": "Шӑп ҫак текст",
+	"advancedsearch-field-or": "Ҫак сӑмахсенчен пӗри",
+	"advancedsearch-field-not": "Ку сӑмахсемсӗр",
+	"advancedsearch-field-subpageof": "Ку страницӑн ҫумстраницисем",
+	"advancedsearch-field-intitle": "Страница ятӗнче пур",
+	"advancedsearch-field-deepcategory": "Ку категорири страницӑсем",
+	"advancedsearch-field-hastemplate": "Ҫак шаблонлӑ страницӑсем",
+	"advancedsearch-field-inlanguage": "Ҫак чӗлхеллӗ страницӑсем",
+	"advancedsearch-field-filetype": "Файл тӗсӗ",
+	"advancedsearch-field-filew": "Файл сарлакӑшӗ пиксельпе",
+	"advancedsearch-field-fileh": "Файл ҫӳллӗшӗ пиксельпе",
+	"advancedsearch-field-sort": "Сортламалли йӗрке",
+	"advancedsearch-field-preview-sort": "$1 тӑрӑх сортла"
+}

@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"12imom",
-			"Patriot Kur"
+			"Patriot Kur",
+			"Patriot Kor",
+			"Гусейн"
 		]
 	},
 	"advancedsearch-optgroup-structure": "struktur",
 	"advancedsearch-field-plain": "ım sıxanon",
 	"advancedsearch-field-filetype": "Faili tip",
 	"advancedsearch-filetype-video": "video",
-	"advancedsearch-namespaces-preset-all": "Həmə"
+	"advancedsearch-namespaces-preset-all": "Həmmə"
 }

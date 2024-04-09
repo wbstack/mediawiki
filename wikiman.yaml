@@ -1,6 +1,6 @@
 ---
 mediawikiVersion: "1.39"
-mediawikiRepoRef: 1e3757f7f2e2a06ccd5c4f962753b8c9abe1fed6
+mediawikiRepoRef: 3406e1b7d014d22f2a68237ebf447a88b5ac74ed
 mediawikiRemove:
   - docs
   - extensions/README
@@ -120,6 +120,8 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-TextExtracts
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
+  - name: DismissableSiteNotice
+    repoName: wikimedia/mediawiki-extensions-DismissableSiteNotice
   ## These extensions should not currently use the mediawikiVersion
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
@@ -137,7 +139,7 @@ extensions:
   # Using our own archive repo temporarily for our Federated Properties endeavour
   # discussion: https://github.com/wbstack/mediawiki/pull/155
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/dafcd25ae4bef76e04e20be54030ac904d7ca80d/wikibase-1698311415-REL1_39.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/6428b996ab7c1f881022f477a660520e978af5e7/wikibase-1706623789-REL1_39.tar.gz
     remove:
       - build
       - vendor

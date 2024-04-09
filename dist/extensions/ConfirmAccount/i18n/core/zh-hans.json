@@ -13,14 +13,16 @@
 			"Yfdyh000",
 			"佛壁灯",
 			"Lakejason0",
-			"CrownedWharf566"
+			"CrownedWharf566",
+			"LittlePaw365",
+			"Xyb"
 		]
 	},
-	"confirmaccount-newrequests": "'''$1'''个打开的已确认电子邮件的[[特殊:ConfirmAccounts|账号请求处于挂起状态]]。'''需要您的关注！'''",
+	"confirmaccount-newrequests": "'''$1'''个打开的已确认电子邮件的[[Special:ConfirmAccounts|账号{{PLURAL:$1|请求处于挂起状态}}]]。'''需要您的关注！'''",
 	"requestaccount-loginnotice": "要获取一个用户账号，您必须'''[[Special:RequestAccount|请求一个]]'''。",
 	"action-confirmaccount": "复查并同意账号",
 	"right-confirmaccount": "查看[[Special:ConfirmAccounts|请求账号的队列]]",
-	"right-confirmaccount-notify": "通过电子邮件收到有关新批准的账户请求的通知",
+	"right-confirmaccount-notify": "通过电子邮件接收新批准的账号申请的通知",
 	"action-requestips": "在处理账户请求时查看请求者的IP地址",
 	"right-requestips": "在处理账户请求时查看请求者的IP地址",
 	"action-lookupcredentials": "查看用户凭证",

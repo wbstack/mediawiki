@@ -21,11 +21,14 @@ if ( !defined( 'STDERR' ) ) {
     define( 'STDERR', fopen( 'php://stderr', 'w' ) );
 }
 
+require_once __DIR__ . '/Localization.php';
+
 // Define some conditions to switch behaviour on
 $wwDomainSaysLocal = preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
+$wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $wgBaseDirectory, $wwIsLocalisationRebuild );
 
 $wwUseMailgunExtension = true; // default for wbstack
 if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
@@ -363,6 +366,7 @@ if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
 
     $wgMakeUserPageFromBio = false;
     $wgAutoWelcomeNewUsers = false;
+    $wgConfirmAccountCaptchas = true;
     $wgConfirmAccountRequestFormItems = [
         'UserName'        => [ 'enabled' => true ],
         'RealName'        => [ 'enabled' => false ],
@@ -457,11 +461,22 @@ $wgDnsBlacklistUrls =
     ];
 
 # ConfirmEdit
-wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
-$wgCaptchaClass = 'ReCaptchaNoCaptcha';
-$wgReCaptchaSendRemoteIP = true;
-$wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
-$wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+
+# QuestyCaptcha
+$wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
+if ($wwUseQuestyCaptcha) {
+    $wwLocalization->loadExtension( 'ConfirmEdit/ReCaptchaNoCaptcha' );
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
+    $wgCaptchaClass = 'QuestyCaptcha';
+    $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
+} else {
+    $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
+    wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
+    $wgCaptchaClass = 'ReCaptchaNoCaptcha';
+    $wgReCaptchaSendRemoteIP = true;
+    $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
+    $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
+}
 
 # Mailgun
 if ($wwUseMailgunExtension) {
@@ -479,6 +494,25 @@ $wgMFDefaultSkinClass = 'SkinMinerva';
 # Score
 wfLoadExtension( 'Score' );
 $wgMusicalNotationEnableWikibaseDataType = true;
+
+
+// DismissableSiteNotice - https://www.mediawiki.org/wiki/Extension:DismissableSiteNotice
+// KELOD research banner campagin 2024 Q1 - https://phabricator.wikimedia.org/T357667
+// Visible until March 24th 2024 00:00:00 UTC)
+if (time() < mktime(0, 0, 0, 3, 24, 2024)) {
+	wfLoadExtension( 'DismissableSiteNotice' );
+
+	$wgMajorSiteNoticeID = 1;
+	$wgDismissableSiteNoticeForAnons = true;
+
+	$wgSiteNotice = <<<EOF
+<div style="width:98%; border:3px solid #0566C0; overflow:hidden; background-color: #F9F9FF; padding:16px 16px 16px 16px">
+	<div style="text-align:left; font-size:1.5em; color: #0566C0">Participants for knowledge equity project needed</div>
+	<div style="text-align:left;">Help [https://meta.wikimedia.org/wiki/Wikimedia_Deutschland Wikimedia Deutschland] better understand how Wikidata, Wikibase Suite, and Wikibase Cloud support and pose barriers to knowledge equity. We would like you to participate if you hold and contribute historically marginalized knowledge, using any of these products. If interested, please '''follow the link to fill out the survey →''' [https://meta.wikimedia.org/wiki/Wikimedia_Deutschland/Knowledge_Equity_in_Linked_Open_Data_Research Knowledge Equity in Linked Open Data project]</div>
+</div>
+
+EOF;
+}
 
 #######################################
 ## ---          Wikibase         --- ##
@@ -637,7 +671,11 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     }
 
     // prepends indices with database name
-    $wgCirrusSearchIndexBaseName = $wgDBname;
+    $wgCirrusSearchIndexBaseName = getenv( 'MW_CIRRUSSEARCH_INDEX_BASE_NAME' ) ?: $wgDBname;
+
+    if ( getenv( 'MW_CIRRUSSEARCH_PREFIX_IDS' ) === 'yes' ) {
+        $wgCirrusSearchPrefixIds = true;
+    }
 
     $wgSearchType = 'CirrusSearch';
     $wgCirrusSearchDefaultCluster = 'default';

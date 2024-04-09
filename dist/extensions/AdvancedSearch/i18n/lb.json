@@ -3,7 +3,8 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"advancedsearch-desc": "Liichten Zougang zu erweiderte Sich-Méiglechkeeten op [[Special:Search]]",
@@ -37,7 +38,7 @@
 	"advancedsearch-help-fileh": ";Beschreiwung\n: Dës Felder erlaben et Iech d'Héicht vum Fichier ze spezifizéieren.\n:Denkt wgl. drun:\n* Dëst gëllt nëmme fir déi Typpe vu Fichier déi eng Breet an eng Héicht hunn, wéi Videoen a Biller.\n;Hëllefssäit:\n*[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Fichiersmoossen]\n;Syntax gläichwäerteg beim normale Sichen:\n*Zuele mat <code>fileh</code> do virdrun esou wéi <code>fileh:>600</code>",
 	"advancedsearch-placeholder-exact-text": "\"Kaz ass frou mat der Gees\"",
 	"advancedsearch-inlanguage-default": "Sprooch eraussichen",
-	"advancedsearch-filetype-section-types": "Allgemeng Fichiers-Typen",
+	"advancedsearch-filetype-section-types": "Allgemeng Fichierstyppen",
 	"advancedsearch-filetype-section-image": "Bildformater",
 	"advancedsearch-filetype-section-video": "Videoformater",
 	"advancedsearch-filetype-section-audio": "Audioformater",
