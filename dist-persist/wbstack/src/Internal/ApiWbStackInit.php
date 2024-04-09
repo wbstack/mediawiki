@@ -147,130 +147,13 @@ class ApiWbStackInit extends \ApiBase {
 
 		$title = \Title::newMainPage();
         $page = new \WikiPage($title);
-
-        $text = <<<EOF
-        = What do I need to know about how Wikibase works? =
-        == Wikibase ecosystem ==
-        There are many Wikibases in the ecosystem. The community around Wikibase includes Wikibase users, partners, volunteer developers and tool builders, forming the vibrant and diverse Wikibase Ecosystem. In this ecosystem, we imagine that one day all the Wikibase instances will be connected between themselves and back to Wikidata. 
-         == How is information structured? ==
-        Data is stored in Wikibase in the shape of Items. Each item is accorded its own page. Items are used to represent all the things in human knowledge, including topics, concepts, and objects. For example, the "1988 Summer Olympics", "love", "Elvis Presley", and "gorilla" can all be items. 
-        Items are made up of Statements that describe detailed characteristics of an Item. A statement (graph format: Subject-Predicate-Object) is how the information we know about an item - the data we have about it - gets recorded in your Wikibase instance. 
-        This happens by pairing a property with at least one value; this pair is at the heart of a statement. Statements also serve to connect items to each other, resulting in a linked data structure.
-        
-        The property in a statement describes the data value, and can be thought of as a category of data like "color", "population," or "Commons media" (files hosted on Wikimedia Commons). The value in the statement is the actual piece of data that describes the item. Each property has a data type which defines the kind of values allowed in statements with that property. For example, the property “date of birth” will only accept data in the format of a date.
-        
-        Example:
-        In order to record information about the occupation of Marie Curie, you would need to add a statement to the item for Marie Curie, Marie Curie (Q7186). Using the property, occupation (P106), you could then add the value physicist (Q169470). You could also add the value chemist (Q593644). Note how both chemist and physicist are each their own item, thereby allowing Marie Curie to be linked to these items.
-        
-        How to create items, properties (what is a good property)
-        Click "Create a new Item" on the menu to the left. You will be taken to a page that asks you to give the new item a label and a description. When you're done, click "Create". 
-        
-        Create the property with Special:NewProperty.
-        Property entities can be edited like item entities with labels, descriptions, aliases, and statements.
-        Property labels should be as unambiguous as possible so that it is clear to a user which property is the correct one to use when editing items and adding statements. Properties rarely refer to commonly known concepts but they are more constructs of the Wikidata with specific meanings. Unlike items, property labels must be unique.
-        Property descriptions are less relevant for disambiguation but they should provide enough information about the scope and context of the property so that users understand appropriate usage of the property without having to consult additional help.
-        Property aliases should include all alternative ways of referring to the property.
-        Example:
-        property: P161
-        label: cast member
-        description: actor performing live for a camera or audience
-        aliases: film starring; actor; actress; starring
-        [GOOD PLACE TO CONNECT TO TEMPLATES OF OTHER TEAM]
-        
-        What to not create but reuse from WD
-        Not all items have to be created in your instance. Common concepts can be re-used from other Wikibases, mainly Wikidata. Consider only creating items that are unique to your dataset, or that need their own item page and statements. All items that you only plan on linking to in a statement, could be a link to the item on Wikidata.
-        
-        For example:
-        Item: painting XYZ
-        Statements: 
-        Property: artist
-        Value: Monet 
-        Property: depicts
-        Value: lilies
-        Value: pond
-        → these two values could link to Wikidata instead of being their own items on your instance
-        Don’t panic -> links to help
-        This is a lot of information and possibilities and might seem daunting. Don’t panic. There’s a lot of documentation for you to read, many other Wikibases you can look at to get inspired, a community that is happy to help out with any questions, and the development team who’s happy to support you where needed.
-        
-        
-        
-        
-        
-        == What do i need to know to prepare my data? ==
-        === Data Import ===
-        Instead of inserting your data manually you can make use of more efficient ways to integrate it in bulk.
-        API
-        The Wikibase API allows querying, adding, removing and editing information on Wikidata or any other Wikibase instance. A new version of the API is in the works with theREST API.
-        Tools
-        A variety of tools exist to fill your Wikibase with data and use the API:
-        https://www.mediawiki.org/wiki/Wikibase/Importing
-        QuickStatements
-        WikibaseImport
-        WikibaseIntegrator
-        OpenRefine
-        Wikibase seed data
-        Native MediaWiki export/import
-        RaiseWikibase
-        wikibase-cli
-        Examples
-        Your choice of properties depends on the use case for your Wikibase. An art museum might want to index all exhibits and put the data in relation to each other.
-        Example properties -> templates e.g.[ADD LINK]
-        https://prop-explorer.toolforge.org/
-        Example: Museum
-        Instance of (type: Item)
-        Title (type: String)
-        Created by (type: Item)
-        Depicts (type: item)
-        Located at (type: item)
-        Movement (type: item)
-        Exhibited since (type: date)
-        Example triples
-        
-        Item
-        Property
-        Value
-        Mona Lisa
-        Instance of
-        painting
-        Mona Lisa
-        Title
-        La Gioconda
-        Mona Lisa
-        Created by
-        Leaonardo da Vinci
-        Mona Lisa
-        Depicts
-        Lisa del giocondo, sky, body of water, bridge, …
-        Mona Lisa
-        Located at
-        Louvre
-        Mona Lisa
-        Movement
-        High renaissance
-        Mona Lisa
-        Exhibited since
-        1797
-        
-        
-        Example conversion of imaginary DB to triplets
-        Exhibition object 24: 
-        Painting, Name: Mona lisa, Painter: Leonardo da vinci, pained in 1500, hangs in louvre, uses oil paints
-        
-        (if you have your data in rows, maybe your columns could be your properties, and your row header is your item)
-        
-        
-        
-        
-        
-        source
-        
-        EOF;
+        $text = ApiWbStackInitMainPage::TEXT;
 
         $content = \ContentHandler::makeContent( $text, $title );
 
 		$updater = $page->newPageUpdater( $user );
         $updater->setContent( SlotRecord::MAIN, $content );
         $updater->setRcPatrolStatus( \RecentChange::PRC_PATROLLED );
-        $newRev = $updater->saveRevision( $comment, EDIT_NEW);
+        $updater->saveRevision( $comment, EDIT_NEW );
     }
 }
