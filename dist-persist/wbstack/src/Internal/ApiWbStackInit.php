@@ -141,7 +141,7 @@ class ApiWbStackInit extends \ApiBase {
         ];
     }
 
-    public function initMainPage() {
+    static public function initMainPage() {
         $user = WbStackPlatformReservedUser::getUser();
         $comment = \CommentStoreComment::newUnsavedComment( '(automated) add default content' );
 
