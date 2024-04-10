@@ -143,7 +143,7 @@ class ApiWbStackInit extends \ApiBase {
 
     public function initMainPage() {
         $user = WbStackPlatformReservedUser::getUser();
-        $comment = \CommentStoreComment::newUnsavedComment('(automated) add example content');
+        $comment = \CommentStoreComment::newUnsavedComment( '(automated) add default content' );
 
 		$title = \Title::newMainPage();
         $page = new \WikiPage($title);
