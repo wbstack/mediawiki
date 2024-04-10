@@ -146,7 +146,7 @@ class ApiWbStackInit extends \ApiBase {
         $comment = \CommentStoreComment::newUnsavedComment( '(automated) add default content' );
 
 		$title = \Title::newMainPage();
-        $page = new \WikiPage($title);
+        $page = new \WikiPage( $title );
         $text = ApiWbStackInitMainPage::TEXT;
 
         $content = \ContentHandler::makeContent( $text, $title );
