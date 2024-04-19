@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Tofeiku"
+		]
+	},
+	"templatesandbox": "کوتق ڤاسير تيمڤلت",
+	"templatesandbox-suffix": "کوتق ڤاسير",
+	"templatesandbox-legend": "کوتق ڤاسير تيمڤلت",
+	"templatesandbox-prefix-label": "اولن کوتق ڤاسير:",
+	"templatesandbox-submit": "ليهت",
+	"templatesandbox-title-output": "کوتق ڤاسير تيمڤلت: $1",
+	"templatesandbox-editform-legend": "ڤراليهت لامن دڠن تيمڤلت اين",
+	"templatesandbox-editform-page-label": "تاجوق لامن",
+	"templatesandbox-editform-view-label": "ڤاڤرکن ڤرا‌‌ليهت",
+	"templatesandbox-preview": "ڤراليهت $2",
+	"templatesandbox-previewnote": "'''ايڠت، اين هاڽ ڤراليهت [[:$1]].'''\nسونتيڠن اندا بلوم دسيمڤن!"
+}

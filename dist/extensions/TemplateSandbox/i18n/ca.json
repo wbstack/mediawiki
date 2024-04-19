@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Macofe",
-			"Vriullop"
+			"Vriullop",
+			"Lluis Cat"
 		]
 	},
 	"templatesandbox": "Proves de plantilles",
@@ -27,6 +28,7 @@
 	"templatesandbox-invalid-prefix": "El prefix de proves que heu especificat no és vàlid.",
 	"templatesandbox-prefix-not-local": "El prefix de proves que heu especificat no és local.",
 	"templatesandbox-page-or-revid": "Heu d'introduir un títol de pàgina o un número d'identificació de revisió.",
+	"templatesandbox-editform-need-template": "Per previsualitzar una altra pàgina amb aquesta plantilla, heu de posar-li un nom a la plantilla.",
 	"templatesandbox-editform-need-title": "Per previsualitzar una altra pàgina amb aquesta plantilla, heu d'especificar un títol de pàgina.",
 	"templatesandbox-editform-invalid-title": "El títol que heu especificat per a la previsualització no és vàlid.",
 	"templatesandbox-editform-title-not-exists": "El títol que heu especificat per a la previsualització no existeix."

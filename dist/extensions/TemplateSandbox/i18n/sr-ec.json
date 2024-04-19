@@ -14,6 +14,7 @@
 	"templatesandbox": "Песак за шаблоне",
 	"templatesandbox-desc": "[[Special:TemplateSandbox|Рендерује страницу]] са шаблоном из песка",
 	"templatesandbox-suffix": "песак",
+	"templatesandbox-submit": "Прикажи",
 	"templatesandbox-editform-legend": "Претпреглед странице са овим шаблоном",
 	"templatesandbox-editform-page-label": "Наслов странице",
 	"templatesandbox-editform-view-label": "Претпреглед",

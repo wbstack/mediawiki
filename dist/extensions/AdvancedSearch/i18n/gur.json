@@ -2,10 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Akakiiri",
-			"Amoramah"
+			"Amoramah",
+			"Amire80"
 		]
 	},
-	"advancedsearch-desc": "Yɔ'ɔ naana bɔna adeŋɛ te'ele eere \"capabilities\" n boi [[Special: Search]]",
+	"advancedsearch-desc": "Yɔ'ɔ naana bɔna adeŋɛ te'ele eere \"capabilities\" n boi [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Adeŋɛ te'ele eere",
 	"advancedsearch-optgroup-text": "Ɛ pɛgerɛ gulesegɔ puan",
 	"advancedsearch-optgroup-structure": "Naaŋɔ",
@@ -21,7 +22,7 @@
 	"advancedsearch-field-hastemplate": "Pɛgesi'a n tari tɛmPilate duma",
 	"advancedsearch-field-inlanguage": "Pɛgesi'a n boi yeletɔgum buna puan",
 	"advancedsearch-field-filetype": "Faali buuri",
-	"advancedsearch-field-filew": "Faali yaleŋa n de se'em pizɛl  puan",
+	"advancedsearch-field-filew": "Faali yaleŋa n de se'em pizɛl puan",
 	"advancedsearch-field-fileh": "Faali yaleŋa n de se'em pizɛl puan",
 	"advancedsearch-field-sort": "Gasega sɔa",
 	"advancedsearch-field-preview-sort": "$1 n gãsɛ",
