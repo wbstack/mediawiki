@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240411-0
+- Add default Main page content to new wikis
+
 ## 1.39-7.4-20240320-0
 - Add flag to enable CirrusSearch prefixing for ids (#434)
 - Add ability to override CirrusSearch's base index name (#433)
