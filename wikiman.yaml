@@ -72,6 +72,7 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-Kartographer
   - name: Math
     repoName: wikimedia/mediawiki-extensions-Math
+    repoRef: 2822d35380c87960c56111be025fd2c5817e919e
   - name: Score
     repoName: wikimedia/mediawiki-extensions-Score
   - name: PageImages
