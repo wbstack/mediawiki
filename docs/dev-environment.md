@@ -39,6 +39,14 @@ Removing the installation:
 docker compose down --volumes
 ```
 
+### Updating localizations
+
+After modifying `i18n` files, run the following to update localization caches:
+
+```sh
+docker compose run --rm -it mediawiki bash -c "WBS_DOMAIN=maint php w/maintenance/rebuildLocalisationCache.php --lang=en --force"
+```
+
 ### Debugging Elastic
 
 General overview of the cluster
