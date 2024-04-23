@@ -34,8 +34,10 @@ class ApiWbStackElasticSearchInit extends \ApiBase {
     public function getAllowedParams() {
         return [
             'cluster' => [
+                // Value can be 'all' or a CirrusSearch cluster name defined in LocalSettings.php
                 ParamValidator::PARAM_TYPE => 'string',
-                ParamValidator::PARAM_REQUIRED => true
+                ParamValidator::PARAM_REQUIRED => true,
+                ParamValidator::PARAM_DEFAULT => 'all'
             ]
         ];
     }
