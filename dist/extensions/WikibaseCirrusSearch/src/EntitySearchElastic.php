@@ -10,6 +10,7 @@ use Elastica\Query\DisMax;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Language;
+use MediaWiki\MediaWikiServices;
 use WebRequest;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\LanguageFallbackChainFactory;
@@ -311,7 +312,13 @@ class EntitySearchElastic implements EntitySearchHelper {
 		if ( $result->isOK() ) {
 			$result = $result->getValue();
 		} else {
-			throw new EntitySearchException( $result );
+			$services = MediaWikiServices::getInstance();
+			$config = $services->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
+
+			if ( !$config->get( 'ElasticErrorFailSilently' ) ) {
+				throw new EntitySearchException( $result );
+			}
+			$result = [];
 		}
 
 		if ( $searcher->isReturnRaw() ) {

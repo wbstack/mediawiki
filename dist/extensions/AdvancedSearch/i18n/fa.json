@@ -15,7 +15,8 @@
 			"LordProfo",
 			"Mahdy Saffar",
 			"Mardetanha",
-			"Obzord"
+			"Obzord",
+			"Ebraminio"
 		]
 	},
 	"advancedsearch-desc": "دسترسی آسان به قابلیت‌های جستجوی پیشرفته در [[Special:Search]]",
@@ -69,7 +70,7 @@
 	"advancedsearch-sort-preview-create-timestamp-asc": "حداقل اخیراً ایجاد شده است",
 	"advancedsearch-sort-preview-create-timestamp-desc": "تاریخ ایجاد",
 	"advancedsearch-namespaces-search-in": "جستجو در:",
-	"advancedsearch-namespaces-remember": "انتخاب را برای جستجوهای بعدی به خاطر داشته‌باش",
+	"advancedsearch-namespaces-remember": "انتخاب را برای جستجوهای بعدی به خاطر داشته باش",
 	"advancedsearch-namespaces-preset-all": "همه",
 	"advancedsearch-namespaces-preset-default": "پیش‌فرض",
 	"advancedsearch-namespaces-preset-general-help": "راهنمای عمومی",

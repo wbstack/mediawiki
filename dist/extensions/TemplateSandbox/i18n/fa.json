@@ -28,7 +28,7 @@
 	"templatesandbox-editform-page-label": "عنوان صفحه",
 	"templatesandbox-editform-view-label": "نمایش پیش‌نمایش",
 	"templatesandbox-preview": "پیش‌نمایش $2",
-	"templatesandbox-previewnote": "'''به یاد داشته‌باشید که این فقط پیش‌نمایشی از [[:$1]] است.'''\nتغییرات شما هنوز ذخیره نشده است!",
+	"templatesandbox-previewnote": "'''به یاد داشته باشید که این فقط پیش‌نمایشی از [[:$1]] است.'''\nتغییرات شما هنوز ذخیره نشده است!",
 	"templatesandbox-invalid-title": "عنوانی که مشخص کرده‌اید نامعتبر است.",
 	"templatesandbox-title-not-exists": "عنوانی که مشخص کرده‌اید وجود ندارد.",
 	"templatesandbox-revision-not-exists": "نسخهٔ مشخص‌شدهٔ شما وجود ندارد.",

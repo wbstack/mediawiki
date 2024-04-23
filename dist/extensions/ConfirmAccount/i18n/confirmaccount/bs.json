@@ -40,7 +40,7 @@
 	"confirmaccount-create": "Prihvati (napravi račun)",
 	"confirmaccount-deny": "Odbij (skini sa spiska)",
 	"confirmaccount-reason": "Komentar (bit će uključen u e-porukama za odbijanje i na čekanju):",
-	"confirmaccount-ip": "IP adresa:",
+	"confirmaccount-ip": "IP-adresa:",
 	"confirmaccount-legend": "Potvrdi/odbij ovaj račun",
 	"confirmaccount-submit": "Potvrdi",
 	"confirmaccount-summary": "Stvaranje korisničke stranice za novog korisnika.",
