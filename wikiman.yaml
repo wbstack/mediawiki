@@ -127,6 +127,8 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-EntitySchema
     patchUrls:
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEntitySchema~942447/revisions/2/patch?download
+  - name: DismissableSiteNotice
+    repoName: wikimedia/mediawiki-extensions-DismissableSiteNotice
   ## These extensions should not currently use the mediawikiVersion
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
