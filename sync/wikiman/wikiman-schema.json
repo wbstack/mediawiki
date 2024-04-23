@@ -91,6 +91,9 @@
         },
         "remove": {
           "$ref": "#/$defs/RemoveList"
+        },
+        "patchUrls": {
+          "$ref": "#/$defs/PatchUrlList"
         }
       },
       "additionalProperties": false,
