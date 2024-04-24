@@ -1,0 +1,13 @@
+{
+	"@metadata": {
+		"authors": [
+			"IAlex",
+			"Metroitendo",
+			"Verdy p",
+			"Wyz"
+		]
+	},
+	"sitenotice_close": "fermer",
+	"sitenotice_close-brackets": "[$1]",
+	"sitenotice-desc": "Permet aux utilisateurs de masquer le bandeau d’information du site"
+}
