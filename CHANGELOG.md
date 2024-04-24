@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240424-0
+- Specify a cluster when creating CirrusSearch indices (#437)
+
 ## 1.39-7.4-20240411-0
 - Add default Main page content to new wikis
 
