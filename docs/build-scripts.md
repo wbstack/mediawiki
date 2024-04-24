@@ -47,5 +47,3 @@ Example:
   patchUrls:
   - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/15/patch?download
 ```
-
-**please note**: currently these will get overridden if `wikiman` is used to generate the file!
