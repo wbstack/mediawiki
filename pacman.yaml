@@ -513,7 +513,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Math
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Math/zip/2822d35380c87960c56111be025fd2c5817e919e
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Math/zip/8a037f4f57030f5e44ade0a7d27fc919d20f33c6
   artifactLevel: 1
   destination: ./dist/extensions/Math
   remove:
