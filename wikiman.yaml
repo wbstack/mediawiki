@@ -1,6 +1,6 @@
 ---
 mediawikiVersion: "1.39"
-mediawikiRepoRef: 3406e1b7d014d22f2a68237ebf447a88b5ac74ed
+#mediawikiRepoRef: commit hash goes here
 mediawikiRemove:
   - docs
   - extensions/README
@@ -49,12 +49,18 @@ extensions:
   - name: WikibaseCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseCirrusSearch
     patchUrls:
+      # https://phabricator.wikimedia.org/T334191 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/WikibaseCirrusSearch/+/908801
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~908801/revisions/2/patch?download
+
+      # https://phabricator.wikimedia.org/T335105 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/WikibaseCirrusSearch/+/951473
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~951473/revisions/1/patch?download
+
   - name: WikibaseLexemeCirrusSearch
     repoName: wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch
     patchUrls:
+      # https://phabricator.wikimedia.org/T334191 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/WikibaseLexemeCirrusSearch/+/908803
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexemeCirrusSearch~908803/revisions/1/patch?download
+
   - name: UniversalLanguageSelector
     repoName: wikimedia/mediawiki-extensions-UniversalLanguageSelector
   - name: cldr
@@ -126,7 +132,9 @@ extensions:
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
     patchUrls:
+      # https://phabricator.wikimedia.org/T342001 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/EntitySchema/+/942447
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEntitySchema~942447/revisions/2/patch?download
+
   - name: DismissableSiteNotice
     repoName: wikimedia/mediawiki-extensions-DismissableSiteNotice
   ## These extensions should not currently use the mediawikiVersion
@@ -143,10 +151,9 @@ extensions:
     repoName: nyurik/ThatSrc
     repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
   ## These extensions use urls directly
-  # Using our own archive repo temporarily for our Federated Properties endeavour
-  # discussion: https://github.com/wbstack/mediawiki/pull/155
+  ### Obtain wikibase tar URL from https://www.mediawiki.org/wiki/Special:ExtensionDistributor?extdistname=Wikibase&extdistversion=REL1_39
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/6428b996ab7c1f881022f477a660520e978af5e7/wikibase-1706623789-REL1_39.tar.gz
+    url: https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_39-a396986.tar.gz
     remove:
       - build
       - vendor
@@ -172,10 +179,18 @@ extensions:
       - lib/.storybook
       - lib/.vscode
     patchUrls:
+      # https://phabricator.wikimedia.org/T312256 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/Wikibase/+/833742
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/19/patch?download
+
+      # https://phabricator.wikimedia.org/T342000 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/Wikibase/+/940955
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~940955/revisions/1/patch?download
-      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~943530/revisions/1/patch?download
+
+      # https://phabricator.wikimedia.org/T342001 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/Wikibase/+/943530
+      - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~943530/revisions/2/patch?download
+
+      # https://phabricator.wikimedia.org/T335105 - https://gerrit.wikimedia.org/r/c/mediawiki/extensions/Wikibase/+/951472
       - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~951472/revisions/1/patch?download
+
   # It looks like StopForumSpam inadvertently introduced a dependency on AbuseFilter in REL1_39 (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/3639e0120d53bf5643de57dc6e94293f69680e9f)
   # AFAIK it should be possible to run StopForumSpam without AbuseFilter installed (https://www.mediawiki.org/wiki/Extension:StopForumSpam#AbuseFilter_integration)
   # A subsequent patch, only available in REL1_40, appears to removes this dependency again (https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/commit/5e3aab6e8be0e8effa97f9b454020230b6a70e3d)
