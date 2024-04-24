@@ -202,7 +202,8 @@
 			"Histnou",
 			"LD",
 			"MacOS Weed",
-			"TheresNoTime"
+			"TheresNoTime",
+			"Hecatonchire"
 		]
 	},
 	"tog-underline": "Soulignement des liens :",
@@ -3179,7 +3180,7 @@
 	"tooltip-undo": "« Annuler » rétablit la modification précédente et ouvre la fenêtre de modification en mode prévisualisation. Il est possible d’ajouter une raison dans le résumé.",
 	"tooltip-preferences-save": "Enregistrer les préférences",
 	"tooltip-summary": "Entrez un bref résumé",
-	"interlanguage-link-title": "$1 – $2",
+	"interlanguage-link-title": "$1 – $2",
 	"interlanguage-link-title-nonlang": "$1 – $2",
 	"common.css": "/* Le CSS placé ici sera appliqué à tous les habillages. */",
 	"print.css": "/* Le CSS placé ici affectera les impressions. */",
@@ -3555,7 +3556,7 @@
 	"watchlistedit-clear-removed": "{{PLURAL:$1|Un titre a été retiré|$1 titres ont été retirés}} :",
 	"watchlistedit-too-many": "Votre liste de suivi a été mise à jour. Il y a trop de pages à afficher ici.",
 	"watchlisttools-clear": "Effacer la liste de suivi",
-	"watchlisttools-view": "Afficher les modifications pertinentes",
+	"watchlisttools-view": "Afficher les modifications afférentes",
 	"watchlisttools-edit": "Afficher et modifier la liste de suivi",
 	"watchlisttools-raw": "Modifier la liste de suivi en mode brut",
 	"iranian-calendar-m1": "Farvardin",
