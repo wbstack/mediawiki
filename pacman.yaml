@@ -1,5 +1,5 @@
 - name: mediawiki
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki/zip/ec2d725f9876b663f5ed736340f54814c023431c
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki/zip/374d95c464d317b2cd63fc9a98a84e5cf6e914ac
   artifactLevel: 1
   destination: ./dist
   remove:
@@ -90,7 +90,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: ConfirmEdit
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/3b7e1f015c842016a6ef61249f7e35998c0c146c
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-ConfirmEdit/zip/e7546270dc5b8c82200ad2ee942cdd835bd383b2
   artifactLevel: 1
   destination: ./dist/extensions/ConfirmEdit
   remove:
@@ -1154,7 +1154,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Wikibase
-  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/6428b996ab7c1f881022f477a660520e978af5e7/wikibase-1706623789-REL1_39.tar.gz
+  artifactUrl: https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_39-a396986.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/Wikibase
   remove:
@@ -1201,7 +1201,7 @@
   patchUrls:
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/19/patch?download
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~940955/revisions/1/patch?download
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~943530/revisions/1/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~943530/revisions/2/patch?download
     - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~951472/revisions/1/patch?download
 - name: StopForumSpam
   artifactUrl: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
