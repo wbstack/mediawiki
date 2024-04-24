@@ -1,6 +1,6 @@
 ---
 mediawikiVersion: "1.39"
-mediawikiRepoRef: ec2d725f9876b663f5ed736340f54814c023431c
+#mediawikiRepoRef: commit hash goes here
 mediawikiRemove:
   - docs
   - extensions/README
@@ -137,10 +137,9 @@ extensions:
     repoName: nyurik/ThatSrc
     repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
   ## These extensions use urls directly
-  # Using our own archive repo temporarily for our Federated Properties endeavour
-  # discussion: https://github.com/wbstack/mediawiki/pull/155
+  ### Obtain wikibase tar URL from https://www.mediawiki.org/wiki/Special:ExtensionDistributor?extdistname=Wikibase&extdistversion=REL1_39
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/6428b996ab7c1f881022f477a660520e978af5e7/wikibase-1706623789-REL1_39.tar.gz
+    url: https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_39-a396986.tar.gz
     remove:
       - build
       - vendor
