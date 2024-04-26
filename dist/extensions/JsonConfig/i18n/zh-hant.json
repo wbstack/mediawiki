@@ -7,7 +7,9 @@
 			"LNDDYL",
 			"Liuxinyu970226",
 			"Winston Sung",
-			"Yurik"
+			"Yurik",
+			"H78c67c",
+			"SunAfterRain"
 		]
 	},
 	"nstab-data": "資料",
@@ -48,7 +50,7 @@
 	"jsonconfig-err-url": "參數 \"$1\" 必須為有效的 URL",
 	"jsonconfig-move-aborted-model": "此頁面的 JSON 設定模型 \"$1\" 與新標題模型 \"$2\" 不符",
 	"jsonconfig-move-aborted-ns": "新頁面的標題未設定要儲存 JSON 設定",
-	"jsonconfig-optional-field": "(選填)",
+	"jsonconfig-optional-field": "（非必填）",
 	"jsonconfig-type-name-invalid": "無效",
 	"jsonconfig-type-name-string": "字串",
 	"jsonconfig-type-name-localized": "在地化",

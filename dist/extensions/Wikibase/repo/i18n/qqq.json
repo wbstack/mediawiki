@@ -54,7 +54,8 @@
 			"아라",
 			"Eleassar",
 			"Winston Sung",
-			"Lucas Werkmeister (WMDE)"
+			"Lucas Werkmeister (WMDE)",
+			"আফতাবুজ্জামান"
 		]
 	},
 	"wikibase-desc": "{{desc|name=Wikibase|url=https://www.mediawiki.org/wiki/Extension:Wikibase}}\nSee also [[d:Wikidata:Glossary#Wikidata|Wikidata]] in the Wikidata glossary.\n\n\"Structured\" refers to \"data\", not to \"repository\".",
@@ -166,7 +167,7 @@
 	"wikibase-snakformat-propertynotfound": "Error message displayed on item page for snak with a property that cannot be found.",
 	"wikibase-shortcopyrightwarning-minimal": "A shorter version of the short copyright warning ({{msg-mw|wikibase-shortcopyrightwarning}}) displayed during editing in the JavaScript UI. The copyright warning is displayed within a tooltip next to the save button.\n\nParameters:\n* $1 - the name of the button the message is referring to, set in the {{msg-mw|Wikibase-save}} message\n* $2 - the name of the wiki's page describing the terms of use",
 	"wikibase-shortcopyrightwarning": "A short copyright warning displayed during editing in the JavaScript UI. The copyright warning is displayed within a tooltip next to the save button.\n\nParameters:\n* $1 - the name of the button the message is referring to, set in the {{msg-mw|Wikibase-save}} message\n* $2 - the name of the wiki's page describing the terms of use\n* $3 - an external link to the license\n* $4 - the link text (set in [[mw:Manual:$wgRightsText|$wgRightsText]])\n\nSee also:\n* {{msg-mw|Wikidata-shortcopyrightwarning}}",
-	"wikibase-shortcopyrightwarning-version": "{{notranslate}}\nIndicator for what version of the copyright warning is prevailing. This message is used for configuration purposes and should therefore not be translated or duplicated in any other languages. Should most likely be changed via the [[Mediawiki:wikibase-shortcopyrightwarning-version]] page if the wiki's license for contents gets changed or if \"wikibase-shortcopyrightwarning\" is overwritten on the [[Mediawiki:wikibase-shortcopyrightwarning]] page. Changing this message will result into all users seeing copyright warnings again even if they have dismissed them previously.",
+	"wikibase-shortcopyrightwarning-version": "{{notranslate}}\nIndicator for what version of the copyright warning is prevailing. This message is used for configuration purposes and should therefore not be translated or duplicated in any other languages. Should most likely be changed via the [[MediaWiki:wikibase-shortcopyrightwarning-version]] page if the wiki's license for contents gets changed or if \"wikibase-shortcopyrightwarning\" is overwritten on the [[MediaWiki:wikibase-shortcopyrightwarning]] page. Changing this message will result into all users seeing copyright warnings again even if they have dismissed them previously.",
 	"wikibase-shortcopyrightwarning-accept-persist": "Label of the checkbox to agree to the terms of use and licensing for future edits. \n\nSee also:\n* {{msg-mw|wikibase-shortcopyrightwarning}}",
 	"wikibase-copyrighttooltip-acknowledge": "Label of the link to not show the copyright warning again. A copyright warning is presented to the user whenever the user is about to alter any data unless the warning is not suppressed permanently by clicking this link.\n\n{{Doc-jqueryMsg}}",
 	"wikibase-entityselector-more": "The entity selector is a user interface widget that allows selecting an entity (see [[d:Wikidata:Glossary]]). It consists out of an input field and a list of suggestions that is filled according to the text typed into the input field. Initially, the list of suggestions is filled with a certain number of suggestions. Clicking the link labeled with this message will fill the list of suggestions with additional suggestions. If there are no additional suggestions or no suggestions at all, the link does not show up.\n{{Identical|More}}",
@@ -408,7 +409,7 @@
 	"wikibase-mylanguagefallbackchain-converted-item": "A \"converted\" (taken from data in another language and converted to another language on display) fallback chain item.\n\nParameters:\n* $1 - Language code\n* $2 - Language name\n* $3 - Source language code\n* $4 - Source language name",
 	"wikibase-api-claim-value-missing": "Error message returned from the API when attempting to create a claim with no value.",
 	"wikibase-api-claim-value-unexpected": "Error message returned from the API when attempting to specify a value while creating a non-value claim.",
-	"wikibase-api-common-item": "This is an error message for a situation where a common item was detected that should not have been.",
+	"wikibase-api-common-item": "This is an error message for a situation where a common item was detected that should not have been. \"Common\" means \"shared\" or \"joint\" (rather than the opposite of \"rare\").",
 	"wikibase-api-badtoken": "This is an error message for a situation where there are no or bad token given in the API call and it is expected. Usually this should never be shown to the user, unless there are some exceptional error conditions. The message can be shown after misconfiguration of the system.",
 	"wikibase-api-cant-load-entity-content": "Shown when we can't access the content revision. This could be because it has been deleted, or because it belongs to a different entity.",
 	"wikibase-api-unresolved-redirect": "Error message returned from the API when trying to use an entity ID that refers to a redirect in a context where redirects are not supported.",
@@ -427,7 +428,7 @@
 	"wikibase-api-invalid-list": "Invalid list or data has been provided. This can occour when a list conflicts with itself (the list contains something to modify, but also to remove this item)",
 	"wikibase-api-invalid-property-id": "Error message when the user either missed to provide a required property ID, or provided an ID that formally belongs to an other entity type.",
 	"wikibase-api-invalid-entity-id": "Invalid entityid has been supplied.",
-	"wikibase-api-no-common-item": "There is no common item between to passed parameters when there should be.",
+	"wikibase-api-no-common-item": "There is no common item to be passed between parameters when there should be. \"Common\" means \"shared\" or \"joint\" (rather than the opposite of \"rare\").",
 	"wikibase-api-no-data": "This is an error message for a situation where the \"data\" argument to the API is lacking content. Usually this should never be shown to the user, unless there are some exceptional error condition. This message should probably not exist in the final version.",
 	"wikibase-api-no-external-page": "This is an error message where the external client did reply, but either because of a faulty reply or because the page title could not be unwound, it was not possible to identify an external page.\n* $1 - the site id\n* $2 - the page id\n{{Related|Wikibase-no-external-page}}",
 	"wikibase-api-nosuchrevid": "Page or entity with this revision id could not be found in the database.",

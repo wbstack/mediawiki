@@ -1,9 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Snævar"
+			"Snævar",
+			"Stefán Örvar Sigmundsson"
 		]
 	},
 	"sitenotice_close": "fela",
-	"sitenotice-desc": "Leyfir notendum að loka þessari tilkynningu"
+	"sitenotice-desc": "Leyfir notendum að loka þessari seturstilkynningu"
 }
