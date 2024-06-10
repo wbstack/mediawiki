@@ -7,13 +7,14 @@ try {
     \WBStack\Info\GlobalSet::forDomain($_SERVER['SERVER_NAME']);
 } catch (\WBStack\Info\GlobalSetException $ex) {
     http_response_code($ex->getCode());
-    echo "You have requested the domain: " . $_SERVER['SERVER_NAME'] . ". But that wiki can not currently be loaded.".PHP_EOL;
+    echo "You have requested the domain: " . $_SERVER['SERVER_NAME'] . ". But that wiki can not currently be loaded.<br/>";
     if ($ex->getCode() === 404) {
-        echo "It may never have existed or it might now be deleted.".PHP_EOL;
+        echo "It may never have existed or it might now be deleted.<br/>";
     } else {
-        echo "There was a server error in the platform API.".PHP_EOL;
+        echo "There was a server error in the platform API<br/>.";
     }
-    echo $ex->getMessage();
+    echo $ex->getMessage()."<br/>";
+    echo "You can check the platform status at <a href=\"https://status.wikibase.cloud\">status.wikibase.cloud</a><br/>.";
     die(1);
 }
 
