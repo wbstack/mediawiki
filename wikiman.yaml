@@ -138,7 +138,7 @@ extensions:
   ## These extensions use urls directly
   ### Obtain wikibase tar URL from https://www.mediawiki.org/wiki/Special:ExtensionDistributor?extdistname=Wikibase&extdistversion=REL1_39
   - name: Wikibase
-    url: https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_39-a396986.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/bea851b57845f049ba292f4d9eac6fc4823f736e/wikibase-1713968655-REL1_39.tar.gz
     remove:
       - build
       - vendor
