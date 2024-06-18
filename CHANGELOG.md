@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240618-0
+- Add link pointing to status.wikibase.cloud to error pages
+
 ## 1.39-7.4-20240426-0
 - update mediawiki to 1.39.7
   - actually a bit beyond that: wikiman.yaml refers to the latest REL1_39 branch state now
