@@ -11,10 +11,10 @@ try {
     if ($ex->getCode() === 404) {
         echo "It may never have existed or it might now be deleted.<br/>";
     } else {
-        echo "There was a server error in the platform API<br/>.";
+        echo "There was a server error in the platform API.<br/>";
     }
     echo $ex->getMessage()."<br/>";
-    echo "You can check the platform status at <a href=\"https://status.wikibase.cloud\">status.wikibase.cloud</a><br/>.";
+    echo "You can check the platform status at <a href=\"https://status.wikibase.cloud\">status.wikibase.cloud</a>.<br/>";
     die(1);
 }
 
