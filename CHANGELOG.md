@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240624-0
+- Enable InstantCommons (#444)
+
 ## 1.39-7.4-20240618-0
 - Add link pointing to status.wikibase.cloud to error pages
 
