@@ -156,7 +156,7 @@ $wgEnotifWatchlist = false;
 $wgUseImageMagick = true;
 $wgEnableUploads = false;
 $wgAllowCopyUploads = false;
-$wgUseInstantCommons = false;
+$wgUseInstantCommons = true;
 $wgFileExtensions = array_merge( $wgFileExtensions,
     array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
         'tiff', 'odt', 'odg', 'ods', 'odp', 'svg'
