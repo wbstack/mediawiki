@@ -26,7 +26,8 @@ class ApiWbStackOauthGet extends \ApiBase {
         // Try and get the required consumer
         $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
             $this->getParameter('consumerName'),
-            $this->getParameter('consumerVersion')
+            $this->getParameter('consumerVersion'),
+            $this->getParameter('includeAccess'),
         );
 
         // If it doesnt exist, make sure the user and consumer do
@@ -42,7 +43,8 @@ class ApiWbStackOauthGet extends \ApiBase {
             );
             $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
                 $this->getParameter('consumerName'),
-                $this->getParameter('consumerVersion')
+                $this->getParameter('consumerVersion'),
+                $this->getParameter('includeAccess'),
             );
         }
 
@@ -72,6 +74,10 @@ class ApiWbStackOauthGet extends \ApiBase {
             'grants' => [
                 ParamValidator::PARAM_TYPE => 'string',
                 ParamValidator::PARAM_ISMULTI => true,
+            ],
+            'includeAccess' => [
+                ParamValidator::PARAM_TYPE => 'boolean',
+                ParamValidator::PARAM_REQUIRED => false
             ],
             'callbackUrlTail' => [
                 ParamValidator::PARAM_TYPE => 'string',

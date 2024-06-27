@@ -107,7 +107,7 @@ class WbStackPlatformReservedUser{
         return true;
     }
 
-    public static function getOAuthConsumer($consumerName, $version) {
+    public static function getOAuthConsumer($consumerName, $version, $includeAccess = false) {
         $user = self::getUser();
         // TODO create the oauth consumer on the fly if it doesn't exist (needs grants and callbackurl)
 
@@ -131,10 +131,30 @@ class WbStackPlatformReservedUser{
             return false;
         }
 
-        return [
+        $data = [
             'agent' => $c->getName(),
             'consumerKey' => $c->getConsumerKey(),
             'consumerSecret' => \MediaWiki\Extension\OAuth\Backend\Utils::hmacDBSecret( $c->getSecretKey() ),
         ];
+
+        if ( $includeAccess ) {
+            $a = \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::newFromUserConsumerWiki(
+                $db,
+                $user->getId(),
+                $c,
+                $c->getWiki(),
+                \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::READ_NORMAL,
+                $c->getOAuthVersion(),
+            );
+
+            if ( $a === false ) {
+                return false;
+            }
+
+            $data['accessKey'] = $a->getAccessToken();
+            $data['accessSecret'] = $a->getAccessSecret();
+        }
+
+        return $data;
     }
 }
