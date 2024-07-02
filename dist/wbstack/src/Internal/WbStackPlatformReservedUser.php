@@ -58,7 +58,7 @@ class WbStackPlatformReservedUser{
         // callbackUrl in docker: $QS_PUBLIC_SCHEME_HOST_AND_PORT/api.php
         $data = [
             'action' => 'propose',
-            'name'         => $consumerName,
+            'name'         => self::expandConsumerName($consumerName, $ownerOnly),
             'version'      => $version,
             'description'  => $consumerName,
             'callbackUrl'  => $callbackUrl,
@@ -106,7 +106,7 @@ class WbStackPlatformReservedUser{
         return true;
     }
 
-    public static function getOAuthConsumer($consumerName, $version) {
+    public static function getOAuthConsumer($consumerName, $version, $ownerOnly = false) {
         $user = self::getUser();
         // TODO create the oauth consumer on the fly if it doesn't exist (needs grants and callbackurl)
 
@@ -121,7 +121,7 @@ class WbStackPlatformReservedUser{
         // https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/src/Backend/Consumer.php
         $c = \MediaWiki\Extension\OAuth\Backend\Consumer::newFromNameVersionUser(
             $db,
-            $consumerName,
+            self::expandConsumerName($consumerName, $ownerOnly),
             $version,
             $user->getId()
         );
@@ -151,5 +151,10 @@ class WbStackPlatformReservedUser{
         }
 
         return $data;
+    }
+
+    private static function expandConsumerName(string $consumerName, bool $ownerOnly): string
+    {
+        return $consumerName.($ownerOnly ? '-ownerOnly' : '');
     }
 }

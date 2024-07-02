@@ -8,7 +8,7 @@ use Wikimedia\ParamValidator\ParamValidator;
  * This API is used by tools that need OAuth consumers.
  * Calling this API will either give you details for the spec that you ask if they already exist.
  * OR it will create such a consume, and give you the details.
- * 
+ *
  * Most of the logic for OAuth stuff currently lives within WbStackPlatformReservedUser
  */
 
@@ -27,6 +27,7 @@ class ApiWbStackOauthGet extends \ApiBase {
         $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
             $this->getParameter('consumerName'),
             $this->getParameter('consumerVersion'),
+            $this->getParameter('ownerOnly'),
         );
 
         // If it doesnt exist, make sure the user and consumer do
@@ -43,7 +44,8 @@ class ApiWbStackOauthGet extends \ApiBase {
             );
             $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
                 $this->getParameter('consumerName'),
-                $this->getParameter('consumerVersion')
+                $this->getParameter('consumerVersion'),
+                $this->getParameter('ownerOnly'),
             );
         }
 
