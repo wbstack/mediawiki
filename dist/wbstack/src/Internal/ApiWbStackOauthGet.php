@@ -34,19 +34,17 @@ class ApiWbStackOauthGet extends \ApiBase {
             $callbackUrl = $this->getScheme() . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . $this->getParameter('callbackUrlTail');
 
             WbStackPlatformReservedUser::createIfNotExists();
-            $ok = WbStackPlatformReservedUser::createOauthConsumer(
+            WbStackPlatformReservedUser::createOauthConsumer(
                 $this->getParameter('consumerName'),
                 $this->getParameter('consumerVersion'),
                 $this->getParameter('grants'),
                 $callbackUrl,
-                $this->getParameter('includeAcceptance'),
+                $this->getParameter('ownerOnly'),
             );
-            if ($ok) {
-                $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
-                    $this->getParameter('consumerName'),
-                    $this->getParameter('consumerVersion')
-                );
-            }
+            $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
+                $this->getParameter('consumerName'),
+                $this->getParameter('consumerVersion')
+            );
         }
 
         // Return appropriate result
@@ -80,7 +78,7 @@ class ApiWbStackOauthGet extends \ApiBase {
                 ParamValidator::PARAM_TYPE => 'string',
                 ParamValidator::PARAM_REQUIRED => true
             ],
-            'includeAcceptance' => [
+            'ownerOnly' => [
                 ParamValidator::PARAM_TYPE => 'boolean',
             ],
         ];
