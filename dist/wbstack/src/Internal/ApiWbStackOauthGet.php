@@ -26,28 +26,31 @@ class ApiWbStackOauthGet extends \ApiBase {
         // Try and get the required consumer
         $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
             $this->getParameter('consumerName'),
-            $this->getParameter('consumerVersion')
+            $this->getParameter('consumerVersion'),
         );
 
         // If it doesnt exist, make sure the user and consumer do
-        if(!$consumerData) {
+        if (!$consumerData) {
             $callbackUrl = $this->getScheme() . $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain . $this->getParameter('callbackUrlTail');
 
             WbStackPlatformReservedUser::createIfNotExists();
-            WbStackPlatformReservedUser::createOauthConsumer(
+            $ok = WbStackPlatformReservedUser::createOauthConsumer(
                 $this->getParameter('consumerName'),
                 $this->getParameter('consumerVersion'),
                 $this->getParameter('grants'),
-                $callbackUrl
+                $callbackUrl,
+                $this->getParameter('includeAcceptance'),
             );
-            $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
-                $this->getParameter('consumerName'),
-                $this->getParameter('consumerVersion')
-            );
+            if ($ok) {
+                $consumerData = WbStackPlatformReservedUser::getOAuthConsumer(
+                    $this->getParameter('consumerName'),
+                    $this->getParameter('consumerVersion')
+                );
+            }
         }
 
         // Return appropriate result
-        if(!$consumerData) {
+        if (!$consumerData) {
             $res = ['success' => 0];
         } else {
             $res = [
@@ -76,6 +79,9 @@ class ApiWbStackOauthGet extends \ApiBase {
             'callbackUrlTail' => [
                 ParamValidator::PARAM_TYPE => 'string',
                 ParamValidator::PARAM_REQUIRED => true
+            ],
+            'includeAcceptance' => [
+                ParamValidator::PARAM_TYPE => 'boolean',
             ],
         ];
     }

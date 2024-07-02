@@ -50,7 +50,7 @@ class WbStackPlatformReservedUser{
         return true;
     }
 
-    public static function createOauthConsumer($consumerName, $version, $grants, $callbackUrl) {
+    public static function createOauthConsumer($consumerName, $version, $grants, $callbackUrl, $includeAcceptance = false) {
         // ### Setup oauth consumer...
         // LOGIC mainly from https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/maintenance/createOAuthConsumer.php ?
         // EXECUTION of script from https://github.com/wmde/wikibase-docker/blob/master/wikibase/1.33/bundle/extra-install.sh#L7 ?
@@ -100,8 +100,19 @@ class WbStackPlatformReservedUser{
         $approveStatus = $control->submit();
 
         if ( !$approveStatus->isGood() ) {
-            // TODO return more info...
             return false;
+        }
+
+        if ( $includeAcceptance ) {
+            $acceptanceData = [
+                // TODO: figure out what is expected to go here
+            ];
+            $control = new \MediaWiki\Extension\OAuth\Control\ConsumerAcceptanceSubmitControl( $context, $acceptanceData, $dbw, 1 );
+            $acceptanceStatus = $control->submit();
+
+            if ( !$acceptanceStatus->isGood() ) {
+                return false;
+            }
         }
 
         return true;
@@ -131,10 +142,26 @@ class WbStackPlatformReservedUser{
             return false;
         }
 
-        return [
+        $data = [
             'agent' => $c->getName(),
             'consumerKey' => $c->getConsumerKey(),
             'consumerSecret' => \MediaWiki\Extension\OAuth\Backend\Utils::hmacDBSecret( $c->getSecretKey() ),
         ];
+
+        $a = \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::newFromUserConsumerWiki(
+            $db,
+            $user->getId(),
+            $c,
+            $c->getWiki(),
+            \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::READ_NORMAL,
+            $c->getOAuthVersion(),
+        );
+
+        if ( $a !== false ) {
+            $data['accessKey'] = $a->getAccessToken();
+            $data['accessSecret'] = $a->getAccessSecret();
+        }
+
+        return $data;
     }
 }
