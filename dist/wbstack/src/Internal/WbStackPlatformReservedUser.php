@@ -58,7 +58,7 @@ class WbStackPlatformReservedUser{
         // callbackUrl in docker: $QS_PUBLIC_SCHEME_HOST_AND_PORT/api.php
         $data = [
             'action' => 'propose',
-            'name'         => self::expandConsumerName($consumerName, $ownerOnly),
+            'name'         => $consumerName,
             'version'      => $version,
             'description'  => $consumerName,
             'callbackUrl'  => $callbackUrl,
@@ -121,12 +121,16 @@ class WbStackPlatformReservedUser{
         // https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/src/Backend/Consumer.php
         $c = \MediaWiki\Extension\OAuth\Backend\Consumer::newFromNameVersionUser(
             $db,
-            self::expandConsumerName($consumerName, $ownerOnly),
+            $consumerName,
             $version,
             $user->getId()
         );
 
         if( $c === false ) {
+            return false;
+        }
+
+        if ($c->getOwnerOnly() !== $ownerOnly) {
             return false;
         }
 
@@ -151,10 +155,5 @@ class WbStackPlatformReservedUser{
         }
 
         return $data;
-    }
-
-    private static function expandConsumerName(string $consumerName, bool $ownerOnly): string
-    {
-        return $consumerName.($ownerOnly ? '-ownerOnly' : '');
     }
 }
