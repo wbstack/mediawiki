@@ -151,7 +151,7 @@ class WbStackPlatformReservedUser{
 
         if ( $a !== false ) {
             $data['accessKey'] = $a->getAccessToken();
-            $data['accessSecret'] = $a->getAccessSecret();
+            $data['accessSecret'] = \MediaWiki\Extension\OAuth\Backend\Utils::hmacDBSecret( $a->getAccessSecret() );
         }
 
         return $data;
