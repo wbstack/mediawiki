@@ -50,7 +50,7 @@ class WbStackPlatformReservedUser{
         return true;
     }
 
-    public static function createOauthConsumer($consumerName, $version, $grants, $callbackUrl) {
+    public static function createOauthConsumer($consumerName, $version, $grants, $callbackUrl, $ownerOnly = false) {
         // ### Setup oauth consumer...
         // LOGIC mainly from https://github.com/wikimedia/mediawiki-extensions-OAuth/blob/master/maintenance/createOAuthConsumer.php ?
         // EXECUTION of script from https://github.com/wmde/wikibase-docker/blob/master/wikibase/1.33/bundle/extra-install.sh#L7 ?
@@ -65,7 +65,7 @@ class WbStackPlatformReservedUser{
             'callbackIsPrefix' => true,
             'grants' => '["' . implode( '","', $grants) . '"]',
             'granttype' => 'normal',
-            'ownerOnly' => false,
+            'ownerOnly' => $ownerOnly,
             'email' => WbStackPlatformReservedUser::PLATFORM_RESERVED_EMAIL,
             'wiki' => '*',
             'rsaKey' => '',
@@ -99,15 +99,14 @@ class WbStackPlatformReservedUser{
         $control = new \MediaWiki\Extension\OAuth\Control\ConsumerSubmitControl( $context, $data, $dbw );
         $approveStatus = $control->submit();
 
-        if ( !$approveStatus->isGood() ) {
-            // TODO return more info...
+        if ( !$approveStatus->isOK() ) {
             return false;
         }
 
         return true;
     }
 
-    public static function getOAuthConsumer($consumerName, $version) {
+    public static function getOAuthConsumer($consumerName, $version, $ownerOnly = false) {
         $user = self::getUser();
         // TODO create the oauth consumer on the fly if it doesn't exist (needs grants and callbackurl)
 
@@ -131,10 +130,30 @@ class WbStackPlatformReservedUser{
             return false;
         }
 
-        return [
+        if ($c->getOwnerOnly() !== $ownerOnly) {
+            return false;
+        }
+
+        $data = [
             'agent' => $c->getName(),
             'consumerKey' => $c->getConsumerKey(),
             'consumerSecret' => \MediaWiki\Extension\OAuth\Backend\Utils::hmacDBSecret( $c->getSecretKey() ),
         ];
+
+        $a = \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::newFromUserConsumerWiki(
+            $db,
+            $user->getId(),
+            $c,
+            $c->getWiki(),
+            \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::READ_NORMAL,
+            $c->getOAuthVersion(),
+        );
+
+        if ( $a !== false ) {
+            $data['accessKey'] = $a->getAccessToken();
+            $data['accessSecret'] = \MediaWiki\Extension\OAuth\Backend\Utils::hmacDBSecret( $a->getAccessSecret() );
+        }
+
+        return $data;
     }
 }
