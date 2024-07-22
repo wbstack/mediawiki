@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240722-0
+- Add `ownerOnly` parameter to OAuth setup (#447)
+
 ## 1.39-7.4-20240624-0
 - Enable InstantCommons (#444)
 
