@@ -3,7 +3,8 @@
 		"authors": [
 			"Anakmalaysia",
 			"Macofe",
-			"Hakimi97"
+			"Hakimi97",
+			"Tofeiku"
 		]
 	},
 	"templatesandbox": "Kotak pasir templat",
@@ -21,7 +22,7 @@
 	"templatesandbox-editform-page-label": "Tajuk halaman",
 	"templatesandbox-editform-view-label": "Paparkan Pralihat",
 	"templatesandbox-preview": "Pralihat $2",
-	"templatesandbox-previewnote": "'''Ingat, ini hanya pralihat [[:$1]].'''\nSuntngan anda belum disimpan!",
+	"templatesandbox-previewnote": "'''Ingat, ini hanya pralihat [[:$1]].'''\nSuntingan anda belum disimpan!",
 	"templatesandbox-invalid-title": "Tajuk yang anda nyatakan tidak sah.",
 	"templatesandbox-title-not-exists": "Tajuk yang anda nyatakan tidak wujud.",
 	"templatesandbox-revision-not-exists": "Semakan yang anda nyatakan tidak wujud.",

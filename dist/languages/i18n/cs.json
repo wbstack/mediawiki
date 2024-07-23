@@ -63,7 +63,8 @@
 			"YjM",
 			"לערי ריינהארט",
 			"JAn Dudík",
-			"Felix220"
+			"Felix220",
+			"Decamexd"
 		]
 	},
 	"tog-underline": "Podtrhávat odkazy:",
@@ -1235,7 +1236,7 @@
 	"userrights-expiry": "Čas vypršení:",
 	"userrights-expiry-existing": "Současný čas vypršení: $2, $3",
 	"userrights-expiry-othertime": "Jiný čas:",
-	"userrights-expiry-options": "1 den:1 day,1 týden:1 week,1 měsíc:1 month,3 měsíce:3 months,6 měsíců:6 months,1 rok:1 rok",
+	"userrights-expiry-options": "1 den:1 day,1 týden:1 week,1 měsíc:1 month,3 měsíce:3 months,6 měsíců:6 months,1 rok:1 year",
 	"userrights-invalid-expiry": "Čas vypršení pro skupinu „$1“ je neplatný.",
 	"userrights-expiry-in-past": "Čas vypršení pro skupinu „$1“ je v minulosti.",
 	"userrights-cannot-shorten-expiry": "Čas do vypršení členství ve skupině „$1“ nemůžete zkrátit. To mohou provést pouze uživatelé oprávnění k jejímu přiřazení nebo odstranění.",
@@ -2820,6 +2821,8 @@
 	"movesubpage": "{{PLURAL:$1|Podstránka|Podstránky}}",
 	"movesubpagetext": "Tato stránka má $1 {{PLURAL:$1|podstránku uvedenou|podstránky vypsané|podstránek vypsaných}} níže.",
 	"movesubpagetalktext": "Odpovídající diskusní stránka má {{PLURAL:$1|jednu podstránku, zobrazenou|$1 podstránky, zobrazené|$1 podstránek, zobrazených}} níže.",
+	"movesubpagetext-truncated": "{{PLURAL:$1|První podstránka této stránky je zobrazena|První $1 podstránky této stránky jsou zobrazeny|Prvních $1 podstránek této stránky je zobrazeno}} níže.",
+	"movesubpagetalktext-truncated": "{{PLURAL:$1|První podstránka odpovídající diskusní stránky je zobrazena|První $1 podstránky odpovídající diskusní stránky jsou zobrazeny|Prvních $1 podstránek odpovídající diskusní stránky je zobrazeno}} níže.",
 	"movenosubpage": "Tato stránka nemá žádné podstránky.",
 	"movereason": "Důvod:",
 	"revertmove": "vrátit",
@@ -4096,6 +4099,9 @@
 	"skin-action-undelete": "Obnovit",
 	"skin-action-delete": "Smazat",
 	"skin-action-move": "Přesunout",
+	"parsoid-stash-rate-limit-error": "Nepodařilo se uložit do skrýše, protože byl překročen rychlostní limit. Zkuste to prosím znovu později.",
+	"parsoid-resource-limit-exceeded": "Překročen limit zdrojů Parsoidu: $1",
+	"parsoid-client-error": "Neplatný vstup pro Parsoid: $1",
 	"newpages-showhide-bots": "$1 boty",
 	"newpages-showhide-patrolled": "$1 prověřené editace",
 	"newpages-showhide-redirect": "$1 přesměrování",

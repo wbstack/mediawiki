@@ -5,7 +5,8 @@
 			"Snævar",
 			"Sveinn í Felli",
 			"Ævar Arnfjörð Bjarmason",
-			"පසිඳු කාවින්ද"
+			"පසිඳු කාවින්ද",
+			"Stefán Örvar Sigmundsson"
 		]
 	},
 	"confirmaccounts": "Staðfesta notandabeðnir",
@@ -33,7 +34,7 @@
 	"confirmaccount-noreason": "(engin)",
 	"confirmaccount-create": "Samþykkja (búa til aðgang)",
 	"confirmaccount-hold": "Bíða",
-	"confirmaccount-ip": "Vistfang:",
+	"confirmaccount-ip": "IP-staðfang:",
 	"confirmaccount-submit": "Staðfesta",
 	"confirmaccount-rej": "Notandabeiðninni var hafnað.",
 	"confirmaccount-wsum": "Velkomin!",

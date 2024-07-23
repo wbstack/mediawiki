@@ -14,6 +14,8 @@
 	"advancedsearch-field-hastemplate": "Siiddut, main leat dát mállet",
 	"advancedsearch-field-inlanguage": "Siiddut, mat leat dán gillii",
 	"advancedsearch-field-filetype": "Fiilašládja",
+	"advancedsearch-field-filew": "Fiila govdodat pikselin (govvačuokkisin)",
+	"advancedsearch-field-fileh": "Fiilla allodat pikselin (govvačuokkisin)",
 	"advancedsearch-field-sort": "Sirrenortnet",
 	"advancedsearch-field-preview-sort": "Sirre $1 mielde",
 	"advancedsearch-inlanguage-default": "Vállje giela",

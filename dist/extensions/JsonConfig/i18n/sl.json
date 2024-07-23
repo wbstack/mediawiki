@@ -34,7 +34,7 @@
 	"jsonconfig-err-number": "Parameter »$1« mora biti število",
 	"jsonconfig-err-object-expected": "Vrednost »$1« naj bi bila objekt, obdan z oklepaji {...}",
 	"jsonconfig-err-root-array-expected": "JSON-podatki morajo biti seznam, obdan z oglatimi oklepaji [...]",
-	"jsonconfig-err-root-object-expected": "JSON-podatki morajo biti objekt, obdan z okroglimi oklepaji {...}",
+	"jsonconfig-err-root-object-expected": "Podatki JSON morajo biti objekt, obdan z zavitim oklepajem {...}",
 	"jsonconfig-err-string": "Parameter »$1« mora biti niz",
 	"jsonconfig-err-stringline": "Parameter »$1« mora biti enovrstični niz, ki ne sme biti daljši od $2 znakov, brez tabulatorjev in se ne sme začeti ali končati s presledkom",
 	"jsonconfig-err-unexpected-key": "Objekt »$1« vsebuje nepričakovano polje »$2«",

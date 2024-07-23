@@ -67,7 +67,7 @@
 	"confirmaccount-spam": "Smetje (ne pošlji e-pošte)",
 	"confirmaccount-reason": "Komentar (vključen v e-poštna sporočila o zavrnitvi in zadržanju):",
 	"confirmaccount-ip": "IP-naslov:",
-	"confirmaccount-xff": "Obveyna prvotna povezava (X-Forwarded-For):",
+	"confirmaccount-xff": "Obvezna prvotna povezava (X-Forwarded-For):",
 	"confirmaccount-agent": "User-Agent:",
 	"confirmaccount-legend": "Potrdi/zavrni ta račun",
 	"confirmaccount-submit": "Potrdi",

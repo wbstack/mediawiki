@@ -2,16 +2,25 @@
 	"@metadata": {
 		"authors": [
 			"Babanwalia",
-			"Bgo eiu"
+			"Bgo eiu",
+			"Kuldeepburjbhalaike"
 		]
 	},
 	"prefs-gadgets": "ਗੈਜਟ",
 	"gadgets": "ਗੈਜਟ",
+	"gadgetusage": "ਗੈਜਟ ਵਰਤੋਂ ਦੇ ਅੰਕੜੇ",
+	"gadgetusage-gadget": "ਗੈਜਟ",
+	"gadgetusage-usercount": "ਵਰਤੋਂਕਾਰਾਂ ਦੀ ਸੰਖਿਆ",
+	"gadgetusage-noresults": "ਕੋਈ ਗੈਜਟਸ ਨਹੀਂ ਮਿਲੇ।",
+	"gadgetusage-activeusers": "ਸਰਗਰਮ ਵਰਤੋਂਕਾਰ",
+	"gadgetusage-default": "ਡਿਫ਼ਾਲਟ",
 	"gadgets-title": "ਗੈਜਟ",
+	"gadgets-editdescription": "ਵੇਰਵਾ ਸੋਧੋ",
+	"gadgets-viewdescription": "ਵੇਰਵਾ ਵੇਖੋ",
 	"gadgets-uses": "ਵਰਤਦਾ ਹੈ",
 	"gadgets-default": "ਮੂਲ ਤੌਰ 'ਤੇ ਸਾਰਿਆਂ ਲਈ ਚਾਲੂ ਹੈ।",
 	"gadgets-export": "ਬਰਾਮਦ",
-	"gadgets-export-title": "ਜੁਗਤਾਂ ਦੀ ਬਰਾਮਦ",
-	"gadgets-not-found": "ਜੁਗਤ \"$1\" ਨਹੀਂ ਲੱਭਾ।",
+	"gadgets-export-title": "ਗੈਜਟ ਬਰਾਮਦ",
+	"gadgets-not-found": "ਗੈਜਟ \"$1\" ਨਹੀਂ ਲੱਭਿਆ।",
 	"gadgets-export-download": "ਡਾਊਨਲੋਡ ਕਰੋ"
 }

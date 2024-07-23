@@ -10,7 +10,8 @@
 			"Pizza1016",
 			"Tofeiku",
 			"Yosri",
-			"Bebudak"
+			"Bebudak",
+			"Hakimi97"
 		]
 	},
 	"wikieditor": "Wikiteks keutamaan halaman suntingan",
@@ -18,8 +19,8 @@
 	"wikieditor-wikitext-tab": "Wikiteks",
 	"wikieditor-toolbar": "Bar alatan penyuntingan",
 	"wikieditor-toolbar-desc": "Bar alatan penyuntingan maju",
-	"wikieditor-toolbar-preference": "Bolehkan alatan penyuntingan",
-	"wikieditor-toolbar-preference-help": "Ini kadangkala dipanggil 'penyunting wikiteks 2010'.",
+	"wikieditor-toolbar-preference": "Dayakan palang alat sunting",
+	"wikieditor-toolbar-preference-help": "Palang ini kadangkala dikenali sebagai 'alat sunting wikiteks 2010'.",
 	"wikieditor-toolbar-tool-bold": "Tebal",
 	"wikieditor-toolbar-tool-bold-example": "Teks tebal",
 	"wikieditor-toolbar-tool-italic": "Condong",
@@ -198,7 +199,7 @@
 	"wikieditor-toolbar-help-content-indent-syntax": "Teks normal<br />:Teks terinden<br />::Teks terinden",
 	"wikieditor-toolbar-help-content-indent-result": "Teks normal<dl><dd>Teks terinden<dl><dd>Teks terinden</dd></dl></dd></dl>",
 	"tag-wikieditor-description": "Suntingan dibuat menggunakan [[mw:Special:MyLanguage/Extension:WikiEditor|WikiPenyunting]] (penyunting wikiteks 2010)",
-	"wikieditor-realtimepreview-preview": "Pralihat",
+	"wikieditor-realtimepreview-preview": "Pratayang",
 	"wikieditor-realtimepreview-error": "Pralihat tidak memuat",
 	"wikieditor-realtimepreview-reload": "Muat semula",
 	"wikieditor-realtimepreview-beta-label": "Pralihat Masa Nyata",

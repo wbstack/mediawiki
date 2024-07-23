@@ -2,6 +2,20 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20240722-0
+- Add `ownerOnly` parameter to OAuth setup (#447)
+
+## 1.39-7.4-20240624-0
+- Enable InstantCommons (#444)
+
+## 1.39-7.4-20240618-0
+- Add link pointing to status.wikibase.cloud to error pages
+
+## 1.39-7.4-20240426-0
+- update mediawiki to 1.39.7
+  - actually a bit beyond that: wikiman.yaml refers to the latest REL1_39 branch state now
+- switch Wikibase source to wmf extdist
+
 ## 1.39-7.4-20240424-0
 - Specify a cluster when creating CirrusSearch indices (#437)
 

@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Snævar"
+			"Snævar",
+			"Stefán Örvar Sigmundsson"
 		]
 	},
 	"special-entitieswithoutdescription": "Einingar án lýsingar",
@@ -12,5 +13,5 @@
 	"wikibasecirrus-entitieswithoutlabel-label-type": "Gerð:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Finna",
 	"wikibasecirrus-entitieswithoutlabel-invalid-language": "„$1” er ógildur tungumálakóði.",
-	"wikibasecirrus-entitieswithoutlabel-invalid-type": "„$1” er ógild gerð einingar."
+	"wikibasecirrus-entitieswithoutlabel-invalid-type": "„$1“ er ekki gild einindategund."
 }

@@ -1154,7 +1154,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: Wikibase
-  artifactUrl: https://extdist.wmflabs.org/dist/extensions/Wikibase-REL1_39-a396986.tar.gz
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/bea851b57845f049ba292f4d9eac6fc4823f736e/wikibase-1713968655-REL1_39.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/Wikibase
   remove:

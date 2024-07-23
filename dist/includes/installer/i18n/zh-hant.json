@@ -28,7 +28,8 @@
 			"蘭斯特",
 			"아라",
 			"Willy1018",
-			"列维劳德"
+			"列维劳德",
+			"Func"
 		]
 	},
 	"config-desc": "MediaWiki 安裝程式",
@@ -242,11 +243,11 @@
 	"config-logo-preview-main": "首頁",
 	"config-logo-icon": "標誌（圖示）",
 	"config-logo-icon-help": "您的標誌模樣應採用方形，一般會是超過 50 像素或是 SVG 格式。",
-	"config-logo-wordmark": "字標（選擇性）",
+	"config-logo-wordmark": "字標（非必填）：",
 	"config-logo-wordmark-help": "您站台的名稱。若未定義的話，通常會退回成文字。一般會是高度等於或不超過 30 像素的 SVG。",
-	"config-logo-tagline": "標語（可選）",
+	"config-logo-tagline": "標語（非必填）：",
 	"config-logo-tagline-help": "您站台的標語。僅在您有定義上方字標時才使用。若未定義的話，通常會退回成文字。標語與字標的結合高度在一般規則是不超過 50 像素。",
-	"config-logo-sidebar": "側欄標誌（選擇性）：",
+	"config-logo-sidebar": "側邊欄標誌（非必填）：",
 	"config-logo-filedrop": "拖放圖片檔案至此",
 	"config-logo-sidebar-help": "某些 MediaWiki 外觀的側欄選單會包含高度為 160 像素的標誌。若未定義，會與上方所定義的圖示相同。您可能會想要一個結合字標與圖示的專用圖形。",
 	"config-instantcommons": "開啟即時共享資源",
@@ -254,7 +255,7 @@
 	"config-cc-error": "查無該創作共用授權條款，\n請手動輸入您的授權條款名稱。",
 	"config-cc-again": "請重新選取...",
 	"config-cc-not-chosen": "請選擇您要使用的創用CC授權條款，然後點選 \"proceed\"。",
-	"config-advanced-settings": "進階設定",
+	"config-advanced-settings": "進階組態設定",
 	"config-cache-options": "物件快取設定：",
 	"config-cache-help": "物件快取是用來增進 MediaWiki 速度的一項功能，透過快取經常使用的資料。\n中型到大型的網站我們會建議開啟這個選項，對小型的網站也有一定程度的效果。",
 	"config-cache-none": "不快取 (不會影響功能，但在大型 Wiki 網站可能會有處理速度的問題)",

@@ -927,12 +927,13 @@ class MovePageForm extends UnlistedSpecialPage {
 	 * @param Title $title Page being moved.
 	 */
 	private function showSubpages( $title ) {
+		$maximumMovedPages = $this->getConfig()->get( MainConfigNames::MaximumMovedPages );
 		$nsHasSubpages = $this->nsInfo->hasSubpages( $title->getNamespace() );
-		$subpages = $title->getSubpages();
+		$subpages = $title->getSubpages( $maximumMovedPages + 1 );
 		$count = $subpages instanceof TitleArray ? $subpages->count() : 0;
 
 		$titleIsTalk = $title->isTalkPage();
-		$subpagesTalk = $title->getTalkPage()->getSubpages();
+		$subpagesTalk = $title->getTalkPage()->getSubpages( $maximumMovedPages + 1 );
 		$countTalk = $subpagesTalk instanceof TitleArray ? $subpagesTalk->count() : 0;
 		$totalCount = $count + $countTalk;
 
@@ -946,15 +947,19 @@ class MovePageForm extends UnlistedSpecialPage {
 		);
 
 		if ( $nsHasSubpages ) {
-			$this->showSubpagesList( $subpages, $count, 'movesubpagetext', true );
+			$this->showSubpagesList(
+				$subpages, $count, 'movesubpagetext', 'movesubpagetext-truncated', true
+			);
 		}
 
 		if ( !$titleIsTalk && $countTalk > 0 ) {
-			$this->showSubpagesList( $subpagesTalk, $countTalk, 'movesubpagetalktext' );
+			$this->showSubpagesList(
+				$subpagesTalk, $countTalk, 'movesubpagetalktext', 'movesubpagetalktext-truncated'
+			);
 		}
 	}
 
-	private function showSubpagesList( $subpages, $pagecount, $wikiMsg, $noSubpageMsg = false ) {
+	private function showSubpagesList( $subpages, $pagecount, $msg, $truncatedMsg, $noSubpageMsg = false ) {
 		$out = $this->getOutput();
 
 		# No subpages.
@@ -963,7 +968,14 @@ class MovePageForm extends UnlistedSpecialPage {
 			return;
 		}
 
-		$out->addWikiMsg( $wikiMsg, $this->getLanguage()->formatNum( $pagecount ) );
+		$maximumMovedPages = $this->getConfig()->get( MainConfigNames::MaximumMovedPages );
+
+		if ( $pagecount > $maximumMovedPages ) {
+			$subpages = $this->truncateSubpagesList( $subpages );
+			$out->addWikiMsg( $truncatedMsg, $this->getLanguage()->formatNum( $maximumMovedPages ) );
+		} else {
+			$out->addWikiMsg( $msg, $this->getLanguage()->formatNum( $pagecount ) );
+		}
 		$out->addHTML( "<ul>\n" );
 
 		$linkBatch = $this->linkBatchFactory->newLinkBatch( $subpages );
@@ -976,6 +988,17 @@ class MovePageForm extends UnlistedSpecialPage {
 			$out->addHTML( "<li>$link</li>\n" );
 		}
 		$out->addHTML( "</ul>\n" );
+	}
+
+	private function truncateSubpagesList( iterable $subpages ): array {
+		$returnArray = [];
+		foreach ( $subpages as $subpage ) {
+			$returnArray[] = $subpage;
+			if ( count( $returnArray ) >= $this->getConfig()->get( MainConfigNames::MaximumMovedPages ) ) {
+				break;
+			}
+		}
+		return $returnArray;
 	}
 
 	/**
