@@ -11,7 +11,6 @@ use Elastica\Query\MatchNone;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
 use Language;
-use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeContent;
 use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
@@ -204,13 +203,7 @@ class LexemeSearchEntity implements EntitySearchHelper {
 		if ( $result->isOK() ) {
 			$result = $result->getValue();
 		} else {
-			$services = MediaWikiServices::getInstance();
-			$config = $services->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
-
-			if ( !$config->get( 'ElasticErrorFailSilently' ) ) {
-				throw new EntitySearchException( $result );
-			}
-			$result = [];
+			throw new EntitySearchException( $result );
 		}
 
 		if ( $searcher->isReturnRaw() ) {

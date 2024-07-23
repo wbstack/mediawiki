@@ -318,7 +318,7 @@
         'mediawiki/mediawiki' => array(
             'dev_requirement' => false,
             'provided' => array(
-                0 => '1.39.7',
+                0 => '1.39.8',
             ),
         ),
         'monolog/monolog' => array(

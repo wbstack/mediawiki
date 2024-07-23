@@ -5,7 +5,8 @@
 			"Jim-by",
 			"Red Winged Duck",
 			"Wizardist",
-			"Zedlik"
+			"Zedlik",
+			"Renessaince"
 		]
 	},
 	"confirmaccounts": "Пацьвердзіць запыт на стварэньне рахунку",
@@ -62,7 +63,7 @@
 	"confirmaccount-autorej": "(гэты запыт быў аўтаматычна адхілены з-за неактыўнасьці)",
 	"confirmaccount-held": "({{GENDER:$1|адклаў|адклала}} [[User:$1|$1]] $3 у $4)",
 	"confirmaccount-blockip": "Заблякаваць IP-адрас",
-	"confirmaccount-create": "Зацьвердзіць (стварыць рахунак)",
+	"confirmaccount-create": "Зацьвердзіць (стварыць уліковы запіс)",
 	"confirmaccount-deny": "Адхіліць (выдаліць са сьпісу)",
 	"confirmaccount-hold": "Адкласьці",
 	"confirmaccount-spam": "Спам (не дасылаць лісты па электроннай пошце)",

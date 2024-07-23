@@ -101,7 +101,7 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 			$v = get_object_vars( $v );
 		}
 		if ( is_array( $v ) ) {
-			$v = array_map( 'self::objectToArray', $v );
+			$v = array_map( [ self::class, 'objectToArray' ], $v );
 		}
 		return $v;
 	}

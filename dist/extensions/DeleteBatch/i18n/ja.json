@@ -34,7 +34,7 @@
 	"deletebatch-system-username": "ページ削除スクリプト",
 	"action-deletebatch": "ページの一括削除",
 	"right-deletebatch": "ページを一括削除",
-	"action-deletebatch-spoof": "「ページ削除スクリプト」でページを一括削除",
+	"action-deletebatch-spoof": "「ページ削除スクリプト」でのページの一括削除",
 	"right-deletebatch-spoof": "「ページ削除スクリプト」でページを一括削除",
 	"deletebatch-deleting-file-only": "ファイル解説ページ $1 は存在しません。本体ファイルのみを削除しています。この操作は記録されません。"
 }

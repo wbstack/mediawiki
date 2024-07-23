@@ -26,14 +26,6 @@ class CopyrightMessageBuilder {
 		$renderedSaveMessage = $this->renderSaveMessage( $language, $saveMessageKey );
 		$renderedCopyrightPageMessage = $this->renderCopyrightPageMessage();
 
-		if ( $rightsUrl === '' ) {
-			return wfMessage( 'wikibase-shortcopyrightwarning-minimal' )
-				->params(
-					$renderedSaveMessage,
-					$renderedCopyrightPageMessage
-				);
-		}
-
 		return wfMessage( 'wikibase-shortcopyrightwarning' )
 			->params(
 				$renderedSaveMessage,

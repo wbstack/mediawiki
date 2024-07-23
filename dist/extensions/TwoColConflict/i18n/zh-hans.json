@@ -21,7 +21,9 @@
 			"沈澄心",
 			"神樂坂秀吉",
 			"科劳",
-			"铁桶"
+			"铁桶",
+			"GuoPC",
+			"LittlePaw365"
 		]
 	},
 	"twocolconflict": "基于段落的编辑冲突",
@@ -42,7 +44,7 @@
 	"twocolconflict-special-not-saved": "未发布",
 	"twocolconflict-special-textarea-hint": "您可以查看和复制您修订版本的源代码：",
 	"twocolconflict-special-malformed-title": "标题缺失或无效。",
-	"twocolconflict-special-expired": "没什么可看的。这可能意味着您之前遇到过编辑冲突，但那是前一段时间，您临时存储的文本现在已过期。",
+	"twocolconflict-special-expired": "这里没有内容。这可能表明您在一段时间前遇到了编辑冲突，而您临时存储的文本目前已到期。",
 	"twocolconflict-split-header-hint": "如果您[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 在这个页面]留下反馈，您可以帮助进一步改进此功能。",
 	"twocolconflict-split-header-hint-beta": "感谢您使用此测试版功能。 如果您在[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 此页面]上留下反馈，您可以帮助进一步改进它。",
 	"twocolconflict-split-header-overview": "当您在编辑的时候，另一位用户编辑了相同的页面并在您之前发布了更改。请查看两个版本并将其合并。当您点击{{int:publishchanges}}时，只有在所选方框中的内容会被保存。",

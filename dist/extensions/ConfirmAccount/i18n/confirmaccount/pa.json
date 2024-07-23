@@ -1,14 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
-			"Aalam"
+			"Aalam",
+			"Cabal"
 		]
 	},
-	"confirmaccounts": "ਅਕਾਊਂਟ ਮੰਗ ਪੁਸ਼ਟੀ",
+	"confirmaccounts": "ਖਾਤਾ ਬੇਨਤੀਆਂ ਦੀ ਤਸਦੀਕ ਕਰੋ",
 	"confirmaccount-real-q": "ਨਾਂ",
 	"confirmaccount-email-q": "ਈਮੇਲ",
 	"confirmaccount-showopen": "ਮੰਗਾਂ ਖੋਲ੍ਹੋ",
 	"confirmaccount-showrej": "ਰੱਦ ਕੀਤੀਆਂ ਮੰਗਾਂ",
 	"confirmaccount-review": "ਝਲਕ",
-	"confirmaccount-type": "ਕਤਾਰ:"
+	"confirmaccount-type": "ਕਤਾਰ:",
+	"confirmaccount-legend": "ਇਸ ਖਾਤੇ ਦੀ ਤਸਦੀਕ/ਰੱਦ ਕਰੋ"
 }

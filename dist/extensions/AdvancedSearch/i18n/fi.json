@@ -10,7 +10,8 @@
 			"Stryn",
 			"Valtlait",
 			"Valtlai",
-			"Yupik"
+			"Yupik",
+			"Samoasambia"
 		]
 	},
 	"advancedsearch-desc": "Helpottaa laajennettujen hakuominaisuuksien käyttöä sivulle [[Special:Search|Toiminnot:Haku]]",
@@ -81,6 +82,6 @@
 	"advancedsearch-namespaces-preset-discussion": "Keskustelu",
 	"advancedsearch-namespaces-placeholder": "Lisää nimiavaruuksia...",
 	"prefs-advancedsearch": "Laajennettu haku",
-	"advancedsearch-preference-help": "Laajennettu haku lisää lomakkeen sivulle Special:Search. Näin voit suorittaa erikoistuneita hakuja, vaikka et tietäisi mitään hakusyntaksista. Se myös muuttaa nimiavaruuksien valintatapaa.",
-	"advancedsearch-preference-disable": "Älä näytä laajennetun haun käyttöliittymää kun käytät Special:Search"
+	"advancedsearch-preference-help": "Laajennettu haku lisää lomakkeen sivulle Toiminto:Haku. Näin voit suorittaa erikoistuneita hakuja, vaikka et tietäisi mitään hakusyntaksista. Se myös muuttaa nimiavaruuksien valintatapaa.",
+	"advancedsearch-preference-disable": "Älä näytä laajennetun haun käyttöliittymää hakutoimintoa käytettäessä"
 }

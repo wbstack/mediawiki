@@ -1,0 +1,18 @@
+{
+	"@metadata": {
+		"authors": [
+			"Zolgoyo"
+		]
+	},
+	"advancedsearch-field-plain": "Bo sözler",
+	"advancedsearch-field-not": "Bo sözler tuwıl",
+	"advancedsearch-field-filetype": "Dosiya tipĭ",
+	"advancedsearch-inlanguage-default": "Tĭl sayla",
+	"advancedsearch-filetype-section-video": "Video formatları",
+	"advancedsearch-filetype-section-other": "Başqa formatlar",
+	"advancedsearch-filetype-default": "Dosiya tipĭ sayla",
+	"advancedsearch-filetype-bitmap": "Resĭm",
+	"advancedsearch-namespaces-search-in": "Mĭnda qıdır:",
+	"advancedsearch-namespaces-preset-all": "Epĭsĭ",
+	"advancedsearch-namespaces-preset-discussion": "Muhabbet"
+}

@@ -8,7 +8,10 @@
 			"予弦",
 			"列维劳德",
 			"Winston Sung",
-			"SupaplexTW"
+			"SupaplexTW",
+			"Lakejason0",
+			"沈澄心",
+			"Cookai1205"
 		]
 	},
 	"content-model-wikibase-lexeme": "Wikibase詞位",
@@ -22,7 +25,7 @@
 	"wikibase-entity-summary-wblmergelexemes-to": "已合併詞位至 $3",
 	"wikibase-lexeme-gloss-empty": "未定義註解",
 	"wikibase-lexeme-language-selector-label": "$1 ($2)",
-	"wikibase-lexeme-lemma-language-not-recognized": "所提供的語言代碼無法確認。",
+	"wikibase-lexeme-lemma-language-not-recognized": "所提供的語言代碼無法辨識。",
 	"wikibase-lexeme-lemma-language-option": "$1 ($2)",
 	"wikibase-lexeme-mergelexemes-error-cannot-load": "載入詞位失敗。",
 	"wikibase-lexeme-mergelexemes-error-conflicting-lemma": "合併詞位失敗，請先解決衝突。錯誤：詞位含有用於同一拼寫變體的不同主題。",
@@ -101,7 +104,7 @@
 	"wikibaselexeme-gloss-field-gloss-label": "註解",
 	"wikibaselexeme-gloss-field-language-label": "語言",
 	"wikibaselexeme-grammatical-features-input-placeholder": "例如：標準、比較、過去式...",
-	"wikibaselexeme-header-forms": "詞性",
+	"wikibaselexeme-header-forms": "詞形",
 	"wikibaselexeme-header-senses": "意義",
 	"wikibaselexeme-lemma-edit-placeholder": "主題通常是字詞的最短詞性",
 	"wikibaselexeme-lemma-field-language-label": "拼寫變體",

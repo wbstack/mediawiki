@@ -105,6 +105,7 @@
 	"notification-timestamp-today": "Hodie",
 	"notification-timestamp-yesterday": "Hiere",
 	"notification-inbox-filter-read": "Lektita",
+	"notification-inbox-filter-unread": "Ne lektita",
 	"notification-inbox-filter-all": "Omna",
 	"echo-specialmute-label-mute-notifications": "Silencigez avizi de ca {{GENDER:$1|uzero}}",
 	"echo-notification-alert": "{{PLURAL:$1|($1) avizo|($1) avizi|100=(99+) avizi}}",
@@ -122,6 +123,8 @@
 	"echo-email-batch-link-text-view-all-notifications": "Montrez omna avizi",
 	"notification-header-foreign-alert": "Plusa avizi de {{PLURAL:$5|altra Wiki|$5 altra Wiki}}",
 	"notification-header-foreign-notice": "Altra avizi de {{PLURAL:$5|altra Wiki|$5 altra Wiki}}",
+	"right-manage-all-push-subscriptions": "Administrar omna nemediata (''push'') suskriptaji",
+	"action-manage-all-push-subscriptions": "administrar omna nemediata (''push'') suskriptaji",
 	"group-push-subscription-manager": "Jeranti di suskripti ''push''",
 	"grouppage-push-subscription-manager": "{{ns:project}}:Jeranti di suskripti ''push''"
 }

@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Adeliine",
-			"Pikne"
+			"Pikne",
+			"Misosoof"
 		]
 	},
 	"advancedsearch-desc": "Lihtne juurdepääs täpsematele otsivõimalustele leheküljel [[Special:Search]]",
@@ -24,7 +25,7 @@
 	"advancedsearch-field-filew": "Faili laius pikslites",
 	"advancedsearch-field-fileh": "Faili kõrgus pikslites",
 	"advancedsearch-field-sort": "Järjestusalus",
-	"advancedsearch-field-preview-sort": "$1 järjekorras",
+	"advancedsearch-field-preview-sort": "Järjestusalus: $1",
 	"advancedsearch-help-plain": ";Kirjeldus\n:Otsitakse neid sõnu pealkirjast või tekstist.\n;Silmaspidamiseks\n:* Siia saab sisestada mitu sõna.\n:* Eiratakse kirjavahemärke (välja arvatud koolon ja koma) ning muid märke, mis pole numbrid ega tähed.\n:* Võimalikud on tulemused, mis ei sisalda mõnd otsisõnadest.\n:* Tüvekasutus on lubatud. Näide: kui sisestada ''auto'', vastab sellele ka ''autod''. Tüvekasutus on eri keeltes erinev.\n;Abilehekülg\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Täistekstiotsing]\n;Vaste harilikus otsisüntaksis\n:<code>seesam tänav auto</code>",
 	"advancedsearch-help-phrase": ";Kirjeldus\n:Otsitakse kindlas järjestuses märke. Kirjavahemärke eiratakse.\n;Silmaspidamiseks\n:(kehtib ainult siis, kui kasutada jutumärke, näited allpool) \n:* Eralda otsitavad väljendid koma või tühikuga, nt <code>\"tere hommikust\"</code>, <code>\"tere, sõber!\"</code>.\n:* Eiratakse kirjavahemärke (välja arvatud koolon ja koma) ning muid märke, mis pole numbrid ega tähed.\n:* Otsing ei ole tõstutundlik.\n:* Tüvekasutust ei rakendata.\n;Abilehekülg\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Sõnad, väljendid ja muutemärgid]\n;Vaste harilikus otsisüntaksis\n:Sõnad jutumärkide vahel, nt <code>\"Alusta algusest\"</code>",
 	"advancedsearch-help-or": ";Kirjeldus\n:Leheküljel peab olema vähemalt üks neist otsisõnadest.\n;Abilehekülg\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Sõnad, väljendid ja muutemärgid]\n;Vaste harilikus otsisüntaksis\n:Sõnad, mille vahel on <code>OR</code>, nt <code>sülearvuti OR tahvelarvuti</code>",
@@ -50,16 +51,21 @@
 	"advancedsearch-filetype-bitmap": "Pilt",
 	"advancedsearch-filetype-drawing": "Joonistus",
 	"advancedsearch-filetype-audio": "Heli",
+	"advancedsearch-filetype-video": "Video",
 	"advancedsearch-filetype-office": "Kontor",
 	"advancedsearch-filesize-equals": "võrdub",
 	"advancedsearch-filesize-greater-than": "suurem kui",
 	"advancedsearch-filesize-smaller-than": "väiksem kui",
 	"advancedsearch-sort-relevance": "Asjakohasus",
+	"advancedsearch-sort-last-edit-asc": "Redigeerimiskuupäev – eespool vanemad",
 	"advancedsearch-sort-last-edit-desc": "Redigeerimiskuupäev – eespool praegused",
+	"advancedsearch-sort-create-timestamp-asc": "Alustamiskuupäev – eespool vanemad",
 	"advancedsearch-sort-create-timestamp-desc": "Alustamiskuupäev – eespool praegused",
-	"advancedsearch-sort-preview-relevance": "Asjakohasuse",
-	"advancedsearch-sort-preview-last-edit-desc": "Redigeerimiskuupäevade",
-	"advancedsearch-sort-preview-create-timestamp-desc": "Alustamiskuupäevade",
+	"advancedsearch-sort-preview-relevance": "asjakohasus",
+	"advancedsearch-sort-preview-last-edit-asc": "kõige viimati redigeeritud",
+	"advancedsearch-sort-preview-last-edit-desc": "redigeerimiskuupäev",
+	"advancedsearch-sort-preview-create-timestamp-asc": "kõige viimati alustatud",
+	"advancedsearch-sort-preview-create-timestamp-desc": "alustamiskuupäev",
 	"advancedsearch-namespaces-search-in": "Otsi neist nimeruumidest:",
 	"advancedsearch-namespaces-remember": "Edaspidistes otsingutes pea valikut meeles",
 	"advancedsearch-namespaces-preset-all": "Kõik",

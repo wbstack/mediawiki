@@ -22,7 +22,7 @@
 	"spam-blacklisted-email-signup": "指定されたメールアドレスは現在使用を禁止されています。",
 	"spam-invalid-lines": "このスパムブロックリストには、無効な{{PLURAL:$1|正規表現}}を含む{{PLURAL:$1|行}}があります。保存する前に問題部分を修正してください:",
 	"spam-blacklist-desc": "ページ内の URL や登録利用者のメールアドレスをブロックできるようにする、正規表現に基づいたスパム対策ツール",
-	"log-name-spamblacklist": "スパムブロックリストのログ",
+	"log-name-spamblacklist": "スパムブロックリスト記録",
 	"log-description-spamblacklist": "これらのイベントはスパムブロックリストとの一致を追跡します。",
 	"logentry-spamblacklist-hit": "{{GENDER:$2|$1}} が $3 に $4 を追加しようとした際にスパムブロックリストが発動しました。",
 	"right-spamblacklistlog": "スパムブロックリスト記録を閲覧",

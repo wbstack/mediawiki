@@ -2,12 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Aalam",
-			"Babanwalia"
+			"Babanwalia",
+			"Cabal"
 		]
 	},
 	"requestaccount": "ਅਕਾਊਂਟ ਬੇਨਤੀ",
 	"requestaccount-page": "{{ns:project}}: ਸਰਵਿਸ ਦੀਆਂ ਸ਼ਰਤਾਂ",
-	"requestaccount-dup": "'''ਨੋਟ: ਤੁਸੀਂ ਪਹਿਲਾਂ ਹੀ ਰਜਿਸਟਰ ਹੋਏ ਅਕਾਊਂਟ ਨਾਲ ਲਾਗ ਹੋ ਚੁੱਕੇ ਹੋ।'''",
+	"requestaccount-dup": "'''ਨੋਟ: ਤੁਸੀਂ ਪਹਿਲਾਂ ਹੀ ਦਾਖ਼ਲ-ਖਾਤੇ ਨਾਲ ਦਾਖ਼ਲ ਹੋ ਚੁੱਕੇ ਹੋ।'''",
 	"requestaccount-leg-user": "ਵਰਤੋਂਕਾਰ ਖਾਤਾ",
 	"requestaccount-leg-areas": "ਦਿਲਚਸਪੀ ਦੇ ਖਾਸ ਖੇਤਰ",
 	"requestaccount-leg-person": "ਨਿੱਜੀ ਜਾਣਕਾਰੀ",
@@ -17,12 +18,12 @@
 	"requestaccount-same": "(ਅਸਲੀ ਨਾਂ ਵਾਂਗ ਹੀ)",
 	"requestaccount-email": "ਈਮੇਲ ਐਡਰੈੱਸ:",
 	"requestaccount-reqtype": "ਸਥਿਤੀ:",
-	"requestaccount-level-0": "ਲੇਖਕ",
+	"requestaccount-level-0": "ਲਿਖਾਰੀ",
 	"requestaccount-level-1": "ਐਡੀਟਰ",
-	"requestaccount-bio": "ਨਿੱਜੀ ਜਾਣਕਾਰੀ:",
+	"requestaccount-bio": "ਨਿੱਜੀ ਜੀਵਨੀ (ਸਿਰਫ਼ ਸਾਦਾ ਪਾਠ):",
 	"requestaccount-notes": "ਹੋਰ ਨੋਟ:",
 	"requestaccount-inuse": "ਵਰਤੋਂਕਾਰ-ਨਾਂ ਪਹਿਲੋਂ ਹੀ ਇੱਕ ਲਟਕਦੀ ਖਾਤਾ ਬੇਨਤੀ ਵਿੱਚ ਵਰਤਿਆ ਜਾ ਰਿਹਾ ਹੈ।",
 	"requestaccount-submit": "ਅਕਾਊਂਟ ਬੇਨਤੀ",
-	"requestaccount-email-subj": "{{SITENAME}} ਈਮੇਲ ਐਡਰੈੱਸ ਪੁਸ਼ਟੀ",
+	"requestaccount-email-subj": "{{SITENAME}} ਈਮੇਲ ਪਤੇ ਦੀ ਤਸਦੀਕ",
 	"requestaccount-email-subj-admin": "{{SITENAME}} ਅਕਾਊਂਟ ਮੰਗ"
 }

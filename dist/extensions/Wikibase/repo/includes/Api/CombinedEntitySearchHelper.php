@@ -18,20 +18,12 @@ class CombinedEntitySearchHelper implements EntitySearchHelper {
 	private $searchHelpers;
 
 	/**
-	 * @var EntitySearchHelper[]
-	 */
-	private $searchHelpersFallback;
-
-	/**
 	 * @param array $searchHelpers ordered array of EntitySearchHelpers to be used.
-	 * @param array $searchHelpersFallback ordered array of EntitySearchHelpers for when no results are found using $searchHelpers.
 	 */
-	public function __construct( array $searchHelpers, array $searchHelpersFallback = [] ) {
+	public function __construct( array $searchHelpers ) {
 		Assert::parameterElementType( EntitySearchHelper::class, $searchHelpers, '$searchHelpers' );
-		Assert::parameterElementType( EntitySearchHelper::class, $searchHelpersFallback, '$searchHelpersFallback' );
 
 		$this->searchHelpers = $searchHelpers;
-		$this->searchHelpersFallback = $searchHelpersFallback;
 	}
 
 	/**
@@ -64,24 +56,6 @@ class CombinedEntitySearchHelper implements EntitySearchHelper {
 			}
 		}
 
-		if ( !$allSearchResults ) {
-			foreach ( $this->searchHelpersFallback as $helper ) {
-				$newResults = $helper->getRankedSearchResults(
-					$text,
-					$languageCode,
-					$entityType,
-					$limit - count( $allSearchResults ),
-					$strictLanguage,
-					$profileContext
-				);
-				$allSearchResults = $this->mergeSearchResults( $allSearchResults, $newResults, $limit );
-
-				// If we have already hit the correct number of results then stop looping through helpers
-				if ( $limit - count( $allSearchResults ) <= 0 ) {
-					break;
-				}
-			}
-		}
 		return $allSearchResults;
 	}
 
