@@ -226,8 +226,8 @@ $wgAllowHTMLEmail = true;
 $wgEmailAuthentication = true;
 // require email authentication
 $wgEmailConfirmToEdit = true;
-// TODO make this a real wbstack email address?
-$wgEmergencyContact = "emergency.wbstack@addshore.com";
+
+$wgEmergencyContact = 'noreply@' . getenv('MW_EMAIL_DOMAIN'); //T372617
 $wgPasswordSender = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 $wgNoReplyAddress = 'noreply@' . getenv('MW_EMAIL_DOMAIN');
 
