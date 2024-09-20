@@ -280,19 +280,21 @@ $wgRemoveGroups['bureaucrat'][] = 'bot';
 $wgRemoveGroups['bureaucrat'][] = 'emailconfirmed';
 
 # Remove the predefined interface-admin group
-unset( $wgGroupPermissions['interface-admin'] );
-unset( $wgRevokePermissions['interface-admin'] );
-unset( $wgAddGroups['interface-admin'] );
-unset( $wgRemoveGroups['interface-admin'] );
-unset( $wgGroupsAddToSelf['interface-admin'] );
-unset( $wgGroupsRemoveFromSelf['interface-admin'] );
+// unset( $wgGroupPermissions['interface-admin'] );
+// unset( $wgRevokePermissions['interface-admin'] );
+// unset( $wgAddGroups['interface-admin'] );
+// unset( $wgRemoveGroups['interface-admin'] );
+// unset( $wgGroupsAddToSelf['interface-admin'] );
+// unset( $wgGroupsRemoveFromSelf['interface-admin'] );
 
 # Allow crats to editsitecss
 $wgGroupPermissions['bureaucrat']['editsitecss'] = true;
 
 # Disable user CSS and JS editing for now
 $wgGroupPermissions['user']['editmyusercss'] = false;
-$wgGroupPermissions['user']['editmyuserjs'] = false;
+$wgGroupPermissions['user']['editmyuserjs'] = true;
+
+$wgAllowUserJs = true;
 
 # Allow emailconfirmed to skip captcha
 $wgAutopromote['emailconfirmed'] = APCOND_EMAILCONFIRMED;
