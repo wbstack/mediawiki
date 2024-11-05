@@ -95,10 +95,13 @@ if ( getenv('MW_LOG_TO_STDERR') === 'yes' ) {
 
 if ( $wwDomainSaysLocal ) {
     $wgServer = "http://" . $wikiInfo->domain;
+
+    if ( $_SERVER['SERVER_PORT'] !== 80 ) {
+        $wgServer .= ":" . $_SERVER['SERVER_PORT'];
+    }
 } else {
     $wgServer = "https://" . $wikiInfo->domain;
 }
-
 
 $wgScriptPath = "/w";
 $wgArticlePath = "/wiki/$1";
@@ -543,7 +546,7 @@ $wgWBClientSettings['thisWikiIsTheRepo'] = true;
 $wgWBClientSettings['repoUrl'] = $GLOBALS['wgServer'];
 $wgWBClientSettings['repoSiteName'] = $GLOBALS['wgSitename'];
 
-$localConceptBaseUri = 'https://' . $wikiInfo->domain . '/entity/';
+$localConceptBaseUri = $wgServer . '/entity/';
 
 $wgWBRepoSettings['entitySources'] = [
     'local' => 
