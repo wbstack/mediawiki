@@ -10,29 +10,39 @@ class CustomLogger extends AbstractLogger {
     private $channel;
     private $config;
 
-    public function __construct($channel, $config ) {
+    /**
+     * @param string $channel Logging channel
+     * @param array $config = [
+     *   'ignoreLevels' => (string[]) Ignore messages with these levels
+     *   'ignoreAllInGroup' => (string[]) Ignore messages in these channels
+     *   'logAllInGroup' => (string[]) Log all messages in these channels regardless
+     *      of what is set in either 'ignoreLevels' or 'ignoreAllInGroup'
+     *   'logAllInGroupExceptDebug' => (string[]) Log all non-debug level messages
+     *      in these channels regardless of what is set in either 'ignoreLevels'
+     *      or 'ignoreAllInGroup'
+     * ]
+     */
+    public function __construct( $channel, $config ) {
         $this->channel = $channel;
         $this->config = $config;
     }
 
     public function log( $level, $message, array $context = [] ) {
-        if(in_array($this->channel, $this->config['logAllInGroup'])) {
+        if( in_array( $this->channel, $this->config[ 'logAllInGroup'] ) ) {
             $this->doLog( $level, $message, $context );
             return;
         }
-        if(in_array($this->channel, $this->config['logAllInGroupExceptDebug']) && $level !== 'debug') {
+        if( in_array( $this->channel, $this->config[ 'logAllInGroupExceptDebug' ] ) && $level !== 'debug' ) {
             $this->doLog( $level, $message, $context );
             return;
         }
-
-        if(in_array($this->channel, $this->config['ignoreAllInGroup'])) {
+        if( in_array( $this->channel, $this->config[ 'ignoreAllInGroup' ] ) ) {
             return;
         }
-        if(in_array($level, $this->config['ignoreLevels'])) {
+        if( in_array( $level, $this->config[ 'ignoreLevels' ] ) ) {
             return;
         }
-
-        $this->doLog($level, $message, $context);
+        $this->doLog( $level, $message, $context );
     }
 
     private function doLog( $level, $message, $context ) {
@@ -62,8 +72,6 @@ class CustomLogger extends AbstractLogger {
         if ( json_last_error() !== JSON_ERROR_NONE ) {
             $output = "[$level] " . LegacyLogger::format( $this->channel, $message, $context );
         }
-
         fwrite( STDERR, $output . PHP_EOL );
     }
-
 }
