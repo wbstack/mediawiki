@@ -89,11 +89,31 @@ RUN set -eux; \
 	{ \
 		echo '<Directory /var/www/html>'; \
 		echo '  RewriteEngine On'; \
+        # wikidata-like rewrite rules. "?" added everywhere but we are not sure why
+        echo '  RewriteRule ^/?entity/statement/(L\d+)-([SF]\d+)-(.*)$ /wiki/Special:EntityData/$1#$1-$2\$$3 [NE,R=303,L]';\
+        echo '  RewriteRule ^/?entity/statement/([QqPpL]\d+)-(.*)$ /wiki/Special:EntityData/$1#$1\$$2 [NE,R=303,L]';\
+        echo '  RewriteRule ^/?entity/statement/([QpPpLM]\d+) /wiki/Special:EntityData/$1 [R=303,L]';\
+        echo '  RewriteRule ^/?value/(.*)$ /wiki/Special:ListDatatypes [R=303,L]';\
+        echo '  RewriteRule ^/?reference/(.*)$ /wiki/Help:Sources [R=303,L]';\
+        echo '  RewriteRule ^/?prop/direct/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/direct-normalized/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/novalue/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/statement/value/(.*)$ }/wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/statement/value-normalized/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/qualifier/value/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/qualifier/value-normalized/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/reference/value/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/reference/value-normalized/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/statement/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/qualifier/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/reference/(.*)$ /wiki/Property:$1 [R=303,L]';\
+        echo '  RewriteRule ^/?prop/(.*)$ /wiki/Property:$1 [R=303,L]';\
+		# Enable Wikibase /entity/ redirects, per https://meta.wikimedia.org/wiki/Wikidata/Notes/URI_scheme \
+        echo '  RewriteRule ^/?entity/E(.*)$ /wiki/EntitySchema:E$1 [R=303,QSA,L]';\
+		echo '  RewriteRule ^/?entity/(.*)$ /wiki/Special:EntityData/$1 [R=303,QSA]'; \
 		# Enable Short URLs
 		echo '  RewriteRule ^/*$ %{DOCUMENT_ROOT}/w/index.php [L]'; \
 		echo '  RewriteRule ^/?wiki(/.*)?$ %{DOCUMENT_ROOT}/w/index.php [L]'; \
-		# Enable Wikibase /entity/ redirects, per https://meta.wikimedia.org/wiki/Wikidata/Notes/URI_scheme
-		echo '  RewriteRule ^/?entity/(.*)$ /wiki/Special:EntityData/$1 [R=303,QSA]'; \
 		echo '</Directory>'; \
 	} > "$APACHE_CONFDIR/conf-available/mediawiki.conf"; \
 	a2enconf mediawiki

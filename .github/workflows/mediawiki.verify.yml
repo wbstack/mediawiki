@@ -13,7 +13,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3.3.0
       - name: build docker
-        run: docker-compose up -d
+        run: docker compose up -d
       - name: Wait for server to accept connections
         uses: nick-invision/retry@v2
         with:
@@ -21,7 +21,7 @@ jobs:
           max_attempts: 100
           retry_wait_seconds: 5
           warning_on_retry: false
-          command: docker-compose logs mysql | grep "ready for connections" | wc -l | grep 2
+          command: docker compose logs mysql | grep "ready for connections" | wc -l | grep 2
 
       - run: curl -L -s -N "http://site1.localhost:8001/wiki/Main_Page" | grep -q "Main Page"
       - run: curl -L -s -N "http://site1.localhost:8001/w/api.php" | grep -q "Main module"
