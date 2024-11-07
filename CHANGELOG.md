@@ -1,6 +1,10 @@
 # mediawiki
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
+
+## 1.39-7.4-20241107-0
+- Remove Graph extension (#453)
+
 ## 1.39-7.4-20241101-0
 - Include rewrite rules present in the WMF config for wikidata
 
