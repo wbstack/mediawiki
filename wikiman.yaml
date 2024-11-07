@@ -92,8 +92,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-SecureLinkFixer
   - name: Echo
     repoName: wikimedia/mediawiki-extensions-Echo
-  - name: Graph
-    repoName: wikimedia/mediawiki-extensions-Graph
   - name: Poem
     repoName: wikimedia/mediawiki-extensions-Poem
   - name: TemplateData

@@ -754,28 +754,6 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
-- name: Graph
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Graph/zip/c42809e2aeb89e4ce6907fabbdefba2142cd93ff
-  artifactLevel: 1
-  destination: ./dist/extensions/Graph
-  remove:
-    - tests
-    - .github
-    - .stylelintignore
-    - .nvmrc
-    - .eslintignore
-    - .phan
-    - .storybook
-    - .vscode
-    - .gitignore
-    - .eslintrc.json
-    - .gitreview
-    - .phpcs.xml
-    - .stylelintrc.json
-    - .rubocop.yml
-    - .rubocop_todo.yml
-    - Gruntfile.js
-    - Doxyfile
 - name: Poem
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Poem/zip/0363845b702ae141289f284c25f1e3c173c9843c
   artifactLevel: 1

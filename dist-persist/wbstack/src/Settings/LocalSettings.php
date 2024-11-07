@@ -350,7 +350,6 @@ wfLoadExtension( 'CodeMirror' );
 wfLoadExtension( 'SecureLinkFixer' );
 wfLoadExtension( 'Echo' );
 wfLoadExtension( 'Thanks' );
-wfLoadExtension( 'Graph' );
 wfLoadExtension( 'Poem' );
 wfLoadExtension( 'TemplateData' );
 wfLoadExtension( 'AdvancedSearch' );
