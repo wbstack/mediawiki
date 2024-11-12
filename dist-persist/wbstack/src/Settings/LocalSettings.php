@@ -290,9 +290,11 @@ unset( $wgGroupsRemoveFromSelf['interface-admin'] );
 # Allow crats to editsitecss
 $wgGroupPermissions['bureaucrat']['editsitecss'] = true;
 
-# Disable user CSS and JS editing for now
-$wgGroupPermissions['user']['editmyusercss'] = false;
-$wgGroupPermissions['user']['editmyuserjs'] = false;
+$wgGroupPermissions['user']['editmyusercss'] = true;
+$wgGroupPermissions['user']['editmyuserjs'] = true;
+
+$wgAllowUserCss = true;
+$wgAllowUserJs = true;
 
 # Allow emailconfirmed to skip captcha
 $wgAutopromote['emailconfirmed'] = APCOND_EMAILCONFIRMED;
