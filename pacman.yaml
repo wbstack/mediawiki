@@ -1226,7 +1226,7 @@
     - Gruntfile.js
     - Doxyfile
 - name: VisualEditor
-  artifactUrl: https://extdist.wmflabs.org/dist/extensions/VisualEditor-REL1_39-00ed1d0.tar.gz
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/337ca7e216df2eeb0521f55b001d857a7cc9a5a7/visualeditor-1731406049-REL1_39.tar.gz
   artifactLevel: 1
   destination: ./dist/extensions/VisualEditor
   remove:
