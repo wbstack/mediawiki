@@ -602,6 +602,7 @@ if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     $wgLexemeEnableDataTransclusion = true;
 
     $wgWBRepoSettings['entitySources']['local']['entityNamespaces']['lexeme'] = '146/main';
+    $wgWBClientSettings['entitySources']['local']['entityNamespaces']['lexeme'] = '146/main';
 }
 # Federated Properties, By default not enabled, not enabled in maint mode
 if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {

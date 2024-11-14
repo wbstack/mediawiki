@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+## 1.39-7.4-20241112-0
+- Fix lexeme data transclusion returns 'nil' (#456)
+
 ## 1.39-7.4-20241107-0
 - Remove Graph extension (#453)
 
