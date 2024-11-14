@@ -428,6 +428,14 @@ wfLoadExtension( 'TwoColConflict' );
 // Enable the feature by default
 $wgTwoColConflictBetaFeature = false;
 
+# VisualEditor
+wfLoadExtension( 'VisualEditor' );
+wfLoadExtension( 'Parsoid', "$IP/vendor/wikimedia/parsoid/extension.json" );
+$wgVirtualRestConfig[ 'modules' ][ 'parsoid' ] = array(
+    'url' => $wgServer . $wgScriptPath . '/rest.php'
+);
+$wgDefaultUserOptions[ 'visualeditor-editor' ] = 'visualeditor';
+
 # StopForumSpam
 wfLoadExtension( 'StopForumSpam' );
 

@@ -171,6 +171,8 @@ extensions:
   # We were using v2.9.0 before this
   - name: EmbedVideo
     url: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
+  - name: VisualEditor
+    url: https://github.com/wbstack/mediawiki-tars/raw/337ca7e216df2eeb0521f55b001d857a7cc9a5a7/visualeditor-1731406049-REL1_39.tar.gz
 
 skins:
   - name: Vector

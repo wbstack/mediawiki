@@ -1225,6 +1225,28 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
+- name: VisualEditor
+  artifactUrl: https://github.com/wbstack/mediawiki-tars/raw/337ca7e216df2eeb0521f55b001d857a7cc9a5a7/visualeditor-1731406049-REL1_39.tar.gz
+  artifactLevel: 1
+  destination: ./dist/extensions/VisualEditor
+  remove:
+    - tests
+    - .github
+    - .stylelintignore
+    - .nvmrc
+    - .eslintignore
+    - .phan
+    - .storybook
+    - .vscode
+    - .gitignore
+    - .eslintrc.json
+    - .gitreview
+    - .phpcs.xml
+    - .stylelintrc.json
+    - .rubocop.yml
+    - .rubocop_todo.yml
+    - Gruntfile.js
+    - Doxyfile
 - name: Vector
   artifactUrl: https://codeload.github.com/wikimedia/Vector/zip/ea87ff5466e5521fc7023f44dea3c7b494e37fd0
   artifactLevel: 1

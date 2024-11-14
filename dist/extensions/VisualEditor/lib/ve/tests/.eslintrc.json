@@ -1,0 +1,21 @@
+{
+	"root": true,
+	"extends": [
+		"wikimedia/client-es6",
+		"wikimedia/jquery",
+		"wikimedia/mediawiki",
+		"wikimedia/jsduck",
+		"wikimedia/qunit"
+	],
+	"globals": {
+		"ve": "readonly",
+		"OO": "readonly"
+	},
+	"rules": {
+		"max-len": "off",
+		"no-var": "off",
+		"compat/compat": [ "error", "last 2 chrome versions, last 2 firefox versions" ],
+		"no-jquery/no-class-state": "off",
+		"no-jquery/no-parse-html-literal": "off"
+	}
+}
