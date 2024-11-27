@@ -36,6 +36,8 @@ services:
 
       - MW_REDIS_SERVER_READ=redis.svc
       - MW_REDIS_SERVER_WRITE=redis.svc
+      - MW_REDIS_CACHE_SERVER_READ=redis.svc
+      - MW_REDIS_CACHE_SERVER_WRITE=redis.svc
       - MW_REDIS_PASSWORD=
 
     volumes:

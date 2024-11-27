@@ -15,7 +15,7 @@ $wgParserCacheType = 'db-replicated'; // 'db-replicated' is defined in LocalSett
 // TODO we probably do want a redis connection in some maint scripts...
 if(!$wwDomainIsMaintenance) {
     /** @see RedisBagOStuff for a full explanation of these options. **/
-    $wgMainCacheType = 'redis';
+    $wgMainCacheType = 'redis2'; // See: T380448
     $wgSessionCacheType = 'redis';
     $wgObjectCaches['redis'] = [
         'class' => 'ReplicatedBagOStuff',
@@ -31,6 +31,25 @@ if(!$wwDomainIsMaintenance) {
             'args'  => [ [
                 'class' => 'RedisBagOStuff',
                 'servers' => [ getenv('MW_REDIS_SERVER_WRITE') ]
+            ] ]
+        ],
+        'loggroup'  => 'RedisBagOStuff',
+        'reportDupes' => false
+    ];
+    $wgObjectCaches['redis2'] = [
+        'class' => 'ReplicatedBagOStuff',
+        'readFactory' => [
+            'factory' => [ 'ObjectCache', 'newFromParams' ],
+            'args'  => [ [
+                'class' => 'RedisBagOStuff',
+                'servers' => [ getenv('MW_REDIS_CACHE_SERVER_READ') ]
+            ] ]
+        ],
+        'writeFactory' => [
+            'factory' => [ 'ObjectCache', 'newFromParams' ],
+            'args'  => [ [
+                'class' => 'RedisBagOStuff',
+                'servers' => [ getenv('MW_REDIS_CACHE_SERVER_WRITE') ]
             ] ]
         ],
         'loggroup'  => 'RedisBagOStuff',
