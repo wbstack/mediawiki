@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+# 1.39-7.4-20241128-0
+- Fix missing password for second redis cluster
+
 # 1.39-7.4-20241127-0
 - Add parameters for second redis cluster
 
