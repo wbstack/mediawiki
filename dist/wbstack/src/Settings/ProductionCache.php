@@ -62,7 +62,7 @@ if(!$wwDomainIsMaintenance) {
         $wgObjectCaches['redis']['readFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
         $wgObjectCaches['redis']['writeFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
         $wgObjectCaches['redis2']['readFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
-        $wgObjectCaches['redis2']['writeFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD')
+        $wgObjectCaches['redis2']['writeFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
     }
 }
 
