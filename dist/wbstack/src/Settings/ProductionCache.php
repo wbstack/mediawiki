@@ -17,6 +17,7 @@ if(!$wwDomainIsMaintenance) {
     /** @see RedisBagOStuff for a full explanation of these options. **/
     $wgMainCacheType = 'redis2'; // See: T380448
     $wgSessionCacheType = 'redis';
+    // NOTE Passwords are set further down in config
     $wgObjectCaches['redis'] = [
         'class' => 'ReplicatedBagOStuff',
         'readFactory' => [
@@ -60,6 +61,8 @@ if(!$wwDomainIsMaintenance) {
         // TODO do this optional password setting in a less evil way...
         $wgObjectCaches['redis']['readFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
         $wgObjectCaches['redis']['writeFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
+        $wgObjectCaches['redis2']['readFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
+        $wgObjectCaches['redis2']['writeFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
     }
 }
 
