@@ -173,7 +173,7 @@ $wgLogos = [
 if( $wgLogos["1x"] === null ) {
     // Fallback to the mediawiki logo without the wgLogo overlay
     $wgLogos = [
-        "1x" => "https://upload.wikimedia.org/wikipedia/commons/a/a1/Wikibase_Logo_%E2%80%93_symbol.svg",
+        "1x" => "/w/resources/assets/wikibase_logo.png",
     ];
 }
 
@@ -196,6 +196,11 @@ $wgFooterIcons = [
         "copyright" => [], // placeholder for the built in copyright icon
     ],
     "poweredby" => [
+        "mediawiki" => [
+            "src" => "/w/resources/assets/poweredby_mediawiki_88x31.png",
+            "url" => "https://www.mediawiki.org/",
+            "alt" => "Powered by MediaWiki",
+        ],
         "wbstack" => [
             "src" => "/w/resources/assets/poweredby_wbstack_88x31.png",
             "url" => "https://wbstack.com/",
@@ -205,11 +210,6 @@ $wgFooterIcons = [
             "src" => "/w/resources/assets/poweredby_wikibase_88x31.png",
             "url" => "https://wikiba.se/",
             "alt" => "Powered by Wikibase",
-        ],
-        "mediawiki" => [
-            "src" => "/w/resources/assets/poweredby_mediawiki_88x31.png",
-            "url" => "https://www.mediawiki.org/",
-            "alt" => "Powered by MediaWiki",
         ]
     ],
 ];

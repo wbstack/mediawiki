@@ -173,7 +173,7 @@ $wgLogos = [
 if( $wgLogos["1x"] === null ) {
     // Fallback to the mediawiki logo without the wgLogo overlay
     $wgLogos = [
-        "1x" => "https://upload.wikimedia.org/wikipedia/commons/a/a1/Wikibase_Logo_%E2%80%93_symbol.svg",
+        "1x" => "/w/resources/assets/wikibase_logo.png",
     ];
 }
 
