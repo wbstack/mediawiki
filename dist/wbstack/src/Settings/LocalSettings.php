@@ -196,11 +196,6 @@ $wgFooterIcons = [
         "copyright" => [], // placeholder for the built in copyright icon
     ],
     "poweredby" => [
-        "mediawiki" => [
-            "src" => "/w/resources/assets/poweredby_mediawiki_88x31.png",
-            "url" => "https://www.mediawiki.org/",
-            "alt" => "Powered by MediaWiki",
-        ],
         "wbstack" => [
             "src" => "/w/resources/assets/poweredby_wbstack_88x31.png",
             "url" => "https://wbstack.com/",
@@ -210,6 +205,11 @@ $wgFooterIcons = [
             "src" => "/w/resources/assets/poweredby_wikibase_88x31.png",
             "url" => "https://wikiba.se/",
             "alt" => "Powered by Wikibase",
+        ],
+        "mediawiki" => [
+            "src" => "/w/resources/assets/poweredby_mediawiki_88x31.png",
+            "url" => "https://www.mediawiki.org/",
+            "alt" => "Powered by MediaWiki",
         ]
     ],
 ];
