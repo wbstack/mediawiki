@@ -108,6 +108,8 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-MultimediaViewer
   - name: Auth_remoteuser
     repoName: wikimedia/mediawiki-extensions-Auth_remoteuser
+  - name: WikibaseQualityConstraints
+    repoName: wikimedia/mediawiki-extensions-WikibaseQualityConstraints
   - name: WikibaseManifest
     repoName: wikimedia/mediawiki-extensions-WikibaseManifest
     remove:
