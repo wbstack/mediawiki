@@ -60,7 +60,7 @@ class FixedIndentingDumper(yaml.Dumper):
     def increase_indent(self, flow=False, indentless=False):
         return super().increase_indent(flow, False)
 
-default_branch = get_mediawiki_branch_from_version(mediawiki_version)
+default_branch = get_mediawiki_branch_from_version(mediawiki_version) # pylint: disable-msg=C0103
 remove_from_all = codebases.get('removeFromAll', [])
 output: List[Dict] = [make_artifact_entry({
     'name': 'mediawiki',
