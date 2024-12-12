@@ -2,6 +2,10 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+# 1.39-7.4-20241212-0
+- Update default MediaWiki logo (#421)
+- Update footer badges (#464, #466)
+
 # 1.39-7.4-20241128-0
 - Fix missing password for second redis cluster
 
