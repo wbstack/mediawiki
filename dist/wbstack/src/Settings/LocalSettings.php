@@ -214,6 +214,21 @@ $wgFooterIcons = [
     ],
 ];
 
+// Custom CSS styling
+$styles = [];
+if ( version_compare( MW_VERSION, '1.43', '<' ) ) {
+    array_push( $styles, 'footer-badges.css' );
+}
+$wgResourceModules[ 'wbstack.styling' ] = array(
+    'styles' => $styles,
+    'localBasePath' => "$IP/wbstack/src/Styling",
+    'remoteBasePath' => "$wgScriptPath/wbstack/src/Styling"
+);
+$wgHooks[ 'BeforePageDisplay' ][] = 'onBeforePageDisplay';
+function onBeforePageDisplay( &$out, &$skin ) {
+    $out->addModuleStyles( [ 'wbstack.styling' ] );
+}
+
 // Language
 // TODO this should be settings from the main platform
 $wgLanguageCode = "en";
