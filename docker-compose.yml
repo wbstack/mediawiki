@@ -21,6 +21,7 @@ services:
     environment:
 
       - WBSTACK_LOAD_MW_INTERNAL=yes # THIS is normally hidden
+      - WBSTACK_DOCKER_COMPOSE=yes
       - PLATFORM_API_BACKEND_HOST=api.svc
 
       - MW_DB_SERVER_MASTER=mysql.svc:3306
