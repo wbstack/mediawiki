@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+# 1.39-7.4-20250115-0
+- Add Shape Expression Validator URL to EntitySchema (#469)
+
 # 1.39-7.4-20241212-0
 - Update default MediaWiki logo (#421)
 - Update footer badges (#464, #466)
