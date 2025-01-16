@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+# 1.39-7.4-20250116-0
+- Assume `https://` only in docker-compose setup
+
 # 1.39-7.4-20250115-0
 - Add Shape Expression Validator URL to EntitySchema (#469)
 
