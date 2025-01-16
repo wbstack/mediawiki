@@ -716,6 +716,9 @@ if ( $wikiInfo->getSetting( 'wwExtEnableElasticSearch' ) ) {
     $wgCirrusSearchEnableArchive = false;
     $wgCirrusSearchPrivateClusters = [ 'non-existing-cluster' ];
 
+    // T312908
+    $wgEntitySchemaShExSimpleUrl = 'https://shex-simple.toolforge.org/wikidata/packages/shex-webapp/doc/shex-simple.html';
+
     function getElasticClusterConfig( string $prefix ) {
         $config = [
             'host' => getenv( $prefix . 'HOST' ),
