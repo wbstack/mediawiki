@@ -79,14 +79,14 @@ jobs:
         name: Truncate commit message
         id: truncate-commit-message
         run: |
-          MSG=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
+          MSG=$(git log -1 --pretty=format:%s)
           echo "msg=$MSG" >> $GITHUB_OUTPUT
       -
         uses: peter-evans/create-pull-request@v4
         with:
           path: ./repos/wbaas-deploy-staging
-          commit-message: 'Staging+Local: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
-          title: 'Staging+Local: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
+          commit-message: 'Staging+Local: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
+          title: 'Staging+Local: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
           branch: deploy-to-staging-${{ steps.update-values.outputs.tag }}
           committer: wmdebot <github-bots@wikimedia.de>
           author: wmdebot <github-bots@wikimedia.de>
@@ -100,8 +100,8 @@ jobs:
         uses: peter-evans/create-pull-request@v4
         with:
           path: ./repos/wbaas-deploy-production
-          commit-message: 'Production: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
-          title: 'Production: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
+          commit-message: 'Production: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
+          title: 'Production: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
           branch: deploy-to-production-${{ steps.update-values.outputs.tag }}
           committer: wmdebot <github-bots@wikimedia.de>
           author: wmdebot <github-bots@wikimedia.de>
