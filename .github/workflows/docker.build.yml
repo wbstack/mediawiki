@@ -38,7 +38,6 @@ jobs:
       -
         name: Login to GitHub Container Registry
         uses: docker/login-action@v2.1.0
-        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -52,26 +51,23 @@ jobs:
           platforms: linux/amd64
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,mode=max,dest=/tmp/.buildx-cache
-          push: ${{ github.event_name != 'pull_request' }}
+          push: true
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
       -
         name: Check out `wmde/wbaas-deploy` repository in staging child directory
-        if: github.event_name != 'pull_request'
         uses: actions/checkout@v3.3.0
         with:
           repository: wmde/wbaas-deploy
           path: ./repos/wbaas-deploy-staging
       -
         name: Check out `wmde/wbaas-deploy` repository in production child directory
-        if: github.event_name != 'pull_request'
         uses: actions/checkout@v3.3.0
         with:
           repository: wmde/wbaas-deploy
           path: ./repos/wbaas-deploy-production
       -
         name: Update values for local, staging and production
-        if: github.event_name != 'pull_request'
         id: update-values
         run: |
           TAG="$(echo ${{ steps.docker_meta.outputs.tags }} | cut -d':' -f2)"
@@ -81,14 +77,12 @@ jobs:
           sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-production/k8s/helmfile/env/production/mediawiki-139.values.yaml.gotmpl
       -
         name: Truncate commit message
-        if: github.event_name != 'pull_request'
         id: truncate-commit-message
         run: |
           MSG=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
           echo "msg=$MSG" >> $GITHUB_OUTPUT
       -
         uses: peter-evans/create-pull-request@v4
-        if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-staging
           commit-message: 'Staging+Local: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
@@ -104,7 +98,6 @@ jobs:
             **Changes**: [${{ steps.truncate-commit-message.outputs.msg }}](https://github.com/wbstack/mediawiki/commit/${{ github.sha }})
       -
         uses: peter-evans/create-pull-request@v4
-        if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-production
           commit-message: 'Production: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
