@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - 'main'
-    tags:
-      - '*'
   pull_request:
 
 jobs:
@@ -21,6 +19,8 @@ jobs:
         uses: crazy-max/ghaction-docker-meta@v4.0.1
         with:
           images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v2.2.0
@@ -55,32 +55,23 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
-
-      -
-        name: Check whether wbaas-deploy should be updated
-        id: update-check
-        run: |
-          if [[ "$GITHUB_REF" =~ ^refs/tags/.+$ ]]; then
-              echo "This is a tagged release, will try to create an update in wbaas-deploy."
-              echo "match=true" >> $GITHUB_OUTPUT
-          fi
       -
         name: Check out `wmde/wbaas-deploy` repository in staging child directory
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v3.3.0
         with:
           repository: wmde/wbaas-deploy
           path: ./repos/wbaas-deploy-staging
       -
         name: Check out `wmde/wbaas-deploy` repository in production child directory
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         uses: actions/checkout@v3.3.0
         with:
           repository: wmde/wbaas-deploy
           path: ./repos/wbaas-deploy-production
       -
         name: Update values for local, staging and production
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         id: update-values
         run: |
           TAG="$GITHUB_REF_NAME"
@@ -90,14 +81,14 @@ jobs:
           sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-production/k8s/helmfile/env/production/mediawiki-139.values.yaml.gotmpl
       -
         name: Truncate commit message
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         id: truncate-commit-message
         run: |
           MSG=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
           echo "msg=$MSG" >> $GITHUB_OUTPUT
       -
         uses: peter-evans/create-pull-request@v4
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-staging
           commit-message: 'Staging+Local: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
@@ -113,7 +104,7 @@ jobs:
             **Changes**: [${{ steps.truncate-commit-message.outputs.msg }}](https://github.com/wbstack/mediawiki/commit/${{ github.sha }})
       -
         uses: peter-evans/create-pull-request@v4
-        if: steps.update-check.outputs.match == 'true'
+        if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-production
           commit-message: 'Production: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
