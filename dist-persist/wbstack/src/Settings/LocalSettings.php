@@ -29,7 +29,6 @@ $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
 $wwLocalization = new Localization( $wgExtensionMessagesFiles, $wgMessagesDirs, $wgBaseDirectory, $wwIsLocalisationRebuild );
-$wwDockerCompose = getenv('WBSTACK_DOCKER_COMPOSE') === 'yes';
 
 $wwUseMailgunExtension = true; // default for wbstack
 if (getenv('MW_MAILGUN_DISABLED') === 'yes') {
@@ -94,7 +93,7 @@ if ( getenv('MW_LOG_TO_STDERR') === 'yes' ) {
     ];
 }
 
-if ( $wwDockerCompose ) {
+if ( $wwDomainSaysLocal ) {
     $wgServer = "http://" . $wikiInfo->domain;
 } else {
     $wgServer = "https://" . $wikiInfo->domain;
@@ -325,6 +324,8 @@ $wgGroupPermissions['platform']['mwoauthproposeconsumer'] = true;
 $wgGroupPermissions['platform']['mwoauthmanageconsumer'] = true;
 $wgGroupPermissions['platform']['mwoauthviewprivate'] = true;
 $wgGroupPermissions['platform']['mwoauthupdateownconsumer'] = true;
+$wgOAuth2PrivateKey = '/mediawiki/jwtRS256.key';
+$wgOAuth2PublicKey = '/mediawiki/jwtRS256.key.pub';
 
 #######################################
 ## ---          Skins            --- ##
