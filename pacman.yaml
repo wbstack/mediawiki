@@ -266,8 +266,8 @@
     - Gruntfile.js
     - Doxyfile
   patchUrls:
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~908801/revisions/2/patch?download
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~951473/revisions/1/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~1120939/revisions/2/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseCirrusSearch~1120941/revisions/1/patch?download
 - name: WikibaseLexemeCirrusSearch
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexemeCirrusSearch/zip/242d23e0335f9e6128b9959b81f08d0f3113736c
   artifactLevel: 1
@@ -291,7 +291,7 @@
     - Gruntfile.js
     - Doxyfile
   patchUrls:
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexemeCirrusSearch~908803/revisions/1/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibaseLexemeCirrusSearch~1120949/revisions/1/patch?download
 - name: UniversalLanguageSelector
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-UniversalLanguageSelector/zip/2438e94c1e9b304b2668feb42ba293460d7ded0b
   artifactLevel: 1
@@ -1175,7 +1175,7 @@
     - lib/.storybook
     - lib/.vscode
   patchUrls:
-    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~951472/revisions/1/patch?download
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~1120952/revisions/1/patch?download
 - name: StopForumSpam
   artifactUrl: https://github.com/wikimedia/mediawiki-extensions-StopForumSpam/archive/5e3aab6e8be0e8effa97f9b454020230b6a70e3d.zip
   artifactLevel: 1
