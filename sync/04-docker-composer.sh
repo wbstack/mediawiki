@@ -18,7 +18,7 @@ composer_in_docker () {
   docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v "$COMPOSER_WORK_DIR":/app \
   --volume "$SCRIPT_COMPOSER_CACHE":/tmp/cache \
   --entrypoint composer -w /app \
-  docker-registry.wikimedia.org/releng/composer-package-php74:0.3.0-s7 "$@"
+  docker-registry.wikimedia.org/releng/composer-package-php81:8.1.30-s1 "$@"
 }
 
 COMPOSER_WORK_DIR=$(mktemp -d -p "$DIR")
