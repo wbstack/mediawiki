@@ -2,8 +2,8 @@
 
 namespace Wikibase\Lib\Sites;
 
-use Site;
-use SiteStore;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteStore;
 
 /**
  * Builds the site identifiers table
@@ -87,7 +87,7 @@ class SitesBuilder {
 	 * @param Site[] $sites
 	 * @param string $wikiId
 	 *
-	 * @return string
+	 * @return string|null
 	 */
 	private function getInterwikiGroup( array $sites, $wikiId ) {
 		if ( !array_key_exists( $wikiId, $sites ) ) {

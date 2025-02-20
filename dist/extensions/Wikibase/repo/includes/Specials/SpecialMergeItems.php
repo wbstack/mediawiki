@@ -1,18 +1,20 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Specials;
 
 use Exception;
-use Html;
-use HTMLForm;
-use Message;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Message\Message;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
-use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\UserInputException;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\Interactors\ItemMergeException;
 use Wikibase\Repo\Interactors\ItemMergeInteractor;
 use Wikibase\Repo\Interactors\TokenCheckInteractor;
@@ -27,45 +29,32 @@ use Wikibase\Repo\Localizer\ExceptionLocalizer;
  */
 class SpecialMergeItems extends SpecialWikibasePage {
 
-	/**
-	 * @var EntityIdParser
-	 */
-	private $idParser;
-
-	/**
-	 * @var ExceptionLocalizer
-	 */
-	private $exceptionLocalizer;
-
-	/**
-	 * @var ItemMergeInteractor
-	 */
-	private $interactor;
-
-	/**
-	 * @var EntityTitleLookup
-	 */
-	private $titleLookup;
-
-	/**
-	 * @var TokenCheckInteractor
-	 */
-	private $tokenCheck;
+	private AnonymousEditWarningBuilder $anonymousEditWarningBuilder;
+	private EntityIdParser $idParser;
+	private ExceptionLocalizer $exceptionLocalizer;
+	private ItemMergeInteractor $interactor;
+	private EntityTitleLookup $titleLookup;
+	private TokenCheckInteractor $tokenCheck;
+	private bool $isMobileView;
 
 	public function __construct(
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		EntityIdParser $idParser,
 		EntityTitleLookup $titleLookup,
 		ExceptionLocalizer $exceptionLocalizer,
 		ItemMergeInteractor $interactor,
+		bool $isMobileView,
 		TokenCheckInteractor $tokenCheck
 	) {
 		parent::__construct( 'MergeItems', 'item-merge' );
 
+		$this->anonymousEditWarningBuilder = $anonymousEditWarningBuilder;
 		$this->idParser = $idParser;
 		$this->exceptionLocalizer = $exceptionLocalizer;
 		$this->interactor = $interactor;
 		$this->titleLookup = $titleLookup;
 		$this->tokenCheck = $tokenCheck;
+		$this->isMobileView = $isMobileView;
 	}
 
 	public function doesWrites() {
@@ -73,12 +62,9 @@ class SpecialMergeItems extends SpecialWikibasePage {
 	}
 
 	/**
-	 * @param string $name
-	 *
-	 * @return ItemId|null
 	 * @throws UserInputException
 	 */
-	private function getItemIdParam( $name ) {
+	private function getItemIdParam( string $name ): ?ItemId {
 		$rawId = $this->getTextParam( $name );
 
 		if ( $rawId === '' ) {
@@ -106,13 +92,13 @@ class SpecialMergeItems extends SpecialWikibasePage {
 		}
 	}
 
-	private function getStringListParam( $name ) {
+	private function getStringListParam( string $name ): array {
 		$list = $this->getTextParam( $name );
 
 		return $list === '' ? [] : explode( '|', $list );
 	}
 
-	private function getTextParam( $name ) {
+	private function getTextParam( string $name ): string {
 		return trim( $this->getRequest()->getText( $name, '' ) );
 	}
 
@@ -139,7 +125,14 @@ class SpecialMergeItems extends SpecialWikibasePage {
 			$summary = $this->getTextParam( 'summary' );
 
 			if ( $fromId && $toId ) {
-				$this->mergeItems( $fromId, $toId, $ignoreConflicts, $summary );
+				$success = $this->getStringListParam( 'success' );
+				if ( count( $success ) === 2 && ctype_digit( $success[0] ) && ctype_digit( $success[1] ) ) {
+					// redirected back here after a successful edit + temp user, show success now
+					// (the success may be inaccurate if users created this URL manually, but that’s harmless)
+					$this->showSuccess( $fromId, $toId, (int)$success[0], (int)$success[1] );
+				} else {
+					$this->mergeItems( $fromId, $toId, $ignoreConflicts, $summary );
+				}
 			}
 		} catch ( ItemMergeException $ex ) {
 			if ( $ex->getPrevious() instanceof UnresolvedEntityRedirectException ) {
@@ -154,14 +147,15 @@ class SpecialMergeItems extends SpecialWikibasePage {
 		$this->createForm();
 	}
 
-	protected function showExceptionMessage( Exception $ex ) {
+	protected function showExceptionMessage( Exception $ex ): void {
 		$msg = $this->exceptionLocalizer->getExceptionMessage( $ex );
 
 		$this->showErrorHTML( $msg->parse() );
 
 		// Report chained exceptions recursively
-		if ( $ex->getPrevious() ) {
-			$this->showExceptionMessage( $ex->getPrevious() );
+		$previousEx = $ex->getPrevious();
+		if ( $previousEx ) {
+			$this->showExceptionMessage( $previousEx );
 		}
 	}
 
@@ -171,17 +165,38 @@ class SpecialMergeItems extends SpecialWikibasePage {
 	 * @param string[] $ignoreConflicts
 	 * @param string $summary
 	 */
-	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, $summary ) {
+	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, $summary ): void {
 		$this->tokenCheck->checkRequestToken( $this->getContext(), 'wpEditToken' );
+
+		$status = $this->interactor->mergeItems( $fromId, $toId, $this->getContext(), $ignoreConflicts, $summary );
+		$newRevisionFromId = $status->getFromEntityRevision()->getRevisionId();
+		$newRevisionToId = $status->getToEntityRevision()->getRevisionId();
+		$savedTempUser = $status->getSavedTempUser();
+		if ( $savedTempUser !== null ) {
+			$redirectUrl = '';
+			$this->getHookRunner()->onTempUserCreatedRedirect(
+				$this->getRequest()->getSession(),
+				$savedTempUser,
+				$this->getPageTitle()->getPrefixedDBkey(),
+				"fromid={$fromId->getSerialization()}&toid={$toId->getSerialization()}" .
+					"&success=$newRevisionFromId|$newRevisionToId",
+				'',
+				$redirectUrl
+			);
+			if ( $redirectUrl ) {
+				$this->getOutput()->redirect( $redirectUrl );
+				return; // success will be shown when returning here from redirect
+			}
+		}
+
+		$this->showSuccess( $fromId, $toId, $newRevisionFromId, $newRevisionToId );
+	}
+
+	private function showSuccess( ItemId $fromId, ItemId $toId, int $newRevisionFromId, int $newRevisionToId ): void {
+		$linkRenderer = $this->getLinkRenderer();
 		$fromTitle = $this->titleLookup->getTitleForId( $fromId );
 		$toTitle = $this->titleLookup->getTitleForId( $toId );
 
-		/** @var EntityRevision $newRevisionFrom */
-		/** @var EntityRevision $newRevisionTo */
-		list( $newRevisionFrom, $newRevisionTo, )
-			= $this->interactor->mergeItems( $fromId, $toId, $this->getContext(), $ignoreConflicts, $summary );
-
-		$linkRenderer = $this->getLinkRenderer();
 		$this->getOutput()->addWikiMsg(
 			'wikibase-mergeitems-success',
 			Message::rawParam(
@@ -193,39 +208,39 @@ class SpecialMergeItems extends SpecialWikibasePage {
 					[ 'redirect' => 'no' ]
 				)
 			),
-			$newRevisionFrom->getRevisionId(),
+			$newRevisionFromId,
 			Message::rawParam(
 				$linkRenderer->makeKnownLink(
 					$toTitle,
 					$toId->getSerialization()
 				)
 			),
-			$newRevisionTo->getRevisionId()
+			$newRevisionToId
 		);
 	}
 
 	/**
 	 * Creates the HTML form for merging two items.
 	 */
-	protected function createForm() {
-		$this->getOutput()->addModules( 'wikibase.special.mergeItems' );
+	protected function createForm(): void {
+		// T324991
+		if ( !$this->isMobileView ) {
+			$this->getOutput()->addModules( 'wikibase.special.mergeItems' );
+		}
 
 		$pre = '';
 		if ( !$this->getUser()->isRegistered() ) {
 			$pre = Html::rawElement(
 				'p',
 				[ 'class' => 'warning' ],
-				$this->msg(
-					'wikibase-anonymouseditwarning',
-					$this->msg( 'wikibase-entity-item' )->text()
-				)->parse()
+				$this->anonymousEditWarningBuilder->buildAnonymousEditWarningHTML( $this->getFullTitle()->getPrefixedText() )
 			);
 		}
 
 		HTMLForm::factory( 'ooui', $this->getFormElements(), $this->getContext() )
 			->setId( 'wb-mergeitems-form1' )
-			->setPreText( $pre )
-			->setHeaderText( $this->msg( 'wikibase-mergeitems-intro' )->parse() )
+			->setPreHtml( $pre )
+			->setHeaderHtml( $this->msg( 'wikibase-mergeitems-intro' )->parse() )
 			->setSubmitID( 'wb-mergeitems-submit' )
 			->setSubmitName( 'wikibase-mergeitems-submit' )
 			->setSubmitTextMsg( 'wikibase-mergeitems-submit' )
@@ -237,22 +252,22 @@ class SpecialMergeItems extends SpecialWikibasePage {
 	/**
 	 * @return array[]
 	 */
-	protected function getFormElements() {
+	protected function getFormElements(): array {
 		return [
 			'fromid' => [
 				'name' => 'fromid',
 				'default' => $this->getRequest()->getVal( 'fromid' ),
 				'type' => 'text',
 				'id' => 'wb-mergeitems-fromid',
-				'label-message' => 'wikibase-mergeitems-fromid'
+				'label-message' => 'wikibase-mergeitems-fromid',
 			],
 			'toid' => [
 				'name' => 'toid',
 				'default' => $this->getRequest()->getVal( 'toid' ),
 				'type' => 'text',
 				'id' => 'wb-mergeitems-toid',
-				'label-message' => 'wikibase-mergeitems-toid'
-			]
+				'label-message' => 'wikibase-mergeitems-toid',
+			],
 		];
 		// TODO: Selector for ignoreconflicts
 	}

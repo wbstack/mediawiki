@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface SpecialCharacterDialog class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -17,9 +17,7 @@ ve.ui.SpecialCharacterDialog = function VeUiSpecialCharacterDialog() {
 	// Parent constructor
 	ve.ui.SpecialCharacterDialog.super.apply( this, arguments );
 
-	this.characters = null;
-	this.$buttonDomList = null;
-	this.categories = null;
+	this.characterListLoaded = false;
 
 	this.$element.addClass( 've-ui-specialCharacterDialog' );
 };
@@ -52,6 +50,14 @@ ve.ui.SpecialCharacterDialog.static.handlesSource = true;
 ve.ui.SpecialCharacterDialog.prototype.initialize = function () {
 	// Parent method
 	ve.ui.SpecialCharacterDialog.super.prototype.initialize.call( this );
+
+	this.characterListLayout = new ve.ui.SymbolListBookletLayout();
+	this.characterListLayout.connect( this, {
+		choose: 'onCharacterListChoose'
+	} );
+	// Character list is lazy-loaded the first time getSetupProcess runs
+
+	this.$body.append( this.characterListLayout.$element );
 };
 
 /**
@@ -60,20 +66,22 @@ ve.ui.SpecialCharacterDialog.prototype.initialize = function () {
 ve.ui.SpecialCharacterDialog.prototype.getSetupProcess = function ( data ) {
 	data = data || {};
 	return ve.ui.SpecialCharacterDialog.super.prototype.getSetupProcess.call( this, data )
-		.next( function () {
-			var inspector = this;
-
+		.next( () => {
 			this.surface = data.surface;
 			this.surface.getModel().connect( this, { contextChange: 'onContextChange' } );
 
-			if ( !this.characters ) {
-				return ve.init.platform.fetchSpecialCharList()
-					.then( function ( specialChars ) {
-						inspector.characters = specialChars;
-						inspector.buildButtonList();
+			this.characterListLayout.$element.toggleClass( 've-ui-specialCharacterDialog-characterList-source', this.surface.getMode() === 'source' );
+
+			if ( !this.characterListLoaded ) {
+				this.characterListLoaded = true;
+
+				ve.init.platform.fetchSpecialCharList()
+					.then( ( symbolData ) => {
+						this.characterListLayout.setSymbolData( symbolData );
+						this.updateSize();
 					} );
 			}
-		}, this );
+		} );
 };
 
 /**
@@ -82,10 +90,10 @@ ve.ui.SpecialCharacterDialog.prototype.getSetupProcess = function ( data ) {
 ve.ui.SpecialCharacterDialog.prototype.getTeardownProcess = function ( data ) {
 	data = data || {};
 	return ve.ui.SpecialCharacterDialog.super.prototype.getTeardownProcess.call( this, data )
-		.first( function () {
+		.first( () => {
 			this.surface.getModel().disconnect( this );
 			this.surface = null;
-		}, this );
+		} );
 };
 
 /**
@@ -93,24 +101,31 @@ ve.ui.SpecialCharacterDialog.prototype.getTeardownProcess = function ( data ) {
  */
 ve.ui.SpecialCharacterDialog.prototype.getReadyProcess = function ( data ) {
 	return ve.ui.SpecialCharacterDialog.super.prototype.getReadyProcess.call( this, data )
-		.next( function () {
+		.next( () => {
+			const surface = this.surface;
 			// The dialog automatically receives focus after opening, move it back to the surface.
 			// (Make sure an existing selection is preserved. Why does focus() reset the selection? 🤦)
-			var previousSelection = this.surface.getModel().getSelection();
-			this.surface.getView().focus();
-			if ( !previousSelection.isNull() ) {
-				this.surface.getModel().setSelection( previousSelection );
-			}
-		}, this );
+			const previousSelection = surface.getModel().getSelection();
+			// On deactivated surfaces (e.g. those using nullSelectionOnBlur), the native selection is
+			// removed after a setTimeout to fix a bug in iOS (T293661, in ve.ce.Surface#deactivate).
+			// Ensure that we restore the selection **after** this happens, otherwise the surface will
+			// get re-blurred. (T318720)
+			setTimeout( () => {
+				surface.getView().focus();
+				if ( !previousSelection.isNull() ) {
+					surface.getModel().setSelection( previousSelection );
+				}
+			} );
+		} );
 };
 
 /**
  * @inheritdoc
  */
 ve.ui.SpecialCharacterDialog.prototype.getActionProcess = function ( action ) {
-	return new OO.ui.Process( function () {
+	return new OO.ui.Process( () => {
 		this.close( { action: action } );
-	}, this );
+	} );
 };
 
 /**
@@ -121,44 +136,12 @@ ve.ui.SpecialCharacterDialog.prototype.onContextChange = function () {
 };
 
 /**
- * Builds the button DOM list based on the character list
- */
-ve.ui.SpecialCharacterDialog.prototype.buildButtonList = function () {
-	this.bookletLayout = new OO.ui.BookletLayout( {
-		outlined: true,
-		continuous: true
-	} );
-	this.pages = [];
-	for ( var category in this.characters ) {
-		this.pages.push(
-			new ve.ui.SpecialCharacterPage( category, {
-				label: this.characters[ category ].label,
-				characters: this.characters[ category ].characters,
-				attributes: this.characters[ category ].attributes,
-				source: this.surface.getMode() === 'source'
-			} )
-		);
-	}
-	this.bookletLayout.addPages( this.pages );
-	this.bookletLayout.$element.on(
-		'click',
-		'.ve-ui-specialCharacterPage-character',
-		this.onListClick.bind( this )
-	);
-
-	this.$body.append( this.bookletLayout.$element );
-
-	this.updateSize();
-};
-
-/**
- * Handle the click event on the list
+ * Handle a character being chosen from the list
  *
- * @param {jQuery.Event} e Mouse click event
+ * @param {Object} character Character data
  */
-ve.ui.SpecialCharacterDialog.prototype.onListClick = function ( e ) {
-	var character = $( e.target ).data( 'character' ),
-		fragment = this.surface.getModel().getFragment(),
+ve.ui.SpecialCharacterDialog.prototype.onCharacterListChoose = function ( character ) {
+	const fragment = this.surface.getModel().getFragment(),
 		mode = this.surface.getMode();
 
 	function encode( text ) {
@@ -181,7 +164,7 @@ ve.ui.SpecialCharacterDialog.prototype.onListClick = function ( e ) {
 
 		ve.track(
 			'activity.' + this.constructor.static.name,
-			{ action: 'insert-' + this.bookletLayout.currentPageName }
+			{ action: 'insert-' + this.characterListLayout.currentPageName }
 		);
 	}
 };

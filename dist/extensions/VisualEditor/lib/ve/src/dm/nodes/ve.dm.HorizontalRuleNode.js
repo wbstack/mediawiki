@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel HorizontalRuleNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.dm.LeafNode
- * @mixins ve.dm.FocusableNode
+ * @mixes ve.dm.FocusableNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model

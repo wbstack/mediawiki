@@ -9,7 +9,7 @@ use CirrusSearch\Searcher;
 use Elastica\Query;
 use Elastica\Query\AbstractQuery;
 use MediaWiki\MediaWikiServices;
-use Status;
+use MediaWiki\Status\Status;
 
 /**
  * Searcher class for performing Wikibase prefix search.
@@ -29,7 +29,7 @@ class WikibasePrefixSearcher extends Searcher {
 	 * @param int $limit Search limit.
 	 * @param CirrusDebugOptions|null $options
 	 */
-	public function __construct( $offset, $limit, CirrusDebugOptions $options = null ) {
+	public function __construct( $offset, $limit, ?CirrusDebugOptions $options = null ) {
 		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'CirrusSearch' );
 		/** @var SearchConfig $config */
 		'@phan-var SearchConfig $config';
@@ -55,7 +55,7 @@ class WikibasePrefixSearcher extends Searcher {
 		$searchQuery->setQuery( $this->query );
 		$resultsType = $this->searchContext->getResultsType();
 		$searchQuery->setSource( $resultsType->getSourceFiltering() );
-		$searchQuery->setStoredFields( $resultsType->getStoredFields() );
+		$searchQuery->setParam( 'fields', $resultsType->getFields() );
 
 		$highlight = $this->searchContext->getHighlight( $resultsType, $this->query );
 		if ( $highlight ) {

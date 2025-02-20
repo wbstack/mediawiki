@@ -20,20 +20,22 @@
 
 namespace MediaWiki\EditPage\Constraint;
 
-use Content;
-use IContextSource;
-use Language;
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Content\Content;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\EditPage\SpamChecker;
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Language\Language;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\Spi;
 use MediaWiki\MainConfigNames;
 use MediaWiki\Permissions\PermissionManager;
+use MediaWiki\Permissions\RateLimiter;
+use MediaWiki\Permissions\RateLimitSubject;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
-use ReadOnlyMode;
-use Title;
-use User;
+use Wikimedia\Rdbms\ReadOnlyMode;
 
 /**
  * Constraints reflect possible errors that need to be checked
@@ -50,23 +52,13 @@ class EditConstraintFactory {
 		MainConfigNames::MaxArticleSize,
 	];
 
-	/** @var ServiceOptions */
-	private $options;
-
-	/** @var Spi */
-	private $loggerFactory;
-
-	/** @var PermissionManager */
-	private $permissionManager;
-
-	/** @var HookContainer */
-	private $hookContainer;
-
-	/** @var ReadOnlyMode */
-	private $readOnlyMode;
-
-	/** @var SpamChecker */
-	private $spamRegexChecker;
+	private ServiceOptions $options;
+	private Spi $loggerFactory;
+	private PermissionManager $permissionManager;
+	private HookContainer $hookContainer;
+	private ReadOnlyMode $readOnlyMode;
+	private SpamChecker $spamRegexChecker;
+	private RateLimiter $rateLimiter;
 
 	/**
 	 * Some constraints have dependencies that need to be injected,
@@ -86,6 +78,7 @@ class EditConstraintFactory {
 	 * @param HookContainer $hookContainer
 	 * @param ReadOnlyMode $readOnlyMode
 	 * @param SpamChecker $spamRegexChecker
+	 * @param RateLimiter $rateLimiter
 	 */
 	public function __construct(
 		ServiceOptions $options,
@@ -93,7 +86,8 @@ class EditConstraintFactory {
 		PermissionManager $permissionManager,
 		HookContainer $hookContainer,
 		ReadOnlyMode $readOnlyMode,
-		SpamChecker $spamRegexChecker
+		SpamChecker $spamRegexChecker,
+		RateLimiter $rateLimiter
 	) {
 		$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 
@@ -112,6 +106,9 @@ class EditConstraintFactory {
 
 		// SpamRegexConstraint
 		$this->spamRegexChecker = $spamRegexChecker;
+
+		// UserRateLimitConstraint
+		$this->rateLimiter = $rateLimiter;
 	}
 
 	/**
@@ -164,6 +161,26 @@ class EditConstraintFactory {
 	public function newReadOnlyConstraint(): ReadOnlyConstraint {
 		return new ReadOnlyConstraint(
 			$this->readOnlyMode
+		);
+	}
+
+	/**
+	 * @param RateLimitSubject $subject
+	 * @param string $oldModel
+	 * @param string $newModel
+	 *
+	 * @return UserRateLimitConstraint
+	 */
+	public function newUserRateLimitConstraint(
+		RateLimitSubject $subject,
+		string $oldModel,
+		string $newModel
+	): UserRateLimitConstraint {
+		return new UserRateLimitConstraint(
+			$this->rateLimiter,
+			$subject,
+			$oldModel,
+			$newModel
 		);
 	}
 
@@ -225,6 +242,25 @@ class EditConstraintFactory {
 			$this->permissionManager,
 			$title,
 			$user
+		);
+	}
+
+	/**
+	 * @param User $performer
+	 * @param Title $title
+	 * @param bool $new
+	 * @return EditRightConstraint
+	 */
+	public function newEditRightConstraint(
+		User $performer,
+		Title $title,
+		bool $new
+	): EditRightConstraint {
+		return new EditRightConstraint(
+			$performer,
+			$this->permissionManager,
+			$title,
+			$new
 		);
 	}
 

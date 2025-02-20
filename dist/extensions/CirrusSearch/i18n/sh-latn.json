@@ -1,18 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
+			"BadDog",
 			"Winston Sung"
 		]
 	},
 	"cirrussearch-desc": "Pretraga za MediaWiki pomoću Elasticsearcha",
-	"cirrussearch-backend-error": "Nismo mogli završiti pretragu zbog privremenog problema. Pokušajte ponovo kasnije.",
+	"cirrussearch-backend-error": "Nije moguće izvršiti pretragu zbog privremenog problema. Pokušajte ponovo kasnije.",
 	"cirrussearch-parse-error": "Nisam razumjela upit. Pojednostavite ga. Uspavam ovo poboljšati sistem za pretragu.",
 	"cirrussearch-too-busy-error": "Pretraga je trenutno prezauzeta. Pokušajte ponovo kasnije.",
 	"cirrussearch-regex-syntax-error": "Sintaksna greška regularnoga izraza u $2: $1",
 	"cirrussearch-regex-too-busy-error": "Trenutačno postoji previše pretraživanja regularnih izraza. Pokušajte ponovo kasnije.",
 	"cirrussearch-regex-too-complex-error": "Regularni izraz je previše složen. Saznajte više o njegovom pojednostavljenju [[mw:Special:MyLanguage/Help:CirrusSearch/RegexTooComplex|ovdje]].",
 	"cirrussearch-now-using": "Ovaj wiki koristi novi pretraživač. ([[mw:Special:MyLanguage/Help:CirrusSearch|Saznajte više]])",
-	"cirrussearch-ignored-headings": " #<!-- ne mijenjajte ništa u ovom redu --> <pre>\n# Zaglavlja što će biti zanemarena pri pretrazi.\n# Izmjene u ovome stupit će na snagu čim se stranica sa zaglavljem indeksira.\n# Možete nametnuti preindeksiranje stranice ako izvršite prazno uređivanje.\n# Sintaksa je sljedeća:\n#   * Sve od znaka \"#\" pa do kraja reda je komentar\n#   * Svaki neprazan red jest tačan naziv što treba se zanemariti, s tim da se razlikuju mala i velika slova i sve ostalo\nReference\nVanjski linkovi\nTakođer pogledajte\n #</pre> <!-- ne mijenjajte ništa u ovom redu -->",
 	"cirrussearch-pref-label": "Nova pretraga",
 	"cirrussearch-pref-desc": "Probajte naš novi način pretrage koji podržava veliki broj jezika, dava aktualnije i navremenije ishodne stavke, pa čak i pronalazi tekst u predložcima.",
 	"cirrussearch-give-feedback": "Dajte nam Vaše mišljenje",
@@ -48,13 +48,14 @@
 	"cirrussearch-completion-profile-classic-pref-name": "Klasična početačna pretraga",
 	"cirrussearch-completion-profile-classic-pref-desc": "Bez ispravljanja pogrešno unesenoga. Nalazi početke naslova.",
 	"cirrussearch-timed-out": "Pretraživanje je isteklo. Dostupan je samo djelomičan ishod.",
-	"cirrussearch-regex-timed-out": "Pretraživanje regularnih izraza je isteklo; dostupan je samo djelomičan ishod. Uprostite je da biste dobili potpun ishod.",
+	"cirrussearch-regex-timed-out": "Isteklo je vrijeme za izvršenje pretrage s regularnim izrazom. Dostupan je samo dio rezultata. Pojednostavite izraz da biste dobili sve rezultate.",
 	"cirrussearch-file-numeric-feature-not-a-number": "Pretražani tekst '$1' zahtijeva numeričku vrijednost, ali je pruženo '$2'.",
 	"cirrusesarch-file-numeric-feature-multi-argument-w-sign": "Pretražani tekst '$1' ne dopušta višestruke argumente i znak s '$2'.",
 	"cirrussearch-feature-not-available": "Tražena ključna riječ '$1' nije omogućena na ovom wikiju.",
 	"cirrussearch-feature-too-many-conditions": "Pruženi su previše uslova za '$1'. Skraćujem na $2.",
 	"cirrussearch-feature-deepcat-endpoint": "$wgCirrusSearchCategoryEndpoint treba dati valjanu SPARQL-završnicu kako bi koristio duboku pretragu kategorija.",
 	"cirrussearch-feature-deepcat-exception": "Nije uspjelo duboko SPARQL-pretraživanje kategorija",
+	"cirrussearch-feature-deepcat-timeout": "Duboko pretraživanje kategorije isteklo je. Najvjerojatnije kategorija ima previše potkategorija",
 	"cirrussearch-feature-deepcat-toomany": "Duboka pretraga dala je previše kategorija",
 	"cirrussearch-feature-deepcat-invalid-title": "Naznačena kategorija je nevažeća.",
 	"cirrussearch-incategory-feature-no-valid-categories": "Nisu pružene ispravne kategorije za '$1'.",
@@ -64,6 +65,6 @@
 	"cirrussearch-article-words": "Riječi u svim sadržajnim stranicama",
 	"cirrussearch-keyword-prefix-ns-mismatch": "Imenski prostor koji se nalazi u pretraženome <code>prefix:</code> ne odgovara traženim imenskim prostorima. Možete ga popraviti stavljanjem <code>all:</code> prije zahtjeva.",
 	"cirrussearch-autoselect-profile": "Neka tražilica odredi najprikladniji profil.",
-	"cirrussearch-offset-too-large": "Nisam mogao dobiti ishod. Podržane su do $1 stavki, ali se traže stavke počevši od $2.",
+	"cirrussearch-offset-too-large": "Ne mogu da dobavim rezulate pretrage. Podržan je prikaz $1 stavaka, a zatraženi su rezultati nakon $2 stavaka.",
 	"cirrussearch-offset-not-allowed-with-random-sort": "Zanemarujem zahtjez za stranično razbijanje proizvoljno sortitanih ishodnih unosa."
 }

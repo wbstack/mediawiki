@@ -1,13 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Chinneeb",
+			"Enkhsaihan2005",
 			"Mongol",
 			"Munkhzaya.E",
 			"Sembuk",
 			"Wisdom",
-			"Буцах",
-			"Chinneeb",
-			"Enkhsaihan2005"
+			"Буцах"
 		]
 	},
 	"tooltip-ca-ve-edit": "Энэ хуудсыг VisualEditor-р засварлах",
@@ -21,6 +21,5 @@
 	"visualeditor-dialog-meta-categories-input-hiddencategorieslabel": "Нуугдсан категориуд",
 	"visualeditor-dialog-transclusion-collapse-options": "Сонголтуудыг нуух",
 	"visualeditor-dialog-transclusion-expand-options": "Сонголтуудыг харуулах",
-	"visualeditor-dialog-transclusion-placeholder": "Загвар нэмэх",
 	"visualeditor-savedialog-label-publish-short": "Нийтлэх"
 }

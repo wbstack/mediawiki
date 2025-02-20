@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Afalau",
+			"Ceirios",
 			"Diafol",
 			"Ham II",
 			"Lloffiwr",
-			"Robin Owain",
-			"Afalau"
+			"Robin Owain"
 		]
 	},
 	"wikibase-client-desc": "Cleient ar gyfer yr estyniad Wikibase",

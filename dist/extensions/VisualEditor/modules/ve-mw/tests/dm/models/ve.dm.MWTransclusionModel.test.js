@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionModel tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 {
@@ -31,7 +31,7 @@
 			} );
 	};
 
-	QUnit.test( 'nextUniquePartId', function ( assert ) {
+	QUnit.test( 'nextUniquePartId', ( assert ) => {
 		const transclusion = new ve.dm.MWTransclusionModel();
 		assert.strictEqual( transclusion.nextUniquePartId(), 'part_0' );
 		assert.strictEqual( transclusion.nextUniquePartId(), 'part_1' );

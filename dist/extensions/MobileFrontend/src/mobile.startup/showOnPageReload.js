@@ -1,4 +1,4 @@
-var
+const
 	storageKey = 'mobileFrontend/toast';
 
 /**
@@ -9,7 +9,7 @@ var
  * @private
  */
 function showPending() {
-	var data = mw.storage.get( storageKey );
+	let data = mw.storage.get( storageKey );
 	if ( data ) {
 		data = JSON.parse( data );
 		mw.notify( data.content, data.options );
@@ -44,9 +44,9 @@ function showOnPageReload( content, options ) {
 		return;
 	}
 	mw.storage.set( storageKey, JSON.stringify( {
-		content: content,
-		options: options
+		content,
+		options
 	} ) );
 }
 
-module.exports = { showOnPageReload: showOnPageReload };
+module.exports = { showOnPageReload };

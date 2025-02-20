@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Festina90",
+			"HanV",
 			"Mainframe98",
 			"Mar(c)",
 			"McDutchie",
@@ -30,8 +31,8 @@
 	"twocolconflict-special-textarea-hint": "U kunt de broncode van uw revisie bekijken en kopiëren:",
 	"twocolconflict-special-malformed-title": "Ontbrekende of ongeldige titel.",
 	"twocolconflict-special-expired": "Niets te zien hier. Dit betekent waarschijnlijk dat u eerder een bewerkingsconflict tegenkwam, maar dat is een tijdje geleden en uw tijdelijk opgeslagen tekst is inmiddels verlopen.",
-	"twocolconflict-split-header-hint": "U kunt helpen deze functie verder te verbeteren door feedback achter te laten [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface op deze pagina].",
-	"twocolconflict-split-header-hint-beta": "Bedankt voor het gebruiken van deze bètafunctie. U kunt helpen om het verder te verbeteren, als u feedback achterlaat [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface op deze pagina].",
+	"twocolconflict-split-header-hint": "U kunt helpen deze functie verder te verbeteren door feedback achter te laten op [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface op deze pagina].",
+	"twocolconflict-split-header-hint-beta": "Bedankt voor het gebruiken van deze bètafunctie. U kunt helpen om het verder te verbeteren, als u feedback achterlaat op [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface deze pagina].",
 	"twocolconflict-split-header-overview": "Terwijl u aan het bewerken was, heeft een andere gebruiker dezelfde pagina bewerkt en voor u gepubliceerd. Bekijk beide versies en voeg ze samen. Alleen de tekst in de geselecteerde vakken wordt opgeslagen wanneer u op \"{{int:publishchanges}}\" klikt.",
 	"twocolconflict-split-your-version-header": "Uw versie",
 	"twocolconflict-split-current-version-header": "Laatste versie van $1",

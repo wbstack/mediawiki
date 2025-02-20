@@ -3,9 +3,9 @@
 		"authors": [
 			"Boulaur",
 			"Cedric31",
-			"Quentí",
+			"Lhanars",
 			"Nicolas Eynaud",
-			"Lhanars"
+			"Quentí"
 		]
 	},
 	"skinname-vector": "Vector (version 2010)",
@@ -31,6 +31,16 @@
 	"vector-jumptocontent": "Vejatz lo contengut",
 	"vector-more-actions": "Mai",
 	"vector-searchsuggest-containing": "Cercar lei paginas que contènon <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-label": "Somari",
 	"vector-toc-beginning": "Començament",
-	"vector-main-menu-tooltip": "Menut principal"
+	"vector-main-menu-tooltip": "Menut principal",
+	"vector-main-menu-label": "Menut principal/Menut principau",
+	"vector-page-tools-label": "Aisinas",
+	"vector-page-tools-general-label": "Generau",
+	"vector-pin-element-label": "mòu a la barra laterala",
+	"vector-unpin-element-label": "Escondre",
+	"empty-language-selector-body": "Lo contengut de la pagina non es disponible dins una autra lenga.",
+	"vector-toc-unpinned-popup": "Lo taula de contengut s'es desplaçada aquí.",
+	"vector-page-tools-unpinned-popup": "Lo menut d'aisinas s'es desplaçat aquí.",
+	"vector-main-menu-unpinned-popup": "Lo menut principal s'es desplaçat aquí."
 }

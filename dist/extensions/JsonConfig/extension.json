@@ -1,6 +1,6 @@
 {
 	"name": "JsonConfig",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"author": [
 		"Yuri Astrakhan",
 		"Eranroz"
@@ -10,7 +10,7 @@
 	"type": "other",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"namespaces": [
 		{
@@ -47,8 +47,8 @@
 	"ExtensionMessagesFiles": {
 		"JsonConfigNamespaces": "JsonConfig.namespaces.php"
 	},
-	"RawHtmlMessages": [
-		"jsonconfig-license"
+	"TrackingCategories": [
+		"jsonconfig-use-category"
 	],
 	"AutoloadNamespaces": {
 		"JsonConfig\\": "includes/"
@@ -84,7 +84,7 @@
 				"jsonconfig-edit-action-cancel",
 				"jsonconfig-edit-button-label",
 				"jsonconfig-edit-dialog-error",
-				"jsonconfig-edit-dialog-error-data-inavlid",
+				"jsonconfig-edit-dialog-error-data-invalid",
 				"jsonconfig-edit-dialog-error-data-missing",
 				"jsonconfig-edit-dialog-error-data-too-large",
 				"jsonconfig-edit-dialog-error-field-name-missing",
@@ -100,26 +100,48 @@
 		"remoteExtPath": "JsonConfig/modules"
 	},
 	"Hooks": {
-		"ApiMain::moduleManager": "JsonConfig\\JCSingleton::onApiMainModuleManager",
-		"ArticleDeleteComplete": "JsonConfig\\JCSingleton::onArticleDeleteComplete",
-		"ArticleUndelete": "JsonConfig\\JCSingleton::onArticleUndelete",
-		"BeforePageDisplay": "JsonConfig\\JCSingleton::onBeforePageDisplay",
-		"CanonicalNamespaces": "JsonConfig\\JCSingleton::onCanonicalNamespaces",
-		"CodeEditorGetPageLanguage": "JsonConfig\\JCSingleton::onCodeEditorGetPageLanguage",
-		"ContentHandlerDefaultModelFor": "JsonConfig\\JCSingleton::onContentHandlerDefaultModelFor",
-		"ContentHandlerForModelID": "JsonConfig\\JCSingleton::onContentHandlerForModelID",
-		"GetContentModels": "JsonConfig\\JCSingleton::onGetContentModels",
-		"AlternateEdit": "JsonConfig\\JCSingleton::onAlternateEdit",
-		"EditPage::showEditForm:initial": "JsonConfig\\JCSingleton::onEditPage",
-		"EditFilterMergedContent": "JsonConfig\\JCSingleton::onEditFilterMergedContent",
-		"EditPageCopyrightWarning": "JsonConfig\\JCSingleton::onEditPageCopyrightWarning",
-		"MovePageIsValidMove": "JsonConfig\\JCSingleton::onMovePageIsValidMove",
-		"PageSaveComplete": "JsonConfig\\JCSingleton::onPageSaveComplete",
-		"ScribuntoExternalLibraries": "JsonConfig\\JCLuaLibrary::onScribuntoExternalLibraries",
-		"SkinCopyrightFooter": "JsonConfig\\JCSingleton::onSkinCopyrightFooter",
-		"TitleGetEditNotices": "JsonConfig\\JCSingleton::onTitleGetEditNotices",
-		"PageMoveComplete": "JsonConfig\\JCSingleton::onPageMoveComplete",
-		"getUserPermissionsErrors": "JsonConfig\\JCSingleton::onGetUserPermissionsErrors"
+		"ApiMain::moduleManager": "main",
+		"ArticleDeleteComplete": "main",
+		"ArticleUndelete": "main",
+		"BeforePageDisplay": "main",
+		"CanonicalNamespaces": "main",
+		"CodeEditorGetPageLanguage": "codeeditor",
+		"ContentHandlerDefaultModelFor": "main",
+		"ContentHandlerForModelID": "main",
+		"GetContentModels": "main",
+		"AlternateEdit": "main",
+		"EditPage::showEditForm:initial": "main",
+		"EditFilterMergedContent": "main",
+		"EditPageCopyrightWarning": "main",
+		"MovePageIsValidMove": "main",
+		"PageSaveComplete": "main",
+		"ScribuntoExternalLibraries": "scribunto",
+		"SkinCopyrightFooterMessage": "main",
+		"TitleGetEditNotices": "main",
+		"PageMoveComplete": "main",
+		"getUserPermissionsErrors": "main"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "JsonConfig\\JCHooks",
+			"services": [
+				"MainConfig",
+				"ContentHandlerFactory"
+			]
+		},
+		"codeeditor": {
+			"class": "JsonConfig\\CodeEditorHooks",
+			"services": [
+				"MainConfig",
+				"ContentHandlerFactory"
+			]
+		},
+		"scribunto": {
+			"class": "JsonConfig\\ScribuntoHooks",
+			"services": [
+				"MainConfig"
+			]
+		}
 	},
 	"config": {
 		"JsonConfigs": {
@@ -160,9 +182,6 @@
 				"dl-de-by-2.0",
 				"GeoNutzV"
 			]
-		},
-		"JsonConfigInterwikiPrefix": {
-			"value": "commons"
 		},
 		"JsonConfigUseGUI": {
 			"value": true

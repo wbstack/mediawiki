@@ -3,9 +3,9 @@
 		"authors": [
 			"Anakmalaysia",
 			"CyberTroopers",
+			"Hakimi97",
 			"Tofeiku",
-			"Xabier Armendaritz",
-			"Hakimi97"
+			"Xabier Armendaritz"
 		]
 	},
 	"uls-desc": "Membolehkan pengguna memilih bahasa dan mengubah tetapan bahasa dengan pelbagai cara",
@@ -31,7 +31,7 @@
 	"ext-uls-display-settings-anon-same-as-content": "$1 (sama dengan kandungan)",
 	"ext-uls-display-settings-anon-log-in-cta": "[[Special:UserLogin|Log masuk]] untuk memilih bahasa yang lain untuk menu.",
 	"ext-uls-webfonts-settings-title": "Muat turun font apabila diperlukan",
-	"ext-uls-webfonts-settings-info": "Muat turun font yang tiada dengan automatik dan dayakan pemilihan pasuan kegemaran.",
+	"ext-uls-webfonts-settings-info": "Muat turun fon yang tiada dengan automatik dan dayakan pemilihan fon kegemaran.",
 	"ext-uls-webfonts-settings-info-link": "Maklumat lanjut",
 	"ext-uls-webfonts-select-for": "Pilih rupa huruf untuk $1",
 	"ext-uls-webfonts-select-for-ui-info": "Rupa huruf yang digunakan untuk antaramuka pengguna",
@@ -71,10 +71,10 @@
 	"ext-uls-setlang-accept": "Terima perubahan",
 	"ext-uls-setlang-loading": "Menetapkan...",
 	"ext-uls-setlang-cancel": "Jangan ubah",
-	"ext-uls-actions-menu-header": "Lebih pilihan",
 	"ext-uls-actions-menu-language-settings-item-label": "Buka tetapan bahasa",
 	"ext-uls-empty-state-header": "Belum ada bahasa",
 	"ext-uls-empty-state-desc": "Tiada bahasa tersedia buat masa ini",
 	"ext-uls-empty-state-header-actions-available": "Belum ada bahasa. Tambah yang baru?",
-	"ext-uls-empty-state-desc-actions-available": "Jadikan kandungan tersedia dalam lebih banyak bahasa."
+	"ext-uls-empty-state-desc-actions-available": "Jadikan kandungan tersedia dalam lebih banyak bahasa.",
+	"ext-uls-add-languages-button-label": "Tambahkan bahasa"
 }

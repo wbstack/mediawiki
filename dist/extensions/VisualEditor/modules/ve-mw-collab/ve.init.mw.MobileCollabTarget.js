@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization MobileCollabTarget class.
  *
- * @copyright 2011-2016 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,7 +15,7 @@
  * @param {mw.Title} title Page sub-title
  * @param {string} rebaserUrl Rebaser server URL
  * @param {Object} [config] Configuration options
- * @cfg {mw.Title} [importTitle] Title to import
+ * @param {mw.Title} [config.importTitle] Title to import
  */
 ve.init.mw.MobileCollabTarget = function VeInitMwMobileCollabTarget( title, rebaserUrl, config ) {
 	// Parent constructor
@@ -89,15 +89,13 @@ ve.init.mw.MobileCollabTarget.static.toolbarGroups = [
 	}
 ];
 
-ve.init.mw.MobileCollabTarget.static.actionGroups = [];
-
 /* Methods */
 
 /**
  * @inheritdoc
  */
 ve.init.mw.MobileCollabTarget.prototype.getSurfaceClasses = function () {
-	var classes = ve.init.mw.MobileCollabTarget.super.prototype.getSurfaceClasses.call( this );
+	const classes = ve.init.mw.MobileCollabTarget.super.prototype.getSurfaceClasses.call( this );
 	return classes.concat( [ 'content' ] );
 };
 

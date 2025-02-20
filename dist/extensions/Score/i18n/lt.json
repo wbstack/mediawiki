@@ -3,9 +3,9 @@
 		"authors": [
 			"Eitvys200",
 			"Manvydasz",
+			"Nokeoo",
 			"Tomasdd",
-			"Zygimantus",
-			"Nokeoo"
+			"Zygimantus"
 		]
 	},
 	"score-abc2lynotexecutable": "ABC į LilyPond konvertavimas negalėjo būti įvykdytas: $1 nėra vykdomasis failas. Įsitikinkite, kad <code>$wgScoreAbc2Ly</code> teisingai nustatytas.",

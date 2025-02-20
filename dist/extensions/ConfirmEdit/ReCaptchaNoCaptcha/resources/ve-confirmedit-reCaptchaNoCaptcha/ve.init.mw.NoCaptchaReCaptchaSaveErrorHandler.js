@@ -1,5 +1,5 @@
-mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
-	mw.libs.ve.targetLoader.addPlugin( function () {
+mw.loader.using( 'ext.visualEditor.targetLoader' ).then( () => {
+	mw.libs.ve.targetLoader.addPlugin( () => {
 
 		ve.init.mw.NoCaptchaReCaptchaSaveErrorHandler = function () {};
 
@@ -8,15 +8,13 @@ mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
 		ve.init.mw.NoCaptchaReCaptchaSaveErrorHandler.static.name = 'confirmEditNoCaptchaReCaptcha';
 
 		ve.init.mw.NoCaptchaReCaptchaSaveErrorHandler.static.getReadyPromise = function () {
-			var onLoadFn = 'onRecaptchaLoadCallback' + Date.now(),
-				deferred, config, scriptURL, params;
-
 			if ( !this.readyPromise ) {
-				deferred = $.Deferred();
-				config = mw.config.get( 'wgConfirmEditConfig' );
-				scriptURL = new mw.Uri( config.reCaptchaScriptURL );
-				params = { onload: onLoadFn, render: 'explicit' };
-				scriptURL.query = $.extend( scriptURL.query, params );
+				const deferred = $.Deferred();
+				const config = mw.config.get( 'wgConfirmEditConfig' );
+				const scriptURL = new URL( config.reCaptchaScriptURL, location.href );
+				const onLoadFn = 'onRecaptchaLoadCallback' + Date.now();
+				scriptURL.searchParams.set( 'onload', onLoadFn );
+				scriptURL.searchParams.set( 'render', 'explicit' );
 
 				this.readyPromise = deferred.promise();
 				window[ onLoadFn ] = deferred.resolve;
@@ -27,13 +25,13 @@ mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
 		};
 
 		ve.init.mw.NoCaptchaReCaptchaSaveErrorHandler.static.matchFunction = function ( data ) {
-			var captchaData = ve.getProp( data, 'visualeditoredit', 'edit', 'captcha' );
+			const captchaData = ve.getProp( data, 'visualeditoredit', 'edit', 'captcha' );
 
 			return !!( captchaData && captchaData.type === 'recaptchanocaptcha' );
 		};
 
 		ve.init.mw.NoCaptchaReCaptchaSaveErrorHandler.static.process = function ( data, target ) {
-			var self = this,
+			const self = this,
 				config = mw.config.get( 'wgConfirmEditConfig' ),
 				siteKey = config.reCaptchaSiteKey,
 				$container = $( '<div>' );
@@ -45,7 +43,7 @@ mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
 			};
 
 			this.getReadyPromise()
-				.then( function () {
+				.then( () => {
 					if ( self.widgetId ) {
 						window.grecaptcha.reset( self.widgetId );
 					} else {

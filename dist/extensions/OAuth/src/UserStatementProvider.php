@@ -2,14 +2,13 @@
 
 namespace MediaWiki\Extension\OAuth;
 
-use Config;
+use MediaWiki\Config\Config;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\GrantsInfo;
+use MediaWiki\User\User;
 use MediaWiki\User\UserGroupManager;
-use MWException;
-use User;
 
 class UserStatementProvider {
 	/** @var Config */
@@ -18,7 +17,7 @@ class UserStatementProvider {
 	protected $user;
 	/** @var Consumer */
 	protected $consumer;
-	/** @var array */
+	/** @var string[] */
 	protected $grants;
 	/** @var UserGroupManager */
 	private $userGroupManager;
@@ -75,7 +74,6 @@ class UserStatementProvider {
 	 * Retrieve user statement suitable for JWT encoding
 	 *
 	 * @return array
-	 * @throws MWException
 	 */
 	public function getUserStatement() {
 		$statement = [];
@@ -106,13 +104,15 @@ class UserStatementProvider {
 	 */
 	public function getUserProfile() {
 		$profile = [
-			'sub' => Utils::getCentralIdFromLocalUser( $this->user ),
+			// 'sub' should be a StringOrURI - https://www.rfc-editor.org/rfc/rfc7519.html#section-4.1.2
+			'sub' => (string)Utils::getCentralIdFromLocalUser( $this->user ),
 		];
 		// Include some MediaWiki info about the user
 		if ( !$this->user->isHidden() ) {
 			$profile['username'] = $this->user->getName();
 			$profile['editcount'] = intval( $this->user->getEditCount() );
-			$profile['confirmed_email'] = $this->user->isEmailConfirmed();
+			// Use confirmed_email for B/C and email_verified because it's in the OIDC spec
+			$profile['confirmed_email'] = $profile['email_verified'] = $this->user->isEmailConfirmed();
 			$profile['blocked'] = $this->user->getBlock() !== null;
 			$profile['registered'] = $this->user->getRegistration();
 			$profile['groups'] = $this->userGroupManager->getUserEffectiveGroups( $this->user );
@@ -132,7 +132,7 @@ class UserStatementProvider {
 				$profile['realname'] = !in_array(
 					'realname', $this->config->get( 'HiddenPrefs' ), true
 				) ? $this->user->getRealName() : '';
-				$profile['email'] = $this->user->getEmail();
+				$profile['email'] = $this->user->isEmailConfirmed() ? $this->user->getEmail() : '';
 			}
 		} else {
 			$profile['blocked'] = true;

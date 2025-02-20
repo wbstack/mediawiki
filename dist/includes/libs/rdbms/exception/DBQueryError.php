@@ -22,7 +22,6 @@ namespace Wikimedia\Rdbms;
 /**
  * @ingroup Database
  * @newable
- * @stable to extend
  */
 class DBQueryError extends DBExpectedError {
 	/** @var string */
@@ -44,13 +43,11 @@ class DBQueryError extends DBExpectedError {
 	 * @param string|null $message Optional message, intended for subclasses (optional)
 	 */
 	public function __construct( IDatabase $db, $error, $errno, $sql, $fname, $message = null ) {
-		if ( $message === null ) {
-			$message = "Error $errno: $error\n" .
-				"Function: $fname\n" .
-				"Query: $sql\n";
-		}
+		$message ??= "Error $errno: $error\n" .
+			"Function: $fname\n" .
+			"Query: $sql\n";
 
-		parent::__construct( $db, $message, [ 'dbName' => $db->getServerName() ] );
+		parent::__construct( $db, $message );
 
 		$this->error = $error;
 		$this->errno = $errno;
@@ -58,8 +55,3 @@ class DBQueryError extends DBExpectedError {
 		$this->fname = $fname;
 	}
 }
-
-/**
- * @deprecated since 1.29
- */
-class_alias( DBQueryError::class, 'DBQueryError' );

@@ -1,4 +1,4 @@
-<?php
+<?php declare( strict_types=1 );
 
 namespace Wikibase\DataModel\Statement;
 
@@ -22,79 +22,62 @@ class StatementGuid {
 	 */
 	public const SEPARATOR = '$';
 
-	/**
-	 * @var EntityId
-	 */
-	private $entityId;
+	private EntityId $entityId;
+	private string $guidPart;
+	private string $serialization;
 
 	/**
-	 * @var string
+	 * @param EntityId $entityId the normalized entity id
+	 * @param string $guidPart the guid part of the statement id that appears after the separator
+	 * @param string|null $originalStatementId the original, non-normalized, statement id.
+	 * Defaults to `null` for compatability.
 	 */
-	private $guidPart;
-
-	/**
-	 * @var string
-	 */
-	private $serialization;
-
-	/**
-	 * @param EntityId $entityId
-	 * @param string $guid
-	 *
-	 * @throws InvalidArgumentException
-	 */
-	public function __construct( EntityId $entityId, $guid ) {
-		if ( !is_string( $guid ) ) {
-			throw new InvalidArgumentException( '$guid must be a string' );
+	public function __construct( EntityId $entityId, string $guidPart, ?string $originalStatementId = null ) {
+		$constructedStatementId = $entityId->getSerialization() . self::SEPARATOR . $guidPart;
+		if ( $originalStatementId !== null
+			 && strtolower( $originalStatementId ) !== strtolower( $constructedStatementId ) ) {
+			throw new InvalidArgumentException( '$originalStatementId does not match $entityId and/or $guidPart' );
 		}
 
-		$this->serialization = $entityId->getSerialization() . self::SEPARATOR . $guid;
+		// use the original serialization when available to avoid normalizing the entity id prefix
+		$this->serialization = $originalStatementId ?? $constructedStatementId;
 		$this->entityId = $entityId;
-		$this->guidPart = $guid;
+		$this->guidPart = $guidPart;
 	}
 
-	/**
-	 * @return EntityId
-	 */
-	public function getEntityId() {
+	public function getEntityId(): EntityId {
 		return $this->entityId;
 	}
 
 	/**
 	 * @since 9.4
-	 *
-	 * @return string
 	 */
-	public function getGuidPart() {
+	public function getGuidPart(): string {
 		return $this->guidPart;
 	}
 
 	/**
-	 * @return string
-	 * @deprecated The value returned by this method might differ in case from the original, unparsed statement GUID
-	 * (the entity ID part might have been lowercase originally, but is always normalized in the return value here),
-	 * which means that the value should not be compared to other statement GUID serializations,
+	 * If the `$originalStatementId` parameter is not used when constructing the StatementGuid object,
+	 * then this method will return a statement id where the entity id prefix is normalized to upper case.
+	 * This could cause issues when comparing to other statement id serializations,
 	 * e.g. to look up a statement in a StatementList.
 	 */
-	public function getSerialization() {
+	public function getSerialization(): string {
 		return $this->serialization;
 	}
 
 	/**
 	 * @param mixed $target
-	 *
-	 * @return bool
 	 */
-	public function equals( $target ) {
+	public function equals( $target ): bool {
 		if ( $this === $target ) {
 			return true;
 		}
 
-		return $target instanceof self
-			&& $target->serialization === $this->serialization;
+		return $target instanceof self && $target->serialization === $this->serialization;
 	}
 
-	public function __toString() {
+	public function __toString(): string {
 		return $this->serialization;
 	}
 

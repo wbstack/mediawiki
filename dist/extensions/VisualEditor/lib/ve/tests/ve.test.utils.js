@@ -1,7 +1,7 @@
 /*!
  * VisualEditor test utilities.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 ( function () {
@@ -19,15 +19,18 @@
 		this.storageDisabled = false;
 	}
 	OO.inheritClass( DummyPlatform, ve.init.Platform );
+	DummyPlatform.prototype.formatNumber = function ( number ) {
+		return number.toLocaleString();
+	};
 	DummyPlatform.prototype.getUserLanguages = function () {
 		return [ 'en' ];
 	};
 	DummyPlatform.prototype.getMessage = function () {
 		return Array.prototype.join.call( arguments, ',' );
 	};
-	DummyPlatform.prototype.getHtmlMessage = function () {
-		var $wrapper = $( '<div>' );
-		Array.prototype.forEach.call( arguments, function ( arg, i, args ) {
+	DummyPlatform.prototype.getHtmlMessage = function ( ...args ) {
+		const $wrapper = $( '<div>' );
+		args.forEach( ( arg, i ) => {
 			$wrapper.append( arg );
 			if ( i < args.length - 1 ) {
 				$wrapper.append( ',' );
@@ -36,6 +39,9 @@
 		// Merge text nodes
 		$wrapper[ 0 ].normalize();
 		return $wrapper.contents().toArray();
+	};
+	DummyPlatform.prototype.getLanguageCodes = function () {
+		return [ 'ar', 'en', 'es', 'fr', 'ru', 'zh' ];
 	};
 	DummyPlatform.prototype.getLanguageName = function ( lang ) {
 		return 'langname-' + lang;
@@ -54,9 +60,10 @@
 	};
 	DummyPlatform.prototype.setUserConfig = function () {};
 	DummyPlatform.prototype.createSafeStorage = function ( store ) {
-		var platform = this;
+		const platform = this;
+		const EXPIRY_PREFIX = '_EXPIRY_';
 
-		var MockSafeStorage = function ( s ) {
+		const MockSafeStorage = function ( s ) {
 			this.store = s;
 		};
 		OO.initClass( MockSafeStorage );
@@ -66,11 +73,12 @@
 			}
 			return this.store.getItem( key );
 		};
-		MockSafeStorage.prototype.set = function ( key, value ) {
+		MockSafeStorage.prototype.set = function ( key, value, expiry ) {
 			if ( platform.storageDisabled || value === '__FAIL__' ) {
 				return false;
 			}
 			this.store.setItem( key, value );
+			this.setExpires( key, expiry );
 			return true;
 		};
 		MockSafeStorage.prototype.remove = function ( key ) {
@@ -78,10 +86,11 @@
 				return false;
 			}
 			this.store.removeItem( key );
+			this.setExpires( key );
 			return true;
 		};
 		MockSafeStorage.prototype.getObject = function ( key ) {
-			var json = this.get( key );
+			const json = this.get( key );
 
 			if ( json === false ) {
 				return false;
@@ -95,10 +104,23 @@
 		};
 		MockSafeStorage.prototype.setObject = function ( key, value ) {
 			try {
-				var json = JSON.stringify( value );
+				const json = JSON.stringify( value );
 				return this.set( key, json );
 			} catch ( e ) {}
 			return false;
+		};
+		MockSafeStorage.prototype.setExpires = function ( key, expiry ) {
+			if ( platform.storageDisabled ) {
+				return false;
+			}
+			if ( expiry ) {
+				this.store.setItem(
+					EXPIRY_PREFIX + key,
+					Math.floor( Date.now() / 1000 ) + expiry
+				);
+			} else {
+				this.store.removeItem( EXPIRY_PREFIX + key );
+			}
 		};
 
 		return new MockSafeStorage( store );
@@ -106,7 +128,7 @@
 	DummyPlatform.prototype.createLocalStorage = DummyPlatform.prototype.createSessionStorage = function ( store ) {
 		store = store || {};
 
-		var MockSystemStorage = function () {};
+		const MockSystemStorage = function () {};
 		OO.initClass( MockSystemStorage );
 		MockSystemStorage.prototype.getItem = function ( key ) {
 			return Object.prototype.hasOwnProperty.call( store, key ) ?
@@ -120,12 +142,12 @@
 			delete store[ key ];
 		};
 		MockSystemStorage.prototype.clear = function () {
-			for ( var key in store ) {
+			for ( const key in store ) {
 				delete store[ key ];
 			}
 		};
 		MockSystemStorage.prototype.key = function ( index ) {
-			var keys = Object.keys( store );
+			const keys = Object.keys( store );
 			return index < keys.length ? keys[ index ] : null;
 		};
 		if ( !Object.prototype.hasOwnProperty.call( store, 'length' ) ) {
@@ -136,9 +158,9 @@
 			} );
 		}
 
-		var storage = this.createSafeStorage( new MockSystemStorage( store ) );
+		const storage = this.createSafeStorage( new MockSystemStorage( store ) );
 
-		return ve.init.createListStorage( storage );
+		return ve.init.createConflictableStorage( storage );
 	};
 
 	ve.test.utils.DummyPlatform = DummyPlatform;
@@ -149,7 +171,7 @@
 	OO.inheritClass( DummyTarget, ve.init.Target );
 	DummyTarget.prototype.addSurface = function () {
 		// Parent method
-		var surface = DummyTarget.super.prototype.addSurface.apply( this, arguments );
+		const surface = DummyTarget.super.prototype.addSurface.apply( this, arguments );
 		this.$element.append( surface.$element );
 		if ( !this.getSurface() ) {
 			this.setSurface( surface );
@@ -171,9 +193,10 @@
 		return ve.createDeferred().resolve().promise();
 	};
 
-	var voidGroup = '(' + ve.elementTypes.void.join( '|' ) + ')';
-	var voidRegexp = new RegExp( '(<' + voidGroup + '[^>]*?(/?))>', 'g' );
-	var originalCreateDocumentFromHtml = ve.createDocumentFromHtml;
+	const voidGroup = '(' + ve.elementTypes.void.join( '|' ) + ')';
+
+	const voidRegexp = new RegExp( '(<' + voidGroup + '[^>]*?(/?))>', 'g' );
+	const originalCreateDocumentFromHtml = ve.createDocumentFromHtml;
 	/**
 	 * Override ve.createDocumentFromHtml to validate HTML structure using an XML parser
 	 *
@@ -190,29 +213,30 @@
 	 */
 	ve.createDocumentFromHtml = function ( html, ignoreXmlWarnings ) {
 		if ( html && !ignoreXmlWarnings ) {
-			var xml = '<xml>' +
+			const xml = '<xml>' +
 				html
 					// Close open void tags
-					.replace( voidRegexp, function () {
-						return arguments[ 3 ] ?
+					.replace(
+						voidRegexp,
+						( ...args ) => args[ 3 ] ?
 							// self-closing - do nothing
-							arguments[ 0 ] :
+							args[ 0 ] :
 							// add close tag
-							arguments[ 0 ] + '</' + arguments[ 2 ] + '>';
-					} )
+							args[ 0 ] + '</' + args[ 2 ] + '>'
+					)
 					// Remove entities, named ones not recognised
 					.replace( /&[^;]+;/g, '' )
 					// Remove doctype
 					.replace( /<!doctype html>/i, '' ) +
 			'</xml>';
-			var xmlDoc;
+			let xmlDoc;
 			// Firefox additionally throws an error
 			try {
 				xmlDoc = ( new DOMParser() ).parseFromString( xml, 'application/xml' );
 			} catch ( e ) {
 			}
 			if ( xmlDoc ) {
-				var parserError = xmlDoc.querySelector( 'parsererror' );
+				const parserError = xmlDoc.querySelector( 'parsererror' );
 				if ( parserError ) {
 					// eslint-disable-next-line no-console
 					console.warn( parserError.innerText, '\n', html, '\n', xml );
@@ -227,95 +251,163 @@
 		return model.getFullData( undefined, 'roundTrip' );
 	}
 
-	ve.test.utils.runIsolateTest = function ( assert, type, range, expected, label ) {
-		var doc = ve.dm.example.createExampleDocument( 'isolationData' ),
+	/**
+	 * Make a HTML `<base>` tag
+	 *
+	 * @param {string} base Base URL
+	 * @return {string}
+	 */
+	ve.test.utils.makeBaseTag = function ( base ) {
+		if ( /[<>&'"]/.test( base ) ) {
+			throw new Error( 'Weird base' );
+		}
+		return '<base href="' + base + '">';
+	};
+
+	/**
+	 * Add a `<base>` tag to `<head>` using HTML string splicing
+	 *
+	 * @param {string} docHtml Document HTML
+	 * @param {string} base Base URL
+	 * @return {string} Document HTML
+	 */
+	ve.test.utils.addBaseTag = function ( docHtml, base ) {
+		if ( !ve.matchTag( docHtml, 'body' ) ) {
+			docHtml = '<body>' + docHtml + '</body>';
+		}
+		return ve.addHeadTag( docHtml, ve.test.utils.makeBaseTag( base ) );
+	};
+
+	/**
+	 * @param {QUnit.Assert} assert
+	 * @param {Object} caseItem
+	 * @param {string} caseItem.type
+	 * @param {ve.Range} caseItem.range
+	 * @param {Function} caseItem.expected
+	 * @param {string} caseItem.base
+	 * @param {string} caseItem.msg
+	 */
+	ve.test.utils.runIsolateTest = function ( assert, caseItem ) {
+		if ( arguments.length > 2 ) {
+			caseItem = {
+				type: arguments[ 1 ],
+				range: arguments[ 2 ],
+				expected: arguments[ 3 ],
+				base: arguments[ 4 ],
+				msg: arguments[ 5 ]
+			};
+		}
+		const doc = ve.dm.example.createExampleDocument( 'isolationData', null, caseItem.base ),
 			surface = new ve.dm.Surface( doc ),
-			fragment = surface.getLinearFragment( range );
+			fragment = surface.getLinearFragment( caseItem.range );
 
-		var data = ve.copy( getSerializableData( doc ) );
-		fragment.isolateAndUnwrap( type );
-		expected( data );
+		const data = ve.copy( getSerializableData( doc ) );
+		fragment.isolateAndUnwrap( caseItem.type );
+		caseItem.expected( data );
 
-		assert.deepEqual( getSerializableData( doc ), data, label );
+		assert.deepEqual( getSerializableData( doc ), data, caseItem.msg );
 	};
 
-	ve.test.utils.runFormatConverterTest = function ( assert, range, type, attributes, expectedRange, expectedData, msg ) {
-		var surface = ve.test.utils.createModelOnlySurfaceFromHtml( ve.dm.example.isolationHtml ),
-			formatAction = new ve.ui.FormatAction( surface ),
-			data = ve.copy( getSerializableData( surface.getModel().getDocument() ) ),
-			originalData = ve.copy( data );
-
-		expectedData( data );
-
-		surface.getModel().setLinearSelection( range );
-		formatAction.convert( type, attributes );
-
-		assert.equalLinearData( getSerializableData( surface.getModel().getDocument() ), data, msg + ': data models match' );
-		assert.equalRange( surface.getModel().getSelection().getRange(), expectedRange, msg + ': ranges match' );
-
-		surface.getModel().undo();
-
-		assert.equalLinearData( getSerializableData( surface.getModel().getDocument() ), originalData, msg + ' (undo): data models match' );
-		assert.equalRange( surface.getModel().getSelection().getRange(), range, msg + ' (undo): ranges match' );
-	};
-
-	ve.test.utils.runActionTest = function ( actionName, assert, html, createView, method, args, rangeOrSelection, msg, options ) {
-		var surface = createView ?
-				ve.test.utils.createViewOnlySurfaceFromHtml( html || ve.dm.example.html ) :
-				ve.test.utils.createModelOnlySurfaceFromHtml( html || ve.dm.example.html ),
-			action = ve.ui.actionFactory.create( actionName, surface ),
+	/**
+	 * @param {QUnit.Assert} assert
+	 * @param {Object} caseItem
+	 * @param {string} caseItem.msg
+	 * @param {string} caseItem.actionName
+	 * @param {string} caseItem.method
+	 * @param {string} caseItem.html
+	 * @param {Array} [caseItem.args] Arguments to pass to the action
+	 * @param {ve.Range|Object|string} caseItem.rangeOrSelection
+	 * @param {boolean} [caseItem.createView] Create a view surface, instead of just a model surface (slower)
+	 * @param {ve.Range|Object|string} [caseItem.expectedRangeOrSelection]
+	 * @param {ve.Range|Object|string} [caseItem.expectedOriginalRangeOrSelection]
+	 * @param {boolean} [caseItem.undo] Test that the action undoes cleanly
+	 * @param {Function} [caseItem.expectedData] Function to mutate linear data into expected data
+	 * @param {Function} [caseItem.expectedOriginalData] Function to mutate linear data into expected data after undo
+	 */
+	ve.test.utils.runActionTest = function ( assert, caseItem ) {
+		if ( arguments.length > 2 ) {
+			const args = Array.prototype.slice.call( arguments );
+			const options = args[ 8 ] || {};
+			assert = args[ 1 ];
+			caseItem = {
+				actionName: args[ 0 ],
+				html: args[ 2 ],
+				createView: args[ 3 ],
+				method: args[ 4 ],
+				args: args[ 5 ],
+				rangeOrSelection: args[ 6 ],
+				msg: args[ 7 ],
+				...options
+			};
+		}
+		const surface = caseItem.createView ?
+				ve.test.utils.createViewOnlySurfaceFromHtml( caseItem.html || ve.dm.example.html ) :
+				ve.test.utils.createModelOnlySurfaceFromHtml( caseItem.html || ve.dm.example.html ),
+			action = ve.ui.actionFactory.create( caseItem.actionName, surface ),
 			data = ve.copy( getSerializableData( surface.getModel().getDocument() ) ),
 			documentModel = surface.getModel().getDocument(),
-			selection = ve.test.utils.selectionFromRangeOrSelection( documentModel, rangeOrSelection ),
-			expectedSelection = options.expectedRangeOrSelection && ve.test.utils.selectionFromRangeOrSelection( documentModel, options.expectedRangeOrSelection );
+			selection = ve.test.utils.selectionFromRangeOrSelection( documentModel, caseItem.rangeOrSelection ),
+			expectedSelection = caseItem.expectedRangeOrSelection && ve.test.utils.selectionFromRangeOrSelection( documentModel, caseItem.expectedRangeOrSelection );
 
-		var originalData;
-		if ( options.undo ) {
+		let originalData;
+		if ( caseItem.undo ) {
 			originalData = ve.copy( data );
 		}
 
 		ve.dm.example.postprocessAnnotations( data, surface.getModel().getDocument().getStore() );
 
-		if ( options.expectedData ) {
-			options.expectedData( data, action );
+		if ( caseItem.expectedData ) {
+			caseItem.expectedData( data, action );
 		}
 
 		surface.getModel().setSelection( selection );
-		action[ method ].apply( action, args || [] );
+		action[ caseItem.method ].apply( action, caseItem.args || [] );
 
-		var actualData = getSerializableData( surface.getModel().getDocument() );
-		ve.dm.example.postprocessAnnotations( actualData, surface.getModel().getDocument().getStore() );
-		assert.equalLinearData( actualData, data, msg + ': data models match' );
-		if ( expectedSelection ) {
-			assert.equalHash( surface.getModel().getSelection(), expectedSelection, msg + ': selections match' );
-		}
-
-		if ( options.undo ) {
-			if ( options.expectedOriginalData ) {
-				options.expectedOriginalData( originalData, action );
-			}
-
-			surface.getModel().undo();
-
-			assert.equalLinearData( getSerializableData( surface.getModel().getDocument() ), originalData, msg + ' (undo): data models match' );
+		const afterApply = () => {
+			const actualData = getSerializableData( surface.getModel().getDocument() );
+			ve.dm.example.postprocessAnnotations( actualData, surface.getModel().getDocument().getStore() );
+			assert.equalLinearData( actualData, data, caseItem.msg + ': data models match' );
 			if ( expectedSelection ) {
-				var expectedOriginalRangeOrSelection = options.expectedOriginalRangeOrSelection &&
-					ve.test.utils.selectionFromRangeOrSelection( documentModel, options.expectedOriginalRangeOrSelection );
-				assert.equalHash( surface.getModel().getSelection(), expectedOriginalRangeOrSelection || selection, msg + ' (undo): selections match' );
+				assert.equalHash( surface.getModel().getSelection(), expectedSelection, caseItem.msg + ': selections match' );
 			}
+
+			if ( caseItem.undo ) {
+				if ( caseItem.expectedOriginalData ) {
+					caseItem.expectedOriginalData( originalData, action );
+				}
+
+				surface.getModel().undo();
+
+				assert.equalLinearData( getSerializableData( surface.getModel().getDocument() ), originalData, caseItem.msg + ' (undo): data models match' );
+				if ( expectedSelection ) {
+					const expectedOriginalRangeOrSelection = caseItem.expectedOriginalRangeOrSelection &&
+						ve.test.utils.selectionFromRangeOrSelection( documentModel, caseItem.expectedOriginalRangeOrSelection );
+					assert.equalHash( surface.getModel().getSelection(), expectedOriginalRangeOrSelection || selection, caseItem.msg + ' (undo): selections match' );
+				}
+			}
+		};
+
+		if ( caseItem.createView ) {
+			// When rendering a view, wait for MutationObserver events to fire
+			// before checking document state.
+			const done = assert.async();
+			setTimeout( () => {
+				afterApply();
+				done();
+			} );
+		} else {
+			// In model-only mode test synchronously
+			afterApply();
 		}
 	};
 
 	ve.test.utils.runGetModelFromDomTest = function ( assert, caseItem, msg ) {
-		// Make sure we've always got a <base> tag
-		var defaultHead = '<base href="' + ve.dm.example.baseUri + '">';
-
 		if ( caseItem.head !== undefined || caseItem.body !== undefined ) {
-			var html = '<head>' + ( caseItem.head || defaultHead ) + '</head><body>' + caseItem.body + '</body>';
-			var htmlDoc = ve.createDocumentFromHtml( html, caseItem.ignoreXmlWarnings );
-			var model = ve.dm.converter.getModelFromDom( htmlDoc, { fromClipboard: !!caseItem.fromClipboard } );
-			var actualDataReal = model.getFullData();
-			var actualDataMeta = getSerializableData( model );
+			const html = '<head>' + ( caseItem.head || '' ) + '</head><body>' + caseItem.body + '</body>';
+			const htmlDoc = ve.createDocumentFromHtml( ve.test.utils.addBaseTag( html, caseItem.base ), caseItem.ignoreXmlWarnings );
+			const model = ve.dm.converter.getModelFromDom( htmlDoc, { fromClipboard: !!caseItem.fromClipboard } );
+			let actualDataReal = model.getFullData();
+			let actualDataMeta = getSerializableData( model );
 
 			// Round-trip here, check round-trip later
 			if ( caseItem.modify ) {
@@ -323,7 +415,7 @@
 				actualDataMeta = ve.copy( actualDataMeta );
 				caseItem.modify( model );
 			}
-			var actualRtDoc = ve.dm.converter.getDomFromModel( model );
+			const actualRtDoc = ve.dm.converter.getDomFromModel( model );
 
 			// Normalize and verify data
 			ve.dm.example.postprocessAnnotations( actualDataReal, model.getStore(), caseItem.preserveAnnotationDomElements );
@@ -335,7 +427,7 @@
 			assert.deepEqual( model.getInnerWhitespace(), caseItem.innerWhitespace || new Array( 2 ), msg + ': inner whitespace' );
 			// Check storeItems have been added to store
 			if ( caseItem.storeItems ) {
-				for ( var hash in caseItem.storeItems ) {
+				for ( const hash in caseItem.storeItems ) {
 					assert.deepEqualWithDomElements(
 						model.getStore().value( hash ) || {},
 						caseItem.storeItems[ hash ],
@@ -344,23 +436,24 @@
 				}
 			}
 			// Check round-trip
-			var expectedRtDoc = caseItem.normalizedBody ?
-				ve.createDocumentFromHtml( caseItem.normalizedBody, caseItem.ignoreXmlWarnings ) :
+			const expectedRtDoc = caseItem.normalizedBody ?
+				ve.createDocumentFromHtml( ve.test.utils.addBaseTag( caseItem.normalizedBody, caseItem.base ), caseItem.ignoreXmlWarnings ) :
 				htmlDoc;
 			assert.equalDomElement( actualRtDoc.body, expectedRtDoc.body, msg + ': round-trip' );
 		}
 	};
 
 	ve.test.utils.getModelFromTestCase = function ( caseItem ) {
-		var store = new ve.dm.HashValueStore();
+		const store = new ve.dm.HashValueStore();
 
 		// Load storeItems into store
 		if ( caseItem.storeItems ) {
-			for ( var hash in caseItem.storeItems ) {
+			for ( const hash in caseItem.storeItems ) {
 				store.hashStore[ hash ] = ve.copy( caseItem.storeItems[ hash ] );
 			}
 		}
-		var model = new ve.dm.Document( ve.dm.example.preprocessAnnotations( caseItem.data, store ) );
+		const model = new ve.dm.Document( ve.dm.example.preprocessAnnotations( caseItem.data, store ) );
+		ve.fixBase( model.getHtmlDocument(), model.getHtmlDocument(), caseItem.base );
 		model.innerWhitespace = caseItem.innerWhitespace ? ve.copy( caseItem.innerWhitespace ) : new Array( 2 );
 		if ( caseItem.modify ) {
 			caseItem.modify( model );
@@ -369,12 +462,12 @@
 	};
 
 	ve.test.utils.runGetDomFromModelTest = function ( assert, caseItem, msg ) {
-		var model = ve.test.utils.getModelFromTestCase( caseItem );
-		var originalData = ve.copy( getSerializableData( model ) );
-		var fromDataBody = caseItem.fromDataBody || caseItem.normalizedBody || caseItem.body;
-		var html = '<body>' + fromDataBody + '</body>';
-		var clipboardHtml = '<body>' + ( caseItem.clipboardBody || fromDataBody ) + '</body>';
-		var previewHtml = '<body>' + ( caseItem.previewBody || fromDataBody ) + '</body>';
+		const model = ve.test.utils.getModelFromTestCase( caseItem );
+		const originalData = ve.copy( getSerializableData( model ) );
+		const fromDataBody = caseItem.fromDataBody || caseItem.normalizedBody || caseItem.body;
+		const html = '<body>' + fromDataBody + '</body>';
+		const clipboardHtml = '<body>' + ( caseItem.clipboardBody || fromDataBody ) + '</body>';
+		const previewHtml = '<body>' + ( caseItem.previewBody || fromDataBody ) + '</body>';
 		assert.equalDomElement(
 			ve.dm.converter.getDomFromModel( model ),
 			ve.createDocumentFromHtml( html, caseItem.ignoreXmlWarnings ),
@@ -399,17 +492,17 @@
 	};
 
 	ve.test.utils.runDiffElementTest = function ( assert, caseItem ) {
-		var oldDoc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( caseItem.oldDoc ) ),
+		const oldDoc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( caseItem.oldDoc ) ),
 			newDoc = ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( caseItem.newDoc ) );
 		// TODO: Differ expects newDoc to be derived from oldDoc and contain all its store data.
 		// We may want to remove that assumption from the differ?
 		newDoc.getStore().merge( oldDoc.getStore() );
-		var visualDiff = new ve.dm.VisualDiff( oldDoc, newDoc, caseItem.forceTimeout ? -1 : undefined );
-		var diffElement = new ve.ui.DiffElement( visualDiff );
+		const visualDiff = new ve.dm.VisualDiff( oldDoc, newDoc, caseItem.forceTimeout ? -1 : undefined );
+		const diffElement = new ve.ui.DiffElement( visualDiff );
 		assert.equalDomElement( diffElement.$document[ 0 ], $( '<div>' ).addClass( 've-ui-diffElement-document' ).html( caseItem.expected )[ 0 ], caseItem.msg );
 		assert.deepEqualWithDomElements(
-			diffElement.descriptions.items.map( function ( item ) { return item.$label.contents().toArray(); } ),
-			( caseItem.expectedDescriptions || [] ).map( function ( expected ) { return $.parseHTML( expected ); } ),
+			diffElement.descriptions.items.map( ( item ) => item.$label.contents().toArray() ),
+			( caseItem.expectedDescriptions || [] ).map( ( expected ) => $.parseHTML( expected ) ),
 			caseItem.msg + ': sidebar'
 		);
 		assert.strictEqual(
@@ -474,9 +567,9 @@
 	ve.test.utils.createSurfaceViewFromDocument = function ( docOrSurface, config ) {
 		config = ve.init.target.getSurfaceConfig( config );
 
-		var model, view;
+		let model = null, view = null;
 
-		var mockSurface = {
+		const mockSurface = {
 			$blockers: $( '<div>' ),
 			$selections: $( '<div>' ),
 			$element: $( '<div>' ),
@@ -567,7 +660,7 @@
 	 * @return {Object} Mock UI surface which only returns a real view (and its model)
 	 */
 	ve.test.utils.createViewOnlySurfaceFromHtml = function ( html, config ) {
-		var surfaceView = ve.test.utils.createSurfaceViewFromDocument(
+		const surfaceView = ve.test.utils.createSurfaceViewFromDocument(
 			ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( html ) ),
 			config
 		);
@@ -583,7 +676,7 @@
 	 * @return {Object} Mock UI surface which only returns a real model
 	 */
 	ve.test.utils.createModelOnlySurfaceFromHtml = function ( html, config ) {
-		var model = new ve.dm.Surface(
+		const model = new ve.dm.Surface(
 			ve.dm.converter.getModelFromDom( ve.createDocumentFromHtml( html ) ),
 			null,
 			config
@@ -630,9 +723,9 @@
 		if ( data.type === '#comment' ) {
 			return document.createComment( data.text );
 		}
-		var node = document.createElement( data.type );
+		const node = document.createElement( data.type );
 		if ( data.children ) {
-			for ( var i = 0; i < data.children.length; i++ ) {
+			for ( let i = 0; i < data.children.length; i++ ) {
 				node.appendChild( buildDom( data.children[ i ] ) );
 			}
 		}
@@ -653,7 +746,7 @@
 	 * @return {string} Serialization of the node and position
 	 */
 	ve.test.utils.serializePosition = function ( rootNode, position, options ) {
-		var html = [];
+		const html = [];
 		function add( node ) {
 			if ( options && options.ignore && $( node ).is( options.ignore ) ) {
 				return;
@@ -686,7 +779,7 @@
 				);
 			}
 			html.push( '>' );
-			for ( var i = 0, len = node.childNodes.length; i < len; i++ ) {
+			for ( let i = 0, len = node.childNodes.length; i < len; i++ ) {
 				if ( node === position.node && i === position.offset ) {
 					html.push( '|' );
 				}
@@ -726,8 +819,8 @@
 		eventSequencer.endLoop = function () {
 			// Run every postponed call in order of postponement. Do not cache
 			// list length, because postponed calls may add more postponed calls
-			for ( var i = 0; i < this.postponedCalls.length; i++ ) {
-				var f = this.postponedCalls[ i ];
+			for ( let i = 0; i < this.postponedCalls.length; i++ ) {
+				const f = this.postponedCalls[ i ];
 				if ( f ) {
 					// Exceptions thrown here will leave the postponed calls
 					// list in an inconsistent state

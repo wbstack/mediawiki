@@ -47,24 +47,24 @@ class LegacyItemDeserializerTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function invalidSerializationProvider() {
+	public static function invalidSerializationProvider() {
 		return [
 			[ null ],
 
 			[ [
-				'links' => [ null ]
+				'links' => [ null ],
 			] ],
 
 			[ [
-				'claims' => null
+				'claims' => null,
 			] ],
 
 			[ [
-				'claims' => [ null ]
+				'claims' => [ null ],
 			] ],
 
 			[ [
-				'entity' => 42
+				'entity' => 42,
 			] ],
 		];
 	}
@@ -99,7 +99,7 @@ class LegacyItemDeserializerTest extends \PHPUnit\Framework\TestCase {
 				'links' => [
 					'foo' => 'bar',
 					'baz' => 'bah',
-				]
+				],
 			],
 			$item
 		);
@@ -132,8 +132,8 @@ class LegacyItemDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertDeserialization(
 			[
 				'claims' => [
-					$this->newStatementSerialization()
-				]
+					$this->newStatementSerialization(),
+				],
 			],
 			$item
 		);
@@ -151,7 +151,7 @@ class LegacyItemDeserializerTest extends \PHPUnit\Framework\TestCase {
 			'q' => [],
 			'g' => 'foo',
 			'rank' => Statement::RANK_NORMAL,
-			'refs' => []
+			'refs' => [],
 		];
 	}
 
@@ -162,8 +162,8 @@ class LegacyItemDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertDeserialization(
 			[
 				'statements' => [
-					$this->newStatementSerialization()
-				]
+					$this->newStatementSerialization(),
+				],
 			],
 			$item
 		);
@@ -178,7 +178,7 @@ class LegacyItemDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $labels, $item->getFingerprint()->getLabels()->toTextArray() );
 	}
 
-	public function TermListProvider() {
+	public static function TermListProvider() {
 		return [
 			[ [] ],
 
@@ -217,7 +217,7 @@ class LegacyItemDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $aliases, $item->getFingerprint()->getAliasGroups()->toTextArray() );
 	}
 
-	public function aliasesListProvider() {
+	public static function aliasesListProvider() {
 		return [
 			[ [] ],
 

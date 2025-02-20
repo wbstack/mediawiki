@@ -11,7 +11,6 @@ use JobSpecification;
 use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
 use MediaWiki\JobQueue\JobQueueGroupFactory;
 use MediaWiki\MediaWikiServices;
-use MWException;
 use Psr\Log\LoggerInterface;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -63,7 +62,7 @@ class DispatchChangesJob extends Job {
 	 */
 	private $changeStore;
 
-	/*
+	/**
 	 * @var LoggerInterface
 	 */
 	private $logger;
@@ -126,9 +125,6 @@ class DispatchChangesJob extends Job {
 		);
 	}
 
-	/**
-	 * @throws MWException
-	 */
 	public function run(): bool {
 		// TODO: for v2 of this job, we could actually get all the newest revision from the DB,
 		//       calculate the change_info ourselves and thus make wb_changes table obsolete?
@@ -140,7 +136,7 @@ class DispatchChangesJob extends Job {
 
 		$changes = $this->changeLookup->loadByEntityIdFromPrimary( $this->entityIdSerialization );
 
-		if ( empty( $changes ) ) {
+		if ( !$changes ) {
 			$this->logger->info( __METHOD__ . ': no changes for {entity} => all have been consumed by previous job?', [
 				'entity' => $this->entityIdSerialization,
 			] );
@@ -153,7 +149,7 @@ class DispatchChangesJob extends Job {
 			$wikisWithSitelinkChanges = [];
 		}
 		$dispatchingClientSites = $this->filterClientWikis( $allClientSites, $subscribedClientSites, $wikisWithSitelinkChanges );
-		if ( empty( $dispatchingClientSites ) ) {
+		if ( !$dispatchingClientSites ) {
 			// without subscribed wikis, this job should never have been scheduled
 			$this->logger->warning( __METHOD__ . ': no wikis subscribed for {entity} => doing nothing', [
 				'entity' => $this->entityIdSerialization,
@@ -189,7 +185,7 @@ class DispatchChangesJob extends Job {
 	private function logUnsubscribedWikisWithSitelinkChanges( $dispatchingClientSites, $subscribedClientSites ) {
 		$clientsWithAddedSitelinks = array_diff( array_keys( $dispatchingClientSites ), $subscribedClientSites );
 		foreach ( $clientsWithAddedSitelinks as $wikiId ) {
-			$this->stats->increment( "wikibase.repo.dispatchChangesJob.sitelinkAdditionDispatched.${wikiId}" );
+			$this->stats->increment( "wikibase.repo.dispatchChangesJob.sitelinkAdditionDispatched.{$wikiId}" );
 		}
 	}
 
@@ -223,7 +219,6 @@ class DispatchChangesJob extends Job {
 	 * @param string[] $subscribedClientSites sites subscribed to this entityId
 	 * @param string[] $wikisWithSitelinkChanges sites whose sitelink was changed
 	 *
-	 * @throws MWException
 	 * @return string[] A mapping of client wiki site IDs to logical database names.
 	 */
 	private function filterClientWikis( array $allClientWikis, array $subscribedClientSites, array $wikisWithSitelinkChanges ): array {

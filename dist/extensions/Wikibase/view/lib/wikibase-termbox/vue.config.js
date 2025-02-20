@@ -29,9 +29,7 @@ function externals() {
 		return [];
 	}
 
-	// get external packages from @wmde/lib-version-check config
-	const package = require( './package.json' );
-	const resourceLoaderModules = Object.keys( package.config.remoteVersion );
+	const resourceLoaderModules = [ 'vue', 'vuex' ];
 	const resourceLoaderPackageFiles = [
 		'./config.json',
 	];
@@ -41,16 +39,27 @@ function externals() {
 	];
 }
 
+// This is a hack. Assets are located in ../assets/ relative to dist/. Migrating to Vue CLI 5 made referring to assets
+// outside of dist/ more complicated and this is a workaround to prepend '../' to asset paths. Better solutions welcome.
+const publicPath = DEV_MODE ? '' : '../';
+
 module.exports = {
 	outputDir: TARGET_NODE ? 'serverDist' : 'dist',
+	publicPath,
 	configureWebpack: () => ( {
-		entry: DEV_MODE ? [ './src/dev-entry.ts', mainEntry ] : mainEntry,
+		entry: DEV_MODE ? './src/dev-entry.ts' : mainEntry,
 		externals: externals(),
 		target: TARGET_NODE ? 'node' : 'web',
 		node: TARGET_NODE ? undefined : false,
 		output: {
 			libraryTarget: DEV_MODE ? undefined : 'commonjs2',
-			filename: `${filePrefix}[name].js`,
+			filename: ( pathData ) => {
+				if ( !TARGET_NODE && pathData.chunk.name === 'main' ) {
+					return `${filePrefix}init.js`;
+				}
+
+				return `${filePrefix}[name].js`;
+			},
 		},
 		optimization: {
 			splitChunks: undefined,
@@ -66,17 +75,10 @@ module.exports = {
 					Object.assign( {}, options, { filename: `${filePrefix}[name].css` } ),
 					...args,
 				] );
-
-			// ResourceLoader has access to /assets/* and /dist/*.css - use assets directly
-			config.module
-				.rule( 'images' )
-				.test( /\.(png|jpe?g|gif|svg)(\?.*)?$/ )
-				.use( 'url-loader' )
-				.loader( 'url-loader' )
-				.options( {
-					limit: -1,
-					name: '[path]/[name].[ext]',
-				} );
+			config.module.rule( 'image' ).set( 'generator', {
+				// Keep image path and filename as they are. ResourceLoader directly accesses assets/.
+				filename: '[path]/[name][ext]',
+			} );
 		}
 
 		config.module
@@ -92,11 +94,14 @@ module.exports = {
 						},
 					},
 				} ) );
+
+		config.module.rule( 'js' ).use( 'babel-loader' )
+			.tap( ( options ) => Object.assign( options, { cacheDirectory: false } ) );
 	},
 	css: {
 		loaderOptions: {
 			sass: {
-				additionalData: '@import "@/styles/_main.scss";',
+				additionalData: '@use "sass:math"; @import "@/styles/_main.scss";',
 			},
 		},
 	},

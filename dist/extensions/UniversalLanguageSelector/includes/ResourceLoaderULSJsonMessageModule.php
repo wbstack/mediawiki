@@ -9,39 +9,31 @@
 
 namespace UniversalLanguageSelector;
 
-use ResourceLoaderContext;
-use ResourceLoaderModule;
-use Xml;
+use MediaWiki\Html\Html;
+use MediaWiki\ResourceLoader\Context;
+use MediaWiki\ResourceLoader\Module;
 
 /**
  * ResourceLoader module for client-side loading of json-based localization.
  */
-class ResourceLoaderULSJsonMessageModule extends ResourceLoaderModule {
+class ResourceLoaderULSJsonMessageModule extends Module {
 	/**
 	 * Part of the ResourceLoader module interface.
 	 * Declares the core ext.uls.i18n module as a dependency.
 	 * @suppress PhanParamSignatureRealMismatchParamType, UnusedSuppression -- T308443
-	 * @param ResourceLoaderContext|null $context
+	 * @param Context|null $context
 	 * @return string[] Module names.
 	 */
-	public function getDependencies( ResourceLoaderContext $context = null ) {
+	public function getDependencies( ?Context $context = null ) {
 		return [ 'ext.uls.i18n' ];
 	}
 
 	/**
-	 * Get supported mobile targets
-	 * @return string[] supported targets
-	 */
-	public function getTargets() {
-		return [ 'desktop', 'mobile' ];
-	}
-
-	/**
 	 * @suppress PhanParamSignatureRealMismatchParamType, UnusedSuppression -- T308443
-	 * @param ResourceLoaderContext $context
+	 * @param Context $context
 	 * @return array
 	 */
-	public function getDefinitionSummary( ResourceLoaderContext $context ) {
+	public function getDefinitionSummary( Context $context ) {
 		$code = $context->getLanguage();
 		$fileHashes = array_map(
 			[ __CLASS__, 'safeFileHash' ],
@@ -59,13 +51,13 @@ class ResourceLoaderULSJsonMessageModule extends ResourceLoaderModule {
 	 * Get the message strings for the current UI language. Uses
 	 * mw.uls.loadLocalization to register them on the frontend.
 	 * @suppress PhanParamSignatureRealMismatchParamType, UnusedSuppression -- T308443
-	 * @param ResourceLoaderContext $context
+	 * @param Context $context
 	 * @return string JavaScript code.
 	 */
-	public function getScript( ResourceLoaderContext $context ) {
+	public function getScript( Context $context ) {
 		$code = $context->getLanguage();
 		$params = [ $code, ULSJsonMessageLoader::getMessages( $code ) ];
 
-		return Xml::encodeJsCall( 'mw.uls.loadLocalization', $params );
+		return Html::encodeJsCall( 'mw.uls.loadLocalization', $params );
 	}
 }

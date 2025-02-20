@@ -2,7 +2,7 @@
 /**
  * Contain classes to list log entries
  *
- * Copyright © 2004 Brion Vibber <brion@pobox.com>
+ * Copyright © 2004 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,30 +23,42 @@
  * @file
  */
 
+use MediaWiki\Context\ContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\Field\HTMLMultiSelectField;
+use MediaWiki\HTMLForm\Field\HTMLSelectField;
+use MediaWiki\HTMLForm\Field\HTMLTitleTextField;
+use MediaWiki\HTMLForm\Field\HTMLUserTextField;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Page\PageReference;
+use MediaWiki\Pager\LogPager;
+use MediaWiki\Parser\Sanitizer;
 use MediaWiki\Permissions\Authority;
-use Wikimedia\Rdbms\IDatabase;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\Xml\Xml;
 
 class LogEventsList extends ContextSource {
 	public const NO_ACTION_LINK = 1;
 	public const NO_EXTRA_USER_LINKS = 2;
 	public const USE_CHECKBOXES = 4;
 
+	/** @var int */
 	public $flags;
 
 	/**
 	 * @var bool
 	 */
 	protected $showTagEditUI;
-
-	/**
-	 * @var array
-	 */
-	protected $allowedActions = null;
 
 	/**
 	 * @var LinkRenderer|null
@@ -56,11 +68,12 @@ class LogEventsList extends ContextSource {
 	/** @var HookRunner */
 	private $hookRunner;
 
+	private LogFormatterFactory $logFormatterFactory;
+
+	/** @var MapCacheLRU */
+	private $tagsCache;
+
 	/**
-	 * @stable to call. As of the 1.36 release, there is no factory for this class, and it is
-	 *         instantiated directly by several extensions. The constructor needs to retain
-	 *         backwards compatibility until a factory has been introduced.
-	 *
 	 * @param IContextSource $context
 	 * @param LinkRenderer|null $linkRenderer
 	 * @param int $flags Can be a combination of self::NO_ACTION_LINK,
@@ -73,7 +86,10 @@ class LogEventsList extends ContextSource {
 		if ( $linkRenderer instanceof LinkRenderer ) {
 			$this->linkRenderer = $linkRenderer;
 		}
-		$this->hookRunner = Hooks::runner();
+		$services = MediaWikiServices::getInstance();
+		$this->hookRunner = new HookRunner( $services->getHookContainer() );
+		$this->logFormatterFactory = $services->getLogFormatterFactory();
+		$this->tagsCache = new MapCacheLRU( 50 );
 	}
 
 	/**
@@ -91,54 +107,47 @@ class LogEventsList extends ContextSource {
 	/**
 	 * Show options for the log list
 	 *
-	 * @param array|string $types
-	 * @param string $user
-	 * @param string|PageReference $page
-	 * @param bool $pattern
+	 * @param string $type Log type
 	 * @param int|string $year Use 0 to start with no year preselected.
 	 * @param int|string $month A month in the 1..12 range. Use 0 to start with no month
 	 *  preselected.
 	 * @param int|string $day A day in the 1..31 range. Use 0 to start with no month
 	 *  preselected.
-	 * @param array|null $filter
-	 * @param string $tagFilter Tag to select by default
-	 * @param string|null $action
+	 * @return bool Whether the options are valid
 	 */
-	public function showOptions( $types = [], $user = '', $page = '', $pattern = false, $year = 0,
-		$month = 0, $day = 0, $filter = null, $tagFilter = '', $action = null
-	) {
-		// For B/C, we take strings, but make sure they are converted...
-		$types = ( $types === '' ) ? [] : (array)$types;
-
+	public function showOptions( $type = '', $year = 0, $month = 0, $day = 0 ) {
 		$formDescriptor = [];
 
 		// Basic selectors
-		$formDescriptor['type'] = $this->getTypeMenuDesc( $types );
-		$formDescriptor['user'] = $this->getUserInputDesc( $user );
-		$formDescriptor['page'] = $this->getTitleInputDesc( $page );
-
-		// Add extra inputs if any
-		// This could either be a form descriptor array or a string with raw HTML.
-		// We need it to work in both cases and show a deprecation warning if it
-		// is a string. See T199495.
-		$extraInputsDescriptor = $this->getExtraInputsDesc( $types );
-		if (
-			is_array( $extraInputsDescriptor ) &&
-			!empty( $extraInputsDescriptor )
-		) {
-			$formDescriptor[ 'extra' ] = $extraInputsDescriptor;
-		} elseif (
-			is_string( $extraInputsDescriptor ) &&
-			$extraInputsDescriptor !== ''
-		) {
-			// We'll add this to the footer of the form later
-			$extraInputsString = $extraInputsDescriptor;
-			wfDeprecated( '$input in LogEventsListGetExtraInputs hook', '1.32' );
-		}
+		$formDescriptor['type'] = $this->getTypeMenuDesc();
+		$formDescriptor['user'] = [
+			'class' => HTMLUserTextField::class,
+			'label-message' => 'specialloguserlabel',
+			'name' => 'user',
+			'ipallowed' => true,
+			'iprange' => true,
+			'external' => true,
+		];
+		$formDescriptor['page'] = [
+			'class' => HTMLTitleTextField::class,
+			'label-message' => 'speciallogtitlelabel',
+			'name' => 'page',
+			'required' => false,
+		];
 
 		// Title pattern, if allowed
 		if ( !$this->getConfig()->get( MainConfigNames::MiserMode ) ) {
-			$formDescriptor['pattern'] = $this->getTitlePatternDesc( $pattern );
+			$formDescriptor['pattern'] = [
+				'type' => 'check',
+				'label-message' => 'log-title-wildcard',
+				'name' => 'pattern',
+			];
+		}
+
+		// Add extra inputs if any
+		$extraInputsDescriptor = $this->getExtraInputsDesc( $type );
+		if ( $extraInputsDescriptor ) {
+			$formDescriptor[ 'extra' ] = $extraInputsDescriptor;
 		}
 
 		// Date menu
@@ -154,84 +163,89 @@ class LogEventsList extends ContextSource {
 			'name' => 'tagfilter',
 			'label-message' => 'tag-filter',
 		];
+		$formDescriptor['tagInvert'] = [
+			'type' => 'check',
+			'name' => 'tagInvert',
+			'label-message' => 'invert',
+			'hide-if' => [ '===', 'tagfilter', '' ],
+		];
 
-		// Filter links
-		if ( $filter ) {
-			$formDescriptor['filters'] = $this->getFiltersDesc( $filter );
+		// Filter checkboxes, when work on all logs
+		if ( $type === '' ) {
+			$formDescriptor['filters'] = $this->getFiltersDesc();
 		}
 
 		// Action filter
-		if (
-			$action !== null &&
-			$this->allowedActions !== null &&
-			count( $this->allowedActions ) > 0
-		) {
-			$formDescriptor['subtype'] = $this->getActionSelectorDesc( $types, $action );
+		$allowedActions = $this->getConfig()->get( MainConfigNames::ActionFilteredLogs );
+		if ( isset( $allowedActions[$type] ) ) {
+			$formDescriptor['subtype'] = $this->getActionSelectorDesc( $type, $allowedActions[$type] );
 		}
 
-		$context = new DerivativeContext( $this->getContext() );
-		$context->setTitle( SpecialPage::getTitleFor( 'Log' ) ); // Remove subpage
-		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $context );
+		$htmlForm = HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() );
 		$htmlForm
+			->setTitle( SpecialPage::getTitleFor( 'Log' ) ) // Remove subpage
 			->setSubmitTextMsg( 'logeventslist-submit' )
-			->setMethod( 'get' )
+			->setMethod( 'GET' )
 			->setWrapperLegendMsg( 'log' )
-			// T321154
-			->setFormIdentifier( 'logeventslist' );
+			->setFormIdentifier( 'logeventslist', true ) // T321154
+			// Set callback for data validation and log type description.
+			->setSubmitCallback( static function ( $formData, $form ) {
+				$form->addPreHtml(
+					( new LogPage( $formData['type'] ) )->getDescription()
+						->setContext( $form->getContext() )->parseAsBlock()
+				);
+				return true;
+			} );
 
-		// TODO This will should be removed at some point. See T199495.
-		if ( isset( $extraInputsString ) ) {
-			$htmlForm->addFooterText( Html::rawElement(
-				'div',
-				[],
-				$extraInputsString
-			) );
-		}
-
-		$htmlForm->prepareForm()->displayForm( false );
+		$result = $htmlForm->prepareForm()->trySubmit();
+		$htmlForm->displayForm( $result );
+		return $result === true || ( $result instanceof Status && $result->isGood() );
 	}
 
 	/**
-	 * @param array $filter
 	 * @return array Form descriptor
 	 */
-	private function getFiltersDesc( $filter ) {
+	private function getFiltersDesc() {
 		$optionsMsg = [];
-		$default = [];
-		foreach ( $filter as $type => $val ) {
+		$filters = $this->getConfig()->get( MainConfigNames::FilterLogTypes );
+		foreach ( $filters as $type => $val ) {
 			$optionsMsg["logeventslist-{$type}-log"] = $type;
-
-			if ( $val === false ) {
-				$default[] = $type;
-			}
 		}
 		return [
 			'class' => HTMLMultiSelectField::class,
 			'label-message' => 'logeventslist-more-filters',
 			'flatlist' => true,
 			'options-messages' => $optionsMsg,
-			'default' => $default,
+			'default' => array_keys( array_intersect( $filters, [ false ] ) ),
 		];
 	}
 
 	/**
-	 * @param array $queryTypes
 	 * @return array Form descriptor
 	 */
-	private function getTypeMenuDesc( $queryTypes ) {
-		$queryType = count( $queryTypes ) == 1 ? $queryTypes[0] : '';
-
-		$typesByName = []; // Temporary array
-		// First pass to load the log names
+	private function getTypeMenuDesc() {
+		$typesByName = [];
+		// Load the log names
 		foreach ( LogPage::validTypes() as $type ) {
 			$page = new LogPage( $type );
-			$restriction = $page->getRestriction();
-			if ( $this->getAuthority()->isAllowed( $restriction ) ) {
-				$typesByName[$type] = $page->getName()->text();
+			$pageText = $page->getName()->text();
+			if ( in_array( $pageText, $typesByName ) ) {
+				LoggerFactory::getInstance( 'error' )->error(
+					'The log type {log_type_one} has the same translation as {log_type_two} for {lang}. ' .
+					'{log_type_one} will not be displayed in the drop down menu on Special:Log.',
+					[
+						'log_type_one' => $type,
+						'log_type_two' => array_search( $pageText, $typesByName ),
+						'lang' => $this->getLanguage()->getCode(),
+					]
+				);
+				continue;
+			}
+			if ( $this->getAuthority()->isAllowed( $page->getRestriction() ) ) {
+				$typesByName[$type] = $pageText;
 			}
 		}
 
-		// Second pass to sort by name
 		asort( $typesByName );
 
 		// Always put "All public logs" on top
@@ -243,86 +257,41 @@ class LogEventsList extends ContextSource {
 			'class' => HTMLSelectField::class,
 			'name' => 'type',
 			'options' => array_flip( $typesByName ),
-			'default' => $queryType,
 		];
 	}
 
 	/**
-	 * @param string $user
+	 * @param string $type
 	 * @return array Form descriptor
 	 */
-	private function getUserInputDesc( $user ) {
-		return [
-			'class' => HTMLUserTextField::class,
-			'label-message' => 'specialloguserlabel',
-			'name' => 'user',
-			'default' => $user,
-		];
-	}
+	private function getExtraInputsDesc( $type ) {
+		if ( $type === 'suppress' ) {
+			return [
+				'type' => 'text',
+				'label-message' => 'revdelete-offender',
+				'name' => 'offender',
+			];
+		} else {
+			// Allow extensions to add an extra input into the descriptor array.
+			$unused = ''; // Deprecated since 1.32, removed in 1.41
+			$formDescriptor = [];
+			$this->hookRunner->onLogEventsListGetExtraInputs( $type, $this, $unused, $formDescriptor );
 
-	/**
-	 * @param string|PageReference $page
-	 * @return array Form descriptor
-	 */
-	private function getTitleInputDesc( $page ) {
-		return [
-			'class' => HTMLTitleTextField::class,
-			'label-message' => 'speciallogtitlelabel',
-			'name' => 'page',
-			'required' => false
-		];
-	}
-
-	/**
-	 * @param bool $pattern
-	 * @return array Form descriptor
-	 */
-	private function getTitlePatternDesc( $pattern ) {
-		return [
-			'type' => 'check',
-			'label-message' => 'log-title-wildcard',
-			'name' => 'pattern',
-		];
-	}
-
-	/**
-	 * @param array $types
-	 * @return array|string Form descriptor or string with HTML
-	 */
-	private function getExtraInputsDesc( $types ) {
-		if ( count( $types ) == 1 ) {
-			if ( $types[0] == 'suppress' ) {
-				return [
-					'type' => 'text',
-					'label-message' => 'revdelete-offender',
-					'name' => 'offender',
-				];
-			} else {
-				// Allow extensions to add their own extra inputs
-				// This could be an array or string. See T199495.
-				$input = ''; // Deprecated
-				$formDescriptor = [];
-				$this->hookRunner->onLogEventsListGetExtraInputs( $types[0], $this, $input, $formDescriptor );
-
-				return empty( $formDescriptor ) ? $input : $formDescriptor;
-			}
+			return $formDescriptor;
 		}
-
-		return [];
 	}
 
 	/**
 	 * Drop down menu for selection of actions that can be used to filter the log
-	 * @param array $types
-	 * @param string $action
+	 * @param string $type
+	 * @param array $actions
 	 * @return array Form descriptor
 	 */
-	private function getActionSelectorDesc( $types, $action ) {
-		$actionOptions = [];
-		$actionOptions[ 'log-action-filter-all' ] = '';
+	private function getActionSelectorDesc( $type, $actions ) {
+		$actionOptions = [ 'log-action-filter-all' => '' ];
 
-		foreach ( $this->allowedActions as $value ) {
-			$msgKey = 'log-action-filter-' . $types[0] . '-' . $value;
+		foreach ( $actions as $value => $_ ) {
+			$msgKey = "log-action-filter-$type-$value";
 			$actionOptions[ $msgKey ] = $value;
 		}
 
@@ -330,19 +299,8 @@ class LogEventsList extends ContextSource {
 			'class' => HTMLSelectField::class,
 			'name' => 'subtype',
 			'options-messages' => $actionOptions,
-			'default' => $action,
-			'label' => $this->msg( 'log-action-filter-' . $types[0] )->text(),
+			'label-message' => 'log-action-filter-' . $type,
 		];
-	}
-
-	/**
-	 * Sets the action types allowed for log filtering
-	 * To one action type may correspond several log_actions
-	 * @param array $actions
-	 * @since 1.27
-	 */
-	public function setAllowedActions( $actions ) {
-		$this->allowedActions = $actions;
 	}
 
 	/**
@@ -365,9 +323,8 @@ class LogEventsList extends ContextSource {
 	 */
 	public function logLine( $row ) {
 		$entry = DatabaseLogEntry::newFromRow( $row );
-		$formatter = LogFormatter::newFromEntry( $entry );
+		$formatter = $this->logFormatterFactory->newFromEntry( $entry );
 		$formatter->setContext( $this->getContext() );
-		$formatter->setLinkRenderer( $this->getLinkRenderer() );
 		$formatter->setShowUserToolLinks( !( $this->flags & self::NO_EXTRA_USER_LINKS ) );
 
 		$time = $this->getLanguage()->userTimeAndDate(
@@ -399,10 +356,17 @@ class LogEventsList extends ContextSource {
 		$del = $this->getShowHideLinks( $row );
 
 		// Any tags...
-		list( $tagDisplay, $newClasses ) = ChangeTags::formatSummaryRow(
-			$row->ts_tags,
-			'logevent',
-			$this->getContext()
+		[ $tagDisplay, $newClasses ] = $this->tagsCache->getWithSetCallback(
+			$this->tagsCache->makeKey(
+				$row->ts_tags ?? '',
+				$this->getUser()->getName(),
+				$this->getLanguage()->getCode()
+			),
+			fn () => ChangeTags::formatSummaryRow(
+				$row->ts_tags,
+				'logevent',
+				$this->getContext()
+			)
 		);
 		$classes = array_merge(
 			[ 'mw-logline-' . $entry->getType() ],
@@ -516,7 +480,7 @@ class LogEventsList extends ContextSource {
 	 * field of this log row, if it's marked as deleted and/or restricted log type.
 	 *
 	 * @param stdClass $row
-	 * @param int $field
+	 * @param int $field One of LogPage::DELETED_ACTION, ::DELETED_COMMENT, ::DELETED_USER, ::DELETED_RESTRICTED
 	 * @param Authority $performer User to check
 	 * @return bool
 	 */
@@ -530,7 +494,7 @@ class LogEventsList extends ContextSource {
 	 * field of this log row, if it's marked as deleted.
 	 *
 	 * @param int $bitfield Current field
-	 * @param int $field
+	 * @param int $field One of LogPage::DELETED_ACTION, ::DELETED_COMMENT, ::DELETED_USER, ::DELETED_RESTRICTED
 	 * @param Authority $performer User to check
 	 * @return bool
 	 */
@@ -555,8 +519,7 @@ class LogEventsList extends ContextSource {
 	 */
 	public static function userCanViewLogType( $type, Authority $performer ) {
 		$logRestrictions = MediaWikiServices::getInstance()->getMainConfig()->get( MainConfigNames::LogRestrictions );
-		if ( isset( $logRestrictions[$type] ) && !$performer->isAllowed( $logRestrictions[$type] )
-		) {
+		if ( isset( $logRestrictions[$type] ) && !$performer->isAllowed( $logRestrictions[$type] ) ) {
 			return false;
 		}
 		return true;
@@ -564,7 +527,7 @@ class LogEventsList extends ContextSource {
 
 	/**
 	 * @param stdClass $row
-	 * @param int $field One of DELETED_* bitfield constants
+	 * @param int $field One of LogPage::DELETED_ACTION, ::DELETED_COMMENT, ::DELETED_USER, ::DELETED_RESTRICTED
 	 * @return bool
 	 */
 	public static function isDeleted( $row, $field ) {
@@ -581,7 +544,7 @@ class LogEventsList extends ContextSource {
 	 * @param array $param Associative Array with the following additional options:
 	 * - lim Integer Limit of items to show, default is 50
 	 * - conds Array Extra conditions for the query
-	 *   (e.g. 'log_action != ' . $dbr->addQuotes( 'revision' ))
+	 *   (e.g. $dbr->expr( 'log_action', '!=', 'revision' ))
 	 * - showIfEmpty boolean Set to false if you don't want any output in case the loglist is empty
 	 *   if set to true (default), "No matching items in log" is displayed if loglist is empty
 	 * - msgKey Array If you want a nice box with a message, set this to the key of the message.
@@ -628,6 +591,8 @@ class LogEventsList extends ContextSource {
 			$msgKey = [ $msgKey ];
 		}
 
+		// ???
+		// @phan-suppress-next-line PhanRedundantCondition
 		if ( $out instanceof OutputPage ) {
 			$context = $out->getContext();
 		} else {
@@ -654,9 +619,10 @@ class LogEventsList extends ContextSource {
 			'',
 			0,
 			$services->getLinkBatchFactory(),
-			$services->getDBLoadBalancer(),
-			$services->getActorNormalization()
+			$services->getActorNormalization(),
+			$services->getLogFormatterFactory()
 		);
+		// @phan-suppress-next-line PhanImpossibleCondition
 		if ( !$useRequestParams ) {
 			# Reset vars that may have been taken from the request
 			$pager->mLimit = 50;
@@ -665,8 +631,9 @@ class LogEventsList extends ContextSource {
 			$pager->mIsBackwards = false;
 		}
 
+		// @phan-suppress-next-line PhanImpossibleCondition
 		if ( $param['useMaster'] ) {
-			$pager->mDb = wfGetDB( DB_PRIMARY );
+			$pager->mDb = $services->getConnectionProvider()->getPrimaryDatabase();
 		}
 		// @phan-suppress-next-line PhanImpossibleCondition
 		if ( isset( $param['offset'] ) ) { # Tell pager to ignore WebRequest offset
@@ -697,6 +664,7 @@ class LogEventsList extends ContextSource {
 				$loglist->endLogEventsList();
 			// add styles for change tags
 			$context->getOutput()->addModuleStyles( 'mediawiki.interface.helpers.styles' );
+		// @phan-suppress-next-line PhanRedundantCondition
 		} elseif ( $showIfEmpty ) {
 			$s = Html::rawElement( 'div', [ 'class' => 'mw-warning-logempty' ],
 				$context->msg( 'logempty' )->parse() );
@@ -763,13 +731,14 @@ class LogEventsList extends ContextSource {
 			);
 		}
 
-		// @phan-suppress-next-line PhanSuspiciousValueComparison
+		// @phan-suppress-next-line PhanSuspiciousValueComparison, PhanRedundantCondition
 		if ( $wrap != '' ) { // Wrap message in html
 			$s = str_replace( '$1', $s, $wrap );
 		}
 
 		/* hook can return false, if we don't want the message to be emitted (Wikia BugId:7093) */
-		if ( Hooks::runner()->onLogEventsListShowLogExtract( $s, $types, $pageName, $user, $param ) ) {
+		$hookRunner = new HookRunner( $services->getHookContainer() );
+		if ( $hookRunner->onLogEventsListShowLogExtract( $s, $types, $pageName, $user, $param ) ) {
 			// $out can be either an OutputPage object or a String-by-reference
 			if ( $out instanceof OutputPage ) {
 				$out->addHTML( $s );
@@ -784,13 +753,13 @@ class LogEventsList extends ContextSource {
 	/**
 	 * SQL clause to skip forbidden log types for this user
 	 *
-	 * @param IDatabase $db
+	 * @param \Wikimedia\Rdbms\IReadableDatabase $db
 	 * @param string $audience Public/user
 	 * @param Authority|null $performer User to check, required when audience isn't public
-	 * @return string|bool String on success, false on failure.
+	 * @return string|false String on success, false on failure.
 	 * @throws InvalidArgumentException
 	 */
-	public static function getExcludeClause( $db, $audience = 'public', Authority $performer = null ) {
+	public static function getExcludeClause( $db, $audience = 'public', ?Authority $performer = null ) {
 		$logRestrictions = MediaWikiServices::getInstance()->getMainConfig()->get( MainConfigNames::LogRestrictions );
 
 		if ( $audience != 'public' && $performer === null ) {
@@ -804,8 +773,7 @@ class LogEventsList extends ContextSource {
 
 		// Don't show private logs to unprivileged users
 		foreach ( $logRestrictions as $logType => $right ) {
-			if ( $audience == 'public' || !$performer->isAllowed( $right )
-			) {
+			if ( $audience == 'public' || !$performer->isAllowed( $right ) ) {
 				$hiddenLogs[] = $logType;
 			}
 		}

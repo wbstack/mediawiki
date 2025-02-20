@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\Maintenance;
 
 $basePath = getenv( 'MW_INSTALL_PATH' ) !== false
@@ -10,14 +12,12 @@ require_once $basePath . '/maintenance/Maintenance.php';
 require_once $basePath . '/extensions/EntitySchema/src/Domain/Storage/IdGenerator.php';
 require_once 'FixedIdGenerator.php';
 
-use EntitySchema\DataAccess\MediaWikiPageUpdaterFactory;
-use EntitySchema\DataAccess\MediaWikiRevisionSchemaInserter;
-use EntitySchema\DataAccess\WatchlistUpdater;
-use Maintenance;
-use MediaWiki\MediaWikiServices;
-use RequestContext;
-use RuntimeException;
-use User;
+use EntitySchema\DataAccess\MediaWikiRevisionEntitySchemaInserter;
+use EntitySchema\MediaWiki\EntitySchemaServices;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\User\User;
 
 /**
  * Maintenance script for creating preexisting EntitySchemas.
@@ -39,7 +39,7 @@ class CreatePreexistingSchemas extends Maintenance {
 		$this->requireExtension( 'EntitySchema' );
 	}
 
-	public function execute() {
+	public function execute(): void {
 		// "Maintenance script" is in MediaWiki's $wgReservedUsernames
 		$user = User::newSystemUser( 'Maintenance script', [ 'steal' => true ] );
 
@@ -160,34 +160,34 @@ class CreatePreexistingSchemas extends Maintenance {
 		];
 	}
 
-	private function createSchema( $idString, array $dataMap, User $user ) {
+	private function createSchema( string $idString, array $dataMap, User $user ): void {
 		$this->output(
 			'Importing Schema with label ' . $dataMap[self::LABEL] . " as EntitySchema $idString... \n"
 		);
 
-		$pageUpdaterFactory = new MediaWikiPageUpdaterFactory( $user );
+		$context = new DerivativeContext( RequestContext::getMain() );
+		$context->setUser( $user );
 
 		$fixedIdGenerator = new FixedIdGenerator( (int)trim( $idString, 'E' ) );
 
-		$services = MediaWikiServices::getInstance();
-		$schemaInserter = new MediaWikiRevisionSchemaInserter(
-			$pageUpdaterFactory,
-			new WatchlistUpdater( $user, NS_ENTITYSCHEMA_JSON ),
+		$services = $this->getServiceContainer();
+		$schemaInserter = new MediaWikiRevisionEntitySchemaInserter(
+			EntitySchemaServices::getMediaWikiPageUpdaterFactory( $services ),
+			EntitySchemaServices::getWatchlistUpdater( $services ),
 			$fixedIdGenerator,
-			RequestContext::getMain(),
-			$services->getHookContainer(),
-			$services->getTitleFactory()
+			$context,
+			$services->getLanguageFactory(),
+			$services->getHookContainer()
 		);
 
-		try {
-			$schemaInserter->insertSchema(
-				'en',
-				$dataMap[self::LABEL] ?? '',
-				$dataMap[self::DESC] ?? '',
-				[],
-				''
-			);
-		} catch ( RuntimeException $e ) {
+		$status = $schemaInserter->insertSchema(
+			'en',
+			$dataMap[self::LABEL] ?? '',
+			$dataMap[self::DESC] ?? '',
+			[],
+			''
+		);
+		if ( !$status->isOK() ) {
 			$this->output(
 				'Failed to save ' . $dataMap[self::LABEL] . " with ID $idString. Moving on... \n"
 			);

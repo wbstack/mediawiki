@@ -7,12 +7,13 @@
 			"Johanna Strodt (WMDE)",
 			"Kghbln",
 			"Metalhead64",
-			"Sebastian Wallroth",
-			"Schniggendiller"
+			"Schniggendiller",
+			"Sebastian Wallroth"
 		]
 	},
 	"advancedsearch-desc": "Ermöglicht einen leichten Zugang zu erweiterten Suchmöglichkeiten auf der Spezialseite [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Erweiterte Suche:",
+	"advancedsearch-options-pane-preview-list": "Derzeit verwendete Suchbegriffe",
 	"advancedsearch-optgroup-text": "Im Seitentext suchen",
 	"advancedsearch-optgroup-structure": "Struktur",
 	"advancedsearch-optgroup-files": "Dateien und Bilder",
@@ -31,6 +32,7 @@
 	"advancedsearch-field-fileh": "Dateihöhe in Pixeln",
 	"advancedsearch-field-sort": "Sortierreihenfolge",
 	"advancedsearch-field-preview-sort": "Sortieren nach $1",
+	"advancedsearch-help-general-instruction": "Detaillierte Anweisungen für $1",
 	"advancedsearch-help-plain": ";Beschreibung\n:Sucht nach diesen Wörtern im Titel oder im Text.\n;Bitte beachte Folgendes\n* Mehrere Wörter können hier eingegeben werden.\n* Satzzeichen und andere nicht-alphanumerische Zeichen (mit Ausnahme des Doppelpunktes und des Kommas) werden ignoriert.\n* Es könnte Ergebnisse geben, die nicht einen oder mehrere deiner Suchbegriffe enthalten.\n* Wortabstammung wird angewandt. Beispiel: Falls <em>Auto</em> eingegeben wird, findet die Suche auch <em>Autos</em>. Die Wortabstammung ist sprachspezifisch.\n;Hilfeseite\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Volltextsuche]\n;Syntaxgleichwertig in der normalen Suche\n:<code>Sesam Straße Auto</code>",
 	"advancedsearch-help-phrase": ";Beschreibung\n:Sucht nach einer besonderen Sequenz von Zeichen. Satzzeichen werden ignoriert.\n;Bitte beachte Folgendes\n(nur gültig bei Verwendung von Anführungszeichen, siehe Beispiel unten)\n* Bei der Suche wird nicht zwischen Groß-/Kleinschreibung unterschieden.\n* Satzzeichen und andere nicht-alphanumerische Zeichen (mit Ausnahme des Doppelpunktes und des Kommas) werden ignoriert.\n* Wortabstammung wird nicht angewandt.\n:* Trenne die Suchbegriffe durch Kommata und Leerzeichen, z.&nbsp;B. <code>\"Guten Morgen\"</code>, <code>\"Hallo Freund\"</code>.\n;Hilfeseite\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Wörter, Ausdrücke und Modifikatoren]\n;Syntaxgleichwertig in der normalen Suche\n:Wörter in Anführungszeichen, zum Beispiel <code>\"Am Anfang beginnen\"</code>",
 	"advancedsearch-help-or": ";Beschreibung\n:Mindestens einer der Suchbegriffe ist in der Seite enthalten.\n;Hilfeseite\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Wörter, Ausdrücke und Modifikatoren]\n;Syntaxgleichwertig in der normalen Suche\n:Wörter mit <code>OR</code> dazwischen, wie <code>Laptop OR Notebook</code>",
@@ -73,6 +75,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "Erstelldatum",
 	"advancedsearch-namespaces-search-in": "Suchen in:",
 	"advancedsearch-namespaces-remember": "Auswahl für zukünftige Suchanfragen merken",
+	"advancedsearch-namespaces-pane-preview-list": "Derzeit aktive Namensraum-Filter",
 	"advancedsearch-namespaces-preset-all": "Alle",
 	"advancedsearch-namespaces-preset-default": "Standard",
 	"advancedsearch-namespaces-preset-general-help": "Allgemeine Hilfe",

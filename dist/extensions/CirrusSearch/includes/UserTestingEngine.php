@@ -2,7 +2,7 @@
 
 namespace CirrusSearch;
 
-use Config;
+use MediaWiki\Config\Config;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -69,7 +69,7 @@ class UserTestingEngine {
 		if ( strpos( $trigger, ':' ) === false ) {
 			return UserTestingStatus::inactive();
 		}
-		list( $testName, $bucket ) = explode( ':', $trigger, 2 );
+		[ $testName, $bucket ] = explode( ':', $trigger, 2 );
 		if ( isset( $this->tests[$testName]['buckets'][$bucket] ) ) {
 			return UserTestingStatus::active( $testName, $bucket );
 		} else {
@@ -113,7 +113,11 @@ class UserTestingEngine {
 			$testConfig['buckets'][$status->getBucket()]['globals'] ?? [] );
 
 		foreach ( $globals as $key => $value ) {
-			if ( array_key_exists( $key, $GLOBALS ) ) {
+			// (T317951) Don't call array_key_exists unless we have to, as it's slow
+			// on PHP 8.1+ for $GLOBALS. When the key is set but is explicitly set
+			// to null, we still need to fall back to array_key_exists, but that's
+			// rarer.
+			if ( isset( $GLOBALS[$key] ) || array_key_exists( $key, $GLOBALS ) ) {
 				$GLOBALS[$key] = $value;
 			}
 		}

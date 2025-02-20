@@ -17,7 +17,7 @@ function ModuleLoader() {
 ModuleLoader.prototype = {
 	/**
 	 * Require (import) a module previously defined using define().
-	 * Searches core module registry using mw.loader.require before consulting
+	 * Searches core module registry using ResourceLoader require before consulting
 	 * its own local registry. This method is deprecated, please do not use.
 	 *
 	 * @memberof ModuleLoader
@@ -25,9 +25,8 @@ ModuleLoader.prototype = {
 	 * @param {string} id Required module id.
 	 * @return {Object} Required module, can be any JavaScript object.
 	 */
-	require: function ( id ) {
-		var module, args,
-			registry = this._register;
+	require( id ) {
+		const registry = this._register;
 
 		/**
 		 * @return {Object} Module
@@ -36,13 +35,14 @@ ModuleLoader.prototype = {
 			if ( !Object.hasOwnProperty.call( registry, id ) ) {
 				throw new Error( 'MobileFrontend Module not found: ' + id );
 			}
-			return registry[ id ];
+			return registry[id];
 		}
-		args = id.split( '/' );
+
+		const args = id.split( '/' );
 		try {
-			module = mw.loader.require( args[0] );
-			if ( module[ args[1] ] ) {
-				return module[ args[1] ];
+			const module = __non_webpack_require__( args[0] );
+			if ( module[args[1]] ) {
+				return module[args[1]];
 			} else {
 				return localRequire();
 			}
@@ -60,13 +60,13 @@ ModuleLoader.prototype = {
 	 * @param {Object} obj Defined module body, can be any JavaScript object.
 	 * @return {Object}
 	 */
-	define: function ( id, obj ) {
-		var self = this;
+	define( id, obj ) {
+		const self = this;
 
 		if ( Object.hasOwnProperty.call( this._register, id ) ) {
 			throw new Error( 'Module already exists: ' + id );
 		}
-		this._register[ id ] = obj;
+		this._register[id] = obj;
 		// return an object of additionally functions to do with the registered module
 		return {
 			/**
@@ -74,7 +74,7 @@ ModuleLoader.prototype = {
 			 * @param {string} deprecatedId Defined module id, which is deprecated.
 			 * @ignore
 			 */
-			deprecate: function ( deprecatedId ) {
+			deprecate( deprecatedId ) {
 				self.deprecate( deprecatedId, obj, id );
 			}
 		};
@@ -90,8 +90,8 @@ ModuleLoader.prototype = {
 	 * @param {string} [replacement] Give an optional replacement for this module (which
 	 * needs to be already defined!)
 	 */
-	deprecate: function ( id, obj, replacement ) {
-		var msg;
+	deprecate( id, obj, replacement ) {
+		let msg;
 		if ( replacement ) {
 			// add an alternative for this module, if any given
 			msg = 'Use ' + replacement + ' instead.';

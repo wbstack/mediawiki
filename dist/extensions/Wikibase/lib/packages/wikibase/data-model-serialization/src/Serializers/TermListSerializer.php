@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\DataModel\Serializers;
 
 use Serializers\Exceptions\SerializationException;
@@ -13,25 +15,13 @@ use Wikibase\DataModel\Term\TermList;
  * @license GPL-2.0-or-later
  * @author Addshore
  */
-class TermListSerializer implements Serializer {
+class TermListSerializer extends MapSerializer implements Serializer {
 
-	/**
-	 * @var Serializer
-	 */
-	private $termSerializer;
+	private TermSerializer $termSerializer;
 
-	/**
-	 * @var bool
-	 */
-	private $useObjectsForMaps;
-
-	/**
-	 * @param Serializer $termSerializer
-	 * @param bool $useObjectsForMaps
-	 */
-	public function __construct( Serializer $termSerializer, $useObjectsForMaps ) {
+	public function __construct( TermSerializer $termSerializer, bool $useObjectsForEmptyMaps ) {
+		parent::__construct( $useObjectsForEmptyMaps );
 		$this->termSerializer = $termSerializer;
-		$this->useObjectsForMaps = $useObjectsForMaps;
 	}
 
 	/**
@@ -44,7 +34,7 @@ class TermListSerializer implements Serializer {
 	 */
 	public function serialize( $object ) {
 		$this->assertIsSerializerFor( $object );
-		return $this->getSerialized( $object );
+		return $this->serializeMap( $this->generateSerializedArrayRepresentation( $object ) );
 	}
 
 	private function assertIsSerializerFor( $object ) {
@@ -56,23 +46,13 @@ class TermListSerializer implements Serializer {
 		}
 	}
 
-	/**
-	 * @param TermList $termList
-	 *
-	 * @return array[]
-	 */
-	private function getSerialized( TermList $termList ) {
+	protected function generateSerializedArrayRepresentation( TermList $termList ): array {
 		$serialization = [];
 
 		foreach ( $termList->getIterator() as $term ) {
 			$serialization[$term->getLanguageCode()] = $this->termSerializer->serialize( $term );
 		}
 
-		if ( $this->useObjectsForMaps ) {
-			$serialization = (object)$serialization;
-		}
-
 		return $serialization;
 	}
-
 }

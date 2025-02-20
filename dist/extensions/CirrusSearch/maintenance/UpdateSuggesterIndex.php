@@ -4,6 +4,7 @@ namespace CirrusSearch\Maintenance;
 
 use CirrusSearch\BuildDocument\Completion\SuggestBuilder;
 use CirrusSearch\Connection;
+use CirrusSearch\Elastica\SearchAfter;
 use CirrusSearch\ElasticaErrorHandler;
 use CirrusSearch\Maintenance\Validators\AnalyzersValidator;
 use CirrusSearch\SearchConfig;
@@ -13,6 +14,7 @@ use Elastica\Query;
 use Elastica\Request;
 use Elastica\Status;
 use MediaWiki\Extension\Elastica\MWElasticUtils;
+use RuntimeException;
 
 /**
  * Update the search configuration on the search backend for the title
@@ -198,11 +200,11 @@ class UpdateSuggesterIndex extends Maintenance {
 		$this->langCode = $wgLanguageCode;
 		$this->bannedPlugins = $wgCirrusSearchBannedPlugins;
 
-		$this->availablePlugins = $this->utils->scanAvailablePlugins( $this->bannedPlugins );
+		$this->availablePlugins = $this->unwrap( $this->utils->scanAvailablePlugins( $this->bannedPlugins ) );
 		$this->analysisConfig = $this->pickAnalyzer( $this->langCode, $this->availablePlugins )
 			->buildConfig();
 
-		$this->utils->checkElasticsearchVersion();
+		$this->unwrap( $this->utils->checkElasticsearchVersion() );
 
 		try {
 			$this->requireCirrusReady();
@@ -254,55 +256,45 @@ class UpdateSuggesterIndex extends Maintenance {
 	 * by a previous update that failed.
 	 */
 	private function checkAndDeleteBrokenIndices() {
-		$indices = $this->utils->getAllIndicesByType( $this->getIndexAliasName() );
+		$indices = $this->unwrap( $this->utils->getAllIndicesByType( $this->getIndexAliasName() ) );
 		if ( count( $indices ) < 2 ) {
 			return;
 		}
 		$indexByName = [];
-		foreach ( $indices as $name ) {
-			$indexByName[$name] = $this->getConnection()->getIndex( $name );
-		}
-
-		$status = new Status( $this->getClient() );
-		foreach ( $status->getIndicesWithAlias( $this->getIndexAliasName() ) as $aliased ) {
-			// do not try to delete indices that are used in aliases
-			unset( $indexByName[$aliased->getName()] );
-		}
-		foreach ( $indexByName as $name => $index ) {
-			# double check with stats
-			$stats = $index->getStats()->getData();
-			// Extra check: if stats report usages we should not try to fix things
-			// automatically.
-			if ( $stats['_all']['total']['search']['suggest_total'] == 0 ) {
-				$this->log( "Deleting broken index {$index->getName()}\n" );
-				$this->deleteIndex( $index );
-			} else {
-				$this->log( "Broken index {$index->getName()} appears to be in use, " .
-					"please check and delete.\n" );
+		foreach ( $indices as $indexName ) {
+			$status = $this->utils->isIndexLive( $indexName );
+			if ( !$status->isGood() ) {
+				$this->log( (string)$status );
+			} elseif ( $status->getValue() === false ) {
+				$this->log( "Deleting broken index {$indexName}\n" );
+				$this->deleteIndex( $this->getConnection()->getIndex( $indexName ) );
 			}
-
 		}
 		# If something went wrong the process will fail when calling pickIndexIdentifierFromOption
 	}
 
 	private function rebuild() {
-		$oldIndexIdentifier = $this->utils->pickIndexIdentifierFromOption(
+		$oldIndexIdentifier = $this->unwrap( $this->utils->pickIndexIdentifierFromOption(
 			'current', $this->getIndexAliasName()
-		);
+		) );
 		$this->oldIndex = $this->getConnection()->getIndex(
 			$this->indexBaseName, $this->indexSuffix, $oldIndexIdentifier
 		);
-		$this->indexIdentifier = $this->utils->pickIndexIdentifierFromOption(
+		$this->indexIdentifier = $this->unwrap( $this->utils->pickIndexIdentifierFromOption(
 			'now', $this->getIndexAliasName()
-		);
+		) );
 
 		$this->createIndex();
-		$this->indexData();
+		$totalSuggestDocs = $this->indexData();
 		if ( $this->optimizeIndex ) {
 			$this->optimize();
 		}
 		$this->enableReplicas();
 		$this->getIndex()->refresh();
+		$docsInIndex = $this->getIndex()->count();
+		if ( $docsInIndex != $totalSuggestDocs ) {
+			$this->error( "Prepared and indexed $totalSuggestDocs docs but the index has $docsInIndex" );
+		}
 		$this->validateAlias();
 		$this->updateVersions();
 		$this->deleteOldIndex();
@@ -319,9 +311,9 @@ class UpdateSuggesterIndex extends Maintenance {
 			return false;
 		}
 
-		$oldIndexIdentifier = $this->utils->pickIndexIdentifierFromOption(
+		$oldIndexIdentifier = $this->unwrap( $this->utils->pickIndexIdentifierFromOption(
 			'current', $this->getIndexAliasName()
-		);
+		) );
 		$oldIndex = $this->getConnection()->getIndex(
 			$this->indexBaseName, $this->indexSuffix, $oldIndexIdentifier
 		);
@@ -397,7 +389,7 @@ class UpdateSuggesterIndex extends Maintenance {
 	private function recycle() {
 		$this->log( "Recycling index {$this->getIndex()->getName()}\n" );
 		$this->recycle = true;
-		$this->indexData();
+		$indexedDocs = $this->indexData();
 		// This is fragile... hopefully most of the docs will be deleted from the old segments
 		// and will result in a fast operation.
 		// New segments should not be affected.
@@ -423,22 +415,23 @@ class UpdateSuggesterIndex extends Maintenance {
 		$query->setQuery( $bool );
 		$query->setSize( $this->indexChunkSize );
 		$query->setSource( false );
-		$query->setSort( [ '_doc' ] );
+		$query->setSort( [
+			[ '_id' => 'asc' ],
+		] );
 		// Explicitly ask for accurate total_hits even-though we use a scroll request
 		$query->setTrackTotalHits( true );
 		$search = new \Elastica\Search( $this->getClient() );
 		$search->setQuery( $query );
 		$search->addIndex( $this->getIndex() );
-		$scroll = new \Elastica\Scroll( $search, '15m' );
+		$searchAfter = new SearchAfter( $search );
 
 		$totalDocsToDump = -1;
 		$docsDumped = 0;
 
 		$this->log( "Deleting remaining docs from previous batch\n" );
-		foreach ( $scroll as $results ) {
+		foreach ( $searchAfter as $results ) {
 			if ( $totalDocsToDump === -1 ) {
-				// hack to support ES6, switch to getTotalHits
-				$totalDocsToDump = $this->getTotalHits( $results );
+				$totalDocsToDump = $results->getTotalHits();
 				if ( $totalDocsToDump === 0 ) {
 					break;
 				}
@@ -450,7 +443,7 @@ class UpdateSuggesterIndex extends Maintenance {
 				$docIds[] = $result->getId();
 			}
 			$this->outputProgress( $docsDumped, $totalDocsToDump );
-			if ( empty( $docIds ) ) {
+			if ( !$docIds ) {
 				continue;
 			}
 
@@ -471,6 +464,10 @@ class UpdateSuggesterIndex extends Maintenance {
 		// Refresh the reader so it now uses the optimized FST,
 		// and actually free and delete old segments.
 		$this->getIndex()->refresh();
+		$docsInIndex = $this->getIndex()->count();
+		if ( $docsInIndex != $indexedDocs ) {
+			$this->error( "Prepared and indexed $indexedDocs docs but the index has $docsInIndex" );
+		}
 	}
 
 	private function deleteOldIndex() {
@@ -515,7 +512,7 @@ class UpdateSuggesterIndex extends Maintenance {
 		$this->output( "ok.\n" );
 	}
 
-	private function indexData() {
+	private function indexData(): int {
 		// We build the suggestions by reading CONTENT and GENERAL indices.
 		// This does not support extra indices like FILES on commons.
 		$sourceIndexSuffixes = [ Connection::CONTENT_INDEX_SUFFIX, Connection::GENERAL_INDEX_SUFFIX ];
@@ -532,10 +529,15 @@ class UpdateSuggesterIndex extends Maintenance {
 		$bool->addFilter( $pageAndNs );
 
 		$query->setQuery( $bool );
-		$query->setSort( [ '_doc' ] );
+		$query->setSort( [
+			[ '_id' => 'asc' ],
+		] );
 		// Explicitly ask for accurate total_hits even-though we use a scroll request
 		$query->setTrackTotalHits( true );
 
+		$totalDocsDumpedFromAllIndices = 0;
+		$totalHitsFromAllIndices = 0;
+		$totalSuggestDocsIndexed = 0;
 		foreach ( $sourceIndexSuffixes as $sourceIndexSuffix ) {
 			$sourceIndex = $this->getConnection()->getIndex( $this->indexBaseName, $sourceIndexSuffix );
 			$search = new \Elastica\Search( $this->getClient() );
@@ -543,14 +545,16 @@ class UpdateSuggesterIndex extends Maintenance {
 			$search->addIndex( $sourceIndex );
 			$query->setSize( $this->indexChunkSize );
 			$totalDocsToDump = -1;
-			$scroll = new \Elastica\Scroll( $search, '15m' );
+			$searchAfter = new SearchAfter( $search );
 
 			$docsDumped = 0;
 			$destinationIndex = $this->getIndex();
 
-			foreach ( $scroll as $results ) {
+			foreach ( $searchAfter as $results ) {
 				if ( $totalDocsToDump === -1 ) {
-					$totalDocsToDump = $this->getTotalHits( $results );
+					$totalDocsToDump = $results->getTotalHits();
+					$totalHitsFromAllIndices += $totalDocsToDump;
+					$this->log( "total hits: $totalDocsToDump\n" );
 					if ( $totalDocsToDump === 0 ) {
 						$this->log( "No documents to index from $sourceIndexSuffix\n" );
 						break;
@@ -568,9 +572,10 @@ class UpdateSuggesterIndex extends Maintenance {
 				}
 
 				$suggestDocs = $this->builder->build( $inputDocs );
-				if ( empty( $suggestDocs ) ) {
+				if ( !$suggestDocs ) {
 					continue;
 				}
+				$totalSuggestDocsIndexed += count( $suggestDocs );
 				$this->outputProgress( $docsDumped, $totalDocsToDump );
 				MWElasticUtils::withRetry( $this->indexRetryAttempts,
 					static function () use ( $destinationIndex, $suggestDocs ) {
@@ -579,7 +584,11 @@ class UpdateSuggesterIndex extends Maintenance {
 				);
 			}
 			$this->log( "Indexing from $sourceIndexSuffix index done.\n" );
+			$totalDocsDumpedFromAllIndices += $docsDumped;
 		}
+		$this->log( "Exported $totalDocsDumpedFromAllIndices ($totalHitsFromAllIndices total hits) " .
+					"from the search indices and indexed $totalSuggestDocsIndexed.\n" );
+		return $totalSuggestDocsIndexed;
 	}
 
 	public function validateAlias() {
@@ -644,7 +653,7 @@ class UpdateSuggesterIndex extends Maintenance {
 	private function createIndex() {
 		// This is "create only" for now.
 		if ( $this->getIndex()->exists() ) {
-			throw new \Exception( "Index already exists." );
+			throw new RuntimeException( "Index already exists." );
 		}
 
 		$mappingConfigBuilder = new SuggesterMappingConfigBuilder();
@@ -686,7 +695,7 @@ class UpdateSuggesterIndex extends Maintenance {
 			'',
 			Request::PUT,
 			$args,
-			[ 'master_timeout' => $this->masterTimeout, 'include_type_name' => 'false' ]
+			[ 'master_timeout' => $this->masterTimeout ]
 		);
 
 		// Index create is async, we have to make sure that the index is ready
@@ -775,16 +784,6 @@ class UpdateSuggesterIndex extends Maintenance {
 	 */
 	protected function getIndexAliasName() {
 		return $this->getConnection()->getIndexName( $this->indexBaseName, $this->indexSuffix );
-	}
-
-	/**
-	 * @param Elastica\ResultSet $results
-	 * @return mixed|string
-	 */
-	private function getTotalHits( Elastica\ResultSet $results ) {
-		// hack to support ES6, switch to getTotalHits
-		return $results->getResponse()->getData()["hits"]["total"]["value"] ??
-			   $results->getResponse()->getData()["hits"]["total"];
 	}
 }
 

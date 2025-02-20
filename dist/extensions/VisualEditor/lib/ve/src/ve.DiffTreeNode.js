@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DiffTreeNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -38,16 +38,10 @@ OO.inheritClass( ve.DiffTreeNode, treeDiffer.TreeNode );
  * @return {boolean} The nodes are equal
  */
 ve.DiffTreeNode.prototype.isEqual = function ( otherNode ) {
-	if ( this.node.canContainContent() && otherNode.node.canContainContent() ) {
-		var nodeRange = this.node.getOuterRange();
-		var otherNodeRange = otherNode.node.getOuterRange();
-		// Optimization: Most nodes we compare are different, so do a quick check
-		// on the range length first.
-		return nodeRange.getLength() === otherNodeRange.getLength() &&
-			JSON.stringify( this.doc.getData( nodeRange ) ) === JSON.stringify( otherNode.doc.getData( otherNodeRange ) );
+	if ( !this.node.isDiffedAsTree() && !otherNode.node.isDiffedAsTree() ) {
+		return ve.dm.VisualDiff.static.compareNodes( this.node, otherNode.node );
 	} else {
-		return this.node.getType() === otherNode.node.getType() &&
-			ve.compare( this.node.getHashObject(), otherNode.node.getHashObject() );
+		return ve.dm.ElementLinearData.static.compareElementsUnannotated( this.node.element, otherNode.node.element );
 	}
 };
 
@@ -57,8 +51,5 @@ ve.DiffTreeNode.prototype.isEqual = function ( otherNode ) {
  * @return {Array} Array of nodes the same type as the original node
  */
 ve.DiffTreeNode.prototype.getOriginalNodeChildren = function () {
-	if ( this.node.children && !this.node.canContainContent() ) {
-		return this.node.children;
-	}
-	return [];
+	return ( this.node.isDiffedAsTree() && this.node.children ) || [];
 };

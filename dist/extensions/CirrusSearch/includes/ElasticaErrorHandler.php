@@ -3,10 +3,11 @@
 namespace CirrusSearch;
 
 use Elastica\Exception\Bulk\ResponseException as BulkResponseException;
+use Elastica\Exception\Connection\HttpException;
 use Elastica\Exception\PartialShardFailureException;
 use Elastica\Exception\ResponseException;
 use MediaWiki\Logger\LoggerFactory;
-use Status;
+use MediaWiki\Status\Status;
 
 /**
  * Generic functions for extracting and reporting on errors/exceptions
@@ -36,8 +37,6 @@ class ElasticaErrorHandler {
 	 * Extract an error message from an exception thrown by Elastica.
 	 * @param \Elastica\Exception\ExceptionInterface $exception exception from which to extract a message
 	 * @return array structuerd error from the exception
-	 * @suppress PhanUndeclaredMethod ExceptionInterface doesn't declare any methods
-	 *  so we have to suppress those warnings.
 	 */
 	public static function extractFullError( \Elastica\Exception\ExceptionInterface $exception ): array {
 		if ( $exception instanceof BulkResponseException ) {
@@ -50,6 +49,11 @@ class ElasticaErrorHandler {
 				'type' => 'bulk',
 				'reason' => $exception->getMessage(),
 				'actionReasons' => $actionReasons,
+			];
+		} elseif ( $exception instanceof HttpException ) {
+			return [
+				'type' => 'http_exception',
+				'reason' => $exception->getMessage()
 			];
 		} elseif ( !( $exception instanceof ResponseException ) ) {
 			// simulate the basic full error structure
@@ -89,14 +93,18 @@ class ElasticaErrorHandler {
 			// response wasnt json or didn't contain 'error' key
 			// in this case elastica reports nothing.
 			$data = $response->getData();
-			$reason = 'Status code ' . $response->getStatus();
+			$parts = [];
+			if ( $response->getStatus() !== null ) {
+				$parts[] = 'Status code ' . $response->getStatus();
+			}
 			if ( isset( $data['message'] ) ) {
 				// Client puts non-json responses here
-				$reason .= "; " . substr( $data['message'], 0, 200 );
+				$parts[] = substr( $data['message'], 0, 200 );
 			} elseif ( is_string( $data ) && $data !== "" ) {
 				// pre-6.0.3 versions of Elastica
-				$reason .= "; " . substr( $data, 0, 200 );
+				$parts[] = substr( $data, 0, 200 );
 			}
+			$reason = implode( "; ", $parts );
 
 			$error = [
 				'type' => 'unknown',
@@ -115,7 +123,7 @@ class ElasticaErrorHandler {
 	 * @param \Elastica\Exception\ExceptionInterface|null $exception
 	 * @return string Either 'rejected', 'failed' or 'unknown'
 	 */
-	public static function classifyError( \Elastica\Exception\ExceptionInterface $exception = null ) {
+	public static function classifyError( ?\Elastica\Exception\ExceptionInterface $exception = null ) {
 		if ( $exception === null ) {
 			return 'unknown';
 		}
@@ -146,30 +154,53 @@ class ElasticaErrorHandler {
 			'failed' => [
 				'type_regexes' => [
 					'^es_rejected_execution_exception$',
+					'^search_phase_execution_exception',
 					'^remote_transport_exception$',
 					'^search_context_missing_exception$',
 					'^null_pointer_exception$',
 					'^elasticsearch_timeout_exception$',
 					'^retry_on_primary_exception$',
+					// These are exceptions thrown by elastica itself
+					// (generally connectivity issues in cURL)
+					'^http_exception$',
+				],
+				'msg_regexes' => [
+					// ClientException thrown by Elastica
+					'^No enabled connection',
+					// These are problems raised by the http intermediary layers (nginx/envoy)
+					'^Status code 503',
+					'^\Qupstream connect error or disconnect/reset\E',
+					'^upstream request timeout',
+					// see \CirrusSearch\Query\CompSuggestQueryBuilder::postProcess, not ideal to rely
+					// on our own exception message for error classification...
+					'^\QInvalid response returned from the backend (probable shard failure during the fetch phase)\E',
+				],
+			],
+			'config_issue' => [
+				'type_regexes' => [
 					'^index_not_found_exception$',
 				],
-				// These are exceptions thrown by elastica itself
 				'msg_regexes' => [
-					'^Couldn\'t connect to host',
-					'^No enabled connection',
-					'^Operation timed out',
-					'^Status code 503',
+					// for 'bulk' errors index_not_found_exception is set
+					// in message and not type
+					'index_not_found_exception',
 				],
+			],
+			'memory_issue' => [
+				'type_regexes' => [
+					'^circuit_breaking_exception$',
+				],
+				'msg_regexes' => [],
 			],
 		];
 
 		foreach ( $heuristics as $type => $heuristic ) {
 			$regex = implode( '|', $heuristic['type_regexes'] );
-			if ( $regex && preg_match( "/$regex/", $error['type'] ) ) {
+			if ( $regex && preg_match( "#$regex#", $error['type'] ) ) {
 				return $type;
 			}
 			$regex = implode( '|', $heuristic['msg_regexes'] );
-			if ( $regex && preg_match( "/$regex/", $error['reason'] ) ) {
+			if ( $regex && preg_match( "#$regex#", $error['reason'] ) ) {
 				return $type;
 			}
 		}
@@ -182,9 +213,8 @@ class ElasticaErrorHandler {
 	 * @return bool is this a parse error?
 	 */
 	public static function isParseError( Status $status ) {
-		/** @todo No good replacements for getErrorsArray */
-		foreach ( $status->getErrorsArray() as $errorMessage ) {
-			if ( $errorMessage[ 0 ] === 'cirrussearch-parse-error' ) {
+		foreach ( $status->getMessages() as $msg ) {
+			if ( $msg->getKey() === 'cirrussearch-parse-error' ) {
 				return true;
 			}
 		}
@@ -195,7 +225,7 @@ class ElasticaErrorHandler {
 	 * @param \Elastica\Exception\ExceptionInterface|null $exception
 	 * @return array Two elements, first is Status object, second is string.
 	 */
-	public static function extractMessageAndStatus( \Elastica\Exception\ExceptionInterface $exception = null ) {
+	public static function extractMessageAndStatus( ?\Elastica\Exception\ExceptionInterface $exception = null ) {
 		if ( !$exception ) {
 			return [ Status::newFatal( 'cirrussearch-backend-error' ), '' ];
 		}
@@ -280,7 +310,7 @@ class ElasticaErrorHandler {
 			// Or if the exception is thrown locally by the node receiving the query:
 			// expected ']' at position 2
 			if ( preg_match( '/(?:[a-z_]+: )?(.+) at position (\d+)/', $syntaxError, $matches ) ) {
-				list( , $errorMessage, $position ) = $matches;
+				[ , $errorMessage, $position ] = $matches;
 			} elseif ( $syntaxError === 'unexpected end-of-string' ) {
 				$errorMessage = 'regex too short to be correct';
 			}

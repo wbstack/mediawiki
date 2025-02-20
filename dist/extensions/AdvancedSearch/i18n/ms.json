@@ -3,12 +3,13 @@
 		"authors": [
 			"Anakmalaysia",
 			"CyberTroopers",
-			"Tofeiku",
-			"Hakimi97"
+			"Hakimi97",
+			"Tofeiku"
 		]
 	},
 	"advancedsearch-desc": "Capaian mudah ke kemampuan carian lanjut di [[Special:Search|Khas:Cari]]",
 	"advancedsearch-options-pane-head": "Carian lanjut",
+	"advancedsearch-options-pane-preview-list": "Kata carian yang digunakan kini",
 	"advancedsearch-optgroup-text": "Cari dalam teks halaman",
 	"advancedsearch-optgroup-structure": "Struktur",
 	"advancedsearch-optgroup-files": "Fail dan gambar",
@@ -27,6 +28,7 @@
 	"advancedsearch-field-fileh": "Tinggi fail dalam piksel",
 	"advancedsearch-field-sort": "Menyusun atur",
 	"advancedsearch-field-preview-sort": "Susun mengikut $1",
+	"advancedsearch-help-general-instruction": "Arahan terperinci untuk $1",
 	"advancedsearch-help-plain": ";Keterangan\n:Mencari perkataan ini di dalam judul mahupun teks.\n;Berwaspada dengan hal-hal berikut\n:* Beberapa perkataan boleh dimasukkan di sini.\n:* Tanda baca dan aksara bukan alfanumerik lain (kecuali noktah bertindih dan koma) akan diabaikan.\n:* Kemungkinan terdapat hasil yang tidak mengandungi salah satu atau lebih istilah dalam pencarian istilah anda.\n:* Pencabangan kata diterapkan. Contoh: Jika anda memasukkan ''kereta'', maka pencarian juga akan mempertimbangkan ''kereta'' dalam carian. Pencabangan kata adalah spesifik pada bahasa tertentu.\n;Laman bantuan\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Pencarian teks lengkap]\n;Sintaks yang setara dalam pencarian biasa\n:pokok semak duri",
 	"advancedsearch-help-phrase": ";Penerangan\n:Carian untuk urutan aksara yang khusus. Punctuation marks are ignored.\n;Berhati-hati dengan yang berikut \n:(hanya sah apabila menggunakan tanda petikan, lihat contoh di bawah) \n:* Pisahkan frasa carian dengan koma atau ruang. Contohnya <code>\"selamat pagi\"</code>, <code>\"helo kawan!\"</code>.\n:* Tanda baca atau aksara bukan angka abjad (dengan pengecualian titik bertindih dan koma) akan diendahkan.\n:* Carian tidak peka huruf besar kecil.\n:* Pendasaran perkataan tidak diguna pakai.\n;Laman bantuan\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Perkataan, frasa dan penerang]\n;Sintaks setara dalam carian biasa\n:Perkataan dalam tanda petikan, contohnya <code>\"Mula pada permulaan\"</code>.",
 	"advancedsearch-help-or": ";Penerangan\n:Sekurang-kurangnya satu daripada istilah carian perlu disertakan dalam laman tersebut.\n;Laman bantuan\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Perkataan, frasa, dan pengubahsuai]\n;Sintaks yang setara dalam pencarian normal\n:Perkataan dengan <code>ATAU</code> di antara perkataan tersebut contohnya <code>Maklumat ATAU Informasi</code> .",

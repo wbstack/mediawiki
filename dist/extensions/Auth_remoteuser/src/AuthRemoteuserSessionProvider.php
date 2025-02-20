@@ -26,8 +26,10 @@
  */
 namespace MediaWiki\Extension\Auth_remoteuser;
 
+use Config;
 use GlobalVarConfig;
-use Hooks;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\User\UserOptionsManager;
 use Wikimedia\AtEase\AtEase;
 
 /**
@@ -44,6 +46,8 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 	 * @since 2.0.0
 	 */
 	public const HOOKNAME = "AuthRemoteuserFilterUserName";
+
+	private HookContainer $hookContainer;
 
 	/**
 	 * The constructor processes the extension configuration.
@@ -69,10 +73,18 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 	 * * `$wgAuthRemoteuserRemoveAuthPagesAndLinks`
 	 * * `$wgAuthRemoteuserPriority`
 	 *
+	 * @param Config $config
+	 * @param HookContainer $hookContainer
+	 * @param UserOptionsManager $userOptionsManager
 	 * @param array $params Session Provider parameters.
 	 * @since 2.0.0
 	 */
-	public function __construct( $params = [] ) {
+	public function __construct(
+		Config $config,
+		HookContainer $hookContainer,
+		UserOptionsManager $userOptionsManager,
+		array $params = []
+	) {
 		# Process our extension specific configuration, but don't overwrite our
 		# parents `$this->config` property, because doing so will clash with the
 		# SessionManager setting of that property due to a different prefix used.
@@ -96,6 +108,7 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 
 		if ( $conf->has( 'UserNameReplaceFilter' ) &&
 			$conf->get( 'UserNameReplaceFilter' ) !== null ) {
+			// @phan-suppress-next-line SecurityCheck-ReDoS TODO Ensure this is not an actual issue
 			$this->setUserNameReplaceFilter(
 				$conf->get( 'UserNameReplaceFilter' )
 			);
@@ -103,6 +116,7 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 
 		if ( $conf->has( 'UserNameBlacklistFilter' ) &&
 			$conf->get( 'UserNameBlacklistFilter' ) !== null ) {
+			// @phan-suppress-next-line SecurityCheck-ReDoS TODO Ensure this is not an actual issue
 			$this->setUserNameMatchFilter(
 				$conf->get( 'UserNameBlacklistFilter' ),
 				false
@@ -111,6 +125,7 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 
 		if ( $conf->has( 'UserNameWhitelistFilter' ) &&
 			$conf->get( 'UserNameWhitelistFilter' ) !== null ) {
+			// @phan-suppress-next-line SecurityCheck-ReDoS TODO Ensure this is not an actual issue
 			$this->setUserNameMatchFilter(
 				$conf->get( 'UserNameWhitelistFilter' ),
 				true
@@ -184,6 +199,7 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 		if ( $conf->has( 'Domain' )
 			&& is_string( $conf->get( 'Domain' ) )
 			&& $conf->get( 'Domain' ) !== '' ) {
+			// @phan-suppress-next-line SecurityCheck-ReDoS TODO Ensure this is not an actual issue
 			$this->setUserNameReplaceFilter( [
 				'@' . $conf->get( 'Domain' ) . '$' => '',
 				'^' . $conf->get( 'Domain' ) . '\\' => ''
@@ -212,7 +228,8 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 			unset( $params[ 'userPrefs' ] );
 		}
 
-		parent::__construct( $params );
+		parent::__construct( $config, $hookContainer, $userOptionsManager, $params );
+		$this->hookContainer = $hookContainer;
 	}
 
 	/**
@@ -223,22 +240,18 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 	 * patterns.
 	 *
 	 * @param array $replacepatterns Array of search and replace patterns.
-	 * @throws UnexpectedValueException Wrong parameter type given.
 	 * @see preg_replace()
 	 * @since 2.0.0
 	 */
-	public function setUserNameReplaceFilter( $replacepatterns ) {
-		if ( !is_array( $replacepatterns ) ) {
-			throw new UnexpectedValueException( __METHOD__ . ' expects an array as parameter.' );
-		}
-
-		Hooks::register(
+	public function setUserNameReplaceFilter( array $replacepatterns ): void {
+		$this->hookContainer->register(
 			static::HOOKNAME,
 			static function ( &$username ) use ( $replacepatterns ) {
 				foreach ( $replacepatterns as $pattern => $replacement ) {
 					AtEase::suppressWarnings();
 					# If $pattern is no regex, create one from it.
-					if ( preg_match( $pattern, null ) === false ) {
+					// @phan-suppress-next-line PhanParamSuspiciousOrder
+					if ( preg_match( $pattern, '' ) === false ) {
 						$pattern = str_replace( '\\', '\\\\', $pattern );
 						$pattern = str_replace( '/', '\\/', $pattern );
 						$pattern = "/$pattern/";
@@ -264,18 +277,11 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 	 *
 	 * @param string[] $names List of names to match remote user name against.
 	 * @param bool $allow Either allow or disallow if name matches.
-	 * @throws UnexpectedValueException Wrong parameter type given.
 	 * @see preg_match()
 	 * @since 2.0.0
 	 */
-	public function setUserNameMatchFilter( $names, $allow ) {
-		if ( !is_array( $names ) ) {
-			throw new UnexpectedValueException( __METHOD__ . ' expects an array as parameter.' );
-		}
-
-		$allow = (bool)$allow;
-
-		Hooks::register(
+	public function setUserNameMatchFilter( array $names, bool $allow ): void {
+		$this->hookContainer->register(
 			static::HOOKNAME,
 			static function ( &$username ) use ( $names, $allow ) {
 				if ( isset( $names[ $username ] ) ) {
@@ -284,7 +290,8 @@ class AuthRemoteuserSessionProvider extends UserNameSessionProvider {
 				foreach ( $names as $pattern ) {
 					AtEase::suppressWarnings();
 					# If $pattern is no regex, create one from it.
-					if ( preg_match( $pattern, null ) === false ) {
+					// @phan-suppress-next-line PhanParamSuspiciousOrder
+					if ( preg_match( $pattern, '' ) === false ) {
 						$pattern = str_replace( '\\', '\\\\', $pattern );
 						$pattern = str_replace( '/', '\\/', $pattern );
 						$pattern = "/$pattern/";

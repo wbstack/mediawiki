@@ -1,15 +1,15 @@
 /*!
  * VisualEditor BranchNode tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.DiffMatchPatch' );
 
 /* Tests */
 
-QUnit.test( 'indexOf/lastIndexOf', function ( assert ) {
-	var dmp = new ve.DiffMatchPatch( new ve.dm.HashValueStore(), new ve.dm.HashValueStore() ),
+QUnit.test( 'indexOf/lastIndexOf', ( assert ) => {
+	const dmp = new ve.DiffMatchPatch( new ve.dm.HashValueStore(), new ve.dm.HashValueStore() ),
 		textString = 'hello world',
 		textArray = textString.split( '' ),
 		cases = [
@@ -86,8 +86,8 @@ QUnit.test( 'indexOf/lastIndexOf', function ( assert ) {
 			}
 		];
 
-	cases.forEach( function ( caseItem ) {
-		var expected = textString.indexOf( caseItem.searchValue, caseItem.fromIndex );
+	cases.forEach( ( caseItem ) => {
+		let expected = textString.indexOf( caseItem.searchValue, caseItem.fromIndex );
 		assert.strictEqual(
 			dmp.indexOf( textArray, caseItem.searchValue, caseItem.fromIndex ),
 			expected,

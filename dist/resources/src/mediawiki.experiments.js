@@ -5,11 +5,11 @@
 	/**
 	 * Provides an API for bucketing users in experiments.
 	 *
-	 * @class mw.experiments
+	 * @namespace mw.experiments
 	 * @singleton
 	 */
 
-	var CONTROL_BUCKET = 'control',
+	const CONTROL_BUCKET = 'control',
 		MAX_INT32_UNSIGNED = 4294967295;
 
 	/**
@@ -23,7 +23,7 @@
 	 */
 	function hashString( string ) {
 		/* eslint-disable no-bitwise */
-		var hash = 0,
+		let hash = 0,
 			i = string.length;
 
 		while ( i-- ) {
@@ -47,9 +47,11 @@
 		 * The name of the experiment and the token are hashed. The hash is converted
 		 * to a number which is then used to get a bucket.
 		 *
-		 * Consider the following experiment specification:
-		 *
-		 * ```
+		 * @example
+		 * // The experiment has three buckets: control, A, and B. The user has a 50% chance of
+		 * // being assigned to the control bucket, and a 25% chance of being assigned to either
+		 * // the A or B bucket. If the experiment were disabled, then the user would always be
+		 * // assigned to the control bucket.
 		 * {
 		 *   name: 'My first experiment',
 		 *   enabled: true,
@@ -59,12 +61,6 @@
 		 *     B: 0.25
 		 *   }
 		 * }
-		 * ```
-		 *
-		 * The experiment has three buckets: control, A, and B. The user has a 50%
-		 * chance of being assigned to the control bucket, and a 25% chance of being
-		 * assigned to either the A or B buckets. If the experiment were disabled,
-		 * then the user would always be assigned to the control bucket.
 		 *
 		 * @param {Object} experiment
 		 * @param {string} experiment.name The name of the experiment
@@ -75,28 +71,25 @@
 		 *  that the user will be assigned to that bucket
 		 * @param {string} token A token that uniquely identifies the user for the
 		 *  duration of the experiment
-		 * @return {string} The bucket
+		 * @return {string|undefined} The bucket
 		 */
 		getBucket: function ( experiment, token ) {
-			var buckets = experiment.buckets,
-				key,
-				range = 0,
-				hash,
-				max,
+			const buckets = experiment.buckets;
+			let range = 0,
 				acc = 0;
 
-			if ( !experiment.enabled || $.isEmptyObject( experiment.buckets ) ) {
+			if ( !experiment.enabled || !Object.keys( experiment.buckets ).length ) {
 				return CONTROL_BUCKET;
 			}
 
-			for ( key in buckets ) {
+			for ( const key in buckets ) {
 				range += buckets[ key ];
 			}
 
-			hash = hashString( experiment.name + ':' + token );
-			max = ( hash / MAX_INT32_UNSIGNED ) * range;
+			const hash = hashString( experiment.name + ':' + token );
+			const max = ( hash / MAX_INT32_UNSIGNED ) * range;
 
-			for ( key in buckets ) {
+			for ( const key in buckets ) {
 				acc += buckets[ key ];
 
 				if ( max <= acc ) {

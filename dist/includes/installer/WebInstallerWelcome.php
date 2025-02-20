@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,10 @@
  * @ingroup Installer
  */
 
+namespace MediaWiki\Installer;
+
+use MediaWiki\Specials\SpecialVersion;
+
 class WebInstallerWelcome extends WebInstallerPage {
 
 	/**
@@ -31,12 +36,12 @@ class WebInstallerWelcome extends WebInstallerPage {
 		$this->parent->output->addWikiTextAsInterface( wfMessage( 'config-welcome' )->plain() );
 		$status = $this->parent->doEnvironmentChecks();
 		if ( $status->isGood() ) {
-			$this->parent->output->addHTML( '<span class="success-message">' .
-				wfMessage( 'config-env-good' )->escaped() . '</span>' );
+			$this->parent->showSuccess( 'config-env-good' );
 			$this->parent->output->addWikiTextAsInterface(
 				wfMessage( 'config-welcome-section-copyright',
 					SpecialVersion::getCopyrightAndAuthorList(),
-					wfExpandUrl( $this->parent->getDocUrl( 'Copying' ) )
+					$this->parent->getVar( 'wgServer' ) .
+						$this->parent->getDocUrl( 'Copying' )
 				)->plain()
 			);
 			$this->startForm();

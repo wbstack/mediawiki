@@ -1,7 +1,10 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Tests\Wikibase\DataModel\Serializers;
 
+use Serializers\DispatchableSerializer;
 use Serializers\Serializer;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\NumericPropertyId;
@@ -19,39 +22,39 @@ use Wikibase\DataModel\Term\TermList;
  * @author Thomas Pellissier Tanon
  * @author Bene* < benestar.wikimedia@gmail.com >
  */
-class PropertySerializerTest extends DispatchableSerializerTest {
+class PropertySerializerTest extends DispatchableSerializerTestCase {
 
-	protected function buildSerializer() {
+	protected function buildSerializer(): DispatchableSerializer {
 		$termListSerializerMock = $this->createMock( Serializer::class );
 		$termListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->will( $this->returnCallback( static function( TermList $termList ) {
+			->willReturnCallback( static function( TermList $termList ) {
 				if ( $termList->isEmpty() ) {
 					return [];
 				}
 
 				return [
-					'en' => [ 'lang' => 'en', 'value' => 'foo' ]
+					'en' => [ 'lang' => 'en', 'value' => 'foo' ],
 				];
-			} ) );
+			} );
 
 		$aliasGroupListSerializerMock = $this->createMock( Serializer::class );
 		$aliasGroupListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->will( $this->returnCallback( static function( AliasGroupList $aliasGroupList ) {
+			->willReturnCallback( static function( AliasGroupList $aliasGroupList ) {
 				if ( $aliasGroupList->isEmpty() ) {
 					return [];
 				}
 
 				return [
-					'en' => [ 'lang' => 'en', 'values' => [ 'foo', 'bar' ] ]
+					'en' => [ 'lang' => 'en', 'values' => [ 'foo', 'bar' ] ],
 				];
-			} ) );
+			} );
 
 		$statementListSerializerMock = $this->createMock( Serializer::class );
 		$statementListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->will( $this->returnCallback( static function( StatementList $statementList ) {
+			->willReturnCallback( static function( StatementList $statementList ) {
 				if ( $statementList->isEmpty() ) {
 					return [];
 				}
@@ -61,14 +64,14 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
+							'rank' => 'normal',
+						],
+					],
 				];
-			} ) );
+			} );
 
 		return new PropertySerializer(
 			$termListSerializerMock,
@@ -77,29 +80,29 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 		);
 	}
 
-	public function serializableProvider() {
+	public function serializableProvider(): array {
 		return [
 			[
-				Property::newFromType( 'string' )
+				Property::newFromType( 'string' ),
 			],
 		];
 	}
 
-	public function nonSerializableProvider() {
+	public function nonSerializableProvider(): array {
 		return [
 			[
-				5
+				5,
 			],
 			[
-				[]
+				[],
 			],
 			[
-				new Item()
+				new Item(),
 			],
 		];
 	}
 
-	public function serializationProvider() {
+	public function serializationProvider(): array {
 		$property = Property::newFromType( 'string' );
 
 		$provider = [
@@ -112,7 +115,7 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 					'aliases' => [],
 					'claims' => [],
 				],
-				$property
+				$property,
 			],
 		];
 
@@ -127,7 +130,7 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 				'aliases' => [],
 				'claims' => [],
 			],
-			$property
+			$property,
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -139,14 +142,14 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 				'labels' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
+						'value' => 'foo',
+					],
 				],
 				'descriptions' => [],
 				'aliases' => [],
 				'claims' => [],
 			],
-			$property
+			$property,
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -159,13 +162,13 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 				'descriptions' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
+						'value' => 'foo',
+					],
 				],
 				'aliases' => [],
 				'claims' => [],
 			],
-			$property
+			$property,
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -179,12 +182,12 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 				'aliases' => [
 					'en' => [
 						'lang' => 'en',
-						'values' => [ 'foo', 'bar' ]
-					]
+						'values' => [ 'foo', 'bar' ],
+					],
 				],
 				'claims' => [],
 			],
-			$property
+			$property,
 		];
 
 		$property = Property::newFromType( 'string' );
@@ -201,15 +204,15 @@ class PropertySerializerTest extends DispatchableSerializerTest {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
+							'rank' => 'normal',
+						],
+					],
 				],
 			],
-			$property
+			$property,
 		];
 
 		return $provider;

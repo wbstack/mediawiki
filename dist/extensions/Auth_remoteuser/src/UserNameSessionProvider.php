@@ -27,12 +27,15 @@
 namespace MediaWiki\Extension\Auth_remoteuser;
 
 use Closure;
-use Hooks;
-use MediaWiki\MediaWikiServices;
+use Config;
+use InvalidArgumentException;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\MainConfigNames;
 use MediaWiki\Session\CookieSessionProvider;
 use MediaWiki\Session\SessionBackend;
 use MediaWiki\Session\SessionInfo;
 use MediaWiki\Session\UserInfo;
+use MediaWiki\User\UserOptionsManager;
 use Sanitizer;
 use Title;
 use User;
@@ -73,7 +76,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @var string[]
 	 * @since 2.0.0
 	 */
-	protected $remoteUserNames;
+	protected array $remoteUserNames;
 
 	/**
 	 * User preferences applied in the moment of local account creation only.
@@ -85,29 +88,29 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * * `realname` - Specifies the users real (display) name.
 	 * * `email` - Specifies the users email address.
 	 *
-	 * @var array
+	 * @var array|null
 	 * @since 2.0.0
 	 */
-	protected $userPrefs;
+	protected ?array $userPrefs;
 
 	/**
 	 * User preferences applied to the user object on each request.
 	 *
 	 * @see self::$userPrefs
-	 * @var array
+	 * @var array|null
 	 * @since 2.0.0
 	 */
-	protected $userPrefsForced;
+	protected ?array $userPrefsForced;
 
 	/**
 	 * Urls in links which differ from the default ones. The following keys are
 	 * supported in this associative array:
 	 * * 'logout' - Redirect to this url on logout.
 	 *
-	 * @var array
+	 * @var array|null
 	 * @since 2.0.0
 	 */
-	protected $userUrls;
+	protected ?array $userUrls;
 
 	/**
 	 * Indicates if the automatically logged-in user can switch to another local
@@ -116,7 +119,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @var bool
 	 * @since 2.0.0
 	 */
-	protected $switchUser;
+	protected bool $switchUser;
 
 	/**
 	 * Indicates if special pages related to authentication getting removed by us.
@@ -124,7 +127,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @var bool
 	 * @since 2.0.0
 	 */
-	protected $removeAuthPagesAndLinks;
+	protected bool $removeAuthPagesAndLinks;
 
 	/**
 	 * A token unique to the remote source session.
@@ -135,7 +138,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @var string
 	 * @since 2.0.0
 	 */
-	protected $remoteToken;
+	protected string $remoteToken;
 
 	/**
 	 * Determines whether to run the `UserLoggedIn` hook after a session has
@@ -144,7 +147,10 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @var bool
 	 * @since 2.0.1
 	 */
-	protected $callUserLoggedInHook = false;
+	protected bool $callUserLoggedInHook = false;
+
+	private HookContainer $hookContainer;
+	private UserOptionsManager $userOptionsManager;
 
 	/**
 	 * The constructor processes the class configuration.
@@ -160,10 +166,21 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * * `switchUser` - @see self::$switchUser
 	 * * `removeAuthPagesAndLinks` - @see self::$removeAuthPagesAndLinks
 	 *
+	 * @param Config $config
+	 * @param HookContainer $hookContainer
+	 * @param UserOptionsManager $userOptionsManager
 	 * @param array $params Session Provider parameters.
 	 * @since 2.0.0
 	 */
-	public function __construct( $params = [] ) {
+	public function __construct(
+		Config $config,
+		HookContainer $hookContainer,
+		UserOptionsManager $userOptionsManager,
+		array $params = []
+	) {
+		$this->hookContainer = $hookContainer;
+		$this->userOptionsManager = $userOptionsManager;
+
 		# Setup configuration defaults.
 		$defaults = [
 			'remoteUserNames' => [],
@@ -237,13 +254,14 @@ class UserNameSessionProvider extends CookieSessionProvider {
 		# instances where a subclass of our own is used as another session provider).
 		#
 		# @see https://tools.ietf.org/html/rfc6265#section-6.1
-		global $wgSessionName, $wgCookiePrefix;
+		$sessionName = $config->get( MainConfigNames::SessionName );
+		$cookiePrefix = $config->get( MainConfigNames::CookiePrefix );
 		$providerprefix = dechex( crc32( get_class( $this ) ) );
 		$params += [
-			'sessionName' => $wgSessionName ?: ( $wgCookiePrefix . $providerprefix . '_session' ),
+			'sessionName' => $sessionName ?: ( $cookiePrefix . $providerprefix . '_session' ),
 			'cookieOptions' => []
 		];
-		$params[ 'cookieOptions' ] += [ 'prefix' => $wgCookiePrefix ];
+		$params[ 'cookieOptions' ] += [ 'prefix' => $cookiePrefix ];
 		$params[ 'cookieOptions' ][ 'prefix' ] .= $providerprefix;
 
 		# Let our parent sanitize the rest of the configuration.
@@ -259,7 +277,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @return ?SessionInfo
 	 * @since 2.0.0
 	 */
-	public function provideSessionInfo( WebRequest $request ) {
+	public function provideSessionInfo( WebRequest $request ): ?SessionInfo {
 		# Loop through user names given by all remote sources. First hit, which
 		# matches a usable local user name, will be used for our SessionInfo then.
 		foreach ( $this->remoteUserNames as $remoteUserName ) {
@@ -272,7 +290,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			# and later for provider metadata.
 			$metadata = [ 'remoteUserName' => (string)$remoteUserName ];
 
-			if ( !is_string( $remoteUserName ) || empty( $remoteUserName ) ) {
+			if ( !is_string( $remoteUserName ) || $remoteUserName === '' ) {
 				$this->logger->warning(
 					"Can't login remote user '{remoteUserName}' automatically. " .
 					"Given remote user name is not of type string or empty.",
@@ -286,7 +304,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			# returning false. This can be used by the wiki administrator to adjust
 			# this SessionProvider to his specific needs.
 			$filteredUserName = $remoteUserName;
-			if ( !Hooks::run( static::HOOKNAME, [ &$filteredUserName ] ) ) {
+			if ( !$this->hookContainer->run( static::HOOKNAME, [ &$filteredUserName ] ) ) {
 				$metadata[ 'filteredUserName' ] = $filteredUserName;
 				$this->logger->warning(
 					"Can't login remote user '{remoteUserName}' automatically. " .
@@ -295,9 +313,10 @@ class UserNameSessionProvider extends CookieSessionProvider {
 				);
 				continue;
 			}
+			// @phan-suppress-next-line PhanRedundantConditionInLoop
 			$metadata[ 'filteredUserName' ] = (string)$filteredUserName;
 
-			if ( !is_string( $filteredUserName ) || empty( $filteredUserName ) ) {
+			if ( !is_string( $filteredUserName ) || $filteredUserName === '' ) {
 				$this->logger->warning(
 					"Can't login remote user '{remoteUserName}' automatically. " .
 					"Filtered remote user name '{filteredUserName}' is not of " .
@@ -443,7 +462,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @return array
 	 * @since 2.0.0
 	 */
-	public function mergeMetadata( array $savedMetadata, array $providedMetadata ) {
+	public function mergeMetadata( array $savedMetadata, array $providedMetadata ): array {
 		$keys = [
 			'userId',
 			'remoteUserName',
@@ -482,7 +501,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 
 		$disableSpecialPages = [];
 		$disablePersonalUrls = [];
-		$preferences = ( $this->userPrefsForced ) ? $this->userPrefsForced : [];
+		$preferences = $this->userPrefsForced ?: [];
 
 		# Disable any special pages related to user switching.
 		if ( !$this->switchUser ) {
@@ -513,7 +532,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 
 		# This can only be true, if our `switchUser` member is set to true and the
 		# user identified by us uses another local wiki user for this session.
-		$switchedUser = ( $info->getUserInfo()->getId() !== $metadata[ 'userId' ] ) ? true : false;
+		$switchedUser = $info->getUserInfo()->getId() !== $metadata[ 'userId' ];
 
 		# Disable password related special pages and hide preference option.
 		if ( !$switchedUser ) {
@@ -539,10 +558,11 @@ class UserNameSessionProvider extends CookieSessionProvider {
 		# therefore we use the `UserLogoutComplete` hook for these type of urls.
 		if ( $this->userUrls && isset( $this->userUrls[ 'logout' ] ) ) {
 			$url = $this->userUrls[ 'logout' ];
+			$hookContainer = $this->hookContainer;
 			if ( $this->canChangeUser() ) {
-				Hooks::register(
+				$hookContainer->register(
 					'UserLogout',
-					static function () use ( $url, $metadata, $switchedUser ) {
+					static function () use ( $url, $metadata, $switchedUser, $hookContainer ) {
 						if ( $url instanceof Closure ) {
 							$url = call_user_func( $url, $metadata );
 						}
@@ -559,7 +579,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 							}
 							return false;
 						}
-						Hooks::register(
+						$hookContainer->register(
 							'UserLogoutComplete',
 							static function () use ( $url ) {
 								global $wgOut;
@@ -571,20 +591,21 @@ class UserNameSessionProvider extends CookieSessionProvider {
 					}
 				);
 			} else {
-				Hooks::register(
-					'PersonalUrls',
-					static function ( &$personalurls ) use ( $url, $metadata ) {
+				$hookContainer->register(
+					'SkinTemplateNavigation::Universal',
+					static function ( $sktemplate, &$links ) use ( $url, $metadata ) {
 						if ( $url instanceof Closure ) {
 							$url = call_user_func( $url, $metadata );
 						}
 						$internal = Title::newFromText( $url );
+						$personalurls = &$links['user-menu'];
 
 						if ( $internal && $internal->isKnown() ) {
 							$url = $internal->getLinkURL();
 						}
 						$personalurls[ 'logout' ] = [
 							'href' => $url,
-							'text' => wfMessage( 'pt-userlogout' )->text(),
+							'text' => $sktemplate->msg( 'pt-userlogout' )->text(),
 							'active' => false
 						];
 						return true;
@@ -601,7 +622,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			if ( $this->userPrefs ) {
 				$prefs += $this->userPrefs;
 			}
-			Hooks::register(
+			$this->hookContainer->register(
 				'LocalUserCreated',
 				function ( $user, $autoCreated ) use ( $prefs, $metadata ) {
 					if ( $autoCreated ) {
@@ -643,7 +664,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			# `$wgHiddenPrefs`, because we still want them to be shown to the user.
 			# Therefore use the according hook to disable their editing capabilities.
 			$keys = array_keys( $preferences );
-			Hooks::register(
+			$this->hookContainer->register(
 				'GetPreferences',
 				static function ( $user, &$prefs ) use ( $keys ) {
 					foreach ( $keys as $key ) {
@@ -677,7 +698,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			$disablePersonalUrls = [];
 		}
 
-		Hooks::register(
+		$this->hookContainer->register(
 			'SpecialPage_initList',
 			static function ( &$specials ) use ( $disableSpecialPages ) {
 				foreach ( $disableSpecialPages as $page => $true ) {
@@ -689,9 +710,10 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			}
 		);
 
-		Hooks::register(
-			'PersonalUrls',
-			static function ( &$personalurls ) use ( $disablePersonalUrls ) {
+		$this->hookContainer->register(
+			'SkinTemplateNavigation::Universal',
+			static function ( $sktemplate, &$links ) use ( $disablePersonalUrls ) {
+				$personalurls = &$links['user-menu'];
 				foreach ( $disablePersonalUrls as $url => $true ) {
 					if ( $true ) {
 						unset( $personalurls[ $url ] );
@@ -720,7 +742,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 			# @see \Wikimedia\ScopedCallback::consume() for MW >=REL1.28
 			$delay = null;
 
-			Hooks::run( 'UserLoggedIn', [ $info->getUserInfo()->getUser() ] );
+			$this->hookContainer->run( 'UserLoggedIn', [ $info->getUserInfo()->getUser() ] );
 
 		}
 
@@ -741,7 +763,7 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @return bool
 	 * @since 2.0.0
 	 */
-	public function canChangeUser() {
+	public function canChangeUser(): bool {
 		return ( $this->switchUser ) ? parent::canChangeUser() : false;
 	}
 
@@ -765,8 +787,9 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @param WebRequest $request The WebRequest.
 	 * @since 2.0.0
 	 */
-	public function persistSession( SessionBackend $session, WebRequest $request ) {
+	public function persistSession( SessionBackend $session, WebRequest $request ): void {
 		$metadata = $session->getProviderMetadata();
+		// @phan-suppress-next-line PhanTypeArraySuspiciousNullable TODO Ensure this is not an actual issue
 		$this->remoteToken = $metadata[ 'filteredUserName' ];
 		parent::persistSession( $session, $request );
 	}
@@ -798,47 +821,43 @@ class UserNameSessionProvider extends CookieSessionProvider {
 	 * @see UserOptionsManager::setOption()
 	 * @since 2.0.0
 	 */
-	public function setUserPrefs( $user, $preferences, $metadata, $saveToDB = false ) {
-		if ( $user instanceof User && is_array( $preferences ) && is_array( $metadata ) ) {
+	public function setUserPrefs( User $user, array $preferences, array $metadata, bool $saveToDB = false ): void {
+		# Mark changes to prevent superfluous database writings.
+		$dirty = false;
 
-			# Mark changes to prevent superfluous database writings.
-			$dirty = false;
+		foreach ( $preferences as $option => $value ) {
 
-			foreach ( $preferences as $option => $value ) {
-
-				# If the given value is a closure, call it to get the value. All of our
-				# provider metadata is exposed to this function as first parameter.
-				if ( $value instanceof Closure ) {
-					$value = call_user_func( $value, $metadata );
-				}
-
-				switch ( $option ) {
-					case 'realname':
-						if ( is_string( $value ) && $value !== $user->getRealName() ) {
-							$dirty = true;
-							$user->setRealName( $value );
-						}
-						break;
-					case 'email':
-						if ( Sanitizer::validateEmail( $value ) && $value !== $user->getEmail() ) {
-							$dirty = true;
-							$user->setEmail( $value );
-							$user->confirmEmail();
-						}
-						break;
-					default:
-						$userOptionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
-						if ( $value != $userOptionsManager->getOption( $user, $option ) ) {
-							$dirty = true;
-							$userOptionsManager->setOption( $user, $option, $value );
-						}
-				}
+			# If the given value is a closure, call it to get the value. All of our
+			# provider metadata is exposed to this function as first parameter.
+			if ( $value instanceof Closure ) {
+				$value = call_user_func( $value, $metadata );
 			}
 
-			# Only update database if something has changed.
-			if ( $saveToDB && $dirty ) {
-				$user->saveSettings();
+			switch ( $option ) {
+				case 'realname':
+					if ( is_string( $value ) && $value !== $user->getRealName() ) {
+						$dirty = true;
+						$user->setRealName( $value );
+					}
+					break;
+				case 'email':
+					if ( Sanitizer::validateEmail( $value ) && $value !== $user->getEmail() ) {
+						$dirty = true;
+						$user->setEmail( $value );
+						$user->confirmEmail();
+					}
+					break;
+				default:
+					if ( $value != $this->userOptionsManager->getOption( $user, $option ) ) {
+						$dirty = true;
+						$this->userOptionsManager->setOption( $user, $option, $value );
+					}
 			}
+		}
+
+		# Only update database if something has changed.
+		if ( $saveToDB && $dirty ) {
+			$user->saveSettings();
 		}
 	}
 

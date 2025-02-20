@@ -15,28 +15,19 @@ class CirrusConfigInterwikiResolver extends BaseInterwikiResolver {
 	 * @return bool true if this resolver can run with the specified config
 	 */
 	public static function accepts( SearchConfig $config ) {
-		if ( !empty( $config->get( 'CirrusSearchInterwikiSources' ) ) ) {
+		if ( $config->get( 'CirrusSearchInterwikiSources' ) ) {
 			return true;
 		}
-		if ( !empty( $config->get( 'CirrusSearchWikiToNameMap' ) ) ) {
+		if ( $config->get( 'CirrusSearchWikiToNameMap' ) ) {
 			return true;
 		}
 		return false;
 	}
 
 	protected function loadMatrix() {
-		$sisterProjects = $this->config->get( 'CirrusSearchInterwikiSources' );
-		if ( $sisterProjects === null ) {
-			$sisterProjects = [];
-		}
-		$languageMap = $this->config->get( 'CirrusSearchLanguageToWikiMap' );
-		if ( $languageMap === null ) {
-			$languageMap = [];
-		}
-		$crossLanguage = $this->config->get( 'CirrusSearchWikiToNameMap' );
-		if ( $crossLanguage === null ) {
-			$crossLanguage = [];
-		}
+		$sisterProjects = $this->config->get( 'CirrusSearchInterwikiSources' ) ?? [];
+		$languageMap = $this->config->get( 'CirrusSearchLanguageToWikiMap' ) ?? [];
+		$crossLanguage = $this->config->get( 'CirrusSearchWikiToNameMap' ) ?? [];
 		$crossLanguage = array_filter( $crossLanguage, function ( $entry ) {
 			return $entry !== $this->config->getWikiId();
 		} );

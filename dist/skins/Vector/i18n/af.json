@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Byeboer",
 			"Naudefj",
 			"Rooiratel"
@@ -15,7 +14,6 @@
 	"vector-language-button-label": "{{PLURAL:$1|$1 taal|$1 tale}}",
 	"vector-no-language-button-label": "Voeg tale by",
 	"vector-no-language-button-aria-label": "Hierdie artikel bestaan slegs in hierdie taal. Voeg die artikel by vir ander tale",
-	"vector-language-redirect-to-top": "Op hierdie {{SITENAME}} is die taalskakels bo-aan die bladsy oorkant die artikeltitel. [[#p-lang-btn|Gaan boontoe]].",
 	"vector-language-variant-switcher-label": "Verander taalvariant",
 	"vector-action-addsection": "Nuwe onderwerp",
 	"vector-action-delete": "Skrap",
@@ -32,11 +30,23 @@
 	"vector-jumptosearch": "Gaan na soektog",
 	"vector-jumptocontent": "Gaan na inhoud",
 	"vector-more-actions": "Meer",
+	"vector-appearance-label": "Voorkoms",
+	"vector-feature-limited-width-name": "Breedte",
+	"vector-feature-limited-width-0-label": "Wyd",
+	"vector-feature-limited-width-1-label": "Standaard",
+	"vector-feature-custom-font-size-name": "Teks",
+	"vector-feature-custom-font-size-0-label": "Klein",
+	"vector-feature-custom-font-size-1-label": "Standaard",
+	"vector-feature-custom-font-size-2-label": "Groot",
+	"skin-theme-name": "Kleur",
+	"skin-theme-day-label": "Lig",
+	"skin-theme-night-label": "Donker",
+	"skin-theme-os-label": "Outomaties",
+	"skin-theme-exclusion-notice": "Hierdie bladsy is altyd in ligte modus.",
 	"vector-search-loader": "Laai tans soekvoorstelle",
 	"vector-searchsuggest-containing": "Soek vir bladsye wat <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> bevat",
 	"vector-intro-page": "Help:Inleiding",
-	"vector-toc-heading": "Inhoud",
-	"vector-toc-toggle-position-title": "versteek",
+	"vector-toc-label": "Inhoud",
 	"vector-toc-beginning": "Inleiding",
 	"vector-toc-toggle-button-label": "Wissel $1 subafdeling",
 	"vector-anon-user-menu-pages": "Bladsye vir uitgemelde redakteurs",
@@ -46,5 +56,14 @@
 	"vector-toc-menu-tooltip": "Inhoudsopgawe",
 	"vector-toc-collapsible-button-label": "Wissel die inhoudsopgawe",
 	"vector-site-nav-label": "Werf",
-	"tooltip-vector-anon-user-menu-title": "Meer opsies"
+	"vector-main-menu-label": "Hoofkieslys",
+	"vector-feature-custom-font-size-exclusion-notice": "Hierdie bladsy gebruik altyd klein lettergrootte",
+	"vector-page-tools-label": "Gereedskap",
+	"vector-page-tools-general-label": "Algemeen",
+	"vector-pin-element-label": "skuif na kantbalk",
+	"vector-unpin-element-label": "versteek",
+	"tooltip-vector-anon-user-menu-title": "Meer opsies",
+	"vector-prefs-limited-width": "Aktiveer beperkte breedte-modus",
+	"vector-prefs-limited-width-help": "Aktiveer beperkte wydte-modus vir 'n verbeterde lees ervaring.",
+	"vector-night-mode-issue-reporting-link-label": "Rapporteer 'n probleem met donkermodus"
 }

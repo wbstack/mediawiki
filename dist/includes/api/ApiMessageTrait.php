@@ -18,6 +18,10 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use InvalidArgumentException;
+
 /**
  * Trait to implement the IApiMessage interface for Message subclasses
  * @since 1.27
@@ -30,10 +34,12 @@ trait ApiMessageTrait {
 	/**
 	 * Compatibility code mappings for various MW messages.
 	 * @todo Ideally anything relying on this should be changed to use ApiMessage.
+	 * @var string[]
 	 */
 	protected static $messageMap = [
 		'actionthrottledtext' => 'ratelimited',
 		'autoblockedtext' => 'autoblocked',
+		'autoblockedtext-tempuser' => 'autoblocked',
 		'badaccess-group0' => 'permissiondenied',
 		'badaccess-groups' => 'permissiondenied',
 		'badipaddress' => 'invalidip',
@@ -41,6 +47,7 @@ trait ApiMessageTrait {
 		'blockedtext' => 'blocked',
 		'blockedtext-composite' => 'blocked',
 		'blockedtext-partial' => 'blocked',
+		'blockedtext-tempuser' => 'blocked',
 		'cannotdelete' => 'cantdelete',
 		'cannotundelete' => 'cantundelete',
 		'cantmove-titleprotected' => 'protectedtitle',
@@ -91,7 +98,9 @@ trait ApiMessageTrait {
 		'userrights-no-interwiki' => 'nointerwikiuserrights',
 	];
 
+	/** @var string|null */
 	protected $apiCode = null;
+	/** @var array */
 	protected $apiData = [];
 
 	public function getApiCode() {
@@ -102,9 +111,9 @@ trait ApiMessageTrait {
 			} elseif ( $key === 'apierror-missingparam' ) {
 				// @todo: Kill this case along with ApiBase::$messageMap
 				$this->apiCode = 'no' . $this->getParams()[0];
-			} elseif ( substr( $key, 0, 8 ) === 'apiwarn-' ) {
+			} elseif ( str_starts_with( $key, 'apiwarn-' ) ) {
 				$this->apiCode = substr( $key, 8 );
-			} elseif ( substr( $key, 0, 9 ) === 'apierror-' ) {
+			} elseif ( str_starts_with( $key, 'apierror-' ) ) {
 				$this->apiCode = substr( $key, 9 );
 			} else {
 				$this->apiCode = $key;
@@ -116,7 +125,7 @@ trait ApiMessageTrait {
 		return $this->apiCode;
 	}
 
-	public function setApiCode( $code, array $data = null ) {
+	public function setApiCode( $code, ?array $data = null ) {
 		if ( $code !== null && !ApiErrorFormatter::isValidApiCode( $code ) ) {
 			throw new InvalidArgumentException( "Invalid code \"$code\"" );
 		}
@@ -135,10 +144,6 @@ trait ApiMessageTrait {
 		$this->apiData = $data;
 	}
 
-	public function serialize(): string {
-		return serialize( $this->__serialize() );
-	}
-
 	public function __serialize() {
 		return [
 			'parent' => parent::__serialize(),
@@ -147,13 +152,12 @@ trait ApiMessageTrait {
 		];
 	}
 
-	public function unserialize( $serialized ): void {
-		$this->__unserialize( unserialize( $serialized ) );
-	}
-
 	public function __unserialize( $data ) {
 		parent::__unserialize( $data['parent'] );
 		$this->apiCode = $data['apiCode'];
 		$this->apiData = $data['apiData'];
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiMessageTrait::class, 'ApiMessageTrait' );

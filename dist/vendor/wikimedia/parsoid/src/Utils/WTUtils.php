@@ -1,9 +1,14 @@
 <?php
 declare( strict_types = 1 );
+// Suppress UnusedPluginSuppression because
+// Phan on PHP 7.4 and PHP 8.1 need different suppressions
+// @phan-file-suppress UnusedPluginSuppression,UnusedPluginFileSuppression
 
 namespace Wikimedia\Parsoid\Utils;
 
 use DOMException;
+use Wikimedia\Assert\UnreachableException;
+use Wikimedia\Bcp47Code\Bcp47Code;
 use Wikimedia\Parsoid\Config\Env;
 use Wikimedia\Parsoid\DOM\Comment;
 use Wikimedia\Parsoid\DOM\Document;
@@ -24,7 +29,14 @@ use Wikimedia\Parsoid\Wt2Html\Frame;
  */
 class WTUtils {
 	private const FIRST_ENCAP_REGEXP =
-		'#(?:^|\s)(mw:(?:Transclusion|Param|LanguageVariant|Extension(/[^\s]+)))(?=$|\s)#D';
+		'#(?:^|\s)(mw:(?:Transclusion|Param|LanguageVariant|Extension(/\S+)))(?=$|\s)#D';
+
+	/**
+	 * Regex corresponding to FIRST_ENCAP_REGEXP, but excluding extensions. If FIRST_ENCAP_REGEXP is
+	 * updated, this one should be as well.
+	 */
+	private const NON_EXTENSION_ENCAP_REGEXP =
+		'#(?:^|\s)(mw:(?:Transclusion|Param|LanguageVariant))(?=$|\s)#D';
 
 	/**
 	 * Regexp for checking marker metas typeofs representing
@@ -88,20 +100,14 @@ class WTUtils {
 	 * anymore since mw:ExtLink is used for all the three link syntaxes.
 	 *
 	 * @param Element $node
-	 * @param ?DataParsoid $dp
 	 * @return bool
 	 */
-	public static function usesWikiLinkSyntax(
-		Element $node, ?DataParsoid $dp
-	): bool {
-		// FIXME: Optimization from ComputeDSR to avoid refetching this property
-		// Is it worth the unnecessary code here?
-		if ( !$dp ) {
-			$dp = DOMDataUtils::getDataParsoid( $node );
+	public static function isATagFromWikiLinkSyntax( Element $node ): bool {
+		if ( DOMCompat::nodeName( $node ) !== 'a' ) {
+			return false;
 		}
 
-		// SSS FIXME: This requires to be made more robust
-		// for when dp->stx value is not present
+		$dp = DOMDataUtils::getDataParsoid( $node );
 		return DOMUtils::hasRel( $node, 'mw:WikiLink' ) ||
 			( isset( $dp->stx ) && $dp->stx !== "url" && $dp->stx !== "magiclink" );
 	}
@@ -112,20 +118,14 @@ class WTUtils {
 	 * multiple link types
 	 *
 	 * @param Element $node
-	 * @param ?DataParsoid $dp
 	 * @return bool
 	 */
-	public static function usesExtLinkSyntax(
-		Element $node, ?DataParsoid $dp
-	): bool {
-		// FIXME: Optimization from ComputeDSR to avoid refetching this property
-		// Is it worth the unnecessary code here?
-		if ( !$dp ) {
-			$dp = DOMDataUtils::getDataParsoid( $node );
+	public static function isATagFromExtLinkSyntax( Element $node ): bool {
+		if ( DOMCompat::nodeName( $node ) !== 'a' ) {
+			return false;
 		}
 
-		// SSS FIXME: This requires to be made more robust
-		// for when $dp->stx value is not present
+		$dp = DOMDataUtils::getDataParsoid( $node );
 		return DOMUtils::hasRel( $node, 'mw:ExtLink' ) &&
 			( !isset( $dp->stx ) || ( $dp->stx !== "url" && $dp->stx !== "magiclink" ) );
 	}
@@ -136,20 +136,14 @@ class WTUtils {
 	 * multiple link types
 	 *
 	 * @param Element $node
-	 * @param ?DataParsoid $dp
 	 * @return bool
 	 */
-	public static function usesURLLinkSyntax(
-		Element $node, ?DataParsoid $dp = null
-	): bool {
-		// FIXME: Optimization from ComputeDSR to avoid refetching this property
-		// Is it worth the unnecessary code here?
-		if ( !$dp ) {
-			$dp = DOMDataUtils::getDataParsoid( $node );
+	public static function isATagFromURLLinkSyntax( Element $node ): bool {
+		if ( DOMCompat::nodeName( $node ) !== 'a' ) {
+			return false;
 		}
 
-		// SSS FIXME: This requires to be made more robust
-		// for when $dp->stx value is not present
+		$dp = DOMDataUtils::getDataParsoid( $node );
 		return DOMUtils::hasRel( $node, 'mw:ExtLink' ) &&
 			isset( $dp->stx ) && $dp->stx === "url";
 	}
@@ -160,18 +154,14 @@ class WTUtils {
 	 * multiple link types
 	 *
 	 * @param Element $node
-	 * @param ?DataParsoid $dp
 	 * @return bool
 	 */
-	public static function usesMagicLinkSyntax(
-		Element $node, ?DataParsoid $dp = null
-	): bool {
-		if ( !$dp ) {
-			$dp = DOMDataUtils::getDataParsoid( $node );
+	public static function isATagFromMagicLinkSyntax( Element $node ): bool {
+		if ( DOMCompat::nodeName( $node ) !== 'a' ) {
+			return false;
 		}
 
-		// SSS FIXME: This requires to be made more robust
-		// for when $dp->stx value is not present
+		$dp = DOMDataUtils::getDataParsoid( $node );
 		return DOMUtils::hasRel( $node, 'mw:ExtLink' ) &&
 			isset( $dp->stx ) && $dp->stx === 'magiclink';
 	}
@@ -194,7 +184,7 @@ class WTUtils {
 	 * @return bool
 	 */
 	public static function hasExpandedAttrsType( Element $node ): bool {
-		return DOMUtils::matchTypeOf( $node, '/^mw:ExpandedAttrs(\/[^\s]+)*$/' ) !== null;
+		return DOMUtils::matchTypeOf( $node, '/^mw:ExpandedAttrs(\/\S+)*$/' ) !== null;
 	}
 
 	/**
@@ -235,21 +225,27 @@ class WTUtils {
 	 * @return Element|null
 	 */
 	public static function findFirstEncapsulationWrapperNode( Node $node ): ?Element {
-		if ( !self::hasParsoidAboutId( $node ) ) {
+		if ( !self::isEncapsulatedDOMForestRoot( $node ) ) {
 			return null;
 		}
 		/** @var Element $node */
 		DOMUtils::assertElt( $node );
 
-		$about = $node->getAttribute( 'about' );
+		$about = DOMCompat::getAttribute( $node, 'about' );
 		$prev = $node;
 		do {
 			$node = $prev;
-			$prev = DOMUtils::previousNonDeletedSibling( $node );
+			$prev = DiffDOMUtils::previousNonDeletedSibling( $node );
 		} while (
 			$prev instanceof Element &&
-			$prev->getAttribute( 'about' ) === $about
+			DOMCompat::getAttribute( $prev, 'about' ) === $about
 		);
+		// NOTE: findFirstEncapsulationWrapperNode can be called by code
+		// even before templates have been fully encapsulated everywhere.
+		// ProcessTreeBuilderFixups::removeAutoInsertedEmptyTags is the main
+		// culprit here and it makes the contract for this helper murky
+		// by hiding potential brokenness since this should never return null
+		// once all templates have been encapsulated!
 		$elt = self::isFirstEncapsulationWrapperNode( $node ) ? $node : null;
 		'@phan-var ?Element $elt'; // @var ?Element $elt
 		return $elt;
@@ -334,25 +330,17 @@ class WTUtils {
 	}
 
 	/**
-	 * Check if $node is an ELEMENT $node belongs to a template/extension.
-	 *
-	 * NOTE: Use with caution. This technique works reliably for the
-	 * root level elements of tpl-content DOM subtrees since only they
-	 * are guaranteed to be  marked and nested content might not
-	 * necessarily be marked.
+	 * Check if $node is a root in an encapsulated DOM forest.
 	 *
 	 * @param Node $node
 	 * @return bool
 	 */
-	public static function hasParsoidAboutId( Node $node ): bool {
-		if (
-			$node instanceof Element &&
-			$node->hasAttribute( 'about' )
-		) {
-			$about = $node->getAttribute( 'about' );
-			// SSS FIXME: Verify that our DOM spec clarifies this
-			// expectation on about-ids and that our clients respect this.
-			return $about && Utils::isParsoidObjectId( $about );
+	public static function isEncapsulatedDOMForestRoot( Node $node ): bool {
+		$about = $node instanceof Element ?
+			DOMCompat::getAttribute( $node, 'about' ) : null;
+		if ( $about !== null ) {
+			// FIXME: Ensure that our DOM spec clarifies this expectation
+			return Utils::isParsoidObjectId( $about );
 		} else {
 			return false;
 		}
@@ -360,11 +348,8 @@ class WTUtils {
 
 	/**
 	 * Does $node represent a redirect link?
-	 *
-	 * @param Node $node
-	 * @return bool
 	 */
-	public static function isRedirectLink( Node $node ): bool {
+	public static function isRedirectLink( ?Node $node ): bool {
 		return $node instanceof Element &&
 			DOMCompat::nodeName( $node ) === 'link' &&
 			DOMUtils::matchRel( $node, '#\bmw:PageProp/redirect\b#' ) !== null;
@@ -372,9 +357,6 @@ class WTUtils {
 
 	/**
 	 * Does $node represent a category link?
-	 *
-	 * @param ?Node $node
-	 * @return bool
 	 */
 	public static function isCategoryLink( ?Node $node ): bool {
 		return $node instanceof Element &&
@@ -384,11 +366,8 @@ class WTUtils {
 
 	/**
 	 * Does $node represent a link that is sol-transparent?
-	 *
-	 * @param Node $node
-	 * @return bool
 	 */
-	public static function isSolTransparentLink( Node $node ): bool {
+	public static function isSolTransparentLink( ?Node $node ): bool {
 		return $node instanceof Element &&
 			DOMCompat::nodeName( $node ) === 'link' &&
 			DOMUtils::matchRel( $node, TokenUtils::SOL_TRANSPARENT_LINK_REGEX ) !== null;
@@ -491,6 +470,33 @@ class WTUtils {
 	}
 
 	/**
+	 * Is $node the first wrapper element of extension content?
+	 *
+	 * @param Node $node
+	 * @return bool
+	 */
+	public static function isFirstExtensionWrapperNode( Node $node ): bool {
+		return DOMUtils::matchTypeOf( $node, "#mw:Extension/#" ) !== null;
+	}
+
+	/**
+	 * Checks whether a first encapsulation wrapper node is encapsulating an extension
+	 * that outputs MediaWiki Core DOM Spec HTML (https://www.mediawiki.org/wiki/Specs/HTML)
+	 * @param Node $node
+	 * @param Env $env
+	 * @return bool
+	 */
+	public static function isExtensionOutputtingCoreMwDomSpec( Node $node, Env $env ): bool {
+		if ( DOMUtils::matchTypeOf( $node, self::NON_EXTENSION_ENCAP_REGEXP ) !== null ) {
+			return false;
+		}
+		$extTagName = self::getExtTagName( $node );
+		$extConfig = $env->getSiteConfig()->getExtTagConfig( $extTagName );
+		$htmlType = $extConfig['options']['outputHasCoreMwDomSpecMarkup'] ?? null;
+		return $htmlType === true;
+	}
+
+	/**
 	 * Is $node an encapsulation wrapper elt?
 	 *
 	 * All root-level $nodes of generated content are considered
@@ -546,16 +552,16 @@ class WTUtils {
 	/**
 	 * Is the $node from extension content?
 	 * @param Node $node
-	 * @param string $extType
+	 * @param ?string $extType If non-null, checks for that specific extension
 	 * @return bool
 	 */
-	public static function fromExtensionContent( Node $node, string $extType ): bool {
-		$parentNode = $node->parentNode;
-		while ( $parentNode && !DOMUtils::atTheTop( $parentNode ) ) {
-			if ( DOMUtils::hasTypeOf( $parentNode, "mw:Extension/$extType" ) ) {
+	public static function fromExtensionContent( Node $node, ?string $extType = null ): bool {
+		$re = $extType ? "#mw:Extension/$extType#" : "#mw:Extension/\w+#";
+		while ( $node && !DOMUtils::atTheTop( $node ) ) {
+			if ( DOMUtils::matchTypeOf( $node, $re ) ) {
 				return true;
 			}
-			$parentNode = $parentNode->parentNode;
+			$node = $node->parentNode;
 		}
 		return false;
 	}
@@ -607,19 +613,19 @@ class WTUtils {
 	 * prevent them from getting fostered out.
 	 *
 	 * @param Node $node
-	 * @param string $about
+	 * @param ?string $about
 	 * @return Node[]
 	 */
-	public static function getAboutSiblings( Node $node, string $about ): array {
+	public static function getAboutSiblings( Node $node, ?string $about ): array {
 		$nodes = [ $node ];
 
-		if ( !$about ) {
+		if ( $about === null ) {
 			return $nodes;
 		}
 
 		$node = $node->nextSibling;
 		while ( $node && (
-			( $node instanceof Element && $node->getAttribute( 'about' ) === $about ) ||
+			( $node instanceof Element && DOMCompat::getAttribute( $node, 'about' ) === $about ) ||
 			( DOMUtils::isFosterablePosition( $node ) && DOMUtils::isIEW( $node ) )
 		) ) {
 			$nodes[] = $node;
@@ -647,8 +653,9 @@ class WTUtils {
 	 * @return Node|null
 	 */
 	public static function skipOverEncapsulatedContent( Node $node ): ?Node {
-		if ( $node instanceof Element && $node->hasAttribute( 'about' ) ) {
-			$about = $node->getAttribute( 'about' );
+		$about = $node instanceof Element ?
+			DOMCompat::getAttribute( $node, 'about' ) : null;
+		if ( $about !== null ) {
 			// Guaranteed not to be empty. It will at least include $node.
 			$aboutSiblings = self::getAboutSiblings( $node, $about );
 			return end( $aboutSiblings )->nextSibling;
@@ -727,8 +734,6 @@ class WTUtils {
 		// Now encode '-', '>' and '&' in the "true value" as HTML entities,
 		// so that they can be safely embedded in an HTML comment.
 		// This part doesn't have to map strings 1-to-1.
-		// WARNING(T279451): This is actually the part which protects the
-		// "-type" key in self::fosterCommentData
 		return preg_replace_callback( '/[->&]/', static function ( $m ) {
 			return Utils::entityEncodeAll( $m[0] );
 		}, $trueValue );
@@ -755,20 +760,39 @@ class WTUtils {
 	 * Utility function: we often need to know the wikitext DSR length for
 	 * an HTML DOM comment value.
 	 *
-	 * @param Comment|CommentTk|string $node A comment node containing a DOM-escaped comment.
+	 * @param Comment|CommentTk $node A comment node containing a DOM-escaped comment.
 	 * @return int The wikitext length in UTF-8 bytes necessary to encode this
 	 *   comment, including 7 characters for the `<!--` and `-->` delimiters.
 	 */
 	public static function decodedCommentLength( $node ): int {
 		// Add 7 for the "<!--" and "-->" delimiters in wikitext.
+		$syntaxLen = 7;
 		if ( $node instanceof Comment ) {
 			$value = $node->nodeValue;
+			if ( $node->previousSibling &&
+				DOMUtils::hasTypeOf( $node->previousSibling, "mw:Placeholder/UnclosedComment" )
+			) {
+				$syntaxLen = 4;
+			}
 		} elseif ( $node instanceof CommentTk ) {
+			// @phan-suppress-next-line PhanUndeclaredProperty dynamic property
+			if ( isset( $node->dataParsoid->unclosedComment ) ) {
+				$syntaxLen = 4;
+			}
 			$value = $node->value;
 		} else {
-			$value = $node;
+			throw new UnreachableException( 'Should not be here!' );
 		}
-		return strlen( self::decodeComment( $value ) ) + 7;
+		return strlen( self::decodeComment( $value ) ) + $syntaxLen;
+	}
+
+	/**
+	 * @param Node $node
+	 * @return ?string
+	 */
+	public static function getExtTagName( Node $node ): ?string {
+		$match = DOMUtils::matchTypeOf( $node, '#^mw:Extension/(.+?)$#D' );
+		return $match ? mb_strtolower( substr( $match, strlen( 'mw:Extension/' ) ) ) : null;
 	}
 
 	/**
@@ -777,10 +801,8 @@ class WTUtils {
 	 * @return ?ExtensionTagHandler
 	 */
 	public static function getNativeExt( Env $env, Node $node ): ?ExtensionTagHandler {
-		$match = DOMUtils::matchTypeOf( $node, '#^mw:Extension/(.+?)$#D' );
-		$matchingTag = $match ? substr( $match, strlen( 'mw:Extension/' ) ) : null;
-		return $matchingTag ?
-			$env->getSiteConfig()->getExtTagImpl( $matchingTag ) : null;
+		$extTagName = self::getExtTagName( $node );
+		return $extTagName ? $env->getSiteConfig()->getExtTagImpl( $extTagName ) : null;
 	}
 
 	/**
@@ -873,6 +895,30 @@ class WTUtils {
 	}
 
 	/**
+	 * Creates an internationalization (i18n) message that will be localized into an arbitrary
+	 * language. The returned DocumentFragment contains, as a single child, a span
+	 * element with the appropriate information for later localization.
+	 * The use of this method is discouraged; use ::createPageContentI18nFragment(...) and
+	 * ::createInterfaceI18nFragment(...) where possible rather than, respectively,
+	 * ::createLangI18nFragment(..., $wgContLang, ...) and
+	 * ::createLangI18nFragment(..., $wgLang,...).
+	 * @param Document $doc
+	 * @param Bcp47Code $lang language for the localization
+	 * @param string $key message key for the message to be localized
+	 * @param ?array $params parameters for localization
+	 * @return DocumentFragment
+	 * @throws DOMException
+	 */
+	public static function createLangI18nFragment(
+		Document $doc, Bcp47Code $lang, string $key, ?array $params = null
+	): DocumentFragment {
+		$frag = self::createEmptyLocalizationFragment( $doc );
+		$i18n = I18nInfo::createLangI18n( $lang, $key, $params );
+		DOMDataUtils::setDataNodeI18n( $frag->firstChild, $i18n );
+		return $frag;
+	}
+
+	/**
 	 * Adds to $element the internationalization information needed for the attribute $name to be
 	 * localized in a later pass into the page content language.
 	 * @param Element $element element on which to add internationalization information
@@ -882,7 +928,7 @@ class WTUtils {
 	 */
 	public static function addPageContentI18nAttribute(
 		Element $element, string $name, string $key, ?array $params = null
-	) {
+	): void {
 		$i18n = I18nInfo::createPageContentI18n( $key, $params );
 		DOMUtils::addTypeOf( $element, 'mw:LocalizedAttrs' );
 		DOMDataUtils::setDataAttrI18n( $element, $name, $i18n );
@@ -897,8 +943,28 @@ class WTUtils {
 	 */
 	public static function addInterfaceI18nAttribute(
 		Element $element, string $name, string $key, ?array $params = null
-	) {
+	): void {
 		$i18n = I18nInfo::createInterfaceI18n( $key, $params );
+		DOMUtils::addTypeOf( $element, 'mw:LocalizedAttrs' );
+		DOMDataUtils::setDataAttrI18n( $element, $name, $i18n );
+	}
+
+	/**
+	 * Adds to $element the internationalization information needed for the attribute $name to be
+	 * localized in a later pass into the provided language.
+	 * The use of this method is discouraged; ; use ::addPageContentI18nAttribute(...) and
+	 * ::addInterfaceI18nAttribute(...) where possible rather than, respectively,
+	 * ::addLangI18nAttribute(..., $wgContLang, ...) and ::addLangI18nAttribute(..., $wgLang, ...).
+	 * @param Element $element element on which to add internationalization information
+	 * @param Bcp47Code $lang language in which the message will be localized
+	 * @param string $name name of the attribute whose value will be localized
+	 * @param string $key message key used for the attribute value localization
+	 * @param ?array $params parameters for localization
+	 */
+	public static function addLangI18nAttribute(
+		Element $element, Bcp47Code $lang, string $name, string $key, ?array $params = null
+	): void {
+		$i18n = I18nInfo::createLangI18n( $lang, $key, $params );
 		DOMUtils::addTypeOf( $element, 'mw:LocalizedAttrs' );
 		DOMDataUtils::setDataAttrI18n( $element, $name, $i18n );
 	}
@@ -1023,6 +1089,7 @@ class WTUtils {
 				$content .= $c->nodeValue;
 			} elseif (
 				$c instanceof Element &&
+				!DOMUtils::isMetaDataTag( $c ) &&
 				!DOMUtils::hasTypeOf( $c, "mw:Extension/ref" )
 			) {
 				$content .= self::textContentFromCaption( $c );

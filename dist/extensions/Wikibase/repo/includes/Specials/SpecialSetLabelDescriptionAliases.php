@@ -2,10 +2,11 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Config\Config;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\Logger\LoggerFactory;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Term\Fingerprint;
@@ -15,13 +16,14 @@ use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
 use Wikibase\Lib\UserInputException;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\ChangeOp\FingerprintChangeOpFactory;
 use Wikibase\Repo\CopyrightMessageBuilder;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\SummaryFormatter;
 
@@ -35,6 +37,9 @@ use Wikibase\Repo\SummaryFormatter;
 class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 
 	use ParameterizedDescriptionTrait;
+
+	public const BUTTON_MESSAGE_PUBLISH = 'publishchanges';
+	public const BUTTON_MESSAGE_SAVE = 'savechanges';
 
 	/**
 	 * @var FingerprintChangeOpFactory
@@ -52,7 +57,17 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	private $permissionChecker;
 
 	/**
+	 * @var LanguageNameUtils
+	 */
+	private $languageNameUtils;
+
+	/**
 	 * @var string
+	 */
+	private $submitButtonMessage;
+
+	/**
+	 * @var string|null
 	 */
 	private $languageCode;
 
@@ -76,10 +91,13 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		FingerprintChangeOpFactory $changeOpFactory,
 		ContentLanguages $termsLanguages,
-		EntityPermissionChecker $permissionChecker
+		EntityPermissionChecker $permissionChecker,
+		LanguageNameUtils $languageNameUtils,
+		string $submitButtonMessage
 	) {
 		parent::__construct(
 			'SetLabelDescriptionAliases',
@@ -87,17 +105,23 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 			$copyrightView,
 			$summaryFormatter,
 			$entityTitleLookup,
-			$editEntityFactory
+			$editEntityFactory,
+			$anonymousEditWarningBuilder,
 		);
 
 		$this->changeOpFactory = $changeOpFactory;
 		$this->termsLanguages = $termsLanguages;
 		$this->permissionChecker = $permissionChecker;
+		$this->languageNameUtils = $languageNameUtils;
+		$this->submitButtonMessage = $submitButtonMessage;
 	}
 
 	public static function factory(
+		LanguageNameUtils $languageNameUtils,
+		Config $mwConfig,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		ChangeOpFactoryProvider $changeOpFactoryProvider,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityPermissionChecker $entityPermissionChecker,
 		EntityTitleLookup $entityTitleLookup,
 		SettingsArray $repoSettings,
@@ -116,9 +140,12 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
+			$anonymousEditWarningBuilder,
 			$changeOpFactoryProvider->getFingerprintChangeOpFactory(),
 			$termsLanguages,
-			$entityPermissionChecker
+			$entityPermissionChecker,
+			$languageNameUtils,
+			$mwConfig->get( 'EditSubmitButtonLabelPublish' ) ? self::BUTTON_MESSAGE_PUBLISH : self::BUTTON_MESSAGE_SAVE
 		);
 	}
 
@@ -179,10 +206,10 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	 *
 	 * @return HTMLForm
 	 */
-	protected function getForm( EntityDocument $entity = null ) {
-		if ( $entity !== null && $this->languageCode !== null ) {
+	protected function getForm( ?EntityDocument $entity ) {
+		if ( $this->isEditFormStep( $entity ) ) {
 
-			$languageName = Language::fetchLanguageName(
+			$languageName = $this->languageNameUtils->getLanguageName(
 				$this->languageCode, $this->getLanguage()->getCode()
 			);
 			$intro = $this->msg(
@@ -195,23 +222,23 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 				'id' => [
 					'name' => 'id',
 					'type' => 'hidden',
-					'default' => $entity->getId()->getSerialization()
+					'default' => $entity->getId()->getSerialization(),
 				],
 				'language' => [
 					'name' => 'language',
 					'type' => 'hidden',
-					'default' => $this->languageCode
+					'default' => $this->languageCode,
 				],
 				'revid' => [
 					'name' => 'revid',
 					'type' => 'hidden',
 					'default' => $this->getBaseRevision()->getRevisionId(),
-				]
+				],
 			];
 			$formDescriptor = array_merge(
 				$formDescriptor,
 				$this->getLabeledInputField( 'label', $this->label ),
-				$this->getLabeledInputField( 'description', $this->description ),
+				$this->getDescriptionInputField( $this->languageCode, $this->description ),
 				$this->getLabeledInputField( 'aliases', implode( '|', $this->aliases ) )
 			);
 		} else {
@@ -225,12 +252,28 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 				'default' => $languageCode,
 				'type' => 'text',
 				'id' => $fieldId,
-				'label-message' => 'wikibase-modifyterm-language'
+				'label-message' => 'wikibase-modifyterm-language',
 			];
 		}
 
 		return HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )
-			->setHeaderText( Html::rawElement( 'p', [], $intro ) );
+			->setHeaderHtml( Html::rawElement( 'p', [], $intro ) );
+	}
+
+	private function getDescriptionInputField( string $languageCode, string $value ): array {
+		$fieldDescription = $this->getLabeledInputField( 'description', $value );
+
+		// We don't support "mul" descriptions (T330193).
+		if ( $languageCode === 'mul' ) {
+			$fieldDescription['description']['disabled'] = true;
+			$fieldDescription['description']['notices'] = [
+				$this->msg(
+					'wikibase-setlabeldescriptionaliases-description-not-supported'
+				)->text(),
+			];
+		}
+
+		return $fieldDescription;
 	}
 
 	/**
@@ -241,7 +284,7 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	 *
 	 * @return array[]
 	 */
-	private function getLabeledInputField( $termType, $value ) {
+	private function getLabeledInputField( $termType, $value ): array {
 		$fieldId = 'wikibase-setlabeldescriptionaliases-' . $termType;
 
 		// Messages:
@@ -255,8 +298,8 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 				'type' => 'text',
 				'id' => $fieldId,
 				'placeholder' => $value,
-				'label-message' => $fieldId . '-label'
-			]
+				'label-message' => $fieldId . '-label',
+			],
 		];
 	}
 
@@ -295,8 +338,8 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	private function extractInput( $subPage ) {
 		$request = $this->getRequest();
 
-		$parts = $subPage === '' ? [] : explode( '/', $subPage, 2 );
-		$this->languageCode = $request->getRawVal( 'language', $parts[1] ?? '' );
+		$parts = $subPage ? explode( '/', $subPage, 2 ) : [];
+		$this->languageCode = $request->getRawVal( 'language' ) ?? $parts[1] ?? '';
 
 		$label = $request->getVal( 'label', '' );
 		$this->label = $this->stringNormalizer->trimToNFC( $label );
@@ -362,7 +405,7 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 		}
 		$changeOps = $this->getChangeOps( $entity->getFingerprint() );
 
-		if ( empty( $changeOps ) ) {
+		if ( !$changeOps ) {
 			return false;
 		}
 
@@ -381,9 +424,8 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 	 * @return bool
 	 */
 	private function assertNoPipeCharacterInAliases( Fingerprint $fingerprint ) {
-		if ( !empty( $this->aliases ) ) {
-			if ( $fingerprint->hasAliasGroup( $this->languageCode )
-			) {
+		if ( $this->aliases ) {
+			if ( $fingerprint->hasAliasGroup( $this->languageCode ) ) {
 				$aliasesInLang = $fingerprint->getAliasGroup( $this->languageCode )->getAliases();
 				foreach ( $aliasesInLang as $alias ) {
 					if ( strpos( $alias, '|' ) !== false ) {
@@ -456,7 +498,7 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 			);
 		}
 
-		if ( !empty( $this->aliases ) ) {
+		if ( $this->aliases ) {
 			if ( !$fingerprint->hasAliasGroup( $this->languageCode )
 				|| $fingerprint->getAliasGroup( $this->languageCode )->getAliases() !== $this->aliases
 			) {
@@ -487,4 +529,29 @@ class SpecialSetLabelDescriptionAliases extends SpecialModifyEntity {
 		return $summary;
 	}
 
+	/**
+	 * @param EntityDocument|null $entity
+	 *
+	 * @return string submit message key
+	 */
+	protected function getSubmitKey( ?EntityDocument $entity ) {
+		if ( $this->isEditFormStep( $entity ) ) {
+			return $this->submitButtonMessage;
+		}
+
+		return 'wikibase-setlabeldescriptionaliases-continue';
+	}
+
+	/**
+	 * @param EntityDocument|null $entity
+	 *
+	 * @return bool
+	 */
+	protected function showCopyrightNotice( ?EntityDocument $entity ) {
+		return $this->isEditFormStep( $entity );
+	}
+
+	private function isEditFormStep( ?EntityDocument $entity ) {
+		return $entity !== null && $this->languageCode !== null;
+	}
 }

@@ -2,18 +2,19 @@
 
 namespace MediaWiki\Extension\DismissableSiteNotice;
 
-use Html;
+use MediaWiki\Hook\SiteNoticeAfterHook;
+use MediaWiki\Html\Html;
+use MediaWiki\Parser\Sanitizer;
 use Skin;
-use Xml;
 
-class Hooks {
+class Hooks implements SiteNoticeAfterHook {
 
 	/**
 	 * @param string &$notice
 	 * @param Skin $skin
 	 * @suppress SecurityCheck-DoubleEscaped
 	 */
-	public static function onSiteNoticeAfter( &$notice, $skin ) {
+	public function onSiteNoticeAfter( &$notice, $skin ) {
 		global $wgMajorSiteNoticeID, $wgDismissableSiteNoticeForAnons;
 		if ( method_exists( $skin, 'getVersion' ) ) {
 			// does the skin support versioning and if so does it provide dismissable site notices?
@@ -22,7 +23,7 @@ class Hooks {
 			}
 		}
 
-		if ( !$notice ) {
+		if ( trim( Sanitizer::removeHTMLcomments( $notice ) ) === '' ) {
 			return;
 		}
 
@@ -54,6 +55,9 @@ class Hooks {
 		}
 
 		if ( $skin->getUser()->isAnon() ) {
+			// If there's no nonce (false), pass null to Html::inlineScript
+			$nonce = $skin->getOutput()->getCSP()->getNonce() ?: null;
+
 			// Hide the sitenotice from search engines (see bug T11209 comment 4)
 			// NOTE: Is this actually effective?
 			// NOTE: Avoid document.write (T125323)
@@ -71,9 +75,10 @@ class Hooks {
 					// - Create temporary element or document fragment
 					// - Set innerHTML.
 					// - Replace node with wrapper's child nodes.
-					'node.outerHTML=' . Xml::encodeJsVar( $notice ) . ';' .
+					'node.outerHTML=' . Html::encodeJsVar( $notice ) . ';' .
 					'}' .
-					'}());'
+					'}());',
+					$nonce
 				);
 			$notice = $jsWrapped;
 		}

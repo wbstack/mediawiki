@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Extension\CLDR;
 
-use Exception;
-use Language;
+use InvalidArgumentException;
+use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MediaWikiServices;
 
 /**
@@ -14,8 +14,9 @@ use MediaWiki\MediaWikiServices;
  * @copyright Copyright © 2007-2011
  * @license GPL-2.0-or-later
  */
-class LanguageNames extends CldrNames {
+class LanguageNames {
 
+	/** @var array */
 	private static $cache = [];
 
 	/**
@@ -46,7 +47,6 @@ class LanguageNames extends CldrNames {
 	 * @param string $code
 	 * @param int $fbMethod
 	 * @param int $list
-	 * @throws Exception
 	 * @return array an associative array of language codes and localized language names
 	 */
 	public static function getNames( $code, $fbMethod = self::FALLBACK_NATIVE,
@@ -56,8 +56,8 @@ class LanguageNames extends CldrNames {
 
 		$native = MediaWikiServices::getInstance()->getLanguageNameUtils()
 			->getLanguageNames(
-				null,
-				$list === self::LIST_MW_SUPPORTED ? 'mwfile' : 'mw'
+				LanguageNameUtils::AUTONYMS,
+				$list === self::LIST_MW_SUPPORTED ? LanguageNameUtils::SUPPORTED : LanguageNameUtils::DEFINED
 			);
 
 		if ( $fbMethod === self::FALLBACK_NATIVE ) {
@@ -66,7 +66,7 @@ class LanguageNames extends CldrNames {
 			// Load missing language names from fallback languages
 			$fb = $xx;
 
-			$fallbacks = Language::getFallbacksFor( $code );
+			$fallbacks = MediaWikiServices::getInstance()->getLanguageFallback()->getAll( $code );
 			foreach ( $fallbacks as $fallback ) {
 				// Overwrite the things in fallback with what we have already
 				$fb = array_merge( self::loadLanguage( $fallback ), $fb );
@@ -80,12 +80,12 @@ class LanguageNames extends CldrNames {
 				$names[$code] = $native[$code];
 			}
 		} else {
-			throw new Exception( "Invalid value for 2:\$fallback in " . __METHOD__ );
+			throw new InvalidArgumentException( "Invalid value for 2:\$fallback in " . __METHOD__ );
 		}
 
 		switch ( $list ) {
 			case self::LIST_MW:
-			/** @noinspection PhpMissingBreakStatementInspection */
+				/** @noinspection PhpMissingBreakStatementInspection */
 			case self::LIST_MW_SUPPORTED:
 				/* Remove entries that are not in fb */
 				$names = array_intersect_key( $names, $native );
@@ -93,7 +93,7 @@ class LanguageNames extends CldrNames {
 			case self::LIST_MW_AND_CLDR:
 				return $names;
 			default:
-				throw new Exception( "Invalid value for 3:\$list in " . __METHOD__ );
+				throw new InvalidArgumentException( "Invalid value for 3:\$list in " . __METHOD__ );
 		}
 	}
 
@@ -110,14 +110,15 @@ class LanguageNames extends CldrNames {
 
 		self::$cache[$code] = [];
 
-		if ( !MediaWikiServices::getInstance()->getLanguageNameUtils()
-			->isValidBuiltInCode( $code )
-		) {
+		$langNameUtils = MediaWikiServices::getInstance()->getLanguageNameUtils();
+
+		if ( !$langNameUtils->isValidBuiltInCode( $code ) ) {
 			return [];
 		}
 
 		/* Load override for wrong or missing entries in cldr */
-		$override = __DIR__ . '/../LocalNames/' . self::getOverrideFileName( $code );
+		$override = __DIR__ . '/../LocalNames/' .
+			$langNameUtils->getFileName( 'LocalNames', $code, '.php' );
 		if ( file_exists( $override ) ) {
 			$languageNames = false;
 			require $override;
@@ -127,7 +128,8 @@ class LanguageNames extends CldrNames {
 			}
 		}
 
-		$filename = __DIR__ . '/../CldrNames/' . self::getFileName( $code );
+		$filename = __DIR__ . '/../CldrNames/' .
+			$langNameUtils->getFileName( 'CldrNames', $code, '.php' );
 		if ( file_exists( $filename ) ) {
 			$languageNames = false;
 			require $filename;
@@ -140,17 +142,6 @@ class LanguageNames extends CldrNames {
 		}
 
 		return self::$cache[$code];
-	}
-
-	/**
-	 * @param array &$names
-	 * @param string $code
-	 * @return bool
-	 */
-	public static function coreHook( &$names, $code ) {
-		$names += self::getNames( $code, self::FALLBACK_NORMAL, self::LIST_MW_AND_CLDR );
-
-		return true;
 	}
 }
 

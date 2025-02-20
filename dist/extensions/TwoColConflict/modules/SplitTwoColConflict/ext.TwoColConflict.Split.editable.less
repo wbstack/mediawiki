@@ -1,4 +1,5 @@
 /* stylelint-disable no-descending-specificity */
+@import 'mediawiki.skin.variables.less';
 
 .mw-twocolconflict-split-editable {
 	.mw-twocolconflict-split-editor {
@@ -10,10 +11,8 @@
 		padding: 0;
 		resize: vertical;
 		overflow: auto;
-		-webkit-box-shadow: none;
-		-moz-box-shadow: none;
 		box-shadow: none;
-		background: transparent;
+		background: @background-color-transparent;
 		color: #000;
 
 		&:focus {

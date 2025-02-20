@@ -305,7 +305,7 @@ class RequestAccountPage extends SpecialPage {
 			$wgCaptchaTriggers['createaccount'] = false;
 		}
 		$abortError = '';
-		if ( !Hooks::run( 'AbortNewAccount', [ $u, &$abortError ] ) ) {
+		if ( !$this->getHookContainer()->run( 'AbortNewAccount', [ $u, &$abortError ] ) ) {
 			// Hook point to add extra creation throttles and blocks
 			wfDebug( "RequestAccount::doSubmit: a hook blocked creation\n" );
 			$this->showForm( $abortError );
@@ -349,7 +349,7 @@ class RequestAccountPage extends SpecialPage {
 		);
 
 		# Actually submit!
-		list( $status, $msg ) = $submission->submit( $this->getContext() );
+		[ $status, $msg ] = $submission->submit( $this->getContext() );
 		# Account for state changes
 		$this->mForgotAttachment = $submission->getAttachmentDidNotForget();
 		$this->mPrevAttachment = $submission->getAttachtmentPrevName();
@@ -393,8 +393,8 @@ class RequestAccountPage extends SpecialPage {
 		$reqUser = $this->getUser();
 		$out = $this->getOutput();
 		# Confirm if this token is in the pending requests
-		list( $bodyArguments, $name,
-			$email_authenticated ) = ConfirmAccount::requestInfoFromEmailToken( $code );
+		[ $bodyArguments, $name,
+			$email_authenticated ] = ConfirmAccount::requestInfoFromEmailToken( $code );
 		if ( $name && $email_authenticated === null ) {
 			# Send confirmation email to prospective user
 			ConfirmAccount::confirmEmail( $name );
@@ -429,7 +429,7 @@ class RequestAccountPage extends SpecialPage {
 			$out->returnToMain();
 		} else {
 			# Maybe the user confirmed after account was created...
-			$user = $this->userFactory->newFromConfirmationCode( $code, UserFactory::READ_LATEST );
+			$user = $this->userFactory->newFromConfirmationCode( $code, IDBAccessObject::READ_LATEST );
 			if ( is_object( $user ) ) {
 				$user->confirmEmail();
 				$user->saveSettings();

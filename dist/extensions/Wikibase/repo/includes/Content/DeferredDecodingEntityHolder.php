@@ -62,7 +62,7 @@ class DeferredDecodingEntityHolder implements EntityHolder {
 		$blob,
 		$contentFormat,
 		$entityType,
-		EntityId $entityId = null
+		?EntityId $entityId = null
 	) {
 		if ( !is_string( $blob ) ) {
 			throw new InvalidArgumentException( '$blob must be a string' );
@@ -100,7 +100,7 @@ class DeferredDecodingEntityHolder implements EntityHolder {
 
 			if ( !( $this->entity instanceof EntityDocument ) ) {
 				throw new RuntimeException( 'Deferred decoding resulted in an incompatible entity, '
-					. 'expected EntityDocument, got ' . gettype( $this->entity ) );
+					. 'expected EntityDocument, got ' . get_debug_type( $this->entity ) );
 			} elseif ( $this->entity->getType() !== $this->entityType ) {
 				throw new RuntimeException( 'Deferred decoding resulted in an incompatible entity, '
 					. 'expected ' . $this->entityType . ', got ' . $this->entity->getType() );

@@ -5,8 +5,8 @@ namespace CirrusSearch\Maintenance\Validators;
 use CirrusSearch\Maintenance\Printer;
 use CirrusSearch\Maintenance\Reindexer;
 use Elastica\Client;
-use RawMessage;
-use Status;
+use MediaWiki\Language\RawMessage;
+use MediaWiki\Status\Status;
 
 class SpecificAliasValidator extends IndexAliasValidator {
 	/**
@@ -49,7 +49,7 @@ class SpecificAliasValidator extends IndexAliasValidator {
 		array $reindexParams,
 		array $reindexValidators,
 		$reindexAndRemoveOk,
-		Printer $out = null
+		?Printer $out = null
 	) {
 		// @todo: this constructor takes too many arguments - refactor!
 

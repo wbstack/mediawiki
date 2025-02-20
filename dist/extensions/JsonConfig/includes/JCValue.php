@@ -1,8 +1,8 @@
 <?php
 namespace JsonConfig;
 
-use Exception;
-use Message;
+use InvalidArgumentException;
+use MediaWiki\Message\Message;
 
 /**
  * A class with validation state that wraps each accessed value in the JCObjContent::validationData
@@ -106,7 +106,8 @@ final class JCValue {
 				// Convert field path to a printable string
 				$args[1] = JCUtils::fieldPathToString( $fieldPath );
 			}
-			$this->error = call_user_func_array( 'wfMessage', $args );
+			// @phan-suppress-next-line PhanParamTooFewUnpack
+			$this->error = wfMessage( ...$args );
 		}
 		return $this->error;
 	}
@@ -114,7 +115,6 @@ final class JCValue {
 	/**
 	 * @param string|int $fld
 	 * @param mixed $value
-	 * @throws Exception
 	 */
 	public function setField( $fld, $value ) {
 		if ( is_object( $this->value ) && is_string( $fld ) ) {
@@ -122,13 +122,12 @@ final class JCValue {
 		} elseif ( is_array( $this->value ) && ( is_string( $fld ) || is_int( $fld ) ) ) {
 			$this->value[$fld] = $value;
 		} else {
-			throw new Exception( 'Type mismatch for field ' . $fld );
+			throw new InvalidArgumentException( 'Type mismatch for field ' . $fld );
 		}
 	}
 
 	/**
 	 * @param string|int $fld
-	 * @throws \Exception
 	 * @return mixed
 	 */
 	public function deleteField( $fld ) {
@@ -144,14 +143,13 @@ final class JCValue {
 				unset( $this->value[$fld] );
 			}
 		} else {
-			throw new Exception( 'Type mismatch for field ' . $fld );
+			throw new InvalidArgumentException( 'Type mismatch for field ' . $fld );
 		}
 		return $tmp;
 	}
 
 	/**
 	 * @param string|int $fld
-	 * @throws \Exception
 	 * @return bool
 	 */
 	public function fieldExists( $fld ) {
@@ -160,12 +158,11 @@ final class JCValue {
 		} elseif ( is_array( $this->value ) && ( is_string( $fld ) || is_int( $fld ) ) ) {
 			return array_key_exists( $fld, $this->value );
 		}
-		throw new Exception( 'Type mismatch for field ' . $fld );
+		throw new InvalidArgumentException( 'Type mismatch for field ' . $fld );
 	}
 
 	/**
 	 * @param string|int $fld
-	 * @throws \Exception
 	 * @return mixed
 	 */
 	public function getField( $fld ) {
@@ -174,6 +171,6 @@ final class JCValue {
 		} elseif ( is_array( $this->value ) && ( is_string( $fld ) || is_int( $fld ) ) ) {
 			return $this->value[$fld];
 		}
-		throw new Exception( 'Type mismatch for field ' . $fld );
+		throw new InvalidArgumentException( 'Type mismatch for field ' . $fld );
 	}
 }

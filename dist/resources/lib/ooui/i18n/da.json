@@ -4,6 +4,7 @@
 			"Cgtdk",
 			"Christian List",
 			"EileenSanda",
+			"Fugithora",
 			"Joedalton",
 			"Laketown",
 			"Macofe",
@@ -14,6 +15,7 @@
 			"Tehnix"
 		]
 	},
+	"ooui-copytextlayout-copy": "Kopiér",
 	"ooui-outline-control-move-down": "Flyt ned",
 	"ooui-outline-control-move-up": "Flyt op",
 	"ooui-outline-control-remove": "Fjern element",
@@ -27,10 +29,12 @@
 	"ooui-dialog-process-dismiss": "Luk",
 	"ooui-dialog-process-retry": "Prøv igen",
 	"ooui-dialog-process-continue": "Fortsæt",
+	"ooui-combobox-button-label": "Vis/skjul muligheder",
 	"ooui-selectfile-button-select": "Vælg en fil",
 	"ooui-selectfile-button-select-multiple": "Vælg filer",
 	"ooui-selectfile-placeholder": "Ingen filer er valgt",
-	"ooui-selectfile-dragdrop-placeholder": "Smid filen her",
+	"ooui-selectfile-dragdrop-placeholder": "Slip fil her",
+	"ooui-selectfile-dragdrop-placeholder-multiple": "Slip filer her",
 	"ooui-popup-widget-close-button-aria-label": "Luk",
 	"ooui-field-help": "Hjælp"
 }

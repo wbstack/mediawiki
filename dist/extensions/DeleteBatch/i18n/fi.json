@@ -6,13 +6,15 @@
 			"Jack Phoenix",
 			"Mobe",
 			"Nedergard",
-			"Nike"
+			"Nike",
+			"Samoasambia"
 		]
 	},
 	"deletebatch": "Poista useita sivuja",
 	"deletebatch-desc": "Mahdollistaa [[Special:DeleteBatch|sivujen poistamisen erissä]].",
-	"deletebatch-help": "Poista useita sivuja. Voit joko tehdä yhden poiston tai poistaa tiedostossa listatut sivut. Valitse käyttäjä, joka näytetään poistolokeissa. Tallennetun tiedoston tulisi sisältää sivun nimi ja vapaaehtoinen syy | -merkin erottamina joka rivillä.",
+	"deletebatch-help": "Poista useita sivuja.\nVoit joko tehdä yhden poiston tai poistaa tiedostossa listatut sivut.\nValitse käyttäjä, joka näytetään poistolokeissa.\nTallennetun tiedoston tulisi sisältää sivun nimi ja vapaaehtoinen syy | -merkin erottamina.",
 	"deletebatch-caption": "Sivulista",
+	"deletebatch-default-reason": "Oletuspoistosyy:",
 	"deletebatch-title": "Poista useita sivuja",
 	"deletebatch-link-back": "Palaa takaisin toimintosivulle",
 	"deletebatch-as": "Poiston suorittaja",

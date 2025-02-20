@@ -3,9 +3,12 @@
 namespace CirrusSearch\Query;
 
 use CirrusSearch\Extra\Query\TokenCountRouter;
+use CirrusSearch\Query\Builder\NearMatchFieldQueryBuilder;
 use CirrusSearch\Search\SearchContext;
 use CirrusSearch\SearchConfig;
+use Elastica\Query\AbstractQuery;
 use Elastica\Query\MatchAll;
+use Elastica\Query\MatchNone;
 use MediaWiki\Logger\LoggerFactory;
 
 /**
@@ -33,6 +36,9 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 	 */
 	private $useTokenCountRouter;
 
+	/** @var NearMatchFieldQueryBuilder */
+	private NearMatchFieldQueryBuilder $nearMatchFieldQueryBuilder;
+
 	/**
 	 * @param SearchConfig $config
 	 * @param KeywordFeature[] $features
@@ -43,6 +49,7 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 		$this->features = $features;
 		$this->useTokenCountRouter = $this->config->getElement(
 			'CirrusSearchWikimediaExtraPlugin', 'token_count_router' ) === true;
+		$this->nearMatchFieldQueryBuilder = NearMatchFieldQueryBuilder::defaultFromSearchConfig( $config );
 	}
 
 	/**
@@ -54,7 +61,7 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 	 */
 	public function build( SearchContext $searchContext, $term ) {
 		$searchContext->addSyntaxUsed( 'full_text' );
-		// Transform Mediawiki specific syntax to filters and extra
+		// Transform MediaWiki specific syntax to filters and extra
 		// (pre-escaped) query string
 		foreach ( $this->features as $feature ) {
 			$term = $feature->apply( $searchContext, $term );
@@ -204,34 +211,30 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 			self::buildFullTextSearchFields( $searchContext, 1, '.plain', true ),
 			self::buildFullTextSearchFields( $searchContext,
 				$this->config->get( 'CirrusSearchStemmedWeight' ), '', true ) );
-		$nearMatchFields = self::buildFullTextSearchFields( $searchContext,
-			$this->config->get( 'CirrusSearchNearMatchWeight' ), '.near_match', true );
-		$nearMatchFields = array_merge( $nearMatchFields, self::buildFullTextSearchFields( $searchContext,
-			$this->config->get( 'CirrusSearchNearMatchWeight' ) * 0.75, '.near_match_asciifolding', true ) );
-		$searchContext->setMainQuery( $this->buildSearchTextQuery( $searchContext, $fields, $nearMatchFields,
-			$this->queryStringQueryString, $nearMatchQuery ) );
+
+		$searchContext->setMainQuery(
+			$this->buildSearchTextQuery(
+				$searchContext,
+				$fields,
+				$this->nearMatchFieldQueryBuilder->buildFromQueryString( $nearMatchQuery ),
+				$this->queryStringQueryString
+			)
+		);
 
 		// The highlighter doesn't know about the weighting from the all fields so we have to send
 		// it a query without the all fields.  This swaps one in.
-		if ( $this->config->getElement( 'CirrusSearchAllFields', 'use' ) ) {
-			$nonAllFields = array_merge(
-				self::buildFullTextSearchFields( $searchContext, 1, '.plain', false ),
-				self::buildFullTextSearchFields( $searchContext,
-					$this->config->get( 'CirrusSearchStemmedWeight' ), '', false ) );
-			$nonAllQueryString = $searchContext->escaper()
-				->fixupWholeQueryString( implode( ' ', $nonAllQuery ) );
-			$searchContext->setHighlightQuery(
-				$this->buildHighlightQuery( $searchContext, $nonAllFields, $nonAllQueryString, 1 )
-			);
-		} else {
-			$nonAllFields = $fields;
-		}
+		$nonAllFields = array_merge(
+			self::buildFullTextSearchFields( $searchContext, 1, '.plain', false ),
+			self::buildFullTextSearchFields( $searchContext,
+				$this->config->get( 'CirrusSearchStemmedWeight' ), '', false ) );
+		$nonAllQueryString = $searchContext->escaper()
+			->fixupWholeQueryString( implode( ' ', $nonAllQuery ) );
+		$searchContext->setHighlightQuery(
+			$this->buildHighlightQuery( $searchContext, $nonAllFields, $nonAllQueryString, 1 )
+		);
 
 		if ( $this->isPhraseRescoreNeeded( $searchContext ) ) {
 			$rescoreFields = $fields;
-			if ( !$this->config->getElement( 'CirrusSearchAllFields', 'use' ) ) {
-				$rescoreFields = $nonAllFields;
-			}
 
 			$searchContext->setPhraseRescoreQuery( $this->buildPhraseRescoreQuery(
 						$searchContext,
@@ -270,11 +273,15 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 		);
 
 		$searchContext->addSyntaxUsed( 'degraded_full_text' );
-		$searchContext->setMainQuery( new \Elastica\Query\Simple( [ 'simple_query_string' => [
+		$simpleQuery = new \Elastica\Query\Simple( [ 'simple_query_string' => [
 			'fields' => $fields,
 			'query' => $this->queryStringQueryString,
 			'default_operator' => 'AND',
-		] ] ) );
+			// Disable all costly operators
+			'flags' => 'OR|AND'
+		] ] );
+		$searchContext->setMainQuery( $simpleQuery );
+		$searchContext->setHighlightQuery( $simpleQuery );
 
 		return true;
 	}
@@ -286,22 +293,20 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 	 *
 	 * @param SearchContext $searchContext
 	 * @param string[] $fields
-	 * @param string[] $nearMatchFields
+	 * @param AbstractQuery $nearMatchQuery
 	 * @param string $queryString
-	 * @param string $nearMatchQuery
 	 * @return \Elastica\Query\AbstractQuery
 	 */
 	protected function buildSearchTextQuery(
 		SearchContext $searchContext,
 		array $fields,
-		array $nearMatchFields,
-		$queryString,
-		$nearMatchQuery
+		AbstractQuery $nearMatchQuery,
+		$queryString
 	) {
 		$slop = $this->config->getElement( 'CirrusSearchPhraseSlop', 'default' );
 		$queryForMostFields = $this->buildQueryString( $fields, $queryString, $slop );
 		$searchContext->addSyntaxUsed( 'full_text_querystring', 5 );
-		if ( !$nearMatchQuery ) {
+		if ( $nearMatchQuery instanceof MatchNone ) {
 			return $queryForMostFields;
 		}
 
@@ -310,10 +315,7 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 		$bool = new \Elastica\Query\BoolQuery();
 		$bool->setMinimumShouldMatch( 1 );
 		$bool->addShould( $queryForMostFields );
-		$nearMatch = new \Elastica\Query\MultiMatch();
-		$nearMatch->setFields( $nearMatchFields );
-		$nearMatch->setQuery( $nearMatchQuery );
-		$bool->addShould( $nearMatch );
+		$bool->addShould( $nearMatchQuery );
 
 		return $bool;
 	}
@@ -353,10 +355,8 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 	}
 
 	/**
-	 * Expand wildcard queries to the all.plain and title.plain fields if
-	 * wgCirrusSearchAllFields[ 'use' ] is set to true. Fallback to all
-	 * the possible fields otherwise. This prevents applying and compiling
-	 * costly wildcard queries too many times.
+	 * Expand wildcard queries to the all.plain and title.plain fields this is reasonable tradeoff
+	 * between perf and precision.
 	 *
 	 * @param SearchContext $context
 	 * @param string $term
@@ -366,16 +366,12 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 		// Try to limit the expansion of wildcards to all the subfields
 		// We still need to add title.plain with a high boost otherwise
 		// match in titles be poorly scored (actually it breaks some tests).
-		if ( $context->getConfig()->getElement( 'CirrusSearchAllFields', 'use' ) ) {
-			$titleWeight = $context->getConfig()->getElement( 'CirrusSearchWeights', 'title' );
-			$fields = [];
-			$fields[] = "title.plain:$term^${titleWeight}";
-			$fields[] = "all.plain:$term";
-			$exact = implode( ' OR ', $fields );
-			return "($exact)";
-		} else {
-			return self::switchSearchToExact( $context, $term, false );
-		}
+		$titleWeight = $context->getConfig()->getElement( 'CirrusSearchWeights', 'title' );
+		$fields = [];
+		$fields[] = "title.plain:$term^{$titleWeight}";
+		$fields[] = "all.plain:$term";
+		$exact = implode( ' OR ', $fields );
+		return "($exact)";
 	}
 
 	/**
@@ -413,45 +409,29 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 	) {
 		$searchWeights = $context->getConfig()->get( 'CirrusSearchWeights' );
 
-		if ( $allFieldAllowed && $context->getConfig()->getElement( 'CirrusSearchAllFields', 'use' ) ) {
-			if ( $fieldSuffix === '.near_match' ) {
-				// The near match fields can't shard a root field because field fields need it -
-				// thus no suffix all.
-				return [ "all_near_match^${weight}" ];
-			}
-			if ( $fieldSuffix === '.near_match_asciifolding' ) {
-				// The near match fields can't shard a root field because field fields need it -
-				// thus no suffix all.
-				return [ "all_near_match.asciifolding^${weight}" ];
-			}
-			return [ "all${fieldSuffix}^${weight}" ];
+		if ( $allFieldAllowed ) {
+			return [ "all{$fieldSuffix}^{$weight}" ];
 		}
 
 		$fields = [];
-		// Only title and redirect support near_match so skip it for everything else
 		$titleWeight = $weight * $searchWeights[ 'title' ];
 		$redirectWeight = $weight * $searchWeights[ 'redirect' ];
-		if ( $fieldSuffix === '.near_match' || $fieldSuffix === '.near_match_asciifolding' ) {
-			$fields[] = "title${fieldSuffix}^${titleWeight}";
-			$fields[] = "redirect.title${fieldSuffix}^${redirectWeight}";
-			return $fields;
-		}
-		$fields[] = "title${fieldSuffix}^${titleWeight}";
-		$fields[] = "redirect.title${fieldSuffix}^${redirectWeight}";
+		$fields[] = "title{$fieldSuffix}^{$titleWeight}";
+		$fields[] = "redirect.title{$fieldSuffix}^{$redirectWeight}";
 		$categoryWeight = $weight * $searchWeights[ 'category' ];
 		$headingWeight = $weight * $searchWeights[ 'heading' ];
 		$openingTextWeight = $weight * $searchWeights[ 'opening_text' ];
 		$textWeight = $weight * $searchWeights[ 'text' ];
 		$auxiliaryTextWeight = $weight * $searchWeights[ 'auxiliary_text' ];
-		$fields[] = "category${fieldSuffix}^${categoryWeight}";
-		$fields[] = "heading${fieldSuffix}^${headingWeight}";
-		$fields[] = "opening_text${fieldSuffix}^${openingTextWeight}";
-		$fields[] = "text${fieldSuffix}^${textWeight}";
-		$fields[] = "auxiliary_text${fieldSuffix}^${auxiliaryTextWeight}";
+		$fields[] = "category{$fieldSuffix}^{$categoryWeight}";
+		$fields[] = "heading{$fieldSuffix}^{$headingWeight}";
+		$fields[] = "opening_text{$fieldSuffix}^{$openingTextWeight}";
+		$fields[] = "text{$fieldSuffix}^{$textWeight}";
+		$fields[] = "auxiliary_text{$fieldSuffix}^{$auxiliaryTextWeight}";
 		$namespaces = $context->getNamespaces();
 		if ( !$namespaces || in_array( NS_FILE, $namespaces ) ) {
 			$fileTextWeight = $weight * $searchWeights[ 'file_text' ];
-			$fields[] = "file_text${fieldSuffix}^${fileTextWeight}";
+			$fields[] = "file_text{$fieldSuffix}^{$fileTextWeight}";
 		}
 		return $fields;
 	}
@@ -582,6 +562,11 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 		return false;
 	}
 
+	/**
+	 * @param string $queryText
+	 * @param AbstractQuery $query
+	 * @return AbstractQuery
+	 */
 	protected function maybeWrapWithTokenCountRouter( $queryText, \Elastica\Query\AbstractQuery $query ) {
 		if ( $this->useTokenCountRouter ) {
 			$tokCount = new TokenCountRouter(
@@ -590,9 +575,7 @@ class FullTextQueryStringQueryBuilder implements FullTextQueryBuilder {
 				// fallack
 				new \Elastica\Query\MatchNone(),
 				// field
-				null,
-				// analyzer
-				'text_search'
+				'text'
 			);
 			$maxTokens = $this->config->get( 'CirrusSearchMaxPhraseTokens' );
 			if ( $maxTokens ) {

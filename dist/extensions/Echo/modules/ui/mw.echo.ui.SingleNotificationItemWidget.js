@@ -4,15 +4,15 @@
 	 *
 	 * @class
 	 * @extends mw.echo.ui.NotificationItemWidget
-	 * @mixins OO.ui.mixin.PendingElement
+	 * @mixes OO.ui.mixin.PendingElement
 	 *
 	 * @constructor
 	 * @param {mw.echo.Controller} controller Echo notifications controller
 	 * @param {mw.echo.dm.NotificationItem} model Notification item model
 	 * @param {Object} [config] Configuration object
-	 * @cfg {jQuery} [$overlay] A jQuery element functioning as an overlay
+	 * @param {jQuery} [config.$overlay] A jQuery element functioning as an overlay
 	 *  for popups.
-	 * @cfg {boolean} [bundle=false] This notification is part of a bundle
+	 * @param {boolean} [config.bundle=false] This notification is part of a bundle
 	 */
 	mw.echo.ui.SingleNotificationItemWidget = function MwEchoUiSingleNotificationItemWidget( controller, model, config ) {
 		config = config || {};
@@ -44,22 +44,6 @@
 	OO.mixinClass( mw.echo.ui.SingleNotificationItemWidget, OO.ui.mixin.PendingElement );
 
 	/* Methods */
-	mw.echo.ui.SingleNotificationItemWidget.prototype.onPrimaryLinkClick = function () {
-		// Log notification click
-
-		mw.echo.logger.logInteraction(
-			mw.echo.Logger.static.actions.notificationClick,
-			mw.echo.Logger.static.context.popup,
-			this.getModel().getId(),
-			this.getModel().getCategory(),
-			false,
-			// Source of this notification if it is cross-wiki
-			// TODO: For notifications in local bundles, we need
-			// to consider changing this
-			this.bundle ? this.getModel().getSource() : ''
-		);
-	};
-
 	/**
 	 * @inheritdoc
 	 */
@@ -78,10 +62,10 @@
 	 * when its read state was updated
 	 *
 	 * @inheritdoc
-	 * @fires sortChange
+	 * @fires OO.EventEmitter#sortChange
 	 */
 	mw.echo.ui.SingleNotificationItemWidget.prototype.toggleRead = function ( read ) {
-		var oldState = this.read;
+		const oldState = this.read;
 
 		// Parent method
 		mw.echo.ui.SingleNotificationItemWidget.super.prototype.toggleRead.call( this, read );

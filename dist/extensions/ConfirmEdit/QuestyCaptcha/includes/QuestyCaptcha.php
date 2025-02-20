@@ -8,27 +8,37 @@
  * @ingroup Extensions
  */
 
+namespace MediaWiki\Extension\ConfirmEdit\QuestyCaptcha;
+
 use MediaWiki\Auth\AuthenticationRequest;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Extension\ConfirmEdit\Auth\CaptchaAuthenticationRequest;
 use MediaWiki\Extension\ConfirmEdit\SimpleCaptcha\SimpleCaptcha;
 use MediaWiki\Extension\ConfirmEdit\Store\CaptchaStore;
+use MediaWiki\Html\Html;
+use MediaWiki\Xml\Xml;
 
 class QuestyCaptcha extends SimpleCaptcha {
-	// used for questycaptcha-edit, questycaptcha-addurl, questycaptcha-badlogin,
-	// questycaptcha-createaccount, questycaptcha-create, questycaptcha-sendemail via getMessage()
+	/**
+	 * @var string used for questycaptcha-edit, questycaptcha-addurl, questycaptcha-badlogin,
+	 * questycaptcha-createaccount, questycaptcha-create, questycaptcha-sendemail via getMessage()
+	 */
 	protected static $messagePrefix = 'questycaptcha-';
 
 	/**
-	 * Validate a captcha response
+	 * Validate a CAPTCHA response
+	 *
+	 * @note Trimming done as per T368112
+	 *
 	 * @param string $answer
 	 * @param array $info
 	 * @return bool
 	 */
 	protected function keyMatch( $answer, $info ) {
 		if ( is_array( $info['answer'] ) ) {
-			return in_array( strtolower( $answer ), array_map( 'strtolower', $info['answer'] ) );
+			return in_array( strtolower( trim( $answer ) ), array_map( 'strtolower', $info['answer'] ) );
 		} else {
-			return strtolower( $answer ) == strtolower( $info['answer'] );
+			return strtolower( trim( $answer ) ) == strtolower( $info['answer'] );
 		}
 	}
 
@@ -86,7 +96,6 @@ class QuestyCaptcha extends SimpleCaptcha {
 				Html::element( 'input', [
 					'name' => 'wpCaptchaWord',
 					'id'   => 'wpCaptchaWord',
-					'class' => 'mw-ui-input',
 					'required',
 					'autocomplete' => 'off',
 					// tab in before the edit textarea
@@ -102,11 +111,12 @@ class QuestyCaptcha extends SimpleCaptcha {
 	}
 
 	public function showHelp() {
-		global $wgOut;
-		$wgOut->setPageTitle( wfMessage( 'captchahelp-title' )->text() );
-		$wgOut->addWikiMsg( 'questycaptchahelp-text' );
+		$context = RequestContext::getMain();
+		$out = $context->getOutput();
+		$out->setPageTitleMsg( $context->msg( 'captchahelp-title' ) );
+		$out->addWikiMsg( 'questycaptchahelp-text' );
 		if ( CaptchaStore::get()->cookiesNeeded() ) {
-			$wgOut->addWikiMsg( 'captchahelp-cookies-needed' );
+			$out->addWikiMsg( 'captchahelp-cookies-needed' );
 		}
 	}
 
@@ -140,3 +150,5 @@ class QuestyCaptcha extends SimpleCaptcha {
 		$formDescriptor['captchaWord']['label-message'] = null;
 	}
 }
+
+class_alias( QuestyCaptcha::class, 'QuestyCaptcha' );

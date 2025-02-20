@@ -2,8 +2,10 @@
 
 namespace MediaWiki\Extension\Math;
 
+use InvalidArgumentException;
 use MediaWiki\Extension\Math\Render\RendererFactory;
-use SpecialPage;
+use MediaWiki\MainConfigNames;
+use MediaWiki\SpecialPage\SpecialPage;
 
 /**
  * Description of SpecialMathShowSVG
@@ -62,11 +64,10 @@ class SpecialMathShowImage extends SpecialPage {
 	}
 
 	public function execute( $par ) {
-		global $wgMathEnableExperimentalInputFormats;
 		$request = $this->getRequest();
 		$hash = $request->getText( 'hash', '' );
 		$tex = $request->getText( 'tex', '' );
-		if ( $wgMathEnableExperimentalInputFormats ) {
+		if ( $this->getConfig()->get( 'MathEnableExperimentalInputFormats' ) ) {
 			$asciimath = $request->getText( 'asciimath', '' );
 		} else {
 			$asciimath = '';
@@ -79,40 +80,46 @@ class SpecialMathShowImage extends SpecialPage {
 		if ( $hash === '' && $tex === '' && $asciimath === '' ) {
 			$this->setHeaders( false );
 			echo $this->printSvgError( 'No Inputhash specified' );
+			return;
+		}
+
+		if ( $tex === '' && $asciimath === '' ) {
+			try {
+				$this->renderer = $this->rendererFactory->getFromHash( $hash );
+			} catch ( InvalidArgumentException $exception ) {
+				$this->setHeaders( false );
+				echo $this->printSvgError( $exception->getMessage() );
+				return;
+			}
+			$this->noRender = $request->getBool( 'noRender', false );
+			$isInDatabase = $this->renderer->readFromCache();
+			if ( $isInDatabase || $this->noRender ) {
+				$success = $isInDatabase;
+			} else {
+				$success = $this->renderer->render();
+			}
+		} elseif ( $asciimath === '' ) {
+			$this->renderer = $this->rendererFactory->getRenderer( $tex, [], $this->mode );
+			$success = $this->renderer->render();
 		} else {
-			if ( $tex === '' && $asciimath === '' ) {
-				$this->renderer = $this->rendererFactory->getRenderer( '', [], $this->mode );
-				$this->renderer->setMd5( $hash );
-				$this->noRender = $request->getBool( 'noRender', false );
-				$isInDatabase = $this->renderer->readFromDatabase();
-				if ( $isInDatabase || $this->noRender ) {
-					$success = $isInDatabase;
-				} else {
-					$success = $this->renderer->render();
-				}
-			} elseif ( $asciimath === '' ) {
-				$this->renderer = $this->rendererFactory->getRenderer( $tex, [], $this->mode );
-				$success = $this->renderer->render();
-			} else {
-				$this->renderer = $this->rendererFactory->getRenderer(
-					$asciimath, [ 'type' => 'ascii' ], $this->mode
-				);
-				$success = $this->renderer->render();
-			}
-			if ( $success ) {
-				$output = $this->renderer->getSvg();
-			} else {
-				$output = $this->printSvgError( $this->renderer->getLastError() );
-			}
-			if ( $output == "" ) {
-				$output = $this->printSvgError( 'No Output produced' );
-				$success = false;
-			}
-			$this->setHeaders( $success );
-			echo $output;
-			if ( $success ) {
-				$this->renderer->writeCache();
-			}
+			$this->renderer = $this->rendererFactory->getRenderer(
+				$asciimath, [ 'type' => 'ascii' ], $this->mode
+			);
+			$success = $this->renderer->render();
+		}
+		if ( $success ) {
+			$output = $this->renderer->getSvg();
+		} else {
+			$output = $this->printSvgError( $this->renderer->getLastError() );
+		}
+		if ( $output == "" ) {
+			$output = $this->printSvgError( 'No Output produced' );
+			$success = false;
+		}
+		$this->setHeaders( $success );
+		echo $output;
+		if ( $success ) {
+			$this->renderer->writeCache();
 		}
 	}
 
@@ -122,7 +129,6 @@ class SpecialMathShowImage extends SpecialPage {
 	 * @return string xml svg image with the error message
 	 */
 	private function printSvgError( $msg ) {
-		global $wgDebugComments;
 		$result = <<<SVG
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 4" preserveAspectRatio="xMidYMid meet" >
 <text text-anchor="start" fill="red" y="2">
@@ -130,7 +136,7 @@ $msg
 </text>
 </svg>
 SVG;
-		if ( $wgDebugComments ) {
+		if ( $this->getConfig()->get( MainConfigNames::DebugComments ) ) {
 			$result .= '<!--' . var_export( $this->renderer, true ) . '-->';
 		}
 		return $result;

@@ -72,5 +72,6 @@
 	"ext-uls-empty-state-header": "დიო ნინეფი ვა რე",
 	"ext-uls-empty-state-desc": "ასე ნინეფი ხემიოლი ვა რე",
 	"ext-uls-empty-state-header-actions-available": "დიო ნინეფი ვა რე. ქეგიაძინასო ახალქ?",
-	"ext-uls-empty-state-desc-actions-available": "ქეგნაჯინით დინორე ხემიოლი რე უმოს მეტ ნინაშა."
+	"ext-uls-empty-state-desc-actions-available": "ქეგნაჯინით დინორე ხემიოლი რე უმოს მეტ ნინაშა.",
+	"ext-uls-add-languages-button-label": "ნინეფიშ გეძინა"
 }

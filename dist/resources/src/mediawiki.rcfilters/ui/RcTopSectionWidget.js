@@ -1,19 +1,18 @@
 /**
- * Top section (between page title and filters) on Special:Recentchanges
+ * Top section (between page title and filters) on Special:Recentchanges.
  *
  * @class mw.rcfilters.ui.RcTopSectionWidget
+ * @ignore
  * @extends OO.ui.Widget
  *
- * @constructor
  * @param {mw.rcfilters.ui.SavedLinksListWidget} savedLinksListWidget
  * @param {jQuery} $topLinks Content of the community-defined links
  * @param {Object} [config] Configuration object
  */
-var RcTopSectionWidget = function MwRcfiltersUiRcTopSectionWidget(
+const RcTopSectionWidget = function MwRcfiltersUiRcTopSectionWidget(
 	savedLinksListWidget, $topLinks, config
 ) {
-	var toplinksTitle,
-		topLinksCookieName = 'rcfilters-toplinks-collapsed-state',
+	const topLinksCookieName = 'rcfilters-toplinks-collapsed-state',
 		topLinksCookie = mw.cookie.get( topLinksCookieName ),
 		topLinksCookieValue = topLinksCookie || 'collapsed',
 		widget = this;
@@ -21,15 +20,15 @@ var RcTopSectionWidget = function MwRcfiltersUiRcTopSectionWidget(
 	config = config || {};
 
 	// Parent
-	RcTopSectionWidget.parent.call( this, config );
+	RcTopSectionWidget.super.call( this, config );
 
 	this.$topLinks = $topLinks;
 
-	toplinksTitle = new OO.ui.ButtonWidget( {
+	const toplinksTitle = new OO.ui.ButtonWidget( {
 		framed: false,
 		indicator: topLinksCookieValue === 'collapsed' ? 'down' : 'up',
 		flags: [ 'progressive' ],
-		label: $( '<span>' ).append( mw.message( 'rcfilters-other-review-tools' ).parse() ).contents()
+		label: mw.message( 'rcfilters-other-review-tools' ).parseDom()
 	} );
 
 	this.$topLinks
@@ -37,12 +36,12 @@ var RcTopSectionWidget = function MwRcfiltersUiRcTopSectionWidget(
 			collapsed: topLinksCookieValue === 'collapsed',
 			$customTogglers: toplinksTitle.$element
 		} )
-		.on( 'beforeExpand.mw-collapsible', function () {
+		.on( 'beforeExpand.mw-collapsible', () => {
 			mw.cookie.set( topLinksCookieName, 'expanded' );
 			toplinksTitle.setIndicator( 'up' );
 			widget.switchTopLinks( 'expanded' );
 		} )
-		.on( 'beforeCollapse.mw-collapsible', function () {
+		.on( 'beforeCollapse.mw-collapsible', () => {
 			mw.cookie.set( topLinksCookieName, 'collapsed' );
 			toplinksTitle.setIndicator( 'down' );
 			widget.switchTopLinks( 'collapsed' );

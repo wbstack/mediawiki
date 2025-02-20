@@ -4,11 +4,12 @@ namespace MediaWiki\Extension\Math;
 
 use DataValues\StringValue;
 use InvalidArgumentException;
+use MediaWiki\Config\ConfigException;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\Languages\LanguageFactory;
-use MWException;
+use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\Site\Site;
 use Psr\Log\LoggerInterface;
-use Site;
 use Wikibase\Client\RepoLinker;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -51,6 +52,9 @@ class MathWikibaseConnector {
 	/** @var LanguageFactory */
 	private $languageFactory;
 
+	/** @var LanguageNameUtils */
+	private $languageNameUtils;
+
 	/** @var EntityRevisionLookup */
 	private $entityRevisionLookup;
 
@@ -85,6 +89,7 @@ class MathWikibaseConnector {
 	 * @param ServiceOptions $options
 	 * @param RepoLinker $repoLinker
 	 * @param LanguageFactory $languageFactory
+	 * @param LanguageNameUtils $languageNameUtils
 	 * @param EntityRevisionLookup $entityRevisionLookup
 	 * @param FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory
 	 * @param Site $site
@@ -96,6 +101,7 @@ class MathWikibaseConnector {
 		ServiceOptions $options,
 		RepoLinker $repoLinker,
 		LanguageFactory $languageFactory,
+		LanguageNameUtils $languageNameUtils,
 		EntityRevisionLookup $entityRevisionLookup,
 		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
 		Site $site,
@@ -106,6 +112,7 @@ class MathWikibaseConnector {
 		$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->repoLinker = $repoLinker;
 		$this->languageFactory = $languageFactory;
+		$this->languageNameUtils = $languageNameUtils;
 		$this->entityRevisionLookup = $entityRevisionLookup;
 		$this->labelDescriptionLookupFactory = $labelDescriptionLookupFactory;
 		$this->site = $site;
@@ -138,7 +145,7 @@ class MathWikibaseConnector {
 	private function loadPropertyId( string $propertyId ): ?EntityId {
 		try {
 			return $this->idParser->parse( $propertyId );
-		} catch ( \ConfigException $e ) {
+		} catch ( ConfigException $e ) {
 			return null;
 		}
 	}
@@ -167,9 +174,9 @@ class MathWikibaseConnector {
 	 * id does not exist
 	 */
 	public function fetchWikibaseFromId( string $qid, string $langCode ): MathWikibaseInfo {
-		try {
+		if ( $this->languageNameUtils->isValidCode( $langCode ) ) {
 			$lang = $this->languageFactory->getLanguage( $langCode );
-		} catch ( MWException $e ) {
+		} else {
 			throw new InvalidArgumentException( "Invalid language code specified." );
 		}
 
@@ -328,11 +335,11 @@ class MathWikibaseConnector {
 			$entityRevision = $this->entityRevisionLookup->getEntityRevision( $entityId );
 			$innerEntity = $entityRevision->getEntity();
 			if ( $innerEntity instanceof Item ) {
-					$globalID = $this->site->getGlobalId();
-					if ( $innerEntity->hasLinkToSite( $globalID ) ) {
-						$siteLink = $innerEntity->getSiteLink( $globalID );
-						return $this->site->getPageUrl( $siteLink->getPageName() );
-					}
+				$globalID = $this->site->getGlobalId();
+				if ( $innerEntity->hasLinkToSite( $globalID ) ) {
+					$siteLink = $innerEntity->getSiteLink( $globalID );
+					return $this->site->getPageUrl( $siteLink->getPageName() );
+				}
 			}
 		} catch ( StorageException $e ) {
 			$this->logger->warning(

@@ -2,18 +2,18 @@
  * Extend OOUI's TagItemWidget to also display a popup on hover.
  *
  * @class mw.rcfilters.ui.TagItemWidget
+ * @ignore
  * @extends OO.ui.TagItemWidget
- * @mixins OO.ui.mixin.PopupElement
+ * @mixes OO.ui.mixin.PopupElement
  *
- * @constructor
  * @param {mw.rcfilters.Controller} controller
  * @param {mw.rcfilters.dm.FiltersViewModel} filtersViewModel
- * @param {mw.rcfilters.dm.FilterItem} invertModel
+ * @param {mw.rcfilters.dm.FilterItem|null} invertModel
  * @param {mw.rcfilters.dm.FilterItem} itemModel Item model
  * @param {Object} config Configuration object
- * @cfg {jQuery} [$overlay] A jQuery object serving as overlay for popups
+ * @param {jQuery} [config.$overlay] A jQuery object serving as overlay for popups
  */
-var TagItemWidget = function MwRcfiltersUiTagItemWidget(
+const TagItemWidget = function MwRcfiltersUiTagItemWidget(
 	controller, filtersViewModel, invertModel, itemModel, config
 ) {
 	// Configuration initialization
@@ -25,7 +25,7 @@ var TagItemWidget = function MwRcfiltersUiTagItemWidget(
 	this.itemModel = itemModel;
 	this.selected = false;
 
-	TagItemWidget.parent.call( this, $.extend( {
+	TagItemWidget.super.call( this, Object.assign( {
 		data: this.itemModel.getName()
 	}, config ) );
 
@@ -33,7 +33,7 @@ var TagItemWidget = function MwRcfiltersUiTagItemWidget(
 	this.popupLabel = new OO.ui.LabelWidget();
 
 	// Mixin constructors
-	OO.ui.mixin.PopupElement.call( this, $.extend( {
+	OO.ui.mixin.PopupElement.call( this, Object.assign( {
 		popup: {
 			padded: false,
 			align: 'center',
@@ -57,7 +57,9 @@ var TagItemWidget = function MwRcfiltersUiTagItemWidget(
 
 	// Events
 	this.filtersViewModel.connect( this, { highlightChange: 'updateUiBasedOnState' } );
-	this.invertModel.connect( this, { update: 'updateUiBasedOnState' } );
+	if ( this.invertModel ) {
+		this.invertModel.connect( this, { update: 'updateUiBasedOnState' } );
+	}
 	this.itemModel.connect( this, { update: 'updateUiBasedOnState' } );
 
 	// Initialization
@@ -84,14 +86,14 @@ OO.mixinClass( TagItemWidget, OO.ui.mixin.PopupElement );
  */
 TagItemWidget.prototype.updateUiBasedOnState = function () {
 	// Update label if needed
-	var labelMsg = this.itemModel.getLabelMessageKey( this.invertModel.isSelected() );
+	const labelMsg = this.itemModel.getLabelMessageKey( this.invertModel && this.invertModel.isSelected() );
 	if ( labelMsg ) {
-		this.setLabel( $( '<div>' ).append(
-			$( '<bdi>' ).html(
+		this.setLabel(
+			$( '<bdi>' ).append(
 				// eslint-disable-next-line mediawiki/msg-doc
-				mw.message( labelMsg, mw.html.escape( this.itemModel.getLabel() ) ).parse()
+				mw.message( labelMsg, mw.html.escape( this.itemModel.getLabel() ) ).parseDom()
 			)
-		).contents() );
+		);
 	} else {
 		this.setLabel(
 			$( '<bdi>' ).text(
@@ -108,7 +110,7 @@ TagItemWidget.prototype.updateUiBasedOnState = function () {
  * Set the current highlight color for this item
  */
 TagItemWidget.prototype.setHighlightColor = function () {
-	var selectedColor = this.filtersViewModel.isHighlightEnabled() && this.itemModel.isHighlighted ?
+	const selectedColor = this.filtersViewModel.isHighlightEnabled() && this.itemModel.isHighlighted ?
 		this.itemModel.getHighlightColor() :
 		null;
 
@@ -129,15 +131,15 @@ TagItemWidget.prototype.setCurrentMuteState = function () {};
  * Respond to mouse enter event
  */
 TagItemWidget.prototype.onMouseEnter = function () {
-	var labelText = this.itemModel.getStateMessage();
+	const labelText = this.itemModel.getStateMessage();
 
 	if ( labelText ) {
 		this.popupLabel.setLabel( labelText );
 
 		// Set timeout for the popup to show
-		this.popupTimeoutShow = setTimeout( function () {
+		this.popupTimeoutShow = setTimeout( () => {
 			this.popup.toggle( true );
-		}.bind( this ), 500 );
+		}, 500 );
 
 		// Cancel the hide timeout
 		clearTimeout( this.popupTimeoutHide );
@@ -149,9 +151,9 @@ TagItemWidget.prototype.onMouseEnter = function () {
  * Respond to mouse leave event
  */
 TagItemWidget.prototype.onMouseLeave = function () {
-	this.popupTimeoutHide = setTimeout( function () {
+	this.popupTimeoutHide = setTimeout( () => {
 		this.popup.toggle( false );
-	}.bind( this ), 250 );
+	}, 250 );
 
 	// Clear the show timeout
 	clearTimeout( this.popupTimeoutShow );

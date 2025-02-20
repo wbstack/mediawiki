@@ -1,8 +1,6 @@
 <?php
 /** Fon (fɔ̀ngbè)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -31,5 +29,8 @@ $namespaceNames = [
 	NS_CATEGORY         => "Akpaxwé",
 	NS_CATEGORY_TALK    => "Akpaxwé_lɛ_sín_xoɖɔtɛn",
 ];
+
+// Remove French gendered user namespace aliases
+$namespaceGenderAliases = [];
 
 $linkTrail = '/^([a-zàâçéèêîôûäëïöüùÇÉÂÊÎÔÛÄËÏÖÜÀÈÙƉɖ̀Ɛ̌ɛ̂Ɔ́ɔ̄]+)(.*)$/sDu';

@@ -78,7 +78,7 @@ class AccountConfirmSubmission {
 	 * @return array
 	 */
 	protected function spamRequest( IContextSource $context ) {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_PRIMARY );
 		$dbw->startAtomic( __METHOD__ );
 
 		$ok = $this->accountReq->markRejected( $this->admin, wfTimestampNow(), '' );

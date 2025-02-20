@@ -4,9 +4,9 @@
 			"Anakmalaysia",
 			"Aviator",
 			"CyberTroopers",
+			"Hakimi97",
 			"Jeluang Terluang",
-			"Tofeiku",
-			"Hakimi97"
+			"Tofeiku"
 		]
 	},
 	"cirrussearch-desc": "Enjin pencarian yang dikuasakan oleh Elasticsearch untuk MediaWiki",
@@ -17,7 +17,6 @@
 	"cirrussearch-regex-too-busy-error": "Terlalu banyak pencarian ungkapan nalar yang sedang dijalankan. Sila cuba lagi nanti.",
 	"cirrussearch-regex-too-complex-error": "Ungkapan nalar terlalu rumit. Ketahui lebih lanjut mengenai cara memudahkannya [[mw:Special:MyLanguage/Help:CirrusSearch/RegexTooComplex|di sini]].",
 	"cirrussearch-now-using": "Wiki ini sedang menggunakan enjin pencarian baru. ([[mw:Special:MyLanguage/Help:CirrusSearch|Ketahui lebih lanjut]])",
-	"cirrussearch-ignored-headings": " #<!-- jangan usik baris ini --> <pre>\n# Tajuk yang akan diabaikan oleh pencarian.\n# Suntingannya diperlakukan sebaik sahaja laman yang bertajuk ini diindekskan.\n# Anda boleh memaksakan pengindeksan semula laman dengan melakukan suntingan nol (null edit).\n# Sintaks adalah seperti berikut:\n#   * Semuanya dari aksara \"#\" ke hujung baris dikira komen.\n#   * Setiap baris tak kosong ialah tajuk yang setepatnya untuk diabaikan.\nRujukan\nPautan luar\nLihat juga\n #</pre> <!-- jangan usik baris ini -->",
 	"cirrussearch-pref-label": "Carian baru",
 	"cirrussearch-pref-desc": "Cuba carian baru kami yang menyokong lebih banyak bahasa, memberikan hasil yang lebih terkini, dan bahkan dapat mencari teks di dalam templat.",
 	"cirrussearch-give-feedback": "Berikan kami maklum balas anda",
@@ -33,12 +32,7 @@
 	"cirrussearch-completion-profile-normal-pref-desc": "Tiada pembetulan kesilapan menaip. Menyelesaikan lencongan yang rapat.",
 	"cirrussearch-completion-profile-classic-pref-name": "Carian awalan klasik",
 	"cirrussearch-completion-profile-classic-pref-desc": "Tiada pembetulan kesilapan menaip. Padan dengan permulaan tajuk.",
-	"cirrussearch-explore-similar-related": "Berkaitan",
-	"cirrussearch-explore-similar-categories": "Kategori",
-	"cirrussearch-explore-similar-languages": "Bahasa",
 	"cirrussearch-explore-similar-related-none": "Tiada halaman berkaitan yang tersedia",
-	"cirrussearch-explore-similar-categories-none": "Tiada kategori yang tersedia",
-	"cirrussearch-explore-similar-languages-none": "Tidak tersedia dalam bahasa lain",
 	"cirrussearch-article-words": "Perkataan dalam semua laman kandungan",
 	"cirrussearch-inlanguage-deprecate-comma": "Penggunaan tanda koma sebagai pemisah untuk kata kunci inlanguage sudah lapuk. Sila gunakan tanda paip | untuk memisahkan bahasa."
 }

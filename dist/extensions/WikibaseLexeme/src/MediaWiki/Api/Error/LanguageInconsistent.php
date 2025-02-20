@@ -2,6 +2,9 @@
 
 namespace Wikibase\Lexeme\MediaWiki\Api\Error;
 
+use MediaWiki\Api\ApiMessage;
+use MediaWiki\Message\Message;
+
 /**
  * @license GPL-2.0-or-later
  */
@@ -28,16 +31,16 @@ class LanguageInconsistent implements ApiError {
 
 	/** @inheritDoc */
 	public function asApiMessage( $parameterName, array $path ) {
-		$message = new \Message(
+		$message = new Message(
 			'apierror-wikibaselexeme-language-inconsistent',
 			[ $parameterName, implode( '/', $path ), $this->expectedLanguage, $this->givenLanguage ]
 		);
-		return new \ApiMessage(
+		return new ApiMessage(
 			$message,
 			'inconsistent-language',
 			[
 				'parameterName' => $parameterName,
-				'fieldPath' => $path
+				'fieldPath' => $path,
 			]
 		);
 	}

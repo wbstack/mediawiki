@@ -2,8 +2,8 @@
 
 namespace Wikibase\Client;
 
-use Html;
-use Title;
+use MediaWiki\Html\Html;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 
@@ -41,10 +41,10 @@ class RepoItemLinkGenerator {
 
 	/**
 	 * @param NamespaceChecker $namespaceChecker
-	 * @param RepoLinker       $repoLinker
-	 * @param EntityIdParser   $entityIdParser
-	 * @param string           $langLinkSiteGroup
-	 * @param string           $siteGlobalId
+	 * @param RepoLinker $repoLinker
+	 * @param EntityIdParser $entityIdParser
+	 * @param string $langLinkSiteGroup
+	 * @param string $siteGlobalId
 	 */
 	public function __construct(
 		NamespaceChecker $namespaceChecker,
@@ -94,7 +94,7 @@ class RepoItemLinkGenerator {
 	 *
 	 * @return bool
 	 */
-	private function canHaveLink( Title $title, $action, array $noExternalLangLinks = null ) {
+	private function canHaveLink( Title $title, $action, ?array $noExternalLangLinks ) {
 		if ( $action !== 'view' ) {
 			return false;
 		}
@@ -114,7 +114,7 @@ class RepoItemLinkGenerator {
 	 *
 	 * @return bool
 	 */
-	private function isSuppressed( array $noExternalLangLinks = null ) {
+	private function isSuppressed( ?array $noExternalLangLinks ) {
 		return $noExternalLangLinks !== null && in_array( '*', $noExternalLangLinks );
 	}
 
@@ -143,7 +143,7 @@ class RepoItemLinkGenerator {
 	 *
 	 * @return string HTML
 	 */
-	private function getAddLinksLink( Title $title, EntityId $entityId = null ) {
+	private function getAddLinksLink( Title $title, ?EntityId $entityId ) {
 		if ( $entityId ) {
 			$href = $this->getEntityUrl( $entityId );
 		} else {
@@ -168,7 +168,7 @@ class RepoItemLinkGenerator {
 	private function getNewItemUrl( Title $title ) {
 		$params = [
 			'site' => $this->siteGlobalId,
-			'page' => $title->getPrefixedText()
+			'page' => $title->getPrefixedText(),
 		];
 
 		$url = $this->repoLinker->getPageUrl( 'Special:NewItem' );
@@ -200,7 +200,7 @@ class RepoItemLinkGenerator {
 		$html = Html::rawElement(
 			'span',
 			[
-				'class' => "wb-langlinks-$action wb-langlinks-link"
+				'class' => "wb-langlinks-$action wb-langlinks-link",
 			],
 			$link
 		);

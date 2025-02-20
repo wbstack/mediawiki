@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTransclusionTableCellNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,7 +10,7 @@
  *
  * @class
  * @extends ve.dm.MWTransclusionNode
- * @mixins ve.dm.TableCellableNode
+ * @mixes ve.dm.TableCellableNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model

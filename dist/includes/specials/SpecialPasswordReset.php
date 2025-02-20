@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:PasswordReset
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,10 +16,18 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use ErrorPageError;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\MainConfigNames;
+use MediaWiki\SpecialPage\FormSpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\User\PasswordReset;
+use MediaWiki\User\User;
+use ThrottledError;
 
 /**
  * Special page for requesting a password reset email.
@@ -33,18 +39,7 @@ use MediaWiki\MainConfigNames;
  * @ingroup SpecialPage
  */
 class SpecialPasswordReset extends FormSpecialPage {
-	/** @var PasswordReset */
-	private $passwordReset;
-
-	/**
-	 * @var Status
-	 */
-	private $result;
-
-	/**
-	 * @var string Identifies which password reset field was specified by the user.
-	 */
-	private $method;
+	private PasswordReset $passwordReset;
 
 	/**
 	 * @param PasswordReset $passwordReset
@@ -59,6 +54,7 @@ class SpecialPasswordReset extends FormSpecialPage {
 		return true;
 	}
 
+	/** @inheritDoc */
 	public function userCanExecute( User $user ) {
 		return $this->passwordReset->isAllowed( $user )->isGood();
 	}
@@ -81,14 +77,16 @@ class SpecialPasswordReset extends FormSpecialPage {
 		parent::execute( $par );
 	}
 
+	/** @inheritDoc */
 	protected function getFormFields() {
 		$resetRoutes = $this->getConfig()->get( MainConfigNames::PasswordResetRoutes );
 		$a = [];
 		if ( isset( $resetRoutes['username'] ) && $resetRoutes['username'] ) {
 			$a['Username'] = [
-				'type' => 'text',
+				'type' => 'user',
 				'default' => $this->getRequest()->getSession()->suggestLoginUsername(),
 				'label-message' => 'passwordreset-username',
+				'excludetemp' => true,
 			];
 
 			if ( $this->getUser()->isRegistered() ) {
@@ -106,6 +104,7 @@ class SpecialPasswordReset extends FormSpecialPage {
 		return $a;
 	}
 
+	/** @inheritDoc */
 	protected function getDisplayFormat() {
 		return 'ooui';
 	}
@@ -127,32 +126,30 @@ class SpecialPasswordReset extends FormSpecialPage {
 
 		$message = ( $i > 1 ) ? 'passwordreset-text-many' : 'passwordreset-text-one';
 
-		$form->setHeaderText( $this->msg( $message, $i )->parseAsBlock() );
+		$form->setHeaderHtml( $this->msg( $message, $i )->parseAsBlock() );
 		$form->setSubmitTextMsg( 'mailmypassword' );
 	}
 
 	/**
-	 * Process the form.  At this point we know that the user passes all the criteria in
-	 * userCanExecute(), and if the data array contains 'Username', etc, then Username
+	 * Process the form.
+	 * At this point, we know that the user passes all the criteria in
+	 * userCanExecute(), and if the data array contains 'Username', etc., then Username
 	 * resets are allowed.
 	 * @param array $data
-	 * @throws MWException
-	 * @throws ThrottledError|PermissionsError
 	 * @return Status
 	 */
 	public function onSubmit( array $data ) {
 		$username = $data['Username'] ?? null;
 		$email = $data['Email'] ?? null;
 
-		$this->method = $username ? 'username' : 'email';
-		$this->result = Status::wrap(
+		$result = Status::wrap(
 			$this->passwordReset->execute( $this->getUser(), $username, $email ) );
 
-		if ( $this->result->hasMessage( 'actionthrottledtext' ) ) {
+		if ( $result->hasMessage( 'actionthrottledtext' ) ) {
 			throw new ThrottledError;
 		}
 
-		return $this->result;
+		return $result;
 	}
 
 	/**
@@ -180,7 +177,7 @@ class SpecialPasswordReset extends FormSpecialPage {
 		}
 		$output->addWikiMsg( 'passwordreset-success-info', $info );
 
-		// Link to main page.
+		// Add a return to link to the main page.
 		$output->returnToMain();
 	}
 
@@ -189,14 +186,21 @@ class SpecialPasswordReset extends FormSpecialPage {
 	 * @return bool
 	 */
 	public function isListed() {
-		if ( $this->passwordReset->isAllowed( $this->getUser() )->isGood() ) {
-			return parent::isListed();
+		if ( !$this->passwordReset->isEnabled()->isGood() ) {
+			return false;
 		}
 
-		return false;
+		return parent::isListed();
 	}
 
+	/** @inheritDoc */
 	protected function getGroupName() {
-		return 'users';
+		return 'login';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialPasswordReset::class, 'SpecialPasswordReset' );

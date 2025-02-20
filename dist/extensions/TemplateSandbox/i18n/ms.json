@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Anakmalaysia",
-			"Macofe",
 			"Hakimi97",
+			"Macofe",
 			"Tofeiku"
 		]
 	},
@@ -20,7 +20,7 @@
 	"templatesandbox-title-output": "Kotak pasir templat: $1",
 	"templatesandbox-editform-legend": "Pralihatkan halaman ini dengan templat ini",
 	"templatesandbox-editform-page-label": "Tajuk halaman",
-	"templatesandbox-editform-view-label": "Paparkan Pralihat",
+	"templatesandbox-editform-view-label": "Paparkan pralihat",
 	"templatesandbox-preview": "Pralihat $2",
 	"templatesandbox-previewnote": "'''Ingat, ini hanya pralihat [[:$1]].'''\nSuntingan anda belum disimpan!",
 	"templatesandbox-invalid-title": "Tajuk yang anda nyatakan tidak sah.",
@@ -36,7 +36,7 @@
 	"templatesandbox-editform-need-template": "Untuk mempralihatkan satu lagi halaman dengan templat ini, tajuk halaman mesti dinyatakan.",
 	"templatesandbox-editform-need-title": "Untuk mempralihatkan satu lagi halaman dengan templat ini, tajuk halaman mesti dinyatakan.",
 	"templatesandbox-editform-invalid-template": "Nama templat yang anda nyatakan adalah tidak sah.",
-	"templatesandbox-editform-invalid-title": "Halaman yang anda nyatakan untuk pratayang adalah tidak sah.",
+	"templatesandbox-editform-invalid-title": "Halaman yang anda nyatakan untuk pralihat adalah tidak sah.",
 	"templatesandbox-editform-title-not-exists": "Halaman yang anda nyatakan untuk pralihat tidak wujud.",
 	"templatesandbox-failed-replace-section": "Gagal menggantikan bahagian halaman sedia ada."
 }

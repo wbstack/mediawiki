@@ -9,10 +9,10 @@ use CirrusSearch\Query\SimpleKeywordFeature;
 use CirrusSearch\Search\SearchContext;
 use CirrusSearch\Util;
 use CirrusSearch\WarningCollector;
-use Config;
 use Elastica\Query\AbstractQuery;
 use Elastica\Query\BoolQuery;
 use Elastica\Query\MatchQuery;
+use MediaWiki\Config\Config;
 use Wikibase\Search\Elastic\Fields\StatementsField;
 use Wikimedia\Assert\Assert;
 
@@ -203,7 +203,7 @@ class HasLicenseFeature extends SimpleKeywordFeature implements FilterQueryFeatu
 		$queries = [];
 		foreach ( $this->licenseMapping as $mapping ) {
 			foreach ( $mapping as $statementString ) {
-				list( $propertyId, ) = explode( '=', $statementString );
+				[ $propertyId, ] = explode( '=', $statementString );
 				if ( !isset( $queries[$propertyId] ) ) {
 					$queries[$propertyId] = [
 						'occur' => 'should',

@@ -1,8 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"Al12si",
+			"Hello903hello",
+			"Ktchankt",
+			"Moon0319",
+			"Shinjiman",
 			"Winston Sung",
-			"Ktchankt"
+			"Xð"
 		]
 	},
 	"uls-desc": "畀用家唔同方法去揀語言同調整語言設定",
@@ -71,5 +76,6 @@
 	"ext-uls-empty-state-header": "未有語言住",
 	"ext-uls-empty-state-desc": "而家未有語言",
 	"ext-uls-empty-state-header-actions-available": "未有語言住。加返個新嘅？",
-	"ext-uls-empty-state-desc-actions-available": "令內容有更多語言版本。"
+	"ext-uls-empty-state-desc-actions-available": "令內容有更多語言版本。",
+	"ext-uls-add-languages-button-label": "加語言"
 }

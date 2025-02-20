@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Dead3y3",
-			"Glavkos",
-			"DesVaMan"
+			"DesVaMan",
+			"Glavkos"
 		]
 	},
 	"torblock-desc": "Επιτρέπει να φραγούν κόμβοι εξόδου tor από το να επεξεργράζονται ένα wiki",

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWLanguageVariantInlineNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,7 +10,7 @@
  *
  * @class
  * @extends ve.ce.LeafNode
- * @mixins ve.ce.MWLanguageVariantNode
+ * @mixes ve.ce.MWLanguageVariantNode
  *
  * @constructor
  * @param {ve.dm.MWLanguageVariantInlineNode} model Model to observe

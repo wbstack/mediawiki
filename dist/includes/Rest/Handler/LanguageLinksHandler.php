@@ -2,20 +2,22 @@
 
 namespace MediaWiki\Rest\Handler;
 
-use MalformedTitleException;
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\Page\ExistingPageRecord;
 use MediaWiki\Page\PageLookup;
+use MediaWiki\Rest\Handler\Helper\PageRedirectHelper;
+use MediaWiki\Rest\Handler\Helper\PageRestHelperFactory;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\Response;
 use MediaWiki\Rest\SimpleHandler;
-use TitleFormatter;
-use TitleParser;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\Title\TitleParser;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\Message\ParamType;
 use Wikimedia\Message\ScalarParam;
 use Wikimedia\ParamValidator\ParamValidator;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * Class LanguageLinksHandler
@@ -25,20 +27,12 @@ use Wikimedia\Rdbms\ILoadBalancer;
  */
 class LanguageLinksHandler extends SimpleHandler {
 
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var LanguageNameUtils */
-	private $languageNameUtils;
-
-	/** @var TitleFormatter */
-	private $titleFormatter;
-
-	/** @var TitleParser */
-	private $titleParser;
-
-	/** @var PageLookup */
-	private $pageLookup;
+	private IConnectionProvider $dbProvider;
+	private LanguageNameUtils $languageNameUtils;
+	private TitleFormatter $titleFormatter;
+	private TitleParser $titleParser;
+	private PageLookup $pageLookup;
+	private PageRestHelperFactory $helperFactory;
 
 	/**
 	 * @var ExistingPageRecord|false|null
@@ -46,24 +40,36 @@ class LanguageLinksHandler extends SimpleHandler {
 	private $page = false;
 
 	/**
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LanguageNameUtils $languageNameUtils
 	 * @param TitleFormatter $titleFormatter
 	 * @param TitleParser $titleParser
 	 * @param PageLookup $pageLookup
+	 * @param PageRestHelperFactory $helperFactory
 	 */
 	public function __construct(
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LanguageNameUtils $languageNameUtils,
 		TitleFormatter $titleFormatter,
 		TitleParser $titleParser,
-		PageLookup $pageLookup
+		PageLookup $pageLookup,
+		PageRestHelperFactory $helperFactory
 	) {
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->languageNameUtils = $languageNameUtils;
 		$this->titleFormatter = $titleFormatter;
 		$this->titleParser = $titleParser;
 		$this->pageLookup = $pageLookup;
+		$this->helperFactory = $helperFactory;
+	}
+
+	private function getRedirectHelper(): PageRedirectHelper {
+		return $this->helperFactory->newPageRedirectHelper(
+			$this->getResponseFactory(),
+			$this->getRouter(),
+			$this->getPath(),
+			$this->getRequest()
+		);
 	}
 
 	/**
@@ -85,6 +91,8 @@ class LanguageLinksHandler extends SimpleHandler {
 	 */
 	public function run( $title ) {
 		$page = $this->getPage();
+		$params = $this->getValidatedParams();
+
 		if ( !$page ) {
 			throw new LocalizedHttpException(
 				new MessageValue( 'rest-nonexistent-title',
@@ -93,6 +101,17 @@ class LanguageLinksHandler extends SimpleHandler {
 				404
 			);
 		}
+
+		'@phan-var \MediaWiki\Page\ExistingPageRecord $page';
+		$redirectResponse = $this->getRedirectHelper()->createNormalizationRedirectResponseIfNeeded(
+			$page,
+			$params['title'] ?? null
+		);
+
+		if ( $redirectResponse !== null ) {
+			return $redirectResponse;
+		}
+
 		if ( !$this->getAuthority()->authorizeRead( 'read', $page ) ) {
 			throw new LocalizedHttpException(
 				new MessageValue( 'rest-permission-denied-title',
@@ -107,14 +126,12 @@ class LanguageLinksHandler extends SimpleHandler {
 
 	private function fetchLinks( $pageId ) {
 		$result = [];
-		$res = $this->loadBalancer->getConnectionRef( DB_REPLICA )
-			->select(
-				'langlinks',
-				'*',
-				[ 'll_from' => $pageId ],
-				__METHOD__,
-				[ 'ORDER BY' => 'll_lang' ]
-			);
+		$res = $this->dbProvider->getReplicaDatabase()->newSelectQueryBuilder()
+			->select( [ 'll_title', 'll_lang' ] )
+			->from( 'langlinks' )
+			->where( [ 'll_from' => $pageId ] )
+			->orderBy( 'll_lang' )
+			->caller( __METHOD__ )->fetchResultSet();
 		foreach ( $res as $item ) {
 			try {
 				$targetTitle = $this->titleParser->parseTitle( $item->ll_title );
@@ -163,11 +180,7 @@ class LanguageLinksHandler extends SimpleHandler {
 	 */
 	protected function getLastModified(): ?string {
 		$page = $this->getPage();
-		if ( !$page ) {
-			return null;
-		}
-
-		return $page->getTouched();
+		return $page ? $page->getTouched() : null;
 	}
 
 	/**

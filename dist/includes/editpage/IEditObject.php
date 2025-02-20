@@ -46,6 +46,9 @@ interface IEditObject {
 	/** Status: Content too big (> $wgMaxArticleSize) */
 	public const AS_CONTENT_TOO_BIG = 216;
 
+	/** Status: revision x was deleted while editing (?action=edit&oldid=x) */
+	public const AS_REVISION_WAS_DELETED = 217;
+
 	/** Status: this anonymous user is not allowed to edit this page */
 	public const AS_READ_ONLY_PAGE_ANON = 218;
 
@@ -111,4 +114,7 @@ interface IEditObject {
 
 	/** Status: edit rejected because browser doesn't support Unicode. */
 	public const AS_UNICODE_NOT_SUPPORTED = 242;
+
+	/** Status: edit rejected because server was unable to acquire a temporary account name for this user */
+	public const AS_UNABLE_TO_ACQUIRE_TEMP_ACCOUNT = 243;
 }

@@ -21,7 +21,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Tyn przipis je używany {{PLURAL:$1|rŏz|$1 razy}} na tyj strōnie. Zmiany zorbiōne sam bydōm wkludzōne we wszyjskich miyjscach, kaj tyn przipis je używany.",
 	"cite-ve-dialog-reference-options-group-label": "Użyj tyj grupy",
 	"cite-ve-dialog-reference-options-group-placeholder": "Ôgōlne przipisy",
-	"cite-ve-dialog-reference-options-name-label": "Użyj zaś tego miana",
 	"cite-ve-dialog-reference-options-responsive-label": "Użyj respōnsywnego układu kolumn",
 	"cite-ve-dialog-reference-options-section": "Ôpcyje",
 	"cite-ve-dialog-reference-placeholder": "Wpisz abo wraź swōj przipis sam abo wraż muster cytatu.",
@@ -43,7 +42,5 @@
 	"cite-ve-referenceslist-missingref-in-list": "Tyn przipis je zdefiniowany we mustrze abo inkszym gynerowanym bloku i na terŏz może być ino podyjzdrzany we trybie zdrzōdłowym.",
 	"cite-ve-referenceslist-missingreflist": "Ta lista przipisōw je gynerowanŏ we mustrze i na terŏz może być ino edytowany we trybie zdrzōdłowym.",
 	"cite-ve-toolbar-group-label": "Przipis",
-	"cite-ve-othergroup-item": "Przipis $1",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Przipisy",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Miano grupy przipisōw: „$1”"
+	"cite-ve-othergroup-item": "Przipis $1"
 }

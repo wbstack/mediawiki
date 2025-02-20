@@ -3,49 +3,66 @@
 		"type": "object",
 		"properties": {
 			"id": {
-				"type": "string"
+				"type": "string",
+				"readOnly": true
 			},
 			"type": {
-				"type": "string"
+				"type": "string",
+				"const": "item",
+				"readOnly": true
 			},
-			"labels": {
-				"$ref": "#/Labels"
-			},
-			"descriptions": {
-				"$ref": "#/Descriptions"
-			},
-			"aliases": {
-				"$ref": "#/Aliases"
-			},
+			"labels": { "$ref": "#/Labels" },
+			"descriptions": { "$ref": "#/Descriptions" },
+			"aliases": { "$ref": "#/Aliases" },
 			"sitelinks": {
 				"$ref": "./schema-parts.json#/Sitelinks"
 			},
 			"statements": {
-				"$ref": "./schema-parts.json#/Statements"
+				"type": "object",
+				"additionalProperties": {
+					"type": "array",
+					"items": { "$ref": "#/Statement" }
+				}
+			}
+		}
+	},
+	"Property": {
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "string",
+				"readOnly": true
+			},
+			"type": {
+				"type": "string",
+				"const": "property",
+				"readOnly": true
+			},
+			"data_type": {
+				"type": "string"
+			},
+			"labels": { "$ref": "#/Labels" },
+			"descriptions": { "$ref": "#/Descriptions" },
+			"aliases": { "$ref": "#/Aliases" },
+			"statements": {
+				"type": "object",
+				"additionalProperties": {
+					"type": "array",
+					"items": { "$ref": "#/Statement" }
+				}
 			}
 		},
-		"discriminator": {
-			"propertyName": "type"
-		}
+		"required": [ "data_type" ]
 	},
 	"Labels": {
 		"type": "object",
 		"additionalProperties": {
 			"type": "string"
-		},
-		"example": {
-			"en": "Douglas Adams",
-			"fr": "Douglas Adams"
 		}
-	},
-	"Descriptions": {
+	},	"Descriptions": {
 		"type": "object",
 		"additionalProperties": {
 			"type": "string"
-		},
-		"example": {
-			"en": "Science-fiction writer",
-			"fr": "écrivain de science-fiction"
 		}
 	},
 	"Aliases": {
@@ -53,127 +70,76 @@
 		"additionalProperties": {
 			"type": "array",
 			"items": { "type": "string" }
-		},
-		"example": {
-			"en": [
-				"Douglas Noel Adams",
-				"Douglas Noël Adams"
-			],
-			"fr": [
-				"Douglas Noel Adams"
-			]
 		}
 	},
 	"Sitelink": {
 		"type": "object",
 		"properties": {
-			"site": {
-				"type": "string"
-			},
 			"title": {
 				"type": "string"
 			},
 			"badges": {
 				"type": "array",
 				"items": { "type": "string" }
+			},
+			"url": {
+				"type": "string",
+				"readOnly": true
 			}
-		}
+		},
+		"required": [ "title" ]
 	},
 	"Statement": {
-		"type": "object",
-		"properties": {
-			"id": {
-				"type": "string",
-				"description": "The globally unique identfier for this Statement",
-				"readOnly": true
-			},
-			"mainsnak": {
-				"$ref": "#/Snak"
-			},
-			"rank": {
-				"type": "string",
-				"default": "normal",
-				"enum": [ "deprecated", "normal", "preferred" ]
-			},
-			"qualifiers": {
-				"$ref": "./schema-parts.json#/Qualifiers"
-			},
-			"qualifiers-order": {
-				"type": "array",
-				"items": {
-					"type": "string"
-				}
-			},
-			"references": {
-				"type": "array",
-				"items": { "$ref": "#/Reference" }
-			}
-		}
-	},
-	"Reference": {
 		"allOf": [
-			{ "$ref": "./schema-parts.json#/HashBearing" },
 			{
 				"type": "object",
 				"properties": {
-					"hash": {
-						"description": "Hash of a reference"
+					"id": {
+						"description": "The globally unique identifier for this Statement",
+						"type": "string",
+						"readOnly": true
 					},
-					"snaks": {
-						"$ref": "./schema-parts.json#/Snaks"
-					},
-					"snaks-order": {
+					"rank": {
+						"description": "The rank of the Statement",
+						"type": "string",
+						"enum": [ "deprecated", "normal", "preferred" ],
+						"default": "normal"
+					}
+				}
+			},
+			{ "$ref": "./schema-parts.json#/PropertyValuePair" },
+			{
+				"type": "object",
+				"properties": {
+					"qualifiers": {
 						"type": "array",
-						"items": {
-							"type": "string"
-						}
+						"items": { "$ref": "#/Qualifier" },
+						"default": [ ]
+					},
+					"references": {
+						"type": "array",
+						"items": { "$ref": "#/Reference" },
+						"default": [ ]
 					}
 				}
 			}
 		]
 	},
 	"Qualifier": {
-		"allOf": [
-			{ "$ref": "#/Snak" },
-			{
-				"properties": {
-					"hash": {
-						"description": "Hash of a qualifier"
-					}
-				}
-			}
-		]
+		"$ref": "./schema-parts.json#/PropertyValuePair"
 	},
-	"Snak": {
-		"allOf": [
-			{ "$ref": "./schema-parts.json#/HashBearing" },
-			{
-				"type": "object",
-				"properties": {
-					"snaktype": {
-						"type": "string"
-					},
-					"property": {
-						"type": "string"
-					},
-					"hash": {
-						"description": "Hash of a snak"
-					},
-					"datatype": {
-						"description": "The property data type",
-						"type": "string",
-						"readOnly": true
-					},
-					"datavalue": {
-						"type": "object",
-						"additionalProperties": true,
-						"example": {
-							"type": "string",
-							"value": "I am a goat"
-						}
-					}
-				}
+	"Reference": {
+		"type": "object",
+		"properties": {
+			"hash": {
+				"description": "Hash of the Reference",
+				"type": "string",
+				"readOnly": true
+			},
+			"parts": {
+				"type": "array",
+				"items": { "$ref": "./schema-parts.json#/PropertyValuePair" }
 			}
-		]
+		}
 	}
 }

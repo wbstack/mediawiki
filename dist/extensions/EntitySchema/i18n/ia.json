@@ -4,14 +4,16 @@
 			"McDutchie"
 		]
 	},
+	"datatypes-type-entity-schema": "Schema de entitate",
 	"entityschema-desc": "Immagazinar e discuter Schemas pro entitates Wikibase",
 	"special-newschema": "Crear un nove EntitySchema",
+	"nstab-entityschema": "EntitySchema",
+	"tooltip-ca-nstab-entityschema": "Definition EntitySchema",
 	"entityschema-newschema-label": "Etiquetta:",
 	"entityschema-newschema-description": "Description:",
 	"entityschema-newschema-aliases": "Aliases, separate per barras vertical:",
 	"entityschema-newschema-schema-shexc": "Codice de expressiones de forma:",
 	"entityschema-newschema-submit": "Crear",
-	"entityschema-newschema-copyright": "Cliccante sur \"$1\" tu accepta le [[$2|conditiones de uso]] e tu accepta irrevocabilemente de liberar tu contributiones sub le $3.",
 	"entityschema-anonymouseditwarning": "Attention: Tu non ha aperite session. Tu adresse IP essera registrate in le historia de modificationes de iste Schema.",
 	"entityschema-label-edit-placeholder": "insere un etiquetta in $1",
 	"entityschema-description-edit-placeholder": "insere un description in $1",
@@ -22,7 +24,6 @@
 	"entityschema-error-schemaupdate-failed": "Le Schema non ha potite esser actualisate",
 	"entityschema-error-schematext-conflict": "Iste Schema ha essite cambiate interim. Per favor, retorna al pagina del Schema e essaya de modificar lo de novo.",
 	"entityschema-error-namebadge-conflict": "Iste Schema ha essite cambiate intertanto. Per favor retorna al pagina del Schema e tenta modificar de novo le etiquettas, descriptiones e alias in iste lingua.",
-	"entityschema-error-saving-failed": "Le salveguarda del Schema ha fallite con le sequente message: $1",
 	"entityschema-error-not-post": "Iste action debe esser facite con un requesta POST.",
 	"entityschema-error-inconsistent-id": "Non tote le versiones fornite pertine al titulo specificate.",
 	"entityschema-error-wrong-page-revisions": "Le version fornite non pertine al pagina actual.",
@@ -78,5 +79,9 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "Tu es sur le puncto de definir etiquetta, description e aliases in '''$1''' pro Schema [[$3|$2]].",
 	"entityschema-special-label": "Etiquetta:",
 	"entityschema-special-description": "Description:",
-	"entityschema-special-aliases": "Aliases, separate per barras vertical:"
+	"entityschema-special-aliases": "Aliases, separate per barras vertical:",
+	"wikibase-listdatatypes-entity-schema-head": "Schema de entitate",
+	"wikibase-listdatatypes-entity-schema-body": "Ligamine al schemas de entitate immagazinate in le spatio de nomines configurate in le mesme wiki. Le valor debe esser sin le prefixo del spatio de nomines \"EntitySchema:\".",
+	"wikibase-validator-illegal-entity-schema-title": "Le valor debe comenciar con <code>E</code> e le resto debe esser solmente digitos.",
+	"wikibase-validator-no-such-entity-schema": "Le EntitySchema $1 non existe."
 }

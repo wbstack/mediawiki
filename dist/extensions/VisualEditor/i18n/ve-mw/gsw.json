@@ -1,16 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"80686",
 			"Als-Holder",
-			"J. 'mach' wust",
-			80686
+			"J. 'mach' wust"
 		]
 	},
-	"tooltip-ca-createsource": "Dr Quälltäxt zue däre Syten aalege",
-	"tooltip-ca-editsource": "Am Quälltäxt vu däre Syte schaffe",
 	"tooltip-ca-ve-edit": "Die Syte bearbeite",
-	"visualeditor-beta-warning": "VisualEditor isch in dr Beta-Version. S cha syy, ass Dir Softwarefähler uffallen un ass Du an Teil vu dr Syte nit chasch schaffe. Druck uf „{{int:visualeditor-ca-editsource}}“ go in dr Wikitäxtmodus chuu. Doderby gehn nit gspychereti Änderige verlore.",
-	"visualeditor-browserwarning": "Du bruchsch e Browser, wu vum VisualEditor nit offiziäll unterstitzt wird.",
+	"tooltip-ca-editsource": "Am Quälltäxt vu däre Syte schaffe",
+	"tooltip-ca-createsource": "Dr Quälltäxt zue däre Syten aalege",
 	"visualeditor-ca-createlocaldescriptionsource": "Lokale Bschrybigsquälltäxt zuefiege",
 	"visualeditor-ca-createsource": "Quälltäxt aalege",
 	"visualeditor-ca-editsource": "Quälltäxt bearbeite",
@@ -38,7 +36,6 @@
 	"visualeditor-dialog-meta-languages-section": "Sproche",
 	"visualeditor-dialog-meta-settings-label": "Syte Yystellige",
 	"visualeditor-dialog-transclusion-add-template": "Vorlag zuefiege",
-	"visualeditor-dialog-transclusion-placeholder": "Neui Vorlag",
 	"visualeditor-languages-tool": "Sproche",
 	"visualeditor-version-label": "Version"
 }

@@ -13,16 +13,16 @@
 			"Nike",
 			"Pahkiqaz",
 			"Pxos",
+			"Pyscowicz",
+			"Samoasambia",
 			"Stryn",
 			"Syreeni",
-			"Varusmies",
-			"Pyscowicz"
+			"Varusmies"
 		]
 	},
 	"captcha-edit": "Ratkaise alla oleva laskutoimitus muokataksesi tätä sivua ([[Special:Captcha/help|lisätietoja]]):",
 	"captcha-edit-fail": "Virheellinen tai puuttuva CAPTCHA.",
 	"captcha-desc": "Tarjoaa CAPTCHA-tekniikoita suojaamaan mainoslinkkejä ja salasana-arvailua vastaan.",
-	"captcha-label": "CAPTCHA",
 	"captcha-help": "CAPTCHAn ratkaisu",
 	"captcha-info-help": "CAPTCHAn kuvaus",
 	"captcha-id-label": "CAPTCHA-tunnus",
@@ -38,7 +38,7 @@
 	"captcha-error": "CAPTCHA-varmennus epäonnistui sisäisen virheen vuoksi: $1",
 	"captchahelp-title": "CAPTCHA-ohje",
 	"captchahelp-cookies-needed": "Tämä toiminto vaatii evästeiden hyväksymistä selaimessa.",
-	"captchahelp-text": "Vapaasti muokattavat verkkosivut, kuten tämä wiki, joutuvat usein roskapostihyökkäysten kohteeksi, jolloin roskapostittajat lisäävät automaattisesti linkkejä sivuille. Vaikka nämä linkit voidaan poistaa, aiheutuu niistä merkittävää haittaa.\n\nJoissakin tilanteissa, erityisesti lisättäessä artikkeliin uusia nettilinkkejä, saatetaan sinua pyytää suorittamaan roskapostitarkastus. Tietokone-ohjelmiston on vaikeaa läpäistä tarkastusta, joten se estää automaattiset lisäykset sallien kuitenkin ihmisten tehdä muutoksia sivustoon.\n\nValitettavasti tämä saattaa haitata käyttäjiä, joilla on rajoittunut näkökyky tai käyttäjiä, jotka käyttävät teksti- tai puhepohjaisia selaimia. \nTällä hetkellä meillä ei ole käytettävissä puhepohjaista vaihtoehtoa. \nOta yhteyttä [[Special:ListAdmins|sivuston ylläpitäjiin]], jos et pysty tekemään asianmukaisia muutoksia.\n\nVoit palata muokkaustilaan selaimen paluutoiminnolla.",
+	"captchahelp-text": "Vapaasti muokattavat verkkosivut, kuten tämä wiki, joutuvat usein roskapostihyökkäysten kohteeksi, jolloin roskapostittajat lisäävät automaattisesti linkkejä sivuille. Vaikka nämä linkit voidaan poistaa, aiheutuu niistä merkittävää haittaa.\n\nJoissakin tilanteissa, erityisesti lisättäessä artikkeliin uusia nettilinkkejä, saatetaan sinua pyytää suorittamaan roskapostitarkastus. Tietokone-ohjelmiston on vaikeaa läpäistä tarkastusta, joten se estää automaattiset lisäykset sallien kuitenkin ihmisten tehdä muutoksia sivustoon.\n\nValitettavasti tämä saattaa haitata käyttäjiä, joilla on rajoittunut näkökyky tai käyttäjiä, jotka käyttävät teksti- tai puhepohjaisia selaimia. \nTällä hetkellä meillä ei ole käytettävissä puhepohjaista vaihtoehtoa. \nOta yhteyttä [[{{int:grouppage-sysop}}|sivuston ylläpitäjiin]], jos et pysty tekemään asianmukaisia muutoksia.\n\nVoit palata muokkaustilaan selaimen paluutoiminnolla.",
 	"captcha-addurl-whitelist": " #<!-- jätä tämä rivi juuri näin kuin se on --> <pre>\n# Syntaksi on seuraava:\n#  * Kaikki #-merkistä eteenpäin on kommenttia\n#  * Jokainen ei-tyhjä rivi on säännöllisen lausekkeen osa, joka suoritetaan vain linkeissä esiintyville verkkonimille.\n  #</pre> <!-- jätä tämä rivi juuri näin kuin se on -->",
 	"right-skipcaptcha": "Suorittaa ilman CAPTCHA-kysymystä sellaisia toimintoja, jotka sitä muuten edellyttäisivät",
 	"action-skipcaptcha": "Suorittaa ilman CAPTCHA-kysymystä sellaisia toimintoja, jotka sitä muuten edellyttäisivät",
@@ -46,5 +46,7 @@
 	"confirmedit-preview-content": "Sisältö",
 	"confirmedit-preview-validity": "Kelpoisuus",
 	"confirmedit-preview-valid": "kelvollinen",
-	"confirmedit-preview-invalid": "kelpaamaton"
+	"confirmedit-preview-invalid": "kelpaamaton",
+	"confirmedit-preview-description": "Seuraava taulukko näyttää listan tämän sivun riveistä ja mikäli se on pätevä IP-osoite tai IP-alue. Jos rivi on pätevä IP-osoite tai IP-alue, se tullaan jättämään CAPTCHA-varmennusten ulkopuolelle, mutta virheelliset rivit sivuutetaan. Esimerkki pätevästä IP-alueesta on: 69.208.0.0/16, joka pätee välille 69.208.0.0 – 69.208.255.255. [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Range_blocks#Calculating_the_CIDR_suffix Lisätietoja] IP-alueiden laskemisesta.",
+	"abusefilter-edit-action-showcaptcha": "Vaadi käyttäjää suorittamaan CAPTCHA jatkaakseen toimintoa. Käyttäjät, joilla on lupa ohittaa CAPTCHA, ovat vapautettuja tästä vaatimuksesta."
 }

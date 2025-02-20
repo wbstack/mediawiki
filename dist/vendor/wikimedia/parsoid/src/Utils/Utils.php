@@ -3,9 +3,14 @@ declare( strict_types = 1 );
 
 namespace Wikimedia\Parsoid\Utils;
 
+use Psr\Log\LoggerInterface;
+use Wikimedia\Bcp47Code\Bcp47Code;
+use Wikimedia\Bcp47Code\Bcp47CodeValue;
 use Wikimedia\Parsoid\Config\Env;
+use Wikimedia\Parsoid\Config\SiteConfig;
 use Wikimedia\Parsoid\Core\DomSourceRange;
 use Wikimedia\Parsoid\Core\Sanitizer;
+use Wikimedia\Parsoid\NodeData\DataMw;
 use Wikimedia\Parsoid\Tokens\Token;
 use Wikimedia\Parsoid\Wikitext\Consts;
 
@@ -74,16 +79,44 @@ class Utils {
 	}
 
 	/**
-	 * deep clones by default.
-	 * FIXME, see T161647
-	 * @param object|array $obj any plain object not tokens or DOM trees
+	 * Deep clones by default.
+	 * @param object|array $obj arrays or plain objects
+	 *    Tokens or DOM nodes shouldn't be passed in.
+	 *
+	 *    CAVEAT: It looks like debugging methods pass in arrays
+	 *    that can have DOM nodes. So, for debugging purposes,
+	 *    we handle top-level DOM nodes or DOM nodes embedded in arrays
+	 *    But, this will miserably fail if an object embeds a DOM node.
+	 *
 	 * @param bool $deepClone
+	 * @param bool $debug
 	 * @return object|array
 	 */
-	public static function clone( $obj, $deepClone = true ) {
+	public static function clone( $obj, $deepClone = true, $debug = false ) {
+		if ( $debug ) {
+			if ( $obj instanceof \DOMNode ) {
+				return $obj->cloneNode( $deepClone );
+			}
+			if ( is_array( $obj ) ) {
+				if ( $deepClone ) {
+					return array_map(
+						static function ( $o ) {
+							return Utils::clone( $o, true, true );
+						},
+						$obj
+					);
+				} else {
+					return $obj; // Copy-on-write cloning
+				}
+			}
+		}
+
 		if ( !$deepClone && is_object( $obj ) ) {
 			return clone $obj;
 		}
+
+		// FIXME, see T161647
+		// This will fail if $obj is (or embeds) a DOMNode
 		return unserialize( serialize( $obj ) );
 	}
 
@@ -176,8 +209,8 @@ class Utils {
 	 * @return string
 	 */
 	public static function extractExtBody( Token $token ): string {
-		$src = $token->getAttribute( 'source' );
-		$extTagOffsets = $token->dataAttribs->extTagOffsets;
+		$src = $token->getAttributeV( 'source' );
+		$extTagOffsets = $token->dataParsoid->extTagOffsets;
 		'@phan-var \Wikimedia\Parsoid\Core\DomSourceRange $extTagOffsets';
 		return $extTagOffsets->stripTags( $src );
 	}
@@ -193,8 +226,16 @@ class Utils {
 	}
 
 	/**
-	 * Check for valid DSR range(s)
-	 * DSR = "DOM Source Range".
+	 * Basic check if a DOM Source Range (DSR) is valid.
+	 *
+	 * Clarifications about the "basic validity checks":
+	 * - Only checks for underflow, not for overflow.
+	 * - Does not verify that start <= end
+	 * - Does not verify that openWidth + endWidth <= end - start
+	 *   (even so, the values might be invalid because of content)
+	 * These would be overkill for our purposes. Given how DSR computation
+	 * works in thie codebase, the real scenarios we care about are
+	 * non-null / non-negative values since that can happen.
 	 *
 	 * @param ?DomSourceRange $dsr DSR source range values
 	 * @param bool $all Also check the widths of the container tag
@@ -206,9 +247,11 @@ class Utils {
 		return $dsr !== null &&
 			self::isValidOffset( $dsr->start ) &&
 			self::isValidOffset( $dsr->end ) &&
-			( !$all || ( self::isValidOffset( $dsr->openWidth ) &&
+			( !$all || (
+				self::isValidOffset( $dsr->openWidth ) &&
 				self::isValidOffset( $dsr->closeWidth )
-				) );
+			  )
+			);
 	}
 
 	/**
@@ -326,35 +369,54 @@ class Utils {
 	 * Get argument information for an extension tag token.
 	 *
 	 * @param Token $extToken
-	 * @return \stdClass
+	 * @return DataMw
 	 */
-	public static function getExtArgInfo( Token $extToken ): \stdClass {
-		$name = $extToken->getAttribute( 'name' );
-		$options = $extToken->getAttribute( 'options' );
-		return (object)[
-			'dict' => (object)[
-				'name' => $name,
-				'attrs' => PHPUtils::arrayToObject( TokenUtils::kvToHash( $options ) ),
-				'body' => (object)[
-					'extsrc' => self::extractExtBody( $extToken )
-				],
-			],
-		];
+	public static function getExtArgInfo( Token $extToken ): DataMw {
+		$name = $extToken->getAttributeV( 'name' );
+		$options = $extToken->getAttributeV( 'options' );
+		$defaultDataMw = new DataMw( [
+			'name' => $name,
+			// T367616: 'attrs' should be renamed to 'extAttrs'
+			'attrs' => (object)TokenUtils::kvToHash( $options ),
+		] );
+		$extTagOffsets = $extToken->dataParsoid->extTagOffsets;
+		if ( $extTagOffsets->closeWidth !== 0 ) {
+			// If not self-closing...
+			$defaultDataMw->body = (object)[
+				'extsrc' => self::extractExtBody( $extToken ),
+			];
+		}
+		return $defaultDataMw;
 	}
 
 	/**
 	 * Parse media dimensions
 	 *
+	 * @param SiteConfig $siteConfig
 	 * @param string $str media dimension string to parse
 	 * @param bool $onlyOne If set, returns null if multiple dimenstions are present
-	 * @return ?array{x:int,y?:int}
+	 * @param bool $localized Defaults to false; set to true if the $str
+	 *   has already been matched against `img_width` to localize the `px`
+	 *   suffix.
+	 * @return ?array{x:int,y?:int,bogusPx:bool}
 	 */
 	public static function parseMediaDimensions(
-		string $str, bool $onlyOne = false
+		SiteConfig $siteConfig, string $str, bool $onlyOne = false,
+		bool $localized = false
 	): ?array {
+		if ( !$localized ) {
+			$getOption = $siteConfig->getMediaPrefixParameterizedAliasMatcher();
+			$bits = $getOption( $str );
+			$normalizedBit0 = $bits ? mb_strtolower( trim( $bits['k'] ) ) : null;
+			if ( $normalizedBit0 === 'img_width' ) {
+				$str = $bits['v'];
+			}
+		}
 		$dimensions = null;
-		if ( preg_match( '/^(\d*)(?:x(\d+))?\s*(?:px\s*)?$/D', $str, $match ) ) {
-			$dimensions = [ 'x' => null, 'y' => null ];
+		// We support a trailing 'px' here for historical reasons
+		// (T15500, T53628, T207032)
+		if ( preg_match( '/^(\d*)(?:x(\d+))?\s*(px\s*)?$/D', $str, $match ) ) {
+			$dimensions = [ 'x' => null, 'y' => null, 'bogusPx' => false ];
 			if ( !empty( $match[1] ) ) {
 				$dimensions['x'] = intval( $match[1], 10 );
 			}
@@ -363,6 +425,9 @@ class Utils {
 					return null;
 				}
 				$dimensions['y'] = intval( $match[2], 10 );
+			}
+			if ( !empty( $match[3] ) ) {
+				$dimensions['bogusPx'] = true;
 			}
 		}
 		return $dimensions;
@@ -401,15 +466,6 @@ class Utils {
 	}
 
 	/**
-	 * FIXME: This feels broken.
-	 * Magic words masquerading as templates.
-	 * @return array
-	 */
-	public static function magicMasqs() {
-		return PHPUtils::makeSet( [ 'defaultsort', 'displaytitle' ] );
-	}
-
-	/**
 	 * This regex was generated by running through *all unicode characters* and
 	 * testing them against *all regexes* for linktrails in a default MW install.
 	 * We had to treat it a little bit, here's what we changed:
@@ -438,14 +494,140 @@ class Utils {
 	}
 
 	/**
-	 * Convert mediawiki-format language code to a BCP47-compliant language
-	 * code suitable for including in HTML.  See
-	 * `GlobalFunctions.php::wfBCP47()` in mediawiki sources.
+	 * Convert BCP-47-compliant language code to MediaWiki-internal code.
 	 *
-	 * @param string $code Mediawiki language code.
-	 * @return string BCP47 language code.
+	 * This is a temporary back-compatibility hack; Parsoid should be
+	 * using BCP 47 strings or Bcp47Code objects in all its external APIs.
+	 * Try to avoid using it, though: there's no guarantee
+	 * that this mapping will remain in sync with upstream.
+	 *
+	 * @param string|Bcp47Code $code BCP-47 language code
+	 * @return string MediaWiki-internal language code
 	 */
-	public static function bcp47n( $code ) {
+	public static function bcp47ToMwCode( $code ): string {
+		// This map is dumped from
+		// LanguageCode::NON_STANDARD_LANGUAGE_CODE_MAPPING in core, but
+		// with keys and values swapped and BCP-47 codes lowercased:
+		//
+		//   array_flip(array_map(strtolower,
+		//       LanguageCode::NON_STANDARD_LANGUAGE_CODE_MAPPING))
+		//
+		// Hopefully we will be able to deprecate and remove this from
+		// Parsoid quickly enough that keeping it in sync with upstream
+		// is not an issue.
+		static $MAP = [
+			"cbk" => "cbk-zam",
+			"de-x-formal" => "de-formal",
+			"egl" => "eml",
+			"en-x-rtl" => "en-rtl",
+			"es-x-formal" => "es-formal",
+			"hu-x-formal" => "hu-formal",
+			"jv-x-bms" => "map-bms",
+			"ro-cyrl-md" => "mo",
+			"nrf" => "nrm",
+			"nl-x-informal" => "nl-informal",
+			"nap-x-tara" => "roa-tara",
+			"en-simple" => "simple",
+			"sr-cyrl" => "sr-ec",
+			"sr-latn" => "sr-el",
+			"zh-hans-cn" => "zh-cn",
+			"zh-hans-sg" => "zh-sg",
+			"zh-hans-my" => "zh-my",
+			"zh-hant-tw" => "zh-tw",
+			"zh-hant-hk" => "zh-hk",
+			"zh-hant-mo" => "zh-mo",
+		];
+		if ( $code instanceof Bcp47Code ) {
+			$code = $code->toBcp47Code();
+		}
+		$code = strtolower( $code ); // All MW-internal codes are lowercase
+		return $MAP[$code] ?? $code;
+	}
+
+	/**
+	 * Convert MediaWiki-internal language code to a BCP-47-compliant
+	 * language code suitable for including in HTML.
+	 *
+	 * This is a temporary back-compatibility hack, needed for compatibility
+	 * when running in standalone mode with MediaWiki Action APIs which expose
+	 * internal language codes.  These APIs should eventually be improved
+	 * so that they also expose BCP-47 compliant codes, which can then be
+	 * used directly by Parsoid without conversion.  But until that day
+	 * comes, this function will paper over the differences.
+	 *
+	 * Note that MediaWiki-internal Language objects implement Bcp47Code,
+	 * so we can transition interfaces which currently take a string code
+	 * to pass a Language object instead; that will make this method
+	 * effectively a no-op and avoid the issue of upstream sync of the
+	 * mapping table.
+	 *
+	 * @param string|Bcp47Code $code MediaWiki-internal language code or object
+	 * @param bool $strict If true, this code will log a deprecation message
+	 *  or fail if a MediaWiki-internal language code is passed.
+	 * @param ?LoggerInterface $warnLogger A deprecation warning will be
+	 *   emitted on $warnLogger if $strict is true and a string-valued
+	 *   MediaWiki-internal language code is passed; otherwise an exception
+	 *   will be thrown.
+	 * @return Bcp47Code BCP-47 language code.
+	 * @see LanguageCode::bcp47()
+	 */
+	public static function mwCodeToBcp47(
+		$code, bool $strict = false, ?LoggerInterface $warnLogger = null
+	): Bcp47Code {
+		if ( $code instanceof Bcp47Code ) {
+			return $code;
+		}
+		if ( $strict ) {
+			$msg = "Use of string-valued BCP-47 codes is deprecated.";
+			if ( defined( 'MW_PHPUNIT_TEST' ) || defined( 'MW_PARSER_TEST' ) ) {
+				// Always throw an error if running tests
+				throw new \Error( $msg );
+			}
+			if ( $warnLogger ) {
+				$warnLogger->warning( $msg );
+			} else {
+				// Strict mode requested but no deprecation logger provided
+				throw new \Error( $msg );
+			}
+		}
+		// This map is dumped from
+		// LanguageCode::getNonstandardLanguageCodeMapping() in core.
+		// Hopefully we will be able to deprecate and remove this method
+		// from Parsoid quickly enough that keeping it in sync with upstream
+		// will not be an issue.
+		static $MAP = [
+			"als" => "gsw",
+			"bat-smg" => "sgs",
+			"be-x-old" => "be-tarask",
+			"fiu-vro" => "vro",
+			"roa-rup" => "rup",
+			"zh-classical" => "lzh",
+			"zh-min-nan" => "nan",
+			"zh-yue" => "yue",
+			"cbk-zam" => "cbk",
+			"de-formal" => "de-x-formal",
+			"eml" => "egl",
+			"en-rtl" => "en-x-rtl",
+			"es-formal" => "es-x-formal",
+			"hu-formal" => "hu-x-formal",
+			"map-bms" => "jv-x-bms",
+			"mo" => "ro-Cyrl-MD",
+			"nrm" => "nrf",
+			"nl-informal" => "nl-x-informal",
+			"roa-tara" => "nap-x-tara",
+			"simple" => "en-simple",
+			"sr-ec" => "sr-Cyrl",
+			"sr-el" => "sr-Latn",
+			"zh-cn" => "zh-Hans-CN",
+			"zh-sg" => "zh-Hans-SG",
+			"zh-my" => "zh-Hans-MY",
+			"zh-tw" => "zh-Hant-TW",
+			"zh-hk" => "zh-Hant-HK",
+			"zh-mo" => "zh-Hant-MO",
+		];
+		$code = $MAP[$code] ?? $code;
+		// The rest of this code is copied verbatim from LanguageCode::bcp47()
+		// in core.
 		$codeSegment = explode( '-', $code );
 		$codeBCP = [];
 		foreach ( $codeSegment as $segNo => $seg ) {
@@ -463,6 +645,17 @@ class Utils {
 				$codeBCP[$segNo] = strtolower( $seg );
 			}
 		}
-		return implode( '-', $codeBCP );
+		return new Bcp47CodeValue( implode( '-', $codeBCP ) );
+	}
+
+	/**
+	 * BCP 47 codes are case-insensitive, so this helper does a "proper"
+	 * comparison of Bcp47Code objects.
+	 * @param Bcp47Code $a
+	 * @param Bcp47Code $b
+	 * @return bool true iff $a and $b represent the same language
+	 */
+	public static function isBcp47CodeEqual( Bcp47Code $a, Bcp47Code $b ): bool {
+		return strcasecmp( $a->toBcp47Code(), $b->toBcp47Code() ) === 0;
 	}
 }

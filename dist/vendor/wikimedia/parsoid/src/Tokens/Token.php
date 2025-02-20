@@ -5,20 +5,28 @@ namespace Wikimedia\Parsoid\Tokens;
 
 use stdClass;
 use Wikimedia\Assert\Assert;
-use Wikimedia\Parsoid\Core\DomSourceRange;
+use Wikimedia\JsonCodec\JsonCodec;
+use Wikimedia\Parsoid\NodeData\DataMw;
 use Wikimedia\Parsoid\NodeData\DataParsoid;
-use Wikimedia\Parsoid\Utils\PHPUtils;
+use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Wt2Html\Frame;
 
 /**
  * Catch-all class for all token types.
  */
 abstract class Token implements \JsonSerializable {
-	/** @var DataParsoid|null */
-	public $dataAttribs;
+	public DataParsoid $dataParsoid;
+	public ?DataMw $dataMw = null;
 
 	/** @var KV[] */
 	public $attribs;
+
+	protected function __construct(
+		?DataParsoid $dataParsoid, ?DataMw $dataMw
+	) {
+		$this->dataParsoid = $dataParsoid ?? new DataParsoid;
+		$this->dataMw = $dataMw;
+	}
 
 	/**
 	 * @inheritDoc
@@ -65,7 +73,7 @@ abstract class Token implements \JsonSerializable {
 	 * Set a value and preserve the original wikitext that produced it.
 	 *
 	 * @param string $name
-	 * @param string|Token|Token[] $value
+	 * @param string|Token|array<Token|string> $value
 	 * @param mixed $origValue
 	 */
 	public function addNormalizedAttribute( string $name, $value, $origValue ): void {
@@ -77,9 +85,9 @@ abstract class Token implements \JsonSerializable {
 	 * Generic attribute accessor.
 	 *
 	 * @param string $name
-	 * @return string|Token|Token[]|KV[]|null
+	 * @return string|Token|array<Token|string>|KV[]|null
 	 */
-	public function getAttribute( string $name ) {
+	public function getAttributeV( string $name ) {
 		return KV::lookup( $this->attribs, $name );
 	}
 
@@ -107,7 +115,7 @@ abstract class Token implements \JsonSerializable {
 	 * Set an unshadowed attribute.
 	 *
 	 * @param string $name
-	 * @param string|Token|Token[] $value
+	 * @param string|Token|array<Token|string> $value
 	 */
 	public function setAttribute( string $name, $value ): void {
 		// First look for the attribute and change the last match if found.
@@ -125,7 +133,7 @@ abstract class Token implements \JsonSerializable {
 	}
 
 	/**
-	 * Store the original value of an attribute in a token's dataAttribs.
+	 * Store the original value of an attribute in a token's dataParsoid.
 	 *
 	 * @param string $name
 	 * @param mixed $value
@@ -134,14 +142,10 @@ abstract class Token implements \JsonSerializable {
 	public function setShadowInfo( string $name, $value, $origValue ): void {
 		// Don't shadow if value is the same or the orig is null
 		if ( $value !== $origValue && $origValue !== null ) {
-			if ( !isset( $this->dataAttribs->a ) ) {
-				$this->dataAttribs->a = [];
-			}
-			$this->dataAttribs->a[$name] = $value;
-			if ( !isset( $this->dataAttribs->sa ) ) {
-				$this->dataAttribs->sa = [];
-			}
-			$this->dataAttribs->sa[$name] = $origValue;
+			$this->dataParsoid->a ??= [];
+			$this->dataParsoid->a[$name] = $value;
+			$this->dataParsoid->sa ??= [];
+			$this->dataParsoid->sa[$name] = $origValue;
 		}
 	}
 
@@ -152,32 +156,32 @@ abstract class Token implements \JsonSerializable {
 	 *
 	 * @param string $name
 	 * @return array Information about the shadow info attached to this attribute:
-	 *   - value: (Token|Token[]|string)
+	 *   - value: (string|Token|array<Token|string>)
 	 *     When modified is false and fromsrc is true, this is always a string.
 	 *   - modified: (bool)
 	 *   - fromsrc: (bool)
 	 */
 	public function getAttributeShadowInfo( string $name ): array {
-		$curVal = $this->getAttribute( $name );
+		$curVal = $this->getAttributeV( $name );
 
 		// Not the case, continue regular round-trip information.
-		if ( !property_exists( $this->dataAttribs, 'a' ) ||
-			!array_key_exists( $name, $this->dataAttribs->a )
+		if ( !property_exists( $this->dataParsoid, 'a' ) ||
+			!array_key_exists( $name, $this->dataParsoid->a )
 		) {
 			return [
 				"value" => $curVal,
 				// Mark as modified if a new element
-				"modified" => $this->dataAttribs->isModified(),
+				"modified" => $this->dataParsoid->isModified(),
 				"fromsrc" => false
 			];
-		} elseif ( $this->dataAttribs->a[$name] !== $curVal ) {
+		} elseif ( $this->dataParsoid->a[$name] !== $curVal ) {
 			return [
 				"value" => $curVal,
 				"modified" => true,
 				"fromsrc" => false
 			];
-		} elseif ( !property_exists( $this->dataAttribs, 'sa' ) ||
-			!array_key_exists( $name, $this->dataAttribs->sa )
+		} elseif ( !property_exists( $this->dataParsoid, 'sa' ) ||
+			!array_key_exists( $name, $this->dataParsoid->sa )
 		) {
 			return [
 				"value" => $curVal,
@@ -186,7 +190,7 @@ abstract class Token implements \JsonSerializable {
 			];
 		} else {
 			return [
-				"value" => $this->dataAttribs->sa[$name],
+				"value" => $this->dataParsoid->sa[$name],
 				"modified" => false,
 				"fromsrc" => true
 			];
@@ -199,16 +203,12 @@ abstract class Token implements \JsonSerializable {
 	 * @param string $name
 	 */
 	public function removeAttribute( string $name ): void {
-		$out = [];
-		$attribs = $this->attribs;
-		// FIXME: Could use array_filter
-		for ( $i = 0, $l = count( $attribs ); $i < $l; $i++ ) {
-			$kv = $attribs[$i];
-			if ( mb_strtolower( $kv->k ) !== $name ) {
-				$out[] = $kv;
+		foreach ( $this->attribs as $i => $kv ) {
+			if ( mb_strtolower( $kv->k ) === $name ) {
+				unset( $this->attribs[$i] );
 			}
 		}
-		$this->attribs = $out;
+		$this->attribs = array_values( $this->attribs );
 	}
 
 	/**
@@ -243,7 +243,7 @@ abstract class Token implements \JsonSerializable {
 	 * @return string
 	 */
 	public function getWTSource( Frame $frame ): string {
-		$tsr = $this->dataAttribs->tsr ?? null;
+		$tsr = $this->dataParsoid->tsr ?? null;
 		if ( !( $tsr instanceof SourceRange ) ) {
 			throw new InvalidTokenException( 'Expected token to have tsr info.' );
 		}
@@ -277,7 +277,7 @@ abstract class Token implements \JsonSerializable {
 			}
 			$so = $e["srcOffsets"] ?? null;
 			if ( $so ) {
-				$so = KVSourceRange::fromArray( $so );
+				$so = KVSourceRange::newFromJsonArray( $so );
 			}
 			$kvs[] = new KV(
 				$e["k"] ?? null,
@@ -314,55 +314,43 @@ abstract class Token implements \JsonSerializable {
 		}
 
 		if ( is_array( $input ) && isset( $input['type'] ) ) {
-			if ( isset( $input['dataAttribs'] ) ) {
-				$da = new DataParsoid;
-				foreach ( $input['dataAttribs'] as $key => $value ) {
-					switch ( $key ) {
-						case 'tmp':
-							$tmp = $da->getTemp();
-							foreach ( $value as $key2 => $value2 ) {
-								$tmp->$key2 = $value2;
-							}
-							break;
-						case 'dsr':
-							// dsr is generally for DOM trees, not Tokens.
-							$da->dsr = DomSourceRange::fromArray( $value );
-							break;
-						case 'tsr':
-							$da->tsr = SourceRange::fromArray( $value );
-							break;
-						case 'extTagOffsets':
-							$da->extTagOffsets = DomSourceRange::fromArray( $value );
-							break;
-						case 'extLinkContentOffsets':
-							$da->extLinkContentOffsets =
-								SourceRange::fromArray( $value );
-							break;
-						default:
-							$da->$key = $value;
-					}
-				}
+			$codec = new JsonCodec();
+			if ( isset( $input['dataParsoid'] ) ) {
+				$da = $codec->newFromJsonArray(
+					$input['dataParsoid'],
+					DOMDataUtils::getCodecHints()['data-parsoid']
+				);
 			} else {
 				$da = null;
 			}
+			if ( isset( $input['dataMw'] ) ) {
+				$dmw = $codec->newFromJsonArray(
+					$input['dataMw'],
+					DOMDataUtils::getCodecHints()['data-mw']
+				);
+			} else {
+				$dmw = null;
+			}
+			// In theory this should be refactored to use JsonCodecable
+			// and remove the ad-hoc deserialization code here.
 			switch ( $input['type'] ) {
 				case "SelfclosingTagTk":
-					$token = new SelfclosingTagTk( $input['name'], self::kvsFromArray( $input['attribs'] ), $da );
+					$token = new SelfclosingTagTk( $input['name'], self::kvsFromArray( $input['attribs'] ), $da, $dmw );
 					break;
 				case "TagTk":
-					$token = new TagTk( $input['name'], self::kvsFromArray( $input['attribs'] ), $da );
+					$token = new TagTk( $input['name'], self::kvsFromArray( $input['attribs'] ), $da, $dmw );
 					break;
 				case "EndTagTk":
-					$token = new EndTagTk( $input['name'], self::kvsFromArray( $input['attribs'] ), $da );
+					$token = new EndTagTk( $input['name'], self::kvsFromArray( $input['attribs'] ), $da, $dmw );
 					break;
 				case "NlTk":
-					$token = new NlTk( $da->tsr ?? null, $da );
+					$token = new NlTk( $da->tsr ?? null, $da, $dmw );
 					break;
 				case "EOFTk":
 					$token = new EOFTk();
 					break;
 				case "CommentTk":
-					$token = new CommentTk( $input["value"], $da );
+					$token = new CommentTk( $input["value"], $da, $dmw );
 					break;
 				default:
 					// Looks like data-parsoid can have a 'type' property in some cases
@@ -377,32 +365,27 @@ abstract class Token implements \JsonSerializable {
 
 		if ( is_array( $token ) ) {
 			self::rebuildNestedTokens( $token );
-		} else {
+		} elseif ( $token instanceof Token ) {
 			if ( !empty( $token->attribs ) ) {
 				self::rebuildNestedTokens( $token->attribs );
 			}
-			if ( !empty( $token->dataAttribs ) ) {
-				self::rebuildNestedTokens( $token->dataAttribs );
-			}
+			self::rebuildNestedTokens( $token->dataParsoid );
 		}
 
 		return $token;
 	}
 
-	/**
-	 * @param string $key
-	 * @return ?string
-	 */
 	public function fetchExpandedAttrValue( string $key ): ?string {
 		if ( preg_match(
-			'/mw:ExpandedAttrs/', $this->getAttribute( 'typeof' ) ?? ''
+			'/mw:ExpandedAttrs/', $this->getAttributeV( 'typeof' ) ?? ''
 		) ) {
-			$attribs = PHPUtils::jsonDecode(
-				$this->getAttribute( 'data-mw' ), false
-			)->attribs;
-			foreach ( $attribs as $attr ) {
-				if ( $attr[0]->txt === $key ) {
-					return $attr[1]->html;
+			$dmw = $this->dataMw;
+			if ( !isset( $dmw->attribs ) ) {
+				return null;
+			}
+			foreach ( $dmw->attribs as $attr ) {
+				if ( ( $attr->key['txt'] ?? null ) === $key ) {
+					return $attr->value['html'] ?? null;
 				}
 			}
 		}

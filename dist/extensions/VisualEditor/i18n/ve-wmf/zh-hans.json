@@ -2,12 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Anakmalaysia",
+			"Anterdc99",
 			"Bencmq",
 			"Demmy",
 			"Diskdance",
 			"Hydra",
 			"Hzy980512",
 			"Liangent",
+			"LittlePaw365",
 			"Liuxinyu970226",
 			"Qiyue2001",
 			"Shirayuki",
@@ -18,12 +20,15 @@
 			"Yfdyh000",
 			"Zhangjintao",
 			"乌拉跨氪",
-			"아라",
-			"Anterdc99",
-			"LittlePaw365",
-			"星海"
+			"星海",
+			"아라"
 		]
 	},
+	"tag-editcheck-newcontent-description": "EditCheck 发现页面中添加了新的内容",
+	"tag-editcheck-newreference-description": "页面中添加了参考来源",
+	"tag-editcheck-references-description": "EditCheck 认为可能需要参考来源",
+	"tag-editcheck-references-activated": "[[{{MediaWiki:editcheck-falsepositives-link}}|编辑检查（参考资料）已激活]]",
+	"tag-editcheck-references-activated-description": "EditCheck认为可能需要参考文献，且显示了UI",
 	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|可视化编辑]]",
 	"tag-visualeditor-description": "使用[[{{MediaWiki:visualeditor-descriptionpagelink}}|可视化编辑器]]进行的编辑",
 	"tag-visualeditor-needcheck": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|可视化编辑：需检查]]",
@@ -35,8 +40,6 @@
 	"visualeditor-feedback-link": "Project:可视化编辑器/反馈",
 	"visualeditor-feedback-tool": "留下有关此软件的反馈",
 	"visualeditor-help-label": "阅读用户指南",
-	"visualeditor-help-link": "mw:Special:MyLanguage/Help:VisualEditor/User guide",
-	"visualeditor-help-title": "有关如何使用编辑器的指南",
 	"visualeditor-welcomedialog-action": "开始编辑",
 	"visualeditor-welcomedialog-content": "人人皆可编辑，并且任何改进都有帮助。",
 	"visualeditor-welcomedialog-content-thanks": "感谢您帮助世界发现更多！",

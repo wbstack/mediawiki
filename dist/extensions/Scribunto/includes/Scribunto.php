@@ -2,9 +2,10 @@
 
 namespace MediaWiki\Extension\Scribunto;
 
-use MWException;
-use Parser;
-use Title;
+use MediaWiki\Config\ConfigException;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Title\Title;
 
 /**
  * Static function collection for general extension support.
@@ -30,21 +31,22 @@ class Scribunto {
 	 *
 	 * @param array $extraOptions Extra options to pass to the constructor,
 	 *  in addition to the configured options
-	 * @throws MWException
 	 * @return ScribuntoEngineBase
 	 */
 	public static function newDefaultEngine( $extraOptions = [] ) {
-		global $wgScribuntoDefaultEngine, $wgScribuntoEngineConf;
-		if ( !$wgScribuntoDefaultEngine ) {
-			throw new MWException(
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+		$defaultEngine = $config->get( 'ScribuntoDefaultEngine' );
+		if ( !$defaultEngine ) {
+			throw new ConfigException(
 				'Scribunto extension is enabled but $wgScribuntoDefaultEngine is not set'
 			);
 		}
 
-		if ( !isset( $wgScribuntoEngineConf[$wgScribuntoDefaultEngine] ) ) {
-			throw new MWException( 'Invalid scripting engine is specified in $wgScribuntoDefaultEngine' );
+		$engineConf = $config->get( 'ScribuntoEngineConf' );
+		if ( !isset( $engineConf[$defaultEngine] ) ) {
+			throw new ConfigException( 'Invalid scripting engine is specified in $wgScribuntoDefaultEngine' );
 		}
-		$options = $extraOptions + $wgScribuntoEngineConf[$wgScribuntoDefaultEngine];
+		$options = $extraOptions + $engineConf[$defaultEngine];
 		// @phan-suppress-next-line PhanTypeMismatchArgument false positive
 		return self::newEngine( $options );
 	}
@@ -58,7 +60,7 @@ class Scribunto {
 	 * @return ScribuntoEngineBase
 	 */
 	public static function getParserEngine( Parser $parser ) {
-		if ( empty( $parser->scribunto_engine ) ) {
+		if ( !isset( $parser->scribunto_engine ) ) {
 			$parser->scribunto_engine = self::newDefaultEngine( [ 'parser' => $parser ] );
 			$parser->scribunto_engine->setTitle( $parser->getTitle() );
 		}
@@ -72,7 +74,7 @@ class Scribunto {
 	 * @return bool
 	 */
 	public static function isParserEnginePresent( Parser $parser ) {
-		return !empty( $parser->scribunto_engine );
+		return isset( $parser->scribunto_engine );
 	}
 
 	/**
@@ -80,7 +82,7 @@ class Scribunto {
 	 * @param Parser $parser
 	 */
 	public static function resetParserEngine( Parser $parser ) {
-		if ( !empty( $parser->scribunto_engine ) ) {
+		if ( isset( $parser->scribunto_engine ) ) {
 			$parser->scribunto_engine->destroy();
 			$parser->scribunto_engine = null;
 		}
@@ -93,7 +95,7 @@ class Scribunto {
 	 * @param Title|null &$forModule Module for which this is a doc page
 	 * @return bool
 	 */
-	public static function isDocPage( Title $title, Title &$forModule = null ) {
+	public static function isDocPage( Title $title, ?Title &$forModule = null ) {
 		$docPage = wfMessage( 'scribunto-doc-page-name' )->inContentLanguage();
 		if ( $docPage->isDisabled() ) {
 			return false;

@@ -2,11 +2,11 @@
 
 namespace Wikibase\Repo\Content;
 
-use Hooks;
+use BadMethodCallException;
 use InvalidArgumentException;
 use LogicException;
-use MWException;
-use Title;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\Repo\ItemSearchTextGenerator;
@@ -51,9 +51,9 @@ class ItemContent extends EntityContent {
 	 * @param Title|null $redirectTitle Title of the redirect target.
 	 */
 	public function __construct(
-		EntityHolder $itemHolder = null,
-		EntityRedirect $entityRedirect = null,
-		Title $redirectTitle = null
+		?EntityHolder $itemHolder = null,
+		?EntityRedirect $entityRedirect = null,
+		?Title $redirectTitle = null
 	) {
 		parent::__construct( self::CONTENT_MODEL_ID );
 
@@ -140,29 +140,28 @@ class ItemContent extends EntityContent {
 	}
 
 	/**
-	 * @throws MWException when it's a redirect (targets will never be resolved)
-	 * @throws LogicException if the content object is empty and does not contain an entity.
+	 * @note This method cannot be called on redirects (targets will never be resolved)
 	 * @return Item
 	 */
 	public function getItem() {
 		$redirect = $this->getRedirectTarget();
 
 		if ( $redirect ) {
-			throw new MWException( 'Unresolved redirect to [[' . $redirect->getFullText() . ']]' );
+			throw new BadMethodCallException( 'Unresolved redirect to [[' . $redirect->getFullText() . ']]' );
 		}
 
 		if ( !$this->itemHolder ) {
 			throw new LogicException( 'This content object is empty' );
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $this->itemHolder->getEntity( Item::class );
 	}
 
 	/**
 	 * @see EntityContent::getEntity
 	 *
-	 * @throws MWException when it's a redirect (targets will never be resolved)
-	 * @throws LogicException if the content object is empty and does not contain an entity.
+	 * @note This method cannot be called on redirects (targets will never be resolved)
 	 * @return Item
 	 */
 	public function getEntity() {
@@ -191,7 +190,9 @@ class ItemContent extends EntityContent {
 		$searchTextGenerator = new ItemSearchTextGenerator();
 		$text = $searchTextGenerator->generate( $this->getItem() );
 
-		if ( !Hooks::run( 'WikibaseTextForSearchIndex', [ $this, &$text ] ) ) {
+		if ( !MediaWikiServices::getInstance()->getHookContainer()
+			->run( 'WikibaseTextForSearchIndex', [ $this, &$text ] )
+		) {
 			return '';
 		}
 

@@ -33,11 +33,12 @@ use MediaWiki\Config\ServiceOptions;
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\ResourceLoader\MessageBlobStore;
 use MediaWiki\Settings\SettingsBuilder;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to rebuild the localisation cache.
@@ -85,7 +86,7 @@ class RebuildLocalisationCache extends Maintenance {
 		);
 	}
 
-	public function finalSetup( SettingsBuilder $settingsBuilder = null ) {
+	public function finalSetup( SettingsBuilder $settingsBuilder ) {
 		# This script needs to be run to build the initial l10n cache. But if
 		# LanguageCode is not 'en', it won't be able to run because there is
 		# no l10n cache. Break the cycle by forcing the LanguageCode setting to 'en'.
@@ -122,7 +123,7 @@ class RebuildLocalisationCache extends Maintenance {
 		}
 
 		// XXX Copy-pasted from ServiceWiring.php. Do we need a factory for this one caller?
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		$lc = new LocalisationCacheBulkLoad(
 			new ServiceOptions(
 				LocalisationCache::CONSTRUCTOR_OPTIONS,
@@ -188,7 +189,7 @@ class RebuildLocalisationCache extends Maintenance {
 
 					$numRebuilt = $this->doRebuild( $codes, $lc, $force );
 					// Report the number of rebuilt langs to the parent.
-					$msg = strval( $numRebuilt ) . "\n";
+					$msg = "$numRebuilt\n";
 					socket_write( $socketpair[1], $msg, strlen( $msg ) );
 					// Child exits.
 					return;
@@ -278,9 +279,11 @@ class RebuildLocalisationCache extends Maintenance {
 	 * @param bool $forced
 	 */
 	public function setForce( $forced = true ) {
-		$this->mOptions['force'] = $forced;
+		$this->setOption( 'force', $forced );
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = RebuildLocalisationCache::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

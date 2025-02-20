@@ -9,9 +9,12 @@ Dependencies
 This extension relies on Wikibase and CirrusSearch extensions to be installed and fully functional.
 Please refer to documentation of these extensions for instructions on how to install them.
 
-This extension relies on the wikimedia search-extra plugin for elasticsearch to be installed to
-the elasticsearch cluster. Please refer to documentation of the plugin for instructions on how
-to install it.
+This extension relies on the wikimedia search-extra and search-highlighter plugins for elasticsearch
+to be installed to the elasticsearch cluster. Please refer to documentation of the plugins for
+instructions on how to install them:
+
+https://mvnrepository.com/artifact/org.wikimedia.search/extra
+https://mvnrepository.com/artifact/org.wikimedia.search.highlighter/experimental-highlighter-elasticsearch-plugin
 
 Configurations
 --------------

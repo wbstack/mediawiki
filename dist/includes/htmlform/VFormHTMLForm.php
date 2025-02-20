@@ -1,5 +1,7 @@
 <?php
 
+namespace MediaWiki\HTMLForm;
+
 /**
  * HTML form generation and submission handling, vertical-form style.
  *
@@ -21,6 +23,8 @@
  * @file
  */
 
+use MediaWiki\Html\Html;
+
 /**
  * Compact stacked vertical format for forms.
  *
@@ -33,14 +37,11 @@ class VFormHTMLForm extends HTMLForm {
 	 */
 	protected $mWrapperLegend = false;
 
-	/**
-	 * Symbolic display format name.
-	 * @var string
-	 */
+	/** @inheritDoc */
 	protected $displayFormat = 'vform';
 
 	public static function loadInputFromParameters( $fieldname, $descriptor,
-		HTMLForm $parent = null
+		?HTMLForm $parent = null
 	) {
 		$field = parent::loadInputFromParameters( $fieldname, $descriptor, $parent );
 		$field->setShowEmptyLabel( false );
@@ -48,10 +49,6 @@ class VFormHTMLForm extends HTMLForm {
 	}
 
 	public function getHTML( $submitResult ) {
-		// This is required for VForm HTMLForms that use that style regardless
-		// of wgUseMediaWikiUIEverywhere (since they pre-date it).
-		// When wgUseMediaWikiUIEverywhere is removed, this should be consolidated
-		// with the addModuleStyles in SpecialPage->setHeaders.
 		$this->getOutput()->addModuleStyles( [
 			'mediawiki.ui',
 			'mediawiki.ui.button',
@@ -62,97 +59,23 @@ class VFormHTMLForm extends HTMLForm {
 		return parent::getHTML( $submitResult );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
+	protected function formatField( HTMLFormField $field, $value ) {
+		return $field->getVForm( $value );
+	}
+
 	protected function getFormAttributes() {
-		$attribs = parent::getFormAttributes();
-		$attribs['class'] = [ 'mw-htmlform', 'mw-ui-vform', 'mw-ui-container' ];
-		return $attribs;
+		return [ 'class' => [ 'mw-htmlform', 'mw-ui-vform', 'mw-ui-container' ] ] +
+			parent::getFormAttributes();
 	}
 
 	public function wrapForm( $html ) {
 		// Always discard $this->mWrapperLegend
 		return Html::rawElement( 'form', $this->getFormAttributes(), $html );
 	}
-
-	public function getButtons() {
-		$buttons = '';
-
-		if ( $this->mShowSubmit ) {
-			$attribs = [];
-
-			if ( isset( $this->mSubmitID ) ) {
-				$attribs['id'] = $this->mSubmitID;
-			}
-
-			if ( isset( $this->mSubmitName ) ) {
-				$attribs['name'] = $this->mSubmitName;
-			}
-
-			if ( isset( $this->mSubmitTooltip ) ) {
-				$attribs += Linker::tooltipAndAccesskeyAttribs( $this->mSubmitTooltip );
-			}
-
-			$attribs['class'] = [
-				'mw-htmlform-submit',
-				'mw-ui-button mw-ui-big mw-ui-block',
-			];
-			foreach ( $this->mSubmitFlags as $flag ) {
-				$attribs['class'][] = 'mw-ui-' . $flag;
-			}
-
-			$buttons .= Xml::submitButton( $this->getSubmitText(), $attribs ) . "\n";
-		}
-
-		if ( $this->mShowReset ) {
-			$buttons .= Html::element(
-				'input',
-				[
-					'type' => 'reset',
-					'value' => $this->msg( 'htmlform-reset' )->text(),
-					'class' => 'mw-ui-button mw-ui-big mw-ui-block',
-				]
-			) . "\n";
-		}
-
-		if ( $this->mShowCancel ) {
-			$target = $this->getCancelTargetURL();
-			$buttons .= Html::element(
-					'a',
-					[
-						'class' => 'mw-ui-button mw-ui-big mw-ui-block',
-						'href' => $target,
-					],
-					$this->msg( 'cancel' )->text()
-				) . "\n";
-		}
-
-		foreach ( $this->mButtons as $button ) {
-			$attrs = [
-				'type' => 'submit',
-				'name' => $button['name'],
-				'value' => $button['value']
-			];
-
-			// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset Always set in HTMLForm::addButton
-			if ( $button['attribs'] ) {
-				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset Always set in HTMLForm::addButton
-				$attrs += $button['attribs'];
-			}
-
-			if ( isset( $button['id'] ) ) {
-				$attrs['id'] = $button['id'];
-			}
-
-			$attrs['class'] = isset( $attrs['class'] ) ? (array)$attrs['class'] : [];
-			$attrs['class'][] = 'mw-ui-button mw-ui-big mw-ui-block';
-
-			$buttons .= Html::element( 'input', $attrs ) . "\n";
-		}
-
-		if ( !$buttons ) {
-			return '';
-		}
-
-		return Html::rawElement( 'div',
-			[ 'class' => 'mw-htmlform-submit-buttons' ], "\n$buttons" ) . "\n";
-	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( VFormHTMLForm::class, 'VFormHTMLForm' );

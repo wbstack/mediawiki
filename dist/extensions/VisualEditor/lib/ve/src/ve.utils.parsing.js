@@ -1,11 +1,7 @@
 /*!
  * VisualEditor parsing utilities, used when converting HTMLDocuments and strings.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
- */
-
-/**
- * @class ve
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -15,7 +11,7 @@
  * @return {boolean} Element is a block element
  */
 ve.isBlockElement = function ( element ) {
-	var elementName = typeof element === 'string' ? element : element.nodeName;
+	const elementName = typeof element === 'string' ? element : element.nodeName;
 	return ve.elementTypes.block.indexOf( elementName.toLowerCase() ) !== -1;
 };
 
@@ -26,7 +22,7 @@ ve.isBlockElement = function ( element ) {
  * @return {boolean} Element is a void element
  */
 ve.isVoidElement = function ( element ) {
-	var elementName = typeof element === 'string' ? element : element.nodeName;
+	const elementName = typeof element === 'string' ? element : element.nodeName;
 	return ve.elementTypes.void.indexOf( elementName.toLowerCase() ) !== -1;
 };
 
@@ -62,6 +58,7 @@ ve.elementTypes = {
  */
 ve.matchTag = function ( html, tag ) {
 	return html.match(
+
 		new RegExp( '<' + tag + '(>|\\s[^>]*>)' )
 	);
 };
@@ -82,17 +79,17 @@ ve.addHeadTag = function ( docHtml, tagHtml ) {
 	 * @return {string}
 	 */
 	function insertAfter( match, text ) {
-		var offset = match.index + match[ 0 ].length;
+		const offset = match.index + match[ 0 ].length;
 		return docHtml.slice( 0, offset ) +
 			text +
 			docHtml.slice( offset );
 	}
 
-	var headMatch = ve.matchTag( docHtml, 'head' );
+	const headMatch = ve.matchTag( docHtml, 'head' );
 	if ( headMatch ) {
 		return insertAfter( headMatch, tagHtml );
 	} else {
-		var htmlMatch = ve.matchTag( docHtml, 'html' );
+		const htmlMatch = ve.matchTag( docHtml, 'html' );
 		if ( htmlMatch ) {
 			// <html> but no <head>
 			return insertAfter( htmlMatch, '<head>' + tagHtml + '</head>' );
@@ -128,12 +125,10 @@ ve.createDocumentFromHtml = function ( html ) {
 		html = ve.addHeadTag( html, '<meta name="format-detection" content="telephone=no" data-ve-tmp/>' );
 	}
 
-	// Support: IE
-	// IE doesn't like empty strings
-	var newDocument = new DOMParser().parseFromString( html || '<body></body>', 'text/html' );
+	const newDocument = new DOMParser().parseFromString( html, 'text/html' );
 
 	// Remove iOS hack
-	var tmpMeta = newDocument.querySelector( 'meta[data-ve-tmp]' );
+	const tmpMeta = newDocument.querySelector( 'meta[data-ve-tmp]' );
 	if ( tmpMeta ) {
 		tmpMeta.parentNode.removeChild( tmpMeta );
 	}
@@ -154,7 +149,7 @@ ve.createDocumentFromHtml = function ( html ) {
  * @param {string} [fallbackBase] Base URL to use if resolving the base URL fails or there is no <base> tag
  */
 ve.fixBase = function ( targetDoc, sourceDoc, fallbackBase ) {
-	var baseNode = targetDoc.getElementsByTagName( 'base' )[ 0 ];
+	let baseNode = targetDoc.getElementsByTagName( 'base' )[ 0 ];
 	if ( baseNode ) {
 		// Support: Safari
 		// In Safari a base node with an invalid href (e.g. protocol-relative)
@@ -202,7 +197,7 @@ ve.properInnerHtml = function ( element ) {
 /**
  * Get the actual outer HTML of a DOM node.
  *
- * @see ve#properInnerHtml
+ * @see ve.properInnerHtml
  * @param {HTMLElement} element HTML element to get outer HTML of
  * @return {string} Outer HTML
  */
@@ -221,9 +216,10 @@ ve.properOuterHtml = function ( element ) {
  * @return {HTMLElement} Either element, or a fixed-up clone of it
  */
 ve.fixupPreBug = function ( element ) {
+	// Support: Chrome, FF
 	if ( ve.isPreInnerHtmlBroken === undefined ) {
 		// Test whether newlines in `<pre>` are serialized back correctly
-		var div = document.createElement( 'div' );
+		const div = document.createElement( 'div' );
 		div.innerHTML = '<pre>\n\n</pre>';
 		ve.isPreInnerHtmlBroken = div.innerHTML === '<pre>\n</pre>';
 	}
@@ -237,14 +233,14 @@ ve.fixupPreBug = function ( element ) {
 	// If we don't see a leading newline, we still don't know if the original HTML was
 	// `<pre>Foo</pre>` or `<pre>\nFoo</pre>`, but that's a syntactic difference, not a
 	// semantic one, and handling that is the integration target's job.
-	var $element = $( element ).clone();
-	$element.find( 'pre, textarea, listing' ).each( function () {
-		var matches;
-		if ( this.firstChild && this.firstChild.nodeType === Node.TEXT_NODE ) {
-			matches = this.firstChild.data.match( /^(\r\n|\r|\n)/ );
+	const $element = $( element ).clone();
+	$element.find( 'pre, textarea, listing' ).each( ( i, el ) => {
+		let matches;
+		if ( el.firstChild && el.firstChild.nodeType === Node.TEXT_NODE ) {
+			matches = el.firstChild.data.match( /^(\r\n|\r|\n)/ );
 			if ( matches && matches[ 1 ] ) {
 				// Prepend a newline exactly like the one we saw
-				this.firstChild.insertData( 0, matches[ 1 ] );
+				el.firstChild.insertData( 0, matches[ 1 ] );
 			}
 		}
 	} );
@@ -265,135 +261,9 @@ ve.fixupPreBug = function ( element ) {
  * @return {string} Normalized attribute value
  */
 ve.normalizeAttributeValue = function ( name, value, nodeName ) {
-	var node = document.createElement( nodeName || 'div' );
+	const node = document.createElement( nodeName || 'div' );
 	node.setAttribute( name, value );
-	// Support: IE
-	// IE normalizes invalid CSS to empty string, then if you normalize
-	// an empty string again it becomes null. Return an empty string
-	// instead of null to make this function idempotent.
-	return node.getAttribute( name ) || '';
-};
-
-/**
- * Helper function for #parseXhtml and #serializeXhtml.
- *
- * Map attributes that are broken in IE to attributes prefixed with data-ve-
- * or vice versa. rowspan/colspan are also broken in Firefox 38 and below, but
- * we don't consider that serious enough to run this function for Firefox.
- *
- * @param {string} html HTML string. Must also be valid XML. Must only have
- *   one root node (e.g. be a complete document).
- * @param {boolean} unmask Map the masked attributes back to their originals
- * @return {string} HTML string modified to mask/unmask broken attributes
- */
-ve.transformStyleAttributes = function ( html, unmask ) {
-	var maskAttrs = [
-		// Support: IE
-		'style', // IE normalizes 'color:#ffd' to 'color: rgb(255, 255, 221);'
-		'bgcolor', // IE normalizes '#FFDEAD' to '#ffdead'
-		'color', // IE normalizes 'Red' to 'red'
-		'width', // IE normalizes '240px' to '240'
-		'height', // Same as width
-		'rowspan', // IE (and FF 38 and below) normalizes rowspan="02" to rowspan="2"
-		'colspan' // Same as rowspan
-	];
-
-	// Parse the HTML into an XML DOM
-	var xmlDoc = new DOMParser().parseFromString( html, 'text/xml' );
-
-	// Go through and mask/unmask each attribute on all elements that have it
-	for ( var i = 0, len = maskAttrs.length; i < len; i++ ) {
-		var fromAttr = unmask ? 'data-ve-' + maskAttrs[ i ] : maskAttrs[ i ];
-		var toAttr = unmask ? maskAttrs[ i ] : 'data-ve-' + maskAttrs[ i ];
-		// eslint-disable-next-line no-loop-func
-		$( xmlDoc ).find( '[' + fromAttr + ']' ).each( function () {
-			var fromAttrValue = this.getAttribute( fromAttr );
-
-			if ( unmask ) {
-				this.removeAttribute( fromAttr );
-
-				// If the data-ve- version doesn't normalize to the same value,
-				// the attribute must have changed, so don't overwrite it
-				var fromAttrNormalized = ve.normalizeAttributeValue( toAttr, fromAttrValue, this.nodeName );
-				// toAttr can't not be set, but IE returns null if the value was ''
-				var toAttrValue = this.getAttribute( toAttr ) || '';
-				if ( toAttrValue !== fromAttrNormalized ) {
-					return;
-				}
-			}
-
-			this.setAttribute( toAttr, fromAttrValue );
-		} );
-	}
-
-	// Inject empty text nodes into empty non-void tags to prevent things like <a></a> from
-	// being serialized as <a /> and wreaking havoc
-	$( xmlDoc ).find( ':empty:not(' + ve.elementTypes.void.join( ',' ) + ')' ).each( function () {
-		this.appendChild( xmlDoc.createTextNode( '' ) );
-	} );
-
-	// Serialize back to a string
-	return new XMLSerializer().serializeToString( xmlDoc );
-};
-
-/**
- * Parse an HTML string into an HTML DOM, while masking attributes affected by
- * normalization bugs if a broken browser is detected.
- * Since this process uses an XML parser, the input must be valid XML as well as HTML.
- *
- * @param {string} html HTML string. Must also be valid XML. Must only have
- *   one root node (e.g. be a complete document).
- * @return {HTMLDocument} HTML DOM
- */
-ve.parseXhtml = function ( html ) {
-	// Support: IE
-	// Feature-detect style attribute breakage in IE
-	if ( ve.isStyleAttributeBroken === undefined ) {
-		ve.isStyleAttributeBroken = ve.normalizeAttributeValue( 'style', 'color:#ffd' ) !== 'color:#ffd';
-	}
-	if ( ve.isStyleAttributeBroken ) {
-		html = ve.transformStyleAttributes( html, false );
-	}
-	return ve.createDocumentFromHtml( html );
-};
-
-/**
- * Serialize an HTML DOM created with #parseXhtml back to an HTML string, unmasking any
- * attributes that were masked.
- *
- * @param {HTMLDocument} doc HTML DOM
- * @return {string} Serialized HTML string
- */
-ve.serializeXhtml = function ( doc ) {
-	return ve.serializeXhtmlElement( doc.documentElement );
-};
-
-/**
- * Serialize an HTML element created with #parseXhtml back to an HTML string, unmasking any
- * attributes that were masked.
- *
- * @param {HTMLElement} element HTML element
- * @return {string} Serialized HTML string
- */
-ve.serializeXhtmlElement = function ( element ) {
-	// Support: IE
-	// Feature-detect style attribute breakage in IE
-	if ( ve.isStyleAttributeBroken === undefined ) {
-		// Note this doesn't catch the rowspan/colspan normalization in Firefox 38 and below
-		// We don't think FF<38 is sufficiently broken to justify going through all this XML parsing stuff
-		ve.isStyleAttributeBroken = ve.normalizeAttributeValue( 'style', 'color:#ffd' ) !== 'color:#ffd';
-	}
-	if ( !ve.isStyleAttributeBroken ) {
-		// Support: Firefox
-		// Use outerHTML if possible because in Firefox, XMLSerializer URL-encodes
-		// hrefs but outerHTML doesn't
-		return ve.properOuterHtml( element );
-	}
-
-	var xml = new XMLSerializer().serializeToString( ve.fixupPreBug( element ) );
-	// FIXME T126035: This strips out xmlns as a quick hack
-	xml = xml.replace( '<html xmlns="http://www.w3.org/1999/xhtml"', '<html' );
-	return ve.transformStyleAttributes( xml, true );
+	return node.getAttribute( name );
 };
 
 /**
@@ -404,7 +274,7 @@ ve.serializeXhtmlElement = function ( element ) {
  * @return {string} Resolved URL
  */
 ve.resolveUrl = function ( url, base ) {
-	var node = base.createElement( 'a' );
+	const node = base.createElement( 'a' );
 	node.setAttribute( 'href', url );
 	// If doc.baseURI isn't set, node.href will be an empty string
 	// This is crazy, returning the original URL is better

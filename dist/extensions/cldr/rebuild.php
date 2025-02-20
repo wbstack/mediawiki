@@ -56,8 +56,12 @@ class CLDRRebuild extends Maintenance {
 
 		// Get an array of all MediaWiki languages ( $wgLanguageNames + $wgExtraLanguageNames )
 		$languages = $langNameUtils->getLanguageNames();
+		# hack to get Konkani, until CLDR renames it from 'kok' to 'gom-deva' (T347625)
+		$languages['kok'] = 'Foo';
 		# hack to get pt-pt too
 		$languages['pt-pt'] = 'Foo';
+		// hack to get the correct script for mni (T313883)
+		$languages['mni-mtei'] = 'Foo';
 		ksort( $languages );
 
 		foreach ( $languages as $code => $name ) {
@@ -76,6 +80,10 @@ class CLDRRebuild extends Maintenance {
 				}
 				if ( isset( $codeParts[2] ) && strlen( $codeParts[2] ) === 2 ) {
 					$codeParts[2] = strtoupper( $codeParts[2] );
+				}
+				if ( isset( $codeParts[1] ) && $codeParts[1] === 'tarask' ) {
+					// hack to get be-tarask
+					$codeParts[1] = 'TARASK';
 				}
 				$codeCLDR = implode( '_', $codeParts );
 			} else {
@@ -125,22 +133,29 @@ class CLDRRebuild extends Maintenance {
 	 */
 	private function getRealCode( $code ) {
 		$realCode = $code;
-		if ( !strcmp( $code, 'kk' ) ) {
+		if ( $code === 'kk' ) {
 			$realCode = 'kk-cyrl';
-		} elseif ( !strcmp( $code, 'ku' ) ) {
-			$realCode = 'ku-latn';
-		} elseif ( !strcmp( $code, 'sr' ) ) {
-			$realCode = 'sr-ec';
-		} elseif ( !strcmp( $code, 'tg' ) ) {
-			$realCode = 'tg-cyrl';
-		} elseif ( !strcmp( $code, 'zh' ) ) {
-			$realCode = 'zh-hans';
-		} elseif ( !strcmp( $code, 'pt' ) ) {
-			$realCode = 'pt-br';
-		} elseif ( !strcmp( $code, 'pt-pt' ) ) {
-			$realCode = 'pt';
-		} elseif ( !strcmp( $code, 'az-arab' ) ) {
+		} elseif ( $code === 'az-arab' ) {
 			$realCode = 'azb';
+		} elseif ( $code === 'kok' ) {
+			// T347625
+			$realCode = 'gom-deva';
+		} elseif ( $code === 'ku' ) {
+			$realCode = 'ku-latn';
+		} elseif ( $code === 'mni-mtei' ) {
+			$realCode = 'mni';
+		} elseif ( $code === 'mni' ) {
+			$realCode = 'mni-beng';
+		} elseif ( $code === 'pt' ) {
+			$realCode = 'pt-br';
+		} elseif ( $code === 'pt-pt' ) {
+			$realCode = 'pt';
+		} elseif ( $code === 'sr' ) {
+			$realCode = 'sr-cyrl';
+		} elseif ( $code === 'tg' ) {
+			$realCode = 'tg-cyrl';
+		} elseif ( $code === 'zh' ) {
+			$realCode = 'zh-hans';
 		}
 
 		return $realCode;

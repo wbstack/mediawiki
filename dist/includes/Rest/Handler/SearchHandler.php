@@ -2,27 +2,28 @@
 
 namespace MediaWiki\Rest\Handler;
 
-use Config;
 use InvalidArgumentException;
 use ISearchResultSet;
 use MediaWiki\Cache\CacheKeyHelper;
+use MediaWiki\Config\Config;
 use MediaWiki\MainConfigNames;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageStore;
 use MediaWiki\Page\RedirectLookup;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Rest\Handler;
+use MediaWiki\Rest\Handler\Helper\RestStatusTrait;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\Response;
 use MediaWiki\Search\Entity\SearchResultThumbnail;
+use MediaWiki\Search\SearchResultThumbnailProvider;
+use MediaWiki\Title\TitleFormatter;
 use SearchEngine;
 use SearchEngineConfig;
 use SearchEngineFactory;
 use SearchResult;
 use SearchSuggestion;
-use Status;
-use TitleFormatter;
-use Wikimedia\Message\MessageValue;
+use StatusValue;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -30,24 +31,15 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  * Handler class for Core REST API endpoint that handles basic search
  */
 class SearchHandler extends Handler {
+	use RestStatusTrait;
 
-	/** @var SearchEngineFactory */
-	private $searchEngineFactory;
-
-	/** @var SearchEngineConfig */
-	private $searchEngineConfig;
-
-	/** @var PermissionManager */
-	private $permissionManager;
-
-	/** @var RedirectLookup */
-	private $redirectLookup;
-
-	/** @var PageStore */
-	private $pageStore;
-
-	/** @var TitleFormatter */
-	private $titleFormatter;
+	private SearchEngineFactory $searchEngineFactory;
+	private SearchEngineConfig $searchEngineConfig;
+	private SearchResultThumbnailProvider $searchResultThumbnailProvider;
+	private PermissionManager $permissionManager;
+	private RedirectLookup $redirectLookup;
+	private PageStore $pageStore;
+	private TitleFormatter $titleFormatter;
 
 	/**
 	 * Search page body and titles.
@@ -69,7 +61,7 @@ class SearchHandler extends Handler {
 	 */
 	private $mode = null;
 
-	/** Limit results to 50 pages per default */
+	/** Limit results to 50 pages by default */
 	private const LIMIT = 50;
 
 	/** Hard limit results to 100 pages */
@@ -86,19 +78,11 @@ class SearchHandler extends Handler {
 	 */
 	private $completionCacheExpiry;
 
-	/**
-	 * @param Config $config
-	 * @param SearchEngineFactory $searchEngineFactory
-	 * @param SearchEngineConfig $searchEngineConfig
-	 * @param PermissionManager $permissionManager
-	 * @param RedirectLookup $redirectLookup
-	 * @param PageStore $pageStore
-	 * @param TitleFormatter $titleFormatter
-	 */
 	public function __construct(
 		Config $config,
 		SearchEngineFactory $searchEngineFactory,
 		SearchEngineConfig $searchEngineConfig,
+		SearchResultThumbnailProvider $searchResultThumbnailProvider,
 		PermissionManager $permissionManager,
 		RedirectLookup $redirectLookup,
 		PageStore $pageStore,
@@ -106,6 +90,7 @@ class SearchHandler extends Handler {
 	) {
 		$this->searchEngineFactory = $searchEngineFactory;
 		$this->searchEngineConfig = $searchEngineConfig;
+		$this->searchResultThumbnailProvider = $searchResultThumbnailProvider;
 		$this->permissionManager = $permissionManager;
 		$this->redirectLookup = $redirectLookup;
 		$this->pageStore = $pageStore;
@@ -144,21 +129,17 @@ class SearchHandler extends Handler {
 
 	/**
 	 * Get SearchResults when results are either SearchResultSet or Status objects
-	 * @param ISearchResultSet|Status|null $results
+	 * @param ISearchResultSet|StatusValue|null $results
 	 * @return SearchResult[]
 	 * @throws LocalizedHttpException
 	 */
 	private function getSearchResultsOrThrow( $results ) {
 		if ( $results ) {
-			if ( $results instanceof Status ) {
+			if ( $results instanceof StatusValue ) {
 				$status = $results;
 				if ( !$status->isOK() ) {
-					list( $error ) = $status->splitByErrorType();
-					if ( $error->getErrors() ) { // Only throw for errors, suppress warnings (for now)
-						$errorMessages = $error->getMessage();
-						throw new LocalizedHttpException(
-							new MessageValue( "rest-search-error", [ $errorMessages->getKey() ] )
-						);
+					if ( $status->getMessages( 'error' ) ) { // Only throw for errors, suppress warnings (for now)
+						$this->throwExceptionForStatus( $status, 'rest-search-error', 500 );
 					}
 				}
 				$statusValue = $status->getValue();
@@ -323,7 +304,6 @@ class SearchHandler extends Handler {
 
 		return [
 			'mimetype' => $thumbnail->getMimeType(),
-			'size' => $thumbnail->getSize(),
 			'width' => $thumbnail->getWidth(),
 			'height' => $thumbnail->getHeight(),
 			'duration' => $thumbnail->getDuration(),
@@ -363,9 +343,8 @@ class SearchHandler extends Handler {
 	 * @return array
 	 */
 	private function buildThumbnailsFromPageIdentities( array $pageIdentities ) {
-		$thumbnails = array_fill_keys( array_keys( $pageIdentities ), null );
-
-		$this->getHookRunner()->onSearchResultProvideThumbnail( $pageIdentities, $thumbnails );
+		$thumbnails = $this->searchResultThumbnailProvider->getThumbnails( $pageIdentities );
+		$thumbnails += array_fill_keys( array_keys( $pageIdentities ), null );
 
 		return array_map( function ( $thumbnail ) {
 			return [ 'thumbnail' => $this->serializeThumbnail( $thumbnail ) ];

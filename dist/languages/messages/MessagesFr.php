@@ -1,8 +1,6 @@
 <?php
 /** French (français)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -62,6 +60,7 @@ $specialPageAliases = [
 	'Deadendpages'              => [ 'Pages_en_impasse', 'PagesEnImpasse' ],
 	'DeletedContributions'      => [ 'Contributions_supprimées', 'ContributionsSupprimées', 'ContributionSupprimees' ],
 	'DoubleRedirects'           => [ 'Doubles_redirections', 'DoublesRedirections', 'Redirections_doubles', 'RedirectionsDoubles' ],
+	'EditRecovery'              => [ 'Récupération_des_modifications' ],
 	'EditWatchlist'             => [ 'Éditer_Liste_de_suivi', 'ÉditerListeDeSuivi' ],
 	'Emailuser'                 => [ 'Envoyer_un_courriel', 'EnvoyerUnCourriel', 'Courriel', 'Envoyer_un_e-mail', 'EnvoyerUnEMail', 'E-mail', 'EMail' ],
 	'ExpandTemplates'           => [ 'ExpansionDesModèles' ],
@@ -110,6 +109,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'Modifications_récentes', 'Modifications_recentes', 'ModificationsRécentes', 'ModificationsRecentes' ],
 	'Recentchangeslinked'       => [ 'Suivi_des_liens', 'SuiviDesLiens' ],
 	'Redirect'                  => [ 'Redirection' ],
+	'Renameuser'                => [ 'Renommer_utilisateur', 'RenommerUtilisateur' ],
 	'Revisiondelete'            => [ 'Versions_supprimées', 'Versions_supprimees', 'Versionsupprimées', 'Versionsupprimees' ],
 	'Search'                    => [ 'Recherche', 'Rechercher', 'Chercher' ],
 	'Shortpages'                => [ 'Pages_courtes', 'PagesCourtes' ],
@@ -200,7 +200,7 @@ $magicWords = [
 	'img_thumbnail'             => [ '1', 'vignette', 'thumb', 'thumbnail' ],
 	'img_top'                   => [ '1', 'haut', 'top' ],
 	'img_upright'               => [ '1', 'redresse', 'redresse=$1', 'redresse_$1', 'upright', 'upright=$1', 'upright $1' ],
-	'language'                  => [ '0', '#LANGUE:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#LANGUE', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'MINUS:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'INITMINUS:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'JOURLOCAL', 'JOUR1LOCAL', 'LOCALDAY' ],

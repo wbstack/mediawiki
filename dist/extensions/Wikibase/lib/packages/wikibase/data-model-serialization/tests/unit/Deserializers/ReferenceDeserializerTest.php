@@ -18,14 +18,14 @@ use Wikibase\DataModel\Snak\SnakList;
  * @license GPL-2.0-or-later
  * @author Thomas Pellissier Tanon
  */
-class ReferenceDeserializerTest extends DispatchableDeserializerTest {
+class ReferenceDeserializerTest extends DispatchableDeserializerTestCase {
 
 	protected function buildDeserializer() {
 		$snaksDeserializerMock = $this->createMock( Deserializer::class );
 		$snaksDeserializerMock->expects( $this->any() )
 			->method( 'deserialize' )
-			->with( $this->equalTo( [] ) )
-			->will( $this->returnValue( new SnakList() ) );
+			->with( [] )
+			->willReturn( new SnakList() );
 
 		return new ReferenceDeserializer( $snaksDeserializerMock );
 	}
@@ -35,8 +35,8 @@ class ReferenceDeserializerTest extends DispatchableDeserializerTest {
 			[
 				[
 					'hash' => 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
-					'snaks' => []
-				]
+					'snaks' => [],
+				],
 			],
 		];
 	}
@@ -44,10 +44,10 @@ class ReferenceDeserializerTest extends DispatchableDeserializerTest {
 	public function nonDeserializableProvider() {
 		return [
 			[
-				42
+				42,
 			],
 			[
-				[]
+				[],
 			],
 		];
 	}
@@ -58,14 +58,14 @@ class ReferenceDeserializerTest extends DispatchableDeserializerTest {
 				new Reference(),
 				[
 					'hash' => 'da39a3ee5e6b4b0d3255bfef95601890afd80709',
-					'snaks' => []
-				]
+					'snaks' => [],
+				],
 			],
 			[
 				new Reference(),
 				[
-					'snaks' => []
-				]
+					'snaks' => [],
+				],
 			],
 		];
 	}
@@ -78,33 +78,33 @@ class ReferenceDeserializerTest extends DispatchableDeserializerTest {
 					'P24' => [
 						[
 							'snaktype' => 'novalue',
-							'property' => 'P24'
-						]
+							'property' => 'P24',
+						],
 					],
 					'P42' => [
 						[
 							'snaktype' => 'somevalue',
-							'property' => 'P42'
+							'property' => 'P42',
 						],
 						[
 							'snaktype' => 'novalue',
-							'property' => 'P42'
-						]
-					]
+							'property' => 'P42',
+						],
+					],
 				]
 			) )
-			->will( $this->returnValue( new SnakList( [
+			->willReturn( new SnakList( [
 				new PropertyNoValueSnak( new NumericPropertyId( 'P24' ) ),
 				new PropertySomeValueSnak( new NumericPropertyId( 'P42' ) ),
-				new PropertyNoValueSnak( new NumericPropertyId( 'P42' ) )
-			] ) ) );
+				new PropertyNoValueSnak( new NumericPropertyId( 'P42' ) ),
+			] ) );
 
 		$referenceDeserializer = new ReferenceDeserializer( $snaksDeserializerMock );
 
 		$reference = new Reference( new SnakList( [
 			new PropertySomeValueSnak( new NumericPropertyId( 'P42' ) ),
 			new PropertyNoValueSnak( new NumericPropertyId( 'P42' ) ),
-			new PropertyNoValueSnak( new NumericPropertyId( 'P24' ) )
+			new PropertyNoValueSnak( new NumericPropertyId( 'P24' ) ),
 		] ) );
 
 		$serialization = [
@@ -113,24 +113,24 @@ class ReferenceDeserializerTest extends DispatchableDeserializerTest {
 				'P24' => [
 					[
 						'snaktype' => 'novalue',
-						'property' => 'P24'
-					]
+						'property' => 'P24',
+					],
 				],
 				'P42' => [
 					[
 						'snaktype' => 'somevalue',
-						'property' => 'P42'
+						'property' => 'P42',
 					],
 					[
 						'snaktype' => 'novalue',
-						'property' => 'P42'
-					]
-				]
+						'property' => 'P42',
+					],
+				],
 			],
 			'snaks-order' => [
 				'P42',
-				'P24'
-			]
+				'P24',
+			],
 		];
 
 		$this->assertTrue( $reference->equals( $referenceDeserializer->deserialize( $serialization ) ) );
@@ -144,11 +144,11 @@ class ReferenceDeserializerTest extends DispatchableDeserializerTest {
 		$this->buildDeserializer()->deserialize( $serialization );
 	}
 
-	public function invalidDeserializationProvider() {
+	public static function invalidDeserializationProvider() {
 		return [
 			[
 				'hash' => 'da',
-				'snaks' => []
+				'snaks' => [],
 			],
 		];
 	}
@@ -158,7 +158,7 @@ class ReferenceDeserializerTest extends DispatchableDeserializerTest {
 		$this->buildDeserializer()->deserialize( [
 			'hash' => 'foo',
 			'snaks' => [],
-			'snaks-order' => null
+			'snaks-order' => null,
 		] );
 	}
 

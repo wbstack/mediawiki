@@ -1,10 +1,5 @@
 <?php
-
-use Wikimedia\Rdbms\ILoadBalancer;
-
 /**
- * Implements Special:Randomrootpage
- *
  * Copyright © 2008 Hojjat (aka Huji)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,23 +18,38 @@ use Wikimedia\Rdbms\ILoadBalancer;
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use MediaWiki\Title\NamespaceInfo;
+use Wikimedia\Rdbms\IConnectionProvider;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\LikeValue;
+
+/**
+ * Redirect to a random page that isn't a subpage.
+ *
+ * @ingroup SpecialPage
+ */
 class SpecialRandomRootPage extends SpecialRandomPage {
 
 	/**
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param NamespaceInfo $nsInfo
 	 */
 	public function __construct(
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		NamespaceInfo $nsInfo
 	) {
-		parent::__construct( $loadBalancer, $nsInfo );
+		parent::__construct( $dbProvider, $nsInfo );
 		$this->mName = 'Randomrootpage';
-		$dbr = $loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA );
-		$this->extra[] = 'page_title NOT ' . $dbr->buildLike( $dbr->anyString(), '/', $dbr->anyString() );
+		$dbr = $dbProvider->getReplicaDatabase();
+		$this->extra[] = $dbr->expr(
+			'page_title',
+			IExpression::NOT_LIKE,
+			new LikeValue( $dbr->anyString(), '/', $dbr->anyString() )
+		);
 	}
 
 	// Don't select redirects
@@ -47,3 +57,9 @@ class SpecialRandomRootPage extends SpecialRandomPage {
 		return false;
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialRandomRootPage::class, 'SpecialRandomRootPage' );

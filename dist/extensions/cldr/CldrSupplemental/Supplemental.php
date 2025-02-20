@@ -229,6 +229,10 @@ $currencyFractions = [
 		'cashDigits' => '0',
 		'cashRounding' => '0',
 	],
+	'SLE' => [
+		'digits' => '2',
+		'rounding' => '0',
+	],
 	'SLL' => [
 		'digits' => '0',
 		'rounding' => '0',
@@ -481,13 +485,12 @@ $localeCurrencies = [
 	],
 	'CU' => [
 		'CUP',
-		'CUC',
 	],
 	'CV' => [
 		'CVE',
 	],
 	'CW' => [
-		'ANG',
+		'XCG',
 	],
 	'CX' => [
 		'AUD',
@@ -631,7 +634,7 @@ $localeCurrencies = [
 		'HNL',
 	],
 	'HR' => [
-		'HRK',
+		'EUR',
 	],
 	'HT' => [
 		'HTG',
@@ -954,7 +957,7 @@ $localeCurrencies = [
 		'EUR',
 	],
 	'SL' => [
-		'SLL',
+		'SLE',
 	],
 	'SM' => [
 		'EUR',
@@ -978,7 +981,7 @@ $localeCurrencies = [
 		'USD',
 	],
 	'SX' => [
-		'ANG',
+		'XCG',
 	],
 	'SY' => [
 		'SYP',

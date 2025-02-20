@@ -2,6 +2,8 @@
 
 namespace Elastica\Index;
 
+use Elastica\Exception\ClientException;
+use Elastica\Exception\ConnectionException;
 use Elastica\Exception\NotFoundException;
 use Elastica\Exception\ResponseException;
 use Elastica\Index as BaseIndex;
@@ -67,20 +69,32 @@ class Settings
      *
      * @param string $setting OPTIONAL Setting name to return
      *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     *
      * @return array|int|string|null Settings data
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-update-settings.html
      */
-    public function get(string $setting = '')
+    public function get(string $setting = '', bool $includeDefaults = false)
     {
-        $requestData = $this->request()->getData();
+        $queryParameters = [
+            'include_defaults' => $includeDefaults,
+        ];
+
+        $requestData = $this->request([], Request::GET, $queryParameters)->getData();
         $data = \reset($requestData);
 
         if (empty($data['settings']) || empty($data['settings']['index'])) {
             // should not append, the request should throw a ResponseException
             throw new NotFoundException('Index '.$this->getIndex()->getName().' not found');
         }
+
         $settings = $data['settings']['index'];
+        $defaults = $data['defaults']['index'] ?? [];
+
+        $settings = \array_merge($defaults, $settings);
 
         if (!$setting) {
             // return all array
@@ -259,11 +273,12 @@ class Settings
      *
      * To have this changes made the index has to be closed and reopened
      *
-     * @param string $key Merge policy key (for ex. expunge_deletes_allowed)
+     * @param string     $key   Merge policy key (for ex. expunge_deletes_allowed)
+     * @param int|string $value
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-merge.html
      */
-    public function setMergePolicy(string $key, string $value): Response
+    public function setMergePolicy(string $key, $value): Response
     {
         $this->_index->close();
         $response = $this->set(['merge.policy.'.$key => $value]);
@@ -277,7 +292,7 @@ class Settings
      *
      * @param string $key Merge policy key (for ex. expunge_deletes_allowed)
      *
-     * @return string Refresh interval
+     * @return int|string
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/index-modules-merge.html
      */
@@ -292,6 +307,10 @@ class Settings
      * Can be used to set/update settings.
      *
      * @param array $data Arguments
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      *
      * @return Response Response object
      */
@@ -326,9 +345,13 @@ class Settings
      * @param array  $data   OPTIONAL Data array
      * @param string $method OPTIONAL Transfer method (default = \Elastica\Request::GET)
      *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     *
      * @return Response Response object
      */
-    public function request(array $data = [], string $method = Request::GET): Response
+    public function request(array $data = [], string $method = Request::GET, array $queryParameters = []): Response
     {
         $path = '_settings';
 
@@ -336,6 +359,6 @@ class Settings
             $data = ['index' => $data];
         }
 
-        return $this->getIndex()->request($path, $method, $data);
+        return $this->getIndex()->request($path, $method, $data, $queryParameters);
     }
 }

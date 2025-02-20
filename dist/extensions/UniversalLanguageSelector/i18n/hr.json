@@ -2,13 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Bugoslav",
+			"Ivi104",
 			"MaGa",
 			"Neptune, the Mystic",
 			"Ponor",
 			"Roberta F.",
 			"SpeedyGonsales",
-			"Xð",
-			"Ivi104"
+			"Xð"
 		]
 	},
 	"uls-desc": "Omogućuje suradniku nekoliko načina odabira jezika i postavljanja jezičnih postavki",
@@ -74,10 +74,10 @@
 	"ext-uls-setlang-accept": "Prihvati izmjenu",
 	"ext-uls-setlang-loading": "Primjenjuje se...",
 	"ext-uls-setlang-cancel": "Nemoj promijeniti",
-	"ext-uls-actions-menu-header": "Više mogućnosti",
 	"ext-uls-actions-menu-language-settings-item-label": "Otvori jezične postavke",
 	"ext-uls-empty-state-header": "Nema drugih jezika",
 	"ext-uls-empty-state-desc": "Trenutačno nema dostupnih jezika",
 	"ext-uls-empty-state-header-actions-available": "Još nema drugih jezika. Želite li dodati novi?",
-	"ext-uls-empty-state-desc-actions-available": "Učinite sadržaj dostupnim na više jezika."
+	"ext-uls-empty-state-desc-actions-available": "Učinite sadržaj dostupnim na više jezika.",
+	"ext-uls-add-languages-button-label": "Dodajte druge jezike"
 }

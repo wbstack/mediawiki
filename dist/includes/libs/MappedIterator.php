@@ -33,10 +33,11 @@ class MappedIterator extends FilterIterator {
 	/** @var array */
 	protected $cache = [];
 
-	protected $rewound = false; // boolean; whether rewind() has been called
+	/** @var bool whether rewind() has been called */
+	protected $rewound = false;
 
 	/**
-	 * Build an new iterator from a base iterator by having the former wrap the
+	 * Build a new iterator from a base iterator by having the former wrap the
 	 * later, returning the result of "value" callback for each current() invocation.
 	 * The callback takes the result of current() on the base iterator as an argument.
 	 * The keys of the base iterator are reused verbatim.

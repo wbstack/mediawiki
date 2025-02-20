@@ -14,7 +14,7 @@
 	"type": "other",
 	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"config": {
 		"TwoColConflictBetaFeature": {
@@ -38,14 +38,25 @@
 	},
 	"Hooks": {
 		"GetBetaFeaturePreferences": "TwoColConflict\\Hooks\\TwoColConflictHooks::onGetBetaFeaturePreferences",
-		"GetPreferences": "TwoColConflict\\Hooks\\TwoColConflictHooks::onGetPreferences",
-		"LoadUserOptions": "TwoColConflict\\Hooks\\TwoColConflictHooks::onLoadUserOptions",
-		"AlternateEdit": "TwoColConflict\\Hooks\\TwoColConflictHooks::onAlternateEdit",
-		"EditPage::importFormData": "TwoColConflict\\Hooks\\EditPageImportFormDataHookHandler::onEditPageImportFormData",
-		"EditPageBeforeConflictDiff": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageBeforeConflictDiff",
-		"EditPageBeforeEditButtons": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageBeforeEditButtons",
-		"EditPage::showEditForm:initial": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageShowEditFormInitial",
-		"EditPage::showEditForm:fields": "TwoColConflict\\Hooks\\TwoColConflictHooks::onEditPageShowEditFormFields"
+		"GetPreferences": "main",
+		"LoadUserOptions": "main",
+		"AlternateEdit": "main",
+		"EditPage::importFormData": "editpageformdata",
+		"EditPageBeforeConflictDiff": "main",
+		"EditPageBeforeEditButtons": "main",
+		"EditPage::showEditForm:initial": "main",
+		"EditPage::showEditForm:fields": "main"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "TwoColConflict\\Hooks\\TwoColConflictHooks",
+			"services": [
+				"TwoColConflictContext"
+			]
+		},
+		"editpageformdata": {
+			"class": "TwoColConflict\\Hooks\\EditPageImportFormDataHookHandler"
+		}
 	},
 	"DefaultUserOptions": {
 		"twocolconflict-enabled": 1
@@ -57,15 +68,26 @@
 	},
 	"ResourceModules": {
 		"ext.TwoColConflict.SplitJs": {
+			"class": "MediaWiki\\ResourceLoader\\CodexModule",
+			"codexComponents": [
+				"CdxMessage"
+			],
+			"codexStyleOnly": true,
 			"packageFiles": [
 				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.init.js",
+				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Merger.js",
 				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Tour.js",
+				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.tracking.js",
 				"modules/ext.TwoColConflict.Settings.js"
 			],
 			"styles": [
 				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Tour.less"
 			],
+			"skinStyles": {
+				"monobook": "modules/TalkPageConflict/ext.TwoColConflict.Talk.styles.monobook.less"
+			},
 			"dependencies": [
+				"mediawiki.util",
 				"mediawiki.api",
 				"mediawiki.cookie",
 				"mediawiki.pulsatingdot",
@@ -74,8 +96,7 @@
 				"oojs-ui",
 				"oojs-ui.styles.icons-interactions",
 				"user.options",
-				"ext.TwoColConflict.Split.TourImages",
-				"ext.TwoColConflict.Util"
+				"ext.TwoColConflict.Split.TourImages"
 			],
 			"messages": [
 				"parentheses",
@@ -125,7 +146,7 @@
 			]
 		},
 		"ext.TwoColConflict.Split.TourImages": {
-			"class": "ResourceLoaderImageModule",
+			"class": "MediaWiki\\ResourceLoader\\ImageModule",
 			"selector": ".mw-twocolconflict-split-tour-image-{name}",
 			"images": {
 				"blue-dot": {
@@ -145,13 +166,6 @@
 				}
 			}
 		},
-		"ext.TwoColConflict.Util": {
-			"packageFiles": [
-				"modules/ext.TwoColConflict.Util.js",
-				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.Merger.js",
-				"modules/SplitTwoColConflict/ext.TwoColConflict.Split.tracking.js"
-			]
-		},
 		"ext.TwoColConflict.JSCheck": {
 			"packageFiles": [
 				"modules/ext.TwoColConflict.JSCheck.js"
@@ -167,7 +181,7 @@
 			"services": [
 				"TwoColConflictContext",
 				"MainObjectStash",
-				"StatsdDataFactory"
+				"StatsFactory"
 			]
 		}
 	},
@@ -179,7 +193,7 @@
 			"SplitTwoColConflict/TwoColConflict.Split.tracking.test.js"
 		],
 		"dependencies": [
-			"ext.TwoColConflict.Util"
+			"ext.TwoColConflict.SplitJs"
 		]
 	},
 	"attributes": {

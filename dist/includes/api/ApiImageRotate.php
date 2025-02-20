@@ -18,36 +18,37 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use ChangeTags;
 use MediaWiki\FileBackend\FSFile\TempFSFileFactory;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\TitleFactory;
+use RepoGroup;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * @ingroup API
  */
 class ApiImageRotate extends ApiBase {
+	/** @var ApiPageSet|null */
 	private $mPageSet = null;
 
-	/** @var RepoGroup */
-	private $repoGroup;
+	private RepoGroup $repoGroup;
+	private TempFSFileFactory $tempFSFileFactory;
+	private TitleFactory $titleFactory;
 
-	/** @var TempFSFileFactory */
-	private $tempFSFileFactory;
-
-	/**
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param RepoGroup $repoGroup
-	 * @param TempFSFileFactory $tempFSFileFactory
-	 */
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		RepoGroup $repoGroup,
-		TempFSFileFactory $tempFSFileFactory
+		TempFSFileFactory $tempFSFileFactory,
+		TitleFactory $titleFactory
 	) {
 		parent::__construct( $mainModule, $moduleName );
 		$this->repoGroup = $repoGroup;
 		$this->tempFSFileFactory = $tempFSFileFactory;
+		$this->titleFactory = $titleFactory;
 	}
 
 	public function execute() {
@@ -74,7 +75,8 @@ class ApiImageRotate extends ApiBase {
 			}
 		}
 
-		foreach ( $pageSet->getTitles() as $title ) {
+		foreach ( $pageSet->getPages() as $page ) {
+			$title = $this->titleFactory->newFromPageIdentity( $page );
 			$r = [];
 			$r['id'] = $title->getArticleID();
 			ApiQueryBase::addTitleInfo( $r, $title );
@@ -167,9 +169,7 @@ class ApiImageRotate extends ApiBase {
 	 * @return ApiPageSet
 	 */
 	private function getPageSet() {
-		if ( $this->mPageSet === null ) {
-			$this->mPageSet = new ApiPageSet( $this, 0, NS_FILE );
-		}
+		$this->mPageSet ??= new ApiPageSet( $this, 0, NS_FILE );
 
 		return $this->mPageSet;
 	}
@@ -216,4 +216,11 @@ class ApiImageRotate extends ApiBase {
 				=> 'apihelp-imagerotate-example-generator',
 		];
 	}
+
+	public function getHelpUrls() {
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Imagerotate';
+	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiImageRotate::class, 'ApiImageRotate' );

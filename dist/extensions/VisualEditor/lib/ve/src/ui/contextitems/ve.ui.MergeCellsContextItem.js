@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MergeCellsContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -10,14 +10,17 @@
  * @class
  * @extends ve.ui.LinearContextItem
  *
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config] Configuration options
  */
 ve.ui.MergeCellsContextItem = function VeUiMergeCellsContextItem( context, model, config ) {
 	// Parent constructor
 	ve.ui.MergeCellsContextItem.super.call( this, context, model, config );
 
+	this.dimensions = new OO.ui.LabelWidget( {
+		classes: [ 've-ui-mergeCellsContextItem-dimensions' ]
+	} );
 	if ( this.context.isMobile() ) {
 		// Use desktop-style label-only button, as otherwise the "edit" button
 		// gets collapsed to just the edit icon.
@@ -28,6 +31,7 @@ ve.ui.MergeCellsContextItem = function VeUiMergeCellsContextItem( context, model
 
 	// Initialization
 	this.$element.addClass( 've-ui-mergeCellsContextItem' );
+	this.$title.append( this.dimensions.$element );
 };
 
 /* Inheritance */
@@ -63,7 +67,7 @@ ve.ui.MergeCellsContextItem.prototype.setup = function () {
 	ve.ui.MergeCellsContextItem.super.prototype.setup.apply( this, arguments );
 
 	// If not disabled, selection must be table and spanning multiple matrix cells
-	var selection = this.getFragment().getSurface().getSelection(),
+	const selection = this.getFragment().getSurface().getSelection(),
 		documentModel = this.getFragment().getDocument(),
 		// There's some situations involving transclusion table cells which
 		// can make us have a LinearSelection here, so make sure this will
@@ -76,8 +80,14 @@ ve.ui.MergeCellsContextItem.prototype.setup = function () {
 		// Ideally we would check this in isCompatibleWith, but only the model node is available there
 		this.$element.detach();
 	} else {
+		this.dimensions.setLabel(
+			ve.msg( 'visualeditor-table-selection-dimensions',
+				selection.getColCount(),
+				selection.getRowCount()
+			)
+		);
 		this.editButton.setLabel(
-			isMergeable && selection.isSingleCell( documentModel ) ?
+			selection.isSingleCell( documentModel ) ?
 				ve.msg( 'visualeditor-table-merge-cells-unmerge' ) :
 				ve.msg( 'visualeditor-table-merge-cells-merge' )
 		);

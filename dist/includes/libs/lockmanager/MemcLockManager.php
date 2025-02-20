@@ -1,7 +1,5 @@
 <?php
 /**
- * Version of LockManager based on using memcached servers.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,8 +16,10 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup LockManager
  */
+
+use Wikimedia\ObjectCache\MemcachedBagOStuff;
+use Wikimedia\ObjectCache\MemcachedPhpBagOStuff;
 use Wikimedia\WaitConditionLoop;
 
 /**
@@ -110,8 +110,8 @@ class MemcLockManager extends QuorumLockManager {
 
 		$now = time();
 		// Check if the requested locks conflict with existing ones...
-		foreach ( $pathsByType as $type => $paths ) {
-			foreach ( $paths as $path ) {
+		foreach ( $pathsByType as $type => $paths2 ) {
+			foreach ( $paths2 as $path ) {
 				$locksKey = $this->recordKeyForPath( $path );
 				$locksHeld = isset( $lockRecords[$locksKey] )
 					? self::sanitizeLockArray( $lockRecords[$locksKey] )
@@ -184,8 +184,8 @@ class MemcLockManager extends QuorumLockManager {
 		$lockRecords = $memc->getMulti( $keys );
 
 		// Remove the requested locks from all records...
-		foreach ( $pathsByType as $type => $paths ) {
-			foreach ( $paths as $path ) {
+		foreach ( $pathsByType as $type => $paths2 ) {
+			foreach ( $paths2 as $path ) {
 				$locksKey = $this->recordKeyForPath( $path ); // lock record
 				if ( !isset( $lockRecords[$locksKey] ) ) {
 					$status->warning( 'lockmanager-fail-releaselock', $path );
@@ -348,11 +348,14 @@ class MemcLockManager extends QuorumLockManager {
 	 * Make sure remaining locks get cleared
 	 */
 	public function __destruct() {
-		while ( count( $this->locksHeld ) ) {
-			foreach ( $this->locksHeld as $path => $locks ) {
-				$this->doUnlock( [ $path ], self::LOCK_EX );
-				$this->doUnlock( [ $path ], self::LOCK_SH );
+		$pathsByType = [];
+		foreach ( $this->locksHeld as $path => $locks ) {
+			foreach ( $locks as $type => $count ) {
+				$pathsByType[$type][] = $path;
 			}
+		}
+		if ( $pathsByType ) {
+			$this->unlockByType( $pathsByType );
 		}
 	}
 }

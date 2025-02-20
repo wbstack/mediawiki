@@ -20,97 +20,65 @@
  * @file
  */
 
-use MediaWiki\Api\ApiHookRunner;
+namespace MediaWiki\Api;
+
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\Content\TextContent;
+use MediaWiki\Feed\FeedItem;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Pager\ContribsPager;
 use MediaWiki\ParamValidator\TypeDef\UserDef;
 use MediaWiki\Revision\RevisionAccessException;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\Title;
+use MediaWiki\User\ExternalUserNames;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserRigorOptions;
 use Wikimedia\ParamValidator\ParamValidator;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * @ingroup API
  */
 class ApiFeedContributions extends ApiBase {
 
-	/** @var RevisionStore */
-	private $revisionStore;
+	private RevisionStore $revisionStore;
+	private LinkRenderer $linkRenderer;
+	private LinkBatchFactory $linkBatchFactory;
+	private HookContainer $hookContainer;
+	private IConnectionProvider $dbProvider;
+	private NamespaceInfo $namespaceInfo;
+	private UserFactory $userFactory;
+	private CommentFormatter $commentFormatter;
+	private ApiHookRunner $hookRunner;
 
-	/** @var TitleParser */
-	private $titleParser;
-
-	/** @var LinkRenderer */
-	private $linkRenderer;
-
-	/** @var LinkBatchFactory */
-	private $linkBatchFactory;
-
-	/** @var HookContainer */
-	private $hookContainer;
-
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var NamespaceInfo */
-	private $namespaceInfo;
-
-	/** @var ActorMigration */
-	private $actorMigration;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/** @var CommentFormatter */
-	private $commentFormatter;
-
-	/** @var ApiHookRunner */
-	private $hookRunner;
-
-	/**
-	 * @param ApiMain $main
-	 * @param string $action
-	 * @param RevisionStore $revisionStore
-	 * @param TitleParser $titleParser
-	 * @param LinkRenderer $linkRenderer
-	 * @param LinkBatchFactory $linkBatchFactory
-	 * @param HookContainer $hookContainer
-	 * @param ILoadBalancer $loadBalancer
-	 * @param NamespaceInfo $namespaceInfo
-	 * @param ActorMigration $actorMigration
-	 * @param UserFactory $userFactory
-	 * @param CommentFormatter $commentFormatter
-	 */
 	public function __construct(
 		ApiMain $main,
-		$action,
+		string $action,
 		RevisionStore $revisionStore,
-		TitleParser $titleParser,
 		LinkRenderer $linkRenderer,
 		LinkBatchFactory $linkBatchFactory,
 		HookContainer $hookContainer,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		NamespaceInfo $namespaceInfo,
-		ActorMigration $actorMigration,
 		UserFactory $userFactory,
 		CommentFormatter $commentFormatter
 	) {
 		parent::__construct( $main, $action );
 		$this->revisionStore = $revisionStore;
-		$this->titleParser = $titleParser;
 		$this->linkRenderer = $linkRenderer;
 		$this->linkBatchFactory = $linkBatchFactory;
 		$this->hookContainer = $hookContainer;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->namespaceInfo = $namespaceInfo;
-		$this->actorMigration = $actorMigration;
 		$this->userFactory = $userFactory;
 		$this->commentFormatter = $commentFormatter;
 
@@ -184,8 +152,7 @@ class ApiFeedContributions extends ApiBase {
 			$this->linkRenderer,
 			$this->linkBatchFactory,
 			$this->hookContainer,
-			$this->loadBalancer,
-			$this->actorMigration,
+			$this->dbProvider,
 			$this->revisionStore,
 			$this->namespaceInfo,
 			$targetUser,
@@ -282,7 +249,7 @@ class ApiFeedContributions extends ApiBase {
 			// XXX: we could get an HTML representation of the content via getParserOutput, but that may
 			//     contain JS magic and generally may not be suitable for inclusion in a feed.
 			//     Perhaps Content should have a getDescriptiveHtml method and/or a getSourceText method.
-			// Compare also FeedUtils::formatDiffRow.
+			// Compare also MediaWiki\Feed\FeedUtils::formatDiffRow.
 			$html = '';
 		}
 
@@ -303,7 +270,7 @@ class ApiFeedContributions extends ApiBase {
 			],
 			'user' => [
 				ParamValidator::PARAM_TYPE => 'user',
-				UserDef::PARAM_ALLOWED_USER_TYPES => [ 'name', 'ip', 'cidr', 'id', 'interwiki' ],
+				UserDef::PARAM_ALLOWED_USER_TYPES => [ 'name', 'ip', 'temp', 'cidr', 'id', 'interwiki' ],
 				ParamValidator::PARAM_REQUIRED => true,
 			],
 			'namespace' => [
@@ -317,7 +284,9 @@ class ApiFeedContributions extends ApiBase {
 			],
 			'tagfilter' => [
 				ParamValidator::PARAM_ISMULTI => true,
-				ParamValidator::PARAM_TYPE => array_values( ChangeTags::listDefinedTags() ),
+				ParamValidator::PARAM_TYPE => array_values( MediaWikiServices::getInstance()
+					->getChangeTagsStore()->listDefinedTags()
+				),
 				ParamValidator::PARAM_DEFAULT => '',
 			],
 			'deletedonly' => false,
@@ -342,4 +311,11 @@ class ApiFeedContributions extends ApiBase {
 				=> 'apihelp-feedcontributions-example-simple',
 		];
 	}
+
+	public function getHelpUrls() {
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Feedcontributions';
+	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiFeedContributions::class, 'ApiFeedContributions' );

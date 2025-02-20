@@ -3,7 +3,7 @@ namespace Wikibase\Lexeme\Search\Elastic;
 
 use CirrusSearch\Search\BaseResultsType;
 use Elastica\ResultSet;
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\Lexeme\DataAccess\LexemeDescription;
@@ -71,14 +71,6 @@ class LexemeTermResult extends BaseResultsType {
 	 * @return string[]
 	 */
 	public function getFields() {
-		return [];
-	}
-
-	/**
-	 * ES5 variant of getFields.
-	 * @return string[]
-	 */
-	public function getStoredFields() {
 		return [];
 	}
 

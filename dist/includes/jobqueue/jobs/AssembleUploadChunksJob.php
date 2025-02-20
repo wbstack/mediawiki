@@ -1,7 +1,5 @@
 <?php
 /**
- * Assemble the segments of a chunked upload.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,18 +16,24 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Upload
  */
+
+use MediaWiki\Api\ApiUpload;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Request\WebRequestUpload;
+use MediaWiki\Status\Status;
 use Wikimedia\ScopedCallback;
 
 /**
  * Assemble the segments of a chunked upload.
  *
  * @ingroup Upload
+ * @ingroup JobQueue
  */
-class AssembleUploadChunksJob extends Job {
-	public function __construct( Title $title, array $params ) {
-		parent::__construct( 'AssembleUploadChunks', $title, $params );
+class AssembleUploadChunksJob extends Job implements GenericParameterJob {
+	public function __construct( array $params ) {
+		parent::__construct( 'AssembleUploadChunks', $params );
 		$this->removeDuplicates = true;
 	}
 
@@ -39,6 +43,7 @@ class AssembleUploadChunksJob extends Job {
 			ScopedCallback::consume( $scope ); // T126450
 		} );
 
+		$logger = LoggerFactory::getInstance( 'upload' );
 		$context = RequestContext::getMain();
 		$user = $context->getUser();
 		try {
@@ -48,6 +53,35 @@ class AssembleUploadChunksJob extends Job {
 				return false;
 			}
 
+			// TODO add some sort of proper locking maybe
+			$startingStatus = UploadBase::getSessionStatus( $user, $this->params['filekey'] );
+			if (
+				!$startingStatus ||
+				( $startingStatus['result'] ?? '' ) !== 'Poll' ||
+				( $startingStatus['stage'] ?? '' ) !== 'queued'
+			) {
+				$logger->warning( "Tried to assemble upload that is in stage {stage}/{result}",
+					[
+						'stage' => $startingStatus['stage'] ?? '-',
+						'result' => $startingStatus['result'] ?? '-',
+						'status' => (string)( $startingStatus['status'] ?? '-' ),
+						'filekey' => $this->params['filekey'],
+						'filename' => $this->params['filename'],
+						'user' => $user->getName(),
+					]
+				);
+				// If it is marked as currently in progress, abort. Otherwise
+				// assume it is some sort of replag issue or maybe a retry even
+				// though retries are impossible and just warn.
+				if (
+					$startingStatus &&
+					$startingStatus['stage'] === 'assembling' &&
+					$startingStatus['result'] !== 'Failure'
+				) {
+					$this->setLastError( __METHOD__ . " already in progress" );
+					return false;
+				}
+			}
 			UploadBase::setSessionStatus(
 				$user,
 				$this->params['filekey'],
@@ -60,7 +94,16 @@ class AssembleUploadChunksJob extends Job {
 				$this->params['filekey'],
 				new WebRequestUpload( $context->getRequest(), 'null' )
 			);
-
+			if (
+				isset( $this->params['filesize'] ) &&
+				$this->params['filesize'] !== (int)$upload->getOffset()
+			) {
+				// Check to make sure we are not executing prior to the API's
+				// transaction being committed. (T350917)
+				throw new UnexpectedValueException(
+					"UploadStash file size does not match job's. Potential mis-nested transaction?"
+				);
+			}
 			// Combine all of the chunks into a local file and upload that to a new stash file
 			$status = $upload->concatenateChunks();
 			if ( !$status->isGood() ) {
@@ -69,7 +112,14 @@ class AssembleUploadChunksJob extends Job {
 					$this->params['filekey'],
 					[ 'result' => 'Failure', 'stage' => 'assembling', 'status' => $status ]
 				);
-
+				$logger->info( "Chunked upload assembly job failed for {filekey} because {status}",
+					[
+						'filekey' => $this->params['filekey'],
+						'filename' => $this->params['filename'],
+						'user' => $user->getName(),
+						'status' => (string)$status
+					]
+				);
 				// the chunks did not get assembled, but this should not be considered a job
 				// failure - they simply didn't pass verification for some reason, and that
 				// reason is stored in above session to inform the clients
@@ -88,11 +138,13 @@ class AssembleUploadChunksJob extends Job {
 			$newFileKey = $upload->getStashFile()->getFileKey();
 
 			// Remove the old stash file row and first chunk file
+			// Note: This does not delete the chunks, only the stash file
+			// which is same as first chunk but with a different name.
 			$upload->stash->removeFileNoAuth( $this->params['filekey'] );
 
 			// Build the image info array while we have the local reference handy
-			$apiMain = new ApiMain(); // dummy object (XXX)
-			$imageInfo = $upload->getImageInfo( $apiMain->getResult() );
+			$apiUpload = ApiUpload::getDummyInstance();
+			$imageInfo = $apiUpload->getUploadImageInfo( $upload );
 
 			// Cleanup any temporary local file
 			$upload->cleanupTempFile();
@@ -107,6 +159,15 @@ class AssembleUploadChunksJob extends Job {
 					'filekey' => $newFileKey,
 					'imageinfo' => $imageInfo,
 					'status' => $status
+				]
+			);
+			$logger->info( "{filekey} successfully assembled into {newkey}",
+				[
+					'filekey' => $this->params['filekey'],
+					'newkey' => $newFileKey,
+					'filename' => $this->params['filename'],
+					'user' => $user->getName(),
+					'status' => (string)$status
 				]
 			);
 		} catch ( Exception $e ) {

@@ -20,9 +20,9 @@
 
 namespace MediaWiki\Edit;
 
-use Content;
-use ParserOptions;
-use ParserOutput;
+use MediaWiki\Content\Content;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
 use RuntimeException;
 
 /**

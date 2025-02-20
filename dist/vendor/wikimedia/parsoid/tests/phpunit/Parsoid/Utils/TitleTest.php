@@ -3,15 +3,24 @@
 namespace Test\Parsoid\Utils;
 
 use PHPUnit\Framework\MockObject\MockObject;
+use Wikimedia\Bcp47Code\Bcp47CodeValue;
 use Wikimedia\Parsoid\Mocks\MockSiteConfig;
 use Wikimedia\Parsoid\Utils\Title;
 use Wikimedia\Parsoid\Utils\TitleException;
-use Wikimedia\Parsoid\Utils\TitleNamespace;
 
 /**
  * @coversDefaultClass \Wikimedia\Parsoid\Utils\Title
  */
 class TitleTest extends \PHPUnit\Framework\TestCase {
+	private static function newTitle( ...$args ) {
+		// Access non-public constructor
+		$classReflection = new \ReflectionClass( Title::class );
+		$constructor = $classReflection->getConstructor();
+		$constructor->setAccessible( true );
+		$title = $classReflection->newInstanceWithoutConstructor();
+		$constructor->invokeArgs( $title, $args );
+		return $title;
+	}
 
 	/**
 	 * @covers ::__construct
@@ -20,39 +29,31 @@ class TitleTest extends \PHPUnit\Framework\TestCase {
 	 * @covers ::getPrefixedText
 	 * @covers ::getFragment
 	 * @covers ::getNamespace
-	 * @covers ::getNamespaceId
 	 * @dataProvider provideBasics
 	 */
 	public function testBasics( $args, $key, $pKey, $pText, $fragment, $ns ) {
-		array_splice( $args, 2, 0, [ new MockSiteConfig( [] ) ] );
-		$title = new Title( ...$args );
+		$title = self::newTitle( '', ...$args );
 		$this->assertSame( $key, $title->getKey() );
 		$this->assertSame( $pKey, $title->getPrefixedDBKey() );
 		$this->assertSame( $pText, $title->getPrefixedText() );
-		$this->assertSame( $fragment, $title->getFragment() );
-		$this->assertSame( $ns, $title->getNamespaceId() );
-		$namespace = $title->getNamespace();
-		$this->assertInstanceOf( TitleNamespace::class, $namespace );
-		$this->assertSame( $ns, $namespace->getId() );
+		$this->assertSame( $fragment, $title->getFragment() ?: null );
+		$this->assertSame( $ns, $title->getNamespace() );
+
+		// LinkTarget tests
+		$this->assertSame( '', $title->getInterwiki() );
+		$this->assertSame( $ns, $title->getNamespace() );
+		$this->assertSame( $key, $title->getDBKey() );
+		$this->assertSame( $fragment ?? '', $title->getFragment() );
 	}
 
 	public function provideBasics() {
-		$ns0 = new TitleNamespace( 0, new MockSiteConfig( [] ) );
-		$ns2 = new TitleNamespace( 2, new MockSiteConfig( [] ) );
 		return [
-			'Basic article' => [ [ 'Basic_page', 0 ], 'Basic_page', 'Basic_page', 'Basic page', null, 0 ],
+			'Basic article' => [ [ 'Basic_page', 0, '' ], 'Basic_page', 'Basic_page', 'Basic page', null, 0 ],
 			'User-namespace page' => [
-				[ 'Basic_page', 2 ], 'Basic_page', 'User:Basic_page', 'User:Basic page', null, 2
+				[ 'Basic_page', 2, 'User' ], 'Basic_page', 'User:Basic_page', 'User:Basic page', null, 2
 			],
 			'With fragment' => [
-				[ 'Basic_page', 0, 'frag' ], 'Basic_page', 'Basic_page', 'Basic page', 'frag', 0
-			],
-
-			'Basic article with TitleNamespace' => [
-				[ 'Basic_page', $ns0 ], 'Basic_page', 'Basic_page', 'Basic page', null, 0
-			],
-			'User-namespace page with TitleNamespace' => [
-				[ 'Basic_page', $ns2 ], 'Basic_page', 'User:Basic_page', 'User:Basic page', null, 2
+				[ 'Basic_page', 0, '', 'frag' ], 'Basic_page', 'Basic_page', 'Basic page', 'frag', 0
 			],
 		];
 	}
@@ -65,18 +66,24 @@ class TitleTest extends \PHPUnit\Framework\TestCase {
 	private function getMockSiteConfig( string $lang = 'en' ) {
 		$siteConfig = $this->getMockBuilder( MockSiteConfig::class )
 			->setConstructorArgs( [ [] ] )
-			->onlyMethods( [ 'lang', 'namespaceCase', 'specialPageLocalName' ] )
+			->onlyMethods( [ 'langBcp47', 'namespaceCase', 'specialPageLocalName', 'interwikiMap' ] )
 			->getMock();
 		$siteConfig->method( 'namespaceCase' )->willReturnCallback( static function ( $ns ) {
 			return $ns === 15 ? 'case-sensitive' : 'first-letter';
 		} );
-		$siteConfig->method( 'lang' )->willReturn( $lang );
+		$siteConfig->method( 'langBcp47' )->willReturn( new Bcp47CodeValue( $lang ) );
 		$siteConfig->method( 'specialPageLocalName' )->willReturnCallback( static function ( $alias ) {
 			if ( $alias === 'DoesNotExist' ) {
 				return null;
 			}
 			return strtoupper( $alias );
 		} );
+		$siteConfig->method( 'interwikiMap' )->willReturn( [
+			'remotetestiw' => [
+				'prefix' => 'remotetestiw',
+				'url' => 'http://example.com/$1',
+			],
+		] );
 
 		return $siteConfig;
 	}
@@ -85,16 +92,21 @@ class TitleTest extends \PHPUnit\Framework\TestCase {
 	 * @covers ::newFromText
 	 * @dataProvider provideNewFromText
 	 */
-	public function testNewFromText( $args, $key, $ns, $fragment, $lang = 'en' ) {
-		array_splice( $args, 1, 0, [ $this->getMockSiteConfig( $lang ) ] );
+	public function testNewFromText( $args, $key, $ns, $fragment, $lang = null, $interwiki = '', $rawKey = null ) {
+		array_splice( $args, 1, 0, [ $this->getMockSiteConfig( $lang ?? 'en' ) ] );
 		$title = Title::newFromText( ...$args );
 		$this->assertSame( $key, $title->getKey() );
-		$this->assertSame( $ns, $title->getNamespaceId() );
-		$this->assertSame( $fragment, $title->getFragment() );
+		$this->assertSame( $ns, $title->getNamespace() );
+		$this->assertSame( $fragment, $title->getFragment() ?: null );
+
+		// LinkTarget tests
+		$this->assertSame( $interwiki, $title->getInterwiki() );
+		$this->assertSame( $ns, $title->getNamespace() );
+		$this->assertSame( $rawKey ?? $key, $title->getDBKey() );
+		$this->assertSame( $fragment ?? '', $title->getFragment() );
 	}
 
 	public function provideNewFromText() {
-		$ns2 = new TitleNamespace( 2, new MockSiteConfig( [] ) );
 		$x255 = str_repeat( 'X', 255 );
 		$x512 = str_repeat( 'X', 512 );
 		$poo63 = str_repeat( '💩', 63 );
@@ -105,7 +117,6 @@ class TitleTest extends \PHPUnit\Framework\TestCase {
 			'Default NS, overridden' => [ [ 'File:Foo bar', 2 ], 'Foo_bar', 6, null ],
 			'Default NS, overridden to main' => [ [ ':Foo bar', 2 ], 'Foo_bar', 0, null ],
 			'Default NS, overridden to not-main' => [ [ ':File:Foo bar', 2 ], 'Foo_bar', 6, null ],
-			'Default NS (TitleNamespace)' => [ [ 'Foo bar', $ns2 ], 'Foo_bar', 2, null ],
 			'With fragment' => [ [ 'User:Basic page#frag#ment' ], 'Basic_page', 2, 'frag#ment' ],
 			'Should normalize fragment' => [ [ 'User:Basic page#frag ment' ], 'Basic_page', 2, 'frag_ment' ],
 
@@ -148,7 +159,10 @@ class TitleTest extends \PHPUnit\Framework\TestCase {
 			[ [ 'A \'B\'' ], 'A_\'B\'', 0, null ],
 			[ [ '.com' ], '.com', 0, null ],
 			[ [ '~' ], '~', 0, null ],
-			[ [ '#' ], '', 0, '' ],
+			// Parsoid had historically differentiated between '' and '#'
+			// as a title, but core does not distinguish between these two
+			// cases of an "empty' title.
+			[ [ '#' ], '', 0, null ],
 			[ [ 'Test#Abc' ], 'Test', 0, 'Abc' ],
 			[ [ '"' ], '"', 0, null ],
 			[ [ '\'' ], '\'', 0, null ],
@@ -211,6 +225,16 @@ class TitleTest extends \PHPUnit\Framework\TestCase {
 			[ [ 'User_Talk:::1' ], '0:0:0:0:0:0:0:1', 3, null ],
 			[ [ 'User_talk:::1' ], '0:0:0:0:0:0:0:1', 3, null ],
 			[ [ 'User_talk:::1/24' ], '0:0:0:0:0:0:0:1/24', 3, null ],
+			// Interwiki link, with prefix: note that we put these in the
+			// main namespace, and the "dbkey" contains everything after the
+			// interwiki prefix, including the "namespace"
+			[ [ 'remotetestiw:User:Bar' ], 'remotetestiw:User:Bar', 0, null, null, 'remotetestiw', 'User:Bar' ],
+			[ [ 'remotetestiw:User:Bar#Foo' ], 'remotetestiw:User:Bar', 0, 'Foo', null, 'remotetestiw', 'User:Bar' ],
+			// remotetestiw in user (T329690)
+			[ [ 'remotetestiw:', 2 ], 'remotetestiw:', 2, null, null, 'remotetestiw', '' ],
+			// Colons in talk namespaces (T332903)
+			// phpcs:ignore Generic.Files.LineLength.TooLong
+			[ [ 'Talk:2024:Expressions of Interest/Wikimania 2024 Istanbul, Türkiye' ], '2024:Expressions_of_Interest/Wikimania_2024_Istanbul,_Türkiye', 1, null ],
 		];
 	}
 
@@ -279,8 +303,6 @@ class TitleTest extends \PHPUnit\Framework\TestCase {
 			// Note: Commented out because they are not marked invalid by the PHP test as
 			// Title::newFromText runs Sanitizer::decodeCharReferencesAndNormalize first.
 			// 'A &eacute; B',
-			// 'A &#233; B',
-			// 'A &#x00E9; B',
 			// Subject of NS_TALK does not roundtrip to NS_MAIN
 			[ 'Talk:File:Example.svg', 'title-invalid-talk-namespace' ],
 			// Directory navigation

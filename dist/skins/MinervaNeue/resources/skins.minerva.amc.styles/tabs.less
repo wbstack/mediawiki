@@ -3,24 +3,19 @@
 	overflow-x: auto;
 
 	.minerva__tab {
-		font-size: @taglineFontSize;
 		margin: 0 10px 0 0;
-		color: @colorGray5;
-		font-weight: bold;
 		padding-bottom: 6px;
 		display: inline-block;
 
-		&:visited,
-		&:hover,
-		&:active {
+		.minerva__tab-text {
+			font-size: @font-size-tag-line;
+			font-weight: bold;
+			color: @color-subtle;
 			text-decoration: none;
 		}
 
-		&.new,
-		&.new:visited,
-		&.new:hover,
-		&.new:active {
-			color: @color-link-new;
+		&.new .minerva__tab-text {
+			color: @color-link-red;
 		}
 
 		&:last-child {
@@ -29,7 +24,7 @@
 
 		// note core doesn't use BEM.
 		&.selected {
-			border-bottom: (@pageActionBorder * 2) solid @colorGray5;
+			border-bottom: @border-width-thick @border-style-base #54595d;
 		}
 	}
 }

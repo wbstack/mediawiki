@@ -1,12 +1,12 @@
 {
-	"openapi": "3.0.3",
+	"openapi": "3.1.0",
 	"info": {
 		"title": "Wikibase REST API",
-		"version": "0.1",
+		"version": "1.1",
 		"description": "OpenAPI definition of Wikibase REST API",
 		"contact": {
 			"name": "Wikimedia Deutschland - Wikibase Product Platform Team",
-			"url": "https://phabricator.wikimedia.org/project/board/5771/"
+			"url": "https://phabricator.wikimedia.org/project/board/6692/"
 		},
 		"license": {
 			"name": "GNU General Public License v2.0 or later",
@@ -43,6 +43,46 @@
 			}
 		},
 		{
+			"name": "sitelinks",
+			"description": "Wikibase Item Sitelinks",
+			"externalDocs": {
+				"description": "Wikibase Data Model - Sitelinks",
+				"url": "https://www.mediawiki.org/wiki/Wikibase/DataModel#Sitelinks"
+			}
+		},
+		{
+			"name": "properties",
+			"description": "Wikibase Properties",
+			"externalDocs": {
+				"description": "Wikibase Data Model - Properties",
+				"url": "https://www.mediawiki.org/wiki/Wikibase/DataModel#Properties"
+			}
+		},
+		{
+			"name": "labels",
+			"description": "Wikibase Labels",
+			"externalDocs": {
+				"description": "Wikibase Data Model - Terms",
+				"url": "https://www.mediawiki.org/wiki/Wikibase/DataModel#EntityDescriptions_of_Items_and_Properties"
+			}
+		},
+		{
+			"name": "descriptions",
+			"description": "Wikibase Descriptions",
+			"externalDocs": {
+				"description": "Wikibase Data Model - Terms",
+				"url": "https://www.mediawiki.org/wiki/Wikibase/DataModel#EntityDescriptions_of_Items_and_Properties"
+			}
+		},
+		{
+			"name": "aliases",
+			"description": "Wikibase Aliases",
+			"externalDocs": {
+				"description": "Wikibase Data Model - Terms",
+				"url": "https://www.mediawiki.org/wiki/Wikibase/DataModel#EntityDescriptions_of_Items_and_Properties"
+			}
+		},
+		{
 			"name": "statements",
 			"description": "Wikibase Statements",
 			"externalDocs": {
@@ -50,5 +90,8 @@
 				"url": "https://www.mediawiki.org/wiki/Wikibase/DataModel#Statements"
 			}
 		}
+	],
+	"servers": [
+		{ "url": "https://wikibase.example/w/rest.php/wikibase/v1" }
 	]
 }

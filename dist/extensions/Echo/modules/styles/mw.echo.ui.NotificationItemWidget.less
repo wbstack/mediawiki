@@ -1,3 +1,4 @@
+@import 'mediawiki.skin.variables.less';
 @import 'mediawiki.mixins.less';
 @import '../echo.variables.less';
 @import '../echo.mixins.less';
@@ -9,8 +10,10 @@
 	white-space: normal;
 	padding: 0.8em 1em 0.5em 1em;
 	box-sizing: border-box;
-	border: 1px solid #c8ccd1;
-	border-bottom: 0;
+
+	&:not( :last-child ) {
+		border-bottom: @border-width-base @border-style-base @border-color-subtle;
+	}
 
 	&:not( [ href ] ) {
 		// Items without a primary URL are not clickable
@@ -22,26 +25,35 @@
 		cursor: inherit;
 	}
 
-	&:hover {
-		text-decoration: none;
-		background-color: #ececec;
-	}
-
 	&:focus {
 		text-decoration: none;
-		box-shadow: inset 0 0 0 2px @color-primary;
-		outline: 0;
+		box-shadow: @box-shadow-inset-medium @box-shadow-color-progressive--focus;
+		outline: @outline-base--focus;
 	}
 
-	&:last-child {
-		border-bottom: 1px solid #c8ccd1;
+	&:hover {
+		text-decoration: none;
+		// FIXME: Non-standard design token. Replace with a standard token and revise skin-theme rules.
+		background-color: #ececec;
+
+		.skin-theme-clientpref-night & {
+			@media screen {
+				background-color: @background-color-interactive-subtle;
+			}
+		}
+
+		.skin-theme-clientpref-os & {
+			@media screen and ( prefers-color-scheme: dark ) {
+				background-color: @background-color-interactive-subtle;
+			}
+		}
 	}
 
 	&-unread {
 		background-color: @background-color-base;
 
 		&:hover {
-			background-color: #f8f9fa;
+			background-color: @background-color-interactive-subtle;
 		}
 	}
 
@@ -88,7 +100,7 @@
 			overflow-wrap: break-word;
 
 			&-header {
-				color: @notification-text-color;
+				color: @color-emphasized;
 			}
 
 			&-body {
@@ -135,16 +147,19 @@
 			}
 
 			&-menu {
-				.mw-echo-ui-mixin-hover-opacity();
 				vertical-align: bottom;
 				padding: 0;
+
+				> .oo-ui-buttonElement-button {
+					.mw-echo-ui-mixin-hover-opacity();
+				}
 			}
 
 			&-timestamp {
 				flex-grow: 1;
 				text-align: right;
 				vertical-align: bottom;
-				color: @color-base--emphasized;
+				color: @color-emphasized;
 				opacity: @opacity-low;
 				white-space: nowrap;
 			}
@@ -251,19 +266,13 @@
 	}
 
 	&-initiallyUnseen {
-		-webkit-animation-name: unseen-fadeout-to-read;
 		animation-name: unseen-fadeout-to-read;
-		-webkit-animation-duration: 0.5s;
 		animation-duration: 0.5s;
-		-webkit-animation-delay: 2s;
 		animation-delay: 2s;
-		-webkit-animation-timing-function: ease-out;
 		animation-timing-function: ease-out;
-		-webkit-animation-fill-mode: both;
 		animation-fill-mode: both;
 
 		&.mw-echo-ui-notificationItemWidget-unread {
-			-webkit-animation-name: unseen-fadeout-to-unread;
 			animation-name: unseen-fadeout-to-unread;
 		}
 	}
@@ -273,16 +282,6 @@
 	// These styles are in modules/nojs/ext.echo.notifications.less
 }
 
-@-webkit-keyframes unseen-fadeout-to-unread {
-	from {
-		background-color: @notification-background-unseen;
-	}
-
-	to {
-		background-color: @notification-background-unread;
-	}
-}
-
 @keyframes unseen-fadeout-to-unread {
 	from {
 		background-color: @notification-background-unseen;
@@ -290,16 +289,6 @@
 
 	to {
 		background-color: @notification-background-unread;
-	}
-}
-
-@-webkit-keyframes unseen-fadeout-to-read {
-	from {
-		background-color: @notification-background-unseen;
-	}
-
-	to {
-		background-color: @notification-background-read;
 	}
 }
 

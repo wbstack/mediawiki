@@ -18,7 +18,7 @@
  * @ingroup Actions
  */
 
-use MediaWiki\MainConfigNames;
+use MediaWiki\EditPage\EditPage;
 
 /**
  * Page edition handler (action=edit)
@@ -58,13 +58,6 @@ class EditAction extends FormlessAction {
 		// The editor should always see the latest content when starting their edit.
 		// Also to ensure cookie blocks can be set (T152462).
 		$out->disableClientCache();
-
-		if ( $this->getContext()->getConfig()->get( MainConfigNames::UseMediaWikiUIEverywhere ) ) {
-			$out->addModuleStyles( [
-				'mediawiki.ui.input',
-				'mediawiki.ui.checkbox',
-			] );
-		}
 
 		$article = $this->getArticle();
 		if ( $this->getHookRunner()->onCustomEditor( $article, $this->getUser() ) ) {

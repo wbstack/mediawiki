@@ -30,7 +30,7 @@ class ItemChangeTest extends EntityChangeTest {
 		return ItemChange::class;
 	}
 
-	public function itemChangeProvider() {
+	public static function itemChangeProvider() {
 		$changes = array_filter(
 			TestChanges::getChanges(),
 			function( EntityChange $change ) {
@@ -54,7 +54,7 @@ class ItemChangeTest extends EntityChangeTest {
 		$this->assertInstanceOf( Diff::class, $siteLinkDiff, 'getSiteLinkDiff must return a Diff' );
 	}
 
-	public function changeBackwardsCompatProvider() {
+	public static function changeBackwardsCompatProvider() {
 		//NOTE: Disable developer warnings that may get triggered by
 		//      the B/C code path.
 		AtEase::suppressWarnings();
@@ -80,10 +80,11 @@ class ItemChangeTest extends EntityChangeTest {
 				'links' => new DiffOpChange(
 					[ 'foowiki' => 'X', 'barwiki' => 'Y' ],
 					[ 'barwiki' => 'Y', 'foowiki' => 'X' ]
-				)
+				),
 			] );
 
 			// make sure we got the right key for sitelinks
+			// phpcs:ignore MediaWiki.Usage.ForbiddenFunctions.assert
 			assert( $diff->getSiteLinkDiff() !== null );
 
 			//NOTE: ItemChange's constructor may or may not already fix the bad diff.

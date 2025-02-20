@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"multimediaviewer-optin-pref": "De <span class=\"plainlinks\">[https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:Media_Viewer/About Media Viewer]</span> aktivéieren",
@@ -28,12 +29,6 @@
 	"multimediaviewer-restriction-ihl": "Op dësem Bild si Symboler déi duerch dat internationaalt humanitärt Recht geschützt sinn.",
 	"multimediaviewer-restriction-insignia": "Op dësem Bild sinn offiziell Logoen déi eventuell den Objet vu rechtleche Limitatiounen si kéinten.",
 	"multimediaviewer-restriction-nazi": "Op dësem Bild si Nazi- oder aner faschistesch Symboler déi an eenzele Länner kéinte verbuede sinn.",
-	"multimediaviewer-about-mmv": "Iwwer dësen Interface",
-	"multimediaviewer-optout-mmv": "Media Viewer ausschalten",
-	"multimediaviewer-optin-mmv": "Media Viewer aktivéieren",
-	"multimediaviewer-optout-pending-mmv": "Media Viewer desaktivéieren",
-	"multimediaviewer-optin-pending-mmv": "Media Viewer aktivéieren",
-	"multimediaviewer-optin-help": "Media Viewer gëtt benotzt fir Biller ze weisen.",
 	"multimediaviewer-geolocation": "Plaz: $1",
 	"multimediaviewer-reuse-link": "Dëse Fichier deelen oder abannen",
 	"multimediaviewer-reuse-loading-placeholder": "Lueden...",
@@ -71,18 +66,15 @@
 	"multimediaviewer-next-image-alt-text": "Nächst Bild weisen",
 	"multimediaviewer-prev-image-alt-text": "Viregt Bild weisen",
 	"multimediaviewer-title-popup-text": "Beschreiwung",
-	"multimediaviewer-credit-popup-text": "Informatioun iwwer den Auteur an d'Quell",
+	"multimediaviewer-credit-popup-text": "Informatiounen iwwer den Auteur an d'Quell",
 	"multimediaviewer-title-popup-text-more": "Kompletten Beschreiwung weisen",
 	"multimediaviewer-credit-popup-text-more": "Weist all Informatiounen iwwer den Auteur an d'Quell",
 	"multimediaviewer-download-attribution-cta-header": "Dir musst eng Referenz op den Auteur maachen",
 	"multimediaviewer-download-attribution-cta": "Weist mir wéi",
+	"multimediaviewer-copy-button": "Kopéieren",
 	"multimediaviewer-reuse-warning-deletion": "Et gouf virgeschloen dëse Fichier ze läschen.",
 	"multimediaviewer-reuse-warning-nonfree": "Dëse Fichier huet keng fräi Lizenz.",
 	"multimediaviewer-reuse-warning-noattribution": "Dëse Fichier huet keng Informatiounen iwwer den Auteur.",
-	"multimediaviewer-options-dialog-header": "Media Viewer ausschalten?",
-	"multimediaviewer-options-learn-more": "Fir méi ze wëssen",
-	"multimediaviewer-option-submit-button": "Media Viewer ausschalten",
-	"multimediaviewer-option-cancel-button": "Ofbriechen",
 	"multimediaviewer-disable-confirmation-header": "Dir hutt de Media Viewer ausgeschalt",
 	"multimediaviewer-enable-dialog-header": "Media Viewer aschalten?",
 	"multimediaviewer-enable-submit-button": "Media Viewer aktivéieren",

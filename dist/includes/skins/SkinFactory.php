@@ -84,7 +84,7 @@ class SkinFactory {
 	 * @param true|null $skippable Whether the skin is skippable and should be hidden
 	 *   from user preferences. By default, this is determined based by $wgSkipSkins.
 	 */
-	public function register( $name, $displayName, $spec, bool $skippable = null ) {
+	public function register( $name, $displayName, $spec, ?bool $skippable = null ) {
 		if ( !is_callable( $spec ) ) {
 			if ( is_array( $spec ) ) {
 				if ( !isset( $spec['args'] ) ) {
@@ -118,6 +118,7 @@ class SkinFactory {
 	 * @return array
 	 */
 	public function getSkinNames() {
+		wfDeprecated( __METHOD__, '1.37' );
 		return $this->displayNames;
 	}
 
@@ -177,9 +178,12 @@ class SkinFactory {
 	/**
 	 * Return options provided for a given skin name
 	 *
+	 * For documentation about keys you can expect to exist,
+	 * and their default values, refer to the Skin constructor.
+	 *
 	 * @since 1.38
 	 * @param string $name Name of the skin you want options from
-	 * @return array Skin options passed into constructor
+	 * @return array
 	 */
 	public function getSkinOptions( string $name ): array {
 		$skin = $this->makeSkin( $name );

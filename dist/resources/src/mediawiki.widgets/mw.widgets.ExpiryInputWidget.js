@@ -8,25 +8,26 @@
 ( function () {
 
 	/**
-	 * Creates a mw.widgets.ExpiryWidget object.
+	 * @classdesc Expiry widget.
 	 *
 	 * @class mw.widgets.ExpiryWidget
 	 * @extends OO.ui.Widget
 	 *
 	 * @constructor
+	 * @description Create a mw.widgets.ExpiryWidget object.
 	 * @param {Object} [config] Configuration options
 	 */
 	mw.widgets.ExpiryWidget = function ( config ) {
-		var RFC2822 = 'ddd, DD MMM YYYY HH:mm:ss [GMT]';
+		const RFC2822 = 'ddd, DD MMM YYYY HH:mm:ss [GMT]';
 
 		// Config initialization
-		config = $.extend( {}, config );
+		config = Object.assign( {}, config );
 
 		this.relativeField = new config.RelativeInputClass( config.relativeInput );
 		this.relativeField.$element.addClass( 'mw-widget-ExpiryWidget-relative' );
 
 		// Parent constructor
-		mw.widgets.ExpiryWidget.parent.call( this, config );
+		mw.widgets.ExpiryWidget.super.call( this, config );
 
 		// Properties
 		this.inputSwitch = new OO.ui.ButtonSelectWidget( {
@@ -55,7 +56,7 @@
 		// Events
 
 		// Toggle the visible inputs.
-		this.inputSwitch.on( 'choose', function ( event ) {
+		this.inputSwitch.on( 'choose', ( event ) => {
 			switch ( event.getData() ) {
 				case 'date':
 					this.dateTimeField.toggle( true );
@@ -66,13 +67,11 @@
 					this.relativeField.toggle( true );
 					break;
 			}
-		}.bind( this ) );
+		} );
 
 		// When the date time field update, update the relative
 		// field.
-		this.dateTimeField.on( 'change', function ( value ) {
-			var datetime;
-
+		this.dateTimeField.on( 'change', ( value ) => {
 			// Do not alter the visible input.
 			if ( this.relativeField.isVisible() ) {
 				return;
@@ -84,7 +83,7 @@
 				return;
 			}
 
-			datetime = moment( value );
+			const datetime = moment( value );
 
 			// If the datetime is invlaid for some reason, reset the relative field.
 			if ( !datetime.isValid() ) {
@@ -93,13 +92,11 @@
 
 			// Set the relative field value. The field only accepts English strings.
 			this.relativeField.setValue( datetime.utc().locale( 'en' ).format( RFC2822 ) );
-		}.bind( this ) );
+		} );
 
 		// When the relative field update, update the date time field if it's a
 		// value that moment understands.
-		this.relativeField.on( 'change', function ( event ) {
-			var datetime;
-
+		this.relativeField.on( 'change', ( event ) => {
 			// Emit a change event for this widget.
 			this.emit( 'change', event );
 
@@ -110,14 +107,14 @@
 
 			// Parsing of free text field may fail, so always check if the date is
 			// valid.
-			datetime = moment( event );
+			const datetime = moment( event );
 
 			if ( datetime.isValid() ) {
 				this.dateTimeField.setValue( datetime.utc().toISOString() );
 			} else {
 				this.dateTimeField.setValue( undefined );
 			}
-		}.bind( this ) );
+		} );
 
 		// Initialization
 		this.$element
@@ -141,9 +138,9 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.ExpiryWidget.static.reusePreInfuseDOM = function ( node, config ) {
-		var $relativeElement = $( node ).find( '.mw-widget-ExpiryWidget-relative' );
+		const $relativeElement = $( node ).find( '.mw-widget-ExpiryWidget-relative' );
 
-		config = mw.widgets.ExpiryWidget.parent.static.reusePreInfuseDOM( node, config );
+		config = mw.widgets.ExpiryWidget.super.static.reusePreInfuseDOM( node, config );
 
 		// eslint-disable-next-line no-jquery/no-class-state
 		if ( $relativeElement.hasClass( 'oo-ui-textInputWidget' ) ) {
@@ -165,7 +162,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.ExpiryWidget.static.gatherPreInfuseState = function ( node, config ) {
-		var state = mw.widgets.ExpiryWidget.parent.static.gatherPreInfuseState( node, config );
+		const state = mw.widgets.ExpiryWidget.super.static.gatherPreInfuseState( node, config );
 
 		state.relativeInput = config.RelativeInputClass.static.gatherPreInfuseState(
 			$( node ).find( '.mw-widget-ExpiryWidget-relative' ),
@@ -179,7 +176,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.ExpiryWidget.prototype.restorePreInfuseState = function ( state ) {
-		mw.widgets.ExpiryWidget.parent.prototype.restorePreInfuseState.call( this, state );
+		mw.widgets.ExpiryWidget.super.prototype.restorePreInfuseState.call( this, state );
 		this.relativeField.restorePreInfuseState( state.relativeInput );
 	};
 
@@ -187,7 +184,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.ExpiryWidget.prototype.setDisabled = function ( disabled ) {
-		mw.widgets.ExpiryWidget.parent.prototype.setDisabled.call( this, disabled );
+		mw.widgets.ExpiryWidget.super.prototype.setDisabled.call( this, disabled );
 		this.relativeField.setDisabled( disabled );
 
 		if ( this.inputSwitch ) {

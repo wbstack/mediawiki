@@ -2,7 +2,6 @@
 	"@metadata": {
 		"authors": []
 	},
-	"twocolconflict": "TwoColConflict",
 	"twocolconflict-desc": "Uporedo prikazuje ekran za rešavanje sukoba izmena",
 	"twocolconflictprovidesubmittedtext": "Sukob izmena:",
 	"twocolconflict-beta-feature-message": "Sukob izmena baziran na paragrafima",

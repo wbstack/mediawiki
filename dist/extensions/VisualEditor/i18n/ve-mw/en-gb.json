@@ -8,10 +8,10 @@
 			"Jdforrester",
 			"Ohvet",
 			"Pierpao",
+			"Reedy",
 			"Robin Owain",
 			"Rodrigue",
-			"Shirayuki",
-			"Reedy"
+			"Shirayuki"
 		]
 	},
 	"visualeditor-dialog-transclusion-template-title-modifier": "Template documentation and [//www.mediawiki.org/wiki/Special:MyLanguage/Manual:Glossary#Parameter parameter] names (if existing) are not available when editing templates utilising nested syntax or modifiers, such as [//www.mediawiki.org/wiki/Special:MyLanguage/Help:Substitution subst]."

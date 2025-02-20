@@ -12,8 +12,7 @@ use Wikimedia\Rdbms\ILoadBalancer;
  * @since 1.39
  */
 class LocalSerialProvider extends DBSerialProvider {
-	/** @var ILoadBalancer */
-	private $lb;
+	private ILoadBalancer $lb;
 
 	/**
 	 * @param array $config
@@ -28,7 +27,7 @@ class LocalSerialProvider extends DBSerialProvider {
 	}
 
 	protected function getDB() {
-		return $this->lb->getConnectionRef(
+		return $this->lb->getConnection(
 			DB_PRIMARY,
 			[],
 			false,

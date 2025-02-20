@@ -21,11 +21,13 @@
 
 namespace MediaWiki\Skins\Vector\FeatureManagement\Requirements;
 
-use CentralIdLookup;
-use Config;
+use MediaWiki\Config\Config;
+use MediaWiki\Extension\BetaFeatures\BetaFeatures;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Skins\Vector\Constants;
 use MediaWiki\Skins\Vector\FeatureManagement\Requirement;
-use User;
-use WebRequest;
+use MediaWiki\User\UserIdentity;
 
 /**
  * The `OverridableConfigRequirement` allows us to define requirements that can override
@@ -37,8 +39,7 @@ use WebRequest;
  *     $config,
  *     $user,
  *     $request,
- *     $centralIdLookup,
- *     'configName',
+ *     MainConfigNames::Sitename,
  *     'requirementName',
  *     'overrideName',
  *     'configTestName',
@@ -52,9 +53,9 @@ use WebRequest;
  * and config object for the current state and returns it. Contrast to:
  *
  * ```lang=php
- * $featureManager->registerRequirement(
- *   'Foo',
- *   $config->get( 'Sitename' )
+ * $featureManager->registerSimpleRequirement(
+ *   'requirementName',
+ *   (bool)$config->get( MainConfigNames::Sitename )
  * );
  * ```
  *
@@ -65,80 +66,40 @@ use WebRequest;
  *
  * @package MediaWiki\Skins\Vector\FeatureManagement\Requirements
  */
-final class OverridableConfigRequirement implements Requirement {
+class OverridableConfigRequirement implements Requirement {
 
-	/**
-	 * @var Config
-	 */
-	private $config;
+	private Config $config;
 
-	/**
-	 * @var User
-	 */
-	private $user;
+	private UserIdentity $user;
 
-	/**
-	 * @var WebRequest
-	 */
-	private $request;
+	private string $configName;
 
-	/**
-	 * @var CentralIdLookup|null
-	 */
-	private $centralIdLookup;
+	private string $requirementName;
 
-	/**
-	 * @var string
-	 */
-	private $configName;
-
-	/**
-	 * @var string
-	 */
-	private $requirementName;
-
-	/**
-	 * @var string
-	 */
-	private $overrideName;
-
-	/**
-	 * @var string|null
-	 */
-	private $configTestName;
+	private OverrideableRequirementHelper $helper;
 
 	/**
 	 * This constructor accepts all dependencies needed to determine whether
 	 * the overridable config is enabled for the current user and request.
 	 *
 	 * @param Config $config
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @param WebRequest $request
-	 * @param CentralIdLookup|null $centralIdLookup
 	 * @param string $configName Any `Config` key. This name is used to query `$config` state.
 	 * @param string $requirementName The name of the requirement presented to FeatureManager.
-	 * @param string|null $overrideName The name of the override presented to FeatureManager, i.e. query parameter.
-	 *   When not set defaults to lowercase version of config key.
-	 * @param string|null $configTestName The name of the AB test config presented to FeatureManager if applicable.
 	 */
 	public function __construct(
 		Config $config,
-		User $user,
+		UserIdentity $user,
 		WebRequest $request,
-		?CentralIdLookup $centralIdLookup,
 		string $configName,
-		string $requirementName,
-		?string $overrideName = null,
-		?string $configTestName = null
+		string $requirementName
 	) {
 		$this->config = $config;
 		$this->user = $user;
-		$this->request = $request;
-		$this->centralIdLookup = $centralIdLookup;
 		$this->configName = $configName;
 		$this->requirementName = $requirementName;
-		$this->overrideName = $overrideName === null ? strtolower( $configName ) : $overrideName;
-		$this->configTestName = $configTestName;
+		$this->helper = new OverrideableRequirementHelper( $request, $requirementName );
 	}
 
 	/**
@@ -156,28 +117,9 @@ final class OverridableConfigRequirement implements Requirement {
 	 * @inheritDoc
 	 */
 	public function isMet(): bool {
-		// Check query parameter.
-		if ( $this->request->getCheck( $this->overrideName ) ) {
-			return $this->request->getBool( $this->overrideName );
-		}
-
-		// Check if there's config for AB testing.
-		if (
-			!empty( $this->configTestName ) &&
-			(bool)$this->config->get( $this->configTestName ) &&
-			$this->user->isRegistered()
-		) {
-			$id = null;
-			if ( $this->centralIdLookup ) {
-				$id = $this->centralIdLookup->centralIdFromLocalUser( $this->user );
-			}
-
-			// $id will be 0 if the central ID lookup failed.
-			if ( !$id ) {
-				$id = $this->user->getId();
-			}
-
-			return $id % 2 === 0;
+		$isMet = $this->helper->isMet();
+		if ( $isMet !== null ) {
+			return $isMet;
 		}
 
 		// If AB test is not enabled, fallback to checking config state.
@@ -188,6 +130,7 @@ final class OverridableConfigRequirement implements Requirement {
 			$thisConfig = [
 				'logged_in' => $thisConfig,
 				'logged_out' => $thisConfig,
+				'beta' => $thisConfig,
 			];
 		} elseif ( array_key_exists( 'default', $thisConfig ) ) {
 			$thisConfig = [
@@ -197,12 +140,32 @@ final class OverridableConfigRequirement implements Requirement {
 			$thisConfig = [
 				'logged_in' => $thisConfig['logged_in'] ?? false,
 				'logged_out' => $thisConfig['logged_out'] ?? false,
+				'beta' => $thisConfig['beta'] ?? false,
 			];
 		}
 
 		// Fallback to config.
-		return array_key_exists( 'default', $thisConfig ) ?
+		$userConfig = array_key_exists( 'default', $thisConfig ) ?
 			$thisConfig[ 'default' ] :
 			$thisConfig[ $this->user->isRegistered() ? 'logged_in' : 'logged_out' ];
+		// Check if use has enabled beta features
+		$betaFeatureConfig = array_key_exists( 'beta', $thisConfig ) && $thisConfig[ 'beta' ];
+		$betaFeatureEnabled = in_array( $this->configName, Constants::VECTOR_BETA_FEATURES ) &&
+			$betaFeatureConfig && $this->isVector2022BetaFeatureEnabled();
+		// If user has enabled beta features, use beta config
+		return $betaFeatureEnabled ? $betaFeatureConfig : $userConfig;
+	}
+
+	/**
+	 * Check if user has enabled the Vector 2022 beta features
+	 * @return bool
+	 */
+	public function isVector2022BetaFeatureEnabled(): bool {
+		return ExtensionRegistry::getInstance()->isLoaded( 'BetaFeatures' ) &&
+			/* @phan-suppress-next-line PhanUndeclaredClassMethod */
+			BetaFeatures::isFeatureEnabled(
+			$this->user,
+			Constants::VECTOR_2022_BETA_KEY
+		);
 	}
 }

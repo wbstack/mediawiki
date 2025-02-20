@@ -2,7 +2,7 @@
 
 namespace TwoColConflict\Html;
 
-use Html;
+use MediaWiki\Html\Html;
 use MessageLocalizer;
 use OOUI\HtmlSnippet;
 use OOUI\IconWidget;
@@ -14,23 +14,12 @@ use TwoColConflict\SplitConflictUtils;
  */
 class CoreUiHintHtml {
 
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
+	private MessageLocalizer $messageLocalizer;
 
-	/**
-	 * @param MessageLocalizer $messageLocalizer
-	 */
-	public function __construct(
-		MessageLocalizer $messageLocalizer
-	) {
+	public function __construct( MessageLocalizer $messageLocalizer ) {
 		$this->messageLocalizer = $messageLocalizer;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getHtml(): string {
 		$closeIcon = new IconWidget( [
 			'icon' => 'close',

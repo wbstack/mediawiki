@@ -13,7 +13,7 @@
 	"jsonconfig-edit-action-cancel": "Cancel",
 	"jsonconfig-edit-button-label": "Edit as table",
 	"jsonconfig-edit-dialog-error": "Unable to edit as a table: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Data does not match the schema",
+	"jsonconfig-edit-dialog-error-data-invalid": "Data does not match the schema",
 	"jsonconfig-edit-dialog-error-data-missing": "JSON <code>data</code> property is missing or not an array",
 	"jsonconfig-edit-dialog-error-data-too-large": "Dataset is too large to edit as a table",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Each field must have a name",
@@ -54,6 +54,8 @@
 	"jsonconfig-type-name-number": "number",
 	"jsonconfig-type-abbr-boolean": "(B)",
 	"jsonconfig-type-name-boolean": "boolean",
+	"jsonconfig-use-category": "Pages using the JsonConfig extension",
+	"jsonconfig-use-category-desc": "These pages use the <code>mw.ext.data.get</code> method provided by the [[:mw:Extension:JsonConfig|JsonConfig]] extension. The <code>mw.ext.data.get</code> method is considered expensive.",
 	"jsonconfig-license": "Data available under $1.",
 	"jsonconfig-license-not-set": "When you edit this page, you agree to release your contribution according to the license specified in the <code>licence</code> field.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
@@ -92,10 +94,11 @@
 	"jsonconfig-license-url-dl-de-by-1.0": "https://www.govdata.de/dl-de/by-1-0",
 	"jsonconfig-license-url-dl-de-by-2.0": "https://www.govdata.de/dl-de/by-2-0",
 	"jsonconfig-license-url-GeoNutzV": "https://www.gesetze-im-internet.de/geonutzv/__2.html",
-	"jsonconfig-license-copyrightwarning": "By saving changes, you agree to the [https://foundation.wikimedia.org/wiki/Terms_of_Use Terms of Use], and you irrevocably agree to release your contribution under [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "By saving changes, you agree to the [https://foundation.wikimedia.org/wiki/Terms_of_Use Terms of Use], and you irrevocably agree to release your contribution according to the license specified in the <code>licence</code> field.",
-	"jsonconfig-license-notice": "'''Note:''' When you edit this page, you agree to release your contribution under [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning": "By publishing changes, you agree to release your contribution according to the terms of the [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] license.",
+	"jsonconfig-license-copyrightwarning-license-unset": "By publishing changes, you agree to release your contribution according to the license specified in the <code>licence</code> field.",
+	"jsonconfig-license-notice": "'''Note:''' When you edit this page, you agree to release your contribution according to the terms of the [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] license.",
 	"jsonconfig-license-notice-license-unset": "'''Note:''' When you edit this page, you agree to release your contribution according to the license specified in the <code>licence</code> field.",
 	"right-jsonconfig-flush": "Manipulate JsonConfig via API",
-	"action-jsonconfig-flush": "manipulate JsonConfig via API"
+	"action-jsonconfig-flush": "manipulate JsonConfig via API",
+	"jsonconfig-blocked-page-creation": "The page title you have specified does not match any of the patterns configured for the JSONConfig extension for this wiki."
 }

@@ -1,12 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Soumaya",
-			"Amire80"
+			"Amire80",
+			"Soumaya"
 		]
 	},
 	"advancedsearch-desc": "D tõe n paama baoob sẽn yaa sõma n paase[[Special:Search]]",
 	"advancedsearch-options-pane-head": "Baoosg sẽn yaa sõma:",
+	"advancedsearch-options-pane-preview-list": "Baoosg sẽn yaa sasa wã",
 	"advancedsearch-optgroup-text": "Bao-y seb-neng ning sẽn be wã pʋgẽ",
 	"advancedsearch-optgroup-structure": "Dɩtaarã",
 	"advancedsearch-optgroup-files": "Dĩp-rãmbã la fotã",
@@ -25,6 +26,7 @@
 	"advancedsearch-field-fileh": "Dĩng-rãmbã sẽn yaa pixel",
 	"advancedsearch-field-sort": "Dɩk-y n ges-y",
 	"advancedsearch-field-preview-sort": "B sẽn pʋɩ-b ne$1",
+	"advancedsearch-help-general-instruction": "Sõsg sẽn be sõsg pʋgẽ$1",
 	"advancedsearch-help-plain": ";Description\n:Bõn-kãensã baooda sõsdã zug bɩ seb-gʋlsdã pʋgẽ.\n;Bɩ y bãng bũmb nins sẽn pʋgdã\n:* Y tõe n kẽnga gom-biis wʋsg pʋgẽ.\n:* B pa na n bao n bãng sõss nins sẽn be bãnã pʋgẽ wã ye.\n:* Tõe tɩ y na n paama sõss nins y sẽn bao n pa yãt ye.\n:* B rɩkda gom-bi-kãnga. Makr: Y sã n gʋls \"karo\" tɩ b bao n bãng bũmb ning sẽn yaa \"karo\" wã, y na n baoame me tɩ y bãng bũmb ning b sẽn yeel tɩ \"karo\". Gom-biig ning sẽn yitẽ wã yaa goam sẽn yaa toor fasɩ.\n;Sõng-y n ges-y\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Full text search]\n;Syntax -equivalent in the normal search\n:<code>sesame street car</code>",
 	"advancedsearch-help-phrase": "B sẽn wilg tɩ b yaa be be be\n:Bõn-naands pʋga baoosgo. B pa get b sẽn maand bũmb ninsã ye.\n;Bɩ y bãng bũmb nins sẽn pʋgdã\n: (b sẽn tõe n maan n wilg tɩ y pa tar sõssã bal n dat n sõsdã, ges makr ning sẽn be ka wã)\n:* Bɩ y welg sogs-kãensã ne kom bɩ zĩiga, wala: <code>\"good morning\"</code>, <code> \"hello friend!\"</code>.\n:* B pa na n ges sõss nins sẽn be sõssã pʋgẽ wã ye, la b pa na n tags sõss nins b sẽn gʋls ne sõssã ye (ka b sẽn mak sõssã la kom-n-taarã) ye.\n:* B sẽn baood bũmb ninsã pa wilgdẽ tɩ b pa segd n maan bũmb sẽn yaa sõma ye.\n:* Pa rɩkd gom-biis sẽn yitẽ ye.\n;Sõng-y n ges-y\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;Syntax -equivalent in the normal search\n:Words in quotation marks, for example <code>\"Begin at the beginning\"</code>.",
 	"advancedsearch-help-or": ";Description\n:Bɩ y yãgs sõss a yembr bɩ a yembr zugẽ.\n;Sõng-y n ges-y\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;Syntax-equivalent in the normal search\n:Words with <code>OR</code> in between them like <code>Laptop OR Notebook</code>.",
@@ -67,6 +69,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "b sẽn naanã daar",
 	"advancedsearch-namespaces-search-in": "Bao-y n bãng:",
 	"advancedsearch-namespaces-remember": "Tẽeg-y tɩ b yãk-y n na n bao n bãng-y bũmb ning sẽn na n yɩlẽ n bao n paase",
+	"advancedsearch-namespaces-pane-preview-list": "B sẽn tʋmd taab n dat n wilg b sẽn dat n maan bũmb ninsã",
 	"advancedsearch-namespaces-preset-all": "B fãa",
 	"advancedsearch-namespaces-preset-default": "Dɩlla sẽn pa tõe n maan bũmb ye",
 	"advancedsearch-namespaces-preset-general-help": "Sõng sẽn yaa kãseng",

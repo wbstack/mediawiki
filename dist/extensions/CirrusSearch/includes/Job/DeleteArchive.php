@@ -4,7 +4,8 @@ namespace CirrusSearch\Job;
 
 use CirrusSearch\Connection;
 use CirrusSearch\Updater;
-use Title;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 /**
  * Job wrapper for deleting pages from archive.
@@ -24,15 +25,15 @@ class DeleteArchive extends CirrusTitleJob {
 	 * @return bool
 	 */
 	protected function doJob() {
-		$archive = new \PageArchive( $this->title );
 		$docs = $this->params['docIds'];
 
 		// Remove page IDs that still have archived revs
-		foreach ( $archive->listRevisions() as $rev ) {
+		$archivedRevisionLookup = MediaWikiServices::getInstance()->getArchivedRevisionLookup();
+		foreach ( $archivedRevisionLookup->listRevisions( $this->title ) as $rev ) {
 			unset( $docs[$rev->ar_page_id] );
 		}
 
-		if ( empty( $docs ) ) {
+		if ( !$docs ) {
 			// If we have more deleted instances of the same title, no need to bother.
 			return true;
 		}

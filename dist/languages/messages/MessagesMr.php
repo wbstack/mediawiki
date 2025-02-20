@@ -1,8 +1,6 @@
 <?php
 /** Marathi (मराठी)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -137,6 +135,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'अविशिष्ट_पुर्ननिर्देशन' ],
 	'Recentchanges'             => [ 'अलीकडील_बदल' ],
 	'Recentchangeslinked'       => [ 'सांधलेलेअलिकडीलबदल' ],
+	'Renameuser'                => [ 'सदस्यपुर्नामितकरा' ],
 	'Revisiondelete'            => [ 'आवर्तनवगळा' ],
 	'Search'                    => [ 'शोधा' ],
 	'Shortpages'                => [ 'छोटी_पाने' ],
@@ -226,7 +225,7 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1अंश', '$1कणी', '$1पक्ष', '$1px' ],
 	'index'                     => [ '1', '__क्रमीत__', '__अनुक्रमीत__', '__INDEX__' ],
 	'int'                       => [ '0', 'इन्ट:', 'INT:' ],
-	'language'                  => [ '0', '#भाषा:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#भाषा', '#LANGUAGE' ],
 	'localday'                  => [ '1', 'स्थानिकदिवस', 'LOCALDAY' ],
 	'localday2'                 => [ '1', 'स्थानिकदिवस२', 'LOCALDAY2' ],
 	'localdayname'              => [ '1', 'स्थानिकदिवसनाव', 'LOCALDAYNAME' ],

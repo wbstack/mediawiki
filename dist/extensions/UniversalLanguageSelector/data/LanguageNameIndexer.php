@@ -24,6 +24,10 @@ if ( $IP === false ) {
 }
 require_once "$IP/maintenance/Maintenance.php";
 
+use MediaWiki\Extension\CLDR\LanguageNames;
+use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\MainConfigNames;
+
 class LanguageNameIndexer extends Maintenance {
 	public function __construct() {
 		parent::__construct();
@@ -33,10 +37,10 @@ class LanguageNameIndexer extends Maintenance {
 	}
 
 	public function execute() {
-		global $wgExtraLanguageNames;
-
 		// Avoid local configuration leaking to this script
-		$wgExtraLanguageNames = [];
+		if ( $this->getConfig()->get( MainConfigNames::ExtraLanguageNames ) !== [] ) {
+			$this->fatalError( 'You have entries in $wgExtraLanguageNames. Needs to be empty for this script.' );
+		}
 
 		$languageNames = [];
 		// Add languages from language-data
@@ -51,7 +55,8 @@ class LanguageNameIndexer extends Maintenance {
 		// Languages and their names in different languages from Names.php and the cldr extension
 		// This comes after $ulsLanguages so that for example the als/gsw mixup is using the code
 		// used in the Wikimedia world.
-		$mwLanguages = Language::fetchLanguageNames( null, 'all' );
+		$mwLanguages = $this->getServiceContainer()->getLanguageNameUtils()
+			->getLanguageNames( LanguageNameUtils::AUTONYMS, LanguageNameUtils::ALL );
 		foreach ( array_keys( $mwLanguages ) as $languageCode ) {
 			$languageNames[ $languageCode ] = LanguageNames::getNames( $languageCode, 0, 2 );
 		}
@@ -59,9 +64,6 @@ class LanguageNameIndexer extends Maintenance {
 		$buckets = [];
 		foreach ( $languageNames as $translations ) {
 			foreach ( $translations as $targetLanguage => $translation ) {
-				// Remove directionality markers used in Names.php: users are not
-				// going to type these.
-				$translation = str_replace( "\xE2\x80\x8E", '', $translation );
 				$translation = mb_strtolower( $translation );
 				$translation = trim( $translation );
 
@@ -76,7 +78,12 @@ class LanguageNameIndexer extends Maintenance {
 
 					$type = 'prefix';
 					$display = $translation;
-					if ( $index > 0 && count( $words ) > 1 ) {
+					if ( $index > 0 ) {
+						// Avoid creating infix entries for short strings like punctuation, articles, prepositions...
+						if ( mb_strlen( $word ) < 3 ) {
+							continue;
+						}
+
 						$type = 'infix';
 						$display = "$word — $translation";
 					}
@@ -91,8 +98,14 @@ class LanguageNameIndexer extends Maintenance {
 		// by people who search in English.
 		// To resolve this, some languages are added here locally.
 		$specialLanguages = [
+			// Abron / Brong / Bono (T369464)
+			'abr' => [ 'bono', 'brong' ],
 			// Catalan, sometimes searched as "Valencià"
 			'ca' => [ 'valencia' ],
+			// Compatibility with the old name and other Chinese varieties
+			'cdo' => [ 'chinese min dong' ],
+			// Older name, see T375891
+			'dtp' => [ 'bundu-liwan, dusun' ],
 			// Spanish, the transliteration of the autonym is often used for searching
 			'es' => [ 'castellano' ],
 			// Armenian, the transliteration of the autonym is often used for searching
@@ -101,12 +114,49 @@ class LanguageNameIndexer extends Maintenance {
 			'ka' => [ 'kartuli', 'qartuli' ],
 			// Japanese, the transliteration of the autonym is often used for searching
 			'ja' => [ 'nihongo', 'にほんご' ],
+			// Chiluvale (T368856)
+			'lue' => [ 'luvale, chi-' ],
+			// Tigrinya: variant names in Hebrew,
+			// to ensure they can be found in different spellings
+			'ti' => [
+				'טגריניה',
+				'טגרינית',
+				'טיגריניה',
+				'טיגרינית',
+				'תגריניה',
+				'תגרינית',
+				'תיגריניה',
+			],
+			// Tigre: variant names in Hebrew,
+			// to ensure they can be found in different spellings
+			'tig' => [
+				'טגרה',
+				'טגרית',
+				'טיגרה',
+				'תגרה',
+				'תגרית',
+				'תיגרה',
+				'תיגרית',
+			],
+			// Mon, renamed in core MediaWiki's Names.php (T352776)
+			'mnw' => [ 'ဘာသာ မန်' ],
+			// Palembang, also known as "Musi".
+			// Writing this as two words ensures that it has a unique key,
+			// so that Moore (mos), which is known as "musi" in one of the languages,
+			// can also be found
+			'mui' => [ 'musi palembang' ],
 			// Western Punjabi, doesn't start with the word "Punjabi" in any language
 			'pnb' => [ 'punjabi western' ],
+			// Tai Nuea (T367377)
+			'tdd' => [ 'ᥖᥭᥰᥖᥬᥳᥑᥨᥒᥰ' ],
+			// Waale (T368046) - support alternate spellings of the name
+			'wlx' => [ 'waali', 'waalii' ],
 			// Simplified and Traditional Chinese, because zh-hans and zh-hant
 			// are not mapped to any English name
 			'zh-hans' => [ 'chinese simplified' ],
 			'zh-hant' => [ 'chinese traditional' ],
+			// Compatibility with the old name and other Chinese varieties
+			'zh-min-nan' => [ 'chinese min nan' ],
 		];
 
 		foreach ( $specialLanguages as $targetLanguage => $translations ) {
@@ -144,6 +194,9 @@ class LanguageNameIndexer extends Maintenance {
 		$this->generateFile( $buckets );
 	}
 
+	/**
+	 * @return array
+	 */
 	private function getLanguageData() {
 		$file = __DIR__ . '/../lib/jquery.uls/src/jquery.uls.data.js';
 		$contents = file_get_contents( $file );
@@ -158,6 +211,9 @@ class LanguageNameIndexer extends Maintenance {
 		return $data;
 	}
 
+	/**
+	 * @param array $buckets
+	 */
 	private function generateFile( array $buckets ) {
 		$template = <<<'PHP'
 <?php

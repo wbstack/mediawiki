@@ -3,6 +3,7 @@
  * Find first paragraph that has text content, i.e. paragraphs that are not empty.
  * Keep in sync with MoveLeadParagraphTransform::identifyLeadParagraph().
  *
+ * @private
  * @param {jQuery} $body Where to search for paragraphs
  * @return {Node|null} The lead paragraph
  */
@@ -16,7 +17,7 @@ module.exports = function identifyLeadParagraph( $body ) {
 	// Keep in sync with MoveLeadParagraphTransform::isNonLeadParagraph()
 	function isNonLeadParagraph( node ) {
 		node = node.cloneNode( true );
-		var $node = $( node );
+		const $node = $( node );
 		// The paragraph itself can be an invisible template (T293834)
 		if ( $node.hasClass( 've-ce-focusableNode-invisible' ) ) {
 			return true;
@@ -29,9 +30,9 @@ module.exports = function identifyLeadParagraph( $body ) {
 		return true;
 	}
 
-	var $paragraphs = $body.children( 'p' );
-	for ( var i = 0; i < $paragraphs.length; i++ ) {
-		var p = $paragraphs[ i ];
+	const $paragraphs = $body.children( 'p' );
+	for ( let i = 0; i < $paragraphs.length; i++ ) {
+		const p = $paragraphs[ i ];
 		if ( !isNonLeadParagraph( p ) ) {
 			return p;
 		}

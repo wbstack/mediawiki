@@ -1,0 +1,25 @@
+{
+	"@metadata": {
+		"authors": [
+			"IJzeren Jan",
+			"Polda18"
+		]
+	},
+	"wikibase-dataitem": "Element Vikidanyh",
+	"wikibase-editlinks": "Praviti linky",
+	"wikibase-addlinkstitle": "Dodati medžujezyčne linky",
+	"wikibase-linkitem-addlinks": "Dodati linky",
+	"wikibase-linkitem-title": "Povezati s straniceju",
+	"wikibase-linkitem-linkpage": "Povezati s straniceju",
+	"wikibase-linkitem-selectlink": "Prosimo, izberite sajt i stranicu, ktoru hočete povezati s tutoju straniceju.",
+	"wikibase-linkitem-input-site": "Jezyk:",
+	"wikibase-linkitem-input-page": "Stranica:",
+	"wikibase-rc-hide-wikidata-hide": "Skryti",
+	"wikibase-rc-hide-wikidata-show": "Pokazati",
+	"wikibase-rcfilters-hide-wikibase-description": "Pravky proizhodeče iz Vikidanyh",
+	"unconnectedpages": "Stranice ne povezane s elementami",
+	"unconnectedpages-summary": "Tuta stranica sodrživaje spisok stranic, ktore ne sut povezane s nijednym elementom danyh (v imennyh prostorah, ktore poddrživajut povezanje elementov).",
+	"wikibase-unconnectedpages-submit": "Pokazati stranice",
+	"entityusage": "Upotrěba objektov",
+	"wikibase-otherprojects": "V drugyh projektah"
+}

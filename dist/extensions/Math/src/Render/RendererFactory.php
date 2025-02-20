@@ -2,15 +2,18 @@
 
 namespace MediaWiki\Extension\Math\Render;
 
+use InvalidArgumentException;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\Extension\Math\MathConfig;
 use MediaWiki\Extension\Math\MathLaTeXML;
 use MediaWiki\Extension\Math\MathMathML;
 use MediaWiki\Extension\Math\MathMathMLCli;
+use MediaWiki\Extension\Math\MathNativeMML;
 use MediaWiki\Extension\Math\MathRenderer;
 use MediaWiki\Extension\Math\MathSource;
-use MediaWiki\User\UserOptionsLookup;
+use MediaWiki\User\Options\UserOptionsLookup;
 use Psr\Log\LoggerInterface;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 class RendererFactory {
 
@@ -33,23 +36,28 @@ class RendererFactory {
 	/** @var LoggerInterface */
 	private $logger;
 
+	private WANObjectCache $cache;
+
 	/**
 	 * @param ServiceOptions $serviceOptions
 	 * @param MathConfig $mathConfig
 	 * @param UserOptionsLookup $userOptionsLookup
 	 * @param LoggerInterface $logger
+	 * @param WANObjectCache $cache
 	 */
 	public function __construct(
 		ServiceOptions $serviceOptions,
 		MathConfig $mathConfig,
 		UserOptionsLookup $userOptionsLookup,
-		LoggerInterface $logger
+		LoggerInterface $logger,
+		WANObjectCache $cache
 	) {
 		$serviceOptions->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->options = $serviceOptions;
 		$this->mathConfig = $mathConfig;
 		$this->userOptionsLookup = $userOptionsLookup;
 		$this->logger = $logger;
+		$this->cache = $cache;
 	}
 
 	/**
@@ -68,7 +76,7 @@ class RendererFactory {
 		if ( isset( $params['forcemathmode'] ) ) {
 			$mode = $params['forcemathmode'];
 		}
-		if ( !in_array( $mode, $this->mathConfig->getValidRenderingModes() ) ) {
+		if ( !in_array( $mode, $this->mathConfig->getValidRenderingModes(), true ) ) {
 			$mode = $this->userOptionsLookup->getDefaultOption( 'math' );
 		}
 		if ( $this->options->get( 'MathEnableExperimentalInputFormats' ) === true &&
@@ -77,27 +85,30 @@ class RendererFactory {
 		) {
 			// Support of MathML input (experimental)
 			// Currently support for mode 'mathml' only
-			if ( !in_array( $params['type'], [ 'pmml', 'ascii' ] ) ) {
+			if ( !in_array( $params['type'], [ 'pmml', 'ascii' ], true ) ) {
 				unset( $params['type'] );
 			}
 		}
 		if ( isset( $params['chem'] ) ) {
-			$mode = MathConfig::MODE_MATHML;
+			$mode = ( $mode == MathConfig::MODE_NATIVE_MML ) ? MathConfig::MODE_NATIVE_MML : MathConfig::MODE_MATHML;
 			$params['type'] = 'chem';
 		}
 		switch ( $mode ) {
 			case MathConfig::MODE_SOURCE:
 				$renderer = new MathSource( $tex, $params );
 				break;
+			case MathConfig::MODE_NATIVE_MML:
+				$renderer = new MathNativeMML( $tex, $params, $this->cache );
+				break;
 			case MathConfig::MODE_LATEXML:
-				$renderer = new MathLaTeXML( $tex, $params );
+				$renderer = new MathLaTeXML( $tex, $params, $this->cache );
 				break;
 			case MathConfig::MODE_MATHML:
 			default:
 				if ( $this->options->get( 'MathoidCli' ) ) {
-					$renderer = new MathMathMLCli( $tex, $params );
+					$renderer = new MathMathMLCli( $tex, $params, $this->cache );
 				} else {
-					$renderer = new MathMathML( $tex, $params );
+					$renderer = new MathMathML( $tex, $params, $this->cache );
 				}
 		}
 		$this->logger->debug(
@@ -107,6 +118,21 @@ class RendererFactory {
 				'mode' => $mode
 			]
 		);
+		return $renderer;
+	}
+
+	public function getFromHash( $inputHash ): MathRenderer {
+		$key = $this->cache->makeGlobalKey(
+			MathRenderer::class,
+			$inputHash
+		);
+		$rpage = $this->cache->get( $key );
+		if ( $rpage === false ) {
+			throw new InvalidArgumentException( 'Cache key is invalid' );
+		}
+		$mode = $rpage['math_mode'];
+		$renderer = $this->getRenderer( '', [], $mode );
+		$renderer->initializeFromCache( $rpage );
 		return $renderer;
 	}
 }

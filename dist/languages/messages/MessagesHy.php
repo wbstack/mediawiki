@@ -1,8 +1,6 @@
 <?php
 /** Armenian (Հայերեն)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -11,7 +9,7 @@ $separatorTransformTable = [
 	',' => "\u{00A0}", # nbsp
 	'.' => ','
 ];
-$minimumGroupingDigits = 2; // As per CLDR 31, this value is 1 (T262500)
+$minimumGroupingDigits = 2; // intentional deviation from CLDR (T262500)
 
 $fallback8bitEncoding = 'UTF-8';
 
@@ -118,7 +116,7 @@ $magicWords = [
 	'img_thumbnail'             => [ '1', 'մինի', 'thumb', 'thumbnail' ],
 	'img_width'                 => [ '1', '$1փքս', '$1px' ],
 	'int'                       => [ '0', 'ՆԵՐՔ՝', 'INT:' ],
-	'language'                  => [ '0', '#ԼԵԶՈՒ՝', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#ԼԵԶՈՒ՝', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'ՓՈՔՐԱՏԱՌ՝', 'LC:' ],
 	'lcfirst'                   => [ '0', 'ՓՈՔՐԱՏԱՌ_ՍԿԶԲՆԱՏԱՌ՝', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'ՏԵՂԱԿԱՆ_ՕՐԸ', 'LOCALDAY' ],

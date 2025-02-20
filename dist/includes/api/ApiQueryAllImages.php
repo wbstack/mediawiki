@@ -24,12 +24,21 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use File;
+use LocalFile;
+use LocalRepo;
 use MediaWiki\MainConfigNames;
 use MediaWiki\ParamValidator\TypeDef\UserDef;
 use MediaWiki\Permissions\GroupPermissionsLookup;
+use MediaWiki\Title\Title;
+use RepoGroup;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\IReadableDatabase;
+use Wikimedia\Rdbms\LikeValue;
 
 /**
  * Query module to enumerate all images.
@@ -43,18 +52,11 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 	 */
 	protected $mRepo;
 
-	/** @var GroupPermissionsLookup */
-	private $groupPermissionsLookup;
+	private GroupPermissionsLookup $groupPermissionsLookup;
 
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param RepoGroup $repoGroup
-	 * @param GroupPermissionsLookup $groupPermissionsLookup
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		RepoGroup $repoGroup,
 		GroupPermissionsLookup $groupPermissionsLookup
 	) {
@@ -68,7 +70,7 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 	 * which may not necessarily be the same as the local DB.
 	 *
 	 * TODO: allow querying non-local repos.
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	protected function getDB() {
 		return $this->mRepo->getReplicaDB();
@@ -151,11 +153,9 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 
 			// Pagination
 			if ( $params['continue'] !== null ) {
-				$cont = explode( '|', $params['continue'] );
-				$this->dieContinueUsageIf( count( $cont ) != 1 );
-				$op = $ascendingOrder ? '>' : '<';
-				$continueFrom = $db->addQuotes( $cont[0] );
-				$this->addWhere( "img_name $op= $continueFrom" );
+				$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'string' ] );
+				$op = $ascendingOrder ? '>=' : '<=';
+				$this->addWhere( $db->expr( 'img_name', $op, $cont[0] ) );
 			}
 
 			// Image filters
@@ -164,9 +164,13 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 			$this->addWhereRange( 'img_name', $ascendingOrder ? 'newer' : 'older', $from, $to );
 
 			if ( isset( $params['prefix'] ) ) {
-				$this->addWhere( 'img_name' . $db->buildLike(
-					$this->titlePartToKey( $params['prefix'], NS_FILE ),
-					$db->anyString() ) );
+				$this->addWhere(
+					$db->expr(
+						'img_name',
+						IExpression::LIKE,
+						new LikeValue( $this->titlePartToKey( $params['prefix'], NS_FILE ), $db->anyString() )
+					)
+				);
 			}
 		} else {
 			// Check mutually exclusive params
@@ -202,15 +206,12 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 			$this->addWhereRange( 'img_name', $ascendingOrder ? 'newer' : 'older', null, null );
 
 			if ( $params['continue'] !== null ) {
-				$cont = explode( '|', $params['continue'] );
-				$this->dieContinueUsageIf( count( $cont ) != 2 );
-				$op = ( $ascendingOrder ? '>' : '<' );
-				$continueTimestamp = $db->addQuotes( $db->timestamp( $cont[0] ) );
-				$continueName = $db->addQuotes( $cont[1] );
-				$this->addWhere( "img_timestamp $op $continueTimestamp OR " .
-					"(img_timestamp = $continueTimestamp AND " .
-					"img_name $op= $continueName)"
-				);
+				$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'timestamp', 'string' ] );
+				$op = ( $ascendingOrder ? '>=' : '<=' );
+				$this->addWhere( $db->buildComparison( $op, [
+					'img_timestamp' => $db->timestamp( $cont[0] ),
+					'img_name' => $cont[1],
+				] ) );
 			}
 
 			// Image filters
@@ -224,7 +225,7 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 					[
 						'ug_group' => $this->groupPermissionsLookup->getGroupsWithPermission( 'bot' ),
 						'ug_user = actor_user',
-						'ug_expiry IS NULL OR ug_expiry >= ' . $db->addQuotes( $db->timestamp() )
+						$db->expr( 'ug_expiry', '=', null )->or( 'ug_expiry', '>=', $db->timestamp() )
 					]
 				] ] );
 				$groupCond = $params['filterbots'] == 'nobots' ? 'NULL' : 'NOT NULL';
@@ -247,7 +248,7 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 			if ( !$this->validateSha1Hash( $sha1 ) ) {
 				$this->dieWithError( 'apierror-invalidsha1hash' );
 			}
-			$sha1 = Wikimedia\base_convert( $sha1, 16, 36, 31 );
+			$sha1 = \Wikimedia\base_convert( $sha1, 16, 36, 31 );
 		} elseif ( isset( $params['sha1base36'] ) ) {
 			$sha1 = strtolower( $params['sha1base36'] );
 			if ( !$this->validateSha1Base36Hash( $sha1 ) ) {
@@ -265,18 +266,13 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 
 			$mimeConds = [];
 			foreach ( $params['mime'] as $mime ) {
-				list( $major, $minor ) = File::splitMime( $mime );
-				$mimeConds[] = $db->makeList(
-					[
-						'img_major_mime' => $major,
-						'img_minor_mime' => $minor,
-					],
-					LIST_AND
-				);
+				[ $major, $minor ] = File::splitMime( $mime );
+				$mimeConds[] =
+					$db->expr( 'img_major_mime', '=', $major )
+						->and( 'img_minor_mime', '=', $minor );
 			}
-			// safeguard against internal_api_error_DBQueryError
 			if ( count( $mimeConds ) > 0 ) {
-				$this->addWhere( $db->makeList( $mimeConds, LIST_OR ) );
+				$this->addWhere( $db->orExpr( $mimeConds ) );
 			} else {
 				// no MIME types, no files
 				$this->getResult()->addValue( 'query', $this->getModuleName(), [] );
@@ -286,15 +282,6 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 
 		$limit = $params['limit'];
 		$this->addOption( 'LIMIT', $limit + 1 );
-		$sortFlag = '';
-		if ( !$ascendingOrder ) {
-			$sortFlag = ' DESC';
-		}
-		if ( $params['sort'] == 'timestamp' ) {
-			$this->addOption( 'ORDER BY', 'img_timestamp' . $sortFlag );
-		} else {
-			$this->addOption( 'ORDER BY', 'img_name' . $sortFlag );
-		}
 
 		$res = $this->select( __METHOD__ );
 
@@ -372,12 +359,12 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 				ParamValidator::PARAM_TYPE => 'timestamp'
 			],
 			'prop' => [
-				ParamValidator::PARAM_TYPE => ApiQueryImageInfo::getPropertyNames( $this->propertyFilter ),
+				ParamValidator::PARAM_TYPE => ApiQueryImageInfo::getPropertyNames( self::PROPERTY_FILTER ),
 				ParamValidator::PARAM_DEFAULT => 'timestamp|url',
 				ParamValidator::PARAM_ISMULTI => true,
 				ApiBase::PARAM_HELP_MSG => 'apihelp-query+imageinfo-param-prop',
 				ApiBase::PARAM_HELP_MSG_PER_VALUE =>
-					ApiQueryImageInfo::getPropertyMessages( $this->propertyFilter ),
+					ApiQueryImageInfo::getPropertyMessages( self::PROPERTY_FILTER ),
 			],
 			'prefix' => null,
 			'minsize' => [
@@ -390,7 +377,7 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 			'sha1base36' => null,
 			'user' => [
 				ParamValidator::PARAM_TYPE => 'user',
-				UserDef::PARAM_ALLOWED_USER_TYPES => [ 'name', 'ip', 'id', 'interwiki' ],
+				UserDef::PARAM_ALLOWED_USER_TYPES => [ 'name', 'ip', 'temp', 'id', 'interwiki' ],
 			],
 			'filterbots' => [
 				ParamValidator::PARAM_DEFAULT => 'all',
@@ -419,7 +406,7 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 		return $ret;
 	}
 
-	private $propertyFilter = [ 'archivename', 'thumbmime', 'uploadwarning' ];
+	private const PROPERTY_FILTER = [ 'archivename', 'thumbmime', 'uploadwarning' ];
 
 	protected function getExamplesMessages() {
 		return [
@@ -440,3 +427,6 @@ class ApiQueryAllImages extends ApiQueryGeneratorBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Allimages';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryAllImages::class, 'ApiQueryAllImages' );

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2009 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
+ * Copyright © 2009 Roan Kattouw <roan.kattouw@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,13 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use ChangeTags;
+use Exception;
+use ImportStreamSource;
 use MediaWiki\MainConfigNames;
+use WikiImporterFactory;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -30,17 +36,11 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class ApiImport extends ApiBase {
 
-	/** @var WikiImporterFactory */
-	private $wikiImporterFactory;
+	private WikiImporterFactory $wikiImporterFactory;
 
-	/**
-	 * @param ApiMain $main
-	 * @param string $action
-	 * @param WikiImporterFactory $wikiImporterFactory
-	 */
 	public function __construct(
 		ApiMain $main,
-		$action,
+		string $action,
 		WikiImporterFactory $wikiImporterFactory
 	) {
 		parent::__construct( $main, $action );
@@ -93,7 +93,7 @@ class ApiImport extends ApiBase {
 			}
 		}
 
-		$importer = $this->wikiImporterFactory->getWikiImporter( $source->value );
+		$importer = $this->wikiImporterFactory->getWikiImporter( $source->value, $this->getAuthority() );
 		if ( isset( $params['namespace'] ) ) {
 			$importer->setTargetNamespace( $params['namespace'] );
 		} elseif ( isset( $params['rootpage'] ) ) {
@@ -107,7 +107,8 @@ class ApiImport extends ApiBase {
 			$importer,
 			$isUpload,
 			$params['interwikisource'],
-			$params['summary']
+			$params['summary'],
+			$this
 		);
 		if ( $params['tags'] ) {
 			$reporter->setChangeTags( $params['tags'] );
@@ -200,3 +201,6 @@ class ApiImport extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Import';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiImport::class, 'ApiImport' );

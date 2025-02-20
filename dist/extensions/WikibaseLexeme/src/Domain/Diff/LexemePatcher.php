@@ -171,10 +171,13 @@ class LexemePatcher implements EntityPatcherStrategy {
 					break;
 
 				case $formDiff instanceof ChangeFormDiffOp:
-					$form = $lexeme->getForm( $formDiff->getFormId() );
-					if ( $form !== null ) {
-						$this->formPatcher->patch( $form, $formDiff );
+					try {
+						$form = $lexeme->getForm( $formDiff->getFormId() );
+					} catch ( \OutOfRangeException $e ) {
+						// form does not exist (anymore? may have been removed), nothing to patch (T326768)
+						break;
 					}
+					$this->formPatcher->patch( $form, $formDiff );
 					break;
 
 				default:
@@ -200,10 +203,13 @@ class LexemePatcher implements EntityPatcherStrategy {
 					break;
 
 				case $senseDiff instanceof ChangeSenseDiffOp:
-					$sense = $lexeme->getSense( $senseDiff->getSenseId() );
-					if ( $sense !== null ) {
-						$this->sensePatcher->patchEntity( $sense, $senseDiff );
+					try {
+						$sense = $lexeme->getSense( $senseDiff->getSenseId() );
+					} catch ( \OutOfRangeException $e ) {
+						// sense does not exist (anymore? may have been removed), nothing to patch (T284061)
+						break;
 					}
+					$this->sensePatcher->patchEntity( $sense, $senseDiff );
 					break;
 
 				default:

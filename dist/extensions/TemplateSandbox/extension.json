@@ -7,7 +7,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"SpecialPages": {
 		"TemplateSandbox": {
@@ -16,7 +16,8 @@
 				"RevisionLookup",
 				"ContentHandlerFactory",
 				"WikiPageFactory",
-				"ContentRenderer"
+				"ContentRenderer",
+				"TempUserConfig"
 			]
 		}
 	},
@@ -40,6 +41,23 @@
 			"scripts": "ext.TemplateSandbox.js",
 			"dependencies": "ext.TemplateSandbox.top"
 		},
+		"ext.TemplateSandbox.preview": {
+			"messages": [
+				"templatesandbox-preview"
+			],
+			"packageFiles": [
+				"ext.TemplateSandbox.preview.js",
+				{
+					"name": "parsedMessages.json",
+					"callback": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::getParsedMessages"
+				}
+			],
+			"dependencies": [
+				"jquery.spinner",
+				"mediawiki.util",
+				"mediawiki.page.preview"
+			]
+		},
 		"ext.TemplateSandbox.visualeditor": {
 			"messages": [
 				"templatesandbox-editform-view-label",
@@ -50,17 +68,15 @@
 				"templatesandbox-editform-view-label",
 				"templatesandbox-preview"
 			],
-			"targets": [
-				"desktop"
-			],
 			"packageFiles": [
 				"ext.TemplateSandbox.VisualEditor.js",
 				{
 					"name": "namespaces.json",
-					"callback": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::getResourceLoaderData"
+					"callback": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::getTemplateNamespaces"
 				}
 			],
 			"dependencies": [
+				"web2017-polyfills",
 				"oojs-ui",
 				"mediawiki.jqueryMsg",
 				"mediawiki.widgets"
@@ -72,11 +88,24 @@
 		"remoteExtPath": "TemplateSandbox/modules"
 	},
 	"Hooks": {
-		"EditPage::importFormData": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::importFormData",
-		"EditPage::showStandardInputs:options": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::injectOptions",
-		"AlternateEditPreview": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::templateSandboxPreview",
-		"APIGetAllowedParams": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::onAPIGetAllowedParams",
-		"ApiMakeParserOptions": "MediaWiki\\Extension\\TemplateSandbox\\Hooks::onApiMakeParserOptions"
+		"EditPage::importFormData": "main",
+		"EditPage::showStandardInputs:options": "main",
+		"AlternateEditPreview": "main",
+		"APIGetAllowedParams": "main",
+		"ApiMakeParserOptions": "main"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "MediaWiki\\Extension\\TemplateSandbox\\Hooks",
+			"services": [
+				"ContentHandlerFactory",
+				"ContentRenderer",
+				"ContentTransformer",
+				"HookContainer",
+				"UserOptionsLookup",
+				"WikiPageFactory"
+			]
+		}
 	},
 	"attributes": {
 		"VisualEditor": {

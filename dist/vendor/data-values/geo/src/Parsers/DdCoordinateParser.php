@@ -34,11 +34,10 @@ class DdCoordinateParser extends LatLongParserBase {
 	/**
 	 * @param ParserOptions|null $options
 	 */
-	public function __construct( ParserOptions $options = null ) {
-		$options = $options ?: new ParserOptions();
-		$options->defaultOption( self::OPT_DEGREE_SYMBOL, '°' );
-
-		parent::__construct( $options );
+	public function __construct( ?ParserOptions $options = null ) {
+		parent::__construct(
+			( $options ?: new ParserOptions() )->withDefaultOption( self::OPT_DEGREE_SYMBOL, '°' )
+		);
 
 		$this->defaultDelimiters = [ $this->getOption( self::OPT_DEGREE_SYMBOL ) ];
 	}
@@ -107,7 +106,7 @@ class DdCoordinateParser extends LatLongParserBase {
 			}
 		}
 
-		return ( 1 === $match );
+		return ( $match === 1 );
 	}
 
 	/**
@@ -201,7 +200,7 @@ class DdCoordinateParser extends LatLongParserBase {
 			];
 
 			foreach ( $ns as $delimiter ) {
-				if ( mb_strpos( $normalizedCoordinateString, $delimiter ) === 0 ) {
+				if ( str_starts_with( $normalizedCoordinateString, $delimiter ) ) {
 					// String starts with "north" or "west" symbol: Separation needs to be done
 					// before the "east" or "west" symbol.
 					$delimiters = array_merge( $ew, $delimiters );

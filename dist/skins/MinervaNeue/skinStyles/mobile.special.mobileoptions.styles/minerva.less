@@ -1,21 +1,21 @@
 @import '../../minerva.less/minerva.variables.less';
 
-@media all and ( min-width: @width-breakpoint-tablet ) {
+@media all and ( min-width: @min-width-breakpoint-tablet ) {
 	.ns-special .pre-content {
-		background: #fff;
+		background: @background-color-base;
 		margin-bottom: 15px;
 
 		.tagline,
 		h1 {
-			margin: 0 @contentMargin;
+			margin: 0 @margin-content;
 		}
 	}
 
 	.ns-special .mw-body {
-		background: @colorGray14;
+		background: @background-color-interactive;
 
 		form {
-			background: #fff;
+			background: @background-color-base;
 		}
 	}
 }

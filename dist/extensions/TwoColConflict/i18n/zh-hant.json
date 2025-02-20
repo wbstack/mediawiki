@@ -8,8 +8,8 @@
 			"LNDDYL",
 			"Liuxinyu970226",
 			"Tranve",
-			"烈羽",
-			"Winston Sung"
+			"Winston Sung",
+			"烈羽"
 		]
 	},
 	"twocolconflict": "基於段落編輯衝突",
@@ -31,8 +31,8 @@
 	"twocolconflict-special-textarea-hint": "您可以檢視並複製您的修訂的原有 wiki 語法：",
 	"twocolconflict-special-malformed-title": "缺少或無效的標題。",
 	"twocolconflict-special-expired": "沒有內容。此問題代表著在前一陣子您之前有遇到編輯衝突，而當時您臨時儲存的文字現在已逾期。",
-	"twocolconflict-split-header-hint": "若您有在[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 此頁面]留下意見回饋，您可以協助讓此功能變得更好。",
-	"twocolconflict-split-header-hint-beta": "感謝您使用此測試功能。若您願意[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 在此頁面]留下意見回饋，就能協助這個功能可以變得更好。",
+	"twocolconflict-split-header-hint": "若您有在[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 此專案討論頁]留下意見回饋，您可以協助讓這個功能變得更好。",
+	"twocolconflict-split-header-hint-beta": "感謝您使用此測試功能。若您願意[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface 此專案討論頁]留下意見回饋，就能協助這個功能可以變得更好。",
 	"twocolconflict-split-header-overview": "當您在編輯時，有另一位使用者剛好編輯了相同頁面，並早於您之前做出發布。請檢閱兩邊的版本，並合併它們。當您點擊「{{int:publishchanges}}」時，所選框內的文字將會被儲存下來。",
 	"twocolconflict-split-your-version-header": "您的修訂",
 	"twocolconflict-split-current-version-header": "自 $1 的最新修訂",

@@ -1,6 +1,7 @@
+@import 'mediawiki.skin.variables.less';
+@import 'mediawiki.mixins.less';
 @import '../echo.variables.less';
 @import '../echo.mixins.less';
-@import 'mediawiki.mixins.less';
 
 // This is only valid for the Special:Notifications page in no-JS mode,
 // where the formatting of the notifications include the following structure
@@ -42,16 +43,12 @@
 		}
 	}
 
-	.mw-echo-notifications {
-		background-color: @notification-background-read;
-	}
-
 	.mw-echo-content {
 		overflow: hidden;
 		display: block;
 
 		.mw-echo-title {
-			color: @notification-text-color;
+			color: @color-emphasized;
 		}
 
 		.mw-echo-payload {

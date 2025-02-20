@@ -1,8 +1,10 @@
 <?php
 namespace JsonConfig;
 
-use Exception;
-use Message;
+use InvalidArgumentException;
+use LogicException;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Message\Message;
 use stdClass;
 
 /**
@@ -48,7 +50,7 @@ abstract class JCObjContent extends JCContent {
 			// ensure that data is sorted in the right order
 			self::markUnchecked( $this->validationData );
 		}
-		return \FormatJson::encode( $this->getDataWithDefaults(), true, \FormatJson::ALL_OK );
+		return FormatJson::encode( $this->getDataWithDefaults(), true, FormatJson::ALL_OK );
 	}
 
 	protected function createDefaultView() {
@@ -57,12 +59,11 @@ abstract class JCObjContent extends JCContent {
 
 	/**
 	 * Get configuration data with custom defaults
-	 * @throws \Exception in case validation is not complete
 	 * @return mixed
 	 */
 	public function getDataWithDefaults() {
 		if ( $this->isValidating !== false ) {
-			throw new Exception( 'This method may only be called after validation is complete' );
+			throw new LogicException( 'This method may only be called after validation is complete' );
 		}
 		if ( $this->dataWithDefaults === null ) {
 			$this->dataWithDefaults = JCUtils::sanitize( $this->validationData );
@@ -72,12 +73,11 @@ abstract class JCObjContent extends JCContent {
 
 	/**
 	 * Get status array that recursively describes dataWithDefaults
-	 * @throws \Exception
 	 * @return JCValue
 	 */
 	public function getValidationData() {
 		if ( $this->isValidating === null ) {
-			throw new Exception(
+			throw new LogicException(
 				'This method may only be called during or after validation has started'
 			);
 		}
@@ -87,12 +87,11 @@ abstract class JCObjContent extends JCContent {
 	/**
 	 * Call this function before performing data validation inside the derived validate()
 	 * @param mixed $data
-	 * @throws \Exception
 	 * @return bool if true, validation should be performed, otherwise all checks will be ignored
 	 */
 	protected function initValidation( $data ) {
 		if ( $this->isValidating !== null ) {
-			throw new Exception( 'This method may only be called before validation has started' );
+			throw new LogicException( 'This method may only be called before validation has started' );
 		}
 		$this->isValidating = true;
 		if ( !$this->isRootArray && !is_object( $data ) ) {
@@ -108,7 +107,6 @@ abstract class JCObjContent extends JCContent {
 
 	/**
 	 * Derived validate() must return the result of this function
-	 * @throws \Exception
 	 * @return array|null
 	 */
 	protected function finishValidation() {
@@ -161,7 +159,6 @@ abstract class JCObjContent extends JCContent {
 	 * @param callable|null $validator callback function as defined in JCValidators::run(). More than
 	 *        one  validator may be given. If validators are not provided, any value is accepted
 	 * @return bool true if ok, false otherwise
-	 * @throws \Exception if $this->initValidation() was not called.
 	 */
 	public function testOptional( $path, $default, $validator = null ) {
 		$vld = self::convertValidators( $validator, func_get_args(), 2 );
@@ -182,7 +179,6 @@ abstract class JCObjContent extends JCContent {
 	 *        More than one validator may be given.
 	 *        If validators are not provided, any value is accepted
 	 * @param callable ...$extraValidators
-	 * @throws \Exception
 	 * @return bool true if ok, false otherwise
 	 */
 	public function test( $path, $validator, ...$extraValidators ) {
@@ -203,7 +199,6 @@ abstract class JCObjContent extends JCContent {
 	 *        More than one validator may be given.
 	 *        If validators are not provided, any value is accepted
 	 * @param callable ...$extraValidators
-	 * @throws \Exception
 	 * @return bool true if all values tested ok, false otherwise
 	 */
 	public function testEach( $path, $validator = null, ...$extraValidators ) {
@@ -231,14 +226,13 @@ abstract class JCObjContent extends JCContent {
 	 * @param array|string $path
 	 * @param array $validators
 	 * @return bool
-	 * @throws \Exception
 	 */
 	private function testInt( $path, $validators ) {
 		if ( !$this->getStatus()->isOK() ) {
 			return false; // skip all validation in case of a fatal error
 		}
 		if ( $this->isValidating !== true ) {
-			throw new Exception(
+			throw new LogicException(
 				'This function should only be called inside the validateContent() override'
 			);
 		}
@@ -250,7 +244,6 @@ abstract class JCObjContent extends JCContent {
 	 * @param array $fldPath For error reporting, path to the current field
 	 * @param JCValue $jcv
 	 * @param mixed $validators
-	 * @throws \Exception
 	 * @internal param JCValue $status
 	 * @return bool
 	 */
@@ -265,7 +258,7 @@ abstract class JCObjContent extends JCContent {
 			$fld = (int)$fld;
 		}
 		if ( !is_int( $fld ) && !is_string( $fld ) ) {
-			throw new Exception( 'Unexpected field type, only strings and integers are allowed' );
+			throw new InvalidArgumentException( 'Unexpected field type, only strings and integers are allowed' );
 		}
 		$fldPath[] = $fld;
 
@@ -288,7 +281,7 @@ abstract class JCObjContent extends JCContent {
 			if ( is_int( $fld ) ) {
 				if ( count( $jcv->getValue() ) < $fld ) {
 					// Allow existing index or index+1 for appending last item
-					throw new Exception( "List index is too large at '" .
+					throw new InvalidArgumentException( "List index is too large at '" .
 										 JCUtils::fieldPathToString( $fldPath ) .
 										 "'. Index may not exceed list size." );
 				}
@@ -303,7 +296,7 @@ abstract class JCObjContent extends JCContent {
 				}
 			}
 			if ( $subJcv === null ) {
-				throw new Exception( 'Logic error - subJcv must be valid here' );
+				throw new LogicException( 'Logic error - subJcv must be valid here' );
 			} elseif ( $subJcv === false ) {
 				// field does not exist
 				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
@@ -442,7 +435,6 @@ abstract class JCObjContent extends JCContent {
 	/** Get field from data object/array
 	 * @param string|int|array $field
 	 * @param stdClass|array|JCValue|null $data
-	 * @throws \Exception
 	 * @return false|null|JCValue search result:
 	 *      false if not found
 	 *      null if error (argument type does not match storage)
@@ -454,7 +446,7 @@ abstract class JCObjContent extends JCContent {
 		}
 		foreach ( (array)$field as $fld ) {
 			if ( !is_int( $fld ) && !is_string( $fld ) ) {
-				throw new Exception( 'Field must be either int or string' );
+				throw new InvalidArgumentException( 'Field must be either int or string' );
 			}
 			if ( $data instanceof JCValue ) {
 				$data = $data->getValue();
@@ -485,7 +477,6 @@ abstract class JCObjContent extends JCContent {
 	 * @param JCValue $jcv
 	 * @param int|string $fld
 	 * @param array $fldPath
-	 * @throws \Exception
 	 * @return bool|null true if renamed, false if not found or original unchanged,
 	 *   null if duplicate (error)
 	 */

@@ -59,7 +59,7 @@ class DescriptionsField extends TermIndexField {
 		foreach ( $this->languages as $language ) {
 			// TODO: here we probably will need better language-specific analyzers
 			if ( empty( $this->stemmingSettings[$language]['index'] ) ) {
-				$langConfig = [ 'type' => 'text', 'index' => false ];
+				$langConfig = $this->getUnindexedField();
 			} else {
 				$langConfig = $this->getTokenizedSubfield( $engine->getConfig(),
 					$language . '_text',
@@ -77,17 +77,23 @@ class DescriptionsField extends TermIndexField {
 	/**
 	 * @param EntityDocument $entity
 	 *
-	 * @return string[] Array of descriptions in available languages.
+	 * @return array|null Array of descriptions in available languages.
 	 */
 	public function getFieldData( EntityDocument $entity ) {
 		if ( !( $entity instanceof DescriptionsProvider ) ) {
-			return [];
+			return null;
 		}
 		$data = [];
 		foreach ( $entity->getDescriptions() as $language => $desc ) {
-			$data[$language] = $desc->getText();
+			// While wikibase can only have a single description,
+			// WikibaseMediaInfo reports an array of descriptions. To keep the
+			// constructed search docs consistent report an array here as well.
+			$data[$language] = [ $desc->getText() ];
 		}
-		return $data;
+		// Shouldn't return empty arrays, that will be encoded to json as an
+		// empty list instead of an empty map. Elastic doesn't mind, but this
+		// allows more consistency working with the resulting cirrus docs
+		return $data ?: null;
 	}
 
 	/**

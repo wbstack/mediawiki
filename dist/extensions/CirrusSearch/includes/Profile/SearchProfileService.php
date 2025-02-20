@@ -2,17 +2,18 @@
 
 namespace CirrusSearch\Profile;
 
+use CirrusSearch\BuildDocument\DocumentSizeLimiter;
 use CirrusSearch\Dispatch\BasicSearchQueryRoute;
 use CirrusSearch\Dispatch\CirrusDefaultSearchQueryRoute;
 use CirrusSearch\Dispatch\DefaultSearchQueryDispatchService;
 use CirrusSearch\Dispatch\SearchQueryDispatchService;
 use CirrusSearch\Dispatch\SearchQueryRoute;
 use CirrusSearch\Search\SearchQuery;
-use Config;
+use MediaWiki\Config\Config;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\User\Options\UserOptionsLookup;
 use MediaWiki\User\UserIdentity;
-use MediaWiki\User\UserOptionsLookup;
-use RequestContext;
-use WebRequest;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -99,6 +100,12 @@ class SearchProfileService {
 	public const SANEITIZER = 'saneitizer';
 
 	/**
+	 * Profile type used by the document size limiter
+	 * @see DocumentSizeLimiter
+	 */
+	public const DOCUMENT_SIZE_LIMITER = 'document_size_limiter';
+
+	/**
 	 * Profiles used for building fulltext search queries
 	 * @see \CirrusSearch\Search\SearchContext::getFulltextQueryBuilderProfile()
 	 */
@@ -177,8 +184,8 @@ class SearchProfileService {
 	 */
 	public function __construct(
 		UserOptionsLookup $userOptionsLookup,
-		WebRequest $request = null,
-		UserIdentity $user = null
+		?WebRequest $request = null,
+		?UserIdentity $user = null
 	) {
 		$this->userOptionsLookup = $userOptionsLookup;
 		$this->request = $request ?? RequestContext::getMain()->getRequest();

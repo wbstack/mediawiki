@@ -1,27 +1,10 @@
 /*!
  * Parsoid utilities.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 mw.libs.ve = mw.libs.ve || {};
-
-/**
- * Resolve a URL relative to a given base.
- *
- * Copied from ve.resolveUrl
- *
- * @param {string} url URL to resolve
- * @param {HTMLDocument} base Document whose base URL to use
- * @return {string} Resolved URL
- */
-mw.libs.ve.resolveUrl = function ( url, base ) {
-	var node = base.createElement( 'a' );
-	node.setAttribute( 'href', url );
-	// If doc.baseURI isn't set, node.href will be an empty string
-	// This is crazy, returning the original URL is better
-	return node.href || url;
-};
 
 /**
  * Decode a URI component into a mediawiki article title
@@ -48,12 +31,17 @@ mw.libs.ve.decodeURIComponentIntoArticleTitle = function ( s, preserveUnderscore
 /**
  * Unwrap Parsoid sections
  *
+ * data-mw-section-id attributes are copied to the first child (the heading) during
+ * this step so that we can place the cursor in the correct place when section editing.
+ * These attributes **must be removed** before being sent back to Parsoid to avoid
+ * unnecessary re-serialization.
+ *
  * @param {HTMLElement} element Parent element, e.g. document body
  * @param {string} [keepSection] Section to keep
  */
 mw.libs.ve.unwrapParsoidSections = function ( element, keepSection ) {
-	Array.prototype.forEach.call( element.querySelectorAll( 'section[data-mw-section-id]' ), function ( section ) {
-		var parent = section.parentNode,
+	Array.prototype.forEach.call( element.querySelectorAll( 'section[data-mw-section-id]' ), ( section ) => {
+		const parent = section.parentNode,
 			sectionId = section.getAttribute( 'data-mw-section-id' );
 		// Copy section ID to first child (should be a heading)
 		// Pseudo-sections (with negative section IDs) may not have a heading
@@ -77,7 +65,7 @@ mw.libs.ve.unwrapParsoidSections = function ( element, keepSection ) {
  * @param {HTMLElement} element Parent element, e.g. document body
  */
 mw.libs.ve.stripParsoidFallbackIds = function ( element ) {
-	Array.prototype.forEach.call( element.querySelectorAll( 'span[typeof="mw:FallbackId"][id]:empty' ), function ( legacySpan ) {
+	Array.prototype.forEach.call( element.querySelectorAll( 'span[typeof="mw:FallbackId"][id]:empty' ), ( legacySpan ) => {
 		legacySpan.parentNode.removeChild( legacySpan );
 	} );
 };
@@ -85,8 +73,8 @@ mw.libs.ve.stripParsoidFallbackIds = function ( element ) {
 mw.libs.ve.restbaseIdRegExp = /^mw[a-zA-Z0-9\-_]{2,6}$/;
 
 mw.libs.ve.stripRestbaseIds = function ( doc ) {
-	var restbaseIdRegExp = mw.libs.ve.restbaseIdRegExp;
-	Array.prototype.forEach.call( doc.querySelectorAll( '[id^="mw"]' ), function ( element ) {
+	const restbaseIdRegExp = mw.libs.ve.restbaseIdRegExp;
+	Array.prototype.forEach.call( doc.querySelectorAll( '[id^="mw"]' ), ( element ) => {
 		if ( restbaseIdRegExp.test( element.id ) ) {
 			element.removeAttribute( 'id' );
 		}
@@ -100,26 +88,26 @@ mw.libs.ve.stripRestbaseIds = function ( doc ) {
  * @param {HTMLElement} element Parent element, e.g. document body
  */
 mw.libs.ve.reduplicateStyles = function ( element ) {
-	Array.prototype.forEach.call( element.querySelectorAll( 'link[rel~="mw-deduplicated-inline-style"]' ), function ( link ) {
-		var href = link.getAttribute( 'href' );
+	Array.prototype.forEach.call( element.querySelectorAll( 'link[rel~="mw-deduplicated-inline-style"]' ), ( link ) => {
+		const href = link.getAttribute( 'href' );
 		if ( !href || href.slice( 0, 'mw-data:'.length ) !== 'mw-data:' ) {
 			return;
 		}
-		var key = href.slice( 'mw-data:'.length );
-		var style = element.querySelector( 'style[data-mw-deduplicate="' + key + '"]' );
+		const key = href.slice( 'mw-data:'.length );
+		const style = element.querySelector( 'style[data-mw-deduplicate="' + key + '"]' );
 		if ( !style ) {
 			return;
 		}
 
-		var newStyle = link.ownerDocument.createElement( 'style' );
+		const newStyle = link.ownerDocument.createElement( 'style' );
 		newStyle.setAttribute( 'data-mw-deduplicate', key );
 
 		// Copy content from the old `style` node (for rendering)
-		for ( var i = 0; i < style.childNodes.length; i++ ) {
+		for ( let i = 0; i < style.childNodes.length; i++ ) {
 			newStyle.appendChild( style.childNodes[ i ].cloneNode( true ) );
 		}
 		// Copy attributes from the old `link` node (for selser)
-		Array.prototype.forEach.call( link.attributes, function ( attr ) {
+		Array.prototype.forEach.call( link.attributes, ( attr ) => {
 			if ( attr.name !== 'rel' && attr.name !== 'href' ) {
 				newStyle.setAttribute( attr.name, attr.value );
 			}
@@ -128,15 +116,15 @@ mw.libs.ve.reduplicateStyles = function ( element ) {
 		link.parentNode.replaceChild( newStyle, link );
 	} );
 
-	Array.prototype.forEach.call( element.querySelectorAll( 'style[data-mw-deduplicate]:empty' ), function ( style ) {
-		var key = style.getAttribute( 'data-mw-deduplicate' );
-		var firstStyle = element.querySelector( 'style[data-mw-deduplicate="' + key + '"]' );
+	Array.prototype.forEach.call( element.querySelectorAll( 'style[data-mw-deduplicate]:empty' ), ( style ) => {
+		const key = style.getAttribute( 'data-mw-deduplicate' );
+		const firstStyle = element.querySelector( 'style[data-mw-deduplicate="' + key + '"]' );
 		if ( !firstStyle || firstStyle === style ) {
 			return;
 		}
 
 		// Copy content from the first matching `style` node (for rendering)
-		for ( var i = 0; i < firstStyle.childNodes.length; i++ ) {
+		for ( let i = 0; i < firstStyle.childNodes.length; i++ ) {
 			style.appendChild( firstStyle.childNodes[ i ].cloneNode( true ) );
 		}
 	} );
@@ -158,14 +146,14 @@ mw.libs.ve.deduplicateStyles = function ( element ) {
 	 * @return {boolean}
 	 */
 	function isFosterablePosition( node ) {
-		var fosterablePositions = [ 'table', 'thead', 'tbody', 'tfoot', 'tr' ];
+		const fosterablePositions = [ 'table', 'thead', 'tbody', 'tfoot', 'tr' ];
 		return node && fosterablePositions.indexOf( node.parentNode.nodeName.toLowerCase() ) !== -1;
 	}
 
-	var styleTagKeys = {};
+	const styleTagKeys = {};
 
-	Array.prototype.forEach.call( element.querySelectorAll( 'style[data-mw-deduplicate]' ), function ( style ) {
-		var key = style.getAttribute( 'data-mw-deduplicate' );
+	Array.prototype.forEach.call( element.querySelectorAll( 'style[data-mw-deduplicate]' ), ( style ) => {
+		const key = style.getAttribute( 'data-mw-deduplicate' );
 
 		if ( !styleTagKeys[ key ] ) {
 			// Not a dupe
@@ -175,12 +163,12 @@ mw.libs.ve.deduplicateStyles = function ( element ) {
 
 		if ( !isFosterablePosition( style ) ) {
 			// Dupe - replace with a placeholder <link> reference
-			var link = style.ownerDocument.createElement( 'link' );
+			const link = style.ownerDocument.createElement( 'link' );
 			link.setAttribute( 'rel', 'mw-deduplicated-inline-style' );
 			link.setAttribute( 'href', 'mw-data:' + key );
 
 			// Copy attributes from the old `link` node (for selser)
-			Array.prototype.forEach.call( style.attributes, function ( attr ) {
+			Array.prototype.forEach.call( style.attributes, ( attr ) => {
 				if ( attr.name !== 'rel' && attr.name !== 'data-mw-deduplicate' ) {
 					link.setAttribute( attr.name, attr.value );
 				}
@@ -211,21 +199,21 @@ mw.libs.ve.deduplicateStyles = function ( element ) {
  * @param {string} [prefix] Prefix to add to fragment and target ID to avoid collisions
  */
 mw.libs.ve.fixFragmentLinks = function ( container, docTitle, prefix ) {
-	var docTitleText = docTitle.getPrefixedText();
+	const docTitleText = docTitle.getPrefixedText();
 	prefix = prefix || '';
-	Array.prototype.forEach.call( container.querySelectorAll( 'a[href*="#"]' ), function ( el ) {
-		var fragment = null;
+	Array.prototype.forEach.call( container.querySelectorAll( 'a[href*="#"]' ), ( el ) => {
+		let fragment = null;
 		if ( el.getAttribute( 'href' )[ 0 ] === '#' ) {
-			// Leagcy parser
+			// Legacy parser
 			fragment = el.getAttribute( 'href' ).slice( 1 );
 		} else {
 			// Parsoid HTML
-			var targetData = mw.libs.ve.getTargetDataFromHref( el.href, el.ownerDocument );
+			const targetData = mw.libs.ve.getTargetDataFromHref( el.href, el.ownerDocument );
 
 			if ( targetData.isInternal ) {
-				var title = mw.Title.newFromText( targetData.title );
+				const title = mw.Title.newFromText( targetData.title );
 				if ( title && title.getPrefixedText() === docTitleText ) {
-					fragment = new mw.Uri( el.href ).fragment;
+					fragment = new URL( el.href ).hash.slice( 1 );
 				}
 			}
 		}
@@ -236,7 +224,7 @@ mw.libs.ve.fixFragmentLinks = function ( container, docTitle, prefix ) {
 				el.setAttribute( 'href', '#' );
 			} else {
 				if ( prefix ) {
-					var target = container.querySelector( '#' + $.escapeSelector( fragment ) );
+					const target = container.querySelector( '#' + $.escapeSelector( fragment ) );
 					// There may be multiple links to a specific target, so check the target
 					// hasn't already been fixed (in which case it would be null)
 					if ( target ) {
@@ -250,7 +238,7 @@ mw.libs.ve.fixFragmentLinks = function ( container, docTitle, prefix ) {
 		}
 	} );
 	// Remove any section heading anchors which weren't fixed above (T218492)
-	Array.prototype.forEach.call( container.querySelectorAll( 'h1, h2, h3, h4, h5, h6' ), function ( el ) {
+	Array.prototype.forEach.call( container.querySelectorAll( 'h1, h2, h3, h4, h5, h6' ), ( el ) => {
 		if ( el.hasAttribute( 'id' ) && !el.hasAttribute( 'data-mw-id-fixed' ) ) {
 			el.removeAttribute( 'id' );
 		}
@@ -258,89 +246,130 @@ mw.libs.ve.fixFragmentLinks = function ( container, docTitle, prefix ) {
 };
 
 /**
+ * @typedef {Object} TargetData
+ * @memberof mw.libs.ve
+ * @property {string} title The title of the internal link (if the href is internal)
+ * @property {boolean} isInternal True if the href pointed to the local wiki, false if href is external
+ */
+
+/**
  * Parse URL to get title it points to.
  *
  * @param {string} href
- * @param {HTMLDocument|string} doc Document whose base URL to use, or base URL as a string.
- * @return {Object} Information about the given href
- * @return {string} return.title
- *    The title of the internal link, else the original href if href is external
- * @return {string} return.rawTitle
- *    The title without URL decoding and underscore normalization applied
- * @return {boolean} return.isInternal
- *    True if the href pointed to the local wiki, false if href is external
+ * @param {HTMLDocument} doc Document whose base URL to use
+ * @return {mw.libs.ve.TargetData} Information about the given href
  */
 mw.libs.ve.getTargetDataFromHref = function ( href, doc ) {
 	function regexEscape( str ) {
 		return str.replace( /([.?*+^$[\]\\(){}|-])/g, '\\$1' );
 	}
 
-	var isInternal = null;
-	// Protocol relative href
-	var relativeHref = href.replace( /^https?:/i, '' );
+	function returnExternalData() {
+		return { isInternal: false };
+	}
+
+	function returnInternalData( titleish ) {
+		// This value doesn't necessarily come from Parsoid (and it might not have the "./" prefix), but
+		// this method will work fine.
+		const data = mw.libs.ve.parseParsoidResourceName( titleish );
+		data.isInternal = true;
+		return data;
+	}
+
+	let url;
+	try {
+		url = new URL( href, doc.baseURI );
+	} catch ( e ) {
+		// An invalid URL was provided (e.g. `https://`)
+		return returnExternalData();
+	}
 
 	// Equivalent to `ve.init.platform.getExternalLinkUrlProtocolsRegExp()`, which can not be called here
-	var externalLinkUrlProtocolsRegExp = new RegExp( '^(' + mw.config.get( 'wgUrlProtocols' ) + ')', 'i' );
-	// Paths that don't start with a registered external url protocol
-	if ( !externalLinkUrlProtocolsRegExp.test( href ) ) {
-		isInternal = true;
-	} else {
-		// Check if this matches the server's script path (as used by red links)
-		var scriptBase = mw.libs.ve.resolveUrl( mw.config.get( 'wgScript' ), doc ).replace( /^https?:/i, '' );
-		if ( relativeHref.indexOf( scriptBase ) === 0 ) {
-			var uri = new mw.Uri( relativeHref );
-			var queryLength = Object.keys( uri.query ).length;
-			if (
-				( queryLength === 1 && uri.query.title ) ||
-				( queryLength === 3 && uri.query.title && uri.query.action === 'edit' && uri.query.redlink === '1' )
-			) {
-				href = uri.query.title + ( uri.fragment ? '#' + uri.fragment : '' );
-				isInternal = true;
-			} else if ( queryLength > 1 ) {
-				href = relativeHref;
-				isInternal = false;
-			}
-		}
-		if ( isInternal === null ) {
-			// Check if this matches the server's article path
-			var articleBase = mw.libs.ve.resolveUrl( mw.config.get( 'wgArticlePath' ), doc ).replace( /^https?:/i, '' );
-			var articleBaseRegex = new RegExp( regexEscape( articleBase ).replace( regexEscape( '$1' ), '(.*)' ) );
-			var matches = relativeHref.match( articleBaseRegex );
-			if ( matches && matches[ 1 ].split( '#' )[ 0 ].indexOf( '?' ) === -1 ) {
-				// Take the relative path
-				href = matches[ 1 ];
-				isInternal = true;
-			} else {
-				isInternal = false;
-			}
+	const externalLinkUrlProtocolsRegExp = new RegExp( '^(' + mw.config.get( 'wgUrlProtocols' ) + ')', 'i' );
+	// We don't want external links that don't start with a registered external URL protocol
+	// (to avoid generating 'javascript:' URLs), so treat it as internal
+	if ( !externalLinkUrlProtocolsRegExp.test( url.toString() ) ) {
+		return returnInternalData( url.toString() );
+	}
+
+	// Strip red link query parameters
+	if ( url.searchParams.get( 'action' ) === 'edit' && url.searchParams.get( 'redlink' ) === '1' ) {
+		url.searchParams.delete( 'action' );
+		url.searchParams.delete( 'redlink' );
+	}
+	// Count remaining query parameters
+	const keys = [];
+	url.searchParams.forEach( ( val, key ) => {
+		keys.push( key );
+	} );
+	const queryLength = keys.length;
+
+	const relativeHref = url.toString().replace( /^https?:/i, '' );
+	// Check if this matches the server's script path (as used by red links)
+	const scriptBase = new URL( mw.config.get( 'wgScript' ), doc.baseURI ).toString().replace( /^https?:/i, '' );
+	if ( relativeHref.indexOf( scriptBase ) === 0 ) {
+		if ( queryLength === 1 && url.searchParams.get( 'title' ) ) {
+			return returnInternalData( url.searchParams.get( 'title' ) + url.hash );
 		}
 	}
 
-	// This href doesn't necessarily come from Parsoid (and it might not have the "./" prefix), but
-	// this method will work fine.
-	var data = mw.libs.ve.parseParsoidResourceName( href );
-	data.isInternal = isInternal;
-	return data;
+	// Check if this matches the server's article path
+	const articleBase = new URL( mw.config.get( 'wgArticlePath' ), doc.baseURI ).toString().replace( /^https?:/i, '' );
+	const articleBaseRegex = new RegExp( regexEscape( articleBase ).replace( regexEscape( '$1' ), '(.*)' ) );
+	const matches = relativeHref.match( articleBaseRegex );
+	if ( matches ) {
+		if ( queryLength === 0 && matches && matches[ 1 ].split( '#' )[ 0 ].indexOf( '?' ) === -1 ) {
+			// Take the relative path
+			return returnInternalData( matches[ 1 ] );
+		}
+	}
+
+	// Doesn't match any of the known URL patterns, or has extra parameters
+	return returnExternalData();
 };
+
+/**
+ * Encode a page title into a Parsoid resource name.
+ *
+ * @param {string} title
+ * @return {string}
+ */
+mw.libs.ve.encodeParsoidResourceName = function ( title ) {
+	// Parsoid: Sanitizer::sanitizeTitleURI, Env::makeLink
+	const idx = title.indexOf( '#' );
+	let anchor = null;
+	if ( idx !== -1 ) {
+		anchor = title.slice( idx + 1 );
+		title = title.slice( 0, idx );
+	}
+	let encodedTitle = title.replace( /[%? [\]#|<>]/g, ( match ) => mw.util.wikiUrlencode( match ) );
+	if ( anchor !== null ) {
+		encodedTitle += '#' + mw.util.escapeIdForLink( anchor );
+	}
+	return './' + encodedTitle;
+};
+
+/**
+ * @typedef ParsedResource
+ * @memberof mw.libs.ve
+ * @property {string} title Full page title in text form (with namespace, and spaces instead of underscores)
+ */
 
 /**
  * Split Parsoid resource name into the href prefix and the page title.
  *
  * @param {string} resourceName Resource name, from a `href` or `resource` attribute
- * @return {Object} Object with the following properties:
- * @return {string} return.title Full page title in text form (with namespace, and spaces instead of underscores)
- * @return {string} return.rawTitle The title without URL decoding and underscore normalization applied
+ * @return {mw.libs.ve.ParsedResource} Parsed resource name
  */
 mw.libs.ve.parseParsoidResourceName = function ( resourceName ) {
 	// Resource names are always prefixed with './' to prevent the MediaWiki namespace from being
 	// interpreted as a URL protocol, consider e.g. 'href="./File:Foo.png"'.
 	// (We accept input without the prefix, so this can also take plain page titles.)
-	var matches = resourceName.match( /^(\.\/|)(.*)$/ );
+	const matches = resourceName.match( /^(\.\/|)(.*)$/ );
 	return {
 		// '%' and '?' are valid in page titles, but normally URI-encoded. This also changes underscores
 		// to spaces.
-		title: mw.libs.ve.decodeURIComponentIntoArticleTitle( matches[ 2 ] ),
-		rawTitle: matches[ 2 ]
+		title: mw.libs.ve.decodeURIComponentIntoArticleTitle( matches[ 2 ] )
 	};
 };
 

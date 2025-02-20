@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel protocol server class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 'use strict';
@@ -42,8 +42,7 @@ ve.dm.ProtocolServer.static.palette = [
  * @return {Promise} Resolves when loaded
  */
 ve.dm.ProtocolServer.prototype.ensureLoaded = function ( docName ) {
-	const documentStore = this,
-		rebaseServer = this.rebaseServer;
+	const rebaseServer = this.rebaseServer;
 
 	let loading = this.loadingForDoc.get( docName );
 
@@ -51,8 +50,8 @@ ve.dm.ProtocolServer.prototype.ensureLoaded = function ( docName ) {
 		return loading;
 	}
 	this.logger.logServerEvent( { type: 'ProtocolServer#load', docName: docName } );
-	loading = this.documentStore.load( docName ).then( function ( change ) {
-		documentStore.logger.logServerEvent( {
+	loading = this.documentStore.load( docName ).then( ( change ) => {
+		this.logger.logServerEvent( {
 			type: 'ProtocolServer#loaded',
 			docName: docName,
 			length: change.getLength()
@@ -117,15 +116,19 @@ ve.dm.ProtocolServer.prototype.onLogEvent = function ( context, event ) {
  * Setup author on the server and send initialization events
  *
  * @param {Object} context The connection context
+ * @param {number} [startLength=0] The length of the common history
+ * @param {Function} [usernameGenerator] Function which returns a username, with an authorID argument
  */
-ve.dm.ProtocolServer.prototype.welcomeClient = function ( context ) {
+ve.dm.ProtocolServer.prototype.welcomeClient = function ( context, startLength, usernameGenerator ) {
 	const docName = context.docName,
 		serverId = context.serverId,
 		authorId = context.authorId;
 
+	if ( !startLength ) {
+		startLength = 0;
+	}
 	this.rebaseServer.updateDocState( docName, authorId, null, {
-		// TODO: i18n
-		name: 'User ' + authorId,
+		name: usernameGenerator ? usernameGenerator( authorId ) : 'User ' + authorId,
 		color: this.constructor.static.palette[
 			authorId % this.constructor.static.palette.length
 		],
@@ -153,7 +156,7 @@ ve.dm.ProtocolServer.prototype.welcomeClient = function ( context ) {
 	// feasible if TransactionProcessor was modified to have a "don't sync, just apply"
 	// mode and ve.dm.Document was faked with { data: …, metadata: …, store: … }
 	context.sendAuthor( 'initDoc', {
-		history: state.history.serialize( true ),
+		history: state.history.mostRecent( startLength ).serialize( true ),
 		authors: state.getActiveAuthors()
 	} );
 };

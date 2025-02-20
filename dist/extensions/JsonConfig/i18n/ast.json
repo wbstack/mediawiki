@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Xuacu",
-			"Yurik",
-			"YoaR"
+			"YoaR",
+			"Yurik"
 		]
 	},
 	"jsonconfig-desc": "Permite guardar la configuración JSON nuna wiki",

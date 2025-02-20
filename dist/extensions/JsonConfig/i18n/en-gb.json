@@ -3,7 +3,8 @@
 		"authors": [
 			"Bjh21",
 			"Piano1forte2",
-			"Reedy"
+			"Reedy",
+			"Shirayuki"
 		]
 	},
 	"jsonconfig-err-license": "Parameter \"$1\" must be one of the valid licence codes, for example $2",

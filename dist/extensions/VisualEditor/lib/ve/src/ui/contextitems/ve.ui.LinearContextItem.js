@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LinearContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,11 +9,11 @@
  *
  * @class
  * @extends ve.ui.ContextItem
- * @mixins OO.ui.mixin.PendingElement
+ * @mixes OO.ui.mixin.PendingElement
  *
  * @constructor
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} [model] Model item is related to
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} [model] Model the item is related to
  * @param {Object} [config] Configuration options
  */
 ve.ui.LinearContextItem = function VeUiLinearContextItem( context, model, config ) {
@@ -90,12 +90,6 @@ ve.ui.LinearContextItem = function VeUiLinearContextItem( context, model, config
 OO.inheritClass( ve.ui.LinearContextItem, ve.ui.ContextItem );
 OO.mixinClass( ve.ui.ContextItem, OO.ui.mixin.PendingElement );
 
-/* Events */
-
-/**
- * @event command
- */
-
 /* Static Properties */
 
 ve.ui.LinearContextItem.static.editable = true;
@@ -118,9 +112,10 @@ ve.ui.LinearContextItem.static.embeddable = true;
  * @localdoc Executes the command related to #static-commandName on the context's surface
  *
  * @protected
+ * @fires ve.ui.ContextItem#command
  */
 ve.ui.LinearContextItem.prototype.onEditButtonClick = function () {
-	var command = this.getCommand();
+	const command = this.getCommand();
 
 	if ( command ) {
 		command.execute( this.context.getSurface(), undefined, 'context' );
@@ -167,10 +162,10 @@ ve.ui.LinearContextItem.prototype.renderBody = function () {
 /**
  * @inheritdoc
  */
-ve.ui.LinearContextItem.prototype.setup = function () {
+ve.ui.LinearContextItem.prototype.setup = function ( refreshing ) {
 	this.renderBody();
 
-	var isEmpty = this.$body.is( ':empty' );
+	const isEmpty = this.$body.is( ':empty' );
 	if ( isEmpty && this.context.isMobile() ) {
 		if ( this.isEditable() ) {
 			this.$head.append( this.editButton.$element );
@@ -178,7 +173,11 @@ ve.ui.LinearContextItem.prototype.setup = function () {
 	}
 	this.$element.toggleClass( 've-ui-linearContextItem-empty', isEmpty );
 
-	ve.track( 'activity.' + this.constructor.static.name, { action: 'context-show' } );
+	if ( !refreshing ) {
+		// Re-showing a context for some reason (probably a selection-change
+		// within the context on a persistent item) shouldn't re-fire this.
+		ve.track( 'activity.' + this.constructor.static.name, { action: 'context-show' } );
+	}
 
 	return this;
 };

@@ -5,8 +5,7 @@ namespace CirrusSearch\BuildDocument\Completion;
 use CirrusSearch\Connection;
 use Elastica\Multi\Search as MultiSearch;
 use Elastica\Search;
-use LinkBatch;
-use Title;
+use MediaWiki\MediaWikiServices;
 
 /**
  * Build a doc ready for the titlesuggest index.
@@ -135,6 +134,7 @@ class SuggestBuilder {
 	 * @return \Elastica\Document[] a set of suggest documents
 	 */
 	public function build( $inputDocs, $explain = false ) {
+		$titleFactory = MediaWikiServices::getInstance()->getTitleFactory();
 		// Cross namespace titles
 		$crossNsTitles = [];
 		$docs = [];
@@ -176,7 +176,7 @@ class SuggestBuilder {
 						$explainDetails = $this->scoringMethod->explain( $inputDoc );
 					}
 
-					$title = Title::makeTitle( $redir['namespace'], $redir['title'] );
+					$title = $titleFactory->makeTitle( $redir['namespace'], $redir['title'] );
 					$crossNsTitles[] = [
 						'title' => $title,
 						'score' => $score,
@@ -189,9 +189,9 @@ class SuggestBuilder {
 		}
 
 		// Build cross ns suggestions
-		if ( !empty( $crossNsTitles ) ) {
+		if ( $crossNsTitles ) {
 			$titles = array_column( $crossNsTitles, 'title' );
-			$lb = new LinkBatch( $titles );
+			$lb = MediaWikiServices::getInstance()->getLinkBatchFactory()->newLinkBatch( $titles );
 			$lb->setCaller( __METHOD__ );
 			$lb->execute();
 			// This is far from perfect:
@@ -264,7 +264,7 @@ class SuggestBuilder {
 	 * @param array|null $scoreExplanation
 	 * @return \Elastica\Document the suggestion document
 	 */
-	private function buildTitleSuggestion( $docId, array $title, $score, array $inputDoc, array $scoreExplanation = null ) {
+	private function buildTitleSuggestion( $docId, array $title, $score, array $inputDoc, ?array $scoreExplanation = null ) {
 		$inputs = [ $title['text'] ];
 		foreach ( $title['variants'] as $variant ) {
 			$inputs[] = $variant;
@@ -293,7 +293,7 @@ class SuggestBuilder {
 	 * @param array|null $scoreExplanation
 	 * @return \Elastica\Document the suggestion document
 	 */
-	private function buildRedirectsSuggestion( $docId, array $redirects, $score, array $inputDoc, array $scoreExplanation = null ) {
+	private function buildRedirectsSuggestion( $docId, array $redirects, $score, array $inputDoc, ?array $scoreExplanation = null ) {
 		$inputs = [];
 		foreach ( $redirects as $redirect ) {
 			$inputs[] = $redirect;
@@ -315,7 +315,7 @@ class SuggestBuilder {
 	 * @param array|null $scoreExplanation
 	 * @return \Elastica\Document a doc ready to be indexed in the completion suggester
 	 */
-	private function buildSuggestion( $suggestionType, $docId, array $inputs, $score, array $inputDoc, array $scoreExplanation = null ) {
+	private function buildSuggestion( $suggestionType, $docId, array $inputs, $score, array $inputDoc, ?array $scoreExplanation = null ) {
 		$doc = [
 			'batch_id' => $this->batchId,
 			'source_doc_id' => $inputDoc['id'],

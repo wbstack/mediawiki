@@ -101,7 +101,7 @@ CREATE TABLE /*_*/log_search (
 
 CREATE TABLE /*_*/change_tag (
   ct_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
-  ct_rc_id INT UNSIGNED DEFAULT NULL,
+  ct_rc_id BIGINT UNSIGNED DEFAULT NULL,
   ct_log_id INT UNSIGNED DEFAULT NULL,
   ct_rev_id INT UNSIGNED DEFAULT NULL,
   ct_params BLOB DEFAULT NULL,
@@ -155,15 +155,14 @@ CREATE TABLE /*_*/redirect (
 
 CREATE TABLE /*_*/pagelinks (
   pl_from INT UNSIGNED DEFAULT 0 NOT NULL,
-  pl_namespace INT DEFAULT 0 NOT NULL,
-  pl_title VARBINARY(255) DEFAULT '' NOT NULL,
+  pl_target_id BIGINT UNSIGNED NOT NULL,
   pl_from_namespace INT DEFAULT 0 NOT NULL,
-  INDEX pl_namespace (pl_namespace, pl_title, pl_from),
-  INDEX pl_backlinks_namespace (
-    pl_from_namespace, pl_namespace,
-    pl_title, pl_from
+  INDEX pl_target_id (pl_target_id, pl_from),
+  INDEX pl_backlinks_namespace_target_id (
+    pl_from_namespace, pl_target_id,
+    pl_from
   ),
-  PRIMARY KEY(pl_from, pl_namespace, pl_title)
+  PRIMARY KEY(pl_from, pl_target_id)
 ) /*$wgDBTableOptions*/;
 
 
@@ -206,7 +205,6 @@ CREATE TABLE /*_*/iwlinks (
   iwl_prefix VARBINARY(32) DEFAULT '' NOT NULL,
   iwl_title VARBINARY(255) DEFAULT '' NOT NULL,
   INDEX iwl_prefix_title_from (iwl_prefix, iwl_title, iwl_from),
-  INDEX iwl_prefix_from_title (iwl_prefix, iwl_from, iwl_title),
   PRIMARY KEY(iwl_from, iwl_prefix, iwl_title)
 ) /*$wgDBTableOptions*/;
 
@@ -338,13 +336,6 @@ CREATE TABLE /*_*/sites (
   site_forward TINYINT(1) NOT NULL,
   site_config BLOB NOT NULL,
   UNIQUE INDEX site_global_key (site_global_key),
-  INDEX site_type (site_type),
-  INDEX site_group (site_group),
-  INDEX site_source (site_source),
-  INDEX site_language (site_language),
-  INDEX site_protocol (site_protocol),
-  INDEX site_domain (site_domain),
-  INDEX site_forward (site_forward),
   PRIMARY KEY(site_id)
 ) /*$wgDBTableOptions*/;
 
@@ -385,22 +376,13 @@ CREATE TABLE /*_*/protected_titles (
 CREATE TABLE /*_*/externallinks (
   el_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
   el_from INT UNSIGNED DEFAULT 0 NOT NULL,
-  el_to BLOB NOT NULL,
-  el_index BLOB NOT NULL,
-  el_index_60 VARBINARY(60) NOT NULL,
-  INDEX el_from (
-    el_from,
-    el_to(40)
+  el_to_domain_index VARBINARY(255) DEFAULT '' NOT NULL,
+  el_to_path BLOB DEFAULT NULL,
+  INDEX el_from (el_from),
+  INDEX el_to_domain_index_to_path (
+    el_to_domain_index,
+    el_to_path(60)
   ),
-  INDEX el_to (
-    el_to(60),
-    el_from
-  ),
-  INDEX el_index (
-    el_index(60)
-  ),
-  INDEX el_index_60 (el_index_60, el_id),
-  INDEX el_from_index_60 (el_from, el_index_60, el_id),
   PRIMARY KEY(el_id)
 ) /*$wgDBTableOptions*/;
 
@@ -412,16 +394,6 @@ CREATE TABLE /*_*/ip_changes (
   INDEX ipc_rev_timestamp (ipc_rev_timestamp),
   INDEX ipc_hex_time (ipc_hex, ipc_rev_timestamp),
   PRIMARY KEY(ipc_rev_id)
-) /*$wgDBTableOptions*/;
-
-
-CREATE TABLE /*_*/revision_comment_temp (
-  revcomment_rev INT UNSIGNED NOT NULL,
-  revcomment_comment_id BIGINT UNSIGNED NOT NULL,
-  UNIQUE INDEX revcomment_rev (revcomment_rev),
-  PRIMARY KEY(
-    revcomment_rev, revcomment_comment_id
-  )
 ) /*$wgDBTableOptions*/;
 
 
@@ -490,9 +462,6 @@ CREATE TABLE /*_*/categorylinks (
     cl_to, cl_type, cl_sortkey, cl_from
   ),
   INDEX cl_timestamp (cl_to, cl_timestamp),
-  INDEX cl_collation_ext (
-    cl_collation, cl_to, cl_type, cl_from
-  ),
   PRIMARY KEY(cl_from, cl_to)
 ) /*$wgDBTableOptions*/;
 
@@ -537,7 +506,7 @@ CREATE TABLE /*_*/uploadstash (
   us_status VARCHAR(50) NOT NULL,
   us_chunk_inx INT UNSIGNED DEFAULT NULL,
   us_props BLOB DEFAULT NULL,
-  us_size INT UNSIGNED NOT NULL,
+  us_size BIGINT UNSIGNED NOT NULL,
   us_sha1 VARCHAR(31) NOT NULL,
   us_mime VARCHAR(255) DEFAULT NULL,
   us_media_type ENUM(
@@ -565,7 +534,7 @@ CREATE TABLE /*_*/filearchive (
   fa_deleted_user INT DEFAULT NULL,
   fa_deleted_timestamp BINARY(14) DEFAULT NULL,
   fa_deleted_reason_id BIGINT UNSIGNED NOT NULL,
-  fa_size INT UNSIGNED DEFAULT 0,
+  fa_size BIGINT UNSIGNED DEFAULT 0,
   fa_width INT DEFAULT 0,
   fa_height INT DEFAULT 0,
   fa_metadata MEDIUMBLOB DEFAULT NULL,
@@ -611,7 +580,7 @@ CREATE TABLE /*_*/text (
 CREATE TABLE /*_*/oldimage (
   oi_name VARBINARY(255) DEFAULT '' NOT NULL,
   oi_archive_name VARBINARY(255) DEFAULT '' NOT NULL,
-  oi_size INT UNSIGNED DEFAULT 0 NOT NULL,
+  oi_size BIGINT UNSIGNED DEFAULT 0 NOT NULL,
   oi_width INT DEFAULT 0 NOT NULL,
   oi_height INT DEFAULT 0 NOT NULL,
   oi_bits INT DEFAULT 0 NOT NULL,
@@ -657,45 +626,58 @@ CREATE TABLE /*_*/objectcache (
 ) /*$wgDBTableOptions*/;
 
 
-CREATE TABLE /*_*/ipblocks (
-  ipb_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
-  ipb_address TINYBLOB NOT NULL,
-  ipb_user INT UNSIGNED DEFAULT 0 NOT NULL,
-  ipb_by_actor BIGINT UNSIGNED NOT NULL,
-  ipb_reason_id BIGINT UNSIGNED NOT NULL,
-  ipb_timestamp BINARY(14) NOT NULL,
-  ipb_auto TINYINT(1) DEFAULT 0 NOT NULL,
-  ipb_anon_only TINYINT(1) DEFAULT 0 NOT NULL,
-  ipb_create_account TINYINT(1) DEFAULT 1 NOT NULL,
-  ipb_enable_autoblock TINYINT(1) DEFAULT 1 NOT NULL,
-  ipb_expiry VARBINARY(14) NOT NULL,
-  ipb_range_start TINYBLOB NOT NULL,
-  ipb_range_end TINYBLOB NOT NULL,
-  ipb_deleted TINYINT(1) DEFAULT 0 NOT NULL,
-  ipb_block_email TINYINT(1) DEFAULT 0 NOT NULL,
-  ipb_allow_usertalk TINYINT(1) DEFAULT 0 NOT NULL,
-  ipb_parent_block_id INT UNSIGNED DEFAULT NULL,
-  ipb_sitewide TINYINT(1) DEFAULT 1 NOT NULL,
-  UNIQUE INDEX ipb_address_unique (
-    ipb_address(255),
-    ipb_user,
-    ipb_auto
+CREATE TABLE /*_*/block (
+  bl_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
+  bl_target INT UNSIGNED NOT NULL,
+  bl_by_actor BIGINT UNSIGNED NOT NULL,
+  bl_reason_id BIGINT UNSIGNED NOT NULL,
+  bl_timestamp BINARY(14) NOT NULL,
+  bl_anon_only TINYINT(1) DEFAULT 0 NOT NULL,
+  bl_create_account TINYINT(1) DEFAULT 1 NOT NULL,
+  bl_enable_autoblock TINYINT(1) DEFAULT 1 NOT NULL,
+  bl_expiry VARBINARY(14) NOT NULL,
+  bl_deleted TINYINT(1) DEFAULT 0 NOT NULL,
+  bl_block_email TINYINT(1) DEFAULT 0 NOT NULL,
+  bl_allow_usertalk TINYINT(1) DEFAULT 0 NOT NULL,
+  bl_parent_block_id INT UNSIGNED DEFAULT NULL,
+  bl_sitewide TINYINT(1) DEFAULT 1 NOT NULL,
+  INDEX bl_timestamp (bl_timestamp),
+  INDEX bl_target (bl_target),
+  INDEX bl_expiry (bl_expiry),
+  INDEX bl_parent_block_id (bl_parent_block_id),
+  PRIMARY KEY(bl_id)
+) /*$wgDBTableOptions*/;
+
+
+CREATE TABLE /*_*/block_target (
+  bt_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
+  bt_address TINYBLOB DEFAULT NULL,
+  bt_user INT UNSIGNED DEFAULT NULL,
+  bt_user_text VARBINARY(255) DEFAULT NULL,
+  bt_auto TINYINT(1) DEFAULT 0 NOT NULL,
+  bt_range_start TINYBLOB DEFAULT NULL,
+  bt_range_end TINYBLOB DEFAULT NULL,
+  bt_ip_hex TINYBLOB DEFAULT NULL,
+  bt_count INT DEFAULT 0 NOT NULL,
+  INDEX bt_address (
+    bt_address(42)
   ),
-  INDEX ipb_user (ipb_user),
-  INDEX ipb_range (
-    ipb_range_start(8),
-    ipb_range_end(8)
+  INDEX bt_ip_user_text (
+    bt_ip_hex(35),
+    bt_user_text(255)
   ),
-  INDEX ipb_timestamp (ipb_timestamp),
-  INDEX ipb_expiry (ipb_expiry),
-  INDEX ipb_parent_block_id (ipb_parent_block_id),
-  PRIMARY KEY(ipb_id)
+  INDEX bt_range (
+    bt_range_start(35),
+    bt_range_end(35)
+  ),
+  INDEX bt_user (bt_user),
+  PRIMARY KEY(bt_id)
 ) /*$wgDBTableOptions*/;
 
 
 CREATE TABLE /*_*/image (
   img_name VARBINARY(255) DEFAULT '' NOT NULL,
-  img_size INT UNSIGNED DEFAULT 0 NOT NULL,
+  img_size BIGINT UNSIGNED DEFAULT 0 NOT NULL,
   img_width INT DEFAULT 0 NOT NULL,
   img_height INT DEFAULT 0 NOT NULL,
   img_metadata MEDIUMBLOB NOT NULL,
@@ -730,7 +712,7 @@ CREATE TABLE /*_*/image (
 
 
 CREATE TABLE /*_*/recentchanges (
-  rc_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
+  rc_id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   rc_timestamp BINARY(14) NOT NULL,
   rc_actor BIGINT UNSIGNED NOT NULL,
   rc_namespace INT DEFAULT 0 NOT NULL,
@@ -804,7 +786,7 @@ CREATE TABLE /*_*/page (
   page_is_new TINYINT UNSIGNED DEFAULT 0 NOT NULL,
   page_random DOUBLE PRECISION UNSIGNED NOT NULL,
   page_touched BINARY(14) NOT NULL,
-  page_links_updated VARBINARY(14) DEFAULT NULL,
+  page_links_updated BINARY(14) DEFAULT NULL,
   page_latest INT UNSIGNED NOT NULL,
   page_len INT UNSIGNED NOT NULL,
   page_content_model VARBINARY(32) DEFAULT NULL,
@@ -836,6 +818,7 @@ CREATE TABLE /*_*/user (
   user_registration BINARY(14) DEFAULT NULL,
   user_editcount INT UNSIGNED DEFAULT NULL,
   user_password_expires VARBINARY(14) DEFAULT NULL,
+  user_is_temp TINYINT(1) DEFAULT 0 NOT NULL,
   UNIQUE INDEX user_name (user_name),
   INDEX user_email_token (user_email_token),
   INDEX user_email (
@@ -847,21 +830,22 @@ CREATE TABLE /*_*/user (
 
 CREATE TABLE /*_*/user_autocreate_serial (
   uas_shard INT UNSIGNED NOT NULL,
+  uas_year SMALLINT UNSIGNED NOT NULL,
   uas_value INT UNSIGNED NOT NULL,
-  PRIMARY KEY(uas_shard)
+  PRIMARY KEY(uas_shard, uas_year)
 ) /*$wgDBTableOptions*/;
 
 
 CREATE TABLE /*_*/revision (
-  rev_id INT UNSIGNED AUTO_INCREMENT NOT NULL,
+  rev_id BIGINT UNSIGNED AUTO_INCREMENT NOT NULL,
   rev_page INT UNSIGNED NOT NULL,
-  rev_comment_id BIGINT UNSIGNED DEFAULT 0 NOT NULL,
-  rev_actor BIGINT UNSIGNED DEFAULT 0 NOT NULL,
+  rev_comment_id BIGINT UNSIGNED NOT NULL,
+  rev_actor BIGINT UNSIGNED NOT NULL,
   rev_timestamp BINARY(14) NOT NULL,
   rev_minor_edit TINYINT UNSIGNED DEFAULT 0 NOT NULL,
   rev_deleted TINYINT UNSIGNED DEFAULT 0 NOT NULL,
   rev_len INT UNSIGNED DEFAULT NULL,
-  rev_parent_id INT UNSIGNED DEFAULT NULL,
+  rev_parent_id BIGINT UNSIGNED DEFAULT NULL,
   rev_sha1 VARBINARY(32) DEFAULT '' NOT NULL,
   INDEX rev_timestamp (rev_timestamp),
   INDEX rev_page_timestamp (rev_page, rev_timestamp),
@@ -875,12 +859,12 @@ CREATE TABLE /*_*/revision (
 
 CREATE TABLE /*_*/searchindex (
   si_page INT UNSIGNED NOT NULL,
-  si_title VARCHAR(255) DEFAULT '' NOT NULL,
+  si_title MEDIUMTEXT NOT NULL,
   si_text MEDIUMTEXT NOT NULL,
-  UNIQUE INDEX si_page (si_page),
   FULLTEXT INDEX si_title (si_title),
-  FULLTEXT INDEX si_text (si_text)
-) ENGINE = MyISAM DEFAULT CHARSET = utf8;
+  FULLTEXT INDEX si_text (si_text),
+  PRIMARY KEY(si_page)
+) ENGINE = MyISAM DEFAULT CHARSET = utf8mb4;
 
 
 CREATE TABLE /*_*/linktarget (

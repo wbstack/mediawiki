@@ -19,16 +19,16 @@ class EntityIdComposerTest extends TestCase {
 
 	private function getComposer() {
 		return new EntityIdComposer( [
-			'numeric-item' => static function( $repositoryName, $uniquePart ) {
+			'numeric-item' => static function( $uniquePart ) {
 				return new ItemId( 'Q' . $uniquePart );
 			},
-			'custom-item' => static function( $repositoryName, $uniquePart ) {
+			'custom-item' => static function( $uniquePart ) {
 				return new ItemId( 'Q100' . $uniquePart );
 			},
 		] );
 	}
 
-	public function invalidConstructorArgumentProvider() {
+	public static function invalidConstructorArgumentProvider() {
 		$callable = static function() {
 		};
 
@@ -55,10 +55,10 @@ class EntityIdComposerTest extends TestCase {
 			},
 		] );
 		$this->expectException( UnexpectedValueException::class );
-		$composer->composeEntityId( '', 'item', 1 );
+		$composer->composeEntityId( 'item', 1 );
 	}
 
-	public function validUniquePartProvider() {
+	public static function validUniquePartProvider() {
 		return [
 			'int' => [ 'numeric-item', 3, new ItemId( 'Q3' ) ],
 			'float' => [ 'numeric-item', 4.0, new ItemId( 'Q4' ) ],
@@ -72,11 +72,11 @@ class EntityIdComposerTest extends TestCase {
 	 * @dataProvider validUniquePartProvider
 	 */
 	public function testGivenValidFragment_buildSucceeds( $entityType, $uniquePart, EntityId $expected ) {
-		$id = $this->getComposer()->composeEntityId( '', $entityType, $uniquePart );
+		$id = $this->getComposer()->composeEntityId( $entityType, $uniquePart );
 		$this->assertEquals( $expected, $id );
 	}
 
-	public function invalidUniquePartProvider() {
+	public static function invalidUniquePartProvider() {
 		return [
 			[ null, 1 ],
 			[ 'unknown', 2 ],
@@ -91,7 +91,7 @@ class EntityIdComposerTest extends TestCase {
 	public function testGivenInvalidFragment_buildFails( $entityType, $uniquePart ) {
 		$composer = $this->getComposer();
 		$this->expectException( InvalidArgumentException::class );
-		$composer->composeEntityId( '', $entityType, $uniquePart );
+		$composer->composeEntityId( $entityType, $uniquePart );
 	}
 
 }

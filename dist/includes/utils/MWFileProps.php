@@ -20,6 +20,10 @@
  * @file
  */
 
+use Wikimedia\FileBackend\FileBackend;
+use Wikimedia\FileBackend\FSFile\FSFile;
+use Wikimedia\Mime\MimeAnalyzer;
+
 /**
  * MimeMagic helper wrapper
  *
@@ -79,7 +83,7 @@ class MWFileProps {
 			# Unclear if callers of this method expect that.
 			$info['mime'] = $this->magic->improveTypeFromExtension( $info['file-mime'], $ext );
 
-			list( $info['major_mime'], $info['minor_mime'] ) = File::splitMime( $info['mime'] );
+			[ $info['major_mime'], $info['minor_mime'] ] = File::splitMime( $info['mime'] );
 			$info['media_type'] = $this->magic->getMediaType( $path, $info['mime'] );
 
 			# Height, width and metadata

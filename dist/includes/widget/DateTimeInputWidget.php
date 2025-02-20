@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Widget;
 
+use InvalidArgumentException;
+use OOUI\InputWidget;
 use OOUI\Tag;
 
 /**
@@ -10,11 +12,15 @@ use OOUI\Tag;
  * @copyright 2016 MediaWiki Widgets Team and others; see AUTHORS.txt
  * @license MIT
  */
-class DateTimeInputWidget extends \OOUI\InputWidget {
+class DateTimeInputWidget extends InputWidget {
 
+	/** @var string|null */
 	protected $type = null;
+	/** @var string|null */
 	protected $min = null;
+	/** @var string|null */
 	protected $max = null;
+	/** @var bool|null */
 	protected $clearable = null;
 
 	/**
@@ -27,7 +33,7 @@ class DateTimeInputWidget extends \OOUI\InputWidget {
 	public function __construct( array $config = [] ) {
 		// We need $this->type set before calling the parent constructor
 		if ( !isset( $config['type'] ) ) {
-			throw new \InvalidArgumentException( '$config[\'type\'] must be specified' );
+			throw new InvalidArgumentException( '$config[\'type\'] must be specified' );
 		}
 		$this->type = $config['type'];
 

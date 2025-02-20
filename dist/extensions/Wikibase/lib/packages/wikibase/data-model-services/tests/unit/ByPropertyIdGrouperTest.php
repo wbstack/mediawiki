@@ -25,7 +25,7 @@ class ByPropertyIdGrouperTest extends TestCase {
 	 */
 	public function testConstructor( $argument ) {
 		$instance = new ByPropertyIdGrouper( $argument );
-		$this->assertCount( count( $argument ), $instance->getPropertyIds() );
+		$this->assertSameSize( $argument, $instance->getPropertyIds() );
 	}
 
 	public function validConstructorArgumentProvider() {
@@ -45,7 +45,7 @@ class ByPropertyIdGrouperTest extends TestCase {
 		new ByPropertyIdGrouper( $argument );
 	}
 
-	public function invalidConstructorArgumentProvider() {
+	public static function invalidConstructorArgumentProvider() {
 		return [
 			[ null ],
 			[ 'notAnObject' ],
@@ -61,18 +61,18 @@ class ByPropertyIdGrouperTest extends TestCase {
 
 		$cases['empty list'] = [
 			[],
-			[]
+			[],
 		];
 
 		$cases['some property ids'] = [
 			[
 				$this->getPropertyIdProviderMock( 'P42' ),
-				$this->getPropertyIdProviderMock( 'P23' )
+				$this->getPropertyIdProviderMock( 'P23' ),
 			],
 			[
 				new NumericPropertyId( 'P42' ),
-				new NumericPropertyId( 'P23' )
-			]
+				new NumericPropertyId( 'P23' ),
+			],
 		];
 
 		$cases['duplicate property ids'] = [
@@ -81,8 +81,8 @@ class ByPropertyIdGrouperTest extends TestCase {
 				new NumericPropertyId( 'P42' ),
 				new NumericPropertyId( 'P23' ),
 				new NumericPropertyId( 'P15' ),
-				new NumericPropertyId( 'P10' )
-			]
+				new NumericPropertyId( 'P10' ),
+			],
 		];
 
 		return $cases;
@@ -105,13 +105,13 @@ class ByPropertyIdGrouperTest extends TestCase {
 		$cases[] = [
 			$this->getPropertyIdProviders(),
 			'P42',
-			[ 'abc', 'jkl' ]
+			[ 'abc', 'jkl' ],
 		];
 
 		$cases[] = [
 			$this->getPropertyIdProviders(),
 			'P23',
-			[ 'def' ]
+			[ 'def' ],
 		];
 
 		return $cases;
@@ -164,7 +164,7 @@ class ByPropertyIdGrouperTest extends TestCase {
 			$this->getPropertyIdProviderMock( 'P23', 'def' ),
 			$this->getPropertyIdProviderMock( 'P15', 'ghi' ),
 			$this->getPropertyIdProviderMock( 'P42', 'jkl' ),
-			$this->getPropertyIdProviderMock( 'P10', 'mno' )
+			$this->getPropertyIdProviderMock( 'P10', 'mno' ),
 		];
 	}
 
@@ -181,11 +181,11 @@ class ByPropertyIdGrouperTest extends TestCase {
 
 		$propertyIdProvider->expects( $this->once() )
 			->method( 'getPropertyId' )
-			->will( $this->returnValue( new NumericPropertyId( $propertyId ) ) );
+			->willReturn( new NumericPropertyId( $propertyId ) );
 
 		$propertyIdProvider->expects( $this->any() )
 			->method( 'getType' )
-			->will( $this->returnValue( $type ) );
+			->willReturn( $type );
 
 		return $propertyIdProvider;
 	}

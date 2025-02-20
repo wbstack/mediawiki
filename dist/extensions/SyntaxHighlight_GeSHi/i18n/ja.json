@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ant176",
 			"Aotake",
 			"Fryed-peach",
 			"JtFuruhata",
@@ -10,8 +11,8 @@
 			"Rxy",
 			"Shirayuki",
 			"Sujiniku",
-			"Yuukin0248",
-			"Ant176"
+			"Waki285",
+			"Yuukin0248"
 		]
 	},
 	"syntaxhighlight-desc": "[http://pygments.org/ Pygments - Python 構文ハイライト機能] を利用したタグ <code>&lt;syntaxhighlight&gt;</code> を提供する",
@@ -29,5 +30,7 @@
 	"syntaxhighlight-visualeditor-mwsyntaxhighlightinspector-title": "コード",
 	"syntaxhighlight-error-pygments-invocation-failure": "Pygmentsの呼び出しに失敗しました",
 	"syntaxhighlight-error-unknown-language": "「$1」は不明な言語です",
-	"syntaxhighlight-error-exceeds-size-limit": "記述された$1{{PLURAL:$1|バイト}}の構文は、ハイライトの最大許容サイズである$2{{PLURAL:$2|バイト}}を超えています"
+	"syntaxhighlight-error-exceeds-size-limit": "記述された$1{{PLURAL:$1|バイト}}の構文は、ハイライトの最大許容サイズである$2{{PLURAL:$2|バイト}}を超えています",
+	"syntaxhighlight-button-copy": "コピー",
+	"syntaxhighlight-button-copied": "コピーしました"
 }

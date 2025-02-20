@@ -12,38 +12,44 @@ use Deserializers\Exceptions\InvalidAttributeException;
 use Deserializers\Exceptions\MissingAttributeException;
 use Deserializers\Exceptions\MissingTypeException;
 use Deserializers\Exceptions\UnsupportedTypeException;
+use Exception;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
 use Wikibase\DataModel\Snak\PropertySomeValueSnak;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
+use Wikibase\DataModel\Snak\SnakObject;
 
 /**
  * Package private
  *
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- * @author Thomas Pellissier Tanon
  */
 class SnakDeserializer implements DispatchableDeserializer {
 
-	/**
-	 * @var Deserializer
-	 */
-	private $dataValueDeserializer;
-
-	/**
-	 * @var EntityIdParser
-	 */
-	private $propertyIdParser;
+	private Deserializer $dataValueDeserializer;
+	private EntityIdParser $propertyIdParser;
+	private PropertyDataTypeLookup $dataTypeLookup;
+	private array $deserializerBuilders;
+	private array $dataTypeToValueTypeMap;
+	private SnakValueDeserializer $snakValueDeserializer;
 
 	public function __construct(
 		EntityIdParser $propertyIdParser,
-		Deserializer $dataValueDeserializer
+		Deserializer $dataValueDeserializer,
+		PropertyDataTypeLookup $dataTypeLookup,
+		array $deserializerBuilders,
+		array $dataTypeToValueTypeMap,
+		SnakValueDeserializer $snakValueDeserializer
 	) {
 		$this->dataValueDeserializer = $dataValueDeserializer;
 		$this->propertyIdParser = $propertyIdParser;
+		$this->dataTypeLookup = $dataTypeLookup;
+		$this->deserializerBuilders = $deserializerBuilders;
+		$this->dataTypeToValueTypeMap = $dataTypeToValueTypeMap;
+		$this->snakValueDeserializer = $snakValueDeserializer;
 	}
 
 	/**
@@ -53,17 +59,17 @@ class SnakDeserializer implements DispatchableDeserializer {
 	 *
 	 * @return bool
 	 */
-	public function isDeserializerFor( $serialization ) {
+	public function isDeserializerFor( $serialization ): bool {
 		return is_array( $serialization )
 			&& $this->hasSnakType( $serialization )
 			&& $this->hasCorrectSnakType( $serialization );
 	}
 
-	private function hasSnakType( $serialization ) {
+	private function hasSnakType( array $serialization ): bool {
 		return array_key_exists( 'snaktype', $serialization );
 	}
 
-	private function hasCorrectSnakType( $serialization ) {
+	private function hasCorrectSnakType( array $serialization ): bool {
 		return in_array( $serialization['snaktype'], [ 'novalue', 'somevalue', 'value' ] );
 	}
 
@@ -90,7 +96,7 @@ class SnakDeserializer implements DispatchableDeserializer {
 	 * @throws InvalidAttributeException
 	 * @return PropertyNoValueSnak|PropertySomeValueSnak|PropertyValueSnak
 	 */
-	private function getDeserialized( array $serialization ) {
+	private function getDeserialized( array $serialization ): SnakObject {
 		switch ( $serialization['snaktype'] ) {
 			case 'novalue':
 				return $this->newNoValueSnak( $serialization );
@@ -101,51 +107,62 @@ class SnakDeserializer implements DispatchableDeserializer {
 		}
 	}
 
-	private function newNoValueSnak( array $serialization ) {
+	private function newNoValueSnak( array $serialization ): PropertyNoValueSnak {
 		return new PropertyNoValueSnak( $this->deserializePropertyId( $serialization['property'] ) );
 	}
 
-	private function newSomeValueSnak( array $serialization ) {
+	private function newSomeValueSnak( array $serialization ): PropertySomeValueSnak {
 		return new PropertySomeValueSnak( $this->deserializePropertyId( $serialization['property'] ) );
 	}
 
-	private function newValueSnak( array $serialization ) {
+	private function newValueSnak( array $serialization ): PropertyValueSnak {
 		$this->requireAttribute( $serialization, 'datavalue' );
+		$propertyId = $this->deserializePropertyId( $serialization['property'] );
+
+		$this->assertValidDataValue( $serialization['datavalue'] );
 
 		return new PropertyValueSnak(
-			$this->deserializePropertyId( $serialization['property'] ),
-			$this->deserializeDataValue( $serialization['datavalue'] )
+			$propertyId,
+			$this->deserializeDataValue( $propertyId, $serialization['datavalue'] )
 		);
 	}
 
-	/**
-	 * @param array $serialization
-	 *
-	 * @return DataValue
-	 */
-	private function deserializeDataValue( $serialization ) {
+	private function deserializeDataValue( PropertyId $propertyId, array $serialization ): DataValue {
 		try {
-			return $this->dataValueDeserializer->deserialize( $serialization );
+			return $this->needsDataTypeLookup( $serialization[DataValueDeserializer::TYPE_KEY] )
+				? $this->lookUpDataTypeAndDeserializeValue( $propertyId, $serialization )
+				: $this->dataValueDeserializer->deserialize( $serialization );
 		} catch ( DeserializationException $ex ) {
-			$value = isset( $serialization[DataValueDeserializer::VALUE_KEY] )
-				? $serialization[DataValueDeserializer::VALUE_KEY]
-				: null;
-			$type = isset( $serialization[DataValueDeserializer::TYPE_KEY] )
-				? $serialization[DataValueDeserializer::TYPE_KEY]
-				: null;
-			$error = isset( $serialization['error'] ) ? $serialization['error'] : $ex->getMessage();
+			return $this->newUndeserializableValue( $serialization, $ex );
+		}
+	}
 
-			return new UnDeserializableValue( $value, $type, $error );
+	private function assertValidDataValue( $serialization ): void {
+		if ( !is_array( $serialization ) || !array_key_exists( DataValueDeserializer::TYPE_KEY, $serialization ) ) {
+			throw new MissingTypeException( 'Not an array or missing the key "' . DataValueDeserializer::TYPE_KEY . '"' );
+		}
+
+		if ( !array_key_exists( DataValueDeserializer::VALUE_KEY, $serialization ) ) {
+			throw new MissingAttributeException( DataValueDeserializer::VALUE_KEY );
 		}
 	}
 
 	/**
-	 * @param string $serialization
-	 *
-	 * @throws InvalidAttributeException
-	 * @return PropertyId
+	 * We only need to look up the data type if the value type needs a data type specific parser.
 	 */
-	private function deserializePropertyId( $serialization ) {
+	private function needsDataTypeLookup( string $valueType ): bool {
+		$possibleDataTypeKeys = array_map(
+			fn( string $dataType ) => "PT:$dataType",
+			array_keys( $this->dataTypeToValueTypeMap, $valueType, true )
+		);
+
+		return !empty( array_intersect( $possibleDataTypeKeys, array_keys( $this->deserializerBuilders ) ) );
+	}
+
+	/**
+	 * @throws InvalidAttributeException
+	 */
+	private function deserializePropertyId( string $serialization ): PropertyId {
 		try {
 			$id = $this->propertyIdParser->parse( $serialization );
 		} catch ( EntityIdParsingException $ex ) {
@@ -167,7 +184,7 @@ class SnakDeserializer implements DispatchableDeserializer {
 		);
 	}
 
-	private function assertCanDeserialize( $serialization ) {
+	private function assertCanDeserialize( $serialization ): void {
 		if ( !is_array( $serialization ) ) {
 			throw new DeserializationException( 'The snak serialization should be an array' );
 		}
@@ -181,12 +198,30 @@ class SnakDeserializer implements DispatchableDeserializer {
 		}
 	}
 
-	private function requireAttribute( array $array, $attributeName ) {
+	private function requireAttribute( array $array, string $attributeName ): void {
 		if ( !array_key_exists( $attributeName, $array ) ) {
 			throw new MissingAttributeException(
 				$attributeName
 			);
 		}
+	}
+
+	private function newUndeserializableValue( array $serialization, Exception $exception ): UnDeserializableValue {
+		$value = $serialization[DataValueDeserializer::VALUE_KEY] ?? null;
+		$type = $serialization[DataValueDeserializer::TYPE_KEY] ?? null;
+		$error = $serialization['error'] ?? $exception->getMessage();
+
+		return new UnDeserializableValue( $value, $type, $error );
+	}
+
+	private function lookUpDataTypeAndDeserializeValue( PropertyId $propertyId, array $serialization ): DataValue {
+		try {
+			$dataType = $this->dataTypeLookup->getDataTypeIdForProperty( $propertyId );
+		} catch ( Exception $e ) {
+			return $this->newUndeserializableValue( $serialization, $e );
+		}
+
+		return $this->snakValueDeserializer->deserialize( $dataType, $serialization );
 	}
 
 }

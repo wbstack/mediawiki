@@ -81,7 +81,7 @@ class IndexTemplateBuilder {
 		$indexTemplate = $this->createIndexTemplate();
 		$analysisConfigBuilder = new AnalysisConfigBuilder( $this->languageCode, $this->availablePlugins, $this->getSearchConfig() );
 		$filter = new AnalysisFilter();
-		list( $analysis, $mappings ) = $filter->filterAnalysis( $analysisConfigBuilder->buildConfig(),
+		[ $analysis, $mappings ] = $filter->filterAnalysis( $analysisConfigBuilder->buildConfig(),
 			$this->templateDefinition['mappings'], true );
 		$templateDefinition = array_merge_recursive( $this->templateDefinition, [ 'settings' => [ 'analysis' => $analysis ] ] );
 		$templateDefinition['mappings'] = $mappings;
@@ -106,8 +106,7 @@ class IndexTemplateBuilder {
 		return $this->connection->getConfig();
 	}
 
-	//
-	private function createIndexTemplate() {
+	private function createIndexTemplate(): IndexTemplate {
 		// Can go back to plain IndexTemplate when upgrading to Elastica 7
 		return new class( $this->connection->getClient(), $this->templateName ) extends IndexTemplate {
 			public function request( $method, $data = [], array $query = [] ) {
@@ -116,7 +115,7 @@ class IndexTemplateBuilder {
 			}
 
 			public function create( array $args = [] ) {
-				return $this->request( \Elastica\Request::PUT, $args, [ 'include_type_name' => 'false' ] );
+				return $this->request( \Elastica\Request::PUT, $args );
 			}
 		};
 	}

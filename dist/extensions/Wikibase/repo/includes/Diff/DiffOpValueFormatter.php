@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Diff;
 
-use Html;
+use MediaWiki\Html\Html;
 
 /**
  * Class for generating diff rows for a given set of old and new values.
@@ -97,7 +97,7 @@ class DiffOpValueFormatter {
 	 * @return string HTML
 	 */
 	private function generateEmptyCells() {
-		$html = Html::rawElement( 'td', [ 'colspan' => '2' ], '&nbsp;' );
+		$html = Html::element( 'td', [ 'colspan' => '2' ], "\u{00A0}" );
 
 		return $html;
 	}

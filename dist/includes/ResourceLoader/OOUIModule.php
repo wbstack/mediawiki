@@ -20,8 +20,8 @@
 
 namespace MediaWiki\ResourceLoader;
 
-use ExtensionRegistry;
 use InvalidArgumentException;
+use MediaWiki\Registration\ExtensionRegistry;
 
 /**
  * Convenience methods for dealing with OOUI themes and their relations to MW skins.
@@ -30,8 +30,11 @@ use InvalidArgumentException;
  * @internal
  */
 trait OOUIModule {
+	/** @var string[] */
 	protected static $knownScriptsModules = [ 'core' ];
+	/** @var string[] */
 	protected static $knownStylesModules = [ 'core', 'widgets', 'toolbars', 'windows' ];
+	/** @var string[] */
 	protected static $knownImagesModules = [
 		'indicators',
 		// Extra icons
@@ -40,6 +43,7 @@ trait OOUIModule {
 		'icons-content',
 		'icons-editing-advanced',
 		'icons-editing-citation',
+		'icons-editing-functions',
 		'icons-editing-core',
 		'icons-editing-list',
 		'icons-editing-styling',
@@ -98,13 +102,13 @@ trait OOUIModule {
 		$themePaths = self::$builtinThemePaths;
 		$themePaths += ExtensionRegistry::getInstance()->getAttribute( 'OOUIThemePaths' );
 
-		list( $defaultLocalBasePath, $defaultRemoteBasePath ) =
+		[ $defaultLocalBasePath, $defaultRemoteBasePath ] =
 			FileModule::extractBasePaths();
 
 		// Allow custom themes' paths to be relative to the skin/extension that defines them,
 		// like with ResourceModuleSkinStyles
-		foreach ( $themePaths as $theme => &$paths ) {
-			list( $localBasePath, $remoteBasePath ) =
+		foreach ( $themePaths as &$paths ) {
+			[ $localBasePath, $remoteBasePath ] =
 				FileModule::extractBasePaths( $paths );
 			if ( $localBasePath !== $defaultLocalBasePath || $remoteBasePath !== $defaultRemoteBasePath ) {
 				foreach ( $paths as &$path ) {
@@ -179,6 +183,3 @@ trait OOUIModule {
 		return $this->getThemePath( $theme, 'images', $module );
 	}
 }
-
-/** @deprecated since 1.39 */
-class_alias( OOUIModule::class, 'ResourceLoaderOOUIModule' );

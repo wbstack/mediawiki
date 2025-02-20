@@ -15,61 +15,44 @@
  * along with MultimediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
-	// Shortcut for prototype later
-	var MPP;
+const HtmlUtils = require( '../mmv.HtmlUtils.js' );
+const Description = require( './mmv.ui.description.js' );
+const UiElement = require( './mmv.ui.js' );
+const MetadataPanelScroller = require( './mmv.ui.metadataPanelScroller.js' );
+const Permission = require( './mmv.ui.permission.js' );
+const ProgressBar = require( './mmv.ui.progressBar.js' );
+const StripeButtons = require( './mmv.ui.stripeButtons.js' );
+const TruncatableTextField = require( './mmv.ui.truncatableTextField.js' );
 
+/**
+ * Represents the metadata panel in the viewer
+ */
+class MetadataPanel extends UiElement {
 	/**
-	 * Represents the metadata panel in the viewer
-	 *
-	 * @class mw.mmv.ui.MetadataPanel
-	 * @extends mw.mmv.ui.Element
-	 * @constructor
 	 * @param {jQuery} $container The container for the panel (.mw-mmv-post-image).
 	 * @param {jQuery} $aboveFold The brighter headline of the metadata panel (.mw-mmv-above-fold).
 	 *  Called "aboveFold" for historical reasons, but actually a part of the next sibling of the element
 	 *  is also above the fold (bottom of the screen).
-	 * @param {mw.SafeStorage} localStorage the localStorage object, for dependency injection
-	 * @param {mw.mmv.Config} config A configuration object.
 	 */
-	function MetadataPanel( $container, $aboveFold, localStorage, config ) {
-		mw.mmv.ui.Element.call( this, $container );
+	constructor( $container, $aboveFold ) {
+		super( $container );
 
 		this.$aboveFold = $aboveFold;
 
-		/** @property {mw.mmv.Config} config - */
-		this.config = config;
-
-		/** @property {mw.mmv.HtmlUtils} htmlUtils - */
-		this.htmlUtils = new mw.mmv.HtmlUtils();
-
-		this.initializeHeader( localStorage );
+		this.initializeHeader();
 		this.initializeImageMetadata();
-		this.initializeAboutLinks();
 	}
-	OO.inheritClass( MetadataPanel, mw.mmv.ui.Element );
-	MPP = MetadataPanel.prototype;
-
-	/**
-	 * Maximum number of restriction icons before default icon is used
-	 *
-	 * @property {number} MAX_RESTRICT
-	 * @static
-	 */
-	MetadataPanel.MAX_RESTRICT = 4;
 
 	/**
 	 * FIXME this should be in the jquery.fullscreen plugin.
 	 *
 	 * @return {boolean}
 	 */
-	MPP.isFullscreened = function () {
+	isFullscreened() {
 		return $( this.$container ).closest( '.jq-fullscreened' ).length > 0;
-	};
+	}
 
-	MPP.attach = function () {
-		var panel = this;
-
+	attach() {
 		this.scroller.attach();
 		this.buttons.attach();
 		this.title.attach();
@@ -79,63 +62,56 @@
 			.add( this.$authorAndSource )
 			.add( this.title.$ellipsis )
 			.add( this.creditField.$ellipsis )
-			.each( function () {
-				$( this ).tipsy( 'enable' );
-			} )
-			.on( 'click.mmv-mp', function ( e ) {
-				var clickTargetIsLink = $( e.target ).is( 'a' ),
-					clickTargetIsTruncated = !!$( e.target ).closest( '.mw-mmv-ttf-truncated' ).length,
-					someTextIsExpanded = !!$( e.target ).closest( '.mw-mmv-untruncated' ).length;
+			.on( 'click.mmv-mp', ( e ) => {
+				const clickTargetIsLink = $( e.target ).is( 'a' );
+				const clickTargetIsTruncated = !!$( e.target ).closest( '.mw-mmv-ttf-truncated' ).length;
+				const someTextIsExpanded = !!$( e.target ).closest( '.mw-mmv-untruncated' ).length;
 
-				if (
-					!clickTargetIsLink && // don't interfere with clicks on links in the text
+				if ( !clickTargetIsLink && // don't interfere with clicks on links in the text
 					clickTargetIsTruncated && // don't expand when non-truncated text is clicked
 					!someTextIsExpanded // ignore clicks if text is already expanded
 				) {
-					if ( panel.isFullscreened() ) {
-						panel.revealTruncatedText();
+					if ( this.isFullscreened() ) {
+						this.revealTruncatedText();
 					} else {
-						panel.scroller.toggle( 'up' );
+						this.scroller.toggle( 'up' );
 					}
 				}
 			} );
 
-		$( this.$container ).on( 'mmv-metadata-open.mmv-mp mmv-metadata-reveal-truncated-text.mmv-mp', function () {
-			panel.revealTruncatedText();
-		} ).on( 'mmv-metadata-close.mmv-mp', function () {
-			panel.hideTruncatedText();
-		} ).on( 'mouseleave.mmv-mp', function () {
-			if ( panel.isFullscreened() ) {
-				var duration = parseFloat( panel.$container.css( 'transition-duration' ) ) * 1000 || 0;
-				panel.panelShrinkTimeout = setTimeout( function () {
-					panel.hideTruncatedText();
+		$( this.$container ).on( 'mmv-metadata-open.mmv-mp mmv-metadata-reveal-truncated-text.mmv-mp', () => {
+			this.revealTruncatedText();
+		} ).on( 'mmv-metadata-close.mmv-mp', () => {
+			this.hideTruncatedText();
+		} ).on( 'mouseleave.mmv-mp', () => {
+			if ( this.isFullscreened() ) {
+				const duration = parseFloat( this.$container.css( 'transition-duration' ) ) * 1000 || 0;
+				this.panelShrinkTimeout = setTimeout( () => {
+					this.hideTruncatedText();
 				}, duration );
 			}
-		} ).on( 'mouseenter.mmv-mp', function () {
-			clearTimeout( panel.panelShrinkTimeout );
-		} ).on( 'mmv-permission-grow.mmv-mp', function () {
-			panel.$permissionLink
-				.text( mw.message( 'multimediaviewer-permission-link-hide' ).text() );
-		} ).on( 'mmv-permission-shrink.mmv-mp', function () {
-			panel.$permissionLink
-				.text( mw.message( 'multimediaviewer-permission-link' ).text() );
+		} ).on( 'mouseenter.mmv-mp', () => {
+			clearTimeout( this.panelShrinkTimeout );
+		} ).on( 'mmv-permission-grow.mmv-mp', () => {
+			this.$permissionLink
+				.text( mw.msg( 'multimediaviewer-permission-link-hide' ) );
+		} ).on( 'mmv-permission-shrink.mmv-mp', () => {
+			this.$permissionLink
+				.text( mw.msg( 'multimediaviewer-permission-link' ) );
 		} );
 
-		this.handleEvent( 'jq-fullscreen-change.lip', function () {
-			panel.hideTruncatedText();
+		this.handleEvent( 'fullscreenchange.lip', () => {
+			this.hideTruncatedText();
 		} );
-	};
+	}
 
-	MPP.unattach = function () {
+	unattach() {
 		this.scroller.freezeHeight();
 
 		this.$title
 			.add( this.title.$ellipsis )
 			.add( this.$authorAndSource )
 			.add( this.creditField.$ellipsis )
-			.each( function () {
-				$( this ).tipsy( 'hide' ).tipsy( 'disable' );
-			} )
 			.off( 'click.mmv-mp' );
 
 		$( this.$container ).off( '.mmv-mp' );
@@ -143,9 +119,9 @@
 		this.scroller.unattach();
 		this.buttons.unattach();
 		this.clearEvents();
-	};
+	}
 
-	MPP.empty = function () {
+	empty() {
 		this.scroller.freezeHeight();
 		this.scroller.empty();
 
@@ -167,8 +143,10 @@
 		this.$filenamePrefix.empty();
 		this.$filenameLi.addClass( 'empty' );
 
-		this.$datetime.empty();
-		this.$datetimeLi.addClass( 'empty' );
+		this.$datetimeCreated.empty();
+		this.$datetimeCreatedLi.addClass( 'empty' );
+		this.$datetimeUpdated.empty();
+		this.$datetimeUpdatedLi.addClass( 'empty' );
 
 		this.$location.empty();
 		this.$locationLi.addClass( 'empty' );
@@ -176,20 +154,16 @@
 		this.progressBar.empty();
 
 		this.$container.removeClass( 'mw-mmv-untruncated' );
-	};
+	}
 
 	/* Initialization methods */
-
 	/**
 	 * Initializes the header, which contains the title, credit, and license elements.
-	 *
-	 * @param {mw.SafeStorage} localStorage the localStorage object, for dependency injection
 	 */
-	MPP.initializeHeader = function ( localStorage ) {
-		this.progressBar = new mw.mmv.ui.ProgressBar( this.$aboveFold );
+	initializeHeader() {
+		this.progressBar = new ProgressBar( this.$aboveFold );
 
-		this.scroller = new mw.mmv.ui.MetadataPanelScroller( this.$container, this.$aboveFold,
-			localStorage );
+		this.scroller = new MetadataPanelScroller( this.$container, this.$aboveFold );
 
 		this.$titleDiv = $( '<div>' )
 			.addClass( 'mw-mmv-title-contain' )
@@ -199,20 +173,20 @@
 
 		this.initializeButtons(); // float, needs to be on top
 		this.initializeTitle();
-	};
+	}
 
 	/**
 	 * Initializes the title elements.
 	 */
-	MPP.initializeTitle = function () {
+	initializeTitle() {
 		this.$titlePara = $( '<p>' )
-			.addClass( 'mw-mmv-title-para' )
+			.addClass( 'mw-mmv-title-para mw-parser-output' )
 			.appendTo( this.$aboveFold );
 
 		this.$title = $( '<span>' )
 			.addClass( 'mw-mmv-title' );
 
-		this.title = new mw.mmv.ui.TruncatableTextField( this.$titlePara, this.$title, {
+		this.title = new TruncatableTextField( this.$titlePara, this.$title, {
 			styles: [ 'mw-mmv-title-small', 'mw-mmv-title-smaller' ]
 		} );
 		this.title.setTitle(
@@ -220,20 +194,17 @@
 			mw.message( 'multimediaviewer-title-popup-text-more' )
 		);
 
-		this.$title.add( this.title.$ellipsis ).tipsy( {
-			delayIn: mw.config.get( 'wgMultimediaViewer' ).tooltipDelay,
-			gravity: this.correctEW( 'sw' )
-		} );
-	};
+		this.$title.add( this.title.$ellipsis );
+	}
 
-	MPP.initializeButtons = function () {
-		this.buttons = new mw.mmv.ui.StripeButtons( this.$titleDiv );
-	};
+	initializeButtons() {
+		this.buttons = new StripeButtons( this.$titleDiv );
+	}
 
 	/**
 	 * Initializes the main body of metadata elements.
 	 */
-	MPP.initializeImageMetadata = function () {
+	initializeImageMetadata() {
 		this.$container.addClass( 'mw-mmv-ttf-ellipsis-container' );
 
 		this.$imageMetadata = $( '<div>' )
@@ -249,15 +220,15 @@
 			.appendTo( this.$imageMetadata );
 
 		this.initializeCredit();
-		this.description = new mw.mmv.ui.Description( this.$imageMetadataLeft );
-		this.permission = new mw.mmv.ui.Permission( this.$imageMetadataLeft, this.scroller );
+		this.description = new Description( this.$imageMetadataLeft );
+		this.permission = new Permission( this.$imageMetadataLeft, this.scroller );
 		this.initializeImageLinks();
-	};
+	}
 
 	/**
 	 * Initializes the credit elements.
 	 */
-	MPP.initializeCredit = function () {
+	initializeCredit() {
 		this.$credit = $( '<p>' )
 			.addClass( 'mw-mmv-credit empty' )
 			.appendTo( this.$imageMetadataLeft );
@@ -266,7 +237,7 @@
 		this.$authorAndSource = $( '<span>' )
 			.addClass( 'mw-mmv-source-author' );
 
-		this.creditField = new mw.mmv.ui.TruncatableTextField(
+		this.creditField = new TruncatableTextField(
 			this.$credit,
 			this.$authorAndSource,
 			{ styles: [] }
@@ -277,16 +248,13 @@
 			mw.message( 'multimediaviewer-credit-popup-text-more' )
 		);
 
-		this.$authorAndSource.add( this.creditField.$ellipsis ).tipsy( {
-			delayIn: mw.config.get( 'wgMultimediaViewer' ).tooltipDelay,
-			gravity: this.correctEW( 'sw' )
-		} );
-	};
+		this.$authorAndSource.add( this.creditField.$ellipsis );
+	}
 
 	/**
 	 * Initializes the list of image metadata on the right side of the panel.
 	 */
-	MPP.initializeImageLinks = function () {
+	initializeImageLinks() {
 		this.$imageLinkDiv = $( '<div>' )
 			.addClass( 'mw-mmv-image-links-div' )
 			.appendTo( this.$imageMetadataRight );
@@ -299,14 +267,12 @@
 		this.initializeFilename();
 		this.initializeDatetime();
 		this.initializeLocation();
-	};
+	}
 
 	/**
 	 * Initializes the license elements.
 	 */
-	MPP.initializeLicense = function () {
-		var panel = this;
-
+	initializeLicense() {
 		this.$licenseLi = $( '<li>' )
 			.addClass( 'mw-mmv-license-li empty' )
 			.appendTo( this.$imageLinks );
@@ -322,24 +288,24 @@
 
 		this.$permissionLink = $( '<span>' )
 			.addClass( 'mw-mmv-permission-link mw-mmv-label' )
-			.text( mw.message( 'multimediaviewer-permission-link' ).text() )
+			.text( mw.msg( 'multimediaviewer-permission-link' ) )
 			.appendTo( this.$licenseLi )
 			.hide()
-			.on( 'click', function () {
-				if ( panel.permission.isFullSize() ) {
-					panel.permission.shrink();
+			.on( 'click', () => {
+				if ( this.permission.isFullSize() ) {
+					this.permission.shrink();
 				} else {
-					panel.permission.grow();
-					panel.scroller.toggle( 'up' );
+					this.permission.grow();
+					this.scroller.toggle( 'up' );
 				}
 				return false;
 			} );
-	};
+	}
 
 	/**
 	 * Initializes the filename element.
 	 */
-	MPP.initializeFilename = function () {
+	initializeFilename() {
 		this.$filenameLi = $( '<li>' )
 			.addClass( 'mw-mmv-filename-li empty' )
 			.appendTo( this.$imageLinks );
@@ -351,25 +317,33 @@
 		this.$filename = $( '<span>' )
 			.addClass( 'mw-mmv-filename' )
 			.appendTo( this.$filenameLi );
-	};
+	}
 
 	/**
 	 * Initializes the upload date/time element.
 	 */
-	MPP.initializeDatetime = function () {
-		this.$datetimeLi = $( '<li>' )
+	initializeDatetime() {
+		this.$datetimeCreatedLi = $( '<li>' )
 			.addClass( 'mw-mmv-datetime-li empty' )
 			.appendTo( this.$imageLinks );
 
-		this.$datetime = $( '<span>' )
+		this.$datetimeCreated = $( '<span>' )
 			.addClass( 'mw-mmv-datetime' )
-			.appendTo( this.$datetimeLi );
-	};
+			.appendTo( this.$datetimeCreatedLi );
+
+		this.$datetimeUpdatedLi = $( '<li>' )
+			.addClass( 'mw-mmv-datetime-li empty' )
+			.appendTo( this.$imageLinks );
+
+		this.$datetimeUpdated = $( '<span>' )
+			.addClass( 'mw-mmv-datetime' )
+			.appendTo( this.$datetimeUpdatedLi );
+	}
 
 	/**
 	 * Initializes the geolocation element.
 	 */
-	MPP.initializeLocation = function () {
+	initializeLocation() {
 		this.$locationLi = $( '<li>' )
 			.addClass( 'mw-mmv-location-li empty' )
 			.appendTo( this.$imageLinks );
@@ -377,27 +351,9 @@
 		this.$location = $( '<a>' )
 			.addClass( 'mw-mmv-location' )
 			.appendTo( this.$locationLi );
-	};
-
-	/**
-	 * Initializes two about links at the bottom of the panel.
-	 */
-	MPP.initializeAboutLinks = function () {
-		this.$mmvAboutLink = $( '<a>' )
-			.prop( 'href', mw.config.get( 'wgMultimediaViewer' ).infoLink )
-			.text( mw.message( 'multimediaviewer-about-mmv' ).text() )
-			.addClass( 'mw-mmv-about-link' );
-
-		this.$mmvAboutLinks = $( '<div>' )
-			.addClass( 'mw-mmv-about-links' )
-			.append(
-				this.$mmvAboutLink
-			)
-			.appendTo( this.$imageMetadata );
-	};
+	}
 
 	/* Setters */
-
 	/**
 	 * Sets the image title at the top of the metadata panel.
 	 * The title will be the first one available form the options below:
@@ -405,11 +361,11 @@
 	 * - the description from the filepage
 	 * - the filename (without extension)
 	 *
-	 * @param {mw.mmv.LightboxImage} image
-	 * @param {mw.mmv.model.Image} imageData
+	 * @param {LightboxImage} image
+	 * @param {ImageModel} imageData
 	 */
-	MPP.setTitle = function ( image, imageData ) {
-		var title;
+	setTitle( image, imageData ) {
+		let title;
 
 		if ( image.caption ) {
 			title = image.caption;
@@ -420,36 +376,23 @@
 		}
 
 		this.title.set( title );
-	};
-
-	/**
-	 * Sets the upload or creation date and time in the panel
-	 *
-	 * @param {string} date The formatted date to set.
-	 * @param {boolean} created Whether this is the creation date
-	 */
-	MPP.setDateTime = function ( date, created ) {
-		this.$datetime.text(
-			mw.message(
-				( created ? 'multimediaviewer-datetime-created' : 'multimediaviewer-datetime-uploaded' ),
-				date
-			).text()
-		);
-
-		this.$datetimeLi.removeClass( 'empty' );
-	};
+	}
 
 	/**
 	 * Sets the file name in the panel.
 	 *
 	 * @param {string} filename The file name to set, without prefix
 	 */
-	MPP.setFileName = function ( filename ) {
-		this.$filenamePrefix.text( 'File:' );
+	setFileName( filename ) {
+		this.$filenamePrefix.text(
+			mw.config.get( 'wgFormattedNamespaces' )[
+				mw.config.get( 'wgNamespaceIds' ).file
+			] + ':'
+		);
 		this.$filename.text( filename );
 
 		this.$filenameLi.removeClass( 'empty' );
-	};
+	}
 
 	/**
 	 * Set source and author.
@@ -460,7 +403,7 @@
 	 * @param {number} authorCount
 	 * @param {string} filepageUrl URL of the file page (used when other data is not available)
 	 */
-	MPP.setCredit = function ( attribution, source, author, authorCount, filepageUrl ) {
+	setCredit( attribution, source, author, authorCount, filepageUrl ) {
 		// sanitization will be done by TruncatableTextField.set()
 		if ( attribution && ( authorCount <= 1 || !authorCount ) ) {
 			this.creditField.set( this.wrapAttribution( attribution ) );
@@ -487,7 +430,7 @@
 		}
 
 		this.$credit.removeClass( 'empty' );
-	};
+	}
 
 	/**
 	 * Wraps a source string it with MediaViewer styles
@@ -495,12 +438,12 @@
 	 * @param {string} source Warning - unsafe HTML sometimes goes here
 	 * @return {string} unsafe HTML
 	 */
-	MPP.wrapSource = function ( source ) {
+	wrapSource( source ) {
 		return $( '<span>' )
 			.addClass( 'mw-mmv-source' )
 			.append( $.parseHTML( source ) )
 			.get( 0 ).outerHTML;
-	};
+	}
 
 	/**
 	 * Wraps an author string with MediaViewer styles
@@ -510,24 +453,24 @@
 	 * @param {string} filepageUrl URL of the file page (used when some author data is not available)
 	 * @return {string} unsafe HTML
 	 */
-	MPP.wrapAuthor = function ( author, authorCount, filepageUrl ) {
-		var $wrapper = $( '<span>' )
+	wrapAuthor( author, authorCount, filepageUrl ) {
+		const $wrapper = $( '<span>' )
 			.addClass( 'mw-mmv-author' );
 
 		if ( authorCount > 1 ) {
-			var moreText = this.htmlUtils.jqueryToHtml(
+			const moreText = HtmlUtils.jqueryToHtml(
 				$( '<a>' )
 					.addClass( 'mw-mmv-more-authors' )
-					.text( mw.message( 'multimediaviewer-multiple-authors', authorCount - 1 ).text() )
+					.text( mw.msg( 'multimediaviewer-multiple-authors', authorCount - 1 ) )
 					.attr( 'href', filepageUrl )
 			);
-			$wrapper.append( mw.message( 'multimediaviewer-multiple-authors-combine', author, moreText ).text() );
+			$wrapper.append( mw.msg( 'multimediaviewer-multiple-authors-combine', author, moreText ) );
 		} else {
 			$wrapper.append( author );
 		}
 
 		return $wrapper.get( 0 ).outerHTML;
-	};
+	}
 
 	/**
 	 * Wraps an attribution string with MediaViewer styles
@@ -535,22 +478,27 @@
 	 * @param {string} attribution Warning - unsafe HTML sometimes goes here
 	 * @return {string} unsafe HTML
 	 */
-	MPP.wrapAttribution = function ( attribution ) {
+	wrapAttribution( attribution ) {
 		return $( '<span>' )
 			.addClass( 'mw-mmv-author' )
 			.addClass( 'mw-mmv-source' )
 			.append( $.parseHTML( attribution ) )
 			.get( 0 ).outerHTML;
-	};
+	}
 
 	/**
 	 * Sets the license display in the panel
 	 *
-	 * @param {mw.mmv.model.License|null} license license data (could be missing)
+	 * @param {License|null} license license data (could be missing)
 	 * @param {string} filePageUrl URL of the file description page
 	 */
-	MPP.setLicense = function ( license, filePageUrl ) {
-		var shortName, url, isCc, isPd;
+	setLicense( license, filePageUrl ) {
+		let shortName;
+		let url;
+		let isCc;
+		let isPd;
+
+		filePageUrl += `?uselang=${ mw.config.get( 'wgUserLanguage' ) }#${ mw.msg( 'license-header' ) }`;
 
 		if ( license ) {
 			shortName = license.getShortName();
@@ -558,7 +506,7 @@
 			isCc = license.isCc();
 			isPd = license.isPd();
 		} else {
-			shortName = mw.message( 'multimediaviewer-license-default' ).text();
+			shortName = mw.msg( 'multimediaviewer-license-default' );
 			url = filePageUrl;
 			isCc = isPd = false;
 		}
@@ -572,30 +520,29 @@
 			.toggleClass( 'cc-license', isCc )
 			.toggleClass( 'pd-license', isPd )
 			.removeClass( 'empty' );
-	};
+	}
 
 	/**
 	 * Set an extra permission text which should be displayed.
 	 *
 	 * @param {string} permission
 	 */
-	MPP.setPermission = function ( permission ) {
+	setPermission( permission ) {
 		this.$permissionLink.show();
 		this.permission.set( permission );
-	};
+	}
 
 	/**
 	 * Sets any special restrictions that should be displayed.
 	 *
 	 * @param {string[]} restrictions Array of restrictions
 	 */
-	MPP.setRestrictions = function ( restrictions ) {
-		var panel = this,
-			restrictionsSet = {},
-			showDefault = false,
-			validRestrictions = 0;
+	setRestrictions( restrictions ) {
+		const restrictionsSet = {};
+		let showDefault = false;
+		let validRestrictions = 0;
 
-		restrictions.forEach( function ( value, index ) {
+		restrictions.forEach( ( value, index ) => {
 			// The following messages are used here:
 			// * multimediaviewer-restriction-2257
 			// * multimediaviewer-restriction-aus-reserve
@@ -612,7 +559,7 @@
 			// * multimediaviewer-restriction-trademarked
 			// * multimediaviewer-restriction-default
 			// * multimediaviewer-restriction-default-and-others
-			if ( !mw.message( 'multimediaviewer-restriction-' + value ).exists() || value === 'default' || index + 1 > MetadataPanel.MAX_RESTRICT ) {
+			if ( !mw.message( `multimediaviewer-restriction-${ value }` ).exists() || value === 'default' || index + 1 > MetadataPanel.MAX_RESTRICT ) {
 				showDefault = true; // If the restriction isn't defined or there are more than MAX_RESTRICT of them, show a generic symbol at the end
 				return;
 			}
@@ -622,18 +569,18 @@
 				restrictionsSet[ value ] = true;
 			}
 
-			panel.$restrictions.append( panel.createRestriction( value ) );
+			this.$restrictions.append( this.createRestriction( value ) );
 			validRestrictions++; // See how many defined restrictions are added so we know which default i18n msg to use
 		} );
 
 		if ( showDefault ) {
 			if ( validRestrictions ) {
-				panel.$restrictions.append( panel.createRestriction( 'default-and-others' ) );
+				this.$restrictions.append( this.createRestriction( 'default-and-others' ) );
 			} else {
-				panel.$restrictions.append( panel.createRestriction( 'default' ) );
+				this.$restrictions.append( this.createRestriction( 'default' ) );
 			}
 		}
-	};
+	}
 
 	/**
 	 * Helper function that generates restriction labels
@@ -641,8 +588,9 @@
 	 * @param {string} type Restriction type
 	 * @return {jQuery} jQuery object of label
 	 */
-	MPP.createRestriction = function ( type ) {
-		var $label = $( '<span>' )
+	createRestriction( type ) {
+		mw.loader.using( 'mmv.ui.restriction', () => {} ); // for restriction icons
+		const $label = $( '<span>' )
 			.addClass( 'mw-mmv-label mw-mmv-restriction-label' )
 			// Messages duplicated from above for linter
 			// * multimediaviewer-restriction-2257
@@ -660,11 +608,7 @@
 			// * multimediaviewer-restriction-trademarked
 			// * multimediaviewer-restriction-default
 			// * multimediaviewer-restriction-default-and-others
-			.prop( 'title', mw.message( 'multimediaviewer-restriction-' + type ).text() )
-			.tipsy( {
-				delay: mw.config.get( 'wgMultimediaViewer' ).tooltipDelay,
-				gravity: this.correctEW( 'se' )
-			} );
+			.prop( 'title', mw.msg( `multimediaviewer-restriction-${ type }` ) );
 
 		$( '<span>' )
 			// The following classes are used here:
@@ -682,100 +626,94 @@
 			// * mw-mmv-restriction-personality
 			// * mw-mmv-restriction-trademarked:after
 			// * mw-mmv-restriction-default
-			.addClass( 'mw-mmv-restriction-label-inner mw-mmv-restriction-' +
-				( type === 'default-and-others' ? 'default' : type ) )
-			.text( mw.message( 'multimediaviewer-restriction-' + type ).text() )
+			.addClass( `mw-mmv-restriction-label-inner mw-mmv-restriction-${ type === 'default-and-others' ? 'default' : type }` )
+			.text( mw.msg( `multimediaviewer-restriction-${ type }` ) )
 			.appendTo( $label );
 
 		return $label;
-	};
+	}
 
 	/**
 	 * Sets location data in the interface.
 	 *
-	 * @param {mw.mmv.model.Image} imageData
+	 * @param {ImageModel} imageData
 	 */
-	MPP.setLocationData = function ( imageData ) {
+	setLocationData( imageData ) {
 		if ( !imageData.hasCoords() ) {
 			return;
 		}
 
-		var latitude = imageData.latitude >= 0 ? imageData.latitude : imageData.latitude * -1;
-		var latmsg = 'multimediaviewer-geoloc-' + ( imageData.latitude >= 0 ? 'north' : 'south' );
-		var latdeg = Math.floor( latitude );
-		var latremain = latitude - latdeg;
-		var latmin = Math.floor( ( latremain ) * 60 );
-
-		var longitude = imageData.longitude >= 0 ? imageData.longitude : imageData.longitude * -1;
-		var longmsg = 'multimediaviewer-geoloc-' + ( imageData.longitude >= 0 ? 'east' : 'west' );
-		var longdeg = Math.floor( longitude );
-		var longremain = longitude - longdeg;
-		var longmin = Math.floor( ( longremain ) * 60 );
-
-		longremain -= longmin / 60;
-		latremain -= latmin / 60;
-		var latsec = Math.round( latremain * 100 * 60 * 60 ) / 100;
-		var longsec = Math.round( longremain * 100 * 60 * 60 ) / 100;
+		/**
+		 * Form at latitude or longitude as deg/min/sec array
+		 *
+		 * @param {number} value latitude or longitude
+		 * @return {string[]} formatted deg/min/sec array
+		 */
+		function convertDegMinSec( value ) {
+			value = Math.abs( value );
+			const deg = Math.floor( value );
+			value -= deg;
+			const min = Math.floor( value * 60 );
+			value -= min / 60;
+			const sec = Math.round( value * 100 * 60 * 60 ) / 100;
+			return [ deg, min, sec ].map( ( n ) => mw.language.convertNumber( n ) );
+		}
 
 		this.$location.text(
-			mw.message( 'multimediaviewer-geolocation',
-				mw.message(
-					'multimediaviewer-geoloc-coords',
-
-					mw.message(
-						'multimediaviewer-geoloc-coord',
-						mw.language.convertNumber( latdeg ),
-						mw.language.convertNumber( latmin ),
-						mw.language.convertNumber( latsec ),
+			mw.msg( 'multimediaviewer-geolocation',
+				mw.msg( 'multimediaviewer-geoloc-coords',
+					mw.msg( 'multimediaviewer-geoloc-coord',
+						...convertDegMinSec( imageData.latitude ),
 						// The following messages are used here:
 						// * multimediaviewer-geoloc-north
 						// * multimediaviewer-geoloc-south
-						mw.message( latmsg ).text()
-					).text(),
+						mw.msg( `multimediaviewer-geoloc-${ imageData.latitude >= 0 ? 'north' : 'south' }` )
+					),
 
-					mw.message(
-						'multimediaviewer-geoloc-coord',
-						mw.language.convertNumber( longdeg ),
-						mw.language.convertNumber( longmin ),
-						mw.language.convertNumber( longsec ),
+					mw.msg( 'multimediaviewer-geoloc-coord',
+						...convertDegMinSec( imageData.longitude ),
 						// The following messages are used here:
 						// * multimediaviewer-geoloc-east
 						// * multimediaviewer-geoloc-west
-						mw.message( longmsg ).text()
-					).text()
-				).text()
-			).text()
+						mw.msg( `multimediaviewer-geoloc-${ imageData.longitude >= 0 ? 'east' : 'west' }` )
+					)
+				)
+			)
 		);
 
 		this.$location.prop( 'href', (
-			'//tools.wmflabs.org/geohack/geohack.php?pagename=' +
-			'File:' + imageData.title.getMain() +
-			'&params=' +
-			Math.abs( imageData.latitude ) + ( imageData.latitude >= 0 ? '_N_' : '_S_' ) +
-			Math.abs( imageData.longitude ) + ( imageData.longitude >= 0 ? '_E_' : '_W_' ) +
-			'&language=' + encodeURIComponent( mw.config.get( 'wgUserLanguage' ) )
+			'https://geohack.toolforge.org/geohack.php?pagename=' +
+			`${ imageData.title.getPrefixedText()
+			}&params=${
+				Math.abs( imageData.latitude ) }${ imageData.latitude >= 0 ? '_N_' : '_S_'
+			}${ Math.abs( imageData.longitude ) }${ imageData.longitude >= 0 ? '_E_' : '_W_'
+			}&language=${ encodeURIComponent( mw.config.get( 'wgUserLanguage' ) ) }`
 		) );
 
 		this.$locationLi.removeClass( 'empty' );
-	};
+	}
 
 	/**
 	 * Set all the image information in the panel
 	 *
-	 * @param {mw.mmv.LightboxImage} image
-	 * @param {mw.mmv.model.Image} imageData
-	 * @param {mw.mmv.model.Repo} repoData
+	 * @param {LightboxImage} image
+	 * @param {ImageModel} imageData
 	 */
-	MPP.setImageInfo = function ( image, imageData, repoData ) {
-		var panel = this;
-
+	setImageInfo( image, imageData ) {
 		if ( imageData.creationDateTime ) {
-			panel.setDateTime( this.formatDate( imageData.creationDateTime ), true );
-		} else if ( imageData.uploadDateTime ) {
-			panel.setDateTime( this.formatDate( imageData.uploadDateTime ) );
+			this.$datetimeCreated.text(
+				mw.msg( 'multimediaviewer-datetime-created', this.formatDate( imageData.creationDateTime ) )
+			);
+			this.$datetimeCreatedLi.removeClass( 'empty' );
+		}
+		if ( imageData.uploadDateTime ) {
+			this.$datetimeUpdated.text(
+				mw.msg( 'multimediaviewer-datetime-uploaded', this.formatDate( imageData.uploadDateTime ) )
+			);
+			this.$datetimeUpdatedLi.removeClass( 'empty' );
 		}
 
-		this.buttons.set( imageData, repoData );
+		this.buttons.set( image, imageData );
 		this.description.set( imageData.description, image.caption );
 
 		this.setLicense( imageData.license, imageData.descriptionUrl );
@@ -799,7 +737,7 @@
 
 		this.resetTruncatedText();
 		this.scroller.unfreezeHeight();
-	};
+	}
 
 	/**
 	 * Show an error message, in case the data could not be loaded
@@ -807,10 +745,10 @@
 	 * @param {string} title image title
 	 * @param {string} error error message
 	 */
-	MPP.showError = function ( title, error ) {
-		this.$credit.text( mw.message( 'multimediaviewer-metadata-error', error ).text() );
+	showError( title, error ) {
+		this.$credit.text( mw.msg( 'multimediaviewer-metadata-error', error ) );
 		this.$title.html( title );
-	};
+	}
 
 	/**
 	 * Transforms a date string into localized, human-readable format.
@@ -819,8 +757,8 @@
 	 * @param {string} dateString
 	 * @return {string} formatted date
 	 */
-	MPP.formatDate = function ( dateString ) {
-		var lang = mw.config.get( 'wgUserLanguage' );
+	formatDate( dateString ) {
+		let lang = mw.config.get( 'wgUserLanguage' );
 		if ( lang === 'en' || lang === 'qqx' ) {
 			// prefer "D MMMM YYYY" format
 			// avoid passing invalid "qqx" to native toLocaleString(),
@@ -828,7 +766,11 @@
 			// and thus sometimes cause tests to fail.
 			lang = 'en-GB';
 		}
-		var date = new Date( dateString );
+		if ( dateString.length === 4 ) {
+			// assume yyyy
+			return dateString;
+		}
+		const date = new Date( dateString );
 		try {
 			if ( date instanceof Date && !isNaN( date ) ) {
 				return date.toLocaleString( lang, {
@@ -838,47 +780,55 @@
 					timeZone: 'UTC'
 				} );
 			}
-		} catch ( ignore ) {}
+		} catch ( ignore ) { }
 		// fallback to original date string
 		return dateString;
-	};
+	}
 
 	/**
 	 * Shows truncated text in the title and credit (this also rearranges the layout a bit).
 	 */
-	MPP.revealTruncatedText = function () {
+	revealTruncatedText() {
 		if ( this.$container.hasClass( 'mw-mmv-untruncated' ) ) {
 			return;
 		}
 		this.$container.addClass( 'mw-mmv-untruncated' );
 		this.title.grow();
 		this.creditField.grow();
-	};
+	}
 
 	/**
 	 * Undoes changes made by revealTruncatedText().
 	 */
-	MPP.hideTruncatedText = function () {
+	hideTruncatedText() {
 		if ( !this.$container.hasClass( 'mw-mmv-untruncated' ) ) {
 			return;
 		}
 		this.title.shrink();
 		this.creditField.shrink();
 		this.$container.removeClass( 'mw-mmv-untruncated' );
-	};
+	}
 
 	/**
 	 * Hide or reveal truncated text based on whether the panel is open. This is normally handled by
 	 * MetadataPanelScroller, but when the panel is reset (e.g. on a prev/next event) sometimes the panel position can change without a panel , such as on a
 	 * prev/next event; in such cases this function has to be called.
 	 */
-	MPP.resetTruncatedText = function () {
+	resetTruncatedText() {
 		if ( this.scroller.panelIsOpen() ) {
 			this.revealTruncatedText();
 		} else {
 			this.hideTruncatedText();
 		}
-	};
+	}
+}
 
-	mw.mmv.ui.MetadataPanel = MetadataPanel;
-}() );
+/**
+ * Maximum number of restriction icons before default icon is used
+ *
+ * @property {number} MAX_RESTRICT
+ * @static
+ */
+MetadataPanel.MAX_RESTRICT = 4;
+
+module.exports = MetadataPanel;

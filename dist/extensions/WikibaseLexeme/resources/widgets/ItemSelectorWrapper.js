@@ -7,24 +7,20 @@ module.exports = ( function () {
 	 * @return {jQuery.Promise}
 	 */
 	function formatEntityLabel( api, id ) {
-		var deferred = $.Deferred(),
-			dataValue = { value: { id: id }, type: 'wikibase-entityid' };
-
-		api.formatValue(
-			dataValue,
+		return api.formatValue(
+			{ value: { id: id }, type: 'wikibase-entityid' },
 			{},
 			'wikibase-item',
 			'text/plain',
 			''
 		).then( function ( response ) {
-			deferred.resolve( response.result );
+			return response.result;
 		} );
-
-		return deferred.promise();
 	}
 
 	return function ( api ) {
 		return {
+			compatConfig: { MODE: 3 },
 			props: [ 'value' ],
 			template: '<input>',
 			mounted: function () {
@@ -59,11 +55,17 @@ module.exports = ( function () {
 			},
 			watch: {
 				value: function ( value ) {
-					$( this.$el ).data( 'entityselector' ).selectedEntity( value );
+					var selector = $( this.$el ).data( 'entityselector' );
+					if ( selector ) {
+						selector.selectedEntity( value );
+					}
 				}
 			},
-			destroyed: function () {
-				$( this.$el ).data( 'entityselector' ).destroy();
+			unmounted: function () {
+				var selector = $( this.$el ).data( 'entityselector' );
+				if ( selector ) {
+					selector.destroy();
+				}
 			}
 		};
 	};

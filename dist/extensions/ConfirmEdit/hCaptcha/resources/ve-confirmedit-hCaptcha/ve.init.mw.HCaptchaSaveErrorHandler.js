@@ -1,5 +1,5 @@
-mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
-	mw.libs.ve.targetLoader.addPlugin( function () {
+mw.loader.using( 'ext.visualEditor.targetLoader' ).then( () => {
+	mw.libs.ve.targetLoader.addPlugin( () => {
 		ve.init.mw.HCaptchaSaveErrorHandler = function () {};
 
 		OO.inheritClass( ve.init.mw.HCaptchaSaveErrorHandler, ve.init.mw.SaveErrorHandler );
@@ -7,14 +7,13 @@ mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
 		ve.init.mw.HCaptchaSaveErrorHandler.static.name = 'confirmEditHCaptcha';
 
 		ve.init.mw.HCaptchaSaveErrorHandler.static.getReadyPromise = function () {
-			var onLoadFn = 'onHcaptchaLoadCallback' + Date.now(),
-				deferred, scriptURL, params;
-
 			if ( !this.readyPromise ) {
-				deferred = $.Deferred();
-				scriptURL = new mw.Uri( require( './config.json' ).hCaptchaScriptURL );
-				params = { onload: onLoadFn, render: 'explicit' };
-				scriptURL.query = $.extend( scriptURL.query, params );
+				const deferred = $.Deferred();
+				const config = require( './config.json' );
+				const scriptURL = new URL( config.hCaptchaScriptURL, location.href );
+				const onLoadFn = 'onHcaptchaLoadCallback' + Date.now();
+				scriptURL.searchParams.set( 'onload', onLoadFn );
+				scriptURL.searchParams.set( 'render', 'explicit' );
 
 				this.readyPromise = deferred.promise();
 				window[ onLoadFn ] = deferred.resolve;
@@ -25,13 +24,13 @@ mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
 		};
 
 		ve.init.mw.HCaptchaSaveErrorHandler.static.matchFunction = function ( data ) {
-			var captchaData = ve.getProp( data, 'visualeditoredit', 'edit', 'captcha' );
+			const captchaData = ve.getProp( data, 'visualeditoredit', 'edit', 'captcha' );
 
 			return !!( captchaData && captchaData.type === 'hcaptcha' );
 		};
 
 		ve.init.mw.HCaptchaSaveErrorHandler.static.process = function ( data, target ) {
-			var self = this,
+			const self = this,
 				siteKey = require( './config.json' ).hCaptchaSiteKey,
 				$container = $( '<div>' );
 
@@ -42,7 +41,7 @@ mw.loader.using( 'ext.visualEditor.targetLoader' ).then( function () {
 			};
 
 			this.getReadyPromise()
-				.then( function () {
+				.then( () => {
 					// ProcessDialog's error system isn't great for this yet.
 					target.saveDialog.clearMessage( 'api-save-error' );
 					target.saveDialog.showMessage( 'api-save-error', $container, { wrap: false } );

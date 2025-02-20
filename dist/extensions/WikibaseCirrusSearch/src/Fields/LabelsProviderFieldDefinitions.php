@@ -2,6 +2,7 @@
 
 namespace Wikibase\Search\Elastic\Fields;
 
+use MediaWiki\Config\ConfigFactory;
 use Wikibase\Repo\Search\Fields\FieldDefinitions;
 use Wikibase\Repo\Search\Fields\WikibaseIndexField;
 
@@ -19,10 +20,22 @@ class LabelsProviderFieldDefinitions implements FieldDefinitions {
 	private $languageCodes;
 
 	/**
-	 * @param string[] $languageCodes
+	 * @var array
 	 */
-	public function __construct( array $languageCodes ) {
+	private $stemmingSettings;
+
+	/**
+	 * @param string[] $languageCodes
+	 * @param ConfigFactory|null $configFactory
+	 */
+	public function __construct( array $languageCodes, ?ConfigFactory $configFactory = null ) {
 		$this->languageCodes = $languageCodes;
+		if ( $configFactory === null ) {
+			$this->stemmingSettings = [];
+		} else {
+			$this->stemmingSettings = $configFactory->makeConfig( 'WikibaseCirrusSearch' )
+				->get( 'UseStemming' );
+		}
 	}
 
 	/**
@@ -30,8 +43,7 @@ class LabelsProviderFieldDefinitions implements FieldDefinitions {
 	 */
 	public function getFields() {
 		return [
-			LabelCountField::NAME => new LabelCountField(),
-			LabelsField::NAME => new LabelsField( $this->languageCodes ),
+			LabelsField::NAME => new LabelsField( $this->languageCodes, $this->stemmingSettings ),
 			AllLabelsField::NAME => new AllLabelsField(),
 		];
 	}

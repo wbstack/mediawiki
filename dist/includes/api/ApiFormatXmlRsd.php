@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Copyright © 2010 Bryan Tong Minh and Brion Vibber
+ * Copyright © 2010 Bryan Tong Minh and Brooke Vibber
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,11 +21,13 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
 /**
  * @ingroup API
  */
 class ApiFormatXmlRsd extends ApiFormatXml {
-	public function __construct( ApiMain $main, $format ) {
+	public function __construct( ApiMain $main, string $format ) {
 		parent::__construct( $main, $format );
 		$this->setRootElement( 'rsd' );
 	}
@@ -39,3 +41,6 @@ class ApiFormatXmlRsd extends ApiFormatXml {
 		return parent::recXmlPrint( $name, $value, $indent, $attributes );
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiFormatXmlRsd::class, 'ApiFormatXmlRsd' );

@@ -19,67 +19,57 @@
 
 namespace MediaWiki\Parser\Parsoid\Config;
 
-use ContentHandler;
 use File;
-use LinkBatch;
-use Linker;
 use MediaTransformError;
-use MediaWiki\BadFileLookup;
+use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Category\TrackingCategories;
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Content\ContentHandler;
 use MediaWiki\Content\Transform\ContentTransformer;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Language\LanguageCode;
+use MediaWiki\Linker\Linker;
 use MediaWiki\MainConfigNames;
-use Parser;
-use ParserFactory;
-use ReadOnlyMode;
+use MediaWiki\Page\File\BadFileLookup;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserFactory;
+use MediaWiki\Parser\PPFrame;
+use MediaWiki\Title\Title;
 use RepoGroup;
-use Title;
+use Wikimedia\Assert\UnreachableException;
 use Wikimedia\Parsoid\Config\DataAccess as IDataAccess;
 use Wikimedia\Parsoid\Config\PageConfig as IPageConfig;
 use Wikimedia\Parsoid\Config\PageContent as IPageContent;
 use Wikimedia\Parsoid\Core\ContentMetadataCollector;
+use Wikimedia\Parsoid\Core\LinkTarget as ParsoidLinkTarget;
+use Wikimedia\Rdbms\ReadOnlyMode;
 
 /**
  * Implement Parsoid's abstract class for data access.
  *
  * @since 1.39
+ * @internal
  */
 class DataAccess extends IDataAccess {
-
-	/** @var RepoGroup */
-	private $repoGroup;
-
-	/** @var BadFileLookup */
-	private $badFileLookup;
-
-	/** @var HookContainer */
-	private $hookContainer;
-
-	/** @var HookRunner */
-	private $hookRunner;
-
-	/** @var ContentTransformer */
-	private $contentTransformer;
-
-	/** @var Parser */
-	private $parser;
-
-	/** @var \PPFrame */
-	private $ppFrame;
-
-	/** @var ?PageConfig */
-	private $previousPageConfig;
-
 	public const CONSTRUCTOR_OPTIONS = [
 		MainConfigNames::SVGMaxSize,
 	];
 
-	/** @var ServiceOptions */
-	private $config;
-
-	/** @var ReadOnlyMode */
-	private $readOnlyMode;
+	private RepoGroup $repoGroup;
+	private BadFileLookup $badFileLookup;
+	private HookContainer $hookContainer;
+	private HookRunner $hookRunner;
+	private ContentTransformer $contentTransformer;
+	private TrackingCategories $trackingCategories;
+	private ParserFactory $parserFactory;
+	/** Lazy-created via self::prepareParser() */
+	private ?Parser $parser = null;
+	private PPFrame $ppFrame;
+	private ?PageConfig $previousPageConfig = null;
+	private ServiceOptions $config;
+	private ReadOnlyMode $readOnlyMode;
+	private LinkBatchFactory $linkBatchFactory;
 
 	/**
 	 * @param ServiceOptions $config MediaWiki main configuration object
@@ -87,10 +77,12 @@ class DataAccess extends IDataAccess {
 	 * @param BadFileLookup $badFileLookup
 	 * @param HookContainer $hookContainer
 	 * @param ContentTransformer $contentTransformer
+	 * @param TrackingCategories $trackingCategories
 	 * @param ReadOnlyMode $readOnlyMode used to disable linting when the
 	 *   database is read-only.
 	 * @param ParserFactory $parserFactory A legacy parser factory,
 	 *   for PST/preprocessing/extension handling
+	 * @param LinkBatchFactory $linkBatchFactory
 	 */
 	public function __construct(
 		ServiceOptions $config,
@@ -98,8 +90,10 @@ class DataAccess extends IDataAccess {
 		BadFileLookup $badFileLookup,
 		HookContainer $hookContainer,
 		ContentTransformer $contentTransformer,
+		TrackingCategories $trackingCategories,
 		ReadOnlyMode $readOnlyMode,
-		ParserFactory $parserFactory
+		ParserFactory $parserFactory,
+		LinkBatchFactory $linkBatchFactory
 	) {
 		$config->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->config = $config;
@@ -107,13 +101,13 @@ class DataAccess extends IDataAccess {
 		$this->badFileLookup = $badFileLookup;
 		$this->hookContainer = $hookContainer;
 		$this->contentTransformer = $contentTransformer;
+		$this->trackingCategories = $trackingCategories;
 		$this->readOnlyMode = $readOnlyMode;
+		$this->linkBatchFactory = $linkBatchFactory;
 
 		$this->hookRunner = new HookRunner( $hookContainer );
 
-		// Use the same legacy parser object for all calls to extension tag
-		// processing, for greater compatibility.
-		$this->parser = $parserFactory->create();
+		$this->parserFactory = $parserFactory;
 		$this->previousPageConfig = null; // ensure we initialize parser options
 	}
 
@@ -153,13 +147,27 @@ class DataAccess extends IDataAccess {
 		}
 
 		// Parser::makeImage() always sets this
-		$hp['targetlang'] = $pageConfig->getPageLanguage();
+		$hp['targetlang'] = LanguageCode::bcp47ToInternal(
+			$pageConfig->getPageLanguageBcp47()
+		);
 
 		return $hp;
 	}
 
 	/** @inheritDoc */
-	public function getPageInfo( IPageConfig $pageConfig, array $titles ): array {
+	public function getPageInfo( $pageConfigOrTitle, array $titles ): array {
+		if ( $pageConfigOrTitle instanceof IPageConfig ) {
+			$context_title = Title::newFromLinkTarget(
+				$pageConfigOrTitle->getLinkTarget()
+			);
+		} elseif ( is_string( $pageConfigOrTitle ) ) {
+			// Temporary, deprecated.
+			$context_title = Title::newFromTextThrow( $pageConfigOrTitle );
+		} elseif ( $pageConfigOrTitle instanceof ParsoidLinkTarget ) {
+			$context_title = Title::newFromLinkTarget( $pageConfigOrTitle );
+		} else {
+			throw new UnreachableException( "Bad type for argument 1" );
+		}
 		$titleObjs = [];
 		$pagemap = [];
 		$classes = [];
@@ -184,7 +192,8 @@ class DataAccess extends IDataAccess {
 				$titleObjs[$name] = $t;
 			}
 		}
-		$linkBatch = new LinkBatch( $titleObjs );
+		$linkBatch = $this->linkBatchFactory->newLinkBatch( $titleObjs );
+		$linkBatch->setCaller( __METHOD__ );
 		$linkBatch->execute();
 
 		foreach ( $titleObjs as $obj ) {
@@ -192,7 +201,6 @@ class DataAccess extends IDataAccess {
 			$pagemap[$obj->getArticleID()] = $pdbk;
 			$classes[$pdbk] = $obj->isRedirect() ? 'mw-redirect' : '';
 		}
-		$context_title = Title::newFromText( $pageConfig->getTitle() );
 		$this->hookRunner->onGetLinkColours(
 			# $classes is passed by reference and mutated
 			$pagemap, $classes, $context_title
@@ -218,7 +226,7 @@ class DataAccess extends IDataAccess {
 
 	/** @inheritDoc */
 	public function getFileInfo( IPageConfig $pageConfig, array $files ): array {
-		$page = Title::newFromText( $pageConfig->getTitle() );
+		$page = Title::newFromLinkTarget( $pageConfig->getLinkTarget() );
 
 		$keys = [];
 		foreach ( $files as $f ) {
@@ -250,7 +258,9 @@ class DataAccess extends IDataAccess {
 				'mime' => $file->getMimeType(),
 				'url' => $file->getFullUrl(),
 				'mustRender' => $file->mustRender(),
-				'badFile' => $this->badFileLookup->isBadFile( $filename, $page ?: false ),
+				'badFile' => $this->badFileLookup->isBadFile( $filename, $page ),
+				'timestamp' => $file->getTimestamp(),
+				'sha1' => $file->getSha1(),
 			];
 
 			$length = $file->getLength();
@@ -281,7 +291,7 @@ class DataAccess extends IDataAccess {
 
 					// Proposed MediaTransformOutput serialization method for T51896 etc.
 					// Note that getAPIData(['fullurl']) would return
-					// wfExpandUrl(), which wouldn't respect the wiki's
+					// UrlUtils::expand(), which wouldn't respect the wiki's
 					// protocol preferences -- instead it would use the
 					// protocol used for the API request.
 					if ( is_callable( [ $mto, 'getAPIData' ] ) ) {
@@ -316,8 +326,12 @@ class DataAccess extends IDataAccess {
 		// be retained. This should also provide better compatibility with extension tags.
 		$clearState = $this->previousPageConfig !== $pageConfig;
 		$this->previousPageConfig = $pageConfig;
+		// Use the same legacy parser object for all calls to extension tag
+		// processing, for greater compatibility.
+		$this->parser ??= $this->parserFactory->create();
 		$this->parser->startExternalParse(
-			Title::newFromText( $pageConfig->getTitle() ), $pageConfig->getParserOptions(),
+			Title::newFromLinkTarget( $pageConfig->getLinkTarget() ),
+			$pageConfig->getParserOptions(),
 			$outputType, $clearState, $pageConfig->getRevisionId() );
 		$this->parser->resetOutput();
 
@@ -334,7 +348,7 @@ class DataAccess extends IDataAccess {
 		'@phan-var PageConfig $pageConfig'; // @var PageConfig $pageConfig
 		// This could use prepareParser(), but it's only called once per page,
 		// so it's not essential.
-		$titleObj = Title::newFromText( $pageConfig->getTitle() );
+		$titleObj = Title::newFromLinkTarget( $pageConfig->getLinkTarget() );
 		$user = $pageConfig->getParserOptions()->getUserIdentity();
 		$content = ContentHandler::makeContent( $wikitext, $titleObj, CONTENT_MODEL_WIKITEXT );
 		return $this->contentTransformer->preSaveTransform(
@@ -358,9 +372,9 @@ class DataAccess extends IDataAccess {
 		// created (implicitly in ::prepareParser()/Parser::resetOutput() )
 		// which we then have to manually merge.
 		$out = $parser->getOutput();
-		$out->setText( $html );
+		$out->setRawText( $html );
 		$out->collectMetadata( $metadata ); # merges $out into $metadata
-		return $out->getText( [ 'unwrap' => true ] ); # HTML
+		return Parser::extractBody( $out->getRawText() );
 	}
 
 	/** @inheritDoc */
@@ -384,7 +398,7 @@ class DataAccess extends IDataAccess {
 		$wikitext = $parser->getStripState()->unstripBoth( $wikitext );
 
 		// XXX: Ideally we will eventually have the legacy parser use our
-		// ContentMetadataCollector instead of having an new ParserOutput
+		// ContentMetadataCollector instead of having a new ParserOutput
 		// created (implicitly in ::prepareParser()/Parser::resetOutput() )
 		// which we then have to manually merge.
 		$out = $parser->getOutput();
@@ -394,10 +408,14 @@ class DataAccess extends IDataAccess {
 
 	/** @inheritDoc */
 	public function fetchTemplateSource(
-		IPageConfig $pageConfig, string $title
+		IPageConfig $pageConfig, $title
 	): ?IPageContent {
 		'@phan-var PageConfig $pageConfig'; // @var PageConfig $pageConfig
-		$titleObj = Title::newFromText( $title );
+		if ( is_string( $title ) ) {
+			$titleObj = Title::newFromTextThrow( $title );
+		} else {
+			$titleObj = Title::newFromLinkTarget( $title );
+		}
 
 		// Use the PageConfig to take advantage of custom template
 		// fetch hooks like FlaggedRevisions, etc.
@@ -407,8 +425,12 @@ class DataAccess extends IDataAccess {
 	}
 
 	/** @inheritDoc */
-	public function fetchTemplateData( IPageConfig $pageConfig, string $title ): ?array {
+	public function fetchTemplateData( IPageConfig $pageConfig, $title ): ?array {
 		$ret = [];
+		if ( !is_string( $title ) ) {
+			$titleObj = Title::newFromLinkTarget( $title );
+			$title = $titleObj->getPrefixedText();
+		}
 		// @todo: This hook needs some clean up: T304899
 		$this->hookRunner->onParserFetchTemplateData(
 			[ $title ],
@@ -424,6 +446,24 @@ class DataAccess extends IDataAccess {
 		return $tplData;
 	}
 
+	/**
+	 * Add a tracking category with the given key to the metadata for the page.
+	 * @param IPageConfig $pageConfig the page on which the tracking category
+	 *   is to be added
+	 * @param ContentMetadataCollector $metadata The metadata for the page
+	 * @param string $key Message key (not localized)
+	 */
+	public function addTrackingCategory(
+		IPageConfig $pageConfig,
+		ContentMetadataCollector $metadata,
+		string $key
+	): void {
+		$page = Title::newFromLinkTarget( $pageConfig->getLinkTarget() );
+		$this->trackingCategories->addTrackingCategory(
+			$metadata, $key, $page
+		);
+	}
+
 	/** @inheritDoc */
 	public function logLinterData( IPageConfig $pageConfig, array $lints ): void {
 		if ( $this->readOnlyMode->isReadOnly() ) {
@@ -431,7 +471,9 @@ class DataAccess extends IDataAccess {
 		}
 
 		$revId = $pageConfig->getRevisionId();
-		$title = $pageConfig->getTitle();
+		$title = Title::newFromLinkTarget(
+			$pageConfig->getLinkTarget()
+		)->getPrefixedText();
 		$pageInfo = $this->getPageInfo( $pageConfig, [ $title ] );
 		$latest = $pageInfo[$title]['revId'];
 

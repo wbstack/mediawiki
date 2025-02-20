@@ -38,10 +38,8 @@
 	"config-env-good": "L’environament es estat verificat.\nPodètz installar MediaWiki.",
 	"config-env-bad": "L’environament es estat verificat.\nPodètz pas installar MediaWiki.",
 	"config-env-php": "PHP $1 es installat.",
-	"config-unicode-using-intl": "Utilizacion de [https://pecl.php.net/intl l'extension PECL intl] per la normalizacion Unicode.",
 	"config-memory-raised": "Lo paramètre <code>memory_limit</code> de PHP èra a $1, portat a $2.",
 	"config-apc": "[https://www.php.net/apc APC] es installat",
-	"config-wincache": "[https://www.iis.net/downloads/microsoft/wincache-extension WinCache] es installat",
 	"config-diff3-bad": "GNU diff3 pas trobat.",
 	"config-git": "Logicial de contraròtle de version Git trobat : <code>$1</code>.",
 	"config-git-bad": "Logicial de contraròtle de version Git pas trobat.",
@@ -113,7 +111,6 @@
 	"config-license-cc-0": "Creative Commons Zero (domeni public)",
 	"config-license-gfdl": "GNU Free Documentation License 1.3 o ulteriora",
 	"config-license-pd": "Domeni public",
-	"config-license-cc-choose": "Seleccionar una licéncia Creative Commons personalizada",
 	"config-email-settings": "Paramètres de corrièr electronic",
 	"config-enable-email": "Activar los corrièls sortents",
 	"config-email-user": "Activar los corrièrs electronics d'utilizaire a utilizaire",
@@ -125,7 +122,6 @@
 	"config-upload-enable": "Activar lo telecargament dels fichièrs",
 	"config-upload-deleted": "Repertòri pels fichièrs suprimits :",
 	"config-instantcommons": "Activar ''InstantCommons''",
-	"config-cc-again": "Causissètz tornarmai...",
 	"config-advanced-settings": "Configuracion avançada",
 	"config-cache-options": "Paramètres per la mesa en cache dels objèctes :",
 	"config-memcached-servers": "servidors per Memcached :",
@@ -139,7 +135,6 @@
 	"config-install-database": "Creacion de la basa de donadas",
 	"config-install-schema": "Creacion d'esquèma",
 	"config-install-pg-schema-not-exist": "L'esquèma PostgreSQL existís pas",
-	"config-install-pg-commit": "Validacion de las modificacions",
 	"config-install-pg-plpgsql": "Verificacion del lengatge PL/pgSQL",
 	"config-install-user": "Creacion d'un utilizaire de la basa de donadas",
 	"config-install-user-alreadyexists": "L'utilizaire « $1 » existís ja.",
@@ -159,5 +154,5 @@
 	"config-help": "ajuda",
 	"config-help-tooltip": "clicar per agrandir",
 	"mainpagetext": "<strong>MediaWiki es estat installat amb succès.<strong>",
-	"mainpagedocfooter": "Consultatz lo [https://meta.wikimedia.org/wiki/Help:Contents/fr Guida de l'utilizaire] per mai d'entresenhas sus l'utilizacion d'aqueste logicial de wiki.\n\n== Per començar ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Lista dels paramètres de configuracion]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ/oc FAQ MediaWiki]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ Lista de discussions de las distribucions de MediaWiki]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Localisation#Translation_resources Adaptatz MediaWiki dins vòstra lenga]"
+	"mainpagedocfooter": "Consultatz lo [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents/fr Guida de l'utilizaire] per mai d'entresenhas sus l'utilizacion d'aqueste logicial de wiki.\n\n== Per començar ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Lista dels paramètres de configuracion]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ/oc FAQ MediaWiki]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ Lista de discussions de las distribucions de MediaWiki]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Localisation#Translation_resources Adaptatz MediaWiki dins vòstra lenga]"
 }

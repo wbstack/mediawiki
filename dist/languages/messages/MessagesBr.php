@@ -1,8 +1,6 @@
 <?php
 /** Breton (brezhoneg)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -108,6 +106,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'KemmoùDiwezhañ' ],
 	'Recentchangeslinked'       => [ 'KemmoùKar' ],
 	'Redirect'                  => [ 'Adkas' ],
+	'Renameuser' => [ 'AdenevelImplijer' ],
 	'Revisiondelete'            => [ 'StummoùDiverket' ],
 	'Search'                    => [ 'Klask' ],
 	'Shortpages'                => [ 'PajennoùBerr' ],
@@ -158,7 +157,7 @@ $magicWords = [
 	'img_right'                 => [ '1', 'dehou', 'right' ],
 	'img_sub'                   => [ '1', 'is', 'sub' ],
 	'img_top'                   => [ '1', 'krec\'h', 'top' ],
-	'language'                  => [ '0', '#YEZH:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#YEZH', '#LANGUAGE' ],
 	'namespace'                 => [ '1', 'ESAOUENNANV', 'NAMESPACE' ],
 	'namespacee'                => [ '1', 'ESAOUENNANVSK', 'NAMESPACEE' ],
 	'numberofactiveusers'       => [ '1', 'NIVERAIMPLIJERIENOBERIANT', 'NUMBEROFACTIVEUSERS' ],

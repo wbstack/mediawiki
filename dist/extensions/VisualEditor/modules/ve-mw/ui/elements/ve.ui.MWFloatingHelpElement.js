@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWFloatingHelpElement class.
  *
- * @copyright 2011-2021 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,8 +14,8 @@
  *
  * @constructor
  * @param {Object} config
- * @cfg {string} label
- * @cfg {jQuery} $message
+ * @param {string} config.label
+ * @param {jQuery} config.$message
  */
 ve.ui.MWFloatingHelpElement = function VeUiMWFloatingHelpElement( config ) {
 	// Parent constructor
@@ -39,7 +39,7 @@ ve.ui.MWFloatingHelpElement = function VeUiMWFloatingHelpElement( config ) {
 	this.windowManager.$element.addClass( 've-ui-mwFloatingHelpElement-windowManager' );
 
 	if ( OO.ui.isMobile() ) {
-		$( document.body ).append( this.windowManager.$element );
+		$( OO.ui.getTeleportTarget() ).append( this.windowManager.$element );
 	} else {
 		this.$element.append( this.windowManager.$element );
 	}
@@ -57,7 +57,7 @@ OO.inheritClass( ve.ui.MWFloatingHelpElement, OO.ui.Element );
 
 ve.ui.MWFloatingHelpElement.prototype.onClick = function () {
 	if ( !this.helpButton.hasFlag( 'primary' ) ) {
-		var window = this.windowManager.openWindow( this.helpDialog );
+		const window = this.windowManager.openWindow( this.helpDialog );
 
 		window.opening.then( this.updateButton.bind( this, true ) );
 		window.closing.then( this.updateButton.bind( this, false ) );

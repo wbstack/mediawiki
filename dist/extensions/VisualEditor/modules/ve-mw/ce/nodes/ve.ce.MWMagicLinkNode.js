@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWMagicLinkNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,7 +10,7 @@
  *
  * @class
  * @extends ve.ce.LeafNode
- * @mixins ve.ce.FocusableNode
+ * @mixes ve.ce.FocusableNode
  * @constructor
  * @param {ve.dm.MWMagicLinkNode} model Model to observe
  * @param {Object} [config] Configuration options
@@ -65,9 +65,11 @@ ve.ce.MWMagicLinkNode.static.getDescription = function ( model ) {
  */
 ve.ce.MWMagicLinkNode.prototype.onUpdate = function () {
 	this.$link
-		.attr( 'href', this.model.getHref() )
 		.attr( 'rel', this.model.getRel() )
 		.text( this.model.getAttribute( 'content' ) );
+
+	// T322704
+	ve.setAttributeSafe( this.$link[ 0 ], 'href', this.model.getHref(), '#' );
 };
 
 /* Registration */

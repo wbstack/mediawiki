@@ -1,8 +1,5 @@
 <?php
-
 /**
- * Copyright 2014
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -23,19 +20,24 @@
 
 namespace MediaWiki\Extension\Gadgets\Content;
 
-use Content;
-use DeferrableUpdate;
-use FormatJson;
-use JsonContentHandler;
-use Linker;
+use MediaWiki\Content\Content;
+use MediaWiki\Content\JsonContentHandler;
 use MediaWiki\Content\Renderer\ContentParseParams;
-use MediaWiki\Revision\SlotRenderingProvider;
-use ParserOutput;
-use Title;
+use MediaWiki\Content\ValidationParams;
+use MediaWiki\Extension\Gadgets\GadgetRepo;
+use MediaWiki\Extension\Gadgets\MediaWikiGadgetsJsonRepo;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Linker\Linker;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Title\Title;
+use StatusValue;
 
 class GadgetDefinitionContentHandler extends JsonContentHandler {
-	public function __construct() {
-		parent::__construct( 'GadgetDefinition' );
+	private GadgetRepo $gadgetRepo;
+
+	public function __construct( string $modelId, GadgetRepo $gadgetRepo ) {
+		parent::__construct( $modelId );
+		$this->gadgetRepo = $gadgetRepo;
 	}
 
 	/**
@@ -43,19 +45,43 @@ class GadgetDefinitionContentHandler extends JsonContentHandler {
 	 * @return bool
 	 */
 	public function canBeUsedOn( Title $title ) {
-		return $title->inNamespace( NS_GADGET_DEFINITION );
+		return MediaWikiGadgetsJsonRepo::isGadgetDefinitionTitle( $title );
 	}
 
-	/**
-	 * @return string
-	 */
+	/** @inheritDoc */
 	protected function getContentClass() {
 		return GadgetDefinitionContent::class;
 	}
 
 	public function makeEmptyContent() {
 		$class = $this->getContentClass();
-		return new $class( FormatJson::encode( $this->getDefaultMetadata(), "\t" ) );
+		return new $class( FormatJson::encode( $this->getEmptyDefinition(), "\t" ) );
+	}
+
+	/**
+	 * @param Content $content
+	 * @param ValidationParams $validationParams
+	 * @return StatusValue
+	 */
+	public function validateSave( Content $content, ValidationParams $validationParams ) {
+		$status = parent::validateSave( $content, $validationParams );
+		'@phan-var GadgetDefinitionContent $content';
+		if ( !$status->isOK() ) {
+			return $content->validate();
+		}
+		return $status;
+	}
+
+	public function getEmptyDefinition() {
+		return [
+			'settings' => [
+				'category' => '',
+			],
+			'module' => [
+				'pages' => [],
+				'dependencies' => [],
+			]
+		];
 	}
 
 	public function getDefaultMetadata() {
@@ -64,56 +90,24 @@ class GadgetDefinitionContentHandler extends JsonContentHandler {
 				'rights' => [],
 				'default' => false,
 				'package' => false,
+				'requiresES6' => false,
 				'hidden' => false,
 				'skins' => [],
 				'actions' => [],
+				'namespaces' => [],
+				'categories' => [],
+				'contentModels' => [],
 				'category' => '',
 				'supportsUrlLoad' => false,
 			],
 			'module' => [
-				'scripts' => [],
-				'styles' => [],
-				'datas' => [],
+				'pages' => [],
 				'peers' => [],
 				'dependencies' => [],
 				'messages' => [],
 				'type' => '',
 			],
 		];
-	}
-
-	/**
-	 * @param Title $title The title of the page to supply the updates for.
-	 * @param string $role The role (slot) in which the content is being used.
-	 * @return DeferrableUpdate[] A list of DeferrableUpdate objects for putting information
-	 *        about this content object somewhere.
-	 */
-	public function getDeletionUpdates( Title $title, $role ) {
-		return array_merge(
-			parent::getDeletionUpdates( $title, $role ),
-			[ new GadgetDefinitionDeletionUpdate( $title ) ]
-		);
-	}
-
-	/**
-	 * @param Title $title The title of the page to supply the updates for.
-	 * @param Content $content The content to generate data updates for.
-	 * @param string $role The role (slot) in which the content is being used.
-	 * @param SlotRenderingProvider $slotOutput A provider that can be used to gain access to
-	 *        a ParserOutput of $content by calling $slotOutput->getSlotParserOutput( $role, false ).
-	 * @return DeferrableUpdate[] A list of DeferrableUpdate objects for putting information
-	 *        about this content object somewhere.
-	 */
-	public function getSecondaryDataUpdates(
-		Title $title,
-		Content $content,
-		$role,
-		SlotRenderingProvider $slotOutput
-	) {
-		return array_merge(
-			parent::getSecondaryDataUpdates( $title, $content, $role, $slotOutput ),
-			[ new GadgetDefinitionSecondaryDataUpdate( $title ) ]
-		);
 	}
 
 	/**
@@ -128,30 +122,38 @@ class GadgetDefinitionContentHandler extends JsonContentHandler {
 		// Create a deep clone. FIXME: unserialize(serialize()) is hacky.
 		$data = unserialize( serialize( $content->getData()->getValue() ) );
 		if ( $data !== null ) {
-			foreach ( [ 'scripts', 'styles', 'datas' ] as $type ) {
-				if ( isset( $data->module->{$type} ) ) {
-					foreach ( $data->module->{$type} as &$page ) {
-						$title = Title::makeTitleSafe( NS_GADGET, $page );
-						$this->makeLink( $parserOutput, $page, $title );
+			if ( isset( $data->module->pages ) ) {
+				foreach ( $data->module->pages as &$page ) {
+					$title = Title::makeTitleSafe( NS_MEDIAWIKI, "Gadget-$page" );
+					$this->makeLink( $parserOutput, $page, $title );
+				}
+			}
+			if ( isset( $data->module->dependencies ) ) {
+				foreach ( $data->module->dependencies as &$dep ) {
+					if ( str_starts_with( $dep, 'ext.gadget.' ) ) {
+						$gadgetId = explode( 'ext.gadget.', $dep )[ 1 ];
+						$title = $this->gadgetRepo->getGadgetDefinitionTitle( $gadgetId );
+						if ( $title ) {
+							$this->makeLink( $parserOutput, $dep, $title );
+						}
 					}
 				}
 			}
-			foreach ( $data->module->dependencies as &$dep ) {
-				if ( str_starts_with( $dep, 'ext.gadget.' ) ) {
-					$gadgetId = explode( 'ext.gadget.', $dep )[1];
-					$title = Title::makeTitleSafe( NS_GADGET_DEFINITION, $gadgetId );
-					$this->makeLink( $parserOutput, $dep, $title );
+			if ( isset( $data->module->peers ) ) {
+				foreach ( $data->module->peers as &$peer ) {
+					$title = $this->gadgetRepo->getGadgetDefinitionTitle( $peer );
+					if ( $title ) {
+						$this->makeLink( $parserOutput, $peer, $title );
+					}
 				}
 			}
-			foreach ( $data->module->peers as &$peer ) {
-				$title = Title::makeTitleSafe( NS_GADGET_DEFINITION, $peer );
-				$this->makeLink( $parserOutput, $peer, $title );
+			if ( isset( $data->module->messages ) ) {
+				foreach ( $data->module->messages as &$msg ) {
+					$title = Title::makeTitleSafe( NS_MEDIAWIKI, $msg );
+					$this->makeLink( $parserOutput, $msg, $title );
+				}
 			}
-			foreach ( $data->module->messages as &$msg ) {
-				$title = Title::makeTitleSafe( NS_MEDIAWIKI, $msg );
-				$this->makeLink( $parserOutput, $msg, $title );
-			}
-			if ( $data->settings->category ) {
+			if ( isset( $data->settings->category ) && $data->settings->category ) {
 				$this->makeLink(
 					$parserOutput,
 					$data->settings->category,

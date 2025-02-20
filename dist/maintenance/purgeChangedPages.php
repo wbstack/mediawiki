@@ -21,9 +21,11 @@
  * @ingroup Maintenance
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -68,7 +70,7 @@ class PurgeChangedPages extends Maintenance {
 			}
 		}
 
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 		$minTime = $dbr->timestamp( $this->getOption( 'starttime' ) );
 		$maxTime = $dbr->timestamp( $this->getOption( 'endtime' ) );
 
@@ -82,27 +84,21 @@ class PurgeChangedPages extends Maintenance {
 			// Adjust bach size if we are stuck in a second that had many changes
 			$bSize = ( $stuckCount + 1 ) * $this->getBatchSize();
 
-			$res = $dbr->select(
-				[ 'page', 'revision' ],
-				[
-					'rev_timestamp',
-					'page_namespace',
-					'page_title',
-				],
-				[
-					"rev_timestamp > " . $dbr->addQuotes( $minTime ),
-					"rev_timestamp <= " . $dbr->addQuotes( $maxTime ),
-					// Only get rows where the revision is the latest for the page.
-					// Other revisions would be duplicate and we don't need to purge if
-					// there has been an edit after the interesting time window.
-					"page_latest = rev_id",
-				],
-				__METHOD__,
-				[ 'ORDER BY' => 'rev_timestamp', 'LIMIT' => $bSize ],
-				[
-					'page' => [ 'JOIN', 'rev_page=page_id' ],
-				]
-			);
+			$res = $dbr->newSelectQueryBuilder()
+				->select( [ 'rev_timestamp', 'page_namespace', 'page_title', ] )
+				->from( 'revision' )
+				->join( 'page', null, 'rev_page=page_id' )
+				->where( [
+					$dbr->expr( 'rev_timestamp', '>', $minTime ),
+					$dbr->expr( 'rev_timestamp', '<=', $maxTime ),
+				] )
+				// Only get rows where the revision is the latest for the page.
+				// Other revisions would be duplicate and we don't need to purge if
+				// there has been an edit after the interesting time window.
+				->andWhere( "page_latest = rev_id" )
+				->orderBy( 'rev_timestamp' )
+				->limit( $bSize )
+				->caller( __METHOD__ )->fetchResultSet();
 
 			if ( !$res->numRows() ) {
 				// nothing more found so we are done
@@ -110,7 +106,7 @@ class PurgeChangedPages extends Maintenance {
 			}
 
 			// Kludge to not get stuck in loops for batches with the same timestamp
-			list( $rows, $lastTime ) = $this->pageableSortedRows( $res, 'rev_timestamp', $bSize );
+			[ $rows, $lastTime ] = $this->pageableSortedRows( $res, 'rev_timestamp', $bSize );
 			if ( !count( $rows ) ) {
 				++$stuckCount;
 				continue;
@@ -138,7 +134,7 @@ class PurgeChangedPages extends Maintenance {
 			}
 
 			// Send batch of purge requests out to CDN servers
-			$hcu = MediaWikiServices::getInstance()->getHtmlCacheUpdater();
+			$hcu = $this->getServiceContainer()->getHtmlCacheUpdater();
 			$hcu->purgeUrls( $urls, $hcu::PURGE_NAIVE );
 
 			if ( $this->hasOption( 'sleep-per-batch' ) ) {
@@ -199,5 +195,7 @@ class PurgeChangedPages extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = PurgeChangedPages::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

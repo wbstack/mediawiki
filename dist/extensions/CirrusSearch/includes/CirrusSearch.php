@@ -2,6 +2,7 @@
 
 namespace CirrusSearch;
 
+use CirrusSearch\Extra\MultiList\MultiListBuilder;
 use CirrusSearch\Parser\NamespacePrefixParser;
 use CirrusSearch\Parser\QueryStringRegex\SearchQueryParseException;
 use CirrusSearch\Profile\ContextualProfileOverride;
@@ -15,19 +16,19 @@ use CirrusSearch\Search\SearchQuery;
 use CirrusSearch\Search\SearchQueryBuilder;
 use CirrusSearch\Search\TitleHelper;
 use CirrusSearch\Search\TitleResultsType;
-use CirrusSearch\Wikimedia\WeightedTagsHooks;
 use ISearchResultSet;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\ProperPageIdentity;
-use RequestContext;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use MediaWiki\WikiMap\WikiMap;
 use SearchEngine;
 use SearchIndexField;
 use SearchSuggestionSet;
-use Status;
-use Title;
-use User;
-use WebRequest;
-use WikiMap;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -158,10 +159,10 @@ class CirrusSearch extends SearchEngine {
 	 * @param InterwikiResolver|null $interwikiResolver
 	 * @param TitleHelper|null $titleHelper
 	 */
-	public function __construct( SearchConfig $config = null,
-		CirrusDebugOptions $debugOptions = null,
-		NamespacePrefixParser $namespacePrefixParser = null,
-		InterwikiResolver $interwikiResolver = null, TitleHelper $titleHelper = null
+	public function __construct( ?SearchConfig $config = null,
+		?CirrusDebugOptions $debugOptions = null,
+		?NamespacePrefixParser $namespacePrefixParser = null,
+		?InterwikiResolver $interwikiResolver = null, ?TitleHelper $titleHelper = null
 	) {
 		// Initialize UserTesting before we create a Connection
 		// This is useful to do tests across multiple clusters
@@ -186,7 +187,7 @@ class CirrusSearch extends SearchEngine {
 		$this->debugOptions = $debugOptions ?? CirrusDebugOptions::fromRequest( $this->request );
 		$this->titleHelper = $titleHelper ?: new TitleHelper( WikiMap::getCurrentWikiId(), $interwikiResolver,
 			static function ( $v ) {
-				return \Sanitizer::escapeIdForLink( $v );
+				return Sanitizer::escapeIdForLink( $v );
 			}
 		);
 		$extraFieldsInSearchResults = $this->config->get( 'CirrusSearchExtraFieldsInSearchResults' );
@@ -223,14 +224,14 @@ class CirrusSearch extends SearchEngine {
 	 */
 	public function supports( $feature ) {
 		switch ( $feature ) {
-		case 'search-update':
-		case 'list-redirects':
-			return false;
-		case self::FT_QUERY_INDEP_PROFILE_TYPE:
-		case self::EXTRA_FIELDS_TO_EXTRACT:
-			return true;
-		default:
-			return parent::supports( $feature );
+			case 'search-update':
+			case 'list-redirects':
+				return false;
+			case self::FT_QUERY_INDEP_PROFILE_TYPE:
+			case self::EXTRA_FIELDS_TO_EXTRACT:
+				return true;
+			default:
+				return parent::supports( $feature );
 		}
 	}
 
@@ -385,13 +386,20 @@ class CirrusSearch extends SearchEngine {
 	 * @return string[]
 	 */
 	public function getValidSorts() {
-		return [
+		$sorts = [
 			'relevance', 'just_match', 'none',
 			'incoming_links_asc', 'incoming_links_desc',
 			'last_edit_asc', 'last_edit_desc',
 			'create_timestamp_asc', 'create_timestamp_desc',
 			'random', 'user_random',
 		];
+
+		if ( $this->config->getElement( 'CirrusSearchNaturalTitleSort', 'use' ) ) {
+			$sorts[] = 'title_natural_asc';
+			$sorts[] = 'title_natural_desc';
+		}
+
+		return $sorts;
 	}
 
 	/**
@@ -511,18 +519,18 @@ class CirrusSearch extends SearchEngine {
 	 * @return array|null
 	 * @see SearchEngine::getProfiles()
 	 */
-	public function getProfiles( $profileType, User $user = null ) {
+	public function getProfiles( $profileType, ?User $user = null ) {
 		$profileService = $this->config->getProfileService();
 		$serviceProfileType = null;
 		switch ( $profileType ) {
-		case SearchEngine::COMPLETION_PROFILE_TYPE:
-			if ( $this->config->isCompletionSuggesterEnabled() ) {
-				$serviceProfileType = SearchProfileService::COMPLETION;
-			}
-			break;
-		case SearchEngine::FT_QUERY_INDEP_PROFILE_TYPE:
-			$serviceProfileType = SearchProfileService::RESCORE;
-			break;
+			case SearchEngine::COMPLETION_PROFILE_TYPE:
+				if ( $this->config->isCompletionSuggesterEnabled() ) {
+					$serviceProfileType = SearchProfileService::COMPLETION;
+				}
+				break;
+			case SearchEngine::FT_QUERY_INDEP_PROFILE_TYPE:
+				$serviceProfileType = SearchProfileService::RESCORE;
+				break;
 		}
 
 		if ( $serviceProfileType === null ) {
@@ -593,7 +601,7 @@ class CirrusSearch extends SearchEngine {
 
 		$term = trim( $term );
 
-		if ( empty( $term ) ) {
+		if ( $term === '' ) {
 			return Status::newGood( [] );
 		}
 
@@ -607,69 +615,31 @@ class CirrusSearch extends SearchEngine {
 	}
 
 	/**
-	 * Request the setting of the weighted_tags field for the given tag(s) and weight(s).
-	 * Will set a "$tagPrefix/$tagName" tag for each element of $tagNames, and will unset
-	 * all other tags with the same prefix (in other words, this will replace the existing
-	 * tag set for a given prefix). When $tagName is omitted, 'exists' will be used - this
-	 * is canonical for tag types where the tag is fully determined by the prefix.
-	 *
-	 * This is meant for testing and non-production setups. For production a more efficient batched
-	 * update process can be implemented outside MediaWiki.
-	 *
-	 * @param ProperPageIdentity $page
-	 * @param string $tagPrefix
-	 * @param string|string[]|null $tagNames
-	 * @param int|int[]|null $tagWeights Tag weights (between 1-1000). When $tagNames is omitted,
-	 *   $tagWeights should be a single number; otherwise it should be a tagname => weight map.
+	 * @deprecated update via {@link WeightedTagsUpdater} service
 	 */
 	public function updateWeightedTags( ProperPageIdentity $page, string $tagPrefix, $tagNames = null, $tagWeights = null ): void {
-		Assert::parameterType( [ 'string', 'array', 'null' ], $tagNames, '$tagNames' );
-		if ( is_array( $tagNames ) ) {
-			Assert::parameterElementType( 'string', $tagNames, '$tagNames' );
-		}
 		Assert::precondition( strpos( $tagPrefix, '/' ) === false,
 			"invalid tag prefix $tagPrefix: must not contain /" );
-		foreach ( (array)$tagNames as $tagName ) {
-			Assert::precondition( strpos( $tagName, '|' ) === false,
-				"invalid tag name $tagName: must not contain |" );
-		}
-		if ( $tagWeights !== null ) {
-			if ( $tagNames === null ) {
-				$tagWeightsToCheck = [ $tagWeights ];
-			} else {
-				$tagWeightsToCheck = $tagWeights;
-			}
-			foreach ( $tagWeightsToCheck as $tagName => $weight ) {
-				if ( $tagNames ) {
-					Assert::precondition( in_array( $tagName, (array)$tagNames, true ),
-						"tag name $tagName used in \$tagWeights but not found in \$tagNames" );
-				}
-				Assert::precondition( is_int( $weight ), "weights must be integers but $weight is "
-					. gettype( $weight ) );
-				Assert::precondition( $weight >= 1 && $weight <= 1000,
-					"weights must be between 1 and 1000 (found: $weight)" );
-			}
-		}
 
-		$this->getUpdater()->updateWeightedTags( $page,
-			WeightedTagsHooks::FIELD_NAME, $tagPrefix, $tagNames, $tagWeights );
+		$this->getUpdater()->updateWeightedTags(
+			$page,
+			$tagPrefix,
+			MultiListBuilder::buildTagWeightsFromLegacyParameters( $tagNames, $tagWeights )
+		);
 	}
 
 	/**
-	 * Request the reset of the weighted_tags field for the category $tagCategory.
-	 *
-	 * @param ProperPageIdentity $page
-	 * @param string $tagPrefix
+	 * @deprecated update via {@link WeightedTagsUpdater} service
 	 */
 	public function resetWeightedTags( ProperPageIdentity $page, string $tagPrefix ): void {
-		$this->getUpdater()->resetWeightedTags( $page, WeightedTagsHooks::FIELD_NAME, $tagPrefix );
+		$this->getUpdater()->resetWeightedTags( $page, [ $tagPrefix ] );
 	}
 
 	/**
 	 * Helper method to facilitate mocking during tests.
 	 * @return Updater
 	 */
-	protected function getUpdater() {
+	protected function getUpdater(): Updater {
 		return new Updater( $this->connection );
 	}
 
@@ -693,7 +663,7 @@ class CirrusSearch extends SearchEngine {
 	 * @param SearchConfig|null $config
 	 * @return Searcher
 	 */
-	private function makeSearcher( SearchConfig $config = null ) {
+	private function makeSearcher( ?SearchConfig $config = null ) {
 		return new Searcher( $this->connection, $this->offset, $this->limit, $config ?? $this->config, $this->namespaces,
 				null, false, $this->debugOptions, $this->namespacePrefixParser, $this->interwikiResolver, $this->titleHelper,
 				$this->getCirrusSearchHookRunner() );

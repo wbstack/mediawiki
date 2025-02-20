@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWStaticRedirectMetaItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -37,7 +37,7 @@ ve.dm.MWStaticRedirectMetaItem.static.toDataElement = function () {
 };
 
 ve.dm.MWStaticRedirectMetaItem.static.toDomElements = function ( dataElement, doc ) {
-	var meta = doc.createElement( 'meta' );
+	const meta = doc.createElement( 'meta' );
 	meta.setAttribute( 'property', 'mw:PageProp/staticredirect' );
 	return [ meta ];
 };

@@ -7,8 +7,13 @@ use Error;
 use Wikimedia\Parsoid\Config\DataAccess;
 use Wikimedia\Parsoid\Config\PageConfig;
 use Wikimedia\Parsoid\Config\PageContent;
+use Wikimedia\Parsoid\Config\SiteConfig;
 use Wikimedia\Parsoid\Core\ContentMetadataCollector;
+use Wikimedia\Parsoid\Core\LinkTarget;
+use Wikimedia\Parsoid\ParserTests\MockApiHelper;
 use Wikimedia\Parsoid\Utils\PHPUtils;
+use Wikimedia\Parsoid\Utils\Title;
+use Wikimedia\Parsoid\Utils\TitleValue;
 
 /**
  * This implements some of the functionality that the tests/ParserTests/MockAPIHelper.php
@@ -16,6 +21,8 @@ use Wikimedia\Parsoid\Utils\PHPUtils;
  * by parser tests.
  */
 class MockDataAccess extends DataAccess {
+	private SiteConfig $siteConfig;
+
 	private static $PAGE_DATA = [
 		"Main_Page" => [
 			"title" => "Main Page",
@@ -285,21 +292,27 @@ class MockDataAccess extends DataAccess {
 			'width' => 1941,
 			'height' => 220,
 			'bits' => 8,
-			'mime' => 'image/jpeg'
+			'mime' => 'image/jpeg',
+			'sha1' => '0000000000000000000000000000001', // Wikimedia\base_convert( '1', 16, 36, 31 )
+			'timestamp' => '20010115123500',
 		],
 		'Thumb.png' => [
 			'size' => 22589,
 			'width' => 135,
 			'height' => 135,
 			'bits' => 8,
-			'mime' => 'image/png'
+			'mime' => 'image/png',
+			'sha1' => '0000000000000000000000000000002', // Wikimedia\base_convert( '2', 16, 36, 31 )
+			'timestamp' => '20130225203040',
 		],
 		'Foobar.svg' => [
 			'size' => 12345,
 			'width' => 240,
 			'height' => 180,
 			'bits' => 24,
-			'mime' => 'image/svg+xml'
+			'mime' => 'image/svg+xml',
+			'sha1' => null, // Wikimedia\base_convert( '', 16, 36, 31 ) returns false
+			'timestamp' => '20010115123500',
 		],
 		'Bad.jpg' => [
 			'size' => 12345,
@@ -307,13 +320,17 @@ class MockDataAccess extends DataAccess {
 			'height' => 240,
 			'bits' => 24,
 			'mime' => 'image/jpeg',
+			'sha1' => '0000000000000000000000000000003', // Wikimedia\base_convert( '3', 16, 36, 31 )
+			'timestamp' => '20010115123500',
 		],
 		'LoremIpsum.djvu' => [
 			'size' => 3249,
 			'width' => 2480,
 			'height' => 3508,
 			'bits' => 8,
-			'mime' => 'image/vnd.djvu'
+			'mime' => 'image/vnd.djvu',
+			'sha1' => null, // Wikimedia\base_convert( '', 16, 36, 31 ) returns false
+			'timestamp' => '20010115123600',
 		],
 		'Video.ogv' => [
 			'size' => 12345,
@@ -329,6 +346,8 @@ class MockDataAccess extends DataAccess {
 				'1.2' => 'seek%3D1.2',
 				'85' => 'seek%3D3.3666666666667', # hard limited by duration
 			],
+			'sha1' => null, // Wikimedia\base_convert( '', 16, 36, 31 ) returns false
+			'timestamp' => '20010115123500',
 		],
 		'Audio.oga' => [
 			'size' => 12345,
@@ -340,30 +359,38 @@ class MockDataAccess extends DataAccess {
 			'duration' => 0.99875,
 			'mime' => 'audio/ogg; codecs="vorbis"',
 			'mediatype' => 'AUDIO',
-			'title' => 'Original Ogg file (41 kbps)',
-			'shorttitle' => 'Ogg source',
+			'sha1' => null, // Wikimedia\base_convert( '', 16, 36, 31 ) returns false
+			'timestamp' => '20010115123500',
 		]
 	];
 
 	/**
-	 * @param string $title
+	 * @param string|LinkTarget $title
 	 * @return string
 	 */
-	private function normTitle( string $title ): string {
+	private function normTitle( $title ): string {
+		if ( !is_string( $title ) ) {
+			$title = Title::newFromLinkTarget(
+				$title, $this->siteConfig
+			);
+			return $title->getPrefixedDBKey();
+		}
 		return strtr( $title, ' ', '_' );
 	}
 
 	/**
+	 * @param SiteConfig $siteConfig
 	 * @param array $opts
 	 */
-	public function __construct( array $opts ) {
+	public function __construct( SiteConfig $siteConfig, array $opts ) {
+		$this->siteConfig = $siteConfig;
 		// Update data of the large page
 		$mainSlot = &self::$PAGE_DATA['Large_Page']['slots']['main'];
 		$mainSlot['*'] = str_repeat( 'a', $opts['maxWikitextSize'] ?? 1000000 );
 	}
 
 	/** @inheritDoc */
-	public function getPageInfo( PageConfig $pageConfig, array $titles ): array {
+	public function getPageInfo( $pageConfigOrTitle, array $titles ): array {
 		$ret = [];
 		foreach ( $titles as $title ) {
 			$normTitle = $this->normTitle( $title );
@@ -416,6 +443,8 @@ class MockDataAccess extends DataAccess {
 				'mediatype' => $mediatype,
 				'mime' => $props['mime'],
 				'badFile' => ( $normFileName === 'Bad.jpg' ),
+				'sha1' => $props['sha1'],
+				'timestamp' => $props['timestamp'],
 			];
 
 			if ( isset( $props['duration'] ) ) {
@@ -450,26 +479,11 @@ class MockDataAccess extends DataAccess {
 			}
 
 			if ( !empty( $txopts['height'] ) || !empty( $txopts['width'] ) ) {
-				if ( $txopts['height'] === null ) {
-					// File::scaleHeight in PHP
-					$txopts['height'] = round( $height * $txopts['width'] / $width );
-				} elseif ( $txopts['width'] === null ) {
-					// MediaHandler::fitBoxWidth in PHP
-					// This is crazy!
-					$idealWidth = $width * $txopts['height'] / $height;
-					$roundedUp = ceil( $idealWidth );
-					if ( round( $roundedUp * $height / $width ) > $txopts['height'] ) {
-						$txopts['width'] = floor( $idealWidth );
-					} else {
-						$txopts['width'] = $roundedUp;
-					}
-				} else {
-					if ( round( $height * $txopts['width'] / $width ) > $txopts['height'] ) {
-						$txopts['width'] = ceil( $width * $txopts['height'] / $height );
-					} else {
-						$txopts['height'] = round( $height * $txopts['width'] / $width );
-					}
-				}
+
+				// Set $txopts['width'] and $txopts['height']
+				$rtwidth = &$txopts['width'];
+				$rtheight = &$txopts['height'];
+				MockApiHelper::transformHelper( $width, $height, $rtwidth, $rtheight );
 
 				$urlWidth = $txopts['width'];
 				if ( $txopts['width'] > $width ) {
@@ -507,23 +521,6 @@ class MockDataAccess extends DataAccess {
 				$info['thumbwidth'] = $txopts['width'];
 				$info['thumbheight'] = $txopts['height'];
 				$info['thumburl'] = $turl;
-			}
-			// Make this look like a TMH response
-			if ( isset( $props['title'] ) || isset( $props['shorttitle'] ) ) {
-				$info['derivatives'] = [
-					[
-						'src' => $info['url'],
-						'type' => $info['mime'],
-						'width' => strval( $info['width'] ),
-						'height' => strval( $info['height'] ),
-					]
-				];
-				if ( isset( $props['title'] ) ) {
-					$info['derivatives'][0]['title'] = $props['title'];
-				}
-				if ( isset( $props['shorttitle'] ) ) {
-					$info['derivatives'][0]['shorttitle'] = $props['shorttitle'];
-				}
 			}
 
 			$ret[] = $info;
@@ -591,7 +588,10 @@ class MockDataAccess extends DataAccess {
 			$ret = (string)$revid;
 		} elseif ( $wikitext === '{{mangle}}' ) {
 			$ret = 'hi';
-			$metadata->addCategory( 'Mangle', 'ho' );
+			$metadata->addCategory(
+				Title::newFromText( 'Category:Mangle', $this->siteConfig ),
+				'ho'
+			);
 		} else {
 			$ret = '';
 		}
@@ -601,7 +601,7 @@ class MockDataAccess extends DataAccess {
 
 	/** @inheritDoc */
 	public function fetchTemplateSource(
-		PageConfig $pageConfig, string $title
+		PageConfig $pageConfig, LinkTarget $title
 	): ?PageContent {
 		$normTitle = $this->normTitle( $title );
 		$pageData = self::$PAGE_DATA[$normTitle] ?? null;
@@ -617,7 +617,7 @@ class MockDataAccess extends DataAccess {
 	}
 
 	/** @inheritDoc */
-	public function fetchTemplateData( PageConfig $pageConfig, string $title ): ?array {
+	public function fetchTemplateData( PageConfig $pageConfig, LinkTarget $title ): ?array {
 		return self::TEMPLATE_DATA[$this->normTitle( $title )] ?? null;
 	}
 
@@ -628,5 +628,28 @@ class MockDataAccess extends DataAccess {
 		foreach ( $lints as $l ) {
 			error_log( PHPUtils::jsonEncode( $l ) );
 		}
+	}
+
+	private const TRACKING_CATEGORIES = [
+		'broken-file-category' => 'Pages with broken file links',
+		'magiclink-tracking-rfc' => 'Pages using RFC magic links',
+		'magiclink-tracking-isbn' => 'Pages using ISBN magic links',
+		'magiclink-tracking-pmid' => 'Pages using PMID magic links',
+	];
+
+	/** @inheritDoc */
+	public function addTrackingCategory(
+		PageConfig $pageConfig,
+		ContentMetadataCollector $metadata,
+		string $key
+	): void {
+		if ( !isset( self::TRACKING_CATEGORIES[$key] ) ) {
+			throw new Error( 'Unknown tracking category: ' . $key );
+		}
+		$tv = TitleValue::tryNew(
+			14, // NS_CATEGORY,
+			self::TRACKING_CATEGORIES[$key]
+		);
+		$metadata->addCategory( $tv );
 	}
 }

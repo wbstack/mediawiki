@@ -53,13 +53,16 @@ class ApiULSSetLanguage extends ApiBase {
 		$this->languageNameUtils = $languageNameUtils;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function execute() {
 		$request = $this->getRequest();
 		if ( !$request->wasPosted() ) {
 			$this->dieWithError( [ 'apierror-mustbeposted', $request->getText( 'action' ) ] );
 		}
 
-		$languageCode = $request->getRawVal( 'languagecode', '' );
+		$languageCode = $request->getRawVal( 'languagecode' ) ?? '';
 		if ( !$this->languageNameUtils->isSupportedLanguage( $languageCode ) ) {
 			$this->dieWithError(
 				[ 'apierror-invalidlang', $this->encodeParamName( 'languagecode' ) ]
@@ -67,7 +70,7 @@ class ApiULSSetLanguage extends ApiBase {
 		}
 
 		$user = $this->getUser();
-		if ( !$user->isRegistered() ) {
+		if ( !$user->isNamed() ) {
 			if ( $this->getConfig()->get( 'ULSAnonCanChangeLanguage' ) ) {
 				// Anonymous users can change language.
 				// Use a cookie that also can changed by JavaScript.
@@ -91,6 +94,9 @@ class ApiULSSetLanguage extends ApiBase {
 		} );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function getAllowedParams() {
 		return [
 			'languagecode' => [
@@ -99,11 +105,17 @@ class ApiULSSetLanguage extends ApiBase {
 		];
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function isInternal() {
 		// Try to scare people away from using this externally
 		return true;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function needsToken() {
 		return 'csrf';
 	}

@@ -2,13 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Arman musikyan",
+			"Armenoid",
 			"Kareyac",
 			"Teak",
 			"Vadgt",
 			"Xelgen",
-			"Սերգեյ Սաֆարյան",
-			"Armenoid",
-			"Դավիթ Սարոյան"
+			"Դավիթ Սարոյան",
+			"Սերգեյ Սաֆարյան"
 		]
 	},
 	"skinname-vector": "Սովորական",
@@ -17,7 +17,6 @@
 	"vector-languages": "Լեզուներ",
 	"vector-language-button-label": "{{PLURAL:$1|$1 լեզու}}",
 	"vector-no-language-button-label": "Ավելացնել լեզուներ",
-	"vector-language-redirect-to-top": "Այս կայքում լեզվական հղումները գտնվում են էջի վերևում՝ հոդվածի վերնագրի դիմաց։ [[#p-lang-btn|Անցնել վերև]]։",
 	"vector-action-addsection": "Ավելացնել քննարկում",
 	"vector-action-delete": "Ջնջել",
 	"vector-action-move": "Վերանվանել",
@@ -30,13 +29,28 @@
 	"vector-view-view": "Կարդալ",
 	"vector-view-viewsource": "Դիտել ելատեքստը",
 	"vector-more-actions": "Ավելին",
+	"vector-appearance-label": "Արտաքին տեսք",
+	"vector-feature-limited-width-name": "Լայնք",
+	"vector-feature-limited-width-0-label": "Լայն",
+	"vector-feature-limited-width-1-label": "Սովորական",
+	"vector-feature-custom-font-size-name": "Տեքստ",
+	"vector-feature-custom-font-size-0-label": "Փոքր",
+	"vector-feature-custom-font-size-1-label": "Սովորական",
+	"vector-feature-custom-font-size-2-label": "Մեծ",
 	"vector-intro-page": "Օգնություն:Գլխացանկ",
-	"vector-toc-heading": "Բովանդակություն",
-	"vector-toc-toggle-position-title": "թաքցնել",
+	"vector-toc-label": "Բովանդակություն",
 	"vector-toc-beginning": "Ներածություն",
 	"vector-anon-user-menu-pages": "Էջեր չգրանցված խմբագիրների համար",
 	"vector-anon-user-menu-pages-learn": "իմանալ ավելին",
 	"vector-main-menu-tooltip": "Հիմնական ընտրացանկ",
 	"vector-toc-menu-tooltip": "Բովանդակություն",
-	"tooltip-vector-anon-user-menu-title": "Այլ ընտրանքներ"
+	"vector-main-menu-label": "Հիմնական ընտրացանկ",
+	"vector-feature-custom-font-size-exclusion-notice": "Այս էջում միշտ փոքր տառաչափ է օգտագործում",
+	"vector-page-tools-label": "Գործիքներ",
+	"vector-page-tools-general-label": "Ընդհանուր",
+	"vector-page-tools-actions-label": "Գործողություններ",
+	"vector-pin-element-label": "տեղափոխել կողագոտի",
+	"vector-unpin-element-label": "թաքցնել",
+	"tooltip-vector-anon-user-menu-title": "Այլ ընտրանքներ",
+	"vector-night-mode-beta-tag": "(բետա)"
 }

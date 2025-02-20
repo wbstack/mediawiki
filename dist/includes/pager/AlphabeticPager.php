@@ -1,7 +1,5 @@
 <?php
 /**
- * Efficient paging for SQL queries.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,11 +16,13 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Pager
  */
+
+namespace MediaWiki\Pager;
 
 /**
  * IndexPager with an alphabetic list and a formatted navigation bar
+ *
  * @stable to extend
  * @ingroup Pager
  */
@@ -52,3 +52,6 @@ abstract class AlphabeticPager extends IndexPager {
 		return $this->mNavigationBar;
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( AlphabeticPager::class, 'AlphabeticPager' );

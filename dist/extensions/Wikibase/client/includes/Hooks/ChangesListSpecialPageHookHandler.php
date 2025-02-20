@@ -1,19 +1,22 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\Hooks;
 
 use ChangesListBooleanFilter;
-use ChangesListSpecialPage;
-use ExtensionRegistry;
+use MediaWiki\Html\FormOptions;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\SpecialPage\ChangesListSpecialPage;
 use MediaWiki\SpecialPage\Hook\ChangesListSpecialPageQueryHook;
-use MediaWiki\User\UserOptionsLookup;
-use User;
+use MediaWiki\User\Options\UserOptionsLookup;
+use MediaWiki\User\User;
 use Wikibase\Client\RecentChanges\RecentChangeFactory;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\Lib\Rdbms\ClientDomainDbFactory;
 use Wikibase\Lib\SettingsArray;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 
 /**
  * @license GPL-2.0-or-later
@@ -21,44 +24,36 @@ use Wikimedia\Rdbms\IDatabase;
  */
 class ChangesListSpecialPageHookHandler implements ChangesListSpecialPageQueryHook {
 
-	/**
-	 * @var IDatabase
-	 */
-	private $dbr;
+	private IReadableDatabase $dbr;
 
-	/**
-	 * @var bool
-	 */
-	private $showExternalChanges;
+	private bool $showExternalChanges;
 
-	/**
-	 * @var UserOptionsLookup
-	 */
-	private $userOptionsLookup;
+	private bool $isMobileView;
 
-	/**
-	 * @param IDatabase $dbr
-	 * @param bool $showExternalChanges
-	 * @param UserOptionsLookup $userOptionsLookup
-	 */
+	private UserOptionsLookup $userOptionsLookup;
+
 	public function __construct(
-		IDatabase $dbr,
-		$showExternalChanges,
+		IReadableDatabase $dbr,
+		bool $showExternalChanges,
+		bool $isMobileView,
 		UserOptionsLookup $userOptionsLookup
 	) {
 		$this->dbr = $dbr;
 		$this->showExternalChanges = $showExternalChanges;
+		$this->isMobileView = $isMobileView;
 		$this->userOptionsLookup = $userOptionsLookup;
 	}
 
 	public static function factory(
 		UserOptionsLookup $userOptionsLookup,
 		ClientDomainDbFactory $dbFactory,
+		bool $isMobileView,
 		SettingsArray $clientSettings
 	): self {
 		return new self(
-			$dbFactory->newLocalDb()->connections()->getLazyReadConnectionRef(),
+			$dbFactory->newLocalDb()->connections()->getReadConnection(),
 			$clientSettings->getSetting( 'showExternalRecentChanges' ),
+			$isMobileView,
 			$userOptionsLookup
 		);
 	}
@@ -73,7 +68,7 @@ class ChangesListSpecialPageHookHandler implements ChangesListSpecialPageQueryHo
 	 * @param array &$conds Array of WHERE conditionals for query
 	 * @param array &$query_options Array of options for the database request
 	 * @param array &$join_conds Join conditions for the tables
-	 * @param \FormOptions $opts FormOptions for this request
+	 * @param FormOptions $opts FormOptions for this request
 	 */
 	public function onChangesListSpecialPageQuery( $name, &$tables, &$fields,
 			&$conds, &$query_options, &$join_conds, $opts ) {
@@ -91,8 +86,9 @@ class ChangesListSpecialPageHookHandler implements ChangesListSpecialPageQueryHo
 	public static function onChangesListSpecialPageStructuredFilters( $special ) {
 		$services = MediaWikiServices::getInstance();
 		$handler = self::factory(
-			MediaWikiServices::getInstance()->getUserOptionsLookup(),
+			$services->getUserOptionsLookup(),
 			WikibaseClient::getClientDomainDbFactory( $services ),
+			WikibaseClient::getMobileSite( $services ),
 			WikibaseClient::getSettings( $services )
 		);
 		// The *user-facing* filter is only registered if external changes
@@ -105,12 +101,16 @@ class ChangesListSpecialPageHookHandler implements ChangesListSpecialPageQueryHo
 		}
 	}
 
-	protected function addFilter( ChangesListSpecialPage $specialPage ) {
+	protected function addFilter( ChangesListSpecialPage $specialPage ): void {
 		$filterName = $this->getFilterName();
 		$changeTypeGroup = $specialPage->getFilterGroup( 'changeType' );
 
-		$specialPage->getOutput()->addModules( 'wikibase.client.jqueryMsg' );
-		$specialPage->getOutput()->addModuleStyles( 'wikibase.client.miscStyles' );
+		$out = $specialPage->getOutput();
+		$out->addModules( 'wikibase.client.jqueryMsg' );
+		// T324991
+		if ( !$this->isMobileView ) {
+			$out->addModuleStyles( 'wikibase.client.miscStyles' );
+		}
 
 		$wikidataFilter = new ChangesListBooleanFilter( [
 			'name' => $filterName,
@@ -128,7 +128,7 @@ class ChangesListSpecialPageHookHandler implements ChangesListSpecialPageQueryHo
 			'cssClassSuffix' => 'src-mw-wikibase',
 			'isRowApplicableCallable' => static function ( $ctx, $rc ) {
 				return RecentChangeFactory::isWikibaseChange( $rc );
-			}
+			},
 		] );
 
 		$significanceGroup = $specialPage->getFilterGroup( 'significance' );
@@ -164,18 +164,11 @@ class ChangesListSpecialPageHookHandler implements ChangesListSpecialPageQueryHo
 		}
 	}
 
-	/**
-	 * @param IDatabase $dbr
-	 * @param array &$conds
-	 */
-	public function addWikibaseConditions( IDatabase $dbr, array &$conds ) {
-		$conds[] = 'rc_source != ' . $dbr->addQuotes( RecentChangeFactory::SRC_WIKIBASE );
+	public function addWikibaseConditions( IReadableDatabase $dbr, array &$conds ): void {
+		$conds[] = $dbr->expr( 'rc_source', '!=', RecentChangeFactory::SRC_WIKIBASE );
 	}
 
-	/**
-	 * @return bool
-	 */
-	protected function hasWikibaseChangesEnabled() {
+	protected function hasWikibaseChangesEnabled(): bool {
 		return $this->showExternalChanges;
 	}
 
@@ -183,10 +176,7 @@ class ChangesListSpecialPageHookHandler implements ChangesListSpecialPageQueryHo
 		return (bool)$this->userOptionsLookup->getOption( $user, $this->getOptionName( $pageName ) );
 	}
 
-	/**
-	 * @return string
-	 */
-	private function getFilterName() {
+	private function getFilterName(): string {
 		return 'hideWikibase';
 	}
 

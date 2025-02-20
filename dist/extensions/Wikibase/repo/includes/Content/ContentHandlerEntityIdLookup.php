@@ -4,9 +4,9 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Content;
 
-use Hooks;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Title\Title;
 use OutOfBoundsException;
-use Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\Lib\Store\EntityIdLookup;
@@ -23,8 +23,17 @@ class ContentHandlerEntityIdLookup implements EntityIdLookup {
 	 */
 	private $entityContentFactory;
 
-	public function __construct( EntityContentFactory $entityContentFactory ) {
+	/**
+	 * @var HookContainer
+	 */
+	private $hookContainer;
+
+	public function __construct(
+		EntityContentFactory $entityContentFactory,
+		HookContainer $hookContainer
+	) {
 		$this->entityContentFactory = $entityContentFactory;
+		$this->hookContainer = $hookContainer;
 	}
 
 	/**
@@ -36,7 +45,7 @@ class ContentHandlerEntityIdLookup implements EntityIdLookup {
 	public function getEntityIdForTitle( Title $title ): ?EntityId {
 		$contentModel = $title->getContentModel();
 
-		Hooks::run( 'GetEntityContentModelForTitle', [ $title, &$contentModel ] );
+		$this->hookContainer->run( 'GetEntityContentModelForTitle', [ $title, &$contentModel ] );
 
 		try {
 			$handler = $this->entityContentFactory->getEntityHandlerForContentModel( $contentModel );

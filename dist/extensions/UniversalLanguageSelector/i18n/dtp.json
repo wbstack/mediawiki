@@ -1,10 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Meqqal",
-			"CorrelMoris38"
+			"CorrelMoris38",
+			"Jilorisa",
+			"Meqqal"
 		]
 	},
 	"uls-plang-title-languages": "Boros",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|One more|$1 lobi ogumu}}"
+	"ext-uls-compact-link-count": "{{PLURAL:$1|Iso po daa|$1 iso po kawagu}}"
 }

@@ -1,7 +1,5 @@
 <?php
 /**
- * Job queue base code.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,33 +18,34 @@
  * @file
  */
 
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Deferred\JobQueueEnqueueUpdate;
 use MediaWiki\MediaWikiServices;
+use Wikimedia\ObjectCache\WANObjectCache;
+use Wikimedia\Rdbms\ReadOnlyMode;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 use Wikimedia\UUID\GlobalIdGenerator;
 
 /**
- * Class to handle enqueueing of background jobs
+ * Handle enqueueing of background jobs.
  *
- * @ingroup JobQueue
+ * @warning This service class supports queuing jobs to foreign wikis via JobQueueGroupFactory,
+ * but other operations may be called for the local wiki only. Exceptions may be thrown if you
+ * attempt to inspect, pop, or execute a foreign wiki's job queue.
+ *
  * @since 1.21
+ * @ingroup JobQueue
  */
 class JobQueueGroup {
-	/**
-	 * @var JobQueueGroup[]
-	 * @deprecated since 1.37
-	 */
-	protected static $instances = [];
-
 	/** @var MapCacheLRU */
 	protected $cache;
 
 	/** @var string Wiki domain ID */
 	protected $domain;
-	/** @var ConfiguredReadOnlyMode Read only mode */
+	/** @var ReadOnlyMode Read only mode */
 	protected $readOnlyMode;
-	/** @var bool Whether the wiki is not recognized in configuration */
-	protected $invalidDomain = false;
-	/** @var array */
-	private $jobClasses;
+	/** @var array|null */
+	private $localJobClasses;
 	/** @var array */
 	private $jobTypeConfiguration;
 	/** @var array */
@@ -68,26 +67,23 @@ class JobQueueGroup {
 
 	private const PROC_CACHE_TTL = 15; // integer; seconds
 
-	private const CACHE_VERSION = 1; // integer; cache version
-
 	/**
 	 * @internal Use MediaWikiServices::getJobQueueGroupFactory
 	 *
 	 * @param string $domain Wiki domain ID
-	 * @param ConfiguredReadOnlyMode $readOnlyMode Read-only mode
-	 * @param bool $invalidDomain Whether the wiki is not recognized in configuration
-	 * @param array $jobClasses
+	 * @param ReadOnlyMode $readOnlyMode Read-only mode
+	 * @param array|null $localJobClasses
 	 * @param array $jobTypeConfiguration
 	 * @param array $jobTypesExcludedFromDefaultQueue
 	 * @param IBufferingStatsdDataFactory $statsdDataFactory
 	 * @param WANObjectCache $wanCache
 	 * @param GlobalIdGenerator $globalIdGenerator
+	 *
 	 */
 	public function __construct(
 		$domain,
-		ConfiguredReadOnlyMode $readOnlyMode,
-		bool $invalidDomain,
-		array $jobClasses,
+		ReadOnlyMode $readOnlyMode,
+		?array $localJobClasses,
 		array $jobTypeConfiguration,
 		array $jobTypesExcludedFromDefaultQueue,
 		IBufferingStatsdDataFactory $statsdDataFactory,
@@ -97,33 +93,12 @@ class JobQueueGroup {
 		$this->domain = $domain;
 		$this->readOnlyMode = $readOnlyMode;
 		$this->cache = new MapCacheLRU( 10 );
-		$this->invalidDomain = $invalidDomain;
-		$this->jobClasses = $jobClasses;
+		$this->localJobClasses = $localJobClasses;
 		$this->jobTypeConfiguration = $jobTypeConfiguration;
 		$this->jobTypesExcludedFromDefaultQueue = $jobTypesExcludedFromDefaultQueue;
 		$this->statsdDataFactory = $statsdDataFactory;
 		$this->wanCache = $wanCache;
 		$this->globalIdGenerator = $globalIdGenerator;
-	}
-
-	/**
-	 * @deprecated since 1.37 Use JobQueueGroupFactory::makeJobQueueGroup (hard deprecated since 1.39)
-	 * @param bool|string $domain Wiki domain ID
-	 * @return JobQueueGroup
-	 */
-	public static function singleton( $domain = false ) {
-		wfDeprecated( __METHOD__, '1.37' );
-		return MediaWikiServices::getInstance()->getJobQueueGroupFactory()->makeJobQueueGroup( $domain );
-	}
-
-	/**
-	 * Destroy the singleton instances
-	 *
-	 * @deprecated since 1.37 (hard deprecated since 1.39)
-	 * @return void
-	 */
-	public static function destroySingletons() {
-		wfDeprecated( __METHOD__, '1.37' );
 	}
 
 	/**
@@ -136,7 +111,7 @@ class JobQueueGroup {
 		$conf = [ 'domain' => $this->domain, 'type' => $type ];
 		$conf += $this->jobTypeConfiguration[$type] ?? $this->jobTypeConfiguration['default'];
 		if ( !isset( $conf['readOnlyReason'] ) ) {
-			$conf['readOnlyReason'] = $this->readOnlyMode->getReason();
+			$conf['readOnlyReason'] = $this->readOnlyMode->getConfiguredReason();
 		}
 
 		$conf['stats'] = $this->statsdDataFactory;
@@ -153,17 +128,9 @@ class JobQueueGroup {
 	 * and updates the aggregate job queue information cache as needed.
 	 *
 	 * @param IJobSpecification|IJobSpecification[] $jobs A single Job or a list of Jobs
-	 * @throws InvalidArgumentException
 	 * @return void
 	 */
 	public function push( $jobs ) {
-		if ( $this->invalidDomain ) {
-			// Do not enqueue job that cannot be run (T171371)
-			$e = new LogicException( "Domain '{$this->domain}' is not recognized." );
-			MWExceptionHandler::logException( $e );
-			return;
-		}
-
 		$jobs = is_array( $jobs ) ? $jobs : [ $jobs ];
 		if ( $jobs === [] ) {
 			return;
@@ -199,7 +166,7 @@ class JobQueueGroup {
 			}
 		}
 
-		$cache = ObjectCache::getLocalClusterInstance();
+		$cache = MediaWikiServices::getInstance()->getObjectCacheFactory()->getLocalClusterInstance();
 		$cache->set(
 			$cache->makeGlobalKey( 'jobqueue', $this->domain, 'hasjobs', self::TYPE_ANY ),
 			'true',
@@ -222,11 +189,6 @@ class JobQueueGroup {
 	 * @since 1.26
 	 */
 	public function lazyPush( $jobs ) {
-		if ( $this->invalidDomain ) {
-			// Do not enqueue job that cannot be run (T171371)
-			throw new LogicException( "Domain '{$this->domain}' is not recognized." );
-		}
-
 		if ( PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg' ) {
 			$this->push( $jobs );
 			return;
@@ -241,7 +203,9 @@ class JobQueueGroup {
 	}
 
 	/**
-	 * Pop a job off one of the job queues
+	 * Pop one job off a job queue
+	 *
+	 * @warning May not be called on foreign wikis!
 	 *
 	 * This pops a job off a queue as specified by $wgJobTypeConf and
 	 * updates the aggregate job queue information cache as needed.
@@ -249,15 +213,17 @@ class JobQueueGroup {
 	 * @param int|string $qtype JobQueueGroup::TYPE_* constant or job type string
 	 * @param int $flags Bitfield of JobQueueGroup::USE_* constants
 	 * @param array $ignored List of job types to ignore
-	 * @return RunnableJob|bool Returns false on failure
+	 * @return RunnableJob|false Returns false on failure
+	 * @throws JobQueueError
 	 */
 	public function pop( $qtype = self::TYPE_DEFAULT, $flags = 0, array $ignored = [] ) {
 		$job = false;
 
-		if ( !WikiMap::isCurrentWikiDbDomain( $this->domain ) ) {
+		if ( !$this->localJobClasses ) {
 			throw new JobQueueError(
 				"Cannot pop '{$qtype}' job off foreign '{$this->domain}' wiki queue." );
-		} elseif ( is_string( $qtype ) && !isset( $this->jobClasses[$qtype] ) ) {
+		}
+		if ( is_string( $qtype ) && !isset( $this->localJobClasses[$qtype] ) ) {
 			// Do not pop jobs if there is no class for the queue type
 			throw new JobQueueError( "Unrecognized job type '$qtype'." );
 		}
@@ -310,11 +276,13 @@ class JobQueueGroup {
 	 * Register the "root job" of a given job into the queue for de-duplication.
 	 * This should only be called right *after* all the new jobs have been inserted.
 	 *
+	 * @deprecated since 1.40
 	 * @param RunnableJob $job
 	 * @return bool
 	 */
 	public function deduplicateRootJob( RunnableJob $job ) {
-		return $this->get( $job->getType() )->deduplicateRootJob( $job );
+		wfDeprecated( __METHOD__, '1.40' );
+		return true;
 	}
 
 	/**
@@ -322,9 +290,12 @@ class JobQueueGroup {
 	 *
 	 * This does nothing for certain queue classes.
 	 *
+	 * @deprecated since 1.41, use JobQueue::waitForBackups() instead.
+	 *
 	 * @return void
 	 */
 	public function waitForBackups() {
+		wfDeprecated( __METHOD__, '1.41' );
 		// Try to avoid doing this more than once per queue storage medium
 		foreach ( $this->jobTypeConfiguration as $type => $conf ) {
 			$this->get( $type )->waitForBackups();
@@ -334,14 +305,21 @@ class JobQueueGroup {
 	/**
 	 * Get the list of queue types
 	 *
+	 * @warning May not be called on foreign wikis!
+	 *
 	 * @return string[]
 	 */
 	public function getQueueTypes() {
-		return array_keys( $this->getCachedConfigVar( 'wgJobClasses' ) );
+		if ( !$this->localJobClasses ) {
+			throw new JobQueueError( 'Cannot inspect job queue from foreign wiki' );
+		}
+		return array_keys( $this->localJobClasses );
 	}
 
 	/**
 	 * Get the list of default queue types
+	 *
+	 * @warning May not be called on foreign wikis!
 	 *
 	 * @return string[]
 	 */
@@ -352,12 +330,14 @@ class JobQueueGroup {
 	/**
 	 * Check if there are any queues with jobs (this is cached)
 	 *
+	 * @warning May not be called on foreign wikis!
+	 *
+	 * @since 1.23
 	 * @param int $type JobQueueGroup::TYPE_* constant
 	 * @return bool
-	 * @since 1.23
 	 */
 	public function queuesHaveJobs( $type = self::TYPE_ANY ) {
-		$cache = ObjectCache::getLocalClusterInstance();
+		$cache = MediaWikiServices::getInstance()->getObjectCacheFactory()->getLocalClusterInstance();
 		$key = $cache->makeGlobalKey( 'jobqueue', $this->domain, 'hasjobs', $type );
 
 		$value = $cache->get( $key );
@@ -375,6 +355,8 @@ class JobQueueGroup {
 
 	/**
 	 * Get the list of job types that have non-empty queues
+	 *
+	 * @warning May not be called on foreign wikis!
 	 *
 	 * @return string[] List of job types that have non-empty queues
 	 */
@@ -400,6 +382,8 @@ class JobQueueGroup {
 
 	/**
 	 * Get the size of the queues for a list of job types
+	 *
+	 * @warning May not be called on foreign wikis!
 	 *
 	 * @return int[] Map of (job type => size)
 	 */
@@ -456,39 +440,12 @@ class JobQueueGroup {
 	}
 
 	/**
-	 * @param string $name
-	 * @return mixed
-	 */
-	private function getCachedConfigVar( $name ) {
-		// @TODO: cleanup this whole method with a proper config system
-		if ( WikiMap::isCurrentWikiDbDomain( $this->domain ) ) {
-			return $GLOBALS[$name]; // common case
-		} else {
-			$wiki = WikiMap::getWikiIdFromDbDomain( $this->domain );
-			$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-			$value = $cache->getWithSetCallback(
-				$cache->makeGlobalKey( 'jobqueue', 'configvalue', $this->domain, $name ),
-				$cache::TTL_DAY + mt_rand( 0, $cache::TTL_DAY ),
-				static function () use ( $wiki, $name ) {
-					global $wgConf;
-					// @TODO: use the full domain ID here
-					return [ 'v' => $wgConf->getConfig( $wiki, $name ) ];
-				},
-				[ 'pcTTL' => WANObjectCache::TTL_PROC_LONG ]
-			);
-
-			return $value['v'];
-		}
-	}
-
-	/**
 	 * @param array $jobs
-	 * @throws InvalidArgumentException
 	 */
 	private function assertValidJobs( array $jobs ) {
 		foreach ( $jobs as $job ) {
 			if ( !( $job instanceof IJobSpecification ) ) {
-				$type = is_object( $job ) ? get_class( $job ) : gettype( $job );
+				$type = get_debug_type( $job );
 				throw new InvalidArgumentException( "Expected IJobSpecification objects, got " . $type );
 			}
 		}

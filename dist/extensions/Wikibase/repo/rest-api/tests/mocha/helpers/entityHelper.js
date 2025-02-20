@@ -1,63 +1,60 @@
 'use strict';
 
 const { action, utils } = require( 'api-testing' );
+const {
+	newSetSitelinkRequestBuilder,
+	newCreateItemRequestBuilder,
+	newAddPropertyStatementRequestBuilder,
+	newGetPropertyRequestBuilder,
+	newCreatePropertyRequestBuilder
+} = require( './RequestBuilderFactory' );
 
-async function createEntity( type, entity ) {
-	return action.getAnon().action( 'wbeditentity', {
-		new: type,
-		token: '+\\',
-		data: JSON.stringify( entity )
+async function deleteProperty( propertyId ) {
+	const admin = await action.root();
+	return admin.action( 'delete', {
+		title: `Property:${propertyId}`,
+		token: await admin.token()
 	}, 'POST' );
 }
 
 async function createUniqueStringProperty() {
-	return await createEntity( 'property', {
-		labels: { en: { language: 'en', value: `string-property-${utils.uniq()}` } },
-		datatype: 'string'
-	} );
+	return await newCreatePropertyRequestBuilder( {
+		data_type: 'string',
+		labels: { en: `string-property-${utils.uniq()}` }
+	} ).makeRequest();
 }
 
-async function createSingleItem() {
-	const stringPropertyId = ( await createUniqueStringProperty() ).entity.id;
+/**
+ * @param {Array} statements
+ *
+ * @return {Object}
+ */
+async function createItemWithStatements( statements ) {
+	return ( await newCreateItemRequestBuilder( {
+		labels: { en: `item with statements ${utils.uniq()}` },
+		statements: Array.isArray( statements ) ? statementListToStatementGroups( statements ) : statements
+	} ).makeRequest() ).body;
+}
 
-	const item = {
-		labels: { en: { language: 'en', value: `non-empty-item-${utils.uniq()}` } },
-		descriptions: { en: { language: 'en', value: 'non-empty-item-description' } },
-		aliases: { en: [ { language: 'en', value: 'non-empty-item-alias' } ] },
-		claims: [
-			{ // with value, without qualifiers or references
-				mainsnak: {
-					snaktype: 'value',
-					property: stringPropertyId,
-					datavalue: { value: 'im a statement value', type: 'string' }
-				}, type: 'statement', rank: 'normal'
-			},
-			{ // no value, with qualifier and reference
-				mainsnak: {
-					snaktype: 'novalue',
-					property: stringPropertyId
-				},
-				type: 'statement',
-				rank: 'normal',
-				qualifiers: [
-					{
-						snaktype: 'value',
-						property: stringPropertyId,
-						datavalue: { value: 'im a qualifier value', type: 'string' }
-					}
-				],
-				references: [ {
-					snaks: [ {
-						snaktype: 'value',
-						property: stringPropertyId,
-						datavalue: { value: 'im a reference value', type: 'string' }
-					} ]
-				} ]
-			}
-		]
-	};
+function statementListToStatementGroups( statementList ) {
+	return statementList.reduce( ( groups, statement ) => ( {
+		...groups,
+		[ statement.property.id ]: [ ...( groups[ statement.property.id ] || [] ), statement ]
+	} ), {} );
+}
 
-	return await createEntity( 'item', item );
+/**
+ * @param {Array} statements
+ *
+ * @return {Object}
+ */
+async function createPropertyWithStatements( statements ) {
+	const propertyId = ( await createUniqueStringProperty() ).body.id;
+	for ( const statement of statements ) {
+		await newAddPropertyStatementRequestBuilder( propertyId, statement ).makeRequest();
+	}
+
+	return ( await newGetPropertyRequestBuilder( propertyId ).makeRequest() ).body;
 }
 
 /**
@@ -65,7 +62,7 @@ async function createSingleItem() {
  * @return {Promise<string>} - the id of the item to redirect from (source)
  */
 async function createRedirectForItem( redirectTarget ) {
-	const redirectSource = ( await createEntity( 'item', {} ) ).entity.id;
+	const redirectSource = ( await newCreateItemRequestBuilder( {} ).makeRequest() ).body.id;
 	await action.getAnon().action( 'wbcreateredirect', {
 		from: redirectSource,
 		to: redirectTarget,
@@ -75,10 +72,11 @@ async function createRedirectForItem( redirectTarget ) {
 	return redirectSource;
 }
 
-async function getLatestEditMetadata( itemId ) {
+async function getLatestEditMetadata( entityId ) {
+	const entityTitle = ( entityId.charAt( 0 ) === 'P' ) ? `Property:${entityId}` : `Item:${entityId}`;
 	const editMetadata = ( await action.getAnon().action( 'query', {
 		list: 'recentchanges',
-		rctitle: `Item:${itemId}`,
+		rctitle: entityTitle,
 		rclimit: 1,
 		rcprop: 'tags|flags|comment|ids|timestamp|user'
 	} ) ).query.recentchanges[ 0 ];
@@ -89,36 +87,64 @@ async function getLatestEditMetadata( itemId ) {
 	};
 }
 
-async function protectItem( itemId ) {
-	const mindy = await action.mindy();
-	await mindy.action( 'protect', {
-		title: `Item:${itemId}`,
-		token: await mindy.token(),
-		protections: 'edit=sysop',
+async function changeEntityProtectionStatus( entityId, allowedUserGroup ) {
+	const admin = await action.root();
+	const pageNamespace = entityId.startsWith( 'Q' ) ? 'Item' : 'Property';
+	await admin.action( 'protect', {
+		title: `${pageNamespace}:${entityId}`,
+		token: await admin.token(),
+		protections: `edit=${allowedUserGroup}`,
 		expiry: 'infinite'
 	}, 'POST' );
 }
 
-function newStatementSerializationWithRandomStringValue( property ) {
+/**
+ * @param {string} propertyId
+ * @return {{property: {id: string}, value: {type: string, content: string}}}
+ */
+function newStatementWithRandomStringValue( propertyId ) {
 	return {
-		mainsnak: {
-			snaktype: 'value',
-			datavalue: {
-				type: 'string',
-				value: 'random-string-value-' + utils.uniq()
-			},
-			property
+		property: {
+			id: propertyId
 		},
-		type: 'statement'
+		value: {
+			type: 'value',
+			content: 'random-string-value-' + utils.uniq()
+		}
 	};
 }
 
+async function getLocalSiteId() {
+	return ( await action.getAnon().meta(
+		'wikibase',
+		{ wbprop: 'siteid' }
+	) ).siteid;
+}
+
+async function createLocalSitelink( itemId, title, badges = [] ) {
+	await createWikiPage( title, 'sitelink test' );
+	await newSetSitelinkRequestBuilder( itemId, await getLocalSiteId(), { title, badges } )
+		.makeRequest();
+}
+
+/**
+ * @param {string} articleTitle
+ * @param {string} text
+ */
+async function createWikiPage( articleTitle, text ) {
+	await action.getAnon().edit( articleTitle, { text } );
+}
+
 module.exports = {
-	createEntity,
-	createSingleItem,
+	deleteProperty,
+	createItemWithStatements,
+	createPropertyWithStatements,
 	createUniqueStringProperty,
 	createRedirectForItem,
 	getLatestEditMetadata,
-	protectItem,
-	newStatementWithRandomStringValue: newStatementSerializationWithRandomStringValue
+	changeEntityProtectionStatus,
+	newStatementWithRandomStringValue,
+	getLocalSiteId,
+	createLocalSitelink,
+	createWikiPage
 };

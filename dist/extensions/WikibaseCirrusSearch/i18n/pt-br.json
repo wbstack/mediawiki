@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"555",
 			"Almondega",
 			"Cainamarques",
 			"Eduardo Addad de Oliveira",
@@ -20,8 +21,7 @@
 			"Peter Fernando",
 			"TheEduGobi",
 			"Trigonometria87",
-			"Vivaelcelta",
-			555
+			"Vivaelcelta"
 		]
 	},
 	"wikibasecirrus-desc": "Extensão Wikibase para usar a funcionalidade CirrusSearch",

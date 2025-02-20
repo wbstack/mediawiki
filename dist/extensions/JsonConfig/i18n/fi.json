@@ -3,7 +3,9 @@
 		"authors": [
 			"Nike",
 			"Pyscowicz",
-			"Valtlait"
+			"Samoasambia",
+			"Valtlait",
+			"Silvonen"
 		]
 	},
 	"jsonconfig-edit-action-cancel": "Peruuta",
@@ -14,6 +16,7 @@
 	"jsonconfig-type-name-localized": "lokalisoitu",
 	"jsonconfig-type-name-number": "luku",
 	"jsonconfig-type-name-boolean": "totuusarvo",
+	"jsonconfig-use-category": "JsonConfig-laajennusta käyttävät sivut",
 	"jsonconfig-license": "Tiedot on käytettävissä lisenssillä $1.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
 	"jsonconfig-license-name-CC-BY-1.0": "Creative Commons Nimeä 1.0",
@@ -27,7 +30,7 @@
 	"jsonconfig-license-name-CC-BY-SA-2.5": "Creative Commons Nimeä-JaaSamoin 2.5",
 	"jsonconfig-license-name-CC-BY-SA-3.0": "Creative Commons Nimeä-JaaSamoin 3.0",
 	"jsonconfig-license-name-CC-BY-SA-4.0": "Creative Commons Nimeä-JaaSamoin 4.0",
-	"jsonconfig-license-name-CC-BY-SA-4.0+": "Creative Commons Nimeä-JaaSamoin 4.0  tai uudempi versio",
+	"jsonconfig-license-name-CC-BY-SA-4.0+": "Creative Commons Nimeä-JaaSamoin 4.0 tai uudempi versio",
 	"jsonconfig-license-url-CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/deed.fi",
 	"jsonconfig-license-url-CC-BY-1.0": "https://creativecommons.org/licenses/by/1.0/deed.fi",
 	"jsonconfig-license-url-CC-BY-2.0": "https://creativecommons.org/licenses/by/2.0/deed.fi",

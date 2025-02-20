@@ -2,19 +2,19 @@
 
 namespace Wikibase\Repo\Maintenance;
 
-use DerivativeContext;
 use Generator;
-use IContextSource;
-use Maintenance;
-use RequestContext;
-use User;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\User\User;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Term\Fingerprint;
 use Wikibase\Lib\WikibaseSettings;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\WikibaseRepo;
 
 $basePath = getenv( 'MW_INSTALL_PATH' ) !== false
@@ -150,7 +150,7 @@ class PopulateWithRandomEntitiesAndTerms extends Maintenance {
 	private function saveEntity(
 		EntityDocument $entity,
 		IContextSource $context,
-		MediawikiEditEntityFactory $editEntityFactory
+		MediaWikiEditEntityFactory $editEntityFactory
 	): ?EntityId {
 		$editEntity = $editEntityFactory->newEditEntity( $context );
 

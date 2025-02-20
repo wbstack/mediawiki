@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface FormatAction class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -12,6 +12,7 @@
  *
  * @constructor
  * @param {ve.ui.Surface} surface Surface to act on
+ * @param {string} [source]
  */
 ve.ui.FormatAction = function VeUiFormatAction() {
 	// Parent constructor
@@ -42,30 +43,27 @@ ve.ui.FormatAction.static.methods = [ 'convert' ];
  * @return {boolean} Action was executed
  */
 ve.ui.FormatAction.prototype.convert = function ( type, attributes ) {
-	var surfaceModel = this.surface.getModel(),
+	const surfaceModel = this.surface.getModel(),
 		fragment = surfaceModel.getFragment(),
 		fragmentSelection = fragment.getSelection();
 
 	if ( !( fragmentSelection instanceof ve.dm.LinearSelection ) ) {
-		return;
+		return false;
 	}
 
-	var fragments = [];
-	var i, length;
+	const fragments = [];
+
 	// We can't have headings or pre's in a list, so if we're trying to convert
 	// things that are in lists to a heading or a pre, split the list
-	var selected = fragment.getLeafNodes();
-	for ( i = 0, length = selected.length; i < length; i++ ) {
-		var contentBranch = selected[ i ].node.isContent() ?
-			selected[ i ].node.getParent() :
-			selected[ i ].node;
+	fragment.getSelectedLeafNodes().forEach( ( node ) => {
+		const contentBranch = node.isContent() ? node.getParent() : node;
 
 		fragments.push( surfaceModel.getLinearFragment( contentBranch.getOuterRange(), true ) );
-	}
+	} );
 
-	for ( i = 0, length = fragments.length; i < length; i++ ) {
-		fragments[ i ].isolateAndUnwrap( type );
-	}
+	fragments.forEach( ( f ) => {
+		f.isolateAndUnwrap( type );
+	} );
 
 	fragment.convertNodes( type, attributes );
 	if ( fragmentSelection.isCollapsed() ) {

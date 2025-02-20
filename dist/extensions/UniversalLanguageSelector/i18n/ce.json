@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Nemo bis",
+			"Исмаил Садуев",
 			"Умар"
 		]
 	},
@@ -20,7 +21,7 @@
 	"ext-uls-display-settings-desc": "Меню а, шрифтийн а мотт",
 	"ext-uls-language-settings-title": "Мотт дIахIоттор",
 	"ext-uls-language-settings-apply": "Ӏалашдан",
-	"ext-uls-language-settings-cancel": "Цаоьшу",
+	"ext-uls-language-settings-cancel": "ДӀадаккхар",
 	"ext-uls-language-buttons-help": "Хийца меньюн мотт. Чулацаман мотт хийца лур бац.",
 	"ext-uls-display-settings-font-settings": "Шрифташ дӀахӀоттор",
 	"ext-uls-display-settings-ui-language": "Интерфейсан мотт",
@@ -43,7 +44,7 @@
 	"ext-uls-back-to-input-settings": "Йуха гӀо",
 	"ext-uls-ime-help": "Муха лелайо",
 	"ext-uls-disable-input-method": "Лелайе шен пилгу",
-	"ext-uls-input-settings-more-languages-tooltip": "Лелолуш долу меттанаш",
+	"ext-uls-input-settings-more-languages-tooltip": "Кхидолу меттанаш",
 	"jquery-ime-other-languages": "Кхин меттанаш",
 	"jquery-ime-disable-text": "Лелайе шен пилгу",
 	"jquery-ime-help": "ГӀо",
@@ -52,7 +53,7 @@
 	"ext-uls-input-disable-info": "Йаздаран гӀирс дӀабайина.",
 	"ext-uls-input-settings-noime": "ХӀокху меттан раскладкаш билгалйина йац.",
 	"ext-uls-input-disable-notification": "Йаздаран гӀирс дӀабайина.",
-	"ext-uls-input-disable-notification-undo": "Цаоьшу",
+	"ext-uls-input-disable-notification-undo": "Йухайаккха",
 	"ext-uls-input-disable-notification-info-personal": "Йаздаран гӀирс лело йиш йу муьлхачу хенахь мотт хуьйцу гӀирсан чохь.",
 	"ext-uls-input-disable-notification-info-interlanguage": "Йаздаран гӀирс лело йиш йу муьлхачу хенахь мотт хуьйцу гӀирсан чохь.",
 	"ext-uls-language-settings-applying": "ДӀахӀоттор…",
@@ -68,10 +69,10 @@
 	"ext-uls-setlang-accept": "Бакъбе хийцамаш",
 	"ext-uls-setlang-loading": "ДӀахӀоттор…",
 	"ext-uls-setlang-cancel": "Ма хийца",
-	"ext-uls-actions-menu-header": "Дукха таронаш",
 	"ext-uls-actions-menu-language-settings-item-label": "Схьабелла меттанийн гӀирс",
 	"ext-uls-empty-state-header": "Меттанаш цкъачунна бац",
 	"ext-uls-empty-state-desc": "Цкъачунна тӀекхочуш меттанаш бац",
 	"ext-uls-empty-state-header-actions-available": "Меттанаш цкъачунна бац. ТӀетоха керланиг?",
-	"ext-uls-empty-state-desc-actions-available": "Контент дукха меттанашкахь тӀекхочуш йе."
+	"ext-uls-empty-state-desc-actions-available": "Контент дукха меттанашкахь тӀекхочуш йе.",
+	"ext-uls-add-languages-button-label": "ТӀетоха меттанаш"
 }

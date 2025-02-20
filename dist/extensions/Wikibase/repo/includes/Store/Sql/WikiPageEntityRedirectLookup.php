@@ -2,8 +2,7 @@
 
 namespace Wikibase\Repo\Store\Sql;
 
-use MWException;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Lookup\EntityRedirectLookup;
 use Wikibase\DataModel\Services\Lookup\EntityRedirectLookupException;
@@ -56,33 +55,19 @@ class WikiPageEntityRedirectLookup implements EntityRedirectLookup {
 			throw new EntityRedirectLookupException( $targetId, null, $ex );
 		}
 
-		try {
-			$dbr = $this->repoDb->connections()->getReadConnectionRef();
-		} catch ( MWException $ex ) {
-			throw new EntityRedirectLookupException( $targetId, null, $ex );
-		}
-
-		$res = $dbr->select(
-			[ 'page', 'redirect' ],
-			[ 'page_namespace', 'page_title' ],
-			[
+		$dbr = $this->repoDb->connections()->getReadConnection();
+		$res = $dbr->newSelectQueryBuilder()
+			->select( [ 'page_namespace', 'page_title' ] )
+			->from( 'page' )
+			->join( 'redirect', null, 'rd_from=page_id' )
+			->where( [
 				'rd_title' => $title->getDBkey(),
 				'rd_namespace' => $title->getNamespace(),
 				// Entity redirects are guaranteed to be in the same namespace
 				'page_namespace' => $title->getNamespace(),
-			],
-			__METHOD__,
-			[
-				'LIMIT' => 1000 // everything should have a hard limit
-			],
-			[
-				'redirect' => [ 'JOIN', 'rd_from=page_id' ],
-			]
-		);
-
-		if ( !$res ) {
-			return [];
-		}
+			] )
+			->limit( 1000 ) // everything should have a hard limit
+			->caller( __METHOD__ )->fetchResultSet();
 
 		$ids = [];
 		foreach ( $res as $row ) {
@@ -112,29 +97,21 @@ class WikiPageEntityRedirectLookup implements EntityRedirectLookup {
 			throw new EntityRedirectLookupException( $entityId, null, $ex );
 		}
 
-		try {
-			if ( $forUpdate === EntityRedirectLookup::FOR_UPDATE ) {
-				$db = $this->repoDb->connections()->getWriteConnectionRef();
-			} else {
-				$db = $this->repoDb->connections()->getReadConnectionRef();
-			}
-		} catch ( MWException $ex ) {
-			throw new EntityRedirectLookupException( $entityId, null, $ex );
+		if ( $forUpdate === EntityRedirectLookup::FOR_UPDATE ) {
+			$db = $this->repoDb->connections()->getWriteConnection();
+		} else {
+			$db = $this->repoDb->connections()->getReadConnection();
 		}
 
-		$row = $db->selectRow(
-			[ 'page', 'redirect' ],
-			[ 'page_id', 'rd_namespace', 'rd_title' ],
-			[
+		$row = $db->newSelectQueryBuilder()
+			->select( [ 'page_id', 'rd_namespace', 'rd_title' ] )
+			->from( 'page' )
+			->leftJoin( 'redirect', null, 'rd_from=page_id' )
+			->where( [
 				'page_title' => $title->getDBkey(),
-				'page_namespace' => $title->getNamespace()
-			],
-			__METHOD__,
-			[],
-			[
-				'redirect' => [ 'LEFT JOIN', 'rd_from=page_id' ]
-			]
-		);
+				'page_namespace' => $title->getNamespace(),
+			] )
+			->caller( __METHOD__ )->fetchRow();
 
 		if ( !$row ) {
 			throw new EntityRedirectLookupException( $entityId );

@@ -1,6 +1,8 @@
 ( function () {
 
 	/**
+	 * @classdesc DateTimeFormatter for the proleptic Gregorian calendar.
+	 *
 	 * Provides various methods needed for formatting dates and times. This
 	 * implementation implements the proleptic Gregorian calendar over years
 	 * 0000–9999.
@@ -9,26 +11,27 @@
 	 * @extends mw.widgets.datetime.DateTimeFormatter
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.datetime.ProlepticGregorianDateTimeFormatter`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {Object} [fullMonthNames] Mapping 1–12 to full month names.
-	 * @cfg {Object} [shortMonthNames] Mapping 1–12 to abbreviated month names.
+	 * @param {Object} [config.fullMonthNames] Mapping 1–12 to full month names.
+	 * @param {Object} [config.shortMonthNames] Mapping 1–12 to abbreviated month names.
 	 *  If {@link #fullMonthNames fullMonthNames} is given and this is not,
 	 *  defaults to the first three characters from that setting.
-	 * @cfg {Object} [fullDayNames] Mapping 0–6 to full day of week names. 0 is Sunday, 6 is Saturday.
-	 * @cfg {Object} [shortDayNames] Mapping 0–6 to abbreviated day of week names. 0 is Sunday, 6 is Saturday.
+	 * @param {Object} [config.fullDayNames] Mapping 0–6 to full day of week names. 0 is Sunday, 6 is Saturday.
+	 * @param {Object} [config.shortDayNames] Mapping 0–6 to abbreviated day of week names. 0 is Sunday, 6 is Saturday.
 	 *  If {@link #fullDayNames fullDayNames} is given and this is not, defaults to
 	 *  the first three characters from that setting.
-	 * @cfg {string[]} [dayLetters] Weekday column headers for a calendar. Array of 7 strings.
+	 * @param {string[]} [config.dayLetters] Weekday column headers for a calendar. Array of 7 strings.
 	 *  If {@link #fullDayNames fullDayNames} or {@link #shortDayNames shortDayNames}
 	 *  are given and this is not, defaults to the first character from
 	 *  shortDayNames.
-	 * @cfg {string[]} [hour12Periods] AM and PM texts. Array of 2 strings, AM and PM.
-	 * @cfg {number} [weekStartsOn=0] What day the week starts on: 0 is Sunday, 1 is Monday, 6 is Saturday.
+	 * @param {string[]} [config.hour12Periods] AM and PM texts. Array of 2 strings, AM and PM.
+	 * @param {number} [config.weekStartsOn=0] What day the week starts on: 0 is Sunday, 1 is Monday, 6 is Saturday.
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter = function MwWidgetsDatetimeProlepticGregorianDateTimeFormatter( config ) {
 		this.constructor.static.setupDefaults();
 
-		config = $.extend( {
+		config = Object.assign( {
 			weekStartsOn: 0,
 			hour12Periods: this.constructor.static.hour12Periods
 		}, config );
@@ -36,32 +39,32 @@
 		if ( config.fullMonthNames && !config.shortMonthNames ) {
 			config.shortMonthNames = {};
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( config.fullMonthNames, function ( k, v ) {
+			$.each( config.fullMonthNames, ( k, v ) => {
 				config.shortMonthNames[ k ] = v.slice( 0, 3 );
 			} );
 		}
 		if ( config.shortDayNames && !config.dayLetters ) {
 			config.dayLetters = [];
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( config.shortDayNames, function ( k, v ) {
+			$.each( config.shortDayNames, ( k, v ) => {
 				config.dayLetters[ k ] = v.slice( 0, 1 );
 			} );
 		}
 		if ( config.fullDayNames && !config.dayLetters ) {
 			config.dayLetters = [];
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( config.fullDayNames, function ( k, v ) {
+			$.each( config.fullDayNames, ( k, v ) => {
 				config.dayLetters[ k ] = v.slice( 0, 1 );
 			} );
 		}
 		if ( config.fullDayNames && !config.shortDayNames ) {
 			config.shortDayNames = {};
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( config.fullDayNames, function ( k, v ) {
+			$.each( config.fullDayNames, ( k, v ) => {
 				config.shortDayNames[ k ] = v.slice( 0, 3 );
 			} );
 		}
-		config = $.extend( {
+		config = Object.assign( {
 			fullMonthNames: this.constructor.static.fullMonthNames,
 			shortMonthNames: this.constructor.static.shortMonthNames,
 			fullDayNames: this.constructor.static.fullDayNames,
@@ -89,7 +92,13 @@
 	/* Static */
 
 	/**
-	 * @inheritdoc
+	 * Default format specifications.
+	 *
+	 * See the `format` parameter in {@link mw.widgets.datetime.DateTimeFormatter}.
+	 *
+	 * @memberof mw.widgets.datetime.ProlepticGregorianDateTimeFormatter
+	 * @type {Object.<string,string>}
+	 * @name formats
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.static.formats = {
 		'@time': '${hour|0}:${minute|0}:${second|0}',
@@ -103,7 +112,8 @@
 	 *
 	 * @static
 	 * @inheritable
-	 * @property {Object}
+	 * @type {Object}
+	 * @name mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.fullMonthNames
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.static.fullMonthNames = null;
 
@@ -112,7 +122,8 @@
 	 *
 	 * @static
 	 * @inheritable
-	 * @property {Object}
+	 * @type {Object}
+	 * @name mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.shortMonthNames
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.static.shortMonthNames = null;
 
@@ -121,7 +132,8 @@
 	 *
 	 * @static
 	 * @inheritable
-	 * @property {Object}
+	 * @type {Object}
+	 * @name mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.fullDayNames
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.static.fullDayNames = null;
 
@@ -130,7 +142,8 @@
 	 *
 	 * @static
 	 * @inheritable
-	 * @property {Object}
+	 * @type {Object}
+	 * @name mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.shortDayNames
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.static.shortDayNames = null;
 
@@ -139,16 +152,18 @@
 	 *
 	 * @static
 	 * @inheritable
-	 * @property {string[]}
+	 * @type {string[]}
+	 * @name mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.dayLetters
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.static.dayLetters = null;
 
 	/**
-	 * Default AM/PM indicators
+	 * Default AM/PM indicators.
 	 *
 	 * @static
 	 * @inheritable
-	 * @property {string[]}
+	 * @type {string[]}
+	 * @name mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.hour12Periods
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.static.hour12Periods = null;
 
@@ -158,30 +173,30 @@
 		if ( this.fullMonthNames && !this.shortMonthNames ) {
 			this.shortMonthNames = {};
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( this.fullMonthNames, function ( k, v ) {
+			$.each( this.fullMonthNames, ( k, v ) => {
 				this.shortMonthNames[ k ] = v.slice( 0, 3 );
-			}.bind( this ) );
+			} );
 		}
 		if ( this.shortDayNames && !this.dayLetters ) {
 			this.dayLetters = [];
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( this.shortDayNames, function ( k, v ) {
+			$.each( this.shortDayNames, ( k, v ) => {
 				this.dayLetters[ k ] = v.slice( 0, 1 );
-			}.bind( this ) );
+			} );
 		}
 		if ( this.fullDayNames && !this.dayLetters ) {
 			this.dayLetters = [];
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( this.fullDayNames, function ( k, v ) {
+			$.each( this.fullDayNames, ( k, v ) => {
 				this.dayLetters[ k ] = v.slice( 0, 1 );
-			}.bind( this ) );
+			} );
 		}
 		if ( this.fullDayNames && !this.shortDayNames ) {
 			this.shortDayNames = {};
 			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( this.fullDayNames, function ( k, v ) {
+			$.each( this.fullDayNames, ( k, v ) => {
 				this.shortDayNames[ k ] = v.slice( 0, 3 );
-			}.bind( this ) );
+			} );
 		}
 
 		if ( !this.fullMonthNames ) {
@@ -240,11 +255,13 @@
 			};
 		}
 		if ( !this.dayLetters ) {
-			this.dayLetters = [];
-			// eslint-disable-next-line no-jquery/no-each-util
-			$.each( this.shortDayNames, function ( k, v ) {
-				this.dayLetters[ k ] = v.slice( 0, 1 );
-			}.bind( this ) );
+			const dayLetters = [];
+			const shortDayNames = this.shortDayNames;
+			for ( const dayOfWeek in shortDayNames ) {
+				const shortDayName = shortDayNames[ dayOfWeek ];
+				dayLetters[ dayOfWeek ] = shortDayName.slice( 0, 1 );
+			}
+			this.dayLetters = dayLetters;
 		}
 
 		if ( !this.hour12Periods ) {
@@ -258,7 +275,7 @@
 	/* Methods */
 
 	/**
-	 * @inheritdoc
+	 * Turn a tag into a field specification object.
 	 *
 	 * Additional fields implemented here are:
 	 * - ${year|#}: Year as a number
@@ -282,9 +299,14 @@
 	 * - ${second|0}: Second as a number with leading 0
 	 * - ${millisecond|#}: Millisecond as a number
 	 * - ${millisecond|0}: Millisecond as a number, zero-padded to 3 digits
+	 *
+	 * @protected
+	 * @param {string} tag
+	 * @param {string[]} params
+	 * @return {FieldSpecificationObject} Field specification object, or null if the tag+params are unrecognized.
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.prototype.getFieldForTag = function ( tag, params ) {
-		var spec = null;
+		let spec = null;
 
 		switch ( tag + '|' + params[ 0 ] ) {
 			case 'year|#':
@@ -391,7 +413,7 @@
 			if ( spec.values ) {
 				spec.size = Math.max.apply(
 					// eslint-disable-next-line no-jquery/no-map-util
-					null, $.map( spec.values, function ( v ) { return v.length; } )
+					null, $.map( spec.values, ( v ) => v.length )
 				);
 			}
 		}
@@ -400,7 +422,7 @@
 	};
 
 	/**
-	 * Get components from a Date object
+	 * Get components from a Date object.
 	 *
 	 * Components are:
 	 * - year {number}
@@ -419,7 +441,7 @@
 	 * @return {Object} Components
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.prototype.getComponentsFromDate = function ( date ) {
-		var ret;
+		let ret;
 
 		if ( !( date instanceof Date ) ) {
 			date = this.defaultDate;
@@ -464,13 +486,13 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.prototype.getDateFromComponents = function ( components ) {
-		var date = new Date();
+		const date = new Date();
 
-		components = $.extend( {}, components );
+		components = Object.assign( {}, components );
 		if ( components.hour === undefined && components.hour12 !== undefined && components.hour12period !== undefined ) {
 			components.hour = ( components.hour12 % 12 ) + ( components.hour12period ? 12 : 0 );
 		}
-		components = $.extend( {}, this.getComponentsFromDate( null ), components );
+		components = Object.assign( {}, this.getComponentsFromDate( null ), components );
 
 		if ( components.zone ) {
 			// Can't just use the constructor because that's stupid about ancient years.
@@ -489,12 +511,12 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.prototype.adjustComponent = function ( date, component, delta, mode ) {
-		var min, max, range, components;
+		let min, max;
 
 		if ( !( date instanceof Date ) ) {
 			date = this.defaultDate;
 		}
-		components = this.getComponentsFromDate( date );
+		const components = this.getComponentsFromDate( date );
 
 		switch ( component ) {
 			case 'year':
@@ -538,7 +560,7 @@
 		}
 
 		components[ component ] += delta;
-		range = max - min + 1;
+		const range = max - min + 1;
 		switch ( mode ) {
 			case 'overflow':
 				// Date() will mostly handle it automatically. But months need
@@ -579,7 +601,7 @@
 	};
 
 	/**
-	 * Get the number of days in a month
+	 * Get the number of days in a month.
 	 *
 	 * @protected
 	 * @param {number} month
@@ -609,7 +631,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.prototype.getCalendarHeadings = function () {
-		var a = this.dayLetters;
+		const a = this.dayLetters;
 
 		if ( this.weekStartsOn ) {
 			return a.slice( this.weekStartsOn ).concat( a.slice( 0, this.weekStartsOn ) );
@@ -633,22 +655,23 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.datetime.ProlepticGregorianDateTimeFormatter.prototype.getCalendarData = function ( date ) {
-		var dt, t, d, e, i, row,
-			getDate = this.local ? 'getDate' : 'getUTCDate',
-			setDate = this.local ? 'setDate' : 'setUTCDate',
-			ret = {
-				dayComponent: 'day',
-				monthComponent: 'month'
-			};
+		const getDate = this.local ? 'getDate' : 'getUTCDate',
+			setDate = this.local ? 'setDate' : 'setUTCDate';
+
+		const ret = {
+			dayComponent: 'day',
+			monthComponent: 'month'
+		};
 
 		if ( !( date instanceof Date ) ) {
 			date = this.defaultDate;
 		}
 
-		dt = new Date( date.getTime() );
+		let dt = new Date( date.getTime() );
 		dt[ setDate ]( 1 );
-		t = dt.getTime();
+		const t = dt.getTime();
 
+		let d, e;
 		if ( this.local ) {
 			ret.header = this.fullMonthNames[ dt.getMonth() + 1 ] + ' ' + dt.getFullYear();
 			d = dt.getDay() % 7;
@@ -666,8 +689,8 @@
 
 		ret.rows = [];
 		while ( d <= e ) {
-			row = [];
-			for ( i = 0; i < 7; i++, d++ ) {
+			const row = [];
+			for ( let i = 0; i < 7; i++, d++ ) {
 				dt = new Date( t );
 				dt[ setDate ]( d );
 				row[ i ] = {

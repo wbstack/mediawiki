@@ -9,10 +9,10 @@ use InvalidArgumentException;
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Page\PageRecord;
 use MediaWiki\Page\PageStore;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use Title;
-use TitleFactory;
 use Traversable;
 use UnexpectedValueException;
 use Wikibase\Client\Usage\EntityUsage;
@@ -194,7 +194,7 @@ class AffectedPagesFinder {
 	 *
 	 * @return Traversable of PageEntityUsages
 	 *
-	 * @see @ref md_docs_topics_usagetracking for details about virtual usages
+	 * @see @ref docs_topics_usagetracking for details about virtual usages
 	 */
 	private function getAffectedPages( EntityChange $change ) {
 		$entityId = $change->getEntityId();
@@ -340,7 +340,7 @@ class AffectedPagesFinder {
 	private function makeVirtualUsages( array $titles, EntityId $entityId, array $aspects ) {
 		$usagesForItem = [];
 		foreach ( $aspects as $aspect ) {
-			list( $aspect, $modifier ) = EntityUsage::splitAspectKey( $aspect );
+			[ $aspect, $modifier ] = EntityUsage::splitAspectKey( $aspect );
 			$usagesForItem[] = new EntityUsage( $entityId, $aspect, $modifier );
 		}
 

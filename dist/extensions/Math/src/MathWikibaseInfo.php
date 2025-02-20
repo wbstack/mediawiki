@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\Math;
 
 use DataValues\StringValue;
-use Html;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Formatters\SnakFormatter;
@@ -18,17 +18,17 @@ class MathWikibaseInfo {
 	private $id;
 
 	/**
-	 * @var string the label of the item
+	 * @var string|null the label of the item
 	 */
 	private $label;
 
 	/**
-	 * @var string description of the item
+	 * @var string|null description of the item
 	 */
 	private $description;
 
 	/**
-	 * @var StringValue a symbol representing the item
+	 * @var StringValue|null a symbol representing the item
 	 */
 	private $symbol;
 
@@ -43,7 +43,7 @@ class MathWikibaseInfo {
 	private $mathFormatter;
 
 	/**
-	 * @var string
+	 * @var string|null
 	 */
 	private $url;
 
@@ -51,7 +51,7 @@ class MathWikibaseInfo {
 	 * @param EntityId $entityId
 	 * @param MathFormatter|null $mathFormatter to format math equations. Default format is HTML.
 	 */
-	public function __construct( EntityId $entityId, MathFormatter $mathFormatter = null ) {
+	public function __construct( EntityId $entityId, ?MathFormatter $mathFormatter = null ) {
 		$this->id = $entityId;
 		$this->mathFormatter = $mathFormatter ?: new MathFormatter( SnakFormatter::FORMAT_HTML );
 	}
@@ -106,21 +106,21 @@ class MathWikibaseInfo {
 	}
 
 	/**
-	 * @return string label
+	 * @return string|null label
 	 */
 	public function getLabel() {
 		return $this->label;
 	}
 
 	/**
-	 * @return string description
+	 * @return string|null description
 	 */
 	public function getDescription() {
 		return $this->description;
 	}
 
 	/**
-	 * @return StringValue symbol
+	 * @return StringValue|null symbol
 	 */
 	public function getSymbol() {
 		return $this->symbol;
@@ -145,7 +145,7 @@ class MathWikibaseInfo {
 	}
 
 	/**
-	 * @return string
+	 * @return string|null
 	 */
 	public function getUrl() {
 		return $this->url;
@@ -175,8 +175,7 @@ class MathWikibaseInfo {
 		$labelAlign = $lang->isRTL() ? 'left' : 'right';
 		$labelAlignOpposite = !$lang->isRTL() ? 'left' : 'right';
 
-		$output = Html::openElement( "table", [ "style" => "padding: 5px" ] );
-		$output .= Html::openElement( "tbody" );
+		$output = '';
 
 		foreach ( $this->hasParts as $part ) {
 			$output .= Html::openElement( "tr" );
@@ -193,7 +192,7 @@ class MathWikibaseInfo {
 					$part->getLabel()
 				);
 			} else {
-				$output .= $part->getLabel();
+				$output .= htmlspecialchars( $part->getLabel() );
 			}
 
 			$output .= Html::closeElement( "td" );
@@ -221,10 +220,9 @@ class MathWikibaseInfo {
 			$output .= Html::closeElement( "tr" );
 		}
 
-		$output .= Html::closeElement( "tbody" );
-		$output .= Html::closeElement( "table" );
-
-		return $output;
+		return Html::rawElement( 'table', [ 'style' => 'padding: 5px' ],
+			Html::rawElement( 'tbody', [], $output )
+		);
 	}
 
 	/**
@@ -232,22 +230,20 @@ class MathWikibaseInfo {
 	 * @return string
 	 */
 	public function generateSmallTableOfParts() {
-		$output = Html::openElement( "table" );
-		$output .= Html::openElement( "tbody" );
+		$output = '';
 
 		foreach ( $this->hasParts as $part ) {
-			$output .= Html::openElement( "tr" );
-			$output .= Html::rawElement(
-				"td",
-				[ "style" => "text-align:right;" ],
-				$part->getFormattedSymbol()
+			$output .= Html::rawElement( 'tr', [],
+				Html::rawElement( 'td',
+					[ 'style' => 'text-align: center; padding-right: 5px;' ],
+					$part->getFormattedSymbol()
+				) .
+				Html::element( 'td', [ 'style' => 'text-align:left;' ], $part->getLabel() )
 			);
-			$output .= Html::element( "td", [ "style" => "text-align:left;" ], $part->getLabel() );
-			$output .= Html::closeElement( "tr" );
 		}
 
-		$output .= Html::closeElement( "tbody" );
-		$output .= Html::closeElement( "table" );
-		return $output;
+		return Html::rawElement( 'table', [],
+			Html::rawElement( 'tbody', [], $output )
+		);
 	}
 }

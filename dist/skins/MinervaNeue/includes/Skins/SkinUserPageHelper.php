@@ -20,56 +20,46 @@
 
 namespace MediaWiki\Minerva\Skins;
 
-use IContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserNameUtils;
-use Title;
-use User;
 
 class SkinUserPageHelper {
-	/**
-	 * @var UserNameUtils
-	 */
-	private $userNameUtils;
+	private UserFactory $userFactory;
+	private UserNameUtils $userNameUtils;
+	private IContextSource $context;
+	private ?Title $title;
+	private bool $fetchedData = false;
+	private ?User $pageUser = null;
 
-	/**
-	 * @var Title|null
-	 */
-	private $title;
-
-	/**
-	 * @var bool
-	 */
-	private $fetchedData = false;
-
-	/**
-	 * @var User
-	 */
-	private $pageUser;
-
-	/**
-	 * @var IContextSource|null
-	 */
-	private $context;
-
-	/**
-	 * @param UserNameUtils $userNameUtils
-	 * @param Title|null $title
-	 * @param IContextSource|null $context
-	 */
-	public function __construct( UserNameUtils $userNameUtils, Title $title = null, IContextSource $context = null ) {
+	public function __construct(
+		UserFactory $userFactory,
+		UserNameUtils $userNameUtils
+	) {
+		$this->userFactory = $userFactory;
 		$this->userNameUtils = $userNameUtils;
-		$this->title = $title;
+	}
+
+	public function setContext( IContextSource $context ): self {
 		$this->context = $context;
+		return $this;
+	}
+
+	public function setTitle( ?Title $title ): self {
+		$this->title = $title;
+		$this->fetchedData = false;
+		$this->pageUser = null;
+		return $this;
 	}
 
 	/**
 	 * Fetch user data and store locally for performance improvement
-	 * @return User|null
 	 */
-	private function fetchData() {
-		if ( $this->fetchedData === false ) {
-			if ( $this->title && $this->title->inNamespace( NS_USER ) && !$this->title->isSubpage()
-			) {
+	private function fetchData(): ?User {
+		if ( !$this->fetchedData ) {
+			if ( $this->title && $this->title->inNamespace( NS_USER ) && !$this->title->isSubpage() ) {
 				$this->pageUser = $this->buildPageUserObject( $this->title );
 			}
 			$this->fetchedData = true;
@@ -79,42 +69,31 @@ class SkinUserPageHelper {
 
 	/**
 	 * Return new User object based on username or IP address.
-	 * @param Title $title
-	 * @return User|null
 	 */
-	private function buildPageUserObject( Title $title ) {
+	private function buildPageUserObject( Title $title ): ?User {
 		$titleText = $title->getText();
 
 		if ( $this->userNameUtils->isIP( $titleText ) ) {
-			return User::newFromAnyId( null, $titleText, null );
+			return $this->userFactory->newAnonymous( $titleText );
 		}
 
-		$pageUserId = User::idFromName( $titleText );
-		if ( $pageUserId ) {
-			return User::newFromId( $pageUserId );
+		$user = $this->userFactory->newFromName( $titleText );
+		if ( $user && $user->isRegistered() ) {
+			return $user;
 		}
 
 		return null;
 	}
 
-	/**
-	 * @return User|null
-	 */
-	public function getPageUser() {
+	public function getPageUser(): ?User {
 		return $this->fetchData();
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isUserPage() {
+	public function isUserPage(): bool {
 		return $this->fetchData() !== null;
 	}
 
-	/**
-	 * @return bool
-	 */
-	public function isUserPageAccessibleToCurrentUser() {
+	public function isUserPageAccessibleToCurrentUser(): bool {
 		$pageUser = $this->fetchData();
 		$isHidden = $pageUser && $pageUser->isHidden();
 		$canViewHidden = $this->context && $this->context->getAuthority()->isAllowed( 'hideuser' );

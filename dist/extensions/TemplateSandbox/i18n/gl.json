@@ -25,14 +25,17 @@
 	"templatesandbox-invalid-title": "O título que especificou non é válido.",
 	"templatesandbox-title-not-exists": "O título que especificou non existe.",
 	"templatesandbox-revision-not-exists": "A revisión que especificou non existe.",
+	"templatesandbox-revision-no-content": "A revisión que especificou non ten contido ou non ten permiso para vela.",
 	"templatesandbox-invalid-prefix": "O prefixo da zona de probas que especificou non é válido.",
 	"templatesandbox-prefix-not-local": "O prefixo da zona de probas que especificou non é local.",
 	"templatesandbox-page-or-revid": "Cómpre indicar un título de páxina ou ben un número de identificación de revisión.",
 	"templatesandbox-fail-post": "<em>Dado que o código HTML puro está activado en {{SITENAME}} e produciuse unha perda dos datos da sesión, a vista previa está oculta como precaución contra ataques mediante código JavaScript.</em>\n\n<strong>Se este é un intento lexítimo de acceso á vista previa, inténteo de novo.</strong>\nSe segue sen funcionar, probe a [[Special:UserLogout|saír]] e volver a entrar coa súa conta.",
 	"templatesandbox-fail-post-anon": "<em>Dado que o código HTML puro está activado en {{SITENAME}} e produciuse unha perda dos datos da sesión, a vista previa está oculta como precaución contra ataques mediante código JavaScript.</em>\n\n<strong>Se este é un intento lexítimo de acceso á vista previa, probe a [[Special:UserLogin|saír]] e volver a entrar coa súa conta.</strong>",
+	"templatesandbox-anon-limited-preview": "A vista previa dos cambios de JavaScript e CSS está desactivada se non ten a sesión iniciada. Se precisa ver tales cambios, [[Special:UserLogin|inicie sesión]] e inténteo de novo.",
 	"templatesandbox-editform-need-template": "Para ollar a vista previa doutra páxina con este modelo, cómpre especificar o nome dun modelo.",
 	"templatesandbox-editform-need-title": "Para ollar a vista previa doutra páxina con este modelo, cómpre especificar un título de páxina.",
 	"templatesandbox-editform-invalid-template": "O nome de modelo especificado non é válido.",
 	"templatesandbox-editform-invalid-title": "O título que especificou para a vista previa non é válido.",
-	"templatesandbox-editform-title-not-exists": "O título que especificou para a vista previa non existe."
+	"templatesandbox-editform-title-not-exists": "O título que especificou para a vista previa non existe.",
+	"templatesandbox-failed-replace-section": "Produciuse un erro ao substituír a sección da páxina existente."
 }

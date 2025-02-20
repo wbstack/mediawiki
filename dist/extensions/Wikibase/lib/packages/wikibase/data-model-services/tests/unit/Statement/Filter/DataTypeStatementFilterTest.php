@@ -26,7 +26,7 @@ class DataTypeStatementFilterTest extends TestCase {
 
 		$dataTypeLookup->expects( $this->once() )
 			->method( 'getDataTypeIdForProperty' )
-			->will( $this->returnCallback( static function( PropertyId $propertyId ) {
+			->willReturnCallback( static function( PropertyId $propertyId ) {
 				$id = $propertyId->getSerialization();
 
 				if ( $id === 'P3' ) {
@@ -34,7 +34,7 @@ class DataTypeStatementFilterTest extends TestCase {
 				}
 
 				return $id === 'P1' ? 'identifier' : 'string';
-			} ) );
+			} );
 
 		return $dataTypeLookup;
 	}
@@ -47,7 +47,7 @@ class DataTypeStatementFilterTest extends TestCase {
 		$this->assertSame( $expected, $filter->statementMatches( $statement ) );
 	}
 
-	public function statementProvider() {
+	public static function statementProvider() {
 		$identifier = new Statement( new PropertyNoValueSnak( 1 ) );
 		$string = new Statement( new PropertyNoValueSnak( 2 ) );
 		$deleted = new Statement( new PropertyNoValueSnak( 3 ) );

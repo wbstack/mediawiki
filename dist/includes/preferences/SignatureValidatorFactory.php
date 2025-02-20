@@ -22,11 +22,11 @@
 namespace MediaWiki\Preferences;
 
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Parser\ParserOptions;
 use MediaWiki\SpecialPage\SpecialPageFactory;
+use MediaWiki\Title\TitleFactory;
 use MediaWiki\User\UserIdentity;
 use MessageLocalizer;
-use ParserOptions;
-use TitleFactory;
 
 /**
  * @since 1.38
@@ -37,6 +37,9 @@ class SignatureValidatorFactory {
 
 	/** @var callable */
 	private $parserFactoryClosure;
+
+	/** @var callable */
+	private $lintErrorCheckerClosure;
 
 	/** @var SpecialPageFactory */
 	private $specialPageFactory;
@@ -49,12 +52,14 @@ class SignatureValidatorFactory {
 	 * @param callable $parserFactoryClosure A function which returns a ParserFactory.
 	 *   We use this instead of an actual ParserFactory to avoid a circular dependency,
 	 *   since Parser also needs a SignatureValidatorFactory for signature formatting.
+	 * @param callable $lintErrorCheckerClosure A function which returns a LintErrorChecker, same as above.
 	 * @param SpecialPageFactory $specialPageFactory
 	 * @param TitleFactory $titleFactory
 	 */
 	public function __construct(
 		ServiceOptions $options,
 		callable $parserFactoryClosure,
+		callable $lintErrorCheckerClosure,
 		SpecialPageFactory $specialPageFactory,
 		TitleFactory $titleFactory
 	) {
@@ -62,6 +67,7 @@ class SignatureValidatorFactory {
 		$this->serviceOptions = $options;
 		$this->serviceOptions->assertRequiredOptions( SignatureValidator::CONSTRUCTOR_OPTIONS );
 		$this->parserFactoryClosure = $parserFactoryClosure;
+		$this->lintErrorCheckerClosure = $lintErrorCheckerClosure;
 		$this->specialPageFactory = $specialPageFactory;
 		$this->titleFactory = $titleFactory;
 	}
@@ -83,8 +89,9 @@ class SignatureValidatorFactory {
 			$localizer,
 			$popts,
 			( $this->parserFactoryClosure )(),
+			( $this->lintErrorCheckerClosure )(),
 			$this->specialPageFactory,
-			$this->titleFactory
+			$this->titleFactory,
 		);
 	}
 }

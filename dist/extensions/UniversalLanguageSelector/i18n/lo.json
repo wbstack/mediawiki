@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Xð",
+			"Kimmie023",
 			"Lookruk",
-			"Kimmie023"
+			"Xð"
 		]
 	},
 	"uls-plang-title-languages": "ພາສາ",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|ອີກ 1 ພາສາ|ອີກ $1 ພາສາ}}"
+	"ext-uls-compact-link-count": "{{PLURAL:$1|ອີກ 1 ພາສາ|ອີກ $1 ພາສາ}}",
+	"ext-uls-add-languages-button-label": "ເພີ່ມພາສາ"
 }

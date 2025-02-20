@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWPreNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -30,7 +30,7 @@ ve.ce.MWPreNode.static.name = 'mwPre';
 
 ve.ce.MWPreNode.static.tagName = 'pre';
 
-ve.ce.MWPreNode.static.primaryCommandName = 'pre';
+ve.ce.MWPreNode.static.primaryCommandName = 'mwPre';
 
 /* Registration */
 

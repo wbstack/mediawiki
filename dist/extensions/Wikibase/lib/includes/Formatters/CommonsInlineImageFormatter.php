@@ -4,14 +4,15 @@ namespace Wikibase\Lib\Formatters;
 
 use DataValues\StringValue;
 use File;
-use Html;
 use InvalidArgumentException;
-use Language;
-use Linker;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
+use MediaWiki\Languages\LanguageFactory;
+use MediaWiki\Linker\Linker;
 use MediaWiki\MediaWikiServices;
-use ParserOptions;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Title\Title;
 use RepoGroup;
-use Title;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 
@@ -54,20 +55,21 @@ class CommonsInlineImageFormatter implements ValueFormatter {
 	/**
 	 * @param ParserOptions $parserOptions Options for thumbnail size
 	 * @param array $thumbLimits Mapping of thumb number to the limit like [ 0 => 120, 1 => 240, ...]
+	 * @param LanguageFactory $languageFactory
 	 * @param FormatterOptions|null $options
 	 * @param RepoGroup|null $repoGroup
-	 * @throws \MWException
 	 */
 	public function __construct(
 		ParserOptions $parserOptions,
 		array $thumbLimits,
-		FormatterOptions $options = null,
-		RepoGroup $repoGroup = null
+		LanguageFactory $languageFactory,
+		?FormatterOptions $options = null,
+		?RepoGroup $repoGroup = null
 	) {
 		$this->options = $options ?: new FormatterOptions();
 
 		$languageCode = $this->options->getOption( ValueFormatter::OPT_LANG );
-		$this->language = Language::factory( $languageCode );
+		$this->language = $languageFactory->getLanguage( $languageCode );
 		$this->repoGroup = $repoGroup ?: MediaWikiServices::getInstance()->getRepoGroup();
 		$this->parserOptions = $parserOptions;
 		$this->thumbLimits = $thumbLimits;
@@ -97,7 +99,7 @@ class CommonsInlineImageFormatter implements ValueFormatter {
 
 		$transformOptions = [
 			'width' => $this->getThumbWidth( $this->parserOptions->getThumbSize() ),
-			'height' => 1000
+			'height' => 1000,
 		];
 
 		$file = $this->repoGroup->findFile( $fileName );
@@ -126,7 +128,7 @@ class CommonsInlineImageFormatter implements ValueFormatter {
 	private function wrapThumb( Title $title, $thumbHtml ) {
 		$attributes = [
 			'class' => 'image',
-			'href' => 'https://commons.wikimedia.org/wiki/File:' . $title->getPartialURL()
+			'href' => 'https://commons.wikimedia.org/wiki/File:' . $title->getPartialURL(),
 		];
 
 		return Html::rawElement(
@@ -143,7 +145,7 @@ class CommonsInlineImageFormatter implements ValueFormatter {
 	 */
 	private function getCaptionHtml( Title $title, $file = null ) {
 		$attributes = [
-			'href' => 'https://commons.wikimedia.org/wiki/File:' . $title->getPartialURL()
+			'href' => 'https://commons.wikimedia.org/wiki/File:' . $title->getPartialURL(),
 		];
 		$innerHtml = Html::element( 'a', $attributes, $title->getText() );
 
@@ -165,7 +167,7 @@ class CommonsInlineImageFormatter implements ValueFormatter {
 	private function getFileMetaHtml( File $file ) {
 		return $this->language->semicolonList( [
 			$file->getDimensionsString(),
-			htmlspecialchars( $this->language->formatSize( $file->getSize() ) )
+			htmlspecialchars( $this->language->formatSize( $file->getSize() ) ),
 		] );
 	}
 

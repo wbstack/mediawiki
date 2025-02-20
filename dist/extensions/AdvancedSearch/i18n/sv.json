@@ -3,15 +3,16 @@
 		"authors": [
 			"Ainali",
 			"Bengtsson96",
+			"Lejonel",
 			"Mjälten",
 			"Sabelöga",
 			"Technic2",
-			"WikiPhoenix",
-			"Lejonel"
+			"WikiPhoenix"
 		]
 	},
 	"advancedsearch-desc": "Enkel åtkomst till avancerade sökförmågor på [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Avancerad sök:",
+	"advancedsearch-options-pane-preview-list": "Söktermer som används för närvarande",
 	"advancedsearch-optgroup-text": "Sök i sidtext",
 	"advancedsearch-optgroup-structure": "Struktur",
 	"advancedsearch-optgroup-files": "Filer och bilder",
@@ -30,6 +31,7 @@
 	"advancedsearch-field-fileh": "Filhöjd i bildpunkter",
 	"advancedsearch-field-sort": "Sorteringsföljd",
 	"advancedsearch-field-preview-sort": "Sortera efter $1",
+	"advancedsearch-help-general-instruction": "Detaljerade instruktioner för $1",
 	"advancedsearch-help-plain": ";Beskrivning\n:Söker efter dessa ord i titeln eller texten. \n;Observera följande\n:* Flera ord kan anges här. \n:* Punkter och andra tecken som inte är alfanumeriska (förutom kolon och komma) kommer att ignoreras. \n:* Resultat som inte innehåller ett eller flera ord kan förekomma. \n:* Böjningsformer används. T.ex.: Om \"bil\" anges kommer sökningen också att överväga \"bilar\". Böjningsformer är språkspecifikt. \n;Hjälpsida\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Heltextsökning] \n;Motsvarande syntax i en normal sökning\n:<code>sesame street car</code>",
 	"advancedsearch-help-phrase": ";Beskrivning\n:Söker efter en specifik teckensekvens. Punkter ignoreras.\n;Observera följande:\n:(endast giltigt när citationstecken används, se exemplet nedan) \n:* Separera sökfraser med kommatecken eller mellanslag t.ex. <code>\"god morgon\"</code>, <code>\"hej kompis!\"</code>.\n:* Punkter och andra tecken som inte är alfanumeriska (förutom kolon och komma) kommer att ignoreras.\n:* Sökningar är inte skiftlägeskänsliga.\n:* Böjningsformer används inte.\n;Hjälpsida\n;[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Ord, fraser och modifierare]\n;Motsvarande syntax i en normal sökning:\n:Ord inom citationstecken, t.ex. <code>\"Börja från början\".",
 	"advancedsearch-help-or": ";Beskrivning\n:Minst ett av söktermerna måste finnas på sidan.\n;Hjälpsida\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Ord, fraser och modifierare]\n;Motsvarande syntax i en normal sökning:\n:Ord med <code>OR</code> emellan som <code>Laptop OR Notebook</code>.",
@@ -70,8 +72,9 @@
 	"advancedsearch-sort-preview-last-edit-desc": "redigeringsdatum",
 	"advancedsearch-sort-preview-create-timestamp-asc": "senast skapad",
 	"advancedsearch-sort-preview-create-timestamp-desc": "skapningsdatum",
-	"advancedsearch-namespaces-search-in": "Sök på:",
+	"advancedsearch-namespaces-search-in": "Sök i:",
 	"advancedsearch-namespaces-remember": "Kom ihåg val för framtida sökningar",
+	"advancedsearch-namespaces-pane-preview-list": "Namnrymdsfilter som används för närvarande",
 	"advancedsearch-namespaces-preset-all": "Alla",
 	"advancedsearch-namespaces-preset-default": "Standard",
 	"advancedsearch-namespaces-preset-general-help": "Allmän hjälp",

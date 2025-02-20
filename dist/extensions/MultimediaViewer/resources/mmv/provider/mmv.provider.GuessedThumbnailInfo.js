@@ -15,45 +15,47 @@
  * along with MediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
-	/**
-	 * This provider is similar to mw.mmv.provider.ThumbnailInfo, but instead of making an API call
-	 * to get the thumbnail URL, it tries to guess it. There are two failure modes:
-	 * - known failure: in the given situation it does not seem possible or safe to guess the URL.
-	 *   It is up to the caller to obtain it by falling back to the normal provider.
-	 * - unexpected failure: we guess an URL but it does not work. The current implementation is
-	 *   conservative so at least on WMF wikis this probably won't happen, but should be reckoned
-	 *   with anyway. On other wikis (especially ones which do not generate thumbnails on demand
-	 *   via the 404 handler) this could be more frequent. Again, it is the caller's resonsibility
-	 *   to handle this by detecting image loading errors and falling back to the normal provider.
-	 *
-	 * @class mw.mmv.provider.GuessedThumbnailInfo
-	 * @constructor
-	 */
-	function GuessedThumbnailInfo() {}
+const Thumbnail = require( '../model/mmv.model.Thumbnail.js' );
+
+/**
+ * This provider is similar to ThumbnailInfo, but instead of making an API call
+ * to get the thumbnail URL, it tries to guess it. There are two failure modes:
+ * - known failure: in the given situation it does not seem possible or safe to guess the URL.
+ *   It is up to the caller to obtain it by falling back to the normal provider.
+ * - unexpected failure: we guess an URL but it does not work. The current implementation is
+ *   conservative so at least on WMF wikis this probably won't happen, but should be reckoned
+ *   with anyway. On other wikis (especially ones which do not generate thumbnails on demand
+ *   via the 404 handler) this could be more frequent. Again, it is the caller's responsibility
+ *   to handle this by detecting image loading errors and falling back to the normal provider.
+ */
+class GuessedThumbnailInfo {
 
 	/**
 	 * File extensions which are vector types (as opposed to bitmap).
 	 * Thumbnails of vector types can be larger than the original file.
 	 *
-	 * @property {Object.<string, number>}
+	 * @return {Object.<string, number>}
 	 */
-	GuessedThumbnailInfo.prototype.vectorExtensions = {
-		svg: 1
-	};
+	get vectorExtensions() {
+		return {
+			svg: 1
+		};
+	}
 
 	/**
 	 * File extensions which can be displayed in the browser.
 	 * Other file types need to be thumbnailed even if the size of the original file would be right.
 	 *
-	 * @property {Object.<string, number>}
+	 * @return {Object.<string, number>}
 	 */
-	GuessedThumbnailInfo.prototype.displayableExtensions = {
-		png: 1,
-		jpg: 1,
-		jpeg: 1,
-		gif: 1
-	};
+	get displayableExtensions() {
+		return {
+			png: 1,
+			jpg: 1,
+			jpeg: 1,
+			gif: 1
+		};
+	}
 
 	/**
 	 * Try to guess the thumbnailinfo for a thumbnail without doing an API request.
@@ -67,12 +69,12 @@
 	 * @param {number} width thumbnail width in pixels
 	 * @param {number} originalWidth width of original image in pixels
 	 * @param {number} originalHeight height of original image in pixels
-	 * @return {jQuery.Promise.<mw.mmv.model.Thumbnail>}
+	 * @return {jQuery.Promise.<Thumbnail>}
 	 */
-	GuessedThumbnailInfo.prototype.get = function ( file, sampleUrl, width, originalWidth, originalHeight ) {
-		var url = this.getUrl( file, sampleUrl, width, originalWidth );
+	get( file, sampleUrl, width, originalWidth, originalHeight ) {
+		const url = this.getUrl( file, sampleUrl, width, originalWidth );
 		if ( url ) {
-			return $.Deferred().resolve( new mw.mmv.model.Thumbnail(
+			return $.Deferred().resolve( new Thumbnail(
 				url,
 				this.guessWidth( file, width, originalWidth ),
 				this.guessHeight( file, width, originalWidth, originalHeight )
@@ -80,7 +82,7 @@
 		} else {
 			return $.Deferred().reject( 'Could not guess thumbnail URL' );
 		}
-	};
+	}
 
 	/**
 	 * Try to guess the URL of a thumbnail without doing an API request.
@@ -92,9 +94,9 @@
 	 * @param {number} originalWidth width of original image in pixels
 	 * @return {string|undefined} a thumbnail URL or nothing
 	 */
-	GuessedThumbnailInfo.prototype.getUrl = function ( file, sampleUrl, width, originalWidth ) {
-		var needsFullSize = this.needsOriginal( file, width, originalWidth ),
-			sampleIsFullSize = this.isFullSizeUrl( sampleUrl, file );
+	getUrl( file, sampleUrl, width, originalWidth ) {
+		const needsFullSize = this.needsOriginal( file, width, originalWidth );
+		const sampleIsFullSize = this.isFullSizeUrl( sampleUrl, file );
 
 		if ( sampleIsFullSize && needsFullSize ) {
 			// sample thumbnail uses full size, and we need full size as well - the sample URL
@@ -117,7 +119,7 @@
 		} else { // sampleIsFullSize && !needsOriginal
 			return this.guessThumbUrl( file, sampleUrl, width );
 		}
-	};
+	}
 
 	/**
 	 * True if the original image needs to be used as a thumbnail.
@@ -128,9 +130,9 @@
 	 * @param {number} originalWidth width of original image in pixels
 	 * @return {boolean}
 	 */
-	GuessedThumbnailInfo.prototype.needsOriginal = function ( file, width, originalWidth ) {
+	needsOriginal( file, width, originalWidth ) {
 		return width >= originalWidth && !this.canHaveLargerThumbnailThanOriginal( file );
-	};
+	}
 
 	/**
 	 * Checks if a given thumbnail URL is full-size (the original image) or scaled
@@ -140,9 +142,9 @@
 	 * @param {mw.Title} file
 	 * @return {boolean}
 	 */
-	GuessedThumbnailInfo.prototype.isFullSizeUrl = function ( url, file ) {
+	isFullSizeUrl( url, file ) {
 		return !this.obscureFilename( url, file ).match( '/thumb/' );
-	};
+	}
 
 	/**
 	 * Removes the filename in a reversible way. This is useful because the filename can be nearly
@@ -151,16 +153,16 @@
 	 * @protected
 	 * @param {string} url a thumbnail URL
 	 * @param {mw.Title} file
-	 * @return {string} thumbnnail URL with occurences of the filename replaced by `<filename>`
+	 * @return {string} thumbnail URL with occurrences of the filename replaced by `<filename>`
 	 */
-	GuessedThumbnailInfo.prototype.obscureFilename = function ( url, file ) {
+	obscureFilename( url, file ) {
 		// corresponds to File::getUrlRel() which uses rawurlencode()
-		var filenameInUrl = mw.util.rawurlencode( file.getMain() );
+		const filenameInUrl = mw.util.rawurlencode( file.getMain() );
 
 		// In the URL to the original file the filename occurs once. In a thumbnail URL it usually
 		// occurs twice, but can occur once if it is too short. We replace twice, can't hurt.
 		return url.replace( filenameInUrl, '<filename>' ).replace( filenameInUrl, '<filename>' );
-	};
+	}
 
 	/**
 	 * Undoes #obscureFilename().
@@ -168,15 +170,15 @@
 	 * @protected
 	 * @param {string} url a thumbnail URL (with obscured filename)
 	 * @param {mw.Title} file
-	 * @return {string} original thumbnnail URL
+	 * @return {string} original thumbnail URL
 	 */
-	GuessedThumbnailInfo.prototype.restoreFilename = function ( url, file ) {
+	restoreFilename( url, file ) {
 		// corresponds to File::getUrlRel() which uses rawurlencode()
-		var filenameInUrl = mw.util.rawurlencode( file.getMain() );
+		const filenameInUrl = mw.util.rawurlencode( file.getMain() );
 
 		// <> cannot be used in titles, so this is safe
 		return url.replace( '<filename>', filenameInUrl ).replace( '<filename>', filenameInUrl );
-	};
+	}
 
 	/**
 	 * True if the file is of a type for which the thumbnail can be scaled beyond the original size.
@@ -185,9 +187,9 @@
 	 * @param {mw.Title} file
 	 * @return {boolean}
 	 */
-	GuessedThumbnailInfo.prototype.canHaveLargerThumbnailThanOriginal = function ( file ) {
+	canHaveLargerThumbnailThanOriginal( file ) {
 		return ( file.getExtension().toLowerCase() in this.vectorExtensions );
-	};
+	}
 
 	/**
 	 * True if the file type can be displayed in most browsers, false if it needs thumbnailing
@@ -196,9 +198,9 @@
 	 * @param {mw.Title} file
 	 * @return {boolean}
 	 */
-	GuessedThumbnailInfo.prototype.canBeDisplayedInBrowser = function ( file ) {
+	canBeDisplayedInBrowser( file ) {
 		return ( file.getExtension().toLowerCase() in this.displayableExtensions );
-	};
+	}
 
 	/**
 	 * Guess what will be the width of the thumbnail. (Thumbnails for most file formats cannot be
@@ -210,13 +212,13 @@
 	 * @param {number} originalWidth width of original image in pixels
 	 * @return {number} guessed width
 	 */
-	GuessedThumbnailInfo.prototype.guessWidth = function ( file, width, originalWidth ) {
+	guessWidth( file, width, originalWidth ) {
 		if ( width >= originalWidth && !this.canHaveLargerThumbnailThanOriginal( file ) ) {
 			return originalWidth;
 		} else {
 			return width;
 		}
-	};
+	}
 
 	/**
 	 * Guess what will be the height of the thumbnail, given its width.
@@ -228,7 +230,7 @@
 	 * @param {number} originalHeight height of original image in pixels
 	 * @return {number} guessed height
 	 */
-	GuessedThumbnailInfo.prototype.guessHeight = function ( file, width, originalWidth, originalHeight ) {
+	guessHeight( file, width, originalWidth, originalHeight ) {
 		if ( width >= originalWidth && !this.canHaveLargerThumbnailThanOriginal( file ) ) {
 			return originalHeight;
 		} else {
@@ -236,7 +238,7 @@
 			// backend uses) but that should not cause any issues
 			return Math.round( width * ( originalHeight / originalWidth ) );
 		}
-	};
+	}
 
 	/**
 	 * Given a thumbnail URL with a wrong size, returns one with the right size.
@@ -247,22 +249,22 @@
 	 * @param {number} width thumbnail width in pixels
 	 * @return {string|undefined} thumbnail URL with the correct size
 	 */
-	GuessedThumbnailInfo.prototype.replaceSize = function ( file, sampleUrl, width ) {
-		var url = this.obscureFilename( sampleUrl, file ),
-			sizeRegexp = /\b\d{1,5}px\b/;
+	replaceSize( file, sampleUrl, width ) {
+		let url = this.obscureFilename( sampleUrl, file );
+		const sizeRegexp = /\b\d{1,5}px\b/;
 
 		// this should never happen, but let's play it safe - returning the sample URL and believing
-		// it is the resized one would be bad. Returning a wrong filename is not catastrophical
+		// it is the resized one would be bad. Returning a wrong filename is not catastrophic
 		// as long as we return a non-working wrong filename, which would not be the case here.
 		if ( !url.match( sizeRegexp ) ) {
 			return undefined;
 		}
 
 		// we are assuming here that the other thumbnail parameters do not look like a size
-		url = url.replace( sizeRegexp, width + 'px' );
+		url = url.replace( sizeRegexp, `${ width }px` );
 
 		return this.restoreFilename( url, file );
-	};
+	}
 
 	/**
 	 * Try to guess the original URL to the file, from a thumb URL.
@@ -272,8 +274,8 @@
 	 * @param {string} thumbnailUrl
 	 * @return {string} URL of the original file
 	 */
-	GuessedThumbnailInfo.prototype.guessFullUrl = function ( file, thumbnailUrl ) {
-		var url = this.obscureFilename( thumbnailUrl, file );
+	guessFullUrl( file, thumbnailUrl ) {
+		let url = this.obscureFilename( thumbnailUrl, file );
 
 		if ( url === thumbnailUrl ) {
 			// Did not find the filename, maybe due to URL encoding issues. Bail out.
@@ -285,7 +287,7 @@
 		url = url.replace( '/thumb', '' );
 
 		return this.restoreFilename( url, file );
-	};
+	}
 
 	/**
 	 * Hardest version: try to guess thumbnail URL from original
@@ -296,14 +298,14 @@
 	 * @param {number} width thumbnail width in pixels
 	 * @return {string|undefined} thumbnail URL
 	 */
-	GuessedThumbnailInfo.prototype.guessThumbUrl = function () {
+	guessThumbUrl() {
 		// Not implemented. This can be very complicated (the thumbnail might have other
 		// parameters than the size, which are impossible to guess, might be converted to some
 		// other format, might have a special shortened format depending on the length of the
 		// filename) and it is unlikely to be useful - it would be only called when we need
 		// a thumbnail that is smaller than the sample (the thumbnail which is already on the page).
 		return undefined;
-	};
+	}
+}
 
-	mw.mmv.provider.GuessedThumbnailInfo = GuessedThumbnailInfo;
-}() );
+module.exports = GuessedThumbnailInfo;

@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\View;
 
-use SpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
 use Wikibase\View\SpecialPageLinker;
 
 /**
@@ -15,7 +15,7 @@ class RepoSpecialPageLinker implements SpecialPageLinker {
 
 	/**
 	 * @param string $pageName
-	 * @param string[] $subPageParams Parameters to be added as slash-separated sub pages
+	 * @param string[] $subPageParams Parameters to be added as slash-separated subpages
 	 *
 	 * @return string
 	 */

@@ -4,7 +4,8 @@ namespace Wikibase\Lib\Formatters;
 
 use DataValues\TimeValue;
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Language\Language;
+use MediaWiki\Languages\LanguageFactory;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 
@@ -28,15 +29,15 @@ class MwTimeIsoFormatter implements ValueFormatter {
 	 */
 	private $options;
 
-	/**
-	 * @param FormatterOptions|null $options
-	 */
-	public function __construct( FormatterOptions $options = null ) {
+	public function __construct(
+		LanguageFactory $languageFactory,
+		?FormatterOptions $options = null
+	) {
 		$this->options = $options ?: new FormatterOptions();
 		$this->options->defaultOption( ValueFormatter::OPT_LANG, 'en' );
 
 		$languageCode = $this->options->getOption( ValueFormatter::OPT_LANG );
-		$this->language = Language::factory( $languageCode );
+		$this->language = $languageFactory->getLanguage( $languageCode );
 	}
 
 	/**
@@ -145,12 +146,12 @@ class MwTimeIsoFormatter implements ValueFormatter {
 	/**
 	 * @see Language::sprintfDate
 	 *
-	 * @param string $dateFormat
+	 * @param string|null $dateFormat
 	 *
 	 * @return string A date format for the month that roundtrips the Wikibase TimeParsers.
 	 */
 	private function getMonthFormat( $dateFormat ) {
-		if ( preg_match( '/(?:[FMn]|(?<!x)m|xg)[.,]?/', $dateFormat, $matches ) ) {
+		if ( $dateFormat && preg_match( '/(?:[FMn]|(?<!x)m|xg)[.,]?/', $dateFormat, $matches ) ) {
 			return $matches[0];
 		}
 
@@ -192,11 +193,11 @@ class MwTimeIsoFormatter implements ValueFormatter {
 			throw new InvalidArgumentException( 'Unable to parse time value.' );
 		}
 
-		list( , $year, $month, $day ) = $matches;
+		[ , $year, $month, $day ] = $matches;
 
-		if ( $year == 0 && $precision < TimeValue::PRECISION_YEAR
-			|| $month == 0 && $precision >= TimeValue::PRECISION_MONTH
-			|| $day == 0 && $precision >= TimeValue::PRECISION_DAY
+		if ( ( $year == 0 && $precision < TimeValue::PRECISION_YEAR )
+			|| ( $month == 0 && $precision >= TimeValue::PRECISION_MONTH )
+			|| ( $day == 0 && $precision >= TimeValue::PRECISION_DAY )
 		) {
 			throw new InvalidArgumentException( 'Time value insufficient for precision.' );
 		}
@@ -212,7 +213,7 @@ class MwTimeIsoFormatter implements ValueFormatter {
 	 */
 	private function getLocalizedYear( $isoTimestamp, $precision ) {
 		preg_match( '/^(\D*)(\d*)/', $isoTimestamp, $matches );
-		list( , $sign, $year ) = $matches;
+		[ , $sign, $year ] = $matches;
 		$isBCE = $sign === '-';
 
 		$shift = 1;
@@ -323,6 +324,7 @@ class MwTimeIsoFormatter implements ValueFormatter {
 			return $number;
 		}
 
+		$number = (int)$number;
 		switch ( $function ) {
 			case 'ceil':
 				$shifted = ceil( $number / $shift ) * $unshift;

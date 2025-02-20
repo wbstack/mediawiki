@@ -1,10 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Localizer;
 
 use Exception;
 use InvalidArgumentException;
-use Message;
+use MediaWiki\Message\Message;
 use Wikibase\Lib\MessageException;
 
 /**
@@ -14,32 +16,15 @@ use Wikibase\Lib\MessageException;
  */
 class MessageExceptionLocalizer implements ExceptionLocalizer {
 
-	/**
-	 * @see ExceptionLocalizer::getExceptionMessage()
-	 *
-	 * @param Exception $exception
-	 *
-	 * @return Message
-	 * @throws InvalidArgumentException
-	 */
-	public function getExceptionMessage( Exception $exception ) {
-		if ( !$this->hasExceptionMessage( $exception ) ) {
+	public function getExceptionMessage( Exception $exception ): Message {
+		if ( !( $exception instanceof MessageException ) ) {
 			throw new InvalidArgumentException( '$exception is not a MessageException.' );
 		}
 
-		/** @var MessageException $exception */
-		'@phan-var MessageException $exception';
 		return new Message( $exception->getKey(), $exception->getParams() );
 	}
 
-	/**
-	 * @see ExceptionLocalizer::hasExceptionMessage()
-	 *
-	 * @param Exception $exception
-	 *
-	 * @return bool
-	 */
-	public function hasExceptionMessage( Exception $exception ) {
+	public function hasExceptionMessage( Exception $exception ): bool {
 		return $exception instanceof MessageException;
 	}
 

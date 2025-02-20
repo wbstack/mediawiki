@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface format tool classes.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -114,7 +114,7 @@ ve.ui.MWHeading6FormatTool.static.format = { type: 'mwHeading', attributes: { le
 ve.ui.toolFactory.register( ve.ui.MWHeading6FormatTool );
 
 ( function () {
-	for ( var i = 1; i <= 6; i++ ) {
+	for ( let i = 1; i <= 6; i++ ) {
 		ve.ui.commandRegistry.register(
 			new ve.ui.Command(
 				'heading' + i, 'format', 'convert',

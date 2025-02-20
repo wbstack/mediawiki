@@ -17,13 +17,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  *
- * @since 1.34
+ * @since 1.36 (As UnknownContent in 1.34)
  *
  * @file
  * @ingroup Content
  *
  * @author Daniel Kinzler
  */
+
+namespace MediaWiki\Content;
 
 /**
  * Content object implementation representing unknown content.
@@ -147,3 +149,5 @@ class FallbackContent extends AbstractContent {
 	}
 
 }
+/** @deprecated class alias since 1.43 */
+class_alias( FallbackContent::class, 'FallbackContent' );

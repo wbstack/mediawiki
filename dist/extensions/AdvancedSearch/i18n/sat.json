@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Fagunkoyel Hansdah",
-			"Ramjit Tudu"
+			"Ramjit Tudu",
+			"ᱤᱧ ᱢᱟᱛᱟᱞ"
 		]
 	},
 	"advancedsearch-optgroup-text": "ᱥᱟᱦᱴᱟ ᱚᱞ ᱨᱮ ᱥᱮᱸᱫᱽᱨᱟ",
@@ -29,6 +30,8 @@
 	"advancedsearch-filesize-equals": "ᱥᱚᱢᱟᱱ",
 	"advancedsearch-filesize-greater-than": "ᱠᱷᱚᱱ ᱢᱟᱨᱟᱝ",
 	"advancedsearch-filesize-smaller-than": "ᱠᱷᱚᱱ ᱦᱩᱰᱤᱧ",
+	"advancedsearch-sort-preview-last-edit-desc": "ᱥᱟᱯᱲᱟᱣ ᱢᱟᱹᱦᱤᱛ",
+	"advancedsearch-sort-preview-create-timestamp-desc": "ᱩᱪᱷᱟᱹᱱ ᱢᱟᱹᱦᱤᱛ",
 	"advancedsearch-namespaces-search-in": "ᱥᱮᱸᱫᱽᱨᱟ ᱨᱮ:",
 	"advancedsearch-namespaces-remember": "ᱵᱟᱪᱷᱚᱱ ᱨᱮᱵᱮᱫᱽ ᱢᱮ ᱦᱟᱯᱮᱱ ᱯᱟᱱᱛᱮᱠᱚ ᱞᱟᱹᱜᱤᱫ",
 	"advancedsearch-namespaces-preset-all": "ᱡᱚᱛᱚ",

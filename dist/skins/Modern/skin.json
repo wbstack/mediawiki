@@ -10,7 +10,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "skin",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"ValidSkinNames": {
 		"modern": {
@@ -18,6 +18,7 @@
 			"args": [
 				{
 					"name": "modern",
+					"supportsMwHeading": true,
 					"scripts": [],
 					"styles": [
 						"skins.modern"
@@ -44,15 +45,14 @@
 	},
 	"ResourceModules": {
 		"skins.modern": {
-			"class": "ResourceLoaderSkinModule",
+			"class": "MediaWiki\\ResourceLoader\\SkinModule",
 			"features": {
 				"content-links": true,
 				"content-media": true,
-				"interface-message-box": true,
 				"interface-category": true,
+				"interface-edit-section-links": true,
 				"content-tables": true,
 				"i18n-ordered-lists": true,
-				"i18n-all-lists-margins": true,
 				"i18n-headings": true
 			},
 			"styles": {
@@ -71,6 +71,7 @@
 	},
 	"ResourceModuleSkinStyles": {
 		"modern": {
+			"+mediawiki.page.ready": "skinStyles/teleportTarget.less",
 			"+oojs-ui-core.styles": "skinStyles/ooui.less",
 			"+mediawiki.action.view.redirectPage": "skinStyles/mediawiki.action.view.redirectPage.css",
 			"+mediawiki.notification": "skinStyles/mediawiki.notification.less",

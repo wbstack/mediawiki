@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableSectionNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -40,7 +40,7 @@ ve.ce.TableSectionNode.static.name = 'tableSection';
  * @throws {Error} If style is invalid
  */
 ve.ce.TableSectionNode.prototype.getTagName = function () {
-	var style = this.model.getAttribute( 'style' ),
+	const style = this.model.getAttribute( 'style' ),
 		types = { header: 'thead', body: 'tbody', footer: 'tfoot' };
 
 	if ( !Object.prototype.hasOwnProperty.call( types, style ) ) {

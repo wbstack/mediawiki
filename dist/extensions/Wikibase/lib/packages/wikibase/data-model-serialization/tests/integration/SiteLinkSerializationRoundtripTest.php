@@ -9,6 +9,7 @@ use Wikibase\DataModel\Deserializers\DeserializerFactory;
 use Wikibase\DataModel\Entity\BasicEntityIdParser;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Serializers\SerializerFactory;
+use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\SiteLink;
 
 /**
@@ -26,7 +27,10 @@ class SiteLinkSerializationRoundtripTest extends TestCase {
 		$serializerFactory = new SerializerFactory( new DataValueSerializer() );
 		$deserializerFactory = new DeserializerFactory(
 			new DataValueDeserializer(),
-			new BasicEntityIdParser()
+			new BasicEntityIdParser(),
+			new InMemoryDataTypeLookup(),
+			[],
+			[]
 		);
 
 		$serialization = $serializerFactory->newSiteLinkSerializer()->serialize( $siteLink );
@@ -34,22 +38,22 @@ class SiteLinkSerializationRoundtripTest extends TestCase {
 		$this->assertEquals( $siteLink, $newSiteLink );
 	}
 
-	public function siteLinkProvider() {
+	public static function siteLinkProvider() {
 		return [
 			[
-				new SiteLink( 'enwiki', 'Nyan Cat' )
+				new SiteLink( 'enwiki', 'Nyan Cat' ),
 			],
 			[
 				new SiteLink( 'enwiki', 'Nyan Cat', [
-					new ItemId( 'Q42' )
-				] )
+					new ItemId( 'Q42' ),
+				] ),
 			],
 			[
 				new SiteLink( 'frwikisource', 'Nyan Cat', [
 					new ItemId( 'Q42' ),
-					new ItemId( 'q43' )
-				] )
-			]
+					new ItemId( 'q43' ),
+				] ),
+			],
 		];
 	}
 

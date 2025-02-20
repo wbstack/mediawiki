@@ -7,7 +7,10 @@ use CirrusSearch\Connection;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\Searcher;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
+use Wikimedia\Stats\Metrics\CounterMetric;
+use Wikimedia\Stats\Metrics\NullMetric;
+use Wikimedia\Stats\StatsFactory;
 use WikiPage;
 
 /**
@@ -51,6 +54,11 @@ class Checker {
 	private $remediator;
 
 	/**
+	 * @var StatsFactory Used to record stats about the process
+	 */
+	private StatsFactory $statsFactory;
+
+	/**
 	 * @var bool Should we log id's that are found to have no problems
 	 */
 	private $logSane;
@@ -81,6 +89,7 @@ class Checker {
 	 * @param Remediator $remediator the remediator to which to send titles
 	 *   that are insane
 	 * @param Searcher $searcher searcher to use for fetches
+	 * @param StatsFactory $statsFactory to use for recording metrics
 	 * @param bool $logSane should we log sane ids
 	 * @param bool $fastRedirectCheck fast but inconsistent redirect check
 	 * @param ArrayObject|null $pageCache cache for WikiPage loaded from db
@@ -92,20 +101,50 @@ class Checker {
 		Connection $connection,
 		Remediator $remediator,
 		Searcher $searcher,
+		StatsFactory $statsFactory,
 		$logSane,
 		$fastRedirectCheck,
-		ArrayObject $pageCache = null,
-		callable $isOldFn = null
+		?ArrayObject $pageCache = null,
+		?callable $isOldFn = null
 	) {
 		$this->searchConfig = $config;
 		$this->connection = $connection;
-		$this->remediator = $remediator;
+		$this->statsFactory = $statsFactory;
+		$this->remediator = new CountingRemediator(
+			$remediator,
+			function ( string $problem ) {
+				return $this->getCounter( "fixed", $problem );
+			}
+		);
 		$this->searcher = $searcher;
 		$this->logSane = $logSane;
 		$this->fastRedirectCheck = $fastRedirectCheck;
 		$this->pageCache = $pageCache;
 		$this->isOldFn = $isOldFn ?? static function ( WikiPage $page ) {
 			return false;
+		};
+	}
+
+	/**
+	 * Decide if a document should be reindexed based on time since last reindex
+	 *
+	 * Consider a page as old every $numCycles times the saneitizer loops over
+	 * the same document. This ensures documents have been reindexed within the
+	 * last `$numCycles * actual_loop_duration` (note that the configured
+	 * duration is min_loop_duration, but in practice configuration ensures min
+	 * and actual are typically the same).
+	 *
+	 * @param int $loopId The number of times the checker has looped over
+	 *  the document set.
+	 * @param int $numCycles The number of loops after which a document
+	 *  is considered old.
+	 * @return \Closure
+	 */
+	public static function makeIsOldClosure( $loopId, $numCycles ) {
+		$loopMod = $loopId % $numCycles;
+		return static function ( \WikiPage $page ) use ( $numCycles, $loopMod ) {
+			$pageIdMod = $page->getId() % $numCycles;
+			return $pageIdMod == $loopMod;
 		};
 	}
 
@@ -143,12 +182,25 @@ class Checker {
 				$nbPagesFixed++;
 			}
 		}
-		$clusterName = $this->connection->getClusterName();
-		$stats = MediaWikiServices::getInstance()->getStatsdDataFactory();
-		$stats->updateCount( "CirrusSearch.$clusterName.sanitization.fixed", $nbPagesFixed );
-		$stats->updateCount( "CirrusSearch.$clusterName.sanitization.checked", count( $pageIds ) );
-		$stats->updateCount( "CirrusSearch.$clusterName.sanitization.old", $nbPagesOld );
+		$this->getCounter( "checked" )->incrementBy( count( $pageIds ) );
+		// This is a duplicate of the "fixed" counter with the
+		// "problem => oldDocument" label. It can be removed once
+		// dashboards have transitioned away from statsd.
+		$this->getCounter( "old" )->incrementBy( $nbPagesOld );
+
 		return $nbPagesFixed;
+	}
+
+	/**
+	 * @return CounterMetric|NullMetric
+	 */
+	private function getCounter( string $action, string $problem = "n/a" ) {
+		$cluster = $this->connection->getClusterName();
+		return $this->statsFactory->getCounter( "sanitization_total" )
+			->setLabel( "problem", $problem )
+			->setLabel( "search_cluster", $cluster )
+			->setLabel( "action", $action )
+			->copyToStatsdAt( "CirrusSearch.$cluster.sanitization.$action" );
 	}
 
 	/**
@@ -167,7 +219,10 @@ class Checker {
 		$inIndex = $fromIndex !== [];
 		if ( $this->checkIfRedirect( $page ) ) {
 			if ( $inIndex ) {
-				$this->remediator->redirectInIndex( $page );
+				foreach ( $fromIndex as $indexInfo ) {
+					$indexSuffix = $this->connection->extractIndexSuffix( $indexInfo->getIndex() );
+					$this->remediator->redirectInIndex( $docId, $page, $indexSuffix );
+				}
 				return true;
 			}
 			$this->sane( $pageId, 'Redirect not in index' );
@@ -213,10 +268,8 @@ class Checker {
 		$inIndex = $fromIndex !== [];
 		if ( $inIndex ) {
 			foreach ( $fromIndex as $r ) {
-				$title = Title::makeTitleSafe( $r->namespace, $r->title );
-				if ( $title === null ) {
-					$title = Title::makeTitle( NS_SPECIAL, 'Badtitle/InvalidInDBOrElastic' );
-				}
+				$title = Title::makeTitleSafe( $r->namespace, $r->title ) ??
+					Title::makeTitle( NS_SPECIAL, 'Badtitle/InvalidInDBOrElastic' );
 				$this->remediator->ghostPageInIndex( $docId, $title );
 			}
 			return true;
@@ -318,7 +371,7 @@ class Checker {
 		// care of the cleaning.
 		$cache = $this->pageCache ?: new ArrayObject();
 		$pageIds = array_diff( $pageIds, array_keys( $cache->getArrayCopy() ) );
-		if ( empty( $pageIds ) ) {
+		if ( !$pageIds ) {
 			return $cache->getArrayCopy();
 		}
 		$dbr = $this->getDB();
@@ -346,10 +399,10 @@ class Checker {
 	}
 
 	/**
-	 * @return \Wikimedia\Rdbms\IDatabase
+	 * @return \Wikimedia\Rdbms\IReadableDatabase
 	 */
 	private function getDB() {
-		return wfGetDB( DB_REPLICA );
+		return MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
 	}
 
 	/**

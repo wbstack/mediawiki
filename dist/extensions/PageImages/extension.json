@@ -6,10 +6,15 @@
 	"license-name": "WTFPL",
 	"type": "api",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"APIPropModules": {
-		"pageimages": "PageImages\\ApiQueryPageImages"
+		"pageimages": {
+			"class": "PageImages\\ApiQueryPageImages",
+			"services": [
+				"RepoGroup"
+			]
+		}
 	},
 	"MessagesDirs": {
 		"PageImages": [
@@ -31,25 +36,49 @@
 		"ParserModifyImageHTML": "parser",
 		"ParserTestGlobals": "parser",
 		"SearchResultProvideThumbnail": "search",
-		"SpecialMobileEditWatchlist::images": "PageImages\\PageImages::onSpecialMobileEditWatchlistImages"
+		"SpecialMobileEditWatchlist::images": "mobile"
 	},
 	"HookHandlers": {
 		"main": {
-			"class": "PageImages\\PageImages"
+			"class": "PageImages\\PageImages",
+			"services": [
+				"MainConfig",
+				"DBLoadBalancerFactory",
+				"RepoGroup",
+				"UserOptionsLookup"
+			]
 		},
 		"parser": {
-			"class": "PageImages\\Hooks\\ParserFileProcessingHookHandlers"
+			"class": "PageImages\\Hooks\\ParserFileProcessingHookHandlers",
+			"services": [
+				"MainConfig",
+				"RepoGroup",
+				"MainWANObjectCache",
+				"HttpRequestFactory",
+				"DBLoadBalancerFactory",
+				"TitleFactory",
+				"LinksMigration"
+			]
 		},
 		"search": {
 			"class": "PageImages\\Hooks\\SearchResultProvideThumbnailHookHandler",
 			"services": [
+				"SearchResultThumbnailProvider",
 				"PageProps",
 				"RepoGroup"
 			]
+		},
+		"mobile": {
+			"class": "PageImages\\Hooks\\MobileFrontendHookHandlers"
 		}
 	},
 	"JobClasses": {
-		"InitImageDataJob": "PageImages\\Job\\InitImageDataJob"
+		"InitImageDataJob": {
+			"class": "PageImages\\Job\\InitImageDataJob",
+			"services": [
+				"DBLoadBalancerFactory"
+			]
+		}
 	},
 	"config": {
 		"PageImagesScores": {

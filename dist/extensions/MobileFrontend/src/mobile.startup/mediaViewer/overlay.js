@@ -1,4 +1,9 @@
-var m = require( '../moduleLoaderSingleton' ),
+/**
+ * Internal for use inside Minerva only. See {@link module:mobile.startup} for access.
+ *
+ * @module mobile.startup/mediaViewer
+ */
+const m = require( '../moduleLoaderSingleton' ),
 	promisedView = require( '../promisedView' ),
 	util = require( '../util' ),
 	header = require( '../headers' ).header,
@@ -8,11 +13,13 @@ var m = require( '../moduleLoaderSingleton' ),
 /**
  * Produce an overlay for mediaViewer
  *
+ * @name overlay
+ * @memberof module:mobile.startup/mediaViewer
  * @param {Object} options
- * @return {Overlay}
+ * @return {module:mobile.startup/Overlay}
  */
 function mediaViewerOverlay( options ) {
-	var overlay = Overlay.make(
+	const overlay = Overlay.make(
 		{
 			headers: [
 				header( '', [], icons.cancel( 'gray' ) )
@@ -22,8 +29,8 @@ function mediaViewerOverlay( options ) {
 		promisedView(
 			util.Promise.all( [
 				mw.loader.using( 'mobile.mediaViewer' )
-			] ).then( function () {
-				var ImageCarousel = m.require( 'mobile.mediaViewer' ).ImageCarousel;
+			] ).then( () => {
+				const ImageCarousel = m.require( 'mobile.mediaViewer' ).ImageCarousel;
 				return new ImageCarousel( options );
 			} )
 		)

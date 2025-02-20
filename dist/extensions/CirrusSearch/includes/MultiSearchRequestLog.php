@@ -34,14 +34,10 @@ class MultiSearchRequestLog extends SearchRequestLog {
 		// is returned by Request::getData(). Each single request is represented
 		// by two lines, first a metadata line about the request and second the
 		// actual query.
-		/** @phan-suppress-next-line PhanTypeMismatchArgumentInternal getData() actually returns array|string */
 		$lines = explode( "\n", trim( $this->request->getData(), "\n" ) );
-		// @phan-suppress-next-line PhanImpossibleCondition
-		if ( !empty( $lines ) ) {
-			$vars += $this->extractRequestVariables(
-				array_slice( $lines, 0, 2 )
-			);
-		}
+		$vars += $this->extractRequestVariables(
+			array_slice( $lines, 0, 2 )
+		);
 
 		$responseData = $this->response->getData();
 		if ( !empty( $responseData['responses'] ) ) {
@@ -85,7 +81,6 @@ class MultiSearchRequestLog extends SearchRequestLog {
 		// is returned by Request::getData(). Each single request is represented
 		// by two lines, first a metadata line about the request and second the
 		// actual query.
-		/** @phan-suppress-next-line PhanTypeMismatchArgumentInternal getData() actually returns array|string */
 		$lines = explode( "\n", trim( $this->request->getData(), "\n" ) );
 		$requestData = array_chunk( $lines, 2 );
 

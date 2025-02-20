@@ -19,46 +19,57 @@
  * @ingroup Pager
  */
 
+namespace MediaWiki\Pager;
+
+use LocalRepo;
+use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\MainConfigNames;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserNameUtils;
+use MediaWiki\Xml\Xml;
+use RepoGroup;
+use UnexpectedValueException;
 use Wikimedia\Rdbms\FakeResultWrapper;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\Subquery;
 
 /**
  * @ingroup Pager
  */
 class ImageListPager extends TablePager {
 
+	/** @var string[]|null */
 	protected $mFieldNames = null;
-
-	// Subclasses should override buildQueryConds instead of using $mQueryConds variable.
-	protected $mQueryConds = [];
-
-	protected $mUserName = null;
-
 	/**
-	 * The relevant user
-	 *
-	 * @var User|null
+	 * @deprecated Subclasses should override {@see buildQueryConds} instead
+	 * @var array
 	 */
+	protected $mQueryConds = [];
+	/** @var string|null */
+	protected $mUserName = null;
+	/** @var User|null The relevant user */
 	protected $mUser = null;
-
+	/** @var bool */
 	protected $mIncluding = false;
-
+	/** @var bool */
 	protected $mShowAll = false;
-
+	/** @var string */
 	protected $mTableName = 'image';
 
-	/** @var CommentStore */
-	private $commentStore;
-
-	/** @var LocalRepo */
-	private $localRepo;
-
-	/** @var UserCache */
-	private $userCache;
+	private CommentStore $commentStore;
+	private LocalRepo $localRepo;
+	private CommentFormatter $commentFormatter;
+	private LinkBatchFactory $linkBatchFactory;
 
 	/**
 	 * The unique sort fields for the sort options for unique paginate
@@ -73,10 +84,11 @@ class ImageListPager extends TablePager {
 	 * @param IContextSource $context
 	 * @param CommentStore $commentStore
 	 * @param LinkRenderer $linkRenderer
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param RepoGroup $repoGroup
-	 * @param UserCache $userCache
 	 * @param UserNameUtils $userNameUtils
+	 * @param CommentFormatter $commentFormatter
+	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param string $userName
 	 * @param string $search
 	 * @param bool $including
@@ -86,10 +98,11 @@ class ImageListPager extends TablePager {
 		IContextSource $context,
 		CommentStore $commentStore,
 		LinkRenderer $linkRenderer,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		RepoGroup $repoGroup,
-		UserCache $userCache,
 		UserNameUtils $userNameUtils,
+		CommentFormatter $commentFormatter,
+		LinkBatchFactory $linkBatchFactory,
 		$userName,
 		$search,
 		$including,
@@ -99,7 +112,6 @@ class ImageListPager extends TablePager {
 
 		$this->mIncluding = $including;
 		$this->mShowAll = $showAll;
-		$dbr = $loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA );
 
 		if ( $userName !== null && $userName !== '' ) {
 			$nt = Title::makeTitleSafe( NS_USER, $userName );
@@ -117,22 +129,21 @@ class ImageListPager extends TablePager {
 			}
 		}
 
-		if ( !$including ) {
-			if ( $this->getRequest()->getText( 'sort', 'img_date' ) == 'img_date' ) {
-				$this->mDefaultDirection = IndexPager::DIR_DESCENDING;
-			} else {
-				$this->mDefaultDirection = IndexPager::DIR_ASCENDING;
-			}
-		} else {
+		if ( $including ||
+			$this->getRequest()->getText( 'sort', 'img_date' ) === 'img_date'
+		) {
 			$this->mDefaultDirection = IndexPager::DIR_DESCENDING;
+		} else {
+			$this->mDefaultDirection = IndexPager::DIR_ASCENDING;
 		}
-		// Set database before parent constructor to avoid setting it there with wfGetDB
-		$this->mDb = $dbr;
+		// Set database before parent constructor to avoid setting it there
+		$this->mDb = $dbProvider->getReplicaDatabase();
 
 		parent::__construct( $context, $linkRenderer );
 		$this->commentStore = $commentStore;
 		$this->localRepo = $repoGroup->getLocalRepo();
-		$this->userCache = $userCache;
+		$this->commentFormatter = $commentFormatter;
+		$this->linkBatchFactory = $linkBatchFactory;
 	}
 
 	/**
@@ -150,7 +161,7 @@ class ImageListPager extends TablePager {
 	 * @param string $userName Unescaped user name
 	 */
 	protected function outputUserDoesNotExist( $userName ) {
-		$this->getOutput()->addHtml( Html::warningBox(
+		$this->getOutput()->addHTML( Html::warningBox(
 			$this->getOutput()->msg( 'listfiles-userdoesnotexist', wfEscapeWikiText( $userName ) )->parse(),
 			'mw-userpage-userdoesnotexist'
 		) );
@@ -197,11 +208,10 @@ class ImageListPager extends TablePager {
 			// img_description down here, in order so that its still after the username field.
 			$this->mFieldNames['img_description'] = $this->msg( 'listfiles_description' )->text();
 
-			if ( !$this->getConfig()->get( MainConfigNames::MiserMode ) && !$this->mShowAll ) {
-				$this->mFieldNames['count'] = $this->msg( 'listfiles_count' )->text();
-			}
 			if ( $this->mShowAll ) {
 				$this->mFieldNames['top'] = $this->msg( 'listfiles-latestversion' )->text();
+			} elseif ( !$this->getConfig()->get( MainConfigNames::MiserMode ) ) {
+				$this->mFieldNames['count'] = $this->msg( 'listfiles_count' )->text();
 			}
 		}
 
@@ -212,7 +222,6 @@ class ImageListPager extends TablePager {
 		if ( $this->mIncluding ) {
 			return false;
 		}
-		$sortable = array_keys( self::INDEX_FIELDS );
 		/* For reference, the indices we can use for sorting are:
 		 * On the image table: img_actor_timestamp, img_size, img_timestamp
 		 * On oldimage: oi_actor_timestamp, oi_name_timestamp
@@ -220,26 +229,24 @@ class ImageListPager extends TablePager {
 		 * In particular that means we cannot sort by timestamp when not filtering
 		 * by user and including old images in the results. Which is sad. (T279982)
 		 */
-		if ( $this->getConfig()->get( MainConfigNames::MiserMode ) && $this->mUserName !== null ) {
-			// If we're sorting by user, the index only supports sorting by time.
-			return $field === 'img_timestamp';
-		} elseif ( $this->getConfig()->get( MainConfigNames::MiserMode )
-			&& $this->mShowAll /* && mUserName === null */
-		) {
-			// no oi_timestamp index, so only alphabetical sorting in this case.
-			return $field === 'img_name';
+		if ( $this->getConfig()->get( MainConfigNames::MiserMode ) ) {
+			if ( $this->mUserName !== null ) {
+				// If we're sorting by user, the index only supports sorting by time.
+				return $field === 'img_timestamp';
+			} elseif ( $this->mShowAll ) {
+				// no oi_timestamp index, so only alphabetical sorting in this case.
+				return $field === 'img_name';
+			}
 		}
 
-		return in_array( $field, $sortable );
+		return isset( self::INDEX_FIELDS[$field] );
 	}
 
 	public function getQueryInfo() {
 		// Hacky Hacky Hacky - I want to get query info
 		// for two different tables, without reimplementing
 		// the pager class.
-		$qi = $this->getQueryInfoReal( $this->mTableName );
-
-		return $qi;
+		return $this->getQueryInfoReal( $this->mTableName );
 	}
 
 	/**
@@ -277,8 +284,6 @@ class ImageListPager extends TablePager {
 			$join_conds['actor'] = [ 'JOIN', 'actor_id=img_actor' ];
 		}
 
-		$options = [];
-
 		# Description field
 		$commentQuery = $this->commentStore->getJoin( $prefix . '_description' );
 		$tables += $commentQuery['tables'];
@@ -293,11 +298,12 @@ class ImageListPager extends TablePager {
 		# Depends on $wgMiserMode
 		# Will also not happen if mShowAll is true.
 		if ( array_key_exists( 'count', $this->getFieldNames() ) ) {
-			$fields['count'] = $dbr->buildSelectSubquery(
-				'oldimage',
-				'COUNT(oi_archive_name)',
-				'oi_name = img_name',
-				__METHOD__
+			$fields['count'] = new Subquery( $dbr->newSelectQueryBuilder()
+				->select( 'COUNT(oi_archive_name)' )
+				->from( 'oldimage' )
+				->where( 'oi_name = img_name' )
+				->caller( __METHOD__ )
+				->getSQL()
 			);
 		}
 
@@ -305,7 +311,7 @@ class ImageListPager extends TablePager {
 			'tables' => $tables,
 			'fields' => $fields,
 			'conds' => $this->buildQueryConds( $table ),
-			'options' => $options,
+			'options' => [],
 			'join_conds' => $join_conds
 		];
 	}
@@ -317,15 +323,21 @@ class ImageListPager extends TablePager {
 	 * @param int $limit
 	 * @param bool $order IndexPager::QUERY_ASCENDING or IndexPager::QUERY_DESCENDING
 	 * @return IResultWrapper
-	 * @throws MWException
 	 */
 	public function reallyDoQuery( $offset, $limit, $order ) {
 		$dbr = $this->getDatabase();
 		$prevTableName = $this->mTableName;
 		$this->mTableName = 'image';
-		list( $tables, $fields, $conds, $fname, $options, $join_conds ) =
+		[ $tables, $fields, $conds, $fname, $options, $join_conds ] =
 			$this->buildQueryInfo( $offset, $limit, $order );
-		$imageRes = $dbr->select( $tables, $fields, $conds, $fname, $options, $join_conds );
+		$imageRes = $dbr->newSelectQueryBuilder()
+			->tables( is_array( $tables ) ? $tables : [ $tables ] )
+			->fields( $fields )
+			->conds( $conds )
+			->caller( $fname )
+			->options( $options )
+			->joinConds( $join_conds )
+			->fetchResultSet();
 		$this->mTableName = $prevTableName;
 
 		if ( !$this->mShowAll ) {
@@ -337,15 +349,23 @@ class ImageListPager extends TablePager {
 		# Hacky...
 		$oldIndex = $this->mIndexField;
 		foreach ( $this->mIndexField as &$index ) {
-			if ( substr( $index, 0, 4 ) !== 'img_' ) {
-				throw new MWException( "Expected to be sorting on an image table field" );
+			if ( !str_starts_with( $index, 'img_' ) ) {
+				throw new UnexpectedValueException( "Expected to be sorting on an image table field" );
 			}
 			$index = 'oi_' . substr( $index, 4 );
 		}
+		unset( $index );
 
-		list( $tables, $fields, $conds, $fname, $options, $join_conds ) =
+		[ $tables, $fields, $conds, $fname, $options, $join_conds ] =
 			$this->buildQueryInfo( $offset, $limit, $order );
-		$oldimageRes = $dbr->select( $tables, $fields, $conds, $fname, $options, $join_conds );
+		$oldimageRes = $dbr->newSelectQueryBuilder()
+			->tables( is_array( $tables ) ? $tables : [ $tables ] )
+			->fields( $fields )
+			->conds( $conds )
+			->caller( $fname )
+			->options( $options )
+			->joinConds( $join_conds )
+			->fetchResultSet();
 
 		$this->mTableName = $prevTableName;
 		$this->mIndexField = $oldIndex;
@@ -406,8 +426,10 @@ class ImageListPager extends TablePager {
 	}
 
 	public function getDefaultSort() {
-		if ( $this->mShowAll && $this->getConfig()->get( MainConfigNames::MiserMode ) &&
-		$this->mUserName === null ) {
+		if ( $this->mShowAll &&
+			$this->getConfig()->get( MainConfigNames::MiserMode ) &&
+			$this->mUserName === null
+		) {
 			// Unfortunately no index on oi_timestamp.
 			return 'img_name';
 		} else {
@@ -416,22 +438,20 @@ class ImageListPager extends TablePager {
 	}
 
 	protected function doBatchLookups() {
-		$userIds = [];
 		$this->mResult->seek( 0 );
+		$batch = $this->linkBatchFactory->newLinkBatch();
 		foreach ( $this->mResult as $row ) {
-			if ( $row->actor_user ) {
-				$userIds[] = $row->actor_user;
-			}
+			$batch->add( NS_USER, $row->actor_name );
+			$batch->add( NS_USER_TALK, $row->actor_name );
+			$batch->add( NS_FILE, $row->img_name );
 		}
-		# Do a link batch query for names and userpages
-		$this->userCache->doQuery( $userIds, [ 'userpage' ], __METHOD__ );
+		$batch->execute();
 	}
 
 	/**
 	 * @param string $field
 	 * @param string|null $value
 	 * @return string
-	 * @throws MWException
 	 */
 	public function formatValue( $field, $value ) {
 		$linkRenderer = $this->getLinkRenderer();
@@ -443,10 +463,9 @@ class ImageListPager extends TablePager {
 				if ( $file ) {
 					$thumb = $file->transform( [ 'width' => 180, 'height' => 360 ] );
 					if ( $thumb ) {
-						return $thumb->toHtml( [ 'desc-link' => true ] );
-					} else {
-						return $this->msg( 'thumbnail_error', '' )->escaped();
+						return $thumb->toHtml( [ 'desc-link' => true, 'loading' => 'lazy' ] );
 					}
+					return $this->msg( 'thumbnail_error', '' )->escaped();
 				} else {
 					return htmlspecialchars( $this->getCurrentRow()->img_name );
 				}
@@ -455,23 +474,25 @@ class ImageListPager extends TablePager {
 				return htmlspecialchars( $this->getLanguage()->userTimeAndDate( $value, $this->getUser() ) );
 			case 'img_name':
 				static $imgfile = null;
-				if ( $imgfile === null ) {
-					$imgfile = $this->msg( 'imgfile' )->text();
-				}
+				$imgfile ??= $this->msg( 'imgfile' )->text();
 
 				// Weird files can maybe exist? T24227
 				$filePage = Title::makeTitleSafe( NS_FILE, $value );
 				if ( $filePage ) {
-					$link = $linkRenderer->makeKnownLink(
+					$html = $linkRenderer->makeKnownLink(
 						$filePage,
 						$filePage->getText()
 					);
-					$download = Xml::element(
-						'a',
-						[ 'href' => $this->localRepo->newFile( $filePage )->getUrl() ],
-						$imgfile
-					);
-					$download = $this->msg( 'parentheses' )->rawParams( $download )->escaped();
+					$opt = [ 'time' => wfTimestamp( TS_MW, $this->mCurrentRow->img_timestamp ) ];
+					$file = $this->localRepo->findFile( $value, $opt );
+					if ( $file ) {
+						$download = Xml::element(
+							'a',
+							[ 'href' => $file->getUrl() ],
+							$imgfile
+						);
+						$html .= ' ' . $this->msg( 'parentheses' )->rawParams( $download )->escaped();
+					}
 
 					// Add delete links if allowed
 					// From https://github.com/Wikia/app/pull/3859
@@ -481,51 +502,56 @@ class ImageListPager extends TablePager {
 						$delete = $linkRenderer->makeKnownLink(
 							$filePage, $deleteMsg, [], [ 'action' => 'delete' ]
 						);
-						$delete = $this->msg( 'parentheses' )->rawParams( $delete )->escaped();
-
-						return "$link $download $delete";
+						$html .= ' ' . $this->msg( 'parentheses' )->rawParams( $delete )->escaped();
 					}
 
-					return "$link $download";
+					return $html;
 				} else {
 					return htmlspecialchars( $value );
 				}
 			case 'img_actor':
-				if ( $this->mCurrentRow->actor_user ) {
-					$name = $this->mCurrentRow->actor_name;
-					$link = $linkRenderer->makeLink(
-						Title::makeTitle( NS_USER, $name ),
-						$name
-					);
-				} else {
-					$link = $value !== null ? htmlspecialchars( $value ) : '';
-				}
-
-				return $link;
+				$userId = (int)$this->mCurrentRow->actor_user;
+				$userName = $this->mCurrentRow->actor_name;
+				return Linker::userLink( $userId, $userName )
+					. Linker::userToolLinks( $userId, $userName );
 			case 'img_size':
 				return htmlspecialchars( $this->getLanguage()->formatSize( (int)$value ) );
 			case 'img_description':
 				$field = $this->mCurrentRow->description_field;
 				$value = $this->commentStore->getComment( $field, $this->mCurrentRow )->text;
-				return Linker::formatComment( $value );
+				return $this->commentFormatter->format( $value );
 			case 'count':
 				return htmlspecialchars( $this->getLanguage()->formatNum( intval( $value ) + 1 ) );
 			case 'top':
 				// Messages: listfiles-latestversion-yes, listfiles-latestversion-no
 				return $this->msg( 'listfiles-latestversion-' . $value )->escaped();
 			default:
-				throw new MWException( "Unknown field '$field'" );
+				throw new UnexpectedValueException( "Unknown field '$field'" );
 		}
+	}
+
+	/**
+	 * Escape the options list
+	 * @return array
+	 */
+	private function getEscapedLimitSelectList(): array {
+		$list = $this->getLimitSelectList();
+		$result = [];
+		foreach ( $list as $key => $value ) {
+			$result[htmlspecialchars( $key )] = $value;
+		}
+		return $result;
 	}
 
 	public function getForm() {
 		$formDescriptor = [];
 		$formDescriptor['limit'] = [
-			'type' => 'select',
+			'type' => 'radio',
 			'name' => 'limit',
 			'label-message' => 'table_pager_limit_label',
-			'options' => $this->getLimitSelectList(),
-			'default' => $this->mLimit,
+			'options' => $this->getEscapedLimitSelectList(),
+			'flatlist' => true,
+			'default' => $this->mLimit
 		];
 
 		$formDescriptor['user'] = [
@@ -557,7 +583,7 @@ class ImageListPager extends TablePager {
 			->setMethod( 'get' )
 			->setId( 'mw-listfiles-form' )
 			->setTitle( $this->getTitle() )
-			->setSubmitTextMsg( 'table_pager_limit_submit' )
+			->setSubmitTextMsg( 'listfiles-pager-submit' )
 			->setWrapperLegendMsg( 'listfiles' )
 			->addHiddenFields( $query )
 			->prepareForm()
@@ -603,3 +629,9 @@ class ImageListPager extends TablePager {
 		return SpecialPage::getTitleFor( 'Listfiles' );
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( ImageListPager::class, 'ImageListPager' );

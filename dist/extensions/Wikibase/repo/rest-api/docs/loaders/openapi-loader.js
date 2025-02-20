@@ -1,4 +1,4 @@
-const SwaggerParser = require( '@apidevtools/swagger-parser' );
+const { bundle, loadConfig } = require( '@redocly/openapi-core' );
 const path = require( 'path' );
 
 module.exports = function ( _ ) {
@@ -6,15 +6,18 @@ module.exports = function ( _ ) {
 
 	this.addContextDependency( path.dirname( this.resourcePath ) );
 
-	SwaggerParser
-		.dereference(
-			this.resourcePath,
-			{
-				resolve: {
-					http: false
-				}
-			}
-		)
-		.then( spec => done( null, JSON.stringify( spec ) ) )
+	loadConfig( { configPath: 'redocly.yaml' } )
+		.then( ( config ) => {
+			bundle( { ref: this.resourcePath, config, dereference: true } )
+				.then( ( result ) => {
+					const baseUrl = process.env.API_URL || 'https://wikibase.example/w/rest.php';
+
+					done( null, JSON.stringify( {
+						...result.bundle.parsed,
+						servers: [ { url: baseUrl + '/wikibase/v1' } ]
+					} ) );
+				} )
+				.catch( ( { message } ) => done( message ) );
+		} )
 		.catch( ( { message } ) => done( message ) );
 };

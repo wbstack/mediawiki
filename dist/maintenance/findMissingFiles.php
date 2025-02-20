@@ -18,9 +18,9 @@
  * @file
  */
 
-use MediaWiki\MediaWikiServices;
-
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 class FindMissingFiles extends Maintenance {
 	public function __construct() {
@@ -36,7 +36,7 @@ class FindMissingFiles extends Maintenance {
 	public function execute() {
 		$lastName = $this->getOption( 'start', '' );
 
-		$repo = MediaWikiServices::getInstance()->getRepoGroup()->getLocalRepo();
+		$repo = $this->getServiceContainer()->getRepoGroup()->getLocalRepo();
 		$dbr = $repo->getReplicaDB();
 		$be = $repo->getBackend();
 		$batchSize = $this->getBatchSize();
@@ -44,34 +44,30 @@ class FindMissingFiles extends Maintenance {
 		$mtime1 = $dbr->timestampOrNull( $this->getOption( 'mtimeafter', null ) );
 		$mtime2 = $dbr->timestampOrNull( $this->getOption( 'mtimebefore', null ) );
 
-		$joinTables = [];
-		$joinConds = [];
+		$queryBuilder = $dbr->newSelectQueryBuilder()
+			->select( [ 'name' => 'img_name' ] )
+			->from( 'image' )
+			->where( $dbr->expr( 'img_name', '>', $lastName ) )
+			->groupBy( 'name' )
+			->orderBy( 'name' )
+			->limit( $batchSize );
+
 		if ( $mtime1 || $mtime2 ) {
-			$joinTables[] = 'page';
-			$joinConds['page'] = [ 'JOIN',
-				[ 'page_title = img_name', 'page_namespace' => NS_FILE ] ];
-			$joinTables[] = 'logging';
-			$on = [ 'log_page = page_id', 'log_type' => [ 'upload', 'move', 'delete' ] ];
+			$queryBuilder->join( 'page', null, 'page_title = img_name' );
+			$queryBuilder->andWhere( [ 'page_namespace' => NS_FILE ] );
+
+			$queryBuilder->join( 'logging', null, 'log_page = page_id' );
+			$queryBuilder->andWhere( [ 'log_type' => [ 'upload', 'move', 'delete' ] ] );
 			if ( $mtime1 ) {
-				$on[] = "log_timestamp > {$dbr->addQuotes($mtime1)}";
+				$queryBuilder->andWhere( $dbr->expr( 'log_timestamp', '>', $mtime1 ) );
 			}
 			if ( $mtime2 ) {
-				$on[] = "log_timestamp < {$dbr->addQuotes($mtime2)}";
+				$queryBuilder->andWhere( $dbr->expr( 'log_timestamp', '<', $mtime2 ) );
 			}
-			$joinConds['logging'] = [ 'JOIN', $on ];
 		}
 
 		do {
-			$res = $dbr->select(
-				array_merge( [ 'image' ], $joinTables ),
-				[ 'name' => 'img_name' ],
-				[ "img_name > " . $dbr->addQuotes( $lastName ) ],
-				__METHOD__,
-				// DISTINCT causes a pointless filesort
-				[ 'ORDER BY' => 'name', 'GROUP BY' => 'name',
-					'LIMIT' => $batchSize ],
-				$joinConds
-			);
+			$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 
 			// Check if any of these files are missing...
 			$pathsByName = [];
@@ -89,11 +85,11 @@ class FindMissingFiles extends Maintenance {
 
 			// Find all missing old versions of any of the files in this batch...
 			if ( count( $pathsByName ) ) {
-				$ores = $dbr->select( 'oldimage',
-					[ 'oi_name', 'oi_archive_name' ],
-					[ 'oi_name' => array_map( 'strval', array_keys( $pathsByName ) ) ],
-					__METHOD__
-				);
+				$ores = $dbr->newSelectQueryBuilder()
+					->select( [ 'oi_name', 'oi_archive_name' ] )
+					->from( 'oldimage' )
+					->where( [ 'oi_name' => array_map( 'strval', array_keys( $pathsByName ) ) ] )
+					->caller( __METHOD__ )->fetchResultSet();
 
 				$checkPaths = [];
 				foreach ( $ores as $row ) {
@@ -118,5 +114,7 @@ class FindMissingFiles extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = FindMissingFiles::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

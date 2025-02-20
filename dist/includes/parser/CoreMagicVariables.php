@@ -20,9 +20,14 @@
  * @file
  * @ingroup Parser
  */
+
+namespace MediaWiki\Parser;
+
+use DateTime;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\MainConfigNames;
-use MediaWiki\Parser\ParserOutputFlags;
+use MediaWiki\Specials\SpecialVersion;
+use MediaWiki\Utils\MWTimestamp;
 use Psr\Log\LoggerInterface;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
@@ -32,8 +37,40 @@ use Wikimedia\Timestamp\ConvertibleTimestamp;
  * @ingroup Parser
  */
 class CoreMagicVariables {
-	/** @var int Assume that no output will later be saved this many seconds after parsing */
-	private const MAX_TTS = 900;
+	/** Map of (word ID => cache TTL hint) */
+	private const CACHE_TTL_BY_ID = [
+		'currenttime' => 3600,
+		'localtime' => 3600,
+		'numberofarticles' => 3600,
+		'numberoffiles' => 3600,
+		'numberofedits' => 3600,
+		'numberofusers' => 3600,
+		'numberofactiveusers' => 3600,
+		'numberofpages' => 3600,
+		'currentversion' => 86400,
+		'currenttimestamp' => 3600,
+		'localtimestamp' => 3600,
+		'pagesinnamespace' => 3600,
+		'numberofadmins' => 3600,
+		'numberingroup' => 3600,
+	];
+
+	/** Map of (time unit => relative datetime specifier) */
+	private const DEADLINE_DATE_SPEC_BY_UNIT = [
+		'Y' => 'first day of January next year midnight',
+		'M' => 'first day of next month midnight',
+		'D' => 'next day midnight',
+		// Note that this relative datetime specifier does not zero out
+		// minutes/seconds, but we will do so manually in
+		// ::applyUnitTimestampDeadline() when given the unit 'H'
+		'H' => 'next hour'
+	];
+	/** Seconds of clock skew fudge factor for time-interval deadline TTLs */
+	private const DEADLINE_TTL_CLOCK_FUDGE = 1;
+	/** Max seconds to "randomly" add to time-interval deadline TTLs to avoid stampedes */
+	private const DEADLINE_TTL_STAGGER_MAX = 15;
+	/** Minimum time-interval deadline TTL */
+	private const MIN_DEADLINE_TTL = 15;
 
 	/**
 	 * Expand the magic variable given by $index.
@@ -42,11 +79,10 @@ class CoreMagicVariables {
 	 * @param string $id The name of the variable, and equivalently, the magic
 	 *   word ID which was used to match the variable
 	 * @param ConvertibleTimestamp $ts Timestamp to use when expanding magic variable
-	 * @param NamespaceInfo $nsInfo The NamespaceInfo to use when expanding
 	 * @param ServiceOptions $svcOptions Service options for the parser
 	 * @param LoggerInterface $logger
-	 * @return string|null The expanded value, or null to indicate the given
-	 *  index wasn't a known magic variable.
+	 * @return string|null The expanded value, as wikitext, or null to
+	 *  indicate the given index wasn't a known magic variable.
 	 */
 	public static function expand(
 		// Fundamental options
@@ -54,12 +90,15 @@ class CoreMagicVariables {
 		string $id,
 		// Context passed over from the parser
 		ConvertibleTimestamp $ts,
-		NamespaceInfo $nsInfo,
 		ServiceOptions $svcOptions,
 		LoggerInterface $logger
 	): ?string {
-		$pageLang = $parser->getFunctionLang();
-		$title = $parser->getTitle();
+		$pageLang = $parser->getTargetLanguage();
+
+		$cacheTTL = self::CACHE_TTL_BY_ID[$id] ?? -1;
+		if ( $cacheTTL > -1 ) {
+			$parser->getOutput()->updateCacheExpiry( $cacheTTL );
+		}
 
 		switch ( $id ) {
 			case '!':
@@ -67,234 +106,183 @@ class CoreMagicVariables {
 			case '=':
 				return '=';
 			case 'currentmonth':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'M' );
+
 				return $pageLang->formatNumNoSeparators( $ts->format( 'm' ) );
 			case 'currentmonth1':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'M' );
+
 				return $pageLang->formatNumNoSeparators( $ts->format( 'n' ) );
 			case 'currentmonthname':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'M' );
+
 				return $pageLang->getMonthName( (int)$ts->format( 'n' ) );
 			case 'currentmonthnamegen':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'M' );
+
 				return $pageLang->getMonthNameGen( (int)$ts->format( 'n' ) );
 			case 'currentmonthabbrev':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'M' );
+
 				return $pageLang->getMonthAbbreviation( (int)$ts->format( 'n' ) );
 			case 'currentday':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'D' );
+
 				return $pageLang->formatNumNoSeparators( $ts->format( 'j' ) );
 			case 'currentday2':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'D' );
+
 				return $pageLang->formatNumNoSeparators( $ts->format( 'd' ) );
 			case 'localmonth':
-				return $pageLang->formatNumNoSeparators( self::makeTsLocal( $svcOptions, $ts )->format( 'm' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'M' );
+
+				return $pageLang->formatNumNoSeparators( $localTs->format( 'm' ) );
 			case 'localmonth1':
-				return $pageLang->formatNumNoSeparators( self::makeTsLocal( $svcOptions, $ts )->format( 'n' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'M' );
+
+				return $pageLang->formatNumNoSeparators( $localTs->format( 'n' ) );
 			case 'localmonthname':
-				return $pageLang->getMonthName( (int)self::makeTsLocal( $svcOptions, $ts )->format( 'n' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'M' );
+
+				return $pageLang->getMonthName( (int)$localTs->format( 'n' ) );
 			case 'localmonthnamegen':
-				return $pageLang->getMonthNameGen( (int)self::makeTsLocal( $svcOptions, $ts )->format( 'n' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'M' );
+
+				return $pageLang->getMonthNameGen( (int)$localTs->format( 'n' ) );
 			case 'localmonthabbrev':
-				return $pageLang->getMonthAbbreviation( (int)self::makeTsLocal( $svcOptions, $ts )->format( 'n' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'M' );
+
+				return $pageLang->getMonthAbbreviation( (int)$localTs->format( 'n' ) );
 			case 'localday':
-				return $pageLang->formatNumNoSeparators( self::makeTsLocal( $svcOptions, $ts )->format( 'j' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'D' );
+
+				return $pageLang->formatNumNoSeparators( $localTs->format( 'j' ) );
 			case 'localday2':
-				return $pageLang->formatNumNoSeparators( self::makeTsLocal( $svcOptions, $ts )->format( 'd' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'D' );
+
+				return $pageLang->formatNumNoSeparators( $localTs->format( 'd' ) );
 			case 'pagename':
-				return wfEscapeWikiText( $title->getText() );
 			case 'pagenamee':
-				return wfEscapeWikiText( $title->getPartialURL() );
 			case 'fullpagename':
-				return wfEscapeWikiText( $title->getPrefixedText() );
 			case 'fullpagenamee':
-				return wfEscapeWikiText( $title->getPrefixedURL() );
 			case 'subpagename':
-				return wfEscapeWikiText( $title->getSubpageText() );
 			case 'subpagenamee':
-				return wfEscapeWikiText( $title->getSubpageUrlForm() );
 			case 'rootpagename':
-				return wfEscapeWikiText( $title->getRootText() );
 			case 'rootpagenamee':
-				return wfEscapeWikiText( wfUrlencode( str_replace(
-					' ',
-					'_',
-					$title->getRootText()
-				) ) );
 			case 'basepagename':
-				return wfEscapeWikiText( $title->getBaseText() );
 			case 'basepagenamee':
-				return wfEscapeWikiText( wfUrlencode( str_replace(
-					' ',
-					'_',
-					$title->getBaseText()
-				) ) );
 			case 'talkpagename':
-				if ( $title->canHaveTalkPage() ) {
-					$talkPage = $title->getTalkPage();
-					return wfEscapeWikiText( $talkPage->getPrefixedText() );
-				}
-				return '';
 			case 'talkpagenamee':
-				if ( $title->canHaveTalkPage() ) {
-					$talkPage = $title->getTalkPage();
-					return wfEscapeWikiText( $talkPage->getPrefixedURL() );
-				}
-				return '';
 			case 'subjectpagename':
-				$subjPage = $title->getSubjectPage();
-				return wfEscapeWikiText( $subjPage->getPrefixedText() );
 			case 'subjectpagenamee':
-				$subjPage = $title->getSubjectPage();
-				return wfEscapeWikiText( $subjPage->getPrefixedURL() );
-			case 'pageid': // requested in T25427
-				// Inform the edit saving system that getting the canonical output
-				// after page insertion requires a parse that used that exact page ID
-				self::setOutputFlag( $parser, $logger, ParserOutputFlags::VARY_PAGE_ID, '{{PAGEID}} used' );
-				$value = $title->getArticleID();
-				if ( !$value ) {
-					$value = $parser->getOptions()->getSpeculativePageId();
-					if ( $value ) {
-						$parser->getOutput()->setSpeculativePageIdUsed( $value );
-					}
-				}
-				return (string)$value;
+			case 'pageid':
 			case 'revisionid':
-				$namespace = $title->getNamespace();
-				if (
-					$svcOptions->get( MainConfigNames::MiserMode ) &&
-					!$parser->getOptions()->getInterfaceMessage() &&
-					// @TODO: disallow this variable on all namespaces
-					$nsInfo->isSubject( $namespace )
-				) {
-					// Use a stub result instead of the actual revision ID in order to avoid
-					// double parses on page save but still allow preview detection (T137900)
-					if ( $parser->getRevisionId() || $parser->getOptions()->getSpeculativeRevId() ) {
-						return '-';
-					} else {
-						self::setOutputFlag(
-							$parser,
-							$logger,
-							ParserOutputFlags::VARY_REVISION_EXISTS,
-							'{{REVISIONID}} used'
-						);
-						return '';
-					}
-				} else {
-					// Inform the edit saving system that getting the canonical output after
-					// revision insertion requires a parse that used that exact revision ID
-					self::setOutputFlag( $parser, $logger, ParserOutputFlags::VARY_REVISION_ID, '{{REVISIONID}} used' );
-					$value = $parser->getRevisionId();
-					if ( $value === 0 ) {
-						$rev = $parser->getRevisionRecordObject();
-						$value = $rev ? $rev->getId() : $value;
-					}
-					if ( !$value ) {
-						$value = $parser->getOptions()->getSpeculativeRevId();
-						if ( $value ) {
-							$parser->getOutput()->setSpeculativeRevIdUsed( $value );
-						}
-					}
-					return (string)$value;
-				}
-			case 'revisionday':
-				return strval( (int)self::getRevisionTimestampSubstring(
-					$parser, $logger, 6, 2, self::MAX_TTS, $id
-				) );
-			case 'revisionday2':
-				return self::getRevisionTimestampSubstring(
-					$parser, $logger, 6, 2, self::MAX_TTS, $id
-				);
-			case 'revisionmonth':
-				return self::getRevisionTimestampSubstring(
-					$parser, $logger, 4, 2, self::MAX_TTS, $id
-				);
-			case 'revisionmonth1':
-				return strval( (int)self::getRevisionTimestampSubstring(
-					$parser, $logger, 4, 2, self::MAX_TTS, $id
-				) );
-			case 'revisionyear':
-				return self::getRevisionTimestampSubstring(
-					$parser, $logger, 0, 4, self::MAX_TTS, $id
-				);
-			case 'revisiontimestamp':
-				return self::getRevisionTimestampSubstring(
-					$parser, $logger, 0, 14, self::MAX_TTS, $id
-				);
 			case 'revisionuser':
-				// Inform the edit saving system that getting the canonical output after
-				// revision insertion requires a parse that used the actual user ID
-				self::setOutputFlag( $parser, $logger, ParserOutputFlags::VARY_USER, '{{REVISIONUSER}} used' );
-				// Note that getRevisionUser() can return null; we need to
-				// be sure to cast this to (an empty) string, since 'null'
-				// means "magic variable not handled here".
-				return (string)$parser->getRevisionUser();
+			case 'revisionday':
+			case 'revisionday2':
+			case 'revisionmonth':
+			case 'revisionmonth1':
+			case 'revisionyear':
+			case 'revisiontimestamp':
+			case 'namespace':
+			case 'namespacee':
+			case 'namespacenumber':
+			case 'talkspace':
+			case 'talkspacee':
+			case 'subjectspace':
+			case 'subjectspacee':
+			case 'cascadingsources':
+				# First argument of the corresponding parser function
+				# (second argument of the PHP implementation) is
+				# "title".
+
+				# Note that for many of these {{FOO}} is subtly different
+				# from {{FOO:{{PAGENAME}}}}, so we can't pass $title here
+				# we have to explicitly use the "no arguments" form of the
+				# parser function by passing `null` to indicate a missing
+				# argument (which then defaults to the current page title).
+				return CoreParserFunctions::$id( $parser, null );
 			case 'revisionsize':
 				return (string)$parser->getRevisionSize();
-			case 'namespace':
-				return str_replace( '_', ' ',
-					$parser->getContentLanguage()->getNsText( $title->getNamespace() ) );
-			case 'namespacee':
-				return wfUrlencode( $parser->getContentLanguage()->getNsText( $title->getNamespace() ) );
-			case 'namespacenumber':
-				return (string)$title->getNamespace();
-			case 'talkspace':
-				return $title->canHaveTalkPage()
-					? str_replace( '_', ' ', $title->getTalkNsText() )
-					: '';
-			case 'talkspacee':
-				return $title->canHaveTalkPage()
-					? wfUrlencode( $title->getTalkNsText() )
-					: '';
-			case 'subjectspace':
-				return str_replace( '_', ' ', $title->getSubjectNsText() );
-			case 'subjectspacee':
-				return ( wfUrlencode( $title->getSubjectNsText() ) );
 			case 'currentdayname':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'D' );
+
 				return $pageLang->getWeekdayName( (int)$ts->format( 'w' ) + 1 );
 			case 'currentyear':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'Y' );
+
 				return $pageLang->formatNumNoSeparators( $ts->format( 'Y' ) );
 			case 'currenttime':
 				return $pageLang->time( $ts->getTimestamp( TS_MW ), false, false );
 			case 'currenthour':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'H' );
+
 				return $pageLang->formatNumNoSeparators( $ts->format( 'H' ) );
 			case 'currentweek':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'D' );
 				// @bug T6594 PHP5 has it zero padded, PHP4 does not, cast to
 				// int to remove the padding
 				return $pageLang->formatNum( (int)$ts->format( 'W' ) );
 			case 'currentdow':
+				self::applyUnitTimestampDeadline( $parser, $ts, 'D' );
+
 				return $pageLang->formatNum( $ts->format( 'w' ) );
 			case 'localdayname':
-				return $pageLang->getWeekdayName(
-					(int)self::makeTsLocal( $svcOptions, $ts )->format( 'w' ) + 1
-				);
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'D' );
+
+				return $pageLang->getWeekdayName( (int)$localTs->format( 'w' ) + 1 );
 			case 'localyear':
-				return $pageLang->formatNumNoSeparators( self::makeTsLocal( $svcOptions, $ts )->format( 'Y' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'Y' );
+
+				return $pageLang->formatNumNoSeparators( $localTs->format( 'Y' ) );
 			case 'localtime':
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+
 				return $pageLang->time(
-					self::makeTsLocal( $svcOptions, $ts )->format( 'YmdHis' ),
+					$localTs->format( 'YmdHis' ),
 					false,
 					false
 				);
 			case 'localhour':
-				return $pageLang->formatNumNoSeparators( self::makeTsLocal( $svcOptions, $ts )->format( 'H' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'H' );
+
+				return $pageLang->formatNumNoSeparators( $localTs->format( 'H' ) );
 			case 'localweek':
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'D' );
 				// @bug T6594 PHP5 has it zero padded, PHP4 does not, cast to
 				// int to remove the padding
-				return $pageLang->formatNum( (int)self::makeTsLocal( $svcOptions, $ts )->format( 'W' ) );
+				return $pageLang->formatNum( (int)$localTs->format( 'W' ) );
 			case 'localdow':
-				return $pageLang->formatNum( self::makeTsLocal( $svcOptions, $ts )->format( 'w' ) );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+				self::applyUnitTimestampDeadline( $parser, $localTs, 'D' );
+
+				return $pageLang->formatNum( $localTs->format( 'w' ) );
 			case 'numberofarticles':
-				return $pageLang->formatNum( SiteStats::articles() );
 			case 'numberoffiles':
-				return $pageLang->formatNum( SiteStats::images() );
 			case 'numberofusers':
-				return $pageLang->formatNum( SiteStats::users() );
 			case 'numberofactiveusers':
-				return $pageLang->formatNum( SiteStats::activeUsers() );
 			case 'numberofpages':
-				return $pageLang->formatNum( SiteStats::pages() );
 			case 'numberofadmins':
-				return $pageLang->formatNum( SiteStats::numberingroup( 'sysop' ) );
 			case 'numberofedits':
-				return $pageLang->formatNum( SiteStats::edits() );
+				# second argument is 'raw'; magic variables are "not raw"
+				return CoreParserFunctions::$id( $parser, null );
 			case 'currenttimestamp':
 				return $ts->getTimestamp( TS_MW );
 			case 'localtimestamp':
-				return self::makeTsLocal( $svcOptions, $ts )->format( 'YmdHis' );
+				$localTs = self::makeTsLocal( $svcOptions, $ts );
+
+				return $localTs->format( 'YmdHis' );
 			case 'currentversion':
 				return SpecialVersion::getVersion();
 			case 'articlepath':
@@ -315,8 +303,17 @@ class CoreMagicVariables {
 				return $parser->getContentLanguage()->getCode();
 			case 'pagelanguage':
 				return $pageLang->getCode();
-			case 'cascadingsources':
-				return CoreParserFunctions::cascadingsources( $parser );
+			case 'userlanguage':
+				if ( $svcOptions->get( MainConfigNames::ParserEnableUserLanguage ) ) {
+					return $parser->getOptions()->getUserLang();
+				} else {
+					return $pageLang->getCode();
+				}
+			case 'bcp47':
+			case 'dir':
+			case 'language':
+				# magic variables are the same as empty/default first argument
+				return CoreParserFunctions::$id( $parser );
 			default:
 				// This is not one of the core magic variables
 				return null;
@@ -337,65 +334,37 @@ class CoreMagicVariables {
 	}
 
 	/**
+	 * Adjust the cache expiry to account for a dynamic timestamp displayed in output
+	 *
 	 * @param Parser $parser
-	 * @param LoggerInterface $logger
-	 * @param int $start
-	 * @param int $len
-	 * @param int $mtts Max time-till-save; sets vary-revision-timestamp if result changes by then
-	 * @param string $variable Parser variable name
-	 * @return string
+	 * @param ConvertibleTimestamp $ts Current timestamp with the display timezone
+	 * @param string $unit The unit the timestamp is expressed in; one of ("Y", "M", "D", "H")
 	 */
-	private static function getRevisionTimestampSubstring(
+	private static function applyUnitTimestampDeadline(
 		Parser $parser,
-		LoggerInterface $logger,
-		int $start,
-		int $len,
-		int $mtts,
-		string $variable
-	): string {
-		// Get the timezone-adjusted timestamp to be used for this revision
-		$resNow = substr( $parser->getRevisionTimestamp(), $start, $len );
-		// Possibly set vary-revision if there is not yet an associated revision
-		if ( !$parser->getRevisionRecordObject() ) {
-			// Get the timezone-adjusted timestamp $mtts seconds in the future.
-			// This future is relative to the current time and not that of the
-			// parser options. The rendered timestamp can be compared to that
-			// of the timestamp specified by the parser options.
-			$resThen = substr(
-				$parser->getContentLanguage()->userAdjust( wfTimestamp( TS_MW, time() + $mtts ), '' ),
-				$start,
-				$len
-			);
+		ConvertibleTimestamp $ts,
+		string $unit
+	) {
+		$tsUnix = (int)$ts->getTimestamp( TS_UNIX );
 
-			if ( $resNow !== $resThen ) {
-				// Inform the edit saving system that getting the canonical output after
-				// revision insertion requires a parse that used an actual revision timestamp
-				self::setOutputFlag( $parser, $logger, ParserOutputFlags::VARY_REVISION_TIMESTAMP, "$variable used" );
-			}
+		$date = new DateTime( "@$tsUnix" );
+		$date->setTimezone( $ts->getTimezone() );
+		$date->modify( self::DEADLINE_DATE_SPEC_BY_UNIT[$unit] );
+		if ( $unit === 'H' ) {
+			// Zero out the minutes/seconds
+			$date->setTime( intval( $date->format( 'H' ), 10 ), 0, 0 );
+		} else {
+			$date->setTime( 0, 0, 0 );
 		}
+		$deadlineUnix = (int)$date->format( 'U' );
 
-		return $resNow;
-	}
+		$ttl = max( $deadlineUnix - $tsUnix, self::MIN_DEADLINE_TTL );
+		$ttl += self::DEADLINE_TTL_CLOCK_FUDGE;
+		$ttl += ( $tsUnix % self::DEADLINE_TTL_STAGGER_MAX );
 
-	/**
-	 * Helper method borrowed from Parser.php: sets the flag on the output
-	 * but also does some debug logging.
-	 * @param Parser $parser
-	 * @param LoggerInterface $logger
-	 * @param string $flag
-	 * @param string $reason
-	 */
-	private static function setOutputFlag(
-		Parser $parser,
-		LoggerInterface $logger,
-		string $flag,
-		string $reason
-	): void {
-		$parser->getOutput()->setOutputFlag( $flag );
-		$name = $parser->getTitle()->getPrefixedText();
-		// This code was moved from Parser::setOutputFlag and used __METHOD__
-		// originally; we've hard-coded that output here so that our refactor
-		// doesn't change the messages in the logs.
-		$logger->debug( "Parser::setOutputFlag: set $flag flag on '$name'; $reason" );
+		$parser->getOutput()->updateCacheExpiry( $ttl );
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( CoreMagicVariables::class, 'CoreMagicVariables' );

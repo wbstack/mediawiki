@@ -1,21 +1,25 @@
 /*!
  * VisualEditor ContentEditable TableNode tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.ce.TableNode' );
 
 /* Tests */
 
-QUnit.test( 'getNearestCellNode', function ( assert ) {
-	var view = ve.test.utils.createSurfaceViewFromHtml(
-			'<table>' +
-				'<tr><td>Foo' +
-					'<table><tr><td>Bar</td></tr></table>' +
-				'</td><td>Baz</td></tr>' +
-			'</table>'
-		),
+QUnit.test( 'getNearestCellNode', ( assert ) => {
+	const view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.singleLine`
+			<table>
+				<tr>
+					<td>
+						Foo
+						<table><tr><td>Bar</td></tr></table>
+					</td>
+					<td>Baz</td>
+				</tr>
+			</table>'
+		` ),
 		documentNode = view.getDocument().getDocumentNode(),
 		tableNode = documentNode.children[ 0 ],
 		$tableNode = tableNode.$element,
@@ -37,19 +41,19 @@ QUnit.test( 'getNearestCellNode', function ( assert ) {
 			}
 		];
 
-	cases.forEach( function ( caseItem ) {
+	cases.forEach( ( caseItem ) => {
 		assert.strictEqual( tableNode.getNearestCellNode( caseItem.element ), caseItem.node, caseItem.msg );
 	} );
 	view.destroy();
 } );
 
-QUnit.test( 'getFirstSectionNode', function ( assert ) {
-	var view = ve.test.utils.createSurfaceViewFromHtml(
-			'<table>' +
-				'<caption>Caption</caption>' +
-				'<tr><td>Foo</td></tr>' +
-			'</table>'
-		),
+QUnit.test( 'getFirstSectionNode', ( assert ) => {
+	const view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.singleLine`
+			<table>
+				<caption>Caption</caption>
+				<tr><td>Foo</td></tr>
+			</table>
+		` ),
 		documentNode = view.getDocument().getDocumentNode(),
 		tableNode = documentNode.children[ 0 ],
 		result = tableNode.getFirstSectionNode();
@@ -58,8 +62,8 @@ QUnit.test( 'getFirstSectionNode', function ( assert ) {
 	assert.strictEqual( result, tableNode.children[ 1 ], 'result is 2nd child of table' );
 } );
 
-QUnit.test( 'onTableMouseDown/onTableMouseMove/onTableMouseUp/onTableDblClick', function ( assert ) {
-	var realVeCeSurfaceGetOffsetFromCoords = ve.ce.Surface.prototype.getOffsetFromCoords,
+QUnit.test( 'onTableMouseDown/onTableMouseMove/onTableMouseUp/onTableDblClick', ( assert ) => {
+	const realVeCeSurfaceGetOffsetFromCoords = ve.ce.Surface.prototype.getOffsetFromCoords,
 		view = ve.test.utils.createSurfaceViewFromDocument( ve.dm.example.createExampleDocument( 'mergedCells' ) ),
 		model = view.getModel(),
 		documentNode = view.getDocument().getDocumentNode(),
@@ -82,7 +86,7 @@ QUnit.test( 'onTableMouseDown/onTableMouseMove/onTableMouseUp/onTableDblClick', 
 		tableNode.onTableMouseMove( e );
 		tableNode.onTableMouseUp( e );
 
-		var expectedSelection = ve.test.utils.selectionFromRangeOrSelection(
+		let expectedSelection = ve.test.utils.selectionFromRangeOrSelection(
 			model.getDocument(),
 			{
 				type: 'table',
@@ -125,8 +129,8 @@ QUnit.test( 'onTableMouseDown/onTableMouseMove/onTableMouseUp/onTableDblClick', 
 	}
 } );
 
-QUnit.test( 'onTableMouseDown', function ( assert ) {
-	var view = ve.test.utils.createSurfaceViewFromHtml(
+QUnit.test( 'onTableMouseDown', ( assert ) => {
+	const view = ve.test.utils.createSurfaceViewFromHtml(
 			'<table><tr><td>Foo</td><td>Bar</td></tr></table>'
 		),
 		documentNode = view.getDocument().getDocumentNode(),
@@ -167,7 +171,7 @@ QUnit.test( 'onTableMouseDown', function ( assert ) {
 			}
 		];
 
-	cases.forEach( function ( caseItem ) {
+	cases.forEach( ( caseItem ) => {
 		tableNode.onTableMouseDown( ve.extendObject( mockEvent, caseItem.event ) );
 		assert.deepEqual(
 			tableNode.surface.getModel().getSelection().toJSON(),

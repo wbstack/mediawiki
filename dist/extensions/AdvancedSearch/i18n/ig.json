@@ -2,12 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Oby Ezeilo",
-			"Amire80",
 			"Sayvhior"
 		]
 	},
 	"advancedsearch-desc": "Ụzọ dị mfe iji mee nchọpụta [[Special:Search]]",
-	"advancedsearch-options-pane-head": "Ọchịchọ na adighị mfe",
+	"advancedsearch-options-pane-head": "Ọchịchọ na adighị mfe:",
 	"advancedsearch-optgroup-text": "Chọọ n'ihu akwụkwọ ederede",
 	"advancedsearch-optgroup-structure": "Nzube",
 	"advancedsearch-optgroup-files": "Failụ na ihe oyiri di iche iche",

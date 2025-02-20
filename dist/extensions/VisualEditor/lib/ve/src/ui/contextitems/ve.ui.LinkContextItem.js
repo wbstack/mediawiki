@@ -1,7 +1,7 @@
 /*!
  * VisualEditor LinkContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -10,9 +10,9 @@
  * @class
  * @extends ve.ui.AnnotationContextItem
  *
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config] Configuration options
  */
 ve.ui.LinkContextItem = function VeUiLinkContextItem( context, model, config ) {
 	// Parent constructor
@@ -101,17 +101,17 @@ ve.ui.LinkContextItem.prototype.getDescription = function () {
  * @inheritdoc
  */
 ve.ui.LinkContextItem.prototype.renderBody = function () {
-	var htmlDoc = this.context.getSurface().getModel().getDocument().getHtmlDocument();
-	this.$body.empty().append(
-		$( '<a>' )
-			.addClass( 've-ui-linkContextItem-link' )
-			.text( this.getDescription() )
-			.attr( {
-				href: ve.resolveUrl( this.model.getHref(), htmlDoc ),
-				target: '_blank',
-				rel: 'noopener'
-			} )
-	);
+	const htmlDoc = this.context.getSurface().getModel().getDocument().getHtmlDocument();
+	const $link = $( '<a>' )
+		.addClass( 've-ui-linkContextItem-link' )
+		.text( this.getDescription() )
+		.attr( {
+			target: '_blank',
+			rel: 'noopener'
+		} );
+	// T322704
+	ve.setAttributeSafe( $link[ 0 ], 'href', ve.resolveUrl( this.model.getHref(), htmlDoc ), '#' );
+	this.$body.empty().append( $link );
 	if ( !this.context.isMobile() ) {
 		this.$body.append( this.$labelLayout );
 	}
@@ -124,13 +124,13 @@ ve.ui.LinkContextItem.prototype.renderBody = function () {
  * @protected
  */
 ve.ui.LinkContextItem.prototype.updateLabelPreview = function () {
-	var surfaceModel = this.context.getSurface().getModel(),
+	const surfaceModel = this.context.getSurface().getModel(),
 		annotationView = this.getAnnotationView();
 
 	// annotationView is a potentially old view node from when the context was
 	// first focused in the document. If the annotation model has been changed
 	// as well, this may be a problem.
-	var label;
+	let label;
 	if ( annotationView ) {
 		label = surfaceModel.getFragment().expandLinearSelection( 'annotation', annotationView.getModel() ).getText();
 	}
@@ -146,7 +146,7 @@ ve.ui.LinkContextItem.prototype.updateLabelPreview = function () {
  * @protected
  */
 ve.ui.LinkContextItem.prototype.onLabelButtonClick = function () {
-	var surface = this.context.getSurface().getView(),
+	const surface = this.context.getSurface().getView(),
 		annotationView = this.getAnnotationView();
 
 	surface.selectNodeContents(

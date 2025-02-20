@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Lea.Fakauvea",
 			"Lea.fakauvea"
 		]
@@ -22,7 +21,6 @@
 	"vector-language-button-label": "{{PLURAL:$1|$1 lea|lea e $1}}",
 	"vector-no-language-button-label": "Kumi he tahi lea",
 	"vector-no-language-button-aria-label": "E tohi pe te fakamatala i te lea aeni. Fakaliliu ki ni tahi 'u lea.",
-	"vector-language-redirect-to-top": "I te {{SITENAME}} e fai te fili o tau lea i te fuga pāsina i te faha'i mata'u o te higoa o te fakamatala. [[#p-lang-btn|'Alu ki 'oluga]].",
 	"vector-language-variant-switcher-label": "Fetogi te maga lea",
 	"vector-action-addsection": "Tohi he kupu",
 	"vector-action-delete": "Molehi",
@@ -42,9 +40,7 @@
 	"vector-search-loader": "Kua vave asi mai te fua o te kumi",
 	"vector-searchsuggest-containing": "Kumi pāsina e tohi ai <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Tokoni:Kamata'aga",
-	"vector-toc-heading": "Faka'alu'alu",
-	"vector-toc-toggle-position-sidebar": "'Alu ki te pou tafa",
-	"vector-toc-toggle-position-title": "fufū",
+	"vector-toc-label": "Faka'alu'alu",
 	"vector-toc-beginning": "Kamata",
 	"vector-toc-toggle-button-label": "Fakahā te vaega $1",
 	"vector-anon-user-menu-pages": "Pāsina o nātou kua mavae ki tu'a",
@@ -53,8 +49,11 @@
 	"vector-main-menu-tooltip": "Fakahoahoa pāsina",
 	"vector-toc-menu-tooltip": "Laupapa fakatu'utu'u",
 	"vector-toc-collapsible-button-label": "Ave kehe te laupapa fakatu'utu'u",
-	"vector-article-tools-nav-label": "Me'a gaue",
 	"vector-site-nav-label": "Site",
+	"vector-page-tools-label": "Me'a gaue",
+	"vector-page-tools-general-label": "Tāfito",
+	"vector-pin-element-label": "'Alu ki te pou tafa",
+	"vector-unpin-element-label": "fufū",
 	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Felogo'i]]",
 	"tooltip-vector-anon-user-menu-title": "Hoko atu"
 }

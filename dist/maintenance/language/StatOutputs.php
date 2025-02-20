@@ -23,7 +23,7 @@
  * @author Antoine Musso <hashar at free dot fr>
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Specials\SpecialVersion;
 use Wikimedia\AtEase\AtEase;
 
 /**
@@ -64,7 +64,7 @@ class WikiStatsOutput extends StatsOutput {
 		if ( is_array( $wgDummyLanguageCodes ) ) {
 			$dummyCodes = [];
 			foreach ( $wgDummyLanguageCodes as $dummyCode => $correctCode ) {
-				$dummyCodes[] = MediaWikiServices::getInstance()
+				$dummyCodes[] = $this->getServiceContainer()
 					->getLanguageNameUtils()
 					->getLanguageName( $dummyCode ) . ' (' . $dummyCode . ')';
 			}

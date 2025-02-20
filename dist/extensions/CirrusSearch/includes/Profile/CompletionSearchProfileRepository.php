@@ -40,8 +40,18 @@ class CompletionSearchProfileRepository implements SearchProfileRepository {
 	 */
 	public static function fromConfig( $repoType, $repoName, $configEntry, SearchConfig $config ) {
 		return new self( $repoType, $repoName, $config, static function () use ( $configEntry, $config ) {
-			return ConfigProfileRepository::extractConfig( $configEntry, $config )
-				+ ConfigProfileRepository::extractAttribute( $configEntry );
+			return ConfigProfileRepository::extractConfig( $configEntry, $config );
+		} );
+	}
+
+	/**
+	 * @param SearchProfileRepository $repository
+	 * @param SearchConfig $config
+	 * @return self
+	 */
+	public static function fromRepo( SearchProfileRepository $repository, SearchConfig $config ): self {
+		return new self( $repository->repositoryType(), $repository->repositoryName(), $config, static function () use ( $repository ) {
+			return $repository->listExposedProfiles();
 		} );
 	}
 
@@ -62,7 +72,7 @@ class CompletionSearchProfileRepository implements SearchProfileRepository {
 			}
 			$originalProfiles = call_user_func( $arrayLoader );
 			if ( !is_array( $originalProfiles ) ) {
-				throw new SearchProfileException( "Expected an array but got a " . gettype( $originalProfiles ) );
+				throw new SearchProfileException( "Expected an array but got a " . get_debug_type( $originalProfiles ) );
 			}
 			foreach ( $originalProfiles as $name => $settings ) {
 				$allowed = true;

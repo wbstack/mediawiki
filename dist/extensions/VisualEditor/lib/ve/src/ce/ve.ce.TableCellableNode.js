@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableCellableNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -45,7 +45,7 @@ ve.ce.TableCellableNode.prototype.setEditing = function () {
  * @throws {Error} Invalid style
  */
 ve.ce.TableCellableNode.prototype.getTagName = function () {
-	var style = this.model.getAttribute( 'style' ),
+	const style = this.model.getAttribute( 'style' ),
 		types = { data: 'td', header: 'th' };
 
 	if ( !Object.prototype.hasOwnProperty.call( types, style ) ) {

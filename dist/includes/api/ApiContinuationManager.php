@@ -18,6 +18,10 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use UnexpectedValueException;
+
 /**
  * This manages continuation state.
  * @since 1.25 this is no longer a subclass of ApiBase
@@ -264,7 +268,7 @@ class ApiContinuationManager {
 	 * @param ApiResult $result
 	 */
 	public function setContinuationIntoResult( ApiResult $result ) {
-		list( $data, $batchcomplete ) = $this->getContinuation();
+		[ $data, $batchcomplete ] = $this->getContinuation();
 		if ( $data ) {
 			$result->addValue( null, 'continue', $data,
 				ApiResult::ADD_ON_TOP | ApiResult::NO_SIZE_CHECK );
@@ -275,3 +279,6 @@ class ApiContinuationManager {
 		}
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiContinuationManager::class, 'ApiContinuationManager' );

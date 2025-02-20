@@ -33,7 +33,11 @@
  * based on nukePage by Rob Church
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
+
+use MediaWiki\Title\Title;
 
 /**
  * Maintenance script that removes pages with only one revision from the
@@ -54,10 +58,14 @@ class NukeNS extends Maintenance {
 		$ns = $this->getOption( 'ns', NS_MEDIAWIKI );
 		$delete = $this->hasOption( 'delete' );
 		$all = $this->hasOption( 'all' );
-		$dbw = $this->getDB( DB_PRIMARY );
+		$dbw = $this->getPrimaryDB();
 		$this->beginTransaction( $dbw, __METHOD__ );
 
-		$res = $dbw->select( 'page', 'page_title', [ 'page_namespace' => $ns ], __METHOD__ );
+		$res = $dbw->newSelectQueryBuilder()
+			->select( 'page_title' )
+			->from( 'page' )
+			->where( [ 'page_namespace' => $ns ] )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		$n_deleted = 0;
 
@@ -67,12 +75,11 @@ class NukeNS extends Maintenance {
 			$id = $title->getArticleID();
 
 			// Get corresponding revisions
-			$revs = $dbw->selectFieldValues(
-				'revision',
-				'rev_id',
-				[ 'rev_page' => $id ],
-				__METHOD__
-			);
+			$revs = $dbw->newSelectQueryBuilder()
+				->select( 'rev_id' )
+				->from( 'revision' )
+				->where( [ 'rev_page' => $id ] )
+				->caller( __METHOD__ )->fetchFieldValues();
 			$count = count( $revs );
 
 			// skip anything that looks modified (i.e. multiple revs)
@@ -83,7 +90,10 @@ class NukeNS extends Maintenance {
 				// as much as I hate to cut & paste this, it's a little different, and
 				// I already have the id & revs
 				if ( $delete ) {
-					$dbw->delete( 'page', [ 'page_id' => $id ], __METHOD__ );
+					$dbw->newDeleteQueryBuilder()
+						->deleteFrom( 'page' )
+						->where( [ 'page_id' => $id ] )
+						->caller( __METHOD__ )->execute();
 					$this->commitTransaction( $dbw, __METHOD__ );
 					// Delete revisions as appropriate
 					/** @var NukePage $child */
@@ -103,14 +113,17 @@ class NukeNS extends Maintenance {
 
 			# update statistics - better to decrement existing count, or just count
 			# the page table?
-			$pages = $dbw->selectField( 'site_stats', 'ss_total_pages', [], __METHOD__ );
+			$pages = $dbw->newSelectQueryBuilder()
+				->select( 'ss_total_pages' )
+				->from( 'site_stats' )
+				->caller( __METHOD__ )->fetchField();
 			$pages -= $n_deleted;
-			$dbw->update(
-				'site_stats',
-				[ 'ss_total_pages' => $pages ],
-				[ 'ss_row_id' => 1 ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'site_stats' )
+				->set( [ 'ss_total_pages' => $pages ] )
+				->where( [ 'ss_row_id' => 1 ] )
+				->caller( __METHOD__ )
+				->execute();
 		}
 
 		if ( !$delete ) {
@@ -119,5 +132,7 @@ class NukeNS extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = NukeNS::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

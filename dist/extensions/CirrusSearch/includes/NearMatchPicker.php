@@ -2,9 +2,9 @@
 
 namespace CirrusSearch;
 
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\Logger\LoggerFactory;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Picks the best "near match" title.

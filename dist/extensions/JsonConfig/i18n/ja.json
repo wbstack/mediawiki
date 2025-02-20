@@ -2,18 +2,18 @@
 	"@metadata": {
 		"authors": [
 			"Akki-102525",
+			"Chqaz",
 			"Kkairri",
 			"Object＊tofu",
 			"Otokoume",
 			"Shirayuki",
 			"Suyama",
 			"Thibaut120094",
+			"Tmv",
 			"Yurik",
 			"Yusuke1109",
 			"つぶあん派",
-			"春春眠眠",
-			"Chqaz",
-			"Tmv"
+			"春春眠眠"
 		]
 	},
 	"nstab-data": "データ",
@@ -22,7 +22,7 @@
 	"jsonconfig-edit-action-cancel": "キャンセル",
 	"jsonconfig-edit-button-label": "テーブルとして編集",
 	"jsonconfig-edit-dialog-error": "テーブルとして編集できません：$1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "データがスキーマと一致しません",
+	"jsonconfig-edit-dialog-error-data-invalid": "データがスキーマと一致しません",
 	"jsonconfig-edit-dialog-error-data-too-large": "データセットが大きすぎるためテーブルとして編集できません",
 	"jsonconfig-edit-dialog-error-field-name-missing": "各フィールドは名前が必須です",
 	"jsonconfig-edit-dialog-title": "JSONを編集",

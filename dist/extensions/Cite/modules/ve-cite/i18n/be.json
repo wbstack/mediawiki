@@ -1,14 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Artificial123",
 			"Chadyka",
 			"Goshaproject",
 			"Mikalai Udodau",
+			"Plaga med",
 			"Дзяніс Тутэйшы",
-			"Чаховіч Уладзіслаў",
-			"Plaga med"
+			"Чаховіч Уладзіслаў"
 		]
 	},
 	"visualeditor-cite-tool-name-book": "Кніга",
@@ -31,7 +30,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Гэтая зноска выкарыстоўваецца {{PLURAL:$1|$1 раз|$1 разы|$1 разоў|1=адзін раз|2=двойчы|3=тройчы}} на гэтай старонцы. Змены, зробленыя тут, будуць прыменены ва ўсіх месцах, дзе гэтая зноска выкарыстоўваецца паўторна.",
 	"cite-ve-dialog-reference-options-group-label": "Выкарыстоўваць гэту групу",
 	"cite-ve-dialog-reference-options-group-placeholder": "Агульныя спасылкі",
-	"cite-ve-dialog-reference-options-name-label": "Паўторна выкарыстоўваць гэта імя",
 	"cite-ve-dialog-reference-options-responsive-label": "Выкарыстоўваць дызайн з рэспансіўнымі слупкамі",
 	"cite-ve-dialog-reference-options-section": "Параметры",
 	"cite-ve-dialog-reference-placeholder": "Напішыце ці ўстаўце сваю зноску тут, або ўпішыце шаблон цытавання.",
@@ -53,7 +51,5 @@
 	"cite-ve-referenceslist-missingref-in-list": "Гэтая зноска вызначаная ў шаблоне ці іншым створаным блоку і пакуль яна можа быць перадпаказаная толькі ў рэжыме праўкі зыходнага тэксту.",
 	"cite-ve-referenceslist-missingreflist": "Гэты спіс зносак створаны шаблонам і пакуль яго можна правіць толькі ў рэжыме зыходнага тэксту.",
 	"cite-ve-toolbar-group-label": "Зноскі",
-	"cite-ve-othergroup-item": "$1 зноска",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Зноскі",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Назва групы зносак: «$1»"
+	"cite-ve-othergroup-item": "$1 зноска"
 }

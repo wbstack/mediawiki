@@ -20,7 +20,6 @@
 	"config-env-php": "PHP $1 è nstallatu.",
 	"config-apc": "[https://www.php.net/apc APC] è nstallatu",
 	"config-apcu": "[https://www.php.net/apcu APCu] è nstallatu",
-	"config-wincache": "[https://www.iis.net/downloads/microsoft/wincache-extension WinCache] è nstallatu",
 	"config-db-type": "Tipu di databbasi:",
 	"config-db-host": "Host dû databbasi:",
 	"config-db-install-account": "Cuntu utentu pâ nstallazzioni",
@@ -44,12 +43,12 @@
 	"config-admin-password-blank": "Nzirisci na password pû cuntu di l'amministraturi.",
 	"config-admin-email": "Nnirizzu email:",
 	"config-email-settings": "Mpustazzioni email",
-	"config-skins": "Peddi",
+	"config-skins": "Peḍḍi",
 	"config-install-step-done": "fattu",
 	"config-install-user-alreadyexists": "L'utenti \"$1\" già esisti.",
 	"config-install-logo-blank": "Nzirisci n'URL di logu vàlidu.",
 	"config-help": "aiutu",
 	"config-screenshot": "screenshot",
 	"mainpagetext": "<strong>MediaWiki havi statu nstallatu.</strong>",
-	"mainpagedocfooter": "Pi favuri cunsulta [https://meta.wikimedia.org/wiki/Help:Contents uida utenti] pi aiutu supra l'usu e la cunfigurazzioni di stu software wiki.\n\n== P'accuminzari ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Alencu di mpustazzioni di cunfigurazzioni]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki FAQ]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org Mailing list dî rilassi di MediaWiki]"
+	"mainpagedocfooter": "Pi favuri cunsulta [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents uida utenti] pi aiutu supra l'usu e la cunfigurazzioni di stu software wiki.\n\n== P'accuminzari ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Alencu di mpustazzioni di cunfigurazzioni]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki FAQ]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org Mailing list dî rilassi di MediaWiki]"
 }

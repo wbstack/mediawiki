@@ -4,6 +4,9 @@
 			"Njardarlogar"
 		]
 	},
+	"datatypes-type-entity-schema": "Einingsskjema",
+	"nstab-entityschema": "Einingsskjema",
+	"tooltip-ca-nstab-entityschema": "Einingsskjemadefinisjon",
 	"entityschema-newschema-label": "Merkelapp:",
 	"entityschema-newschema-description": "Skildring:",
 	"entityschema-newschema-aliases": "Andre namn, fråskilde av vertikalstrekar:",

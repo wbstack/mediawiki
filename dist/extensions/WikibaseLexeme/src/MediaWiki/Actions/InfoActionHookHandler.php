@@ -2,9 +2,9 @@
 
 namespace Wikibase\Lexeme\MediaWiki\Actions;
 
-use IContextSource;
-use PageProps;
-use Title;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Page\PageProps;
+use MediaWiki\Title\Title;
 use Wikibase\Lexeme\Domain\Model\LexemeId;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
@@ -103,7 +103,7 @@ class InfoActionHookHandler {
 			foreach ( $pageProperties as $property => $value ) {
 				$output[] = [
 					$this->context->msg( 'wikibase-pageinfo-' . $property )->parse(),
-					$this->context->getLanguage()->formatNum( (int)$value )
+					$this->context->getLanguage()->formatNum( (int)$value ),
 				];
 			}
 		}

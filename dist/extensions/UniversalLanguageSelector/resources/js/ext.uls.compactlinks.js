@@ -152,7 +152,6 @@
 		 */
 		this.compactList = null;
 
-		this.commonInterlanguageList = null;
 		this.$trigger = null;
 		this.compactSize = 0;
 		this.listSize = 0;
@@ -189,8 +188,11 @@
 		for ( language in this.compactList ) {
 			this.compactList[ language ].parentNode.style.display = '';
 		}
-
-		this.addTrigger();
+		// If there is an interlanguage selector in the page already
+		// there is no need to add a trigger and Codex styles (T353850).
+		mw.loader.using( '@wikimedia/codex' ).then( function () {
+			this.addTrigger();
+		}.bind( this ) );
 
 		mw.hook( 'mw.uls.compactlinks.initialized' ).fire( true );
 	};
@@ -328,7 +330,7 @@
 	CompactInterlanguageList.prototype.addTrigger = function () {
 		var trigger = document.createElement( 'button' );
 		// TODO: Should we have a different class name where the CLS styles are attached?
-		trigger.className = 'mw-interlanguage-selector mw-ui-button';
+		trigger.className = 'mw-interlanguage-selector cdx-button';
 		trigger.title = mw.message( 'ext-uls-compact-link-info' ).plain();
 		// Use text() because the message needs {{PLURAL:}}
 		trigger.textContent = mw.message(

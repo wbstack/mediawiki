@@ -4,9 +4,9 @@
 			"Jun Misugi"
 		]
 	},
-	"tooltip-ca-createsource": "Crià lu còditzi fonti di kistha pàgina",
-	"tooltip-ca-editsource": "Mudifiggà lu còditzi fonti di kistha pàgina",
 	"tooltip-ca-ve-edit": "Mudifiggà kistha pàgina",
+	"tooltip-ca-editsource": "Mudifiggà lu còditzi fonti di kistha pàgina",
+	"tooltip-ca-createsource": "Crià lu còditzi fonti di kistha pàgina",
 	"visualeditor-ca-createlocaldescriptionsource": "Aggiugnì fonti di deschrizioni lucari",
 	"visualeditor-ca-createsource": "Crià la fonti",
 	"visualeditor-ca-editsource": "Mudifiggà la fonti",
@@ -23,6 +23,5 @@
 	"visualeditor-dialog-meta-languages-label": "Linghi",
 	"visualeditor-dialog-meta-languages-name-label": "Linga",
 	"visualeditor-dialog-meta-languages-section": "Linghi",
-	"visualeditor-dialog-transclusion-placeholder": "Mudellu nobu",
 	"visualeditor-formatdropdown-format-mw-heading1": "Tìturu di la pàgina"
 }

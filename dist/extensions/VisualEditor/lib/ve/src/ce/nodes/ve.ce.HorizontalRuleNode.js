@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable HorizontalRuleNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.ce.LeafNode
- * @mixins ve.ce.FocusableNode
+ * @mixes ve.ce.FocusableNode
  *
  * @constructor
  * @param {ve.dm.HorizontalRuleNode} model Model to observe

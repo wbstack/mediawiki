@@ -40,5 +40,6 @@
 	"ext-uls-setlang-unknown-error": "ዘይተፈልጠ ጌጋ",
 	"ext-uls-setlang-accept": "ለውጢ ተቐበል",
 	"ext-uls-setlang-loading": "የተግብር ኣሎ...",
-	"ext-uls-setlang-cancel": "ኣይትለወጥ"
+	"ext-uls-setlang-cancel": "ኣይትለወጥ",
+	"ext-uls-add-languages-button-label": "ቋንቋታት ወስኽ"
 }

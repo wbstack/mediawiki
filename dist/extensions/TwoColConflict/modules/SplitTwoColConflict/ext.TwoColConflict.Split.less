@@ -1,7 +1,5 @@
 /* stylelint-disable no-descending-specificity */
-
-@error-border-color: #ff1f1f;
-@error-background-color: #ffe7e7;
+@import 'mediawiki.skin.variables.less';
 
 .mw-twocolconflict-split-header,
 .mw-twocolconflict-special-your-version-header {
@@ -26,12 +24,12 @@
 }
 
 .mw-twocolconflict-split-current-version-header .mw-twocolconflict-revision-label {
-	background-color: #ffe8a6;
+	background-color: @background-color-content-removed;
 }
 
 .mw-twocolconflict-special-your-version-header .mw-twocolconflict-revision-label,
 .mw-twocolconflict-split-your-version-header .mw-twocolconflict-revision-label {
-	background-color: #add8ff;
+	background-color: @background-color-content-added;
 }
 
 .mw-twocolconflict-split-view {
@@ -49,9 +47,9 @@
 	align-items: flex-start;
 
 	&.mw-twocolconflict-no-selection {
-		background-color: @error-background-color;
-		border: 2px solid @error-border-color;
-		border-radius: 2px;
+		background-color: @background-color-error-subtle;
+		border: @border-width-thick @border-style-base @border-color-error;
+		border-radius: @border-radius-base;
 		margin: 5px -5px;
 		padding: 3px;
 	}
@@ -65,8 +63,8 @@
 	position: relative;
 	// Same radius as in MediaWiki core's diff.css
 	border-radius: 0.33em;
-	border-width: 2px 2px 2px 6px;
-	border-style: solid;
+	border-width: @border-width-thick @border-width-thick @border-width-thick 6px;
+	border-style: @border-style-base;
 	padding: 5px 40px 5px 20px;
 	min-height: 50px;
 	white-space: pre-line;
@@ -74,33 +72,33 @@
 	min-width: 0;
 
 	&.mw-twocolconflict-split-add {
-		border-color: #add8ff;
+		border-color: @border-color-content-added;
 	}
 
 	&.mw-twocolconflict-split-delete {
-		border-color: #ffe8a6;
+		border-color: @border-color-content-removed;
 	}
 
 	&.mw-twocolconflict-split-copy {
-		border-color: #e9e9e9;
+		border-color: @border-color-muted;
 		background-color: #fafafa;
 	}
 
 	ins.mw-twocolconflict-diffchange {
-		background-color: #add8ff;
+		background-color: @background-color-content-added;
 	}
 
 	del.mw-twocolconflict-diffchange {
-		background-color: #ffe8a6;
+		background-color: @background-color-content-removed;
 	}
 
 	ins.mw-twocolconflict-diffchange,
 	del.mw-twocolconflict-diffchange {
-		text-decoration: none;
+		text-decoration: @text-decoration-none;
 	}
 
 	&.mw-twocolconflict-split-unselected {
-		color: #72777d;
+		color: @color-disabled;
 
 		&.mw-twocolconflict-split-add {
 			border-color: #eaf3ff;
@@ -116,11 +114,6 @@
 
 		del.mw-twocolconflict-diffchange {
 			background-color: #fef6e7;
-		}
-
-		.oo-ui-widget-disabled > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
-			// Should be @wmui-color-base50 (#a2a9b1), but we can't set the color on an SVG
-			opacity: 0.34;
 		}
 	}
 
@@ -160,14 +153,14 @@
 		overflow: hidden;
 
 		.mw-twocolconflict-split-fade {
-			background-image: linear-gradient( transparent, #fafafa );
-			border-radius: 8px;
+			background-image: linear-gradient( @background-color-transparent, #fafafa );
+			border-radius: @border-radius-base;
 			bottom: 0;
 			height: 50px;
 			left: 0;
 			pointer-events: none; // Allows clicking "through" the element
 			position: absolute;
-			width: 100%;
+			width: @size-full;
 		}
 
 		.mw-twocolconflict-split-collapse-button {
@@ -208,7 +201,7 @@
 	}
 
 	.mw-twocolconflict-no-selection & {
-		color: @error-border-color;
+		color: @color-error;
 	}
 }
 
@@ -225,7 +218,7 @@
 
 	.mw-twocolconflict-split-row.mw-twocolconflict-no-selection & > div {
 		.oo-ui-radioInputWidget [ type='radio' ] + span {
-			border-color: @error-border-color;
+			border-color: @border-color-error;
 		}
 	}
 

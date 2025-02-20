@@ -17,10 +17,16 @@
  *
  * @file
  */
+
+namespace MediaWiki\Deferred;
+
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\SiteStats\SiteStats;
+use UnexpectedValueException;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\RawSQLValue;
 
 /**
  * Class for handling updates to the site_stats table
@@ -100,7 +106,7 @@ class SiteStatsUpdate implements DeferrableUpdate, MergeableUpdate {
 
 	public function doUpdate() {
 		$services = MediaWikiServices::getInstance();
-		$stats = $services->getStatsdDataFactory();
+		$metric = $services->getStatsFactory()->getCounter( 'site_stats_total' );
 		$shards = $services->getMainConfig()->get( MainConfigNames::MultiShardSiteStats ) ?
 			self::SHARDS_ON : self::SHARDS_OFF;
 
@@ -108,13 +114,15 @@ class SiteStatsUpdate implements DeferrableUpdate, MergeableUpdate {
 		foreach ( self::COUNTERS as $type ) {
 			$delta = $this->$type;
 			if ( $delta !== 0 ) {
-				$stats->updateCount( "site.$type", $delta );
+				$metric->setLabel( 'engagement', $type )
+					->copyToStatsdAt( "site.$type" )
+					->incrementBy( $delta );
 			}
 			$deltaByType[$type] = $delta;
 		}
 
 		( new AutoCommitUpdate(
-			$services->getDBLoadBalancer()->getConnectionRef( DB_PRIMARY ),
+			$services->getConnectionProvider()->getPrimaryDatabase(),
 			__METHOD__,
 			static function ( IDatabase $dbw, $fname ) use ( $deltaByType, $shards ) {
 				$set = [];
@@ -130,30 +138,34 @@ class SiteStatsUpdate implements DeferrableUpdate, MergeableUpdate {
 					$delta = (int)$deltaByType[$type];
 					$initValues[$field] = $delta;
 					if ( $delta > 0 ) {
-						$set[] = "$field=" . $dbw->buildGreatest(
+						$set[$field] = new RawSQLValue( $dbw->buildGreatest(
 							[ $field => $dbw->addIdentifierQuotes( $field ) . '+' . abs( $delta ) ],
 							0
-						);
+						) );
 					} elseif ( $delta < 0 ) {
 						$hasNegativeDelta = true;
-						$set[] = "$field=" . $dbw->buildGreatest(
+						$set[$field] = new RawSQLValue( $dbw->buildGreatest(
 							[ 'new' => $dbw->addIdentifierQuotes( $field ) . '-' . abs( $delta ) ],
 							0
-						);
+						) );
 					}
 				}
 
 				if ( $set ) {
 					if ( $hasNegativeDelta ) {
-						$dbw->update( 'site_stats', $set, [ 'ss_row_id' => $shard ], $fname );
+						$dbw->newUpdateQueryBuilder()
+							->update( 'site_stats' )
+							->set( $set )
+							->where( [ 'ss_row_id' => $shard ] )
+							->caller( $fname )->execute();
 					} else {
-						$dbw->upsert(
-							'site_stats',
-							array_merge( [ 'ss_row_id' => $shard ], $initValues ),
-							'ss_row_id',
-							$set,
-							$fname
-						);
+						$dbw->newInsertQueryBuilder()
+							->insertInto( 'site_stats' )
+							->row( array_merge( [ 'ss_row_id' => $shard ], $initValues ) )
+							->onDuplicateKeyUpdate()
+							->uniqueIndexFields( [ 'ss_row_id' ] )
+							->set( $set )
+							->caller( $fname )->execute();
 					}
 				}
 			}
@@ -171,7 +183,7 @@ class SiteStatsUpdate implements DeferrableUpdate, MergeableUpdate {
 		$services = MediaWikiServices::getInstance();
 		$config = $services->getMainConfig();
 
-		$dbr = $services->getDBLoadBalancer()->getConnectionRef( DB_REPLICA, 'vslow' );
+		$dbr = $services->getConnectionProvider()->getReplicaDatabase( false, 'vslow' );
 		# Get non-bot users than did some recent action other than making accounts.
 		# If account creation is included, the number gets inflated ~20+ fold on enwiki.
 		$activeUsers = $dbr->newSelectQueryBuilder()
@@ -179,21 +191,20 @@ class SiteStatsUpdate implements DeferrableUpdate, MergeableUpdate {
 			->from( 'recentchanges' )
 			->join( 'actor', 'actor', 'actor_id=rc_actor' )
 			->where( [
-				'rc_type != ' . $dbr->addQuotes( RC_EXTERNAL ), // Exclude external (Wikidata)
-				'actor_user IS NOT NULL',
-				'rc_bot' => 0,
-				'rc_log_type != ' . $dbr->addQuotes( 'newusers' ) . ' OR rc_log_type IS NULL',
-				'rc_timestamp >= ' . $dbr->addQuotes(
-					$dbr->timestamp( time() - $config->get( MainConfigNames::ActiveUserDays ) * 24 * 3600 ) ),
+				$dbr->expr( 'rc_type', '!=', RC_EXTERNAL ), // Exclude external (Wikidata)
+				$dbr->expr( 'actor_user', '!=', null ),
+				$dbr->expr( 'rc_bot', '=', 0 ),
+				$dbr->expr( 'rc_log_type', '!=', 'newusers' )->or( 'rc_log_type', '=', null ),
+				$dbr->expr( 'rc_timestamp', '>=',
+					$dbr->timestamp( time() - $config->get( MainConfigNames::ActiveUserDays ) * 24 * 3600 ) )
 			] )
 			->caller( __METHOD__ )
 			->fetchField();
-		$dbw->update(
-			'site_stats',
-			[ 'ss_active_users' => intval( $activeUsers ) ],
-			[ 'ss_row_id' => 1 ],
-			__METHOD__
-		);
+		$dbw->newUpdateQueryBuilder()
+			->update( 'site_stats' )
+			->set( [ 'ss_active_users' => intval( $activeUsers ) ] )
+			->where( [ 'ss_row_id' => 1 ] )
+			->caller( __METHOD__ )->execute();
 
 		// Invalid cache used by parser functions
 		SiteStats::unload();
@@ -201,3 +212,6 @@ class SiteStatsUpdate implements DeferrableUpdate, MergeableUpdate {
 		return $activeUsers;
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( SiteStatsUpdate::class, 'SiteStatsUpdate' );

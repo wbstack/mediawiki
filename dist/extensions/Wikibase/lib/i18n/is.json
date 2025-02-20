@@ -3,8 +3,8 @@
 		"authors": [
 			"Maxí",
 			"Snævar",
-			"Sveinn í Felli",
-			"Stefán Örvar Sigmundsson"
+			"Stefán Örvar Sigmundsson",
+			"Sveinn í Felli"
 		]
 	},
 	"specialpages-group-wikibase": "Wikibase",
@@ -49,7 +49,6 @@
 	"datatypes-type-wikibase-property": "Eginleiki",
 	"datatypes-type-commonsMedia": "Commons margmiðlunarskrá",
 	"datatypes-type-external-id": "Ytra auðkenni",
-	"version-wikibase": "Wikibase",
 	"wikibase-time-calendar-gregorian": "Gregoríanskt",
 	"wikibase-time-calendar-julian": "Júlianskt",
 	"wikibase-time-precision-Gannum": "$1 milljarðar ára e.Kr.",

@@ -1,8 +1,5 @@
 <?php
 /**
- * Provides of semaphore semantics for restricting the number
- * of workers that may be concurrently performing the same task.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,6 +18,11 @@
  * @file
  */
 
+namespace MediaWiki\PoolCounter;
+
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
+
 /**
  * Class for dealing with PoolCounters using class members
  */
@@ -37,10 +39,11 @@ abstract class PoolCounterWork {
 	 * @param string $key Key that identifies the queue this work is placed on
 	 * @param PoolCounter|null $poolCounter
 	 */
-	public function __construct( string $type, string $key, PoolCounter $poolCounter = null ) {
+	public function __construct( string $type, string $key, ?PoolCounter $poolCounter = null ) {
 		$this->type = $type;
 		// MW >= 1.35
-		$this->poolCounter = $poolCounter ?? PoolCounter::factory( $type, $key );
+		$this->poolCounter = $poolCounter ??
+			MediaWikiServices::getInstance()->getPoolCounterFactory()->create( $type, $key );
 	}
 
 	/**
@@ -98,37 +101,45 @@ abstract class PoolCounterWork {
 	public function logError( $status ) {
 		$key = $this->poolCounter->getKey();
 
-		wfDebugLog( 'poolcounter', "Pool key '$key' ({$this->type}): "
-			. $status->getMessage()->inLanguage( 'en' )->useDatabase( false )->text() );
+		$this->poolCounter->getLogger()->info(
+			"Pool key '$key' ({$this->type}): " .
+			$status->getMessage()->inLanguage( 'en' )->useDatabase( false )->text()
+		);
 	}
 
 	/**
 	 * Get the result of the work (whatever it is), or the result of the error() function.
+	 *
 	 * This returns the result of the one of the following methods:
-	 *   - a) doWork()       : Applies if the work is exclusive or no another process
-	 *                         is doing it, and on the condition that either this process
-	 *                         successfully entered the pool or the pool counter is down.
-	 *   - b) doCachedWork() : Applies if the work is cacheable and this blocked on another
-	 *                         process which finished the work.
-	 *   - c) fallback()     : Applies for all remaining cases.
-	 * If these all fall through (by returning false), then the result of error() is returned.
 	 *
-	 * In slow stale mode, these three methods are called in the sequence given above, and
-	 * the first non-false response is used.
+	 * - doWork(): Applies if the work is exclusive or no other process
+	 *   is doing it, and on the condition that either this process
+	 *   successfully entered the pool or the pool counter is down.
+	 * - doCachedWork(): Applies if the work is cacheable and this blocked on another
+	 *   process which finished the work.
+	 * - fallback(): Applies for all remaining cases.
 	 *
-	 * In fast stale mode, fallback() is called first if the lock acquisition would block.
-	 * If fallback() returns false, the lock is waited on, then the three methods are
-	 * called in the same sequence as for slow stale mode, including potentially calling
+	 * If these all return false, then the result of error() is returned.
+	 *
+	 * In slow-stale mode, these three methods are called in the sequence given above, and
+	 * the first non-false response is used. This means in case of concurrent cache-miss requests
+	 * for the same revision, later ones will load on DBs and other backend services, and wait for
+	 * earlier requests to succeed and then read out their saved result.
+	 *
+	 * In fast-stale mode, if other requests hold doWork lock already, we call fallback() first
+	 * to let it try to find an acceptable return value. If fallback() returns false, then we
+	 * will wait for the doWork lock, as for slow stale mode, including potentially calling
 	 * fallback() a second time.
 	 *
 	 * @param bool $skipcache
 	 * @return mixed
 	 */
 	public function execute( $skipcache = false ) {
-		if ( $this->cacheable && !$skipcache ) {
+		if ( !$this->cacheable || $skipcache ) {
+			$status = $this->poolCounter->acquireForMe();
+		} else {
 			if ( $this->isFastStaleEnabled() ) {
-				// In fast stale mode, do not wait if fallback() would succeed.
-				// Try to acquire the lock with timeout=0
+				// In fast stale mode, check for existing locks by acquiring lock with 0 timeout
 				$status = $this->poolCounter->acquireForAnyone( 0 );
 				if ( $status->isOK() && $status->value === PoolCounter::TIMEOUT ) {
 					// Lock acquisition would block: try fallback
@@ -142,8 +153,6 @@ abstract class PoolCounterWork {
 			} else {
 				$status = $this->poolCounter->acquireForAnyone();
 			}
-		} else {
-			$status = $this->poolCounter->acquireForMe();
 		}
 
 		if ( !$status->isOK() ) {
@@ -163,7 +172,7 @@ abstract class PoolCounterWork {
 				} finally {
 					$this->poolCounter->release();
 				}
-				// no fall-through, because try returns or throws
+			// no fall-through, because try returns or throws
 			case PoolCounter::DONE:
 				$result = $this->getCachedWork();
 				if ( $result === false ) {
@@ -181,14 +190,15 @@ abstract class PoolCounterWork {
 				if ( $result !== false ) {
 					return $result;
 				}
-				/* no break */
+			/* no break */
 
 			/* These two cases should never be hit... */
 			case PoolCounter::ERROR:
 			default:
 				$errors = [
 					PoolCounter::QUEUE_FULL => 'pool-queuefull',
-					PoolCounter::TIMEOUT => 'pool-timeout' ];
+					PoolCounter::TIMEOUT => 'pool-timeout',
+				];
 
 				$status = Status::newFatal( $errors[$status->value] ?? 'pool-errorunknown' );
 				$this->logError( $status );
@@ -196,3 +206,6 @@ abstract class PoolCounterWork {
 		}
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( PoolCounterWork::class, 'PoolCounterWork' );

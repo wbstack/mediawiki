@@ -1,10 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ezagren",
-			"Arcuscloud"
+			"Arcuscloud",
+			"Ezagren"
 		]
 	},
+	"tag-editcheck-newcontent-description": "EditCheck bapikir isi hanyar ditambahi ka laman",
+	"tag-editcheck-newreference-description": "Bahan acuan ditambahakan ka laman",
+	"tag-editcheck-references-description": "EditCheck bapikir sabuting bahan acuan pinanya diparluakan",
+	"tag-editcheck-references-activated": "[[{{MediaWiki:editcheck-falsepositives-link}}|Edit Check (references) activated]]",
 	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Babakan visual]]",
 	"tag-visualeditor-description": "Dibabak lawan [[{{MediaWiki:visualeditor-descriptionpagelink}}|pambabak visual]]",
 	"tag-visualeditor-wikitext-description": "Babakan mamakai pambabak naskah wiki 2017",

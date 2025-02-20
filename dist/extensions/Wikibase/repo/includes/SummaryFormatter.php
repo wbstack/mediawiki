@@ -5,8 +5,7 @@ namespace Wikibase\Repo;
 use DataValues\DataValue;
 use Exception;
 use InvalidArgumentException;
-use Language;
-use MWException;
+use MediaWiki\Language\Language;
 use ValueFormatters\ValueFormatter;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -121,7 +120,6 @@ class SummaryFormatter {
 	 *
 	 * @param FormatableSummary $summary
 	 *
-	 * @throws MWException
 	 * @return string The auto summary arguments comma-separated
 	 */
 	public function formatAutoSummary( FormatableSummary $summary ) {
@@ -150,7 +148,7 @@ class SummaryFormatter {
 	 * @return string[]
 	 */
 	protected function formatArgList( array $args ) {
-		if ( !empty( $args ) && !isset( $args[0] ) ) {
+		if ( $args && !isset( $args[0] ) ) {
 			// turn assoc array into a list
 			$args = $this->formatKeyValuePairs( $args );
 		}
@@ -186,7 +184,7 @@ class SummaryFormatter {
 					return '<' . get_class( $arg ) . '>';
 				}
 			} elseif ( is_array( $arg ) ) {
-				if ( !empty( $arg ) && !isset( $arg[0] ) ) {
+				if ( $arg && !isset( $arg[0] ) ) {
 					// turn assoc array into a list
 					$arg = $this->formatKeyValuePairs( $arg );
 				}

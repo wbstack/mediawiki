@@ -2,9 +2,9 @@
 
 namespace Wikibase\Lib;
 
-use Language;
+use InvalidArgumentException;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
-use MWException;
 
 /**
  * Object representing either a verbatim language or a converted language.
@@ -21,19 +21,9 @@ class LanguageWithConversion {
 	private static $objectCache = [];
 
 	/**
-	 * @var Language|null
-	 */
-	private $language;
-
-	/**
 	 * @var string
 	 */
 	private $languageCode;
-
-	/**
-	 * @var Language|null
-	 */
-	private $sourceLanguage;
 
 	/**
 	 * @var string|null
@@ -55,23 +45,12 @@ class LanguageWithConversion {
 	 */
 	private $translatePool = [];
 
-	/**
-	 * @param null|Language $language
-	 * @param string $languageCode
-	 * @param null|Language $sourceLanguage
-	 * @param null|string $sourceLanguageCode
-	 * @param null|Language $parentLanguage
-	 */
 	private function __construct(
-		?Language $language,
-		$languageCode,
-		Language $sourceLanguage = null,
-		$sourceLanguageCode = null,
-		Language $parentLanguage = null
+		string $languageCode,
+		?string $sourceLanguageCode,
+		?Language $parentLanguage
 	) {
-		$this->language = $language;
 		$this->languageCode = $languageCode;
-		$this->sourceLanguage = $sourceLanguage;
 		$this->sourceLanguageCode = $sourceLanguageCode;
 		$this->parentLanguage = $parentLanguage;
 	}
@@ -82,7 +61,7 @@ class LanguageWithConversion {
 	 * @param string $code Language code
 	 *
 	 * @return string Validated and normalized code.
-	 * @throws MWException on invalid code
+	 * @throws InvalidArgumentException on invalid code
 	 */
 	public static function validateLanguageCode( $code ) {
 		global $wgDummyLanguageCodes;
@@ -91,10 +70,10 @@ class LanguageWithConversion {
 			$code = $wgDummyLanguageCodes[$code];
 		}
 
-		if ( !Language::isValidCode( $code )
+		if ( !MediaWikiServices::getInstance()->getLanguageNameUtils()->isValidCode( $code )
 			|| strcspn( $code, ":/\\\000" ) !== strlen( $code )
 		) {
-			throw new MWException( __METHOD__ . ': invalid language code ' . $code );
+			throw new InvalidArgumentException( __METHOD__ . ': Invalid language code ' . $code );
 		}
 
 		return $code;
@@ -107,20 +86,18 @@ class LanguageWithConversion {
 	 * @param Language|string|null $sourceLanguage
 	 *          Source language (code) if this is a converted language, or null
 	 *
-	 * @throws MWException
+	 * @throws InvalidArgumentException
 	 * @return self
 	 */
 	public static function factory( $language, $sourceLanguage = null ) {
 		if ( is_string( $language ) ) {
 			$languageCode = self::validateLanguageCode( $language );
-			$language = null;
 		} else {
 			$languageCode = $language->getCode();
 		}
 
 		if ( is_string( $sourceLanguage ) ) {
 			$sourceLanguageCode = self::validateLanguageCode( $sourceLanguage );
-			$sourceLanguage = null;
 		} elseif ( $sourceLanguage === null ) {
 			$sourceLanguageCode = null;
 		} else {
@@ -136,23 +113,20 @@ class LanguageWithConversion {
 			$services = MediaWikiServices::getInstance();
 			$langFactory = $services->getLanguageFactory();
 			$langConvFactory = $services->getLanguageConverterFactory();
-			if ( !$language ) {
-				$language = $langFactory->getLanguage( $languageCode );
-			}
-			$parentLanguage = $langFactory->getParentLanguage( $language->getCode() );
+			$parentLanguage = $langFactory->getParentLanguage( $languageCode );
 
 			if ( !$parentLanguage ) {
-				throw new MWException( __METHOD__ . ': $language does not support conversion' );
+				throw new InvalidArgumentException( __METHOD__ . ': $language does not support conversion' );
 			}
 
 			if ( !$langConvFactory->getLanguageConverter( $parentLanguage )->hasVariant( $sourceLanguageCode ) ) {
-				throw new MWException( __METHOD__ . ': given languages do not have the same parent language' );
+				throw new InvalidArgumentException( __METHOD__ . ': given languages do not have the same parent language' );
 			}
 		} else {
 			$parentLanguage = null;
 		}
 
-		$object = new self( $language, $languageCode, $sourceLanguage, $sourceLanguageCode, $parentLanguage );
+		$object = new self( $languageCode, $sourceLanguageCode, $parentLanguage );
 		self::$objectCache[$languageCode][$sourceLanguageKey] = $object;
 		return $object;
 	}
@@ -167,38 +141,12 @@ class LanguageWithConversion {
 	}
 
 	/**
-	 * Get the language this object wraps.
-	 *
-	 * @return Language
-	 */
-	public function getLanguage() {
-		if ( !$this->language ) {
-			$this->language = Language::factory( $this->languageCode );
-		}
-
-		return $this->language;
-	}
-
-	/**
 	 * Get the code of the source language defined.
 	 *
 	 * @return string|null
 	 */
 	public function getSourceLanguageCode() {
 		return $this->sourceLanguageCode;
-	}
-
-	/**
-	 * Get the source language defined.
-	 *
-	 * @return Language
-	 */
-	public function getSourceLanguage() {
-		if ( $this->sourceLanguageCode !== null && !$this->sourceLanguage ) {
-			$this->sourceLanguage = Language::factory( $this->sourceLanguageCode );
-		}
-
-		return $this->sourceLanguage;
 	}
 
 	/**
@@ -259,9 +207,9 @@ class LanguageWithConversion {
 		if ( $this->parentLanguage && count( $this->translatePool ) ) {
 			$pieces = array_keys( $this->translatePool );
 			$block = implode( "\0", $pieces );
-			$translatedBlock = $this->parentLanguage->getConverter()->translate(
-				$block, $this->languageCode
-			);
+			$translatedBlock = MediaWikiServices::getInstance()->getLanguageConverterFactory()
+				->getLanguageConverter( $this->parentLanguage )
+				->translate( $block, $this->languageCode );
 			$translatedPieces = explode( "\0", $translatedBlock );
 			$this->translateCache += array_combine( $pieces, $translatedPieces );
 			$this->translatePool = [];

@@ -1,9 +1,39 @@
 <?php
 
+use MediaWiki\Config\Config;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Hook\CustomEditorHook;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\ResourceLoader\ResourceLoader;
+use MediaWiki\Output\Hook\MakeGlobalVariablesScriptHook;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\ResourceLoader\Context;
+use MediaWiki\User\User;
 
-class MobileFrontendEditorHooks {
+class MobileFrontendEditorHooks implements
+	CustomEditorHook,
+	MakeGlobalVariablesScriptHook
+{
+
+	/**
+	 * Return messages in content language, for use in a ResourceLoader module.
+	 *
+	 * @param Context $context
+	 * @param Config $config
+	 * @param array $messagesKeys
+	 * @return array
+	 */
+	public static function getContentLanguageMessages(
+		Context $context, Config $config, array $messagesKeys = []
+	): array {
+		return array_combine(
+			$messagesKeys,
+			array_map( static function ( $key ) {
+				return wfMessage( $key )->inContentLanguage()->text();
+			}, $messagesKeys )
+		);
+	}
+
 	/**
 	 * Generate config for usage inside MobileFrontend
 	 * This should be used for variables which:
@@ -16,19 +46,11 @@ class MobileFrontendEditorHooks {
 	 */
 	public static function getResourceLoaderMFConfigVars() {
 		$config = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Config' );
-		$extensionRegistry = ExtensionRegistry::getInstance();
 
 		return [
-			// schemaEditAttemptStep.js
-			'wgMFSchemaEditAttemptStepOversample' => $config->get( 'MFSchemaEditAttemptStepOversample' ),
-			// MFDefaultEditor should be `source`, `visual`, `preference`, or `abtest`.
-			// `preference` means to fall back on the desktop `visualeditor-editor` setting (if VE has been used)
-			// `abtest` means to split between source and visual 50/50
-			// editor.js
 			'wgMFDefaultEditor' => $config->get( 'MFDefaultEditor' ),
-			// wgMFEditorAvailableSkins is defined by skins and means that the skins defined their
-			// MobileFrontend-specific styles, so users can edit on mobile with the skins.
-			'wgMFEditorAvailableSkins' => $extensionRegistry->getAttribute( 'MobileFrontendEditorAvailableSkins' ),
+			'wgMFFallbackEditor' => $config->get( 'MFFallbackEditor' ),
+			'wgMFEnableVEWikitextEditor' => $config->get( 'MFEnableVEWikitextEditor' ),
 		];
 	}
 
@@ -40,64 +62,107 @@ class MobileFrontendEditorHooks {
 	 * @param array &$vars Variables to be added into the output
 	 * @param OutputPage $out OutputPage instance calling the hook
 	 */
-	public static function onMakeGlobalVariablesScript( array &$vars, OutputPage $out ) {
-		$title = $out->getTitle();
-		$context = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Context' );
+	public function onMakeGlobalVariablesScript( &$vars, $out ): void {
+		/** @var MobileContext $mobileContext */
+		$mobileContext = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Context' );
+		$config = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Config' );
 
-		if ( $context->shouldDisplayMobileView() ) {
+		if ( $mobileContext->shouldDisplayMobileView() ) {
 			// mobile.init
-			$vars['wgMFIsPageContentModelEditable'] = self::isPageContentModelEditable( $title );
-			// Accesses getBetaGroupMember so does not belong in onResourceLoaderGetConfigVars
+			$vars['wgMFIsSupportedEditRequest'] = self::isSupportedEditRequest( $out->getContext() );
+			$vars['wgMFScriptPath'] = $config->get( 'MFScriptPath' );
 		}
 	}
 
 	/**
-	 * ResourceLoaderRegisterModules hook handler.
+	 * Decide whether to bother showing the wikitext editor at all.
+	 * If not, we expect the editor initialisation JS to activate.
 	 *
-	 * Registers:
-	 *
-	 * * Modules for the Visual Editor overlay, if the VisualEditor extension is loaded
-	 *
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/ResourceLoaderRegisterModules
-	 *
-	 * @param ResourceLoader $resourceLoader
+	 * @param Article $article The article being viewed.
+	 * @param User $user The user-specific settings.
+	 * @return bool Whether to show the wikitext editor or not.
 	 */
-	public static function onResourceLoaderRegisterModules( ResourceLoader $resourceLoader ) {
-		$resourceBoilerplate = [
-			'localBasePath' => dirname( __DIR__ ),
-			'remoteExtPath' => 'MobileFrontend',
-		];
+	public function onCustomEditor( $article, $user ) {
+		$req = $article->getContext()->getRequest();
+		$title = $article->getTitle();
+		if (
+			!$req->getVal( 'mfnoscript' ) &&
+			self::isSupportedEditRequest( $article->getContext() )
+		) {
+			$params = $req->getValues();
+			$params['mfnoscript'] = '1';
+			$url = wfScript() . '?' . wfArrayToCgi( $params );
+			$escapedUrl = htmlspecialchars( $url );
 
-		// add VisualEditor related modules only, if VisualEditor seems to be installed - T85007
-		if ( ExtensionRegistry::getInstance()->isLoaded( 'VisualEditor' ) ) {
-			$resourceLoader->register( [
-				'mobile.editor.ve' => $resourceBoilerplate + [
-					'dependencies' => [
-						'ext.visualEditor.mobileArticleTarget',
-						'mobile.editor.overlay',
-						'mobile.startup',
-					],
-					'scripts' => 'resources/dist/mobile.editor.ve.js',
-					'targets' => [
-						'mobile',
-					],
-				],
-			] );
+			$out = $article->getContext()->getOutput();
+			$titleMsg = $title->exists() ? 'editing' : 'creating';
+			$out->setPageTitleMsg( wfMessage( $titleMsg, $title->getPrefixedText() ) );
+
+			$msg = false;
+			$msgParams = false;
+			if ( $title->inNamespace( NS_FILE ) && !$title->exists() ) {
+				// Is a new file page (enable upload image only) T60311
+				$msg = 'mobile-frontend-editor-uploadenable';
+			} else {
+				$msg = 'mobile-frontend-editor-toload';
+				$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+				$msgParams = $urlUtils->expand( $url, PROTO_CURRENT );
+			}
+			$out->showPendingTakeover( $url, $msg, $msgParams );
+
+			$out->setRevisionId( $req->getInt( 'oldid', $article->getRevIdFetched() ) );
+			return false;
 		}
+		return true;
 	}
 
 	/**
-	 * Checks whether the editor can handle the existing content handler type.
+	 * Whether the custom editor override should occur
 	 *
-	 * @param Title $title
-	 * @return bool
+	 * @param IContextSource $context
+	 * @return bool Whether the frontend JS should try to display an editor
 	 */
-	protected static function isPageContentModelEditable( Title $title ): bool {
-		$contentHandler = MediaWikiServices::getInstance()->getContentHandlerFactory()
-			->getContentHandler( $title->getContentModel() );
+	protected static function isSupportedEditRequest( IContextSource $context ) {
+		/** @var MobileContext $mobileContext */
+		$mobileContext = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Context' );
+		if ( !$mobileContext->shouldDisplayMobileView() ) {
+			return false;
+		}
 
-		return $contentHandler->supportsDirectEditing()
-			&& $contentHandler->supportsDirectApiEditing();
+		$extensionRegistry = ExtensionRegistry::getInstance();
+		$editorAvailableSkins = $extensionRegistry->getAttribute( 'MobileFrontendEditorAvailableSkins' );
+		if ( !in_array( $context->getSkin()->getSkinName(), $editorAvailableSkins ) ) {
+			// Mobile editor commonly doesn't work well with other skins than Minerva (it looks horribly
+			// broken without some styles that are only defined by Minerva). So we only enable it for the
+			// skin that wants it.
+			return false;
+		}
+
+		$req = $context->getRequest();
+		$title = $context->getTitle();
+
+		// Various things fall back to WikiEditor
+		if ( $req->getRawVal( 'action' ) === 'submit' ) {
+			// Don't try to take over if the form has already been submitted
+			return false;
+		}
+		if ( $title->inNamespace( NS_SPECIAL ) ) {
+			return false;
+		}
+		if ( $title->getContentModel() !== 'wikitext' ) {
+			// Only load the wikitext editor on wikitext. Otherwise we'll rely on the fallback behaviour
+			// (You can test this on MediaWiki:Common.css) ?action=edit url (T173800)
+			return false;
+		}
+		if ( $req->getCheck( 'undo' ) || $req->getCheck( 'undoafter' ) ) {
+			// Undo needs to show a diff above the editor
+			return false;
+		}
+		if ( $req->getRawVal( 'section' ) === 'new' ) {
+			// New sections need a title field
+			return false;
+		}
+		return true;
 	}
 
 }

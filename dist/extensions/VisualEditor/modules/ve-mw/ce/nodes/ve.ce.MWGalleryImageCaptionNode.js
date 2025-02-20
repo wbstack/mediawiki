@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable GalleryImageCaptionNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,6 +10,8 @@
  *
  * @class
  * @extends ve.ce.BranchNode
+ * @mixes ve.ce.ActiveNode
+ *
  * @constructor
  * @param {ve.dm.MWGalleryImageCaptionNode} model Model to observe
  * @param {Object} [config] Configuration options
@@ -18,12 +20,17 @@ ve.ce.MWGalleryImageCaptionNode = function VeCeMWGalleryImageCaptionNode() {
 	// Parent constructor
 	ve.ce.MWGalleryImageCaptionNode.super.apply( this, arguments );
 
+	// Mixin constructor
+	ve.ce.ActiveNode.call( this );
+
 	this.$element.addClass( 'gallerytext' );
 };
 
 /* Inheritance */
 
 OO.inheritClass( ve.ce.MWGalleryImageCaptionNode, ve.ce.BranchNode );
+
+OO.mixinClass( ve.ce.MWGalleryImageCaptionNode, ve.ce.ActiveNode );
 
 /* Static Properties */
 

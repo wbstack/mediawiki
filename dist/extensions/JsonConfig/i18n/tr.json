@@ -3,10 +3,11 @@
 		"authors": [
 			"BaRaN6161 TURK",
 			"Cobija",
+			"Joseph",
+			"MrSchipunov",
 			"MuratTheTurkish",
 			"SaldırganSincap",
-			"Joseph",
-			"MrSchipunov"
+			"Pedian4169"
 		]
 	},
 	"nstab-data": "Veri",
@@ -17,7 +18,7 @@
 	"jsonconfig-edit-action-cancel": "İptal",
 	"jsonconfig-edit-button-label": "Tablo olarak düzenle",
 	"jsonconfig-edit-dialog-error": "Tablo olarak düzenlenemiyor: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Veriler şema ile eşleşmiyor",
+	"jsonconfig-edit-dialog-error-data-invalid": "Veriler şema ile eşleşmiyor",
 	"jsonconfig-edit-dialog-error-data-missing": "JSON <code>data</code> özelliği eksik veya dizi değil",
 	"jsonconfig-edit-dialog-error-data-too-large": "Veri kümesi tablo olarak düzenlenemeyecek kadar büyük",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Her alanın bir adı olmalıdır",
@@ -53,6 +54,7 @@
 	"jsonconfig-type-name-localized": "yerelleştirilmiş",
 	"jsonconfig-type-name-number": "sayı",
 	"jsonconfig-type-name-boolean": "boole",
+	"jsonconfig-use-category": "JsonConfig uzantısını kullanan sayfalar",
 	"jsonconfig-license": "$1 altındaki veriler.",
 	"jsonconfig-license-not-set": "Bu sayfayı düzenlediğinizde, katkınızı <code>licence</code> alanında belirtilen lisansa göre bırakmayı kabul edersiniz.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
@@ -60,8 +62,8 @@
 	"jsonconfig-license-name-dl-de-by-1.0": "Veri lisansı Almanya – atıf – Sürüm 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Veri lisansı Almanya – atıf – sürüm 2.0",
 	"jsonconfig-license-name-GeoNutzV": "Coğrafi Veri lisansı Almanya",
-	"jsonconfig-license-copyrightwarning": "Değişiklikleri kaydederek [https://meta.wikimedia.org/wiki/Terms_of_Use/tr Kullanım Şartları]'nı kabul etmiş olursunuz ve katkınızı [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Değişiklikleri kaydederek [https://meta.wikimedia.org/wiki/Terms_of_Use/tr Kullanım Şartları]'nı kabul edersiniz ve <code>licence</code> alanında belirtilen lisansa göre katkınızı geri dönülmez şekilde bırakmayı kabul edersiniz.",
+	"jsonconfig-license-copyrightwarning": "Değişiklikleri kaydederek [https://foundation.wikimedia.org/wiki/Terms_of_Use Kullanım Şartları]'nı kabul etmiş olursunuz ve katkınızı [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Değişiklikleri yayımlayarak [https://foundation.wikimedia.org/wiki/Terms_of_Use Kullanım Şartları]'nı kabul edersiniz ve <code>licence</code> alanında belirtilen lisansa göre katkınızı geri dönülmez şekilde bırakmayı kabul edersiniz.",
 	"jsonconfig-license-notice": "'''Not:''' Bu sayfayı düzenlediğinizde, katkınızı [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] altında bırakmayı kabul edersiniz.",
 	"jsonconfig-license-notice-license-unset": "'''Not:''' Bu sayfayı düzenlediğinizde, katkınızı <code>licence</code> alanında belirtilen lisansa göre bırakmayı kabul edersiniz.",
 	"right-jsonconfig-flush": "API ile JsonConfig'i değiştir",

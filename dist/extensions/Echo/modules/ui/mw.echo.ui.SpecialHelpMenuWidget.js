@@ -4,13 +4,13 @@
 	 *
 	 * @param {mw.echo.dm.ModelManager} manager Model manager
 	 * @param {Object} config Configuration object
-	 * @cfg {string} [prefLink] Link to preferences page
+	 * @param {string} [config.prefLink] Link to preferences page
 	 */
 	mw.echo.ui.SpecialHelpMenuWidget = function MwEchoUiSpecialHelpMenuWidget( manager, config ) {
 		config = config || {};
 
 		// Parent constructor
-		mw.echo.ui.SpecialHelpMenuWidget.super.call( this, $.extend( {
+		mw.echo.ui.SpecialHelpMenuWidget.super.call( this, Object.assign( {
 			icon: 'settings',
 			label: mw.msg( 'echo-specialpage-special-help-menu-widget-aria-label' ),
 			indicator: 'down',
@@ -26,7 +26,9 @@
 
 		this.markAllReadOption = new OO.ui.MenuOptionWidget( {
 			icon: 'checkAll',
-			label: this.getMarkAllReadOptionLabel(),
+			label: this.getMarkAllReadOptionLabel(
+				this.manager.getPaginationModel().getCurrentPageItemCount()
+			),
 			data: 'markAllRead'
 		} );
 		this.markAllReadOption.toggle( false );
@@ -62,9 +64,9 @@
 	/* Events */
 
 	/**
-	 * @event markAllRead
-	 *
 	 * Mark all notifications as read in the selected wiki
+	 *
+	 * @event mw.echo.ui.SpecialHelpMenuWidget#markAllRead
 	 */
 
 	/* Methods */
@@ -73,7 +75,15 @@
 	 * Respond to source page change
 	 */
 	mw.echo.ui.SpecialHelpMenuWidget.prototype.onSourcePageUpdate = function () {
-		this.markAllReadOption.setLabel( this.getMarkAllReadOptionLabel() );
+		const sourcePagesModel = this.manager.getFiltersModel().getSourcePagesModel(),
+			source = sourcePagesModel.getCurrentSource(),
+			sourcePages = sourcePagesModel.getSourcePages( source ),
+			currentPage = sourcePagesModel.getCurrentPage(),
+			currentCount = currentPage ?
+				sourcePages[ currentPage ].count :
+				sourcePagesModel.getSourceTotalCount( source );
+
+		this.markAllReadOption.setLabel( this.getMarkAllReadOptionLabel( currentCount ) );
 	};
 
 	/**
@@ -82,6 +92,7 @@
 	 * @param {number} count New count
 	 */
 	mw.echo.ui.SpecialHelpMenuWidget.prototype.onLocalCountChange = function ( count ) {
+		this.markAllReadOption.setLabel( this.getMarkAllReadOptionLabel( count ) );
 		this.markAllReadOption.toggle( count > 0 );
 	};
 
@@ -89,21 +100,13 @@
 	 * Handle menu choose events
 	 *
 	 * @param {OO.ui.MenuOptionWidget} item Chosen item
+	 * @fires mw.echo.ui.SpecialHelpMenuWidget#markAllRead
 	 */
 	mw.echo.ui.SpecialHelpMenuWidget.prototype.onMenuChoose = function ( item ) {
-		var data = item.getData();
+		const data = item.getData();
 		if ( data.href ) {
 			location.href = data.href;
 		} else if ( data === 'markAllRead' ) {
-			// Log this action
-			mw.echo.logger.logInteraction(
-				mw.echo.Logger.static.actions.markAllReadClick,
-				mw.echo.Logger.static.context.archive,
-				null, // Notification ID is irrelevant
-				this.manager.getTypeString(), // The type of the list in general
-				null, // The Logger has logic to decide whether this is mobile or not
-				this.manager.getFiltersModel().getSourcePagesModel().getCurrentSource() // Source name
-			);
 			this.emit( 'markAllRead' );
 		}
 	};
@@ -111,16 +114,17 @@
 	/**
 	 * Build the button label
 	 *
+	 * @param {number} count Number of unread notifications
 	 * @return {string} Mark all read button label
 	 */
-	mw.echo.ui.SpecialHelpMenuWidget.prototype.getMarkAllReadOptionLabel = function () {
-		var pageModel = this.manager.getFiltersModel().getSourcePagesModel(),
+	mw.echo.ui.SpecialHelpMenuWidget.prototype.getMarkAllReadOptionLabel = function ( count ) {
+		const pageModel = this.manager.getFiltersModel().getSourcePagesModel(),
 			source = pageModel.getCurrentSource(),
 			sourceTitle = pageModel.getSourceTitle( source );
 
 		return sourceTitle ?
-			mw.msg( 'echo-mark-wiki-as-read', sourceTitle ) :
-			mw.msg( 'echo-mark-all-as-read' );
+			mw.msg( 'echo-mark-wiki-as-read', sourceTitle, count ) :
+			mw.msg( 'echo-mark-all-as-read', count );
 	};
 
 }() );

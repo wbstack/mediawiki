@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Casadelproverbio",
-			"Joetaras",
-			"Amire80"
+			"Joetaras"
 		]
 	},
 	"advancedsearch-desc": "Accesse 'nderra-'nderre a le funziune de ricerche avanzate sus a [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Recerche avanzate:",
+	"advancedsearch-options-pane-preview-list": "Termine de recerche ausate",
 	"advancedsearch-optgroup-text": "Cirche jndr'à 'u teste d'a pàgene",
 	"advancedsearch-optgroup-structure": "Strutture",
 	"advancedsearch-optgroup-files": "Fail e immaggine",
@@ -26,6 +27,7 @@
 	"advancedsearch-field-fileh": "Altezze d'u file in pixel",
 	"advancedsearch-field-sort": "Ordene de l'arrengamende",
 	"advancedsearch-field-preview-sort": "Ordene pe $1",
+	"advancedsearch-help-general-instruction": "'Struziune dettagliate pe $1",
 	"advancedsearch-help-plain": ";Descrizione\n:Cirche ste parole jndr'à 'u titole o jndr'à 'u teste.\n;Arrecuèrde quidde ca avène mò\n:* Ponne essere date cchiù parole.\n:* Le segne de pundeggiature e otre carattere none alfanumerece (tranne le doje punde e 'a virgole) avènene cacate.\n:* Ponne accappà resultate ca non ge tènene une o cchiù de le termine de ricerca toje.\n:* Avène applecate 'u stemming a le parole. Esmbie: ce è scritte ''puzze'', 'a ricerche vè pigghie pure le ''pozzere''. 'U stemming a le parole jè specifeche d'a lènga toje.\n;Pàgene d'aijute\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/help:CirrusSearch#Full_text_search Recerche de teste comblete]\n;Sindasse equivalende jndr'à recerche normale\n:<code>sesame street car</code>",
 	"advancedsearch-help-phrase": ";Descrizione\n:Cirche 'na sequenze specifiche de carattere. Le segne de pundeggiature avènene cacate.\n;Arrecuèrdate stu fatte\n:(valide sulamende quanne se ausane le virgolette, 'ndruche l'esembie aqquà sotte)\n:* Separe cu 'na virgole o 'nu spazie le parole da cercà, es. <code>\"statte bbuène\"</code>, <code>\"cià amiche mie!\"</code>.\n:* Le segne de pundeggiature e otre carattere none alfanumerece (tranne le doje punde e 'a virgole) avènene cacate.\n:* 'A recerche non ge face distinzione 'mbrà maiuscole e minuscole.\n:* Non g'avène applecate 'u stemming a le parole.\n;Pàgene d'aijute\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Parole, locuziune e attrebbute]\n;Sindassi equivalende jndr'à recerche normale\n:Parole 'mbrà virgolette, pe esembie <code>\"Accumìnze da l'inizie\"</code>.",
 	"advancedsearch-help-or": ";Descrizione\n:Ninde ninde une de le termine de recerche adda essere mise jndr'à pàgene.\n;Pàgene de aijute\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Parole, locuziune e attrebbute]\n;Sindasse equivalende jndr'à recerche normale\n:Parole divise da <code>OR</code> cumme <code>Laptop OR Notebook</code>.",
@@ -68,6 +70,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "date de ccrejazione",
 	"advancedsearch-namespaces-search-in": "Cirche pe:",
 	"advancedsearch-namespaces-remember": "Arrecuèrde 'a selezione pe le prossime ricerche",
+	"advancedsearch-namespaces-pane-preview-list": "Filtre de name space attive mò",
 	"advancedsearch-namespaces-preset-all": "Tutte",
 	"advancedsearch-namespaces-preset-default": "Predefinite",
 	"advancedsearch-namespaces-preset-general-help": "Pàggene de aijute",

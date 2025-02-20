@@ -16,17 +16,22 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Change tagging
  */
 
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\RevisionList\RevisionItemBase;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
 
 /**
  * Item class for a logging table row with its associated change tags.
+ *
  * @todo Abstract out a base class for this and RevDelLogItem, similar to the
  * RevisionItem class but specifically for log items.
+ *
  * @since 1.25
+ * @ingroup ChangeTags
  */
 class ChangeTagsLogItem extends RevisionItemBase {
 	public function getIdField() {
@@ -51,7 +56,7 @@ class ChangeTagsLogItem extends RevisionItemBase {
 
 	public function canView() {
 		return LogEventsList::userCan(
-			$this->row, RevisionRecord::SUPPRESSED_ALL, $this->list->getAuthority()
+			$this->row, LogPage::DELETED_RESTRICTED, $this->list->getAuthority()
 		);
 	}
 
@@ -74,12 +79,13 @@ class ChangeTagsLogItem extends RevisionItemBase {
 		$date = htmlspecialchars( $this->list->getLanguage()->userTimeAndDate(
 			$this->row->log_timestamp, $this->list->getUser() ) );
 		$title = Title::makeTitle( $this->row->log_namespace, $this->row->log_title );
-		$formatter = LogFormatter::newFromRow( $this->row );
+		$services = MediaWikiServices::getInstance();
+		$formatter = $services->getLogFormatterFactory()->newFromRow( $this->row );
 		$formatter->setContext( $this->list->getContext() );
 		$formatter->setAudience( LogFormatter::FOR_THIS_USER );
 
 		// Log link for this page
-		$loglink = MediaWikiServices::getInstance()->getLinkRenderer()->makeLink(
+		$loglink = $services->getLinkRenderer()->makeLink(
 			SpecialPage::getTitleFor( 'Log' ),
 			$this->list->msg( 'log' )->text(),
 			[],
@@ -89,18 +95,14 @@ class ChangeTagsLogItem extends RevisionItemBase {
 		// User links and action text
 		$action = $formatter->getActionText();
 
-		$comment = $this->list->getLanguage()->getDirMark() .
-			$formatter->getComment();
-
-		if ( LogEventsList::isDeleted( $this->row, LogPage::DELETED_COMMENT ) ) {
-			$comment = '<span class="history-deleted">' . $comment . '</span>';
-		}
+		$dir = $this->list->getLanguage()->getDir();
+		$comment = Html::rawElement( 'bdi', [ 'dir' => $dir ], $formatter->getComment() );
 
 		$content = "$loglink $date $action $comment";
 		$attribs = [];
 		$tags = $this->getTags();
 		if ( $tags ) {
-			list( $tagSummary, $classes ) = ChangeTags::formatSummaryRow(
+			[ $tagSummary, $classes ] = ChangeTags::formatSummaryRow(
 				$tags,
 				'edittags',
 				$this->list->getContext()
@@ -108,6 +110,6 @@ class ChangeTagsLogItem extends RevisionItemBase {
 			$content .= " $tagSummary";
 			$attribs['class'] = implode( ' ', $classes );
 		}
-		return Xml::tags( 'li', $attribs, $content );
+		return Html::rawElement( 'li', $attribs, $content );
 	}
 }

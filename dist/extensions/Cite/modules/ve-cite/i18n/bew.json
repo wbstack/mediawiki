@@ -22,9 +22,9 @@
 	"cite-ve-citationneeded-title": "Tukilan dibutuhin",
 	"cite-ve-dialog-reference-editing-reused": "Ni ruju'an dipaké {{PLURAL:$1|sekali|$1 kali}} di ni halaman.",
 	"cite-ve-dialog-reference-editing-reused-long": "Ni ruju'an dipaké {{PLURAL:$1|sekali|$1 kali}} di ni halaman. Perobahan nyang dibuat di mari bakal diterepin di mana-mana tempat di mana ni ruju'an dipaké lagi.",
+	"cite-ve-dialog-reference-editing-extends": "Ni ièlah perlèngan deri ruju'an laèn.",
 	"cite-ve-dialog-reference-options-group-label": "Paké ni kelompok",
 	"cite-ve-dialog-reference-options-group-placeholder": "Ruju'an umum",
-	"cite-ve-dialog-reference-options-name-label": "Paké lagi dengen ni nama",
 	"cite-ve-dialog-reference-options-responsive-label": "Paké telepekan kolom ngewaro",
 	"cite-ve-dialog-reference-options-section": "Pilihan",
 	"cite-ve-dialog-reference-placeholder": "Tulis atawa tèmpèl lu punya ruju'an di mari, atawa masukin sablonan tukilan.",
@@ -44,9 +44,7 @@
 	"cite-ve-referenceslist-isempty-default": "Kaga' ada ruju'an di ni halaman nyang kena diserèntain di ni daptar.",
 	"cite-ve-referenceslist-missingref": "Ni ruju'an diterangin di sablonan atawa blok laèn, èn sekarang ni cuman bisa dipermak di mode sumber.",
 	"cite-ve-referenceslist-missingref-in-list": "Ni ruju'an diterangin di sablonan atawa blok laèn, èn sekarang ni cuman bisa diterawangin di mode sumber.",
-	"cite-ve-referenceslist-missingreflist": "Ni daptar ruju'an dibuat ama blatan, èn sekarang ini cuman bisa dipermak di mode sumber.",
+	"cite-ve-referenceslist-missingreflist": "Ni daptar ruju'an dibuat ama sablonan.",
 	"cite-ve-toolbar-group-label": "Tukil",
-	"cite-ve-othergroup-item": "$1 ruju'an",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Ruju'an",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Nama kelompok ruju'an: \"$1\""
+	"cite-ve-othergroup-item": "$1 ruju'an"
 }

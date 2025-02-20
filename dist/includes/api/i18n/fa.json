@@ -6,6 +6,7 @@
 			"Alirezaaa",
 			"Arash.pt",
 			"Beginneruser",
+			"Ebrahim",
 			"Ebraminio",
 			"FarsiNevis",
 			"Fatemi127",
@@ -18,8 +19,7 @@
 			"Mjbmr",
 			"Reza1615",
 			"Sahehco",
-			"Signal89",
-			"Amire80"
+			"Signal89"
 		]
 	},
 	"apihelp-main-extended-description": "<div class=\"hlist plainlinks api-main-links\">\n* [[mw:Special:MyLanguage/API:Main_page|مستندات]]\n* [[mw:Special:MyLanguage/API:Etiquette|آداب و رهنمودهای استفاده]]\n* [[mw:Special:MyLanguage/API:FAQ|پرسش‌های متداول]]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-api.lists.wikimedia.org/ میلینگ لیست]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-api-announce.lists.wikimedia.org/ اطلاعیه‌های واسط برنامه‌نویسی کاربردی]\n* [https://phabricator.wikimedia.org/maniphest/query/GebfyV4uCaLd/#R مشکلات و درخواست‌ها]\n</div>\n\n<strong>وضعیت:</strong> تمام ویژگی‌هایی که در این صفحه نمایش یافته‌اند باید کار بکنند، ولی رابط برنامه‌نویسی کاربردی کماکان در حال توسعه است، و ممکن است در هر زمان تغییر بکند. به عضویت [https://lists.wikimedia.org/hyperkitty/list/mediawiki-api-announce@lists.wikimedia.org/ فهرست پست الکترونیکی mediawiki-api-announce] در بیایید تا از تغییرات باخبر شوید.\n\n<strong>درخواست‌های معیوب:</strong> وقتی درخواست‌های معیوب به رابط برنامه‌نویسی کاربردی فرستاده شوند، یک سرایند اچ‌تی‌تی‌پی با کلید «MediaWiki-API-Erorr» فرستاده می‌شود و بعد هم مقدار سرایند و هم کد خطای بازگردانده شده هر دو به یک مقدار نسبت داده می‌شوند. برای اطلاعات بیشتر [[mw:Special:MyLanguage/API:Errors_and_warnings|API: Errors and warnings]] را ببینید.\n\n<strong>آزمایش:</strong> برای انجام درخواست‌های API آزمایشی [[Special:ApiSandbox]] را ببینید.",
@@ -197,6 +197,7 @@
 	"apihelp-feedrecentchanges-param-hideminor": "پنهان کردن تغییرات جزئی.",
 	"apihelp-feedrecentchanges-param-hidebots": "پنهان کردن تغییرات انجام شده توسط ربات‌ها.",
 	"apihelp-feedrecentchanges-param-hideanons": "پنهان کردن ویرایش‌های کاربران ناشناس.",
+	"apihelp-feedrecentchanges-param-hideanons-temp": "نهفتن تغییرات اعمال‌شده توسط کاربران ناشناس و حساب‌های موقت.",
 	"apihelp-feedrecentchanges-param-hideliu": "پنهان کردن ویرایش‌های کاربران ثبت‌نام کرده.",
 	"apihelp-feedrecentchanges-param-hidepatrolled": "پنهان کردن ویرایش گشت‌زن‌ها.",
 	"apihelp-feedrecentchanges-param-hidemyself": "پنهان کردن ویرایش‌های کاربر فعلی.",
@@ -494,7 +495,10 @@
 	"api-help-examples": "{{PLURAL:$1|نمونه|نمونه‌ها}}:",
 	"api-help-open-in-apisandbox": "<small>[باز کردن در صفحهٔ تمرین]</small>",
 	"apierror-cantchangecontentmodel": "شما مجاز به تغییر مدل محتوای صفحه نیستید.",
-	"apierror-contenttoobig": "حجم محتوای ارائه‌شده از سوی شما از محدودیت اندازهٔ مقاله برابر با $1 {{PLURAL:$1|کیبی‌بایت}} گذر کرده‌است.",
+	"apierror-changecontentmodel-nodirectediting": "مدل محتوای $1 از ویرایش مستقیم پشتیبانی نمی‌کند",
+	"apierror-changecontentmodel-cannotbeused": "مدل محتوای $1 در $2 قابل استفاده نیست",
+	"apierror-changecontentmodel-cannot-convert": "ناتوان در تبدیل مدل محتوای $1 به $2",
+	"apierror-contenttoobig": "حجم محتوای ارائه‌شده از سوی شما از محدودیت اندازهٔ مقاله برابر با $1 {{PLURAL:$1|کیبی‌بایت}} گذر کرده است.",
 	"apierror-contentmodel-mismatch": "محتوایی که وارد کرده‌اید دارای مدل محتوایی <kbd>$1</kbd> است که با مدل محتوای کنونی صفحه <kbd>$2</kbd> متفاوت است.",
 	"apierror-nosuchrcid": "تغییر اخیری با شناسهٔ $1 موجود نیست.",
 	"api-credits-header": "اعتبار"

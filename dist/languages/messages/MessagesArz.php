@@ -1,8 +1,6 @@
 <?php
 /** Egyptian Spoken Arabic (مصرى)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -45,6 +43,7 @@ $specialPageAliases = [
 	'Ancientpages'              => [ 'صفح_قديمه' ],
 	'ApiHelp'                   => [ 'مساعده_Api' ],
 	'ApiSandbox'                => [ 'ملعب_Api' ],
+	'AuthenticationPopupSuccess' => [ 'نجاح_بوب_اب_المصادقه' ],
 	'AutoblockList'             => [ 'ليسته_البلوك_التوماتيكى', 'اعرض_البلوك_التوماتيكى' ],
 	'Badtitle'                  => [ 'عنوان_وحش' ],
 	'Blankpage'                 => [ 'صفحه_فارضيه' ],
@@ -60,6 +59,7 @@ $specialPageAliases = [
 	'ChangePassword'            => [ 'تغيير_الپاسوورد', 'ظبط_الپاسوورد' ],
 	'ComparePages'              => [ 'مقارنه_الصفحات' ],
 	'Confirmemail'              => [ 'تأكيد_الايميل' ],
+	'Contribute'                => [ 'ساهم' ],
 	'Contributions'             => [ 'مساهمات' ],
 	'CreateAccount'             => [ 'ابتدى_حساب' ],
 	'Deadendpages'              => [ 'صفح_نهايه_مسدوده' ],
@@ -68,6 +68,7 @@ $specialPageAliases = [
 	'Diff'                      => [ 'فرق' ],
 	'DoubleRedirects'           => [ 'تحويلات_دوبل' ],
 	'EditPage'                  => [ 'عدل_الصفحه', 'عدل' ],
+	'EditRecovery'              => [ 'ترجيع_التعديل' ],
 	'EditTags'                  => [ 'تغيير_التاجز' ],
 	'EditWatchlist'             => [ 'تغيير_قايمه_المراقبه' ],
 	'Emailuser'                 => [ 'ابعت_ايميل_لليوزر' ],
@@ -108,9 +109,11 @@ $specialPageAliases = [
 	'Mute'                      => [ 'اكتم' ],
 	'Mycontributions'           => [ 'مساهماتى' ],
 	'MyLanguage'                => [ 'اللغة_بتاعتى' ],
+	'Mylog'                     => [ 'السجل_بتاعى' ],
 	'Mypage'                    => [ 'صفحتى' ],
 	'Mytalk'                    => [ 'مناقشتى' ],
 	'Myuploads'                 => [ 'مرفوعاتى', 'فايلاتى' ],
+	'NamespaceInfo'             => [ 'المعلومات_بتاعه_النطاق' ],
 	'Newimages'                 => [ 'فايلات_جديده', 'صور_جديده' ],
 	'Newpages'                  => [ 'صفح_جديده' ],
 	'NewSection'                => [ 'قسم_جديد' ],
@@ -136,7 +139,9 @@ $specialPageAliases = [
 	'Recentchangeslinked'       => [ 'اجدد_التغييرات_اللى_معمول_ليها_لينك', 'تغييرات_مرتبطه' ],
 	'Redirect'                  => [ 'تحويل' ],
 	'RemoveCredentials'         => [ 'مسح_الكريدينشيال' ],
+	'Renameuser'                => [ 'سمّى_تانى_يوزر' ],
 	'ResetTokens'               => [ 'ضبط_المفاتيح' ],
+	'RestSandbox'               => [ 'سبوره_رست' ],
 	'Revisiondelete'            => [ 'مسح_نسخه' ],
 	'RunJobs'                   => [ 'تشغيل_الوظايف' ],
 	'Search'                    => [ 'تدوير' ],
@@ -144,6 +149,7 @@ $specialPageAliases = [
 	'Specialpages'              => [ 'صفح_مخصوصه' ],
 	'Statistics'                => [ 'احصائيات' ],
 	'Tags'                      => [ 'وسوم' ],
+	'TalkPage'                  => [ 'صفحه_المناقشه' ],
 	'TrackingCategories'        => [ 'تصنيفات_التتبع' ],
 	'Unblock'                   => [ 'رفع_منع' ],
 	'Uncategorizedcategories'   => [ 'تصانيف_مش_متصنفه' ],
@@ -178,6 +184,7 @@ $magicWords = [
 	'articlepath'               => [ '0', 'مسار_المقاله', 'مسار_المقالة', 'ARTICLEPATH' ],
 	'basepagename'              => [ '1', 'اسم_الصفحه_الأساسى', 'اسم_الصفحة_الأساسي', 'BASEPAGENAME' ],
 	'basepagenamee'             => [ '1', 'عنوان_الصفحه_الأساسى', 'عنوان_الصفحة_الأساسي', 'BASEPAGENAMEE' ],
+	'bcp47'                     => [ '1', '#بى_سى_بى_47', '#bcp47' ],
 	'bidi'                      => [ '0', 'بيدى:', 'BIDI:' ],
 	'canonicalurl'              => [ '0', 'عنوان_قاعده:', 'عنوان_قاعدة:', 'CANONICALURL:' ],
 	'canonicalurle'             => [ '0', 'مسار_قاعده:', 'مسار_قاعدة:', 'CANONICALURLE:' ],
@@ -201,13 +208,16 @@ $magicWords = [
 	'defaultsort'               => [ '1', 'ترتيب_قياسى:', 'ترتيب_افتراضى:', 'مفتاح_ترتيب_قياسى:', 'مفتاح_ترتيب_افتراضى:', 'ترتيب_تصنيف_قياسى:', 'ترتيب_تصنيف_افتراضى:', 'ترتيب_قياسي:', 'ترتيب_افتراضي:', 'مفتاح_ترتيب_قياسي:', 'مفتاح_ترتيب_افتراضي:', 'ترتيب_تصنيف_قياسي:', 'ترتيب_تصنيف_افتراضي:', 'ترتيب_غيابي:', 'DEFAULTSORT:', 'DEFAULTSORTKEY:', 'DEFAULTCATEGORYSORT:' ],
 	'defaultsort_noerror'       => [ '0', 'من_غير_غلط', 'لاخطأ', 'noerror' ],
 	'defaultsort_noreplace'     => [ '0', 'ماتستبدلش', 'لاتستبدل', 'noreplace' ],
+	'dir'                       => [ '1', '#اتجاه', '#dir' ],
 	'directionmark'             => [ '1', 'علامة_الاتجاه', 'علامة_اتجاه', 'DIRECTIONMARK', 'DIRMARK' ],
 	'displaytitle'              => [ '1', 'عرض_العنوان', 'DISPLAYTITLE' ],
 	'displaytitle_noerror'      => [ '0', 'لا_غلطه', 'noerror' ],
 	'displaytitle_noreplace'    => [ '0', 'لا_استبدال', 'noreplace' ],
 	'expectunusedcategory'      => [ '1', '__اتوقع_تصنيف_مش_مستخدم__', '__EXPECTUNUSEDCATEGORY__', ],
+	'expectunusedtemplate'      => [ '1', '__اتوقع_قالب_مش_مستخدم__', '__EXPECTUNUSEDTEMPLATE__', ],
 	'filepath'                  => [ '0', 'مسار_الملف:', 'FILEPATH:' ],
 	'forcetoc'                  => [ '0', '__لصق_فهرس__', '__FORCETOC__' ],
+	'formal'                    => [ '1', '#رسمى:', '#FORMAL:' ],
 	'formatdate'                => [ '0', 'تهيئه_التاريخ', 'تهيئه_تاريخ', 'تهيئة_التاريخ', 'تهيئة_تاريخ', 'formatdate', 'dateformat' ],
 	'formatnum'                 => [ '0', 'صيغة_رقم', 'FORMATNUM' ],
 	'fullpagename'              => [ '1', 'اسم_الصفحة_الكامل', 'اسم_صفحة_كامل', 'اسم_كامل', 'FULLPAGENAME' ],
@@ -243,7 +253,8 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1بك', '$1عن', '$1px' ],
 	'index'                     => [ '1', '__فهرسة__', '__INDEX__' ],
 	'int'                       => [ '0', 'محتوى:', 'INT:' ],
-	'language'                  => [ '0', '#لغة:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#لغة', '#LANGUAGE' ],
+	'language_option_bcp47'     => [ '1', 'بى_سى_بى_47', 'bcp47' ],
 	'lc'                        => [ '0', 'صغير:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'عنوان_كبير:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'يوم_محلى', 'يوم_محلي', 'LOCALDAY' ],
@@ -344,6 +355,7 @@ $magicWords = [
 	'url_path'                  => [ '0', 'مسار', 'PATH' ],
 	'url_query'                 => [ '0', 'استعلام', 'QUERY' ],
 	'url_wiki'                  => [ '0', 'ويكى', 'ويكي', 'WIKI' ],
+	'userlanguage'              => [ '1', 'لغه_اليوزر', 'USERLANGUAGE' ],
 ];
 
 // (T18469) Override Eastern Arabic numberals, use Western

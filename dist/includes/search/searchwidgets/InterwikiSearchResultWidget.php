@@ -2,11 +2,11 @@
 
 namespace MediaWiki\Search\SearchWidgets;
 
-use Html;
 use HtmlArmor;
+use MediaWiki\Html\Html;
 use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\Specials\SpecialSearch;
 use SearchResult;
-use SpecialSearch;
 
 /**
  * Renders an enhanced interwiki result

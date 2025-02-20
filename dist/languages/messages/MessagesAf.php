@@ -1,8 +1,6 @@
 <?php
 /** Afrikaans (Afrikaans)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -65,7 +63,7 @@ $magicWords = [
 	'img_thumbnail'             => [ '1', 'duimnael', 'thumb', 'thumbnail' ],
 	'img_top'                   => [ '1', 'bo', 'top' ],
 	'index'                     => [ '1', '__INDEKS__', '__INDEX__' ],
-	'language'                  => [ '0', '#TAAL:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#TAAL', '#LANGUAGE' ],
 	'localweek'                 => [ '1', 'HUIDIGEWEEK', 'LOCALWEEK' ],
 	'namespace'                 => [ '1', 'NAAMSPASIE', 'NAMESPACE' ],
 	'noeditsection'             => [ '0', '__GEENNUWEAFDELING__', '__NOEDITSECTION__' ],

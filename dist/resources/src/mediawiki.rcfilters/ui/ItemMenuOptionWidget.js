@@ -1,29 +1,25 @@
-var FilterItemHighlightButton = require( './FilterItemHighlightButton.js' ),
-	CheckboxInputWidget = require( './CheckboxInputWidget.js' ),
-	ItemMenuOptionWidget;
+const FilterItemHighlightButton = require( './FilterItemHighlightButton.js' ),
+	CheckboxInputWidget = require( './CheckboxInputWidget.js' );
 
 /**
- * A widget representing a base toggle item
+ * A widget representing a base toggle item.
  *
  * @class mw.rcfilters.ui.ItemMenuOptionWidget
+ * @ignore
  * @extends OO.ui.MenuOptionWidget
  *
- * @constructor
  * @param {mw.rcfilters.Controller} controller RCFilters controller
  * @param {mw.rcfilters.dm.FiltersViewModel} filtersViewModel
- * @param {mw.rcfilters.dm.ItemModel} invertModel
+ * @param {mw.rcfilters.dm.ItemModel|null} invertModel
  * @param {mw.rcfilters.dm.ItemModel} itemModel Item model
  * @param {mw.rcfilters.ui.HighlightPopupWidget} highlightPopup Shared highlight color picker
  * @param {Object} config Configuration object
  */
-ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
+const ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
 	controller, filtersViewModel, invertModel, itemModel, highlightPopup, config
 ) {
-	var layout,
-		$widgetRow,
-		classes,
-		$label = $( '<div>' )
-			.addClass( 'mw-rcfilters-ui-itemMenuOptionWidget-label' );
+	const $label = $( '<div>' )
+		.addClass( 'mw-rcfilters-ui-itemMenuOptionWidget-label' );
 
 	config = config || {};
 
@@ -33,7 +29,7 @@ ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
 	this.itemModel = itemModel;
 
 	// Parent
-	ItemMenuOptionWidget.parent.call( this, $.extend( {
+	ItemMenuOptionWidget.super.call( this, Object.assign( {
 		// Override the 'check' icon that OOUI defines
 		icon: '',
 		data: this.itemModel.getName(),
@@ -58,6 +54,19 @@ ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
 		);
 	}
 
+	this.helpLink = null;
+	if ( this.itemModel.getHelpLink() ) {
+		this.helpLink = new OO.ui.ButtonWidget( {
+			icon: 'helpNotice',
+			framed: false,
+			title: mw.msg( 'rcfilters-tag-help', this.itemModel.getLabel() ),
+			href: this.itemModel.getHelpLink(),
+			target: '_blank'
+		} );
+		// Prevent clicks on the help link from toggling the option
+		this.helpLink.$button.on( 'mousedown', ( e ) => e.stopPropagation() );
+	}
+
 	this.highlightButton = new FilterItemHighlightButton(
 		this.controller,
 		this.itemModel,
@@ -73,19 +82,21 @@ ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
 		label: mw.msg( 'rcfilters-filter-excluded' )
 	} );
 	this.excludeLabel.toggle(
-		this.itemModel.getGroupModel().getView() === 'namespaces' &&
-		this.itemModel.isSelected() &&
-		this.invertModel.isSelected()
+		this.invertModel &&
+		this.invertModel.isSelected() &&
+		this.itemModel.isSelected()
 	);
 
-	layout = new OO.ui.FieldLayout( this.checkboxWidget, {
+	const layout = new OO.ui.FieldLayout( this.checkboxWidget, {
 		label: $label,
 		align: 'inline'
 	} );
 
 	// Events
 	this.filtersViewModel.connect( this, { highlightChange: 'updateUiBasedOnState' } );
-	this.invertModel.connect( this, { update: 'updateUiBasedOnState' } );
+	if ( this.invertModel ) {
+		this.invertModel.connect( this, { update: 'updateUiBasedOnState' } );
+	}
 	this.itemModel.connect( this, { update: 'updateUiBasedOnState' } );
 	// HACK: Prevent defaults on 'click' for the label so it
 	// doesn't steal the focus away from the input. This means
@@ -94,7 +105,7 @@ ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
 	// defaults on 'click' as well.
 	layout.$label.on( 'click', false );
 
-	$widgetRow = $( '<div>' )
+	const $widgetRow = $( '<div>' )
 		.addClass( 'mw-rcfilters-ui-table' )
 		.append(
 			$( '<div>' )
@@ -106,6 +117,13 @@ ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
 				)
 		);
 
+	if ( this.helpLink ) {
+		$widgetRow.find( '.mw-rcfilters-ui-row' ).append(
+			$( '<div>' )
+				.addClass( 'mw-rcfilters-ui-cell mw-rcfilters-ui-itemMenuOptionWidget-helpLink' )
+				.append( this.helpLink.$element )
+		);
+	}
 	if ( !OO.ui.isMobile() ) {
 		$widgetRow.find( '.mw-rcfilters-ui-row' ).append(
 			$( '<div>' )
@@ -117,9 +135,7 @@ ItemMenuOptionWidget = function MwRcfiltersUiItemMenuOptionWidget(
 		);
 	}
 
-	classes = this.itemModel.getIdentifiers().map( function ( ident ) {
-		return 'mw-rcfilters-ui-itemMenuOptionWidget-identifier-' + ident;
-	} ).concat(
+	const classes = this.itemModel.getIdentifiers().map( ( ident ) => 'mw-rcfilters-ui-itemMenuOptionWidget-identifier-' + ident ).concat(
 		'mw-rcfilters-ui-itemMenuOptionWidget',
 		'mw-rcfilters-ui-itemMenuOptionWidget-view-' + this.itemModel.getGroupModel().getView()
 	);
@@ -157,9 +173,9 @@ ItemMenuOptionWidget.prototype.updateUiBasedOnState = function () {
 
 	this.highlightButton.toggle( this.filtersViewModel.isHighlightEnabled() );
 	this.excludeLabel.toggle(
-		this.itemModel.getGroupModel().getView() === 'namespaces' &&
-		this.itemModel.isSelected() &&
-		this.invertModel.isSelected()
+		this.invertModel &&
+		this.invertModel.isSelected() &&
+		this.itemModel.isSelected()
 	);
 	this.toggle( this.itemModel.isVisible() );
 };

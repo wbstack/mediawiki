@@ -4,9 +4,9 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Lib\Store\Sql;
 
+use BadMethodCallException;
 use InvalidArgumentException;
 use MediaWiki\Logger\LoggerFactory;
-use MWException;
 use Psr\Log\LoggerInterface;
 use RuntimeException;
 use Wikibase\DataModel\Entity\EntityId;
@@ -104,7 +104,7 @@ class SiteLinkTable implements SiteLinkStore {
 		}
 
 		$ok = true;
-		$dbw = $this->db->connections()->getWriteConnectionRef();
+		$dbw = $this->db->connections()->getWriteConnection();
 
 		if ( $linksToDelete ) {
 			$this->logger->debug(
@@ -147,21 +147,17 @@ class SiteLinkTable implements SiteLinkStore {
 			]
 		);
 
-		$insert = [];
+		$insertQueryBuilder = $dbw->newInsertQueryBuilder()
+			->insertInto( $this->table )
+			->ignore();
 		foreach ( $links as $siteLink ) {
-			$insert[] = [
+			$insertQueryBuilder->row( [
 				'ips_item_id' => $item->getId()->getNumericId(),
 				'ips_site_id' => $siteLink->getSiteId(),
-				'ips_site_page' => $siteLink->getPageName()
-			];
+				'ips_site_page' => $siteLink->getPageName(),
+			] );
 		}
-
-		$dbw->insert(
-			$this->table,
-			$insert,
-			__METHOD__,
-			[ 'IGNORE' ]
-		);
+		$insertQueryBuilder->caller( __METHOD__ )->execute();
 
 		return $dbw->affectedRows() ? true : false;
 	}
@@ -187,14 +183,14 @@ class SiteLinkTable implements SiteLinkStore {
 			$siteIds[] = $siteLink->getSiteId();
 		}
 
-		$dbw->delete(
-			$this->table,
-			[
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( $this->table )
+			->where( [
 				'ips_item_id' => $item->getId()->getNumericId(),
-				'ips_site_id' => $siteIds
-			],
-			__METHOD__
-		);
+				'ips_site_id' => $siteIds,
+			] )
+			->caller( __METHOD__ )
+			->execute();
 
 		return true;
 	}
@@ -204,21 +200,20 @@ class SiteLinkTable implements SiteLinkStore {
 	 *
 	 * @param ItemId $itemId
 	 *
-	 * @return boolean Success indicator
-	 * @throws MWException
+	 * @return bool Success indicator
 	 */
 	public function deleteLinksOfItem( ItemId $itemId ): bool {
 		if ( $this->readonly ) {
-			throw new MWException( 'Cannot write when in readonly mode' );
+			throw new BadMethodCallException( 'Cannot write when in readonly mode' );
 		}
 
-		$dbw = $this->db->connections()->getWriteConnectionRef();
+		$dbw = $this->db->connections()->getWriteConnection();
 
-		$dbw->delete(
-			$this->table,
-			[ 'ips_item_id' => $itemId->getNumericId() ],
-			__METHOD__
-		);
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( $this->table )
+			->where( [ 'ips_item_id' => $itemId->getNumericId() ] )
+			->caller( __METHOD__ )
+			->execute();
 
 		return true;
 	}
@@ -241,7 +236,7 @@ class SiteLinkTable implements SiteLinkStore {
 		// We store page titles with spaces instead of underscores
 		$pageTitle = str_replace( '_', ' ', $pageTitle );
 
-		$dbr = $this->db->connections()->getReadConnectionRef();
+		$dbr = $this->db->connections()->getReadConnection();
 
 		$result = $dbr->newSelectQueryBuilder()
 			->select( 'ips_item_id' )
@@ -293,12 +288,12 @@ class SiteLinkTable implements SiteLinkStore {
 				__METHOD__ . ': querying for all links of one or more sites, this is expensive! (T276762)',
 				[
 					'siteIds' => $siteIds,
-					'exception' => new RuntimeException()
+					'exception' => new RuntimeException(),
 				]
 			);
 		}
 
-		$dbr = $this->db->connections()->getReadConnectionRef();
+		$dbr = $this->db->connections()->getReadConnection();
 		$links = $dbr->newSelectQueryBuilder()
 			->select( [
 				'ips_site_id',
@@ -334,7 +329,7 @@ class SiteLinkTable implements SiteLinkStore {
 	public function getSiteLinksForItem( ItemId $itemId ): array {
 		$numericId = $itemId->getNumericId();
 
-		$dbr = $this->db->connections()->getReadConnectionRef();
+		$dbr = $this->db->connections()->getReadConnection();
 
 		$rows = $dbr->newSelectQueryBuilder()
 			->select( [ 'ips_site_id', 'ips_site_page' ] )

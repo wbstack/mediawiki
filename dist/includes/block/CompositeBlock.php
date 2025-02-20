@@ -22,8 +22,10 @@
 
 namespace MediaWiki\Block;
 
+use InvalidArgumentException;
+use MediaWiki\Message\Message;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
-use Title;
 
 /**
  * Multiple Block class.
@@ -36,6 +38,30 @@ use Title;
 class CompositeBlock extends AbstractBlock {
 	/** @var AbstractBlock[] */
 	private $originalBlocks;
+
+	/**
+	 * Helper method for merging multiple blocks into a composite block.
+	 * @param AbstractBlock ...$blocks
+	 * @return self
+	 */
+	public static function createFromBlocks( AbstractBlock ...$blocks ): self {
+		$originalBlocks = [];
+		foreach ( $blocks as $block ) {
+			if ( $block instanceof self ) {
+				$originalBlocks = array_merge( $originalBlocks, $block->getOriginalBlocks() );
+			} else {
+				$originalBlocks[] = $block;
+			}
+		}
+		if ( !$originalBlocks ) {
+			throw new InvalidArgumentException( 'No blocks given' );
+		}
+		return new self( [
+			'address' => $originalBlocks[0]->target,
+			'reason' => new Message( 'blockedtext-composite-reason' ),
+			'originalBlocks' => $originalBlocks,
+		] );
+	}
 
 	/**
 	 * Create a new block with specified parameters on a user, IP or IP range.
@@ -55,10 +81,10 @@ class CompositeBlock extends AbstractBlock {
 
 		$this->originalBlocks = $options[ 'originalBlocks' ];
 
-		$this->setHideName( $this->propHasValue( 'mHideName', true ) );
+		$this->setHideName( $this->propHasValue( 'hideName', true ) );
 		$this->isHardblock( $this->propHasValue( 'isHardblock', true ) );
 		$this->isSitewide( $this->propHasValue( 'isSitewide', true ) );
-		$this->isEmailBlocked( $this->propHasValue( 'mBlockEmail', true ) );
+		$this->isEmailBlocked( $this->propHasValue( 'blockEmail', true ) );
 		$this->isCreateAccountBlocked( $this->propHasValue( 'blockCreateAccount', true ) );
 		$this->isUsertalkEditAllowed( !$this->propHasValue( 'allowUsertalk', false ) );
 	}
@@ -106,6 +132,38 @@ class CompositeBlock extends AbstractBlock {
 	 */
 	public function getOriginalBlocks() {
 		return $this->originalBlocks;
+	}
+
+	/**
+	 * Create a clone of the object with the original blocks array set to
+	 * something else.
+	 *
+	 * @since 1.42
+	 * @param AbstractBlock[] $blocks
+	 * @return self
+	 */
+	public function withOriginalBlocks( array $blocks ) {
+		$clone = clone $this;
+		$clone->originalBlocks = $blocks;
+		return $clone;
+	}
+
+	public function toArray(): array {
+		return $this->originalBlocks;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getTimestamp(): string {
+		$minStart = null;
+		foreach ( $this->originalBlocks as $block ) {
+			$startTime = $block->getTimestamp();
+			if ( $minStart === null || $startTime === '' || $startTime < $minStart ) {
+				$minStart = $startTime;
+			}
+		}
+		return $minStart ?? '';
 	}
 
 	/**
@@ -162,7 +220,7 @@ class CompositeBlock extends AbstractBlock {
 	/**
 	 * @inheritDoc
 	 */
-	public function appliesToUsertalk( Title $usertalk = null ) {
+	public function appliesToUsertalk( ?Title $usertalk = null ) {
 		return $this->methodReturnsValue( __FUNCTION__, true, $usertalk );
 	}
 

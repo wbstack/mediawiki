@@ -18,7 +18,6 @@ use stdClass;
  * Subclasses can override methods to make it solely work on the result resource instead.
  *
  * @ingroup Database
- * @stable to override
  */
 abstract class ResultWrapper implements IResultWrapper {
 	/**
@@ -137,9 +136,7 @@ abstract class ResultWrapper implements IResultWrapper {
 
 	#[\ReturnTypeWillChange]
 	public function current() {
-		if ( $this->currentRow === null ) {
-			$this->currentRow = $this->fetchObject();
-		}
+		$this->currentRow ??= $this->fetchObject();
 
 		return $this->currentRow;
 	}
@@ -158,14 +155,7 @@ abstract class ResultWrapper implements IResultWrapper {
 	}
 
 	public function getFieldNames() {
-		if ( $this->fieldNames === null ) {
-			$this->fieldNames = $this->doGetFieldNames();
-		}
+		$this->fieldNames ??= $this->doGetFieldNames();
 		return $this->fieldNames;
 	}
 }
-
-/**
- * @deprecated since 1.29
- */
-class_alias( ResultWrapper::class, 'ResultWrapper' );

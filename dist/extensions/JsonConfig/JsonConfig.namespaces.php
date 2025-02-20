@@ -26,6 +26,13 @@ $namespaceNames['es'] = [
 	487 => 'Datos_discusión',
 ];
 
+$namespaceNames['fa'] = [
+	482 => 'پیکربندی',
+	483 => 'بحث_پیکربندی',
+	486 => 'داده',
+	487 => 'بحث_داده',
+];
+
 $namespaceNames['vi'] = [
 	482 => 'Cấu_hình',
 	483 => 'Thảo_luận_Cấu_hình',

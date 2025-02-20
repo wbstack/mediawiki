@@ -90,8 +90,8 @@ class TokenUtils {
 			( $token instanceof TagTk ||
 			$token instanceof EndTagTk ||
 			$token instanceof SelfClosingTagTk ) &&
-			isset( $token->dataAttribs->stx ) &&
-			$token->dataAttribs->stx === 'html';
+			isset( $token->dataParsoid->stx ) &&
+			$token->dataParsoid->stx === 'html';
 	}
 
 	/**
@@ -128,7 +128,7 @@ class TokenUtils {
 				$token instanceof EndTagTk
 			) &&
 			$token->getName() === 'link' &&
-			preg_match( self::SOL_TRANSPARENT_LINK_REGEX, $token->getAttribute( 'rel' ) ?? '' );
+			preg_match( self::SOL_TRANSPARENT_LINK_REGEX, $token->getAttributeV( 'rel' ) ?? '' );
 	}
 
 	/**
@@ -147,13 +147,13 @@ class TokenUtils {
 			( $token->getName() === 'meta' &&
 				$token->hasAttribute( 'property' ) &&
 				preg_match( $env->getSiteConfig()->bswPagePropRegexp(),
-					$token->getAttribute( 'property' ) ?? '' )
+					$token->getAttributeV( 'property' ) ?? '' )
 			) );
 	}
 
 	/**
 	 * This should come close to matching
-	 * {@link DOMUtils.emitsSolTransparentSingleLineWT},
+	 * {@link WTUtils::emitsSolTransparentSingleLineWT},
 	 * without the single line caveat.
 	 * @param Env $env
 	 * @param Token|string $token
@@ -161,7 +161,7 @@ class TokenUtils {
 	 */
 	public static function isSolTransparent( Env $env, $token ): bool {
 		if ( is_string( $token ) ) {
-			return (bool)preg_match( '/^\s*$/D', $token );
+			return (bool)preg_match( '/^[ \t]*$/D', $token );
 		} elseif ( self::isSolTransparentLinkTag( $token ) ) {
 			return true;
 		} elseif ( $token instanceof CommentTk && !self::isTranslationUnitMarker( $env, $token ) ) {
@@ -171,7 +171,7 @@ class TokenUtils {
 		} elseif ( !$token instanceof SelfclosingTagTk || $token->getName() !== 'meta' ) {
 			return false;
 		} else {  // only metas left
-			return !( isset( $token->dataAttribs->stx ) && $token->dataAttribs->stx === 'html' );
+			return !( isset( $token->dataParsoid->stx ) && $token->dataParsoid->stx === 'html' );
 		}
 	}
 
@@ -197,7 +197,7 @@ class TokenUtils {
 	public static function isEmptyLineMetaToken( $token ): bool {
 		return $token instanceof SelfclosingTagTk &&
 			$token->getName() === 'meta' &&
-			$token->getAttribute( 'typeof' ) === 'mw:EmptyLine';
+			$token->getAttributeV( 'typeof' ) === 'mw:EmptyLine';
 	}
 
 	/**
@@ -210,10 +210,10 @@ class TokenUtils {
 	 *   no match.
 	 */
 	public static function matchTypeOf( Token $t, string $typeRe ): ?string {
-		if ( !$t->hasAttribute( 'typeof' ) ) {
+		$v = $t->getAttributeV( 'typeof' );
+		if ( $v === null ) {
 			return null;
 		}
-		$v = $t->getAttribute( 'typeof' );
 		Assert::invariant( is_string( $v ), "Typeof is not simple" );
 		foreach ( preg_split( '/\s+/', $v, -1, PREG_SPLIT_NO_EMPTY ) as $ty ) {
 			$count = preg_match( $typeRe, $ty );
@@ -242,14 +242,14 @@ class TokenUtils {
 	/**
 	 * Shift TSR of a token
 	 *
-	 * Port warning: in JS this was sometimes called with $offset=undefined, which meant do
+	 * PORT-FIXME: In JS this was sometimes called with $offset=undefined, which meant do
 	 * nothing by default, except if there was a third parameter set to true, in which case it
 	 * meant the same thing as $offset = null. We can't pass in undefined in PHP, so this should
 	 * usually be handled with isset() is the caller. But isset() returns true if the variable is
 	 * null, so let's use false instead of null for whatever the previous code meant by a null
 	 * offset.
 	 *
-	 * @param Token[] $tokens
+	 * @param array<Token|string> $tokens
 	 * @param int|false $offset
 	 */
 	public static function shiftTokenTSR( array $tokens, $offset ): void {
@@ -264,7 +264,7 @@ class TokenUtils {
 		}
 
 		// update/clear tsr
-		for ( $i = 0,  $n = count( $tokens );  $i < $n;  $i++ ) {
+		for ( $i = 0, $n = count( $tokens );  $i < $n;  $i++ ) {
 			$t = $tokens[$i];
 			switch ( is_object( $t ) ? get_class( $t ) : null ) {
 				case TagTk::class:
@@ -272,7 +272,7 @@ class TokenUtils {
 				case NlTk::class:
 				case CommentTk::class:
 				case EndTagTk::class:
-					$da = $t->dataAttribs;
+					$da = $t->dataParsoid;
 					$tsr = $da->tsr;
 					if ( $tsr ) {
 						if ( $offset ) {
@@ -298,14 +298,14 @@ class TokenUtils {
 					// now that $frame->srcText is always accurate?
 
 					// content offsets for ext-links
-					if ( $offset && isset( $da->extLinkContentOffsets ) ) {
-						$da->extLinkContentOffsets =
-							$da->extLinkContentOffsets->offset( $offset );
+					if ( $offset && isset( $da->tmp->extLinkContentOffsets ) ) {
+						$da->tmp->extLinkContentOffsets =
+							$da->tmp->extLinkContentOffsets->offset( $offset );
 					}
 
 					// Process attributes
 					if ( isset( $t->attribs ) ) {
-						for ( $j = 0,  $m = count( $t->attribs );  $j < $m;  $j++ ) {
+						for ( $j = 0, $m = count( $t->attribs );  $j < $m;  $j++ ) {
 							$a = $t->attribs[$j];
 							if ( is_array( $a->k ) ) {
 								self::shiftTokenTSR( $a->k, $offset );
@@ -497,8 +497,7 @@ class TokenUtils {
 			if ( $sr instanceof DomSourceRange ) {
 				// Adjust widths back from being character offsets
 				if ( $sr->openWidth !== null ) {
-					// @phan-suppress-next-line PhanPluginDuplicateExpressionAssignmentOperation; consistency
-					$sr->openWidth = $sr->openWidth - $sr->start;
+					$sr->openWidth -= $sr->start;
 				}
 				if ( $sr->closeWidth !== null ) {
 					$sr->closeWidth = $sr->end - $sr->closeWidth;
@@ -508,7 +507,7 @@ class TokenUtils {
 	}
 
 	/**
-	 * @param array<Token>|array<KV>|KV|Token|DomSourceRange|KVSourceRange|SourceRange|string $input
+	 * @param array<Token|string>|array<KV>|KV|Token|DomSourceRange|KVSourceRange|SourceRange|string $input
 	 * @param callable $offsetFunc
 	 */
 	private static function collectOffsets( $input, callable $offsetFunc ): void {
@@ -523,17 +522,17 @@ class TokenUtils {
 				self::collectOffsets( $input->srcOffsets, $offsetFunc );
 			}
 		} elseif ( $input instanceof Token ) {
-			if ( isset( $input->dataAttribs->tsr ) ) {
-				self::collectOffsets( $input->dataAttribs->tsr, $offsetFunc );
+			if ( isset( $input->dataParsoid->tsr ) ) {
+				self::collectOffsets( $input->dataParsoid->tsr, $offsetFunc );
 			}
-			if ( isset( $input->dataAttribs->extLinkContentOffsets ) ) {
-				self::collectOffsets( $input->dataAttribs->extLinkContentOffsets, $offsetFunc );
+			if ( isset( $input->dataParsoid->tmp->extLinkContentOffsets ) ) {
+				self::collectOffsets( $input->dataParsoid->tmp->extLinkContentOffsets, $offsetFunc );
 			}
-			if ( isset( $input->dataAttribs->tokens ) ) {
-				self::collectOffsets( $input->dataAttribs->tokens, $offsetFunc );
+			if ( isset( $input->dataParsoid->tokens ) ) {
+				self::collectOffsets( $input->dataParsoid->tokens, $offsetFunc );
 			}
-			if ( isset( $input->dataAttribs->extTagOffsets ) ) {
-				self::collectOffsets( $input->dataAttribs->extTagOffsets, $offsetFunc );
+			if ( isset( $input->dataParsoid->extTagOffsets ) ) {
+				self::collectOffsets( $input->dataParsoid->extTagOffsets, $offsetFunc );
 			}
 			self::collectOffsets( $input->attribs, $offsetFunc );
 		} elseif ( $input instanceof KVSourceRange ) {
@@ -623,7 +622,7 @@ class TokenUtils {
 			} elseif ( !empty( $opts['stripEmptyLineMeta'] ) && self::isEmptyLineMetaToken( $token ) ) {
 				// If requested, strip empty line meta tokens too.
 			} elseif ( !empty( $opts['includeEntities'] ) && self::isEntitySpanToken( $token ) ) {
-				$out .= $token->dataAttribs->src;
+				$out .= $token->dataParsoid->src;
 				$i += 2; // Skip child and end tag.
 			} elseif ( $strict ) {
 				// If strict, return accumulated string on encountering first non-text token
@@ -637,7 +636,7 @@ class TokenUtils {
 			) {
 				// Handle dom fragments
 				$domFragment = $opts['env']->getDOMFragment(
-					$token->dataAttribs->html
+					$token->dataParsoid->html
 				);
 				// Calling `env->removeDOMFragment()` here is case dependent
 				// but should be rare enough when permissible that it can be
@@ -666,7 +665,7 @@ class TokenUtils {
 	 * Convert an array of key-value pairs into a hash of keys to values.
 	 * For duplicate keys, the last entry wins.
 	 * @param array<KV> $kvs
-	 * @return array<string,Token[]>|array<string,string>
+	 * @return array<string,array<Token|string>>|array<string,string>
 	 */
 	public static function kvToHash( array $kvs ): array {
 		$res = [];

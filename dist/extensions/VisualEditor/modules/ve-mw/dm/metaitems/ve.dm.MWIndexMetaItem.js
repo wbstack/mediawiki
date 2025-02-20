@@ -1,12 +1,12 @@
 /*!
  * VisualEditor DataModel MWIndexMetaItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /**
- * DataModel index meta item (for __INDEX__ and __NOINDEX__).
+ * DataModel index meta item (for `__INDEX__` and `__NOINDEX__`).
  *
  * @class
  * @extends ve.dm.MWFlaggedMetaItem

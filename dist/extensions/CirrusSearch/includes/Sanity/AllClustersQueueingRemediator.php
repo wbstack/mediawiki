@@ -3,8 +3,9 @@
 namespace CirrusSearch\Sanity;
 
 use CirrusSearch\Assignment\ClusterAssignment;
+use CirrusSearch\UpdateGroup;
 use JobQueueGroup;
-use Title;
+use MediaWiki\Title\Title;
 use WikiPage;
 
 /**
@@ -29,7 +30,7 @@ class AllClustersQueueingRemediator implements Remediator {
 	 * @param JobQueueGroup $jobQueueGroup
 	 */
 	public function __construct( ClusterAssignment $clusterAssignment, JobQueueGroup $jobQueueGroup ) {
-		$this->clusters = $clusterAssignment->getWritableClusters();
+		$this->clusters = $clusterAssignment->getWritableClusters( UpdateGroup::SANEITIZER );
 		$this->inner = new QueueingRemediator( null, $jobQueueGroup );
 	}
 
@@ -49,8 +50,8 @@ class AllClustersQueueingRemediator implements Remediator {
 	/**
 	 * @inheritDoc
 	 */
-	public function redirectInIndex( WikiPage $page ) {
-		$this->inner->redirectInIndex( $page );
+	public function redirectInIndex( string $docId, WikiPage $page, string $indexSuffix ) {
+		$this->inner->redirectInIndex( $docId, $page, $indexSuffix );
 	}
 
 	/**

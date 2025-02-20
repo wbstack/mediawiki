@@ -5,5 +5,6 @@
 	"sitenotice_id": "0",
 	"sitenotice_close": "dismiss",
 	"sitenotice_close-brackets": "[$1]",
+	"sitenotice-extensionname": "Dismissable&shy;Site&shy;Notice",
 	"sitenotice-desc": "Allows users to close the sitenotice"
 }

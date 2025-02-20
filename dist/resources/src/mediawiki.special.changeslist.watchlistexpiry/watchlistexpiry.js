@@ -8,23 +8,21 @@
 	 * @param {Event} event The click event.
 	 */
 	function addDaysLeftMessages( event ) {
-		var timeLeft, msg, $label,
-			$clock = $( event.target );
-		timeLeft = $clock.data( 'days-left' );
+		const $clock = $( event.target );
+		const timeLeft = $clock.data( 'days-left' );
 		if ( timeLeft === undefined ) {
 			// Give up if there's no data attribute (e.g. in the watchlist legend).
 			return;
 		}
-		msg = timeLeft > 0 ?
+		const msg = timeLeft > 0 ?
 			mw.msg( 'watchlist-expiry-days-left', timeLeft ) :
 			mw.msg( 'watchlist-expiry-hours-left' );
-		$label = $( '<span>' );
-		$label.addClass( 'mw-watchlistexpiry-msg' );
-		$label.text( mw.msg( 'parentheses', msg ) );
-		$clock.after( $label );
+		$clock.after( $( '<span>' )
+			.addClass( 'mw-watchlistexpiry-msg' )
+			.text( mw.msg( 'parentheses', msg ) ) );
 	}
 
-	$( function () {
+	$( () => {
 		if ( 'ontouchstart' in document.documentElement ) {
 			$( '.mw-changesList-watchlistExpiry' ).one( 'click', addDaysLeftMessages );
 		}

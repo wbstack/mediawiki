@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Danmichaelo",
+			"EdoAug",
 			"Jeblad",
-			"Jon Harald Søby",
-			"EdoAug"
+			"Jon Harald Søby"
 		]
 	},
 	"uls-desc": "Gir brukeren flere måter å velge språk på og endre språkinnstillinger",
@@ -70,10 +70,10 @@
 	"ext-uls-setlang-accept": "Godta endring",
 	"ext-uls-setlang-loading": "Tar i bruk …",
 	"ext-uls-setlang-cancel": "Ikke endre",
-	"ext-uls-actions-menu-header": "Flere alternativer",
 	"ext-uls-actions-menu-language-settings-item-label": "Åpne språkinnstillinger",
 	"ext-uls-empty-state-header": "Ingen språk ennå",
 	"ext-uls-empty-state-desc": "Ingen andre språk er tilgjengelige per nå",
 	"ext-uls-empty-state-header-actions-available": "Ingen språk ennå. Vil du legge til ett?",
-	"ext-uls-empty-state-desc-actions-available": "Gjør innholdet tilgjengelig på flere språk."
+	"ext-uls-empty-state-desc-actions-available": "Gjør innholdet tilgjengelig på flere språk.",
+	"ext-uls-add-languages-button-label": "Legg til språk"
 }

@@ -1,12 +1,12 @@
 /*!
- * OOUI v0.44.4
+ * OOUI v0.51.1
  * https://www.mediawiki.org/wiki/OOUI
  *
- * Copyright 2011–2023 OOUI Team and other contributors.
+ * Copyright 2011–2024 OOUI Team and other contributors.
  * Released under the MIT license
  * http://oojs.mit-license.org
  *
- * Date: 2023-01-04T17:25:12Z
+ * Date: 2024-09-19T17:13:45Z
  */
 .oo-ui-icon-arrowNext {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/arrowNext-ltr.svg);
@@ -89,6 +89,24 @@
 .oo-ui-image-progressive.oo-ui-icon-move {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/move-progressive.svg);
 }
+.oo-ui-icon-first {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveFirst-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-first {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveFirst-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-first {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveFirst-ltr-progressive.svg);
+}
+.oo-ui-icon-last {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveLast-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-last {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveLast-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-last {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveLast-ltr-progressive.svg);
+}
 .oo-ui-icon-next {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/next-ltr.svg);
 }
@@ -107,23 +125,14 @@
 .oo-ui-image-progressive.oo-ui-icon-previous {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/previous-ltr-progressive.svg);
 }
-.oo-ui-icon-last {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveLast-ltr.svg);
+.oo-ui-icon-sortVertical {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/sortVertical.svg);
 }
-.oo-ui-image-invert.oo-ui-icon-last {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveLast-ltr-invert.svg);
+.oo-ui-image-invert.oo-ui-icon-sortVertical {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/sortVertical-invert.svg);
 }
-.oo-ui-image-progressive.oo-ui-icon-last {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveLast-ltr-progressive.svg);
-}
-.oo-ui-icon-first {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveFirst-ltr.svg);
-}
-.oo-ui-image-invert.oo-ui-icon-first {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveFirst-ltr-invert.svg);
-}
-.oo-ui-image-progressive.oo-ui-icon-first {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/moveFirst-ltr-progressive.svg);
+.oo-ui-image-progressive.oo-ui-icon-sortVertical {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/sortVertical-progressive.svg);
 }
 .oo-ui-icon-upTriangle {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/upTriangle.svg);
@@ -327,6 +336,15 @@
 .oo-ui-image-progressive.oo-ui-icon-infoFilled:lang(ar) {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/lightbulb-progressive.svg);
 }
+.oo-ui-icon-qrCode {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/qrCode.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-qrCode {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/qrCode-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-qrCode {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/qrCode-progressive.svg);
+}
 .oo-ui-icon-robot {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/robot.svg);
 }
@@ -478,6 +496,18 @@
 .oo-ui-image-progressive.oo-ui-icon-speechBubbles {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/speechBubbles-ltr-progressive.svg);
 }
+.oo-ui-icon-success {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/success.svg);
+}
+.oo-ui-image-success.oo-ui-icon-success {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/success-success.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-success {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/success-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-success {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/success-progressive.svg);
+}
 .oo-ui-icon-tray {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/tray.svg);
 }
@@ -577,6 +607,15 @@
 }
 .oo-ui-image-progressive.oo-ui-icon-ellipsis {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/ellipsis-progressive.svg);
+}
+.oo-ui-icon-verticalEllipsis {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/verticalEllipsis.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-verticalEllipsis {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/verticalEllipsis-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-verticalEllipsis {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/verticalEllipsis-progressive.svg);
 }
 .oo-ui-icon-feedback {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/feedback-ltr.svg);
@@ -811,18 +850,6 @@
 }
 .oo-ui-image-progressive.oo-ui-icon-settings {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/settings-progressive.svg);
-}
-.oo-ui-icon-stopHand {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/hand.svg);
-}
-.oo-ui-image-destructive.oo-ui-icon-stopHand {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/hand-destructive.svg);
-}
-.oo-ui-image-invert.oo-ui-icon-stopHand {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/hand-invert.svg);
-}
-.oo-ui-image-progressive.oo-ui-icon-stopHand {
-  background-image: /* @embed */ url(themes/wikimediaui/images/icons/hand-progressive.svg);
 }
 .oo-ui-icon-subtract {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/subtract.svg);
@@ -2004,6 +2031,43 @@
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/textStyle-progressive.svg);
 }
 
+.oo-ui-icon-function {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/function.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-function {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/function-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-function {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/function-progressive.svg);
+}
+.oo-ui-icon-functionArgument {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/functionArgument-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-functionArgument {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/functionArgument-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-functionArgument {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/functionArgument-ltr-progressive.svg);
+}
+.oo-ui-icon-instance {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/instance-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-instance {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/instance-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-instance {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/instance-ltr-progressive.svg);
+}
+.oo-ui-icon-literal {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/literal-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-literal {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/literal-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-literal {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/literal-ltr-progressive.svg);
+}
+
 .oo-ui-icon-indent {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/indent-ltr.svg);
 }
@@ -2265,6 +2329,15 @@
 }
 .oo-ui-image-progressive.oo-ui-icon-outline {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/outline-ltr-progressive.svg);
+}
+.oo-ui-icon-palette {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/palette-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-palette {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/palette-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-palette {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/palette-ltr-progressive.svg);
 }
 .oo-ui-icon-paste {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/paste-ltr.svg);
@@ -2792,6 +2865,15 @@
 .oo-ui-image-progressive.oo-ui-icon-userGroup {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/userGroup-ltr-progressive.svg);
 }
+.oo-ui-icon-userRights {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/userRights-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-userRights {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/userRights-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-userRights {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/userRights-ltr-progressive.svg);
+}
 .oo-ui-icon-userTalk {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/userTalk-ltr.svg);
 }
@@ -2800,6 +2882,15 @@
 }
 .oo-ui-image-progressive.oo-ui-icon-userTalk {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/userTalk-ltr-progressive.svg);
+}
+.oo-ui-icon-userTemporary {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/userTemporary-ltr.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-userTemporary {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/userTemporary-ltr-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-userTemporary {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/userTemporary-ltr-progressive.svg);
 }
 .oo-ui-icon-watchlist {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/watchlist-ltr.svg);
@@ -2866,6 +2957,15 @@
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/viewDetails-ltr-progressive.svg);
 }
 
+.oo-ui-icon-appearance {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/appearance.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-appearance {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/appearance-invert.svg);
+}
+.oo-ui-image-progressive.oo-ui-icon-appearance {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/appearance-progressive.svg);
+}
 .oo-ui-icon-bright {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/bright.svg);
 }
@@ -2954,11 +3054,35 @@
 .oo-ui-image-invert.oo-ui-icon-logoCC {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-CC-invert.svg);
 }
+.oo-ui-icon-logoMediaWiki {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-MediaWiki.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoMediaWiki {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-MediaWiki-invert.svg);
+}
+.oo-ui-icon-logoMetaWiki {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-MetaWiki.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoMetaWiki {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-MetaWiki-invert.svg);
+}
+.oo-ui-icon-logoWikibooks {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikibooks.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikibooks {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikibooks-invert.svg);
+}
 .oo-ui-icon-logoWikidata {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikidata.svg);
 }
 .oo-ui-image-invert.oo-ui-icon-logoWikidata {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikidata-invert.svg);
+}
+.oo-ui-icon-logoWikifunctions {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikifunctions.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikifunctions {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikifunctions-invert.svg);
 }
 .oo-ui-icon-logoWikimedia {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikimedia.svg);
@@ -2978,11 +3102,53 @@
 .oo-ui-image-invert.oo-ui-icon-logoWikimediaDiscovery {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikimedia-Discovery-invert.svg);
 }
+.oo-ui-icon-logoWikinews {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikinews.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikinews {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikinews-invert.svg);
+}
 .oo-ui-icon-logoWikipedia {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikipedia.svg);
 }
 .oo-ui-image-invert.oo-ui-icon-logoWikipedia {
   background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikipedia-invert.svg);
+}
+.oo-ui-icon-logoWikiquote {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikiquote.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikiquote {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikiquote-invert.svg);
+}
+.oo-ui-icon-logoWikisource {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikisource.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikisource {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikisource-invert.svg);
+}
+.oo-ui-icon-logoWikispecies {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikispecies.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikispecies {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikispecies-invert.svg);
+}
+.oo-ui-icon-logoWikiversity {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikiversity.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikiversity {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikiversity-invert.svg);
+}
+.oo-ui-icon-logoWikivoyage {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikivoyage.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWikivoyage {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wikivoyage-invert.svg);
+}
+.oo-ui-icon-logoWiktionary {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wiktionary.svg);
+}
+.oo-ui-image-invert.oo-ui-icon-logoWiktionary {
+  background-image: /* @embed */ url(themes/wikimediaui/images/icons/logo-Wiktionary-invert.svg);
 }
 
 .oo-ui-indicator-clear {

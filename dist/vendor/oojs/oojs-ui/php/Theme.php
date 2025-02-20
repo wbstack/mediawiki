@@ -19,13 +19,12 @@ abstract class Theme {
 	/**
 	 * @param Theme|null $theme Theme to use throughout the application
 	 */
-	public static function setSingleton( Theme $theme = null ) {
+	public static function setSingleton( ?Theme $theme = null ) {
 		self::$singleton = $theme;
 	}
 
 	/**
 	 * @return Theme
-	 * @throws Exception
 	 */
 	public static function singleton() {
 		if ( !self::$singleton ) {

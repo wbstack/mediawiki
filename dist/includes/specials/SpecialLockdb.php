@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Lockdb
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,14 +16,22 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use ErrorPageError;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\MainConfigNames;
+use MediaWiki\SpecialPage\FormSpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\User\User;
 use Wikimedia\AtEase\AtEase;
 
 /**
- * A form to make the database readonly (eg for maintenance purposes).
+ * A form to make the database read-only (eg for maintenance purposes).
+ *
+ * See also @ref $wgReadOnlyFile.
  *
  * @ingroup SpecialPage
  */
@@ -70,7 +76,7 @@ class SpecialLockdb extends FormSpecialPage {
 
 	protected function alterForm( HTMLForm $form ) {
 		$form->setWrapperLegend( false )
-			->setHeaderText( $this->msg( 'lockdbtext' )->parseAsBlock() )
+			->setHeaderHtml( $this->msg( 'lockdbtext' )->parseAsBlock() )
 			->setSubmitTextMsg( 'lockbtn' );
 	}
 
@@ -116,3 +122,6 @@ class SpecialLockdb extends FormSpecialPage {
 		return 'wiki';
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialLockdb::class, 'SpecialLockdb' );

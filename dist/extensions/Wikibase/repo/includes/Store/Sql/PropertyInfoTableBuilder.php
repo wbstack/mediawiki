@@ -100,7 +100,7 @@ class PropertyInfoTableBuilder {
 	 * Database updates a batched into multiple transactions. Do not call this
 	 * method within an (explicit) database transaction.
 	 */
-	public function rebuildPropertyInfo() {
+	public function rebuildPropertyInfo(): int {
 		$propertyNamespace = $this->entityNamespaceLookup->getEntityNamespace(
 			Property::ENTITY_TYPE
 		);
@@ -108,24 +108,28 @@ class PropertyInfoTableBuilder {
 			throw new RuntimeException( __METHOD__ . ' can not run with no Property namespace defined.' );
 		}
 
-		$dbw = $this->propertyInfoTable->getDomainDb()->connections()->getWriteConnectionRef();
+		$dbw = $this->propertyInfoTable->getDomainDb()->connections()->getWriteConnection();
 
 		$total = 0;
 
-		$join = [];
-		$tables = [ 'page' ];
+		$queryBuilderTemplate = $dbw->newSelectQueryBuilder();
+		$queryBuilderTemplate->select( [ 'page_title', 'page_id' ] )
+			->from( 'page' );
 
 		if ( !$this->shouldUpdateAllEntities ) {
-			$piTable = $this->propertyInfoTable->getTableName();
-
-			$tables[] = $piTable;
-			$join[$piTable] = [
-				'LEFT JOIN',
-				[
-					$dbw->buildConcat( [ "'P'", 'pi_property_id' ] ) . ' = page_title',
-				]
-			];
+			$queryBuilderTemplate->leftJoin(
+				$this->propertyInfoTable->getTableName(),
+				null,
+				$dbw->buildConcat( [ $dbw->addQuotes( 'P' ), 'pi_property_id' ] ) . ' = page_title'
+			);
+			$queryBuilderTemplate->where( [ 'pi_property_id' => null ] ); // only add missing entries
 		}
+
+		$queryBuilderTemplate->where( [ 'page_namespace' => $propertyNamespace ] )
+			->orderBy( 'page_id', $queryBuilderTemplate::SORT_ASC )
+			->limit( $this->batchSize )
+			->forUpdate()
+			->caller( __METHOD__ );
 
 		$ticket = $this->propertyInfoTable->getDomainDb()->getEmptyTransactionTicket( __METHOD__ );
 		$pageId = 1;
@@ -137,22 +141,9 @@ class PropertyInfoTableBuilder {
 
 			$dbw->startAtomic( __METHOD__ );
 
-			$props = $dbw->select(
-				$tables,
-				[ 'page_title', 'page_id' ],
-				[
-					'page_id > ' . $pageId,
-					'page_namespace = ' . $propertyNamespace,
-					$this->shouldUpdateAllEntities ? '1=1' : 'pi_property_id IS NULL', // if not $all, only add missing entries
-				],
-				__METHOD__,
-				[
-					'LIMIT' => $this->batchSize,
-					'ORDER BY' => 'page_id ASC',
-					'FOR UPDATE'
-				],
-				$join
-			);
+			$queryBuilder = clone $queryBuilderTemplate;
+			$queryBuilder->where( $dbw->expr( 'page_id', '>', $pageId ) );
+			$props = $queryBuilder->fetchResultSet();
 
 			$c = 0;
 
@@ -196,6 +187,7 @@ class PropertyInfoTableBuilder {
 		$info = $this->propertyInfoBuilder->buildPropertyInfo( $property );
 
 		$this->propertyInfoTable->setPropertyInfo(
+			// @phan-suppress-next-line PhanTypeMismatchArgumentSuperType
 			$property->getId(),
 			$info
 		);

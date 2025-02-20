@@ -2,9 +2,9 @@
 
 namespace Wikibase\Lexeme\MediaWiki\Specials\HTMLForm;
 
-use HTMLComboboxField;
 use InvalidArgumentException;
-use RequestContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\HTMLForm\Field\HTMLComboboxField;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeLanguageNameLookup;
 use Wikibase\Lexeme\WikibaseLexemeServices;
 use Wikibase\Lib\ContentLanguages;
@@ -57,7 +57,7 @@ class LemmaLanguageField extends HTMLComboboxField {
 				'wikibase-lexeme-lemma-language-option',
 				[
 					$lookup->getName( $code ),
-					$code
+					$code,
 				]
 			)->plain();
 			$languageOptions[$option] = $code;

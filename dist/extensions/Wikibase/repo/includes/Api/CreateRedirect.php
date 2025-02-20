@@ -4,10 +4,11 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiResult;
-use ApiUsageException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Api\ApiUsageException;
 use MediaWiki\Permissions\PermissionManager;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -25,39 +26,14 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class CreateRedirect extends ApiBase {
 
-	/**
-	 * @var EntityIdParser
-	 */
-	private $idParser;
+	use ApiCreateTempUserTrait;
 
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
+	private EntityIdParser $idParser;
+	private ApiErrorReporter $errorReporter;
+	private ItemRedirectCreationInteractor $interactor;
+	private PermissionManager $permissionManager;
+	private array $sandboxEntityIds;
 
-	/**
-	 * @var ItemRedirectCreationInteractor
-	 */
-	private $interactor;
-
-	/**
-	 * @var PermissionManager
-	 */
-	private $permissionManager;
-
-	/** @var string[] */
-	private $sandboxEntityIds;
-
-	/**
-	 * @see ApiBase::__construct
-	 *
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param EntityIdParser $idParser
-	 * @param ApiErrorReporter $errorReporter
-	 * @param ItemRedirectCreationInteractor $interactor
-	 * @param PermissionManager $permissionManager
-	 */
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
@@ -108,7 +84,7 @@ class CreateRedirect extends ApiBase {
 			$fromId = $this->idParser->parse( $params['from'] );
 			$toId = $this->idParser->parse( $params['to'] );
 
-			$this->createRedirect( $fromId, $toId, $bot, $this->getResult() );
+			$this->createRedirect( $fromId, $toId, $bot, $this->getResult(), $params );
 		} catch ( EntityIdParsingException $ex ) {
 			$this->errorReporter->dieException( $ex, 'invalid-entity-id' );
 		} catch ( RedirectCreationException $ex ) {
@@ -121,14 +97,24 @@ class CreateRedirect extends ApiBase {
 	 * @param EntityId $toId
 	 * @param bool $bot Whether the edit should be marked as bot
 	 * @param ApiResult $result The result object to report the result to.
+	 * @param array $params Any other params (for ApiCreateTempUserTrait).
 	 *
 	 * @throws RedirectCreationException
 	 */
-	private function createRedirect( EntityId $fromId, EntityId $toId, bool $bot, ApiResult $result ): void {
-		$this->interactor->createRedirect( $fromId, $toId, $bot, [], $this->getContext() ); // TODO pass through $tags (T229918)
+	private function createRedirect( EntityId $fromId, EntityId $toId, bool $bot, ApiResult $result, array $params ): void {
+		$status = $this->interactor->createRedirect( $fromId, $toId, $bot, [], $this->getContext() ); // TODO pass through $tags (T229918)
 
 		$result->addValue( null, 'success', 1 );
-		$result->addValue( null, 'redirect', $toId->getSerialization() );
+		$result->addValue( null, 'redirect', $status->getRedirect()->getTargetId()->getSerialization() );
+		$savedTempUser = $status->getSavedTempUser();
+		if ( $savedTempUser !== null ) {
+			$result->addValue( null, 'tempusercreated', $savedTempUser->getName() );
+			$redirectUrl = $this->getTempUserRedirectUrl( $params, $savedTempUser );
+			if ( $redirectUrl === '' ) {
+				$redirectUrl = null;
+			}
+			$result->addValue( null, 'tempuserredirect', $redirectUrl );
+		}
 	}
 
 	/**
@@ -171,7 +157,7 @@ class CreateRedirect extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getAllowedParams(): array {
-		return [
+		return array_merge( [
 			'from' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
@@ -187,8 +173,8 @@ class CreateRedirect extends ApiBase {
 			'bot' => [
 				ParamValidator::PARAM_TYPE => 'boolean',
 				ParamValidator::PARAM_DEFAULT => false,
-			]
-		];
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
 	/**

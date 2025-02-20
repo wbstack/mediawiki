@@ -23,6 +23,7 @@
 
 use MediaWiki\MediaWikiServices;
 use Wikimedia\AtEase\AtEase;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Search engine hook for SQLite
@@ -34,13 +35,12 @@ class SearchSqlite extends SearchDatabase {
 	 * @return bool
 	 */
 	private function fulltextSearchSupported() {
-		$dbr = $this->lb->getMaintenanceConnectionRef( DB_REPLICA );
-		$sql = (string)$dbr->selectField(
-			$dbr->addIdentifierQuotes( 'sqlite_master' ),
-			'sql',
-			[ 'tbl_name' => $dbr->tableName( 'searchindex', 'raw' ) ],
-			__METHOD__
-		);
+		$dbr = $this->dbProvider->getReplicaDatabase();
+		$sql = (string)$dbr->newSelectQueryBuilder()
+			->select( 'sql' )
+			->from( $dbr->addIdentifierQuotes( 'sqlite_master' ) )
+			->where( [ 'tbl_name' => $dbr->tableName( 'searchindex', 'raw' ) ] )
+			->caller( __METHOD__ )->fetchField();
 
 		return ( stristr( $sql, 'fts' ) !== false );
 	}
@@ -63,7 +63,7 @@ class SearchSqlite extends SearchDatabase {
 				$filteredText, $m, PREG_SET_ORDER ) ) {
 			foreach ( $m as $bits ) {
 				AtEase::suppressWarnings();
-				list( /* all */, $modifier, $term, $nonQuoted, $wildcard ) = $bits;
+				[ /* all */, $modifier, $term, $nonQuoted, $wildcard ] = $bits;
 				AtEase::restoreWarnings();
 
 				if ( $nonQuoted != '' ) {
@@ -131,7 +131,7 @@ class SearchSqlite extends SearchDatabase {
 			wfDebug( __METHOD__ . ": Can't understand search query '{$filteredText}'" );
 		}
 
-		$dbr = $this->lb->getConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
 		$searchon = $dbr->addQuotes( $searchon );
 		$field = $this->getIndexField( $fulltext );
 
@@ -191,10 +191,14 @@ class SearchSqlite extends SearchDatabase {
 
 		$filteredTerm =
 			$this->filter( MediaWikiServices::getInstance()->getContentLanguage()->lc( $term ) );
-		$dbr = $this->lb->getConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
+		// The real type is still IDatabase, but IReplicaDatabase is used for safety.
+		'@phan-var IDatabase $dbr';
+		// phpcs:ignore MediaWiki.Usage.DbrQueryUsage.DbrQueryFound
 		$resultSet = $dbr->query( $this->getQuery( $filteredTerm, $fulltext ), __METHOD__ );
 
 		$total = null;
+		// phpcs:ignore MediaWiki.Usage.DbrQueryUsage.DbrQueryFound
 		$totalResult = $dbr->query( $this->getCountQuery( $filteredTerm, $fulltext ), __METHOD__ );
 		$row = $totalResult->fetchObject();
 		if ( $row ) {
@@ -216,7 +220,7 @@ class SearchSqlite extends SearchDatabase {
 		if ( $this->namespaces === [] ) {
 			$namespaces = NS_MAIN;
 		} else {
-			$dbr = $this->lb->getConnectionRef( DB_REPLICA );
+			$dbr = $this->dbProvider->getReplicaDatabase();
 			$namespaces = $dbr->makeList( $this->namespaces );
 		}
 		return 'AND page_namespace IN (' . $namespaces . ')';
@@ -228,9 +232,7 @@ class SearchSqlite extends SearchDatabase {
 	 * @return string
 	 */
 	private function limitResult( $sql ) {
-		$dbr = $this->lb->getConnectionRef( DB_REPLICA );
-
-		return $dbr->limitResult( $sql, $this->limit, $this->offset );
+		return $this->dbProvider->getReplicaDatabase()->limitResult( $sql, $this->limit, $this->offset );
 	}
 
 	/**
@@ -265,21 +267,21 @@ class SearchSqlite extends SearchDatabase {
 	 */
 	private function queryMain( $filteredTerm, $fulltext ) {
 		$match = $this->parseQuery( $filteredTerm, $fulltext );
-		$dbr = $this->lb->getMaintenanceConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
 		$page = $dbr->tableName( 'page' );
 		$searchindex = $dbr->tableName( 'searchindex' );
 		return "SELECT $searchindex.rowid, page_namespace, page_title " .
-			"FROM $page,$searchindex " .
+			"FROM $searchindex CROSS JOIN $page " .
 			"WHERE page_id=$searchindex.rowid AND $match";
 	}
 
 	private function getCountQuery( $filteredTerm, $fulltext ) {
 		$match = $this->parseQuery( $filteredTerm, $fulltext );
-		$dbr = $this->lb->getMaintenanceConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
 		$page = $dbr->tableName( 'page' );
 		$searchindex = $dbr->tableName( 'searchindex' );
 		return "SELECT COUNT(*) AS c " .
-			"FROM $page,$searchindex " .
+			"FROM $searchindex CROSS JOIN $page " .
 			"WHERE page_id=$searchindex.rowid AND $match " .
 			$this->queryNamespaces();
 	}
@@ -298,14 +300,15 @@ class SearchSqlite extends SearchDatabase {
 		}
 		// @todo find a method to do it in a single request,
 		// couldn't do it so far due to typelessness of FTS3 tables.
-		$dbw = $this->lb->getConnectionRef( DB_PRIMARY );
-		$dbw->delete( 'searchindex', [ 'rowid' => $id ], __METHOD__ );
-		$dbw->insert( 'searchindex',
-			[
-				'rowid' => $id,
-				'si_title' => $title,
-				'si_text' => $text
-			], __METHOD__ );
+		$dbw = $this->dbProvider->getPrimaryDatabase();
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'searchindex' )
+			->where( [ 'rowid' => $id ] )
+			->caller( __METHOD__ )->execute();
+		$dbw->newInsertQueryBuilder()
+			->insertInto( 'searchindex' )
+			->row( [ 'rowid' => $id, 'si_title' => $title, 'si_text' => $text ] )
+			->caller( __METHOD__ )->execute();
 	}
 
 	/**
@@ -320,10 +323,11 @@ class SearchSqlite extends SearchDatabase {
 			return;
 		}
 
-		$dbw = $this->lb->getConnectionRef( DB_PRIMARY );
-		$dbw->update( 'searchindex',
-			[ 'si_title' => $title ],
-			[ 'rowid' => $id ],
-			__METHOD__ );
+		$dbw = $this->dbProvider->getPrimaryDatabase();
+		$dbw->newUpdateQueryBuilder()
+			->update( 'searchindex' )
+			->set( [ 'si_title' => $title ] )
+			->where( [ 'rowid' => $id ] )
+			->caller( __METHOD__ )->execute();
 	}
 }

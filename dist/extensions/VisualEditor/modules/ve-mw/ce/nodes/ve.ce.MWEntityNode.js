@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWEntityNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -44,11 +44,10 @@ ve.ce.MWEntityNode.static.name = 'mwEntity';
  * Handle model update events.
  */
 ve.ce.MWEntityNode.prototype.onUpdate = function () {
-	var
-		chr = this.model.getAttribute( 'character' ),
-		whitespaceHtmlChars = ve.visibleWhitespaceCharacters,
+	const whitespaceHtmlChars = ve.visibleWhitespaceCharacters,
 		significantWhitespace = this.getModel().getParent().hasSignificantWhitespace();
 
+	let chr = this.model.getAttribute( 'character' );
 	if ( chr === '\u00a0' ) {
 		// &nbsp; non-breaking space
 		this.$element

@@ -18,6 +18,10 @@
  * @file
  */
 
+use MediaWiki\Category\CategoryViewer;
+use MediaWiki\Title\Title;
+use Wikimedia\LightweightObjectStore\ExpirationAwareness;
+
 /**
  * Special handling for category description pages.
  *
@@ -66,7 +70,7 @@ class CategoryPage extends Article {
 		$outputPage = $this->getContext()->getOutput();
 		$outputPage->adaptCdnTTL(
 			$this->getPage()->getTouched(),
-			IExpiringStore::TTL_MINUTE
+			ExpirationAwareness::TTL_MINUTE
 		);
 	}
 

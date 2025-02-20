@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Minh Nguyen"
+			"Minh Nguyen",
+			"Vinhtantran"
 		]
 	},
 	"entityschema-desc": "Lưu và thảo luận về các sơ đồ thực thể Wikibase",
@@ -11,7 +12,6 @@
 	"entityschema-newschema-aliases": "Các biệt danh, phân tách bằng dấu sổ thẳng:",
 	"entityschema-newschema-schema-shexc": "Mã nguồn Biểu thức Hình dạng (ShEx):",
 	"entityschema-newschema-submit": "Tạo",
-	"entityschema-newschema-copyright": "Với việc bấm nút “$1”, bạn chấp nhận [[$2|các điều khoản sử dụng]], và bạn đồng ý phát hành, một cách không thể hủy bỏ, đóng góp của mình theo $3.",
 	"entityschema-anonymouseditwarning": "Cảnh báo: Bạn chưa đăng nhập. Địa chỉ IP của bạn sẽ được ghi lại trong lịch sử sửa đổi của sơ đồ này.",
 	"entityschema-label-edit-placeholder": "nhập nhãn trong $1",
 	"entityschema-description-edit-placeholder": "nhập miêu tả trong $1",
@@ -65,5 +65,6 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "Đang đặt nhãn, miêu tả, và biệt danh trong '''$1''' của sơ đồ [[$3|$2]].",
 	"entityschema-special-label": "Nhãn:",
 	"entityschema-special-description": "Miêu tả:",
-	"entityschema-special-aliases": "Các biệt danh, phân tách bằng dấu sổ thẳng:"
+	"entityschema-special-aliases": "Các biệt danh, phân tách bằng dấu sổ thẳng:",
+	"wikibase-validator-illegal-entity-schema-title": "Giá trị phải bắt đầu bằng <code>E</code> và nối tiếp bằng các con số."
 }

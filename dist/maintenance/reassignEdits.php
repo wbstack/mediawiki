@@ -23,10 +23,12 @@
  * @license GPL-2.0-or-later
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\User\User;
 use Wikimedia\IPUtils;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that reassigns edits from a user or IP address
@@ -74,45 +76,42 @@ class ReassignEdits extends Maintenance {
 	 * @param User &$to User to assign edits to
 	 * @param bool $updateRC Update the recent changes table
 	 * @param bool $report Don't change things; just echo numbers
-	 * @return int Number of entries changed, or that would be changed
+	 * @return int The number of entries changed, or that would be changed
 	 */
 	private function doReassignEdits( &$from, &$to, $updateRC = false, $report = false ) {
-		$dbw = $this->getDB( DB_PRIMARY );
+		$dbw = $this->getPrimaryDB();
 		$this->beginTransaction( $dbw, __METHOD__ );
-		$actorNormalization = MediaWikiServices::getInstance()->getActorNormalization();
+		$actorNormalization = $this->getServiceContainer()->getActorNormalization();
 		$fromActorId = $actorNormalization->findActorId( $from, $dbw );
 
 		# Count things
 		$this->output( "Checking current edits..." );
-		$revQueryInfo = ActorMigration::newMigration()->getWhere( $dbw, 'rev_user', $from );
-		$revisionRows = $dbw->selectRowCount(
-			[ 'revision' ] + $revQueryInfo['tables'],
-			'*',
-			$revQueryInfo['conds'],
-			__METHOD__,
-			[],
-			$revQueryInfo['joins']
-		);
+
+		$revisionRows = $dbw->newSelectQueryBuilder()
+			->select( '*' )
+			->from( 'revision' )
+			->where( [ 'rev_actor' => $fromActorId ] )
+			->caller( __METHOD__ )
+			->fetchRowCount();
+
 		$this->output( "found {$revisionRows}.\n" );
 
 		$this->output( "Checking deleted edits..." );
-		$archiveRows = $dbw->selectRowCount(
-			[ 'archive' ],
-			'*',
-			[ 'ar_actor' => $fromActorId ],
-			__METHOD__
-		);
+		$archiveRows = $dbw->newSelectQueryBuilder()
+			->select( '*' )
+			->from( 'archive' )
+			->where( [ 'ar_actor' => $fromActorId ] )
+			->caller( __METHOD__ )->fetchRowCount();
 		$this->output( "found {$archiveRows}.\n" );
 
 		# Don't count recent changes if we're not supposed to
 		if ( $updateRC ) {
 			$this->output( "Checking recent changes..." );
-			$recentChangesRows = $dbw->selectRowCount(
-				[ 'recentchanges' ],
-				'*',
-				[ 'rc_actor' => $fromActorId ],
-				__METHOD__
-			);
+			$recentChangesRows = $dbw->newSelectQueryBuilder()
+				->select( '*' )
+				->from( 'recentchanges' )
+				->where( [ 'rc_actor' => $fromActorId ] )
+				->caller( __METHOD__ )->fetchRowCount();
 			$this->output( "found {$recentChangesRows}.\n" );
 		} else {
 			$recentChangesRows = 0;
@@ -127,32 +126,37 @@ class ReassignEdits extends Maintenance {
 			if ( $revisionRows ) {
 				# Reassign edits
 				$this->output( "Reassigning current edits..." );
-				$dbw->update(
-					'revision',
-					[ 'rev_actor' => $toActorId ],
-					[ 'rev_actor' => $fromActorId ],
-					__METHOD__
-				);
+
+				$dbw->newUpdateQueryBuilder()
+					->update( 'revision' )
+					->set( [ 'rev_actor' => $toActorId ] )
+					->where( [ 'rev_actor' => $fromActorId ] )
+					->caller( __METHOD__ )->execute();
+
 				$this->output( "done.\n" );
 			}
 
 			if ( $archiveRows ) {
 				$this->output( "Reassigning deleted edits..." );
-				$dbw->update( 'archive',
-					[ 'ar_actor' => $toActorId ],
-					[ 'ar_actor' => $fromActorId ],
-					__METHOD__
-				);
+
+				$dbw->newUpdateQueryBuilder()
+					->update( 'archive' )
+					->set( [ 'ar_actor' => $toActorId ] )
+					->where( [ 'ar_actor' => $fromActorId ] )
+					->caller( __METHOD__ )->execute();
+
 				$this->output( "done.\n" );
 			}
 			# Update recent changes if required
 			if ( $recentChangesRows ) {
 				$this->output( "Updating recent changes..." );
-				$dbw->update( 'recentchanges',
-					[ 'rc_actor' => $toActorId ],
-					[ 'rc_actor' => $fromActorId ],
-					__METHOD__
-				);
+
+				$dbw->newUpdateQueryBuilder()
+					->update( 'recentchanges' )
+					->set( [ 'rc_actor' => $toActorId ] )
+					->where( [ 'rc_actor' => $fromActorId ] )
+					->caller( __METHOD__ )->execute();
+
 				$this->output( "done.\n" );
 			}
 
@@ -160,13 +164,12 @@ class ReassignEdits extends Maintenance {
 			# ip_changes. No update needed, as $to cannot be an IP.
 			if ( !$from->isRegistered() ) {
 				$this->output( "Deleting ip_changes..." );
-				$dbw->delete(
-					'ip_changes',
-					[
-						'ipc_hex' => IPUtils::toHex( $from->getName() )
-					],
-					__METHOD__
-				);
+
+				$dbw->newDeleteQueryBuilder()
+					->deleteFrom( 'ip_changes' )
+					->where( [ 'ipc_hex' => IPUtils::toHex( $from->getName() ) ] )
+					->caller( __METHOD__ )->execute();
+
 				$this->output( "done.\n" );
 			}
 		}
@@ -183,7 +186,7 @@ class ReassignEdits extends Maintenance {
 	 * @return User
 	 */
 	private function initialiseUser( $username ) {
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		if ( $services->getUserNameUtils()->isIP( $username ) ) {
 			$user = User::newFromName( $username, false );
 			$user->getActorId();
@@ -199,5 +202,7 @@ class ReassignEdits extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = ReassignEdits::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

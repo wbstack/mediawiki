@@ -24,12 +24,11 @@
 
 namespace WikiHiero;
 
-use Config;
-use Html;
-use MWException;
-use OutputPage;
-use Parser;
-use RequestContext;
+use MediaWiki\Config\Config;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Html\Html;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\Parser;
 
 class WikiHiero {
 	public const IMAGE_EXT = 'png';
@@ -43,7 +42,9 @@ class WikiHiero {
 
 	private const TABLE_START = '<table class="mw-hiero-table">';
 
+	/** @var int */
 	private $scale = 100;
+	/** @var Config */
 	private $config;
 
 	/** @var string[] */
@@ -55,9 +56,8 @@ class WikiHiero {
 
 	/**
 	 * @param Config|null $config
-	 * @throws MWException
 	 */
-	public function __construct( Config $config = null ) {
+	public function __construct( ?Config $config = null ) {
 		$this->config = $config ?: RequestContext::getMain()->getConfig();
 		self::loadData();
 	}
@@ -86,6 +86,7 @@ class WikiHiero {
 	public static function parserHook( $input, $args, $parser ) {
 		$hiero = new WikiHiero();
 		$parser->getOutput()->addModuleStyles( [ 'ext.wikihiero' ] );
+		$parser->addTrackingCategory( 'wikihiero-usage-tracking-category' );
 		// Strip newlines to avoid breakage in the wiki parser block pass
 		return str_replace( "\n", " ", $hiero->render( $input ) );
 	}
@@ -114,9 +115,10 @@ class WikiHiero {
 	 * @return string a string to add to the stream
 	 */
 	private function renderGlyph( $glyph, $height = null ) {
-		$imageClass = null;
+		// Support skins with night theme.
+		$imageClass = 'skin-invert';
 		if ( $this->isMirrored( $glyph ) ) {
-			$imageClass = 'mw-mirrored';
+			$imageClass .= ' mw-mirrored';
 		}
 		$glyph = $this->extractCode( $glyph );
 
@@ -322,7 +324,7 @@ class WikiHiero {
 				}
 
 				// test if block exists in the prefabs list
-				if ( in_array( $prefabs, self::$prefabs ) ) {
+				if ( in_array( $prefabs, self::$prefabs, true ) ) {
 					$contentHtml .= '<td>' . $this->renderGlyph(
 						$prefabs,
 						$this->resizeGlyph( $prefabs, $is_cartouche )
@@ -401,8 +403,7 @@ class WikiHiero {
 		$style = null;
 		if ( $this->scale != 100 ) {
 			$ratio = floatval( $this->scale ) / 100;
-			$style = "-ms-transform: scale($ratio,$ratio); -webkit-transform: scale($ratio,$ratio);"
-				. " -o-transform: scale($ratio,$ratio); transform: scale($ratio,$ratio);";
+			$style = "transform: scale($ratio,$ratio);";
 		}
 
 		return Html::rawElement(

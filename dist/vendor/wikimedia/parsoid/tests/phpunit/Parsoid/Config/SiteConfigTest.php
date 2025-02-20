@@ -3,6 +3,7 @@
 namespace Test\Parsoid\Config;
 
 use PHPUnit\Framework\MockObject\MockObject;
+use Wikimedia\Bcp47Code\Bcp47CodeValue;
 use Wikimedia\Parsoid\Config\SiteConfig;
 use Wikimedia\TestingAccessWrapper;
 
@@ -33,8 +34,8 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testUcfirst() {
-		$siteConfig = $this->getSiteConfig( [ 'lang' ] );
-		$siteConfig->method( 'lang' )->willReturn( 'en' );
+		$siteConfig = $this->getSiteConfig( [ 'langBcp47' ] );
+		$siteConfig->method( 'langBcp47' )->willReturn( new Bcp47CodeValue( 'en' ) );
 
 		$this->assertSame( 'Foo', $siteConfig->ucfirst( 'Foo' ) );
 		$this->assertSame( 'Foo', $siteConfig->ucfirst( 'foo' ) );
@@ -42,8 +43,8 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( 'Iii', $siteConfig->ucfirst( 'iii' ) );
 
 		foreach ( [ 'tr', 'kaa', 'kk', 'az' ] as $lang ) {
-			$siteConfig = $this->getSiteConfig( [ 'lang' ] );
-			$siteConfig->method( 'lang' )->willReturn( $lang );
+			$siteConfig = $this->getSiteConfig( [ 'langBcp47' ] );
+			$siteConfig->method( 'langBcp47' )->willReturn( new Bcp47CodeValue( $lang ) );
 			$this->assertSame( 'İii', $siteConfig->ucfirst( 'iii' ), "Special logic for $lang" );
 		}
 	}
@@ -128,6 +129,10 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 				'prefix' => 'example',
 				'url' => '//example.org/$1',
 			],
+			'2' => [
+				'prefix' => '2',
+				'url' => 'https://two.org/$1',
+			],
 		] );
 
 		$this->assertSame( $expect, $siteConfig->interwikiMatcher( $href ) );
@@ -148,6 +153,7 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 			[ 'https://en.wikipedia.org/wiki/Foobar', [ ':en', 'Foobar' ] ], // not 'w'
 			[ './w:Foobar', [ 'w', 'Foobar' ] ],
 			[ 'de%3AFoobar', [ ':de', 'Foobar' ] ],
+			[ 'https://two.org/Two', [ '2', 'Two' ] ],
 
 			// Protocol-relative handling
 			[ 'https://archive.org/details/301works', [ 'iarchive', '301works' ] ],
@@ -163,7 +169,7 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 
 	public function testInterwikiMatcher_tooManyPatterns() {
 		$map = [];
-		for ( $i = 0; $i < 100000; $i++ ) {
+		for ( $i = 0; $i < 100; $i++ ) {
 			$map["x$i"] = [
 				'prefix' => "x$i",
 				'url' => "https://example.org/$i/$1",
@@ -179,8 +185,8 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		$siteConfig->method( 'interwikiMap' )->willReturn( $map );
 
 		$this->assertSame(
-			[ 'x9876', 'Foobar' ],
-			$siteConfig->interwikiMatcher( 'https://example.org/9876/Foobar' )
+			[ 'x76', 'Foobar' ],
+			$siteConfig->interwikiMatcher( 'https://example.org/76/Foobar' )
 		);
 		$this->assertSame(
 			[ ':l', 'Foobar' ],
@@ -205,12 +211,12 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 
 	public function provideProtocolMethods() {
 		return [
-			[ 'http://wikipedia.org',                       false, false ],
-			[ 'https://wikipedia.org',                      true, true ],
-			[ 'ftp://ftp.something.net',                    false, false ],
-			[ 'something http://wikipedia.org',             false, false ],
-			[ 'something https://wikipedia.org',            false, true ],
-			[ 'something ftp://ftp.something.net',          false, false ],
+			[ 'http://wikipedia.org', false, false ],
+			[ 'https://wikipedia.org', true, true ],
+			[ 'ftp://ftp.something.net', false, false ],
+			[ 'something http://wikipedia.org', false, false ],
+			[ 'something https://wikipedia.org', false, true ],
+			[ 'something ftp://ftp.something.net', false, false ],
 			[ 'http://wikipedia.org https://wikipedia.org', false, true ],
 			[ 'https://wikipedia.org http://wikipedia.org', true, true ],
 		];
@@ -242,39 +248,39 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 
 	public function provideGetResourceURLPatternMatcher() {
 		$isbnTests = [
-			[ "Special:BookSources/1234567890X",      [ 'ISBN', '1234567890X' ] ],
-			[ "Special:Booksources/1234567890X",      [ 'ISBN', '1234567890X' ] ],
-			[ "special:BookSources/1234567890X",      [ 'ISBN', '1234567890X' ] ],
-			[ "special:Booksources/1234567890X",      [ 'ISBN', '1234567890X' ] ],
-			[ "Special:BookSources/1234567890x",      [ 'ISBN', '1234567890x' ] ],
-			[ "Special:BookSources/1234567890",       [ 'ISBN', '1234567890' ] ],
-			[ "../Special:BookSources/1234567890",    [ 'ISBN', '1234567890' ] ],
+			[ "Special:BookSources/1234567890X", [ 'ISBN', '1234567890X' ] ],
+			[ "Special:Booksources/1234567890X", [ 'ISBN', '1234567890X' ] ],
+			[ "special:BookSources/1234567890X", [ 'ISBN', '1234567890X' ] ],
+			[ "special:Booksources/1234567890X", [ 'ISBN', '1234567890X' ] ],
+			[ "Special:BookSources/1234567890x", [ 'ISBN', '1234567890x' ] ],
+			[ "Special:BookSources/1234567890", [ 'ISBN', '1234567890' ] ],
+			[ "../Special:BookSources/1234567890", [ 'ISBN', '1234567890' ] ],
 			[ "../../Special:BookSources/1234567890", [ 'ISBN', '1234567890' ] ],
-			[ "SPECIAL:BOOKSOURCES/1234567890",       [ 'ISBN', '1234567890' ] ], // see the ?i flag
-			[ "Special:BookSources/1234567890Y",      false ],
-			[ "special:boksources/1234567890",        false ],
-			[ "Notspecial:Booksources/1234567890",    false ],
+			[ "SPECIAL:BOOKSOURCES/1234567890", [ 'ISBN', '1234567890' ] ], // see the ?i flag
+			[ "Special:BookSources/1234567890Y", false ],
+			[ "special:boksources/1234567890", false ],
+			[ "Notspecial:Booksources/1234567890", false ],
 		];
 		$pmidTests = [
-			[ "//www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract",        [ 'PMID', 'covid19' ] ],
-			[ "https://www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract",  [ 'PMID', 'covid19' ] ],
-			[ "http://www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract",   [ 'PMID', 'covid19' ] ],
-			[ "http://www.ncbi.nlm.nih.gov/pubmed/covid19",                 false ],
+			[ "//www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract", [ 'PMID', 'covid19' ] ],
+			[ "https://www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract", [ 'PMID', 'covid19' ] ],
+			[ "http://www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract", [ 'PMID', 'covid19' ] ],
+			[ "http://www.ncbi.nlm.nih.gov/pubmed/covid19", false ],
 			// FIXME T257629: Strange that our code treats "foobar://" as "foobar:" + "//"
 			[ "foobar://www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract", [ 'PMID', 'covid19' ] ],
-			[ "http://www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract&something_more",  false ],
+			[ "http://www.ncbi.nlm.nih.gov/pubmed/covid19?dopt=Abstract&something_more", false ],
 		];
 		$rfcTests = [
-			[ "//tools.ietf.org/html/rfc1234",        [ 'RFC', '1234' ] ],
-			[ "https://tools.ietf.org/html/rfc1234",  [ 'RFC', '1234' ] ],
-			[ "http://tools.ietf.org/html/rfc1234",   [ 'RFC', '1234' ] ],
+			[ "//tools.ietf.org/html/rfc1234", [ 'RFC', '1234' ] ],
+			[ "https://tools.ietf.org/html/rfc1234", [ 'RFC', '1234' ] ],
+			[ "http://tools.ietf.org/html/rfc1234", [ 'RFC', '1234' ] ],
 			// FIXME T257629: Strange that our code accepts RFCs with "_" and doesn't have more validity checking
 			// but, magic links are on the way out anyway.
-			[ "http://tools.ietf.org/html/rfc_1234",  [ 'RFC', '_1234' ] ],
+			[ "http://tools.ietf.org/html/rfc_1234", [ 'RFC', '_1234' ] ],
 			// FIXME T257629: Strange that our code treats "foobar://" as "foobar:" + "//"
 			[ "foobar://tools.ietf.org/html/rfc1234", [ 'RFC', '1234' ] ],
-			[ "http://tools.ietf.org/html/RFC1234",   false ],
-			[ "http://tools.ietf.org/json/rfc1234",   false ],
+			[ "http://tools.ietf.org/html/RFC1234", false ],
+			[ "http://tools.ietf.org/json/rfc1234", false ],
 		];
 
 		return array_merge( $isbnTests, $pmidTests, $rfcTests );
@@ -304,25 +310,6 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		return $siteConfig;
 	}
 
-	public function testMagicWords() {
-		// FIXME: Given that Parsoid proxies {{..}} wikitext to core for expansion,
-		// some of these tests don't mean a while lot right now. There are known
-		// bugs in SiteConfig right now.
-		$siteConfig = $this->setupMagicWordTestConfig();
-		// Expected results
-		$mwMap = [
-			'lossy=$1'             => [ true, 'img_lossy' ],
-			'numberofwikis'        => [ false, 'numberofwikis' ],
-			'lcfirst:'             => [ false, 'lcfirst' ],
-			'expr'                 => [ false, 'expr' ],
-			'__NOGLOBAL__'         => [ true, 'noglobal' ],
-			'DEFAULTSORT:'         => [ true, 'defaultsort' ],
-			'DEFAULTSORTKEY:'      => [ true, 'defaultsort' ],
-			'DEFAULTCATEGORYSORT:' => [ true, 'defaultsort' ]
-		];
-		$this->assertSame( $mwMap, $siteConfig->magicWords() );
-	}
-
 	public function testMwAliases() {
 		// FIXME: Given that Parsoid proxies {{..}} wikitext to core for expansion,
 		// some of these tests don't mean a while lot right now. There are known
@@ -350,13 +337,13 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 
 	public function provideGetMagicWordForFunctionHooks() {
 		return [
-			[ "LCFIRST" , "lcfirst" ],
-			[ "lcfirst" , "lcfirst" ],
-			[ "#expr"   , "expr" ],
-			[ "#EXPR"   , "expr" ],
-			[ "expr"    , null ],
-			[ "expr:"    , null ],
-			[ "#expr:"    , null ],
+			[ "LCFIRST", "lcfirst" ],
+			[ "lcfirst", "lcfirst" ],
+			[ "#expr", "expr" ],
+			[ "#EXPR", "expr" ],
+			[ "expr", null ],
+			[ "expr:", null ],
+			[ "#expr:", null ],
 			[ "lcfirst:", null ],
 			[ "#lcfirst", null ],
 		];
@@ -372,8 +359,8 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 
 	public function provideGetMagicWordForVariable() {
 		return [
-			[ "numberofwikis" , "numberofwikis" ],
-			[ "NUMBEROFWIKIS" , null ],
+			[ "numberofwikis", "numberofwikis" ],
+			[ "NUMBEROFWIKIS", null ],
 			[ "numberofadmins", null ],
 		];
 	}
@@ -390,7 +377,7 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 	public function provideLinkTrailRegex() {
 		return [
 			[ '/^([a-z]+)(.*)$/sD', '/^([a-z]+)/sD' ], // enwiki
-			[ '/^()(.*)$/sD'      , null ] // zhwiki
+			[ '/^()(.*)$/sD', null ] // zhwiki
 		];
 	}
 }

@@ -2,7 +2,6 @@
 
 namespace Wikibase\Client\RecentChanges;
 
-use MWException;
 use RecentChange;
 use Wikimedia\Rdbms\SessionConsistentConnectionManager;
 
@@ -27,26 +26,25 @@ class RecentChangesFinder {
 	 *
 	 * @param RecentChange $change
 	 *
-	 * @throws MWException
 	 * @return int|null
 	 */
 	public function getRecentChangeId( RecentChange $change ) {
 		$attribs = $change->getAttributes();
 
 		//XXX: need to check master?
-		$db = $this->connectionManager->getReadConnectionRef();
+		$db = $this->connectionManager->getReadConnection();
 
-		$res = $db->select(
-			'recentchanges',
-			[ 'rc_id', 'rc_timestamp', 'rc_source', 'rc_params' ],
-			[
+		$res = $db->newSelectQueryBuilder()
+			->select( [ 'rc_id', 'rc_params' ] )
+			->from( 'recentchanges' )
+			->where( [
 				'rc_namespace' => $attribs['rc_namespace'],
 				'rc_title' => $attribs['rc_title'],
 				'rc_timestamp' => $db->timestamp( $attribs['rc_timestamp'] ),
-				'rc_source' => RecentChangeFactory::SRC_WIKIBASE
-			],
-			__METHOD__
-		);
+				'rc_source' => RecentChangeFactory::SRC_WIKIBASE,
+			] )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 
 		if ( $res->numRows() === 0 ) {
 			return null;
