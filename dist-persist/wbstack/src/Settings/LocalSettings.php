@@ -492,12 +492,12 @@ $wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
 if ($wwUseQuestyCaptcha) {
     $wwLocalization->loadExtension( 'ConfirmEdit/ReCaptchaNoCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
-    $wgCaptchaClass = 'QuestyCaptcha';
+    $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\QuestyCaptcha\\QuestyCaptcha';
     $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
 } else {
     $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
-    $wgCaptchaClass = 'ReCaptchaNoCaptcha';
+    $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\ReCaptchaNoCaptcha\\ReCaptchaNoCaptcha';
     $wgReCaptchaSendRemoteIP = true;
     $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
     $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
