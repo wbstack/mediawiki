@@ -74,7 +74,7 @@ jobs:
         if: github.event_name != 'pull_request'
         id: update-values
         run: |
-          TAG="$GITHUB_REF_NAME"
+          TAG="$(echo ${{ steps.docker_meta.outputs.tags }} | cut -d':' -f2)"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-staging/k8s/helmfile/env/local/mediawiki-139.values.yaml.gotmpl
           sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-staging/k8s/helmfile/env/staging/mediawiki-139.values.yaml.gotmpl
@@ -84,15 +84,15 @@ jobs:
         if: github.event_name != 'pull_request'
         id: truncate-commit-message
         run: |
-          MSG=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
+          MSG=$(git log -1 --pretty=format:%s)
           echo "msg=$MSG" >> $GITHUB_OUTPUT
       -
         uses: peter-evans/create-pull-request@v4
         if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-staging
-          commit-message: 'Staging+Local: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
-          title: 'Staging+Local: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
+          commit-message: 'Staging+Local: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
+          title: 'Staging+Local: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
           branch: deploy-to-staging-${{ steps.update-values.outputs.tag }}
           committer: wmdebot <github-bots@wikimedia.de>
           author: wmdebot <github-bots@wikimedia.de>
@@ -107,8 +107,8 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           path: ./repos/wbaas-deploy-production
-          commit-message: 'Production: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
-          title: 'Production: Deploy new MediaWiki image ${{ steps.update-values.outputs.tag }}'
+          commit-message: 'Production: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
+          title: 'Production: Deploy new MediaWiki image ${{ steps.docker_meta.outputs.tags }}'
           branch: deploy-to-production-${{ steps.update-values.outputs.tag }}
           committer: wmdebot <github-bots@wikimedia.de>
           author: wmdebot <github-bots@wikimedia.de>
