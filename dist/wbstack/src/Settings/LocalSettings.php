@@ -469,7 +469,7 @@ $wgBlacklistSettings = [
 ];
 
 # Check IPs at https://whatismyipaddress.com/blacklist-check if they are troublesome
-$wgEnableDnsBlacklist = true;
+$wgEnableDnsBlacklist = !$wwDockerCompose;
 $wgDnsBlacklistUrls =
     [
         'combined.abuse.ch.',
@@ -624,21 +624,16 @@ if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {
     $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
 }
 
-# Auth_remoteuser, By default not enabled, enabled in WikiInfo-maint.json
-if( $wikiInfo->getSetting('wwSandboxAutoUserLogin') ) {
-    wfLoadExtension( 'Auth_remoteuser' );
-    $wgAuthRemoteuserUserName = "SandboxAdmin";
-    # Allow Auth_remoteuser to create missing accounts
-    $wgGroupPermissions['*']['autocreateaccount'] = true;
-    # Stop users making any additional accounts
-    $wgGroupPermissions['*']['createaccount'] = false;
-
-    # Allow users to act like admins, and pretend they have confirmed emails (so no captchas)
+if ( $wwDockerCompose === true ) {
+    # Grant local users admin-like privileges
     $wgAddGroups['user'][] = 'emailconfirmed';
     $wgAddGroups['user'][] = 'sysop';
 
-    # Do not force people verify their email account, as they can't do that...
+    # Do not force local users to verify their email account
     $wgEmailConfirmToEdit = false;
+
+    # Do not force local users to complete a captcha
+    $wgGroupPermissions['*']['skipcaptcha'] = true;
 }
 
 # WikibaseManifest
