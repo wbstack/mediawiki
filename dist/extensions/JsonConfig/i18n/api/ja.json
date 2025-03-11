@@ -2,11 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Shirayuki",
-			"つぶあん派",
-			"Tmv"
+			"Tmv",
+			"つぶあん派"
 		]
 	},
-	"apihelp-jsonconfig-description": "JsonConfig サブシステムに直接アクセスできるようにします。",
 	"apihelp-jsonconfig-summary": "JsonConfig サブシステムに直接アクセスできるようにします。",
 	"apihelp-jsonconfig-param-title": "名前空間接頭辞なしで処理するタイトル。",
 	"apihelp-jsonconfig-example-1": "設定内容を表示",

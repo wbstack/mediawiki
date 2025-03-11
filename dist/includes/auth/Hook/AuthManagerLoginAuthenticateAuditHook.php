@@ -3,7 +3,7 @@
 namespace MediaWiki\Auth\Hook;
 
 use MediaWiki\Auth\AuthenticationResponse;
-use User;
+use MediaWiki\User\User;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.
@@ -23,12 +23,13 @@ interface AuthManagerLoginAuthenticateAuditHook {
 	 * @param AuthenticationResponse $response Response in either a PASS or FAIL state
 	 * @param User|null $user User being authenticated against, or null if authentication
 	 *   failed before getting that far
-	 * @param string $username A guess at the username being authenticated, or null if we can't
+	 * @param string|null $username A guess at the username being authenticated, or null if we can't
 	 *   even determine that. When $user is not null, it can be in the form of
 	 *   <username>@<more info> (e.g. for bot passwords).
 	 * @param string[] $extraData Array (string => string) with extra information, intended to be
 	 *   added to log contexts. Fields it might include:
 	 *   - appId: application ID, only if the login was with a bot password
+	 *   - performer: the user performing the login authentication request
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onAuthManagerLoginAuthenticateAudit( $response, $user,

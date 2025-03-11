@@ -2,7 +2,7 @@
 
 namespace Wikibase\Lexeme\MediaWiki\ParserOutput;
 
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Repo\ParserOutput\EntityParserOutputUpdater;
@@ -13,7 +13,7 @@ use Wikibase\Repo\ParserOutput\StatementDataUpdater;
  */
 class LexemeParserOutputUpdater implements EntityParserOutputUpdater {
 
-	private $statementDataUpdater;
+	private StatementDataUpdater $statementDataUpdater;
 
 	public function __construct( StatementDataUpdater $statementDataUpdater ) {
 		$this->statementDataUpdater = $statementDataUpdater;

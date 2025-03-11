@@ -1,7 +1,8 @@
 module.exports = ( function ( wb ) {
 	'use strict';
 
-	var ViewController = require( './ViewController.js' );
+	var ViewController = require( './ViewController.js' ),
+		ENTITY_CHANGERS = wb.entityChangers;
 
 	/**
 	 * A view controller implementation for editing wikibase datamodel values
@@ -147,11 +148,14 @@ module.exports = ( function ( wb ) {
 				? 'wikibase-publish-inprogress'
 				: 'wikibase-save-inprogress'
 		) );
-		this._model.save( this._view.value(), this._value ).done( function ( savedValue ) {
-			self.setValue( savedValue );
-			self._view.value( savedValue );
+		this._model.save( this._view.value(), this._value ).done( function ( valueChangeResult ) {
+			self.setValue( valueChangeResult.getSavedValue() );
+			self._view.value( valueChangeResult.getSavedValue() );
 			self._toolbar.toggleActionMessage();
 			self._leaveEditMode( dropValue );
+			if ( valueChangeResult.getTempUserWatcher().getRedirectUrl() ) {
+				window.location.href = valueChangeResult.getTempUserWatcher().getRedirectUrl();
+			}
 		} ).fail( function ( error ) {
 			self._view.enable();
 			self.setError( error );
@@ -176,12 +180,18 @@ module.exports = ( function ( wb ) {
 		if ( this._value ) {
 			promise = this._model.remove( this._value );
 		} else {
-			promise = $.Deferred().resolve().promise();
+			var emptyValueChangeResult = new ENTITY_CHANGERS.ValueChangeResult(
+				null, new ENTITY_CHANGERS.TempUserWatcher()
+			);
+			promise = $.Deferred().resolve( emptyValueChangeResult ).promise();
 		}
-		return promise.done( function () {
+		return promise.done( function ( valueChangeResult ) {
 			self._value = null;
 			self._toolbar.toggleActionMessage();
 			self._leaveEditMode( true );
+			if ( valueChangeResult.getTempUserWatcher().getRedirectUrl() ) {
+				window.location.href = valueChangeResult.getTempUserWatcher().getRedirectUrl();
+			}
 		} ).fail( function ( error ) {
 			self._view.enable();
 			self.setError( error );

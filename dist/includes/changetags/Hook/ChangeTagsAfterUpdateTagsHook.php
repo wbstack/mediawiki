@@ -2,8 +2,8 @@
 
 namespace MediaWiki\ChangeTags\Hook;
 
+use MediaWiki\User\User;
 use RecentChange;
-use User;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.
@@ -14,7 +14,7 @@ use User;
  */
 interface ChangeTagsAfterUpdateTagsHook {
 	/**
-	 * This hook is called after tags have been updated with the ChangeTags::updateTags function.
+	 * This hook is called after tags have been updated with the ChangeTagsStore->updateTags function.
 	 *
 	 * @since 1.35
 	 *

@@ -2,13 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Anakmalaysia",
+			"Cookai1205",
 			"Cwlin0416",
+			"Ericliu1912",
 			"Justincheng12345",
+			"Kly",
 			"Liuxinyu970226",
 			"Shinjiman",
-			"Simon Shek",
-			"Kly",
-			"Ericliu1912"
+			"Simon Shek"
 		]
 	},
 	"hieroglyphs": "試用象形文字標籤",
@@ -58,5 +59,7 @@
 	"wikihiero-th-meaning": "意思",
 	"wikihiero-th-result": "結果",
 	"wikihiero-visualeditor-mwhieroinspector-title": "象形文字",
-	"wikihiero-void": "半寬虛空塊"
+	"wikihiero-void": "半寬虛空塊",
+	"wikihiero-usage-tracking-category": "使用WikiHiero擴充功能的頁面",
+	"wikihiero-usage-tracking-category-desc": "此分類會自動添加到使用WikiHiero擴充功能的頁面"
 }

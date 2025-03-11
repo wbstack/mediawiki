@@ -10,13 +10,13 @@ use Wikimedia\Parsoid\Utils\TokenUtils;
  * A parameter object wrapper, essentially an array of key/value pairs with a few extra methods.
  */
 class Params {
-	/** @phan-var KV[] */
+	/** @var KV[] */
 	public $args;
 
-	/** @var array */
+	/** @var ?array */
 	public $argDict;
 
-	/** @var array */
+	/** @var ?array */
 	public $namedArgsDict;
 
 	/**

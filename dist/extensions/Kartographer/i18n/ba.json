@@ -1,25 +1,25 @@
 {
 	"@metadata": {
 		"authors": [
+			"Sagan",
+			"Stjn",
 			"Азат Хәлилов",
 			"Айсар",
+			"З. ӘЙЛЕ",
 			"Лилиә",
 			"Ләйсән",
-			"Янмурза Баки",
-			"Amire80",
-			"З. ӘЙЛЕ",
-			"Sagan"
+			"Янмурза Баки"
 		]
 	},
 	"kartographer-attribution": "[https://foundation.wikimedia.org/wiki/Maps_Terms_of_Use Викимедиа карталары] | мәғлүмәттәр © [https://www.openstreetmap.org/copyright OpenStreetMap ҡатнашыусылары]",
-	"kartographer-broken-category": "Карталары дөрөҫ булмаған {{#switch:{{NAMESPACE}}|{{ns:File}}=файлдар|#default=биттәр}}",
+	"kartographer-broken-category": "Карталары дөрөҫ булмаған биттәр",
 	"kartographer-broken-category-desc": "Был биттә файҙаланырға яраҡһыҙ карталар бар",
 	"kartographer-desc": "Карталарҙы вики-биткә өҫтәргә рөхсәт итә.",
-	"kartographer-error-context-multi": " проблемы:\n$2-нең проблемалары &LT;$1&ГТ;",
+	"kartographer-error-context-multi": "$1 проблемалары: $2",
 	"kartographer-error-json": "JSON хатаһы: $1",
 	"kartographer-error-missing-attr": "Атрибут \"$1\" юҡ",
 	"kartographer-error-bad_attr": "\"$1\" атрибутының мәғәнәһе рөхсәт ителмәй",
-	"kartographer-error-bad_data": "JSON хаталы",
+	"kartographer-error-bad_data": "JSON эстәлеге GeoJSON+simplestyle стилендә рөхсәт ителмәй. Түбәндәге исемлектә уны  [https://phabricator.wikimedia.org/diffusion/EKAR/browse/master/schemas/geojson.json JSON схемаһына] ярашлы аңлатырға тырышыуҙар килтерелә. Уларҙың барыһы ла хаталы түгел.",
 	"kartographer-tracking-category": "Карталы {{#switch:{{NAMESPACE}}|{{ns:File}}=файлдар|#default=биттәр}}",
 	"kartographer-tracking-category-desc": "Был биттә карта бар",
 	"leafletdraw-draw-handlers-circle-radius": "Радиус",

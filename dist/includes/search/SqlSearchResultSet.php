@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
@@ -55,7 +56,7 @@ class SqlSearchResultSet extends SearchResultSet {
 			$this->resultSet->rewind();
 			$terms = MediaWikiServices::getInstance()->getContentLanguage()
 				->convertForSearchResult( $this->terms );
-			while ( ( $row = $this->resultSet->fetchObject() ) !== false ) {
+			foreach ( $this->resultSet as $row ) {
 				$result = new SqlSearchResult(
 					Title::makeTitle( $row->page_namespace, $row->page_title ),
 					$terms

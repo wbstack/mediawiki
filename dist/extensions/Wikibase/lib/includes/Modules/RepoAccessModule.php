@@ -19,9 +19,6 @@ use Wikibase\Lib\WikibaseSettings;
  */
 class RepoAccessModule extends RL\Module {
 
-	/** @var string[] */
-	protected $targets = [ 'desktop', 'mobile' ];
-
 	/**
 	 * This one lets the client JavaScript know where it can find
 	 * the API and the article path of the repo
@@ -39,14 +36,14 @@ class RepoAccessModule extends RL\Module {
 			$wbRepo = [
 				'url' => $settings->getSetting( 'repoUrl' ),
 				'scriptPath' => $settings->getSetting( 'repoScriptPath' ),
-				'articlePath' => $settings->getSetting( 'repoArticlePath' )
+				'articlePath' => $settings->getSetting( 'repoArticlePath' ),
 			];
 		} else {
 			// just assume we're the repo
 			$wbRepo = [
 				'url' => $wgServer,
 				'scriptPath' => $wgScriptPath,
-				'articlePath' => $wgArticlePath
+				'articlePath' => $wgArticlePath,
 			];
 		}
 

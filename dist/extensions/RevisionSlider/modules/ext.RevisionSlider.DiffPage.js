@@ -2,13 +2,16 @@
  * Module handling diff page reloading and the RevisionSlider browser history
  *
  * @class Diffpage
+ * @param {History} [historyObj] Defaults to the global History object
  * @constructor
  */
-function DiffPage() {
+function DiffPage( historyObj ) {
 	this.lastRequest = null;
+
+	this.history = historyObj || history;
 }
 
-$.extend( DiffPage.prototype, {
+Object.assign( DiffPage.prototype, {
 	/**
 	 * Refreshes the diff view with two given revision IDs
 	 *
@@ -18,7 +21,7 @@ $.extend( DiffPage.prototype, {
 	 * @param {number} [retryAttempt=0]
 	 */
 	refresh: function ( diff, oldid, sliderView, retryAttempt ) {
-		var self = this,
+		const self = this,
 			retryLimit = 2,
 			data = {
 				diff: diff,
@@ -29,7 +32,7 @@ $.extend( DiffPage.prototype, {
 		retryAttempt = retryAttempt || 0;
 
 		if ( Object.keys( params ).length > 0 ) {
-			$.extend( data, params );
+			Object.assign( data, params );
 		}
 
 		if ( this.lastRequest ) {
@@ -44,26 +47,28 @@ $.extend( DiffPage.prototype, {
 			tryCount: 0
 		} );
 		// Don't chain, so lastRequest is a jQuery.jqXHR object
-		this.lastRequest.then( function ( data2 ) {
-			var $data = $( data2 ),
+		this.lastRequest.then( ( data2 ) => {
+			const $data = $( data2 ),
 				$container = $( '.mw-revslider-container' ),
 				scrollLeft = $container.find( '.mw-revslider-revisions-container' ).scrollLeft();
 
 			// Add our current rendered slider into the newly loaded container
 			$data.find( '.mw-revslider-container' ).replaceWith( $container );
-			var $contentText = $data.find( '#mw-content-text' );
+			const $contentText = $data.find( '#mw-content-text' );
 
 			// Replace elements on the page with the newly loaded elements, from top to bottom
 			$( '#mw-content-text' ).replaceWith( $contentText );
 			$( '.printfooter' ).replaceWith( $data.find( '.printfooter' ) );
-			$( '#catlinks' ).replaceWith( $data.find( '#catlinks' ) );
-			$( '#mw-panel' ).replaceWith( $data.find( '#mw-panel' ) );
-			// Update edit link
-			$( '#ca-edit a, #ca-ve-edit a' ).each( function () {
-				var uri = new mw.Uri( $( this ).attr( 'href' ) );
-				uri.query.oldid = diff;
-				$( this ).attr( 'href', uri.toString() );
+
+			const $catlinks = $data.find( '.catlinks[data-mw="interface"]' );
+			mw.hook( 'wikipage.categories' ).fire( $catlinks );
+			$( '.catlinks[data-mw="interface"]' ).replaceWith( $catlinks );
+
+			// Replace navigation menus. See also T211557
+			[ '#t-permalink', '#ca-delete', '#ca-edit', '#footer-places-mobileview' ].forEach( ( selector ) => {
+				$( selector ).parent().replaceWith( $data.find( selector ).parent() );
 			} );
+
 			// Update wgRevisionId (T161257), and wgDiffOldId/NewId
 			mw.config.set( {
 				wgRevisionId: diff,
@@ -75,9 +80,13 @@ $.extend( DiffPage.prototype, {
 
 			self.addHandlersToCoreLinks( sliderView );
 
+			// Re-trigger existing, stable core hooks under the same circumstances as in core
 			mw.hook( 'wikipage.content' ).fire( $contentText );
-			mw.hook( 'wikipage.diff' ).fire( $( 'body' ).find( 'table.diff' ) );
 
+			const $nodes = $( 'table.diff[data-mw="interface"]' );
+			if ( $nodes.length ) {
+				mw.hook( 'wikipage.diff' ).fire( $nodes.eq( 0 ) );
+			}
 		}, function ( xhr ) {
 			$( 'table.diff[data-mw="interface"]' ).removeClass( 'mw-revslider-diff-loading' );
 			if ( xhr.statusText !== 'abort' ) {
@@ -100,14 +109,11 @@ $.extend( DiffPage.prototype, {
 	 * @param {SliderView} sliderView
 	 */
 	replaceState: function ( diff, oldid, sliderView ) {
-		// IE9 does not have history.replaceState()
-		if ( typeof history.replaceState === 'function' ) {
-			history.replaceState(
-				this.getStateObject( diff, oldid, sliderView ),
-				$( document ).find( 'title' ).text(),
-				this.getStateUrl( diff, oldid )
-			);
-		}
+		this.history.replaceState(
+			this.getStateObject( diff, oldid, sliderView ),
+			$( document ).find( 'title' ).text(),
+			this.getStateUrl( diff, oldid )
+		);
 	},
 
 	/**
@@ -118,19 +124,17 @@ $.extend( DiffPage.prototype, {
 	 * @param {SliderView} sliderView
 	 */
 	pushState: function ( diff, oldid, sliderView ) {
-		// IE9 does not have history.pushState()
-		if ( typeof history.pushState === 'function' ) {
-			history.pushState(
-				this.getStateObject( diff, oldid, sliderView ),
-				$( document ).find( 'title' ).text(),
-				this.getStateUrl( diff, oldid )
-			);
-		}
+		this.history.pushState(
+			this.getStateObject( diff, oldid, sliderView ),
+			$( document ).find( 'title' ).text(),
+			this.getStateUrl( diff, oldid )
+		);
 	},
 
 	/**
 	 * Gets a state object to be used with history.replaceState and history.pushState
 	 *
+	 * @private
 	 * @param {number} diff
 	 * @param {number} oldid
 	 * @param {SliderView} sliderView
@@ -149,17 +153,16 @@ $.extend( DiffPage.prototype, {
 	/**
 	 * Gets a URL to be used with history.replaceState and history.pushState
 	 *
+	 * @private
 	 * @param {number} diff
 	 * @param {number} oldid
 	 * @return {string}
 	 */
 	getStateUrl: function ( diff, oldid ) {
-		var url = mw.util.wikiScript( 'index' ) + '?diff=' + diff + '&oldid=' + oldid,
-			params = this.getExtraDiffPageParams();
-		if ( Object.keys( params ).length > 0 ) {
-			Object.keys( params ).forEach( function ( key ) {
-				url += '&' + key + '=' + params[ key ];
-			} );
+		let url = mw.util.wikiScript( 'index' ) + '?diff=' + diff + '&oldid=' + oldid;
+		const params = this.getExtraDiffPageParams();
+		for ( const key in params ) {
+			url += '&' + key + '=' + params[ key ];
 		}
 		return url;
 	},
@@ -168,15 +171,14 @@ $.extend( DiffPage.prototype, {
 	 * Returns an object containing all possible parameters that should be included in diff URLs
 	 * when selected revisions change, e.g. uselang
 	 *
+	 * @private
 	 * @return {Object}
 	 */
 	getExtraDiffPageParams: function () {
-		var params = {},
-			paramArray = location.search.slice( 1 ).split( '&' ).filter( function ( elem ) {
-				return elem.indexOf( '=' ) > 0 && elem.match( /^(diff|oldid)=/ ) === null;
-			} );
-		paramArray.forEach( function ( elem ) {
-			var pair = elem.split( '=', 2 );
+		const params = {},
+			paramArray = location.search.slice( 1 ).split( '&' ).filter( ( elem ) => elem.indexOf( '=' ) > 0 && elem.match( /^(diff|oldid)=/ ) === null );
+		paramArray.forEach( ( elem ) => {
+			const pair = elem.split( '=', 2 );
 			params[ pair[ 0 ] ] = pair[ 1 ];
 		} );
 		return params;
@@ -186,7 +188,7 @@ $.extend( DiffPage.prototype, {
 	 * @param {SliderView} sliderView
 	 */
 	initOnPopState: function ( sliderView ) {
-		window.addEventListener( 'popstate', function ( event ) {
+		window.addEventListener( 'popstate', ( event ) => {
 			if ( event.state === null ) {
 				return;
 			}
@@ -204,11 +206,11 @@ $.extend( DiffPage.prototype, {
 	 * @param {SliderView} sliderView
 	 */
 	addHandlersToCoreLinks: function ( sliderView ) {
-		$( '#differences-nextlink' ).on( 'click', function () {
+		$( '#differences-nextlink' ).on( 'click', () => {
 			sliderView.showNextDiff();
 			return false;
 		} );
-		$( '#differences-prevlink' ).on( 'click', function () {
+		$( '#differences-prevlink' ).on( 'click', () => {
 			sliderView.showPrevDiff();
 			return false;
 		} );

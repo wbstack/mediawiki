@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Avjoska",
 			"Boxmein",
 			"Pikne",
@@ -29,7 +28,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Seda viidet on sellel leheküljel kasutatud {{PLURAL:$1|ühel korral|2=kaks korda|$1 korda}}. Siin tehtud muudatused rakenduvad igas kohas, kus seda viidet kasutatakse.",
 	"cite-ve-dialog-reference-options-group-label": "Viiterühm",
 	"cite-ve-dialog-reference-options-group-placeholder": "Üldviited",
-	"cite-ve-dialog-reference-options-name-label": "Korduvkasutusnimi",
 	"cite-ve-dialog-reference-options-responsive-label": "Kasuta isereguleeruvat veergude paigutust",
 	"cite-ve-dialog-reference-options-section": "Suvandid",
 	"cite-ve-dialog-reference-placeholder": "Kirjuta või kleebi siia viide või lisa viitemall.",
@@ -49,9 +47,7 @@
 	"cite-ve-referenceslist-isempty-default": "Sellel leheküljel puuduvad viited, mida selles loendis näidata.",
 	"cite-ve-referenceslist-missingref": "Selle viite kirjeldus on mallis või muul moel genereeritud plokis ning praegu saab seda redigeerida vaid lähteteksti režiimis.",
 	"cite-ve-referenceslist-missingref-in-list": "See viide on määratletud mallis või muus genereeritud plokis ning praegu saab seda eelvaadelda ainult lähteteksti režiimis.",
-	"cite-ve-referenceslist-missingreflist": "Selle viiteloendi tekitab mall ja praegu saab seda redigeerida ainult lähteteksti režiimis.",
+	"cite-ve-referenceslist-missingreflist": "Selle viiteloendi tekitab mall.",
 	"cite-ve-toolbar-group-label": "Viide",
-	"cite-ve-othergroup-item": "Viide: {{lc:$1}}",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Viited",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Viiterühma nimi: \"$1\""
+	"cite-ve-othergroup-item": "Viide: {{lc:$1}}"
 }

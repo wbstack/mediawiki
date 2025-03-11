@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface language tool class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -18,7 +18,7 @@ ve.ui.LanguageInspectorTool = function VeUiLanguageInspectorTool() {
 };
 OO.inheritClass( ve.ui.LanguageInspectorTool, ve.ui.FragmentInspectorTool );
 ve.ui.LanguageInspectorTool.static.name = 'language';
-ve.ui.LanguageInspectorTool.static.group = 'meta';
+ve.ui.LanguageInspectorTool.static.group = 'textStyle';
 ve.ui.LanguageInspectorTool.static.icon = 'language';
 ve.ui.LanguageInspectorTool.static.title =
 	OO.ui.deferMsg( 'visualeditor-annotationbutton-language-tooltip' );

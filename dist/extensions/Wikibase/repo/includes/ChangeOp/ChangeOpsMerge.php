@@ -3,8 +3,8 @@
 namespace Wikibase\Repo\ChangeOp;
 
 use InvalidArgumentException;
-use Site;
-use SiteLookup;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteLookup;
 use ValueValidators\Error;
 use ValueValidators\Result;
 use Wikibase\DataModel\Entity\EntityId;
@@ -137,6 +137,7 @@ class ChangeOpsMerge {
 
 	/**
 	 * @throws ChangeOpException
+	 * @return ChangeOpResult
 	 */
 	public function apply() {
 		// NOTE: we don't want to validate the ChangeOps individually, since they represent
@@ -278,7 +279,7 @@ class ChangeOpsMerge {
 
 		$errors = $this->removeConflictsWithEntity( $errors, $fromId );
 
-		if ( !empty( $errors ) ) {
+		if ( $errors ) {
 			$result = Result::newError( $errors );
 			throw new ChangeOpValidationException( $result );
 		}

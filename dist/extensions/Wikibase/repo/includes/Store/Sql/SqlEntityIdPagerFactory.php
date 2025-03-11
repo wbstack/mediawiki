@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Store\Sql;
 
-use LinkCache;
+use MediaWiki\Cache\LinkCache;
 use Wikibase\DataModel\Services\EntityId\EntityIdPager;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\Store\EntityIdLookup;
@@ -40,7 +40,7 @@ class SqlEntityIdPagerFactory {
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityIdLookup $entityIdLookup,
 		RepoDomainDb $repoDomainDb,
-		LinkCache $linkCache = null
+		?LinkCache $linkCache = null
 	) {
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
 		$this->entityIdLookup = $entityIdLookup;

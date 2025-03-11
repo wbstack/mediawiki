@@ -36,7 +36,7 @@ class SiteLinkChangeOpFactory {
 	 * @throws InvalidArgumentException
 	 * @return ChangeOp
 	 */
-	public function newSetSiteLinkOp( $siteId, $pageName, array $badges = null ) {
+	public function newSetSiteLinkOp( $siteId, $pageName, ?array $badges = null ) {
 		if ( $badges !== null ) {
 			$this->validateBadges( $badges );
 		}
@@ -51,7 +51,7 @@ class SiteLinkChangeOpFactory {
 	 * @return ChangeOp
 	 */
 	public function newRemoveSiteLinkOp( $siteId ) {
-		return new ChangeOpSiteLink( $siteId, null );
+		return new ChangeOpRemoveSiteLink( $siteId );
 	}
 
 	/**

@@ -18,14 +18,13 @@
 		"issues": "https://phabricator.wikimedia.org/"
 	},
 	"require": {
-		"php": ">=5.5.9",
 		"composer/installers": ">=1.0.1"
 	},
 	"require-dev": {
-		"mediawiki/mediawiki-codesniffer": "39.0.0",
-		"mediawiki/minus-x": "1.1.1",
+		"mediawiki/mediawiki-codesniffer": "45.0.0",
+		"mediawiki/minus-x": "1.1.3",
 		"php-parallel-lint/php-console-highlighter": "1.0.0",
-		"php-parallel-lint/php-parallel-lint": "1.3.2"
+		"php-parallel-lint/php-parallel-lint": "1.4.0"
 	},
 	"scripts": {
 		"fix": [
@@ -41,7 +40,8 @@
 	},
 	"config": {
 		"allow-plugins": {
-			"composer/installers": true
+			"composer/installers": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
 		}
 	}
 }

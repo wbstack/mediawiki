@@ -1,13 +1,13 @@
 /*!
  * VisualEditor UserInterface Table Context class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
  * Context menu for editing tables.
  *
- * Two are usually generated for column and row actions separately.
+ * Three are usually generated for column, row and (on mobile) table-wide actions separately.
  *
  * @class
  * @extends ve.ui.Context
@@ -42,7 +42,7 @@ ve.ui.TableLineContext = function VeUiTableLineContext( tableNode, itemGroup, co
 	this.onDocumentMouseDownHandler = this.onDocumentMouseDown.bind( this );
 
 	// Initialization
-	var labels = {
+	const labels = {
 		col: ve.msg( 'visualeditor-table-context-col' ),
 		row: ve.msg( 'visualeditor-table-context-row' ),
 		table: ve.msg( 'visualeditor-toolbar-table' )
@@ -54,6 +54,7 @@ ve.ui.TableLineContext = function VeUiTableLineContext( tableNode, itemGroup, co
 	// The following classes are used here:
 	// * ve-ui-tableLineContext-col
 	// * ve-ui-tableLineContext-row
+	// * ve-ui-tableLineContext-table
 	this.$element
 		.addClass( 've-ui-tableLineContext ve-ui-tableLineContext-' + itemGroup )
 		.append( this.icon.$element, this.popup.$element );
@@ -91,12 +92,12 @@ ve.ui.TableLineContext.static.positions = {
  * @inheritdoc
  */
 ve.ui.TableLineContext.prototype.getRelatedSources = function () {
-	var items = this.constructor.static.groups[ this.itemGroup ];
+	const items = this.constructor.static.groups[ this.itemGroup ];
 
 	if ( !this.relatedSources ) {
 		this.relatedSources = [];
 
-		for ( var i = 0, l = items.length; i < l; i++ ) {
+		for ( let i = 0, l = items.length; i < l; i++ ) {
 			this.relatedSources.push( {
 				type: 'item',
 				name: items[ i ]
@@ -149,8 +150,8 @@ ve.ui.TableLineContext.prototype.onModelSelect = function () {
 ve.ui.TableLineContext.prototype.toggleMenu = function ( show, restoreEditing ) {
 	show = show === undefined ? !this.popup.isVisible() : !!show;
 
-	var surfaceModel = this.surface.getModel();
-	var surfaceView = this.surface.getView();
+	const surfaceModel = this.surface.getModel();
+	const surfaceView = this.surface.getView();
 
 	// Remember whether the table was in editing mode, because some itemGroups
 	// will force it into editing mode so their commands can work on a
@@ -171,7 +172,7 @@ ve.ui.TableLineContext.prototype.toggleMenu = function ( show, restoreEditing ) 
 		surfaceModel.connect( this, { select: 'onModelSelect' } );
 		surfaceView.$document.on( 'mousedown', this.onDocumentMouseDownHandler );
 		surfaceView.deactivate();
-		var dir = surfaceView.getSelectionDirectionality();
+		const dir = surfaceView.getSelectionDirectionality();
 		// eslint-disable-next-line mediawiki/class-doc
 		this.$element
 			.removeClass( 've-ui-dir-block-rtl ve-ui-dir-block-ltr' )

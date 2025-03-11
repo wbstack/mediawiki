@@ -2,14 +2,14 @@
 
 namespace JsonConfig;
 
-use Exception;
-use FormatJson;
-use Language;
+use InvalidArgumentException;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
+use MediaWiki\StubObject\StubUserLang;
 use MWHttpRequest;
-use Status;
 use stdClass;
-use StubUserLang;
 
 /**
  * Various useful utility functions (all static)
@@ -21,9 +21,9 @@ class JCUtils {
 	 * All complex arguments are escaped with FormatJson::encode()
 	 * @param string $msg
 	 * @param mixed|array $vals
-	 * @param bool|array $query
+	 * @param array $query
 	 */
-	public static function warn( $msg, $vals, $query = false ) {
+	public static function warn( $msg, $vals, $query = [] ) {
 		if ( !is_array( $vals ) ) {
 			$vals = [ $vals ];
 		}
@@ -36,21 +36,13 @@ class JCUtils {
 			$vals['query'] = $query;
 		}
 		$isFirst = true;
-		foreach ( $vals as $k => &$v ) {
-			if ( $isFirst ) {
-				$isFirst = false;
-				$msg .= ': ';
-			} else {
-				$msg .= ', ';
-			}
+		foreach ( $vals as $k => $v ) {
+			$msg .= $isFirst ? ': ' : ', ';
+			$isFirst = false;
 			if ( is_string( $k ) ) {
 				$msg .= $k . '=';
 			}
-			if ( is_string( $v ) || is_int( $v ) ) {
-				$msg .= $v;
-			} else {
-				$msg .= FormatJson::encode( $v );
-			}
+			$msg .= is_scalar( $v ) ? $v : FormatJson::encode( $v );
 		}
 		wfLogWarning( $msg );
 	}
@@ -59,7 +51,6 @@ class JCUtils {
 	 * @param string $url
 	 * @param string $username
 	 * @param string $password
-	 * @throws \Exception
 	 * @return MWHttpRequest|false
 	 */
 	public static function initApiRequestObj( $url, $username, $password ) {
@@ -184,7 +175,6 @@ class JCUtils {
 	/**
 	 * Converts an array representing path to a field into a string in 'a/b/c[0]/d' format
 	 * @param array $fieldPath
-	 * @throws \Exception
 	 * @return string
 	 */
 	public static function fieldPathToString( array $fieldPath ) {
@@ -195,7 +185,7 @@ class JCUtils {
 			} elseif ( is_string( $fld ) ) {
 				$res .= $res !== '' ? ( '/' . $fld ) : $fld;
 			} else {
-				throw new Exception(
+				throw new InvalidArgumentException(
 					'Unexpected field type, only strings and integers are allowed'
 				);
 			}
@@ -261,8 +251,9 @@ class JCUtils {
 	 * @return bool
 	 */
 	public static function isListOfLangs( $arr ) {
-		return count( $arr ) === count( array_filter( $arr, static function ( $v ) {
-			return is_string( $v ) && Language::isValidBuiltInCode( $v );
+		$languageNameUtils = MediaWikiServices::getInstance()->getLanguageNameUtils();
+		return count( $arr ) === count( array_filter( $arr, static function ( $v ) use ( $languageNameUtils ) {
+			return is_string( $v ) && $languageNameUtils->isValidBuiltInCode( $v );
 		} ) );
 	}
 

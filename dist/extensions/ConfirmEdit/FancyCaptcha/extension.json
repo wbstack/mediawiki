@@ -9,7 +9,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "antispam",
 	"APIModules": {
-		"fancycaptchareload": "ApiFancyCaptchaReload"
+		"fancycaptchareload": "MediaWiki\\Extension\\ConfirmEdit\\FancyCaptcha\\ApiFancyCaptchaReload"
 	},
 	"MessagesDirs": {
 		"FancyCaptcha": [
@@ -19,32 +19,21 @@
 	},
 	"AutoloadClasses": {
 		"FancyCaptcha": "includes/FancyCaptcha.php",
-		"HTMLFancyCaptchaField": "includes/HTMLFancyCaptchaField.php",
-		"ApiFancyCaptchaReload": "includes/ApiFancyCaptchaReload.php"
+		"MediaWiki\\Extension\\ConfirmEdit\\FancyCaptcha\\FancyCaptcha": "includes/FancyCaptcha.php"
+	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\ConfirmEdit\\FancyCaptcha\\": "includes/"
 	},
 	"ResourceModules": {
 		"ext.confirmEdit.fancyCaptcha.styles": {
-			"styles": "ext.confirmEdit.fancyCaptcha.less",
-			"targets": [
-				"mobile",
-				"desktop"
-			]
+			"styles": "ext.confirmEdit.fancyCaptcha.less"
 		},
 		"ext.confirmEdit.fancyCaptcha": {
 			"scripts": "ext.confirmEdit.fancyCaptcha.js",
-			"dependencies": "mediawiki.api",
-			"targets": [
-				"mobile",
-				"desktop"
+			"dependencies": [
+				"ext.confirmEdit.fancyCaptcha.styles",
+				"mediawiki.api"
 			]
-		},
-		"ext.confirmEdit.fancyCaptchaMobile": {
-			"scripts": "ext.confirmEdit.fancyCaptcha.js",
-			"targets": [
-				"mobile",
-				"desktop"
-			],
-			"dependencies": "mobile.startup"
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -54,7 +43,7 @@
 	"callback": "MediaWiki\\Extension\\ConfirmEdit\\Hooks::onFancyCaptchaSetup",
 	"config": {
 		"CaptchaClass": {
-			"value": "FancyCaptcha"
+			"value": "MediaWiki\\Extension\\ConfirmEdit\\FancyCaptcha\\FancyCaptcha"
 		},
 		"CaptchaFileBackend": {
 			"value": ""
@@ -70,6 +59,10 @@
 		},
 		"CaptchaDeleteOnSolve": {
 			"value": false
+		},
+		"CaptchaStorageDirectory": {
+			"description": "The directory that captchas will be stored in on the CaptchaFileBackend. You probably don't need to change this!",
+			"value": "captcha-render"
 		}
 	},
 	"manifest_version": 2

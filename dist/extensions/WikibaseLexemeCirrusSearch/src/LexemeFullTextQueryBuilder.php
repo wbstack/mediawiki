@@ -8,7 +8,7 @@ use Elastica\Query\BoolQuery;
 use Elastica\Query\DisMax;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Repo\WikibaseRepo;
@@ -67,7 +67,6 @@ class LexemeFullTextQueryBuilder implements FullTextQueryBuilder {
 	 * Create fulltext builder from global environment.
 	 * @param array $settings Configuration from config file
 	 * @return LexemeFullTextQueryBuilder
-	 * @throws \MWException
 	 */
 	public static function newFromGlobals( array $settings ) {
 		return new static(
@@ -83,7 +82,6 @@ class LexemeFullTextQueryBuilder implements FullTextQueryBuilder {
 	 *
 	 * @param SearchContext $searchContext
 	 * @param string $term term to search
-	 * @throws \MWException
 	 */
 	public function build( SearchContext $searchContext, $term ) {
 		if ( $searchContext->areResultsPossible() && !$searchContext->isSpecialKeywordUsed() ) {
@@ -162,7 +160,7 @@ class LexemeFullTextQueryBuilder implements FullTextQueryBuilder {
 
 		// Near match ones, they use constant score
 		$nearMatchQuery = new DisMax();
-		$nearMatchQuery->setTieBreaker( 0 );
+		$nearMatchQuery->setTieBreaker( $profile['tie-breaker'] ?? 0 );
 		foreach ( $fields as $field ) {
 			$nearMatchQuery->addQuery( EntitySearchUtils::makeConstScoreQuery( $field[0], $field[1],
 				$term ) );

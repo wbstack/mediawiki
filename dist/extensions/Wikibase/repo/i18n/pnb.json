@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Abbas dhothar",
+			"Bgo eiu",
 			"Khalid Mahmood",
-			"Ladsgroup",
-			"Bgo eiu"
+			"Ladsgroup"
 		]
 	},
 	"wikibase-desc": "مرتب ڈیٹے دا ذخیرہ",
@@ -12,6 +12,12 @@
 	"wikibase-entity-item": "مد",
 	"wikibase-entity-property": "صفت",
 	"wikibase-entity-query": "سانچ",
+	"nstab-item": "مد",
+	"tooltip-ca-nstab-item": "آئیٹم ویکھو",
+	"nstab-property": "صفت",
+	"tooltip-ca-nstab-property": "صفت ویکھو",
+	"nstab-query": "سانچ",
+	"tooltip-ca-nstab-query": "سانچ ویکھو",
 	"wikibase-edit": "سودھو",
 	"wikibase-save": "سامبھو",
 	"wikibase-publish": "چھاپو",
@@ -21,7 +27,7 @@
 	"wikibase-addreference": "حوالہ پایو",
 	"wikibase-save-inprogress": "سانبھیا جا رہا ہے…",
 	"wikibase-publish-inprogress": "چھاپ ہو رہا اے…",
-	"wikibase-remove-inprogress": "ہٹائیا جا رہا ہے…",
+	"wikibase-remove-inprogress": "ہٹایا جا رہا اے…",
 	"wikibase-statementlistview-add": "مُل پایو",
 	"wikibase-statementlistview-add-tooltip": "نواں مُل پایو",
 	"wikibase-statementgrouplistview-add": "بیان پایو",
@@ -117,8 +123,6 @@
 	"wikibase-newproperty-fieldset": "نواں وشیشتا بݨاؤ",
 	"wikibase-newproperty-datatype": "ڈیٹا دی قِسم",
 	"wikibase-newproperty-pick-data-type": "(ڈیٹا دی قِسم چݨیو)",
-	"wikibase-description-helppage": "Help:تفصیل",
-	"wikibase-label-helppage": "Help:چیپی",
 	"special-newitem": "نواں مد بݨاؤ",
 	"wikibase-newitem-fieldset": "کوئی نویں آئیٹم بݨاؤ",
 	"wikibase-newitem-site": "پہلے جوڑ دی سائیٹ",

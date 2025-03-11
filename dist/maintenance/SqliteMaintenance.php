@@ -21,13 +21,13 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
-
 use Wikimedia\AtEase\AtEase;
-use Wikimedia\Rdbms\DBConnRef;
+use Wikimedia\Rdbms\DatabaseSqlite;
 use Wikimedia\Rdbms\IMaintainableDatabase;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that performs some operations specific to SQLite database backend.
@@ -54,13 +54,15 @@ class SqliteMaintenance extends Maintenance {
 			return;
 		}
 
-		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+		$lb = $this->getServiceContainer()->getDBLoadBalancer();
 		$dbw = $lb->getMaintenanceConnectionRef( DB_PRIMARY );
 		if ( $dbw->getType() !== 'sqlite' ) {
 			$this->error( "This maintenance script requires a SQLite database.\n" );
 
 			return;
 		}
+		/** @var DatabaseSqlite $dbw */
+		'@phan-var DatabaseSqlite $dbw';
 
 		if ( $this->hasOption( 'vacuum' ) ) {
 			$this->vacuum( $dbw );
@@ -75,9 +77,8 @@ class SqliteMaintenance extends Maintenance {
 		}
 	}
 
-	private function vacuum( DBConnRef $dbw ) {
-		// Call non-standard DatabaseSqlite::getDbFilePath method
-		$prevSize = filesize( $dbw->__call( 'getDbFilePath', [] ) );
+	private function vacuum( DatabaseSqlite $dbw ) {
+		$prevSize = filesize( $dbw->getDbFilePath() );
 		if ( $prevSize == 0 ) {
 			$this->fatalError( "Can't vacuum an empty database.\n" );
 		}
@@ -108,10 +109,10 @@ class SqliteMaintenance extends Maintenance {
 		}
 	}
 
-	private function backup( DBConnRef $dbw, $fileName ) {
+	private function backup( DatabaseSqlite $dbw, $fileName ) {
 		$this->output( "Backing up database:\n   Locking..." );
 		$dbw->query( 'BEGIN IMMEDIATE TRANSACTION', __METHOD__ );
-		$ourFile = $dbw->__call( 'getDbFilePath', [] );
+		$ourFile = $dbw->getDbFilePath();
 		$this->output( "   Copying database file $ourFile to $fileName..." );
 		AtEase::suppressWarnings();
 		if ( !copy( $ourFile, $fileName ) ) {
@@ -138,5 +139,7 @@ class SqliteMaintenance extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = SqliteMaintenance::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

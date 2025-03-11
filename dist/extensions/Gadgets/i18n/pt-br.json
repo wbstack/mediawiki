@@ -1,11 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
+			"555",
 			"Almondega",
 			"Eduardo Addad de Oliveira",
 			"Eduardo.mps",
 			"Eduardoaddad",
 			"Felipe L. Ewald",
+			"Fúlvio",
 			"Giro720",
 			"GoEThe",
 			"Hamilton Abreu",
@@ -13,15 +15,14 @@
 			"Helder.wiki",
 			"Luan",
 			"Rafael Vargas",
-			"Teles",
-			555,
-			"Fúlvio"
+			"Teles"
 		]
 	},
 	"gadgets-desc": "Permite que os usuários selecionem [[Special:Gadgets|\"gadgets\" JavaScript e CSS]] personalizados nas suas [[Special:Preferences#mw-prefsection-gadgets|preferências]]",
 	"prefs-gadgets": "Gadgets",
+	"prefs-description-gadgets": "Ativar as funcionalidades adicionais para a sua conta.",
 	"gadgets-prefstext": "Em baixo tem uma lista de ''gadgets'' especiais que pode ativar para a sua conta.\nEstes ''gadgets'' são baseados principalmente em JavaScript, sendo necessário ativar o suporte a JavaScript no seu navegador para que funcionem.\nNote que estes não terão efeito nesta página de preferências.\n\nNote também que estes ''gadgets'' especiais não fazem parte do ''software'' MediaWiki, sendo geralmente desenvolvidos e mantidos por utilizadores na sua wiki local.\nOs administradores locais podem editar as [[MediaWiki:Gadgets-definition|definições]] dos ''gadgets'' disponíveis, e os administradores locais podem editar as suas  [[Special:Gadgets|descrições]], onde pode ver o código fonte de cada ''gadget''. O número de utilizadores para cada ''gadget'' nesta wiki está listado nas [[Special:GadgetUsage|estatísticas de utilização de ''gadgets'']].",
-	"gadgets": "Gadgets",
+	"special-gadgets": "Gadgets",
 	"gadgetusage": "Estatísticas de uso de gadgets",
 	"gadgetusage-gadget": "Gadgets",
 	"gadgetusage-usercount": "Número de usuários",
@@ -36,8 +37,8 @@
 	"gadgets-viewdescription": "Ver descrição",
 	"gadgets-uses": "Usos",
 	"gadgets-required-rights": "Requer {{PLURAL:$2|o seguinte privilégio|os seguintes privilégios}}:\n\n$1",
-	"gadgets-required-skins": "Disponível {{PLURAL:$2|no skin $1|nos seguintes skins: $1}}.",
-	"gadgets-required-actions": "Funciona {{PLURAL:$2|na ação de página \"$1\"|nas seguintes ações de página: $1}}",
+	"gadgets-required-skins": "Disponível {{PLURAL:$2|para o skin $1|para os seguintes skins: $1}}.",
+	"gadgets-required-actions": "Limitado {{PLURAL:$2|à ação de página \"$1\"|às seguintes ações de página: $1}}",
 	"gadgets-default": "Ativado para todos por padrão.",
 	"gadgets-legacy": "O gadget não está carregado. Por favor, migre para ResourceLoader. ([https://www.mediawiki.org/wiki/Special:MyLanguage/ResourceLoader/Migration_guide_(users) Mais informacões])",
 	"gadgets-packaged": "Este gadget está [https://www.mediawiki.org/wiki/ResourceLoader/Package_files empacotado], com o ponto de entrada sendo $1",
@@ -46,12 +47,9 @@
 	"gadgets-not-found": "O gadget \"$1\" não encontrado.",
 	"gadgets-export-text": "Para exportar o gadget $1, clique no botão \"{{int:gadgets-export-download}}\", salve o arquivo transferido,\nvá à página Special:Import no wiki de destino e faça o upload do arquivo. Depois, adicione o seguinte à página MediaWiki:Gadgets-definition:\n<pre>$2</pre>\nÉ necessário que você tenha, no wiki de destino, as permissões necessárias (incluindo o privilégio de editar mensagens de sistema) e a importação por upload de arquivos deve estar ativada.",
 	"gadgets-export-download": "Baixar",
+	"gadgets-requires-es6": "Este gadget é suportado apenas por navegadores compatíveis com ES6",
 	"gadgets-validate-notset": "A propriedade <code>$1</code> não está definida.",
-	"gadgets-validate-wrongtype": "A propriedade <code>$1</code> deve ser do tipo <code>$2</code> em vez de <code>$3</code>.",
-	"right-gadgets-edit": "Editar as páginas de JavaScript e CSS dos gadgets",
-	"action-gadgets-edit": "editar a página de JavaScript ou CSS deste gadget",
-	"right-gadgets-definition-edit": "Editar as definições dos gadgets",
-	"action-gadgets-definition-edit": "editar a definição deste gadget",
-	"gadgets-wrong-contentmodel": "As páginas no espaço nominal {{ns:2302}} devem ser do modelo de conteúdo GadgetDefinition.",
+	"gadgets-validate-wrongtype": "A propriedade <code>$1</code> deve ser <code>$2</code> em vez de <code>$3</code>.",
+	"gadgets-validate-nopage": "A página \"$1\" não existe.",
 	"gadgets-supports-urlload": "Este gadget oferece suporte ao carregamento via URL com o parâmetro de consulta <code>?withgadget</code>."
 }

@@ -3,7 +3,9 @@
 		"authors": [
 			"Crt",
 			"Hunsvotti",
+			"Samoasambia",
 			"Stryn",
+			"Valtlai",
 			"Valtlait",
 			"VezonThunder"
 		]
@@ -25,12 +27,15 @@
 	"score-noimages": "Nuottikuvia ei syntynyt. Tarkista, että lähdekoodisi on oikein.",
 	"score-page": "Sivu $1",
 	"score-readerr": "Tiedostoa $1 ei voitu lukea.",
+	"score-use-category": "Score-laajennusta käyttävät sivut",
+	"score-use-category-desc": "Nämä sivut käyttävät [https://www.mediawiki.org/wiki/Extension:Score Score]-laajennusta.",
 	"score-visualeditor-mwscoredialog-audio": "Sisällytä äänitiedosto (luodaan oletuksena automaattisesti)",
 	"score-visualeditor-mwscoredialog-card-advanced": "Edistynyt",
 	"score-visualeditor-mwscoredialog-card-audio": "Ääni",
 	"score-visualeditor-mwscoredialog-lang": "Kieli",
 	"score-visualeditor-mwscoredialog-notelanguage": "Nuotinnuskieli",
-	"score-visualeditor-mwscoredialog-override-audio": "Käytä olemassa olevaa ääntitiedostoa",
+	"score-visualeditor-mwscoredialog-override-audio": "Käytä olemassa olevaa äänitiedostoa",
+	"score-visualeditor-mwscoredialog-override-audio-placeholder": "Olemassa olevan äänitiedoston nimi",
 	"score-visualeditor-mwscoredialog-override-midi": "Käytä olemassa olevaa MIDI-tiedostoa",
 	"score-visualeditor-mwscoredialog-override-midi-placeholder": "Olemassa olevan MIDI-tiedoston nimi",
 	"score-visualeditor-mwscoredialog-raw": "Tämä on täydellinen LilyPond-tiedosto",

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel DefinitionListItemNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -36,13 +36,22 @@ ve.dm.DefinitionListItemNode.static.defaultAttributes = {
 ve.dm.DefinitionListItemNode.static.matchTagNames = [ 'dt', 'dd' ];
 
 ve.dm.DefinitionListItemNode.static.toDataElement = function ( domElements ) {
-	var style = domElements[ 0 ].nodeName.toLowerCase() === 'dt' ? 'term' : 'definition';
+	const style = domElements[ 0 ].nodeName.toLowerCase() === 'dt' ? 'term' : 'definition';
 	return { type: this.name, attributes: { style: style } };
 };
 
 ve.dm.DefinitionListItemNode.static.toDomElements = function ( dataElement, doc ) {
-	var tag = dataElement.attributes && dataElement.attributes.style === 'term' ? 'dt' : 'dd';
+	const tag = dataElement.attributes && dataElement.attributes.style === 'term' ? 'dt' : 'dd';
 	return [ doc.createElement( tag ) ];
+};
+
+// Nodes which are diffed as a list must have the same description logic as each other
+ve.dm.DefinitionListItemNode.static.describeChanges = function () {
+	return ve.dm.ListNode.static.describeChanges.apply( this, arguments );
+};
+
+ve.dm.DefinitionListItemNode.static.describeChange = function () {
+	return ve.dm.ListNode.static.describeChange.apply( this, arguments );
 };
 
 /* Registration */

@@ -4,9 +4,10 @@
  */
 
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 class PurgeExpiredWatchlistItems extends Maintenance {
 
@@ -21,13 +22,13 @@ class PurgeExpiredWatchlistItems extends Maintenance {
 	 */
 	public function execute() {
 		// Make sure watchlist expiring is enabled.
-		if ( !MediaWikiServices::getInstance()->getMainConfig()->get( MainConfigNames::WatchlistExpiry ) ) {
+		if ( !$this->getServiceContainer()->getMainConfig()->get( MainConfigNames::WatchlistExpiry ) ) {
 			$this->error( "Watchlist expiry is not enabled. Set `\$wgWatchlistExpiry = true;` to enable." );
 			return false;
 		}
 
 		// Loop through 500 entries at a time and delete them.
-		$watchedItemStore = MediaWikiServices::getInstance()->getWatchedItemStore();
+		$watchedItemStore = $this->getServiceContainer()->getWatchedItemStore();
 		$count = $watchedItemStore->countExpired();
 		$this->output( $count . " expired watchlist entries found.\n" );
 		if ( $count === 0 ) {
@@ -44,5 +45,7 @@ class PurgeExpiredWatchlistItems extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = PurgeExpiredWatchlistItems::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

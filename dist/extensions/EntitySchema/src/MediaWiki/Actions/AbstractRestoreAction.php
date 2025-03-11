@@ -1,23 +1,25 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Actions;
 
 use EditAction;
-use Html;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Status\Status;
 use PermissionsError;
 use ReadOnlyError;
-use Status;
 use UserBlockedError;
-use WebRequest;
 
 /**
  * @license GPL-2.0-or-later
  */
 abstract class AbstractRestoreAction extends EditAction {
 
-	public function getRestriction() {
+	public function getRestriction(): string {
 		return 'edit';
 	}
 
@@ -41,7 +43,7 @@ abstract class AbstractRestoreAction extends EditAction {
 	 * @throws UserBlockedError
 	 * @throws PermissionsError
 	 */
-	protected function checkPermissions() {
+	protected function checkPermissions(): void {
 		$services = MediaWikiServices::getInstance();
 		$pm = $services->getPermissionManager();
 		$checkReplica = !$this->getRequest()->wasPosted();
@@ -66,9 +68,12 @@ abstract class AbstractRestoreAction extends EditAction {
 	 *
 	 * @param Status $status The status to report.
 	 */
-	protected function showRestoreErrorPage( Status $status ) {
-		$this->getOutput()->prepareErrorPage(
-			$this->msg( 'entityschema-restore-heading-failed' ),
+	protected function showRestoreErrorPage( Status $status ): void {
+		$this->getOutput()->prepareErrorPage();
+		$this->getOutput()->setPageTitleMsg(
+			$this->msg( 'entityschema-restore-heading-failed' )
+		);
+		$this->getOutput()->setHTMLTitle(
 			$this->msg( 'errorpagetitle' )
 		);
 

@@ -6,10 +6,10 @@
 			"FatosMorina",
 			"Klein Muçi",
 			"Liridon",
-			"Olsi"
+			"Olsi",
+			"INNERLMNT"
 		]
 	},
-	"minerva-talk-add-topic": "Shto një temë",
 	"mobile-frontend-editor-edit": "Redakto",
 	"mobile-frontend-history": "Shihni historik përpunimesh të kësaj faqeje.",
 	"mobile-frontend-home-button": "Kreu",
@@ -22,5 +22,6 @@
 	"mobile-frontend-main-menu-watchlist": "Listë vëzhgimesh",
 	"mobile-frontend-pageaction-edit-tooltip": "Përpunoni seksionin e kryes në këtë faqe",
 	"mobile-frontend-placeholder": "Kërko te {{SITENAME}}",
-	"mobile-frontend-random-button": "Kuturu"
+	"mobile-frontend-random-button": "Kuturu",
+	"minerva-page-actions-overflow": "Më shumë"
 }

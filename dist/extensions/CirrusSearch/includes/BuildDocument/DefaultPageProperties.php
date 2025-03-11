@@ -4,23 +4,24 @@ namespace CirrusSearch\BuildDocument;
 
 use CirrusSearch\Util;
 use Elastica\Document;
-use MWTimestamp;
-use Title;
-use WikiMap;
-use Wikimedia\Rdbms\IDatabase;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\Utils\MWTimestamp;
+use MediaWiki\WikiMap\WikiMap;
+use Wikimedia\Rdbms\IReadableDatabase;
 use WikiPage;
 
 /**
  * Default properties attached to all page documents.
  */
 class DefaultPageProperties implements PagePropertyBuilder {
-	/** @var IDatabase Wiki database to query additional page properties from. */
+	/** @var IReadableDatabase Wiki database to query additional page properties from. */
 	private $db;
 
 	/**
-	 * @param IDatabase $db Wiki database to query additional page properties from.
+	 * @param IReadableDatabase $db Wiki database to query additional page properties from.
 	 */
-	public function __construct( IDatabase $db ) {
+	public function __construct( IReadableDatabase $db ) {
 		$this->db = $db;
 	}
 
@@ -30,16 +31,17 @@ class DefaultPageProperties implements PagePropertyBuilder {
 	 * @param Document $doc The document to be populated
 	 * @param WikiPage $page The page to scope operation to
 	 */
-	public function initialize( Document $doc, WikiPage $page ): void {
+	public function initialize( Document $doc, WikiPage $page, RevisionRecord $revision ): void {
 		$title = $page->getTitle();
 		$doc->set( 'wiki', WikiMap::getCurrentWikiId() );
+		$doc->set( 'page_id', $page->getId() );
 		$doc->set( 'namespace',
 			$title->getNamespace() );
 		$doc->set( 'namespace_text',
 			Util::getNamespaceText( $title ) );
 		$doc->set( 'title', $title->getText() );
 		$doc->set( 'timestamp',
-			wfTimestamp( TS_ISO_8601, $page->getTimestamp() ) );
+			wfTimestamp( TS_ISO_8601, $revision->getTimestamp() ) );
 		$createTs = $this->loadCreateTimestamp(
 			$page->getId(), TS_ISO_8601 );
 		if ( $createTs !== false ) {
@@ -56,11 +58,8 @@ class DefaultPageProperties implements PagePropertyBuilder {
 
 	/**
 	 * {@inheritDoc}
-	 *
-	 * @param Document $doc
-	 * @param Title $title
 	 */
-	public function finalize( Document $doc, Title $title ): void {
+	public function finalize( Document $doc, Title $title, RevisionRecord $revision ): void {
 		// NOOP
 	}
 
@@ -71,13 +70,13 @@ class DefaultPageProperties implements PagePropertyBuilder {
 	 * @return string|bool Formatted timestamp or false on failure
 	 */
 	private function loadCreateTimestamp( int $pageId, int $style ) {
-		$row = $this->db->selectRow(
-			'revision',
-			'rev_timestamp',
-			[ 'rev_page' => $pageId ],
-			__METHOD__,
-			[ 'ORDER BY' => 'rev_timestamp ASC' ]
-		);
+		$row = $this->db->newSelectQueryBuilder()
+			->select( 'rev_timestamp' )
+			->from( 'revision' )
+			->where( [ 'rev_page' => $pageId ] )
+			->orderBy( 'rev_timestamp' )
+			->caller( __METHOD__ )
+			->fetchRow();
 		if ( !$row ) {
 			return false;
 		}

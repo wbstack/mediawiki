@@ -3,8 +3,10 @@ module.exports = ( function ( mw, wikibase ) {
 
 	return function ( languageCodes ) {
 		return {
+			compatConfig: { MODE: 3 },
 			props: [ 'initialCode' ],
 			template: '<input>',
+			emits: [ 'input' ],
 			mounted: function () {
 				var vm = this,
 					languageMenuOptions,
@@ -60,7 +62,7 @@ module.exports = ( function ( mw, wikibase ) {
 					$( this.$el ).data( 'languagesuggester' ).setSelectedValue( value, value );
 				}
 			},
-			destroyed: function () {
+			unmounted: function () {
 				$( this.$el ).data( 'languagesuggester' ).destroy();
 			},
 			computed: {

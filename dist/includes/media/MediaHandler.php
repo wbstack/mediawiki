@@ -16,10 +16,14 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Media
  */
 
+use MediaWiki\Context\IContextSource;
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Status\Status;
+use Wikimedia\FileBackend\FSFile\FSFile;
 
 /**
  * @defgroup Media Media
@@ -32,7 +36,6 @@ use MediaWiki\MediaWikiServices;
  * Base media handler class
  *
  * @stable to extend
- *
  * @ingroup Media
  */
 abstract class MediaHandler {
@@ -230,7 +233,7 @@ abstract class MediaHandler {
 				$info += [ 'width' => 0, 'height' => 0, 'metadata' => [] ];
 				if ( !is_array( $info['metadata'] ) ) {
 					throw new InvalidArgumentException( 'Media handler ' .
-						static::class . ' returned ' . gettype( $info['metadata'] ) .
+						static::class . ' returned ' . get_debug_type( $info['metadata'] ) .
 						' for metadata, should be array' );
 				}
 				return $info;
@@ -293,7 +296,7 @@ abstract class MediaHandler {
 	 */
 	public static function getMetadataVersion() {
 		$version = [ '2' ]; // core metadata version
-		Hooks::runner()->onGetMetadataVersion( $version );
+		( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )->onGetMetadataVersion( $version );
 
 		return implode( ';', $version );
 	}
@@ -867,9 +870,8 @@ abstract class MediaHandler {
 		$roundedUp = ceil( $idealWidth );
 		if ( round( $roundedUp * $boxHeight / $boxWidth ) > $maxHeight ) {
 			return (int)floor( $idealWidth );
-		} else {
-			return $roundedUp;
 		}
+		return $roundedUp;
 	}
 
 	/**
@@ -1065,7 +1067,7 @@ abstract class MediaHandler {
 	}
 
 	/**
-	 * If its an audio file, return the length of the file. Otherwise 0.
+	 * If it's an audio file, return the length of the file. Otherwise 0.
 	 *
 	 * File::getLength() existed for a long time, but was calling a method
 	 * that only existed in some subclasses of this class (The TMH ones).
@@ -1162,7 +1164,7 @@ abstract class MediaHandler {
 
 			foreach ( $pageList as $page ) {
 				if ( $page > $lastPage + 1 ) {
-					if ( $firstPage != $lastPage ) {
+					if ( $firstPage !== $lastPage ) {
 						$ranges[] = "$firstPage-$lastPage";
 					} else {
 						$ranges[] = "$firstPage";

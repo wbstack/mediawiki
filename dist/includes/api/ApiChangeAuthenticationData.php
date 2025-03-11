@@ -20,6 +20,8 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
 use MediaWiki\Auth\AuthManager;
 use MediaWiki\MainConfigNames;
 
@@ -29,17 +31,11 @@ use MediaWiki\MainConfigNames;
  * @ingroup API
  */
 class ApiChangeAuthenticationData extends ApiBase {
-	/** @var AuthManager */
-	private $authManager;
+	private AuthManager $authManager;
 
-	/**
-	 * @param ApiMain $main
-	 * @param string $action
-	 * @param AuthManager $authManager
-	 */
 	public function __construct(
 		ApiMain $main,
-		$action,
+		string $action,
 		AuthManager $authManager
 	) {
 		parent::__construct( $main, $action, 'changeauth' );
@@ -47,7 +43,7 @@ class ApiChangeAuthenticationData extends ApiBase {
 	}
 
 	public function execute() {
-		if ( !$this->getUser()->isRegistered() ) {
+		if ( !$this->getUser()->isNamed() ) {
 			$this->dieWithError( 'apierror-mustbeloggedin-changeauthenticationdata', 'notloggedin' );
 		}
 
@@ -108,3 +104,6 @@ class ApiChangeAuthenticationData extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Manage_authentication_data';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiChangeAuthenticationData::class, 'ApiChangeAuthenticationData' );

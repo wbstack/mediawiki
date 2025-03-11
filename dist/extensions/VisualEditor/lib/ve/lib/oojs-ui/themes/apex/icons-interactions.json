@@ -32,6 +32,9 @@
 		"ellipsis": {
 			"file": "../wikimediaui/images/icons/ellipsis.svg"
 		},
+		"verticalEllipsis": {
+			"file": "../wikimediaui/images/icons/verticalEllipsis.svg"
+		},
 		"feedback": {
 			"file": {
 				"ltr": "../wikimediaui/images/icons/feedback-ltr.svg",
@@ -118,10 +121,6 @@
 		},
 		"settings": {
 			"file": "../wikimediaui/images/icons/settings.svg"
-		},
-		"stopHand": {
-			"file": "../wikimediaui/images/icons/hand.svg",
-			"deprecated": "Renamed since v0.43.0, use 'hand' instead."
 		},
 		"subtract": {
 			"file": "../wikimediaui/images/icons/subtract.svg"

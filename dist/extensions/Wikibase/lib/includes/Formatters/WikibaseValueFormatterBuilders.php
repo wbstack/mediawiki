@@ -7,8 +7,9 @@ namespace Wikibase\Lib\Formatters;
 use DataValues\Geo\Formatters\GlobeCoordinateFormatter;
 use DataValues\Geo\Formatters\LatLongFormatter;
 use InvalidArgumentException;
-use Language;
-use RequestContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Languages\LanguageFactory;
+use MediaWiki\Parser\ParserOptions;
 use ValueFormatters\DecimalFormatter;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\QuantityFormatter;
@@ -20,6 +21,7 @@ use Wikibase\DataModel\Services\EntityId\EntityIdLabelFormatter;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
 use Wikibase\DataModel\Services\Lookup\EntityRetrievingTermLookup;
 use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\LanguageNameLookupFactory;
 use Wikibase\Lib\Store\CachingFallbackLabelDescriptionLookup;
 use Wikibase\Lib\Store\EntityExistenceChecker;
 use Wikibase\Lib\Store\EntityRedirectChecker;
@@ -29,6 +31,7 @@ use Wikibase\Lib\Store\EntityUrlLookup;
 use Wikibase\Lib\Store\LanguageFallbackLabelDescriptionLookup;
 use Wikibase\Lib\Store\RedirectResolvingLatestRevisionLookup;
 use Wikibase\Lib\TermFallbackCache\TermFallbackCacheFacade;
+use Wikibase\Lib\TermLanguageFallbackChain;
 
 /**
  * Low level factory for ValueFormatters for well known data types.
@@ -48,9 +51,9 @@ class WikibaseValueFormatterBuilders {
 	private $labelDescriptionLookupFactory;
 
 	/**
-	 * @var LanguageNameLookup
+	 * @var LanguageNameLookupFactory
 	 */
-	private $languageNameLookup;
+	private $languageNameLookupFactory;
 
 	/**
 	 * @var EntityIdParser
@@ -115,11 +118,6 @@ class WikibaseValueFormatterBuilders {
 	private $useKartographerMaplinkInWikitext;
 
 	/**
-	 * @var int
-	 */
-	private $entitySchemaNamespace;
-
-	/**
 	 * @var array
 	 */
 	private $thumbLimits;
@@ -144,27 +142,32 @@ class WikibaseValueFormatterBuilders {
 	 */
 	private $entityRedirectChecker;
 
+	/**
+	 * @var LanguageFactory
+	 */
+	private $languageFactory;
+
 	public function __construct(
 		FormatterLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
-		LanguageNameLookup $languageNameLookup,
+		LanguageNameLookupFactory $languageNameLookupFactory,
 		EntityIdParser $itemUriParser,
 		string $geoShapeStorageBaseUrl,
 		string $tabularDataStorageBaseUrl,
 		TermFallbackCacheFacade $termFallbackCacheFacade,
 		EntityLookup $entityLookup,
 		RedirectResolvingLatestRevisionLookup $redirectResolvingLatestRevisionLookup,
-		int $entitySchemaNamespace,
 		EntityExistenceChecker $entityExistenceChecker,
 		EntityTitleTextLookup $entityTitleTextLookup,
 		EntityUrlLookup $entityUrlLookup,
 		EntityRedirectChecker $entityRedirectChecker,
-		EntityTitleLookup $entityTitleLookup = null,
-		CachingKartographerEmbeddingHandler $kartographerEmbeddingHandler = null,
+		LanguageFactory $languageFactory,
+		?EntityTitleLookup $entityTitleLookup = null,
+		?CachingKartographerEmbeddingHandler $kartographerEmbeddingHandler = null,
 		bool $useKartographerMaplinkInWikitext = false,
 		array $thumbLimits = []
 	) {
 		$this->labelDescriptionLookupFactory = $labelDescriptionLookupFactory;
-		$this->languageNameLookup = $languageNameLookup;
+		$this->languageNameLookupFactory = $languageNameLookupFactory;
 		$this->itemUriParser = $itemUriParser;
 		$this->geoShapeStorageBaseUrl = $geoShapeStorageBaseUrl;
 		$this->tabularDataStorageBaseUrl = $tabularDataStorageBaseUrl;
@@ -175,12 +178,12 @@ class WikibaseValueFormatterBuilders {
 		$this->snakFormat = new SnakFormat();
 		$this->kartographerEmbeddingHandler = $kartographerEmbeddingHandler;
 		$this->useKartographerMaplinkInWikitext = $useKartographerMaplinkInWikitext;
-		$this->entitySchemaNamespace = $entitySchemaNamespace;
 		$this->thumbLimits = $thumbLimits;
 		$this->entityExistenceChecker = $entityExistenceChecker;
 		$this->entityTitleTextLookup = $entityTitleTextLookup;
 		$this->entityUrlLookup = $entityUrlLookup;
 		$this->entityRedirectChecker = $entityRedirectChecker;
+		$this->languageFactory = $languageFactory;
 	}
 
 	private function newPlainEntityIdFormatter( FormatterOptions $options ) {
@@ -211,7 +214,9 @@ class WikibaseValueFormatterBuilders {
 	private function escapeValueFormatter( $format, ValueFormatter $formatter ) {
 		switch ( $this->snakFormat->getBaseFormat( $format ) ) {
 			case SnakFormatter::FORMAT_HTML:
-				return new EscapingValueFormatter( $formatter, 'htmlspecialchars' );
+				return new EscapingValueFormatter( $formatter, static function ( string $string ): string {
+					return htmlspecialchars( $string, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
+				} );
 			case SnakFormatter::FORMAT_WIKI:
 				return new EscapingValueFormatter( $formatter, 'wfEscapeWikiText' );
 			default:
@@ -247,7 +252,7 @@ class WikibaseValueFormatterBuilders {
 		return new ItemPropertyIdHtmlLinkFormatter(
 			$this->getLabelDescriptionLookup( $options ),
 			$this->entityTitleLookup,
-			$this->languageNameLookup,
+			$this->newLanguageNameLookup( $options ),
 			new NonExistingEntityIdHtmlBrokenLinkFormatter(
 				'wikibase-deletedentity-',
 				$this->entityTitleTextLookup,
@@ -260,7 +265,7 @@ class WikibaseValueFormatterBuilders {
 		return new ItemPropertyIdHtmlLinkFormatter(
 			$this->getLabelDescriptionLookup( $options ),
 			$this->entityTitleLookup,
-			$this->languageNameLookup,
+			$this->newLanguageNameLookup( $options ),
 			new NonExistingEntityIdHtmlFormatter( 'wikibase-deletedentity-' )
 		);
 	}
@@ -327,8 +332,9 @@ class WikibaseValueFormatterBuilders {
 	public function newCommonsMediaFormatter( $format, FormatterOptions $options ) {
 		if ( $this->snakFormat->isPossibleFormat( SnakFormatter::FORMAT_HTML_VERBOSE, $format ) ) {
 			return new CommonsInlineImageFormatter(
-				RequestContext::getMain()->getOutput()->parserOptions(),
+				ParserOptions::newFromContext( RequestContext::getMain() ),
 				$this->thumbLimits,
+				$this->languageFactory,
 				$options
 			);
 		}
@@ -382,34 +388,31 @@ class WikibaseValueFormatterBuilders {
 	 *
 	 * @return ValueFormatter
 	 */
-	public function newEntitySchemaFormatter( $format, FormatterOptions $options ) {
-		switch ( $this->snakFormat->getBaseFormat( $format ) ) {
-			case SnakFormatter::FORMAT_HTML:
-				return new WikiLinkHtmlFormatter( $this->entitySchemaNamespace );
-			case SnakFormatter::FORMAT_WIKI:
-				return new WikiLinkWikitextFormatter( $this->entitySchemaNamespace );
-			default:
-				return $this->newStringFormatter( $format );
-		}
-	}
-
-	/**
-	 * @param string $format The desired target format, see SnakFormatter::FORMAT_XXX
-	 * @param FormatterOptions $options
-	 *
-	 * @return ValueFormatter
-	 */
 	public function newTimeFormatter( $format, FormatterOptions $options ) {
-		// TODO: Add a wikitext formatter that shows the calendar model
 		if ( $this->snakFormat->isPossibleFormat( SnakFormatter::FORMAT_HTML_DIFF, $format ) ) {
 			return new TimeDetailsFormatter(
 				$options,
-				new HtmlTimeFormatter( $options, new MwTimeIsoFormatter( $options ) )
+				new HtmlTimeFormatter(
+					$options,
+					new MwTimeIsoFormatter( $this->languageFactory, $options ),
+					new ShowCalendarModelDecider()
+				)
 			);
 		} elseif ( $this->isHtmlFormat( $format ) ) {
-			return new HtmlTimeFormatter( $options, new MwTimeIsoFormatter( $options ) );
+			return new HtmlTimeFormatter(
+				$options,
+				new MwTimeIsoFormatter( $this->languageFactory, $options ),
+				new ShowCalendarModelDecider()
+			);
 		} else {
-			return $this->escapeValueFormatter( $format, new MwTimeIsoFormatter( $options ) );
+			return $this->escapeValueFormatter(
+				$format,
+				new PlaintextTimeFormatter(
+					$options,
+					new MwTimeIsoFormatter( $this->languageFactory, $options ),
+					new ShowCalendarModelDecider()
+				)
+			);
 		}
 	}
 
@@ -419,7 +422,7 @@ class WikibaseValueFormatterBuilders {
 	 * @return MediaWikiNumberLocalizer
 	 */
 	private function getNumberLocalizer( FormatterOptions $options ) {
-		$language = Language::factory( $options->getOption( ValueFormatter::OPT_LANG ) );
+		$language = $this->languageFactory->getLanguage( $options->getOption( ValueFormatter::OPT_LANG ) );
 		return new MediaWikiNumberLocalizer( $language );
 	}
 
@@ -471,6 +474,7 @@ class WikibaseValueFormatterBuilders {
 				$options,
 				$this->newGlobeCoordinateFormatter( SnakFormatter::FORMAT_HTML, $options ),
 				$this->kartographerEmbeddingHandler,
+				$this->languageFactory,
 				$isPreview
 			);
 		}
@@ -484,7 +488,7 @@ class WikibaseValueFormatterBuilders {
 
 		$options->setOption( LatLongFormatter::OPT_FORMAT, LatLongFormatter::TYPE_DMS );
 		$options->setOption( LatLongFormatter::OPT_SPACING_LEVEL, [
-			LatLongFormatter::OPT_SPACE_LATLONG
+			LatLongFormatter::OPT_SPACE_LATLONG,
 		] );
 		$options->setOption( LatLongFormatter::OPT_DIRECTIONAL, true );
 
@@ -499,13 +503,16 @@ class WikibaseValueFormatterBuilders {
 
 	/**
 	 * @param string $format The desired target format, see SnakFormatter::FORMAT_XXX
+	 * @param FormatterOptions $options
 	 *
 	 * @return MonolingualHtmlFormatter|MonolingualWikitextFormatter|MonolingualTextFormatter
 	 */
-	public function newMonolingualFormatter( $format ) {
+	public function newMonolingualFormatter( $format, FormatterOptions $options ) {
 		switch ( $this->snakFormat->getBaseFormat( $format ) ) {
 			case SnakFormatter::FORMAT_HTML:
-				return new MonolingualHtmlFormatter( $this->languageNameLookup );
+				return new MonolingualHtmlFormatter(
+					$this->newLanguageNameLookup( $options )
+				);
 			case SnakFormatter::FORMAT_WIKI:
 				return new MonolingualWikitextFormatter();
 			default:
@@ -517,12 +524,29 @@ class WikibaseValueFormatterBuilders {
 		$lookup = $this->labelDescriptionLookupFactory->getLabelDescriptionLookup( $options );
 		return new LabelsProviderEntityIdHtmlLinkFormatter(
 			$lookup,
-			$this->languageNameLookup,
+			$this->newLanguageNameLookup( $options ),
 			$this->entityExistenceChecker,
 			$this->entityTitleTextLookup,
 			$this->entityUrlLookup,
 			$this->entityRedirectChecker
 		);
+	}
+
+	private function newLanguageNameLookup( FormatterOptions $options ): LanguageNameLookup {
+		if ( $options->hasOption( ValueFormatter::OPT_LANG ) ) {
+			return $this->languageNameLookupFactory->getForLanguageCode(
+				$options->getOption( ValueFormatter::OPT_LANG )
+			);
+		} elseif ( $options->hasOption( FormatterLabelDescriptionLookupFactory::OPT_LANGUAGE_FALLBACK_CHAIN ) ) {
+			/** @var TermLanguageFallbackChain $chain */
+			$chain = $options->getOption( FormatterLabelDescriptionLookupFactory::OPT_LANGUAGE_FALLBACK_CHAIN );
+			'@phan-var TermLanguageFallbackChain $chain';
+			return $this->languageNameLookupFactory->getForLanguageCode(
+				$chain->getFallbackChain()[0]->getLanguageCode()
+			);
+		} else {
+			throw new InvalidArgumentException( 'FormatterOptions must have OPT_LANG or OPT_LANGUAGE_FALLBACK_CHAIN' );
+		}
 	}
 
 }

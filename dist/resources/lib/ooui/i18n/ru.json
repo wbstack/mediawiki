@@ -26,6 +26,7 @@
 			"Умар"
 		]
 	},
+	"ooui-copytextlayout-copy": "Скопировать",
 	"ooui-outline-control-move-down": "Переместить элемент вниз",
 	"ooui-outline-control-move-up": "Переместить элемент вверх",
 	"ooui-outline-control-remove": "Удалить пункт",
@@ -42,7 +43,6 @@
 	"ooui-combobox-button-label": "Переключить параметры",
 	"ooui-selectfile-button-select": "Выберите файл",
 	"ooui-selectfile-button-select-multiple": "Выберите файлы",
-	"ooui-selectfile-not-supported": "Выбор файла не поддерживается",
 	"ooui-selectfile-placeholder": "Файл не выбран",
 	"ooui-selectfile-dragdrop-placeholder": "Перетащите файл сюда",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Перетащите файлы сюда",

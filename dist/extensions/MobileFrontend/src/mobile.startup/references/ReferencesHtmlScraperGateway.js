@@ -1,4 +1,4 @@
-var ReferencesGateway = require( './ReferencesGateway' ),
+const ReferencesGateway = require( './ReferencesGateway' ),
 	mfExtend = require( './../mfExtend' ),
 	util = require( './../util' );
 
@@ -6,7 +6,8 @@ var ReferencesGateway = require( './ReferencesGateway' ),
  * Gateway for retrieving references via the content of the Page
  *
  * @class ReferencesHtmlScraperGateway
- * @extends ReferencesGateway
+ * @memberof module:mobile.startup/references
+ * @extends module:mobile.startup/references~Gateway
  * @inheritdoc
  */
 function ReferencesHtmlScraperGateway() {
@@ -27,16 +28,18 @@ mfExtend( ReferencesHtmlScraperGateway, ReferencesGateway, {
 	 * @param {jQuery.Object} $container to scan for an element
 	 * @return {jQuery.Promise} that can be used by getReference
 	 */
-	getReferenceFromContainer: function ( id, $container ) {
-		var $el, $ol, $parent,
-			result = util.Deferred();
+	getReferenceFromContainer( id, $container ) {
+		const result = util.Deferred();
 
-		$el = $container.find( '#' + util.escapeSelector( id ) );
+		const $el = $container.find( '#' + util.escapeSelector( id ) );
 		if ( $el.length ) {
+			let $parent;
+
 			// This finds either the inner <ol class="mw-extended-references">, or the outer
 			// <ol class="references">
-			$ol = $el.closest( 'ol' );
-			if ( $ol.hasClass( 'mw-extended-references' ) ) {
+			const $ol = $el.closest( 'ol' );
+			const isSubref = $ol.hasClass( 'mw-extended-references' );
+			if ( isSubref ) {
 				$parent = $ol.parent();
 			}
 			// The following classes are used here:
@@ -45,7 +48,8 @@ mfExtend( ReferencesHtmlScraperGateway, ReferencesGateway, {
 			( $parent || $el ).find( '.external' ).addClass( this.EXTERNAL_LINK_CLASS );
 			result.resolve( {
 				text: this.getReferenceHtml( $el ),
-				parentText: this.getReferenceHtml( $parent )
+				parentText: this.getReferenceHtml( $parent ),
+				isSubref
 			} );
 		} else {
 			result.reject( ReferencesGateway.ERROR_NOT_EXIST );
@@ -53,12 +57,13 @@ mfExtend( ReferencesHtmlScraperGateway, ReferencesGateway, {
 		return result.promise();
 	},
 	/**
+	 * @memberof ReferencesHtmlScraperGateway
 	 * @param {jQuery.Object|undefined} $reference
-	 * @returns {string}
+	 * @return {string|undefined}
 	 */
-	getReferenceHtml: function ( $reference ) {
+	getReferenceHtml( $reference ) {
 		return $reference ?
-			$reference.find( '.mw-reference-text, .reference-text' ).first().html() :
+			$reference.children( '.mw-reference-text, .reference-text' ).first().html() :
 			'';
 	},
 	/**
@@ -67,10 +72,10 @@ mfExtend( ReferencesHtmlScraperGateway, ReferencesGateway, {
 	 * @instance
 	 * @param {string} hash Hash fragment with leading '#'
 	 * @param {Page} page (unused)
-	 * @param {PageHTMLParser} pageHTMLParser
+	 * @param {module:mobile.startup/PageHTMLParser} pageHTMLParser
 	 */
-	getReference: function ( hash, page, pageHTMLParser ) {
-		var id = mw.util.percentDecodeFragment( hash.slice( 1 ) );
+	getReference( hash, page, pageHTMLParser ) {
+		const id = mw.util.percentDecodeFragment( hash.slice( 1 ) );
 		// If an id is not found it's possible the id passed needs decoding (per T188547).
 		return this.getReferenceFromContainer( id, pageHTMLParser.$el.find( 'ol.references' ) );
 	}

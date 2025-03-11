@@ -3,13 +3,13 @@
 		"authors": [
 			"Geraki",
 			"Glavkos",
+			"MnLsVt",
 			"NikosLikomitros",
 			"Nikosgranturismogt",
+			"P20kios",
 			"Protnet",
 			"Sarri.greek",
-			"Αντιγόνη",
-			"MnLsVt",
-			"P20kios"
+			"Αντιγόνη"
 		]
 	},
 	"thanks-desc": "Προσθέτει συνδέσμους για να ευχαριστείτε χρήστες για επεξεργασίες, σχόλια, κλπ.",
@@ -17,9 +17,6 @@
 	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|δέχτηκε ευχαριστίες}}}}",
 	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Ευχαριστία}}}}",
 	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|δέχτηκε ευχαριστίες}}}}",
-	"thanks-button-action-queued": "{{GENDER:$1|{{GENDER:$2|Ευχαριστώ}}}} $1…",
-	"thanks-button-action-cancel": "Ακύρωση",
-	"thanks-button-action-completed": "Εσείς {{GENDER:$1|{{GENDER:$2|ευχαριστήσατε}}}} $1",
 	"thanks-error-undefined": "Η ενέργεια ευχαριστίας απέτυχε (σφάλμα κώδικα: $1). Παρακαλούμε δοκιμάστε ξανά.",
 	"thanks-error-invalid-log-id": "Δεν βρέθηκε η καταχώριση καταγραφής",
 	"thanks-error-invalid-log-type": "Ο τύπος καταγραφής '$1' δε βρίσκεται στη λίστα με τους επιτρεπόμενους τύπους αρχείων καταγραφής.",
@@ -43,7 +40,6 @@
 	"echo-pref-subscription-edit-thank": "Με ευχαριστεί για την επεξεργασία μου",
 	"echo-pref-tooltip-edit-thank": "Να ειδοποιούμαι όταν κάποιος με ευχαριστεί για μια επεξεργασία που έκανα.",
 	"echo-category-title-edit-thank": "Ευχαριστίες",
-	"notification-thanks-diff-link": "την επεξεργασία σου",
 	"notification-header-rev-thank": "{{GENDER:$2|Ο|Η}} $1 {{GENDER:$4|σας}} ευχαρίστησε για την επεξεργασία σας στην <strong>$3</strong>.",
 	"notification-header-creation-thank": "{{GENDER:$2|Ο|Η}} $1 {{GENDER:$4|σας}} ευχαρίστησε για τη δημιουργία της σελίδας <strong>$3</strong>.",
 	"notification-header-log-thank": "$1 {{GENDER:$2|Ευχαρίστησε}} {{GENDER:$4|εσάς}} για τις ενέργειες σας σχετικά με το <strong>$3</strong>.",
@@ -62,7 +58,6 @@
 	"thanks-error-invalidpostid": "Το Post ID δεν είναι έγκυρο.",
 	"flow-thanks-confirmation-special": "Θέλετε να στείλετε δημόσια ευχαριστία για αυτό το σχόλιο;",
 	"flow-thanks-thanked-notice": "{{GENDER:$3|Εσείς}} ευχαριστήσατε τον $1 για το σχόλιο {{GENDER:$2|του|της}}.",
-	"notification-flow-thanks-post-link": "σχόλιό σας",
 	"notification-header-flow-thank": "{{GENDER:$2|Ο|Η}} $1 {{GENDER:$5|σας}} ευχαρίστησε για το σχόλιό σας στο «<strong>$3</strong>».",
 	"notification-compact-header-flow-thank": "{{GENDER:$2|Ο|Η}} $1 {{GENDER:$3|σας}} ευχαρίστησε.",
 	"notification-bundle-header-flow-thank": "{{PLURAL:$1|Ένα άτομο σας ευχαρίστησε|$1 άτομα σας ευχαρίστησαν|100=99+ άτομα σας ευχαρίστησαν}} για το σχόλιό {{GENDER:$3|σας}} στο «<strong>$2</strong>».",

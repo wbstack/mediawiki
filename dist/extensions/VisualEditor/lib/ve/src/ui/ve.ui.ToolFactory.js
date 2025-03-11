@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ToolFactory class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends OO.ui.ToolFactory
- * @mixins ve.ui.ModeledFactory
+ * @mixes ve.ui.ModeledFactory
  *
  * @constructor
  */

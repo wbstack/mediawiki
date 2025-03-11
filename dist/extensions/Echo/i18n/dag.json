@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Alhassan Abdul-Manan",
 			"Attah Mohammed"
 		]
 	},
@@ -28,6 +29,7 @@
 	"echo-category-title-watchlist": "Mali niŋ n-yuli peeji maa",
 	"echo-category-title-minor-watchlist": "Malimi bela niŋ n-yuli peeji maa",
 	"echo-pref-tooltip-edit-user-talk": "Teemi ma so yi ti mali m peeji maa niŋ.",
+	"echo-pref-tooltip-edit-user-page": "Teemi ma so yi ti mali m peeji maa niŋ.",
 	"echo-pref-tooltip-article-linked": "Teemi ma so yi ti zaŋ m peeji maa kpɛhi peeji shɛli ni.",
 	"echo-pref-tooltip-mention": "Teemi ma so yi ti zaŋ liŋki shɛli na ti ga m peeji maa.",
 	"echo-pref-tooltip-mention-failure": "Teemi ma di yi ti niŋ ka n ku tooi zaŋ binshɛli talim so.",
@@ -40,7 +42,7 @@
 	"echo-pref-tooltip-minor-watchlist": "Teemi ma so yi ti niŋ maliniŋ din dii bi yaɣi lala m peeji yuunili maa ni.",
 	"notifications": "Tibili dimsibu lahabaya",
 	"tooltip-pt-notifications-alert": "{{GENDER:|Your}} teera",
-	"tooltip-pt-notifications-notice": "{{GENDER:|Your}} lahibaya",
+	"tooltip-pt-notifications-notice": "{{GENDER:|A}} teera",
 	"echo-displaynotificationsconfiguration-sorting-by-section-header": "Balibu mali sɔŋ",
 	"echo-displaynotificationsconfiguration-enabled-default-new-users-legend": "Ninvuɣ' pala",
 	"echo-specialpage": "Lahibali teera",
@@ -54,8 +56,10 @@
 	"notification-link-text-view-mention-failure": "{{PLURAL:$1|Viem mention|View mention}}",
 	"notification-link-text-view-changes": "{{GENDER:$1|View}} Taɣibu",
 	"notification-link-text-view-page": "Yulimi paaji",
+	"notification-header-edit-user-page": "$1 {{GENDER:$2|edited}} <strong>{{GENDER:$3|your}} use page</strong>.",
 	"notification-header-edit-user-talk": "$1 {{GENDER:$2|left}} satarili din <strong>{{GENDER:$3|your}} yɛltɔɣili peeji </strong>.",
 	"notification-header-edit-user-talk-with-section": "$1 {{GENDER:$2|left}} satarili din nyɛ <strong>{{GENDER:$3|your}} yɛltɔɣili peeji</strong>din \"<strong>$4</strong>\".",
+	"notification-compact-header-edit-user-page": "$1 {{GENDER:$2||edited}} {{GENDER:$3|your}} ŋun su peeji.",
 	"notification-compact-header-edit-user-talk": "$1 {{GENDER:$2|left}} {{GENDER:$3|your}} satarili.",
 	"notification-compact-header-edit-user-talk-with-section": "$1 {{GENDER:$2|left}} {{GENDER:$3|you}} satarili din be \"<strong>$4</strong>\".",
 	"notification-header-mention-other-nosection": "$1 {{GENDER:$2|mentioned}} {{GENDER:$3|you}} ni <strong>$4</strong>.",
@@ -78,6 +82,7 @@
 	"echo-notification-notice-text-only": "Baŋsibu",
 	"echo-overlay-link": "Lahibali teeriba zaa",
 	"echo-overlay-title": "<b>Notifications</b>",
+	"echo-mark-all-as-read": "Dihimi {{PLURAL:$1|all}} n-wuhi ni di karimya",
 	"echo-displaysnippet-title": "Lahibali teeri paali",
 	"echo-date-today": "Zuŋɔ",
 	"echo-date-yesterday": "Sɔhila"

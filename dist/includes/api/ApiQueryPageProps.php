@@ -20,6 +20,10 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\Page\PageProps;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -29,17 +33,11 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class ApiQueryPageProps extends ApiQueryBase {
 
-	/** @var PageProps */
-	private $pageProps;
+	private PageProps $pageProps;
 
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param PageProps $pageProps
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		PageProps $pageProps
 	) {
 		parent::__construct( $query, $moduleName, 'pp' );
@@ -52,8 +50,8 @@ class ApiQueryPageProps extends ApiQueryBase {
 
 		$params = $this->extractRequestParams();
 		if ( $params['continue'] ) {
-			$continueValue = (int)$params['continue'];
-			$this->dieContinueUsageIf( strval( $continueValue ) !== $params['continue'] );
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'int' ] );
+			$continueValue = $cont[0];
 			$filteredPages = [];
 			foreach ( $pages as $id => $page ) {
 				if ( $id >= $continueValue ) {
@@ -133,3 +131,6 @@ class ApiQueryPageProps extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Pageprops';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryPageProps::class, 'ApiQueryPageProps' );

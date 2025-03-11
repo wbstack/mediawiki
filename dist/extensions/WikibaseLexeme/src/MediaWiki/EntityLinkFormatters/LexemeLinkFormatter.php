@@ -1,14 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\MediaWiki\EntityLinkFormatters;
 
 use HtmlArmor;
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\DataModel\Entity\EntityId;
-use Wikibase\DataModel\Services\Lookup\EntityLookup;
-use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
-use Wikibase\DataModel\Term\TermList;
-use Wikibase\Lexeme\Domain\Model\Lexeme;
+use Wikibase\Lexeme\DataAccess\Store\LemmaLookup;
 use Wikibase\Lexeme\Domain\Model\LexemeId;
 use Wikibase\Lexeme\Presentation\Formatters\LexemeTermFormatter;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
@@ -21,46 +20,25 @@ use Wikimedia\Assert\Assert;
  */
 class LexemeLinkFormatter implements EntityLinkFormatter {
 
-	/**
-	 * @var EntityLookup
-	 */
-	private $entityLookup;
+	private LemmaLookup $lemmaLookup;
 
-	/**
-	 * @var DefaultEntityLinkFormatter
-	 */
-	private $linkFormatter;
+	private DefaultEntityLinkFormatter $linkFormatter;
 
-	/**
-	 * @var Language
-	 */
-	private $language;
+	private Language $language;
 
-	/**
-	 * @var LexemeTermFormatter
-	 */
-	private $lemmaFormatter;
+	private LexemeTermFormatter $lemmaFormatter;
 
-	/**
-	 * @var EntityTitleTextLookup
-	 */
-	private $entityTitleTextLookup;
+	private EntityTitleTextLookup $entityTitleTextLookup;
 
-	/**
-	 * @param EntityLookup $entityLookup
-	 * @param DefaultEntityLinkFormatter $linkFormatter
-	 * @param LexemeTermFormatter $lemmaFormatter
-	 * @param Language $language
-	 */
 	public function __construct(
 		EntityTitleTextLookup $entityTitleTextLookup,
-		EntityLookup $entityLookup,
+		LemmaLookup $lemmaLookup,
 		EntityLinkFormatter $linkFormatter,
 		LexemeTermFormatter $lemmaFormatter,
 		Language $language
 	) {
 		$this->entityTitleTextLookup = $entityTitleTextLookup;
-		$this->entityLookup = $entityLookup;
+		$this->lemmaLookup = $lemmaLookup;
 		$this->linkFormatter = $linkFormatter;
 		$this->lemmaFormatter = $lemmaFormatter;
 		$this->language = $language;
@@ -69,7 +47,7 @@ class LexemeLinkFormatter implements EntityLinkFormatter {
 	/**
 	 * @inheritDoc
 	 */
-	public function getHtml( EntityId $entityId, array $labelData = null ) {
+	public function getHtml( EntityId $entityId, ?array $labelData = null ): string {
 		Assert::parameterType( LexemeId::class, $entityId, '$entityId' );
 		'@phan-var LexemeId $entityId';
 
@@ -78,7 +56,7 @@ class LexemeLinkFormatter implements EntityLinkFormatter {
 			[
 				'language' => $this->language->getCode(),
 				'value' => new HtmlArmor(
-					$this->lemmaFormatter->format( $this->getLemmas( $entityId ) )
+					$this->lemmaFormatter->format( $this->lemmaLookup->getLemmas( $entityId ) )
 				),
 			]
 		);
@@ -89,44 +67,16 @@ class LexemeLinkFormatter implements EntityLinkFormatter {
 	 */
 	public function getTitleAttribute(
 		EntityId $entityId,
-		array $labelData = null,
-		array $descriptionData = null
-	) {
+		?array $labelData = null,
+		?array $descriptionData = null
+	): string {
 		// TODO Can't this use $entityId->getSerialization() directly?
 		//      It may have only used the Title text for historical reasons.
 		return $this->entityTitleTextLookup->getPrefixedText( $entityId )
 			?? $entityId->getSerialization();
 	}
 
-	/**
-	 * @param LexemeId $entityId
-	 * @return TermList
-	 * @suppress PhanUndeclaredMethod
-	 */
-	private function getLemmas( LexemeId $entityId ): TermList {
-		try {
-			$lexeme = $this->entityLookup->getEntity( $entityId );
-		} catch ( UnresolvedEntityRedirectException $ex ) { // T228996
-			// Regression catch.
-			// When there's a double redirect in lexems (eg. L1 -> L2 -> L3)
-			// then getting lemmas of L1 will fatal as the second redirect is
-			// not handlred by the lookup, and the exception bubbles up here.
-			// Fatal was caused by that exception as it wasn't handled. Seen on
-			// Special:RecentChanges and Special:WhatLinksHere pages.
-			// Handled gracefully with this catch, by returning an empty list,
-			// effectively displaying the lexeme by its ID instead.
-			return new TermList();
-		}
-
-		if ( $lexeme === null ) {
-			return new TermList();
-		}
-
-		/** @var Lexeme $lexeme */
-		return $lexeme->getLemmas();
-	}
-
-	public function getFragment( EntityId $entityId, $fragment ) {
+	public function getFragment( EntityId $entityId, $fragment ): string {
 		return $fragment;
 	}
 

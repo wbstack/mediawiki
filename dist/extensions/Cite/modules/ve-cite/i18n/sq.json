@@ -2,7 +2,6 @@
 	"@metadata": {
 		"authors": [
 			"Agonqurdina",
-			"Amire80",
 			"Ammartivari",
 			"Arianit",
 			"Besnik b",
@@ -20,7 +19,7 @@
 		]
 	},
 	"visualeditor-cite-tool-name-book": "Libër",
-	"visualeditor-cite-tool-name-journal": "Gazetë",
+	"visualeditor-cite-tool-name-journal": "Revistë shkencore",
 	"visualeditor-cite-tool-name-news": "Lajm",
 	"visualeditor-cite-tool-name-web": "Faqe rrjeti",
 	"cite-ve-changedesc-ref-group-both": "Grupi i referencës u ndryshua nga \"$1\" në \"$2\"",
@@ -39,7 +38,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Kjo referencë është përdorur {{PLURAL:$1|once|2=twice|$1 times}} në këtë faqe. Ndryshimet e bëra këtu do të zbatohen në të gjitha vendet ku do të ripërdoret kjo referencë.",
 	"cite-ve-dialog-reference-options-group-label": "Përdorni këtë grup",
 	"cite-ve-dialog-reference-options-group-placeholder": "Referenca të përgjithshme",
-	"cite-ve-dialog-reference-options-name-label": "Ripërdoreni me këtë emër",
 	"cite-ve-dialog-reference-options-responsive-label": "Përdorni skemë shtyllash reaguese",
 	"cite-ve-dialog-reference-options-section": "Mundësi",
 	"cite-ve-dialog-reference-placeholder": "Shkruani ose ngjitni këtu referencën tuaj ose futni një gjedhe citimesh.",
@@ -61,7 +59,5 @@
 	"cite-ve-referenceslist-missingref-in-list": "Kjo referencë është përkufizuar në një gjedhe ose tjetër bllok të prodhuar dhe tani mund të parashihet vetëm me përpunuesin e burimit.",
 	"cite-ve-referenceslist-missingreflist": "Kjo listë referencash është prodhuar nga një gjedhe dhe tani mund të përpunohet vetëm me përpunuesin e burimit.",
 	"cite-ve-toolbar-group-label": "Citoni",
-	"cite-ve-othergroup-item": "Referencë $1",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Referenca",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Emër grupi referencash: \"$1\""
+	"cite-ve-othergroup-item": "Referencë $1"
 }

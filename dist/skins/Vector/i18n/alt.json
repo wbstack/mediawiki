@@ -3,6 +3,7 @@
 		"authors": [
 			"Agilight",
 			"Altai uul",
+			"Bakpay",
 			"HalanTul",
 			"Батыр Комдошев"
 		]
@@ -23,5 +24,10 @@
 	"vector-view-viewsource": "Темдектерин кӧрӧр",
 	"vector-more-actions": "Кӧптӧдӧ",
 	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> бар бӱктерди бедрери",
-	"vector-toc-beginning": "Башталганы"
+	"vector-toc-label": "Толынтызы",
+	"vector-toc-beginning": "Башталганы",
+	"vector-main-menu-label": "Тӧс меню",
+	"vector-page-tools-label": "Јепселдер",
+	"vector-page-tools-general-label": "Текши",
+	"vector-unpin-element-label": "јажырар"
 }

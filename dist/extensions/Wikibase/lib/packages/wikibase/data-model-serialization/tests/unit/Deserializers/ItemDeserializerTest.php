@@ -22,14 +22,14 @@ use Wikibase\DataModel\Term\TermList;
  * @author Thomas Pellissier Tanon
  * @author Bene* < benestar.wikimedia@gmail.com >
  */
-class ItemDeserializerTest extends DispatchableDeserializerTest {
+class ItemDeserializerTest extends DispatchableDeserializerTestCase {
 
 	protected function buildDeserializer() {
 		$entityIdDeserializerMock = $this->createMock( Deserializer::class );
 		$entityIdDeserializerMock->expects( $this->any() )
 			->method( 'deserialize' )
-			->with( $this->equalTo( 'Q42' ) )
-			->will( $this->returnValue( new ItemId( 'Q42' ) ) );
+			->with( 'Q42' )
+			->willReturn( new ItemId( 'Q42' ) );
 
 		$termListDeserializerMock = $this->createMock( Deserializer::class );
 		$termListDeserializerMock->expects( $this->any() )
@@ -37,10 +37,10 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 			->with( $this->equalTo( [
 				'en' => [
 					'lang' => 'en',
-					'value' => 'foo'
-				]
+					'value' => 'foo',
+				],
 			] ) )
-			->will( $this->returnValue( new TermList( [ new Term( 'en', 'foo' ) ] ) ) );
+			->willReturn( new TermList( [ new Term( 'en', 'foo' ) ] ) );
 
 		$aliasGroupListDeserializerMock = $this->createMock( Deserializer::class );
 		$aliasGroupListDeserializerMock->expects( $this->any() )
@@ -48,12 +48,11 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 			->with( $this->equalTo( [
 				'en' => [
 					'lang' => 'en',
-					'values' => [ 'foo', 'bar' ]
-				]
+					'values' => [ 'foo', 'bar' ],
+				],
 			] ) )
-			->will( $this->returnValue(
-				new AliasGroupList( [ new AliasGroup( 'en', [ 'foo', 'bar' ] ) ] ) )
-			);
+			->willReturn(
+				new AliasGroupList( [ new AliasGroup( 'en', [ 'foo', 'bar' ] ) ] ) );
 
 		$statement = new Statement( new PropertyNoValueSnak( 42 ) );
 		$statement->setGuid( 'test' );
@@ -66,14 +65,14 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 					[
 						'mainsnak' => [
 							'snaktype' => 'novalue',
-							'property' => 'P42'
+							'property' => 'P42',
 						],
 						'type' => 'statement',
-						'rank' => 'normal'
-					]
-				]
+						'rank' => 'normal',
+					],
+				],
 			] ) )
-			->will( $this->returnValue( new StatementList( $statement ) ) );
+			->willReturn( new StatementList( $statement ) );
 
 		$siteLinkDeserializerMock = $this->createMock( Deserializer::class );
 		$siteLinkDeserializerMock->expects( $this->any() )
@@ -81,9 +80,9 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 			->with( $this->equalTo( [
 				'site' => 'enwiki',
 				'title' => 'Nyan Cat',
-				'badges' => []
+				'badges' => [],
 			] ) )
-			->will( $this->returnValue( new SiteLink( 'enwiki', 'Nyan Cat' ) ) );
+			->willReturn( new SiteLink( 'enwiki', 'Nyan Cat' ) );
 
 		return new ItemDeserializer(
 			$entityIdDeserializerMock,
@@ -98,8 +97,8 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 		return [
 			[
 				[
-					'type' => 'item'
-				]
+					'type' => 'item',
+				],
 			],
 		];
 	}
@@ -107,15 +106,15 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 	public function nonDeserializableProvider() {
 		return [
 			[
-				5
+				5,
 			],
 			[
-				[]
+				[],
 			],
 			[
 				[
-					'type' => 'property'
-				]
+					'type' => 'property',
+				],
 			],
 		];
 	}
@@ -125,8 +124,8 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 			[
 				new Item(),
 				[
-					'type' => 'item'
-				]
+					'type' => 'item',
+				],
 			],
 		];
 
@@ -135,8 +134,8 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 			$item,
 			[
 				'type' => 'item',
-				'id' => 'Q42'
-			]
+				'id' => 'Q42',
+			],
 		];
 
 		$item = new Item();
@@ -148,10 +147,10 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 				'labels' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
-				]
-			]
+						'value' => 'foo',
+					],
+				],
+			],
 		];
 
 		$item = new Item();
@@ -163,10 +162,10 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 				'descriptions' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
-				]
-			]
+						'value' => 'foo',
+					],
+				],
+			],
 		];
 
 		$item = new Item();
@@ -178,10 +177,10 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 				'aliases' => [
 					'en' => [
 						'lang' => 'en',
-						'values' => [ 'foo', 'bar' ]
-					]
-				]
-			]
+						'values' => [ 'foo', 'bar' ],
+					],
+				],
+			],
 		];
 
 		$item = new Item();
@@ -195,14 +194,14 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
-				]
-			]
+							'rank' => 'normal',
+						],
+					],
+				],
+			],
 		];
 
 		$item = new Item();
@@ -215,10 +214,10 @@ class ItemDeserializerTest extends DispatchableDeserializerTest {
 					'enwiki' => [
 						'site' => 'enwiki',
 						'title' => 'Nyan Cat',
-						'badges' => []
-					]
-				]
-			]
+						'badges' => [],
+					],
+				],
+			],
 		];
 
 		return $provider;

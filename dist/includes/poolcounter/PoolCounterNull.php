@@ -1,8 +1,5 @@
 <?php
 /**
- * Provides of semaphore semantics for restricting the number
- * of workers that may be concurrently performing the same task.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,13 +18,20 @@
  * @file
  */
 
+namespace MediaWiki\PoolCounter;
+
+use MediaWiki\Status\Status;
+
 /**
  * A default PoolCounter, which provides no locking.
+ *
+ * @internal
+ * @since 1.33
  */
 class PoolCounterNull extends PoolCounter {
 
 	public function __construct() {
-		/* No parameters needed */
+		// No parameters needed
 	}
 
 	public function acquireForMe( $timeout = null ) {
@@ -42,3 +46,6 @@ class PoolCounterNull extends PoolCounter {
 		return Status::newGood( PoolCounter::RELEASED );
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( PoolCounterNull::class, 'PoolCounterNull' );

@@ -19,364 +19,100 @@
  * @ingroup Pager
  */
 
+namespace MediaWiki\Pager;
+
+use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\HookContainer\HookContainer;
-use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Linker\LinkRenderer;
-use MediaWiki\Revision\RevisionFactory;
-use MediaWiki\Revision\RevisionRecord;
-use Wikimedia\Rdbms\FakeResultWrapper;
-use Wikimedia\Rdbms\ILoadBalancer;
-use Wikimedia\Rdbms\IResultWrapper;
+use MediaWiki\Revision\RevisionStore;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\User\UserFactory;
+use MediaWiki\User\UserIdentity;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * @ingroup Pager
  */
-class DeletedContribsPager extends ReverseChronologicalPager {
-
-	public $mGroupByDate = true;
-
+class DeletedContribsPager extends ContributionsPager {
 	/**
-	 * @var string[] Local cache for escaped messages
-	 */
-	public $messages;
-
-	/**
-	 * @var string User name, or a string describing an IP address range
-	 */
-	public $target;
-
-	/**
-	 * @var string|int A single namespace number, or an empty string for all namespaces
-	 */
-	public $namespace = '';
-
-	/** @var CommentStore */
-	private $commentStore;
-
-	/** @var HookRunner */
-	private $hookRunner;
-
-	/** @var RevisionFactory */
-	private $revisionFactory;
-
-	/**
-	 * @param IContextSource $context
-	 * @param CommentStore $commentStore
 	 * @param HookContainer $hookContainer
 	 * @param LinkRenderer $linkRenderer
-	 * @param ILoadBalancer $loadBalancer
-	 * @param RevisionFactory $revisionFactory
-	 * @param string $target
-	 * @param string|int $namespace
+	 * @param IConnectionProvider $dbProvider
+	 * @param RevisionStore $revisionStore
+	 * @param NamespaceInfo $namespaceInfo
+	 * @param CommentFormatter $commentFormatter
+	 * @param LinkBatchFactory $linkBatchFactory
+	 * @param UserFactory $userFactory
+	 * @param IContextSource $context
+	 * @param array $options
+	 * @param UserIdentity $target
 	 */
 	public function __construct(
-		IContextSource $context,
-		CommentStore $commentStore,
 		HookContainer $hookContainer,
 		LinkRenderer $linkRenderer,
-		ILoadBalancer $loadBalancer,
-		RevisionFactory $revisionFactory,
-		$target,
-		$namespace
+		IConnectionProvider $dbProvider,
+		RevisionStore $revisionStore,
+		NamespaceInfo $namespaceInfo,
+		CommentFormatter $commentFormatter,
+		LinkBatchFactory $linkBatchFactory,
+		UserFactory $userFactory,
+		IContextSource $context,
+		array $options,
+		$target
 	) {
-		// Set database before parent constructor to avoid setting it there with wfGetDB
-		$this->mDb = $loadBalancer->getConnectionRef( ILoadBalancer::DB_REPLICA, 'contributions' );
-		parent::__construct( $context, $linkRenderer );
-		$msgs = [ 'deletionlog', 'undeleteviewlink', 'diff' ];
-		foreach ( $msgs as $msg ) {
-			$this->messages[$msg] = $this->msg( $msg )->text();
-		}
-		$this->target = $target;
-		$this->namespace = $namespace;
-		$this->hookRunner = new HookRunner( $hookContainer );
-		$this->commentStore = $commentStore;
-		$this->revisionFactory = $revisionFactory;
-	}
+		$options['isArchive'] = true;
 
-	public function getDefaultQuery() {
-		$query = parent::getDefaultQuery();
-		$query['target'] = $this->target;
-
-		return $query;
-	}
-
-	public function getQueryInfo() {
-		$dbr = $this->getDatabase();
-		$userCond = [ 'actor_name' => $this->target ];
-		$conds = array_merge( $userCond, $this->getNamespaceCond() );
-		// Paranoia: avoid brute force searches (T19792)
-		if ( !$this->getAuthority()->isAllowed( 'deletedhistory' ) ) {
-			$conds[] = $dbr->bitAnd( 'ar_deleted', RevisionRecord::DELETED_USER ) . ' = 0';
-		} elseif ( !$this->getAuthority()->isAllowedAny( 'suppressrevision', 'viewsuppressed' ) ) {
-			$conds[] = $dbr->bitAnd( 'ar_deleted', RevisionRecord::SUPPRESSED_USER ) .
-				' != ' . RevisionRecord::SUPPRESSED_USER;
-		}
-
-		$queryInfo = $this->revisionFactory->getArchiveQueryInfo();
-		$queryInfo['conds'] = $conds;
-		$queryInfo['options'] = [];
-
-		// rename the "joins" field to "join_conds" as expected by the base class.
-		$queryInfo['join_conds'] = $queryInfo['joins'];
-		unset( $queryInfo['joins'] );
-
-		ChangeTags::modifyDisplayQuery(
-			$queryInfo['tables'],
-			$queryInfo['fields'],
-			$queryInfo['conds'],
-			$queryInfo['join_conds'],
-			$queryInfo['options'],
-			''
+		parent::__construct(
+			$linkRenderer,
+			$linkBatchFactory,
+			$hookContainer,
+			$revisionStore,
+			$namespaceInfo,
+			$commentFormatter,
+			$userFactory,
+			$context,
+			$options,
+			$target
 		);
 
-		return $queryInfo;
+		$this->revisionIdField = 'ar_rev_id';
+		$this->revisionParentIdField = 'ar_parent_id';
+		$this->revisionTimestampField = 'ar_timestamp';
+		$this->revisionLengthField = 'ar_len';
+		$this->revisionDeletedField = 'ar_deleted';
+		$this->revisionMinorField = 'ar_minor_edit';
+		$this->userNameField = 'ar_user_text';
+		$this->pageNamespaceField = 'ar_namespace';
+		$this->pageTitleField = 'ar_title';
 	}
 
 	/**
-	 * This method basically executes the exact same code as the parent class, though with
-	 * a hook added, to allow extensions to add additional queries.
-	 *
-	 * @param string $offset Index offset, inclusive
-	 * @param int $limit Exact query limit
-	 * @param bool $order IndexPager::QUERY_ASCENDING or IndexPager::QUERY_DESCENDING
-	 * @return IResultWrapper
+	 * @inheritDoc
 	 */
-	public function reallyDoQuery( $offset, $limit, $order ) {
-		$data = [ parent::reallyDoQuery( $offset, $limit, $order ) ];
+	protected function getRevisionQuery() {
+		$queryBuilder = $this->revisionStore->newArchiveSelectQueryBuilder( $this->getDatabase() )
+			->joinComment()
+			->where( [ 'actor_name' => $this->target ] );
 
-		// This hook will allow extensions to add in additional queries, nearly
-		// identical to ContribsPager::reallyDoQuery.
-		$this->hookRunner->onDeletedContribsPager__reallyDoQuery(
-			$data, $this, $offset, $limit, $order );
+		return $queryBuilder->getQueryInfo();
+	}
 
-		$result = [];
-
-		// loop all results and collect them in an array
-		foreach ( $data as $query ) {
-			foreach ( $query as $i => $row ) {
-				// use index column as key, allowing us to easily sort in PHP
-				$result[$row->{$this->getIndexField()} . "-$i"] = $row;
-			}
-		}
-
-		// sort results
-		if ( $order === self::QUERY_ASCENDING ) {
-			ksort( $result );
-		} else {
-			krsort( $result );
-		}
-
-		// enforce limit
-		$result = array_slice( $result, 0, $limit );
-
-		// get rid of array keys
-		$result = array_values( $result );
-
-		return new FakeResultWrapper( $result );
+	/**
+	 * @return string[]
+	 */
+	protected function getExtraSortFields() {
+		return [ 'ar_id' ];
 	}
 
 	public function getIndexField() {
 		return 'ar_timestamp';
 	}
-
-	/**
-	 * @return string
-	 */
-	public function getTarget() {
-		return $this->target;
-	}
-
-	/**
-	 * @return int|string
-	 */
-	public function getNamespace() {
-		return $this->namespace;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	protected function getStartBody() {
-		return "<section class='mw-pager-body'>\n";
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	protected function getEndBody() {
-		return "</section>\n";
-	}
-
-	private function getNamespaceCond() {
-		if ( $this->namespace !== '' ) {
-			return [ 'ar_namespace' => (int)$this->namespace ];
-		} else {
-			return [];
-		}
-	}
-
-	/**
-	 * Generates each row in the contributions list.
-	 *
-	 * @todo This would probably look a lot nicer in a table.
-	 * @param stdClass $row
-	 * @return string
-	 */
-	public function formatRow( $row ) {
-		$ret = '';
-		$classes = [];
-		$attribs = [];
-
-		if ( $this->revisionFactory->isRevisionRow( $row, 'archive' ) ) {
-			$revRecord = $this->revisionFactory->newRevisionFromArchiveRow( $row );
-			$revId = $revRecord->getId();
-			if ( $revId ) {
-				$attribs['data-mw-revid'] = $revId;
-				[ $ret, $classes ] = $this->formatRevisionRow( $row );
-			}
-		}
-
-		// Let extensions add data
-		$this->hookRunner->onDeletedContributionsLineEnding(
-			$this, $ret, $row, $classes, $attribs );
-		$attribs = array_filter( $attribs,
-			[ Sanitizer::class, 'isReservedDataAttribute' ],
-			ARRAY_FILTER_USE_KEY
-		);
-
-		if ( $classes === [] && $attribs === [] && $ret === '' ) {
-			wfDebug( "Dropping Special:DeletedContribution row that could not be formatted" );
-			$ret = "<!-- Could not format Special:DeletedContribution row. -->\n";
-		} else {
-			$attribs['class'] = $classes;
-			$ret = Html::rawElement( 'li', $attribs, $ret ) . "\n";
-		}
-
-		return $ret;
-	}
-
-	/**
-	 * Generates each row in the contributions list for archive entries.
-	 *
-	 * Contributions which are marked "top" are currently on top of the history.
-	 * For these contributions, a [rollback] link is shown for users with sysop
-	 * privileges. The rollback link restores the most recent version that was not
-	 * written by the target user.
-	 *
-	 * @todo This would probably look a lot nicer in a table.
-	 * @param stdClass $row
-	 * @return array
-	 */
-	private function formatRevisionRow( $row ) {
-		$page = Title::makeTitle( $row->ar_namespace, $row->ar_title );
-
-		$linkRenderer = $this->getLinkRenderer();
-
-		$revRecord = $this->revisionFactory->newRevisionFromArchiveRow(
-				$row,
-				RevisionFactory::READ_NORMAL,
-				$page
-			);
-
-		$undelete = SpecialPage::getTitleFor( 'Undelete' );
-
-		$logs = SpecialPage::getTitleFor( 'Log' );
-		$dellog = $linkRenderer->makeKnownLink(
-			$logs,
-			$this->messages['deletionlog'],
-			[],
-			[
-				'type' => 'delete',
-				'page' => $page->getPrefixedText()
-			]
-		);
-
-		$reviewlink = $linkRenderer->makeKnownLink(
-			SpecialPage::getTitleFor( 'Undelete', $page->getPrefixedDBkey() ),
-			$this->messages['undeleteviewlink']
-		);
-
-		$user = $this->getUser();
-
-		if ( $this->getAuthority()->isAllowed( 'deletedtext' ) ) {
-			$last = $linkRenderer->makeKnownLink(
-				$undelete,
-				$this->messages['diff'],
-				[],
-				[
-					'target' => $page->getPrefixedText(),
-					'timestamp' => $revRecord->getTimestamp(),
-					'diff' => 'prev'
-				]
-			);
-		} else {
-			$last = htmlspecialchars( $this->messages['diff'] );
-		}
-
-		$comment = Linker::revComment( $revRecord );
-		$date = $this->getLanguage()->userTimeAndDate( $revRecord->getTimestamp(), $user );
-
-		if ( !$this->getAuthority()->isAllowed( 'undelete' ) ||
-			!$revRecord->userCan( RevisionRecord::DELETED_TEXT, $this->getAuthority() )
-		) {
-			$link = htmlspecialchars( $date ); // unusable link
-		} else {
-			$link = $linkRenderer->makeKnownLink(
-				$undelete,
-				$date,
-				[ 'class' => 'mw-changeslist-date' ],
-				[
-					'target' => $page->getPrefixedText(),
-					'timestamp' => $revRecord->getTimestamp()
-				]
-			);
-		}
-		// Style deleted items
-		if ( $revRecord->isDeleted( RevisionRecord::DELETED_TEXT ) ) {
-			$class = Linker::getRevisionDeletedClass( $revRecord );
-			$link = '<span class="' . $class . '">' . $link . '</span>';
-		}
-
-		$pagelink = $linkRenderer->makeLink(
-			$page,
-			null,
-			[ 'class' => 'mw-changeslist-title' ]
-		);
-
-		if ( $revRecord->isMinor() ) {
-			$mflag = ChangesList::flag( 'minor' );
-		} else {
-			$mflag = '';
-		}
-
-		// Revision delete link
-		$del = Linker::getRevDeleteLink( $user, $revRecord, $page );
-		if ( $del ) {
-			$del .= ' ';
-		}
-
-		$tools = Html::rawElement(
-			'span',
-			[ 'class' => 'mw-deletedcontribs-tools' ],
-			$this->msg( 'parentheses' )->rawParams( $this->getLanguage()->pipeList(
-				[ $last, $dellog, $reviewlink ] ) )->escaped()
-		);
-
-		// Tags, if any.
-		list( $tagSummary, $classes ) = ChangeTags::formatSummaryRow(
-			$row->ts_tags,
-			'deletedcontributions',
-			$this->getContext()
-		);
-
-		$separator = '<span class="mw-changeslist-separator">. .</span>';
-		$ret = "{$del}{$link} {$tools} {$separator} {$mflag} {$pagelink} {$comment} {$tagSummary}";
-
-		# Denote if username is redacted for this edit
-		if ( $revRecord->isDeleted( RevisionRecord::DELETED_USER ) ) {
-			$ret .= " <strong>" . $this->msg( 'rev-deleted-user-contribs' )->escaped() . "</strong>";
-		}
-
-		return [ $ret, $classes ];
-	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( DeletedContribsPager::class, 'DeletedContribsPager' );

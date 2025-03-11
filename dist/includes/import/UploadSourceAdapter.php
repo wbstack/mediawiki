@@ -2,7 +2,7 @@
 /**
  * MediaWiki page data importer.
  *
- * Copyright © 2003,2005 Brion Vibber <brion@pobox.com>
+ * Copyright © 2003,2005 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,6 +54,29 @@ class UploadSourceAdapter {
 		self::$sourceRegistrations[$id] = $source;
 
 		return $id;
+	}
+
+	/**
+	 * @param string $id
+	 * @return bool
+	 */
+	public static function isSeekableSource( string $id ) {
+		if ( !isset( self::$sourceRegistrations[$id] ) ) {
+			return false;
+		}
+		return self::$sourceRegistrations[$id]->isSeekable();
+	}
+
+	/**
+	 * @param string $id
+	 * @param int $offset
+	 * @return int|false
+	 */
+	public static function seekSource( string $id, int $offset ) {
+		if ( !isset( self::$sourceRegistrations[$id] ) ) {
+			return false;
+		}
+		return self::$sourceRegistrations[$id]->seek( $offset );
 	}
 
 	/**

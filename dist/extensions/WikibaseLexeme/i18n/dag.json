@@ -1,16 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Dnshitobu",
-			"Alhassan Peter"
+			"Alhassan Peter",
+			"Dnshitobu"
 		]
 	},
 	"content-model-wikibase-lexeme": "Wikibase Lexeme",
 	"datatypes-type-wikibase-form": "Bɔhisi gbaŋ",
 	"datatypes-type-wikibase-lexeme": "Bachi",
 	"datatypes-type-wikibase-sense": "Gbunni",
+	"nstab-lexeme": "Bachi",
 	"special-mergelexemes": "Laɣimmi bachinima ayi",
 	"special-newlexeme": "Nammi bachi palli",
+	"tooltip-ca-nstab-lexeme": "Bachi gbunni",
 	"wikibase-entity-summary-wblmergelexemes-from": "Piligimi kpe $3 n-laɣim bachi maa",
 	"wikibase-entity-summary-wblmergelexemes-to": "Laɣimmi bachi maa niŋ $3",
 	"wikibase-lexeme-gloss-empty": "Bachinima gbunni bi kahigi",
@@ -83,6 +85,7 @@
 	"wikibaselexeme-form-description": "$1 for: $2 ($3): $4",
 	"wikibaselexeme-form-field-language-label": "Bachi ŋmɛbu bal' shɛli",
 	"wikibaselexeme-form-field-representation-label": "Zaŋzali zaani",
+	"wikibaselexeme-form-field-required": "Di bɔri garigibu",
 	"wikibaselexeme-form-grammatical-features": "Bachi pubu yaɣili biɛhigu",
 	"wikibaselexeme-form-representation-redundant-language": "Di ku tooi niŋ ka kpɛhi zaŋzali zaani bɔbili din bachinima ŋmɛbu nyɛ yim.",
 	"wikibaselexeme-gloss-field-gloss-label": "Bachinima gbunni",

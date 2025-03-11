@@ -2,11 +2,11 @@
 
 namespace CirrusSearch\Api;
 
-use ApiQuery;
-use ApiQueryBase;
 use CirrusSearch\BuildDocument\Completion\SuggestBuilder;
 use Elastica\Document;
 use InvalidArgumentException;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryBase;
 use Wikimedia\ParamValidator\ParamValidator;
 
 class QueryCompSuggestBuildDoc extends ApiQueryBase {
@@ -28,12 +28,13 @@ class QueryCompSuggestBuildDoc extends ApiQueryBase {
 			return;
 		}
 
-		foreach ( $this->getPageSet()->getGoodTitles() as $origPageId => $title ) {
+		foreach ( $this->getPageSet()->getGoodPages() as $origPageId => $title ) {
 			$docs = $this->loadDocuments( $title );
 			$this->addExplanation( $builder, $origPageId, $docs );
 		}
 	}
 
+	/** @inheritDoc */
 	protected function getAllowedParams() {
 		return [
 			'method' => [

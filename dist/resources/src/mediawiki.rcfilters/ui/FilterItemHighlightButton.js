@@ -1,20 +1,22 @@
+const HighlightColors = require( '../HighlightColors.js' );
+
 /**
- * A button to configure highlight for a filter item
+ * A button to configure highlight for a filter item.
  *
  * @class mw.rcfilters.ui.FilterItemHighlightButton
+ * @ignore
  * @extends OO.ui.PopupButtonWidget
  *
- * @constructor
  * @param {mw.rcfilters.Controller} controller RCFilters controller
  * @param {mw.rcfilters.dm.FilterItem} model Filter item model
  * @param {mw.rcfilters.ui.HighlightPopupWidget} highlightPopup Shared highlight color picker
  * @param {Object} [config] Configuration object
  */
-var FilterItemHighlightButton = function MwRcfiltersUiFilterItemHighlightButton( controller, model, highlightPopup, config ) {
+const FilterItemHighlightButton = function MwRcfiltersUiFilterItemHighlightButton( controller, model, highlightPopup, config ) {
 	config = config || {};
 
 	// Parent
-	FilterItemHighlightButton.parent.call( this, $.extend( true, {}, config, {
+	FilterItemHighlightButton.super.call( this, $.extend( true, {}, config, {
 		icon: 'highlight',
 		indicator: 'down'
 	} ) );
@@ -28,7 +30,7 @@ var FilterItemHighlightButton = function MwRcfiltersUiFilterItemHighlightButton(
 	// This lives inside a MenuOptionWidget, which intercepts mousedown
 	// to select the item. We want to prevent that when we click the highlight
 	// button
-	this.$element.on( 'mousedown', function ( e ) {
+	this.$element.on( 'mousedown', ( e ) => {
 		e.stopPropagation();
 	} );
 
@@ -56,14 +58,14 @@ FilterItemHighlightButton.prototype.onAction = function () {
 	this.popup.setFilterItem( this.model );
 
 	// Parent method
-	FilterItemHighlightButton.parent.prototype.onAction.call( this );
+	FilterItemHighlightButton.super.prototype.onAction.call( this );
 };
 
 /**
  * Respond to item model update event
  */
 FilterItemHighlightButton.prototype.updateUiBasedOnModel = function () {
-	var currentColor = this.model.getHighlightColor(),
+	const currentColor = this.model.getHighlightColor(),
 		widget = this;
 
 	this.$icon.toggleClass(
@@ -71,7 +73,7 @@ FilterItemHighlightButton.prototype.updateUiBasedOnModel = function () {
 		currentColor !== null
 	);
 
-	mw.rcfilters.HighlightColors.forEach( function ( c ) {
+	HighlightColors.forEach( ( c ) => {
 		// The following classes are used here:
 		// * mw-rcfilters-ui-filterItemHighlightButton-circle-color-c1
 		// * mw-rcfilters-ui-filterItemHighlightButton-circle-color-c2

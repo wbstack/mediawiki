@@ -2,12 +2,12 @@
 
 namespace MediaWiki\Extension\OAuth\Rest\Handler;
 
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Control\ConsumerAccessControl;
 use MediaWiki\Rest\LocalizedHttpException;
 use MWRestrictions;
-use RequestContext;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -71,12 +71,21 @@ class ResetClientSecret extends AbstractClientHandler {
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
 			],
+		];
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getBodyParamSettings(): array {
+		return [
 			'reason' => [
-				self::PARAM_SOURCE => 'post',
+				self::PARAM_SOURCE => 'body',
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => false,
 				ParamValidator::PARAM_DEFAULT => '',
 			],
 		];
 	}
+
 }

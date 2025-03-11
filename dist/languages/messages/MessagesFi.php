@@ -1,8 +1,6 @@
 <?php
 /** Finnish (suomi)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -115,6 +113,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'Tuoreet_muutokset' ],
 	'Recentchangeslinked'       => [ 'Linkitetyt_muutokset' ],
 	'Redirect'                  => [ 'Ohjaus' ],
+	'Renameuser'                => [ 'Käyttäjätunnusten_nimeäminen' ],
 	'Revisiondelete'            => [ 'Poista_versio' ],
 	'Search'                    => [ 'Haku' ],
 	'Shortpages'                => [ 'Lyhyet_sivut' ],
@@ -195,7 +194,7 @@ $magicWords = [
 	'img_thumbnail'             => [ '1', 'pienoiskuva', 'pienois', 'thumb', 'thumbnail' ],
 	'img_top'                   => [ '1', 'ylös', 'ylhäällä', 'top' ],
 	'img_upright'               => [ '1', 'pysty', 'pysty=$1', 'pysty_$1', 'yläoikea', 'yläoikea=$1', 'yläoikea_$1', 'upright', 'upright=$1', 'upright $1' ],
-	'language'                  => [ '0', '#KIELI:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#KIELI', '#LANGUAGE' ],
 	'localday'                  => [ '1', 'PAIKALLINENPÄIVÄ', 'LOCALDAY' ],
 	'localday2'                 => [ '1', 'PAIKALLINENPÄIVÄ2', 'LOCALDAY2' ],
 	'localdayname'              => [ '1', 'PAIKALLINENPÄIVÄNIMI', 'LOCALDAYNAME' ],

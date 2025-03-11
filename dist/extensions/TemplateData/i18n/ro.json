@@ -4,6 +4,7 @@
 			"ImGelu",
 			"Minisarm",
 			"NGC 54",
+			"Paloi Sciurala",
 			"XXN"
 		]
 	},
@@ -57,7 +58,6 @@
 	"templatedata-modal-button-done": "Gata",
 	"templatedata-modal-button-importParams": "Importă parametri",
 	"templatedata-modal-button-removemap": "Elimină harta",
-	"templatedata-modal-button-restoreparam": "Restaurează parametrul",
 	"templatedata-modal-button-saveparam": "Salvare",
 	"templatedata-modal-confirmcancel": "Sunteți {{GENDER:|sigur|sigură}} că doriți să vă respingeți schimbările?",
 	"templatedata-modal-current-language": "Limba curentă: $1",
@@ -69,7 +69,6 @@
 	"templatedata-modal-placeholder-paramkey": "Numele parametrului",
 	"templatedata-modal-placeholder-prompt-map-name": "Introduce numele hărții",
 	"templatedata-modal-search-input-placeholder": "Căutare după numele sau codul limbii",
-	"templatedata-modal-table-param-actions": "Acțiuni",
 	"templatedata-modal-table-param-aliases": "Aliasuri (separate prin virgulă)",
 	"templatedata-modal-table-param-autovalue": "Valoare automată",
 	"templatedata-modal-table-param-default": "Implicit ($1)",
@@ -84,7 +83,6 @@
 	"templatedata-modal-table-param-required": "Obligatoriu",
 	"templatedata-modal-table-param-suggested": "Sugerat",
 	"templatedata-modal-table-param-type": "Tip",
-	"templatedata-modal-table-param-uneditablefield": "Needitabil",
 	"templatedata-modal-title": "Editor documentație format",
 	"templatedata-modal-title-addparam": "Adăugare parametru nou",
 	"templatedata-modal-title-choose-language": "Alegere limbă",

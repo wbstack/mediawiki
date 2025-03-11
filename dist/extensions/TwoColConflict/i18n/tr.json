@@ -4,6 +4,7 @@
 			"BaRaN6161 TURK",
 			"Diyapazon",
 			"Hedda",
+			"Joseph",
 			"MuratTheTurkish",
 			"Vesely35"
 		]
@@ -27,8 +28,8 @@
 	"twocolconflict-special-textarea-hint": "Revizyonuzu kaynağını görüntüleyebilir ve kopyalayabilirsiniz:",
 	"twocolconflict-special-malformed-title": "Eksik veya geçersiz başlık.",
 	"twocolconflict-special-expired": "Burada görülecek bir şey yok. Bu muhtemelen daha önce bir değişiklik çakışmasıyla karşılaştığınız anlamına gelir, ancak bu bir süre önceydi ve geçici olarak depolanan metninizin süresi şimdiye kadar doldu.",
-	"twocolconflict-split-header-hint": "[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface Bu sayfada] geri bildirim bırakırsanız, bu özelliğin daha da geliştirilmesine yardımcı olabilirsiniz.",
-	"twocolconflict-split-header-hint-beta": "Bu beta özelliğini kullandığınız için teşekkür ederiz. [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface Bu sayfada] geri bildirim bırakırsanız, daha da geliştirmeye yardımcı olabilirsiniz.",
+	"twocolconflict-split-header-hint": "[//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface Projenin tartışma sayfasında] geri bildirim bırakırsanız, bu özelliğin daha da geliştirilmesine yardımcı olabilirsiniz.",
+	"twocolconflict-split-header-hint-beta": "Bu beta özelliğini kullandığınız için teşekkür ederiz. [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface Projenin tartışma sayfasında] geri bildirim bırakırsanız, daha da geliştirmeye yardımcı olabilirsiniz.",
 	"twocolconflict-split-header-overview": "Siz değişiklik yaparken başka bir kullanıcı aynı sayfayı değiştirdi ve önünüzde yayınladı. Lütfen her iki sürümü de inceleyin ve birleştirin. \"{{int:publishchanges}}\" düğmesini tıkladığınızda yalnızca seçili kutulardaki metin kaydedilecektir.",
 	"twocolconflict-split-your-version-header": "Revizyonunuz",
 	"twocolconflict-split-current-version-header": "$1 itibarı ile sayfanın şu anki hâli",

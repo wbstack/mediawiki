@@ -2,27 +2,11 @@
 
 namespace JsonConfig;
 
-use Language;
-use MWException;
-use Scribunto_LuaError;
-use Scribunto_LuaLibraryBase;
+use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LibraryBase;
+use MediaWiki\Extension\Scribunto\Engines\LuaCommon\LuaError;
+use MediaWiki\MediaWikiServices;
 
-class JCLuaLibrary extends Scribunto_LuaLibraryBase {
-
-	/**
-	 * @param string $engine
-	 * @param string[] &$extraLibraries
-	 *
-	 * @return bool
-	 */
-	public static function onScribuntoExternalLibraries( $engine, array &$extraLibraries ) {
-		global $wgJsonConfigEnableLuaSupport;
-		if ( $wgJsonConfigEnableLuaSupport && $engine == 'lua' ) {
-			$extraLibraries['mw.ext.data'] = 'JsonConfig\JCLuaLibrary';
-		}
-
-		return true;
-	}
+class JCLuaLibrary extends LibraryBase {
 
 	public function register() {
 		$functions = [ 'get' => [ $this, 'get' ] ];
@@ -35,7 +19,7 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 	 * @param string $titleStr name of the page in the Data namespace
 	 * @param string $langCode language code. If '_' is given, returns all codes
 	 * @return false[]|mixed[]
-	 * @throws Scribunto_LuaError
+	 * @throws LuaError
 	 */
 	public function get( $titleStr, $langCode ) {
 		$this->checkType( 'get', 1, $titleStr, 'string' );
@@ -43,10 +27,11 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 			$language = $this->getParser()->getTargetLanguage();
 		} elseif ( $langCode !== '_' ) {
 			$this->checkType( 'get', 2, $langCode, 'string' );
-			try {
-				$language = Language::factory( $langCode );
-			} catch ( MWException $e ) {
-				throw new Scribunto_LuaError( 'bad argument #2 to "get" (not a valid language code)' );
+			$services = MediaWikiServices::getInstance();
+			if ( $services->getLanguageNameUtils()->isValidCode( $langCode ) ) {
+				$language = $services->getLanguageFactory()->getLanguage( $langCode );
+			} else {
+				throw new LuaError( 'bad argument #2 to "get" (not a valid language code)' );
 			}
 		} else {
 			$language = null;
@@ -54,7 +39,7 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 
 		$jct = JCSingleton::parseTitle( $titleStr, NS_DATA );
 		if ( !$jct ) {
-			throw new Scribunto_LuaError( 'bad argument #1 to "get" (not a valid title)' );
+			throw new LuaError( 'bad argument #1 to "get" (not a valid title)' );
 		}
 
 		$content = JCSingleton::getContentFromLocalCache( $jct );
@@ -65,7 +50,9 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 			$prop = 'jsonconfig_getdata';
 			$output = $this->getParser()->getOutput();
 			$prevValue = (int)( $output->getPageProperty( $prop ) ?? 0 );
-			$output->setPageProperty( $prop, strval( 1 + $prevValue ) );
+			$output->setNumericPageProperty( $prop, 1 + $prevValue );
+			// Transition to a tracking category
+			$this->getParser()->addTrackingCategory( 'jsonconfig-use-category' );
 		}
 
 		if ( !$content ) {
@@ -101,7 +88,7 @@ class JCLuaLibrary extends Scribunto_LuaLibraryBase {
 			$v = get_object_vars( $v );
 		}
 		if ( is_array( $v ) ) {
-			$v = array_map( 'self::objectToArray', $v );
+			$v = array_map( [ self::class, 'objectToArray' ], $v );
 		}
 		return $v;
 	}

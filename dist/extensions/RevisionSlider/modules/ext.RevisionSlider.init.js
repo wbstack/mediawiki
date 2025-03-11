@@ -1,18 +1,17 @@
-var Settings = require( 'ext.RevisionSlider.Settings' ),
+const Settings = require( 'ext.RevisionSlider.Settings' ),
 	settings = new Settings(),
 	SliderModule = require( 'ext.RevisionSlider.Slider' ),
 	HelpDialog = SliderModule.HelpDialog,
 	RevisionSliderApi = SliderModule.Api,
 	Slider = SliderModule.Slider,
 	utils = SliderModule.utils,
-	autoExpand = settings.shouldAutoExpand(),
-	expanded = autoExpand,
 	toggleButton = OO.ui.ButtonWidget.static.infuse( $( '.mw-revslider-toggle-button' ) );
+let autoExpand = settings.shouldAutoExpand();
+let expanded = autoExpand;
 
 function initialize() {
-	var startTime = mw.now(),
-		api = new RevisionSliderApi( mw.util.wikiScript( 'api' ) ),
-		changeTags = [];
+	const startTime = mw.now();
+	const api = new RevisionSliderApi( mw.util.wikiScript( 'api' ) );
 
 	toggleButton.$element.children().attr( {
 		'aria-expanded': autoExpand,
@@ -28,38 +27,31 @@ function initialize() {
 
 	HelpDialog.init();
 
-	api.fetchAvailableChangeTags().then( function ( data ) {
-		if ( typeof data === 'object' &&
-			data.query &&
-			data.query.tags &&
-			data.query.tags.length > 0
-		) {
-			changeTags = data.query.tags;
-		}
+	api.fetchAvailableChangeTags().then( ( data ) => {
+		const changeTags = data && data.query && data.query.tags || [];
 		api.fetchRevisionData( mw.config.get( 'wgPageName' ), {
-			startId: mw.config.get( 'wgDiffNewId' ),
+			startId: Math.max( mw.config.get( 'wgDiffOldId' ), mw.config.get( 'wgDiffNewId' ) ),
 			limit: utils.calculateRevisionsPerWindow( 160, 16 ),
 			changeTags: changeTags
-		} ).then( function ( data2 ) {
+		} ).then( ( data2 ) => {
 			mw.track( 'timing.MediaWiki.RevisionSlider.timing.initFetchRevisionData', mw.now() - startTime );
 
 			try {
-				var revs = data2.revisions;
+				const revs = data2.revisions;
 				revs.reverse();
 
-				var $container = $( '.mw-revslider-slider-wrapper' );
+				const $container = $( '.mw-revslider-slider-wrapper' );
 				$container.attr( 'id', 'mw-revslider-slider-wrapper' );
 
-				var revisionList = new SliderModule.RevisionList(
+				const revisionList = new SliderModule.RevisionList(
 					SliderModule.makeRevisions( revs ),
 					changeTags
 				);
-				revisionList.getView().setDir( $container.css( 'direction' ) || 'ltr' );
 
-				var slider = new Slider( revisionList );
+				const slider = new Slider( revisionList );
 				slider.getView().render( $container );
 
-				$( window ).on( 'resize', OO.ui.throttle( function () {
+				$( window ).on( 'resize', OO.ui.throttle( () => {
 					slider.getView().render( $container );
 				}, 250 ) );
 
@@ -72,13 +64,13 @@ function initialize() {
 				mw.track( 'timing.MediaWiki.RevisionSlider.timing.init', mw.now() - startTime );
 			} catch ( err ) {
 				$( '.mw-revslider-placeholder' )
-					.text( mw.message( 'revisionslider-loading-failed' ).text() );
+					.text( mw.msg( 'revisionslider-loading-failed' ) );
 				mw.log.error( err );
 				mw.track( 'counter.MediaWiki.RevisionSlider.error.init' );
 			}
-		}, function ( err ) {
+		}, ( err ) => {
 			$( '.mw-revslider-placeholder' )
-				.text( mw.message( 'revisionslider-loading-failed' ).text() );
+				.text( mw.msg( 'revisionslider-loading-failed' ) );
 			mw.log.error( err );
 			mw.track( 'counter.MediaWiki.RevisionSlider.error.init' );
 		} );
@@ -86,25 +78,23 @@ function initialize() {
 }
 
 function expand() {
-	toggleButton.setTitle( mw.message( 'revisionslider-toggle-title-collapse' ).text() );
+	toggleButton.setTitle( mw.msg( 'revisionslider-toggle-title-collapse' ) );
 	$( '.mw-revslider-container' ).removeClass( 'mw-revslider-container-collapsed' )
 		.addClass( 'mw-revslider-container-expanded' );
-	$( '.mw-revslider-slider-wrapper' ).show();
-	$( '.mw-revslider-auto-expand-button' ).show();
+	$( '.mw-revslider-slider-wrapper, .mw-revslider-auto-expand-button' ).show();
 	toggleButton.$element.children().attr( 'aria-expanded', 'true' );
 	expanded = true;
 }
 
 function collapse() {
-	toggleButton.setTitle( mw.message( 'revisionslider-toggle-title-expand' ).text() );
+	toggleButton.setTitle( mw.msg( 'revisionslider-toggle-title-expand' ) );
 	$( '.mw-revslider-container' ).removeClass( 'mw-revslider-container-expanded' )
 		.addClass( 'mw-revslider-container-collapsed' );
-	$( '.mw-revslider-slider-wrapper' ).hide();
-	$( '.mw-revslider-auto-expand-button' ).hide();
+	$( '.mw-revslider-slider-wrapper, .mw-revslider-auto-expand-button' ).hide();
 	toggleButton.$element.children().attr( 'aria-expanded', 'false' );
 }
 
-var autoExpandButton = new OO.ui.ToggleButtonWidget( {
+const autoExpandButton = new OO.ui.ToggleButtonWidget( {
 	icon: 'pushPin',
 	classes: [ 'mw-revslider-auto-expand-button' ],
 	title: mw.msg( autoExpand ?
@@ -151,11 +141,9 @@ toggleButton.connect( this, {
 		if ( expanded ) {
 			expand();
 			mw.track( 'counter.MediaWiki.RevisionSlider.event.expand' );
-			mw.hook( 'revslider.expand' ).fire();
 		} else {
 			collapse();
 			mw.track( 'counter.MediaWiki.RevisionSlider.event.collapse' );
-			mw.hook( 'revslider.collapse' ).fire();
 		}
 	}
 } );

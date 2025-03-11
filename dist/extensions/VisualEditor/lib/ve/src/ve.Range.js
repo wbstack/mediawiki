@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Range class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -80,9 +80,9 @@ ve.Range.static.newCoveringRange = function ( ranges, backwards ) {
 	if ( ranges.length === 0 ) {
 		throw new Error( 'newCoveringRange() requires at least one range' );
 	}
-	var minStart = ranges[ 0 ].start;
-	var maxEnd = ranges[ 0 ].end;
-	for ( var i = 1; i < ranges.length; i++ ) {
+	let minStart = ranges[ 0 ].start;
+	let maxEnd = ranges[ 0 ].end;
+	for ( let i = 1; i < ranges.length; i++ ) {
 		if ( ranges[ i ].start < minStart ) {
 			minStart = ranges[ i ].start;
 		}
@@ -90,7 +90,7 @@ ve.Range.static.newCoveringRange = function ( ranges, backwards ) {
 			maxEnd = ranges[ i ].end;
 		}
 	}
-	var range;
+	let range;
 	if ( backwards ) {
 		range = new ve.Range( maxEnd, minStart );
 	} else {

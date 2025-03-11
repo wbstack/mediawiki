@@ -29,7 +29,7 @@ class DerivedPropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 		$this->assertInstanceOf( PropertyValueSnak::class, $snak );
 	}
 
-	public function validConstructorArgumentsProvider() {
+	public static function validConstructorArgumentsProvider() {
 		return [
 			'No extras' => [
 				new NumericPropertyId( 'P1' ),
@@ -44,8 +44,8 @@ class DerivedPropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 			'numeric id' => [
 				42,
 				new StringValue( 'foo' ),
-				[]
-			]
+				[],
+			],
 		];
 	}
 
@@ -61,7 +61,7 @@ class DerivedPropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 		new DerivedPropertyValueSnak( $propertyId, $dataValue, $derivedDataValues );
 	}
 
-	public function invalidConstructorArgumentsProvider() {
+	public static function invalidConstructorArgumentsProvider() {
 		return [
 			'fail - Integer key' => [
 				new NumericPropertyId( 'P9001' ),
@@ -128,8 +128,8 @@ class DerivedPropertyValueSnakTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		$this->assertSame(
-			'a:2:{i:0;s:5:"P9001";i:1;C:22:"DataValues\StringValue":2:{bc}}',
-			$snak->serialize()
+			'a:2:{i:0;s:5:"P9001";i:1;O:22:"DataValues\StringValue":1:{i:0;s:2:"bc";}}',
+			$snak->serialize(),
 		);
 	}
 

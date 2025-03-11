@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki Initialization ViewportZoomHandler class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -47,7 +47,7 @@ ve.init.mw.ViewportZoomHandler = function VeInitMwViewportZoomHandler() {
  * Change the `<meta name="viewport">` tag to prevent automatic zooming.
  */
 ve.init.mw.ViewportZoomHandler.prototype.preventZoom = function () {
-	this.$viewportMeta.attr( 'content', function ( i, val ) {
+	this.$viewportMeta.attr( 'content', ( i, val ) => {
 		// Remove existing maximum-scale, if any, and add 'maximum-scale=1.0'. Don't change other values.
 		if ( val ) {
 			val = val.replace( /maximum-scale=[\d.]+(,\s*|$)/, '' );

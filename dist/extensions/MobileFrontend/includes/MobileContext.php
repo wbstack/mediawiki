@@ -1,9 +1,13 @@
 <?php
 
+use MediaWiki\Config\Config;
+use MediaWiki\Context\ContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Utils\UrlUtils;
 use MobileFrontend\Devices\DeviceDetectorService;
 use MobileFrontend\WMFBaseDomainExtractor;
-use Wikimedia\IPUtils;
 
 /**
  * Provide various request-dependant methods to use in mobile context
@@ -15,7 +19,6 @@ class MobileContext extends ContextSource {
 	public const STOP_MOBILE_REDIRECT_COOKIE_NAME = 'stopMobileRedirect';
 	public const USEFORMAT_COOKIE_NAME = 'mf_useformat';
 	public const USER_MODE_PREFERENCE_NAME = 'mfMode';
-	public const LOGGER_CHANNEL = 'mobile';
 
 	// Keep in sync with https://wikitech.wikimedia.org/wiki/X-Analytics.
 	private const ANALYTICS_HEADER_KEY = 'mf-m';
@@ -93,9 +96,11 @@ class MobileContext extends ContextSource {
 	public static $mfStopRedirectCookieHost = null;
 
 	/**
-	 * @var string|null Stores the actual mobile url template.
+	 * In-process cache for checking whether the current wiki has a mobile URL that's
+	 * different from the desktop one.
+	 * @var bool|null
 	 */
-	private $mobileUrlTemplate = null;
+	private $hasMobileUrl = null;
 
 	/**
 	 * @var Config
@@ -201,7 +206,7 @@ class MobileContext extends ContextSource {
 				$this->mobileMode = $mobileAction;
 			} else {
 				$user = $this->getUser();
-				if ( $user->isAnon() ) {
+				if ( !$user->isRegistered() ) {
 					$this->loadMobileModeCookie();
 				} else {
 					$userOptionManager = MediaWikiServices::getInstance()->getUserOptionsManager();
@@ -233,14 +238,6 @@ class MobileContext extends ContextSource {
 			$mode = '';
 		}
 		$services = MediaWikiServices::getInstance();
-		$stats = $services->getStatsdDataFactory();
-		// Update statistics
-		if ( $mode === self::MODE_BETA ) {
-			$stats->updateCount( 'mobile.opt_in_cookie_set', 1 );
-		}
-		if ( !$mode ) {
-			$stats->updateCount( 'mobile.opt_in_cookie_unset', 1 );
-		}
 		$this->mobileMode = $mode;
 
 		$user = $this->getUser();
@@ -273,6 +270,7 @@ class MobileContext extends ContextSource {
 	 */
 	private static function isAmcUser() {
 		$services = MediaWikiServices::getInstance();
+		/** @var \MobileFrontend\Amc\UserMode $userMode */
 		$userMode = $services->getService( 'MobileFrontend.AMC.UserMode' );
 		return $userMode->isEnabled();
 	}
@@ -296,60 +294,7 @@ class MobileContext extends ContextSource {
 		// check if we need to toggle between mobile/desktop view
 		$this->checkToggleView();
 		$this->mobileView = $this->shouldDisplayMobileViewInternal();
-		if ( $this->mobileView ) {
-			$this->redirectMobileEnabledPages();
-			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
-			$hookContainer->run( 'EnterMobileMode', [ $this ] );
-		}
 		return $this->mobileView;
-	}
-
-	/**
-	 * If a page has an equivalent but different mobile page redirect to it
-	 */
-	private function redirectMobileEnabledPages() {
-		$request = $this->getRequest();
-		$title = $this->getTitle();
-
-		$redirectUrl = null;
-		if ( $request->getCheck( 'diff' ) &&
-			MobileFrontendHooks::shouldMobileFormatSpecialPages( $this->getUser() )
-		) {
-			$redirectUrl = SpecialMobileDiff::getMobileUrlFromDesktop( $request );
-		}
-
-		if ( $request->getVal( 'action' ) === 'history' &&
-			// IContextSource::getTitle() can be null
-			$title !== null &&
-			// check, if SpecialMobileHistory supports the history action set for this title
-			// content model
-			SpecialMobileHistory::shouldUseSpecialHistory( $title, $this->getUser() )
-		) {
-			$values = $this->getRequest()->getValues();
-			$curid = $request->getInt( 'curid' );
-			// avoid infinite redirect loops
-			unset( $values['action'] );
-			// Avoid multiple history parameters
-			unset( $values['title'] );
-			// the curid when passed to a page ignores the title as it represents a page
-			// ID.
-			// e.g. URL ?title=Special:History/John_Finnie&curid=31775812 will not show
-			// Special:History but the page associated with id `31775812`
-			// For consistency it must be stripped and used
-			// More details on T214531
-			if ( $curid ) {
-				$title = Title::newFromID( $curid );
-				unset( $values['curid'] );
-			} else {
-				$title = $this->getTitle();
-			}
-			$redirectUrl = SpecialPage::getTitleFor( 'History', $title )->
-				getLocalURL( $values );
-		}
-
-		if ( $redirectUrl ) {
-			$this->getOutput()->redirect( $redirectUrl );
-		}
 	}
 
 	/**
@@ -434,12 +379,10 @@ class MobileContext extends ContextSource {
 		$stopMobileRedirectCookieSecureValue =
 			$this->config->get( 'MFStopMobileRedirectCookieSecureValue' );
 
-		if ( $expiry === null ) {
-			$expiry = $this->getUseFormatCookieExpiry();
-		}
-
 		$this->getRequest()->response()->setCookie(
-			self::STOP_MOBILE_REDIRECT_COOKIE_NAME, 'true', $expiry,
+			self::STOP_MOBILE_REDIRECT_COOKIE_NAME,
+			'true',
+			$expiry ?? $this->getUseFormatCookieExpiry(),
 			[
 				'domain' => $this->getStopMobileRedirectCookieDomain(),
 				'prefix' => '',
@@ -471,8 +414,6 @@ class MobileContext extends ContextSource {
 	}
 
 	/**
-	 * Get the useformat cookie
-	 *
 	 * This cookie can determine whether or not a user should see the mobile
 	 * version of a page.
 	 *
@@ -523,13 +464,10 @@ class MobileContext extends ContextSource {
 	 * @param int|null $expiry Expiration of cookie
 	 */
 	public function setUseFormatCookie( $cookieFormat = 'true', $expiry = null ) {
-		if ( $expiry === null ) {
-			$expiry = $this->getUseFormatCookieExpiry();
-		}
 		$this->getRequest()->response()->setCookie(
 			self::USEFORMAT_COOKIE_NAME,
 			$cookieFormat,
-			$expiry,
+			$expiry ?? $this->getUseFormatCookieExpiry(),
 			[
 				'prefix' => '',
 				'httpOnly' => true,
@@ -595,237 +533,139 @@ class MobileContext extends ContextSource {
 	}
 
 	/**
-	 * Take a URL Host Template and return the mobile token portion
-	 *
-	 * Eg if a desktop domain is en.wikipedia.org, but the mobile variant is
-	 * en.m.wikipedia.org, the mobile token is 'm.'
-	 *
-	 * @param string $mobileUrlHostTemplate URL host
-	 * @return string
+	 * Returns the callback from $wgMobileUrlCallback, which changes
+	 *   a desktop domain into a mobile domain.
+	 * @return callable|null
+	 * @phan-return callable(string):string|null
 	 */
-	public function getMobileHostToken( $mobileUrlHostTemplate ) {
-		return preg_replace( '/%h[0-9]\.{0,1}/', '', $mobileUrlHostTemplate );
+	private function getMobileUrlCallback(): ?callable {
+		return $this->config->get( 'MobileUrlCallback' );
 	}
 
 	/**
-	 * Get the template for mobile URLs.
-	 * @see $wgMobileUrlTemplate
-	 * @return string
+	 * True if the current wiki has separate mobile and desktop domains (regardless
+	 * of which domain is used by the current request).
+	 * @return bool
 	 */
-	public function getMobileUrlTemplate() {
-		if ( $this->mobileUrlTemplate === null ) {
-			$this->mobileUrlTemplate = $this->config->get( 'MobileUrlTemplate' );
+	public function hasMobileDomain(): bool {
+		if ( $this->hasMobileUrl === null ) {
+			$mobileUrlCallback = $this->getMobileUrlCallback();
+			if ( $mobileUrlCallback ) {
+				$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+				$server = $urlUtils->expand( $this->getConfig()->get( 'Server' ), PROTO_CANONICAL ) ?? '';
+				$host = $urlUtils->parse( $server )['host'] ?? '';
+				$mobileDomain = call_user_func( $mobileUrlCallback, $host );
+				$this->hasMobileUrl = $mobileDomain !== $host;
+			} else {
+				$this->hasMobileUrl = false;
+			}
 		}
-		return $this->mobileUrlTemplate;
+		return $this->hasMobileUrl;
 	}
 
 	/**
-	 * Take a URL and return a copy that conforms to the mobile URL template
+	 * Take a URL and return the equivalent mobile URL (ie. replace the domain with the
+	 * mobile domain).
+	 *
+	 * Typically this is a URL for the current wiki, but it can be anything as long as
+	 * $wgMobileUrlCallback can convert its domain (so e.g. interwiki links can be
+	 * converted). If the domain is already a mobile domain, or not recognized by
+	 * $wgMobileUrlCallback, or the wiki does not use mobile domains and so
+	 * $wgMobileUrlCallback is not set, the URL will be returned unchanged (except
+	 * $forceHttps will still be applied).
+	 *
 	 * @param string $url URL to convert
-	 * @param bool $forceHttps should force HTTPS?
+	 * @param bool $forceHttps Force HTTPS, even if the original URL used HTTP
 	 * @return string|bool
 	 */
 	public function getMobileUrl( $url, $forceHttps = false ) {
-		if ( $this->shouldDisplayMobileView() ) {
-			$subdomainTokenReplacement = null;
-			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
-			if ( $hookContainer->run( 'GetMobileUrl', [ &$subdomainTokenReplacement, $this ] ) ) {
-				// @phan-suppress-next-line PhanRedundantCondition May set by hook
-				if ( !empty( $subdomainTokenReplacement ) ) {
-					$mobileUrlHostTemplate = $this->parseMobileUrlTemplate( 'host' );
-					$mobileToken = $this->getMobileHostToken( $mobileUrlHostTemplate );
-					$this->mobileUrlTemplate = str_replace(
-						$mobileToken,
-						$subdomainTokenReplacement,
-						$this->getMobileUrlTemplate()
-					);
-				}
-			}
-		}
-
-		$parsedUrl = wfParseUrl( $url );
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+		$parsedUrl = $urlUtils->parse( $url );
 		// if parsing failed, maybe it's a local Url, try to expand and reparse it - task T107505
 		if ( !$parsedUrl ) {
-			$expandedUrl = wfExpandUrl( $url );
+			$expandedUrl = $urlUtils->expand( $url, PROTO_CURRENT );
 			if ( $expandedUrl ) {
-				$parsedUrl = wfParseUrl( $expandedUrl );
+				$parsedUrl = $urlUtils->parse( $expandedUrl );
 			}
 			if ( !$expandedUrl || !$parsedUrl ) {
 				return false;
 			}
 		}
 
-		$this->updateMobileUrlHost( $parsedUrl );
+		$mobileUrlCallback = $this->getMobileUrlCallback();
+		if ( $mobileUrlCallback ) {
+			$parsedUrl['host'] = call_user_func( $mobileUrlCallback, $parsedUrl['host'] );
+		}
 		if ( $forceHttps ) {
 			$parsedUrl['scheme'] = 'https';
 			$parsedUrl['delimiter'] = '://';
 		}
 
-		$assembleUrl = wfAssembleUrl( $parsedUrl );
+		$assembleUrl = UrlUtils::assemble( $parsedUrl );
 		return $assembleUrl;
 	}
 
 	/**
-	 * If a mobile-domain is specified by the $wgMobileUrlTemplate and
-	 * there's a mobile header, then we assume the user is accessing
-	 * the site from the mobile-specific domain (because why would the
-	 * desktop site set the header?).
+	 * Checks whether the current request is using the mobile domain.
+	 *
+	 * This assumes that some infrastructure outside MediaWiki will set a
+	 * header (specified by $wgMFMobileHeader) on requests which use the
+	 * mobile domain. This means that the traffic routing layer can rewrite
+	 * hostnames to be canonical, so non-MobileFrontend-aware code can still
+	 * work.
+	 *
 	 * @return bool
 	 */
 	public function usingMobileDomain() {
 		$mobileHeader = $this->config->get( 'MFMobileHeader' );
-		return ( $this->config->get( 'MobileUrlTemplate' )
+		return ( $this->hasMobileDomain()
 			&& $mobileHeader
 			&& $this->getRequest()->getHeader( $mobileHeader ) !== false
 		);
 	}
 
 	/**
-	 * Take a URL and return a copy that removes any mobile tokens
+	 * Take a URL and return a copy that removes any mobile tokens.
+	 *
+	 * This only works with URLs of the current wiki.
+	 *
 	 * @param string $url representing a page on the mobile domain e.g. `https://en.m.wikipedia.org/`
 	 * @return string (absolute url)
 	 */
 	public function getDesktopUrl( $url ) {
-		$parsedUrl = wfParseUrl( $url );
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+		$parsedUrl = $urlUtils->parse( $url ) ?? [];
 		$this->updateDesktopUrlHost( $parsedUrl );
 		$this->updateDesktopUrlQuery( $parsedUrl );
-		$desktopUrl = wfAssembleUrl( $parsedUrl );
+		$desktopUrl = UrlUtils::assemble( $parsedUrl );
 		return $desktopUrl;
 	}
 
 	/**
-	 * Update host of given URL to conform to mobile URL template.
-	 * @param array &$parsedUrl Result of parseUrl() or wfParseUrl()
-	 */
-	protected function updateMobileUrlHost( array &$parsedUrl ) {
-		if ( IPUtils::isIPAddress( $parsedUrl['host'] ) ) {
-			// Do not update host when IP is used
-			return;
-		}
-		$mobileUrlHostTemplate = $this->parseMobileUrlTemplate( 'host' );
-		if ( !strlen( $mobileUrlHostTemplate ) ) {
-			return;
-		}
-
-		$parsedHostParts = explode( ".", $parsedUrl['host'] );
-		$templateHostParts = explode( ".", $mobileUrlHostTemplate );
-		$targetHostParts = [];
-
-		foreach ( $templateHostParts as $key => $templateHostPart ) {
-			if ( strstr( $templateHostPart, '%h' ) ) {
-				$parsedHostPartKey = substr( $templateHostPart, 2 );
-				// @phan-suppress-next-line PhanImpossibleTypeComparisonInLoop
-				if ( !array_key_exists( $parsedHostPartKey, $parsedHostParts ) ) {
-					// invalid pattern for this host, ignore
-					return;
-				}
-				// @phan-suppress-next-line PhanTypeMismatchDimFetch
-				$targetHostParts[$key] = $parsedHostParts[$parsedHostPartKey];
-			} elseif ( isset( $parsedHostParts[$key] )
-				&& $templateHostPart == $parsedHostParts[$key] ) {
-				$targetHostParts = $parsedHostParts;
-				break;
-			} else {
-				$targetHostParts[$key] = $templateHostPart;
-			}
-		}
-
-		$parsedUrl['host'] = implode( ".", $targetHostParts );
-	}
-
-	/**
 	 * Update the host of a given URL to strip out any mobile tokens
-	 * @param array &$parsedUrl Result of parseUrl() or wfParseUrl()
+	 * @param array &$parsedUrl Result of parseUrl() or UrlUtils::parse()
 	 */
 	protected function updateDesktopUrlHost( array &$parsedUrl ) {
 		$server = $this->getConfig()->get( 'Server' );
 
-		$mobileUrlHostTemplate = $this->parseMobileUrlTemplate( 'host' );
-		if ( !strlen( $mobileUrlHostTemplate ) ) {
+		if ( !$this->hasMobileDomain() ) {
 			return;
 		}
 
-		$parsedWgServer = wfParseUrl( $server );
-		$parsedUrl['host'] = $parsedWgServer['host'];
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+		$parsedWgServer = $urlUtils->parse( $server );
+		$parsedUrl['host'] = $parsedWgServer['host'] ?? '';
 	}
 
 	/**
 	 * Update the query portion of a given URL to remove any 'useformat' params
-	 * @param array &$parsedUrl Result of parseUrl() or wfParseUrl()
+	 * @param array &$parsedUrl Result of parseUrl() or UrlUtils::parse()
 	 */
 	protected function updateDesktopUrlQuery( array &$parsedUrl ) {
 		if ( isset( $parsedUrl['query'] ) && strpos( $parsedUrl['query'], 'useformat' ) !== false ) {
 			$query = wfCgiToArray( $parsedUrl['query'] );
 			unset( $query['useformat'] );
 			$parsedUrl['query'] = wfArrayToCgi( $query );
-		}
-	}
-
-	/**
-	 * Update path of given URL to conform to mobile URL template.
-	 *
-	 * NB: this is not actually being used anywhere at the moment. It will
-	 * take some magic to get MW to properly handle path modifications like
-	 * this is intended to provide. This will hopefully be implemented someday
-	 * in the not to distant future.
-	 *
-	 * @param array &$parsedUrl Result of parseUrl() or wfParseUrl()
-	 */
-	protected function updateMobileUrlPath( array &$parsedUrl ) {
-		$scriptPath = $this->getConfig()->get( 'ScriptPath' );
-
-		$mobileUrlPathTemplate = $this->parseMobileUrlTemplate( 'path' );
-
-		// if there's no path template, no reason to continue.
-		if ( !strlen( $mobileUrlPathTemplate ) ) {
-			return;
-		}
-
-		// find out if we already have a templated path
-		$templatePathOffset = strpos( $mobileUrlPathTemplate, '%p' );
-		$templatePathSansToken = substr( $mobileUrlPathTemplate, 0, $templatePathOffset );
-		if ( substr_compare( $parsedUrl['path'], $scriptPath . $templatePathSansToken, 0 ) > 0 ) {
-			return;
-		}
-
-		$scriptPathLength = strlen( $scriptPath );
-		// the "+ 1" removes the preceding "/" from the path sans $wgScriptPath
-		$pathSansScriptPath = substr( $parsedUrl['path'], $scriptPathLength + 1 );
-		$parsedUrl['path'] = $scriptPath . $templatePathSansToken . $pathSansScriptPath;
-	}
-
-	/**
-	 * Parse mobile URL template into its host and path components.
-	 *
-	 * Optionally specify which portion of the template you want returned.
-	 * @param string|null $part which part to return?
-	 * @return mixed
-	 */
-	public function parseMobileUrlTemplate( $part = null ) {
-		$mobileUrlTemplate = $this->getMobileUrlTemplate();
-
-		$pathStartPos = strpos( $mobileUrlTemplate, '/' );
-
-		/**
-		 * This if/else block exists because of an annoying aspect of substr()
-		 * Even if you pass 'null' or 'false' into the 'length' param, it
-		 * will return an empty string.
-		 * http://www.stopgeek.com/wp-content/uploads/2007/07/sense.jpg
-		 */
-		if ( $pathStartPos === false ) {
-			$host = substr( $mobileUrlTemplate, 0 );
-		} else {
-			$host = substr( $mobileUrlTemplate, 0,  $pathStartPos );
-		}
-
-		$path = substr( $mobileUrlTemplate, $pathStartPos );
-
-		if ( $part == 'host' ) {
-			return $host;
-		} elseif ( $part == 'path' ) {
-			return $path;
-		} else {
-			return [ 'host' => $host, 'path' => $path ];
 		}
 	}
 
@@ -840,7 +680,7 @@ class MobileContext extends ContextSource {
 	 */
 	public function toggleView( $view ) {
 		$this->viewChange = $view;
-		if ( !strlen( trim( $this->getMobileUrlTemplate() ) ) ) {
+		if ( !$this->hasMobileDomain() ) {
 			$this->useFormat = $view;
 		}
 	}
@@ -849,9 +689,15 @@ class MobileContext extends ContextSource {
 	 * Performs view change as requested vy toggleView()
 	 */
 	public function doToggling() {
-		$mobileUrlTemplate = $this->getMobileUrlTemplate();
+		// make sure viewChange is set
+		$this->shouldDisplayMobileView();
 
 		if ( !$this->viewChange ) {
+			return;
+		}
+
+		$title = $this->getTitle();
+		if ( !$title ) {
 			return;
 		}
 
@@ -859,15 +705,15 @@ class MobileContext extends ContextSource {
 		unset( $query['mobileaction'] );
 		unset( $query['useformat'] );
 		unset( $query['title'] );
-		$url = $this->getTitle()->getFullURL( $query, false, PROTO_CURRENT );
+		$url = $title->getFullURL( $query, false, PROTO_CURRENT );
 
 		if ( $this->viewChange == 'mobile' ) {
 			// unset stopMobileRedirect cookie
 			// @TODO is this necessary with unsetting the cookie via JS?
 			$this->unsetStopMobileRedirectCookie();
 
-			// if no mobileurl template, set mobile cookie
-			if ( !strlen( trim( $mobileUrlTemplate ) ) ) {
+			// if no mobile domain support, set mobile cookie
+			if ( !$this->hasMobileDomain() ) {
 				$this->setUseFormatCookie();
 			} else {
 				// else redirect to mobile domain
@@ -882,8 +728,8 @@ class MobileContext extends ContextSource {
 				$this->unsetUseFormatCookie();
 			}
 
-			if ( strlen( trim( $mobileUrlTemplate ) ) ) {
-				// if mobileurl template, redirect to desktop domain
+			if ( $this->hasMobileDomain() ) {
+				// if there is mobile domain support, redirect to desktop domain
 				$desktopUrl = $this->getDesktopUrl( $url );
 				$this->getOutput()->redirect( $desktopUrl, 301 );
 			}
@@ -912,9 +758,10 @@ class MobileContext extends ContextSource {
 	 * @return bool
 	 */
 	public function isLocalUrl( $url ) {
-		$parsedTarget = wfParseUrl( $url );
-		$parsedServer = wfParseUrl( $this->config->get( 'Server' ) );
-		return $parsedTarget['host'] === $parsedServer['host'];
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+		$parsedTargetHost = $urlUtils->parse( $url )['host'] ?? '';
+		$parsedServerHost = $urlUtils->parse( $this->config->get( 'Server' ) )['host'] ?? '';
+		return $parsedTargetHost === $parsedServerHost;
 	}
 
 	/**
@@ -977,7 +824,7 @@ class MobileContext extends ContextSource {
 	 * @param string $xanalytics_item In the format key=value
 	 */
 	public function addAnalyticsLogItemFromXAnalytics( $xanalytics_item ) {
-		list( $key, $val ) = explode( '=', $xanalytics_item, 2 );
+		[ $key, $val ] = explode( '=', $xanalytics_item, 2 );
 		$this->addAnalyticsLogItem( urldecode( $key ), urldecode( $val ) );
 	}
 
@@ -999,38 +846,7 @@ class MobileContext extends ContextSource {
 	}
 
 	/**
-	 * Process-local override for MFStripResponsiveImages, used by
-	 * the mobileview API request.
-	 * @var bool|null
-	 */
-	private $stripResponsiveImagesOverride = null;
-
-	/**
-	 * Should image thumbnails in pages remove the high-density additions
-	 * during this request?
-	 *
-	 * @return bool
-	 */
-	public function shouldStripResponsiveImages() {
-		if ( $this->stripResponsiveImagesOverride === null ) {
-			return $this->shouldDisplayMobileView()
-				&& $this->config->get( 'MFStripResponsiveImages' );
-		} else {
-			return $this->stripResponsiveImagesOverride;
-		}
-	}
-
-	/**
-	 * Config override for responsive image strip mode.
-	 *
-	 * @param bool $val New value
-	 */
-	public function setStripResponsiveImages( $val ) {
-		$this->stripResponsiveImagesOverride = $val;
-	}
-
-	/**
-	 * Gets whether Wikibase descriptions should be shown in search results, including nearby search,
+	 * Gets whether Wikibase descriptions should be shown in search results,
 	 * and watchlists; or as taglines on article pages.
 	 * Doesn't take into account whether the wikidata descriptions
 	 * feature has been enabled.

@@ -28,5 +28,6 @@
 	"ext-uls-setlang-loading": "Femkülepelu...",
 	"ext-uls-setlang-cancel": "Kalekilpe",
 	"ext-uls-empty-state-header": "Mülelay kewünh",
-	"ext-uls-empty-state-desc": "Petu mülelay zungun"
+	"ext-uls-empty-state-desc": "Petu mülelay zungun",
+	"ext-uls-add-languages-button-label": "Püñamtun zungun"
 }

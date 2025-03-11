@@ -19,15 +19,14 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
 use MediaWiki\User\ActorNormalization;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserRigorOptions;
-use Wikimedia\Rdbms\LBFactory;
-use Wikimedia\Rdbms\LoadBalancer;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script for finding and replacing invalid actor IDs, see T261325 and T307738.
@@ -36,33 +35,9 @@ require_once __DIR__ . '/Maintenance.php';
  */
 class FindMissingActors extends Maintenance {
 
-	/**
-	 * @var UserFactory|null
-	 */
-	private $userFactory;
-
-	/**
-	 * @var UserNameUtils|null
-	 */
-	private $userNameUtils;
-
-	/**
-	 * @var LoadBalancer|null
-	 */
-	private $loadBalancer;
-
-	/**
-	 * @var LBFactory
-	 */
-	private $lbFactory;
-
-	/**
-	 * @var ActorNormalization
-	 */
-	private $actorNormalization;
-
-	/** @var array|null */
-	private $tables;
+	private UserFactory $userFactory;
+	private UserNameUtils $userNameUtils;
+	private ActorNormalization $actorNormalization;
 
 	public function __construct() {
 		parent::__construct();
@@ -86,41 +61,20 @@ class FindMissingActors extends Maintenance {
 		$this->setBatchSize( 1000 );
 	}
 
-	public function initializeServices(
-		?UserFactory $userFactory = null,
-		?UserNameUtils $userNameUtils = null,
-		?LoadBalancer $loadBalancer = null,
-		?LBFactory $lbFactory = null,
-		?ActorNormalization $actorNormalization = null
-	) {
-		$services = MediaWikiServices::getInstance();
-
-		$this->userFactory = $userFactory ?? $this->userFactory ?? $services->getUserFactory();
-		$this->userNameUtils = $userNameUtils ?? $this->userNameUtils ?? $services->getUserNameUtils();
-		$this->loadBalancer = $loadBalancer ?? $this->loadBalancer ?? $services->getDBLoadBalancer();
-		$this->lbFactory = $lbFactory ?? $this->lbFactory ?? $services->getDBLoadBalancerFactory();
-		$this->actorNormalization = $actorNormalization ?? $this->actorNormalization ??
-			$services->getActorNormalization();
-	}
-
 	/**
 	 * @return array
 	 */
 	private function getTables() {
-		if ( !$this->tables ) {
-			$tables = [
-				'ar_actor' => [ 'archive', 'ar_actor', 'ar_id' ],
-				'ipb_by_actor' => [ 'ipblocks', 'ipb_by_actor', 'ipb_id' ], // no index on ipb_by_actor!
-				'img_actor' => [ 'image', 'img_actor', 'img_name' ],
-				'oi_actor' => [ 'oldimage', 'oi_actor', 'oi_archive_name' ], // no index on oi_archive_name!
-				'fa_actor' => [ 'filearchive', 'fa_actor', 'fa_id' ],
-				'rc_actor' => [ 'recentchanges', 'rc_actor', 'rc_id' ],
-				'log_actor' => [ 'logging', 'log_actor', 'log_id' ],
-				'rev_actor' => [ 'revision', 'rev_actor', 'rev_id' ],
-			];
-			$this->tables = $tables;
-		}
-		return $this->tables;
+		return [
+			'ar_actor' => [ 'archive', 'ar_actor', 'ar_id' ],
+			'img_actor' => [ 'image', 'img_actor', 'img_name' ],
+			'oi_actor' => [ 'oldimage', 'oi_actor', 'oi_archive_name' ], // no index on oi_archive_name!
+			'fa_actor' => [ 'filearchive', 'fa_actor', 'fa_id' ],
+			'rc_actor' => [ 'recentchanges', 'rc_actor', 'rc_id' ],
+			'log_actor' => [ 'logging', 'log_actor', 'log_id' ],
+			'rev_actor' => [ 'revision', 'rev_actor', 'rev_id' ],
+			'bl_by_actor' => [ 'block', 'bl_by_actor', 'bl_id' ], // no index on bl_by_actor!
+		];
 	}
 
 	/**
@@ -166,7 +120,7 @@ class FindMissingActors extends Maintenance {
 			$this->fatalError( "Unknown user: '$name'" );
 		}
 
-		$dbw = $this->loadBalancer->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->getPrimaryDB();
 		$actorId = $this->actorNormalization->acquireActorId( $user, $dbw );
 
 		if ( !$actorId ) {
@@ -178,7 +132,11 @@ class FindMissingActors extends Maintenance {
 	}
 
 	public function execute() {
-		$this->initializeServices();
+		$services = $this->getServiceContainer();
+		$this->userFactory = $services->getUserFactory();
+		$this->userNameUtils = $services->getUserNameUtils();
+		$this->actorNormalization = $services->getActorNormalization();
+		$this->setDBProvider( $services->getConnectionProvider() );
 
 		$field = $this->getOption( 'field' );
 		if ( !$this->getTableInfo( $field ) ) {
@@ -225,10 +183,7 @@ class FindMissingActors extends Maintenance {
 		[ $table, $actorField, $idField ] = $this->getTableInfo( $field );
 		$this->output( "Finding invalid actor IDs in $table.$actorField...\n" );
 
-		$dbr = $this->loadBalancer->getConnectionRef(
-			DB_REPLICA,
-			[ 'maintenance', 'vslow', 'slow' ]
-		);
+		$dbr = $this->getServiceContainer()->getDBLoadBalancer()->getConnection( DB_REPLICA, 'vslow' );
 
 		/*
 		We are building an SQL query like this one here, performing a left join
@@ -246,23 +201,18 @@ class FindMissingActors extends Maintenance {
 		LIMIT 1000;
 		*/
 
-		$conds = $type == 'missing'
-			? [ 'actor_id' => null ]
-			: [ 'actor_name' => '' ];
+		$queryBuilder = $dbr->newSelectQueryBuilder()
+			->select( [ $actorField, $idField ] )
+			->from( $table )
+			->leftJoin( 'actor', null, [ "$actorField = actor_id" ] )
+			->where( $type == 'missing' ? [ 'actor_id' => null ] : [ 'actor_name' => '' ] )
+			->limit( $this->getBatchSize() );
 
 		if ( $skip ) {
-			$conds[] = $actorField . ' NOT IN ( ' . $dbr->makeList( $skip ) . ' ) ';
+			$queryBuilder->andWhere( $dbr->expr( $actorField, '!=', $skip ) );
 		}
 
-		$queryBuilder = $dbr->newSelectQueryBuilder();
-		$queryBuilder->table( $table )
-			->fields( [ $actorField, $idField ] )
-			->conds( $conds )
-			->leftJoin( 'actor', null, [ "$actorField = actor_id" ] )
-			->limit( $this->getBatchSize() )
-			->caller( __METHOD__ );
-
-		$res = $queryBuilder->fetchResultSet();
+		$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 		$count = $res->numRows();
 
 		$bad = [];
@@ -303,13 +253,17 @@ class FindMissingActors extends Maintenance {
 		$count = count( $ids );
 		$this->output( "OVERWRITING $count actor IDs in $table.$actorField with $overwrite...\n" );
 
-		$dbw = $this->loadBalancer->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->getPrimaryDB();
 
-		$dbw->update( $table, [ $actorField => $overwrite ], [ $idField => $ids ], __METHOD__ );
+		$dbw->newUpdateQueryBuilder()
+			->update( $table )
+			->set( [ $actorField => $overwrite ] )
+			->where( [ $idField => $ids ] )
+			->caller( __METHOD__ )->execute();
 
 		$count = $dbw->affectedRows();
 
-		$this->lbFactory->waitForReplication();
+		$this->waitForReplication();
 		$this->output( "\tUpdated $count rows.\n" );
 
 		return $count;
@@ -317,5 +271,7 @@ class FindMissingActors extends Maintenance {
 
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = FindMissingActors::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

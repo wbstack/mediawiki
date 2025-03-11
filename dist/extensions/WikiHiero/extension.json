@@ -10,12 +10,15 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "parserhook",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"Hooks": {
-		"ParserFirstCallInit": [
-			"WikiHiero\\Hooks::onParserFirstCallInit"
-		]
+		"ParserFirstCallInit": "main"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "WikiHiero\\Hooks"
+		}
 	},
 	"MessagesDirs": {
 		"Wikihiero": [
@@ -72,10 +75,6 @@
 			],
 			"messages": [
 				"wikihiero-visualeditor-mwhieroinspector-title"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		}
 	},
@@ -88,6 +87,9 @@
 	},
 	"ParsoidModules": [
 		"WikiHiero\\Hooks"
+	],
+	"TrackingCategories": [
+		"wikihiero-usage-tracking-category"
 	],
 	"manifest_version": 2
 }

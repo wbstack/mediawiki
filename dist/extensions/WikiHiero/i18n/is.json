@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Sveinn í Felli",
-			"Stefán Örvar Sigmundsson"
+			"Stefán Örvar Sigmundsson",
+			"Sveinn í Felli"
 		]
 	},
 	"hieroglyphs": "Prófa myndleturstákuppnmerkingu",
@@ -19,5 +19,7 @@
 	"wikihiero-th-code": "Kóði",
 	"wikihiero-th-meaning": "Merking",
 	"wikihiero-th-result": "Útkoma",
-	"wikihiero-visualeditor-mwhieroinspector-title": "Helgirúnir"
+	"wikihiero-visualeditor-mwhieroinspector-title": "Helgirúnir",
+	"wikihiero-usage-tracking-category": "Síður sem nota WikiHiero",
+	"wikihiero-usage-tracking-category-desc": "Þessum flokki er sjálfkrafa bætt við síður sem nota WikiHiero-viðbótina"
 }

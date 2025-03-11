@@ -1,10 +1,17 @@
 <?php
+
+namespace MediaWiki\HTMLForm\Field;
+
+use ChangeTags;
+use MediaWiki\HTMLForm\HTMLFormField;
+
 /**
  * Wrapper for ChangeTags::buildTagFilterSelector to use in HTMLForm
  *
  * @stable to extend
  */
 class HTMLTagFilter extends HTMLFormField {
+	/** @var array */
 	protected $tagFilter;
 
 	public function getTableRow( $value ) {
@@ -31,7 +38,7 @@ class HTMLTagFilter extends HTMLFormField {
 		if ( $this->tagFilter ) {
 			return parent::getOOUI( $value );
 		}
-		return new OOUI\FieldLayout( new OOUI\Widget() );
+		return new \OOUI\FieldLayout( new \OOUI\Widget() );
 	}
 
 	public function getInputHTML( $value ) {
@@ -54,3 +61,6 @@ class HTMLTagFilter extends HTMLFormField {
 		return true;
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLTagFilter::class, 'HTMLTagFilter' );

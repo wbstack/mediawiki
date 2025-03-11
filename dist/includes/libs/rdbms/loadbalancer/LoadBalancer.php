@@ -20,20 +20,19 @@
 namespace Wikimedia\Rdbms;
 
 use ArrayUtils;
-use BagOStuff;
-use EmptyBagOStuff;
 use InvalidArgumentException;
 use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
 use LogicException;
-use NullStatsdDataFactory;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RuntimeException;
 use Throwable;
 use UnexpectedValueException;
-use WANObjectCache;
-use Wikimedia\RequestTimeout\CriticalSectionProvider;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\EmptyBagOStuff;
+use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\ScopedCallback;
+use Wikimedia\Stats\NullStatsdDataFactory;
 
 /**
  * @see ILoadBalancer
@@ -42,63 +41,35 @@ use Wikimedia\ScopedCallback;
 class LoadBalancer implements ILoadBalancerForOwner {
 	/** @var ILoadMonitor */
 	private $loadMonitor;
-	/** @var CriticalSectionProvider|null */
-	private $csProvider;
-	/** @var callable|null Callback to run before the first connection attempt */
-	private $chronologyCallback;
 	/** @var BagOStuff */
 	private $srvCache;
 	/** @var WANObjectCache */
 	private $wanCache;
 	/** @var DatabaseFactory */
 	private $databaseFactory;
-	/**
-	 * @var callable|null An optional callback that returns a ScopedCallback instance,
-	 * meant to profile the actual query execution in {@see Database::doQuery}
-	 */
-	private $profiler;
+
 	/** @var TransactionProfiler */
 	private $trxProfiler;
 	/** @var StatsdDataFactoryInterface */
 	private $statsd;
 	/** @var LoggerInterface */
-	private $connLogger;
-	/** @var LoggerInterface */
-	private $queryLogger;
-	/** @var LoggerInterface */
-	private $replLogger;
-	/** @var LoggerInterface */
-	private $perfLogger;
+	private $logger;
 	/** @var callable Exception logger */
 	private $errorLogger;
-	/** @var callable Deprecation logger */
-	private $deprecationLogger;
-
-	/** @var DatabaseDomain Local DB domain ID and default for selectDB() calls */
+	/** @var DatabaseDomain Local DB domain ID and default for new connections */
 	private $localDomain;
 
-	/** @var IDatabase[][][] Map of (pool category => server index => domain => Database) */
+	/** @var array<string,array<int,Database[]>> Map of (connection pool => server index => Database[]) */
 	private $conns;
 
-	/** @var string|null The name of the DB cluster */
+	/** @var string The name of the DB cluster */
 	private $clusterName;
-	/** @var array[] Map of (server index => server config array) */
-	private $servers;
-	/** @var array[] Map of (group => server index => weight) */
+	/** @var ServerInfo */
+	private $serverInfo;
+	/** @var array<string,array<int,int|float>> Map of (group => server index => weight) */
 	private $groupLoads;
-	/** @var int Seconds to spend waiting on replica DB lag to resolve */
-	private $waitTimeout;
-	/** @var array The LoadMonitor configuration */
-	private $loadMonitorConfig;
-	/** @var int */
-	private $maxLag;
 	/** @var string|null Default query group to use with getConnection() */
 	private $defaultGroup;
-
-	/** @var bool Whether this PHP instance is for a CLI script */
-	private $cliMode;
-	/** @var string Agent name for query profiling */
-	private $agent;
 
 	/** @var array[] $aliases Map of (table => (dbname, schema, prefix) map) */
 	private $tableAliases = [];
@@ -115,24 +86,24 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	private $trxRoundId = false;
 	/** @var string Stage of the current transaction round in the transaction round life-cycle */
 	private $trxRoundStage = self::ROUND_CURSORY;
-	/** @var Database Connection handle that caused a problem */
-	private $errorConnection;
 	/** @var int[] The group replica server indexes keyed by group */
 	private $readIndexByGroup = [];
-	/** @var DBPrimaryPos|false Replication sync position or false if not set */
+	/** @var DBPrimaryPos|null Replication sync position or false if not set */
 	private $waitForPos;
-	/** @var bool Whether the generic reader fell back to a lagged replica DB */
+	/** @var bool Whether a lagged replica DB was used */
 	private $laggedReplicaMode = false;
-	/** @var string The last DB selection or connection error */
-	private $lastError = 'Unknown error';
 	/** @var string|false Reason this instance is read-only or false if not */
 	private $readOnlyReason = false;
 	/** @var int Total number of new connections ever made with this instance */
 	private $connectionCounter = 0;
 	/** @var bool */
 	private $disabled = false;
+	private ?ChronologyProtector $chronologyProtector = null;
 	/** @var bool Whether the session consistency callback already executed */
-	private $chronologyCallbackTriggered = false;
+	private $chronologyProtectorCalled = false;
+
+	/** @var Database|null The last connection handle that caused a problem */
+	private $lastErrorConn;
 
 	/** @var DatabaseDomain[] Map of (domain ID => domain instance) */
 	private $nonLocalDomainCache = [];
@@ -143,16 +114,10 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 */
 	private $modcount = 0;
 
+	/** The "server index" LB info key; see {@link IDatabase::getLBInfo()} */
 	private const INFO_SERVER_INDEX = 'serverIndex';
-	private const INFO_AUTOCOMMIT_ONLY = 'autoCommitOnly';
-	private const INFO_FORIEGN = 'foreign';
-	private const INFO_FOREIGN_REF_COUNT = 'foreignPoolRefCount';
-
-	/**
-	 * Default 'maxLag' when unspecified
-	 * @internal Only for use within LoadBalancer/LoadMonitor
-	 */
-	public const MAX_LAG_DEFAULT = 6;
+	/** The "connection category" LB info key; see {@link IDatabase::getLBInfo()} */
+	private const INFO_CONN_CATEGORY = 'connCategory';
 
 	/** Warn when this many connection are held */
 	private const CONN_HELD_WARN_THRESHOLD = 10;
@@ -162,15 +127,12 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	/** Seconds to cache primary DB server read-only status */
 	private const TTL_CACHE_READONLY = 5;
 
-	private const KEY_LOCAL = 'local';
-	private const KEY_FOREIGN_FREE = 'foreignFree';
-	private const KEY_FOREIGN_INUSE = 'foreignInUse';
-
-	private const KEY_LOCAL_NOROUND = 'localAutoCommit';
-	private const KEY_FOREIGN_FREE_NOROUND = 'foreignFreeAutoCommit';
-	private const KEY_FOREIGN_INUSE_NOROUND = 'foreignInUseAutoCommit';
-
-	private const KEY_LOCAL_DOMAIN = '__local__';
+	/** A category of connections that are tracked and transaction round aware */
+	private const CATEGORY_ROUND = 'round';
+	/** A category of connections that are tracked and in autocommit-mode */
+	private const CATEGORY_AUTOCOMMIT = 'auto-commit';
+	/** A category of connections that are untracked and in gauge-mode */
+	private const CATEGORY_GAUGE = 'gauge';
 
 	/** Transaction round, explicit or implicit, has not finished writing */
 	private const ROUND_CURSORY = 'cursory';
@@ -200,66 +162,59 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 * @return void
 	 */
 	protected function configure( array $params ): void {
-		if ( !isset( $params['servers'] ) || !count( $params['servers'] ) ) {
-			throw new InvalidArgumentException( 'Missing or empty "servers" parameter' );
-		}
-
-		$localDomain = isset( $params['localDomain'] )
+		$this->localDomain = isset( $params['localDomain'] )
 			? DatabaseDomain::newFromId( $params['localDomain'] )
 			: DatabaseDomain::newUnspecified();
-		$this->setLocalDomain( $localDomain );
 
-		$this->maxLag = $params['maxLag'] ?? self::MAX_LAG_DEFAULT;
-
-		$listKey = -1;
-		$this->servers = [];
+		$this->serverInfo = new ServerInfo();
 		$this->groupLoads = [ self::GROUP_GENERIC => [] ];
-		foreach ( $params['servers'] as $i => $server ) {
-			if ( ++$listKey !== $i ) {
-				throw new UnexpectedValueException( 'List expected for "servers" parameter' );
+		foreach ( $this->serverInfo->normalizeServerMaps( $params['servers'] ?? [] ) as $i => $server ) {
+			$this->serverInfo->addServer( $i, $server );
+			foreach ( $server['groupLoads'] as $group => $weight ) {
+				$this->groupLoads[$group][$i] = $weight;
 			}
-			$this->servers[ $i ] = $server;
-			foreach ( ( $server['groupLoads'] ?? [] ) as $group => $ratio ) {
-				$this->groupLoads[ $group ][ $i ] = $ratio;
-			}
-			$this->groupLoads[ self::GROUP_GENERIC ][ $i ] = $server['load'];
+			$this->groupLoads[self::GROUP_GENERIC][$i] = $server['load'];
 		}
-
-		$this->waitTimeout = $params['waitTimeout'] ?? self::MAX_WAIT_DEFAULT;
+		// If the cluster name is not specified, fallback to the current primary name
+		$this->clusterName = $params['clusterName']
+			?? $this->serverInfo->getServerName( ServerInfo::WRITER_INDEX );
 
 		if ( isset( $params['readOnlyReason'] ) && is_string( $params['readOnlyReason'] ) ) {
 			$this->readOnlyReason = $params['readOnlyReason'];
 		}
 
-		$this->loadMonitorConfig = $params['loadMonitor'] ?? [ 'class' => 'LoadMonitorNull' ];
-		$this->loadMonitorConfig += [ 'lagWarnThreshold' => $this->maxLag ];
-
 		$this->srvCache = $params['srvCache'] ?? new EmptyBagOStuff();
 		$this->wanCache = $params['wanCache'] ?? WANObjectCache::newEmpty();
-		$this->databaseFactory = $params['databaseFactory'] ?? new DatabaseFactory();
-		$this->errorLogger = $params['errorLogger'] ?? static function ( Throwable $e ) {
-				trigger_error( get_class( $e ) . ': ' . $e->getMessage(), E_USER_WARNING );
-		};
-		$this->deprecationLogger = $params['deprecationLogger'] ?? static function ( $msg ) {
-				trigger_error( $msg, E_USER_DEPRECATED );
-		};
-		$this->replLogger = $params['replLogger'] ?? new NullLogger();
-		$this->connLogger = $params['connLogger'] ?? new NullLogger();
-		$this->queryLogger = $params['queryLogger'] ?? new NullLogger();
-		$this->perfLogger = $params['perfLogger'] ?? new NullLogger();
 
-		$this->clusterName = $params['clusterName'] ?? null;
-		$this->profiler = $params['profiler'] ?? null;
+		// Note: this parameter is normally absent. It is injectable for testing purposes only.
+		$this->databaseFactory = $params['databaseFactory'] ?? new DatabaseFactory( $params );
+
+		$this->errorLogger = $params['errorLogger'] ?? static function ( Throwable $e ) {
+			trigger_error( get_class( $e ) . ': ' . $e->getMessage(), E_USER_WARNING );
+		};
+		$this->logger = $params['logger'] ?? new NullLogger();
+
 		$this->trxProfiler = $params['trxProfiler'] ?? new TransactionProfiler();
 		$this->statsd = $params['statsdDataFactory'] ?? new NullStatsdDataFactory();
 
-		$this->csProvider = $params['criticalSectionProvider'] ?? null;
+		// Set up LoadMonitor
+		$loadMonitorConfig = $params['loadMonitor'] ?? [ 'class' => LoadMonitorNull::class ];
+		$compat = [
+			'LoadMonitor' => LoadMonitor::class,
+			'LoadMonitorNull' => LoadMonitorNull::class
+		];
+		$class = $loadMonitorConfig['class'];
+		// @phan-suppress-next-line PhanImpossibleCondition
+		if ( isset( $compat[$class] ) ) {
+			$class = $compat[$class];
+		}
+		$this->loadMonitor = new $class(
+			$this, $this->srvCache, $this->wanCache, $loadMonitorConfig );
+		$this->loadMonitor->setLogger( $this->logger );
+		$this->loadMonitor->setStatsdDataFactory( $this->statsd );
 
-		$this->cliMode = $params['cliMode'] ?? ( PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg' );
-		$this->agent = $params['agent'] ?? '';
-
-		if ( isset( $params['chronologyCallback'] ) ) {
-			$this->chronologyCallback = $params['chronologyCallback'];
+		if ( isset( $params['chronologyProtector'] ) ) {
+			$this->chronologyProtector = $params['chronologyProtector'];
 		}
 
 		if ( isset( $params['roundStage'] ) ) {
@@ -275,27 +230,15 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	private static function newTrackedConnectionsArray() {
+		// Note that CATEGORY_GAUGE connections are untracked
 		return [
-			// Connection were transaction rounds may be applied
-			self::KEY_LOCAL => [],
-			self::KEY_FOREIGN_INUSE => [],
-			self::KEY_FOREIGN_FREE => [],
-			// Auto-committing counterpart connections that ignore transaction rounds
-			self::KEY_LOCAL_NOROUND => [],
-			self::KEY_FOREIGN_INUSE_NOROUND => [],
-			self::KEY_FOREIGN_FREE_NOROUND => []
+			self::CATEGORY_ROUND => [],
+			self::CATEGORY_AUTOCOMMIT => []
 		];
 	}
 
 	public function getClusterName(): string {
-		if ( $this->clusterName !== null ) {
-			$name = $this->clusterName;
-		} else {
-			// Fallback to the current primary name if not specified
-			$name = $this->getServerName( $this->getWriterIndex() );
-		}
-
-		return $name;
+		return $this->clusterName;
 	}
 
 	public function getLocalDomainID(): string {
@@ -332,11 +275,11 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	/**
-	 * Resolve $groups into a list of query groups defining as having database servers
+	 * Get the first group in $groups with assigned servers, falling back to the default group
 	 *
 	 * @param string[]|string|false $groups Query group(s) in preference order, [], or false
 	 * @param int $i Specific server index or DB_PRIMARY/DB_REPLICA
-	 * @return string[] Non-empty group list in preference order with the default group appended
+	 * @return string Query group
 	 */
 	private function resolveGroups( $groups, $i ) {
 		// If a specific replica server was specified, then $groups makes no sense
@@ -346,48 +289,49 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		}
 
 		if ( $groups === [] || $groups === false || $groups === $this->defaultGroup ) {
-			$resolvedGroups = [ $this->defaultGroup ]; // common case
-		} elseif ( is_string( $groups ) && isset( $this->groupLoads[$groups] ) ) {
-			$resolvedGroups = [ $groups, $this->defaultGroup ];
+			$resolvedGroup = $this->defaultGroup;
+		} elseif ( is_string( $groups ) ) {
+			$resolvedGroup = isset( $this->groupLoads[$groups] ) ? $groups : $this->defaultGroup;
 		} elseif ( is_array( $groups ) ) {
-			$resolvedGroups = $groups;
-			if ( !in_array( $this->defaultGroup, $resolvedGroups ) ) {
-				$resolvedGroups[] = $this->defaultGroup;
+			$resolvedGroup = $this->defaultGroup;
+			foreach ( $groups as $group ) {
+				if ( isset( $this->groupLoads[$group] ) ) {
+					$resolvedGroup = $group;
+					break;
+				}
 			}
 		} else {
-			$resolvedGroups = [ $this->defaultGroup ];
+			$resolvedGroup = $this->defaultGroup;
 		}
 
-		return $resolvedGroups;
+		return $resolvedGroup;
 	}
 
 	/**
+	 * Sanitize connection flags provided by a call to getConnection()
+	 *
 	 * @param int $flags Bitfield of class CONN_* constants
-	 * @param int $i Specific server index or DB_PRIMARY/DB_REPLICA
 	 * @param string $domain Database domain
 	 * @return int Sanitized bitfield
 	 */
-	private function sanitizeConnectionFlags( $flags, $i, $domain ) {
-		// Whether an outside caller is explicitly requesting the primary database server
-		if ( $i === self::DB_PRIMARY || $i === $this->getWriterIndex() ) {
-			$flags |= self::CONN_INTENT_WRITABLE;
-		}
-
+	protected function sanitizeConnectionFlags( $flags, $domain ) {
 		if ( self::fieldHasBit( $flags, self::CONN_TRX_AUTOCOMMIT ) ) {
 			// Callers use CONN_TRX_AUTOCOMMIT to bypass REPEATABLE-READ staleness without
 			// resorting to row locks (e.g. FOR UPDATE) or to make small out-of-band commits
 			// during larger transactions. This is useful for avoiding lock contention.
-
-			// Primary DB server attributes (should match those of the replica DB servers)
-			$attributes = $this->getServerAttributes( $this->getWriterIndex() );
+			// Assuming all servers are of the same type (or similar), which is overwhelmingly
+			// the case, use the primary server information to get the attributes. The information
+			// for $i cannot be used since it might be DB_REPLICA, which might require connection
+			// attempts in order to be resolved into a real server index.
+			$attributes = $this->getServerAttributes( ServerInfo::WRITER_INDEX );
 			if ( $attributes[Database::ATTR_DB_LEVEL_LOCKING] ) {
 				// The RDBMS does not support concurrent writes (e.g. SQLite), so attempts
 				// to use separate connections would just cause self-deadlocks. Note that
 				// REPEATABLE-READ staleness is not an issue since DB-level locking means
 				// that transactions are Strict Serializable anyway.
 				$flags &= ~self::CONN_TRX_AUTOCOMMIT;
-				$type = $this->getServerType( $this->getWriterIndex() );
-				$this->connLogger->info( __METHOD__ . ": CONN_TRX_AUTOCOMMIT disallowed ($type)" );
+				$type = $this->serverInfo->getServerType( ServerInfo::WRITER_INDEX );
+				$this->logger->info( __METHOD__ . ": CONN_TRX_AUTOCOMMIT disallowed ($type)" );
 			} elseif ( isset( $this->tempTablesOnlyMode[$domain] ) ) {
 				// T202116: integration tests are active and queries should be all be using
 				// temporary clone tables (via prefix). Such tables are not visible across
@@ -406,11 +350,16 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 * @throws DBUnexpectedError
 	 */
 	private function enforceConnectionFlags( IDatabase $conn, $flags ) {
-		if ( self::fieldHasBit( $flags, self::CONN_TRX_AUTOCOMMIT ) ) {
+		if (
+			self::fieldHasBit( $flags, self::CONN_TRX_AUTOCOMMIT ) ||
+			// Handles with open transactions are avoided since they might be subject
+			// to REPEATABLE-READ snapshots, which could affect the lag estimate query.
+			self::fieldHasBit( $flags, self::CONN_UNTRACKED_GAUGE )
+		) {
 			if ( $conn->trxLevel() ) {
 				throw new DBUnexpectedError(
 					$conn,
-					'Handle requested with CONN_TRX_AUTOCOMMIT yet it has a transaction'
+					'Handle requested with autocommit-mode yet it has a transaction'
 				);
 			}
 
@@ -419,58 +368,32 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	/**
-	 * Get a LoadMonitor instance
-	 *
-	 * @return ILoadMonitor
+	 * @param array<int,int|float> $loads Map of (server index => weight) for a load group
+	 * @param int|float $sessionLagLimit Additional maximum lag threshold imposed by the session;
+	 *  use INF if none applies. Servers will count as lagged if their lag exceeds either this
+	 *  value or the configured "max lag" value.
+	 * @return int|false Index of a non-lagged server with non-zero weight; false if none
 	 */
-	private function getLoadMonitor() {
-		if ( !isset( $this->loadMonitor ) ) {
-			$compat = [
-				'LoadMonitor' => LoadMonitor::class,
-				'LoadMonitorNull' => LoadMonitorNull::class,
-				'LoadMonitorMySQL' => LoadMonitorMySQL::class,
-			];
+	private function getRandomNonLagged( array $loads, $sessionLagLimit = INF ) {
+		$lags = $this->getLagTimes();
 
-			$class = $this->loadMonitorConfig['class'];
-			if ( isset( $compat[$class] ) ) {
-				$class = $compat[$class];
-			}
-
-			$this->loadMonitor = new $class(
-				$this, $this->srvCache, $this->wanCache, $this->loadMonitorConfig );
-			$this->loadMonitor->setLogger( $this->replLogger );
-			$this->loadMonitor->setStatsdDataFactory( $this->statsd );
-		}
-
-		return $this->loadMonitor;
-	}
-
-	/**
-	 * @param array $loads
-	 * @param string $domain Resolved DB domain
-	 * @param int|float $maxLag Restrict the maximum allowed lag to this many seconds, or INF for no max
-	 * @return int|string|false
-	 */
-	private function getRandomNonLagged( array $loads, string $domain, $maxLag = INF ) {
-		$lags = $this->getLagTimes( $domain );
-
-		# Unset excessively lagged servers
+		// Unset excessively lagged servers from the load group
 		foreach ( $lags as $i => $lag ) {
-			if ( $i !== $this->getWriterIndex() ) {
-				# How much lag this server nominally is allowed to have
-				$maxServerLag = $this->servers[$i]['max lag'] ?? $this->maxLag; // default
-				# Constrain that further by $maxLag argument
-				$maxServerLag = min( $maxServerLag, $maxLag );
+			if ( $i !== ServerInfo::WRITER_INDEX ) {
+				// How much lag normally counts as "excessive" for this server
+				$maxServerLag = $this->serverInfo->getServerMaxLag( $i );
+				// How much lag counts as "excessive" for this server given the session
+				$maxServerLag = min( $maxServerLag, $sessionLagLimit );
 
-				$srvName = $this->getServerName( $i );
+				$srvName = $this->serverInfo->getServerName( $i );
 				if ( $lag === false && !is_infinite( $maxServerLag ) ) {
-					$this->replLogger->debug(
+					$this->logger->debug(
 						__METHOD__ . ": server {db_server} is not replicating?",
 						[ 'db_server' => $srvName ]
 					);
 					unset( $loads[$i] );
 				} elseif ( $lag > $maxServerLag ) {
-					$this->replLogger->debug(
+					$this->logger->debug(
 						__METHOD__ .
 							": server {db_server} has {lag} seconds of lag (>= {maxlag})",
 						[ 'db_server' => $srvName, 'lag' => $lag, 'maxlag' => $maxServerLag ]
@@ -480,218 +403,141 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			}
 		}
 
-		# Find out if all the replica DBs with non-zero load are lagged
-		$sum = 0;
-		foreach ( $loads as $load ) {
-			$sum += $load;
-		}
-		if ( $sum == 0 ) {
-			# No appropriate DB servers except maybe the primary and some replica DBs with zero load
-			# Do NOT use the primary DB
-			# Instead, this function will return false, triggering read-only mode,
-			# and a lagged replica DB will be used instead.
+		if ( array_sum( $loads ) == 0 ) {
+			// All the replicas with non-zero weight are lagged and the primary has zero load.
+			// Inform caller so that it can use switch to read-only mode and use a lagged replica.
 			return false;
 		}
 
-		if ( count( $loads ) == 0 ) {
-			return false;
-		}
-
-		# Return a random representative of the remainder
+		// Return a server index based on weighted random selection
 		return ArrayUtils::pickRandom( $loads );
 	}
 
-	/**
-	 * Get the server index to use for a specified server index and query group list
-	 *
-	 * @param int $i Specific server index or DB_PRIMARY/DB_REPLICA
-	 * @param string[] $groups Non-empty query group list in preference order
-	 * @param string|false $domain
-	 * @return int A specific server index (replica DBs are checked for connectivity)
-	 */
-	private function getConnectionIndex( $i, array $groups, $domain ) {
-		if ( $i === self::DB_PRIMARY ) {
-			$i = $this->getWriterIndex();
-		} elseif ( $i === self::DB_REPLICA ) {
-			foreach ( $groups as $group ) {
-				$groupIndex = $this->getReaderIndex( $group, $domain );
-				if ( $groupIndex !== false ) {
-					$i = $groupIndex; // group connection succeeded
-					break;
-				}
-			}
-		} elseif ( !isset( $this->servers[$i] ) ) {
-			throw new UnexpectedValueException( "Invalid server index index #$i" );
-		}
-
-		if ( $i === self::DB_REPLICA ) {
-			$this->lastError = 'Unknown error'; // set here in case of worse failure
-			$this->lastError = 'No working replica DB server: ' . $this->lastError;
-			$this->reportConnectionError();
-		}
-
-		return $i;
-	}
-
-	public function getReaderIndex( $group = false, $domain = false ) {
-		$domain = $this->resolveDomainID( $domain );
+	public function getReaderIndex( $group = false ) {
 		$group = is_string( $group ) ? $group : self::GROUP_GENERIC;
 
-		if ( $this->getServerCount() == 1 ) {
-			// Skip the load balancing if there's only one server
-			return $this->getWriterIndex();
+		if ( !$this->serverInfo->hasReplicaServers() ) {
+			// There is only one possible server to use (the primary)
+			return ServerInfo::WRITER_INDEX;
 		}
 
 		$index = $this->getExistingReaderIndex( $group );
 		if ( $index !== self::READER_INDEX_NONE ) {
-			// A reader index was already selected and "waitForPos" was handled
+			// A reader index was already selected for this query group. Keep using it,
+			// since any session replication position was already waited on and any
+			// active transaction will be reused (e.g. for point-in-time snapshots).
 			return $index;
 		}
 
-		// Use the server weight array for this load group
-		if ( isset( $this->groupLoads[$group] ) ) {
-			$loads = $this->groupLoads[$group];
-		} else {
-			$this->connLogger->info( __METHOD__ . ": no loads for group $group" );
-
+		// Get the server weight array for this load group
+		$loads = $this->groupLoads[$group] ?? [];
+		if ( !$loads ) {
+			$this->logger->info( __METHOD__ . ": no loads for group $group" );
 			return false;
 		}
 
-		// Scale the configured load ratios according to each server's load and state
-		$this->getLoadMonitor()->scaleLoads( $loads, $domain );
+		// Load any session replication positions, before any connection attempts,
+		// since reading them afterwards can only cause more delay due to possibly
+		// seeing even higher replication positions (e.g. from concurrent requests).
+		$this->loadSessionPrimaryPos();
 
-		// Pick a server to use, accounting for weights, load, lag, and "waitForPos"
-		$this->lazyLoadReplicationPositions(); // optimizes server candidate selection
-		[ $i, $laggedReplicaMode ] = $this->pickReaderIndex( $loads, $domain );
+		// Scale the configured load weights according to each server's load/state.
+		// This can sometimes trigger server connections due to cache regeneration.
+		$this->loadMonitor->scaleLoads( $loads );
+
+		// Pick a server, accounting for load weights, lag, and session consistency
+		$i = $this->pickReaderIndex( $loads );
 		if ( $i === false ) {
-			// DB connection unsuccessful
+			// Connection attempts failed
 			return false;
 		}
 
-		// If data seen by queries is expected to reflect the transactions committed as of
-		// or after a given replication position then wait for the DB to apply those changes
-		if ( $this->waitForPos && $i !== $this->getWriterIndex() && !$this->doWait( $i ) ) {
+		// If data seen by queries is expected to reflect writes from a prior transaction,
+		// then wait for the chosen server to apply those changes. This is used to improve
+		// session consistency.
+		if ( !$this->awaitSessionPrimaryPos( $i ) ) {
 			// Data will be outdated compared to what was expected
-			$laggedReplicaMode = true;
+			$this->setLaggedReplicaMode();
 		}
 
-		// Cache the reader index for future DB_REPLICA handles
-		$this->setExistingReaderIndex( $group, $i );
-		// Record whether the generic reader index is in "lagged replica DB" mode
-		if ( $group === self::GROUP_GENERIC && $laggedReplicaMode ) {
-			$this->laggedReplicaMode = true;
-			$this->replLogger->debug( __METHOD__ . ": setting lagged replica mode" );
+		// Keep using this server for DB_REPLICA handles for this group
+		if ( $i < 0 ) {
+			throw new UnexpectedValueException( "Cannot set a negative read server index" );
 		}
+		$this->readIndexByGroup[$group] = $i;
 
 		$serverName = $this->getServerName( $i );
-		$this->connLogger->debug( __METHOD__ . ": using server $serverName for group '$group'" );
+		$this->logger->debug( __METHOD__ . ": using server $serverName for group '$group'" );
 
 		return $i;
 	}
 
 	/**
-	 * Get the server index chosen by the load balancer for use with the given query group
+	 * Get the server index chosen for DB_REPLICA connections for the given query group
 	 *
 	 * @param string $group Query group; use false for the generic group
-	 * @return int Server index or LoadBalancer::READER_INDEX_NONE if none was chosen
+	 * @return int Specific server index or LoadBalancer::READER_INDEX_NONE if none was chosen
 	 */
 	protected function getExistingReaderIndex( $group ) {
 		return $this->readIndexByGroup[$group] ?? self::READER_INDEX_NONE;
 	}
 
 	/**
-	 * Set the server index chosen by the load balancer for use with the given query group
-	 *
-	 * @param string $group Query group; use false for the generic group
-	 * @param int $index The index of a specific server
-	 */
-	private function setExistingReaderIndex( $group, $index ) {
-		if ( $index < 0 ) {
-			throw new UnexpectedValueException( "Cannot set a negative read server index" );
-		}
-		$this->readIndexByGroup[$group] = $index;
-	}
-
-	/**
-	 * Pick a server that is reachable, preferably non-lagged, and return its server index
+	 * Pick a server that is reachable and preferably non-lagged based on the load weights
 	 *
 	 * This will leave the server connection open within the pool for reuse
 	 *
-	 * @param array $loads List of server weights
-	 * @param string $domain Resolved DB domain
-	 * @return array (reader index, lagged replica mode) or (false, false) on failure
+	 * @param array<int,int|float> $loads Map of (server index => weight) for a load group
+	 * @return int|false Server index to use as the load group reader index; false on failure
 	 */
-	private function pickReaderIndex( array $loads, string $domain ) {
+	private function pickReaderIndex( array $loads ) {
 		if ( $loads === [] ) {
-			throw new InvalidArgumentException( "Server configuration array is empty" );
+			throw new InvalidArgumentException( "Load group array is empty" );
 		}
 
-		/** @var int|false $i Index of selected server */
 		$i = false;
-		/** @var bool $laggedReplicaMode Whether server is considered lagged */
-		$laggedReplicaMode = false;
-
 		// Quickly look through the available servers for a server that meets criteria...
 		$currentLoads = $loads;
 		while ( count( $currentLoads ) ) {
-			if ( $laggedReplicaMode ) {
-				$i = ArrayUtils::pickRandom( $currentLoads );
+			if ( $this->waitForPos && $this->waitForPos->asOfTime() ) {
+				$this->logger->debug( __METHOD__ . ": session has replication position" );
+				// ChronologyProtector::getSessionPrimaryPos called in loadSessionPrimaryPos()
+				// sets "waitForPos" for session consistency. This triggers doWait() after
+				// connect, so it's especially good to avoid lagged servers so as to avoid
+				// excessive delay in that method.
+				$ago = microtime( true ) - $this->waitForPos->asOfTime();
+				// Aim for <= 1 second of waiting (being too picky can backfire)
+				$i = $this->getRandomNonLagged( $currentLoads, $ago + 1 );
 			} else {
-				$i = false;
-				if ( $this->waitForPos && $this->waitForPos->asOfTime() ) {
-					$this->replLogger->debug( __METHOD__ . ": replication positions detected" );
-					// "chronologyCallback" sets "waitForPos" for session consistency.
-					// This triggers doWait() after connect, so it's especially good to
-					// avoid lagged servers so as to avoid excessive delay in that method.
-					$ago = microtime( true ) - $this->waitForPos->asOfTime();
-					// Aim for <= 1 second of waiting (being too picky can backfire)
-					$i = $this->getRandomNonLagged( $currentLoads, $domain, $ago + 1 );
-				}
-				if ( $i === false ) {
-					// Any server with less lag than it's 'max lag' param is preferable
-					$i = $this->getRandomNonLagged( $currentLoads, $domain );
-				}
-				if ( $i === false && count( $currentLoads ) ) {
-					// All replica DBs lagged. Switch to read-only mode
-					$this->replLogger->error(
-						__METHOD__ . ": all replica DBs lagged. Switch to read-only mode",
-						[ 'db_domain' => $domain ]
-					);
-					$i = ArrayUtils::pickRandom( $currentLoads );
-					$laggedReplicaMode = true;
-				}
+				// Any server with less lag than it's 'max lag' param is preferable
+				$i = $this->getRandomNonLagged( $currentLoads );
+			}
+
+			if ( $i === false && count( $currentLoads ) ) {
+				$this->setLaggedReplicaMode();
+				// All replica DBs lagged, just pick anything.
+				$i = ArrayUtils::pickRandom( $currentLoads );
 			}
 
 			if ( $i === false ) {
 				// pickRandom() returned false.
-				// This is permanent and means the configuration or the load monitor
+				// This is permanent and means the configuration or LoadMonitor
 				// wants us to return false.
-				$this->connLogger->debug( __METHOD__ . ": pickRandom() returned false" );
-
-				return [ false, false ];
+				$this->logger->debug( __METHOD__ . ": no suitable server found" );
+				return false;
 			}
 
 			$serverName = $this->getServerName( $i );
-			$this->connLogger->debug( __METHOD__ . ": Using reader #$i: $serverName..." );
+			$this->logger->debug( __METHOD__ . ": connecting to $serverName..." );
 
 			// Get a connection to this server without triggering complementary connections
 			// to other servers (due to things like lag or read-only checks). We want to avoid
 			// the risk of overhead and recursion here.
-			$conn = $this->getServerConnection( $i, $domain, self::CONN_SILENCE_ERRORS );
+			$conn = $this->getServerConnection( $i, self::DOMAIN_ANY, self::CONN_SILENCE_ERRORS );
 			if ( !$conn ) {
-				$this->connLogger->warning(
-					__METHOD__ . ": failed connecting to $i/{db_domain}",
-					[ 'db_domain' => $domain ]
-				);
+				$this->logger->warning( __METHOD__ . ": failed connecting to $serverName" );
 				unset( $currentLoads[$i] ); // avoid this server next iteration
-				$i = false;
 				continue;
-			}
-
-			// Decrement reference counter, we are finished with this connection.
-			// It will be incremented for the caller later.
-			if ( !$this->localDomain->equals( $domain ) ) {
-				$this->reuseConnectionInternal( $conn );
 			}
 
 			// Return this server
@@ -700,53 +546,47 @@ class LoadBalancer implements ILoadBalancerForOwner {
 
 		// If all servers were down, quit now
 		if ( $currentLoads === [] ) {
-			$this->connLogger->error(
-				__METHOD__ . ": all servers down",
-				[ 'db_domain' => $domain ]
-			);
+			$this->logger->error( __METHOD__ . ": all servers down" );
 		}
 
-		return [ $i, $laggedReplicaMode ];
+		return $i;
 	}
 
-	public function waitFor( $pos ) {
-		$oldPos = $this->waitForPos;
-		try {
-			$this->waitForPos = $pos;
-
-			$genericIndex = $this->getExistingReaderIndex( self::GROUP_GENERIC );
-			// If a generic reader connection was already established, then wait now.
-			// Otherwise, wait until a connection is established in getReaderIndex().
-			if ( $genericIndex > $this->getWriterIndex() && !$this->doWait( $genericIndex ) ) {
-				$this->laggedReplicaMode = true;
-				$this->replLogger->debug( __METHOD__ . ": setting lagged replica mode" );
-			}
-		} finally {
-			// Restore the older position if it was higher since this is used for lag-protection
-			$this->setWaitForPositionIfHigher( $oldPos );
-		}
-	}
-
-	public function waitForAll( $pos, $timeout = null ) {
-		$timeout = $timeout ?: $this->waitTimeout;
+	public function waitForAll( DBPrimaryPos $pos, $timeout = null ) {
+		$timeout = $timeout ?: self::MAX_WAIT_DEFAULT;
 
 		$oldPos = $this->waitForPos;
 		try {
 			$this->waitForPos = $pos;
 
-			$ok = true;
-			foreach ( $this->getStreamingReplicaIndexes() as $i ) {
+			$failedReplicas = [];
+			foreach ( $this->serverInfo->getStreamingReplicaIndexes() as $i ) {
 				if ( $this->serverHasLoadInAnyGroup( $i ) ) {
 					$start = microtime( true );
-					$ok = $this->doWait( $i, $timeout ) && $ok;
-					$timeout -= intval( microtime( true ) - $start );
-					if ( $timeout <= 0 ) {
-						break; // timeout reached
+					$ok = $this->awaitSessionPrimaryPos( $i, $timeout );
+					if ( !$ok ) {
+						$failedReplicas[] = $this->getServerName( $i );
 					}
+					$timeout -= intval( microtime( true ) - $start );
 				}
 			}
 
-			return $ok;
+			// Stop spamming logs when only one replica is lagging and we have 5+ replicas.
+			// Mediawiki automatically stops sending queries to the lagged one.
+			$failed = $failedReplicas && ( count( $failedReplicas ) > 1 || $this->getServerCount() < 5 );
+			if ( $failed ) {
+				$this->logger->error(
+					"Timed out waiting for replication to reach {raw_pos}",
+					[
+						'raw_pos' => $pos->__toString(),
+						'failed_hosts' => $failedReplicas,
+						'timeout' => $timeout,
+						'exception' => new RuntimeException()
+					]
+				);
+			}
+
+			return !$failed;
 		} finally {
 			// Restore the old position; this is used for throttling, not lag-protection
 			$this->waitForPos = $oldPos;
@@ -767,40 +607,23 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		return false;
 	}
 
-	/**
-	 * @param DBPrimaryPos|false $pos
-	 */
-	private function setWaitForPositionIfHigher( $pos ) {
-		if ( !$pos ) {
-			return;
-		}
-
-		if ( !$this->waitForPos || $pos->hasReached( $this->waitForPos ) ) {
-			$this->waitForPos = $pos;
-		}
-	}
-
 	public function getAnyOpenConnection( $i, $flags = 0 ) {
-		$i = ( $i === self::DB_PRIMARY ) ? $this->getWriterIndex() : $i;
-		// Connection handles required to be in auto-commit mode use a separate connection
-		// pool since the main pool is effected by implicit and explicit transaction rounds
-		$autoCommitOnly = self::fieldHasBit( $flags, self::CONN_TRX_AUTOCOMMIT );
-
+		$i = ( $i === self::DB_PRIMARY ) ? ServerInfo::WRITER_INDEX : $i;
 		$conn = false;
-		foreach ( $this->conns as $type => $connsByServer ) {
+		foreach ( $this->conns as $type => $poolConnsByServer ) {
 			if ( $i === self::DB_REPLICA ) {
 				// Consider all existing connections to any server
-				$applicableConnsByServer = $connsByServer;
+				$applicableConnsByServer = $poolConnsByServer;
 			} else {
 				// Consider all existing connections to a specific server
-				$applicableConnsByServer = isset( $connsByServer[$i] )
-					? [ $i => $connsByServer[$i] ]
+				$applicableConnsByServer = isset( $poolConnsByServer[$i] )
+					? [ $i => $poolConnsByServer[$i] ]
 					: [];
 			}
 
-			$conn = $this->pickAnyOpenConnection( $applicableConnsByServer, $autoCommitOnly );
+			$conn = $this->pickAnyOpenConnection( $applicableConnsByServer );
 			if ( $conn ) {
-				$this->connLogger->debug( __METHOD__ . ": found '$type' connection to #$i." );
+				$this->logger->debug( __METHOD__ . ": found '$type' connection to #$i." );
 				break;
 			}
 		}
@@ -814,41 +637,19 @@ class LoadBalancer implements ILoadBalancerForOwner {
 
 	/**
 	 * @param Database[][] $connsByServer Map of (server index => array of DB handles)
-	 * @param bool $autoCommitOnly Whether to only look for auto-commit connections
-	 * @return IDatabase|false An appropriate open connection or false if none found
+	 * @return IDatabaseForOwner|false An appropriate open connection or false if none found
 	 */
-	private function pickAnyOpenConnection( array $connsByServer, $autoCommitOnly ) {
+	private function pickAnyOpenConnection( array $connsByServer ) {
 		foreach ( $connsByServer as $i => $conns ) {
 			foreach ( $conns as $conn ) {
 				if ( !$conn->isOpen() ) {
-					$this->connLogger->warning(
+					$this->logger->warning(
 						__METHOD__ .
 						": pooled DB handle for {db_server} (#$i) has no open connection.",
 						$this->getConnLogContext( $conn )
 					);
-
 					continue; // some sort of error occurred?
 				}
-
-				if ( $autoCommitOnly ) {
-					// Only accept CONN_TRX_AUTOCOMMIT connections
-					if ( !$conn->getLBInfo( self::INFO_AUTOCOMMIT_ONLY ) ) {
-						// Connection is aware of transaction rounds
-						continue;
-					}
-
-					if ( $conn->trxLevel() ) {
-						// Some sort of bug left a transaction open
-						$this->connLogger->warning(
-							__METHOD__ .
-							": pooled DB handle for {db_server} (#$i) has a pending transaction.",
-							$this->getConnLogContext( $conn )
-						);
-
-						continue;
-					}
-				}
-
 				return $conn;
 			}
 		}
@@ -859,23 +660,37 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	/**
 	 * Wait for a given replica DB to catch up to the primary DB pos stored in "waitForPos"
 	 *
+	 * @see loadSessionPrimaryPos()
+	 *
 	 * @param int $index Specific server index
 	 * @param int|null $timeout Max seconds to wait; default is "waitTimeout"
-	 * @return bool
+	 * @return bool Success
 	 */
-	private function doWait( $index, $timeout = null ) {
-		$timeout = max( 1, intval( $timeout ?: $this->waitTimeout ) );
+	private function awaitSessionPrimaryPos( $index, $timeout = null ) {
+		$timeout = max( 1, intval( $timeout ?: self::MAX_WAIT_DEFAULT ) );
+
+		if ( !$this->waitForPos || $index === ServerInfo::WRITER_INDEX ) {
+			return true;
+		}
+
+		$srvName = $this->getServerName( $index );
 
 		// Check if we already know that the DB has reached this point
-		$srvName = $this->getServerName( $index );
-		$key = $this->srvCache->makeGlobalKey( __CLASS__, 'last-known-pos', $srvName, 'v1' );
+		$key = $this->srvCache->makeGlobalKey( __CLASS__, 'last-known-pos', $srvName, 'v2' );
+
 		/** @var DBPrimaryPos $knownReachedPos */
-		$knownReachedPos = $this->srvCache->get( $key );
+		$position = $this->srvCache->get( $key );
+		if ( !is_array( $position ) ) {
+			$knownReachedPos = null;
+		} else {
+			$class = $position['_type_'];
+			$knownReachedPos = $class::newFromArray( $position );
+		}
 		if (
 			$knownReachedPos instanceof DBPrimaryPos &&
 			$knownReachedPos->hasReached( $this->waitForPos )
 		) {
-			$this->replLogger->debug(
+			$this->logger->debug(
 				__METHOD__ .
 				": replica DB {db_server} known to be caught up (pos >= $knownReachedPos).",
 				[ 'db_server' => $srvName ]
@@ -894,7 +709,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			// the risk of overhead and recursion here.
 			$conn = $this->getServerConnection( $index, self::DOMAIN_ANY, $flags );
 			if ( !$conn ) {
-				$this->replLogger->warning(
+				$this->logger->warning(
 					__METHOD__ . ': failed to connect to {db_server}',
 					[ 'db_server' => $srvName ]
 				);
@@ -906,7 +721,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			$close = true;
 		}
 
-		$this->replLogger->info(
+		$this->logger->info(
 			__METHOD__ .
 			': waiting for replica DB {db_server} to catch up...',
 			$this->getConnLogContext( $conn )
@@ -917,7 +732,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		$ok = ( $result !== null && $result != -1 );
 		if ( $ok ) {
 			// Remember that the DB reached this point
-			$this->srvCache->set( $key, $this->waitForPos, BagOStuff::TTL_DAY );
+			$this->srvCache->set( $key, $this->waitForPos->toArray(), BagOStuff::TTL_DAY );
 		}
 
 		if ( $close ) {
@@ -928,46 +743,55 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	public function getConnection( $i, $groups = [], $domain = false, $flags = 0 ) {
-		return $this->getConnectionRef( $i, $groups, $domain, $flags );
+		if ( self::fieldHasBit( $flags, self::CONN_SILENCE_ERRORS ) ) {
+			throw new UnexpectedValueException(
+				__METHOD__ . ' got CONN_SILENCE_ERRORS; connection is already deferred'
+			);
+		}
+
+		$domain = $this->resolveDomainID( $domain );
+		$role = ( $i === self::DB_PRIMARY || $i === ServerInfo::WRITER_INDEX )
+			? self::DB_PRIMARY
+			: self::DB_REPLICA;
+
+		return new DBConnRef( $this, [ $i, $groups, $domain, $flags ], $role, $this->modcount );
 	}
 
 	public function getConnectionInternal( $i, $groups = [], $domain = false, $flags = 0 ): IDatabase {
 		$domain = $this->resolveDomainID( $domain );
-		$groups = $this->resolveGroups( $groups, $i );
-		$flags = $this->sanitizeConnectionFlags( $flags, $i, $domain );
+		$group = $this->resolveGroups( $groups, $i );
+		$flags = $this->sanitizeConnectionFlags( $flags, $domain );
 		// If given DB_PRIMARY/DB_REPLICA, resolve it to a specific server index. Resolving
 		// DB_REPLICA might trigger getServerConnection() calls due to the getReaderIndex()
 		// connectivity checks or LoadMonitor::scaleLoads() server state cache regeneration.
 		// The use of getServerConnection() instead of getConnection() avoids infinite loops.
-		$serverIndex = $this->getConnectionIndex( $i, $groups, $domain );
-		// Get an open connection to that server (might trigger a new connection)
-		$conn = $this->getServerConnection( $serverIndex, $domain, $flags );
-		// Set primary DB handles as read-only if there is high replication lag
-		if (
-			$conn &&
-			$serverIndex === $this->getWriterIndex() &&
-			$this->getLaggedReplicaMode( $domain ) &&
-			!is_string( $conn->getLBInfo( $conn::LB_READ_ONLY_REASON ) )
-		) {
-			$genericIndex = $this->getExistingReaderIndex( self::GROUP_GENERIC );
-			$reason = ( $genericIndex !== self::READER_INDEX_NONE )
-				? 'The database is read-only until replication lag decreases.'
-				: 'The database is read-only until replica database servers becomes reachable.';
-			$conn->setLBInfo( $conn::LB_READ_ONLY_REASON, $reason );
+		$serverIndex = $i;
+		if ( $i === self::DB_PRIMARY ) {
+			$serverIndex = ServerInfo::WRITER_INDEX;
+		} elseif ( $i === self::DB_REPLICA ) {
+			$groupIndex = $this->getReaderIndex( $group );
+			if ( $groupIndex !== false ) {
+				// Group connection succeeded
+				$serverIndex = $groupIndex;
+			}
+			if ( $serverIndex < 0 ) {
+				$this->reportConnectionError( 'could not connect to any replica DB server' );
+			}
+		} elseif ( !$this->serverInfo->hasServerIndex( $i ) ) {
+			throw new UnexpectedValueException( "Invalid server index index #$i" );
 		}
-
-		return $conn;
+		// Get an open connection to that server (might trigger a new connection)
+		return $this->getServerConnection( $serverIndex, $domain, $flags );
 	}
 
 	public function getServerConnection( $i, $domain, $flags = 0 ) {
+		$domainInstance = DatabaseDomain::newFromId( $domain );
 		// Number of connections made before getting the server index and handle
 		$priorConnectionsMade = $this->connectionCounter;
 		// Get an open connection to this server (might trigger a new connection)
-		$conn = $this->localDomain->equals( $domain )
-			? $this->getLocalConnection( $i, $flags )
-			: $this->getForeignConnection( $i, $domain, $flags );
+		$conn = $this->reuseOrOpenConnectionForNewRef( $i, $domainInstance, $flags );
 		// Throw an error or otherwise bail out if the connection attempt failed
-		if ( !( $conn instanceof IDatabase ) ) {
+		if ( !( $conn instanceof IDatabaseForOwner ) ) {
 			if ( !self::fieldHasBit( $flags, self::CONN_SILENCE_ERRORS ) ) {
 				$this->reportConnectionError();
 			}
@@ -980,12 +804,12 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			$this->trxProfiler->recordConnection(
 				$conn->getServerName(),
 				$conn->getDBname(),
-				self::fieldHasBit( $flags, self::CONN_INTENT_WRITABLE )
+				( $i === ServerInfo::WRITER_INDEX && $this->hasStreamingReplicaServers() )
 			);
 		}
 
 		if ( !$conn->isOpen() ) {
-			$this->errorConnection = $conn;
+			$this->lastErrorConn = $conn;
 			// Connection was made but later unrecoverably lost for some reason.
 			// Do not return a handle that will just throw exceptions on use, but
 			// let the calling code, e.g. getReaderIndex(), try another server.
@@ -995,98 +819,16 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			return false;
 		}
 
-		// Make sure that flags like CONN_TRX_AUTOCOMMIT are respected by this handle
-		$this->enforceConnectionFlags( $conn, $flags );
-		// Set primary DB handles as read-only if the load balancer is configured as read-only
-		// or the primary database server is running in server-side read-only mode. Note that
-		// replica DB handles are always read-only via Database::assertIsWritablePrimary().
-		// Read-only mode due to replication lag is *avoided* here to avoid recursion.
-		if ( $i === $this->getWriterIndex() ) {
-			if ( $this->readOnlyReason !== false ) {
-				$readOnlyReason = $this->readOnlyReason;
-			} elseif ( $this->isPrimaryConnectionReadOnly( $conn, $flags ) ) {
-				$readOnlyReason = 'The primary database server is running in read-only mode.';
-			} else {
-				$readOnlyReason = false;
-			}
-			$conn->setLBInfo( $conn::LB_READ_ONLY_REASON, $readOnlyReason );
-		}
-
 		return $conn;
 	}
 
-	public function reuseConnection( IDatabase $conn ) {
-		// no-op
-	}
-
-	public function reuseConnectionInternal( IDatabase $conn ) {
-		$serverIndex = $conn->getLBInfo( self::INFO_SERVER_INDEX );
-		$refCount = $conn->getLBInfo( self::INFO_FOREIGN_REF_COUNT );
-		if ( $serverIndex === null || $refCount === null ) {
-			return; // non-foreign connection; no domain-use tracking to update
-		} elseif ( $conn instanceof DBConnRef ) {
-			// DBConnRef already handles calling reuseConnection() and only passes the live
-			// Database instance to this method. Any caller passing in a DBConnRef is broken.
-			$this->connLogger->error(
-				__METHOD__ . ": got DBConnRef instance",
-				[ 'db_domain' => $conn->getDomainID(), 'exception' => new RuntimeException() ]
-			);
-
-			return;
-		}
-
-		if ( $this->disabled ) {
-			return; // DBConnRef handle probably survived longer than the LoadBalancer
-		}
-
-		if ( $conn->getLBInfo( self::INFO_AUTOCOMMIT_ONLY ) ) {
-			$connFreeKey = self::KEY_FOREIGN_FREE_NOROUND;
-			$connInUseKey = self::KEY_FOREIGN_INUSE_NOROUND;
-		} else {
-			$connFreeKey = self::KEY_FOREIGN_FREE;
-			$connInUseKey = self::KEY_FOREIGN_INUSE;
-		}
-
-		$domain = $conn->getDomainID();
-		$existingDomainConn = $this->conns[$connInUseKey][$serverIndex][$domain] ?? null;
-		if ( !$existingDomainConn ) {
-			throw new InvalidArgumentException(
-				"Connection $serverIndex/$domain not found; it may have already been freed" );
-		} elseif ( $existingDomainConn !== $conn ) {
-			throw new InvalidArgumentException(
-				"Connection $serverIndex/$domain mismatched; it may have already been freed" );
-		}
-
-		$existingDomainConn->setLBInfo( self::INFO_FOREIGN_REF_COUNT, --$refCount );
-		if ( $refCount <= 0 ) {
-			$this->conns[$connFreeKey][$serverIndex][$domain] = $existingDomainConn;
-			unset( $this->conns[$connInUseKey][$serverIndex][$domain] );
-			if ( !$this->conns[$connInUseKey][$serverIndex] ) {
-				unset( $this->conns[$connInUseKey][$serverIndex] ); // clean up
-			}
-			$this->connLogger->debug( __METHOD__ . ": freed connection $serverIndex/$domain" );
-		} else {
-			$this->connLogger->debug( __METHOD__ .
-				": reference count for $serverIndex/$domain reduced to $refCount" );
-		}
-	}
-
-	public function getConnectionRef( $i, $groups = [], $domain = false, $flags = 0 ): IDatabase {
-		if ( self::fieldHasBit( $flags, self::CONN_SILENCE_ERRORS ) ) {
-			throw new UnexpectedValueException(
-				__METHOD__ . ' got CONN_SILENCE_ERRORS; connection is already deferred'
-			);
-		}
-
-		$domain = $this->resolveDomainID( $domain );
-		$role = $this->getRoleFromIndex( $i );
-
-		return new DBConnRef( $this, [ $i, $groups, $domain, $flags ], $role, $this->modcount );
-	}
-
-	public function getLazyConnectionRef( $i, $groups = [], $domain = false, $flags = 0 ): IDatabase {
-		wfDeprecated( __METHOD__, '1.38 Use ::getConnectionRef' );
-		return $this->getConnectionRef( $i, $groups, $domain, $flags );
+	/**
+	 * @deprecated since 1.39.
+	 */
+	public function getConnectionRef( $i, $groups = [], $domain = false, $flags = 0 ): DBConnRef {
+		wfDeprecated( __METHOD__, '1.39' );
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType to be removed soon
+		return $this->getConnection( $i, $groups, $domain, $flags );
 	}
 
 	public function getMaintenanceConnectionRef(
@@ -1102,209 +844,131 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		}
 
 		$domain = $this->resolveDomainID( $domain );
-		$role = $this->getRoleFromIndex( $i );
+		$role = ( $i === self::DB_PRIMARY || $i === ServerInfo::WRITER_INDEX )
+			? self::DB_PRIMARY
+			: self::DB_REPLICA;
 
 		return new DBConnRef( $this, [ $i, $groups, $domain, $flags ], $role, $this->modcount );
 	}
 
 	/**
-	 * @param int $i Server index or DB_PRIMARY/DB_REPLICA
-	 * @return int One of DB_PRIMARY/DB_REPLICA
-	 */
-	private function getRoleFromIndex( $i ) {
-		return ( $i === self::DB_PRIMARY || $i === $this->getWriterIndex() )
-			? self::DB_PRIMARY
-			: self::DB_REPLICA;
-	}
-
-	/**
-	 * Open a connection to a local DB, or return one if it is already open.
+	 * Get a live connection handle to the given domain
 	 *
-	 * On error, returns false, and the connection which caused the
-	 * error will be available via $this->errorConnection.
-	 *
-	 * @note If disable() was called on this LoadBalancer, this method will throw a DBAccessError.
+	 * This will reuse an existing tracked connection when possible. In some cases, this
+	 * involves switching the DB domain of an existing handle in order to reuse it. If no
+	 * existing handles can be reused, then a new connection will be made.
 	 *
 	 * @param int $i Specific server index
-	 * @param int $flags Class CONN_* constant bitfield
-	 * @return Database
-	 * @throws InvalidArgumentException When the server index is invalid
-	 * @throws UnexpectedValueException When the DB domain of the connection is corrupted
-	 */
-	private function getLocalConnection( $i, $flags = 0 ) {
-		$autoCommit = self::fieldHasBit( $flags, self::CONN_TRX_AUTOCOMMIT );
-		// Connection handles required to be in auto-commit mode use a separate connection
-		// pool since the main pool is effected by implicit and explicit transaction rounds
-		$connKey = $autoCommit ? self::KEY_LOCAL_NOROUND : self::KEY_LOCAL;
-
-		if ( isset( $this->conns[$connKey][$i][self::KEY_LOCAL_DOMAIN] ) ) {
-			$conn = $this->conns[$connKey][$i][self::KEY_LOCAL_DOMAIN];
-			$this->connLogger->debug( __METHOD__ . ": reused a connection for $connKey/$i" );
-		} else {
-			$conn = $this->reallyOpenConnection(
-				$i,
-				$this->localDomain,
-				[ self::INFO_AUTOCOMMIT_ONLY => $autoCommit ]
-			);
-			if ( $conn->isOpen() ) {
-				$this->connLogger->debug( __METHOD__ . ": opened new connection for $connKey/$i" );
-				$this->conns[$connKey][$i][self::KEY_LOCAL_DOMAIN] = $conn;
-			} else {
-				$this->connLogger->warning( __METHOD__ . ": connection error for $connKey/$i" );
-				$this->errorConnection = $conn;
-				$conn = false;
-			}
-		}
-
-		// Check to make sure that the right domain is selected
-		if (
-			$conn instanceof IDatabase &&
-			!$this->localDomain->isCompatible( $conn->getDomainID() )
-		) {
-			throw new UnexpectedValueException(
-				"Got connection to '{$conn->getDomainID()}', " .
-				"but expected local domain ('{$this->localDomain}')"
-			);
-		}
-
-		return $conn;
-	}
-
-	/**
-	 * Open a connection to a foreign DB, or return one if it is already open.
-	 *
-	 * Increments a reference count on the returned connection which locks the
-	 * connection to the requested domain. This reference count can be
-	 * decremented by calling reuseConnection().
-	 *
-	 * If a connection is open to the appropriate server already, but with the wrong
-	 * database, it will be switched to the right database and returned, as long as
-	 * it has been freed first with reuseConnection().
-	 *
-	 * On error, returns false, and the connection which caused the
-	 * error will be available via $this->errorConnection.
-	 *
-	 * @note If disable() was called on this LoadBalancer, this method will throw a DBAccessError.
-	 *
-	 * @param int $i Specific server index
-	 * @param string $domain Domain ID to open
-	 * @param int $flags Class CONN_* constant bitfield
-	 * @return Database|false Returns false on connection error
+	 * @param DatabaseDomain $domain Database domain ID required by the reference
+	 * @param int $flags Bit field of class CONN_* constants
+	 * @return IDatabase|null Database or null on error
 	 * @throws DBError When database selection fails
 	 * @throws InvalidArgumentException When the server index is invalid
 	 * @throws UnexpectedValueException When the DB domain of the connection is corrupted
+	 * @throws DBAccessError If disable() was called
 	 */
-	private function getForeignConnection( $i, $domain, $flags = 0 ) {
-		$domainInstance = DatabaseDomain::newFromId( $domain );
-		$autoCommit = self::fieldHasBit( $flags, self::CONN_TRX_AUTOCOMMIT );
-		// Connection handles required to be in auto-commit mode use a separate connection
-		// pool since the main pool is effected by implicit and explicit transaction rounds
-		if ( $autoCommit ) {
-			$connFreeKey = self::KEY_FOREIGN_FREE_NOROUND;
-			$connInUseKey = self::KEY_FOREIGN_INUSE_NOROUND;
+	private function reuseOrOpenConnectionForNewRef( $i, DatabaseDomain $domain, $flags = 0 ) {
+		// Figure out which connection pool to use based on the flags
+		if ( $this->fieldHasBit( $flags, self::CONN_UNTRACKED_GAUGE ) ) {
+			// Use low timeouts, use autocommit mode, ignore transaction rounds
+			$category = self::CATEGORY_GAUGE;
+		} elseif ( self::fieldHasBit( $flags, self::CONN_TRX_AUTOCOMMIT ) ) {
+			// Use autocommit mode, ignore transaction rounds
+			$category = self::CATEGORY_AUTOCOMMIT;
 		} else {
-			$connFreeKey = self::KEY_FOREIGN_FREE;
-			$connInUseKey = self::KEY_FOREIGN_INUSE;
+			// Respect DBO_DEFAULT, respect transaction rounds
+			$category = self::CATEGORY_ROUND;
 		}
 
-		/** @var Database $conn */
 		$conn = null;
-
-		if ( isset( $this->conns[$connInUseKey][$i][$domain] ) ) {
-			// Reuse an in-use connection for the same domain
-			$conn = $this->conns[$connInUseKey][$i][$domain];
-			$this->connLogger->debug( __METHOD__ . ": reusing connection $connInUseKey/$i/$domain" );
-		} elseif ( isset( $this->conns[$connFreeKey][$i][$domain] ) ) {
-			// Reuse a free connection for the same domain
-			$conn = $this->conns[$connFreeKey][$i][$domain];
-			unset( $this->conns[$connFreeKey][$i][$domain] );
-			$this->conns[$connInUseKey][$i][$domain] = $conn;
-			$this->connLogger->debug( __METHOD__ . ": reusing free connection $connInUseKey/$i/$domain" );
-		} elseif ( !empty( $this->conns[$connFreeKey][$i] ) ) {
-			// Reuse a free connection from another domain if possible
-			foreach ( $this->conns[$connFreeKey][$i] as $oldDomain => $oldConn ) {
-				if ( $domainInstance->getDatabase() !== null ) {
-					// Check if changing the database will require a new connection.
-					// In that case, leave the connection handle alone and keep looking.
-					// This prevents connections from being closed mid-transaction and can
-					// also avoid overhead if the same database will later be requested.
-					if (
-						$oldConn->databasesAreIndependent() &&
-						$oldConn->getDBname() !== $domainInstance->getDatabase()
-					) {
-						continue;
-					}
-					// Select the new database, schema, and prefix
-					$conn = $oldConn;
-					$conn->selectDomain( $domainInstance );
-				} else {
-					// Stay on the current database, but update the schema/prefix
-					$conn = $oldConn;
-					$conn->dbSchema( $domainInstance->getSchema() );
-					$conn->tablePrefix( $domainInstance->getTablePrefix() );
+		// Reuse a free connection in the pool from any domain if possible. There should only
+		// be one connection in this pool unless either:
+		//  - a) IDatabase::databasesAreIndependent() returns true (e.g. postgres) and two
+		//       or more database domains have been used during the load balancer's lifetime
+		//  - b) Two or more nested function calls used getConnection() on different domains.
+		foreach ( ( $this->conns[$category][$i] ?? [] ) as $poolConn ) {
+			// Check if any required DB domain changes for the new reference are possible
+			// Calling selectDomain() would trigger a reconnect, which will break if a
+			// transaction is active or if there is any other meaningful session state.
+			$isShareable = !(
+				$poolConn->databasesAreIndependent() &&
+				$domain->getDatabase() !== null &&
+				$domain->getDatabase() !== $poolConn->getDBname()
+			);
+			if ( $isShareable ) {
+				$conn = $poolConn;
+				// Make any required DB domain changes for the new reference
+				if ( !$domain->isUnspecified() ) {
+					$conn->selectDomain( $domain );
 				}
-				unset( $this->conns[$connFreeKey][$i][$oldDomain] );
-				// Note that if $domain is an empty string, getDomainID() might not match it
-				$this->conns[$connInUseKey][$i][$conn->getDomainID()] = $conn;
-				$this->connLogger->debug( __METHOD__ .
-					": reusing free connection from $oldDomain for $domain" );
+				$this->logger->debug( __METHOD__ . ": reusing connection for $i/$domain" );
 				break;
 			}
 		}
 
+		// If necessary, try to open a new connection and add it to the pool
 		if ( !$conn ) {
 			$conn = $this->reallyOpenConnection(
 				$i,
-				$domainInstance,
-				[
-					self::INFO_AUTOCOMMIT_ONLY => $autoCommit,
-					self::INFO_FORIEGN => true,
-					self::INFO_FOREIGN_REF_COUNT => 0
-				]
+				$domain,
+				[ self::INFO_CONN_CATEGORY => $category ]
 			);
 			if ( $conn->isOpen() ) {
-				// Note that if $domain is an empty string, getDomainID() might not match it
-				$this->conns[$connInUseKey][$i][$conn->getDomainID()] = $conn;
-				$this->connLogger->debug( __METHOD__ . ": opened new connection for $connInUseKey/$i/$domain" );
+				// Make Database::isReadOnly() respect server-side and configuration-based
+				// read-only mode. Note that replica handles are always seen as read-only
+				// in Database::isReadOnly() and Database::assertIsWritablePrimary().
+				if ( $i === ServerInfo::WRITER_INDEX ) {
+					if ( $this->readOnlyReason !== false ) {
+						$readOnlyReason = $this->readOnlyReason;
+					} elseif ( $this->isPrimaryRunningReadOnly( $conn ) ) {
+						$readOnlyReason = 'The primary database server is running in read-only mode.';
+					} else {
+						$readOnlyReason = false;
+					}
+					$conn->setLBInfo( $conn::LB_READ_ONLY_REASON, $readOnlyReason );
+				}
+				// Connection obtained; check if it belongs to a tracked connection category
+				if ( isset( $this->conns[$category] ) ) {
+					// Track this connection for future reuse
+					$this->conns[$category][$i][] = $conn;
+				}
 			} else {
-				$this->connLogger->warning(
-					__METHOD__ . ": connection error for $connInUseKey/$i/{db_domain}",
-					[ 'db_domain' => $domain ]
-				);
-				$this->errorConnection = $conn;
-				$conn = false;
+				$this->logger->warning( __METHOD__ . ": connection error for $i/$domain" );
+				$this->lastErrorConn = $conn;
+				$conn = null;
 			}
 		}
 
-		if ( $conn instanceof IDatabase ) {
+		if ( $conn instanceof IDatabaseForOwner ) {
 			// Check to make sure that the right domain is selected
-			if ( !$domainInstance->isCompatible( $conn->getDomainID() ) ) {
-				throw new UnexpectedValueException(
-					"Got connection to '{$conn->getDomainID()}', but expected '$domain'" );
-			}
-			// Increment reference count
-			$refCount = $conn->getLBInfo( self::INFO_FOREIGN_REF_COUNT );
-			$conn->setLBInfo( self::INFO_FOREIGN_REF_COUNT, $refCount + 1 );
+			$this->assertConnectionDomain( $conn, $domain );
+			// Check to make sure that the CONN_* flags are respected
+			$this->enforceConnectionFlags( $conn, $flags );
 		}
 
 		return $conn;
+	}
+
+	/**
+	 * Sanity check to make sure that the right domain is selected
+	 *
+	 * @param Database $conn
+	 * @param DatabaseDomain $domain
+	 * @throws DBUnexpectedError
+	 */
+	private function assertConnectionDomain( Database $conn, DatabaseDomain $domain ) {
+		if ( !$domain->isCompatible( $conn->getDomainID() ) ) {
+			throw new UnexpectedValueException(
+				"Got connection to '{$conn->getDomainID()}', but expected one for '{$domain}'"
+			);
+		}
 	}
 
 	public function getServerAttributes( $i ) {
 		return $this->databaseFactory->attributesFromType(
 			$this->getServerType( $i ),
-			$this->servers[$i]['driver'] ?? null
+			$this->serverInfo->getServerDriver( $i )
 		);
-	}
-
-	/**
-	 * Test if the specified index represents an open connection
-	 *
-	 * @param int $index Server index
-	 * @return bool
-	 */
-	private function isOpen( $index ) {
-		return (bool)$this->getAnyOpenConnection( $index );
 	}
 
 	/**
@@ -1315,7 +979,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 * @param int $i Specific server index
 	 * @param DatabaseDomain $domain Domain the connection is for, possibly unspecified
 	 * @param array $lbInfo Additional information for setLBInfo()
-	 * @return IDatabase
+	 * @return Database
 	 * @throws DBAccessError
 	 * @throws InvalidArgumentException
 	 */
@@ -1324,13 +988,37 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			throw new DBAccessError();
 		}
 
-		$server = $this->getServerInfoStrict( $i );
+		$server = $this->serverInfo->getServerInfoStrict( $i );
+		if ( $lbInfo[self::INFO_CONN_CATEGORY] === self::CATEGORY_GAUGE ) {
+			// Use low connection/read timeouts for connection used for gauging server health.
+			// Gauge information should be cached and used to avoid outages. Indefinite hanging
+			// while gauging servers would do the opposite.
+			$server['connectTimeout'] = min( 1, $server['connectTimeout'] ?? INF );
+			$server['receiveTimeout'] = min( 1, $server['receiveTimeout'] ?? INF );
+			// Avoid implicit transactions and avoid any SET query for session variables during
+			// Database::open(). If a server becomes slow, every extra query can cause significant
+			// delays, even with low connect/receive timeouts.
+			$server['flags'] ??= 0;
+			$server['flags'] &= ~IDatabase::DBO_DEFAULT;
+			$server['flags'] |= IDatabase::DBO_GAUGE;
+		} else {
+			// Use implicit transactions unless explicitly configured otherwise
+			$server['flags'] ??= IDatabase::DBO_DEFAULT;
+		}
+
+		if ( !empty( $server['is static'] ) ) {
+			$topologyRole = IDatabase::ROLE_STATIC_CLONE;
+		} else {
+			$topologyRole = ( $i === ServerInfo::WRITER_INDEX )
+				? IDatabase::ROLE_STREAMING_MASTER
+				: IDatabase::ROLE_STREAMING_REPLICA;
+		}
 
 		$conn = $this->databaseFactory->create(
 			$server['type'],
 			array_merge( $server, [
 				// Basic replication role information
-				'topologyRole' => $this->getTopologyRole( $i, $server ),
+				'topologyRole' => $topologyRole,
 				// Use the database specified in $domain (null means "none or entrypoint DB");
 				// fallback to the $server default if the RDBMs is an embedded library using a
 				// file on disk since there would be nothing to access to without a DB/file name.
@@ -1338,39 +1026,22 @@ class LoadBalancer implements ILoadBalancerForOwner {
 					? ( $domain->getDatabase() ?? $server['dbname'] ?? null )
 					: $domain->getDatabase(),
 				// Override the $server default schema with that of $domain if specified
-				'schema' => $domain->getSchema() ?? $server['schema'] ?? null,
+				'schema' => $domain->getSchema(),
 				// Use the table prefix specified in $domain
 				'tablePrefix' => $domain->getTablePrefix(),
-				// Participate in transaction rounds if $server does not specify otherwise
-				'flags' => $this->initConnFlags( $server['flags'] ?? IDatabase::DBO_DEFAULT ),
-				// Inject the PHP execution mode and the agent string
-				'cliMode' => $this->cliMode,
-				'agent' => $this->agent,
-				// Inject object and callback dependencies
-				'topologicalPrimaryConnRef' => $this->getConnectionRef(
-					self::DB_PRIMARY,
-					[],
-					$domain->getId()
-				),
 				'srvCache' => $this->srvCache,
-				'connLogger' => $this->connLogger,
-				'queryLogger' => $this->queryLogger,
-				'replLogger' => $this->replLogger,
+				'logger' => $this->logger,
 				'errorLogger' => $this->errorLogger,
-				'deprecationLogger' => $this->deprecationLogger,
-				'profiler' => $this->profiler,
 				'trxProfiler' => $this->trxProfiler,
-				'criticalSectionProvider' => $this->csProvider
+				'lbInfo' => [ self::INFO_SERVER_INDEX => $i ] + $lbInfo
 			] ),
 			Database::NEW_UNCONNECTED
 		);
-		// Attach load balancer information to the handle
-		$conn->setLBInfo( [ self::INFO_SERVER_INDEX => $i ] + $lbInfo );
 		// Set alternative table/index names before any queries can be issued
 		$conn->setTableAliases( $this->tableAliases );
 		$conn->setIndexAliases( $this->indexAliases );
 		// Account for any active transaction round and listeners
-		if ( $i === $this->getWriterIndex() ) {
+		if ( $i === ServerInfo::WRITER_INDEX ) {
 			if ( $this->trxRoundId !== false ) {
 				$this->applyTransactionRoundFlags( $conn );
 			}
@@ -1384,190 +1055,155 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			$conn->initConnection();
 			++$this->connectionCounter;
 		} catch ( DBConnectionError $e ) {
+			$this->lastErrorConn = $conn;
 			// ignore; let the DB handle the logging
 		}
 
-		// Try to maintain session consistency for clients that trigger write transactions
-		// in a request or script and then return soon after in another request or script.
-		// This requires cooperation with ChronologyProtector and the application wiring.
 		if ( $conn->isOpen() ) {
-			$this->lazyLoadReplicationPositions();
+			$this->logger->debug( __METHOD__ . ": opened new connection for $i/$domain" );
+		} else {
+			$this->logger->warning(
+				__METHOD__ . ": connection error for $i/{db_domain}",
+				[ 'db_domain' => $domain->getId() ]
+			);
 		}
 
 		// Log when many connection are made during a single request/script
-		$count = $this->getCurrentConnectionCount();
+		$count = 0;
+		foreach ( $this->conns as $poolConnsByServer ) {
+			foreach ( $poolConnsByServer as $serverConns ) {
+				$count += count( $serverConns );
+			}
+		}
 		if ( $count >= self::CONN_HELD_WARN_THRESHOLD ) {
-			$this->perfLogger->warning(
+			$this->logger->warning(
 				__METHOD__ . ": {connections}+ connections made (primary={primarydb})",
 				$this->getConnLogContext(
 					$conn,
 					[
 						'connections' => $count,
-						'primarydb' => $this->getPrimaryServerName(),
+						'primarydb' => $this->serverInfo->getPrimaryServerName(),
 						'db_domain' => $domain->getId()
 					]
 				)
 			);
 		}
 
+		$this->assertConnectionDomain( $conn, $domain );
+
 		return $conn;
 	}
 
 	/**
-	 * @param int $i Specific server index
-	 * @param array $server Server config map
-	 * @return string IDatabase::ROLE_* constant
+	 * Make sure that any "waitForPos" replication positions are loaded and available
+	 *
+	 * Each load balancer cluster has up to one replication position for the session.
+	 * These are used when data read by queries is expected to reflect writes caused
+	 * by a prior request/script from the same client.
+	 *
+	 * @see awaitSessionPrimaryPos()
 	 */
-	private function getTopologyRole( $i, array $server ) {
-		if ( !empty( $server['is static'] ) ) {
-			return IDatabase::ROLE_STATIC_CLONE;
-		}
-
-		return ( $i === $this->getWriterIndex() )
-			? IDatabase::ROLE_STREAMING_MASTER
-			: IDatabase::ROLE_STREAMING_REPLICA;
-	}
-
-	/**
-	 * @see IDatabase::DBO_DEFAULT
-	 * @param int $flags Bit field of IDatabase::DBO_* constants from configuration
-	 * @return int Bit field of IDatabase::DBO_* constants to use with Database::factory()
-	 */
-	private function initConnFlags( $flags ) {
-		if ( self::fieldHasBit( $flags, IDatabase::DBO_DEFAULT ) ) {
-			if ( $this->cliMode ) {
-				$flags &= ~IDatabase::DBO_TRX;
-			} else {
-				$flags |= IDatabase::DBO_TRX;
+	private function loadSessionPrimaryPos() {
+		if ( !$this->chronologyProtectorCalled && $this->chronologyProtector ) {
+			$this->chronologyProtectorCalled = true;
+			$pos = $this->chronologyProtector->getSessionPrimaryPos( $this );
+			$this->logger->debug( __METHOD__ . ': executed chronology callback.' );
+			if ( $pos ) {
+				if ( !$this->waitForPos || $pos->hasReached( $this->waitForPos ) ) {
+					$this->waitForPos = $pos;
+				}
 			}
 		}
-
-		return $flags;
 	}
 
 	/**
-	 * Make sure that any "waitForPos" positions are loaded and available to doWait()
-	 */
-	private function lazyLoadReplicationPositions() {
-		if ( !$this->chronologyCallbackTriggered && $this->chronologyCallback ) {
-			$this->chronologyCallbackTriggered = true;
-			( $this->chronologyCallback )( $this ); // generally calls waitFor()
-			$this->connLogger->debug( __METHOD__ . ': executed chronology callback.' );
-		}
-	}
-
-	/**
+	 * @param string $extraLbError Separat load balancer error
 	 * @throws DBConnectionError
 	 * @return never
 	 */
-	private function reportConnectionError() {
-		$conn = $this->errorConnection; // the connection which caused the error
-		$context = [
-			'method' => __METHOD__,
-			'last_error' => $this->lastError,
-		];
+	private function reportConnectionError( $extraLbError = '' ) {
+		if ( $this->lastErrorConn instanceof IDatabaseForOwner ) {
+			$srvName = $this->lastErrorConn->getServerName();
+			$lastDbError = $this->lastErrorConn->lastError() ?: 'unknown error';
 
-		if ( $conn instanceof IDatabase ) {
-			$srvName = $conn->getServerName();
-			$this->connLogger->warning(
-				__METHOD__ . ": connection error: {last_error} ({db_server})",
-				$this->getConnLogContext( $conn, $context )
+			$exception = new DBConnectionError(
+				$this->lastErrorConn,
+				$extraLbError
+					? "{$extraLbError}; {$lastDbError} ({$srvName})"
+					: "{$lastDbError} ({$srvName})"
 			);
-			$error = $conn->lastError() ?: $this->lastError;
-			throw new DBConnectionError( $conn, "{$error} ($srvName)" );
+
+			if ( $extraLbError ) {
+				$this->logger->warning(
+					__METHOD__ . ": $extraLbError; {last_error} ({db_server})",
+					$this->getConnLogContext(
+						$this->lastErrorConn,
+						[
+							'method' => __METHOD__,
+							'last_error' => $lastDbError
+						]
+					)
+				);
+			}
 		} else {
-			// No last connection, probably due to all servers being too busy
-			$this->connLogger->error(
-				__METHOD__ .
-				": LB failure with no last connection. Connection error: {last_error}",
-				$context
+			$exception = new DBConnectionError(
+				null,
+				$extraLbError ?: 'could not connect to the DB server'
 			);
 
-			// If all servers were busy, "lastError" will contain something sensible
-			throw new DBConnectionError( null, $this->lastError );
-		}
-	}
-
-	public function getWriterIndex() {
-		return 0;
-	}
-
-	/**
-	 * Returns true if the specified index is a valid server index
-	 *
-	 * @param int $i
-	 * @return bool
-	 * @deprecated Since 1.34
-	 */
-	public function haveIndex( $i ) {
-		return array_key_exists( $i, $this->servers );
-	}
-
-	/**
-	 * Returns true if the specified index is valid and has non-zero load
-	 *
-	 * @param int $i
-	 * @return bool
-	 * @deprecated Since 1.34
-	 */
-	public function isNonZeroLoad( $i ) {
-		return ( isset( $this->servers[$i] ) && $this->groupLoads[self::GROUP_GENERIC][$i] > 0 );
-	}
-
-	public function getServerCount() {
-		return count( $this->servers );
-	}
-
-	public function hasReplicaServers() {
-		return ( $this->getServerCount() > 1 );
-	}
-
-	/**
-	 * @return int[] List of replica server indexes
-	 */
-	private function getStreamingReplicaIndexes() {
-		$indexes = [];
-		foreach ( $this->servers as $i => $server ) {
-			if ( $i !== $this->getWriterIndex() && empty( $server['is static'] ) ) {
-				$indexes[] = $i;
+			if ( $extraLbError ) {
+				$this->logger->error(
+					__METHOD__ . ": $extraLbError",
+					[
+						'method' => __METHOD__,
+						'last_error' => '(last connection error missing)'
+					]
+				);
 			}
 		}
 
-		return $indexes;
+		throw $exception;
+	}
+
+	public function getServerCount() {
+		return $this->serverInfo->getServerCount();
+	}
+
+	public function hasReplicaServers() {
+		return $this->serverInfo->hasReplicaServers();
 	}
 
 	public function hasStreamingReplicaServers() {
-		return (bool)$this->getStreamingReplicaIndexes();
+		return $this->serverInfo->hasStreamingReplicaServers();
 	}
 
 	public function getServerName( $i ): string {
-		$name = $this->servers[$i]['serverName'] ?? ( $this->servers[$i]['host'] ?? '' );
-
-		return ( $name !== '' ) ? $name : 'localhost';
+		return $this->serverInfo->getServerName( $i );
 	}
 
 	public function getServerInfo( $i ) {
-		return $this->servers[$i] ?? false;
+		return $this->serverInfo->getServerInfo( $i );
 	}
 
 	public function getServerType( $i ) {
-		return $this->servers[$i]['type'] ?? 'unknown';
+		return $this->serverInfo->getServerType( $i );
 	}
 
 	public function getPrimaryPos() {
-		$index = $this->getWriterIndex();
-
-		$conn = $this->getAnyOpenConnection( $index );
+		$conn = $this->getAnyOpenConnection( ServerInfo::WRITER_INDEX );
 		if ( $conn ) {
 			return $conn->getPrimaryPos();
 		}
 
-		$conn = $this->getConnectionInternal( $index, self::CONN_SILENCE_ERRORS );
+		$conn = $this->getConnectionInternal( ServerInfo::WRITER_INDEX, self::CONN_SILENCE_ERRORS );
 		// @phan-suppress-next-line PhanRedundantCondition
 		if ( !$conn ) {
 			$this->reportConnectionError();
 		}
 
+		// ::getConnectionInternal() should return IDatabaseForOwner but changing signature
+		// is not straightforward (being implemented in Wikibase)
+		'@phan-var IDatabaseForOwner $conn';
 		try {
 			return $conn->getPrimaryPos();
 		} finally {
@@ -1575,33 +1211,11 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		}
 	}
 
-	public function getReplicaResumePos() {
-		// Get the position of any existing primary DB server connection
-		$primaryConn = $this->getAnyOpenConnection( $this->getWriterIndex() );
-		if ( $primaryConn ) {
-			return $primaryConn->getPrimaryPos();
-		}
-
-		// Get the highest position of any existing replica server connection
-		$highestPos = false;
-		foreach ( $this->getStreamingReplicaIndexes() as $i ) {
-			$conn = $this->getAnyOpenConnection( $i );
-			$pos = $conn ? $conn->getReplicaPos() : false;
-			if ( !$pos ) {
-				continue; // no open connection or could not get position
-			}
-
-			$highestPos = $highestPos ?: $pos;
-			if ( $pos->hasReached( $highestPos ) ) {
-				$highestPos = $pos;
-			}
-		}
-
-		return $highestPos;
-	}
-
 	/**
 	 * Apply updated configuration.
+	 *
+	 * This only unregisters servers that were removed in the new configuration.
+	 * It does not register new servers nor update the group load weights.
 	 *
 	 * This invalidates any open connections. However, existing connections may continue to be
 	 * used while they are in an active transaction. In that case, the old connection will be
@@ -1618,17 +1232,51 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 * @return void
 	 */
 	public function reconfigure( array $params ) {
-		// NOTE: We could close all connection here, but some may be in the middle of
-		//       a transaction. So instead, we leave it to DBConnRef to close the
-		//       connection when it detects that the modcount has changed and no
-		//       transaction is open.
+		$anyServerDepooled = false;
 
-		$this->configure( $params );
+		$paramServers = $params['servers'];
+		$newIndexByServerIndex = $this->serverInfo->reconfigureServers( $paramServers );
+		foreach ( $newIndexByServerIndex as $i => $ni ) {
+			if ( $ni !== null ) {
+				// Server still exists in the new config
+				$newWeightByGroup = $paramServers[$ni]['groupLoads'] ?? [];
+				$newWeightByGroup[ILoadBalancer::GROUP_GENERIC] = $paramServers[$ni]['load'];
+				// Check if the server was removed from any load groups
+				foreach ( $this->groupLoads as $group => $weightByIndex ) {
+					if ( isset( $weightByIndex[$i] ) && !isset( $newWeightByGroup[$group] ) ) {
+						// Server no longer in this load group in the new config
+						$anyServerDepooled = true;
+						unset( $this->groupLoads[$group][$i] );
+					}
+				}
+			} else {
+				// Server no longer exists in the new config
+				$anyServerDepooled = true;
+				// Note that if the primary server is depooled and a replica server promoted
+				// to new primary, then DB_PRIMARY handles will fail with server index errors
+				foreach ( $this->groupLoads as $group => $loads ) {
+					unset( $this->groupLoads[$group][$i] );
+				}
+			}
+		}
 
-		// Bump modification counter to invalidate the connections held by DBConnRef
-		// instances. This will cause the next call to a method on the DBConnRef
-		// to get a new connection from getConnectionInternal()
-		$this->modcount++;
+		if ( $anyServerDepooled ) {
+			// NOTE: We could close all connection here, but some may be in the middle of
+			//       a transaction. So instead, we leave it to DBConnRef to close the
+			//       connection when it detects that the modcount has changed and no
+			//       transaction is open.
+			$this->logger->info( 'Reconfiguring dbs!' );
+			// Unpin DB_REPLICA connection groups from server indexes
+			$this->readIndexByGroup = [];
+			// We could close all connection here, but some may be in the middle of a
+			// transaction. So instead, we leave it to DBConnRef to close the connection
+			// when it detects that the modcount has changed and no transaction is open.
+			$this->conns = self::newTrackedConnectionsArray();
+			// Bump modification counter to invalidate the connections held by DBConnRef
+			// instances. This will cause the next call to a method on the DBConnRef
+			// to get a new connection from getConnectionInternal()
+			$this->modcount++;
+		}
 	}
 
 	public function disable( $fname = __METHOD__ ) {
@@ -1640,30 +1288,37 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		/** @noinspection PhpUnusedLocalVariableInspection */
 		$scope = ScopedCallback::newScopedIgnoreUserAbort();
 		foreach ( $this->getOpenConnections() as $conn ) {
-			$srvName = $conn->getServerName();
 			$conn->close( $fname );
 		}
 
 		$this->conns = self::newTrackedConnectionsArray();
 	}
 
-	public function closeConnection( IDatabase $conn ) {
+	/**
+	 * Close a connection
+	 *
+	 * Using this function makes sure the LoadBalancer knows the connection is closed.
+	 * If you use $conn->close() directly, the load balancer won't update its state.
+	 *
+	 * @param IDatabaseForOwner $conn
+	 */
+	private function closeConnection( IDatabaseForOwner $conn ) {
 		if ( $conn instanceof DBConnRef ) {
 			// Avoid calling close() but still leaving the handle in the pool
 			throw new RuntimeException( 'Cannot close DBConnRef instance; it must be shareable' );
 		}
 
+		$domain = $conn->getDomainID();
 		$serverIndex = $conn->getLBInfo( self::INFO_SERVER_INDEX );
 		if ( $serverIndex === null ) {
-			throw new RuntimeException( 'Database handle is missing server index' );
+			throw new UnexpectedValueException( "Handle on '$domain' missing server index" );
 		}
 
-		$srvName = $this->getServerName( $serverIndex );
-		$domain = $conn->getDomainID();
+		$srvName = $this->serverInfo->getServerName( $serverIndex );
 
 		$found = false;
-		foreach ( $this->conns as $type => $connsByServer ) {
-			$key = array_search( $conn, $connsByServer[$serverIndex] ?? [], true );
+		foreach ( $this->conns as $type => $poolConnsByServer ) {
+			$key = array_search( $conn, $poolConnsByServer[$serverIndex] ?? [], true );
 			if ( $key !== false ) {
 				$found = true;
 				unset( $this->conns[$type][$serverIndex][$key] );
@@ -1671,24 +1326,18 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		}
 
 		if ( !$found ) {
-			$this->connLogger->warning(
+			$this->logger->warning(
 				__METHOD__ .
-				": got orphaned connection to database $serverIndex/$domain at '$srvName'."
+				": orphaned connection to database {$this->stringifyConn( $conn )} at '$srvName'."
 			);
 		}
 
-		$this->connLogger->debug(
+		$this->logger->debug(
 			__METHOD__ .
-			": closing connection to database $serverIndex/$domain at '$srvName'."
+			": closing connection to database {$this->stringifyConn( $conn )} at '$srvName'."
 		);
 
 		$conn->close( __METHOD__ );
-	}
-
-	public function commitAll( $fname = __METHOD__ ) {
-		$this->commitPrimaryChanges( $fname );
-		$this->flushPrimarySnapshots( $fname );
-		$this->flushReplicaSnapshots( $fname );
 	}
 
 	public function finalizePrimaryChanges( $fname = __METHOD__ ) {
@@ -1717,12 +1366,10 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		return $total;
 	}
 
-	public function approvePrimaryChanges( array $options, $fname = __METHOD__ ) {
+	public function approvePrimaryChanges( int $maxWriteDuration, $fname = __METHOD__ ) {
 		$this->assertTransactionRoundStage( self::ROUND_FINALIZED );
 		/** @noinspection PhpUnusedLocalVariableInspection */
 		$scope = ScopedCallback::newScopedIgnoreUserAbort();
-
-		$limit = $options['maxWriteDuration'] ?? 0;
 
 		$this->trxRoundStage = self::ROUND_ERROR; // "failed" until proven otherwise
 		foreach ( $this->getOpenPrimaryConnections() as $conn ) {
@@ -1738,22 +1385,22 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			// Assert that the time to replicate the transaction will be reasonable.
 			// If this fails, then all DB transactions will be rollback back together.
 			$time = $conn->pendingWriteQueryDuration( $conn::ESTIMATE_DB_APPLY );
-			if ( $limit > 0 ) {
-				if ( $time > $limit ) {
+			if ( $maxWriteDuration > 0 ) {
+				if ( $time > $maxWriteDuration ) {
 					$humanTimeSec = round( $time, 3 );
 					throw new DBTransactionSizeError(
 						$conn,
-						"Transaction spent {time}s in writes, exceeding the {$limit}s limit",
+						"Transaction spent {time}s in writes, exceeding the {$maxWriteDuration}s limit",
 						// Message parameters for: transaction-duration-limit-exceeded
-						[ $time, $limit ],
+						[ $time, $maxWriteDuration ],
 						null,
 						[ 'time' => $humanTimeSec ]
 					);
 				} elseif ( $time > 0 ) {
 					$timeMs = $time * 1000;
-					$humanTimeMs = $timeMs > 1 ? round( $timeMs ) : round( $timeMs, 3 );
-					$this->perfLogger->debug(
-						"Transaction spent {time_ms}ms in writes, under the {$limit}s limit",
+					$humanTimeMs = round( $timeMs, $timeMs > 1 ? 0 : 3 );
+					$this->logger->debug(
+						"Transaction spent {time_ms}ms in writes, under the {$maxWriteDuration}s limit",
 						[ 'time_ms' => $humanTimeMs ]
 					);
 				}
@@ -1872,9 +1519,8 @@ class LoadBalancer implements ILoadBalancerForOwner {
 			foreach ( $this->getOpenPrimaryConnections() as $conn ) {
 				if ( $conn->writesPending() ) {
 					// A callback from another handle wrote to this one and DBO_TRX is set
-					$this->queryLogger->warning( $fname . ": found writes pending." );
-					$fnames = implode( ', ', $conn->pendingWriteAndCallbackCallers() );
-					$this->queryLogger->warning(
+					$fnames = implode( ', ', $conn->pendingWriteCallers() );
+					$this->logger->info(
 						"$fname: found writes pending ($fnames).",
 						$this->getConnLogContext(
 							$conn,
@@ -1884,7 +1530,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 				} elseif ( $conn->trxLevel() ) {
 					// A callback from another handle read from this one and DBO_TRX is set,
 					// which can easily happen if there is only one DB (no replicas)
-					$this->queryLogger->debug( "$fname: found empty transaction." );
+					$this->logger->debug( "$fname: found empty transaction." );
 				}
 				try {
 					$conn->commit( $fname, $conn::FLUSHING_ALL_PEERS );
@@ -1896,7 +1542,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 
 		$this->trxRoundStage = $oldStage;
 
-		return $errors ? $errors[0] : null;
+		return $errors[0] ?? null;
 	}
 
 	public function runPrimaryTransactionListenerCallbacks( $fname = __METHOD__ ) {
@@ -1920,7 +1566,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		}
 		$this->trxRoundStage = self::ROUND_CURSORY;
 
-		return $errors ? $errors[0] : null;
+		return $errors[0] ?? null;
 	}
 
 	public function rollbackPrimaryChanges( $fname = __METHOD__ ) {
@@ -1985,7 +1631,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 * @param Database $conn
 	 */
 	private function applyTransactionRoundFlags( Database $conn ) {
-		if ( $conn->getLBInfo( self::INFO_AUTOCOMMIT_ONLY ) ) {
+		if ( $conn->getLBInfo( self::INFO_CONN_CATEGORY ) !== self::CATEGORY_ROUND ) {
 			return; // transaction rounds do not apply to these connections
 		}
 
@@ -2004,7 +1650,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 * @param Database $conn
 	 */
 	private function undoTransactionRoundFlags( Database $conn ) {
-		if ( $conn->getLBInfo( self::INFO_AUTOCOMMIT_ONLY ) ) {
+		if ( $conn->getLBInfo( self::INFO_CONN_CATEGORY ) !== self::CATEGORY_ROUND ) {
 			return; // transaction rounds do not apply to these connections
 		}
 
@@ -2018,8 +1664,15 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	public function flushReplicaSnapshots( $fname = __METHOD__ ) {
-		foreach ( $this->getOpenReplicaConnections() as $conn ) {
-			$conn->flushSnapshot( $fname );
+		foreach ( $this->conns as $poolConnsByServer ) {
+			foreach ( $poolConnsByServer as $serverIndex => $serverConns ) {
+				if ( $serverIndex === ServerInfo::WRITER_INDEX ) {
+					continue; // skip primary
+				}
+				foreach ( $serverConns as $conn ) {
+					$conn->flushSnapshot( $fname );
+				}
+			}
 		}
 	}
 
@@ -2029,16 +1682,8 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		}
 	}
 
-	/**
-	 * @return string
-	 * @since 1.32
-	 */
-	public function getTransactionRoundStage() {
-		return $this->trxRoundStage;
-	}
-
 	public function hasPrimaryConnection() {
-		return $this->isOpen( $this->getWriterIndex() );
+		return (bool)$this->getAnyOpenConnection( ServerInfo::WRITER_INDEX );
 	}
 
 	public function hasPrimaryChanges() {
@@ -2061,7 +1706,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	public function hasOrMadeRecentPrimaryChanges( $age = null ) {
-		$age = $age ?? $this->waitTimeout;
+		$age ??= self::MAX_WAIT_DEFAULT;
 
 		return ( $this->hasPrimaryChanges()
 			|| $this->lastPrimaryChangeTimestamp() > microtime( true ) - $age );
@@ -2085,39 +1730,20 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		return false;
 	}
 
-	public function getLaggedReplicaMode( $domain = false ) {
-		$domain = $this->resolveDomainID( $domain );
-
-		if ( $this->laggedReplicaMode ) {
-			// Stay in lagged replica mode once it is observed on any domain
-			return true;
-		}
-
-		if ( $this->hasStreamingReplicaServers() ) {
-			// This will set "laggedReplicaMode" as needed
-			$this->getReaderIndex( self::GROUP_GENERIC, $domain );
-		}
-
-		return $this->laggedReplicaMode;
+	private function setLaggedReplicaMode(): void {
+		$this->laggedReplicaMode = true;
+		$this->logger->warning( __METHOD__ . ": setting lagged replica mode" );
 	}
 
 	public function laggedReplicaUsed() {
 		return $this->laggedReplicaMode;
 	}
 
-	public function getReadOnlyReason( $domain = false ) {
-		$domainInstance = DatabaseDomain::newFromId( $this->resolveDomainID( $domain ) );
-
+	public function getReadOnlyReason() {
 		if ( $this->readOnlyReason !== false ) {
 			return $this->readOnlyReason;
-		} elseif ( $this->isPrimaryRunningReadOnly( $domainInstance ) ) {
+		} elseif ( $this->isPrimaryRunningReadOnly() ) {
 			return 'The primary database server is running in read-only mode.';
-		} elseif ( $this->getLaggedReplicaMode( $domain ) ) {
-			$genericIndex = $this->getExistingReaderIndex( self::GROUP_GENERIC );
-
-			return ( $genericIndex !== self::READER_INDEX_NONE )
-				? 'The database is read-only until replication lag decreases.'
-				: 'The database is read-only until a replica database server becomes reachable.';
 		}
 
 		return false;
@@ -2125,85 +1751,37 @@ class LoadBalancer implements ILoadBalancerForOwner {
 
 	/**
 	 * @note This method suppresses DBError exceptions in order to avoid severe downtime
-	 * @param IDatabase $conn Primary connection
-	 * @param int $flags Bitfield of class CONN_* constants
-	 * @return bool Whether the entire server or currently selected DB/schema is read-only
-	 */
-	private function isPrimaryConnectionReadOnly( IDatabase $conn, $flags = 0 ) {
-		// Note that table prefixes are not related to server-side read-only mode
-		$key = $this->srvCache->makeGlobalKey(
-			'rdbms-server-readonly',
-			$conn->getServerName(),
-			(string)$conn->getDBname(),
-			(string)$conn->dbSchema()
-		);
-
-		if ( self::fieldHasBit( $flags, self::CONN_REFRESH_READ_ONLY ) ) {
-			// Refresh the local server cache. This is useful when the caller is
-			// currently in the process of updating a corresponding WANCache key.
-			try {
-				$readOnly = (int)$conn->serverIsReadOnly();
-			} catch ( DBError $e ) {
-				$readOnly = 0;
-			}
-			$this->srvCache->set( $key, $readOnly, BagOStuff::TTL_PROC_SHORT );
-		} else {
-			$readOnly = $this->srvCache->getWithSetCallback(
-				$key,
-				BagOStuff::TTL_PROC_SHORT,
-				static function () use ( $conn ) {
-					try {
-						$readOnly = (int)$conn->serverIsReadOnly();
-					} catch ( DBError $e ) {
-						$readOnly = 0;
-					}
-
-					return $readOnly;
-				}
-			);
-		}
-
-		return (bool)$readOnly;
-	}
-
-	/**
-	 * @note This method suppresses DBError exceptions in order to avoid severe downtime
-	 * @param DatabaseDomain $domain
+	 * @param IDatabaseForOwner|null $conn Recently acquired primary connection; null if not applicable
 	 * @return bool Whether the entire primary DB server or the local domain DB is read-only
 	 */
-	private function isPrimaryRunningReadOnly( DatabaseDomain $domain ) {
+	private function isPrimaryRunningReadOnly( ?IDatabaseForOwner $conn = null ) {
 		// Context will often be HTTP GET/HEAD; heavily cache the results
 		return (bool)$this->wanCache->getWithSetCallback(
 			// Note that table prefixes are not related to server-side read-only mode
 			$this->wanCache->makeGlobalKey(
 				'rdbms-server-readonly',
-				$this->getPrimaryServerName(),
-				$domain->getDatabase(),
-				(string)$domain->getSchema()
+				$this->serverInfo->getPrimaryServerName()
 			),
 			self::TTL_CACHE_READONLY,
-			function () use ( $domain ) {
+			function ( $oldValue ) use ( $conn ) {
 				$scope = $this->trxProfiler->silenceForScope();
-
-				$index = $this->getWriterIndex();
-				// Refresh the local server cache as well. This is done in order to avoid
-				// backfilling the WANCache with data that is already significantly stale
-				$flags = self::CONN_SILENCE_ERRORS | self::CONN_REFRESH_READ_ONLY;
-				$conn = $this->getServerConnection( $index, $domain->getId(), $flags );
+				$conn ??= $this->getServerConnection(
+					ServerInfo::WRITER_INDEX,
+					self::DOMAIN_ANY,
+					self::CONN_SILENCE_ERRORS
+				);
 				if ( $conn ) {
 					try {
-						$readOnly = (int)$this->isPrimaryConnectionReadOnly( $conn );
+						$value = (int)$conn->serverIsReadOnly();
 					} catch ( DBError $e ) {
-						$readOnly = 0;
+						$value = is_int( $oldValue ) ? $oldValue : 0;
 					}
-					$this->reuseConnectionInternal( $conn );
 				} else {
-					$readOnly = 0;
+					$value = 0;
 				}
-
 				ScopedCallback::consume( $scope );
 
-				return $readOnly;
+				return $value;
 			},
 			[
 				'busyValue' => 0,
@@ -2223,27 +1801,13 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		return $success;
 	}
 
-	public function forEachOpenConnection( $callback, array $params = [] ) {
-		wfDeprecated( __METHOD__, '1.39' );
-		foreach ( $this->getOpenConnections() as $conn ) {
-			$callback( $conn, ...$params );
-		}
-	}
-
-	public function forEachOpenPrimaryConnection( $callback, array $params = [] ) {
-		wfDeprecated( __METHOD__, '1.39' );
-		foreach ( $this->getOpenPrimaryConnections() as $conn ) {
-			$callback( $conn, ...$params );
-		}
-	}
-
 	/**
 	 * Get all open connections
 	 * @return \Generator|Database[]
 	 */
 	private function getOpenConnections() {
-		foreach ( $this->conns as $connsByServer ) {
-			foreach ( $connsByServer as $serverConns ) {
+		foreach ( $this->conns as $poolConnsByServer ) {
+			foreach ( $poolConnsByServer as $serverConns ) {
 				foreach ( $serverConns as $conn ) {
 					yield $conn;
 				}
@@ -2256,61 +1820,27 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	 * @return \Generator|Database[]
 	 */
 	private function getOpenPrimaryConnections() {
-		$primaryIndex = $this->getWriterIndex();
-		foreach ( $this->conns as $connsByServer ) {
-			if ( isset( $connsByServer[$primaryIndex] ) ) {
-				/** @var IDatabase $conn */
-				foreach ( $connsByServer[$primaryIndex] as $conn ) {
-					yield $conn;
-				}
+		foreach ( $this->conns as $poolConnsByServer ) {
+			/** @var IDatabaseForOwner $conn */
+			foreach ( ( $poolConnsByServer[ServerInfo::WRITER_INDEX] ?? [] ) as $conn ) {
+				yield $conn;
 			}
 		}
 	}
 
-	/**
-	 * Get open replica connections
-	 * @return \Generator|Database[]
-	 */
-	private function getOpenReplicaConnections() {
-		foreach ( $this->conns as $connsByServer ) {
-			foreach ( $connsByServer as $i => $serverConns ) {
-				if ( $i === $this->getWriterIndex() ) {
-					continue; // skip primary DB
-				}
-				foreach ( $serverConns as $conn ) {
-					yield $conn;
-				}
-			}
-		}
-	}
-
-	/**
-	 * @return int
-	 */
-	private function getCurrentConnectionCount() {
-		$count = 0;
-		foreach ( $this->conns as $connsByServer ) {
-			foreach ( $connsByServer as $serverConns ) {
-				$count += count( $serverConns );
-			}
-		}
-
-		return $count;
-	}
-
-	public function getMaxLag( $domain = false ) {
-		$domain = $this->resolveDomainID( $domain );
-
+	public function getMaxLag() {
 		$host = '';
 		$maxLag = -1;
 		$maxIndex = 0;
 
-		if ( $this->hasReplicaServers() ) {
-			$lagTimes = $this->getLagTimes( $domain );
+		if ( $this->serverInfo->hasReplicaServers() ) {
+			$lagTimes = $this->getLagTimes();
 			foreach ( $lagTimes as $i => $lag ) {
-				if ( $this->groupLoads[self::GROUP_GENERIC][$i] > 0 && $lag > $maxLag ) {
+				// Allowing the value to be unset due to stale cache (T361824)
+				$load = $this->groupLoads[self::GROUP_GENERIC][$i] ?? 0;
+				if ( $load > 0 && $lag > $maxLag ) {
 					$maxLag = $lag;
-					$host = $this->getServerInfoStrict( $i, 'host' );
+					$host = $this->serverInfo->getServerInfoStrict( $i, 'host' );
 					$maxIndex = $i;
 				}
 			}
@@ -2319,66 +1849,70 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		return [ $host, $maxLag, $maxIndex ];
 	}
 
-	public function getLagTimes( $domain = false ) {
-		$domain = $this->resolveDomainID( $domain );
-
+	public function getLagTimes() {
 		if ( !$this->hasReplicaServers() ) {
-			return [ $this->getWriterIndex() => 0 ]; // no replication = no lag
+			return [ ServerInfo::WRITER_INDEX => 0 ]; // no replication = no lag
 		}
-
-		$knownLagTimes = []; // map of (server index => 0 seconds)
-		$indexesWithLag = [];
-		foreach ( $this->servers as $i => $server ) {
-			if ( empty( $server['is static'] ) ) {
-				$indexesWithLag[] = $i; // DB server might have replication lag
-			} else {
-				$knownLagTimes[$i] = 0; // DB server is a non-replicating and read-only archive
-			}
-		}
-
-		return $this->getLoadMonitor()->getLagTimes( $indexesWithLag, $domain ) + $knownLagTimes;
+		$fname = __METHOD__;
+		return $this->wanCache->getWithSetCallback(
+			$this->wanCache->makeGlobalKey( 'rdbms-lags', $this->getClusterName() ),
+			// Add jitter to avoid stampede
+			10 + mt_rand( 1, 10 ),
+			function () use ( $fname ) {
+				$lags = [];
+				foreach ( $this->serverInfo->getStreamingReplicaIndexes() as $i ) {
+					$conn = $this->getServerConnection(
+						$i,
+						self::DOMAIN_ANY,
+						self::CONN_SILENCE_ERRORS | self::CONN_UNTRACKED_GAUGE
+					);
+					if ( $conn ) {
+						$lags[$i] = $conn->getLag();
+						$conn->close( $fname );
+					} else {
+						$lags[$i] = false;
+					}
+				}
+				return $lags;
+			},
+			[ 'lockTSE' => 30 ]
+		);
 	}
 
-	public function waitForPrimaryPos( IDatabase $conn, $pos = false, $timeout = null ) {
-		$timeout = max( 1, $timeout ?: $this->waitTimeout );
-
-		if ( $conn->getLBInfo( self::INFO_SERVER_INDEX ) === $this->getWriterIndex() ) {
+	public function waitForPrimaryPos( IDatabase $conn ) {
+		if ( $conn->getLBInfo( self::INFO_SERVER_INDEX ) === ServerInfo::WRITER_INDEX ) {
 			return true; // not a replica DB server
 		}
 
-		if ( !$pos ) {
-			// Get the current primary DB position, opening a connection only if needed
-			$this->replLogger->debug( __METHOD__ . ': no position passed; using current' );
-			$index = $this->getWriterIndex();
-			$flags = self::CONN_SILENCE_ERRORS;
-			$primaryConn = $this->getAnyOpenConnection( $index, $flags );
-			if ( $primaryConn ) {
-				$pos = $primaryConn->getPrimaryPos();
-			} else {
-				$primaryConn = $this->getServerConnection( $index, self::DOMAIN_ANY, $flags );
-				if ( !$primaryConn ) {
-					throw new DBReplicationWaitError(
-						null,
-						"Could not obtain a primary database connection to get the position"
-					);
-				}
-				$pos = $primaryConn->getPrimaryPos();
-				$this->closeConnection( $primaryConn );
+		// Get the current primary DB position, opening a connection only if needed
+		$flags = self::CONN_SILENCE_ERRORS;
+		$primaryConn = $this->getAnyOpenConnection( ServerInfo::WRITER_INDEX, $flags );
+		if ( $primaryConn ) {
+			$pos = $primaryConn->getPrimaryPos();
+		} else {
+			$primaryConn = $this->getServerConnection( ServerInfo::WRITER_INDEX, self::DOMAIN_ANY, $flags );
+			if ( !$primaryConn ) {
+				throw new DBReplicationWaitError(
+					null,
+					"Could not obtain a primary database connection to get the position"
+				);
 			}
+			$pos = $primaryConn->getPrimaryPos();
+			$this->closeConnection( $primaryConn );
 		}
 
-		if ( $pos instanceof DBPrimaryPos ) {
-			$this->replLogger->debug( __METHOD__ . ': waiting' );
-			$result = $conn->primaryPosWait( $pos, $timeout );
+		if ( $pos instanceof DBPrimaryPos && $conn instanceof IDatabaseForOwner ) {
+			$this->logger->debug( __METHOD__ . ': waiting' );
+			$result = $conn->primaryPosWait( $pos, self::MAX_WAIT_DEFAULT );
 			$ok = ( $result !== null && $result != -1 );
 			if ( $ok ) {
-				$this->replLogger->debug( __METHOD__ . ': done waiting (success)' );
+				$this->logger->debug( __METHOD__ . ': done waiting (success)' );
 			} else {
-				$this->replLogger->debug( __METHOD__ . ': done waiting (failure)' );
+				$this->logger->debug( __METHOD__ . ': done waiting (failure)' );
 			}
 		} else {
 			$ok = false; // something is misconfigured
-			$this->replLogger->error(
+			$this->logger->error(
 				__METHOD__ . ': could not get primary pos for {db_server}',
 				$this->getConnLogContext( $conn, [ 'exception' => new RuntimeException() ] )
 			);
@@ -2387,7 +1921,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		return $ok;
 	}
 
-	public function setTransactionListener( $name, callable $callback = null ) {
+	public function setTransactionListener( $name, ?callable $callback = null ) {
 		if ( $callback ) {
 			$this->trxRecurringCallbacks[$name] = $callback;
 		} else {
@@ -2411,32 +1945,17 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	public function setLocalDomainPrefix( $prefix ) {
-		// Find connections to explicit foreign domains still marked as in-use...
-		$domainsInUse = [];
-		foreach ( $this->getOpenConnections() as $conn ) {
-			// Once reuseConnection() is called on a handle, its reference count goes from 1 to 0.
-			// Until then, it is still in use by the caller (explicitly or via DBConnRef scope).
-			if ( $conn->getLBInfo( self::INFO_FOREIGN_REF_COUNT ) > 0 ) {
-				$domainsInUse[] = $conn->getDomainID();
-			}
-		}
-
-		// Do not switch connections to explicit foreign domains unless marked as safe
-		if ( $domainsInUse ) {
-			$domains = implode( ', ', $domainsInUse );
-			throw new DBUnexpectedError( null,
-				"Foreign domain connections are still in use ($domains)" );
-		}
-
-		$this->setLocalDomain( new DatabaseDomain(
+		$oldLocalDomain = $this->localDomain;
+		$this->localDomain = new DatabaseDomain(
 			$this->localDomain->getDatabase(),
 			$this->localDomain->getSchema(),
 			$prefix
-		) );
+		);
 
-		// Update the prefix for all local connections...
+		// Update the prefix for existing connections.
+		// Existing DBConnRef handles will not be affected.
 		foreach ( $this->getOpenConnections() as $conn ) {
-			if ( !$conn->getLBInfo( self::INFO_FORIEGN ) ) {
+			if ( $oldLocalDomain->equals( $conn->getDomainID() ) ) {
 				$conn->tablePrefix( $prefix );
 			}
 		}
@@ -2444,8 +1963,7 @@ class LoadBalancer implements ILoadBalancerForOwner {
 
 	public function redefineLocalDomain( $domain ) {
 		$this->closeAll( __METHOD__ );
-
-		$this->setLocalDomain( DatabaseDomain::newFromId( $domain ) );
+		$this->localDomain = DatabaseDomain::newFromId( $domain );
 	}
 
 	public function setTempTablesOnlyMode( $value, $domain ) {
@@ -2460,39 +1978,12 @@ class LoadBalancer implements ILoadBalancerForOwner {
 	}
 
 	/**
-	 * @param DatabaseDomain $domain
-	 */
-	private function setLocalDomain( DatabaseDomain $domain ) {
-		$this->localDomain = $domain;
-	}
-
-	/**
-	 * @param int $i Server index
-	 * @param string|null $field Server index field [optional]
-	 * @return array|mixed
+	 * @param IDatabase $conn
+	 * @return string Description of a connection handle for log messages
 	 * @throws InvalidArgumentException
 	 */
-	private function getServerInfoStrict( $i, $field = null ) {
-		if ( !isset( $this->servers[$i] ) || !is_array( $this->servers[$i] ) ) {
-			throw new InvalidArgumentException( "No server with index '$i'" );
-		}
-
-		if ( $field !== null ) {
-			if ( !array_key_exists( $field, $this->servers[$i] ) ) {
-				throw new InvalidArgumentException( "No field '$field' in server index '$i'" );
-			}
-
-			return $this->servers[$i][$field];
-		}
-
-		return $this->servers[$i];
-	}
-
-	/**
-	 * @return string Name of the primary DB server of the relevant DB cluster (e.g. "db1052")
-	 */
-	private function getPrimaryServerName() {
-		return $this->getServerName( $this->getWriterIndex() );
+	private function stringifyConn( IDatabase $conn ) {
+		return $conn->getLBInfo( self::INFO_SERVER_INDEX ) . '/' . $conn->getDomainID();
 	}
 
 	/**
@@ -2521,9 +2012,12 @@ class LoadBalancer implements ILoadBalancerForOwner {
 		);
 	}
 
+	/**
+	 * @param float|null &$time Mock UNIX timestamp for testing
+	 * @internal
+	 * @codeCoverageIgnore
+	 */
+	public function setMockTime( &$time ) {
+		$this->loadMonitor->setMockTime( $time );
+	}
 }
-
-/**
- * @deprecated since 1.29
- */
-class_alias( LoadBalancer::class, 'LoadBalancer' );

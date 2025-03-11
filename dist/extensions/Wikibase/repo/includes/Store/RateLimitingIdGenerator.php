@@ -4,8 +4,8 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Store;
 
-use IContextSource;
-use Status;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Status\Status;
 use Wikibase\Lib\Store\StorageException;
 
 /**

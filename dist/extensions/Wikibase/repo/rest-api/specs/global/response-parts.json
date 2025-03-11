@@ -5,25 +5,31 @@
 			{
 				"required": [ "id", "type", "labels", "descriptions", "aliases", "statements", "sitelinks" ],
 				"properties": {
-					"statements": { "$ref": "#/StatementsResponse" }
+					"sitelinks": {
+						"additionalProperties": {
+							"required": [ "title", "badges", "url" ]
+						}
+					},
+					"statements": {
+						"additionalProperties": {
+							"items": { "$ref": "#/StatementResponseRequired" }
+						}
+					}
 				}
 			}
 		]
 	},
-	"StatementsResponse": {
-		"additionalProperties": {
-			"items": { "$ref": "#/StatementResponse" }
-		}
-	},
-	"StatementResponse": {
+	"PropertyResponse": {
 		"allOf": [
-			{ "$ref": "./schemas.json#/Statement" },
+			{ "$ref": "./schemas.json#/Property" },
 			{
-				"required": [ "id", "mainsnak", "rank", "qualifiers", "qualifiers-order", "references" ],
+				"required": [ "id", "type", "data_type", "labels", "descriptions", "aliases", "statements" ],
 				"properties": {
-					"mainsnak": { "required": [ "snaktype", "property", "datatype", "hash" ] },
-					"qualifiers": { "$ref": "#/QualifiersResponseRequired" },
-					"references": { "$ref": "#/ReferencesResponseRequired" }
+					"statements": {
+						"additionalProperties": {
+							"items": { "$ref": "#/StatementResponseRequired" }
+						}
+					}
 				}
 			}
 		]
@@ -32,30 +38,49 @@
 		"type": "object",
 		"properties": {
 			"code": { "type": "string" },
-			"message": { "type": "string" }
+			"message": { "type": "string" },
+			"context": { "type": "object" }
 		},
 		"required": [ "code", "message" ]
 	},
-	"QualifiersResponseRequired": {
-		"additionalProperties": {
-			"items": {
-				"required": [ "snaktype", "property", "datatype", "hash" ]
+	"StatementResponseRequired": {
+		"allOf": [
+			{ "$ref": "#/PropertyValueResponseRequired" },
+			{
+				"required": [ "id", "rank", "qualifiers", "references" ],
+				"properties": {
+					"qualifiers": {
+						"items": { "$ref": "#/QualifierResponseRequired" }
+					},
+					"references": {
+						"items": { "$ref": "#/ReferenceResponseRequired" }
+					}
+				}
 			}
-		}
+		]
+	},
+	"QualifierResponseRequired": {
+		"$ref": "#/PropertyValueResponseRequired"
 	},
 	"ReferenceResponseRequired": {
-		"required": [ "hash", "snaks", "snaks-order" ],
+		"required": [ "hash", "parts" ],
 		"properties": {
-			"snaks": {
-				"additionalProperties": {
-					"items": {
-						"required": [ "snaktype", "property", "datatype", "hash" ]
-					}
+			"parts": {
+				"items": {
+					"$ref": "#/PropertyValueResponseRequired"
 				}
 			}
 		}
 	},
-	"ReferencesResponseRequired": {
-		"items": { "$ref": "#/ReferenceResponseRequired" }
+	"PropertyValueResponseRequired": {
+		"required": [ "property", "value" ],
+		"properties": {
+			"property": {
+				"required": [ "id", "data_type" ]
+			},
+			"value": {
+				"required": [ "type" ]
+			}
+		}
 	}
 }

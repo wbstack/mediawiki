@@ -13,7 +13,7 @@
       "prefix": "mwt_someprefix",
       "user": "mwu_someuser",
       "password": "somepassword",
-      "version": "mw1.39-wbs1",
+      "version": "mw1.43-wbs1",
       "wiki_id": 1,
       "created_at": "2019-10-28 10:44:54",
       "updated_at": "2019-10-28 10:44:54"
@@ -61,14 +61,6 @@
       },
       {
         "id": 5,
-        "name": "wwSandboxAutoUserLogin",
-        "value": "1",
-        "wiki_id": 1,
-        "created_at": "2019-10-28 10:44:54",
-        "updated_at": "2019-10-28 10:44:54"
-      },
-      {
-        "id": 6,
         "name": "nyurikThatSrcEnable",
         "value": "1",
         "wiki_id": 1,
@@ -76,7 +68,7 @@
         "updated_at": "2019-10-28 10:44:54"
       },
       {
-        "id": 7,
+        "id": 6,
         "name": "wwExtEnableElasticSearch",
         "value": "1",
         "wiki_id": 1,

@@ -1,15 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Eduardo Addad de Oliveira",
 			"Eduardoaddad",
+			"Fúlvio",
 			"Jaideraf",
-			"Leonardo9387",
-			"Amire80"
+			"Juwan",
+			"Leonardo9387"
 		]
 	},
 	"advancedsearch-desc": "Acesso fácil a capacidades de pesquisa avançada em [[Special:Search]]",
 	"advancedsearch-options-pane-head": "Pesquisa avançada:",
+	"advancedsearch-options-pane-preview-list": "Termos de pesquisa usados atualmente",
 	"advancedsearch-optgroup-text": "Pesquisar no texto da página",
 	"advancedsearch-optgroup-structure": "Estrutura",
 	"advancedsearch-optgroup-files": "Arquivos e imagens",
@@ -28,6 +31,7 @@
 	"advancedsearch-field-fileh": "Altura do arquivo em pixels",
 	"advancedsearch-field-sort": "Ordenação",
 	"advancedsearch-field-preview-sort": "Ordenar por $1",
+	"advancedsearch-help-general-instruction": "Instruções detalhadas para $1",
 	"advancedsearch-help-plain": ";Descrição\n:Pesquisa estas palavras no título ou no texto.\n;Note as seguintes\n:* Podem ser introduzidas várias palavras aqui.\n:* Os sinais de pontuação e outros caracteres alfanuméricos (exceto os dois pontos e a vírgula) serão ignorados.\n:* Podem existir resultados que não incluem um ou mais dos termos pesquisados.\n:* São consideradas palavras derivadas. Exemplo: Se for introduzido ''car'', a pesquisa também considera ''cars''. A derivação de palavras é específica de cada língua.\n;Página de ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Pesquisa de texto completa]\n;Equivalente sintático na pesquisa normal\n:<code>sesame street car</code>",
 	"advancedsearch-help-phrase": ";Descrição\n:Pesquisa uma sequência específica de caracteres. Os sinais de pontuação são ignorados.\n;Note as seguintes \n:(funciona apenas com aspas, ver exemplo abaixo) \n:* Separe os termos a pesquisar por vírgula e espaço, por exemplo: <code>\"bom dia\"</code>, <code>\"olá amigo!\"</code>.\n:* Os sinais de pontuação e outros caracteres alfanuméricos (exceto os dois pontos e a vírgula) serão ignorados.\n:* A pesquisa não é sensível a maiúsculas e minúsculas.\n:* Não são consideradas palavras derivadas.\n;Página de ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch/pt#Words.2C_phrases.2C_and_modifiers Palavras, frases e modificadores]\n;Equivalente sintático na pesquisa normal\n:Palavras envolvidas em aspas, por exemplo: <code>\"Começar pelo início\"</code>.",
 	"advancedsearch-help-or": ";Descrição\n:Pelo menos um dos termos pesquisados tem de estar incluído na página.\n;Página de ajuda\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Palavras, frases e modificadores]\n;Equivalente sintático na pesquisa normal\n:Palavras com <code>OR</code> entre elas como <code>Laptop OR Notebook</code>",
@@ -70,6 +74,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "data de criação",
 	"advancedsearch-namespaces-search-in": "Pesquisar em:",
 	"advancedsearch-namespaces-remember": "Lembrar seleção para futuras pesquisas",
+	"advancedsearch-namespaces-pane-preview-list": "Filtros de espaço de nomes ativos",
 	"advancedsearch-namespaces-preset-all": "Todos",
 	"advancedsearch-namespaces-preset-default": "Padrão",
 	"advancedsearch-namespaces-preset-general-help": "Ajuda geral",

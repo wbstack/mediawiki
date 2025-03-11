@@ -2,21 +2,19 @@
 
 namespace CirrusSearch;
 
-use Elastica\Index;
-use Elasticsearch\Endpoints\Indices\GetMapping;
-use IBufferingStatsdDataFactory;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Language\Language;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\PoolCounter\PoolCounterWorkViaCallback;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
-use NullStatsdDataFactory;
-use PoolCounterWorkViaCallback;
-use Status;
-use Title;
-use UIDGenerator;
-use WebRequest;
-use WikiMap;
+use MediaWiki\WikiMap\WikiMap;
 use Wikimedia\Assert\Assert;
 use Wikimedia\IPUtils;
+use Wikimedia\Stats\StatsFactory;
 
 /**
  * Random utility functions that don't have a better home
@@ -62,17 +60,24 @@ class Util {
 	}
 
 	/**
+	 * Set label and statsd BC setup for pool counter metrics
 	 * @param string $type The pool counter type, such as CirrusSearch-Search
 	 * @param bool $isSuccess If the pool counter gave a success, or failed the request
-	 * @return string The key used for collecting timing stats about this pool counter request
+	 * @param float $observation the time it took to update the counter
+	 * @return void
 	 */
-	private static function getPoolStatsKey( $type, $isSuccess ) {
+	private static function recordPoolStats( string $type, bool $isSuccess, float $observation ): void {
 		$pos = strpos( $type, '-' );
 		if ( $pos !== false ) {
 			$type = substr( $type, $pos + 1 );
 		}
 		$postfix = $isSuccess ? 'successMs' : 'failureMs';
-		return "CirrusSearch.poolCounter.$type.$postfix";
+		self::getStatsFactory()
+			->getTiming( "pool_counter_seconds" )
+			->setLabel( "type", $type )
+			->setLabel( "status", $isSuccess ? "success" : "failure" )
+			->copyToStatsdAt( "CirrusSearch.poolCounter.$type.$postfix" )
+			->observe( $observation );
 	}
 
 	/**
@@ -88,10 +93,10 @@ class Util {
 		callable $callback
 	) {
 		return function () use ( $type, $isSuccess, $callback, $startPoolWork ) {
-			MediaWikiServices::getInstance()->getStatsdDataFactory()->timing(
-				self::getPoolStatsKey( $type, $isSuccess ),
-				intval( 1000 * ( microtime( true ) - $startPoolWork ) )
-			);
+			self::recordPoolStats(
+				$type,
+				$isSuccess,
+				1000 * ( microtime( true ) - $startPoolWork ) );
 
 			return $callback( ...func_get_args() );
 		};
@@ -128,9 +133,7 @@ class Util {
 		$key = "$type:$wgCirrusSearchPoolCounterKey";
 
 		$errorCallback = static function ( Status $status ) use ( $key, $busyErrorMsg ) {
-			/** @todo No good replacements for getErrorsArray */
-			$errors = $status->getErrorsArray();
-			$error = $errors[0][0];
+			$error = $status->getMessages()[0]->getKey();
 
 			LoggerFactory::getInstance( 'CirrusSearch' )->warning(
 				"Pool error on {key}:  {error}",
@@ -161,7 +164,7 @@ class Util {
 	public static function parsePotentialPercent( $str ) {
 		$result = floatval( $str );
 		if ( strpos( $str, '%' ) === false ) {
-			return (float)$result;
+			return $result;
 		}
 		return $result / 100;
 	}
@@ -179,22 +182,6 @@ class Util {
 		$lines = array_map( 'trim', $lines );          // Remove extra spaces
 		$lines = array_filter( $lines );               // Remove empty lines
 		return $lines;
-	}
-
-	/**
-	 * Test if $string ends with $suffix
-	 *
-	 * @param string $string string to test
-	 * @param string $suffix
-	 * @return bool true if $string ends with $suffix
-	 */
-	public static function endsWith( $string, $suffix ) {
-		$strlen = strlen( $string );
-		$suffixlen = strlen( $suffix );
-		if ( $suffixlen > $strlen ) {
-			return false;
-		}
-		return substr_compare( $string, $suffix, $strlen - $suffixlen, $suffixlen ) === 0;
 	}
 
 	/**
@@ -239,10 +226,8 @@ class Util {
 	 * @param SearchConfig|null $config Search config requesting the templates
 	 * @return float[]
 	 */
-	public static function getDefaultBoostTemplates( SearchConfig $config = null ) {
-		if ( $config === null ) {
-			$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'CirrusSearch' );
-		}
+	public static function getDefaultBoostTemplates( ?SearchConfig $config = null ) {
+		$config ??= MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'CirrusSearch' );
 
 		$fromConfig = $config->get( 'CirrusSearchBoostTemplates' );
 		if ( $config->get( 'CirrusSearchIgnoreOnWikiBoostTemplates' ) ) {
@@ -252,7 +237,7 @@ class Util {
 		}
 
 		$fromMessage = self::getOnWikiBoostTemplates( $config );
-		if ( empty( $fromMessage ) ) {
+		if ( !$fromMessage ) {
 			// the onwiki config is empty (or unknown for non-local
 			// config), we can fallback to templates from config
 			return $fromConfig;
@@ -378,7 +363,8 @@ class Util {
 		if ( $token === null ) {
 			// random UID, 70B tokens have a collision probability of 4*10^-16
 			// so should work for marking unique queries.
-			$uuid = UIDGenerator::newUUIDv4();
+			$gen = MediaWikiServices::getInstance()->getGlobalIdGenerator();
+			$uuid = $gen->newUUIDv4();
 			// make it a little shorter by using straight base36
 			$hex = substr( $uuid, 0, 8 ) . substr( $uuid, 9, 4 ) .
 				substr( $uuid, 14, 4 ) . substr( $uuid, 19, 4 ) .
@@ -393,7 +379,7 @@ class Util {
 	 * @return string A token that identifies the source of the request
 	 */
 	public static function generateIdentToken( $extraData = '' ) {
-		$request = \RequestContext::getMain()->getRequest();
+		$request = RequestContext::getMain()->getRequest();
 		try {
 			$ip = $request->getIP();
 		} catch ( \MWException $e ) {
@@ -431,10 +417,10 @@ class Util {
 	 * all methods will apply something similar to near space flattener.
 	 * @param string $namespace name of the namespace to identify
 	 * @param string $method either naive or utr30
-	 * @param \Language|null $language
+	 * @param Language|null $language
 	 * @return bool|int
 	 */
-	public static function identifyNamespace( $namespace, $method = 'naive', \Language $language = null ) {
+	public static function identifyNamespace( $namespace, $method = 'naive', ?Language $language = null ) {
 		static $naive = null;
 		static $utr30 = null;
 
@@ -456,13 +442,11 @@ class Util {
 
 		Assert::postcondition( $normalizer !== null,
 			'Failed to load Transliterator with method ' . $method );
-		if ( $language === null ) {
-			$language = MediaWikiServices::getInstance()->getContentLanguage();
-		}
 		$namespace = $normalizer->transliterate( $namespace );
 		if ( $namespace === '' ) {
 			return false;
 		}
+		$language ??= MediaWikiServices::getInstance()->getContentLanguage();
 		foreach ( $language->getNamespaceIds() as $candidate => $nsId ) {
 			if ( $normalizer->transliterate( $candidate ) === $namespace ) {
 				return $nsId;
@@ -541,34 +525,33 @@ class Util {
 	}
 
 	/**
-	 * @return IBufferingStatsdDataFactory
+	 * @return StatsFactory prefixed with the "CirrusSearch" component
 	 */
-	public static function getStatsDataFactory(): IBufferingStatsdDataFactory {
-		if ( defined( 'MW_PHPUNIT_TEST' ) ) {
-			return new NullStatsdDataFactory();
-		}
-		return MediaWikiServices::getInstance()->getStatsdDataFactory();
+	public static function getStatsFactory(): StatsFactory {
+		return MediaWikiServices::getInstance()->getStatsFactory()->withComponent( "CirrusSearch" );
 	}
 
 	/**
 	 * @param SearchConfig $config Configuration of the check
 	 * @param string $ip The address to check against, ipv4 or ipv6.
-	 * @param string $userAgent Http user agent of the request
+	 * @param string[] $headers Map from http header name to value. All names must be uppercased.
 	 * @return bool True when the parameters appear to be a non-interactive use case.
 	 */
-	public static function looksLikeAutomation( SearchConfig $config, string $ip, string $userAgent ): bool {
-		// Does the user agent have an automation-like user agent, such as
-		// HeadlessChrome or a popular http client package for various
-		// languages?
-		$uaPattern = $config->get( 'CirrusSearchAutomationUserAgentRegex' );
-		if ( $uaPattern !== null ) {
-			$ret = preg_match( $uaPattern, $userAgent );
+	public static function looksLikeAutomation( SearchConfig $config, string $ip, array $headers ): bool {
+		// Is there an http header that can be matched with regex to flag automation,
+		// such as the user-agent or a flag applied by some infrastructure?
+		$automationHeaders = $config->get( 'CirrusSearchAutomationHeaderRegexes' ) ?? [];
+		foreach ( $automationHeaders as $name => $pattern ) {
+			$name = strtoupper( $name );
+			if ( !isset( $headers[$name] ) ) {
+				continue;
+			}
+			$ret = preg_match( $pattern, $headers[$name] );
 			if ( $ret === 1 ) {
 				return true;
 			} elseif ( $ret === false ) {
 				LoggerFactory::getInstance( 'CirrusSearch' )->warning(
-					'Invalid regex provided in `CirrusSearchAutomationUserAgentRegex`.' );
-				return false;
+					"Invalid regex provided for header `$name` in `CirrusSearchAutomationHeaderRegexes`." );
 			}
 		}
 
@@ -580,27 +563,6 @@ class Util {
 
 		// Default assumption that requests are interactive
 		return false;
-	}
-
-	/**
-	 * Recreation of Index::getMapping but with support for include_type_name.
-	 *
-	 * Should be removed once 7.x is the minimum supported version and all
-	 * callers have transitioned to includeTypeName === false.
-	 *
-	 * @param Index $index
-	 * @return array
-	 */
-	public static function getIndexMapping( Index $index ) {
-		// $index->getMapping() does not support passing include_type_name so we rely on low-level
-		// elasticsearch/elasticsearch endpoints
-		// It should be fine to remove this while we no longer support es6 which defaults this value
-		// to true.
-		$response = $index->requestEndpoint( ( new GetMapping() )->setParams( [ 'include_type_name' => 'false' ] ) );
-		$data = $response->getData();
-		// $data is single element array with the backing index name as key
-		$mapping = array_shift( $data );
-		return $mapping['mappings'] ?? [];
 	}
 
 	/**
@@ -634,16 +596,11 @@ class Util {
 			}
 
 			// When dumping the query we skip _everything_ but echoing the query.
-			\RequestContext::getMain()->getOutput()->disable();
+			RequestContext::getMain()->getOutput()->disable();
 			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable $header can't be null here
 			$request->response()->header( $header );
 			echo $output;
 			exit();
-		}
-
-		// TODO: Remove once all tests are compatible
-		if ( $debugOptions->isBackwardCompatible() && $debugOptions->getCirrusExplainFormat() === null ) {
-			$result = json_encode( $result, JSON_PRETTY_PRINT );
 		}
 
 		return $result;

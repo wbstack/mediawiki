@@ -18,9 +18,14 @@
  *
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\Title\TitleParser;
+use MediaWiki\Title\TitleValue;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../includes/Benchmarker.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that benchmarks TitleValue vs Title.
@@ -62,8 +67,8 @@ class BenchmarkTitleValue extends Benchmarker {
 	}
 
 	public function execute() {
-		$this->titleFormatter = MediaWikiServices::getInstance()->getTitleFormatter();
-		$this->titleParser = MediaWikiServices::getInstance()->getTitleParser();
+		$this->titleFormatter = $this->getServiceContainer()->getTitleFormatter();
+		$this->titleParser = $this->getServiceContainer()->getTitleParser();
 		$this->titleValue = $this->constructTitleValue();
 		$this->title = $this->constructTitle();
 		$this->toParse = 'Category:FooBar';
@@ -140,5 +145,7 @@ class BenchmarkTitleValue extends Benchmarker {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = BenchmarkTitleValue::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

@@ -2,7 +2,7 @@
 
 namespace CirrusSearch\Sanity;
 
-use Title;
+use MediaWiki\Title\Title;
 use WikiPage;
 
 /**
@@ -11,12 +11,13 @@ use WikiPage;
  * The actions can be reset by calling resetActions()
  */
 class BufferedRemediator implements Remediator {
+	/** @var array[] */
 	private $actions = [];
 
 	/**
 	 * @inheritDoc
 	 */
-	public function redirectInIndex( WikiPage $page ) {
+	public function redirectInIndex( string $docId, WikiPage $page, string $indexSuffix ) {
 		$this->actions[] = [ substr( __METHOD__, strlen( __CLASS__ ) + 2 ), func_get_args() ];
 	}
 
@@ -56,7 +57,7 @@ class BufferedRemediator implements Remediator {
 	}
 
 	/**
-	 * The list of recorded actions (for Unit Tests)
+	 * The list of recorded actions
 	 * @return array
 	 */
 	public function getActions() {

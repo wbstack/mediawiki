@@ -5,9 +5,13 @@ declare( strict_types = 1 );
 namespace Wikimedia\Parsoid\Config\Api;
 
 use Wikimedia\Assert\Assert;
+use Wikimedia\Bcp47Code\Bcp47Code;
 use Wikimedia\Parsoid\Config\PageConfig as IPageConfig;
 use Wikimedia\Parsoid\Config\PageContent;
+use Wikimedia\Parsoid\Config\SiteConfig as ISiteConfig;
 use Wikimedia\Parsoid\Mocks\MockPageContent;
+use Wikimedia\Parsoid\Utils\Title;
+use Wikimedia\Parsoid\Utils\Utils;
 
 /**
  * PageConfig via MediaWiki's Action API
@@ -16,25 +20,27 @@ use Wikimedia\Parsoid\Mocks\MockPageContent;
  */
 class PageConfig extends IPageConfig {
 
-	/** @var ApiHelper */
+	/** @var ?ApiHelper */
 	private $api;
 
-	/** @var string */
+	private ISiteConfig $siteConfig;
+
+	/** @var Title */
 	private $title;
 
 	/** @var string|null */
 	private $revid;
 
-	/** @phan-var array<string,mixed>|null */
+	/** @var array<string,mixed>|null */
 	private $page;
 
-	/** @phan-var array<string,mixed>|null */
+	/** @var array<string,mixed>|null */
 	private $rev;
 
 	/** @var PageContent|null */
 	private $content;
 
-	/** @var string|null */
+	/** @var ?Bcp47Code */
 	private $pagelanguage;
 
 	/** @var string|null */
@@ -42,17 +48,25 @@ class PageConfig extends IPageConfig {
 
 	/**
 	 * @param ?ApiHelper $api (only needed if $opts doesn't provide page info)
+	 * @param ISiteConfig $siteConfig
 	 * @param array $opts
 	 */
-	public function __construct( ?ApiHelper $api, array $opts ) {
+	public function __construct( ?ApiHelper $api, ISiteConfig $siteConfig, array $opts ) {
+		parent::__construct();
 		$this->api = $api;
+		$this->siteConfig = $siteConfig;
 
 		if ( !isset( $opts['title'] ) ) {
 			throw new \InvalidArgumentException( '$opts[\'title\'] must be set' );
 		}
+		if ( !( $opts['title'] instanceof Title ) ) {
+			throw new \InvalidArgumentException( '$opts[\'title\'] must be a Title' );
+		}
 		$this->title = $opts['title'];
 		$this->revid = $opts['revid'] ?? null;
-		$this->pagelanguage = $opts['pageLanguage'] ?? null;
+		# pageLanguage can/should be passed as a Bcp47Code object
+		$this->pagelanguage = !empty( $opts['pageLanguage'] ) ?
+			Utils::mwCodeToBcp47( $opts['pageLanguage'] ) : null;
 		$this->pagelanguageDir = $opts['pageLanguageDir'] ?? null;
 
 		// This option is primarily used to mock the page content.
@@ -73,13 +87,10 @@ class PageConfig extends IPageConfig {
 		}
 	}
 
-	/**
-	 * @param array $opts
-	 */
-	private function mockPageContent( array $opts ) {
+	private function mockPageContent( array $opts ): void {
 		$this->page = [
-			'title' => $this->title,
-			'ns' => $opts['pagens'] ?? 0,
+			'title' => $this->title->getPrefixedText(),
+			'ns' => $this->title->getNamespace(),
 			'pageid' => -1,
 			'pagelanguage' => $opts['pageLanguage'] ?? 'en',
 			'pagelanguagedir' => $opts['pageLanguageDir'] ?? 'ltr',
@@ -106,7 +117,7 @@ class PageConfig extends IPageConfig {
 		if ( !empty( $this->revid ) ) {
 			$params['revids'] = $this->revid;
 		} else {
-			$params['titles'] = $this->title;
+			$params['titles'] = $this->title->getPrefixedDBKey();
 			$params['rvlimit'] = 1;
 		}
 
@@ -135,22 +146,12 @@ class PageConfig extends IPageConfig {
 		return $this->rev['slots']['main']['contentmodel'] ?? 'wikitext';
 	}
 
-	public function hasLintableContentModel(): bool {
-		$contentmodel = $this->getContentModel();
-		return $contentmodel === 'wikitext' ||
-			$contentmodel === 'proofread-page';
-	}
-
 	/** @inheritDoc */
-	public function getTitle(): string {
+	public function getLinkTarget(): Title {
 		$this->loadData();
-		return $this->page['title']; // normalized
-	}
-
-	/** @inheritDoc */
-	public function getNs(): int {
-		$this->loadData();
-		return $this->page['ns'];
+		return Title::newFromText(
+			$this->page['title'], $this->siteConfig, $this->page['ns']
+		);
 	}
 
 	/** @inheritDoc */
@@ -160,9 +161,13 @@ class PageConfig extends IPageConfig {
 	}
 
 	/** @inheritDoc */
-	public function getPageLanguage(): string {
+	public function getPageLanguageBcp47(): Bcp47Code {
 		$this->loadData();
-		return $this->pagelanguage ?? $this->page['pagelanguage'] ?? 'en';
+		# Note that 'en' is a last-resort fail-safe fallback; it shouldn't
+		# ever be reached in practice.
+		return $this->pagelanguage ??
+			# T320662: core should provide an API to get the BCP-47 form directly
+			Utils::mwCodeToBcp47( $this->page['pagelanguage'] ?? 'en' );
 	}
 
 	/** @inheritDoc */
@@ -221,17 +226,4 @@ class PageConfig extends IPageConfig {
 		}
 		return $this->content;
 	}
-
-	/**
-	 * @param array $parsoidSettings
-	 * @param array $opts
-	 * @return PageConfig
-	 */
-	public static function fromSettings(
-		array $parsoidSettings, array $opts
-	): PageConfig {
-		$api = ApiHelper::fromSettings( $parsoidSettings );
-		return new PageConfig( $api, $opts );
-	}
-
 }

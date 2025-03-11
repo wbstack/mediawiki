@@ -4,7 +4,7 @@ namespace Wikibase\Lexeme\Search\Elastic;
 use CirrusSearch\Search\BaseCirrusSearchResultSet;
 use Elastica\Result;
 use Elastica\ResultSet as ElasticaResultSet;
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\Lexeme\DataAccess\LexemeDescription;
 
 /**
@@ -61,7 +61,6 @@ class LexemeResultSet extends BaseCirrusSearchResultSet {
 	/**
 	 * @param Result $result
 	 * @return LexemeResult|null
-	 * @throws \MWException
 	 */
 	protected function transformOneResult( Result $result ) {
 		$hash = spl_object_hash( $result );

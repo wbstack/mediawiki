@@ -4,8 +4,9 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Services\Statement\StatementGuidParser;
@@ -32,6 +33,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 class RemoveClaims extends ApiBase {
 
 	use FederatedPropertyApiValidatorTrait;
+	use ApiCreateTempUserTrait;
 
 	/**
 	 * @var StatementChangeOpFactory
@@ -159,6 +161,7 @@ class RemoveClaims extends ApiBase {
 		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'pageinfo' );
 		$this->resultBuilder->markSuccess();
 		$this->resultBuilder->setList( null, 'claims', $params['claim'], 'claim' );
+		$this->resultBuilder->addTempUser( $status, fn( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
 	/**
@@ -209,7 +212,7 @@ class RemoveClaims extends ApiBase {
 		// Not using array_diff but array_diff_key does have a huge performance impact.
 		$missingGuids = array_diff_key( array_flip( $requiredGuids ), $existingGuids );
 
-		if ( !empty( $missingGuids ) ) {
+		if ( $missingGuids ) {
 			$this->errorReporter->dieError(
 				'Statement(s) with GUID(s) ' . implode( ', ', array_keys( $missingGuids ) ) . ' not found',
 				'invalid-guid'
@@ -272,6 +275,7 @@ class RemoveClaims extends ApiBase {
 				],
 				'bot' => false,
 			],
+			$this->getCreateTempUserParams(),
 			parent::getAllowedParams()
 		);
 	}
@@ -285,7 +289,7 @@ class RemoveClaims extends ApiBase {
 		return [
 			'action=wbremoveclaims&claim=' . $guid . '&token=foobar'
 				. '&baserevid=7201010'
-				=> [ 'apihelp-wbremoveclaims-example-1', $guid ]
+				=> [ 'apihelp-wbremoveclaims-example-1', $guid ],
 		];
 	}
 

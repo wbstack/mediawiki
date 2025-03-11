@@ -1,5 +1,6 @@
 {
 	"name": "DismissableSiteNotice",
+	"namemsg": "sitenotice-extensionname",
 	"version": "1.0.1",
 	"author": [
 		"Brion Vibber",
@@ -19,7 +20,12 @@
 		}
 	},
 	"Hooks": {
-		"SiteNoticeAfter": "MediaWiki\\Extension\\DismissableSiteNotice\\Hooks::onSiteNoticeAfter"
+		"SiteNoticeAfter": "main"
+	},
+	"HookHandlers": {
+		"main": {
+			"class": "MediaWiki\\Extension\\DismissableSiteNotice\\Hooks"
+		}
 	},
 	"MessagesDirs": {
 		"DismissableSiteNotice": [
@@ -30,20 +36,12 @@
 		"ext.dismissableSiteNotice": {
 			"scripts": "ext.dismissableSiteNotice.js",
 			"dependencies": [
-				"jquery.cookie",
+				"mediawiki.cookie",
 				"mediawiki.util"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.dismissableSiteNotice.styles": {
-			"styles": "ext.dismissableSiteNotice.css",
-			"targets": [
-				"desktop",
-				"mobile"
-			]
+			"styles": "ext.dismissableSiteNotice.css"
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -55,6 +53,6 @@
 	},
 	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	}
 }

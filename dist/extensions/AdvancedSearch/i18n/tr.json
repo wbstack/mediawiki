@@ -1,21 +1,23 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"BaRaN6161 TURK",
 			"By erdo can",
 			"Hedda",
+			"Joseph",
 			"MuratTheTurkish",
 			"Rapsar",
 			"SaldırganSincap",
 			"Sayginer",
 			"Sucsuzz",
 			"Suvarioglu",
-			"Trockya",
-			"Amire80"
+			"Trockya"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]] sayfasındaki gelişmiş arama özelliklerine kolay erişim",
 	"advancedsearch-options-pane-head": "Gelişmiş arama:",
+	"advancedsearch-options-pane-preview-list": "Şu anda kullanılan arama terimleri",
 	"advancedsearch-optgroup-text": "Sayfa metninde ara",
 	"advancedsearch-optgroup-structure": "Yapısal",
 	"advancedsearch-optgroup-files": "Dosyalar ve resimler",
@@ -34,6 +36,7 @@
 	"advancedsearch-field-fileh": "Piksel olarak dosya yüksekliği",
 	"advancedsearch-field-sort": "Sıralama düzeni",
 	"advancedsearch-field-preview-sort": "Sıralama türü $1",
+	"advancedsearch-help-general-instruction": "$1 için ayrıntılı yönergeler",
 	"advancedsearch-help-plain": ";Açıklama\n:Bu kelimeleri başlık veya metin olarak arar.\n;Aşağıdakilerden haberdar olun\n:* Buraya birden fazla kelime girilebilir.\n:* Noktalama işaretleri ve alfanümerik olmayan diğer karakterler (iki nokta üst üste ve virgül hariç) göz ardı edilecektir.\n:* Arama terimlerinizden bir veya daha fazlasını içermeyen sonuçlar olabilir.\n:* Örneğin, ''araba'' yazıldıysa aramada ''arabalar'' da dikkate alınacaktır. Bu kelime, dile özgüdür.\n;Yardım sayfası\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch/tr#Full_text_search Tam metin arama]\n;Normal aramada sözdizim eşdeğeri\n:<code>susam sokağı araba</code>",
 	"advancedsearch-help-phrase": ";Açıklama\n:Belirli bir karakter dizisi arar. Noktalama işaretleri dikkate alınmaz.\n;Aşağıdakilerini dikkate alın\n:(yalnızca tırnak işaretleri kullanıldığında geçerlidir, aşağıdaki örneğe bakın) \n:* Arama ifadelerini virgül veya boşluk ile ayırın, ör. <code>\"günaydın\"</code>, <code>\"selam dostum!\"</code>.\n:* Noktalama işaretleri ve alfanümerik olmayan diğer karakterler (iki nokta üst üste ve virgül hariç) göz ardı edilecektir.\n:* Arama büyük-küçük harfe duyarlı değil.\n:* Kelime köklendirmesi uygulanmaz.\n;Yardım sayfası\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch/tr#Words.2C_phrases.2C_and_modifiers Kelimeler, ifadeler ve değiştiriciler]\n;Normal aramada sözdizim eşdeğeri\n:Tırnak işareti içindeki kelimeler, ör. <code>\"Başlangıçta başlayın\"</code>.",
 	"advancedsearch-help-or": ";Açıklama\n:Arama terimlerinden en az biri sayfaya eklenmelidir.\n;Yardım sayfası\n:[https://www.mediawiki.org/wiki/Help:CirrusSearch/tr#Words.2C_phrases.2C_and_modifiers Kelimeler, ifadeler ve değiştiriciler]\n;Normal aramada sözdizim eşdeğeri\n:<code>OR</code> ile kelimeler, ör. <code>Laptop OR Notebook</code>.",
@@ -76,6 +79,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "oluşturulma tarihi",
 	"advancedsearch-namespaces-search-in": "Şurada ara:",
 	"advancedsearch-namespaces-remember": "Gelecekteki aramalar için seçimi hatırla",
+	"advancedsearch-namespaces-pane-preview-list": "Şu anda etkin ad alanı süzgeçleri",
 	"advancedsearch-namespaces-preset-all": "Hepsi",
 	"advancedsearch-namespaces-preset-default": "Varsayılan",
 	"advancedsearch-namespaces-preset-general-help": "Genel Yardım",

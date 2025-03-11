@@ -1,4 +1,4 @@
-var
+const
 	mfExtend = require( './mfExtend' ),
 	util = require( './util' ),
 	View = require( './View' );
@@ -7,7 +7,7 @@ var
  * Representation of a thumbnail
  *
  * @class Thumbnail
- * @extends View
+ * @extends module:mobile.startup/View
  * @param {Object} options
  */
 function Thumbnail( options ) {
@@ -20,7 +20,7 @@ mfExtend( Thumbnail, View, {
 	/**
 	 * @memberof Thumbnail
 	 * @instance
-	 * @mixes View#defaults
+	 * @mixes module:mobile.startup/View#defaults
 	 * @property {Object} defaults Default options hash.
 	 * @property {string} defaults.filename uri decoded filename including File: prefix
 	 *  associated with thumbnail
@@ -33,8 +33,9 @@ mfExtend( Thumbnail, View, {
 	 * @memberof Thumbnail
 	 * @instance
 	 */
-	postRender: function () {
-		this.options.description = this.$el.siblings( '.thumbcaption' ).text();
+	postRender() {
+		this.options.description = this.$el.siblings( '.thumbcaption, figcaption' )
+			.prop( 'innerText' ) || '';
 	},
 	/**
 	 * Obtain description for thumbnail
@@ -43,7 +44,7 @@ mfExtend( Thumbnail, View, {
 	 * @instance
 	 * @return {string}
 	 */
-	getDescription: function () {
+	getDescription() {
 		return this.options.description;
 	},
 	/**
@@ -53,7 +54,7 @@ mfExtend( Thumbnail, View, {
 	 * @instance
 	 * @return {string}
 	 */
-	getFileName: function () {
+	getFileName() {
 		return this.options.filename;
 	}
 } );

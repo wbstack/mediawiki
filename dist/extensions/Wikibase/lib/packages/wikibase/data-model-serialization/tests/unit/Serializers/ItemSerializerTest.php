@@ -1,12 +1,17 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Tests\Wikibase\DataModel\Serializers;
 
-use Serializers\Serializer;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\Property;
+use Wikibase\DataModel\Serializers\AliasGroupListSerializer;
 use Wikibase\DataModel\Serializers\ItemSerializer;
+use Wikibase\DataModel\Serializers\SiteLinkSerializer;
+use Wikibase\DataModel\Serializers\StatementListSerializer;
+use Wikibase\DataModel\Serializers\TermListSerializer;
 use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
 use Wikibase\DataModel\Statement\StatementList;
@@ -21,40 +26,43 @@ use Wikibase\DataModel\Term\TermList;
  * @author Jan Zerebecki < jan.wikimedia@zerebecki.de >
  * @author Bene* < benestar.wikimedia@gmail.com >
  */
-class ItemSerializerTest extends DispatchableSerializerTest {
+class ItemSerializerTest extends DispatchableSerializerTestCase {
 
-	protected function buildSerializer( $useObjectsForMaps = false ) {
-		$termListSerializerMock = $this->createMock( Serializer::class );
+	protected function buildSerializer( bool $useObjectsForEmptyMaps = false ): ItemSerializer {
+		$termListSerializerMock = $this->createMock( TermListSerializer::class );
 		$termListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->will( $this->returnCallback( static function( TermList $termList ) {
+			->willReturnCallback( static function ( TermList $termList ) {
 				if ( $termList->isEmpty() ) {
 					return [];
 				}
 
 				return [
-					'en' => [ 'lang' => 'en', 'value' => 'foo' ]
+					'en' => [ 'lang' => 'en', 'value' => 'foo' ],
 				];
-			} ) );
+			} );
 
-		$aliasGroupListSerializerMock = $this->createMock( Serializer::class );
+		$aliasGroupListSerializerMock = $this->createMock( AliasGroupListSerializer::class );
 		$aliasGroupListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->will( $this->returnCallback( static function( AliasGroupList $aliasGroupList ) {
+			->willReturnCallback( static function ( AliasGroupList $aliasGroupList ) {
 				if ( $aliasGroupList->isEmpty() ) {
 					return [];
 				}
 
 				return [
-					'en' => [ 'lang' => 'en', 'values' => [ 'foo', 'bar' ] ]
+					'en' => [ 'lang' => 'en', 'values' => [ 'foo', 'bar' ] ],
 				];
-			} ) );
+			} );
 
-		$statementListSerializerMock = $this->createMock( Serializer::class );
+		$statementListSerializerMock = $this->createMock( StatementListSerializer::class );
 		$statementListSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->will( $this->returnCallback( static function( StatementList $statementList ) {
+			->willReturnCallback( static function ( StatementList $statementList ) use ( $useObjectsForEmptyMaps ) {
 				if ( $statementList->isEmpty() ) {
+					if ( $useObjectsForEmptyMaps ) {
+						return (object)[];
+					}
 					return [];
 				}
 
@@ -63,41 +71,41 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
+							'rank' => 'normal',
+						],
+					],
 				];
-			} ) );
+			} );
 
-		$siteLinkSerializerMock = $this->createMock( Serializer::class );
+		$siteLinkSerializerMock = $this->createMock( SiteLinkSerializer::class );
 		$siteLinkSerializerMock->expects( $this->any() )
 			->method( 'serialize' )
-			->with( $this->equalTo( new SiteLink( 'enwiki', 'Nyan Cat' ) ) )
-			->will( $this->returnValue( [
+			->with( new SiteLink( 'enwiki', 'Nyan Cat' ) )
+			->willReturn( [
 				'site' => 'enwiki',
 				'title' => 'Nyan Cat',
-				'badges' => []
-			] ) );
+				'badges' => [],
+			] );
 
 		return new ItemSerializer(
 			$termListSerializerMock,
 			$aliasGroupListSerializerMock,
 			$statementListSerializerMock,
 			$siteLinkSerializerMock,
-			$useObjectsForMaps
+			$useObjectsForEmptyMaps,
 		);
 	}
 
-	public function serializableProvider() {
+	public function serializableProvider(): array {
 		return [
 			[ new Item() ],
 		];
 	}
 
-	public function nonSerializableProvider() {
+	public function nonSerializableProvider(): array {
 		return [
 			[ 5 ],
 			[ [] ],
@@ -105,7 +113,7 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 		];
 	}
 
-	public function serializationProvider() {
+	public function serializationProvider(): array {
 		$provider = [
 			[
 				[
@@ -116,7 +124,7 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 					'claims' => [],
 					'sitelinks' => [],
 				],
-				new Item()
+				new Item(),
 			],
 		];
 
@@ -131,7 +139,7 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 				'claims' => [],
 				'sitelinks' => [],
 			],
-			$entity
+			$entity,
 		];
 
 		$entity = new Item();
@@ -142,15 +150,15 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 				'labels' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
+						'value' => 'foo',
+					],
 				],
 				'descriptions' => [],
 				'aliases' => [],
 				'claims' => [],
 				'sitelinks' => [],
 			],
-			$entity
+			$entity,
 		];
 
 		$entity = new Item();
@@ -162,14 +170,14 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 				'descriptions' => [
 					'en' => [
 						'lang' => 'en',
-						'value' => 'foo'
-					]
+						'value' => 'foo',
+					],
 				],
 				'aliases' => [],
 				'claims' => [],
 				'sitelinks' => [],
 			],
-			$entity
+			$entity,
 		];
 
 		$entity = new Item();
@@ -182,13 +190,13 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 				'aliases' => [
 					'en' => [
 						'lang' => 'en',
-						'values' => [ 'foo', 'bar' ]
-					]
+						'values' => [ 'foo', 'bar' ],
+					],
 				],
 				'claims' => [],
 				'sitelinks' => [],
 			],
-			$entity
+			$entity,
 		];
 
 		$entity = new Item();
@@ -204,16 +212,16 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 						[
 							'mainsnak' => [
 								'snaktype' => 'novalue',
-								'property' => 'P42'
+								'property' => 'P42',
 							],
 							'type' => 'statement',
-							'rank' => 'normal'
-						]
-					]
+							'rank' => 'normal',
+						],
+					],
 				],
 				'sitelinks' => [],
 			],
-			$entity
+			$entity,
 		];
 
 		$item = new Item();
@@ -229,24 +237,24 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 					'enwiki' => [
 						'site' => 'enwiki',
 						'title' => 'Nyan Cat',
-						'badges' => []
-					]
+						'badges' => [],
+					],
 				],
 			],
-			$item
+			$item,
 		];
 
 		return $provider;
 	}
 
-	public function testItemSerializerWithOptionObjectsForMaps() {
-		$serializer = $this->buildSerializer( true );
+	public function testItemSerializerEmptyMapsSerialization(): void {
+		$serializer = $this->buildSerializer( false );
 
 		$item = new Item();
 		$item->getSiteLinkList()->addNewSiteLink( 'enwiki', 'Nyan Cat' );
 
-		$sitelinks = new \stdClass();
-		$sitelinks->enwiki = [
+		$sitelinks = [];
+		$sitelinks['enwiki'] = [
 			'site' => 'enwiki',
 			'title' => 'Nyan Cat',
 			'badges' => [],
@@ -264,4 +272,20 @@ class ItemSerializerTest extends DispatchableSerializerTest {
 		$this->assertEquals( $serial, $serializer->serialize( $item ) );
 	}
 
+	public function testItemSerializerUsesObjectsForEmptyMaps(): void {
+		$serializer = $this->buildSerializer( true );
+
+		$item = new Item();
+
+		$serial = [
+			'type' => 'item',
+			'labels' => [],
+			'descriptions' => [],
+			'aliases' => [],
+			'claims' => (object)[],
+			'sitelinks' => (object)[],
+		];
+
+		$this->assertEquals( $serial, $serializer->serialize( $item ) );
+	}
 }

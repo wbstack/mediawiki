@@ -18,6 +18,10 @@
  * @file
  */
 
+namespace MediaWiki\Title;
+
+use MediaWiki\Language\Language;
+
 /**
  * A class to convert page titles on a foreign wiki (ForeignTitle objects) into
  * page titles on the local wiki (Title objects), using a default namespace
@@ -30,20 +34,10 @@
  * main namespace as a last resort.
  */
 class NaiveImportTitleFactory implements ImportTitleFactory {
-	/** @var Language */
-	private $contentLanguage;
+	private Language $contentLanguage;
+	private NamespaceInfo $namespaceInfo;
+	private TitleFactory $titleFactory;
 
-	/** @var NamespaceInfo */
-	private $namespaceInfo;
-
-	/** @var TitleFactory */
-	private $titleFactory;
-
-	/**
-	 * @param Language $contentLanguage
-	 * @param NamespaceInfo $namespaceInfo
-	 * @param TitleFactory $titleFactory
-	 */
 	public function __construct(
 		Language $contentLanguage,
 		NamespaceInfo $namespaceInfo,
@@ -87,3 +81,6 @@ class NaiveImportTitleFactory implements ImportTitleFactory {
 		return $this->titleFactory->makeTitleSafe( 0, $foreignTitle->getFullText() );
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( NaiveImportTitleFactory::class, 'NaiveImportTitleFactory' );

@@ -13,11 +13,10 @@
 	 * @return {jQuery}
 	 */
 	function jQueryFindWithParent( $context, selector ) {
-		var matches;
-
 		$context = $( $context );
 		selector = selector.trim();
 
+		let matches;
 		while ( selector && ( matches = selector.match( /(.*?(?:^|[>\s+~]))(<\s*[^>\s+~]+)(.*?)$/ ) ) ) {
 			if ( matches[ 1 ].trim() ) {
 				$context = $context.find( matches[ 1 ] );
@@ -44,12 +43,11 @@
 	 * @see jQuery#findWithParent
 	 */
 	$.fn.findWithParent = function ( selector ) {
-		var selectors = selector.split( ',' ),
-			$elements = $(),
-			self = this;
+		const selectors = selector.split( ',' );
+		let $elements = $();
 
-		selectors.forEach( function ( sel ) {
-			$elements = $elements.add( jQueryFindWithParent( self, sel ) );
+		selectors.forEach( ( sel ) => {
+			$elements = $elements.add( jQueryFindWithParent( this, sel ) );
 		} );
 
 		return $elements;

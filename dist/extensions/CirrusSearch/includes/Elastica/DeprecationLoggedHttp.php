@@ -5,19 +5,16 @@ namespace CirrusSearch\Elastica;
 use Elastica\Connection;
 use Elastica\Transport\Http;
 use MediaWiki\Logger\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 class DeprecationLoggedHttp extends Http {
 
+	/** @var LoggerInterface */
 	private $logger;
 
-	public function __construct( Connection $connection = null ) {
+	public function __construct( ?Connection $connection = null ) {
 		parent::__construct( $connection );
 		$this->logger = LoggerFactory::getInstance( 'CirrusSearchDeprecation' );
-	}
-
-	private function strStartsWith( $str, $prefix ) {
-		// TODO: php 8 use str_starts_with
-		return substr( $str, 0, strlen( $prefix ) ) === $prefix;
 	}
 
 	/**
@@ -30,7 +27,7 @@ class DeprecationLoggedHttp extends Http {
 		curl_setopt( $curlConnection, CURLOPT_HEADERFUNCTION, function ( $curl, $header ) {
 			// Elasticsearch sends Warning, but seeing lowercase coming in from curl. Didn't
 			// find docs confirming this is standard, do lowercase to have an expectation.
-			if ( $this->strStartsWith( strtolower( $header ), 'warning:' ) ) {
+			if ( str_starts_with( strtolower( $header ), 'warning:' ) ) {
 				$this->logger->warning( $header, [
 					// A bit awkward, but we want to log a stack trace without
 					// being too specific about how that happens.

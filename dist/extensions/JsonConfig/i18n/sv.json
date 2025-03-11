@@ -15,7 +15,7 @@
 	"jsonconfig-edit-action-cancel": "Avbryt",
 	"jsonconfig-edit-button-label": "Redigera som tabell",
 	"jsonconfig-edit-dialog-error": "Kunde inte redigera som tabell: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Datat matchar inte schemat",
+	"jsonconfig-edit-dialog-error-data-invalid": "Datat matchar inte schemat",
 	"jsonconfig-edit-dialog-error-data-missing": "JSON <code>data</code>-egenskapen saknas eller är inte en array",
 	"jsonconfig-edit-dialog-error-data-too-large": "Datasetet är för stort för att redigeras som tabell",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Varje fält måste ha ett namn",

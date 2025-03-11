@@ -1,9 +1,13 @@
+@import 'mediawiki.skin.variables.less';
+
 /* stylelint-disable selector-class-pattern */
 
 /* Galleries */
 /* Don't forget to update gallery.print.css */
 
-ul.gallery {
+// Increase specificity to override `.mw-content-rtl .mw-content-ltr ul` (T326017)
+// TODO: Galleries should not use `<ul>` (T38755)
+ul.gallery.gallery.gallery {
 	margin: 2px;
 	padding: 2px;
 	display: block;
@@ -34,8 +38,15 @@ li.gallerybox {
 div.gallerytext {
 	overflow: hidden;
 	font-size: 94%;
-	padding: 2px 4px;
+	padding: 9px 4px 17px;
 	word-wrap: break-word;
+
+	// FIXME: This is for backwards compatibility with parser markup generated prior
+	// to I5039c7ef9e07199c256fd568b4f94714e5831d17. It can be removed when we no longer
+	// need to worry about that HTML.
+	p {
+		margin: 0;
+	}
 }
 
 .galleryfilename {
@@ -93,8 +104,7 @@ ul.mw-gallery-packed-hover li.gallerybox:hover div.gallerytextwrapper,
 ul.mw-gallery-packed-overlay li.gallerybox div.gallerytextwrapper,
 ul.mw-gallery-packed-hover li.gallerybox.mw-gallery-focused div.gallerytextwrapper {
 	position: absolute;
-	background: #fff;
-	background: rgba( 255, 255, 255, 0.8 );
+	background: @background-color-backdrop-light;
 	padding: 5px 10px;
 	bottom: 0;
 	left: 0; /* Needed for IE */
@@ -123,10 +133,14 @@ ul.mw-gallery-packed-hover li.gallerybox.mw-gallery-focused div.gallerytextwrapp
 }
 
 /* Slideshow */
-ul.gallery.mw-gallery-slideshow {
+// Increase specificity to override `.mw-content-rtl .mw-content-ltr ul` (T326017)
+// TODO: Galleries should not use `<ul>` (T38755)
+ul.gallery.gallery.gallery.mw-gallery-slideshow {
 	display: block;
 	margin: 4em 0;
+}
 
+.mw-gallery-slideshow {
 	.gallerycaption {
 		font-size: 1.3em;
 		margin: 0;
@@ -183,7 +197,7 @@ ul.gallery.mw-gallery-slideshow {
 @media screen {
 	/* Background and border colors are defined separately for print mode */
 	li.gallerybox div.thumb {
-		border: 1px solid #c8ccd1;
-		background-color: #f8f9fa;
+		background-color: @background-color-neutral-subtle;
+		border: @border-subtle;
 	}
 }

@@ -16,7 +16,6 @@
 		]
 	},
 	"confirmaccounts": "Benutzerkontenanträge bestätigen",
-	"confirmaccount-extensionname": "Confirm User Accounts",
 	"confirmaccount-desc": "Ermöglicht es Benutzerkontenanträge zu bestätigen",
 	"confirmaccount-maintext": "'''Diese Seite dient dazu, wartende Benutzerkontenanträge für ''{{SITENAME}}'' zu bearbeiten.'''\n\nJede Benutzerkontenwarteschlange besteht aus drei Unterwarteschlangen. Eine für offene Anfrage, eine für Anträge im „abwarten“-Status und eine für kürzlich abgelehnte Anfragen.\n\nWenn du auf einen Antrag antwortest, überprüfe die Informationen sorgfältig und bestätige die enthaltenen Informationen.\nDeine Aktionen werden nichtöffentlich protokolliert. Es wird auch von dir erwartet, die Aktionen anderer zu überprüfen.",
 	"confirmaccount-list": "Unten findest du eine Liste von noch zu bearbeitenden Benutzerkontoanträgen.\nSobald ein Antrag bestätigt oder zurückgewiesen wurde, wird er aus der Liste entfernt.",

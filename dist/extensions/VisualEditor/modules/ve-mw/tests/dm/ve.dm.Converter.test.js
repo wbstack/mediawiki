@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MediaWiki-specific Converter tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -15,6 +15,7 @@ QUnit.test( 'getModelFromDom', ( assert ) => {
 		if ( caseItem.mwConfig ) {
 			mw.config.set( caseItem.mwConfig );
 		}
+		caseItem.base = caseItem.base || ve.dm.mwExample.baseUri;
 
 		ve.test.utils.runGetModelFromDomTest( assert, caseItem, msg );
 	}
@@ -28,6 +29,7 @@ QUnit.test( 'getDomFromModel', ( assert ) => {
 		if ( caseItem.mwConfig ) {
 			mw.config.set( caseItem.mwConfig );
 		}
+		caseItem.base = caseItem.base || ve.dm.mwExample.baseUri;
 
 		ve.test.utils.runGetDomFromModelTest( assert, caseItem, msg );
 	}

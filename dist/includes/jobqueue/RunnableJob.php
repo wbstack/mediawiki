@@ -1,7 +1,5 @@
 <?php
 /**
- * Job queue task instance that can be executed via a run() method
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,26 +19,36 @@
  */
 
 /**
- * Job that has a run() method and metadata accessors for JobQueue::pop() and JobQueue::ack()
+ * Job that has a run() method and metadata accessors for JobQueue::pop() and JobQueue::ack().
  *
  * Instances are not only enqueueable via JobQueue::push(), but they can also be executed by
- * by calling their run() method. When constructing a job to be enqueued via JobQueue::push(),
- * it will not be possible to construct a RunnableJob instance if the class for that job is not
+ * calling their run() method. When constructing a job to be enqueued via JobQueue::push(), it
+ * will not be possible to construct a RunnableJob instance if the class for that job is not
  * loaded by the application for the local DB domain. In that case, the general-purpose
  * JobSpecification class can be used instead.
  *
- * @stable to implement
+ * See [the architecture doc](@ref jobqueuearch) for more information.
  *
- * @ingroup JobQueue
+ * @stable to implement
  * @since 1.33
+ * @ingroup JobQueue
  */
 interface RunnableJob extends IJobSpecification {
 	/** @var int Job must not be wrapped in the usual explicit LBFactory transaction round */
 	public const JOB_NO_EXPLICIT_TRX_ROUND = 1;
 
 	/**
-	 * Run the job
-	 * @return bool Success
+	 * Run the job.
+	 *
+	 * If this method returns `false` or completes exceptionally, the job runner will retry executing this
+	 * job unless the number of retries has exceeded its configured retry limit.
+	 * Retries are allowed by default, unless allowRetries() is overridden to disable retries.
+	 *
+	 * See [the architecture doc](@ref jobqueuearch) for more information.
+	 *
+	 * @return bool Return `false` to instruct the job runner to retry a failed job.
+	 * Otherwise return `true` to indicate that a job completed
+	 * (i.e. succeeded, or failed in a way that's deterministic or redundant).
 	 */
 	public function run();
 
@@ -73,6 +81,11 @@ interface RunnableJob extends IJobSpecification {
 	public function getRequestId();
 
 	/**
+	 * Whether to retry execution of this job if run() returned `false` or threw an exception.
+	 *
+	 * @warning In some setups (i.e. when using change-propagation) jobs may
+	 *  still be retried even when this is false if the job fails due to a
+	 *  timeout unless it is also configured in change-prop config (T358939).
 	 * @return bool Whether this job can be retried on failure by job runners
 	 * @since 1.21
 	 */

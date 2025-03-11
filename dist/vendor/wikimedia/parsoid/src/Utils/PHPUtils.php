@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Wikimedia\Parsoid\Utils;
 
-use Exception;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Assert\UnreachableException;
 
@@ -16,7 +15,7 @@ use Wikimedia\Assert\UnreachableException;
 class PHPUtils {
 	/**
 	 * Convert a counter to a Base64 encoded string.
-	 * Padding is stripped. \,+ are replaced with _,- respectively.
+	 * Padding is stripped. /,+ are replaced with _,- respectively.
 	 * Warning: Max integer is 2^31 - 1 for bitwise operations.
 	 * @param int $n
 	 * @return string
@@ -63,11 +62,7 @@ class PHPUtils {
 	 * @return string
 	 */
 	public static function jsonEncode( $o ): string {
-		$str = json_encode( $o, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
-		if ( $str === false ) {
-			// Do this manually until JSON_THROW_ON_ERROR is available
-			throw new Exception( 'JSON encoding failed.' );
-		}
+		$str = json_encode( $o, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR );
 		$str = str_replace( self::BAD_CHARS, self::BAD_CHARS_ESCAPED, $str );
 		return $str;
 	}
@@ -308,32 +303,6 @@ class PHPUtils {
 	public static function encodeURIComponent( string $str ): string {
 		$revert = [ '%21' => '!', '%2A' => '*', '%27' => "'", '%28' => '(', '%29' => ')' ];
 		return strtr( rawurlencode( $str ), $revert );
-	}
-
-	/**
-	 * Convert an array to an object. Workaround for
-	 * T228346 / https://bugs.php.net/bug.php?id=78379
-	 *
-	 * PHP 7 introduced "efficient" casting of arrays to objects by taking a
-	 * reference instead of duplicating the array. However, this was not
-	 * properly accounted for in the garbage collector. The garbage collector
-	 * would free the array while it was still referred to by live objects.
-	 *
-	 * The workaround here is to manually duplicate the array. It's not
-	 * necessary to do a deep copy since only the top-level array is referenced
-	 * by the new object.
-	 *
-	 * It's only necessary to call this for potentially shared arrays, such as
-	 * compile-time constants. Arrays that have a reference count of 1 can be
-	 * cast to objects in the usual way. For example, array literals containing
-	 * variables are typically unshared.
-	 *
-	 * @param array $array
-	 * @return \stdClass
-	 */
-	public static function arrayToObject( $array ) {
-		// FIXME: remove this workaround (T254519)
-		return (object)array_combine( array_keys( $array ), array_values( $array ) );
 	}
 
 	/**

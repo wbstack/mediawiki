@@ -15,7 +15,6 @@
 	"thanks-thanked": "{{GENDER:$1|մասնակցին շնորհակալություն է հայտնված}}",
 	"thanks-button-thank": "{{GENDER:$1|Շնորհակալություն հայտնել}}",
 	"thanks-button-thanked": "{{GENDER:$1|մասնակցին շնորհակալություն  է հայտնված:}}",
-	"thanks-button-action-cancel": "Չեղարկել",
 	"thanks-error-undefined": "Չստացվեց շնորհակալություն հայտնել։ Փորձեք կրկին։",
 	"thanks-error-invalidrevision": "Խմբագրման համարանիշը վավեր չէ։",
 	"thanks-error-ratelimited": "{{GENDER:$1|Դուք}} շատ եք շնորհակալություն հայտնել։ Սպասեք որոշ ժամանակ և նորից փորձեք։",
@@ -26,7 +25,6 @@
 	"echo-pref-subscription-edit-thank": "Շնորհակալություն ինձ իմ խմբագրման համար",
 	"echo-pref-tooltip-edit-thank": "Տեղեկացնել, երբ ինչ–որ մեկը շնորհակալ է իմ կատարած խմբագրման համար։",
 	"echo-category-title-edit-thank": "Շնորհակալ է",
-	"notification-thanks-diff-link": "Ձեր խմբագրման",
 	"notification-header-rev-thank": "$1 մասնակիցը շնորհակալ է Ձեզ $3 էջում Ձեր խմբագրման համար։",
 	"log-name-thanks": "Շնորհակալությունների գրանցամատյան",
 	"log-description-thanks": "Ստորև «շնորհակալություներ» ստացած մասնակիցների ցանկն է։",
@@ -34,6 +32,5 @@
 	"thanks-confirmation-special-rev": "Ուզո՞ւմ եք շնորհակալություն հայտնել այս խմբագրման համար:",
 	"notification-link-text-view-post": "Դիտել մեկնաբանությունը",
 	"flow-thanks-confirmation-special": "Ուզո՞ւմ եք շնորհակալություն հայտնել այս մեկնաբանման համար:",
-	"notification-flow-thanks-post-link": "Ձեր մեկնաբանությունը",
 	"notification-compact-header-flow-thank": "$1 մասնակիցը {{GENDER:$2|շնորհակալություն է}} հայտնել {{GENDER:$3|ձեզ}}"
 }

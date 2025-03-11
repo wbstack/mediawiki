@@ -7,7 +7,7 @@
 	"type": "antispam",
 	"version": "1.1.0",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"callback": "MediaWiki\\Extension\\TorBlock\\Hooks::registerExtension",
 	"GroupPermissions": {
@@ -23,9 +23,15 @@
 	"AvailableRights": [
 		"torunblocked"
 	],
+	"APIModules": {
+		"torblock": {
+			"class": "MediaWiki\\Extension\\TorBlock\\ApiTorBlock"
+		}
+	},
 	"MessagesDirs": {
 		"TorBlock": [
-			"i18n"
+			"i18n",
+			"i18n/api"
 		]
 	},
 	"AutoloadNamespaces": {
@@ -33,7 +39,10 @@
 	},
 	"HookHandlers": {
 		"TorBlockHooks": {
-			"class": "MediaWiki\\Extension\\TorBlock\\Hooks"
+			"class": "MediaWiki\\Extension\\TorBlock\\Hooks",
+			"services": [
+				"HookContainer"
+			]
 		},
 		"TorBlockAbuseFilterHooks": {
 			"class": "MediaWiki\\Extension\\TorBlock\\TorBlockAbuseFilterHooks"
@@ -70,7 +79,7 @@
 		"AbuseFilter-builder": {
 			"handler": "TorBlockAbuseFilterHooks"
 		},
-		"EmailUserPermissionsErrors": {
+		"UserCanSendEmail": {
 			"handler": "TorBlockHooks"
 		},
 		"OtherBlockLogLink": {

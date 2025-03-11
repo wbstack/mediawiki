@@ -3,8 +3,8 @@
 namespace Wikibase\Lib\Formatters;
 
 use DataValues\TimeValue;
-use Html;
 use InvalidArgumentException;
+use MediaWiki\Html\Html;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 
@@ -31,20 +31,17 @@ class TimeDetailsFormatter implements ValueFormatter {
 
 	/**
 	 * @param FormatterOptions|null $options
-	 * @param ValueFormatter|null $timeFormatter A TimeValue formatter that outputs a single line of
+	 * @param ValueFormatter $timeFormatter A TimeValue formatter that outputs a single line of
 	 * HTML, suitable for headings.
 	 */
 	public function __construct(
-		FormatterOptions $options = null,
-		ValueFormatter $timeFormatter = null
+		?FormatterOptions $options,
+		ValueFormatter $timeFormatter
 	) {
 		$this->options = $options ?: new FormatterOptions();
 		$this->options->defaultOption( ValueFormatter::OPT_LANG, 'en' );
 
-		$this->timeFormatter = $timeFormatter ?: new HtmlTimeFormatter(
-			$this->options,
-			new MwTimeIsoFormatter( $this->options )
-		);
+		$this->timeFormatter = $timeFormatter;
 	}
 
 	/**
@@ -80,9 +77,9 @@ class TimeDetailsFormatter implements ValueFormatter {
 			$beforeHtml = $this->getAmountAndPrecisionHtml( $precision, $before );
 			$afterHtml = $this->getAmountAndPrecisionHtml( $precision, $after );
 		} else {
-			$precisionHtml = htmlspecialchars( $precision );
-			$beforeHtml = htmlspecialchars( $value->getBefore() );
-			$afterHtml = htmlspecialchars( $value->getAfter() );
+			$precisionHtml = htmlspecialchars( (string)$precision );
+			$beforeHtml = htmlspecialchars( (string)$value->getBefore() );
+			$afterHtml = htmlspecialchars( (string)$value->getAfter() );
 		}
 
 		$html = '';
@@ -116,7 +113,7 @@ class TimeDetailsFormatter implements ValueFormatter {
 			return htmlspecialchars( $timestamp );
 		}
 
-		list( , $sign, $year, $rest ) = $matches;
+		[ , $sign, $year, $rest ] = $matches;
 
 		// Actual MINUS SIGN (U+2212) instead of HYPHEN-MINUS (U+002D)
 		$sign = $sign === '-' ? "\xE2\x88\x92" : '+';

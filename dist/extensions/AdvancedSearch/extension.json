@@ -14,7 +14,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"AutoloadNamespaces": {
 		"AdvancedSearch\\": "includes/"
@@ -59,7 +59,13 @@
 	},
 	"HookHandlers": {
 		"main": {
-			"class": "AdvancedSearch\\Hooks"
+			"class": "AdvancedSearch\\Hooks",
+			"services": [
+				"UserOptionsLookup",
+				"LanguageNameUtils",
+				"SearchEngineConfig",
+				"MimeAnalyzer"
+			]
 		}
 	},
 	"Hooks": {
@@ -73,7 +79,7 @@
 		]
 	},
 	"DefaultUserOptions": {
-		"advancedsearch-disable": false
+		"advancedsearch-disable": 0
 	},
 	"ResourceModules": {
 		"ext.advancedSearch.initialstyles": {
@@ -86,6 +92,9 @@
 				"modules/ext.advancedSearch.less"
 			],
 			"skinStyles": {
+				"minerva": [
+					"modules/ext.advancedSearch.minerva.less"
+				],
 				"timeless": [
 					"modules/ext.advancedSearch.timeless.less"
 				],
@@ -98,7 +107,8 @@
 			"class": "AdvancedSearch\\SearchnamespaceTokenModule"
 		},
 		"ext.advancedSearch.elements": {
-			"scripts": [
+			"packageFiles": [
+				"modules/ext.advancedSearch.elements.js",
 				"modules/ext.advancedSearch.defaultFields.js",
 				"modules/ext.advancedSearch.FieldCollection.js",
 				"modules/ext.advancedSearch.FieldElementBuilder.js",
@@ -106,7 +116,6 @@
 				"modules/ext.advancedSearch.SearchField.js",
 				"modules/dm/ext.advancedSearch.getDefaultNamespaces.js",
 				"modules/dm/ext.advancedSearch.SearchModel.js",
-				"modules/ui/ext.advancedSearch.StoreListener.js",
 				"modules/ui/ext.advancedSearch.FormState.js",
 				"modules/ui/ext.advancedSearch.ExpandablePane.js",
 				"modules/ui/ext.advancedSearch.NamespaceFilters.js",
@@ -114,14 +123,16 @@
 				"modules/ui/ext.advancedSearch.SearchPreview.js",
 				"modules/ui/ext.advancedSearch.NamespacesPreview.js",
 				"modules/dm/ext.advancedSearch.NamespacePresetProviders.js",
-				"modules/dm/ext.advancedSearch.getSortMethods.js",
 				"modules/ui/ext.advancedSearch.MenuSelectWidget.js",
 				"modules/ui/ext.advancedSearch.ItemMenuOptionWidget.js",
 				"modules/ui/ext.advancedSearch.CheckboxInputWidget.js",
 				"modules/ext.advancedSearch.util.js"
 			],
 			"messages": [
+				"advancedsearch-help-general-instruction",
 				"advancedsearch-options-pane-head",
+				"advancedsearch-options-pane-preview-list",
+				"advancedsearch-namespaces-pane-preview-list",
 				"advancedsearch-namespaces-search-in",
 				"advancedsearch-namespaces-placeholder",
 				"advancedsearch-sort-relevance",
@@ -138,9 +149,6 @@
 				"advancedsearch-namespaces-preset-default",
 				"advancedsearch-namespaces-preset-general-help",
 				"advancedsearch-namespaces-preset-discussion",
-				"advancedsearch-filesize-equals-symbol",
-				"advancedsearch-filesize-greater-than-symbol",
-				"advancedsearch-filesize-smaller-than-symbol",
 				"advancedsearch-field-plain",
 				"advancedsearch-field-phrase",
 				"advancedsearch-field-or",
@@ -159,7 +167,10 @@
 				"advancedsearch-sort-preview-last-edit-asc",
 				"advancedsearch-sort-preview-last-edit-desc",
 				"advancedsearch-sort-preview-create-timestamp-asc",
-				"advancedsearch-sort-preview-create-timestamp-desc"
+				"advancedsearch-sort-preview-create-timestamp-desc",
+				"colon-separator",
+				"comma-separator",
+				"word-separator"
 			],
 			"dependencies": [
 				"mediawiki.user",
@@ -170,11 +181,12 @@
 				"oojs-ui-widgets",
 				"oojs-ui.styles.icons-layout",
 				"oojs-ui.styles.icons-interactions",
+				"ext.advancedSearch.SearchFieldUI",
 				"ext.advancedSearch.styles"
 			]
 		},
 		"ext.advancedSearch.init": {
-			"scripts": [
+			"packageFiles": [
 				"modules/ext.advancedSearch.init.js"
 			],
 			"dependencies": [
@@ -183,7 +195,8 @@
 			]
 		},
 		"ext.advancedSearch.SearchFieldUI": {
-			"scripts": [
+			"packageFiles": [
+				"modules/ext.advancedSearch.SearchFieldUI.js",
 				"modules/dm/ext.advancedSearch.TitleCache.js",
 				"modules/dm/ext.advancedSearch.MultiselectLookup.js",
 				"modules/ui/ext.advancedSearch.ArbitraryWordInput.js",
@@ -193,8 +206,8 @@
 				"modules/ui/mixins/ext.advancedSearch.ClassesForDropdownOptions.js",
 				"modules/ui/ext.advancedSearch.FileTypeSelection.js",
 				"modules/ui/ext.advancedSearch.SortPreference.js",
+				"modules/dm/ext.advancedSearch.getSortMethods.js",
 				"modules/ui/ext.advancedSearch.LanguageSelection.js",
-				"modules/ui/ext.advancedSearch.TextInput.js",
 				"modules/ui/ext.advancedSearch.ImageDimensionInput.js",
 				"modules/ui/ext.advancedSearch.ImageDimensionLayout.js",
 				"modules/ui/ext.advancedSearch.TextInput.js",
@@ -270,7 +283,6 @@
 		],
 		"dependencies": [
 			"ext.advancedSearch.elements",
-			"ext.advancedSearch.SearchFieldUI",
 			"oojs-ui"
 		]
 	},

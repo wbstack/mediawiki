@@ -1,14 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Lifeway",
-			"Валентина Семёнова",
 			"Mxalexandrov86",
-			"Amire80"
+			"Валентина Семёнова"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]] манмыште кумдаҥдыме кычалме йӧным куштылгын кучылтмаш",
 	"advancedsearch-options-pane-head": "Кумдаҥдыме кычалмаш:",
+	"advancedsearch-options-pane-preview-list": "Кызыт кучылтмо кычалме йодыш-влак",
 	"advancedsearch-optgroup-text": "Велыж текстыште кычалаш",
 	"advancedsearch-optgroup-structure": "Структур",
 	"advancedsearch-optgroup-files": "Файл да сӱрет-влак",
@@ -27,6 +28,7 @@
 	"advancedsearch-field-fileh": "Пиксель дене файлын кӱкшытшӧ",
 	"advancedsearch-field-sort": "Ойыркалыме радам",
 	"advancedsearch-field-preview-sort": "$1 дене ойыркалаш",
+	"advancedsearch-help-general-instruction": "$1-лан тӱрыс инструкций",
 	"advancedsearch-help-plain": ";Ончыктен возымаш\n:Тиде мут кычалмаш вуймутышто але текстыште ышталтеш.\n;Тидым шотыш налза \n:* Тыште икмыняр мутым пурташ лиеш.\n:* Пунктуаций пале да вес алфавит гыч огыл пале-влак (кокточко да запятой деч посна) шотеш огыт налалт.\n:* Тыште лийын кертыт лектыш-влак, кудыжо ик але икмыняр тендан кычалмаш йодыш деч посна улыт.\n:* Тыгай муттӱҥ кучылталтеш. Мутлан:\"автомобиль\" мутым пуртымо гын, кычалмаште тыгак \"автомобили\" шотыш налалташ тӱҥалеш. Мут кузе лекме кажне посна йылме деч шога.\n;Полыш велыж\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Full text search]\n;Синтаксический эквивалент тыглай кычалмаште\n: <code>сезам урем гыч машина</code>.",
 	"advancedsearch-help-phrase": ";Возен ончыктымаш\n:Символ радамым кычалеш.Чарналтыш пале-влак шотеш огыт налалт.\n;Тидым шотеш нал\n:(кавычкым кучылтмо годым веле пашам ышта, примерым ӱлнырак ончо)\n:*кычалме ой-влакым запятой але пробел ден ойырыза, мутлан <code>\"поро эр\"</code>, <code>\"салам, йолташ!\"</code>.\n:* Чарналтыш пале да моло символ-влак(кокточко да запятой деч посна) шотеш огыт налалт.\n:* Кычалмаш регистр деч ок шого.\n:* Тыште ойсавыртш ок ыште.\n;Справке велыж\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers мут, шомак да модификатор-влак]\n;Тыглай кычалмаште синтаксический эквивалент\n:Мут-влак кокытан кавычкыште, мутлан <code>\"Тӱҥалтыш гыч угыч тӱҥалза\"</code>.",
 	"advancedsearch-help-or": ";возен ончыктымаш\n:Велыжыште кеч ик кычалме келшык лийшаш.\n;Полыш велыж\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Мут, ой да модификатор]\n;Тыглай кычалмаште синтаксический эквивалент\n:Нунын коклаште <code>OR</code> дене мут-влак, мутлан <code>Laptop OR Notebook</code>.",
@@ -69,6 +71,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "ыштен лукмо жаплан",
 	"advancedsearch-namespaces-search-in": "(Кушто) кычалаш:",
 	"advancedsearch-namespaces-remember": "Ончыкыжым кычалаш манын, ойырымым шарнен кодаш",
+	"advancedsearch-namespaces-pane-preview-list": "Кызытсе жапыште кумдан кучылталтше лӱм кумдык фильтр-влак",
 	"advancedsearch-namespaces-preset-all": "Чыла",
 	"advancedsearch-namespaces-preset-default": "Ончылгочсо",
 	"advancedsearch-namespaces-preset-general-help": "Чумыр справке",

@@ -5,8 +5,8 @@ namespace CirrusSearch\Job;
 use CirrusSearch\OtherIndexesUpdater;
 use CirrusSearch\SearchConfig;
 use MediaWiki\MediaWikiServices;
-use Title;
-use WikiMap;
+use MediaWiki\Title\Title;
+use MediaWiki\WikiMap\WikiMap;
 
 /**
  * Job wrapper around OtherIndexes. Used during page updates.

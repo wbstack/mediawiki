@@ -2,11 +2,11 @@
 
 namespace JsonConfig;
 
-use Html;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageReference;
-use ParserOptions;
-use ParserOutput;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * This class is used in case when there is no custom view defined for JCContent object
@@ -151,7 +151,7 @@ class JCTabularContentView extends JCContentView {
 					$makeRow( $titleHeaders, [ 'class' => 'mw-tabular-row-name' ] ),
 				] ) ) . Html::rawElement( 'tbody', [], implode( "\n", $rows ) ) ) .
 			$content->renderSources(
-				MediaWikiServices::getInstance()->getParser()->getFreshParser(),
+				MediaWikiServices::getInstance()->getParserFactory()->getInstance(),
 				$page,
 				$revId,
 				$options

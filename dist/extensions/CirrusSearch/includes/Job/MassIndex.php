@@ -5,7 +5,7 @@ namespace CirrusSearch\Job;
 use CirrusSearch\Updater;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 use WikiPage;
 
 /**
@@ -51,7 +51,6 @@ class MassIndex extends CirrusGenericJob {
 
 	/**
 	 * @return bool
-	 * @throws \MWException
 	 */
 	protected function doJob() {
 		// Reload pages from pageIds to throw into the updater
@@ -71,8 +70,9 @@ class MassIndex extends CirrusGenericJob {
 		}
 		// Now invoke the updater!
 		$updater = Updater::build( $this->searchConfig, $this->params['cluster'] ?? null );
-		$count = $updater->updatePages( $pageData, $this->params[ 'updateFlags' ] );
-		return $count >= 0;
+		$updater->updatePages( $pageData, $this->params[ 'updateFlags' ] );
+		// retries are handled in a separate queue
+		return true;
 	}
 
 	/**

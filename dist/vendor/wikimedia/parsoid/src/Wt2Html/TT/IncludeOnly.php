@@ -3,10 +3,10 @@ declare( strict_types = 1 );
 
 namespace Wikimedia\Parsoid\Wt2Html\TT;
 
+use Wikimedia\Parsoid\NodeData\DataMw;
 use Wikimedia\Parsoid\Tokens\EOFTk;
 use Wikimedia\Parsoid\Tokens\SelfclosingTagTk;
 use Wikimedia\Parsoid\Tokens\SourceRange;
-use Wikimedia\Parsoid\Utils\PHPUtils;
 use Wikimedia\Parsoid\Wt2Html\TokenTransformManager;
 
 /**
@@ -14,52 +14,33 @@ use Wikimedia\Parsoid\Wt2Html\TokenTransformManager;
  * Strips all tokens in noinclude sections.
  */
 class IncludeOnly extends TokenCollector {
-	/**
-	 * @param TokenTransformManager $manager
-	 * @param array $options options
-	 */
+
 	public function __construct( TokenTransformManager $manager, array $options ) {
 		parent::__construct( $manager, $options );
 	}
 
-	/**
-	 * @return string
-	 */
 	protected function type(): string {
 		return 'tag';
 	}
 
-	/**
-	 * @return string
-	 */
 	protected function name(): string {
 		return 'includeonly';
 	}
 
-	/**
-	 * @return bool
-	 */
 	protected function toEnd(): bool {
 		return true;    // Match the end-of-input if </noinclude> is missing.
 	}
 
-	/**
-	 * @return bool
-	 */
 	protected function ackEnd(): bool {
 		return false;
 	}
 
-	/**
-	 * @param array $collection
-	 * @return TokenHandlerResult
-	 */
 	protected function transformation( array $collection ): TokenHandlerResult {
 		$start = array_shift( $collection );
 
 		// Handle self-closing tag case specially!
 		if ( $start instanceof SelfclosingTagTk ) {
-			$tsr = $start->dataAttribs->tsr ?? new SourceRange( null, null );
+			$tsr = $start->dataParsoid->tsr ?? new SourceRange( null, null );
 			$token = TokenCollector::buildMetaToken(
 				$this->manager,
 				'mw:Includes/IncludeOnly',
@@ -67,9 +48,8 @@ class IncludeOnly extends TokenCollector {
 				$tsr,
 				null
 			);
-			if ( $start->dataAttribs->src ) {
-				$datamw = PHPUtils::jsonEncode( [ 'src' => $start->dataAttribs->src ] );
-				$token->addAttribute( 'data-mw', $datamw );
+			if ( $start->dataParsoid->src ) {
+				$token->dataMw = new DataMw( [ 'src' => $start->dataParsoid->src ] );
 			}
 			return ( $this->options['isInclude'] ) ?
 				new TokenHandlerResult( [] ) : new TokenHandlerResult( [ $token ] );
@@ -94,9 +74,8 @@ class IncludeOnly extends TokenCollector {
 			$tokens[] = TokenCollector::buildStrippedMetaToken( $this->manager, $name,
 				$start, $eof ? null : $end );
 
-			if ( $start->dataAttribs->src ) {
-				$dataMw = PHPUtils::jsonEncode( [ 'src' => $start->dataAttribs->src ] );
-				$tokens[0]->addAttribute( 'data-mw', $dataMw );
+			if ( $start->dataParsoid->src ) {
+				$tokens[0]->dataMw = new DataMw( [ 'src' => $start->dataParsoid->src ] );
 			}
 
 			if ( $end && !$eof ) {
@@ -104,7 +83,7 @@ class IncludeOnly extends TokenCollector {
 				// stripped token (above) got the entire tsr value, we are artificially
 				// setting the tsr on this node to zero-width to ensure that
 				// DSR computation comes out correct.
-				$endPos = isset( $end->dataAttribs->tsr ) ? $end->dataAttribs->tsr->end : null;
+				$endPos = isset( $end->dataParsoid->tsr ) ? $end->dataParsoid->tsr->end : null;
 				$tokens[] = TokenCollector::buildMetaToken( $this->manager, $name,
 					true, new SourceRange( $endPos, $endPos ), '' );
 			}

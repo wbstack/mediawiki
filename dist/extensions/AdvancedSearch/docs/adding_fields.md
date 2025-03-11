@@ -14,6 +14,7 @@ The `fieldCollection.add` method takes your field definition and the section nam
 
 
 ```javascript
+const { createSearchFieldFromObject, TextInput } = require( 'ext.advancedSearch.elements' );
 mw.hook( 'advancedSearch.configureFields' ).add( function ( fieldCollection ) {
   var fieldDefinition = {
     id: 'prefix',
@@ -22,7 +23,7 @@ mw.hook( 'advancedSearch.configureFields' ).add( function ( fieldCollection ) {
       return 'prefix:' + val.trim();
     },
     init: function ( state, config ) {
-      return new mw.libs.advancedSearch.ui.TextInput( state, config );
+      return new TextInput( state, config );
     },
     layout: function ( widget, field ) {
       return new OO.ui.FieldLayout(
@@ -36,11 +37,11 @@ mw.hook( 'advancedSearch.configureFields' ).add( function ( fieldCollection ) {
       );
     }
   };
-  fieldCollection.add( mw.libs.advancedSearch.createSearchFieldFromObject( fieldDefinition , 'extra' ) );
+  fieldCollection.add( createSearchFieldFromObject( fieldDefinition , 'extra' ) );
 } );
 ```
 
-`createSearchFieldFromObject` is a helper function that returns a subclassed instance of [`mw.libs.advancedSearch.SearchField`](../modules/ext.advancedSearch.SearchField.js). `SearchField` is an abstract class that defines the properties and methods that all search field configuration entries must implement. All the object properties and methods you pass into the field definition in `createSearchFieldFromObject` will become properties and methods of the new `SearchField` subclass.
+`createSearchFieldFromObject` is a helper function that returns a subclassed instance of [`SearchField`](../modules/ext.advancedSearch.SearchField.js). `SearchField` is an abstract class that defines the properties and methods that all search field configuration entries must implement. All the object properties and methods you pass into the field definition in `createSearchFieldFromObject` will become properties and methods of the new `SearchField` subclass.
 
 You can place the code for adding new fields in the [`common.js` page](https://www.mediawiki.org/wiki/Manual:Interface/JavaScript) or in a [gadget definition](https://www.mediawiki.org/wiki/Extension:Gadgets).
 
@@ -50,11 +51,11 @@ You can place the code for adding new fields in the [`common.js` page](https://w
 
 #### id
 
-A unique ID for the field.
+A unique name for the field.
 
 #### defaultValue
 
-The default value for the field. The correct value (empty string, empty array, etc) depends on the widget you use in the `init` function (see below). For example, for `mw.libs.advancedSearch.ui.TextInput`, the default value needs to be an empty string. For `mw.libs.advancedSearch.ui.ArbitraryWordInput` (the pill-style input), the default value needs to be an empty array.
+The default value for the field. The correct value (empty string, empty array, etc) depends on the widget you use in the `init` function (see below). For example, for `TextInput`, the default value needs to be an empty string. For `ArbitraryWordInput` (the pill-style input), the default value needs to be an empty array.
 
 #### formatter
 The formatter function takes the field value and converts it to MediaWiki search keywords.
@@ -74,13 +75,13 @@ function ( val ) {
 }
 ```
 
-If you're getting strings as input, remember to trim the whitespace at the beginning and end of the value. Please think of all possible values that might come from yoir field. You might need to quote and/or escape the values coming from your field.
+If you're getting strings as input, remember to trim the whitespace at the beginning and end of the value. Please think of all possible values that might come from your field. You might need to quote and/or escape the values coming from your field.
 
 #### init
 
 A function that returns an AdvancedSearch widget instance. AdvancedSearch widgets are subclasses of OOUI widgets with additional state handling capabilities.
 
-If you want to have a plain text input field or a "pill box" text input field like most of the other AdvancedSearch fields, use the `mw.libs.advancedSearch.ui.TextInput` and `mw.libs.advancedSearch.ui.ArbitraryWordInput` widgets.
+If you want to have a plain text input field or a "pill box" text input field like most of the other AdvancedSearch fields, use the `TextInput` and `ArbitraryWordInput` widgets.
 
 For more complex custom widgets, have a look at the in-depth explanation the section "Implementing your own widgets" to see what state-handling methods you need.
 
@@ -131,22 +132,22 @@ Your widgets don't have to implement the event handler themselves, AdvancedSearc
 Here is some minimal widget example code that shows how to handle the "update" event from the store:
 
 ```javascript
-mw.libs.advancedSearch.ui.MyWidget = function ( store, config ) {
+const MyWidget = function ( store, config ) {
 	this.fieldId = config.fieldId;
 	this.store = store;
 	store.connect( this, { update: 'onStoreUpdate' } );
 
-	mw.libs.advancedSearch.ui.MyWidget.parent.call( this, config );
+	MyWidget.parent.call( this, config );
 	this.setValuesFromStore();
 };
 
-OO.inheritClass( mw.libs.advancedSearch.ui.MyWidget, OO.ui.Widget );
+OO.inheritClass( MyWidget, OO.ui.Widget );
 
-mw.libs.advancedSearch.ui.MyWidget.prototype.onStoreUpdate = function () {
+MyWidget.prototype.onStoreUpdate = function () {
 	this.setValuesFromStore();
 };
 
-mw.libs.advancedSearch.ui.MyWidget.prototype.setValuesFromStore = function () {
+MyWidget.prototype.setValuesFromStore = function () {
 	if ( this.store.hasFieldChanged( this.fieldId, this.data ) ) {
 		this.setValue( this.store.getField( this.fieldId ) );
 	}

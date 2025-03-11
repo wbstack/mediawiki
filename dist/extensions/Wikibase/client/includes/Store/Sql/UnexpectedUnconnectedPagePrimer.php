@@ -10,7 +10,7 @@ use Onoi\MessageReporter\NullMessageReporter;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikimedia\Rdbms\ConnectionManager;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * Maintenance helper which adds or updates the "unexpectedUnconnectedPage" page property
@@ -21,45 +21,21 @@ use Wikimedia\Rdbms\IDatabase;
  */
 class UnexpectedUnconnectedPagePrimer {
 
-	/**
-	 * @var ConnectionManager
-	 */
-	private $localConnectionManager;
+	private ConnectionManager $localConnectionManager;
 
-	/**
-	 * @var ClientDomainDb
-	 */
-	private $clientDb;
+	private ClientDomainDb $clientDb;
 
-	/**
-	 * @var NamespaceChecker
-	 */
-	private $namespaceChecker;
+	private NamespaceChecker $namespaceChecker;
 
-	/**
-	 * @var int
-	 */
-	private $batchSize;
+	private int $batchSize;
 
-	/**
-	 * @var int
-	 */
-	private $batchSizeSelectMultiplicator = 1000;
+	private int $batchSizeSelectMultiplicator = 1000;
 
-	/**
-	 * @var MessageReporter
-	 */
-	private $progressReporter;
+	private MessageReporter $progressReporter;
 
-	/**
-	 * @var int
-	 */
-	private $position = 0;
+	private int $position = 0;
 
-	/**
-	 * @var int|null
-	 */
-	private $maxPageId = null;
+	private ?int $maxPageId = null;
 
 	/**
 	 * @param ClientDomainDb $clientDb
@@ -133,6 +109,7 @@ class UnexpectedUnconnectedPagePrimer {
 					'up to page ID ' . $this->position . ' (inclusive).'
 				);
 				$this->clientDb->replication()->wait();
+				$this->clientDb->autoReconfigure();
 			}
 		}
 
@@ -144,7 +121,7 @@ class UnexpectedUnconnectedPagePrimer {
 	/**
 	 * @return int The number of pages affected.
 	 */
-	private function processUnexpectedUnconnectedBatch() {
+	private function processUnexpectedUnconnectedBatch(): int {
 		$pages = $this->getUnexpectedUnconnectedBatch();
 
 		if ( !$pages ) {
@@ -163,15 +140,15 @@ class UnexpectedUnconnectedPagePrimer {
 	private function persistUnexpectedUnconnectedBatch( array $pages ): int {
 		$rows = $this->makeUnexpectedUnconnectedRows( $pages );
 
-		$dbw = $this->localConnectionManager->getWriteConnectionRef();
+		$dbw = $this->localConnectionManager->getWriteConnection();
 		$dbw->startAtomic( __METHOD__ );
 
-		$dbw->replace(
-			'page_props',
-			[ [ 'pp_page', 'pp_propname' ] ],
-			$rows,
-			__METHOD__
-		);
+		$dbw->newReplaceQueryBuilder()
+			->replaceInto( 'page_props' )
+			->uniqueIndexFields( [ 'pp_page', 'pp_propname' ] )
+			->rows( $rows )
+			->caller( __METHOD__ )
+			->execute();
 
 		$dbw->endAtomic( __METHOD__ );
 
@@ -204,47 +181,35 @@ class UnexpectedUnconnectedPagePrimer {
 	 * @return int[][] Page id, page namespace pairs
 	 */
 	private function getUnexpectedUnconnectedBatch(): array {
-		$dbr = $this->localConnectionManager->getReadConnectionRef();
+		$dbr = $this->localConnectionManager->getReadConnection();
 
 		$lastPosition = $this->position + $this->batchSize * $this->batchSizeSelectMultiplicator;
-		$result = $dbr->select(
-			[ 'page', 'page_props' ],
-			[ 'page_id', 'page_namespace' ],
-			[
+		$result = $dbr->newSelectQueryBuilder()
+			->select( [ 'page_id', 'page_namespace' ] )
+			->from( 'page' )
+			->leftJoin( 'page_props', null, [
+				'page_id = pp_page',
+				'pp_propname' => [
+					'wikibase_item', 'unexpectedUnconnectedPage', 'expectedUnconnectedPage',
+				],
+			] )
+			->where( [
 				'page_namespace' => $this->namespaceChecker->getWikibaseNamespaces(),
 				'page_is_redirect' => 0,
-				'page_id > ' . $this->position,
-				'page_id <= ' . $lastPosition,
-				// Either the propname needs to be null (the page prop is not set yet), or the
-				// propname matches and the value is larger than 0 (which is the legacy format
-				// where we used positive sort keys).
-				$dbr->makeList( [
-						'pp_propname IS NULL',
-						$dbr->makeList( [
-							'pp_propname = ' . $dbr->addQuotes( 'unexpectedUnconnectedPage' ),
-							'pp_sortkey > 0'
-						], IDatabase::LIST_AND )
-					],
-					IDatabase::LIST_OR
-				)
-			],
-			__METHOD__,
-			[
-				'ORDER BY' => 'page_id ASC',
-				'LIMIT' => $this->batchSize,
-			],
-			[
-				'page_props' => [
-					'LEFT JOIN',
-					[
-						'page_id = pp_page',
-						'pp_propname' => [
-							'wikibase_item', 'unexpectedUnconnectedPage', 'expectedUnconnectedPage'
-						]
-					]
-				]
-			]
-		);
+				$dbr->expr( 'page_id', '>', $this->position ),
+				$dbr->expr( 'page_id', '<=', $lastPosition ),
+			] )
+			// Either the propname needs to be null (the page prop is not set yet), or the
+			// propname matches and the value is larger than 0 (which is the legacy format
+			// where we used positive sort keys).
+			->andWhere( $dbr->expr( 'pp_propname', '=', null )
+				->orExpr(
+					$dbr->expr( 'pp_propname', '=', 'unexpectedUnconnectedPage' )
+						->and( 'pp_sortkey', '>', 0 )
+				) )
+			->orderBy( 'page_id', SelectQueryBuilder::SORT_ASC )
+			->limit( $this->batchSize )
+			->caller( __METHOD__ )->fetchResultSet();
 		$pages = [];
 		foreach ( $result as $row ) {
 			$pages[] = [ $row->page_id, $row->page_namespace ];
@@ -265,12 +230,10 @@ class UnexpectedUnconnectedPagePrimer {
 	private function getMaximumPageIdToCheck(): int {
 		// Pages added now are fine anyway, as we assume the new page prop to be active when this
 		// script is run.
-		return (int)$this->localConnectionManager->getReadConnectionRef()->selectField(
-			'page',
-			'MAX(page_id)',
-			[],
-			__METHOD__
-		);
+		return (int)$this->localConnectionManager->getReadConnection()->newSelectQueryBuilder()
+			->select( 'MAX(page_id)' )
+			->from( 'page' )
+			->caller( __METHOD__ )->fetchField();
 	}
 
 }

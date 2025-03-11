@@ -5,12 +5,10 @@
 			"Terfili"
 		]
 	},
-	"tooltip-ca-createsource": "Crear il code da funtauna da questa pagina",
-	"tooltip-ca-editsource": "Modifitgar il code da funtauna da questa pagina",
 	"tooltip-ca-ve-edit": "Modifitgar questa pagina",
+	"tooltip-ca-editsource": "Modifitgar il code da funtauna da questa pagina",
+	"tooltip-ca-createsource": "Crear il code da funtauna da questa pagina",
 	"visualeditor-advancedsettings-tool": "Configuraziun avanzada",
-	"visualeditor-beta-warning": "VisualEditor è anc en la fasa d'emprova ('beta'). Igl è pussaivel che ti fruntas sin problems tecnics u che ti na pos betg modifitgar parts da la pagina. Clicca sin \"{{int:visualeditor-ca-editsource}}\" per midar al modus da wikitext. Modificaziuns betg memorisadas vegnan ad ir a perder.",
-	"visualeditor-browserwarning": "Ti dovras in navigatur che na vegn betg sustegnì uffizialmain da VisualEditor.",
 	"visualeditor-ca-createsource": "Crear il code",
 	"visualeditor-ca-editsource": "Modifitgar il code",
 	"visualeditor-ca-editsource-section": "modifitgar il code",
@@ -45,7 +43,6 @@
 	"visualeditor-dialog-meta-languages-section": "Linguas",
 	"visualeditor-dialog-meta-settings-label": "Configuraziun da la pagina",
 	"visualeditor-dialog-transclusion-add-template": "Agiunscher in model",
-	"visualeditor-dialog-transclusion-placeholder": "Nov model",
 	"visualeditor-dialogbutton-media-tooltip": "Medias",
 	"visualeditor-editnotices-tool": "$1 {{PLURAL:$1|avertiment|avertiments}}",
 	"visualeditor-editsummary": "Descriva che ti has modifitga",
@@ -56,6 +53,5 @@
 	"visualeditor-formatdropdown-format-mw-heading5": "Terza sutsecziun",
 	"visualeditor-formatdropdown-format-mw-heading6": "Quarta sutsecziun",
 	"visualeditor-languages-tool": "Linguas",
-	"visualeditor-preference-core-label": "VisualEditor",
 	"visualeditor-version-label": "Versiun"
 }

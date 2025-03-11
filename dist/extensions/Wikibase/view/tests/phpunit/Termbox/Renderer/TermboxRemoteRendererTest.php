@@ -3,11 +3,10 @@
 namespace Wikibase\View\Tests\Termbox\Renderer;
 
 use Exception;
-use Language;
 use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
 use MediaWiki\Http\HttpRequestFactory;
+use MediaWiki\MediaWikiServices;
 use MWHttpRequest;
-use NullStatsdDataFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
@@ -19,6 +18,7 @@ use Wikibase\Lib\TermLanguageFallbackChain;
 use Wikibase\View\Termbox\Renderer\TermboxNoRemoteRendererException;
 use Wikibase\View\Termbox\Renderer\TermboxRemoteRenderer;
 use Wikibase\View\Termbox\Renderer\TermboxRenderingException;
+use Wikimedia\Stats\NullStatsdDataFactory;
 
 /**
  * @covers \Wikibase\View\Termbox\Renderer\TermboxRemoteRenderer
@@ -346,8 +346,9 @@ class TermboxRemoteRendererTest extends TestCase {
 		$stubContentLanguages = $this->createStub( ContentLanguages::class );
 		$stubContentLanguages->method( 'hasLanguage' )
 			->willReturn( true );
-		return new TermLanguageFallbackChain( array_map( function ( $languageCode ) {
-			return LanguageWithConversion::factory( Language::factory( $languageCode ) );
+		$languageFactory = MediaWikiServices::getInstance()->getLanguageFactory();
+		return new TermLanguageFallbackChain( array_map( function ( $languageCode ) use ( $languageFactory ) {
+			return LanguageWithConversion::factory( $languageFactory->getLanguage( $languageCode ) );
 		}, $languages ), $stubContentLanguages );
 	}
 

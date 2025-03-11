@@ -1,18 +1,19 @@
 {
 	"@metadata": {
 		"authors": [
+			"Kizule",
 			"Macofe",
 			"Milicevic01",
 			"Obsuser",
 			"Prevodim",
 			"Srdjan m",
 			"Srđan",
-			"Сербијана",
-			"Kizule"
+			"Сербијана"
 		]
 	},
 	"echo-desc": "Sistem za obaveštavanje korisnika o događajima i porukama",
 	"prefs-echo": "Obaveštenja",
+	"prefs-description-echo": "Određujete koja obaveštenja {{GENDER:|želite}} da primate i kako.",
 	"prefs-emailsettings": "Opcije e-pošte",
 	"prefs-echosubscriptions": "Obaveštavaj me o:",
 	"prefs-echocrosswiki": "Međuviki obaveštenja",

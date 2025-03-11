@@ -4,7 +4,7 @@ namespace Wikibase\Client;
 
 use InvalidArgumentException;
 use MediaWiki\MediaWikiServices;
-use NamespaceInfo;
+use MediaWiki\Title\NamespaceInfo;
 
 /**
  * Checks if a namespace in Wikibase Client shall have wikibase links, etc., based on settings
@@ -36,7 +36,7 @@ class NamespaceChecker {
 	public function __construct(
 		array $excludedNamespaces,
 		array $enabledNamespaces = [],
-		NamespaceInfo $namespaceInfo = null
+		?NamespaceInfo $namespaceInfo = null
 	) {
 		$this->excludedNamespaces = $excludedNamespaces;
 		$this->enabledNamespaces = $enabledNamespaces;
@@ -87,7 +87,7 @@ class NamespaceChecker {
 	 * @return bool
 	 */
 	private function isEnabled( $namespace ) {
-		return empty( $this->enabledNamespaces )
+		return !$this->enabledNamespaces
 			|| in_array( $namespace, $this->enabledNamespaces );
 	}
 
@@ -113,7 +113,7 @@ class NamespaceChecker {
 	public function getWikibaseNamespaces() {
 		$enabled = $this->enabledNamespaces;
 
-		if ( empty( $enabled ) ) {
+		if ( !$enabled ) {
 			$enabled = $this->namespaceInfo->getValidNamespaces();
 		}
 

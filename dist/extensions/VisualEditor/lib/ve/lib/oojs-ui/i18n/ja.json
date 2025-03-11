@@ -18,6 +18,7 @@
 			"Translatealcd"
 		]
 	},
+	"ooui-copytextlayout-copy": "コピー",
 	"ooui-outline-control-move-down": "項目を下に移動させる",
 	"ooui-outline-control-move-up": "項目を上に移動させる",
 	"ooui-outline-control-remove": "項目を除去",
@@ -34,7 +35,6 @@
 	"ooui-combobox-button-label": "オプションの切り替え",
 	"ooui-selectfile-button-select": "ファイルを選択",
 	"ooui-selectfile-button-select-multiple": "ファイルを選択",
-	"ooui-selectfile-not-supported": "ファイルの選択はサポートされていません",
 	"ooui-selectfile-placeholder": "ファイルが選択されていません",
 	"ooui-selectfile-dragdrop-placeholder": "ファイルをここにドロップ",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "ファイルをここにドロップしてください",

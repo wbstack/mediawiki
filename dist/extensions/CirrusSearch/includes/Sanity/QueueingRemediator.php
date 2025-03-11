@@ -6,7 +6,7 @@ use CirrusSearch\Job\DeletePages;
 use CirrusSearch\Job\LinksUpdate;
 use JobQueueGroup;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 use WikiPage;
 
 /**
@@ -44,7 +44,7 @@ class QueueingRemediator implements Remediator {
 	 *  or null to update all clusters.
 	 * @param JobQueueGroup|null $jobQueueGroup
 	 */
-	public function __construct( $cluster, JobQueueGroup $jobQueueGroup = null ) {
+	public function __construct( $cluster, ?JobQueueGroup $jobQueueGroup = null ) {
 		$this->cluster = $cluster;
 		$this->jobQueue = $jobQueueGroup ?: MediaWikiServices::getInstance()->getJobQueueGroup();
 	}
@@ -52,7 +52,16 @@ class QueueingRemediator implements Remediator {
 	/**
 	 * @inheritDoc
 	 */
-	public function redirectInIndex( WikiPage $page ) {
+	public function redirectInIndex( string $docId, WikiPage $page, string $indexSuffix ) {
+		// Links update job will delete this if $indexSuffix is the expected one,
+		// but if it's in the wrong index we need an explicit delete.
+		$this->jobQueue->push(
+			new DeletePages( $page->getTitle(), [
+				'indexSuffix' => $indexSuffix,
+				'docId' => $docId,
+				'cluster' => $this->cluster,
+			] )
+		);
 		$this->pushLinksUpdateJob( $page );
 	}
 
@@ -104,12 +113,6 @@ class QueueingRemediator implements Remediator {
 	}
 
 	private function pushLinksUpdateJob( WikiPage $page ) {
-		$this->jobQueue->push(
-			new LinksUpdate( $page->getTitle(), [
-				'addedLinks' => [],
-				'removedLinks' => [],
-				'cluster' => $this->cluster,
-			] )
-		);
+		$this->jobQueue->push( LinksUpdate::newSaneitizerUpdate( $page->getTitle(), $this->cluster ) );
 	}
 }

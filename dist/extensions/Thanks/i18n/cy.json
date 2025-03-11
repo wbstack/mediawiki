@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Afalau",
+			"Ceirios",
 			"Diafol",
 			"Lloffiwr",
 			"Macofe",
-			"Robin Owain",
-			"Afalau"
+			"Robin Owain"
 		]
 	},
 	"thanks-desc": "Ychwanegu dolenni sy'n caniatáu defnyddwyr i ddiolch defnyddwyr eraill am olygiadau, sylwadau, ayb.",
@@ -13,9 +14,6 @@
 	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|diolchwyd}}}}",
 	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Diolch}}}}",
 	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Diolchwyd}}}}",
-	"thanks-button-action-queued": "{{GENDER:$1|{{GENDER:$2|Wrthi'n diolch}}}} $1…",
-	"thanks-button-action-cancel": "Canslo",
-	"thanks-button-action-completed": "Rydych chi wedi {{GENDER:$1|{{GENDER:$2|diolch}}}} $1",
 	"thanks-error-undefined": "Methwyd dweud diolch (cod gwall: $1). Ceisiwch eto.",
 	"thanks-error-invalid-log-id": "Ni chanfuwyd cofnod log",
 	"thanks-error-invalid-log-type": "Nid yw'r log '$1' yn y rhestr logiau a ganiateir.",
@@ -39,7 +37,6 @@
 	"echo-pref-subscription-edit-thank": "Diolchiadau am fy golygiadau",
 	"echo-pref-tooltip-edit-thank": "Hysbyser fi pan fo rhywun yn fy niolch am un o'm golygiadau.",
 	"echo-category-title-edit-thank": "Diolchiadau",
-	"notification-thanks-diff-link": "eich golygiad",
 	"notification-header-rev-thank": "$1 Rhododd {{GENDER:$2|air o ddiolch}} i {{GENDER:$4|chi}} am eich golygiad ar '''$3'''.",
 	"notification-header-creation-thank": "Mae $1 {{GENDER:$2|wedi dweud diolch}} i {{GENDER:$4|chi}} am greu <strong>$3</strong>.",
 	"notification-header-log-thank": "Mae $1 {{GENDER:$2|wedi dweud diolch}} wrthoch {{GENDER:$4|chi}} am eich gweithred ar <strong>$3</strong>.",
@@ -58,7 +55,6 @@
 	"thanks-error-invalidpostid": "Nid yw'r ID post yn ddilys.",
 	"flow-thanks-confirmation-special": "Ydych chi wir eisiau dweud diolch (yn gyhoeddus) am y sylw hwn?",
 	"flow-thanks-thanked-notice": "Rydych {{GENDER:$3|chi}} wedi diolch $1 am {{GENDER:$2|ei|ei|eu}} sylw.",
-	"notification-flow-thanks-post-link": "eich sylw",
 	"notification-header-flow-thank": "Mae $1 {{GENDER:$2|wedi dweud diolch}} wrthoch {{GENDER:$5|chi}} am eich sylw yn \"<strong>$3</strong>\".",
 	"notification-compact-header-flow-thank": "Mae $1 {{GENDER:$2|wedi dweud diolch}} wrthoch {{GENDER:$3|chi}}.",
 	"notification-bundle-header-flow-thank": "Mae {{PLURAL:$1|un person|$1 berson|$1 pherson|$1 person|100=99+ o bobl}} wedi dweud diolch wrthoch {{GENDER:$3|chi}} am eich sylw ar \"<strong>$2</strong>\".",

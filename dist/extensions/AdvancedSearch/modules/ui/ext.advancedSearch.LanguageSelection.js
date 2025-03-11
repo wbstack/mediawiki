@@ -1,31 +1,33 @@
-( function () {
-	'use strict';
+'use strict';
 
-	mw.libs = mw.libs || {};
-	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
-	mw.libs.advancedSearch.ui = mw.libs.advancedSearch.ui || {};
+const ClassesForDropdownOptions = require( './mixins/ext.advancedSearch.ClassesForDropdownOptions.js' );
+const StoreListener = require( './ext.advancedSearch.StoreListener.js' );
 
-	var getOptions = function ( optionProvider ) {
-		var languages = optionProvider.getLanguages();
-		return [ { data: '', label: mw.msg( 'advancedsearch-inlanguage-default' ) } ].concat( languages );
-	};
+/**
+ * @param {LanguageOptionProvider} optionProvider
+ * @return {Object[]}
+ */
+const getOptions = function ( optionProvider ) {
+	const languages = optionProvider.getLanguages();
+	return [ { data: '', label: mw.msg( 'advancedsearch-inlanguage-default' ) } ].concat( languages );
+};
 
-	/**
-	 * @class
-	 * @extends OO.ui.DropdownInputWidget
-	 * @constructor
-	 *
-	 * @param {mw.libs.advancedSearch.dm.SearchModel} store
-	 * @param {mw.libs.advancedSearch.dm.LanguageOptionProvider} optionProvider
-	 * @param {Object} config
-	 */
-	mw.libs.advancedSearch.ui.LanguageSelection = function ( store, optionProvider, config ) {
-		config = $.extend( { options: getOptions( optionProvider ) }, config );
-		this.className = 'mw-advancedSearch-inlanguage-';
-		mw.libs.advancedSearch.ui.LanguageSelection.parent.call( this, store, config );
-	};
+/**
+ * @class
+ * @extends StoreListener
+ *
+ * @constructor
+ * @param {SearchModel} store
+ * @param {LanguageOptionProvider} optionProvider
+ * @param {Object} config
+ */
+const LanguageSelection = function ( store, optionProvider, config ) {
+	config = Object.assign( { options: getOptions( optionProvider ) }, config );
+	this.className = 'mw-advancedSearch-inlanguage-';
+	LanguageSelection.super.call( this, store, config );
+};
 
-	OO.inheritClass( mw.libs.advancedSearch.ui.LanguageSelection, mw.libs.advancedSearch.ui.StoreListener );
-	OO.mixinClass( mw.libs.advancedSearch.ui.LanguageSelection, mw.libs.advancedSearch.ui.ClassesForDropdownOptions );
+OO.inheritClass( LanguageSelection, StoreListener );
+OO.mixinClass( LanguageSelection, ClassesForDropdownOptions );
 
-}() );
+module.exports = LanguageSelection;

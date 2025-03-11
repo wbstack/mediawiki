@@ -58,7 +58,7 @@ class PageEntityUsages {
 	 * @return bool
 	 */
 	public function isEmpty() {
-		return empty( $this->usages );
+		return !$this->usages;
 	}
 
 	/**
@@ -125,7 +125,7 @@ class PageEntityUsages {
 	 * @return bool
 	 */
 	public function equals( self $other ) {
-		if ( !$other->getPageId() === $this->getPageId() ) {
+		if ( $other->getPageId() !== $this->getPageId() ) {
 			return false;
 		} elseif ( array_keys( $other->getUsages() ) != array_keys( $this->getUsages() ) ) {
 			return false;

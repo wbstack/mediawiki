@@ -2,12 +2,13 @@
 
 namespace Wikibase\Client;
 
+use CirrusSearch\SearchConfig;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use Skin;
-use Title;
-use User;
-use Wikibase\Client\DataAccess\Scribunto\Scribunto_LuaWikibaseEntityLibrary;
-use Wikibase\Client\DataAccess\Scribunto\Scribunto_LuaWikibaseLibrary;
+use Wikibase\Client\DataAccess\Scribunto\WikibaseEntityLibrary;
+use Wikibase\Client\DataAccess\Scribunto\WikibaseLibrary;
 use Wikibase\Client\Hooks\SkinAfterBottomScriptsHandler;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
@@ -44,8 +45,8 @@ final class ClientHooks {
 	public static function onScribuntoExternalLibraries( $engine, array &$extraLibraries ) {
 		$allowDataTransclusion = WikibaseClient::getSettings()->getSetting( 'allowDataTransclusion' );
 		if ( $engine == 'lua' && $allowDataTransclusion === true ) {
-			$extraLibraries['mw.wikibase'] = Scribunto_LuaWikibaseLibrary::class;
-			$extraLibraries['mw.wikibase.entity'] = Scribunto_LuaWikibaseEntityLibrary::class;
+			$extraLibraries['mw.wikibase'] = WikibaseLibrary::class;
+			$extraLibraries['mw.wikibase.entity'] = WikibaseEntityLibrary::class;
 		}
 	}
 
@@ -110,7 +111,10 @@ final class ClientHooks {
 			$repoLinker = WikibaseClient::getRepoLinker();
 
 			return [
+				// Warning: This id is misleading; the 't' refers to the link's original place in the toolbox,
+				// it now lives in the other projects section, but we must keep the 't' for compatibility with gadgets.
 				'id' => 't-wikibase',
+				'icon' => 'logoWikidata',
 				'text' => $skin->msg( 'wikibase-dataitem' )->text(),
 				'href' => $repoLinker->getEntityUrl( $entityId ),
 			];
@@ -158,13 +162,9 @@ final class ClientHooks {
 		];
 	}
 
-	public static function onGetDoubleUnderscoreIDs( &$doubleUnderscoreIDs ) {
-		$doubleUnderscoreIDs[] = 'expectedUnconnectedPage';
-	}
-
 	/**
 	 * Add morelikewithwikibase keyword.
-	 * @param $config
+	 * @param SearchConfig $config
 	 * @param array &$extraFeatures
 	 */
 	public static function onCirrusSearchAddQueryFeatures(
@@ -231,7 +231,7 @@ final class ClientHooks {
 	 * Used to propagate configuration for the linkitem feature to JavaScript.
 	 * This is used in the "wikibase.client.linkitem.init" module.
 	 */
-	public static function getLinkitemConfiguration() {
+	public static function getLinkitemConfiguration(): array {
 		$cache = MediaWikiServices::getInstance()->getLocalServerObjectCache();
 		$key = $cache->makeKey(
 			'wikibase-client',
@@ -245,7 +245,7 @@ final class ClientHooks {
 				$currentSite = [
 					'globalSiteId' => $site->getGlobalId(),
 					'languageCode' => $site->getLanguageCode(),
-					'langLinkSiteGroup' => WikibaseClient::getLangLinkSiteGroup()
+					'langLinkSiteGroup' => WikibaseClient::getLangLinkSiteGroup(),
 				];
 				$value = [ 'currentSite' => $currentSite ];
 
@@ -259,7 +259,7 @@ final class ClientHooks {
 		);
 	}
 
-	/** @param ContentLanguages[] $contentLanguages */
+	/** @param ContentLanguages[] &$contentLanguages */
 	public static function onWikibaseContentLanguages( array &$contentLanguages ): void {
 		if ( !WikibaseClient::getSettings()->getSetting( 'tmpEnableMulLanguageCode' ) ) {
 			return;
@@ -273,10 +273,6 @@ final class ClientHooks {
 			$contentLanguages[WikibaseContentLanguages::CONTEXT_TERM],
 			new StaticContentLanguages( [ 'mul' ] )
 		);
-	}
-
-	public static function onMaintenanceShellStart(): void {
-		require_once __DIR__ . '/MaintenanceShellStart.php';
 	}
 
 }

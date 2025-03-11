@@ -1,5 +1,9 @@
 <?php
 
+use MediaWiki\Html\Html;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+
 class MobileFrontendSkinHooks {
 	/**
 	 * Returns HTML of terms of use link or null if it shouldn't be displayed
@@ -33,12 +37,13 @@ class MobileFrontendSkinHooks {
 		if ( $url ) {
 			$url = wfAppendQuery( $url, 'mobileaction=toggle_view_desktop' );
 		} else {
-			$title = $skin->getTitle();
+			$title = $skin->getTitle() ?? Title::newMainPage();
 			$url = $title->getLocalURL(
 				$req->appendQueryValue( 'mobileaction', 'toggle_view_desktop' )
 			);
 		}
-		$desktopUrl = $context->getDesktopUrl( wfExpandUrl( $url, PROTO_RELATIVE ) );
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
+		$desktopUrl = $context->getDesktopUrl( $urlUtils->expand( $url, PROTO_RELATIVE ) ?? '' );
 
 		$desktop = $context->msg( 'mobile-frontend-view-desktop' )->text();
 		return Html::element( 'a',
@@ -58,6 +63,11 @@ class MobileFrontendSkinHooks {
 		unset( $args['title'], $args['useformat'] );
 		$args['mobileaction'] = 'toggle_view_mobile';
 		$title = $skin->getTitle();
+		// Title could be null
+		// If no title, there is a problem with context. Possibly inside a test.
+		if ( !$title ) {
+			return '';
+		}
 		$mobileViewUrl = $title->getFullURL( $args );
 		$mobileViewUrl = $context->getMobileUrl( $mobileViewUrl );
 

@@ -3,7 +3,8 @@
 namespace Wikibase\Repo\Parsers;
 
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Language\Language;
+use MediaWiki\MediaWikiServices;
 use ValueParsers\ParserOptions;
 use ValueParsers\ValueParser;
 
@@ -35,7 +36,7 @@ class MwDateFormatParserFactory {
 		$languageCode = 'en',
 		$dateFormatPreference = 'dmy',
 		$dateFormatType = 'date',
-		ParserOptions $options = null
+		?ParserOptions $options = null
 	) {
 		if ( !is_string( $languageCode ) || $languageCode === '' ) {
 			throw new InvalidArgumentException( '$languageCode must be a non-empty string' );
@@ -49,7 +50,7 @@ class MwDateFormatParserFactory {
 			throw new InvalidArgumentException( '$dateFormatType must be a non-empty string' );
 		}
 
-		$language = Language::factory( $languageCode );
+		$language = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $languageCode );
 		$dateFormat = $language->getDateFormatString( $dateFormatType, $dateFormatPreference );
 		$digitTransformTable = $language->digitTransformTable();
 		$monthNames = $this->getCachedMonthNames( $language );
@@ -57,7 +58,9 @@ class MwDateFormatParserFactory {
 		if ( $options === null ) {
 			$options = new ParserOptions();
 		}
-		$options->setOption( DateFormatParser::OPT_DATE_FORMAT, $dateFormat );
+		if ( $dateFormat !== null ) { // Language::getDateFormatString() sometimes returns null even though it shouldn’t (T384963)
+			$options->setOption( DateFormatParser::OPT_DATE_FORMAT, $dateFormat );
+		}
 		$options->setOption( DateFormatParser::OPT_DIGIT_TRANSFORM_TABLE, $digitTransformTable );
 		$options->setOption( DateFormatParser::OPT_MONTH_NAMES, $monthNames );
 		return new DateFormatParser( $options );

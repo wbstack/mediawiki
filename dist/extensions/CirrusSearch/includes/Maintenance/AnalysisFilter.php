@@ -2,6 +2,8 @@
 
 namespace CirrusSearch\Maintenance;
 
+use MediaWiki\Json\FormatJson;
+
 /**
  * Filter unused and duplicate entries from elasticsearch index configuration
  */
@@ -160,7 +162,7 @@ class AnalysisFilter {
 		$keysByContent = [];
 		foreach ( $input as $k => $v ) {
 			$sorted = $this->recursiveKsort( $v );
-			$content = \FormatJson::encode( $sorted );
+			$content = FormatJson::encode( $sorted );
 			$keysByContent[$content][] = $k;
 		}
 		$aliases = [];
@@ -230,14 +232,18 @@ class AnalysisFilter {
 	 * @param array $analysis Elasticsearch index analysis configuration
 	 * @param array $mappings Elasticsearch index mapping configuration
 	 * @param bool $deduplicate When true deduplicate the analysis chain
+	 * @param string[] $protected list of named analyzers that should not be removed.
 	 * @return array [$settings, $mappings]
 	 */
-	public function filterAnalysis( array $analysis, array $mappings, $deduplicate = false ) {
+	public function filterAnalysis( array $analysis, array $mappings, $deduplicate = false, array $protected = [] ) {
 		if ( $deduplicate ) {
 			$aliases = $this->deduplicateAnalysisConfig( $analysis );
 			$mappings = $this->pushAnalyzerAliasesIntoMappings( $mappings, $aliases );
 		}
 		$usedAnalyzers = $this->findUsedAnalyzersInMappings( $mappings );
+		// protected analyzers may be renamed in the mappings, but this retains them in the config as well
+		// to ensure they are available for query-time.
+		$usedAnalyzers->addAll( $protected );
 		$analysis = $this->filterUnusedAnalysisChain( $analysis, $usedAnalyzers );
 		return [ $analysis, $mappings ];
 	}

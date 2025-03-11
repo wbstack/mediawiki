@@ -20,24 +20,24 @@
 
 namespace MediaWiki\Storage;
 
-use BagOStuff;
-use Content;
-use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
+use MediaWiki\Content\Content;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\WikiPageFactory;
+use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Parser\ParserOutputFlags;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Storage\Hook\ParserOutputStashForEditHook;
 use MediaWiki\User\UserEditTracker;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentity;
-use ParserOutput;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\ScopedCallback;
+use Wikimedia\Stats\StatsFactory;
 use WikiPage;
 
 /**
@@ -49,15 +49,16 @@ use WikiPage;
  * See also mediawiki.action.edit/stash.js.
  *
  * @since 1.34
+ * @ingroup Page
  */
 class PageEditStash {
 	/** @var BagOStuff */
 	private $cache;
-	/** @var ILoadBalancer */
-	private $lb;
+	/** @var IConnectionProvider */
+	private $dbProvider;
 	/** @var LoggerInterface */
 	private $logger;
-	/** @var StatsdDataFactoryInterface */
+	/** @var StatsFactory */
 	private $stats;
 	/** @var ParserOutputStashForEditHook */
 	private $hookRunner;
@@ -87,9 +88,9 @@ class PageEditStash {
 
 	/**
 	 * @param BagOStuff $cache
-	 * @param ILoadBalancer $lb
+	 * @param IConnectionProvider $dbProvider
 	 * @param LoggerInterface $logger
-	 * @param StatsdDataFactoryInterface $stats
+	 * @param StatsFactory $stats
 	 * @param UserEditTracker $userEditTracker
 	 * @param UserFactory $userFactory
 	 * @param WikiPageFactory $wikiPageFactory
@@ -98,9 +99,9 @@ class PageEditStash {
 	 */
 	public function __construct(
 		BagOStuff $cache,
-		ILoadBalancer $lb,
+		IConnectionProvider $dbProvider,
 		LoggerInterface $logger,
-		StatsdDataFactoryInterface $stats,
+		StatsFactory $stats,
 		UserEditTracker $userEditTracker,
 		UserFactory $userFactory,
 		WikiPageFactory $wikiPageFactory,
@@ -108,7 +109,7 @@ class PageEditStash {
 		$initiator
 	) {
 		$this->cache = $cache;
-		$this->lb = $lb;
+		$this->dbProvider = $dbProvider;
 		$this->logger = $logger;
 		$this->stats = $stats;
 		$this->userEditTracker = $userEditTracker;
@@ -129,8 +130,7 @@ class PageEditStash {
 		$logger = $this->logger;
 
 		if ( $pageUpdater instanceof WikiPage ) {
-			// TODO: Trigger deprecation warning once extensions have been fixed.
-			//       Or better, create PageUpdater::prepareAndStash and deprecate this method.
+			wfDeprecated( __METHOD__ . ' with WikiPage instance', '1.42' );
 			$pageUpdater = $pageUpdater->newPageUpdater( $user );
 		}
 
@@ -144,7 +144,7 @@ class PageEditStash {
 		// the stash request finishes parsing. For the lock acquisition below, there is not much
 		// need to duplicate parsing of the same content/user/summary bundle, so try to avoid
 		// blocking at all here.
-		$dbw = $this->lb->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->dbProvider->getPrimaryDatabase();
 		if ( !$dbw->lock( $key, $fname, 0 ) ) {
 			// De-duplicate requests on the same key
 			return self::ERROR_BUSY;
@@ -269,7 +269,7 @@ class PageEditStash {
 
 		$editInfo = $this->getAndWaitForStashValue( $key );
 		if ( !is_object( $editInfo ) || !$editInfo->output ) {
-			$this->incrStatsByContent( 'cache_misses.no_stash', $content );
+			$this->incrCacheReadStats( 'miss', 'no_stash', $content );
 			if ( $this->recentStashEntryCount( $user ) > 0 ) {
 				$logger->info( "Empty cache for key '{key}' but not for user.", $logContext );
 			} else {
@@ -285,28 +285,28 @@ class PageEditStash {
 		$isCacheUsable = true;
 		if ( $age <= self::PRESUME_FRESH_TTL_SEC ) {
 			// Assume nothing changed in this time
-			$this->incrStatsByContent( 'cache_hits.presumed_fresh', $content );
+			$this->incrCacheReadStats( 'hit', 'presumed_fresh', $content );
 			$logger->debug( "Timestamp-based cache hit for key '{key}'.", $logContext );
 		} elseif ( !$user->isRegistered() ) {
 			$lastEdit = $this->lastEditTime( $user );
 			$cacheTime = $editInfo->output->getCacheTime();
 			if ( $lastEdit < $cacheTime ) {
 				// Logged-out user made no local upload/template edits in the meantime
-				$this->incrStatsByContent( 'cache_hits.presumed_fresh', $content );
+				$this->incrCacheReadStats( 'hit', 'presumed_fresh', $content );
 				$logger->debug( "Edit check based cache hit for key '{key}'.", $logContext );
 			} else {
 				$isCacheUsable = false;
-				$this->incrStatsByContent( 'cache_misses.proven_stale', $content );
+				$this->incrCacheReadStats( 'miss', 'proven_stale', $content );
 				$logger->info( "Stale cache for key '{key}' due to outside edits.", $logContext );
 			}
 		} else {
 			if ( $editInfo->edits === $this->userEditTracker->getUserEditCount( $user ) ) {
 				// Logged-in user made no local upload/template edits in the meantime
-				$this->incrStatsByContent( 'cache_hits.presumed_fresh', $content );
+				$this->incrCacheReadStats( 'hit', 'presumed_fresh', $content );
 				$logger->debug( "Edit count based cache hit for key '{key}'.", $logContext );
 			} else {
 				$isCacheUsable = false;
-				$this->incrStatsByContent( 'cache_misses.proven_stale', $content );
+				$this->incrCacheReadStats( 'miss', 'proven_stale', $content );
 				$logger->info( "Stale cache for key '{key}'due to outside edits.", $logContext );
 			}
 		}
@@ -347,12 +347,20 @@ class PageEditStash {
 	}
 
 	/**
-	 * @param string $subkey
+	 * @param string $result
+	 * @param string $reason
 	 * @param Content $content
 	 */
-	private function incrStatsByContent( $subkey, Content $content ) {
-		$this->stats->increment( 'editstash.' . $subkey ); // overall for b/c
-		$this->stats->increment( 'editstash_by_model.' . $content->getModel() . '.' . $subkey );
+	private function incrCacheReadStats( $result, $reason, Content $content ) {
+		static $subtypeByResult = [ 'miss' => 'cache_misses', 'hit' => 'cache_hits' ];
+		$this->stats->getCounter( "editstash_cache_checks_total" )
+			->setLabel( 'reason', $reason )
+			->setLabel( 'result', $result )
+			->setLabel( 'model', $content->getModel() )
+			->copyToStatsdAt( [
+				'editstash.' . $subtypeByResult[ $result ] . '.' . $reason,
+				'editstash_by_model.' . $content->getModel() . '.' . $subtypeByResult[ $result ] . '.' . $reason ] )
+			->increment();
 	}
 
 	/**
@@ -366,16 +374,16 @@ class PageEditStash {
 			$start = microtime( true );
 			// We ignore user aborts and keep parsing. Block on any prior parsing
 			// so as to use its results and make use of the time spent parsing.
-			// Skip this logic if there no primary connection in case this method
-			// is called on an HTTP GET request for some reason.
-			$dbw = $this->lb->getAnyOpenConnection( $this->lb->getWriterIndex() );
-			if ( $dbw && $dbw->lock( $key, __METHOD__, 30 ) ) {
+			$dbw = $this->dbProvider->getPrimaryDatabase();
+			if ( $dbw->lock( $key, __METHOD__, 30 ) ) {
 				$editInfo = $this->getStashValue( $key );
 				$dbw->unlock( $key, __METHOD__ );
 			}
 
 			$timeMs = 1000 * max( 0, microtime( true ) - $start );
-			$this->stats->timing( 'editstash.lock_wait_time', $timeMs );
+			$this->stats->getTiming( 'editstash_lock_wait_seconds' )
+				->copyToStatsdAt( 'editstash.lock_wait_time' )
+				->observe( $timeMs );
 		}
 
 		return $editInfo;
@@ -412,9 +420,7 @@ class PageEditStash {
 	 * @return string|null TS_MW timestamp or null
 	 */
 	private function lastEditTime( UserIdentity $user ) {
-		$db = $this->lb->getConnectionRef( DB_REPLICA );
-
-		$time = $db->newSelectQueryBuilder()
+		$time = $this->dbProvider->getReplicaDatabase()->newSelectQueryBuilder()
 			->select( 'MAX(rc_timestamp)' )
 			->from( 'recentchanges' )
 			->join( 'actor', null, 'actor_id=rc_actor' )
@@ -453,7 +459,7 @@ class PageEditStash {
 	 */
 	private function getStashKey( PageIdentity $page, $contentHash, UserIdentity $user ) {
 		return $this->cache->makeKey(
-			'stashedit-info-v1',
+			'stashedit-info-v2',
 			md5( "{$page->getNamespace()}\n{$page->getDBkey()}" ),
 			// Account for the edit model/text
 			$contentHash,
@@ -467,12 +473,9 @@ class PageEditStash {
 	 * @return stdClass|bool Object map (pstContent,output,outputID,timestamp,edits) or false
 	 */
 	private function getStashValue( $key ) {
-		$stashInfo = $this->cache->get( $key );
-		if ( is_object( $stashInfo ) && $stashInfo->output instanceof ParserOutput ) {
-			return $stashInfo;
-		}
+		$serial = $this->cache->get( $key );
 
-		return false;
+		return $this->unserializeStashInfo( $serial );
 	}
 
 	/**
@@ -512,10 +515,14 @@ class PageEditStash {
 			'pstContent' => $pstContent,
 			'output'     => $parserOutput,
 			'timestamp'  => $timestamp,
-			'edits'      => $user->isRegistered() ? $this->userEditTracker->getUserEditCount( $user ) : null,
+			'edits'      => $this->userEditTracker->getUserEditCount( $user ),
 		];
+		$serial = $this->serializeStashInfo( $stashInfo );
+		if ( $serial === false ) {
+			return 'store_error';
+		}
 
-		$ok = $this->cache->set( $key, $stashInfo, $ttl, BagOStuff::WRITE_ALLOW_SEGMENTS );
+		$ok = $this->cache->set( $key, $serial, $ttl, BagOStuff::WRITE_ALLOW_SEGMENTS );
 		if ( $ok ) {
 			// These blobs can waste slots in low cardinality memcached slabs
 			$this->pruneExcessStashedEntries( $user, $key );
@@ -534,7 +541,7 @@ class PageEditStash {
 		$keyList = $this->cache->get( $key ) ?: [];
 		if ( count( $keyList ) >= self::MAX_CACHE_RECENT ) {
 			$oldestKey = array_shift( $keyList );
-			$this->cache->delete( $oldestKey, BagOStuff::WRITE_PRUNE_SEGMENTS );
+			$this->cache->delete( $oldestKey, BagOStuff::WRITE_ALLOW_SEGMENTS );
 		}
 
 		$keyList[] = $newKey;
@@ -549,5 +556,22 @@ class PageEditStash {
 		$key = $this->cache->makeKey( 'stash-edit-recent', sha1( $user->getName() ) );
 
 		return count( $this->cache->get( $key ) ?: [] );
+	}
+
+	private function serializeStashInfo( stdClass $stashInfo ) {
+		// @todo: use JSON with ParserOutput and Content
+		return serialize( $stashInfo );
+	}
+
+	private function unserializeStashInfo( $serial ) {
+		if ( is_string( $serial ) ) {
+			// @todo: use JSON with ParserOutput and Content
+			$stashInfo = unserialize( $serial );
+			if ( is_object( $stashInfo ) && $stashInfo->output instanceof ParserOutput ) {
+				return $stashInfo;
+			}
+		}
+
+		return false;
 	}
 }

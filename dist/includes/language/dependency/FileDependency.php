@@ -27,7 +27,9 @@ use Wikimedia\AtEase\AtEase;
  * @ingroup Language
  */
 class FileDependency extends CacheDependency {
+	/** @var string */
 	private $filename;
+	/** @var null|false|int */
 	private $timestamp;
 
 	/**
@@ -36,7 +38,7 @@ class FileDependency extends CacheDependency {
 	 * @stable to call
 	 *
 	 * @param string $filename The name of the file, preferably fully qualified
-	 * @param null|bool|int $timestamp The unix last modified timestamp, or false if the
+	 * @param null|false|int $timestamp The unix last modified timestamp, or false if the
 	 *        file does not exist. If omitted, the timestamp will be loaded from
 	 *        the file.
 	 *
@@ -68,9 +70,6 @@ class FileDependency extends CacheDependency {
 		}
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isExpired() {
 		AtEase::suppressWarnings();
 		$lastmod = filemtime( $this->filename );

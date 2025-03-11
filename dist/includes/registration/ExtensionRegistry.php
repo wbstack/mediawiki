@@ -1,15 +1,33 @@
 <?php
 
+namespace MediaWiki\Registration;
+
+use AutoLoader;
 use Composer\Semver\Semver;
+use InvalidArgumentException;
+use LogicException;
+use MediaWiki\Settings\SettingsBuilder;
 use MediaWiki\Shell\Shell;
 use MediaWiki\ShellDisabledError;
+use MediaWiki\WikiMap\WikiMap;
+use ObjectCacheFactory;
+use RuntimeException;
+use UnexpectedValueException;
+use Wikimedia\ObjectCache\BagOStuff;
 use Wikimedia\ScopedCallback;
 
 /**
- * The Registry loads JSON files, and uses a Processor
- * to extract information from them. It also registers
- * classes with the autoloader.
+ * @defgroup ExtensionRegistry ExtensionRegistry
  *
+ * For higher level documentation, see <https://www.mediawiki.org/wiki/Manual:Extension_registration/Architecture>.
+ */
+
+/**
+ * Load JSON files, and uses a Processor to extract information.
+ *
+ * This also adds the extension's classes to the AutoLoader.
+ *
+ * @ingroup ExtensionRegistry
  * @since 1.25
  */
 class ExtensionRegistry {
@@ -140,15 +158,45 @@ class ExtensionRegistry {
 	private $cache = null;
 
 	/**
+	 * @var ?SettingsBuilder
+	 */
+	private ?SettingsBuilder $settingsBuilder = null;
+
+	private static bool $accessDisabledForUnitTests = false;
+
+	/**
 	 * @codeCoverageIgnore
 	 * @return ExtensionRegistry
 	 */
 	public static function getInstance() {
+		if ( self::$accessDisabledForUnitTests ) {
+			throw new RuntimeException( 'Access is disabled in unit tests' );
+		}
 		if ( self::$instance === null ) {
 			self::$instance = new self();
 		}
 
 		return self::$instance;
+	}
+
+	/**
+	 * @internal
+	 */
+	public static function disableForTest(): void {
+		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
+			throw new RuntimeException( 'Can only be called in tests' );
+		}
+		self::$accessDisabledForUnitTests = true;
+	}
+
+	/**
+	 * @internal
+	 */
+	public static function enableForTest(): void {
+		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
+			throw new RuntimeException( 'Can only be called in tests' );
+		}
+		self::$accessDisabledForUnitTests = false;
 	}
 
 	/**
@@ -165,6 +213,7 @@ class ExtensionRegistry {
 
 	/**
 	 * @since 1.34
+	 *
 	 * @param bool $check
 	 */
 	public function setCheckDevRequires( $check ) {
@@ -177,6 +226,7 @@ class ExtensionRegistry {
 	 * TestAutoloadNamespaces should be added to the autoloader.
 	 *
 	 * @since 1.35
+	 *
 	 * @param bool $load
 	 */
 	public function setLoadTestClassesAndNamespaces( $load ) {
@@ -196,7 +246,7 @@ class ExtensionRegistry {
 			// @codeCoverageIgnoreStart
 			if ( $mtime === false ) {
 				$err = error_get_last();
-				throw new Exception( "Unable to open file $path: {$err['message']}" );
+				throw new MissingExtensionException( $path, $err['message'] );
 				// @codeCoverageIgnoreEnd
 			}
 		}
@@ -206,9 +256,16 @@ class ExtensionRegistry {
 
 	private function getCache(): BagOStuff {
 		if ( !$this->cache ) {
+			// NOTE: Copy of ObjectCacheFactory::getDefaultKeyspace
+			//
 			// Can't call MediaWikiServices here, as we must not cause services
 			// to be instantiated before extensions have loaded.
-			return ObjectCache::makeLocalServerCache();
+			global $wgCachePrefix;
+			$keyspace = ( is_string( $wgCachePrefix ) && $wgCachePrefix !== '' )
+				? $wgCachePrefix
+				: WikiMap::getCurrentWikiDbDomain()->getId();
+
+			return ObjectCacheFactory::makeLocalServerCache( $keyspace );
 		}
 
 		return $this->cache;
@@ -241,6 +298,7 @@ class ExtensionRegistry {
 			];
 			$this->varyHash = md5( json_encode( $vary ) );
 		}
+
 		return $this->varyHash;
 	}
 
@@ -252,17 +310,13 @@ class ExtensionRegistry {
 		$this->lazyAttributes = [];
 	}
 
-	/**
-	 * @throws MWException If the queue is already marked as finished (no further things should
-	 *  be loaded then).
-	 */
 	public function loadFromQueue() {
 		if ( !$this->queued ) {
 			return;
 		}
 
 		if ( $this->finished ) {
-			throw new MWException(
+			throw new LogicException(
 				"The following paths tried to load late: "
 				. implode( ', ', array_keys( $this->queued ) )
 			);
@@ -340,6 +394,7 @@ class ExtensionRegistry {
 
 	/**
 	 * Get the list of abilities and their values
+	 *
 	 * @return bool[]
 	 */
 	private function getAbilities() {
@@ -375,8 +430,9 @@ class ExtensionRegistry {
 	 * @internal since 1.39. Extensions should use ExtensionProcessor instead.
 	 *
 	 * @param int[] $queue keys are filenames, values are ignored
+	 *
 	 * @return array extracted info
-	 * @throws Exception
+	 * @throws InvalidArgumentException
 	 * @throws ExtensionDependencyError
 	 */
 	public function readFromQueue( array $queue ) {
@@ -387,26 +443,16 @@ class ExtensionRegistry {
 		foreach ( $queue as $path => $mtime ) {
 			$json = file_get_contents( $path );
 			if ( $json === false ) {
-				throw new Exception( "Unable to read $path, does it exist?" );
+				throw new InvalidArgumentException( "Unable to read $path, does it exist?" );
 			}
 			$info = json_decode( $json, /* $assoc = */ true );
 			if ( !is_array( $info ) ) {
-				throw new Exception( "$path is not a valid JSON file." );
+				throw new InvalidArgumentException( "$path is not a valid JSON file." );
 			}
 
-			if ( !isset( $info['manifest_version'] ) ) {
-				wfDeprecatedMsg(
-					"{$info['name']}'s extension.json or skin.json does not have manifest_version, " .
-					'this is deprecated since MediaWiki 1.29',
-					'1.29', false, false
-				);
-				$warnings = true;
-				// For backwards-compatibility, assume a version of 1
-				$info['manifest_version'] = 1;
-			}
 			$version = $info['manifest_version'];
 			if ( $version < self::OLDEST_MANIFEST_VERSION || $version > self::MANIFEST_VERSION ) {
-				throw new Exception( "$path: unsupported manifest_version: {$version}" );
+				throw new InvalidArgumentException( "$path: unsupported manifest_version: {$version}" );
 			}
 
 			// get all requirements/dependencies for this extension
@@ -436,53 +482,64 @@ class ExtensionRegistry {
 	}
 
 	protected function exportExtractedData( array $info ) {
-		foreach ( $info['globals'] as $key => $val ) {
-			// If a merge strategy is set, read it and remove it from the value
-			// so it doesn't accidentally end up getting set.
-			if ( is_array( $val ) && isset( $val[self::MERGE_STRATEGY] ) ) {
-				$mergeStrategy = $val[self::MERGE_STRATEGY];
-				unset( $val[self::MERGE_STRATEGY] );
-			} else {
-				$mergeStrategy = 'array_merge';
-			}
+		if ( $info['globals'] ) {
+			// Create a copy of the keys to allow fast access via isset also for null values
+			// Since php8.1 always a read-only copy is created when the whole object is passed on function calls
+			// (like for array_key_exists). See T366547 - https://wiki.php.net/rfc/restrict_globals_usage
+			$knownGlobals = array_fill_keys( array_keys( $GLOBALS ), true );
 
-			if ( $mergeStrategy === 'provide_default' ) {
-				if ( !array_key_exists( $key, $GLOBALS ) ) {
-					$GLOBALS[$key] = $val;
+			foreach ( $info['globals'] as $key => $val ) {
+				// If a merge strategy is set, read it and remove it from the value
+				// so it doesn't accidentally end up getting set.
+				if ( is_array( $val ) && isset( $val[self::MERGE_STRATEGY] ) ) {
+					$mergeStrategy = $val[self::MERGE_STRATEGY];
+					unset( $val[self::MERGE_STRATEGY] );
+				} else {
+					$mergeStrategy = 'array_merge';
 				}
-				continue;
-			}
 
-			// Optimistic: If the global is not set, or is an empty array, replace it entirely.
-			// Will be O(1) performance.
-			if ( !array_key_exists( $key, $GLOBALS ) || ( is_array( $GLOBALS[$key] ) && !$GLOBALS[$key] ) ) {
-				$GLOBALS[$key] = $val;
-				continue;
-			}
+				if ( $mergeStrategy === 'provide_default' ) {
+					if ( !isset( $knownGlobals[$key] ) ) {
+						$GLOBALS[$key] = $val;
+						$knownGlobals[$key] = true;
+					}
+					continue;
+				}
 
-			if ( !is_array( $GLOBALS[$key] ) || !is_array( $val ) ) {
-				// config setting that has already been overridden, don't set it
-				continue;
-			}
+				// Performance optimization: When the global doesn't exist (not even with null), just set it
+				if ( !isset( $knownGlobals[$key] ) ) {
+					$GLOBALS[$key] = $val;
+					$knownGlobals[$key] = true;
+					continue;
+				} elseif ( !is_array( $val ) || !is_array( $GLOBALS[$key] ) ) {
+					// When at least one of the global value and the default is not an array, the merge
+					// strategy is ignored and the global value will simply override the default.
+					continue;
+				} elseif ( !$GLOBALS[$key] ) {
+					// Performance optimization: When the target is an empty array, just set it
+					$GLOBALS[$key] = $val;
+					continue;
+				}
 
-			switch ( $mergeStrategy ) {
-				case 'array_merge_recursive':
-					$GLOBALS[$key] = array_merge_recursive( $GLOBALS[$key], $val );
-					break;
-				case 'array_replace_recursive':
-					$GLOBALS[$key] = array_replace_recursive( $val, $GLOBALS[$key] );
-					break;
-				case 'array_plus_2d':
-					$GLOBALS[$key] = wfArrayPlus2d( $GLOBALS[$key], $val );
-					break;
-				case 'array_plus':
-					$GLOBALS[$key] += $val;
-					break;
-				case 'array_merge':
-					$GLOBALS[$key] = array_merge( $val, $GLOBALS[$key] );
-					break;
-				default:
-					throw new UnexpectedValueException( "Unknown merge strategy '$mergeStrategy'" );
+				switch ( $mergeStrategy ) {
+					case 'array_merge_recursive':
+						$GLOBALS[$key] = array_merge_recursive( $GLOBALS[$key], $val );
+						break;
+					case 'array_replace_recursive':
+						$GLOBALS[$key] = array_replace_recursive( $val, $GLOBALS[$key] );
+						break;
+					case 'array_plus_2d':
+						$GLOBALS[$key] = wfArrayPlus2d( $GLOBALS[$key], $val );
+						break;
+					case 'array_plus':
+						$GLOBALS[$key] += $val;
+						break;
+					case 'array_merge':
+						$GLOBALS[$key] = array_merge( $val, $GLOBALS[$key] );
+						break;
+					default:
+						throw new UnexpectedValueException( "Unknown merge strategy '$mergeStrategy'" );
+				}
 			}
 		}
 
@@ -517,6 +574,9 @@ class ExtensionRegistry {
 			}
 		}
 
+		// XXX: SettingsBuilder should really be a parameter to this method.
+		$settings = $this->getSettingsBuilder();
+
 		foreach ( $info['callbacks'] as $name => $cb ) {
 			if ( !is_callable( $cb ) ) {
 				if ( is_array( $cb ) ) {
@@ -524,16 +584,15 @@ class ExtensionRegistry {
 				}
 				throw new UnexpectedValueException( "callback '$cb' is not callable" );
 			}
-			$cb( $info['credits'][$name] );
+			$cb( $info['credits'][$name], $settings );
 		}
 	}
 
 	/**
 	 * Whether a thing has been loaded
+	 *
 	 * @param string $name
 	 * @param string $constraint The required version constraint for this dependency
-	 * @throws LogicException if a specific constraint is asked for,
-	 *                        but the extension isn't versioned
 	 * @return bool
 	 */
 	public function isLoaded( $name, $constraint = '*' ) {
@@ -553,6 +612,7 @@ class ExtensionRegistry {
 
 	/**
 	 * @param string $name
+	 *
 	 * @return array
 	 */
 	public function getAttribute( $name ) {
@@ -570,7 +630,9 @@ class ExtensionRegistry {
 	/**
 	 * Get an attribute value that isn't cached by reading each
 	 * extension.json file again
+	 *
 	 * @param string $name
+	 *
 	 * @return array
 	 */
 	protected function getLazyLoadedAttribute( $name ) {
@@ -587,6 +649,7 @@ class ExtensionRegistry {
 		$data = $cache->get( $key );
 		if ( $data !== false ) {
 			$this->lazyAttributes[$name] = $data;
+
 			return $data;
 		}
 
@@ -610,19 +673,21 @@ class ExtensionRegistry {
 	 *
 	 * @param string $name Name of attribute to override
 	 * @param array $value Value to set
+	 *
 	 * @return ScopedCallback to reset
 	 * @since 1.33
 	 */
 	public function setAttributeForTest( $name, array $value ) {
 		// @codeCoverageIgnoreStart
 		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
-			throw new RuntimeException( __METHOD__ . ' can only be used in tests' );
+			throw new LogicException( __METHOD__ . ' can only be used in tests' );
 		}
 		// @codeCoverageIgnoreEnd
 		if ( isset( $this->testAttributes[$name] ) ) {
-			throw new Exception( "The attribute '$name' has already been overridden" );
+			throw new InvalidArgumentException( "The attribute '$name' has already been overridden" );
 		}
 		$this->testAttributes[$name] = $value;
+
 		return new ScopedCallback( function () use ( $name ) {
 			unset( $this->testAttributes[$name] );
 		} );
@@ -642,6 +707,7 @@ class ExtensionRegistry {
 	 *
 	 * @param string $dir
 	 * @param string[] $files
+	 *
 	 * @return array
 	 */
 	protected static function processAutoLoader( $dir, array $files ) {
@@ -649,6 +715,27 @@ class ExtensionRegistry {
 		foreach ( $files as &$file ) {
 			$file = "$dir/$file";
 		}
+
 		return $files;
 	}
+
+	/**
+	 * @internal for use by Setup. Hopefully in the future, we find a better way.
+	 *
+	 * @param SettingsBuilder $settingsBuilder
+	 */
+	public function setSettingsBuilder( SettingsBuilder $settingsBuilder ) {
+		$this->settingsBuilder = $settingsBuilder;
+	}
+
+	private function getSettingsBuilder(): SettingsBuilder {
+		if ( $this->settingsBuilder === null ) {
+			$this->settingsBuilder = SettingsBuilder::getInstance();
+		}
+
+		return $this->settingsBuilder;
+	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ExtensionRegistry::class, 'ExtensionRegistry' );

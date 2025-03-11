@@ -3,6 +3,7 @@
 namespace CirrusSearch;
 
 use Exception;
+use LogicException;
 use MediaWiki\Extension\Elastica\ElasticaConnection;
 use MediaWiki\MediaWikiServices;
 use Wikimedia\Assert\Assert;
@@ -103,9 +104,7 @@ class Connection extends ElasticaConnection {
 	 */
 	public static function getPool( SearchConfig $config, $cluster = null ) {
 		$assignment = $config->getClusterAssignment();
-		if ( $cluster === null ) {
-			$cluster = $assignment->getSearchCluster();
-		}
+		$cluster ??= $assignment->getSearchCluster();
 		$wiki = $config->getWikiId();
 		$clusterId = $assignment->uniqueId( $cluster );
 		return self::$pool[$wiki][$clusterId] ?? new self( $config, $cluster );
@@ -240,7 +239,7 @@ class Connection extends ElasticaConnection {
 		$matches = [];
 		$possible = implode( '|', array_map( 'preg_quote', $this->getAllIndexSuffixes( null ) ) );
 		if ( !preg_match( "/_($possible)_[^_]+$/", $name, $matches ) ) {
-			throw new Exception( "Can't parse index name: $name" );
+			throw new LogicException( "Can't parse index name: $name" );
 		}
 
 		return $matches[1];
@@ -271,7 +270,7 @@ class Connection extends ElasticaConnection {
 	 *  query the namespaces, or false if both need to be queried.
 	 * @deprecated 1.38 Use self::pickIndexSuffixForNamespaces
 	 */
-	public function pickIndexTypeForNamespaces( array $namespaces = null ) {
+	public function pickIndexTypeForNamespaces( ?array $namespaces = null ) {
 		return $this->pickIndexSuffixForNamespaces( $namespaces );
 	}
 
@@ -280,7 +279,7 @@ class Connection extends ElasticaConnection {
 	 * @return string|false The suffix to use (e.g. content or general) to
 	 *  query the namespaces, or false if all need to be queried.
 	 */
-	public function pickIndexSuffixForNamespaces( array $namespaces = null ) {
+	public function pickIndexSuffixForNamespaces( ?array $namespaces = null ) {
 		$indexSuffixes = [];
 		if ( $namespaces ) {
 			foreach ( $namespaces as $namespace ) {

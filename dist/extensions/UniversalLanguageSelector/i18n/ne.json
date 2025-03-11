@@ -54,10 +54,10 @@
 	"ext-uls-setlang-accept": "परिवर्तन स्वीकार गर्नुहोस्",
 	"ext-uls-setlang-loading": "लागू गर्दै...",
 	"ext-uls-setlang-cancel": "परिवर्तन नगर्नुहोस्",
-	"ext-uls-actions-menu-header": "थप विकल्पहरू",
 	"ext-uls-actions-menu-language-settings-item-label": "भाषा अभिरुचिहरू खोल्नुहोस्",
 	"ext-uls-empty-state-header": "अहिलेसम्म कुनै भाषाहरू छैनन्",
 	"ext-uls-empty-state-desc": "अहिलेको लागि कुनै भाषाहरू उपलब्ध छैनन्",
 	"ext-uls-empty-state-header-actions-available": "अझै कुनै भाषा छैन। एउटा नयाँ थप्नुहोस्?",
-	"ext-uls-empty-state-desc-actions-available": "थप भाषाहरूमा सामग्री उपलब्ध गराउनुहोस्।"
+	"ext-uls-empty-state-desc-actions-available": "थप भाषाहरूमा सामग्री उपलब्ध गराउनुहोस्।",
+	"ext-uls-add-languages-button-label": "भाषाहरू थप्नुहोस्"
 }

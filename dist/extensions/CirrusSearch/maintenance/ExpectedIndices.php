@@ -4,7 +4,8 @@ namespace CirrusSearch\Maintenance;
 
 use CirrusSearch\Connection;
 use CirrusSearch\SearchConfig;
-use WikiMap;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\WikiMap\WikiMap;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
@@ -38,7 +39,7 @@ class ExpectedIndices extends Maintenance {
 	public function execute() {
 		$clusters = $this->requestedClusters(
 			$this->getOption( 'cluster', null ) );
-		echo \FormatJson::encode( [
+		echo FormatJson::encode( [
 			'dbname' => WikiMap::getCurrentWikiId(),
 			'clusters' => $this->clusterInfo( $clusters ),
 		], !$this->getOption( 'oneline' ) ), "\n";
@@ -64,12 +65,11 @@ class ExpectedIndices extends Maintenance {
 	private function requestedClusters( ?string $requested ): array {
 		$assignment = $this->getSearchConfig()->getClusterAssignment();
 		if ( $requested !== null ) {
-			// Single cluster
-			return $assignment->canWriteToCluster( $requested )
+			return $assignment->hasCluster( $requested )
 				? [ $requested ]
 				: [];
 		}
-		return $assignment->getWritableClusters();
+		return $assignment->getAllKnownClusters();
 	}
 
 	private function allIndexNames( Connection $conn ): array {

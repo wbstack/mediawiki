@@ -1,7 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"ChrisPtDe"
+			"ChrisPtDe",
+			"Pppery",
+			"Krinkle"
 		]
 	},
 	"config-desc": "La programeria d’enstalacion de MediaWiki",
@@ -30,7 +32,6 @@
 	"config-env-php": "PHP $1 est enstalâ.",
 	"config-memory-raised": "Lo paramètre <code>memory_limit</code> de PHP ére a $1, portâ a $2.",
 	"config-apc": "[https://www.php.net/apc APC] est enstalâ",
-	"config-wincache": "[https://www.iis.net/downloads/microsoft/wincache-extension WinCache] est enstalâ",
 	"config-diff3-bad": "GNU diff3 entrovâblo.",
 	"config-db-type": "Tipo de bâsa de balyês :",
 	"config-db-host": "Hôto de la bâsa de balyês :",
@@ -88,7 +89,6 @@
 	"config-license-cc-0": "Creative Commons Zero (domêno publico)",
 	"config-license-gfdl": "Licence de documentacion libra GNU 1.3 ou ben ples novèla",
 	"config-license-pd": "Domêno publico",
-	"config-license-cc-choose": "Chouèsir una licence Creative Commons pèrsonalisâ",
 	"config-email-settings": "Paramètres de mèssageria èlèctronica",
 	"config-enable-email": "Activar los mèssâjos que sôrtont",
 	"config-email-user": "Activar los mèssâjos d’usanciér a usanciér",
@@ -100,10 +100,9 @@
 	"config-upload-enable": "Activar lo tèlèchargement des fichiérs",
 	"config-upload-deleted": "Dossiér por los fichiérs suprimâs :",
 	"config-instantcommons": "Activar Instant Commons",
-	"config-cc-again": "Tornâd chouèsir...",
 	"config-advanced-settings": "Configuracion avanciê",
 	"config-cache-options": "Paramètres por la misa en cache de les chouses :",
-	"config-cache-accel": "Misa en cache de les chouses PHP (APC, XCache ou ben WinCache)",
+	"config-cache-accel": "Misa en cache de les chouses PHP (APC ou ben APCu)",
 	"config-memcached-servers": "Sèrvors por memcached :",
 	"config-extensions": "Èxtensions",
 	"config-install-step-done": "fêt",
@@ -112,7 +111,6 @@
 	"config-install-database": "Crèacion de la bâsa de balyês",
 	"config-install-schema": "Crèacion de plan",
 	"config-install-pg-schema-not-exist": "Lo plan PostgreSQL ègziste pas",
-	"config-install-pg-commit": "Validacion des changements",
 	"config-install-pg-plpgsql": "Contrôlo du lengâjo PL/pgSQL",
 	"config-install-user": "Crèacion d’un usanciér de la bâsa de balyês",
 	"config-install-user-alreadyexists": "L’usanciér « $1 » ègziste ja",
@@ -131,5 +129,5 @@
 	"config-download-localsettings": "Tèlèchargiér <code>LocalSettings.php</code>",
 	"config-help": "éde",
 	"mainpagetext": "'''MediaWiki at étâ enstalâ avouéc reusséta.'''",
-	"mainpagedocfooter": "Vêde lo [https://meta.wikimedia.org/wiki/Aide:Contenu guido d’usanciér] por més d’enformacions sur l’usâjo de la programeria vouiqui.\n\n== Emmodar avouéc MediaWiki ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Lista des paramètres de configuracion]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ/fr FDQ sur MediaWiki]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ Lista de discussion sur les distribucions de MediaWiki]"
+	"mainpagedocfooter": "Vêde lo [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents guido d’usanciér] por més d’enformacions sur l’usâjo de la programeria vouiqui.\n\n== Emmodar avouéc MediaWiki ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Lista des paramètres de configuracion]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ/fr FDQ sur MediaWiki]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ Lista de discussion sur les distribucions de MediaWiki]"
 }

@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"ElangoRamanujam",
+			"Fahimrazick",
 			"Jayarathina",
 			"Kaartic",
 			"Kanags",
@@ -10,8 +10,7 @@
 			"Shanmugamp7",
 			"Siddhan",
 			"Surya Prakash.S.A.",
-			"TRYPPN",
-			"Fahimrazick"
+			"TRYPPN"
 		]
 	},
 	"vector-opt-out": "பழைய பார்வைக்கு மாறு",
@@ -33,8 +32,14 @@
 	"vector-jumptocontent": "உள்ளடக்கத்துக்குச் செல்",
 	"vector-more-actions": "மேலும்",
 	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> உள்ளடக்கிய பக்கங்களை தேடு",
-	"vector-toc-toggle-position-title": "மறை",
+	"vector-toc-label": "உள்ளடக்கம்",
 	"vector-toc-beginning": "தொடக்கம்",
 	"vector-toc-menu-tooltip": "பொருளடக்கம்",
-	"vector-toc-collapsible-button-label": "பொருளடக்கத்தை மாற்று"
+	"vector-toc-collapsible-button-label": "பொருளடக்கத்தை மாற்று",
+	"vector-main-menu-label": "முதன்மைப் பட்டி",
+	"vector-page-tools-label": "கருவிகள்",
+	"vector-page-tools-general-label": "பொது",
+	"vector-unpin-element-label": "மறை",
+	"empty-language-selector-body": "மற்ற மொழிகளில் ஆதரிக்கப்படாத பக்க உள்ளடக்கம்.",
+	"vector-toc-unpinned-popup": "பொருளடக்கம் இங்கு நகர்த்தப்பட்டது."
 }

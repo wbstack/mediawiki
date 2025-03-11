@@ -22,17 +22,16 @@
  * @ingroup Maintenance
  */
 
-// NO_AUTOLOAD -- file-scope define() used to modify behaviour
-
 # Start from scratch
 use MediaWiki\MainConfigNames;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Settings\SettingsBuilder;
 
+// @codeCoverageIgnoreStart
 define( 'MW_NO_EXTENSION_MESSAGES', 1 );
 
 require_once __DIR__ . '/Maintenance.php';
-$maintClass = MergeMessageFileList::class;
-$mmfl = false;
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that merges $wgExtensionMessagesFiles from various
@@ -57,10 +56,10 @@ class MergeMessageFileList extends Maintenance {
 	}
 
 	public function execute() {
-		global $mmfl;
-		global $wgExtensionEntryPointListFiles;
+		$config = $this->getConfig();
+		$extensionEntryPointListFiles = $config->get( MainConfigNames::ExtensionEntryPointListFiles );
 
-		if ( !count( $wgExtensionEntryPointListFiles )
+		if ( !count( $extensionEntryPointListFiles )
 			&& !$this->hasOption( 'list-file' )
 			&& !$this->hasOption( 'extensions-dir' )
 		) {
@@ -68,12 +67,12 @@ class MergeMessageFileList extends Maintenance {
 				"\$wgExtensionEntryPointListFiles is not set" );
 		}
 
-		$mmfl = [ 'setupFiles' => [] ];
+		$setupFiles = [];
 
 		# Add setup files contained in file passed to --list-file
 		if ( $this->hasOption( 'list-file' ) ) {
 			$extensionPaths = $this->readFile( $this->getOption( 'list-file' ) );
-			$mmfl['setupFiles'] = array_merge( $mmfl['setupFiles'], $extensionPaths );
+			$setupFiles = array_merge( $setupFiles, $extensionPaths );
 		}
 
 		# Now find out files in a directory
@@ -90,12 +89,11 @@ class MergeMessageFileList extends Maintenance {
 					$possibilities = [
 						"$extdir/$extname/extension.json",
 						"$extdir/$extname/skin.json",
-						"$extdir/$extname/$extname.php"
 					];
 					$found = false;
 					foreach ( $possibilities as $extfile ) {
 						if ( file_exists( $extfile ) ) {
-							$mmfl['setupFiles'][] = $extfile;
+							$setupFiles[] = $extfile;
 							$found = true;
 							break;
 						}
@@ -103,27 +101,23 @@ class MergeMessageFileList extends Maintenance {
 
 					if ( !$found ) {
 						$this->error( "Extension {$extname} in {$extdir} lacks expected entry point: " .
-							"extension.json, skin.json, or {$extname}.php." );
+							"extension.json or skin.json " .
+							"(PHP entry points are no longer supported by this script)." );
 					}
 				}
 			}
 		}
 
 		# Add setup files defined via configuration
-		foreach ( $wgExtensionEntryPointListFiles as $points ) {
+		foreach ( $extensionEntryPointListFiles as $points ) {
 			$extensionPaths = $this->readFile( $points );
-			$mmfl['setupFiles'] = array_merge( $mmfl['setupFiles'], $extensionPaths );
+			$setupFiles = array_merge( $setupFiles, $extensionPaths );
 		}
 
-		if ( $this->hasOption( 'output' ) ) {
-			$mmfl['output'] = $this->getOption( 'output' );
-		}
-		if ( $this->hasOption( 'quiet' ) ) {
-			$mmfl['quiet'] = true;
-		}
+		$this->generateMessageFileList( $setupFiles );
 	}
 
-	public function finalSetup( SettingsBuilder $settingsBuilder = null ) {
+	public function finalSetup( SettingsBuilder $settingsBuilder ) {
 		# This script commonly needs to be run before the l10n cache. But if
 		# LanguageCode is not 'en', it won't be able to run because there is
 		# no l10n cache. Break the cycle by forcing the LanguageCode setting to 'en'.
@@ -145,7 +139,7 @@ class MergeMessageFileList extends Maintenance {
 	 * @return array List of absolute extension paths
 	 */
 	private function readFile( $fileName ) {
-		global $IP;
+		$IP = MW_INSTALL_PATH;
 
 		$files = [];
 		$fileLines = file( $fileName );
@@ -161,7 +155,10 @@ class MergeMessageFileList extends Maintenance {
 			if ( $extension !== '' ) {
 				# Paths may use the string $IP to be substituted by the actual value
 				$extension = str_replace( '$IP', $IP, $extension );
-				if ( file_exists( $extension ) ) {
+				if ( !str_ends_with( $extension, '.json' ) ) {
+					$this->error( "Extension {$extension} does not end with .json " .
+						"(PHP entry points are no longer supported by this script)" );
+				} elseif ( file_exists( $extension ) ) {
 					$files[] = $extension;
 				} else {
 					$this->error( "Extension {$extension} doesn't exist" );
@@ -171,64 +168,74 @@ class MergeMessageFileList extends Maintenance {
 
 		return $files;
 	}
-}
 
-require_once RUN_MAINTENANCE_IF_MAIN;
+	private function generateMessageFileList( array $setupFiles ) {
+		$IP = MW_INSTALL_PATH;
 
-$queue = [];
-'@phan-var string[][] $mmfl';
-foreach ( $mmfl['setupFiles'] as $fileName ) {
-	if ( strval( $fileName ) === '' ) {
-		continue;
-	}
-	if ( empty( $mmfl['quiet'] ) ) {
-		fwrite( STDERR, "Loading data from $fileName\n" );
-	}
-	// Using extension.json or skin.json
-	if ( str_ends_with( $fileName, '.json' ) ) {
-		$queue[$fileName] = 1;
-	} else {
-		require_once $fileName;
-	}
-}
+		$outputFile = $this->getOption( 'output' );
+		$quiet = $this->hasOption( 'quiet' );
 
-if ( $queue ) {
-	$registry = new ExtensionRegistry();
-	$data = $registry->readFromQueue( $queue );
-	foreach ( [ 'wgExtensionMessagesFiles', 'wgMessagesDirs' ] as $var ) {
-		if ( isset( $data['globals'][$var] ) ) {
-			$GLOBALS[$var] = array_merge( $data['globals'][$var], $GLOBALS[$var] );
+		$queue = [];
+
+		foreach ( $setupFiles as $fileName ) {
+			if ( strval( $fileName ) === '' ) {
+				continue;
+			}
+			if ( !$quiet ) {
+				fwrite( STDERR, "Loading data from $fileName\n" );
+			}
+			$queue[$fileName] = 1;
+		}
+
+		$config = $this->getConfig();
+		$vars = [
+			'wgExtensionMessagesFiles' => $config->get( MainConfigNames::ExtensionMessagesFiles ),
+			'wgMessagesDirs' => $config->get( MainConfigNames::MessagesDirs ),
+		];
+
+		if ( $queue ) {
+			$registry = new ExtensionRegistry();
+			$data = $registry->readFromQueue( $queue );
+			foreach ( [ 'wgExtensionMessagesFiles', 'wgMessagesDirs' ] as $var ) {
+				if ( isset( $data['globals'][$var] ) ) {
+					$vars[$var] = array_merge( $data['globals'][$var], $vars[$var] );
+				}
+			}
+		}
+
+		if ( !$quiet ) {
+			fwrite( STDERR, "\n" );
+		}
+		$s =
+			"<?php\n" .
+			"## This file is generated by mergeMessageFileList.php. Do not edit it directly.\n\n" .
+			"if ( defined( 'MW_NO_EXTENSION_MESSAGES' ) ) return;\n\n" .
+			'$wgExtensionMessagesFiles = ' . var_export( $vars['wgExtensionMessagesFiles'], true ) . ";\n\n" .
+			'$wgMessagesDirs = ' . var_export( $vars['wgMessagesDirs'], true ) . ";\n\n";
+
+		$dirs = [
+			$IP,
+			dirname( __DIR__ ),
+			realpath( $IP )
+		];
+
+		foreach ( $dirs as $dir ) {
+			$s = preg_replace( "/'" . preg_quote( $dir, '/' ) . "([^']*)'/", '"$IP\1"', $s );
+		}
+
+		if ( $outputFile !== null ) {
+			$res = file_put_contents( $outputFile, $s );
+			if ( $res === false ) {
+				fwrite( STDERR, "Failed to write to $outputFile\n" );
+				exit( 1 );
+			}
+		} else {
+			echo $s;
 		}
 	}
 }
 
-if ( empty( $mmfl['quiet'] ) ) {
-	fwrite( STDERR, "\n" );
-}
-$s =
-	"<?php\n" .
-	"## This file is generated by mergeMessageFileList.php. Do not edit it directly.\n\n" .
-	"if ( defined( 'MW_NO_EXTENSION_MESSAGES' ) ) return;\n\n" .
-	'$wgExtensionMessagesFiles = ' . var_export( $wgExtensionMessagesFiles, true ) . ";\n\n" .
-	'$wgMessagesDirs = ' . var_export( $wgMessagesDirs, true ) . ";\n\n";
-
-$dirs = [
-	$IP,
-	dirname( __DIR__ ),
-	realpath( $IP )
-];
-
-foreach ( $dirs as $dir ) {
-	$s = preg_replace( "/'" . preg_quote( $dir, '/' ) . "([^']*)'/", '"$IP\1"', $s );
-}
-
-if ( isset( $mmfl['output'] ) ) {
-	$outputFile = $mmfl['output'];
-	$res = file_put_contents( $outputFile, $s );
-	if ( $res === false ) {
-		fwrite( STDERR, "Failed to write to $outputFile\n" );
-		exit( 1 );
-	}
-} else {
-	echo $s;
-}
+// @codeCoverageIgnoreStart
+$maintClass = MergeMessageFileList::class;
+require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

@@ -44,8 +44,8 @@ class YearMonthTimeParser extends StringValueParser {
 	 */
 	public function __construct(
 		MonthNameProvider $monthNameProvider,
-		ParserOptions $options = null,
-		EraParser $eraParser = null
+		?ParserOptions $options = null,
+		?EraParser $eraParser = null
 	) {
 		parent::__construct( $options );
 
@@ -64,15 +64,8 @@ class YearMonthTimeParser extends StringValueParser {
 	 * @return TimeValue
 	 */
 	protected function stringParse( $value ) {
-		list( $newValue, $sign ) = $this->splitBySignAndEra( $value );
-
-		// Matches year and month separated by a separator.
-		// \p{L} matches letters outside the ASCII range.
-		$regex = '/^(-?[\d\p{L}]+)\s*?[\/\-\s.,]\s*(-?[\d\p{L}]+)$/u';
-		if ( !preg_match( $regex, $newValue, $matches ) ) {
-			throw new ParseException( 'Failed to parse year and month', $value, self::FORMAT_NAME );
-		}
-		list( , $a, $b ) = $matches;
+		[ $newValue, $sign ] = $this->splitBySignAndEra( $value );
+		[ $a, $b ] = $this->splitByYearMonth( $value, $newValue );
 
 		// non-empty sign indicates the era (e.g. "BCE") was specified
 		// don't accept a negative number as the year
@@ -108,6 +101,24 @@ class YearMonthTimeParser extends StringValueParser {
 	}
 
 	/**
+	 * Returns two strings which can either be the month or year (depending on input order)
+	 *
+	 * @param string $originalValue The value as original given (for error reporting)
+	 * @param string $newValue As produced by splitBySignAndEra
+	 *
+	 * @return array( string $a, string $b )
+	 */
+	private function splitByYearMonth( $originalValue, string $newValue ): array {
+		// Matches year and month separated by a separator.
+		// \p{L} matches letters outside the ASCII range.
+		$regex = '/^(-?[\d\p{L}]+)\s*?[\/\-\s.,]\s*(-?[\d\p{L}]+)$/u';
+		if ( !preg_match( $regex, $newValue, $matches ) ) {
+			throw new ParseException( 'Failed to parse year and month', $originalValue, self::FORMAT_NAME );
+		}
+		return array_splice( $matches, 1 );
+	}
+
+	/**
 	 * @param string $value
 	 *
 	 * @return array( string $newValue, string $sign )
@@ -120,7 +131,7 @@ class YearMonthTimeParser extends StringValueParser {
 			$newValue = $trimmedValue;
 			$sign = '';
 		} else {
-			list( $sign, $newValue ) = $this->eraParser->parse( $trimmedValue );
+			[ $sign, $newValue ] = $this->eraParser->parse( $trimmedValue );
 			if ( $newValue === $trimmedValue ) {
 				// EraParser defaults to "+" but we need to indicate "unspecified era"
 				$sign = '';

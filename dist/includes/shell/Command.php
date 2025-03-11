@@ -21,7 +21,6 @@
 namespace MediaWiki\Shell;
 
 use Exception;
-use MediaWiki\ProcOpenError;
 use MediaWiki\ShellDisabledError;
 use Profiler;
 use Psr\Log\LoggerInterface;
@@ -29,6 +28,7 @@ use Psr\Log\NullLogger;
 use Shellbox\Command\UnboxedCommand;
 use Shellbox\Command\UnboxedExecutor;
 use Shellbox\Command\UnboxedResult;
+use Stringable;
 use Wikimedia\ScopedCallback;
 
 /**
@@ -36,15 +36,13 @@ use Wikimedia\ScopedCallback;
  *
  * @since 1.30
  */
-class Command extends UnboxedCommand {
-	/** @var bool */
-	private $everExecuted = false;
+class Command extends UnboxedCommand implements Stringable {
+	private bool $everExecuted = false;
 
 	/** @var string */
 	private $method;
 
-	/** @var LoggerInterface */
-	protected $logger;
+	protected LoggerInterface $logger;
 
 	/**
 	 * Don't call directly, instead use Shell::command()
@@ -57,7 +55,7 @@ class Command extends UnboxedCommand {
 			throw new ShellDisabledError();
 		}
 		parent::__construct( $executor );
-		$this->setLogger( new NullLogger );
+		$this->setLogger( new NullLogger() );
 	}
 
 	/**
@@ -76,6 +74,9 @@ class Command extends UnboxedCommand {
 		}
 	}
 
+	/**
+	 * @param LoggerInterface $logger
+	 */
 	public function setLogger( LoggerInterface $logger ) {
 		$this->logger = $logger;
 		if ( $this->executor ) {
@@ -137,19 +138,6 @@ class Command extends UnboxedCommand {
 	}
 
 	/**
-	 * Sets cgroup for this command. Has no effect since MW 1.36. This setting
-	 * is injected into the executor from CommandFactory instead.
-	 *
-	 * @deprecated since 1.36
-	 * @param string|false $cgroup Absolute file path to the cgroup, or false to not use a cgroup
-	 * @return $this
-	 */
-	public function cgroup( $cgroup ): Command {
-		wfDeprecated( __METHOD__, '1.36' );
-		return $this;
-	}
-
-	/**
 	 * Set restrictions for this request, overwriting any previously set restrictions.
 	 *
 	 * Add the "no network" restriction:
@@ -202,11 +190,13 @@ class Command extends UnboxedCommand {
 	 *
 	 * limit.sh will always be whitelisted
 	 *
-	 * @deprecated since 1.36 Use allowPath/disallowPath
+	 * @deprecated since 1.36 Use allowPath/disallowPath. Hard
+	 *   deprecated in 1.40 and to be removed in 1.41
 	 * @param string[] $paths
 	 * @return $this
 	 */
 	public function whitelistPaths( array $paths ): Command {
+		wfDeprecated( __METHOD__, '1.36' );
 		$this->allowedPaths( array_merge( $this->getAllowedPaths(), $paths ) );
 		return $this;
 	}
@@ -217,8 +207,6 @@ class Command extends UnboxedCommand {
 	 *
 	 * @return UnboxedResult
 	 * @throws Exception
-	 * @throws ProcOpenError
-	 * @throws ShellDisabledError
 	 */
 	public function execute(): UnboxedResult {
 		$this->everExecuted = true;

@@ -7,6 +7,7 @@ use Countable;
 use InvalidArgumentException;
 use IteratorAggregate;
 use OutOfBoundsException;
+use Traversable;
 
 /**
  * Unordered list of AliasGroup objects.
@@ -45,7 +46,7 @@ class AliasGroupList implements Countable, IteratorAggregate {
 	 * @see Countable::count
 	 * @return int
 	 */
-	public function count() {
+	public function count(): int {
 		return count( $this->groups );
 	}
 
@@ -53,7 +54,7 @@ class AliasGroupList implements Countable, IteratorAggregate {
 	 * @see IteratorAggregate::getIterator
 	 * @return Iterator|AliasGroup[]
 	 */
-	public function getIterator() {
+	public function getIterator(): Traversable {
 		return new ArrayIterator( $this->groups );
 	}
 
@@ -156,7 +157,7 @@ class AliasGroupList implements Countable, IteratorAggregate {
 	 *
 	 * @param AliasGroup $group
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasAliasGroup( AliasGroup $group ) {
 		return array_key_exists( $group->getLanguageCode(), $this->groups )
@@ -168,7 +169,7 @@ class AliasGroupList implements Countable, IteratorAggregate {
 	 *
 	 * @param string $languageCode
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasGroupForLanguage( $languageCode ) {
 		return array_key_exists( $languageCode, $this->groups );

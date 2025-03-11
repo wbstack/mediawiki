@@ -18,43 +18,54 @@
  * @file
  */
 
+use MediaWiki\Context\IContextSource;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Language\Language;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Specials\SpecialUpload;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\NamespaceInfo;
 use Wikimedia\RequestTimeout\TimeoutException;
 
 /**
  * Sub class of HTMLForm that provides the form section of SpecialUpload
  */
 class UploadForm extends HTMLForm {
+	/** @var bool */
 	protected $mWatch;
+	/** @var bool */
 	protected $mForReUpload;
+	/** @var string */
 	protected $mSessionKey;
+	/** @var bool */
 	protected $mHideIgnoreWarning;
+	/** @var bool */
 	protected $mDestWarningAck;
+	/** @var string */
 	protected $mDestFile;
 
+	/** @var string */
 	protected $mComment;
 	/** @var string raw html */
 	protected $mTextTop;
 	/** @var string raw html */
 	protected $mTextAfterSummary;
 
+	/** @var string[] */
 	protected $mSourceIds;
-
-	protected $mMaxFileSize = [];
 
 	/** @var array */
 	protected $mMaxUploadSize = [];
 
-	/** @var LocalRepo */
-	private $localRepo;
-
-	/** @var Language */
-	private $contentLanguage;
-
-	/** @var NamespaceInfo */
-	private $nsInfo;
+	private LocalRepo $localRepo;
+	private Language $contentLanguage;
+	private NamespaceInfo $nsInfo;
+	private HookRunner $hookRunner;
 
 	/**
 	 * @param array $options
@@ -63,14 +74,16 @@ class UploadForm extends HTMLForm {
 	 * @param LocalRepo|null $localRepo
 	 * @param Language|null $contentLanguage
 	 * @param NamespaceInfo|null $nsInfo
+	 * @param HookContainer|null $hookContainer
 	 */
 	public function __construct(
 		array $options = [],
-		IContextSource $context = null,
-		LinkRenderer $linkRenderer = null,
-		LocalRepo $localRepo = null,
-		Language $contentLanguage = null,
-		NamespaceInfo $nsInfo = null
+		?IContextSource $context = null,
+		?LinkRenderer $linkRenderer = null,
+		?LocalRepo $localRepo = null,
+		?Language $contentLanguage = null,
+		?NamespaceInfo $nsInfo = null,
+		?HookContainer $hookContainer = null
 	) {
 		if ( $context instanceof IContextSource ) {
 			$this->setContext( $context );
@@ -92,6 +105,7 @@ class UploadForm extends HTMLForm {
 		$this->localRepo = $localRepo;
 		$this->contentLanguage = $contentLanguage;
 		$this->nsInfo = $nsInfo;
+		$this->hookRunner = new HookRunner( $hookContainer ?? $services->getHookContainer() );
 
 		$this->mWatch = !empty( $options['watch'] );
 		$this->mForReUpload = !empty( $options['forreupload'] );
@@ -111,7 +125,7 @@ class UploadForm extends HTMLForm {
 			+ $this->getDescriptionSection()
 			+ $this->getOptionsSection();
 
-		$this->getHookRunner()->onUploadFormInitDescriptor( $descriptor );
+		$this->hookRunner->onUploadFormInitDescriptor( $descriptor );
 		parent::__construct( $descriptor, $this->getContext(), 'upload' );
 
 		# Add a link to edit MediaWiki:Licenses
@@ -124,7 +138,7 @@ class UploadForm extends HTMLForm {
 				[ 'action' => 'edit' ]
 			);
 			$editLicenses = '<p class="mw-upload-editlicenses">' . $licensesLink . '</p>';
-			$this->addFooterText( $editLicenses, 'description' );
+			$this->addFooterHtml( $editLicenses, 'description' );
 		}
 
 		# Set some form properties
@@ -222,7 +236,7 @@ class UploadForm extends HTMLForm {
 				'checked' => $selectedSourceType == 'url',
 			];
 		}
-		$this->getHookRunner()->onUploadFormSourceDescriptors(
+		$this->hookRunner->onUploadFormSourceDescriptors(
 			$descriptor, $radio, $selectedSourceType );
 
 		$descriptor['Extensions'] = [
@@ -302,7 +316,7 @@ class UploadForm extends HTMLForm {
 			if ( $file ) {
 				$mto = $file->transform( [ 'width' => 120 ] );
 				if ( $mto ) {
-					$this->addHeaderText(
+					$this->addHeaderHtml(
 						'<div class="thumb t' .
 						$this->contentLanguage->alignEnd() . '">' .
 						Html::element( 'img', [

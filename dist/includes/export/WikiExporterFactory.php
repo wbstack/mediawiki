@@ -20,11 +20,12 @@
 
 namespace MediaWiki\Export;
 
+use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Revision\RevisionStore;
-use TitleParser;
+use MediaWiki\Title\TitleParser;
 use WikiExporter;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 
 /**
  * Factory service for WikiExporter instances.
@@ -42,23 +43,29 @@ class WikiExporterFactory {
 	/** @var TitleParser */
 	private $titleParser;
 
+	/** @var CommentStore */
+	private $commentStore;
+
 	/**
 	 * @param HookContainer $hookContainer
 	 * @param RevisionStore $revisionStore
 	 * @param TitleParser $titleParser
+	 * @param CommentStore $commentStore
 	 */
 	public function __construct(
 		HookContainer $hookContainer,
 		RevisionStore $revisionStore,
-		TitleParser $titleParser
+		TitleParser $titleParser,
+		CommentStore $commentStore
 	) {
 		$this->hookContainer = $hookContainer;
 		$this->revisionStore = $revisionStore;
 		$this->titleParser = $titleParser;
+		$this->commentStore = $commentStore;
 	}
 
 	/**
-	 * @param IDatabase $db
+	 * @param IReadableDatabase $db
 	 * @param int|array $history
 	 * @param int $text
 	 * @param null|array $limitNamespaces
@@ -66,13 +73,14 @@ class WikiExporterFactory {
 	 * @return WikiExporter
 	 */
 	public function getWikiExporter(
-		IDatabase $db,
+		IReadableDatabase $db,
 		$history = WikiExporter::CURRENT,
 		$text = WikiExporter::TEXT,
 		$limitNamespaces = null
 	): WikiExporter {
 		return new WikiExporter(
 			$db,
+			$this->commentStore,
 			$this->hookContainer,
 			$this->revisionStore,
 			$this->titleParser,

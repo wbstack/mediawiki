@@ -1,8 +1,6 @@
 <?php
 /** Arabic (العربية)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -143,6 +141,7 @@ $magicWords = [
 	'articlepath'               => [ '0', 'مسار_المقالة', 'ARTICLEPATH' ],
 	'basepagename'              => [ '1', 'اسم_الصفحة_الأساسي', 'BASEPAGENAME' ],
 	'basepagenamee'             => [ '1', 'عنوان_الصفحة_الأساسي', 'BASEPAGENAMEE' ],
+	'bcp47'                     => [ '1', '#بي_سي_بي_47', '#bcp47' ],
 	'bidi'                      => [ '0', 'ثا:', 'BIDI:' ],
 	'canonicalurl'              => [ '0', 'عنوان_قاعدة:', 'CANONICALURL:' ],
 	'canonicalurle'             => [ '0', 'مسار_قاعدة:', 'CANONICALURLE:' ],
@@ -166,13 +165,16 @@ $magicWords = [
 	'defaultsort'               => [ '1', 'ترتيب_افتراضي:', 'مفتاح_ترتيب_افتراضي:', 'ترتيب_تصنيف_افتراضي:', 'ترتيب_غيابي:', 'DEFAULTSORT:', 'DEFAULTSORTKEY:', 'DEFAULTCATEGORYSORT:' ],
 	'defaultsort_noerror'       => [ '0', 'لاخطأ', 'noerror' ],
 	'defaultsort_noreplace'     => [ '0', 'لاتستبدل', 'noreplace' ],
+	'dir'                       => [ '1', '#اتجاه', '#dir' ],
 	'directionmark'             => [ '1', 'علامة_الاتجاه', 'علامة_اتجاه', 'DIRECTIONMARK', 'DIRMARK' ],
 	'displaytitle'              => [ '1', 'عرض_العنوان', 'DISPLAYTITLE' ],
 	'displaytitle_noerror'      => [ '0', 'لا_خطأ', 'noerror' ],
 	'displaytitle_noreplace'    => [ '0', 'لااستبدال', 'noreplace' ],
-	'expectunusedcategory'      => [ '1', '__توقع_تصنيف_غير_مستخدم__','__EXPECTUNUSEDCATEGORY__', ],
+	'expectunusedcategory'      => [ '1', '__توقع_تصنيف_غير_مستخدم__', '__EXPECTUNUSEDCATEGORY__', ],
+	'expectunusedtemplate'      => [ '1', '__توقع_قالب_غير_مستخدم__', '__EXPECTUNUSEDTEMPLATE__', ],
 	'filepath'                  => [ '0', 'مسار_الملف:', 'FILEPATH:' ],
 	'forcetoc'                  => [ '0', '__لصق_فهرس__', '__FORCETOC__' ],
+	'formal'                    => [ '1', '#رسمي:', '#FORMAL:' ],
 	'formatdate'                => [ '0', 'تهيئة_التاريخ', 'تهيئة_تاريخ', 'formatdate', 'dateformat' ],
 	'formatnum'                 => [ '0', 'صيغة_رقم', 'FORMATNUM' ],
 	'fullpagename'              => [ '1', 'اسم_الصفحة_الكامل', 'اسم_صفحة_كامل', 'اسم_كامل', 'FULLPAGENAME' ],
@@ -208,7 +210,8 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1بك', '$1عن', '$1px' ],
 	'index'                     => [ '1', '__فهرسة__', '__INDEX__' ],
 	'int'                       => [ '0', 'محتوى:', 'INT:' ],
-	'language'                  => [ '0', '#لغة:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#لغة', '#LANGUAGE' ],
+	'language_option_bcp47'     => [ '1', 'بي_سي_بي_47', 'bcp47' ],
 	'lc'                        => [ '0', 'صغير:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'عنوان_كبير:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'يوم_محلي', 'LOCALDAY' ],
@@ -254,7 +257,7 @@ $magicWords = [
 	'padleft'                   => [ '0', 'باد_يسار', 'PADLEFT' ],
 	'padright'                  => [ '0', 'باد_يمين', 'PADRIGHT' ],
 	'pageid'                    => [ '0', 'رقم_صفحة', 'PAGEID' ],
-	'pagelanguage'              => [ '1', 'لغة_الصفحة','PAGELANGUAGE' ],
+	'pagelanguage'              => [ '1', 'لغة_الصفحة', 'PAGELANGUAGE' ],
 	'pagename'                  => [ '1', 'اسم_الصفحة', 'PAGENAME' ],
 	'pagenamee'                 => [ '1', 'عنوان_الصفحة', 'PAGENAMEE' ],
 	'pagesincategory'           => [ '1', 'صفحات_في_التصنيف', 'صفحات_في_تصنيف', 'PAGESINCATEGORY', 'PAGESINCAT' ],
@@ -309,6 +312,7 @@ $magicWords = [
 	'url_path'                  => [ '0', 'مسار', 'PATH' ],
 	'url_query'                 => [ '0', 'استعلام', 'QUERY' ],
 	'url_wiki'                  => [ '0', 'ويكي', 'WIKI' ],
+	'userlanguage'              => [ '1', 'لغة_المستخدم', 'USERLANGUAGE' ],
 ];
 
 /** @phpcs-require-sorted-array */
@@ -320,6 +324,7 @@ $specialPageAliases = [
 	'Ancientpages'              => [ 'صفحات_قديمة' ],
 	'ApiHelp'                   => [ 'مساعدة_إيه_بي_آي' ],
 	'ApiSandbox'                => [ 'ملعب_إيه_بي_آي' ],
+	'AuthenticationPopupSuccess' => [ 'نجاح_منبثقة_المصادقة' ],
 	'AutoblockList'             => [ 'قائمة_المنع_التلقائي', 'عرض_المنع_التلقائي' ],
 	'Badtitle'                  => [ 'عنوان_سيئ' ],
 	'Blankpage'                 => [ 'صفحة_فارغة' ],
@@ -335,6 +340,7 @@ $specialPageAliases = [
 	'ChangePassword'            => [ 'تغيير_كلمة_السر', 'ضبط_كلمة_السر' ],
 	'ComparePages'              => [ 'مقارنة_الصفحات' ],
 	'Confirmemail'              => [ 'تأكيد_البريد' ],
+	'Contribute'                => [ 'ساهم' ],
 	'Contributions'             => [ 'مساهمات' ],
 	'CreateAccount'             => [ 'إنشاء_حساب' ],
 	'Deadendpages'              => [ 'صفحات_نهاية_مسدودة' ],
@@ -343,6 +349,7 @@ $specialPageAliases = [
 	'Diff'                      => [ 'فرق' ],
 	'DoubleRedirects'           => [ 'تحويلات_مزدوجة' ],
 	'EditPage'                  => [ 'عدل_الصفحة', 'عدل' ],
+	'EditRecovery'              => [ 'استرداد_التعديل' ],
 	'EditTags'                  => [ 'تعديل_الوسوم' ],
 	'EditWatchlist'             => [ 'تعديل_قائمة_المراقبة' ],
 	'Emailuser'                 => [ 'مراسلة_المستخدم' ],
@@ -383,9 +390,11 @@ $specialPageAliases = [
 	'Mute'                      => [ 'كتم' ],
 	'Mycontributions'           => [ 'مساهماتي' ],
 	'MyLanguage'                => [ 'لغتي' ],
+	'Mylog'                     => [ 'سجلي' ],
 	'Mypage'                    => [ 'صفحتي' ],
 	'Mytalk'                    => [ 'نقاشي' ],
 	'Myuploads'                 => [ 'مرفوعاتي', 'ملفاتي' ],
+	'NamespaceInfo'             => [ 'معلومات_النطاق' ],
 	'Newimages'                 => [ 'ملفات_جديدة', 'صور_جديدة' ],
 	'Newpages'                  => [ 'صفحات_جديدة' ],
 	'NewSection'                => [ 'قسم_جديد' ],
@@ -411,7 +420,9 @@ $specialPageAliases = [
 	'Recentchangeslinked'       => [ 'أحدث_التغييرات_الموصولة', 'تغييرات_مرتبطة' ],
 	'Redirect'                  => [ 'تحويل' ],
 	'RemoveCredentials'         => [ 'إزالة_الاعتمادات' ],
+	'Renameuser'                => [ 'إعادة_تسمية_مستخدم' ],
 	'ResetTokens'               => [ 'إعادة_ضبط_المفاتيح' ],
+	'RestSandbox'               => [ 'ملعب_رست' ],
 	'Revisiondelete'            => [ 'حذف_مراجعة', 'حذف_نسخة' ],
 	'RunJobs'                   => [ 'تشغيل_الوظائف' ],
 	'Search'                    => [ 'بحث' ],
@@ -419,6 +430,7 @@ $specialPageAliases = [
 	'Specialpages'              => [ 'صفحات_خاصة' ],
 	'Statistics'                => [ 'إحصاءات' ],
 	'Tags'                      => [ 'وسوم' ],
+	'TalkPage'                  => [ 'صفحة_النقاش' ],
 	'TrackingCategories'        => [ 'تصنيفات_التتبع' ],
 	'Unblock'                   => [ 'رفع_منع' ],
 	'Uncategorizedcategories'   => [ 'تصنيفات_غير_مصنفة' ],

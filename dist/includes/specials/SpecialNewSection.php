@@ -1,7 +1,5 @@
 <?php
 /**
- * Redirect from Special:NewSection/$1 to index.php?title=$1&action=edit&section=new.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,13 +16,24 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
+ */
+
+namespace MediaWiki\Specials;
+
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\SpecialPage\RedirectSpecialPage;
+use MediaWiki\Title\Title;
+use SearchEngineFactory;
+
+/**
+ * Redirect from Special:NewSection/$1 to index.php?title=$1&action=edit&section=new.
+ *
  * @ingroup SpecialPage
  * @author DannyS712
  */
 class SpecialNewSection extends RedirectSpecialPage {
 
-	/** @var SearchEngineFactory */
-	private $searchEngineFactory;
+	private SearchEngineFactory $searchEngineFactory;
 
 	/**
 	 * @param SearchEngineFactory $searchEngineFactory
@@ -101,3 +110,9 @@ class SpecialNewSection extends RedirectSpecialPage {
 		return 'redirects';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialNewSection::class, 'SpecialNewSection' );

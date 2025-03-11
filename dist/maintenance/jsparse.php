@@ -1,7 +1,5 @@
 <?php
 /**
- * Test JavaScript validity parses using jsmin+'s parser
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,35 +19,36 @@
  * @ingroup Maintenance
  */
 
-use Wikimedia\AtEase\AtEase;
-
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
- * Maintenance script to test JavaScript validity using JsMinPlus' parser
+ * Ad-hoc run ResourceLoader validation for user-supplied JavaScript.
+ *
+ * Matches the behaviour of ResourceLoader\Module::validateScriptFile, currently
+ * powered by the the Peast library.
  *
  * @ingroup Maintenance
  */
 class JSParseHelper extends Maintenance {
+	/** @var int */
 	public $errs = 0;
 
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Runs parsing/syntax checks on JavaScript files' );
-		$this->addArg( 'file(s)', 'JavaScript file to test', false );
+		$this->addDescription( 'Validate syntax of JavaScript files' );
+		$this->addArg( 'file(s)', 'JavaScript files or "-" to read stdin', true, true );
 	}
 
 	public function execute() {
-		if ( !$this->hasArg( 0 ) ) {
-			$this->maybeHelp( true );
-		}
-		$files = $this->mArgs;
+		$files = $this->getArgs();
 
-		$parser = new JSParser();
 		foreach ( $files as $filename ) {
-			AtEase::suppressWarnings();
-			$js = file_get_contents( $filename );
-			AtEase::restoreWarnings();
+			$js = $filename === '-'
+				? stream_get_contents( STDIN )
+				// phpcs:ignore Generic.PHP.NoSilencedErrors
+				: @file_get_contents( $filename );
 			if ( $js === false ) {
 				$this->output( "$filename ERROR: could not read file\n" );
 				$this->errs++;
@@ -57,10 +56,10 @@ class JSParseHelper extends Maintenance {
 			}
 
 			try {
-				$parser->parse( $js, $filename, 1 );
+				Peast\Peast::ES2016( $js )->parse();
 			} catch ( Exception $e ) {
 				$this->errs++;
-				$this->output( "$filename ERROR: " . $e->getMessage() . "\n" );
+				$this->output( "$filename ERROR: " . get_class( $e ) . ": " . $e->getMessage() . "\n" );
 				continue;
 			}
 
@@ -73,5 +72,7 @@ class JSParseHelper extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = JSParseHelper::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

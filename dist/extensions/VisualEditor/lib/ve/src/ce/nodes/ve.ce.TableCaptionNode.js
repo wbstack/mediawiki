@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable TableCaptionNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.ce.BranchNode
- * @mixins ve.ce.ActiveNode
+ * @mixes ve.ce.ActiveNode
  * @constructor
  * @param {ve.dm.TableCaptionNode} model Model to observe
  * @param {Object} [config] Configuration options

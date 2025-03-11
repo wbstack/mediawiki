@@ -3,11 +3,12 @@
 declare( strict_types = 1 );
 namespace Wikibase\Lib;
 
-use CachedBagOStuff;
-use IBufferingStatsdDataFactory;
+use ObjectCacheFactory;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Wikibase\Lib\TermFallbackCache\TermFallbackCacheServiceFactory;
+use Wikimedia\ObjectCache\CachedBagOStuff;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 
 /**
  * Factory for accessing the shared cache
@@ -42,6 +43,11 @@ class TermFallbackCacheFactory {
 	private $serviceFactory;
 
 	/**
+	 * @var ObjectCacheFactory
+	 */
+	private $objectCacheFactory;
+
+	/**
 	 * @var int|null
 	 */
 	private $cacheVersion;
@@ -53,6 +59,7 @@ class TermFallbackCacheFactory {
 	 * @param string $cacheSecret
 	 * @param TermFallbackCacheServiceFactory $serviceFactory
 	 * @param int|null $cacheVersion
+	 * @param ObjectCacheFactory $objectCacheFactory
 	 */
 	public function __construct(
 		$cacheType,
@@ -60,7 +67,8 @@ class TermFallbackCacheFactory {
 		IBufferingStatsdDataFactory $statsdDataFactory,
 		string $cacheSecret,
 		TermFallbackCacheServiceFactory $serviceFactory,
-		?int $cacheVersion
+		?int $cacheVersion,
+		ObjectCacheFactory $objectCacheFactory
 	) {
 		$this->termFallbackCacheType = $cacheType;
 		$this->logger = $logger;
@@ -68,10 +76,11 @@ class TermFallbackCacheFactory {
 		$this->cacheSecret = $cacheSecret;
 		$this->serviceFactory = $serviceFactory;
 		$this->cacheVersion = $cacheVersion;
+		$this->objectCacheFactory = $objectCacheFactory;
 	}
 
 	public function getTermFallbackCache(): CacheInterface {
-		$bagOStuff = $this->serviceFactory->newSharedCache( $this->termFallbackCacheType );
+		$bagOStuff = $this->serviceFactory->newSharedCache( $this->termFallbackCacheType, $this->objectCacheFactory );
 		if ( !$bagOStuff instanceof CachedBagOStuff ) {
 			$bagOStuff = $this->serviceFactory->newInMemoryCache( $bagOStuff ); // wrap in an in-memory cache
 		}

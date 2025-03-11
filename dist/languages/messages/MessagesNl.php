@@ -1,8 +1,6 @@
 <?php
 /** Dutch (Nederlands)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -171,7 +169,7 @@ $magicWords = [
 	'img_thumbnail'             => [ '1', 'miniatuur', 'thumb', 'thumbnail' ],
 	'img_top'                   => [ '1', 'boven', 'top' ],
 	'img_upright'               => [ '1', 'rechtop', 'rechtop=$1', 'rechtop$1', 'upright', 'upright=$1', 'upright $1' ],
-	'language'                  => [ '0', '#TAAL:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#TAAL', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'KL:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'KLEERSTE:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'PLAATSELIJKEDAG', 'LOKALEDAG', 'LOCALDAY' ],
@@ -348,6 +346,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'RecenteWijzigingen' ],
 	'Recentchangeslinked'       => [ 'RecenteWijzigingenGelinkt', 'VerwanteWijzigingen' ],
 	'Redirect'                  => [ 'Doorverwijzen' ],
+	'Renameuser'                => [ 'GebruikerHernoemen' ],
 	'ResetTokens'               => [ 'TokensOpnieuwInstellen' ],
 	'Revisiondelete'            => [ 'VersieVerwijderen', 'HerzieningVerwijderen', 'RevisieVerwijderen' ],
 	'RunJobs'                   => [ 'TakenUitvoeren' ],
@@ -384,3 +383,4 @@ $specialPageAliases = [
 ];
 
 $linkTrail = '/^([a-zäöüïëéèà]+)(.*)$/sDu';
+$formalityIndex = 1;

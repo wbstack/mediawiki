@@ -21,10 +21,17 @@
  * @ingroup Parser
  */
 
+namespace MediaWiki\Parser;
+
+use HtmlArmor;
+use MediaWiki\Cache\LinkCache;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Language\ILanguageConverter;
+use MediaWiki\Linker\Linker;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
 /**
  * @internal for using in Parser only.
@@ -32,27 +39,17 @@ use MediaWiki\MediaWikiServices;
  * @ingroup Parser
  */
 class LinkHolderArray {
-	/** @var array[][] */
-	public $internals = [];
-	/** @var array[] */
-	public $interwikis = [];
+	/** @var array<int,array<int,array>> Indexed by numeric namespace and link ids, {@see Parser::nextLinkID} */
+	private $internals = [];
+	/** @var array<int,array> Indexed by numeric link id */
+	private $interwikis = [];
 	/** @var int */
-	public $size = 0;
-
-	/**
-	 * @var Parser
-	 */
-	public $parent;
-
-	/**
-	 * Current language converter
-	 * @var ILanguageConverter
-	 */
+	private $size = 0;
+	/** @var Parser */
+	private $parent;
+	/** @var ILanguageConverter */
 	private $languageConverter;
-
-	/**
-	 * @var HookRunner
-	 */
+	/** @var HookRunner */
 	private $hookRunner;
 
 	/**
@@ -128,7 +125,7 @@ class LinkHolderArray {
 	 */
 	public function makeHolder( Title $nt, $text = '', $trail = '', $prefix = '' ) {
 		# Separate the link trail from the rest of the link
-		list( $inside, $trail ) = Linker::splitTrail( $trail );
+		[ $inside, $trail ] = Linker::splitTrail( $trail );
 
 		$key = $this->parent->nextLinkID();
 		$entry = [
@@ -174,7 +171,7 @@ class LinkHolderArray {
 		$output = $this->parent->getOutput();
 		$linkRenderer = $this->parent->getLinkRenderer();
 
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = $services->getConnectionProvider()->getReplicaDatabase();
 
 		# Sort by namespace
 		ksort( $this->internals );
@@ -189,21 +186,14 @@ class LinkHolderArray {
 		foreach ( $this->internals as $ns => $entries ) {
 			foreach ( $entries as [ 'title' => $title, 'pdbk' => $pdbk ] ) {
 				/** @var Title $title */
-
-				# Skip invalid entries.
-				# Result will be ugly, but prevents crash.
-				if ( $title === null ) {
-					continue;
-				}
-
 				# Check if it's a static known link, e.g. interwiki
 				if ( $title->isAlwaysKnown() ) {
 					$classes[$pdbk] = '';
-				} elseif ( $ns == NS_SPECIAL ) {
+				} elseif ( $ns === NS_SPECIAL ) {
 					$classes[$pdbk] = 'new';
 				} else {
 					$id = $linkCache->getGoodLinkID( $pdbk );
-					if ( $id != 0 ) {
+					if ( $id ) {
 						$classes[$pdbk] = $linkRenderer->getLinkClasses( $title );
 						$output->addLink( $title, $id );
 						$pagemap[$id] = $pdbk;
@@ -254,21 +244,21 @@ class LinkHolderArray {
 				$pdbk = $entry['pdbk'];
 				$title = $entry['title'];
 				$query = $entry['query'] ?? [];
-				$searchkey = "<!--LINK'\" $ns:$index-->";
+				$searchkey = "$ns:$index";
 				$displayTextHtml = $entry['text'];
 				if ( isset( $entry['selflink'] ) ) {
-					$replacePairs[$searchkey] = Linker::makeSelfLinkObj( $title, $displayTextHtml, $query );
+					$replacePairs[$searchkey] = Linker::makeSelfLinkObj(
+						$title, $displayTextHtml, $query, '', '',
+						Sanitizer::escapeIdForLink( $title->getFragment() )
+					);
 					continue;
 				}
-				if ( $displayTextHtml === '' ) {
-					$displayText = null;
-				} else {
-					$displayText = new HtmlArmor( $displayTextHtml );
-				}
+
+				$displayText = $displayTextHtml === '' ? null : new HtmlArmor( $displayTextHtml );
 				if ( !isset( $classes[$pdbk] ) ) {
 					$classes[$pdbk] = 'new';
 				}
-				if ( $classes[$pdbk] == 'new' ) {
+				if ( $classes[$pdbk] === 'new' ) {
 					$linkCache->addBadLinkObj( $title );
 					$output->addLink( $title, 0 );
 					$link = $linkRenderer->makeBrokenLink(
@@ -286,7 +276,7 @@ class LinkHolderArray {
 
 		# Do the thing
 		$text = preg_replace_callback(
-			'/(<!--LINK\'" .*?-->)/',
+			'/<!--LINK\'" (-?[\d:]+)-->/',
 			static function ( array $matches ) use ( $replacePairs ) {
 				return $replacePairs[$matches[1]];
 			},
@@ -299,7 +289,7 @@ class LinkHolderArray {
 	 * @param string &$text
 	 */
 	protected function replaceInterwiki( &$text ) {
-		if ( empty( $this->interwikis ) ) {
+		if ( !$this->interwikis ) {
 			return;
 		}
 
@@ -307,16 +297,13 @@ class LinkHolderArray {
 		$output = $this->parent->getOutput();
 		$replacePairs = [];
 		$linkRenderer = $this->parent->getLinkRenderer();
-		foreach ( $this->interwikis as $key => $link ) {
-			$replacePairs[$key] = $linkRenderer->makeLink(
-				$link['title'],
-				new HtmlArmor( $link['text'] )
-			);
-			$output->addInterwikiLink( $link['title'] );
+		foreach ( $this->interwikis as $key => [ 'title' => $title, 'text' => $linkText ] ) {
+			$replacePairs[$key] = $linkRenderer->makeLink( $title, new HtmlArmor( $linkText ) );
+			$output->addInterwikiLink( $title );
 		}
 
 		$text = preg_replace_callback(
-			'/<!--IWLINK\'" (.*?)-->/',
+			'/<!--IWLINK\'" (\d+)-->/',
 			static function ( array $matches ) use ( $replacePairs ) {
 				return $replacePairs[$matches[1]];
 			},
@@ -326,14 +313,13 @@ class LinkHolderArray {
 
 	/**
 	 * Modify $this->internals and $classes according to language variant linking rules
-	 * @param array &$classes
+	 * @param string[] &$classes
 	 */
 	protected function doVariants( &$classes ) {
 		$linkBatchFactory = MediaWikiServices::getInstance()->getLinkBatchFactory();
 		$linkBatch = $linkBatchFactory->newLinkBatch();
 		$variantMap = []; // maps $pdbkey_Variant => $keys (of link holders)
 		$output = $this->parent->getOutput();
-		$linkCache = MediaWikiServices::getInstance()->getLinkCache();
 		$titlesToBeConverted = '';
 		$titlesAttrs = [];
 
@@ -341,7 +327,7 @@ class LinkHolderArray {
 		// single string to all variants. This would improve parser's performance
 		// significantly.
 		foreach ( $this->internals as $ns => $entries ) {
-			if ( $ns == NS_SPECIAL ) {
+			if ( $ns === NS_SPECIAL ) {
 				continue;
 			}
 			foreach ( $entries as $index => [ 'title' => $title, 'pdbk' => $pdbk ] ) {
@@ -369,7 +355,7 @@ class LinkHolderArray {
 			$ns = $title->getNamespace();
 			$text = $title->getText();
 
-			foreach ( $titlesAllVariants as $variantName => $textVariants ) {
+			foreach ( $titlesAllVariants as $textVariants ) {
 				$textVariant = $textVariants[$i];
 				if ( $textVariant === $text ) {
 					continue;
@@ -380,7 +366,7 @@ class LinkHolderArray {
 				// Self-link checking for mixed/different variant titles. At this point, we
 				// already know the exact title does not exist, so the link cannot be to a
 				// variant of the current title that exists as a separate page.
-				if ( $variantTitle->equals( $parentTitle ) && !$title->hasFragment() ) {
+				if ( $variantTitle->equals( $parentTitle ) ) {
 					$this->internals[$ns][$index]['selflink'] = true;
 					continue 2;
 				}
@@ -392,7 +378,6 @@ class LinkHolderArray {
 
 		// process categories, check if a category exists in some variant
 		$categoryMap = []; // maps $category_variant => $category (dbkeys)
-		$varCategories = []; // category replacements oldDBkey => newDBkey
 		foreach ( $output->getCategoryNames() as $category ) {
 			$categoryTitle = Title::makeTitleSafe( NS_CATEGORY, $category );
 			$linkBatch->addObj( $categoryTitle );
@@ -400,84 +385,96 @@ class LinkHolderArray {
 			foreach ( $variants as $variant ) {
 				if ( $variant !== $category ) {
 					$variantTitle = Title::makeTitleSafe( NS_CATEGORY, $variant );
-					if ( $variantTitle === null ) {
-						continue;
+					if ( $variantTitle ) {
+						$linkBatch->addObj( $variantTitle );
+						$categoryMap[$variant] = [ $category, $categoryTitle ];
 					}
-					$linkBatch->addObj( $variantTitle );
-					$categoryMap[$variant] = [ $category, $categoryTitle ];
 				}
 			}
 		}
 
-		if ( !$linkBatch->isEmpty() ) {
-			// construct query
-			$dbr = wfGetDB( DB_REPLICA );
+		if ( $linkBatch->isEmpty() ) {
+			return;
+		}
 
-			$varRes = $dbr->newSelectQueryBuilder()
-				->select( LinkCache::getSelectFields() )
-				->from( 'page' )
-				->where( [ $linkBatch->constructSet( 'page', $dbr ) ] )
-				->caller( __METHOD__ )
-				->fetchResultSet();
+		// construct query
+		$dbr = MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
 
-			$pagemap = [];
-			$linkRenderer = $this->parent->getLinkRenderer();
+		$varRes = $dbr->newSelectQueryBuilder()
+			->select( LinkCache::getSelectFields() )
+			->from( 'page' )
+			->where( [ $linkBatch->constructSet( 'page', $dbr ) ] )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 
-			// for each found variants, figure out link holders and replace
-			foreach ( $varRes as $s ) {
-				$variantTitle = Title::makeTitle( $s->page_namespace, $s->page_title );
-				$varPdbk = $variantTitle->getPrefixedDBkey();
-				$vardbk = $variantTitle->getDBkey();
+		$pagemap = [];
+		$varCategories = [];
+		$linkCache = MediaWikiServices::getInstance()->getLinkCache();
+		$linkRenderer = $this->parent->getLinkRenderer();
 
-				$holderKeys = [];
-				if ( isset( $variantMap[$varPdbk] ) ) {
-					$holderKeys = $variantMap[$varPdbk];
-					$linkCache->addGoodLinkObjFromRow( $variantTitle, $s );
-					$output->addLink( $variantTitle, $s->page_id );
+		// for each found variants, figure out link holders and replace
+		foreach ( $varRes as $s ) {
+			$variantTitle = Title::makeTitle( $s->page_namespace, $s->page_title );
+			$varPdbk = $variantTitle->getPrefixedDBkey();
+
+			if ( !isset( $variantMap[$varPdbk] ) ) {
+				continue;
+			}
+
+			$linkCache->addGoodLinkObjFromRow( $variantTitle, $s );
+			$output->addLink( $variantTitle, $s->page_id );
+
+			// loop over link holders
+			foreach ( $variantMap[$varPdbk] as $key ) {
+				[ $ns, $index ] = explode( ':', $key, 2 );
+				$entry =& $this->internals[(int)$ns][(int)$index];
+
+				// The selflink we marked above might not have been the first
+				// $textVariants so be sure to skip any entries that have
+				// subsequently been marked.
+				if ( isset( $entry['selflink'] ) ) {
+					continue;
 				}
 
-				// loop over link holders
-				foreach ( $holderKeys as $key ) {
-					list( $ns, $index ) = explode( ':', $key, 2 );
-					$entry =& $this->internals[$ns][$index];
-					$pdbk = $entry['pdbk'];
+				$pdbk = $entry['pdbk'];
+				if ( !isset( $classes[$pdbk] ) || $classes[$pdbk] === 'new' ) {
+					// found link in some of the variants, replace the link holder data
+					$entry['title'] = $variantTitle;
+					$entry['pdbk'] = $varPdbk;
 
-					if ( !isset( $classes[$pdbk] ) || $classes[$pdbk] === 'new' ) {
-						// found link in some of the variants, replace the link holder data
-						$entry['title'] = $variantTitle;
-						$entry['pdbk'] = $varPdbk;
-
-						// set pdbk and colour
+					// set pdbk and colour if we haven't checked this title yet.
+					if ( !isset( $classes[$varPdbk] ) ) {
 						$classes[$varPdbk] = $linkRenderer->getLinkClasses( $variantTitle );
-						$pagemap[$s->page_id] = $pdbk;
-					}
-				}
-
-				// check if the object is a variant of a category
-				if ( isset( $categoryMap[$vardbk] ) ) {
-					list( $oldkey, $oldtitle ) = $categoryMap[$vardbk];
-					if ( !isset( $varCategories[$oldkey] ) && !$oldtitle->exists() ) {
-						$varCategories[$oldkey] = $vardbk;
+						$pagemap[$s->page_id] = $varPdbk;
 					}
 				}
 			}
-			$this->hookRunner->onGetLinkColours( $pagemap, $classes, $this->parent->getTitle() );
 
-			// rebuild the categories in original order (if there are replacements)
-			if ( $varCategories !== [] ) {
-				$newCats = [];
-				$originalCats = $output->getCategories();
-				foreach ( $originalCats as $cat => $sortkey ) {
-					// make the replacement
-					$newCats[$varCategories[$cat] ?? $cat] = $sortkey;
+			// check if the object is a variant of a category
+			$vardbk = $variantTitle->getDBkey();
+			if ( isset( $categoryMap[$vardbk] ) ) {
+				[ $oldkey, $oldtitle ] = $categoryMap[$vardbk];
+				if ( !isset( $varCategories[$oldkey] ) && !$oldtitle->exists() ) {
+					$varCategories[$oldkey] = $vardbk;
 				}
-				$output->setCategories( $newCats );
 			}
+		}
+		$this->hookRunner->onGetLinkColours( $pagemap, $classes, $this->parent->getTitle() );
+
+		// rebuild the categories in original order (if there are replacements)
+		if ( $varCategories !== [] ) {
+			$newCats = [];
+			foreach ( $output->getCategoryNames() as $cat ) {
+				$sortkey = $output->getCategorySortKey( $cat );
+				// make the replacement
+				$newCats[$varCategories[$cat] ?? $cat] = $sortkey;
+			}
+			$output->setCategories( $newCats );
 		}
 	}
 
 	/**
-	 * Replace <!--LINK--> and <!--IWLINK--> link placeholders with plain text of links
+	 * Replace <!--LINK'" …--> and <!--IWLINK'" …--> link placeholders with plain text of links
 	 * (not HTML-formatted).
 	 *
 	 * @param string $text
@@ -485,13 +482,13 @@ class LinkHolderArray {
 	 */
 	public function replaceText( $text ) {
 		return preg_replace_callback(
-			'/<!--(IW)?LINK\'" (.*?)-->/',
+			'/<!--(IW)?LINK\'" (-?[\d:]+)-->/',
 			function ( $matches ) {
-				list( $unchanged, $isInterwiki, $key ) = $matches;
+				[ $unchanged, $isInterwiki, $key ] = $matches;
 
 				if ( !$isInterwiki ) {
-					list( $ns, $index ) = explode( ':', $key, 2 );
-					return $this->internals[$ns][$index]['text'] ?? $unchanged;
+					[ $ns, $index ] = explode( ':', $key, 2 );
+					return $this->internals[(int)$ns][(int)$index]['text'] ?? $unchanged;
 				} else {
 					return $this->interwikis[$key]['text'] ?? $unchanged;
 				}
@@ -500,3 +497,6 @@ class LinkHolderArray {
 		);
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( LinkHolderArray::class, 'LinkHolderArray' );

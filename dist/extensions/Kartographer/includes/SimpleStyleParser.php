@@ -2,43 +2,50 @@
 
 namespace Kartographer;
 
-use FormatJson;
+use InvalidArgumentException;
 use JsonConfig\JCMapDataContent;
 use JsonConfig\JCSingleton;
 use JsonSchema\Validator;
-use LogicException;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\MediaWikiServices;
-use Parser;
-use Status;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\PPFrame;
+use StatusValue;
 use stdClass;
 
 /**
- * Parses and sanitizes text properties of GeoJSON/simplestyle by putting them through parser
+ * Parses and sanitizes text properties of GeoJSON/simplestyle by putting them through the MediaWiki
+ * wikitext parser.
+ *
+ * @license MIT
  */
 class SimpleStyleParser {
 
-	private const PARSED_PROPS = [ 'title', 'description' ];
+	/**
+	 * Maximum for marker-symbol="-number…" counters. See T141335 for discussion to possibly
+	 * increase this to 199 or even 999.
+	 */
+	private const MAX_NUMERIC_COUNTER = 99;
+	public const WIKITEXT_PROPERTIES = [ 'title', 'description' ];
 
-	/** @var MediaWikiWikitextParser */
-	private $parser;
+	private WikitextParser $parser;
+	private array $options;
+	private string $mapServer;
 
-	/** @var array */
-	private $options;
-
-	/** @var string */
-	private $mapService;
+	public static function newFromParser( Parser $parser, ?PPFrame $frame = null ): self {
+		return new self( new MediaWikiWikitextParser( $parser, $frame ) );
+	}
 
 	/**
-	 * @param MediaWikiWikitextParser|Parser $parser
+	 * @param WikitextParser $parser
 	 * @param array $options Set ['saveUnparsed' => true] to back up the original values of title
 	 *                       and description in _origtitle and _origdescription
 	 */
-	public function __construct( $parser, array $options = [] ) {
-		// TODO: Temporary compatibility, remove when not needed any more
-		$this->parser = $parser instanceof Parser ? new MediaWikiWikitextParser( $parser ) : $parser;
+	public function __construct( WikitextParser $parser, array $options = [] ) {
+		$this->parser = $parser;
 		$this->options = $options;
 		// @fixme: More precise config?
-		$this->mapService = MediaWikiServices::getInstance()
+		$this->mapServer = MediaWikiServices::getInstance()
 			->getMainConfig()
 			->get( 'KartographerMapServer' );
 	}
@@ -47,16 +54,16 @@ class SimpleStyleParser {
 	 * Parses string into JSON and performs validation/sanitization
 	 *
 	 * @param string|null $input
-	 * @return Status
+	 * @return StatusValue with the value being [ 'data' => stdClass[], 'schema-errors' => array[] ]
 	 */
-	public function parse( $input ): Status {
+	public function parse( ?string $input ): StatusValue {
 		if ( !$input || trim( $input ) === '' ) {
-			return Status::newGood( [] );
+			return StatusValue::newGood( [ 'data' => [] ] );
 		}
 
 		$status = FormatJson::parse( $input, FormatJson::TRY_FIXING | FormatJson::STRIP_COMMENTS );
 		if ( !$status->isOK() ) {
-			return Status::newFatal( 'kartographer-error-json', $status->getMessage() );
+			return StatusValue::newFatal( 'kartographer-error-json', $status->getMessage() );
 		}
 
 		return $this->parseObject( $status->value );
@@ -66,13 +73,13 @@ class SimpleStyleParser {
 	 * Validate and sanitize a parsed GeoJSON data object
 	 *
 	 * @param array|stdClass &$data
-	 * @return Status
+	 * @return StatusValue
 	 */
-	public function parseObject( &$data ): Status {
+	public function parseObject( &$data ): StatusValue {
 		if ( !is_array( $data ) ) {
 			$data = [ $data ];
 		}
-		$status = $this->validateContent( $data );
+		$status = $this->validateGeoJSON( $data );
 		if ( $status->isOK() ) {
 			$status = $this->normalizeAndSanitize( $data );
 		}
@@ -80,91 +87,109 @@ class SimpleStyleParser {
 	}
 
 	/**
-	 * Normalize an object
-	 *
 	 * @param stdClass[]|stdClass &$data
-	 * @return Status
+	 * @return StatusValue
 	 */
-	public function normalizeAndSanitize( &$data ): Status {
-		$status = $this->normalize( $data );
-		$this->sanitize( $data );
+	public function normalizeAndSanitize( &$data ): StatusValue {
+		$status = $this->recursivelyNormalizeExternalData( $data );
+		$this->recursivelySanitizeAndParseWikitext( $data );
 		return $status;
 	}
 
 	/**
 	 * @param stdClass[] $values
-	 * @param int[] &$counters
-	 * @return array|false [ string $markerSymbol, stdClass $markerProperties ]
+	 * @param array<string,int> &$counters
+	 * @return array{string,stdClass}|null [ string $firstMarkerSymbol, stdClass $firstMarkerProperties ]
 	 */
-	public static function updateMarkerSymbolCounters( array $values, array &$counters = [] ) {
-		$firstMarker = false;
+	public static function updateMarkerSymbolCounters( array $values, array &$counters = [] ): ?array {
+		$firstMarker = null;
 		foreach ( $values as $item ) {
 			// While the input should be validated, it's still arbitrary user input.
 			if ( !( $item instanceof stdClass ) ) {
 				continue;
 			}
 
-			if ( isset( $item->properties->{'marker-symbol'} ) ) {
-				$marker = $item->properties->{'marker-symbol'};
-				// all special markers begin with a dash
-				// both 'number' and 'letter' have 6 symbols
-				$type = substr( $marker, 0, 7 );
-				$isNumber = $type === '-number';
-				if ( $isNumber || $type === '-letter' ) {
-					// numbers 1..99 or letters a..z
-					$count = $counters[$marker] ?? 0;
-					if ( $count < ( $isNumber ? 99 : 26 ) ) {
-						$counters[$marker] = ++$count;
-					}
-					$marker = $isNumber ? strval( $count ) : chr( ord( 'a' ) + $count - 1 );
-					$item->properties->{'marker-symbol'} = $marker;
-					if ( $firstMarker === false ) {
-						// GeoJSON is in lowercase, but the letter is shown as uppercase
-						$firstMarker = [ mb_strtoupper( $marker ), $item->properties ];
-					}
+			$marker = $item->properties->{'marker-symbol'} ?? '';
+			$isNumber = str_starts_with( $marker, '-number' );
+			if ( $isNumber || str_starts_with( $marker, '-letter' ) ) {
+				// numbers 1..99 or letters a..z
+				$count = $counters[$marker] ?? 0;
+				if ( $count < ( $isNumber ? self::MAX_NUMERIC_COUNTER : 26 ) ) {
+					$counters[$marker] = ++$count;
 				}
+				$marker = $isNumber ? strval( $count ) : chr( ord( 'a' ) + $count - 1 );
+				$item->properties->{'marker-symbol'} = $marker;
+				// GeoJSON is in lowercase, but the letter is shown as uppercase
+				$firstMarker ??= [ mb_strtoupper( $marker ), $item->properties ];
 			}
-			if ( !isset( $item->type ) ) {
-				continue;
-			}
-			$type = $item->type;
-			if ( $type === 'FeatureCollection' && isset( $item->features ) ) {
-				$tmp = self::updateMarkerSymbolCounters( $item->features, $counters );
-				if ( $firstMarker === false ) {
-					$firstMarker = $tmp;
-				}
-			} elseif ( $type === 'GeometryCollection' && isset( $item->geometries ) ) {
-				$tmp = self::updateMarkerSymbolCounters( $item->geometries, $counters );
-				if ( $firstMarker === false ) {
-					$firstMarker = $tmp;
-				}
+
+			// Recurse into FeatureCollection and GeometryCollection
+			$features = $item->features ?? $item->geometries ?? null;
+			if ( $features ) {
+				$firstMarker ??= self::updateMarkerSymbolCounters( $features, $counters );
 			}
 		}
 		return $firstMarker;
 	}
 
 	/**
-	 * @param mixed $json
-	 * @return Status
+	 * @param stdClass[] $values
+	 * @return array{string,stdClass}|null Same as {@see updateMarkerSymbolCounters}, but with the
+	 *  $firstMarkerSymbol name not updated
 	 */
-	private function validateContent( $json ): Status {
-		$schema = self::loadSchema();
+	public static function findFirstMarkerSymbol( array $values ): ?array {
+		foreach ( $values as $item ) {
+			// While the input should be validated, it's still arbitrary user input.
+			if ( !( $item instanceof stdClass ) ) {
+				continue;
+			}
+
+			$marker = $item->properties->{'marker-symbol'} ?? '';
+			if ( str_starts_with( $marker, '-number' ) || str_starts_with( $marker, '-letter' ) ) {
+				return [ $marker, $item->properties ];
+			}
+
+			// Recurse into FeatureCollection and GeometryCollection
+			$features = $item->features ?? $item->geometries ?? null;
+			if ( $features ) {
+				$found = self::findFirstMarkerSymbol( $features );
+				if ( $found ) {
+					return $found;
+				}
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * @param stdClass[] $data
+	 * @return StatusValue
+	 */
+	private function validateGeoJSON( array $data ): StatusValue {
+		// Basic top-level validation. The JSON schema validation below does this again, but gives
+		// terrible, very hard to understand error messages.
+		foreach ( $data as $geoJSON ) {
+			if ( !( $geoJSON instanceof stdClass ) ) {
+				return StatusValue::newFatal( 'kartographer-error-json-object' );
+			}
+			if ( !isset( $geoJSON->type ) || !is_string( $geoJSON->type ) || !$geoJSON->type ) {
+				return StatusValue::newFatal( 'kartographer-error-json-type' );
+			}
+		}
+
+		$schema = (object)[ '$ref' => 'file://' . dirname( __DIR__ ) . '/schemas/geojson.json' ];
 		$validator = new Validator();
-		$validator->check( $json, $schema );
+		$validator->check( $data, $schema );
 
 		if ( !$validator->isValid() ) {
-			$status = Status::newFatal( 'kartographer-error-bad_data' );
-			foreach ( $validator->getErrors() as $error ) {
-				$status->fatal(
-					'kartographer-error-json-schema-error',
-					wfEscapeWikiText( $error['pointer'] ?? '' ),
-					wfEscapeWikiText( $error['message'] ?? '' )
-				);
-			}
+			$errors = $validator->getErrors( Validator::ERROR_DOCUMENT_VALIDATION );
+			$status = StatusValue::newFatal( 'kartographer-error-bad_data' );
+			$status->setResult( false, [ 'schema-errors' => $errors ] );
 			return $status;
 		}
 
-		return Status::newGood();
+		return StatusValue::newGood();
 	}
 
 	/**
@@ -174,10 +199,10 @@ class SimpleStyleParser {
 	 *
 	 * @param stdClass[]|stdClass &$json
 	 */
-	protected function sanitize( &$json ) {
+	private function recursivelySanitizeAndParseWikitext( &$json ): void {
 		if ( is_array( $json ) ) {
 			foreach ( $json as &$element ) {
-				$this->sanitize( $element );
+				$this->recursivelySanitizeAndParseWikitext( $element );
 			}
 		} elseif ( is_object( $json ) ) {
 			foreach ( array_keys( get_object_vars( $json ) ) as $prop ) {
@@ -185,32 +210,31 @@ class SimpleStyleParser {
 				if ( str_starts_with( $prop, '_' ) ) {
 					unset( $json->$prop );
 				} else {
-					$this->sanitize( $json->$prop );
+					$this->recursivelySanitizeAndParseWikitext( $json->$prop );
 				}
 			}
 
-			if ( property_exists( $json, 'properties' ) && is_object( $json->properties ) ) {
-				$this->sanitizeProperties( $json->properties );
+			if ( isset( $json->properties ) && is_object( $json->properties ) ) {
+				$this->parseWikitextProperties( $json->properties );
 			}
 		}
 	}
 
 	/**
-	 * Normalizes JSON
-	 *
 	 * @param stdClass[]|stdClass &$json
-	 * @return Status
+	 * @return StatusValue
 	 */
-	protected function normalize( &$json ): Status {
-		$status = Status::newGood();
+	private function recursivelyNormalizeExternalData( &$json ): StatusValue {
+		$status = StatusValue::newGood();
 		if ( is_array( $json ) ) {
 			foreach ( $json as &$element ) {
-				$this->normalize( $element );
+				$status->merge( $this->recursivelyNormalizeExternalData( $element ) );
 			}
+			unset( $element );
 		} elseif ( is_object( $json ) && isset( $json->type ) && $json->type === 'ExternalData' ) {
-			$status->merge( $this->normalizeExternalData( $json ) );
+			$status->merge( $this->normalizeExternalDataServices( $json ) );
 		}
-		$status->value = $json;
+		$status->value = [ 'data' => $json ];
 
 		return $status;
 	}
@@ -219,9 +243,9 @@ class SimpleStyleParser {
 	 * Canonicalizes an ExternalData object
 	 *
 	 * @param stdClass &$object
-	 * @return Status
+	 * @return StatusValue
 	 */
-	private function normalizeExternalData( &$object ): Status {
+	private function normalizeExternalDataServices( stdClass &$object ): StatusValue {
 		$service = $object->service ?? null;
 		$ret = (object)[
 			'type' => 'ExternalData',
@@ -242,7 +266,7 @@ class SimpleStyleParser {
 				if ( isset( $object->query ) ) {
 					$query['query'] = $object->query;
 				}
-				$ret->url = $this->mapService . '/' .
+				$ret->url = $this->mapServer . '/' .
 					// 'geomask' service is the same as inverted geoshape service
 					// Kartotherian does not support it, request it as geoshape
 					( $service === 'geomask' ? 'geoshape' : $service ) .
@@ -257,7 +281,7 @@ class SimpleStyleParser {
 				if ( !$jct || JCSingleton::getContentClass( $jct->getConfig()->model ) !==
 							  JCMapDataContent::class
 				) {
-					return Status::newFatal( 'kartographer-error-title', $object->title );
+					return StatusValue::newFatal( 'kartographer-error-title', $object->title );
 				}
 				$query = [
 					'format' => 'json',
@@ -269,24 +293,22 @@ class SimpleStyleParser {
 				break;
 
 			default:
-				throw new LogicException( "Unexpected service name '$service'" );
+				throw new InvalidArgumentException( "Unexpected service name '$service'" );
 		}
 
 		$object = $ret;
-		return Status::newGood();
+		return StatusValue::newGood();
 	}
 
 	/**
-	 * Sanitizes properties
-	 *
 	 * HACK: this function supports JsonConfig-style localization that doesn't pass validation
 	 *
 	 * @param stdClass $properties
 	 */
-	private function sanitizeProperties( $properties ) {
+	private function parseWikitextProperties( stdClass $properties ) {
 		$saveUnparsed = $this->options['saveUnparsed'] ?? false;
 
-		foreach ( self::PARSED_PROPS as $prop ) {
+		foreach ( self::WIKITEXT_PROPERTIES as $prop ) {
 			if ( !property_exists( $properties, $prop ) ) {
 				continue;
 			}
@@ -294,7 +316,7 @@ class SimpleStyleParser {
 			$origProp = "_orig$prop";
 			$property = &$properties->$prop;
 
-			if ( is_string( $property ) ) {
+			if ( is_string( $property ) && $property !== '' ) {
 				if ( $saveUnparsed ) {
 					$properties->$origProp = $property;
 				}
@@ -304,7 +326,7 @@ class SimpleStyleParser {
 					$properties->$origProp = (object)[];
 				}
 				foreach ( $property as $language => &$text ) {
-					if ( !is_string( $text ) ) {
+					if ( !is_string( $text ) || $text === '' ) {
 						unset( $property->$language );
 					} else {
 						if ( $saveUnparsed ) {
@@ -313,6 +335,7 @@ class SimpleStyleParser {
 						$text = $this->parser->parseWikitext( $text );
 					}
 				}
+				unset( $text );
 
 				// Delete empty localizations
 				if ( !get_object_vars( $property ) ) {
@@ -326,18 +349,4 @@ class SimpleStyleParser {
 		}
 	}
 
-	/**
-	 * @return stdClass
-	 */
-	private static function loadSchema(): stdClass {
-		static $schema;
-
-		if ( !$schema ) {
-			$schema = (object)[
-				'$ref' => 'file://' . dirname( __DIR__ ) . '/schemas/geojson.json',
-			];
-		}
-
-		return $schema;
-	}
 }

@@ -2,7 +2,8 @@
 
 namespace Wikibase\Repo\Specials;
 
-use SpecialPage;
+use MediaWiki\Message\Message;
+use MediaWiki\SpecialPage\SpecialPage;
 use UserBlockedError;
 use Wikibase\Lib\StringNormalizer;
 
@@ -26,7 +27,7 @@ abstract class SpecialWikibasePage extends SpecialPage {
 	/**
 	 * @param string $name
 	 * @param string $restriction
-	 * @param bool   $listed
+	 * @param bool $listed
 	 */
 	public function __construct( $name = '', $restriction = '', $listed = true ) {
 		parent::__construct( $name, $restriction, $listed );
@@ -48,10 +49,10 @@ abstract class SpecialWikibasePage extends SpecialPage {
 	/**
 	 * @see SpecialPage::getDescription
 	 *
-	 * @return string
+	 * @return Message
 	 */
 	public function getDescription() {
-		return $this->msg( 'special-' . strtolower( $this->getName() ) )->text();
+		return $this->msg( 'special-' . strtolower( $this->getName() ) );
 	}
 
 	/**
@@ -60,7 +61,7 @@ abstract class SpecialWikibasePage extends SpecialPage {
 	public function setHeaders() {
 		$out = $this->getOutput();
 		$out->setArticleRelated( false );
-		$out->setPageTitle( $this->getDescription() );
+		$out->setPageTitleMsg( $this->getDescription() );
 	}
 
 	/**
@@ -86,7 +87,7 @@ abstract class SpecialWikibasePage extends SpecialPage {
 	protected function checkBlocked() {
 		$block = $this->getUser()->getBlock();
 		if ( $block && $block->isSitewide() ) {
-			throw new UserBlockedError( $this->getUser()->getBlock() );
+			throw new UserBlockedError( $block );
 		}
 	}
 

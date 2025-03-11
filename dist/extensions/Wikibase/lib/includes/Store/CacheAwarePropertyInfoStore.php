@@ -5,8 +5,9 @@ namespace Wikibase\Lib\Store;
 use InvalidArgumentException;
 use MediaWiki\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
-use WANObjectCache;
 use Wikibase\DataModel\Entity\NumericPropertyId;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * Implementation of PropertyInfoStore wrapping the instance modifying the local
@@ -21,8 +22,6 @@ use Wikibase\DataModel\Entity\NumericPropertyId;
  */
 class CacheAwarePropertyInfoStore implements PropertyInfoStore {
 
-	private const SINGLE_PROPERTY_CACHE_KEY_SEPARATOR = ':';
-
 	public const CACHE_CLASS = 'CacheAwarePropertyInfoStore';
 
 	/**
@@ -31,7 +30,7 @@ class CacheAwarePropertyInfoStore implements PropertyInfoStore {
 	protected $innerStore;
 
 	/**
-	 * @var WANObjectCache
+	 * @var WANObjectCache|BagOStuff
 	 */
 	protected $cache;
 
@@ -52,14 +51,14 @@ class CacheAwarePropertyInfoStore implements PropertyInfoStore {
 
 	/**
 	 * @param PropertyInfoStore $store The info store to call back to.
-	 * @param WANObjectCache $cache
-	 * @param int $cacheDuration       Number of seconds to keep the cached version for.
+	 * @param WANObjectCache|BagOStuff $cache
+	 * @param int $cacheDuration Number of seconds to keep the cached version for.
 	 *                                 Defaults to 3600 seconds = 1 hour.
-	 * @param string $cacheKeyGroup    Group name of the Wikibases to be used when generating global cache keys
+	 * @param string $cacheKeyGroup Group name of the Wikibases to be used when generating global cache keys
 	 */
 	public function __construct(
 		PropertyInfoStore $store,
-		WANObjectCache $cache,
+		$cache,
 		$cacheDuration = 3600,
 		$cacheKeyGroup = ''
 	) {
@@ -92,7 +91,6 @@ class CacheAwarePropertyInfoStore implements PropertyInfoStore {
 		// update primary store
 		$this->innerStore->setPropertyInfo( $propertyId, $info );
 
-		$allPropertyInfo = $this->cache->get( $this->getFullTableCacheKey() );
 		$id = $propertyId->getSerialization();
 
 		// Update per property cache
@@ -108,11 +106,8 @@ class CacheAwarePropertyInfoStore implements PropertyInfoStore {
 		$this->deleteCacheKeyForProperty( $propertyId );
 		$this->deleteFullTableCacheKey();
 
-		// Set for current Data Center only
-		// Note: when set for current DC during a write a shorter ttl could be used to ensure a read away from writes recaches
-		// the data in the not too distant future...
-		$this->cache->set( $this->getSinglePropertyCacheKey( $propertyId ), $info, $this->cacheDuration );
-		$this->cache->set( $this->getFullTableCacheKey(), $allPropertyInfo, $this->cacheDuration );
+		// Trying to set the same key would be ignored if it is within the
+		// tombstone TTL, so don't do that.
 	}
 
 	/**
@@ -133,10 +128,6 @@ class CacheAwarePropertyInfoStore implements PropertyInfoStore {
 			return false;
 		}
 
-		$allPropertyInfo = $this->cache->get( $this->getFullTableCacheKey() );
-
-		unset( $allPropertyInfo[$id] );
-
 		// Update external cache
 		$this->logger->debug(
 			'{method}: updating cache after removing property {id}',
@@ -150,11 +141,8 @@ class CacheAwarePropertyInfoStore implements PropertyInfoStore {
 		$this->deleteCacheKeyForProperty( $propertyId );
 		$this->deleteFullTableCacheKey();
 
-		// Set for current Data Center only
-		// Note: when set for current DC during a write a shorter ttl could be used to ensure a read away from writes recaches
-		// the data in the not too distant future...
-		$this->cache->set( $this->getFullTableCacheKey(), $allPropertyInfo, $this->cacheDuration );
-
+		// Trying to set the same key would be ignored if it is within the
+		// tombstone TTL, so don't do that.
 		return true;
 	}
 

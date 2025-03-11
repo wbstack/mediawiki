@@ -2,9 +2,10 @@
 
 namespace Wikibase\Client\Hooks;
 
+use MediaWiki\Hook\GetDoubleUnderscoreIDsHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
-use Parser;
-use PPFrame;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\PPFrame;
 use Wikibase\Client\DataAccess\ParserFunctions\Runner;
 use Wikibase\Lib\ParserFunctions\CommaSeparatedList;
 use Wikibase\Lib\SettingsArray;
@@ -14,7 +15,7 @@ use Wikibase\Lib\SettingsArray;
  * @author Katie Filbert < aude.wiki@gmail.com >
  * @author Thiemo Kreuz
  */
-class ParserFunctionRegistrant implements ParserFirstCallInitHook {
+class ParserFunctionRegistrant implements ParserFirstCallInitHook, GetDoubleUnderscoreIDsHook {
 
 	/**
 	 * @var bool Setting to enable use of property parser function.
@@ -45,6 +46,13 @@ class ParserFunctionRegistrant implements ParserFirstCallInitHook {
 		$this->registerNoLangLinkHandler( $parser );
 		$this->registerShortDescHandler( $parser );
 		$this->registerParserFunctions( $parser );
+	}
+
+	/**
+	 * @param string[] &$doubleUnderscoreIDs
+	 */
+	public function onGetDoubleUnderscoreIDs( &$doubleUnderscoreIDs ): void {
+		$doubleUnderscoreIDs[] = 'expectedUnconnectedPage';
 	}
 
 	private function registerNoLangLinkHandler( Parser $parser ) {

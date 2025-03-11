@@ -2,9 +2,9 @@
 
 namespace Wikibase\Repo;
 
-use Language;
-use Message;
-use OutputPage;
+use MediaWiki\Language\Language;
+use MediaWiki\Message\Message;
+use MediaWiki\Output\OutputPage;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -82,8 +82,8 @@ class OutputPageJsConfigBuilder {
 		return [
 			'wbCopyright' => [
 				'version' => $versionMessage->parse(),
-				'messageHtml' => $copyrightMessage->inLanguage( $language )->parse()
-			]
+				'messageHtml' => $copyrightMessage->inLanguage( $language )->parse(),
+			],
 		];
 	}
 

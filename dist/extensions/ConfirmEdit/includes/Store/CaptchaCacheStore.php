@@ -2,17 +2,16 @@
 
 namespace MediaWiki\Extension\ConfirmEdit\Store;
 
-use BagOStuff;
 use MediaWiki\MediaWikiServices;
+use Wikimedia\ObjectCache\BagOStuff;
 
 class CaptchaCacheStore extends CaptchaStore {
 	/** @var BagOStuff */
-	private $cache;
+	private $store;
 
 	public function __construct() {
 		parent::__construct();
-
-		$this->cache = MediaWikiServices::getInstance()->getMainObjectStash();
+		$this->store = MediaWikiServices::getInstance()->getMicroStash();
 	}
 
 	/**
@@ -21,11 +20,13 @@ class CaptchaCacheStore extends CaptchaStore {
 	public function store( $index, $info ) {
 		global $wgCaptchaSessionExpiration;
 
-		$cache = $this->cache;
-		$cache->set(
-			$cache->makeKey( 'captcha', $index ),
+		$this->store->set(
+			$this->store->makeKey( 'captcha', $index ),
 			$info,
-			$wgCaptchaSessionExpiration
+			$wgCaptchaSessionExpiration,
+			// Assume the write will reach the master DC before the user sends the
+			// HTTP POST request attempted to solve the captcha and perform an action
+			$this->store::WRITE_BACKGROUND
 		);
 	}
 
@@ -33,16 +34,14 @@ class CaptchaCacheStore extends CaptchaStore {
 	 * @inheritDoc
 	 */
 	public function retrieve( $index ) {
-		$cache = $this->cache;
-		return $cache->get( $cache->makeKey( 'captcha', $index ) ) ?: false;
+		return $this->store->get( $this->store->makeKey( 'captcha', $index ) );
 	}
 
 	/**
 	 * @inheritDoc
 	 */
 	public function clear( $index ) {
-		$cache = $this->cache;
-		$cache->delete( $cache->makeKey( 'captcha', $index ) );
+		$this->store->delete( $this->store->makeKey( 'captcha', $index ) );
 	}
 
 	public function cookiesNeeded() {

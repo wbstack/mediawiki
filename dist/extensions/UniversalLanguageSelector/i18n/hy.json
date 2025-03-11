@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"23artashes",
+			"Kareyac",
 			"M hamlet",
 			"Xelgen",
 			"Դավիթ Սարոյան",
@@ -60,9 +61,9 @@
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Եվս մեկը|Եվս $1}}",
 	"ext-uls-compact-link-info": "Բոլոր լեզուները (նախնական ցանկը կազմված է ձեր և մյուսների կողմից հաճախ ընտրված տարբերակները)",
 	"prefs-languages": "Լեզուներ",
-	"ext-uls-actions-menu-header": "Այլ ընտրանքներ",
 	"ext-uls-actions-menu-language-settings-item-label": "Բացել լեզվի կարգավորումները",
 	"ext-uls-empty-state-header": "Լեզուներ դեռ չկան",
 	"ext-uls-empty-state-desc": "Տվյալ պահին մատչելի լեզուներ չկան",
-	"ext-uls-empty-state-header-actions-available": "Լեզուներ դեռ չկան։ Ավելացնե՞լ։"
+	"ext-uls-empty-state-header-actions-available": "Լեզուներ դեռ չկան։ Ավելացնե՞լ։",
+	"ext-uls-add-languages-button-label": "Ավելացնել լեզուներ"
 }

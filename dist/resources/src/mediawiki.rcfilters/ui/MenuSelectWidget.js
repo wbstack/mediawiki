@@ -1,23 +1,22 @@
-var FilterMenuHeaderWidget = require( './FilterMenuHeaderWidget.js' ),
+const FilterMenuHeaderWidget = require( './FilterMenuHeaderWidget.js' ),
 	HighlightPopupWidget = require( './HighlightPopupWidget.js' ),
 	FilterMenuSectionOptionWidget = require( './FilterMenuSectionOptionWidget.js' ),
-	FilterMenuOptionWidget = require( './FilterMenuOptionWidget.js' ),
-	MenuSelectWidget;
+	FilterMenuOptionWidget = require( './FilterMenuOptionWidget.js' );
 
 /**
- * A floating menu widget for the filter list
+ * A floating menu widget for the filter list.
  *
  * @class mw.rcfilters.ui.MenuSelectWidget
+ * @ignore
  * @extends OO.ui.MenuSelectWidget
  *
- * @constructor
  * @param {mw.rcfilters.Controller} controller Controller
  * @param {mw.rcfilters.dm.FiltersViewModel} model View model
  * @param {Object} [config] Configuration object
- * @cfg {boolean} [isMobile] a boolean flag determining whether the menu
+ * @param {boolean} [config.isMobile] a boolean flag determining whether the menu
  * should display a header or not (the header is omitted on mobile).
- * @cfg {jQuery} [$overlay] A jQuery object serving as overlay for popups
- * @cfg {Object[]} [footers] An array of objects defining the footers for
+ * @param {jQuery} [config.$overlay] A jQuery object serving as overlay for popups
+ * @param {Object[]} [config.footers] An array of objects defining the footers for
  *  this menu, with a definition whether they appear per specific views.
  *  The expected structure is:
  *  [
@@ -29,9 +28,7 @@ var FilterMenuHeaderWidget = require( './FilterMenuHeaderWidget.js' ),
  *     }
  *  ]
  */
-MenuSelectWidget = function MwRcfiltersUiMenuSelectWidget( controller, model, config ) {
-	var header;
-
+const MenuSelectWidget = function MwRcfiltersUiMenuSelectWidget( controller, model, config ) {
 	config = config || {};
 
 	this.controller = controller;
@@ -46,7 +43,7 @@ MenuSelectWidget = function MwRcfiltersUiMenuSelectWidget( controller, model, co
 	this.footers = [];
 
 	// Parent
-	MenuSelectWidget.parent.call( this, $.extend( config, {
+	MenuSelectWidget.super.call( this, Object.assign( config, {
 		$autoCloseIgnore: this.$overlay,
 		width: config.isMobile ? undefined : 650,
 		// Our filtering is done through the model
@@ -57,6 +54,7 @@ MenuSelectWidget = function MwRcfiltersUiMenuSelectWidget( controller, model, co
 			.addClass( 'mw-rcfilters-ui-menuSelectWidget-group' )
 	);
 
+	let header;
 	if ( !config.isMobile ) {
 		// When hiding the header (i.e. mobile mode) avoid problems
 		// with clippable and the menu's fixed width.
@@ -96,8 +94,8 @@ MenuSelectWidget = function MwRcfiltersUiMenuSelectWidget( controller, model, co
 	// Append all footers; we will control their visibility
 	// based on view
 	config.footers = config.isMobile ? [] : config.footers || [];
-	config.footers.forEach( function ( footerData ) {
-		var isSticky = footerData.sticky === undefined ? true : !!footerData.sticky,
+	config.footers.forEach( ( footerData ) => {
+		const isSticky = footerData.sticky === undefined ? true : !!footerData.sticky,
 			adjustedData = {
 				// Wrap the element with our own footer wrapper
 				// The following classes are used here:
@@ -119,7 +117,7 @@ MenuSelectWidget = function MwRcfiltersUiMenuSelectWidget( controller, model, co
 				this.$body.append( adjustedData.$element );
 			}
 		}
-	}.bind( this ) );
+	} );
 
 	// Switch to the correct view
 	this.updateView();
@@ -141,7 +139,7 @@ MenuSelectWidget.prototype.onModelSearchChange = function () {
  */
 MenuSelectWidget.prototype.toggle = function ( show ) {
 	this.lazyMenuCreation();
-	MenuSelectWidget.parent.prototype.toggle.call( this, show );
+	MenuSelectWidget.super.prototype.toggle.call( this, show );
 	// Always open this menu downwards. FilterTagMultiselectWidget scrolls it into view.
 	this.setVerticalPosition( 'below' );
 };
@@ -150,7 +148,7 @@ MenuSelectWidget.prototype.toggle = function ( show ) {
  * lazy creation of the menu
  */
 MenuSelectWidget.prototype.lazyMenuCreation = function () {
-	var widget = this,
+	const widget = this,
 		items = [],
 		viewGroupCount = {},
 		groups = this.model.getFilterGroups();
@@ -167,7 +165,7 @@ MenuSelectWidget.prototype.lazyMenuCreation = function () {
 
 	// Count groups per view
 	// eslint-disable-next-line no-jquery/no-each-util
-	$.each( groups, function ( groupName, groupModel ) {
+	$.each( groups, ( groupName, groupModel ) => {
 		if ( !groupModel.isHidden() ) {
 			viewGroupCount[ groupModel.getView() ] = viewGroupCount[ groupModel.getView() ] || 0;
 			viewGroupCount[ groupModel.getView() ]++;
@@ -175,8 +173,8 @@ MenuSelectWidget.prototype.lazyMenuCreation = function () {
 	} );
 
 	// eslint-disable-next-line no-jquery/no-each-util
-	$.each( groups, function ( groupName, groupModel ) {
-		var currentItems = [],
+	$.each( groups, ( groupName, groupModel ) => {
+		const currentItems = [],
 			view = groupModel.getView();
 
 		if ( !groupModel.isHidden() ) {
@@ -196,12 +194,12 @@ MenuSelectWidget.prototype.lazyMenuCreation = function () {
 			}
 
 			// Add items
-			widget.model.getGroupFilters( groupName ).forEach( function ( filterItem ) {
+			widget.model.getGroupFilters( groupName ).forEach( ( filterItem ) => {
 				currentItems.push(
 					new FilterMenuOptionWidget(
 						widget.controller,
 						widget.model,
-						widget.model.getInvertModel(),
+						widget.model.getInvertModel( view ),
 						filterItem,
 						widget.highlightPopup,
 						{
@@ -215,7 +213,7 @@ MenuSelectWidget.prototype.lazyMenuCreation = function () {
 			// without rebuilding the widgets each time
 			widget.views[ view ] = widget.views[ view ] || [];
 			widget.views[ view ] = widget.views[ view ].concat( currentItems );
-			items = items.concat( currentItems );
+			items.push( ...currentItems );
 		}
 	} );
 
@@ -236,7 +234,7 @@ MenuSelectWidget.prototype.onModelInitialize = function () {
  * Update view
  */
 MenuSelectWidget.prototype.updateView = function () {
-	var viewName = this.model.getCurrentView();
+	const viewName = this.model.getCurrentView();
 
 	if ( this.views[ viewName ] && this.currentView !== viewName ) {
 		this.updateFooterVisibility( viewName );
@@ -267,7 +265,7 @@ MenuSelectWidget.prototype.updateView = function () {
 MenuSelectWidget.prototype.updateFooterVisibility = function ( currentView ) {
 	currentView = currentView || this.model.getCurrentView();
 
-	this.footers.forEach( function ( data ) {
+	this.footers.forEach( ( data ) => {
 		data.$element.toggle(
 			// This footer should only be shown if it is configured
 			// for all views or for this specific view
@@ -282,15 +280,14 @@ MenuSelectWidget.prototype.updateFooterVisibility = function ( currentView ) {
  * widget appears if the menu is empty.
  */
 MenuSelectWidget.prototype.postProcessItems = function () {
-	var i,
-		itemWasSelected = false,
-		items = this.getItems();
+	let itemWasSelected = false;
+	const items = this.getItems();
 
 	// If we are not already selecting an item, always make sure
 	// that the top item is selected
 	if ( !this.userSelecting ) {
 		// Select the first item in the list
-		for ( i = 0; i < items.length; i++ ) {
+		for ( let i = 0; i < items.length; i++ ) {
 			if (
 				!( items[ i ] instanceof OO.ui.MenuSectionOptionWidget ) &&
 				items[ i ].isVisible()
@@ -306,33 +303,30 @@ MenuSelectWidget.prototype.postProcessItems = function () {
 		}
 	}
 
-	this.noResults.toggle( !this.getItems().some( function ( item ) {
-		return item.isVisible();
-	} ) );
+	this.noResults.toggle( !this.getItems().some( ( item ) => item.isVisible() ) );
 };
 
 /**
  * Get the option widget that matches the model given
  *
+ * @ignore
  * @param {mw.rcfilters.dm.ItemModel} model Item model
  * @return {mw.rcfilters.ui.ItemMenuOptionWidget} Option widget
  */
 MenuSelectWidget.prototype.getItemFromModel = function ( model ) {
 	this.lazyMenuCreation();
-	return this.views[ model.getGroupModel().getView() ].filter( function ( item ) {
-		return item.getName() === model.getName();
-	} )[ 0 ];
+	return this.views[ model.getGroupModel().getView() ].filter( ( item ) => item.getName() === model.getName() )[ 0 ];
 };
 
 /**
  * @inheritdoc
  */
 MenuSelectWidget.prototype.onDocumentKeyDown = function ( e ) {
-	var nextItem,
-		currentItem = this.findHighlightedItem() || this.findSelectedItem();
+	const currentItem = this.findHighlightedItem() || this.findSelectedItem();
+	let nextItem;
 
 	// Call parent
-	MenuSelectWidget.parent.prototype.onDocumentKeyDown.call( this, e );
+	MenuSelectWidget.super.prototype.onDocumentKeyDown.call( this, e );
 
 	// We want to select the item on arrow movement
 	// rather than just highlight it, like the menu

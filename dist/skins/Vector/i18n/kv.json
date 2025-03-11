@@ -4,7 +4,6 @@
 			"Comp1089",
 			"Enye Lav",
 			"Merrahtar",
-			"Amire80",
 			"СерМар"
 		]
 	},
@@ -21,5 +20,10 @@
 	"vector-view-view": "Лыддьыны",
 	"vector-more-actions": "Нӧшта",
 	"vector-searchsuggest-containing": "Корсьны лист бокъяс, кӧні эм <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
-	"vector-toc-beginning": "Заводитчӧм"
+	"vector-toc-label": "Юриндалысь",
+	"vector-toc-beginning": "Заводитчӧм",
+	"vector-main-menu-label": "Медшӧр меню",
+	"vector-page-tools-label": "Инструментъяс",
+	"vector-page-tools-general-label": "Ӧтувъя",
+	"vector-unpin-element-label": "сайӧдны"
 }

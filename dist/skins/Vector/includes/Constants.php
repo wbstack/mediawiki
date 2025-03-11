@@ -32,11 +32,6 @@ final class Constants {
 	 */
 	public const SKIN_VERSION_LATEST = '2';
 
-	/**
-	 * @var string
-	 */
-	public const SERVICE_FEATURE_MANAGER = 'Vector.FeatureManager';
-
 	// These are tightly coupled to skin.json's configs. See skin.json for documentation.
 	/**
 	 * @var string
@@ -47,24 +42,7 @@ final class Constants {
 	/**
 	 * @var string
 	 */
-	public const CONFIG_KEY_DEFAULT_SIDEBAR_VISIBLE_FOR_AUTHORISED_USER =
-		'VectorDefaultSidebarVisibleForAuthorisedUser';
-
-	/**
-	 * @var string
-	 */
-	public const CONFIG_KEY_DEFAULT_SIDEBAR_VISIBLE_FOR_ANONYMOUS_USER =
-		'VectorDefaultSidebarVisibleForAnonymousUser';
-
-	/**
-	 * @var string
-	 */
 	public const PREF_KEY_SKIN = 'skin';
-
-	/**
-	 * @var string
-	 */
-	public const PREF_KEY_SIDEBAR_VISIBLE = 'VectorSidebarVisible';
 
 	// These are used in the Feature Management System.
 	/**
@@ -81,12 +59,12 @@ final class Constants {
 	/**
 	 * @var string
 	 */
-	public const FEATURE_LANGUAGE_IN_HEADER = 'LanguageInHeader';
+	public const REQUIREMENT_LOGGED_IN = 'LoggedIn';
 
 	/**
 	 * @var string
 	 */
-	public const CONFIG_KEY_DISABLE_SIDEBAR_PERSISTENCE = 'VectorDisableSidebarPersistence';
+	public const FEATURE_LANGUAGE_IN_HEADER = 'LanguageInHeader';
 
 	/**
 	 * @var string
@@ -99,25 +77,9 @@ final class Constants {
 	public const REQUIREMENT_LANGUAGE_IN_HEADER = 'LanguageInHeader';
 
 	/**
-	 * Defines whether or not the Language in header A/B test is running. See
-	 * https://phabricator.wikimedia.org/T280825 for additional detail about the test.
-	 *
-	 * Note well that if the associated config value is falsy, then we fall back to choosing the
-	 * language treatment based on the `VectorLanguageInHeader` config variable.
-	 *
-	 * @var string
-	 */
-	public const CONFIG_LANGUAGE_IN_HEADER_TREATMENT_AB_TEST = 'VectorLanguageInHeaderTreatmentABTest';
-
-	/**
 	 * @var string
 	 */
 	public const CONFIG_STICKY_HEADER = 'VectorStickyHeader';
-
-	/**
-	 * @var string
-	 */
-	public const CONFIG_STICKY_HEADER_EDIT = 'VectorStickyHeaderEdit';
 
 	/**
 	 * @var string
@@ -127,17 +89,7 @@ final class Constants {
 	/**
 	 * @var string
 	 */
-	public const REQUIREMENT_STICKY_HEADER_EDIT = 'StickyHeaderEdit';
-
-	/**
-	 * @var string
-	 */
 	public const FEATURE_STICKY_HEADER = 'StickyHeader';
-
-	/**
-	 * @var string
-	 */
-	public const FEATURE_STICKY_HEADER_EDIT = 'StickyHeaderEdit';
 
 	/**
 	 * Defines whether an A/B test is running.
@@ -194,47 +146,154 @@ final class Constants {
 	/**
 	 * @var string
 	 */
-	public const REQUIREMENT_LANGUAGE_ALERT_IN_SIDEBAR = 'LanguageAlertInSidebar';
-
-	/**
-	 * @var string
-	 */
-	public const CONFIG_LANGUAGE_ALERT_IN_SIDEBAR = 'VectorLanguageAlertInSidebar';
-
-	/**
-	 * @var string
-	 */
-	public const FEATURE_LANGUAGE_ALERT_IN_SIDEBAR = 'LanguageAlertInSidebar';
-
-	/**
-	 * @var string
-	 */
-	public const FEATURE_TABLE_OF_CONTENTS = 'TableOfContents';
-
-	/**
-	 * @var string
-	 */
-	public const REQUIREMENT_TABLE_OF_CONTENTS = 'TableOfContents';
-
-	/**
-	 * @var string
-	 */
 	public const WEB_AB_TEST_ARTICLE_ID_FACTORY_SERVICE = 'WikimediaEvents.WebABTestArticleIdFactory';
 
 	/**
 	 * @var string
 	 */
-	public const FEATURE_VISUAL_ENHANCEMENTS = 'VisualEnhancementNext';
+	public const FEATURE_PAGE_TOOLS_PINNED = 'PageToolsPinned';
 
 	/**
 	 * @var string
 	 */
-	public const REQUIREMENT_VISUAL_ENHANCEMENTS = 'VisualEnhancementNext';
+	public const REQUIREMENT_PAGE_TOOLS_PINNED = 'PageToolsPinned';
 
 	/**
 	 * @var string
 	 */
-	public const CONFIG_KEY_VISUAL_ENHANCEMENTS = 'VectorVisualEnhancementNext';
+	public const PREF_KEY_PAGE_TOOLS_PINNED = 'vector-page-tools-pinned';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_TOC_PINNED = 'TOCPinned';
+
+	/**
+	 * @var string
+	 */
+	public const PREF_KEY_TOC_PINNED = 'vector-toc-pinned';
+
+	/**
+	 * @var string
+	 */
+	public const FEATURE_TOC_PINNED = 'TOCPinned';
+
+	/**
+	 * @var string
+	 */
+	public const FEATURE_MAIN_MENU_PINNED = 'MainMenuPinned';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_MAIN_MENU_PINNED = 'MainMenuPinned';
+
+	/**
+	 * @var string
+	 */
+	public const PREF_KEY_MAIN_MENU_PINNED = 'vector-main-menu-pinned';
+
+	/**
+	 * @var string
+	 */
+	public const FEATURE_LIMITED_WIDTH = 'LimitedWidth';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_LIMITED_WIDTH = 'LimitedWidth';
+
+	/**
+	 * @var string
+	 */
+	public const PREF_KEY_LIMITED_WIDTH = 'vector-limited-width';
+
+	/**
+	 * @var string
+	 */
+	public const FEATURE_LIMITED_WIDTH_CONTENT = 'LimitedWidthContent';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_LIMITED_WIDTH_CONTENT = 'LimitedWidthContent';
+
+	/**
+	 * @var bool
+	 */
+	public const CONFIG_DEFAULT_LIMITED_WIDTH = 1;
+
+	/**
+	 * @var string
+	 */
+	public const PREF_KEY_FONT_SIZE = 'vector-font-size';
+
+	/**
+	 * @var string
+	 */
+	public const FEATURE_FONT_SIZE = 'CustomFontSize';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_FONT_SIZE = 'CustomFontSize';
+
+	/**
+	 * @var string
+	 */
+	public const FEATURE_APPEARANCE_PINNED = 'AppearancePinned';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_APPEARANCE_PINNED = 'AppearancePinned';
+
+	/**
+	 * @var string
+	 */
+	public const PREF_KEY_APPEARANCE_PINNED = 'vector-appearance-pinned';
+
+	/**
+	 * @var string
+	 */
+	public const CONFIG_KEY_NIGHT_MODE = 'VectorNightMode';
+
+	/**
+	 * @var string
+	 */
+	public const FEATURE_NIGHT_MODE = 'NightMode';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_NIGHT_MODE = 'NightMode';
+
+	/**
+	 * @var string
+	 */
+	public const PREF_KEY_NIGHT_MODE = 'vector-theme';
+
+	/**
+	 * @var string
+	 */
+	public const REQUIREMENT_PREF_NIGHT_MODE = 'PrefNightMode';
+
+	/**
+	 * @var string
+	 */
+	public const PREF_NIGHT_MODE = 'PrefNightMode';
+
+	/**
+	 * @var string
+	 */
+	public const VECTOR_2022_BETA_KEY = 'vector-2022-beta-feature';
+
+	/**
+	 * @var array
+	 */
+	public const VECTOR_BETA_FEATURES = [
+		self::CONFIG_KEY_NIGHT_MODE,
+	];
 
 	/**
 	 * This class is for namespacing constants only. Forbid construction.

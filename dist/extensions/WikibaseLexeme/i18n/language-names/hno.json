@@ -4,6 +4,7 @@
 			"Bgo eiu"
 		]
 	},
+	"wikibase-lexeme-language-name-apc": "شامی عربی",
 	"wikibase-lexeme-language-name-az-cyrl": "ازیری (سرلک الخط)",
 	"wikibase-lexeme-language-name-bas": "بسا",
 	"wikibase-lexeme-language-name-bfi": "برطانوی اشارہ زبان",
@@ -37,6 +38,8 @@
 	"wikibase-lexeme-language-name-non-runr": "پرانڑی (رونی الخط)",
 	"wikibase-lexeme-language-name-nrf-gg": "گویرنیے",
 	"wikibase-lexeme-language-name-nrf-je": "جیریے",
+	"wikibase-lexeme-language-name-obt": "پرانڑی بریٹونی",
+	"wikibase-lexeme-language-name-pks": "پاکستان اشارہ زبان",
 	"wikibase-lexeme-language-name-pt-ao1990": "پرتگالی (پرتگالی زبان الخط دا فیصلہ ۱۹۹۰ء)",
 	"wikibase-lexeme-language-name-pt-colb1945": "پرتگالی (پرتگالی برازیلی الخط دی مجلس ۱۹۴۵ء)",
 	"wikibase-lexeme-language-name-quc": "کئیچے",
@@ -52,9 +55,13 @@
 	"wikibase-lexeme-language-name-sat-beng": "چاکما (بنگالی الخط)",
 	"wikibase-lexeme-language-name-sat-latn": "سنتالی (لاطینی الخط)",
 	"wikibase-lexeme-language-name-sat-orya": "سنتالی (اوڑیا الخط)",
+	"wikibase-lexeme-language-name-sia": "اکلا سامی",
+	"wikibase-lexeme-language-name-sjk": "کیمی سامی",
 	"wikibase-lexeme-language-name-sux-latn": "سومیری (لاطینی الخط)",
 	"wikibase-lexeme-language-name-sux-xsux": "سومیری (سومیری الخط)",
 	"wikibase-lexeme-language-name-syl-beng": "سلہیٹی (بنگالی الخط)",
 	"wikibase-lexeme-language-name-tlh-latn": "کلنگان (لاطینی الخط)",
-	"wikibase-lexeme-language-name-tlh-piqd": "کلنگان (کلنگان الخط)"
+	"wikibase-lexeme-language-name-tlh-piqd": "کلنگان (کلنگان الخط)",
+	"wikibase-lexeme-language-name-txg": "تانگوت",
+	"wikibase-lexeme-language-name-xbm": "وچکارلی ںریٹونی"
 }

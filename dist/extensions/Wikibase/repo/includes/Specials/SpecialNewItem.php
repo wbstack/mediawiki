@@ -1,20 +1,26 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Specials;
 
-use Message;
-use OutputPage;
-use Site;
-use Status;
+use MediaWiki\Message\Message;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Site\Site;
+use MediaWiki\Status\Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\Item;
+use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Lib\Store\EntityTitleLookup;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\Lib\Summary;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\CopyrightMessageBuilder;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
+use Wikibase\Repo\SiteLinkPageNormalizer;
 use Wikibase\Repo\SiteLinkTargetProvider;
 use Wikibase\Repo\Specials\HTMLForm\HTMLAliasesField;
 use Wikibase\Repo\Specials\HTMLForm\HTMLContentLanguageField;
@@ -38,29 +44,31 @@ class SpecialNewItem extends SpecialNewEntity {
 	public const FIELD_ALIASES = 'aliases';
 	public const FIELD_SITE = 'site';
 	public const FIELD_PAGE = 'page';
+	public const FIELD_BADGES = 'badges';
 
-	/**
-	 * @var TermValidatorFactory
-	 */
-	private $termValidatorFactory;
+	private SiteLinkPageNormalizer $siteLinkPageNormalizer;
 
-	/**
-	 * @var TermsCollisionDetector
-	 */
-	private $termsCollisionDetector;
+	private AnonymousEditWarningBuilder $anonymousEditWarningBuilder;
 
-	/** @var ValidatorErrorLocalizer */
-	private $errorLocalizer;
+	private TermValidatorFactory $termValidatorFactory;
 
-	/**
-	 * @var SiteLinkTargetProvider
-	 */
-	private $siteLinkTargetProvider;
+	private TermsCollisionDetector $termsCollisionDetector;
+
+	private ValidatorErrorLocalizer $errorLocalizer;
+
+	private SiteLinkTargetProvider $siteLinkTargetProvider;
 
 	/**
 	 * @var string[]
 	 */
-	private $siteLinkGroups;
+	private array $siteLinkGroups;
+
+	private FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory;
+
+	/**
+	 * @var string[]
+	 */
+	private array $badgeItems;
 
 	public function __construct(
 		array $tags,
@@ -68,12 +76,17 @@ class SpecialNewItem extends SpecialNewEntity {
 		EntityNamespaceLookup $entityNamespaceLookup,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
+		SiteLinkPageNormalizer $siteLinkPageNormalizer,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		TermValidatorFactory $termValidatorFactory,
 		TermsCollisionDetector $termsCollisionDetector,
 		ValidatorErrorLocalizer $errorLocalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
-		array $siteLinkGroups
+		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
+		array $badgeItems,
+		array $siteLinkGroups,
+		bool $isMobileView
 	) {
 		parent::__construct(
 			'NewItem',
@@ -83,21 +96,30 @@ class SpecialNewItem extends SpecialNewEntity {
 			$entityNamespaceLookup,
 			$summaryFormatter,
 			$entityTitleLookup,
-			$editEntityFactory
+			$editEntityFactory,
+			$isMobileView
 		);
+		$this->anonymousEditWarningBuilder = $anonymousEditWarningBuilder;
 		$this->termValidatorFactory = $termValidatorFactory;
 		$this->termsCollisionDetector = $termsCollisionDetector;
 		$this->errorLocalizer = $errorLocalizer;
+		$this->siteLinkPageNormalizer = $siteLinkPageNormalizer;
 		$this->siteLinkTargetProvider = $siteLinkTargetProvider;
 		$this->siteLinkGroups = $siteLinkGroups;
+		$this->labelDescriptionLookupFactory = $labelDescriptionLookupFactory;
+		$this->badgeItems = $badgeItems;
 	}
 
 	public static function factory(
-		MediawikiEditEntityFactory $editEntityFactory,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityNamespaceLookup $entityNamespaceLookup,
 		EntityTitleLookup $entityTitleLookup,
+		FallbackLabelDescriptionLookupFactory $labelDescriptionLookupFactory,
 		TermsCollisionDetector $itemTermsCollisionDetector,
+		bool $isMobileView,
 		SettingsArray $repoSettings,
+		SiteLinkPageNormalizer $siteLinkPageNormalizer,
 		SiteLinkTargetProvider $siteLinkTargetProvider,
 		SummaryFormatter $summaryFormatter,
 		TermValidatorFactory $termValidatorFactory,
@@ -116,31 +138,30 @@ class SpecialNewItem extends SpecialNewEntity {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
+			$siteLinkPageNormalizer,
+			$anonymousEditWarningBuilder,
 			$termValidatorFactory,
 			$itemTermsCollisionDetector,
 			$errorLocalizer,
 			$siteLinkTargetProvider,
-			$repoSettings->getSetting( 'siteLinkGroups' )
+			$labelDescriptionLookupFactory,
+			$repoSettings->getSetting( 'badgeItems' ),
+			$repoSettings->getSetting( 'siteLinkGroups' ),
+			$isMobileView
 		);
 	}
 
 	/**
 	 * @see SpecialNewEntity::doesWrites
-	 *
-	 * @return bool
 	 */
-	public function doesWrites() {
+	public function doesWrites(): bool {
 		return true;
 	}
 
 	/**
 	 * @see SpecialNewEntity::createEntityFromFormData
-	 *
-	 * @param array $formData
-	 *
-	 * @return Item
 	 */
-	protected function createEntityFromFormData( array $formData ) {
+	protected function createEntityFromFormData( array $formData ): Item {
 		$languageCode = $formData[ self::FIELD_LANG ];
 
 		$item = new Item();
@@ -151,9 +172,18 @@ class SpecialNewItem extends SpecialNewEntity {
 
 		if ( isset( $formData[ self::FIELD_SITE ] ) ) {
 			$site = $this->getSiteLinkTargetSite( $formData[ self::FIELD_SITE ] );
-			$normalizedPageName = $site->normalizePageName( $formData[ self::FIELD_PAGE ] );
+			'@phan-var Site $site'; // site is guaranteed to exist by this point
 
-			$item->getSiteLinkList()->addNewSiteLink( $site->getGlobalId(), $normalizedPageName );
+			$badges = $formData[ self::FIELD_BADGES ];
+
+			$normalizedPageName = $this->siteLinkPageNormalizer->normalize( $site, $formData[ self::FIELD_PAGE ], $badges );
+
+			$badgeItemIds = array_map(
+				fn ( $badgeId ) => new ItemId( $badgeId ),
+				$badges
+			);
+
+			$item->getSiteLinkList()->addNewSiteLink( $site->getGlobalId(), $normalizedPageName, $badgeItemIds );
 		}
 
 		return $item;
@@ -162,7 +192,7 @@ class SpecialNewItem extends SpecialNewEntity {
 	/**
 	 * @return array[]
 	 */
-	protected function getFormFields() {
+	protected function getFormFields(): array {
 		$formFields = [
 			self::FIELD_LANG => [
 				'name' => self::FIELD_LANG,
@@ -209,7 +239,7 @@ class SpecialNewItem extends SpecialNewEntity {
 
 					return true;
 				},
-				'label-message' => 'wikibase-newitem-site'
+				'label-message' => 'wikibase-newitem-site',
 			];
 
 			$formFields[ self::FIELD_PAGE ] = [
@@ -238,19 +268,49 @@ class SpecialNewItem extends SpecialNewEntity {
 
 					return true;
 				},
-				'label-message' => 'wikibase-newitem-page'
+				'label-message' => 'wikibase-newitem-page',
+			];
+
+			$formFields[ self::FIELD_BADGES ] = [
+				'name' => self::FIELD_BADGES,
+				'type' => 'multiselect',
+				'label-message' => 'wikibase-setsitelink-badges',
+				'options' => $this->getMultiSelectOptionsForBadges(),
+				'default' => [],
+				'id' => 'wb-newentity-badges',
 			];
 		}
 
 		return $formFields;
 	}
 
-	/**
-	 * @see SpecialNewEntity::getLegend
-	 *
-	 * @return string|Message Message key or Message object
-	 */
-	protected function getLegend() {
+	private function getMultiSelectOptionsForBadges(): array {
+		$badgesOptions = [];
+
+		/** @var ItemId[] $badgeItemIds */
+		$badgeItemIds = array_map(
+			fn ( $badgeId ) => new ItemId( $badgeId ),
+			array_keys( $this->badgeItems )
+		);
+
+		$labelLookup = $this->labelDescriptionLookupFactory->newLabelDescriptionLookup(
+			$this->getLanguage(),
+			$badgeItemIds
+		);
+
+		foreach ( $badgeItemIds as $badgeId ) {
+			$idSerialization = $badgeId->getSerialization();
+
+			$label = $labelLookup->getLabel( $badgeId );
+			$label = $label === null ? $idSerialization : $label->getText();
+
+			$badgesOptions[$label] = $idSerialization;
+		}
+
+		return $badgesOptions;
+	}
+
+	protected function getLegend(): Message {
 		return $this->msg( 'wikibase-newitem-fieldset' );
 	}
 
@@ -259,22 +319,15 @@ class SpecialNewItem extends SpecialNewEntity {
 	 *
 	 * @return string[]
 	 */
-	protected function getWarnings() {
+	protected function getWarnings(): array {
 		if ( !$this->getUser()->isRegistered() ) {
-			return [
-				$this->msg( 'wikibase-anonymouseditwarning', $this->msg( 'wikibase-entity-item' ) )->parse(),
-			];
+			return [ $this->anonymousEditWarningBuilder->buildAnonymousEditWarningHTML( $this->getFullTitle()->getPrefixedText() ) ];
 		}
 
 		return [];
 	}
 
-	/**
-	 * @param array $formData
-	 *
-	 * @return Status
-	 */
-	protected function validateFormData( array $formData ) {
+	protected function validateFormData( array $formData ): Status {
 		$status = Status::newGood();
 
 		if ( $formData[ self::FIELD_LABEL ] == ''
@@ -295,11 +348,19 @@ class SpecialNewItem extends SpecialNewEntity {
 			$validator = $this->termValidatorFactory->getLabelValidator( $this->getEntityType() );
 			$result = $validator->validate( $formData[self::FIELD_LABEL] );
 			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
+
+			$validator = $this->termValidatorFactory->getLabelLanguageValidator();
+			$result = $validator->validate( $formData[self::FIELD_LANG] );
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 
 		if ( $formData[self::FIELD_DESCRIPTION] != '' ) {
 			$validator = $this->termValidatorFactory->getDescriptionValidator();
 			$result = $validator->validate( $formData[self::FIELD_DESCRIPTION] );
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
+
+			$validator = $this->termValidatorFactory->getDescriptionLanguageValidator();
+			$result = $validator->validate( $formData[self::FIELD_LANG] );
 			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 
@@ -311,6 +372,10 @@ class SpecialNewItem extends SpecialNewEntity {
 			}
 
 			$result = $validator->validate( implode( '|', $formData[self::FIELD_ALIASES] ) );
+			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
+
+			$validator = $this->termValidatorFactory->getAliasLanguageValidator();
+			$result = $validator->validate( $formData[self::FIELD_LANG] );
 			$status->merge( $this->errorLocalizer->getResultStatus( $result ) );
 		}
 
@@ -347,7 +412,7 @@ class SpecialNewItem extends SpecialNewEntity {
 	 * @return Summary
 	 * @suppress PhanParamSignatureMismatch Uses intersection types
 	 */
-	protected function createSummary( EntityDocument $item ) {
+	protected function createSummary( EntityDocument $item ): Summary {
 		$uiLanguageCode = $this->getLanguage()->getCode();
 
 		$summary = new Summary( 'wbeditentity', 'create' );
@@ -364,7 +429,7 @@ class SpecialNewItem extends SpecialNewEntity {
 		return $summary;
 	}
 
-	protected function displayBeforeForm( OutputPage $output ) {
+	protected function displayBeforeForm( OutputPage $output ): void {
 		parent::displayBeforeForm( $output );
 		$output->addModules( 'wikibase.special.languageLabelDescriptionAliases' );
 	}
@@ -372,7 +437,7 @@ class SpecialNewItem extends SpecialNewEntity {
 	/**
 	 * @inheritDoc
 	 */
-	protected function getEntityType() {
+	protected function getEntityType(): string {
 		return Item::ENTITY_TYPE;
 	}
 

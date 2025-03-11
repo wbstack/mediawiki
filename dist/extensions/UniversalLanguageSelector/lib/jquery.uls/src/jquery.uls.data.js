@@ -12,6 +12,13 @@
             ],
             "Qafár af"
         ],
+        "aae": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "arbërisht"
+        ],
         "ab": [
             "Cyrl",
             [
@@ -25,6 +32,13 @@
                 "AM"
             ],
             "Wôbanakiôdwawôgan"
+        ],
+        "abr": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Abron"
         ],
         "abs": [
             "Latn",
@@ -46,7 +60,36 @@
             [
                 "AM"
             ],
-            "kwéyòl"
+            "Kwéyòl Sent Lisi"
+        ],
+        "ach": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Acoli"
+        ],
+        "acm": [
+            "Arab",
+            [
+                "ME"
+            ],
+            "عراقي"
+        ],
+        "acq": [
+            "Arab",
+            [
+                "ME",
+                "AF"
+            ],
+            "تعزية-عدنية"
+        ],
+        "ada": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Dangme"
         ],
         "ady": [
             "Cyrl",
@@ -105,6 +148,13 @@
             ],
             "अहिराणी"
         ],
+        "aii": [
+            "Syrc",
+            [
+                "ME"
+            ],
+            "ܣܘܪܝܬ"
+        ],
         "ajg": [
             "Latn",
             [
@@ -113,28 +163,21 @@
             "ajagbe"
         ],
         "ajp": [
-            "Arab",
-            [
-                "ME"
-            ],
-            "شامي"
+            "apc"
         ],
         "ajp-arab": [
-            "ajp"
+            "apc"
         ],
         "ajp-latn": [
-            "Latn",
-            [
-                "ME"
-            ],
-            "šāmi"
+            "apc-latn"
         ],
-        "ak": [
+        "akb": [
             "Latn",
             [
-                "AF"
+                "AS",
+                "PA"
             ],
-            "Akan"
+            "Batak Angkola"
         ],
         "akz": [
             "Latn",
@@ -164,6 +207,9 @@
                 "EU"
             ],
             "Gegë"
+        ],
+        "als": [
+            "sq"
         ],
         "alt": [
             "Cyrl",
@@ -215,6 +261,30 @@
             ],
             "अंगिका"
         ],
+        "apc": [
+            "Arab",
+            [
+                "ME"
+            ],
+            "شامي"
+        ],
+        "apc-arab": [
+            "apc"
+        ],
+        "apc-latn": [
+            "Latn",
+            [
+                "ME"
+            ],
+            "šāmi"
+        ],
+        "apw": [
+            "Latn",
+            [
+                "AM"
+            ],
+            "Ndee biyati'"
+        ],
         "ar": [
             "Arab",
             [
@@ -251,6 +321,13 @@
                 "ME"
             ],
             "جازايرية"
+        ],
+        "ars": [
+            "Arab",
+            [
+                "ME"
+            ],
+            "نجدي"
         ],
         "ary": [
             "Arab",
@@ -291,7 +368,7 @@
             [
                 "AM"
             ],
-            "American sign language"
+            "American Sign Language"
         ],
         "ast": [
             "Latn",
@@ -354,14 +431,6 @@
             ],
             "تۆرکجه"
         ],
-        "az-latn": [
-            "Latn",
-            [
-                "EU",
-                "ME"
-            ],
-            "azərbaycanca"
-        ],
         "az-cyrl": [
             "Cyrl",
             [
@@ -369,6 +438,14 @@
                 "ME"
             ],
             "азәрбајҹанҹа"
+        ],
+        "az-latn": [
+            "Latn",
+            [
+                "EU",
+                "ME"
+            ],
+            "azərbaycanca"
         ],
         "azb": [
             "az-arab"
@@ -416,12 +493,8 @@
         "bat-smg": [
             "sgs"
         ],
-        "bbc-latn": [
-            "Latn",
-            [
-                "AS"
-            ],
-            "Batak Toba"
+        "bbc": [
+            "bbc-latn"
         ],
         "bbc-batk": [
             "Batk",
@@ -430,8 +503,12 @@
             ],
             "ᯅᯖᯂ᯲ ᯖᯬᯅ"
         ],
-        "bbc": [
-            "bbc-latn"
+        "bbc-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Batak Toba"
         ],
         "bcc": [
             "Arab",
@@ -462,6 +539,13 @@
             ],
             "Bajau Sama"
         ],
+        "be": [
+            "Cyrl",
+            [
+                "EU"
+            ],
+            "беларуская"
+        ],
         "be-tarask": [
             "Cyrl",
             [
@@ -472,19 +556,19 @@
         "be-x-old": [
             "be-tarask"
         ],
-        "be": [
-            "Cyrl",
+        "bem": [
+            "Latn",
             [
-                "EU"
+                "AF"
             ],
-            "беларуская"
+            "IciBemba"
         ],
         "bew": [
             "Latn",
             [
                 "AS"
             ],
-            "Bahasa Betawi"
+            "Betawi"
         ],
         "bfa": [
             "Latn",
@@ -493,13 +577,6 @@
             ],
             "Bari"
         ],
-        "bft": [
-            "Arab",
-            [
-                "AS"
-            ],
-            "بلتی"
-        ],
         "bfq": [
             "Taml",
             [
@@ -507,12 +584,33 @@
             ],
             "படகா"
         ],
+        "bft": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "بلتی"
+        ],
         "bg": [
             "Cyrl",
             [
                 "EU"
             ],
             "български"
+        ],
+        "bgc": [
+            "Deva",
+            [
+                "AS"
+            ],
+            "हरियाणवी"
+        ],
+        "bgc-arab": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "ہریانوی"
         ],
         "bgn": [
             "Arab",
@@ -538,6 +636,13 @@
                 "PA"
             ],
             "Bislama"
+        ],
+        "bin": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Ẹdo"
         ],
         "bjn": [
             "Latn",
@@ -595,6 +700,20 @@
             ],
             "བོད་ཡིག"
         ],
+        "bol": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "bòo pìkkà"
+        ],
+        "bom": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "bèrom"
+        ],
         "bpy": [
             "Beng",
             [
@@ -639,6 +758,14 @@
             ],
             "bosanski"
         ],
+        "btd": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Batak Dairi"
+        ],
         "btm": [
             "Latn",
             [
@@ -653,12 +780,48 @@
             ],
             "Iriga Bicolano"
         ],
+        "bts": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Sahap Simalungun"
+        ],
+        "btx": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "cakap Karo"
+        ],
+        "btz": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Batak Alas-Kluet"
+        ],
         "bug": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Basa Ugi"
+        ],
+        "bug-bugi": [
             "Bugi",
             [
-                "AS"
+                "AS",
+                "PA"
             ],
             "ᨅᨔ ᨕᨘᨁᨗ"
+        ],
+        "bug-latn": [
+            "bug"
         ],
         "bum": [
             "Latn",
@@ -688,12 +851,26 @@
             ],
             "ብሊን"
         ],
+        "byv": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Mə̀dʉ̂mbɑ̀"
+        ],
         "bzj": [
             "Latn",
             [
                 "AM"
             ],
             "Bileez Kriol"
+        ],
+        "bzs": [
+            "Sgnw",
+            [
+                "AM"
+            ],
+            "Língua brasileira de sinais"
         ],
         "ca": [
             "Latn",
@@ -731,14 +908,7 @@
             [
                 "AS"
             ],
-            "Mìng-dĕ̤ng-ngṳ̄"
-        ],
-        "cdo-latn": [
-            "Latn",
-            [
-                "AS"
-            ],
-            "Mìng-dĕ̤ng-ngṳ̄ Bàng-uâ-cê"
+            "閩東語 \/ Mìng-dĕ̤ng-ngṳ̄"
         ],
         "cdo-hani": [
             "Hani",
@@ -746,6 +916,13 @@
                 "AS"
             ],
             "閩東語（漢字）"
+        ],
+        "cdo-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Mìng-dĕ̤ng-ngṳ̄ Bàng-uâ-cê"
         ],
         "ce": [
             "Cyrl",
@@ -783,7 +960,7 @@
             [
                 "AM"
             ],
-            "Choctaw"
+            "Chahta anumpa"
         ],
         "chr": [
             "Cher",
@@ -806,8 +983,67 @@
             ],
             "Anishinaabemowin"
         ],
+        "cja": [
+            "cja-latn"
+        ],
+        "cja-arab": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "چم فور"
+        ],
+        "cja-cham": [
+            "Cham",
+            [
+                "AS"
+            ],
+            "ꨌꩌ ꨚꨭꩉ"
+        ],
+        "cja-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Cam pur"
+        ],
+        "cjk": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "cokwe"
+        ],
+        "cjm": [
+            "cjm-cham"
+        ],
+        "cjm-arab": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "چم فاي"
+        ],
+        "cjm-cham": [
+            "Cham",
+            [
+                "AS"
+            ],
+            "ꨌꩌ ꨚꨰ"
+        ],
+        "cjm-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Cam pai"
+        ],
         "cjy": [
-            "cjy-hant"
+            "Hant",
+            [
+                "AS"
+            ],
+            "晉語"
         ],
         "cjy-hans": [
             "Hans",
@@ -821,7 +1057,7 @@
             [
                 "AS"
             ],
-            "晉語"
+            "晉語（正字）"
         ],
         "ckb": [
             "Arab",
@@ -829,6 +1065,13 @@
                 "ME"
             ],
             "کوردی"
+        ],
+        "cko": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Anufɔ"
         ],
         "ckt": [
             "Cyrl",
@@ -883,6 +1126,34 @@
             ],
             "Capiceño"
         ],
+        "cpx": [
+            "Hant",
+            [
+                "AS"
+            ],
+            "莆仙語 \/ Pó-sing-gṳ̂"
+        ],
+        "cpx-hans": [
+            "Hans",
+            [
+                "AS"
+            ],
+            "莆仙语（简体）"
+        ],
+        "cpx-hant": [
+            "Hant",
+            [
+                "AS"
+            ],
+            "莆仙語（繁體）"
+        ],
+        "cpx-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Pó-sing-gṳ̂ (Báⁿ-uā-ci̍)"
+        ],
         "cr": [
             "Cans",
             [
@@ -916,6 +1187,13 @@
         ],
         "crh-latn": [
             "crh"
+        ],
+        "crh-ro": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "tatarşa"
         ],
         "cs": [
             "Latn",
@@ -973,6 +1251,20 @@
             ],
             "дарган"
         ],
+        "ddn": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "dendi"
+        ],
+        "de": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "Deutsch"
+        ],
         "de-at": [
             "Latn",
             [
@@ -994,12 +1286,15 @@
             ],
             "Deutsch (Sie-Form)"
         ],
-        "de": [
+        "dga": [
             "Latn",
             [
-                "EU"
+                "AF"
             ],
-            "Deutsch"
+            "Dagaare"
+        ],
+        "dik": [
+            "din"
         ],
         "din": [
             "Latn",
@@ -1023,6 +1318,13 @@
             ],
             "डोगरी"
         ],
+        "dru": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "drekai"
+        ],
         "dsb": [
             "Latn",
             [
@@ -1035,7 +1337,7 @@
             [
                 "AS"
             ],
-            "Dusun Bundu-liwan"
+            "Kadazandusun"
         ],
         "dty": [
             "Deva",
@@ -1044,12 +1346,26 @@
             ],
             "डोटेली"
         ],
+        "dua": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Duálá"
+        ],
         "dv": [
             "Thaa",
             [
                 "AS"
             ],
             "ދިވެހިބަސް"
+        ],
+        "dyu": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Julakan"
         ],
         "dz": [
             "Tibt",
@@ -1079,6 +1395,13 @@
             ],
             "Emiliàn"
         ],
+        "ekp": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "ẹkpeye"
+        ],
         "el": [
             "Grek",
             [
@@ -1099,6 +1422,19 @@
                 "EU"
             ],
             "emiliàn e rumagnòl"
+        ],
+        "en": [
+            "Latn",
+            [
+                "EU",
+                "AM",
+                "AF",
+                "ME",
+                "AS",
+                "PA",
+                "WW"
+            ],
+            "English"
         ],
         "en-ca": [
             "Latn",
@@ -1123,18 +1459,12 @@
             ],
             "Simple English"
         ],
-        "en": [
+        "en-us": [
             "Latn",
             [
-                "EU",
-                "AM",
-                "AF",
-                "ME",
-                "AS",
-                "PA",
-                "WW"
+                "AM"
             ],
-            "English"
+            "American English"
         ],
         "eo": [
             "Latn",
@@ -1142,6 +1472,17 @@
                 "WW"
             ],
             "Esperanto"
+        ],
+        "es": [
+            "Latn",
+            [
+                "EU",
+                "AM",
+                "AF",
+                "WW",
+                "PA"
+            ],
+            "español"
         ],
         "es-419": [
             "Latn",
@@ -1159,17 +1500,6 @@
                 "WW"
             ],
             "español (formal)"
-        ],
-        "es": [
-            "Latn",
-            [
-                "EU",
-                "AM",
-                "AF",
-                "WW",
-                "PA"
-            ],
-            "español"
         ],
         "es-ni": [
             "Latn",
@@ -1341,6 +1671,9 @@
             ],
             "furlan"
         ],
+        "fuv": [
+            "ff"
+        ],
         "fvr": [
             "Latn",
             [
@@ -1383,6 +1716,13 @@
             ],
             "Alekano"
         ],
+        "gan": [
+            "Hant",
+            [
+                "AS"
+            ],
+            "贛語"
+        ],
         "gan-hans": [
             "Hans",
             [
@@ -1391,14 +1731,14 @@
             "赣语（简体）"
         ],
         "gan-hant": [
-            "gan"
-        ],
-        "gan": [
             "Hant",
             [
                 "AS"
             ],
-            "贛語"
+            "贛語（繁體）"
+        ],
+        "gaz": [
+            "om"
         ],
         "gbm": [
             "Deva",
@@ -1419,7 +1759,7 @@
             [
                 "AM"
             ],
-            "Guadeloupean Creole French"
+            "kréyòl Gwadloup"
         ],
         "gcr": [
             "Latn",
@@ -1590,26 +1930,11 @@
             "X̱aat Kíl"
         ],
         "hak": [
-            "Latn",
+            "Hant",
             [
                 "AS"
             ],
-            "Hak-kâ-fa"
-        ],
-        "haw": [
-            "Latn",
-            [
-                "AM",
-                "PA"
-            ],
-            "Hawai`i"
-        ],
-        "he": [
-            "Hebr",
-            [
-                "ME"
-            ],
-            "עברית"
+            "客家語 \/ Hak-kâ-ngî"
         ],
         "hak-hans": [
             "Hans",
@@ -1624,6 +1949,28 @@
                 "AS"
             ],
             "客家語（繁體）"
+        ],
+        "hak-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Hak-kâ-ngî (Pha̍k-fa-sṳ)"
+        ],
+        "haw": [
+            "Latn",
+            [
+                "AM",
+                "PA"
+            ],
+            "Hawaiʻi"
+        ],
+        "he": [
+            "Hebr",
+            [
+                "ME"
+            ],
+            "עברית"
         ],
         "hi": [
             "Deva",
@@ -1657,12 +2004,26 @@
             ],
             "Ilonggo"
         ],
+        "hke": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "kihunde"
+        ],
         "hne": [
             "Deva",
             [
                 "AS"
             ],
             "छत्तीसगढ़ी"
+        ],
+        "hno": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "ہندکو"
         ],
         "ho": [
             "Latn",
@@ -1713,19 +2074,19 @@
             ],
             "Kreyòl ayisyen"
         ],
-        "hu-formal": [
-            "Latn",
-            [
-                "EU"
-            ],
-            "Magyar (magázó)"
-        ],
         "hu": [
             "Latn",
             [
                 "EU"
             ],
             "magyar"
+        ],
+        "hu-formal": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "Magyar (magázó)"
         ],
         "hy": [
             "Armn",
@@ -1757,6 +2118,21 @@
             ],
             "interlingua"
         ],
+        "iba": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Jaku Iban"
+        ],
+        "ibb": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "ibibio"
+        ],
         "id": [
             "Latn",
             [
@@ -1779,6 +2155,20 @@
             ],
             "Igbo"
         ],
+        "igb": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Ebira"
+        ],
+        "igl": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Igala"
+        ],
         "ii": [
             "Yiii",
             [
@@ -1791,7 +2181,7 @@
             [
                 "AM"
             ],
-            "Iñupiak"
+            "Iñupiatun"
         ],
         "ike-cans": [
             "Cans",
@@ -1835,6 +2225,30 @@
             ],
             "íslenska"
         ],
+        "ish": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "awain"
+        ],
+        "isv": [
+            "isv-latn"
+        ],
+        "isv-cyrl": [
+            "Cyrl",
+            [
+                "EU"
+            ],
+            "меджусловјанскы"
+        ],
+        "isv-latn": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "medžuslovjansky"
+        ],
         "it": [
             "Latn",
             [
@@ -1858,6 +2272,13 @@
                 "AS"
             ],
             "日本語"
+        ],
+        "jac": [
+            "Latn",
+            [
+                "AM"
+            ],
+            "Abꞌxubꞌal Poptiꞌ"
         ],
         "jam": [
             "Latn",
@@ -1943,6 +2364,35 @@
             ],
             "Jinghpaw"
         ],
+        "kai": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Karai-karai"
+        ],
+        "kaj": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Jju"
+        ],
+        "kam": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "kĩkamba"
+        ],
+        "kbd": [
+            "Cyrl",
+            [
+                "EU",
+                "ME"
+            ],
+            "адыгэбзэ"
+        ],
         "kbd-cyrl": [
             "kbd"
         ],
@@ -1952,14 +2402,6 @@
                 "EU"
             ],
             "Qabardjajəbza"
-        ],
-        "kbd": [
-            "Cyrl",
-            [
-                "EU",
-                "ME"
-            ],
-            "адыгэбзэ"
         ],
         "kbp": [
             "Latn",
@@ -2003,12 +2445,31 @@
             ],
             "Kongo"
         ],
+        "kge": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Kumoring"
+        ],
+        "kge-arab": [
+            "Arab",
+            [
+                "AS",
+                "PA"
+            ],
+            "كوموريڠ"
+        ],
         "kgp": [
             "Latn",
             [
                 "AM"
             ],
             "Kaingáng"
+        ],
+        "khk": [
+            "mn"
         ],
         "khw": [
             "Arab",
@@ -2024,6 +2485,13 @@
                 "AF"
             ],
             "Gĩkũyũ"
+        ],
+        "kip": [
+            "Deva",
+            [
+                "AS"
+            ],
+            "शेषी पाङ"
         ],
         "kiu": [
             "Latn",
@@ -2106,12 +2574,29 @@
             ],
             "ភាសាខ្មែរ"
         ],
+        "kmb": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "kimbundu"
+        ],
+        "kmr": [
+            "ku-latn"
+        ],
         "kn": [
             "Knda",
             [
                 "AS"
             ],
             "ಕನ್ನಡ"
+        ],
+        "knc": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Yerwa Kanuri"
         ],
         "knn": [
             "Deva",
@@ -2120,19 +2605,19 @@
             ],
             "महाराष्ट्रीय कोंकणी"
         ],
-        "ko-kp": [
-            "Kore",
-            [
-                "AS"
-            ],
-            "조선말"
-        ],
         "ko": [
             "Kore",
             [
                 "AS"
             ],
             "한국어"
+        ],
+        "ko-kp": [
+            "Kore",
+            [
+                "AS"
+            ],
+            "조선말"
         ],
         "koi": [
             "Cyrl",
@@ -2183,6 +2668,9 @@
             ],
             "Karjala"
         ],
+        "ks": [
+            "ks-arab"
+        ],
         "ks-arab": [
             "Arab",
             [
@@ -2196,9 +2684,6 @@
                 "AS"
             ],
             "कॉशुर"
-        ],
-        "ks": [
-            "ks-arab"
         ],
         "ksf": [
             "Latn",
@@ -2230,7 +2715,7 @@
                 "EU",
                 "ME"
             ],
-            "كوردي"
+            "کوردی (عەرەبی)"
         ],
         "ku-latn": [
             "Latn",
@@ -2246,6 +2731,13 @@
                 "EU"
             ],
             "къумукъ"
+        ],
+        "kus": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Kʋsaal"
         ],
         "kv": [
             "Cyrl",
@@ -2278,15 +2770,6 @@
         "lad": [
             "lad-latn"
         ],
-        "lad-latn": [
-            "Latn",
-            [
-                "ME",
-                "EU",
-                "AM"
-            ],
-            "Ladino"
-        ],
         "lad-hebr": [
             "Hebr",
             [
@@ -2296,12 +2779,28 @@
             ],
             "לאדינו"
         ],
+        "lad-latn": [
+            "Latn",
+            [
+                "ME",
+                "EU",
+                "AM"
+            ],
+            "Ladino"
+        ],
         "lag": [
             "Latn",
             [
                 "AF"
             ],
             "Kilaangi"
+        ],
+        "laj": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Lëblaŋo"
         ],
         "lb": [
             "Latn",
@@ -2316,6 +2815,13 @@
                 "EU"
             ],
             "лакку"
+        ],
+        "ldn": [
+            "Latn",
+            [
+                "WW"
+            ],
+            "Láadan"
         ],
         "lez": [
             "Cyrl",
@@ -2351,6 +2857,13 @@
                 "EU"
             ],
             "Ligure"
+        ],
+        "lij-mc": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "munegascu"
         ],
         "liv": [
             "Latn",
@@ -2402,19 +2915,19 @@
             ],
             "ລາວ"
         ],
+        "lou": [
+            "Latn",
+            [
+                "AM"
+            ],
+            "Kouri-Vini"
+        ],
         "loz": [
             "Latn",
             [
                 "AF"
             ],
             "Silozi"
-        ],
-        "lt": [
-            "Latn",
-            [
-                "EU"
-            ],
-            "lietuvių"
         ],
         "lrc": [
             "Arab",
@@ -2424,6 +2937,13 @@
             ],
             "لۊری شومالی"
         ],
+        "lt": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "lietuvių"
+        ],
         "ltg": [
             "Latn",
             [
@@ -2431,12 +2951,33 @@
             ],
             "latgaļu"
         ],
+        "lua": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "ciluba"
+        ],
         "lud": [
             "Latn",
             [
                 "EU"
             ],
             "lüüdi"
+        ],
+        "lue": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "chiluvale"
+        ],
+        "luo": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "dholuo"
         ],
         "lus": [
             "Latn",
@@ -2466,6 +3007,9 @@
             ],
             "latviešu"
         ],
+        "lvs": [
+            "lv"
+        ],
         "lzh": [
             "Hant",
             [
@@ -2488,12 +3032,35 @@
             ],
             "Madhurâ"
         ],
+        "mag": [
+            "Deva",
+            [
+                "AS"
+            ],
+            "मगही"
+        ],
         "mai": [
             "Deva",
             [
                 "AS"
             ],
             "मैथिली"
+        ],
+        "mak": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Mangkasarak"
+        ],
+        "mak-bugi": [
+            "Bugi",
+            [
+                "AS",
+                "PA"
+            ],
+            "ᨆᨀᨔᨑ"
         ],
         "map-bms": [
             "Latn",
@@ -2515,6 +3082,21 @@
                 "EU"
             ],
             "мокшень"
+        ],
+        "mey": [
+            "Arab",
+            [
+                "AF"
+            ],
+            "الحسانية"
+        ],
+        "mfa": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Klate-Ttaning"
         ],
         "mfe": [
             "Latn",
@@ -2601,6 +3183,16 @@
             "mvf"
         ],
         "mnc": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "manju gisun"
+        ],
+        "mnc-latn": [
+            "mnc"
+        ],
+        "mnc-mong": [
             "Mong",
             [
                 "AS"
@@ -2621,12 +3213,20 @@
             ],
             "মেইতেই লোন্"
         ],
+        "mns": [
+            "Cyrl",
+            [
+                "EU",
+                "AS"
+            ],
+            "ма̄ньси"
+        ],
         "mnw": [
             "Mymr",
             [
                 "AS"
             ],
-            "ဘာသာ မန်"
+            "ဘာသာမန်"
         ],
         "mo": [
             "Cyrl",
@@ -2692,6 +3292,13 @@
             ],
             "بهاس ملايو"
         ],
+        "msi": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Bahasa Sabah"
+        ],
         "mt": [
             "Latn",
             [
@@ -2704,7 +3311,7 @@
             [
                 "AS"
             ],
-            "Musi"
+            "Baso Palembang"
         ],
         "mus": [
             "Latn",
@@ -2785,7 +3392,7 @@
             [
                 "AS"
             ],
-            "Bân-lâm-gú"
+            "閩南語 \/ Bân-lâm-gú"
         ],
         "nan-hani": [
             "Hani",
@@ -2794,12 +3401,54 @@
             ],
             "閩南語（漢字）"
         ],
+        "nan-hans": [
+            "Hans",
+            [
+                "AS"
+            ],
+            "闽南语（简化汉字）"
+        ],
+        "nan-hant": [
+            "Hant",
+            [
+                "AS"
+            ],
+            "閩南語（傳統漢字）"
+        ],
+        "nan-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Bân-lâm-gú (Lô-má-jī)"
+        ],
+        "nan-latn-pehoeji": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Bân-lâm-gú (Pe̍h-ōe-jī)"
+        ],
+        "nan-latn-tailo": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Bân-lâm-gú (Tâi-lô)"
+        ],
         "nap": [
             "Latn",
             [
                 "EU"
             ],
             "Napulitano"
+        ],
+        "naq": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Khoekhoegowab"
         ],
         "nb": [
             "Latn",
@@ -2815,19 +3464,19 @@
             ],
             "siNdebele saseNyakatho"
         ],
-        "nds-nl": [
-            "Latn",
-            [
-                "EU"
-            ],
-            "Nedersaksisch"
-        ],
         "nds": [
             "Latn",
             [
                 "EU"
             ],
             "Plattdüütsch"
+        ],
+        "nds-nl": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "Nedersaksisch"
         ],
         "ne": [
             "Deva",
@@ -2857,6 +3506,13 @@
             ],
             "Li Niha"
         ],
+        "nit": [
+            "Telu",
+            [
+                "AS"
+            ],
+            "కొలామి"
+        ],
         "niu": [
             "Latn",
             [
@@ -2871,14 +3527,6 @@
             ],
             "Ao"
         ],
-        "nl-informal": [
-            "Latn",
-            [
-                "EU",
-                "AM"
-            ],
-            "Nederlands (informeel)"
-        ],
         "nl": [
             "Latn",
             [
@@ -2886,6 +3534,14 @@
                 "AM"
             ],
             "Nederlands"
+        ],
+        "nl-informal": [
+            "Latn",
+            [
+                "EU",
+                "AM"
+            ],
+            "Nederlands (informeel)"
         ],
         "nmz": [
             "Latn",
@@ -2900,6 +3556,20 @@
                 "EU"
             ],
             "norsk (nynorsk)"
+        ],
+        "nn-hognorsk": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "norsk (høgnorsk)"
+        ],
+        "nnh": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "ngiembɔɔn"
         ],
         "no": [
             "Latn",
@@ -2936,6 +3606,9 @@
             ],
             "Novial"
         ],
+        "npi": [
+            "ne"
+        ],
         "nqo": [
             "Nkoo",
             [
@@ -2950,6 +3623,20 @@
             ],
             "isiNdebele seSewula"
         ],
+        "nrf-gg": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "Guernésiais"
+        ],
+        "nrf-je": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "Jèrriais"
+        ],
         "nrm": [
             "Latn",
             [
@@ -2963,6 +3650,13 @@
                 "AF"
             ],
             "Sesotho sa Leboa"
+        ],
+        "nup": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Nupe"
         ],
         "nus": [
             "Latn",
@@ -2992,12 +3686,26 @@
             ],
             "runyankore"
         ],
+        "nyo": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Orunyoro"
+        ],
         "nys": [
             "Latn",
             [
                 "PA"
             ],
             "Nyungar"
+        ],
+        "nzi": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Nzema"
         ],
         "oc": [
             "Latn",
@@ -3047,6 +3755,9 @@
                 "AS"
             ],
             "ଓଡ଼ିଆ"
+        ],
+        "ory": [
+            "or"
         ],
         "os": [
             "Cyrl",
@@ -3122,6 +3833,9 @@
             ],
             "Nasa Yuwe"
         ],
+        "pbt": [
+            "ps"
+        ],
         "pcd": [
             "Latn",
             [
@@ -3152,12 +3866,31 @@
             ],
             "Plautdietsch"
         ],
+        "pes": [
+            "fa"
+        ],
+        "pey": [
+            "Latn",
+            [
+                "EU",
+                "PA",
+                "AS"
+            ],
+            "Petjoh"
+        ],
         "pfl": [
             "Latn",
             [
                 "EU"
             ],
             "Pälzisch"
+        ],
+        "phr": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "پوٹھواری"
         ],
         "pi": [
             "Deva",
@@ -3178,7 +3911,14 @@
             [
                 "PA"
             ],
-            "Pijin"
+            "Solomon Aelan Pijin"
+        ],
+        "piu": [
+            "Latn",
+            [
+                "PA"
+            ],
+            "Pintupi-Luritja"
         ],
         "pjt": [
             "Latn",
@@ -3200,6 +3940,9 @@
                 "EU"
             ],
             "polski"
+        ],
+        "plt": [
+            "mg"
         ],
         "pms": [
             "Latn",
@@ -3260,13 +4003,6 @@
             ],
             "پښتو"
         ],
-        "pt-br": [
-            "Latn",
-            [
-                "AM"
-            ],
-            "português do Brasil"
-        ],
         "pt": [
             "Latn",
             [
@@ -3278,6 +4014,13 @@
                 "WW"
             ],
             "português"
+        ],
+        "pt-br": [
+            "Latn",
+            [
+                "AM"
+            ],
+            "português do Brasil"
         ],
         "pwn": [
             "Latn",
@@ -3306,6 +4049,9 @@
                 "AM"
             ],
             "Runa shimi"
+        ],
+        "quy": [
+            "qu"
         ],
         "qwh": [
             "Latn",
@@ -3378,6 +4124,48 @@
                 "EU"
             ],
             "rumantsch"
+        ],
+        "rm-puter": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "puter"
+        ],
+        "rm-rumgr": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "rumantsch grischun"
+        ],
+        "rm-surmiran": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "surmiran"
+        ],
+        "rm-sursilv": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "sursilvan"
+        ],
+        "rm-sutsilv": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "sutsilvan"
+        ],
+        "rm-vallader": [
+            "Latn",
+            [
+                "EU"
+            ],
+            "vallader"
         ],
         "rmc": [
             "Latn",
@@ -3470,13 +4258,6 @@
         ],
         "ruq-cyrl": [
             "ruq"
-        ],
-        "ruq-grek": [
-            "Grek",
-            [
-                "EU"
-            ],
-            "Megleno-Romanian (Greek script)"
         ],
         "ruq-latn": [
             "Latn",
@@ -3612,19 +4393,19 @@
             ],
             "davvisámegiella (Ruoŧa bealde)"
         ],
-        "ses": [
-            "Latn",
-            [
-                "AF"
-            ],
-            "Koyraboro Senni"
-        ],
         "sei": [
             "Latn",
             [
                 "AM"
             ],
             "Cmique Itom"
+        ],
+        "ses": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Koyraboro Senni"
         ],
         "sg": [
             "Latn",
@@ -3645,7 +4426,24 @@
             [
                 "EU"
             ],
+            "srpskohrvatski \/ српскохрватски"
+        ],
+        "sh-cyrl": [
+            "Cyrl",
+            [
+                "EU"
+            ],
+            "српскохрватски"
+        ],
+        "sh-latn": [
+            "Latn",
+            [
+                "EU"
+            ],
             "srpskohrvatski"
+        ],
+        "shi": [
+            "shi-latn"
         ],
         "shi-latn": [
             "Latn",
@@ -3661,9 +4459,6 @@
             ],
             "ⵜⴰⵛⵍⵃⵉⵜ"
         ],
-        "shi": [
-            "shi-latn"
-        ],
         "shn": [
             "Mymr",
             [
@@ -3671,15 +4466,15 @@
             ],
             "လိၵ်ႈတႆး"
         ],
+        "shy": [
+            "shy-latn"
+        ],
         "shy-latn": [
             "Latn",
             [
                 "AF"
             ],
             "tacawit"
-        ],
-        "shy": [
-            "shy-latn"
         ],
         "si": [
             "Sinh",
@@ -3726,6 +4521,16 @@
             ],
             "slovenčina"
         ],
+        "skr": [
+            "skr-arab"
+        ],
+        "skr-arab": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "سرائیکی"
+        ],
         "sl": [
             "Latn",
             [
@@ -3753,47 +4558,6 @@
                 "AS"
             ],
             "Bahasa Selayar"
-        ],
-        "skr-arab": [
-            "Arab",
-            [
-                "AS"
-            ],
-            "سرائیکی"
-        ],
-        "skr": [
-            "skr-arab"
-        ],
-        "srq": [
-            "Latn",
-            [
-                "AM"
-            ],
-            "mbia cheë"
-        ],
-        "syc": [
-            "Syrc",
-            [
-                "ME"
-            ],
-            "ܣܘܪܝܝܐ"
-        ],
-        "syl": [
-            "Sylo",
-            [
-                "AS"
-            ],
-            "ꠍꠤꠟꠐꠤ"
-        ],
-        "syl-beng": [
-            "Beng",
-            [
-                "AS"
-            ],
-            "সিলেটি"
-        ],
-        "syl-sylo": [
-            "syl"
         ],
         "sm": [
             "Latn",
@@ -3861,15 +4625,15 @@
         "sr": [
             "sr-cyrl"
         ],
-        "sr-ec": [
-            "sr-cyrl"
-        ],
         "sr-cyrl": [
             "Cyrl",
             [
                 "EU"
             ],
             "српски"
+        ],
+        "sr-ec": [
+            "sr-cyrl"
         ],
         "sr-el": [
             "sr-latn"
@@ -3895,6 +4659,13 @@
                 "EU"
             ],
             "sardu campidanesu"
+        ],
+        "srq": [
+            "Latn",
+            [
+                "AM"
+            ],
+            "mbia cheë"
         ],
         "ss": [
             "Latn",
@@ -3953,12 +4724,39 @@
             ],
             "Shikomoro"
         ],
+        "swh": [
+            "sw"
+        ],
         "sxu": [
             "Latn",
             [
                 "EU"
             ],
             "Säggssch"
+        ],
+        "syc": [
+            "Syrc",
+            [
+                "ME"
+            ],
+            "ܣܘܪܝܝܐ"
+        ],
+        "syl": [
+            "Sylo",
+            [
+                "AS"
+            ],
+            "ꠍꠤꠟꠐꠤ"
+        ],
+        "syl-beng": [
+            "Beng",
+            [
+                "AS"
+            ],
+            "সিলেটি"
+        ],
+        "syl-sylo": [
+            "syl"
         ],
         "szl": [
             "Latn",
@@ -3981,6 +4779,23 @@
             ],
             "தமிழ்"
         ],
+        "taq": [
+            "taq-tfng"
+        ],
+        "taq-latn": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "təmajəq"
+        ],
+        "taq-tfng": [
+            "Tfng",
+            [
+                "AF"
+            ],
+            "ⵜⴰⵎⴰⵌⴰⵆ"
+        ],
         "tay": [
             "Latn",
             [
@@ -4000,7 +4815,7 @@
             [
                 "AS"
             ],
-            "ᥖᥭᥰᥖᥬᥳᥑᥨᥒᥰ"
+            "ᥖᥭᥰ ᥖᥬᥲ ᥑᥨᥒᥰ"
         ],
         "te": [
             "Telu",
@@ -4017,6 +4832,9 @@
             ],
             "tetun"
         ],
+        "tg": [
+            "tg-cyrl"
+        ],
         "tg-cyrl": [
             "Cyrl",
             [
@@ -4030,9 +4848,6 @@
                 "AS"
             ],
             "tojikī"
-        ],
-        "tg": [
-            "tg-cyrl"
         ],
         "th": [
             "Thai",
@@ -4053,7 +4868,14 @@
             [
                 "AF"
             ],
-            "ትግረ"
+            "ትግሬ"
+        ],
+        "tji": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "bifzivsar"
         ],
         "tk": [
             "Latn",
@@ -4117,6 +4939,13 @@
             ],
             "lea faka-Tonga"
         ],
+        "toi": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "chitonga"
+        ],
         "tok": [
             "Latn",
             [
@@ -4164,6 +4993,13 @@
             ],
             "Seediq"
         ],
+        "trw": [
+            "Arab",
+            [
+                "AS"
+            ],
+            "توروالی"
+        ],
         "ts": [
             "Latn",
             [
@@ -4177,6 +5013,13 @@
                 "EU"
             ],
             "Τσακωνικά"
+        ],
+        "tsg": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "Sinūg"
         ],
         "tt": [
             "Cyrl",
@@ -4194,6 +5037,13 @@
                 "EU"
             ],
             "tatarça"
+        ],
+        "ttj": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Orutooro"
         ],
         "ttt": [
             "Cyrl",
@@ -4268,13 +5118,6 @@
             ],
             "ئۇيغۇرچە"
         ],
-        "ug-latn": [
-            "Latn",
-            [
-                "AS"
-            ],
-            "uyghurche"
-        ],
         "ug-cyrl": [
             "Cyrl",
             [
@@ -4282,12 +5125,26 @@
             ],
             "уйғурчә"
         ],
+        "ug-latn": [
+            "Latn",
+            [
+                "AS"
+            ],
+            "uyghurche"
+        ],
         "uk": [
             "Cyrl",
             [
                 "EU"
             ],
             "українська"
+        ],
+        "umb": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "umbundu"
         ],
         "umu": [
             "Latn",
@@ -4321,12 +5178,8 @@
         "uz-latn": [
             "uz"
         ],
-        "ve": [
-            "Latn",
-            [
-                "AF"
-            ],
-            "Tshivenda"
+        "uzn": [
+            "uz"
         ],
         "vai": [
             "Vaii",
@@ -4334,6 +5187,13 @@
                 "AF"
             ],
             "ꕙꔤ"
+        ],
+        "ve": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "Tshivenda"
         ],
         "vec": [
             "Latn",
@@ -4427,6 +5287,13 @@
             ],
             "Faka'uvea"
         ],
+        "wlx": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "waale"
+        ],
         "wo": [
             "Latn",
             [
@@ -4434,12 +5301,33 @@
             ],
             "Wolof"
         ],
+        "wsg": [
+            "Telu",
+            [
+                "AS"
+            ],
+            "గోండి"
+        ],
         "wuu": [
-            "Hans",
+            "Hani",
             [
                 "AS"
             ],
             "吴语"
+        ],
+        "wuu-hans": [
+            "Hans",
+            [
+                "AS"
+            ],
+            "吴语（简体）"
+        ],
+        "wuu-hant": [
+            "Hant",
+            [
+                "AS"
+            ],
+            "吳語（正體）"
         ],
         "xal": [
             "Cyrl",
@@ -4461,6 +5349,14 @@
                 "EU"
             ],
             "მარგალური"
+        ],
+        "xmm": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Manado"
         ],
         "xsy": [
             "Latn",
@@ -4523,6 +5419,20 @@
             ],
             "粵語"
         ],
+        "yue-hans": [
+            "Hans",
+            [
+                "AS"
+            ],
+            "粵语（简体）"
+        ],
+        "yue-hant": [
+            "Hant",
+            [
+                "AS"
+            ],
+            "粵語（繁體）"
+        ],
         "za": [
             "Latn",
             [
@@ -4544,14 +5454,25 @@
             ],
             "ⵜⴰⵎⴰⵣⵉⵖⵜ ⵜⴰⵏⴰⵡⴰⵢⵜ"
         ],
+        "zgh-latn": [
+            "Latn",
+            [
+                "AF"
+            ],
+            "tamaziɣt tanawayt"
+        ],
         "zh": [
-            "Hans",
+            "Hani",
             [
                 "AS",
                 "PA",
-                "AM"
+                "AM",
+                "WW"
             ],
             "中文"
+        ],
+        "zh-cdo": [
+            "cdo"
         ],
         "zh-classical": [
             "lzh"
@@ -4568,7 +5489,8 @@
             [
                 "AS",
                 "PA",
-                "AM"
+                "AM",
+                "WW"
             ],
             "中文（简体）"
         ],
@@ -4577,7 +5499,8 @@
             [
                 "AS",
                 "PA",
-                "AM"
+                "AM",
+                "WW"
             ],
             "中文（繁體）"
         ],
@@ -4617,13 +5540,21 @@
             [
                 "AS"
             ],
-            "中文（台灣）"
+            "中文（臺灣）"
         ],
         "zh-yue": [
             "yue"
         ],
-        "zh-cdo": [
-            "cdo"
+        "zmi": [
+            "Latn",
+            [
+                "AS",
+                "PA"
+            ],
+            "Nismilan"
+        ],
+        "zsm": [
+            "ms"
         ],
         "zu": [
             "Latn",
@@ -4702,6 +5633,7 @@
             "Bali",
             "Batk",
             "Bugi",
+            "Cham",
             "Java",
             "Khmr",
             "Laoo",
@@ -4764,6 +5696,7 @@
             "uz",
             "tk",
             "bgn",
+            "kaa",
             "ug-arab",
             "kk-arab",
             "kk-cyrl"
@@ -4787,6 +5720,8 @@
         ],
         "AO": [
             "pt",
+            "umb",
+            "kmb",
             "ln"
         ],
         "AR": [
@@ -4860,6 +5795,7 @@
         ],
         "BF": [
             "mos",
+            "dyu",
             "fr",
             "ff"
         ],
@@ -4914,6 +5850,7 @@
             "en",
             "de",
             "it",
+            "vec",
             "ja",
             "es",
             "kgp",
@@ -4989,6 +5926,7 @@
         ],
         "CD": [
             "sw",
+            "lua",
             "fr",
             "ln",
             "kg",
@@ -5030,10 +5968,14 @@
             "en",
             "bum",
             "ff",
+            "nnh",
             "bkm",
             "bas",
+            "byv",
+            "dua",
             "ar",
             "ksf",
+            "ken",
             "agq",
             "ha-arab",
             "ha"
@@ -5042,6 +5984,7 @@
             "zh",
             "wuu",
             "yue",
+            "yue-hans",
             "hsn",
             "hak",
             "nan",
@@ -5068,6 +6011,9 @@
             "es",
             "guc",
             "yrl"
+        ],
+        "CQ": [
+            "en"
         ],
         "CR": [
             "es"
@@ -5172,7 +6118,8 @@
             "ru",
             "en",
             "fi",
-            "vro"
+            "vro",
+            "ie"
         ],
         "EG": [
             "ar",
@@ -5209,7 +6156,8 @@
             "so",
             "ti",
             "wal",
-            "aa"
+            "aa",
+            "gez"
         ],
         "FI": [
             "fi",
@@ -5272,6 +6220,7 @@
             "gu",
             "sco",
             "cy",
+            "ro",
             "bn",
             "ar",
             "zh-hant",
@@ -5307,11 +6256,13 @@
             "en"
         ],
         "GH": [
-            "ak",
             "en",
             "ee",
+            "abr",
             "gur",
+            "ada",
             "gaa",
+            "nzi",
             "ha",
             "ff"
         ],
@@ -5381,7 +6332,8 @@
         "HR": [
             "hr",
             "en",
-            "it"
+            "it",
+            "vec"
         ],
         "HT": [
             "ht",
@@ -5416,8 +6368,10 @@
             "bbc-latn",
             "zh-hant",
             "zh",
+            "mak",
             "rej",
             "gor",
+            "kge",
             "sly",
             "mwv"
         ],
@@ -5430,6 +6384,7 @@
             "he",
             "en",
             "ar",
+            "apc",
             "ru",
             "ro",
             "yi",
@@ -5460,12 +6415,14 @@
             "bho",
             "awa",
             "as",
+            "bgc",
+            "mag",
             "mai",
             "hne",
             "ne",
             "sat",
             "ks-arab",
-            "gom-deva",
+            "knn",
             "gbm",
             "sd",
             "doi",
@@ -5510,6 +6467,7 @@
             "bqi",
             "luz",
             "lki",
+            "kaa",
             "bgn",
             "hy",
             "ps",
@@ -5526,6 +6484,7 @@
             "it",
             "en",
             "fr",
+            "lmo",
             "sc",
             "de",
             "vec",
@@ -5536,9 +6495,9 @@
             "sdc",
             "fur",
             "egl",
+            "lld",
             "ca",
             "el",
-            "lmo",
             "pms",
             "hr",
             "rgn"
@@ -5552,6 +6511,7 @@
         ],
         "JO": [
             "ar",
+            "apc",
             "en"
         ],
         "JP": [
@@ -5563,6 +6523,8 @@
             "sw",
             "en",
             "ki",
+            "luo",
+            "kam",
             "so",
             "pko",
             "om",
@@ -5572,10 +6534,12 @@
         ],
         "KG": [
             "ky",
-            "ru"
+            "ru",
+            "kaa"
         ],
         "KH": [
-            "km"
+            "km",
+            "cja-latn"
         ],
         "KI": [
             "en"
@@ -5605,12 +6569,14 @@
             "en",
             "de",
             "ug-cyrl",
-            "ug-arab"
+            "ug-arab",
+            "kaa"
         ],
         "LA": [
             "lo"
         ],
         "LB": [
+            "apc",
             "ar",
             "en",
             "hy",
@@ -5780,6 +6746,7 @@
             "es",
             "en",
             "yua",
+            "vec",
             "sei"
         ],
         "MY": [
@@ -5787,7 +6754,9 @@
             "en",
             "zh",
             "ta",
+            "iba",
             "jv",
+            "zmi",
             "dtp",
             "ml",
             "bug",
@@ -5805,6 +6774,7 @@
             "af",
             "kj",
             "ng",
+            "naq",
             "hz",
             "en",
             "de",
@@ -5828,12 +6798,15 @@
             "ha",
             "ig",
             "yo",
+            "ff",
             "efi",
+            "ibb",
             "ha-arab",
+            "bin",
+            "kaj",
             "kcg",
             "ar",
-            "ann",
-            "ff"
+            "ann"
         ],
         "NI": [
             "es"
@@ -5917,6 +6890,7 @@
             "war",
             "pam",
             "pag",
+            "tsg",
             "zh-hant",
             "zh",
             "cps",
@@ -5930,12 +6904,15 @@
             "ps",
             "sd",
             "skr-arab",
+            "hno",
             "brh",
             "fa",
             "bgn",
+            "tg-cyrl",
             "bft",
+            "khw",
             "ks-arab",
-            "khw"
+            "trw"
         ],
         "PL": [
             "pl",
@@ -5947,7 +6924,8 @@
             "uk",
             "csb",
             "sli",
-            "lt"
+            "lt",
+            "prg"
         ],
         "PM": [
             "fr",
@@ -5961,7 +6939,8 @@
             "en"
         ],
         "PS": [
-            "ar"
+            "ar",
+            "apc"
         ],
         "PT": [
             "pt",
@@ -6047,6 +7026,7 @@
             "sr-cyrl",
             "vep",
             "mn",
+            "kaa",
             "izh",
             "vot",
             "cu"
@@ -6057,7 +7037,8 @@
             "fr"
         ],
         "SA": [
-            "ar"
+            "ar",
+            "ars"
         ],
         "SB": [
             "en",
@@ -6101,6 +7082,7 @@
             "hr",
             "en",
             "de",
+            "vec",
             "hu",
             "it"
         ],
@@ -6129,7 +7111,8 @@
         "SN": [
             "wo",
             "fr",
-            "ff"
+            "ff",
+            "mey"
         ],
         "SO": [
             "so",
@@ -6160,6 +7143,7 @@
             "nl"
         ],
         "SY": [
+            "apc",
             "ar",
             "ku-latn",
             "fr",
@@ -6192,6 +7176,7 @@
             "th",
             "en",
             "nod",
+            "mfa",
             "zh-hant",
             "zh",
             "mnw",
@@ -6214,7 +7199,8 @@
             "tk",
             "ru",
             "uz",
-            "ku-latn"
+            "ku-latn",
+            "kaa"
         ],
         "TN": [
             "aeb-arab",
@@ -6229,6 +7215,8 @@
             "tr",
             "en",
             "ku-latn",
+            "apc",
+            "kaa",
             "kbd",
             "az-latn",
             "az-arab",
@@ -6285,7 +7273,10 @@
             "lg",
             "nyn",
             "en",
+            "laj",
+            "ach",
             "rw",
+            "ttj",
             "hi"
         ],
         "UM": [
@@ -6313,7 +7304,9 @@
             "cho",
             "lkt",
             "ik",
-            "mus"
+            "mus",
+            "io",
+            "jbo"
         ],
         "UY": [
             "es"
@@ -6345,7 +7338,8 @@
         "VN": [
             "vi",
             "zh-hant",
-            "zh"
+            "zh",
+            "cjm-cham"
         ],
         "VU": [
             "bi",
@@ -6391,6 +7385,7 @@
             "sw"
         ],
         "ZM": [
+            "bem",
             "en",
             "ny",
             "loz"

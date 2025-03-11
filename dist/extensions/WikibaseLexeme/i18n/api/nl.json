@@ -2,10 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"Daanboven",
+			"McDutchie",
 			"Ndecouck",
 			"Romaine",
-			"Sjoerddebruin",
-			"McDutchie"
+			"Sjoerddebruin"
 		]
 	},
 	"apierror-wikibaselexeme-form-must-have-at-least-one-representation": "De vorm moet ten minste één representatie bevatten",
@@ -58,7 +58,6 @@
 	"apihelp-wbleditsenseelements-param-senseId": "ID van de betekenis, bijv. L10-S2",
 	"apihelp-wbleditsenseelements-param-tags": "Wijzigingslabels om op de versie toe te passen.",
 	"apihelp-wbleditsenseelements-summary": "Bewerkt glossen van een betekenis",
-	"apihelp-wblmergelexemes-description": "Twee lexemen samenvoegen.",
 	"apihelp-wblmergelexemes-example-1": "Voegt gegevens van <samp>L123</samp> samen in <samp>L321</samp>",
 	"apihelp-wblmergelexemes-param-bot": "Deze bewerking als robotbewerking markeren. Deze URL-markering zal alleen in acht worden genomen indien de gebruiker tot de groep “bot” behoort.",
 	"apihelp-wblmergelexemes-param-source": "De ID van waaruit moet worden samengevoegd",

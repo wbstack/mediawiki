@@ -28,6 +28,9 @@ use Wikimedia\ParamValidator\ParamValidator;
  * @ingroup API
  */
 class ApiLanguageSearch extends ApiBase {
+	/**
+	 * @inheritDoc
+	 */
 	public function execute() {
 		$params = $this->extractRequestParams();
 		$search = $params['search'];
@@ -37,6 +40,9 @@ class ApiLanguageSearch extends ApiBase {
 		$result->addValue( null, $this->getModuleName(), $searches );
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	public function getAllowedParams() {
 		return [
 			'search' => [
@@ -62,5 +68,12 @@ class ApiLanguageSearch extends ApiBase {
 			'action=languagesearch&search=ഫി&typos=1'
 				=> 'apihelp-languagesearch-example-3',
 		];
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getHelpUrls() {
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Languagesearch';
 	}
 }

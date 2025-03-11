@@ -3,7 +3,8 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"exif-imagewidth": "Breet",
@@ -22,7 +23,7 @@
 	"exif-rowsperstrip": "Zuel vun den Zeile pro Strëpp",
 	"exif-stripbytecounts": "Byte pro kompriméiert Strëpp",
 	"exif-jpeginterchangeformat": "Offset zou JPEG SOI",
-	"exif-jpeginterchangeformatlength": "Gréisst vun de JPEG-Daten a Byten",
+	"exif-jpeginterchangeformatlength": "Gréisst vun den JPEG-Daten a Byte",
 	"exif-whitepoint": "Manuell mat Miessung",
 	"exif-primarychromaticities": "Faarwe vun de primäre Faarwen",
 	"exif-ycbcrcoefficients": "YCbCr-Koeffizienten",
@@ -340,7 +341,7 @@
 	"exif-iimcategory-pol": "Politik",
 	"exif-iimcategory-rel": "Relioun a Glawen",
 	"exif-iimcategory-sci": "Wëssenschaft an Technologie",
-	"exif-iimcategory-soi": "Sozial Themen",
+	"exif-iimcategory-soi": "Sozial Theemen",
 	"exif-iimcategory-spo": "Sport",
 	"exif-iimcategory-war": "Krich, Konflikt an Onrou",
 	"exif-iimcategory-wea": "Wieder",

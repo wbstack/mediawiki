@@ -2,8 +2,9 @@
 
 namespace MediaWiki\Extension\Math;
 
-use Hooks;
+use MediaWiki\Extension\Math\Hooks\HookRunner;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\MediaWikiServices;
 use StatusValue;
 
 /**
@@ -20,9 +21,9 @@ class MathLaTeXML extends MathMathML {
 	/** @var string settings for LaTeXML daemon */
 	private $LaTeXMLSettings = '';
 
-	public function __construct( $tex = '', $params = [] ) {
+	public function __construct( $tex = '', $params = [], $cache = null ) {
 		global $wgMathLaTeXMLUrl;
-		parent::__construct( $tex, $params );
+		parent::__construct( $tex, $params, $cache );
 		$this->host = $wgMathLaTeXMLUrl;
 		$this->setMode( MathConfig::MODE_LATEXML );
 	}
@@ -55,11 +56,7 @@ class MathLaTeXML extends MathMathML {
 	 */
 	public function getLaTeXMLSettings() {
 		global $wgMathDefaultLaTeXMLSetting;
-		if ( $this->LaTeXMLSettings ) {
-			return $this->LaTeXMLSettings;
-		}
-
-		return $wgMathDefaultLaTeXMLSetting;
+		return $this->LaTeXMLSettings ?: $wgMathDefaultLaTeXMLSetting;
 	}
 
 	/**
@@ -95,7 +92,7 @@ class MathLaTeXML extends MathMathML {
 
 		// There is an API-inconsistency between different versions of the LaTeXML daemon
 		// some versions require the literal prefix other don't allow it.
-		if ( !strpos( $this->host, '/convert' ) ) {
+		if ( !str_contains( $this->host, '/convert' ) ) {
 			$postData = preg_replace( '/&tex=/', '&tex=literal:', $postData, 1 );
 		}
 
@@ -121,9 +118,10 @@ class MathLaTeXML extends MathMathML {
 					$this->setMathml( $jsonResult->result );
 					// Avoid PHP 7.1 warning from passing $this by reference
 					$renderer = $this;
-					Hooks::run( 'MathRenderingResultRetrieved',
-						[ &$renderer, &$jsonResult ]
-					); // Enables debugging of server results
+					( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )
+						->onMathRenderingResultRetrieved(
+							$renderer, $jsonResult
+						); // Enables debugging of server results
 					return StatusValue::newGood();
 				}
 
@@ -150,42 +148,8 @@ class MathLaTeXML extends MathMathML {
 		}
 	}
 
-	/**
-	 * Calculates the SVG image based on the MathML input
-	 * No cache is used.
-	 * @return bool
-	 */
-	public function calculateSvg() {
-		$renderer = new MathMathML( $this->getTex() );
-		$renderer->setMathml( $this->getMathml() );
-		$renderer->setMode( MathConfig::MODE_LATEXML );
-		$renderer->setPurge();
-		$res = $renderer->render();
-		if ( $res == true ) {
-			$this->setSvg( $renderer->getSvg() );
-		} else {
-			$lastError = $renderer->getLastError();
-			LoggerFactory::getInstance( 'Math' )->error(
-				'Failed to convert LaTeXML-MathML to SVG:' . $lastError );
-		}
-		return $res;
-	}
-
-	/**
-	 * Gets the SVG image
-	 *
-	 * @param string $render if set to 'render' (default) and no SVG image exists, the function
-	 *                       tries to generate it on the fly.
-	 *                       Otherwise, if set to 'cached', and there is no SVG in the database
-	 *                       cache, an empty string is returned.
-	 *
-	 * @return string XML-Document of the rendered SVG
-	 */
-	public function getSvg( $render = 'render' ) {
-		if ( $render == 'render' && ( $this->isPurge() || $this->svg == '' ) ) {
-			$this->calculateSvg();
-		}
-		return parent::getSvg( $render );
+	public function getHtmlOutput( bool $svg = true ): string {
+		return parent::getHtmlOutput( false );
 	}
 
 	/**

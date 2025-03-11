@@ -7,11 +7,11 @@
 			"BáthoryPéter",
 			"Csega",
 			"Dorgan",
+			"Eukarióta",
 			"Máté",
 			"R-Joe",
 			"Tacsipacsi",
-			"Tgr",
-			"Eukarióta"
+			"Tgr"
 		]
 	},
 	"uls-desc": "Többféle módot kínál a felhasználónak nyelv kiválasztására és a nyelvi beállítások módosítására",
@@ -80,5 +80,6 @@
 	"ext-uls-empty-state-header": "Még nincsenek nyelvek",
 	"ext-uls-empty-state-desc": "Egyelőre nem állnak rendelkezésre nyelvek",
 	"ext-uls-empty-state-header-actions-available": "Még nincsenek nyelvek. Hozzáadsz egy újat?",
-	"ext-uls-empty-state-desc-actions-available": "Tedd elérhetővé a tartalmat több nyelven."
+	"ext-uls-empty-state-desc-actions-available": "Tedd elérhetővé a tartalmat több nyelven.",
+	"ext-uls-add-languages-button-label": "Nyelvek hozzáadása"
 }

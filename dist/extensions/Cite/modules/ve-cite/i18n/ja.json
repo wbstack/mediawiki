@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"2nd-player",
+			"Ant176",
 			"Delim",
 			"Foomin10",
 			"Fryed-peach",
@@ -10,6 +11,7 @@
 			"Kkairri",
 			"Los688",
 			"Miya",
+			"Omotecho",
 			"Otokoume",
 			"Penn Station",
 			"Plover-Y",
@@ -19,9 +21,9 @@
 			"Sujiniku",
 			"Takot",
 			"Vigorous action",
+			"Waki285",
 			"Whym",
-			"おはぐろ蜻蛉",
-			"Omotecho"
+			"おはぐろ蜻蛉"
 		]
 	},
 	"visualeditor-cite-tool-name-book": "書籍",
@@ -42,9 +44,9 @@
 	"cite-ve-citationneeded-title": "要出典",
 	"cite-ve-dialog-reference-editing-reused": "この脚注はこのページ上で$1{{PLURAL:$1|回}}使用されています。",
 	"cite-ve-dialog-reference-editing-reused-long": "この脚注は、このページで$1回使われています。ここでの変更は、この脚注が使われているすべての場所に適用されます。",
+	"cite-ve-dialog-reference-editing-extends": "これは別の脚注の拡張です。",
 	"cite-ve-dialog-reference-options-group-label": "使用するグループ",
 	"cite-ve-dialog-reference-options-group-placeholder": "汎用の脚注",
-	"cite-ve-dialog-reference-options-name-label": "この名前で再使用",
 	"cite-ve-dialog-reference-options-responsive-label": "レスポンシブなコラムレイアウトを使用する",
 	"cite-ve-dialog-reference-options-section": "オプション",
 	"cite-ve-dialog-reference-placeholder": "ここに脚注を入力し、若しくは貼り付け、又は引用テンプレートを追加してください。",
@@ -64,9 +66,7 @@
 	"cite-ve-referenceslist-isempty-default": "このページには、この一覧に含められる脚注がありません。",
 	"cite-ve-referenceslist-missingref": "この脚注はテンプレート内または別途生成されたブロック内で定義されているため、現時点ではソースモードでのみ編集できます。",
 	"cite-ve-referenceslist-missingref-in-list": "この脚注はテンプレート内または別途生成されたブロック内で定義されているため、現時点ではソースモードでのみプレビューできます。",
-	"cite-ve-referenceslist-missingreflist": "この脚注リストはテンプレートにより生成されているため、現時点ではソースモードでのみ編集できます。",
+	"cite-ve-referenceslist-missingreflist": "この脚注リストはテンプレートにより生成されています。",
 	"cite-ve-toolbar-group-label": "引用",
-	"cite-ve-othergroup-item": "$1 脚注",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "脚注",
-	"visualeditor-internal-list-diff-group-name-mwreference": "脚注のグループ名: 「$1」"
+	"cite-ve-othergroup-item": "$1 脚注"
 }

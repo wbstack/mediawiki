@@ -4,17 +4,15 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiResult;
 use DataValues\DataValue;
 use Exception;
-use IBufferingStatsdDataFactory;
 use InvalidArgumentException;
 use LogicException;
-use NullStatsdDataFactory;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Status\Status;
 use OutOfBoundsException;
-use Status;
 use ValueParsers\ParseException;
 use ValueParsers\ParserOptions;
 use ValueParsers\ValueParser;
@@ -30,6 +28,8 @@ use Wikibase\Repo\Validators\CompositeValidator;
 use Wikibase\Repo\Validators\ValidatorErrorLocalizer;
 use Wikibase\Repo\ValueParserFactory;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
+use Wikimedia\Stats\NullStatsdDataFactory;
 
 /**
  * API module for using value parsers.
@@ -103,7 +103,7 @@ class ParseValue extends ApiBase {
 		ValidatorErrorLocalizer $validatorErrorLocalizer,
 		PropertyDataTypeLookup $propertyDataTypeLookup,
 		ApiErrorReporter $errorReporter,
-		IBufferingStatsdDataFactory $stats = null
+		?IBufferingStatsdDataFactory $stats = null
 	) {
 		parent::__construct( $mainModule, $moduleName );
 		$this->dataTypeFactory = $dataTypeFactory;
@@ -178,7 +178,7 @@ class ParseValue extends ApiBase {
 		// in the ValueParserFactory (see WikibaseRepo.ServiceWiring.php).
 		$name = $params['datatype'] ?: $params['parser'];
 
-		if ( empty( $name ) && isset( $params['property'] ) ) {
+		if ( $name === null && isset( $params['property'] ) ) {
 			try {
 				$propertyId = new NumericPropertyId( $params['property'] );
 			} catch ( InvalidArgumentException $ex ) {
@@ -197,7 +197,7 @@ class ParseValue extends ApiBase {
 			}
 		}
 
-		if ( empty( $name ) ) {
+		if ( $name === null ) {
 			// If neither 'datatype' not 'parser' is given, tell the client to use 'datatype'.
 			$this->errorReporter->dieWithError(
 				'wikibase-api-not-recognized-datatype',
@@ -213,6 +213,8 @@ class ParseValue extends ApiBase {
 				'wikibase-api-not-recognized-datatype',
 				'unknown-datatype'
 			);
+
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new LogicException( 'dieError() did not throw an exception' );
 		}
 	}
@@ -222,12 +224,12 @@ class ParseValue extends ApiBase {
 
 		$name = $params['datatype'];
 
-		if ( empty( $name ) && isset( $params['property'] ) ) {
+		if ( $name === null && isset( $params['property'] ) ) {
 			$propertyId = new NumericPropertyId( $params['property'] );
 			$name = $this->propertyDataTypeLookup->getDataTypeIdForProperty( $propertyId );
 		}
 
-		if ( empty( $name ) ) {
+		if ( $name === null ) {
 			// 'datatype' parameter is required for validation.
 			$this->errorReporter->dieWithError(
 				'wikibase-api-not-recognized-datatype',
@@ -255,7 +257,7 @@ class ParseValue extends ApiBase {
 
 	private function parseStringValue( ValueParser $parser, string $value, ?ValueValidator $validator ): array {
 		$result = [
-			'raw' => $value
+			'raw' => $value,
 		];
 
 		try {

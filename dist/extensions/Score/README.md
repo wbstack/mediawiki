@@ -54,10 +54,10 @@ Linux container.
 
 Score uses POSIX shell scripts and so requires a Bash or a similar shell to
 be installed, for example, the MinGW shell that is distributed with **Git for Windows**.
-Configure its location with `$wgScoreShell`, typically:
+Configure its location with `$wgShellboxShell`, typically:
 
 ```
-$wgScoreShell = 'C:\Program Files\Git\bin\bash.exe';
+$wgShellboxShell = 'C:\Program Files\Git\bin\bash.exe';
 ```
 
 GhostScript is distributed with LilyPond, however this GhostScript cannot find
@@ -78,7 +78,7 @@ $wgScoreEnvironment = [
    the directory is writable by your webserver. If you do not create this
    directory, the Score extension will attempt to create it for you with the
    rights available to it.
-4. Add the lines
+4. Add the following lines to the `LocalSettings.php` file:
 ```php
    wfLoadExtension( 'Score' );
    $wgScoreTrim = true;

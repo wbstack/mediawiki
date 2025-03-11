@@ -1,8 +1,11 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\Usage;
 
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
+use Wikibase\Client\ParserOutput\ParserOutputProvider;
 
 /**
  * This implementation of the UsageAccumulator interface acts as a wrapper around
@@ -20,38 +23,25 @@ class ParserOutputUsageAccumulator extends UsageAccumulator {
 	 */
 	public const EXTENSION_DATA_KEY = 'wikibase-entity-usage';
 
-	/**
-	 * @var ParserOutput
-	 */
-	private $parserOutput;
-
-	/**
-	 * @var EntityUsageFactory
-	 */
-	private $entityUsageFactory;
-
-	/**
-	 * @var UsageDeduplicator
-	 */
-	private $usageDeduplicator;
+	private EntityUsageFactory $entityUsageFactory;
+	private UsageDeduplicator $usageDeduplicator;
+	private ParserOutputProvider $parserOutputProvider;
 
 	public function __construct(
-		ParserOutput $parserOutput,
+		ParserOutputProvider $parserOutputProvider,
 		EntityUsageFactory $entityUsageFactory,
 		UsageDeduplicator $deduplicator
 	) {
-		$this->parserOutput = $parserOutput;
+		$this->parserOutputProvider = $parserOutputProvider;
 		$this->usageDeduplicator = $deduplicator;
 		$this->entityUsageFactory = $entityUsageFactory;
 	}
 
 	/**
 	 * @see UsageAccumulator::addUsage
-	 *
-	 * @param EntityUsage $usage
 	 */
-	public function addUsage( EntityUsage $usage ) {
-		$this->parserOutput->appendExtensionData(
+	public function addUsage( EntityUsage $usage ): void {
+		$this->getParserOutput()->appendExtensionData(
 			self::EXTENSION_DATA_KEY, $usage->getIdentityString()
 		);
 	}
@@ -61,8 +51,8 @@ class ParserOutputUsageAccumulator extends UsageAccumulator {
 	 *
 	 * @return EntityUsage[]
 	 */
-	public function getUsages() {
-		$usageIdentities = $this->parserOutput->getExtensionData( self::EXTENSION_DATA_KEY ) ?: [];
+	public function getUsages(): array {
+		$usageIdentities = $this->getParserOutput()->getExtensionData( self::EXTENSION_DATA_KEY ) ?: [];
 
 		$usages = [];
 		foreach ( $usageIdentities as $usageIdentity => $value ) {
@@ -75,4 +65,7 @@ class ParserOutputUsageAccumulator extends UsageAccumulator {
 		return [];
 	}
 
+	private function getParserOutput(): ParserOutput {
+		return $this->parserOutputProvider->getParserOutput();
+	}
 }

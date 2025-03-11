@@ -18,7 +18,9 @@
  * @file
  */
 
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageFactory;
+use MediaWiki\MediaWikiServices;
 
 /**
  * @since 1.16.3
@@ -256,7 +258,7 @@ class IcuCollation extends Collation {
 
 		$mainCollator = Collator::create( $locale );
 		if ( !$mainCollator ) {
-			throw new MWException( "Invalid ICU locale specified for collation: $locale" );
+			throw new InvalidArgumentException( "Invalid ICU locale specified for collation: $locale" );
 		}
 		$this->mainCollator = $mainCollator;
 
@@ -265,7 +267,7 @@ class IcuCollation extends Collation {
 		$this->primaryCollator->setStrength( Collator::PRIMARY );
 
 		// If the special suffix for numeric collation is present, turn on numeric collation.
-		if ( substr( $locale, -5, 5 ) === '-u-kn' ) {
+		if ( str_ends_with( $locale, '-u-kn' ) ) {
 			$this->useNumericCollation = true;
 			// Strip off the special suffix so it doesn't trip up fetchFirstLetterData().
 			$this->locale = substr( $this->locale, 0, -5 );
@@ -334,7 +336,8 @@ class IcuCollation extends Collation {
 	 */
 	private function getFirstLetterData() {
 		if ( $this->firstLetterData === null ) {
-			$cache = ObjectCache::getLocalServerInstance( CACHE_ANYTHING );
+			$cache = MediaWikiServices::getInstance()->getObjectCacheFactory()
+				->getLocalServerInstance( CACHE_ANYTHING );
 			$cacheKey = $cache->makeKey(
 				'first-letters',
 				static::class,
@@ -352,7 +355,6 @@ class IcuCollation extends Collation {
 
 	/**
 	 * @return array
-	 * @throws MWException
 	 */
 	private function fetchFirstLetterData() {
 		// Generate data from serialized data file
@@ -373,7 +375,7 @@ class IcuCollation extends Collation {
 		} elseif ( $this->locale === 'root' ) {
 			$letters = require __DIR__ . "/data/first-letters-root.php";
 		} else {
-			throw new MWException( "MediaWiki does not support ICU locale " .
+			throw new RuntimeException( "MediaWiki does not support ICU locale " .
 				"\"{$this->locale}\"" );
 		}
 
@@ -483,57 +485,5 @@ class IcuCollation extends Collation {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Return the version of Unicode appropriate for the version of ICU library
-	 * currently in use, or false when it can't be determined.
-	 *
-	 * @since 1.21
-	 * @return string|bool
-	 */
-	public static function getUnicodeVersionForICU() {
-		$icuVersion = INTL_ICU_VERSION;
-		if ( !$icuVersion ) {
-			return false;
-		}
-
-		$versionPrefix = substr( $icuVersion, 0, 3 );
-		// Source: https://icu.unicode.org/download
-		$map = [
-			'71.' => '14.0',
-			'70.' => '14.0',
-			'69.' => '13.0',
-			'68.' => '13.0',
-			'67.' => '13.0',
-			'66.' => '13.0',
-			'65.' => '12.0',
-			'64.' => '12.0',
-			'63.' => '11.0',
-			'62.' => '11.0',
-			'61.' => '10.0',
-			'60.' => '10.0',
-			'59.' => '9.0',
-			'58.' => '9.0',
-			'57.' => '8.0',
-			'56.' => '8.0',
-			'55.' => '7.0',
-			'54.' => '7.0',
-			'53.' => '6.3',
-			'52.' => '6.3',
-			'51.' => '6.2',
-			'50.' => '6.2',
-			'49.' => '6.1',
-			'4.8' => '6.0',
-			'4.6' => '6.0',
-			'4.4' => '5.2',
-			'4.2' => '5.1',
-			'4.0' => '5.1',
-			'3.8' => '5.0',
-			'3.6' => '5.0',
-			'3.4' => '4.1',
-		];
-
-		return $map[$versionPrefix] ?? false;
 	}
 }

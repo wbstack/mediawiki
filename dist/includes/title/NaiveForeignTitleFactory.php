@@ -18,18 +18,18 @@
  * @file
  */
 
+namespace MediaWiki\Title;
+
+use MediaWiki\Language\Language;
+
 /**
  * A parser that translates page titles on a foreign wiki into ForeignTitle
  * objects, with no knowledge of the namespace setup on the foreign site.
  */
 class NaiveForeignTitleFactory implements ForeignTitleFactory {
 
-	/** @var Language */
-	private $contentLanguage;
+	private Language $contentLanguage;
 
-	/**
-	 * @param Language $contentLanguage
-	 */
 	public function __construct( Language $contentLanguage ) {
 		$this->contentLanguage = $contentLanguage;
 	}
@@ -72,7 +72,7 @@ class NaiveForeignTitleFactory implements ForeignTitleFactory {
 			: $ns != 0;
 
 		if ( count( $pieces ) === 2 && $isNamespacePartValid ) {
-			list( $namespaceName, $pageName ) = $pieces;
+			[ $namespaceName, $pageName ] = $pieces;
 		} else {
 			$namespaceName = '';
 			$pageName = $title;
@@ -81,3 +81,6 @@ class NaiveForeignTitleFactory implements ForeignTitleFactory {
 		return new ForeignTitle( $ns, $namespaceName, $pageName );
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( NaiveForeignTitleFactory::class, 'NaiveForeignTitleFactory' );

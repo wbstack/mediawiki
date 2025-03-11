@@ -3,10 +3,10 @@
 namespace MediaWiki\Extension\Notifications\Push;
 
 use MediaWiki\Http\HttpRequestFactory;
+use MediaWiki\Status\Status;
 use MWHttpRequest;
 use Psr\Log\LoggerAwareInterface;
 use Psr\Log\LoggerAwareTrait;
-use Status;
 
 class NotificationServiceClient implements LoggerAwareInterface {
 
@@ -43,9 +43,8 @@ class NotificationServiceClient implements LoggerAwareInterface {
 
 			$tokenMap[$topic][$provider][] = $subscription->getToken();
 		}
-		foreach ( array_keys( $tokenMap ) as $topic ) {
-			foreach ( array_keys( $tokenMap[$topic] ) as $provider ) {
-				$tokens = $tokenMap[$topic][$provider];
+		foreach ( $tokenMap as $topic => $providerMap ) {
+			foreach ( $providerMap as $provider => $tokens ) {
 				$payload = [
 					'deviceTokens' => $tokens,
 					'messageType' => 'checkEchoV1'
@@ -69,7 +68,7 @@ class NotificationServiceClient implements LoggerAwareInterface {
 		if ( !$status->isOK() ) {
 			$errors = $status->getErrorsByType( 'error' );
 			$this->logger->warning(
-				Status::wrap( $status )->getMessage( false, false, 'en' )->serialize(),
+				serialize( Status::wrap( $status )->getMessage( false, false, 'en' ) ),
 				[
 					'error' => $errors,
 					'caller' => __METHOD__,
@@ -88,7 +87,7 @@ class NotificationServiceClient implements LoggerAwareInterface {
 	private function constructRequest( string $provider, array $payload ): MWHttpRequest {
 		$url = "$this->endpointBase/$provider";
 		$opts = [ 'method' => 'POST', 'postData' => json_encode( $payload ) ];
-		$req = $this->httpRequestFactory->create( $url, $opts );
+		$req = $this->httpRequestFactory->create( $url, $opts, __METHOD__ );
 		$req->setHeader( 'Content-Type', 'application/json; charset=utf-8' );
 		return $req;
 	}

@@ -31,23 +31,24 @@
 
 namespace MediaWiki\Extension\TorBlock;
 
-use Html;
 use MediaWiki\Block\AbstractBlock;
-use MediaWiki\Block\CompositeBlock;
 use MediaWiki\Block\DatabaseBlock;
 use MediaWiki\Block\Hook\AbortAutoblockHook;
 use MediaWiki\Block\Hook\GetUserBlockHook;
 use MediaWiki\ChangeTags\Hook\ChangeTagsListActiveHook;
 use MediaWiki\ChangeTags\Hook\ListDefinedTagsHook;
-use MediaWiki\Hook\EmailUserPermissionsErrorsHook;
+use MediaWiki\Extension\TorBlock\Hooks\HookRunner;
 use MediaWiki\Hook\OtherBlockLogLinkHook;
 use MediaWiki\Hook\RecentChange_saveHook;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Html\Html;
 use MediaWiki\Permissions\Hook\GetUserPermissionsErrorsExpensiveHook;
+use MediaWiki\Title\Title;
 use MediaWiki\User\Hook\AutopromoteConditionHook;
 use MediaWiki\User\Hook\GetAutoPromoteGroupsHook;
+use MediaWiki\User\Hook\UserCanSendEmailHook;
+use MediaWiki\User\User;
 use RecentChange;
-use Title;
-use User;
 use Wikimedia\IPUtils;
 
 class Hooks implements
@@ -59,14 +60,20 @@ class Hooks implements
 	RecentChange_saveHook,
 	ListDefinedTagsHook,
 	ChangeTagsListActiveHook,
-	EmailUserPermissionsErrorsHook,
+	UserCanSendEmailHook,
 	OtherBlockLogLinkHook
 {
+
+	private HookRunner $hookRunner;
 
 	public static function registerExtension() {
 		// Define new autopromote condition
 		// Numbers won't work, we'll get collisions
 		define( 'APCOND_TOR', 'tor' );
+	}
+
+	public function __construct( HookContainer $hookContainer ) {
+		$this->hookRunner = new HookRunner( $hookContainer );
 	}
 
 	/**
@@ -129,7 +136,7 @@ class Hooks implements
 
 			// Allow site customization of blocked message.
 			$blockedMsg = 'torblock-blocked';
-			\Hooks::run( 'TorBlockBlockedMsg', [ &$blockedMsg ] );
+			$this->hookRunner->onTorBlockBlockedMsg( $blockedMsg );
 			$result = [ $blockedMsg, $wgRequest->getIP() ];
 
 			return false;
@@ -142,20 +149,19 @@ class Hooks implements
 	 * Check if the user is logged in from a Tor exit node but is not exempt.
 	 * If so, block the user.
 	 *
-	 * @param User $user User sending email
-	 * @param string $editToken Edit token supplied
-	 * @param array &$hookError Will be filled with block information
+	 * @param User $user
+	 * @param array &$hookErr
 	 * @return bool
 	 */
-	public function onEmailUserPermissionsErrors( $user, $editToken, &$hookError ) {
+	public function onUserCanSendEmail( $user, &$hookErr ) {
 		global $wgRequest;
 		if ( !self::checkUserCan( $user ) ) {
 			wfDebugLog( 'torblock', "User detected as trying to send an email from Tor node. Preventing." );
 
 			// Allow site customization of blocked message.
 			$blockedMsg = 'torblock-blocked';
-			\Hooks::run( 'TorBlockBlockedMsg', [ &$blockedMsg ] );
-			$hookError = [
+			$this->hookRunner->onTorBlockBlockedMsg( $blockedMsg );
+			$hookErr = [
 				'permissionserrors',
 				$blockedMsg,
 				[ $wgRequest->getIP() ],
@@ -182,7 +188,7 @@ class Hooks implements
 			return true;
 		}
 
-		$blocks = $block instanceof CompositeBlock ? $block->getOriginalBlocks() : [ $block ];
+		$blocks = $block->toArray();
 
 		$removeBlock = true;
 		foreach ( $blocks as $singleBlock ) {

@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Athena in Wonderland",
 			"Banjo",
 			"Elisardojm",
@@ -20,7 +19,7 @@
 	"wikibasecirrus-entitieswithoutdescription-legend": "Obter a lista de entidades sen descrición",
 	"special-entitieswithoutlabel": "Entidades sen etiqueta",
 	"wikibasecirrus-entitieswithoutlabel-legend": "Obter a lista de entidades sen etiqueta",
-	"wikibasecirrus-entitieswithoutlabel-label-language": "Código da lingua:",
+	"wikibasecirrus-entitieswithoutlabel-label-language": "Código de lingua:",
 	"wikibasecirrus-entitieswithoutlabel-label-type": "Tipo:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Procurar",
 	"wikibasecirrus-entitieswithoutlabel-invalid-language": "\"$1\" non é un código de lingua válido.",

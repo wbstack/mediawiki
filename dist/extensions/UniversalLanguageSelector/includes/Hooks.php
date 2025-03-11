@@ -20,27 +20,29 @@
 
 namespace UniversalLanguageSelector;
 
-use Config;
 use ExtensionRegistry;
-use Html;
 use IBufferingStatsdDataFactory;
 use IContextSource;
+use LanguageCode;
 use MediaWiki\Babel\Babel;
+use MediaWiki\Config\Config;
 use MediaWiki\Extension\BetaFeatures\BetaFeatures;
 use MediaWiki\Hook\BeforePageDisplayHook;
 use MediaWiki\Hook\MakeGlobalVariablesScriptHook;
 use MediaWiki\Hook\UserGetLanguageObjectHook;
+use MediaWiki\Html\Html;
 use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Preferences\Hook\GetPreferencesHook;
+use MediaWiki\ResourceLoader\Context;
 use MediaWiki\ResourceLoader\Hook\ResourceLoaderGetConfigVarsHook;
 use MediaWiki\Skins\Hook\SkinAfterPortletHook;
+use MediaWiki\User\User;
 use MediaWiki\User\UserOptionsLookup;
-use MobileContext;
-use OutputPage;
 use RequestContext;
 use Skin;
 use SkinTemplate;
-use User;
 
 /**
  * @phpcs:disable MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName
@@ -98,17 +100,34 @@ class Hooks implements
 	}
 
 	/**
+	 * Checks whether language is in header.
+	 *
+	 * @param Skin $skin
+	 * @return bool
+	 */
+	private function isLanguageInHeader( Skin $skin ): bool {
+		$languageInHeaderConfig = $skin->getConfig()->get( 'VectorLanguageInHeader' );
+		$userStatus = $skin->getUser()->isAnon() ? 'logged_out' : 'logged_in';
+		return $languageInHeaderConfig[ $userStatus ] ?? true;
+	}
+
+	/**
 	 * Whether ULS Compact interlanguage links enabled
 	 *
 	 * @param User $user
+	 * @param Skin $skin
 	 * @return bool
 	 */
-	private function isCompactLinksEnabled( User $user ) {
+	private function isCompactLinksEnabled( User $user, Skin $skin ) {
 		// Whether any user visible features are enabled
 		if ( !$this->config->get( 'ULSEnable' ) ) {
 			return false;
 		}
-
+		// Compact links should be disabled in Vector 2022 skin,
+		// when the language button is displayed at the top of the content
+		if ( $skin->getSkinName() === 'vector-2022' ) {
+			return !$this->isLanguageInHeader( $skin );
+		}
 		if ( $this->config->get( 'ULSCompactLanguageLinksBetaFeature' ) === true &&
 			$this->config->get( 'InterwikiMagic' ) === true &&
 			$this->config->get( 'HideInterlanguageLinks' ) === false &&
@@ -131,33 +150,42 @@ class Hooks implements
 	}
 
 	/**
+	 * Adds Codex styles in a way that is compatible with MLEB.
+	 *
+	 * @param OutputPage $out
+	 */
+	private function loadCodexStyles( OutputPage $out ) {
+		// Only needed for skins that do not load Codex.
+		if ( !in_array( $out->getSkin()->getSkinName(), [ 'minerva', 'vector-2022' ] ) ) {
+			$out->addModuleStyles( 'codex-search-styles' );
+		}
+	}
+
+	/**
 	 * @param OutputPage $out
 	 * @param Skin $skin
 	 * Hook: BeforePageDisplay
 	 */
 	public function onBeforePageDisplay( $out, $skin ): void {
 		$unsupportedSkins = [ 'minerva', 'apioutput' ];
-		if ( in_array( $skin->getSkinName(), $unsupportedSkins ) ) {
+		if ( in_array( $skin->getSkinName(), $unsupportedSkins, true ) ) {
 			return;
 		}
 		// Soft dependency to Wikibase client. Don't enable CLL if links are managed manually.
 		$excludedLinks = $out->getProperty( 'noexternallanglinks' );
-		$override = is_array( $excludedLinks ) && in_array( '*', $excludedLinks );
-		$isCompactLinksEnabled = $this->isCompactLinksEnabled( $out->getUser() );
+		$override = is_array( $excludedLinks ) && in_array( '*', $excludedLinks, true );
+		$isCompactLinksEnabled = $this->isCompactLinksEnabled( $out->getUser(), $skin );
+		$isVector2022LanguageInHeader = $skin->getSkinName() === 'vector-2022' && $this->isLanguageInHeader( $skin );
 		$config = [
 			'wgULSPosition' => $this->config->get( 'ULSPosition' ),
 			'wgULSisCompactLinksEnabled' => $isCompactLinksEnabled,
+			'wgVector2022LanguageInHeader' => $isVector2022LanguageInHeader
 		];
 
-		// Load compact links if no mw-interlanguage-selector element is present in the page HTML.
-		// We use the same mechanism as Skin::getDefaultModules and check the HTML for the presence in the HTML,
-		// using the class as the heuristic.
-		// Note if the element is rendered by the skin, its assumed that no collapsing is needed.
-		// See T264824 for more information.
-		if ( !$override && $isCompactLinksEnabled &&
-			strpos( $out->getHTML(), 'mw-interlanguage-selector' ) === false
-		) {
+		if ( !$override && $isCompactLinksEnabled ) {
 			$out->addModules( 'ext.uls.compactlinks' );
+			// Add styles for the default button in the page.
+			$this->loadCodexStyles( $out );
 		}
 
 		if ( is_string( $this->config->get( 'ULSGeoService' ) ) ) {
@@ -167,6 +195,13 @@ class Hooks implements
 		if ( $this->isEnabled() ) {
 			// Enable UI language selection for the user.
 			$out->addModules( 'ext.uls.interface' );
+			$this->loadCodexStyles( $out );
+
+			$title = $out->getTitle();
+			$isMissingPage = !$title || !$title->exists();
+			// if current page doesn't exist or if it's a talk page, we should use a different layout inside ULS
+			// according to T316559. Add JS config variable here, to let frontend know, when this is the case
+			$config[ 'wgULSisLanguageSelectorEmpty' ] = $isMissingPage || $title->isTalkPage();
 		}
 
 		// This is added here, and not in onResourceLoaderGetConfigVars to allow skins and extensions
@@ -246,11 +281,11 @@ class Hooks implements
 		}
 
 		// The element id will be 'pt-uls'
-		$langCode = $context->getLanguage()->getCode();
+		$mwLangCode = $context->getLanguage()->getCode();
 
 		return [
 			'uls' => [
-				'text' => $this->languageNameUtils->getLanguageName( $langCode ),
+				'text' => $this->languageNameUtils->getLanguageName( $mwLangCode ),
 				'href' => '#',
 				// Skin meta data to allow skin (e.g. Vector) to add icons
 				'icon' => 'wikimedia-language',
@@ -263,27 +298,36 @@ class Hooks implements
 	}
 
 	/**
-	 * @param float[] $preferred
-	 * @return string
+	 * @param float[] $preferred Mapping of
+	 *  'Preferred languages by lowercased BCP 47 language codes' => 'weight'
+	 * @return string MediaWiki internal language code or empty string if there's no matched
+	 *  language code
 	 */
 	protected function getDefaultLanguage( array $preferred ) {
-		$supported = $this->languageNameUtils->getLanguageNames( LanguageNameUtils::AUTONYMS, 'mwfile' );
+		/** @var array supported List of Supported languages by MediaWiki internal language codes */
+		$supported = $this->languageNameUtils
+			->getLanguageNames( LanguageNameUtils::AUTONYMS, LanguageNameUtils::SUPPORTED );
 
-		// look for a language that is acceptable to the client
+		// Convert BCP 47 language code to MediaWiki internal language code and
+		// look for a MediaWiki internal language code that is acceptable to the client
 		// and known to the wiki.
-		foreach ( $preferred as $code => $weight ) {
-			if ( isset( $supported[$code] ) ) {
-				return $code;
+		foreach ( $preferred as $bcp47LangCode => $weight ) {
+			$mwLangCode = LanguageCode::bcp47ToInternal( $bcp47LangCode );
+			if ( isset( $supported[$mwLangCode] ) ) {
+				return $mwLangCode;
 			}
 		}
 
-		// Some browsers might only send codes like de-de.
-		// Try with bare code.
-		foreach ( $preferred as $code => $weight ) {
-			$parts = explode( '-', $code, 2 );
-			$code = $parts[0];
-			if ( isset( $supported[$code] ) ) {
-				return $code;
+		// Some browsers might:
+		// - Sent codes like 'zh-hant-tw':
+		//   FIXME: Try 'zh-tw', 'zh-hant', 'zh' respectively
+		// - Only send codes like 'de-de':
+		//   Try with bare code 'de'
+		foreach ( $preferred as $bcp47LangCode => $weight ) {
+			$parts = explode( '-', $bcp47LangCode, 2 );
+			$mwLangCode = $parts[0];
+			if ( isset( $supported[$mwLangCode] ) ) {
+				return $mwLangCode;
 			}
 		}
 
@@ -406,18 +450,19 @@ class Hooks implements
 			$vars['wgULSBabelLanguages'] = array_keys( $userLanguageInfo );
 		}
 
-		// An optimization to avoid loading all of uls.data just to get the autonym
-		$langCode = $out->getLanguage()->getCode();
-		$vars['wgULSCurrentAutonym'] = $this->languageNameUtils->getLanguageName( $langCode );
-
 		$setLangCode = $this->getSetLang( $out );
 		if ( $setLangCode ) {
-			$vars['wgULSCurrentLangCode'] = $langCode;
+			$vars['wgULSCurrentLangCode'] = $out->getLanguage()->getCode();
 			$vars['wgULSSetLangCode'] = $setLangCode;
 			$vars['wgULSSetLangName'] = $this->languageNameUtils->getLanguageName( $setLangCode );
 		}
 	}
 
+	/**
+	 * @param User $user User whose preferences are being modified
+	 * @param array &$preferences Preferences description array, to be fed to an HTMLForm object
+	 * @return bool|void True or no return value to continue or false to abort
+	 */
 	public function onGetPreferences( $user, &$preferences ) {
 		// T259037: Does not work well on Minerva
 		$skin = RequestContext::getMain()->getSkin();
@@ -452,6 +497,10 @@ class Hooks implements
 		}
 	}
 
+	/**
+	 * @param User $user
+	 * @param array[] &$prefs
+	 */
 	public function onGetBetaFeaturePreferences( $user, array &$prefs ) {
 		if ( $this->config->get( 'ULSCompactLanguageLinksBetaFeature' ) === true &&
 			$this->config->get( 'InterwikiMagic' ) === true &&
@@ -485,9 +534,22 @@ class Hooks implements
 			return;
 		}
 
-		// @todo: document what this block is for.
-		if ( $skin->getSkinName() !== 'vector-2022' && $this->config->get( 'ULSPosition' ) !== 'interlanguage' ) {
+		// The ULS settings cog is only needed on projects which show the ULS button in the sidebar
+		// e.g. it is shown in the personal menu
+		if ( $this->config->get( 'ULSPosition' ) !== 'interlanguage' ) {
 			return;
+		}
+
+		$hasLanguages = $skin->getLanguages() !== [];
+		// For Vector 2022, the ULS settings cog is not needed for projects
+		// where a dedicated language button in the header ($wgVectorLanguageInHeader is true).
+		if ( $skin->getSkinName() === 'vector-2022' ) {
+			$languageInHeaderConfig = $skin->getConfig()->get( 'VectorLanguageInHeader' );
+			$languageInHeader = $languageInHeaderConfig[
+				$skin->getUser()->isAnon() ? 'logged_out' : 'logged_in' ] ?? true;
+			if ( $hasLanguages && $languageInHeader ) {
+				return;
+			}
 		}
 
 		if ( !$this->isEnabled() ) {
@@ -496,33 +558,20 @@ class Hooks implements
 
 		// An empty span will force the language portal to always display in
 		// the skins that support it! e.g. Vector. (T275147)
-		if ( count( $skin->getLanguages() ) === 0 ) {
+		if ( !$hasLanguages ) {
 			// If no languages force it on.
 			$content .= Html::element(
 				'span',
-				[
-					'class' => 'uls-after-portlet-link',
-				],
+				[ 'class' => 'uls-after-portlet-link', ],
 				''
 			);
 		}
 	}
 
 	/**
-	 * Add basic webfonts support to the mobile interface (via MobileFrontend extension)
-	 * Hook: EnterMobileMode
-	 * @param MobileContext $context
+	 * @param OutputPage $out
+	 * @return string|null
 	 */
-	public function onEnterMobileMode( MobileContext $context ) {
-		// Currently only supported in mobile Beta mode
-		if ( $this->config->get( 'ULSEnable' ) &&
-			$this->config->get( 'ULSMobileWebfontsEnabled' ) &&
-			$context->isBetaGroupMember()
-		) {
-			$context->getOutput()->addModules( 'ext.uls.webfonts.mobile' );
-		}
-	}
-
 	private function getSetLang( OutputPage $out ): ?string {
 		$setLangCode = $out->getRequest()->getRawVal( 'setlang' );
 		if ( $setLangCode && $this->languageNameUtils->isSupportedLanguage( $setLangCode ) ) {
@@ -531,4 +580,28 @@ class Hooks implements
 
 		return null;
 	}
+
+	/**
+	 * @param Context $context
+	 * @param Config $config
+	 * @return array
+	 */
+	public static function getModuleData( Context $context, Config $config ): array {
+		$languageNameUtils = MediaWikiServices::getInstance()->getLanguageNameUtils();
+		return [
+			'currentAutonym' => $languageNameUtils->getLanguageName( $context->getLanguage() ),
+		];
+	}
+
+	/**
+	 * @param Context $context
+	 * @param Config $config
+	 * @return array
+	 */
+	public static function getModuleDataSummary( Context $context, Config $config ): array {
+		return [
+			'currentAutonym' => $context->getLanguage(),
+		];
+	}
+
 }

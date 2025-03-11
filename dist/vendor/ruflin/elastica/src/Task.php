@@ -2,6 +2,9 @@
 
 namespace Elastica;
 
+use Elastica\Exception\ClientException;
+use Elastica\Exception\ConnectionException;
+use Elastica\Exception\ResponseException;
 use Elasticsearch\Endpoints\Tasks;
 
 /**
@@ -28,7 +31,7 @@ class Task extends Param
     protected $_response;
 
     /**
-     * @var array
+     * @var array<string, mixed>
      */
     protected $_data;
 
@@ -55,6 +58,8 @@ class Task extends Param
 
     /**
      * Returns task data.
+     *
+     * @return array<string, mixed>
      */
     public function getData(): array
     {
@@ -79,6 +84,12 @@ class Task extends Param
 
     /**
      * Refresh task status.
+     *
+     * @param array<string, mixed> $options
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function refresh(array $options = []): void
     {
@@ -98,6 +109,9 @@ class Task extends Param
         return true === $data['completed'];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function cancel(): Response
     {
         if ('' === $this->_id) {

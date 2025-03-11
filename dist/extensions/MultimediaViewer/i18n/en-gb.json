@@ -3,11 +3,10 @@
 		"authors": [
 			"Bjh21",
 			"Caliburn",
-			"Shirayuki",
-			"Reedy"
+			"Reedy",
+			"Shirayuki"
 		]
 	},
 	"multimediaviewer-license-default": "View licence",
-	"multimediaviewer-embed-license": "Licenced under $1.",
 	"multimediaviewer-reuse-warning-nonfree": "This file does not have a free licence."
 }

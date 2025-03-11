@@ -27,7 +27,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Ovaj izvor se koristi {{PLURAL:$1|jednom|2=dva puta|$1 puta}} na ovoj stranici. Promene napravljene ovde primenjivaće se na svim mestima gde se on ponovo koristi.",
 	"cite-ve-dialog-reference-options-group-label": "Koristi ovu grupu",
 	"cite-ve-dialog-reference-options-group-placeholder": "Opšte reference",
-	"cite-ve-dialog-reference-options-name-label": "Ponovo koristi pod ovim imenom",
 	"cite-ve-dialog-reference-options-responsive-label": "Prilagodljivi raspored kolona",
 	"cite-ve-dialog-reference-options-section": "Opcije",
 	"cite-ve-dialog-reference-placeholder": "Ovde napišite ili nalepite referencu ili umetnite šablon za reference.",
@@ -49,7 +48,5 @@
 	"cite-ve-referenceslist-missingref-in-list": "Ova referenca je definisana u šablonu ili drugom generisanom bloku i za sada može da se pregleda samo u izvornom režimu.",
 	"cite-ve-referenceslist-missingreflist": "Ovu listu referenci je generisao šablon i za sada se može uređivati samo u izvornom režimu.",
 	"cite-ve-toolbar-group-label": "Referenca",
-	"cite-ve-othergroup-item": "$1 izvor",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Reference",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Ime grupe referenci: „$1”"
+	"cite-ve-othergroup-item": "$1 izvor"
 }

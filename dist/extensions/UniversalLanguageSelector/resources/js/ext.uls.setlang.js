@@ -42,11 +42,11 @@
 
 	function getButtons() {
 		$cancelBtn = $( '<button>' )
-			.addClass( 'mw-ui-button uls-setlang-cancel' )
+			.addClass( 'cdx-button uls-setlang-cancel' )
 			.text( mw.msg( 'ext-uls-setlang-cancel' ) );
 
 		$acceptBtn = $( '<button>' )
-			.addClass( 'mw-ui-button mw-ui-progressive active uls-setlang-apply' )
+			.addClass( 'cdx-button cdx-button--type-primary cdx-button--action-progressive active uls-setlang-apply' )
 			.text( mw.msg( 'ext-uls-setlang-accept' ) );
 
 		return $( '<div>' )
@@ -67,14 +67,14 @@
 	 * @return {string}
 	 */
 	function currentUrlWithoutSetLang() {
-		var uri = new mw.Uri();
-		delete uri.query.setlang;
-		return uri.toString();
+		var url = new URL( location.href );
+		url.searchParams.delete( 'setlang' );
+		return url.toString();
 	}
 
 	function removeSetLangFromHistory() {
-		if ( 'setlang' in mw.Uri().query ) {
-			history.replaceState( null, 'no-setlang-url', currentUrlWithoutSetLang() );
+		if ( new URL( location.href ).searchParams.has( 'setlang' ) ) {
+			history.replaceState( null, '', currentUrlWithoutSetLang() );
 		}
 	}
 

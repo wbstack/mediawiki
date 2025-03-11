@@ -11,6 +11,7 @@ use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Serializers\SerializerFactory;
+use Wikibase\DataModel\Services\Lookup\InMemoryDataTypeLookup;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
 
 /**
@@ -22,7 +23,7 @@ use Wikibase\DataModel\Snak\PropertyNoValueSnak;
  */
 class EntitySerializationRoundtripTest extends TestCase {
 
-	public function itemProvider() {
+	public static function itemProvider() {
 		$empty = new Item( new ItemId( 'Q42' ) );
 
 		$withLabels = new Item();
@@ -68,7 +69,7 @@ class EntitySerializationRoundtripTest extends TestCase {
 		$this->assertTrue( $item->equals( $newEntity ) );
 	}
 
-	public function propertyProvider() {
+	public static function propertyProvider() {
 		return [
 			[ Property::newFromType( 'string' ) ],
 		];
@@ -92,7 +93,13 @@ class EntitySerializationRoundtripTest extends TestCase {
 	}
 
 	private function newDeserializerFactory() {
-		return new DeserializerFactory( new DataValueDeserializer(), new BasicEntityIdParser() );
+		return new DeserializerFactory(
+			new DataValueDeserializer(),
+			new BasicEntityIdParser(),
+			new InMemoryDataTypeLookup(),
+			[],
+			[]
+		);
 	}
 
 }

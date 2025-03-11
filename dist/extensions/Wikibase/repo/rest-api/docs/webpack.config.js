@@ -6,7 +6,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const outputPath = path.resolve( __dirname, '../../../docs/rest-api' ); // eslint-disable-line no-undef
 
 module.exports = {
-	mode: 'development',
+	mode: 'production',
 	entry: {
 		app: require.resolve( __dirname, 'index.js' ) // eslint-disable-line no-undef
 	},
@@ -52,5 +52,12 @@ module.exports = {
 	output: {
 		filename: '[name].bundle.js',
 		path: outputPath
-	}
+	},
+	devServer: {
+		static: {
+			directory: __dirname,
+		},
+		compress: true,
+		port: 9000,
+	},
 };

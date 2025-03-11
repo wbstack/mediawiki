@@ -20,8 +20,16 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleValue;
+use stdClass;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 use Wikimedia\Rdbms\SelectQueryBuilder;
 
@@ -37,7 +45,8 @@ use Wikimedia\Rdbms\SelectQueryBuilder;
 abstract class ApiQueryBase extends ApiBase {
 	use ApiQueryBlockInfoTrait;
 
-	private $mQueryModule, $mDb;
+	private ApiQuery $mQueryModule;
+	private ?IReadableDatabase $mDb;
 
 	/**
 	 * @var SelectQueryBuilder|null
@@ -50,7 +59,7 @@ abstract class ApiQueryBase extends ApiBase {
 	 * @param string $moduleName
 	 * @param string $paramPrefix
 	 */
-	public function __construct( ApiQuery $queryModule, $moduleName, $paramPrefix = '' ) {
+	public function __construct( ApiQuery $queryModule, string $moduleName, $paramPrefix = '' ) {
 		parent::__construct( $queryModule->getMain(), $moduleName, $paramPrefix );
 		$this->mQueryModule = $queryModule;
 		$this->mDb = null;
@@ -112,31 +121,11 @@ abstract class ApiQueryBase extends ApiBase {
 	/**
 	 * Get the Query database connection (read-only)
 	 * @stable to override
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	protected function getDB() {
-		if ( $this->mDb === null ) {
-			$this->mDb = $this->getQuery()->getDB();
-		}
+		$this->mDb ??= $this->getQuery()->getDB();
 
-		return $this->mDb;
-	}
-
-	/**
-	 * Change the database connection for subsequent calls to ::getDB().
-	 *
-	 * See ApiQuery::getNamedDB() for more information.
-	 *
-	 * @deprecated since 1.39 Use or override ApiBase::getDB() and optionally
-	 *  pass a query group to wfGetDB() or ILoadBalancer::getConnectionRef().
-	 * @param string $name Name to assign to the database connection
-	 * @param int $db One of the DB_* constants
-	 * @param string|string[] $groups Query groups
-	 * @return IDatabase
-	 */
-	public function selectNamedDB( $name, $db, $groups ) {
-		wfDeprecated( __METHOD__, '1.39' );
-		$this->mDb = $this->getQuery()->getNamedDB( $name, $db, $groups );
 		return $this->mDb;
 	}
 
@@ -171,9 +160,7 @@ abstract class ApiQueryBase extends ApiBase {
 	 * @return SelectQueryBuilder
 	 */
 	protected function getQueryBuilder() {
-		if ( $this->queryBuilder === null ) {
-			$this->queryBuilder = $this->getDB()->newSelectQueryBuilder();
-		}
+		$this->queryBuilder ??= $this->getDB()->newSelectQueryBuilder();
 		return $this->queryBuilder;
 	}
 
@@ -245,7 +232,7 @@ abstract class ApiQueryBase extends ApiBase {
 	 * input, consider using addWhereIDsFld() instead.
 	 *
 	 * @see IDatabase::select()
-	 * @param string|array $value
+	 * @param string|array|IExpression $value
 	 */
 	protected function addWhere( $value ) {
 		if ( is_array( $value ) ) {
@@ -261,7 +248,7 @@ abstract class ApiQueryBase extends ApiBase {
 
 	/**
 	 * Same as addWhere(), but add the WHERE clauses only if a condition is met
-	 * @param string|array $value
+	 * @param string|array|IExpression $value
 	 * @param bool $condition If false, do nothing
 	 * @return bool
 	 */
@@ -282,7 +269,7 @@ abstract class ApiQueryBase extends ApiBase {
 	 * consider using addWhereIDsFld() instead.
 	 *
 	 * @param string $field Field name
-	 * @param int|string|string[]|int[] $value Value; ignored if null or empty array
+	 * @param int|string|(string|int|null)[] $value Value; ignored if null or empty array
 	 */
 	protected function addWhereFld( $field, $value ) {
 		if ( $value !== null && !( is_array( $value ) && !$value ) ) {
@@ -346,11 +333,11 @@ abstract class ApiQueryBase extends ApiBase {
 		$db = $this->getDB();
 
 		if ( $start !== null ) {
-			$this->addWhere( $field . $after . $db->addQuotes( $start ) );
+			$this->addWhere( $db->expr( $field, $after, $start ) );
 		}
 
 		if ( $end !== null ) {
-			$this->addWhere( $field . $before . $db->addQuotes( $end ) );
+			$this->addWhere( $db->expr( $field, $before, $end ) );
 		}
 
 		if ( $sort ) {
@@ -401,7 +388,7 @@ abstract class ApiQueryBase extends ApiBase {
 	 *  ApiQueryBaseProcessRow hook will be expected.
 	 * @return IResultWrapper
 	 */
-	protected function select( $method, $extraQuery = [], array &$hookData = null ) {
+	protected function select( $method, $extraQuery = [], ?array &$hookData = null ) {
 		$queryBuilder = clone $this->getQueryBuilder();
 		if ( isset( $extraQuery['tables'] ) ) {
 			$queryBuilder->rawTables( (array)$extraQuery['tables'] );
@@ -497,17 +484,16 @@ abstract class ApiQueryBase extends ApiBase {
 	 * @return bool Whether the element fit in the result
 	 */
 	protected function addPageSubItem( $pageId, $item, $elemname = null ) {
-		if ( $elemname === null ) {
-			$elemname = $this->getModulePrefix();
-		}
 		$result = $this->getResult();
 		$fit = $result->addValue( [ 'query', 'pages', $pageId,
 			$this->getModuleName() ], null, $item );
 		if ( !$fit ) {
 			return false;
 		}
-		$result->addIndexedTagName( [ 'query', 'pages', $pageId,
-			$this->getModuleName() ], $elemname );
+		$result->addIndexedTagName(
+			[ 'query', 'pages', $pageId, $this->getModuleName() ],
+			$elemname ?? $this->getModulePrefix()
+		);
 
 		return true;
 	}
@@ -610,7 +596,7 @@ abstract class ApiQueryBase extends ApiBase {
 	 *
 	 * @param IResultWrapper $res Result set to work on.
 	 *  The result set must have _namespace and _title fields with the provided field prefix
-	 * @param string $fname The caller function name, always use __METHOD__
+	 * @param string $fname The caller function name, always use __METHOD__ @phan-mandatory-param
 	 * @param string $fieldPrefix Prefix for fields to check gender for
 	 */
 	protected function executeGenderCacheFromResultWrapper(
@@ -646,3 +632,6 @@ abstract class ApiQueryBase extends ApiBase {
 
 	// endregion -- end of utility methods
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryBase::class, 'ApiQueryBase' );

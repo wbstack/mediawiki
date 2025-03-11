@@ -21,8 +21,11 @@
  * @ingroup RevisionDelete
  */
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Title\Title;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\RawSQLValue;
 
 /**
  * Backend functions for suppressing and unsuppressing all references to a given user,
@@ -43,12 +46,12 @@ class RevisionDeleteUser {
 	 * @param null|IDatabase $dbw If you happen to have one lying around
 	 * @return bool True on success, false on failure (e.g. invalid user ID)
 	 */
-	private static function setUsernameBitfields( $name, $userId, $op, IDatabase $dbw = null ) {
+	private static function setUsernameBitfields( $name, $userId, $op, ?IDatabase $dbw = null ) {
 		if ( !$userId || ( $op !== '|' && $op !== '&' ) ) {
 			return false;
 		}
 		if ( !$dbw instanceof IDatabase ) {
-			$dbw = wfGetDB( DB_PRIMARY );
+			$dbw = MediaWikiServices::getInstance()->getConnectionProvider()->getPrimaryDatabase();
 		}
 
 		# To suppress, we OR the current bitfields with RevisionRecord::DELETED_USER
@@ -67,81 +70,81 @@ class RevisionDeleteUser {
 		$userTitle = Title::makeTitleSafe( NS_USER, $name );
 		$userDbKey = $userTitle->getDBkey();
 
-		$actorId = $dbw->selectField( 'actor', 'actor_id', [ 'actor_name' => $name ], __METHOD__ );
+		$actorId = $dbw->newSelectQueryBuilder()
+			->select( 'actor_id' )
+			->from( 'actor' )
+			->where( [ 'actor_name' => $name ] )
+			->caller( __METHOD__ )->fetchField();
 		if ( $actorId ) {
 			# Hide name from live edits
-			$dbw->update(
-				'revision',
-				[ self::buildSetBitDeletedField( 'rev_deleted', $op, $delUser, $dbw ) ],
-				[ 'rev_actor' => $actorId ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'revision' )
+				->set( self::buildSetBitDeletedField( 'rev_deleted', $op, $delUser, $dbw ) )
+				->where( [ 'rev_actor' => $actorId ] )
+				->caller( __METHOD__ )->execute();
 
 			# Hide name from deleted edits
-			$dbw->update(
-				'archive',
-				[ self::buildSetBitDeletedField( 'ar_deleted', $op, $delUser, $dbw ) ],
-				[ 'ar_actor' => $actorId ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'archive' )
+				->set( self::buildSetBitDeletedField( 'ar_deleted', $op, $delUser, $dbw ) )
+				->where( [ 'ar_actor' => $actorId ] )
+				->caller( __METHOD__ )->execute();
 
 			# Hide name from logs
-			$dbw->update(
-				'logging',
-				[ self::buildSetBitDeletedField( 'log_deleted', $op, $delUser, $dbw ) ],
-				[ 'log_actor' => $actorId, 'log_type != ' . $dbw->addQuotes( 'suppress' ) ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'logging' )
+				->set( self::buildSetBitDeletedField( 'log_deleted', $op, $delUser, $dbw ) )
+				->where( [ 'log_actor' => $actorId, $dbw->expr( 'log_type', '!=', 'suppress' ) ] )
+				->caller( __METHOD__ )->execute();
 
 			# Hide name from RC
-			$dbw->update(
-				'recentchanges',
-				[ self::buildSetBitDeletedField( 'rc_deleted', $op, $delUser, $dbw ) ],
-				[ 'rc_actor' => $actorId ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'recentchanges' )
+				->set( self::buildSetBitDeletedField( 'rc_deleted', $op, $delUser, $dbw ) )
+				->where( [ 'rc_actor' => $actorId ] )
+				->caller( __METHOD__ )->execute();
 
 			# Hide name from live images
-			$dbw->update(
-				'oldimage',
-				[ self::buildSetBitDeletedField( 'oi_deleted', $op, $delUser, $dbw ) ],
-				[ 'oi_actor' => $actorId ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'oldimage' )
+				->set( self::buildSetBitDeletedField( 'oi_deleted', $op, $delUser, $dbw ) )
+				->where( [ 'oi_actor' => $actorId ] )
+				->caller( __METHOD__ )->execute();
 
 			# Hide name from deleted images
-			$dbw->update(
-				'filearchive',
-				[ self::buildSetBitDeletedField( 'fa_deleted', $op, $delUser, $dbw ) ],
-				[ 'fa_actor' => $actorId ],
-				__METHOD__
-			);
+			$dbw->newUpdateQueryBuilder()
+				->update( 'filearchive' )
+				->set( self::buildSetBitDeletedField( 'fa_deleted', $op, $delUser, $dbw ) )
+				->where( [ 'fa_actor' => $actorId ] )
+				->caller( __METHOD__ )->execute();
 		}
 
 		# Hide log entries pointing to the user page
-		$dbw->update(
-			'logging',
-			[ self::buildSetBitDeletedField( 'log_deleted', $op, $delAction, $dbw ) ],
-			[ 'log_namespace' => NS_USER, 'log_title' => $userDbKey,
-			'log_type != ' . $dbw->addQuotes( 'suppress' ) ],
-			__METHOD__
-		);
+		$dbw->newUpdateQueryBuilder()
+			->update( 'logging' )
+			->set( self::buildSetBitDeletedField( 'log_deleted', $op, $delAction, $dbw ) )
+			->where( [
+				'log_namespace' => NS_USER,
+				'log_title' => $userDbKey,
+				$dbw->expr( 'log_type', '!=', 'suppress' )
+			] )
+			->caller( __METHOD__ )->execute();
 
 		# Hide RC entries pointing to the user page
-		$dbw->update(
-			'recentchanges',
-			[ self::buildSetBitDeletedField( 'rc_deleted', $op, $delAction, $dbw ) ],
-			[ 'rc_namespace' => NS_USER, 'rc_title' => $userDbKey, 'rc_logid > 0' ],
-			__METHOD__
-		);
+		$dbw->newUpdateQueryBuilder()
+			->update( 'recentchanges' )
+			->set( self::buildSetBitDeletedField( 'rc_deleted', $op, $delAction, $dbw ) )
+			->where( [ 'rc_namespace' => NS_USER, 'rc_title' => $userDbKey, $dbw->expr( 'rc_logid', '>', 0 ) ] )
+			->caller( __METHOD__ )->execute();
 
 		return true;
 	}
 
 	private static function buildSetBitDeletedField( $field, $op, $value, IDatabase $dbw ) {
-		return $field . ' = ' . ( $op === '&'
+		return [ $field => new RawSQLValue( $op === '&'
 			? $dbw->bitAnd( $field, $value )
-			: $dbw->bitOr( $field, $value ) );
+			: $dbw->bitOr( $field, $value )
+		) ];
 	}
 
 	/**
@@ -150,7 +153,7 @@ class RevisionDeleteUser {
 	 * @param IDatabase|null $dbw If you happen to have one lying around
 	 * @return bool True on success, false on failure (e.g. invalid user ID)
 	 */
-	public static function suppressUserName( $name, $userId, IDatabase $dbw = null ) {
+	public static function suppressUserName( $name, $userId, ?IDatabase $dbw = null ) {
 		return self::setUsernameBitfields( $name, $userId, '|', $dbw );
 	}
 
@@ -160,7 +163,7 @@ class RevisionDeleteUser {
 	 * @param IDatabase|null $dbw If you happen to have one lying around
 	 * @return bool True on success, false on failure (e.g. invalid user ID)
 	 */
-	public static function unsuppressUserName( $name, $userId, IDatabase $dbw = null ) {
+	public static function unsuppressUserName( $name, $userId, ?IDatabase $dbw = null ) {
 		return self::setUsernameBitfields( $name, $userId, '&', $dbw );
 	}
 }

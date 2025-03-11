@@ -15,21 +15,16 @@
  * along with MultimediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
+/**
+ * Represents information about an image thumbnail
+ */
+class Thumbnail {
 	/**
-	 * Represents information about an image thumbnail
-	 *
-	 * @class mw.mmv.model.Thumbnail
-	 * @constructor
 	 * @param {string} url URL to the thumbnail
 	 * @param {number} width Width in pixels
 	 * @param {number} height Height in pixels
 	 */
-	function Thumbnail(
-		url,
-		width,
-		height
-	) {
+	constructor( url, width, height ) {
 		if ( !url || !width || !height ) {
 			throw new Error( 'All parameters are required and cannot be empty or zero' );
 		}
@@ -43,6 +38,6 @@
 		/** @property {number} height The height of the thumbnail in pixels */
 		this.height = height;
 	}
+}
 
-	mw.mmv.model.Thumbnail = Thumbnail;
-}() );
+module.exports = Thumbnail;

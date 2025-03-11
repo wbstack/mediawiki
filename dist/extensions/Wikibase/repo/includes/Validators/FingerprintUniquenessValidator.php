@@ -87,7 +87,7 @@ class FingerprintUniquenessValidator implements ValueValidator {
 			}
 		}
 
-		if ( !empty( $errors ) ) {
+		if ( $errors ) {
 			return Result::newError( $errors );
 		}
 
@@ -99,11 +99,12 @@ class FingerprintUniquenessValidator implements ValueValidator {
 	 *  [ language code => [ 'label' => label text, 'descripition' => description text ] ]
 	 */
 	private function getChangedLabelsAndDescriptionsPerLanguage( ChangeOpFingerprintResult $changeOpsResult ): Generator {
-		list( $newTerms, $oldTerms ) = $this->collectNewAndOldTerms( $changeOpsResult );
+		[ $newTerms, $oldTerms ] = $this->collectNewAndOldTerms( $changeOpsResult );
 
 		$labelDescriptionPairsPerLanguage = $this->generateLabelDescriptionPairs(
 			$newTerms,
 			$oldTerms,
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable Validated via ::ENTITY_TYPE
 			$changeOpsResult->getEntityId()
 		);
 
@@ -203,7 +204,7 @@ class FingerprintUniquenessValidator implements ValueValidator {
 			[
 				$label,
 				$lang,
-				$collidingEntityId
+				$collidingEntityId,
 			]
 		);
 	}

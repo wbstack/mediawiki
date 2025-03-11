@@ -13,15 +13,12 @@
 			"i18n/api"
 		]
 	},
-	"AutoloadClasses": {
-		"ReCaptchaNoCaptcha": "includes/ReCaptchaNoCaptcha.php",
-		"ReCaptchaNoCaptchaHooks": "includes/ReCaptchaNoCaptchaHooks.php",
-		"HTMLReCaptchaNoCaptchaField": "includes/HTMLReCaptchaNoCaptchaField.php",
-		"ReCaptchaNoCaptchaAuthenticationRequest": "includes/ReCaptchaNoCaptchaAuthenticationRequest.php"
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\ConfirmEdit\\ReCaptchaNoCaptcha\\": "includes/"
 	},
 	"config": {
 		"CaptchaClass": {
-			"value": "ReCaptchaNoCaptcha"
+			"value": "MediaWiki\\Extension\\ConfirmEdit\\ReCaptchaNoCaptcha\\ReCaptchaNoCaptcha"
 		},
 		"ReCaptchaSiteKey": {
 			"value": ""
@@ -39,15 +36,19 @@
 	},
 	"ResourceModules": {
 		"ext.confirmEdit.reCaptchaNoCaptcha.visualEditor": {
-			"scripts": "ve-confirmedit-reCaptchaNoCaptcha/ve.init.mw.NoCaptchaReCaptchaSaveErrorHandler.js",
-			"targets": [
-				"desktop",
-				"mobile"
-			]
+			"dependencies": [
+				"web2017-polyfills"
+			],
+			"scripts": "ve-confirmedit-reCaptchaNoCaptcha/ve.init.mw.NoCaptchaReCaptchaSaveErrorHandler.js"
+		}
+	},
+	"HookHandlers": {
+		"ReCaptchaHooks": {
+			"class": "MediaWiki\\Extension\\ConfirmEdit\\ReCaptchaNoCaptcha\\Hooks"
 		}
 	},
 	"Hooks": {
-		"ResourceLoaderGetConfigVars": "ReCaptchaNoCaptchaHooks::onResourceLoaderGetConfigVars"
+		"ResourceLoaderGetConfigVars": "ReCaptchaHooks"
 	},
 	"attributes": {
 		"VisualEditor": {

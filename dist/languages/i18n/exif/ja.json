@@ -3,7 +3,9 @@
 		"authors": [
 			"2nd-player",
 			"Fryed-peach",
+			"Hzy980512",
 			"Likibp",
+			"Marine-Blue",
 			"Ohgi",
 			"Otokoume",
 			"Rxy",
@@ -14,8 +16,7 @@
 			"Whym",
 			"Yusuke1109",
 			"ネイ",
-			"Marine-Blue",
-			"Hzy980512"
+			"Yaakiyu.jp"
 		]
 	},
 	"exif-imagewidth": "画像の幅",
@@ -198,7 +199,6 @@
 	"exif-originalimageheight": "トリミングされる前の画像の高さ",
 	"exif-originalimagewidth": "トリミングされる前の画像の幅",
 	"exif-contact-value": "$1\n\n$2\n<div class=\"adr\">\n$3\n\n$4, $5, $6 $7\n</div>\n$8",
-	"exif-subjectnewscode-value": "$2 ($1)",
 	"exif-compression-1": "無圧縮",
 	"exif-compression-2": "CCITT Group 3 1次元修正ハフマン連長符号化",
 	"exif-compression-3": "CCITT Group 3 ファックス符号化",
@@ -415,5 +415,14 @@
 	"exif-initialviewheadingdegrees": "初回ビューの向首角（度数）",
 	"exif-initialviewpitchdegrees": "初回ビューのピッチ角（度数）",
 	"exif-initialviewrolldegrees": "初回ビューのロール角（度数）",
+	"exif-initialhorizontalfovdegrees": "初期FOV（水平角度）",
+	"exif-initialverticalfovdegrees": "初期FOV（垂直角度）",
+	"exif-croppedareaimagewidthpixels": "パノラマのトリミング幅",
+	"exif-croppedareaimageheightpixels": "パノラマのトリミング高さ",
+	"exif-fullpanowidthpixels": "パノラマ全体の幅",
+	"exif-fullpanoheightpixels": "パノラマ全体の高さ",
+	"exif-croppedarealeftpixels": "パノラマの左側の切り取り幅",
+	"exif-croppedareatoppixels": "パノラマの上側の切り取り幅",
+	"exif-initialcameradolly": "カメラドリーの初期位置",
 	"exif-stitchingsoftware": "スティッチングソフトウェア"
 }

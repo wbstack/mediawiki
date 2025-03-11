@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Kizule",
-			"Zoranzoki21",
-			"Milicevic01"
+			"Milicevic01",
+			"Zoranzoki21"
 		]
 	},
 	"nstab-data": "Подаци",
@@ -28,5 +28,8 @@
 	"jsonconfig-license-name-CC-BY-SA-2.5": "Creative Commons Ауторство-Делити под истим условима 2.5",
 	"jsonconfig-license-name-CC-BY-SA-3.0": "Creative Commons Ауторство-Делити под истим условима 3.0",
 	"jsonconfig-license-name-CC-BY-SA-4.0": "Creative Commons Ауторство-Делити под истим условима 4.0",
-	"jsonconfig-license-name-CC-BY-SA-4.0+": "Creative Commons Ауторство-Делити под истим условима 4.0 или каснија верзија"
+	"jsonconfig-license-name-CC-BY-SA-4.0+": "Creative Commons Ауторство-Делити под истим условима 4.0 или каснија верзија",
+	"jsonconfig-license-copyrightwarning": "Објављивањем измена, прихватате да објавите свој допринос под лиценцама [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Објављивањем измена, прихватате да објавите свој допринос под лиценцама наведеним у пољу <code>licence</code>.",
+	"jsonconfig-license-notice": "'''Напомена:''' Уређивањем ове странице прихватате да објавите свој допринос под лиценцом [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}]."
 }

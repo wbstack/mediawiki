@@ -22,6 +22,7 @@ namespace MediaWiki\SyntaxHighlight;
 
 use MediaWiki\MediaWikiServices;
 use Shellbox\Command\BoxedCommand;
+use Shellbox\ShellboxError;
 
 /**
  * Wrapper around the `pygmentize` command
@@ -30,30 +31,23 @@ class Pygmentize {
 
 	/**
 	 * If no pygmentize is configured, use bundled
-	 *
-	 * @return bool
 	 */
 	public static function useBundled(): bool {
-		global $wgPygmentizePath;
-		return $wgPygmentizePath === false;
+		$config = MediaWikiServices::getInstance()->getMainConfig();
+		return $config->get( 'PygmentizePath' ) === false;
 	}
 
 	/**
 	 * Get a real path to pygmentize
-	 *
-	 * @return string
 	 */
 	private static function getPath(): string {
-		global $wgPygmentizePath;
-
+		$config = MediaWikiServices::getInstance()->getMainConfig();
 		// If $wgPygmentizePath is unset, use the bundled copy.
-		return $wgPygmentizePath ?: __DIR__ . '/../pygments/pygmentize';
+		return $config->get( 'PygmentizePath' ) ?: __DIR__ . '/../pygments/pygmentize';
 	}
 
 	/**
 	 * Get the version of pygments (cached)
-	 *
-	 * @return string
 	 */
 	public static function getVersion(): string {
 		static $version;
@@ -93,8 +87,6 @@ class Pygmentize {
 
 	/**
 	 * Get the version of bundled pygments
-	 *
-	 * @return string
 	 */
 	private static function getBundledVersion(): string {
 		return trim( file_get_contents( __DIR__ . '/../pygments/VERSION' ) );
@@ -104,7 +96,6 @@ class Pygmentize {
 	 * Shell out to get installed pygments version
 	 *
 	 * @internal For use by WANObjectCache/BagOStuff only
-	 * @return string
 	 */
 	public static function fetchVersion(): string {
 		$result = self::boxedCommand()
@@ -128,8 +119,6 @@ class Pygmentize {
 	 *
 	 * Note: if using bundled, the CSS is already available
 	 * in modules/pygments.generated.css.
-	 *
-	 * @return string
 	 */
 	public static function getGeneratedCSS(): string {
 		// This is rarely called as the result gets HTTP-cached via long-expiry load.php.
@@ -148,27 +137,55 @@ class Pygmentize {
 	 * Shell out to get generated CSS from pygments
 	 *
 	 * @internal Only public for updateCSS.php
-	 * @return string
 	 */
 	public static function fetchGeneratedCSS(): string {
-		$result = self::boxedCommand()
+		$lightModeRun = self::boxedCommand()
 			->params(
 				self::getPath(), '-f', 'html',
 				'-S', 'default', '-a', '.mw-highlight' )
 			->includeStderr()
 			->execute();
+		$darkModeRun = self::boxedCommand()
+			->params(
+				self::getPath(), '-f', 'html',
+				'-S', 'monokai', '-a', '    .skin-theme-clientpref-night .mw-highlight' )
+			->includeStderr()
+			->execute();
 		self::recordShellout( 'generated_css' );
-		$output = $result->getStdout();
-		if ( $result->getExitCode() != 0 ) {
-			throw new PygmentsException( $output );
+
+		$lightModeOutput = trim( $lightModeRun->getStdout() );
+		if ( $lightModeRun->getExitCode() != 0 ) {
+			throw new PygmentsException( $lightModeOutput );
 		}
-		return $output;
+		$darkModeOutput = trim( $darkModeRun->getStdout() );
+		if ( $darkModeRun->getExitCode() != 0 ) {
+			throw new PygmentsException( $darkModeOutput );
+		}
+
+		$lightModeRules = explode( "\n", $lightModeOutput );
+		$darkModeRules = explode( "\n", $darkModeOutput );
+		$commonRules = array_intersect( $lightModeRules, $darkModeRules );
+
+		$nightThemeCss = implode( "\n", array_diff( $darkModeRules, $commonRules ) );
+		$osThemeCss = str_replace( '.skin-theme-clientpref-night',
+			'.skin-theme-clientpref-os', $nightThemeCss );
+
+		return <<<EOD
+			$lightModeOutput
+			@media screen {
+			$nightThemeCss
+			}
+			@media screen and ( prefers-color-scheme: dark ) {
+			$osThemeCss
+			}
+
+			EOD;
 	}
 
 	/**
 	 * Get the list of supported lexers by pygments (cached)
 	 *
-	 * @return array
+	 * @return array<string,true>
 	 */
 	public static function getLexers(): array {
 		if ( self::useBundled() ) {
@@ -189,14 +206,29 @@ class Pygmentize {
 	}
 
 	/**
+	 * Determine if the pygments command line supports the --json option
+	 *
+	 * @return bool
+	 */
+	private static function pygmentsSupportsJsonOutput(): bool {
+		$version = self::getVersion();
+		return ( version_compare( $version, '2.11.0' ) !== -1 );
+	}
+
+	/**
 	 * Shell out to get supported lexers by pygments
 	 *
 	 * @internal Only public for updateLexerList.php
-	 * @return array
+	 * @return array<string,true>
 	 */
 	public static function fetchLexers(): array {
+		$cliParams = [ self::getPath(), '-L', 'lexer' ];
+		if ( self::pygmentsSupportsJsonOutput() ) {
+			$cliParams[] = '--json';
+		}
+
 		$result = self::boxedCommand()
-			->params( self::getPath(), '-L', 'lexer' )
+			->params( $cliParams )
 			->includeStderr()
 			->execute();
 		self::recordShellout( 'fetch_lexers' );
@@ -205,12 +237,47 @@ class Pygmentize {
 			throw new PygmentsException( $output );
 		}
 
-		// Post-process the output, ideally pygments would output this in a
-		// machine-readable format (https://github.com/pygments/pygments/issues/1437)
-		$output = $result->getStdout();
+		if ( self::pygmentsSupportsJsonOutput() ) {
+			$lexers = self::parseLexersFromJson( $output );
+		} else {
+			$lexers = self::parseLexersFromText( $output );
+		}
+
+		sort( $lexers );
+		return array_fill_keys( $lexers, true );
+	}
+
+	/**
+	 * Parse json output of the pygments lexers list and return as php array
+	 *
+	 * @param string $output JSON formatted output of pygments lexers list
+	 * @return array
+	 */
+	private static function parseLexersFromJson( $output ): array {
+		$data = json_decode( $output, true );
+		if ( $data === null ) {
+			throw new PygmentsException(
+				'Got invalid JSON from Pygments: ' . $output );
+		}
+		$lexers = [];
+		foreach ( array_values( $data['lexers'] ) as $lexer ) {
+			$lexers = array_merge( $lexers, $lexer['aliases'] );
+		}
+		return $lexers;
+	}
+
+	/**
+	 * Parse original stdout of the pygments lexers list
+	 * This was the only format available before pygments 2.11.0
+	 * NOTE: Should be removed when pygments 2.11 is the minimum version expected to be installed
+	 *
+	 * @param string $output Textual list of pygments lexers
+	 * @return array
+	 */
+	private static function parseLexersFromText( $output ): array {
 		$lexers = [];
 		foreach ( explode( "\n", $output ) as $line ) {
-			if ( substr( $line, 0, 1 ) === '*' ) {
+			if ( str_starts_with( $line, '*' ) ) {
 				$newLexers = explode( ', ', trim( $line, "* :\r\n" ) );
 
 				// Skip internal, unnamed lexers
@@ -219,14 +286,7 @@ class Pygmentize {
 				}
 			}
 		}
-		$lexers = array_unique( $lexers );
-		sort( $lexers );
-		$data = [];
-		foreach ( $lexers as $lexer ) {
-			$data[$lexer] = true;
-		}
-
-		return $data;
+		return $lexers;
 	}
 
 	/**
@@ -242,22 +302,37 @@ class Pygmentize {
 		foreach ( $options as $k => $v ) {
 			$optionPairs[] = "{$k}={$v}";
 		}
-		$result = self::boxedCommand()
-			->params(
-				self::getPath(),
-				'-l', $lexer,
-				'-f', 'html',
-				'-O', implode( ',', $optionPairs ),
-				'file'
-			)
-			->inputFileFromString( 'file', $code )
-			->execute();
 		self::recordShellout( 'highlight' );
+
+		try {
+			$result = self::boxedCommand()
+				->params(
+					self::getPath(),
+					'-l', $lexer,
+					'-f', 'html',
+					'-O', implode( ',', $optionPairs ),
+					'file'
+				)
+				->inputFileFromString( 'file', $code )
+				->execute();
+		} catch ( ShellboxError $exception ) {
+			// If we have trouble sending or receiving over the network to
+			// Shellbox, we technically don't know if the command succeed or failed,
+			// but, treat the highlight() command as recoverable by wrapping this in
+			// PygmentsException. This permits the Parser tag to fallback to
+			// plainCodeWrap(), thus avoiding a fatal on pageviews (T292663).
+			throw new PygmentsException( 'ShellboxError', 0, $exception );
+		}
 
 		$output = $result->getStdout();
 		if ( $result->getExitCode() != 0 ) {
-			throw new PygmentsException( $output );
+			if ( $output === "" || $output === null ) {
+				// Stdout was empty, report stderr instead
+				$output = $result->getStderr();
+			}
+			throw new PygmentsException( (string)$output );
 		}
+
 		return $output;
 	}
 
@@ -284,7 +359,10 @@ class Pygmentize {
 	 * @param string $type Type of shellout
 	 */
 	private static function recordShellout( $type ) {
-		$statsd = MediaWikiServices::getInstance()->getStatsdDataFactory();
-		$statsd->increment( "syntaxhighlight_shell.$type" );
+		MediaWikiServices::getInstance()->getStatsFactory()
+			->getCounter( 'syntaxhighlight_shell_total' )
+			->setLabel( 'type', $type )
+			->copyToStatsdAt( "syntaxhighlight_shell.$type" )
+			->increment();
 	}
 }

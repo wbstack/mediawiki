@@ -3,9 +3,8 @@
 namespace Wikibase\Repo\ParserOutput;
 
 use DataValues\Geo\Values\GlobeCoordinateValue;
-use Language;
 use MediaWiki\MediaWikiServices;
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Snak\Snak;
 use Wikibase\DataModel\Statement\Statement;
@@ -66,7 +65,7 @@ class GlobeCoordinateKartographerDataUpdater implements StatementDataUpdater {
 
 		// Hack: Get the language this ParserOutput was parsed in
 		if ( isset( $jsVars['wgUserLanguage'] ) ) {
-			$language = Language::factory( $jsVars['wgUserLanguage'] );
+			$language = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $jsVars['wgUserLanguage'] );
 		} else {
 			// If this is not the user language, we will (maybe) need to parse this twice.
 			$language = MediaWikiServices::getInstance()->getContentLanguage();
@@ -76,23 +75,10 @@ class GlobeCoordinateKartographerDataUpdater implements StatementDataUpdater {
 			$this->globeCoordinateValues,
 			$language
 		);
-
-		$parserOutput->addJsConfigVars( $kartographerParserOutput->getJsConfigVars() );
-		$parserOutput->addModules( $kartographerParserOutput->getModules() );
-		$parserOutput->addModuleStyles( $kartographerParserOutput->getModuleStyles() );
-
-		$parserOutput->setExtensionData(
-			'kartographer',
-			$kartographerParserOutput->getExtensionData( 'kartographer' )
-		);
-		$parserOutput->setPageProperty(
-			'kartographer_links',
-			$kartographerParserOutput->getPageProperty( 'kartographer_links' )
-		);
-		$parserOutput->setPageProperty(
-			'kartographer_frames',
-			$kartographerParserOutput->getPageProperty( 'kartographer_frames' )
-		);
+		// Transfer kartographer-related metadata (jsconfigvars, modules,
+		// modulestyles, extensiondata, page properties) to our own
+		// ParserOutput
+		$kartographerParserOutput->collectMetadata( $parserOutput );
 	}
 
 }

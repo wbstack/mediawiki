@@ -2,7 +2,7 @@
 /**
  * 7z stream wrapper
  *
- * Copyright © 2005 Brion Vibber <brion@pobox.com>
+ * Copyright © 2005 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,6 +23,8 @@
  * @file
  * @ingroup Maintenance
  */
+
+namespace MediaWiki\Maintenance;
 
 use MediaWiki\Shell\Shell;
 
@@ -105,3 +107,6 @@ class SevenZipStream {
 		return fseek( $this->stream, $offset, $whence );
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( SevenZipStream::class, 'SevenZipStream' );

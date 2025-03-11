@@ -1,8 +1,6 @@
 <?php
 /** Fiji Hindi (Latin script) (Fiji Hindi)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -16,7 +14,7 @@ $namespaceNames = [
 	NS_PROJECT_TALK     => '$1_baat',
 	NS_FILE             => 'file',
 	NS_FILE_TALK        => 'file_ke_baat',
-	NS_MEDIAWIKI_TALK   => 'Mediawiki_ke_baat',
+	NS_MEDIAWIKI_TALK   => 'MediaWiki_ke_baat',
 	NS_TEMPLATE_TALK    => 'Template_ke_baat',
 	NS_HELP             => 'madat',
 	NS_HELP_TALK        => 'madat_ke_baat',

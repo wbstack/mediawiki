@@ -21,44 +21,52 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
 use Wikimedia\Rdbms\DBConnectionError;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\LikeValue;
 
-require __DIR__ . '/../CommandLineInc.php';
+// @codeCoverageIgnoreStart
+require_once __DIR__ . '/../Maintenance.php';
+// @codeCoverageIgnoreEnd
 
-if ( count( $args ) < 1 ) {
-	echo "Usage: php trackBlobs.php <cluster> [... <cluster>]\n";
-	echo "Adds blobs from a given ES cluster to the blob_tracking table\n";
-	echo "Automatically deletes the tracking table and starts from the start again when restarted.\n";
-
-	exit( 1 );
-}
-$tracker = new TrackBlobs( $args );
-$tracker->run();
-echo "All done.\n";
-
-class TrackBlobs {
-	public $clusters, $textClause;
+class TrackBlobs extends Maintenance {
+	/** @var string[] */
+	public $clusters;
+	/** @var IExpression|null */
+	public $textClause;
+	/** @var bool */
 	public $doBlobOrphans;
+	/** @var array */
 	public $trackedBlobs = [];
 
+	/** @var int */
 	public $batchSize = 1000;
+	/** @var int */
 	public $reportingInterval = 10;
 
-	public function __construct( $clusters ) {
-		$this->clusters = $clusters;
+	public function __construct() {
+		parent::__construct();
+
+		$this->addArg( 'cluster', 'cluster(s) to scan', true, true );
+
+		$this->addDescription(
+			'Adds blobs from a given ES cluster to the blob_tracking table. ' .
+			'Automatically deletes the tracking table and starts from the start again when restarted.'
+		);
+	}
+
+	public function execute() {
+		$this->clusters = $this->parameters->getArgs();
 		if ( extension_loaded( 'gmp' ) ) {
 			$this->doBlobOrphans = true;
-			foreach ( $clusters as $cluster ) {
+			foreach ( $this->clusters as $cluster ) {
 				$this->trackedBlobs[$cluster] = gmp_init( 0 );
 			}
 		} else {
 			echo "Warning: the gmp extension is needed to find orphan blobs\n";
 		}
-	}
 
-	public function run() {
 		$this->checkIntegrity();
 		$this->initTrackingTable();
 		$this->trackRevisions();
@@ -66,19 +74,22 @@ class TrackBlobs {
 		if ( $this->doBlobOrphans ) {
 			$this->findOrphanBlobs();
 		}
+		$this->output( "All done.\n" );
 	}
 
 	private function checkIntegrity() {
 		echo "Doing integrity check...\n";
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 
 		// Scan for HistoryBlobStub objects in the text table (T22757)
 
-		$exists = (bool)$dbr->selectField( 'text', '1',
-			'old_flags LIKE \'%object%\' AND old_flags NOT LIKE \'%external%\' ' .
-			'AND LOWER(CONVERT(LEFT(old_text,22) USING latin1)) = \'o:15:"historyblobstub"\'',
-			__METHOD__
-		);
+		$exists = (bool)$dbr->newSelectQueryBuilder()
+			->select( '1' )
+			->from( 'text' )
+			->where(
+				'old_flags LIKE \'%object%\' AND old_flags NOT LIKE \'%external%\' ' .
+				'AND LOWER(CONVERT(LEFT(old_text,22) USING latin1)) = \'o:15:"historyblobstub"\'' )
+			->caller( __METHOD__ )->fetchField();
 
 		if ( $exists ) {
 			echo "Integrity check failed: found HistoryBlobStub objects in your text table.\n" .
@@ -91,7 +102,7 @@ class TrackBlobs {
 	}
 
 	private function initTrackingTable() {
-		$dbw = wfGetDB( DB_PRIMARY );
+		$dbw = $this->getDB( DB_PRIMARY );
 		if ( $dbw->tableExists( 'blob_tracking', __METHOD__ ) ) {
 			$dbw->query( 'DROP TABLE ' . $dbw->tableName( 'blob_tracking' ), __METHOD__ );
 			$dbw->query( 'DROP TABLE ' . $dbw->tableName( 'blob_orphans' ), __METHOD__ );
@@ -101,14 +112,16 @@ class TrackBlobs {
 
 	private function getTextClause() {
 		if ( !$this->textClause ) {
-			$dbr = wfGetDB( DB_REPLICA );
-			$this->textClause = '';
+			$dbr = $this->getReplicaDB();
+			$conds = [];
 			foreach ( $this->clusters as $cluster ) {
-				if ( $this->textClause != '' ) {
-					$this->textClause .= ' OR ';
-				}
-				$this->textClause .= 'old_text' . $dbr->buildLike( "DB://$cluster/", $dbr->anyString() );
+				$conds[] = $dbr->expr(
+					'old_text',
+					IExpression::LIKE,
+					new LikeValue( "DB://$cluster/", $dbr->anyString() )
+				);
 			}
+			$this->textClause = $dbr->orExpr( $conds );
 		}
 
 		return $this->textClause;
@@ -130,46 +143,47 @@ class TrackBlobs {
 	 *  Scan the revision table for rows stored in the specified clusters
 	 */
 	private function trackRevisions() {
-		$dbw = wfGetDB( DB_PRIMARY );
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbw = $this->getPrimaryDB();
+		$dbr = $this->getReplicaDB();
 
 		$textClause = $this->getTextClause();
 		$startId = 0;
-		$endId = (int)$dbr->selectField( 'revision', 'MAX(rev_id)', '', __METHOD__ );
+		$endId = (int)$dbr->newSelectQueryBuilder()
+			->select( 'MAX(rev_id)' )
+			->from( 'revision' )
+			->caller( __METHOD__ )->fetchField();
 		$batchesDone = 0;
 		$rowsInserted = 0;
 
 		echo "Finding revisions...\n";
 
-		$fields = [ 'rev_id', 'rev_page', 'old_id', 'old_flags', 'old_text' ];
-		$options = [
-			'ORDER BY' => 'rev_id',
-			'LIMIT' => $this->batchSize
-		];
 		$conds = [
 			$textClause,
-			'old_flags ' . $dbr->buildLike( $dbr->anyString(), 'external', $dbr->anyString() ),
+			$dbr->expr(
+				'old_flags',
+				IExpression::LIKE,
+				new LikeValue( $dbr->anyString(), 'external', $dbr->anyString() )
+			)
 		];
-		$slotRoleStore = MediaWikiServices::getInstance()->getSlotRoleStore();
-		$tables = [ 'revision', 'slots', 'content', 'text' ];
+		$slotRoleStore = $this->getServiceContainer()->getSlotRoleStore();
+
 		$conds = array_merge( [
-			'rev_id=slot_revision_id',
-			'slot_role_id=' . $slotRoleStore->getId( SlotRecord::MAIN ),
-			'content_id=slot_content_id',
+			'slot_role_id' => $slotRoleStore->getId( SlotRecord::MAIN ),
 			'SUBSTRING(content_address, 1, 3)=' . $dbr->addQuotes( 'tt:' ),
-			'SUBSTRING(content_address, 4)=old_id',
 		], $conds );
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
 		while ( true ) {
-			$res = $dbr->select( $tables,
-				$fields,
-				array_merge( [
-					'rev_id > ' . $dbr->addQuotes( $startId ),
-				], $conds ),
-				__METHOD__,
-				$options
-			);
+			$res = $dbr->newSelectQueryBuilder()
+				->select( [ 'rev_id', 'rev_page', 'old_id', 'old_flags', 'old_text' ] )
+				->from( 'revision' )
+				->join( 'slots', null, 'rev_id=slot_revision_id' )
+				->join( 'content', null, 'content_id=slot_content_id' )
+				->join( 'text', null, 'SUBSTRING(content_address, 4)=old_id' )
+				->where( $dbr->expr( 'rev_id', '>', $startId ) )
+				->andWhere( $conds )
+				->orderBy( 'rev_id' )
+				->limit( $this->batchSize )
+				->caller( __METHOD__ )->fetchResultSet();
 			if ( !$res->numRows() ) {
 				break;
 			}
@@ -198,14 +212,17 @@ class TrackBlobs {
 					gmp_setbit( $this->trackedBlobs[$info['cluster']], $info['id'] );
 				}
 			}
-			$dbw->insert( 'blob_tracking', $insertBatch, __METHOD__ );
+			$dbw->newInsertQueryBuilder()
+				->insertInto( 'blob_tracking' )
+				->rows( $insertBatch )
+				->caller( __METHOD__ )->execute();
 			$rowsInserted += count( $insertBatch );
 
 			++$batchesDone;
 			if ( $batchesDone >= $this->reportingInterval ) {
 				$batchesDone = 0;
 				echo "$startId / $endId\n";
-				$lbFactory->waitForReplication();
+				$this->waitForReplication();
 			}
 		}
 		echo "Found $rowsInserted revisions\n";
@@ -218,41 +235,40 @@ class TrackBlobs {
 	 */
 	private function trackOrphanText() {
 		# Wait until the blob_tracking table is available in the replica DB
-		$dbw = wfGetDB( DB_PRIMARY );
-		$dbr = wfGetDB( DB_REPLICA );
-		$pos = $dbw->getPrimaryPos();
-		$dbr->primaryPosWait( $pos, 100000 );
+		$dbw = $this->getPrimaryDB();
+		$dbr = $this->getReplicaDB();
+		$this->getServiceContainer()->getDBLoadBalancerFactory()->waitForReplication( [ 'timeout' => 100_000 ] );
 
 		$textClause = $this->getTextClause();
 		$startId = 0;
-		$endId = (int)$dbr->selectField( 'text', 'MAX(old_id)', '', __METHOD__ );
+		$endId = (int)$dbr->newSelectQueryBuilder()
+			->select( 'MAX(old_id)' )
+			->from( 'text' )
+			->caller( __METHOD__ )->fetchField();
 		$rowsInserted = 0;
 		$batchesDone = 0;
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
 		echo "Finding orphan text...\n";
 
 		# Scan the text table for orphan text
 		while ( true ) {
-			$res = $dbr->select( [ 'text', 'blob_tracking' ],
-				[ 'old_id', 'old_flags', 'old_text' ],
-				[
-					'old_id>' . $dbr->addQuotes( $startId ),
+			$res = $dbr->newSelectQueryBuilder()
+				->select( [ 'old_id', 'old_flags', 'old_text' ] )
+				->from( 'text' )
+				->leftJoin( 'blob_tracking', null, 'bt_text_id=old_id' )
+				->where( [
+					$dbr->expr( 'old_id', '>', $startId ),
 					$textClause,
-					'old_flags ' . $dbr->buildLike( $dbr->anyString(), 'external', $dbr->anyString() ),
-					'bt_text_id IS NULL'
-				],
-				__METHOD__,
-				[
-					'ORDER BY' => 'old_id',
-					'LIMIT' => $this->batchSize
-				],
-				[ 'blob_tracking' => [ 'LEFT JOIN', 'bt_text_id=old_id' ] ]
-			);
-			$ids = [];
-			foreach ( $res as $row ) {
-				$ids[] = $row->old_id;
-			}
+					$dbr->expr(
+						'old_flags',
+						IExpression::LIKE,
+						new LikeValue( $dbr->anyString(), 'external', $dbr->anyString() )
+					),
+					'bt_text_id' => null,
+				] )
+				->orderBy( 'old_id' )
+				->limit( $this->batchSize )
+				->caller( __METHOD__ )->fetchResultSet();
 
 			if ( !$res->numRows() ) {
 				break;
@@ -283,14 +299,17 @@ class TrackBlobs {
 					gmp_setbit( $this->trackedBlobs[$info['cluster']], $info['id'] );
 				}
 			}
-			$dbw->insert( 'blob_tracking', $insertBatch, __METHOD__ );
+			$dbw->newInsertQueryBuilder()
+				->insertInto( 'blob_tracking' )
+				->rows( $insertBatch )
+				->caller( __METHOD__ )->execute();
 
 			$rowsInserted += count( $insertBatch );
 			++$batchesDone;
 			if ( $batchesDone >= $this->reportingInterval ) {
 				$batchesDone = 0;
 				echo "$startId / $endId\n";
-				$lbFactory->waitForReplication();
+				$this->waitForReplication();
 			}
 		}
 		echo "Found $rowsInserted orphan text rows\n";
@@ -310,8 +329,10 @@ class TrackBlobs {
 			return;
 		}
 
-		$dbw = wfGetDB( DB_PRIMARY );
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
+		$dbw = $this->getPrimaryDB();
+		$lbFactory = $this->getServiceContainer()->getDBLoadBalancerFactory();
+		$dbStore = $this->getServiceContainer()->getExternalStoreFactory()->getStore( 'DB' );
+		'@phan-var ExternalStoreDB $dbStore'; /** @var ExternalStoreDB $dbStore */
 
 		foreach ( $this->clusters as $cluster ) {
 			echo "Searching for orphan blobs in $cluster...\n";
@@ -326,10 +347,7 @@ class TrackBlobs {
 				}
 				continue;
 			}
-			$table = $extDB->getLBInfo( 'blobs table' );
-			if ( $table === null ) {
-				$table = 'blobs';
-			}
+			$table = $dbStore->getTable( $cluster );
 			if ( !$extDB->tableExists( $table, __METHOD__ ) ) {
 				echo "No blobs table on cluster $cluster\n";
 				continue;
@@ -337,16 +355,20 @@ class TrackBlobs {
 			$startId = 0;
 			$batchesDone = 0;
 			$actualBlobs = gmp_init( 0 );
-			$endId = (int)$extDB->selectField( $table, 'MAX(blob_id)', '', __METHOD__ );
+			$endId = (int)$extDB->newSelectQueryBuilder()
+				->select( 'MAX(blob_id)' )
+				->from( $table )
+				->caller( __METHOD__ )->fetchField();
 
 			// Build a bitmap of actual blob rows
 			while ( true ) {
-				$res = $extDB->select( $table,
-					[ 'blob_id' ],
-					[ 'blob_id > ' . $extDB->addQuotes( $startId ) ],
-					__METHOD__,
-					[ 'LIMIT' => $this->batchSize, 'ORDER BY' => 'blob_id' ]
-				);
+				$res = $extDB->newSelectQueryBuilder()
+					->select( [ 'blob_id' ] )
+					->from( $table )
+					->where( $extDB->expr( 'blob_id', '>', $startId ) )
+					->orderBy( 'blob_id' )
+					->limit( $this->batchSize )
+					->caller( __METHOD__ )->fetchResultSet();
 
 				if ( !$res->numRows() ) {
 					break;
@@ -382,7 +404,10 @@ class TrackBlobs {
 					'bo_blob_id' => $id
 				];
 				if ( count( $insertBatch ) > $this->batchSize ) {
-					$dbw->insert( 'blob_orphans', $insertBatch, __METHOD__ );
+					$dbw->newInsertQueryBuilder()
+						->insertInto( 'blob_orphans' )
+						->rows( $insertBatch )
+						->caller( __METHOD__ )->execute();
 					$insertBatch = [];
 				}
 
@@ -390,9 +415,17 @@ class TrackBlobs {
 				++$numOrphans;
 			}
 			if ( $insertBatch ) {
-				$dbw->insert( 'blob_orphans', $insertBatch, __METHOD__ );
+				$dbw->newInsertQueryBuilder()
+					->insertInto( 'blob_orphans' )
+					->rows( $insertBatch )
+					->caller( __METHOD__ )->execute();
 			}
 			echo "Found $numOrphans orphan(s) in $cluster\n";
 		}
 	}
 }
+
+// @codeCoverageIgnoreStart
+$maintClass = TrackBlobs::class;
+require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

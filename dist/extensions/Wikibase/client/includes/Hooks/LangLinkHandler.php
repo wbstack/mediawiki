@@ -2,10 +2,11 @@
 
 namespace Wikibase\Client\Hooks;
 
-use ParserOutput;
-use Site;
-use SiteLookup;
-use Title;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteLookup;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleValue;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\DataModel\SiteLink;
 
@@ -227,7 +228,7 @@ class LangLinkHandler {
 				continue;
 			}
 
-			list( $lang, $page ) = $parts;
+			[ $lang, $page ] = $parts;
 
 			if ( $sites->hasNavigationId( $lang ) ) {
 				$site = $sites->getSiteByNavigationId( $lang );
@@ -251,7 +252,7 @@ class LangLinkHandler {
 	 * link on the page.
 	 *
 	 * @param Title $title The page's title
-	 * @param ParserOutput $parserOutput   Parsed representation of the page
+	 * @param ParserOutput $parserOutput Parsed representation of the page
 	 *
 	 * @return SiteLink[] An associative array, using site IDs for keys
 	 *         and the target pages in the respective languages as the associated value.
@@ -311,7 +312,13 @@ class LangLinkHandler {
 			$interwikiCode = $this->getInterwikiCodeFromSite( $targetSite );
 
 			if ( $interwikiCode ) {
-				$link = "$interwikiCode:$page";
+				// Note that interwiki codes can conflict with namespace
+				// prefixes, so be careful to use TitleValue here and not
+				// to attempt to reparse the Title from '$prefix:$title',
+				// since that could lead to the prefix being interpreted
+				// as a namespace not an interwiki prefix (T363538).
+				[ $title, $frag ] = array_pad( explode( '#', $page, 2 ), 2, '' );
+				$link = TitleValue::tryNew( NS_MAIN, $title, $frag, $interwikiCode );
 				$parserOutput->addLanguageLink( $link );
 			} else {
 				wfWarn( "No interlanguage prefix found for $siteId." );
@@ -334,11 +341,11 @@ class LangLinkHandler {
 	public function getInterwikiCodeFromSite( Site $site ) {
 		// FIXME: We should use $site->getInterwikiIds, but the interwiki ids in
 		// the sites table are wrong currently, see T137537.
-		$id = $site->getGlobalId();
+		$id = $site->getGlobalId() ?? '';
 		$id = preg_replace( '/(wiki\w*|wiktionary)$/', '', $id );
 		$id = strtr( $id, [ '_' => '-' ] );
 		if ( !$id ) {
-			$id = $site->getLanguageCode();
+			$id = $site->getLanguageCode() ?? '';
 		}
 		return $id;
 	}

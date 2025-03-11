@@ -1,38 +1,53 @@
 <?php
 
+// phpcs:disable MediaWiki.NamingConventions.LowerCamelFunctionsName.FunctionName
+
 namespace TwoColConflict\Hooks;
 
-use EditPage;
-use ExtensionRegistry;
+use MediaWiki\EditPage\EditPage;
 use MediaWiki\Extension\EventLogging\EventLogging;
+use MediaWiki\Hook\AlternateEditHook;
+use MediaWiki\Hook\EditPage__showEditForm_fieldsHook;
+use MediaWiki\Hook\EditPage__showEditForm_initialHook;
+use MediaWiki\Hook\EditPageBeforeConflictDiffHook;
+use MediaWiki\Hook\EditPageBeforeEditButtonsHook;
+use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Preferences\Hook\GetPreferencesHook;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\User\Options\Hook\LoadUserOptionsHook;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
 use OOUI\ButtonInputWidget;
-use OutputPage;
 use TwoColConflict\ConflictFormValidator;
 use TwoColConflict\Html\CoreUiHintHtml;
 use TwoColConflict\SplitTwoColConflictHelper;
 use TwoColConflict\TalkPageConflict\ResolutionSuggester;
 use TwoColConflict\TwoColConflictContext;
-use User;
 
 /**
  * Hook handlers for the TwoColConflict extension.
  *
  * @license GPL-2.0-or-later
  */
-class TwoColConflictHooks {
+class TwoColConflictHooks implements
+	GetPreferencesHook,
+	LoadUserOptionsHook,
+	AlternateEditHook,
+	EditPageBeforeConflictDiffHook,
+	EditPageBeforeEditButtonsHook,
+	EditPage__showEditForm_initialHook,
+	EditPage__showEditForm_fieldsHook
+{
 
-	/**
-	 * @var TwoColConflictContext
-	 */
-	private $twoColContext;
+	private TwoColConflictContext $twoColContext;
 
-	private static function newFromGlobalState() {
+	private static function newFromGlobalState(): self {
 		return new self( MediaWikiServices::getInstance()->getService( 'TwoColConflictContext' ) );
 	}
 
-	private function __construct( TwoColConflictContext $twoColContext ) {
+	public function __construct( TwoColConflictContext $twoColContext ) {
 		$this->twoColContext = $twoColContext;
 	}
 
@@ -41,14 +56,7 @@ class TwoColConflictHooks {
 	 *
 	 * @param EditPage $editPage
 	 */
-	public static function onAlternateEdit( EditPage $editPage ) {
-		self::newFromGlobalState()->doAlternateEdit( $editPage );
-	}
-
-	/**
-	 * @param EditPage $editPage
-	 */
-	private function doAlternateEdit( EditPage $editPage ) {
+	public function onAlternateEdit( $editPage ) {
 		$context = $editPage->getContext();
 
 		// Skip out if the feature is disabled
@@ -69,7 +77,7 @@ class TwoColConflictHooks {
 			return new SplitTwoColConflictHelper(
 				$title,
 				$context->getOutput(),
-				$services->getStatsdDataFactory(),
+				$services->getStatsFactory(),
 				$submitButtonLabel,
 				$services->getContentHandlerFactory(),
 				$this->twoColContext,
@@ -77,6 +85,7 @@ class TwoColConflictHooks {
 					$baseRevision,
 					$wikiPage->getContentHandler()->getDefaultFormat()
 				),
+				$services->getCommentFormatter(),
 				$services->getMainObjectStash(),
 				$editPage->summary,
 				$services->getUserOptionsLookup()->getOption( $context->getUser(), 'editfont' )
@@ -102,10 +111,11 @@ class TwoColConflictHooks {
 	 * @param EditPage $editPage
 	 * @param OutputPage $outputPage
 	 */
-	public static function onEditPageShowEditFormInitial(
-		EditPage $editPage,
-		OutputPage $outputPage
+	public function onEditPage__showEditForm_initial(
+		$editPage,
+		$outputPage
 	) {
+		// What the script does is only used for logging in doEditPageBeforeConflictDiff below
 		if ( ExtensionRegistry::getInstance()->isLoaded( 'EventLogging' ) ) {
 			$outputPage->addModules( 'ext.TwoColConflict.JSCheck' );
 		}
@@ -117,18 +127,10 @@ class TwoColConflictHooks {
 	 * @param EditPage $editPage
 	 * @param OutputPage $outputPage
 	 */
-	public static function onEditPageShowEditFormFields(
-		EditPage $editPage,
-		OutputPage $outputPage
+	public function onEditPage__showEditForm_fields(
+		$editPage,
+		$outputPage
 	) {
-		self::newFromGlobalState()->doEditPageShowEditFormFields( $editPage, $outputPage );
-	}
-
-	/**
-	 * @param EditPage $editPage
-	 * @param OutputPage $outputPage
-	 */
-	public function doEditPageShowEditFormFields( EditPage $editPage, OutputPage $outputPage ) {
 		// TODO remove this hint when we're sure people are aware of the new feature
 		if ( $editPage->isConflict &&
 			$this->twoColContext->shouldCoreHintBeShown( $outputPage->getUser() )
@@ -147,18 +149,10 @@ class TwoColConflictHooks {
 	 * @param EditPage $editPage
 	 * @param OutputPage $outputPage
 	 */
-	public static function onEditPageBeforeConflictDiff(
-		EditPage $editPage,
-		OutputPage $outputPage
+	public function onEditPageBeforeConflictDiff(
+		$editPage,
+		$outputPage
 	) {
-		self::newFromGlobalState()->doEditPageBeforeConflictDiff( $editPage, $outputPage );
-	}
-
-	/**
-	 * @param EditPage $editPage
-	 * @param OutputPage $outputPage
-	 */
-	public function doEditPageBeforeConflictDiff( EditPage $editPage, OutputPage $outputPage ) {
 		$context = $editPage->getContext();
 		$title = $context->getTitle();
 		$request = $context->getRequest();
@@ -180,7 +174,7 @@ class TwoColConflictHooks {
 						$user,
 						$context->getTitle()
 					),
-					'isAnon' => !$user->isRegistered(),
+					'isAnon' => !$user->isNamed(),
 					'editCount' => (int)$user->getEditCount(),
 					'pageNs' => $context->getTitle()->getNamespace(),
 					'baseRevisionId' => $baseRevision ? $baseRevision->getId() : 0,
@@ -206,19 +200,11 @@ class TwoColConflictHooks {
 	 * @param ButtonInputWidget[] &$buttons
 	 * @param int &$tabindex
 	 */
-	public static function onEditPageBeforeEditButtons(
-		EditPage $editPage,
-		array &$buttons,
+	public function onEditPageBeforeEditButtons(
+		$editPage,
+		&$buttons,
 		&$tabindex
 	) {
-		self::newFromGlobalState()->doEditPageBeforeEditButtons( $editPage, $buttons );
-	}
-
-	/**
-	 * @param EditPage $editPage
-	 * @param ButtonInputWidget[] &$buttons
-	 */
-	public function doEditPageBeforeEditButtons( EditPage $editPage, array &$buttons ) {
 		$context = $editPage->getContext();
 		if ( $this->twoColContext->shouldTwoColConflictBeShown(
 				$context->getUser(),
@@ -247,16 +233,16 @@ class TwoColConflictHooks {
 	/**
 	 * @param array[] &$prefs
 	 */
-	public function doGetBetaFeaturePreferences( array &$prefs ) {
+	private function doGetBetaFeaturePreferences( array &$prefs ): void {
 		if ( $this->twoColContext->isUsedAsBetaFeature() ) {
 			$config = MediaWikiServices::getInstance()->getMainConfig();
-			$extensionAssetsPath = $config->get( 'ExtensionAssetsPath' );
+			$path = $config->get( MainConfigNames::ExtensionAssetsPath );
 			$prefs[TwoColConflictContext::BETA_PREFERENCE_NAME] = [
 				'label-message' => 'twocolconflict-beta-feature-message',
 				'desc-message' => 'twocolconflict-beta-feature-description',
 				'screenshot' => [
-					'ltr' => "$extensionAssetsPath/TwoColConflict/resources/TwoColConflict-beta-features-ltr.svg",
-					'rtl' => "$extensionAssetsPath/TwoColConflict/resources/TwoColConflict-beta-features-rtl.svg",
+					'ltr' => "$path/TwoColConflict/resources/TwoColConflict-beta-features-ltr.svg",
+					'rtl' => "$path/TwoColConflict/resources/TwoColConflict-beta-features-rtl.svg",
 				],
 				'info-link'
 					=> 'https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Two_Column_Edit_Conflict_View',
@@ -270,14 +256,7 @@ class TwoColConflictHooks {
 	 * @param User $user
 	 * @param array[] &$preferences
 	 */
-	public static function onGetPreferences( $user, array &$preferences ) {
-		self::newFromGlobalState()->doGetPreferences( $preferences );
-	}
-
-	/**
-	 * @param array[] &$preferences
-	 */
-	public function doGetPreferences( array &$preferences ) {
+	public function onGetPreferences( $user, &$preferences ) {
 		if ( $this->twoColContext->isUsedAsBetaFeature() ) {
 			return;
 		}
@@ -289,34 +268,15 @@ class TwoColConflictHooks {
 		];
 	}
 
-	/**
-	 * @param UserIdentity $user
-	 * @param array &$options
-	 */
-	public static function onLoadUserOptions( UserIdentity $user, array &$options ) {
-		self::newFromGlobalState()->doLoadUserOptions( $options );
-	}
-
-	/**
-	 * If a user is opted-out of the beta feature, that will be copied over to the newer
-	 * preference.  This ensures that anyone who has opted-out continues to be so as we
-	 * promote wikis out of beta feature mode.
-	 *
-	 * This entire function can be removed once all users have been migrated away from
-	 * their beta feature preference.  See T250955.
-	 *
-	 * @param array &$options
-	 */
-	public function doLoadUserOptions( array &$options ) {
+	public function onLoadUserOptions( UserIdentity $user, array &$options ): void {
 		if ( $this->twoColContext->isUsedAsBetaFeature() ) {
 			return;
 		}
 
-		$betaPreference = $options[TwoColConflictContext::BETA_PREFERENCE_NAME] ?? null;
-		if ( $betaPreference === 0 ) {
-			$options[TwoColConflictContext::ENABLED_PREFERENCE] = 0;
-		}
-		$options[TwoColConflictContext::BETA_PREFERENCE_NAME] = null;
+		// Drop obsolete option from the database. The original plan was to migrate the Beta opt-in
+		// to the later opt-out. This is not possible. Every user who changed some option will also
+		// have this option set. Impossible to know if the Beta feature was intentionally disabled.
+		unset( $options[TwoColConflictContext::BETA_PREFERENCE_NAME] );
 	}
 
 }

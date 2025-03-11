@@ -1,13 +1,15 @@
-module.exports = ( function () {
+module.exports = ( function ( wb ) {
 	'use strict';
 
 	var Lemma = require( '../datamodel/Lemma.js' );
 	var LemmaList = require( '../datatransfer/LemmaList.js' );
+	var ENTITY_CHANGERS = wb.entityChangers;
 
 	function getRequestLemmas( origLemmas, currentLemmas ) {
-		var removedLemmas = [];
+		var removedLemmas = [], origLemmaValues = {};
 
 		origLemmas.forEach( function ( origLemma ) {
+			origLemmaValues[ origLemma.language ] = origLemma.value;
 			var lemmaNotRemoved = currentLemmas.some( function ( lemma ) {
 				return origLemma.language === lemma.language;
 			} );
@@ -18,7 +20,9 @@ module.exports = ( function () {
 
 		var requestLemmas = {};
 		currentLemmas.forEach( function ( lemma ) {
-			requestLemmas[ lemma.language ] = lemma.copy();
+			if ( lemma.value !== origLemmaValues[ lemma.language ] ) {
+				requestLemmas[ lemma.language ] = lemma.copy();
+			}
 		} );
 		removedLemmas.forEach( function ( lemma ) {
 			requestLemmas[ lemma.language ] = { language: lemma.language, remove: '' };
@@ -164,6 +168,9 @@ module.exports = ( function () {
 						} );
 
 						context.commit( 'finishSaving' );
+						var tempUserWatcher = new ENTITY_CHANGERS.TempUserWatcher();
+						tempUserWatcher.processApiResult( response );
+						return new ENTITY_CHANGERS.ValueChangeResult( saveLexeme, tempUserWatcher );
 					} ).fail( function () {
 						context.commit( 'finishSaving' );
 					} );
@@ -171,4 +178,4 @@ module.exports = ( function () {
 			}
 		};
 	};
-}() );
+}( wikibase ) );

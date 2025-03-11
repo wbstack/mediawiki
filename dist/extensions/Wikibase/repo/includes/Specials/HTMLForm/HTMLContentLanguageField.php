@@ -2,8 +2,9 @@
 
 namespace Wikibase\Repo\Specials\HTMLForm;
 
-use HTMLComboboxField;
 use InvalidArgumentException;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\HTMLForm\Field\HTMLComboboxField;
 use Wikibase\Lib\LanguageNameLookup;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -27,11 +28,12 @@ class HTMLContentLanguageField extends HTMLComboboxField {
 			'label-message' => 'wikibase-content-language-edit-label',
 		];
 
-		if ( isset( $params['parent'] ) && $params['parent'] instanceof \IContextSource ) {
-			/** @var \IContextSource $form */
-			$form = $params['parent'];
-			$params['default'] = $form->getLanguage()->getCode();
+		$parent = $params['parent'] ?? null;
+		if ( !( $parent instanceof IContextSource ) ) {
+			throw new InvalidArgumentException( 'parent option must be an IContextSource' );
 		}
+		$languageCode = $parent->getLanguage()->getCode();
+		$params['default'] ??= $languageCode;
 
 		if ( isset( $params['options'] )
 			 || isset( $params['options-message'] )
@@ -45,7 +47,7 @@ class HTMLContentLanguageField extends HTMLComboboxField {
 		$contentLanguages = WikibaseRepo::getTermsLanguages();
 		$params['options'] = $this->constructOptions(
 			$contentLanguages->getLanguages(),
-			WikibaseRepo::getLanguageNameLookup()
+			WikibaseRepo::getLanguageNameLookupFactory()->getForLanguageCode( $languageCode )
 		);
 
 		parent::__construct( array_merge( $defaultParameters, $params ) );
@@ -60,7 +62,7 @@ class HTMLContentLanguageField extends HTMLComboboxField {
 	private function constructOptions( array $languageCodes, LanguageNameLookup $lookup ) {
 		$languageOptions = [];
 		foreach ( $languageCodes as $code ) {
-			$languageName = $lookup->getName( $code );
+			$languageName = $lookup->getNameForTerms( $code );
 			$languageOptions["$languageName ($code)"] = $code;
 		}
 

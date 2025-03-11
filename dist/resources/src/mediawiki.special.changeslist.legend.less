@@ -11,8 +11,12 @@
 	font-size: 85%;
 	line-height: 1.2em;
 	padding: 0.5em;
-	border: 1px solid #ddd;
+	border: @border-subtle;
 	background-color: @background-color-base;
+
+	summary {
+		cursor: pointer;
+	}
 
 	dl {
 		/* Parent element defines sufficient padding */

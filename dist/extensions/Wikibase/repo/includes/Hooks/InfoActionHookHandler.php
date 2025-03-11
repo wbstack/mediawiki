@@ -2,11 +2,11 @@
 
 namespace Wikibase\Repo\Hooks;
 
-use Html;
-use IContextSource;
-use PageProps;
-use SiteLookup;
-use Title;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\Page\PageProps;
+use MediaWiki\Site\SiteLookup;
+use MediaWiki\Title\Title;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
 use Wikibase\Repo\Store\SubscriptionLookup;
@@ -132,7 +132,7 @@ class InfoActionHookHandler {
 			foreach ( $pageProperties as $property => $value ) {
 				$output[] = [
 					$this->context->msg( 'wikibase-pageinfo-' . $property )->parse(),
-					$this->context->getLanguage()->formatNum( (int)$value )
+					$this->context->getLanguage()->formatNum( (int)$value ),
 				];
 			}
 		}
@@ -164,7 +164,7 @@ class InfoActionHookHandler {
 	private function getNoSubscriptionText() {
 		return [
 			$this->context->msg( 'wikibase-pageinfo-subscription' )->parse(),
-			$this->context->msg( 'wikibase-pageinfo-subscription-none' )->parse()
+			$this->context->msg( 'wikibase-pageinfo-subscription-none' )->parse(),
 		];
 	}
 

@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo;
 
+use Traversable;
+
 /**
  * Lazy and potentially infinite version of PHPs native range() function (without $step support).
  *
@@ -16,12 +18,12 @@ class RangeTraversable implements \IteratorAggregate {
 	/** @var int|null */
 	private $inclusiveUpperBound;
 
-	public function __construct( int $startingNumber = 1, int $inclusiveUpperBound = null ) {
+	public function __construct( int $startingNumber = 1, ?int $inclusiveUpperBound = null ) {
 		$this->startingNumber = $startingNumber;
 		$this->inclusiveUpperBound = $inclusiveUpperBound;
 	}
 
-	public function getIterator() {
+	public function getIterator(): Traversable {
 		$number = $this->startingNumber;
 
 		if ( $this->inclusiveUpperBound === null ) {

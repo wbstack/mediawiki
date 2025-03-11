@@ -22,34 +22,30 @@
 
 namespace MediaWiki\Deferred\LinksUpdate;
 
-use Category;
-use DeferredUpdates;
-use EnqueueableDataUpdate;
 use InvalidArgumentException;
 use JobSpecification;
+use MediaWiki\Category\Category;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Deferred\EnqueueableDataUpdate;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use MWException;
-use ParserOutput;
-use WikiPage;
+use MediaWiki\Page\PageIdentity;
+use MediaWiki\Page\PageIdentityValue;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * Update object handling the cleanup of links tables after a page was deleted.
  */
 class LinksDeletionUpdate extends LinksUpdate implements EnqueueableDataUpdate {
-	/** @var WikiPage */
-	protected $page;
 	/** @var string */
 	protected $timestamp;
 
 	/**
-	 * @param WikiPage $page Page we are updating
+	 * @param PageIdentity $page Page we are updating
 	 * @param int|null $pageId ID of the page we are updating [optional]
 	 * @param string|null $timestamp TS_MW timestamp of deletion
-	 * @throws MWException
 	 */
-	public function __construct( WikiPage $page, $pageId = null, $timestamp = null ) {
-		$this->page = $page;
+	public function __construct( PageIdentity $page, $pageId = null, $timestamp = null ) {
 		if ( $pageId ) {
 			$this->mId = $pageId; // page ID at time of deletion
 		} elseif ( $page->exists() ) {
@@ -62,15 +58,20 @@ class LinksDeletionUpdate extends LinksUpdate implements EnqueueableDataUpdate {
 
 		$fakePO = new ParserOutput();
 		$fakePO->setCacheTime( $timestamp );
-		// Use immutable page identity to keep reference to the page id at time of deletion - T299244
-		$immutablePageIdentity = $page->getTitle()->toPageIdentity();
+		// Use an immutable page identity to keep reference to the page id at time of deletion - T299244
+		$immutablePageIdentity = new PageIdentityValue(
+			$page->getId(),
+			$page->getNamespace(),
+			$page->getDBkey(),
+			$page->getWikiId()
+		);
 		parent::__construct( $immutablePageIdentity, $fakePO, false );
 	}
 
 	protected function doIncrementalUpdate() {
 		$services = MediaWikiServices::getInstance();
 		$config = $services->getMainConfig();
-		$lbFactory = $services->getDBLoadBalancerFactory();
+		$dbProvider = $services->getConnectionProvider();
 		$batchSize = $config->get( MainConfigNames::UpdateRowsPerQuery );
 
 		$id = $this->mId;
@@ -91,37 +92,34 @@ class LinksDeletionUpdate extends LinksUpdate implements EnqueueableDataUpdate {
 		}
 
 		// Delete restrictions for the deleted page
-		$dbw->delete( 'page_restrictions', [ 'pr_page' => $id ], __METHOD__ );
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'page_restrictions' )
+			->where( [ 'pr_page' => $id ] )
+			->caller( __METHOD__ )->execute();
 
 		// Delete any redirect entry
-		$dbw->delete( 'redirect', [ 'rd_from' => $id ], __METHOD__ );
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'redirect' )
+			->where( [ 'rd_from' => $id ] )
+			->caller( __METHOD__ )->execute();
 
 		// Find recentchanges entries to clean up...
-		$rcIdsForTitle = $dbw->selectFieldValues(
-			'recentchanges',
-			'rc_id',
-			[
-				'rc_type != ' . RC_LOG,
-				'rc_namespace' => $title->getNamespace(),
-				'rc_title' => $title->getDBkey(),
-				'rc_timestamp < ' .
-					$dbw->addQuotes( $dbw->timestamp( $this->timestamp ) )
-			],
-			__METHOD__
-		);
-		$rcIdsForPage = $dbw->selectFieldValues(
-			'recentchanges',
-			'rc_id',
-			[ 'rc_type != ' . RC_LOG, 'rc_cur_id' => $id ],
-			__METHOD__
-		);
+		// Select RC IDs just by curid, and not by title (see T307865 and T140960)
+		$rcIdsForPage = $dbw->newSelectQueryBuilder()
+			->select( 'rc_id' )
+			->from( 'recentchanges' )
+			->where( [ $dbw->expr( 'rc_type', '!=', RC_LOG ), 'rc_cur_id' => $id ] )
+			->caller( __METHOD__ )->fetchFieldValues();
 
 		// T98706: delete by PK to avoid lock contention with RC delete log insertions
-		$rcIdBatches = array_chunk( array_merge( $rcIdsForTitle, $rcIdsForPage ), $batchSize );
+		$rcIdBatches = array_chunk( $rcIdsForPage, $batchSize );
 		foreach ( $rcIdBatches as $rcIdBatch ) {
-			$dbw->delete( 'recentchanges', [ 'rc_id' => $rcIdBatch ], __METHOD__ );
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'recentchanges' )
+				->where( [ 'rc_id' => $rcIdBatch ] )
+				->caller( __METHOD__ )->execute();
 			if ( count( $rcIdBatches ) > 1 ) {
-				$lbFactory->commitAndWaitForReplication(
+				$dbProvider->commitAndWaitForReplication(
 					__METHOD__, $this->ticket, [ 'domain' => $dbw->getDomainID() ]
 				);
 			}
@@ -140,6 +138,3 @@ class LinksDeletionUpdate extends LinksUpdate implements EnqueueableDataUpdate {
 		];
 	}
 }
-
-/** @deprecated since 1.38 */
-class_alias( LinksDeletionUpdate::class, 'LinksDeletionUpdate' );

@@ -23,6 +23,8 @@
  * @since 1.22
  */
 
+use MediaWiki\Message\Message;
+
 /**
  * This class formats patrol log entries.
  *
@@ -59,6 +61,7 @@ class PatrolLogFormatter extends LogFormatter {
 			$revlink = htmlspecialchars( $revision );
 		}
 
+		// @phan-suppress-next-line SecurityCheck-XSS Unlikely positive, only if language format is bad
 		$params[3] = Message::rawParam( $revlink );
 
 		return $params;

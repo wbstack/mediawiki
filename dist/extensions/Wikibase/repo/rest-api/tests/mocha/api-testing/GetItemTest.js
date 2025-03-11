@@ -1,61 +1,80 @@
 'use strict';
 
-const { createEntity, createRedirectForItem, getLatestEditMetadata } = require( '../helpers/entityHelper' );
-const { RequestBuilder } = require( '../helpers/RequestBuilder' );
 const { assert, utils } = require( 'api-testing' );
-
-function newGetItemRequestBuilder( itemId ) {
-	return new RequestBuilder()
-		.withRoute( 'GET', '/entities/items/{item_id}' )
-		.withPathParam( 'item_id', itemId );
-}
-
-function makeEtag( ...revisionIds ) {
-	return revisionIds.map( ( revId ) => `"${revId}"` ).join( ',' );
-}
+const { expect } = require( '../helpers/chaiHelper' );
+const {
+	createRedirectForItem,
+	getLatestEditMetadata,
+	newStatementWithRandomStringValue,
+	createUniqueStringProperty,
+	getLocalSiteId,
+	createLocalSitelink
+} = require( '../helpers/entityHelper' );
+const { newGetItemRequestBuilder, newCreateItemRequestBuilder } = require( '../helpers/RequestBuilderFactory' );
+const { makeEtag } = require( '../helpers/httpHelper' );
+const { assertValidError } = require( '../helpers/responseValidator' );
 
 const germanLabel = 'a-German-label-' + utils.uniq();
 const englishLabel = 'an-English-label-' + utils.uniq();
 const englishDescription = 'an-English-description-' + utils.uniq();
 
-describe( 'GET /entities/items/{id}', () => {
+describe( newGetItemRequestBuilder().getRouteDescription(), () => {
 	let testItemId;
 	let testModified;
 	let testRevisionId;
+	let siteId;
+	let testStatementPropertyId;
+	let testStatement;
+	const linkedArticle = utils.title( 'Article-linked-to-test-item' );
 
 	function newValidRequestBuilderWithTestItem() {
 		return newGetItemRequestBuilder( testItemId ).assertValidRequest();
 	}
 
-	function assertValid200Response( response ) {
-		assert.equal( response.status, 200 );
-		assert.equal( response.body.id, testItemId );
-		assert.deepEqual( response.body.aliases, {} ); // expect {}, not []
-		assert.equal( response.header[ 'last-modified' ], testModified );
-		assert.equal( response.header.etag, makeEtag( testRevisionId ) );
-	}
-
 	before( async () => {
-		const createItemResponse = await createEntity( 'item', {
+		siteId = await getLocalSiteId();
+
+		testStatementPropertyId = ( await createUniqueStringProperty() ).body.id;
+		testStatement = newStatementWithRandomStringValue( testStatementPropertyId );
+
+		const createItemResponse = await newCreateItemRequestBuilder( {
 			labels: {
-				de: { language: 'de', value: germanLabel },
-				en: { language: 'en', value: englishLabel }
+				de: germanLabel,
+				en: englishLabel
 			},
-			descriptions: {
-				en: { language: 'en', value: englishDescription }
-			}
-		} );
-		testItemId = createItemResponse.entity.id;
+			descriptions: { en: englishDescription },
+			statements: { [ testStatementPropertyId ]: [ testStatement ] }
+		} ).makeRequest();
+		testItemId = createItemResponse.body.id;
+		await createLocalSitelink( testItemId, linkedArticle );
 
 		const testItemCreationMetadata = await getLatestEditMetadata( testItemId );
 		testModified = testItemCreationMetadata.timestamp;
 		testRevisionId = testItemCreationMetadata.revid;
 	} );
 
-	it( 'can GET an item with metadata', async () => {
+	it( 'can GET all item data including metadata', async () => {
 		const response = await newValidRequestBuilderWithTestItem().makeRequest();
 
-		assertValid200Response( response );
+		expect( response ).to.have.status( 200 );
+
+		assert.equal( response.body.id, testItemId );
+		assert.deepEqual( response.body.aliases, {} ); // expect {}, not []
+		assert.deepEqual( response.body.labels, {
+			de: germanLabel,
+			en: englishLabel
+		} );
+		assert.deepEqual( response.body.descriptions, { en: englishDescription } );
+
+		assert.deepEqual(
+			response.body.statements[ testStatementPropertyId ][ 0 ].value,
+			testStatement.value
+		);
+
+		assert.include( response.body.sitelinks[ siteId ].url, linkedArticle );
+
+		assert.equal( response.header[ 'last-modified' ], testModified );
+		assert.equal( response.header.etag, makeEtag( testRevisionId ) );
 	} );
 
 	it( 'can GET a partial item with single _fields param', async () => {
@@ -63,7 +82,7 @@ describe( 'GET /entities/items/{id}', () => {
 			.withQueryParam( '_fields', 'labels' )
 			.makeRequest();
 
-		assert.equal( response.status, 200 );
+		expect( response ).to.have.status( 200 );
 		assert.deepEqual( response.body, {
 			id: testItemId,
 			labels: {
@@ -80,7 +99,7 @@ describe( 'GET /entities/items/{id}', () => {
 			.withQueryParam( '_fields', 'labels,descriptions,aliases' )
 			.makeRequest();
 
-		assert.equal( response.status, 200 );
+		expect( response ).to.have.status( 200 );
 		assert.deepEqual( response.body, {
 			id: testItemId,
 			labels: {
@@ -98,36 +117,33 @@ describe( 'GET /entities/items/{id}', () => {
 
 	it( '400 error - bad request, invalid item ID', async () => {
 		const itemId = 'X123';
-		const response = await newGetItemRequestBuilder( itemId )
-			.makeRequest();
+		const response = await newGetItemRequestBuilder( itemId ).assertInvalidRequest().makeRequest();
 
-		assert.equal( response.status, 400 );
-		assert.header( response, 'Content-Language', 'en' );
-		assert.equal( response.body.code, 'invalid-item-id' );
-		assert.include( response.body.message, itemId );
+		assertValidError(
+			response,
+			400,
+			'invalid-path-parameter',
+			{ parameter: 'item_id' }
+		);
 	} );
 
 	it( '400 error - bad request, invalid field', async () => {
-		const itemId = 'Q123';
-		const response = await newGetItemRequestBuilder( itemId )
-			.withQueryParam( '_fields', 'unknown_field' )
+		const queryParamName = '_fields';
+		const response = await newGetItemRequestBuilder( 'Q123' )
+			.withQueryParam( queryParamName, 'unknown_field' )
 			.assertInvalidRequest()
 			.makeRequest();
 
-		assert.equal( response.status, 400 );
-		assert.header( response, 'Content-Language', 'en' );
-		assert.equal( response.body.code, 'invalid-field' );
-		assert.include( response.body.message, 'unknown_field' );
+		assertValidError( response, 400, 'invalid-query-parameter', { parameter: queryParamName } );
+		assert.include( response.body.message, queryParamName );
 	} );
 
 	it( '404 error - item not found', async () => {
 		const itemId = 'Q999999';
 		const response = await newGetItemRequestBuilder( itemId ).makeRequest();
 
-		assert.equal( response.status, 404 );
-		assert.header( response, 'Content-Language', 'en' );
-		assert.equal( response.body.code, 'item-not-found' );
-		assert.include( response.body.message, itemId );
+		assertValidError( response, 404, 'resource-not-found', { resource_type: 'item' } );
+		assert.strictEqual( response.body.message, 'The requested resource does not exist' );
 	} );
 
 	describe( 'redirects', () => {
@@ -140,10 +156,10 @@ describe( 'GET /entities/items/{id}', () => {
 		it( 'responds with a 308 including the redirect target location', async () => {
 			const response = await newGetItemRequestBuilder( redirectSourceId ).makeRequest();
 
-			assert.equal( response.status, 308 );
+			expect( response ).to.have.status( 308 );
 
 			const redirectLocation = new URL( response.headers.location );
-			assert.isTrue( redirectLocation.pathname.endsWith( `rest.php/wikibase/v0/entities/items/${testItemId}` ) );
+			assert.isTrue( redirectLocation.pathname.endsWith( `rest.php/wikibase/v1/entities/items/${testItemId}` ) );
 			assert.empty( redirectLocation.search );
 		} );
 
@@ -153,13 +169,10 @@ describe( 'GET /entities/items/{id}', () => {
 				.withQueryParam( '_fields', fields )
 				.makeRequest();
 
-			assert.equal( response.status, 308 );
+			expect( response ).to.have.status( 308 );
 
 			const redirectLocation = new URL( response.headers.location );
-			assert.equal(
-				redirectLocation.searchParams.get( '_fields' ),
-				fields
-			);
+			assert.equal( redirectLocation.searchParams.get( '_fields' ), fields );
 		} );
 
 	} );

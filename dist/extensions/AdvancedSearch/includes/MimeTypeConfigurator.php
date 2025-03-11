@@ -2,21 +2,15 @@
 
 namespace AdvancedSearch;
 
-use MimeAnalyzer;
+use Wikimedia\Mime\MimeAnalyzer;
 
 /**
  * @license GPL-2.0-or-later
  */
 class MimeTypeConfigurator {
 
-	/**
-	 * @var MimeAnalyzer
-	 */
-	private $mimeAnalyzer;
+	private MimeAnalyzer $mimeAnalyzer;
 
-	/**
-	 * @param MimeAnalyzer $mimeAnalyzer
-	 */
 	public function __construct( MimeAnalyzer $mimeAnalyzer ) {
 		$this->mimeAnalyzer = $mimeAnalyzer;
 	}
@@ -26,27 +20,17 @@ class MimeTypeConfigurator {
 	 *
 	 * @return string[] List of file extension => MIME type.
 	 */
-	public function getMimeTypes( array $fileExtensions ) {
+	public function getMimeTypes( array $fileExtensions ): array {
 		$mimeTypes = [];
 
 		foreach ( $fileExtensions as $ext ) {
-			$mimeType = $this->getFirstMimeTypeByFileExtension( $ext );
-			if ( !isset( $mimeTypes[$mimeType] ) ) {
-				$mimeTypes[$mimeType] = $ext;
+			$mimeType = $this->mimeAnalyzer->getMimeTypeFromExtensionOrNull( $ext );
+			if ( $mimeType ) {
+				$mimeTypes += [ $mimeType => $ext ];
 			}
 		}
 
 		return array_flip( $mimeTypes );
-	}
-
-	/**
-	 * Uses MimeAnalyzer to determine the mimetype of a given file extension
-	 *
-	 * @param string $fileExtension
-	 * @return string|null First mime type associated with the given file extension
-	 */
-	private function getFirstMimeTypeByFileExtension( $fileExtension ) {
-		return $this->mimeAnalyzer->getMimeTypeFromExtensionOrNull( $fileExtension );
 	}
 
 }

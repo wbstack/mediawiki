@@ -1,8 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
-			"AgnesAbah",
-			"Amire80"
+			"AgnesAbah"
 		]
 	},
 	"uls-desc": "Jé nwu éné éku kí téné ichí lugbó wéwé kpaí kí néké nwí chétins ichí ché",
@@ -72,5 +71,6 @@
 	"ext-uls-empty-state-header": "Íchí dó mó tañ",
 	"ext-uls-empty-state-desc": "Íchí dú dó mó abajoí tañ",
 	"ext-uls-empty-state-header-actions-available": "Íchí dò mò tañ. Dí étito manwù",
-	"ext-uls-empty-state-desc-actions-available": "Dí omí óla í té é fí amí ichí ómuné"
+	"ext-uls-empty-state-desc-actions-available": "Dí omí óla í té é fí amí ichí ómuné",
+	"ext-uls-add-languages-button-label": "Dí amí ichí manwu"
 }

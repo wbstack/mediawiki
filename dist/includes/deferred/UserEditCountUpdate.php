@@ -20,10 +20,14 @@
  * @file
  */
 
+namespace MediaWiki\Deferred;
+
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserIdentity;
+use RuntimeException;
 use Wikimedia\Assert\Assert;
+use Wikimedia\Rdbms\RawSQLValue;
 
 /**
  * Handles increment the edit count for a given set of users
@@ -41,7 +45,7 @@ class UserEditCountUpdate implements DeferrableUpdate, MergeableUpdate {
 	 * @param int $increment
 	 */
 	public function __construct( UserIdentity $user, $increment ) {
-		if ( !$user->isRegistered() ) {
+		if ( !$user->getId() ) {
 			throw new RuntimeException( "Got anonymous user" );
 		}
 		$this->infoByUser = [
@@ -69,24 +73,27 @@ class UserEditCountUpdate implements DeferrableUpdate, MergeableUpdate {
 	public function doUpdate() {
 		$mwServices = MediaWikiServices::getInstance();
 		$lb = $mwServices->getDBLoadBalancer();
-		$dbw = $lb->getConnectionRef( DB_PRIMARY );
+		$dbw = $lb->getConnection( DB_PRIMARY );
 		$editTracker = $mwServices->getUserEditTracker();
 		$fname = __METHOD__;
 
 		( new AutoCommitUpdate( $dbw, __METHOD__, function () use ( $lb, $dbw, $fname, $editTracker ) {
 			foreach ( $this->infoByUser as $userId => $info ) {
-				$dbw->update(
-					'user',
-					[ 'user_editcount=user_editcount+' . (int)$info->getIncrement() ],
-					[ 'user_id' => $userId, 'user_editcount IS NOT NULL' ],
-					$fname
-				);
+				$dbw->newUpdateQueryBuilder()
+					->update( 'user' )
+					->set( [
+						'user_editcount' => new RawSQLValue(
+							'user_editcount+' . (int)$info->getIncrement()
+						)
+					] )
+					->where( [ 'user_id' => $userId, $dbw->expr( 'user_editcount', '!=', null ) ] )
+					->caller( $fname )->execute();
 				// Lazy initialization check...
 				if ( $dbw->affectedRows() == 0 ) {
 					// The user_editcount is probably NULL (e.g. not initialized).
 					// Since this update runs after the new revisions were committed,
 					// wait for the replica DB to catch up so they will be counted.
-					$dbr = $lb->getConnectionRef( DB_REPLICA );
+					$dbr = $lb->getConnection( DB_REPLICA );
 					// If $dbr is actually the primary DB, then clearing the snapshot
 					// is harmless and waitForPrimaryPos() will just no-op.
 					$dbr->flushSnapshot( $fname );
@@ -103,3 +110,6 @@ class UserEditCountUpdate implements DeferrableUpdate, MergeableUpdate {
 		$hookRunner->onUserEditCountUpdate( array_values( $this->infoByUser ) );
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( UserEditCountUpdate::class, 'UserEditCountUpdate' );

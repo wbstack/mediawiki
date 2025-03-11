@@ -1,11 +1,13 @@
 /**
  * @license GPL-2.0-or-later
  */
+
 ( function ( wb ) {
 	'use strict';
 
 	var FormSerializer = require( '../serialization/FormSerializer.js' ),
-		getDeserializer = require( 'wikibase.lexeme.getDeserializer' );
+		getDeserializer = require( 'wikibase.lexeme.getDeserializer' ),
+		ENTITY_CHANGERS = wb.entityChangers;
 
 	/**
 	 * @constructor
@@ -40,7 +42,7 @@
 	 *
 	 * @class wikibase.lexeme.entityChangers.FormChanger
 	 */
-	$.extend( SELF.prototype, {
+	Object.assign( SELF.prototype, {
 
 		/**
 		 * @type {wikibase.api.RepoApi}
@@ -110,6 +112,12 @@
 			return this.saveNewFormData( serializedForm.representations, serializedForm.grammaticalFeatures );
 		},
 
+		_handleTempUserAndCreateSavedValueResult: function ( form, data ) {
+			var tempUserWatcher = new ENTITY_CHANGERS.TempUserWatcher();
+			tempUserWatcher.processApiResult( data );
+			return new ENTITY_CHANGERS.ValueChangeResult( form, tempUserWatcher );
+		},
+
 		saveChangedFormData: function ( formId, representations, grammaticalFeatures ) {
 			var self = this;
 
@@ -130,7 +138,7 @@
 			} ).then( function ( data ) {
 				var form = self.lexemeDeserializer.deserializeForm( data.form );
 				self.formData = self.formSerializer.serialize( form );
-				return form;
+				return self._handleTempUserAndCreateSavedValueResult( form, data );
 			} ).catch( function ( code, response ) {
 				throw convertPlainTextErrorsToRepoApiError( response.errors, 'save' );
 			} );
@@ -153,7 +161,7 @@
 				var form = self.lexemeDeserializer.deserializeForm( data.form );
 				self.revisionStore.setFormRevision( data.lastrevid, form.getId() );
 				self.formData = self.formSerializer.serialize( form );
-				return form;
+				return self._handleTempUserAndCreateSavedValueResult( form, data );
 			} ).catch( function ( code, response ) {
 				throw convertPlainTextErrorsToRepoApiError( response.errors, 'save' );
 			} );
@@ -161,6 +169,7 @@
 
 		remove: function ( form ) {
 			var deferred = $.Deferred();
+			var self = this;
 
 			this.api.post( {
 				action: 'wblremoveform',
@@ -170,7 +179,9 @@
 				bot: 0,
 				tags: this.getTags()
 			} )
-				.then( deferred.resolve )
+				.then( function ( data ) {
+					deferred.resolve( self._handleTempUserAndCreateSavedValueResult( null, data ) );
+				} )
 				.fail( function ( code, response ) {
 					deferred.reject( convertPlainTextErrorsToRepoApiError( response.errors, 'remove' ) );
 				} );

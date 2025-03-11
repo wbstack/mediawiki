@@ -22,11 +22,17 @@
  */
 
 class Cookie {
+	/** @var string */
 	protected $name;
+	/** @var string */
 	protected $value;
+	/** @var int|false */
 	protected $expires;
+	/** @var string|null */
 	protected $path;
+	/** @var string|null */
 	protected $domain;
+	/** @var bool */
 	protected $isSessionKey = true;
 	// TO IMPLEMENT  protected $secure
 	// TO IMPLEMENT? protected $maxAge (add onto expires)
@@ -48,7 +54,6 @@ class Cookie {
 	 *        expires A date string
 	 *        path    The path this cookie is used on
 	 *        domain  Domain this cookie is used on
-	 * @throws InvalidArgumentException
 	 */
 	public function set( $value, $attr ) {
 		$this->value = $value;
@@ -91,25 +96,20 @@ class Cookie {
 		// Don't allow a trailing dot or addresses without a or just a leading dot
 		if ( substr( $domain, -1 ) == '.' ||
 			count( $dc ) <= 1 ||
-			count( $dc ) == 2 && $dc[0] === ''
+			( count( $dc ) == 2 && $dc[0] === '' )
 		) {
 			return false;
 		}
 
 		// Only allow full, valid IP addresses
 		if ( preg_match( '/^[0-9.]+$/', $domain ) ) {
-			if ( count( $dc ) != 4 ) {
-				return false;
-			}
-
-			if ( ip2long( $domain ) === false ) {
+			if ( count( $dc ) !== 4 || ip2long( $domain ) === false ) {
 				return false;
 			}
 
 			if ( $originDomain == null || $originDomain == $domain ) {
 				return true;
 			}
-
 		}
 
 		// Don't allow cookies for "co.uk" or "gov.uk", etc, but allow "supermarket.uk"

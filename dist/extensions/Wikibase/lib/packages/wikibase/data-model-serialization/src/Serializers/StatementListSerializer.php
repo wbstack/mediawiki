@@ -1,11 +1,12 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\DataModel\Serializers;
 
 use Serializers\DispatchableSerializer;
 use Serializers\Exceptions\SerializationException;
 use Serializers\Exceptions\UnsupportedObjectException;
-use Serializers\Serializer;
 use Wikibase\DataModel\Statement\StatementList;
 
 /**
@@ -14,25 +15,13 @@ use Wikibase\DataModel\Statement\StatementList;
  * @license GPL-2.0-or-later
  * @author Bene* < benestar.wikimedia@gmail.com >
  */
-class StatementListSerializer implements DispatchableSerializer {
+class StatementListSerializer extends MapSerializer implements DispatchableSerializer {
 
-	/**
-	 * @var Serializer
-	 */
-	private $statementSerializer;
+	private StatementSerializer $statementSerializer;
 
-	/**
-	 * @var bool
-	 */
-	private $useObjectsForMaps;
-
-	/**
-	 * @param Serializer $statementSerializer
-	 * @param bool $useObjectsForMaps
-	 */
-	public function __construct( Serializer $statementSerializer, $useObjectsForMaps ) {
+	public function __construct( StatementSerializer $statementSerializer, bool $useObjectsForEmptyMaps ) {
+		parent::__construct( $useObjectsForEmptyMaps );
 		$this->statementSerializer = $statementSerializer;
-		$this->useObjectsForMaps = $useObjectsForMaps;
 	}
 
 	/**
@@ -62,10 +51,10 @@ class StatementListSerializer implements DispatchableSerializer {
 			);
 		}
 
-		return $this->getSerialized( $object );
+		return $this->serializeMap( $this->generateSerializedArrayRepresentation( $object ) );
 	}
 
-	private function getSerialized( StatementList $statementList ) {
+	protected function generateSerializedArrayRepresentation( StatementList $statementList ): array {
 		$serialization = [];
 
 		foreach ( $statementList->toArray() as $statement ) {
@@ -78,11 +67,6 @@ class StatementListSerializer implements DispatchableSerializer {
 			$serialization[$idSerialization][] = $this->statementSerializer->serialize( $statement );
 		}
 
-		if ( $this->useObjectsForMaps ) {
-			$serialization = (object)$serialization;
-		}
-
 		return $serialization;
 	}
-
 }

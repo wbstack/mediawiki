@@ -4,8 +4,11 @@ namespace Elastica;
 
 use Elastica\Bulk\Action;
 use Elastica\Bulk\ResponseSet;
+use Elastica\Exception\Bulk\ResponseException as BulkResponseException;
+use Elastica\Exception\ClientException;
 use Elastica\Exception\ConnectionException;
 use Elastica\Exception\InvalidException;
+use Elastica\Exception\ResponseException;
 use Elastica\Script\AbstractScript;
 use Elasticsearch\Endpoints\AbstractEndpoint;
 use Elasticsearch\Endpoints\ClosePointInTime;
@@ -84,6 +87,10 @@ class Client
 
     /**
      * Get current version.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function getVersion(): string
     {
@@ -201,7 +208,11 @@ class Client
      *
      * @param array|Document[] $docs Array of Elastica\Document
      *
-     * @throws InvalidException If docs is empty
+     * @throws InvalidException      If docs is empty
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     * @throws BulkResponseException
      */
     public function updateDocuments(array $docs, array $requestParams = []): ResponseSet
     {
@@ -230,7 +241,11 @@ class Client
      *
      * @param array|Document[] $docs Array of Elastica\Document
      *
-     * @throws InvalidException If docs is empty
+     * @throws InvalidException      If docs is empty
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     * @throws BulkResponseException
      */
     public function addDocuments(array $docs, array $requestParams = []): ResponseSet
     {
@@ -258,11 +273,15 @@ class Client
      * @param array                         $options array of query params to use for query. For possible options check es api
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function updateDocument($id, $data, $index, array $options = []): Response
     {
         $endpoint = new Update();
-        $endpoint->setID($id);
+        $endpoint->setId($id);
         $endpoint->setIndex($index);
 
         if ($data instanceof AbstractScript) {
@@ -291,7 +310,7 @@ class Client
             $requestData = $data;
         }
 
-        //If an upsert document exists
+        // If an upsert document exists
         if ($data instanceof AbstractScript || $data instanceof Document) {
             if ($data->hasUpsert()) {
                 $requestData['upsert'] = $data->getUpsert()->getData();
@@ -319,6 +338,10 @@ class Client
      * @param array|Document[] $docs
      *
      * @throws InvalidException
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     * @throws BulkResponseException
      */
     public function deleteDocuments(array $docs, array $requestParams = []): ResponseSet
     {
@@ -361,7 +384,7 @@ class Client
      */
     public function connect()
     {
-        return $this->_initConnections();
+        $this->_initConnections();
     }
 
     /**
@@ -385,7 +408,7 @@ class Client
     }
 
     /**
-     * @throws \Elastica\Exception\ClientException
+     * @throws ClientException
      *
      * @return Connection
      */
@@ -432,6 +455,10 @@ class Client
      * @param bool|string  $routing Optional routing key for all ids
      *
      * @throws InvalidException
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     * @throws BulkResponseException
      */
     public function deleteIds(array $ids, $index, $routing = false): ResponseSet
     {
@@ -474,8 +501,11 @@ class Client
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
      *
-     * @throws \Elastica\Exception\ResponseException
+     * @throws ResponseException
      * @throws InvalidException
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws BulkResponseException
      */
     public function bulk(array $params): ResponseSet
     {
@@ -501,7 +531,9 @@ class Client
      * @param array        $query       OPTIONAL Query params
      * @param string       $contentType Content-Type sent with this request
      *
-     * @throws Exception\ClientException|Exception\ConnectionException
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function request(string $path, string $method = Request::GET, $data = [], array $query = [], string $contentType = Request::DEFAULT_CONTENT_TYPE): Response
     {
@@ -538,6 +570,10 @@ class Client
 
     /**
      * Makes calls to the elasticsearch server with usage official client Endpoint.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function requestEndpoint(AbstractEndpoint $endpoint): Response
     {
@@ -555,6 +591,10 @@ class Client
      * @param array $args OPTIONAL Optional arguments
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-forcemerge.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function forcemergeAll($args = []): Response
     {
@@ -568,6 +608,10 @@ class Client
      * Closes the given PointInTime.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/point-in-time-api.html#close-point-in-time-api
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function closePointInTime(string $pointInTimeId): Response
     {
@@ -581,6 +625,10 @@ class Client
      * Refreshes all search indices.
      *
      * @see https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-refresh.html
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function refreshAll(): Response
     {

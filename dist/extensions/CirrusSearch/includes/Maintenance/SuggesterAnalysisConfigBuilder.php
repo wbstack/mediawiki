@@ -46,7 +46,7 @@ class SuggesterAnalysisConfigBuilder extends AnalysisConfigBuilder {
 			// Use ICU Folding if the plugin is available and activated in the config
 			$folding_type = [ 'type' => 'icu_folding' ];
 			$unicodeSetFilter = $this->getICUSetFilter( $language );
-			if ( !empty( $unicodeSetFilter ) ) {
+			if ( $unicodeSetFilter !== null ) {
 				$folding_type['unicodeSetFilter'] = $unicodeSetFilter;
 			}
 		}
@@ -68,9 +68,9 @@ class SuggesterAnalysisConfigBuilder extends AnalysisConfigBuilder {
 						',=>\u0020', // useful for "Lastname, Firstname"
 						'"=>\u0020', // " certainly phrase search?
 						'-=>\u0020', // useful for hyphenated names
-						"'=>\u0020",       // Useful for finding names
-						'\u2019=>\u0020',  // Unicode right single quote
-						'\u02BC=>\u0020',  // Unicode modifier letter apostrophe
+						"'=>\u0020", // Useful for finding names
+						'\u2019=>\u0020', // Unicode right single quote
+						'\u02BC=>\u0020', // Unicode modifier letter apostrophe
 						// Not sure about ( and )...
 						// very useful to search for :
 						// "john smith explo" instead of "john smith (expl"
@@ -226,43 +226,43 @@ class SuggesterAnalysisConfigBuilder extends AnalysisConfigBuilder {
 		$config['filter']['stop_filter']['stopwords'] = $defaultStopSet;
 
 		switch ( $this->getDefaultTextAnalyzerType( $language ) ) {
-		// Please add languages in alphabetical order.
-		case 'arabic':
-			$config[ 'char_filter' ][ 'arabic_numeral_map' ] = [
-				// T117217 fold Eastern Arabic Numerals (٠۱۲۳...) into Western (0123...)
-				'type' => 'mapping',
-				'mappings' => [
-					'\u0660=>0', '\u0661=>1', '\u0662=>2',
-					'\u0663=>3', '\u0664=>4', '\u0665=>5',
-					'\u0666=>6', '\u0667=>7', '\u0668=>8',
-					'\u0669=>9',
-				],
-			];
+			// Please add languages in alphabetical order.
+			case 'arabic':
+				$config[ 'char_filter' ][ 'arabic_numeral_map' ] = [
+					// T117217 fold Eastern Arabic Numerals (٠۱۲۳...) into Western (0123...)
+					'type' => 'mapping',
+					'mappings' => [
+						'\u0660=>0', '\u0661=>1', '\u0662=>2',
+						'\u0663=>3', '\u0664=>4', '\u0665=>5',
+						'\u0666=>6', '\u0667=>7', '\u0668=>8',
+						'\u0669=>9',
+					],
+				];
 
-			// add arabic_numeral_map to plain and copy plain to plain_search
-			$config[ 'analyzer' ][ 'plain' ][ 'char_filter' ][] = 'arabic_numeral_map';
-			$config[ 'analyzer' ][ 'plain_search' ] = $config[ 'analyzer' ][ 'plain' ];
-			break;
-		case 'russian':
-			$config[ 'char_filter' ][ 'russian_diacritic_map' ] = [
-				// T117217 fold Eastern Arabic Numerals (٠۱۲۳...) into Western (0123...)
-				'type' => 'mapping',
-				'mappings' => [
-					// T102298 ignore combining acute / stress accents
-					'\u0301=>',
-					// T124592 fold ё=>е and Ё=>Е, precomposed or with combining diacritic
-					'\u0451=>\u0435',
-					'\u0401=>\u0415',
-					'\u0435\u0308=>\u0435',
-					'\u0415\u0308=>\u0415',
+				// add arabic_numeral_map to plain and copy plain to plain_search
+				$config[ 'analyzer' ][ 'plain' ][ 'char_filter' ][] = 'arabic_numeral_map';
+				$config[ 'analyzer' ][ 'plain_search' ] = $config[ 'analyzer' ][ 'plain' ];
+				break;
+			case 'russian':
+				$config[ 'char_filter' ][ 'russian_diacritic_map' ] = [
+					// T117217 fold Eastern Arabic Numerals (٠۱۲۳...) into Western (0123...)
+					'type' => 'mapping',
+					'mappings' => [
+						// T102298 ignore combining acute / stress accents
+						'\u0301=>',
+						// T124592 fold ё=>е and Ё=>Е, precomposed or with combining diacritic
+						'\u0451=>\u0435',
+						'\u0401=>\u0415',
+						'\u0435\u0308=>\u0435',
+						'\u0415\u0308=>\u0415',
 
-				],
-			];
+					],
+				];
 
-			// add arabic_numeral_map to plain and copy plain to plain_search
-			$config[ 'analyzer' ][ 'plain' ][ 'char_filter' ][] = 'russian_diacritic_map';
-			$config[ 'analyzer' ][ 'plain_search' ] = $config[ 'analyzer' ][ 'plain' ];
-			break;
+				// add arabic_numeral_map to plain and copy plain to plain_search
+				$config[ 'analyzer' ][ 'plain' ][ 'char_filter' ][] = 'russian_diacritic_map';
+				$config[ 'analyzer' ][ 'plain_search' ] = $config[ 'analyzer' ][ 'plain' ];
+				break;
 		}
 
 		if ( $this->isIcuAvailable() ) {
@@ -291,9 +291,7 @@ class SuggesterAnalysisConfigBuilder extends AnalysisConfigBuilder {
 	 * @return array the analysis config
 	 */
 	public function buildConfig( $language = null ) {
-		if ( $language === null ) {
-			$language = $this->defaultLanguage;
-		}
+		$language ??= $this->defaultLanguage;
 		return $this->customize( $this->defaults( $language ), $language );
 	}
 

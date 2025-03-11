@@ -114,7 +114,7 @@ class ConfirmAccountPreAuthenticationProvider extends AbstractPreAuthenticationP
 		);
 
 		# Update the queue to reflect approval of this user
-		list( $status, $msg ) = $submission->submit( RequestContext::getMain() );
+		[ $status, $msg ] = $submission->submit( RequestContext::getMain() );
 		if ( $status !== true ) {
 			throw new ErrorPageError( 'createacct-error', new RawMessage( $msg ) );
 		}

@@ -1,6 +1,9 @@
 <?php
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\Parsoid\ParsoidParser;
+use MediaWiki\Title\Title;
 
 /**
  * Parse some wikitext.
@@ -52,7 +55,9 @@ use MediaWiki\MediaWikiServices;
  * @license GPL-2.0-or-later
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to parse some wikitext.
@@ -60,6 +65,7 @@ require_once __DIR__ . '/Maintenance.php';
  * @ingroup Maintenance
  */
 class CLIParser extends Maintenance {
+	/** @var Parser|ParsoidParser */
 	protected $parser;
 
 	public function __construct() {
@@ -72,6 +78,7 @@ class CLIParser extends Maintenance {
 			true
 		);
 		$this->addArg( 'file', 'File containing wikitext (Default: stdin)', false );
+		$this->addOption( 'parsoid', 'Whether to use Parsoid', false, false, 'p' );
 	}
 
 	public function execute() {
@@ -84,7 +91,16 @@ class CLIParser extends Maintenance {
 	 * @return string HTML Rendering
 	 */
 	public function render( $wikitext ) {
-		return $this->parse( $wikitext )->getText( [ 'wrapperDivClass' => '' ] );
+		$options = ParserOptions::newFromAnon();
+		$options->setOption( 'enableLimitReport', false );
+		$po = $this->parser->parse(
+			$wikitext,
+			$this->getTitle(),
+			$options
+		);
+		// TODO T371008 consider if using the Content framework makes sense instead of creating the pipeline
+		$pipeline = $this->getServiceContainer()->getDefaultOutputPipeline();
+		return $pipeline->run( $po, $options, [ 'wrapperDivClass' => '' ] )->getContentHolderText();
 	}
 
 	/**
@@ -105,7 +121,12 @@ class CLIParser extends Maintenance {
 	}
 
 	protected function initParser() {
-		$this->parser = MediaWikiServices::getInstance()->getParserFactory()->create();
+		$services = $this->getServiceContainer();
+		if ( $this->hasOption( 'parsoid' ) ) {
+			$this->parser = $services->getParsoidParserFactory()->create();
+		} else {
+			$this->parser = $services->getParserFactory()->create();
+		}
 	}
 
 	/**
@@ -120,21 +141,9 @@ class CLIParser extends Maintenance {
 
 		return Title::newFromText( $title );
 	}
-
-	/**
-	 * @param string $wikitext Wikitext to parse
-	 * @return ParserOutput
-	 */
-	protected function parse( $wikitext ) {
-		$options = ParserOptions::newFromAnon();
-		$options->setOption( 'enableLimitReport', false );
-		return $this->parser->parse(
-			$wikitext,
-			$this->getTitle(),
-			$options
-		);
-	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = CLIParser::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

@@ -1,12 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Baba Ayɛ'ɛra",
-			"Akakiiri"
+			"Akakiiri",
+			"Baba Ayɛ'ɛra"
 		]
 	},
 	"echo-desc": "Nyuɔ sɛka n bo'ori yeleitɛ la lahebaari tiirɛ zi'an",
 	"prefs-echo": "Tiirɛ duma",
+	"prefs-description-echo": "Loe fum n boti tiirɛ sɛka buuri ti fu tara {{GENDER:|you}} la fum n wan yo'e ba se'em.",
 	"prefs-emailsettings": "imeeli yɔ'ɔ",
 	"prefs-echosubscriptions": "Tiɛ mam yeleitɔ dina wa",
 	"prefs-echocrosswiki": "Wiki n pue tu'usɛ taaba lahebaari tiirɛ",
@@ -31,6 +32,7 @@
 	"echo-log": "Nɛrekuuŋɔ ki'a",
 	"echo-new-messages": "Fu tari la tɔgum pɛgepaalɛ lahebaari",
 	"echo-category-title-edit-user-talk": "{{PLURAL:$1|Edit|Edits}} mam tuuma tɔgum pɛgerɛ",
+	"echo-category-title-edit-user-page": "{{PLURAL:$1|Edit|Edits}} mam tuuma pɛgerɛ",
 	"echo-category-title-article-linked": "Pɛgerɛ {{PLURAL:$1|link|links}}",
 	"echo-category-title-reverted": "Demese {{PLURAL:$1|revert|reverts}}",
 	"echo-category-title-mention": "{{PLURAL:$1|Mention|Mentions}}",
@@ -47,6 +49,7 @@
 	"echo-category-title-watchlist": "Demese la fu bisɛ pɛgerɛ",
 	"echo-category-title-minor-watchlist": "Demese fii la fu bisɛ pɛgerɛ",
 	"echo-pref-tooltip-edit-user-talk": "Tiɛ mam bɛra san demese mam tuuma tɔgum pɛgerɛ",
+	"echo-pref-tooltip-edit-user-page": "Tiɛ mam nɛra san demese mam tuuma pɛgerɛ",
 	"notifications": "Lahebaari tiirɛ",
 	"tooltip-pt-notifications-alert": "{{GENDER:|Your}} tiirɛ duma",
 	"tooltip-pt-notifications-notice": "{{GENDER:|Your}} tiirɛ",
@@ -58,8 +61,10 @@
 	"notification-link-text-view-mention-failure": "{{PLURAL\n:$1|View mention|View mentions}}",
 	"notification-link-text-view-changes": "{{GENDER:$1|View}} changes",
 	"notification-link-text-view-page": "Bisɛ pɛgerɛ",
+	"notification-header-edit-user-page": "$1 {{GENDER:$2|edited}} <strong>{{GENDER:$3|your}} user page</strong>.",
 	"notification-header-edit-user-talk": "$1 {{GENDER:$2|left}} a message on <strong>{{GENDER:$3|your}} talk page</strong>.",
 	"notification-header-edit-user-talk-with-section": "$1 {{GENDER:$2|left}} a message on <strong>{{GENDER:$3|your}} talk page</strong> in \"<strong>$4</strong>\".",
+	"notification-compact-header-edit-user-page": "$1 {{GENDER:$2|edited}} {{GENDER:$3|your}} user page",
 	"notification-compact-header-edit-user-talk": "$1 {{GENDER:$2|left}} {{GENDER:$3|you}} a message",
 	"notification-compact-header-edit-user-talk-with-section": "$1 {{GENDER:$2|left}} {{GENDER:$3|you}} a message in \"<strong>$4</strong>\".",
 	"notification-header-page-linked": "A link was made from <strong>$4</strong> to <strong>$3</strong>.",
@@ -110,6 +115,7 @@
 	"notification-link-article-reminder": "Bisɛ pɛgerɛ",
 	"notification-header-reverted": "Your {{PLURAL:$4|edit on <strong>$3</strong> was|edits on <strong>$3</strong> were}} {{GENDER:$2|reverted\n}}.",
 	"notification-header-emailuser": "$1 {{GENDER:$2|sent}} you an email.",
+	"notification-edit-user-page-email-subject": "$1 {{GENDER:$2|edited}} {{GENDER:$3|your}} user page on {{SITENAME}}",
 	"notification-edit-talk-page-email-subject2": "$1 {{GENDER:$2|left}} {{GENDER:$3|you}} a message on {{SITENAME}}",
 	"notification-page-linked-email-subject": "A page {{GENDER:$3|you}} created was linked\n on {{SITENAME}}",
 	"notification-reverted-email-subject2": "{{GENDER:$3|Your}} {{PLURAL:$4|edit was|edits were}} {{GENDER:$2|reverted\n}} on {{SITENAME}}",
@@ -136,5 +142,7 @@
 	"echo-notification-notice-text-only": "'Notices'",
 	"echo-overlay-link": "'All notifications'",
 	"echo-overlay-title": "<b>Notifications\n</b>",
-	"echo-mark-all-as-read-confirmation": "$1 {{PLURAL:$1|notification|notifications}} marked\n as read"
+	"echo-mark-all-as-read": "Mark {{PLURAL:$1|all}} as read",
+	"echo-mark-all-as-read-confirmation": "$1 {{PLURAL:$1|notification|notifications}} marked\n as read",
+	"echo-mark-wiki-as-read": "Mark {{PLURAL:$2|all}} as read in selected wiki\n: $1"
 }

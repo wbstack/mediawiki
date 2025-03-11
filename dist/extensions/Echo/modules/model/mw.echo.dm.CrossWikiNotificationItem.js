@@ -9,7 +9,7 @@
 	 * @constructor
 	 * @param {number} id Notification id
 	 * @param {Object} [config] Configuration object
-	 * @cfg {number} count The initial anticipated count of notifications through all
+	 * @param {number} config.count The initial anticipated count of notifications through all
 	 *  of the sources.
 	 */
 	mw.echo.dm.CrossWikiNotificationItem = function MwEchoDmCrossWikiNotificationItem( id, config ) {
@@ -32,10 +32,10 @@
 	/* Events */
 
 	/**
-	 * @event discard
-	 * @param {string} name The symbolic name for the list model that was discarded
-	 *
 	 * A sub list has been discarded
+	 *
+	 * @event mw.echo.dm.CrossWikiNotificationItem#discard
+	 * @param {string} name The symbolic name for the list model that was discarded
 	 */
 
 	/* Methods */
@@ -44,7 +44,7 @@
 	 * Respond to list being removed from the cross-wiki bundle.
 	 *
 	 * @param {mw.echo.dm.NotificationGroupsList} sourceModel The source model that was removed
-	 * @fires discard
+	 * @fires mw.echo.dm.CrossWikiNotificationItem#discard
 	 */
 	mw.echo.dm.CrossWikiNotificationItem.prototype.onListDiscard = function ( sourceModel ) {
 		this.emit( 'discard', sourceModel.getName() );
@@ -65,11 +65,10 @@
 	 * @return {string[]} Source names
 	 */
 	mw.echo.dm.CrossWikiNotificationItem.prototype.getSourceNames = function () {
-		var i,
-			sourceNames = [],
+		const sourceNames = [],
 			sourceLists = this.list.getItems();
 
-		for ( i = 0; i < sourceLists.length; i++ ) {
+		for ( let i = 0; i < sourceLists.length; i++ ) {
 			sourceNames.push( sourceLists[ i ].getName() );
 		}
 
@@ -103,12 +102,11 @@
 	 * @return {boolean} There are unseen items
 	 */
 	mw.echo.dm.CrossWikiNotificationItem.prototype.hasUnseen = function () {
-		var i, j, items,
-			sourceLists = this.getList().getItems();
+		const sourceLists = this.getList().getItems();
 
-		for ( i = 0; i < sourceLists.length; i++ ) {
-			items = sourceLists[ i ].getItems();
-			for ( j = 0; j < items.length; j++ ) {
+		for ( let i = 0; i < sourceLists.length; i++ ) {
+			const items = sourceLists[ i ].getItems();
+			for ( let j = 0; j < items.length; j++ ) {
 				if ( !items[ j ].isSeen() ) {
 					return true;
 				}
@@ -124,8 +122,8 @@
 	 * @param {number} timestamp New seen timestamp
 	 */
 	mw.echo.dm.CrossWikiNotificationItem.prototype.updateSeenState = function ( timestamp ) {
-		this.getList().getItems().forEach( function ( source ) {
-			source.getItems().forEach( function ( notification ) {
+		this.getList().getItems().forEach( ( source ) => {
+			source.getItems().forEach( ( notification ) => {
 				notification.toggleSeen(
 					notification.isRead() || notification.getTimestamp() < timestamp
 				);
@@ -139,8 +137,8 @@
 	 * @return {mw.echo.dm.NotificationItem[]} All items across all sources
 	 */
 	mw.echo.dm.CrossWikiNotificationItem.prototype.getItems = function () {
-		var notifications = [];
-		this.list.getItems().forEach( function ( sourceList ) {
+		let notifications = [];
+		this.list.getItems().forEach( ( sourceList ) => {
 			notifications = notifications.concat( sourceList.getItems() );
 		} );
 

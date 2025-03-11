@@ -68,5 +68,6 @@
 	"ext-uls-setlang-cancel": "Сольлго бәәх",
 	"ext-uls-actions-menu-language-settings-item-label": "Келнә тохруллһиг неех",
 	"ext-uls-empty-state-header": "Келмүд одахн уга",
-	"ext-uls-empty-state-header-actions-available": "Келмүд уга. Шиниг немхий?"
+	"ext-uls-empty-state-header-actions-available": "Келмүд уга. Шиниг немхий?",
+	"ext-uls-add-languages-button-label": "Кел немх"
 }

@@ -4,6 +4,12 @@
  *
  * @ingroup Maintenance
  */
+
+use MediaWiki\Extension\Notifications\DbFactory;
+use MediaWiki\Extension\Notifications\NotifUser;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\User\User;
+
 require_once getenv( 'MW_INSTALL_PATH' ) !== false
 	? getenv( 'MW_INSTALL_PATH' ) . '/maintenance/Maintenance.php'
 	: __DIR__ . '/../../../maintenance/Maintenance.php';
@@ -31,10 +37,8 @@ class RecomputeNotifCounts extends Maintenance {
 	}
 
 	public function execute() {
-		$dbFactory = MWEchoDbFactory::newFromDefault();
-		$dbwEcho = $dbFactory->getEchoDb( DB_PRIMARY );
+		$dbFactory = DbFactory::newFromDefault();
 		$dbrEcho = $dbFactory->getEchoDb( DB_REPLICA );
-		$dbr = wfGetDB( DB_REPLICA );
 
 		$userIDs = $this->getOption( 'user-ids' );
 		$userIDs = $userIDs ? explode( ',', $userIDs ) : null;
@@ -63,7 +67,9 @@ class RecomputeNotifCounts extends Maintenance {
 			$userIterator->setCaller( __METHOD__ );
 		} else {
 			$userQuery = User::getQueryInfo();
-			$userIterator = new BatchRowIterator( $dbr, $userQuery['tables'], 'user_id', $this->getBatchSize() );
+			$userIterator = new BatchRowIterator(
+				$this->getReplicaDB(), $userQuery['tables'], 'user_id', $this->getBatchSize()
+			);
 			$userIterator->setFetchColumns( $userQuery['fields'] );
 			$userIterator->addJoinConditions( $userQuery['joins'] );
 			$userIterator->setCaller( __METHOD__ );
@@ -77,12 +83,12 @@ class RecomputeNotifCounts extends Maintenance {
 				} else {
 					$user = User::newFromId( is_object( $rowOrID ) ? $rowOrID->notification_user : $rowOrID );
 				}
-				$notifUser = MWEchoNotifUser::newFromUser( $user );
+				$notifUser = NotifUser::newFromUser( $user );
 				$notifUser->resetNotificationCount();
 			}
 			$count += count( $batch );
 			$this->output( "$count users' counts recomputed.\n" );
-			$dbFactory->waitForReplicas();
+			$this->waitForReplication();
 		}
 	}
 }

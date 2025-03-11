@@ -49,16 +49,8 @@ class ChangeOpReferenceRemove extends ChangeOpBase {
 		$this->referenceHash = $referenceHash;
 	}
 
-	/**
-	 * @see ChangeOp::apply()
-	 *
-	 * @param EntityDocument $entity
-	 * @param Summary|null $summary
-	 *
-	 * @throws InvalidArgumentException
-	 * @throws ChangeOpException
-	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	/** @inheritDoc */
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		if ( !( $entity instanceof StatementListProvider ) ) {
 			throw new InvalidArgumentException( '$entity must be a StatementListProvider' );
 		}
@@ -88,7 +80,7 @@ class ChangeOpReferenceRemove extends ChangeOpBase {
 	 *
 	 * @throws ChangeOpException
 	 */
-	protected function removeReference( ReferenceList $references, Summary $summary = null ) {
+	protected function removeReference( ReferenceList $references, ?Summary $summary ) {
 		if ( !$references->hasReferenceHash( $this->referenceHash ) ) {
 			throw new ChangeOpException( "Reference with hash $this->referenceHash does not exist" );
 		}

@@ -29,7 +29,7 @@ class LegacySnakListDeserializerTest extends \PHPUnit\Framework\TestCase {
 		$this->deserializer = new LegacySnakListDeserializer( $snakDeserializer );
 	}
 
-	public function invalidSerializationProvider() {
+	public static function invalidSerializationProvider() {
 		return [
 			[ null ],
 			[ [ null ] ],
@@ -68,7 +68,7 @@ class LegacySnakListDeserializerTest extends \PHPUnit\Framework\TestCase {
 			[
 				'somevalue',
 				1337,
-			]
+			],
 		];
 
 		$this->assertEquals(

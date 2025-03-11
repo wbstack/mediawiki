@@ -4,9 +4,9 @@
 			"Lloffiwr",
 			"Muddyb",
 			"Muddyb Blast Producer",
+			"Wangombe",
 			"Xð",
-			"Yasen igra",
-			"Wangombe"
+			"Yasen igra"
 		]
 	},
 	"uls-desc": "Humpa mtumiaji njia kadhaa za kuchagua lugha na kurekebisha mipangilio ya lugha",
@@ -70,7 +70,6 @@
 	"ext-uls-setlang-heading": "Badilisha lugha ya kiolesura",
 	"ext-uls-setlang-accept": "Kubali mabadiliko",
 	"ext-uls-setlang-cancel": "Ghairi",
-	"ext-uls-actions-menu-header": "Chaguo zaidi",
 	"ext-uls-actions-menu-language-settings-item-label": "Fungua mipangilio ya lugha",
 	"ext-uls-empty-state-header": "Hakuna lugha bado",
 	"ext-uls-empty-state-desc": "Hakuna lugha zinazopatikana kwa sasa",

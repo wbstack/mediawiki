@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 1.8.2
+
+- Fix deprecation warnings in PHP 8.4
+
+## 1.8.1
+
+- Fix error handling in Stream::getContents()
+
+## 1.8.0
+
+- Deprecate HttplugFactory, use Psr17Factory instead
+- Make depencendy on php-http/message-factory optional
+
+## 1.7.0
+
+- Bump to PHP 7.2 minimum
+- Allow psr/http-message v2
+- Use copy-on-write for streams created from strings
+
 ## 1.6.1
 
 - Security fix: CVE-2023-29197

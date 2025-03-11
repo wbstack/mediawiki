@@ -1,8 +1,0 @@
-{
-	"@metadata": {
-		"authors": [
-			"Sagan"
-		]
-	},
-	"auth_remoteuser-desc": "Үҙгәреүсән мөхиттән ҡулланыусылар системаһына автоматик инеүҙе башҡара <code>REMOTE_USER</code>"
-}

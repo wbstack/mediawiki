@@ -23,7 +23,6 @@
 
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use Wikimedia\RequestTimeout\TimeoutException;
 
 /**
  * Handler for Tiff images.
@@ -34,7 +33,7 @@ class TiffHandler extends ExifBitmapHandler {
 	/**
 	 * TIFF files over 10M are considered expensive to thumbnail
 	 */
-	private const EXPENSIVE_SIZE_LIMIT = 10485760;
+	private const EXPENSIVE_SIZE_LIMIT = 10_485_760;
 
 	/**
 	 * Conversion to PNG for inline display can be disabled here...
@@ -86,7 +85,7 @@ class TiffHandler extends ExifBitmapHandler {
 			$meta = BitmapMetadataHandler::Tiff( $filename );
 			if ( !is_array( $meta ) ) {
 				// This should never happen, but doesn't hurt to be paranoid.
-				throw new MWException( 'Metadata array is not an array' );
+				throw new InvalidTiffException( 'Metadata array is not an array' );
 			}
 			$info = [
 				'width' => $meta['ImageWidth'] ?? 0,
@@ -98,9 +97,7 @@ class TiffHandler extends ExifBitmapHandler {
 				$info['metadata'] = $meta;
 			}
 			return $info;
-		} catch ( TimeoutException $e ) {
-			throw $e;
-		} catch ( Exception $e ) {
+		} catch ( InvalidTiffException $e ) {
 			// BitmapMetadataHandler throws an exception in certain exceptional
 			// cases like if file does not exist.
 			wfDebug( __METHOD__ . ': ' . $e->getMessage() );

@@ -13,9 +13,9 @@
 		this.shown = false;
 	}
 
-	ActionsMenu.template = '<div class="uls-menu uls-language-actions-dialog">' +
+	ActionsMenu.template = '<div class="uls-menu uls-language-actions-dialog notheme skin-invert">' +
 			'<div class="uls-language-actions-title">' +
-				'<button class="mw-ui-button mw-ui-quiet uls-language-actions-close"></button>' +
+				'<button class="cdx-button cdx-button--weight-quiet uls-language-actions-close"></button>' +
 				'<span> <strong></strong> </span>' +
 			'</div>' +
 			'<div class="uls-language-action-items"></div>' +
@@ -77,7 +77,7 @@
 
 		i18n: function () {
 			this.$template.find( '.uls-language-actions-title strong' )
-				.text( $.i18n( 'ext-uls-actions-menu-header' ) );
+				.text( $.i18n( 'ext-uls-add-languages-button-label' ) );
 		},
 
 		hide: function () {

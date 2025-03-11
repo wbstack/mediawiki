@@ -3,7 +3,7 @@
 declare( strict_types = 1 );
 namespace Wikibase\Lib\Formatters;
 
-use Html;
+use MediaWiki\Html\Html;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityTitleTextLookup;
 use Wikibase\Lib\Store\EntityUrlLookup;
@@ -49,7 +49,7 @@ class NonExistingEntityIdHtmlBrokenLinkFormatter extends NonExistingEntityIdHtml
 				$this->entityTitleTextLookup->getPrefixedText( $entityId )
 			)->text(),
 			'href' => $this->entityUrlLookup->getLinkUrl( $entityId ),
-			'class' => 'new'
+			'class' => 'new',
 		];
 		$messageSection = $this->getUndefinedInfoMessage( $entityId );
 		return Html::element( 'a', $attributes, $entityId->getSerialization() ) . $messageSection;

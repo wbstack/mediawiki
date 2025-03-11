@@ -4,19 +4,18 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Hooks;
 
-use Content;
-use JobQueueGroup;
+use JobQueueError;
+use MediaWiki\Content\Content;
 use MediaWiki\Hook\PageMoveCompleteHook;
 use MediaWiki\JobQueue\JobQueueGroupFactory;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\Page\Hook\ArticleDeleteCompleteHook;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
-use MWException;
 use Psr\Log\LoggerInterface;
-use Title;
-use User;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\UpdateRepo\UpdateRepo;
@@ -39,40 +38,14 @@ use WikiPage;
  */
 class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteCompleteHook {
 
-	/**
-	 * @var NamespaceChecker
-	 */
-	private $namespaceChecker;
-
-	/**
-	 * @var JobQueueGroup
-	 */
-	private $jobQueueGroup;
-
-	/**
-	 * @var SiteLinkLookup
-	 */
-	private $siteLinkLookup;
-
-	/**
-	 * @var LoggerInterface
-	 */
-	private $logger;
-
-	/**
-	 * @var ClientDomainDb
-	 */
-	private $clientDb;
-
-	/**
-	 * @var string
-	 */
-	private $siteGlobalID;
-
-	/**
-	 * @var bool
-	 */
-	private $propagateChangesToRepo;
+	private NamespaceChecker $namespaceChecker;
+	private JobQueueGroupFactory $jobQueueGroupFactory;
+	private DatabaseEntitySource $entitySource;
+	private SiteLinkLookup $siteLinkLookup;
+	private LoggerInterface $logger;
+	private ClientDomainDb $clientDb;
+	private string $siteGlobalID;
+	private bool $propagateChangesToRepo;
 
 	public static function factory(
 		JobQueueGroupFactory $jobQueueGroupFactory,
@@ -82,13 +55,10 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		SettingsArray $clientSettings,
 		ClientStore $store
 	): ?self {
-
-		$repoDB = $entitySource->getDatabaseName();
-		$jobQueueGroup = $jobQueueGroupFactory->makeJobQueueGroup( $repoDB );
-
 		return new self(
 			$namespaceChecker,
-			$jobQueueGroup,
+			$jobQueueGroupFactory,
+			$entitySource,
 			$store->getSiteLinkLookup(),
 			LoggerFactory::getInstance( 'UpdateRepo' ),
 			$clientDomainDbFactory->newLocalDb(),
@@ -97,25 +67,19 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		);
 	}
 
-	/**
-	 * @param NamespaceChecker $namespaceChecker
-	 * @param JobQueueGroup $jobQueueGroup
-	 * @param SiteLinkLookup $siteLinkLookup
-	 * @param LoggerInterface $logger
-	 * @param string $siteGlobalID
-	 * @param bool $propagateChangesToRepo
-	 */
 	public function __construct(
 		NamespaceChecker $namespaceChecker,
-		JobQueueGroup $jobQueueGroup,
+		JobQueueGroupFactory $jobQueueGroupFactory,
+		DatabaseEntitySource $entitySource,
 		SiteLinkLookup $siteLinkLookup,
 		LoggerInterface $logger,
 		ClientDomainDb $clientDb,
-		$siteGlobalID,
-		$propagateChangesToRepo
+		string $siteGlobalID,
+		bool $propagateChangesToRepo
 	) {
 		$this->namespaceChecker = $namespaceChecker;
-		$this->jobQueueGroup = $jobQueueGroup;
+		$this->jobQueueGroupFactory = $jobQueueGroupFactory;
+		$this->entitySource = $entitySource;
 		$this->siteLinkLookup = $siteLinkLookup;
 		$this->logger = $logger;
 		$this->clientDb = $clientDb;
@@ -126,12 +90,8 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 
 	/**
 	 * @see NamespaceChecker::isWikibaseEnabled
-	 *
-	 * @param int $namespace
-	 *
-	 * @return bool
 	 */
-	private function isWikibaseEnabled( $namespace ) {
+	private function isWikibaseEnabled( int $namespace ): bool {
 		return $this->namespaceChecker->isWikibaseEnabled( $namespace );
 	}
 
@@ -166,39 +126,34 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 	}
 
 	/**
-	 * Push the $updateRepo to the job queue if applicable,
-	 * and if successful, set the $titleProperty on the $title.
-	 * Hook handlers later look at this property in an attempt to determine
-	 * whether the update was successfully applied/enqueued or not.
+	 * Push the $updateRepo to the job queue if applicable.
 	 */
 	private function applyUpdateRepo(
 		UpdateRepo $updateRepo,
-		LinkTarget $title,
-		string $titleProperty = null
+		LinkTarget $title
 	): void {
 		if ( !$updateRepo->isApplicable() ) {
 			return;
 		}
 
 		try {
-			$updateRepo->injectJob( $this->jobQueueGroup );
-
-			// To be able to find out about this in the ArticleDeleteAfter
-			// hook (but see T268135)
-			if ( $titleProperty ) {
-				$title->$titleProperty = true;
-			}
-		} catch ( MWException $e ) {
-			// This is not a reason to let an exception bubble up, we just
-			// show a message to the user that the Wikibase item needs to be
-			// manually updated.
+			$jobQueueGroup = $this->jobQueueGroupFactory->makeJobQueueGroup(
+				$this->entitySource->getDatabaseName()
+			);
+			$updateRepo->injectJob( $jobQueueGroup );
+		} catch ( JobQueueError $e ) {
+			// This is not a reason to let an exception bubble up; the messages shown by
+			// MovePageNotice and DeletePageNoticeCreator already ask the user to check
+			// that the item was correctly updated anyways.
+			// (We used to show different messages in this case, but this broke,
+			// went unnoticed for years, and the code was removed in T268135 and T353161.)
 			wfLogWarning( $e->getMessage() );
 
 			$this->logger->debug(
 				'{method}: Failed to inject job: "{msg}"!',
 				[
 					'method' => __METHOD__,
-					'msg' => $e->getMessage()
+					'msg' => $e->getMessage(),
 				]
 			);
 
@@ -229,17 +184,13 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		$logEntry,
 		$archivedRevisionCount
 	) {
-		if ( $this->propagateChangesToRepo !== true ) {
+		if ( !$this->propagateChangesToRepo ) {
 			return true;
 		}
 
 		$updateRepo = $this->makeDelete( $user, $wikiPage->getTitle() );
 
-		$this->applyUpdateRepo(
-			$updateRepo,
-			$wikiPage->getTitle(),
-			'wikibasePushedDeleteToRepo'
-		);
+		$this->applyUpdateRepo( $updateRepo, $wikiPage->getTitle() );
 
 		return true;
 	}
@@ -269,7 +220,7 @@ class UpdateRepoHookHandler implements PageMoveCompleteHook, ArticleDeleteComple
 		$reason,
 		$revisionRecord
 	) {
-		if ( $this->propagateChangesToRepo !== true ) {
+		if ( !$this->propagateChangesToRepo ) {
 			return true;
 		}
 

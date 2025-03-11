@@ -615,6 +615,13 @@ Default:
 
 Maximum number of redirects per target page to index.
 
+; $wgCirrusSearchIndexFieldsToCleanup
+
+Default:
+	$wgCirrusSearchIndexFieldsToCleanup = []
+
+List of strings identifying the fields to remove from the index when the next in-place re-index is run.
+
 ; $wgCirrusSearchLinkedArticlesToUpdate
 
 Default:
@@ -651,9 +658,7 @@ Default:
         'file_text' => 0.5,
     ];
 
-Weight of fields.  If $wgCirrusSearchAllFields['use']
-is false this can be changed on the fly.  If it is true then changes to this require
-an in place reindex to take effect.
+Weight of fields. Changes to this require an in place reindex to take effect.
 
 ; $wgCirrusSearchPrefixWeights
 
@@ -666,23 +671,6 @@ Default:
     ];
 
 Weight of fields in prefix search.  It is safe to change these at any time.
-
-; $wgCirrusSearchAllFields
-
-Default:
-    $wgCirrusSearchAllFields = [ 'build' => true, 'use' => true ];
-
-Enable building and using of "all" fields that contain multiple copies of other fields
-for weighting.  These all fields exist entirely to speed up the full_text query type by
-baking the weights above into a single field.  This is useful because it drastically
-reduces the random io to power the query from 14 term queries per term in the query
-string to 2.  Each term query is potentially one or two disk random io actions.  The
-reduction isn't strictly 7:1 because we skip file_text in non file namespace (now 6:1)
-and the near match fields (title and redirect) also kick it, but only once per query.
-Also don't forget the io from the phrase rescore - this helps with that, but its even
-more muddy how much.
-Note setting 'use' to true without having set 'build' to true and performing an in place
-reindex will cause all searches to find nothing.
 
 ; $wgCirrusSearchBoostOpening
 
@@ -1508,6 +1496,20 @@ Values:
  - strictly negative value to keep the full content and disable this feature (default)
  - positive value to truncate the content the expected size (0 will remove everything)
 
+; $wgCirrusSearchDocumentSizeLimiterProfile
+
+Default:
+    $wgCirrusSearchDocumentSizeLimiterProfile = "default"
+
+Set the profile for the document size limiter, see profiles/DocumentSizeLimiterProfiles.config.php
+
+; $wgCirrusSearchDocumentSizeLimiterProfiles
+
+Default:
+    $wgCirrusSearchDocumentSizeLimiterProfiles = []
+
+Add extra limiter profiles.
+
 ; $wgCirrusSearchElasticQuirks
 
 Default:
@@ -1584,11 +1586,11 @@ Maximum tree depth to descend when using deep category queries.
 ; $wgCirrusSearchCategoryMax
 
 Default:
-    $wgCirrusSearchCategoryMax = 256;
+    $wgCirrusSearchCategoryMax = 1000
 
 Maximum overall category count for deep category query. Note that ElasticSearch
-has limit of 1024 boolean clauses by default, so this limit should be well under
-Elastic limits.
+has limit of 1024 clauses in a single boolean query by default, this limit
+must be under the Elastic limits.
 
 ; $wgCirrusSearchNamespaceResolutionMethod
 
@@ -1601,17 +1603,17 @@ Method to use for namespace name resolution, can be:
 - 'utr30': using a more aggressive folding technique
    based on the UTR30 specs (specs used but lucene but withdrawn by Unicode)
 
-; $wgCirrusSearchAutomationUserAgentRegex
+; $wgCirrusSearchAutomationHeaderRegexes
 
 Default:
-  $wgCirrusSearchAutomationUserAgentRegex = null;
+  $wgCirrusSearchAutomationHeaderRegexes = null;
 
-A regular expression to be applied against an http user agent. When matching
-the related request will be considered an automated request and use the
-appropriate pool counter to limit concurrency.
+A map from http header to regular expression to be applied against that header
+value. When matching the related request will be considered an automated
+request and use the appropriate pool counter to limit concurrency.
 
 Example:
-  $wgCirrusSearchAutomationUserAgentRegex = '/HeadlessChrome/';
+  $wgCirrusSearchAutomationHeaderRegexes = [ 'user-agent' => '/HeadlessChrome/' ];
 
 ; $wgCirrusSearchAutomationCIDRs
 
@@ -1655,4 +1657,67 @@ Example:
     'last_editor',
   ];
 
+; $wgCirrusSearchEnableIncomingLinkCounting
 
+Default:
+  $wgCirrusSearchEnableIncomingLinkCounting = true
+
+Setting to false will stop Cirrus from performing link counting queries and
+updating the incoming_links value of the search documents. These queries can be
+quite frequent, somewhat expensive, and often don't result in actually updating
+the document (the value doesn't change frequently).
+
+The incoming_links values will still be used as part of relevance scoring. This
+should only be disabled if an external process has been configured to update
+the incoming_links field on a scheduled basis separate from the edit pipeline.
+
+; $wgCirrusSearchDeduplicateAnalysis
+
+Default:
+  $wgCirrusSearchDeduplicateAnalysis = false;
+
+Setting to true will enable deduplication of the elasticsearch index analysis
+settings. In most cases this is not necessary and makes investigating and
+understanding the system more complicated. In special cases where many
+languages analysis chains are loaded into a single index this deduplication can
+greatly reduce the amount of time the nodes require to process the index
+settings.
+
+; $wgCirrusSearchUseEventBusBridge
+
+Default:
+  $wgCirrusSearchUseEventBusBridge = false;
+
+Emit page-rerenders events to EventBus. Required if the udpate process is managed
+outside of MW.
+
+; $wgCirrusSearchNaturalTitleSort
+
+Default:
+  $wgCirrusSearchNaturalTitleSort = [
+      'build' => false,
+      'use' => false,
+  ];
+
+Enables the usage of the title_natural_asc and title_natural_desc sort orders.
+Requires definining both the language and country sort should be specialized
+to. This requires the analysis-icu elasticsearch plugin to be installed.
+
+Example english configuration:
+
+  $wgCirrusSearchNaturalTitleSort = [
+      'build' => true,
+      'use' => true,
+      'language' => 'en',
+      'country' => 'US',
+  ];
+
+Set build to true and reindex before setting use to true.
+
+; $wgCirrusSearchEnableEventBusWeightedTags
+
+Default:
+  $CirrusSearchEnableEventBusWeightedTags = false;
+
+ Enables external processing of weighted tag changes.
+ Changes are offloaded via EventBus and processed by the search update pipeline.

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface CompletionAction class.
  *
- * @copyright 2011-2019 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -16,6 +16,7 @@
  *
  * @constructor
  * @param {ve.ui.Surface} surface Surface to act on
+ * @param {string} [source]
  */
 ve.ui.CompletionAction = function VeUiCompletionAction() {
 	// Parent constructor
@@ -29,29 +30,26 @@ OO.inheritClass( ve.ui.CompletionAction, ve.ui.Action );
 /* Static Properties */
 
 /**
- * Length to which to limit the list of returned completions
+ * @property {number} Length to which to limit the list of returned completions
  *
  * @static
- * @property {number}
  */
 ve.ui.CompletionAction.static.defaultLimit = 8;
 
 /**
- * Length of the trigger sequence for the action
+ * @property {number} Length of the trigger sequence for the action
  *
  * This many characters will be stripped from the start of the current input by
- * CompletionWidget.
+ * CompletionWidget when triggered by a sequence, see #getSequenceLength.
  *
  * @static
- * @property {number}
  */
-ve.ui.CompletionAction.static.triggerLength = 1;
+ve.ui.CompletionAction.static.sequenceLength = 1;
 
 /**
- * Whether the current input should be included as a completion automatically
+ * @property {boolean} Whether the current input should be included as a completion automatically
  *
  * @static
- * @property {boolean}
  */
 ve.ui.CompletionAction.static.alwaysIncludeInput = true;
 
@@ -62,10 +60,11 @@ ve.ui.CompletionAction.static.methods = [ 'open' ];
 /**
  * Show the completions
  *
+ * @param {boolean} [isolateInput] Isolate input from the surface
  * @return {boolean} Action was executed
  */
-ve.ui.CompletionAction.prototype.open = function () {
-	this.surface.completion.setup( this );
+ve.ui.CompletionAction.prototype.open = function ( isolateInput ) {
+	this.surface.completion.setup( this, isolateInput );
 
 	return true;
 };
@@ -75,8 +74,9 @@ ve.ui.CompletionAction.prototype.open = function () {
  *
  * @abstract
  * @param {string} input
- * @param {number} [limit=20] restrict number of results to this
- * @return {jQuery.Promise} promise that will return results
+ * @param {number} [limit=20] Maximum number of results
+ * @return {jQuery.Promise} Promise that resolves with list of suggestions.
+ *  Suggestions are converted to menu itmes by getMenuItemForSuggestion.
  */
 ve.ui.CompletionAction.prototype.getSuggestions = null;
 
@@ -88,12 +88,23 @@ ve.ui.CompletionAction.prototype.getSuggestions = null;
  * same input and its resolved suggestions
  *
  * @param {string} input User input
- * @param {string[]} [suggestions] Returned suggestions
+ * @param {Array} [suggestions] Returned suggestions
  * @return {jQuery|string|OO.ui.HtmlSnippet|Function|null|undefined} Label. Use undefined
  *  to avoid updating the label, and null to clear it.
  */
 ve.ui.CompletionAction.prototype.getHeaderLabel = function () {
 	return null;
+};
+
+/**
+ * Choose a specific item
+ *
+ * @param {OO.ui.MenuOptionWidget} item Chosen item
+ * @param {ve.Range} range Current surface range
+ */
+ve.ui.CompletionAction.prototype.chooseItem = function ( item, range ) {
+	const fragment = this.insertCompletion( item.getData(), range );
+	fragment.collapseToEnd().select();
 };
 
 /**
@@ -116,9 +127,19 @@ ve.ui.CompletionAction.prototype.insertCompletion = function ( data, range ) {
  * @return {boolean} Whether to abandon
  */
 ve.ui.CompletionAction.prototype.shouldAbandon = function ( input, matches ) {
-	// abandon after adding whitespace if there are no active potential matches
-	return matches === ( this.constructor.static.alwaysIncludeInput ? 1 : 0 ) &&
-		!!( input && /\s$/.test( input ) );
+	// Abandon after adding whitespace if there are no active potential matches,
+	// or if whitespace has been the sole input
+	return /^\s+$/.test( input ) ||
+		( matches === 0 && /\s$/.test( input ) );
+};
+
+/**
+ * Get the length of the sequence which triggered this action
+ *
+ * @return {number} Length of the sequence
+ */
+ve.ui.CompletionAction.prototype.getSequenceLength = function () {
+	return this.source === 'sequence' ? this.constructor.static.sequenceLength : 0;
 };
 
 // helpers
@@ -127,11 +148,22 @@ ve.ui.CompletionAction.prototype.shouldAbandon = function ( input, matches ) {
  * Make a menu item for a given suggestion
  *
  * @protected
- * @param  {string} suggestion
+ * @param  {any} suggestion Suggestion data, string by default
  * @return {OO.ui.MenuOptionWidget}
  */
 ve.ui.CompletionAction.prototype.getMenuItemForSuggestion = function ( suggestion ) {
 	return new OO.ui.MenuOptionWidget( { data: suggestion, label: suggestion } );
+};
+
+/**
+ * Update the menu item list before adding, e.g. to add menu groups
+ *
+ * @protected
+ * @param  {OO.ui.MenuOptionWidget[]} menuItems
+ * @return {OO.ui.MenuOptionWidget[]}
+ */
+ve.ui.CompletionAction.prototype.updateMenuItems = function ( menuItems ) {
+	return menuItems;
 };
 
 /**
@@ -146,24 +178,52 @@ ve.ui.CompletionAction.prototype.getMenuItemForSuggestion = function ( suggestio
  * input to the list if alwaysIncludeInput and there wasn't an exact match.
  *
  * @protected
- * @param  {string[]} suggestions List of strings of valid completions
+ * @param  {any[]} suggestions List of valid completions, strings by default
  * @param  {string} input Input to filter the suggestions to
- * @return {string[]}
+ * @return {any[]}
  */
 ve.ui.CompletionAction.prototype.filterSuggestionsForInput = function ( suggestions, input ) {
-	var exact = false,
-		inputTrimmed = input.trim(),
-		inputTrimmedLower = inputTrimmed.toLowerCase().trim();
-	suggestions = suggestions.filter( function ( word ) {
-		var wordLower = word.toLowerCase();
-		exact = exact || wordLower === inputTrimmedLower;
-		return wordLower.slice( 0, inputTrimmedLower.length ) === inputTrimmedLower;
+	input = input.trim();
+
+	const normalizedInput = input.toLowerCase().trim();
+
+	let exact = false;
+	suggestions = suggestions.filter( ( suggestion ) => {
+		const result = this.compareSuggestionToInput( suggestion, normalizedInput );
+		exact = exact || result.isExact;
+		return result.isMatch;
 	} );
+
 	if ( this.constructor.static.defaultLimit < suggestions.length ) {
 		suggestions.length = this.constructor.static.defaultLimit;
 	}
-	if ( !exact && this.constructor.static.alwaysIncludeInput && inputTrimmed.length ) {
-		suggestions.push( inputTrimmed );
+	if ( !exact && this.constructor.static.alwaysIncludeInput && input.length ) {
+		suggestions.push( this.createSuggestion( input ) );
 	}
 	return suggestions;
+};
+
+/**
+ * Compare a suggestion to the normalized user input (lower case)
+ *
+ * @param {any} suggestion Suggestion data, string by default
+ * @param {string} normalizedInput Noramlized user input
+ * @return {Object} Match object, containing two booleans, `isMatch` and `isExact`
+ */
+ve.ui.CompletionAction.prototype.compareSuggestionToInput = function ( suggestion, normalizedInput ) {
+	const normalizedSuggestion = suggestion.toLowerCase();
+	return {
+		isMatch: normalizedSuggestion.slice( 0, normalizedInput.length ) === normalizedInput,
+		isExact: normalizedSuggestion === normalizedInput
+	};
+};
+
+/**
+ * Create a suggestion from an input
+ *
+ * @param {string} input User input
+ * @return {any} Suggestion data, string by default
+ */
+ve.ui.CompletionAction.prototype.createSuggestion = function ( input ) {
+	return input;
 };

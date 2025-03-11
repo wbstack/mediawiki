@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"StanProg",
-			"Vlad5250"
+			"Vlad5250",
+			"Ted Masters"
 		]
 	},
 	"nstab-data": "Данни",
@@ -13,7 +14,7 @@
 	"jsonconfig-edit-action-cancel": "Отказ",
 	"jsonconfig-edit-button-label": "Редактиране като таблица",
 	"jsonconfig-edit-dialog-error": "Не може да се редактира като таблица: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Данните не съответстват на схемата",
+	"jsonconfig-edit-dialog-error-data-invalid": "Данните не съответстват на схемата",
 	"jsonconfig-edit-dialog-error-data-missing": "JSON-свойството <code>data</code> липсва или не е масив",
 	"jsonconfig-edit-dialog-error-data-too-large": "Наборът от данни е твърде голям за да се редактира като таблица",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Всяко поле трябва да има име",
@@ -27,14 +28,16 @@
 	"jsonconfig-type-name-localized": "локализирано",
 	"jsonconfig-type-name-number": "число",
 	"jsonconfig-type-name-boolean": "булев",
+	"jsonconfig-use-category": "Страници, използващи разширението JsonConfig",
+	"jsonconfig-use-category-desc": "Тези страници използват метода <code>mw.ext.data.get</code>, предоставен от разширението [[:mw:Extension:JsonConfig|JsonConfig]]. Методът <code>mw.ext.data.get</code> е считан за ресурсоемък.",
 	"jsonconfig-license": "Данните са достъпни под $1.",
 	"jsonconfig-license-not-set": "При редактиране на страницата се съгласявате, че публикувате приносите си съгласно лиценза, който е указан в поле <code>лиценз</code>.",
 	"jsonconfig-license-name-CC0-1.0": "Криейтив Комънс Нула",
 	"jsonconfig-license-name-dl-de-zero-2.0": "Лиценз за данни Германия - Нула - Версия 2.0",
 	"jsonconfig-license-name-dl-de-by-1.0": "Лиценз за данни Германия – приписване – Версия 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Лиценз за данни Германия – приписване – версия 2.0",
-	"jsonconfig-license-copyrightwarning": "Със съхраняването на промените, се съгласявате с [https://foundation.wikimedia.org/wiki/Terms_of_Use/bg Условията за ползване] и се съгласявате безвъзвратно да отдадете своя принос под [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Със съхраняването на промените, се съгласявате с [https://foundation.wikimedia.org/wiki/Terms_of_Use/bg Условията за ползване] и се съгласявате безвъзвратно да отдадете своя принос под лиценза, който е посочен в полето <code>licence</code>.",
+	"jsonconfig-license-copyrightwarning": "С публикуването на промените, се съгласявате с [https://foundation.wikimedia.org/wiki/Terms_of_Use/bg Условията за ползване] и се съгласявате безвъзвратно да отдадете своя принос под [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "С публикуването на промените, се съгласявате с [https://foundation.wikimedia.org/wiki/Terms_of_Use/bg Условията за ползване] и се съгласявате безвъзвратно да отдадете своя принос под лиценза, който е посочен в полето <code>licence</code>.",
 	"right-jsonconfig-flush": "Работа с JsonConfig чрез API",
 	"action-jsonconfig-flush": "работа с JsonConfig чрез API"
 }

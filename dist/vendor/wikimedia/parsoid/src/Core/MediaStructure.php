@@ -5,8 +5,8 @@ namespace Wikimedia\Parsoid\Core;
 
 use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\DOM\Node;
+use Wikimedia\Parsoid\Utils\DiffDOMUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
-use Wikimedia\Parsoid\Utils\DOMUtils;
 use Wikimedia\Parsoid\Utils\WTUtils;
 use Wikimedia\Parsoid\Wikitext\Consts;
 
@@ -82,45 +82,26 @@ class MediaStructure {
 	}
 
 	/**
-	 * @return bool
+	 * @return ?string the resource name if it exists, otherwise null
 	 */
-	public function hasResource(): bool {
-		return $this->mediaElt->hasAttribute( 'resource' );
+	public function getResource(): ?string {
+		return DOMCompat::getAttribute( $this->mediaElt, 'resource' );
 	}
 
 	/**
-	 * @return string
+	 * @return ?string The alt text if it exists, otherwise null
 	 */
-	public function getResource(): string {
-		return $this->mediaElt->getAttribute( 'resource' ) ?? '';
+	public function getAlt(): ?string {
+		return DOMCompat::getAttribute( $this->mediaElt, 'alt' );
 	}
 
 	/**
-	 * @return bool
+	 * @return ?string The media href if it exists, otherwise null.
 	 */
-	public function hasAlt(): bool {
-		return $this->mediaElt->hasAttribute( 'alt' );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getAlt(): string {
-		return $this->mediaElt->getAttribute( 'alt' ) ?? '';
-	}
-
-	/**
-	 * @return bool
-	 */
-	public function hasMediaUrl(): bool {
-		return $this->linkElt && $this->linkElt->hasAttribute( 'href' );
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getMediaUrl(): string {
-		return $this->linkElt ? ( $this->linkElt->getAttribute( 'href' ) ?? '' ) : '';
+	public function getMediaUrl(): ?string {
+		return $this->linkElt ?
+			DOMCompat::getAttribute( $this->linkElt, 'href' ) :
+			null;
 	}
 
 	/**
@@ -136,7 +117,7 @@ class MediaStructure {
 		do {
 			// Try being lenient, maybe there was a content model violation when
 			// parsing and an active formatting element was reopened in the wrapper
-			$linkElt = DOMUtils::firstNonSepChild( $linkElt );
+			$linkElt = DiffDOMUtils::firstNonSepChild( $linkElt );
 		} while (
 			$linkElt instanceof Element && DOMCompat::nodeName( $linkElt ) !== 'a' &&
 			isset( Consts::$HTML['FormattingTags'][DOMCompat::nodeName( $linkElt )] )
@@ -154,7 +135,7 @@ class MediaStructure {
 				return null;
 			}
 		} else {
-			$mediaElt = DOMUtils::firstNonSepChild( $linkElt );
+			$mediaElt = DiffDOMUtils::firstNonSepChild( $linkElt );
 		}
 		if (
 			!( $mediaElt instanceof Element &&

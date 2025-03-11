@@ -1,8 +1,6 @@
 <?php
 /**
- * Implements Special:ListAdmins
- *
- * Copyright © 2004 Brion Vibber, lcrocker, Tim Starling,
+ * Copyright © 2004 Brooke Vibber, lcrocker, Tim Starling,
  * Domas Mituzas, Antoine Musso, Jens Frank, Zhengzhu,
  * 2006 Rob Church <robchur@gmail.com>
  *
@@ -22,11 +20,14 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials\Redirects;
+
+use MediaWiki\SpecialPage\SpecialRedirectToSpecial;
+
 /**
- * Redirect page: Special:ListAdmins --> Special:ListUsers/sysop.
+ * Redirect to Special:ListUsers/sysop.
  *
  * @ingroup SpecialPage
  */
@@ -35,3 +36,6 @@ class SpecialListAdmins extends SpecialRedirectToSpecial {
 		parent::__construct( 'Listadmins', 'Listusers', 'sysop' );
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialListAdmins::class, 'SpecialListAdmins' );

@@ -24,15 +24,14 @@ namespace MediaWiki\ResourceLoader;
 
 use CSSJanus;
 use Exception;
-use ExtensionRegistry;
 use FileContentsHasher;
 use InvalidArgumentException;
 use LogicException;
 use MediaWiki\Languages\LanguageFallback;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use ObjectCache;
-use OutputPage;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Registration\ExtensionRegistry;
 use RuntimeException;
 use Wikimedia\Minify\CSSMin;
 use Wikimedia\RequestTimeout\TimeoutException;
@@ -132,14 +131,11 @@ class FileModule extends Module {
 	/** @var bool Link to raw files in debug mode */
 	protected $debugRaw = true;
 
-	/** @var string[] */
-	protected $targets = [ 'desktop' ];
-
 	/** @var bool Whether CSSJanus flipping should be skipped for this module */
 	protected $noflip = false;
 
-	/** @var bool Whether this module requires the client to support ES6 */
-	protected $es6 = false;
+	/** @var bool Whether to skip the structure test ResourcesTest::testRespond() */
+	protected $skipStructureTest = false;
 
 	/**
 	 * @var bool Whether getStyleURLsForDebug should return raw file paths,
@@ -164,24 +160,24 @@ class FileModule extends Module {
 	protected $vueComponentParser = null;
 
 	/**
-	 * Constructs a new module from an options array.
+	 * Construct a new module from an options array.
 	 *
 	 * @param array $options See $wgResourceModules for the available options.
 	 * @param string|null $localBasePath Base path to prepend to all local paths in $options.
-	 *     Defaults to $IP
+	 *     Defaults to MW_INSTALL_PATH
 	 * @param string|null $remoteBasePath Base path to prepend to all remote paths in $options.
 	 *     Defaults to $wgResourceBasePath
 	 */
 	public function __construct(
 		array $options = [],
-		string $localBasePath = null,
-		string $remoteBasePath = null
+		?string $localBasePath = null,
+		?string $remoteBasePath = null
 	) {
 		// Flag to decide whether to automagically add the mediawiki.template module
 		$hasTemplates = false;
 		// localBasePath and remoteBasePath both have unbelievably long fallback chains
 		// and need to be handled separately.
-		list( $this->localBasePath, $this->remoteBasePath ) =
+		[ $this->localBasePath, $this->remoteBasePath ] =
 			self::extractBasePaths( $options, $localBasePath, $remoteBasePath );
 
 		// Extract, validate and normalise remaining options
@@ -224,7 +220,6 @@ class FileModule extends Module {
 				// Lists of strings
 				case 'dependencies':
 				case 'messages':
-				case 'targets':
 					// Normalise
 					$option = array_values( array_unique( (array)$option ) );
 					sort( $option );
@@ -239,7 +234,7 @@ class FileModule extends Module {
 				// Single booleans
 				case 'debugRaw':
 				case 'noflip':
-				case 'es6':
+				case 'skipStructureTest':
 					$this->{$member} = (bool)$option;
 					break;
 			}
@@ -273,7 +268,7 @@ class FileModule extends Module {
 	 *
 	 * @param array $options Module definition
 	 * @param string|null $localBasePath Path to use if not provided in module definition. Defaults
-	 *     to $IP
+	 *     to MW_INSTALL_PATH
 	 * @param string|null $remoteBasePath Path to use if not provided in module definition. Defaults
 	 *     to $wgResourceBasePath
 	 * @return string[] [ localBasePath, remoteBasePath ]
@@ -283,17 +278,11 @@ class FileModule extends Module {
 		$localBasePath = null,
 		$remoteBasePath = null
 	) {
-		global $IP;
 		// The different ways these checks are done, and their ordering, look very silly,
 		// but were preserved for backwards-compatibility just in case. Tread lightly.
 
-		if ( $localBasePath === null ) {
-			$localBasePath = $IP;
-		}
-		if ( $remoteBasePath === null ) {
-			$remoteBasePath = MediaWikiServices::getInstance()->getMainConfig()
-				->get( MainConfigNames::ResourceBasePath );
-		}
+		$remoteBasePath ??= MediaWikiServices::getInstance()->getMainConfig()
+			->get( MainConfigNames::ResourceBasePath );
 
 		if ( isset( $options['remoteExtPath'] ) ) {
 			$extensionAssetsPath = MediaWikiServices::getInstance()->getMainConfig()
@@ -327,17 +316,10 @@ class FileModule extends Module {
 			$remoteBasePath = '/';
 		}
 
-		return [ $localBasePath, $remoteBasePath ];
+		return [ $localBasePath ?? MW_INSTALL_PATH, $remoteBasePath ];
 	}
 
-	/**
-	 * Gets all scripts for a given context concatenated together.
-	 *
-	 * @param Context $context Context in which to generate script
-	 * @return string|array JavaScript code for $context, or package files data structure
-	 */
 	public function getScript( Context $context ) {
-		$deprecationScript = $this->getDeprecationInformation( $context );
 		$packageFiles = $this->getPackageFiles( $context );
 		if ( $packageFiles !== null ) {
 			foreach ( $packageFiles['files'] as &$file ) {
@@ -346,15 +328,14 @@ class FileModule extends Module {
 					$file['type'] = 'script';
 				}
 			}
-			if ( $deprecationScript ) {
-				$mainFile =& $packageFiles['files'][$packageFiles['main']];
-				$mainFile['content'] = $deprecationScript . $mainFile['content'];
-			}
 			return $packageFiles;
 		}
 
 		$files = $this->getScriptFiles( $context );
-		return $deprecationScript . $this->readScriptFiles( $files );
+		foreach ( $files as &$file ) {
+			$this->readFileInfo( $context, $file );
+		}
+		return [ 'plainScripts' => $files ];
 	}
 
 	/**
@@ -368,10 +349,12 @@ class FileModule extends Module {
 
 		$urls = [];
 		foreach ( $this->getScriptFiles( $context ) as $file ) {
-			$url = OutputPage::transformResourcePath( $config, $this->getRemotePath( $file ) );
-			// Expand debug URL in case we are another wiki's module source (T255367)
-			$url = $rl->expandUrl( $server, $url );
-			$urls[] = $url;
+			if ( isset( $file['filePath'] ) ) {
+				$url = OutputPage::transformResourcePath( $config, $this->getRemotePath( $file['filePath'] ) );
+				// Expand debug URL in case we are another wiki's module source (T255367)
+				$url = $rl->expandUrl( $server, $url );
+				$urls[] = $url;
+			}
 		}
 		return $urls;
 	}
@@ -380,9 +363,40 @@ class FileModule extends Module {
 	 * @return bool
 	 */
 	public function supportsURLLoading() {
-		// If package files are involved, don't support URL loading, because that breaks
-		// scoped require() functions
-		return $this->debugRaw && !$this->packageFiles;
+		// phpcs:ignore Generic.WhiteSpace.LanguageConstructSpacing.IncorrectSingle
+		return
+			// Denied by options?
+			$this->debugRaw
+			// If package files are involved, don't support URL loading, because that breaks
+			// scoped require() functions
+			&& !$this->packageFiles
+			// Can't link to scripts generated by callbacks
+			&& !$this->hasGeneratedScripts();
+	}
+
+	public function shouldSkipStructureTest() {
+		return $this->skipStructureTest || parent::shouldSkipStructureTest();
+	}
+
+	/**
+	 * Determine whether the module may potentially have generated scripts.
+	 *
+	 * @return bool
+	 */
+	private function hasGeneratedScripts() {
+		foreach (
+			[ $this->scripts, $this->languageScripts, $this->skinScripts, $this->debugScripts ]
+			as $scripts
+		) {
+			foreach ( $scripts as $script ) {
+				if ( is_array( $script ) ) {
+					if ( isset( $script['callback'] ) || isset( $script['versionCallback'] ) ) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -468,7 +482,7 @@ class FileModule extends Module {
 	 * @param Context|null $context
 	 * @return string[] List of module names
 	 */
-	public function getDependencies( Context $context = null ) {
+	public function getDependencies( ?Context $context = null ) {
 		return $this->dependencies;
 	}
 
@@ -498,7 +512,7 @@ class FileModule extends Module {
 	}
 
 	public function requiresES6() {
-		return $this->es6;
+		return true;
 	}
 
 	/**
@@ -522,45 +536,47 @@ class FileModule extends Module {
 	private function getFileHashes( Context $context ) {
 		$files = [];
 
-		$styleFiles = $this->getStyleFiles( $context );
-		foreach ( $styleFiles as $paths ) {
-			$files = array_merge( $files, $paths );
+		foreach ( $this->getStyleFiles( $context ) as $filePaths ) {
+			foreach ( $filePaths as $filePath ) {
+				$files[] = $this->getLocalPath( $filePath );
+			}
 		}
 
 		// Extract file paths for package files
 		// Optimisation: Use foreach() and isset() instead of array_map/array_filter.
 		// This is a hot code path, called by StartupModule for thousands of modules.
 		$expandedPackageFiles = $this->expandPackageFiles( $context );
-		$packageFiles = [];
 		if ( $expandedPackageFiles ) {
 			foreach ( $expandedPackageFiles['files'] as $fileInfo ) {
-				if ( isset( $fileInfo['filePath'] ) ) {
-					$packageFiles[] = $fileInfo['filePath'];
+				$filePath = $fileInfo['filePath'] ?? $fileInfo['versionFilePath'] ?? null;
+				if ( $filePath instanceof FilePath ) {
+					$files[] = $filePath->getLocalPath();
 				}
 			}
 		}
 
-		// Merge all the file paths we were able discover directly from the module definition.
-		// This is the primary list of direct-dependent files for this module.
-		$files = array_merge(
-			$files,
-			$packageFiles,
-			$this->scripts,
-			$this->templates,
-			$context->getDebug() ? $this->debugScripts : [],
-			$this->getLanguageScripts( $context->getLanguage() ),
-			self::tryForKey( $this->skinScripts, $context->getSkin(), 'default' )
-		);
-		if ( $this->skipFunction ) {
-			$files[] = $this->skipFunction;
+		// Add other configured paths
+		$scriptFileInfos = $this->getScriptFiles( $context );
+		foreach ( $scriptFileInfos as $fileInfo ) {
+			$filePath = $fileInfo['filePath'] ?? $fileInfo['versionFilePath'] ?? null;
+			if ( $filePath instanceof FilePath ) {
+				$files[] = $filePath->getLocalPath();
+			}
 		}
 
-		// Expand these local paths into absolute file paths
-		$files = array_map( [ $this, 'getLocalPath' ], $files );
+		foreach ( $this->templates as $filePath ) {
+			$files[] = $this->getLocalPath( $filePath );
+		}
+
+		if ( $this->skipFunction ) {
+			$files[] = $this->getLocalPath( $this->skipFunction );
+		}
 
 		// Add any lazily discovered file dependencies from previous module builds.
-		// These are added last because they are already absolute file paths.
-		$files = array_merge( $files, $this->getFileDependencies( $context ) );
+		// These are already absolute paths.
+		foreach ( $this->getFileDependencies( $context ) as $file ) {
+			$files[] = $file;
+		}
 
 		// Filter out any duplicates. Typically introduced by getFileDependencies() which
 		// may lazily re-discover a primary file.
@@ -589,13 +605,8 @@ class FileModule extends Module {
 			//    this affects 'scripts' and other file paths, getFileHashes accounts for that.)
 			// - remoteBasePath (Per T104950)
 			// - dependencies (provided via startup module)
-			// - targets
 			// - group (provided via startup module)
-			'scripts',
-			'debugScripts',
 			'styles',
-			'languageScripts',
-			'skinScripts',
 			'skinStyles',
 			'messages',
 			'templates',
@@ -606,6 +617,7 @@ class FileModule extends Module {
 		}
 
 		$packageFiles = $this->expandPackageFiles( $context );
+		$packageSummaries = [];
 		if ( $packageFiles ) {
 			// Extract the minimum needed:
 			// - The 'main' pointer (included as-is).
@@ -615,14 +627,23 @@ class FileModule extends Module {
 			//   'getFileHashes' method tracks their content already.
 			//   It is important that the keys of the $packageFiles['files'] array
 			//   are preserved, as they do affect the module output.
-			$packageFiles['files'] = array_map( static function ( $fileInfo ) {
-				return $fileInfo['definitionSummary'] ?? ( $fileInfo['content'] ?? null );
-			}, $packageFiles['files'] );
+			foreach ( $packageFiles['files'] as $fileName => $fileInfo ) {
+				$packageSummaries[$fileName] =
+					$fileInfo['definitionSummary'] ?? $fileInfo['content'] ?? null;
+			}
+		}
+
+		$scriptFiles = $this->getScriptFiles( $context );
+		$scriptSummaries = [];
+		foreach ( $scriptFiles as $fileName => $fileInfo ) {
+			$scriptSummaries[$fileName] =
+				$fileInfo['definitionSummary'] ?? $fileInfo['content'] ?? null;
 		}
 
 		$summary[] = [
 			'options' => $options,
-			'packageFiles' => $packageFiles,
+			'packageFiles' => $packageSummaries,
+			'scripts' => $scriptSummaries,
 			'fileHashes' => $this->getFileHashes( $context ),
 			'messageBlob' => $this->getMessageBlob( $context ),
 		];
@@ -704,6 +725,7 @@ class FileModule extends Module {
 
 	/**
 	 * Infer the file type from a package file path.
+	 *
 	 * @param string $path
 	 * @return string 'script', 'script-vue', or 'data'
 	 */
@@ -718,7 +740,7 @@ class FileModule extends Module {
 	}
 
 	/**
-	 * Collates styles file paths by 'media' option (or 'all' if 'media' is not set)
+	 * Collate style file paths by 'media' option (or 'all' if 'media' is not set)
 	 *
 	 * @param array $list List of file paths in any combination of index/path
 	 *     or path/options pairs
@@ -729,16 +751,10 @@ class FileModule extends Module {
 		foreach ( $list as $key => $value ) {
 			if ( is_int( $key ) ) {
 				// File name as the value
-				if ( !isset( $collatedFiles['all'] ) ) {
-					$collatedFiles['all'] = [];
-				}
 				$collatedFiles['all'][] = $value;
 			} elseif ( is_array( $value ) ) {
 				// File name as the key, options array as the value
 				$optionValue = $value['media'] ?? 'all';
-				if ( !isset( $collatedFiles[$optionValue] ) ) {
-					$collatedFiles[$optionValue] = [];
-				}
 				$collatedFiles[$optionValue][] = $key;
 			}
 		}
@@ -770,21 +786,29 @@ class FileModule extends Module {
 	 * Get script file paths for this module, in order of proper execution.
 	 *
 	 * @param Context $context
-	 * @return array<int,string|FilePath> File paths
+	 * @return array An array of file info arrays as returned by expandFileInfo()
 	 */
 	private function getScriptFiles( Context $context ): array {
 		// List in execution order: scripts, languageScripts, skinScripts, debugScripts.
 		// Documented at MediaWiki\MainConfigSchema::ResourceModules.
-		$files = array_merge(
-			$this->scripts,
-			$this->getLanguageScripts( $context->getLanguage() ),
-			self::tryForKey( $this->skinScripts, $context->getSkin(), 'default' )
-		);
+		$filesByCategory = [
+			'scripts' => $this->scripts,
+			'languageScripts' => $this->getLanguageScripts( $context->getLanguage() ),
+			'skinScripts' => self::tryForKey( $this->skinScripts, $context->getSkin(), 'default' ),
+		];
 		if ( $context->getDebug() ) {
-			$files = array_merge( $files, $this->debugScripts );
+			$filesByCategory['debugScripts'] = $this->debugScripts;
 		}
 
-		return array_unique( $files, SORT_REGULAR );
+		$expandedFiles = [];
+		foreach ( $filesByCategory as $category => $files ) {
+			foreach ( $files as $key => $fileInfo ) {
+				$expandedFileInfo = $this->expandFileInfo( $context, $fileInfo, "$category\[$key]" );
+				$expandedFiles[$expandedFileInfo['name']] = $expandedFileInfo;
+			}
+		}
+
+		return $expandedFiles;
 	}
 
 	/**
@@ -842,7 +866,7 @@ class FileModule extends Module {
 
 			// Add new file paths, remapping them to refer to our directories and not use settings
 			// from the module we're modifying, which come from the base definition.
-			list( $localBasePath, $remoteBasePath ) = self::extractBasePaths( $overrides );
+			[ $localBasePath, $remoteBasePath ] = self::extractBasePaths( $overrides );
 
 			foreach ( $paths as $path ) {
 				$styleFiles[] = new FilePath( $path, $localBasePath, $remoteBasePath );
@@ -869,7 +893,7 @@ class FileModule extends Module {
 	}
 
 	/**
-	 * Gets a list of file paths for all skin styles in the module used by
+	 * Get a list of file paths for all skin styles in the module used by
 	 * the skin.
 	 *
 	 * @param string $skinName The name of the skin
@@ -882,7 +906,7 @@ class FileModule extends Module {
 	}
 
 	/**
-	 * Gets a list of file paths for all skin style files in the module,
+	 * Get a list of file paths for all skin style files in the module,
 	 * for all available skins.
 	 *
 	 * @return array A list of file paths collated by media type
@@ -905,7 +929,7 @@ class FileModule extends Module {
 	}
 
 	/**
-	 * Returns all style files and all skin style files used by this module.
+	 * Get all style files and all skin style files used by this module.
 	 *
 	 * @return array
 	 */
@@ -917,32 +941,13 @@ class FileModule extends Module {
 
 		$result = [];
 
-		foreach ( $collatedStyleFiles as $media => $styleFiles ) {
+		foreach ( $collatedStyleFiles as $styleFiles ) {
 			foreach ( $styleFiles as $styleFile ) {
 				$result[] = $this->getLocalPath( $styleFile );
 			}
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Get the contents of a list of JavaScript files. Helper for getScript().
-	 *
-	 * @param array<int,string|FilePath> $scripts List of file paths to scripts to read, remap and concatenate
-	 * @return string Concatenated JavaScript code
-	 */
-	private function readScriptFiles( array $scripts ) {
-		if ( !$scripts ) {
-			return '';
-		}
-		$js = '';
-		foreach ( array_unique( $scripts, SORT_REGULAR ) as $fileName ) {
-			$localPath = $this->getLocalPath( $fileName );
-			$contents = $this->getFileContents( $localPath, 'script' );
-			$js .= ResourceLoader::ensureNewline( $contents );
-		}
-		return $js;
 	}
 
 	/**
@@ -1017,6 +1022,7 @@ class FileModule extends Module {
 				/* $swapLtrRtlInURL = */ true,
 				/* $swapLeftRightInURL = */ false
 			);
+			$this->hasGeneratedStyles = true;
 		}
 
 		$localDir = dirname( $localPath );
@@ -1042,15 +1048,6 @@ class FileModule extends Module {
 	 */
 	public function getFlip( Context $context ) {
 		return $context->getDirection() === 'rtl' && !$this->noflip;
-	}
-
-	/**
-	 * Get target(s) for the module, eg ['desktop'] or ['desktop', 'mobile']
-	 *
-	 * @return string[]
-	 */
-	public function getTargets() {
-		return $this->targets;
 	}
 
 	/**
@@ -1090,7 +1087,8 @@ class FileModule extends Module {
 		static $cache;
 		// @TODO: dependency injection
 		if ( !$cache ) {
-			$cache = ObjectCache::getLocalServerInstance( CACHE_ANYTHING );
+			$cache = MediaWikiServices::getInstance()->getObjectCacheFactory()
+				->getLocalServerInstance( CACHE_ANYTHING );
 		}
 
 		$skinName = $context->getSkin();
@@ -1102,11 +1100,14 @@ class FileModule extends Module {
 
 		$vars = $this->getLessVars( $context );
 		// Construct a cache key from a hash of the LESS source, and a hash digest
-		// of the LESS variables used for compilation.
+		// of the LESS variables and import dirs used for compilation.
 		ksort( $vars );
 		$compilerParams = [
 			'vars' => $vars,
 			'importDirs' => $importDirs,
+			// CodexDevelopmentDir affects import path mapping in ResourceLoader::getLessCompiler(),
+			// so take that into account too
+			'codexDevDir' => $this->getConfig()->get( MainConfigNames::CodexDevelopmentDir )
 		];
 		$key = $cache->makeGlobalKey(
 			'resourceloader-less',
@@ -1128,7 +1129,7 @@ class FileModule extends Module {
 			// T253055: store the implicit dependency paths in a form relative to any install
 			// path so that multiple version of the application can share the cache for identical
 			// less stylesheets. This also avoids churn during application updates.
-			$files = $compiler->AllParsedFiles();
+			$files = $compiler->getParsedFiles();
 			$data = [
 				'css'   => $css,
 				'files' => Module::getRelativePaths( $files ),
@@ -1180,7 +1181,8 @@ class FileModule extends Module {
 	 * If-None-Match headers for a HTTP 304 response.
 	 *
 	 * @param Context $context
-	 * @return array|null
+	 * @return array|null Array of arrays as returned by expandFileInfo(), with the key being
+	 *   the file name, or null if this is not a package file module.
 	 * @phan-return array{main:?string,files:array[]}|null
 	 */
 	private function expandPackageFiles( Context $context ) {
@@ -1195,21 +1197,11 @@ class FileModule extends Module {
 		$mainFile = null;
 
 		foreach ( $this->packageFiles as $key => $fileInfo ) {
-			if ( !is_array( $fileInfo ) ) {
-				$fileInfo = [ 'name' => $fileInfo, 'file' => $fileInfo ];
-			}
-			if ( !isset( $fileInfo['name'] ) ) {
-				$msg = "Missing 'name' key in package file info for module '{$this->getName()}'," .
-					" offset '{$key}'.";
-				$this->getLogger()->error( $msg );
-				throw new LogicException( $msg );
-			}
-			$fileName = $this->getPath( $fileInfo['name'] );
-
-			// Infer type from alias if needed
-			$type = $fileInfo['type'] ?? self::getPackageFileType( $fileName );
-			$expanded = [ 'type' => $type ];
-			if ( !empty( $fileInfo['main'] ) ) {
+			$expanded = $this->expandFileInfo( $context, $fileInfo, "packageFiles[$key]" );
+			$fileName = $expanded['name'];
+			if ( !empty( $expanded['main'] ) ) {
+				unset( $expanded['main'] );
+				$type = $expanded['type'];
 				$mainFile = $fileName;
 				if ( $type !== 'script' && $type !== 'script-vue' ) {
 					$msg = "Main file in package must be of type 'script', module " .
@@ -1218,80 +1210,6 @@ class FileModule extends Module {
 					throw new LogicException( $msg );
 				}
 			}
-
-			// Perform expansions (except 'file' and 'callback'), creating one of these keys:
-			// - 'content': literal value.
-			// - 'filePath': content to be read from a file.
-			// - 'callback': content computed by a callable.
-			if ( isset( $fileInfo['content'] ) ) {
-				$expanded['content'] = $fileInfo['content'];
-			} elseif ( isset( $fileInfo['file'] ) ) {
-				$expanded['filePath'] = $fileInfo['file'];
-			} elseif ( isset( $fileInfo['callback'] ) ) {
-				// If no extra parameter for the callback is given, use null.
-				$expanded['callbackParam'] = $fileInfo['callbackParam'] ?? null;
-
-				if ( !is_callable( $fileInfo['callback'] ) ) {
-					$msg = "Invalid 'callback' for module '{$this->getName()}', file '{$fileName}'.";
-					$this->getLogger()->error( $msg );
-					throw new LogicException( $msg );
-				}
-				if ( isset( $fileInfo['versionCallback'] ) ) {
-					if ( !is_callable( $fileInfo['versionCallback'] ) ) {
-						throw new LogicException( "Invalid 'versionCallback' for "
-							. "module '{$this->getName()}', file '{$fileName}'."
-						);
-					}
-
-					// Execute the versionCallback with the same arguments that
-					// would be given to the callback
-					$callbackResult = ( $fileInfo['versionCallback'] )(
-						$context,
-						$this->getConfig(),
-						$expanded['callbackParam']
-					);
-					if ( $callbackResult instanceof FilePath ) {
-						$expanded['filePath'] = $callbackResult;
-					} else {
-						$expanded['definitionSummary'] = $callbackResult;
-					}
-					// Don't invoke 'callback' here as it may be expensive (T223260).
-					$expanded['callback'] = $fileInfo['callback'];
-				} else {
-					// Else go ahead invoke callback with its arguments.
-					$callbackResult = ( $fileInfo['callback'] )(
-						$context,
-						$this->getConfig(),
-						$expanded['callbackParam']
-					);
-					if ( $callbackResult instanceof FilePath ) {
-						$expanded['filePath'] = $callbackResult;
-					} else {
-						$expanded['content'] = $callbackResult;
-					}
-				}
-			} elseif ( isset( $fileInfo['config'] ) ) {
-				if ( $type !== 'data' ) {
-					$msg = "Key 'config' only valid for data files. "
-						. " Module '{$this->getName()}', file '{$fileName}' is '{$type}'.";
-					$this->getLogger()->error( $msg );
-					throw new LogicException( $msg );
-				}
-				$expandedConfig = [];
-				foreach ( $fileInfo['config'] as $configKey => $var ) {
-					$expandedConfig[ is_numeric( $configKey ) ? $var : $configKey ] = $this->getConfig()->get( $var );
-				}
-				$expanded['content'] = $expandedConfig;
-			} elseif ( !empty( $fileInfo['main'] ) ) {
-				// [ 'name' => 'foo.js', 'main' => true ] is shorthand
-				$expanded['filePath'] = $fileName;
-			} else {
-				$msg = "Incomplete definition for module '{$this->getName()}', file '{$fileName}'. "
-					. "One of 'file', 'content', 'callback', or 'config' must be set.";
-				$this->getLogger()->error( $msg );
-				throw new LogicException( $msg );
-			}
-
 			$expandedFiles[$fileName] = $expanded;
 		}
 
@@ -1315,10 +1233,171 @@ class FileModule extends Module {
 	}
 
 	/**
-	 * Resolve the package files definition and generates the content of each package file.
+	 * Process a file info array as specified in configuration or extension.json,
+	 * expanding shortcuts and callbacks.
+	 *
+	 * @see MainConfigSchema::ResourceModules
 	 *
 	 * @param Context $context
-	 * @return array|null Package files data structure, see ResourceLoaderModule::getScript()
+	 * @param array|string|FilePath $fileInfo
+	 * @param string $debugKey
+	 * @return array An associative array with the following keys:
+	 *   - name: (string) The filename relative to the module base. This is unique only within
+	 *     the context of the current module. It may be a virtual name.
+	 *   - type: (string) May be 'script', 'script-vue', 'data' or 'text'
+	 *   - filePath: (FilePath) The FilePath object which should be used to load the content.
+	 *     This will be absent if the content was loaded another way.
+	 *   - virtualFilePath: (FilePath) A FilePath object for a virtual path which doesn't actually
+	 *     exist. This is used for source map generation. Optional.
+	 *   - versionFilePath: (FilePath) A FilePath object which is the ultimate source of a
+	 *     generated file. The timestamp and contents will be used for version generation.
+	 *     Generated by the callback specified in versionCallback. Optional.
+	 *   - content: (string|mixed) If the 'type' element is 'script', this is a string containing
+	 *     JS code, being the contents of the script file. For any other type, this contains data
+	 *     which will be JSON serialized. Optional, if not set, it will be set in readFileInfo().
+	 *   - callback: (callable) A callback to call to obtain the contents. This will be set if the
+	 *     version callback was present in the input, indicating that the callback is expensive.
+	 *   - callbackParam: (array) The parameters to be passed to the callback.
+	 *   - definitionSummary: (array) The data returned by the version callback.
+	 *   - main: (bool) Whether the file is the main file of the package.
+	 */
+	private function expandFileInfo( Context $context, $fileInfo, $debugKey ) {
+		if ( is_string( $fileInfo ) ) {
+			// Inline common case
+			return [
+				'name' => $fileInfo,
+				'type' => self::getPackageFileType( $fileInfo ),
+				'filePath' => new FilePath( $fileInfo, $this->localBasePath, $this->remoteBasePath )
+			];
+		} elseif ( $fileInfo instanceof FilePath ) {
+			$fileInfo = [
+				'name' => $fileInfo->getPath(),
+				'file' => $fileInfo
+			];
+		} elseif ( !is_array( $fileInfo ) ) {
+			$msg = "Invalid type in $debugKey for module '{$this->getName()}', " .
+				"must be array, string or FilePath";
+			$this->getLogger()->error( $msg );
+			throw new LogicException( $msg );
+		}
+		if ( !isset( $fileInfo['name'] ) ) {
+			$msg = "Missing 'name' key in $debugKey for module '{$this->getName()}'";
+			$this->getLogger()->error( $msg );
+			throw new LogicException( $msg );
+		}
+		$fileName = $this->getPath( $fileInfo['name'] );
+
+		// Infer type from alias if needed
+		$type = $fileInfo['type'] ?? self::getPackageFileType( $fileName );
+		$expanded = [
+			'name' => $fileName,
+			'type' => $type
+		];
+		if ( !empty( $fileInfo['main'] ) ) {
+			$expanded['main'] = true;
+		}
+
+		// Perform expansions (except 'file' and 'callback'), creating one of these keys:
+		// - 'content': literal value.
+		// - 'filePath': content to be read from a file.
+		// - 'callback': content computed by a callable.
+		if ( isset( $fileInfo['content'] ) ) {
+			$expanded['content'] = $fileInfo['content'];
+		} elseif ( isset( $fileInfo['file'] ) ) {
+			$expanded['filePath'] = $this->makeFilePath( $fileInfo['file'] );
+		} elseif ( isset( $fileInfo['callback'] ) ) {
+			// If no extra parameter for the callback is given, use null.
+			$expanded['callbackParam'] = $fileInfo['callbackParam'] ?? null;
+
+			if ( !is_callable( $fileInfo['callback'] ) ) {
+				$msg = "Invalid 'callback' for module '{$this->getName()}', file '{$fileName}'.";
+				$this->getLogger()->error( $msg );
+				throw new LogicException( $msg );
+			}
+			if ( isset( $fileInfo['versionCallback'] ) ) {
+				if ( !is_callable( $fileInfo['versionCallback'] ) ) {
+					throw new LogicException( "Invalid 'versionCallback' for "
+						. "module '{$this->getName()}', file '{$fileName}'."
+					);
+				}
+
+				// Execute the versionCallback with the same arguments that
+				// would be given to the callback
+				$callbackResult = ( $fileInfo['versionCallback'] )(
+					$context,
+					$this->getConfig(),
+					$expanded['callbackParam']
+				);
+				if ( $callbackResult instanceof FilePath ) {
+					$callbackResult->initBasePaths( $this->localBasePath, $this->remoteBasePath );
+					$expanded['versionFilePath'] = $callbackResult;
+				} else {
+					$expanded['definitionSummary'] = $callbackResult;
+				}
+				// Don't invoke 'callback' here as it may be expensive (T223260).
+				$expanded['callback'] = $fileInfo['callback'];
+			} else {
+				// Else go ahead invoke callback with its arguments.
+				$callbackResult = ( $fileInfo['callback'] )(
+					$context,
+					$this->getConfig(),
+					$expanded['callbackParam']
+				);
+				if ( $callbackResult instanceof FilePath ) {
+					$callbackResult->initBasePaths( $this->localBasePath, $this->remoteBasePath );
+					$expanded['filePath'] = $callbackResult;
+				} else {
+					$expanded['content'] = $callbackResult;
+				}
+			}
+		} elseif ( isset( $fileInfo['config'] ) ) {
+			if ( $type !== 'data' ) {
+				$msg = "Key 'config' only valid for data files. "
+					. " Module '{$this->getName()}', file '{$fileName}' is '{$type}'.";
+				$this->getLogger()->error( $msg );
+				throw new LogicException( $msg );
+			}
+			$expandedConfig = [];
+			foreach ( $fileInfo['config'] as $configKey => $var ) {
+				$expandedConfig[ is_numeric( $configKey ) ? $var : $configKey ] = $this->getConfig()->get( $var );
+			}
+			$expanded['content'] = $expandedConfig;
+		} elseif ( !empty( $fileInfo['main'] ) ) {
+			// [ 'name' => 'foo.js', 'main' => true ] is shorthand
+			$expanded['filePath'] = $this->makeFilePath( $fileName );
+		} else {
+			$msg = "Incomplete definition for module '{$this->getName()}', file '{$fileName}'. "
+				. "One of 'file', 'content', 'callback', or 'config' must be set.";
+			$this->getLogger()->error( $msg );
+			throw new LogicException( $msg );
+		}
+		if ( !isset( $expanded['filePath'] ) ) {
+			$expanded['virtualFilePath'] = $this->makeFilePath( $fileName );
+		}
+		return $expanded;
+	}
+
+	/**
+	 * Cast a FilePath or string to a FilePath
+	 *
+	 * @param FilePath|string $path
+	 * @return FilePath
+	 */
+	private function makeFilePath( $path ): FilePath {
+		if ( $path instanceof FilePath ) {
+			return $path;
+		} elseif ( is_string( $path ) ) {
+			return new FilePath( $path, $this->localBasePath, $this->remoteBasePath );
+		} else {
+			throw new InvalidArgumentException( '$path must be either FilePath or string' );
+		}
+	}
+
+	/**
+	 * Resolve the package files definition and generate the content of each package file.
+	 *
+	 * @param Context $context
+	 * @return array|null Package files data structure, see Module::getScript()
 	 */
 	public function getPackageFiles( Context $context ) {
 		if ( $this->packageFiles === null ) {
@@ -1328,78 +1407,10 @@ class FileModule extends Module {
 		if ( isset( $this->fullyExpandedPackageFiles[ $hash ] ) ) {
 			return $this->fullyExpandedPackageFiles[ $hash ];
 		}
-		$expandedPackageFiles = $this->expandPackageFiles( $context );
+		$expandedPackageFiles = $this->expandPackageFiles( $context ) ?? [];
 
-		// Expand file contents
-		foreach ( $expandedPackageFiles['files'] as $fileName => &$fileInfo ) {
-			// Turn any 'filePath' or 'callback' key into actual 'content',
-			// and remove the key after that. The callback could return a
-			// ResourceLoaderFilePath object; if that happens, fall through
-			// to the 'filePath' handling.
-			if ( isset( $fileInfo['callback'] ) ) {
-				$callbackResult = ( $fileInfo['callback'] )(
-					$context,
-					$this->getConfig(),
-					$fileInfo['callbackParam']
-				);
-				if ( $callbackResult instanceof FilePath ) {
-					// Fall through to the filePath handling code below
-					$fileInfo['filePath'] = $callbackResult;
-				} else {
-					$fileInfo['content'] = $callbackResult;
-				}
-				unset( $fileInfo['callback'] );
-			}
-			// Only interpret 'filePath' if 'content' hasn't been set already.
-			// This can happen if 'versionCallback' provided 'filePath',
-			// while 'callback' provides 'content'. In that case both are set
-			// at this point. The 'filePath' from 'versionCallback' in that case is
-			// only to inform getDefinitionSummary().
-			if ( !isset( $fileInfo['content'] ) && isset( $fileInfo['filePath'] ) ) {
-				$localPath = $this->getLocalPath( $fileInfo['filePath'] );
-				$content = $this->getFileContents( $localPath, 'package' );
-				if ( $fileInfo['type'] === 'data' ) {
-					$content = json_decode( $content );
-				}
-				$fileInfo['content'] = $content;
-				unset( $fileInfo['filePath'] );
-			}
-			if ( $fileInfo['type'] === 'script-vue' ) {
-				try {
-					$parsedComponent = $this->getVueComponentParser()->parse(
-						// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
-						$fileInfo['content'],
-						[ 'minifyTemplate' => !$context->getDebug() ]
-					);
-				} catch ( TimeoutException $e ) {
-					throw $e;
-				} catch ( Exception $e ) {
-					$msg = "Error parsing file '$fileName' in module '{$this->getName()}': " .
-						$e->getMessage();
-					$this->getLogger()->error( $msg );
-					throw new RuntimeException( $msg );
-				}
-				$encodedTemplate = json_encode( $parsedComponent['template'] );
-				if ( $context->getDebug() ) {
-					// Replace \n (backslash-n) with space + backslash-newline in debug mode
-					// We only replace \n if not preceded by a backslash, to avoid breaking '\\n'
-					$encodedTemplate = preg_replace( '/(?<!\\\\)\\\\n/', " \\\n", $encodedTemplate );
-					// Expand \t to real tabs in debug mode
-					$encodedTemplate = strtr( $encodedTemplate, [ "\\t" => "\t" ] );
-				}
-				$fileInfo['content'] = [
-					'script' => $parsedComponent['script'] .
-						";\nmodule.exports.template = $encodedTemplate;",
-					'style' => $parsedComponent['style'] ?? '',
-					'styleLang' => $parsedComponent['styleLang'] ?? 'css'
-				];
-				$fileInfo['type'] = 'script+style';
-			}
-
-			// Not needed for client response, exists for use by getDefinitionSummary().
-			unset( $fileInfo['definitionSummary'] );
-			// Not needed for client response, used by callbacks only.
-			unset( $fileInfo['callbackParam'] );
+		foreach ( $expandedPackageFiles['files'] as &$fileInfo ) {
+			$this->readFileInfo( $context, $fileInfo );
 		}
 
 		$this->fullyExpandedPackageFiles[ $hash ] = $expandedPackageFiles;
@@ -1407,7 +1418,92 @@ class FileModule extends Module {
 	}
 
 	/**
-	 * Takes an input string and removes the UTF-8 BOM character if present
+	 * Given a file info array as returned by expandFileInfo(), expand the file paths and
+	 * remaining callbacks, ensuring that the 'content' element is populated. Modify
+	 * the array by reference, removing intermediate data such as callback parameters.
+	 *
+	 * @param Context $context
+	 * @param array &$fileInfo
+	 */
+	private function readFileInfo( Context $context, array &$fileInfo ) {
+		// Turn any 'filePath' or 'callback' key into actual 'content',
+		// and remove the key after that. The callback could return a
+		// FilePath object; if that happens, fall through to the 'filePath'
+		// handling.
+		if ( !isset( $fileInfo['content'] ) && isset( $fileInfo['callback'] ) ) {
+			$callbackResult = ( $fileInfo['callback'] )(
+				$context,
+				$this->getConfig(),
+				$fileInfo['callbackParam']
+			);
+			if ( $callbackResult instanceof FilePath ) {
+				// Fall through to the filePath handling code below
+				$fileInfo['filePath'] = $callbackResult;
+			} else {
+				$fileInfo['content'] = $callbackResult;
+			}
+			unset( $fileInfo['callback'] );
+		}
+		// Only interpret 'filePath' if 'content' hasn't been set already.
+		// This can happen if 'versionCallback' provided 'filePath',
+		// while 'callback' provides 'content'. In that case both are set
+		// at this point. The 'filePath' from 'versionCallback' in that case is
+		// only to inform getDefinitionSummary().
+		if ( !isset( $fileInfo['content'] ) && isset( $fileInfo['filePath'] ) ) {
+			$localPath = $this->getLocalPath( $fileInfo['filePath'] );
+			$content = $this->getFileContents( $localPath, 'package' );
+			if ( $fileInfo['type'] === 'data' ) {
+				$content = json_decode( $content, false, 512, JSON_THROW_ON_ERROR );
+			}
+			$fileInfo['content'] = $content;
+		}
+		if ( $fileInfo['type'] === 'script-vue' ) {
+			try {
+				$parsedComponent = $this->getVueComponentParser()->parse(
+				// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset False positive
+					$fileInfo['content'],
+					[ 'minifyTemplate' => !$context->getDebug() ]
+				);
+			} catch ( TimeoutException $e ) {
+				throw $e;
+			} catch ( Exception $e ) {
+				$msg = "Error parsing file '{$fileInfo['name']}' in module '{$this->getName()}': " .
+					$e->getMessage();
+				$this->getLogger()->error( $msg );
+				throw new RuntimeException( $msg );
+			}
+			$encodedTemplate = json_encode( $parsedComponent['template'] );
+			if ( $context->getDebug() ) {
+				// Replace \n (backslash-n) with space + backslash-n + backslash-newline in debug mode
+				// The \n has to be preserved to prevent Vue parser issues (T351771)
+				// We only replace \n if not preceded by a backslash, to avoid breaking '\\n'
+				$encodedTemplate = preg_replace( '/(?<!\\\\)\\\\n/', " \\n\\\n", $encodedTemplate );
+				// Expand \t to real tabs in debug mode
+				$encodedTemplate = strtr( $encodedTemplate, [ "\\t" => "\t" ] );
+			}
+			$fileInfo['content'] = [
+				'script' => $parsedComponent['script'] .
+					";\nmodule.exports.template = $encodedTemplate;",
+				'style' => $parsedComponent['style'] ?? '',
+				'styleLang' => $parsedComponent['styleLang'] ?? 'css'
+			];
+			$fileInfo['type'] = 'script+style';
+		}
+		if ( !isset( $fileInfo['content'] ) ) {
+			// This should not be possible due to validation in expandFileInfo()
+			$msg = "Unable to resolve contents for file {$fileInfo['name']}";
+			$this->getLogger()->error( $msg );
+			throw new RuntimeException( $msg );
+		}
+
+		// Not needed for client response, exists for use by getDefinitionSummary().
+		unset( $fileInfo['definitionSummary'] );
+		// Not needed for client response, used by callbacks only.
+		unset( $fileInfo['callbackParam'] );
+	}
+
+	/**
+	 * Take an input string and remove the UTF-8 BOM character if present
 	 *
 	 * We need to remove these after reading a file, because we concatenate our files and
 	 * the BOM character is not valid in the middle of a string.
@@ -1423,6 +1519,3 @@ class FileModule extends Module {
 		return $input;
 	}
 }
-
-/** @deprecated since 1.39 */
-class_alias( FileModule::class, 'ResourceLoaderFileModule' );

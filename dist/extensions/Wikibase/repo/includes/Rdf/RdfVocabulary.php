@@ -3,9 +3,10 @@
 namespace Wikibase\Repo\Rdf;
 
 use DataValues\DataValue;
+use InvalidArgumentException;
+use MediaWiki\Language\LanguageCode;
 use OutOfBoundsException;
 use Wikibase\DataAccess\EntitySourceDefinitions;
-use Wikibase\DataModel\Assert\RepositoryNameAssert;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Statement\Statement;
 use Wikimedia\Assert\Assert;
@@ -63,12 +64,6 @@ class RdfVocabulary {
 	private const COMMONS_DATA_URI = 'http://commons.wikimedia.org/data/main/';
 	private const GEO_URI = 'http://www.opengis.net/ont/geosparql#';
 	private const PROV_URI = 'http://www.w3.org/ns/prov#';
-
-	// Gregorian calendar link.
-	// I'm not very happy about hardcoding it here but see no better way so far.
-	// See also DataValues\TimeValue\TimeFormatter::XXX_CALENDAR constants.
-	private const GREGORIAN_CALENDAR = 'http://www.wikidata.org/entity/Q1985727';
-	private const JULIAN_CALENDAR = 'http://www.wikidata.org/entity/Q1985786';
 
 	/**
 	 * URI for unit "1"
@@ -167,8 +162,6 @@ class RdfVocabulary {
 		string $licenseUrl = 'http://creativecommons.org/publicdomain/zero/1.0/'
 	) {
 		Assert::parameterElementType( 'string', $conceptUris, '$conceptUris' );
-		RepositoryNameAssert::assertParameterKeysAreValidRepositoryNames( $conceptUris, '$conceptUris' );
-
 		Assert::parameterElementType( 'string', $dataUris, '$dataUris' );
 
 		Assert::parameter(
@@ -370,12 +363,7 @@ class RdfVocabulary {
 	 * @return string
 	 */
 	public function getEntityLName( EntityId $entityId ) {
-		$id = $entityId->getSerialization();
-
-		$localIdPart = $entityId->getLocalPart();
-		// If local ID part (ID excluding repository prefix) contains a colon, ie. the ID contains
-		// "chained" repository prefixes, replace all colons with periods in the local ID part.
-		return str_replace( ':', '.', $localIdPart );
+		return $entityId->getSerialization();
 	}
 
 	/**
@@ -394,7 +382,11 @@ class RdfVocabulary {
 	 * @return string
 	 */
 	public function getStatementLName( Statement $statement ) {
-		return preg_replace( '/[^\w-]/', '-', $statement->getGuid() );
+		$guid = $statement->getGuid();
+		if ( $guid === null ) {
+			throw new InvalidArgumentException( 'Can only process statements that have a non-null GUID' );
+		}
+		return preg_replace( '/[^\w-]/', '-', $guid );
 	}
 
 	/**
@@ -487,7 +479,7 @@ class RdfVocabulary {
 			return $this->canonicalLanguageCodes[$languageCode];
 		}
 
-		self::$canonicalLanguageCodeCache[$languageCode] = \LanguageCode::bcp47( $languageCode );
+		self::$canonicalLanguageCodeCache[$languageCode] = LanguageCode::bcp47( $languageCode );
 		return self::$canonicalLanguageCodeCache[$languageCode];
 	}
 

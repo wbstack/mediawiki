@@ -1,16 +1,19 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Actions;
 
-use CommentStoreComment;
-use EntitySchema\DataAccess\MediaWikiRevisionSchemaUpdater;
-use EntitySchema\Domain\Model\SchemaId;
-use EntitySchema\Services\SchemaConverter\FullArraySchemaData;
+use EntitySchema\DataAccess\EntitySchemaStatus;
+use EntitySchema\DataAccess\MediaWikiRevisionEntitySchemaUpdater;
+use EntitySchema\Domain\Model\EntitySchemaId;
+use EntitySchema\MediaWiki\EntitySchemaRedirectTrait;
+use EntitySchema\Services\Converter\FullArrayEntitySchemaData;
+use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
 use PermissionsError;
 use ReadOnlyError;
-use RuntimeException;
-use Status;
 use UserBlockedError;
 
 /**
@@ -18,15 +21,17 @@ use UserBlockedError;
  */
 class UndoSubmitAction extends AbstractUndoAction {
 
-	public function getName() {
+	use EntitySchemaRedirectTrait;
+
+	public function getName(): string {
 		return 'submit';
 	}
 
-	public function getRestriction() {
+	public function getRestriction(): string {
 		return 'edit';
 	}
 
-	public function show() {
+	public function show(): void {
 		$permStatus = $this->checkPermissions();
 		if ( !$permStatus->isOK() ) {
 			$this->showUndoErrorPage( $permStatus );
@@ -36,11 +41,10 @@ class UndoSubmitAction extends AbstractUndoAction {
 		$undoStatus = $this->undo();
 		if ( !$undoStatus->isOK() ) {
 			$this->showUndoErrorPage( $undoStatus );
+			return;
 		}
 
-		$this->getOutput()->redirect(
-			$this->getTitle()->getFullURL()
-		);
+		$this->redirectToEntitySchema( $undoStatus );
 	}
 
 	/**
@@ -73,62 +77,60 @@ class UndoSubmitAction extends AbstractUndoAction {
 		return Status::newGood();
 	}
 
-	private function undo(): Status {
+	private function undo(): EntitySchemaStatus {
 		$req = $this->getContext()->getRequest();
 
 		$diffStatus = $this->getDiffFromRequest( $req );
 		if ( !$diffStatus->isOK() ) {
-			return $diffStatus;
+			return EntitySchemaStatus::wrap( $diffStatus );
 		}
 
 		$patchStatus = $this->tryPatching( $diffStatus->getValue() );
 		if ( !$patchStatus->isOK() ) {
-			return $patchStatus;
+			return EntitySchemaStatus::wrap( $patchStatus );
 		}
 
-		return $this->storePatchedSchema( ...$patchStatus->getValue() );
+		[ $patchedSchema, $baseRevId ] = $patchStatus->getValue();
+		return $this->storePatchedSchema( $patchedSchema, $baseRevId );
 	}
 
-	private function storePatchedSchema( FullArraySchemaData $patchedSchema, int $baseRevId ): Status {
-		$schemaUpdater = MediaWikiRevisionSchemaUpdater::newFromContext( $this->getContext() );
+	private function storePatchedSchema(
+		FullArrayEntitySchemaData $patchedSchema,
+		int $baseRevId
+	): EntitySchemaStatus {
+		$schemaUpdater = MediaWikiRevisionEntitySchemaUpdater::newFromContext( $this->getContext() );
 
 		$summary = $this->createSummaryCommentForUndoRev(
 			$this->getContext()->getRequest()->getText( 'wpSummary' ),
 			$this->getContext()->getRequest()->getInt( 'undo' )
 			);
 
-		try {
-			$schemaUpdater->overwriteWholeSchema(
-				new SchemaId( $this->getTitle()->getTitleValue()->getText() ),
-				$patchedSchema->data['labels'],
-				$patchedSchema->data['descriptions'],
-				$patchedSchema->data['aliases'],
-				$patchedSchema->data['schemaText'],
-				$baseRevId,
-				$summary
-			);
-		} catch ( RuntimeException $e ) {
-			return Status::newFatal( 'entityschema-error-saving-failed', $e->getMessage() );
-		}
-
-		return Status::newGood();
+		return $schemaUpdater->overwriteWholeSchema(
+			new EntitySchemaId( $this->getTitle()->getTitleValue()->getText() ),
+			$patchedSchema->data['labels'],
+			$patchedSchema->data['descriptions'],
+			$patchedSchema->data['aliases'],
+			$patchedSchema->data['schemaText'],
+			$baseRevId,
+			$summary
+		);
 	}
 
-	private function createSummaryCommentForUndoRev( $userSummary, $undoRevId ): CommentStoreComment {
+	private function createSummaryCommentForUndoRev( string $userSummary, int $undoRevId ): CommentStoreComment {
 		$revToBeUndone = MediaWikiServices::getInstance()
 			->getRevisionStore()
 			->getRevisionById( $undoRevId );
 		$userName = $revToBeUndone->getUser()->getName();
-		$autoComment = MediaWikiRevisionSchemaUpdater::AUTOCOMMENT_UNDO
+		$autoComment = MediaWikiRevisionEntitySchemaUpdater::AUTOCOMMENT_UNDO
 			. ':' . $undoRevId
 			. ':' . $userName;
 		return CommentStoreComment::newUnsavedComment(
 			'/* ' . $autoComment . ' */' . $userSummary,
 			[
-				'key' => MediaWikiRevisionSchemaUpdater::AUTOCOMMENT_UNDO,
+				'key' => MediaWikiRevisionEntitySchemaUpdater::AUTOCOMMENT_UNDO,
 				'summary' => $userSummary,
 				'undoRevId' => $undoRevId,
-				'userName' => $userName
+				'userName' => $userName,
 			]
 		);
 	}

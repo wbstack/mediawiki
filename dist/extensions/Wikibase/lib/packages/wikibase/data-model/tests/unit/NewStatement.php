@@ -5,9 +5,12 @@ namespace Wikibase\DataModel\Tests;
 use DataValues\DataValue;
 use DataValues\StringValue;
 use InvalidArgumentException;
+use LogicException;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdValue;
 use Wikibase\DataModel\Entity\NumericPropertyId;
+use Wikibase\DataModel\Reference;
+use Wikibase\DataModel\ReferenceList;
 use Wikibase\DataModel\Snak\PropertyNoValueSnak;
 use Wikibase\DataModel\Snak\PropertySomeValueSnak;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
@@ -52,11 +55,16 @@ class NewStatement {
 	private $qualifiers = [];
 
 	/**
+	 * @var Reference[]
+	 */
+	private $references = [];
+
+	/**
 	 * @param NumericPropertyId|string $propertyId
-	 * @return self
+	 * @return static
 	 */
 	public static function forProperty( $propertyId ) {
-		$result = new self();
+		$result = new static();
 		if ( is_string( $propertyId ) ) {
 			$propertyId = new NumericPropertyId( $propertyId );
 		}
@@ -67,10 +75,10 @@ class NewStatement {
 
 	/**
 	 * @param NumericPropertyId|string $propertyId
-	 * @return self
+	 * @return static
 	 */
 	public static function someValueFor( $propertyId ) {
-		$result = self::forProperty( $propertyId );
+		$result = static::forProperty( $propertyId );
 		$result->type = PropertySomeValueSnak::class;
 
 		return $result;
@@ -78,10 +86,10 @@ class NewStatement {
 
 	/**
 	 * @param NumericPropertyId|string $propertyId
-	 * @return self
+	 * @return static
 	 */
 	public static function noValueFor( $propertyId ) {
-		$result = self::forProperty( $propertyId );
+		$result = static::forProperty( $propertyId );
 		$result->type = PropertyNoValueSnak::class;
 
 		return $result;
@@ -90,9 +98,13 @@ class NewStatement {
 	/**
 	 * @param DataValue|EntityId|string $dataValue If not a DataValue object, the builder tries to
 	 *  guess the type and turns it into a DataValue object.
-	 * @return self
+	 * @return static
 	 */
 	public function withValue( $dataValue ) {
+		if ( $this->type !== null && $this->type !== PropertyValueSnak::class ) {
+			throw new LogicException( "Statements of type {$this->type} must not have a value" );
+		}
+
 		$result = clone $this;
 
 		$result->dataValue = $this->createDataValueObject( $dataValue );
@@ -103,7 +115,7 @@ class NewStatement {
 
 	/**
 	 * @param int $rank
-	 * @return self
+	 * @return static
 	 */
 	public function withRank( $rank ) {
 		$result = clone $this;
@@ -127,12 +139,12 @@ class NewStatement {
 
 	/**
 	 * @param string $guid
-	 * @return self
+	 * @return static
 	 */
 	public function withGuid( $guid ) {
 		$result = clone $this;
 		if ( $result->guid !== null ) {
-			throw new \LogicException( 'Cannot redefine GUID' );
+			throw new LogicException( 'Cannot redefine GUID' );
 		}
 
 		$result->guid = (string)$guid;
@@ -141,12 +153,12 @@ class NewStatement {
 	}
 
 	/**
-	 * @return self
+	 * @return static
 	 */
 	public function withSomeGuid() {
 		$result = clone $this;
 		if ( $result->guid !== null ) {
-			throw new \LogicException( 'Cannot redefine GUID' );
+			throw new LogicException( 'Cannot redefine GUID' );
 		}
 
 		$result->guid = self::GENERATE_GUID;
@@ -159,7 +171,7 @@ class NewStatement {
 	 * @param DataValue|EntityId|string $value If not a DataValue object, the builder tries to
 	 *  guess the type and turns it into a DataValue object.
 	 *
-	 * @return self
+	 * @return static
 	 */
 	public function withQualifier( $propertyId, $value ) {
 		$result = clone $this;
@@ -170,6 +182,18 @@ class NewStatement {
 		$value = $this->createDataValueObject( $value );
 
 		$result->qualifiers[] = new PropertyValueSnak( $propertyId, $value );
+
+		return $result;
+	}
+
+	/**
+	 * @param Reference $reference
+	 * @return static
+	 */
+	public function withReference( Reference $reference ) {
+		$result = clone $this;
+
+		$result->references[] = $reference;
 
 		return $result;
 	}
@@ -199,7 +223,7 @@ class NewStatement {
 				$snack = new PropertyValueSnak( $this->propertyId, $this->dataValue );
 				break;
 			default:
-				throw new \LogicException( "Unknown statement type: '{$this->type}'" );
+				throw new LogicException( "Unknown statement type: '{$this->type}'" );
 		}
 
 		$result = new Statement( $snack );
@@ -216,6 +240,8 @@ class NewStatement {
 		foreach ( $this->qualifiers as $qualifier ) {
 			$result->getQualifiers()->addSnak( $qualifier );
 		}
+
+		$result->setReferences( new ReferenceList( $this->references ) );
 
 		return $result;
 	}

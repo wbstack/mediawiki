@@ -3,7 +3,7 @@
  *
  * Class containing Flat linear data and a hash-value store.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -55,7 +55,7 @@ ve.dm.FlatLinearData.prototype.isElementData = function ( offset ) {
  * @return {boolean} At least one elements exists in data
  */
 ve.dm.FlatLinearData.prototype.containsElementData = function () {
-	var i = this.getLength();
+	let i = this.getLength();
 	while ( i-- ) {
 		if ( this.isElementData( i ) ) {
 			return true;

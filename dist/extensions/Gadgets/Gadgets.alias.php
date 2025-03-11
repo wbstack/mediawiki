@@ -214,6 +214,12 @@ $specialPageAliases['ko'] = [
 	'GadgetUsage' => [ '소도구사용량' ],
 ];
 
+/** Kashmiri (کٲشُر) */
+$specialPageAliases['ks-arab'] = [
+	'Gadgets' => [ 'آلہٕ' ],
+	'GadgetUsage' => [ 'آلہٕ_اِستِمال' ],
+];
+
 /** Ladino (Ladino) */
 $specialPageAliases['lad'] = [
 	'Gadgets' => [ 'Instrumenticos' ],
@@ -242,6 +248,12 @@ $specialPageAliases['mk'] = [
 /** Malayalam (മലയാളം) */
 $specialPageAliases['ml'] = [
 	'Gadgets' => [ 'കൂട' ],
+];
+
+/** Mon (ဘာသာ မန်) */
+$specialPageAliases['mnw'] = [
+	'Gadgets' => [ 'ကိရိယာဂမၠိုင်' ],
+	'GadgetUsage' => [ 'ကိရိယာစရင်အင်' ],
 ];
 
 /** Marathi (मराठी) */
@@ -403,6 +415,12 @@ $specialPageAliases['ur'] = [
 	'GadgetUsage' => [ 'آلات_کا_استعمال' ],
 ];
 
+/** Uzbek (oʻzbekcha) */
+$specialPageAliases['uz'] = [
+	'Gadgets' => [ 'Gadjetlar' ],
+	'GadgetUsage' => [ 'Gadjetlardan_foydalanish' ],
+];
+
 /** Venetian (vèneto) */
 $specialPageAliases['vec'] = [
 	'Gadgets' => [ 'Strumenti' ],
@@ -413,17 +431,14 @@ $specialPageAliases['vi'] = [
 	'Gadgets' => [ 'Tiện_ích', 'Công_cụ_đa_năng' ],
 ];
 
-/** Chinese (中文) */
-$specialPageAliases['zh'] = [
-	'Gadgets' => [ '小工具' ],
-];
-
 /** Simplified Chinese (中文（简体）) */
 $specialPageAliases['zh-hans'] = [
 	'Gadgets' => [ '小工具' ],
+	'GadgetUsage' => [ '小工具使用统计' ],
 ];
 
 /** Traditional Chinese (中文（繁體）) */
 $specialPageAliases['zh-hant'] = [
 	'Gadgets' => [ '小工具' ],
+	'GadgetUsage' => [ '小工具使用統計' ],
 ];

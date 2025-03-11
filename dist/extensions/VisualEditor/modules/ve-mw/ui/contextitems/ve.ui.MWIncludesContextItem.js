@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWIncludesContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -11,9 +11,9 @@
  * @extends ve.ui.LinearContextItem
  *
  * @constructor
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config]
  */
 ve.ui.MWIncludesContextItem = function VeUiMWIncludesContextItem() {
 	// Parent constructor
@@ -49,7 +49,7 @@ ve.ui.MWIncludesContextItem.static.modelClasses = [
  * @return {string}
  */
 ve.ui.MWIncludesContextItem.prototype.getLabelMessage = function () {
-	var key = {
+	const key = {
 		'mw:Includes/NoInclude': 'visualeditor-includes-noinclude-start',
 		'mw:Includes/NoInclude/End': 'visualeditor-includes-noinclude-end',
 		'mw:Includes/OnlyInclude': 'visualeditor-includes-onlyinclude-start',
@@ -64,7 +64,7 @@ ve.ui.MWIncludesContextItem.prototype.getLabelMessage = function () {
  * @return {jQuery}
  */
 ve.ui.MWIncludesContextItem.prototype.getDescriptionMessage = function () {
-	var key = {
+	const key = {
 		'mw:Includes/NoInclude': 'visualeditor-includes-noinclude-description',
 		'mw:Includes/OnlyInclude': 'visualeditor-includes-onlyinclude-description',
 		'mw:Includes/IncludeOnly': 'visualeditor-includes-includeonly-description'
@@ -79,11 +79,11 @@ ve.ui.MWIncludesContextItem.prototype.getDescriptionMessage = function () {
 ve.ui.MWIncludesContextItem.prototype.renderBody = function () {
 	this.$body.empty();
 
-	var $desc = this.getDescriptionMessage();
+	const $desc = this.getDescriptionMessage();
 	this.$body.append( $desc, $( document.createTextNode( mw.msg( 'word-separator' ) ) ) );
 
 	if ( this.model.getAttribute( 'mw' ) ) {
-		var wikitext = this.model.getAttribute( 'mw' ).src;
+		let wikitext = this.model.getAttribute( 'mw' ).src;
 		// The opening and closing tags are included, eww
 		wikitext = wikitext.replace( /^<includeonly>\s*([\s\S]*)\s*<\/includeonly>$/, '$1' );
 		this.$body.append( $( '<pre>' )
@@ -96,7 +96,7 @@ ve.ui.MWIncludesContextItem.prototype.renderBody = function () {
 		);
 	}
 
-	var $docMsg = mw.message( 'visualeditor-includes-documentation' ).parseDom();
+	const $docMsg = mw.message( 'visualeditor-includes-documentation' ).parseDom();
 	this.$body.append( $docMsg );
 };
 

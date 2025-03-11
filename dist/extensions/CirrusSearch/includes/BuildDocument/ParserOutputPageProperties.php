@@ -8,42 +8,31 @@ use CirrusSearch\SearchConfig;
 use Elastica\Document;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
-use ParserCache;
-use ParserOutput;
-use Sanitizer;
-use Title;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Title\Title;
+use Wikimedia\LightweightObjectStore\ExpirationAwareness;
 use WikiPage;
 
 /**
  * Extract searchable properties from the MediaWiki ParserOutput
  */
 class ParserOutputPageProperties implements PagePropertyBuilder {
-	/** @var ParserCache */
-	private $parserCache;
-	/** @var bool */
-	private $forceParse;
 	/** @var SearchConfig */
 	private $config;
 
 	/**
-	 * @param ParserCache $cache Cache to retrieve ParserOutput from
-	 * @param bool $forceParse When true ignore the cache and re-parse
-	 *  wikitext.
 	 * @param SearchConfig $config
 	 */
-	public function __construct( ParserCache $cache, bool $forceParse, SearchConfig $config ) {
-		$this->parserCache = $cache;
-		$this->forceParse = $forceParse;
+	public function __construct( SearchConfig $config ) {
 		$this->config = $config;
 	}
 
 	/**
 	 * {@inheritDoc}
-	 *
-	 * @param Document $doc The document to be populated
-	 * @param WikiPage $page The page to scope operation to
 	 */
-	public function initialize( Document $doc, WikiPage $page ): void {
+	public function initialize( Document $doc, WikiPage $page, RevisionRecord $revision ): void {
 		// NOOP
 	}
 
@@ -56,18 +45,10 @@ class ParserOutputPageProperties implements PagePropertyBuilder {
 
 	/**
 	 * {@inheritDoc}
-	 *
-	 * @param Document $doc
-	 * @param Title $title
-	 * @throws BuildDocumentException
 	 */
-	public function finalize( Document $doc, Title $title ): void {
+	public function finalize( Document $doc, Title $title, RevisionRecord $revision ): void {
 		$page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
-		// TODO: If parserCache is null here then we will parse for every
-		// cluster and every retry.  Maybe instead of forcing a parse, we could
-		// force a parser cache update during self::initialize?
-		$cache = $this->forceParse ? null : $this->parserCache;
-		$this->finalizeReal( $doc, $page, $cache, new CirrusSearch );
+		$this->finalizeReal( $doc, $page, new CirrusSearch, $revision );
 	}
 
 	/**
@@ -75,26 +56,60 @@ class ParserOutputPageProperties implements PagePropertyBuilder {
 	 *
 	 * @param Document $doc Document to finalize
 	 * @param WikiPage $page WikiPage to scope operation to
-	 * @param ?ParserCache $parserCache Cache to fetch parser output from. When null the
-	 *  wikitext parser will be invoked.
 	 * @param CirrusSearch $engine SearchEngine implementation
+	 * @param RevisionRecord $revision The page revision to use
 	 * @throws BuildDocumentException
 	 */
-	public function finalizeReal( Document $doc, WikiPage $page, ?ParserCache $parserCache, CirrusSearch $engine ): void {
-		$contentHandler = $page->getContentHandler();
-		// TODO: Should see if we can change content handler api to avoid
-		// the WikiPage god object, but currently parser cache is still
-		// tied to WikiPage as well.
-		$output = $contentHandler->getParserOutputForIndexing( $page, $parserCache );
+	public function finalizeReal(
+		Document $doc,
+		WikiPage $page,
+		CirrusSearch $engine,
+		RevisionRecord $revision
+	): void {
+		$wanCache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+		$cacheKey = $wanCache->makeKey(
+			'CirrusSearchParserOutputPageProperties',
+			$page->getId(),
+			$revision->getId(),
+			$page->getTouched(),
+			'v2'
+		);
 
-		if ( !$output ) {
-			throw new BuildDocumentException( "ParserOutput cannot be obtained." );
+		// We are having problems with low hit rates, but haven't been able to
+		// track down why that is. Log a sample of keys so we can evaluate if
+		// the problem is that $page->getTouched() is changing between
+		// invocations. -- eb 2024 july 9
+		if ( $page->getId() % 1000 === 0 ) {
+			LoggerFactory::getInstance( 'CirrusSearch' )->debug(
+				'Sampling of CirrusSearchParserOutputPageProperties cache keys: {cache_key}',
+				[
+					'cache_key' => $cacheKey,
+					'revision_id' => $revision->getId(),
+					'page_id' => $page->getId(),
+				] );
 		}
 
-		$fieldDefinitions = $engine->getSearchIndexFields();
-		$fieldContent = $contentHandler->getDataForSearchIndex( $page, $output, $engine );
-		$fieldContent = self::fixAndFlagInvalidUTF8InSource( $fieldContent, $page->getId() );
+		$fieldContent = $wanCache->getWithSetCallback(
+			$cacheKey,
+			ExpirationAwareness::TTL_HOUR * 6,
+			function () use ( $page, $revision, $engine ) {
+				$contentHandler = $page->getContentHandler();
+				// TODO: Should see if we can change content handler api to avoid
+				// the WikiPage god object, but currently parser cache is still
+				// tied to WikiPage as well.
+				$output = $contentHandler->getParserOutputForIndexing( $page, null, $revision );
+
+				if ( !$output ) {
+					throw new BuildDocumentException( "ParserOutput cannot be obtained." );
+				}
+
+				$fieldContent = $contentHandler->getDataForSearchIndex( $page, $output, $engine, $revision );
+				$fieldContent['display_title'] = self::extractDisplayTitle( $page->getTitle(), $output );
+				return self::fixAndFlagInvalidUTF8InSource( $fieldContent, $page->getId() );
+			}
+		);
 		$fieldContent = $this->truncateFileContent( $fieldContent );
+		$fieldDefinitions = $engine->getSearchIndexFields();
 		foreach ( $fieldContent as $field => $fieldData ) {
 			$doc->set( $field, $fieldData );
 			if ( isset( $fieldDefinitions[$field] ) ) {
@@ -102,8 +117,6 @@ class ParserOutputPageProperties implements PagePropertyBuilder {
 				CirrusIndexField::addIndexingHints( $doc, $field, $hints );
 			}
 		}
-
-		$doc->set( 'display_title', self::extractDisplayTitle( $page->getTitle(), $output ) );
 	}
 
 	/**
@@ -138,7 +151,7 @@ class ParserOutputPageProperties implements PagePropertyBuilder {
 		// The strategy here is to see if the portion before the : is a valid namespace
 		// in either the language of the wiki or the language of the page. If it is
 		// then we strip it from the display title.
-		list( $maybeNs, $maybeDisplayTitle ) = explode( ':', $clean, 2 );
+		[ $maybeNs, $maybeDisplayTitle ] = explode( ':', $clean, 2 );
 		$cleanTitle = Title::newFromText( $clean );
 		if ( $cleanTitle === null ) {
 			// The title is invalid, we cannot extract the ns prefix

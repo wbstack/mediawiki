@@ -2,9 +2,10 @@
 	"@metadata": {
 		"authors": [
 			"BamLifa",
+			"CapitainAfrika",
 			"Dfoy",
-			"Moyogo",
-			"CapitainAfrika"
+			"Eruedin",
+			"Moyogo"
 		]
 	},
 	"mobile-frontend-editor-edit": "Kobɔngisa",
@@ -14,5 +15,7 @@
 	"mobile-frontend-main-menu-nearby": "Pɛmbɛ́ni",
 	"mobile-frontend-main-menu-settings": "Palamɛ́tɛlɛ",
 	"mobile-frontend-main-menu-watchlist": "Nkásá nalandí",
-	"mobile-frontend-placeholder": "Luka na {{SITENAME}}"
+	"mobile-frontend-placeholder": "Boluki {{SITENAME}}",
+	"mobile-frontend-random-button": "Mbɛsɛ",
+	"minerva-page-actions-overflow": "Lisúsu"
 }

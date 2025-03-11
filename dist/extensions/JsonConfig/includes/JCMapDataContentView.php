@@ -1,12 +1,12 @@
 <?php
 namespace JsonConfig;
 
-use ExtensionRegistry;
-use FormatJson;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageReference;
-use ParserOptions;
-use ParserOutput;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Registration\ExtensionRegistry;
 
 /**
  * @package JsonConfig
@@ -31,15 +31,14 @@ class JCMapDataContentView extends JCContentView {
 		JCContent $content, PageReference $page, $revId, ParserOptions $options,
 		$generateHtml, ParserOutput &$output
 	) {
-		$mainParser = MediaWikiServices::getInstance()->getParser();
-		$parser = $mainParser->getFreshParser();
+		$parser = MediaWikiServices::getInstance()->getParserFactory()->getInstance();
 
 		$localizedData = $content->getLocalizedData( $options->getUserLangObj() );
 		if ( $localizedData ) {
 			$extReg = ExtensionRegistry::getInstance();
 
 			// Test both because for some reason getTags() is empty during preview
-			if ( in_array( 'mapframe', $mainParser->getTags(), true ) ||
+			if ( in_array( 'mapframe', $parser->getTags(), true ) ||
 				$extReg->isLoaded( 'Kartographer' )
 			) {
 				$zoom = $content->getField( 'zoom' );
@@ -64,15 +63,21 @@ $jsonText
 EOT;
 			} else {
 				$jsonText = FormatJson::encode( $localizedData->data, true, FormatJson::UTF8_OK );
-				if ( in_array( 'syntaxhighlight', $mainParser->getTags(), true ) ||
+				if ( in_array( 'syntaxhighlight', $parser->getTags(), true ) ||
 					$extReg->isLoaded( 'SyntaxHighlight' )
 				) {
 					$text = "<syntaxhighlight lang=json>\n$jsonText\n</syntaxhighlight>";
 				} else {
-					$text = "<pre>\n$jsonText\n</pre>";
+					$text = "<pre dir=ltr>\n$jsonText\n</pre>";
 				}
 			}
 			$output = $parser->parse( $text, $page, $options, true, true, $revId );
+		}
+
+		// avoid that $output->getRawText() throws down the line if there's errors in the JSON validation and
+		// $localizedData is null
+		if ( !$output->hasText() ) {
+			$output->setRawText( '' );
 		}
 
 		return $content->renderDescription( $options->getUserLangObj() ) . '<br>' .

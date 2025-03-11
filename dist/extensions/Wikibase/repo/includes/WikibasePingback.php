@@ -3,19 +3,19 @@
 declare( strict_types=1 );
 namespace Wikibase\Repo;
 
-use Config;
-use DeferredUpdates;
-use ExtensionRegistry;
-use FormatJson;
+use MediaWiki\Config\Config;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\Http\HttpRequestFactory;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\SiteStats\SiteStats;
+use MediaWiki\Utils\MWTimestamp;
 use MWCryptRand;
-use MWTimestamp;
-use ObjectCache;
+use ObjectCacheFactory;
 use Psr\Log\LoggerInterface;
-use RequestContext;
-use SiteStats;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\SettingsArray;
 use Wikimedia\Rdbms\ConnectionManager;
@@ -77,6 +77,11 @@ class WikibasePingback {
 	private $requestFactory;
 
 	/**
+	 * @var ObjectCacheFactory
+	 */
+	private $objectCacheFactory;
+
+	/**
 	 * @var ConnectionManager
 	 */
 	private $repoConnections;
@@ -87,23 +92,26 @@ class WikibasePingback {
 	 * @param ExtensionRegistry|null $extensionRegistry
 	 * @param SettingsArray|null $wikibaseRepoSettings
 	 * @param HttpRequestFactory|null $requestFactory
+	 * @param ObjectCacheFactory|null $objectCacheFactory
 	 * @param RepoDomainDb|null $repoDomainDb
 	 * @param string|null $key
 	 */
 	public function __construct(
-		Config $config = null,
-		LoggerInterface $logger = null,
-		ExtensionRegistry $extensionRegistry = null,
-		SettingsArray $wikibaseRepoSettings = null,
-		HTTPRequestFactory $requestFactory = null,
-		RepoDomainDb $repoDomainDb = null,
-		string $key = null
+		?Config $config = null,
+		?LoggerInterface $logger = null,
+		?ExtensionRegistry $extensionRegistry = null,
+		?SettingsArray $wikibaseRepoSettings = null,
+		?HTTPRequestFactory $requestFactory = null,
+		?ObjectCacheFactory $objectCacheFactory = null,
+		?RepoDomainDb $repoDomainDb = null,
+		?string $key = null
 	) {
 		$this->config = $config ?: RequestContext::getMain()->getConfig();
 		$this->logger = $logger ?: LoggerFactory::getInstance( __CLASS__ );
 		$this->extensionRegistry = $extensionRegistry ?: ExtensionRegistry::getInstance();
 		$this->wikibaseRepoSettings = $wikibaseRepoSettings ?: WikibaseRepo::getSettings();
 		$this->requestFactory = $requestFactory ?: MediaWikiServices::getInstance()->getHttpRequestFactory();
+		$this->objectCacheFactory = $objectCacheFactory ?: MediaWikiServices::getInstance()->getObjectCacheFactory();
 		$this->repoConnections = $repoDomainDb ? $repoDomainDb->connections() :
 			WikibaseRepo::getRepoDomainDbFactory()->newRepoDb()->connections();
 
@@ -146,20 +154,20 @@ class WikibasePingback {
 	/**
 	 * Record the fact that we have sent a pingback for this Wikibase version,
 	 * to ensure we don't submit data multiple times.
-	 * @return bool
 	 */
 	private function markSent() {
 		$dbw = $this->repoConnections->getWriteConnection();
 
 		$timestamp = MWTimestamp::time();
 
-		return $dbw->upsert(
-			'updatelog',
-			[ 'ul_key' => $this->key, 'ul_value' => $timestamp ],
-			'ul_key',
-			[ 'ul_value' => $timestamp ],
-			__METHOD__
-		);
+		$dbw->newInsertQueryBuilder()
+			->insertInto( 'updatelog' )
+			->row( [ 'ul_key' => $this->key, 'ul_value' => $timestamp ] )
+			->onDuplicateKeyUpdate()
+			->uniqueIndexFields( 'ul_key' )
+			->set( [ 'ul_value' => $timestamp ] )
+			->caller( __METHOD__ )
+			->execute();
 	}
 
 	/**
@@ -171,7 +179,7 @@ class WikibasePingback {
 	 * @return bool Whether lock was acquired
 	 */
 	private function acquireLock() {
-		$cache = ObjectCache::getLocalClusterInstance();
+		$cache = $this->objectCacheFactory->getLocalClusterInstance();
 		if ( !$cache->add( $this->key, 1, 60 * 60 ) ) {
 			return false;  // throttled
 		}
@@ -205,7 +213,7 @@ class WikibasePingback {
 			'SyntaxHighlight' => 'SH',
 			'Babel' => 'BBL',
 			'Auth_remoteuser' => 'AR',
-			'ArticlePlaceholder' => 'AP'
+			'ArticlePlaceholder' => 'AP',
 		];
 
 		$currentExtensions = array_keys( $this->extensionRegistry->getAllThings() );
@@ -240,7 +248,7 @@ class WikibasePingback {
 			'hasEntities'  => $hasEntities,
 			'federation'  => $federation,
 			'extensions'  => $extensions,
-			'termbox' => $this->wikibaseRepoSettings->getSetting( 'termboxEnabled' )
+			'termbox' => $this->wikibaseRepoSettings->getSetting( 'termboxEnabled' ),
 		];
 
 		$limit = ini_get( 'memory_limit' );
@@ -287,12 +295,14 @@ class WikibasePingback {
 			if ( $id === false ) {
 				$id = MWCryptRand::generateHex( 32 );
 				$dbw = $this->repoConnections->getWriteConnection();
-				$dbw->insert(
-					'updatelog',
-					[ 'ul_key' => 'WikibasePingback', 'ul_value' => $id ],
-					__METHOD__,
-					[ 'IGNORE' ]
-				);
+				$dbw->newInsertQueryBuilder()
+					->insertInto( 'updatelog' )
+					->ignore()
+					->row( [
+						'ul_key' => 'WikibasePingback',
+						'ul_value' => $id,
+					] )
+					->caller( __METHOD__ )->execute();
 
 				if ( !$dbw->affectedRows() ) {
 					$id = $dbw->newSelectQueryBuilder()
@@ -363,7 +373,7 @@ class WikibasePingback {
 		} );
 	}
 
-	public static function doSchedule( WikibasePingback $instance = null ) {
+	public static function doSchedule( ?WikibasePingback $instance = null ) {
 		$instance = $instance ?: new WikibasePingback;
 		if ( $instance->shouldSend() ) {
 			$instance->sendPingback();

@@ -1,11 +1,11 @@
 ( function () {
 	'use strict';
 
-	var attrName = 'data-revision-id';
+	const attrName = 'data-revision-id';
 
 	function reloadThankedState() {
-		$( 'a.mw-thanks-thank-link' ).each( function ( idx, el ) {
-			var $thankLink = $( el );
+		$( 'a.mw-thanks-thank-link' ).each( ( idx, el ) => {
+			const $thankLink = $( el );
 			if ( mw.thanks.thanked.contains( $thankLink.attr( attrName ) ) ) {
 				$thankLink.before(
 					$( '<span>' ).addClass( 'mw-thanks-thank-confirmation' ).text(
@@ -16,17 +16,20 @@
 		} );
 	}
 
-	// $thankLink is the element with the data-revision-id attribute
-	// $thankElement is the element to be removed on success
+	/**
+	 * Send thanks
+	 *
+	 * @param {jQuery} $thankLink The element with the data-revision-id attribute
+	 * @param {jQuery} $thankElement The element to be removed on success
+	 */
 	function sendThanks( $thankLink, $thankElement ) {
-		var source, apiParams;
-
 		if ( $thankLink.data( 'clickDisabled' ) ) {
 			// Prevent double clicks while we haven't received a response from API request
-			return false;
+			return;
 		}
 		$thankLink.data( 'clickDisabled', true );
 
+		let source;
 		// Determine the thank source (history, diff, or log).
 		if ( mw.config.get( 'wgAction' ) === 'history' ) {
 			source = 'history';
@@ -37,7 +40,7 @@
 		}
 
 		// Construct the API parameters.
-		apiParams = {
+		const apiParams = {
 			action: 'thank',
 			source: source
 		};
@@ -51,28 +54,30 @@
 		( new mw.Api() ).postWithToken( 'csrf', apiParams )
 			.then(
 				// Success
-				function () {
+				() => {
 					$thankElement.before( mw.message( 'thanks-thanked', mw.user, $thankLink.data( 'recipient-gender' ) ).escaped() );
 					$thankElement.remove();
 					mw.thanks.thanked.push( $thankLink.attr( attrName ) );
 				},
 				// Fail
-				function ( errorCode ) {
+				( errorCode ) => {
 					// If error occurred, enable attempting to thank again
 					$thankLink.data( 'clickDisabled', false );
+					let msg;
 					switch ( errorCode ) {
 						case 'invalidrevision':
-							OO.ui.alert( mw.msg( 'thanks-error-invalidrevision' ) );
+							msg = mw.msg( 'thanks-error-invalidrevision' );
 							break;
 						case 'ratelimited':
-							OO.ui.alert( mw.msg( 'thanks-error-ratelimited', mw.user ) );
+							msg = mw.msg( 'thanks-error-ratelimited', mw.user );
 							break;
 						case 'revdeleted':
-							OO.ui.alert( mw.msg( 'thanks-error-revdeleted' ) );
+							msg = mw.msg( 'thanks-error-revdeleted' );
 							break;
 						default:
-							OO.ui.alert( mw.msg( 'thanks-error-undefined', errorCode ) );
+							msg = mw.msg( 'thanks-error-undefined', errorCode );
 					}
+					OO.ui.alert( msg );
 				}
 			);
 	}
@@ -83,10 +88,10 @@
 	 * @param {jQuery} $content
 	 */
 	function addActionToLinks( $content ) {
-		var $thankLinks = $content.find( 'a.mw-thanks-thank-link' );
+		const $thankLinks = $content.find( 'a.mw-thanks-thank-link' );
 		if ( mw.config.get( 'thanks-confirmation-required' ) ) {
 			$thankLinks.each( function () {
-				var $thankLink = $( this );
+				const $thankLink = $( this );
 				$thankLink.confirmable( {
 					i18n: {
 						confirm: mw.msg( 'thanks-confirmation2', mw.user ),
@@ -103,7 +108,7 @@
 			} );
 		} else {
 			$thankLinks.on( 'click', function ( e ) {
-				var $thankLink = $( this );
+				const $thankLink = $( this );
 				e.preventDefault();
 				sendThanks( $thankLink, $thankLink );
 			} );
@@ -118,11 +123,15 @@
 		$( reloadThankedState );
 	}
 
-	$( function () {
+	$( () => {
 		addActionToLinks( $( 'body' ) );
 	} );
 
-	mw.hook( 'wikipage.diff' ).add( function ( $content ) {
+	mw.hook( 'wikipage.diff' ).add( ( $content ) => {
+		addActionToLinks( $content );
+	} );
+
+	mw.hook( 'wikipage.content' ).add( ( $content ) => {
 		addActionToLinks( $content );
 	} );
 }() );

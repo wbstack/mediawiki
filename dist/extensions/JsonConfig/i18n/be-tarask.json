@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Red Winged Duck"
+			"Red Winged Duck",
+			"Renessaince"
 		]
 	},
+	"jsonconfig-use-category": "Старонкі, якія выкарыстоўваюць пашырэньне JsonConfig",
 	"right-jsonconfig-flush": "маніпуляваньне JsonConfig праз API"
 }

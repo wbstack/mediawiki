@@ -38,7 +38,7 @@ class EntityIdValueTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $id, $newId );
 	}
 
-	public function instanceProvider() {
+	public static function instanceProvider() {
 		/** @var EntityId[] $ids */
 		$ids = [
 			new ItemId( 'Q1' ),
@@ -46,7 +46,6 @@ class EntityIdValueTest extends \PHPUnit\Framework\TestCase {
 			new NumericPropertyId( 'P1' ),
 			new NumericPropertyId( 'P31337' ),
 			new CustomEntityId( 'X567' ),
-			new NumericPropertyId( 'foo:P678' ),
 		];
 
 		$argLists = [];
@@ -79,14 +78,14 @@ class EntityIdValueTest extends \PHPUnit\Framework\TestCase {
 		$this->assertIsString( $id->getSortKey() );
 	}
 
-	public function provideGetArrayValue() {
+	public static function provideGetArrayValue() {
 		return [
 			'Q2147483647' => [
 				new ItemId( 'Q2147483647' ),
 				[
 					'entity-type' => 'item',
 					'numeric-id' => 2147483647,
-					'id' => 'Q2147483647'
+					'id' => 'Q2147483647',
 				],
 			],
 			'P31337' => [
@@ -104,14 +103,6 @@ class EntityIdValueTest extends \PHPUnit\Framework\TestCase {
 					'id' => 'X567',
 				],
 			],
-			'foo:P678' => [
-				new NumericPropertyId( 'foo:P678' ),
-				[
-					'entity-type' => 'property',
-					'numeric-id' => 678,
-					'id' => 'foo:P678',
-				],
-			],
 		];
 	}
 
@@ -126,35 +117,29 @@ class EntityIdValueTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testSerialize() {
+		$serialization = 'O:32:"Wikibase\DataModel\Entity\ItemId":1:{s:13:"serialization";s:6:"Q31337";}';
 		$id = new EntityIdValue( new ItemId( 'Q31337' ) );
 
-		$this->assertSame( 'C:32:"Wikibase\DataModel\Entity\ItemId":6:{Q31337}', $id->serialize() );
+		$this->assertSame(
+			$serialization,
+			$id->serialize()
+		);
 	}
 
-	public function provideDeserializationCompatibility() {
+	public static function provideDeserializationCompatibility() {
 		$local = new EntityIdValue( new ItemId( 'Q31337' ) );
-		$foreign = new EntityIdValue( new NumericPropertyId( 'foo:P678' ) );
 		$custom = new EntityIdValue( new CustomEntityId( 'X567' ) );
 
 		return [
-			'local: Version 0.5 alpha (f5b8b64)' => [
-				'C:39:"Wikibase\DataModel\Entity\EntityIdValue":14:{["item",31337]}',
-				$local
+			'local 2022-03 PHP 7.4+' => [
+				'O:39:"Wikibase\DataModel\Entity\EntityIdValue":'
+					. '1:{s:8:"entityId";O:32:"Wikibase\DataModel\Entity\ItemId":1:{s:13:"serialization";s:6:"Q31337";}}',
+				$local,
 			],
-			'local: Version 7.0 (7fcddfc)' => [
-				'C:39:"Wikibase\DataModel\Entity\EntityIdValue":'
-					. '50:{C:32:"Wikibase\DataModel\Entity\ItemId":6:{Q31337}}',
-				$local
-			],
-			'foreign: Version 7.0 (7fcddfc)' => [
-				'C:39:"Wikibase\DataModel\Entity\EntityIdValue":'
-					. '63:{C:43:"Wikibase\DataModel\Entity\NumericPropertyId":8:{foo:P678}}',
-				$foreign
-			],
-			'custom: Version 7.0 (7fcddfc): custom' => [
-				'C:39:"Wikibase\DataModel\Entity\EntityIdValue":'
-					. '58:{C:42:"Wikibase\DataModel\Fixtures\CustomEntityId":4:{X567}}',
-				$custom
+			'custom 2023-09 PHP 7.4+' => [
+				'O:39:"Wikibase\DataModel\Entity\EntityIdValue":'
+					. '1:{s:8:"entityId";O:42:"Wikibase\DataModel\Fixtures\CustomEntityId":1:{s:13:"serialization";s:4:"X567";}}',
+				$custom,
 			],
 		];
 	}
@@ -180,7 +165,7 @@ class EntityIdValueTest extends \PHPUnit\Framework\TestCase {
 		$this->assertEquals( $id, EntityIdValue::newFromArray( $array ) );
 	}
 
-	public function validArrayProvider() {
+	public static function validArrayProvider() {
 		return [
 			'Legacy format' => [ [
 				'entity-type' => 'item',
@@ -203,7 +188,7 @@ class EntityIdValueTest extends \PHPUnit\Framework\TestCase {
 		EntityIdValue::newFromArray( $invalidArray );
 	}
 
-	public function invalidArrayProvider() {
+	public static function invalidArrayProvider() {
 		return [
 			[ null ],
 

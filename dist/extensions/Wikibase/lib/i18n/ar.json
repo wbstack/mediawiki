@@ -10,6 +10,7 @@
 			"Eyas",
 			"Fitoschido",
 			"Gagnabil",
+			"Hubaishan",
 			"Macofe",
 			"Maroen1990",
 			"Meno25",
@@ -21,8 +22,7 @@
 			"زكريا",
 			"سامي الرحيلي",
 			"محمد أحمد عبد الفتاح",
-			"مشعل الحربي",
-			"Hubaishan"
+			"مشعل الحربي"
 		]
 	},
 	"specialpages-group-wikibase": "قاعدة الويكي",
@@ -38,6 +38,7 @@
 	"wikibase-error-ui-no-external-page": "الصفحة \"$2\" لم يمكن إيجادها على \"$1\".",
 	"wikibase-error-ui-edit-conflict": "نفس القيمة تم تعديلها في ذلك الوقت، مما تسبب في حدوث تضارب في التحرير. من فضلك أعد تحميل الصفحة.",
 	"wikibase-language-fallback-transliteration-hint": "$1 (مترجم)",
+	"wikibase-language-name-for-terms-mul": "افتراضيا لجميع اللغات",
 	"wikibase-quantitydetails-amount": "الكمية",
 	"wikibase-quantitydetails-upperbound": "الحد الأعلى",
 	"wikibase-quantitydetails-lowerbound": "الحد الأدنى",
@@ -73,7 +74,6 @@
 	"datatypes-type-geo-shape": "شكل جغرافي",
 	"datatypes-type-tabular-data": "بيانات مجدولة",
 	"datatypes-type-external-id": "معرف خارجي",
-	"datatypes-type-entity-schema": "مخطط الكيان",
 	"version-wikibase": "قاعدة ويكي",
 	"wikibase-time-calendar-gregorian": "غريغوري",
 	"wikibase-time-calendar-julian": "يولياني",
@@ -148,7 +148,9 @@
 	"wikibase-entity-summary-wbsetqualifier-add": "أضاف {{PLURAL:$1|تصفية|تصفيات}}",
 	"wikibase-entity-summary-wbsetqualifier-update": "غيّر {{PLURAL:$1|تصفية|تصفيات}}",
 	"wikibase-entity-summary-wbremovequalifiers-remove": "أزال {{PLURAL:$1|تصفية|تصفيات}}",
+	"wikibase-entity-summary-wbremovequalifiers-update": "أزال {{PLURAL:$1|تصفية|تصفيات}}",
 	"wikibase-entity-summary-wbremovereferences-remove": "أزال {{PLURAL:$3|مرجع|مراجع}} من ادعاء",
+	"wikibase-entity-summary-wbremovereferences-update": "أزال {{PLURAL:$3|مرجع|مراجع}} من ادعاء",
 	"wikibase-entity-summary-wbmergeitems-from": "دمج العنصر من $3",
 	"wikibase-entity-summary-wbmergeitems-to": "دمج العنصر إلى $3",
 	"wikibase-item-summary-wbcreate-new": "إنشاء عنصر جديد",

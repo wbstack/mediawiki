@@ -5,7 +5,7 @@ namespace Wikibase\Lexeme\MediaWiki\Content;
 use InvalidArgumentException;
 use LogicException;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityRedirect;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\Presentation\Content\LemmaTextSummaryFormatter;
@@ -48,9 +48,9 @@ class LexemeContent extends EntityContent {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct(
-		EntityHolder $lexemeHolder = null,
-		EntityRedirect $redirect = null,
-		Title $redirectTitle = null
+		?EntityHolder $lexemeHolder = null,
+		?EntityRedirect $redirect = null,
+		?Title $redirectTitle = null
 	) {
 		parent::__construct( self::CONTENT_MODEL_ID );
 
@@ -84,7 +84,7 @@ class LexemeContent extends EntityContent {
 			'language',
 			'site',
 			'type',
-			'hash'
+			'hash',
 		];
 	}
 
@@ -163,10 +163,10 @@ class LexemeContent extends EntityContent {
 			$count += $sense->getStatements()->count();
 		}
 
-		$properties['wb-claims'] = (string)$count;
+		$properties['wb-claims'] = $count;
 
-		$properties['wbl-senses'] = (string)$lexeme->getSenses()->count();
-		$properties['wbl-forms'] = (string)$lexeme->getForms()->count();
+		$properties['wbl-senses'] = $lexeme->getSenses()->count();
+		$properties['wbl-forms'] = $lexeme->getForms()->count();
 
 		return $properties;
 	}
@@ -202,7 +202,7 @@ class LexemeContent extends EntityContent {
 		$this->lexemeHolder = $lexemeHolder;
 	}
 
-	private function constructAsRedirect( EntityRedirect $redirect, Title $redirectTitle = null ) {
+	private function constructAsRedirect( EntityRedirect $redirect, ?Title $redirectTitle = null ) {
 		if ( $redirectTitle === null ) {
 			throw new InvalidArgumentException(
 				'$redirect and $redirectTitle must both be provided or both be empty.'

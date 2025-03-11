@@ -24,6 +24,10 @@
 
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Status\Status;
+use MediaWiki\Xml\Xml;
+use Wikimedia\FileBackend\FileBackend;
+use Wikimedia\FileBackend\HTTPFileStreamer;
 
 /**
  * Base class for the output of MediaHandler::doTransform() and File::transform().
@@ -190,17 +194,19 @@ abstract class MediaTransformOutput {
 	public function getLocalCopyPath() {
 		if ( $this->isError() ) {
 			return false;
-		} elseif ( $this->path === null ) {
+		}
+
+		if ( $this->path === null ) {
 			return $this->file->getLocalRefPath(); // assume thumb was not scaled
-		} elseif ( FileBackend::isStoragePath( $this->path ) ) {
+		}
+		if ( FileBackend::isStoragePath( $this->path ) ) {
 			$be = $this->file->getRepo()->getBackend();
 			// The temp file will be process cached by FileBackend
 			$fsFile = $be->getLocalReference( [ 'src' => $this->path ] );
 
 			return $fsFile ? $fsFile->getPath() : false;
-		} else {
-			return $this->path; // may return false
 		}
+		return $this->path; // may return false
 	}
 
 	/**
@@ -213,13 +219,25 @@ abstract class MediaTransformOutput {
 	public function streamFileWithStatus( $headers = [] ) {
 		if ( !$this->path ) {
 			return Status::newFatal( 'backend-fail-stream', '<no path>' );
-		} elseif ( FileBackend::isStoragePath( $this->path ) ) {
-			$be = $this->file->getRepo()->getBackend();
+		}
+
+		$repo = $this->file->getRepo();
+
+		if ( $repo && FileBackend::isStoragePath( $this->path ) ) {
 			return Status::wrap(
-				$be->streamFile( [ 'src' => $this->path, 'headers' => $headers ] ) );
-		} else { // FS-file
-			$success = StreamFile::stream( $this->getLocalCopyPath(), $headers );
-			return $success ? Status::newGood() : Status::newFatal( 'backend-fail-stream', $this->path );
+				$repo->getBackend()->streamFile(
+					[ 'src' => $this->path, 'headers' => $headers, ]
+				)
+			);
+		} else {
+			$streamer = new HTTPFileStreamer(
+				$this->getLocalCopyPath(),
+				$repo ? $repo->getBackend()->getStreamerOptions() : []
+			);
+
+			$success = $streamer->stream( $headers );
+			return $success ? Status::newGood()
+				: Status::newFatal( 'backend-fail-stream', $this->path );
 		}
 	}
 
@@ -245,15 +263,13 @@ abstract class MediaTransformOutput {
 	protected function linkWrap( $linkAttribs, $contents ) {
 		if ( isset( $linkAttribs['href'] ) ) {
 			return Xml::tags( 'a', $linkAttribs, $contents );
-		} else {
-			$parserEnableLegacyMediaDOM = MediaWikiServices::getInstance()
-				->getMainConfig()->get( MainConfigNames::ParserEnableLegacyMediaDOM );
-			if ( $parserEnableLegacyMediaDOM ) {
-				return $contents;
-			} else {
-				return Xml::tags( 'span', $linkAttribs ?: null, $contents );
-			}
 		}
+		$parserEnableLegacyMediaDOM = MediaWikiServices::getInstance()
+			->getMainConfig()->get( MainConfigNames::ParserEnableLegacyMediaDOM );
+		if ( $parserEnableLegacyMediaDOM ) {
+			return $contents;
+		}
+		return Xml::tags( 'span', $linkAttribs ?: null, $contents );
 	}
 
 	/**

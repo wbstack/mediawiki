@@ -4,11 +4,12 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use Site;
-use SiteList;
-use Status;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteList;
+use MediaWiki\Status\Status;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\SiteLink;
 use Wikibase\DataModel\SiteLinkList;
@@ -31,6 +32,8 @@ use Wikimedia\ParamValidator\ParamValidator;
  * @author Addshore
  */
 class LinkTitles extends ApiBase {
+
+	use ApiCreateTempUserTrait;
 
 	/** @var SiteLinkStore */
 	private $siteLinkStore;
@@ -136,13 +139,13 @@ class LinkTitles extends ApiBase {
 		$sites = $this->siteLinkTargetProvider->getSiteList( $this->siteLinkGroups );
 
 		/** @var Site $fromSite */
-		list( $fromSite, $fromPage ) = $this->getSiteAndNormalizedPageName(
+		[ $fromSite, $fromPage ] = $this->getSiteAndNormalizedPageName(
 			$sites,
 			$params['fromsite'],
 			$params['fromtitle']
 		);
 		/** @var Site $toSite */
-		list( $toSite, $toPage ) = $this->getSiteAndNormalizedPageName(
+		[ $toSite, $toPage ] = $this->getSiteAndNormalizedPageName(
 			$sites,
 			$params['tosite'],
 			$params['totitle']
@@ -205,7 +208,7 @@ class LinkTitles extends ApiBase {
 
 		$this->resultBuilder->addSiteLinkList( $siteLinkList, 'entity' );
 		$status = $this->getAttemptSaveStatus( $item, $summary, $flags );
-		$this->buildResult( $item, $status );
+		$this->buildResult( $item, $status, $params );
 	}
 
 	/**
@@ -229,29 +232,23 @@ class LinkTitles extends ApiBase {
 		return [ $siteObj, $page ];
 	}
 
-	private function getAttemptSaveStatus( ?Item $item, Summary $summary, int $flags ): Status {
-		if ( $item === null ) {
-			// to not have an Item isn't really bad at this point
-			return Status::newGood( true );
-		} else {
-			// Do the actual save, or if it don't exist yet create it.
-			return $this->entitySavingHelper->attemptSaveEntity(
-				$item,
-				$summary,
-				$this->extractRequestParams(),
-				$this->getContext(),
-				$flags
-			);
-		}
+	private function getAttemptSaveStatus( Item $item, Summary $summary, int $flags ): Status {
+		// Do the actual save, or if it don't exist yet create it.
+		return $this->entitySavingHelper->attemptSaveEntity(
+			$item,
+			$summary,
+			$this->extractRequestParams(),
+			$this->getContext(),
+			$flags
+		);
 	}
 
-	private function buildResult( ?Item $item, Status $status ): void {
-		if ( $item !== null ) {
-			$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'entity' );
-			$this->resultBuilder->addBasicEntityInformation( $item->getId(), 'entity' );
-		}
+	private function buildResult( Item $item, Status $status, array $params ): void {
+		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'entity' );
+		$this->resultBuilder->addBasicEntityInformation( $item->getId(), 'entity' );
 
 		$this->resultBuilder->markSuccess( $status->isOK() );
+		$this->resultBuilder->addTempUser( $status, fn( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
 	/**
@@ -287,7 +284,7 @@ class LinkTitles extends ApiBase {
 	protected function getAllowedParams(): array {
 		$siteIds = $this->siteLinkGlobalIdentifiersProvider->getList( $this->siteLinkGroups );
 
-		return array_merge( parent::getAllowedParams(), [
+		return array_merge( parent::getAllowedParams(), $this->getCreateTempUserParams(), [
 			'tosite' => [
 				ParamValidator::PARAM_TYPE => $siteIds,
 				ParamValidator::PARAM_REQUIRED => true,

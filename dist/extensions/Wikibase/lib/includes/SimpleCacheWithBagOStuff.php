@@ -3,37 +3,22 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Lib;
 
-use BagOStuff;
 use DateInterval;
 use DateTime;
 use Psr\Log\LoggerAwareTrait;
 use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
-use Traversable;
+use Wikimedia\ObjectCache\BagOStuff;
 
 /**
  * @license GPL-2.0-or-later
  */
 class SimpleCacheWithBagOStuff implements CacheInterface {
-
 	use LoggerAwareTrait;
 
-	private const INVALID_KEY_REGEX = '/[\{\}\(\)\/\\\\@:]/';
-
-	/**
-	 * @var BagOStuff
-	 */
-	private $inner;
-
-	/**
-	 * @var string
-	 */
-	private $prefix;
-
-	/**
-	 * @var string
-	 */
-	private $secret;
+	private BagOStuff $inner;
+	private string $prefix;
+	private string $secret;
 
 	/**
 	 * @param BagOStuff $inner
@@ -45,7 +30,7 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 	public function __construct( BagOStuff $inner, string $prefix, string $secret ) {
 		$this->assertKeyIsValid( $prefix );
 
-		if ( empty( $secret ) ) {
+		if ( $secret === '' ) {
 			throw new \InvalidArgumentException( "Secret is required to be a nonempty string" );
 		}
 
@@ -185,7 +170,6 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 	 */
 	public function setMultiple( $values, $ttl = null ) {
 		$values = $this->toAssociativeArray( $values );
-		$this->assertKeysAreValidAllowIntegers( array_keys( $values ) );
 
 		$ttl = $this->normalizeTtl( $ttl );
 
@@ -240,25 +224,6 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 		return $result !== false;
 	}
 
-	/*
-	 * Due to the fact that in PHP array indices are automatically casted
-	 * to integers if possible, e.g. `['0' => ''] === [0 => '']`, we have to
-	 * allow integers to be present as keys in $values in `setMultiple()`
-	 */
-	private function assertKeysAreValidAllowIntegers( $keys ): void {
-		$this->assertKeysAreValid(
-			array_map(
-				function ( $key ) {
-					if ( is_int( $key ) ) {
-						return (string)$key;
-					}
-					return $key;
-				},
-				$keys
-			)
-		);
-	}
-
 	private function assertKeysAreValid( $keys ): void {
 		foreach ( $keys as $key ) {
 			$this->assertKeyIsValid( $key );
@@ -270,7 +235,7 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 	 */
 	private function assertKeyIsValid( $key ): void {
 		if ( !is_string( $key ) ) {
-			$type = gettype( $key );
+			$type = get_debug_type( $key );
 			throw new CacheInvalidArgumentException( "Cache key should be string or integer, `{$type}` is given" );
 		}
 
@@ -278,7 +243,7 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 			throw new CacheInvalidArgumentException( "Cache key cannot be an empty string" );
 		}
 
-		if ( preg_match( self::INVALID_KEY_REGEX, $key ) ) {
+		if ( preg_match( '/[{}()\/\\\\@:]/', $key ) ) {
 			throw new CacheInvalidArgumentException( "Cache key contains characters that are not allowed: `{$key}`" );
 		}
 	}
@@ -289,21 +254,14 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 	 * @throws CacheInvalidArgumentException
 	 */
 	private function toArray( $var ) {
-		if ( !$this->isIterable( $var ) ) {
-			$type = gettype( $var );
+		if ( is_array( $var ) ) {
+			return $var;
+		} elseif ( !( $var instanceof \Traversable ) ) {
+			$type = get_debug_type( $var );
 			throw new CacheInvalidArgumentException( "Expected iterable, `{$type}` given" );
 		}
 
-		if ( $var instanceof Traversable ) {
-			$result = [];
-			foreach ( $var as $value ) {
-				$result[] = $value;
-			}
-		} else {
-			$result = $var;
-		}
-
-		return $result;
+		return iterator_to_array( $var, false );
 	}
 
 	/**
@@ -312,29 +270,19 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 	 * @throws CacheInvalidArgumentException
 	 */
 	private function toAssociativeArray( $var ) {
-		if ( !$this->isIterable( $var ) ) {
-			$type = gettype( $var );
+		if ( is_array( $var ) ) {
+			return $var;
+		} elseif ( !is_iterable( $var ) ) {
+			$type = get_debug_type( $var );
 			throw new CacheInvalidArgumentException( "Expected iterable, `{$type}` given" );
 		}
 
-		if ( $var instanceof Traversable ) {
-			$result = [];
-			foreach ( $var as $key => $value ) {
-				if ( !( is_string( $key ) || is_int( $key ) ) ) {
-					$type = gettype( $key );
-					throw new CacheInvalidArgumentException( "Cache key should be string or integer, `{$type}` is given" );
-				}
-				$result[ $key ] = $value;
-			}
-		} else {
-			$result = $var;
+		$result = [];
+		foreach ( $var as $key => $value ) {
+			$this->assertKeyIsValid( is_int( $key ) ? (string)$key : $key );
+			$result[$key] = $value;
 		}
-
 		return $result;
-	}
-
-	private function isIterable( $var ) {
-		return is_array( $var ) || ( is_object( $var ) && ( $var instanceof Traversable ) );
 	}
 
 	/**
@@ -351,9 +299,7 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 		// very small (in former example it will be 0.001). This issue makes tests flaky.
 		// @see https://phabricator.wikimedia.org/T201453
 		if ( $ttl instanceof DateInterval ) {
-			$date = new DateTime();
-			$date->add( $ttl );
-			return $date->getTimestamp() - time() + 1;
+			return ( new DateTime() )->add( $ttl )->getTimestamp() - time() + 1;
 		} elseif ( $ttl === 0 ) {
 			// BagOStuff treats zero as indefinite while PSR requires this to be ttl meaning zero
 			// is basically an expired entry (we have tests relying on this assumption)
@@ -362,18 +308,17 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 			return $ttl;
 		} elseif ( $ttl === null ) {
 			return BagOStuff::TTL_INDEFINITE;
-		} else {
-			$type = gettype( $ttl );
-			throw new CacheInvalidArgumentException( "Invalid TTL: `null|int|\DateInterval` expected, `$type` given" );
 		}
+
+		$type = get_debug_type( $ttl );
+		throw new CacheInvalidArgumentException( "Invalid TTL: `null|int|\DateInterval` expected, `$type` given" );
 	}
 
 	private function serialize( $value ) {
-		$serializedValue = serialize( $value );
-		$dataToStore = utf8_encode( $serializedValue );
+		$dataToStore = serialize( $value );
 
 		$signature = hash_hmac( 'sha256', $dataToStore, $this->secret );
-		return json_encode( [ $signature, $dataToStore ] );
+		return json_encode( [ 2, $signature, $dataToStore ] );
 	}
 
 	/**
@@ -391,18 +336,87 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 	 * @see https://www.owasp.org/index.php/PHP_Object_Injection
 	 */
 	private function unserialize( $string, $default, array $loggingContext ) {
+		$decoded = $this->decode( $string, $loggingContext );
+		if ( $decoded === null ) {
+			return $default;
+		}
+
+		[ 'signatureToCheck' => $signatureToCheck, 'data' => $data ] = $decoded;
+		if ( !$this->validate( $signatureToCheck, $data, $loggingContext ) ) {
+			return $default;
+		}
+
+		return $this->safelyUnserialize( $data, $default, $loggingContext );
+	}
+
+	/**
+	 * Decode the data in the cache, which is expected to be
+	 * a JSON-serialized array of the form
+	 * `[ 2, "signatureToCheck", "phpSerializedData" ]`
+	 * (where `2` is a version number that may be increased in future if necessary).
+	 *
+	 * @return string[]|null If successful, an array with 'signatureToCheck' and 'data';
+	 * `null` means that the data was invalid and an alert was already logged.
+	 * Keep in mind that a successfully decoded value is not trustworthy
+	 * until it has been {@link self::validate() validated}.
+	 */
+	private function decode( string $string, array $loggingContext ): ?array {
 		$result = json_decode( $string );
 
-		list( $signatureToCheck, $data ) = $result;
+		if ( !is_array( $result ) || count( $result ) !== 3 ) {
+			$this->logger->alert( 'Unknown or invalid cache format', $loggingContext + [
+				'type' => get_debug_type( $result ),
+				'count' => is_array( $result ) ? count( $result ) : 'N/A',
+			] );
+			return null;
+		}
+
+		[ $version, $signatureToCheck, $data ] = $result;
+		if ( $version !== 2 ) {
+			$this->logger->alert( 'Unknown cache format version {formatVersion}', $loggingContext + [
+				'formatVersion' => $version,
+			] );
+			return null;
+		}
+		if ( !is_string( $signatureToCheck ) ) {
+			$this->logger->alert( 'Invalid signature (not a string)', $loggingContext + [
+				'signature' => $signatureToCheck,
+			] );
+			return null;
+		}
+		if ( !is_string( $data ) ) {
+			$this->logger->alert( 'Invalid data (not a string)', $loggingContext + [
+				'data' => $data,
+			] );
+			return null;
+		}
+
+		return [ 'signatureToCheck' => $signatureToCheck, 'data' => $data ];
+	}
+
+	/**
+	 * Validate the signature of the data from the cache.
+	 *
+	 * @return bool Whether the signature is valid or not.
+	 * In case of an invalid signature, an alert is logged.
+	 */
+	private function validate( string $signatureToCheck, string $data, array $loggingContext ): bool {
 		$correctSignature = hash_hmac( 'sha256', $data, $this->secret );
 		$hashEquals = hash_equals( $correctSignature, $signatureToCheck );
 		if ( !$hashEquals ) {
 			$this->logger->alert( "Incorrect signature", $loggingContext );
-
-			return $default;
 		}
-		$decodedData = utf8_decode( $data );
+		return $hashEquals;
+	}
 
+	/**
+	 * Unserialize the data once it has been {@link self::decode() decoded}
+	 * and {@link self::validate() validated}.
+	 * Even then, we only support unserializing `stdClass`, no other classes.
+	 *
+	 * @return mixed
+	 */
+	private function safelyUnserialize( string $decodedData, $default, array $loggingContext ) {
 		if ( $decodedData === serialize( false ) ) {
 			return false;
 		}
@@ -411,13 +425,12 @@ class SimpleCacheWithBagOStuff implements CacheInterface {
 		$value = @unserialize(
 			$decodedData,
 			[
-				'allowed_classes' => [ \stdClass::class ]
+				'allowed_classes' => [ \stdClass::class ],
 			]
 		);
 
 		if ( $value === false ) {
 			$this->logger->alert( "Cannot deserialize stored value", $loggingContext );
-
 			return $default;
 		}
 

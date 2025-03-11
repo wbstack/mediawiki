@@ -17,7 +17,7 @@ use Wikibase\DataModel\Services\EntityId\SuffixEntityIdParser;
  */
 class SuffixEntityIdParserTest extends TestCase {
 
-	public function validInputProvider() {
+	public static function validInputProvider() {
 		return [
 			'base URI' => [ 'http://acme.test/entity/', 'http://acme.test/entity/Q14', new ItemId( 'Q14' ) ],
 			'interwiki prefix' => [ 'wikidata:', 'wikidata:P14', new NumericPropertyId( 'P14' ) ],
@@ -32,7 +32,7 @@ class SuffixEntityIdParserTest extends TestCase {
 		$this->assertEquals( $expected, $parser->parse( $input ) );
 	}
 
-	public function invalidInputProvider() {
+	public static function invalidInputProvider() {
 		return [
 			'mismatching prefix' => [ 'http://acme.test/entity/', 'http://www.wikidata.org/entity/Q14' ],
 			'incomplete prefix' => [ 'http://acme.test/entity/', 'http://acme.test/Q14' ],
@@ -41,10 +41,10 @@ class SuffixEntityIdParserTest extends TestCase {
 			'input is shorter than prefix' => [ 'http://acme.test/entity/', 'http://acme.test/' ],
 			'input is same as prefix' => [ 'http://acme.test/entity/', 'http://acme.test/entity/' ],
 			'input is lexicographically smaller than prefix' => [
-				'http://acme.test/entity/', 'http://aaaa.test/entity/Q14'
+				'http://acme.test/entity/', 'http://aaaa.test/entity/Q14',
 			],
 			'input is lexicographically greater than prefix' => [
-				'http://acme.test/entity/', 'http://cccc.test/entity/Q14'
+				'http://acme.test/entity/', 'http://cccc.test/entity/Q14',
 			],
 		];
 	}

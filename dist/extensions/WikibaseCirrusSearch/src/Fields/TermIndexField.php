@@ -26,7 +26,7 @@ abstract class TermIndexField extends SearchIndexFieldDefinition implements Wiki
 	protected function getUnindexedField() {
 		return [
 			'type' => 'text',
-			'index' => 'false',
+			'index' => false,
 			'fields' => []
 		];
 	}

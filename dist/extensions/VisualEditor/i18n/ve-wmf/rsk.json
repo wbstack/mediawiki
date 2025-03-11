@@ -4,6 +4,7 @@
 			"Keresturec"
 		]
 	},
+	"tag-editcheck-references-description": "EditCheck трима же референца можебуц була потребна",
 	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|визуалне ушорйованє]]",
 	"tag-visualeditor-description": "Пременка направена зоз [[{{MediaWiki:visualeditor-descriptionpagelink}}|визуалним едитором]]",
 	"tag-visualeditor-needcheck": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Визуални едитор: превериц]]",
@@ -15,7 +16,6 @@
 	"visualeditor-feedback-link": "Project:Визуални едитор/Повратна информация",
 	"visualeditor-feedback-tool": "Охабце повратну информацию о тим софтверу",
 	"visualeditor-help-label": "Пречитайце  упутство о хаснованю",
-	"visualeditor-help-title": "Упутство за хансованє едитора",
 	"visualeditor-welcomedialog-action": "Почнї едитовац",
 	"visualeditor-welcomedialog-content": "Ту кажде може едитовац, а кажде злєпшанє помага.",
 	"visualeditor-welcomedialog-content-thanks": "Дзекуєме вам же помагаце же би ше швет знаня ище баржей упозналоǃ",

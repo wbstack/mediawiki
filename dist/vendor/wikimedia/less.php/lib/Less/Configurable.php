@@ -1,10 +1,6 @@
 <?php
-
 /**
- * Configurable
- *
- * @package Less
- * @subpackage Core
+ * @private
  */
 abstract class Less_Configurable {
 
@@ -13,24 +9,17 @@ abstract class Less_Configurable {
 	 *
 	 * @var array
 	 */
-	protected $options = array();
+	protected $options = [];
 
 	/**
 	 * Array of default options
 	 *
 	 * @var array
 	 */
-	protected $defaultOptions = array();
+	protected $defaultOptions = [];
 
 	/**
-	 * Set options
-	 *
-	 * If $options is an object it will be converted into an array by called
-	 * it's toArray method.
-	 *
-	 * @throws Exception
-	 * @param array|object $options
-	 *
+	 * @param array $options
 	 */
 	public function setOptions( $options ) {
 		$options = array_intersect_key( $options, $this->defaultOptions );

@@ -24,6 +24,7 @@ namespace MediaWiki\Minerva\Permissions;
  */
 interface IMinervaPagePermissions {
 
+	public const WATCHABLE = 'watchable';
 	public const WATCH = 'watch';
 	public const SWITCH_LANGUAGE = 'switch-language';
 	/** Given user permission, the page content is editable. */
@@ -42,13 +43,13 @@ interface IMinervaPagePermissions {
 	 * @param string $action
 	 * @return bool
 	 */
-	public function isAllowed( $action );
+	public function isAllowed( $action ): bool;
 
 	/**
 	 * Returns true, if the page can have a talk page and user is logged in.
 	 *
 	 * @return bool
 	 */
-	public function isTalkAllowed();
+	public function isTalkAllowed(): bool;
 
 }

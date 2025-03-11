@@ -1,21 +1,46 @@
 /**
- * Copies interwiki links to sidebar
+ * Copies interwiki links to main menu
  *
  * Temporary solution to T287206, can be removed when the new ULS built in Vue.js
  * has been released and contains this
  */
-function addInterwikiLinkToSidebar() {
-	// eslint-disable-next-line no-jquery/no-global-selector
-	var $editLink = $( '#p-lang-btn .wbc-editpage' );
-	if ( $editLink.length ) {
-		// Use title attribute for link text
-		$editLink.text( $editLink.attr( 'title' ) || '' );
-		var $li = $( '<li>' )
-			// If the Wikibase code runs last, this class is required so it matches the selector @:
-			// https://gerrit.wikimedia.org/g/mediawiki/extensions/Wikibase/+/f2e96e1b08fc5ae2e2e92f05d5eda137dc6b1bc8/client/resources/wikibase.client.linkitem.init.js#82
-			.addClass( 'wb-langlinks-link' )
-			.append( $editLink );
-		$li.appendTo( '#p-tb ul' );
+function addInterwikiLinkToMainMenu() {
+	const editLink = /** @type {HTMLElement|null} */ (
+		document.querySelector( '#p-lang-btn .wbc-editpage' )
+	);
+
+	if ( !editLink ) {
+		return;
+	}
+	const title = editLink.getAttribute( 'title' ) || '';
+
+	const addInterlanguageLink = mw.util.addPortletLink(
+		'p-tb',
+		editLink.getAttribute( 'href' ) || '#',
+		// Original text is "Edit links".
+		// Since its taken out of context the title is more descriptive.
+		title,
+		'wbc-editpage',
+		title
+	);
+
+	if ( addInterlanguageLink ) {
+		addInterlanguageLink.addEventListener( 'click', ( /** @type {Event} */ e ) => {
+			e.preventDefault();
+			// redirect to the detached and original edit link
+			editLink.click();
+		} );
+	}
+}
+
+/**
+ * Checks if ULS is disabled, and makes sure the language dropdown continues
+ * to work if it is.
+ */
+function checkIfULSDisabled() {
+	const langModuleState = mw.loader.getState( 'ext.uls.interface' );
+	if ( langModuleState === null || langModuleState === 'registered' ) {
+		document.documentElement.classList.add( 'vector-uls-disabled' );
 	}
 }
 
@@ -23,5 +48,6 @@ function addInterwikiLinkToSidebar() {
  * Initialize the language button.
  */
 module.exports = function () {
-	addInterwikiLinkToSidebar();
+	checkIfULSDisabled();
+	addInterwikiLinkToMainMenu();
 };

@@ -21,9 +21,15 @@
  * @ingroup Parser
  */
 
+namespace MediaWiki\Parser;
+
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\LanguageCode;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use StringUtils;
+use UnexpectedValueException;
 
 /**
  * Various tag hooks, registered in every Parser
@@ -44,7 +50,6 @@ class CoreTagHooks {
 	 * @param ServiceOptions $options
 	 *
 	 * @return void
-	 * @throws MWException
 	 * @internal
 	 */
 	public static function register( Parser $parser, ServiceOptions $options ) {
@@ -83,7 +88,6 @@ class CoreTagHooks {
 			[ '&gt;', '&lt;' ],
 			$content
 		);
-		// @phan-suppress-next-line SecurityCheck-XSS Ad-hoc escaping above.
 		return Html::rawElement( 'pre', $attribs, $content );
 	}
 
@@ -100,7 +104,6 @@ class CoreTagHooks {
 	 * @param ?string $content
 	 * @param array $attributes
 	 * @param Parser $parser
-	 * @throws MWException
 	 * @return array|string Output of tag hook
 	 * @internal
 	 */
@@ -118,11 +121,11 @@ class CoreTagHooks {
 					[ 'class' => 'error' ],
 					// Using ->text() not ->parse() as
 					// a paranoia measure against a loop.
-					wfMessage( 'rawhtml-notallowed' )->escaped()
+					$parser->msg( 'rawhtml-notallowed' )->escaped()
 				);
 			}
 		} else {
-			throw new MWException( '<html> extension tag encountered unexpectedly' );
+			throw new UnexpectedValueException( '<html> extension tag encountered unexpectedly' );
 		}
 	}
 
@@ -192,7 +195,7 @@ class CoreTagHooks {
 	public static function indicator( ?string $content, array $attributes, Parser $parser, PPFrame $frame ): string {
 		if ( !isset( $attributes['name'] ) || trim( $attributes['name'] ) === '' ) {
 			return '<span class="error">' .
-				wfMessage( 'invalid-indicator-name' )->inContentLanguage()->parse() .
+				$parser->msg( 'invalid-indicator-name' )->parse() .
 				'</span>';
 		}
 
@@ -247,8 +250,11 @@ class CoreTagHooks {
 		return Html::rawElement(
 			'span',
 			[ 'class' => 'error' ],
-			wfMessage( 'invalid-langconvert-attrs' )->inContentLanguage()->parse()
+			$parser->msg( 'invalid-langconvert-attrs' )->parse()
 		);
 	}
 
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( CoreTagHooks::class, 'CoreTagHooks' );

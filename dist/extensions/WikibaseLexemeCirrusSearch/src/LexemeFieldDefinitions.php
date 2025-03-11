@@ -29,7 +29,7 @@ class LexemeFieldDefinitions implements FieldDefinitions {
 
 	public function __construct( FieldDefinitions $statements,
 								 EntityLookup $entityLookup,
-								 NumericPropertyId $lexemeLanguageCodePropertyId = null ) {
+								 ?NumericPropertyId $lexemeLanguageCodePropertyId = null ) {
 		$this->statements = $statements;
 		$this->lexemeLanguageCodePropertyId = $lexemeLanguageCodePropertyId;
 		$this->entityLookup = $entityLookup;

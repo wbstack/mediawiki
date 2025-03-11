@@ -7,9 +7,9 @@ use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\DOM\Node;
 use Wikimedia\Parsoid\Html2Wt\SerializerState;
 use Wikimedia\Parsoid\NodeData\DataParsoid;
+use Wikimedia\Parsoid\Utils\DiffDOMUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
-use Wikimedia\Parsoid\Utils\DOMUtils;
 
 class TRHandler extends DOMHandler {
 
@@ -39,7 +39,7 @@ class TRHandler extends DOMHandler {
 
 	/** @inheritDoc */
 	public function before( Element $node, Node $otherNode, SerializerState $state ): array {
-		if ( $this->trWikitextNeeded( $node,  DOMDataUtils::getDataParsoid( $node ) ) ) {
+		if ( $this->trWikitextNeeded( $node, DOMDataUtils::getDataParsoid( $node ) ) ) {
 			return [ 'min' => 1, 'max' => $this->maxNLsInTable( $node, $otherNode ) ];
 		} else {
 			return [ 'min' => 0, 'max' => $this->maxNLsInTable( $node, $otherNode ) ];
@@ -51,23 +51,18 @@ class TRHandler extends DOMHandler {
 		return [ 'min' => 0, 'max' => $this->maxNLsInTable( $node, $otherNode ) ];
 	}
 
-	/**
-	 * @param Element $node
-	 * @param DataParsoid $dp
-	 * @return bool
-	 */
 	private function trWikitextNeeded( Element $node, DataParsoid $dp ): bool {
 		// If the token has 'startTagSrc' set, it means that the tr
 		// was present in the source wikitext and we emit it -- if not,
 		// we ignore it.
 		// ignore comments and ws
-		if ( ( $dp->startTagSrc ?? null ) || DOMUtils::previousNonSepSibling( $node ) ) {
+		if ( ( $dp->startTagSrc ?? null ) || DiffDOMUtils::previousNonSepSibling( $node ) ) {
 			return true;
 		} else {
 			// If parent has a thead/tbody previous sibling, then
 			// we need the |- separation. But, a caption preceded
 			// this node's parent, all is good.
-			$parentSibling = DOMUtils::previousNonSepSibling( $node->parentNode );
+			$parentSibling = DiffDOMUtils::previousNonSepSibling( $node->parentNode );
 
 			// thead/tbody/tfoot is always present around tr tags in the DOM.
 			return $parentSibling && DOMCompat::nodeName( $parentSibling ) !== 'caption';

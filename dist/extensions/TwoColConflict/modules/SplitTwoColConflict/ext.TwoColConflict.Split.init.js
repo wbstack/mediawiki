@@ -1,37 +1,19 @@
 'use strict';
 
-var UtilModule = require( 'ext.TwoColConflict.Util' );
+const Merger = require( './ext.TwoColConflict.Split.Merger.js' );
+const Tracking = require( './ext.TwoColConflict.Split.tracking.js' );
 
 /**
  * @param {jQuery} $column
- * @return {OO.ui.Element}
+ * @param {boolean} [enabled=true]
  */
-function getColumnEditButton( $column ) {
-	return OO.ui.ButtonWidget.static.infuse(
-		$column.find( '.mw-twocolconflict-split-edit-button' )
-	);
-}
-
-/**
- * @param {jQuery} $column
- */
-function disableColumn( $column ) {
-	getColumnEditButton( $column )
-		.toggle( false );
-	$column
-		.removeClass( 'mw-twocolconflict-split-selected' )
-		.addClass( 'mw-twocolconflict-split-unselected' );
-}
-
-/**
- * @param {jQuery} $column
- */
-function enableColumn( $column ) {
-	getColumnEditButton( $column )
-		.toggle( true );
-	$column
-		.addClass( 'mw-twocolconflict-split-selected' )
-		.removeClass( 'mw-twocolconflict-split-unselected' );
+function enableColumn( $column, enabled ) {
+	enabled = enabled !== false;
+	const $editButton = $column.find( '.mw-twocolconflict-split-edit-button' );
+	const editButton = OO.ui.ButtonWidget.static.infuse( $editButton );
+	editButton.toggle( enabled );
+	$column.toggleClass( 'mw-twocolconflict-split-selected', enabled )
+		.toggleClass( 'mw-twocolconflict-split-unselected', !enabled );
 }
 
 function getSelectedColumn( $element ) {
@@ -66,8 +48,8 @@ function collapseText( $row ) {
  * @param {jQuery} $row
  */
 function enableEditing( $row ) {
-	var $selected = getSelectedColumn( $row ),
-		originalHeight = $selected.find( '.mw-twocolconflict-split-editable' ).height();
+	const $selected = getSelectedColumn( $row );
+	const originalHeight = $selected.find( '.mw-twocolconflict-split-editable' ).height();
 
 	expandText( $row );
 	$row.addClass( 'mw-twocolconflict-split-editing' );
@@ -78,7 +60,7 @@ function enableEditing( $row ) {
 	$row.find( '.mw-twocolconflict-split-editable' ).addClass( getEditorFontClass() );
 
 	$selected.find( 'textarea' ).each( function () {
-		var $editor = $( this );
+		const $editor = $( this );
 		if ( $editor.height() < originalHeight ) {
 			$editor.height( originalHeight );
 		}
@@ -103,12 +85,12 @@ function disableEditing( $row ) {
  * @param {jQuery} $row
  */
 function saveEditing( $row ) {
-	var $selected = getSelectedColumn( $row ),
-		$editor = $selected.find( '.mw-twocolconflict-split-editor' ),
-		$diffText = $selected.find( '.mw-twocolconflict-split-difftext' );
+	const $selected = getSelectedColumn( $row );
+	const $editor = $selected.find( '.mw-twocolconflict-split-editor' );
+	const $diffText = $selected.find( '.mw-twocolconflict-split-difftext' );
 
 	if ( !$editor.length || $editor.val() === $editor[ 0 ].defaultValue ) {
-		var $resetDiffText = $selected.find( '.mw-twocolconflict-split-reset-diff-text' );
+		const $resetDiffText = $selected.find( '.mw-twocolconflict-split-reset-diff-text' );
 		$diffText.html( $resetDiffText.html() );
 	} else {
 		$diffText.text( $editor.val() );
@@ -121,9 +103,9 @@ function saveEditing( $row ) {
  * @param {jQuery} $row
  */
 function resetWarning( $row ) {
-	var $selected = getSelectedColumn( $row ),
-		$editor = $selected.find( '.mw-twocolconflict-split-editor' ),
-		originalText = $editor[ 0 ].defaultValue;
+	const $selected = getSelectedColumn( $row );
+	const $editor = $selected.find( '.mw-twocolconflict-split-editor' );
+	const originalText = $editor[ 0 ].defaultValue;
 
 	// The later merge ignores trailing newlines, they don't cause a change
 	if ( !$editor.length ||
@@ -147,10 +129,10 @@ function resetWarning( $row ) {
 				}
 			]
 		}
-	).done( function ( confirmed ) {
+	).done( ( confirmed ) => {
 		if ( confirmed ) {
-			var $diffText = $selected.find( '.mw-twocolconflict-split-difftext' ),
-				$resetDiffText = $selected.find( '.mw-twocolconflict-split-reset-diff-text' );
+			const $diffText = $selected.find( '.mw-twocolconflict-split-difftext' );
+			const $resetDiffText = $selected.find( '.mw-twocolconflict-split-reset-diff-text' );
 
 			$editor.val( originalText );
 			$diffText.html( $resetDiffText.html() );
@@ -166,12 +148,12 @@ function initButtonEvents() {
 		{ selector: '.mw-twocolconflict-split-reset-button', onclick: resetWarning },
 		{ selector: '.mw-twocolconflict-split-expand-button', onclick: expandText },
 		{ selector: '.mw-twocolconflict-split-collapse-button', onclick: collapseText }
-	].forEach( function ( button ) {
+	].forEach( ( button ) => {
 		$( button.selector ).each( function () {
-			var widget = OO.ui.ButtonWidget.static.infuse( this ),
-				$row = widget.$element.closest( '.mw-twocolconflict-single-row, .mw-twocolconflict-split-row' );
+			const widget = OO.ui.ButtonWidget.static.infuse( this );
+			const $row = widget.$element.closest( '.mw-twocolconflict-single-row, .mw-twocolconflict-split-row' );
 
-			widget.on( 'click', function () {
+			widget.on( 'click', () => {
 				button.onclick( $row );
 			} );
 		} );
@@ -184,10 +166,10 @@ function isEditableSingleColumn( $column ) {
 
 function initColumnClickEvent() {
 	$( '.mw-twocolconflict-split-column, .mw-twocolconflict-single-column' ).each( function () {
-		var $column = $( this ),
-			$row = $column.closest( '.mw-twocolconflict-single-row, .mw-twocolconflict-split-row' );
+		const $column = $( this );
+		const $row = $column.closest( '.mw-twocolconflict-single-row, .mw-twocolconflict-split-row' );
 
-		$column.on( 'click', function () {
+		$column.on( 'click', () => {
 			if (
 				( $column.is( '.mw-twocolconflict-split-selected' ) || isEditableSingleColumn( $column ) ) &&
 				!$row.is( '.mw-twocolconflict-split-editing' )
@@ -199,8 +181,8 @@ function initColumnClickEvent() {
 }
 
 function resetHeaderSideSelector( selectedValue ) {
-	var $headerSelection = $( '.mw-twocolconflict-split-selection-header' ),
-		$selectedSide = $headerSelection.find( 'input:checked' );
+	const $headerSelection = $( '.mw-twocolconflict-split-selection-header' );
+	const $selectedSide = $headerSelection.find( 'input:checked' );
 
 	if ( $selectedSide.val() !== selectedValue ) {
 		$selectedSide.prop( 'checked', false );
@@ -213,11 +195,11 @@ function resetHeaderSideSelector( selectedValue ) {
 }
 
 function initHeaderSideSelector() {
-	var $headerSelection = $( '.mw-twocolconflict-split-selection-header' );
+	const $headerSelection = $( '.mw-twocolconflict-split-selection-header' );
 
 	$headerSelection.find( 'input' ).on( 'change', function () {
-		var $selectedHeaderSide = $( this ),
-			$unselectedHeaderSide = $headerSelection.find( 'input:not(:checked)' );
+		const $selectedHeaderSide = $( this );
+		const $unselectedHeaderSide = $headerSelection.find( 'input:not(:checked)' );
 		$selectedHeaderSide.prop( 'title', mw.msg(
 			$selectedHeaderSide.val() === 'other' ?
 				'twocolconflict-split-selected-all-other-tooltip' :
@@ -230,7 +212,7 @@ function initHeaderSideSelector() {
 		) );
 
 		$( '.mw-twocolconflict-split-selection-row input' ).each( function () {
-			var $rowButton = $( this );
+			const $rowButton = $( this );
 			if ( $rowButton.val() === $selectedHeaderSide.val() ) {
 				$rowButton.click();
 			}
@@ -239,16 +221,16 @@ function initHeaderSideSelector() {
 }
 
 function handleSelectColumn() {
-	var $row = $( this ).closest( '.mw-twocolconflict-split-row' ),
-		$selected = $row.find( '.mw-twocolconflict-split-selection-row input:checked' ),
-		$unselected = $row.find( '.mw-twocolconflict-split-selection-row input:not(:checked)' ),
-		$label = $row.find( '.mw-twocolconflict-split-selector-label span' ),
-		// TODO: Rename classes, "add" should be "your", etc.
-		$yourColumn = $row.find( '.mw-twocolconflict-split-add' ),
-		$otherColumn = $row.find( '.mw-twocolconflict-split-delete' );
+	const $row = $( this ).closest( '.mw-twocolconflict-split-row' );
+	const $selected = $row.find( '.mw-twocolconflict-split-selection-row input:checked' );
+	const $unselected = $row.find( '.mw-twocolconflict-split-selection-row input:not(:checked)' );
+	const $label = $row.find( '.mw-twocolconflict-split-selector-label span' );
+	// TODO: Rename classes, "add" should be "your", etc.
+	const $yourColumn = $row.find( '.mw-twocolconflict-split-add' );
+	const $otherColumn = $row.find( '.mw-twocolconflict-split-delete' );
 
 	if ( $selected.val() === 'your' ) {
-		disableColumn( $otherColumn );
+		enableColumn( $otherColumn, false );
 		enableColumn( $yourColumn );
 		$selected.prop( 'title', mw.msg( 'twocolconflict-split-selected-your-tooltip' ) );
 		$unselected.prop( 'title', mw.msg( 'twocolconflict-split-select-other-tooltip' ) );
@@ -256,14 +238,14 @@ function handleSelectColumn() {
 		$label.text( mw.msg( 'twocolconflict-split-your-version-chosen' ) );
 	} else if ( $selected.val() === 'other' ) {
 		enableColumn( $otherColumn );
-		disableColumn( $yourColumn );
+		enableColumn( $yourColumn, false );
 		$selected.prop( 'title', mw.msg( 'twocolconflict-split-selected-other-tooltip' ) );
 		$unselected.prop( 'title', mw.msg( 'twocolconflict-split-select-your-tooltip' ) );
 		$row.removeClass( 'mw-twocolconflict-no-selection' );
 		$label.text( mw.msg( 'twocolconflict-split-other-version-chosen' ) );
 	} else {
-		disableColumn( $otherColumn );
-		disableColumn( $yourColumn );
+		enableColumn( $otherColumn, false );
+		enableColumn( $yourColumn, false );
 		$label.text( mw.msg( 'twocolconflict-split-choose-version' ) );
 	}
 
@@ -271,8 +253,8 @@ function handleSelectColumn() {
 }
 
 function initRowSideSelectors() {
-	var $rowSwitches = $( '.mw-twocolconflict-split-selection-row' ),
-		$radioButtons = $rowSwitches.find( 'input' );
+	const $rowSwitches = $( '.mw-twocolconflict-split-selection-row' );
+	const $radioButtons = $rowSwitches.find( 'input' );
 
 	// TODO remove when having no selection is the default
 	$radioButtons.prop( 'checked', false );
@@ -283,29 +265,28 @@ function initRowSideSelectors() {
 
 function showPreview( parsedContent, parsedNote ) {
 	$( '#wikiPreview' ).remove();
-	var $html = $( 'html' );
-
-	var $note = $( '<div>' )
+	const $html = $( 'html' );
+	const noteContentElement = $( '<div>' )
+		.append( $( parsedNote ).children() )[ 0 ];
+	const $note = $( '<div>' )
 		.addClass( 'previewnote' )
 		.append(
 			$( '<h2>' )
 				.attr( 'id', 'mw-previewheader' )
 				.append( mw.msg( 'preview' ) ),
-			$( '<div>' )
-				.addClass( [ 'mw-message-box', 'mw-message-box-warning' ] )
-				.append( $( parsedNote ).children() )
+			mw.util.messageBox( noteContentElement, 'warning' )
 		);
 
 	// The following classes are used here:
 	// * mw-content-ltr
 	// * mw-content-rtl
-	var $content = $( '<div>' )
+	const $content = $( '<div>' )
 		.addClass( 'mw-content-' + $html.attr( 'dir' ) )
 		.attr( 'dir', $html.attr( 'dir' ) )
 		.attr( 'lang', $html.attr( 'lang' ) )
 		.append( parsedContent );
 
-	var $preview = $( '<div>' )
+	const $preview = $( '<div>' )
 		.attr( 'id', 'wikiPreview' )
 		.addClass( 'ontop' );
 
@@ -313,20 +294,18 @@ function showPreview( parsedContent, parsedNote ) {
 		$preview.append( $note, $content )
 	);
 
-	$( 'html, body' ).animate( { scrollTop: $( '#top' ).offset().top }, 500 );
+	$( 'html, body' ).animate( { scrollTop: $( '#content' ).offset().top }, 500 );
 }
 
 function validateForm() {
-	var isFormValid = true;
+	let isFormValid = true;
 
 	$( '.mw-twocolconflict-split-selection-row' ).each( function () {
-		var $row = $( this ).closest( '.mw-twocolconflict-split-row' ),
-			$checked = $row.find( 'input:checked' );
+		const $row = $( this ).closest( '.mw-twocolconflict-split-row' );
+		const $checked = $row.find( 'input:checked' );
 
-		if ( $checked.length ) {
-			$row.removeClass( 'mw-twocolconflict-no-selection' );
-		} else {
-			$row.addClass( 'mw-twocolconflict-no-selection' );
+		$row.toggleClass( 'mw-twocolconflict-no-selection', !$checked.length );
+		if ( !$checked.length ) {
 			isFormValid = false;
 		}
 	} );
@@ -335,29 +314,29 @@ function validateForm() {
 }
 
 function initPreview() {
-	var $previewBtn = $( '#wpPreviewWidget' );
+	const $previewBtn = $( '#wpPreviewWidget' );
 	if ( !$previewBtn.length ) {
 		return;
 	}
 
-	var api = new mw.Api();
+	const api = new mw.Api();
 
 	OO.ui.infuse( $previewBtn )
 		.setDisabled( false );
 
-	$( '#wpPreview' ).click( function ( e ) {
+	$( '#wpPreview' ).click( ( e ) => {
 		e.preventDefault();
 
 		if ( !validateForm() ) {
 			return;
 		}
 
-		var arrow = $( 'html' ).attr( 'dir' ) === 'rtl' ? '←' : '→',
-			title = mw.config.get( 'wgPageName' );
+		const arrow = $( 'html' ).attr( 'dir' ) === 'rtl' ? '←' : '→';
+		const title = mw.config.get( 'wgPageName' );
 
 		$.when(
 			api.parse(
-				UtilModule.Merger( getSelectedColumn( $( '.mw-twocolconflict-split-view' ) ) ),
+				Merger( getSelectedColumn( $( '.mw-twocolconflict-split-view' ) ) ),
 				{
 					title: title,
 					prop: 'text',
@@ -376,14 +355,14 @@ function initPreview() {
 					disableeditsection: true
 				}
 			)
-		).done( function ( parsedContent, parsedNote ) {
+		).done( ( parsedContent, parsedNote ) => {
 			showPreview( parsedContent, parsedNote );
 		} );
 	} );
 }
 
 function initSubmit() {
-	$( '#wpSave' ).click( function ( e ) {
+	$( '#wpSave' ).click( ( e ) => {
 		if ( !validateForm() ) {
 			e.preventDefault();
 		}
@@ -391,7 +370,7 @@ function initSubmit() {
 }
 
 function initSwapHandling() {
-	var $swapButton = $( '.mw-twocolconflict-single-swap-button' );
+	const $swapButton = $( '.mw-twocolconflict-single-swap-button' );
 	if ( !$swapButton.length ) {
 		return;
 	}
@@ -403,19 +382,19 @@ function initSwapHandling() {
 	}
 
 	function setRowNumber( $column, oldRowNum, newRowNum ) {
-		$column.find( 'input, textarea' ).each( function ( index, input ) {
+		$column.find( 'input, textarea' ).each( ( index, input ) => {
 			input.name = input.name.replace( '[' + oldRowNum + ']', '[' + newRowNum + ']' );
 		} );
 	}
 
-	OO.ui.ButtonWidget.static.infuse( $swapButton ).on( 'click', function () {
-		var $rowContainer = $( '.mw-twocolconflict-single-column-rows' ),
-			$rows = $rowContainer.find( '.mw-twocolconflict-conflicting-talk-row' ),
-			$buttonContainer = $rowContainer.find( '.mw-twocolconflict-single-swap-button-container' ),
-			$upper = $rows.eq( 0 ),
-			$lower = $rows.eq( 1 ),
-			upperRowNum = getRowNumber( $upper ),
-			lowerRowNum = getRowNumber( $lower );
+	OO.ui.ButtonWidget.static.infuse( $swapButton ).on( 'click', () => {
+		const $rowContainer = $( '.mw-twocolconflict-single-column-rows' );
+		const $rows = $rowContainer.find( '.mw-twocolconflict-conflicting-talk-row' );
+		const $buttonContainer = $rowContainer.find( '.mw-twocolconflict-single-swap-button-container' );
+		const $upper = $rows.eq( 0 );
+		const $lower = $rows.eq( 1 );
+		const upperRowNum = getRowNumber( $upper );
+		const lowerRowNum = getRowNumber( $lower );
 
 		setRowNumber( $upper, upperRowNum, lowerRowNum );
 		setRowNumber( $lower, lowerRowNum, upperRowNum );
@@ -428,14 +407,14 @@ function initSwapHandling() {
  * Expose an action to copy the entire wikitext source of "your" originally submitted revision.
  */
 function initSourceCopy() {
-	var $copyLink = $( '.mw-twocolconflict-copy-link a' ),
-		wasClicked = false,
-		$confirmPopup, popupTimeout;
+	const $copyLink = $( '.mw-twocolconflict-copy-link a' );
+	let wasClicked = false;
+	let popupTimeout;
 	if ( !$copyLink.length ) {
 		return;
 	}
 
-	$confirmPopup = new OO.ui.PopupWidget( {
+	const $confirmPopup = new OO.ui.PopupWidget( {
 		$content: $( '<p>' ).text( mw.msg( 'twocolconflict-copy-notice' ) ),
 		$floatableContainer: $copyLink,
 		position: 'above',
@@ -448,7 +427,7 @@ function initSourceCopy() {
 
 	$copyLink.text( mw.msg( 'twocolconflict-copy-action' ) )
 		.attr( 'title', mw.msg( 'twocolconflict-copy-tooltip' ) );
-	$copyLink.click( function () {
+	$copyLink.click( () => {
 		$( '.mw-twocolconflict-your-text' ).select();
 		document.execCommand( 'copy' );
 
@@ -459,48 +438,52 @@ function initSourceCopy() {
 		}
 
 		$confirmPopup.toggle( true );
-		popupTimeout = setTimeout( function () {
+		popupTimeout = setTimeout( () => {
 			$confirmPopup.toggle( false );
 		}, 5000 );
 
 		return false;
 	} );
 
-	$confirmPopup.on( 'toggle', function () {
+	$confirmPopup.on( 'toggle', () => {
 		clearTimeout( popupTimeout );
 	} );
 }
 
-$( function () {
-	var $coreHintCheckbox = $( '.mw-twocolconflict-core-ui-hint input[ type="checkbox" ]' );
-	if ( $coreHintCheckbox.length ) {
-		$coreHintCheckbox.change( function () {
-			if ( this.checked ) {
-				( new mw.Api() ).saveOption( 'userjs-twocolconflict-hide-core-hint', '1' );
-			}
-		} );
-		// When the hint element exists, the split view does not, and nothing below applies
-		return;
-	}
+if ( !window.QUnit ) {
+	$( () => {
+		const $coreHintCheckbox = $( '.mw-twocolconflict-core-ui-hint input[ type="checkbox" ]' );
+		if ( $coreHintCheckbox.length ) {
+			$coreHintCheckbox.change( function () {
+				if ( this.checked && mw.user.isNamed() ) {
+					( new mw.Api() ).saveOption( 'userjs-twocolconflict-hide-core-hint', '1' );
+				}
+			} );
+			// When the hint element exists, the split view does not, and nothing below applies
+			return;
+		}
 
-	var initTracking = UtilModule.Tracking.initTrackingListeners,
-		initTour = require( './ext.TwoColConflict.Split.Tour.js' );
+		const initTracking = Tracking.initTrackingListeners;
+		const initTour = require( './ext.TwoColConflict.Split.Tour.js' );
 
-	// disable all javascript from this feature when testing the nojs implementation
-	if ( mw.cookie.get( '-twocolconflict-test-nojs', 'mw' ) ) {
-		// set CSS class so nojs CSS rules are applied
-		$( 'html' ).removeClass( 'client-js' ).addClass( 'client-nojs' );
-		return;
-	}
+		// disable all javascript from this feature when testing the nojs implementation
+		if ( mw.cookie.get( '-twocolconflict-test-nojs', 'mw' ) ) {
+			// set CSS class so nojs CSS rules are applied
+			$( 'html' ).removeClass( 'client-js' ).addClass( 'client-nojs' );
+			return;
+		}
 
-	initRowSideSelectors();
-	initHeaderSideSelector();
-	initColumnClickEvent();
-	initButtonEvents();
-	initSwapHandling();
-	initPreview();
-	initSubmit();
-	initTour();
-	initTracking();
-	initSourceCopy();
-} );
+		initRowSideSelectors();
+		initHeaderSideSelector();
+		initColumnClickEvent();
+		initButtonEvents();
+		initSwapHandling();
+		initPreview();
+		initSubmit();
+		initTour();
+		initTracking();
+		initSourceCopy();
+	} );
+}
+
+module.exports = { private: { Merger, RowFormatter: Tracking.private.RowFormatter } };

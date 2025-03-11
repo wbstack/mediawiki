@@ -19,16 +19,24 @@
  * @ingroup RevisionDelete
  */
 
+use MediaWiki\Cache\HTMLCacheUpdater;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\FileRepo\File\FileSelectQueryBuilder;
 use MediaWiki\Page\PageIdentity;
-use Wikimedia\Rdbms\IDatabase;
+use MediaWiki\Status\Status;
+use Wikimedia\Rdbms\IReadableDatabase;
+use Wikimedia\Rdbms\IResultWrapper;
 use Wikimedia\Rdbms\LBFactory;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * List for oldimage table items
  */
 class RevDelFileList extends RevDelList {
 
-	/** @var HtmlCacheUpdater */
+	protected const SUPPRESS_BIT = File::DELETED_RESTRICTED;
+
+	/** @var HTMLCacheUpdater */
 	private $htmlCacheUpdater;
 
 	/** @var RepoGroup */
@@ -48,7 +56,7 @@ class RevDelFileList extends RevDelList {
 	 * @param PageIdentity $page
 	 * @param array $ids
 	 * @param LBFactory $lbFactory
-	 * @param HtmlCacheUpdater $htmlCacheUpdater
+	 * @param HTMLCacheUpdater $htmlCacheUpdater
 	 * @param RepoGroup $repoGroup
 	 */
 	public function __construct(
@@ -56,7 +64,7 @@ class RevDelFileList extends RevDelList {
 		PageIdentity $page,
 		array $ids,
 		LBFactory $lbFactory,
-		HtmlCacheUpdater $htmlCacheUpdater,
+		HTMLCacheUpdater $htmlCacheUpdater,
 		RepoGroup $repoGroup
 	) {
 		parent::__construct( $context, $page, $ids, $lbFactory );
@@ -81,8 +89,8 @@ class RevDelFileList extends RevDelList {
 	}
 
 	/**
-	 * @param IDatabase $db
-	 * @return mixed
+	 * @param IReadableDatabase $db
+	 * @return IResultWrapper
 	 */
 	public function doQuery( $db ) {
 		$archiveNames = [];
@@ -90,18 +98,11 @@ class RevDelFileList extends RevDelList {
 			$archiveNames[] = $timestamp . '!' . $this->page->getDBkey();
 		}
 
-		$oiQuery = OldLocalFile::getQueryInfo();
-		return $db->select(
-			$oiQuery['tables'],
-			$oiQuery['fields'],
-			[
-				'oi_name' => $this->page->getDBkey(),
-				'oi_archive_name' => $archiveNames
-			],
-			__METHOD__,
-			[ 'ORDER BY' => 'oi_timestamp DESC' ],
-			$oiQuery['joins']
-		);
+		$queryBuilder = FileSelectQueryBuilder::newForOldFile( $db );
+		$queryBuilder
+			->where( [ 'oi_name' => $this->page->getDBkey(), 'oi_archive_name' => $archiveNames ] )
+			->orderBy( 'oi_timestamp', SelectQueryBuilder::SORT_DESC );
+		return $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 	}
 
 	public function newItem( $row ) {
@@ -153,13 +154,10 @@ class RevDelFileList extends RevDelList {
 
 		$this->htmlCacheUpdater->purgeUrls(
 			$purgeUrls,
-			HtmlCacheUpdater::PURGE_INTENT_TXROUND_REFLECTED
+			HTMLCacheUpdater::PURGE_INTENT_TXROUND_REFLECTED
 		);
 
 		return Status::newGood();
 	}
 
-	public function getSuppressBit() {
-		return File::DELETED_RESTRICTED;
-	}
 }

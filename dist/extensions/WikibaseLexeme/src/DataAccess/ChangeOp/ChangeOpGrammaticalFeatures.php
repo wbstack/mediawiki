@@ -36,7 +36,7 @@ class ChangeOpGrammaticalFeatures implements ChangeOp {
 		return Result::newSuccess();
 	}
 
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		Assert::parameterType( Form::class, $entity, '$entity' );
 		'@phan-var Form $entity';
 
@@ -52,7 +52,7 @@ class ChangeOpGrammaticalFeatures implements ChangeOp {
 		return [ EntityPermissionChecker::ACTION_EDIT ];
 	}
 
-	private function updateSummary( Form $form, Summary $summary = null ) {
+	private function updateSummary( Form $form, ?Summary $summary = null ) {
 		if ( $summary === null ) {
 			return;
 		}
@@ -64,29 +64,29 @@ class ChangeOpGrammaticalFeatures implements ChangeOp {
 
 		$formId = $form->getId();
 
-		if ( !empty( $addedFeatures ) && !empty( $removedFeatures ) ) {
+		if ( $addedFeatures && $removedFeatures ) {
 			$summary->setAction( self::SUMMARY_ACTION_UPDATE );
 			$summary->setLanguage( null );
 			$summary->addAutoCommentArgs( [
-				$formId->getSerialization() // TODO: use FormId not string?
+				$formId->getSerialization(), // TODO: use FormId not string?
 			] );
 			return;
 		}
 
-		if ( !empty( $addedFeatures ) ) {
+		if ( $addedFeatures ) {
 			$summary->setAction( self::SUMMARY_ACTION_ADD );
 			$summary->setLanguage( null );
 			$summary->addAutoCommentArgs( [
-				$formId->getSerialization() // TODO: use FormId not string?
+				$formId->getSerialization(), // TODO: use FormId not string?
 			] );
 			$summary->addAutoSummaryArgs( $addedFeatures );
 		}
 
-		if ( !empty( $removedFeatures ) ) {
+		if ( $removedFeatures ) {
 			$summary->setAction( self::SUMMARY_ACTION_REMOVE );
 			$summary->setLanguage( null );
 			$summary->addAutoCommentArgs( [
-				$formId->getSerialization() // TODO: use FormId not string?
+				$formId->getSerialization(), // TODO: use FormId not string?
 			] );
 			$summary->addAutoSummaryArgs( $removedFeatures );
 		}

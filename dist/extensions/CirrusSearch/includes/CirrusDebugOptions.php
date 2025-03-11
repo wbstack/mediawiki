@@ -3,6 +3,7 @@
 namespace CirrusSearch;
 
 use Elastica\Query;
+use MediaWiki\Request\WebRequest;
 
 /**
  * Cirrus debug options generally set via *unofficial* URI param (&cirrusXYZ=ZYX)
@@ -44,20 +45,14 @@ class CirrusDebugOptions {
 	 */
 	private $dumpAndDie = false;
 
-	/**
-	 * @var bool used by unit tests when cross-repo dependencies need to preserve compatiblity
-	 *  until all patches are merged.
-	 */
-	private $backCompat = true;
-
 	private function __construct() {
 	}
 
 	/**
-	 * @param \WebRequest $request
+	 * @param WebRequest $request
 	 * @return CirrusDebugOptions
 	 */
-	public static function fromRequest( \WebRequest $request ) {
+	public static function fromRequest( WebRequest $request ) {
 		$options = new self();
 		$options->cirrusCompletionVariant = $request->getArray( 'cirrusCompletionVariant' );
 		$options->cirrusDumpQuery = $request->getCheck( 'cirrusDumpQuery' );
@@ -80,15 +75,12 @@ class CirrusDebugOptions {
 	/**
 	 * Dump the query but not die.
 	 * Only useful in Unit tests.
-	 * @param bool $backCompat used by unit tests when cross-repo dependencies
-	 *  need to preserve compatiblity until all patches are merged.
 	 * @return CirrusDebugOptions
 	 */
-	public static function forDumpingQueriesInUnitTests( $backCompat = true ) {
+	public static function forDumpingQueriesInUnitTests() {
 		$options = new self();
 		$options->cirrusDumpQuery = true;
 		$options->dumpAndDie = false;
-		$options->backCompat = $backCompat;
 		return $options;
 	}
 
@@ -105,12 +97,12 @@ class CirrusDebugOptions {
 	/**
 	 * Inspect the param names $param and return its value only
 	 * if it belongs to the set of allowed values declared in $allowedValues
-	 * @param \WebRequest $request
+	 * @param WebRequest $request
 	 * @param string $param
 	 * @param string[] $allowedValues
 	 * @return string|null the debug option or null
 	 */
-	private static function debugOption( \WebRequest $request, $param, array $allowedValues ) {
+	private static function debugOption( WebRequest $request, $param, array $allowedValues ) {
 		$val = $request->getVal( $param );
 		if ( $val === null ) {
 			return null;
@@ -197,9 +189,5 @@ class CirrusDebugOptions {
 	 */
 	public function mustNeverBeCached() {
 		return $this->isReturnRaw() || $this->cirrusExplain !== null;
-	}
-
-	public function isBackwardCompatible(): bool {
-		return $this->backCompat;
 	}
 }

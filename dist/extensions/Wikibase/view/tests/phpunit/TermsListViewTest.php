@@ -5,7 +5,9 @@ namespace Wikibase\View\Tests;
 use Wikibase\DataModel\Term\AliasGroupList;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\DataModel\Term\TermList;
+use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\TermLanguageFallbackChain;
 use Wikibase\View\DummyLocalizedTextProvider;
 use Wikibase\View\LanguageDirectionalityLookup;
 use Wikibase\View\LocalizedTextProvider;
@@ -31,14 +33,18 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 
 	private function getTermsListView(
 		$languageNameCalls = 0,
-		LocalizedTextProvider $textProvider = null
+		?LocalizedTextProvider $textProvider = null,
+		?LanguageFallbackChainFactory $languageFallbackChainFactory = null,
+		$mulEnabled = false
 	) {
 		$languageNameLookup = $this->createMock( LanguageNameLookup::class );
 		$languageNameLookup->expects( $this->exactly( $languageNameCalls ) )
-			->method( 'getName' )
+			->method( 'getNameForTerms' )
 			->willReturnCallback( function( $languageCode ) {
 				return "<LANGUAGENAME-$languageCode>";
 			} );
+		$languageNameLookup->expects( $this->never() )
+			->method( 'getName' ); // should use getNameForTerms(), see above
 
 		$languageDirectionalityLookup = $this->createMock( LanguageDirectionalityLookup::class );
 		$languageDirectionalityLookup->method( 'getDirectionality' )
@@ -46,7 +52,7 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 				return [
 					'en' => 'ltr',
 					'arc' => 'rtl',
-					'qqx' => 'ltr'
+					'qqx' => 'ltr',
 				][ $languageCode ];
 			} );
 
@@ -54,27 +60,29 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 			TemplateFactory::getDefaultInstance(),
 			$languageNameLookup,
 			$textProvider ?: new DummyLocalizedTextProvider(),
-			$languageDirectionalityLookup
+			$languageDirectionalityLookup,
+			$languageFallbackChainFactory ?? $this->createStub( LanguageFallbackChainFactory::class ),
+			$mulEnabled
 		);
 	}
 
-	private function getTermList( $term, $languageCode = 'en' ) {
+	private static function getTermList( $term, $languageCode = 'en' ) {
 		return new TermList( [ new Term( $languageCode, $term ) ] );
 	}
 
-	public function getTermsListViewProvider() {
+	public static function getTermsListViewProvider(): iterable {
 		$languageCode = 'arc';
-		$labels = $this->getTermList( '<LABEL>', $languageCode );
-		$descriptions = $this->getTermList( '<DESCRIPTION>', $languageCode );
+		$labels = self::getTermList( '<LABEL>', $languageCode );
+		$descriptions = self::getTermList( '<DESCRIPTION>', $languageCode );
 		$aliasGroups = new AliasGroupList();
 		$aliasGroups->setAliasesForLanguage( $languageCode, [ '<ALIAS1>', '<ALIAS2>' ] );
 
 		return [
 			[
-				$labels, $descriptions, $aliasGroups, $languageCode, true, true, true
+				$labels, $descriptions, $aliasGroups, $languageCode, true, true, true,
 			],
 			[
-				new TermList(), new TermList(), new AliasGroupList(), 'lkt', false, false, false
+				new TermList(), new TermList(), new AliasGroupList(), 'lkt', false, false, false,
 			],
 			[
 				new TermList(),
@@ -83,8 +91,8 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 				'en',
 				false,
 				false,
-				false
-			]
+				false,
+			],
 		];
 	}
 
@@ -153,8 +161,8 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testGetTermsListView_noAliasesProvider() {
-		$labels = $this->getTermList( '<LABEL>' );
-		$descriptions = $this->getTermList( '<DESCRIPTION>' );
+		$labels = self::getTermList( '<LABEL>' );
+		$descriptions = self::getTermList( '<DESCRIPTION>' );
 		$view = $this->getTermsListView( 1 );
 		$html = $view->getHtml( $labels, $descriptions, null, [ 'en' ] );
 
@@ -170,6 +178,67 @@ class TermsListViewTest extends \PHPUnit\Framework\TestCase {
 		$this->assertStringNotContainsString( '&lt;ALIAS1&gt;', $html );
 		$this->assertStringNotContainsString( '&lt;ALIAS2&gt;', $html );
 		$this->assertStringNotContainsString( '&amp;', $html, 'no double escaping' );
+	}
+
+	public function testGetTermsListViewMul(): void {
+		$view = $this->getTermsListView( 1 );
+		$html = $view->getHtml(
+			new TermList(),
+			new TermList(),
+			new AliasGroupList(),
+			[ 'mul' ]
+		);
+		$this->assertStringContainsString( '(wikibase-description-not-applicable)', $html );
+		$this->assertStringContainsString( '(wikibase-description-not-applicable-title)', $html );
+	}
+
+	public static function labelPlaceholderFallbackScenarioProvider(): iterable {
+		$englishLabel = 'English Label';
+		yield 'no mul' => [
+			false,
+			[ 'en-ca', 'en' ],
+			'en-ca',
+			$englishLabel,
+			'(wikibase-label-empty)',
+		];
+		yield 'shows en for en-ca label' => [
+			true,
+			[ 'en-ca', 'en', 'mul' ],
+			'en-ca',
+			$englishLabel,
+			$englishLabel,
+		];
+		yield 'doesn\'t show en for de label' => [
+			true,
+			[ 'de', 'mul', 'en' ],
+			'de',
+			$englishLabel,
+			'(wikibase-label-empty)',
+		];
+	}
+
+	/**
+	 * @dataProvider labelPlaceholderFallbackScenarioProvider
+	 */
+	public function testGetTermsListViewLabelPlaceholderFallback_(
+		bool $mulEnabled,
+		array $fetchLanguageCodes,
+		string $requestedLanguageCode,
+		string $englishLabel,
+		string $expectedText
+	): void {
+		$languageFallbackChain = $this->createConfiguredMock( TermLanguageFallbackChain::class, [
+			'getFetchLanguageCodes' => $fetchLanguageCodes,
+			'extractPreferredValue' => [ 'language' => 'en', 'value' => $englishLabel ],
+		] );
+		$languageFallbackChainFactory = $this->createConfiguredMock( LanguageFallbackChainFactory::class, [
+			'newFromLanguageCode' => $languageFallbackChain,
+		] );
+		$view = $this->getTermsListView( 1, null, $languageFallbackChainFactory, $mulEnabled );
+
+		$labels = new TermList( [ new Term( 'en', $englishLabel ) ] );
+		$html = $view->getListItemHtml( $labels, new TermList(), null, $requestedLanguageCode );
+		$this->assertStringContainsString( $expectedText, $html );
 	}
 
 }

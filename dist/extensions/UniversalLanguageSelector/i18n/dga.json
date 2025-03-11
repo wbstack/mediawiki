@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Zakaria Tunsung",
-			"Linus Konkor"
+			"Linus Konkor",
+			"Zakaria Tunsung"
 		]
 	},
 	"uls-desc": "Ko a tontona sobie yaga ka o na kaa iri kɔkɔre ane na maale kɔkɔre sɛgeroo",
@@ -72,5 +72,6 @@
 	"ext-uls-empty-state-header": "Kɔkɔre zaa kyebe sɛre",
 	"ext-uls-empty-state-desc": "Kɔkɔre zaa naŋ ba kyebe pampana ŋa",
 	"ext-uls-empty-state-header-actions-available": "Kɔkɔre zaa kyebe sɛre. Paale bompaalaa?",
-	"ext-uls-empty-state-desc-actions-available": "Vɛŋ ka a yelbulo be kɔkɔ yaga poɔ."
+	"ext-uls-empty-state-desc-actions-available": "Vɛŋ ka a yelbulo be kɔkɔ yaga poɔ.",
+	"ext-uls-add-languages-button-label": "Paale kɔkɔɛ"
 }

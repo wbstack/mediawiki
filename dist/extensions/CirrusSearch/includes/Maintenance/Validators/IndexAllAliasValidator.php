@@ -4,6 +4,7 @@ namespace CirrusSearch\Maintenance\Validators;
 
 use CirrusSearch\Maintenance\Printer;
 use Elastica\Client;
+use MediaWiki\Status\Status;
 
 class IndexAllAliasValidator extends IndexAliasValidator {
 	/**
@@ -19,7 +20,7 @@ class IndexAllAliasValidator extends IndexAliasValidator {
 	 * @param string $type
 	 * @param Printer|null $out
 	 */
-	public function __construct( Client $client, $aliasName, $specificIndexName, $startOver, $type, Printer $out = null ) {
+	public function __construct( Client $client, $aliasName, $specificIndexName, $startOver, $type, ?Printer $out = null ) {
 		parent::__construct( $client, $aliasName, $specificIndexName, $startOver, $out );
 		$this->shouldRemovePrefix = $type;
 	}
@@ -27,7 +28,7 @@ class IndexAllAliasValidator extends IndexAliasValidator {
 	/**
 	 * @param string[] $add
 	 * @param string[] $remove
-	 * @return \Status
+	 * @return Status
 	 */
 	protected function updateIndices( array $add, array $remove ) {
 		$data = [];
@@ -59,6 +60,6 @@ class IndexAllAliasValidator extends IndexAliasValidator {
 	protected function shouldRemoveFromAlias( $name ) {
 		// Only if the name starts with the type being processed otherwise we'd
 		// remove the content index from the all alias.
-		return strpos( $name, "$this->shouldRemovePrefix" ) === 0;
+		return str_starts_with( $name, $this->shouldRemovePrefix );
 	}
 }

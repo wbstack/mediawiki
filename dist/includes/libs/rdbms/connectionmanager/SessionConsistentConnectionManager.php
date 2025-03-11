@@ -64,7 +64,7 @@ class SessionConsistentConnectionManager extends ConnectionManager {
 	 * @param string[]|null $groups
 	 * @param int $flags
 	 *
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	public function getReadConnection( ?array $groups = null, int $flags = 0 ) {
 		if ( $this->forceWriteConnection ) {
@@ -85,31 +85,6 @@ class SessionConsistentConnectionManager extends ConnectionManager {
 	public function getWriteConnection( int $flags = 0 ) {
 		$this->prepareForUpdates();
 		return parent::getWriteConnection( $flags );
-	}
-
-	/**
-	 * @since 1.29
-	 *
-	 * @param string[]|null $groups
-	 *
-	 * @return DBConnRef
-	 */
-	public function getReadConnectionRef( array $groups = null ) {
-		if ( $this->forceWriteConnection ) {
-			return parent::getWriteConnectionRef();
-		}
-
-		return parent::getReadConnectionRef( $groups );
-	}
-
-	/**
-	 * @since 1.29
-	 *
-	 * @return DBConnRef
-	 */
-	public function getWriteConnectionRef() {
-		$this->prepareForUpdates();
-		return parent::getWriteConnectionRef();
 	}
 
 }

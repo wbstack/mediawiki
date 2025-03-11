@@ -2,7 +2,11 @@
 
 namespace MediaWiki\Api;
 
+use Article;
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Session\Session;
+use MediaWiki\User\UserIdentity;
 
 /**
  * This class provides an implementation of the hook interfaces used
@@ -15,6 +19,7 @@ class ApiHookRunner implements
 	Hook\APIAfterExecuteHook,
 	Hook\ApiCheckCanExecuteHook,
 	Hook\ApiDeprecationHelpHook,
+	Hook\ApiLogFeatureUsageHook,
 	Hook\ApiFeedContributions__feedItemHook,
 	Hook\ApiFormatHighlightHook,
 	Hook\APIGetAllowedParamsHook,
@@ -46,15 +51,16 @@ class ApiHookRunner implements
 	\MediaWiki\Hook\FileUndeleteCompleteHook,
 	\MediaWiki\Hook\GetLinkColoursHook,
 	\MediaWiki\Hook\ImportSourcesHook,
-	\MediaWiki\Hook\LanguageLinksHook,
-	\MediaWiki\Hook\OutputPageBeforeHTMLHook,
-	\MediaWiki\Hook\OutputPageCheckLastModifiedHook,
+	\MediaWiki\Output\Hook\LanguageLinksHook,
+	\MediaWiki\Output\Hook\OutputPageBeforeHTMLHook,
+	\MediaWiki\Output\Hook\OutputPageCheckLastModifiedHook,
+	\MediaWiki\Page\Hook\ArticleParserOptionsHook,
+	\MediaWiki\Hook\TempUserCreatedRedirectHook,
 	\MediaWiki\Hook\UserLoginCompleteHook,
 	\MediaWiki\Hook\UserLogoutCompleteHook,
 	\MediaWiki\SpecialPage\Hook\ChangeAuthenticationDataAuditHook
 {
-	/** @var HookContainer */
-	private $container;
+	private HookContainer $container;
 
 	public function __construct( HookContainer $container ) {
 		$this->container = $container;
@@ -120,6 +126,13 @@ class ApiHookRunner implements
 		return $this->container->run(
 			'APIHelpModifyOutput',
 			[ $module, &$help, $options, &$tocData ]
+		);
+	}
+
+	public function onApiLogFeatureUsage( $feature, array $clientInfo ): void {
+		$this->container->run(
+			'ApiLogFeatureUsage',
+			[ $feature, $clientInfo ]
 		);
 	}
 
@@ -273,6 +286,13 @@ class ApiHookRunner implements
 		);
 	}
 
+	public function onArticleParserOptions( Article $article, ParserOptions $popts ) {
+		return $this->container->run(
+			'ArticleParserOptions',
+			[ $article, $popts ]
+		);
+	}
+
 	public function onChangeAuthenticationDataAudit( $req, $status ) {
 		return $this->container->run(
 			'ChangeAuthenticationDataAudit',
@@ -333,6 +353,20 @@ class ApiHookRunner implements
 		return $this->container->run(
 			'RequestHasSameOriginSecurity',
 			[ $request ]
+		);
+	}
+
+	public function onTempUserCreatedRedirect(
+		Session $session,
+		UserIdentity $user,
+		string $returnTo,
+		string $returnToQuery,
+		string $returnToAnchor,
+		&$redirectUrl
+	) {
+		return $this->container->run(
+			'TempUserCreatedRedirect',
+			[ $session, $user, $returnTo, $returnToQuery, $returnToAnchor, &$redirectUrl ]
 		);
 	}
 

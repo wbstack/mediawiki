@@ -20,8 +20,8 @@
 
 namespace MediaWiki\EditPage\Constraint;
 
+use MediaWiki\Title\Title;
 use StatusValue;
-use Title;
 
 /**
  * Don't save a new page if it's blank or if it's a MediaWiki:
@@ -34,17 +34,10 @@ use Title;
  */
 class DefaultTextConstraint implements IEditConstraint {
 
-	/** @var Title */
-	private $title;
-
-	/** @var bool */
-	private $allowBlank;
-
-	/** @var string */
-	private $userProvidedText;
-
-	/** @var string|null */
-	private $result;
+	private Title $title;
+	private bool $allowBlank;
+	private string $userProvidedText;
+	private string $result;
 
 	/**
 	 * @param Title $title

@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
+use MediaWiki\Html\Html;
 use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\Lib\LanguageFallbackChainFactory;
@@ -60,14 +60,16 @@ class SpecialAvailableBadges extends SpecialWikibasePage {
 	public function execute( $subPage ) {
 		parent::execute( $subPage );
 
-		$this->getOutput()->addHTML( $this->makeAllBadgesHtml() );
+		$outputPage = $this->getOutput();
+		$outputPage->addHTML( $this->makeAllBadgesHtml() );
+		$outputPage->addModuleStyles( 'wikibase.alltargets' );
 	}
 
 	/**
 	 * @return string HTML
 	 */
 	private function makeAllBadgesHtml() {
-		if ( empty( $this->badgeItems ) ) {
+		if ( !$this->badgeItems ) {
 			return Html::element(
 				'p',
 				[],

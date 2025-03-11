@@ -2,8 +2,8 @@
 
 namespace Wikibase\Lib\Changes;
 
-use Exception;
 use InvalidArgumentException;
+use LogicException;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Wikibase\DataModel\Entity\EntityDocument;
@@ -134,30 +134,29 @@ class EntityChangeFactory {
 	/**
 	 * Constructs an EntityChange from the given old and new Entity.
 	 *
-	 * @param string      $action The action name
+	 * @param string $action The action name
 	 * @param EntityDocument|null $oldEntity
 	 * @param EntityDocument|null $newEntity
-	 *
 	 * @return EntityChange
-	 * @throws Exception
 	 */
 	public function newFromUpdate(
 		$action,
-		EntityDocument $oldEntity = null,
-		EntityDocument $newEntity = null
+		?EntityDocument $oldEntity,
+		?EntityDocument $newEntity = null
 	): EntityChange {
 		if ( $oldEntity === null && $newEntity === null ) {
-			throw new Exception( 'Either $oldEntity or $newEntity must be given' );
+			throw new InvalidArgumentException( 'Either $oldEntity or $newEntity must be given' );
 		}
 
 		if ( $oldEntity === null ) {
 			$id = $newEntity->getId();
+			// @phan-suppress-next-line PhanTypeMismatchArgumentNullable false positive
 			$diff = $this->entityDiffer->getConstructionDiff( $newEntity );
 		} elseif ( $newEntity === null ) {
 			$id = $oldEntity->getId();
 			$diff = $this->entityDiffer->getDestructionDiff( $oldEntity );
 		} elseif ( $oldEntity->getType() !== $newEntity->getType() ) {
-			throw new Exception( 'Entity type mismatch' );
+			throw new LogicException( 'Entity type mismatch' );
 		} else {
 			$id = $newEntity->getId();
 			$diff = $this->entityDiffer->diffEntities( $oldEntity, $newEntity );

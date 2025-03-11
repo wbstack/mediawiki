@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\EditEntity;
 
-use MWException;
 use ReadOnlyError;
-use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityRevision;
+use Wikibase\Lib\Store\RevisionedUnresolvedRedirectException;
+use Wikibase\Lib\Store\StorageException;
 
 /**
  * Handler for editing activity, providing a unified interface for saving modified entities while performing
@@ -41,18 +41,18 @@ interface EditEntity {
 	 * Indicates that the content failed some precondition to saving,
 	 * such as a global uniqueness constraint.
 	 */
-	public const PRECONDITION_FAILED = 16;
+	public const PRECONDITION_FAILED_ERROR = 16;
 
 	/**
 	 * Indicates that the content triggered an edit filter that uses
 	 * the EditFilterMergedContent hook to supervise edits.
 	 */
-	public const FILTERED = 32;
+	public const FILTERED_ERROR = 32;
 
 	/**
 	 * Indicates that the edit exceeded a rate limit.
 	 */
-	public const RATE_LIMIT = 64;
+	public const RATE_LIMIT_ERROR = 64;
 
 	/**
 	 * bit mask for asking for any error.
@@ -80,22 +80,15 @@ interface EditEntity {
 	 * yet, this returns null.
 	 *
 	 * @return EntityRevision|null
-	 * @throws MWException
+	 * @throws RevisionedUnresolvedRedirectException
+	 * @throws StorageException
 	 */
 	public function getBaseRevision();
 
 	/**
 	 * Get the status object. Only defined after attemptSave() was called.
 	 *
-	 * After a successful save, the Status object's value field will contain an array,
-	 * just like the status returned by WikiPage::doUserEditContent(). Well known fields
-	 * in the status value are:
-	 *
-	 *  - new: bool whether the edit created a new page
-	 *  - revision: Revision the new revision object
-	 *  - errorFlags: bit field indicating errors, see the XXX_ERROR constants.
-	 *
-	 * @return Status
+	 * @return EditEntityStatus
 	 */
 	public function getStatus();
 
@@ -142,13 +135,12 @@ interface EditEntity {
 	/**
 	 * Attempts to save the given Entity object.
 	 *
-	 * This method performs entity level permission checks, checks the edit toke, enforces rate
+	 * This method performs entity level permission checks, checks the edit token, enforces rate
 	 * limits, resolves edit conflicts, and updates user watchlists if appropriate.
 	 *
 	 * Success or failure are reported via the Status object returned by this method.
 	 *
 	 * @todo $flags here should ideally not refer to EDIT_ constants from mediawiki core.
-	 * @todo This shouldn't throw MWExceptions
 	 *
 	 * @param EntityDocument $newEntity
 	 * @param string $summary The edit summary.
@@ -159,11 +151,11 @@ interface EditEntity {
 	 * @param bool|null $watch Whether the user wants to watch the entity.
 	 *                                Set to null to apply default according to getWatchDefault().
 	 * @param string[] $tags Change tags to add to the edit.
-	 * Callers are responsible for checking that the user is permitted to add these tags.
+	 * Callers are responsible for checking that the user is permitted to add these tags
+	 * (typically using {@link ChangeTagsStore::canAddTagsAccompanyingChange}).
 	 *
-	 * @return Status
+	 * @return EditEntityStatus
 	 *
-	 * @throws MWException
 	 * @throws ReadOnlyError
 	 *
 	 * @see    WikiPage::doUserEditContent

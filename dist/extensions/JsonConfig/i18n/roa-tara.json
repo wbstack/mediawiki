@@ -12,7 +12,7 @@
 	"jsonconfig-edit-action-cancel": "Annulle",
 	"jsonconfig-edit-button-label": "Cange cumme tabbelle",
 	"jsonconfig-edit-dialog-error": "Non ge pozze cangià cumme a 'na tabbelle: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Le date non ge s'accocchiane cu 'u scheme",
+	"jsonconfig-edit-dialog-error-data-invalid": "Le date non ge s'accocchiane cu 'u scheme",
 	"jsonconfig-edit-dialog-error-data-missing": "probbietà de le <code>data</code> JSON jè mangande o non g'è 'n'array",
 	"jsonconfig-edit-dialog-error-data-too-large": "'U 'nzieme de date jè troppe granne pe cangiarle cumme 'na tabbelle",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Ogne cambe adda avè 'nu nome",

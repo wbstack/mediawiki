@@ -2,13 +2,14 @@
 
 namespace TwoColConflict;
 
-use Config;
-use ExtensionRegistry;
+use MediaWiki\Config\Config;
 use MediaWiki\Extension\BetaFeatures\BetaFeatures;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Title\Title;
+use MediaWiki\User\Options\UserOptionsLookup;
 use MediaWiki\User\UserIdentity;
-use MediaWiki\User\UserOptionsLookup;
 use MobileContext;
-use Title;
+use WikiPage;
 
 /**
  * @license GPL-2.0-or-later
@@ -19,37 +20,16 @@ class TwoColConflictContext {
 	public const ENABLED_PREFERENCE = 'twocolconflict-enabled';
 	public const HIDE_CORE_HINT_PREFERENCE = 'userjs-twocolconflict-hide-core-hint';
 
-	/**
-	 * @var Config
-	 */
-	private $config;
+	private Config $config;
+	private UserOptionsLookup $userOptionsLookup;
+	private ExtensionRegistry $extensionRegistry;
+	private ?MobileContext $mobileContext;
 
-	/**
-	 * @var UserOptionsLookup
-	 */
-	private $userOptionsLookup;
-
-	/**
-	 * @var ExtensionRegistry
-	 */
-	private $extensionRegistry;
-
-	/**
-	 * @var MobileContext|null
-	 */
-	private $mobileContext;
-
-	/**
-	 * @param Config $config
-	 * @param UserOptionsLookup $userOptionsLookup
-	 * @param ExtensionRegistry $extensionRegistry
-	 * @param MobileContext|null $mobileContext
-	 */
 	public function __construct(
 		Config $config,
 		UserOptionsLookup $userOptionsLookup,
 		ExtensionRegistry $extensionRegistry,
-		MobileContext $mobileContext = null
+		?MobileContext $mobileContext = null
 	) {
 		$this->config = $config;
 		$this->userOptionsLookup = $userOptionsLookup;
@@ -80,6 +60,12 @@ class TwoColConflictContext {
 	 *   may be excluded for this interface.
 	 */
 	public function shouldTwoColConflictBeShown( UserIdentity $user, Title $title ): bool {
+		if ( !$title->hasContentModel( CONTENT_MODEL_WIKITEXT ) &&
+			!$title->hasContentModel( CONTENT_MODEL_TEXT )
+		) {
+			return false;
+		}
+
 		// T249817: Temporarily disabled on mobile
 		if ( $this->mobileContext && $this->mobileContext->shouldDisplayMobileView() ) {
 			return false;
@@ -96,13 +82,20 @@ class TwoColConflictContext {
 	}
 
 	/**
-	 * @param Title $title
+	 * @param WikiPage $page
+	 * @param UserIdentity $user
 	 * @return bool True if this article is appropriate for the talk page
 	 *   workflow, and the interface has been enabled by configuration.
 	 */
-	public function shouldTalkPageSuggestionBeConsidered( Title $title ): bool {
+	public function shouldTalkPageSuggestionBeConsidered( WikiPage $page, UserIdentity $user ): bool {
 		return $this->isTalkPageSuggesterEnabled() &&
-			$this->isEligibleTalkPage( $title );
+			$this->isEligibleTalkPage( $page->getTitle() ) &&
+			!$this->isSelfConflict( $page, $user );
+	}
+
+	private function isSelfConflict( WikiPage $page, UserIdentity $user ): bool {
+		$lastRevision = $page->getRevisionRecord();
+		return $lastRevision && $user->equals( $lastRevision->getUser() );
 	}
 
 	private function hasUserEnabledFeature( UserIdentity $user ): bool {

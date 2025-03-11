@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface LanguageResultWidget class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -40,7 +40,7 @@ OO.inheritClass( ve.ui.LanguageResultWidget, OO.ui.OptionWidget );
  * @chainable
  */
 ve.ui.LanguageResultWidget.prototype.updateLabel = function ( query, matchedProperty, compare ) {
-	var data = this.getData();
+	const data = this.getData();
 
 	if ( matchedProperty === 'name' ) {
 		this.name.setHighlightedQuery( data.name, query, compare );

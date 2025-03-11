@@ -59,17 +59,12 @@ class Statement implements PropertyIdProvider {
 
 	/**
 	 * @since 2.0
-	 *
-	 * @param Snak $mainSnak
-	 * @param SnakList|null $qualifiers
-	 * @param ReferenceList|null $references
-	 * @param string|null $guid
 	 */
 	public function __construct(
 		Snak $mainSnak,
-		SnakList $qualifiers = null,
-		ReferenceList $references = null,
-		string $guid = null
+		?SnakList $qualifiers = null,
+		?ReferenceList $references = null,
+		?string $guid = null
 	) {
 		$this->mainSnak = $mainSnak;
 		$this->qualifiers = $qualifiers ?: new SnakList();
@@ -178,7 +173,7 @@ class Statement implements PropertyIdProvider {
 	 *
 	 * @since 0.1
 	 *
-	 * @param integer $rank
+	 * @param int $rank
 	 *
 	 * @throws InvalidArgumentException
 	 */
@@ -195,7 +190,7 @@ class Statement implements PropertyIdProvider {
 	/**
 	 * @since 0.1
 	 *
-	 * @return integer
+	 * @return int
 	 */
 	public function getRank(): int {
 		return $this->rank;

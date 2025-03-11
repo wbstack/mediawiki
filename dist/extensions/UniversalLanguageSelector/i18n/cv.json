@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Chuvash2014",
-			"Astahar"
+			"Astahar",
+			"Chuvash2014"
 		]
 	},
 	"uls-desc": "Хутшӑнакана чӗлхене суйлама тата чӗлхе ӗнерлевне палӑртма темиҫе мел парать",
@@ -31,5 +31,6 @@
 	"ext-uls-empty-state-header": "Чӗлхесем хальлӗхе ҫук",
 	"ext-uls-empty-state-desc": "Хальлӗхе суйламалли чӗлхесем ҫук",
 	"ext-uls-empty-state-header-actions-available": "Чӗлхесем хальлӗхе ҫук. Ҫӗннине хушасшӑн-и?",
-	"ext-uls-empty-state-desc-actions-available": "Контентпа ытларах чӗлхепе паллашма май тӑвӑр."
+	"ext-uls-empty-state-desc-actions-available": "Контентпа ытларах чӗлхепе паллашма май тӑвӑр.",
+	"ext-uls-add-languages-button-label": "Чӗлхесем хуш"
 }

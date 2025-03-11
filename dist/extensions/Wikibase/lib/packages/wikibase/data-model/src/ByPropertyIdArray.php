@@ -14,7 +14,7 @@ use Wikibase\DataModel\Entity\PropertyId;
  * Helper for managing objects indexed by property id.
  *
  * This is a light weight alternative approach to using something
- * like GenericArrayObject with the advantages that no extra interface
+ * like ArrayObject with the advantages that no extra interface
  * is needed and that indexing does not happen automatically.
  *
  * Lack of automatic indexing means that you will need to call the
@@ -61,7 +61,7 @@ class ByPropertyIdArray extends ArrayObject {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct( $input = null ) {
-		if ( is_object( $input ) && !( $input instanceof Traversable ) ) {
+		if ( $input && !is_iterable( $input ) ) {
 			throw new InvalidArgumentException( '$input must be an array, Traversable or null' );
 		}
 

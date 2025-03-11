@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Cookai1205",
 			"Cwlin0416",
 			"Kly",
 			"Liuxinyu970226",
@@ -8,7 +9,7 @@
 		]
 	},
 	"skinname-modern": "現代（Modern）",
-	"modern.css": "/* 此 CSS 會影響使用 Modern 介面外觀的使用者 */",
-	"modern.js": "/* 此 JavaScript 會用於使用 Modern 介面外觀的使用者 */",
+	"modern.css": "/* 此處所有的 CSS 都會在使用者使用 Modern 外觀時載入 */",
+	"modern.js": "/* 此處所有的 JavaScript 都會在使用者使用 Modern 外觀時載入 */",
 	"modern-desc": "帶有側邊欄與上方橫列的藍/灰色外觀。由 MonoBook 外觀衍生而來"
 }

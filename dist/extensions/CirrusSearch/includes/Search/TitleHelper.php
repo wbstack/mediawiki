@@ -5,8 +5,9 @@ namespace CirrusSearch\Search;
 use CirrusSearch\InterwikiResolver;
 use CirrusSearch\Util;
 use MediaWiki\MediaWikiServices;
-use Title;
-use WikiMap;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Title\Title;
+use MediaWiki\WikiMap\WikiMap;
 
 /**
  * Utility class build MW Title from elastica Result/ResultSet classes
@@ -34,10 +35,10 @@ class TitleHelper {
 	 * @param InterwikiResolver|null $interwikiResolver
 	 * @param callable|null $linkSanitizer
 	 */
-	public function __construct( $hostWikiID = null, InterwikiResolver $interwikiResolver = null, callable $linkSanitizer = null ) {
+	public function __construct( $hostWikiID = null, ?InterwikiResolver $interwikiResolver = null, ?callable $linkSanitizer = null ) {
 		$this->hostWikiID = $hostWikiID ?: WikiMap::getCurrentWikiId();
 		$this->interwikiResolver = $interwikiResolver ?: MediaWikiServices::getInstance()->getService( InterwikiResolver::SERVICE );
-		$this->linkSanitizer = $linkSanitizer ?: [ \Sanitizer::class, 'escapeIdForLink' ];
+		$this->linkSanitizer = $linkSanitizer ?: [ Sanitizer::class, 'escapeIdForLink' ];
 	}
 
 	/**
@@ -50,14 +51,15 @@ class TitleHelper {
 	 * @param \Elastica\Result $r int $namespace
 	 * @return Title
 	 */
-	public function makeTitle( \Elastica\Result $r ) {
-		$iwPrefix = $this->identifyInterwikiPrefix( $r ) ?? '';
-		if ( empty( $iwPrefix ) && $r->namespace !== null && $r->title !== null ) {
-			return Title::makeTitle( $r->namespace, $r->title );
-		} else {
-			$nsPrefix = $r->namespace_text ? $r->namespace_text . ':' : '';
-			return Title::makeTitle( 0, $nsPrefix . $r->title, '', $iwPrefix );
+	public function makeTitle( \Elastica\Result $r ): Title {
+		$iwPrefix = $this->identifyInterwikiPrefix( $r );
+		$titleFactory = MediaWikiServices::getInstance()->getTitleFactory();
+		if ( $iwPrefix === null && $r->namespace !== null && $r->title !== null ) {
+			return $titleFactory->makeTitle( $r->namespace, $r->title );
 		}
+
+		$nsPrefix = $r->namespace_text ? $r->namespace_text . ':' : '';
+		return $titleFactory->makeTitle( 0, $nsPrefix . $r->title, '', $iwPrefix ?? '' );
 	}
 
 	/**
@@ -73,7 +75,7 @@ class TitleHelper {
 	 */
 	public function makeRedirectTitle( \Elastica\Result $r, $redirectText, $redirNamespace ) {
 		$iwPrefix = self::identifyInterwikiPrefix( $r );
-		if ( empty( $iwPrefix ) ) {
+		if ( $iwPrefix === null ) {
 			return Title::makeTitle( $redirNamespace, $redirectText );
 		}
 		if ( $redirNamespace === $r->namespace ) {

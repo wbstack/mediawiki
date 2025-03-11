@@ -3,15 +3,19 @@
 		"authors": [
 			"Bluehill",
 			"Bluemersen",
+			"Dr1t jg",
 			"Ellif",
 			"Kwj2772",
 			"MemphisA5",
 			"Revi",
-			"Ykhwong"
+			"Suleiman the Magnificent Television",
+			"Ykhwong",
+			"밥풀떼기"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search|특수:검색]]의 고급 검색 기능에 대한 쉬운 접근입니다",
 	"advancedsearch-options-pane-head": "고급 검색:",
+	"advancedsearch-options-pane-preview-list": "현재 사용되는 검색어",
 	"advancedsearch-optgroup-text": "본문 내에서 찾기",
 	"advancedsearch-optgroup-structure": "구조",
 	"advancedsearch-optgroup-files": "파일과 그림",
@@ -30,6 +34,7 @@
 	"advancedsearch-field-fileh": "파일 높이 (화소)",
 	"advancedsearch-field-sort": "정렬 순서",
 	"advancedsearch-field-preview-sort": "$1(으)로 정렬",
+	"advancedsearch-help-general-instruction": "$1에 대한 상세한 지침",
 	"advancedsearch-help-plain": ";설명\n:제목이나 텍스트에서 이 단어들을 검색합니다.\n;다음을 숙지하십시오\n:* 여기에 여러 단어를 입력할 수 있습니다.\n:* 구두점과 그 밖의 영숫자가 아닌 문자들(콜론과 쉼표는 제외)은 무시됩니다.\n:* 검색 단어 중 하나 이상을 포함하지 않는 결과가 있을 수 있습니다.\n:* 어간이 적용됩니다. 예: ''car''를 입력하면 검색은 ''cars''도 고려합니다. 어간은 언어에 특화되어 있습니다.\n;도움말 문서\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Full text search]\n;일반 검색에서 구문 일치\n:<code>sesame street car</code>",
 	"advancedsearch-help-phrase": ";설명\n:특정한 문자열을 검색합니다. 구두점은 무시됩니다.\n;다음을 수직하십시오\n:(인용 부호를 사용할 때에만 유효합니다. 아래 예시를 참고하십시오)\n:* 쉼표나 공백으로 검색의 구를 구분합니다. (예: <code>\"good morning\"</code>, <code>\"hello friend!\"</code>)\n:* 구두점과 그 밖의 영숫자가 아닌 문자들(콜론과 쉼표는 제외)은 무시됩니다.\n:* 검색은 대소문자를 구별하지 않습니다.\n:* 어간은 적용되지 않습니다.\n;도움말 문서\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Words, phrases, and modifiers]\n;일반 검색에서 구문 일치\n:예를 들어 <code>\"Begin at the beginning\"</code>처럼 단어에 인용 부호를 포함합니다.",
 	"advancedsearch-help-or": ";설명\n:검색 조건 중 최소한 한 개는 포함된 문서를 검색합니다.\n;도움말 페이지\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers 단어, 구, 한정어]\n;일반 검색에서 동일 효과를 내는 구문\n:단어 사이에 <code>OR</code>을 쓰면 됩니다. 예시: <code>오렌지 OR 귤</code>.",
@@ -72,6 +77,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "생성일",
 	"advancedsearch-namespaces-search-in": "검색 위치:",
 	"advancedsearch-namespaces-remember": "향후 검색에 선택 기억하기",
+	"advancedsearch-namespaces-pane-preview-list": "현재 활성화된 네임스페이스 필터",
 	"advancedsearch-namespaces-preset-all": "모두",
 	"advancedsearch-namespaces-preset-default": "기본값",
 	"advancedsearch-namespaces-preset-general-help": "일반 도움말",

@@ -2,6 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Aey Tai Nuea",
+			"AeyTaiNuea",
+			"Dai Meng Mao Long",
 			"咽頭べさ"
 		]
 	},
@@ -17,5 +19,11 @@
 	"vector-view-history": "ᥖᥨᥭᥰ ᥙᥪᥢᥰ",
 	"vector-view-view": "ᥚᥖᥴ ᥖᥨᥭᥰ",
 	"vector-more-actions": "ᥘᥛᥴ ᥘᥫᥴ",
-	"vector-searchsuggest-containing": "ᥔᥩᥐ ᥞᥣᥴ ᥖᥩᥢᥲ ᥖᥣᥱ ᥘᥣᥲ ᥘᥤᥐ ᥓᥫᥰ ᥑᥝᥲ ᥙᥣᥰ ᥝᥭᥳ <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>"
+	"vector-searchsuggest-containing": "ᥔᥩᥐ ᥞᥣᥴ ᥖᥩᥢᥲ ᥖᥣᥱ ᥘᥣᥲ ᥘᥤᥐ ᥓᥫᥰ ᥑᥝᥲ ᥙᥣᥰ ᥝᥭᥳ <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-label": "ᥘᥣᥛᥰ ᥘᥬᥰ",
+	"vector-toc-beginning": "ᥛᥫ ᥖᥥᥱ ᥛᥢᥰ",
+	"vector-main-menu-label": "ᥛᥥ ᥘᥧ ᥖᥤ ᥘᥐᥴ",
+	"vector-page-tools-label": "ᥑᥫᥒ ᥐᥛᥳ ᥐᥦᥛ",
+	"vector-page-tools-general-label": "ᥐᥧ ᥓᥫᥰ",
+	"vector-unpin-element-label": "ᥔᥫᥒᥱ ᥝᥭᥳ"
 }

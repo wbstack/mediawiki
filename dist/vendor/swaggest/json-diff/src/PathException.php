@@ -14,6 +14,9 @@ class PathException extends Exception
     /** @var string */
     private $field;
 
+    /** @var int */
+    private $opIndex;
+
     /**
      * @param string $message
      * @param OpPath $operation
@@ -26,7 +29,7 @@ class PathException extends Exception
         $operation,
         $field,
         $code = 0,
-        Throwable $previous = null
+        ?Throwable $previous = null
     )
     {
         parent::__construct($message, $code, $previous);
@@ -48,5 +51,23 @@ class PathException extends Exception
     public function getField()
     {
         return $this->field;
+    }
+
+    /**
+     * @param int $opIndex
+     * @return $this
+     */
+    public function setOpIndex($opIndex)
+    {
+        $this->opIndex = $opIndex;
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getOpIndex()
+    {
+        return $this->opIndex;
     }
 }

@@ -1,0 +1,28 @@
+/*!
+ * JavaScript for the edit form on Special:SetEntitySchemaLabelDescriptionAliases
+ */
+( function () {
+	'use strict';
+
+	function aliasesLengthString( aliases ) {
+		return aliases
+			.split( '|' )
+			.map( ( alias ) => alias.trim() )
+			.join( '' );
+	}
+
+	$( () => {
+		const schemaNameBadgeMaxSizeChars = mw.config.get( 'wgEntitySchemaNameBadgeMaxSizeChars' ),
+			labelInput = OO.ui.infuse( $( '#entityschema-title-label' ) ),
+			descriptionInput = OO.ui.infuse( $( '#entityschema-heading-description' ) ),
+			aliasInput = OO.ui.infuse( $( '#entityschema-heading-aliases' ) );
+
+		mw.widgets.visibleCodePointLimit( labelInput, schemaNameBadgeMaxSizeChars );
+		mw.widgets.visibleCodePointLimit( descriptionInput, schemaNameBadgeMaxSizeChars );
+		mw.widgets.visibleCodePointLimit(
+			aliasInput,
+			schemaNameBadgeMaxSizeChars,
+			aliasesLengthString,
+		);
+	} );
+}() );

@@ -52,7 +52,7 @@ class CSSMin {
 	 * the file content in place of the web address could be an uncompromising win for
 	 * all users.
 	 *
-	 * To avoid mistakes and protect performance we put an arbitrary limit on this.
+	 * To avoid mistakes and protect performance, we put an arbitrary limit on this.
 	 * If a file is larger than this limit, it should probably be loaded using the
 	 * default CSS behaviour (by URL, without `@embed` instruction), or embedded as
 	 * SVG directly in the HTML response if it is such a vital part of the page.
@@ -126,7 +126,7 @@ class CSSMin {
 	 *
 	 * If the image file has a suitable MIME type and size, encode it as a data URI, base64-encoded
 	 * for binary files or just percent-encoded otherwise. Return false if the image type is
-	 * unfamiliar or file exceeds the size limit.
+	 * unfamiliar or the file exceeds the size limit.
 	 *
 	 * @param string $file Image file to encode.
 	 * @param string|null $type File's MIME type or null. If null, CSSMin will
@@ -171,25 +171,30 @@ class CSSMin {
 			$encoded = rawurlencode( $contents );
 			// Unencode some things that don't need to be encoded, to make the encoding smaller
 			$encoded = strtr( $encoded, [
-				'%20' => ' ', // Unencode spaces
-				'%2F' => '/', // Unencode slashes
-				'%3A' => ':', // Unencode colons
-				'%3D' => '=', // Unencode equals signs
-				'%0A' => ' ', // Change newlines to spaces
-				'%0D' => ' ', // Change carriage returns to spaces
-				'%09' => ' ', // Change tabs to spaces
+				// Unencode spaces
+				'%20' => ' ',
+				// Unencode slashes
+				'%2F' => '/',
+				// Unencode colons
+				'%3A' => ':',
+				// Unencode equals signs
+				'%3D' => '=',
+				// Change newlines to spaces
+				'%0A' => ' ',
+				// Change carriage returns to spaces
+				'%0D' => ' ',
+				// Change tabs to spaces
+				'%09' => ' ',
 			] );
 			// Consolidate runs of multiple spaces in a row
 			$encoded = preg_replace( '/ {2,}/', ' ', $encoded );
 			// Remove leading and trailing spaces
 			$encoded = trim( $encoded, ' ' );
-			$uri = 'data:' . $type . ',' . $encoded;
-			return $uri;
+			return 'data:' . $type . ',' . $encoded;
 		}
 
 		// Try #2: Encoded data URI
-		$uri = 'data:' . $type . ';base64,' . base64_encode( $contents );
-		return $uri;
+		return 'data:' . $type . ';base64,' . base64_encode( $contents );
 	}
 
 	/**
@@ -339,11 +344,9 @@ class CSSMin {
 
 		// Re-insert comments
 		$pattern = '/' . self::PLACEHOLDER . '(\d+)x/';
-		$source = preg_replace_callback( $pattern, static function ( $match ) use ( &$comments ) {
+		return preg_replace_callback( $pattern, static function ( $match ) use ( &$comments ) {
 			return $comments[ $match[1] ];
 		}, $source );
-
-		return $source;
 	}
 
 	/**
@@ -442,7 +445,7 @@ class CSSMin {
 			return self::resolveUrl( $remote, $url );
 		}
 
-		// Pass thru fully-qualified and protocol-relative URLs and data URIs, as well as local URLs if
+		// Pass through fully-qualified and protocol-relative URLs and data URIs, as well as local URLs if
 		// we can't expand them.
 		// Also skips anchors or the rare `behavior` property specifying application's default behavior
 		if (

@@ -23,7 +23,7 @@ use Wikibase\DataModel\Snak\SnakList;
  */
 class ReferenceListTest extends \PHPUnit\Framework\TestCase {
 
-	public function instanceProvider() {
+	public static function instanceProvider() {
 		return [
 			[ new ReferenceList( [] ) ],
 			[ new ReferenceList( [
@@ -63,7 +63,7 @@ class ReferenceListTest extends \PHPUnit\Framework\TestCase {
 		new ReferenceList( $input );
 	}
 
-	public function invalidConstructorArgumentsProvider() {
+	public static function invalidConstructorArgumentsProvider() {
 		$id1 = new NumericPropertyId( 'P1' );
 
 		return [
@@ -481,7 +481,7 @@ class ReferenceListTest extends \PHPUnit\Framework\TestCase {
 		$snaks = [
 			new PropertyNoValueSnak( 1 ),
 			new PropertyNoValueSnak( 3 ),
-			new PropertyNoValueSnak( 2 )
+			new PropertyNoValueSnak( 2 ),
 		];
 
 		$references->addNewReference( $snaks );
@@ -522,7 +522,6 @@ class ReferenceListTest extends \PHPUnit\Framework\TestCase {
 	 * It is just here to catch unintentional changes.
 	 */
 	public function testSerializationStability() {
-		$this->markTestSkipped( 'Skipping temporarily until Wikimedia has fully migrated to PHP 7.4 (see T316923)' );
 		$list = new ReferenceList();
 		$list->addNewReference( new PropertyNoValueSnak( 1 ) );
 
@@ -530,10 +529,9 @@ class ReferenceListTest extends \PHPUnit\Framework\TestCase {
 		 * https://wiki.php.net/rfc/custom_object_serialization
 		 */
 		if ( version_compare( phpversion(), '7.4', '>=' ) ) {
-			$testString = "a:1:{i:0;O:28:\"Wikibase\\DataModel\\Reference\":1:{s:35:\"\x00Wikibase\\DataModel\\"
-				. "Reference\x00snaks\";O:32:\"Wikibase\\DataModel\\Snak\\SnakList\":2:{s:4:\""
-				. 'data";a:1:{i:0;C:43:"Wikibase\\DataModel\\Snak\\PropertyNoValueSnak":2:{P1}}s:5'
-				. ':"index";i:0;}}}';
+			$testString = "a:1:{i:0;O:28:\"Wikibase\DataModel\Reference\":1:{s:35:\"\x00Wikibase\DataModel\Reference"
+				. "\x00snaks\";O:32:\"Wikibase\DataModel\Snak\SnakList\":2:{s:4:\"data\";a:1:{i:0;O:43:\"Wikibase\\"
+				. 'DataModel\Snak\PropertyNoValueSnak":1:{i:0;s:2:"P1";}}s:5:"index";i:0;}}}';
 		} else {
 			$testString = "a:1:{i:0;O:28:\"Wikibase\\DataModel\\Reference\":1:{s:35:\"\x00Wikibase\\DataModel\\"
 				. "Reference\x00snaks\";C:32:\"Wikibase\\DataModel\\Snak\\SnakList\":100:{a:2:{s:4:\""

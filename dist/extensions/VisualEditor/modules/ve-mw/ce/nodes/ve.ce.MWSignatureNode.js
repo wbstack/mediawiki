@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWSignatureNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -56,12 +56,12 @@ ve.ce.MWSignatureNode.static.getDescription = function () {
 };
 
 // Update the timestamp on inserted signatures every minute.
-setInterval( function () {
-	var liveSignatures = ve.ce.MWSignatureNode.static.liveSignatures;
+setInterval( () => {
+	const liveSignatures = ve.ce.MWSignatureNode.static.liveSignatures;
 
-	var updatedSignatures = [];
-	for ( var i = 0; i < liveSignatures.length; i++ ) {
-		var sig = liveSignatures[ i ];
+	const updatedSignatures = [];
+	for ( let i = 0; i < liveSignatures.length; i++ ) {
+		const sig = liveSignatures[ i ];
 		try {
 			sig.forceUpdate();
 			updatedSignatures.push( sig );
@@ -90,13 +90,13 @@ ve.ce.MWSignatureNode.prototype.onSetup = function () {
  * @inheritdoc
  */
 ve.ce.MWSignatureNode.prototype.onTeardown = function () {
-	var liveSignatures = this.constructor.static.liveSignatures;
+	const liveSignatures = this.constructor.static.liveSignatures;
 
 	// Parent method
 	ve.ce.MWSignatureNode.super.prototype.onTeardown.call( this );
 
 	// Stop tracking
-	var index = liveSignatures.indexOf( this );
+	const index = liveSignatures.indexOf( this );
 	if ( index !== -1 ) {
 		liveSignatures.splice( index, 1 );
 	}
@@ -106,45 +106,62 @@ ve.ce.MWSignatureNode.prototype.onTeardown = function () {
  * @inheritdoc ve.ce.GeneratedContentNode
  */
 ve.ce.MWSignatureNode.prototype.generateContents = function () {
-	// Parsoid doesn't support pre-save transforms. PHP parser doesn't support Parsoid's
-	// meta attributes (that may or may not be required).
+	const doc = this.getModel().getDocument();
+	let abortable, aborted;
+	const abortedPromise = ve.createDeferred().reject( 'http',
+		{ textStatus: 'abort', exception: 'abort' } ).promise();
 
-	// We could try hacking up one (or even both) of these, but just calling the two parsers
-	// in order seems slightly saner.
+	function abort() {
+		aborted = true;
+		if ( abortable && abortable.abort ) {
+			abortable.abort();
+		}
+	}
 
-	// We must have only one top-level node, this is the easiest way.
-	var wikitext = '<span>~~~~</span>';
-	var doc = this.getModel().getDocument();
-
-	var deferred = ve.createDeferred();
-	var xhr = ve.init.target.getContentApi( doc ).post( {
-		action: 'parse',
-		text: wikitext,
-		contentmodel: 'wikitext',
-		prop: 'text',
-		onlypst: true
-	} )
-		.done( function ( resp ) {
-			var wt = ve.getProp( resp, 'parse', 'text' );
-			if ( wt ) {
-				ve.init.target.parseWikitextFragment( wt, true, doc ).then( function ( response ) {
-					if ( ve.getProp( response, 'visualeditor', 'result' ) !== 'success' ) {
-						deferred.reject();
-						return;
-					}
-
-					// Simplified case of template rendering, don't need to worry about filtering etc
-					deferred.resolve( $( response.visualeditor.content ).contents().toArray() );
-				} );
-			} else {
-				deferred.reject();
+	// Acquire a temporary user username before previewing, so that signatures
+	// display the temp user instead of IP user. (T331397)
+	return mw.user.acquireTempUserName()
+		.then( () => {
+			if ( aborted ) {
+				return abortedPromise;
 			}
-		} )
-		.fail( function () {
-			deferred.reject();
-		} );
 
-	return deferred.promise( { abort: xhr.abort } );
+			// We must have only one top-level node, this is the easiest way.
+			const wikitext = '<span>~~~~</span>';
+
+			// Parsoid doesn't support pre-save transforms. PHP parser doesn't support Parsoid's
+			// meta attributes (that may or may not be required).
+			// We could try hacking up one (or even both) of these, but just calling the two parsers
+			// in order seems slightly saner.
+			return ( abortable = ve.init.target.getContentApi( doc ).post( {
+				action: 'parse',
+				text: wikitext,
+				contentmodel: 'wikitext',
+				prop: 'text',
+				onlypst: true
+			} ) );
+		} )
+		.then( ( pstResponse ) => {
+			if ( aborted ) {
+				return abortedPromise;
+			}
+			const wikitext = ve.getProp( pstResponse, 'parse', 'text' );
+			if ( !wikitext ) {
+				return ve.createDeferred().reject();
+			}
+			return ( abortable = ve.init.target.parseWikitextFragment( wikitext, true, doc ) );
+		} )
+		.then( ( parseResponse ) => {
+			if ( aborted ) {
+				return abortedPromise;
+			}
+			if ( ve.getProp( parseResponse, 'visualeditor', 'result' ) !== 'success' ) {
+				return ve.createDeferred().reject();
+			}
+			// Simplified case of template rendering, don't need to worry about filtering etc
+			return $( parseResponse.visualeditor.content ).contents().toArray();
+		} )
+		.promise( { abort: abort } );
 };
 
 /* Registration */

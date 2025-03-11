@@ -30,27 +30,21 @@ class ExternalLinkHandler extends TokenHandler {
 		}
 	}
 
-	/**
-	 * @param string $str
-	 * @return bool
-	 */
 	private static function imageExtensions( string $str ): bool {
 		switch ( $str ) {
+			case 'avif': // fall through
+			case 'gif': // fall through
+			case 'jpeg': // fall through
 			case 'jpg': // fall through
 			case 'png': // fall through
-			case 'gif': // fall through
 			case 'svg':
+			case 'webp':
 				return true;
 			default:
 				return false;
 		}
 	}
 
-	/**
-	 * @param array $array
-	 * @param callable $fn
-	 * @return bool
-	 */
 	private function arraySome( array $array, callable $fn ): bool {
 		foreach ( $array as $value ) {
 			if ( $fn( $value ) ) {
@@ -60,10 +54,6 @@ class ExternalLinkHandler extends TokenHandler {
 		return false;
 	}
 
-	/**
-	 * @param string $href
-	 * @return bool
-	 */
 	private function hasImageLink( string $href ): bool {
 		$allowedPrefixes = $this->env->getSiteConfig()->allowedExternalImagePrefixes();
 		$bits = explode( '.', $href );
@@ -85,17 +75,14 @@ class ExternalLinkHandler extends TokenHandler {
 			} );
 	}
 
-	/**
-	 * @param Token $token
-	 * @return TokenHandlerResult|null
-	 */
 	private function onUrlLink( Token $token ): ?TokenHandlerResult {
 		$tagAttrs = null;
 		$builtTag = null;
 		$env = $this->env;
-		$origHref = $token->getAttribute( 'href' );
+		$origHref = $token->getAttributeV( 'href' );
 		$href = TokenUtils::tokensToString( $origHref );
-		$dataAttribs = $token->dataAttribs->clone();
+		$dataParsoid = $token->dataParsoid->clone();
+		$dataMw = $token->dataMw ? $token->dataMw->clone() : null;
 
 		if ( $this->hasImageLink( $href ) ) {
 			$checkAlt = explode( '/', $href );
@@ -109,7 +96,7 @@ class ExternalLinkHandler extends TokenHandler {
 			$tagAttrs = WikiLinkHandler::buildLinkAttrs(
 				$token->attribs, false, null, $tagAttrs )['attribs'];
 			return new TokenHandlerResult(
-				[ new SelfclosingTagTk( 'img', $tagAttrs, $dataAttribs ) ] );
+				[ new SelfclosingTagTk( 'img', $tagAttrs, $dataParsoid, $dataMw ) ] );
 		} else {
 			$tagAttrs = [
 				new KV( 'rel', 'mw:ExtLink' )
@@ -119,8 +106,8 @@ class ExternalLinkHandler extends TokenHandler {
 			// href is set explicitly below
 			$tagAttrs = WikiLinkHandler::buildLinkAttrs(
 				$token->attribs, false, null, $tagAttrs )['attribs'];
-			$builtTag = new TagTk( 'a', $tagAttrs, $dataAttribs );
-			$dataAttribs->stx = 'url';
+			$builtTag = new TagTk( 'a', $tagAttrs, $dataParsoid, $dataMw );
+			$dataParsoid->stx = 'url';
 
 			if ( !$this->options['inTemplate'] ) {
 				// Since we messed with the text of the link, we need
@@ -133,12 +120,12 @@ class ExternalLinkHandler extends TokenHandler {
 			}
 
 			$dp = new DataParsoid;
-			$dp->tsr = $dataAttribs->tsr->expandTsrK()->value;
+			$dp->tsr = $dataParsoid->tsr->expandTsrK()->value;
 			return new TokenHandlerResult( [
 					$builtTag,
 					// Make sure there are no IDN-ignored characters in the text so
 					// the user doesn't accidentally copy any.
-					Sanitizer::cleanUrl( $env->getSiteConfig(), $href, '' ),   // mode could be 'wikilink'
+					Sanitizer::cleanUrl( $env->getSiteConfig(), $href, '' ), // mode could be 'wikilink'
 					new EndTagTk(
 						'a',
 						[],
@@ -158,15 +145,16 @@ class ExternalLinkHandler extends TokenHandler {
 		$newAttrs = null;
 		$aStart = null;
 		$env = $this->env;
-		$origHref = $token->getAttribute( 'href' );
+		$origHref = $token->getAttributeV( 'href' );
 		$hasExpandedAttrs = TokenUtils::hasTypeOf( $token, 'mw:ExpandedAttrs' );
 		$href = TokenUtils::tokensToString( $origHref );
 		$hrefWithEntities = TokenUtils::tokensToString( $origHref, false, [
 				'includeEntities' => true
 			]
 		);
-		$content = $token->getAttribute( 'mw:content' );
-		$dataAttribs = $token->dataAttribs->clone();
+		$content = $token->getAttributeV( 'mw:content' );
+		$dataParsoid = $token->dataParsoid->clone();
+		$dataMw = $token->dataMw ? $token->dataMw->clone() : null;
 		$magLinkType = TokenUtils::matchTypeOf(
 			$token, '#^mw:(Ext|Wiki)Link/(ISBN|RFC|PMID)$#'
 		);
@@ -196,14 +184,13 @@ class ExternalLinkHandler extends TokenHandler {
 			// combine with existing rdfa attrs
 			$newAttrs = WikiLinkHandler::buildLinkAttrs(
 				$token->attribs, false, null, $newAttrs )['attribs'];
-			$aStart = new TagTk( 'a', $newAttrs, $dataAttribs );
+			$aStart = new TagTk( 'a', $newAttrs, $dataParsoid, $dataMw );
 			$tokens = array_merge( [ $aStart ],
 				is_array( $content ) ? $content : [ $content ], [ new EndTagTk( 'a' ) ] );
 			return new TokenHandlerResult( $tokens );
 		} elseif ( ( !$hasExpandedAttrs && is_string( $origHref ) ) ||
 					$this->urlParser->tokenizeURL( $hrefWithEntities ) !== false
 		) {
-			$rdfaType = 'mw:ExtLink';
 			if ( is_array( $content ) && count( $content ) === 1 && is_string( $content[0] ) ) {
 				$src = $content[0];
 				if ( $env->getSiteConfig()->hasValidProtocol( $src ) &&
@@ -221,12 +208,12 @@ class ExternalLinkHandler extends TokenHandler {
 				}
 			}
 
-			$newAttrs = [ new KV( 'rel', $rdfaType ) ];
+			$newAttrs = [ new KV( 'rel', 'mw:ExtLink' ) ];
 			// combine with existing rdfa attrs
 			// href is set explicitly below
 			$newAttrs = WikiLinkHandler::buildLinkAttrs(
 				$token->attribs, false, null, $newAttrs )['attribs'];
-			$aStart = new TagTk( 'a', $newAttrs, $dataAttribs );
+			$aStart = new TagTk( 'a', $newAttrs, $dataParsoid, $dataMw );
 
 			if ( !$this->options['inTemplate'] ) {
 				// If we are from a top-level page, add normalized attr info for
@@ -234,9 +221,9 @@ class ExternalLinkHandler extends TokenHandler {
 				//
 				// extLinkContentOffsets->start covers all spaces before content
 				// and we need src without those spaces.
-				$tsr0a = $dataAttribs->tsr->start + 1;
-				$tsr1a = $dataAttribs->extLinkContentOffsets->start -
-					strlen( $token->getAttribute( 'spaces' ) ?? '' );
+				$tsr0a = $dataParsoid->tsr->start + 1;
+				$tsr1a = $dataParsoid->tmp->extLinkContentOffsets->start -
+					strlen( $token->getAttributeV( 'spaces' ) ?? '' );
 				$length = $tsr1a - $tsr0a;
 				$aStart->addNormalizedAttribute( 'href', $href,
 					substr( $this->manager->getFrame()->getSrcText(), $tsr0a, $length ) );
@@ -246,7 +233,7 @@ class ExternalLinkHandler extends TokenHandler {
 
 			$content = PipelineUtils::getDOMFragmentToken(
 				$content,
-				$dataAttribs->tsr ? $dataAttribs->extLinkContentOffsets : null,
+				$dataParsoid->tsr ? $dataParsoid->tmp->extLinkContentOffsets : null,
 				[ 'inlineContext' => true, 'token' => $token ]
 			);
 

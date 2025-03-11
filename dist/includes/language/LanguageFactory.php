@@ -20,16 +20,19 @@
 
 namespace MediaWiki\Languages;
 
-use Config;
-use Language;
-use LanguageConverter;
+use InvalidArgumentException;
 use LocalisationCache;
+use LogicException;
 use MapCacheLRU;
+use MediaWiki\Config\Config;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Language\Language;
+use MediaWiki\Language\LanguageCode;
+use MediaWiki\Language\LanguageConverter;
 use MediaWiki\MainConfigNames;
-use MWException;
-use NamespaceInfo;
+use MediaWiki\Title\NamespaceInfo;
+use Wikimedia\Bcp47Code\Bcp47Code;
 
 /**
  * Internationalisation code
@@ -118,22 +121,53 @@ class LanguageFactory {
 	/**
 	 * Get a cached or new language object for a given language code
 	 * with normalization of the language code.
-	 * @param string $code
-	 * @throws MWException if the language code contains dangerous characters, e.g. HTML special
-	 *  characters or characters illegal in MediaWiki titles.
+	 *
+	 * If the language code comes from user input, check
+	 * LanguageNameUtils::isValidCode() before calling this method.
+	 *
+	 * The language code is presumed to be a MediaWiki-internal code,
+	 * unless you pass a Bcp47Code opaque object, in which case it is
+	 * presumed to be a standard BCP-47 code.  (There are, regrettably,
+	 * some ambiguous codes where this makes a difference.)
+	 *
+	 * As the Language class itself implements Bcp47Code, this method is an efficient
+	 * and safe downcast if you pass in a Language object.
+	 *
+	 * @param string|Bcp47Code $code
 	 * @return Language
 	 */
 	public function getLanguage( $code ): Language {
-		$code = $this->options->get( MainConfigNames::DummyLanguageCodes )[$code] ?? $code;
+		if ( $code instanceof Language ) {
+			return $code;
+		}
+		if ( $code instanceof Bcp47Code ) {
+			// Any compatibility remapping of valid BCP-47 codes would be done
+			// inside ::bcp47ToInternal, not here.
+			$code = LanguageCode::bcp47ToInternal( $code );
+		} else {
+			// Perform various deprecated and compatibility mappings of
+			// internal codes.
+			$code = $this->options->get( MainConfigNames::DummyLanguageCodes )[$code] ?? $code;
+		}
 		return $this->getRawLanguage( $code );
+	}
+
+	public function getLanguageCode( string $code ): LanguageCode {
+		$code = $this->options->get( MainConfigNames::DummyLanguageCodes )[$code] ?? $code;
+		if ( !$this->langNameUtils->isValidCode( $code ) ) {
+			throw new InvalidArgumentException( "Invalid language code \"$code\"" );
+		}
+		return new LanguageCode( $code );
 	}
 
 	/**
 	 * Get a cached or new language object for a given language code
 	 * without normalization of the language code.
+	 *
+	 * If the language code comes from user input, check LanguageNameUtils::isValidCode()
+	 * before calling this method.
+	 *
 	 * @param string $code
-	 * @throws MWException if the language code contains dangerous characters, e.g. HTML special
-	 *  characters or characters illegal in MediaWiki titles.
 	 * @return Language
 	 * @since 1.39
 	 */
@@ -147,15 +181,15 @@ class LanguageFactory {
 	}
 
 	/**
-	 * Create a language object for a given language code
+	 * Create a language object for a given language code.
+	 *
 	 * @param string $code
-	 * @param bool $fallback Whether we're going through language fallback chain
-	 * @throws MWException if the language code or fallback sequence is invalid
+	 * @param bool $fallback Whether we're going through the language fallback chain
 	 * @return Language
 	 */
 	private function newFromCode( $code, $fallback = false ): Language {
 		if ( !$this->langNameUtils->isValidCode( $code ) ) {
-			throw new MWException( "Invalid language code \"$code\"" );
+			throw new InvalidArgumentException( "Invalid language code \"$code\"" );
 		}
 
 		$constructorArgs = [
@@ -192,12 +226,12 @@ class LanguageFactory {
 			}
 		}
 
-		throw new MWException( "Invalid fallback sequence for language '$code'" );
+		throw new LogicException( "Invalid fallback sequence for language '$code'" );
 	}
 
 	/**
 	 * @param string $code
-	 * @param bool $fallback Whether we're going through language fallback chain
+	 * @param bool $fallback Whether we're going through the language fallback chain
 	 * @return string Name of the language class
 	 */
 	private function classFromCode( $code, $fallback = true ) {
@@ -210,13 +244,25 @@ class LanguageFactory {
 
 	/**
 	 * Get the "parent" language which has a converter to convert a "compatible" language
-	 * (in another variant) to this language (eg. zh for zh-cn, but not en for en-gb).
+	 * (in another variant) to this language (eg., zh for zh-cn, but not en for en-gb).
 	 *
-	 * @param string $code
-	 * @return Language|null
+	 * @note This method does not contain the deprecated and compatibility
+	 *  mappings of Language::getLanguage(string).
+	 *
+	 * @param string|Bcp47Code $code The language to convert to; can be an
+	 *  internal MediaWiki language code or a Bcp47Code object (which includes
+	 *  Language, which implements Bcp47Code).
+	 * @return Language|null A base language which has a converter to the given
+	 *  language, or null if none exists.
 	 * @since 1.22
 	 */
 	public function getParentLanguage( $code ) {
+		if ( $code instanceof Language ) {
+			$code = $code->getCode();
+		} elseif ( $code instanceof Bcp47Code ) {
+			$code = LanguageCode::bcp47ToInternal( $code );
+		}
+		// $code is now a mediawiki internal code string.
 		// We deliberately use array_key_exists() instead of isset() because we cache null.
 		if ( !array_key_exists( $code, $this->parentLangCache ) ) {
 			if ( !$this->langNameUtils->isValidBuiltInCode( $code ) ) {

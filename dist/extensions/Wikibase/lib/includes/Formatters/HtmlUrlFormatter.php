@@ -3,8 +3,8 @@
 namespace Wikibase\Lib\Formatters;
 
 use DataValues\StringValue;
-use Html;
 use InvalidArgumentException;
+use MediaWiki\Html\Html;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 
@@ -21,14 +21,11 @@ class HtmlUrlFormatter implements ValueFormatter {
 	 */
 	protected $attributes;
 
-	/**
-	 * @param FormatterOptions|null $options
-	 */
-	public function __construct( FormatterOptions $options = null ) {
+	public function __construct( ?FormatterOptions $options = null ) {
 		// TODO: configure from options; see also HtmlExternalIdentifierFormatter
 		$this->attributes = [
 			'rel' => 'nofollow',
-			'class' => 'external free'
+			'class' => 'external free',
 		];
 	}
 

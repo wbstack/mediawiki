@@ -13,6 +13,8 @@ use Wikibase\Lexeme\Domain\Model\SenseId;
  */
 class ChangeSenseDiffOp extends EntityDiff implements SenseDiff {
 
+	use Nonserializable;
+
 	/**
 	 * @var SenseId
 	 */
@@ -49,14 +51,6 @@ class ChangeSenseDiffOp extends EntityDiff implements SenseDiff {
 		return $this->diffOps['claim'] ?? new Diff( [] );
 	}
 
-	public function serialize() {
-		throw new LogicException( "serialize() is not implemented" );
-	}
-
-	public function unserialize( $serialized ) {
-		throw new LogicException( "unserialize() is not implemented" );
-	}
-
 	public function getType(): string {
 		return 'diff';
 	}
@@ -65,7 +59,7 @@ class ChangeSenseDiffOp extends EntityDiff implements SenseDiff {
 		return false;
 	}
 
-	public function toArray( callable $valueConverter = null ): array {
+	public function toArray( ?callable $valueConverter = null ): array {
 		throw new LogicException( "toArray() is not implemented" );
 	}
 
@@ -92,7 +86,7 @@ class ChangeSenseDiffOp extends EntityDiff implements SenseDiff {
 		throw new LogicException( "getOperations() is not implemented" );
 	}
 
-	public function getArrayCopy() {
+	public function getArrayCopy(): array {
 		// Due to the way this DiffOp is structured the default implementation would return nothing
 		throw new LogicException( "getArrayCopy() is not implemented" );
 	}

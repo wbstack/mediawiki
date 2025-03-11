@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWNumberedExternalLinkNodeContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -11,9 +11,9 @@
  * @extends ve.ui.LinkContextItem
  *
  * @constructor
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config]
  */
 ve.ui.MWNumberedExternalLinkNodeContextItem = function VeUiMWNumberedExternalLinkNodeContextItem() {
 	// Parent constructor
@@ -22,7 +22,16 @@ ve.ui.MWNumberedExternalLinkNodeContextItem = function VeUiMWNumberedExternalLin
 	// Initialization
 	this.$element.addClass( 've-ui-mwNumberedExternalLinkNodeContextItem' );
 
-	if ( this.labelButton ) {
+	if ( this.context.isMobile() ) {
+		// Label editing button doesn't exist on mobile by default
+		this.labelButton = new OO.ui.ButtonWidget( {
+			label: OO.ui.deferMsg( 'visualeditor-linknodeinspector-add-label' ),
+			framed: false,
+			flags: [ 'progressive' ]
+		} );
+		this.labelButton.connect( this, { click: 'onLabelButtonClick' } );
+		this.$labelLayout.empty().append( this.labelButton.$element );
+	} else {
 		this.labelButton.setLabel( OO.ui.deferMsg( 'visualeditor-linknodeinspector-add-label' ) );
 	}
 };
@@ -45,7 +54,7 @@ ve.ui.MWNumberedExternalLinkNodeContextItem.static.clearable = false;
  * @inheritdoc
  */
 ve.ui.MWNumberedExternalLinkNodeContextItem.prototype.onLabelButtonClick = function () {
-	var surfaceModel = this.context.getSurface().getModel(),
+	const surfaceModel = this.context.getSurface().getModel(),
 		surfaceView = this.context.getSurface().getView(),
 		doc = surfaceModel.getDocument(),
 		nodeRange = this.model.getOuterRange();
@@ -55,23 +64,21 @@ ve.ui.MWNumberedExternalLinkNodeContextItem.prototype.onLabelButtonClick = funct
 	// perhaps be consolidated into a reusable "replace node with annotated
 	// text and select that text" method somewhere appropriate.
 
-	var annotation = new ve.dm.MWExternalLinkAnnotation( {
+	const annotation = new ve.dm.MWExternalLinkAnnotation( {
 		type: 'link/mwExternal',
 		attributes: {
 			href: this.model.getHref()
 		}
 	} );
-	var annotations = doc.data.getAnnotationsFromOffset( nodeRange.start ).clone();
+	const annotations = doc.data.getAnnotationsFromOffset( nodeRange.start ).clone();
 	annotations.push( annotation );
-	var content = this.model.getHref().split( '' );
+	const content = this.model.getHref().split( '' );
 	ve.dm.Document.static.addAnnotationsToData( content, annotations );
 	surfaceModel.change(
 		ve.dm.TransactionBuilder.static.newFromReplacement( doc, nodeRange, content )
 	);
-	setTimeout( function () {
-		surfaceView.selectAnnotation( function ( view ) {
-			return view.model instanceof ve.dm.MWExternalLinkAnnotation;
-		} );
+	setTimeout( () => {
+		surfaceView.selectAnnotation( ( view ) => view.model instanceof ve.dm.MWExternalLinkAnnotation );
 	} );
 };
 

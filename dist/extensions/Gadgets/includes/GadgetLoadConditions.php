@@ -1,7 +1,4 @@
 <?php
-
-namespace MediaWiki\Extension\Gadgets;
-
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,23 +15,31 @@ namespace MediaWiki\Extension\Gadgets;
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  *
- * @author Siddharth VP
  * @file
  */
 
-use OutputPage;
-use Skin;
-use User;
+namespace MediaWiki\Extension\Gadgets;
 
+use MediaWiki\Output\OutputPage;
+use MediaWiki\User\User;
+use Skin;
+
+/**
+ * @author Siddharth VP
+ */
 class GadgetLoadConditions {
 	/** @var User */
 	private $user;
-	/** @var string */
-	private $target;
 	/** @var Skin */
 	private $skin;
 	/** @var string */
 	private $action;
+	/** @var int */
+	private $namespace;
+	/** @var string[] */
+	private $categories;
+	/** @var string */
+	private $contentModel;
 	/** @var string|null */
 	private $withGadgetParam;
 
@@ -43,23 +48,23 @@ class GadgetLoadConditions {
 	 */
 	public function __construct( OutputPage $out ) {
 		$this->user = $out->getUser();
-		$this->target = $out->getTarget() ?? 'desktop';
 		$this->skin = $out->getSkin();
 		$this->action = $out->getContext()->getActionName();
+		$this->namespace = $out->getTitle()->getNamespace();
+		$this->categories = $out->getCategories();
+		$this->contentModel = $out->getTitle()->getContentModel();
 		$this->withGadgetParam = $out->getRequest()->getRawVal( 'withgadget' );
 	}
 
-	/**
-	 * @param Gadget $gadget
-	 * @return bool
-	 */
-	public function check( Gadget $gadget ) {
+	public function check( Gadget $gadget ): bool {
 		$urlLoad = $this->withGadgetParam === $gadget->getName() && $gadget->supportsUrlLoad();
 
 		return ( $gadget->isEnabled( $this->user ) || $urlLoad )
 			&& $gadget->isAllowed( $this->user )
 			&& $gadget->isActionSupported( $this->action )
 			&& $gadget->isSkinSupported( $this->skin )
-			&& ( in_array( $this->target, $gadget->getTargets() ) );
+			&& $gadget->isNamespaceSupported( $this->namespace )
+			&& $gadget->isCategorySupported( $this->categories )
+			&& $gadget->isContentModelSupported( $this->contentModel );
 	}
 }

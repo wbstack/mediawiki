@@ -2,24 +2,18 @@
 
 namespace MediaWiki\Skins\Vector;
 
-use Config;
-use IContextSource;
 use MediaWiki\Auth\Hook\LocalUserCreatedHook;
-use MediaWiki\Hook\MakeGlobalVariablesScriptHook;
-use MediaWiki\Hook\OutputPageBodyAttributesHook;
-use MediaWiki\Hook\RequestContextCreateSkinHook;
+use MediaWiki\Config\Config;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Preferences\Hook\GetPreferencesHook;
 use MediaWiki\ResourceLoader as RL;
-use MediaWiki\ResourceLoader\Hook\ResourceLoaderSiteModulePagesHook;
-use MediaWiki\ResourceLoader\Hook\ResourceLoaderSiteStylesModulePagesHook;
 use MediaWiki\Skins\Hook\SkinPageReadyConfigHook;
-use OutputPage;
+use MediaWiki\Skins\Vector\Hooks\HookRunner;
+use MediaWiki\User\Options\UserOptionsManager;
+use MediaWiki\User\User;
 use RuntimeException;
-use Skin;
 use SkinTemplate;
-use Title;
-use User;
 
 /**
  * Presentation hook handlers for Vector skin.
@@ -32,13 +26,19 @@ use User;
 class Hooks implements
 	GetPreferencesHook,
 	LocalUserCreatedHook,
-	MakeGlobalVariablesScriptHook,
-	OutputPageBodyAttributesHook,
-	ResourceLoaderSiteModulePagesHook,
-	ResourceLoaderSiteStylesModulePagesHook,
-	RequestContextCreateSkinHook,
 	SkinPageReadyConfigHook
 {
+	private Config $config;
+	private UserOptionsManager $userOptionsManager;
+
+	public function __construct(
+		Config $config,
+		UserOptionsManager $userOptionsManager
+	) {
+		$this->config = $config;
+		$this->userOptionsManager = $userOptionsManager;
+	}
+
 	/**
 	 * Checks if the current skin is a variant of Vector
 	 *
@@ -53,10 +53,14 @@ class Hooks implements
 	}
 
 	/**
+	 * @param RL\Context $context
 	 * @param Config $config
 	 * @return array
 	 */
-	private static function getActiveABTest( $config ) {
+	public static function getActiveABTest(
+		RL\Context $context,
+		Config $config
+	) {
 		$ab = $config->get(
 			Constants::CONFIG_WEB_AB_TEST_ENROLLMENT
 		);
@@ -88,22 +92,6 @@ class Hooks implements
 	}
 
 	/**
-	 * Passes config variables to Vector (modern) ResourceLoader module.
-	 * @param RL\Context $context
-	 * @param Config $config
-	 * @return array
-	 */
-	public static function getVectorResourceLoaderConfig(
-		RL\Context $context,
-		Config $config
-	) {
-		return [
-			'wgVectorSearchHost' => $config->get( 'VectorSearchHost' ),
-			'wgVectorWebABTestEnrollment' => self::getActiveABTest( $config ),
-		];
-	}
-
-	/**
 	 * Generates config variables for skins.vector.search Resource Loader module (defined in
 	 * skin.json).
 	 *
@@ -115,11 +103,15 @@ class Hooks implements
 		RL\Context $context,
 		Config $config
 	): array {
-		$result = $config->get( 'VectorWvuiSearchOptions' );
-		$result['highlightQuery'] =
-			VectorServices::getLanguageService()->canWordsBeSplitSafely( $context->getLanguage() );
+		$vectorSearchConfig = [
+			'highlightQuery' =>
+				VectorServices::getLanguageService()->canWordsBeSplitSafely( $context->getLanguage() )
+		];
 
-		return $result;
+		$hookRunner = new HookRunner( MediaWikiServices::getInstance()->getHookContainer() );
+		$hookRunner->onVectorSearchResourceLoaderConfig( $vectorSearchConfig );
+
+		return array_merge( $config->get( 'VectorWvuiSearchOptions' ), $vectorSearchConfig );
 	}
 
 	/**
@@ -147,14 +139,13 @@ class Hooks implements
 		// and from its point of view they are the same thing.
 		// Please see the modules `skins.vector.js` and `skins.vector.legacy.js`
 		// for the wire up of search.
-		// The related method self::getVectorResourceLoaderConfig handles which
-		// search to load.
 		$config['search'] = false;
 	}
 
 	/**
-	 * Transforms watch item inside the action navigation menu
+	 * Moves watch item from actions to views menu.
 	 *
+	 * @internal used inside Hooks::onSkinTemplateNavigation
 	 * @param array &$content_navigation
 	 */
 	private static function updateActionsMenu( &$content_navigation ) {
@@ -167,20 +158,65 @@ class Hooks implements
 		}
 
 		// Promote watch link from actions to views and add an icon
-		if ( $key !== null ) {
-			self::appendClassToItem(
-				$content_navigation['actions'][$key]['class'],
-				[ 'icon' ]
-			);
+		// The second check to isset is pointless but shuts up phan.
+		if ( $key !== null && isset( $content_navigation['actions'][ $key ] ) ) {
 			$content_navigation['views'][$key] = $content_navigation['actions'][$key];
 			unset( $content_navigation['actions'][$key] );
 		}
 	}
 
 	/**
+	 * Adds icons to items in the "views" menu.
+	 *
+	 * @internal used inside Hooks::onSkinTemplateNavigation
+	 * @param array &$content_navigation
+	 * @param bool $isLegacy is this the legacy Vector skin?
+	 */
+	private static function updateViewsMenuIcons( &$content_navigation, $isLegacy ) {
+		// @phan-suppress-next-line PhanTypePossiblyInvalidDimOffset
+		foreach ( $content_navigation['views'] as &$item ) {
+			$icon = $item['icon'] ?? null;
+			if ( $icon ) {
+				if ( $isLegacy ) {
+					self::appendClassToItem(
+						$item['class'],
+						[ 'icon' ]
+					);
+				} else {
+					// Force the item as a button with hidden text.
+					$item['button'] = true;
+					$item['text-hidden'] = true;
+					$item = self::updateMenuItemData( $item, false );
+				}
+			} elseif ( !$isLegacy ) {
+				// The vector-tab-noicon class is only used in Vector-22.
+				self::appendClassToItem(
+					$item['class'],
+					[ 'vector-tab-noicon' ]
+				);
+			}
+		}
+	}
+
+	/**
+	 * All associated pages menu items do not have icons so are given the vector-tab-noicon class.
+	 *
+	 * @internal used inside Hooks::onSkinTemplateNavigation
+	 * @param array &$content_navigation
+	 */
+	private static function updateAssociatedPagesMenuIcons( &$content_navigation ) {
+		foreach ( $content_navigation['associated-pages'] as &$item ) {
+			self::appendClassToItem(
+				$item['class'],
+				[ 'vector-tab-noicon' ]
+			);
+		}
+	}
+
+	/**
 	 * Adds class to a property
 	 *
-	 * @param array &$item to update
+	 * @param array|string &$item to update
 	 * @param array|string $classes to add to the item
 	 */
 	private static function appendClassToItem( &$item, $classes ) {
@@ -209,26 +245,15 @@ class Hooks implements
 	 *  - Adds icons
 	 *  - Makes user page and watchlist collapsible
 	 *
+	 * @internal used inside ::updateUserLinksItems
 	 * @param SkinTemplate $sk
 	 * @param array &$content_navigation
+	 * @suppress PhanTypeInvalidDimOffset
 	 */
 	private static function updateUserLinksDropdownItems( $sk, &$content_navigation ) {
 		// For logged-in users in modern Vector, rearrange some links in the personal toolbar.
 		$user = $sk->getUser();
-		$isTemp = $user->isTemp();
-		$isRegistered = $user->isRegistered();
-		if ( $isTemp ) {
-			if ( isset( $content_navigation['user-page']['tmpuserpage'] ) ) {
-				$content_navigation['user-page']['tmpuserpage']['collapsible'] = true;
-				$content_navigation['user-page']['tmpuserpage'] =
-					self::updateMenuItemData( $content_navigation['user-page']['tmpuserpage'] );
-			}
-			if ( isset( $content_navigation['user-menu']['tmpuserpage'] ) ) {
-				$content_navigation['user-menu']['tmpuserpage']['collapsible'] = true;
-				$content_navigation['user-menu']['tmpuserpage'] =
-					self::updateMenuItemData( $content_navigation['user-menu']['tmpuserpage'] );
-			}
-		} elseif ( $isRegistered ) {
+		if ( $user->isRegistered() ) {
 			// Remove user page from personal menu dropdown for logged in use
 			$content_navigation['user-menu']['userpage']['collapsible'] = true;
 			// watchlist may be disabled if $wgGroupPermissions['*']['viewmywatchlist'] = false;
@@ -236,94 +261,76 @@ class Hooks implements
 			if ( isset( $content_navigation['user-menu']['watchlist'] ) ) {
 				$content_navigation['user-menu']['watchlist']['collapsible'] = true;
 			}
-			// Remove logout link from user-menu and recreate it in SkinVector,
-			unset( $content_navigation['user-menu']['logout'] );
-		}
 
-		if ( $isRegistered ) {
-			// Prefix user link items with associated icon.
-			// Don't show icons for anon menu items (besides login and create account).
-			// Loop through each menu to check/append its link classes.
+			// Anon editor links handled manually in new anon editor menu
+			$logoutMenu = [];
+			if ( isset( $content_navigation['user-menu']['logout'] ) ) {
+				$logoutMenu['logout'] = $content_navigation['user-menu']['logout'];
+				$logoutMenu['logout']['id'] = 'pt-logout';
+				unset( $content_navigation['user-menu']['logout'] );
+			}
+			$content_navigation['user-menu-logout'] = $logoutMenu;
+
 			self::updateMenuItems( $content_navigation, 'user-menu' );
+			self::updateMenuItems( $content_navigation, 'user-menu-logout' );
 		} else {
 			// Remove "Not logged in" from personal menu dropdown for anon users.
 			unset( $content_navigation['user-menu']['anonuserpage'] );
-		}
 
-		if ( !$isRegistered || $isTemp ) {
-			// "Create account" link is handled manually by Vector
-			unset( $content_navigation['user-menu']['createaccount'] );
-			// "Login" link is handled manually by Vector
-			unset( $content_navigation['user-menu']['login'] );
-			// Remove duplicate "Login" link added by SkinTemplate::buildPersonalUrls if group read permissions
-			// are set to false.
-			unset( $content_navigation['user-menu']['login-private'] );
+			// Make login and create account collapsible
+			if ( isset( $content_navigation['user-menu']['login'] ) ) {
+				$content_navigation['user-menu']['login']['collapsible'] = true;
+			}
+			if ( isset( $content_navigation['user-menu']['login-private'] ) ) {
+				$content_navigation['user-menu']['login-private']['collapsible'] = true;
+			}
+			if ( isset( $content_navigation['user-menu']['createaccount'] ) ) {
+				$content_navigation['user-menu']['createaccount']['collapsible'] = true;
+			}
+
+			// Anon editor links handled manually in new anon editor menu
+			$anonEditorMenu = [];
+			if ( isset( $content_navigation['user-menu']['anoncontribs'] ) ) {
+				$anonEditorMenu['anoncontribs'] = $content_navigation['user-menu']['anoncontribs'];
+				$anonEditorMenu['anoncontribs']['id'] = 'pt-anoncontribs';
+				unset( $content_navigation['user-menu']['anoncontribs'] );
+			}
+			if ( isset( $content_navigation['user-menu']['anontalk'] ) ) {
+				$anonEditorMenu['anontalk'] = $content_navigation['user-menu']['anontalk'];
+				$anonEditorMenu['anontalk']['id'] = 'pt-anontalk';
+				unset( $content_navigation['user-menu']['anontalk'] );
+			}
+			$content_navigation['user-menu-anon-editor'] = $anonEditorMenu;
+
+			// Only show icons for anon menu items (login and create account).
+			self::updateMenuItems( $content_navigation, 'user-menu' );
 		}
 	}
 
 	/**
-	 * Populates 'vector-user-menu-overflow' bucket for modern Vector with modified personal navigation (user links)
-	 * menu items, including 'notification', 'user-interface-preferences', 'user-page', 'vector-user-menu-overflow'
+	 * Echo has styles that control icons rendering in places we don't want them.
+	 * This code works around T343838.
 	 *
 	 * @param SkinTemplate $sk
 	 * @param array &$content_navigation
 	 */
-	private static function updateUserLinksOverflowItems( $sk, &$content_navigation ) {
-		$overflow = 'vector-user-menu-overflow';
-		$content_navigation[$overflow] = [];
-
-		// Logged in and logged out overflow items
-		if ( isset( $content_navigation['user-interface-preferences']['uls'] ) ) {
-			$content_navigation[$overflow]['uls'] = array_merge(
-				$content_navigation['user-interface-preferences']['uls'], [
-				'collapsible' => true,
-			] );
-		}
-
-		// Logged in overflow items
-		if ( isset( $content_navigation['user-page']['userpage'] ) ) {
-			$content_navigation[$overflow]['userpage'] = array_merge(
-				$content_navigation['user-page']['userpage'], [
-				// T312157: Style the userpage link as a blue link rather than a quiet button.
-				'button' => false,
-				'collapsible' => true,
-				// Remove icon
-				'icon' => '',
-			] );
-		}
+	private static function fixEcho( $sk, &$content_navigation ) {
 		if ( isset( $content_navigation['notifications'] ) ) {
-			foreach ( $content_navigation['notifications'] as $key => $data ) {
-				$content_navigation[$overflow][$key] = $data;
+			foreach ( $content_navigation['notifications'] as &$item ) {
+				$icon = $item['icon'] ?? null;
+				if ( $icon ) {
+					$linkClass = $item['link-class'] ?? [];
+					$newLinkClass = [
+						// Allows Echo to react to clicks
+						'mw-echo-notification-badge-nojs'
+					];
+					if ( in_array( 'mw-echo-unseen-notifications', $linkClass ) ) {
+						$newLinkClass[] = 'mw-echo-unseen-notifications';
+					}
+					$item['link-class'] = $newLinkClass;
+				}
 			}
 		}
-		if ( isset( $content_navigation['user-menu']['watchlist'] ) ) {
-			$content_navigation[$overflow]['watchlist'] = array_merge(
-				$content_navigation['user-menu']['watchlist'], [
-				'id' => 'pt-watchlist-2',
-				'button' => true,
-				'collapsible' => true,
-				'text-hidden' => true,
-			] );
-		}
-
-		// Anon/temp overflow items
-		$user = $sk->getUser();
-		$isTemp = $user->isTemp();
-		$isRegistered = $user->isRegistered();
-		$isCreateAccountAllowed = ( !$isRegistered || $isTemp );
-		if ( isset( $content_navigation['user-menu']['createaccount'] ) && $isCreateAccountAllowed ) {
-			$content_navigation[$overflow]['createaccount'] = array_merge(
-				$content_navigation['user-menu']['createaccount'], [
-				'id' => 'pt-createaccount-2',
-				// T312157: Style the userpage link as a blue link rather than a quiet button.
-				'button' => false,
-				'collapsible' => true,
-				// Remove icon
-				'icon' => '',
-			] );
-		}
-
-		self::updateMenuItems( $content_navigation, $overflow );
 	}
 
 	/**
@@ -331,6 +338,7 @@ class Hooks implements
 	 * are removed from the dropdown to be handled separately. In legacy Vector, the custom "user-page" bucket is
 	 * removed to preserve existing behavior.
 	 *
+	 * @internal used inside Hooks::onSkinTemplateNavigation
 	 * @param SkinTemplate $sk
 	 * @param array &$content_navigation
 	 */
@@ -341,7 +349,7 @@ class Hooks implements
 			// users in legacy Vector.
 			unset( $content_navigation['user-page'] );
 		} else {
-			self::updateUserLinksOverflowItems( $sk, $content_navigation );
+			self::fixEcho( $sk, $content_navigation );
 			self::updateUserLinksDropdownItems( $sk, $content_navigation );
 		}
 	}
@@ -349,12 +357,13 @@ class Hooks implements
 	/**
 	 * Modifies list item to make it collapsible.
 	 *
+	 * @internal used in ::updateItemData and ::createMoreOverflowMenu
 	 * @param array &$item
 	 * @param string $prefix defaults to user-links-
 	 */
 	private static function makeMenuItemCollapsible( array &$item, string $prefix = 'user-links-' ) {
-		$COLLAPSE_MENU_ITEM_CLASS = $prefix . 'collapsible-item';
-		self::appendClassToItem( $item[ 'class' ], $COLLAPSE_MENU_ITEM_CLASS );
+		$collapseMenuItemClass = $prefix . 'collapsible-item';
+		self::appendClassToItem( $item[ 'class' ], $collapseMenuItemClass );
 	}
 
 	/**
@@ -364,27 +373,32 @@ class Hooks implements
 	 * @param string $name
 	 * @return string of HTML
 	 */
-	public static function makeIcon( $name ) {
+	private static function makeIcon( $name ) {
 		// Html::makeLink will pass this through rawElement
-		return '<span class="mw-ui-icon mw-ui-icon-' . $name . ' mw-ui-icon-wikimedia-' . $name . '"></span>';
+		return '<span class="vector-icon mw-ui-icon-' . $name . ' mw-ui-icon-wikimedia-' . $name . '"></span>';
 	}
 
 	/**
 	 * Update template data to include classes and html that handle buttons, icons, and collapsible items.
 	 *
-	 * @internal for use inside Vector skin.
+	 * @internal used in ::updateMenuItemData
 	 * @param array $item data to update
 	 * @param string $buttonClassProp property to append button classes
 	 * @param string $iconHtmlProp property to set icon HTML
+	 * @param bool $unsetIcon should the icon field be unset?
 	 * @return array $item Updated data
 	 */
-	private static function updateItemData( $item, $buttonClassProp, $iconHtmlProp ) {
+	private static function updateItemData(
+		$item, $buttonClassProp, $iconHtmlProp, $unsetIcon = true
+	) {
 		$hasButton = $item['button'] ?? false;
 		$hideText = $item['text-hidden'] ?? false;
 		$isCollapsible = $item['collapsible'] ?? false;
 		$icon = $item['icon'] ?? '';
+		if ( $unsetIcon ) {
+			unset( $item['icon'] );
+		}
 		unset( $item['button'] );
-		unset( $item['icon'] );
 		unset( $item['text-hidden'] );
 		unset( $item['collapsible'] );
 
@@ -392,59 +406,36 @@ class Hooks implements
 			self::makeMenuItemCollapsible( $item );
 		}
 		if ( $hasButton ) {
-			self::appendClassToItem( $item[ $buttonClassProp ], [ 'mw-ui-button', 'mw-ui-quiet' ] );
+			// Hardcoded button classes, this should be fixed by replacing Hooks.php with VectorComponentButton.php
+			self::appendClassToItem( $item[ $buttonClassProp ], [
+				'cdx-button',
+				'cdx-button--fake-button',
+				'cdx-button--fake-button--enabled',
+				'cdx-button--weight-quiet'
+			] );
 		}
 		if ( $icon ) {
-			if ( $hideText ) {
-				$iconElementClasses = [ 'mw-ui-icon', 'mw-ui-icon-element',
-					// Some extensions declare icons without the wikimedia- prefix. e.g. Echo
-					'mw-ui-icon-' . $icon,
-					// FIXME: Some icon names are prefixed with `wikimedia-`.
-					// We should seek to remove all these instances.
-					'mw-ui-icon-wikimedia-' . $icon
-				];
-				self::appendClassToItem( $item[ $buttonClassProp ], $iconElementClasses );
-			} else {
-				$item[ $iconHtmlProp ] = self::makeIcon( $icon );
+			if ( $hideText && $hasButton ) {
+				self::appendClassToItem( $item[ $buttonClassProp ], [ 'cdx-button--icon-only' ] );
 			}
+
+			$item[ $iconHtmlProp ] = self::makeIcon( $icon );
 		}
 		return $item;
 	}
 
 	/**
-	 * Updates template data for Vector dropdown menus.
-	 *
-	 * @param array $item Menu data to update
-	 * @return array $item Updated menu data
-	 */
-	public static function updateDropdownMenuData( $item ) {
-		$buttonClassProp = 'heading-class';
-		$iconHtmlProp = 'html-vector-heading-icon';
-		return self::updateItemData( $item, $buttonClassProp, $iconHtmlProp );
-	}
-
-	/**
-	 * Updates template data for Vector link items.
-	 *
-	 * @param array $item link data to update
-	 * @return array $item Updated link data
-	 */
-	public static function updateLinkData( $item ) {
-		$buttonClassProp = 'class';
-		$iconHtmlProp = 'link-html';
-		return self::updateItemData( $item, $buttonClassProp, $iconHtmlProp );
-	}
-
-	/**
 	 * Updates template data for Vector menu items.
 	 *
+	 * @internal used inside Hooks::updateMenuItems ::updateViewsMenuIcons and ::updateUserLinksDropdownItems
 	 * @param array $item menu item data to update
+	 * @param bool $unsetIcon should the icon field be unset?
 	 * @return array $item Updated menu item data
 	 */
-	public static function updateMenuItemData( $item ) {
+	private static function updateMenuItemData( $item, $unsetIcon = true ) {
 		$buttonClassProp = 'link-class';
 		$iconHtmlProp = 'link-html';
-		return self::updateItemData( $item, $buttonClassProp, $iconHtmlProp );
+		return self::updateItemData( $item, $buttonClassProp, $iconHtmlProp, $unsetIcon );
 	}
 
 	/**
@@ -454,8 +445,8 @@ class Hooks implements
 	 * @param string $menu identifier
 	 */
 	private static function updateMenuItems( &$content_navigation, $menu ) {
-		foreach ( $content_navigation[$menu] as $key => $item ) {
-			$content_navigation[$menu][$key] = self::updateMenuItemData( $item );
+		foreach ( $content_navigation[$menu] as &$item ) {
+			$item = self::updateMenuItemData( $item );
 		}
 	}
 
@@ -474,8 +465,8 @@ class Hooks implements
 	 */
 	private static function createMoreOverflowMenu( &$content_navigation ) {
 		$clonedViews = [];
-		foreach ( array_keys( $content_navigation['views'] ?? [] ) as $key ) {
-			$newItem = $content_navigation['views'][$key];
+		foreach ( $content_navigation['views'] ?? [] as $key => $item ) {
+			$newItem = $item;
 			self::makeMenuItemCollapsible(
 				$newItem,
 				'vector-more-'
@@ -497,62 +488,85 @@ class Hooks implements
 	 * @param array &$content_navigation
 	 */
 	public static function onSkinTemplateNavigation( $sk, &$content_navigation ) {
-		$title = $sk->getRelevantTitle();
-
 		$skinName = $sk->getSkinName();
-		if ( self::isVectorSkin( $skinName ) ) {
-			if (
-				$sk->getConfig()->get( 'VectorUseIconWatch' ) &&
-				$title && $title->canExist()
-			) {
-				self::updateActionsMenu( $content_navigation );
-			}
-
-			self::updateUserLinksItems( $sk, $content_navigation );
+		// These changes should only happen in Vector.
+		if ( !$skinName || !self::isVectorSkin( $skinName ) ) {
+			return;
 		}
+
+		$title = $sk->getRelevantTitle();
+		if (
+			$sk->getConfig()->get( 'VectorUseIconWatch' ) &&
+			$title && $title->canExist()
+		) {
+			self::updateActionsMenu( $content_navigation );
+		}
+
+		self::updateUserLinksItems( $sk, $content_navigation );
 		if ( $skinName === Constants::SKIN_NAME_MODERN ) {
 			self::createMoreOverflowMenu( $content_navigation );
 		}
+
+		// The updating of the views menu happens /after/ the overflow menu has been created
+		// this avoids icons showing in the more overflow menu.
+		self::updateViewsMenuIcons( $content_navigation, self::isSkinVersionLegacy( $skinName ) );
+		self::updateAssociatedPagesMenuIcons( $content_navigation );
 	}
 
 	/**
-	 * Adds MediaWiki:Vector.css as the skin style that controls classic Vector.
-	 *
-	 * @param string $skin
-	 * @param array &$pages
-	 */
-	public function onResourceLoaderSiteStylesModulePages( $skin, &$pages ): void {
-		if ( $skin === Constants::SKIN_NAME_MODERN ) {
-			$pages['MediaWiki:Vector.css'] = [ 'type' => 'style' ];
-		}
-	}
-
-	/**
-	 * Adds MediaWiki:Vector.css as the skin style that controls classic Vector.
-	 *
-	 * @param string $skin
-	 * @param array &$pages
-	 */
-	public function onResourceLoaderSiteModulePages( $skin, &$pages ): void {
-		if ( $skin === Constants::SKIN_NAME_MODERN ) {
-			$pages['MediaWiki:Vector.js'] = [ 'type' => 'script' ];
-		}
-	}
-
-	/**
-	 * Adds the persistent sidebar hidden API preference.
+	 * Adds Vector specific user preferences that can only be accessed via API.
 	 *
 	 * @param User $user User whose preferences are being modified.
 	 * @param array[] &$prefs Preferences description array, to be fed to a HTMLForm object.
 	 */
 	public function onGetPreferences( $user, &$prefs ): void {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
+		$services = MediaWikiServices::getInstance();
+		$featureManagerFactory = $services->getService( 'Vector.FeatureManagerFactory' );
+		$featureManager = $featureManagerFactory->createFeatureManager( RequestContext::getMain() );
+		$isNightModeEnabled = $featureManager->isFeatureEnabled( Constants::FEATURE_NIGHT_MODE );
+
 		$vectorPrefs = [
-			Constants::PREF_KEY_SIDEBAR_VISIBLE => [
-				'type' => 'api',
-				'default' => $config->get(
-					Constants::CONFIG_KEY_DEFAULT_SIDEBAR_VISIBLE_FOR_AUTHORISED_USER
-				),
+			Constants::PREF_KEY_LIMITED_WIDTH => [
+				'type' => 'toggle',
+				'label-message' => 'vector-prefs-limited-width',
+				'section' => 'rendering/skin/skin-prefs',
+				'help-message' => 'vector-prefs-limited-width-help',
+				'hide-if' => [ '!==', 'skin', Constants::SKIN_NAME_MODERN ],
+			],
+			Constants::PREF_KEY_FONT_SIZE => [
+				'type' => 'select',
+				'label-message' => 'vector-feature-custom-font-size-name',
+				'section' => 'rendering/skin/skin-prefs',
+				'options-messages' => [
+					'vector-feature-custom-font-size-0-label' => '0',
+					'vector-feature-custom-font-size-1-label' => '1',
+					'vector-feature-custom-font-size-2-label' => '2',
+				],
+				'hide-if' => [ '!==', 'skin', Constants::SKIN_NAME_MODERN ],
+			],
+			Constants::PREF_KEY_PAGE_TOOLS_PINNED => [
+				'type' => 'api'
+			],
+			Constants::PREF_KEY_MAIN_MENU_PINNED => [
+				'type' => 'api'
+			],
+			Constants::PREF_KEY_TOC_PINNED => [
+				'type' => 'api'
+			],
+			Constants::PREF_KEY_APPEARANCE_PINNED => [
+				'type' => 'api'
+			],
+			Constants::PREF_KEY_NIGHT_MODE => [
+				'type' => $isNightModeEnabled ? 'select' : 'api',
+				'label-message' => 'skin-theme-name',
+				'help-message' => 'skin-theme-description',
+				'section' => 'rendering/skin/skin-prefs',
+				'options-messages' => [
+					'skin-theme-day-label' => 'day',
+					'skin-theme-night-label' => 'night',
+					'skin-theme-os-label' => 'os',
+				],
+				'hide-if' => [ '!==', 'skin', Constants::SKIN_NAME_MODERN ],
 			],
 		];
 		$prefs += $vectorPrefs;
@@ -565,11 +579,9 @@ class Hooks implements
 	 * @param bool $isAutoCreated
 	 */
 	public function onLocalUserCreated( $user, $isAutoCreated ) {
-		$config = MediaWikiServices::getInstance()->getMainConfig();
-		$default = $config->get( Constants::CONFIG_KEY_DEFAULT_SKIN_VERSION_FOR_NEW_ACCOUNTS );
+		$default = $this->config->get( Constants::CONFIG_KEY_DEFAULT_SKIN_VERSION_FOR_NEW_ACCOUNTS );
 		if ( $default ) {
-			$optionsManager = MediaWikiServices::getInstance()->getUserOptionsManager();
-			$optionsManager->setOption(
+			$this->userOptionsManager->setOption(
 				$user,
 				Constants::PREF_KEY_SKIN,
 				$default === Constants::SKIN_VERSION_LEGACY ?
@@ -579,214 +591,50 @@ class Hooks implements
 	}
 
 	/**
-	 * Returns the necessary TOC classes.
-	 *
-	 * @param Skin $sk
-	 * @param Config $config
-	 * @return string[]
-	 */
-	private static function getTocClasses( Skin $sk, $config ): array {
-		if ( !( $sk instanceof SkinVector22 ) ) {
-			return [];
-		}
-
-		$classes = [];
-		if (
-			$sk->isTOCABTestEnabled() &&
-			$sk->isTableOfContentsVisibleInSidebar() &&
-			!$sk->getUser()->isAnon()
-		) {
-			$userBucket = !$sk->isUserInTocTreatmentBucket()
-				? 'control'
-				: 'treatment';
-			$experimentConfig = $config->get( Constants::CONFIG_WEB_AB_TEST_ENROLLMENT );
-			$experimentName = $experimentConfig[ 'name' ];
-			$classes[] = $experimentName;
-			$classes[] = "$experimentName-$userBucket";
-		}
-
-		return $classes;
-	}
-
-	/**
-	 * Called when OutputPage::headElement is creating the body tag to allow skins
-	 * and extensions to add attributes they might need to the body of the page.
-	 *
-	 * @param OutputPage $out
-	 * @param Skin $sk
-	 * @param string[] &$bodyAttrs
-	 */
-	public function onOutputPageBodyAttributes( $out, $sk, &$bodyAttrs ): void {
-		$skinName = $out->getSkin()->getSkinName();
-		if ( !self::isVectorSkin( $skinName ) ) {
-			return;
-		}
-		$config = $sk->getConfig();
-
-		// As of 2020/08/13, this CSS class is referred to by the following deployed extensions:
-		//
-		// - VisualEditor
-		// - CodeMirror
-		// - WikimediaEvents
-		//
-		// See https://codesearch.wmcloud.org/deployed/?q=skin-vector-legacy for an up-to-date
-		// list.
-		if ( self::isSkinVersionLegacy( $skinName ) ) {
-			$bodyAttrs['class'] .= ' skin-vector-legacy';
-		}
-
-		$tocClasses = self::getTocClasses( $sk, $config );
-		if ( $tocClasses ) {
-			$bodyAttrs['class'] .= ' ' . implode( ' ', $tocClasses );
-		}
-
-		// Should we disable the max-width styling?
-		if ( !self::isSkinVersionLegacy( $skinName ) && $sk->getTitle() && self::shouldDisableMaxWidth(
-			$config->get( 'VectorMaxWidthOptions' ),
-			$sk->getTitle(),
-			$out->getRequest()->getValues()
-		) ) {
-			$bodyAttrs['class'] .= ' skin-vector-disable-max-width';
-		}
-
-		$featureManager = VectorServices::getFeatureManager();
-		$bodyAttrs['class'] .= ' ' . implode( ' ', $featureManager->getFeatureBodyClass() );
-		$bodyAttrs['class'] = trim( $bodyAttrs['class'] );
-	}
-
-	/**
-	 * Temporary RequestContextCreateSkin hook handler.
-	 * Switches to new Vector on certain pages.
-	 *
-	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/RequestContextCreateSkin
-	 *
-	 * @param IContextSource $context The RequestContext object the skin is being created for.
-	 * @param Skin|null|string &$skin A variable reference you may set a Skin instance or string
-	 *                                key on to override the skin that will be used for the context.
-	 * @return bool|void
-	 */
-	public function onRequestContextCreateSkin( $context, &$skin ) {
-		if ( !$skin ) {
-			// user is anonymous
-			$user = $context->getUser();
-			$config = $context->getConfig();
-			$titles = $config->get( 'Vector2022PreviewPages' );
-			$title = $context->getTitle();
-			$titleText = $title ? $title->getPrefixedText() : null;
-			if ( $titleText && $user->isAnon() && in_array( $titleText, $titles ) ) {
-				$skin = 'vector-2022';
-			}
-		}
-	}
-
-	/**
-	 * Per the $options configuration (for use with $wgVectorMaxWidthOptions)
-	 * determine whether max-width should be disabled on the page.
-	 * For the main page: Check the value of $options['exclude']['mainpage']
-	 * For all other pages, the following will happen:
-	 * - the array $options['include'] of canonical page names will be checked
-	 *   against the current page. If a page has been listed there, function will return false
-	 *   (max-width will not be  disabled)
-	 * Max width is disabled if:
-	 *  1) The current namespace is listed in array $options['exclude']['namespaces']
-	 *  OR
-	 *  2) A query string parameter matches one of the regex patterns in $exclusions['querystring'].
-	 *
-	 * @internal only for use inside tests.
-	 * @param array $options
-	 * @param Title $title
-	 * @param array $requestValues
-	 * @return bool
-	 */
-	public static function shouldDisableMaxWidth( array $options, Title $title, array $requestValues ) {
-		$canonicalTitle = $title->getRootTitle();
-
-		$inclusions = $options['include'] ?? [];
-		$exclusions = $options['exclude'] ?? [];
-
-		if ( $title->isMainPage() ) {
-			// only one check to make
-			return $exclusions['mainpage'] ?? false;
-		} elseif ( $canonicalTitle->isSpecialPage() ) {
-			$canonicalTitle->fixSpecialName();
-		}
-
-		//
-		// Check the inclusions based on the canonical title
-		// The inclusions are checked first as these trump any exclusions.
-		//
-		// Now we have the canonical title and the inclusions link we look for any matches.
-		foreach ( $inclusions as $titleText ) {
-			$includedTitle = Title::newFromText( $titleText );
-
-			if ( $canonicalTitle->equals( $includedTitle ) ) {
-				return false;
-			}
-		}
-
-		//
-		// Check the exclusions
-		// If nothing matches the exclusions to determine what should happen
-		//
-		$excludeNamespaces = $exclusions['namespaces'] ?? [];
-		// Max width is disabled on certain namespaces
-		if ( $title->inNamespaces( $excludeNamespaces ) ) {
-			return true;
-		}
-		$excludeQueryString = $exclusions['querystring'] ?? [];
-
-		foreach ( $excludeQueryString as $param => $excludedParamPattern ) {
-			$paramValue = $requestValues[$param] ?? false;
-			if ( $paramValue ) {
-				if ( $excludedParamPattern === '*' ) {
-					// Backwards compatibility for the '*' wildcard.
-					$excludedParamPattern = '.+';
-				}
-				return (bool)preg_match( "/$excludedParamPattern/", $paramValue );
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * NOTE: Please use ResourceLoaderGetConfigVars hook instead if possible
-	 * for adding config to the page.
-	 * Adds config variables to JS that depend on current page/request.
-	 *
-	 * Adds a config flag that can disable saving the VectorSidebarVisible
-	 * user preference when the sidebar menu icon is clicked.
-	 *
-	 * @param array &$vars Array of variables to be added into the output.
-	 * @param OutputPage $out OutputPage instance calling the hook
-	 */
-	public function onMakeGlobalVariablesScript( &$vars, $out ): void {
-		$skin = $out->getSkin();
-		$skinName = $skin->getSkinName();
-		if ( !self::isVectorSkin( $skinName ) ) {
-			return;
-		}
-		$config = $out->getConfig();
-		$user = $out->getUser();
-
-		if ( $user->isRegistered() && self::isSkinVersionLegacy( $skinName ) ) {
-			$vars[ 'wgVectorDisableSidebarPersistence' ] =
-				$config->get(
-					Constants::CONFIG_KEY_DISABLE_SIDEBAR_PERSISTENCE
-				);
-		}
-		// Must be exposed to CentralNotice banners via mw.config
-		$vars[ 'wgVector2022PreviewPages' ] = $config->get( 'Vector2022PreviewPages' );
-	}
-
-	/**
 	 * Gets whether the current skin version is the legacy version.
-	 * Should mirror SkinVector::isLegacy
 	 *
 	 * @param string $skinName hint that can be used to detect modern vector.
 	 * @return bool
 	 */
 	private static function isSkinVersionLegacy( $skinName ): bool {
 		return $skinName === Constants::SKIN_NAME_LEGACY;
+	}
+
+	/**
+	 * Register Vector 2022 beta feature to the beta features list
+	 *
+	 * @param User $user User the preferences are for
+	 * @param array &$betaFeatures
+	 */
+	public function onGetBetaFeaturePreferences( User $user, array &$betaFeatures ) {
+		$skinName = RequestContext::getMain()->getSkinName();
+		// Only Vector 2022 is supported for beta features
+		if ( $skinName !== Constants::SKIN_NAME_MODERN ) {
+			return;
+		}
+		// Only add Vector 2022 beta feature if there is at least one beta feature present in config
+		$configHasBeta = false;
+		foreach ( Constants::VECTOR_BETA_FEATURES as $featureName ) {
+			if ( $this->config->has( $featureName ) && $this->config->get( $featureName )[ 'beta' ] === true ) {
+				$configHasBeta = true;
+				break;
+			}
+		}
+		if ( !$configHasBeta ) {
+			return;
+		}
+		$skinsAssetsPath = $this->config->get( 'StylePath' );
+		$imagesDir = "$skinsAssetsPath/Vector/resources/images";
+		$betaFeatures[ Constants::VECTOR_2022_BETA_KEY ] = [
+			'label-message' => 'vector-2022-beta-preview-label',
+			'desc-message' => 'vector-2022-beta-preview-description',
+			'screenshot' => [
+				// follow up work to add images is required in T349321
+				'ltr' => "$imagesDir/vector-2022-beta-preview-ltr.svg",
+				'rtl' => "$imagesDir/vector-2022-beta-preview-rtl.svg",
+			],
+			'info-link' => 'https://www.mediawiki.org/wiki/Special:MyLanguage/Reading/Web/Accessibility_for_reading',
+			'discussion-link' => 'https://www.mediawiki.org/wiki/Talk:Reading/Web/Accessibility_for_reading',
+		];
 	}
 }

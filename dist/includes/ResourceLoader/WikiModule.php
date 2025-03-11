@@ -22,21 +22,21 @@
 
 namespace MediaWiki\ResourceLoader;
 
-use Content;
 use CSSJanus;
-use FormatJson;
+use MediaWiki\Content\Content;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleValue;
 use MemoizedCallable;
-use Title;
-use TitleValue;
 use Wikimedia\Minify\CSSMin;
 use Wikimedia\Rdbms\Database;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 /**
@@ -100,7 +100,7 @@ class WikiModule extends Module {
 	 * @param array|null $options For back-compat, this can be omitted in favour of overwriting
 	 *  getPages.
 	 */
-	public function __construct( array $options = null ) {
+	public function __construct( ?array $options = null ) {
 		if ( $options === null ) {
 			return;
 		}
@@ -111,7 +111,6 @@ class WikiModule extends Module {
 				case 'scripts':
 				case 'datas':
 				case 'group':
-				case 'targets':
 					$this->{$member} = $option;
 					break;
 			}
@@ -180,10 +179,10 @@ class WikiModule extends Module {
 	 * be set to the foreign wiki directly. Methods getScript() and getContent()
 	 * will not use this handle and are not valid on the local wiki.
 	 *
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	protected function getDB() {
-		return wfGetDB( DB_REPLICA );
+		return MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
 	}
 
 	/**
@@ -353,8 +352,7 @@ class WikiModule extends Module {
 
 	/**
 	 * @param Context $context
-	 * @return array
-	 * @phan-return array{main:string,files:string[][]}
+	 * @return array{main:?string,files:array<string,array>}
 	 */
 	private function getPackageFiles( Context $context ): array {
 		$main = null;
@@ -374,9 +372,7 @@ class WikiModule extends Module {
 						'content' => $script,
 					];
 					// First script becomes the "main" script
-					if ( $main === null ) {
-						$main = $fileKey;
-					}
+					$main ??= $fileKey;
 				} elseif ( $options['type'] === 'data' ) {
 					$data = FormatJson::decode( $content );
 					if ( $data == null ) {
@@ -432,9 +428,6 @@ class WikiModule extends Module {
 				[ $style, false, $remoteDir, true ]
 			);
 			$media = $options['media'] ?? 'all';
-			if ( !isset( $styles[$media] ) ) {
-				$styles[$media] = [];
-			}
 			$style = ResourceLoader::makeComment( $titleText ) . $style;
 			$styles[$media][] = $style;
 		}
@@ -481,7 +474,7 @@ class WikiModule extends Module {
 
 		// Optimisation: For user modules, don't needlessly load if there are no non-empty pages
 		// This is worthwhile because unlike most modules, user modules require their own
-		// separate embedded request (managed by ResourceLoaderClientHtml).
+		// separate embedded request (managed by ClientHtml).
 		$revisions = $this->getTitleInfo( $context );
 		if ( $this->getGroup() === self::GROUP_USER ) {
 			foreach ( $revisions as $revision ) {
@@ -514,13 +507,11 @@ class WikiModule extends Module {
 	 * @return array[] Keyed by page name
 	 */
 	protected function getTitleInfo( Context $context ) {
-		$dbr = $this->getDB();
-
 		$pageNames = array_keys( $this->getPages( $context ) );
 		sort( $pageNames );
 		$batchKey = implode( '|', $pageNames );
 		if ( !isset( $this->titleInfo[$batchKey] ) ) {
-			$this->titleInfo[$batchKey] = static::fetchTitleInfo( $dbr, $pageNames, __METHOD__ );
+			$this->titleInfo[$batchKey] = static::fetchTitleInfo( $this->getDB(), $pageNames, __METHOD__ );
 		}
 
 		$titleInfo = $this->titleInfo[$batchKey];
@@ -545,12 +536,12 @@ class WikiModule extends Module {
 	}
 
 	/**
-	 * @param IDatabase $db
-	 * @param array $pages
-	 * @param string $fname
+	 * @param IReadableDatabase $db
+	 * @param string[] $pages
+	 * @param string $fname @phan-mandatory-param
 	 * @return array
 	 */
-	protected static function fetchTitleInfo( IDatabase $db, array $pages, $fname = __METHOD__ ) {
+	protected static function fetchTitleInfo( IReadableDatabase $db, array $pages, $fname = __METHOD__ ) {
 		$titleInfo = [];
 		$linkBatchFactory = MediaWikiServices::getInstance()->getLinkBatchFactory();
 		$batch = $linkBatchFactory->newLinkBatch();
@@ -562,12 +553,12 @@ class WikiModule extends Module {
 			}
 		}
 		if ( !$batch->isEmpty() ) {
-			$res = $db->select( 'page',
+			$res = $db->newSelectQueryBuilder()
 				// Include page_touched to allow purging if cache is poisoned (T117587, T113916)
-				[ 'page_namespace', 'page_title', 'page_touched', 'page_len', 'page_latest' ],
-				$batch->constructSet( 'page', $db ),
-				$fname
-			);
+				->select( [ 'page_namespace', 'page_title', 'page_touched', 'page_len', 'page_latest' ] )
+				->from( 'page' )
+				->where( $batch->constructSet( 'page', $db ) )
+				->caller( $fname )->fetchResultSet();
 			foreach ( $res as $row ) {
 				// Avoid including ids or timestamps of revision/page tables so
 				// that versions are not wasted
@@ -575,7 +566,7 @@ class WikiModule extends Module {
 				$titleInfo[self::makeTitleKey( $title )] = [
 					'page_len' => $row->page_len,
 					'page_latest' => $row->page_latest,
-					'page_touched' => $row->page_touched,
+					'page_touched' => ConvertibleTimestamp::convert( TS_MW, $row->page_touched ),
 				];
 			}
 		}
@@ -583,81 +574,94 @@ class WikiModule extends Module {
 	}
 
 	/**
+	 * Batched version of WikiModule::getTitleInfo
+	 *
+	 * Title info for the passed modules is cached together. On index.php, OutputPage improves
+	 * cache use by having one batch shared between all users (site-wide modules) and a batch
+	 * for current-user modules.
+	 *
 	 * @since 1.28
+	 * @internal For use by ResourceLoader and OutputPage only
 	 * @param Context $context
-	 * @param IDatabase $db
 	 * @param string[] $moduleNames
 	 */
 	public static function preloadTitleInfo(
-		Context $context, IDatabase $db, array $moduleNames
+		Context $context, array $moduleNames
 	) {
 		$rl = $context->getResourceLoader();
 		// getDB() can be overridden to point to a foreign database.
-		// For now, only preload local. In the future, we could preload by wikiID.
-		$allPages = [];
-		/** @var WikiModule[] $wikiModules */
-		$wikiModules = [];
+		// Group pages by database to ensure we fetch titles from the correct database.
+		// By preloading both local and foreign titles, this method doesn't depend
+		// on knowing the local database.
+
+		/** @var array<string,array{db:IReadableDatabase,pages:string[],modules:WikiModule[]}> $byDomain */
+		$byDomain = [];
 		foreach ( $moduleNames as $name ) {
 			$module = $rl->getModule( $name );
 			if ( $module instanceof self ) {
-				$mDB = $module->getDB();
 				// Subclasses may implement getDB differently
-				if ( $mDB->getDomainID() === $db->getDomainID() ) {
-					$wikiModules[] = $module;
-					$allPages += $module->getPages( $context );
-				}
+				$db = $module->getDB();
+				$domain = $db->getDomainID();
+
+				$byDomain[ $domain ] ??= [ 'db' => $db, 'pages' => [], 'modules' => [] ];
+				$byDomain[ $domain ]['pages'] = array_merge(
+					$byDomain[ $domain ]['pages'],
+					array_keys( $module->getPages( $context ) )
+				);
+				$byDomain[ $domain ]['modules'][] = $module;
 			}
 		}
 
-		if ( !$wikiModules ) {
+		if ( !$byDomain ) {
 			// Nothing to preload
 			return;
 		}
 
-		$pageNames = array_keys( $allPages );
-		sort( $pageNames );
-		$hash = sha1( implode( '|', $pageNames ) );
-
-		// Avoid Zend bug where "static::" does not apply LSB in the closure
-		$func = [ static::class, 'fetchTitleInfo' ];
+		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 		$fname = __METHOD__;
 
-		$cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
-		$allInfo = $cache->getWithSetCallback(
-			$cache->makeGlobalKey( 'resourceloader-titleinfo', $db->getDomainID(), $hash ),
-			$cache::TTL_HOUR,
-			static function ( $curVal, &$ttl, array &$setOpts ) use ( $func, $pageNames, $db, $fname ) {
-				$setOpts += Database::getCacheSetOptions( $db );
+		foreach ( $byDomain as $domainId => $batch ) {
+			// Fetch title info
+			sort( $batch['pages'] );
+			$pagesHash = sha1( implode( '|', $batch['pages'] ) );
+			$allInfo = $cache->getWithSetCallback(
+				$cache->makeGlobalKey( 'resourceloader-titleinfo', $domainId, $pagesHash ),
+				$cache::TTL_HOUR,
+				static function ( $curVal, &$ttl, array &$setOpts ) use ( $batch, $fname ) {
+					$setOpts += Database::getCacheSetOptions( $batch['db'] );
+					return static::fetchTitleInfo( $batch['db'], $batch['pages'], $fname );
+				},
+				[
+					'checkKeys' => [
+						$cache->makeGlobalKey( 'resourceloader-titleinfo', $domainId ) ]
+				]
+			);
 
-				return call_user_func( $func, $db, $pageNames, $fname );
-			},
-			[
-				'checkKeys' => [
-					$cache->makeGlobalKey( 'resourceloader-titleinfo', $db->getDomainID() ) ]
-			]
-		);
-
-		foreach ( $wikiModules as $wikiModule ) {
-			$pages = $wikiModule->getPages( $context );
-			// Before we intersect, map the names to canonical form (T145673).
-			$intersect = [];
-			foreach ( $pages as $pageName => $unused ) {
-				$title = Title::newFromText( $pageName );
-				if ( $title ) {
-					$intersect[ self::makeTitleKey( $title ) ] = 1;
-				} else {
-					// Page name may be invalid if user-provided (e.g. gadgets)
-					$rl->getLogger()->info(
-						'Invalid wiki page title "{title}" in ' . __METHOD__,
-						[ 'title' => $pageName ]
-					);
+			// Inject to WikiModule objects
+			foreach ( $batch['modules'] as $wikiModule ) {
+				$pages = $wikiModule->getPages( $context );
+				$info = [];
+				foreach ( $pages as $pageName => $unused ) {
+					// Map page name to canonical form (T145673).
+					$title = Title::newFromText( $pageName );
+					if ( !$title ) {
+						// Page name may be invalid if user-provided (e.g. gadgets)
+						$rl->getLogger()->info(
+							'Invalid wiki page title "{title}" in ' . __METHOD__,
+							[ 'title' => $pageName ]
+						);
+						continue;
+					}
+					$infoKey = self::makeTitleKey( $title );
+					if ( isset( $allInfo[$infoKey] ) ) {
+						$info[$infoKey] = $allInfo[$infoKey];
+					}
 				}
+				$pageNames = array_keys( $pages );
+				sort( $pageNames );
+				$batchKey = implode( '|', $pageNames );
+				$wikiModule->setTitleInfo( $batchKey, $info );
 			}
-			$info = array_intersect_key( $allInfo, $intersect );
-			$pageNames = array_keys( $pages );
-			sort( $pageNames );
-			$batchKey = implode( '|', $pageNames );
-			$wikiModule->setTitleInfo( $batchKey, $info );
 		}
 	}
 
@@ -697,7 +701,7 @@ class WikiModule extends Module {
 		}
 
 		if ( !$purge ) {
-			$title = Title::castFromPageIdentity( $page );
+			$title = Title::newFromPageIdentity( $page );
 			$purge = ( $title->isSiteConfigPage() || $title->isUserConfigPage() );
 		}
 
@@ -719,6 +723,3 @@ class WikiModule extends Module {
 		return ( $this->styles && !$this->scripts ) ? self::LOAD_STYLES : self::LOAD_GENERAL;
 	}
 }
-
-/** @deprecated since 1.39 */
-class_alias( WikiModule::class, 'ResourceLoaderWikiModule' );

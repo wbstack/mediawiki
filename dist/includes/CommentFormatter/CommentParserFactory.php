@@ -2,14 +2,14 @@
 
 namespace MediaWiki\CommentFormatter;
 
-use Language;
-use LinkCache;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Cache\LinkCache;
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Language\Language;
 use MediaWiki\Linker\LinkRenderer;
-use NamespaceInfo;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\TitleParser;
 use RepoGroup;
-use TitleParser;
 
 /**
  * @internal

@@ -1,109 +1,107 @@
-( function () {
-	'use strict';
+'use strict';
 
-	mw.libs = mw.libs || {};
-	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
-	mw.libs.advancedSearch.ui = mw.libs.advancedSearch.ui || {};
+/**
+ * @class
+ * @extends OO.ui.TagMultiselectWidget
+ *
+ * @constructor
+ * @param {SearchModel} store
+ * @param {Object} config
+ * @param {string} config.fieldId Field name
+ * @param {string} [config.placeholder=""]
+ */
+const ArbitraryWordInput = function ( store, config ) {
+	this.store = store;
+	this.fieldId = config.fieldId;
+	this.placeholderText = config.placeholder || '';
 
-	/**
-	 * @class
-	 * @extends OO.ui.TagMultiselectWidget
-	 * @constructor
-	 *
-	 * @param {mw.libs.advancedSearch.dm.SearchModel} store
-	 * @param {Object} config
-	 */
-	mw.libs.advancedSearch.ui.ArbitraryWordInput = function ( store, config ) {
-		config = $.extend( {}, config );
+	this.store.connect( this, { update: 'onStoreUpdate' } );
 
-		this.store = store;
-		this.fieldId = config.fieldId;
-		this.placeholderText = config.placeholder || '';
+	ArbitraryWordInput.super.call(
+		this,
+		Object.assign( { allowArbitrary: true }, config )
+	);
 
-		this.store.connect( this, { update: 'onStoreUpdate' } );
+	this.input.$input.on( 'input', this.buildTagsFromInput.bind( this ) );
 
-		mw.libs.advancedSearch.ui.ArbitraryWordInput.parent.call(
-			this,
-			$.extend( { allowArbitrary: true }, config )
-		);
+	// Optimization: Skip listener if placeholder will always be empty
+	if ( this.placeholderText ) {
+		this.on( 'change', this.updatePlaceholder.bind( this ) );
+	}
 
-		this.input.$input.on( 'input', this.buildTagsFromInput.bind( this ) );
+	// run initial size calculation after off-canvas construction (hidden parent node)
+	this.input.$input.on( 'visible', () => {
+		this.updateInputSize();
+	} );
 
-		// Optimization: Skip listener if placeholder will always be empty
-		if ( this.placeholderText ) {
-			this.on( 'change', this.updatePlaceholder.bind( this ) );
-		}
+	this.populateFromStore();
+};
 
-		// run initial size calculation after off-canvas construction (hidden parent node)
-		this.input.$input.on( 'visible', function () {
-			this.updateInputSize();
-		}.bind( this ) );
+OO.inheritClass( ArbitraryWordInput, OO.ui.TagMultiselectWidget );
 
-		this.populateFromStore();
-	};
+ArbitraryWordInput.prototype.populateFromStore = function () {
+	if ( this.store.hasFieldChanged( this.fieldId, this.getValue() ) ) {
+		this.setValue( this.store.getField( this.fieldId ) );
+	}
+};
 
-	OO.inheritClass( mw.libs.advancedSearch.ui.ArbitraryWordInput, OO.ui.TagMultiselectWidget );
+ArbitraryWordInput.prototype.onStoreUpdate = function () {
+	this.populateFromStore();
+};
 
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.populateFromStore = function () {
-		if ( this.store.hasFieldChanged( this.fieldId, this.getValue() ) ) {
-			this.setValue( this.store.getField( this.fieldId ) );
-		}
-	};
+ArbitraryWordInput.prototype.buildTagsFromInput = function () {
+	const segments = this.input.getValue().split( /[\s,]+/ );
 
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.onStoreUpdate = function () {
-		this.populateFromStore();
-	};
+	if ( segments.length > 1 ) {
+		const self = this;
 
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.buildTagsFromInput = function () {
-		var segments = this.input.getValue().split( /[\s,]+/ );
+		segments.forEach( ( segment ) => {
+			if ( self.isAllowedData( segment ) ) {
+				self.addTag( segment );
+			}
+		} );
 
-		if ( segments.length > 1 ) {
-			var self = this;
+		this.clearInput();
+	}
+};
 
-			segments.forEach( function ( segment ) {
-				if ( self.isAllowedData( segment ) ) {
-					self.addTag( segment );
-				}
-			} );
+/**
+ * @inheritdoc
+ */
+ArbitraryWordInput.prototype.isAllowedData = function ( data ) {
+	return data.trim() &&
+		ArbitraryWordInput.super.prototype.isAllowedData.call( this, data );
+};
 
-			this.clearInput();
-		}
-	};
+ArbitraryWordInput.prototype.updatePlaceholder = function () {
+	// bust cached width so placeholder remains changeable
+	this.contentWidthWithPlaceholder = undefined;
+	this.input.$input.attr( 'placeholder', this.getTextForPlaceholder() );
+};
 
-	/**
-	 * @inheritdoc
-	 */
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.isAllowedData = function ( data ) {
-		return data.trim() &&
-			mw.libs.advancedSearch.ui.ArbitraryWordInput.parent.prototype.isAllowedData.call( this, data );
-	};
+/**
+ * @return {string}
+ */
+ArbitraryWordInput.prototype.getTextForPlaceholder = function () {
+	return this.getValue().length ? '' : this.placeholderText;
+};
 
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.updatePlaceholder = function () {
-		// bust cached width so placeholder remains changeable
-		this.contentWidthWithPlaceholder = undefined;
-		this.input.$input.attr( 'placeholder', this.getTextForPlaceholder() );
-	};
+/**
+ * @inheritdoc
+ */
+ArbitraryWordInput.prototype.doInputEnter = function () {
+	return !this.input.getValue().trim() ||
+		ArbitraryWordInput.super.prototype.doInputEnter.call( this );
+};
 
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.getTextForPlaceholder = function () {
-		return this.getValue().length ? '' : this.placeholderText;
-	};
+/**
+ * @inheritdoc
+ */
+ArbitraryWordInput.prototype.onInputBlur = function () {
+	if ( this.input.getValue().trim() ) {
+		this.addTagFromInput();
+	}
+	return ArbitraryWordInput.super.prototype.onInputBlur.call( this );
+};
 
-	/**
-	 * @inheritdoc
-	 */
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.doInputEnter = function () {
-		return !this.input.getValue().trim() ||
-			mw.libs.advancedSearch.ui.ArbitraryWordInput.parent.prototype.doInputEnter.call( this );
-	};
-
-	/**
-	 * @inheritdoc
-	 */
-	mw.libs.advancedSearch.ui.ArbitraryWordInput.prototype.onInputBlur = function () {
-		if ( this.input.getValue().trim() ) {
-			this.addTagFromInput();
-		}
-		return mw.libs.advancedSearch.ui.ArbitraryWordInput.parent.prototype.onInputBlur.call( this );
-	};
-
-}() );
+module.exports = ArbitraryWordInput;

@@ -1,9 +1,9 @@
 const util = require( '../util' ),
 	View = require( '../View' ),
-	Icon = require( '../Icon' );
+	IconButton = require( '../IconButton' );
 
 /**
- * @extends View
+ * @extends module:mobile.startup/View
  */
 class SearchHeaderView extends View {
 	/**
@@ -14,17 +14,21 @@ class SearchHeaderView extends View {
 	 * @param {Function} props.onInput executed every time input changes
 	 * @param {string} props.placeholderMsg
 	 * @param {string} props.action
+	 * @parm {string} [props.autocapitalize] none or sentences
 	 * @param {string} [props.searchTerm] default
 	 */
 	constructor( props ) {
 		super(
-			util.extend( {}, props, {
+			util.extend( {
+				autocapitalize: 'sentences'
+			}, props, {
 				events: {
 					'input input': 'onInput'
 				}
 			} )
 		);
 	}
+
 	/** @inheritdoc */
 	onInput( ev ) {
 		const query = ev.target.value;
@@ -35,24 +39,30 @@ class SearchHeaderView extends View {
 			this.clearIcon.$el.hide();
 		}
 	}
+
 	/** @inheritdoc */
 	get isTemplateMode() {
 		return true;
 	}
+
 	/** @inheritdoc */
 	get template() {
 		return util.template( `<div class="overlay-title search-header-view">
 		<form method="get" action="{{action}}" class="search-box">
-		<input class="search mw-ui-background-icon-search" type="search" name="search" autocomplete="off" placeholder="{{placeholderMsg}}" aria-label="{{placeholderMsg}}" value="{{searchTerm}}">
+		<input class="search mf-icon-search" type="search" name="search"
+			autocapitalize="{{autocapitalize}}"
+			autocomplete="off" placeholder="{{placeholderMsg}}" aria-label="{{placeholderMsg}}" value="{{searchTerm}}">
 		<input type="hidden" name="title" value="{{defaultSearchPage}}">
 		</form>
 </div>` );
 	}
+
 	/** @inheritdoc */
 	postRender() {
-		const clearIcon = new Icon( {
+		const clearIcon = new IconButton( {
 			tagName: 'button',
-			name: 'clear',
+			icon: 'clear',
+			size: 'medium',
 			isSmall: true,
 			label: mw.msg( 'mobile-frontend-clear-search' ),
 			additionalClassNames: 'clear',

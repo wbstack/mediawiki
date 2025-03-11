@@ -3,29 +3,33 @@
 namespace MediaWiki\Extension\OAuth\Control;
 
 use Composer\Semver\VersionParser;
-use EchoEvent;
 use Exception;
-use ExtensionRegistry;
-use FormatJson;
-use IContextSource;
 use LogicException;
 use ManualLogEntry;
+use MediaWiki\Api\ApiMessage;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Extension\Notifications\Model\Event;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance;
 use MediaWiki\Extension\OAuth\Backend\MWOAuthDataStore;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Entity\ClientEntity;
+use MediaWiki\Extension\OAuth\OAuthServices;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Sanitizer;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use MediaWiki\WikiMap\WikiMap;
 use MWCryptRand;
 use MWException;
-use Sanitizer;
-use SpecialPage;
-use Title;
+use StatusValue;
 use UnexpectedValueException;
-use User;
-use WikiMap;
-use Wikimedia\Rdbms\DBConnRef;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * (c) Aaron Schulz 2013, GPL
@@ -58,11 +62,11 @@ class ConsumerSubmitControl extends SubmitControl {
 	/**
 	 * Names of the actions that can be performed on a consumer. These are the same as the
 	 * options in getRequiredFields().
-	 * @var array
+	 * @var string[]
 	 */
 	public static $actions = [ 'propose', 'update', 'approve', 'reject', 'disable', 'reenable' ];
 
-	/** @var DBConnRef */
+	/** @var IDatabase */
 	protected $dbw;
 
 	/**
@@ -74,9 +78,9 @@ class ConsumerSubmitControl extends SubmitControl {
 	/**
 	 * @param IContextSource $context
 	 * @param array $params
-	 * @param DBConnRef $dbw Result of Utils::getCentralDB( DB_PRIMARY )
+	 * @param IDatabase $dbw Result of Utils::getCentralDB( DB_PRIMARY )
 	 */
-	public function __construct( IContextSource $context, array $params, DBConnRef $dbw ) {
+	public function __construct( IContextSource $context, array $params, IDatabase $dbw ) {
 		parent::__construct( $context, $params );
 		$this->dbw = $dbw;
 	}
@@ -129,10 +133,41 @@ class ConsumerSubmitControl extends SubmitControl {
 					return in_array( $i, [ Consumer::OAUTH_VERSION_1, Consumer::OAUTH_VERSION_2 ] );
 				},
 				'callbackUrl' => static function ( $s, $vals ) {
+					$isOAuth1 = (int)$vals['oauthVersion'] === Consumer::OAUTH_VERSION_1;
+					$isOAuth2 = !$isOAuth1;
+
 					if ( strlen( $s ?? '' ) > 2000 ) {
 						return false;
+					} elseif ( $vals['ownerOnly'] ) {
+						return true;
 					}
-					return $vals['ownerOnly'] || wfParseUrl( $s ) !== false;
+
+					$urlParts = wfParseUrl( $s );
+					if ( !$urlParts ) {
+						return false;
+					} elseif ( $isOAuth2 && !self::isSecureContext( $urlParts ) ) {
+						return StatusValue::newFatal(
+							new ApiMessage( 'mwoauth-error-callback-url-must-be-https', 'invalid_callback_url' )
+						);
+					} elseif ( ( $isOAuth1 || $vals['oauth2IsConfidential'] )
+						&& WikiMap::getWikiFromUrl( $s )
+					) {
+						return StatusValue::newGood()->warning(
+							new ApiMessage( 'mwoauth-error-callback-server-url', 'invalid_callback_url' )
+						);
+					} elseif ( ( $isOAuth2 || !$vals['callbackIsPrefix'] )
+						&& in_array( $urlParts['path'] ?? '', [ '', '/' ], true )
+						&& !( $urlParts['query'] ?? false )
+						&& !( $urlParts['fragment'] ?? false )
+					) {
+						$message = $isOAuth1
+							? 'mwoauth-error-callback-bare-domain-oauth1'
+							: 'mwoauth-error-callback-bare-domain-oauth2';
+						return StatusValue::newGood()->warning(
+							new ApiMessage( $message, 'invalid_callback_url' )
+						);
+					}
+					return true;
 				},
 				'description' => $validateBlobSize,
 				'email' => static function ( $s ) {
@@ -142,7 +177,7 @@ class ConsumerSubmitControl extends SubmitControl {
 					global $wgConf;
 					return ( $s === '*'
 						|| in_array( $s, $wgConf->getLocalDatabases() )
-						|| array_search( $s, Utils::getAllWikiNames() ) !== false
+						|| in_array( $s, Utils::getAllWikiNames() )
 					);
 				},
 				'oauth2GrantTypes' => static function ( $a, $vals ) {
@@ -188,7 +223,7 @@ class ConsumerSubmitControl extends SubmitControl {
 		$readOnlyMode = MediaWikiServices::getInstance()->getReadOnlyMode();
 		if ( !$user->getId() ) {
 			return $this->failure( 'not_logged_in', 'badaccess-group0' );
-		} elseif ( $user->isLocked() || $wgBlockDisablesLogin && $user->getBlock() ) {
+		} elseif ( $user->isLocked() || ( $wgBlockDisablesLogin && $user->getBlock() ) ) {
 			return $this->failure( 'user_blocked', 'badaccess-group0' );
 		} elseif ( $readOnlyMode->isReadOnly() ) {
 			return $this->failure( 'readonly', 'readonlytext', $readOnlyMode->getReason() );
@@ -213,331 +248,344 @@ class ConsumerSubmitControl extends SubmitControl {
 		$permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
 
 		switch ( $action ) {
-		case 'propose':
-			if ( !$permissionManager->userHasRight( $user, 'mwoauthproposeconsumer' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( !$user->isEmailConfirmed() ) {
-				return $this->failure( 'email_not_confirmed', 'mwoauth-consumer-email-unconfirmed' );
-			} elseif ( $user->getEmail() !== $this->vals['email'] ) {
-				// @TODO: allow any email and don't set emailAuthenticated below
-				return $this->failure( 'email_mismatched', 'mwoauth-consumer-email-mismatched' );
-			}
+			case 'propose':
+				if ( !$permissionManager->userHasRight( $user, 'mwoauthproposeconsumer' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( !$user->isEmailConfirmed() ) {
+					return $this->failure( 'email_not_confirmed', 'mwoauth-consumer-email-unconfirmed' );
+				} elseif ( $user->getEmail() !== $this->vals['email'] ) {
+					// @TODO: allow any email and don't set emailAuthenticated below
+					return $this->failure( 'email_mismatched', 'mwoauth-consumer-email-mismatched' );
+				}
 
-			if ( Consumer::newFromNameVersionUser(
-				$dbw, $this->vals['name'], $this->vals['version'], $centralUserId
-			) ) {
-				return $this->failure( 'consumer_exists', 'mwoauth-consumer-alreadyexists' );
-			}
+				if ( Consumer::newFromNameVersionUser(
+					$dbw, $this->vals['name'], $this->vals['version'], $centralUserId
+				) ) {
+					return $this->failure( 'consumer_exists', 'mwoauth-consumer-alreadyexists' );
+				}
 
-			$wikiNames = Utils::getAllWikiNames();
-			$dbKey = array_search( $this->vals['wiki'], $wikiNames );
-			if ( $dbKey !== false ) {
-				$this->vals['wiki'] = $dbKey;
-			}
+				$wikiNames = Utils::getAllWikiNames();
+				$dbKey = array_search( $this->vals['wiki'], $wikiNames );
+				if ( $dbKey !== false ) {
+					$this->vals['wiki'] = $dbKey;
+				}
 
-			$curVer = $dbw->selectField( 'oauth_registered_consumer',
-				'oarc_version',
-				[ 'oarc_name' => $this->vals['name'], 'oarc_user_id' => $centralUserId ],
-				__METHOD__,
-				[ 'ORDER BY' => 'oarc_registration DESC', 'FOR UPDATE' ]
-			);
-			if ( $curVer !== false && version_compare( $curVer, $this->vals['version'], '>=' ) ) {
-				return $this->failure( 'consumer_exists',
-					'mwoauth-consumer-alreadyexistsversion', $curVer );
-			}
+				$curVer = $dbw->newSelectQueryBuilder()
+					->select( 'oarc_version' )
+					->from( 'oauth_registered_consumer' )
+					->where( [ 'oarc_name' => $this->vals['name'], 'oarc_user_id' => $centralUserId ] )
+					->orderBy( 'oarc_registration', SelectQueryBuilder::SORT_DESC )
+					->forUpdate()
+					->caller( __METHOD__ )
+					->fetchField();
+				if ( $curVer !== false && version_compare( $curVer, $this->vals['version'], '>=' ) ) {
+					return $this->failure( 'consumer_exists',
+						'mwoauth-consumer-alreadyexistsversion', $curVer );
+				}
 
-			// Handle owner-only mode
-			if ( $this->vals['ownerOnly'] ) {
-				$this->vals['callbackUrl'] = SpecialPage::getTitleFor( 'OAuth', 'verified' )
-					->getLocalURL();
-				$this->vals['callbackIsPrefix'] = '';
-				$stage = Consumer::STAGE_APPROVED;
-			} else {
-				$stage = Consumer::STAGE_PROPOSED;
-			}
+				// Handle owner-only mode
+				if ( $this->vals['ownerOnly'] ) {
+					$this->vals['callbackUrl'] = SpecialPage::getTitleFor( 'OAuth', 'verified' )
+						->getLocalURL();
+					$this->vals['callbackIsPrefix'] = '';
+					$stage = Consumer::STAGE_APPROVED;
+				} else {
+					$stage = Consumer::STAGE_PROPOSED;
+				}
 
-			// Handle grant types
-			$grants = [];
-			switch ( $this->vals['granttype'] ) {
-				case 'authonly':
-					$grants = [ 'mwoauth-authonly' ];
-					break;
-				case 'authonlyprivate':
-					$grants = [ 'mwoauth-authonlyprivate' ];
-					break;
-				case 'normal':
-					$grants = array_unique( array_merge(
-						// implied grants
-						MediaWikiServices::getInstance()
-							->getGrantsInfo()
-							->getHiddenGrants(),
-						FormatJson::decode( $this->vals['grants'], true )
-					) );
-					break;
-			}
+				// Handle grant types
+				$grants = [];
+				switch ( $this->vals['granttype'] ) {
+					case 'authonly':
+						$grants = [ 'mwoauth-authonly' ];
+						break;
+					case 'authonlyprivate':
+						$grants = [ 'mwoauth-authonlyprivate' ];
+						break;
+					case 'normal':
+						$grants = array_unique( array_merge(
+							// implied grants
+							MediaWikiServices::getInstance()
+								->getGrantsInfo()
+								->getHiddenGrants(),
+							FormatJson::decode( $this->vals['grants'], true )
+						) );
+						break;
+				}
 
-			$now = wfTimestampNow();
-			$cmr = Consumer::newFromArray(
-				[
-					'id'                 => null,
-					'consumerKey'        => MWCryptRand::generateHex( 32 ),
-					'userId'             => $centralUserId,
-					'email'              => $user->getEmail(),
-					'emailAuthenticated' => $now,
-					'developerAgreement' => 1,
-					'secretKey'          => MWCryptRand::generateHex( 32 ),
-					'registration'       => $now,
-					'stage'              => $stage,
-					'stageTimestamp'     => $now,
-					'grants'             => $grants,
-					'restrictions'       => $this->vals['restrictions'],
-					'deleted'            => 0
-				] + $this->vals
-			);
-			$cmr->save( $dbw );
-
-			if ( $cmr->getOwnerOnly() ) {
-				$this->makeLogEntry(
-					$dbw, $cmr, 'create-owner-only', $user, $this->vals['description']
+				$now = wfTimestampNow();
+				$cmr = Consumer::newFromArray(
+					[
+						'id'                 => null,
+						'consumerKey'        => MWCryptRand::generateHex( 32 ),
+						'userId'             => $centralUserId,
+						'email'              => $user->getEmail(),
+						'emailAuthenticated' => $now,
+						'developerAgreement' => 1,
+						'secretKey'          => MWCryptRand::generateHex( 32 ),
+						'registration'       => $now,
+						'stage'              => $stage,
+						'stageTimestamp'     => $now,
+						'grants'             => $grants,
+						'restrictions'       => $this->vals['restrictions'],
+						'deleted'            => 0
+					] + $this->vals
 				);
-			} else {
-				$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['description'] );
-				$this->notify( $cmr, $user, $action, '' );
-			}
 
-			// If it's owner-only, automatically accept it for the user too.
-			$accessToken = null;
-			if ( $cmr->getOwnerOnly() ) {
-				$accessToken = MWOAuthDataStore::newToken();
-				$cmra = ConsumerAcceptance::newFromArray( [
-					'id'           => null,
-					'wiki'         => $cmr->getWiki(),
-					'userId'       => $centralUserId,
-					'consumerId'   => $cmr->getId(),
-					'accessToken'  => $accessToken->key,
-					'accessSecret' => $accessToken->secret,
-					'grants'       => $cmr->getGrants(),
-					'accepted'     => $now,
-					'oauth_version' => $cmr->getOAuthVersion()
-				] );
-				$cmra->save( $dbw );
-				if ( $cmr instanceof ClientEntity ) {
-					// OAuth2 client
-					try {
-						$accessToken = $cmr->getOwnerOnlyAccessToken( $cmra );
-					} catch ( Exception $ex ) {
-						return $this->failure(
-							'unable_to_retrieve_access_token',
-							'mwoauth-oauth2-unable-to-retrieve-access-token',
-							$ex->getMessage()
-						);
+				$logAction = 'propose';
+				$oauthServices = OAuthServices::wrap( MediaWikiServices::getInstance() );
+				$workflow = $oauthServices->getWorkflow();
+				$autoApproved = $workflow->consumerCanBeAutoApproved( $cmr );
+				if ( $cmr->getOwnerOnly() ) {
+					// FIXME the stage is set a few dozen lines earlier - should simplify this
+					$logAction = 'create-owner-only';
+				} elseif ( $autoApproved ) {
+					$cmr->setField( 'stage', Consumer::STAGE_APPROVED );
+					$logAction = 'propose-autoapproved';
+				}
+
+				$cmr->save( $dbw );
+				$this->makeLogEntry( $dbw, $cmr, $logAction, $user, $this->vals['description'] );
+				if ( !$cmr->getOwnerOnly() && !$autoApproved ) {
+					// Notify admins if the consumer needs to be approved.
+					if ( $cmr->getStage() === Consumer::STAGE_PROPOSED ) {
+						$this->notify( $cmr, $user, $action, '' );
 					}
 				}
-			}
 
-			return $this->success( [ 'consumer' => $cmr, 'accessToken' => $accessToken ] );
-		case 'update':
-			if ( !$permissionManager->userHasRight( $user, 'mwoauthupdateownconsumer' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			}
-
-			$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
-			if ( !$cmr ) {
-				return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
-			} elseif ( $cmr->getUserId() !== $centralUserId ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif (
-				$cmr->getStage() !== Consumer::STAGE_APPROVED
-				&& $cmr->getStage() !== Consumer::STAGE_PROPOSED
-			) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( $cmr->getDeleted()
-				&& !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
-				return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
-			}
-
-			$cmr->setFields( [
-				'rsaKey'       => $this->vals['rsaKey'],
-				'restrictions' => $this->vals['restrictions'],
-				'secretKey'    => $this->vals['resetSecret']
-					? MWCryptRand::generateHex( 32 )
-					: $cmr->getSecretKey(),
-			] );
-
-			// Log if something actually changed
-			if ( $cmr->save( $dbw ) ) {
-				$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
-				$this->notify( $cmr, $user, $action,  $this->vals['reason'] );
-			}
-
-			$accessToken = null;
-			if ( $cmr->getOwnerOnly() && $this->vals['resetSecret'] ) {
-				$cmra = $cmr->getCurrentAuthorization( $user, WikiMap::getCurrentWikiId() );
-				$accessToken = MWOAuthDataStore::newToken();
-				$fields = [
-					'wiki'         => $cmr->getWiki(),
-					'userId'       => $centralUserId,
-					'consumerId'   => $cmr->getId(),
-					'accessSecret' => $accessToken->secret,
-					'grants'       => $cmr->getGrants(),
-				];
-
-				if ( $cmra ) {
-					$accessToken->key = $cmra->getAccessToken();
-					$cmra->setFields( $fields );
-				} else {
-					$cmra = ConsumerAcceptance::newFromArray( $fields + [
+				// If it's owner-only, automatically accept it for the user too.
+				$accessToken = null;
+				if ( $cmr->getOwnerOnly() ) {
+					$accessToken = MWOAuthDataStore::newToken();
+					$cmra = ConsumerAcceptance::newFromArray( [
 						'id'           => null,
+						'wiki'         => $cmr->getWiki(),
+						'userId'       => $centralUserId,
+						'consumerId'   => $cmr->getId(),
 						'accessToken'  => $accessToken->key,
-						'accepted'     => wfTimestampNow(),
+						'accessSecret' => $accessToken->secret,
+						'grants'       => $cmr->getGrants(),
+						'accepted'     => $now,
+						'oauth_version' => $cmr->getOAuthVersion()
 					] );
+					$cmra->save( $dbw );
+					if ( $cmr instanceof ClientEntity ) {
+						// OAuth2 client
+						try {
+							$accessToken = $cmr->getOwnerOnlyAccessToken( $cmra );
+						} catch ( Exception $ex ) {
+							return $this->failure(
+								'unable_to_retrieve_access_token',
+								'mwoauth-oauth2-unable-to-retrieve-access-token',
+								$ex->getMessage()
+							);
+						}
+					}
 				}
-				$cmra->save( $dbw );
-				if ( $cmr instanceof ClientEntity ) {
-					$accessToken = $cmr->getOwnerOnlyAccessToken( $cmra, true );
+
+				return $this->success( [ 'consumer' => $cmr, 'accessToken' => $accessToken ] );
+			case 'update':
+				if ( !$permissionManager->userHasRight( $user, 'mwoauthupdateownconsumer' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
 				}
-			}
 
-			return $this->success( [ 'consumer' => $cmr, 'accessToken' => $accessToken ] );
-		case 'approve':
-			if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			}
+				$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
+				if ( !$cmr ) {
+					return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
+				} elseif ( $cmr->getUserId() !== $centralUserId ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif (
+					$cmr->getStage() !== Consumer::STAGE_APPROVED
+					&& $cmr->getStage() !== Consumer::STAGE_PROPOSED
+				) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( $cmr->getDeleted()
+					&& !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
+					return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
+				}
 
-			$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
-			if ( !$cmr ) {
-				return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
-			} elseif ( !in_array( $cmr->getStage(), [
-				Consumer::STAGE_PROPOSED,
-				Consumer::STAGE_EXPIRED,
-				Consumer::STAGE_REJECTED,
-			] ) ) {
-				return $this->failure( 'not_proposed', 'mwoauth-consumer-not-proposed' );
-			} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
-				return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
-			}
+				$cmr->setFields( [
+					'rsaKey'       => $this->vals['rsaKey'],
+					'restrictions' => $this->vals['restrictions'],
+					'secretKey'    => $this->vals['resetSecret']
+						? MWCryptRand::generateHex( 32 )
+						: $cmr->getSecretKey(),
+				] );
 
-			$cmr->setFields( [
-				'stage'          => Consumer::STAGE_APPROVED,
-				'stageTimestamp' => wfTimestampNow(),
-				'deleted'        => 0 ] );
+				// Log if something actually changed
+				if ( $cmr->save( $dbw ) ) {
+					$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
+					$this->notify( $cmr, $user, $action, $this->vals['reason'] );
+				}
 
-			// Log if something actually changed
-			if ( $cmr->save( $dbw ) ) {
-				$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
-				$this->notify( $cmr, $user, $action,  $this->vals['reason'] );
-			}
+				$accessToken = null;
+				if ( $cmr->getOwnerOnly() && $this->vals['resetSecret'] ) {
+					$cmra = $cmr->getCurrentAuthorization( $user, WikiMap::getCurrentWikiId() );
+					$accessToken = MWOAuthDataStore::newToken();
+					$fields = [
+						'wiki'         => $cmr->getWiki(),
+						'userId'       => $centralUserId,
+						'consumerId'   => $cmr->getId(),
+						'accessSecret' => $accessToken->secret,
+						'grants'       => $cmr->getGrants(),
+					];
 
-			return $this->success( $cmr );
-		case 'reject':
-			if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			}
+					if ( $cmra ) {
+						$accessToken->key = $cmra->getAccessToken();
+						$cmra->setFields( $fields );
+					} else {
+						$cmra = ConsumerAcceptance::newFromArray( $fields + [
+							'id'           => null,
+							'accessToken'  => $accessToken->key,
+							'accepted'     => wfTimestampNow(),
+						] );
+					}
+					$cmra->save( $dbw );
+					if ( $cmr instanceof ClientEntity ) {
+						$accessToken = $cmr->getOwnerOnlyAccessToken( $cmra, true );
+					}
+				}
 
-			$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
-			if ( !$cmr ) {
-				return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
-			} elseif ( $cmr->getStage() !== Consumer::STAGE_PROPOSED ) {
-				return $this->failure( 'not_proposed', 'mwoauth-consumer-not-proposed' );
-			} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( $this->vals['suppress'] && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
-				return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
-			}
+				return $this->success( [ 'consumer' => $cmr, 'accessToken' => $accessToken ] );
+			case 'approve':
+				if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				}
 
-			$cmr->setFields( [
-				'stage'          => Consumer::STAGE_REJECTED,
-				'stageTimestamp' => wfTimestampNow(),
-				'deleted'        => $this->vals['suppress'] ] );
+				$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
+				if ( !$cmr ) {
+					return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
+				} elseif ( !in_array( $cmr->getStage(), [
+					Consumer::STAGE_PROPOSED,
+					Consumer::STAGE_EXPIRED,
+					Consumer::STAGE_REJECTED,
+				] ) ) {
+					return $this->failure( 'not_proposed', 'mwoauth-consumer-not-proposed' );
+				} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
+					return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
+				}
 
-			// Log if something actually changed
-			if ( $cmr->save( $dbw ) ) {
-				$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
-				$this->notify( $cmr, $user, $action,  $this->vals['reason'] );
-			}
+				$cmr->setFields( [
+					'stage'          => Consumer::STAGE_APPROVED,
+					'stageTimestamp' => wfTimestampNow(),
+					'deleted'        => 0 ] );
 
-			return $this->success( $cmr );
-		case 'disable':
-			if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( $this->vals['suppress'] && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			}
+				// Log if something actually changed
+				if ( $cmr->save( $dbw ) ) {
+					$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
+					$this->notify( $cmr, $user, $action, $this->vals['reason'] );
+				}
 
-			$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
-			if ( !$cmr ) {
-				return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
-			} elseif ( $cmr->getStage() !== Consumer::STAGE_APPROVED
+				return $this->success( $cmr );
+			case 'reject':
+				if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				}
+
+				$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
+				if ( !$cmr ) {
+					return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
+				} elseif ( $cmr->getStage() !== Consumer::STAGE_PROPOSED ) {
+					return $this->failure( 'not_proposed', 'mwoauth-consumer-not-proposed' );
+				} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( $this->vals['suppress'] && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
+					return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
+				}
+
+				$cmr->setFields( [
+					'stage'          => Consumer::STAGE_REJECTED,
+					'stageTimestamp' => wfTimestampNow(),
+					'deleted'        => $this->vals['suppress'] ] );
+
+				// Log if something actually changed
+				if ( $cmr->save( $dbw ) ) {
+					$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
+					$this->notify( $cmr, $user, $action, $this->vals['reason'] );
+				}
+
+				return $this->success( $cmr );
+			case 'disable':
+				if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( $this->vals['suppress'] && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				}
+
+				$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
+				if ( !$cmr ) {
+					return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
+				} elseif ( $cmr->getStage() !== Consumer::STAGE_APPROVED
 				&& $cmr->getDeleted() == $this->vals['suppress']
-			) {
-				return $this->failure( 'not_approved', 'mwoauth-consumer-not-approved' );
-			} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
-				return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
-			}
+				) {
+					return $this->failure( 'not_approved', 'mwoauth-consumer-not-approved' );
+				} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
+					return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
+				}
 
-			$cmr->setFields( [
-				'stage'          => Consumer::STAGE_DISABLED,
-				'stageTimestamp' => wfTimestampNow(),
-				'deleted'        => $this->vals['suppress'] ] );
+				$cmr->setFields( [
+					'stage'          => Consumer::STAGE_DISABLED,
+					'stageTimestamp' => wfTimestampNow(),
+					'deleted'        => $this->vals['suppress'] ] );
 
-			// Log if something actually changed
-			if ( $cmr->save( $dbw ) ) {
-				$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
-				$this->notify( $cmr, $user, $action,  $this->vals['reason'] );
-			}
+				// Log if something actually changed
+				if ( $cmr->save( $dbw ) ) {
+					$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
+					$this->notify( $cmr, $user, $action, $this->vals['reason'] );
+				}
 
-			return $this->success( $cmr );
-		case 'reenable':
-			if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			}
+				return $this->success( $cmr );
+			case 'reenable':
+				if ( !$permissionManager->userHasRight( $user, 'mwoauthmanageconsumer' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				}
 
-			$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
-			if ( !$cmr ) {
-				return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
-			} elseif ( $cmr->getStage() !== Consumer::STAGE_DISABLED ) {
-				return $this->failure( 'not_disabled', 'mwoauth-consumer-not-disabled' );
-			} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
-				return $this->failure( 'permission_denied', 'badaccess-group0' );
-			} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
-				return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
-			}
+				$cmr = Consumer::newFromKey( $dbw, $this->vals['consumerKey'] );
+				if ( !$cmr ) {
+					return $this->failure( 'invalid_consumer_key', 'mwoauth-invalid-consumer-key' );
+				} elseif ( $cmr->getStage() !== Consumer::STAGE_DISABLED ) {
+					return $this->failure( 'not_disabled', 'mwoauth-consumer-not-disabled' );
+				} elseif ( $cmr->getDeleted() && !$permissionManager->userHasRight( $user, 'mwoauthsuppress' ) ) {
+					return $this->failure( 'permission_denied', 'badaccess-group0' );
+				} elseif ( !$cmr->checkChangeToken( $context, $this->vals['changeToken'] ) ) {
+					return $this->failure( 'change_conflict', 'mwoauth-consumer-conflict' );
+				}
 
-			$cmr->setFields( [
-				'stage'          => Consumer::STAGE_APPROVED,
-				'stageTimestamp' => wfTimestampNow(),
-				'deleted'        => 0 ] );
+				$cmr->setFields( [
+					'stage'          => Consumer::STAGE_APPROVED,
+					'stageTimestamp' => wfTimestampNow(),
+					'deleted'        => 0 ] );
 
-			// Log if something actually changed
-			if ( $cmr->save( $dbw ) ) {
-				$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
-				$this->notify( $cmr, $user, $action,  $this->vals['reason'] );
-			}
+				// Log if something actually changed
+				if ( $cmr->save( $dbw ) ) {
+					$this->makeLogEntry( $dbw, $cmr, $action, $user, $this->vals['reason'] );
+					$this->notify( $cmr, $user, $action, $this->vals['reason'] );
+				}
 
-			return $this->success( $cmr );
+				return $this->success( $cmr );
 		}
 	}
 
 	/**
-	 * @param DBConnRef $db
+	 * @param IDatabase $db
 	 * @param int $userId
 	 * @return Title
 	 */
-	protected function getLogTitle( DBConnRef $db, $userId ) {
+	protected function getLogTitle( IDatabase $db, $userId ) {
 		$name = Utils::getCentralUserNameFromId( $userId );
 		return Title::makeTitleSafe( NS_USER, $name );
 	}
 
 	/**
-	 * @param DBConnRef $dbw
+	 * @param IDatabase $dbw
 	 * @param Consumer $cmr
 	 * @param string $action
 	 * @param User $performer
@@ -572,9 +620,8 @@ class ConsumerSubmitControl extends SubmitControl {
 	/**
 	 * @param Consumer $cmr Consumer which was the subject of the action
 	 * @param User $user User who performed the action
-	 * @param string $actionType Action type
+	 * @param string $actionType
 	 * @param string $comment
-	 * @throws MWException
 	 */
 	protected function notify( $cmr, $user, $actionType, $comment ) {
 		if ( !in_array( $actionType, self::$actions, true ) ) {
@@ -586,7 +633,7 @@ class ConsumerSubmitControl extends SubmitControl {
 			return;
 		}
 
-		EchoEvent::create( [
+		Event::create( [
 			'type' => 'oauth-app-' . $actionType,
 			'agent' => $user,
 			'extra' => [
@@ -596,5 +643,38 @@ class ConsumerSubmitControl extends SubmitControl {
 				'comment' => $comment,
 			],
 		] );
+	}
+
+	/**
+	 * Decide whether the given (parsed) URL corresponds to a secure context.
+	 * (This is only an approximation of the algorithm browsers use,
+	 * since some considerations such as frames don't apply here.)
+	 *
+	 * @see https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts
+	 *
+	 * @param array $urlParts As returned by {@link wfParseUrl()}.
+	 * @return bool
+	 */
+	protected static function isSecureContext( array $urlParts ): bool {
+		if ( $urlParts['scheme'] === 'https' ) {
+			return true;
+		}
+
+		$host = $urlParts['host'];
+		if ( $host === 'localhost'
+			|| $host === '127.0.0.1'
+			|| $host === '[::1]'
+			|| str_ends_with( $host, '.localhost' )
+			// The wmftest.{com,net,org} domains hosted by the Wikimedia
+			// Foundation include a '*.local IN A 127.0.0.1' that is used in
+			// some local development environments.
+			|| str_ends_with( $host, '.local.wmftest.com' )
+			|| str_ends_with( $host, '.local.wmftest.net' )
+			|| str_ends_with( $host, '.local.wmftest.org' )
+		) {
+			return true;
+		}
+
+		return false;
 	}
 }

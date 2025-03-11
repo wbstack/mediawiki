@@ -18,15 +18,28 @@ interface ClusterAssignment {
 	public function getSearchCluster();
 
 	/**
+	 * @param string $updateGroup UpdateGroup::* constant
 	 * @return string[] List of the cluster groups to send writes to
 	 */
-	public function getWritableClusters(): array;
+	public function getWritableClusters( string $updateGroup ): array;
+
+	/**
+	 * @return string[] List all known cluster groups
+	 */
+	public function getAllKnownClusters(): array;
 
 	/**
 	 * @param string $clusterName
-	 * @return bool True when the named cluster is writable
+	 * @return bool True if the cluster is defined
 	 */
-	public function canWriteToCluster( $clusterName );
+	public function hasCluster( string $clusterName ): bool;
+
+	/**
+	 * @param string $clusterName
+	 * @param string $updateGroup UpdateGroup::* constant
+	 * @return bool True when the named cluster is writable for this kind of update
+	 */
+	public function canWriteToCluster( $clusterName, $updateGroup );
 
 	/**
 	 * @param string|null $cluster Name of cluster group to return connection

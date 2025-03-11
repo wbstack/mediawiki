@@ -5,18 +5,18 @@
 	 *
 	 * @class
 	 * @extends OO.ui.Widget
-	 * @mixins OO.SortedEmitterList
+	 * @mixes OO.SortedEmitterList
 	 *
 	 * @constructor
 	 * @param {Function} sortingCallback Callback that compares two items.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {jQuery} [$group] The container element created by the class. If this configuration
+	 * @param {jQuery} [config.$group] The container element created by the class. If this configuration
 	 *  is omitted, the group element will use a generated `<div>`.
-	 * @cfg {jQuery} [$overlay] A jQuery element functioning as an overlay
+	 * @param {jQuery} [config.$overlay] A jQuery element functioning as an overlay
 	 *  for popups.
-	 * @cfg {number} [timestamp=0] A fallback timestamp for the list, usually representing
+	 * @param {number} [config.timestamp=0] A fallback timestamp for the list, usually representing
 	 *  the timestamp of the latest item.
-	 * @cfg {boolean} [animated=false] Animate the sorting of items
+	 * @param {boolean} [config.animated=false] Animate the sorting of items
 	 */
 	mw.echo.ui.SortedListWidget = function MwEchoUiSortedListWidget( sortingCallback, config ) {
 		config = config || {};
@@ -34,10 +34,12 @@
 		this.animated = !!config.animated;
 
 		// Initialization
-		this.setGroupElement( config.$group || this.$element );
+		this.setGroupElement( config.$group || $( '<div>' ) );
 
+		this.$group.addClass( 'mw-echo-ui-sortedListWidget-group' );
 		this.$element
-			.addClass( 'mw-echo-ui-sortedListWidget' );
+			.addClass( 'mw-echo-ui-sortedListWidget' )
+			.append( this.$group );
 	};
 
 	/* Initialization */
@@ -51,12 +53,9 @@
 	 * @inheritdoc
 	 */
 	mw.echo.ui.SortedListWidget.prototype.onItemSortChange = function ( item ) {
-		var fakeWidget,
-			widget = this;
-
 		if ( this.animated ) {
 			// Create a fake widget with cloned contents
-			fakeWidget = new mw.echo.ui.ClonedNotificationItemWidget(
+			const fakeWidget = new mw.echo.ui.ClonedNotificationItemWidget(
 				item.$element.clone( true ),
 				{
 					id: item.getId() + '.42',
@@ -73,21 +72,18 @@
 			);
 
 			// remove real item from item list, without touching the DOM
-			this.removeItems( item );
+			this.removeItems( [ item ] );
 
 			// insert real item, hidden
 			item.$element.hide();
-			this.addItems( item );
-
-			// insert fake
-			this.addItems( fakeWidget );
+			this.addItems( [ item, fakeWidget ] );
 
 			// fade out fake
 			// FIXME: Use CSS transition
 			// eslint-disable-next-line no-jquery/no-fade
-			fakeWidget.$element.fadeOut( 400, function () {
+			fakeWidget.$element.fadeOut( 400, () => {
 				// remove fake
-				widget.removeItems( fakeWidget );
+				this.removeItems( [ fakeWidget ] );
 				// fade-in real item
 				// eslint-disable-next-line no-jquery/no-fade
 				item.$element.fadeIn( 400 );
@@ -105,10 +101,8 @@
 	 * @param {jQuery} $group Element to use as group
 	 */
 	mw.echo.ui.SortedListWidget.prototype.setGroupElement = function ( $group ) {
-		var i, len;
-
 		this.$group = $group;
-		for ( i = 0, len = this.items.length; i < len; i++ ) {
+		for ( let i = 0, len = this.items.length; i < len; i++ ) {
 			this.$group.append( this.items[ i ].$element );
 		}
 	};
@@ -120,11 +114,10 @@
 	 * @return {OO.ui.Element|null} Item with equivalent data, `null` if none exists
 	 */
 	mw.echo.ui.SortedListWidget.prototype.getItemFromId = function ( id ) {
-		var i, len, item,
-			hash = OO.getHash( id );
+		const hash = OO.getHash( id );
 
-		for ( i = 0, len = this.items.length; i < len; i++ ) {
-			item = this.items[ i ];
+		for ( let i = 0, len = this.items.length; i < len; i++ ) {
+			const item = this.items[ i ];
 			if ( hash === OO.getHash( item.getId() ) ) {
 				return item;
 			}
@@ -140,11 +133,10 @@
 	 * @return {OO.ui.Element|null} Item with equivalent data, `null` if none exists
 	 */
 	mw.echo.ui.SortedListWidget.prototype.findItemFromData = function ( data ) {
-		var i, len, item,
-			hash = OO.getHash( data );
+		const hash = OO.getHash( data );
 
-		for ( i = 0, len = this.items.length; i < len; i++ ) {
-			item = this.items[ i ];
+		for ( let i = 0, len = this.items.length; i < len; i++ ) {
+			const item = this.items[ i ];
 			if ( hash === OO.getHash( item.getData() ) ) {
 				return item;
 			}
@@ -158,20 +150,19 @@
 	 *
 	 * @param {OO.EventEmitter[]} items Items to remove
 	 * @chainable
-	 * @fires remove
+	 * @return {mw.echo.ui.SortedListWidget}
+	 * @fires OO.EmitterList#remove
 	 */
 	mw.echo.ui.SortedListWidget.prototype.removeItems = function ( items ) {
-		var i, item, index;
-
 		if ( !Array.isArray( items ) ) {
 			items = [ items ];
 		}
 
 		if ( items.length > 0 ) {
 			// Remove specific items
-			for ( i = 0; i < items.length; i++ ) {
-				item = items[ i ];
-				index = this.items.indexOf( item );
+			for ( let i = 0; i < items.length; i++ ) {
+				const item = items[ i ];
+				const index = this.items.indexOf( item );
 				if ( index !== -1 ) {
 					item.setElementGroup( null );
 					item.$element.detach();
@@ -247,13 +238,12 @@
 	 * Clear all items
 	 *
 	 * @chainable
-	 * @fires clear
+	 * @return {mw.echo.ui.SortedListWidget}
+	 * @fires OO.EmitterList#clear
 	 */
 	mw.echo.ui.SortedListWidget.prototype.clearItems = function () {
-		var i, len, item;
-
-		for ( i = 0, len = this.items.length; i < len; i++ ) {
-			item = this.items[ i ];
+		for ( let i = 0, len = this.items.length; i < len; i++ ) {
+			const item = this.items[ i ];
 			item.setElementGroup( null );
 			item.$element.detach();
 		}
@@ -269,7 +259,7 @@
 	 * @return {string} Latest timestamp
 	 */
 	mw.echo.ui.SortedListWidget.prototype.getTimestamp = function () {
-		var items = this.getItems();
+		const items = this.getItems();
 
 		return (
 			items.length > 0 ?

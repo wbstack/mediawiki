@@ -26,7 +26,6 @@
 	"config-page-existingwiki": "Wiki existant",
 	"config-restart": "Oui, le relancer",
 	"config-env-php": "PHP $1 est installé.",
-	"config-unicode-using-intl": "Utilisation de [https://pecl.php.net/intl l'extension PECL intl] pour la normalisation Unicode.",
 	"config-diff3-bad": "GNU diff3 introuvable.",
 	"config-db-username": "Nom d’useur de la base de données:",
 	"config-db-password": "Mot de passe de la base de données:",
@@ -53,7 +52,6 @@
 	"config-enable-email": "Activer les emails sortants",
 	"config-email-user": "Activer les emails d'useur à useur",
 	"config-email-watchlist": "Activer la notification de la liste de suivi",
-	"config-cc-again": "Choisissez à nouveau...",
 	"config-install-step-done": "fait",
 	"config-install-step-failed": "échoué",
 	"config-install-extensions": "Inclusion des extensions",
@@ -61,9 +59,8 @@
 	"config-install-schema": "Création de schéma",
 	"config-install-pg-schema-not-exist": "Le schéma PostgreSQL existe pas",
 	"config-install-pg-schema-failed": "Échoué lors de la création des tables.\nAssurez-vous que l'useur \"$1\" peut écrire selon le schéma \"$2\".",
-	"config-install-pg-commit": "Validation des modifications",
 	"config-help": "aide",
 	"config-help-tooltip": "cliquer pour agrandir",
 	"mainpagetext": "'''Vous avez bien installé MediaWiki.'''",
-	"mainpagedocfooter": "Lisez la [https://meta.wikimedia.org/wiki/Help:Contents Guide des Useurs] pour apprendre à user le wiki software.\n\n== Pour Commencer ==\n\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Réglage]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki: Questions Souvent Posées]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ MediaWiki Liste à Malle]"
+	"mainpagedocfooter": "Lisez la [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents Guide des Useurs] pour apprendre à user le wiki software.\n\n== Pour Commencer ==\n\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Réglage]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki: Questions Souvent Posées]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ MediaWiki Liste à Malle]"
 }

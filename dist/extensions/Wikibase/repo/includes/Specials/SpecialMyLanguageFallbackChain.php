@@ -4,11 +4,13 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Specials;
 
-use ExtensionRegistry;
-use Html;
-use IContextSource;
-use Language;
-use SpecialPage;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\Languages\LanguageFactory;
+use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\Message\Message;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\SpecialPage\SpecialPage;
 use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\TermLanguageFallbackChain;
 
@@ -21,9 +23,19 @@ use Wikibase\Lib\TermLanguageFallbackChain;
 class SpecialMyLanguageFallbackChain extends SpecialPage {
 
 	/**
-	 * @var TermLanguageFallbackChain
+	 * @var TermLanguageFallbackChain|null
 	 */
 	private $chain;
+
+	/**
+	 * @var LanguageFactory
+	 */
+	private $languageFactory;
+
+	/**
+	 * @var LanguageNameUtils
+	 */
+	private $languageNameUtils;
 
 	/**
 	 * @var LanguageFallbackChainFactory
@@ -31,10 +43,14 @@ class SpecialMyLanguageFallbackChain extends SpecialPage {
 	private $languageFallbackChainFactory;
 
 	public function __construct(
+		LanguageFactory $languageFactory,
+		LanguageNameUtils $languageNameUtils,
 		LanguageFallbackChainFactory $languageFallbackChainFactory
 	) {
 		parent::__construct( 'MyLanguageFallbackChain' );
 
+		$this->languageFactory = $languageFactory;
+		$this->languageNameUtils = $languageNameUtils;
 		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
 	}
 
@@ -44,8 +60,8 @@ class SpecialMyLanguageFallbackChain extends SpecialPage {
 	}
 
 	/** @inheritDoc */
-	public function getDescription(): string {
-		return $this->msg( 'special-mylanguagefallbackchain' )->text();
+	public function getDescription(): Message {
+		return $this->msg( 'special-mylanguagefallbackchain' );
 	}
 
 	/**
@@ -89,12 +105,15 @@ class SpecialMyLanguageFallbackChain extends SpecialPage {
 		$this->getOutput()->addHTML( Html::openElement( 'ul' ) );
 
 		foreach ( $this->getLanguageFallbackChain()->getFallbackChain() as $lang ) {
-			$language = $lang->getLanguage();
-			$sourceLanguage = $lang->getSourceLanguage();
-			$languageName = Language::fetchLanguageName( $language->getCode(), $inLanguage );
+			$languageCode = $lang->getLanguageCode();
+			$sourceLanguageCode = $lang->getSourceLanguageCode();
+			$language = $this->languageFactory->getLanguage( $languageCode );
+			$languageName = $this->languageNameUtils->getLanguageName( $languageCode, $inLanguage );
 
-			if ( $sourceLanguage ) {
-				$sourceLanguageName = Language::fetchLanguageName( $sourceLanguage->getCode(), $inLanguage );
+			if ( $sourceLanguageCode ) {
+				$sourceLanguage = $this->languageFactory->getLanguage( $sourceLanguageCode );
+				$sourceLanguageName = $this->languageNameUtils
+					->getLanguageName( $sourceLanguageCode, $inLanguage );
 				$msgHtml = $this->msg(
 					'wikibase-mylanguagefallbackchain-converted-item',
 					$language->getHtmlCode(),

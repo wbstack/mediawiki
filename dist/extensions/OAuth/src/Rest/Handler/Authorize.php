@@ -13,12 +13,11 @@ use MediaWiki\Extension\OAuth\Entity\UserEntity;
 use MediaWiki\Extension\OAuth\Exception\ClientApprovalDenyException;
 use MediaWiki\Extension\OAuth\Response;
 use MediaWiki\Rest\Response as RestResponse;
-use MWException;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\User;
+use MediaWiki\WikiMap\WikiMap;
 use MWExceptionHandler;
-use SpecialPage;
 use Throwable;
-use User;
-use WikiMap;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -45,7 +44,7 @@ class Authorize extends AuthenticationHandler {
 			// Note: Owner-only clients can only use client_credentials grant
 			// so would be rejected from this endpoint with invalid_client error
 			// automatically, no need for additional checks
-			if ( !$this->user instanceof User || $this->user->isAnon() ) {
+			if ( !$this->user instanceof User || !$this->user->isNamed() ) {
 				return $this->getLoginRedirectResponse();
 			}
 
@@ -167,7 +166,6 @@ class Authorize extends AuthenticationHandler {
 	/**
 	 * @param AuthorizationRequest $authRequest
 	 * @return RestResponse
-	 * @throws MWException
 	 */
 	private function getApprovalRedirectResponse( AuthorizationRequest $authRequest ) {
 		return $this->getResponseFactory()->createTemporaryRedirect(
@@ -197,16 +195,16 @@ class Authorize extends AuthenticationHandler {
 	/**
 	 * @return string
 	 */
-	protected function getGrantKey() {
-		return 'response_type';
+	protected function getGrantType() {
+		return $this->getValidatedParams()['response_type'];
 	}
 
 	/**
-	 * @param string $grantKey
+	 * @param string $grantType
 	 * @return string|false
 	 */
-	protected function getGrantClass( $grantKey ) {
-		switch ( $grantKey ) {
+	protected function getGrantClass( $grantType ) {
+		switch ( $grantType ) {
 			case static::RESPONSE_TYPE_CODE:
 				return AuthorizationCodeAuthorization::class;
 			default:
@@ -246,7 +244,7 @@ class Authorize extends AuthenticationHandler {
 		$scopes = $approval->getGrants();
 		$requestedScopes = $this->getFlatScopes( $authRequest->getScopes() );
 		$missing = array_diff( $requestedScopes, $scopes );
-		if ( !empty( $missing ) ) {
+		if ( $missing ) {
 			return false;
 		}
 

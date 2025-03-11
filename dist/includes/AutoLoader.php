@@ -46,9 +46,11 @@ class AutoLoader {
 		'MediaWiki\\Block\\' => __DIR__ . '/block/',
 		'MediaWiki\\Cache\\' => __DIR__ . '/cache/',
 		'MediaWiki\\ChangeTags\\' => __DIR__ . '/changetags/',
+		'MediaWiki\\Composer\\' => __DIR__ . '/composer/',
 		'MediaWiki\\Config\\' => __DIR__ . '/config/',
 		'MediaWiki\\Content\\' => __DIR__ . '/content/',
 		'MediaWiki\\DB\\' => __DIR__ . '/db/',
+		'MediaWiki\\Deferred\\' => __DIR__ . '/deferred/',
 		'MediaWiki\\Deferred\\LinksUpdate\\' => __DIR__ . '/deferred/LinksUpdate/',
 		'MediaWiki\\Diff\\' => __DIR__ . '/diff/',
 		'MediaWiki\\EditPage\\' => __DIR__ . '/editpage/',
@@ -66,7 +68,10 @@ class AutoLoader {
 		'MediaWiki\\Mail\\' => __DIR__ . '/mail/',
 		'MediaWiki\\Page\\' => __DIR__ . '/page/',
 		'MediaWiki\\Parser\\' => __DIR__ . '/parser/',
+		'MediaWiki\\Password\\' => __DIR__ . '/password/',
+		'MediaWiki\\PoolCounter\\' => __DIR__ . '/poolcounter/',
 		'MediaWiki\\Preferences\\' => __DIR__ . '/preferences/',
+		'MediaWiki\\RCFeed\\' => __DIR__ . '/recentchanges/RCFeed/',
 		'MediaWiki\\Search\\' => __DIR__ . '/search/',
 		'MediaWiki\\Search\\SearchWidgets\\' => __DIR__ . '/search/searchwidgets/',
 		'MediaWiki\\Session\\' => __DIR__ . '/session/',
@@ -74,27 +79,22 @@ class AutoLoader {
 		'MediaWiki\\Site\\' => __DIR__ . '/site/',
 		'MediaWiki\\Sparql\\' => __DIR__ . '/sparql/',
 		'MediaWiki\\SpecialPage\\' => __DIR__ . '/specialpage/',
+		'MediaWiki\\Specials\\Contribute\\' => __DIR__ . '/specials/Contribute',
 		'MediaWiki\\Tidy\\' => __DIR__ . '/tidy/',
 		'MediaWiki\\User\\' => __DIR__ . '/user/',
 		'MediaWiki\\Utils\\' => __DIR__ . '/utils/',
 		'MediaWiki\\Widget\\' => __DIR__ . '/widget/',
 		'Wikimedia\\' => __DIR__ . '/libs/',
+		'Wikimedia\\Composer\\' => __DIR__ . '/libs/composer/',
 		'Wikimedia\\Http\\' => __DIR__ . '/libs/http/',
 		'Wikimedia\\Rdbms\\Platform\\' => __DIR__ . '/libs/rdbms/platform/',
 		'Wikimedia\\UUID\\' => __DIR__ . '/libs/uuid/',
 	];
 
 	/**
-	 * Cache for lower-case version of the content of $wgAutoloadLocalClasses.
-	 * @var array|null
-	 */
-	private static $autoloadLocalClassesLower = null;
-
-	/**
 	 * @var string[] Namespace (ends with \) => Path (ends with /)
-	 * @internal Will become private in 1.40.
 	 */
-	public static $psr4Namespaces = self::CORE_NAMESPACES;
+	private static $psr4Namespaces = self::CORE_NAMESPACES;
 
 	/**
 	 * @var string[] Class => File
@@ -165,7 +165,7 @@ class AutoLoader {
 	 * @return string|null The path containing the class, not null if not found
 	 */
 	public static function find( $className ): ?string {
-		global $wgAutoloadLocalClasses, $wgAutoloadClasses, $wgAutoloadAttemptLowercase;
+		global $wgAutoloadLocalClasses, $wgAutoloadClasses;
 
 		// NOTE: $wgAutoloadClasses is supported for compatibility with old-style extension
 		//       registration files.
@@ -175,28 +175,10 @@ class AutoLoader {
 			$wgAutoloadClasses[$className] ??
 			false;
 
-		if ( !$filename && $wgAutoloadAttemptLowercase ) {
-			// Try a different capitalisation.
-			//
-			// PHP 4 objects are always serialized with the classname coerced to lowercase,
-			// and we are plagued with several legacy uses created by MediaWiki < 1.5, see
-			// https://wikitech.wikimedia.org/wiki/Text_storage_data
-			if ( self::$autoloadLocalClassesLower === null ) {
-				self::$autoloadLocalClassesLower = array_change_key_case( $wgAutoloadLocalClasses, CASE_LOWER );
-			}
-			$lowerClass = strtolower( $className );
-			if ( isset( self::$autoloadLocalClassesLower[$lowerClass] ) ) {
-				if ( function_exists( 'wfDebugLog' ) ) {
-					wfDebugLog( 'autoloader', "Class {$className} was loaded using incorrect case" );
-				}
-				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable
-				$filename = self::$autoloadLocalClassesLower[$lowerClass];
-			}
-		}
-
 		if ( !$filename && strpos( $className, '\\' ) !== false ) {
 			// This class is namespaced, so look in the namespace map
 			$prefix = $className;
+			// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 			while ( ( $pos = strrpos( $prefix, '\\' ) ) !== false ) {
 				// Check to see if this namespace prefix is in the map
 				$prefix = substr( $className, 0, $pos + 1 );
@@ -241,16 +223,8 @@ class AutoLoader {
 		$filename = self::find( $className );
 
 		if ( $filename !== null ) {
-			require $filename;
+			require_once $filename;
 		}
-	}
-
-	/**
-	 * Method to clear the protected class property $autoloadLocalClassesLower.
-	 * Used in tests.
-	 */
-	public static function resetAutoloadLocalClassesLower() {
-		self::$autoloadLocalClassesLower = null;
 	}
 
 	///// Methods used during testing //////////////////////////////////////////////

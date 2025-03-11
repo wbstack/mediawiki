@@ -3,7 +3,7 @@
 		Also used by CentralNotice to inject banners into Vector.
 	Indicator[] array-indicators wiki-defined badges such as "good article",
 		"featured article". An empty array if none are defined.
-	string html-title
+	string|null html-title
 	bool is-article
 	string msg-tagline
 	string html-subtitle
@@ -21,14 +21,14 @@
 	MenuDefinition data-portlets.data-views
 	MenuDefinition data-portlets.data-actions
 	object data-search-box. See SearchBox.mustache for documentation.
-	object data-portlets-sidebar. See Sidebar.mustache for documentation.
+	object data-portlets-main-menu. See MainMenu.mustache for documentation.
 	object data-footer for footer template partial. see Footer.mustache for documentation.
 }}
 <div id="mw-page-base" class="noprint"></div>
 <div id="mw-head-base" class="noprint"></div>
 <div id="content" class="mw-body" role="main">
 	<a id="top"></a>
-	<div id="siteNotice">{{{html-site-notice}}}</div>
+	{{{html-site-notice}}}
 	{{>Indicators}}
 	{{{html-title-heading}}}
 	<div id="bodyContent" class="vector-body">
@@ -60,10 +60,10 @@
 		<div id="right-navigation">
 			{{#data-views}}{{>LegacyMenu}}{{/data-views}}
 			{{#data-actions}}{{>LegacyMenu}}{{/data-actions}}
-			{{#data-search-box}}{{>SearchBox}}{{/data-search-box}}
+			{{#data-search-box}}{{>LegacySearchBox}}{{/data-search-box}}
 		</div>
 		{{/data-portlets}}
 	</div>
-	{{#data-portlets-sidebar}}{{>LegacySidebar}}{{/data-portlets-sidebar}}
+	{{#data-portlets-main-menu}}{{>LegacySidebar}}{{/data-portlets-main-menu}}
 </div>
 {{#data-footer}}{{>Footer}}{{/data-footer}}

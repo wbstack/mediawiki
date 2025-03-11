@@ -2,8 +2,10 @@
 
 namespace Test\Parsoid;
 
+use Wikimedia\Bcp47Code\Bcp47CodeValue;
 use Wikimedia\Parsoid\Core\PageBundle;
 use Wikimedia\Parsoid\Mocks\MockDataAccess;
+use Wikimedia\Parsoid\Mocks\MockMetrics;
 use Wikimedia\Parsoid\Mocks\MockPageConfig;
 use Wikimedia\Parsoid\Mocks\MockPageContent;
 use Wikimedia\Parsoid\Mocks\MockSiteConfig;
@@ -27,11 +29,11 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 		$opts = [];
 
 		$siteConfig = new MockSiteConfig( $opts );
-		$dataAccess = new MockDataAccess( $opts );
+		$dataAccess = new MockDataAccess( $siteConfig, $opts );
 		$parsoid = new Parsoid( $siteConfig, $dataAccess );
 
 		$pageContent = new MockPageContent( [ 'main' => $wt ] );
-		$pageConfig = new MockPageConfig( $opts, $pageContent );
+		$pageConfig = new MockPageConfig( $siteConfig, $opts, $pageContent );
 		$out = $parsoid->wikitext2html( $pageConfig, $parserOpts );
 		if ( !empty( $parserOpts['pageBundle'] ) ) {
 			$this->assertTrue( $out instanceof PageBundle );
@@ -73,11 +75,11 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 		];
 
 		$siteConfig = new MockSiteConfig( $opts );
-		$dataAccess = new MockDataAccess( $opts );
+		$dataAccess = new MockDataAccess( $siteConfig, $opts );
 		$parsoid = new Parsoid( $siteConfig, $dataAccess );
 
 		$pageContent = new MockPageContent( [ 'main' => $wt ] );
-		$pageConfig = new MockPageConfig( $opts, $pageContent );
+		$pageConfig = new MockPageConfig( $siteConfig, $opts, $pageContent );
 		$lint = $parsoid->wikitext2lint( $pageConfig, $parserOpts );
 		$this->assertEquals( $expected, $lint );
 	}
@@ -91,6 +93,7 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 						'type' => 'wikilink-in-extlink',
 						'dsr' => [ 0, 52, 19, 1 ],
 						'params' => [],
+						'templateInfo' => null,
 					]
 				]
 			]
@@ -105,11 +108,11 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 		$opts = [];
 
 		$siteConfig = new MockSiteConfig( $opts );
-		$dataAccess = new MockDataAccess( $opts );
+		$dataAccess = new MockDataAccess( $siteConfig, $opts );
 		$parsoid = new Parsoid( $siteConfig, $dataAccess );
 
 		$pageContent = new MockPageContent( [ 'main' => '' ] );
-		$pageConfig = new MockPageConfig( $opts, $pageContent );
+		$pageConfig = new MockPageConfig( $siteConfig, $opts, $pageContent );
 		$wt = $parsoid->html2wikitext( $pageConfig, $input, $parserOpts );
 		$this->assertEquals( $expected, $wt );
 	}
@@ -135,11 +138,11 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 		$opts = [];
 
 		$siteConfig = new MockSiteConfig( $opts );
-		$dataAccess = new MockDataAccess( $opts );
+		$dataAccess = new MockDataAccess( $siteConfig, $opts );
 		$parsoid = new Parsoid( $siteConfig, $dataAccess );
 
-		$pageContent = new MockPageContent( [ 'main' => '' ] );
-		$pageConfig = new MockPageConfig( [
+		$pageContent = new MockPageContent( [ 'main' => $testOpts['pageContent'] ?? '' ] );
+		$pageConfig = new MockPageConfig( $siteConfig, [
 			'pageLanguage' => $testOpts['pageLanguage'] ?? 'en'
 		], $pageContent );
 		$pb = new PageBundle(
@@ -165,14 +168,56 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 		// phpcs:disable Generic.Files.LineLength.TooLong
 		return [
 			[
+				'convertoffsets',
+				[
+					'html' => '<p id="mwAA">La Luna è l\'unico satellite naturale della Terra</p><p id="mwAQ">La Luna è l\'unico satellite naturale della Terra</p>',
+					'parsoid' => '{"counter":2,"ids":{"mwAA":{"dsr":[0,49,0,0]},"mwAQ":{"dsr":[51,100,0,0]}},"offsetType":"byte"}',
+					'mw' => null,
+				],
+				[
+					'html' => '<p id="mwAA">La Luna è l\'unico satellite naturale della Terra</p><p id="mwAQ">La Luna è l\'unico satellite naturale della Terra</p>',
+					'parsoid' => '{"counter":2,"ids":{"mwAA":{"dsr":[0,48,0,0]},"mwAQ":{"dsr":[50,98,0,0]}},"offsetType":"ucs2"}',
+					'mw' => '{"ids":[]}',
+					'version' => self::$defaultContentVersion,
+				],
+				[
+					'inputOffsetType' => 'byte',
+					'outputOffsetType' => 'ucs2',
+					// Note the accented e char that is a multi-byte char.
+					// Without the pageContent property, offset conversion will not work.
+					'pageContent' => "La Luna è l'unico satellite naturale della Terra\n\nLa Luna è l'unico satellite naturale della Terra",
+					'body_only' => true
+				]
+			],
+			[
+				'convertoffsets',
+				[
+					'html' => '<p id="mwAA">La Luna è l\'unico satellite naturale della Terra</p><p id="mwAQ">La Luna è l\'unico satellite naturale della Terra</p>',
+					'parsoid' => '{"counter":2,"ids":{"mwAA":{"dsr":[0,48,0,0]},"mwAQ":{"dsr":[50,98,0,0]}},"offsetType":"ucs2"}',
+					'mw' => null,
+				],
+				[
+					'html' => '<p id="mwAA">La Luna è l\'unico satellite naturale della Terra</p><p id="mwAQ">La Luna è l\'unico satellite naturale della Terra</p>',
+					'parsoid' => '{"counter":2,"ids":{"mwAA":{"dsr":[0,49,0,0]},"mwAQ":{"dsr":[51,100,0,0]}},"offsetType":"byte"}',
+					'mw' => '{"ids":[]}',
+					'version' => self::$defaultContentVersion,
+				],
+				[
+					'inputOffsetType' => 'ucs2',
+					'outputOffsetType' => 'byte',
+					'pageContent' => "La Luna è l'unico satellite naturale della Terra\n\nLa Luna è l'unico satellite naturale della Terra",
+					'body_only' => true
+				]
+			],
+			[
 				'redlinks',
 				[
-					'html' => '<p><a rel="mw:WikiLink" href="./Special:Version" title="Special:Version">Special:Version</a> <a rel="mw:WikiLink" href="./Doesnotexist" title="Doesnotexist">Doesnotexist</a> <a rel="mw:WikiLink" href="./Redirected" title="Redirected">Redirected</a></p>',
+					'html' => '<p><a rel="mw:WikiLink" href="./Special:Version" title="Special:Version">Special:Version</a> <a rel="mw:WikiLink" href="./Doesnotexist?action=edit&amp;redlink=1" typeof="mw:LocalizedAttrs" title="Doesnotexist" class="new" data-mw-i18n=\'{"title":{"lang":"x-page","key":"red-link-title","params":["Doesnotexist"]}}\'>Doesnotexist</a> <a rel="mw:WikiLink" href="./Redirected" title="Redirected">Redirected</a></p>',
 					'parsoid' => null,
 					'mw' => null,
 				],
 				[
-					'html' => '<p><a rel="mw:WikiLink" href="./Special:Version" title="Special:Version">Special:Version</a> <a rel="mw:WikiLink" href="./Doesnotexist" title="Doesnotexist" class="new">Doesnotexist</a> <a rel="mw:WikiLink" href="./Redirected" title="Redirected" class="mw-redirect">Redirected</a></p>',
+					'html' => '<p><a rel="mw:WikiLink" href="./Special:Version" title="Special:Version">Special:Version</a> <a rel="mw:WikiLink" href="./Doesnotexist?action=edit&amp;redlink=1" typeof="mw:LocalizedAttrs" title="Doesnotexist" class="new" data-mw-i18n=\'{"title":{"lang":"x-page","key":"red-link-title","params":["Doesnotexist"]}}\'>Doesnotexist</a> <a rel="mw:WikiLink" href="./Redirected" title="Redirected" class="mw-redirect">Redirected</a></p>',
 					'parsoid' => '{"counter":-1,"ids":[],"offsetType":"byte"}',
 					'mw' => '{"ids":[]}',
 					'version' => self::$defaultContentVersion,
@@ -184,12 +229,12 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 			[
 				'redlinks',
 				[
-					'html' => '<body id="mwAA" lang="en" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr"><p id="mwAQ"><a rel="mw:WikiLink" href="./Not_an_article" title="Not an article" id="mwAg">abcd</a></p>' . "\n" . '</body>',
+					'html' => '<body id="mwAA" lang="en" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr"><p id="mwAQ"><a rel="mw:WikiLink" href="./Not_an_article?action=edit&amp;redlink=1" id="mwAg" typeof="mw:LocalizedAttrs" class="new" title="Not an article" data-mw-i18n=\'{"title":{"lang":"x-page","key":"red-link-title","params":["Not an article"]}}\'>abcd</a></p>' . "\n" . '</body>',
 					'parsoid' => '{"counter":2,"ids":{"mwAA":{"dsr":[0,24,0,0]},"mwAQ":{"dsr":[0,23,0,0]},"mwAg":{"stx":"piped","a":{"href":"./Not_an_article"},"sa":{"href":"Not an article"},"dsr":[0,23,17,2]}},"offsetType":"byte"}',
 					'mw' => '{"ids":[]}',
 				],
 				[
-					'html' => '<p id="mwAQ"><a rel="mw:WikiLink" href="./Not_an_article" title="Not an article" id="mwAg" class="new">abcd</a></p>' . "\n",
+					'html' => '<p id="mwAQ"><a rel="mw:WikiLink" href="./Not_an_article?action=edit&amp;redlink=1" id="mwAg" typeof="mw:LocalizedAttrs" title="Not an article" class="new" data-mw-i18n=\'{"title":{"lang":"x-page","key":"red-link-title","params":["Not an article"]}}\'>abcd</a></p>' . "\n",
 					'parsoid' => '{"counter":-1,"ids":{"mwAA":{"dsr":[0,24,0,0]},"mwAQ":{"dsr":[0,23,0,0]},"mwAg":{"stx":"piped","a":{"href":"./Not_an_article"},"sa":{"href":"Not an article"},"dsr":[0,23,17,2]}},"offsetType":"byte"}',
 					'mw' => '{"ids":[]}',
 					'version' => self::$defaultContentVersion,
@@ -203,12 +248,12 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 			[
 				'redlinks',
 				[
-					'html' => '<body id="mwAA" lang="en" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr"><p id="mwAQ"><a id="mwAg" href="./Not_an_article">abcd</a></p></body>',
+					'html' => '<body id="mwAA" lang="en" class="mw-content-ltr sitedir-ltr ltr mw-body-content parsoid-body mediawiki mw-parser-output" dir="ltr"><p id="mwAQ"><a id="mwAg" href="./Not_an_article?action=edit&amp;redlink=1" title="Not an article">abcd</a></p></body>',
 					'parsoid' => null,
 					'mw' => null,
 				],
 				[
-					'html' => '<p id="mwAQ"><a id="mwAg" href="./Not_an_article">abcd</a></p>',
+					'html' => '<p id="mwAQ"><a id="mwAg" href="./Not_an_article?action=edit&amp;redlink=1" title="Not an article">abcd</a></p>',
 					'parsoid' => '{"counter":-1,"ids":[],"offsetType":"byte"}',
 					'mw' => '{"ids":[]}',
 					'version' => self::$defaultContentVersion,
@@ -233,10 +278,10 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 				],
 				[
 					'body_only' => true,
-					'pageLanguage' => 'sr',
+					'pageLanguage' => new Bcp47CodeValue( 'sr' ),
 					'variant' => [
-						'source' => 'sr-ec',
-						'target' => 'sr-el',
+						'wikitext' => new Bcp47CodeValue( 'sr-Cyrl' ),
+						'html' => new Bcp47CodeValue( 'sr-Latn' ),
 					]
 				]
 			],
@@ -255,10 +300,10 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 				],
 				[
 					'body_only' => true,
-					'pageLanguage' => 'sr',
+					'pageLanguage' => new Bcp47CodeValue( 'sr' ),
 					'variant' => [
-						'source' => 'sr-el',
-						'target' => 'sr-ec',
+						'wikitext' => new Bcp47CodeValue( 'sr-Latn' ),
+						'html' => new Bcp47CodeValue( 'sr-Cyrl' ),
 					]
 				]
 			],
@@ -277,10 +322,10 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 				],
 				[
 					'body_only' => true,
-					'pageLanguage' => 'sr',
+					'pageLanguage' => new Bcp47CodeValue( 'sr' ),
 					'variant' => [
-						'source' => 'sr-el',
-						'target' => 'sr-ec',
+						'wikitext' => new Bcp47CodeValue( 'sr-Latn' ),
+						'html' => new Bcp47CodeValue( 'sr-Cyrl' ),
 					]
 				]
 			],
@@ -301,14 +346,99 @@ class ParsoidTest extends \PHPUnit\Framework\TestCase {
 				],
 				[
 					'body_only' => true,
-					'pageLanguage' => 'sr',
+					'pageLanguage' => new Bcp47CodeValue( 'sr' ),
 					'variant' => [
-						'source' => 'sr-el',
-						'target' => 'sr-ec',
+						'wikitext' => new Bcp47CodeValue( 'sr-Latn' ),
+						'html' => new Bcp47CodeValue( 'sr-Cyrl' ),
 					]
 				]
 			],
 		];
 		// phpcs:enable Generic.Files.LineLength.TooLong
 	}
+
+	/**
+	 * @covers ::implementsLanguageConversionBcp47
+	 * @dataProvider provideImplementsLanguageConversionBcp47
+	 */
+	public function testImplementsLanguageConversionBcp47( string $htmlVariantCode, $expected ) {
+		$opts = [];
+
+		$siteConfig = new MockSiteConfig( $opts );
+		$dataAccess = new MockDataAccess( $siteConfig, $opts );
+		$parsoid = new Parsoid( $siteConfig, $dataAccess );
+
+		$pageContent = new MockPageContent( [ 'main' => '' ] );
+		$pageConfig = new MockPageConfig( $siteConfig, $opts, $pageContent );
+
+		$actual = $parsoid->implementsLanguageConversionBcp47( $pageConfig, new Bcp47CodeValue( $htmlVariantCode ) );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	public function provideImplementsLanguageConversionBcp47() {
+		yield 'Variant conversion is implemented for en-x-piglatin' => [
+			'en-x-piglatin', true
+		];
+
+		yield 'Variant conversion is not implemented for kk-latn' => [
+			'kk-latn', false
+		];
+	}
+
+	/**
+	 * @covers ::recordParseMetrics
+	 */
+	public function testParseMetrics() {
+		$opts = [];
+		$wt = "testing '''123'''";
+
+		$siteConfig = new MockSiteConfig( $opts );
+		$dataAccess = new MockDataAccess( $siteConfig, $opts );
+		$parsoid = new Parsoid( $siteConfig, $dataAccess );
+
+		$pageContent = new MockPageContent( [ 'main' => $wt ] );
+		$pageConfig = new MockPageConfig( $siteConfig, $opts, $pageContent );
+		$parsoid->wikitext2html( $pageConfig );
+
+		$metrics = $siteConfig->metrics();
+		$this->assertInstanceOf( MockMetrics::class, $metrics );
+		$log = $metrics->log;
+		$this->assertContains(
+			[ 'timing', 'entry.wt2html.pageWithOldid.size.input', 17.0 ],
+			$log
+		);
+	}
+
+	/**
+	 * @covers ::recordSerializationMetrics
+	 */
+	public function testSerializationMetrics() {
+		$opts = [];
+		$html = "<p>hiho</p>";
+
+		$siteConfig = new MockSiteConfig( $opts );
+		$dataAccess = new MockDataAccess( $siteConfig, $opts );
+		$parsoid = new Parsoid( $siteConfig, $dataAccess );
+
+		$pageContent = new MockPageContent( [ 'main' => '' ] );
+		$pageConfig = new MockPageConfig( $siteConfig, $opts, $pageContent );
+
+		$wt = $parsoid->html2wikitext( $pageConfig, $html );
+		$this->assertEquals( 'hiho', $wt );
+
+		$metrics = $siteConfig->metrics();
+		$this->assertInstanceOf( MockMetrics::class, $metrics );
+		$log = $metrics->log;
+		$this->assertCount( 14, $log );
+
+		$this->assertEquals(
+			[ 'timing', 'entry.html2wt.size.input', 11.0 ],
+			$log[6]
+		);
+		$this->assertEquals(
+			[ 'timing', 'entry.html2wt.size.output', 4.0 ],
+			$log[10]
+		);
+	}
+
 }

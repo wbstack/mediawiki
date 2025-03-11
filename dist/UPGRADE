@@ -3,7 +3,8 @@ specific problems, you should check:
 
 * the docs at https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents ;
 * the mediawiki-l mailing list archive at
-  https://lists.wikimedia.org/pipermail/mediawiki-l/ ; and
+  https://lists.wikimedia.org/hyperkitty/list/mediawiki-l@lists.wikimedia.org/ ;
+  and
 * the bug tracker at https://phabricator.wikimedia.org/
 
 … for information and workarounds to common issues.
@@ -17,7 +18,7 @@ Important: Upgrading from releases older than two LTS release is not supported a
 If you want to upgrade from an old version, please upgrade to a more recent LTS version first,
 then to this version.
 
-Currently any upgrade from any version older than 1.31 will fail.
+Currently any upgrade from any version older than 1.35 will fail.
 
 === Consult the release notes ===
 
@@ -67,8 +68,8 @@ upgrade your database in place.
 
 ==== From the command line ====
 
-From the command line, browse to the "maintenance" directory and run the
-update.php script to check and update the schema. This will insert missing
+From the command line, browse to the "maintenance" directory and use
+`run.php update` to check and update the schema. This will insert missing
 tables, update existing tables, and move data around as needed. In most cases,
 this is successful and nothing further needs to be done.
 

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel AlienTableCellNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.dm.AlienNode
- * @mixins ve.dm.TableCellableNode
+ * @mixes ve.dm.TableCellableNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model

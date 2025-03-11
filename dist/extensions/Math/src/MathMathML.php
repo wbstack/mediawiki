@@ -8,18 +8,17 @@
 
 namespace MediaWiki\Extension\Math;
 
-use Exception;
-use Hooks;
-use Html;
+use MediaWiki\Extension\Math\Hooks\HookRunner;
+use MediaWiki\Html\Html;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
 use Psr\Log\LoggerInterface;
-use SpecialPage;
 use StatusValue;
 use stdClass;
-use Title;
-use Xml;
-use XmlTypeCheck;
+use Throwable;
+use Wikimedia\Mime\XmlTypeCheck;
 
 /**
  * Converts LaTeX to MathML using the mathoid-server
@@ -48,20 +47,17 @@ class MathMathML extends MathRenderer {
 	 */
 	private $svgPath = false;
 
-	/** @var string|false */
-	private $pngPath = false;
-
 	/** @var string|null */
 	private $mathoidStyle;
 
-	public function __construct( $tex = '', $params = [] ) {
+	public function __construct( string $tex = '', array $params = [], $cache = null ) {
 		global $wgMathMathMLUrl;
-		parent::__construct( $tex, $params );
+		parent::__construct( $tex, $params, $cache );
 		$this->setMode( MathConfig::MODE_MATHML );
 		$this->host = $wgMathMathMLUrl;
 		if ( isset( $params['type'] ) ) {
 			$allowedTypes = [ 'pmml', 'ascii', 'chem' ];
-			if ( in_array( $params['type'], $allowedTypes ) ) {
+			if ( in_array( $params['type'], $allowedTypes, true ) ) {
 				$this->inputType = $params['type'];
 			}
 			if ( $params['type'] == 'pmml' ) {
@@ -100,7 +96,7 @@ class MathMathML extends MathRenderer {
 	 */
 	public static function batchEvaluate( array $renderers ) {
 		$rbis = [];
-		foreach ( $renderers as $key => $renderer ) {
+		foreach ( $renderers as $renderer ) {
 			$rbi = new MathRestbaseInterface( $renderer->getTex(), $renderer->getInputType() );
 			$renderer->setRestbaseInterface( $rbi );
 			$rbis[] = $rbi;
@@ -114,11 +110,7 @@ class MathMathML extends MathRenderer {
 	 * @return string[]
 	 */
 	public function getAllowedRootElements() {
-		if ( $this->allowedRootElements ) {
-			return $this->allowedRootElements;
-		} else {
-			return $this->defaultAllowedRootElements;
-		}
+		return $this->allowedRootElements ?: $this->defaultAllowedRootElements;
 	}
 
 	/**
@@ -140,10 +132,11 @@ class MathMathML extends MathRenderer {
 	}
 
 	public function render() {
-		global $wgMathFullRestbaseURL;
+		global $wgMathFullRestbaseURL, $wgMathSvgRenderer;
 		try {
-			if ( in_array( $this->inputType, $this->restbaseInputTypes ) &&
-				 in_array( $this->mode, $this->restbaseRenderingModes )
+			if ( $wgMathSvgRenderer === 'restbase' &&
+				in_array( $this->inputType, $this->restbaseInputTypes, true ) &&
+				in_array( $this->mode, $this->restbaseRenderingModes, true )
 			) {
 				if ( !$this->rbi ) {
 					$this->rbi =
@@ -155,7 +148,6 @@ class MathMathML extends MathRenderer {
 					$this->mathml = $rbi->getMathML();
 					$this->mathoidStyle = $rbi->getMathoidStyle();
 					$this->svgPath = $rbi->getFullSvgUrl();
-					$this->pngPath = $rbi->getFullPngUrl();
 					$this->warnings = $rbi->getWarnings();
 				} elseif ( $this->lastError === '' ) {
 					$this->doCheck();
@@ -173,7 +165,7 @@ class MathMathML extends MathRenderer {
 				return $renderResult->isGood();
 			}
 			return true;
-		} catch ( Exception $e ) {
+		} catch ( Throwable $e ) {
 			$this->lastError = $this->getError( 'math_mathoid_error',
 				$wgMathFullRestbaseURL, $e->getMessage() );
 			$this->logger->error( $e->getMessage(), [ $e, $this ] );
@@ -223,7 +215,7 @@ class MathMathML extends MathRenderer {
 		global $wgMathLaTeXMLTimeout;
 		$post = $this->getPostData();
 		$options = [ 'method' => 'POST', 'postData' => $post, 'timeout' => $wgMathLaTeXMLTimeout ];
-		$req = MediaWikiServices::getInstance()->getHttpRequestFactory()->create( $this->host, $options );
+		$req = MediaWikiServices::getInstance()->getHttpRequestFactory()->create( $this->host, $options, __METHOD__ );
 		$status = $req->execute();
 		if ( $status->isGood() ) {
 			return StatusValue::newGood( $req->getContent() );
@@ -261,7 +253,8 @@ class MathMathML extends MathRenderer {
 	public function getPostData() {
 		$input = $this->getTex();
 		if ( $this->inputType == 'pmml' ||
-			 $this->getMode() == MathConfig::MODE_LATEXML && $this->getMathml() ) {
+			( $this->getMode() == MathConfig::MODE_LATEXML && $this->getMathml() )
+		) {
 			$out = 'type=mml&q=' . rawurlencode( $this->getMathml() );
 		} elseif ( $this->inputType == 'ascii' ) {
 			$out = 'type=asciimath&q=' . rawurlencode( $input );
@@ -340,7 +333,7 @@ class MathMathML extends MathRenderer {
 			$name = $xmlObject->getRootElement();
 			$elementSplit = explode( ':', $name );
 			$localName = end( $elementSplit );
-			if ( in_array( $localName, $this->getAllowedRootElements() ) ) {
+			if ( in_array( $localName, $this->getAllowedRootElements(), true ) ) {
 				$out = true;
 			} else {
 				$this->logger->error( "Got wrong root element: $name" );
@@ -358,7 +351,7 @@ class MathMathML extends MathRenderer {
 			return $this->svgPath;
 		}
 		return SpecialPage::getTitleFor( 'MathShowImage' )->getLocalURL( [
-				'hash' => $this->getMd5(),
+				'hash' => $this->getInputHash(),
 				'mode' => $this->getMode(),
 				'noRender' => $noRender
 			]
@@ -404,18 +397,11 @@ class MathMathML extends MathRenderer {
 	 */
 	protected function getFallbackImage( $noRender = false, $classOverride = false ) {
 		$attribs = [
-			'src' => $this->getFallbackImageUrl( $noRender )
+			'src' => $this->getFallbackImageUrl( $noRender ),
+			'class' => $classOverride === false ? $this->getClassName( true ) : $classOverride,
 		];
-		if ( $classOverride === false ) { // $class = '' suppresses class attribute
-			$class = $this->getClassName( true );
-		} else {
-			$class = $classOverride;
-		}
 		if ( !$this->mathoidStyle ) {
 			$this->correctSvgStyle( $this->mathoidStyle );
-		}
-		if ( $class ) {
-			$attribs['class'] = $class;
 		}
 
 		return Html::element( 'img', $this->getAttributes( 'span', $attribs, [
@@ -449,22 +435,28 @@ class MathMathML extends MathRenderer {
 		} else {
 			$class .= 'inline';
 		}
-		if ( !$fallback ) {
+		if ( $fallback ) {
+			// Support 3rd party gadgets and extensions.
+			$class .= ' mw-invert';
+			// Support skins with night theme.
+			$class .= ' skin-invert';
+		} else {
 			$class .= ' mwe-math-mathml-a11y';
 		}
 		return $class;
 	}
 
 	/**
+	 * @param bool $svg
 	 * @return string Html output that is embedded in the page
 	 */
-	public function getHtmlOutput() {
+	public function getHtmlOutput( bool $svg = true ): string {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 		$enableLinks = $config->get( "MathEnableFormulaLinks" );
-		if ( $this->getMathStyle() == 'display' ) {
-			$element = 'div';
+		if ( $this->getMathStyle() === 'display' ) {
+			$mml_class = 'mwe-math-mathml-display';
 		} else {
-			$element = 'span';
+			$mml_class = 'mwe-math-mathml-inline';
 		}
 		$attribs = [ 'class' => 'mwe-math-element' ];
 		if ( $this->getID() !== '' ) {
@@ -473,15 +465,10 @@ class MathMathML extends MathRenderer {
 		$hyperlink = null;
 		if ( isset( $this->params['qid'] ) && preg_match( '/Q\d+/', $this->params['qid'] ) ) {
 			$attribs['data-qid'] = $this->params['qid'];
-			// TODO: SpecialPage::getTitleFor uses the depcrated method Title::newFromTitleValue and
-			// declares a never thrown MWException. Once this SpecialPage is updated, update the next line.
-			$titleObj = Title::newFromLinkTarget( SpecialPage::getTitleValueFor( 'MathWikibase' ) );
+			$titleObj = SpecialPage::getTitleFor( 'MathWikibase' );
 			$hyperlink = $titleObj->getLocalURL( [ 'qid' => $this->params['qid'] ] );
 		}
-		$output = Html::openElement( $element, $attribs );
-		if ( $hyperlink && $enableLinks ) {
-			$output .= Html::openElement( 'a', [ 'href' => $hyperlink, 'style' => 'color:inherit;' ] );
-		}
+		$output = '';
 		// MathML has to be wrapped into a div or span in order to be able to hide it.
 		// Remove displayStyle attributes set by the MathML converter
 		// (Beginning from Mathoid 0.2.5 block is the default layout.)
@@ -491,47 +478,61 @@ class MathMathML extends MathRenderer {
 		if ( $this->getMathStyle() == 'display' ) {
 			$mml = preg_replace( '/<math/', '<math display="block"', $mml );
 		}
-		$output .= Xml::tags( $element, [
-			'class' => $this->getClassName(), 'style' => 'display: none;'
-		], $mml );
-		$output .= $this->getFallbackImage();
-		if ( $hyperlink && $enableLinks ) {
-			$output .= Html::closeElement( 'a' );
+
+		if ( $svg ) {
+			$mml_attribs = [
+				'class' => $this->getClassName(),
+				'style' => 'display: none;'
+			];
+		} else {
+			$mml_attribs = [
+				'class' => $mml_class,
+			];
 		}
-		$output .= Html::closeElement( $element );
-		return $output;
+		$output .= Html::rawElement( 'span', $mml_attribs, $mml );
+		if ( $svg ) {
+			$output .= $this->getFallbackImage();
+		}
+
+		if ( $hyperlink && $enableLinks ) {
+			$output = Html::rawElement( 'a',
+				[ 'href' => $hyperlink, 'style' => 'color:inherit;' ],
+				$output
+			);
+		}
+
+		return Html::rawElement( 'span', $attribs, $output );
 	}
 
 	protected function dbOutArray() {
 		$out = parent::dbOutArray();
-		if ( $this->getMathTableName() == 'mathoid' ) {
+		if ( $this->getMathTableName() === 'mathoid' ) {
 			$out['math_input'] = $out['math_inputtex'];
 			unset( $out['math_inputtex'] );
-			$out['math_png'] = $this->png;
 		}
 		return $out;
 	}
 
 	protected function dbInArray() {
 		$out = parent::dbInArray();
-		if ( $this->getMathTableName() == 'mathoid' ) {
+		if ( $this->getMathTableName() === 'mathoid' ) {
 			$out = array_diff( $out, [ 'math_inputtex' ] );
 			$out[] = 'math_input';
 		}
 		return $out;
 	}
 
-	protected function initializeFromDatabaseRow( $rpage ) {
+	public function initializeFromCache( $rpage ) {
 		// mathoid allows different input formats
 		// therefore the column name math_inputtex was changed to math_input
-		if ( $this->getMathTableName() == 'mathoid' && !empty( $rpage->math_input ) ) {
-			$this->userInputTex = $rpage->math_input;
+		if ( $this->getMathTableName() === 'mathoid' && isset( $rpage['math_input'] ) ) {
+			$this->userInputTex = $rpage['math_input'];
 		}
-		parent::initializeFromDatabaseRow( $rpage );
+		parent::initializeFromCache( $rpage );
 	}
 
 	/**
-	 * @param stdClass $jsonResult json result
+	 * @param stdClass $jsonResult
 	 * @param string $host name
 	 *
 	 * @return StatusValue
@@ -555,8 +556,8 @@ class MathMathML extends MathRenderer {
 			}
 			// Avoid PHP 7.1 warning from passing $this by reference
 			$renderer = $this;
-			Hooks::run( 'MathRenderingResultRetrieved',
-				[ &$renderer, &$jsonResult ]
+			( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )->onMathRenderingResultRetrieved(
+				$renderer, $jsonResult
 			); // Enables debugging of server results
 			return StatusValue::newGood(); // FIXME: empty?
 		} else {

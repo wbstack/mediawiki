@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Afalau",
+			"Ceirios",
 			"Divec",
 			"Lloffiwr",
 			"Nemo bis",
-			"Robin Owain",
-			"Afalau"
+			"Robin Owain"
 		]
 	},
 	"uls-desc": "Yn cynnig sawl ffordd i'r defnyddiwr allu dewis iaith a newid gosodiadau iaith",
@@ -60,5 +61,6 @@
 	"ext-uls-language-settings-applying": "Wrthi'n gosod...",
 	"ext-uls-compact-link-count": "{{PLURAL:$1|Un arall|$1 eraill}}",
 	"prefs-languages": "Ieithoedd",
-	"ext-uls-compact-language-links-preference": "Defnyddio [[$1|rhestr ieithoedd gryno]], ag ieithoedd sy'n berthnasol ichi."
+	"ext-uls-compact-language-links-preference": "Defnyddio [[$1|rhestr ieithoedd gryno]], ag ieithoedd sy'n berthnasol ichi.",
+	"ext-uls-add-languages-button-label": "Ychwanegu ieithoedd"
 }

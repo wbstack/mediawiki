@@ -1,16 +1,18 @@
-var
+const
 	pageJSONParser = require( '../mobile.startup/page/pageJSONParser' ),
 	util = require( '../mobile.startup/util' ),
 	extendSearchParams = require( '../mobile.startup/extendSearchParams' );
 
 /**
- * @class WatchListGateway
+ * API for interacting with watchlist.
+ *
  * @param {mw.Api} api
  * @param {string} lastTitle of page listed in Watchlist to be used as a continuation parameter
+ * @private
  */
 function WatchListGateway( api, lastTitle ) {
 	this.api = api;
-	// Try to keep it in sync with SpecialMobileWatchlist::LIMIT (php)
+	// Try to keep it in sync with SpecialMobileEditWatchlist::LIMIT (php)
 	this.limit = 50;
 
 	if ( lastTitle ) {
@@ -36,7 +38,7 @@ WatchListGateway.prototype = {
 	 * @return {jQuery.Deferred}
 	 */
 	loadWatchlist: function () {
-		var self = this,
+		const self = this,
 			params = extendSearchParams( 'watchlist', {
 				prop: [ 'info', 'revisions' ],
 				rvprop: 'timestamp|user',
@@ -48,9 +50,7 @@ WatchListGateway.prototype = {
 		if ( this.canContinue === false ) {
 			return util.Deferred().resolve( [] );
 		}
-		return this.api.get( params, {
-			url: this.apiUrl
-		} ).then( function ( data ) {
+		return this.api.get( params ).then( function ( data ) {
 			if ( data.continue !== undefined ) {
 				self.continueParams = data.continue;
 			} else {
@@ -68,7 +68,7 @@ WatchListGateway.prototype = {
 	 * @return {Page[]}
 	 */
 	parseData: function ( data ) {
-		var pages;
+		let pages;
 
 		if ( !data.query || !data.query.pages ) {
 			return [];

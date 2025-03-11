@@ -1,36 +1,40 @@
 'use strict';
 
 const { assert } = require( 'api-testing' );
+const { expect } = require( '../helpers/chaiHelper' );
 const {
-	createEntity,
-	createSingleItem,
 	createRedirectForItem,
-	getLatestEditMetadata
+	createUniqueStringProperty,
+	getLatestEditMetadata,
+	newStatementWithRandomStringValue,
+	createItemWithStatements
 } = require( '../helpers/entityHelper' );
-const { RequestBuilder } = require( '../helpers/RequestBuilder' );
+const {
+	newGetItemStatementsRequestBuilder,
+	newCreateItemRequestBuilder
+} = require( '../helpers/RequestBuilderFactory' );
+const { makeEtag } = require( '../helpers/httpHelper' );
+const { assertValidError } = require( '../helpers/responseValidator' );
 
-function newGetItemStatementsRequestBuilder( itemId ) {
-	return new RequestBuilder()
-		.withRoute( 'GET', '/entities/items/{item_id}/statements' )
-		.withPathParam( 'item_id', itemId );
-}
-
-describe( 'GET /entities/items/{id}/statements', () => {
-
-	function makeEtag( ...revisionIds ) {
-		return revisionIds.map( ( revId ) => `"${revId}"` ).join( ',' );
-	}
+describe( newGetItemStatementsRequestBuilder().getRouteDescription(), () => {
 
 	let testItemId;
-	let testPropertyId;
+	let testStatementPropertyId;
+	let testStatementPropertyId2;
 	let testModified;
 	let testRevisionId;
+	let testStatements;
 
 	before( async () => {
-		const createSingleItemResponse = await createSingleItem();
+		testStatementPropertyId = ( await createUniqueStringProperty() ).body.id;
+		testStatementPropertyId2 = ( await createUniqueStringProperty() ).body.id;
 
-		testItemId = createSingleItemResponse.entity.id;
-		testPropertyId = Object.keys( createSingleItemResponse.entity.claims )[ 0 ];
+		testStatements = [
+			newStatementWithRandomStringValue( testStatementPropertyId ),
+			newStatementWithRandomStringValue( testStatementPropertyId ),
+			newStatementWithRandomStringValue( testStatementPropertyId2 )
+		];
+		testItemId = ( await createItemWithStatements( testStatements ) ).id;
 
 		const testItemCreationMetadata = await getLatestEditMetadata( testItemId );
 		testModified = testItemCreationMetadata.timestamp;
@@ -42,23 +46,39 @@ describe( 'GET /entities/items/{id}/statements', () => {
 			.assertValidRequest()
 			.makeRequest();
 
-		assert.equal( response.status, 200 );
-		assert.exists( response.body[ testPropertyId ] );
-		assert.equal( response.body[ testPropertyId ][ 0 ].mainsnak.snaktype, 'value' );
-		assert.equal( response.body[ testPropertyId ][ 1 ].mainsnak.snaktype, 'novalue' );
+		expect( response ).to.have.status( 200 );
+		assert.exists( response.body[ testStatementPropertyId ] );
+		assert.deepEqual(
+			response.body[ testStatementPropertyId ][ 0 ].value,
+			testStatements[ 0 ].value
+		);
+		assert.deepEqual(
+			response.body[ testStatementPropertyId ][ 1 ].value,
+			testStatements[ 1 ].value
+		);
 		assert.equal( response.header[ 'last-modified' ], testModified );
 		assert.equal( response.header.etag, makeEtag( testRevisionId ) );
 	} );
 
-	it( 'can GET empty statements list', async () => {
-		const createItemResponse = await createEntity( 'item',
-			{ labels: { en: { language: 'en', value: 'item without statements' } } }
-		);
-		const response = await newGetItemStatementsRequestBuilder( createItemResponse.entity.id )
+	it( 'can filter statements by property', async () => {
+		const response = await newGetItemStatementsRequestBuilder( testItemId )
+			.withQueryParam( 'property', testStatementPropertyId )
 			.assertValidRequest()
 			.makeRequest();
 
-		assert.equal( response.status, 200 );
+		expect( response ).to.have.status( 200 );
+		assert.deepEqual( Object.keys( response.body ), [ testStatementPropertyId ] );
+		assert.strictEqual( response.body[ testStatementPropertyId ].length, 2 );
+	} );
+
+	it( 'can GET empty statements list', async () => {
+		const createItemResponse = await newCreateItemRequestBuilder( { labels: { en: 'item without statements' } }
+		).makeRequest();
+		const response = await newGetItemStatementsRequestBuilder( createItemResponse.body.id )
+			.assertValidRequest()
+			.makeRequest();
+
+		expect( response ).to.have.status( 200 );
 		assert.empty( response.body );
 	} );
 
@@ -68,10 +88,23 @@ describe( 'GET /entities/items/{id}/statements', () => {
 			.assertInvalidRequest()
 			.makeRequest();
 
-		assert.equal( response.status, 400 );
-		assert.header( response, 'Content-Language', 'en' );
-		assert.equal( response.body.code, 'invalid-item-id' );
-		assert.include( response.body.message, itemId );
+		assertValidError(
+			response,
+			400,
+			'invalid-path-parameter',
+			{ parameter: 'item_id' }
+		);
+	} );
+
+	it( '400 error - bad request, invalid property ID filter', async () => {
+		const queryParamName = 'property';
+		const response = await newGetItemStatementsRequestBuilder( testItemId )
+			.withQueryParam( queryParamName, 'X123' )
+			.assertInvalidRequest()
+			.makeRequest();
+
+		assertValidError( response, 400, 'invalid-query-parameter', { parameter: queryParamName } );
+		assert.include( response.body.message, queryParamName );
 	} );
 
 	it( '404 error - item not found', async () => {
@@ -80,10 +113,8 @@ describe( 'GET /entities/items/{id}/statements', () => {
 			.assertValidRequest()
 			.makeRequest();
 
-		assert.equal( response.status, 404 );
-		assert.header( response, 'Content-Language', 'en' );
-		assert.equal( response.body.code, 'item-not-found' );
-		assert.include( response.body.message, itemId );
+		assertValidError( response, 404, 'resource-not-found', { resource_type: 'item' } );
+		assert.strictEqual( response.body.message, 'The requested resource does not exist' );
 	} );
 
 	it( '308 - item redirected', async () => {
@@ -94,11 +125,10 @@ describe( 'GET /entities/items/{id}/statements', () => {
 			.assertValidRequest()
 			.makeRequest();
 
-		assert.equal( response.status, 308 );
-
+		expect( response ).to.have.status( 308 );
 		assert.isTrue(
 			new URL( response.headers.location ).pathname
-				.endsWith( `rest.php/wikibase/v0/entities/items/${redirectTarget}/statements` )
+				.endsWith( `rest.php/wikibase/v1/entities/items/${redirectTarget}/statements` )
 		);
 	} );
 

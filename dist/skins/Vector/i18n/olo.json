@@ -22,5 +22,10 @@
 	"vector-view-viewsource": "Kačo algukoodu",
 	"vector-more-actions": "Vie",
 	"vector-searchsuggest-containing": "Eči sivuloi, kudamis on <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
-	"vector-toc-beginning": "Algavo"
+	"vector-toc-label": "Syväindö",
+	"vector-toc-beginning": "Algavo",
+	"vector-main-menu-label": "Piävalličuslistu",
+	"vector-page-tools-label": "Instrumentat",
+	"vector-page-tools-general-label": "Yhtehine",
+	"vector-unpin-element-label": "peitä"
 }

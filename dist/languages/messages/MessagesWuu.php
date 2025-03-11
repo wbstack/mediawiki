@@ -1,8 +1,6 @@
 <?php
 /** Wu (吴语)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -18,7 +16,7 @@
  * @author 十弌
  */
 
-$fallback = 'zh-hans, zh, zh-hant';
+$fallback = 'wuu-hans, wuu-hant, zh-hans, zh, zh-hant';
 
 $datePreferences = [
 	'default',

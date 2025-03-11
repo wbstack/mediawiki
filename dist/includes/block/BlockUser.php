@@ -22,27 +22,29 @@
 namespace MediaWiki\Block;
 
 use ChangeTags;
-use MalformedTitleException;
+use InvalidArgumentException;
 use ManualLogEntry;
 use MediaWiki\Block\Restriction\AbstractRestriction;
 use MediaWiki\Block\Restriction\ActionRestriction;
 use MediaWiki\Block\Restriction\NamespaceRestriction;
 use MediaWiki\Block\Restriction\PageRestriction;
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Message\Message;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
 use MediaWiki\User\UserEditTracker;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentity;
-use Message;
 use Psr\Log\LoggerInterface;
 use RevisionDeleteUser;
-use Status;
-use Title;
-use TitleFactory;
-use Wikimedia\Timestamp\ConvertibleTimestamp;
+use Wikimedia\ParamValidator\TypeDef\ExpiryDef;
 
 /**
  * Handles the backend logic of blocking users
@@ -72,38 +74,17 @@ class BlockUser {
 	/** @var Authority Performer of the block */
 	private $performer;
 
-	/** @var ServiceOptions */
-	private $options;
-
-	/** @var BlockRestrictionStore */
-	private $blockRestrictionStore;
-
-	/** @var BlockPermissionChecker */
-	private $blockPermissionChecker;
-
-	/** @var BlockUtils */
-	private $blockUtils;
-
-	/** @var HookRunner */
-	private $hookRunner;
-
-	/** @var DatabaseBlockStore */
-	private $databaseBlockStore;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/** @var UserEditTracker */
-	private $userEditTracker;
-
-	/** @var LoggerInterface */
-	private $logger;
-
-	/** @var TitleFactory */
-	private $titleFactory;
-
-	/** @var BlockActionInfo */
-	private $blockActionInfo;
+	private ServiceOptions $options;
+	private BlockRestrictionStore $blockRestrictionStore;
+	private BlockPermissionChecker $blockPermissionChecker;
+	private BlockUtils $blockUtils;
+	private BlockActionInfo $blockActionInfo;
+	private HookRunner $hookRunner;
+	private DatabaseBlockStore $blockStore;
+	private UserFactory $userFactory;
+	private UserEditTracker $userEditTracker;
+	private LoggerInterface $logger;
+	private TitleFactory $titleFactory;
 
 	/**
 	 * @internal For use by UserBlockCommandFactory
@@ -163,7 +144,7 @@ class BlockUser {
 	 * even within this class. If you want to determine whether the block will be partial,
 	 * use $this->isPartial().
 	 */
-	private $isPartialRaw = false;
+	private $isPartialRaw;
 
 	/** @var AbstractRestriction[] */
 	private $blockRestrictions = [];
@@ -194,14 +175,14 @@ class BlockUser {
 	 *    Valid options:
 	 *    - isCreateAccountBlocked      : Are account creations prevented?
 	 *    - isEmailBlocked              : Is emailing other users prevented?
-	 *    - isHardBlock                 : Are registered users prevented from editing?
+	 *    - isHardBlock                 : Are named (non-temporary) users prevented from editing?
 	 *    - isAutoblocking              : Should this block spread to others to
 	 *                                    limit block evasion?
-	 *    - isUserTalkEditBlocked       : Is editing blocked user's own talkpage allowed?
+	 *    - isUserTalkEditBlocked       : Is editing blocked user's own talk page prevented?
 	 *    - isHideUser                  : Should blocked user's name be hidden (needs hideuser)?
 	 *    - isPartial                   : Is this block partial? This is ignored when
 	 *                                    blockRestrictions is not an empty array.
-	 * @param array $blockRestrictions
+	 * @param AbstractRestriction[] $blockRestrictions
 	 * @param string[] $tags Tags that should be assigned to the log entry
 	 */
 	public function __construct(
@@ -235,7 +216,7 @@ class BlockUser {
 			);
 		$this->blockUtils = $blockUtils;
 		$this->hookRunner = new HookRunner( $hookContainer );
-		$this->databaseBlockStore = $databaseBlockStore;
+		$this->blockStore = $databaseBlockStore;
 		$this->userFactory = $userFactory;
 		$this->userEditTracker = $userEditTracker;
 		$this->logger = $logger;
@@ -243,7 +224,7 @@ class BlockUser {
 		$this->blockActionInfo = $blockActionInfo;
 
 		// Process block target
-		list( $this->target, $rawTargetType ) = $this->blockUtils->parseBlockTarget( $target );
+		[ $this->target, $rawTargetType ] = $this->blockUtils->parseBlockTarget( $target );
 		if ( $rawTargetType !== null ) { // Guard against invalid targets
 			$this->targetType = $rawTargetType;
 		} else {
@@ -270,14 +251,7 @@ class BlockUser {
 			}
 		}
 
-		// This needs to be called after $this->blockRestrictions is set, as
-		// $this->isPartial() makes use of it.
-		if (
-			isset( $blockOptions['isPartial'] ) &&
-			!$this->isPartial()
-		) {
-			$this->isPartialRaw = $blockOptions['isPartial'];
-		}
+		$this->isPartialRaw = !empty( $blockOptions['isPartial'] ) && !$blockRestrictions;
 
 		if (
 			!$this->isPartial() ||
@@ -334,18 +308,11 @@ class BlockUser {
 	 * @return string|false Timestamp (format TS_MW) or 'infinity' or false on error.
 	 */
 	public static function parseExpiryInput( string $expiry ) {
-		if ( wfIsInfinity( $expiry ) ) {
-			return 'infinity';
-		}
-
-		// ConvertibleTimestamp::time() used so we can fake the current time in tests
-		$expiry = strtotime( $expiry, ConvertibleTimestamp::time() );
-
-		if ( $expiry < 0 || $expiry === false ) {
+		try {
+			return ExpiryDef::normalizeExpiry( $expiry, TS_MW );
+		} catch ( InvalidArgumentException $e ) {
 			return false;
 		}
-
-		return wfTimestamp( TS_MW, $expiry );
 	}
 
 	/**
@@ -360,8 +327,8 @@ class BlockUser {
 	/**
 	 * Configure DatabaseBlock according to class properties
 	 *
-	 * @param DatabaseBlock|null $sourceBlock Copy any options from this block,
-	 *                                        null to construct a new one.
+	 * @param DatabaseBlock|null $sourceBlock Copy any options from this block.
+	 *   Null to construct a new one.
 	 *
 	 * @return DatabaseBlock
 	 */
@@ -404,15 +371,16 @@ class BlockUser {
 	}
 
 	/**
-	 * Places a block with checking permissions
+	 * Place a block, checking permissions
 	 *
 	 * @param bool $reblock Should this reblock?
 	 *
 	 * @return Status If the block is successful, the value of the returned
-	 * Status is an instance of a newly placed block.
+	 *   Status is an instance of a newly placed block.
 	 */
 	public function placeBlock( bool $reblock = false ): Status {
-		$priorBlock = DatabaseBlock::newFromTarget( $this->target, null, /*fromPrimary=*/true );
+		$priorBlock = $this->blockStore
+			->newFromTarget( $this->target, null, /*fromPrimary=*/true );
 		$priorHideUser = $priorBlock instanceof DatabaseBlock && $priorBlock->getHideName();
 		if (
 			$this->blockPermissionChecker
@@ -420,11 +388,13 @@ class BlockUser {
 					$this->isHideUser || $priorHideUser
 				) !== true
 		) {
+			$this->logger->debug( 'placeBlock: checkBasePermissions failed' );
 			return Status::newFatal( $priorHideUser ? 'cant-see-hidden-user' : 'badaccess-group0' );
 		}
 
 		$blockCheckResult = $this->blockPermissionChecker->checkBlockPermissions();
 		if ( $blockCheckResult !== true ) {
+			$this->logger->debug( 'placeBlock: checkBlockPermissions failed' );
 			return Status::newFatal( $blockCheckResult );
 		}
 
@@ -437,13 +407,13 @@ class BlockUser {
 		}
 
 		if ( $this->tags !== [] ) {
-			// TODO: Use DI, see T245964
 			$status = ChangeTags::canAddTagsAccompanyingChange(
 				$this->tags,
 				$this->performer
 			);
 
 			if ( !$status->isOK() ) {
+				$this->logger->debug( 'placeBlock: ChangeTags::canAddTagsAccompanyingChange failed' );
 				return $status;
 			}
 		}
@@ -453,9 +423,11 @@ class BlockUser {
 			try {
 				$title = $this->titleFactory->newFromTextThrow( $pageRestriction );
 				if ( !$title->exists() ) {
+					$this->logger->debug( "placeBlock: nonexistent page restriction $title" );
 					$status->fatal( 'cant-block-nonexistent-page', $pageRestriction );
 				}
 			} catch ( MalformedTitleException $e ) {
+				$this->logger->debug( 'placeBlock: malformed page restriction title' );
 				$status->fatal( $e->getMessageObject() );
 			}
 		}
@@ -467,21 +439,23 @@ class BlockUser {
 	}
 
 	/**
-	 * Places a block without any sort of permissions checks.
+	 * Place a block without any sort of permissions checks.
 	 *
 	 * @param bool $reblock Should this reblock?
 	 *
 	 * @return Status If the block is successful, the value of the returned
-	 * Status is an instance of a newly placed block.
+	 *   Status is an instance of a newly placed block.
 	 */
 	public function placeBlockUnsafe( bool $reblock = false ): Status {
 		$status = $this->blockUtils->validateTarget( $this->target );
 
 		if ( !$status->isOK() ) {
+			$this->logger->debug( 'placeBlockUnsafe: invalid target' );
 			return $status;
 		}
 
 		if ( $this->isUserTalkEditBlocked === null ) {
+			$this->logger->debug( 'placeBlockUnsafe: partial block on user talk page' );
 			return Status::newFatal( 'ipb-prevent-user-talk-edit' );
 		}
 
@@ -493,19 +467,23 @@ class BlockUser {
 			// the time can't be parsed
 			!$this->expiryTime
 		) {
+			$this->logger->debug( 'placeBlockUnsafe: invalid expiry' );
 			return Status::newFatal( 'ipb_expiry_invalid' );
 		}
 
 		if ( $this->expiryTime < wfTimestampNow() ) {
+			$this->logger->debug( 'placeBlockUnsafe: expiry in the past' );
 			return Status::newFatal( 'ipb_expiry_old' );
 		}
 
 		if ( $this->isHideUser ) {
 			if ( $this->isPartial() ) {
+				$this->logger->debug( 'placeBlockUnsafe: partial block cannot hide user' );
 				return Status::newFatal( 'ipb_hide_partial' );
 			}
 
 			if ( !wfIsInfinity( $this->rawExpiry ) ) {
+				$this->logger->debug( 'placeBlockUnsafe: temp user block has expiry' );
 				return Status::newFatal( 'ipb_expiry_temp' );
 			}
 
@@ -514,6 +492,7 @@ class BlockUser {
 				$hideUserContribLimit !== false &&
 				$this->userEditTracker->getUserEditCount( $this->target ) > $hideUserContribLimit
 			) {
+				$this->logger->debug( 'placeBlockUnsafe: hide user with too many contribs' );
 				return Status::newFatal( 'ipb_hide_invalid', Message::numParam( $hideUserContribLimit ) );
 			}
 		}
@@ -525,6 +504,7 @@ class BlockUser {
 				!$this->isCreateAccountBlocked &&
 				!$this->isUserTalkEditBlocked
 			) {
+				$this->logger->debug( 'placeBlockUnsafe: empty partial block' );
 				return Status::newFatal( 'ipb-empty-block' );
 			}
 		}
@@ -548,6 +528,7 @@ class BlockUser {
 		if ( !$this->hookRunner->onBlockIp( $block, $legacyUser, $denyReason ) ) {
 			$status = Status::newGood();
 			foreach ( $denyReason as $key ) {
+				$this->logger->debug( "placeBlockInternal: hook aborted with message \"$key\"" );
 				$status->fatal( $key );
 			}
 			return $status;
@@ -555,12 +536,13 @@ class BlockUser {
 
 		// Is there a conflicting block?
 		// xxx: there is an identical call at the beginning of ::placeBlock
-		$priorBlock = DatabaseBlock::newFromTarget( $this->target, null, /*fromPrimary=*/true );
+		$priorBlock = $this->blockStore
+			->newFromTarget( $this->target, null, /*fromPrimary=*/true );
 
 		// T287798: we are blocking an IP that is currently autoblocked
 		// we can ignore the block because ipb_address_unique allows the IP address
 		// be both manually blocked and autoblocked
-		// this will work as long as DatabaseBlock::newLoad prefers manual IP blocks
+		// this will work as long as DatabaseBlockStore::newLoad prefers manual IP blocks
 		// over autoblocks
 		if ( $priorBlock !== null
 			&& $priorBlock->getType() === AbstractBlock::TYPE_AUTO
@@ -569,30 +551,35 @@ class BlockUser {
 			$priorBlock = null;
 		}
 
-		$isReblock = false;
 		if ( $priorBlock !== null ) {
 			// Reblock only if the caller wants so
 			if ( !$reblock ) {
+				$this->logger->debug(
+					'placeBlockInternal: already blocked and reblock not requested' );
 				return Status::newFatal( 'ipb_already_blocked', $block->getTargetName() );
 			}
 
 			if ( $block->equals( $priorBlock ) ) {
 				// Block settings are equal => user is already blocked
+				$this->logger->debug( 'placeBlockInternal: already blocked, no change' );
 				return Status::newFatal( 'ipb_already_blocked', $block->getTargetName() );
 			}
 
 			$currentBlock = $this->configureBlock( $priorBlock );
-			$this->databaseBlockStore->updateBlock( $currentBlock ); // TODO handle failure
-			$isReblock = true;
+			$logEntry = $this->prepareLogEntry( true );
+			$this->blockStore->updateBlock( $currentBlock ); // TODO handle failure
 			$block = $currentBlock;
 		} else {
+			$logEntry = $this->prepareLogEntry( false );
 			// Try to insert block.
-			$insertStatus = $this->databaseBlockStore->insertBlock( $block );
+			$insertStatus = $this->blockStore->insertBlock( $block );
 			if ( !$insertStatus ) {
 				$this->logger->warning( 'Block could not be inserted. No existing block was found.' );
 				return Status::newFatal( 'ipb-block-not-found', $block->getTargetName() );
 			}
 		}
+		// Relate log ID to block ID (T27763)
+		$logEntry->setRelations( [ 'ipb_id' => $block->getId() ] );
 
 		// Set *_deleted fields if requested
 		if ( $this->isHideUser ) {
@@ -601,14 +588,17 @@ class BlockUser {
 			RevisionDeleteUser::suppressUserName( $this->target->getName(), $this->target->getId() );
 		}
 
-		$this->hookRunner->onBlockIpComplete( $block, $legacyUser, $priorBlock );
+		DeferredUpdates::addCallableUpdate( function () use ( $block, $legacyUser, $priorBlock ) {
+			$this->hookRunner->onBlockIpComplete( $block, $legacyUser, $priorBlock );
+		} );
 
 		// DatabaseBlock constructor sanitizes certain block options on insert
 		$this->isEmailBlocked = $block->isEmailBlocked();
 		$this->isAutoblocking = $block->isAutoblocking();
 
-		$this->log( $block, $isReblock );
+		$this->log( $logEntry );
 
+		$this->logger->debug( 'placeBlockInternal: success' );
 		return Status::newGood( $block );
 	}
 
@@ -681,7 +671,7 @@ class BlockUser {
 		if ( $this->isPartial() ) {
 			$pageRestrictions = $this->getPageRestrictions();
 			$namespaceRestrictions = $this->getNamespaceRestrictions();
-			$actionRestriction = $this->getActionRestrictions();
+			$actionRestrictions = $this->getActionRestrictions();
 
 			if ( count( $pageRestrictions ) > 0 ) {
 				$logParams['7::restrictions']['pages'] = $pageRestrictions;
@@ -689,34 +679,45 @@ class BlockUser {
 			if ( count( $namespaceRestrictions ) > 0 ) {
 				$logParams['7::restrictions']['namespaces'] = $namespaceRestrictions;
 			}
-			if ( count( $actionRestriction ) ) {
-				$logParams['7::restrictions']['actions'] = $actionRestriction;
+			if ( count( $actionRestrictions ) ) {
+				$logParams['7::restrictions']['actions'] = $actionRestrictions;
 			}
 		}
 		return $logParams;
 	}
 
 	/**
-	 * Log the block to Special:Log
+	 * Create the log entry object to be inserted. Do read queries here before
+	 * we start locking block_target rows.
 	 *
-	 * @param DatabaseBlock $block
 	 * @param bool $isReblock
+	 * @return ManualLogEntry
 	 */
-	private function log( DatabaseBlock $block, bool $isReblock ) {
+	private function prepareLogEntry( bool $isReblock ) {
 		$logType = $this->isHideUser ? 'suppress' : 'block';
 		$logAction = $isReblock ? 'reblock' : 'block';
+		$title = Title::makeTitle( NS_USER, $this->target );
+		// Preload the page_id: needed for log_page in ManualLogEntry::insert()
+		$title->getArticleID();
 
 		$logEntry = new ManualLogEntry( $logType, $logAction );
-		$logEntry->setTarget( Title::makeTitle( NS_USER, $this->target ) );
+		$logEntry->setTarget( $title );
 		$logEntry->setComment( $this->reason );
 		$logEntry->setPerformer( $this->performer->getUser() );
 		$logEntry->setParameters( $this->constructLogParams() );
-		// Relate log ID to block ID (T27763)
-		$logEntry->setRelations( [ 'ipb_id' => $block->getId() ] );
 		$logEntry->addTags( $this->tags );
 		if ( $this->logDeletionFlags !== null ) {
 			$logEntry->setDeleted( $this->logDeletionFlags );
 		}
+		return $logEntry;
+	}
+
+	/**
+	 * Log the block to Special:Log
+	 *
+	 * @param ManualLogEntry $logEntry
+	 */
+	private function log( ManualLogEntry $logEntry ) {
 		$logId = $logEntry->insert();
 		$logEntry->publish( $logId );
 	}

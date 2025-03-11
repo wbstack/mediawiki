@@ -1,21 +1,22 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\Hooks;
 
 use HtmlArmor;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Interwiki\InterwikiLookup;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\SpecialPage\SpecialPageFactory;
-use RequestContext;
-use Title;
-use TitleValue;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleValue;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\PropertyId;
-use Wikibase\DataModel\Entity\SerializableEntityId;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookup;
 use Wikibase\DataModel\Services\Lookup\LabelDescriptionLookupException;
 use Wikibase\DataModel\Services\Lookup\TermLookup;
@@ -37,7 +38,7 @@ use Wikibase\Repo\Hooks\Formatters\EntityLinkFormatterFactory;
  * their entity ID.
  *
  * Label lookups are relatively expensive if done repeatedly for individual labels. If possible,
- * labels should be pre-loaded and buffered for later use via the HtmlPageLinkRendererEnd hook.
+ * labels will be pre-loaded via the LabelPrefetchHookHandler and buffered for later use here.
  *
  * @see LabelPrefetchHookHandler
  *
@@ -46,70 +47,20 @@ use Wikibase\Repo\Hooks\Formatters\EntityLinkFormatterFactory;
  */
 class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook {
 
-	/**
-	 * @var EntityExistenceChecker
-	 */
-	private $entityExistenceChecker;
-
-	/**
-	 * @var EntityIdParser
-	 */
-	private $entityIdParser;
-
-	/**
-	 * @var TermLookup
-	 */
-	private $termLookup;
-
-	/**
-	 * @var EntityNamespaceLookup
-	 */
-	private $localEntityNamespaceLookup;
-
-	/**
-	 * @var InterwikiLookup
-	 */
-	private $interwikiLookup;
-
-	/**
-	 * @var EntityLinkFormatterFactory
-	 */
-	private $linkFormatterFactory;
-
-	/**
-	 * @var SpecialPageFactory
-	 */
-	private $specialPageFactory;
-
-	/**
-	 * @var LanguageFallbackChainFactory
-	 */
-	private $languageFallbackChainFactory;
-
-	/**
-	 * @var LabelDescriptionLookup|null
-	 */
-	private $labelDescriptionLookup;
-
-	/**
-	 * @var EntityUrlLookup
-	 */
-	private $entityUrlLookup;
-
-	/**
-	 * @var LinkTargetEntityIdLookup
-	 */
-	private $linkTargetEntityIdLookup;
-
-	/**
-	 * @var string|null
-	 */
-	private $federatedPropertiesSourceScriptUrl;
-
-	/**
-	 * @var bool
-	 */
-	private $federatedPropertiesEnabled;
+	private EntityExistenceChecker $entityExistenceChecker;
+	private EntityIdParser $entityIdParser;
+	private TermLookup $termLookup;
+	private EntityNamespaceLookup $localEntityNamespaceLookup;
+	private InterwikiLookup $interwikiLookup;
+	private EntityLinkFormatterFactory $linkFormatterFactory;
+	private SpecialPageFactory $specialPageFactory;
+	private LanguageFallbackChainFactory $languageFallbackChainFactory;
+	private ?LabelDescriptionLookup $labelDescriptionLookup = null;
+	private EntityUrlLookup $entityUrlLookup;
+	private LinkTargetEntityIdLookup $linkTargetEntityIdLookup;
+	private ?string $federatedPropertiesSourceScriptUrl;
+	private bool $federatedPropertiesEnabled;
+	private bool $isMobileSite;
 
 	public static function factory(
 		InterwikiLookup $interwikiLookup,
@@ -121,6 +72,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		LanguageFallbackChainFactory $languageFallbackChainFactory,
 		LinkTargetEntityIdLookup $linkTargetEntityIdLookup,
 		EntityNamespaceLookup $localEntityNamespaceLookup,
+		bool $isMobileSite,
 		SettingsArray $repoSettings,
 		TermLookup $termLookup
 	): self {
@@ -136,7 +88,8 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 			$entityUrlLookup,
 			$linkTargetEntityIdLookup,
 			$repoSettings->getSetting( 'federatedPropertiesSourceScriptUrl' ),
-			$repoSettings->getSetting( 'federatedPropertiesEnabled' )
+			$repoSettings->getSetting( 'federatedPropertiesEnabled' ),
+			$isMobileSite
 		);
 	}
 
@@ -191,7 +144,8 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		EntityUrlLookup $entityUrlLookup,
 		LinkTargetEntityIdLookup $linkTargetEntityIdLookup,
 		?string $federatedPropertiesSourceScriptUrl,
-		bool $federatedPropertiesEnabled
+		bool $federatedPropertiesEnabled,
+		bool $isMobileSite
 	) {
 		$this->entityExistenceChecker = $entityExistenceChecker;
 		$this->entityIdParser = $entityIdParser;
@@ -205,6 +159,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		$this->linkTargetEntityIdLookup = $linkTargetEntityIdLookup;
 		$this->federatedPropertiesSourceScriptUrl = $federatedPropertiesSourceScriptUrl;
 		$this->federatedPropertiesEnabled = $federatedPropertiesEnabled;
+		$this->isMobileSite = $isMobileSite;
 	}
 
 	/**
@@ -223,8 +178,8 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		&$text,
 		array &$customAttribs,
 		RequestContext $context,
-		&$html = null
-	) {
+		?string &$html = null
+	): bool {
 		$outTitle = $context->getOutput()->getTitle();
 
 		// For good measure: Don't do anything in case the OutputPage has no Title set.
@@ -234,14 +189,13 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 
 		// if custom link text is given, there is no point in overwriting it
 		// but not if it is similar to the plain title
-		if ( $text !== null && $target->getFullText() !== HtmlArmor::getHtml( $text ) ) {
+		if ( $text !== null
+				&& $target->getFullText() !== HtmlArmor::getHtml( $text )
+				&& $target->getText() !== HtmlArmor::getHtml( $text ) ) {
 			return true;
 		}
 
-		// Only continue on comment links or on special pages.
-		// Don't run this code when accessing it through the api (eg. for parsing) as the title is
-		// set to a special page dummy in api.php, see https://phabricator.wikimedia.org/T111346
-		if ( $this->isApiRequest() || !$this->shouldConvert( $outTitle, $linkRenderer ) ) {
+		if ( !$this->shouldConvertNoBadTitle( $outTitle, $linkRenderer ) ) {
 			return true;
 		}
 
@@ -266,7 +220,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		LinkTarget $linkTarget,
 		&$text,
 		array &$customAttribs
-		): void {
+	): void {
 		$entityId = $this->linkTargetEntityIdLookup->getEntityId( $linkTarget );
 		$text = $entityId->getSerialization();
 
@@ -299,8 +253,8 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		&$text,
 		array &$customAttribs,
 		RequestContext $context,
-		&$html = null
-	) {
+		?string &$html = null
+	): bool {
 		$foreignEntityId = $this->parseForeignEntityId( $target );
 		$isLocalEntityNamespace = $target->getInterwiki() === ''
 			&& $this->localEntityNamespaceLookup->isEntityNamespace( $target->getNamespace() );
@@ -311,7 +265,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		$entityId = $this->linkTargetEntityIdLookup->getEntityId( $target );
 		if ( !$entityId ) {
 			// Handle "fake" titles for new entities as generated by
-			// MediawikiEditFilterHookRunner::getContextForEditFilter().
+			// MediaWikiEditFilterHookRunner::getContextForEditFilter().
 			// For instance, a link to Property:NewProperty would be replaced by
 			// a link to Special:NewProperty. This is useful in logs, to indicate
 			// that the logged action occurred while creating an entity.
@@ -320,7 +274,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 				return true;
 			}
 			$targetText = $target->getText();
-			[ $name, ] = $this->specialPageFactory->resolveAlias( $targetText );
+			[ $name ] = $this->specialPageFactory->resolveAlias( $targetText );
 			if ( $name === null ) {
 				return true;
 			}
@@ -333,11 +287,11 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 			return false;
 		}
 
-		if ( $target->isRedirect() ) {
-			$customAttribs['href'] = wfAppendQuery( $this->entityUrlLookup->getLinkUrl( $entityId ), [ 'redirect' => 'no' ] );
-		} else {
-			$customAttribs['href'] = $this->entityUrlLookup->getLinkUrl( $entityId );
+		$linkUrl = $this->entityUrlLookup->getLinkUrl( $entityId );
+		if ( $target->isRedirect() && $linkUrl !== null ) {
+			$linkUrl = wfAppendQuery( $linkUrl, [ 'redirect' => 'no' ] );
 		}
+		$customAttribs['href'] = $linkUrl;
 
 		if ( !$this->entityExistenceChecker->exists( $entityId ) ) {
 			// The link points to a non-existing entity.
@@ -377,8 +331,8 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 
 		// add wikibase styles in all cases, so we can format the link properly:
 		$out = $context->getOutput();
-		$out->addModuleStyles( [ 'wikibase.common' ] );
-		if ( $this->federatedPropertiesEnabled && $entityId instanceof PropertyId ) {
+		$out->addModuleStyles( [ 'wikibase.alltargets' ] );
+		if ( !$this->isMobileSite && $this->federatedPropertiesEnabled && $entityId instanceof PropertyId ) {
 			$customAttribs[ 'class' ] = $customAttribs[ 'class' ] == '' ? 'fedprop' : $customAttribs[ 'class' ] . ' fedprop';
 			$out->addModules( 'wikibase.federatedPropertiesLeavingSiteNotice' );
 		}
@@ -387,9 +341,6 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 
 	/**
 	 * Remove the new class from a space separated list of classes.
-	 *
-	 * @param string $classes
-	 * @return string
 	 */
 	private function removeNewClass( string $classes ): string {
 		return implode( ' ', array_filter(
@@ -404,7 +355,7 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 	 * @param TermFallback|null $term
 	 * @return string[]|null
 	 */
-	private function termFallbackToTermData( TermFallback $term = null ) {
+	private function termFallbackToTermData( ?TermFallback $term ): ?array {
 		if ( $term ) {
 			return [
 				'value' => $term->getText(),
@@ -415,27 +366,18 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		return null;
 	}
 
-	/**
-	 * @param LinkTarget $target
-	 *
-	 * @return EntityId|null
-	 */
-	private function parseForeignEntityId( LinkTarget $target ) {
+	private function parseForeignEntityId( LinkTarget $target ): ?EntityId {
 		$interwiki = $target->getInterwiki();
 
 		if ( $interwiki === '' || !$this->interwikiLookup->isValidInterwiki( $interwiki ) ) {
 			return null;
 		}
 
-		$idPart = $this->extractForeignIdString( $target );
+		$foreignId = $this->extractForeignIdString( $target );
 
-		$idPrefix = '';
-
-		if ( $idPart !== null ) {
+		if ( $foreignId !== null ) {
 			try {
-				// FIXME: This assumes repository name is equal to interwiki. This assumption might
-				// become invalid
-				return $this->entityIdParser->parse( SerializableEntityId::joinSerialization( [ $idPrefix, '', $idPart ] ) );
+				return $this->entityIdParser->parse( $foreignId );
 			} catch ( EntityIdParsingException $ex ) {
 			}
 		}
@@ -478,31 +420,14 @@ class HtmlPageLinkRendererEndHookHandler implements HtmlPageLinkRendererEndHook 
 		return null;
 	}
 
-	/**
-	 * Whether this is an API request.
-	 *
-	 * @return bool
-	 */
-	private function isApiRequest(): bool {
-		return defined( 'MW_API' )
-			&& MW_API !== 'TEST'; // T269608
-	}
-
-	/**
-	 * Whether we should try to convert links on this page.
-	 *
-	 * @param Title|null $currentTitle
-	 * @param LinkRenderer $linkRenderer
-	 *
-	 * @return bool
-	 * @suppress PhanTypeMismatchDeclaredParam
-	 */
-	private function shouldConvert( Title $currentTitle, LinkRenderer $linkRenderer ) {
+	private function shouldConvertNoBadTitle( Title $currentTitle, LinkRenderer $linkRenderer ): bool {
 		return $linkRenderer->isForComment() ||
 			// Note: this may not work right with special page transclusion. If $out->getTitle()
 			// doesn't return the transcluded special page's title, the transcluded text will
 			// not have entity IDs resolved to labels.
-			$currentTitle->isSpecialPage();
+			// Also Note: Badtitle is excluded because it is used in rendering actual page content
+			// that is added to the ParserCache. See T327062#8796532 and https://www.mediawiki.org/wiki/API:Stashedit
+			( $currentTitle->isSpecialPage() && !$currentTitle->isSpecial( 'Badtitle' ) );
 	}
 
 	private function getLabelDescriptionLookup( RequestContext $context ): LabelDescriptionLookup {

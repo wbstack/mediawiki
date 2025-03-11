@@ -15,6 +15,8 @@
  * @license GPL-2.0-or-later
  */
 
+use MediaWiki\Context\RequestContext;
+
 require_once __DIR__ . '/Wikibase.example.php';
 
 // Wikibase Cirrus search should not be used in browser tests
@@ -32,11 +34,9 @@ $wgWBRepoSettings['dataBridgeEnabled'] = true;
 // enable tainted-refs
 $wgWBRepoSettings['taintedReferencesEnabled'] = true;
 
-// enable Wikibase REST API
+// enable Wikibase REST API (both the production-ready and work-in-progress routes)
 $wgRestAPIAdditionalRouteFiles[] = 'extensions/Wikibase/repo/rest-api/routes.json';
-
-// enable data value normalization
-$wgWBRepoSettings['tmpNormalizeDataValues'] = true;
+$wgRestAPIAdditionalRouteFiles[] = 'extensions/Wikibase/repo/rest-api/routes.dev.json';
 
 // enable Federated Properties. With only local (= db) Entity Sources, this should have no effect.
 $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
@@ -44,23 +44,10 @@ $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
 $wgWBRepoSettings['federatedPropertiesSourceScriptUrl'] = 'https://wikidata.beta.wmflabs.org/w/';
 
 // make sitelinks to the current wiki work
-$wgWBRepoSettings['siteLinkGroups'] = [ 'CI' ];
+$wgWBRepoSettings['siteLinkGroups'][] = 'CI';
 
-$originalBadgeItems = $wgWBRepoSettings['badgeItems'] ?? [];
-$originalRedirectBadgeItems = $wgWBRepoSettings['redirectBadgeItems'] ?? [];
-$wgWBRepoSettings['badgeItems'] = static function () use ( $originalBadgeItems ) {
-	global $wgRequest;
-
-	$badges = $wgRequest->getHeader( 'X-Wikibase-CI-Badges', WebRequest::GETHEADER_LIST ) ?: [];
-	return $originalBadgeItems + array_fill_keys( $badges, 'CI-badge-class' );
-};
-$wgWBRepoSettings['redirectBadgeItems'] = static function () use ( $originalRedirectBadgeItems ) {
-	global $wgRequest;
-
-	return array_merge(
-		$originalRedirectBadgeItems,
-		$wgRequest->getHeader( 'X-Wikibase-CI-Redirect-Badges', WebRequest::GETHEADER_LIST ) ?: []
-	);
-};
-unset( $originalBadgeItems );
-unset( $originalRedirectBadgeItems );
+// This is a dangerous hack that should never ever be done on any production wiki. It enables e2e tests for config-dependent behavior.
+$configOverrides = json_decode( RequestContext::getMain()->getRequest()->getHeader( 'X-Config-Override' ) ?: '{}', true );
+foreach ( $configOverrides as $name => $value ) {
+	$GLOBALS[$name] = is_array( $value ) ? array_merge( $GLOBALS[$name] ?? [], $value ) : $value;
+}

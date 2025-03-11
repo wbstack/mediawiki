@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface DataTransferHandlerFactory tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.ui.DataTransferHandlerFactory' );
@@ -25,13 +25,15 @@ ve.test.utils.makeStubTransferItem = function ( type, kind, extension ) {
 	return {
 		type: type,
 		kind: kind,
-		getExtension: function () { return extension; }
+		getExtension: function () {
+			return extension;
+		}
 	};
 };
 
 /* Tests */
-QUnit.test( 'getHandlerNameForItem', function ( assert ) {
-	var makeStubTransferHandler = ve.test.utils.makeStubTransferHandler,
+QUnit.test( 'getHandlerNameForItem', ( assert ) => {
+	const makeStubTransferHandler = ve.test.utils.makeStubTransferHandler,
 		makeStubTransferItem = ve.test.utils.makeStubTransferItem,
 		factory = new ve.ui.DataTransferHandlerFactory(),
 		stubItemTypeHtml = makeStubTransferItem( 'text/html' ),
@@ -40,13 +42,13 @@ QUnit.test( 'getHandlerNameForItem', function ( assert ) {
 		stubItemExtHtml = makeStubTransferItem( null, null, 'html' ),
 		stubItemProto = makeStubTransferItem( '__proto__', '__proto__', '__proto__' );
 
-	var StubHandlerFileHtml1 = makeStubTransferHandler( 'filehtml1', true, [ 'text/html' ], [ 'file' ], [ 'html' ] );
-	var StubHandlerFileHtml2 = makeStubTransferHandler( 'filehtml2', false, [ 'text/html' ], [ 'file' ], [ 'html' ] );
-	var StubHandlerStringHtml = makeStubTransferHandler( 'stringhtml', false, [ 'text/html' ], [ 'string' ] );
-	var StubHandlerHtml1 = makeStubTransferHandler( 'html1', true, [ 'text/html' ] );
-	var StubHandlerHtml2 = makeStubTransferHandler( 'html2', false, [ 'text/html' ] );
+	const StubHandlerFileHtml1 = makeStubTransferHandler( 'filehtml1', true, [ 'text/html' ], [ 'file' ], [ 'html' ] );
+	const StubHandlerFileHtml2 = makeStubTransferHandler( 'filehtml2', false, [ 'text/html' ], [ 'file' ], [ 'html' ] );
+	const StubHandlerStringHtml = makeStubTransferHandler( 'stringhtml', false, [ 'text/html' ], [ 'string' ] );
+	const StubHandlerHtml1 = makeStubTransferHandler( 'html1', true, [ 'text/html' ] );
+	const StubHandlerHtml2 = makeStubTransferHandler( 'html2', false, [ 'text/html' ] );
 	// The `html3` handler should never show up
-	var StubHandlerHtml3 = makeStubTransferHandler( 'html3', true, [ 'text/html' ] );
+	const StubHandlerHtml3 = makeStubTransferHandler( 'html3', true, [ 'text/html' ] );
 	StubHandlerHtml3.static.matchFunction = function () {
 		return false;
 	};

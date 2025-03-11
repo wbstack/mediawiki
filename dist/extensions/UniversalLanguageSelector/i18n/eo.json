@@ -1,14 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
+			"Blahma",
 			"Gamliel Fishkin",
 			"KuboF",
 			"Macofe",
 			"Mirin",
 			"NMaia",
 			"Robin van der Vliet",
-			"Blahma",
 			"Ziko"
 		]
 	},
@@ -79,5 +78,6 @@
 	"ext-uls-empty-state-header": "Ankoraŭ neniuj lingvoj",
 	"ext-uls-empty-state-desc": "Neniuj lingvoj estas haveblaj nuntempe",
 	"ext-uls-empty-state-header-actions-available": "Ankoraŭ neniuj lingvoj. Ĉu aldoni novan?",
-	"ext-uls-empty-state-desc-actions-available": "Disponigu la enhavon en pli da lingvoj."
+	"ext-uls-empty-state-desc-actions-available": "Disponigu la enhavon en pli da lingvoj.",
+	"ext-uls-add-languages-button-label": "Aldoni lingvojn"
 }

@@ -1,8 +1,6 @@
 <?php
 /** Franco-Provençal (arpetan)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -111,6 +109,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'Redirèccion_a_l\'hasârd', 'RedirèccionALHasârd' ],
 	'Recentchanges'             => [ 'Dèrriérs_changements', 'DèrriérsChangements' ],
 	'Recentchangeslinked'       => [ 'Survelyence_des_lims', 'SurvelyenceDesLims' ],
+	'Renameuser'                => [ 'Renomar_l\'usanciér', 'RenomarLUsanciér' ],
 	'Revisiondelete'            => [ 'Vèrsions_suprimâs', 'VèrsionsSuprimâs' ],
 	'Search'                    => [ 'Rechèrchiér', 'Rechèrche' ],
 	'Shortpages'                => [ 'Pâges_côrtes', 'PâgesCôrtes' ],
@@ -199,7 +198,7 @@ $magicWords = [
 	'img_upright'               => [ '1', 'drêt', 'drêt=$1', 'drêt $1', 'redresse', 'redresse=$1', 'redresse $1', 'redresse_$1', 'upright', 'upright=$1', 'upright $1' ],
 	'index'                     => [ '1', '__ENDÈXE__', '__INDEX__' ],
 	'int'                       => [ '0', 'ENT:', 'INT:' ],
-	'language'                  => [ '0', '#LENGOUA:', '#LANGUE:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#LENGOUA', '#LANGUE', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'PETIÔTA_LÈTRA:', 'MINUS:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'PREMIÉRE_PETIÔTA_LÈTRA:', 'INITMINUS:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'JORN_LOCAL', 'JOURLOCAL', 'JOUR1LOCAL', 'LOCALDAY' ],

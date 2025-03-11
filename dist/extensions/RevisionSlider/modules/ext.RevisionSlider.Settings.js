@@ -7,7 +7,7 @@ function Settings() {
 	this.autoExpand = this.loadBoolean( 'autoexpand' );
 }
 
-$.extend( Settings.prototype, {
+Object.assign( Settings.prototype, {
 	/**
 	 * @type {boolean}
 	 */
@@ -53,25 +53,25 @@ $.extend( Settings.prototype, {
 	},
 
 	/**
+	 * @private
 	 * @param {string} name
 	 * @param {string} defaultValue
 	 * @return {string|boolean}
 	 */
 	loadSetting: function ( name, defaultValue ) {
-		var setting;
-		if ( !mw.user.isAnon() ) {
+		let setting;
+		if ( mw.user.isNamed() ) {
 			setting = mw.user.options.get( 'userjs-revslider-' + name );
 		} else {
-			setting = mw.storage.get( 'mw-revslider-' + name );
-			if ( !setting ) {
-				setting = mw.cookie.get( '-revslider-' + name );
-			}
+			setting = mw.storage.get( 'mw-revslider-' + name ) ||
+				mw.cookie.get( '-revslider-' + name );
 		}
 
 		return setting !== null && setting !== false ? setting : defaultValue;
 	},
 
 	/**
+	 * @private
 	 * @param {string} name
 	 * @param {boolean} [defaultValue]
 	 * @return {boolean}
@@ -81,11 +81,12 @@ $.extend( Settings.prototype, {
 	},
 
 	/**
+	 * @private
 	 * @param {string} name
 	 * @param {string} value
 	 */
 	saveSetting: function ( name, value ) {
-		if ( !mw.user.isAnon() ) {
+		if ( mw.user.isNamed() ) {
 			( new mw.Api() ).saveOption( 'userjs-revslider-' + name, value );
 		} else {
 			if ( !mw.storage.set( 'mw-revslider-' + name, value ) ) {
@@ -95,6 +96,7 @@ $.extend( Settings.prototype, {
 	},
 
 	/**
+	 * @private
 	 * @param {string} name
 	 * @param {boolean} value
 	 */

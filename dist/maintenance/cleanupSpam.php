@@ -21,12 +21,18 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\ExternalLinks\LinkFilter;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\StubObject\StubGlobalUser;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use Wikimedia\Rdbms\Database;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to cleanup all spam from a given hostname.
@@ -55,7 +61,7 @@ class CleanupSpam extends Maintenance {
 			$this->fatalError( "Invalid username specified in 'spambot_username' message: $username" );
 		}
 		// Hack: Grant bot rights so we don't flood RecentChanges
-		MediaWikiServices::getInstance()->getUserGroupManager()->addUserToGroup( $user, 'bot' );
+		$this->getServiceContainer()->getUserGroupManager()->addUserToGroup( $user, 'bot' );
 		StubGlobalUser::setUser( $user );
 
 		$spec = $this->getArg( 0 );
@@ -90,6 +96,7 @@ class CleanupSpam extends Maintenance {
 							"$IP/maintenance/cleanupSpam.php",
 							[ '--wiki', $wikiId, $spec ]
 						);
+						// phpcs:ignore MediaWiki.Usage.ForbiddenFunctions.passthru
 						passthru( "$cmd | sed 's/^/$wikiId:  /'" );
 					}
 				}
@@ -104,7 +111,7 @@ class CleanupSpam extends Maintenance {
 
 			$count = 0;
 			/** @var Database $dbr */
-			$dbr = $this->getDB( DB_REPLICA );
+			$dbr = $this->getReplicaDB();
 			foreach ( $protConds as $prot => $conds ) {
 				$res = $dbr->newSelectQueryBuilder()
 					->select( 'el_from' )
@@ -113,8 +120,8 @@ class CleanupSpam extends Maintenance {
 					->where( $conds )
 					->caller( __METHOD__ )
 					->fetchResultSet();
-				$count = $res->numRows();
-				$this->output( "Found $count articles containing $spec\n" );
+				$count += $res->numRows();
+				$this->output( "Found $count articles containing $spec so far...\n" );
 				foreach ( $res as $row ) {
 					$this->cleanupArticle(
 						$row->el_from,
@@ -135,7 +142,6 @@ class CleanupSpam extends Maintenance {
 	 * @param string $domain
 	 * @param string $protocol
 	 * @param Authority $performer
-	 * @throws MWException
 	 */
 	private function cleanupArticle( $id, $domain, $protocol, Authority $performer ) {
 		$title = Title::newFromID( $id );
@@ -147,7 +153,7 @@ class CleanupSpam extends Maintenance {
 
 		$this->output( $title->getPrefixedDBkey() . " ..." );
 
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		$revLookup = $services->getRevisionLookup();
 		$rev = $revLookup->getRevisionByTitle( $title );
 		$currentRevId = $rev->getId();
@@ -168,7 +174,7 @@ class CleanupSpam extends Maintenance {
 			// This happens e.g. when a link comes from a template rather than the page itself
 			$this->output( "False match\n" );
 		} else {
-			$dbw = $this->getDB( DB_PRIMARY );
+			$dbw = $this->getPrimaryDB();
 			$this->beginTransaction( $dbw, __METHOD__ );
 			$page = $services->getWikiPageFactory()->newFromTitle( $title );
 			if ( $rev ) {
@@ -187,10 +193,8 @@ class CleanupSpam extends Maintenance {
 			} elseif ( $this->hasOption( 'delete' ) ) {
 				// Didn't find a non-spammy revision, blank the page
 				$this->output( "deleting\n" );
-				$page->doDeleteArticleReal(
-					wfMessage( 'spam_deleting', $domain )->inContentLanguage()->text(),
-					$performer->getUser()
-				);
+				$deletePage = $services->getDeletePageFactory()->newDeletePage( $page, $performer );
+				$deletePage->deleteUnsafe( wfMessage( 'spam_deleting', $domain )->inContentLanguage()->text() );
 			} else {
 				// Didn't find a non-spammy revision, blank the page
 				$handler = $services->getContentHandlerFactory()
@@ -210,5 +214,7 @@ class CleanupSpam extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = CleanupSpam::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

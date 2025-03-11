@@ -2,16 +2,16 @@
 
 namespace MediaWiki\Extension\OAuth\Frontend;
 
-use EchoAttributeManager;
-use EchoEventPresentationModel;
+use MediaWiki\Extension\Notifications\AttributeManager;
+use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\Utils;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\User\User;
 use MWException;
-use SpecialPage;
-use User;
 
 class EchoOAuthStageChangePresentationModel extends EchoEventPresentationModel {
-	/** @var User[] OAuth admins who should be notified about additiions to the review queue */
+	/** @var User[] OAuth admins who should be notified about additions to the review queue */
 	protected static $oauthAdmins;
 
 	/** @var Consumer|false */
@@ -35,11 +35,22 @@ class EchoOAuthStageChangePresentationModel extends EchoEventPresentationModel {
 		}
 
 		return [
-			EchoAttributeManager::ATTR_LOCATORS => [ Utils::class . '::locateUsersToNotify' ],
+			AttributeManager::ATTR_LOCATORS => [
+				[ [ Utils::class, 'locateUsersToNotify' ] ]
+			],
 			'category' => $category,
 			'presentation-model' => self::class,
 			'icon' => 'oauth',
 		];
+	}
+
+	/**
+	 * Hide notifications that were already handled by another OAuth admin
+	 * @inheritDoc
+	 */
+	public function canRender() {
+		$action = $this->event->getExtraParam( 'action' );
+		return !( $action === 'propose' && $this->getConsumerStage() !== Consumer::STAGE_PROPOSED );
 	}
 
 	public function getHeaderMessage() {
@@ -117,5 +128,13 @@ class EchoOAuthStageChangePresentationModel extends EchoEventPresentationModel {
 	protected function getConsumerName() {
 		$consumer = $this->getConsumer();
 		return $consumer ? $consumer->getName() : false;
+	}
+
+	/**
+	 * @return int The stage, or -1 if the consumer doesn't exist
+	 */
+	protected function getConsumerStage() {
+		$consumer = $this->getConsumer();
+		return $consumer ? $consumer->getStage() : -1;
 	}
 }

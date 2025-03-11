@@ -4,8 +4,8 @@
 			"Cedric31",
 			"Fitoschido",
 			"Guilhelma",
-			"Quentí",
-			"Lhanars"
+			"Lhanars",
+			"Quentí"
 		]
 	},
 	"mobile-frontend-editor-edit": "Modificar",
@@ -26,5 +26,5 @@
 	"mobile-frontend-placeholder": "Recercar sus {{SITENAME}}",
 	"mobile-frontend-random-button": "A l'azard",
 	"mobile-frontend-user-newmessages": "Avètz de messatges novèls sus vòstra pagina de discussion",
-	"minerva-page-actions-protect": "Protegir"
+	"minerva-page-actions-editfull": "Modificar tota la pagina"
 }

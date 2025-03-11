@@ -45,7 +45,7 @@ class LCStoreStaticArray implements LCStore {
 
 	public function startWrite( $code ) {
 		if ( !is_dir( $this->directory ) && !wfMkdirParents( $this->directory, null, __METHOD__ ) ) {
-			throw new MWException( "Unable to create the localisation store " .
+			throw new RuntimeException( "Unable to create the localisation store " .
 				"directory \"{$this->directory}\"" );
 		}
 
@@ -68,7 +68,7 @@ class LCStoreStaticArray implements LCStore {
 	 * @return bool
 	 */
 	private static function isValueArray( array $arr ) {
-		foreach ( $arr as $key => $value ) {
+		foreach ( $arr as $value ) {
 			if ( is_scalar( $value )
 				|| $value === null
 				|| ( is_array( $value ) && self::isValueArray( $value ) )
@@ -108,7 +108,7 @@ class LCStoreStaticArray implements LCStore {
 	}
 
 	/**
-	 * Decode something that was encoded with encode
+	 * Decode something that was encoded with 'encode'
 	 *
 	 * @param mixed $encoded
 	 * @return array|mixed
@@ -120,7 +120,7 @@ class LCStoreStaticArray implements LCStore {
 			return $encoded;
 		}
 
-		list( $type, $data ) = $encoded;
+		[ $type, $data ] = $encoded;
 
 		switch ( $type ) {
 			case 'v':

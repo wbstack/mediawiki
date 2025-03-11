@@ -19,6 +19,7 @@
 	"jsonconfig-edit-action-cancel": "Annuleren",
 	"jsonconfig-edit-button-label": "Als tabel bewerken",
 	"jsonconfig-edit-dialog-error": "Kan niet als tabel bewerken: $1",
+	"jsonconfig-edit-dialog-error-data-invalid": "Gegevens komen niet overeen met het schema",
 	"jsonconfig-edit-dialog-error-data-missing": "De JSON-eigenschap <code>data</code> ontbreekt of is geen array",
 	"jsonconfig-edit-dialog-error-data-too-large": "De gegevensreeks is te groot om als tabel te bewerken",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Elk veld moet een naam hebben",
@@ -54,6 +55,8 @@
 	"jsonconfig-type-name-localized": "gelocaliseerd",
 	"jsonconfig-type-name-number": "getal",
 	"jsonconfig-type-name-boolean": "Boolean",
+	"jsonconfig-use-category": "Pagina's die de uitbreiding JsonConfig gebruiken",
+	"jsonconfig-use-category-desc": "Deze pagina’s gebruiken de methode <code>mw.ext.data.get</code> die wordt geleverd door de uitbreiding [[:mw:Extension:JsonConfig|JsonConfig]]. De methode <code>mw.ext.data.get</code> wordt als systeembelastend beschouwd.",
 	"jsonconfig-license": "Gegevens beschikbaar onder $1.",
 	"jsonconfig-license-not-set": "Wanneer u deze pagina bewerkt, gaat u ermee akkoord uw bijdrage vrij te geven volgens de licentie die is opgegeven in het veld <code>licence</code>.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
@@ -61,7 +64,11 @@
 	"jsonconfig-license-name-dl-de-by-1.0": "Gegevenslicentie Duitsland – Naamsvermelding – Versie 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Gegevenslicentie Duitsland – Naamsvermelding – Versie 2.0",
 	"jsonconfig-license-name-GeoNutzV": "Geo-gegevenslicentie Duitsland",
+	"jsonconfig-license-copyrightwarning": "Door wijzigingen te publiceren gaat u ermee akkoord uw bijdrage vrij te geven volgens de voorwaarden van de licentie [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Door wijzigingen te publiceren gaat u ermee akkoord uw bijdrage vrij te geven volgens de licentie die is opgegeven in het veld <code>licence</code>.",
+	"jsonconfig-license-notice": "'''Let op:''' Wanneer u deze pagina bewerkt, gaat u ermee akkoord uw bijdrage vrij te geven volgens de voorwaarden van de licentie [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Let op:''' Wanneer u deze pagina bewerkt, gaat u ermee akkoord uw bijdrage vrij te geven volgens de licentie die is opgegeven in het veld <code>licence</code>.",
 	"right-jsonconfig-flush": "Manipuleer JsonConfig via API",
-	"action-jsonconfig-flush": "JsonConfig via API te manipuleren"
+	"action-jsonconfig-flush": "JsonConfig via API te manipuleren",
+	"jsonconfig-blocked-page-creation": "De paginatitel die u heeft opgegeven komt met geen van de patronen overeen die zijn ingesteld voor de uitbreiding JSONConfig voor deze wiki."
 }

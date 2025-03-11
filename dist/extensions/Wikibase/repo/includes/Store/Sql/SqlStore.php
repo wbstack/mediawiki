@@ -2,10 +2,9 @@
 
 namespace Wikibase\Repo\Store\Sql;
 
-use HashBagOStuff;
-use Hooks;
+use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\MediaWikiServices;
-use ObjectCache;
+use ObjectCacheFactory;
 use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataAccess\WikibaseServices;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -20,7 +19,6 @@ use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\CacheAwarePropertyInfoStore;
 use Wikibase\Lib\Store\CacheRetrievingEntityRevisionLookup;
 use Wikibase\Lib\Store\CachingEntityRevisionLookup;
-use Wikibase\Lib\Store\CachingPropertyInfoLookup;
 use Wikibase\Lib\Store\EntityByLinkedTitleLookup;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
@@ -46,6 +44,8 @@ use Wikibase\Repo\Store\IdGenerator;
 use Wikibase\Repo\Store\ItemsWithoutSitelinksFinder;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\WikibaseRepo;
+use Wikimedia\ObjectCache\EmptyBagOStuff;
+use Wikimedia\ObjectCache\HashBagOStuff;
 
 /**
  * Implementation of the store interface using an SQL backend via MediaWiki's
@@ -97,9 +97,9 @@ class SqlStore implements Store {
 	private $entityStoreWatcher = null;
 
 	/**
-	 * @var PropertyInfoLookup|null
+	 * @var PropertyInfoLookup
 	 */
-	private $propertyInfoLookup = null;
+	private PropertyInfoLookup $propertyInfoLookup;
 
 	/**
 	 * @var PropertyInfoStore|null
@@ -137,6 +137,11 @@ class SqlStore implements Store {
 	private $wikibaseServices;
 
 	/**
+	 * @var HookContainer
+	 */
+	private $hookContainer;
+
+	/**
 	 * @var string
 	 */
 	private $cacheKeyPrefix;
@@ -165,6 +170,11 @@ class SqlStore implements Store {
 	private $entitySource;
 
 	/**
+	 * @var ObjectCacheFactory
+	 */
+	private $objectCacheFactory;
+
+	/**
 	 * @param EntityChangeFactory $entityChangeFactory
 	 * @param EntityIdParser $entityIdParser
 	 * @param EntityIdComposer $entityIdComposer
@@ -173,6 +183,7 @@ class SqlStore implements Store {
 	 * @param EntityNamespaceLookup $entityNamespaceLookup
 	 * @param IdGenerator $idGenerator
 	 * @param WikibaseServices $wikibaseServices Service container providing data access services
+	 * @param HookContainer $hookContainer Service container providing data access services
 	 * @param DatabaseEntitySource $entitySource
 	 * @param SettingsArray $settings
 	 */
@@ -185,8 +196,11 @@ class SqlStore implements Store {
 		EntityNamespaceLookup $entityNamespaceLookup,
 		IdGenerator $idGenerator,
 		WikibaseServices $wikibaseServices,
+		HookContainer $hookContainer,
 		DatabaseEntitySource $entitySource,
-		SettingsArray $settings
+		SettingsArray $settings,
+		PropertyInfoLookup $propertyInfoLookup,
+		ObjectCacheFactory $objectCacheFactory
 	) {
 		$this->entityChangeFactory = $entityChangeFactory;
 		$this->entityIdParser = $entityIdParser;
@@ -196,12 +210,15 @@ class SqlStore implements Store {
 		$this->entityNamespaceLookup = $entityNamespaceLookup;
 		$this->idGenerator = $idGenerator;
 		$this->wikibaseServices = $wikibaseServices;
+		$this->hookContainer = $hookContainer;
 		$this->entitySource = $entitySource;
+		$this->objectCacheFactory = $objectCacheFactory;
 
 		$this->cacheKeyPrefix = $settings->getSetting( 'sharedCacheKeyPrefix' );
 		$this->cacheKeyGroup = $settings->getSetting( 'sharedCacheKeyGroup' );
 		$this->cacheType = $settings->getSetting( 'sharedCacheType' );
 		$this->cacheDuration = $settings->getSetting( 'sharedCacheDuration' );
+		$this->propertyInfoLookup = $propertyInfoLookup;
 	}
 
 	/**
@@ -225,7 +242,7 @@ class SqlStore implements Store {
 	public function getEntityByLinkedTitleLookup() {
 		$lookup = $this->newSiteLinkStore();
 
-		Hooks::run( 'GetEntityByLinkedTitleLookup', [ &$lookup ] );
+		$this->hookContainer->run( 'GetEntityByLinkedTitleLookup', [ &$lookup ] );
 
 		return $lookup;
 	}
@@ -316,6 +333,7 @@ class SqlStore implements Store {
 			$this->entityIdComposer,
 			$services->getRevisionStore(),
 			$this->entitySource,
+			$services->getActorNormalization(),
 			$services->getPermissionManager(),
 			$services->getWatchlistManager(),
 			$services->getWikiPageFactory(),
@@ -391,7 +409,7 @@ class SqlStore implements Store {
 		// Lower caching layer using persistent cache (e.g. memcached).
 		$persistentCachingLookup = new CachingEntityRevisionLookup(
 			new EntityRevisionCache(
-				ObjectCache::getInstance( CACHE_NONE ),
+				new EmptyBagOStuff(),
 				$this->cacheDuration,
 				$this->getEntityRevisionLookupCacheKey()
 			),
@@ -420,7 +438,7 @@ class SqlStore implements Store {
 		if ( !$this->cacheRetrievingEntityRevisionLookup ) {
 			$cacheRetrievingEntityRevisionLookup = new CacheRetrievingEntityRevisionLookup(
 				new EntityRevisionCache(
-					ObjectCache::getInstance( $this->cacheType ),
+					$this->objectCacheFactory->getInstance( $this->cacheType ),
 					$this->cacheDuration,
 					$this->getEntityRevisionLookupCacheKey()
 				),
@@ -436,35 +454,12 @@ class SqlStore implements Store {
 	}
 
 	/**
-	 * @see Store::getPropertyInfoLookup
+	 * @deprecated use WikibaseRepo::getPropertyInfoLookup instead
 	 *
 	 * @return PropertyInfoLookup
 	 */
-	public function getPropertyInfoLookup() {
-		if ( !$this->propertyInfoLookup ) {
-			$this->propertyInfoLookup = $this->newPropertyInfoLookup();
-		}
-
+	public function getPropertyInfoLookup(): PropertyInfoLookup {
 		return $this->propertyInfoLookup;
-	}
-
-	/**
-	 * @return PropertyInfoLookup
-	 */
-	private function newPropertyInfoLookup() {
-		$wanCachedPropertyInfoLookup = new CachingPropertyInfoLookup(
-			$this->wikibaseServices->getPropertyInfoLookup(),
-			MediaWikiServices::getInstance()->getMainWANObjectCache(),
-			$this->cacheKeyGroup,
-			$this->cacheDuration
-		);
-
-		return new CachingPropertyInfoLookup(
-			$wanCachedPropertyInfoLookup,
-			MediaWikiServices::getInstance()->getLocalServerObjectCache(),
-			$this->cacheKeyGroup,
-			$this->cacheDuration
-		);
 	}
 
 	/**
@@ -490,14 +485,18 @@ class SqlStore implements Store {
 	private function newPropertyInfoStore() {
 		// TODO: this should be changed so it uses the same PropertyInfoTable instance which is used by the
 		// lookup configured for local entity source As we don't want to introduce DispatchingPropertyInfoStore service.
-
 		$table = $this->getPropertyInfoTable();
 
-		// TODO: we might want to register the CacheAwarePropertyInfoLookup instance created by
-		// newPropertyInfoLookup as a watcher to this CacheAwarePropertyInfoStore instance.
+		// TODO: we might want to register the CachingPropertyInfoLookup instance defined in
+		// WikibaseRepo.PropertyInfoLookup as a watcher to this CacheAwarePropertyInfoStore instance.
 		return new CacheAwarePropertyInfoStore(
-			$table,
-			MediaWikiServices::getInstance()->getMainWANObjectCache(),
+			new CacheAwarePropertyInfoStore(
+				$table,
+				MediaWikiServices::getInstance()->getMainWANObjectCache(),
+				$this->cacheDuration,
+				$this->cacheKeyGroup
+			),
+			MediaWikiServices::getInstance()->getLocalServerObjectCache(),
 			$this->cacheDuration,
 			$this->cacheKeyGroup
 		);

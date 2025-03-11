@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface MWTemplatePlaceholderPage class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -17,7 +17,7 @@
  * @param {ve.dm.MWTemplatePlaceholderModel} placeholder Template placeholder
  * @param {string} name Unique symbolic name of page
  * @param {Object} [config] Configuration options
- * @cfg {jQuery} [$overlay] Overlay to render dropdowns in
+ * @param {jQuery} [config.$overlay] Overlay to render dropdowns in
  */
 ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeholder, name, config ) {
 	// Configuration initialization
@@ -45,8 +45,6 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 		choose: 'onAddTemplate'
 	} );
 
-	this.addTemplateInput.$input.attr( 'aria-label', ve.msg( 'visualeditor-dialog-transclusion-add-template' ) );
-
 	this.addTemplateButton = new OO.ui.ButtonWidget( {
 		label: ve.msg( 'visualeditor-dialog-transclusion-add-template-save' ),
 		flags: [ 'progressive' ],
@@ -55,34 +53,29 @@ ve.ui.MWTemplatePlaceholderPage = function VeUiMWTemplatePlaceholderPage( placeh
 	} )
 		.connect( this, { click: 'onAddTemplate' } );
 
-	var addTemplateActionFieldLayout = new OO.ui.ActionFieldLayout(
+	const addTemplateActionFieldLayout = new OO.ui.ActionFieldLayout(
 		this.addTemplateInput,
 		this.addTemplateButton,
-		{ align: 'top' }
+		{
+			label: ve.msg( 'visualeditor-dialog-transclusion-template-search-help' ),
+			align: 'top'
+		}
 	);
 
-	var addTemplateFieldsetConfig = {
-		label: ve.msg( 'visualeditor-dialog-transclusion-placeholder' ),
+	const dialogTitle = this.placeholder.getTransclusion().isSingleTemplate() ?
+		'visualeditor-dialog-transclusion-template-search' :
+		'visualeditor-dialog-transclusion-add-template';
+
+	const addTemplateFieldsetConfig = {
+		// The following messages are used here:
+		// * visualeditor-dialog-transclusion-template-search
+		// * visualeditor-dialog-transclusion-add-template
+		label: ve.msg( dialogTitle ),
 		icon: 'puzzle',
 		classes: [ 've-ui-mwTransclusionDialog-addTemplateFieldset' ],
 		items: [ addTemplateActionFieldLayout ]
 	};
 
-	var dialogTitle = this.placeholder.getTransclusion().isSingleTemplate() ?
-		'visualeditor-dialog-transclusion-template-search' :
-		'visualeditor-dialog-transclusion-add-template';
-
-	// TODO: Remove `mw.storage.remove` after a few months, let's say December 2022.
-	mw.storage.remove( 'mwe-visualeditor-hide-visualeditor-dialog-transclusion-feedback-message' );
-
-	addTemplateFieldsetConfig = ve.extendObject( addTemplateFieldsetConfig, {
-		// The following messages are used here:
-		// * visualeditor-dialog-transclusion-template-search
-		// * visualeditor-dialog-transclusion-add-template
-		label: ve.msg( dialogTitle ),
-		help: ve.msg( 'visualeditor-dialog-transclusion-template-search-help' ),
-		helpInline: true
-	} );
 	this.addTemplateFieldset = new OO.ui.FieldsetLayout( addTemplateFieldsetConfig );
 
 	// Initialization
@@ -113,13 +106,13 @@ ve.ui.MWTemplatePlaceholderPage.prototype.focus = function () {
  * @private
  */
 ve.ui.MWTemplatePlaceholderPage.prototype.onAddTemplate = function () {
-	var transclusion = this.placeholder.getTransclusion(),
+	const transclusion = this.placeholder.getTransclusion(),
 		menu = this.addTemplateInput.getLookupMenu();
 
 	if ( menu.isVisible() ) {
 		menu.chooseItem( menu.findSelectedItem() );
 	}
-	var name = this.addTemplateInput.getMWTitle();
+	const name = this.addTemplateInput.getMWTitle();
 	if ( !name ) {
 		// Invalid titles return null, so abort here.
 		return;
@@ -127,19 +120,19 @@ ve.ui.MWTemplatePlaceholderPage.prototype.onAddTemplate = function () {
 
 	// TODO tracking will only be implemented temporarily to answer questions on
 	// template usage for the Technical Wishes topic area see T258917
-	var event = {
+	const event = {
 		action: 'add-template',
 		// eslint-disable-next-line camelcase
 		template_names: [ name.getPrefixedText() ]
 	};
-	var editCountBucket = mw.config.get( 'wgUserEditCountBucket' );
+	const editCountBucket = mw.config.get( 'wgUserEditCountBucket' );
 	if ( editCountBucket !== null ) {
 		// eslint-disable-next-line camelcase
 		event.user_edit_count_bucket = editCountBucket;
 	}
 	mw.track( 'event.VisualEditorTemplateDialogUse', event );
 
-	var part = ve.dm.MWTemplateModel.newFromName( transclusion, name );
+	const part = ve.dm.MWTemplateModel.newFromName( transclusion, name );
 	transclusion.replacePart( this.placeholder, part ).then(
 		transclusion.addPromptedParameters.bind( transclusion )
 	);

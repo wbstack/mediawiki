@@ -2,18 +2,13 @@
 
 namespace Wikibase\Repo\Diff;
 
-use Content;
 use DifferenceEngine;
-use Html;
-use IContextSource;
-use Language;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Revision\RevisionRecord;
-use MWException;
-use ParserOutput;
-use Wikibase\Repo\Content\EntityContent;
 use Wikibase\Repo\FederatedProperties\FederatedPropertiesError;
-use Wikibase\Repo\WikibaseRepo;
 use Wikibase\View\ToolbarEditSectionGenerator;
 use WikiPage;
 
@@ -25,38 +20,11 @@ use WikiPage;
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class EntityContentDiffView extends DifferenceEngine {
-
-	/**
-	 * @var BasicEntityDiffVisualizer
-	 */
-	private $diffVisualizer;
-
-	/**
-	 * @see DifferenceEngine::__construct
-	 *
-	 * @param IContextSource|null $context
-	 * @param int $old
-	 * @param int $new
-	 * @param int $rcid
-	 * @param bool $refreshCache
-	 * @param bool $unhide
-	 */
-	public function __construct( $context = null, $old = 0, $new = 0, $rcid = 0, $refreshCache = false, $unhide = false ) {
-		parent::__construct( $context, $old, $new, $rcid, $refreshCache, $unhide );
-
-		$entityDiffVisualizerFactory = WikibaseRepo::getEntityDiffVisualizerFactory();
-		$this->diffVisualizer = new DispatchingEntityDiffVisualizer( $entityDiffVisualizerFactory, $context );
-	}
-
 	/**
 	 * @return Language
 	 */
-	public function getDiffLang() {
-		if ( $this->mDiffLang === null ) {
-			$this->mDiffLang = $this->getLanguage();
-		}
-
-		return parent::getDiffLang();
+	public function getDefaultLanguage() {
+		return $this->getLanguage();
 	}
 
 	/**
@@ -107,7 +75,7 @@ class EntityContentDiffView extends DifferenceEngine {
 			) {
 				$editQuery = [
 					'action' => 'edit',
-					'restore' => $rev->getId()
+					'restore' => $rev->getId(),
 				];
 				$msg = $this->msg( 'wikibase-restoreold' )->text();
 				$header .= ' ' . $this->msg( 'parentheses' )->rawParams(
@@ -126,30 +94,6 @@ class EntityContentDiffView extends DifferenceEngine {
 	}
 
 	/**
-	 * @see DifferenceEngine::generateContentDiffBody
-	 *
-	 * @param Content $old
-	 * @param Content $new
-	 *
-	 * @throws MWException If the two content objects are neither EntityContent nor TextContent.
-	 * @return string
-	 */
-	public function generateContentDiffBody( Content $old, Content $new ) {
-		if ( ( $old instanceof EntityContent ) && ( $new instanceof EntityContent ) ) {
-			// add common CSS, the diff may include entity links with labels, including fallback indicators
-			$this->getOutput()->addModuleStyles( [ 'wikibase.common' ] );
-
-			$diff = $old->getDiff( $new );
-			return $this->diffVisualizer->visualizeEntityContentDiff( $diff );
-		} elseif ( ( $old instanceof EntityContent ) !== ( $new instanceof EntityContent ) ) {
-			$this->getOutput()->showErrorPage( 'errorpagetitle', 'wikibase-non-entity-diff' );
-			return '';
-		}
-
-		return parent::generateContentDiffBody( $old, $new );
-	}
-
-	/**
 	 * @param WikiPage $page
 	 * @param RevisionRecord $rev
 	 *
@@ -157,9 +101,7 @@ class EntityContentDiffView extends DifferenceEngine {
 	 */
 	protected function getParserOutput( WikiPage $page, RevisionRecord $rev ) {
 		$parserOptions = $page->makeParserOptions( $this->getContext() );
-
-		// Do not poison parser cache with diff-specific stuff
-		$parserOptions->addExtraKey( 'diff=1' );
+		$parserOptions->setRenderReason( 'diff-page' );
 
 		try {
 			$parserOutput = $page->getParserOutput( $parserOptions, $rev->getId() );
@@ -175,17 +117,6 @@ class EntityContentDiffView extends DifferenceEngine {
 		}
 
 		return $parserOutput;
-	}
-
-	/**
-	 * @inheritDoc
-	 */
-	protected function getDiffBodyCacheKeyParams() {
-		$parent = parent::getDiffBodyCacheKeyParams();
-		$code = $this->getLanguage()->getCode();
-		$parent[] = "lang-{$code}";
-
-		return $parent;
 	}
 
 }

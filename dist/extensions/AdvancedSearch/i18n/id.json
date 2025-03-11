@@ -2,13 +2,16 @@
 	"@metadata": {
 		"authors": [
 			"Daud I.F. Argana",
+			"Ezagren",
 			"J Nia30",
 			"Kenrick95",
+			"Stevannus rua",
 			"William Surya Permana"
 		]
 	},
 	"advancedsearch-desc": "Akses mudah ke penelusuran tingkat lanjut di [[Special:Search]]",
-	"advancedsearch-options-pane-head": "Pencarian lanjut:",
+	"advancedsearch-options-pane-head": "Penelusuran lanjutan:",
+	"advancedsearch-options-pane-preview-list": "Istilah pencarian yang digunakan saat ini",
 	"advancedsearch-optgroup-text": "Cari dalam teks halaman",
 	"advancedsearch-optgroup-structure": "Struktur",
 	"advancedsearch-optgroup-files": "Berkas dan gambar",
@@ -27,6 +30,7 @@
 	"advancedsearch-field-fileh": "Tinggi berkas dalam piksel",
 	"advancedsearch-field-sort": "Pengurutan",
 	"advancedsearch-field-preview-sort": "Urut berdasarkan $1",
+	"advancedsearch-help-general-instruction": "Instruksi terperinci untuk $1",
 	"advancedsearch-help-plain": ";Keterangan\n:Mencari kata-kata ini di dalam judul maupun teks.\n;Waspadai hal-hal berikut\n:* Beberapa kata dapat dimasukkan di sini.\n:* Tanda baca dan karakter non-alfanumerik lainnya (kecuali titik dua dan koma) akan diabaikan.\n:* Mungkin terdapat hasil yang tidak mengandung salah satu atau lebih istilah bagian dari pencarian Anda.\n:* Pencabangan kata diterapkan. Contoh: Jika Anda memasukkan ''pohon'', maka pencarian juga akan mempertimbangkan ''pepohonan''. Pencabangan kata berlaku spesifik pada bahasa tertentu.\n;Halaman bantuan\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Full_text_search Pencarian teks lengkap]\n;Sintaks yang setara dalam pencarian biasa\n:<code>pohon semak duri</code>",
 	"advancedsearch-help-phrase": ";Keterangan\n:Mencari urutan karakter-karakter yang spesifik. Tanda baca diabaikan.\n;Waspadai hal-hal berikut\n:(hanya berlaku ketika menggunakan tanda kutip, lihat contoh di bawah)\n:* Pisahkan antar frasa pencarian dengan koma atau spasi, misalnya <code>\"selamat pagi nusantara\"</code>, <code>\"halo selebriti\"</code>.\n:* Tanda baca dan karakter non-alfanumerik lainnya (kecuali titik dua dan koma) akan diabaikan.\n:* Pencarian tidak peka kapitalisasi.\n:* Pencabangan kata tidak diterapkan.\n;Halaman bantuan\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Kata, frasa, dan pengubah]\n;Sintaks yang setara dalam pencarian biasa\n:Kata-kata dalam tanda kutip, misalnya <code>\"Dimulai dari mimpi\"</code>.",
 	"advancedsearch-help-or": ";Keterangan\n:Setidaknya salah satu istilah pencarian harus tercantum dalam halaman.\n;Halaman bantuan\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Kata, frasa, dan pengubah]\n;Sintaks yang setara dalam pencarian biasa\n: Kata-kata dengan <code>OR</code> di antara mereka, misalnya <code>Daun OR Rumput</code>.",
@@ -69,6 +73,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "tanggal pembuatan",
 	"advancedsearch-namespaces-search-in": "Cari dalam:",
 	"advancedsearch-namespaces-remember": "Ingat pilihan untuk pencarian selanjutnya",
+	"advancedsearch-namespaces-pane-preview-list": "Filter ruang nama yang aktif saat ini",
 	"advancedsearch-namespaces-preset-all": "Semua",
 	"advancedsearch-namespaces-preset-default": "Baku",
 	"advancedsearch-namespaces-preset-general-help": "Bantuan Umum",

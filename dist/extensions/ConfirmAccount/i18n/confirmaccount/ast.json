@@ -1,12 +1,13 @@
 {
 	"@metadata": {
 		"authors": [
-			"Xuacu"
+			"Xuacu",
+			"YoaR"
 		]
 	},
 	"confirmaccounts": "Confirmar solicitúes de cuenta",
 	"confirmaccount-desc": "Da a los burócrates la capacidá de confirmar solicitúes de cuenta",
-	"confirmaccount-maintext": "'''Esta páxina s'usa pa confirmar les solicitúes de cuentes pendientes en ''{{SITENAME}}'''''.\n\nCada cola de solicitú de cuenta consta de tres sub-coles.\nUna p'abrir la solicitú, otra pa les qu'otros alministradores tengan n'espera pendientes de más información, y otra pa les solicitúes refugaes de recién.\n\nAl responder a una solicitú revísala con procuru y, si ye necesario, confirma la información que contien.\nLes tos aiciones quedarán rexistraes de mou priváu.\nTamién s'espera que revises cualquier actividá que tenga llugar equí amás de lo que faigas tu mesmu.",
+	"confirmaccount-maintext": "'''Esta páxina s'usa pa confirmar les solicitúes de cuentes pendientes en ''{{SITENAME}}'''''.\n\nCada cola de solicitú de cuenta consta de tres sub-coles.\nUna p'abrir la solicitú, otra pa les qu'otros alministradores tengan n'espera pendientes de más información, y otra pa les solicitúes refugaes de recién.\n\nAl responder a una solicitú revísala con procuru y, si ye necesario, confirma la información que contién.\nLes tos aiciones quedarán rexistraes de mou priváu.\nTamién s'espera que revises cualquier actividá que tenga llugar equí amás de lo que faigas tu mesmu.",
 	"confirmaccount-list": "Abaxo hai una llista de solicitúes de cuenta qu'esperen aprobación.\nCuando una solicitú s'aprueba o se refuga se desanicia d'esta llista.",
 	"confirmaccount-list2": "Abaxo hai una llista de solicitúes de cuenta refugaes de recién que se puen desaniciar automaticamente cuando tengan dellos díes.\nInda se puen aprobar como cuentes, pero pue ser meyor que consultes primero col alministrador que les refugó enantes de facelo.",
 	"confirmaccount-list3": "Abaxo hai una llista coles solicitúes de cuentes que caducaron y que se puen desaniciar de mou automáticu cuando tengan dellos díes.\nInda se puen aprobar como cuentes.",

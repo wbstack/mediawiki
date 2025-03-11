@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\OAuth;
 
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
 use League\OAuth2\Server\Middleware\ResourceServerMiddleware;
+use League\OAuth2\Server\ResourceServer as LeagueResourceServer;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\MWOAuthException;
 use MediaWiki\Extension\OAuth\Backend\Utils;
@@ -12,12 +13,12 @@ use MediaWiki\Extension\OAuth\Entity\ScopeEntity;
 use MediaWiki\Extension\OAuth\Repository\AccessTokenRepository;
 use MediaWiki\Extension\OAuth\Repository\ScopeRepository;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
 use MediaWiki\Rest\HttpException;
+use MediaWiki\User\User;
 use MWException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
-use User;
-use WebRequest;
 
 class ResourceServer {
 	/** @var ResourceServerMiddleware */
@@ -45,7 +46,7 @@ class ResourceServer {
 	protected function __construct( string $publicKey, string $canonicalServer ) {
 		$accessTokenRepository = new AccessTokenRepository( $canonicalServer );
 
-		$server = new \League\OAuth2\Server\ResourceServer(
+		$server = new LeagueResourceServer(
 			$accessTokenRepository,
 			$publicKey
 		);
@@ -65,7 +66,7 @@ class ResourceServer {
 		if ( is_string( $authHeader ) ) {
 			$authHeader = [ $authHeader ];
 		}
-		if ( !empty( $authHeader ) && strpos( $authHeader[0], 'Bearer' ) === 0 ) {
+		if ( $authHeader && strpos( $authHeader[0], 'Bearer' ) === 0 ) {
 			return true;
 		}
 		return false;
@@ -227,7 +228,10 @@ class ResourceServer {
 
 	private function assertVerified() {
 		if ( !$this->verified ) {
-			throw new MWOAuthException( 'mwoauth-oauth2-error-request-not-verified' );
+			throw new MWOAuthException( 'mwoauth-oauth2-error-request-not-verified', [
+				'consumer' => $this->getClient()->getConsumerKey(),
+				'consumer_name' => $this->getClient()->getName(),
+			] );
 		}
 	}
 }

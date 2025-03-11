@@ -38,5 +38,6 @@
 	"ext-uls-empty-state-header": "Hapasati pave nemitauro",
 	"ext-uls-empty-state-desc": "Hapana mitauro iripo parizvino",
 	"ext-uls-empty-state-header-actions-available": "Hapasati pave nemitauro. Wedzera imwe itsva?",
-	"ext-uls-empty-state-desc-actions-available": "Ita kuti zvirozvemo zviwanikwe mumimwe mitauro."
+	"ext-uls-empty-state-desc-actions-available": "Ita kuti zvirozvemo zviwanikwe mumimwe mitauro.",
+	"ext-uls-add-languages-button-label": "Wedzera mitauro"
 }

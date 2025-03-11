@@ -228,11 +228,11 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 */
 	public function __construct(
 		SearchConfig $config,
-		array $namespaces = null,
-		CirrusDebugOptions $options = null,
-		FallbackRunner $fallbackRunner = null,
-		FetchPhaseConfigBuilder $fetchPhaseConfigBuilder = null,
-		CirrusSearchHookRunner $cirrusSearchHookRunner = null
+		?array $namespaces = null,
+		?CirrusDebugOptions $options = null,
+		?FallbackRunner $fallbackRunner = null,
+		?FetchPhaseConfigBuilder $fetchPhaseConfigBuilder = null,
+		?CirrusSearchHookRunner $cirrusSearchHookRunner = null
 	) {
 		$this->config = $config;
 		$this->namespaces = $namespaces;
@@ -387,14 +387,14 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	public function isSpecialKeywordUsed() {
 		// full_text is not considered a special keyword
 		// TODO: investigate using BasicQueryClassifier::SIMPLE_BAG_OF_WORDS instead
-		return !empty( array_diff_key( $this->syntaxUsed, [
+		return array_diff_key( $this->syntaxUsed, [
 			'full_text' => true,
 			'full_text_simple_match' => true,
 			'full_text_querystring' => true,
 			BasicQueryClassifier::SIMPLE_BAG_OF_WORDS => true,
 			BasicQueryClassifier::SIMPLE_PHRASE => true,
 			BasicQueryClassifier::BAG_OF_WORDS_WITH_PHRASE => true,
-		] ) );
+		] ) !== [];
 	}
 
 	/**
@@ -425,7 +425,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 * Using getSyntaxUsed() is better in most cases.
 	 */
 	public function getSearchType() {
-		if ( empty( $this->syntaxUsed ) ) {
+		if ( !$this->syntaxUsed ) {
 			return 'full_text';
 		}
 		arsort( $this->syntaxUsed );
@@ -453,7 +453,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 * @param AbstractQuery|null $query Query that should be used for highlighting if different
 	 *  from the query used for selecting.
 	 */
-	public function setHighlightQuery( AbstractQuery $query = null ) {
+	public function setHighlightQuery( ?AbstractQuery $query = null ) {
 		$this->isDirty = true;
 		$this->highlightQuery = $query;
 	}
@@ -501,7 +501,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 *  from the query used for selecting.
 	 */
 	private function getHighlightQuery( AbstractQuery $mainQuery ) {
-		if ( empty( $this->nonTextHighlightQueries ) ) {
+		if ( !$this->nonTextHighlightQueries ) {
 			// If no explicit highlight query is provided elastic
 			// will fallback to $mainQuery without specifying it.
 			return $this->highlightQuery;
@@ -541,7 +541,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 *  the main quedry, non text queries, and any additional filters.
 	 */
 	public function getQuery() {
-		if ( empty( $this->nonTextQueries ) ) {
+		if ( !$this->nonTextQueries ) {
 			$mainQuery = $this->mainQuery ?: new \Elastica\Query\MatchAll();
 		} else {
 			$mainQuery = new \Elastica\Query\BoolQuery();
@@ -702,6 +702,7 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	/**
 	 * @return array[] Array of arrays. Each sub array is a set of values
 	 *  suitable for creating an i18n message.
+	 * @phan-return non-empty-array[]
 	 */
 	public function getWarnings() {
 		return $this->warnings;
@@ -842,8 +843,8 @@ class SearchContext implements WarningCollector, FilterBuilder {
 	 */
 	public static function fromSearchQuery(
 		SearchQuery $query,
-		FallbackRunner $fallbackRunner = null,
-		CirrusSearchHookRunner $cirrusSearchHookRunner = null
+		?FallbackRunner $fallbackRunner = null,
+		?CirrusSearchHookRunner $cirrusSearchHookRunner = null
 	): SearchContext {
 		$searchContext = new SearchContext(
 			$query->getSearchConfig(),

@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Macofe",
+			"McDutchie",
 			"SPQRobin",
-			"Siebrand",
-			"McDutchie"
+			"Siebrand"
 		]
 	},
 	"wikibasecirrus-desc": "Wikibase-uitbreiding voor het gebruik van de functionaliteit van CirrusSearch",

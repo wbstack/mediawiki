@@ -1,7 +1,7 @@
 /**
  * Wikivoyage customization.
  *
- * @alternateClassName ext.kartographer.wikivoyage
+ * @borrows Kartographer.Wikivoyage as ext.kartographer.wikivoyage
  * @class Kartographer.Wikivoyage
  * @singleton
  */
@@ -14,10 +14,5 @@ module.exports = {
 	/**
 	 * @type {Kartographer.Wikivoyage.WVMap}
 	 */
-	WVMap: require( './WVMap.js' ),
-
-	/**
-	 * @type {Kartographer.Wikivoyage.NearbyArticles}
-	 */
-	NearbyArticles: require( './NearbyArticles.js' )
+	WVMap: require( './WVMap.js' )
 };

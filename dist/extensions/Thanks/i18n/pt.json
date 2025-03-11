@@ -15,7 +15,8 @@
 			"Oona",
 			"Opraco",
 			"Titoncio",
-			"Vitorvicentevalente"
+			"Vitorvicentevalente",
+			"Waldyrious"
 		]
 	},
 	"thanks-desc": "Adiciona hiperligações para agradecer a utilizadores por edições, comentários, etc.",
@@ -23,9 +24,6 @@
 	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|agradecimento enviado}}}}",
 	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Agradecer}}}}",
 	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Agradecimento enviado}}}}",
-	"thanks-button-action-queued": "{{GENDER:$1|{{GENDER:$2|A agradecer a}}}} $1…",
-	"thanks-button-action-cancel": "Cancelar",
-	"thanks-button-action-completed": "Você {{GENDER:$1|{{GENDER:$2|agradeceu a}}}} $1",
 	"thanks-error-undefined": "A ação de agradecimento falhou (código de erro: $1). Por favor, tente novamente.",
 	"thanks-error-invalid-log-id": "A entrada do registo não foi encontrada",
 	"thanks-error-invalid-log-type": "O tipo de registo '$1' não consta da lista dos tipos de registo permitidos.",
@@ -49,7 +47,6 @@
 	"echo-pref-subscription-edit-thank": "Agradece-me pela minha edição",
 	"echo-pref-tooltip-edit-thank": "Notificar-me quando alguém me agradecer por uma edição que eu fiz.",
 	"echo-category-title-edit-thank": "Agradecimentos",
-	"notification-thanks-diff-link": "sua edição",
 	"notification-header-rev-thank": "$1 {{GENDER:$2|agradeceu-lhe}} {{GENDER:$4|pela}} sua edição em <strong>$3</strong>.",
 	"notification-header-creation-thank": "$1 {{GENDER:$2|agradeceu}}{{GENDER:$4|-lhe}} a criação de <strong>$3</strong>.",
 	"notification-header-log-thank": "$1 {{GENDER:$2|agradeceu}}{{GENDER:$4|}} a sua ação relacionada com <strong>$3</strong>.",
@@ -68,7 +65,6 @@
 	"thanks-error-invalidpostid": "Identificador de mensagem inválido.",
 	"flow-thanks-confirmation-special": "Deseja agradecer publicamente este comentário?",
 	"flow-thanks-thanked-notice": "{{GENDER:$3|Você}} agradeceu a $1 o comentário {{GENDER:$2|dele|dela}}.",
-	"notification-flow-thanks-post-link": "o seu comentário",
 	"notification-header-flow-thank": "$1 {{GENDER:$2|agradeceu-lhe}} {{GENDER:$5|pelo}} seu comentário em \"<strong>$3</strong>\".",
 	"notification-compact-header-flow-thank": "$1 {{GENDER:$2|agradeceu}}{{GENDER:$3|-lhe}}.",
 	"notification-bundle-header-flow-thank": "{{PLURAL:$1|Uma pessoa agradeceu-lhe|$1 pessoas agradeceram-lhe|100=Mais de 99 pessoas agradeceram-lhe}} pelo {{GENDER:$3|seu}} comentário em \"<strong>$2</strong>\".",

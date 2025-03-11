@@ -21,19 +21,23 @@
  * @ingroup Cache
  */
 
-use MediaWiki\Cache\CacheKeyHelper;
+namespace MediaWiki\Cache;
+
+use InvalidArgumentException;
+use MediaWiki\Language\Language;
 use MediaWiki\Linker\LinksMigration;
 use MediaWiki\Linker\LinkTarget;
-use MediaWiki\Logger\LoggerFactory;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageIdentityValue;
 use MediaWiki\Page\PageReference;
 use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\Title\TitleValue;
 use Psr\Log\LoggerInterface;
+use RuntimeException;
 use Wikimedia\Assert\Assert;
-use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\Platform\ISQLPlatform;
 
 /**
  * Class representing a list of titles
@@ -43,7 +47,7 @@ use Wikimedia\Rdbms\IResultWrapper;
  */
 class LinkBatch {
 	/**
-	 * @var array[] 2-d array, first index namespace, second index dbkey, value arbitrary
+	 * @var array<int,array<string,mixed>> 2-d array, first index namespace, second index dbkey, value arbitrary
 	 */
 	public $data = [];
 
@@ -78,9 +82,9 @@ class LinkBatch {
 	private $genderCache;
 
 	/**
-	 * @var ILoadBalancer
+	 * @var IConnectionProvider
 	 */
-	private $loadBalancer;
+	private $dbProvider;
 
 	/** @var LinksMigration */
 	private $linksMigration;
@@ -89,38 +93,35 @@ class LinkBatch {
 	private $logger;
 
 	/**
+	 * @see \MediaWiki\Cache\LinkBatchFactory
+	 *
+	 * @internal
 	 * @param iterable<LinkTarget>|iterable<PageReference> $arr Initial items to be added to the batch
-	 * @param LinkCache|null $linkCache
-	 * @param TitleFormatter|null $titleFormatter
-	 * @param Language|null $contentLanguage
-	 * @param GenderCache|null $genderCache
-	 * @param ILoadBalancer|null $loadBalancer
-	 * @param LinksMigration|null $linksMigration
-	 * @param LoggerInterface|null $logger
-	 * @deprecated since 1.35 Use makeLinkBatch of the LinkBatchFactory service instead
+	 * @param LinkCache $linkCache
+	 * @param TitleFormatter $titleFormatter
+	 * @param Language $contentLanguage
+	 * @param GenderCache $genderCache
+	 * @param IConnectionProvider $dbProvider
+	 * @param LinksMigration $linksMigration
+	 * @param LoggerInterface $logger
 	 */
 	public function __construct(
-		iterable $arr = [],
-		?LinkCache $linkCache = null,
-		?TitleFormatter $titleFormatter = null,
-		?Language $contentLanguage = null,
-		?GenderCache $genderCache = null,
-		?ILoadBalancer $loadBalancer = null,
-		?LinksMigration $linksMigration = null,
-		?LoggerInterface $logger = null
+		iterable $arr,
+		LinkCache $linkCache,
+		TitleFormatter $titleFormatter,
+		Language $contentLanguage,
+		GenderCache $genderCache,
+		IConnectionProvider $dbProvider,
+		LinksMigration $linksMigration,
+		LoggerInterface $logger
 	) {
-		$getServices = static function () {
-			// BC hack. Use a closure so this can be unit-tested.
-			return MediaWikiServices::getInstance();
-		};
-
-		$this->linkCache = $linkCache ?? $getServices()->getLinkCache();
-		$this->titleFormatter = $titleFormatter ?? $getServices()->getTitleFormatter();
-		$this->contentLanguage = $contentLanguage ?? $getServices()->getContentLanguage();
-		$this->genderCache = $genderCache ?? $getServices()->getGenderCache();
-		$this->loadBalancer = $loadBalancer ?? $getServices()->getDBLoadBalancer();
-		$this->linksMigration = $linksMigration ?? $getServices()->getLinksMigration();
-		$this->logger = $logger ?? LoggerFactory::getInstance( 'LinkBatch' );
+		$this->linkCache = $linkCache;
+		$this->titleFormatter = $titleFormatter;
+		$this->contentLanguage = $contentLanguage;
+		$this->genderCache = $genderCache;
+		$this->dbProvider = $dbProvider;
+		$this->linksMigration = $linksMigration;
+		$this->logger = $logger;
 
 		foreach ( $arr as $item ) {
 			$this->addObj( $item );
@@ -175,10 +176,6 @@ class LinkBatch {
 			// T137083
 			return;
 		}
-		if ( !array_key_exists( $ns, $this->data ) ) {
-			$this->data[$ns] = [];
-		}
-
 		$this->data[$ns][strtr( $dbkey, ' ', '_' )] = 1;
 	}
 
@@ -186,7 +183,7 @@ class LinkBatch {
 	 * Set the link list to a given 2-d array
 	 * First key is the namespace, second is the DB key, value arbitrary
 	 *
-	 * @param array $array
+	 * @param array<int,array<string,mixed>> $array
 	 */
 	public function setArray( $array ) {
 		$this->data = $array;
@@ -264,9 +261,7 @@ class LinkBatch {
 
 		// For each returned entry, add it to the list of good links, and remove it from $remaining
 
-		if ( $this->pageIdentities === null ) {
-			$this->pageIdentities = [];
-		}
+		$this->pageIdentities ??= [];
 
 		$ids = [];
 		$remaining = $this->data;
@@ -324,7 +319,7 @@ class LinkBatch {
 
 	/**
 	 * Perform the existence test query, return a result wrapper with page_id fields
-	 * @return bool|IResultWrapper
+	 * @return IResultWrapper|false
 	 */
 	public function doQuery() {
 		if ( $this->isEmpty() ) {
@@ -332,19 +327,18 @@ class LinkBatch {
 		}
 
 		// This is similar to LinkHolderArray::replaceInternal
-		$dbr = $this->loadBalancer->getConnectionRef( DB_REPLICA );
-		$table = 'page';
-		$fields = LinkCache::getSelectFields();
+		$dbr = $this->dbProvider->getReplicaDatabase();
+		$queryBuilder = $dbr->newSelectQueryBuilder()
+			->select( LinkCache::getSelectFields() )
+			->from( 'page' )
+			->where( $this->constructSet( 'page', $dbr ) );
 
-		$conds = $this->constructSet( 'page', $dbr );
-
-		// Do query
 		$caller = __METHOD__;
 		if ( strval( $this->caller ) !== '' ) {
 			$caller .= " (for {$this->caller})";
 		}
 
-		return $dbr->select( $table, $fields, $conds, $caller );
+		return $queryBuilder->caller( $caller )->fetchResultSet();
 	}
 
 	/**
@@ -353,11 +347,7 @@ class LinkBatch {
 	 * @return bool Whether the query was successful
 	 */
 	public function doGenderQuery() {
-		if ( $this->isEmpty() ) {
-			return false;
-		}
-
-		if ( !$this->contentLanguage->needsGenderDistinction() ) {
+		if ( $this->isEmpty() || !$this->contentLanguage->needsGenderDistinction() ) {
 			return false;
 		}
 
@@ -369,13 +359,17 @@ class LinkBatch {
 	/**
 	 * Construct a WHERE clause which will match all the given titles.
 	 *
+	 * It is the caller's responsibility to only call this if the LinkBatch is
+	 * not empty, because there is no safe way to represent a SQL conditional
+	 * for the empty set.
+	 *
 	 * @param string $prefix The appropriate table's field name prefix ('page', 'pl', etc)
-	 * @param IDatabase $db DB object to use
-	 * @return string|bool String with SQL where clause fragment, or false if no items.
+	 * @param ISQLPlatform $db DB object to use
+	 * @return string String with SQL where clause fragment
 	 */
 	public function constructSet( $prefix, $db ) {
 		if ( isset( $this->linksMigration::$prefixToTableMapping[$prefix] ) ) {
-			list( $blNamespace, $blTitle ) = $this->linksMigration->getTitleFields(
+			[ $blNamespace, $blTitle ] = $this->linksMigration->getTitleFields(
 				$this->linksMigration::$prefixToTableMapping[$prefix]
 			);
 		} else {
@@ -385,3 +379,6 @@ class LinkBatch {
 		return $db->makeWhereFrom2d( $this->data, $blNamespace, $blTitle );
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( LinkBatch::class, 'LinkBatch' );

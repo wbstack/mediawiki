@@ -2,16 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Eitvys200",
-			"Tomasdd",
-			"Nokeoo"
+			"Nokeoo",
+			"Tomasdd"
 		]
 	},
-	"apihelp-jsonconfig-description": "Leidžia tiesiogiai pasiekti JsonConfig posistemę.",
 	"apihelp-jsonconfig-summary": "Leidžia tiesiogiai pasiekti JsonConfig posistemę.",
 	"apihelp-jsonconfig-example-1": "Rodyti konfigūraciją",
 	"apihelp-jsonconfig-example-2": "Atstatyti [[Data:Brazil/Amazonas.map]]",
 	"apihelp-jsonconfig-example-3": "Įkelti iš naujo [[Data:Brazil/Amazonas.map]]",
-	"apihelp-jsondata-description": "Gauti lokalizuotus JSON duomenys.",
 	"apihelp-jsondata-summary": "Gauti lokalizuotus JSON duomenis.",
 	"apierror-jsonconfig-paramrequired": "Parametras <var>$1</var> reikalingas šiai komandai."
 }

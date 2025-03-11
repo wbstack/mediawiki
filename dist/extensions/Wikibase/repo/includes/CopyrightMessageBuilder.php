@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo;
 
-use Language;
-use Message;
+use MediaWiki\Language\Language;
+use MediaWiki\Message\Message;
 
 /**
  * @license GPL-2.0-or-later

@@ -1,5 +1,7 @@
 <?php
 
+namespace MediaWiki\HTMLForm\Field;
+
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Widget\NamespacesMultiselectWidget;
 
@@ -67,6 +69,8 @@ class HTMLNamespacesMultiselectField extends HTMLSelectNamespace {
 	}
 
 	public function getInputOOUI( $value ) {
+		$this->mParent->getOutput()->addModuleStyles( 'mediawiki.widgets.TagMultiselectWidget.styles' );
+
 		$params = [
 			'id' => $this->mID,
 			'name' => $this->mName,
@@ -92,6 +96,10 @@ class HTMLNamespacesMultiselectField extends HTMLSelectNamespace {
 			$params['input'] = $this->mParams['input'];
 		}
 
+		if ( isset( $this->mParams['allowEditTags'] ) ) {
+			$params['allowEditTags'] = $this->mParams['allowEditTags'];
+		}
+
 		if ( $value !== null ) {
 			// $value is a string, but the widget expects an array
 			$params['default'] = $value === '' ? [] : explode( "\n", $value );
@@ -114,4 +122,14 @@ class HTMLNamespacesMultiselectField extends HTMLSelectNamespace {
 		return [ 'mediawiki.widgets.NamespacesMultiselectWidget' ];
 	}
 
+	public function getInputCodex( $value, $hasErrors ) {
+		// HTMLTextAreaField defaults to 'rows' => 25, which is too big for this field
+		// Use 10 instead (but allow $this->mParams to override that value)
+		$textAreaField = new HTMLTextAreaField( $this->mParams + [ 'rows' => 10 ] );
+		return $textAreaField->getInputCodex( $value, $hasErrors );
+	}
+
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLNamespacesMultiselectField::class, 'HTMLNamespacesMultiselectField' );

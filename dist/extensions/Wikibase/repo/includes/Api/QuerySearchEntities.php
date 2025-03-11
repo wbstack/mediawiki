@@ -4,9 +4,10 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiPageSet;
-use ApiQuery;
-use ApiQueryGeneratorBase;
+use MediaWiki\Api\ApiPageSet;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryGeneratorBase;
+use MediaWiki\Api\ApiUsageException;
 use MediaWiki\Cache\LinkBatchFactory;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\Interactors\TermSearchResult;
@@ -25,28 +26,25 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 
 	private LinkBatchFactory $linkBatchFactory;
 
-	/**
-	 * @var EntitySearchHelper
-	 */
-	private $entitySearchHelper;
+	private EntitySearchHelper $entitySearchHelper;
+
+	private EntityTitleLookup $titleLookup;
+
+	private ContentLanguages $termsLanguages;
 
 	/**
-	 * @var EntityTitleLookup
+	 * @var string[] The supported entity types.
+	 * This should be initialized from {@link WikibaseRepo::getEnabledEntityTypes()},
+	 * <strong>not</strong> from {@link WikibaseRepo::getEnabledEntityTypesForSearch()} –
+	 * unlike {@link SearchEntities}, this module does not support additional entity types
+	 * that are not registered with Wikibase’s entity registration yet
+	 * (every search result’s {@link TermSearchResult::getEntityId() entity ID}
+	 * must be non-null so that we can use the {@link EntityTitleLookup}).
 	 */
-	private $titleLookup;
-
-	/**
-	 * @var ContentLanguages
-	 */
-	private $termsLanguages;
-
-	/**
-	 * @var string[]
-	 */
-	private $entityTypes;
+	private array $entityTypes;
 
 	/** @var (string|null)[] */
-	private $searchProfiles;
+	private array $searchProfiles;
 
 	public function __construct(
 		ApiQuery $apiQuery,
@@ -146,7 +144,7 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 	 * @param array $params
 	 *
 	 * @return TermSearchResult[]
-	 * @throws \ApiUsageException
+	 * @throws ApiUsageException
 	 */
 	private function getSearchResults( array $params ): array {
 		try {
@@ -160,6 +158,8 @@ class QuerySearchEntities extends ApiQueryGeneratorBase {
 			);
 		} catch ( EntitySearchException $ese ) {
 			$this->dieStatus( $ese->getStatus() );
+
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new InvariantException( "dieStatus() must throw an exception" );
 		}
 	}

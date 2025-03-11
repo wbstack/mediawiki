@@ -2,13 +2,12 @@
 
 namespace MediaWiki\Extension\SpamBlacklist;
 
-use Exception;
+use InvalidArgumentException;
+use MediaWiki\Content\TextContent;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Revision\SlotRecord;
-use ObjectCache;
-use TextContent;
-use Title;
-use User;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
 /**
  * Base class for different kinds of blacklists
@@ -17,14 +16,14 @@ abstract class BaseBlacklist {
 	/**
 	 * Array of blacklist sources
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	public $files = [];
 
 	/**
 	 * Array containing regexes to test against
 	 *
-	 * @var bool|array
+	 * @var string[]|false
 	 */
 	protected $regexes = false;
 
@@ -48,7 +47,7 @@ abstract class BaseBlacklist {
 	/**
 	 * Array containing blacklists that extend BaseBlacklist
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	private static $blacklistTypes = [
 		'spam' => SpamBlacklist::class,
@@ -58,13 +57,11 @@ abstract class BaseBlacklist {
 	/**
 	 * Array of blacklist instances
 	 *
-	 * @var array
+	 * @var self[]
 	 */
 	private static $instances = [];
 
 	/**
-	 * Constructor
-	 *
 	 * @param array $settings
 	 */
 	public function __construct( $settings = [] ) {
@@ -100,7 +97,7 @@ abstract class BaseBlacklist {
 	/**
 	 * Return the array of blacklist types currently defined
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public static function getBlacklistTypes() {
 		return self::$blacklistTypes;
@@ -128,11 +125,10 @@ abstract class BaseBlacklist {
 	 * @deprecated Use getSpamBlacklist() or getEmailBlacklist() instead
 	 * @param string $type Code for the blacklist
 	 * @return BaseBlacklist
-	 * @throws Exception
 	 */
 	public static function getInstance( $type ) {
 		if ( !isset( self::$blacklistTypes[$type] ) ) {
-			throw new Exception( "Invalid blacklist type '$type' passed to " . __METHOD__ );
+			throw new InvalidArgumentException( "Invalid blacklist type '$type' passed to " . __METHOD__ );
 		}
 
 		if ( !isset( self::$instances[$type] ) ) {
@@ -238,7 +234,7 @@ abstract class BaseBlacklist {
 	/**
 	 * Fetch local and (possibly cached) remote blacklists.
 	 * Will be cached locally across multiple invocations.
-	 * @return array set of regular expressions, potentially empty.
+	 * @return string[] set of regular expressions, potentially empty.
 	 */
 	public function getBlacklists() {
 		if ( $this->regexes === false ) {
@@ -253,7 +249,7 @@ abstract class BaseBlacklist {
 	/**
 	 * Returns the local blacklist
 	 *
-	 * @return array Regular expressions
+	 * @return string[] Regular expressions
 	 */
 	public function getLocalBlacklists() {
 		$type = $this->getBlacklistType();
@@ -271,7 +267,7 @@ abstract class BaseBlacklist {
 	/**
 	 * Returns the (local) whitelist
 	 *
-	 * @return array Regular expressions
+	 * @return string[] Regular expressions
 	 */
 	public function getWhitelists() {
 		$type = $this->getBlacklistType();
@@ -298,6 +294,11 @@ abstract class BaseBlacklist {
 		if ( !$this->files ) {
 			# No lists
 			wfDebugLog( 'SpamBlacklist', "no files specified\n" );
+			return [];
+		}
+
+		if ( defined( 'MW_PHPUNIT_TEST' ) ) {
+			wfDebugLog( 'SpamBlacklist', 'remote loading disabled during PHPUnit test' );
 			return [];
 		}
 
@@ -372,7 +373,8 @@ abstract class BaseBlacklist {
 		// FIXME: This is a hack to use Memcached where possible (incl. WMF),
 		// but have CACHE_DB as fallback (instead of no cache).
 		// This might be a good candidate for T248005.
-		$cache = ObjectCache::getInstance( $wgMessageCacheType );
+		$services = MediaWikiServices::getInstance()->getObjectCacheFactory();
+		$cache = $services->getInstance( $wgMessageCacheType );
 
 		$listType = $this->getBlacklistType();
 		// There are two keys, when the warning key expires, a random thread will refresh
@@ -453,5 +455,3 @@ abstract class BaseBlacklist {
 		// subclass this
 	}
 }
-
-class_alias( BaseBlacklist::class, 'BaseBlacklist' );

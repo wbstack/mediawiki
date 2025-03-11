@@ -5,6 +5,8 @@
 		]
 	},
 	"apihelp-templatedata-summary": "De gegevens ophalen die zijn opgeslagen door de uitbreiding TemplateData.",
+	"apihelp-templatedata-example-1": "Sjabloongegevens teruggeven voor [[Template:Foobar]], met resultaat als het sjabloon niet bestaat, of wel bestaat maar geen sjabloongegevens heeft",
+	"apihelp-templatedata-example-2": "Sjabloongegevens teruggeven voor [[Template:Phabricator]], zonder resultaat als het sjabloon niet bestaat, of wel bestaat maar geen sjabloongegevens heeft",
 	"apihelp-templatedata-param-includeMissingTitles": "Gegevens over titels ook retourneren als deze ontbreken of geen sjabloongegevens hebben. Standaard worden titels alleen geretourneerd als ze bestaan en sjabloongegevens hebben.",
 	"apihelp-templatedata-param-doNotIgnoreMissingTitles": "Gegevens over titels ook retourneren als deze ontbreken of geen sjabloongegevens hebben. Standaard (voor achterwaartse compatibiliteit) worden titels alleen geretourneerd als ze bestaan en sjabloongegevens hebben.",
 	"apihelp-templatedata-param-lang": "Gelokaliseerde waarden in deze taal retourneren. Standaard worden alle beschikbare vertalingen geretourneerd.",

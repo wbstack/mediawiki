@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWMediaContextItem class.
  *
- * @copyright 2011-2017 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -11,9 +11,9 @@
  * @extends ve.ui.LinearContextItem
  *
  * @constructor
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config]
  */
 ve.ui.MWMediaContextItem = function VeUiMWMediaContextItem( context, model ) {
 	// Parent constructor
@@ -22,7 +22,7 @@ ve.ui.MWMediaContextItem = function VeUiMWMediaContextItem( context, model ) {
 	// Initialization
 	this.$element.addClass( 've-ui-mwMediaContextItem' );
 
-	var mediaTag = model.getAttribute( 'mediaTag' ) || 'img';
+	const mediaTag = model.getAttribute( 'mediaTag' ) || 'img';
 
 	this.setIcon( {
 		img: 'image',
@@ -32,7 +32,7 @@ ve.ui.MWMediaContextItem = function VeUiMWMediaContextItem( context, model ) {
 		video: 'play'
 	}[ mediaTag ] );
 
-	var messagePostfix = ( mediaTag === 'audio' || mediaTag === 'video' ) ? mediaTag : 'image';
+	const messagePostfix = ( mediaTag === 'audio' || mediaTag === 'video' ) ? mediaTag : 'image';
 
 	// The following messages are used here:
 	// * visualeditor-media-title-audio
@@ -71,16 +71,17 @@ ve.ui.MWMediaContextItem.prototype.getDescription = function () {
  * @inheritdoc
  */
 ve.ui.MWMediaContextItem.prototype.renderBody = function () {
-	var title = mw.Title.newFromText( mw.libs.ve.normalizeParsoidResourceName( this.model.getAttribute( 'resource' ) ) );
-	this.$body.append(
-		$( '<a>' )
-			.text( this.getDescription() )
-			.attr( {
-				href: title.getUrl(),
-				target: '_blank',
-				rel: 'noopener'
-			} )
-	);
+	const title = mw.Title.newFromText( mw.libs.ve.normalizeParsoidResourceName( this.model.getAttribute( 'resource' ) ) );
+	const $link = $( '<a>' )
+		.text( this.getDescription() )
+		.attr( {
+			target: '_blank',
+			rel: 'noopener'
+		} );
+	// T322704
+	ve.setAttributeSafe( $link[ 0 ], 'href', title.getUrl(), '#' );
+
+	this.$body.append( $link );
 };
 
 /* Registration */

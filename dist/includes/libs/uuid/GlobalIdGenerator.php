@@ -61,9 +61,6 @@ class GlobalIdGenerator {
 	/** @var array Cached file handles */
 	protected $fileHandles = [];
 
-	/** @var int B/C constant (deprecated since 1.36) */
-	public const QUICK_VOLATILE = 1;
-
 	/**
 	 * Avoid using __CLASS__ so namespace separators aren't interpreted
 	 * as path components on Windows (T259693)
@@ -97,8 +94,14 @@ class GlobalIdGenerator {
 			throw new InvalidArgumentException( "No temp directory provided" );
 		}
 		$this->tmpDir = $tempDirectory;
-		// Check if getmyuid exists, it could be disabled for security reasons - T324513
-		$fileSuffix = function_exists( 'getmyuid' ) ? getmyuid() : '';
+		// Include the UID in the filename (T268420, T358768)
+		if ( function_exists( 'posix_geteuid' ) ) {
+			$fileSuffix = posix_geteuid();
+		} elseif ( function_exists( 'getmyuid' ) ) {
+			$fileSuffix = getmyuid();
+		} else {
+			$fileSuffix = '';
+		}
 		$this->uniqueFilePrefix = self::FILE_PREFIX . $fileSuffix;
 		$this->nodeIdFile = $tempDirectory . '/' . $this->uniqueFilePrefix . '-UID-nodeid';
 		// If different processes run as different users, they may have different temp dirs.
@@ -175,8 +178,8 @@ class GlobalIdGenerator {
 		Assert::parameter( $base <= 36, '$base', 'must be <= 36' );
 		Assert::parameter( $base >= 2, '$base', 'must be >= 2' );
 
-		$info = $this->getTimeAndDelay( 'lockFile128', 16384, 1048576, 1048576 );
-		$info[self::CLOCK_OFFSET_COUNTER] %= 1048576;
+		$info = $this->getTimeAndDelay( 'lockFile128', 16384, 1_048_576, 1_048_576 );
+		$info[self::CLOCK_OFFSET_COUNTER] %= 1_048_576;
 
 		return \Wikimedia\base_convert( $this->getTimestampedID128( $info ), 2, $base );
 	}
@@ -311,16 +314,13 @@ class GlobalIdGenerator {
 	 * Return an ID that is sequential *only* for this node and bucket
 	 *
 	 * These IDs are suitable for per-host sequence numbers, e.g. for some packet protocols.
-	 * If GlobalIdGenerator::QUICK_VOLATILE is used the counter might reset on
-	 * server restart.
 	 *
 	 * @param string $bucket Arbitrary bucket name (should be ASCII)
 	 * @param int $bits Bit size (<=48) of resulting numbers before wrap-around
-	 * @param int $flags (supports GlobalIdGenerator::QUICK_VOLATILE)
 	 * @return float Integer value as float
 	 */
-	public function newSequentialPerNodeID( $bucket, $bits = 48, $flags = 0 ) {
-		return current( $this->newSequentialPerNodeIDs( $bucket, $bits, 1, $flags ) );
+	public function newSequentialPerNodeID( $bucket, $bits = 48 ) {
+		return current( $this->newSequentialPerNodeIDs( $bucket, $bits, 1 ) );
 	}
 
 	/**
@@ -329,12 +329,11 @@ class GlobalIdGenerator {
 	 * @param string $bucket Arbitrary bucket name (should be ASCII)
 	 * @param int $bits Bit size (16 to 48) of resulting numbers before wrap-around
 	 * @param int $count Number of IDs to return
-	 * @param int $flags (supports GlobalIdGenerator::QUICK_VOLATILE)
 	 * @return array Ordered list of float integer values
 	 * @see GlobalIdGenerator::newSequentialPerNodeID()
 	 */
-	public function newSequentialPerNodeIDs( $bucket, $bits, $count, $flags = 0 ) {
-		return $this->getSequentialPerNodeIDs( $bucket, $bits, $count, $flags );
+	public function newSequentialPerNodeIDs( $bucket, $bits, $count ) {
+		return $this->getSequentialPerNodeIDs( $bucket, $bits, $count );
 	}
 
 	/**
@@ -368,12 +367,11 @@ class GlobalIdGenerator {
 	 * @param string $bucket Arbitrary bucket name (should be ASCII)
 	 * @param int $bits Bit size (16 to 48) of resulting numbers before wrap-around
 	 * @param int $count Number of IDs to return
-	 * @param int $flags (supports GlobalIdGenerator::QUICK_VOLATILE)
 	 * @return array Ordered list of float integer values
 	 * @throws RuntimeException
 	 * @see GlobalIdGenerator::newSequentialPerNodeID()
 	 */
-	protected function getSequentialPerNodeIDs( $bucket, $bits, $count, $flags ) {
+	protected function getSequentialPerNodeIDs( $bucket, $bits, $count ) {
 		if ( $count <= 0 ) {
 			return [];
 		}
@@ -431,7 +429,7 @@ class GlobalIdGenerator {
 	/**
 	 * Get a (time,counter,clock sequence) where (time,counter) is higher
 	 * than any previous (time,counter) value for the given clock sequence.
-	 * This is useful for making UIDs sequential on a per-node bases.
+	 * This is useful for making UIDs sequential on a per-node basis.
 	 *
 	 * @param string $lockFile Name of a local lock file
 	 * @param int $clockSeqSize The number of possible clock sequence values
@@ -492,7 +490,7 @@ class GlobalIdGenerator {
 		//    - For any drift above 10ms, we pretend that the clock went backwards, and treat
 		//      it the same way as after an NTP sync, by incrementing clock sequence instead.
 		//      Given the sequence rolls over automatically, and silently, and is meant to be
-		//      rare, this is essentially sacrifices a reasonable guarantee of uniqueness.
+		//      rare, this essentially sacrifices a reasonable guarantee of uniqueness.
 		//    - For long running processes (e.g. longer than a few seconds) the drift can
 		//      easily be more than 2 seconds. Because we only have a single lock file
 		//      and don't want to keep too many counters and deal with clearing those,
@@ -515,40 +513,38 @@ class GlobalIdGenerator {
 			// The UID lock file was already initialized
 			$clkSeq = (int)$data[0] % $clockSeqSize;
 			$prevSec = (int)$data[1];
-			// Counter for UIDs with the same timestamp,
-			$msecCounter = 0;
+			$prevMsecCounter = (int)$data[2] % $msecCounterSize;
 			$randOffset = (int)$data[3] % $counterSize;
-
-			// If the system clock moved backwards by an NTP sync,
-			// or if the last writer process had its clock drift ahead,
-			// Try to catch up if the gap is small, so that we can keep a single
-			// monotonic logic file.
+			// If the system clock moved back or inter-process clock drift caused the last
+			// writer process to record a higher time than the current process time, then
+			// briefly wait for the current process clock to catch up.
 			$sec = $this->timeWaitUntil( $prevSec );
 			if ( $sec === false ) {
-				// Gap is too big. Looks like the clock got moved back significantly.
-				// Start a new clock sequence, and re-randomize the extra offset,
-				// which is useful for UIDs that do not include the clock sequence number.
+				// There was too much clock drift to wait. Bump the clock sequence number to
+				// avoid collisions between new and already-generated IDs with the same time.
 				$clkSeq = ( $clkSeq + 1 ) % $clockSeqSize;
 				$sec = time();
-				$randOffset = mt_rand( 0, $offsetSize - 1 );
+				$msecCounter = 0;
+				$randOffset = random_int( 0, $offsetSize - 1 );
 				trigger_error( "Clock was set back; sequence number incremented." );
 			} elseif ( $sec === $prevSec ) {
-				// Double check, only keep remainder if a previous writer wrote
-				// something here that we don't accept.
-				$msecCounter = (int)$data[2] % $msecCounterSize;
-				// Bump the counter if the time has not changed yet
-				if ( ++$msecCounter >= $msecCounterSize ) {
+				// The time matches the last ID. Bump the tie-breaking counter.
+				$msecCounter = $prevMsecCounter + 1;
+				if ( $msecCounter >= $msecCounterSize ) {
 					// More IDs generated with the same time than counterSize can accommodate
 					flock( $handle, LOCK_UN );
 					throw new RuntimeException( "Counter overflow for timestamp value." );
 				}
+			} else {
+				// The time is higher than the last ID. Reset the tie-breaking counter.
+				$msecCounter = 0;
 			}
 		} else {
 			// Initialize UID lock file information
-			$clkSeq = mt_rand( 0, $clockSeqSize - 1 );
+			$clkSeq = random_int( 0, $clockSeqSize - 1 );
 			$sec = time();
 			$msecCounter = 0;
-			$randOffset = mt_rand( 0, $offsetSize - 1 );
+			$randOffset = random_int( 0, $offsetSize - 1 );
 		}
 
 		// Update and release the UID lock file
@@ -599,7 +595,7 @@ class GlobalIdGenerator {
 	 * @throws RuntimeException
 	 */
 	protected function millisecondsSinceEpochBinary( array $time ) {
-		list( $sec, $msec ) = $time;
+		[ $sec, $msec ] = $time;
 		$ts = 1000 * $sec + $msec;
 		if ( $ts > 2 ** 52 ) {
 			throw new RuntimeException( __METHOD__ .
@@ -616,7 +612,7 @@ class GlobalIdGenerator {
 	 * @throws RuntimeException
 	 */
 	protected function intervalsSinceGregorianBinary( array $time, $delta = 0 ) {
-		list( $sec, $msec ) = $time;
+		[ $sec, $msec ] = $time;
 		$offset = '122192928000000000';
 
 		// 64 bit integers
@@ -657,10 +653,8 @@ class GlobalIdGenerator {
 
 		$this->loaded = true;
 
-		$nodeId = '';
-		if ( is_file( $this->nodeIdFile ) ) {
-			$nodeId = file_get_contents( $this->nodeIdFile );
-		}
+		// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		$nodeId = @file_get_contents( $this->nodeIdFile ) ?: '';
 		// Try to get some ID that uniquely identifies this machine (RFC 4122)...
 		if ( !preg_match( '/^[0-9a-f]{12}$/i', $nodeId ) ) {
 			AtEase::suppressWarnings();
@@ -668,7 +662,7 @@ class GlobalIdGenerator {
 				// https://technet.microsoft.com/en-us/library/bb490913.aspx
 				$csv = trim( ( $this->shellCallback )( 'getmac /NH /FO CSV' ) );
 				$line = substr( $csv, 0, strcspn( $csv, "\n" ) );
-				$info = str_getcsv( $line );
+				$info = str_getcsv( $line, ",", "\"", "\\" );
 				// @phan-suppress-next-line PhanTypeMismatchArgumentNullableInternal False positive
 				$nodeId = isset( $info[0] ) ? str_replace( '-', '', $info[0] ) : '';
 			} elseif ( is_executable( '/sbin/ifconfig' ) ) {

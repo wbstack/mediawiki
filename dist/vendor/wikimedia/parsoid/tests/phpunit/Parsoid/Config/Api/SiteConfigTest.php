@@ -2,6 +2,7 @@
 
 namespace Test\Parsoid\Config\Api;
 
+use Wikimedia\Bcp47Code\Bcp47CodeValue;
 use Wikimedia\Parsoid\Config\Api\SiteConfig;
 
 /**
@@ -178,10 +179,10 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testLang() {
-		$this->assertSame(
+	public function testLangBcp47() {
+		$this->assertEqualsIgnoringCase(
 			'en',
-			$this->getSiteConfig()->lang()
+			$this->getSiteConfig()->langBcp47()->toBcp47Code()
 		);
 	}
 
@@ -192,10 +193,18 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testResponsiveReferences() {
+	public function testGetMWConfigValue() {
 		$this->assertSame(
-			[ 'enabled' => true, 'threshold' => 10 ],
-			$this->getSiteConfig()->responsiveReferences()
+			true,
+			$this->getSiteConfig()->getMWConfigValue( 'CiteResponsiveReferences' )
+		);
+		$this->assertSame(
+			10,
+			$this->getSiteConfig()->getMWConfigValue( 'CiteResponsiveReferencesThreshold' )
+		);
+		$this->assertSame(
+			null,
+			$this->getSiteConfig()->getMWConfigValue( 'CiteUnknownConfig' )
 		);
 	}
 
@@ -206,9 +215,9 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testLangConverterEnabled() {
-		$this->assertTrue( $this->getSiteConfig()->langConverterEnabled( 'zh' ) );
-		$this->assertFalse( $this->getSiteConfig()->langConverterEnabled( 'de' ) );
+	public function testLangConverterEnabledBcp47() {
+		$this->assertTrue( $this->getSiteConfig()->langConverterEnabledBcp47( new Bcp47CodeValue( 'zh' ) ) );
+		$this->assertFalse( $this->getSiteConfig()->langConverterEnabledBcp47( new Bcp47CodeValue( 'de' ) ) );
 	}
 
 	public function testScript() {
@@ -255,15 +264,19 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testVariants() {
-		$ret = $this->getSiteConfig()->variants();
+	public function testVariantsFor() {
+		$ret = $this->getSiteConfig()->variantsFor( new Bcp47CodeValue( 'zh-hant-tw' ) );
 		$this->assertIsArray( $ret );
-		$this->assertSame(
+		$this->assertEquals(
 			[
-				'base' => 'zh',
-				'fallbacks' => [ 'zh-hant', 'zh-hk', 'zh-mo' ],
+				'base' => new Bcp47CodeValue( 'zh' ),
+				'fallbacks' => [
+					new Bcp47CodeValue( 'zh-Hant' ),
+					new Bcp47CodeValue( 'zh-Hant-HK' ),
+					new Bcp47CodeValue( 'zh-Hant-MO' ),
+				],
 			],
-			$ret['zh-tw'] ?? null
+			$ret
 		);
 	}
 
@@ -274,10 +287,11 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testMagicWords() {
-		$ret = $this->getSiteConfig()->magicWords();
-		$this->assertIsArray( $ret );
-		$this->assertSame( [ 1, 'disambiguation' ], $ret['__DISAMBIG__'] ?? null );
+	public function testGetMagicWordForBehaviorSwitch() {
+		$this->assertSame(
+			'disambiguation',
+			$this->getSiteConfig()->getMagicWordForBehaviorSwitch( '__DISAMBIG__' )
+		);
 	}
 
 	public function testMwAliases() {
@@ -293,16 +307,16 @@ class SiteConfigTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testMagicWordCanonicalName() {
+	public function testGetMagicWordForMediaOption() {
 		$this->assertSame(
 			'img_width',
-			$this->getSiteConfig()->magicWordCanonicalName( '$1px' )
+			$this->getSiteConfig()->getMagicWordForMediaOption( '$1px' )
 		);
 	}
 
-	public function testIsMagicWord() {
-		$this->assertTrue( $this->getSiteConfig()->isMagicWord( '$1px' ) );
-		$this->assertSame( false, $this->getSiteConfig()->isMagicWord( 'img_width' ) );
+	public function testIsBehaviorSwitch() {
+		$this->assertTrue( $this->getSiteConfig()->isBehaviorSwitch( '__TOC__' ) );
+		$this->assertSame( false, $this->getSiteConfig()->isBehaviorSwitch( 'img_width' ) );
 	}
 
 	public function testGetMagicWordMatcher() {

@@ -1,4 +1,7 @@
 <?php
+
+namespace MediaWiki\Extension\Notifications;
+
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +22,7 @@
  */
 
 use MediaWiki\ResourceLoader as RL;
+use RuntimeException;
 
 /**
  * A sibling of secret special sauce.
@@ -32,27 +36,16 @@ class ResourceLoaderEchoImageModule extends RL\ImageModule {
 
 		// Check to make sure icons are set
 		if ( !isset( $this->definition['icons'] ) ) {
-			throw new MWException( 'Icons must be set.' );
+			throw new RuntimeException( 'Icons must be set.' );
 		}
 
 		$images = [];
 		foreach ( $this->definition['icons'] as $iconName => $definition ) {
 			// FIXME: We also have a 'site' icon which is "magical"
 			// and uses witchcraft and should be handled specifically
-			if ( isset( $definition[ 'path' ] ) ) {
-				if ( is_array( $definition[ 'path' ] ) ) {
-					$paths = [];
-					foreach ( $definition[ 'path' ] as $dir => $p ) {
-						// Has both rtl and ltr definitions
-						$paths[ $dir ] = $p;
-					}
-				} else {
-					$paths = $definition[ 'path' ];
-				}
-
-				if ( !empty( $paths ) ) {
-					$images[ $iconName ][ 'file' ] = $paths;
-				}
+			if ( isset( $definition[ 'path' ] ) && $definition[ 'path' ] ) {
+				// string or array, if array, has both rtl and ltr definitions
+				$images[ $iconName ][ 'file' ] = $definition[ 'path' ];
 			}
 		}
 

@@ -23,9 +23,9 @@
 
 namespace MediaWiki\Session;
 
+use MediaWiki\Request\WebRequest;
+use MediaWiki\User\User;
 use Psr\Log\LoggerAwareInterface;
-use User;
-use WebRequest;
 
 /**
  * This exists to make IDEs happy, so they don't see the
@@ -61,7 +61,7 @@ interface SessionManagerInterface extends LoggerAwareInterface {
 	 *  session associated with this WebRequest object will be overwritten.
 	 * @return Session|null
 	 */
-	public function getSessionById( $id, $create = false, WebRequest $request = null );
+	public function getSessionById( $id, $create = false, ?WebRequest $request = null );
 
 	/**
 	 * Create a new, empty session
@@ -73,7 +73,7 @@ interface SessionManagerInterface extends LoggerAwareInterface {
 	 *  session associated with this WebRequest object will be overwritten.
 	 * @return Session
 	 */
-	public function getEmptySession( WebRequest $request = null );
+	public function getEmptySession( ?WebRequest $request = null );
 
 	/**
 	 * Invalidate sessions for a user
@@ -91,15 +91,12 @@ interface SessionManagerInterface extends LoggerAwareInterface {
 	 *
 	 * The return value is such that someone could theoretically do this:
 	 * @code
-	 * foreach ( $provider->getVaryHeaders() as $header => $options ) {
-	 *   $outputPage->addVaryHeader( $header, $options );
+	 * foreach ( $provider->getVaryHeaders() as $header => $_ ) {
+	 *   $outputPage->addVaryHeader( $header );
 	 * }
 	 * @endcode
 	 *
-	 * Note that the $options argument to OutputPage::addVaryHeader() has
-	 * been deprecated and should always be null.
-	 *
-	 * @return array
+	 * @return array<string,null>
 	 */
 	public function getVaryHeaders();
 

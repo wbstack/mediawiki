@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Balajijagadesh",
-			"Rakeshonwiki",
-			"Fahimrazick"
+			"Fahimrazick",
+			"Rakeshonwiki"
 		]
 	},
 	"kartographer-broken-category": "உடைந்த வரைப்படங்கள் கொண்ட பக்கங்கள்",
@@ -12,7 +12,6 @@
 	"kartographer-sidebar-latitude": "குறுக்குக் கோடு",
 	"kartographer-sidebar-longitude": "குத்துயரக் கோடு",
 	"kartographer-sidebar-mapdetails": "வெளி வரைப்படம்",
-	"kartographer-sidebar-service": "சேவை",
 	"kartographer-sidebar-togglebutton": "வெளி வரைப்படம்",
 	"leafletdraw-draw-handlers-circle-radius": "ஆரம்",
 	"leafletdraw-draw-toolbar-actions-text": "கைவிடுக",

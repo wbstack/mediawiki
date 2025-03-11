@@ -6,9 +6,9 @@
 			"Eitvys200",
 			"Hugo.arg",
 			"Manvydasz",
-			"Tomasdd",
 			"Nokeoo",
-			"Pavel1513"
+			"Pavel1513",
+			"Tomasdd"
 		]
 	},
 	"cirrussearch-desc": "Elasticsearch-įgalinta MediaWiki paieška",
@@ -19,8 +19,7 @@
 	"cirrussearch-regex-too-busy-error": "Per daug reguliariųjų išraiškų paieškų veikia vienu metu. Prašome vėliau pabandyti dar kartą.",
 	"cirrussearch-regex-too-complex-error": "Per daug sudėtinga reguliarioji išraiška. Apie jos supaprastinimą galite išmokti [[mw:Special:MyLanguage/Help:CirrusSearch/RegexTooComplex|čia]].",
 	"cirrussearch-now-using": "Ši wiki svetainė naudoja naujovišką paieškos variklį. ([[mw:Special:MyLanguage/Help:CirrusSearch|Plačiau]])",
-	"cirrussearch-ignored-headings": " #<!-- palikite šią eilutę tiksliai tokią, kokia ji yra --> <pre>\n# Antraštės, kurios bus ignoruojamos paieškų.\n# Pakeitimai įsigalios iš karto, kai bus suindeksuota puslapio antraštė.\n# Galite priversti perindeksuoti puslapį atlikdami tuščią pakeitimą.\n# Sintaksė tokia:\n#   * Viskas nuo simbolio \"#\" iki eilutės pabaigos yra komentaras.\n#   * Kiekviena netuščia eilutė yra tikslus pavadinimas, kurį reikia ignoruoti, tipas ir visa kita.\nNuorodos\nIšorinės nuorodos\nTaip pat žr.\n #</pre> <!-- palikite šią eilutę tiksliai tokią, kokia ji yra -->",
-	"cirrussearch-boost-templates": " #<!-- palikite šią eilutę tiksliai tokią, kokia ji yra --> <pre>\n# Jeigu puslapis talpina vieną arba daugiau šių šablonų, tada jo paieškos balas yra padauginamas iš sukonfigūruotos procentinės dalies.\n# Pakeitimai įsigalioja iš karto.\n# Sintaksė tokia:\n#   * Viskas nuo simbolio \"#\" iki eilutės galo yra komentaras.\n#   * Kiekviena netuščia eilutė yra tikslus šablono pavadinimas, kurį norite paaukštinti, vardų sritis, po kurios eina \"|\" simbolis, po to skaičius ir \"%\" simbolis.\n# Gerų eilučių pavyzdžiai:\n# Šablonas:Geras|150%\n# Šablonas:Labai Labai Geras|300%\n# Šablonas:Prastas|50%\n# Neveikiančių eilučių pavyzdžiai:\n# Šablonas:Foo|150.234234% <-- neleidžiamos dešimtainės dalys!\n# Foo|150% <--- techniškai veikia, bet tik Foo puslapiui iš pagrindinės vardų srities\n# Galite testuoti konfigūracijos pakeitimus vykdydami užklausas su prefiksu boost-templates:\"XX\", čia XX yra visi šablonai, kuriuos norite paaukštinti, atskirti tarpais, o ne naujomis eilutėmis.\n# Užklausos, kurios naudoja boost-templates:\"XX\", ignoruoja šio lauko turinį.\n #</pre> <!-- palikite šią eilutę tiksliai tokią, kokia ji yra -->",
+	"cirrussearch-boost-templates": " #<!-- palikite šią eilutę tiksliai tokią, kokia ji yra --> <pre>\n# Jeigu puslapis talpina vieną arba daugiau šių šablonų, tada jo paieškos balas yra padauginamas iš sukonfigūruotos procentinės dalies.\n# Pakeitimai įsigalioja iš karto.\n# Sintaksė tokia:\n#   * Viskas nuo simbolio \"#\" iki eilutės galo yra komentaras.\n#   * Kiekviena netuščia eilutė yra tikslus šablono pavadinimas, kurį norite paaukštinti, vardų sritis, po kurios eina \"|\" simbolis, po to skaičius ir \"%\" simbolis.\n# Gerų eilučių pavyzdžiai:\n# Šablonas:Geras|150%\n# Šablonas:Labai Labai Geras|300%\n# Šablonas:Prastas|50%\n# Neveikiančių eilučių pavyzdžiai:\n# Šablonas:Foo|150.234234% # neleidžiamos dešimtainės dalys!\n# Foo|150% # techniškai veikia, bet tik Foo puslapiui iš pagrindinės vardų srities\n# Galite testuoti konfigūracijos pakeitimus vykdydami užklausas su prefiksu boost-templates:\"XX\", čia XX yra visi šablonai, kuriuos norite paaukštinti, atskirti tarpais, o ne naujomis eilutėmis.\n# Užklausos, kurios naudoja boost-templates:\"XX\", ignoruoja šio lauko turinį.\n #</pre> <!-- palikite šią eilutę tiksliai tokią, kokia ji yra -->",
 	"cirrussearch-pref-label": "Nauja paieška",
 	"cirrussearch-pref-desc": "Išbandykite naują paiešką, kuri palaiko daugiau kalbų, pateikia aktualesnius rezultatus ir net gali rasti tekstą šablone.",
 	"cirrussearch-give-feedback": "Pateikite mums savo atsiliepimą",
@@ -36,13 +35,12 @@
 	"cirrussearch-completion-profile-normal-pref-desc": "Netaiso riktų. Panašius nukreipimus suveda į vieną.",
 	"cirrussearch-completion-profile-classic-pref-name": "Įprastinė paieška pagal žodžio pradžią",
 	"cirrussearch-completion-profile-classic-pref-desc": "Netaiso riktų. Ieškoma pagal žodžio pradžią.",
+	"cirrussearch-feature-deepcat-timeout": "Baigėsi kategorijos platesnės paieškos skirtasis laikas. Greičiausiai kategorijoje yra per daug subkategorijų.",
 	"cirrussearch-feature-deepcat-invalid-title": "Pateikta kategorija negalima.",
 	"cirrussearch-feature-pageid-invalid-id": "Negalimas puslapio {{PLURAL:$2|ID}}: $1",
 	"cirrussearch-incategory-feature-no-valid-categories": "„$1“ nepateikta jokia galima kategorija.",
 	"cirrussearch-mlt-feature-no-valid-titles": "„$1“ nepateiktas joks galimas pavadinimas.",
 	"cirrussearch-mlt-not-configured": "Funkcija „$1“ netinkamai sukonfigūruota. Paprašykite administratoriaus pataisyti $wgCirrusSearchMoreLikeThisFields",
-	"cirrussearch-explore-similar-categories": "Kategorijos",
-	"cirrussearch-explore-similar-languages": "Kalbos",
 	"cirrussearch-explore-similar-related-none": "Nėra jokių susijusių puslapių",
 	"cirrussearch-article-words": "Žodžiai visuose turinio puslapiuose"
 }

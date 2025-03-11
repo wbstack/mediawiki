@@ -2,17 +2,18 @@
 
 namespace MediaWiki\Extension\OAuth\Rest\Handler;
 
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Extension\OAuth\Backend\Consumer;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Control\ConsumerAccessControl;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\ResponseInterface;
 use MediaWiki\Rest\SimpleHandler;
-use RequestContext;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * Handles the oauth2/consumers endpoint, which returns
@@ -89,10 +90,7 @@ class ListClients extends SimpleHandler {
 		return $responseFactory->createJson( $response );
 	}
 
-	/**
-	 *
-	 * @return array
-	 */
+	/** @inheritDoc */
 	public function getParamSettings() {
 		return [
 			'limit' => [
@@ -121,16 +119,11 @@ class ListClients extends SimpleHandler {
 	 * @return array the results
 	 */
 	private function getDbResults( int $centralId ) {
-		$dbr = $this->loadBalancer->getConnectionRef( DB_REPLICA );
+		$dbr = $this->loadBalancer->getConnection( DB_REPLICA );
 
 		$params = $this->getValidatedParams();
 		$limit = $params['limit'];
 		$offset = $params['offset'];
-
-		$options = [
-			'LIMIT' => $limit,
-			'OFFSET' => $offset
-		];
 
 		$oauthVersion = $params['oauth_version'];
 		$conds = [ 'oarc_user_id' => $centralId ];
@@ -138,21 +131,22 @@ class ListClients extends SimpleHandler {
 			$conds['oarc_oauth_version'] = (int)$oauthVersion;
 		}
 
-		$options['ORDER BY'] = 'oarc_id DESC';
+		$res = $dbr->newSelectQueryBuilder()
+			->select( array_values( $this->propertyMapping ) )
+			->from( 'oauth_registered_consumer' )
+			->where( $conds )
+			->orderBy( 'oarc_id', SelectQueryBuilder::SORT_DESC )
+			->limit( $limit )
+			->offset( $offset )
+			->caller( __METHOD__ )
+			->fetchResultSet();
 
-		$res = $dbr->select(
-			'oauth_registered_consumer',
-			array_values( $this->propertyMapping ),
-			$conds,
-			__METHOD__,
-			$options
-		);
-
-		$total = $dbr->selectRowCount(
-			'oauth_registered_consumer',
-			'oarc_consumer_key',
-			$conds
-		);
+		$total = $dbr->newSelectQueryBuilder()
+			->select( 'oarc_consumer_key' )
+			->from( 'oauth_registered_consumer' )
+			->where( $conds )
+			->caller( __METHOD__ )
+			->fetchRowCount();
 
 		return [
 			'clients' => $this->processDbResults( $res ),

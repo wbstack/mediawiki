@@ -19,19 +19,13 @@ use InvalidArgumentException;
  */
 class GlobeCoordinateValue implements DataValue {
 
-	private $latLong;
-
-	/**
-	 * @var float|null
-	 */
-	private $precision;
+	private LatLongValue $latLong;
+	private ?float $precision;
 
 	/**
 	 * IRI of the globe on which the location resides.
-	 *
-	 * @var string
 	 */
-	private $globe;
+	private string $globe;
 
 	/**
 	 * Wikidata concept URI for the Earth. Used as default value when no other globe was specified.
@@ -40,12 +34,12 @@ class GlobeCoordinateValue implements DataValue {
 
 	/**
 	 * @param LatLongValue $latLong
-	 * @param float|int|null $precision in degrees, e.g. 0.01.
-	 * @param string|null $globe IRI, defaults to 'http://www.wikidata.org/entity/Q2'.
+	 * @param ?float $precision in degrees, e.g. 0.01.
+	 * @param ?string $globe IRI, defaults to 'http://www.wikidata.org/entity/Q2'.
 	 *
 	 * @throws IllegalValueException
 	 */
-	public function __construct( LatLongValue $latLong, float $precision = null, string $globe = null ) {
+	public function __construct( LatLongValue $latLong, ?float $precision = null, ?string $globe = null ) {
 		$this->assertIsPrecision( $precision );
 
 		if ( $globe === null ) {
@@ -128,7 +122,11 @@ class GlobeCoordinateValue implements DataValue {
 	 * @return string
 	 */
 	public function serialize(): string {
-		return json_encode( array_values( $this->getArrayValue() ) );
+		return json_encode( $this->__serialize() );
+	}
+
+	public function __serialize(): array {
+		return array_values( $this->getArrayValue() );
 	}
 
 	/**
@@ -139,7 +137,11 @@ class GlobeCoordinateValue implements DataValue {
 	 * @throws InvalidArgumentException
 	 */
 	public function unserialize( $value ) {
-		[ $latitude, $longitude, $altitude, $precision, $globe ] = json_decode( $value );
+		$this->__unserialize( json_decode( $value ) );
+	}
+
+	public function __unserialize( array $data ): void {
+		[ $latitude, $longitude, $altitude, $precision, $globe ] = $data;
 		$this->__construct( new LatLongValue( $latitude, $longitude ), $precision, $globe );
 	}
 
@@ -216,7 +218,7 @@ class GlobeCoordinateValue implements DataValue {
 			throw new IllegalValueException( 'numeric longitude field required' );
 		}
 
-		return new static(
+		return new self(
 			new LatLongValue(
 				(float)$data['latitude'],
 				(float)$data['longitude']

@@ -3,16 +3,18 @@
 namespace Wikibase\Repo\Specials;
 
 use InvalidArgumentException;
+use MediaWiki\Languages\LanguageNameUtils;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Term\DescriptionsProvider;
 use Wikibase\Lib\ContentLanguages;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Summary;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOps;
 use Wikibase\Repo\CopyrightMessageBuilder;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\EntityPermissionChecker;
 use Wikibase\Repo\SummaryFormatter;
 
@@ -30,9 +32,11 @@ class SpecialSetDescription extends SpecialModifyTerm {
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		EntityPermissionChecker $entityPermissionChecker,
-		ContentLanguages $termsLanguages
+		ContentLanguages $termsLanguages,
+		LanguageNameUtils $languageNameUtils
 	) {
 		parent::__construct(
 			'SetDescription',
@@ -42,14 +46,18 @@ class SpecialSetDescription extends SpecialModifyTerm {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
+			$anonymousEditWarningBuilder,
 			$entityPermissionChecker,
-			$termsLanguages
+			$termsLanguages,
+			$languageNameUtils
 		);
 	}
 
 	public static function factory(
+		LanguageNameUtils $languageNameUtils,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder,
 		ChangeOpFactoryProvider $changeOpFactoryProvider,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityPermissionChecker $entityPermissionChecker,
 		EntityTitleLookup $entityTitleLookup,
 		SettingsArray $repoSettings,
@@ -69,8 +77,10 @@ class SpecialSetDescription extends SpecialModifyTerm {
 			$summaryFormatter,
 			$entityTitleLookup,
 			$editEntityFactory,
+			$anonymousEditWarningBuilder,
 			$entityPermissionChecker,
-			$termsLanguages
+			$termsLanguages,
+			$languageNameUtils
 		);
 	}
 

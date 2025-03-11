@@ -1,16 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Ajiniyaz Nurniyazov",
 			"Inabat Allanova",
 			"Nurlan",
-			"Xð",
-			"Ajiniyaz Nurniyazov"
+			"Xð"
 		]
 	},
 	"uls-plang-title-languages": "Tiller",
 	"ext-uls-select-language-settings-icon-tooltip": "Til sazlamaları",
-	"ext-uls-undo-language-tooltip-text": "Til $1 den ózgertirildi",
-	"ext-uls-undo-language-tooltip-text-local": "Bul wiki ushın til ózgertirildi. Barlıq wikilar tilin ózgertiw ushın [[Special:GlobalPreferences|global sazlamalardı]] tekseriń.",
+	"ext-uls-undo-language-tooltip-text": "Til $1 degennen ózgertildi",
+	"ext-uls-undo-language-tooltip-text-local": "Bul wiki ushın til ózgertildi. Barlıq wikiler tilin ózgertiw ushın [[Special:GlobalPreferences|globallıq sazlawlardı]] tekseriń.",
 	"ext-uls-language-settings-preferences-link": "Basqa til sazlamaları",
 	"uls-betafeature-label": "Íqsham til siltemeleri",
 	"uls-betafeature-desc": "Tek sizge kóbirek uyqas tiller diziminiń qısqalaw versiyasın kórsetiń.",
@@ -27,7 +27,7 @@
 	"ext-uls-display-settings-ui-language": "Displey tili",
 	"ext-uls-display-settings-anon-same-as-content": "$1 (kontent penen birdey)",
 	"ext-uls-webfonts-settings-title": "Zárúrlik tuwılǵanda shriftlerdi júklep alıw.",
-	"ext-uls-webfonts-settings-info": "Kerekli háripti avtomalıq túrde júklep alıw hám qálegen háripti tańlawǵa ruqsat beriw.",
+	"ext-uls-webfonts-settings-info": "Kerekli háripti avtomatlıq túrde júklep alıw hám qálegen háripti tańlawǵa ruqsat beriw.",
 	"ext-uls-webfonts-settings-info-link": "Kóbirek maǵlıwmat",
 	"ext-uls-input-settings-title": "Engiziw sazlawları",
 	"ext-uls-input-settings-title-short": "Ornatıw",
@@ -37,8 +37,12 @@
 	"ext-uls-disable-input-method": "Jergilikli klaviaturanı qollanıw",
 	"jquery-ime-other-languages": "Basqa tiller",
 	"jquery-ime-disable-text": "Jergilikli klaviaturanı qollanıw",
+	"jquery-ime-help": "Járdem",
 	"ext-uls-input-disable": "Engiziw quralların óshiriw",
 	"ext-uls-input-enable": "Engiziw quralların qosıw",
-	"ext-uls-compact-link-count": "{{PLURAL:$1|Taǵı birew|$1 taǵı}}",
-	"prefs-languages": "Tiller"
+	"ext-uls-input-disable-notification": "Kirgiziw quralları óshirildi",
+	"ext-uls-input-disable-notification-undo": "Biykarlaw",
+	"ext-uls-compact-link-count": "{{PLURAL:$1|Taǵı birew|Taǵı $1}}",
+	"prefs-languages": "Tiller",
+	"ext-uls-add-languages-button-label": "Tillerdi qosıw"
 }

@@ -36,16 +36,10 @@ These options apply only to “repo” functionality.
 ### $wgLexemeNamespace
 
 The number of the namespace in which WikibaseLexeme stores Lexeme entities.
-If you change this, you must also change `$wgLexemeTalkNamespace`.
+A corresponding talk namespace is automatically registered as well.
+Set to `false` to disable registering namespaces automatically.
 
-DEFAULT: `146`
-
-### $wgLexemeTalkNamespace
-
-The number of the talk namespace associated with the `$wgLexemeNamespace`.
-Must be `$wgLexemeNamespace + 1`.
-
-DEFAULT: `147`
+DEFAULT: `146` (therefore the default talk namespace is `147`)
 
 ### $wgLexemeLanguageCodePropertyId
 
@@ -67,13 +61,6 @@ This is used on the Special:NewLexeme page to present the user with more useful 
 Other Items can still be selected and used as the lexical category of a Lexeme.
 
 DEFAULT: `[]`
-
-### $wgLexemeEnableNewAlpha
-
-Whether to enable the new version of the Special:NewLexeme page, Special:NewLexemeAlpha.
-This option is temporary and will be removed when Special:NewLexemeAlpha replaces Special:NewLexeme.
-
-DEFAULT: `false`
 
 ## Client options
 

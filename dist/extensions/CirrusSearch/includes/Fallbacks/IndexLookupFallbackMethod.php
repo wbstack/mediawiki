@@ -97,7 +97,7 @@ class IndexLookupFallbackMethod implements FallbackMethod, ElasticSearchRequestF
 			->setStoredFields( $this->storedFields );
 		$search = new Search( $client );
 		$search->setQuery( $query )
-			->addIndex( $this->index );
+			->addIndex( $client->getIndex( $this->index ) );
 		return $search;
 	}
 
@@ -110,7 +110,7 @@ class IndexLookupFallbackMethod implements FallbackMethod, ElasticSearchRequestF
 		if ( count( $ar ) != 2 ) {
 			throw new SearchProfileException( "Invalid profile parameter [$keyAndValue]" );
 		}
-		list( $key, $value ) = $ar;
+		[ $key, $value ] = $ar;
 		switch ( $key ) {
 			case 'params':
 				$paramValue = $this->profileParams[$value] ?? null;
@@ -159,7 +159,7 @@ class IndexLookupFallbackMethod implements FallbackMethod, ElasticSearchRequestF
 	 * @param InterwikiResolver|null $interwikiResolver
 	 * @return FallbackMethod|null the method instance or null if unavailable
 	 */
-	public static function build( SearchQuery $query, array $params, InterwikiResolver $interwikiResolver = null ) {
+	public static function build( SearchQuery $query, array $params, ?InterwikiResolver $interwikiResolver = null ) {
 		if ( !$query->isWithDYMSuggestion() ) {
 			return null;
 		}
@@ -241,7 +241,7 @@ class IndexLookupFallbackMethod implements FallbackMethod, ElasticSearchRequestF
 			return FallbackStatus::noSuggestion();
 		}
 		$resultSet = $context->getMethodResponse();
-		if ( empty( $resultSet->getResults() ) ) {
+		if ( !$resultSet->getResults() ) {
 			return FallbackStatus::noSuggestion();
 		}
 		$res = $resultSet->getResults()[0];

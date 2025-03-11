@@ -1,8 +1,5 @@
 <?php
 /**
- * Base code for update jobs that put some secondary data extracted
- * from article content into the database.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -20,10 +17,19 @@
  *
  * @file
  */
+use MediaWiki\Deferred\AutoCommitUpdate;
+use MediaWiki\Deferred\DeferredUpdates;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 
+/**
+ * Helper for a Job that writes data derived from page content to the database.
+ *
+ * Used by RefreshLinksJob via LinksUpdate.
+ *
+ * @ingroup JobQueue
+ */
 class PurgeJobUtils {
 	/**
 	 * Invalidate the cache of a list of pages from a single namespace.
@@ -44,21 +50,18 @@ class PurgeJobUtils {
 			__METHOD__,
 			static function () use ( $dbw, $namespace, $dbkeys, $fname ) {
 				$services = MediaWikiServices::getInstance();
-				$lbFactory = $services->getDBLoadBalancerFactory();
+				$dbProvider = $services->getConnectionProvider();
 				// Determine which pages need to be updated.
 				// This is necessary to prevent the job queue from smashing the DB with
 				// large numbers of concurrent invalidations of the same page.
 				$now = $dbw->timestamp();
-				$ids = $dbw->selectFieldValues(
-					'page',
-					'page_id',
-					[
-						'page_namespace' => $namespace,
-						'page_title' => $dbkeys,
-						'page_touched < ' . $dbw->addQuotes( $now )
-					],
-					$fname
-				);
+				$ids = $dbw->newSelectQueryBuilder()
+					->select( 'page_id' )
+					->from( 'page' )
+					->where( [ 'page_namespace' => $namespace ] )
+					->andWhere( [ 'page_title' => $dbkeys ] )
+					->andWhere( $dbw->expr( 'page_touched', '<', $now ) )
+					->caller( $fname )->fetchFieldValues();
 
 				if ( !$ids ) {
 					return;
@@ -66,20 +69,17 @@ class PurgeJobUtils {
 
 				$batchSize =
 					$services->getMainConfig()->get( MainConfigNames::UpdateRowsPerQuery );
-				$ticket = $lbFactory->getEmptyTransactionTicket( $fname );
+				$ticket = $dbProvider->getEmptyTransactionTicket( $fname );
 				$idBatches = array_chunk( $ids, $batchSize );
 				foreach ( $idBatches as $idBatch ) {
-					$dbw->update(
-						'page',
-						[ 'page_touched' => $now ],
-						[
-							'page_id' => $idBatch,
-							'page_touched < ' . $dbw->addQuotes( $now ) // handle races
-						],
-						$fname
-					);
+					$dbw->newUpdateQueryBuilder()
+						->update( 'page' )
+						->set( [ 'page_touched' => $now ] )
+						->where( [ 'page_id' => $idBatch ] )
+						->andWhere( $dbw->expr( 'page_touched', '<', $now ) ) // handle races
+						->caller( $fname )->execute();
 					if ( count( $idBatches ) > 1 ) {
-						$lbFactory->commitAndWaitForReplication( $fname, $ticket );
+						$dbProvider->commitAndWaitForReplication( $fname, $ticket );
 					}
 				}
 			}

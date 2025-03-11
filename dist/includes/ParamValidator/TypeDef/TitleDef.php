@@ -3,7 +3,7 @@
 namespace MediaWiki\ParamValidator\TypeDef;
 
 use MediaWiki\Linker\LinkTarget;
-use TitleFactory;
+use MediaWiki\Title\TitleFactory;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\Callbacks;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -59,6 +59,8 @@ class TitleDef extends TypeDef {
 	public function validate( $name, $value, array $settings, array $options ) {
 		$mustExist = !empty( $settings[self::PARAM_MUST_EXIST] );
 		$returnObject = !empty( $settings[self::PARAM_RETURN_OBJECT] );
+
+		$this->failIfNotString( $name, $value, $settings, $options );
 
 		$title = $this->titleFactory->newFromText( $value );
 

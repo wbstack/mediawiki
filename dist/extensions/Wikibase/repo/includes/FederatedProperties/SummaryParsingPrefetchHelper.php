@@ -5,6 +5,7 @@ namespace Wikibase\Repo\FederatedProperties;
 
 use LogicException;
 use MediaWiki\Revision\RevisionRecord;
+use Psr\Log\LoggerInterface;
 use Wikibase\DataAccess\PrefetchingTermLookup;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\PropertyId;
@@ -22,11 +23,16 @@ class SummaryParsingPrefetchHelper {
 	 */
 	private $prefetchingLookup;
 
+	/** @var LoggerInterface */
+	private $logger;
+
 	public function __construct(
-		PrefetchingTermLookup $prefetchingLookup
+		PrefetchingTermLookup $prefetchingLookup,
+		LoggerInterface $logger
 
 	) {
 		$this->prefetchingLookup = $prefetchingLookup;
+		$this->logger = $logger;
 	}
 
 	/**
@@ -35,13 +41,13 @@ class SummaryParsingPrefetchHelper {
 	public const PROPERTY_SUMMARY_REGEXP = '/\[\[(\S+)(P[1-9]\d*)\]\]/';
 
 	/**
-	 * @param IResultWrapper|array $rows
+	 * @param IResultWrapper|\stdClass[]|RevisionRecord[] $rows
 	 * @param array $languageCodes
 	 * @param array $termTypes
 	 */
 	public function prefetchFederatedProperties( $rows, array $languageCodes, array $termTypes ): void {
 		$resultProperties = $this->extractSummaryProperties( $rows );
-		if ( empty( $resultProperties ) ) {
+		if ( !$resultProperties ) {
 			return;
 		}
 		try {
@@ -51,20 +57,20 @@ class SummaryParsingPrefetchHelper {
 				$languageCodes
 			);
 		} catch ( FederatedPropertiesException $ex ) {
-			wfLogWarning(
-				__METHOD__ . ': Prefetching failed for federated properties: ' . implode( ',', $resultProperties )
-			);
+			$this->logger->warning( 'Prefetching failed for federated properties: {resultProperties}', [
+				'resultProperties' => implode( ',', $resultProperties ),
+				'exception' => $ex,
+			] );
 		}
 	}
 
 	/**
-	 * @param IResultWrapper|array $result
+	 * @param IResultWrapper|\stdClass[]|RevisionRecord[] $result
 	 * @return PropertyId[]
 	 */
 	public function extractSummaryProperties( $result ): array {
 		$propertyIds = [];
 		foreach ( $result as $revisionRow ) {
-
 			$comment = $this->getCommentText( $revisionRow );
 			if ( $comment === null ) {
 				continue;
@@ -81,6 +87,10 @@ class SummaryParsingPrefetchHelper {
 		return $propertyIds;
 	}
 
+	/**
+	 * @param \stdClass|RevisionRecord|null $revisionRow
+	 * @return string|null
+	 */
 	private function getCommentText( $revisionRow ) {
 		if ( $revisionRow === null ) {
 			return null;

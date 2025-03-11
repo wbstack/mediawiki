@@ -25,7 +25,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Pustaka puniki kaanggén {{PLURAL:$1|acepok|2=pindo|kaping $1}} ring kaca puniki. Pasiluran kakardi iriki pacang katerapang ring makasami genah pustaka kaanggén.",
 	"cite-ve-dialog-reference-options-group-label": "Anggén seka puniki",
 	"cite-ve-dialog-reference-options-group-placeholder": "Pustaka umum",
-	"cite-ve-dialog-reference-options-name-label": "Anggén malih antuk aran puniki",
 	"cite-ve-dialog-reference-options-responsive-label": "Anggén tata genah kolom résponsip",
 	"cite-ve-dialog-reference-options-section": "Opsi",
 	"cite-ve-dialog-reference-placeholder": "Surat utawi témpél pustaka iriki, utawi sisipang mal sitasi.",
@@ -45,9 +44,7 @@
 	"cite-ve-referenceslist-isempty-default": "Nénten wénten pustaka ring kaca puniki sané prasida kasarengang ring lis puniki.",
 	"cite-ve-referenceslist-missingref": "Pustaka puniki kanikayang ring mal utawi blok tiosan, miwah mangkin wantah prasida kauahin ring uahan wit",
 	"cite-ve-referenceslist-missingref-in-list": "Pustaka puniki kanikayang ring mal utawi blok tiosan, miwah mangkin wantah prasida kapracingak ring uahan wit",
-	"cite-ve-referenceslist-missingreflist": "Pustaka puniki karipta olih mal, miwah mangkin wantah prasida kauahin ring uahan wit",
+	"cite-ve-referenceslist-missingreflist": "Pustaka puniki karipta olih mal, miwah mangkin wantah prasida kauahin ring uahan wit.",
 	"cite-ve-toolbar-group-label": "Anggit",
-	"cite-ve-othergroup-item": "$1 pustaka",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Pustaka",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Aran seka pustaka: \"$1\""
+	"cite-ve-othergroup-item": "$1 pustaka"
 }

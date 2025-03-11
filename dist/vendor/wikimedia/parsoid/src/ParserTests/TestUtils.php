@@ -20,6 +20,17 @@ use Wikimedia\Parsoid\Utils\DOMUtils;
 use Wikimedia\Parsoid\Utils\Utils;
 use Wikimedia\Parsoid\Utils\WTUtils;
 
+/**
+ * This class contains helper functions which should not be directly used
+ * outside of Parsoid.
+ *
+ * Per T332457, most of the code in Wikimedia\Parsoid\ParserTests is
+ * "for use in parser test runners only", including the core parser
+ * test runner, but this file is "more internal" than that: core's
+ * parser test runner should not use these helpers directly.
+ *
+ * @internal
+ */
 class TestUtils {
 	/** @var mixed */
 	private static $consoleColor;
@@ -76,7 +87,7 @@ class TestUtils {
 			//     If possible, get rid of it and diff-mark dependency
 			//     on the env object.
 			$mockEnv = new MockEnv( [] );
-			$mockSerializer = new WikitextSerializer( [ 'env' => $mockEnv ] );
+			$mockSerializer = new WikitextSerializer( $mockEnv, [] );
 			$mockState = new SerializerState( $mockSerializer, [ 'selserMode' => false ] );
 			if ( is_string( $domBody ) ) {
 				// Careful about the lifetime of this document
@@ -121,8 +132,9 @@ class TestUtils {
 			$out = preg_replace( $unnecessaryAttribs . '\\\\?"[^\"]*\\\\?"/u', '', $out );
 			$out = preg_replace( $unnecessaryAttribs . "\\\\?'[^\']*\\\\?'/u", '', $out ); // single-quoted variant
 			$out = preg_replace( $unnecessaryAttribs . '&apos;.*?&apos;/u', '', $out ); // apos variant
-			if ( !$options['check-referrer'] ) {
+			if ( !$options['externallinktarget'] ) {
 				$out = preg_replace( '/ nofollow/', '', $out );
+				$out = str_replace( ' rel="nofollow"', '', $out );
 				$out = preg_replace( '/ noreferrer noopener/', '', $out );
 			}
 
@@ -155,8 +167,7 @@ class TestUtils {
 		$out = preg_replace( $attribTroubleRE . "'[^']*\\\\?'/u", '', $out ); // single-quoted variant
 		// strip typeof last
 		$out = preg_replace( '/ typeof="[^\"]*"/u', '', $out );
-		// replace mwt ids
-		$out = preg_replace( '/ id="mw((t\d+)|([\w-]{2,}))"/u', '', $out );
+		$out = self::stripParsoidIds( $out );
 		$out = preg_replace( '/<span[^>]+about="[^"]*"[^>]*>/u', '', $out );
 		$out = preg_replace( '#(\s)<span>\s*</span>\s*#u', '$1', $out );
 		$out = preg_replace( '#<span>\s*</span>#u', '', $out );
@@ -173,9 +184,14 @@ class TestUtils {
 	}
 
 	/**
-	 * @param Node $node
-	 * @param ?string $stripSpanTypeof
+	 * Strip Parsoid ID attributes (id="mwXX", used to associate NodeData) from an HTML string
+	 * @param string $s
+	 * @return string
 	 */
+	public static function stripParsoidIds( string $s ): string {
+		return preg_replace( '/ id="mw([-\w]{2,})"/u', '', $s );
+	}
+
 	private static function cleanSpans(
 		Node $node, ?string $stripSpanTypeof
 	): void {
@@ -188,18 +204,13 @@ class TestUtils {
 		for ( $child = $node->firstChild; $child; $child = $next ) {
 			$next = $child->nextSibling;
 			if ( $child instanceof Element && DOMCompat::nodeName( $child ) === 'span' &&
-				preg_match( $stripSpanTypeof, $child->getAttribute( 'typeof' ) ?? '' )
+				preg_match( $stripSpanTypeof, DOMCompat::getAttribute( $child, 'typeof' ) ?? '' )
 			) {
 				self::unwrapSpan( $node, $child, $stripSpanTypeof );
 			}
 		}
 	}
 
-	/**
-	 * @param Node $parent
-	 * @param Node $node
-	 * @param ?string $stripSpanTypeof
-	 */
 	private static function unwrapSpan(
 		Node $parent, Node $node, ?string $stripSpanTypeof
 	): void {
@@ -210,10 +221,6 @@ class TestUtils {
 		$parent->removeChild( $node );
 	}
 
-	/**
-	 * @param ?Node $node
-	 * @return bool
-	 */
 	private static function newlineAround( ?Node $node ): bool {
 		return $node && preg_match(
 			'/^(body|caption|div|dd|dt|li|p|table|tr|td|th|tbody|dl|ol|ul|h[1-6])$/D',
@@ -221,11 +228,6 @@ class TestUtils {
 		);
 	}
 
-	/**
-	 * @param Node $node
-	 * @param array $opts
-	 * @return Node
-	 */
 	private static function normalizeIEWVisitor(
 		Node $node, array $opts
 	): Node {
@@ -267,8 +269,9 @@ class TestUtils {
 			// hack, since PHP adds a newline before </pre>
 			$opts['stripLeadingWS'] = false;
 			$opts['stripTrailingWS'] = true;
-		} elseif ( DOMCompat::nodeName( $node ) === 'span' &&
-			preg_match( '/^mw[:]/', $node->getAttribute( 'typeof' ) ?? '' )
+		} elseif (
+			DOMCompat::nodeName( $node ) === 'span' &&
+			DOMUtils::matchTypeOf( $node, '/^mw:/' )
 		) {
 			// SPAN is transparent; pass the strip parameters down to kids
 		} else {
@@ -277,9 +280,7 @@ class TestUtils {
 		$child = $node->firstChild;
 		// Skip over the empty mw:FallbackId <span> and strip leading WS
 		// on the other side of it.
-		if ( preg_match( '/^h[1-6]$/D', DOMCompat::nodeName( $node ) ) &&
-			$child && WTUtils::isFallbackIdSpan( $child )
-		) {
+		if ( $child && DOMUtils::isHeading( $node ) && WTUtils::isFallbackIdSpan( $child ) ) {
 			$child = $child->nextSibling;
 		}
 		for ( ; $child; $child = $next ) {
@@ -348,16 +349,12 @@ class TestUtils {
 	 * @return string
 	 */
 	public static function normalizePhpOutput( string $html ): string {
-		$html = preg_replace(
+		return preg_replace(
 			// do not expect section editing for now
 			'/<span[^>]+class="mw-headline"[^>]*>(.*?)<\/span> '
 			. '*(<span class="mw-editsection"><span class="mw-editsection-bracket">'
 			. '\[<\/span>.*?<span class="mw-editsection-bracket">\]<\/span><\/span>)?/u',
 			'$1',
-			$html
-		);
-		return preg_replace(
-			'#<a[^>]+class="mw-headline-anchor"[^>]*>§</a>#', '',
 			$html
 		);
 	}
@@ -435,7 +432,7 @@ class TestUtils {
 			// Attempt to instantiate this class to determine if the
 			// (optional) php-console-color library is installed.
 			try {
-				self::$consoleColor = new \JakubOnderka\PhpConsoleColor\ConsoleColor();
+				self::$consoleColor = new \PHP_Parallel_Lint\PhpConsoleColor\ConsoleColor();
 			} catch ( Error $e ) {
 				/* fall back to no-color mode */
 			}
