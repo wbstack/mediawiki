@@ -248,8 +248,8 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../league/oauth2-server',
             'aliases' => array(
-                0 => '9.0.0',
-                1 => '9999999-dev',
+                0 => '9999999-dev',
+                1 => '9.0.0',
             ),
             'dev_requirement' => false,
         ),
@@ -707,9 +707,9 @@
             'dev_requirement' => false,
         ),
         'swaggest/json-diff' => array(
-            'pretty_version' => 'v3.11.0',
-            'version' => '3.11.0.0',
-            'reference' => 'c55d38a3cb372753b5d5ee4c9b7d8470e486e6a5',
+            'pretty_version' => 'v3.12.1',
+            'version' => '3.12.1.0',
+            'reference' => '7ebc4eab95bcc73916433964c266588d09b35052',
             'type' => 'library',
             'install_path' => __DIR__ . '/../swaggest/json-diff',
             'aliases' => array(),
