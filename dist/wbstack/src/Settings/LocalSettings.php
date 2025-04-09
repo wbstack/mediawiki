@@ -263,6 +263,9 @@ if (getenv('MW_SMTP_ENABLED') === 'yes') {
 $wgSecretKey = $wikiInfo->getSetting('wgSecretKey');
 $wgAuthenticationTokenVersion = "1";
 
+$wgOAuth2PrivateKey = $wikiInfo->getSetting('wgOAuth2PrivateKey');
+$wgOAuth2PublicKey = $wikiInfo->getSetting('wgOAuth2PublicKey');
+
 // So we are uniform, have the project namespace as Project
 $wgMetaNamespace = 'Project';
 // Needed so that Wikibase items appear in Special:Random and are counted as content pages.
