@@ -930,6 +930,28 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
+- name: WikibaseQualityConstraints
+  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseQualityConstraints/zip/6a261e0cacd967ebf0515148b0596202e260f2fa
+  artifactLevel: 1
+  destination: ./dist/extensions/WikibaseQualityConstraints
+  remove:
+    - tests
+    - .github
+    - .stylelintignore
+    - .nvmrc
+    - .eslintignore
+    - .phan
+    - .storybook
+    - .vscode
+    - .gitignore
+    - .eslintrc.json
+    - .gitreview
+    - .phpcs.xml
+    - .stylelintrc.json
+    - .rubocop.yml
+    - .rubocop_todo.yml
+    - Gruntfile.js
+    - Doxyfile
 - name: WikibaseManifest
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseManifest/zip/a9acda8d9f3e671e30fdf14c00570d1b06a763ab
   artifactLevel: 1
