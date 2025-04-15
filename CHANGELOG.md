@@ -2,6 +2,9 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+# 1.39-7.4-20250415-0
+- Add OAuth2 settings
+
 # 1.39-7.4-20250116-0
 - Assume `https://` only in docker-compose setup
 
