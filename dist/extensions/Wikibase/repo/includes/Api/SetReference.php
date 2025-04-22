@@ -4,9 +4,10 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
 use Deserializers\Exceptions\DeserializationException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
 use Psr\Log\LoggerInterface;
 use Wikibase\DataModel\Deserializers\DeserializerFactory;
 use Wikibase\DataModel\Entity\EntityDocument;
@@ -35,6 +36,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 class SetReference extends ApiBase {
 
 	use FederatedPropertyApiValidatorTrait;
+	use ApiCreateTempUserTrait;
 
 	/**
 	 * @var StatementChangeOpFactory
@@ -195,6 +197,7 @@ class SetReference extends ApiBase {
 		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, 'pageinfo' );
 		$this->resultBuilder->markSuccess();
 		$this->resultBuilder->addReference( $newReference );
+		$this->resultBuilder->addTempUser( $status, fn( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
 	private function validateParameters( array $params ): void {
@@ -222,6 +225,7 @@ class SetReference extends ApiBase {
 			);
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnNullable null handled as !is_array
 		return $rawArray;
 	}
 
@@ -330,6 +334,7 @@ class SetReference extends ApiBase {
 				],
 				'bot' => false,
 			],
+			$this->getCreateTempUserParams(),
 			parent::getAllowedParams()
 		);
 	}

@@ -1,28 +1,34 @@
 /*!
  * VisualEditor DataModel MWInternalLinkAnnotation tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.dm.MWInternalLinkAnnotation', ve.test.utils.newMwEnvironment() );
 
 QUnit.test( 'toDataElement', ( assert ) => {
-	const doc = ve.dm.example.createExampleDocumentFromData( [] ),
-		externalLink = ( href ) => {
-			return () => {
+	// The expected data depends on site configuration, so we need to generate the cases several times.
+	const getCases = () => {
+		const
+			externalLink = ( href ) => {
 				const link = document.createElement( 'a' );
 				link.setAttribute( 'href', href );
 				return link;
-			};
-		},
-		internalLink = ( pageTitle, params ) => {
-			return () => {
+			},
+			internalLink = ( pageTitle, params ) => {
 				const link = document.createElement( 'a' );
-				link.setAttribute( 'href', location.origin + mw.Title.newFromText( pageTitle ).getUrl( params ) );
+				link.setAttribute( 'href', mw.Title.newFromText( pageTitle ).getUrl( params ) );
+				return link;
+			},
+			parsoidLink = ( href ) => {
+				const link = document.createElement( 'a' );
+				if ( mw.config.get( 'wgArticlePath' ).includes( '?' ) ) {
+					href = href.replace( './', './index.php?title=' );
+				}
+				link.setAttribute( 'href', href );
 				return link;
 			};
-		},
-		cases = [
+		return [
 			{
 				msg: 'Not an internal link',
 				element: externalLink( 'http://example.com/' ),
@@ -41,20 +47,18 @@ QUnit.test( 'toDataElement', ( assert ) => {
 					attributes: {
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo',
-						origTitle: 'Foo',
 						title: 'Foo'
 					}
 				}
 			},
 			{
 				msg: 'Relative path',
-				element: externalLink( './Foo' ),
+				element: parsoidLink( './Foo' ),
 				expected: {
 					type: 'link/mwInternal',
 					attributes: {
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo',
-						origTitle: 'Foo',
 						title: 'Foo'
 					}
 				}
@@ -65,7 +69,7 @@ QUnit.test( 'toDataElement', ( assert ) => {
 				expected: {
 					type: 'link/mwExternal',
 					attributes: {
-						href: location.origin + mw.Title.newFromText( 'Foo' ).getUrl( { action: 'history' } )
+						href: mw.Title.newFromText( 'Foo' ).getUrl( { action: 'history' } )
 					}
 				}
 			},
@@ -75,7 +79,7 @@ QUnit.test( 'toDataElement', ( assert ) => {
 				expected: {
 					type: 'link/mwExternal',
 					attributes: {
-						href: location.origin + mw.Title.newFromText( 'Foo' ).getUrl( { diff: '3', oldid: '2' } )
+						href: mw.Title.newFromText( 'Foo' ).getUrl( { diff: '3', oldid: '2' } )
 					}
 				}
 			},
@@ -87,7 +91,6 @@ QUnit.test( 'toDataElement', ( assert ) => {
 					attributes: {
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo',
-						origTitle: 'Foo',
 						title: 'Foo'
 					}
 				}
@@ -96,26 +99,14 @@ QUnit.test( 'toDataElement', ( assert ) => {
 				// Because percent-encoded URLs aren't valid titles, but what they decode to might be
 				msg: 'Percent encoded characters',
 				element: internalLink( 'Foo?' ),
-				expected: [
-					{
-						type: 'link/mwInternal',
-						attributes: {
-							lookupTitle: 'Foo?',
-							normalizedTitle: 'Foo?',
-							origTitle: 'Foo?',
-							title: 'Foo?'
-						}
-					},
-					{
-						type: 'link/mwInternal',
-						attributes: {
-							lookupTitle: 'Foo?',
-							normalizedTitle: 'Foo?',
-							origTitle: 'Foo%3F',
-							title: 'Foo?'
-						}
+				expected: {
+					type: 'link/mwInternal',
+					attributes: {
+						lookupTitle: 'Foo?',
+						normalizedTitle: 'Foo?',
+						title: 'Foo?'
 					}
-				]
+				}
 			},
 			{
 				// The fragment should make it into some parts of this, and not others
@@ -126,7 +117,6 @@ QUnit.test( 'toDataElement', ( assert ) => {
 					attributes: {
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo#bar',
-						origTitle: 'Foo#bar',
 						title: 'Foo#bar'
 					}
 				}
@@ -140,88 +130,111 @@ QUnit.test( 'toDataElement', ( assert ) => {
 					attributes: {
 						lookupTitle: 'Foo',
 						normalizedTitle: 'Foo#' + mw.util.escapeIdForLink( 'bar?' ),
-						origTitle: 'Foo#' + mw.util.escapeIdForLink( 'bar?' ),
 						title: 'Foo#' + mw.util.escapeIdForLink( 'bar?' )
 					}
 				}
 			}
-		],
-		converter = new ve.dm.Converter( ve.dm.modelRegistry, ve.dm.nodeFactory, ve.dm.annotationFactory, ve.dm.metaItemFactory );
+		];
+	};
 
-	// toDataElement is called during a converter run, so we need to fake up a bit of state to test it.
-	// This would normally be done by ve.dm.converter.getModelFromDom.
-	converter.doc = doc.getHtmlDocument();
-	converter.targetDoc = doc.getHtmlDocument();
-	converter.store = doc.getStore();
-	converter.internalList = doc.getInternalList();
-	converter.contextStack = [];
-	converter.fromClipboard = true;
+	const converter = new ve.dm.Converter( ve.dm.modelRegistry, ve.dm.nodeFactory, ve.dm.annotationFactory, ve.dm.metaItemFactory );
 
 	const articlePaths = [
 		{
+			// MediaWiki config settings:
+			// $wgScriptPath = '/w';
+			// $wgUsePathInfo = false;
 			msg: 'query string URL',
-			wgArticlePath: mw.config.get( 'wgScriptPath' ) + '/index.php?title=$1'
+			config: {
+				wgServer: 'http://example.org',
+				wgScript: '/w/index.php',
+				wgArticlePath: '/w/index.php?title=$1'
+			},
+			// Parsoid-generated <base href> given these MediaWiki config settings:
+			base: 'http://example.org/w/'
 		},
 		{
-			msg: 'short URL',
-			wgArticlePath: mw.config.get( 'wgScriptPath' ) + '/index.php/$1'
+			// MediaWiki config settings:
+			// $wgScriptPath = '/w';
+			// $wgUsePathInfo = true;
+			msg: 'short URL using pathinfo',
+			config: {
+				wgServer: 'http://example.org',
+				wgScript: '/w/index.php',
+				wgArticlePath: '/w/index.php/$1'
+			},
+			// Parsoid-generated <base href> given these MediaWiki config settings:
+			base: 'http://example.org/w/index.php/'
+		},
+		{
+			// MediaWiki config settings:
+			// $wgScriptPath = '/w';
+			// $wgArticlePath = '/wiki/$1';
+			msg: 'proper short URL',
+			config: {
+				wgServer: 'http://example.org',
+				wgScript: '/w/index.php',
+				wgArticlePath: '/wiki/$1'
+			},
+			// Parsoid-generated <base href> given these MediaWiki config settings:
+			base: 'http://example.org/wiki/'
 		}
 	];
 
-	for ( let i = 0; i < cases.length; i++ ) {
-		articlePaths.forEach( function ( pathData, j ) {
-			mw.config.set( 'wgArticlePath', pathData.wgArticlePath );
+	for ( const pathData of articlePaths ) {
+		// Set up global state (site configuration)
+		mw.config.set( pathData.config );
+
+		const doc = ve.dm.mwExample.createExampleDocumentFromData( [], null, pathData.base );
+		// toDataElement is called during a converter run, so we need to fake up a bit of state to test it.
+		// This would normally be done by ve.dm.converter.getModelFromDom.
+		converter.doc = doc.getHtmlDocument();
+		converter.targetDoc = doc.getHtmlDocument();
+		converter.store = doc.getStore();
+		converter.internalList = doc.getInternalList();
+		converter.contextStack = [];
+		converter.fromClipboard = true;
+
+		// Generate test cases for this site configuration
+		for ( const caseItem of getCases() ) {
 			assert.deepEqual(
-				ve.dm.MWInternalLinkAnnotation.static.toDataElement( [ cases[ i ].element() ], converter ),
-				Array.isArray( cases[ i ].expected ) ?
-					cases[ i ].expected[ j ] :
-					cases[ i ].expected,
-				cases[ i ].msg + ': ' + pathData.msg
+				ve.dm.MWInternalLinkAnnotation.static.toDataElement( [ caseItem.element ], converter ),
+				caseItem.expected,
+				caseItem.msg + ': ' + pathData.msg
 			);
-		} );
+		}
 	}
 } );
 
-QUnit.test( 'getFragment', ( assert ) => {
-	const cases = [
-			{
-				msg: 'No fragment returns null',
-				original: 'Foo',
-				expected: null
-			},
-			{
-				msg: 'Invalid title returns null',
-				original: 'A%20B',
-				expected: null
-			},
-			{
-				msg: 'Blank fragment returns empty string',
-				original: 'Foo#',
-				expected: ''
-			},
-			{
-				msg: 'Extant fragment returns same string',
-				original: 'Foo#bar',
-				expected: 'bar'
-			},
-			{
-				msg: 'Hash-bang works returns full string',
-				original: 'Foo#!bar',
-				expected: '!bar'
-			},
-			{
-				msg: 'Double-hash returns everything after the first hash',
-				original: 'Foo##bar',
-				expected: '#bar'
-			},
-			{
-				msg: 'Multi-fragment returns everything after the first hash',
-				original: 'Foo#bar#baz#bat',
-				expected: 'bar#baz#bat'
-			}
-		];
-
-	for ( let i = 0; i < cases.length; i++ ) {
-		assert.strictEqual( ve.dm.MWInternalLinkAnnotation.static.getFragment( cases[ i ].original ), cases[ i ].expected, cases[ i ].msg );
+QUnit.test.each( 'getFragment', {
+	'No fragment returns null': {
+		original: 'Foo',
+		expected: null
+	},
+	'Invalid title returns null': {
+		original: 'A%20B',
+		expected: null
+	},
+	'Blank fragment returns empty string': {
+		original: 'Foo#',
+		expected: ''
+	},
+	'Extant fragment returns same string': {
+		original: 'Foo#bar',
+		expected: 'bar'
+	},
+	'Hash-bang works returns full string': {
+		original: 'Foo#!bar',
+		expected: '!bar'
+	},
+	'Double-hash returns everything after the first hash': {
+		original: 'Foo##bar',
+		expected: '#bar'
+	},
+	'Multi-fragment returns everything after the first hash': {
+		original: 'Foo#bar#baz#bat',
+		expected: 'bar#baz#bat'
 	}
+}, ( assert, { original, expected } ) => {
+	assert.strictEqual( ve.dm.MWInternalLinkAnnotation.static.getFragment( original ), expected );
 } );

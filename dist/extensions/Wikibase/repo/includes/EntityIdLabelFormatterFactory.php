@@ -1,10 +1,13 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo;
 
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\DataModel\Services\EntityId\EntityIdLabelFormatter;
 use Wikibase\Lib\Formatters\SnakFormatter;
+use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
 use Wikibase\View\EntityIdFormatterFactory;
 
 /**
@@ -15,10 +18,16 @@ use Wikibase\View\EntityIdFormatterFactory;
  */
 class EntityIdLabelFormatterFactory implements EntityIdFormatterFactory {
 
+	private FallbackLabelDescriptionLookupFactory $lookupFactory;
+
+	public function __construct( FallbackLabelDescriptionLookupFactory $lookupFactory ) {
+		$this->lookupFactory = $lookupFactory;
+	}
+
 	/**
 	 * @see EntityIdFormatterFactory::getOutputFormat
 	 *
-	 * @return string SnakFormatter::FORMAT_HTML
+	 * @return string SnakFormatter::FORMAT_PLAIN
 	 */
 	public function getOutputFormat() {
 		return SnakFormatter::FORMAT_PLAIN;
@@ -32,9 +41,7 @@ class EntityIdLabelFormatterFactory implements EntityIdFormatterFactory {
 	 * @return EntityIdLabelFormatter
 	 */
 	public function getEntityIdFormatter( Language $language ) {
-		// TODO inject factory as service
-		$labelDescriptionLookup = WikibaseRepo::getFallbackLabelDescriptionLookupFactory()
-			->newLabelDescriptionLookup( $language );
+		$labelDescriptionLookup = $this->lookupFactory->newLabelDescriptionLookup( $language );
 
 		return new EntityIdLabelFormatter( $labelDescriptionLookup );
 	}

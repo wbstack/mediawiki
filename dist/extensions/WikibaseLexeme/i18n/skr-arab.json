@@ -1,16 +1,18 @@
 {
 	"@metadata": {
 		"authors": [
-			"Saraiki",
-			"Bgo eiu"
+			"Bgo eiu",
+			"Saraiki"
 		]
 	},
 	"content-model-wikibase-lexeme": "وِکیبیس مفرد لفظ",
 	"datatypes-type-wikibase-form": "شکل",
 	"datatypes-type-wikibase-lexeme": "مفرد لفظ",
 	"datatypes-type-wikibase-sense": "معنیٰ",
+	"nstab-lexeme": "مفرد لفظ",
 	"special-mergelexemes": "ݙو مفرد لفظ ضم کرو",
 	"special-newlexeme": "نواں مفرد لفظ خلقو",
+	"tooltip-ca-nstab-lexeme": "مفرد لفظ تعریف",
 	"wikibase-lexeme-mergelexemes-error-permission-denied": "اجازت دا انکار تھی ڳیا",
 	"wikibase-lexeme-mergelexemes-submit": "مفرد لفظ ضم کرو",
 	"wikibase-lexeme-summary-wbeditentity-create-form": "نویں شکل شامل تھی ڳئی",
@@ -37,6 +39,7 @@
 	"wikibaselexeme-field-lexical-category-label": "مفرد لفظ ونکی",
 	"wikibaselexeme-form-field-language-label": "ہجیاں دا متغیر",
 	"wikibaselexeme-form-field-representation-label": "اظہار",
+	"wikibaselexeme-form-field-required": "ضروری خانہ",
 	"wikibaselexeme-gloss-field-gloss-label": "تشریح",
 	"wikibaselexeme-gloss-field-language-label": "زبان",
 	"wikibaselexeme-header-forms": "شکلاں",

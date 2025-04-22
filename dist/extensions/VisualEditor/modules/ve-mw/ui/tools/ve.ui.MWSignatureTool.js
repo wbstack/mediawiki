@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki UserInterface signature tool class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -59,7 +59,7 @@ if ( mw.Title.wantSignaturesNamespace( mw.config.get( 'wgNamespaceNumber' ) ) ) 
 	} );
 	if ( mw.libs.ve.isWikitextAvailable ) {
 		// Ensure wikitextCommandRegistry has finished loading
-		mw.loader.using( 'ext.visualEditor.mwwikitext' ).then( function () {
+		mw.loader.using( 'ext.visualEditor.mwwikitext' ).then( () => {
 			ve.ui.wikitextCommandRegistry.register(
 				new ve.ui.Command( 'mwSignature', 'content', 'insert', {
 					args: [ '~~~~', false, true /* collaseToEnd */ ],

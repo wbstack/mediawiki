@@ -1,11 +1,5 @@
 <?php
-
-use Wikimedia\Rdbms\ILoadBalancer;
-
 /**
- * Represents the site configuration of a wiki.
- * Holds a list of sites (ie SiteList), stored in the database.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,44 +15,40 @@ use Wikimedia\Rdbms\ILoadBalancer;
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  *
- * @since 1.25
- *
  * @file
- * @ingroup Site
+ */
+
+namespace MediaWiki\Site;
+
+use Wikimedia\Rdbms\IConnectionProvider;
+use Wikimedia\Rdbms\IDatabase;
+
+/**
+ * Holds a list of sites stored in the database.
  *
- * @license GPL-2.0-or-later
+ * @since 1.25
+ * @ingroup Site
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  * @author Daniel Kinzler
  */
 class DBSiteStore implements SiteStore {
-
-	/**
-	 * @var SiteList|null
-	 */
+	/** @var SiteList|null */
 	protected $sites = null;
-
-	/**
-	 * @var ILoadBalancer
-	 */
-	private $dbLoadBalancer;
+	/** @var IConnectionProvider */
+	private $dbProvider;
 
 	/**
 	 * @since 1.27
-	 *
-	 * @todo inject some kind of connection manager that is aware of the target wiki,
-	 * instead of injecting a LoadBalancer.
-	 *
-	 * @param ILoadBalancer $dbLoadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 */
-	public function __construct( ILoadBalancer $dbLoadBalancer ) {
-		$this->dbLoadBalancer = $dbLoadBalancer;
+	public function __construct( IConnectionProvider $dbProvider ) {
+		$this->dbProvider = $dbProvider;
 	}
 
 	/**
 	 * @see SiteStore::getSites
 	 *
 	 * @since 1.25
-	 *
 	 * @return SiteList
 	 */
 	public function getSites() {
@@ -75,11 +65,10 @@ class DBSiteStore implements SiteStore {
 	protected function loadSites() {
 		$this->sites = new SiteList();
 
-		$dbr = $this->dbLoadBalancer->getConnectionRef( DB_REPLICA );
+		$dbr = $this->dbProvider->getReplicaDatabase();
 
-		$res = $dbr->select(
-			'sites',
-			[
+		$res = $dbr->newSelectQueryBuilder()
+			->select( [
 				'site_id',
 				'site_global_key',
 				'site_type',
@@ -91,11 +80,10 @@ class DBSiteStore implements SiteStore {
 				'site_data',
 				'site_forward',
 				'site_config',
-			],
-			'',
-			__METHOD__,
-			[ 'ORDER BY' => 'site_global_key' ]
-		);
+			] )
+			->from( 'sites' )
+			->orderBy( 'site_global_key' )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		foreach ( $res as $row ) {
 			$site = Site::newForType( $row->site_type );
@@ -114,16 +102,10 @@ class DBSiteStore implements SiteStore {
 		}
 
 		// Batch load the local site identifiers.
-		$ids = $dbr->select(
-			'site_identifiers',
-			[
-				'si_site',
-				'si_type',
-				'si_key',
-			],
-			[],
-			__METHOD__
-		);
+		$ids = $dbr->newSelectQueryBuilder()
+			->select( [ 'si_site', 'si_type', 'si_key', ] )
+			->from( 'site_identifiers' )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		foreach ( $ids as $id ) {
 			if ( $this->sites->hasInternalId( $id->si_site ) ) {
@@ -138,9 +120,7 @@ class DBSiteStore implements SiteStore {
 	 * @see SiteStore::getSite
 	 *
 	 * @since 1.25
-	 *
 	 * @param string $globalId
-	 *
 	 * @return Site|null
 	 */
 	public function getSite( $globalId ) {
@@ -155,9 +135,7 @@ class DBSiteStore implements SiteStore {
 	 * @see SiteStore::saveSite
 	 *
 	 * @since 1.25
-	 *
 	 * @param Site $site
-	 *
 	 * @return bool Success indicator
 	 */
 	public function saveSite( Site $site ) {
@@ -168,21 +146,17 @@ class DBSiteStore implements SiteStore {
 	 * @see SiteStore::saveSites
 	 *
 	 * @since 1.25
-	 *
 	 * @param Site[] $sites
-	 *
 	 * @return bool Success indicator
 	 */
 	public function saveSites( array $sites ) {
-		if ( empty( $sites ) ) {
+		if ( !$sites ) {
 			return true;
 		}
 
-		$dbw = $this->dbLoadBalancer->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->dbProvider->getPrimaryDatabase();
 
 		$dbw->startAtomic( __METHOD__ );
-
-		$success = true;
 
 		$internalIds = [];
 		$localIds = [];
@@ -210,11 +184,16 @@ class DBSiteStore implements SiteStore {
 
 			$rowId = $site->getInternalId();
 			if ( $rowId !== null ) {
-				$success = $dbw->update(
-					'sites', $fields, [ 'site_id' => $rowId ], __METHOD__
-				) && $success;
+				$dbw->newUpdateQueryBuilder()
+					->update( 'sites' )
+					->set( $fields )
+					->where( [ 'site_id' => $rowId ] )
+					->caller( __METHOD__ )->execute();
 			} else {
-				$success = $dbw->insert( 'sites', $fields, __METHOD__ ) && $success;
+				$dbw->newInsertQueryBuilder()
+					->insertInto( 'sites' )
+					->row( $fields )
+					->caller( __METHOD__ )->execute();
 				$rowId = $dbw->insertId();
 			}
 
@@ -226,30 +205,24 @@ class DBSiteStore implements SiteStore {
 		}
 
 		if ( $internalIds !== [] ) {
-			$dbw->delete(
-				'site_identifiers',
-				[ 'si_site' => $internalIds ],
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'site_identifiers' )
+				->where( [ 'si_site' => $internalIds ] )
+				->caller( __METHOD__ )->execute();
 		}
 
 		foreach ( $localIds as $localId ) {
-			$dbw->insert(
-				'site_identifiers',
-				[
-					'si_site' => $localId[0],
-					'si_type' => $localId[1],
-					'si_key' => $localId[2],
-				],
-				__METHOD__
-			);
+			$dbw->newInsertQueryBuilder()
+				->insertInto( 'site_identifiers' )
+				->row( [ 'si_site' => $localId[0], 'si_type' => $localId[1], 'si_key' => $localId[2] ] )
+				->caller( __METHOD__ )->execute();
 		}
 
 		$dbw->endAtomic( __METHOD__ );
 
 		$this->reset();
 
-		return $success;
+		return true;
 	}
 
 	/**
@@ -265,20 +238,25 @@ class DBSiteStore implements SiteStore {
 	 * Clears the list of sites stored in the database.
 	 *
 	 * @see SiteStore::clear()
-	 *
-	 * @return bool Success
 	 */
 	public function clear() {
-		$dbw = $this->dbLoadBalancer->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->dbProvider->getPrimaryDatabase();
 
 		$dbw->startAtomic( __METHOD__ );
-		$ok = $dbw->delete( 'sites', '*', __METHOD__ );
-		$ok = $dbw->delete( 'site_identifiers', '*', __METHOD__ ) && $ok;
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'sites' )
+			->where( IDatabase::ALL_ROWS )
+			->caller( __METHOD__ )->execute();
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'site_identifiers' )
+			->where( IDatabase::ALL_ROWS )
+			->caller( __METHOD__ )->execute();
 		$dbw->endAtomic( __METHOD__ );
 
 		$this->reset();
-
-		return $ok;
 	}
 
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( DBSiteStore::class, 'DBSiteStore' );

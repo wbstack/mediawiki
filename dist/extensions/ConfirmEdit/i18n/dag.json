@@ -1,11 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Dnshitobu",
 			"Attah Mohammed"
 		]
 	},
-	"captcha-label": "CAPTCHA",
 	"captcha-id-label": "CAPTCHA ID",
 	"captchahelp-title": "CAPTCHA sɔŋsim",
 	"confirmedit-preview-line": "Kuliga lamba",

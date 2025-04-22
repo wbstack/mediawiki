@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MobileActionsContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -13,9 +13,9 @@
  * @class
  * @extends ve.ui.LinearContextItem
  *
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config] Configuration options
  */
 ve.ui.MobileActionsContextItem = function VeUiMobileActionsContextItem( context, model, config ) {
 	// Parent constructor
@@ -74,13 +74,13 @@ ve.ui.MobileActionsContextItem.static.isCompatibleWith = function ( model ) {
  * Handle copy button click events.
  */
 ve.ui.MobileActionsContextItem.prototype.onCopyButtonClick = function () {
-	var surfaceView = this.context.getSurface().getView();
+	const surfaceView = this.context.getSurface().getView();
 
 	surfaceView.activate();
 	// Force a native selection on mobile
 	surfaceView.preparePasteTargetForCopy( true );
 
-	var copied;
+	let copied;
 	try {
 		copied = document.execCommand( 'copy' );
 	} catch ( e ) {
@@ -102,10 +102,12 @@ ve.ui.MobileActionsContextItem.prototype.onCopyButtonClick = function () {
 
 /**
  * Handle delete button click events.
+ *
+ * @fires ve.ui.ContextItem#command
  */
 ve.ui.MobileActionsContextItem.prototype.onDeleteButtonClick = function () {
-	var surface = this.context.getSurface();
-	var command = surface.commandRegistry.lookup( 'backspace' );
+	const surface = this.context.getSurface();
+	const command = surface.commandRegistry.lookup( 'backspace' );
 
 	// Use the 'backspace' command as this triggers the KeyDownHandler for the
 	// current selection, e.g. ve.ce.TableDeleteKeyDownHandler will be used to

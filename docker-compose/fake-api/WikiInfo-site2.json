@@ -13,7 +13,7 @@
       "prefix": "mwdb_site2",
       "user": "mwu_someuser",
       "password": "somepassword",
-      "version": "mw1.39-wbs1",
+      "version": "mw1.43-wbs1",
       "wiki_id": 2,
       "created_at": "2021-01-01 10:10:10",
       "updated_at": "2021-01-01 10:10:10"
@@ -45,30 +45,6 @@
       },
       {
         "id": 3,
-        "name": "wwExtEnableInviteSignup",
-        "value": "1",
-        "wiki_id": 2,
-        "created_at": "2021-01-01 10:10:10",
-        "updated_at": "2021-01-01 10:10:10"
-      },
-      {
-        "id": 4,
-        "name": "wwExtEnableConfirmAccount",
-        "value": "1",
-        "wiki_id": 2,
-        "created_at": "2021-01-01 10:10:10",
-        "updated_at": "2021-01-01 10:10:10"
-      },
-      {
-        "id": 5,
-        "name": "wwSandboxAutoUserLogin",
-        "value": "1",
-        "wiki_id": 2,
-        "created_at": "2021-01-01 10:10:10",
-        "updated_at": "2021-01-01 10:10:10"
-      },
-      {
-        "id": 6,
         "name": "nyurikThatSrcEnable",
         "value": "0",
         "wiki_id": 2,
@@ -76,7 +52,7 @@
         "updated_at": "2021-01-01 10:10:10"
       },
       {
-        "id": 7,
+        "id": 4,
         "name": "wwExtEnableElasticSearch",
         "value": "1",
         "wiki_id": 2,

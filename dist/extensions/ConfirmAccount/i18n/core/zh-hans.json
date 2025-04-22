@@ -2,20 +2,20 @@
 	"@metadata": {
 		"authors": [
 			"Chenxiaoqino",
+			"CrownedWharf566",
 			"Diskdance",
 			"Hydra",
 			"Kuailong",
+			"Lakejason0",
+			"LittlePaw365",
 			"Liuxinyu970226",
 			"Mark85296341",
 			"Shizhao",
 			"Tranve",
 			"Wilsonmess",
+			"Xyb",
 			"Yfdyh000",
-			"佛壁灯",
-			"Lakejason0",
-			"CrownedWharf566",
-			"LittlePaw365",
-			"Xyb"
+			"佛壁灯"
 		]
 	},
 	"confirmaccount-newrequests": "'''$1'''个打开的已确认电子邮件的[[Special:ConfirmAccounts|账号{{PLURAL:$1|请求处于挂起状态}}]]。'''需要您的关注！'''",

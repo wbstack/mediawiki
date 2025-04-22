@@ -6,9 +6,16 @@
 
 'use strict';
 
+/**
+ * Grunt configuration
+ *
+ * @param {Object} grunt The grunt object
+ */
 module.exports = function ( grunt ) {
 	const modules = grunt.file.readJSON( 'build/modules.json' ),
 		moduleUtils = require( './build/moduleUtils' ),
+		path = require( 'path' ),
+		fg = require( 'fast-glob' ),
 		rebaserBuildFiles = moduleUtils.makeBuildList( modules, [ 'rebaser.build' ] ),
 		veRebaseFiles = moduleUtils.makeBuildList( modules, [ 'visualEditor.rebase.build' ] ),
 		coreBuildFiles = moduleUtils.makeBuildList( modules, [ 'visualEditor.build' ] ),
@@ -20,10 +27,17 @@ module.exports = function ( grunt ) {
 			return files.map( ( file ) => file.match( /^.*pages\/(.+).html$/ )[ 1 ] );
 		}() );
 
+	const distLessFiles = {
+		'dist/visualEditor-apex.css': 'dist/visualEditor-apex.less',
+		'dist/visualEditor-wikimediaui.css': 'dist/visualEditor-wikimediaui.less',
+		'dist/visualEditor-rebase.css': 'dist/visualEditor-rebase.less'
+	};
+
 	grunt.loadNpmTasks( 'grunt-banana-checker' );
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-contrib-concat' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
+	grunt.loadNpmTasks( 'grunt-contrib-less' );
 	grunt.loadNpmTasks( 'grunt-contrib-watch' );
 	grunt.loadNpmTasks( 'grunt-css-url-embed' );
 	grunt.loadNpmTasks( 'grunt-cssjanus' );
@@ -36,6 +50,12 @@ module.exports = function ( grunt ) {
 	// We want to use `grunt watch` to start this and karma watch together.
 	grunt.renameTask( 'watch', 'runwatch' );
 
+	/**
+	 * Build an object of required coverage percentages
+	 *
+	 * @param {number} pc Percentage coverage required (for all aspects)
+	 * @return {Object} required coverage percentages
+	 */
 	function coverAll( pc ) {
 		return {
 			functions: pc,
@@ -45,10 +65,30 @@ module.exports = function ( grunt ) {
 		};
 	}
 
+	function fixPaths( src, filepath ) {
+		const makeRelative = ( target ) => {
+			const currentDir = path.dirname( path.resolve( filepath ) );
+			const targetAbsolute = path.resolve( currentDir, target );
+			return path.relative( 'dist', targetAbsolute );
+		};
+
+		src = src.replace(
+			/@import ["'](.*)["']/g,
+			( ...args ) => `@import '${ makeRelative( args[ 1 ] ) }'`
+		);
+		src = src.replace(
+			/url\([\s]*["']?([^)]*)["']?[\s]*\)/g,
+			( ...args ) => args[ 1 ].includes( 'data:' ) ? args[ 0 ] : `url('${ makeRelative( args[ 1 ] ) }')`
+		);
+
+		return src;
+	}
+
 	grunt.initConfig( {
 		pkg: grunt.file.readJSON( 'package.json' ),
 		clean: {
-			dist: [ 'dist/*', 'coverage/*' ]
+			dist: [ 'dist/*', 'coverage/*' ],
+			less: Object.values( distLessFiles )
 		},
 		concat: {
 			'rebaser.build': {
@@ -69,9 +109,10 @@ module.exports = function ( grunt ) {
 			},
 			'visualEditor.rebase.styles': {
 				options: {
-					banner: grunt.file.read( 'build/banner.txt' )
+					banner: grunt.file.read( 'build/banner.txt' ),
+					process: fixPaths
 				},
-				dest: 'dist/visualEditor-rebase.css',
+				dest: 'dist/visualEditor-rebase.less',
 				src: veRebaseFiles.styles
 			},
 			js: {
@@ -84,16 +125,18 @@ module.exports = function ( grunt ) {
 			},
 			'css-apex': {
 				options: {
-					banner: grunt.file.read( 'build/banner.txt' )
+					banner: grunt.file.read( 'build/banner.txt' ),
+					process: fixPaths
 				},
-				dest: 'dist/visualEditor-apex.css',
+				dest: 'dist/visualEditor-apex.less',
 				src: coreBuildFilesApex.styles
 			},
 			'css-wikimediaui': {
 				options: {
-					banner: grunt.file.read( 'build/banner.txt' )
+					banner: grunt.file.read( 'build/banner.txt' ),
+					process: fixPaths
 				},
-				dest: 'dist/visualEditor-wikimediaui.css',
+				dest: 'dist/visualEditor-wikimediaui.less',
 				src: coreBuildFilesWikimediaUI.styles
 			},
 			// HACK: Ideally these libraries would provide their own distribution files (T95667)
@@ -104,6 +147,18 @@ module.exports = function ( grunt ) {
 			'jquery.uls.data': {
 				dest: 'dist/lib/jquery.uls.data.js',
 				src: modules[ 'jquery.uls.data' ].scripts
+			}
+		},
+		less: {
+			options: {
+				// Throw errors if we try to calculate mixed units, like `px` and `em` values.
+				strictUnits: true,
+				// Force LESS v3.0.0+ to let us use mixins before we later upgrade to @plugin
+				// architecture.
+				javascriptEnabled: true
+			},
+			dist: {
+				files: distLessFiles
 			}
 		},
 		cssjanus: {
@@ -117,11 +172,6 @@ module.exports = function ( grunt ) {
 			}
 		},
 		cssUrlEmbed: {
-			options: {
-				// TODO: Image paths are relative to their folders, but the files have already been
-				// flattened as this point, so supporting more that one baseDir is not possible.
-				baseDir: 'src/ui/styles/nodes'
-			},
 			dist: {
 				files: {
 					'dist/visualEditor-apex.css': 'dist/visualEditor-apex.css',
@@ -144,19 +194,6 @@ module.exports = function ( grunt ) {
 			}
 		},
 		buildloader: {
-			iframe: {
-				targetFile: '.jsduck/eg-iframe.html',
-				template: '.jsduck/eg-iframe.html.template',
-				modules: modules,
-				load: [
-					'visualEditor.standalone.apex.dist',
-					'visualEditor.standalone.read'
-				],
-				pathPrefix: '../',
-				i18n: [ 'i18n/', 'lib/oojs-ui/i18n/' ],
-				indent: '\t\t',
-				dir: 'ltr'
-			},
 			desktopDemoApex: {
 				targetFile: 'demos/ve/desktop.html',
 				template: 'demos/ve/demo.html.template',
@@ -206,7 +243,7 @@ module.exports = function ( grunt ) {
 				demoPages: demoPages
 			},
 			desktopDemoWikimediaUIDist: {
-				targetFile: 'demos/ve/desktop-wikimediaui-dist.html',
+				targetFile: 'demos/ve/desktop-dist-wikimediaui.html',
 				template: 'demos/ve/demo.html.template',
 				modules: modules,
 				load: [
@@ -311,46 +348,44 @@ module.exports = function ( grunt ) {
 			options: {
 				typos: 'build/typos.json'
 			},
-			src: [
-				'**/*.{js,json,less,css,txt}',
-				'!package-lock.json',
-				'!rebaser/package-lock.json',
+			src: fg.globSync( [
+				'**/*.{js,json,less,css,txt,md,sh}',
+				'!**/package-lock.json',
 				'!build/typos.json',
 				'!lib/**',
-				'!i18n/**',
-				'!{coverage,dist,docs,node_modules,rebaser/node_modules}/**',
+				'!**/i18n/**/*.json',
+				'!**/{coverage,dist,docs,node_modules}/**',
 				'!.git/**'
-			]
+			] )
+				// Overwrite ignores
+				.concat( fg.globSync( [
+					'**/i18n/**/en.json',
+					'**/i18n/**/qqq.json',
+					'!**/{coverage,dist,docs,node_modules}/**'
+				] ) )
 		},
 		eslint: {
 			options: {
 				cache: true,
 				fix: grunt.option( 'fix' )
 			},
-			all: [
+			all: fg.globSync( [
 				'**/*.{js,json}',
-				'*.html',
-				'{bin,build,demos,src,tests,rebaser}/**/*.html',
-				'!coverage/**',
-				'!dist/**',
-				'!docs/**',
+				'**/.*.{js,json}',
+				'demos/**/*.html',
 				'!lib/**',
-				'!node_modules/**',
-				'!rebaser/node_modules/**'
-			]
+				'!**/{coverage,dist,docs,node_modules}/**'
+			] )
 		},
 		stylelint: {
 			options: {
 				reportNeedlessDisables: true
 			},
-			all: [
-				'**/*.css',
-				'!coverage/**',
-				'!dist/**',
-				'!docs/**',
+			all: fg.globSync( [
+				'**/*.{css,less}',
 				'!lib/**',
-				'!node_modules/**'
-			]
+				'!**/{coverage,dist,docs,node_modules}/**'
+			] )
 		},
 		banana: {
 			all: 'i18n/'
@@ -368,7 +403,9 @@ module.exports = function ( grunt ) {
 					ChromeCustom: {
 						base: 'ChromeHeadless',
 						// Chrome requires --no-sandbox in Docker/CI.
-						flags: ( process.env.CHROMIUM_FLAGS || '' ).split( ' ' )
+						flags: process.env.CHROMIUM_FLAGS ?
+							process.env.CHROMIUM_FLAGS.split( ' ' ) :
+							undefined
 					}
 				},
 				autoWatch: false
@@ -398,10 +435,12 @@ module.exports = function ( grunt ) {
 							lines: 20,
 							excludes: [
 								'rebaser/src/dm/ve.dm.DocumentStore.js',
+								'rebaser/src/dm/ve.dm.PeerTransportServer.js',
 								'rebaser/src/dm/ve.dm.ProtocolServer.js',
 								'rebaser/src/dm/ve.dm.RebaseDocState.js',
 								'rebaser/src/dm/ve.dm.TransportServer.js',
 								'src/ve.track.js',
+								'src/ve.ext-peer.js',
 								'src/init/**/*.js',
 								// DM
 								'src/dm/ve.dm.InternalList.js',
@@ -429,6 +468,7 @@ module.exports = function ( grunt ) {
 								'src/ui/datatransferhandlers/*.js',
 								'src/ui/dialogs/*.js',
 								'src/ui/inspectors/ve.ui.CommentAnnotationInspector.js',
+								'src/ui/layouts/*.js',
 								'src/ui/pages/*.js',
 								'src/ui/tools/*.js',
 								'src/ui/widgets/*.js',
@@ -491,13 +531,13 @@ module.exports = function ( grunt ) {
 	grunt.registerTask( 'git-status', function () {
 		const done = this.async();
 		// Are there unstaged changes?
-		require( 'child_process' ).exec( 'git ls-files --modified', function ( err, stdout, stderr ) {
+		require( 'child_process' ).exec( 'git ls-files --modified', ( err, stdout, stderr ) => {
 			const ret = err || stderr || stdout;
 			if ( ret ) {
 				grunt.log.error( 'Unstaged changes in these files:' );
 				grunt.log.error( ret );
 				// Show a condensed diff
-				require( 'child_process' ).exec( 'git diff -U1 | tail -n +3', function ( err2, stdout2, stderr2 ) {
+				require( 'child_process' ).exec( 'git diff -U1 | tail -n +3', ( err2, stdout2, stderr2 ) => {
 					grunt.log.write( err2 || stderr2 || stdout2 );
 					done( false );
 				} );
@@ -508,7 +548,7 @@ module.exports = function ( grunt ) {
 		} );
 	} );
 
-	grunt.registerTask( 'build', [ 'clean', 'concat', 'cssjanus', 'cssUrlEmbed', 'copy', 'buildloader' ] );
+	grunt.registerTask( 'build', [ 'clean:dist', 'concat', 'less', 'clean:less', 'cssjanus', 'cssUrlEmbed', 'copy', 'buildloader' ] );
 	grunt.registerTask( 'lint', [ 'tyops', 'eslint', 'stylelint', 'banana' ] );
 	grunt.registerTask( 'unit', [ 'karma:chrome', 'karma:firefox' ] );
 	grunt.registerTask( '_test', [ 'lint', 'git-build', 'build', 'unit' ] );

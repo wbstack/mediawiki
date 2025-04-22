@@ -2,9 +2,8 @@
 
 namespace Wikibase\Lib\Store;
 
-use MWException;
+use MediaWiki\User\User;
 use PermissionsError;
-use User;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityRedirect;
@@ -58,7 +57,7 @@ interface EntityStore {
 	 * $baseRevId is no longer the current revision.
 	 * @param string[] $tags Change tags to add to the edit.
 	 * Callers are responsible for permission checks
-	 * (typically using {@link ChangeTags::canAddTagsAccompanyingChange}).
+	 * (typically using {@link ChangeTagsStore::canAddTagsAccompanyingChange}).
 	 *
 	 * @see WikiPage::doEditContent
 	 *
@@ -79,7 +78,7 @@ interface EntityStore {
 	 * $baseRevId is no longer the current revision.
 	 * @param string[] $tags Change tags to add to the edit.
 	 * Callers are responsible for permission checks
-	 * (typically using {@link ChangeTags::canAddTagsAccompanyingChange}).
+	 * (typically using {@link ChangeTagsStore::canAddTagsAccompanyingChange}).
 	 *
 	 * @see WikiPage::doEditContent
 	 *
@@ -105,7 +104,7 @@ interface EntityStore {
 	 * Check if no edits were made by other users since the given revision.
 	 * This makes the assumption that revision ids are monotonically increasing.
 	 *
-	 * @see EditPage::userWasLastToEdit()
+	 * @see \MediaWiki\EditPage\EditPage::userWasLastToEdit()
 	 *
 	 * @param User $user
 	 * @param EntityId $id the entity to check
@@ -124,7 +123,6 @@ interface EntityStore {
 	 * @param EntityId $id the entity to watch
 	 * @param bool $watch whether to watch or unwatch the page.
 	 *
-	 * @throws MWException
 	 * @return void
 	 */
 	public function updateWatchlist( User $user, EntityId $id, $watch );

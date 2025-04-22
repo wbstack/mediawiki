@@ -2,11 +2,11 @@
 
 namespace Wikibase\Lib\Store\Sql\Terms;
 
-use BagOStuff;
 use InvalidArgumentException;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\Lib\Store\AbstractTermPropertyLabelResolver;
 use Wikibase\Lib\Store\Sql\Terms\Util\StatsdMonitoring;
+use Wikimedia\ObjectCache\BagOStuff;
 
 /**
  * Resolves and caches property labels (which are unique per language) into entity IDs
@@ -25,10 +25,10 @@ class CachedDatabasePropertyLabelResolver extends AbstractTermPropertyLabelResol
 	/**
 	 * @param string $languageCode The language of the labels to look up (typically, the wiki's content language)
 	 * @param TermInLangIdsResolver $dbTermInLangIdsResolver Must be instance of {@link DatabaseTermInLangIdsResolver}
-	 * @param BagOStuff $cache      The cache to use for labels (typically from ObjectCache::getLocalClusterInstance())
-	 * @param int $cacheDuration    Number of seconds to keep the cached version for.
+	 * @param BagOStuff $cache The cache to use for labels
+	 * @param int $cacheDuration Number of seconds to keep the cached version for.
 	 *                              Defaults to 3600 seconds = 1 hour.
-	 * @param string $cacheKey      The cache key to use, auto-generated based on $lang per default.
+	 * @param string $cacheKey The cache key to use, auto-generated based on $lang per default.
 	 *                              Should be set to something including the wiki name
 	 *                              of the wiki that maintains the properties.
 	 */

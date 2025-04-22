@@ -3,8 +3,7 @@
 namespace Wikibase\Lexeme\Presentation\View;
 
 use InvalidArgumentException;
-use Language;
-use Message;
+use MediaWiki\Message\Message;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
 use Wikibase\DataModel\Term\Term;
@@ -201,7 +200,7 @@ HTML;
 	 * @return string Plain text
 	 */
 	private function getLocalizedMessage( $key, array $params = [] ) {
-		return ( new Message( $key, $params, Language::factory( $this->languageCode ) ) )->text();
+		return ( new Message( $key, $params ) )->inLanguage( $this->languageCode )->text();
 	}
 
 	/**
@@ -225,12 +224,12 @@ HTML;
 				'inEditMode' => false,
 				'isSaving' => false,
 				'lemmaList' => $lemmas,
-				'isUnsaveable' => true
+				'isUnsaveable' => true,
 			],
 			[
 				'message' => function ( $key ) {
 					return $this->getLocalizedMessage( $key );
-				}
+				},
 			]
 		);
 
@@ -261,12 +260,12 @@ HTML;
 				'formattedLexicalCategory' => $this->idFormatter->formatEntityId(
 					$lexicalCategoryId
 				),
-				'lexicalCategory' => $lexicalCategoryId->getSerialization()
+				'lexicalCategory' => $lexicalCategoryId->getSerialization(),
 			],
 			[
 				'message' => function ( $key ) {
 					return $this->getLocalizedMessage( $key );
-				}
+				},
 			]
 		);
 

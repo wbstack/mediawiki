@@ -1,25 +1,29 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
-use ApiBase;
-use ApiMain;
 use LogicException;
-use Message;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Message\Message;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
 use Wikibase\Lexeme\MediaWiki\Api\Error\SenseNotFound;
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\SenseIdDeserializer;
-use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\LookupConstants;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\Api\ApiHelperFactory;
+use Wikibase\Repo\Api\ResultBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -29,38 +33,22 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class RemoveSense extends ApiBase {
 
+	use ApiCreateTempUserTrait;
+
 	private const LATEST_REVISION = 0;
 
-	/**
-	 * @var RemoveSenseRequestParser
-	 */
-	private $requestParser;
-
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
-
-	/**
-	 * @var MediawikiEditEntityFactory
-	 */
-	private $editEntityFactory;
-
-	/**
-	 * @var SummaryFormatter
-	 */
-	private $summaryFormatter;
-
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $entityRevisionLookup;
+	private RemoveSenseRequestParser $requestParser;
+	private ResultBuilder $resultBuilder;
+	private ApiErrorReporter $errorReporter;
+	private MediaWikiEditEntityFactory $editEntityFactory;
+	private SummaryFormatter $summaryFormatter;
+	private EntityRevisionLookup $entityRevisionLookup;
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
 		ApiHelperFactory $apiHelperFactory,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityIdParser $entityIdParser,
 		Store $store,
 		SummaryFormatter $summaryFormatter
@@ -74,24 +62,23 @@ class RemoveSense extends ApiBase {
 			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$editEntityFactory,
 			$summaryFormatter,
-			static function ( $module ) use ( $apiHelperFactory ) {
-				return $apiHelperFactory->getErrorReporter( $module );
-			}
+			$apiHelperFactory
 		);
 	}
 
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		RemoveSenseRequestParser $requestParser,
 		EntityRevisionLookup $entityRevisionLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		SummaryFormatter $summaryFormatter,
-		callable $errorReporterInstantiator
+		ApiHelperFactory $apiHelperFactory
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
-		$this->errorReporter = $errorReporterInstantiator( $this );
+		$this->resultBuilder = $apiHelperFactory->getResultBuilder( $this );
+		$this->errorReporter = $apiHelperFactory->getErrorReporter( $this );
 		$this->requestParser = $requestParser;
 		$this->editEntityFactory = $editEntityFactory;
 		$this->entityRevisionLookup = $entityRevisionLookup;
@@ -101,9 +88,9 @@ class RemoveSense extends ApiBase {
 	/**
 	 * @see ApiBase::execute()
 	 *
-	 * @throws \ApiUsageException
+	 * @throws ApiUsageException
 	 */
-	public function execute() {
+	public function execute(): void {
 		$params = $this->extractRequestParams();
 		$request = $this->requestParser->parse( $params );
 		if ( $request->getBaseRevId() ) {
@@ -189,40 +176,32 @@ class RemoveSense extends ApiBase {
 			$this->dieStatus( $status );
 		}
 
-		/** @var EntityRevision $entityRevision */
-		$entityRevision = $status->getValue()['revision'];
-
-		$apiResult = $this->getResult();
-		$apiResult->addValue( null, 'lastrevid', $entityRevision->getRevisionId() );
-		$apiResult->addValue( null, 'success', 1 );
+		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, null );
+		$this->resultBuilder->markSuccess();
+		$this->resultBuilder->addTempUser( $status, fn ( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
-	/** @inheritDoc */
-	protected function getAllowedParams() {
-		// TODO baserevid (not in addsense etc currently....)
-		return array_merge(
-			[
-				RemoveSenseRequestParser::PARAM_SENSE_ID => [
-					ParamValidator::PARAM_TYPE => 'string',
-					ParamValidator::PARAM_REQUIRED => true,
-				],
-				AddFormRequestParser::PARAM_BASEREVID => [
-					ParamValidator::PARAM_TYPE => 'integer',
-				],
-				'tags' => [
-					ParamValidator::PARAM_TYPE => 'tags',
-					ParamValidator::PARAM_ISMULTI => true,
-				],
-				'bot' => [
-					ParamValidator::PARAM_TYPE => 'boolean',
-					ParamValidator::PARAM_DEFAULT => false,
-				]
-			]
-		);
+	protected function getAllowedParams(): array {
+		return array_merge( [
+			RemoveSenseRequestParser::PARAM_SENSE_ID => [
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => true,
+			],
+			RemoveSenseRequestParser::PARAM_BASEREVID => [
+				ParamValidator::PARAM_TYPE => 'integer',
+			],
+			'tags' => [
+				ParamValidator::PARAM_TYPE => 'tags',
+				ParamValidator::PARAM_ISMULTI => true,
+			],
+			'bot' => [
+				ParamValidator::PARAM_TYPE => 'boolean',
+				ParamValidator::PARAM_DEFAULT => false,
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
-	/** @inheritDoc */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -230,26 +209,24 @@ class RemoveSense extends ApiBase {
 	 * As long as this codebase is in development and APIs might change any time without notice, we
 	 * mark all as internal. This adds an "unstable" notice, but does not hide them in any way.
 	 */
-	public function isInternal() {
+	public function isInternal(): bool {
 		return true;
 	}
 
-	/** @inheritDoc */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
-	/** @inheritDoc */
-	public function mustBePosted() {
+	public function mustBePosted(): bool {
 		return true;
 	}
 
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		$senseId = 'L10-S20';
 
 		$query = http_build_query( [
 			'action' => $this->getModuleName(),
-			RemoveSenseRequestParser::PARAM_SENSE_ID => $senseId
+			RemoveSenseRequestParser::PARAM_SENSE_ID => $senseId,
 		] );
 
 		$exampleMessage = new Message(
@@ -258,7 +235,7 @@ class RemoveSense extends ApiBase {
 		);
 
 		return [
-			urldecode( $query ) => $exampleMessage
+			urldecode( $query ) => $exampleMessage,
 		];
 	}
 

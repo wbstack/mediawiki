@@ -1,8 +1,6 @@
 {
 	"@metadata": {
-		"authors": [
-			"Lam-ang"
-		]
+		"authors": []
 	},
-	"elastica-desc": "Batayan nga annong ti [http://www.elasticsearch.org/ Elasticsearch] para kadagiti sabali a pagpaatiddog babaen ti panangited ti biblioteka ti [http://elastica.io/ Elastica]"
+	"elastica-desc": "Batayan nga annong ti [https://www.elastic.co/ Elasticsearch] para kadagiti sabali a pagpaatiddog babaen ti panangited ti biblioteka ti [https://elastica.io/ Elastica]"
 }

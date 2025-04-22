@@ -17,7 +17,7 @@ use Wikimedia\Parsoid\Wt2Html\PegTokenizer;
  */
 class Wikitext {
 	/**
-	 * Equivalent of 'preprocessWikitext' from Parser.php in core.
+	 * Equivalent of 'preprocess' from Parser.php in core.
 	 * - expands templates
 	 * - replaces magic variables
 	 *
@@ -78,12 +78,12 @@ class Wikitext {
 			// Then, substitute each starting '{{' with '{{subst' using the
 			// template token's tsr.
 			$tokenizer = new PegTokenizer( $env );
-			$tokens = $tokenizer->tokenizeSync( $wt );
+			$tokens = $tokenizer->tokenizeSync( $wt, [ 'sol' => true ] );
 			$tsrIncr = 0;
 			foreach ( $tokens as $token ) {
 				/** @var Token $token */
 				if ( $token->getName() === 'template' ) {
-					$tsr = $token->dataAttribs->tsr;
+					$tsr = $token->dataParsoid->tsr;
 					$wt = substr( $wt, 0, $tsr->start + $tsrIncr )
 						. '{{subst:' . substr( $wt, $tsr->start + $tsrIncr + 2 );
 					$tsrIncr += 6;

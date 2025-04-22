@@ -1,12 +1,12 @@
 /*!
  * VisualEditor client (browser) specific utilities that interact with a rendered DOM.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
  * @method
- * @inheritdoc OO.ui.Element#scrollIntoView
+ * @see OO.ui.Element#scrollIntoView
  */
 ve.scrollIntoView = OO.ui.Element.static.scrollIntoView.bind( OO.ui.Element.static );
 
@@ -16,7 +16,7 @@ ve.scrollIntoView = OO.ui.Element.static.scrollIntoView.bind( OO.ui.Element.stat
  * @param {HTMLElement} element
  */
 ve.selectElement = function ( element ) {
-	var win = OO.ui.Element.static.getWindow( element ),
+	const win = OO.ui.Element.static.getWindow( element ),
 		nativeRange = win.document.createRange(),
 		nativeSelection = win.getSelection();
 	nativeRange.setStart( element, 0 );
@@ -44,7 +44,7 @@ ve.supportsSelectionExtend = !!window.getSelection().extend;
  * @return {Object} Translated rect
  */
 ve.translateRect = function ( rect, x, y ) {
-	var translatedRect = {};
+	const translatedRect = {};
 	if ( rect.top !== undefined ) {
 		translatedRect.top = rect.top + y;
 	}
@@ -72,14 +72,14 @@ ve.translateRect = function ( rect, x, y ) {
  * The start rectangle is the top-most, and the end rectangle is the bottom-most.
  *
  * @param {Object[]|null} rects Full list of rectangles
- * @return {Object|null} Object containing two rectangles: start and end, or null if there are no rectangles
+ * @return {Object.<string,Object>|null} Object containing two rectangles: start and end, or null if there are no rectangles
  */
 ve.getStartAndEndRects = function ( rects ) {
 	if ( !rects || !rects.length ) {
 		return null;
 	}
-	var startRect, endRect;
-	for ( var i = 0, l = rects.length; i < l; i++ ) {
+	let startRect, endRect;
+	for ( let i = 0, l = rects.length; i < l; i++ ) {
 		if ( !startRect || rects[ i ].top < startRect.top ) {
 			// Use ve.extendObject as ve.copy copies non-plain objects by reference
 			startRect = ve.extendObject( {}, rects[ i ] );
@@ -103,6 +103,90 @@ ve.getStartAndEndRects = function ( rects ) {
 		start: startRect,
 		end: endRect
 	};
+};
+
+/**
+ * Minimize a set of rectangles by discarding ones which are contained by others
+ *
+ * @param {Object[]} rects Full list of rectangles
+ * @param {number} [allowedErrorOffset=3] Allowed error offset, the pixel error amount
+ *  used in coordinate comparisons.
+ * @return {Object[]} Minimized list of rectangles
+ */
+ve.minimizeRects = function ( rects, allowedErrorOffset ) {
+	if ( allowedErrorOffset === undefined ) {
+		allowedErrorOffset = 3;
+	}
+
+	// Check if rect1 contains rect2
+	function contains( rect1, rect2 ) {
+		return rect2.left >= rect1.left - allowedErrorOffset &&
+			rect2.top >= rect1.top - allowedErrorOffset &&
+			rect2.right <= rect1.right + allowedErrorOffset &&
+			rect2.bottom <= rect1.bottom + allowedErrorOffset;
+	}
+
+	function merge( rect1, rect2 ) {
+		const rect = {
+			top: Math.min( rect1.top, rect2.top ),
+			left: Math.min( rect1.left, rect2.left ),
+			bottom: Math.max( rect1.bottom, rect2.bottom ),
+			right: Math.max( rect1.right, rect2.right )
+		};
+		rect.width = rect.right - rect.left;
+		rect.height = rect.bottom - rect.top;
+		return rect;
+	}
+
+	function isApprox( a, b ) {
+		return Math.abs( a - b ) < allowedErrorOffset;
+	}
+
+	const minimalRects = [];
+	rects.forEach( ( rect ) => {
+		let keep = true;
+		for ( let i = 0, il = minimalRects.length; i < il; i++ ) {
+			// This rect is contained by an existing rect, discard
+			if ( contains( minimalRects[ i ], rect ) ) {
+				keep = false;
+				break;
+			}
+			// An existing rect is contained by this rect, discard the existing rect
+			if ( contains( rect, minimalRects[ i ] ) ) {
+				minimalRects.splice( i, 1 );
+				i--;
+				il--;
+				break;
+			}
+			// Rect is horizontally adjacent to an existing rect, merge
+			if (
+				isApprox( rect.top, minimalRects[ i ].top ) && isApprox( rect.bottom, minimalRects[ i ].bottom ) && (
+					isApprox( rect.left, minimalRects[ i ].right ) || isApprox( rect.right, minimalRects[ i ].left )
+				)
+			) {
+				keep = false;
+				minimalRects[ i ] = merge( minimalRects[ i ], rect );
+				break;
+			}
+			// Rect is vertically adjacent to an existing rect, merge
+			if (
+				isApprox( rect.left, minimalRects[ i ].left ) && isApprox( rect.right, minimalRects[ i ].right ) && (
+					isApprox( rect.top, minimalRects[ i ].bottom ) || isApprox( rect.bottom, minimalRects[ i ].top )
+				)
+			) {
+				keep = false;
+				minimalRects[ i ] = merge( minimalRects[ i ], rect );
+				break;
+			}
+			// TODO: Consider case where a rect bridges two existing minimalRects, and so requires two
+			// merges in one step. As rects are usually returned in order, this is unlikely to happen.
+		}
+		if ( keep ) {
+			minimalRects.push( rect );
+		}
+	} );
+
+	return minimalRects;
 };
 
 /**
@@ -141,11 +225,11 @@ ve.isUnmodifiedLeftClick = function ( e ) {
  * @return {boolean} Whether multiple clipboardData item formats are supported
  */
 ve.isClipboardDataFormatsSupported = function ( e, customTypes ) {
-	var cacheKey = customTypes ? 'cachedCustom' : 'cached';
+	const cacheKey = customTypes ? 'cachedCustom' : 'cached';
 
 	if ( ve.isClipboardDataFormatsSupported[ cacheKey ] === undefined ) {
-		var profile = $.client.profile();
-		var clipboardData = e.originalEvent.clipboardData || e.originalEvent.dataTransfer;
+		const profile = $.client.profile();
+		const clipboardData = e.originalEvent.clipboardData || e.originalEvent.dataTransfer;
 		ve.isClipboardDataFormatsSupported[ cacheKey ] = !!(
 			clipboardData &&
 			( !customTypes || profile.name !== 'edge' ) && (
@@ -164,14 +248,16 @@ ve.isClipboardDataFormatsSupported = function ( e, customTypes ) {
 /**
  * Workaround for catastrophic Firefox bug (T209646)
  *
+ * Support: Firefox <= ~70
  * anchorNode and focusNode return unusable 'Restricted' object
  * when focus is in a number input:
  * https://bugzilla.mozilla.org/show_bug.cgi?id=1495482
+ * This task was resolved around late 2019
  *
  * @param {Selection} selection Native selection
  */
 ve.fixSelectionNodes = function ( selection ) {
-	var profile = $.client.profile();
+	const profile = $.client.profile();
 
 	if ( profile.layout !== 'gecko' ) {
 		return;
@@ -180,7 +266,7 @@ ve.fixSelectionNodes = function ( selection ) {
 	function fixNodeProperty( prop ) {
 		Object.defineProperty( selection, prop, {
 			get: function () {
-				var node = Object.getOwnPropertyDescriptor( Selection.prototype, prop ).get.call( this );
+				const node = Object.getOwnPropertyDescriptor( Selection.prototype, prop ).get.call( this );
 				try {
 					// Try to read a property out of node if it not null
 					// Throws an exception in FF
@@ -205,52 +291,6 @@ ve.fixSelectionNodes = function ( selection ) {
 };
 
 /**
- * Register a passive event listener
- *
- * @param {HTMLElement} elem Element to register event on
- * @param {string} event Name of event to register
- * @param {Function} handler Event handler (which cannot call event.preventDefault)
- */
-ve.addPassiveEventListener = function ( elem, event, handler ) {
-	elem.addEventListener( event, handler, ve.isPassiveEventsSupported() ? { passive: true } : false );
-};
-
-/**
- * Remove a passive event listener
- *
- * @param {HTMLElement} elem Element to remove event from
- * @param {string} event Name of event to remove
- * @param {Function} handler Event handler to remove
- */
-ve.removePassiveEventListener = function ( elem, event, handler ) {
-	elem.removeEventListener( event, handler, ve.isPassiveEventsSupported() ? { passive: true } : false );
-};
-
-/**
- * Test whether passive event listeners are supported
- *
- * @return {boolean} Whether passive event listeners are supported
- */
-ve.isPassiveEventsSupported = function () {
-	if ( ve.isPassiveEventsSupported.supported === undefined ) {
-		try {
-			var opts = Object.defineProperty( {}, 'passive', {
-				// eslint-disable-next-line getter-return
-				get: function () {
-					ve.isPassiveEventsSupported.supported = true;
-				}
-			} );
-			window.addEventListener( 'testPassive', null, opts );
-			window.removeEventListener( 'testPassive', null, opts );
-		} catch ( e ) {}
-		if ( ve.isPassiveEventsSupported.supported !== true ) {
-			ve.isPassiveEventsSupported.supported = false;
-		}
-	}
-	return ve.isPassiveEventsSupported.supported;
-};
-
-/**
  * Safely decode HTML entities
  *
  * @param {string} html Text with HTML entities
@@ -258,7 +298,7 @@ ve.isPassiveEventsSupported = function () {
  */
 ve.safeDecodeEntities = function ( html ) {
 	// Decode HTML entities, safely (no elements permitted inside textarea)
-	var textarea = document.createElement( 'textarea' );
+	const textarea = document.createElement( 'textarea' );
 	textarea.innerHTML = html;
 	return textarea.textContent;
 };

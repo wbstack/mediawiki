@@ -14,8 +14,6 @@ https://www.mediawiki.org/wiki/Extension:ConfirmEdit
 The following modules are included in ConfirmEdit:
 
 * SimpleCaptcha - users have to solve an arithmetic math problem
-* MathCaptcha - users have to solve a math problem that's displayed as
-an image
 * FancyCaptcha - users have to identify a series of characters, displayed
 in a stylized way
 * QuestyCaptcha - users have to answer a question, out of a series of
@@ -23,6 +21,8 @@ questions defined by the administrator(s)
 * ReCaptchaNoCaptcha - users have to solve different types of visually or
 audially tasks.
 * hCaptcha - users have to solve visual tasks
+* Turnstile - users check a box, which runs some client-side JS
+heuristics
 
 ### License
 
@@ -31,9 +31,7 @@ ConfirmEdit is published under the GPL license.
 ### Authors
 
 The main framework, and the SimpleCaptcha and FancyCaptcha modules, were
-written by Brion Vibber.
-
-The MathCaptcha module was written by Rob Church.
+written by Brooke Vibber.
 
 The QuestyCaptcha module was written by Benjamin Lees.
 
@@ -91,13 +89,13 @@ $wgCaptchaTriggersOnNamespace = [];
  * Indicate how to store per-session data required to match up the
  * internal captcha data with the editor.
  *
- * 'CaptchaSessionStore' uses PHP's session storage, which is cookie-based
+ * 'MediaWiki\Extension\ConfirmEdit\Store\CaptchaSessionStore' uses PHP's session storage, which is cookie-based
  * and may fail for anons with cookies disabled.
  *
- * 'CaptchaCacheStore' uses MW's object cache (specifically, MediaWikiServices::getMainObjectStash),
- * which avoids the cookie dependency, but may be fragile depending on the cache backend.
+ * 'CaptchaCacheStore' uses MediaWiki core's MicroStash,
+ * for storing captch data with a TTL eviction strategy.
  */
-$wgCaptchaStorageClass = 'CaptchaSessionStore';
+$wgCaptchaStorageClass = 'MediaWiki\Extension\ConfirmEdit\Store\CaptchaSessionStore';
 
 /**
  * Number of seconds a captcha session should last in the data cache

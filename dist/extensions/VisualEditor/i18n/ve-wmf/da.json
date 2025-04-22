@@ -19,6 +19,7 @@
 			"Steenth"
 		]
 	},
+	"tag-editcheck-references-activated": "[[{{MediaWiki:editcheck-falsepositives-link}}|Redigeringstjek (referencer) aktiveret]]",
 	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Visuel redigering]]",
 	"tag-visualeditor-description": "Redigeret ved hjælp af [[{{MediaWiki:visualeditor-descriptionpagelink}}|visuel redigering]]",
 	"tag-visualeditor-needcheck": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Visuel redigering: Tjek]]",
@@ -30,8 +31,6 @@
 	"visualeditor-feedback-link": "Project:VisualEditor/Feedback",
 	"visualeditor-feedback-tool": "Giv tilbagemelding om denne software",
 	"visualeditor-help-label": "Læs brugervejledningen",
-	"visualeditor-help-link": "mw:Special:MyLanguage/Help:VisualEditor/User guide",
-	"visualeditor-help-title": "Vejledning til hvordan du bruger editoren",
 	"visualeditor-welcomedialog-action": "Start redigering",
 	"visualeditor-welcomedialog-content": "Alle kan redigere, og enhver forbedring er en hjælp.",
 	"visualeditor-welcomedialog-content-thanks": "Tak, fordi du er med til at hjælpe verden til at finde ud af mere!",

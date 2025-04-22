@@ -15,7 +15,7 @@
 	"type": "other",
 	"manifest_version": 2,
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"ConfigRegistry": {
 		"revisionslider": "GlobalVarConfig::newInstance"
@@ -71,24 +71,14 @@
 			"styles": [
 				"modules/ext.RevisionSlider.less"
 			],
-			"skinStyles": {
-				"monobook": [
-					"modules/ext.RevisionSlider.monobook.css"
-				],
-				"modern": [
-					"modules/ext.RevisionSlider.modern.css"
-				]
-			},
 			"dependencies": [
 				"moment",
 				"oojs-ui",
 				"oojs-ui.styles.icons-moderation",
 				"oojs-ui.styles.icons-movement",
 				"oojs-ui.styles.indicators",
-				"mediawiki.jqueryMsg",
 				"ext.RevisionSlider.Settings",
 				"ext.RevisionSlider.Slider",
-				"mediawiki.api",
 				"mediawiki.util"
 			],
 			"messages": [
@@ -101,14 +91,12 @@
 				"revisionslider-turn-off-auto-expand-title"
 			]
 		},
-		"ext.RevisionSlider.noscript": {
-			"styles": "modules/ext.RevisionSlider.noscript.css"
-		},
 		"ext.RevisionSlider.Settings": {
 			"packageFiles": [
 				"modules/ext.RevisionSlider.Settings.js"
 			],
 			"dependencies": [
+				"mediawiki.api",
 				"mediawiki.user",
 				"mediawiki.storage",
 				"mediawiki.cookie"
@@ -135,6 +123,7 @@
 				"ext.RevisionSlider.dialogImages",
 				"jquery.ui",
 				"mediawiki.language",
+				"mediawiki.jqueryMsg",
 				"mediawiki.Uri",
 				"mediawiki.util",
 				"moment",
@@ -165,7 +154,7 @@
 			]
 		},
 		"ext.RevisionSlider.dialogImages": {
-			"class": "ResourceLoaderImageModule",
+			"class": "MediaWiki\\ResourceLoader\\ImageModule",
 			"selector": ".mw-revslider-help-dialog-slide-{name}",
 			"images": {
 				"1": {
@@ -185,10 +174,20 @@
 		"remoteExtPath": "RevisionSlider"
 	},
 	"Hooks": {
-		"DifferenceEngineViewHeader": "MediaWiki\\Extension\\RevisionSlider\\RevisionSliderHooks::onDifferenceEngineViewHeader",
-		"GetPreferences": "MediaWiki\\Extension\\RevisionSlider\\RevisionSliderHooks::onGetPreferences"
+		"DifferenceEngineViewHeader": "RevisionSliderHooks",
+		"GetPreferences": "RevisionSliderHooks"
+	},
+	"HookHandlers": {
+		"RevisionSliderHooks": {
+			"class": "MediaWiki\\Extension\\RevisionSlider\\RevisionSliderHooks",
+			"services": [
+				"ConfigFactory",
+				"UserOptionsLookup",
+				"StatsdDataFactory"
+			]
+		}
 	},
 	"DefaultUserOptions": {
-		"revisionslider-disable": false
+		"revisionslider-disable": 0
 	}
 }

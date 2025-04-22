@@ -1,24 +1,24 @@
 /**
  * Widget defining the behavior used to choose from a set of values
- * in a single_value group
+ * in a single_value group.
  *
  * @class mw.rcfilters.ui.ValuePickerWidget
+ * @ignore
  * @extends OO.ui.Widget
- * @mixins OO.ui.mixin.LabelElement
+ * @mixes OO.ui.mixin.LabelElement
  *
- * @constructor
  * @param {mw.rcfilters.dm.FilterGroup} model Group model
  * @param {Object} [config] Configuration object
- * @cfg {Function} [itemFilter] A filter function for the items from the
+ * @param {Function} [config.itemFilter] A filter function for the items from the
  *  model. If not given, all items will be included. The function must
  *  handle item models and return a boolean whether the item is included
  *  or not. Example: function ( itemModel ) { return itemModel.isSelected(); }
  */
-var ValuePickerWidget = function MwRcfiltersUiValuePickerWidget( model, config ) {
+const ValuePickerWidget = function MwRcfiltersUiValuePickerWidget( model, config ) {
 	config = config || {};
 
 	// Parent
-	ValuePickerWidget.parent.call( this, config );
+	ValuePickerWidget.super.call( this, config );
 	// Mixin constructors
 	OO.ui.mixin.LabelElement.call( this, config );
 
@@ -53,10 +53,11 @@ OO.mixinClass( ValuePickerWidget, OO.ui.mixin.LabelElement );
 /* Events */
 
 /**
+ * An item has been chosen.
+ *
  * @event choose
  * @param {string} name Item name
- *
- * An item has been chosen
+ * @ignore
  */
 
 /* Methods */
@@ -82,14 +83,12 @@ ValuePickerWidget.prototype.onSelectWidgetChoose = function ( chosenItem ) {
  * Initialize the select widget
  */
 ValuePickerWidget.prototype.initializeSelectWidget = function () {
-	var items = this.model.getItems()
+	const items = this.model.getItems()
 		.filter( this.itemFilter )
-		.map( function ( filterItem ) {
-			return new OO.ui.ButtonOptionWidget( {
-				data: filterItem.getName(),
-				label: filterItem.getLabel()
-			} );
-		} );
+		.map( ( filterItem ) => new OO.ui.ButtonOptionWidget( {
+			data: filterItem.getName(),
+			label: filterItem.getLabel()
+		} ) );
 
 	this.selectWidget.clearItems();
 	this.selectWidget.addItems( items );
@@ -102,7 +101,7 @@ ValuePickerWidget.prototype.initializeSelectWidget = function () {
  * that is currently selected
  */
 ValuePickerWidget.prototype.selectCurrentModelItem = function () {
-	var selectedItem = this.model.findSelectedItems()[ 0 ];
+	const selectedItem = this.model.findSelectedItems()[ 0 ];
 
 	if ( selectedItem ) {
 		this.selectWidget.selectItemByData( selectedItem.getName() );

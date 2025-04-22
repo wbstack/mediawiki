@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo\RestApi\Domain\Services;
 
-use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
+use Wikibase\Repo\RestApi\Domain\ReadModel\Item;
 
 /**
  * @license GPL-2.0-or-later

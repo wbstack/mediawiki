@@ -32,14 +32,8 @@ class TooltipGenerator {
 		'advancedsearch-help-sort'
 	];
 
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
+	private MessageLocalizer $messageLocalizer;
 
-	/**
-	 * @param MessageLocalizer $messageLocalizer
-	 */
 	public function __construct( MessageLocalizer $messageLocalizer ) {
 		$this->messageLocalizer = $messageLocalizer;
 	}
@@ -47,11 +41,14 @@ class TooltipGenerator {
 	/**
 	 * @return string[]
 	 */
-	public function generateTooltips() {
+	public function generateTooltips(): array {
 		$tooltips = [];
 
 		foreach ( self::MESSAGE_KEYS as $key ) {
-			$tooltips[$key] = $this->messageLocalizer->msg( $key )->parse();
+			$msg = $this->messageLocalizer->msg( $key );
+			if ( !$msg->isDisabled() ) {
+				$tooltips[$key] = $msg->parse();
+			}
 		}
 
 		return $tooltips;

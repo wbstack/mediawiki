@@ -13,10 +13,15 @@ use Wikimedia\RemexHtml\TreeBuilder\TreeBuilder;
 use Wikimedia\RemexHtml\TreeBuilder\TreeMutationTracer;
 
 class RemexDriver extends TidyDriverBase {
+	/** @var bool */
 	private $treeMutationTrace;
+	/** @var bool */
 	private $serializerTrace;
+	/** @var bool */
 	private $mungerTrace;
+	/** @var bool */
 	private $pwrap;
+	/** @var bool */
 	private $enableLegacyMediaDOM;
 
 	/** @internal */
@@ -26,17 +31,12 @@ class RemexDriver extends TidyDriverBase {
 	];
 
 	/**
-	 * @param ServiceOptions|array $options Passing an array is deprecated.
+	 * @param ServiceOptions $options
 	 */
-	public function __construct( $options ) {
-		if ( is_array( $options ) ) {
-			wfDeprecated( __METHOD__ . " with array argument", '1.36' );
-			$config = $options;
-		} else {
-			$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
-			$config = $options->get( MainConfigNames::TidyConfig );
-			$this->enableLegacyMediaDOM = $options->get( MainConfigNames::ParserEnableLegacyMediaDOM );
-		}
+	public function __construct( ServiceOptions $options ) {
+		$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
+		$config = $options->get( MainConfigNames::TidyConfig );
+		$this->enableLegacyMediaDOM = $options->get( MainConfigNames::ParserEnableLegacyMediaDOM );
 		$config += [
 			'treeMutationTrace' => false,
 			'serializerTrace' => false,

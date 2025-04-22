@@ -4,7 +4,7 @@ namespace Wikibase\Repo\Maintenance;
 
 use DataValues\DecimalMath;
 use DataValues\DecimalValue;
-use Maintenance;
+use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Sparql\SparqlClient;
 use Wikibase\Lib\WikibaseSettings;
@@ -125,7 +125,7 @@ class UpdateUnits extends Maintenance {
 				'factor' => "1",
 				'unit' => $coherentUnitName,
 				'label' => $coherentUnitData['unitLabel'],
-				'siLabel' => $coherentUnitData['unitLabel']
+				'siLabel' => $coherentUnitData['unitLabel'],
 			];
 		}
 
@@ -210,7 +210,7 @@ class UpdateUnits extends Maintenance {
 				'factor' => trim( $newFactor->getValue(), '+' ),
 				'unit' => $newUnit['unit'],
 				'label' => $unit['unitLabel'],
-				'siLabel' => $newUnit['siLabel']
+				'siLabel' => $newUnit['siLabel'],
 			];
 		}
 		return null;
@@ -260,7 +260,7 @@ class UpdateUnits extends Maintenance {
 				'unit' => $unit['siUnit'],
 				// These two are just for humans, not used by actual converter
 				'label' => $unit['unitLabel'],
-				'siLabel' => $unit['siUnitLabel']
+				'siLabel' => $unit['siUnitLabel'],
 			];
 		}
 

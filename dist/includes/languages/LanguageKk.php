@@ -28,68 +28,11 @@
  * @ingroup Languages
  */
 class LanguageKk extends LanguageKk_cyrl {
-	/**
-	 * It fixes issue with ucfirst for transforming 'i' to 'İ'
-	 *
-	 * @param string $string
-	 *
-	 * @return string
-	 */
-	public function ucfirst( $string ) {
-		if ( substr( $string, 0, 1 ) === 'i' ) {
-			$variant = $this->getPreferredVariant();
-			if ( $variant == 'kk-latn' || $variant == 'kk-tr' ) {
-				return 'İ' . substr( $string, 1 );
-			}
-		}
-		return parent::ucfirst( $string );
-	}
-
-	/**
-	 * It fixes issue with  lcfirst for transforming 'I' to 'ı'
-	 *
-	 * @param string $string
-	 *
-	 * @return string
-	 */
-	public function lcfirst( $string ) {
-		if ( substr( $string, 0, 1 ) === 'I' ) {
-			$variant = $this->getPreferredVariant();
-			if ( $variant == 'kk-latn' || $variant == 'kk-tr' ) {
-				return 'ı' . substr( $string, 1 );
-			}
-		}
-		return parent::lcfirst( $string );
-	}
-
-	/**
-	 * @param string $word
-	 * @param string $case
-	 * @return string
-	 */
 	public function convertGrammar( $word, $case ) {
 		// T277689: If there's no word, then there's nothing to convert.
 		if ( $word === '' ) {
 			return '';
 		}
-
-		$variant = $this->getPreferredVariant();
-		switch ( $variant ) {
-			case 'kk-arab':
-			case 'kk-cn':
-				$word = parent::convertGrammarKk_arab( $word, $case );
-				break;
-			case 'kk-latn':
-			case 'kk-tr':
-				$word = parent::convertGrammarKk_latn( $word, $case );
-				break;
-			case 'kk-cyrl':
-			case 'kk-kz':
-			case 'kk':
-			default:
-				$word = parent::convertGrammarKk_cyrl( $word, $case );
-		}
-
-		return $word;
+		return parent::convertGrammarKk_cyrl( $word, $case );
 	}
 }

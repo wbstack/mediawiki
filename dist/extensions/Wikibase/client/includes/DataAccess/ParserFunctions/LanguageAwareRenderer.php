@@ -6,12 +6,12 @@ namespace Wikibase\Client\DataAccess\ParserFunctions;
 
 use Exception;
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
-use Message;
-use ParserOutput;
-use Status;
-use Title;
+use MediaWiki\Message\Message;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 use Wikibase\Client\DataAccess\StatementTransclusionInteractor;
 use Wikibase\Client\PropertyLabelNotResolvedException;
 use Wikibase\DataModel\Entity\EntityId;

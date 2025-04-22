@@ -14,7 +14,6 @@
 	"cite-ve-citationneeded-title": "حَوالہٕ ضۆروٗرَتھ",
 	"cite-ve-dialog-reference-options-group-label": "یہِ چَماتھ کٔرِو اِستِمال",
 	"cite-ve-dialog-reference-options-group-placeholder": "عام حَوالہٕ",
-	"cite-ve-dialog-reference-options-name-label": "یہِ ناو کٔرِو بیٚیہِ اِستِمال",
 	"cite-ve-dialog-reference-options-section": "اِختِیار",
 	"cite-ve-dialog-reference-title": "حَوالہٕ",
 	"cite-ve-dialog-reference-useexisting-tool": "بیٚیِہ اِستِمال",
@@ -26,7 +25,5 @@
 	"cite-ve-dialogbutton-reference-tooltip": "اِبتِدٲیی",
 	"cite-ve-dialogbutton-referenceslist-tooltip": "حَوالہٕ فِہرِست",
 	"cite-ve-toolbar-group-label": "حَوالہٕ",
-	"cite-ve-othergroup-item": "$1 حَوالہٕ",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "حَوالہٕ",
-	"visualeditor-internal-list-diff-group-name-mwreference": "حَوالہٕ جَمٲژ ناو: ''$1''"
+	"cite-ve-othergroup-item": "$1 حَوالہٕ"
 }

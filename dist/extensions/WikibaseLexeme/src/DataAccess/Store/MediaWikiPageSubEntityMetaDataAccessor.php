@@ -2,7 +2,6 @@
 
 namespace Wikibase\Lexeme\DataAccess\Store;
 
-use BadMethodCallException;
 use LogicException;
 use stdClass;
 use Wikibase\DataModel\Entity\EntityId;
@@ -19,7 +18,7 @@ use Wikibase\Lib\Store\Sql\WikiPageEntityMetaDataAccessor;
  */
 class MediaWikiPageSubEntityMetaDataAccessor implements WikiPageEntityMetaDataAccessor {
 
-	private $wikiPageEntityMetaDataLookup;
+	private WikiPageEntityMetaDataAccessor $wikiPageEntityMetaDataLookup;
 
 	public function __construct( WikiPageEntityMetaDataAccessor $entityMetaDataAccessor ) {
 		$this->wikiPageEntityMetaDataLookup = $entityMetaDataAccessor;
@@ -78,13 +77,11 @@ class MediaWikiPageSubEntityMetaDataAccessor implements WikiPageEntityMetaDataAc
 	 *     LookupConstants::LATEST_FROM_MASTER).
 	 *
 	 * @return never
-	 *
-	 * @throws BadMethodCallException
 	 */
 	public function loadRevisionInformationByRevisionId( EntityId $entityId,
 		$revisionId,
 		$mode = LookupConstants::LATEST_FROM_MASTER ) {
-		throw new BadMethodCallException( 'Not Implemented' );
+		throw new LogicException( 'Not Implemented' );
 	}
 
 	/**

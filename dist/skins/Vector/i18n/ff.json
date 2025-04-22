@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Ibrahima",
 			"Ibrahima Malal Sarr",
 			"Musaddam Idriss"
@@ -20,5 +19,6 @@
 	"vector-view-viewsource": "Yiyto ɗaɗol",
 	"vector-more-actions": "Ɓeydu",
 	"vector-searchsuggest-containing": "Yiylo kelle coomɗe $1<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-label": "Loowdi",
 	"vector-toc-beginning": "Fuɗɗam"
 }

@@ -20,7 +20,7 @@ declare( strict_types = 1 );
 
 namespace MWParsoid\Rest\Handler;
 
-use MediaWiki\Rest\Handler\ParsoidFormatHelper;
+use MediaWiki\Rest\Handler\Helper\ParsoidFormatHelper;
 use MediaWiki\Rest\Handler\ParsoidHandler as CoreParsoidHandler;
 use MediaWiki\Rest\HttpException;
 use MediaWiki\Rest\Response;
@@ -72,7 +72,7 @@ class PageHandler extends CoreParsoidHandler {
 
 		if ( !in_array( $format, ParsoidFormatHelper::VALID_PAGE, true ) ) {
 			throw new HttpException(
-				"Invalid page format: ${format}", 404
+				"Invalid page format: {$format}", 404
 			);
 		}
 

@@ -79,6 +79,7 @@ return [
 	},
 	WbManifest::OAUTH_URL_FACTORY => static function ( MediaWikiServices $services ) {
 		return new OAuthUrlFactory(
+			$services->getMainConfig(),
 			ExtensionRegistry::getInstance(),
 			$services->getSpecialPageFactory()
 		);

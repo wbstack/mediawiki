@@ -1,10 +1,5 @@
 <?php
 /**
- * Special pages that are used to get user independent links pointing to
- * current user's pages (user page, talk page, contributions, etc.).
- * This can let us cache a single copy of some generated content for all
- * users or be linked in wikitext help pages.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -21,17 +16,31 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials\Redirects;
+
+use MediaWiki\SpecialPage\RedirectSpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Title\Title;
+use MediaWiki\User\TempUser\TempUserConfig;
+
 /**
- * Special page pointing to current user's uploaded files.
+ * Redirect to Special:Listfiles for the current user's name or IP.
  *
  * @ingroup SpecialPage
  */
 class SpecialMyuploads extends RedirectSpecialPage {
-	public function __construct() {
+
+	private TempUserConfig $tempUserConfig;
+
+	/**
+	 * @param TempUserConfig $tempUserConfig
+	 */
+	public function __construct( TempUserConfig $tempUserConfig ) {
 		parent::__construct( 'Myuploads' );
+
+		$this->tempUserConfig = $tempUserConfig;
 		$this->mAllowedRedirectParams = [ 'limit', 'ilshowall', 'ilsearch' ];
 	}
 
@@ -40,6 +49,11 @@ class SpecialMyuploads extends RedirectSpecialPage {
 	 * @return Title
 	 */
 	public function getRedirect( $subpage ) {
+		// Redirect to login for anon users when temp accounts are enabled.
+		if ( $this->tempUserConfig->isEnabled() && $this->getUser()->isAnon() ) {
+			$this->requireLogin();
+		}
+
 		return SpecialPage::getTitleFor( 'Listfiles', $this->getUser()->getName() );
 	}
 
@@ -53,3 +67,8 @@ class SpecialMyuploads extends RedirectSpecialPage {
 		return true;
 	}
 }
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialMyuploads::class, 'SpecialMyuploads' );

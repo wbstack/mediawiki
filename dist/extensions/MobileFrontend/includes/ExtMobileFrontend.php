@@ -1,12 +1,20 @@
 <?php
 
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\TemplateParser;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MobileFrontend\Api\ApiParseExtender;
 use MobileFrontend\ContentProviders\IContentProvider;
+use MobileFrontend\Features\FeaturesManager;
+use MobileFrontend\Hooks\HookRunner;
 use MobileFrontend\Transforms\LazyImageTransform;
 use MobileFrontend\Transforms\MakeSectionsTransform;
 use MobileFrontend\Transforms\MoveLeadParagraphTransform;
-use MobileFrontend\Transforms\SubHeadingTransform;
+use MobileFrontend\Transforms\RemovableClassesTransform;
 use Wikibase\Client\WikibaseClient;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\Services\Lookup\TermLookupException;
@@ -31,7 +39,6 @@ class ExtMobileFrontend {
 		$canViewHidden = !$isHidden || $out->getAuthority()->isAllowed( 'hideuser' );
 
 		$out->addModuleStyles( [
-			'mediawiki.ui.icon',
 			'mobile.userpage.styles', 'mobile.userpage.images'
 		] );
 
@@ -79,7 +86,8 @@ class ExtMobileFrontend {
 	 */
 	public static function domParseMobile( OutputPage $out, $html = '' ) {
 		$services = MediaWikiServices::getInstance();
-		$featureManager = $services->getService( 'MobileFrontend.FeaturesManager' );
+		/** @var FeaturesManager $featuresManager */
+		$featuresManager = $services->getService( 'MobileFrontend.FeaturesManager' );
 		/** @var MobileContext $context */
 		$context = $services->getService( 'MobileFrontend.Context' );
 		$config = $services->getService( 'MobileFrontend.Config' );
@@ -89,17 +97,22 @@ class ExtMobileFrontend {
 		$action = $context->getRequest()->getText( 'action', 'view' );
 		$isView = $action === 'view' || ApiParseExtender::isParseAction( $action );
 
+		$shouldUseParsoid = false;
+		if ( ExtensionRegistry::getInstance()->isLoaded( 'ParserMigration' ) ) {
+			$oracle = MediaWikiServices::getInstance()->getService( 'ParserMigration.Oracle' );
+			$shouldUseParsoid =
+				$oracle->shouldUseParsoid( $context->getUser(), $context->getRequest(), $title );
+		}
+
 		$enableSections = (
 			// Don't collapse sections e.g. on JS pages
 			$title->canExist()
 			&& $title->getContentModel() == CONTENT_MODEL_WIKITEXT
 			// And not in certain namespaces
-			&& array_search(
-				$ns,
-				$config->get( 'MFNamespacesWithoutCollapsibleSections' )
-			) === false
+			&& !in_array( $ns, $config->get( 'MFNamespacesWithoutCollapsibleSections' ) )
 			// And not when what's shown is not actually article text
 			&& $isView
+			&& !$shouldUseParsoid
 		);
 
 		// https://phabricator.wikimedia.org/T232690
@@ -109,27 +122,33 @@ class ExtMobileFrontend {
 			return $html;
 		}
 
-		$formatter = new MobileFormatter(
-			MobileFormatter::wrapHtml( $html ),
-			$title,
-			$config,
-			$context
-		);
+		$formatter = new MobileFormatter( $html );
 
-		$hookContainer = $services->getHookContainer();
-		$hookContainer->run( 'MobileFrontendBeforeDOM', [ $context, $formatter ] );
+		$hookRunner = new HookRunner( $services->getHookContainer() );
+		$hookRunner->onMobileFrontendBeforeDOM( $context, $formatter );
 
-		$shouldLazyTransformImages = $featureManager->isFeatureAvailableForCurrentUser( 'MFLazyLoadImages' );
+		$shouldLazyTransformImages = $featuresManager->isFeatureAvailableForCurrentUser( 'MFLazyLoadImages' );
 		$leadParagraphEnabled = in_array( $ns, $config->get( 'MFNamespacesWithLeadParagraphs' ) );
 		$showFirstParagraphBeforeInfobox = $leadParagraphEnabled &&
-			$featureManager->isFeatureAvailableForCurrentUser( 'MFShowFirstParagraphBeforeInfobox' );
+			$featuresManager->isFeatureAvailableForCurrentUser( 'MFShowFirstParagraphBeforeInfobox' );
 
 		$transforms = [];
+		// Remove specified content in content namespaces
+		if ( in_array( $title->getNamespace(), $config->get( 'ContentNamespaces' ), true ) ) {
+			$mfRemovableClasses = $config->get( 'MFRemovableClasses' );
+			$removableClasses = $mfRemovableClasses['base'];
+			if ( $context->isBetaGroupMember() ) {
+				$removableClasses = array_unique(
+					array_merge( $removableClasses, $mfRemovableClasses['beta'] )
+				);
+			}
+
+			$transforms[] = new RemovableClassesTransform( $removableClasses );
+		}
+
 		if ( $enableSections ) {
 			$options = $config->get( 'MFMobileFormatterOptions' );
 			$topHeadingTags = $options['headings'];
-
-			$transforms[] = new SubHeadingTransform( $topHeadingTags );
 
 			$transforms[] = new MakeSectionsTransform(
 				$topHeadingTags,
@@ -145,9 +164,12 @@ class ExtMobileFrontend {
 			$transforms[] = new MoveLeadParagraphTransform( $title, $title->getLatestRevID() );
 		}
 
+		$start = microtime( true );
 		$formatter->applyTransforms( $transforms );
+		$end = microtime( true );
+		$report = sprintf( "MobileFormatter took %.3f seconds", $end - $start );
 
-		return $formatter->getText();
+		return $formatter->getText() . "\n<!-- $report -->";
 	}
 
 	/**
@@ -163,9 +185,9 @@ class ExtMobileFrontend {
 			return User::newFromAnyId( null, $titleText, null );
 		}
 
-		$pageUserId = User::idFromName( $titleText );
-		if ( $pageUserId ) {
-			return User::newFromId( $pageUserId );
+		$user = User::newFromName( $titleText );
+		if ( $user && $user->isRegistered() ) {
+			return $user;
 		}
 
 		return null;
@@ -182,6 +204,7 @@ class ExtMobileFrontend {
 	protected static function getUserPageContent( IContextSource $output,
 		User $pageUser, Title $title
 	) {
+		/** @var MobileContext $context */
 		$context = MediaWikiServices::getInstance()->getService( 'MobileFrontend.Context' );
 		$pageUsername = $pageUser->getName();
 		// Is the current user viewing their own page?
@@ -209,7 +232,8 @@ class ExtMobileFrontend {
 		// It doesn't matter here since the page doesn't exist.
 		$data['editUrl'] = $title->getLinkURL( [ 'action' => 'edit', 'section' => 0 ] );
 		$data['editSection'] = 0;
-		$data['createPageLinkAdditionalClasses'] = $isCurrentUser ? 'mw-ui-button' : '';
+		$data['createPageLinkAdditionalClasses'] = $isCurrentUser ?
+			'cdx-button cdx-button--action-progressive cdx-button--weight-primary' : '';
 
 		$templateParser = new TemplateParser( __DIR__ . '/templates' );
 		return $templateParser->processTemplate( 'UserPageCta', $data );

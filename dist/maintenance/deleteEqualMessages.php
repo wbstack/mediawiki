@@ -19,9 +19,15 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Languages\LanguageNameUtils;
+use MediaWiki\Pager\AllMessagesTablePager;
+use MediaWiki\StubObject\StubGlobalUser;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that deletes all pages in the MediaWiki namespace
@@ -42,11 +48,11 @@ class DeleteEqualMessages extends Maintenance {
 	}
 
 	/**
-	 * @param string|bool $langCode See --lang-code option.
+	 * @param string|false $langCode See --lang-code option.
 	 * @param array &$messageInfo
 	 */
 	protected function fetchMessageInfo( $langCode, array &$messageInfo ) {
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		$contLang = $services->getContentLanguage();
 		if ( $langCode ) {
 			$this->output( "\n... fetching message info for language: $langCode" );
@@ -68,9 +74,9 @@ class DeleteEqualMessages extends Maintenance {
 			$messageNames,
 			$langCode,
 			$nonContentLanguage,
-			$this->getDB( DB_REPLICA )
+			$this->getReplicaDB()
 		);
-		// getCustomisedStatuses is stripping the sub page from the page titles, add it back
+		// getCustomisedStatuses is stripping the subpage from the page titles, add it back
 		$titleSuffix = $nonContentLanguage ? "/$langCode" : '';
 
 		foreach ( $messageNames as $key ) {
@@ -115,14 +121,14 @@ class DeleteEqualMessages extends Maintenance {
 
 		$this->output( 'Checking for pages with default message...' );
 
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		// Load message information
 		if ( $langCode ) {
 			$langCodes = $services->getLanguageNameUtils()
-				->getLanguageNames( null, 'mwfile' );
+				->getLanguageNames( LanguageNameUtils::AUTONYMS, LanguageNameUtils::SUPPORTED );
 			if ( $langCode === '*' ) {
 				// All valid lang-code subpages in NS_MEDIAWIKI that
-				// override the messsages in that language
+				// override the messages in that language
 				foreach ( $langCodes as $key => $value ) {
 					$this->fetchMessageInfo( $key, $messageInfo );
 				}
@@ -182,16 +188,16 @@ class DeleteEqualMessages extends Maintenance {
 
 		// Handle deletion
 		$this->output( "\n...deleting equal messages (this may take a long time!)..." );
-		$dbw = $this->getDB( DB_PRIMARY );
-		$lbFactory = $services->getDBLoadBalancerFactory();
+		$dbw = $this->getPrimaryDB();
 		$wikiPageFactory = $services->getWikiPageFactory();
+		$delPageFactory = $services->getDeletePageFactory();
 		foreach ( $messageInfo['results'] as $result ) {
-			$lbFactory->waitForReplication();
+			$this->waitForReplication();
 			$dbw->ping();
 			$title = Title::makeTitle( NS_MEDIAWIKI, $result['title'] );
 			$this->output( "\n* [[$title]]" );
 			$page = $wikiPageFactory->newFromTitle( $title );
-			$status = $page->doDeleteArticleReal( 'No longer required', $user );
+			$status = $delPageFactory->newDeletePage( $page, $user )->deleteUnsafe( 'No longer required' );
 			if ( !$status->isOK() ) {
 				$this->output( " (Failed!)" );
 			}
@@ -199,10 +205,8 @@ class DeleteEqualMessages extends Maintenance {
 				$title = Title::makeTitle( NS_MEDIAWIKI_TALK, $result['title'] );
 				$this->output( "\n* [[$title]]" );
 				$page = $wikiPageFactory->newFromTitle( $title );
-				$status = $page->doDeleteArticleReal(
-					'Orphaned talk page of no longer required message',
-					$user
-				);
+				$status = $delPageFactory->newDeletePage( $page, $user )
+					->deleteUnsafe( 'Orphaned talk page of no longer required message' );
 				if ( !$status->isOK() ) {
 					$this->output( " (Failed!)" );
 				}
@@ -212,5 +216,7 @@ class DeleteEqualMessages extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = DeleteEqualMessages::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

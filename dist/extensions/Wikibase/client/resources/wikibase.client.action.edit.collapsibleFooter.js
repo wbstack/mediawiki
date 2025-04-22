@@ -30,15 +30,17 @@
 			collapsed: isCollapsed
 		} );
 
-		$toggler.addClass( isCollapsed ? 'mw-icon-arrow-collapsed' : 'mw-icon-arrow-expanded' );
+		if ( isCollapsed ) {
+			$toggler.addClass( 'mw-editfooter-toggler-collapsed' );
+		}
 
 		$list.on( 'beforeExpand.mw-collapsible', function () {
-			$toggler.removeClass( 'mw-icon-arrow-collapsed' ).addClass( 'mw-icon-arrow-expanded' );
+			$toggler.removeClass( 'mw-editfooter-toggler-collapsed' );
 			mw.storage.set( storeKey, expandedVal );
 		} );
 
 		$list.on( 'beforeCollapse.mw-collapsible', function () {
-			$toggler.removeClass( 'mw-icon-arrow-expanded' ).addClass( 'mw-icon-arrow-collapsed' );
+			$toggler.addClass( 'mw-editfooter-toggler-collapsed' );
 			mw.storage.set( storeKey, collapsedVal );
 		} );
 	};

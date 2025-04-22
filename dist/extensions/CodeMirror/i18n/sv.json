@@ -2,8 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Lokal Profil",
-			"WikiPhoenix",
-			"Sabelöga"
+			"Sabelöga",
+			"WikiPhoenix"
 		]
 	},
 	"codemirror-desc": "Ger syntaxmarkerad redigering för redigering av wikitext",

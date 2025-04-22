@@ -9,7 +9,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "antispam",
 	"MessagesDirs": {
-		"HCaptcha": [
+		"hCaptcha": [
 			"i18n"
 		]
 	},
@@ -46,16 +46,15 @@
 	},
 	"ResourceModules": {
 		"ext.confirmEdit.hCaptcha.visualEditor": {
+			"dependencies": [
+				"web2017-polyfills"
+			],
 			"packageFiles": [
 				"ve-confirmedit-hCaptcha/ve.init.mw.HCaptchaSaveErrorHandler.js",
 				{
 					"name": "ve-confirmedit-hCaptcha/config.json",
 					"callback": "MediaWiki\\Extension\\ConfirmEdit\\hCaptcha\\Hooks\\ResourceLoaderHooks::getHCaptchaResourceLoaderConfig"
 				}
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		}
 	},

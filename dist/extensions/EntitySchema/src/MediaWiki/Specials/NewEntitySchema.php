@@ -1,21 +1,25 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Specials;
 
+use EntitySchema\DataAccess\EntitySchemaStatus;
 use EntitySchema\DataAccess\MediaWikiPageUpdaterFactory;
-use EntitySchema\DataAccess\MediaWikiRevisionSchemaInserter;
-use EntitySchema\DataAccess\SqlIdGenerator;
-use EntitySchema\DataAccess\WatchlistUpdater;
+use EntitySchema\DataAccess\MediaWikiRevisionEntitySchemaInserter;
+use EntitySchema\Domain\Storage\IdGenerator;
+use EntitySchema\MediaWiki\EntitySchemaRedirectTrait;
+use EntitySchema\MediaWiki\EntitySchemaServices;
 use EntitySchema\Presentation\InputValidator;
-use Html;
-use HTMLForm;
-use Language;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\MediaWikiServices;
-use OutputPage;
+use MediaWiki\Message\Message;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\User\TempUser\TempUserConfig;
 use PermissionsError;
-use SpecialPage;
-use Status;
-use Title;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\Specials\SpecialPageCopyrightView;
@@ -27,6 +31,8 @@ use Wikibase\Repo\Specials\SpecialPageCopyrightView;
  */
 class NewEntitySchema extends SpecialPage {
 
+	use EntitySchemaRedirectTrait;
+
 	public const FIELD_DESCRIPTION = 'description';
 
 	public const FIELD_LABEL = 'label';
@@ -37,21 +43,35 @@ class NewEntitySchema extends SpecialPage {
 
 	public const FIELD_LANGUAGE = 'languagecode';
 
+	private IdGenerator $idGenerator;
+
 	private SpecialPageCopyrightView $copyrightView;
 
-	public function __construct( SettingsArray $repoSettings ) {
+	private TempUserConfig $tempUserConfig;
+
+	private MediaWikiPageUpdaterFactory $pageUpdaterFactory;
+
+	public function __construct(
+		TempUserConfig $tempUserConfig,
+		SettingsArray $repoSettings,
+		IdGenerator $idGenerator,
+		MediaWikiPageUpdaterFactory $pageUpdaterFactory
+	) {
 		parent::__construct(
 			'NewEntitySchema',
 			'createpage'
 		);
+		$this->idGenerator = $idGenerator;
 		$this->copyrightView = new SpecialPageCopyrightView(
 			new CopyrightMessageBuilder(),
 			$repoSettings->getSetting( 'dataRightsUrl' ),
 			$repoSettings->getSetting( 'dataRightsText' )
 		);
+		$this->tempUserConfig = $tempUserConfig;
+		$this->pageUpdaterFactory = $pageUpdaterFactory;
 	}
 
-	public function execute( $subPage ) {
+	public function execute( $subPage ): void {
 		parent::execute( $subPage );
 
 		$this->checkPermissionsWithSubpage( $subPage );
@@ -62,7 +82,7 @@ class NewEntitySchema extends SpecialPage {
 			->setSubmitID( 'entityschema-newschema-submit' )
 			->setSubmitTextMsg( 'entityschema-newschema-submit' )
 			->setValidationErrorMessage( [ [
-				'entityschema-error-possibly-multiple-messages-available'
+				'entityschema-error-possibly-multiple-messages-available',
 			] ] )
 			->setSubmitCallback( [ $this, 'submitCallback' ] );
 		$form->prepareForm();
@@ -71,9 +91,9 @@ class NewEntitySchema extends SpecialPage {
 		$submitStatus = $form->tryAuthorizedSubmit();
 
 		if ( $submitStatus && $submitStatus->isGood() ) {
-			$this->getOutput()->redirect(
-				$submitStatus->getValue()
-			);
+			// wrap it, in case HTMLForm turned it into a generic Status
+			$submitStatus = EntitySchemaStatus::wrap( $submitStatus );
+			$this->redirectToEntitySchema( $submitStatus );
 			return;
 		}
 
@@ -83,50 +103,39 @@ class NewEntitySchema extends SpecialPage {
 		$form->displayForm( $submitStatus ?: Status::newGood() );
 	}
 
-	public function submitCallback( $data, HTMLForm $form ) {
+	public function submitCallback( array $data, HTMLForm $form ): Status {
 		// TODO: no form data validation??
 
-		$idGenerator = new SqlIdGenerator(
-			MediaWikiServices::getInstance()->getDBLoadBalancer(),
-			'entityschema_id_counter',
-			$this->getConfig()->get( 'EntitySchemaSkippedIDs' )
-		);
-
-		$pageUpdaterFactory = new MediaWikiPageUpdaterFactory( $this->getUser() );
-
 		$services = MediaWikiServices::getInstance();
-		$schemaInserter = new MediaWikiRevisionSchemaInserter(
-			$pageUpdaterFactory,
-			new WatchlistUpdater( $this->getUser(), NS_ENTITYSCHEMA_JSON ),
-			$idGenerator,
+		$schemaInserter = new MediaWikiRevisionEntitySchemaInserter(
+			$this->pageUpdaterFactory,
+			EntitySchemaServices::getWatchlistUpdater( $services ),
+			$this->idGenerator,
 			$this->getContext(),
-			$services->getHookContainer(),
-			$services->getTitleFactory()
+			$services->getLanguageFactory(),
+			$services->getHookContainer()
 		);
-		$newId = $schemaInserter->insertSchema(
+		return $schemaInserter->insertSchema(
 			$data[self::FIELD_LANGUAGE],
 			$data[self::FIELD_LABEL],
 			$data[self::FIELD_DESCRIPTION],
 			array_filter( array_map( 'trim', explode( '|', $data[self::FIELD_ALIASES] ) ) ),
 			$data[self::FIELD_SCHEMA_TEXT]
 		);
-
-		$title = Title::makeTitle( NS_ENTITYSCHEMA_JSON, $newId->getId() );
-
-		return Status::newGood( $title->getFullURL() );
 	}
 
-	public function getDescription() {
-		return $this->msg( 'special-newschema' )->text();
+	public function getDescription(): Message {
+		return $this->msg( 'special-newschema' );
 	}
 
-	protected function getGroupName() {
+	protected function getGroupName(): string {
 		return 'wikibase';
 	}
 
 	private function getFormFields(): array {
 		$langCode = $this->getLanguage()->getCode();
-		$langName = Language::fetchLanguageName( $langCode, $langCode );
+		$langName = MediaWikiServices::getInstance()->getLanguageNameUtils()
+			->getLanguageName( $langCode, $langCode );
 		$inputValidator = InputValidator::newFromGlobalState();
 		return [
 			self::FIELD_LABEL => [
@@ -140,7 +149,7 @@ class NewEntitySchema extends SpecialPage {
 				'label-message' => 'entityschema-newschema-label',
 				'validation-callback' => [
 					$inputValidator,
-					'validateStringInputLength'
+					'validateStringInputLength',
 				],
 			],
 			self::FIELD_DESCRIPTION => [
@@ -153,7 +162,7 @@ class NewEntitySchema extends SpecialPage {
 				'label-message' => 'entityschema-newschema-description',
 				'validation-callback' => [
 					$inputValidator,
-					'validateStringInputLength'
+					'validateStringInputLength',
 				],
 			],
 			self::FIELD_ALIASES => [
@@ -166,7 +175,7 @@ class NewEntitySchema extends SpecialPage {
 				'label-message' => 'entityschema-newschema-aliases',
 				'validation-callback' => [
 					$inputValidator,
-					'validateAliasesLength'
+					'validateAliasesLength',
 				],
 			],
 			self::FIELD_SCHEMA_TEXT => [
@@ -178,7 +187,7 @@ class NewEntitySchema extends SpecialPage {
 				'label-message' => 'entityschema-newschema-schema-shexc',
 				'validation-callback' => [
 					$inputValidator,
-					'validateSchemaTextLength'
+					'validateSchemaTextLength',
 				],
 				'useeditfont' => true,
 			],
@@ -190,7 +199,7 @@ class NewEntitySchema extends SpecialPage {
 		];
 	}
 
-	private function displayBeforeForm( OutputPage $output ) {
+	private function displayBeforeForm( OutputPage $output ): void {
 		$output->addHTML( $this->getCopyrightHTML() );
 
 		foreach ( $this->getWarnings() as $warning ) {
@@ -207,7 +216,7 @@ class NewEntitySchema extends SpecialPage {
 	}
 
 	private function getWarnings(): array {
-		if ( $this->getUser()->isAnon() ) {
+		if ( $this->getUser()->isAnon() && !$this->tempUserConfig->isEnabled() ) {
 			return [
 				$this->msg(
 					'entityschema-anonymouseditwarning'
@@ -218,16 +227,16 @@ class NewEntitySchema extends SpecialPage {
 		return [];
 	}
 
-	private function addJavaScript() {
+	private function addJavaScript(): void {
 		$output = $this->getOutput();
 		$output->addModules( [
-			'ext.EntitySchema.special.newSchema',
+			'ext.EntitySchema.special.newEntitySchema',
 		] );
 		$output->addJsConfigVars( [
 			'wgEntitySchemaSchemaTextMaxSizeBytes' =>
 				intval( $this->getConfig()->get( 'EntitySchemaSchemaTextMaxSizeBytes' ) ),
 			'wgEntitySchemaNameBadgeMaxSizeChars' =>
-				intval( $this->getConfig()->get( 'EntitySchemaNameBadgeMaxSizeChars' ) )
+				intval( $this->getConfig()->get( 'EntitySchemaNameBadgeMaxSizeChars' ) ),
 		] );
 	}
 
@@ -237,7 +246,7 @@ class NewEntitySchema extends SpecialPage {
 	 *
 	 * @throws PermissionsError
 	 */
-	protected function checkPermissionsWithSubpage( $subPage ) {
+	protected function checkPermissionsWithSubpage( ?string $subPage ): void {
 		$pm = MediaWikiServices::getInstance()->getPermissionManager();
 		$checkReplica = !$this->getRequest()->wasPosted();
 		$permissionErrors = $pm->getPermissionErrors(

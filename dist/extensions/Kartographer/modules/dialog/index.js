@@ -1,13 +1,13 @@
 /**
  * Module to help rendering maps in a full screen dialog.
  *
- * @alternateClassName ext.kartographer.dialog
+ * @borrows Kartographer.Dialog as ext.kartographer.dialog
  * @class Kartographer.Dialog
  * @singleton
  */
-var Dialog = require( './dialog.js' ),
-	router = require( 'mediawiki.router' ),
-	windowManager, mapDialog, routerEnabled;
+const Dialog = require( './dialog.js' );
+const router = require( 'mediawiki.router' );
+let windowManager, mapDialog, routerEnabled;
 
 /**
  * @return {Kartographer.Dialog}
@@ -35,8 +35,10 @@ function close() {
 	}
 }
 
-function closeIfNotMapRoute( routeEv ) {
-	var isMapRoute = routeEv && /^\/(map|maplink)\//.test( routeEv.path );
+function onRouterRoute( routeEv ) {
+	// The hash has been changed by some user action. If it is no longer
+	// a known map route, close the map dialog.
+	const isMapRoute = routeEv && /^\/(map|maplink)\//.test( routeEv.path );
 	if ( !isMapRoute ) {
 		close();
 	}
@@ -50,23 +52,22 @@ module.exports = {
 	 * @param {Kartographer.Box.MapClass} map
 	 */
 	render: function ( map ) {
-		var manager = getWindowManager(),
-			dialog = getMapDialog(),
-			instance;
+		const manager = getWindowManager();
+		const dialog = getMapDialog();
 
 		if ( map.useRouter && !routerEnabled ) {
-			router.on( 'route', closeIfNotMapRoute );
-			router.route( '', closeIfNotMapRoute );
+			router.on( 'route', onRouterRoute );
 			routerEnabled = true;
 		}
 
 		if ( !manager.getCurrentWindow() ) {
-			instance = manager.openWindow( dialog, { map: map } );
-			instance.closing.then( function () {
-				if ( map.parentMap ) {
-					// FIXME we need to correct for the footerbar offset
+			const instance = manager.openWindow( dialog, { map: map } );
+			instance.closing.then( () => {
+				if ( map.parentMap && !map.parentMap.options.alwaysStatic ) {
+					const targetPoint = map.project( map.getCenter(), map.getZoom() ).subtract( dialog.offset ),
+						targetLatLng = map.unproject( targetPoint, map.getZoom() );
 					map.parentMap.setView(
-						map.getCenter(),
+						targetLatLng,
 						map.getZoom()
 					);
 				}
@@ -85,28 +86,26 @@ module.exports = {
 	 *                          The rendering process might not yet be finished.
 	 */
 	renderNewMap: function ( mapObject ) {
-		var manager = getWindowManager(),
-			dialog = getMapDialog(),
-			deferred = $.Deferred(),
-			promises = [ mw.loader.using( 'ext.kartographer.box' ) ],
-			instance;
+		const manager = getWindowManager();
+		const dialog = getMapDialog();
+		const deferred = $.Deferred();
+		const promises = [ mw.loader.using( 'ext.kartographer.box' ) ];
 
 		if ( !manager.getCurrentWindow() ) {
 			// We open the window immediately to guarantee responsiveness
 			// Only THEN we set the map
-			instance = manager.openWindow( dialog, {} );
+			const instance = manager.openWindow( dialog, {} );
 			promises.push( instance.opened );
 		}
-		$.when.apply( $, promises ).then( function () {
-			var map = require( 'ext.kartographer.box' ).map( mapObject );
+		$.when.apply( $, promises ).then( () => {
+			const map = require( 'ext.kartographer.box' ).map( mapObject );
 			deferred.resolve( map );
 			if ( map.useRouter && !routerEnabled ) {
-				router.on( 'route', closeIfNotMapRoute );
-				router.route( '', closeIfNotMapRoute );
+				router.on( 'route', onRouterRoute );
 				routerEnabled = true;
 			}
 			dialog.setMap( map );
-		}, function () {
+		}, () => {
 			deferred.reject();
 		} );
 		return deferred.promise();
@@ -118,9 +117,10 @@ module.exports = {
 	close: function () {
 		if ( mapDialog && mapDialog.map.useRouter ) {
 			router.navigate( '' );
-		} else {
-			close();
+			// #navigate uses history.pushState which doesn't trigger a
+			// hashchange event, so we still need to close the dialog manually.
 		}
+		close();
 	},
 
 	private: {

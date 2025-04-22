@@ -2,10 +2,10 @@
 
 namespace Wikibase\Client\Hooks;
 
-use LanguageCode;
-use Site;
-use SiteLookup;
-use Title;
+use MediaWiki\Language\LanguageCode;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteLookup;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\DataModel\SiteLink;
 
@@ -157,7 +157,7 @@ class OtherProjectsSidebarGenerator {
 		$attributes = [
 			'msg' => 'wikibase-otherprojects-' . $site->getGroup(),
 			'class' => 'wb-otherproject-link wb-otherproject-' . $site->getGroup(),
-			'href' => $site->getPageUrl( $siteLink->getPageName() )
+			'href' => $site->getPageUrl( $siteLink->getPageName() ),
 		];
 
 		$siteLanguageCode = $site->getLanguageCode();

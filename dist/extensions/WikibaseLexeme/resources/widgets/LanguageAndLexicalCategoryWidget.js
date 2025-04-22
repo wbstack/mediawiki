@@ -13,13 +13,14 @@ module.exports = ( function () {
 	 */
 	return function ( template, api, messages ) {
 		return {
+			compatConfig: { MODE: 3 },
 			props: [ 'language', 'lexicalCategory', 'inEditMode', 'isSaving' ],
 			template: template,
 			components: {
 				'item-selector': ItemSelectorWrapper( api )
 			},
 
-			filters: {
+			methods: {
 				message: function ( key ) {
 					return messages.get( key );
 				}

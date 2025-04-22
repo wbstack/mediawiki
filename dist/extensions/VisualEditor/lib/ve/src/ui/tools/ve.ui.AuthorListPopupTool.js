@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface AuthorListPopupTool class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -101,7 +101,7 @@ ve.ui.AuthorListPopupTool.prototype.setup = function ( surface ) {
 		authorDisconnect: 'onSynchronizerAuthorDisconnect'
 	} );
 
-	for ( var authorId in this.synchronizer.authors ) {
+	for ( const authorId in this.synchronizer.authors ) {
 		this.onSynchronizerAuthorUpdate( +authorId );
 	}
 };
@@ -146,7 +146,7 @@ ve.ui.AuthorListPopupTool.prototype.updateAuthorCount = function () {
  * @param {number} authorId The author ID
  */
 ve.ui.AuthorListPopupTool.prototype.onSynchronizerAuthorUpdate = function ( authorId ) {
-	var authorItem = this.authorItems[ authorId ];
+	let authorItem = this.authorItems[ authorId ];
 
 	if ( authorId !== this.synchronizer.getAuthorId() ) {
 		if ( !authorItem ) {
@@ -179,7 +179,7 @@ ve.ui.AuthorListPopupTool.prototype.onSynchronizerAuthorUpdate = function ( auth
  * @param {number} authorId The author ID
  */
 ve.ui.AuthorListPopupTool.prototype.onSynchronizerAuthorDisconnect = function ( authorId ) {
-	var authorItem = this.authorItems[ authorId ];
+	const authorItem = this.authorItems[ authorId ];
 	if ( authorItem ) {
 		authorItem.$element.remove();
 		delete this.authorItems[ authorId ];
@@ -190,7 +190,7 @@ ve.ui.AuthorListPopupTool.prototype.onSynchronizerAuthorDisconnect = function ( 
 /* Static Properties */
 
 ve.ui.AuthorListPopupTool.static.name = 'authorList';
-ve.ui.AuthorListPopupTool.static.group = 'utility';
+ve.ui.AuthorListPopupTool.static.group = 'users';
 ve.ui.AuthorListPopupTool.static.icon = 'userAvatar';
 ve.ui.AuthorListPopupTool.static.title = '1';
 ve.ui.AuthorListPopupTool.static.autoAddToCatchall = false;

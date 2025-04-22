@@ -1,23 +1,27 @@
 /*!
  * VisualEditor ContentEditable linear delete key down handler tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.ce.LinearDeleteKeyDownHandler', {
 	// See https://github.com/platinumazure/eslint-plugin-qunit/issues/68
 	// eslint-disable-next-line qunit/resolve-async
 	beforeEach: function ( assert ) {
-		var done = assert.async();
+		const done = assert.async();
 		return ve.init.platform.getInitializedPromise().then( done );
 	}
 } );
 
-QUnit.test( 'special key down: linear backspace/delete', function ( assert ) {
-	var done = assert.async(),
-		promise = Promise.resolve(),
+QUnit.test( 'special key down: linear backspace/delete', ( assert ) => {
+	const done = assert.async(),
 		noChange = function () {},
 		emptyList = '<ul><li><p></p></li></ul>',
+		blockAlien = '<div rel="ve:Alien"></div>',
+		blockAliens = blockAlien + '<p>a</p>' + blockAlien,
+		blockAliensEmptyParagraph = blockAlien + '<p></p>' + blockAlien,
+		table = '<table><tr><td>a</td></tr></table>',
+		tablesEmptyParagraph = table + '<p></p>' + table,
 		link = '<p>foo <a href="#">bar</a> baz</p>',
 		cases = [
 			{
@@ -98,14 +102,14 @@ QUnit.test( 'special key down: linear backspace/delete', function ( assert ) {
 				keys: [ 'BACKSPACE' ],
 				expectedData: noChange,
 				expectedRangeOrSelection: new ve.Range( 39, 41 ),
-				msg: 'Focusable node selected but not deleted by backspace'
+				msg: 'Inline focusable node selected but not deleted by backspace'
 			},
 			{
 				rangeOrSelection: new ve.Range( 39 ),
 				keys: [ 'DELETE' ],
 				expectedData: noChange,
 				expectedRangeOrSelection: new ve.Range( 39, 41 ),
-				msg: 'Focusable node selected but not deleted by delete'
+				msg: 'Inline focusable node selected but not deleted by delete'
 			},
 			{
 				rangeOrSelection: new ve.Range( 39, 41 ),
@@ -114,7 +118,53 @@ QUnit.test( 'special key down: linear backspace/delete', function ( assert ) {
 					data.splice( 39, 2 );
 				},
 				expectedRangeOrSelection: new ve.Range( 39 ),
-				msg: 'Focusable node deleted if selected first'
+				msg: 'Inline focusable node deleted if selected first'
+			},
+			{
+				htmlOrDoc: blockAliens,
+				rangeOrSelection: new ve.Range( 3 ),
+				keys: [ 'BACKSPACE' ],
+				expectedData: noChange,
+				expectedRangeOrSelection: new ve.Range( 0, 2 ),
+				msg: 'Block focusable node selected but not deleted by backspace'
+			},
+			{
+				htmlOrDoc: blockAliens,
+				rangeOrSelection: new ve.Range( 4 ),
+				keys: [ 'DELETE' ],
+				expectedData: noChange,
+				expectedRangeOrSelection: new ve.Range( 5, 7 ),
+				msg: 'Block focusable node selected but not deleted by delete'
+			},
+			{
+				htmlOrDoc: blockAliens,
+				rangeOrSelection: new ve.Range( 0, 2 ),
+				keys: [ 'DELETE' ],
+				expectedData: function ( data ) {
+					data.splice( 0, 2 );
+				},
+				expectedRangeOrSelection: new ve.Range( 1 ),
+				msg: 'Block focusable node deleted if selected first'
+			},
+			{
+				htmlOrDoc: blockAliensEmptyParagraph,
+				rangeOrSelection: new ve.Range( 3 ),
+				keys: [ 'BACKSPACE' ],
+				expectedData: function ( data ) {
+					data.splice( 2, 2 );
+				},
+				expectedRangeOrSelection: new ve.Range( 0, 2 ),
+				msg: 'Block focusable node selected and empty paragraph deleted'
+			},
+			{
+				htmlOrDoc: blockAliensEmptyParagraph,
+				rangeOrSelection: new ve.Range( 3 ),
+				keys: [ 'DELETE' ],
+				expectedData: function ( data ) {
+					data.splice( 2, 2 );
+				},
+				expectedRangeOrSelection: new ve.Range( 2, 4 ),
+				msg: 'Block focusable node selected but not deleted by delete from empty paragraph'
 			},
 			{
 				rangeOrSelection: new ve.Range( 38 ),
@@ -139,6 +189,37 @@ QUnit.test( 'special key down: linear backspace/delete', function ( assert ) {
 					fromRow: 0
 				},
 				msg: 'Table cell selected but not deleted by delete'
+			},
+			{
+				htmlOrDoc: tablesEmptyParagraph,
+				rangeOrSelection: new ve.Range( 12 ),
+				keys: [ 'BACKSPACE' ],
+				expectedData: function ( data ) {
+					data.splice( 11, 2 );
+				},
+				expectedRangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 0, 11 ),
+					fromCol: 0,
+					fromRow: 0
+				},
+				msg: 'Table selected but not deleted by backspace from empty paragraph'
+			},
+			{
+				htmlOrDoc: tablesEmptyParagraph,
+				rangeOrSelection: new ve.Range( 12 ),
+				keys: [ 'DELETE' ],
+				expectedData: function ( data ) {
+					data.splice( 11, 2 );
+				},
+				expectedRangeOrSelection: {
+					type: 'table',
+					tableRange: new ve.Range( 11, 22 ),
+					fromCol: 0,
+					fromRow: 0
+				},
+				// TODO: Delete the empty paragraph instead
+				msg: 'Table selected but not deleted by delete from empty paragraph'
 			},
 			{
 				htmlOrDoc: '<p>a</p>' + emptyList + '<p>b</p>',
@@ -242,9 +323,9 @@ QUnit.test( 'special key down: linear backspace/delete', function ( assert ) {
 				rangeOrSelection: new ve.Range( 18 ),
 				keys: [ 'DELETE' ],
 				expectedData: function ( data ) {
-					var paragraph = data.splice( 14, 5 );
+					const paragraph = data.splice( 14, 5 );
 					data.splice( 13, 2 ); // Remove the empty listItem
-					data.splice.apply( data, [ 14, 0 ].concat( paragraph ) );
+					data.splice( 14, 0, ...paragraph );
 				},
 				expectedRangeOrSelection: new ve.Range( 18 ),
 				msg: 'Non-empty multi-item list at end of document unwrapped by delete'
@@ -431,10 +512,9 @@ QUnit.test( 'special key down: linear backspace/delete', function ( assert ) {
 			}
 		];
 
-	cases.forEach( function ( caseItem ) {
-		promise = promise.then( function () {
-			return ve.test.utils.runSurfaceHandleSpecialKeyTest( assert, caseItem );
-		} );
+	let promise = Promise.resolve();
+	cases.forEach( ( caseItem ) => {
+		promise = promise.then( () => ve.test.utils.runSurfaceHandleSpecialKeyTest( assert, caseItem ) );
 	} );
 
 	promise.finally( () => done() );

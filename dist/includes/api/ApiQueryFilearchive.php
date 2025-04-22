@@ -24,11 +24,20 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use ArchivedFile;
+use File;
 use MediaWiki\CommentFormatter\CommentFormatter;
 use MediaWiki\CommentFormatter\CommentItem;
+use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleValue;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\LikeValue;
 
 /**
  * Query module to enumerate all deleted files.
@@ -37,21 +46,12 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  */
 class ApiQueryFilearchive extends ApiQueryBase {
 
-	/** @var CommentStore */
-	private $commentStore;
+	private CommentStore $commentStore;
+	private CommentFormatter $commentFormatter;
 
-	/** @var CommentFormatter */
-	private $commentFormatter;
-
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param CommentStore $commentStore
-	 * @param CommentFormatter $commentFormatter
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		CommentStore $commentStore,
 		CommentFormatter $commentFormatter
 	) {
@@ -93,19 +93,13 @@ class ApiQueryFilearchive extends ApiQueryBase {
 		$this->addJoinConds( $fileQuery['joins'] );
 
 		if ( $params['continue'] !== null ) {
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != 3 );
-			$op = $params['dir'] == 'descending' ? '<' : '>';
-			$cont_from = $db->addQuotes( $cont[0] );
-			$cont_timestamp = $db->addQuotes( $db->timestamp( $cont[1] ) );
-			$cont_id = (int)$cont[2];
-			$this->dieContinueUsageIf( $cont[2] !== (string)$cont_id );
-			$this->addWhere( "fa_name $op $cont_from OR " .
-				"(fa_name = $cont_from AND " .
-				"(fa_timestamp $op $cont_timestamp OR " .
-				"(fa_timestamp = $cont_timestamp AND " .
-				"fa_id $op= $cont_id )))"
-			);
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'string', 'timestamp', 'int' ] );
+			$op = $params['dir'] == 'descending' ? '<=' : '>=';
+			$this->addWhere( $db->buildComparison( $op, [
+				'fa_name' => $cont[0],
+				'fa_timestamp' => $db->timestamp( $cont[1] ),
+				'fa_id' => $cont[2],
+			] ) );
 		}
 
 		// Image filters
@@ -114,9 +108,13 @@ class ApiQueryFilearchive extends ApiQueryBase {
 		$to = ( $params['to'] === null ? null : $this->titlePartToKey( $params['to'], NS_FILE ) );
 		$this->addWhereRange( 'fa_name', $dir, $from, $to );
 		if ( isset( $params['prefix'] ) ) {
-			$this->addWhere( 'fa_name' . $db->buildLike(
-				$this->titlePartToKey( $params['prefix'], NS_FILE ),
-				$db->anyString() ) );
+			$this->addWhere(
+				$db->expr(
+					'fa_name',
+					IExpression::LIKE,
+					new LikeValue( $this->titlePartToKey( $params['prefix'], NS_FILE ), $db->anyString() )
+				)
+			);
 		}
 
 		$sha1Set = isset( $params['sha1'] );
@@ -128,7 +126,7 @@ class ApiQueryFilearchive extends ApiQueryBase {
 				if ( !$this->validateSha1Hash( $sha1 ) ) {
 					$this->dieWithError( 'apierror-invalidsha1hash' );
 				}
-				$sha1 = Wikimedia\base_convert( $sha1, 16, 36, 31 );
+				$sha1 = \Wikimedia\base_convert( $sha1, 16, 36, 31 );
 			} elseif ( $sha1base36Set ) {
 				$sha1 = strtolower( $params['sha1base36'] );
 				if ( !$this->validateSha1Base36Hash( $sha1 ) ) {
@@ -190,6 +188,7 @@ class ApiQueryFilearchive extends ApiQueryBase {
 				break;
 			}
 
+			$exists = $row->fa_archive_name !== '';
 			$canViewFile = RevisionRecord::userCanBitfield( $row->fa_deleted, File::DELETED_FILE, $user );
 
 			$file = [];
@@ -214,13 +213,16 @@ class ApiQueryFilearchive extends ApiQueryBase {
 				$file['userid'] = (int)$row->fa_user;
 				$file['user'] = $row->fa_user_text;
 			}
-			if ( $fld_sha1 && $canViewFile ) {
-				$file['sha1'] = Wikimedia\base_convert( $row->fa_sha1, 36, 16, 40 );
+			if ( !$exists ) {
+				$file['filemissing'] = true;
+			}
+			if ( $fld_sha1 && $canViewFile && $exists ) {
+				$file['sha1'] = \Wikimedia\base_convert( $row->fa_sha1, 36, 16, 40 );
 			}
 			if ( $fld_timestamp ) {
 				$file['timestamp'] = wfTimestamp( TS_ISO_8601, $row->fa_timestamp );
 			}
-			if ( ( $fld_size || $fld_dimensions ) && $canViewFile ) {
+			if ( ( $fld_size || $fld_dimensions ) && $canViewFile && $exists ) {
 				$file['size'] = $row->fa_size;
 
 				$pageCount = ArchivedFile::newFromRow( $row )->pageCount();
@@ -231,19 +233,19 @@ class ApiQueryFilearchive extends ApiQueryBase {
 				$file['height'] = $row->fa_height;
 				$file['width'] = $row->fa_width;
 			}
-			if ( $fld_mediatype && $canViewFile ) {
+			if ( $fld_mediatype && $canViewFile && $exists ) {
 				$file['mediatype'] = $row->fa_media_type;
 			}
-			if ( $fld_metadata && $canViewFile ) {
+			if ( $fld_metadata && $canViewFile && $exists ) {
 				$metadataArray = ArchivedFile::newFromRow( $row )->getMetadataArray();
 				$file['metadata'] = $row->fa_metadata
 					? ApiQueryImageInfo::processMetaData( $metadataArray, $result )
 					: null;
 			}
-			if ( $fld_bitdepth && $canViewFile ) {
+			if ( $fld_bitdepth && $canViewFile && $exists ) {
 				$file['bitdepth'] = $row->fa_bits;
 			}
-			if ( $fld_mime && $canViewFile ) {
+			if ( $fld_mime && $canViewFile && $exists ) {
 				$file['mime'] = "$row->fa_major_mime/$row->fa_minor_mime";
 			}
 			if ( $fld_archivename && $row->fa_archive_name !== null ) {
@@ -333,3 +335,6 @@ class ApiQueryFilearchive extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Filearchive';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryFilearchive::class, 'ApiQueryFilearchive' );

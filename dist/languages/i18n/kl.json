@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Aputtu",
 			"Iketsi",
 			"Kaare",
@@ -118,7 +117,7 @@
 	"portal": "Allattartup saqqaa",
 	"privacy": "Namminermut paasissutissat",
 	"retrievedfrom": "Uannga aaneqartoq \"$1\"",
-	"youhavenewmessages": "<!-- This sentence shall be empty because of kl grammar. --> $1 ($2)",
+	"new-messages": "<!-- This sentence shall be empty because of kl grammar. --> $1 ($2)",
 	"editsection": "aaqqissoruk",
 	"editold": "aaqqissoruk",
 	"viewsourceold": "toqqavia takuuk",
@@ -145,7 +144,6 @@
 	"viewsourcetext": "Qupperneq takusinnaavat aamma sanarfia kopeersinnaavat:",
 	"logouttext": "'''Maanna anivutit.'''\n\n{{SITENAME}} atorlugu ingerlaqqissinnaavutit kinaanerit isertorlugu, iseqqissinnaavutilluunniit taamatut isissuteqarlutit imalt. allat iserfigisinnaanngorpaat.",
 	"yourname": "Atuisutut atit",
-	"yourpassword": "Isissutissaq:",
 	"yourpasswordagain": "Isissutissaq allaqqiguk",
 	"login": "Iserit",
 	"nav-login-createaccount": "Konto-mik pilersitsigit imalt. iserit",
@@ -222,9 +220,6 @@
 	"search-suggest": "Una piviuk: $1",
 	"search-nonefound": "Ujaasineq inerneqanngilaq",
 	"mypreferences": "Inissiffissat",
-	"prefs-rc": "Allannguutit kingulliit",
-	"saveprefs": "Toqqukkit",
-	"yourlanguage": "Oqaatsit:",
 	"group-sysop": "Administratorit",
 	"skin-action-addsection": "Imm. nutaaq",
 	"action-move": "Nuuguk",
@@ -297,7 +292,6 @@
 	"blanknamespace": "(Pingaarneq)",
 	"tool-link-contributions": "Atuisup tapii",
 	"mycontris": "Tapikka",
-	"contribsub2": "$1-meersoq ($2)",
 	"uctop": "kingulleq",
 	"month": "Qaammat:",
 	"year": "Ukioq:",

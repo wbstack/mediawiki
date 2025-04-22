@@ -1,70 +1,71 @@
-( function () {
-	'use strict';
+'use strict';
 
-	mw.libs = mw.libs || {};
-	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
-	mw.libs.advancedSearch.dm = mw.libs.advancedSearch.dm || {};
+const getDefaultNamespaces = require( './ext.advancedSearch.getDefaultNamespaces.js' );
+const { arrayContains } = require( '../ext.advancedSearch.util.js' );
+
+/**
+ * @class
+ * @property {Object.<int,string>} namespaces
+ * @property {Object.<string,Function>} providerFunctions
+ *
+ * @constructor
+ * @param {Object.<int,string>} namespaces Mapping namespace ids to localized names
+ */
+const NamespacePresetProviders = function ( namespaces ) {
+	this.namespaces = namespaces;
+	this.providerFunctions = {
+		all: ( namespaceIds ) => namespaceIds,
+		discussion: ( namespaceIds ) => namespaceIds.filter( mw.Title.isTalkNamespace ),
+		defaultNamespaces: () => getDefaultNamespaces( mw.user.options.values )
+	};
 
 	/**
-	 * Fired when the namespace ID providers are initialized
+	 * Fired after the default namespace preset provider functions have been registered. Hook
+	 * handlers can add additional presets and modify or remove existing ones. See docs/settings.md
+	 * for an example.
 	 *
-	 * The real event name is `advancedSearch.initNamespacePresetProviders`, but jsDuck does not support dots in event names.
-	 *
-	 * @event advancedSearch_initNamespacePresetProviders
-	 * @param {Object} providerFunctions
+	 * @event advancedSearch.initNamespacePresetProviders
+	 * @param {Object.<string,Function>} providerFunctions
+	 * @stable to use
 	 */
+	mw.hook( 'advancedSearch.initNamespacePresetProviders' ).fire( this.providerFunctions );
+};
 
-	/**
-	 * @param {Object} namespaces Mapping namespace IDs to localized names
-	 * @constructor
-	 */
-	mw.libs.advancedSearch.dm.NamespacePresetProviders = function ( namespaces ) {
-		this.namespaces = namespaces;
-		this.providerFunctions = {
-			all: function ( namespaceIds ) {
-				return namespaceIds;
-			},
-			discussion: function ( namespaceIds ) {
-				return namespaceIds.filter( mw.Title.isTalkNamespace );
-			},
-			defaultNamespaces: function () {
-				return mw.libs.advancedSearch.dm.getDefaultNamespaces( mw.user.options.values );
+OO.initClass( NamespacePresetProviders );
+
+/**
+ * @param {string} providerName
+ * @return {boolean}
+ */
+NamespacePresetProviders.prototype.hasProvider = function ( providerName ) {
+	return Object.prototype.hasOwnProperty.call( this.providerFunctions, providerName );
+};
+
+/**
+ * @param {string} providerName
+ * @return {string[]}
+ */
+NamespacePresetProviders.prototype.getNamespaceIdsFromProvider = function ( providerName ) {
+	const self = this;
+
+	return this.providerFunctions[ providerName ]( Object.keys( this.namespaces ) )
+		// Calling String() as a function casts numbers to strings
+		.map( String )
+		.filter( ( id ) => {
+			if ( id in self.namespaces ) {
+				return true;
 			}
-		};
-		mw.hook( 'advancedSearch.initNamespacePresetProviders' ).fire( this.providerFunctions );
-	};
+			mw.log.warn( 'AdvancedSearch namespace preset provider "' + providerName + '" returned invalid namespace id' );
+			return false;
+		} );
+};
 
-	OO.initClass( mw.libs.advancedSearch.dm.NamespacePresetProviders );
+/**
+ * @param {string[]} namespaceIds
+ * @return {boolean}
+ */
+NamespacePresetProviders.prototype.namespaceIdsAreValid = function ( namespaceIds ) {
+	return arrayContains( Object.keys( this.namespaces ), namespaceIds );
+};
 
-	mw.libs.advancedSearch.dm.NamespacePresetProviders.prototype.hasProvider = function ( providerName ) {
-		return Object.prototype.hasOwnProperty.call( this.providerFunctions, providerName );
-	};
-
-	/**
-	 * @param {string} providerName
-	 * @return {string[]}
-	 */
-	mw.libs.advancedSearch.dm.NamespacePresetProviders.prototype.getNamespaceIdsFromProvider = function ( providerName ) {
-		var self = this;
-
-		return this.providerFunctions[ providerName ]( Object.keys( this.namespaces ) )
-			// Calling String() as a function casts numbers to strings
-			.map( String )
-			.filter( function ( id ) {
-				if ( id in self.namespaces ) {
-					return true;
-				}
-				mw.log.warn( 'AdvancedSearch namespace preset provider "' + providerName + '" returned invalid namespace ID' );
-				return false;
-			} );
-	};
-
-	/**
-	 * @param {string[]} namespaceIds
-	 * @return {boolean}
-	 */
-	mw.libs.advancedSearch.dm.NamespacePresetProviders.prototype.namespaceIdsAreValid = function ( namespaceIds ) {
-		return mw.libs.advancedSearch.util.arrayContains( Object.keys( this.namespaces ), namespaceIds );
-	};
-
-}() );
+module.exports = NamespacePresetProviders;

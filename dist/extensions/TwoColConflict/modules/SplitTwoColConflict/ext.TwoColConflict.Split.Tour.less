@@ -1,11 +1,13 @@
+@import 'mediawiki.skin.variables.less';
+
 @block-element-padding: 5px 0;
 
 .mw-twocolconflict-split-tour-image-landscape {
 	height: 180px;
-	width: 100%;
+	width: @size-full;
 	background-repeat: no-repeat;
-	background-position: center;
-	background-size: 100%;
+	background-position: @background-position-base;
+	background-size: @size-full;
 	padding: @block-element-padding;
 	margin: 0.4em 0 0.5em 0;
 }
@@ -31,7 +33,8 @@
 }
 
 .mw-twocolconflict-split-tour-popup {
-	color: #000;
+	// T202884: The popup anchored to a grayed out container should not appear grayed out
+	color: @color-base;
 	z-index: 2;
 }
 
@@ -42,7 +45,7 @@
 }
 
 .mw-twocolconflict-split-tour-pulsating-button {
-	cursor: pointer;
+	cursor: @cursor-base--hover;
 	position: absolute;
 	z-index: 1;
 	left: 50%;
@@ -82,5 +85,5 @@
 	height: 30px;
 	width: 30px;
 	background-repeat: no-repeat;
-	background-position: center;
+	background-position: @background-position-base;
 }

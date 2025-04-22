@@ -20,33 +20,42 @@
 namespace MediaWiki\Rest\Handler;
 
 use Composer\Semver\Semver;
-use ExtensionRegistry;
 use InvalidArgumentException;
 use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
 use LogicException;
+use MediaWiki\Content\WikitextContent;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Language\LanguageCode;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Parser\Parsoid\HTMLTransform;
+use MediaWiki\Page\PageIdentity;
+use MediaWiki\Page\ProperPageIdentity;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\Parsoid\Config\SiteConfig;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Rest\Handler;
+use MediaWiki\Rest\Handler\Helper\HtmlInputTransformHelper;
+use MediaWiki\Rest\Handler\Helper\HtmlOutputRendererHelper;
+use MediaWiki\Rest\Handler\Helper\ParsoidFormatHelper;
 use MediaWiki\Rest\HttpException;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\Response;
-use MediaWiki\Rest\ResponseException;
 use MediaWiki\Revision\MutableRevisionRecord;
 use MediaWiki\Revision\RevisionAccessException;
+use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Revision\SuppressedDataException;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\Title;
+use MediaWiki\WikiMap\WikiMap;
 use MobileContext;
-use ParserOutput;
-use RequestContext;
-use Title;
-use WikiMap;
 use Wikimedia\Http\HttpAcceptParser;
 use Wikimedia\Message\DataMessageValue;
+use Wikimedia\Message\MessageValue;
 use Wikimedia\Parsoid\Config\DataAccess;
 use Wikimedia\Parsoid\Config\PageConfig;
 use Wikimedia\Parsoid\Config\PageConfigFactory;
-use Wikimedia\Parsoid\Config\SiteConfig;
 use Wikimedia\Parsoid\Core\ClientError;
 use Wikimedia\Parsoid\Core\PageBundle;
 use Wikimedia\Parsoid\Core\ResourceLimitExceededException;
@@ -56,27 +65,21 @@ use Wikimedia\Parsoid\Utils\ContentUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Parsoid\Utils\DOMUtils;
 use Wikimedia\Parsoid\Utils\Timing;
-use WikitextContent;
+
+// TODO logging, timeouts(?), CORS
+// TODO content negotiation (routes.js routes.acceptable)
+// TODO handle MaxConcurrentCallsError (pool counter?)
 
 /**
  * Base class for Parsoid handlers.
+ * @internal For use by the Parsoid extension
  */
 abstract class ParsoidHandler extends Handler {
-	// TODO logging, timeouts(?), CORS
-	// TODO content negotiation (routes.js routes.acceptable)
-	// TODO handle MaxConcurrentCallsError (pool counter?)
 
-	/** @var array Parsoid-specific settings array from $config */
-	private $parsoidSettings;
-
-	/** @var SiteConfig */
-	protected $siteConfig;
-
-	/** @var PageConfigFactory */
-	protected $pageConfigFactory;
-
-	/** @var DataAccess */
-	protected $dataAccess;
+	private RevisionLookup $revisionLookup;
+	protected SiteConfig $siteConfig;
+	protected PageConfigFactory $pageConfigFactory;
+	protected DataAccess $dataAccess;
 
 	/** @var ExtensionRegistry */
 	protected $extensionRegistry;
@@ -94,31 +97,32 @@ abstract class ParsoidHandler extends Handler {
 		$services = MediaWikiServices::getInstance();
 		// @phan-suppress-next-line PhanTypeInstantiateAbstractStatic
 		return new static(
-			$services->getMainConfig()->get( MainConfigNames::ParsoidSettings ),
+			$services->getRevisionLookup(),
 			$services->getParsoidSiteConfig(),
 			$services->getParsoidPageConfigFactory(),
 			$services->getParsoidDataAccess()
 		);
 	}
 
-	/**
-	 * @param array $parsoidSettings
-	 * @param SiteConfig $siteConfig
-	 * @param PageConfigFactory $pageConfigFactory
-	 * @param DataAccess $dataAccess
-	 */
 	public function __construct(
-		array $parsoidSettings,
+		RevisionLookup $revisionLookup,
 		SiteConfig $siteConfig,
 		PageConfigFactory $pageConfigFactory,
 		DataAccess $dataAccess
 	) {
-		$this->parsoidSettings = $parsoidSettings;
+		$this->revisionLookup = $revisionLookup;
 		$this->siteConfig = $siteConfig;
 		$this->pageConfigFactory = $pageConfigFactory;
 		$this->dataAccess = $dataAccess;
 		$this->extensionRegistry = ExtensionRegistry::getInstance();
 		$this->metrics = $siteConfig->metrics();
+	}
+
+	public function getSupportedRequestTypes(): array {
+		return array_merge( parent::getSupportedRequestTypes(), [
+			'application/x-www-form-urlencoded',
+			'multipart/form-data'
+		] );
 	}
 
 	/**
@@ -132,8 +136,8 @@ abstract class ParsoidHandler extends Handler {
 		// We are cutting some corners here (IDN, non-ASCII casing)
 		// since domain name support is provisional.
 		// TODO use a proper validator instead
-		$server = \RequestContext::getMain()->getConfig()->get( MainConfigNames::Server );
-		$expectedDomain = wfParseUrl( $server )['host'] ?? null;
+		$server = RequestContext::getMain()->getConfig()->get( MainConfigNames::Server );
+		$expectedDomain = parse_url( $server, PHP_URL_HOST );
 		if ( !$expectedDomain ) {
 			throw new LogicException( 'Cannot parse $wgServer' );
 		}
@@ -147,7 +151,7 @@ abstract class ParsoidHandler extends Handler {
 		if ( $this->extensionRegistry->isLoaded( 'MobileFrontend' ) ) {
 			// @phan-suppress-next-line PhanUndeclaredClassMethod
 			$mobileServer = MobileContext::singleton()->getMobileUrl( $server );
-			$expectedMobileDomain = wfParseUrl( $mobileServer )['host'] ?? null;
+			$expectedMobileDomain = parse_url( $mobileServer, PHP_URL_HOST );
 			if ( $expectedMobileDomain && strcasecmp( $expectedMobileDomain, $domain ) === 0 ) {
 				return;
 			}
@@ -184,11 +188,15 @@ abstract class ParsoidHandler extends Handler {
 			case 'application/json':
 				$json = json_decode( $request->getBody()->getContents(), true );
 				if ( !is_array( $json ) ) {
-					throw new HttpException( 'Payload does not JSON decode to an array.', 400 );
+					throw new LocalizedHttpException(
+						new MessageValue( "rest-json-body-parse-error", [ 'not a valid JSON object' ] ), 400 );
 				}
 				return $json;
 			default:
-				throw new HttpException( 'Unsupported Media Type', 415 );
+				throw new LocalizedHttpException(
+					new MessageValue( "rest-unsupported-content-type", [ $contentType ?? '(null)' ] ),
+					415
+				);
 		}
 	}
 
@@ -207,8 +215,13 @@ abstract class ParsoidHandler extends Handler {
 		$opts = array_merge( $body, array_intersect_key( $request->getPathParams(),
 			[ 'from' => true, 'format' => true ] ) );
 		'@phan-var array<string,array|bool|string> $opts'; // @var array<string,array|bool|string> $opts
+		$contentLanguage = $request->getHeaderLine( 'Content-Language' ) ?: null;
+		if ( $contentLanguage ) {
+			$contentLanguage = LanguageCode::normalizeNonstandardCodeAndWarn(
+				$contentLanguage
+			);
+		}
 		$attribs = [
-			'titleMissing' => empty( $request->getPathParams()['title'] ),
 			'pageName' => $request->getPathParam( 'title' ) ?? '',
 			'oldid' => $request->getPathParam( 'revision' ),
 			// "body_only" flag to return just the body (instead of the entire HTML doc)
@@ -216,20 +229,21 @@ abstract class ParsoidHandler extends Handler {
 			'body_only' => $request->getQueryParams()['body_only'] ?? $body['body_only'] ?? null,
 			'errorEnc' => ParsoidFormatHelper::ERROR_ENCODING[$opts['format']] ?? 'plain',
 			'iwp' => WikiMap::getCurrentWikiId(), // PORT-FIXME verify
-			'subst' => (bool)( $request->getQueryParams()['subst'] ?? $body['subst'] ?? null ),
 			'offsetType' => $body['offsetType']
 				?? $request->getQueryParams()['offsetType']
 				// Lint requests should return UCS2 offsets by default
 				?? ( $opts['format'] === ParsoidFormatHelper::FORMAT_LINT ? 'ucs2' : 'byte' ),
-			'pagelanguage' => $request->getHeaderLine( 'Content-Language' ) ?: null,
+			'pagelanguage' => $contentLanguage,
 		];
+
+		// For use in getHtmlOutputRendererHelper
+		$opts['stash'] = $request->getQueryParams()['stash'] ?? false;
 
 		if ( $request->getMethod() === 'POST' ) {
 			if ( isset( $opts['original']['revid'] ) ) {
 				$attribs['oldid'] = $opts['original']['revid'];
 			}
 			if ( isset( $opts['original']['title'] ) ) {
-				$attribs['titleMissing'] = false;
 				$attribs['pageName'] = $opts['original']['title'];
 			}
 		}
@@ -241,6 +255,24 @@ abstract class ParsoidHandler extends Handler {
 			}
 		}
 
+		// For use in getHtmlOutputRendererHelper
+		$opts['accept-language'] = $request->getHeaderLine( 'Accept-Language' ) ?: null;
+
+		$acceptLanguage = null;
+		if ( $opts['accept-language'] !== null ) {
+			$acceptLanguage = LanguageCode::normalizeNonstandardCodeAndWarn(
+				$opts['accept-language']
+			);
+		}
+
+		// Init pageName if oldid is provided and is a valid revision
+		if ( ( $attribs['pageName'] === '' ) && $attribs['oldid'] ) {
+			$rev = $this->revisionLookup->getRevisionById( $attribs['oldid'] );
+			if ( $rev ) {
+				$attribs['pageName'] = $rev->getPage()->getDBkey();
+			}
+		}
+
 		$attribs['envOptions'] = [
 			// We use `prefix` but ought to use `domain` (T206764)
 			'prefix' => $attribs['iwp'],
@@ -248,20 +280,50 @@ abstract class ParsoidHandler extends Handler {
 			// by the parsoid extension. Will be null for core endpoints.
 			'domain' => $request->getPathParam( 'domain' ),
 			'pageName' => $attribs['pageName'],
-			'offsetType' => $attribs['offsetType'],
 			'cookie' => $request->getHeaderLine( 'Cookie' ),
 			'reqId' => $request->getHeaderLine( 'X-Request-Id' ),
 			'userAgent' => $request->getHeaderLine( 'User-Agent' ),
-			'htmlVariantLanguage' => $request->getHeaderLine( 'Accept-Language' ) ?: null,
+			'htmlVariantLanguage' => $acceptLanguage,
 			// Semver::satisfies checks below expect a valid outputContentVersion value.
 			// Better to set it here instead of adding the default value at every check.
 			'outputContentVersion' => Parsoid::defaultHTMLVersion(),
 		];
+
+		# Convert language codes in $opts['updates']['variant'] if present
+		$sourceVariant = $opts['updates']['variant']['source'] ?? null;
+		if ( $sourceVariant ) {
+			$sourceVariant = LanguageCode::normalizeNonstandardCodeAndWarn(
+				$sourceVariant
+			);
+			$opts['updates']['variant']['source'] = $sourceVariant;
+		}
+		$targetVariant = $opts['updates']['variant']['target'] ?? null;
+		if ( $targetVariant ) {
+			$targetVariant = LanguageCode::normalizeNonstandardCodeAndWarn(
+				$targetVariant
+			);
+			$opts['updates']['variant']['target'] = $targetVariant;
+		}
+		if ( isset( $opts['wikitext']['headers']['content-language'] ) ) {
+			$contentLanguage = $opts['wikitext']['headers']['content-language'];
+			$contentLanguage = LanguageCode::normalizeNonstandardCodeAndWarn(
+				$contentLanguage
+			);
+			$opts['wikitext']['headers']['content-language'] = $contentLanguage;
+		}
+		if ( isset( $opts['original']['wikitext']['headers']['content-language'] ) ) {
+			$contentLanguage = $opts['original']['wikitext']['headers']['content-language'];
+			$contentLanguage = LanguageCode::normalizeNonstandardCodeAndWarn(
+				$contentLanguage
+			);
+			$opts['original']['wikitext']['headers']['content-language'] = $contentLanguage;
+		}
+
 		$attribs['opts'] = $opts;
 
 		// TODO: Remove assertDomainIsCorrect() once we no longer need to support the {domain}
 		//       parameter for the endpoints exposed by the parsoid extension.
-		if ( empty( $this->parsoidSettings['debugApi'] ) && $attribs['envOptions']['domain'] !== null ) {
+		if ( $attribs['envOptions']['domain'] !== null ) {
 			$this->assertDomainIsCorrect( $attribs['envOptions']['domain'] );
 		}
 
@@ -269,60 +331,90 @@ abstract class ParsoidHandler extends Handler {
 		return $this->requestAttributes;
 	}
 
-	protected function getHTMLTransform(
+	/**
+	 * @param array $attribs
+	 * @param ?string $source
+	 * @param PageIdentity $page
+	 * @param ?int $revId
+	 *
+	 * @return HtmlOutputRendererHelper
+	 */
+	private function getHtmlOutputRendererHelper(
+		array $attribs,
+		?string $source,
+		PageIdentity $page,
+		?int $revId
+	): HtmlOutputRendererHelper {
+		$services = MediaWikiServices::getInstance();
+
+		// Request lenient rev handling
+		$lenientRevHandling = true;
+
+		$authority = $this->getAuthority();
+
+		$params = [];
+		$helper = $services->getPageRestHelperFactory()->newHtmlOutputRendererHelper(
+			$page, $params, $authority, $revId, $lenientRevHandling
+		);
+
+		// XXX: should default to the page's content model?
+		$model = $attribs['opts']['contentmodel']
+			?? ( $attribs['envOptions']['contentmodel'] ?? CONTENT_MODEL_WIKITEXT );
+
+		if ( $source !== null ) {
+			$helper->setContentSource( $source, $model );
+		}
+
+		if ( isset( $attribs['opts']['stash'] ) ) {
+			$helper->setStashingEnabled( $attribs['opts']['stash'] );
+		}
+
+		if ( isset( $attribs['envOptions']['outputContentVersion'] ) ) {
+			$helper->setOutputProfileVersion( $attribs['envOptions']['outputContentVersion'] );
+		}
+
+		if ( isset( $attribs['pagelanguage'] ) ) {
+			$helper->setPageLanguage( $attribs['pagelanguage'] );
+		}
+
+		if ( isset( $attribs['opts']['accept-language'] ) ) {
+			$helper->setVariantConversionLanguage( $attribs['opts']['accept-language'] );
+		}
+
+		return $helper;
+	}
+
+	/**
+	 * @param array $attribs
+	 * @param string $html
+	 * @param PageIdentity $page
+	 *
+	 * @return HtmlInputTransformHelper
+	 */
+	protected function getHtmlInputTransformHelper(
 		array $attribs,
 		string $html,
-		PageConfig $pageConfig,
-		array $parsoidSettings
-	): HTMLTransform {
-		$transform = new HTMLTransform( $html, $pageConfig, $this->newParsoid(), $parsoidSettings );
+		PageIdentity $page
+	): HtmlInputTransformHelper {
+		$services = MediaWikiServices::getInstance();
 
-		if ( $this->metrics ) {
-			$transform->setMetrics( $this->metrics );
-		}
+		$parameters = $attribs['opts'] + $attribs;
+		$body = $attribs['opts'];
 
-		$transform->setOptions( [
-			'contentmodel' => $attribs['opts']['contentmodel'] ?? null,
-			'offsetType' => $attribs['offsetType'] ?? 'byte',
-		] );
+		$body['html'] = $html;
 
-		if ( isset( $attribs['oldid'] ) ) {
-			$transform->setOriginalRevisionId( $attribs['oldid'] );
-		}
+		$helper = $services->getPageRestHelperFactory()->newHtmlInputTransformHelper(
+			$attribs['envOptions'] + [
+				'offsetType' => $attribs['offsetType'],
+			],
+			$page,
+			$body,
+			$parameters
+		);
 
-		$original = $attribs['opts']['original'] ?? [];
+		$helper->setMetrics( $this->siteConfig->prefixedStatsFactory() );
 
-		// NOTE: We may have an 'original' key that contains no html, but
-		//       just wikitext. We can ignore that here, we only care if there is HTML.
-		if ( !empty( $original['html']['headers']['content-type'] ) ) {
-			$vOriginal = ParsoidFormatHelper::parseContentTypeHeader(
-				$original['html']['headers']['content-type']
-			);
-
-			if ( $vOriginal ) {
-				$transform->setOriginalSchemaVersion( $vOriginal );
-			}
-		}
-
-		if ( isset( $original['html']['body'] ) ) {
-			$transform->setOriginalHtml( $original['html']['body'] );
-		}
-
-		if ( $attribs['opts']['from'] === ParsoidFormatHelper::FORMAT_PAGEBUNDLE ) {
-			if ( isset( $original['data-parsoid']['body'] ) ) {
-				$transform->setOriginalDataParsoid( $original['data-parsoid']['body'] );
-			}
-
-			if ( isset( $original['data-mw']['body'] ) ) {
-				$transform->setOriginalDataMW( $original['data-mw']['body'] );
-			}
-		}
-
-		if ( isset( $attribs['opts']['data-mw']['body'] ) ) {
-			$transform->setModifiedDataMW( $attribs['opts']['data-mw']['body'] );
-		}
-
-		return $transform;
+		return $helper;
 	}
 
 	/**
@@ -395,18 +487,25 @@ abstract class ParsoidHandler extends Handler {
 	}
 
 	/**
-	 * @param string $title The page to be transformed
-	 * @param ?int $revision The revision to be transformed
+	 * Try to create a PageConfig object. If we get an exception (because content
+	 * may be missing or inaccessible), throw an appropriate HTTP response object
+	 * for callers to handle.
+	 *
+	 * @param array $attribs
 	 * @param ?string $wikitextOverride
 	 *   Custom wikitext to use instead of the real content of the page.
-	 * @param ?string $pagelanguageOverride
+	 * @param bool $html2WtMode
 	 * @return PageConfig
+	 * @throws HttpException
 	 */
-	protected function createPageConfig(
-		string $title, ?int $revision, ?string $wikitextOverride = null,
-		?string $pagelanguageOverride = null
+	protected function tryToCreatePageConfig(
+		array $attribs, ?string $wikitextOverride = null, bool $html2WtMode = false
 	): PageConfig {
-		$title = $title ? Title::newFromText( $title ) : Title::newMainPage();
+		$revId = $attribs['oldid'];
+		$pagelanguageOverride = $attribs['pagelanguage'];
+		$title = $attribs['pageName'];
+
+		$title = ( $title !== '' ) ? Title::newFromText( $title ) : Title::newMainPage();
 		if ( !$title ) {
 			// TODO use proper validation
 			throw new LogicException( 'Title not found!' );
@@ -419,9 +518,10 @@ abstract class ParsoidHandler extends Handler {
 			// Create a mutable revision record point to the same revision
 			// and set to the desired wikitext.
 			$revisionRecord = new MutableRevisionRecord( $title );
-			if ( $revision !== null ) {
-				$revisionRecord->setId( $revision );
-			}
+			// Don't set id to $revId if we have $wikitextOverride
+			// A revision corresponds to specific wikitext, which $wikitextOverride
+			// might not be.
+			$revisionRecord->setId( 0 );
 			$revisionRecord->setSlot(
 				SlotRecord::newUnsaved(
 					SlotRecord::MAIN,
@@ -430,111 +530,61 @@ abstract class ParsoidHandler extends Handler {
 			);
 		}
 
-		// Note: Parsoid by design isn't supposed to use the user
-		// context right now, and all user state is expected to be
-		// introduced as a post-parse transform.  So although we pass a
-		// User here, it only currently affects the output in obscure
-		// corner cases; see PageConfigFactory::create() for more.
-		// @phan-suppress-next-line PhanUndeclaredMethod method defined in subtype
-		return $this->pageConfigFactory->create(
-			$title, $user, $revisionRecord ?? $revision, null, $pagelanguageOverride,
-			$this->parsoidSettings
-		);
-	}
-
-	/**
-	 * Redirect to another Parsoid URL (e.g. canonization)
-	 *
-	 * @stable to override
-	 *
-	 * @param string $path Target URL
-	 * @param array $pathParams Path parameters to inject into path
-	 * @param array $queryParams Query parameters
-	 *
-	 * @return Response
-	 */
-	protected function createRedirectResponse(
-		string $path, array $pathParams = [], array $queryParams = []
-	): Response {
-		// FIXME this should not be necessary in the REST entry point
-		unset( $queryParams['title'] );
-
-		$url = $this->getRedirectRouteUrl( $path, $pathParams, $queryParams );
-
-		if ( $this->getRequest()->getMethod() === 'POST' ) {
-			// 307 response
-			$response = $this->getResponseFactory()->createTemporaryRedirect( $url );
-		} else {
-			// 302 response
-			$response = $this->getResponseFactory()->createLegacyTemporaryRedirect( $url );
-		}
-		$response->setHeader( 'Cache-Control', 'private,no-cache,s-maxage=0' );
-		return $response;
-	}
-
-	/**
-	 * Returns the target URL for a redirect to the given path and parameters.
-	 * This exists so subclasses can override it to control whether the redirect
-	 * should go to a private or to a public URL.
-	 *
-	 * @see Router::getRouteUrl()
-	 *
-	 * @stable to override
-	 *
-	 * @param string $path
-	 * @param array $pathParams
-	 * @param array $queryParams
-	 *
-	 * @return string
-	 */
-	protected function getRedirectRouteUrl(
-		string $path, array $pathParams = [], array $queryParams = []
-	) {
-		return $this->getRouter()->getRouteUrl( $path, $pathParams, $queryParams );
-	}
-
-	/**
-	 * Try to create a PageConfig object. If we get an exception (because content
-	 * may be missing or inaccessible), throw an appropriate HTTP response object
-	 * for callers to handle.
-	 *
-	 * @param array $attribs
-	 * @param ?string $wikitext
-	 * @param bool $html2WtMode
-	 * @return PageConfig
-	 * @throws HttpException
-	 */
-	protected function tryToCreatePageConfig(
-		array $attribs, ?string $wikitext = null, bool $html2WtMode = false
-	): PageConfig {
-		$oldid = $attribs['oldid'];
+		$hasOldId = ( $revId !== null );
+		$ensureAccessibleContent = !$html2WtMode || $hasOldId;
 
 		try {
-			$pageConfig = $this->createPageConfig(
-				$attribs['pageName'], $oldid, $wikitext,
-				$attribs['pagelanguage']
+			// Note: Parsoid by design isn't supposed to use the user
+			// context right now, and all user state is expected to be
+			// introduced as a post-parse transform.  So although we pass a
+			// User here, it only currently affects the output in obscure
+			// corner cases; see PageConfigFactory::create() for more.
+			// @phan-suppress-next-line PhanUndeclaredMethod method defined in subtype
+			$pageConfig = $this->pageConfigFactory->create(
+				$title, $user, $revisionRecord ?? $revId, null, $pagelanguageOverride,
+				$ensureAccessibleContent
 			);
-		} catch ( RevisionAccessException $exception ) {
-			throw new HttpException( 'The specified revision is deleted or suppressed.', 404 );
-		}
-
-		$hasOldId = ( $attribs['oldid'] !== null );
-		if ( ( !$html2WtMode || $hasOldId ) && $pageConfig->getRevisionContent() === null ) {
-			// T234549
-			throw new HttpException(
-				'The specified revision does not exist.', 404
+		} catch ( SuppressedDataException $e ) {
+			throw new LocalizedHttpException(
+				new MessageValue( "rest-permission-denied-revision", [ $e->getMessage() ] ), 403
 			);
-		}
-
-		if ( !$html2WtMode && $wikitext === null && !$hasOldId ) {
-			// Redirect to the latest revid
-			throw new ResponseException(
-				$this->createRedirectToOldidResponse( $pageConfig, $attribs )
+		} catch ( RevisionAccessException $e ) {
+			throw new LocalizedHttpException(
+				new MessageValue( "rest-specified-revision-unavailable", [ $e->getMessage() ] ), 404
 			);
 		}
 
 		// All good!
 		return $pageConfig;
+	}
+
+	/**
+	 * Try to create a PageIdentity object.
+	 * If no page is specified in the request, this will return the wiki's main page.
+	 * If an invalid page is requested, this throws an appropriate HTTPException.
+	 *
+	 * @param array $attribs
+	 * @return PageIdentity
+	 * @throws HttpException
+	 */
+	protected function tryToCreatePageIdentity( array $attribs ): PageIdentity {
+		if ( $attribs['pageName'] === '' ) {
+			return Title::newMainPage();
+		}
+
+		// XXX: Should be injected, but the Parsoid extension relies on the
+		//      constructor signature. Also, ParsoidHandler should go away soon anyway.
+		$pageStore = MediaWikiServices::getInstance()->getPageStore();
+
+		$page = $pageStore->getPageByText( $attribs['pageName'] );
+
+		if ( !$page ) {
+			throw new LocalizedHttpException(
+				new MessageValue( "rest-invalid-title", [ 'pageName' ] ), 400
+			);
+		}
+
+		return $page;
 	}
 
 	/**
@@ -591,41 +641,24 @@ abstract class ParsoidHandler extends Handler {
 		return '/v1/revision/{revision}/html';
 	}
 
-	/**
-	 * Expand the current URL with the latest revision number and redirect there.
-	 *
-	 * @param PageConfig $pageConfig
-	 * @param array $attribs Request attributes from getRequestAttributes()
-	 * @return Response
-	 */
-	protected function createRedirectToOldidResponse(
-		PageConfig $pageConfig, array $attribs
-	): Response {
-		$format = $this->getRequest()->getPathParam( 'format' );
-		$target = $pageConfig->getTitle();
-		$revid = $pageConfig->getRevisionId();
-
-		if ( $revid === null ) {
-			throw new LogicException( 'Expected page to have a revision id.' );
-		}
-
-		$this->metrics->increment( 'redirectToOldid.' . $format );
-
-		$pathParams = [
-			'domain' => $attribs['envOptions']['domain'],
-			'format' => $format,
-			'title' => $target,
-			'revision' => $revid
+	private function wtLint(
+		PageConfig $pageConfig, array $attribs, ?array $linterOverrides = []
+	) {
+		$envOptions = $attribs['envOptions'] + [
+			'linterOverrides' => $linterOverrides,
+			'offsetType' => $attribs['offsetType'],
 		];
-
-		if ( $this->getRequest()->getMethod() === 'POST' ) {
-			$pathParams['from'] = $this->getRequest()->getPathParam( 'from' );
-			$newPath = $this->getTransformEndpoint( $format );
-		} else {
-			$newPath = $this->getRevisionContentEndpoint( $format );
-
+		try {
+			$parsoid = $this->newParsoid();
+			$parserOutput = new ParserOutput();
+			return $parsoid->wikitext2lint( $pageConfig, $envOptions, $parserOutput );
+		} catch ( ClientError $e ) {
+			throw new LocalizedHttpException( new MessageValue( "rest-parsoid-error", [ $e->getMessage() ] ), 400 );
+		} catch ( ResourceLimitExceededException $e ) {
+			throw new LocalizedHttpException(
+				new MessageValue( "rest-parsoid-resource-exceeded", [ $e->getMessage() ] ), 413
+			);
 		}
-		return $this->createRedirectResponse( $newPath, $pathParams, $this->getRequest()->getQueryParams() );
 	}
 
 	/**
@@ -636,6 +669,7 @@ abstract class ParsoidHandler extends Handler {
 	 * @param array $attribs Request attributes from getRequestAttributes()
 	 * @param ?string $wikitext Wikitext to transform (or null to use the
 	 *   page specified in the request attributes).
+	 *
 	 * @return Response
 	 */
 	protected function wt2html(
@@ -645,182 +679,139 @@ abstract class ParsoidHandler extends Handler {
 		$opts = $attribs['opts'];
 		$format = $opts['format'];
 		$oldid = $attribs['oldid'];
+		$stash = $opts['stash'] ?? false;
+
+		if ( $format === ParsoidFormatHelper::FORMAT_LINT ) {
+			$linterOverrides = [];
+			if ( $this->extensionRegistry->isLoaded( 'Linter' ) ) { // T360809
+				$disabled = [];
+				$services = MediaWikiServices::getInstance();
+				$linterCategories = $services->getMainConfig()->get( 'LinterCategories' );
+				foreach ( $linterCategories as $name => $cat ) {
+					if ( $cat['priority'] === 'none' ) {
+						$disabled[] = $name;
+					}
+				}
+				$linterOverrides['disabled'] = $disabled;
+			}
+			$lints = $this->wtLint( $pageConfig, $attribs, $linterOverrides );
+			$response = $this->getResponseFactory()->createJson( $lints );
+			return $response;
+		}
+
+		// TODO: This method should take a PageIdentity + revId,
+		//       to reduce the usage of PageConfig in MW core.
+		$helper = $this->getHtmlOutputRendererHelper(
+			$attribs,
+			$wikitext,
+			$this->pageConfigToPageIdentity( $pageConfig ),
+			// Id will be 0 if we have $wikitext but that isn't valid
+			// to call $helper->setRevision with.  In any case, the revision
+			// will be reset when $helper->setContent is called with $wikitext.
+			// Ideally, the revision would be pass through here instead of
+			// the id and wikitext.
+			$pageConfig->getRevisionId() ?: null
+		);
 
 		$needsPageBundle = ( $format === ParsoidFormatHelper::FORMAT_PAGEBUNDLE );
-		$doSubst = ( $wikitext !== null && $attribs['subst'] );
 
-		// Performance Timing options
-		// init refers to time elapsed before parsing begins
-		$metrics = $this->metrics;
-		$timing = Timing::start( $metrics );
-
-		if ( Semver::satisfies( $attribs['envOptions']['outputContentVersion'],
-			'!=' . Parsoid::defaultHTMLVersion() ) ) {
-			$metrics->increment( 'wt2html.parse.version.notdefault' );
-		}
-
-		$parsoid = $this->newParsoid();
-
-		if ( $doSubst ) {
-			if ( $format !== ParsoidFormatHelper::FORMAT_HTML ) {
-				throw new HttpException(
-					'Substitution is only supported for the HTML format.', 501
-				);
-			}
-			$wikitext = $parsoid->substTopLevelTemplates(
-				$pageConfig, (string)$wikitext
-			);
-			$pageConfig = $this->createPageConfig(
-				$attribs['pageName'], $attribs['oldid'], $wikitext
-			);
-		}
-
-		if (
-			!empty( $this->parsoidSettings['devAPI'] ) &&
-			( $request->getQueryParams()['follow_redirects'] ?? false )
-		) {
-			$content = $pageConfig->getRevisionContent();
-			$redirectTarget = $content ? $content->getRedirectTarget() : null;
-			if ( $redirectTarget ) {
-				$redirectInfo = $this->dataAccess->getPageInfo(
-					$pageConfig, [ $redirectTarget ]
-				);
-				$pathParams = [
-					'domain' => $attribs['envOptions']['domain'],
-					'format' => $format,
-					'title' => $redirectTarget,
-					'revision' => $redirectInfo['revId']
-				];
-
-				// NOTE: Core doesn't have REST endpoints that return raw wikitext,
-				//       so the below will fail unless the methods are overwritten.
-				if ( $redirectInfo['revId'] ) {
-					$redirectPath = $this->getRevisionContentEndpoint( ParsoidFormatHelper::FORMAT_WIKITEXT );
-				} else {
-					$redirectPath = $this->getPageContentEndpoint( ParsoidFormatHelper::FORMAT_WIKITEXT );
-				}
-				throw new ResponseException(
-					$this->createRedirectResponse( $redirectPath, $pathParams, $request->getQueryParams() )
-				);
-			}
-		}
-
-		$reqOpts = $attribs['envOptions'] + [
-				'pageBundle' => $needsPageBundle,
-				// When substing, set data-parsoid to be discarded, so that the subst'ed
-				// content is considered new when it comes back.
-				'discardDataParsoid' => $doSubst,
-				'contentmodel' => $opts['contentmodel'] ?? null,
-			];
-
-		// VE, the only client using body_only property,
-		// doesn't want section tags when this flag is set.
-		// (T181226)
 		if ( $attribs['body_only'] ) {
-			$reqOpts['wrapSections'] = false;
-			$reqOpts['body_only'] = true;
+			$helper->setFlavor( 'fragment' );
+		} elseif ( !$needsPageBundle ) {
+			// Inline data-parsoid. This will happen when no special params are set.
+			$helper->setFlavor( 'edit' );
 		}
 
 		if ( $wikitext === null && $oldid !== null ) {
-			$reqOpts['logLinterData'] = true;
 			$mstr = 'pageWithOldid';
 		} else {
 			$mstr = 'wt';
 		}
 
-		// XXX: Not necessary, since it's in the pageConfig
-		// if ( isset( $attribs['pagelanguage'] ) ) {
-		// 	$reqOpts['pagelanguage'] = $attribs['pagelanguage'];
-		// }
+		$parseTiming = Timing::start();
 
-		$timing->end( "wt2html.$mstr.init" );
-		$metrics->timing(
-			"wt2html.$mstr.size.input",
-			strlen( $pageConfig->getPageMainContent() )
-		);
-		$parseTiming = Timing::start( $metrics );
+		if ( $needsPageBundle ) {
+			$pb = $helper->getPageBundle();
 
-		if ( $format === ParsoidFormatHelper::FORMAT_LINT ) {
-			try {
-				$lints = $parsoid->wikitext2lint( $pageConfig, $reqOpts );
-			} catch ( ClientError $e ) {
-				throw new HttpException( $e->getMessage(), 400 );
-			} catch ( ResourceLimitExceededException $e ) {
-				throw new HttpException( $e->getMessage(), 413 );
-			}
-			$response = $this->getResponseFactory()->createJson( $lints );
-		} else {
-			$parserOutput = new ParserOutput();
-			try {
-				$out = $parsoid->wikitext2html(
-					$pageConfig, $reqOpts, $headers, $parserOutput
+			// Handle custom offset requests as a pb2pb transform
+			if ( $attribs['offsetType'] !== 'byte' ) {
+				$parsoid = $this->newParsoid();
+				$pb = $parsoid->pb2pb(
+					$pageConfig,
+					'convertoffsets',
+					$pb,
+					[
+						'inputOffsetType' => 'byte',
+						'outputOffsetType' => $attribs['offsetType']
+					]
 				);
-			} catch ( ClientError $e ) {
-				throw new HttpException( $e->getMessage(), 400 );
-			} catch ( ResourceLimitExceededException $e ) {
-				throw new HttpException( $e->getMessage(), 413 );
-			}
-			if ( $needsPageBundle ) {
-				$response = $this->getResponseFactory()->createJson( $out->responseData() );
-				ParsoidFormatHelper::setContentType( $response, ParsoidFormatHelper::FORMAT_PAGEBUNDLE,
-					$out->version );
-			} else {
-				$response = $this->getResponseFactory()->create();
-				ParsoidFormatHelper::setContentType( $response, ParsoidFormatHelper::FORMAT_HTML,
-					$attribs['envOptions']['outputContentVersion'] );
-				$response->getBody()->write( $out );
-				// @phan-suppress-next-next-line PhanTypeArraySuspiciousNullable $headers can't be null after the
-				// method call, but the docblock of wikitext2html doesn't say that.
-				$response->setHeader( 'Content-Language', $headers['content-language'] );
-				// @phan-suppress-next-line PhanTypeArraySuspiciousNullable Same.
-				$response->addHeader( 'Vary', $headers['vary'] );
 			}
 
-			// NOTE: We used to generate an ETag here, but since it was random every time and the
-			//       output wasn't stored anywhere, it could not possibly match anything, ever.
+			$response = $this->getResponseFactory()->createJson( $pb->responseData() );
+			$helper->putHeaders( $response, false );
 
-			// FIXME: For pagebundle requests, this can be somewhat inflated
-			// because of pagebundle json-encoding overheads
-			$outSize = $response->getBody()->getSize();
-			$parseTime = $parseTiming->end( "wt2html.$mstr.parse" );
-			$timing->end( 'wt2html.total' );
-			$metrics->timing( "wt2html.$mstr.size.output", $outSize );
+			ParsoidFormatHelper::setContentType(
+				$response,
+				ParsoidFormatHelper::FORMAT_PAGEBUNDLE,
+				$pb->version
+			);
+		} else {
+			$out = $helper->getHtml();
 
-			// Ignore slow parse metrics for non-oldid parses
-			if ( $mstr === 'pageWithOldid' ) {
-				if ( $parseTime > 3000 ) {
-					LoggerFactory::getInstance( 'slow-parsoid' )
-						->info( 'Parsing {title} was slow, took {time} seconds', [
-							'time' => number_format( $parseTime / 1000, 2 ),
-							'title' => $pageConfig->getTitle(),
-						] );
+			// TODO: offsetType conversion isn't supported right now for non-pagebundle endpoints
+			// Once the OutputTransform framework lands, we might revisit this.
+
+			$response = $this->getResponseFactory()->create();
+			$response->getBody()->write( $out->getRawText() );
+
+			$helper->putHeaders( $response, true );
+
+			// Emit an ETag only if stashing is enabled. It's not reliably useful otherwise.
+			if ( $stash ) {
+				$eTag = $helper->getETag();
+				if ( $eTag ) {
+					$response->setHeader( 'ETag', $eTag );
 				}
+			}
+		}
 
-				if ( $parseTime > 10 && $outSize > 100 ) {
-					// * Don't bother with this metric for really small parse times
-					//   p99 for initialization time is ~7ms according to grafana.
-					//   So, 10ms ensures that startup overheads don't skew the metrics
-					// * For body_only=false requests, <head> section isn't generated
-					//   and if the output is small, per-request overheads can skew
-					//   the timePerKB metrics.
+		// XXX: For pagebundle requests, this can be somewhat inflated
+		// because of pagebundle json-encoding overheads
+		$outSize = $response->getBody()->getSize();
+		$parseTime = $parseTiming->end();
 
-					// FIXME: This is slightly misleading since there are fixed costs
-					// for generating output like the <head> section and should be factored in,
-					// but this is good enough for now as a useful first degree of approxmation.
-					$timePerKB = $parseTime * 1024 / $outSize;
-					$metrics->timing( 'wt2html.timePerKB', $timePerKB );
+		// Ignore slow parse metrics for non-oldid parses
+		if ( $mstr === 'pageWithOldid' ) {
+			if ( $parseTime > 3000 ) {
+				LoggerFactory::getInstance( 'slow-parsoid' )
+					->info( 'Parsing {title} was slow, took {time} seconds', [
+						'time' => number_format( $parseTime / 1000, 2 ),
+						'title' => Title::newFromLinkTarget( $pageConfig->getLinkTarget() )->getPrefixedText(),
+					] );
+			}
 
-					if ( $timePerKB > 500 ) {
-						// At 100ms/KB, even a 100KB page which isn't that large will take 10s.
-						// So, we probably want to shoot for a threshold under 100ms.
-						// But, let's start with 500ms+ outliers first and see what we uncover.
-						LoggerFactory::getInstance( 'slow-parsoid' )
-							->info( 'Parsing {title} was slow, timePerKB took {timePerKB} ms, total: {time} seconds', [
-								'time' => number_format( $parseTime / 1000, 2 ),
-								'timePerKB' => number_format( $timePerKB, 1 ),
-								'title' => $pageConfig->getTitle(),
-							] );
-					}
+			if ( $parseTime > 10 && $outSize > 100 ) {
+				// * Don't bother with this metric for really small parse times
+				//   p99 for initialization time is ~7ms according to grafana.
+				//   So, 10ms ensures that startup overheads don't skew the metrics
+				// * For body_only=false requests, <head> section isn't generated
+				//   and if the output is small, per-request overheads can skew
+				//   the timePerKB metrics.
+
+				// NOTE: This is slightly misleading since there are fixed costs
+				// for generating output like the <head> section and should be factored in,
+				// but this is good enough for now as a useful first degree of approxmation.
+				$timePerKB = $parseTime * 1024 / $outSize;
+				if ( $timePerKB > 500 ) {
+					// At 100ms/KB, even a 100KB page which isn't that large will take 10s.
+					// So, we probably want to shoot for a threshold under 100ms.
+					// But, let's start with 500ms+ outliers first and see what we uncover.
+					LoggerFactory::getInstance( 'slow-parsoid' )
+						->info( 'Parsing {title} was slow, timePerKB took {timePerKB} ms, total: {time} seconds', [
+							'time' => number_format( $parseTime / 1000, 2 ),
+							'timePerKB' => number_format( $timePerKB, 1 ),
+							'title' => Title::newFromLinkTarget( $pageConfig->getLinkTarget() )->getPrefixedText(),
+						] );
 				}
 			}
 		}
@@ -828,19 +819,15 @@ abstract class ParsoidHandler extends Handler {
 		if ( $wikitext !== null ) {
 			// Don't cache requests when wt is set in case somebody uses
 			// GET for wikitext parsing
+			// XXX: can we just refuse to do wikitext parsing in a GET request?
 			$response->setHeader( 'Cache-Control', 'private,no-cache,s-maxage=0' );
 		} elseif ( $oldid !== null ) {
-			// FIXME this should be handled in core (cf OutputPage::sendCacheControl)
+			// XXX: can this go away? Parsoid's PageContent class doesn't expose supressed revision content.
 			if ( $request->getHeaderLine( 'Cookie' ) ||
 				$request->getHeaderLine( 'Authorization' ) ) {
 				// Don't cache requests with a session.
 				$response->setHeader( 'Cache-Control', 'private,no-cache,s-maxage=0' );
 			}
-			// Indicate the MediaWiki revision in a header as well for
-			// ease of extraction in clients.
-			$response->setHeader( 'Content-Revision-Id', $oldid );
-		} else {
-			throw new LogicException( 'Should be unreachable' );
 		}
 		return $response;
 	}
@@ -854,7 +841,7 @@ abstract class ParsoidHandler extends Handler {
 	}
 
 	/**
-	 * @param PageConfig $pageConfig
+	 * @param PageConfig|PageIdentity $page
 	 * @param array $attribs Attributes gotten from requests
 	 * @param string $html Original HTML
 	 *
@@ -862,19 +849,23 @@ abstract class ParsoidHandler extends Handler {
 	 * @throws HttpException
 	 */
 	protected function html2wt(
-		PageConfig $pageConfig, array $attribs, string $html
+		$page, array $attribs, string $html
 	) {
+		if ( $page instanceof PageConfig ) {
+			// TODO: Deprecate passing a PageConfig.
+			//       Ideally, callers would use HtmlToContentTransform directly.
+			$page = Title::newFromLinkTarget( $page->getLinkTarget() );
+		}
+
 		try {
-			$transform = $this->getHTMLTransform( $attribs, $html, $pageConfig, $this->parsoidSettings );
-			$wikitext = $transform->htmlToWikitext();
+			$transform = $this->getHtmlInputTransformHelper( $attribs, $html, $page );
 
 			$response = $this->getResponseFactory()->create();
-			ParsoidFormatHelper::setContentType( $response, ParsoidFormatHelper::FORMAT_WIKITEXT );
-			$response->getBody()->write( $wikitext );
+			$transform->putContent( $response );
 
 			return $response;
 		} catch ( ClientError $e ) {
-			throw new HttpException( $e->getMessage(), 400 );
+			throw new LocalizedHttpException( new MessageValue( "rest-parsoid-error", [ $e->getMessage() ] ), 400 );
 		}
 	}
 
@@ -886,22 +877,17 @@ abstract class ParsoidHandler extends Handler {
 	 * @throws HttpException
 	 */
 	protected function pb2pb( array $attribs ) {
-		$request = $this->getRequest();
 		$opts = $attribs['opts'];
 
 		$revision = $opts['previous'] ?? $opts['original'] ?? null;
 		if ( !isset( $revision['html'] ) ) {
-			throw new HttpException(
-				'Missing revision html.', 400
-			);
+			throw new LocalizedHttpException( new MessageValue( "rest-missing-revision-html" ), 400 );
 		}
 
 		$vOriginal = ParsoidFormatHelper::parseContentTypeHeader(
 			$revision['html']['headers']['content-type'] ?? '' );
 		if ( $vOriginal === null ) {
-			throw new HttpException(
-				'Content-type of revision html is missing.', 400
-			);
+			throw new LocalizedHttpException( new MessageValue( "rest-missing-revision-html-content-type" ), 400 );
 		}
 		$attribs['envOptions']['inputContentVersion'] = $vOriginal;
 		'@phan-var array<string,array|string> $attribs'; // @var array<string,array|string> $attribs
@@ -939,9 +925,7 @@ abstract class ParsoidHandler extends Handler {
 			} elseif ( isset( $opts['updates']['variant'] ) ) {
 				return $this->languageConversion( $pageConfig, $attribs, $revision );
 			} else {
-				throw new HttpException(
-					'Unknown transformation.', 400
-				);
+				throw new LocalizedHttpException( new MessageValue( "rest-unknown-parsoid-transformation" ), 400 );
 			}
 		}
 
@@ -964,9 +948,7 @@ abstract class ParsoidHandler extends Handler {
 			if ( !empty( $attribs['body_only'] ) ) {
 				$doc = $this->parseHTML( $pb->html );
 				$body = DOMCompat::getBody( $doc );
-				$pb->html = ContentUtils::toXML( $body, [
-					'innerXML' => true,
-				] );
+				$pb->html = ContentUtils::toXML( $body, [ 'innerXML' => true ] );
 			}
 
 			$response = $this->getResponseFactory()->createJson( $pb->responseData() );
@@ -980,9 +962,7 @@ abstract class ParsoidHandler extends Handler {
 			$pageConfig = $this->tryToCreatePageConfig( $attribs );
 			return $this->wt2html( $pageConfig, $attribs );
 		} else {
-			throw new HttpException(
-				'We do not know how to do this conversion.', 415
-			);
+			throw new LocalizedHttpException( new MessageValue( "rest-unsupported-profile-conversion" ), 415 );
 		}
 	}
 
@@ -1008,9 +988,7 @@ abstract class ParsoidHandler extends Handler {
 			$revision['contentmodel'] ?? null
 		);
 
-		$out = $parsoid->pb2pb(
-			$pageConfig, 'redlinks', $pb, []
-		);
+		$out = $parsoid->pb2pb( $pageConfig, 'redlinks', $pb, [] );
 
 		$this->validatePb( $out, $attribs['envOptions']['inputContentVersion'] );
 
@@ -1034,25 +1012,15 @@ abstract class ParsoidHandler extends Handler {
 		PageConfig $pageConfig, array $attribs, array $revision
 	) {
 		$opts = $attribs['opts'];
-		$source = $opts['updates']['variant']['source'] ?? null;
 		$target = $opts['updates']['variant']['target'] ??
 			$attribs['envOptions']['htmlVariantLanguage'];
+		$source = $opts['updates']['variant']['source'] ?? null;
 
 		if ( !$target ) {
-			throw new HttpException(
-				'Target variant is required.', 400
-			);
+			throw new LocalizedHttpException( new MessageValue( "rest-target-variant-required" ), 400 );
 		}
 
-		if ( !$this->siteConfig->langConverterEnabledForLanguage(
-			$pageConfig->getPageLanguage()
-		) ) {
-			throw new HttpException(
-				'LanguageConversion is not enabled on this article.', 400
-			);
-		}
-
-		$parsoid = $this->newParsoid();
+		$pageIdentity = $this->tryToCreatePageIdentity( $attribs );
 
 		$pb = new PageBundle(
 			$revision['html']['body'],
@@ -1062,15 +1030,26 @@ abstract class ParsoidHandler extends Handler {
 			$revision['html']['headers'] ?? null,
 			$revision['contentmodel'] ?? null
 		);
-		$out = $parsoid->pb2pb(
-			$pageConfig, 'variant', $pb,
-			[
-				'variant' => [
-					'source' => $source,
-					'target' => $target,
-				]
-			]
-		);
+
+		// XXX: DI should inject HtmlTransformFactory
+		$languageVariantConverter = MediaWikiServices::getInstance()
+			->getHtmlTransformFactory()
+			->getLanguageVariantConverter( $pageIdentity );
+		$languageVariantConverter->setPageConfig( $pageConfig );
+		$httpContentLanguage = $attribs['pagelanguage' ] ?? null;
+		if ( $httpContentLanguage ) {
+			$languageVariantConverter->setPageLanguageOverride( $httpContentLanguage );
+		}
+
+		try {
+			$out = $languageVariantConverter->convertPageBundleVariant( $pb, $target, $source );
+		} catch ( InvalidArgumentException $e ) {
+			throw new LocalizedHttpException(
+				new MessageValue( "rest-unsupported-language-conversion", [ $source ?? '(unspecified)', $target ] ),
+				400,
+				[ 'reason' => $e->getMessage() ]
+			);
+		}
 
 		$response = $this->getResponseFactory()->createJson( $out->responseData() );
 		ParsoidFormatHelper::setContentType(
@@ -1092,8 +1071,35 @@ abstract class ParsoidHandler extends Handler {
 	private function validatePb( PageBundle $pb, string $contentVersion ): void {
 		$errorMessage = '';
 		if ( !$pb->validate( $contentVersion, $errorMessage ) ) {
-			throw new HttpException( $errorMessage, 400 );
+			throw new LocalizedHttpException(
+				new MessageValue( "rest-page-bundle-validation-error", [ $errorMessage ] ),
+				400
+			);
 		}
+	}
+
+	/**
+	 * @param PageConfig $page
+	 *
+	 * @return ProperPageIdentity
+	 * @throws HttpException
+	 */
+	private function pageConfigToPageIdentity( PageConfig $page ): ProperPageIdentity {
+		$services = MediaWikiServices::getInstance();
+
+		$title = $page->getLinkTarget();
+		try {
+			$page = $services->getPageStore()->getPageForLink( $title );
+		} catch ( MalformedTitleException | InvalidArgumentException $e ) {
+			// Note that even some well-formed links are still invalid
+			// parameters for getPageForLink(), e.g. interwiki links or special pages.
+			throw new HttpException(
+				"Bad title: $title", # uses LinkTarget::__toString()
+				400
+			);
+		}
+
+		return $page;
 	}
 
 }

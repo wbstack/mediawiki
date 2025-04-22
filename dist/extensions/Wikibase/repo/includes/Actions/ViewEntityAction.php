@@ -5,10 +5,9 @@ declare( strict_types = 1 );
 namespace Wikibase\Repo\Actions;
 
 use Article;
-use Html;
-use MWException;
-use OutputPage;
-use SpecialPage;
+use MediaWiki\Html\Html;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\SpecialPage\SpecialPage;
 use ViewAction;
 use Wikibase\Repo\WikibaseRepo;
 
@@ -28,7 +27,6 @@ class ViewEntityAction extends ViewAction {
 	 *
 	 * @param Article $article
 	 * @return bool
-	 * @throws MWException
 	 */
 	public static function onBeforeDisplayNoArticleText( Article $article ) {
 		$namespaceLookup = WikibaseRepo::getLocalEntityNamespaceLookup();
@@ -182,10 +180,7 @@ class ViewEntityAction extends ViewAction {
 			);
 		}
 
-		// Escaping HTML characters in order to retain original label that may contain HTML
-		// characters. This prevents having characters evaluated or stripped via
-		// OutputPage::setPageTitle:
-		$outputPage->setPageTitle(
+		$outputPage->setPageTitleMsg(
 			$this->msg(
 				'difference-title'
 				// This should be something like the following,
@@ -193,7 +188,7 @@ class ViewEntityAction extends ViewAction {
 				// or should set the attribute of the h1 to correct direction.
 				// Still note that the direction is "auto" so guessing should
 				// give the right direction in most cases.
-			)->plaintextParams( htmlspecialchars( $titleText ) . $id )
+			)->rawParams( htmlspecialchars( $titleText ) . $id )
 		);
 	}
 

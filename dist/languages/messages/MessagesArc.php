@@ -1,8 +1,6 @@
 <?php
 /** Aramaic (ܐܪܡܝܐ)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -113,7 +111,7 @@ $magicWords = [
 	'img_right'                 => [ '1', 'ܝܡܝܢܐ', 'right' ],
 	'img_sub'                   => [ '1', 'ܦܪܥܝܐ', 'sub' ],
 	'img_thumbnail'             => [ '1', 'ܙܥܘܪܬܐ', 'thumb', 'thumbnail' ],
-	'language'                  => [ '0', '#ܠܫܢܐ:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#ܠܫܢܐ', '#LANGUAGE' ],
 	'msg'                       => [ '0', 'ܐܓܪܬܐ:', 'MSG:' ],
 	'namespace'                 => [ '1', 'ܚܩܠܐ', 'NAMESPACE' ],
 	'numberofarticles'          => [ '1', 'ܡܢܝܢܐ_ܕܡܠܘܐ̈ܐ', 'NUMBEROFARTICLES' ],

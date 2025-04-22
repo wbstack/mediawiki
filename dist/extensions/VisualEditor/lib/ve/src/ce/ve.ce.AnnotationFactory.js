@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable AnnotationFactory class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -30,7 +30,7 @@ OO.inheritClass( ve.ce.AnnotationFactory, OO.Factory );
  * @throws {Error} Unknown annotation type
  */
 ve.ce.AnnotationFactory.prototype.getDescription = function ( annotation ) {
-	var type = annotation.constructor.static.name;
+	const type = annotation.constructor.static.name;
 	if ( Object.prototype.hasOwnProperty.call( this.registry, type ) ) {
 		return this.registry[ type ].static.getDescription( annotation );
 	}

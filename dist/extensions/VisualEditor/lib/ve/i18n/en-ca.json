@@ -7,9 +7,5 @@
 			"Skyllful"
 		]
 	},
-	"visualeditor-align-widget-center": "Centre",
-	"visualeditor-clearbutton-tooltip": "Clear styling",
-	"visualeditor-dialog-action-cancel": "Exit",
-	"visualeditor-dialog-action-goback": "Back",
-	"visualeditor-dialog-error-dismiss": "Back"
+	"visualeditor-align-widget-center": "Centre"
 }

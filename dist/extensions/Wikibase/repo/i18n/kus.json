@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Bugirbiig",
-			"Agurwin Isaac"
+			"Agurwin Isaac",
+			"Bugirbiig"
 		]
 	},
 	"wikibase-desc": "labaar zi'esim sʋŋ",
@@ -10,6 +10,12 @@
 	"wikibase-entity-item": "Laʋk",
 	"wikibase-entity-property": "Zi'esim",
 	"wikibase-entity-query": "Query",
+	"nstab-item": "Laʋk",
+	"tooltip-ca-nstab-item": "Gɔsim laʋk la",
+	"nstab-property": "Nwaasim",
+	"tooltip-ca-nstab-property": "Gɔsimi li nwaasim",
+	"nstab-query": "Query",
+	"tooltip-ca-nstab-query": "Gɔsim Query la",
 	"wikibase-edit": "Dɛmisim gbɛlima",
 	"wikibase-save": "Kpɛn'ɛsim",
 	"wikibase-publish": "Niŋim",
@@ -30,12 +36,14 @@
 	"wikibase-entitytermsforlanguagelistview-language": "Pian'ad",
 	"wikibase-entitytermsforlanguagelistview-more": "Buudi pian'adnam banɛ kpɛn'ɛs wʋsa",
 	"wikibase-entitytermsforlanguagelistview-less": "Buudi pian'adnam bi'ela",
+	"wikibase-entityterms-languagelistview-mul-popup-dont-show-again": "Da pa'al nɛ' ya'asa",
 	"wikibase-label-empty": "Li pʋ sɔbi pa'alɛ",
 	"wikibase-label-edit-placeholder": "Kpɛn'ɛsim zanbin sia",
 	"wikibase-label-edit-placeholder-language-aware": "Kpɛn'ɛsim zanbin $1 ni",
 	"wikibase-description-empty": "Pa'alʋg pʋ nie pa'alɛ",
 	"wikibase-description-edit-placeholder": "Kpɛn'ɛsim pa'alʋg",
 	"wikibase-description-edit-placeholder-language-aware": "Kpɛn'ɛsim pa'alʋg $1 ni",
+	"wikibase-description-edit-placeholder-not-applicable": "Pʋ tʋmma",
 	"wikibase-aliases-edit-placeholder": "Kpɛn'ɛsim yʋ'ʋrsieba",
 	"wikibase-content-language-edit-label": "Buudi pian'ad:",
 	"wikibase-diffview-reference": "Gbanvɛɛnsa",
@@ -80,6 +88,7 @@
 	"wikibase-setlabeldescriptionaliases-description-label": "Pa'alʋg:",
 	"wikibase-setlabeldescriptionaliases-aliases-label": "Yʋ'ʋsieba:",
 	"wikibase-setlabeldescriptionaliases-submit": "Maalim zanbin, pa'alʋg nɛ yʋ'ʋsieba",
+	"wikibase-setlabeldescriptionaliases-continue": "Kem tuon",
 	"special-setsitelink": "Maalim laʋk linki zin'ig",
 	"wikibase-setsitelink-site": "Zin'ig ID:",
 	"wikibase-setsitelink-label": "Zin'ig suotɔ'ɔŋir",

@@ -1,28 +1,25 @@
-/**
- * @class mw.Api.plugin.parse
- */
 ( function () {
 
-	$.extend( mw.Api.prototype, {
+	Object.assign( mw.Api.prototype, /** @lends mw.Api.prototype */ {
 		/**
 		 * Convenience method for 'action=parse'.
 		 *
 		 * @param {string|mw.Title} content Content to parse, either as a wikitext string or
 		 *   a mw.Title.
 		 * @param {Object} additionalParams Parameters object to set custom settings, e.g.
-		 *   redirects, sectionpreview.  prop should not be overridden.
-		 * @return {jQuery.Promise}
-		 * @return {Function} return.done
-		 * @return {string} return.done.data Parsed HTML of `wikitext`.
+		 *   `redirects`, `sectionpreview`. `prop` should not be overridden.
+		 * @return {jQuery.Promise<string>} Promise that resolves with the parsed HTML of `wikitext`
 		 */
 		parse: function ( content, additionalParams ) {
-			var apiPromise,
-				config = $.extend( {
-					formatversion: 2,
-					action: 'parse',
-					contentmodel: 'wikitext'
-				}, additionalParams );
+			const config = Object.assign( {
+				formatversion: 2,
+				action: 'parse',
+				// Minimize the JSON we get back, there is no way to access anything else anyway
+				prop: 'text',
+				contentmodel: 'wikitext'
+			}, additionalParams );
 
+			let apiPromise;
 			if ( mw.Title && content instanceof mw.Title ) {
 				// Parse existing page
 				config.page = content.getPrefixedDb();
@@ -34,16 +31,9 @@
 			}
 
 			return apiPromise
-				.then( function ( data ) {
-					return data.parse.text;
-				} )
+				.then( ( data ) => data.parse.text )
 				.promise( { abort: apiPromise.abort } );
 		}
 	} );
-
-	/**
-	 * @class mw.Api
-	 * @mixins mw.Api.plugin.parse
-	 */
 
 }() );

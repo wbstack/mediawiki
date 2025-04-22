@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Amire80",
+			"Lejonel",
 			"Liuxinyu970226",
 			"Mar(c)",
 			"Nike",
@@ -11,12 +12,12 @@
 			"Thibaut120094",
 			"Umherirrender",
 			"WMDE",
-			"Woytecr",
-			"Lejonel"
+			"Woytecr"
 		]
 	},
 	"advancedsearch-desc": "{{desc|name=AdvancedSearch|url=https://www.mediawiki.org/wiki/Special:MyLanguage/Extension:AdvancedSearch}}",
 	"advancedsearch-options-pane-head": "Label for the introduction of advanced search. It is used both as a header for the expanded pane and as a label for the following options when the pane is collapsed.",
+	"advancedsearch-options-pane-preview-list": "Title used for the list of previewed search terms in the collapsed pane.",
 	"advancedsearch-optgroup-text": "Label for the option group that contains search fields that refer to page content",
 	"advancedsearch-optgroup-structure": "Label for the option group that contains search fields that are specialized and/or more structural like templates, subpages and categories\n{{Identical|Structure}}",
 	"advancedsearch-optgroup-files": "Label for the option group that contains search fields for file type and properties",
@@ -35,6 +36,7 @@
 	"advancedsearch-field-fileh": "Label for the field for file height in pixels",
 	"advancedsearch-field-sort": "Label for the field order",
 	"advancedsearch-field-preview-sort": "Label for the sorting order field in the list of preview pills.\n\nParameters:\n* $1 - The specific type of sorting. Can be, for example, {{msg-mw|advancedsearch-sort-preview-relevance}}, {{msg-mw|advancedsearch-sort-preview-last-edit-desc}}, {{msg-mw|advancedsearch-sort-preview-create-timestamp-desc}}, and more.",
+	"advancedsearch-help-general-instruction": "Informs the user that clicking on the button will display popup instructions on how to use the search field or dropdown list.\n\nParameters:\n* $1 - Name of the field, e.g. {{msg-mw|advancedsearch-field-plain}}, {{msg-mw|advancedsearch-field-deepcategory}}, and many more.",
 	"advancedsearch-help-plain": "Help text shown in a dialog for the field for plain search",
 	"advancedsearch-help-phrase": "Help text shown in a dialog for the field for exact search",
 	"advancedsearch-help-or": "Help text shown in a dialog for the field for or search",
@@ -63,11 +65,8 @@
 	"advancedsearch-filetype-video": "Label for video file type\n{{Identical|Video}}",
 	"advancedsearch-filetype-office": "Label for office file types\n{{Identical|Office}}",
 	"advancedsearch-filesize-equals": "Label for the file width/height 'equals' comparator selection",
-	"advancedsearch-filesize-equals-symbol": "{{notranslate}}\nLabel for the file width/height 'equals' comparator selection as shorthand symbol",
 	"advancedsearch-filesize-greater-than": "Label for the file width/height 'greater than' comparator selection",
-	"advancedsearch-filesize-greater-than-symbol": "{{notranslate}}\nLabel for the file width/height 'greater than' comparator selection as shorthand symbol",
 	"advancedsearch-filesize-smaller-than": "Label for the file width/height 'smaller than' comparator selection",
-	"advancedsearch-filesize-smaller-than-symbol": "{{notranslate}}\nLabel for the file width/height 'smaller than' comparator selection as shorthand symbol",
 	"advancedsearch-sort-relevance": "Dropdown label for sort option relevance",
 	"advancedsearch-sort-last-edit-asc": "Dropdown label for sort option least to most recently edited",
 	"advancedsearch-sort-last-edit-desc": "Dropdown label for sort option most to least recently edited",
@@ -80,6 +79,7 @@
 	"advancedsearch-sort-preview-create-timestamp-desc": "Preview label for sort option most to least recently created. Used as $1 in {{msg-mw|advancedsearch-field-preview-sort}}.",
 	"advancedsearch-namespaces-search-in": "Label for the 'Search in' section heading of the namespace section",
 	"advancedsearch-namespaces-remember": "Label for a checkbox to save namespace choice for advanced search to user preferences",
+	"advancedsearch-namespaces-pane-preview-list": "Title used for the list of previewed namespace filters in the collapsed pane.",
 	"advancedsearch-namespaces-preset-all": "Label for the namespace preset 'All namespaces'\n{{Identical|All}}",
 	"advancedsearch-namespaces-preset-default": "Label for the namespace preset 'Default'\n{{Identical|Default}}",
 	"advancedsearch-namespaces-preset-general-help": "Label for namespace preset 'General Help'",

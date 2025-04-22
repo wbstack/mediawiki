@@ -1,10 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
+			"Coldfact",
 			"Gustave London",
-			"Tšepo",
-			"Coldfact"
+			"Maryam AlAkini",
+			"Tšepo"
 		]
 	},
 	"vector-language-button-label": "{{PLURAL:$1|$1 puo|$1 lipuo}}",

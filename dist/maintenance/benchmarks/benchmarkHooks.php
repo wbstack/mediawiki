@@ -21,7 +21,9 @@
  * @ingroup Benchmark
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../includes/Benchmarker.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that benchmarks %MediaWiki hooks.
@@ -29,6 +31,7 @@ require_once __DIR__ . '/../includes/Benchmarker.php';
  * @ingroup Benchmark
  */
 class BenchmarkHooks extends Benchmarker {
+	/** @inheritDoc */
 	protected $defaultCount = 10;
 
 	public function __construct() {
@@ -44,17 +47,16 @@ class BenchmarkHooks extends Benchmarker {
 			'Loaded 100 hooks' => 100,
 		];
 		$benches = [];
+		$hookContainer = $this->getHookContainer();
 		foreach ( $cases as $label => $load ) {
 			$benches[$label] = [
-				'setup' => function () use ( $load ) {
-					global $wgHooks;
-					$wgHooks['Test'] = [];
+				'setup' => function () use ( $load, $hookContainer ) {
 					for ( $i = 1; $i <= $load; $i++ ) {
-						$wgHooks['Test'][] = [ $this, 'test' ];
+						$hookContainer->register( 'Test', [ $this, 'test' ] );
 					}
 				},
-				'function' => static function () {
-					Hooks::run( 'Test' );
+				'function' => static function () use ( $hookContainer ) {
+					$hookContainer->run( 'Test' );
 				}
 			];
 		}
@@ -69,5 +71,7 @@ class BenchmarkHooks extends Benchmarker {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = BenchmarkHooks::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

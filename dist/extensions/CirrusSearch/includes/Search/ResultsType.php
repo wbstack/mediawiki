@@ -36,7 +36,7 @@ interface ResultsType {
 	 *
 	 * @return array corresponding to Elasticsearch fields syntax
 	 */
-	public function getStoredFields();
+	public function getFields();
 
 	/**
 	 * Get the highlighting configuration.

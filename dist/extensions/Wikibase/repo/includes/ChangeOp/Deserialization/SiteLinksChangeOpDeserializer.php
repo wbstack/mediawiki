@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo\ChangeOp\Deserialization;
 
+use MediaWiki\Site\SiteList;
 use OutOfBoundsException;
-use SiteList;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\ItemId;
@@ -19,7 +19,7 @@ use Wikibase\Repo\SiteLinkTargetProvider;
 /**
  * Deserializer for site link change requests.
  *
- * @see @ref md_docs_topics_changeop-serializations for documentation on site link change request format.
+ * @see @ref docs_topics_changeop-serializations for documentation on site link change request format.
  *
  * @license GPL-2.0-or-later
  */
@@ -139,7 +139,7 @@ class SiteLinksChangeOpDeserializer implements ChangeOpDeserializer {
 					throw new ChangeOpDeserializationException(
 						'A page "' . $serialization['title'] . '" could not be found on "' . $globalSiteId . '"',
 						'no-external-page',
-						[ $globalSiteId,  $serialization['title'] ]
+						[ $globalSiteId, $serialization['title'] ]
 					);
 				}
 
@@ -178,7 +178,7 @@ class SiteLinksChangeOpDeserializer implements ChangeOpDeserializer {
 	 *
 	 * @throws ChangeOpDeserializationException
 	 */
-	private function validateSiteLinkSerialization( $serialization, $siteCode, SiteList $sites = null ) {
+	private function validateSiteLinkSerialization( $serialization, $siteCode, ?SiteList $sites ) {
 		$this->assertArray( $serialization, 'An array was expected, but not found' );
 
 		if ( !array_key_exists( 'site', $serialization ) ) {
@@ -227,6 +227,7 @@ class SiteLinksChangeOpDeserializer implements ChangeOpDeserializer {
 	/**
 	 * @param string $message
 	 * @param string $errorCode
+	 * @return never
 	 *
 	 * @throws ChangeOpDeserializationException
 	 */

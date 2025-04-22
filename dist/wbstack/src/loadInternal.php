@@ -27,6 +27,3 @@ $wgAPIModules['wbstackElasticSearchInit'] = \WBStack\Internal\ApiWbStackElasticS
 $wgAPIModules['wbstackForceSearchIndex'] = \WBStack\Internal\ApiWbStackForceSearchIndex::class;
 $wgAPIModules['wbstackQueueSearchIndexBatches'] = \WBStack\Internal\ApiWbStackQueueSearchIndexBatches::class;
 $wgAPIModules['wbstackSiteStatsUpdate'] = \WBStack\Internal\ApiWbStackSiteStatsUpdate::class;
-
-// This is needed for Sandbox sites to have their Example data loaded via API
-wfLoadExtension( 'WikibaseExampleData' );

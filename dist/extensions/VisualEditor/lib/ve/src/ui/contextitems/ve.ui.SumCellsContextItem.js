@@ -1,7 +1,7 @@
 /*!
  * VisualEditor SumCellsContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -10,9 +10,9 @@
  * @class
  * @extends ve.ui.LinearContextItem
  *
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config] Configuration options
  */
 ve.ui.SumCellsContextItem = function VeUiSumCellsContextItem( context, model, config ) {
 	// Parent constructor
@@ -53,23 +53,23 @@ ve.ui.SumCellsContextItem.prototype.setup = function () {
 	ve.ui.SumCellsContextItem.super.prototype.setup.apply( this, arguments );
 
 	// If not disabled, selection must be table and spanning multiple matrix cells
-	var count = 0,
-		selection = this.getFragment().getSurface().getSelection(),
+	const selection = this.getFragment().getSurface().getSelection(),
 		documentModel = this.getFragment().getDocument(),
 		documentView = this.context.getSurface().getView().getDocument();
 
+	let count = 0;
 	// There's some situations involving transclusion table cells which
 	// can make us have a LinearSelection here, so make sure this will
 	// work:
-	var sum;
+	let sum;
 	if ( selection instanceof ve.dm.TableSelection ) {
-		var cells = selection.getMatrixCells( documentModel, true );
+		const cells = selection.getMatrixCells( documentModel, true );
 		if ( cells.length > 1 ) {
-			sum = cells.reduce( function ( s, cell ) {
-				var number;
+			sum = cells.reduce( ( s, cell ) => {
+				let number;
 				if ( !cell.isPlaceholder() ) {
 					// Get text from view rendering to catch numbers in alien nodes, etc.
-					var viewCell = documentView.getBranchNodeFromOffset( cell.node.getRange().start );
+					const viewCell = documentView.getBranchNodeFromOffset( cell.node.getRange().start );
 					number = ve.init.platform.parseNumber(
 						viewCell.$element.text()
 					);

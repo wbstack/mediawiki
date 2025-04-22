@@ -8,10 +8,11 @@ import {
 	ENTITY_SET_DESCRIPTION,
 	ENTITY_REVISION_UPDATE,
 	ENTITY_ROLLBACK,
+	ENTITY_REDIRECT_UPDATE,
 } from '@/store/entity/mutationTypes';
 import InvalidEntityException from '@/store/entity/exceptions/InvalidEntityException';
 import EntityState from '@/store/entity/EntityState';
-import FingerprintableEntity from '@/datamodel/FingerprintableEntity';
+import { newFingerprintableEntity } from '@/datamodel/FingerprintableEntity';
 import { lockState } from '../lockState';
 
 function newEntityState( entity: any = null ): EntityState {
@@ -23,6 +24,7 @@ function newEntityState( entity: any = null ): EntityState {
 		aliases: {},
 		isEditable: false,
 		baseRevisionFingerprint: null,
+		tempUserRedirectUrl: null,
 	};
 
 	if ( entity !== null ) {
@@ -53,7 +55,7 @@ describe( 'entity/mutations', () => {
 
 		it( 'contains entity data incl baseRevisionFingerprint after initialization', () => {
 			const state: EntityState = newEntityState();
-			const entity = new FingerprintableEntity(
+			const entity = newFingerprintableEntity(
 				'Q123',
 				{ en: { language: 'en', value: 'foo' } },
 				{ en: { language: 'en', value: 'foobar' } },
@@ -176,6 +178,13 @@ describe( 'entity/mutations', () => {
 		const revision = 4711;
 		mutations[ ENTITY_REVISION_UPDATE ]( state, revision );
 		expect( state.baseRevision ).toBe( revision );
+	} );
+
+	it( ENTITY_REDIRECT_UPDATE, () => {
+		const newUrl = new URL( 'https://www.example.com' );
+		const state = newEntityState( { tempUserRedirectUrl: new URL( 'https://wiki.example' ) } );
+		mutations[ ENTITY_REDIRECT_UPDATE ]( state, newUrl );
+		expect( state.tempUserRedirectUrl ).toBe( newUrl );
 	} );
 
 	it( ENTITY_REMOVE_ALIAS, () => {

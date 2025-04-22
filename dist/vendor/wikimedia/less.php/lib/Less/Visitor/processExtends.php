@@ -1,10 +1,6 @@
 <?php
-
 /**
- * Process Extends Visitor
- *
- * @package Less
- * @subpackage visitor
+ * @private
  */
 class Less_Visitor_processExtends extends Less_Visitor {
 
@@ -22,7 +18,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 
 		$root->allExtends = $this->doExtendChaining( $root->allExtends, $root->allExtends );
 
-		$this->allExtendsStack = array();
+		$this->allExtendsStack = [];
 		$this->allExtendsStack[] = &$root->allExtends;
 
 		return $this->visitObj( $root );
@@ -38,7 +34,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 		// this is also the most expensive.. and a match on one selector can cause an extension of a selector we had already processed if
 		// we look at each selector at a time, as is done in visitRuleset
 
-		$extendsToAdd = array();
+		$extendsToAdd = [];
 
 		// loop through comparing every extend with every target extend.
 		// a target extend is the one on the ruleset we are looking at copy/edit/pasting in place
@@ -52,14 +48,14 @@ class Less_Visitor_processExtends extends Less_Visitor {
 				$extend = $extendsList[$extendIndex];
 				$targetExtend = $extendsListTarget[$targetExtendIndex];
 
-				// Optimisation: Explicit reference, <https://github.com/wikimedia/less.php/pull/14>
+				// Optimisation: Explicit reference, <https://github.com/wikimedia/less.php/pull/14>
 				if ( \array_key_exists( $targetExtend->object_id, $extend->parent_ids ) ) {
 					// ignore circular references
 					continue;
 				}
 
 				// find a match in the target extends self selector (the bit before :extend)
-				$selectorPath = array( $targetExtend->selfSelectors[0] );
+				$selectorPath = [ $targetExtend->selfSelectors[0] ];
 				$matches = $this->findMatch( $extend, $selectorPath );
 
 				if ( $matches ) {
@@ -75,7 +71,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 						$newExtend->selfSelectors = $newSelector;
 
 						// add the extend onto the list of extends for that selector
-						end( $newSelector )->extendList = array( $newExtend );
+						end( $newSelector )->extendList = [ $newExtend ];
 						// $newSelector[ count($newSelector)-1]->extendList = array($newExtend);
 
 						// record that we need to add it.
@@ -102,10 +98,10 @@ class Less_Visitor_processExtends extends Less_Visitor {
 			// may no longer be needed.			$this->extendChainCount++;
 			if ( $iterationCount > 100 ) {
 
-				try{
+				try {
 					$selectorOne = $extendsToAdd[0]->selfSelectors[0]->toCSS();
 					$selectorTwo = $extendsToAdd[0]->selector->toCSS();
-				}catch ( Exception $e ) {
+				} catch ( Exception $e ) {
 					$selectorOne = "{unable to calculate}";
 					$selectorTwo = "{unable to calculate}";
 				}
@@ -120,7 +116,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 		return array_merge( $extendsList, $extendsToAdd );
 	}
 
-	protected function visitRule( $ruleNode, &$visitDeeper ) {
+	protected function visitDeclaration( $declNode, &$visitDeeper ) {
 		$visitDeeper = false;
 	}
 
@@ -171,6 +167,11 @@ class Less_Visitor_processExtends extends Less_Visitor {
 		}
 	}
 
+	/**
+	 * @param Less_Tree_Extend $extend
+	 * @param Less_Tree_Selector[] $haystackSelectorPath
+	 * @return false|array<array{index:int,initialCombinator:string}>
+	 */
 	private function findMatch( $extend, $haystackSelectorPath ) {
 		if ( !$this->HasMatches( $extend, $haystackSelectorPath ) ) {
 			return false;
@@ -181,10 +182,10 @@ class Less_Visitor_processExtends extends Less_Visitor {
 		// returns an array of selector matches that can then be replaced
 		//
 		$needleElements = $extend->selector->elements;
-		$potentialMatches = array();
+		$potentialMatches = [];
 		$potentialMatches_len = 0;
 		$potentialMatch = null;
-		$matches = array();
+		$matches = [];
 
 		// loop through the haystack elements
 		$haystack_path_len = count( $haystackSelectorPath );
@@ -198,7 +199,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 
 				// if we allow elements before our match we can add a potential match every time. otherwise only at the first element.
 				if ( $extend->allowBefore || ( $haystackSelectorIndex === 0 && $hackstackElementIndex === 0 ) ) {
-					$potentialMatches[] = array( 'pathIndex' => $haystackSelectorIndex, 'index' => $hackstackElementIndex, 'matched' => 0, 'initialCombinator' => $haystackElement->combinator );
+					$potentialMatches[] = [ 'pathIndex' => $haystackSelectorIndex, 'index' => $hackstackElementIndex, 'matched' => 0, 'initialCombinator' => $haystackElement->combinator ];
 					$potentialMatches_len++;
 				}
 
@@ -222,7 +223,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 							$potentialMatch['length'] = $extend->selector->elements_len;
 							$potentialMatch['endPathIndex'] = $haystackSelectorIndex;
 							$potentialMatch['endPathElementIndex'] = $hackstackElementIndex + 1; // index after end of match
-							$potentialMatches = array(); // we don't allow matches to overlap, so start matching again
+							$potentialMatches = []; // we don't allow matches to overlap, so start matching again
 							$potentialMatches_len = 0;
 							$matches[] = $potentialMatch;
 						}
@@ -253,7 +254,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 				return true;
 			}
 
-			// Optimisation: Explicit reference, <https://github.com/wikimedia/less.php/pull/14>
+			// Optimisation: Explicit reference, <https://github.com/wikimedia/less.php/pull/14>
 			if ( \array_key_exists( $first_el, $hackstackSelector->_oelements_assoc ) ) {
 				return true;
 			}
@@ -263,7 +264,10 @@ class Less_Visitor_processExtends extends Less_Visitor {
 	}
 
 	/**
-	 * @param integer $hackstackElementIndex
+	 * @param array $potentialMatch
+	 * @param Less_Tree_Element[] $needleElements
+	 * @param Less_Tree_Element $haystackElement
+	 * @param int $hackstackElementIndex
 	 */
 	private function PotentialMatch( $potentialMatch, $needleElements, $haystackElement, $hackstackElementIndex ) {
 		if ( $potentialMatch['matched'] > 0 ) {
@@ -292,6 +296,11 @@ class Less_Visitor_processExtends extends Less_Visitor {
 		return $potentialMatch;
 	}
 
+	/**
+	 * @param string|Less_Tree_Attribute|Less_Tree_Dimension|Less_Tree_Keyword $elementValue1
+	 * @param string|Less_Tree_Attribute|Less_Tree_Dimension|Less_Tree_Keyword $elementValue2
+	 * @return bool
+	 */
 	private function isElementValuesEqual( $elementValue1, $elementValue2 ) {
 		if ( $elementValue1 === $elementValue2 ) {
 			return true;
@@ -353,8 +362,17 @@ class Less_Visitor_processExtends extends Less_Visitor {
 			return true;
 		}
 
-		$elementValue1 = ( $elementValue1->value->value ? $elementValue1->value->value : $elementValue1->value );
-		$elementValue2 = ( $elementValue2->value->value ? $elementValue2->value->value : $elementValue2->value );
+		$elementValue1 = $elementValue1->value;
+
+		if ( $elementValue1 instanceof Less_Tree_Quoted ) {
+			$elementValue1 = $elementValue1->value;
+		}
+
+		$elementValue2 = $elementValue2->value;
+
+		if ( $elementValue2 instanceof Less_Tree_Quoted ) {
+			$elementValue2 = $elementValue2->value;
+		}
 
 		return $elementValue1 === $elementValue2;
 	}
@@ -364,7 +382,7 @@ class Less_Visitor_processExtends extends Less_Visitor {
 
 		$currentSelectorPathIndex = 0;
 		$currentSelectorPathElementIndex = 0;
-		$path = array();
+		$path = [];
 		$selectorPath_len = count( $selectorPath );
 
 		for ( $matchIndex = 0, $matches_len = count( $matches ); $matchIndex < $matches_len; $matchIndex++ ) {
@@ -387,8 +405,13 @@ class Less_Visitor_processExtends extends Less_Visitor {
 			}
 
 			$newElements = array_merge(
-				array_slice( $selector->elements, $currentSelectorPathElementIndex, ( $match['index'] - $currentSelectorPathElementIndex ) ), // last parameter of array_slice is different than the last parameter of javascript's slice
-				 array( $firstElement ),
+				array_slice(
+					$selector->elements,
+					$currentSelectorPathElementIndex,
+					// last parameter of array_slice is different than the last parameter of javascript's slice
+					$match['index'] - $currentSelectorPathElementIndex
+				),
+				 [ $firstElement ],
 				 array_slice( $replacementSelector->elements, 1 )
 				);
 
@@ -429,12 +452,12 @@ class Less_Visitor_processExtends extends Less_Visitor {
 		array_pop( $this->allExtendsStack );
 	}
 
-	protected function visitDirective( $directiveNode ) {
-		$newAllExtends = array_merge( $directiveNode->allExtends, end( $this->allExtendsStack ) );
-		$this->allExtendsStack[] = $this->doExtendChaining( $newAllExtends, $directiveNode->allExtends );
+	protected function visitAtRule( $atRuleNode ) {
+		$newAllExtends = array_merge( $atRuleNode->allExtends, end( $this->allExtendsStack ) );
+		$this->allExtendsStack[] = $this->doExtendChaining( $newAllExtends, $atRuleNode->allExtends );
 	}
 
-	protected function visitDirectiveOut() {
+	protected function visitAtRuleOut() {
 		array_pop( $this->allExtendsStack );
 	}
 

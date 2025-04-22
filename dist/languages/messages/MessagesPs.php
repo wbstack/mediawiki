@@ -1,8 +1,6 @@
 <?php
 /** Pashto (پښتو)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -89,6 +87,7 @@ $specialPageAliases = [
 	'Protectedtitles'           => [ 'ژغورلي_سرليکونه' ],
 	'Randompage'                => [ 'ناټاکلی،_ناټاکلی_مخ' ],
 	'Recentchanges'             => [ 'اوسني_بدلونونه' ],
+	'Renameuser'                => [ 'دکارونکي_نوم_بدلون' ],
 	'Search'                    => [ 'پلټنه' ],
 	'Shortpages'                => [ 'لنډ_مخونه' ],
 	'Specialpages'              => [ 'ځانګړي_مخونه' ],
@@ -137,7 +136,7 @@ $magicWords = [
 	'img_right'                 => [ '1', 'ښي', 'right' ],
 	'img_thumbnail'             => [ '1', 'بټنوک', 'thumb', 'thumbnail' ],
 	'index'                     => [ '1', '__ليکلړ__', '__INDEX__' ],
-	'language'                  => [ '0', '#ژبه:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#ژبه', '#LANGUAGE' ],
 	'localday'                  => [ '1', 'سيمه_يزه_ورځ', 'LOCALDAY' ],
 	'localday2'                 => [ '1', 'سيمه_يزه_ورځ۲', 'LOCALDAY2' ],
 	'localdayname'              => [ '1', 'دسيمه_يزې_ورځ_نوم', 'LOCALDAYNAME' ],

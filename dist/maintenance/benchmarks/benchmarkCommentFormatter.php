@@ -1,14 +1,16 @@
 <?php
 
 use MediaWiki\CommentFormatter\CommentItem;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../includes/Benchmarker.php';
+// @codeCoverageIgnoreEnd
 
 class BenchmarkCommentFormatter extends Benchmarker {
 	public function __construct() {
 		parent::__construct();
-		$this->addDescription( 'Benchmark Linker::formatComment()' );
+		$this->addDescription( 'Benchmark CommentFormatter::format()' );
 		$this->addOption( 'file', 'A JSON API result from list=recentchanges',
 			false, true );
 	}
@@ -35,11 +37,12 @@ class BenchmarkCommentFormatter extends Benchmarker {
 			$comments[] = $entry['comment'];
 		}
 		$this->bench( [
-			'Linker::formatComment' => [
-				'function' => static function () use ( $inputs ) {
+			'CommentFormatter::format' => [
+				'function' => function () use ( $inputs ) {
 					Title::clearCaches();
+					$formatter = $this->getServiceContainer()->getCommentFormatter();
 					foreach ( $inputs as $input ) {
-						Linker::formatComment(
+						$formatter->format(
 							$input['comment'],
 							$input['title']
 						);
@@ -48,9 +51,9 @@ class BenchmarkCommentFormatter extends Benchmarker {
 			],
 
 			'CommentFormatter::createBatch' => [
-				'function' => static function () use ( $inputs ) {
+				'function' => function () use ( $inputs ) {
 					Title::clearCaches();
-					$formatter = MediaWikiServices::getInstance()->getCommentFormatter();
+					$formatter = $this->getServiceContainer()->getCommentFormatter();
 					$comments = [];
 					foreach ( $inputs as $input ) {
 						$comments[] = ( new CommentItem( $input['comment'] ) )
@@ -63,9 +66,9 @@ class BenchmarkCommentFormatter extends Benchmarker {
 			],
 
 			'CommentFormatter::formatStrings' => [
-				'function' => static function () use ( $comments ) {
+				'function' => function () use ( $comments ) {
 					Title::clearCaches();
-					$formatter = MediaWikiServices::getInstance()->getCommentFormatter();
+					$formatter = $this->getServiceContainer()->getCommentFormatter();
 					$formatter->formatStrings( $comments );
 				}
 			],
@@ -74,5 +77,7 @@ class BenchmarkCommentFormatter extends Benchmarker {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = BenchmarkCommentFormatter::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

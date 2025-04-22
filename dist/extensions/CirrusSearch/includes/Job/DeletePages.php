@@ -3,7 +3,7 @@
 namespace CirrusSearch\Job;
 
 use CirrusSearch\Updater;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Job wrapper around Updater::deletePages.  If indexSuffix parameter is
@@ -34,6 +34,14 @@ class DeletePages extends CirrusTitleJob {
 		$this->removeDuplicates = false;
 	}
 
+	public static function build( Title $title, string $docId, int $eventTime ): DeletePages {
+		return new self( $title, [
+			"docId" => $docId,
+			self::UPDATE_KIND => self::PAGE_CHANGE,
+			self::ROOT_EVENT_TIME => $eventTime
+		] );
+	}
+
 	/**
 	 * @return bool
 	 */
@@ -42,15 +50,6 @@ class DeletePages extends CirrusTitleJob {
 		// BC for rename from indexType to indexSuffix
 		$indexSuffix = $this->params['indexSuffix'] ?? $this->params['indexType'] ?? null;
 		$updater->deletePages( [ $this->title ], [ $this->params['docId'] ], $indexSuffix );
-
-		if ( $this->getSearchConfig()->get( 'CirrusSearchIndexDeletes' ) ) {
-			$updater->archivePages( [
-				[
-					'title' => $this->title,
-					'page' => $this->params['docId'],
-				],
-			] );
-		}
 
 		return true;
 	}

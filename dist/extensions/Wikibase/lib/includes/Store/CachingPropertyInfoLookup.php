@@ -2,11 +2,11 @@
 
 namespace Wikibase\Lib\Store;
 
-use BagOStuff;
 use MediaWiki\Logger\LoggerFactory;
 use Psr\Log\LoggerInterface;
-use WANObjectCache;
 use Wikibase\DataModel\Entity\PropertyId;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * Class CachingPropertyInfoLookup is an implementation of PropertyInfoLookup
@@ -18,8 +18,6 @@ use Wikibase\DataModel\Entity\PropertyId;
  * @author Daniel Kinzler
  */
 class CachingPropertyInfoLookup implements PropertyInfoLookup {
-
-	private const SINGLE_PROPERTY_CACHE_KEY_SEPARATOR = ':';
 
 	/**
 	 * @var PropertyInfoLookup

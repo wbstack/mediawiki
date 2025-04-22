@@ -8,6 +8,7 @@
 			"Hugo.arg",
 			"Macofe",
 			"Manvydasz",
+			"Nokeoo",
 			"Pofka",
 			"Tomasdd",
 			"Zygimantus"
@@ -18,7 +19,6 @@
 	"thanks-thanked": "{{GENDER:$1|{{GENDER:$2|padėkojo}}}}",
 	"thanks-button-thank": "{{GENDER:$1|{{GENDER:$2|Padėkoti}}}}",
 	"thanks-button-thanked": "{{GENDER:$1|{{GENDER:$2|Padėkojo}}}}",
-	"thanks-button-action-completed": "Jūs {{GENDER:$1|{{GENDER:$2|padėkojote}}}} $1",
 	"thanks-error-undefined": "Padėkoti nepavyko (klaidos kodas: $1). Prašome pabandyti dar kartą.",
 	"thanks-error-invalidrevision": "Netinkamas versijos ID",
 	"thanks-error-revdeleted": "Neįmanoma padėkoti, nes ši versija buvo ištrinta.",
@@ -38,7 +38,6 @@
 	"echo-pref-subscription-edit-thank": "Padėkokite man už mano pakeitimą",
 	"echo-pref-tooltip-edit-thank": "Tebūnie pranešta, kai kas nors padėkoja už mano atliktą keitimą.",
 	"echo-category-title-edit-thank": "Padėkos",
-	"notification-thanks-diff-link": "jūsų pakeitimas",
 	"notification-header-rev-thank": "$1 {{GENDER:$2|padėkojo}} {{GENDER:$4|jums}} už pakeitimą puslapyje <strong>$3</strong>.",
 	"notification-compact-header-edit-thank": "$1 {{GENDER:$2|padėkojo}} {{GENDER:$3|jums}}.",
 	"notification-bundle-header-rev-thank": "{{PLURAL:$1|Vienas žmogus|$1 žmonės|100=99+ žmonės}} padėkojo {{GENDER:$3|jums}} už jūsų „<strong>$2</strong>“ redagavimą.",
@@ -51,7 +50,6 @@
 	"thanks-error-invalidpostid": "Netinkamas įrašo ID.",
 	"flow-thanks-confirmation-special": "Ar norite viešai išsiųsti padėką už šį komentarą?",
 	"flow-thanks-thanked-notice": "{{GENDER:$3|Jūs}} padėkojote $1 už {{GENDER:$2|jo|jos|jų}} komentarą.",
-	"notification-flow-thanks-post-link": "jūsų komentaras",
 	"notification-header-flow-thank": "$1 {{GENDER:$2|padėkojo}} {{GENDER:$5|jums}} už jūsų komentarą „<strong>$3</strong>“.",
 	"notification-compact-header-flow-thank": "$1 {{GENDER:$2|padėkojo}} {{GENDER:$3|jums}}.",
 	"notification-bundle-header-flow-thank": "{{PLURAL:$1|Vienas žmogus|$1 žmonės|100=99+ žmonės}} padėkojo {{GENDER:$3|jums}} už jūsų komentarą „<strong>$2</strong>“."

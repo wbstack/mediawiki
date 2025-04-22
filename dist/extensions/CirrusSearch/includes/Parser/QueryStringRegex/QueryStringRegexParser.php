@@ -21,7 +21,8 @@ use CirrusSearch\Query\KeywordFeature;
 use CirrusSearch\Query\PrefixFeature;
 use CirrusSearch\Search\Escaper;
 use CirrusSearch\Util;
-use Message;
+use LogicException;
+use MediaWiki\Message\Message;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -321,17 +322,14 @@ class QueryStringRegexParser implements QueryParser {
 	}
 
 	private function createClause( ParsedNode $node, $explicit = false, $occur = null ) {
-		if ( $occur === null ) {
-			$occur = self::DEFAULT_OCCUR;
-		}
 		if ( $node instanceof NegatedNode ) {
 			// OR NOT is simply MUST_NOT, there's no SHOULD_NOT in lucene
 			// so simply do what lucene QueryString does: force MUST_NOT whenever
 			// we encounter a negated clause.
 			return new BooleanClause( $node->getChild(), BooleanClause::MUST_NOT,
-				$explicit || $node->getNegationType() === 'NOT' );
+				$explicit || $node->getNegationType() === 'NOT', $node );
 		}
-		return new BooleanClause( $node, $occur, $explicit );
+		return new BooleanClause( $node, $occur ?? self::DEFAULT_OCCUR, $explicit );
 	}
 
 	/**
@@ -442,7 +440,7 @@ class QueryStringRegexParser implements QueryParser {
 					Assert::postcondition( $left !== null, '$left must not be null' );
 					break;
 				default:
-					throw new \Exception( "BUG: unexpected token type {$this->token->getType()}" );
+					throw new LogicException( "BUG: unexpected token type {$this->token->getType()}" );
 			}
 		}
 

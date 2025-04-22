@@ -19,6 +19,7 @@
 			"VezonThunder"
 		]
 	},
+	"ooui-copytextlayout-copy": "Kopioi",
 	"ooui-outline-control-move-down": "Siirrä kohdetta alaspäin",
 	"ooui-outline-control-move-up": "Siirrä kohdetta ylöspäin",
 	"ooui-outline-control-remove": "Poista kohde",
@@ -32,9 +33,9 @@
 	"ooui-dialog-process-dismiss": "Hylkää",
 	"ooui-dialog-process-retry": "Yritä uudelleen",
 	"ooui-dialog-process-continue": "Jatka",
+	"ooui-combobox-button-label": "Vaihda valinnat",
 	"ooui-selectfile-button-select": "Valitse tiedosto",
 	"ooui-selectfile-button-select-multiple": "Valitse tiedostot",
-	"ooui-selectfile-not-supported": "Tiedoston valitsemista ei tueta",
 	"ooui-selectfile-placeholder": "Tiedostoa ei ole valittu",
 	"ooui-selectfile-dragdrop-placeholder": "Pudota tiedosto tähän",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Pudota tiedostot tähän",

@@ -49,8 +49,8 @@ class WikibaseContentLanguages {
 	}
 
 	public static function getDefaultInstance(
-		HookContainer $hookContainer = null,
-		LanguageNameUtils $languageNameUtils = null
+		?HookContainer $hookContainer = null,
+		?LanguageNameUtils $languageNameUtils = null
 	) {
 		if ( $hookContainer === null ) {
 			$hookContainer = MediaWikiServices::getInstance()->getHookContainer();
@@ -69,7 +69,7 @@ class WikibaseContentLanguages {
 		return new self( $contentLanguages );
 	}
 
-	public static function getDefaultTermsLanguages( LanguageNameUtils $languageNameUtils = null ) {
+	public static function getDefaultTermsLanguages( ?LanguageNameUtils $languageNameUtils = null ) {
 		// Note: this list is also the basis of getDefaultMonolingualTextLanguages(); custom
 		// (non-MediaWikiContentLanguages) terms languages also become monolingual text languages.
 		return new UnionContentLanguages(
@@ -90,6 +90,7 @@ class WikibaseContentLanguages {
 					'bqz', // T263946
 					'byv', // T263946
 					'cak', // T278854
+					'cal', // T308062
 					'cnh', // T278853
 					'dua', // T263946
 					'en-us', // T154589
@@ -128,6 +129,7 @@ class WikibaseContentLanguages {
 					'smj', // T146707
 					'sms', // T220118, T223544
 					'srq', // T113408
+					'tpv', // T308062
 					'tvu', // T263946
 					'vut', // T263946
 					'wes', // T263946
@@ -135,128 +137,17 @@ class WikibaseContentLanguages {
 					'yas', // T263946
 					'yat', // T263946
 					'yav', // T263946
-					'ybb' // T263946
+					'ybb', // T263946
 				]
 			)
 		);
 	}
 
-	public static function getDefaultMonolingualTextLanguages( LanguageNameUtils $languageNameUtils = null ) {
+	public static function getDefaultMonolingualTextLanguages( ?LanguageNameUtils $languageNameUtils = null ) {
 		return new DifferenceContentLanguages(
 			new UnionContentLanguages(
 				self::getDefaultTermsLanguages( $languageNameUtils ),
-				new StaticContentLanguages( [
-					// Special ISO 639-2 codes
-					'und', 'mis', 'mul', 'zxx',
-
-					// Other valid codes without MediaWiki localization
-					'abe', // T150633
-					'abq', // T155367
-					'abq-latn', // T155424
-					'alc', // T190981
-					'bdr', // T234330
-					'bnn', // T174230
-					'brx', // T155369
-					'cal', // T266423
-					'ccp', // T210311
-					'cdo-hani', // T180771
-					'chn', // T155370
-					'ckt', // T240097
-					'clc', // T222020
-					'cnr', // T185800
-					'cop', // T155371
-					'crb', // T220284
-					'crl', // T264532
-					'dru', // T267915
-					'el-cy', // T198674
-					'ett', // T125066
-					'eya', // T155372
-					'fkv', // T125066
-					'fos', // T174234
-					'fr-ca', // T151186
-					'frm', // T181823
-					'fro', // T181823
-					'fuf', // T155429
-					'gez', // T155373
-					'gil', // T241424
-					'gml', // T217131
-					'gmy', // T155421
-					'gsw-fr', // T262922
-					'hai', // T138131
-					'hak-hans', // T180771
-					'hak-hant', // T180771
-					'haz', // T155374
-					'hbo', // T155368
-					'ja-hani', // T195816
-					'ja-hira', // T195816
-					'ja-hrkt', // T195816
-					'ja-kana', // T195816
-					'kjh', // T155377
-					'kld', // T198366
-					'koy', // T125066
-					'lag', // T161983
-					'lcm', // T234761
-					'lij-mc', // T254968
-					'lkt', // T125066
-					'mfa', // T235468
-					'mic', // T258331
-					'mid', // T155418
-					'mnc', // T137808
-					'moe', // T151129
-					'non', // T137115
-					'non-runr', // T265782
-					'nr', // T155430
-					'nrf-gg', // T165648
-					'nrf-je', // T165648
-					'nsk', // T250246
-					'nxm', // T167745
-					'oj', // T268431
-					'ojp', // T195816
-					'ojp-hani', // T195816
-					'ojp-hira', // T195816
-					'oma', // T265296
-					'ood', // T155423
-					'otk', // T137809
-					'peo', // T189427
-					'phn-latn', // T155425
-					'phn-phnx', // T155425
-					'pi-sidd', // T230881
-					'pjt', // T155426
-					'ppu', // T174233
-					'pyu', // T174227
-					'quc', // T155376
-					'qya', // T185194
-					'rah', // T267479
-					'rar', // T155427
-					'rm-puter', // T222426
-					'rm-rumgr', // T222426
-					'rm-surmiran', // T222426
-					'rm-sursilv', // T222426
-					'rm-sutsilv', // T222426
-					'rm-vallader', // T222426
-					'rmf', // T226701
-					'sa-sidd', // T230881
-					'sia', // T217521
-					'sjd', // T188596
-					'sjk', // T217521
-					'sjn', // T185194
-					'sjt', // T217521
-					'sju', // T188599
-					'sms', // T188579
-					'ssf', // T174236
-					'syc', // T164580
-					'tlb', // T216798
-					'tli', // T230145
-					'tnq', // T220284
-					'tzl', // T98314
-					'uga', // T155431
-					'umu', // T160531
-					'uun', // T174229
-					'xpu', // T167811
-					'yap', // T155433
-					'ykg' , // T252198
-					'zun', // T155435
-				] )
+				new MediaWikiContentLanguages( $languageNameUtils, LanguageNameUtils::ALL ),
 			),
 			// MediaWiki language codes we don't want for monolingual text values
 			new StaticContentLanguages( [
@@ -277,6 +168,7 @@ class WikibaseContentLanguages {
 				'es-formal',
 				'hu-formal',
 				'nl-informal',
+				'qqq',
 			] )
 		);
 	}

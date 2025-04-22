@@ -15,83 +15,72 @@
  * along with MediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
-	var PBP;
+const UiElement = require( './mmv.ui.js' );
 
+/**
+ * A progress bar for the loading of the image.
+ */
+class ProgressBar extends UiElement {
 	/**
-	 * A progress bar for the loading of the image.
-	 *
-	 * @class mw.mmv.ui.ProgressBar
-	 * @extends mw.mmv.ui.Element
-	 * @constructor
 	 * @param {jQuery} $container
 	 */
-	function ProgressBar( $container ) {
-		mw.mmv.ui.Element.call( this, $container );
+	constructor( $container ) {
+		super( $container );
 		this.init();
 	}
-	OO.inheritClass( ProgressBar, mw.mmv.ui.Element );
-	PBP = ProgressBar.prototype;
 
 	/**
 	 * Initializes the progress display at the top of the panel.
 	 */
-	PBP.init = function () {
+	init() {
 		this.$progress = $( '<div>' )
 			.addClass( 'mw-mmv-progress empty' )
 			.appendTo( this.$container );
 		this.$percent = $( '<div>' )
 			.addClass( 'mw-mmv-progress-percent' )
 			.appendTo( this.$progress );
-	};
+	}
 
-	PBP.empty = function () {
+	empty() {
 		this.hide();
-	};
+	}
 
 	/**
 	 * Hides the bar, resets it to 0 and stops any animation in progress.
 	 */
-	PBP.hide = function () {
+	hide() {
 		this.$progress.addClass( 'empty' );
-		this.$percent.stop().css( { width: 0 } );
-	};
+		this.$percent.css( { width: 0 } );
+	}
 
 	/**
 	 * Handles the progress display when a percentage of progress is received
 	 *
 	 * @param {number} percent a number between 0 and 100
 	 */
-	PBP.animateTo = function ( percent ) {
-		var panel = this;
-
+	animateTo( percent ) {
 		this.$progress.removeClass( 'empty' );
-		this.$percent.stop();
 
 		if ( percent === 100 ) {
 			// When a 100% update comes in, we make sure that the bar is visible, we animate
-			// fast to 100 and we hide the bar when the animation is done
-			// FIXME: Use CSS transition
-			// eslint-disable-next-line no-jquery/no-animate
-			this.$percent.animate( { width: percent + '%' }, 50, 'swing', panel.hide.bind( panel ) );
+			// fast to 100 and we hide the bar
+			this.$percent.css( { width: `${ percent }%` } );
+			this.hide();
 		} else {
 			// When any other % update comes in, we make sure the bar is visible
 			// and we animate to the right position
-			// FIXME: Use CSS transition
-			// eslint-disable-next-line no-jquery/no-animate
-			this.$percent.animate( { width: percent + '%' } );
+			this.$percent.css( { width: `${ percent }%` } );
 		}
-	};
+	}
 
 	/**
-	 * Goes to the given percent without animation
+	 * Goes to the given percent (originally without animation)
 	 *
 	 * @param {number} percent a number between 0 and 100
 	 */
-	PBP.jumpTo = function ( percent ) {
-		this.$progress.removeClass( 'empty' );
-		this.$percent.stop().css( { width: percent + '%' } );
-	};
+	jumpTo( percent ) {
+		this.animateTo( percent );
+	}
+}
 
-	mw.mmv.ui.ProgressBar = ProgressBar;
-}() );
+module.exports = ProgressBar;

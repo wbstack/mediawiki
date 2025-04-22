@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Soumaya",
-			"Raizkgh"
+			"Raizkgh",
+			"Soumaya"
 		]
 	},
 	"visualeditor-cite-tool-name-book": "Sebrã",
@@ -23,9 +23,9 @@
 	"cite-ve-citationneeded-title": "Sõsg ning sẽn be Biiblã pʋgẽ wã",
 	"cite-ve-dialog-reference-editing-reused": "Seb-kãngã pʋgẽ, b tũnugda ne {{PLURAL:$1 de la fois de la fois2=de la fois de $1}}.",
 	"cite-ve-dialog-reference-editing-reused-long": "Seb-kãngã pʋgẽ, b tũnugda ne {{PLURAL:$1 de la fois de la fois2=de la fois de $1}}. Y sã n wa toeem bũmb ning sẽn be be wã, y na n toeema zĩis nins fãa b sẽn lebs n dɩkd n dɩkd gom-kãensã n kõ wã.",
+	"cite-ve-dialog-reference-editing-extends": "Yaa gom-biis a taab n paas woto.",
 	"cite-ve-dialog-reference-options-group-label": "Seb-y sull kãngã",
 	"cite-ve-dialog-reference-options-group-placeholder": "Sõsg ning sẽn be sɛbã pʋgẽ",
-	"cite-ve-dialog-reference-options-name-label": "B sẽn lebg n dɩkd yʋʋr kãngã",
 	"cite-ve-dialog-reference-options-responsive-label": "Sebr- y y sẽn na n tall n tʋm ne y sõorã",
 	"cite-ve-dialog-reference-options-section": "Sõsg ning b sẽn kõ-dã",
 	"cite-ve-dialog-reference-placeholder": "Sõng-y n gʋls-y y sõssã bɩ y gãd-y-yã-a-la ka, bɩ y lis-y sõssã.",
@@ -45,6 +45,7 @@
 	"cite-ve-referenceslist-isempty-default": "Sõsg ning sẽn be seb-kãngã pʋgẽ wã pa tar sõsg sẽn na yɩl n tall-a.",
 	"cite-ve-referenceslist-missingref": "B sẽn naan n wilg tɩ b sẽn dat n maan bũmb ningã yaa b sẽn na n maan bũmb ning fãa, b na n maana bũmb ning fãa sẽn yaa tɩlae.",
 	"cite-ve-referenceslist-missingref-in-list": "B sẽn naan n wilg tɩ b sẽn dat n wilg tɩ d pa segd n maan bũmb ning sẽn pa segd n yɩ to-to wã, b wilgame tɩ d segd n maana bũmb nins sẽn pa segd tɩ yɩ to- to wã.",
+	"cite-ve-referenceslist-missingreflist": "B sẽn yãk tɩ b naan yɩ b sẽn dat n maan bũmb ningã, b wilga b sẽn maan bũmb ningã.",
 	"cite-ve-toolbar-group-label": "D sẽn wilg tɩ",
 	"cite-ve-othergroup-item": "Sõsg ning sẽn be sõsg ning pʋgẽ wã $1"
 }

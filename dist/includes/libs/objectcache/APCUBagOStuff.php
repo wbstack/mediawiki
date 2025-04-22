@@ -1,7 +1,5 @@
 <?php
 /**
- * Object caching using PHP's APCU accelerator.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,31 +16,30 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup Cache
  */
+namespace Wikimedia\ObjectCache;
 
 /**
- * This is a wrapper for APCu's shared memory functions
+ * Store data in the local server memory via APCu (php-apcu)
  *
- * Use PHP serialization to avoid bugs and easily create CAS tokens.
- * APCu has a memory corruption bug when the serializer is set to 'default'.
- * See T120267, and upstream bug reports:
- *  - https://github.com/krakjoe/apcu/issues/38
- *  - https://github.com/krakjoe/apcu/issues/35
- *  - https://github.com/krakjoe/apcu/issues/111
+ * Past issues of note:
+ * - Memory corruption when `apc.serializer=default` in INI:
+ *   https://phabricator.wikimedia.org/T120267
+ * - We used to recommend `apc.serializer=php` as non-default setting, and if not set,
+ *   applied serialize() manually to workaround bugs and to create values we can use
+ *   as CAS tokens. Upstream defaults to serializer=php since php-apcu 5.1.15 (2018).
+ *   https://gerrit.wikimedia.org/r/671634
  *
+ * @see https://www.php.net/apcu
  * @ingroup Cache
  */
 class APCUBagOStuff extends MediumSpecificBagOStuff {
-	/** @var bool Whether to trust the APC implementation to serialization */
-	private $nativeSerialize;
-
 	/**
 	 * @var string String to append to each APC key. This may be changed
 	 *  whenever the handling of values is changed, to prevent existing code
 	 *  from encountering older values which it cannot handle.
 	 */
-	private const KEY_SUFFIX = ':4';
+	private const KEY_SUFFIX = ':5';
 
 	/** @var int Max attempts for implicit CAS operations */
 	private static $CAS_MAX_ATTEMPTS = 100;
@@ -51,11 +48,10 @@ class APCUBagOStuff extends MediumSpecificBagOStuff {
 		// No use in segmenting values
 		$params['segmentationSize'] = INF;
 		parent::__construct( $params );
-		// The extension serializer is still buggy, unlike "php" and "igbinary"
-		$this->nativeSerialize = ( ini_get( 'apc.serializer' ) !== 'default' );
-		// Avoid back-dated values that expire too soon. In particular, regenerating a hot
-		// key before it expires should never have the end-result of purging that key. Using
-		// the web request time becomes increasingly problematic the longer the request lasts.
+		// Versions of apcu < 5.1.19 use apc.use_request_time=1 by default, causing new keys
+		// to be assigned timestamps based on the start of the PHP request/script. The longer
+		// the request has been running, the more likely that newly stored keys will instantly
+		// be seen as expired by other requests. Disable apc.use_request_time.
 		ini_set( 'apc.use_request_time', '0' );
 
 		if ( PHP_SAPI === 'cli' ) {
@@ -71,77 +67,37 @@ class APCUBagOStuff extends MediumSpecificBagOStuff {
 		$getToken = ( $casToken === self::PASS_BY_REF );
 		$casToken = null;
 
-		$blob = apcu_fetch( $key . self::KEY_SUFFIX );
-		$value = $this->nativeSerialize ? $blob : $this->unserialize( $blob );
+		$value = apcu_fetch( $key . self::KEY_SUFFIX );
 		if ( $getToken && $value !== false ) {
 			// Note that if the driver handles serialization then this uses the PHP value
 			// as the token. This might require inspection or re-serialization in doCas().
-			$casToken = $blob;
+			$casToken = $value;
 		}
 
 		return $value;
 	}
 
 	protected function doSet( $key, $value, $exptime = 0, $flags = 0 ) {
-		$blob = $this->nativeSerialize ? $value : $this->getSerialized( $value, $key );
 		$ttl = $this->getExpirationAsTTL( $exptime );
-		return apcu_store( $key . self::KEY_SUFFIX, $blob, $ttl );
+
+		return apcu_store( $key . self::KEY_SUFFIX, $value, $ttl );
 	}
 
 	protected function doAdd( $key, $value, $exptime = 0, $flags = 0 ) {
 		if ( apcu_exists( $key . self::KEY_SUFFIX ) ) {
+			// Avoid global write locks for high contention keys
 			return false;
 		}
 
-		$blob = $this->nativeSerialize ? $value : $this->getSerialized( $value, $key );
 		$ttl = $this->getExpirationAsTTL( $exptime );
-		return apcu_add( $key . self::KEY_SUFFIX, $blob, $ttl );
+
+		return apcu_add( $key . self::KEY_SUFFIX, $value, $ttl );
 	}
 
 	protected function doDelete( $key, $flags = 0 ) {
 		apcu_delete( $key . self::KEY_SUFFIX );
 
 		return true;
-	}
-
-	public function incr( $key, $value = 1, $flags = 0 ) {
-		$result = false;
-		$value = (int)$value;
-
-		// https://github.com/krakjoe/apcu/issues/166
-		for ( $i = 0; $i < self::$CAS_MAX_ATTEMPTS; ++$i ) {
-			$oldCount = apcu_fetch( $key . self::KEY_SUFFIX );
-			if ( !is_int( $oldCount ) ) {
-				break;
-			}
-			$count = $oldCount + $value;
-			if ( apcu_cas( $key . self::KEY_SUFFIX, $oldCount, $count ) ) {
-				$result = $count;
-				break;
-			}
-		}
-
-		return $result;
-	}
-
-	public function decr( $key, $value = 1, $flags = 0 ) {
-		$result = false;
-		$value = (int)$value;
-
-		// https://github.com/krakjoe/apcu/issues/166
-		for ( $i = 0; $i < self::$CAS_MAX_ATTEMPTS; ++$i ) {
-			$oldCount = apcu_fetch( $key . self::KEY_SUFFIX );
-			if ( !is_int( $oldCount ) ) {
-				break;
-			}
-			$count = $oldCount - $value;
-			if ( apcu_cas( $key . self::KEY_SUFFIX, $oldCount, $count ) ) {
-				$result = $count;
-				break;
-			}
-		}
-
-		return $result;
 	}
 
 	protected function doIncrWithInit( $key, $exptime, $step, $init, $flags ) {
@@ -176,20 +132,7 @@ class APCUBagOStuff extends MediumSpecificBagOStuff {
 
 		return $result;
 	}
-
-	public function setNewPreparedValues( array $valueByKey ) {
-		// Do not bother staging serialized values if the PECL driver does the serializing
-		return $this->nativeSerialize
-			? $this->guessSerialSizeOfValues( $valueByKey )
-			: parent::setNewPreparedValues( $valueByKey );
-	}
-
-	public function makeKeyInternal( $keyspace, $components ) {
-		return $this->genericKeyFromComponents( $keyspace, ...$components );
-	}
-
-	protected function convertGenericKey( $key ) {
-		// short-circuit; already uses "generic" keys
-		return $key;
-	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( APCUBagOStuff::class, 'APCUBagOStuff' );

@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Shirayuki"
+			"Omotecho"
 		]
 	},
-	"elastica-desc": "[http://elastica.io/ Elastica] ライブラリを提供することで他の拡張機能で基礎的な [http://www.elasticsearch.org/ Elasticsearch] 機能を実現する"
+	"elastica-desc": "[https://elastica.io/ Elastica] ライブラリの提供により、他の拡張機能の基本を [https://www.elastic.co/ Elasticsearch] に設定する"
 }

@@ -82,8 +82,8 @@ class MappingConfigBuilder {
 	public function __construct(
 		$optimizeForExperimentalHighlighter,
 		$flags = 0,
-		SearchConfig $config = null,
-		CirrusSearchHookRunner $cirrusSearchHookRunner = null
+		?SearchConfig $config = null,
+		?CirrusSearchHookRunner $cirrusSearchHookRunner = null
 	) {
 		$this->optimizeForExperimentalHighlighter = $optimizeForExperimentalHighlighter;
 		if ( $this->optimizeForExperimentalHighlighter ) {
@@ -124,6 +124,19 @@ class MappingConfigBuilder {
 				'index_options' => 'docs'
 			];
 		}
+		if ( $this->config->getElement( 'CirrusSearchNaturalTitleSort', 'build' ) ) {
+			$titleExtraAnalyzers[] = [
+				'fieldName' => 'natural_sort',
+				'type' => 'icu_collation_keyword',
+				// doc values only
+				'index' => false,
+				'numeric' => true,
+				'strength' => 'tertiary',
+				// Does icu support all the language codes?
+				'language' => $this->config->getElement( 'CirrusSearchNaturalTitleSort', 'language' ),
+				'country' => $this->config->getElement( 'CirrusSearchNaturalTitleSort', 'country' ),
+			];
+		}
 
 		$suggestField = [
 			'type' => 'text',
@@ -154,6 +167,10 @@ class MappingConfigBuilder {
 					'type' => 'date',
 					'format' => 'dateOptionalTime',
 				],
+				'page_id' => [
+					'type' => 'long',
+					'index' => false,
+				],
 				'wiki' => $this->searchIndexFieldFactory
 					->newKeywordField( 'wiki' )
 					->getMapping( $this->engine ),
@@ -170,7 +187,6 @@ class MappingConfigBuilder {
 				'text' => $this->getTextFieldMapping(),
 				'text_bytes' => $this->searchIndexFieldFactory
 					->newLongField( 'text_bytes' )
-					->setFlag( SearchIndexField::FLAG_NO_INDEX )
 					->getMapping( $this->engine ),
 				'source_text' => $this->buildSourceTextStringField( 'source_text' )
 					->setMappingFlags( $this->flags )->getMapping( $this->engine ),
@@ -210,7 +226,7 @@ class MappingConfigBuilder {
 	 * @return array the mapping config
 	 */
 	public function buildConfig() {
-		global $wgCirrusSearchAllFields, $wgCirrusSearchWeights;
+		global $wgCirrusSearchWeights;
 
 		$page = $this->getDefaultFields();
 
@@ -226,47 +242,52 @@ class MappingConfigBuilder {
 			}
 		}
 
-		if ( $wgCirrusSearchAllFields[ 'build' ] ) {
-			// Now layer all the fields into the all field once per weight.  Querying it isn't strictly the
-			// same as querying each field - in some ways it is better!  In others it is worse....
-
-			// Better because theoretically tf/idf based scoring works better this way.
-			// Worse because we have to analyze each field multiple times....  Bleh!
-			// This field can't be used for the fvh/experimental highlighter for several reasons:
-			// 1. It is built with copy_to and not stored.
-			// 2. The term frequency information is all whoppy compared to the "real" source text.
-			$allField = $this->searchIndexFieldFactory->
-				newStringField( 'all', TextIndexField::ENABLE_NORMS );
-			$page['properties']['all'] =
-				$allField->setMappingFlags( $this->flags )->getMapping( $this->engine );
-			$page = $this->setupCopyTo( $page, $wgCirrusSearchWeights, 'all' );
-
-			// Now repeat for near_match fields.  The same considerations above apply except near_match
-			// is never used in phrase queries or highlighting.
-			$page[ 'properties' ][ 'all_near_match' ] = [
-				'type' => 'text',
-				'analyzer' => 'near_match',
-				'index_options' => 'freqs',
-				'norms' => false,
-				'similarity' => TextIndexField::getSimilarity( $this->config, 'all_near_match' ),
-				'fields' => [
-					'asciifolding' => [
-						'type' => 'text',
-						'analyzer' => 'near_match_asciifolding',
-						'index_options' => 'freqs',
-						'norms' => false,
-						'similarity' => TextIndexField::getSimilarity( $this->config, 'all_near_match', 'asciifolding' ),
-					],
-				],
+		// Unclear how this would otherwise fit into the process to construct the mapping.
+		// Not used directly in cirrus, supports queries from 'add-a-link' (T301096).
+		if ( isset( $page['properties']['outgoing_link'] ) ) {
+			$page['properties']['outgoing_link']['fields']['token_count'] = [
+				'type' => 'token_count',
+				'analyzer' => 'keyword',
 			];
-			$nearMatchFields = [
-				'title' => $wgCirrusSearchWeights[ 'title' ],
-				'redirect' => $wgCirrusSearchWeights[ 'redirect' ],
-			];
-			$page = $this->setupCopyTo( $page, $nearMatchFields, 'all_near_match' );
 		}
 
-		return $page;
+		// Now layer all the fields into the all field once per weight.  Querying it isn't strictly the
+		// same as querying each field - in some ways it is better!  In others it is worse....
+
+		// Better because theoretically tf/idf based scoring works better this way.
+		// Worse because we have to analyze each field multiple times....  Bleh!
+		// This field can't be used for the fvh/experimental highlighter for several reasons:
+		// 1. It is built with copy_to and not stored.
+		// 2. The term frequency information is all whoppy compared to the "real" source text.
+		$allField = $this->searchIndexFieldFactory->
+			newStringField( 'all', TextIndexField::ENABLE_NORMS );
+		$page['properties']['all'] =
+			$allField->setMappingFlags( $this->flags )->getMapping( $this->engine );
+		$page = $this->setupCopyTo( $page, $wgCirrusSearchWeights, 'all' );
+
+		// Now repeat for near_match fields.  The same considerations above apply except near_match
+		// is never used in phrase queries or highlighting.
+		$page[ 'properties' ][ 'all_near_match' ] = [
+			'type' => 'text',
+			'analyzer' => 'near_match',
+			'index_options' => 'freqs',
+			'norms' => false,
+			'similarity' => TextIndexField::getSimilarity( $this->config, 'all_near_match' ),
+			'fields' => [
+				'asciifolding' => [
+					'type' => 'text',
+					'analyzer' => 'near_match_asciifolding',
+					'index_options' => 'freqs',
+					'norms' => false,
+					'similarity' => TextIndexField::getSimilarity( $this->config, 'all_near_match', 'asciifolding' ),
+				],
+			],
+		];
+		$nearMatchFields = [
+			'title' => $wgCirrusSearchWeights[ 'title' ],
+			'redirect' => $wgCirrusSearchWeights[ 'redirect' ],
+		];
+		return $this->setupCopyTo( $page, $nearMatchFields, 'all_near_match' );
 	}
 
 	/**
@@ -317,7 +338,6 @@ class MappingConfigBuilder {
 			'fields' => [
 				'word_count' => [
 					'type' => 'token_count',
-					'store' => true,
 					'analyzer' => 'plain',
 				]
 			]
@@ -338,6 +358,6 @@ class MappingConfigBuilder {
 	 * @return bool
 	 */
 	public function canOptimizeAnalysisConfig() {
-		return false;
+		return true;
 	}
 }

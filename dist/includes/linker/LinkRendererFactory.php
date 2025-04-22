@@ -20,11 +20,11 @@
  */
 namespace MediaWiki\Linker;
 
-use LinkCache;
+use MediaWiki\Cache\LinkCache;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\SpecialPage\SpecialPageFactory;
-use TitleFormatter;
+use MediaWiki\Title\TitleFormatter;
 
 /**
  * Factory to create LinkRender objects

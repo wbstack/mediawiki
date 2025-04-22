@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWLiveExtensionInspector class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -44,8 +44,8 @@ ve.ui.MWLiveExtensionInspector.prototype.initialize = function () {
  */
 ve.ui.MWLiveExtensionInspector.prototype.getSetupProcess = function ( data ) {
 	return ve.ui.MWLiveExtensionInspector.super.prototype.getSetupProcess.call( this, data )
-		.next( function () {
-			var element = this.getNewElement();
+		.next( () => {
+			const element = this.getNewElement();
 			// Initialization
 			this.getFragment().getSurface().pushStaging();
 
@@ -71,7 +71,7 @@ ve.ui.MWLiveExtensionInspector.prototype.getSetupProcess = function ( data ) {
 			this.selectedNode.connect( this, {
 				generatedContentsError: 'showGeneratedContentsError'
 			} );
-		}, this );
+		} );
 };
 
 /**
@@ -79,7 +79,7 @@ ve.ui.MWLiveExtensionInspector.prototype.getSetupProcess = function ( data ) {
  */
 ve.ui.MWLiveExtensionInspector.prototype.getTeardownProcess = function ( data ) {
 	return ve.ui.MWLiveExtensionInspector.super.prototype.getTeardownProcess.call( this, data )
-		.first( function () {
+		.first( () => {
 			this.input.off( 'change', this.onChangeHandler );
 			this.generatedContentsError.clear();
 			this.generatedContentsError.disconnect( this );
@@ -87,7 +87,7 @@ ve.ui.MWLiveExtensionInspector.prototype.getTeardownProcess = function ( data ) 
 			if ( data === undefined ) { // cancel
 				this.getFragment().getSurface().popStaging();
 			}
-		}, this );
+		} );
 };
 
 /**
@@ -126,7 +126,11 @@ ve.ui.MWLiveExtensionInspector.prototype.onChange = function () {
  * Update the node rendering to reflect the current content in the inspector.
  */
 ve.ui.MWLiveExtensionInspector.prototype.updatePreview = function () {
-	var mwData = ve.copy( this.selectedNode.getAttribute( 'mw' ) );
+	if ( !this.selectedNode ) {
+		// Method is called debounced, so selectedNode may not still exist
+		return;
+	}
+	const mwData = ve.copy( this.selectedNode.getAttribute( 'mw' ) );
 
 	this.updateMwData( mwData );
 

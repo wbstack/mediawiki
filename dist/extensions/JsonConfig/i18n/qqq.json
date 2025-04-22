@@ -23,7 +23,7 @@
 	"jsonconfig-edit-action-cancel": "Label for the cancel button in the edit dialog\n{{identical|Cancel}}",
 	"jsonconfig-edit-button-label": "Label for the button to open the edit dialog",
 	"jsonconfig-edit-dialog-error": "Error message that appears when it is not possible to use the edit dialog. Parameters:\n* $1 - error message explaining why it is not possible to use the dialog",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Error message explaining why it is not possible to use the edit dialog",
+	"jsonconfig-edit-dialog-error-data-invalid": "Error message explaining why it is not possible to use the edit dialog",
 	"jsonconfig-edit-dialog-error-data-missing": "Error message explaining why it is not possible to use the edit dialog{{doc-important|Do not translate text that is quoted or inside <nowiki><var></var></nowiki>, <nowiki><kbd></kbd></nowiki>, <nowiki><samp></samp></nowiki>, or <nowiki><code></code></nowiki> in this message.}}",
 	"jsonconfig-edit-dialog-error-data-too-large": "Error message explaining why it is not possible to use the edit dialog",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Error message explaining why it is not possible to use the edit dialog",
@@ -64,6 +64,8 @@
 	"jsonconfig-type-name-number": "Description of the type of data contained in this column. Shown for columns that contain numbers\n{{Identical|Number}}",
 	"jsonconfig-type-abbr-boolean": "{{optional}}\nA very short indicator of the type of data contained in this column. Shown for columns that contain booleans (true or false)",
 	"jsonconfig-type-name-boolean": "Description of the type of data contained in this column. Shown for columns that contain booleans (true or false)\n{{Identical|Boolean}}",
+	"jsonconfig-use-category": "{{tracking category name}}\nName of [[mw:Help:Tracking categories|tracking category]] to list pages which use the <code>mw.ext.data.get</code> method provided by the [[:mw:Extension:JsonConfig|JsonConfig]] extension.",
+	"jsonconfig-use-category-desc": "Description on [[Special:TrackingCategories]] for the {{msg-mw|jsonconfig-use-category}} tracking category.",
 	"jsonconfig-license": "Shows license text prefix before giving the specific license.\n\nParameters:\n* $1 - * {{msg-mw|jsonconfig-license-or-later}} or {{msg-mw|jsonconfig-license-CC0-1.0}} or other similar license messages",
 	"jsonconfig-license-not-set": "Shows license warning before content saved with specific license. License should be specific in the content.{{doc-important|Do not translate text that is quoted or inside <nowiki><var></var></nowiki>, <nowiki><kbd></kbd></nowiki>, <nowiki><samp></samp></nowiki>, or <nowiki><code></code></nowiki> in this message.}}",
 	"jsonconfig-license-name-CC0-1.0": "Name of the CC0-1.0 license",
@@ -103,9 +105,10 @@
 	"jsonconfig-license-url-dl-de-by-2.0": "{{optional}}\nURL to the Data licence Germany – attribution – version 2.0",
 	"jsonconfig-license-url-GeoNutzV": "{{optional}}\nURL to the Geo Data licence Germany",
 	"jsonconfig-license-copyrightwarning": "Wiki markup of the message to show instead of {{msg-mw|Wikimedia-copyrightwarning}}\n\nParameters:\n* $1 - license code",
-	"jsonconfig-license-copyrightwarning-license-unset": "Wiki markup of the message to show instead of {{msg-mw|Wikimedia-copyrightwarning}} before license specified{{doc-important|Do not translate text that is quoted or inside <nowiki><var></var></nowiki>, <nowiki><kbd></kbd></nowiki>, <nowiki><samp></samp></nowiki>, or <nowiki><code></code></nowiki> in this message.}}",
+	"jsonconfig-license-copyrightwarning-license-unset": "Wiki markup of the message to show instead of {{msg-mw|Wikimedia-copyrightwarning}} and {{msg-mw|jsonconfig-license-copyrightwarning}}, when the JSON file doesn't have a <code>license</code> field upon first loading.\n\n{{doc-important|Do not translate text that is quoted or inside <nowiki><var></var></nowiki>, <nowiki><kbd></kbd></nowiki>, <nowiki><samp></samp></nowiki>, or <nowiki><code></code></nowiki> in this message.}}",
 	"jsonconfig-license-notice": "Text to warn the user about license of the data that they are editing.\n\nParameters:\n* $1 - license code",
 	"jsonconfig-license-notice-license-unset": "Text to warn the user to specifiy license.{{doc-important|Do not translate text that is quoted or inside <nowiki><var></var></nowiki>, <nowiki><kbd></kbd></nowiki>, <nowiki><samp></samp></nowiki>, or <nowiki><code></code></nowiki> in this message.}}",
 	"right-jsonconfig-flush": "{{doc-right|jsonconfig-flush}}",
-	"action-jsonconfig-flush": "{{doc-action|jsonconfig-flush}}"
+	"action-jsonconfig-flush": "{{doc-action|jsonconfig-flush}}",
+	"jsonconfig-blocked-page-creation": "Error message explaining why you cannot create a page with the given title, because it does not match any of the configured patterns.\nSee https://www.mediawiki.org/wiki/Extension:JsonConfig#Configuration for details."
 }

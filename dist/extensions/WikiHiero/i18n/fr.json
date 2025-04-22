@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Gomoko",
+			"Goombiis",
 			"Grondin",
 			"Hashar",
 			"Nnemo",
@@ -58,5 +59,7 @@
 	"wikihiero-th-meaning": "Signification",
 	"wikihiero-th-result": "Résultat",
 	"wikihiero-visualeditor-mwhieroinspector-title": "Hiéroglyphes",
-	"wikihiero-void": "Bloc vide de largeur complète"
+	"wikihiero-void": "Bloc vide de largeur complète",
+	"wikihiero-usage-tracking-category": "Pages utilisant l'extension WikiHiero",
+	"wikihiero-usage-tracking-category-desc": "Cette catégorie est automatiquement ajoutée aux pages qui utilisent l’extension WikiHiero"
 }

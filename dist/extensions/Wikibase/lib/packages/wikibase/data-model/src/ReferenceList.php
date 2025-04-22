@@ -37,7 +37,7 @@ class ReferenceList implements Countable, IteratorAggregate, Serializable {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct( $references = [] ) {
-		if ( !is_array( $references ) && !( $references instanceof Traversable ) ) {
+		if ( !is_iterable( $references ) ) {
 			throw new InvalidArgumentException( '$references must be an array or an instance of Traversable' );
 		}
 
@@ -239,7 +239,7 @@ class ReferenceList implements Countable, IteratorAggregate, Serializable {
 	 */
 	public function __serialize() {
 		return [
-			'references' => array_values( $this->references )
+			'references' => array_values( $this->references ),
 		];
 	}
 
@@ -307,7 +307,7 @@ class ReferenceList implements Countable, IteratorAggregate, Serializable {
 	 *
 	 * @return int
 	 */
-	public function count() {
+	public function count(): int {
 		return count( $this->references );
 	}
 
@@ -318,7 +318,7 @@ class ReferenceList implements Countable, IteratorAggregate, Serializable {
 	 *
 	 * @return Iterator|Reference[]
 	 */
-	public function getIterator() {
+	public function getIterator(): Traversable {
 		return new ArrayIterator( array_values( $this->references ) );
 	}
 

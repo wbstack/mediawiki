@@ -8,6 +8,8 @@
 			"Arash",
 			"Arian Ar",
 			"Beginneruser",
+			"Ebrahim",
+			"Ebraminio",
 			"FarsiNevis",
 			"Huji",
 			"Jeeputer",
@@ -15,12 +17,12 @@
 			"LordProfo",
 			"Mahdy Saffar",
 			"Mardetanha",
-			"Obzord",
-			"Ebraminio"
+			"Obzord"
 		]
 	},
 	"advancedsearch-desc": "دسترسی آسان به قابلیت‌های جستجوی پیشرفته در [[Special:Search]]",
 	"advancedsearch-options-pane-head": "جستجوی پیشرفته:",
+	"advancedsearch-options-pane-preview-list": "عبارت‌های در حال حاضر استفاده شده",
 	"advancedsearch-optgroup-text": "جستجو در متن صفحه",
 	"advancedsearch-optgroup-structure": "ساختار",
 	"advancedsearch-optgroup-files": "پرونده‌ها و تصاویر",

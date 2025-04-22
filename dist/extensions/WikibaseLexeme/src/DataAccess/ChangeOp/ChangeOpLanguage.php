@@ -18,8 +18,8 @@ use Wikimedia\Assert\Assert;
  */
 class ChangeOpLanguage extends ChangeOpBase {
 
-	private $language;
-	private $languageValidator;
+	private ItemId $language;
+	private ValueValidator $languageValidator;
 
 	public function __construct( ItemId $language, ValueValidator $languageValidator ) {
 		$this->language = $language;
@@ -44,7 +44,7 @@ class ChangeOpLanguage extends ChangeOpBase {
 	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		Assert::parameterType( Lexeme::class, $entity, '$entity' );
 		'@phan-var Lexeme $entity';
 

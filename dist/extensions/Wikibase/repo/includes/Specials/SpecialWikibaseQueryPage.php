@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
+use MediaWiki\Html\Html;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Repo\WikibaseRepo;
@@ -52,7 +52,7 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 	/**
 	 * @param string $name
 	 * @param string $restriction
-	 * @param bool   $listed
+	 * @param bool $listed
 	 */
 	public function __construct( $name = '', $restriction = '', $listed = true ) {
 		parent::__construct( $name, $restriction, $listed );
@@ -87,8 +87,8 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 	/**
 	 * Return the result of the query
 	 *
-	 * @param integer $offset Start to include at number of entries from the start title
-	 * @param integer $limit Stop at number of entries after start of inclusion
+	 * @param int $offset Start to include at number of entries from the start title
+	 * @param int $limit Stop at number of entries after start of inclusion
 	 *
 	 * @return EntityId[]
 	 */
@@ -105,7 +105,7 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 		$out = $this->getOutput();
 
 		if ( $this->limit == 0 && $this->offset == 0 ) {
-			list( $this->limit, $this->offset ) = $this->getRequest()
+			[ $this->limit, $this->offset ] = $this->getRequest()
 				->getLimitOffsetForUser( $this->getUser() );
 		}
 
@@ -116,10 +116,10 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 		$out->addHTML( Html::openElement( 'div', [ 'class' => 'mw-spcontent' ] ) );
 
 		if ( $this->numRows > 0 ) {
-			$out->addHTML( $this->msg( 'showingresults' )->numParams(
+			$out->addHTML( $this->msg( 'showingresultsinrange' )->numParams(
 				// do not format the one extra row, if exist
 				min( $this->numRows, $this->limit ),
-				$this->offset + 1 )->parseAsBlock() );
+				$this->offset + 1, min( $this->numRows, $this->limit ) + $this->offset )->parseAsBlock() );
 			// Disable the "next" link when we reach the end
 			$paging = $this->buildPrevNextNavigation(
 				$this->offset,
@@ -153,8 +153,8 @@ abstract class SpecialWikibaseQueryPage extends SpecialWikibasePage {
 	 * Format and output report results using the given information plus OutputPage
 	 *
 	 * @param EntityId[] $entityIds
-	 * @param integer $num number of available result rows
-	 * @param integer $offset paging offset
+	 * @param int $num number of available result rows
+	 * @param int $offset paging offset
 	 */
 	protected function outputResults( array $entityIds, $num, $offset ) {
 		if ( $num > 0 ) {

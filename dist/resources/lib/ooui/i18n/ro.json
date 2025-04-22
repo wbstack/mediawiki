@@ -7,9 +7,11 @@
 			"KlaudiuMihaila",
 			"Minisarm",
 			"NGC 54",
+			"Paloi Sciurala",
 			"Stelistcristi"
 		]
 	},
+	"ooui-copytextlayout-copy": "Copiază",
 	"ooui-outline-control-move-down": "Mută elementul mai jos",
 	"ooui-outline-control-move-up": "Mută elementul mai sus",
 	"ooui-outline-control-remove": "Elimină elementul",
@@ -26,7 +28,6 @@
 	"ooui-combobox-button-label": "Comutați opțiunile",
 	"ooui-selectfile-button-select": "Alege un fișier",
 	"ooui-selectfile-button-select-multiple": "Alege fișierele",
-	"ooui-selectfile-not-supported": "Selecția de fișiere nu este acceptată",
 	"ooui-selectfile-placeholder": "Niciun fișier selectat",
 	"ooui-selectfile-dragdrop-placeholder": "Trageți fișierul aici",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Trageți fișierele aici",

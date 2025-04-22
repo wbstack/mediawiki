@@ -6,7 +6,7 @@ namespace Wikimedia\Parsoid\Html2Wt;
 use Composer\Semver\Semver;
 use Wikimedia\Parsoid\Config\Env;
 use Wikimedia\Parsoid\Core\DomSourceRange;
-use Wikimedia\Parsoid\Core\SelserData;
+use Wikimedia\Parsoid\Core\SelectiveUpdateData;
 use Wikimedia\Parsoid\DOM\Comment;
 use Wikimedia\Parsoid\DOM\Document;
 use Wikimedia\Parsoid\DOM\Element;
@@ -28,24 +28,15 @@ use Wikimedia\Parsoid\Wikitext\Consts;
  */
 class SelectiveSerializer {
 
-	/** @var Env */
-	private $env;
+	private Env $env;
+	private WikitextSerializer $wts;
+	private SelectiveUpdateData $selserData;
+	private bool $trace;
 
-	private $wts;
-	private $trace;
-
-	/** @var SelserData */
-	private $selserData;
-
-	/**
-	 * @param array $options
-	 */
-	public function __construct( $options ) {
-		$this->env = $options['env'];
-		$this->wts = new WikitextSerializer( $options );
+	public function __construct( Env $env, array $options ) {
+		$this->env = $env;
+		$this->wts = new WikitextSerializer( $env, $options );
 		$this->selserData = $options['selserData'];
-
-		// Debug options
 		$this->trace = $this->env->hasTraceFlag( 'selser' );
 	}
 
@@ -103,7 +94,7 @@ class SelectiveSerializer {
 			$start = $eltDSR->innerStart();
 			while ( $c ) {
 				if ( $eltDSR && $c === $firstChild ) {
-					if ( $eltDSR->leadingWS < 0 ) {
+					if ( !$eltDSR->hasValidLeadingWS() ) {
 						// We don't have accurate information about the length of trimmed WS.
 						// So, we cannot wrap this text node with a <span>.
 						break;
@@ -139,7 +130,11 @@ class SelectiveSerializer {
 								$inListItem && DOMUtils::isList( $next ) && WTUtils::isNewElt( $next )
 							)
 						) ) {
-							$len += $eltDSR->trailingWS;
+							if ( !$eltDSR->hasValidTrailingWS() ) {
+								break;
+							} else {
+								$len += $eltDSR->trailingWS;
+							}
 						}
 					}
 
@@ -175,10 +170,7 @@ class SelectiveSerializer {
 		}
 	}
 
-	/**
-	 * @param Element $body
-	 */
-	private function preprocessDOM( Element $body ): void {
+	private function preprocessDOMForSelser( Element $body ): void {
 		if ( Semver::satisfies( $this->env->getInputContentVersion(), '>=2.1.2' ) ) {
 			// Wrap text node children of <li> elements in dummy spans
 			$this->wrapTextChildrenOfNode( $body, 'li' );
@@ -200,11 +192,11 @@ class SelectiveSerializer {
 		$r = null;
 
 		$body = DOMCompat::getBody( $doc );
-		$oldBody = DOMCompat::getBody( $this->selserData->oldDOM );
+		$oldBody = DOMCompat::getBody( $this->selserData->revDOM );
 
-		// Preprocess DOMs
-		$this->preprocessDOM( $oldBody );
-		$this->preprocessDOM( $body );
+		// Preprocess DOMs - this is specific to selser
+		$this->preprocessDOMForSelser( $oldBody );
+		$this->preprocessDOMForSelser( $body );
 
 		// Use provided diff-marked DOM (used during testing)
 		// or generate one (used in production)
@@ -212,14 +204,14 @@ class SelectiveSerializer {
 			$diff = [ 'isEmpty' => false ];
 			$body = DOMCompat::getBody( $this->env->getDOMDiff() );
 		} else {
-			$domDiffTiming = Timing::start( $this->env->getSiteConfig()->metrics() );
+			$domDiffTiming = Timing::start( $this->env->getSiteConfig() );
 			$diff = ( new DOMDiff( $this->env ) )->diff( $oldBody, $body );
-			$domDiffTiming->end( 'html2wt.selser.domDiff' );
+			$domDiffTiming->end( 'html2wt.selser.domDiff', 'html2wt_domDiff_seconds', [ 'wts' => 'selser' ] );
 		}
 
 		if ( $diff['isEmpty'] ) {
 			// Nothing was modified, just re-use the original source
-			$r = $this->selserData->oldText;
+			$r = $this->selserData->revText;
 		} else {
 			if ( $this->trace || $this->env->hasDumpFlag( 'dom:post-dom-diff' ) ) {
 				$options = [ 'storeDiffMark' => true ];

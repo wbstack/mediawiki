@@ -4,12 +4,11 @@ namespace CirrusSearch\Maintenance\Validators;
 
 use CirrusSearch\ElasticaErrorHandler;
 use CirrusSearch\Maintenance\Printer;
-use CirrusSearch\Util;
 use Elastica\Exception\ExceptionInterface;
 use Elastica\Index;
 use Elastica\Mapping;
-use RawMessage;
-use Status;
+use MediaWiki\Language\RawMessage;
+use MediaWiki\Status\Status;
 use Wikimedia\Assert\Assert;
 
 class MappingValidator extends Validator {
@@ -54,7 +53,7 @@ class MappingValidator extends Validator {
 		$optimizeIndexForExperimentalHighlighter,
 		array $availablePlugins,
 		array $mappingConfig,
-		Printer $out = null
+		?Printer $out = null
 	) {
 		parent::__construct( $out );
 
@@ -66,6 +65,11 @@ class MappingValidator extends Validator {
 		Assert::parameter( isset( $mappingConfig['properties'] ), '$mappingConfig',
 			'Mapping types are no longer supported, properties must be top level' );
 		$this->mappingConfig = $mappingConfig;
+	}
+
+	private function isNaturalSortConfigured() {
+		// awkward much?
+		return isset( $this->mappingConfig['properties']['title']['fields']['natural_sort'] );
 	}
 
 	/**
@@ -80,6 +84,13 @@ class MappingValidator extends Validator {
 				"wgCirrusSearchOptimizeIndexForExperimentalHighlighter is set to true but the " .
 				"'experimental-highlighter' plugin is not installed on all hosts." ) );
 		}
+		if ( $this->isNaturalSortConfigured() &&
+			!in_array( 'analysis-icu', $this->availablePlugins ) ) {
+			$this->output( "impossible!\n" );
+			return Status::newFatal( new RawMessage(
+				"wgCirrusSearchNaturalTitleSort is set to build but the " .
+				"'analysis-icu' plugin is not installed on all hosts." ) );
+		}
 
 		if ( !$this->compareMappingToActual() ) {
 			$action = new Mapping( $this->mappingConfig['properties'] );
@@ -88,7 +99,6 @@ class MappingValidator extends Validator {
 			try {
 				$action->send( $this->index, [
 					'master_timeout' => $this->masterTimeout,
-					'include_type_name' => 'false',
 				] );
 				$this->output( "corrected\n" );
 			} catch ( ExceptionInterface $e ) {
@@ -108,7 +118,7 @@ class MappingValidator extends Validator {
 	 * @return bool is the mapping good enough for us?
 	 */
 	private function compareMappingToActual() {
-		$actualMappings = Util::getIndexMapping( $this->index );
+		$actualMappings = $this->index->getMapping();
 		$this->output( "\n" );
 		$this->outputIndented( "\tValidating mapping..." );
 		if ( $this->checkConfig( $actualMappings, $this->mappingConfig ) ) {

@@ -26,12 +26,14 @@
  * @author Daniel Kinzler
  */
 
-use MediaWiki\Content\IContentHandlerFactory;
-use MediaWiki\Content\Renderer\ContentParseParams;
-use MediaWiki\Content\Transform\PreloadTransformParamsValue;
-use MediaWiki\Content\Transform\PreSaveTransformParamsValue;
-use MediaWiki\Content\ValidationParams;
+namespace MediaWiki\Content;
+
+use LogicException;
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\MagicWord;
+use MediaWiki\Title\Title;
+use MWException;
 
 /**
  * Base implementation for content objects.
@@ -181,8 +183,9 @@ abstract class AbstractContent implements Content {
 	 * @stable to override
 	 * @since 1.21
 	 *
-	 * @deprecated since 1.33 use getText() for TextContent instances.
+	 * @deprecated since 1.33. Use getText() for TextContent instances.
 	 *             For other content models, use specialized getters.
+	 *             Emitting deprecation warnings since 1.41.
 	 *
 	 * @return mixed The native representation of the content. Could be a
 	 *    string, a nested array structure, an object, a binary blob...
@@ -192,6 +195,7 @@ abstract class AbstractContent implements Content {
 	 * @note Caller must be aware of content model!
 	 */
 	public function getNativeData() {
+		wfDeprecated( __METHOD__, '1.33' );
 		throw new LogicException( __METHOD__ . ': not implemented' );
 	}
 
@@ -242,7 +246,7 @@ abstract class AbstractContent implements Content {
 	 *
 	 * @see Content::equals
 	 */
-	public function equals( Content $that = null ) {
+	public function equals( ?Content $that = null ) {
 		if ( $that === null ) {
 			return false;
 		}
@@ -255,7 +259,7 @@ abstract class AbstractContent implements Content {
 			return false;
 		}
 
-		// For type safety. Needed for odd cases like MessageContent using CONTENT_MODEL_WIKITEXT
+		// For type safety. Needed for odd cases like non-TextContents using CONTENT_MODEL_WIKITEXT
 		if ( get_class( $that ) !== get_class( $this ) ) {
 			return false;
 		}
@@ -288,27 +292,6 @@ abstract class AbstractContent implements Content {
 	}
 
 	/**
-	 * @since 1.21
-	 * @deprecated since 1.38, use getRedirectTarget() instead.
-	 *   Emitting deprecation warnings since 1.39.
-	 *   Support for redirect chains has been removed.
-	 *
-	 * @return Title[]|null
-	 *
-	 * @see Content::getRedirectChain
-	 */
-	public function getRedirectChain() {
-		wfDeprecated( __METHOD__, '1.38' );
-
-		$title = $this->getRedirectTarget();
-		if ( $title === null ) {
-			return null;
-		} else {
-			return [ $title ];
-		}
-	}
-
-	/**
 	 * Subclasses that implement redirects should override this.
 	 *
 	 * @stable to override
@@ -320,24 +303,6 @@ abstract class AbstractContent implements Content {
 	 */
 	public function getRedirectTarget() {
 		return null;
-	}
-
-	/**
-	 * @note Migrated here from Title::newFromRedirectRecurse.
-	 *
-	 * @since 1.21
-	 * @deprecated since 1.38, use getRedirectTarget() instead.
-	 *   Emitting deprecation warnings since 1.39.
-	 *   Support for redirect chains has been removed.
-	 *
-	 * @return Title|null
-	 *
-	 * @see Content::getUltimateRedirectTarget
-	 */
-	public function getUltimateRedirectTarget() {
-		wfDeprecated( __METHOD__, '1.38' );
-
-		return $this->getRedirectTarget();
 	}
 
 	/**
@@ -385,7 +350,7 @@ abstract class AbstractContent implements Content {
 	 * @stable to override
 	 * @since 1.21
 	 *
-	 * @param string|int|null|bool $sectionId
+	 * @param string|int|null|false $sectionId
 	 * @param Content $with
 	 * @param string $sectionTitle
 	 * @return null
@@ -394,28 +359,6 @@ abstract class AbstractContent implements Content {
 	 */
 	public function replaceSection( $sectionId, Content $with, $sectionTitle = '' ) {
 		return null;
-	}
-
-	/**
-	 * @since 1.21
-	 * @deprecated since 1.37. Hard-deprecated since 1.37.
-	 * Use ContentTransformer::preSaveTransform instead.
-	 * Extensions defining a content model should override ContentHandler::preSaveTransform.
-	 *
-	 * @param Title $title
-	 * @param User $user
-	 * @param ParserOptions $popts
-	 * @return Content $this
-	 *
-	 * @see Content::preSaveTransform
-	 */
-	public function preSaveTransform( Title $title, User $user, ParserOptions $popts ) {
-		wfDeprecated( __METHOD__, '1.37' );
-		$pstParams = new PreSaveTransformParamsValue( $title, $user, $popts );
-		return $this->getContentHandler()->preSaveTransform(
-			$this,
-			$pstParams
-		);
 	}
 
 	/**
@@ -429,65 +372,6 @@ abstract class AbstractContent implements Content {
 	 */
 	public function addSectionHeader( $header ) {
 		return $this;
-	}
-
-	/**
-	 * @since 1.21
-	 * @deprecated since 1.37. Hard-deprecated since 1.37. Use ContentTransformer::preloadTransform instead.
-	 * Extensions defining a content model should override ContentHandler::preloadTransform.
-	 * @param Title $title
-	 * @param ParserOptions $popts
-	 * @param array $params
-	 * @return Content $this
-	 *
-	 * @see Content::preloadTransform
-	 */
-	public function preloadTransform( Title $title, ParserOptions $popts, $params = [] ) {
-		wfDeprecated( __METHOD__, '1.37' );
-		$pltParams = new PreloadTransformParamsValue( $title, $popts, $params );
-		return $this->getContentHandler()->preloadTransform(
-			$this,
-			$pltParams
-		);
-	}
-
-	/**
-	 * @since 1.21
-	 * @deprecated since 1.38. Hard-deprecated since 1.38.
-	 * Use ContentHandler::validateSave instead.
-	 *
-	 * @param WikiPage $page
-	 * @param int $flags
-	 * @param int $parentRevId
-	 * @param User $user
-	 * @return Status
-	 *
-	 * @see Content::prepareSave
-	 */
-	public function prepareSave( WikiPage $page, $flags, $parentRevId, User $user ) {
-		wfDeprecated( __METHOD__, '1.38' );
-		$detectPSDeprecatedOverride = MWDebug::detectDeprecatedOverride(
-			$this,
-			self::class,
-			'prepareSave',
-			'1.38'
-		);
-
-		if ( $detectPSDeprecatedOverride ) {
-			if ( $this->isValid() ) {
-				return Status::newGood();
-			} else {
-				return Status::newFatal( "invalid-content-data" );
-			}
-		}
-
-		$validationParams = new ValidationParams( $page, $flags, $parentRevId );
-		$statusValue = $this->getContentHandler()->validateSave(
-			$this,
-			$validationParams
-		);
-
-		return Status::wrap( $statusValue );
 	}
 
 	/**
@@ -516,7 +400,7 @@ abstract class AbstractContent implements Content {
 	 * @param string $toModel
 	 * @param string $lossy
 	 *
-	 * @return Content|bool
+	 * @return Content|false
 	 *
 	 * @see Content::convert()
 	 */
@@ -529,107 +413,13 @@ abstract class AbstractContent implements Content {
 		$lossy = ( $lossy === 'lossy' ); // string flag, convert to boolean for convenience
 		$result = false;
 
-		Hooks::runner()->onConvertContent( $this, $toModel, $lossy, $result );
+		( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )
+			->onConvertContent( $this, $toModel, $lossy, $result );
 
 		return $result;
 	}
 
-	/**
-	 * Returns a ParserOutput object containing information derived from this content.
-	 * Most importantly, unless $generateHtml was false, the return value contains an
-	 * HTML representation of the content.
-	 *
-	 * Subclasses that want to control the parser output may override this, but it is
-	 * preferred to override fillParserOutput() instead.
-	 *
-	 * Subclasses that override getParserOutput() itself should take care to call the
-	 * ContentGetParserOutput hook.
-	 *
-	 * @since 1.24
-	 * @deprecated since 1.38. Hard-deprecated since 1.38. Use ContentRenderer::getParserOutput instead.
-	 * Extensions defining a content model should override ContentHandler::fillParserOutput.
-	 * @param Title $title Context title for parsing
-	 * @param int|null $revId Revision ID being rendered
-	 * @param ParserOptions|null $options
-	 * @param bool $generateHtml Whether or not to generate HTML
-	 *
-	 * @return ParserOutput Containing information derived from this content.
-	 */
-	public function getParserOutput( Title $title, $revId = null,
-		ParserOptions $options = null, $generateHtml = true
-	) {
-		wfDeprecated( __METHOD__, '1.38' );
-		$detectGPODeprecatedOverride = MWDebug::detectDeprecatedOverride(
-			$this,
-			self::class,
-			'getParserOutput',
-			'1.38'
-		);
-		$detectFPODeprecatedOverride = MWDebug::detectDeprecatedOverride(
-			$this,
-			self::class,
-			'fillParserOutput',
-			'1.38'
-		);
-
-		if ( $detectGPODeprecatedOverride || $detectFPODeprecatedOverride ) {
-			if ( $options === null ) {
-				$options = ParserOptions::newFromAnon();
-			}
-
-			$po = new ParserOutput();
-			$options->registerWatcher( [ $po, 'recordOption' ] );
-
-			if ( Hooks::runner()->onContentGetParserOutput(
-				$this, $title, $revId, $options, $generateHtml, $po )
-			) {
-				// Save and restore the old value, just in case something is reusing
-				// the ParserOptions object in some weird way.
-				$oldRedir = $options->getRedirectTarget();
-				$options->setRedirectTarget( $this->getRedirectTarget() );
-				$this->fillParserOutput( $title, $revId, $options, $generateHtml, $po );
-				$options->setRedirectTarget( $oldRedir );
-			}
-
-			Hooks::runner()->onContentAlterParserOutput( $this, $title, $po );
-			$options->registerWatcher( null );
-
-			return $po;
-		}
-
-		$cpoParams = new ContentParseParams( $title, $revId, $options, $generateHtml );
-		return $this->getContentHandler()->getParserOutput(
-			$this,
-			$cpoParams
-		);
-	}
-
-	/**
-	 * Fills the provided ParserOutput with information derived from the content.
-	 * Unless $generateHtml was false, this includes an HTML representation of the content.
-	 *
-	 * This is called by getParserOutput() after consulting the ContentGetParserOutput hook.
-	 * Subclasses are expected to override this method (or getParserOutput(), if need be).
-	 * Subclasses of TextContent should generally override getHtml() instead.
-	 *
-	 * This placeholder implementation always throws an exception.
-	 *
-	 * @since 1.24
-	 * @deprecated since 1.38. Hard-deprecated since 1.38. Use ContentHandler::fillParserOutput instead.
-	 * @param Title $title Context title for parsing
-	 * @param int|null $revId ID of the revision being rendered.
-	 *  See Parser::parse() for the ramifications.
-	 * @param ParserOptions $options
-	 * @param bool $generateHtml Whether or not to generate HTML
-	 * @param ParserOutput &$output The output object to fill (reference).
-	 *
-	 * @throws MWException
-	 */
-	protected function fillParserOutput( Title $title, $revId,
-		ParserOptions $options, $generateHtml, ParserOutput &$output
-	) {
-		wfDeprecated( __METHOD__, '1.38' );
-		$cpoParams = new ContentParseParams( $title, $revId, $options, $generateHtml );
-		return $this->getContentHandler()->fillParserOutputInternal( $this, $cpoParams, $output );
-	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( AbstractContent::class, 'AbstractContent' );

@@ -7,21 +7,22 @@
 ( function () {
 
 	/**
-	 * Creates an mw.widgets.TitleSearchWidget object.
+	 * @classdesc Title search widget.
 	 *
 	 * @class
 	 * @extends OO.ui.SearchWidget
-	 * @mixins OO.ui.mixin.RequestManager
-	 * @mixins mw.widgets.TitleWidget
+	 * @mixes OO.ui.mixin.RequestManager
+	 * @mixes mw.widgets.TitleWidget
 	 *
 	 * @constructor
+	 * @description Create an mw.widgets.TitleSearchWidget object.
 	 * @param {Object} [config] Configuration options
 	 */
 	mw.widgets.TitleSearchWidget = function MwWidgetsTitleSearchWidget( config ) {
 		config = config || {};
 
 		// Parent constructor
-		mw.widgets.TitleSearchWidget.parent.call( this, config );
+		mw.widgets.TitleSearchWidget.super.call( this, config );
 
 		// Mixin constructors
 		mw.widgets.TitleWidget.call( this, config );
@@ -55,14 +56,14 @@
 	/* Methods */
 
 	/**
-	 * @inheritdoc mw.widgets.TitleWidget
+	 * @inheritdoc
 	 */
 	mw.widgets.TitleSearchWidget.prototype.getQueryValue = function () {
 		return this.getQuery().getValue();
 	};
 
 	/**
-	 * Handle choose events from the result widget
+	 * Handle choose events from the result widget.
 	 *
 	 * @param {OO.ui.OptionWidget} item Chosen item
 	 */
@@ -74,34 +75,32 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.TitleSearchWidget.prototype.onQueryChange = function () {
-		var widget = this;
-
-		this.getRequestData().done( function ( data ) {
-			if ( widget.query.isReadOnly() ) {
+		this.getRequestData().done( ( data ) => {
+			if ( this.query.isReadOnly() ) {
 				// The request object is always abortable, so just
 				// prevent the results from displaying
 				return;
 			}
 			// Parent method
-			mw.widgets.TitleSearchWidget.parent.prototype.onQueryChange.call( widget );
-			widget.results.addItems( widget.getOptionsFromData( data ) );
+			mw.widgets.TitleSearchWidget.super.prototype.onQueryChange.call( this );
+			this.results.addItems( this.getOptionsFromData( data ) );
 		} );
 	};
 
 	/**
-	 * @inheritdoc OO.ui.mixin.RequestManager
+	 * @inheritdoc
 	 */
 	mw.widgets.TitleSearchWidget.prototype.getRequestQuery = function () {
 		return this.getQueryValue();
 	};
 	/**
-	 * @inheritdoc OO.ui.mixin.RequestManager
+	 * @inheritdoc
 	 */
 	mw.widgets.TitleSearchWidget.prototype.getRequest = function () {
 		return this.getSuggestionsPromise();
 	};
 	/**
-	 * @inheritdoc OO.ui.mixin.RequestManager
+	 * @inheritdoc
 	 */
 	mw.widgets.TitleSearchWidget.prototype.getRequestCacheDataFromResponse = function ( response ) {
 		return response.query || {};

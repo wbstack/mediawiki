@@ -2,7 +2,7 @@
 
 namespace TwoColConflict;
 
-use WebRequest;
+use MediaWiki\Request\WebRequest;
 
 /**
  * @license GPL-2.0-or-later

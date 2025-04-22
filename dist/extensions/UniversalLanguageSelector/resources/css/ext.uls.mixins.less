@@ -1,10 +1,10 @@
 // Generate a caret by embedding in the callout.
 // Expects callout to have either selector-right or selecter-left class on it to determine directionality.
 .caret() {
-	&:before,
-	&:after {
-		border-top: 10px solid transparent;
-		border-bottom: 10px solid transparent;
+	&::before,
+	&::after {
+		border-top: 10px @border-style-base @border-color-transparent;
+		border-bottom: 10px @border-style-base @border-color-transparent;
 		display: inline-block;
 		/* 17px aligns nicely with the size of the search row in language selection */
 		top: 17px;
@@ -13,32 +13,32 @@
 	}
 
 	&.selector-right {
-		&:before {
+		&::before {
 			/* @noflip */
-			border-left: 10px solid #c8ccd1;
+			border-left: 10px @border-style-base @border-color-subtle;
 			/* @noflip */
 			right: -11px;
 		}
 
-		&:after {
+		&::after {
 			/* @noflip */
-			border-left: 10px solid #fff;
+			border-left: 10px @border-style-base @border-color-inverted;
 			/* @noflip */
 			right: -10px;
 		}
 	}
 
 	&.selector-left {
-		&:before {
+		&::before {
 			/* @noflip */
-			border-right: 10px solid #c8ccd1;
+			border-right: 10px @border-style-base @border-color-subtle;
 			/* @noflip */
 			left: -11px;
 		}
 
-		&:after {
+		&::after {
 			/* @noflip */
-			border-right: 10px solid #fff;
+			border-right: 10px @border-style-base @border-color-inverted;
 			/* @noflip */
 			left: -10px;
 		}

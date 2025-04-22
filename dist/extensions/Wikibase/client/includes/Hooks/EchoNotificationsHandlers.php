@@ -5,12 +5,13 @@ namespace Wikibase\Client\Hooks;
 use Diff\DiffOp\DiffOp;
 use Diff\DiffOp\DiffOpAdd;
 use Diff\DiffOp\DiffOpChange;
-use EchoEvent;
+use MediaWiki\Extension\Notifications\Model\Event;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\RedirectLookup;
-use MediaWiki\User\UserOptionsManager;
-use Title;
-use User;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Title\Title;
+use MediaWiki\User\Options\UserOptionsManager;
+use MediaWiki\User\User;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\WikibaseClient;
@@ -66,6 +67,7 @@ class EchoNotificationsHandlers {
 	/**
 	 * @param RepoLinker $repoLinker
 	 * @param NamespaceChecker $namespaceChecker
+	 * @param RedirectLookup $redirectLookup
 	 * @param UserOptionsManager $userOptionsManager
 	 * @param string $siteId
 	 * @param bool $sendEchoNotification
@@ -89,8 +91,10 @@ class EchoNotificationsHandlers {
 		$this->repoSiteName = $repoSiteName;
 	}
 
-	// TODO convert this to a proper hook handler class,
-	// register factory with services in extension JSON file
+	/**
+	 * TODO: Convert this to a proper hook handler class,
+	 * register factory with services in extension JSON file
+	 */
 	public static function factory(): self {
 		$services = MediaWikiServices::getInstance();
 		$settings = WikibaseClient::getSettings( $services );
@@ -110,10 +114,10 @@ class EchoNotificationsHandlers {
 	 * Handler for EchoGetBundleRules hook
 	 * @see https://www.mediawiki.org/wiki/Notifications/Developer_guide#Bundled_notifications
 	 *
-	 * @param EchoEvent $event
+	 * @param Event $event
 	 * @param string &$bundleString
 	 */
-	public static function onEchoGetBundleRules( EchoEvent $event, &$bundleString ) {
+	public static function onEchoGetBundleRules( Event $event, &$bundleString ) {
 		if ( $event->getType() === self::NOTIFICATION_TYPE ) {
 			$bundleString = self::NOTIFICATION_TYPE;
 		}
@@ -126,6 +130,9 @@ class EchoNotificationsHandlers {
 	 * @param bool $autocreated True when account was auto-created
 	 */
 	public static function onLocalUserCreated( User $user, $autocreated ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			return;
+		}
 		$self = self::factory();
 		$self->doLocalUserCreated( $user, $autocreated );
 	}
@@ -151,6 +158,9 @@ class EchoNotificationsHandlers {
 	 * @param Change $change
 	 */
 	public static function onWikibaseHandleChange( Change $change ) {
+		if ( !ExtensionRegistry::getInstance()->isLoaded( 'Echo' ) ) {
+			return;
+		}
 		$self = self::factory();
 		$self->doWikibaseHandleChange( $change );
 	}
@@ -186,7 +196,7 @@ class EchoNotificationsHandlers {
 			$metadata = $change->getMetadata();
 			$entityId = $change->getEntityId();
 			$agent = User::newFromName( $metadata['user_text'], false );
-			EchoEvent::create( [
+			Event::create( [
 				'agent' => $agent,
 				'extra' => [
 					// maybe also a diff link?
@@ -195,7 +205,7 @@ class EchoNotificationsHandlers {
 					'entity' => $entityId->getSerialization(),
 				],
 				'title' => $title,
-				'type' => self::NOTIFICATION_TYPE
+				'type' => self::NOTIFICATION_TYPE,
 			] );
 
 			return true;

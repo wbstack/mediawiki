@@ -2,16 +2,19 @@
 
 namespace MediaWiki\Tidy;
 
-use Sanitizer;
+use MediaWiki\Parser\Sanitizer;
 use Wikimedia\RemexHtml\HTMLData;
 use Wikimedia\RemexHtml\Serializer\HtmlFormatter;
 use Wikimedia\RemexHtml\Serializer\SerializerNode;
 
 /**
  * @internal
+ *
+ * WATCH OUT! Unlike normal HtmlFormatter, this class requires the 'ignoreCharRefs' option
+ * in Tokenizer to be used. If that option is not used, it will produce wrong results (T354361).
  */
 class RemexCompatFormatter extends HtmlFormatter {
-	private static $markedEmptyElements = [
+	private const MARKED_EMPTY_ELEMENTS = [
 		'li' => true,
 		'p' => true,
 		'tr' => true,
@@ -22,9 +25,11 @@ class RemexCompatFormatter extends HtmlFormatter {
 
 	public function __construct( $options = [] ) {
 		parent::__construct( $options );
+		// Escape non-breaking space
 		$this->attributeEscapes["\u{00A0}"] = '&#160;';
-		unset( $this->attributeEscapes["&"] );
 		$this->textEscapes["\u{00A0}"] = '&#160;';
+		// Disable escaping of '&', because we expect to see entities, due to 'ignoreCharRefs'
+		unset( $this->attributeEscapes["&"] );
 		unset( $this->textEscapes["&"] );
 		$this->textProcessor = $options['textProcessor'] ?? null;
 	}
@@ -33,6 +38,13 @@ class RemexCompatFormatter extends HtmlFormatter {
 		return '';
 	}
 
+	/**
+	 * WATCH OUT! Unlike normal HtmlFormatter, this class expects that the $text argument contains
+	 * unexpanded character references (entities), as a result of using the 'ignoreCharRefs' option
+	 * in Tokenizer. If that option is not used, this method will produce wrong results (T354361).
+	 *
+	 * @inheritDoc
+	 */
 	public function characters( SerializerNode $parent, $text, $start, $length ) {
 		$text = parent::characters( $parent, $text, $start, $length );
 
@@ -61,7 +73,7 @@ class RemexCompatFormatter extends HtmlFormatter {
 
 		$name = $node->name;
 		$attrs = $node->attrs;
-		if ( isset( self::$markedEmptyElements[$name] ) && $attrs->count() === 0
+		if ( isset( self::MARKED_EMPTY_ELEMENTS[$name] ) && $attrs->count() === 0
 			&& strspn( $contents, "\t\n\f\r " ) === strlen( $contents )
 		) {
 			return "<{$name} class=\"mw-empty-elt\">$contents</{$name}>";

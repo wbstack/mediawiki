@@ -2,7 +2,6 @@
 	"@metadata": {
 		"authors": [
 			"Xuacu",
-			"Amire80",
 			"YoaR"
 		]
 	},
@@ -10,7 +9,7 @@
 	"kartographer-broken-category": "Páxines con mapes frañaos",
 	"kartographer-broken-category-desc": "La páxina incluye un usu inválidu de mapa.",
 	"kartographer-desc": "Permite amestar mapes a les páxines wiki",
-	"kartographer-error-context-multi": "Problemes de &lt;$1&gt;:\n$2",
+	"kartographer-error-context-multi": "Problemes de $1:\n$2",
 	"kartographer-error-json": "Nun pudo analizase'l JSON: $1",
 	"kartographer-error-missing-attr": "Falta l'atributu \"$1\"",
 	"kartographer-error-bad_attr": "L'atributu '$1' tien un valor inválidu",
@@ -26,7 +25,6 @@
 	"kartographer-linktype-satellite": "Satélite",
 	"kartographer-linktype-terrain": "Terrén",
 	"kartographer-linktype-topo": "Topográficu",
-	"kartographer-link-geonames": "GeoNames",
 	"kartographer-sidebar-coordinates": "Coordenaes",
 	"kartographer-sidebar-filterdropdown": "Escueye un tipu de mapa",
 	"kartographer-sidebar-externalservices": "Servicios cartográficos",
@@ -35,7 +33,6 @@
 	"kartographer-sidebar-latitude": "Llatitú",
 	"kartographer-sidebar-longitude": "Llonxitú",
 	"kartographer-sidebar-mapdetails": "Mapes esternos",
-	"kartographer-sidebar-service": "Serviciu",
 	"kartographer-sidebar-togglebutton": "Mapes esternos",
 	"leafletdraw-draw-handlers-circle-radius": "Radiu",
 	"leafletdraw-draw-handlers-circle-tooltip-start": "Fai clic y abasna pa dibuxar un círculu",
@@ -79,12 +76,11 @@
 	"mapbox-control-zoomin-title": "Averar",
 	"mapbox-control-zoomout-title": "Alloñar",
 	"kartographer-fullscreen-close": "Zarrar",
-	"kartographer-fullscreen-collapse": "Tapecer los detalles del mapa",
 	"kartographer-fullscreen-text": "Ver a pantalla completa",
 	"visualeditor-mwmapsdialog-area": "Área de mapa",
 	"visualeditor-mwmapsdialog-content": "Conteníu del mapa",
 	"visualeditor-mwmapsdialog-options": "Opciones",
-	"visualeditor-mwmapsdialog-align": "Alliniamientu",
+	"visualeditor-mwmapsdialog-display": "Alliniamientu",
 	"visualeditor-mwmapsdialog-language": "Llingua",
 	"visualeditor-mwmapsdialog-help-title": "Más información sobro la creación y edición de mapes.",
 	"visualeditor-mwmapsdialog-position-lat": "Llatitú",

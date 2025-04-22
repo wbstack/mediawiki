@@ -4,11 +4,11 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Api;
 
-use ApiQuery;
-use ApiQueryBase;
-use ApiResult;
 use InvalidArgumentException;
-use Title;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryBase;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Title\Title;
 use Wikibase\DataAccess\AliasTermBuffer;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Term\TermBuffer;
@@ -69,10 +69,14 @@ class PageTerms extends ApiQueryBase {
 		$params = $this->extractRequestParams();
 
 		# Only operate on existing pages
-		$titles = $this->getPageSet()->getGoodTitles();
-		if ( !count( $titles ) ) {
+		$pages = $this->getPageSet()->getGoodPages();
+		if ( !count( $pages ) ) {
 			# Nothing to do
 			return;
+		}
+		$titles = [];
+		foreach ( $pages as $pageId => $title ) {
+			$titles[$pageId] = Title::newFromPageIdentity( $title );
 		}
 
 		// NOTE: continuation relies on $titles being sorted by page ID.
@@ -81,6 +85,11 @@ class PageTerms extends ApiQueryBase {
 		$continue = $params['continue'];
 		$termTypes = $params['terms'] ?? TermIndexEntry::$validTermTypes;
 		$languageCode = $params['language'] === 'uselang' ? $this->getLanguage()->getCode() : $params['language'];
+
+		if ( $termTypes === [] ) {
+			$encParamName = $this->encodeParamName( 'terms' );
+			$this->dieWithError( [ 'apierror-paramempty', $encParamName ], "paramempty_$encParamName" );
+		}
 
 		$pagesToEntityIds = $this->getEntityIdsForTitles( $titles, $continue );
 		$entityToPageMap = $this->getEntityToPageMap( $pagesToEntityIds );
@@ -270,7 +279,7 @@ class PageTerms extends ApiQueryBase {
 			],
 			'terms' => [
 				ParamValidator::PARAM_TYPE => TermIndexEntry::$validTermTypes,
-				ParamValidator::PARAM_DEFAULT => implode( '|',  TermIndexEntry::$validTermTypes ),
+				ParamValidator::PARAM_DEFAULT => implode( '|', TermIndexEntry::$validTermTypes ),
 				ParamValidator::PARAM_ISMULTI => true,
 				self::PARAM_HELP_MSG => 'apihelp-query+pageterms-param-terms',
 			],

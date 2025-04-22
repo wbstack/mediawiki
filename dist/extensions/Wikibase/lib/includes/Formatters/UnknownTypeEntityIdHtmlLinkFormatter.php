@@ -2,8 +2,8 @@
 
 namespace Wikibase\Lib\Formatters;
 
-use Html;
-use Title;
+use MediaWiki\Html\Html;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
 use Wikibase\Lib\Store\EntityTitleLookup;
@@ -60,7 +60,7 @@ class UnknownTypeEntityIdHtmlLinkFormatter implements EntityIdFormatter {
 	private function getAttributes( Title $title ) {
 		$attributes = [
 			'title' => $title->getPrefixedText(),
-			'href' => $title->isLocal() ? $title->getLocalURL() : $title->getFullURL()
+			'href' => $title->isLocal() ? $title->getLocalURL() : $title->getFullURL(),
 		];
 
 		if ( $title->isLocal() && $title->isRedirect() ) {

@@ -23,8 +23,8 @@ class SiteLinkDeserializerTest extends TestCase {
 		$entityIdDeserializerMock = $this->createMock( Deserializer::class );
 		$entityIdDeserializerMock->expects( $this->any() )
 			->method( 'deserialize' )
-			->with( $this->equalTo( 'Q42' ) )
-			->will( $this->returnValue( new ItemId( 'Q42' ) ) );
+			->with( 'Q42' )
+			->willReturn( new ItemId( 'Q42' ) );
 
 		return new SiteLinkDeserializer( $entityIdDeserializerMock );
 	}
@@ -39,28 +39,28 @@ class SiteLinkDeserializerTest extends TestCase {
 		$deserializer->deserialize( $nonDeserializable );
 	}
 
-	public function nonDeserializableProvider() {
+	public static function nonDeserializableProvider() {
 		return [
 			[
-				42
+				42,
 			],
 			[
-				[]
-			],
-			[
-				[
-					'id' => 'P10'
-				]
+				[],
 			],
 			[
 				[
-					'site' => '42value'
-				]
+					'id' => 'P10',
+				],
 			],
 			[
 				[
-					'title' => '42value'
-				]
+					'site' => '42value',
+				],
+			],
+			[
+				[
+					'title' => '42value',
+				],
 			],
 		];
 	}
@@ -72,24 +72,24 @@ class SiteLinkDeserializerTest extends TestCase {
 		$this->assertEquals( $object, $this->buildDeserializer()->deserialize( $serialization ) );
 	}
 
-	public function deserializationProvider() {
+	public static function deserializationProvider() {
 		return [
 			[
 				new SiteLink( 'enwiki', 'Nyan Cat' ),
 				[
 					'site' => 'enwiki',
-					'title' => 'Nyan Cat'
-				]
+					'title' => 'Nyan Cat',
+				],
 			],
 			[
 				new SiteLink( 'enwiki', 'Nyan Cat', [
-					new ItemId( 'Q42' )
+					new ItemId( 'Q42' ),
 				] ),
 				[
 					'site' => 'enwiki',
 					'title' => 'Nyan Cat',
-					'badges' => [ 'Q42' ]
-				]
+					'badges' => [ 'Q42' ],
+				],
 			],
 		];
 	}
@@ -98,15 +98,15 @@ class SiteLinkDeserializerTest extends TestCase {
 		$entityIdDeserializerMock = $this->createMock( Deserializer::class );
 		$entityIdDeserializerMock->expects( $this->any() )
 			->method( 'deserialize' )
-			->with( $this->equalTo( 'P42' ) )
-			->will( $this->returnValue( new NumericPropertyId( 'P42' ) ) );
+			->with( 'P42' )
+			->willReturn( new NumericPropertyId( 'P42' ) );
 		$deserializer = new SiteLinkDeserializer( $entityIdDeserializerMock );
 
 		$this->expectException( InvalidAttributeException::class );
 		$deserializer->deserialize( [
 			'site' => 'frwikisource',
 			'title' => 'Nyan Cat',
-			'badges' => [ 'P42' ]
+			'badges' => [ 'P42' ],
 		] );
 	}
 
@@ -118,7 +118,7 @@ class SiteLinkDeserializerTest extends TestCase {
 		$deserializer->deserialize( [
 			'site' => 'frwikisource',
 			'title' => 'Nyan Cat',
-			'badges' => 'Q42'
+			'badges' => 'Q42',
 		] );
 	}
 

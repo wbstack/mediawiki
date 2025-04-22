@@ -18,8 +18,8 @@ use Wikimedia\Assert\Assert;
  */
 class ChangeOpLexicalCategory extends ChangeOpBase {
 
-	private $lexicalCategory;
-	private $lexicalCategoryValidator;
+	private ItemId $lexicalCategory;
+	private ValueValidator $lexicalCategoryValidator;
 
 	public function __construct(
 		ItemId $lexicalCategory,
@@ -47,7 +47,7 @@ class ChangeOpLexicalCategory extends ChangeOpBase {
 	 *
 	 * @throws InvalidArgumentException
 	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		Assert::parameterType( Lexeme::class, $entity, '$entity' );
 		'@phan-var Lexeme $entity';
 

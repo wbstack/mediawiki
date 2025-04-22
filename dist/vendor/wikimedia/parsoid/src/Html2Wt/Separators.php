@@ -12,6 +12,7 @@ use Wikimedia\Parsoid\DOM\DocumentFragment;
 use Wikimedia\Parsoid\DOM\Element;
 use Wikimedia\Parsoid\DOM\Node;
 use Wikimedia\Parsoid\Html2Wt\DOMHandlers\DOMHandler;
+use Wikimedia\Parsoid\Utils\DiffDOMUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Utils\DOMUtils;
@@ -67,10 +68,6 @@ class Separators {
 		return $c;
 	}
 
-	/**
-	 * @param Node $n
-	 * @return int|null
-	 */
 	private static function precedingSeparatorTextLen( Node $n ): ?int {
 		// Given the CSS white-space property and specifically,
 		// "pre" and "pre-line" values for this property, it seems that any
@@ -242,7 +239,7 @@ class Separators {
 			$nodeB = $constraintInfo['nodeB'] ?? null;
 			if (
 				$sepType === 'parent-child' &&
-				!DOMUtils::isContentNode( DOMUtils::firstNonDeletedChild( $nodeA ) ) &&
+				!DiffDOMUtils::isContentNode( DiffDOMUtils::firstNonDeletedChild( $nodeA ) ) &&
 				!(
 					isset( Consts::$HTML['ChildTableTags'][DOMCompat::nodeName( $nodeB )] ) &&
 					!WTUtils::isLiteralHTMLNode( $nodeB )
@@ -305,7 +302,7 @@ class Separators {
 			'debug/wts/sep',
 			'make-new   |',
 			static function () use ( $nlConstraints, $sepNlCount, $minNls, $sep, $origSep ) {
-				$constraints = Utils::clone( $nlConstraints );
+				$constraints = Utils::clone( $nlConstraints, true, true );
 				unset( $constraints['constraintInfo'] );
 				return PHPUtils::jsonEncode( $sep ) . ', ' . PHPUtils::jsonEncode( $origSep ) . ', ' .
 					$minNls . ', ' . $sepNlCount . ', ' . PHPUtils::jsonEncode( $constraints );
@@ -345,10 +342,6 @@ class Separators {
 		return $res;
 	}
 
-	/**
-	 * @param Node $node
-	 * @return string
-	 */
 	public static function debugOut( Node $node ): string {
 		$value = '';
 		if ( $node instanceof Element ) {
@@ -426,20 +419,11 @@ class Separators {
 		];
 	}
 
-	/**
-	 * @param Env $env
-	 * @param SerializerState $state
-	 */
 	public function __construct( Env $env, SerializerState $state ) {
 		$this->env = $env;
 		$this->state = $state;
 	}
 
-	/**
-	 * @param string $sep
-	 * @param array $nlConstraints
-	 * @return string
-	 */
 	private function makeSepIndentPreSafe(
 		string $sep, array $nlConstraints
 	): string {
@@ -493,7 +477,7 @@ class Separators {
 			// (except for a special case for <br> nodes)
 			if ( $nodeB && WTSUtils::precedingSpaceSuppressesIndentPre( $nodeB, $origNodeB ) ) {
 				$isIndentPreSafe = true;
-			} elseif ( $sepType === 'sibling' || $nodeA && DOMUtils::atTheTop( $nodeA ) ) {
+			} elseif ( $sepType === 'sibling' || ( $nodeA && DOMUtils::atTheTop( $nodeA ) ) ) {
 				Assert::invariant( !DOMUtils::atTheTop( $nodeA ) || $sepType === 'parent-child', __METHOD__ );
 
 				// 'nodeB' is the first non-separator child of 'nodeA'.
@@ -501,7 +485,7 @@ class Separators {
 				// Walk past sol-transparent nodes in the right-sibling chain
 				// of 'nodeB' till we establish indent-pre safety.
 				while ( $nodeB &&
-					( DOMUtils::isDiffMarker( $nodeB ) || WTUtils::emitsSolTransparentSingleLineWT( $nodeB ) )
+					( DiffUtils::isDiffMarker( $nodeB ) || WTUtils::emitsSolTransparentSingleLineWT( $nodeB ) )
 				) {
 					$nodeB = $nodeB->nextSibling;
 				}
@@ -565,7 +549,7 @@ class Separators {
 			'debug/wts/sep',
 			'ipre-safe  |',
 			static function () use ( $sep, $nlConstraints ) {
-				$constraints = Utils::clone( $nlConstraints );
+				$constraints = Utils::clone( $nlConstraints, true, true );
 				unset( $constraints['constraintInfo'] );
 				return PHPUtils::jsonEncode( $sep ) . ', ' . PHPUtils::jsonEncode( $constraints );
 			}
@@ -624,7 +608,7 @@ class Separators {
 
 		// Leading trimmed whitespace only makes sense for first child.
 		// Ignore comments (which are part of separators) + deletion markers.
-		if ( DOMUtils::previousNonSepSibling( $node ) ) {
+		if ( DiffDOMUtils::previousNonSepSibling( $node ) ) {
 			return null;
 		}
 
@@ -650,17 +634,24 @@ class Separators {
 			$state = $this->state;
 			$dsr = DOMDataUtils::getDataParsoid( $parentNode )->dsr ?? null;
 			if ( Utils::isValidDSR( $dsr, true ) ) {
-				if ( $state->haveTrimmedWsDSR && (
-					$dsr->leadingWS > 0 || ( $dsr->leadingWS === 0 && $dsr->trailingWS > 0 )
-				) ) {
-					$sep = $state->getOrigSrc( $dsr->innerStart(), $dsr->innerStart() + $dsr->leadingWS ) ?? '';
-					return strspn( $sep, " \t" ) === strlen( $sep ) ? $sep : null;
-				} else {
-					$offset = $dsr->innerStart();
-					if ( $offset < $dsr->innerEnd() ) {
-						$sep = $state->getOrigSrc( $offset, $offset + 1 ) ?? '';
-						return preg_match( '/[ \t]/', $sep ) ? $sep : null;
+				if (
+					$state->haveTrimmedWsDSR &&
+					$dsr->hasTrimmedWS() &&
+					$dsr->hasValidLeadingWS()
+				) {
+					if ( preg_match(
+						'/^([ \t]*)/',
+						$state->getOrigSrc( $dsr->innerRange() ) ?? '',
+						$matches
+					) ) {
+						// $matches[1] is just spaces and tabs
+						return substr( $matches[1], 0, $dsr->leadingWS );
 					}
+				} elseif ( $dsr->innerStart() < $dsr->innerEnd() ) {
+					$sep = $state->getOrigSrc( $dsr->innerRange() ) ?? '';
+					// return first character of inner range iff it is
+					// tab or space
+					return preg_match( '/^[ \t]/', $sep ) ? $sep[0] : null;
 				}
 			}
 		}
@@ -697,11 +688,10 @@ class Separators {
 
 		// Trailing trimmed whitespace only makes sense for last child.
 		// Ignore comments (which are part of separators) + deletion markers.
-		if ( DOMUtils::nextNonSepSibling( $node ) ) {
+		if ( DiffDOMUtils::nextNonSepSibling( $node ) ) {
 			return null;
 		}
 
-		$sep = null;
 		'@phan-var Element|DocumentFragment $parentNode'; // @var Element|DocumentFragment $parentNode
 		if ( isset( Consts::$WikitextTagsWithTrimmableWS[DOMCompat::nodeName( $parentNode )] ) &&
 			( $origNode instanceof Element || !preg_match( '/[ \t]$/', $origNode->nodeValue ) )
@@ -714,29 +704,32 @@ class Separators {
 			$state = $this->state;
 			$dsr = DOMDataUtils::getDataParsoid( $parentNode )->dsr ?? null;
 			if ( Utils::isValidDSR( $dsr, true ) ) {
-				if ( $state->haveTrimmedWsDSR && (
-					$dsr->trailingWS > 0 || ( $dsr->trailingWS === 0 && $dsr->leadingWS > 0 )
-				) ) {
-					$sep = $state->getOrigSrc( $dsr->innerEnd() - $dsr->trailingWS, $dsr->innerEnd() ) ?? '';
-					if ( !preg_match( '/^[ \t]*$/', $sep ) ) {
-						$sep = null;
+				if (
+					$state->haveTrimmedWsDSR &&
+					$dsr->hasTrimmedWS() &&
+					$dsr->hasValidTrailingWS()
+				) {
+					if ( preg_match(
+						'/([ \t]*)$/',
+						$state->getOrigSrc( $dsr->innerRange() ) ?? '',
+						$matches
+					) ) {
+						// $matches[1] is just spaces and tabs
+						// note that trailingWS can be zero
+						return substr( $matches[1], strlen( $matches[1] ) - $dsr->trailingWS );
 					}
-				} else {
-					$offset = $dsr->innerEnd() - 1;
-					// The > instead of >= is to deal with an edge case
-					// = = where that single space is captured by the
-					// getLeadingSpace case above
-					if ( $offset > $dsr->innerStart() ) {
-						$sep = $state->getOrigSrc( $offset, $offset + 1 ) ?? '';
-						if ( !preg_match( '/[ \t]/', $sep ) ) {
-							$sep = null;
-						}
-					}
+				} elseif ( ( $dsr->innerEnd() - 1 ) > $dsr->innerStart() ) {
+					// The > instead of >= in the test above is to
+					// deal with an edge case where that single space
+					// is captured by the getLeadingSpace case above
+					$sep = $state->getOrigSrc( $dsr->innerRange() ) ?? '';
+					// Return last character of $sep iff it is space or tab
+					return preg_match( '/[ \t]$/', $sep ) ? substr( $sep, -1 ) : null;
 				}
 			}
 		}
 
-		return $sep;
+		return null;
 	}
 
 	/**
@@ -745,7 +738,7 @@ class Separators {
 	 * @param Node $node
 	 * @param bool $leading
 	 *   if true, trimmed leading whitespace is emitted
-	 *   if false, trimmed railing whitespace is emitted
+	 *   if false, trimmed trailing whitespace is emitted
 	 * @return string|null
 	 */
 	public function recoverTrimmedWhitespace( Node $node, bool $leading ): ?string {
@@ -755,7 +748,7 @@ class Separators {
 			if ( $leading ) {
 				return $this->fetchLeadingTrimmedSpace( $node );
 			} else {
-				$lastChild = DOMUtils::lastNonDeletedChild( $node );
+				$lastChild = DiffDOMUtils::lastNonDeletedChild( $node );
 				return $lastChild ? $this->fetchTrailingTrimmedSpace( $lastChild ) : null;
 			}
 		}
@@ -792,7 +785,7 @@ class Separators {
 		 * ---------------------------------------------------------------------- */
 		$origSepNeeded = $node !== $prevNode && $state->selserMode;
 		$origSepNeededAndUsable =
-			$origSepNeeded && !$state->inModifiedContent &&
+			$origSepNeeded && !$state->inInsertedContent &&
 			!WTSUtils::nextToDeletedBlockNodeInWT( $prevNode, true ) &&
 			!WTSUtils::nextToDeletedBlockNodeInWT( $node, false ) &&
 			WTSUtils::origSrcValidInEditedContext( $state, $prevNode ) &&
@@ -815,7 +808,7 @@ class Separators {
 					// Can we extrapolate DSR from $prevNode->previousSibling?
 					// Yes, if $prevNode->parentNode didn't have its children edited.
 					$prevNode->previousSibling instanceof Element &&
-					!DiffUtils::directChildrenChanged( $prevNode->parentNode, $this->env )
+					!DiffUtils::directChildrenChanged( $prevNode->parentNode )
 				) {
 					$endDsr = DOMDataUtils::getDataParsoid( $prevNode->previousSibling )->dsr->end ?? null;
 					$correction = null;
@@ -896,7 +889,15 @@ class Separators {
 			}
 
 			// FIXME: Maybe we shouldn't set dsr in the dsr pass if both aren't valid?
-			if ( Utils::isValidDSR( $dsrA ) && Utils::isValidDSR( $dsrB ) ) {
+			// NOTE: Synthetic DSR ranges
+			// may not necessarily have offsets that correspond to valid
+			// UTF-8 characters. So use $state->isValidDSR() to ensure that
+			// all offsets land on valid UTF-8 characters before trying to
+			// construct substrings based on relations between them.
+			if (
+				$state->isValidDSR( $dsrA ) &&
+				$state->isValidDSR( $dsrB )
+			) {
 				// Figure out containment relationship
 				if ( $dsrA->start <= $dsrB->start ) {
 					if ( $dsrB->end <= $dsrA->end ) {
@@ -904,21 +905,21 @@ class Separators {
 							// Both have the same dsr range, so there can't be any
 							// separators between them
 							$sep = '';
-						} elseif ( ( $dsrA->openWidth ?? null ) !== null ) {
+						} elseif ( isset( $dsrA->openWidth ) && $state->isValidDSR( $dsrA, true ) ) {
 							// B in A, from parent to child
-							$sep = $state->getOrigSrc( $dsrA->innerStart(), $dsrB->start );
+							$sep = $state->getOrigSrc( $dsrA->openRange()->to( $dsrB ) );
 						}
 					} elseif ( $dsrA->end <= $dsrB->start ) {
 						// B following A (siblingish)
-						$sep = $state->getOrigSrc( $dsrA->end, $dsrB->start );
-					} elseif ( ( $dsrB->closeWidth ?? null ) !== null ) {
+						$sep = $state->getOrigSrc( $dsrA->to( $dsrB ) );
+					} elseif ( isset( $dsrB->closeWidth ) && $state->isValidDSR( $dsrB, true ) ) {
 						// A in B, from child to parent
-						$sep = $state->getOrigSrc( $dsrA->end, $dsrB->innerEnd() );
+						$sep = $state->getOrigSrc( $dsrA->to( $dsrB->closeRange() ) );
 					}
 				} elseif ( $dsrA->end <= $dsrB->end ) {
-					if ( ( $dsrB->closeWidth ?? null ) !== null ) {
+					if ( isset( $dsrB->closeWidth ) && $state->isValidDSR( $dsrB, true ) ) {
 						// A in B, from child to parent
-						$sep = $state->getOrigSrc( $dsrA->end, $dsrB->innerEnd() );
+						$sep = $state->getOrigSrc( $dsrA->to( $dsrB->closeRange() ) );
 					}
 				} else {
 					$this->env->log( 'info/html2wt', 'dsr backwards: should not happen!' );
@@ -929,7 +930,7 @@ class Separators {
 					$sep = null;
 				}
 			}
-		} elseif ( $origSepNeeded && !DiffUtils::hasDiffMarkers( $prevNode, $this->env ) ) {
+		} elseif ( $origSepNeeded && !DiffUtils::hasDiffMarkers( $prevNode ) ) {
 			// Given the following conditions:
 			// - $prevNode has no diff markers. (checked above)
 			// - $prevNode's next non-sep sibling ($next) was inserted.
@@ -942,8 +943,8 @@ class Separators {
 			//
 			// This minimizes dirty-diffs to that separator text from
 			// the insertion of $next after $prevNode.
-			$next = DOMUtils::nextNonSepSibling( $prevNode );
-			$origSepUsable = $next && DiffUtils::hasInsertedDiffMark( $next, $this->env );
+			$next = DiffDOMUtils::nextNonSepSibling( $prevNode );
+			$origSepUsable = $next && DiffUtils::hasInsertedDiffMark( $next );
 
 			// Check that $next is an ancestor of $node and all nodes
 			// on that path have zero-width wikitext
@@ -961,26 +962,25 @@ class Separators {
 
 			// Extract separator from original source if possible
 			if ( $origSepUsable ) {
-				$origNext = DOMUtils::nextNonSepSibling( $next );
+				$origNext = DiffDOMUtils::nextNonSepSibling( $next );
 				if ( !$origNext ) { // $prevNode was last non-sep child of its parent
 					// We could work harder for text/comments and extrapolate, but skipping that here
 					// FIXME: If we had a generic DSR extrapolation utility, that would be useful
 					$o1 = $prevNode instanceof Element ?
-						DOMDataUtils::getDataParsoid( $prevNode )->dsr->end ?? null : null;
+						DOMDataUtils::getDataParsoid( $prevNode )->dsr ?? null : null;
 					if ( $o1 !== null ) {
 						$dsr2 = DOMDataUtils::getDataParsoid( $prevNode->parentNode )->dsr ?? null;
-						$o2 = $dsr2 ? $dsr2->innerEnd() : null;
-						$sep = $o2 !== null ? $state->getOrigSrc( $o1, $o2 ) : null;
+						$sep = $dsr2 !== null ? $state->getOrigSrc( $o1->to( $dsr2->closeRange() ) ) : null;
 					}
-				} elseif ( !DiffUtils::hasDiffMarkers( $origNext, $this->env ) ) {
+				} elseif ( !DiffUtils::hasDiffMarkers( $origNext ) ) {
 					// We could work harder for text/comments and extrapolate, but skipping that here
 					// FIXME: If we had a generic DSR extrapolation utility, that would be useful
 					$o1 = $prevNode instanceof Element ?
-						DOMDataUtils::getDataParsoid( $prevNode )->dsr->end ?? null : null;
+						DOMDataUtils::getDataParsoid( $prevNode )->dsr ?? null : null;
 					if ( $o1 !== null ) {
 						$o2 = $origNext instanceof Element ?
-							DOMDataUtils::getDataParsoid( $origNext )->dsr->start ?? null : null;
-						$sep = $o2 !== null ? $state->getOrigSrc( $o1, $o2 ) : null;
+							DOMDataUtils::getDataParsoid( $origNext )->dsr ?? null : null;
+						$sep = $o2 !== null ? $state->getOrigSrc( $o1->to( $o2 ) ) : null;
 					}
 				}
 
@@ -999,14 +999,10 @@ class Separators {
 		if ( $sep === null ) {
 			if ( $sepType === 'parent-child' ) {
 				$sep = $this->recoverTrimmedWhitespace( $node, true );
-				if ( $sep !== null ) {
-					$state->sep->src = $sep . $state->sep->src;
-				}
+				$state->sep->src = ( $sep ?? '' ) . $state->sep->src;
 			} elseif ( $sepType === 'child-parent' ) {
 				$sep = $this->recoverTrimmedWhitespace( $node, false );
-				if ( $sep !== null ) {
-					$state->sep->src .= $sep;
-				}
+				$state->sep->src .= $sep ?? '';
 			}
 		}
 

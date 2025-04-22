@@ -111,7 +111,7 @@ class ChangesSubscriptionTableBuilder {
 	 *
 	 * @param ItemId|null $startItem The item to start with.
 	 */
-	public function fillSubscriptionTable( ItemId $startItem = null ) {
+	public function fillSubscriptionTable( ?ItemId $startItem = null ) {
 		$continuation = $startItem === null ? null : [ $startItem->getNumericId(), 0 ];
 
 		while ( true ) {
@@ -133,11 +133,11 @@ class ChangesSubscriptionTableBuilder {
 	 * @return int The number of subscriptions inserted.
 	 */
 	private function processSubscriptionBatch( &$continuation = [] ) {
-		$dbw = $this->db->connections()->getWriteConnectionRef();
+		$dbw = $this->db->connections()->getWriteConnection();
 
 		$subscriptionsPerItemBatch = $this->getSubscriptionsPerItemBatch( $dbw, $continuation );
 
-		if ( empty( $subscriptionsPerItemBatch ) ) {
+		if ( !$subscriptionsPerItemBatch ) {
 			return 0;
 		}
 
@@ -159,14 +159,11 @@ class ChangesSubscriptionTableBuilder {
 		foreach ( $subscriptionsPerItem as $itemId => $subscribers ) {
 			$rows = $this->makeSubscriptionRows( $itemId, $subscribers );
 
-			$db->insert(
-				$this->tableName,
-				$rows,
-				__METHOD__,
-				[
-					'IGNORE'
-				]
-			);
+			$db->newInsertQueryBuilder()
+				->insertInto( $this->tableName )
+				->ignore()
+				->rows( $rows )
+				->caller( __METHOD__ )->execute();
 
 			if ( $this->verbosity === 'verbose' ) {
 				$this->progressReporter->reportMessage( 'Inserted ' . $db->affectedRows()
@@ -187,34 +184,31 @@ class ChangesSubscriptionTableBuilder {
 	 * @return array[] An associative array mapping item IDs to lists of site IDs.
 	 */
 	private function getSubscriptionsPerItemBatch( IDatabase $db, &$continuation = [] ) {
-		if ( empty( $continuation ) ) {
-			$continuationCondition = '1=1';
-		} else {
-			list( $fromItemId, $fromRowId ) = $continuation;
-			$continuationCondition = 'ips_item_id > ' . (int)$fromItemId
-				. ' OR ( '
-					. 'ips_item_id = ' . (int)$fromItemId
-					. ' AND '
-					. 'ips_row_id > ' . $fromRowId
-				. ' )';
+		$queryBuilder = $db->newSelectQueryBuilder();
+		$queryBuilder->select( [ 'ips_row_id', 'ips_item_id', 'ips_site_id' ] )
+			->from( 'wb_items_per_site' );
+
+		$continuationMsg = '';
+		if ( $continuation ) {
+			[ $fromItemId, $fromRowId ] = $continuation;
+			$continuationCondition = $db->buildComparison( '>', [
+				'ips_item_id' => (int)$fromItemId,
+				'ips_row_id' => $fromRowId,
+			] );
+			$queryBuilder->where( $continuationCondition );
+			$continuationMsg = ' with continuation: ' . $continuationCondition;
 		}
 
-		$res = $db->select(
-			'wb_items_per_site',
-			[ 'ips_row_id', 'ips_item_id', 'ips_site_id' ],
-			$continuationCondition,
-			__METHOD__,
-			[
-				'LIMIT' => $this->batchSize,
-				'ORDER BY' => 'ips_item_id, ips_row_id'
-			]
-		);
+		$queryBuilder->orderBy( [ 'ips_item_id', 'ips_row_id' ] )
+			->limit( $this->batchSize );
+		$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 
 		if ( $this->verbosity === 'verbose' ) {
 			$this->progressReporter->reportMessage( 'Selected ' . $res->numRows() . ' wb_item_per_site records'
-				. ' with continuation: ' . $continuationCondition );
+				. $continuationMsg );
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable False positive Pass-by-ref
 		return $this->getSubscriptionsPerItemFromRows( $res, $continuation );
 	}
 
@@ -232,13 +226,13 @@ class ChangesSubscriptionTableBuilder {
 		$subscriptionsPerItem = [];
 
 		$currentItemId = 0;
-		$itemId = null;
+		$itemId = '';
 
 		foreach ( $res as $row ) {
 			if ( $row->ips_item_id != $currentItemId ) {
 				$currentItemId = $row->ips_item_id;
 				$itemId = $this->entityIdComposer
-					->composeEntityId( '', Item::ENTITY_TYPE, $currentItemId )
+					->composeEntityId( Item::ENTITY_TYPE, $currentItemId )
 					->getSerialization();
 			}
 
@@ -264,7 +258,7 @@ class ChangesSubscriptionTableBuilder {
 		foreach ( $subscribers as $subscriber ) {
 			$rows[] = [
 				'cs_entity_id' => $itemId,
-				'cs_subscriber_id' => $subscriber
+				'cs_subscriber_id' => $subscriber,
 			];
 		}
 

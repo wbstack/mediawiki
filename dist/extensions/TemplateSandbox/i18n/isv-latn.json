@@ -1,0 +1,39 @@
+{
+	"@metadata": {
+		"authors": [
+			"IJzeren Jan"
+		]
+	},
+	"templatesandbox": "Pěskovišče za šablony",
+	"templatesandbox-desc": "[[Special:TemplateSandbox|Izobražaje stranicu]] vključajuču šablony s pěskovišča",
+	"templatesandbox-suffix": "pěskovišče",
+	"templatesandbox-legend": "Pěskovišče za šablony",
+	"templatesandbox-text": "Vy možete izbrati sustav šablonov zapisanyh v vašem prostoru pěskovišč, s upotrěboju odpovědnoj prědstavky.\nNa priklad, ako hočete uviděti versiju {{ns:Template}}:Testovati, ktory jeste zapisali kako «{{ns:User}}:Něčto/{{int:templatesandbox-suffix}}/{{ns:Template}}:Testovati», upotrěbite «{{ns:User}}:Něčto/{{int:templatesandbox-suffix}}» kako prědstavku.",
+	"templatesandbox-prefix-label": "Prědstavka pěskovišča:",
+	"templatesandbox-page-label": "Pokazati stranicu:",
+	"templatesandbox-revid-label": "Pokazati versiju:",
+	"templatesandbox-text-label": "Pokazati vikitekst:",
+	"templatesandbox-submit": "Izobraziti",
+	"templatesandbox-title-output": "Pěskovišče za šablony: $1",
+	"templatesandbox-editform-legend": "Pokazati stranicu s tutym šablonom",
+	"templatesandbox-editform-page-label": "Nazva stranice",
+	"templatesandbox-editform-view-label": "Pokazati prědgled",
+	"templatesandbox-preview": "Prědgled stranice $2",
+	"templatesandbox-previewnote": "'''Pametajte, že tuto jest samo prědgled stranice [[:$1]].'''\nVaše izměny ješče ne sut zapisane!",
+	"templatesandbox-invalid-title": "Ukazana vami nazva jest nepravilna.",
+	"templatesandbox-title-not-exists": "Ukazana vami nazva ne jestvuje.",
+	"templatesandbox-revision-not-exists": "Ukazana vami versija ne jestvuje.",
+	"templatesandbox-revision-no-content": "Ukazana vami nazva ne imaje sodržanje, ili prěgledanje ne jest vam dozvoljeno.",
+	"templatesandbox-invalid-prefix": "Ukazana vami prědstavka pěskovišča jest nepravilna.",
+	"templatesandbox-prefix-not-local": "Ukazana vami prědstavka pěskovišča ne jest lokalna.",
+	"templatesandbox-page-or-revid": "Trěba vvesti ili nazvu stranice ili identifikator versije.",
+	"templatesandbox-fail-post": "<em>Iz pričiny utraty danyh sesije, prědgled jest skryty kako měra protiv napadam s pomočju JavaScript’a.</em> \n\n<strong>Ako to jest legitimno pokušenje prědgleda, poprobujte ješče raz.</strong> Ako to ne pomože, poprobujte [[Special:UserLogout|odjaviti se]] i prijaviti se ponovno.",
+	"templatesandbox-fail-post-anon": "<em>Zatože vy ne jeste prijavjeni, prědgled jest skryty kako měra protiv napadam s pomočju JavaScript’a.</em> \n\n<strong>Ako to jest legitimno pokušenje prědgleda, [[Special:UserLogin|prijavite se]] i poprobujte ješče raz.</strong>",
+	"templatesandbox-anon-limited-preview": "Prědgled izměn JavaScript’a i CSS’a jest izključeny za neprijavjenyh koristnikov. Ako trěba vam prědgleděti take izměny, [[Special:UserLogin|prijavite se]] i poprobujte ješče raz.</strong>",
+	"templatesandbox-editform-need-template": "Za prědgleděnje drugoj stranice s tutym šablonom trěba ukazati nazvu šablona.",
+	"templatesandbox-editform-need-title": "Za prědgleděnje drugoj stranice s tutym šablonom trěba ukazati nazvu stranice.",
+	"templatesandbox-editform-invalid-template": "Ukazana vami nazva šablona jest nepravilna.",
+	"templatesandbox-editform-invalid-title": "Ukazana vami nazva stranice za prědgled jest nepravilna.",
+	"templatesandbox-editform-title-not-exists": "Ukazana vami nazva stranice za prědgled ne jestvuje.",
+	"templatesandbox-failed-replace-section": "Zaměna razděla jestvujučej stranice ne udala se."
+}

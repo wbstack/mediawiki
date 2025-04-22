@@ -7,7 +7,7 @@ namespace Wikibase\Repo\ChangeModification;
 use BatchRowIterator;
 use JobSpecification;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\Lib\Changes\RepoRevisionIdentifier;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
@@ -55,7 +55,7 @@ class DispatchChangeDeletionNotificationJob extends DispatchChangeModificationNo
 	}
 
 	private function getArchiveRows( int &$processed, int &$staleRecords, string $entityIdSerialization ): array {
-		$dbr = $this->db->connections()->getReadConnectionRef();
+		$dbr = $this->db->connections()->getReadConnection();
 
 		$iterator = new BatchRowIterator(
 			$dbr,
@@ -65,15 +65,16 @@ class DispatchChangeDeletionNotificationJob extends DispatchChangeModificationNo
 		);
 
 		$thresholdTime = time() - $this->clientRCMaxAge;
-		$staleRecords = (int)$dbr->selectField(
-			'archive', 'COUNT(*)',
-			[
+		$staleRecords = (int)$dbr->newSelectQueryBuilder()
+			->select( 'COUNT(*)' )
+			->from( 'archive' )
+			->where( [
 				'ar_namespace' => $this->getTitle()->getNamespace(),
 				'ar_title' => $this->getTitle()->getDBkey(),
 				'ar_page_id' => $this->pageId,
-				'ar_timestamp < ' . $dbr->addQuotes( $dbr->timestamp( $thresholdTime ) ),
-			], __METHOD__
-		);
+				$dbr->buildComparison( '<', [ 'ar_timestamp' => $dbr->timestamp( $thresholdTime ) ] ),
+			] )
+			->caller( __METHOD__ )->fetchField();
 
 		if ( $staleRecords === $this->archivedRevisionCount ) {
 			return [];
@@ -84,7 +85,7 @@ class DispatchChangeDeletionNotificationJob extends DispatchChangeModificationNo
 			'ar_page_id' => $this->pageId,
 			'ar_title' => $this->title->getDBkey(),
 			'ar_namespace' => $this->title->getNamespace(),
-			'ar_timestamp >= ' . $dbr->addQuotes( $dbr->timestamp( $thresholdTime ) ),
+			$dbr->buildComparison( '>=', [ 'ar_timestamp' => $dbr->timestamp( $thresholdTime ) ] ),
 		] );
 
 		$identifiers = [];
@@ -115,7 +116,7 @@ class DispatchChangeDeletionNotificationJob extends DispatchChangeModificationNo
 			$this->logger->warning( __METHOD__ . ': processed {processed} rows but archived {archived} revisions for {entityId}', [
 				'processed' => $processed,
 				'archived' => $this->archivedRevisionCount - $staleRecords,
-				'entityId' => $entityId->getSerialization()
+				'entityId' => $entityId->getSerialization(),
 			] );
 		}
 

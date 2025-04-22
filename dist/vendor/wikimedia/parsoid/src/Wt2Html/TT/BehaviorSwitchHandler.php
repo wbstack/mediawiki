@@ -12,10 +12,7 @@ use Wikimedia\Parsoid\Wt2Html\TokenTransformManager;
  * Handler for behavior switches, like '__TOC__' and similar.
  */
 class BehaviorSwitchHandler extends TokenHandler {
-	/**
-	 * @param TokenTransformManager $manager
-	 * @param array $options options
-	 */
+
 	public function __construct( TokenTransformManager $manager, array $options ) {
 		parent::__construct( $manager, $options );
 	}
@@ -29,12 +26,12 @@ class BehaviorSwitchHandler extends TokenHandler {
 	 */
 	public function onBehaviorSwitch( Token $token ): TokenHandlerResult {
 		$env = $this->env;
-		$magicWord = $env->getSiteConfig()->magicWordCanonicalName( $token->attribs[0]->v );
-		$env->setVariable( $magicWord, true );
+		$magicWord = $env->getSiteConfig()->getMagicWordForBehaviorSwitch( $token->attribs[0]->v );
+		$env->setBehaviorSwitch( $magicWord, true );
 		$metaToken = new SelfclosingTagTk(
 			'meta',
 			[ new KV( 'property', 'mw:PageProp/' . $magicWord ) ],
-			$token->dataAttribs->clone()
+			$token->dataParsoid->clone()
 		);
 
 		return new TokenHandlerResult( [ $metaToken ] );

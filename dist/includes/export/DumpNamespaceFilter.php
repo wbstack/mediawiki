@@ -2,7 +2,7 @@
 /**
  * Dump output filter to include or exclude pages in a given set of namespaces.
  *
- * Copyright © 2003, 2005, 2006 Brion Vibber <brion@pobox.com>
+ * Copyright © 2003, 2005, 2006 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,6 @@ class DumpNamespaceFilter extends DumpFilter {
 	/**
 	 * @param DumpOutput &$sink
 	 * @param string $param
-	 * @throws MWException
 	 */
 	public function __construct( &$sink, $param ) {
 		parent::__construct( $sink );
@@ -73,7 +72,7 @@ class DumpNamespaceFilter extends DumpFilter {
 				$ns = intval( $key );
 				$this->namespaces[$ns] = true;
 			} else {
-				throw new MWException( "Unrecognized namespace key '$key'\n" );
+				throw new InvalidArgumentException( "Unrecognized namespace key '$key'\n" );
 			}
 		}
 	}

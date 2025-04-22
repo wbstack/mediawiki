@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2007 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
+ * Copyright © 2007 Roan Kattouw <roan.kattouw@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,11 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
 use MediaWiki\Auth\AuthManager;
-use MediaWiki\Block\DatabaseBlock;
+use MediaWiki\Cache\GenderCache;
+use MediaWiki\User\User;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserGroupManager;
 use MediaWiki\User\UserNameUtils;
@@ -35,22 +38,14 @@ use Wikimedia\ParamValidator\ParamValidator;
 class ApiQueryUsers extends ApiQueryBase {
 	use ApiQueryBlockInfoTrait;
 
+	/** @var array<string,true> */
 	private $prop;
 
-	/** @var UserNameUtils */
-	private $userNameUtils;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/** @var UserGroupManager */
-	private $userGroupManager;
-
-	/** @var GenderCache */
-	private $genderCache;
-
-	/** @var AuthManager */
-	private $authManager;
+	private UserNameUtils $userNameUtils;
+	private UserFactory $userFactory;
+	private UserGroupManager $userGroupManager;
+	private GenderCache $genderCache;
+	private AuthManager $authManager;
 
 	/**
 	 * Properties whose contents does not depend on who is looking at them. If the usprops field
@@ -72,18 +67,9 @@ class ApiQueryUsers extends ApiQueryBase {
 		'cancreate',
 	];
 
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 * @param UserNameUtils $userNameUtils
-	 * @param UserFactory $userFactory
-	 * @param UserGroupManager $userGroupManager
-	 * @param GenderCache $genderCache
-	 * @param AuthManager $authManager
-	 */
 	public function __construct(
 		ApiQuery $query,
-		$moduleName,
+		string $moduleName,
 		UserNameUtils $userNameUtils,
 		UserFactory $userFactory,
 		UserGroupManager $userGroupManager,
@@ -143,17 +129,14 @@ class ApiQueryUsers extends ApiQueryBase {
 		$result = $this->getResult();
 
 		if ( count( $parameters ) ) {
-			$userQuery = User::getQueryInfo();
-			$this->addTables( $userQuery['tables'] );
-			$this->addFields( $userQuery['fields'] );
-			$this->addJoinConds( $userQuery['joins'] );
+			$this->getQueryBuilder()->merge( User::newQueryBuilder( $db ) );
 			if ( $useNames ) {
 				$this->addWhereFld( 'user_name', $goodNames );
 			} else {
 				$this->addWhereFld( 'user_id', $userids );
 			}
 
-			$this->addBlockInfoToQuery( isset( $this->prop['blockinfo'] ) );
+			$this->addDeletedUserFilter();
 
 			$data = [];
 			$res = $this->select( __METHOD__ );
@@ -173,9 +156,10 @@ class ApiQueryUsers extends ApiQueryBase {
 				$this->addTables( 'user_groups' );
 				$this->addJoinConds( [ 'user_groups' => [ 'JOIN', 'ug_user=user_id' ] ] );
 				$this->addFields( [ 'user_name' ] );
-				$this->addFields( $this->userGroupManager->getQueryInfo()['fields'] );
-				$this->addWhere( 'ug_expiry IS NULL OR ug_expiry >= ' .
-					$db->addQuotes( $db->timestamp() ) );
+				$this->addFields( [ 'ug_user', 'ug_group', 'ug_expiry' ] );
+				$this->addWhere(
+					$db->expr( 'ug_expiry', '=', null )->or( 'ug_expiry', '>=', $db->timestamp() )
+				);
 				$userGroupsRes = $this->select( __METHOD__ );
 
 				foreach ( $userGroupsRes as $row ) {
@@ -188,6 +172,12 @@ class ApiQueryUsers extends ApiQueryBase {
 					$userNames[] = $row->user_name;
 				}
 				$this->genderCache->doQuery( $userNames, __METHOD__ );
+			}
+
+			if ( isset( $this->prop['blockinfo'] ) ) {
+				$blockInfos = $this->getBlockDetailsForRows( $res );
+			} else {
+				$blockInfos = null;
 			}
 
 			foreach ( $res as $row ) {
@@ -208,6 +198,10 @@ class ApiQueryUsers extends ApiQueryBase {
 				}
 				$data[$key]['userid'] = $user->getId();
 				$data[$key]['name'] = $user->getName();
+
+				if ( $user->isSystemUser() ) {
+					$data[$key]['systemuser'] = true;
+				}
 
 				if ( isset( $this->prop['editcount'] ) ) {
 					$data[$key]['editcount'] = $user->getEditCount();
@@ -238,11 +232,11 @@ class ApiQueryUsers extends ApiQueryBase {
 					$data[$key]['rights'] = $this->getPermissionManager()
 						->getUserPermissions( $user );
 				}
-				if ( $row->ipb_deleted ) {
+				if ( $row->hu_deleted ) {
 					$data[$key]['hidden'] = true;
 				}
-				if ( isset( $this->prop['blockinfo'] ) && $row->ipb_by_text !== null ) {
-					$data[$key] += $this->getBlockDetails( DatabaseBlock::newFromRow( $row ) );
+				if ( isset( $this->prop['blockinfo'] ) && isset( $blockInfos[$row->user_id] ) ) {
+					$data[$key] += $blockInfos[$row->user_id];
 				}
 
 				if ( isset( $this->prop['emailable'] ) ) {
@@ -261,27 +255,16 @@ class ApiQueryUsers extends ApiQueryBase {
 			}
 		}
 
-		$context = $this->getContext();
 		// Second pass: add result data to $retval
 		foreach ( $parameters as $u ) {
 			if ( !isset( $data[$u] ) ) {
 				if ( $useNames ) {
-					$data[$u] = [ 'name' => $u ];
-					$urPage = new UserrightsPage;
-					$urPage->setContext( $context );
-
-					$iwUser = $urPage->fetchUser( $u );
-
-					if ( $iwUser instanceof UserRightsProxy ) {
-						$data[$u]['interwiki'] = true;
-					} else {
-						$data[$u]['missing'] = true;
-						if ( isset( $this->prop['cancreate'] ) ) {
-							$status = $this->authManager->canCreateAccount( $u );
-							$data[$u]['cancreate'] = $status->isGood();
-							if ( !$status->isGood() ) {
-								$data[$u]['cancreateerror'] = $this->getErrorFormatter()->arrayFromStatus( $status );
-							}
+					$data[$u] = [ 'name' => $u, 'missing' => true ];
+					if ( isset( $this->prop['cancreate'] ) ) {
+						$status = $this->authManager->canCreateAccount( $u );
+						$data[$u]['cancreate'] = $status->isGood();
+						if ( !$status->isGood() ) {
+							$data[$u]['cancreateerror'] = $this->getErrorFormatter()->arrayFromStatus( $status );
 						}
 					}
 				} else {
@@ -374,3 +357,6 @@ class ApiQueryUsers extends ApiQueryBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Users';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryUsers::class, 'ApiQueryUsers' );

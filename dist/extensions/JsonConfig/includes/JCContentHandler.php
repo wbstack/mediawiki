@@ -2,12 +2,13 @@
 
 namespace JsonConfig;
 
-use Content;
-use FormatJson;
+use MediaWiki\Content\CodeContentHandler;
+use MediaWiki\Content\Content;
 use MediaWiki\Content\Renderer\ContentParseParams;
 use MediaWiki\Content\Transform\PreSaveTransformParams;
-use ParserOutput;
-use TextContentHandler;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * JSON Json Config content handler
@@ -18,7 +19,7 @@ use TextContentHandler;
  *
  * @author Yuri Astrakhan <yurik@wikimedia.org>
  */
-class JCContentHandler extends TextContentHandler {
+class JCContentHandler extends CodeContentHandler {
 
 	/**
 	 * Internal format to force pretty-printed json serialization
@@ -35,11 +36,11 @@ class JCContentHandler extends TextContentHandler {
 	/**
 	 * Returns the content's text as-is.
 	 *
-	 * @param \Content|JCContent $content This is actually a Content object
+	 * @param Content|JCContent $content This is actually a Content object
 	 * @param string|null $format
 	 * @return mixed
 	 */
-	public function serializeContent( \Content $content, $format = null ) {
+	public function serializeContent( Content $content, $format = null ) {
 		$this->checkFormat( $format );
 		$status = $content->getStatus();
 		if ( $status->isGood() ) {
@@ -55,12 +56,12 @@ class JCContentHandler extends TextContentHandler {
 	}
 
 	/**
-	 * @param \Content|JCContent $oldContent
-	 * @param \Content|JCContent $myContent
-	 * @param \Content|JCContent $yourContent
+	 * @param Content|JCContent $oldContent
+	 * @param Content|JCContent $myContent
+	 * @param Content|JCContent $yourContent
 	 * @return bool|JCContent
 	 */
-	public function merge3( \Content $oldContent, \Content $myContent, \Content $yourContent ) {
+	public function merge3( Content $oldContent, Content $myContent, Content $yourContent ) {
 		// Almost identical clone of the parent's merge3, except that we use pretty-printed merge,
 		// thus allowing much more lenient line-based merging.
 
@@ -84,20 +85,11 @@ class JCContentHandler extends TextContentHandler {
 			return $this->makeEmptyContent();
 		}
 
-		$mergedContent = $this->unserializeContent( $result, $format );
-
-		return $mergedContent;
+		return $this->unserializeContent( $result, $format );
 	}
 
-	/**
-	 * Returns the name of the diff engine to use.
-	 *
-	 * @since 1.21
-	 *
-	 * @return string
-	 */
-	protected function getDiffEngineClass() {
-		return JCJsonDifferenceEngine::class;
+	protected function getSlotDiffRendererWithOptions( IContextSource $context, $options = [] ) {
+		return new JCSlotDiffRenderer( $this->createTextSlotDiffRenderer( $options ) );
 	}
 
 	/**
@@ -115,17 +107,9 @@ class JCContentHandler extends TextContentHandler {
 		return new $class( $text, $modelId, $isSaving );
 	}
 
-	/**
-	 * Returns the name of the associated Content class, to
-	 * be used when creating new objects. Override expected
-	 * by subclasses.
-	 *
-	 * @return string
-	 * @phan-return class-string
-	 */
+	/** @inheritDoc */
 	protected function getContentClass() {
-		$modelId = $this->getModelID();
-		return JCSingleton::getContentClass( $modelId );
+		return JCSingleton::getContentClass( $this->getModelID() );
 	}
 
 	/**

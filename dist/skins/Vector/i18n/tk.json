@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Hanberke",
-			"TayfunEt."
+			"TayfunEt.",
+			"Zolgoyo"
 		]
 	},
 	"vector-opt-out": "Köne görnüşe geçiň",
@@ -11,7 +11,6 @@
 	"vector-language-button-label": "{{PLURAL:$1|$1 Dil}}",
 	"vector-no-language-button-label": "Dil goşuň",
 	"vector-no-language-button-aria-label": "Bu makala diňe şu dilde bar. Makalany başga diller üçin goşuň",
-	"vector-language-redirect-to-top": "Bu {{SITENAME}} saýtynda diller ýokarda, makala adynyň ýanynda. [[#p-lang-btn|Ýokary git]].",
 	"vector-language-variant-switcher-label": "Dil görnüşini üýtgediň",
 	"vector-action-addsection": "Mowzuk goş",
 	"vector-action-delete": "Öçür",
@@ -29,6 +28,7 @@
 	"vector-jumptocontent": "Mazmuna geçiň",
 	"vector-more-actions": "Has köp",
 	"vector-searchsuggest-containing": "Içindäki sahypalary gözläň <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-label": "Mazmuny",
 	"vector-toc-beginning": "Başlangyç",
 	"vector-anon-user-menu-pages-learn": "köpräk oka",
 	"vector-anon-user-menu-pages-label": "Redaktirlemek barada has giňişleýin öwreniň",
@@ -36,5 +36,8 @@
 	"vector-toc-menu-tooltip": "Mazmuny",
 	"vector-toc-collapsible-button-label": "Mazmunyň tablisasyny üýtgediň",
 	"vector-site-nav-label": "Saýt",
+	"vector-main-menu-label": "Esasy menýu",
+	"vector-page-tools-label": "Gurallar",
+	"vector-unpin-element-label": "gizle",
 	"tooltip-vector-anon-user-menu-title": "Has köp wariant"
 }

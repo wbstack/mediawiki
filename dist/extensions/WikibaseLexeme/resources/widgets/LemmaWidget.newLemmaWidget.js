@@ -14,6 +14,7 @@ module.exports = ( function () {
 	 */
 	return function ( template, messages ) {
 		return {
+			compatConfig: { MODE: 3 },
 			props: [ 'lemmas', 'inEditMode', 'isSaving' ],
 			template: template,
 
@@ -26,10 +27,7 @@ module.exports = ( function () {
 				},
 				remove: function ( lemma ) {
 					this.lemmas.remove( lemma );
-				}
-			},
-
-			filters: {
+				},
 				message: function ( key ) {
 					return messages.get( key );
 				}

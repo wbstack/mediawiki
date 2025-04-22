@@ -2,6 +2,8 @@
 
 namespace Elastica;
 
+use Elastica\Exception\ClientException;
+use Elastica\Exception\ConnectionException;
 use Elastica\Exception\ResponseException;
 use Elasticsearch\Endpoints\Indices\Alias\Get;
 use Elasticsearch\Endpoints\Indices\GetAlias;
@@ -26,7 +28,7 @@ class Status
     /**
      * Data.
      *
-     * @var array Data
+     * @var array<string, mixed> Data
      */
     protected $_data;
 
@@ -43,7 +45,7 @@ class Status
     /**
      * Returns status data.
      *
-     * @return array Status data
+     * @return array<string, mixed> Status data
      */
     public function getData()
     {
@@ -91,6 +93,10 @@ class Status
     /**
      * Returns an array with all indices that the given alias name points to.
      *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     *
      * @return Index[]
      */
     public function getIndicesWithAlias(string $alias)
@@ -136,7 +142,7 @@ class Status
     /**
      * Return shards info.
      *
-     * @return array Shards info
+     * @return array<string, mixed> Shards info
      */
     public function getShards()
     {
@@ -147,6 +153,10 @@ class Status
 
     /**
      * Refresh status object.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function refresh(): void
     {

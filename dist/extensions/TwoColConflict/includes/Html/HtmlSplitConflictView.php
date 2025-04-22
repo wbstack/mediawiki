@@ -2,7 +2,7 @@
 
 namespace TwoColConflict\Html;
 
-use Html;
+use MediaWiki\Html\Html;
 use MessageLocalizer;
 
 /**
@@ -11,20 +11,9 @@ use MessageLocalizer;
  */
 class HtmlSplitConflictView {
 
-	/**
-	 * @var HtmlEditableTextComponent
-	 */
-	private $editableTextComponent;
+	private HtmlEditableTextComponent $editableTextComponent;
+	private MessageLocalizer $messageLocalizer;
 
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
-
-	/**
-	 * @param HtmlEditableTextComponent $editableTextComponent
-	 * @param MessageLocalizer $messageLocalizer
-	 */
 	public function __construct(
 		HtmlEditableTextComponent $editableTextComponent,
 		MessageLocalizer $messageLocalizer

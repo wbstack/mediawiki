@@ -2,11 +2,12 @@
 
 namespace MediaWiki\Deferred\LinksUpdate;
 
+use InvalidArgumentException;
 use MediaWiki\Linker\LinkTargetLookup;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageReference;
+use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Revision\RevisionRecord;
-use ParserOutput;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
 use Wikimedia\Rdbms\LBFactory;
@@ -101,9 +102,6 @@ abstract class LinksTable {
 	/** @var RevisionRecord */
 	private $revision;
 
-	/** @var callable|null Callback for deprecated hook */
-	private $afterUpdateHook;
-
 	/** @var bool */
 	protected $strictTestMode;
 
@@ -116,21 +114,18 @@ abstract class LinksTable {
 	 * @param LinkTargetLookup $linkTargetLookup
 	 * @param PageIdentity $sourcePage
 	 * @param int $batchSize
-	 * @param callable|null $afterUpdateHook
 	 */
 	final public function injectBaseDependencies(
 		LBFactory $lbFactory,
 		LinkTargetLookup $linkTargetLookup,
 		PageIdentity $sourcePage,
-		$batchSize,
-		$afterUpdateHook
+		$batchSize
 	) {
 		$this->lbFactory = $lbFactory;
-		$this->db = $this->lbFactory->getMainLB()->getConnectionRef( DB_PRIMARY );
+		$this->db = $this->lbFactory->getPrimaryDatabase();
 		$this->sourcePage = $sourcePage;
 		$this->batchSize = $batchSize;
 		$this->linkTargetLookup = $linkTargetLookup;
-		$this->afterUpdateHook = $afterUpdateHook;
 	}
 
 	/**
@@ -462,28 +457,27 @@ abstract class LinksTable {
 		$batchSize = $this->getBatchSize();
 		$ticket = $this->getTransactionTicket();
 
-		foreach ( array_chunk( $this->rowsToDelete, $batchSize ) as $chunk ) {
-			$factoredConds = $db->factorConds( $chunk );
-			$db->delete(
-				$table,
-				$factoredConds,
-				__METHOD__
-			);
-			$this->lbFactory->commitAndWaitForReplication(
-				__METHOD__, $ticket, [ 'domain' => $domainId ]
-			);
+		$deleteBatches = array_chunk( $this->rowsToDelete, $batchSize );
+		foreach ( $deleteBatches as $chunk ) {
+			$db->newDeleteQueryBuilder()
+				->deleteFrom( $table )
+				->where( $db->factorConds( $chunk ) )
+				->caller( __METHOD__ )->execute();
+			if ( count( $deleteBatches ) > 1 ) {
+				$this->lbFactory->commitAndWaitForReplication( __METHOD__, $ticket );
+			}
 		}
 
 		$insertBatches = array_chunk( $this->rowsToInsert, $batchSize );
 		foreach ( $insertBatches as $insertBatch ) {
-			$db->insert( $table, $insertBatch, __METHOD__, $this->getInsertOptions() );
-			$this->lbFactory->commitAndWaitForReplication(
-				__METHOD__, $ticket, [ 'domain' => $domainId ]
-			);
-		}
-
-		if ( count( $this->rowsToInsert ) && $this->afterUpdateHook ) {
-			( $this->afterUpdateHook )( $table, $this->rowsToInsert );
+			$db->newInsertQueryBuilder()
+				->options( $this->getInsertOptions() )
+				->insertInto( $table )
+				->rows( $insertBatch )
+				->caller( __METHOD__ )->execute();
+			if ( count( $insertBatches ) > 1 ) {
+				$this->lbFactory->commitAndWaitForReplication( __METHOD__, $ticket );
+			}
 		}
 	}
 
@@ -537,7 +531,7 @@ abstract class LinksTable {
 				return $this->getNewLinkIDs();
 
 			default:
-				throw new \InvalidArgumentException( __METHOD__ . ": Unknown link type" );
+				throw new InvalidArgumentException( __METHOD__ . ": Unknown link type" );
 		}
 	}
 

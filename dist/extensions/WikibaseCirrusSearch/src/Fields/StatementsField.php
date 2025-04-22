@@ -3,10 +3,12 @@
 namespace Wikibase\Search\Elastic\Fields;
 
 use CirrusSearch\CirrusSearch;
-use MWException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use SearchEngine;
 use SearchIndexField;
 use SearchIndexFieldDefinition;
+use UnexpectedValueException;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookupException;
@@ -67,6 +69,8 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 	 */
 	private $excludedIds;
 
+	private LoggerInterface $logger;
+
 	/**
 	 * @param PropertyDataTypeLookup $propertyDataTypeLookup
 	 * @param string[] $propertyIds List of property IDs to index
@@ -80,7 +84,8 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 		array $propertyIds,
 		array $indexedTypes,
 		array $excludedIds,
-		array $searchIndexDataFormatters
+		array $searchIndexDataFormatters,
+		?LoggerInterface $logger = null
 	) {
 		parent::__construct( static::NAME, SearchIndexField::INDEX_TYPE_KEYWORD );
 
@@ -89,6 +94,7 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 		$this->searchIndexDataFormatters = $searchIndexDataFormatters;
 		$this->propertyDataTypeLookup = $propertyDataTypeLookup;
 		$this->excludedIds = array_flip( $excludedIds );
+		$this->logger = $logger ?? new NullLogger();
 	}
 
 	/**
@@ -111,7 +117,6 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 	/**
 	 * @param EntityDocument $entity
 	 *
-	 * @throws MWException
 	 * @return mixed Get the value of the field to be indexed when a page/document
 	 *               is indexed. This might be an array with nested data, if the field
 	 *               is defined with nested type or an int or string for simple field types.
@@ -122,12 +127,18 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 		}
 
 		$data = [];
+		$seen = [];
+		$skipped = [];
 
 		/** @var Statement $statement */
 		foreach ( $entity->getStatements() as $statement ) {
 			$snak = $statement->getMainSnak();
 			$mainSnakString = $this->getWhitelistedSnakAsString( $snak, $statement->getGuid() );
-			if ( $mainSnakString !== null ) {
+			$propertyId = $snak->getPropertyId()->getSerialization();
+			if ( $mainSnakString === null ) {
+				$skipped[$propertyId] = true;
+			} else {
+				$seen[$propertyId] = true;
 				$data[] = $mainSnakString;
 				foreach ( $statement->getQualifiers() as $qualifier ) {
 					$qualifierString = $this->getSnakAsString( $qualifier );
@@ -141,7 +152,10 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 			}
 		}
 
-		return $data;
+		// There are entities with thousands of properties, try and be somewhat efficient
+		$missing = array_diff( array_keys( $skipped ), array_keys( $seen ) );
+
+		return array_merge( $data, $missing );
 	}
 
 	/**
@@ -150,31 +164,38 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 	 * e.g. [ 'propertyId' => 'P180', 'value' => 'Q999' ]
 	 *
 	 * @param Snak $snak
+	 * @param ?string $propType The property data type, if already known by the caller.
 	 * @return array|null
-	 * @throws MWException
 	 */
-	protected function getSnakAsPropertyIdAndValue( Snak $snak ) {
+	protected function getSnakAsPropertyIdAndValue( Snak $snak, ?string $propType = null ) {
 		if ( !( $this->snakHasKnownValue( $snak ) ) ) {
 			return null;
 		}
 		/**
 		 * @var PropertyValueSnak $snak
 		 */
+
+		try {
+			$propType ??= $this->propertyDataTypeLookup->getDataTypeIdForProperty( $snak->getPropertyId() );
+		} catch ( PropertyDataTypeLookupException $e ) {
+			return null;
+		}
+
 		/* @phan-suppress-next-line PhanUndeclaredMethod */
 		$dataValue = $snak->getDataValue();
-		$definitionKey = 'VT:' . $dataValue->getType();
-
-		if ( !isset( $this->searchIndexDataFormatters[$definitionKey] ) ) {
+		$formatter = $this->searchIndexDataFormatters[$propType] ?? null;
+		if ( $formatter === null ) {
 			// We do not know how to format these values
 			return null;
 		}
 
-		$formatter = $this->searchIndexDataFormatters[$definitionKey];
 		$value = $formatter( $dataValue );
 
 		if ( !is_string( $value ) ) {
-			throw new MWException( 'Search index data formatter callback for "' . $definitionKey
-								   . '" didn\'t return a string' );
+			throw new UnexpectedValueException(
+				"Search index data formatter callback for data type '$propType' " .
+				" didn't return a string"
+			);
 		}
 		if ( $value === '' ) {
 			return null;
@@ -186,8 +207,8 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 		];
 	}
 
-	protected function getSnakAsString( Snak $snak ) {
-		$snakAsPropertyIdAndValue = $this->getSnakAsPropertyIdAndValue( $snak );
+	protected function getSnakAsString( Snak $snak, ?string $propType = null ) {
+		$snakAsPropertyIdAndValue = $this->getSnakAsPropertyIdAndValue( $snak, $propType );
 		if ( $snakAsPropertyIdAndValue === null ) {
 			return null;
 		}
@@ -204,7 +225,6 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 	 * @param Snak $snak
 	 * @param string $guid Statement GUID to which this snak belongs
 	 * @return null|string
-	 * @throws MWException
 	 */
 	protected function getWhitelistedSnakAsString( Snak $snak, $guid ) {
 		if ( !( $this->snakHasKnownValue( $snak ) ) ) {
@@ -221,8 +241,14 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 		} catch ( PropertyDataTypeLookupException $e ) {
 			// T198091: looks like occasionally we get weird fails on indexing
 			// Log them but do not break indexing other data
-			wfLogWarning( __METHOD__ . ': Failed to look up property ' . $e->getPropertyId() .
-				' for ' . $guid );
+			$this->logger->warning(
+				__METHOD__ . ': Failed to look up property {propertyId} for {guid}',
+				[
+					'propertyId' => $e->getPropertyId()->getSerialization(),
+					'guid' => $guid,
+					'exception' => $e,
+				]
+			);
 			return null;
 		}
 		if ( !array_key_exists( $propType, $this->indexedTypes ) &&
@@ -230,7 +256,7 @@ class StatementsField extends SearchIndexFieldDefinition implements WikibaseInde
 			return null;
 		}
 
-		return $this->getSnakAsString( $snak );
+		return $this->getSnakAsString( $snak, $propType );
 	}
 
 	/**

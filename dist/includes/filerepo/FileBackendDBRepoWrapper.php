@@ -18,7 +18,10 @@
  * @file
  */
 
-use Wikimedia\Rdbms\DBConnRef;
+use MediaWiki\Output\StreamFile;
+use Shellbox\Command\BoxedCommand;
+use Wikimedia\FileBackend\FileBackend;
+use Wikimedia\Rdbms\IDatabase;
 
 /**
  * Proxy backend that manages file layout rewriting for FileRepo.
@@ -43,7 +46,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 	protected $dbHandleFunc;
 	/** @var MapCacheLRU */
 	protected $resolvedPathCache;
-	/** @var DBConnRef[] */
+	/** @var IDatabase[] */
 	protected $dbs;
 
 	public function __construct( array $config ) {
@@ -103,20 +106,22 @@ class FileBackendDBRepoWrapper extends FileBackend {
 				continue;
 			}
 
-			list( , $container ) = FileBackend::splitStoragePath( $path );
+			[ , $container ] = FileBackend::splitStoragePath( $path );
 
 			if ( $container === "{$this->repoName}-public" ) {
 				$name = basename( $path );
-				if ( strpos( $path, '!' ) !== false ) {
-					$sha1 = $db->selectField( 'oldimage', 'oi_sha1',
-						[ 'oi_archive_name' => $name ],
-						__METHOD__
-					);
+				if ( str_contains( $path, '!' ) ) {
+					$sha1 = $db->newSelectQueryBuilder()
+						->select( 'oi_sha1' )
+						->from( 'oldimage' )
+						->where( [ 'oi_archive_name' => $name ] )
+						->caller( __METHOD__ )->fetchField();
 				} else {
-					$sha1 = $db->selectField( 'image', 'img_sha1',
-						[ 'img_name' => $name ],
-						__METHOD__
-					);
+					$sha1 = $db->newSelectQueryBuilder()
+						->select( 'img_sha1' )
+						->from( 'image' )
+						->where( [ 'img_name' => $name ] )
+						->caller( __METHOD__ )->fetchField();
 				}
 				if ( $sha1 === null || !strlen( $sha1 ) ) {
 					$resolved[$i] = $path; // give up
@@ -226,6 +231,13 @@ class FileBackendDBRepoWrapper extends FileBackend {
 		return $this->translateSrcParams( __FUNCTION__, $params );
 	}
 
+	public function addShellboxInputFile( BoxedCommand $command, string $boxedName,
+		array $params
+	) {
+		$params['src'] = $this->getBackendPath( $params['src'], !empty( $params['latest'] ) );
+		return $this->backend->addShellboxInputFile( $command, $boxedName, $params );
+	}
+
 	public function directoryExists( array $params ) {
 		return $this->backend->directoryExists( $params );
 	}
@@ -242,7 +254,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 		return $this->backend->getFeatures();
 	}
 
-	public function clearCache( array $paths = null ) {
+	public function clearCache( ?array $paths = null ) {
 		$this->backend->clearCache( null ); // clear all
 	}
 
@@ -279,7 +291,7 @@ class FileBackendDBRepoWrapper extends FileBackend {
 	 * Get a connection to the repo file registry DB
 	 *
 	 * @param int $index
-	 * @return DBConnRef
+	 * @return IDatabase
 	 */
 	protected function getDB( $index ) {
 		if ( !isset( $this->dbs[$index] ) ) {

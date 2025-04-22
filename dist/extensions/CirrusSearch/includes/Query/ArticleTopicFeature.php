@@ -7,7 +7,7 @@ use CirrusSearch\WarningCollector;
 use CirrusSearch\Wikimedia\WeightedTagsHooks;
 use Elastica\Query\DisMax;
 use Elastica\Query\Term;
-use Message;
+use MediaWiki\Message\Message;
 
 /**
  * Finds pages based on how well they match a given topic, based on scores provided by the
@@ -102,7 +102,7 @@ class ArticleTopicFeature extends SimpleKeywordFeature {
 		$labelsToTerms = array_flip( self::TERMS_TO_LABELS );
 		$topicScores = [];
 		foreach ( $rawTopicData as $rawTopic ) {
-			list( $oresLabel, $scaledScore ) = explode( '|', $rawTopic );
+			[ $oresLabel, $scaledScore ] = explode( '|', $rawTopic );
 			$topicId = $labelsToTerms[$oresLabel];
 			$topicScores[$topicId] = (int)$scaledScore / 1000;
 		}

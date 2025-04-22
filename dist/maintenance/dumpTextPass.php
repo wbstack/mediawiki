@@ -2,7 +2,7 @@
 /**
  * BackupDumper that postprocesses XML dumps from dumpBackup.php to add page text
  *
- * Copyright (C) 2005 Brion Vibber <brion@pobox.com>
+ * Copyright (C) 2005 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,9 @@
  * @file
  * @ingroup Maintenance
  */
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/includes/TextPassDumper.php';
 
 $maintClass = TextPassDumper::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

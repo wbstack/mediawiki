@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Salvemm el lombard",
+			"McDutchie",
 			"S4b1nuz E.656",
-			"McDutchie"
+			"Salvemm el lombard"
 		]
 	},
 	"wikibase-desc": "Archivi di dati struturad",
@@ -158,7 +158,6 @@
 	"wikibase-validator-check-file-type": "L'estension del fail l'è mancanta",
 	"wikibase-validator-illegal-geo-shape-title": "El valor el gh'hà de comenzà con <code>Data:</code> e finì con <code>.map</code>. Dessorapù, o el titol el gh'hà de avegh minga dent di carater compagn di do pont di sbarre de travers o verticai.",
 	"wikibase-validator-illegal-tabular-data-title": "El valor el gh'hà de comenzà con <code>Data:</code> e finì con <code>.tab</code>. Dessorapù, o el titol el gh'hà de avegh minga dent di carater compagn di do pont di sbarre de travers o verticai.",
-	"wikibase-validator-illegal-entity-schema-title": "El valor el gh'hà de comenzà con <code>E</code> e 'l rest el gh'avaria de vesser doma di numer.",
 	"wikibase-validator-no-such-media": "El fail \"$1\" a l'esist minga in su [https://commons.wikimedia.org/ Wikimedia Commons].",
 	"wikibase-validator-no-such-sitelink": "Impossibil trovà el conligament a \"$1\" intanta che se cerchen de modificà i distintiv.",
 	"wikibase-validator-page-not-exists": "La pagina \"$1\" a l'esist minga.",
@@ -205,14 +204,12 @@
 	"wikibase-itemdisambiguation-description": "I valor doprad per la ricerca i gh'hann de avegh denter el test complet de l'element. La lengua l'è un identificador, per esempi \"lmo\".",
 	"wikibase-itemdisambiguation-summary": "Ricerca tut i element con la stessa eticheta.",
 	"special-newproperty": "Crea una proprietà noeuva",
-	"wikibase-newproperty-summary": "Sicùress che la prorpietà la sìa nananmò presenta in su Wikidata!<br />Inserìss un'[[{{int:Wikibase-label-helppage}}|eticheta]] e la [[{{int:Wikibase-description-helppage}}|descrizzion]] per tute i proprietà noeuve, e poeu cata foeura un tipo de dato valid..",
+	"wikibase-newproperty-summary": "Sicùress che la prorpietà la sìa nananmò presenta in su Wikidata!<br />Inserìss un'{{int:Wikibase-label-helppage}}|eticheta e la {{int:Wikibase-description-helppage}}|descrizzion per tute i proprietà noeuve, e poeu cata foeura un tipo de dato valid..",
 	"wikibase-newproperty-fieldset": "Crea una proprietà noeuva",
 	"wikibase-newproperty-datatype": "Tipo de datoː",
 	"wikibase-newproperty-invalid-datatype": "Specificad un tipo de dato minga valid.",
 	"wikibase-newproperty-insufficient-data": "Te gh'hee de completà almanch l'eticheta, la descrizzion o i alias.",
 	"wikibase-newproperty-pick-data-type": "(cata foeura un tipo de dato)",
-	"wikibase-description-helppage": "Help:Descrizzion",
-	"wikibase-label-helppage": "Help:Etichetta",
 	"special-newitem": "Crea un elemenet noeuv",
 	"wikibase-newitem-summary": "Sicuress [[Special:Search|l'element el sia nananmò present in su Wikidata]]!<br />Inserìss un'[[{{int:Wikibase-label-helppage}}|eticheta]] e la [[{{int:Wikibase-description-helppage}}|descrizzion]] per tut i element noeuv.",
 	"wikibase-newitem-fieldset": "Crea un element noeuv",
@@ -398,9 +395,8 @@
 	"wikibase-conflict-patched": "La toa modifica l'è stada missa dent in l'ultima version.",
 	"wikibase-save-unresolved-redirect": "L'è stada incontrada una redirezzion minga risolta de $1 vers $2 intanta che se tentava de salvà una modifica.",
 	"wikibase-restoreold": "restaora",
-	"wikibase-entity-summary-restore": "Restaora a la revision $3 d[[Special:Contributions/$4|{{GENDER:$4|el $4|e la$4|e $4}}]]",
-	"wikibase-entity-summary-undo": "Anulada la modifica $3 d[[Special:Contributions/$4|el $4|e la $4|e $4]] ([[User talk:$4|discussion]])",
-	"wikibase-non-entity-diff": "Impossibil fà el confront infra i contegnud d'una entità e d'una minga-entità",
+	"wikibase-entity-summary-restore": "Restaora a la revision [[Special:Permalink/$3|$3]] d[[Special:Contributions/$4|{{GENDER:$4|el $4|e la$4|e $4}}]]",
+	"wikibase-entity-summary-undo": "Anulada la modifica [[Special:Diff/$3|$3]] d[[Special:Contributions/$4|el $4|e la $4|e $4]] ([[User talk:$4|discussion]])",
 	"wikibase-no-direct-editing": "La modifica diretta l'è stada disativada in del spazzi di nom $1",
 	"wikibase-noentity": "Questa enitità chì l'esist minga.\nTe podet [{{fullurl:{{#Special:Log}}|page={{FULLPAGENAMEE}}}} cerca infra i register relativ] per savè cossa l'è sucecedud.",
 	"wikibase-noentity-createone": "Te podet anca [[$1|creann vun noeuv]].",
@@ -417,8 +413,6 @@
 	"wikibase-listdatatypes-geo-shape-body": "Conligament a una carta geografega missa in archivi in su Wikimedia Commons (o di alter wiki impostade). Varda \"https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Map_Data\" per savenn pussee sora i dati di mappe.",
 	"wikibase-listdatatypes-tabular-data-head": "Dati di tabulad",
 	"wikibase-listdatatypes-tabular-data-body": "Conligament ai dati tabulad miss in archivi in su Wikimedia Commons (o di alter wiki impostad). Varda \"https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Tabular_Data\" per savenn pussee sora i dati tabulad.",
-	"wikibase-listdatatypes-entity-schema-head": "Schema d'entità",
-	"wikibase-listdatatypes-entity-schema-body": "Conligament ai schema d'entitad miss in archivi in del spazzi di nom impostad in de l'istess wiki. El valor el gh'hà de vesser senza el prefiss del namespace \"EntitySchema:\"",
 	"wikibase-listdatatypes-quantity-head": "Quantità",
 	"wikibase-listdatatypes-quantity-body": "Camp dati leteral per una quantità relativa ad un'unità definida de bon. L'unità doprada l'è vun di dati inserid.\n* quantità - valore implicit de la stringa (la mappadura del prefiss de l'unità l'è mimnga ciara)\n* unità - valor implicito de la stringa, predefinid come 1 (la mappadura del corp standard l'è minga ciara)\n* precision (facoltativo) - valor esplicit, el gh'hà l'istessa unità del valor\n* limite de sora - valor massim de la quantità\n* limite de sota - valor minim de la quantità",
 	"wikibase-listdatatypes-monolingualtext-head": "Test monolengua",

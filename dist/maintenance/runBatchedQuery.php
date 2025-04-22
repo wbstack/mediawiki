@@ -23,10 +23,11 @@
  * @ingroup Maintenance
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
-use MediaWiki\MediaWikiServices;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\Platform\ISQLPlatform;
 
 /**
  * Maintenance script to run a database query in batches and wait for replica DBs.
@@ -57,47 +58,51 @@ class RunBatchedQuery extends Maintenance {
 
 		$dbName = $this->getOption( 'db', null );
 		if ( $dbName === null ) {
-			$dbw = $this->getDB( DB_PRIMARY );
+			$dbw = $this->getPrimaryDB();
 		} else {
-			$lbf = MediaWiki\MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
-			$lb = $lbf->getMainLB( $dbName );
-			$dbw = $lb->getConnectionRef( DB_PRIMARY, [], $dbName );
+			$dbw = $this->getServiceContainer()->getConnectionProvider()->getPrimaryDatabase( $dbName );
 		}
 
 		$selectConds = $where;
 		$prevEnd = false;
-		$lbFactory = MediaWikiServices::getInstance()->getDBLoadBalancerFactory();
 
 		$n = 1;
 		do {
 			$this->output( "Batch $n: " );
 			$n++;
 
-			// Note that the update conditions do not rely on atomicity of the
+			// Note that the update conditions do not rely on the atomicity of the
 			// SELECT query in order to guarantee that all rows are updated. The
 			// results of the SELECT are merely a partitioning hint. Simultaneous
 			// updates merely result in the wrong number of rows being updated
 			// in a batch.
 
-			$res = $dbw->select( $table, $key, $selectConds, __METHOD__,
-				[ 'ORDER BY' => $key, 'LIMIT' => $batchSize ] );
+			$res = $dbw->newSelectQueryBuilder()
+				->select( $key )
+				->from( $table )
+				->where( $selectConds )
+				->orderBy( $key )
+				->limit( $batchSize )
+				->caller( __METHOD__ )
+				->fetchResultSet();
+
 			if ( $res->numRows() ) {
 				$res->seek( $res->numRows() - 1 );
 				$row = $res->fetchObject();
-				$end = $dbw->addQuotes( $row->$key );
-				$selectConds = array_merge( $where, [ "$key > $end" ] );
-				$updateConds = array_merge( $where, [ "$key <= $end" ] );
+				$end = $row->$key;
+				$selectConds = array_merge( $where, [ $dbw->expr( $key, '>', $end ) ] );
+				$updateConds = array_merge( $where, [ $dbw->expr( $key, '<=', $end ) ] );
 			} else {
 				$updateConds = $where;
 				$end = false;
 			}
 			if ( $prevEnd !== false ) {
-				$updateConds = array_merge( [ "$key > $prevEnd" ], $updateConds );
+				$updateConds = array_merge( [ $dbw->expr( $key, '>', $prevEnd ) ], $updateConds );
 			}
 
 			$query = "UPDATE " . $dbw->tableName( $table ) .
 				" SET " . $set .
-				" WHERE " . $dbw->makeList( $updateConds, IDatabase::LIST_AND );
+				" WHERE " . $dbw->makeList( $updateConds, ISQLPlatform::LIST_AND );
 
 			$dbw->query( $query, __METHOD__ );
 
@@ -105,7 +110,7 @@ class RunBatchedQuery extends Maintenance {
 
 			$affected = $dbw->affectedRows();
 			$this->output( "$affected rows affected\n" );
-			$lbFactory->waitForReplication();
+			$this->waitForReplication();
 		} while ( $res->numRows() );
 	}
 
@@ -114,5 +119,7 @@ class RunBatchedQuery extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = RunBatchedQuery::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

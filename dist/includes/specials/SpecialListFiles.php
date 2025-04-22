@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Listfiles
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,57 +16,62 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\CommentStore\CommentStore;
+use MediaWiki\Pager\ImageListPager;
+use MediaWiki\SpecialPage\IncludableSpecialPage;
 use MediaWiki\User\UserNamePrefixSearch;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserRigorOptions;
-use Wikimedia\Rdbms\ILoadBalancer;
+use RepoGroup;
+use Wikimedia\Rdbms\IConnectionProvider;
 
+/**
+ * Implements Special:Listfiles
+ *
+ * @ingroup SpecialPage
+ */
 class SpecialListFiles extends IncludableSpecialPage {
 
-	/** @var RepoGroup */
-	private $repoGroup;
-
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var CommentStore */
-	private $commentStore;
-
-	/** @var UserNameUtils */
-	private $userNameUtils;
-
-	/** @var UserNamePrefixSearch */
-	private $userNamePrefixSearch;
-
-	/** @var UserCache */
-	private $userCache;
+	private RepoGroup $repoGroup;
+	private IConnectionProvider $dbProvider;
+	private CommentStore $commentStore;
+	private UserNameUtils $userNameUtils;
+	private UserNamePrefixSearch $userNamePrefixSearch;
+	private CommentFormatter $commentFormatter;
+	private LinkBatchFactory $linkBatchFactory;
 
 	/**
 	 * @param RepoGroup $repoGroup
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param CommentStore $commentStore
 	 * @param UserNameUtils $userNameUtils
 	 * @param UserNamePrefixSearch $userNamePrefixSearch
-	 * @param UserCache $userCache
+	 * @param CommentFormatter $commentFormatter
+	 * @param LinkBatchFactory $linkBatchFactory
 	 */
 	public function __construct(
 		RepoGroup $repoGroup,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		CommentStore $commentStore,
 		UserNameUtils $userNameUtils,
 		UserNamePrefixSearch $userNamePrefixSearch,
-		UserCache $userCache
+		CommentFormatter $commentFormatter,
+		LinkBatchFactory $linkBatchFactory
 	) {
 		parent::__construct( 'Listfiles' );
 		$this->repoGroup = $repoGroup;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->commentStore = $commentStore;
 		$this->userNameUtils = $userNameUtils;
 		$this->userNamePrefixSearch = $userNamePrefixSearch;
-		$this->userCache = $userCache;
+		$this->commentFormatter = $commentFormatter;
+		$this->linkBatchFactory = $linkBatchFactory;
 	}
 
 	public function execute( $par ) {
@@ -87,12 +90,12 @@ class SpecialListFiles extends IncludableSpecialPage {
 		}
 		// Sanitize usernames to avoid symbols in the title of page.
 		$sanitizedUserName = $this->userNameUtils->getCanonical( $userName, UserRigorOptions::RIGOR_NONE );
-		if ( $sanitizedUserName ) {
+		if ( $sanitizedUserName !== false ) {
 			$userName = $sanitizedUserName;
 		}
 
-		if ( $userName ) {
-			$pageTitle = $this->msg( 'listfiles_subpage', $userName );
+		if ( $userName !== '' ) {
+			$pageTitle = $this->msg( 'listfiles_subpage' )->plaintextParams( $userName );
 		} else {
 			$pageTitle = $this->msg( 'listfiles' );
 		}
@@ -101,10 +104,11 @@ class SpecialListFiles extends IncludableSpecialPage {
 			$this->getContext(),
 			$this->commentStore,
 			$this->getLinkRenderer(),
-			$this->loadBalancer,
+			$this->dbProvider,
 			$this->repoGroup,
-			$this->userCache,
 			$this->userNameUtils,
+			$this->commentFormatter,
+			$this->linkBatchFactory,
 			$userName,
 			$search,
 			$this->including(),
@@ -112,7 +116,7 @@ class SpecialListFiles extends IncludableSpecialPage {
 		);
 
 		$out = $this->getOutput();
-		$out->setPageTitle( $pageTitle );
+		$out->setPageTitleMsg( $pageTitle );
 		$out->addModuleStyles( 'mediawiki.special' );
 		if ( $this->including() ) {
 			$out->addParserOutputContent( $pager->getBodyOutput() );
@@ -149,3 +153,6 @@ class SpecialListFiles extends IncludableSpecialPage {
 		return 'media';
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialListFiles::class, 'SpecialListFiles' );

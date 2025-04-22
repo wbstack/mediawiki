@@ -4,8 +4,8 @@ namespace Wikibase\Repo\Maintenance;
 
 use Exception;
 use InvalidArgumentException;
-use Maintenance;
-use User;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\User\User;
 use Wikibase\DataModel\Entity\NumericPropertyId;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\Lib\WikibaseSettings;
@@ -38,6 +38,12 @@ class ChangePropertyDataType extends Maintenance {
 			true,
 			true
 		);
+		$this->addOption(
+			'summary',
+			'Edit summary (will be appended to an automatic edit summary).',
+			false,
+			true
+		);
 	}
 
 	public function execute() {
@@ -64,10 +70,10 @@ class ChangePropertyDataType extends Maintenance {
 			WikibaseRepo::getDataTypeFactory()
 		);
 
-		// "Maintenance script" is in MediaWiki's $wgReservedUsernames
-		$user = User::newFromName( 'Maintenance script' );
+		$user = User::newSystemUser( User::MAINTENANCE_SCRIPT_USER, [ 'steal' => true ] );
+		$summary = $this->getOption( 'summary', '' );
 		try {
-			$propertyDataTypeChanger->changeDataType( $propertyId, $user, $newDataType );
+			$propertyDataTypeChanger->changeDataType( $propertyId, $user, $newDataType, $summary );
 		} catch ( Exception $e ) {
 			$this->fatalError( "An error occurred: " . $e->getMessage() );
 		}

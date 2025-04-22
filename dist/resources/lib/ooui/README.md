@@ -1,5 +1,3 @@
-[![npm](https://img.shields.io/npm/v/oojs-ui.svg?style=flat)](https://www.npmjs.com/package/oojs-ui) [![Packagist](https://img.shields.io/packagist/v/oojs/oojs-ui.svg?style=flat)](https://packagist.org/packages/oojs/oojs-ui)
-
 OOUI
 =================
 
@@ -20,20 +18,20 @@ Quick start
 
 The library is available on [npm](https://www.npmjs.com/package/oojs-ui). To install:
 
-<pre lang="bash">
+```bash
 $ npm install oojs-ui
-</pre>
+```
 
 Once installed, include the following scripts and styles to get started:
 
-<pre lang="html">
+```html
 <script src="node_modules/jquery/dist/jquery.min.js"></script>
 <script src="node_modules/oojs/dist/oojs.min.js"></script>
 
 <script src="node_modules/oojs-ui/dist/oojs-ui.min.js"></script>
 <script src="node_modules/oojs-ui/dist/oojs-ui-wikimediaui.min.js"></script>
 <link rel="stylesheet" href="node_modules/oojs-ui/dist/oojs-ui-wikimediaui.min.css">
-</pre>
+```
 
 
 Loading the library
@@ -78,6 +76,9 @@ We are always delighted when people contribute patches. To setup your developmen
 
 7. You can also copy the distribution files from the dist directory into your project.
 
+8. You can start a local web server by running `php -S localhost:80` in your root dir.
+
+9. You can navigate to http://localhost/tests/ to run the tests locally in your browser.
 
 We use [Gerrit](https://gerrit.wikimedia.org/) for code review, and [Phabricator](https://phabricator.wikimedia.org) to track issues. To contribute patches or join discussions all you need is a [developer account](https://wikitech.wikimedia.org/w/index.php?title=Special:CreateAccount&returnto=Help%3AGetting+Started).
 
@@ -111,38 +112,166 @@ Releases will be numbered in the following format:
 Release
 ----------
 
-Release process:
-<pre lang="bash">
+### Prerequisites
+- [Create an NPM account](https://www.npmjs.com/signup), if you don't have one already
+- Verify that you can [log into your NPM account](https://www.npmjs.com/login)
+- Verify that you are [listed as a maintainer](https://www.npmjs.com/package/oojs-ui/access)
+  of the oojs-ui package. If not, ask an existing maintainer to add you.
+- Make sure that you have two-factor authentication (2FA) set up.
+- Run `npm login` and follow the steps. You should only need to do this once on each computer.
+  If you're not sure if you've already done this, you can run `npm whoami`; if it prints your
+  NPM username, you're already logged in.
+- Clone the mediawiki/vendor repository: https://gerrit.wikimedia.org/r/admin/repos/mediawiki/vendor,general
 
-    $ cd path/to/oojs-ui/
-    $ git remote update
-    $ git checkout -B release -t origin/master
+### Prepare and submit the release commit
+From the root of this repository, update master and check out a new `release` branch:
+```bash
+$ git remote update
+$ git checkout -B release -t origin/master
+```
 
-    # Ensure tests pass
-    $ npm install && composer update && npm test && composer test
+Clean-install npm dependencies, update Composer dependencies, and ensure tests pass:
+```bash
+$ npm ci && composer update && npm test && composer test
+```
 
-    # Update release notes
-    # Copy the resulting list into a new section at the top of History.md and edit
-    # into five sub-sections, in order:
-    # * ### Breaking changes
-    # * ### Deprecations
-    # * ### Features
-    # * ### Styles
-    # * ### Code
-    $ git log --format='* %s (%aN)' --no-merges --reverse v$(node -e 'console.log(require("./package.json").version);')...HEAD | grep -v "Localisation updates from" | sort
-    $ edit History.md
+Generate a list of commits that are part of this release:
+```bash
+$ git log --format='* %s (%aN)' --no-merges v$(node -e 'console.log(require("./package").version);')...HEAD | grep -v "Localisation updates from" | sort
+```
 
-    # Update the version number (change 'patch' to 'minor' if you've made breaking changes):
-    $ npm version patch --git-tag-version=false
+In History.md, add a new heading for this version and date. Copy the list of commits into the new
+section and sort into five sub-sections, in order, omitting any sub-section that has no commits:
+```md
+### Breaking changes
+### Deprecations
+### Features
+### Styles
+### Code
+```
 
-    $ git add -p
-    $ git commit -m "Tag vX.X.X"
-    $ git review
+Generate the list of Phabricator tasks for this release. Copy the resulting list and save it for
+later. In a later step, you will add it to the commit message of the MediaWiki core commit.
+```bash
+$ git log --pretty=format:%b v$(node -e 'console.log(require("./package").version);')...HEAD | grep Bug: | sort | uniq
+```
 
-    # After merging:
-    $ git remote update
-    $ git checkout origin/master
-    $ git tag "vX.X.X"
-    $ npm run publish-build && git push --tags && npm publish
+Update the version number (in the following command, change 'patch' to 'minor' if you've made
+breaking changes):
+```bash
+$ npm version patch --git-tag-version=false
+```
 
-</pre>
+Commit the release and submit to Gerrit. Note that if there is a Phabricator task associated with
+the release, you should edit the commit to add the bug number before running `git review`.
+```bash
+$ git add -u
+$ git commit -m "Tag v$(node -e 'console.log(require("./package").version);')"
+$ git review
+```
+
+### Publish the tag and push to NPM
+After the tag commit is merged in this repo, push the tag and publish to NPM:
+```bash
+$ git remote update
+$ git checkout origin/master
+$ git tag "v$(node -e 'console.log(require("./package").version);')"
+$ npm run publish-build && git push --tags && npm publish
+```
+
+### Update the mediawiki/vendor repo
+In your local mediawiki/vendor repo, point composer to the new version and pull in the updated
+vendor files:
+```bash
+# Replace 1.2.34 with the version number of the new release
+$ composer require oojs/oojs-ui 1.2.34 --no-update
+$ composer update --no-dev
+```
+
+Then commit the changes with the following commit message, replacing 1.2.34 with the new OOUI
+version number (example: https://gerrit.wikimedia.org/r/c/mediawiki/vendor/+/813629).
+```bash
+$ git add -u
+$ git commit
+```
+
+Commit message format:
+```bash
+Update OOUI to v1.2.34
+
+  Release notes: https://gerrit.wikimedia.org/g/oojs/ui/+/v1.2.34/History.md
+```
+
+Push this to gerrit. Take note of the Change-Id in the commit message. Copy it and save it for
+later. You will need it for the Depends-On: line in the commit message when updating MediaWiki.
+```bash
+$ git review
+# Show the last commit
+$ git show --stat
+```
+
+### Update the MediaWiki core repo
+
+In your local MediaWiki core repo, open `composer.json` and update the version number of
+`oojs/oojs-ui` to the new version number.
+
+Open `RELEASE-NOTES-1.NN`. If there is already a list item about OOUI, update the latest version
+number. For example, if there is a list item that says "Updated OOUI from v1.2.0 to v1.2.33",
+update the latter version number fo `v1.2.34`. If there isn't a list item about OOUI yet, add one
+in the `Changed external libraries` section.
+
+Open `resources/lib/foreign-resources.yaml`. For the OOUI listing, change the `version`, the `purl`,
+and the `src` URL to use the new version number. Compute the new integrity hash:
+
+```bash
+$ php maintenance/run.php manageForeignResources make-sri ooui
+# Or if you're running Docker...
+$ docker compose exec mediawiki php maintenance/run.php manageForeignResources make-sri ooui
+```
+
+Then update the OOUI library files:
+```bash
+$ php maintenance/run.php manageForeignResources update ooui
+# Or if you're running Docker...
+$ docker compose exec mediawiki php maintenance/run.php manageForeignResources update ooui
+```
+
+Then run the following command to update `foreign-resources.cdx.json`:
+```bash
+$ php maintenance/run.php manageForeignResources make-cdx
+# Or if you're running Docker...
+$ docker compose exec mediawiki php maintenance/run.php manageForeignResources make-cdx
+```
+
+Then commit the changes with the following commit message, replacing 1.2.34 with the new OOUI
+version number:
+```bash
+$ git add -u
+$ git commit
+```
+
+Commit message format, where the list of bugs is the list you generated during the OOUI tag step,
+and Depends-On is set to the Change-Id of the mediawiki/vendor commit:
+```txt
+Update OOUI to v1.2.34
+
+  Release notes: https://gerrit.wikimedia.org/g/oojs/ui/+/v1.2.34/History.md
+
+Bug: T123456
+Bug: T234567
+Depends-On: I12345678901234567890
+```
+
+Then push that commit to gerrit:
+```bash
+git review
+```
+
+### Update the VisualEditor/VisualEditor repo
+In your local VisualEditor/VisualEditor repo, run the script to create a commit updating the local
+copy of OOUI, and push the commit to Gerrit:
+
+```bash
+$ ./bin/update-ooui.sh
+$ git review
+```

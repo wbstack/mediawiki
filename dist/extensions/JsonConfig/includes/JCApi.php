@@ -1,7 +1,8 @@
 <?php
 namespace JsonConfig;
 
-use ApiBase;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Registration\ExtensionRegistry;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -51,12 +52,11 @@ class JCApi extends ApiBase {
 				$this->getMain()->setCacheMaxAge( 1 * 30 ); // seconds
 				$this->getMain()->setCacheMode( 'public' );
 
-				global $wgJsonConfigModels;
 				$result->addValue(
 					null,
 					'models',
-					\ExtensionRegistry::getInstance()->getAttribute( 'JsonConfigModels' )
-					+ $wgJsonConfigModels
+					ExtensionRegistry::getInstance()->getAttribute( 'JsonConfigModels' )
+					+ $this->getConfig()->get( 'JsonConfigModels' )
 				);
 
 				$data = [];
@@ -149,7 +149,8 @@ class JCApi extends ApiBase {
 					'status',
 					'reset',
 					'reload',
-				]
+				],
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 			'namespace' => [
 				ParamValidator::PARAM_TYPE => 'integer',

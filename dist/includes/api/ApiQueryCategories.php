@@ -20,6 +20,9 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 
@@ -30,11 +33,7 @@ use Wikimedia\ParamValidator\TypeDef\IntegerDef;
  */
 class ApiQueryCategories extends ApiQueryGeneratorBase {
 
-	/**
-	 * @param ApiQuery $query
-	 * @param string $moduleName
-	 */
-	public function __construct( ApiQuery $query, $moduleName ) {
+	public function __construct( ApiQuery $query, string $moduleName ) {
 		parent::__construct( $query, $moduleName, 'cl' );
 	}
 
@@ -91,16 +90,13 @@ class ApiQueryCategories extends ApiQueryGeneratorBase {
 		}
 
 		if ( $params['continue'] !== null ) {
-			$cont = explode( '|', $params['continue'] );
-			$this->dieContinueUsageIf( count( $cont ) != 2 );
-			$op = $params['dir'] == 'descending' ? '<' : '>';
-			$clfrom = (int)$cont[0];
-			$clto = $this->getDB()->addQuotes( $cont[1] );
-			$this->addWhere(
-				"cl_from $op $clfrom OR " .
-				"(cl_from = $clfrom AND " .
-				"cl_to $op= $clto)"
-			);
+			$db = $this->getDB();
+			$cont = $this->parseContinueParamOrDie( $params['continue'], [ 'int', 'string' ] );
+			$op = $params['dir'] == 'descending' ? '<=' : '>=';
+			$this->addWhere( $db->buildComparison( $op, [
+				'cl_from' => $cont[0],
+				'cl_to' => $cont[1],
+			] ) );
 		}
 
 		if ( isset( $show['hidden'] ) && isset( $show['!hidden'] ) ) {
@@ -119,9 +115,9 @@ class ApiQueryCategories extends ApiQueryGeneratorBase {
 					'pp_propname' => 'hiddencat' ] ]
 			] );
 			if ( isset( $show['hidden'] ) ) {
-				$this->addWhere( [ 'pp_propname IS NOT NULL' ] );
+				$this->addWhere( $this->getDB()->expr( 'pp_propname', '!=', null ) );
 			} elseif ( isset( $show['!hidden'] ) ) {
-				$this->addWhere( [ 'pp_propname IS NULL' ] );
+				$this->addWhere( [ 'pp_propname' => null ] );
 			}
 		}
 
@@ -239,3 +235,6 @@ class ApiQueryCategories extends ApiQueryGeneratorBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Categories';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryCategories::class, 'ApiQueryCategories' );

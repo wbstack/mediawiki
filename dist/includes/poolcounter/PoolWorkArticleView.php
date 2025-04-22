@@ -18,9 +18,18 @@
  * @file
  */
 
+namespace MediaWiki\PoolCounter;
+
 use MediaWiki\Logger\Spi as LoggerSpi;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\ParserOutputAccess;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionRenderer;
+use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\WikiMap\WikiMap;
 
 /**
  * PoolCounter protected work wrapping RenderedRevision->getRevisionParserOutput.
@@ -31,16 +40,12 @@ use MediaWiki\Revision\RevisionRenderer;
  * @internal
  */
 class PoolWorkArticleView extends PoolCounterWork {
-
 	/** @var ParserOptions */
 	protected $parserOptions;
-
 	/** @var RevisionRecord */
 	protected $revision;
-
 	/** @var RevisionRenderer */
 	private $renderer;
-
 	/** @var LoggerSpi */
 	protected $loggerSpi;
 
@@ -73,33 +78,53 @@ class PoolWorkArticleView extends PoolCounterWork {
 	}
 
 	/**
+	 * Render the given revision.
+	 *
+	 * @see ParserOutputAccess::renderRevision
+	 *
+	 * @param ?ParserOutput $previousOutput previously-cached output for this
+	 *   page (used by Parsoid for selective updates)
+	 * @param bool $doSample Whether to collect statistics on this render
+	 * @param string $sourceLabel the source label to use on the statistics
 	 * @return Status with the value being a ParserOutput or null
 	 */
-	public function renderRevision(): Status {
+	public function renderRevision(
+		?ParserOutput $previousOutput = null,
+		bool $doSample = false,
+		string $sourceLabel = ''
+	): Status {
 		$renderedRevision = $this->renderer->getRenderedRevision(
 			$this->revision,
 			$this->parserOptions,
 			null,
-			[ 'audience' => RevisionRecord::RAW ]
+			[
+				'audience' => RevisionRecord::RAW,
+				'previous-output' => $previousOutput,
+			]
 		);
-		if ( !$renderedRevision ) {
-			// audience check failed
-			return Status::newFatal( 'pool-errorunknown' );
-		}
 
-		$time = -microtime( true );
 		$parserOutput = $renderedRevision->getRevisionParserOutput();
-		$time += microtime( true );
 
-		// Timing hack
-		if ( $time > 3 ) {
-			// TODO: Use Parser's logger (once it has one)
-			$logger = $this->loggerSpi->getLogger( 'slow-parse' );
-			$logger->info( 'Parsing {title} was slow, took {time} seconds', [
-				'time' => number_format( $time, 2 ),
-				'title' => (string)$this->revision->getPageAsLinkTarget(),
-				'trigger' => 'view',
-			] );
+		if ( $doSample ) {
+			$stats = MediaWikiServices::getInstance()->getStatsFactory();
+			$content = $this->revision->getContent( SlotRecord::MAIN );
+			$labels = [
+				'source' => $sourceLabel,
+				'type' => $previousOutput === null ? 'full' : 'selective',
+				'reason' => $this->parserOptions->getRenderReason(),
+				'parser' => $this->parserOptions->getUseParsoid() ? 'parsoid' : 'legacy',
+				'opportunistic' => 'false',
+				'wiki' => WikiMap::getCurrentWikiId(),
+				'model' => $content ? $content->getModel() : 'unknown',
+			];
+			$stats
+				->getCounter( 'ParserCache_selective_total' )
+				->setLabels( $labels )
+				->increment();
+			$stats
+				->getCounter( 'ParserCache_selective_cpu_seconds' )
+				->setLabels( $labels )
+				->incrementBy( $parserOutput->getTimeProfile( 'cpu' ) );
 		}
 
 		return Status::newGood( $parserOutput );
@@ -114,3 +139,6 @@ class PoolWorkArticleView extends PoolCounterWork {
 	}
 
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( PoolWorkArticleView::class, 'PoolWorkArticleView' );

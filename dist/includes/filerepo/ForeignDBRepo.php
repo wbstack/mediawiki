@@ -21,8 +21,8 @@
  * @ingroup FileRepo
  */
 
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Storage\BlobStore;
-use Wikimedia\Rdbms\Database;
 use Wikimedia\Rdbms\DatabaseDomain;
 use Wikimedia\Rdbms\IDatabase;
 
@@ -31,7 +31,7 @@ use Wikimedia\Rdbms\IDatabase;
  *
  * @ingroup FileRepo
  */
-class ForeignDBRepo extends LocalRepo {
+class ForeignDBRepo extends LocalRepo implements IForeignRepoWithDB {
 	/** @var string */
 	protected $dbType;
 
@@ -109,12 +109,16 @@ class ForeignDBRepo extends LocalRepo {
 		];
 
 		return static function ( $index ) use ( $type, $params ) {
-			return Database::factory( $type, $params );
+			$factory = MediaWikiServices::getInstance()->getDatabaseFactory();
+			return $factory->create( $type, $params );
 		};
 	}
 
+	/**
+	 * @return never
+	 */
 	protected function assertWritableRepo() {
-		throw new MWException( static::class . ': write operations are not supported.' );
+		throw new LogicException( static::class . ': write operations are not supported.' );
 	}
 
 	public function getBlobStore(): ?BlobStore {

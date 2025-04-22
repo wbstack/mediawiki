@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Brokenredirects
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,39 +16,44 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
+
+namespace MediaWiki\Specials;
 
 use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\Title;
+use Skin;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
- * A special page listing redirects to non existent page. Those should be
- * fixed to point to an existing page.
+ * List of redirects to non-existent pages.
+ *
+ * Editors are encouraged to fix these by editing them to redirect to
+ * an existing page instead.
  *
  * @ingroup SpecialPage
  */
 class SpecialBrokenRedirects extends QueryPage {
 
-	/** @var IContentHandlerFactory */
-	private $contentHandlerFactory;
+	private IContentHandlerFactory $contentHandlerFactory;
 
 	/**
 	 * @param IContentHandlerFactory $contentHandlerFactory
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LinkBatchFactory $linkBatchFactory
 	 */
 	public function __construct(
 		IContentHandlerFactory $contentHandlerFactory,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LinkBatchFactory $linkBatchFactory
 	) {
 		parent::__construct( 'BrokenRedirects' );
 		$this->contentHandlerFactory = $contentHandlerFactory;
-		$this->setDBLoadBalancer( $loadBalancer );
+		$this->setDatabaseProvider( $dbProvider );
 		$this->setLinkBatchFactory( $linkBatchFactory );
 	}
 
@@ -71,7 +74,7 @@ class SpecialBrokenRedirects extends QueryPage {
 	}
 
 	public function getQueryInfo() {
-		$dbr = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_REPLICA );
+		$dbr = $this->getDatabaseProvider()->getReplicaDatabase();
 
 		return [
 			'tables' => [
@@ -87,12 +90,11 @@ class SpecialBrokenRedirects extends QueryPage {
 				'rd_fragment',
 			],
 			'conds' => [
-				// Exclude pages that don't exist locally as wiki pages,
-				// but aren't "broken" either.
-				// Special pages and interwiki links
-				'rd_namespace >= 0',
-				'rd_interwiki IS NULL OR rd_interwiki = ' . $dbr->addQuotes( '' ),
-				'p2.page_namespace IS NULL',
+				// Exclude pages that don't exist locally as wiki pages, but aren't "broken" either: special
+				// pages and interwiki links.
+				$dbr->expr( 'rd_namespace', '>=', 0 ),
+				'rd_interwiki' => '',
+				'p2.page_namespace' => null,
 			],
 			'join_conds' => [
 				'p1' => [ 'JOIN', [
@@ -115,7 +117,7 @@ class SpecialBrokenRedirects extends QueryPage {
 
 	/**
 	 * @param Skin $skin
-	 * @param stdClass $result Result row
+	 * @param \stdClass $result Result row
 	 * @return string
 	 */
 	public function formatResult( $skin, $result ) {
@@ -124,15 +126,10 @@ class SpecialBrokenRedirects extends QueryPage {
 			$toObj = Title::makeTitle(
 				$result->rd_namespace,
 				$result->rd_title,
-				$result->rd_fragment ?? ''
+				$result->rd_fragment
 			);
 		} else {
-			$blinks = $fromObj->getBrokenLinksFrom(); # TODO: check for redirect, not for links
-			if ( $blinks ) {
-				$toObj = $blinks[0];
-			} else {
-				$toObj = false;
-			}
+			$toObj = false;
 		}
 
 		$linkRenderer = $this->getLinkRenderer();
@@ -211,3 +208,6 @@ class SpecialBrokenRedirects extends QueryPage {
 		return 'maintenance';
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialBrokenRedirects::class, 'SpecialBrokenRedirects' );

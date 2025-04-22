@@ -3,14 +3,14 @@
 namespace Wikibase\Repo\Tests\RestApi\RouteHandlers;
 
 use Generator;
+use LogicException;
 use PHPUnit\Framework\TestCase;
-use Wikibase\Repo\RestApi\Presentation\Presenters\ErrorJsonPresenter;
+use Wikibase\Repo\RestApi\Application\UseCases\UseCaseError;
 use Wikibase\Repo\RestApi\RouteHandlers\ResponseFactory;
-use Wikibase\Repo\RestApi\UseCases\ErrorResponse;
 
 /**
  * @covers \Wikibase\Repo\RestApi\RouteHandlers\ResponseFactory
- * @covers \Wikibase\Repo\RestApi\Presentation\ErrorResponseToHttpStatus
+ * @covers \Wikibase\Repo\RestApi\RouteHandlers\ErrorResponseToHttpStatus
  *
  * @group Wikibase
  *
@@ -21,43 +21,61 @@ class ResponseFactoryTest extends TestCase {
 	/**
 	 * @dataProvider errorCodeToHttpStatusCodeProvider
 	 */
-	public function testNewErrorResponse( string $errorCode, int $httpStatus ): void {
-		$useCaseResponse = $this->createStub( ErrorResponse::class );
-		$useCaseResponse->method( 'getCode' )->willReturn( $errorCode );
+	public function testNewErrorResponseFromException( string $errorCode, int $httpStatus, array $errorContext = [] ): void {
+		$errorMessage = 'testNewErrorResponseFromException error message';
+		$jsonErrorContext = json_encode( $errorContext );
 
-		$responseBody = '{"some": "json"}';
-		$errorPresenter = $this->createMock( ErrorJsonPresenter::class );
-		$errorPresenter->expects( $this->once() )
-			->method( 'getJson' )
-			->with( $useCaseResponse )
-			->willReturn( $responseBody );
+		$httpResponse = ( new ResponseFactory() )->newErrorResponseFromException(
+			new UseCaseError( $errorCode, $errorMessage, $errorContext )
+		);
 
-		$httpResponse = ( new ResponseFactory( $errorPresenter ) )->newErrorResponse( $useCaseResponse );
-
-		$this->assertSame( $httpResponse->getBody()->getContents(), $responseBody );
+		$this->assertJsonStringEqualsJsonString(
+			$errorContext ?
+				"{ \"code\": \"{$errorCode}\", \"message\": \"{$errorMessage}\", \"context\": $jsonErrorContext }" :
+				"{ \"code\": \"{$errorCode}\", \"message\": \"{$errorMessage}\" }",
+			$httpResponse->getBody()->getContents()
+		);
 		$this->assertSame( $httpStatus, $httpResponse->getStatusCode() );
 	}
 
-	public function errorCodeToHttpStatusCodeProvider(): Generator {
-		yield [ ErrorResponse::INVALID_FIELD, 400 ];
-		yield [ ErrorResponse::INVALID_ITEM_ID,  400 ];
-		yield [ ErrorResponse::INVALID_STATEMENT_ID,  400 ];
-		yield [ ErrorResponse::INVALID_FIELD,  400 ];
-		yield [ ErrorResponse::ITEM_NOT_FOUND,  404 ];
-		yield [ ErrorResponse::STATEMENT_NOT_FOUND,  404 ];
-		yield [ ErrorResponse::UNEXPECTED_ERROR,  500 ];
+	/**
+	 * @dataProvider errorCodeToHttpStatusCodeProvider
+	 */
+	public function testNewErrorResponse( string $errorCode, int $httpStatus, ?array $errorContext = null ): void {
+		$errorMessage = 'testNewErrorResponse error message';
+		$jsonErrorContext = json_encode( $errorContext );
+
+		$httpResponse = ( new ResponseFactory() )->newErrorResponse( $errorCode, $errorMessage, $errorContext );
+
+		$this->assertJsonStringEqualsJsonString(
+			$errorContext ?
+				"{ \"code\": \"{$errorCode}\", \"message\": \"{$errorMessage}\", \"context\": $jsonErrorContext }" :
+				"{ \"code\": \"{$errorCode}\", \"message\": \"{$errorMessage}\" }",
+			$httpResponse->getBody()->getContents()
+		);
+		$this->assertSame( $httpStatus, $httpResponse->getStatusCode() );
+	}
+
+	public static function errorCodeToHttpStatusCodeProvider(): Generator {
+		yield [ UseCaseError::INVALID_QUERY_PARAMETER, 400, [ 'parameter' => '_fields' ] ];
+		yield [ UseCaseError::INVALID_PATH_PARAMETER, 400, [ 'parameter' => '' ] ];
+		yield [ UseCaseError::RESOURCE_NOT_FOUND, 404, [ 'resource_type' => 'statement' ] ];
+		yield [ UseCaseError::UNEXPECTED_ERROR, 500 ];
 	}
 
 	public function testGivenAuthorizationError_newErrorResponseReturnsRestWriteDenied(): void {
-		$useCaseResponse = new ErrorResponse( ErrorResponse::PERMISSION_DENIED, 'item protected' );
 
-		$errorPresenter = $this->createMock( ErrorJsonPresenter::class );
-		$errorPresenter->expects( $this->never() )->method( $this->anything() );
-
-		$httpResponse = ( new ResponseFactory( $errorPresenter ) )->newErrorResponse( $useCaseResponse );
+		$httpResponse = ( new ResponseFactory() )
+			->newErrorResponse( UseCaseError::PERMISSION_DENIED_UNKNOWN_REASON, 'item protected' );
 
 		$this->assertSame( 403, $httpResponse->getStatusCode() );
 		$this->assertStringContainsString( 'rest-write-denied', $httpResponse->getBody()->getContents() );
+	}
+
+	public function testGivenErrorCodeNotAssignedStatusCode_throwLogicException(): void {
+		$this->expectException( LogicException::class );
+
+		( new ResponseFactory() )->newErrorResponse( 'unknown-code', 'should throw a logic exception' );
 	}
 
 }

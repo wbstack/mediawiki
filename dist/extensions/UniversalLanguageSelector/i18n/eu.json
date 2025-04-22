@@ -2,12 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Amaia",
-			"Amire80",
 			"Gorkaazk",
 			"Sator",
 			"Subi",
-			"Xabier Armendaritz",
-			"Theklan"
+			"Theklan",
+			"Xabier Armendaritz"
 		]
 	},
 	"uls-desc": "Hainbat bide eskaintzen dizkio erabiltzaileari hizkuntza bat aukeratu eta hizkuntzaren ezarpenak zehazteko.",
@@ -77,5 +76,6 @@
 	"ext-uls-empty-state-header": "Oraindik ez dago hizkuntzarik",
 	"ext-uls-empty-state-desc": "Momentuz ez dago hizkuntzarik erabilgarri",
 	"ext-uls-empty-state-header-actions-available": "Oraindik ez dago hizkuntzarik. Berri bat gehitu?",
-	"ext-uls-empty-state-desc-actions-available": "Edukia hizkuntza gehiagotan eskuragarri jarri."
+	"ext-uls-empty-state-desc-actions-available": "Edukia hizkuntza gehiagotan eskuragarri jarri.",
+	"ext-uls-add-languages-button-label": "Hizkuntzak gehitu"
 }

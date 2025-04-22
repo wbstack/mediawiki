@@ -8,10 +8,11 @@ use Elastica\Query;
 use Elastica\Task;
 use Elasticsearch\Endpoints\Cluster\Health;
 use Exception;
-use FormatJson;
 use Generator;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Logger\LoggerFactory;
-use MWTimestamp;
+use MediaWiki\Utils\MWTimestamp;
+use RuntimeException;
 
 /**
  * This program is free software; you can redistribute it and/or modify
@@ -62,7 +63,7 @@ class MWElasticUtils {
 						$beforeRetry( $e, $errors );
 					} else {
 						$seconds = static::backoffDelay( $errors );
-						usleep( $seconds * self::ONE_SEC_IN_MICROSEC );
+						usleep( (int)( $seconds * self::ONE_SEC_IN_MICROSEC ) );
 					}
 				}
 			} else {
@@ -94,7 +95,7 @@ class MWElasticUtils {
 		$endpoint->setIndex( $indexName );
 		$response = $client->requestEndpoint( $endpoint );
 		if ( $response->hasError() ) {
-			throw new \Exception( "Error while fetching index health status: " . $response->getError() );
+			throw new RuntimeException( "Error while fetching index health status: " . $response->getError() );
 		}
 		return $response->getData();
 	}
@@ -140,7 +141,6 @@ class MWElasticUtils {
 	 *  will have been deleted.
 	 * @param int $reportEveryNumSec Log task status on this interval of seconds
 	 * @return Task Generator returns the Task instance on completion.
-	 * @throws Exception when task reports failures
 	 */
 	public static function deleteByQuery(
 		Index $index,
@@ -194,7 +194,6 @@ class MWElasticUtils {
 	 * @return \Generator|array[]|\Elastica\Task Returns a generator. Generator yields
 	 *  arrays containing task status responses. Generator returns the Task instance
 	 *  on completion via Generator::getReturn.
-	 * @throws Exception when task reports failures
 	 */
 	public static function deleteByQueryWithStatus(
 		Index $index,
@@ -211,7 +210,7 @@ class MWElasticUtils {
 		}
 		$response = $index->deleteByQuery( $query, $params )->getData();
 		if ( !isset( $response['task'] ) ) {
-			throw new \Exception( 'No task returned: ' . var_export( $response, true ) );
+			throw new RuntimeException( 'No task returned: ' . var_export( $response, true ) );
 		}
 		$log = LoggerFactory::getInstance( 'Elastica' );
 		$clusterName = self::fetchClusterName( $index->getClient() );
@@ -247,7 +246,7 @@ class MWElasticUtils {
 			}
 			yield $task->getData();
 			$delay->next();
-			usleep( $delay->current() * self::ONE_SEC_IN_MICROSEC );
+			usleep( (int)( $delay->current() * self::ONE_SEC_IN_MICROSEC ) );
 			$task->refresh();
 		}
 
@@ -258,7 +257,7 @@ class MWElasticUtils {
 				'runtime' => $now - $start,
 				'status' => FormatJson::encode( $task->getData() ),
 			] );
-			throw new \Exception( 'Failed deleteByQuery: '
+			throw new RuntimeException( 'Failed deleteByQuery: '
 				. implode( ', ', $taskCompleteResponse['failures'] ) );
 		}
 
@@ -279,7 +278,7 @@ class MWElasticUtils {
 	public static function fetchClusterName( Client $client ) {
 		$response = $client->requestEndpoint( new \Elasticsearch\Endpoints\Info );
 		if ( $response->getStatus() !== 200 ) {
-			throw new Exception(
+			throw new RuntimeException(
 				"Failed requesting cluster name, got status code [{$response->getStatus()}]" );
 		}
 		return $response->getData()['cluster_name'];

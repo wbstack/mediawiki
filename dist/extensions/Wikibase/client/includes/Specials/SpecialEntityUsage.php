@@ -2,14 +2,14 @@
 
 namespace Wikibase\Client\Specials;
 
-use Html;
 use HtmlArmor;
-use HTMLForm;
-use Linker;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use MediaWiki\Languages\LanguageConverterFactory;
-use QueryPage;
+use MediaWiki\Linker\Linker;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\Title;
 use Skin;
-use Title;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -60,7 +60,7 @@ class SpecialEntityUsage extends QueryPage {
 	 * @param string|null $subPage
 	 */
 	public function execute( $subPage ) {
-		$entity = $this->getRequest()->getText( 'entity', $subPage );
+		$entity = $this->getRequest()->getText( 'entity', $subPage ?: '' );
 		$this->prepareParams( $entity );
 
 		if ( $this->entityId !== null ) {
@@ -84,7 +84,7 @@ class SpecialEntityUsage extends QueryPage {
 					Html::element(
 						'p',
 						[
-							'class' => 'error'
+							'class' => 'error',
 						],
 						$this->msg( 'wikibase-entityusage-invalid-id', $entity )->text()
 					)
@@ -110,8 +110,8 @@ class SpecialEntityUsage extends QueryPage {
 				'name' => '',
 				'type' => 'submit',
 				'id' => 'wikibase-entityusage-submit',
-				'default' => $this->msg( 'wikibase-entityusage-submit' )->text()
-			]
+				'default' => $this->msg( 'wikibase-entityusage-submit' )->text(),
+			],
 		];
 
 		if ( $this->entityId !== null ) {
@@ -132,38 +132,33 @@ class SpecialEntityUsage extends QueryPage {
 	 * @return array[]
 	 */
 	public function getQueryInfo() {
-		$joinConds = [ 'wbc_entity_usage' => [ 'JOIN', [ 'page_id = eu_page_id' ] ] ];
+		$dbr = $this->db->connections()->getReadConnection();
 		$conds = [ 'eu_entity_id' => $this->entityId->getSerialization() ];
-		$groupConcat = $this->db->connections()->getReadConnectionRef()->buildGroupConcatField(
-			'|',
-			'wbc_entity_usage',
-			'eu_aspect',
-			[ 'eu_page_id = page_id' ] + $conds
-		);
-
-		return [
-			'tables' => [
-				'page',
-				'wbc_entity_usage'
-			],
-			'fields' => [
+		return $dbr->newSelectQueryBuilder()
+			->select( [
 				'value' => 'page_id',
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
-				'aspects' => $groupConcat,
+				'aspects' => $dbr->newSelectQueryBuilder()
+					->table( 'wbc_entity_usage' )
+					->field( 'eu_aspect' )
+					->where( [ 'eu_page_id = page_id' ] )
+					->andWhere( $conds )
+					->buildGroupConcatField( '|' ),
 				'eu_page_id',
-			],
-			'conds' => $conds,
-			'options' => [ 'GROUP BY' => 'eu_page_id' ],
-			'join_conds' => $joinConds
-		];
+			] )
+			->from( 'page' )
+			->join( 'wbc_entity_usage', null, [ 'page_id = eu_page_id' ] )
+			->where( $conds )
+			->groupBy( 'eu_page_id' )
+			->getQueryInfo();
 	}
 
 	/**
 	 * @see QueryPage::formatResult
 	 *
 	 * @param Skin $skin
-	 * @param object $row
+	 * @param \stdClass $row
 	 *
 	 * @return string HTML
 	 */

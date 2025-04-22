@@ -2,19 +2,19 @@
 
 namespace Wikibase\Repo\Store\Sql;
 
-use ActorMigration;
-use CommentStoreComment;
 use InvalidArgumentException;
+use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
+use MediaWiki\Revision\SlotRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use MediaWiki\User\ActorNormalization;
+use MediaWiki\User\User;
 use MediaWiki\Watchlist\WatchlistManager;
-use MWException;
 use RecentChange;
-use Status;
-use Title;
-use User;
 use Wikibase\DataAccess\DatabaseEntitySource;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
@@ -30,6 +30,7 @@ use Wikibase\Repo\Content\EntityContentFactory;
 use Wikibase\Repo\GenericEventDispatcher;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\Store\IdGenerator;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 use WikiPage;
 
 /**
@@ -76,6 +77,8 @@ class WikiPageEntityStore implements EntityStore {
 	/** @var DatabaseEntitySource */
 	private $entitySource;
 
+	private ActorNormalization $actorNormalization;
+
 	/**
 	 * @var PermissionManager
 	 */
@@ -101,6 +104,7 @@ class WikiPageEntityStore implements EntityStore {
 	 * @param EntityIdComposer $entityIdComposer
 	 * @param RevisionStore $revisionStore A RevisionStore for the local database.
 	 * @param DatabaseEntitySource $entitySource
+	 * @param ActorNormalization $actorNormalization
 	 * @param PermissionManager $permissionManager
 	 * @param WatchlistManager $watchlistManager
 	 * @param WikiPageFactory $wikiPageFactory
@@ -113,6 +117,7 @@ class WikiPageEntityStore implements EntityStore {
 		EntityIdComposer $entityIdComposer,
 		RevisionStore $revisionStore,
 		DatabaseEntitySource $entitySource,
+		ActorNormalization $actorNormalization,
 		PermissionManager $permissionManager,
 		WatchlistManager $watchlistManager,
 		WikiPageFactory $wikiPageFactory,
@@ -129,6 +134,7 @@ class WikiPageEntityStore implements EntityStore {
 
 		$this->entitySource = $entitySource;
 
+		$this->actorNormalization = $actorNormalization;
 		$this->permissionManager = $permissionManager;
 
 		$this->watchlistManager = $watchlistManager;
@@ -172,7 +178,7 @@ class WikiPageEntityStore implements EntityStore {
 		$contentModelId = $handler->getModelID();
 		$numericId = $this->idGenerator->getNewId( $contentModelId );
 
-		$entityId = $this->entityIdComposer->composeEntityId( '', $type, $numericId );
+		$entityId = $this->entityIdComposer->composeEntityId( $type, $numericId );
 		$entity->setId( $entityId );
 	}
 
@@ -452,7 +458,7 @@ class WikiPageEntityStore implements EntityStore {
 		 * If we are interacting with the main slot, keep the NEW flag.
 		 * This is consistent with previous behaviour.
 		 */
-		if ( $flags & EDIT_NEW && $parentRevision && $slotRole !== 'main' ) {
+		if ( $flags & EDIT_NEW && $parentRevision && $slotRole !== SlotRecord::MAIN ) {
 			if ( $parentRevision->hasSlot( $slotRole ) ) {
 				throw new StorageException( 'Can\'t create slot, it already exists: ' . $slotRole );
 			}
@@ -506,7 +512,7 @@ class WikiPageEntityStore implements EntityStore {
 	 * Check if no edits were made by other users since the given revision.
 	 * This makes the assumption that revision ids are monotonically increasing.
 	 *
-	 * @see EditPage::userWasLastToEdit()
+	 * @see \MediaWiki\EditPage\EditPage::userWasLastToEdit()
 	 *
 	 * @param User $user
 	 * @param EntityId $id the entity to check (ignored by this implementation)
@@ -523,21 +529,24 @@ class WikiPageEntityStore implements EntityStore {
 		}
 
 		// Scan through the revision table
-		$dbw = $this->db->connections()->getWriteConnectionRef();
-		$revWhere = ActorMigration::newMigration()->getWhere( $dbw, 'rev_user', $user );
-		$res = $dbw->select(
-			[ 'revision' ] + $revWhere['tables'],
-			1,
-			[
+		$dbw = $this->db->connections()->getWriteConnection();
+		$queryBuilder = $dbw->newSelectQueryBuilder()
+			->select( '1' )
+			->from( 'revision' )
+			->where( [
 				'rev_page' => $revision->getPageId(),
-				'rev_id > ' . (int)$lastRevId
-				. ' OR rev_timestamp > ' . $dbw->addQuotes( $dbw->timestamp( $revision->getTimestamp() ) ),
-				'NOT( ' . $revWhere['conds'] . ' )',
-			],
-			__METHOD__,
-			[ 'ORDER BY' => 'rev_timestamp ASC', 'LIMIT' => 1 ],
-			$revWhere['joins']
-		);
+				$dbw->expr( 'rev_id', '>', (int)$lastRevId )
+					->or( 'rev_timestamp', '>', $dbw->timestamp( $revision->getTimestamp() ) ),
+			] );
+		$actorId = $this->actorNormalization->findActorId( $user, $dbw );
+		if ( $actorId !== null ) {
+			// @phan-suppress-next-line PhanRedundantCondition in case findActorId() changes return type
+			$queryBuilder->andWhere( $dbw->expr( 'rev_actor', '!=', (int)$actorId ) );
+		}
+		$res = $queryBuilder
+			->orderBy( 'rev_timestamp', SelectQueryBuilder::SORT_ASC )
+			->limit( 1 )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		return $res->current() === false; // return true if query had no match
 	}
@@ -550,9 +559,8 @@ class WikiPageEntityStore implements EntityStore {
 	 * @param bool $watch whether to watch or unwatch the page.
 	 *
 	 * @throws InvalidArgumentException
-	 * @throws MWException
 	 *
-	 * @note keep in sync with logic in EditPage
+	 * @note keep in sync with logic in \MediaWiki\EditPage\EditPage
 	 */
 	public function updateWatchlist( User $user, EntityId $id, $watch ) {
 		$this->assertCanStoreEntity( $id );
@@ -560,7 +568,7 @@ class WikiPageEntityStore implements EntityStore {
 		$title = $this->getTitleForEntity( $id );
 
 		if (
-			$user->isRegistered() &&
+			$user->isNamed() &&
 			$title &&
 			( $watch != $this->watchlistManager->isWatchedIgnoringRights( $user, $title ) )
 		) {

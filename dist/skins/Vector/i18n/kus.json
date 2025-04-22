@@ -1,9 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Bugirbiig",
-			"Amire80",
 			"Agurwin Isaac",
+			"Bugirbiig",
 			"Mozanky",
 			"Poasana Anabah"
 		]
@@ -35,9 +34,18 @@
 	"vector-jumptosearch": "Iankim vɛɛns",
 	"vector-jumptocontent": "Iankim keŋ kʋ'ʋlʋmin la",
 	"vector-more-actions": "iem paas",
+	"vector-appearance-label": "Pian'azug",
+	"vector-feature-limited-width-name": "Zan'antɔl yalʋŋ",
+	"vector-feature-limited-width-0-label": "Bɛdir",
+	"vector-feature-limited-width-1-label": "Zi'esim",
+	"vector-feature-custom-font-size-name": "Sɔbʋg",
+	"vector-feature-custom-font-size-0-label": "Bi'ela",
+	"vector-feature-custom-font-size-1-label": "Zi'esim",
+	"vector-feature-custom-font-size-2-label": "Bɛdir",
 	"vector-search-loader": "La'asidi pʋtɛn'ɛr ieeb",
 	"vector-searchsuggest-containing": "Iem lakir banɛ mɔri <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Help:Zaŋi pa'al",
+	"vector-toc-label": "Yɛlkpana",
 	"vector-toc-beginning": "Pin'ilʋgʋn",
 	"vector-toc-toggle-button-label": "Diinm $1 pʋdigbil",
 	"vector-anon-user-menu-pages": "Ayiisi-mɛŋ sɔbidib lakir zin'is",
@@ -47,6 +55,22 @@
 	"vector-toc-menu-tooltip": "Yɛlmɛŋa teebul",
 	"vector-toc-collapsible-button-label": "Diinm yɔ'ɔg yɛlmɛŋa teebul la",
 	"vector-site-nav-label": "Zin'ig",
+	"vector-main-menu-label": "Yɛlkpan zin'ig",
+	"vector-page-tools-label": "La'ad",
+	"vector-page-tools-general-label": "Li wʋsa",
+	"vector-page-tools-actions-label": "Tʋʋma nam",
+	"vector-pin-element-label": "Vurigim keŋ kpikpɛŋ",
+	"vector-unpin-element-label": "su'am",
 	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Sɔnsʋg]]",
-	"tooltip-vector-anon-user-menu-title": "Gaansʋg bɛdegʋ"
+	"tooltip-vector-anon-user-menu-title": "Gaansʋg bɛdegʋ",
+	"vector-page-tools-nav-label": "Lakir la'ad",
+	"vector-prefs-limited-width": "Sʋŋim yalʋŋ giŋ suodɔllisim",
+	"vector-prefs-limited-width-help": "Sʋŋim yalʋŋ giŋ suodɔllisim ka li nɔbig karʋŋ baŋir",
+	"empty-language-selector-body": "Lakir yɛlkpana pʋ siak sʋŋ bɛ buudi pian'ad sieba nam nii",
+	"vector-toc-unpinned-popup": "Teebul la yɛlkpana vudigi kpɛn' kpɛla na",
+	"vector-page-tools-unpinned-popup": "La'ad dɔɔg la vudigi kpɛn' kpɛla na",
+	"vector-main-menu-unpinned-popup": "La'ad Dɔmɛŋir la vudigi kpɛn' kpɛla na",
+	"vector-appearance-unpinned-popup": "Nindanwaasim dɔɔg vudigi kpɛn' kpɛla ni",
+	"vector-2022-beta-preview-label": "Suor paamʋg ya'alim tis (vector2022) karʋŋ",
+	"vector-2022-beta-preview-description": "Ieem suori kpɛn' karʋŋ paamʋg bɛllim paala la ni,nwɛnnɛ taipɔgirafi nɔbigir nɛ sabilig nɛɛsim."
 }

@@ -4,7 +4,7 @@ namespace Wikibase\Search\Elastic\Fields;
 
 use CirrusSearch\CirrusSearch;
 use DataValues\UnboundedQuantityValue;
-use MWException;
+use Psr\Log\LoggerInterface;
 use SearchEngine;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
@@ -46,14 +46,16 @@ class StatementQuantityField extends StatementsField implements WikibaseIndexFie
 		array $indexedTypes,
 		array $excludedIds,
 		array $searchIndexDataFormatters,
-		array $allowedQualifierPropertyIds
+		array $allowedQualifierPropertyIds,
+		?LoggerInterface $logger = null
 	) {
 		parent::__construct(
 			$propertyDataTypeLookup,
 			$propertyIds,
 			$indexedTypes,
 			$excludedIds,
-			$searchIndexDataFormatters
+			$searchIndexDataFormatters,
+			$logger
 		);
 		$this->allowedQualifierPropertyIds = $allowedQualifierPropertyIds;
 	}
@@ -61,7 +63,6 @@ class StatementQuantityField extends StatementsField implements WikibaseIndexFie
 	/**
 	 * @param EntityDocument $entity
 	 *
-	 * @throws MWException
 	 * @return mixed Get the value of the field to be indexed when a page/document
 	 *               is indexed. This might be an array with nested data, if the field
 	 *               is defined with nested type or an int or string for simple field types.

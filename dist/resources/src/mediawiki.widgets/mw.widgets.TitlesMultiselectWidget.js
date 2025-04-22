@@ -7,23 +7,22 @@
 ( function () {
 
 	/**
-	 * Creates an mw.widgets.TitlesMultiselectWidget object
+	 * @classdesc Titles multiselect widget.
 	 *
 	 * @class
 	 * @extends OO.ui.MenuTagMultiselectWidget
-	 * @mixins OO.ui.mixin.RequestManager
-	 * @mixins OO.ui.mixin.PendingElement
-	 * @mixins mw.widgets.TitleWidget
+	 * @mixes OO.ui.mixin.RequestManager
+	 * @mixes OO.ui.mixin.PendingElement
+	 * @mixes mw.widgets.TitleWidget
 	 *
 	 * @constructor
+	 * @description Create an mw.widgets.TitlesMultiselectWidget object.
 	 * @param {Object} [config] Configuration options
 	 */
 	mw.widgets.TitlesMultiselectWidget = function MwWidgetsTitlesMultiselectWidget( config ) {
 		// Parent constructor
-		mw.widgets.TitlesMultiselectWidget.parent.call( this, $.extend( true,
+		mw.widgets.TitlesMultiselectWidget.super.call( this, $.extend( true,
 			{
-				clearInputOnChoose: true,
-				inputPosition: 'inline',
 				allowEditTags: false
 			},
 			config
@@ -65,17 +64,13 @@
 				.appendTo( this.$element );
 			// Update with preset values
 			// Set the default value (it might be different from just being empty)
-			this.$hiddenInput.prop( 'defaultValue', this.getItems().map( function ( item ) {
-				return item.getData();
-			} ).join( '\n' ) );
-			this.on( 'change', function ( items ) {
-				this.$hiddenInput.val( items.map( function ( item ) {
-					return item.getData();
-				} ).join( '\n' ) );
+			this.$hiddenInput.prop( 'defaultValue', this.getItems().map( ( item ) => item.getData() ).join( '\n' ) );
+			this.on( 'change', ( items ) => {
+				this.$hiddenInput.val( items.map( ( item ) => item.getData() ).join( '\n' ) );
 				// Trigger a 'change' event as if a user edited the text
 				// (it is not triggered when changing the value from JS code).
 				this.$hiddenInput.trigger( 'change' );
-			}.bind( this ) );
+			} );
 		}
 
 	};
@@ -94,38 +89,48 @@
 	};
 
 	/**
-	 * @inheritdoc OO.ui.MenuTagMultiselectWidget
+	 * @inheritdoc
 	 */
 	mw.widgets.TitlesMultiselectWidget.prototype.onInputChange = function () {
-		var widget = this;
-
 		this.getRequestData()
-			.then( function ( data ) {
+			.then( ( data ) => {
 				// Reset
-				widget.menu.clearItems();
-				widget.menu.addItems( widget.getOptionsFromData( data ) );
-			} ).always( function () {
+				this.menu.clearItems();
+				this.menu.addItems( this.getOptionsFromData( data ) );
+			} ).always( () => {
 				// Parent method
-				mw.widgets.TitlesMultiselectWidget.parent.prototype.onInputChange.call( widget );
+				mw.widgets.TitlesMultiselectWidget.super.prototype.onInputChange.call( this );
 			} );
 	};
 
 	/**
-	 * @inheritdoc OO.ui.mixin.RequestManager
+	 * We have an empty menu when the input is empty, override the implementation from
+	 * MenuTagMultiselectWidget to avoid error and make tags editable.
+	 *
+	 * Only editable when the input is empty.
+	 */
+	mw.widgets.TitlesMultiselectWidget.prototype.onTagSelect = function () {
+		if ( this.hasInput && !this.input.getValue() ) {
+			OO.ui.TagMultiselectWidget.prototype.onTagSelect.apply( this, arguments );
+		}
+	};
+
+	/**
+	 * @inheritdoc
 	 */
 	mw.widgets.TitlesMultiselectWidget.prototype.getRequestQuery = function () {
 		return this.getQueryValue();
 	};
 
 	/**
-	 * @inheritdoc OO.ui.mixin.RequestManager
+	 * @inheritdoc
 	 */
 	mw.widgets.TitlesMultiselectWidget.prototype.getRequest = function () {
 		return this.getSuggestionsPromise();
 	};
 
 	/**
-	 * @inheritdoc OO.ui.mixin.RequestManager
+	 * @inheritdoc
 	 */
 	mw.widgets.TitlesMultiselectWidget.prototype.getRequestCacheDataFromResponse = function ( response ) {
 		return response.query || {};

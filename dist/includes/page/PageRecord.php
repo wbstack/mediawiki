@@ -17,8 +17,11 @@ namespace MediaWiki\Page;
  * ExistingPageRecord instead. Once WikiPage is removed or guaranteed to be immutable and
  * existing, ExistingPageRecord will become an alias of PageRecord.
  *
+ * @see https://www.mediawiki.org/wiki/Manual:Modeling_pages
+ *
  * @stable to type
  * @since 1.36
+ * @ingroup Page
  */
 interface PageRecord extends ProperPageIdentity {
 

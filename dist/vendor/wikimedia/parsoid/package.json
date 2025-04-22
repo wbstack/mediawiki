@@ -15,25 +15,25 @@
 		"semver": "^6.1.0",
 		"simplediff": "^0.1.1",
 		"wikimedia-langconv": "^0.1.0",
-		"wikipeg": "^2.0.6",
+		"wikipeg": "^4.0.0",
 		"yargs": "^16.2.0"
 	},
 	"devDependencies": {
-		"api-testing": "1.5.0",
+		"api-testing": "1.6.0",
 		"chai": "^4.1.2",
 		"colors": "^1.2.4",
-		"eslint": "8.9.0",
-		"eslint-config-wikimedia": "0.22.1",
+		"eslint": "8.57.0",
+		"eslint-config-wikimedia": "0.28.2",
 		"mocha": "git+https://github.com/arlolra/mocha.git#fix-ansi-regex",
 		"nock": "^9.2.5"
 	},
 	"scripts": {
 		"eslint": "eslint --cache --ext .js,.json .",
 		"eslint-fix": "eslint --cache --ext .js,.json --fix .",
-		"regen-php-tokenizer": "bin/inspectTokenizer.js --source --php -o src/Wt2Html/Grammar.php",
-		"regen-php-tokenizer-trace": "bin/inspectTokenizer.js --source --php -o src/Wt2Html/Grammar.php --trace",
-		"regen-php-tests-tokenizer": "node_modules/wikipeg/bin/wikipeg --php --class-name Grammar src/ParserTests/Grammar.pegphp src/ParserTests/Grammar.php",
-		"api-testing": "mocha tests/api-testing",
+		"regen-php-tokenizer": "node bin/inspectTokenizer.js --source --php -o src/Wt2Html/Grammar.php --header-comment-file ./bin/grammarheader-npm.txt",
+		"regen-php-tokenizer-trace": "node bin/inspectTokenizer.js --source --php -o src/Wt2Html/Grammar.php --trace",
+		"regen-php-tests-tokenizer": "node node_modules/wikipeg/bin/wikipeg --php --class-name Grammar src/ParserTests/Grammar.pegphp src/ParserTests/Grammar.php",
+		"api-testing": "mocha --timeout 0 tests/api-testing",
 		"test": "npm run eslint"
 	},
 	"repository": {

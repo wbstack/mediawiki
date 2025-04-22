@@ -21,10 +21,13 @@
 /**
  * Depend on a PHP global variable.
  *
+ * @deprecated since 1.42
  * @ingroup Language
  */
 class GlobalDependency extends CacheDependency {
+	/** @var string */
 	private $name;
+	/** @var mixed */
 	private $value;
 
 	public function __construct( $name ) {
@@ -32,9 +35,6 @@ class GlobalDependency extends CacheDependency {
 		$this->value = $GLOBALS[$name];
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isExpired() {
 		if ( !isset( $GLOBALS[$this->name] ) ) {
 			return true;

@@ -3,10 +3,10 @@
 namespace MediaWiki\Extension\Math\InputCheck;
 
 use MediaWiki\Http\HttpRequestFactory;
-use Message;
-use MWException;
+use MediaWiki\Message\Message;
 use Psr\Log\LoggerInterface;
-use WANObjectCache;
+use RuntimeException;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 class MathoidChecker extends BaseChecker {
 
@@ -24,30 +24,22 @@ class MathoidChecker extends BaseChecker {
 	private $type;
 	/** @var LoggerInterface */
 	private $logger;
-	/** @var int */
+	/** @var int|null */
 	private $statusCode;
 	/** @var string */
 	private $response;
 
-	/**
-	 * @param WANObjectCache $cache
-	 * @param HttpRequestFactory $httpFactory
-	 * @param LoggerInterface $logger
-	 * @param string $url
-	 * @param int $timeout
-	 * @param string $input
-	 * @param string $type
-	 */
 	public function __construct(
 		WANObjectCache $cache,
 		HttpRequestFactory $httpFactory,
 		LoggerInterface $logger,
-		$url,
-		$timeout,
+		string $url,
+		int $timeout,
 		string $input,
-		string $type
+		string $type,
+		bool $purge
 	) {
-		parent::__construct( $input );
+		parent::__construct( $input, $purge );
 		$this->url = $url;
 		$this->timeout = $timeout;
 		$this->cache = $cache;
@@ -60,9 +52,13 @@ class MathoidChecker extends BaseChecker {
 	 * @return array
 	 */
 	public function getCheckResponse(): array {
-		if ( !isset( $this->statusCode ) ) {
-			list( $this->statusCode, $this->response ) = $this->cache->getWithSetCallback(
-				$this->getCacheKey(),
+		if ( $this->statusCode === null ) {
+			$cacheInputKey = $this->getCacheKey();
+			if ( $this->purge ) {
+				$this->cache->delete( $cacheInputKey, WANObjectCache::TTL_INDEFINITE );
+			}
+			[ $this->statusCode, $this->response ] = $this->cache->getWithSetCallback(
+				$cacheInputKey,
 				WANObjectCache::TTL_INDEFINITE,
 				[ $this, 'runCheck' ],
 				[ 'version' => self::VERSION ]
@@ -83,7 +79,6 @@ class MathoidChecker extends BaseChecker {
 
 	/**
 	 * @return array
-	 * @throws MWException
 	 */
 	public function runCheck(): array {
 		$url = "{$this->url}/texvcinfo";
@@ -97,10 +92,10 @@ class MathoidChecker extends BaseChecker {
 		$req = $this->httpFactory->create( $url, $options, __METHOD__ );
 		$req->execute();
 		$statusCode = $req->getStatus();
-		if ( in_array( $statusCode, self::EXPECTED_RETURN_CODES ) ) {
+		if ( in_array( $statusCode, self::EXPECTED_RETURN_CODES, true ) ) {
 			return [ $statusCode, $req->getContent() ];
 		}
-		$e = new MWException( 'Mathoid check returned unexpected error code.' );
+		$e = new RuntimeException( 'Mathoid check returned unexpected error code.' );
 		$this->logger->error( 'Mathoid check endpoint "{url}" returned ' .
 			'HTTP status code "{statusCode}" for post data "{postData}": {exception}.',
 			[
@@ -135,7 +130,7 @@ class MathoidChecker extends BaseChecker {
 		return null;
 	}
 
-	public function getValidTex() {
+	public function getValidTex(): ?string {
 		[ $statusCode, $content ] = $this->getCheckResponse();
 		if ( $statusCode === 200 ) {
 			$json = json_decode( $content );

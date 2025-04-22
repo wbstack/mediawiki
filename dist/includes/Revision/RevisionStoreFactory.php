@@ -26,19 +26,19 @@
 
 namespace MediaWiki\Revision;
 
-use ActorMigration;
-use BagOStuff;
-use CommentStore;
+use MediaWiki\CommentStore\CommentStore;
 use MediaWiki\Content\IContentHandlerFactory;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Page\PageStoreFactory;
 use MediaWiki\Storage\BlobStoreFactory;
 use MediaWiki\Storage\NameTableStoreFactory;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\User\ActorStore;
 use MediaWiki\User\ActorStoreFactory;
 use Psr\Log\LoggerInterface;
-use TitleFactory;
-use WANObjectCache;
 use Wikimedia\Assert\Assert;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\WANObjectCache;
 use Wikimedia\Rdbms\ILBFactory;
 
 /**
@@ -68,8 +68,6 @@ class RevisionStoreFactory {
 
 	/** @var CommentStore */
 	private $commentStore;
-	/** @var ActorMigration */
-	private $actorMigration;
 	/** @var ActorStoreFactory */
 	private $actorStoreFactory;
 	/** @var NameTableStoreFactory */
@@ -98,7 +96,6 @@ class RevisionStoreFactory {
 	 * @param WANObjectCache $cache
 	 * @param BagOStuff $localCache
 	 * @param CommentStore $commentStore
-	 * @param ActorMigration $actorMigration
 	 * @param ActorStoreFactory $actorStoreFactory
 	 * @param LoggerInterface $logger
 	 * @param IContentHandlerFactory $contentHandlerFactory
@@ -114,7 +111,6 @@ class RevisionStoreFactory {
 		WANObjectCache $cache,
 		BagOStuff $localCache,
 		CommentStore $commentStore,
-		ActorMigration $actorMigration,
 		ActorStoreFactory $actorStoreFactory,
 		LoggerInterface $logger,
 		IContentHandlerFactory $contentHandlerFactory,
@@ -129,7 +125,6 @@ class RevisionStoreFactory {
 		$this->cache = $cache;
 		$this->localCache = $localCache;
 		$this->commentStore = $commentStore;
-		$this->actorMigration = $actorMigration;
 		$this->actorStoreFactory = $actorStoreFactory;
 		$this->logger = $logger;
 		$this->contentHandlerFactory = $contentHandlerFactory;
@@ -145,7 +140,48 @@ class RevisionStoreFactory {
 	 *
 	 * @return RevisionStore for the given wikiId with all necessary services
 	 */
-	public function getRevisionStore( $dbDomain = false ) {
+	public function getRevisionStore( $dbDomain = false ): RevisionStore {
+		return $this->getStore(
+			$dbDomain,
+			$this->actorStoreFactory->getActorStore( $dbDomain )
+		);
+	}
+
+	/**
+	 * @since 1.42
+	 *
+	 * @param false|string $dbDomain DB domain of the relevant wiki or false for the current one
+	 *
+	 * @return RevisionStore for the given wikiId with all necessary services
+	 */
+	public function getRevisionStoreForImport( $dbDomain = false ): RevisionStore {
+		return $this->getStore(
+			$dbDomain,
+			$this->actorStoreFactory->getActorStoreForImport( $dbDomain )
+		);
+	}
+
+	/**
+	 * @since 1.43
+	 *
+	 * @param false|string $dbDomain DB domain of the relevant wiki or false for the current one
+	 *
+	 * @return RevisionStore for the given wikiId with all necessary services
+	 */
+	public function getRevisionStoreForUndelete( $dbDomain = false ): RevisionStore {
+		return $this->getStore(
+			$dbDomain,
+			$this->actorStoreFactory->getActorStoreForUndelete( $dbDomain )
+		);
+	}
+
+	/**
+	 * @param false|string $dbDomain
+	 * @param ActorStore $actorStore
+	 *
+	 * @return RevisionStore
+	 */
+	private function getStore( $dbDomain, ActorStore $actorStore ) {
 		Assert::parameterType( [ 'string', 'false' ], $dbDomain, '$dbDomain' );
 
 		$store = new RevisionStore(
@@ -157,8 +193,7 @@ class RevisionStoreFactory {
 			$this->nameTables->getContentModels( $dbDomain ),
 			$this->nameTables->getSlotRoles( $dbDomain ),
 			$this->slotRoleRegistry,
-			$this->actorMigration,
-			$this->actorStoreFactory->getActorStore( $dbDomain ),
+			$actorStore,
 			$this->contentHandlerFactory,
 			$this->pageStoreFactory->getPageStore( $dbDomain ),
 			$this->titleFactory,

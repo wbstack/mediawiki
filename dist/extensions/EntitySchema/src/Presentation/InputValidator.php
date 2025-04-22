@@ -1,56 +1,59 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\Presentation;
 
-use Config;
-use ConfigException;
-use EntitySchema\Domain\Model\SchemaId;
+use EntitySchema\Domain\Model\EntitySchemaId;
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Config\Config;
+use MediaWiki\Config\ConfigException;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MediaWikiServices;
-use Message;
+use MediaWiki\Message\Message;
+use MediaWiki\Title\Title;
 use MessageLocalizer;
-use RequestContext;
-use Title;
 
 /**
  * @license GPL-2.0-or-later
  */
 class InputValidator {
 
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $msgLocalizer;
-	/**
-	 * @var Config
-	 */
-	private $configService;
+	private MessageLocalizer $msgLocalizer;
+	private Config $configService;
+	private LanguageNameUtils $languageNameUtils;
 
 	public static function newFromGlobalState() {
 		return new self(
 			RequestContext::getMain(),
-			MediaWikiServices::getInstance()->getMainConfig()
+			MediaWikiServices::getInstance()->getMainConfig(),
+			MediaWikiServices::getInstance()->getLanguageNameUtils()
 		);
 	}
 
-	public function __construct( MessageLocalizer $msgLocalizer, Config $config ) {
+	public function __construct(
+		MessageLocalizer $msgLocalizer,
+		Config $config,
+		LanguageNameUtils $languageNameUtils
+	) {
 		$this->msgLocalizer = $msgLocalizer;
 		$this->configService = $config;
+		$this->languageNameUtils = $languageNameUtils;
 	}
 
 	/**
-	 * @param $id
+	 * @param string $id
 	 *
 	 * @return true|Message returns true on success and Message on failure
 	 */
-	public function validateIDExists( $id ) {
+	public function validateIDExists( string $id ) {
 		try {
-			$schemaId = new SchemaId( $id );
+			$entitySchemaId = new EntitySchemaId( $id );
 		} catch ( InvalidArgumentException $e ) {
 			return $this->msgLocalizer->msg( 'entityschema-error-invalid-id' );
 		}
-		$title = Title::makeTitle( NS_ENTITYSCHEMA_JSON, $schemaId->getId() );
+		$title = Title::makeTitle( NS_ENTITYSCHEMA_JSON, $entitySchemaId->getId() );
 		if ( !$title->exists() ) {
 			return $this->msgLocalizer->msg( 'entityschema-error-schemadeleted' );
 		}
@@ -59,24 +62,24 @@ class InputValidator {
 	}
 
 	/**
-	 * @param $langCode
+	 * @param string $langCode
 	 *
 	 * @return true|Message returns true on success and Message on failure
 	 */
-	public function validateLangCodeIsSupported( $langCode ) {
-		if ( !Language::isSupportedLanguage( $langCode ) ) {
+	public function validateLangCodeIsSupported( string $langCode ) {
+		if ( !$this->languageNameUtils->isSupportedLanguage( $langCode ) ) {
 			return $this->msgLocalizer->msg( 'entityschema-error-unsupported-langcode' );
 		}
 		return true;
 	}
 
 	/**
-	 * @param $schemaText
+	 * @param string $schemaText
 	 *
 	 * @return true|Message returns true on success and Message on failure
 	 * @throws ConfigException
 	 */
-	public function validateSchemaTextLength( $schemaText ) {
+	public function validateSchemaTextLength( string $schemaText ) {
 		$maxLengthBytes = $this->configService->get( 'EntitySchemaSchemaTextMaxSizeBytes' );
 		$schemaTextLengthBytes = strlen( $schemaText );
 		if ( $schemaTextLengthBytes > $maxLengthBytes ) {
@@ -87,7 +90,7 @@ class InputValidator {
 		return true;
 	}
 
-	public function validateAliasesLength( $aliasesInput ) {
+	public function validateAliasesLength( string $aliasesInput ) {
 		$maxLengthChars = $this->configService->get( 'EntitySchemaNameBadgeMaxSizeChars' );
 		$cleanAliasesString = implode( '', array_map( 'trim', explode( '|', $aliasesInput ) ) );
 		$aliasesLengthChars = mb_strlen( $cleanAliasesString );
@@ -99,7 +102,7 @@ class InputValidator {
 		return true;
 	}
 
-	public function validateStringInputLength( $labelOrDescriptionInput ) {
+	public function validateStringInputLength( string $labelOrDescriptionInput ) {
 		$maxLengthChars = $this->configService->get( 'EntitySchemaNameBadgeMaxSizeChars' );
 		$numInputChars = mb_strlen( $labelOrDescriptionInput );
 		if ( $numInputChars > $maxLengthChars ) {

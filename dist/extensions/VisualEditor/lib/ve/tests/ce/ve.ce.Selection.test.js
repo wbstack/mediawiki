@@ -1,20 +1,21 @@
 /*!
  * VisualEditor ContentEditable selection tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.ce.Selection' );
 
-QUnit.test( 'Rects', function ( assert ) {
-	var html =
-			'<div rel="ve:Alien" style="width: 300px; height: 200px;">foo</div>' +
-			'<div rel="ve:Alien" style="position: relative;">' +
-				'<div style="position: absolute; width: 400px; height: 100px;">foo</div>' +
-				'<div style="position: absolute; width: 150px; height: 500px;">bar</div>' +
-			'</div>' +
-			'<p></p>' +
-			'<table><tr><td style="width: 200px; height: 50px; border: 0; padding: 0; line-height: 0;"></td></tr></table>',
+QUnit.test( 'Rects', ( assert ) => {
+	const html = ve.dm.example.singleLine`
+			<div rel="ve:Alien" style="width: 300px; height: 200px;">foo</div>
+			<div rel="ve:Alien" style="position: relative;">
+				<div style="position: absolute; width: 400px; height: 100px;">foo</div>
+				<div style="position: absolute; width: 150px; height: 500px;">bar</div>
+			</div>
+			<p></p>
+			<table><tr><td style="width: 200px; height: 50px; border: 0; padding: 0; line-height: 0;"></td></tr></table>
+		`,
 		view = ve.test.utils.createSurfaceViewFromHtml( html ),
 		slugHeight = view.getDocument().getDocumentNode().children[ 2 ].$element[ 0 ].childNodes[ 0 ].offsetHeight,
 		model = view.getModel(),
@@ -65,7 +66,7 @@ QUnit.test( 'Rects', function ( assert ) {
 		}
 	}
 
-	cases.forEach( function ( caseItem ) {
+	cases.forEach( ( caseItem ) => {
 		model.setSelection(
 			ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), caseItem.rangeOrSelection )
 		);
@@ -101,11 +102,12 @@ QUnit.test( 'Rects', function ( assert ) {
 	view.destroy();
 } );
 
-QUnit.test( 'getDirectionality', function ( assert ) {
-	var html =
-			'<p>Foo</p>' +
-			'<p style="direction: rtl;">Bar</p>' +
-			'<table style="direction: rtl;"><tr><td>Baz</td></tr></table>',
+QUnit.test( 'getDirectionality', ( assert ) => {
+	const html = ve.dm.example.singleLine`
+			<p>Foo</p>
+			<p style="direction: rtl;">Bar</p>
+			<table style="direction: rtl;"><tr><td>Baz</td></tr></table>
+		`,
 		view = ve.test.utils.createSurfaceViewFromHtml( html ),
 		model = view.getModel(),
 		cases = [
@@ -142,7 +144,7 @@ QUnit.test( 'getDirectionality', function ( assert ) {
 
 		];
 
-	cases.forEach( function ( caseItem ) {
+	cases.forEach( ( caseItem ) => {
 		model.setSelection(
 			ve.test.utils.selectionFromRangeOrSelection( model.getDocument(), caseItem.rangeOrSelection )
 		);
@@ -157,8 +159,8 @@ QUnit.test( 'getDirectionality', function ( assert ) {
 	view.destroy();
 } );
 
-QUnit.test( 'equals', function ( assert ) {
-	var surface1 = {
+QUnit.test( 'equals', ( assert ) => {
+	const surface1 = {
 			getFocusedNode: function () {
 				return null;
 			}

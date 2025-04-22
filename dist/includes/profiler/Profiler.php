@@ -19,6 +19,7 @@
  */
 
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\WikiMap\WikiMap;
 use Psr\Log\LoggerInterface;
 use Wikimedia\Rdbms\TransactionProfiler;
 use Wikimedia\ScopedCallback;
@@ -34,12 +35,10 @@ use Wikimedia\ScopedCallback;
  * @ingroup Profiler
  */
 abstract class Profiler {
-	/** @var string|bool Profiler ID for bucketing data */
+	/** @var string|false Profiler ID for bucketing data */
 	protected $profileID = false;
 	/** @var array All of the params passed from $wgProfiler */
 	protected $params = [];
-	/** @var IContextSource Current request context */
-	protected $context = null;
 	/** @var TransactionProfiler */
 	protected $trxProfiler;
 	/** @var LoggerInterface */
@@ -63,57 +62,61 @@ abstract class Profiler {
 	}
 
 	/**
-	 * Singleton
+	 * @internal For use by Setup.php
+	 * @param array $profilerConf Value from $wgProfiler
+	 */
+	final public static function init( array $profilerConf ): void {
+		$params = $profilerConf + [
+			'class'     => ProfilerStub::class,
+			'sampling'  => 1,
+			'threshold' => 0.0,
+			'output'    => [],
+			'cliEnable' => false,
+		];
+
+		// Avoid global func wfIsCLI() during setup
+		$isCLI = ( PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg' );
+		$inSample = $params['sampling'] === 1 || mt_rand( 1, $params['sampling'] ) === 1;
+		if (
+			!$inSample ||
+			// On CLI, profiling is disabled by default, and can be explicitly enabled
+			// via the `--profiler` option, which MediaWiki\Maintenance\MaintenanceRunner::setup
+			// translates into 'cliEnable'.
+			// See also $wgProfiler docs.
+			//
+			// For this to work, Setup.php must call Profiler::init() after handling of
+			// MW_FINAL_SETUP_CALLBACK, which is what doMaintenance.php uses to call
+			// MaintenanceRunner::setup.
+			( $isCLI && !$params['cliEnable'] )
+		) {
+			$params['class'] = ProfilerStub::class;
+		}
+
+		if ( !is_array( $params['output'] ) ) {
+			$params['output'] = [ $params['output'] ];
+		}
+
+		self::$instance = new $params['class']( $params );
+	}
+
+	/**
 	 * @return Profiler
 	 */
 	final public static function instance() {
-		if ( self::$instance === null ) {
-			global $wgProfiler;
-
-			$params = ( $wgProfiler ?? [] ) + [
-				'class'     => ProfilerStub::class,
-				'sampling'  => 1,
-				'threshold' => 0.0,
-				'output'    => [],
-			];
-
-			$inSample = mt_rand( 0, $params['sampling'] - 1 ) === 0;
-			// wfIsCLI() is not available yet
-			if ( PHP_SAPI === 'cli' || PHP_SAPI === 'phpdbg' || !$inSample ) {
-				$params['class'] = ProfilerStub::class;
-			}
-
-			// "Redundant attempt to cast $params['output'] of type array{} to array"
-			// Not correct, this could be a non-array if $wgProfiler sets it to a non-array.
-			// @phan-suppress-next-line PhanRedundantCondition
-			if ( !is_array( $params['output'] ) ) {
-				$params['output'] = [ $params['output'] ];
-			}
-
-			self::$instance = new $params['class']( $params );
+		if ( !self::$instance ) {
+			trigger_error( 'Called Profiler::instance before settings are loaded', E_USER_WARNING );
+			self::init( [] );
 		}
+
 		return self::$instance;
 	}
 
 	/**
-	 * Replace the current profiler with $profiler if no non-stub profiler is set
-	 *
-	 * @param Profiler $profiler
-	 * @throws MWException
-	 * @since 1.25
-	 */
-	final public static function replaceStubInstance( Profiler $profiler ) {
-		if ( self::$instance && !( self::$instance instanceof ProfilerStub ) ) {
-			throw new MWException( 'Could not replace non-stub profiler instance.' );
-		} else {
-			self::$instance = $profiler;
-		}
-	}
-
-	/**
+	 * @deprecated since 1.41, unused. Can override this base class.
 	 * @param string $id
 	 */
 	public function setProfileID( $id ) {
+		wfDeprecated( __METHOD__, '1.41' );
 		$this->profileID = $id;
 	}
 
@@ -129,26 +132,6 @@ abstract class Profiler {
 	}
 
 	/**
-	 * @internal
-	 * @param IContextSource $context
-	 * @since 1.25
-	 */
-	public function setContext( $context ) {
-		wfDeprecated( __METHOD__, '1.38' );
-		$this->context = $context;
-	}
-
-	/**
-	 * @internal
-	 * @return IContextSource
-	 * @since 1.25
-	 */
-	public function getContext() {
-		wfDeprecated( __METHOD__, '1.38' );
-		return $this->context ?? RequestContext::getMain();
-	}
-
-	/**
 	 * Mark the start of a custom profiling frame (e.g. DB queries).
 	 * The frame ends when the result of this method falls out of scope.
 	 *
@@ -161,7 +144,7 @@ abstract class Profiler {
 	/**
 	 * @param SectionProfileCallback|null &$section
 	 */
-	public function scopedProfileOut( SectionProfileCallback &$section = null ) {
+	public function scopedProfileOut( ?SectionProfileCallback &$section = null ) {
 		$section = null;
 	}
 
@@ -181,7 +164,6 @@ abstract class Profiler {
 	/**
 	 * Get all usable outputs.
 	 *
-	 * @throws MWException
 	 * @return ProfilerOutput[]
 	 * @since 1.25
 	 */
@@ -195,7 +177,7 @@ abstract class Profiler {
 				? 'ProfilerOutput' . ucfirst( $outputType )
 				: $outputType;
 			if ( !class_exists( $outputClass ) ) {
-				throw new MWException( "'$outputType' is an invalid output type" );
+				throw new UnexpectedValueException( "'$outputType' is an invalid output type" );
 			}
 			$outputInstance = new $outputClass( $this, $this->params );
 			if ( $outputInstance->canUse() ) {
@@ -206,7 +188,10 @@ abstract class Profiler {
 	}
 
 	/**
-	 * Log the data to the backing store for all ProfilerOutput instances that have one
+	 * Log data to all the applicable backing stores
+	 *
+	 * This logs the profiling data to the backing store for each configured ProfilerOutput
+	 * instance. It also logs any request data for the TransactionProfiler instance.
 	 *
 	 * @since 1.25
 	 */
@@ -237,7 +222,6 @@ abstract class Profiler {
 	/**
 	 * Log the data to the script/request output for all ProfilerOutput instances that do so
 	 *
-	 * @throws MWException
 	 * @since 1.26
 	 */
 	public function logDataPageOutputOnly() {
@@ -292,10 +276,13 @@ abstract class Profiler {
 	/**
 	 * Whether appending profiles is allowed.
 	 *
+	 * @deprecated since 1.41. Unused.
+	 *
 	 * @since 1.34
 	 * @return bool
 	 */
 	public function getAllowOutput() {
+		wfDeprecated( __METHOD__, '1.41' );
 		return $this->allowOutput;
 	}
 

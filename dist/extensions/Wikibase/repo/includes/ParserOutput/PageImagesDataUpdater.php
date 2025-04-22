@@ -3,7 +3,7 @@
 namespace Wikibase\Repo\ParserOutput;
 
 use DataValues\StringValue;
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
 use Wikibase\DataModel\Entity\PropertyId;
 use Wikibase\DataModel\Snak\PropertyValueSnak;
 use Wikibase\DataModel\Snak\Snak;
@@ -181,7 +181,7 @@ class PageImagesDataUpdater implements StatementDataUpdater {
 			$parserOutput->unsetPageProperty( $this->pagePropName );
 		} else {
 			$fileName = str_replace( ' ', '_', $this->bestFileName );
-			$parserOutput->setPageProperty( $this->pagePropName, $fileName );
+			$parserOutput->setUnsortedPageProperty( $this->pagePropName, $fileName );
 		}
 	}
 

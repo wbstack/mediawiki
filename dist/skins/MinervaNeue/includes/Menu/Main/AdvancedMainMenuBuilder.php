@@ -20,10 +20,8 @@
 
 namespace MediaWiki\Minerva\Menu\Main;
 
-use FatalError;
 use MediaWiki\Minerva\Menu\Definitions;
 use MediaWiki\Minerva\Menu\Group;
-use MWException;
 
 /**
  * A menu builder that provides additional menu entries that match
@@ -33,20 +31,9 @@ use MWException;
  * @package MediaWiki\Minerva\Menu\Main
  */
 final class AdvancedMainMenuBuilder implements IMainMenuBuilder {
-	/**
-	 * @var bool
-	 */
-	private $showMobileOptions;
-
-	/**
-	 * @var bool
-	 */
-	private $showDonateLink;
-
-	/**
-	 * @var Definitions
-	 */
-	private $definitions;
+	private bool $showMobileOptions;
+	private bool $showDonateLink;
+	private Definitions $definitions;
 
 	/**
 	 * Initialize the Default Main Menu builder
@@ -91,8 +78,6 @@ final class AdvancedMainMenuBuilder implements IMainMenuBuilder {
 
 	/**
 	 * @inheritDoc
-	 * @throws FatalError
-	 * @throws MWException
 	 */
 	public function getSiteLinks(): Group {
 		return BuilderUtil::getSiteLinks( $this->definitions );
@@ -101,8 +86,6 @@ final class AdvancedMainMenuBuilder implements IMainMenuBuilder {
 	/**
 	 * Prepares a list of links that have the purpose of discovery in the main navigation menu
 	 * @return Group
-	 * @throws FatalError
-	 * @throws MWException
 	 */
 	public function getInteractionToolsGroup(): Group {
 		$group = new Group( 'p-interaction' );

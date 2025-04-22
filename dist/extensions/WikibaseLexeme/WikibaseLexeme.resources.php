@@ -6,13 +6,13 @@
  */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\ResourceLoader\Context;
 use Wikibase\Lexeme\DataAccess\ChangeOp\Validation\LemmaTermValidator;
+use Wikibase\Lexeme\Presentation\View\TemplateModule;
 use Wikibase\Lexeme\WikibaseLexemeServices;
 use Wikibase\Repo\WikibaseRepo;
 
 return call_user_func( static function () {
-	global $wgLexemeEnableNewAlpha;
-
 	$moduleTemplate = [
 		'localBasePath' => __DIR__ . '/resources',
 		'remoteExtPath' => 'WikibaseLexeme/resources',
@@ -24,13 +24,13 @@ return call_user_func( static function () {
 			return [
 				'tags' => WikibaseRepo::getSettings()->getSetting( 'viewUiTags' ),
 			];
-		}
+		},
 	];
 
 	$modules = [
 		"wikibase.lexeme" => $moduleTemplate + [
 			"scripts" => "__namespace.js",
-			"dependencies" => "wikibase"
+			"dependencies" => "wikibase",
 		],
 		"wikibase.lexeme.lexemeview" => $moduleTemplate + [
 			"packageFiles" => [
@@ -67,12 +67,11 @@ return call_user_func( static function () {
 				[
 					// used by GlossWidget
 					'name' => 'widgets/languages.json',
-					'callback' => 'Wikibase\Lexeme\WikibaseLexemeHooks::getLexemeViewLanguages'
+					'callback' => 'Wikibase\Lexeme\WikibaseLexemeHooks::getLexemeViewLanguages',
 				],
-				$defaultViewConfigFile
+				$defaultViewConfigFile,
 
 			],
-			"es6" => true,
 			"dependencies" => [
 				"jquery.util.getDirectionality",
 				"jquery.ui.languagesuggester",
@@ -119,7 +118,7 @@ return call_user_func( static function () {
 				"wikibaselexeme-lemma-redundant-language",
 				"wikibaselexeme-sense-gloss-invalid-language",
 				"wikibaselexeme-sense-gloss-redundant-language",
-				"wikibase-lexeme-language-selector-label"
+				"wikibase-lexeme-language-selector-label",
 			],
 			"templates" => [
 				'lexemeHeader.vue' => 'templates/lexemeHeader.vue.html',
@@ -127,37 +126,43 @@ return call_user_func( static function () {
 				'languageAndLexicalCategoryWidget.vue' => 'templates/languageAndLexicalCategoryWidget.vue.html',
 				'lemma.vue' => 'templates/lemma.vue.html',
 				'representations.vue' => 'templates/representations.vue.html',
-			]
+			],
 		],
 		"wikibase.templates.lexeme" => $moduleTemplate + [
-			"class" => "\\Wikibase\\Lexeme\\Presentation\\View\\TemplateModule",
+			'scripts' => [
+				[
+					'name' => 'wikibase.templates.lexeme.js',
+					'callback' => [ TemplateModule::class, 'getScript' ],
+					'versionCallback' => [ TemplateModule::class, 'getVersion' ],
+				],
+			],
 			"dependencies" => [
-				"wikibase.templates"
-			]
+				"wikibase.templates",
+			],
 		],
 		"mediawiki.template.vue" => $moduleTemplate + [
 			'scripts' => [
-				'mediawiki.template.vue.js'
-			]
+				'mediawiki.template.vue.js',
+			],
 		],
 		"wikibase.lexeme.datamodel" => $moduleTemplate + [
 			"scripts" => [
 				"datamodel/__namespace.js",
 				"datamodel/Form.js",
-				"datamodel/Sense.js"
+				"datamodel/Sense.js",
 			],
 			"dependencies" => [
 				"util.inherit",
 				"wikibase.datamodel",
-				"wikibase.lexeme"
-			]
+				"wikibase.lexeme",
+			],
 		],
 		"wikibase.lexeme.getDeserializer" => $moduleTemplate + [
 			"packageFiles" => [
 				"getDeserializer.js",
 
 				"serialization/LexemeDeserializer.js",
-				"datamodel/Lexeme.js"
+				"datamodel/Lexeme.js",
 			],
 			"dependencies" => [
 				"util.inherit",
@@ -165,40 +170,7 @@ return call_user_func( static function () {
 				"wikibase.datamodel",
 				"wikibase.lexeme.datamodel",
 				"wikibase.serialization",
-			]
-		],
-
-		// This module cannot go into packageFiles because it's connected to the PHP version of the Widget
-		"wikibase.lexeme.widgets.ItemSelectorWidget" => $moduleTemplate + [
-			"scripts" => [
-				"widgets/__namespace.js",
-				"widgets/ItemSelectorWidget.js"
 			],
-			"dependencies" => [
-				"oojs-ui-core",
-				"oojs-ui-widgets",
-				"mediawiki.widgets",
-				"wikibase.lexeme"
-			]
-		],
-		"wikibase.lexeme.special.NewLexeme" => $moduleTemplate + [
-			"packageFiles" => [
-				"special/NewLexeme.js",
-
-				"services/ItemLookup.js",
-				"services/LanguageFromItemExtractor.js",
-				"special/formHelpers/LexemeLanguageFieldObserver.js",
-			],
-			"styles" => [
-				"special/new-lexeme.less"
-			],
-			"dependencies" => [
-				"mw.config.values.wbRepo",
-				"util.inherit",
-				"wikibase.api.RepoApi",
-				"wikibase.lexeme.config.LexemeLanguageCodePropertyIdConfig",
-				"wikibase.lexeme.widgets.ItemSelectorWidget",
-			]
 		],
 
 		"wikibase.lexeme.view.ViewFactoryFactory" => $moduleTemplate + [
@@ -223,149 +195,153 @@ return call_user_func( static function () {
 				"wikibase.entityChangers.EntityChangersFactory",
 				"wikibase.view.ControllerViewFactory",
 				"wikibase.view.ReadModeViewFactory",
-				"wikibase.api.RepoApi"
-			]
+				"wikibase.api.RepoApi",
+			],
 		],
 		"wikibase.lexeme.config.LexemeLanguageCodePropertyIdConfig" => $moduleTemplate + [
-			"class" => "Wikibase\\Lexeme\\MediaWiki\\Config\\LexemeLanguageCodePropertyIdConfig"
+			"class" => "Wikibase\\Lexeme\\MediaWiki\\Config\\LexemeLanguageCodePropertyIdConfig",
 		],
 		"wikibase.experts.Lexeme" => $moduleTemplate + [
 			"scripts" => [
-				"experts/Lexeme.js"
+				"experts/Lexeme.js",
 			],
 			"dependencies" => [
 				"jquery.valueview.Expert",
-				"wikibase.experts.Entity"
-			]
+				"wikibase.experts.Entity",
+			],
 		],
 		"wikibase.experts.Form" => $moduleTemplate + [
 			"scripts" => [
-				"experts/Form.js"
+				"experts/Form.js",
 			],
 			"dependencies" => [
 				"jquery.valueview.Expert",
-				"wikibase.experts.Entity"
-			]
+				"wikibase.experts.Entity",
+			],
 		],
 		"wikibase.experts.Sense" => $moduleTemplate + [
 			"scripts" => [
-				"experts/Sense.js"
+				"experts/Sense.js",
 			],
 			"dependencies" => [
 				"jquery.valueview.Expert",
-				"wikibase.experts.Entity"
-			]
+				"wikibase.experts.Entity",
+			],
 		],
 		"wikibase.lexeme.styles" => $moduleTemplate + [
 			"styles" => [
-				"lexeme.less"
-			]
+				"lexeme.less",
+			],
+			"skinStyles" => [
+				"vector" => [
+					"lexeme.vector.less",
+				],
+				'vector-2022' => [
+					'lexeme.vector.less',
+				],
+			],
+		],
+
+		"wikibase.lexeme.special.NewLexeme" => $moduleTemplate + [
+			"packageFiles" => [
+				'special/NewLexeme.js',
+				'special/new-lexeme-dist/SpecialNewLexeme.cjs.js',
+				[
+					"name" => "special/settings.json",
+					"callback" => static function () {
+						$wbRepoSettings = WikibaseRepo::getSettings();
+						return [
+							'licenseUrl' => $wbRepoSettings->getSetting( 'dataRightsUrl' ),
+							'licenseText' => $wbRepoSettings->getSetting( 'dataRightsText' ),
+							'tags' => $wbRepoSettings->getSetting( 'specialPageTags' ),
+							'maxLemmaLength' => LemmaTermValidator::LEMMA_MAX_LENGTH,
+							'availableSearchProfiles' => array_keys(
+								$wbRepoSettings->getSetting( 'searchProfiles' )
+							),
+						];
+					},
+				],
+				[
+					'name' => 'special/languageNames.json',
+					'callback' => static function ( Context $context ) {
+						$services = MediaWikiServices::getInstance();
+						$cache = $services->getLocalServerObjectCache();
+
+						return $cache->getWithSetCallback(
+							$cache->makeKey(
+								'wikibaseLexeme-languageNames',
+								$context->getLanguage()
+							),
+							60 * 60, // 1 hour
+							static function () use ( $context, $services ) {
+								$termLanguages = WikibaseLexemeServices::getTermLanguages( $services );
+								$languageNameLookup = WikibaseLexemeServices::getLanguageNameLookupFactory( $services )
+									->getForLanguageCodeAndMessageLocalizer(
+										$context->getLanguage(),
+										$context
+									);
+								$names = [];
+								foreach ( $termLanguages->getLanguages() as $languageCode ) {
+									$names[$languageCode] = $languageNameLookup->getName( $languageCode );
+								}
+								return $names;
+							}
+						);
+					},
+				],
+			],
+			"styles" => [
+				'special/new-lexeme-dist/style.css',
+			],
+			"dependencies" => [
+				'vue',
+				'vuex',
+				'@wikimedia/codex',
+				'mediawiki.user',
+				'wikibase.lexeme.config.LexemeLanguageCodePropertyIdConfig',
+			],
+			"messages" => [
+				"wikibaselexeme-newlexeme-lemma",
+				"wikibaselexeme-newlexeme-lemma-placeholder-with-example",
+				"wikibaselexeme-newlexeme-lemma-empty-error",
+				"wikibaselexeme-newlexeme-lemma-too-long-error",
+				"wikibaselexeme-newlexeme-lemma-language",
+				"wikibaselexeme-newlexeme-lemma-language-empty-error",
+				"wikibaselexeme-newlexeme-lemma-language-help-link-target",
+				"wikibaselexeme-newlexeme-lemma-language-help-link-text",
+				"wikibaselexeme-newlexeme-lemma-language-invalid-error",
+				"wikibaselexeme-newlexeme-lemma-language-placeholder-with-example",
+				"wikibaselexeme-newlexeme-language",
+				"wikibaselexeme-newlexeme-language-empty-error",
+				"wikibaselexeme-newlexeme-language-invalid-error",
+				"wikibaselexeme-newlexeme-language-placeholder-with-example",
+				"wikibaselexeme-newlexeme-lexicalcategory",
+				"wikibaselexeme-newlexeme-lexicalcategory-empty-error",
+				"wikibaselexeme-newlexeme-lexicalcategory-invalid-error",
+				"wikibaselexeme-newlexeme-lexicalcategory-placeholder-with-example",
+				"wikibaselexeme-newlexeme-search-existing",
+				"wikibaselexeme-newlexeme-submit",
+				"wikibaselexeme-newlexeme-submitting",
+				"wikibase-anonymouseditwarning",
+				"wikibase-anonymouseditnotificationtempuser",
+				"wikibase-entityselector-notfound",
+				"wikibase-shortcopyrightwarning",
+				"wikibaselexeme-newlexeme-submit-error",
+				"wikibaselexeme-newlexeme-invalid-language-code-warning",
+				"wikibase-lexeme-lemma-language-option",
+				"copyrightpage",
+				"wikibaselexeme-form-field-required",
+			],
+		],
+		"wikibase.lexeme.special.NewLexeme.styles" => $moduleTemplate + [
+			"styles" => [
+				'special/new-lexeme.less',
+			],
+		],
+		"wikibase.lexeme.special.NewLexeme.legacyBrowserFallback" => $moduleTemplate + [
+			"packageFiles" => [ 'special/NewLexemeFallback.js' ],
 		],
 	];
-
-	if ( $wgLexemeEnableNewAlpha ) {
-		$modules += [
-			"wikibase.lexeme.special.NewLexemeAlpha" => $moduleTemplate + [
-				"es6" => true,
-				"skipFunction" => 'special/SpecialNewLexemeAlphaSkipVueApp.js',
-				"targets" => [
-					'desktop',
-					'mobile',
-				],
-				"packageFiles" => [
-					'special/NewLexemeAlpha.js',
-					'special/new-lexeme-dist/SpecialNewLexeme.cjs.js',
-					[
-						"name" => "special/settings.json",
-						"callback" => static function () {
-							$wbRepoSettings = WikibaseRepo::getSettings();
-							return [
-								'licenseUrl' => $wbRepoSettings->getSetting( 'dataRightsUrl' ),
-								'licenseText' => $wbRepoSettings->getSetting( 'dataRightsText' ),
-								'tags' => $wbRepoSettings->getSetting( 'specialPageTags' ),
-								'maxLemmaLength' => LemmaTermValidator::LEMMA_MAX_LENGTH,
-							];
-						}
-					],
-					[
-						'name' => 'special/languageNames.json',
-						'callback' => static function ( ResourceLoaderContext $context ) {
-							$cache = MediaWikiServices::getInstance()->getLocalServerObjectCache();
-
-							return $cache->getWithSetCallback(
-								$cache->makeKey(
-									'wikibaseLexeme-languageNames',
-									$context->getLanguage()
-								),
-								60 * 60, // 1 hour
-								static function () use ( $context ) {
-									$termLanguages = WikibaseLexemeServices::getTermLanguages();
-									$languageNameLookup = WikibaseLexemeServices::getLanguageNameLookupFactory()
-										->getForLanguageCodeAndMessageLocalizer(
-											$context->getLanguage(),
-											$context
-										);
-									$names = [];
-									foreach ( $termLanguages->getLanguages() as $languageCode ) {
-										$names[$languageCode] = $languageNameLookup->getName( $languageCode );
-									}
-									return $names;
-								}
-							);
-						},
-					],
-				],
-				"styles" => [
-					'special/new-lexeme-dist/style.css',
-				],
-				"dependencies" => [
-					'vue',
-					'vuex',
-					'mediawiki.user',
-					'wikibase.lexeme.config.LexemeLanguageCodePropertyIdConfig',
-				],
-				"messages" => [
-					"wikibaselexeme-newlexeme-lemma",
-					"wikibaselexeme-newlexeme-lemma-placeholder-with-example",
-					"wikibaselexeme-newlexeme-lemma-empty-error",
-					"wikibaselexeme-newlexeme-lemma-too-long-error",
-					"wikibaselexeme-newlexeme-lemma-language",
-					"wikibaselexeme-newlexeme-lemma-language-empty-error",
-					"wikibaselexeme-newlexeme-lemma-language-help-link-target",
-					"wikibaselexeme-newlexeme-lemma-language-help-link-text",
-					"wikibaselexeme-newlexeme-lemma-language-invalid-error",
-					"wikibaselexeme-newlexeme-lemma-language-placeholder-with-example",
-					"wikibaselexeme-newlexeme-language",
-					"wikibaselexeme-newlexeme-language-empty-error",
-					"wikibaselexeme-newlexeme-language-invalid-error",
-					"wikibaselexeme-newlexeme-language-placeholder-with-example",
-					"wikibaselexeme-newlexeme-lexicalcategory",
-					"wikibaselexeme-newlexeme-lexicalcategory-empty-error",
-					"wikibaselexeme-newlexeme-lexicalcategory-invalid-error",
-					"wikibaselexeme-newlexeme-lexicalcategory-placeholder-with-example",
-					"wikibaselexeme-newlexeme-search-existing",
-					"wikibaselexeme-newlexeme-submit",
-					"wikibaselexeme-newlexeme-submitting",
-					"wikibase-anonymouseditwarning",
-					"wikibase-entityselector-notfound",
-					"wikibase-shortcopyrightwarning",
-					"wikibaselexeme-newlexeme-submit-error",
-					"wikibaselexeme-newlexeme-invalid-language-code-warning",
-					"wikibase-lexeme-lemma-language-option",
-					"copyrightpage",
-				],
-			],
-			"wikibase.lexeme.special.NewLexemeAlpha.styles" => $moduleTemplate + [
-				"targets" => [
-					'desktop',
-					'mobile',
-				],
-				"styles" => [
-					'special/new-lexeme-alpha.less',
-				],
-			],
-		];
-	}
 
 	return $modules;
 } );

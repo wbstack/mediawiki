@@ -45,7 +45,7 @@ class ApiEntityNamespaceInfoLookup {
 	}
 
 	private function fetchNamespaces() {
-		if ( !empty( $this->namespaces ) ) {
+		if ( $this->namespaces ) {
 			return;
 		}
 
@@ -54,7 +54,7 @@ class ApiEntityNamespaceInfoLookup {
 			'action' => 'query',
 			'meta' => 'siteinfo',
 			'siprop' => 'namespaces',
-			'format' => 'json'
+			'format' => 'json',
 		] )->getBody()->getContents(), true )['query']['namespaces'];
 	}
 

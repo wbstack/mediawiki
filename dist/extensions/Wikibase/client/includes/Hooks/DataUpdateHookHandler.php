@@ -4,23 +4,24 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Hooks;
 
-use Content;
-use DeferredUpdates;
-use ExtensionRegistry;
 use InvalidArgumentException;
 use JobQueueGroup;
-use LinksUpdate;
+use MediaWiki\Content\Content;
+use MediaWiki\Deferred\DeferredUpdates;
+use MediaWiki\Deferred\LinksUpdate\LinksUpdate;
 use MediaWiki\Hook\LinksUpdateCompleteHook;
 use MediaWiki\Hook\ParserCacheSaveCompleteHook;
 use MediaWiki\Page\Hook\ArticleDeleteCompleteHook;
-use ParserCache;
-use ParserOptions;
-use ParserOutput;
+use MediaWiki\Parser\ParserCache;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use RuntimeException;
-use Title;
-use User;
+use Wikibase\Client\ParserOutput\ScopedParserOutputProvider;
 use Wikibase\Client\Store\AddUsagesForPageJob;
 use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Store\UsageUpdater;
@@ -89,7 +90,7 @@ class DataUpdateHookHandler implements
 		JobQueueGroup $jobScheduler,
 		UsageLookup $usageLookup,
 		UsageAccumulatorFactory $usageAccumulatorFactory,
-		LoggerInterface $logger = null
+		?LoggerInterface $logger = null
 	) {
 		$this->usageUpdater = $usageUpdater;
 		$this->jobScheduler = $jobScheduler;
@@ -152,12 +153,13 @@ class DataUpdateHookHandler implements
 			return;
 		}
 
-		$parserOutput = $linksUpdate->getParserOutput();
-		$usageAcc = $this->usageAccumulatorFactory->newFromParserOutput( $parserOutput );
+		$parserOutputProvider = new ScopedParserOutputProvider( $linksUpdate->getParserOutput() );
+		$usageAcc = $this->usageAccumulatorFactory->newFromParserOutputProvider( $parserOutputProvider );
 
 		// Please note that page views that happen between the page save but before this is run will have
 		// their usages removed (as we might add the usages via onParserCacheSaveComplete before this is run).
 		$this->usageUpdater->replaceUsagesForPage( $pageId, $usageAcc->getUsages() );
+		$parserOutputProvider->close();
 	}
 
 	/**
@@ -172,9 +174,11 @@ class DataUpdateHookHandler implements
 	 */
 	public function onParserCacheSaveComplete( $parserCache, $parserOutput, $title, $popts, $revId ): void {
 		DeferredUpdates::addCallableUpdate( function () use ( $parserOutput, $title ) {
-			$usageAcc = $this->usageAccumulatorFactory->newFromParserOutput( $parserOutput );
+			$parserOutputProvider = new ScopedParserOutputProvider( $parserOutput );
+			$usageAcc = $this->usageAccumulatorFactory->newFromParserOutputProvider( $parserOutputProvider );
 
 			$usages = $this->reindexEntityUsages( $usageAcc->getUsages() );
+			$parserOutputProvider->close();
 			if ( $usages === [] ) {
 				// no usages or no title, bail out
 				return;

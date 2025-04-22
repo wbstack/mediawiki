@@ -12,8 +12,8 @@
 
 namespace MediaWiki\Extension\Math;
 
-use Exception;
-use Html;
+use LogicException;
+use MediaWiki\Html\Html;
 
 /**
  * Takes LaTeX fragments and outputs the source directly to the browser
@@ -36,9 +36,10 @@ class MathSource extends MathRenderer {
 	/**
 	 * Renders TeX by outputting it to the browser in a span tag
 	 *
+	 * @param bool $svg
 	 * @return string span tag with TeX
 	 */
-	public function getHtmlOutput() {
+	public function getHtmlOutput( bool $svg = true ): string {
 		# No need to render or parse anything more!
 		# New lines are replaced with spaces, which avoids confusing our parser (bugs 23190, 22818)
 		if ( $this->getMathStyle() == 'display' ) {
@@ -51,7 +52,7 @@ class MathSource extends MathRenderer {
 				'span',
 				[
 					// the former class name was 'tex'
-					// for backwards compatibility we keep this classname
+					// for backwards compatibility we keep this classname T348938
 					'class' => $class . ' tex',
 					'dir' => 'ltr'
 				]
@@ -61,11 +62,11 @@ class MathSource extends MathRenderer {
 	}
 
 	/**
-	 * @throws Exception always
+	 * @throws LogicException always
 	 * @return never
 	 */
 	protected function getMathTableName() {
-		throw new Exception( 'in math source mode no database caching should happen' );
+		throw new LogicException( 'in math source mode no database caching should happen' );
 	}
 
 	/**

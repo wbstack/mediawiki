@@ -4,15 +4,16 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\LinkedData;
 
-use ApiFormatBase;
-use ApiMain;
-use ApiResult;
-use DerivativeContext;
-use DerivativeRequest;
-use MWException;
-use RequestContext;
+use InvalidArgumentException;
+use MediaWiki\Api\ApiFormatBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Request\DerivativeRequest;
+use MediaWiki\Site\SiteLookup;
+use RuntimeException;
 use Serializers\Serializer;
-use SiteLookup;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Entity\EntityRedirect;
@@ -121,12 +122,11 @@ class EntityDataSerializationService {
 	 *
 	 * @return array tuple of ( $data, $contentType )
 	 * @throws UnknownFlavorException
-	 * @throws MWException
 	 */
 	public function getSerializedData(
 		string $format,
 		EntityRevision $entityRevision,
-		RedirectRevision $followedRedirect = null,
+		?RedirectRevision $followedRedirect = null,
 		array $incomingRedirects = [],
 		?string $flavor = null
 	): array {
@@ -134,7 +134,7 @@ class EntityDataSerializationService {
 		$formatName = $this->entityDataFormatProvider->getFormatName( $format );
 
 		if ( $formatName === null ) {
-			throw new MWException( "Unsupported format: $format" );
+			throw new InvalidArgumentException( "Unsupported format: $format" );
 		}
 
 		$serializer = $this->createApiSerializer( $formatName );
@@ -146,7 +146,7 @@ class EntityDataSerializationService {
 			$rdfBuilder = $this->createRdfBuilder( $formatName, $flavor );
 
 			if ( $rdfBuilder === null ) {
-				throw new MWException( "Could not create serializer for $formatName" );
+				throw new RuntimeException( "Could not create serializer for $formatName" );
 			}
 
 			$data = $this->rdfSerialize( $entityRevision, $followedRedirect, $incomingRedirects, $rdfBuilder, $flavor );
@@ -313,6 +313,7 @@ class EntityDataSerializationService {
 				return RdfProducer::PRODUCE_ALL;
 		}
 
+		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable name is not-null here
 		throw new UnknownFlavorException( $flavorName, [ 'simple', 'dump', 'long', 'full' ] );
 	}
 

@@ -1,8 +1,11 @@
+// TODO: Replace with @import 'mediawiki.skin.variables.less'; with MW core LTS v1.42 dependency.
+@import '../../lib/codex-design-tokens/theme-wikimedia-ui-legacy.less';
+
 .uls-menu.uls-language-actions-dialog {
 	min-width: 248px;
 
 	.uls-language-actions-title {
-		border-bottom: 1px solid #c8ccd1;
+		border-bottom: @border-width-base @border-style-base @border-color-subtle;
 		display: flex;
 		align-items: center;
 		height: 32px;
@@ -11,15 +14,21 @@
 		.uls-language-actions-close {
 			min-width: unset;
 			width: 44px;
-			background: transparent url( ../images/arrow-previous.svg ) no-repeat center;
+			// Note that CSSJanus is flipping the `ltr` in the URL to `rtl`.
+			// Therefore make sure that both icons are available and up-to-date.
+			background: transparent url( ../images/arrow-previous-ltr.svg ) no-repeat center;
 		}
 	}
 
 	.uls-language-action-items {
-		.uls-language-action {
+		.uls-language-action.oo-ui-widget {
 			margin: 0;
 			padding: 12px 8px;
 			display: block;
+
+			.oo-ui-buttonElement-button {
+				padding-left: 36px;
+			}
 		}
 	}
 }

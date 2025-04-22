@@ -8,6 +8,7 @@ use CirrusSearch\Maintenance\AnalysisFilter;
 use CirrusSearch\Maintenance\ConfigUtils;
 use CirrusSearch\Maintenance\Printer;
 use CirrusSearch\SearchConfig;
+use MediaWiki\Status\Status;
 
 /**
  * This program is free software; you can redistribute it and/or modify
@@ -126,44 +127,51 @@ class MetaStoreIndex {
 	}
 
 	/**
-	 * @return \Elastica\Index|null Index on creation, or null if the index
+	 * @return Status with on success \Elastica\Index|null Index on creation, or null if the index
 	 *  already exists.
 	 */
-	public function createIfNecessary() {
+	public function createIfNecessary(): Status {
 		// If the mw_cirrus_metastore alias does not exists it
 		// means we need to create everything from scratch.
 		if ( $this->cirrusReady() ) {
-			return null;
+			return Status::newGood();
+		}
+		$status = $this->configUtils->checkElasticsearchVersion();
+		if ( !$status->isOK() ) {
+			return $status;
 		}
 		$this->log( self::INDEX_NAME . " missing, creating new metastore index.\n" );
 		$newIndex = $this->createNewIndex();
 		$this->switchAliasTo( $newIndex );
-		return $newIndex;
+		return Status::newGood( $newIndex );
 	}
 
-	public function createOrUpgradeIfNecessary() {
-		$newIndex = $this->createIfNecessary();
-		if ( $newIndex === null ) {
+	public function createOrUpgradeIfNecessary(): Status {
+		$newIndexStatus = $this->createIfNecessary();
+		if ( $newIndexStatus->isOK() && $newIndexStatus->getValue() === null ) {
 			$version = $this->metastoreVersion();
 			if ( $version < self::METASTORE_VERSION ) {
 				$this->log( self::INDEX_NAME . " version mismatch, upgrading.\n" );
 				$this->upgradeIndexVersion();
 			} elseif ( $version > self::METASTORE_VERSION ) {
-				throw new \Exception(
-					"Metastore version $version found, cannot upgrade to a lower version: " .
+				return Status::newFatal( "Metastore version $version found, cannot upgrade to a lower version: " .
 					self::METASTORE_VERSION
 				);
 			}
 		}
+		return Status::newGood();
 	}
 
 	private function buildIndexConfiguration() {
-		$plugins = $this->configUtils->scanAvailablePlugins(
+		$pluginsStatus = $this->configUtils->scanAvailablePlugins(
 			$this->config->get( 'CirrusSearchBannedPlugins' ) );
+		if ( !$pluginsStatus->isGood() ) {
+			throw new \RuntimeException( (string)$pluginsStatus );
+		}
 		$filter = new AnalysisFilter();
-		list( $analysis, $mappings ) = $filter->filterAnalysis(
+		[ $analysis, $mappings ] = $filter->filterAnalysis(
 			// Why 'aa'? It comes first? Hoping it receives generic language treatment.
-			( new AnalysisConfigBuilder( 'aa', $plugins ) )->buildConfig(),
+			( new AnalysisConfigBuilder( 'aa', $pluginsStatus->getValue() ) )->buildConfig(),
 			$this->buildMapping()
 		);
 
@@ -198,7 +206,6 @@ class MetaStoreIndex {
 			$this->buildIndexConfiguration(),
 			[
 				'master_timeout' => $this->getMasterTimeout(),
-				'include_type_name' => 'false'
 			]
 		);
 		$this->log( " ok\n" );
@@ -227,7 +234,7 @@ class MetaStoreIndex {
 			}
 			$overlap = array_intersect_key( $properties, $storeProperties );
 			if ( $overlap ) {
-				throw new \Exception( 'Metastore property overlap on: ' . implode( ', ', array_keys( $overlap ) ) );
+				throw new \RuntimeException( 'Metastore property overlap on: ' . implode( ', ', array_keys( $overlap ) ) );
 			}
 			$properties += $storeProperties;
 		}
@@ -252,7 +259,7 @@ class MetaStoreIndex {
 		}
 
 		if ( $oldIndexName == $name ) {
-			throw new \Exception(
+			throw new \RuntimeException(
 				"Cannot switch aliases old and new index names are identical: $name"
 			);
 		}
@@ -299,7 +306,7 @@ class MetaStoreIndex {
 		foreach ( $resp->getData() as $index => $aliases ) {
 			if ( isset( $aliases['aliases'][self::INDEX_NAME] ) ) {
 				if ( $indexName !== null ) {
-					throw new \Exception( "Multiple indices are aliased with " . self::INDEX_NAME .
+					throw new \RuntimeException( "Multiple indices are aliased with " . self::INDEX_NAME .
 						", please fix manually." );
 				}
 				$indexName = $index;
@@ -309,9 +316,12 @@ class MetaStoreIndex {
 	}
 
 	private function upgradeIndexVersion() {
-		$plugins = $this->configUtils->scanAvailableModules();
-		if ( !array_search( 'reindex', $plugins ) ) {
-			throw new \Exception( "The reindex module is mandatory to upgrade the metastore" );
+		$pluginsStatus = $this->configUtils->scanAvailableModules();
+		if ( !$pluginsStatus->isGood() ) {
+			throw new \RuntimeException( (string)$pluginsStatus );
+		}
+		if ( !array_search( 'reindex', $pluginsStatus->getValue() ) ) {
+			throw new \RuntimeException( "The reindex module is mandatory to upgrade the metastore" );
 		}
 		$index = $this->createNewIndex( (string)time() );
 		// Reindex everything except the internal type, it's not clear

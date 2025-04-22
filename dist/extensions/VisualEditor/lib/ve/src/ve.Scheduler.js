@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Scheduler class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -49,10 +49,10 @@ ve.Scheduler.static.maxDelay = 1000;
  *         guarantee that your `done` call on it will be delayed.
  */
 ve.Scheduler.prototype.schedule = function ( immediateAction, completionTest, delayHint ) {
-	var deferred = ve.createDeferred(),
+	const deferred = ve.createDeferred(),
 		startTime = this.now(),
 		testThenAct = function () {
-			var complete;
+			let complete;
 			try {
 				complete = completionTest();
 			} catch ( e ) {

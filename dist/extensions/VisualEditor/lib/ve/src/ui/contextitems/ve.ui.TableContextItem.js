@@ -1,7 +1,7 @@
 /*!
  * VisualEditor TableContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -10,9 +10,9 @@
  * @class
  * @extends ve.ui.LinearContextItem
  *
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config] Configuration options
  */
 ve.ui.TableContextItem = function VeUiTableContextItem( context, model, config ) {
 	// Parent constructor
@@ -64,7 +64,7 @@ ve.ui.TableContextItem.static.isCompatibleWith = function ( model ) {
  * Handle delete button click events.
  */
 ve.ui.TableContextItem.prototype.onDeleteButtonClick = function () {
-	var surfaceModel = this.getFragment().getSurface();
+	const surfaceModel = this.getFragment().getSurface();
 
 	surfaceModel.getLinearFragment(
 		surfaceModel.getSelectedNode().findParent( ve.dm.TableNode ).getOuterRange()

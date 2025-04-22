@@ -9,10 +9,11 @@ use Elastica\Exception\RuntimeException;
 use Elastica\Multi\ResultSet as MultiResultSet;
 use Elastica\Multi\Search;
 use ISearchResultSet;
+use MediaWiki\Config\ConfigException;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Status\Status;
 use MediaWiki\User\UserIdentity;
-use RequestContext;
-use Status;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -84,11 +85,8 @@ abstract class ElasticsearchIntermediary {
 	 *  as slow. Defaults to CirrusSearchSlowSearch config option.
 	 * @param int $extraBackendLatency artificial backend latency.
 	 */
-	protected function __construct( Connection $connection, UserIdentity $user = null, $slowSeconds = null, $extraBackendLatency = 0 ) {
+	protected function __construct( Connection $connection, ?UserIdentity $user = null, $slowSeconds = null, $extraBackendLatency = 0 ) {
 		$this->connection = $connection;
-		if ( $user === null ) {
-			$user = RequestContext::getMain()->getUser();
-		}
 		$this->user = $user ?? RequestContext::getMain()->getUser();
 		$this->slowMillis = (int)( 1000 * ( $slowSeconds ?? $connection->getConfig()->get( 'CirrusSearchSlowSearch' ) ) );
 		$this->extraBackendLatency = $extraBackendLatency;
@@ -177,7 +175,7 @@ abstract class ElasticsearchIntermediary {
 	 *  provided.
 	 * @return Status wrapping $result
 	 */
-	public function success( $result = null, Connection $connection = null ) {
+	public function success( $result = null, ?Connection $connection = null ) {
 		$this->finishRequest( $connection ?? $this->connection );
 		return Status::newGood( $result );
 	}
@@ -205,10 +203,8 @@ abstract class ElasticsearchIntermediary {
 	 *  provided.
 	 * @return Status representing a backend failure
 	 */
-	public function failure( ExceptionInterface $exception = null, Connection $connection = null ) {
-		if ( $connection === null ) {
-			$connection = $this->connection;
-		}
+	public function failure( ?ExceptionInterface $exception = null, ?Connection $connection = null ) {
+		$connection ??= $this->connection;
 		$log = $this->finishRequest( $connection );
 		if ( $log === null ) {
 			// Request was never started, likely trying to close a request
@@ -219,7 +215,7 @@ abstract class ElasticsearchIntermediary {
 			$context = $log->getLogVariables();
 			$logType = $log->getDescription();
 		}
-		list( $status, $message ) = ElasticaErrorHandler::extractMessageAndStatus( $exception );
+		[ $status, $message ] = ElasticaErrorHandler::extractMessageAndStatus( $exception );
 		// This could be multiple MB if the failure is coming from an update
 		// script, as the whole update script is returned in the error
 		// including the parameters. Truncate to a reasonable level so
@@ -228,12 +224,16 @@ abstract class ElasticsearchIntermediary {
 		// whatever else.
 		$context['error_message'] = mb_substr( $message, 0, 4096 );
 
-		$stats = Util::getStatsDataFactory();
+		$stats = Util::getStatsFactory();
 		$type = ElasticaErrorHandler::classifyError( $exception );
 		$clusterName = $connection->getClusterName();
 		$context['cirrussearch_error_type'] = $type;
 
-		$stats->increment( "CirrusSearch.$clusterName.backend_failure.$type" );
+		$stats->getCounter( "backend_failures_total" )
+			->setLabel( "search_cluster", $clusterName )
+			->setLabel( "type", $type )
+			->copyToStatsdAt( "CirrusSearch.$clusterName.backend_failure.$type" )
+			->increment();
 
 		LoggerFactory::getInstance( 'CirrusSearch' )->warning(
 			"Search backend error during {$logType} after {tookMs}: {error_message}",
@@ -270,12 +270,18 @@ abstract class ElasticsearchIntermediary {
 		$log->finish();
 		$tookMs = $log->getTookMs();
 		$clusterName = $connection->getClusterName();
-		$stats = Util::getStatsDataFactory();
-		$stats->timing( "CirrusSearch.$clusterName.requestTime", $tookMs );
 		$this->searchMetrics['wgCirrusTookMs'] = $tookMs;
 		self::$requestLogger->addRequest( $log, $this->user, $this->slowMillis );
 		$type = $log->getQueryType();
-		$stats->timing( "CirrusSearch.$clusterName.requestTimeMs.$type", $tookMs );
+		$stats = Util::getStatsFactory();
+		$stats->getTiming( "request_time_seconds" )
+			->setLabel( "search_cluster", $clusterName )
+			->setLabel( "type", $type )
+			->copyToStatsdAt( [
+				"CirrusSearch.$clusterName.requestTimeMs.$type",
+				"CirrusSearch.$clusterName.requestTime"
+			] )
+			->observe( $tookMs );
 		if ( $log->getElasticTookMs() ) {
 			$this->searchMetrics['wgCirrusElasticTime'] = $log->getElasticTookMs();
 		}
@@ -334,7 +340,7 @@ abstract class ElasticsearchIntermediary {
 		if ( $timeout !== null ) {
 			return $timeout;
 		}
-		throw new \ConfigException( "wgCirrusSearchSearchShardTimeout should have at least a 'default' entry configured" );
+		throw new ConfigException( "wgCirrusSearchSearchShardTimeout should have at least a 'default' entry configured" );
 	}
 
 	/**
@@ -350,7 +356,7 @@ abstract class ElasticsearchIntermediary {
 		if ( $timeout !== null ) {
 			return $timeout;
 		}
-		throw new \ConfigException( "wgCirrusSearchClientSideSearchTimeout should have at least a 'default' entry configured" );
+		throw new ConfigException( "wgCirrusSearchClientSideSearchTimeout should have at least a 'default' entry configured" );
 	}
 
 	/**
@@ -383,8 +389,8 @@ abstract class ElasticsearchIntermediary {
 	protected function runMSearch(
 		Search $search,
 		RequestLog $log,
-		Connection $connection = null,
-		callable $resultsTransformer = null
+		?Connection $connection = null,
+		?callable $resultsTransformer = null
 	): Status {
 		$connection = $connection ?: $this->connection;
 		$this->start( $log );

@@ -5,10 +5,11 @@ namespace Wikimedia\Parsoid\Wikitext;
 
 use Wikimedia\Parsoid\Config\Env;
 use Wikimedia\Parsoid\Core\ContentModelHandler as IContentModelHandler;
-use Wikimedia\Parsoid\Core\SelserData;
+use Wikimedia\Parsoid\Core\SelectiveUpdateData;
 use Wikimedia\Parsoid\DOM\Document;
 use Wikimedia\Parsoid\Ext\DOMProcessor as ExtDOMProcessor;
 use Wikimedia\Parsoid\Ext\ParsoidExtensionAPI;
+use Wikimedia\Parsoid\Html2Wt\RemoveRedLinks;
 use Wikimedia\Parsoid\Html2Wt\SelectiveSerializer;
 use Wikimedia\Parsoid\Html2Wt\WikitextSerializer;
 use Wikimedia\Parsoid\Utils\ContentUtils;
@@ -33,14 +34,16 @@ class ContentModelHandler extends IContentModelHandler {
 
 	/**
 	 * Bring DOM to expected canonical form
-	 * @param Env $env
-	 * @param Document $doc
 	 */
-	private function canonicalizeDOM( Env $env, Document $doc ): void {
+	private function canonicalizeDOM(
+		Env $env, Document $doc, bool $isSelectiveUpdate
+	): void {
 		$body = DOMCompat::getBody( $doc );
 
 		// Convert DOM to internal canonical form
-		DOMDataUtils::visitAndLoadDataAttribs( $body, [ 'markNew' => true ] );
+		DOMDataUtils::visitAndLoadDataAttribs( $body, [
+			'markNew' => !$isSelectiveUpdate,
+		] );
 
 		// Update DSR offsets if necessary.
 		ContentUtils::convertOffsets(
@@ -51,16 +54,21 @@ class ContentModelHandler extends IContentModelHandler {
 		// as well as extended annotation wrappers.
 		// This ensures that we can accept HTML from CX / VE
 		// and other clients that might have stripped them.
-		ContentUtils::stripUnnecessaryWrappersAndFallbackIds( $body );
+		ContentUtils::stripUnnecessaryWrappersAndSyntheticNodes( $body );
+
+		$redLinkRemover = new RemoveRedLinks( $this->env );
+		$redLinkRemover->run( $body );
 	}
 
 	/**
 	 * Fetch prior DOM for selser.
 	 *
 	 * @param ParsoidExtensionAPI $extApi
-	 * @param SelserData $selserData
+	 * @param SelectiveUpdateData $selserData
 	 */
-	private function setupSelser( ParsoidExtensionAPI $extApi, SelserData $selserData ) {
+	private function setupSelser(
+		ParsoidExtensionAPI $extApi, SelectiveUpdateData $selserData
+	) {
 		$env = $this->env;
 
 		// Why is it safe to use a reparsed dom for dom diff'ing?
@@ -98,30 +106,83 @@ class ContentModelHandler extends IContentModelHandler {
 		// selser, will only get worse over time.
 		//
 		// So, we're forced to trade off the correctness for usability.
-		if ( $selserData->oldHTML === null ) {
+		if ( $selserData->revHTML === null ) {
+			$env->log( "warn/html2wt", "Missing selserData->revHTML. Regenerating." );
+
 			// FIXME(T266838): Create a new Env for this parse?  Something is
 			// needed to avoid this rigmarole.
 			$topLevelDoc = $env->topLevelDoc;
 			$env->setupTopLevelDoc();
-			// This effectively parses $selserData->oldText for us because
-			// $selserData->oldText = $env->getPageconfig()->getPageMainContent()
+			// This effectively parses $selserData->revText for us because
+			// $selserData->revText = $env->getPageconfig()->getPageMainContent()
 			$doc = $this->toDOM( $extApi );
 			$env->topLevelDoc = $topLevelDoc;
 		} else {
-			$doc = ContentUtils::createDocument( $selserData->oldHTML, true );
+			$doc = ContentUtils::createDocument( $selserData->revHTML, true );
 		}
 
-		$this->canonicalizeDOM( $env, $doc );
-		$selserData->oldDOM = $doc;
+		$this->canonicalizeDOM( $env, $doc, false );
+		$selserData->revDOM = $doc;
+	}
+
+	private function processIndicators( Document $doc, ParsoidExtensionAPI $extApi ): void {
+		// Erroneous indicators without names will be <span>s
+		$indicators = DOMCompat::querySelectorAll( $doc, 'meta[typeof~="mw:Extension/indicator"]' );
+		$iData = [];
+
+		// https://www.mediawiki.org/wiki/Help:Page_status_indicators#Adding_page_status_indicators
+		// says that last one wins. But, that may just be documentation of the
+		// implementation vs. being a deliberate strategy.
+		//
+		// The indicators are ordered by depth-first pre-order DOM traversal.
+		// This ensures that the indicators are in document textual order.
+		// Given that, the for-loop below implements "last-one-wins" semantics
+		// for indicators that use the same name key.
+		foreach ( $indicators as $meta ) {
+			// Since the DOM is in "stored" state, we have to reparse data-mw here.
+			$codec = DOMDataUtils::getCodec( $doc );
+			$dataMwAttr = DOMCompat::getAttribute( $meta, 'data-mw' );
+			$dmw = $dataMwAttr === null ? null :
+				$codec->newFromJsonString( $dataMwAttr, DOMDataUtils::getCodecHints()['data-mw'] );
+			$name = $dmw->attrs->name;
+			$iData[$name] = $dmw->html;
+		}
+
+		// set indicator metadata for unique keys
+		foreach ( $iData as $name => $html ) {
+			$extApi->getMetadata()->setIndicator( (string)$name, $html );
+		}
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function toDOM( ParsoidExtensionAPI $extApi ): Document {
-		return $this->env->getPipelineFactory()->parse(
-			$this->env->getPageConfig()->getPageMainContent()
-		);
+	public function toDOM(
+		ParsoidExtensionAPI $extApi, ?SelectiveUpdateData $selectiveUpdateData = null
+	): Document {
+		$env = $this->env;
+		$pipelineFactory = $env->getPipelineFactory();
+
+		if ( $selectiveUpdateData ) {
+			$doc = ContentUtils::createDocument( $selectiveUpdateData->revHTML, true );
+			$env->setupTopLevelDoc( $doc );
+			$this->canonicalizeDOM( $env, $env->topLevelDoc, true );
+			$selectiveUpdateData->revDOM = $doc;
+			$doc = $pipelineFactory->selectiveDOMUpdate( $selectiveUpdateData );
+		} else {
+			$doc = $pipelineFactory->parse(
+				// @phan-suppress-next-line PhanDeprecatedFunction not ready for topFrame yet
+				$env->getPageConfig()->getPageMainContent()
+			);
+		}
+
+		// Hardcoded support for indicators
+		// TODO: Eventually we'll want to apply this to selective updates as well
+		if ( !$selectiveUpdateData ) {
+			$this->processIndicators( $doc, $extApi );
+		}
+
+		return $doc;
 	}
 
 	/**
@@ -138,7 +199,7 @@ class ContentModelHandler extends IContentModelHandler {
 	 * @param Env $env
 	 * @param Document $doc
 	 */
-	private function preprocessDOM( Env $env, Document $doc ): void {
+	private function preprocessEditedDOM( Env $env, Document $doc ): void {
 		$siteConfig = $env->getSiteConfig();
 
 		// Run any registered DOM preprocessors
@@ -159,34 +220,38 @@ class ContentModelHandler extends IContentModelHandler {
 	 * @inheritDoc
 	 */
 	public function fromDOM(
-		ParsoidExtensionAPI $extApi, ?SelserData $selserData = null
+		ParsoidExtensionAPI $extApi, ?SelectiveUpdateData $selserData = null
 	): string {
 		$env = $this->env;
-		$metrics = $env->getSiteConfig()->metrics();
-		$setupTiming = Timing::start( $metrics );
+		$siteConfig = $env->getSiteConfig();
+		$setupTiming = Timing::start( $siteConfig );
 
-		$this->canonicalizeDOM( $env, $env->topLevelDoc );
+		$this->canonicalizeDOM( $env, $env->topLevelDoc, false );
 
-		$serializerOpts = [ 'env' => $env, 'selserData' => $selserData ];
-		if ( $selserData && $selserData->oldText !== null ) {
-			$serializer = new SelectiveSerializer( $serializerOpts );
+		$serializerOpts = [ 'selserData' => $selserData ];
+		if ( $selserData ) {
+			$serializer = new SelectiveSerializer( $env, $serializerOpts );
 			$this->setupSelser( $extApi, $selserData );
 			$wtsType = 'selser';
 		} else {
 			// Fallback
-			$serializer = new WikitextSerializer( $serializerOpts );
+			$serializer = new WikitextSerializer( $env, $serializerOpts );
 			$wtsType = 'noselser';
 		}
 
-		$setupTiming->end( 'html2wt.setup' );
+		$setupTiming->end( 'html2wt.setup', 'html2wt_setup_seconds', [] );
 
-		$preprocTiming = Timing::start( $metrics );
-		$this->preprocessDOM( $env, $env->topLevelDoc );
-		$preprocTiming->end( 'html2wt.preprocess' );
+		$preprocTiming = Timing::start( $siteConfig );
+		$this->preprocessEditedDOM( $env, $env->topLevelDoc );
+		$preprocTiming->end( 'html2wt.preprocess', 'html2wt_preprocess_seconds', [] );
 
-		$serializeTiming = Timing::start( $metrics );
+		$serializeTiming = Timing::start( $siteConfig );
 		$res = $serializer->serializeDOM( $env->topLevelDoc );
-		$serializeTiming->end( "html2wt.{$wtsType}.serialize" );
+		$serializeTiming->end(
+			"html2wt.{$wtsType}.serialize",
+			"html2wt_serialize_seconds",
+			[ 'wts' => $wtsType ]
+		);
 
 		return $res;
 	}

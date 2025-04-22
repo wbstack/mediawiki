@@ -20,33 +20,35 @@
 
 namespace MediaWiki\Page;
 
-use ActorMigration;
-use CommentStoreComment;
 use ManualLogEntry;
+use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Language\RawMessage;
 use MediaWiki\MainConfigNames;
 use MediaWiki\Message\Converter;
+use MediaWiki\Message\Message;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\PermissionStatus;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\RevisionStore;
 use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Storage\EditResult;
+use MediaWiki\Title\TitleFormatter;
+use MediaWiki\Title\TitleValue;
+use MediaWiki\User\ActorMigration;
 use MediaWiki\User\ActorNormalization;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentity;
-use Message;
-use RawMessage;
-use ReadOnlyMode;
 use RecentChange;
 use StatusValue;
-use TitleFormatter;
-use TitleValue;
 use Wikimedia\Message\MessageValue;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IDBAccessObject;
+use Wikimedia\Rdbms\ReadOnlyMode;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * Backend logic for performing a page rollback action.
@@ -57,51 +59,11 @@ class RollbackPage {
 
 	/**
 	 * @internal For use in PageCommandFactory only
-	 * @var array
 	 */
 	public const CONSTRUCTOR_OPTIONS = [
 		MainConfigNames::UseRCPatrol,
 		MainConfigNames::DisableAnonTalk,
 	];
-
-	/** @var ServiceOptions */
-	private $options;
-
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/** @var ReadOnlyMode */
-	private $readOnlyMode;
-
-	/** @var TitleFormatter */
-	private $titleFormatter;
-
-	/** @var RevisionStore */
-	private $revisionStore;
-
-	/** @var HookRunner */
-	private $hookRunner;
-
-	/** @var WikiPageFactory */
-	private $wikiPageFactory;
-
-	/** @var ActorMigration */
-	private $actorMigration;
-
-	/** @var ActorNormalization */
-	private $actorNormalization;
-
-	/** @var PageIdentity */
-	private $page;
-
-	/** @var Authority */
-	private $performer;
-
-	/** @var UserIdentity who made the edits we are rolling back */
-	private $byUser;
 
 	/** @var string */
 	private $summary = '';
@@ -112,25 +74,27 @@ class RollbackPage {
 	/** @var string[] */
 	private $tags = [];
 
+	private ServiceOptions $options;
+	private IConnectionProvider $dbProvider;
+	private UserFactory $userFactory;
+	private ReadOnlyMode $readOnlyMode;
+	private RevisionStore $revisionStore;
+	private TitleFormatter $titleFormatter;
+	private HookRunner $hookRunner;
+	private WikiPageFactory $wikiPageFactory;
+	private ActorMigration $actorMigration;
+	private ActorNormalization $actorNormalization;
+	private PageIdentity $page;
+	private Authority $performer;
+	/** @var UserIdentity who made the edits we are rolling back */
+	private UserIdentity $byUser;
+
 	/**
 	 * @internal Create via the RollbackPageFactory service.
-	 * @param ServiceOptions $options
-	 * @param ILoadBalancer $loadBalancer
-	 * @param UserFactory $userFactory
-	 * @param ReadOnlyMode $readOnlyMode
-	 * @param RevisionStore $revisionStore
-	 * @param TitleFormatter $titleFormatter
-	 * @param HookContainer $hookContainer
-	 * @param WikiPageFactory $wikiPageFactory
-	 * @param ActorMigration $actorMigration
-	 * @param ActorNormalization $actorNormalization
-	 * @param PageIdentity $page
-	 * @param Authority $performer
-	 * @param UserIdentity $byUser who made the edits we are rolling back
 	 */
 	public function __construct(
 		ServiceOptions $options,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		UserFactory $userFactory,
 		ReadOnlyMode $readOnlyMode,
 		RevisionStore $revisionStore,
@@ -145,7 +109,7 @@ class RollbackPage {
 	) {
 		$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
 		$this->options = $options;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->userFactory = $userFactory;
 		$this->readOnlyMode = $readOnlyMode;
 		$this->revisionStore = $revisionStore;
@@ -213,10 +177,6 @@ class RollbackPage {
 			$permissionStatus->fatal( 'readonlytext' );
 		}
 
-		$user = $this->userFactory->newFromAuthority( $this->performer );
-		if ( $user->pingLimiter( 'rollback' ) || $user->pingLimiter() ) {
-			$permissionStatus->fatal( 'actionthrottledtext' );
-		}
 		return $permissionStatus;
 	}
 
@@ -280,26 +240,16 @@ class RollbackPage {
 			return $result;
 		}
 
-		$dbw = $this->loadBalancer->getConnectionRef( DB_PRIMARY );
+		$dbw = $this->dbProvider->getPrimaryDatabase();
 
-		// TODO: move this query to RevisionSelectQueryBuilder when it's available
 		// Get the last edit not by this person...
 		// Note: these may not be public values
 		$actorWhere = $this->actorMigration->getWhere( $dbw, 'rev_user', $currentEditor );
-		$targetRevisionRow = $dbw->selectRow(
-			[ 'revision' ] + $actorWhere['tables'],
-			[ 'rev_id', 'rev_timestamp', 'rev_deleted' ],
-			[
-				'rev_page' => $currentRevision->getPageId(),
-				'NOT(' . $actorWhere['conds'] . ')',
-			],
-			__METHOD__,
-			[
-				'USE INDEX' => [ 'revision' => 'rev_page_timestamp' ],
-				'ORDER BY' => [ 'rev_timestamp DESC', 'rev_id DESC' ]
-			],
-			$actorWhere['joins']
-		);
+		$queryBuilder = $this->revisionStore->newSelectQueryBuilder( $dbw )
+			->where( [ 'rev_page' => $currentRevision->getPageId(), 'NOT(' . $actorWhere['conds'] . ')' ] )
+			->useIndex( [ 'revision' => 'rev_page_timestamp' ] )
+			->orderBy( [ 'rev_timestamp', 'rev_id' ], SelectQueryBuilder::SORT_DESC );
+		$targetRevisionRow = $queryBuilder->caller( __METHOD__ )->fetchRow();
 
 		if ( $targetRevisionRow === false ) {
 			// No one else ever edited this page
@@ -313,7 +263,7 @@ class RollbackPage {
 
 		// Generate the edit summary if necessary
 		$targetRevision = $this->revisionStore
-			->getRevisionById( $targetRevisionRow->rev_id, RevisionStore::READ_LATEST );
+			->getRevisionById( $targetRevisionRow->rev_id, IDBAccessObject::READ_LATEST );
 
 		// Save
 		$flags = EDIT_UPDATE | EDIT_INTERNAL;
@@ -364,7 +314,7 @@ class RollbackPage {
 		$summary = $this->getSummary( $currentRevision, $targetRevision );
 
 		// Actually store the rollback
-		$rev = $updater->saveRevision(
+		$rev = $updater->addTags( $this->tags )->saveRevision(
 			CommentStoreComment::newUnsavedComment( $summary ),
 			$flags
 		);
@@ -441,25 +391,17 @@ class RollbackPage {
 			return;
 		}
 
-		$actorId = $this->actorNormalization
-			->acquireActorId( $current->getUser( RevisionRecord::RAW ), $dbw );
+		$actorId = $this->actorNormalization->findActorId( $current->getUser( RevisionRecord::RAW ), $dbw );
 		$timestamp = $dbw->timestamp( $target->getTimestamp() );
-		$rows = $dbw->select(
-			'recentchanges',
-			[ 'rc_id', 'rc_patrolled' ],
-			[
-				'rc_cur_id' => $current->getPageId(),
-				$dbw->makeList( [
-					'rc_timestamp > ' . $dbw->addQuotes( $timestamp ),
-					$dbw->makeList( [
-						'rc_timestamp' => $timestamp,
-						'rc_this_oldid > ' . $dbw->addQuotes( $target->getId() ),
-					], IDatabase::LIST_AND ),
-				], IDatabase::LIST_OR ),
-				'rc_actor' => $actorId,
-			],
-			__METHOD__
-		);
+		$rows = $dbw->newSelectQueryBuilder()
+			->select( [ 'rc_id', 'rc_patrolled' ] )
+			->from( 'recentchanges' )
+			->where( [ 'rc_cur_id' => $current->getPageId(), 'rc_actor' => $actorId, ] )
+			->andWhere( $dbw->buildComparison( '>', [
+				'rc_timestamp' => $timestamp,
+				'rc_this_oldid' => $target->getId(),
+			] ) )
+			->caller( __METHOD__ )->fetchResultSet();
 
 		$all = [];
 		$patrolled = [];
@@ -477,40 +419,36 @@ class RollbackPage {
 			// Mark all reverted edits as if they were made by a bot
 			// Also mark only unpatrolled reverted edits as patrolled
 			if ( $unpatrolled ) {
-				$dbw->update(
-					'recentchanges',
-					[ 'rc_bot' => 1, 'rc_patrolled' => RecentChange::PRC_AUTOPATROLLED ],
-					[ 'rc_id' => $unpatrolled ],
-					__METHOD__
-				);
+				$dbw->newUpdateQueryBuilder()
+					->update( 'recentchanges' )
+					->set( [ 'rc_bot' => 1, 'rc_patrolled' => RecentChange::PRC_AUTOPATROLLED ] )
+					->where( [ 'rc_id' => $unpatrolled ] )
+					->caller( __METHOD__ )->execute();
 			}
 			if ( $patrolled ) {
-				$dbw->update(
-					'recentchanges',
-					[ 'rc_bot' => 1 ],
-					[ 'rc_id' => $patrolled ],
-					__METHOD__
-				);
+				$dbw->newUpdateQueryBuilder()
+					->update( 'recentchanges' )
+					->set( [ 'rc_bot' => 1 ] )
+					->where( [ 'rc_id' => $patrolled ] )
+					->caller( __METHOD__ )->execute();
 			}
 		} elseif ( $useRCPatrol ) {
 			// Mark only unpatrolled reverted edits as patrolled
 			if ( $unpatrolled ) {
-				$dbw->update(
-					'recentchanges',
-					[ 'rc_patrolled' => RecentChange::PRC_AUTOPATROLLED ],
-					[ 'rc_id' => $unpatrolled ],
-					__METHOD__
-				);
+				$dbw->newUpdateQueryBuilder()
+					->update( 'recentchanges' )
+					->set( [ 'rc_patrolled' => RecentChange::PRC_AUTOPATROLLED ] )
+					->where( [ 'rc_id' => $unpatrolled ] )
+					->caller( __METHOD__ )->execute();
 			}
 		} else {
 			// Edit is from a bot
 			if ( $all ) {
-				$dbw->update(
-					'recentchanges',
-					[ 'rc_bot' => 1 ],
-					[ 'rc_id' => $all ],
-					__METHOD__
-				);
+				$dbw->newUpdateQueryBuilder()
+					->update( 'recentchanges' )
+					->set( [ 'rc_bot' => 1 ] )
+					->where( [ 'rc_id' => $all ] )
+					->caller( __METHOD__ )->execute();
 			}
 		}
 	}
@@ -523,6 +461,13 @@ class RollbackPage {
 	 * @return string
 	 */
 	private function getSummary( RevisionRecord $current, RevisionRecord $target ): string {
+		$revisionsBetween = $this->revisionStore->countRevisionsBetween(
+			$current->getPageId(),
+			$target,
+			$current,
+			1000,
+			RevisionStore::INCLUDE_NEW
+		);
 		$currentEditorForPublic = $current->getUser( RevisionRecord::FOR_PUBLIC );
 		if ( $this->summary === '' ) {
 			if ( !$currentEditorForPublic ) { // no public user name
@@ -546,6 +491,7 @@ class RollbackPage {
 			Message::dateTimeParam( $target->getTimestamp() ),
 			$current->getId(),
 			Message::dateTimeParam( $current->getTimestamp() ),
+			$revisionsBetween,
 		];
 		if ( $summary instanceof MessageValue ) {
 			$summary = ( new Converter() )->convertMessageValue( $summary );

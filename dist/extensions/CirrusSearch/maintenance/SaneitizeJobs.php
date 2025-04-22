@@ -6,6 +6,7 @@ use CirrusSearch\Connection;
 use CirrusSearch\Job\CheckerJob;
 use CirrusSearch\MetaStore\MetaSaneitizeJobStore;
 use CirrusSearch\Profile\SearchProfileService;
+use CirrusSearch\UpdateGroup;
 use MediaWiki\MediaWikiServices;
 
 /**
@@ -224,12 +225,10 @@ EOD
 		$this->initMetaStores();
 
 		$jobName = $this->getOption( 'job-name', 'default' );
-		$jobInfo = $this->getJobInfo( $jobName );
-		if ( $jobInfo === null ) {
-			$jobInfo = $this->createNewJob( $jobName );
-		}
+		$jobInfo = $this->getJobInfo( $jobName ) ?? $this->createNewJob( $jobName );
 
 		$pushJobFreq = $this->getOption( 'refresh-freq', 2 * 3600 );
+		$jobQueue = MediaWikiServices::getInstance()->getJobQueueGroup();
 		$loop = new SaneitizeLoop(
 			$this->profileName,
 			$pushJobFreq,
@@ -237,7 +236,8 @@ EOD
 			$profile['min_loop_duration'],
 			function ( $msg, $channel ) {
 				$this->log( $msg, $channel );
-			} );
+			},
+			$jobQueue );
 		$jobs = $loop->run( $jobInfo, $maxJobs, $this->minId, $this->maxId );
 		if ( $jobs ) {
 			// Some job queues implementations ignore the timestamps and
@@ -260,22 +260,22 @@ EOD
 		$assignment = $this->getSearchConfig()->getClusterAssignment();
 		if ( $this->hasOption( 'cluster' ) ) {
 			$cluster = $this->getOption( 'cluster' );
-			if ( $assignment->canWriteToCluster( $cluster ) ) {
-				$this->fatalError( "$cluster is not in the set of writable clusters\n" );
+			if ( $assignment->canWriteToCluster( $cluster, UpdateGroup::CHECK_SANITY ) ) {
+				$this->fatalError( "$cluster is not in the set of check_sanity clusters\n" );
 			}
 			$this->clusters = [ $this->getOption( 'cluster' ) ];
 		}
-		$this->clusters = $assignment->getWritableClusters();
+		$this->clusters = $assignment->getWritableClusters( UpdateGroup::CHECK_SANITY );
 		if ( count( $this->clusters ) === 0 ) {
-			$this->fatalError( 'No clusters are writable...' );
+			$this->fatalError( 'No clusters are available...' );
 		}
 	}
 
 	private function initMetaStores() {
 		$connections = Connection::getClusterConnections( $this->clusters, $this->getSearchConfig() );
 
-		if ( empty( $connections ) ) {
-			$this->fatalError( "No writable cluster found." );
+		if ( !$connections ) {
+			$this->fatalError( "No available cluster found." );
 		}
 
 		$this->metaStores = [];
@@ -413,7 +413,6 @@ EOD
 	 * @return never
 	 */
 	public function fatalError( $msg, $exitCode = 1 ) {
-		// @phan-suppress-previous-line PhanTypeMissingReturn T240141
 		$date = new \DateTime();
 		parent::fatalError( $date->format( 'Y-m-d H:i:s' ) . " " . $msg, $exitCode );
 	}

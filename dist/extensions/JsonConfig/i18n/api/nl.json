@@ -6,6 +6,10 @@
 		]
 	},
 	"apihelp-jsonconfig-summary": "Verstrekt rechtstreekse toegang tot het JsonConfig-subsysteem.",
+	"apihelp-jsonconfig-param-command": "Welke deelhandeling moet worden verricht op JsonConfig:",
+	"apihelp-jsonconfig-paramvalue-command-status": "Toont de JsonConfig-instellingen.",
+	"apihelp-jsonconfig-paramvalue-command-reset": "Wist instellingen uit de cache. Vereist de parameter $1title en het recht jsonconfig-flush.",
+	"apihelp-jsonconfig-paramvalue-command-reload": "Herlaadt instellingen uit de configuratieopslag en slaat ze op in de cache. Vereist de parameter $1title en het recht jsonconfig-reset.",
 	"apihelp-jsonconfig-param-namespace": "Naamruimtenummer van de te verwerken titel.",
 	"apihelp-jsonconfig-param-title": "De te verwerken titel zonder naamruimtevoorvoegsel.",
 	"apihelp-jsonconfig-param-content": "Voor $1command=reload, in plaats daarvan deze inhoud gebruiken.",

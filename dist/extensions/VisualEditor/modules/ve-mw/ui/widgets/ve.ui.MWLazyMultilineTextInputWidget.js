@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWLazyMultilineTextInputWidget class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -20,20 +20,20 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {boolean} [autosize=false]
+ * @param {boolean} [config.autosize=false]
  */
 ve.ui.MWLazyMultilineTextInputWidget = function VeUiMWLazyMultilineTextInputWidget() {
-	var widget = this;
-
 	// Parent constructor
 	ve.ui.MWLazyMultilineTextInputWidget.super.apply( this, arguments );
 
 	// Check autosize is set, but if it isn't you probably shouldn't be using this widget!
 	if ( this.autosize ) {
+		this.$input.addClass( 've-ui-mwLazyMultilineTextInputWidget-collapsed' );
 		this.autosize = false;
-		this.$input.one( 'focus', function () {
-			widget.autosize = true;
-			widget.adjustSize();
+		this.$input.one( 'focus', () => {
+			this.$input.removeClass( 've-ui-mwLazyMultilineTextInputWidget-collapsed' );
+			this.autosize = true;
+			this.adjustSize();
 		} );
 	}
 };

@@ -2,11 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Chrumps",
+			"Msz2001",
 			"Openbk",
 			"Rail",
 			"Railfail536",
 			"SemanticPioneer",
-			"Msz2001"
+			"Woytecr",
+			"IOIOI"
 		]
 	},
 	"nstab-data": "Dane",
@@ -17,7 +19,7 @@
 	"jsonconfig-edit-action-cancel": "Anuluj",
 	"jsonconfig-edit-button-label": "Edytuj jako tabelę",
 	"jsonconfig-edit-dialog-error": "Nie można edytować jako tabeli: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Dane nie odpowiadają schematowi",
+	"jsonconfig-edit-dialog-error-data-invalid": "Dane nie odpowiadają schematowi",
 	"jsonconfig-edit-dialog-error-data-missing": "Własność JSON <code>data</code> nie jest obecna lub nie jest tablicą",
 	"jsonconfig-edit-dialog-error-data-too-large": "Zestaw danych jest zbyt duży, aby edytować go jako tabelę",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Każde pole musi mieć nazwę",
@@ -53,6 +55,7 @@
 	"jsonconfig-type-name-localized": "zlokalizowane dane",
 	"jsonconfig-type-name-number": "liczba",
 	"jsonconfig-type-name-boolean": "wartość logiczna",
+	"jsonconfig-use-category": "Strony używające rozszerzenia JsonConfig",
 	"jsonconfig-license": "Dane dostępne w ramach licencji $1.",
 	"jsonconfig-license-not-set": "Edytując tę stronę zgadzasz się na publikowanie twojego wkładu zgodnie z licencją podaną w polu <code>licence</code>.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
@@ -60,10 +63,11 @@
 	"jsonconfig-license-name-dl-de-by-1.0": "Licencja na dane Niemcy - uznanie autorstwa - wersja 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Licencja na dane Niemcy - uznanie autorstwa - wersja 2.0",
 	"jsonconfig-license-name-GeoNutzV": "Licencja Geo Data Niemcy",
-	"jsonconfig-license-copyrightwarning": "Zapisując zmiany, wyrażasz zgodę na [https://foundation.wikimedia.org/wiki/Terms_of_Use/pl Warunki użytkowania] i nieodwołalnie zgadzasz się na udostępnienie swojego udziału zgodnie z licencją  [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "Zapisując zmiany, wyrażasz zgodę na [https://foundation.wikimedia.org/wiki/Terms_of_Use/pl Warunki użytkowania], a nieodwołalnie zgadzasz się na udostępnienie swojego udziału zgodnie z licencją określoną w polu <code>licencja</code>.",
-	"jsonconfig-license-notice": "'''Uwaga:''' Edytując tę stronę zgadzasz się na publikowanie twojego wkładu na licencji [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning": "Publikując zmiany, akceptujesz nasze [https://foundation.wikimedia.org/wiki/Terms_of_Use/pl Warunki użytkowania] i nieodwołalnie zgadzasz się na udostępnienie swojego wkładu na licencji [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Publikując zmiany, zgadzasz się na udostępnienie swojego wkładu zgodnie z licencją określoną w polu <code>licence</code>.",
+	"jsonconfig-license-notice": "'''Uwaga:''' Edytując tę stronę zgadzasz się na publikowanie twojego wkładu zgodnie z zasadami licencji [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Uwaga:''' Edytując tę stronę zgadzasz się na publikowanie twojego wkładu zgodnie z licencją podaną w polu <code>licence</code>.",
 	"right-jsonconfig-flush": "Zmienianie JsonConfig przez API",
-	"action-jsonconfig-flush": "zmieniania JsonConfig przez API"
+	"action-jsonconfig-flush": "zmieniania JsonConfig przez API",
+	"jsonconfig-blocked-page-creation": "Tytuł strony, który podano, nie pasuje do żadnych wzorów skonfigurowanych dla rozszerzenia JSONConfig dla tej wiki."
 }

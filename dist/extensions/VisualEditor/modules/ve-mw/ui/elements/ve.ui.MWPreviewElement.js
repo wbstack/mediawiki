@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWPreviewElement class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -14,7 +14,7 @@
  * @constructor
  * @param {ve.dm.Node} [model]
  * @param {Object} [config]
- * @cfg {boolean} [useView=false] Use the view HTML, and don't bother generating model HTML, which
+ * @param {boolean} [config.useView=false] Use the view HTML, and don't bother generating model HTML, which
  *  is a bit slower
  */
 ve.ui.MWPreviewElement = function VeUiMwPreviewElement() {
@@ -30,6 +30,25 @@ ve.ui.MWPreviewElement = function VeUiMwPreviewElement() {
 OO.inheritClass( ve.ui.MWPreviewElement, ve.ui.PreviewElement );
 
 /* Method */
+
+/**
+ * @inheritdoc
+ */
+ve.ui.MWPreviewElement.prototype.beforeAppend = function ( element ) {
+	// Parent method
+	ve.ui.MWPreviewElement.super.prototype.beforeAppend.apply( this, arguments );
+
+	// Remove any TemplateStyles stylesheets already present on the page, to avoid
+	// very slow repaints (T330781)
+	Array.prototype.forEach.call( element.querySelectorAll( 'style[data-mw-deduplicate]' ), ( style ) => {
+		const key = style.getAttribute( 'data-mw-deduplicate' );
+
+		const duplicate = element.querySelector( 'style[data-mw-deduplicate="' + key + '"]' );
+		if ( duplicate ) {
+			style.parentNode.removeChild( style );
+		}
+	} );
+};
 
 /**
  * @inheritdoc

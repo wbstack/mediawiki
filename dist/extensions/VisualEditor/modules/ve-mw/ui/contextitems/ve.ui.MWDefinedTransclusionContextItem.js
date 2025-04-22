@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWDefinedTransclusionContextItem class.
  *
- * @copyright 2011-2018 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -38,9 +38,9 @@
  * @extends ve.ui.MWTransclusionContextItem
  *
  * @constructor
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config]
  */
 ve.ui.MWDefinedTransclusionContextItem = function VeUiMWDefinedTransclusionContextItem() {
 	// Parent constructor
@@ -58,7 +58,7 @@ OO.inheritClass( ve.ui.MWDefinedTransclusionContextItem, ve.ui.MWTransclusionCon
 ve.ui.MWDefinedTransclusionContextItem.static.name = null;
 
 ve.ui.MWDefinedTransclusionContextItem.static.toolDefinitions = ( function () {
-	var tools;
+	let tools;
 
 	try {
 		// Must use mw.message to avoid JSON being parsed as Wikitext
@@ -95,12 +95,12 @@ ve.ui.MWDefinedTransclusionContextItem.static.isCompatibleWith = function ( mode
  */
 ve.ui.MWDefinedTransclusionContextItem.static.getToolsByTitle = function () {
 	if ( !this.toolsByTitle ) {
-		var toolsByTitle;
+		let toolsByTitle;
 		this.toolsByTitle = toolsByTitle = {};
-		( this.toolDefinitions[ this.name ] || [] ).forEach( function ( template ) {
-			var titles = Array.isArray( template.title ) ? template.title : [ template.title ];
+		( this.toolDefinitions[ this.name ] || [] ).forEach( ( template ) => {
+			const titles = Array.isArray( template.title ) ? template.title : [ template.title ];
 			// 'title' can be a single title, or list of titles (including redirects)
-			titles.forEach( function ( title ) {
+			titles.forEach( ( title ) => {
 				toolsByTitle[ mw.Title.newFromText( title, mw.config.get( 'wgNamespaceIds' ).template ).getPrefixedText() ] = template;
 			} );
 		} );
@@ -115,9 +115,9 @@ ve.ui.MWDefinedTransclusionContextItem.static.getToolsByTitle = function () {
  * @return {Object|null} Tool definition, or null if no match
  */
 ve.ui.MWDefinedTransclusionContextItem.static.getMatchedTool = function ( model ) {
-	var resource = ve.getProp( model.getAttribute( 'mw' ), 'parts', 0, 'template', 'target', 'href' );
+	const resource = ve.getProp( model.getAttribute( 'mw' ), 'parts', 0, 'template', 'target', 'href' );
 	if ( resource ) {
-		var title = mw.Title.newFromText( mw.libs.ve.normalizeParsoidResourceName( resource ) ).getPrefixedText();
+		const title = mw.Title.newFromText( mw.libs.ve.normalizeParsoidResourceName( resource ) ).getPrefixedText();
 		return this.getToolsByTitle()[ title ] || null;
 	}
 	return null;
@@ -130,13 +130,13 @@ ve.ui.MWDefinedTransclusionContextItem.static.getMatchedTool = function ( model 
  * @return {string|null} Param wikitext, null if not found
  */
 ve.ui.MWDefinedTransclusionContextItem.prototype.getCanonicalParam = function ( name ) {
-	var params = this.tool.params || {};
+	const params = this.tool.params || {};
 
 	if ( Object.prototype.hasOwnProperty.call( params, name ) ) {
-		var aliases = Array.isArray( params[ name ] ) ? params[ name ] : [ params[ name ] ];
+		const aliases = Array.isArray( params[ name ] ) ? params[ name ] : [ params[ name ] ];
 		// Find the first non-empty value from the alias list
-		for ( var i = 0; i < aliases.length; i++ ) {
-			var value = ve.getProp( this.model.getAttribute( 'mw' ), 'parts', 0, 'template', 'params', aliases[ i ], 'wt' );
+		for ( let i = 0; i < aliases.length; i++ ) {
+			const value = ve.getProp( this.model.getAttribute( 'mw' ), 'parts', 0, 'template', 'params', aliases[ i ], 'wt' );
 			if ( value ) {
 				return value;
 			}

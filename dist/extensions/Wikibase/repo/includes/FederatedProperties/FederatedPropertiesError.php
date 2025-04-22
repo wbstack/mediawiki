@@ -4,9 +4,10 @@ declare( strict_types = 1 );
 namespace Wikibase\Repo\FederatedProperties;
 
 use ErrorPageError;
-use Html;
-use RawMessage;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\RawMessage;
 use Wikibase\DataModel\Term\LabelsProvider;
+use Wikibase\Repo\WikibaseRepo;
 use Wikibase\View\Template\TemplateFactory;
 
 /**
@@ -19,6 +20,7 @@ use Wikibase\View\Template\TemplateFactory;
 class FederatedPropertiesError extends ErrorPageError {
 
 	/**
+	 * @param string $languageCode
 	 * @param LabelsProvider $entity
 	 * @param string $msg Message key (string) for error text
 	 * @param array $params Array with parameters to wfMessage()
@@ -55,7 +57,11 @@ class FederatedPropertiesError extends ErrorPageError {
 			parent::report();
 		} else {
 			global $wgOut;
-			$wgOut->addModuleStyles( [ 'wikibase.common' ] );
+			$wgOut->addModuleStyles( [ 'wikibase.alltargets' ] );
+			// T324991
+			if ( !WikibaseRepo::getMobileSite() ) {
+				$wgOut->addModuleStyles( [ 'wikibase.desktop' ] );
+			}
 			parent::report( $action );
 		}
 	}

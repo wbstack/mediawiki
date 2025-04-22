@@ -2,14 +2,19 @@
 	"@metadata": {
 		"authors": [
 			"Kareyac",
-			"Դավիթ Սարոյան"
+			"Դավիթ Սարոյան",
+			"Սերգեյ Սաֆարյան"
 		]
 	},
 	"datatypes-type-wikibase-lexeme": "Բառույթ",
+	"nstab-lexeme": "Բառույթ",
+	"wikibase-lexeme-lexicographical-data": "Բառարանագրական տվյալներ",
+	"wikibase-lexeme-randomlexeme": "Պատահական բառույթ",
 	"wikibase-listdatatypes-wikibase-lexeme-head": "Բառույթ",
 	"wikibaselexeme-diffview-language": "լեզու",
 	"wikibaselexeme-field-language-label": "Լեզու",
 	"wikibaselexeme-field-lexical-category-label": "Բառային կարգ",
+	"wikibaselexeme-form-field-required": "Պարտադիր լրացման դաշտ",
 	"wikibaselexeme-form-grammatical-features": "Քերականական հատկանիշներ",
 	"wikibaselexeme-gloss-field-language-label": "Լեզու",
 	"wikibaselexeme-newlexeme-fieldset": "Ստեղծել նոր բառույթ",

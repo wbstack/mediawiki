@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Irus",
 			"MinecraftAustralia",
 			"Tok Pisin",
@@ -87,7 +86,7 @@
 	"mainpage-description": "Itulau Muamua",
 	"portal": "Vaega mo Tagata Lautele",
 	"portal-url": "Project:Vaega mo Tagata Lautele",
-	"youhavenewmessages": "'Ua iai lau $1 ($2).",
+	"new-messages": "'Ua iai lau $1 ($2).",
 	"editsection": "Teuteu",
 	"editold": "Teuteu",
 	"editlink": "Teuteu",
@@ -100,7 +99,6 @@
 	"mainpage-nstab": "Itulau Muamua",
 	"yourname": "Igoa o le tagata fa'aaoga",
 	"userlogin-yourname": "Igoa o le tagata fa'aaoga",
-	"yourpassword": "'Upu ulufale",
 	"userlogin-yourpassword": "'Upu ulufale",
 	"yourpasswordagain": "Toe lolomi 'upu ulufale",
 	"login": "Fa'aola",
@@ -122,8 +120,6 @@
 	"searchall": "mea 'uma",
 	"mypreferences": "Mea 'ou te fiafia i ai",
 	"searchresultshead": "Su'e",
-	"youremail": "'Imeli:",
-	"username": "Igoa o le tagata fa'aaoga:",
 	"email": "'Imeli",
 	"group-all": "(mea 'uma)",
 	"enhancedrc-history": "Tala fa'asolopito",

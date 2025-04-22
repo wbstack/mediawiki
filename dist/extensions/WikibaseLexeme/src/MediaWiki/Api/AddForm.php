@@ -1,16 +1,21 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
-use ApiBase;
-use ApiMain;
 use LogicException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Message\Message;
 use RuntimeException;
-use Status;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\Lexeme\Domain\Model\Exceptions\ConflictException;
+use Wikibase\Lexeme\Domain\Model\Form;
 use Wikibase\Lexeme\Domain\Model\FormId;
 use Wikibase\Lexeme\Domain\Model\Lexeme;
 use Wikibase\Lexeme\MediaWiki\Api\Error\LexemeNotFound;
@@ -24,8 +29,10 @@ use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\Api\ApiHelperFactory;
+use Wikibase\Repo\Api\ResultBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -35,44 +42,24 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class AddForm extends ApiBase {
 
+	use ApiCreateTempUserTrait;
+
 	private const LATEST_REVISION = 0;
 
-	/**
-	 * @var AddFormRequestParser
-	 */
-	private $requestParser;
-
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
-
-	/**
-	 * @var FormSerializer
-	 */
-	private $formSerializer;
-
-	/**
-	 * @var MediawikiEditEntityFactory
-	 */
-	private $editEntityFactory;
-
-	/**
-	 * @var SummaryFormatter
-	 */
-	private $summaryFormatter;
-
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $entityRevisionLookup;
+	private AddFormRequestParser $requestParser;
+	private ResultBuilder $resultBuilder;
+	private ApiErrorReporter $errorReporter;
+	private FormSerializer $formSerializer;
+	private MediaWikiEditEntityFactory $editEntityFactory;
+	private SummaryFormatter $summaryFormatter;
+	private EntityRevisionLookup $entityRevisionLookup;
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
 		ApiHelperFactory $apiHelperFactory,
 		SerializerFactory $baseDataModelSerializerFactory,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityIdParser $entityIdParser,
 		Store $store,
 		SummaryFormatter $summaryFormatter
@@ -93,25 +80,24 @@ class AddForm extends ApiBase {
 			$store->getEntityRevisionLookup( Store::LOOKUP_CACHING_DISABLED ),
 			$editEntityFactory,
 			$summaryFormatter,
-			static function ( $module ) use ( $apiHelperFactory ) {
-				return $apiHelperFactory->getErrorReporter( $module );
-			}
+			$apiHelperFactory
 		);
 	}
 
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		AddFormRequestParser $requestParser,
 		FormSerializer $formSerializer,
 		EntityRevisionLookup $entityRevisionLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		SummaryFormatter $summaryFormatter,
-		callable $errorReporterInstantiator
+		ApiHelperFactory $apiHelperFactory
 	) {
 		parent::__construct( $mainModule, $moduleName );
 
-		$this->errorReporter = $errorReporterInstantiator( $this );
+		$this->resultBuilder = $apiHelperFactory->getResultBuilder( $this );
+		$this->errorReporter = $apiHelperFactory->getErrorReporter( $this );
 		$this->requestParser = $requestParser;
 		$this->formSerializer = $formSerializer;
 		$this->editEntityFactory = $editEntityFactory;
@@ -122,19 +108,19 @@ class AddForm extends ApiBase {
 	/**
 	 * @see ApiBase::execute()
 	 *
-	 * @throws \ApiUsageException
+	 * @throws ApiUsageException
 	 */
-	public function execute() {
+	public function execute(): void {
 		/*
 		 * {
 			  "representations": [
-				"en-GB": {
+				"en-gb": {
 				  "value": "colour",
-				  "language": "en-GB"
+				  "language": "en-gb"
 				},
-				"en-US": {
+				"en-us": {
 				  "value": "color",
-				  "language": "en-US"
+				  "language": "en-us"
 				}
 			  ],
 			  "grammaticalFeatures": [
@@ -145,10 +131,8 @@ class AddForm extends ApiBase {
 		 *
 		 */
 
-		//FIXME: Response structure? - Added form
 		//FIXME: Representation text normalization
 
-		//TODO: Corresponding HTTP codes on failure (e.g. 400, 404, 422) (?)
 		//TODO: Documenting response structure. Is it possible?
 
 		$params = $this->extractRequestParams();
@@ -163,54 +147,46 @@ class AddForm extends ApiBase {
 		try {
 			$changeOp->apply( $lexeme, $summary );
 		} catch ( ChangeOpException $exception ) {
-			$this->errorReporter->dieException( $exception,  'unprocessable-request' );
+			$this->errorReporter->dieException( $exception, 'unprocessable-request' );
 		}
 
-		if ( $request->getBaseRevId() ) {
-			$baseRevId = $request->getBaseRevId();
-		} else {
-			$baseRevId = $lexemeRevision->getRevisionId();
-		}
+		$baseRevId = $request->getBaseRevId() ?: $lexemeRevision->getRevisionId();
 
 		$flags = $this->buildSaveFlags( $params );
 		$status = $this->saveNewLexemeRevision( $lexeme, $baseRevId, $summary, $flags, $params['tags'] ?: [] );
 
 		if ( !$status->isGood() ) {
-			$this->dieStatus( $status ); // Seems like it is good enough
+			$this->dieStatus( $status );
 		}
 
-		$this->fillApiResultFromStatus( $status );
+		$this->fillApiResultFromStatus( $status, $params );
 	}
 
-	/** @inheritDoc */
-	protected function getAllowedParams() {
-		return array_merge(
-			[
-				AddFormRequestParser::PARAM_LEXEME_ID => [
-					ParamValidator::PARAM_TYPE => 'string',
-					ParamValidator::PARAM_REQUIRED => true,
-				],
-				AddFormRequestParser::PARAM_DATA => [
-					ParamValidator::PARAM_TYPE => 'text',
-					ParamValidator::PARAM_REQUIRED => true,
-				],
-				AddFormRequestParser::PARAM_BASEREVID => [
-					ParamValidator::PARAM_TYPE => 'integer',
-				],
-				'tags' => [
-					ParamValidator::PARAM_TYPE => 'tags',
-					ParamValidator::PARAM_ISMULTI => true,
-				],
-				'bot' => [
-					ParamValidator::PARAM_TYPE => 'boolean',
-					ParamValidator::PARAM_DEFAULT => false,
-				]
-			]
-		);
+	protected function getAllowedParams(): array {
+		return array_merge( [
+			AddFormRequestParser::PARAM_LEXEME_ID => [
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_REQUIRED => true,
+			],
+			AddFormRequestParser::PARAM_DATA => [
+				ParamValidator::PARAM_TYPE => 'text',
+				ParamValidator::PARAM_REQUIRED => true,
+			],
+			AddFormRequestParser::PARAM_BASEREVID => [
+				ParamValidator::PARAM_TYPE => 'integer',
+			],
+			'tags' => [
+				ParamValidator::PARAM_TYPE => 'tags',
+				ParamValidator::PARAM_ISMULTI => true,
+			],
+			'bot' => [
+				ParamValidator::PARAM_TYPE => 'boolean',
+				ParamValidator::PARAM_DEFAULT => false,
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
-	/** @inheritDoc */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -218,65 +194,59 @@ class AddForm extends ApiBase {
 	 * As long as this codebase is in development and APIs might change any time without notice, we
 	 * mark all as internal. This adds an "unstable" notice, but does not hide them in any way.
 	 */
-	public function isInternal() {
+	public function isInternal(): bool {
 		return true;
 	}
 
-	/** @inheritDoc */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
-	/** @inheritDoc */
-	public function mustBePosted() {
+	public function mustBePosted(): bool {
 		return true;
 	}
 
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		$lexemeId = 'L12';
 		$exampleData = [
 			'representations' => [
-				'en-US' => [ 'value' => 'color', 'language' => 'en-US' ],
-				'en-GB' => [ 'value' => 'colour', 'language' => 'en-GB' ],
+				'en-us' => [ 'value' => 'color', 'language' => 'en-us' ],
+				'en-gb' => [ 'value' => 'colour', 'language' => 'en-gb' ],
 			],
 			'grammaticalFeatures' => [
-				'Q1', 'Q2'
-			]
+				'Q1', 'Q2',
+			],
 		];
 
 		$query = http_build_query( [
 			'action' => $this->getModuleName(),
 			AddFormRequestParser::PARAM_LEXEME_ID => $lexemeId,
-			AddFormRequestParser::PARAM_DATA => json_encode( $exampleData )
+			AddFormRequestParser::PARAM_DATA => json_encode( $exampleData ),
 		] );
 
-		$languages = array_map( static function ( $r ) {
-			return $r['language'];
-		}, $exampleData['representations'] );
-		$representations = array_map( static function ( $r ) {
-			return $r['value'];
-		}, $exampleData['representations'] );
+		$languages = array_column( $exampleData['representations'], 'language' );
+		$representations = array_column( $exampleData['representations'], 'value' );
 
 		$representationsText = $this->getLanguage()->commaList( $representations );
 		$languagesText = $this->getLanguage()->commaList( $languages );
 		$grammaticalFeaturesText = $this->getLanguage()->commaList( $exampleData['grammaticalFeatures'] );
 
-		$exampleMessage = new \Message(
+		$exampleMessage = new Message(
 			'apihelp-wbladdform-example-1',
 			[
 				$lexemeId,
 				$representationsText,
 				$languagesText,
-				$grammaticalFeaturesText
+				$grammaticalFeaturesText,
 			]
 		);
 
 		return [
-			urldecode( $query ) => $exampleMessage
+			urldecode( $query ) => $exampleMessage,
 		];
 	}
 
-	private function getFormWithMaxId( Lexeme $lexeme ) {
+	private function getFormWithMaxId( Lexeme $lexeme ): Form {
 		// TODO: This is all rather nasty
 		$maxIdNumber = $lexeme->getForms()->maxFormIdNumber();
 		// TODO: Use some service to get the ID object!
@@ -285,7 +255,7 @@ class AddForm extends ApiBase {
 	}
 
 	/**
-	 * @throws \ApiUsageException
+	 * @throws ApiUsageException
 	 */
 	private function getBaseLexemeRevisionFromRequest( AddFormRequest $request ): EntityRevision {
 		$lexemeId = $request->getLexemeId();
@@ -317,10 +287,7 @@ class AddForm extends ApiBase {
 		return $lexemeRevision;
 	}
 
-	/**
-	 * @return int
-	 */
-	private function buildSaveFlags( array $params ) {
+	private function buildSaveFlags( array $params ): int {
 		$flags = EDIT_UPDATE;
 		if ( isset( $params['bot'] ) && $params['bot'] &&
 			$this->getPermissionManager()->userHasRight( $this->getUser(), 'bot' )
@@ -332,11 +299,11 @@ class AddForm extends ApiBase {
 
 	private function saveNewLexemeRevision(
 		EntityDocument $lexeme,
-		?int $baseRevId,
+		int $baseRevId,
 		FormatableSummary $summary,
-		$flags,
+		int $flags,
 		array $tags
-	): Status {
+	): EditEntityStatus {
 		$editEntity = $this->editEntityFactory->newEditEntity(
 			$this->getContext(),
 			$lexeme->getId(),
@@ -347,7 +314,6 @@ class AddForm extends ApiBase {
 		);
 
 		$tokenThatDoesNotNeedChecking = false;
-		// FIXME: Handle failure
 		try {
 			$status = $editEntity->attemptSave(
 				$lexeme,
@@ -364,22 +330,19 @@ class AddForm extends ApiBase {
 		return $status;
 	}
 
-	private function fillApiResultFromStatus( Status $status ) {
-
-		/** @var EntityRevision $entityRevision */
-		$entityRevision = $status->getValue()['revision'];
-		$revisionId = $entityRevision->getRevisionId();
+	private function fillApiResultFromStatus( EditEntityStatus $status, array $params ): void {
+		$entityRevision = $status->getRevision();
 
 		/** @var Lexeme $editedLexeme */
 		$editedLexeme = $entityRevision->getEntity();
+		'@phan-var Lexeme $editedLexeme';
 		$newForm = $this->getFormWithMaxId( $editedLexeme );
 		$serializedForm = $this->formSerializer->serialize( $newForm );
 
-		$apiResult = $this->getResult();
-		$apiResult->addValue( null, 'lastrevid', $revisionId );
-		// TODO: Do we really need `success` property in response?
-		$apiResult->addValue( null, 'success', 1 );
-		$apiResult->addValue( null, 'form', $serializedForm );
+		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, null );
+		$this->resultBuilder->markSuccess();
+		$this->getResult()->addValue( null, 'form', $serializedForm );
+		$this->resultBuilder->addTempUser( $status, fn ( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
 }

@@ -2,11 +2,12 @@
 
 namespace MediaWiki\Extension\Score;
 
-use Parser;
-use ParserOptions;
+use MediaWiki\Config\Config;
+use MediaWiki\Hook\ParserFirstCallInitHook;
+use MediaWiki\Hook\SoftwareInfoHook;
+use MediaWiki\MainConfigNames;
+use MediaWiki\Parser\Parser;
 use ValueFormatters\FormatterOptions;
-use ValueParsers\StringParser;
-use Wikibase\Repo\Parsers\WikibaseStringValueNormalizer;
 use Wikibase\Repo\Rdf\DedupeBag;
 use Wikibase\Repo\Rdf\EntityMentionListener;
 use Wikibase\Repo\Rdf\NullEntityRdfBuilder;
@@ -14,26 +15,38 @@ use Wikibase\Repo\Rdf\RdfVocabulary;
 use Wikibase\Repo\WikibaseRepo;
 use Wikimedia\Purtle\RdfWriter;
 
-class Hooks {
+class Hooks implements
+	ParserFirstCallInitHook,
+	SoftwareInfoHook
+{
+	private Config $config;
+
+	public function __construct(
+		Config $config
+	) {
+		$this->config = $config;
+	}
+
 	/**
 	 * @param Parser $parser
 	 */
-	public static function onParserFirstCallInit( Parser $parser ) {
-		global $wgUseImageMagick, $wgScoreTrim, $wgScoreUseSvg;
+	public function onParserFirstCallInit( $parser ) {
+		global $wgScoreTrim, $wgScoreUseSvg;
 		if ( $wgScoreUseSvg ) {
 			// For SVG, always set true
 			$wgScoreTrim = true;
 		}
 		if ( $wgScoreTrim === null ) {
 			// Default to if we use Image Magick, since it requires Image Magick.
-			$wgScoreTrim = $wgUseImageMagick;
+			$wgScoreTrim = $this->config->get( MainConfigNames::UseImageMagick );
 		}
 		$parser->setHook( 'score', [ Score::class, 'render' ] );
 	}
 
-	public static function onSoftwareInfo( array &$software ) {
+	/** @inheritDoc */
+	public function onSoftwareInfo( &$software ) {
 		try {
-			$software[ '[http://lilypond.org/ LilyPond]' ] = Score::getLilypondVersion();
+			$software[ '[https://lilypond.org/ LilyPond]' ] = Score::getLilypondVersion();
 		} catch ( ScoreException $ex ) {
 			// LilyPond executable can't found
 		}
@@ -51,7 +64,7 @@ class Hooks {
 		}
 
 		$dataTypeDefinitions['PT:musical-notation'] = [
-			'value-type'                 => 'string',
+			'value-type' => 'string',
 			'validator-factory-callback' => static function () {
 				global $wgScoreMaxLength;
 				// load validator builders
@@ -63,10 +76,6 @@ class Hooks {
 				// $validators[] = new ScoreValidator();
 				// TODO: Take out the validation out of Score
 				return $validators;
-			},
-			'parser-factory-callback' => static function ( ParserOptions $options ) {
-				$normalizer = new WikibaseStringValueNormalizer( WikibaseRepo::getStringNormalizer() );
-				return new StringParser( $normalizer );
 			},
 			'formatter-factory-callback' => static function ( $format, FormatterOptions $options ) {
 				return new ScoreFormatter( $format );
@@ -94,7 +103,7 @@ class Hooks {
 			return;
 		}
 		$dataTypeDefinitions['PT:musical-notation'] = [
-			'value-type'                 => 'string',
+			'value-type' => 'string',
 			'formatter-factory-callback' => static function ( $format, FormatterOptions $options ) {
 				return new ScoreFormatter( $format );
 			},

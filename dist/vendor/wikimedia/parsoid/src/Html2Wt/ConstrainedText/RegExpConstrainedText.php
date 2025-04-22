@@ -17,13 +17,10 @@ abstract class RegExpConstrainedText extends ConstrainedText {
 	/** @var \Closure(string):bool */
 	public $suffixMatcher;
 
-	/**
-	 * @param array $args
-	 */
 	protected function __construct( array $args ) {
 		parent::__construct( $args );
-		$this->prefix = $this->prefix ?? '<nowiki/>';
-		$this->suffix = $this->suffix ?? '<nowiki/>';
+		$this->prefix ??= '<nowiki/>';
+		$this->suffix ??= '<nowiki/>';
 		// functions which return true if escape prefix/suffix need to be added
 		$matcher = static function ( string $re, bool $invert ): callable {
 			return ( static function ( string $context ) use ( $re, $invert ): bool {

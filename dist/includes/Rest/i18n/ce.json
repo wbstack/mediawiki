@@ -4,6 +4,7 @@
 			"Умар"
 		]
 	},
+	"rest-unsupported-content-type": "ТӀе ца оьцу Content-Type: $1",
 	"rest-permission-denied-anon": "Аноним декъашхочун тӀекхочуш йац",
 	"rest-permission-denied-title": "Декъашхочун бакъонаш йац ($1) корта беша",
 	"rest-permission-denied-revision": "Йоьхуш йолу ($1) версин декъашхо тӀекхача ца ло.",
@@ -16,5 +17,6 @@
 	"rest-compare-page-mismatch": "Билгалйина версеш массийта агӀонийн йу, уьш йуьстилла дац.",
 	"rest-compare-permission-denied": "Йоьхуш йолу версин декъашхо тӀекхача ца ло.",
 	"rest-bad-content-model": "Чулацаман нийса йоцу модель: $1",
-	"rest-cannot-load-file": "«$1» коьртана файл чуйаккха мегаш дац."
+	"rest-cannot-load-file": "«$1» коьртана файл чуйаккха мегаш дац.",
+	"rest-badtoken-nosession": "CSRF гӀалат — сеанс йац."
 }

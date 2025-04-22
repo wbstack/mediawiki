@@ -21,9 +21,9 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
-
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to dump a the list of files uploaded,
@@ -80,7 +80,7 @@ By default, outputs relative paths against the parent directory of $wgUploadDire
 	 * @param bool $shared True to pass shared-dir settings to hash func
 	 */
 	private function fetchUsed( $shared ) {
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 
 		$result = $dbr->newSelectQueryBuilder()
 			->select( [ 'il_to', 'img_name' ] )
@@ -101,7 +101,7 @@ By default, outputs relative paths against the parent directory of $wgUploadDire
 	 * @param bool $shared True to pass shared-dir settings to hash func
 	 */
 	private function fetchLocal( $shared ) {
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 		$result = $dbr->newSelectQueryBuilder()
 			->select( 'img_name' )
 			->from( 'image' )
@@ -114,7 +114,7 @@ By default, outputs relative paths against the parent directory of $wgUploadDire
 	}
 
 	private function outputItem( $name, $shared ) {
-		$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $name );
+		$file = $this->getServiceContainer()->getRepoGroup()->findFile( $name );
 		if ( $file && $this->filterItem( $file, $shared ) ) {
 			$filename = $file->getLocalRefPath();
 			$rel = wfRelativePath( $filename, $this->mBasePath );
@@ -129,5 +129,7 @@ By default, outputs relative paths against the parent directory of $wgUploadDire
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = DumpUploads::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

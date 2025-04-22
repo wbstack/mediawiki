@@ -1,195 +1,239 @@
 'use strict';
 
 const { assert, action } = require( 'api-testing' );
+const { expect } = require( '../helpers/chaiHelper' );
 const entityHelper = require( '../helpers/entityHelper' );
-const { RequestBuilder } = require( '../helpers/RequestBuilder' );
+const { formatStatementEditSummary } = require( '../helpers/formatEditSummaries' );
+const {
+	newAddItemStatementRequestBuilder,
+	newRemoveItemStatementRequestBuilder,
+	newRemoveStatementRequestBuilder,
+	newGetStatementRequestBuilder,
+	newCreateItemRequestBuilder
+} = require( '../helpers/RequestBuilderFactory' );
+const { assertValidError } = require( '../helpers/responseValidator' );
+const { getOrCreateBotUser } = require( '../helpers/testUsers' );
 
-async function addStatementWithRandomStringValue( itemId, propertyId ) {
-	const response = await new RequestBuilder()
-		.withRoute( 'POST', '/entities/items/{item_id}/statements' )
-		.withPathParam( 'item_id', itemId )
-		.withHeader( 'content-type', 'application/json' )
-		.withJsonBodyParam(
-			'statement',
-			entityHelper.newStatementWithRandomStringValue( propertyId )
-		).makeRequest();
+describe( 'DELETE statement', () => {
 
-	return response.body;
-}
-
-function newRemoveItemStatementRequestBuilder( itemId, statementId ) {
-	return new RequestBuilder()
-		.withRoute( 'DELETE', '/entities/items/{item_id}/statements/{statement_id}' )
-		.withPathParam( 'item_id', itemId )
-		.withPathParam( 'statement_id', statementId );
-}
-
-describe( 'DELETE /entities/items/{item_id}/statements/{statement_id}', () => {
 	let testItemId;
-	let testPropertyId;
+	let testStatementPropertyId;
 
 	before( async () => {
-		testItemId = ( await entityHelper.createEntity( 'item', {} ) ).entity.id;
-		testPropertyId = ( await entityHelper.createUniqueStringProperty() ).entity.id;
+		testItemId = ( await newCreateItemRequestBuilder( {} ).makeRequest() ).body.id;
+		testStatementPropertyId = ( await entityHelper.createUniqueStringProperty() ).body.id;
 	} );
 
-	function assertValid200Response( response ) {
-		assert.equal( response.status, 200 );
-		assert.equal( response.body, 'Statement deleted' );
-	}
+	[
+		( statementId, patch ) => newRemoveItemStatementRequestBuilder( testItemId, statementId, patch ),
+		newRemoveStatementRequestBuilder
+	].forEach( ( newRemoveRequestBuilder ) => {
+		describe( newRemoveRequestBuilder().getRouteDescription(), () => {
 
-	async function verifyStatementDeleted( statementId ) {
-		const verifyStatement = await new RequestBuilder()
-			.withRoute( 'GET', '/statements/{statement_id}' )
-			.withPathParam( 'statement_id', statementId )
-			.makeRequest();
+			describe( '200 success response', () => {
+				let testStatement;
 
-		assert.equal( verifyStatement.status, 404 );
+				async function addStatementWithRandomStringValue( itemId, statementPropertyId ) {
+					return ( await newAddItemStatementRequestBuilder(
+						itemId,
+						entityHelper.newStatementWithRandomStringValue( statementPropertyId )
+					).makeRequest() ).body;
+				}
 
-	}
+				async function verifyStatementDeleted( statementId ) {
+					const verifyStatement = await newGetStatementRequestBuilder( statementId ).makeRequest();
 
-	describe( '200 success response', () => {
-		let testStatement;
+					expect( verifyStatement ).to.have.status( 404 );
 
-		beforeEach( async () => {
-			testStatement = await addStatementWithRandomStringValue( testItemId, testPropertyId );
-		} );
+				}
 
-		it( "can remove an item's statement without request body", async () => {
-			const response =
-				await newRemoveItemStatementRequestBuilder( testItemId, testStatement.id )
-					.assertValidRequest()
-					.makeRequest();
+				function assertValid200Response( response ) {
+					expect( response ).to.have.status( 200 );
+					assert.equal( response.body, 'Statement deleted' );
+				}
 
-			assertValid200Response( response );
-			const { comment } = await entityHelper.getLatestEditMetadata( testItemId );
-			assert.empty( comment );
-			await verifyStatementDeleted( testStatement.id );
-		} );
+				beforeEach( async () => {
+					testStatement = await addStatementWithRandomStringValue( testItemId, testStatementPropertyId );
+				} );
 
-		it( "can remove an item's statement with edit metadata provided", async () => {
-			const user = await action.mindy();
-			const tag = await action.makeTag( 'e2e test tag', 'Created during e2e test' );
-			const editSummary = 'omg look i removed a statement';
-			const response =
-				await newRemoveItemStatementRequestBuilder( testItemId, testStatement.id )
-					.withJsonBodyParam( 'tags', [ tag ] )
-					.withJsonBodyParam( 'bot', true )
-					.withJsonBodyParam( 'comment', editSummary )
-					.withUser( user )
-					.assertValidRequest()
-					.makeRequest();
+				it( 'can remove a statement without request body', async () => {
+					const response =
+						await newRemoveRequestBuilder( testStatement.id )
+							.assertValidRequest()
+							.makeRequest();
 
-			assertValid200Response( response );
-			await verifyStatementDeleted( testStatement.id );
+					assertValid200Response( response );
+					const { comment } = await entityHelper.getLatestEditMetadata( testItemId );
+					assert.strictEqual(
+						comment,
+						formatStatementEditSummary(
+							'wbremoveclaims',
+							'remove',
+							testStatement.property.id,
+							testStatement.value.content
+						)
+					);
+					await verifyStatementDeleted( testStatement.id );
+				} );
 
-			const editMetadata = await entityHelper.getLatestEditMetadata( testItemId );
-			assert.include( editMetadata.tags, tag );
-			assert.property( editMetadata, 'bot' );
-			assert.strictEqual( editMetadata.comment, editSummary );
-			assert.strictEqual( editMetadata.user, user.username );
+				it( 'can remove a statement with edit metadata provided', async () => {
+					const user = await getOrCreateBotUser();
+					const tag = await action.makeTag( 'e2e test tag', 'Created during e2e test', true );
+					const editSummary = 'omg look i removed a statement';
+					const response =
+						await newRemoveRequestBuilder( testStatement.id )
+							.withJsonBodyParam( 'tags', [ tag ] )
+							.withJsonBodyParam( 'bot', true )
+							.withJsonBodyParam( 'comment', editSummary )
+							.withUser( user )
+							.assertValidRequest()
+							.makeRequest();
+
+					assertValid200Response( response );
+					await verifyStatementDeleted( testStatement.id );
+
+					const editMetadata = await entityHelper.getLatestEditMetadata( testItemId );
+					assert.include( editMetadata.tags, tag );
+					assert.property( editMetadata, 'bot' );
+					assert.strictEqual(
+						editMetadata.comment,
+						formatStatementEditSummary( 'wbremoveclaims',
+							'remove',
+							testStatement.property.id,
+							testStatement.value.content,
+							editSummary
+						)
+					);
+					assert.strictEqual( editMetadata.user, user.username );
+				} );
+			} );
+
+			describe( '400 error response', () => {
+				it( 'statement ID contains invalid entity ID', async () => {
+					const response = await newRemoveRequestBuilder( 'X123$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE' )
+						.assertInvalidRequest()
+						.makeRequest();
+
+					assertValidError(
+						response,
+						400,
+						'invalid-path-parameter',
+						{ parameter: 'statement_id' }
+					);
+				} );
+
+				it( 'statement ID is invalid format', async () => {
+					const response = await newRemoveRequestBuilder( 'not-a-valid-format' )
+						.assertInvalidRequest()
+						.makeRequest();
+
+					assertValidError(
+						response,
+						400,
+						'invalid-path-parameter',
+						{ parameter: 'statement_id' }
+					);
+				} );
+			} );
+
+			describe( '404 statement not found', () => {
+				it( 'responds 404 statement not found for nonexistent statement', async () => {
+					const statementId = testItemId + '$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
+					const response = await newRemoveRequestBuilder( statementId )
+						.assertValidRequest()
+						.makeRequest();
+
+					assertValidError( response, 404, 'resource-not-found', { resource_type: 'statement' } );
+					assert.strictEqual( response.body.message, 'The requested resource does not exist' );
+				} );
+			} );
 		} );
 	} );
 
-	describe( '400 error response', () => {
-		it( 'invalid item ID', async () => {
+	describe( 'long route specific errors', () => {
+		it( 'responds 400 for invalid item ID', async () => {
 			const itemId = 'X123';
 			const statementId = 'Q123$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
 			const response = await newRemoveItemStatementRequestBuilder( itemId, statementId )
 				.assertInvalidRequest()
 				.makeRequest();
 
-			assert.equal( response.status, 400 );
-			assert.header( response, 'Content-Language', 'en' );
-			assert.equal( response.body.code, 'invalid-item-id' );
-			assert.include( response.body.message, itemId );
+			assertValidError(
+				response,
+				400,
+				'invalid-path-parameter',
+				{ parameter: 'item_id' }
+			);
 		} );
 
-		it( 'statement ID contains invalid entity ID', async () => {
-			const statementId = 'X123$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
-			const response = await newRemoveItemStatementRequestBuilder( testItemId, statementId )
-				.assertInvalidRequest()
-				.makeRequest();
-
-			assert.equal( response.status, 400 );
-			assert.header( response, 'Content-Language', 'en' );
-			assert.equal( response.body.code, 'invalid-statement-id' );
-			assert.include( response.body.message, statementId );
-		} );
-
-		it( 'statement ID is invalid format', async () => {
-			const statementId = 'not-a-valid-format';
-			const response = await newRemoveItemStatementRequestBuilder( testItemId, statementId )
-				.assertInvalidRequest()
-				.makeRequest();
-
-			assert.equal( response.status, 400 );
-			assert.header( response, 'Content-Language', 'en' );
-			assert.equal( response.body.code, 'invalid-statement-id' );
-			assert.include( response.body.message, statementId );
-		} );
-
-		it( 'statement is not on an item', async () => {
-			const statementId = 'P123$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
-			const response = await newRemoveItemStatementRequestBuilder( testItemId, statementId )
-				.assertValidRequest()
-				.makeRequest();
-
-			assert.equal( response.status, 400 );
-			assert.header( response, 'Content-Language', 'en' );
-			assert.equal( response.body.code, 'invalid-statement-id' );
-			assert.include( response.body.message, statementId );
-		} );
-	} );
-
-	describe( '404 error response', () => {
-		it( 'requested item does not exist', async () => {
-			const itemId = 'Q999999';
-			const statementId = `${itemId}$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE`;
-			const response = await newRemoveItemStatementRequestBuilder( itemId, statementId )
-				.assertValidRequest()
-				.makeRequest();
-
-			assert.equal( response.status, 404 );
-			assert.header( response, 'Content-Language', 'en' );
-			assert.equal( response.body.code, 'item-not-found' );
-			assert.include( response.body.message, itemId );
-		} );
-		it( 'requested item exists, but statement does not exist on item', async () => {
-			const statementId = testItemId + '$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
-			const response =
-				await newRemoveItemStatementRequestBuilder( testItemId, statementId )
-					.assertValidRequest()
-					.makeRequest();
-
-			assert.equal( response.status, 404 );
-			assert.header( response, 'Content-Language', 'en' );
-			assert.equal( response.body.code, 'statement-not-found' );
-			assert.include( response.body.message, statementId );
-		} );
-		it( "requested item exists, but statement's Item ID does not match", async () => {
+		it( 'responds 400 if item and statement do not match', async () => {
 			const statementId = 'Q1$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
 			const response =
 				await newRemoveItemStatementRequestBuilder( testItemId, statementId )
 					.assertValidRequest()
 					.makeRequest();
 
-			assert.equal( response.status, 404 );
-			assert.header( response, 'Content-Language', 'en' );
-			assert.equal( response.body.code, 'statement-not-found' );
-			assert.include( response.body.message, statementId );
+			const context = { item_id: testItemId, statement_id: statementId };
+			assertValidError( response, 400, 'item-statement-id-mismatch', context );
 		} );
-	} );
 
-	describe( '415 error response', () => {
-		it( 'unsupported media type', async () => {
-			const contentType = 'multipart/form-data';
-			const response = await newRemoveItemStatementRequestBuilder( testItemId, 'id-does-not-matter' )
-				.withHeader( 'content-type', contentType )
+		it( 'responds 404 item-not-found for nonexistent item', async () => {
+			const itemId = 'Q999999';
+			const statementId = `${itemId}$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE`;
+			const response = await newRemoveItemStatementRequestBuilder( itemId, statementId )
+				.assertValidRequest()
 				.makeRequest();
 
-			assert.strictEqual( response.status, 415 );
-			assert.strictEqual( response.body.message, `Unsupported Content-Type: '${contentType}'` );
+			assertValidError( response, 404, 'resource-not-found', { resource_type: 'item' } );
+			assert.strictEqual( response.body.message, 'The requested resource does not exist' );
+		} );
+
+		it( 'responds 404 if statement subject is a redirect', async () => {
+			const redirectSource = await entityHelper.createRedirectForItem( testItemId );
+			const statementId = redirectSource + '$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
+			const response = await newRemoveItemStatementRequestBuilder( redirectSource, statementId )
+				.assertValidRequest()
+				.makeRequest();
+
+			assertValidError( response, 404, 'resource-not-found', { resource_type: 'statement' } );
+			assert.strictEqual( response.body.message, 'The requested resource does not exist' );
 		} );
 	} );
+
+	describe( 'short route specific errors', () => {
+		it( 'responds 400 invalid-statement-id if statement is not on a supported entity', async () => {
+			const response = await newRemoveStatementRequestBuilder( 'L123$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE' )
+				.assertInvalidRequest()
+				.makeRequest();
+
+			assertValidError(
+				response,
+				400,
+				'invalid-path-parameter',
+				{ parameter: 'statement_id' }
+			);
+		} );
+
+		it( 'responds 404 statement not found for nonexistent item', async () => {
+			const statementId = 'Q999999$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
+			const response = await newRemoveStatementRequestBuilder( statementId )
+				.assertValidRequest()
+				.makeRequest();
+
+			assertValidError( response, 404, 'resource-not-found', { resource_type: 'statement' } );
+			assert.strictEqual( response.body.message, 'The requested resource does not exist' );
+		} );
+
+		it( 'statement subject is a redirect', async () => {
+			const redirectSource = await entityHelper.createRedirectForItem( testItemId );
+			const statementId = redirectSource + '$AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE';
+			const response = await newRemoveStatementRequestBuilder( statementId )
+				.assertValidRequest()
+				.makeRequest();
+
+			assertValidError( response, 404, 'resource-not-found', { resource_type: 'statement' } );
+			assert.strictEqual( response.body.message, 'The requested resource does not exist' );
+		} );
+	} );
+
 } );

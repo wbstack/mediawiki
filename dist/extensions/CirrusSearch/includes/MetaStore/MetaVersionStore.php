@@ -10,8 +10,8 @@ use CirrusSearch\Maintenance\SuggesterAnalysisConfigBuilder;
 use CirrusSearch\Maintenance\SuggesterMappingConfigBuilder;
 use Elastica\Index;
 use Elastica\Query\BoolQuery;
-use GitInfo;
-use WikiMap;
+use MediaWiki\Utils\GitInfo;
+use MediaWiki\WikiMap\WikiMap;
 
 class MetaVersionStore implements MetaStore {
 	public const METASTORE_TYPE = 'version';
@@ -119,14 +119,14 @@ class MetaVersionStore implements MetaStore {
 	public static function buildDocument( Connection $connection, $baseName, $typeName ) {
 		global $IP;
 		if ( $typeName == Connection::TITLE_SUGGEST_INDEX_SUFFIX ) {
-			list( $aMaj, $aMin ) = explode( '.', SuggesterAnalysisConfigBuilder::VERSION, 3 );
-			list( $mMaj, $mMin ) = explode( '.', SuggesterMappingConfigBuilder::VERSION, 3 );
+			[ $aMaj, $aMin ] = explode( '.', SuggesterAnalysisConfigBuilder::VERSION, 3 );
+			[ $mMaj, $mMin ] = explode( '.', SuggesterMappingConfigBuilder::VERSION, 3 );
 		} elseif ( $typeName === Connection::ARCHIVE_INDEX_SUFFIX ) {
-			list( $aMaj, $aMin ) = explode( '.', AnalysisConfigBuilder::VERSION, 3 );
-			list( $mMaj, $mMin ) = explode( '.', ArchiveMappingConfigBuilder::VERSION, 3 );
+			[ $aMaj, $aMin ] = explode( '.', AnalysisConfigBuilder::VERSION, 3 );
+			[ $mMaj, $mMin ] = explode( '.', ArchiveMappingConfigBuilder::VERSION, 3 );
 		} else {
-			list( $aMaj, $aMin ) = explode( '.', AnalysisConfigBuilder::VERSION, 3 );
-			list( $mMaj, $mMin ) = explode( '.', MappingConfigBuilder::VERSION, 3 );
+			[ $aMaj, $aMin ] = explode( '.', AnalysisConfigBuilder::VERSION, 3 );
+			[ $mMaj, $mMin ] = explode( '.', MappingConfigBuilder::VERSION, 3 );
 		}
 		$mwInfo = new GitInfo( $IP );
 		$cirrusInfo = new GitInfo( __DIR__ . '/../..' );

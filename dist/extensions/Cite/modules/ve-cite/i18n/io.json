@@ -12,7 +12,6 @@
 	"cite-ve-dialog-reference-editing-reused": "Ica refero uzesas $1 {{PLURAL:$1|foye}} en ca pagino",
 	"cite-ve-dialog-reference-options-group-label": "Uzar ica grupo",
 	"cite-ve-dialog-reference-options-group-placeholder": "Generala referi",
-	"cite-ve-dialog-reference-options-name-label": "Riuzar per ica nomo",
 	"cite-ve-dialog-reference-options-section": "Selekti",
 	"cite-ve-dialog-reference-title": "Refero",
 	"cite-ve-dialog-reference-useexisting-tool": "Ri-uzar",
@@ -30,6 +29,5 @@
 	"cite-ve-referenceslist-isempty-default": "Esas nula referi en ca pagino inkluzenda en ca listo.",
 	"cite-ve-referenceslist-missingref": "Ica refero definesas en shablono od altra produktita bloko, e nun povas redaktesar nur per fonto-maniero.",
 	"cite-ve-toolbar-group-label": "Citar",
-	"cite-ve-othergroup-item": "$1 refero",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Referi"
+	"cite-ve-othergroup-item": "$1 refero"
 }

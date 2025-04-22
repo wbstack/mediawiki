@@ -1,29 +1,39 @@
-@import '../resources/common/variables.less';
+@import '../resources/skins.vector.styles/variables.less';
 
 /* mediawiki.notification */
 
 .mw-notification-area {
 	font-size: @font-size-notification;
+	// Center the notification area with a maximum width.
+	// We can't center .mw-notification-area-overlay as that would break position:fixed.
+	width: 100%;
+	box-sizing: border-box;
+	left: 50%;
+	transform: translateX( -50% );
+
+	.vector-feature-limited-width-clientpref-1 & {
+		max-width: ( @max-width-page-container / @font-size-notification );
+	}
 }
 
 .mw-notification-area-layout {
-	top: 7em;
+	top: 3.5em;
 }
 
 .mw-notification {
 	border: @border-base;
 	border-radius: @border-radius-base;
 	box-shadow: 0 2px 2px 0 rgba( 0, 0, 0, 0.25 );
+	// As the notification area was centered and given variable width, restore
+	// the fixed width of notifications here. Matches .mw-notification-area
+	// rule in core.
+	width: 20em;
+	box-sizing: border-box;
+	margin-left: auto;
 }
 
-/**
- * With the sticky header enabled in modern Vector,
- * We lower the z-index to make the user menu and language picker
- * useable when a notification is present.
- */
 .vector-sticky-header-enabled .mw-notification-area {
 	transition: @transition-sticky-header;
-	z-index: @z-index-menu;
 }
 
 /**
@@ -32,5 +42,5 @@
  * should be moved so that it doesn't obstruct the sticky header
  */
 .vector-sticky-header-visible .mw-notification-area-overlay > .mw-notification-area-floating {
-	transform: translateY( @height-sticky-header );
+	transform: translate( -50%, @height-header );
 }

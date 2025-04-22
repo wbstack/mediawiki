@@ -31,7 +31,7 @@ class LexemeLanguageField extends LexemeKeywordField {
 
 	public function __construct(
 		EntityLookup $entityLookup,
-		NumericPropertyId $lexemeLanguageCodePropertyId = null
+		?NumericPropertyId $lexemeLanguageCodePropertyId = null
 	) {
 		parent::__construct();
 		$this->lexemeLanguageCodePropertyId = $lexemeLanguageCodePropertyId;

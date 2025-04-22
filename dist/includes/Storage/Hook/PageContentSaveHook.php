@@ -2,10 +2,10 @@
 
 namespace MediaWiki\Storage\Hook;
 
-use CommentStoreComment;
-use Content;
+use MediaWiki\CommentStore\CommentStoreComment;
+use MediaWiki\Content\Content;
+use MediaWiki\User\User;
 use StatusValue;
-use User;
 use WikiPage;
 
 /**

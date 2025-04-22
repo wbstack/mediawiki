@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\OAuth\Backend;
 
 use MediaWiki\Extension\OAuth\Lib\OAuthRequest;
 use MediaWiki\Extension\OAuth\Lib\OAuthUtil;
+use MediaWiki\Request\WebRequest;
 
 /**
  * @file
@@ -28,13 +29,13 @@ class MWOAuthRequest extends OAuthRequest {
 
 	/**
 	 * Track the source IP of the request, so we can enforce the allowed IP list
-	 * @return string $ip the ip of the source
+	 * @return string
 	 */
 	public function getSourceIP() {
 		return $this->sourceIP;
 	}
 
-	public static function fromRequest( \WebRequest $request ) {
+	public static function fromRequest( WebRequest $request ) {
 		$httpMethod = strtoupper( $request->getMethod() );
 		$httpUrl = $request->getFullRequestURL();
 

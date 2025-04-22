@@ -61,7 +61,7 @@ class FormSearchEntity extends LexemeSearchEntity {
 				self::CONTEXT_LEXEME_PREFIX );
 
 		$dismax = new DisMax();
-		$dismax->setTieBreaker( 0 );
+		$dismax->setTieBreaker( $profile['tie-breaker'] ?? 0 );
 
 		$fields = [
 			[

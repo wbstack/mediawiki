@@ -2,7 +2,10 @@
 
 namespace CirrusSearch\Api;
 
-use Title;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryBase;
+use MediaWiki\Page\PageIdentity;
+use Wikimedia\ParamValidator\ParamValidator;
 
 /**
  * Dump stored CirrusSearch document for page.
@@ -32,22 +35,23 @@ use Title;
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  */
-class QueryCirrusDoc extends \ApiQueryBase {
+class QueryCirrusDoc extends ApiQueryBase {
 	use ApiTrait;
 
-	public function __construct( \ApiQuery $query, $moduleName ) {
+	public function __construct( ApiQuery $query, $moduleName ) {
 		parent::__construct( $query, $moduleName, 'cd' );
 	}
 
 	public function execute() {
-		foreach ( $this->getPageSet()->getGoodTitles() as $origPageId => $title ) {
-			$this->addByPageId( $origPageId, $title );
+		$sourceFiltering = $this->generateSourceFiltering();
+		foreach ( $this->getPageSet()->getGoodPages() as $origPageId => $title ) {
+			$this->addByPageId( $origPageId, $title, $sourceFiltering );
 		}
 
 		// Not 100% sure we need deletedhistory, but better safe than sorry
 		if ( $this->getUser()->isAllowed( 'deletedhistory' ) ) {
-			foreach ( $this->getPageSet()->getMissingTitles() as $resultPageId => $title ) {
-				$this->addByPageId( $resultPageId, $title );
+			foreach ( $this->getPageSet()->getMissingPages() as $resultPageId => $title ) {
+				$this->addByPageId( $resultPageId, $title, $sourceFiltering );
 			}
 		}
 	}
@@ -56,17 +60,39 @@ class QueryCirrusDoc extends \ApiQueryBase {
 	 * @param int $resultPageId The page id as represented in the api result.
 	 *  This may be negative for missing pages. If those pages were recently
 	 *  deleted they could still be in the elastic index.
-	 * @param Title $title The requested title
+	 * @param PageIdentity $title The requested title
+	 * @param string[]|bool $sourceFiltering source filtering to apply
 	 */
-	private function addByPageId( $resultPageId, Title $title ) {
+	private function addByPageId( $resultPageId, PageIdentity $title, $sourceFiltering ) {
 		$this->getResult()->addValue(
 			[ 'query', 'pages', $resultPageId ],
-			'cirrusdoc', $this->loadDocuments( $title )
+			'cirrusdoc', $this->loadDocuments( $title, $sourceFiltering )
 		);
 	}
 
+	/**
+	 * @return array|bool
+	 */
+	private function generateSourceFiltering() {
+		$params = $this->extractRequestParams();
+		$sourceFiltering = (array)$params['includes'];
+		$includeAll = in_array( 'all', $sourceFiltering );
+
+		if ( !$sourceFiltering || $includeAll ) {
+			return true;
+		} else {
+			return $sourceFiltering;
+		}
+	}
+
 	public function getAllowedParams() {
-		return [];
+		return [
+			'includes' => [
+				ParamValidator::PARAM_TYPE => 'string',
+				ParamValidator::PARAM_DEFAULT => 'all',
+				ParamValidator::PARAM_ISMULTI => true,
+			],
+		];
 	}
 
 	/**
@@ -76,7 +102,9 @@ class QueryCirrusDoc extends \ApiQueryBase {
 	protected function getExamplesMessages() {
 		return [
 			'action=query&prop=cirrusdoc&titles=Main_Page' =>
-				'apihelp-query+cirrusdoc-example'
+				'apihelp-query+cirrusdoc-example',
+			'action=query&prop=cirrusdoc&titles=Main_Page&cdincludes=category' =>
+				'apihelp-query+cirrusdoc-example-2'
 		];
 	}
 

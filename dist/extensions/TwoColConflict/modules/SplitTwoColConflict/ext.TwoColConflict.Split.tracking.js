@@ -2,8 +2,8 @@
 // Disable DOM state lint rule, the purpose of this class is to capture actual state.
 /* eslint-disable no-jquery/no-class-state */
 
-var finalExitEvent = null,
-	COLUMN_COPY = 'c',
+let finalExitEvent = null;
+const COLUMN_COPY = 'c',
 	COLUMN_OTHER = 'o',
 	COLUMN_YOUR = 'y',
 	PACK_VERSION = 'v1:',
@@ -16,14 +16,14 @@ var finalExitEvent = null,
 	TEXT_UNCHANGED = '';
 
 function wasEdited( $column ) {
-	var $editor = $column.find( '.mw-twocolconflict-split-editor' );
+	const $editor = $column.find( '.mw-twocolconflict-split-editor' );
 	return $editor.length && $editor.val() !== $editor[ 0 ].defaultValue;
 }
 
 function RowFormatter() {}
 
 RowFormatter.formatView = function ( $view ) {
-	var $rows = $view.find(
+	const $rows = $view.find(
 		'.mw-twocolconflict-single-row, ' +
 		'.mw-twocolconflict-split-row'
 	);
@@ -32,13 +32,13 @@ RowFormatter.formatView = function ( $view ) {
 };
 
 RowFormatter.formatRows = function ( $rows ) {
-	var formattedRows = $rows.get().map( RowFormatter.formatRow );
+	const formattedRows = $rows.get().map( RowFormatter.formatRow );
 
 	return formattedRows.join( ROW_SEPARATOR );
 };
 
 RowFormatter.formatRow = function ( el ) {
-	var $row = $( el ),
+	const $row = $( el ),
 		$columns = $row.find(
 			'.mw-twocolconflict-single-column, ' +
 			'.mw-twocolconflict-split-column'
@@ -55,7 +55,7 @@ RowFormatter.formatRow = function ( el ) {
 };
 
 RowFormatter.formatSelection = function ( $row ) {
-	var $inputs = $row.find( 'input[type="radio"]' ),
+	const $inputs = $row.find( 'input[type="radio"]' ),
 		selectionName = $inputs.filter( ':checked' ).first().val();
 
 	if ( $inputs.length === 0 ) {
@@ -70,8 +70,8 @@ RowFormatter.formatSelection = function ( $row ) {
 };
 
 RowFormatter.formatColumn = function ( el ) {
-	var $column = $( el ),
-		out = '';
+	const $column = $( el );
+	let out = '';
 	if ( $column.hasClass( 'mw-twocolconflict-split-delete' ) ) {
 		out += COLUMN_OTHER;
 	} else if ( $column.hasClass( 'mw-twocolconflict-split-add' ) ) {
@@ -90,7 +90,7 @@ RowFormatter.formatColumn = function ( el ) {
 };
 
 function buildRowStatistics() {
-	var $view = $( '.mw-twocolconflict-split-view' );
+	const $view = $( '.mw-twocolconflict-split-view' );
 
 	return RowFormatter.formatView( $view );
 }
@@ -111,11 +111,11 @@ function recordExitStatistics() {
 }
 
 function initTrackingListeners() {
-	$( '#wpSave' ).on( 'click', function () {
+	$( '#wpSave' ).on( 'click', () => {
 		finalExitEvent = 'save';
 	} );
 
-	$( '#mw-editform-cancel' ).on( 'click', function () {
+	$( '#mw-editform-cancel' ).on( 'click', () => {
 		finalExitEvent = 'cancel';
 	} );
 

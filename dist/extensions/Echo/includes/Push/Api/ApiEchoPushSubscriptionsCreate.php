@@ -2,11 +2,11 @@
 
 namespace MediaWiki\Extension\Notifications\Push\Api;
 
-use ApiBase;
-use ApiMain;
-use EchoServices;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
 use MediaWiki\Extension\Notifications\Push\SubscriptionManager;
 use MediaWiki\Extension\Notifications\Push\Utils;
+use MediaWiki\Extension\Notifications\Services;
 use Wikimedia\ParamValidator\ParamValidator;
 
 class ApiEchoPushSubscriptionsCreate extends ApiBase {
@@ -31,17 +31,12 @@ class ApiEchoPushSubscriptionsCreate extends ApiBase {
 	 * @return ApiEchoPushSubscriptionsCreate
 	 */
 	public static function factory( ApiBase $parent, string $name ): ApiEchoPushSubscriptionsCreate {
-		$subscriptionManger = EchoServices::getInstance()->getPushSubscriptionManager();
+		$subscriptionManger = Services::getInstance()->getPushSubscriptionManager();
 		$module = new self( $parent->getMain(), $name, $subscriptionManger );
 		$module->parent = $parent;
 		return $module;
 	}
 
-	/**
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param SubscriptionManager $subscriptionManager
-	 */
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,

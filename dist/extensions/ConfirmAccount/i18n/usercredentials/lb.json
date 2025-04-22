@@ -3,10 +3,11 @@
 		"authors": [
 			"Les Meloures",
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
-	"usercredentials": "Referenzen déi de Benotzer uginn huet:",
+	"usercredentials": "Referenzen, déi de Benotzer uginn huet:",
 	"usercredentials-leg": "Confirméiert Referenze vun engem Benotzer nokucken",
 	"usercredentials-user": "Benotzernumm:",
 	"usercredentials-text": "Hei ënnendrënner stinn déi confirméiert Benotzer-Berechtigungsnoweiser fir de gewielte Benotzerkont.",
@@ -15,7 +16,7 @@
 	"usercredentials-leg-person": "Perséinlech Informatiounen",
 	"usercredentials-leg-other": "Aner Informatiounen",
 	"usercredentials-leg-ip": "Donnéeë vun der IP-Adress",
-	"usercredentials-email": "E-mail:",
+	"usercredentials-email": "E-Mail-Adress:",
 	"usercredentials-real": "Richtegen Numm:",
 	"usercredentials-bio": "Biographie:",
 	"usercredentials-attach": "Liewenslaf:",

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2008 Roan Kattouw "<Firstname>.<Lastname>@gmail.com"
+ * Copyright © 2008 Roan Kattouw <roan.kattouw@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,14 @@
  * @file
  */
 
-use MediaWiki\ExtensionInfo;
+namespace MediaWiki\Api;
+
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Message\Message;
+use MediaWiki\Parser\Parser;
+use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\User\UserFactory;
+use MediaWiki\Utils\ExtensionInfo;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -29,6 +35,7 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class ApiParamInfo extends ApiBase {
 
+	/** @var string */
 	private $helpFormat;
 
 	/** @var RequestContext */
@@ -37,14 +44,9 @@ class ApiParamInfo extends ApiBase {
 	/** @var UserFactory */
 	private $userFactory;
 
-	/**
-	 * @param ApiMain $main
-	 * @param string $action
-	 * @param UserFactory $userFactory
-	 */
 	public function __construct(
 		ApiMain $main,
-		$action,
+		string $action,
 		UserFactory $userFactory
 	) {
 		parent::__construct( $main, $action );
@@ -66,11 +68,11 @@ class ApiParamInfo extends ApiBase {
 				if ( $path === '*' || $path === '**' ) {
 					$path = "main+$path";
 				}
-				if ( substr( $path, -2 ) === '+*' || substr( $path, -2 ) === ' *' ) {
+				if ( str_ends_with( $path, '+*' ) || str_ends_with( $path, ' *' ) ) {
 					$submodules = true;
 					$path = substr( $path, 0, -2 );
 					$recursive = false;
-				} elseif ( substr( $path, -3 ) === '+**' || substr( $path, -3 ) === ' **' ) {
+				} elseif ( str_ends_with( $path, '+**' ) || str_ends_with( $path, ' **' ) ) {
 					$submodules = true;
 					$path = substr( $path, 0, -3 );
 					$recursive = true;
@@ -82,7 +84,7 @@ class ApiParamInfo extends ApiBase {
 					try {
 						$module = $this->getModuleFromPath( $path );
 					} catch ( ApiUsageException $ex ) {
-						foreach ( $ex->getStatusValue()->getErrors() as $error ) {
+						foreach ( $ex->getStatusValue()->getMessages() as $error ) {
 							$this->addWarning( $error );
 						}
 						continue;
@@ -129,7 +131,7 @@ class ApiParamInfo extends ApiBase {
 			try {
 				$module = $this->getModuleFromPath( $m );
 			} catch ( ApiUsageException $ex ) {
-				foreach ( $ex->getStatusValue()->getErrors() as $error ) {
+				foreach ( $ex->getStatusValue()->getMessages() as $error ) {
 					$this->addWarning( $error );
 				}
 				continue;
@@ -309,11 +311,12 @@ class ApiParamInfo extends ApiBase {
 				$item = [
 					'query' => $qs
 				];
-				$msg = ApiBase::makeMessage( $msg, $this->context, [
+				$msg = $this->msg(
+					Message::newFromSpecifier( $msg ),
 					$module->getModulePrefix(),
 					$module->getModuleName(),
 					$module->getModulePath()
-				] );
+				);
 				$this->formatHelpMessages( $item, 'description', [ $msg ] );
 				if ( isset( $item['description'] ) ) {
 					if ( is_array( $item['description'] ) ) {
@@ -399,11 +402,12 @@ class ApiParamInfo extends ApiBase {
 			if ( $this->helpFormat === 'none' ) {
 				$ret['dynamicparameters'] = true;
 			} else {
-				$dynamicParams = ApiBase::makeMessage( $dynamicParams, $this->context, [
+				$dynamicParams = $this->msg(
+					Message::newFromSpecifier( $dynamicParams ),
 					$module->getModulePrefix(),
 					$module->getModuleName(),
 					$module->getModulePath()
-				] );
+				);
 				$this->formatHelpMessages( $ret, 'dynamicparameters', [ $dynamicParams ] );
 			}
 		}
@@ -464,3 +468,6 @@ class ApiParamInfo extends ApiBase {
 		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Parameter_information';
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiParamInfo::class, 'ApiParamInfo' );

@@ -1,8 +1,6 @@
 <?php
 /** Kurdish (Latin script) (Kurdî (latînî))
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -100,7 +98,7 @@ $magicWords = [
 	'img_left'                  => [ '1', 'çep', 'left' ],
 	'img_link'                  => [ '1', 'girêdan=$1', 'link=$1' ],
 	'img_right'                 => [ '1', 'rast', 'right' ],
-	'language'                  => [ '0', '#ZIMAN', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#ZIMAN', '#LANGUAGE' ],
 	'nogallery'                 => [ '0', '_GALERÎTUNE_', '__NOGALLERY__' ],
 	'notoc'                     => [ '0', '_NAVEROKTUNE_', '__NOTOC__' ],
 	'numberofactiveusers'       => [ '1', 'HEJMARA_BIKARHÊNERÊN_ÇALAK', 'NUMBEROFACTIVEUSERS' ],

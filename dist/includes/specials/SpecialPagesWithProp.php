@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:PagesWithProp
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -17,15 +15,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  * http://www.gnu.org/copyleft/gpl.html
  *
- * @since 1.21
  * @file
- * @ingroup SpecialPage
  */
 
-use Wikimedia\Rdbms\ILoadBalancer;
+namespace MediaWiki\Specials;
+
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\Title;
+use Skin;
+use stdClass;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * Special:PagesWithProp to search the page_props table
+ *
  * @ingroup SpecialPage
  * @since 1.21
  */
@@ -57,11 +62,11 @@ class SpecialPagesWithProp extends QueryPage {
 	private $sortByValue = false;
 
 	/**
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 */
-	public function __construct( ILoadBalancer $loadBalancer ) {
+	public function __construct( IConnectionProvider $dbProvider ) {
 		parent::__construct( 'PagesWithProp' );
-		$this->setDBLoadBalancer( $loadBalancer );
+		$this->setDatabaseProvider( $dbProvider );
 	}
 
 	public function isCacheable() {
@@ -118,7 +123,7 @@ class SpecialPagesWithProp extends QueryPage {
 			->setTitle( $this->getPageTitle() ) // Remove subpage
 			->setSubmitCallback( [ $this, 'onSubmit' ] )
 			->setWrapperLegendMsg( 'pageswithprop-legend' )
-			->addHeaderText( $this->msg( 'pageswithprop-text' )->parseAsBlock() )
+			->addHeaderHtml( $this->msg( 'pageswithprop-text' )->parseAsBlock() )
 			->setSubmitTextMsg( 'pageswithprop-submit' )
 			->prepareForm();
 		$form->displayForm( false );
@@ -222,7 +227,7 @@ class SpecialPagesWithProp extends QueryPage {
 		if ( $result->pp_value !== '' ) {
 			// Do not show very long or binary values on the special page
 			$valueLength = strlen( $result->pp_value );
-			$isBinary = strpos( $result->pp_value, "\0" ) !== false;
+			$isBinary = str_contains( $result->pp_value, "\0" );
 			$isTooLong = $valueLength > 1024;
 
 			if ( $isBinary || $isTooLong ) {
@@ -249,24 +254,21 @@ class SpecialPagesWithProp extends QueryPage {
 	}
 
 	protected function queryExistingProps( $limit = null, $offset = 0 ) {
-		$opts = [
-			'DISTINCT', 'ORDER BY' => 'pp_propname'
-		];
+		$queryBuilder = $this->getDatabaseProvider()
+			->getReplicaDatabase()
+			->newSelectQueryBuilder()
+			->select( 'pp_propname' )
+			->distinct()
+			->from( 'page_props' )
+			->orderBy( 'pp_propname' );
+
 		if ( $limit ) {
-			$opts['LIMIT'] = $limit;
+			$queryBuilder->limit( $limit );
 		}
 		if ( $offset ) {
-			$opts['OFFSET'] = $offset;
+			$queryBuilder->offset( $offset );
 		}
-
-		$dbr = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_REPLICA );
-		$res = $dbr->select(
-			'page_props',
-			'pp_propname',
-			'',
-			__METHOD__,
-			$opts
-		);
+		$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 
 		$propnames = [];
 		foreach ( $res as $row ) {
@@ -280,3 +282,9 @@ class SpecialPagesWithProp extends QueryPage {
 		return 'pages';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialPagesWithProp::class, 'SpecialPagesWithProp' );

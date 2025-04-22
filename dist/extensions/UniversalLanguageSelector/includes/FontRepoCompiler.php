@@ -2,7 +2,7 @@
 
 namespace UniversalLanguageSelector;
 
-use OutputPage;
+use MediaWiki\Output\OutputPage;
 
 /**
  * This class parses font specification ini files to a central list.
@@ -11,14 +11,23 @@ use OutputPage;
  * @since 2016.04
  */
 class FontRepoCompiler {
+	/** @var string */
 	protected $fsPath;
+	/** @var string */
 	protected $webPath;
 
+	/**
+	 * @param string $fsPath
+	 * @param string $webPath
+	 */
 	public function __construct( $fsPath, $webPath ) {
 		$this->fsPath = $fsPath;
 		$this->webPath = $webPath;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getRepository() {
 		$files = $this->getFilesFromPath( $this->fsPath );
 
@@ -46,14 +55,26 @@ class FontRepoCompiler {
 		];
 	}
 
+	/**
+	 * @param string $fspath
+	 * @return array|false
+	 */
 	public function getFilesFromPath( $fspath ) {
 		return glob( "$fspath/*/font.ini" );
 	}
 
+	/**
+	 * @param string $filepath
+	 * @return array|false
+	 */
 	public function parseFile( $filepath ) {
 		return parse_ini_file( $filepath, true );
 	}
 
+	/**
+	 * @param array $font
+	 * @return array
+	 */
 	public function getLanguages( array $font ) {
 		if ( !isset( $font['languages'] ) ) {
 			return [];
@@ -65,6 +86,11 @@ class FontRepoCompiler {
 		return $languages;
 	}
 
+	/**
+	 * @param array &$languages
+	 * @param array $fontLanguages
+	 * @param string $fontname
+	 */
 	public function appendLanguages( &$languages, $fontLanguages, $fontname ) {
 		foreach ( $fontLanguages as $rcode ) {
 			$code = str_replace( '*', '', $rcode );
@@ -73,7 +99,7 @@ class FontRepoCompiler {
 				$languages[$code] = [ 'system' ];
 			}
 
-			if ( strpos( $rcode, '*' ) !== false ) {
+			if ( str_contains( $rcode, '*' ) ) {
 				if ( $languages[$code][0] === 'system' ) {
 					unset( $languages[$code][0] );
 				}
@@ -84,6 +110,11 @@ class FontRepoCompiler {
 		}
 	}
 
+	/**
+	 * @param array $font
+	 * @param string $fontpath
+	 * @return array
+	 */
 	public function getFontInfo( $font, $fontpath ) {
 		$info = [];
 		$fontdir = basename( $fontpath );
@@ -96,15 +127,15 @@ class FontRepoCompiler {
 			$info['fontstyle'] = $font['fontstyle'];
 		}
 
-		foreach ( [ 'woff', 'woff2' ] as $format ) {
+		foreach ( [ 'woff2' ] as $format ) {
 			if ( isset( $font[$format] ) ) {
 				$info[$format] = OutputPage::transformFilePath( $fontdir, $fontpath, $font[$format] );
 			}
 		}
 
 		// If font formats are not explicitly defined, scan the directory.
-		if ( !isset( $info['woff'] ) ) {
-			foreach ( glob( "$fontpath/*.{woff,woff2}", GLOB_BRACE ) as $fontfile ) {
+		if ( !isset( $info['woff2'] ) ) {
+			foreach ( glob( "$fontpath/*.woff2", GLOB_BRACE ) as $fontfile ) {
 				$type = substr( $fontfile, strrpos( $fontfile, '.' ) + 1 );
 				$info[$type] = OutputPage::transformFilePath( $fontdir, $fontpath, basename( $fontfile ) );
 			}

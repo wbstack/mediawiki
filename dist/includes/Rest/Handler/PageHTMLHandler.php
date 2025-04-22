@@ -2,19 +2,16 @@
 
 namespace MediaWiki\Rest\Handler;
 
-use Config;
-use IBufferingStatsdDataFactory;
 use LogicException;
-use MediaWiki\Edit\ParsoidOutputStash;
-use MediaWiki\MediaWikiServices;
-use MediaWiki\Page\PageLookup;
-use MediaWiki\Parser\Parsoid\ParsoidOutputAccess;
+use MediaWiki\Rest\Handler\Helper\HtmlOutputHelper;
+use MediaWiki\Rest\Handler\Helper\HtmlOutputRendererHelper;
+use MediaWiki\Rest\Handler\Helper\PageContentHelper;
+use MediaWiki\Rest\Handler\Helper\PageRedirectHelper;
+use MediaWiki\Rest\Handler\Helper\PageRestHelperFactory;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\Response;
 use MediaWiki\Rest\SimpleHandler;
 use MediaWiki\Rest\StringStream;
-use MediaWiki\Revision\RevisionLookup;
-use TitleFormatter;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -26,44 +23,50 @@ use Wikimedia\Assert\Assert;
  */
 class PageHTMLHandler extends SimpleHandler {
 
-	/** @var ParsoidHTMLHelper */
-	private $htmlHelper;
-
-	/** @var PageContentHelper */
-	private $contentHelper;
+	private HtmlOutputHelper $htmlHelper;
+	private PageContentHelper $contentHelper;
+	private PageRestHelperFactory $helperFactory;
 
 	public function __construct(
-		Config $config,
-		RevisionLookup $revisionLookup,
-		TitleFormatter $titleFormatter,
-		PageLookup $pageLookup,
-		ParsoidOutputStash $parsoidOutputStash,
-		IBufferingStatsdDataFactory $statsDataFactory,
-		ParsoidOutputAccess $parsoidOutputAccess
+		PageRestHelperFactory $helperFactory
 	) {
-		$this->contentHelper = new PageContentHelper(
-			$config,
-			$revisionLookup,
-			$titleFormatter,
-			$pageLookup
-		);
-		$this->htmlHelper = new ParsoidHTMLHelper(
-			$parsoidOutputStash,
-			$statsDataFactory,
-			$parsoidOutputAccess
+		$this->contentHelper = $helperFactory->newPageContentHelper();
+		$this->helperFactory = $helperFactory;
+	}
+
+	private function getRedirectHelper(): PageRedirectHelper {
+		return $this->helperFactory->newPageRedirectHelper(
+			$this->getResponseFactory(),
+			$this->getRouter(),
+			$this->getPath(),
+			$this->getRequest()
 		);
 	}
 
 	protected function postValidationSetup() {
-		// TODO: Once Authority supports rate limit (T310476), just inject the Authority.
-		$user = MediaWikiServices::getInstance()->getUserFactory()
-			->newFromUserIdentity( $this->getAuthority()->getUser() );
+		$authority = $this->getAuthority();
+		$this->contentHelper->init( $authority, $this->getValidatedParams() );
 
-		$this->contentHelper->init( $user, $this->getValidatedParams() );
+		$page = $this->contentHelper->getPageIdentity();
+		$isSystemMessage = $this->contentHelper->useDefaultSystemMessage();
 
-		$page = $this->contentHelper->getPage();
 		if ( $page ) {
-			$this->htmlHelper->init( $page, $this->getValidatedParams(), $user );
+			if ( $isSystemMessage ) {
+				$this->htmlHelper = $this->helperFactory->newHtmlMessageOutputHelper( $page );
+			} else {
+				$revision = $this->contentHelper->getTargetRevision();
+				$this->htmlHelper = $this->helperFactory->newHtmlOutputRendererHelper(
+					$page, $this->getValidatedParams(), $authority, $revision
+				);
+
+				$request = $this->getRequest();
+				$acceptLanguage = $request->getHeaderLine( 'Accept-Language' ) ?: null;
+				if ( $acceptLanguage ) {
+					$this->htmlHelper->setVariantConversionLanguage(
+						$acceptLanguage
+					);
+				}
+			}
 		}
 	}
 
@@ -72,36 +75,65 @@ class PageHTMLHandler extends SimpleHandler {
 	 * @throws LocalizedHttpException
 	 */
 	public function run(): Response {
-		$this->contentHelper->checkAccess();
+		$this->contentHelper->checkAccessPermission();
+		$page = $this->contentHelper->getPageIdentity();
+		$params = $this->getRequest()->getQueryParams();
 
-		$page = $this->contentHelper->getPage();
+		if ( array_key_exists( 'redirect', $params ) ) {
+			$followWikiRedirects = $params['redirect'] !== 'no';
+		} else {
+			$followWikiRedirects = true;
+		}
 
 		// The call to $this->contentHelper->getPage() should not return null if
 		// $this->contentHelper->checkAccess() did not throw.
 		Assert::invariant( $page !== null, 'Page should be known' );
 
+		$redirectHelper = $this->getRedirectHelper();
+		$redirectHelper->setFollowWikiRedirects( $followWikiRedirects );
+		// Should treat variant redirects a special case as wiki redirects
+		// if ?redirect=no language variant should do nothing and fall into the 404 path
+		$redirectResponse = $redirectHelper->createRedirectResponseIfNeeded(
+			$page,
+			$this->contentHelper->getTitleText()
+		);
+
+		if ( $redirectResponse !== null ) {
+			return $redirectResponse;
+		}
+
+		// We could have a missing page at this point, check and return 404 if that's the case
+		$this->contentHelper->checkHasContent();
+
 		$parserOutput = $this->htmlHelper->getHtml();
-		// Do not de-duplicate styles, Parsoid already does it in a slightly different way (T300325)
-		$parserOutputHtml = $parserOutput->getText( [ 'deduplicateStyles' => false ] );
+		$parserOutputHtml = $parserOutput->getRawText();
 
 		$outputMode = $this->getOutputMode();
 		switch ( $outputMode ) {
 			case 'html':
 				$response = $this->getResponseFactory()->create();
-				// TODO: need to respect content-type returned by Parsoid.
-				$response->setHeader( 'Content-Type', 'text/html' );
 				$this->contentHelper->setCacheControl( $response, $parserOutput->getCacheExpiry() );
 				$response->setBody( new StringStream( $parserOutputHtml ) );
 				break;
 			case 'with_html':
 				$body = $this->contentHelper->constructMetadata();
 				$body['html'] = $parserOutputHtml;
+
+				$redirectTargetUrl = $redirectHelper->getWikiRedirectTargetUrl( $page );
+
+				if ( $redirectTargetUrl ) {
+					$body['redirect_target'] = $redirectTargetUrl;
+				}
+
 				$response = $this->getResponseFactory()->createJson( $body );
 				$this->contentHelper->setCacheControl( $response, $parserOutput->getCacheExpiry() );
 				break;
 			default:
 				throw new LogicException( "Unknown HTML type $outputMode" );
 		}
+
+		$setContentLanguageHeader = ( $outputMode === 'html' );
+		$this->htmlHelper->putHeaders( $response, $setContentLanguageHeader );
 
 		return $response;
 	}
@@ -113,7 +145,7 @@ class PageHTMLHandler extends SimpleHandler {
 	 * @return string|null
 	 */
 	protected function getETag(): ?string {
-		if ( !$this->contentHelper->isAccessible() ) {
+		if ( !$this->contentHelper->isAccessible() || !$this->contentHelper->hasContent() ) {
 			return null;
 		}
 
@@ -125,9 +157,10 @@ class PageHTMLHandler extends SimpleHandler {
 	 * @return string|null
 	 */
 	protected function getLastModified(): ?string {
-		if ( !$this->contentHelper->isAccessible() ) {
+		if ( !$this->contentHelper->isAccessible() || !$this->contentHelper->hasContent() ) {
 			return null;
 		}
+
 		return $this->htmlHelper->getLastModified();
 	}
 
@@ -142,7 +175,10 @@ class PageHTMLHandler extends SimpleHandler {
 	public function getParamSettings(): array {
 		return array_merge(
 			$this->contentHelper->getParamSettings(),
-			$this->htmlHelper->getParamSettings()
+			// Note that postValidation we might end up using
+			// a HtmlMessageOutputHelper, but the param settings
+			// for that are a subset of those for HtmlOutputRendererHelper
+			HtmlOutputRendererHelper::getParamSettings()
 		);
 	}
 }

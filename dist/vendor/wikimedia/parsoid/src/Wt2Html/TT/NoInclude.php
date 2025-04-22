@@ -21,38 +21,22 @@ class NoInclude extends TokenCollector {
 		parent::__construct( $manager, $options );
 	}
 
-	/**
-	 * @return string
-	 */
 	protected function type(): string {
 		return 'tag';
 	}
 
-	/**
-	 * @return string
-	 */
 	protected function name(): string {
 		return 'noinclude';
 	}
 
-	/**
-	 * @return bool
-	 */
 	protected function toEnd(): bool {
 		return true;    // Match the end-of-input if </noinclude> is missing.
 	}
 
-	/**
-	 * @return bool
-	 */
 	protected function ackEnd(): bool {
 		return true;
 	}
 
-	/**
-	 * @param array $collection
-	 * @return TokenHandlerResult
-	 */
 	protected function transformation( array $collection ): TokenHandlerResult {
 		$start = array_shift( $collection );
 		$sc = TokenUtils::getTokenType( $start );
@@ -60,7 +44,7 @@ class NoInclude extends TokenCollector {
 		// A stray end tag.
 		if ( $sc === 'EndTagTk' ) {
 			$meta = TokenCollector::buildMetaToken( $this->manager, 'mw:Includes/NoInclude',
-				true, ( $start->dataAttribs->tsr ?? null ), null );
+				true, ( $start->dataParsoid->tsr ?? null ), null );
 			return new TokenHandlerResult( [ $meta ] );
 		}
 
@@ -73,7 +57,7 @@ class NoInclude extends TokenCollector {
 						$this->manager,
 						'mw:Includes/NoInclude',
 						false,
-						( $start->dataAttribs->tsr ?? null ),
+						( $start->dataParsoid->tsr ?? null ),
 						null )
 				] );
 		}
@@ -85,8 +69,8 @@ class NoInclude extends TokenCollector {
 		if ( empty( $this->options['isInclude'] ) ) {
 			// Content is preserved
 			// Add meta tags for open and close
-			$startTSR = $start->dataAttribs->tsr ?? null;
-			$endTSR = $end->dataAttribs->tsr ?? null;
+			$startTSR = $start->dataParsoid->tsr ?? null;
+			$endTSR = $end->dataParsoid->tsr ?? null;
 			$tokens[] = TokenCollector::buildMetaToken( $this->manager, 'mw:Includes/NoInclude',
 				false, $startTSR, null );
 

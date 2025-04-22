@@ -3,9 +3,9 @@
 		"authors": [
 			"HanV",
 			"Mainframe98",
+			"McDutchie",
 			"Siebrand",
-			"Tvdm",
-			"McDutchie"
+			"Tvdm"
 		]
 	},
 	"deletebatch": "Paginareeks verwijderen",
@@ -27,7 +27,7 @@
 	"deletebatch-file-bad-format": "Het bestand moet tekst zonder opmaak bevatten",
 	"deletebatch-file-missing": "Het bestand kan niet gelezen worden",
 	"deletebatch-select-script": "script pagina's verwijderen",
-	"deletebatch-select-yourself": "u",
+	"deletebatch-select-yourself": "uzelf",
 	"deletebatch-no-page": "Geef ten minste één te verwijderen pagina op of kies een bestand dat de lijst met pagina's bevat.",
 	"deletebatch-system-username": "Pagina verwijderingscript",
 	"action-deletebatch": "een reeks pagina's te verwijderen",

@@ -8,13 +8,13 @@
 			"Hugo.arg",
 			"Mantak111",
 			"Manvydasz",
+			"Nokeoo",
 			"Pofka",
 			"Reedy",
 			"Robotukas11",
 			"Shirayuki",
 			"Tomasdd",
-			"Zygimantus",
-			"Nokeoo"
+			"Zygimantus"
 		]
 	},
 	"visualeditor-cite-tool-name-book": "Knyga",
@@ -28,7 +28,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Ši nuoroda naudojama {{PLURAL:$1|kartą|2=du kartus|$1 kartus}} šiame puslapyje. Čia atlikti pakeitimai bus taikomi visose vietose, kur ši nuoroda naudojama pakartotinai.",
 	"cite-ve-dialog-reference-options-group-label": "Naudoti šią grupę",
 	"cite-ve-dialog-reference-options-group-placeholder": "Bendrosios nuorodos",
-	"cite-ve-dialog-reference-options-name-label": "Pakartotinai naudoti pagal pavadinimą",
 	"cite-ve-dialog-reference-options-responsive-label": "Naudoti interaktyvų stulpelių išdėstymą",
 	"cite-ve-dialog-reference-options-section": "Parinktys",
 	"cite-ve-dialog-reference-placeholder": "Rašykite ar įklijuokite savo nuorodą čia arba įterpkite citatos šabloną.",
@@ -47,9 +46,7 @@
 	"cite-ve-referenceslist-isempty": "Nėra nuorodų su grupe \"$1\" šiame puslapyje, kurias būtų galima pateikti šiame sąraše",
 	"cite-ve-referenceslist-isempty-default": "Šiame puslapyje nėra nuorodų, kurias būtų galima įtraukti į šį sąrašą.",
 	"cite-ve-referenceslist-missingref": "Ši nuoroda yra apibrėžta šablone arba kitame sugeneruotame bloke ir kol kas gali būti redaguojama tik išeities teksto režimu.",
-	"cite-ve-referenceslist-missingreflist": "Šis nuorodų sąrašas sukurtas pagal šabloną ir kol kas jį galima redaguoti tik šaltinio režimu.",
+	"cite-ve-referenceslist-missingreflist": "Šis nuorodų sąrašas sukurtas pagal šabloną.",
 	"cite-ve-toolbar-group-label": "Cituoti",
-	"cite-ve-othergroup-item": "$1 nuoroda",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Išnašos",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Nuorodų grupės pavadinimas: „$1“"
+	"cite-ve-othergroup-item": "$1 nuoroda"
 }

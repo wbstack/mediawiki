@@ -1,15 +1,16 @@
 {
 	"@metadata": {
 		"authors": [
+			"Brettchenweber",
 			"Hoo",
+			"Justman10000",
 			"Kghbln",
 			"Metalhead64",
 			"PerfektesChaos",
-			"Umherirrender",
-			"Justman10000",
-			"Brettchenweber"
+			"Umherirrender"
 		]
 	},
+	"content-model-scribunto": "Scribunto-Modul",
 	"scribunto-desc": "Ermöglicht eine Umgebung zum Einbetten von Skriptsprachen in Wikiseiten",
 	"scribunto-line": "in Zeile $1",
 	"scribunto-module-line": "in $1, Zeile $2",
@@ -67,5 +68,7 @@
 	"scribunto-limitreport-profile-percent": "$1 %",
 	"scribunto-limitreport-logs": "Lua-Logbücher",
 	"nstab-module": "Modul",
-	"tooltip-ca-nstab-module": "Die Modulseite ansehen"
+	"tooltip-ca-nstab-module": "Die Modulseite ansehen",
+	"namespaceinfo-description-ns828": "Namensraum für Lua-Codemodule, die von Wiki-Seiten und deren Dokumentationsseiten aufgerufen werden können",
+	"namespaceinfo-description-ns829": "Diskussionsseiten für die Module und Dokumentation"
 }

@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"AgnesAbah",
-			"Amire80"
+			"Beracy",
+			"Jerryjaymi"
 		]
 	},
 	"vector-opt-out": "Dabi tí alù kí eju ñwu de kwobí",
@@ -25,9 +26,16 @@
 	"vector-jumptosearch": "Lo ti ugbo ke neke téné énwu",
 	"vector-jumptocontent": "Lotí ogba ogbolo",
 	"vector-more-actions": "Mànyú",
+	"vector-appearance-label": "Egbá ehuté",
+	"vector-feature-custom-font-size-0-label": "Kéké",
 	"vector-searchsuggest-containing": "Téné amí ogbá kí gwonwú <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
+	"vector-toc-label": "Èyo ùkóló",
 	"vector-toc-beginning": "Uchane",
 	"vector-anon-user-menu-pages-learn": "Koche tógba",
 	"vector-anon-user-menu-pages-label": "Koche tógba alù kù mà nwoche",
-	"vector-main-menu-tooltip": "Ogba ogbolo"
+	"vector-main-menu-tooltip": "Ogba ogbolo",
+	"vector-page-tools-label": "Amí ewñ ane",
+	"vector-page-tools-general-label": "Ochakadu",
+	"vector-unpin-element-label": "dúmája",
+	"vector-page-tools-nav-label": "Amí eñwu ekwu ogba"
 }

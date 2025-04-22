@@ -24,10 +24,7 @@ use Exception;
 
 /**
  * @ingroup ResourceLoader
- * @internal For use by ResourceLoaderStartUpModule only
+ * @internal For use by StartUpModule only
  */
 class CircularDependencyError extends Exception {
 }
-
-/** @deprecated since 1.39 */
-class_alias( CircularDependencyError::class, 'ResourceLoaderCircularDependencyError' );

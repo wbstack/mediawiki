@@ -152,9 +152,9 @@ class DOMBuilder implements TreeHandler {
 	 *   Null args to DOMImplementation::createDocument
 	 */
 	protected function createDocument(
-		string $doctypeName = null,
-		string $public = null,
-		string $system = null
+		?string $doctypeName = null,
+		?string $public = null,
+		?string $system = null
 	) {
 		$impl = $this->domImplementation;
 		if ( $doctypeName === '' ) {
@@ -173,7 +173,7 @@ class DOMBuilder implements TreeHandler {
 	public function endDocument( $pos ) {
 	}
 
-	private function insertNode( $preposition, $refElement, $node ) {
+	protected function insertNode( $preposition, $refElement, $node ) {
 		if ( $preposition === TreeBuilder::ROOT ) {
 			$parent = $this->doc;
 			$refNode = null;
@@ -310,8 +310,7 @@ class DOMBuilder implements TreeHandler {
 			$prev->appendData( $data );
 		} else {
 			$node = $this->doc->createTextNode( $data );
-			// @phan-suppress-next-line PhanTypeMismatchArgumentNullableInternal
-			$parent->insertBefore( $node, $refNode );
+			$this->insertNode( $preposition, $refElement, $node );
 		}
 	}
 

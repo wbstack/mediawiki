@@ -3,6 +3,7 @@
 		"authors": [
 			"Aftab1995",
 			"Aftabuzzaman",
+			"Aishik Rehman",
 			"Bellayet",
 			"আফতাবুজ্জামান"
 		]
@@ -17,10 +18,9 @@
 	"valueview-expert-timevalue-calendar-julian": "জুলীয়",
 	"valueview-expert-timeinput-precision": "স্পষ্টতা:",
 	"valueview-expert-timeinput-calendar": "পঞ্জিকা:",
-	"valueview-expertextender-languageselector-languagetemplate": "$1 ($2)",
 	"valueview-expertextender-languageselector-label": "ভাষা (আবশ্যিক):",
 	"valueview-expertextender-unitsuggester-label": "একক (ঐচ্ছিক):",
 	"valueview-preview-label": "যা হিসাবে প্রদর্শন করা হবে:",
-	"valueview-preview-novalue": "কোন বৈধ মান স্বীকৃত নয়",
+	"valueview-preview-novalue": "কোনো বৈধ মান স্বীকৃত নয়",
 	"valueview-listrotator-manually": "ম্যানুয়ালি নির্ধারণ করুন"
 }

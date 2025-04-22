@@ -3,15 +3,14 @@
 namespace MediaWiki\Extension\Thanks;
 
 use DatabaseLogEntry;
-use EchoEventPresentationModel;
-use Linker;
 use LogEntry;
-use LogFormatter;
 use LogPage;
+use MediaWiki\Extension\Notifications\Formatters\EchoEventPresentationModel;
+use MediaWiki\Language\RawMessage;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\Sanitizer;
 use MediaWiki\Revision\RevisionRecord;
-use RawMessage;
-use Sanitizer;
-use SpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
 
 class EchoCoreThanksPresentationModel extends EchoEventPresentationModel {
 	/** @var LogEntry|bool|null */
@@ -59,6 +58,8 @@ class EchoCoreThanksPresentationModel extends EchoEventPresentationModel {
 	}
 
 	public function getCompactHeaderMessage() {
+		// The following message is used here:
+		// * notification-compact-header-edit-thank
 		$msg = parent::getCompactHeaderMessage();
 		$msg->params( $this->getViewingUserForGender() );
 		return $msg;
@@ -102,10 +103,11 @@ class EchoCoreThanksPresentationModel extends EchoEventPresentationModel {
 			if ( !$logEntry ) {
 				return '';
 			}
-			$formatter = LogFormatter::newFromEntry( $logEntry );
+			$services = MediaWikiServices::getInstance();
+			$formatter = $services->getLogFormatterFactory()->newFromEntry( $logEntry );
 			$excerpt = $formatter->getPlainActionText();
 			// Turn wikitext into plaintext
-			$excerpt = Linker::formatComment( $excerpt );
+			$excerpt = $services->getCommentFormatter()->format( $excerpt );
 			return Sanitizer::stripAllTags( $excerpt );
 		} else {
 			// Try to get edit summary.
@@ -160,7 +162,8 @@ class EchoCoreThanksPresentationModel extends EchoEventPresentationModel {
 		if ( !$logId ) {
 			$this->logEntry = false;
 		} else {
-			$this->logEntry = DatabaseLogEntry::newFromId( $logId, wfGetDB( DB_REPLICA ) ) ?: false;
+			$dbr = MediaWikiServices::getInstance()->getConnectionProvider()->getReplicaDatabase();
+			$this->logEntry = DatabaseLogEntry::newFromId( $logId, $dbr ) ?: false;
 		}
 		return $this->logEntry;
 	}

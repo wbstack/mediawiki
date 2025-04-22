@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable DocumentNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.ce.BranchNode
- * @mixins ve.ce.ContentEditableNode
+ * @mixes ve.ce.ContentEditableNode
  * @constructor
  * @param {ve.dm.DocumentNode} model Model to observe
  * @param {ve.ce.Surface} surface Surface document is part of

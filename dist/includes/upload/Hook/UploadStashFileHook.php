@@ -2,9 +2,9 @@
 
 namespace MediaWiki\Hook;
 
-use MessageSpecifier;
+use MediaWiki\User\User;
 use UploadBase;
-use User;
+use Wikimedia\Message\MessageSpecifier;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.

@@ -19,33 +19,41 @@
  */
 namespace MediaWiki\Permissions;
 
-use Article;
-use Exception;
+use InvalidArgumentException;
+use LogicException;
 use MediaWiki\Actions\ActionFactory;
+use MediaWiki\Block\AbstractBlock;
+use MediaWiki\Block\Block;
 use MediaWiki\Block\BlockErrorFormatter;
-use MediaWiki\Block\DatabaseBlock;
+use MediaWiki\Block\BlockManager;
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MainConfigNames;
+use MediaWiki\Message\Message;
 use MediaWiki\Page\PageIdentity;
+use MediaWiki\Page\PageReference;
 use MediaWiki\Page\RedirectLookup;
+use MediaWiki\Request\WebRequest;
 use MediaWiki\Session\SessionManager;
+use MediaWiki\SpecialPage\SpecialPage;
 use MediaWiki\SpecialPage\SpecialPageFactory;
+use MediaWiki\Title\NamespaceInfo;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFormatter;
 use MediaWiki\User\TempUser\TempUserConfig;
+use MediaWiki\User\User;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserGroupManager;
+use MediaWiki\User\UserGroupMembership;
 use MediaWiki\User\UserIdentity;
-use MessageSpecifier;
-use NamespaceInfo;
+use MediaWiki\User\UserIdentityLookup;
 use PermissionsError;
-use RequestContext;
-use SpecialPage;
-use Title;
-use TitleFormatter;
-use User;
-use UserCache;
+use StatusValue;
+use Wikimedia\Message\MessageSpecifier;
 use Wikimedia\ScopedCallback;
 
 /**
@@ -80,52 +88,31 @@ class PermissionManager {
 		MainConfigNames::NamespaceProtection,
 		MainConfigNames::RestrictionLevels,
 		MainConfigNames::DeleteRevisionsLimit,
+		MainConfigNames::RateLimits,
+		MainConfigNames::ImplicitRights,
 	];
 
-	/** @var ServiceOptions */
-	private $options;
-
-	/** @var SpecialPageFactory */
-	private $specialPageFactory;
-
-	/** @var RedirectLookup */
-	private $redirectLookup;
-
-	/** @var NamespaceInfo */
-	private $nsInfo;
-
-	/** @var GroupPermissionsLookup */
-	private $groupPermissionsLookup;
-
-	/** @var UserGroupManager */
-	private $userGroupManager;
+	private ServiceOptions $options;
+	private SpecialPageFactory $specialPageFactory;
+	private NamespaceInfo $nsInfo;
+	private GroupPermissionsLookup $groupPermissionsLookup;
+	private UserGroupManager $userGroupManager;
+	private BlockManager $blockManager;
+	private BlockErrorFormatter $blockErrorFormatter;
+	private HookRunner $hookRunner;
+	private UserIdentityLookup $userIdentityLookup;
+	private RedirectLookup $redirectLookup;
+	private RestrictionStore $restrictionStore;
+	private TitleFormatter $titleFormatter;
+	private TempUserConfig $tempUserConfig;
+	private UserFactory $userFactory;
+	private ActionFactory $actionFactory;
 
 	/** @var string[]|null Cached results of getAllPermissions() */
 	private $allRights;
 
-	/** @var BlockErrorFormatter */
-	private $blockErrorFormatter;
-
-	/** @var HookRunner */
-	private $hookRunner;
-
-	/** @var UserCache */
-	private $userCache;
-
-	/** @var RestrictionStore */
-	private $restrictionStore;
-
-	/** @var TitleFormatter */
-	private $titleFormatter;
-
-	/** @var TempUserConfig */
-	private $tempUserConfig;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/** @var ActionFactory */
-	private $actionFactory;
+	/** @var string[]|null Cached results of getImplicitRights() */
+	private $implicitRights;
 
 	/** @var string[][] Cached user rights */
 	private $usersRights = [];
@@ -140,12 +127,12 @@ class PermissionManager {
 	private $cachedRights = [];
 
 	/**
-	 * Array of Strings Core rights.
+	 * Array of core rights.
 	 * Each of these should have a corresponding message of the form
 	 * "right-$right".
 	 * @showinitializer
 	 */
-	private $coreRights = [
+	private const CORE_RIGHTS = [
 		'apihighlimits',
 		'applychangetags',
 		'autoconfirmed',
@@ -205,8 +192,8 @@ class PermissionManager {
 		'patrol',
 		'patrolmarks',
 		'protect',
-		'purge',
 		'read',
+		'renameuser',
 		'reupload',
 		'reupload-own',
 		'reupload-shared',
@@ -226,34 +213,36 @@ class PermissionManager {
 		'viewmyprivateinfo',
 		'viewmywatchlist',
 		'viewsuppressed',
-		'writeapi',
 	];
 
 	/**
-	 * @param ServiceOptions $options
-	 * @param SpecialPageFactory $specialPageFactory
-	 * @param NamespaceInfo $nsInfo
-	 * @param GroupPermissionsLookup $groupPermissionsLookup
-	 * @param UserGroupManager $userGroupManager
-	 * @param BlockErrorFormatter $blockErrorFormatter
-	 * @param HookContainer $hookContainer
-	 * @param UserCache $userCache
-	 * @param RedirectLookup $redirectLookup
-	 * @param RestrictionStore $restrictionStore
-	 * @param TitleFormatter $titleFormatter
-	 * @param TempUserConfig $tempUserConfig
-	 * @param UserFactory $userFactory
-	 * @param ActionFactory $actionFactory
+	 * List of implicit rights.
+	 * These should not have a corresponding message of the form
+	 * "right-$right".
+	 * @showinitializer
 	 */
+	private const CORE_IMPLICIT_RIGHTS = [
+		'renderfile',
+		'renderfile-nonstandard',
+		'stashedit',
+		'stashbasehtml',
+		'mailpassword',
+		'changeemail',
+		'confirmemail',
+		'linkpurge',
+		'purge',
+	];
+
 	public function __construct(
 		ServiceOptions $options,
 		SpecialPageFactory $specialPageFactory,
 		NamespaceInfo $nsInfo,
 		GroupPermissionsLookup $groupPermissionsLookup,
 		UserGroupManager $userGroupManager,
+		BlockManager $blockManager,
 		BlockErrorFormatter $blockErrorFormatter,
 		HookContainer $hookContainer,
-		UserCache $userCache,
+		UserIdentityLookup $userIdentityLookup,
 		RedirectLookup $redirectLookup,
 		RestrictionStore $restrictionStore,
 		TitleFormatter $titleFormatter,
@@ -267,9 +256,10 @@ class PermissionManager {
 		$this->nsInfo = $nsInfo;
 		$this->groupPermissionsLookup = $groupPermissionsLookup;
 		$this->userGroupManager = $userGroupManager;
+		$this->blockManager = $blockManager;
 		$this->blockErrorFormatter = $blockErrorFormatter;
 		$this->hookRunner = new HookRunner( $hookContainer );
-		$this->userCache = $userCache;
+		$this->userIdentityLookup = $userIdentityLookup;
 		$this->redirectLookup = $redirectLookup;
 		$this->restrictionStore = $restrictionStore;
 		$this->titleFormatter = $titleFormatter;
@@ -296,7 +286,7 @@ class PermissionManager {
 	 * @return bool
 	 */
 	public function userCan( $action, User $user, LinkTarget $page, $rigor = self::RIGOR_SECURE ): bool {
-		return !count( $this->getPermissionErrorsInternal( $action, $user, $page, $rigor, true ) );
+		return $this->getPermissionStatus( $action, $user, $page, $rigor, true )->isGood();
 	}
 
 	/**
@@ -321,7 +311,10 @@ class PermissionManager {
 	/**
 	 * Can $user perform $action on a page?
 	 *
-	 * @todo FIXME: This *does not* check throttles (User::pingLimiter()).
+	 * This *does not* check throttles (User::pingLimiter()). If that's desired, use the Authority
+	 * interface methods instead.
+	 *
+	 * @deprecated since 1.43 Use getPermissionStatus() instead.
 	 *
 	 * @param string $action Action that permission needs to be checked for
 	 * @param User $user User to check
@@ -333,7 +326,11 @@ class PermissionManager {
 	 * @param string[] $ignoreErrors Set this to a list of message keys
 	 *   whose corresponding errors may be ignored.
 	 *
-	 * @return array[] Array of arrays of the arguments to wfMessage to explain permissions problems.
+	 * @return array[] Permission errors.
+	 *   Each entry contains valid arguments for wfMessage() / MessageLocalizer::msg().
+	 *   The format is *different* from the normal "legacy error array", as used by
+	 *   Status::getErrorsArray() or PermissionStatus::toLegacyErrorArray():
+	 *   the first element of each entry can be a MessageSpecifier, not just a string.
 	 * @phan-return non-empty-array[]
 	 */
 	public function getPermissionErrors(
@@ -343,21 +340,18 @@ class PermissionManager {
 		$rigor = self::RIGOR_SECURE,
 		$ignoreErrors = []
 	): array {
-		$errors = $this->getPermissionErrorsInternal( $action, $user, $page, $rigor );
+		$status = $this->getPermissionStatus( $action, $user, $page, $rigor );
+		$result = [];
 
-		// Remove the errors being ignored.
-		foreach ( $errors as $index => $error ) {
-			$errKey = is_array( $error ) ? $error[0] : $error;
-
-			if ( in_array( $errKey, $ignoreErrors ) ) {
-				unset( $errors[$index] );
-			}
-			if ( $errKey instanceof MessageSpecifier && in_array( $errKey->getKey(), $ignoreErrors ) ) {
-				unset( $errors[$index] );
+		// Produce a result in the weird format used by this function
+		foreach ( $status->getErrors() as [ 'message' => $keyOrMsg, 'params' => $params ] ) {
+			$key = $keyOrMsg instanceof MessageSpecifier ? $keyOrMsg->getKey() : $keyOrMsg;
+			// Remove the errors being ignored.
+			if ( !in_array( $key, $ignoreErrors ) ) {
+				$result[] = [ $keyOrMsg, ...$params ];
 			}
 		}
-
-		return array_values( $errors );
+		return $result;
 	}
 
 	/**
@@ -382,10 +376,10 @@ class PermissionManager {
 		$rigor = self::RIGOR_SECURE,
 		$ignoreErrors = []
 	): void {
-		$permissionErrors = $this->getPermissionErrors(
-			$action, $user, $page, $rigor, $ignoreErrors );
-		if ( $permissionErrors !== [] ) {
-			throw new PermissionsError( $action, $permissionErrors );
+		$status = $this->getPermissionStatus(
+			$action, $user, $page, $rigor );
+		if ( $status->hasMessagesExcept( ...$ignoreErrors ) ) {
+			throw new PermissionsError( $action, $status );
 		}
 	}
 
@@ -399,43 +393,20 @@ class PermissionManager {
 	 * @return bool
 	 */
 	public function isBlockedFrom( User $user, $page, $fromReplica = false ): bool {
-		$block = $user->getBlock( $fromReplica );
-		if ( !$block ) {
-			return false;
-		}
-
-		if ( $page instanceof PageIdentity ) {
-			$title = Title::castFromPageIdentity( $page );
-		} else {
-			$title = Title::castFromLinkTarget( $page );
-		}
-
-		$blocked = $user->isHidden();
-		if ( !$blocked ) {
-			// Special handling for a user's own talk page. The block is not aware
-			// of the user, so this must be done here.
-			if ( $title->equals( $user->getTalkPage() ) ) {
-				$blocked = $block->appliesToUsertalk( $title );
-			} else {
-				// @phan-suppress-next-line PhanTypeMismatchArgumentNullable castFrom does not return null here
-				$blocked = $block->appliesToTitle( $title );
-			}
-		}
-
-		// only for the purpose of the hook. We really don't need this here.
-		$allowUsertalk = $block->isUsertalkEditAllowed();
-
-		// Allow extensions to let a blocked user access a particular page
-		// @phan-suppress-next-line PhanTypeMismatchArgumentNullable castFrom does not return null here
-		$this->hookRunner->onUserIsBlockedFrom( $user, $title, $blocked, $allowUsertalk );
-
-		return $blocked;
+		return (bool)$this->getApplicableBlock(
+			'edit',
+			$user,
+			$fromReplica ? self::RIGOR_FULL : self::RIGOR_SECURE,
+			$page,
+			$user->getRequest()
+		);
 	}
 
 	/**
-	 * Can $user perform $action on a page? This is an internal function,
-	 * with multiple levels of checks depending on performance needs; see $rigor below.
-	 * It does not check ReadOnlyMode::isReadOnly().
+	 * Can $user perform $action on a page?
+	 *
+	 * This *does not* check throttles (User::pingLimiter()). If that's desired, use the Authority
+	 * interface methods instead.
 	 *
 	 * @param string $action Action that permission needs to be checked for
 	 * @param User $user User to check
@@ -445,24 +416,25 @@ class PermissionManager {
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Set this to true to stop after the first permission error.
-	 * @return array[] Array of arrays of the arguments to wfMessage to explain permissions problems.
-	 * @throws Exception
+	 * @return PermissionStatus Permission errors as a status.
+	 *   Check `$status->isGood()` to tell if the user can perform the action.
+	 *   Use `$status->getMessages()` to display errors if the status is not good.
 	 */
-	private function getPermissionErrorsInternal(
+	public function getPermissionStatus(
 		$action,
 		User $user,
 		LinkTarget $page,
 		$rigor = self::RIGOR_SECURE,
 		$short = false
-	): array {
+	): PermissionStatus {
 		if ( !in_array( $rigor, [ self::RIGOR_QUICK, self::RIGOR_FULL, self::RIGOR_SECURE ] ) ) {
-			throw new Exception( "Invalid rigor parameter '$rigor'." );
+			throw new InvalidArgumentException( "Invalid rigor parameter '$rigor'." );
 		}
 
 		// With RIGOR_QUICK we can assume automatic account creation will
 		// occur. At a higher rigor level, the caller is required to opt
-		// in by either setting the create intent or actually creating
-		// the account.
+		// in by either passing in a temp placeholder user or by actually
+		// creating the account.
 		if ( $rigor === self::RIGOR_QUICK
 			&& !$user->isRegistered()
 			&& $this->tempUserConfig->isAutoCreateAction( $action )
@@ -471,38 +443,26 @@ class PermissionManager {
 		}
 
 		# Read has special handling
-		if ( $action == 'read' ) {
+		if ( $action === 'read' ) {
 			$checks = [
-				'checkPermissionHooks',
-				'checkReadPermissions',
-				'checkUserBlock', // for wgBlockDisablesLogin
+				[ $this, 'checkPermissionHooks' ],
+				[ $this, 'checkReadPermissions' ],
+				[ $this, 'checkUserBlock' ], // for wgBlockDisablesLogin
 			];
+		} elseif ( $action === 'create' ) {
 			# Don't call checkSpecialsAndNSPermissions, checkSiteConfigPermissions
 			# or checkUserConfigPermissions here as it will lead to duplicate
 			# error messages. This is okay to do since anywhere that checks for
 			# create will also check for edit, and those checks are called for edit.
-		} elseif ( $action == 'create' ) {
 			$checks = [
-				'checkQuickPermissions',
-				'checkPermissionHooks',
-				'checkPageRestrictions',
-				'checkCascadingSourcesRestrictions',
-				'checkActionPermissions',
-				'checkUserBlock'
+				[ $this, 'checkQuickPermissions' ],
+				[ $this, 'checkPermissionHooks' ],
+				[ $this, 'checkPageRestrictions' ],
+				[ $this, 'checkCascadingSourcesRestrictions' ],
+				[ $this, 'checkActionPermissions' ],
+				[ $this, 'checkUserBlock' ],
 			];
 		} else {
-			$checks = [
-				'checkQuickPermissions',
-				'checkPermissionHooks',
-				'checkSpecialsAndNSPermissions',
-				'checkSiteConfigPermissions',
-				'checkUserConfigPermissions',
-				'checkPageRestrictions',
-				'checkCascadingSourcesRestrictions',
-				'checkActionPermissions',
-				'checkUserBlock'
-			];
-
 			// Exclude checkUserConfigPermissions on actions that cannot change the
 			// content of the configuration pages.
 			$skipUserConfigActions = [
@@ -524,31 +484,38 @@ class PermissionManager {
 				'viewsuppressed',
 			];
 
-			if ( in_array( $action, $skipUserConfigActions, true ) ) {
-				$checks = array_diff(
-					$checks,
-					[ 'checkUserConfigPermissions' ]
-				);
-				// Reset numbering
-				$checks = array_values( $checks );
+			$checks = [
+				[ $this, 'checkQuickPermissions' ],
+				[ $this, 'checkPermissionHooks' ],
+				[ $this, 'checkSpecialsAndNSPermissions' ],
+				[ $this, 'checkSiteConfigPermissions' ],
+			];
+			if ( !in_array( $action, $skipUserConfigActions, true ) ) {
+				$checks[] = [ $this, 'checkUserConfigPermissions' ];
 			}
+			$checks = [
+				...$checks,
+				[ $this, 'checkPageRestrictions' ],
+				[ $this, 'checkCascadingSourcesRestrictions' ],
+				[ $this, 'checkActionPermissions' ],
+				[ $this, 'checkUserBlock' ]
+			];
 		}
 
-		$errors = [];
+		$status = PermissionStatus::newEmpty();
 		foreach ( $checks as $method ) {
-			$errors = $this->$method( $action, $user, $errors, $rigor, $short, $page );
+			$method( $action, $user, $status, $rigor, $short, $page );
 
-			if ( $short && $errors !== [] ) {
+			if ( $short && !$status->isGood() ) {
 				break;
 			}
 		}
-		// remove duplicate errors
-		$errors = array_unique( $errors, SORT_REGULAR );
-		if ( $errors ) {
+		if ( !$status->isGood() ) {
+			$errors = $status->toLegacyErrorArray();
 			$this->hookRunner->onPermissionErrorAudit( $page, $user, $action, $rigor, $errors );
 		}
 
-		return $errors;
+		return $status;
 	}
 
 	/**
@@ -556,72 +523,73 @@ class PermissionManager {
 	 *
 	 * @param string $action The action to check
 	 * @param User $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkPermissionHooks(
 		$action,
 		User $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove when LinkTarget usage will expand further
 		$title = Title::newFromLinkTarget( $page );
 		// Use getUserPermissionsErrors instead
 		$result = '';
 		if ( !$this->hookRunner->onUserCan( $title, $user, $action, $result ) ) {
-			return $result ? [] : [ [ 'badaccess-group0' ] ];
+			if ( !$result ) {
+				$status->fatal( 'badaccess-group0' );
+			}
+			return;
 		}
 		// Check getUserPermissionsErrors hook
 		if ( !$this->hookRunner->onGetUserPermissionsErrors( $title, $user, $action, $result ) ) {
-			$errors = $this->resultToError( $errors, $result );
+			$this->resultToStatus( $status, $result );
 		}
 		// Check getUserPermissionsErrorsExpensive hook
 		if (
 			$rigor !== self::RIGOR_QUICK
-			&& !( $short && count( $errors ) > 0 )
+			&& !( $short && !$status->isGood() )
 			&& !$this->hookRunner->onGetUserPermissionsErrorsExpensive(
 				$title, $user, $action, $result )
 		) {
-			$errors = $this->resultToError( $errors, $result );
+			$this->resultToStatus( $status, $result );
 		}
-
-		return $errors;
 	}
 
 	/**
 	 * Add the resulting error code to the errors array
 	 *
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param array|string|MessageSpecifier|false $result Result of errors
-	 * @return array List of errors
 	 */
-	private function resultToError( $errors, $result ): array {
+	private function resultToStatus( PermissionStatus $status, $result ): void {
 		if ( is_array( $result ) && count( $result ) && !is_array( $result[0] ) ) {
 			// A single array representing an error
-			$errors[] = $result;
-		} elseif ( is_array( $result ) && is_array( $result[0] ) ) {
+			$status->fatal( ...$result );
+		} elseif ( is_array( $result ) && count( $result ) && is_array( $result[0] ) ) {
 			// A nested array representing multiple errors
-			$errors = array_merge( $errors, $result );
-		} elseif ( $result !== '' && is_string( $result ) ) {
+			foreach ( $result as $result1 ) {
+				$this->resultToStatus( $status, $result1 );
+			}
+		} elseif ( is_string( $result ) && $result !== '' ) {
 			// A string representing a message-id
-			$errors[] = [ $result ];
+			$status->fatal( $result );
 		} elseif ( $result instanceof MessageSpecifier ) {
 			// A message specifier representing an error
-			$errors[] = [ $result ];
+			$status->fatal( $result );
 		} elseif ( $result === false ) {
 			// a generic "We don't want them to do that"
-			$errors[] = [ 'badaccess-group0' ];
+			$status->fatal( 'badaccess-group0' );
 		}
-		return $errors;
+		// If we got here, $results is the empty array or empty string, which mean no errors.
 	}
 
 	/**
@@ -629,23 +597,22 @@ class PermissionManager {
 	 *
 	 * @param string $action The action to check
 	 * @param User $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkReadPermissions(
 		$action,
 		User $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove when LinkTarget usage will expand further
 		$title = Title::newFromLinkTarget( $page );
 
@@ -657,19 +624,19 @@ class PermissionManager {
 		} elseif ( $this->userHasRight( $user, 'read' ) ) {
 			// If the user is allowed to read pages, he is allowed to read all pages
 			$allowed = true;
-		} elseif ( $this->isSameSpecialPage( 'Userlogin', $title )
-			|| $this->isSameSpecialPage( 'PasswordReset', $title )
-			|| $this->isSameSpecialPage( 'Userlogout', $title )
+		} elseif ( $this->isSameSpecialPage( 'Userlogin', $page )
+			|| $this->isSameSpecialPage( 'PasswordReset', $page )
+			|| $this->isSameSpecialPage( 'Userlogout', $page )
 		) {
 			// Always grant access to the login page.
 			// Even anons need to be able to log in.
 			$allowed = true;
-		} elseif ( $this->isSameSpecialPage( 'RunJobs', $title ) ) {
+		} elseif ( $this->isSameSpecialPage( 'RunJobs', $page ) ) {
 			// relies on HMAC key signature alone
 			$allowed = true;
 		} elseif ( is_array( $whiteListRead ) && count( $whiteListRead ) ) {
 			// Time to check the whitelist
-			// Only do these checks is there's something to check against
+			// Only do these checks if there's something to check against
 			$name = $title->getPrefixedText();
 			$dbName = $title->getPrefixedDBkey();
 
@@ -678,7 +645,7 @@ class PermissionManager {
 				|| in_array( $dbName, $whiteListRead, true )
 			) {
 				$allowed = true;
-			} elseif ( $title->getNamespace() === NS_MAIN ) {
+			} elseif ( $page->getNamespace() === NS_MAIN ) {
 				// Old settings might have the title prefixed with
 				// a colon for main-namespace pages
 				if ( in_array( ':' . $name, $whiteListRead ) ) {
@@ -687,7 +654,7 @@ class PermissionManager {
 			} elseif ( $title->isSpecialPage() ) {
 				// If it's a special page, ditch the subpage bit and check again
 				$name = $title->getDBkey();
-				list( $name, /* $subpage */ ) =
+				[ $name, /* $subpage */ ] =
 					$this->specialPageFactory->resolveAlias( $name );
 				if ( $name ) {
 					$pure = SpecialPage::getTitleFor( $name )->getPrefixedText();
@@ -700,7 +667,7 @@ class PermissionManager {
 
 		$whitelistReadRegexp = $this->options->get( MainConfigNames::WhitelistReadRegexp );
 		if ( !$allowed && is_array( $whitelistReadRegexp )
-			&& !empty( $whitelistReadRegexp )
+			&& $whitelistReadRegexp
 		) {
 			$name = $title->getPrefixedText();
 			// Check for regex whitelisting
@@ -716,29 +683,62 @@ class PermissionManager {
 			# If the title is not whitelisted, give extensions a chance to do so...
 			$this->hookRunner->onTitleReadWhitelist( $title, $user, $allowed );
 			if ( !$allowed ) {
-				$errors[] = $this->missingPermissionError( $action, $short );
+				$this->missingPermissionError( $action, $short, $status );
 			}
 		}
-
-		return $errors;
 	}
 
 	/**
-	 * Get a description array for when an action isn't allowed to be performed.
+	 * Add an error to the status when an action isn't allowed to be performed.
 	 *
 	 * @param string $action The action to check
 	 * @param bool $short Short circuit on first error
-	 * @return array Array containing an error message key and any parameters
+	 * @param PermissionStatus $status
 	 */
-	private function missingPermissionError( string $action, bool $short ): array {
+	private function missingPermissionError( string $action, bool $short, PermissionStatus $status ): void {
 		// We avoid expensive display logic for quickUserCan's and such
 		if ( $short ) {
-			return [ 'badaccess-group0' ];
+			$status->fatal( 'badaccess-group0' );
 		}
 
 		// TODO: it would be a good idea to replace the method below with something else like
 		// maybe callback injection
-		return User::newFatalPermissionDeniedStatus( $action )->getErrorsArray()[0];
+		$context = RequestContext::getMain();
+		$fatalStatus = $this->newFatalPermissionDeniedStatus( $action, $context );
+		$status->merge( $fatalStatus );
+		$statusPermission = $fatalStatus->getPermission();
+		if ( $statusPermission ) {
+			$status->setPermission( $statusPermission );
+		}
+	}
+
+	/**
+	 * Factory function for fatal permission-denied errors
+	 *
+	 * @internal for use by UserAuthority
+	 *
+	 * @param string $permission User right required
+	 * @param IContextSource $context
+	 *
+	 * @return PermissionStatus
+	 */
+	public function newFatalPermissionDeniedStatus( $permission, IContextSource $context ): StatusValue {
+		$groups = [];
+		foreach ( $this->groupPermissionsLookup->getGroupsWithPermission( $permission ) as $group ) {
+			$groups[] = UserGroupMembership::getLinkWiki( $group, $context );
+		}
+
+		if ( $groups ) {
+			return PermissionStatus::newFatal(
+				'badaccess-groups',
+				Message::listParam( $groups, 'comma' ),
+				count( $groups )
+			);
+		}
+
+		$status = PermissionStatus::newFatal( 'badaccess-group0' );
+		$status->setPermission( $permission );
+		return $status;
 	}
 
 	/**
@@ -750,9 +750,8 @@ class PermissionManager {
 	 */
 	private function isSameSpecialPage( $name, LinkTarget $page ): bool {
 		if ( $page->getNamespace() === NS_SPECIAL ) {
-			list( $thisName, /* $subpage */ ) =
-				$this->specialPageFactory->resolveAlias( $page->getDBkey() );
-			if ( $name == $thisName ) {
+			[ $pageName ] = $this->specialPageFactory->resolveAlias( $page->getDBkey() );
+			if ( $name === $pageName ) {
 				return true;
 			}
 		}
@@ -764,143 +763,185 @@ class PermissionManager {
 	 *
 	 * @param string $action The action to check
 	 * @param User $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkUserBlock(
 		$action,
 		User $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
+		$block = $this->getApplicableBlock(
+			$action,
+			$user,
+			$rigor,
+			$page,
+			$user->getRequest()
+		);
+
+		if ( $block ) {
+			// @todo FIXME: Pass the relevant context into this function.
+			$context = RequestContext::getMain();
+			$messages = $this->blockErrorFormatter->getMessages(
+				$block,
+				$user,
+				$context->getRequest()->getIP()
+			);
+
+			foreach ( $messages as $message ) {
+				// TODO: We can pass $message directly once getPermissionErrors() is removed.
+				// For now we store the message key as a string here out of overabundance of caution,
+				// because there is a test case verifying that block messages use strings in that format.
+				$status->fatal( $message->getKey(), ...$message->getParams() );
+			}
+		}
+	}
+
+	/**
+	 * Return the Block object applicable for the given permission check, if any.
+	 *
+	 * @internal for use by UserAuthority only
+	 *
+	 * @param string $action The action to check
+	 * @param User $user User to check
+	 * @param string $rigor One of PermissionManager::RIGOR_ constants
+	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
+	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
+	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
+	 * @param LinkTarget|PageReference|null $page
+	 * @param WebRequest|null $request The request to get the IP and cookies
+	 *   from. If this is null, IP and cookie blocks will not be checked.
+	 * @return ?Block
+	 */
+	public function getApplicableBlock(
+		string $action,
+		User $user,
+		string $rigor,
+		$page,
+		?WebRequest $request
+	): ?Block {
 		// Unblocking handled in SpecialUnblock
 		if ( $rigor === self::RIGOR_QUICK || in_array( $action, [ 'unblock' ] ) ) {
-			return $errors;
+			return null;
 		}
 
 		// Optimize for a very common case
 		if ( $action === 'read' && !$this->options->get( MainConfigNames::BlockDisablesLogin ) ) {
-			return $errors;
+			return null;
 		}
 
-		if ( $this->options->get( MainConfigNames::EmailConfirmToEdit )
-			&& !$user->isEmailConfirmed()
-			&& $action === 'edit'
-		) {
-			$errors[] = [ 'confirmedittext' ];
+		// Implicit rights aren't blockable (T350117, T350202).
+		if ( in_array( $action, $this->getImplicitRights(), true ) ) {
+			return null;
 		}
 
-		switch ( $rigor ) {
-			case self::RIGOR_SECURE:
-				$blockInfoFreshness = Authority::READ_LATEST;
-				$useReplica = false;
-				break;
-			case self::RIGOR_FULL:
-				$blockInfoFreshness = Authority::READ_NORMAL;
-				$useReplica = true;
-				break;
-			default:
-				$useReplica = true;
-				$blockInfoFreshness = Authority::READ_NORMAL;
+		$useReplica = $rigor !== self::RIGOR_SECURE;
+		$isExempt = $this->userHasRight( $user, 'ipblock-exempt' );
+		$requestIfNotExempt = $isExempt ? null : $request;
+
+		// Create account blocks are implemented separately due to weird IP exemption rules
+		if ( in_array( $action, [ 'createaccount', 'autocreateaccount' ], true ) ) {
+			return $this->blockManager->getCreateAccountBlock(
+				$user,
+				$requestIfNotExempt,
+				$useReplica
+			);
 		}
 
-		$block = $user->getBlock( $blockInfoFreshness );
+		$block = $this->blockManager->getBlock( $user, $requestIfNotExempt, $useReplica );
+		if ( !$block ) {
+			return null;
+		}
+		$userIsHidden = $block->getHideName();
 
-		if ( $action === 'createaccount' ) {
-			$applicableBlock = null;
-			if ( $block && $block->appliesToRight( 'createaccount' ) ) {
-				$applicableBlock = $block;
+		// Remove elements from the block that explicitly allow the action
+		// (like "read" or "upload").
+		$block = $this->blockManager->filter(
+			$block,
+			static function ( AbstractBlock $originalBlock ) use ( $action ) {
+				// Remove the block if it explicitly allows the action
+				return $originalBlock->appliesToRight( $action ) !== false;
 			}
+		);
+		if ( !$block ) {
+			return null;
+		}
 
-			// T15611: if the IP address the user is trying to create an account from is
-			// blocked with createaccount disabled, prevent new account creation there even
-			// when the user is logged in
-			if ( !$this->userHasRight( $user, 'ipblock-exempt' ) ) {
-				$ipBlock = DatabaseBlock::newFromTarget(
-					null, $user->getRequest()->getIP()
-				);
-				if ( $ipBlock && $ipBlock->appliesToRight( 'createaccount' ) ) {
-					$applicableBlock = $ipBlock;
-				}
-			}
-			// @todo FIXME: Pass the relevant context into this function.
-			if ( $applicableBlock ) {
-				$context = RequestContext::getMain();
-				$message = $this->blockErrorFormatter->getMessage(
-					$applicableBlock,
-					$context->getUser(),
-					$context->getLanguage(),
-					$context->getRequest()->getIP()
-				);
-				$errors[] = array_merge( [ $message->getKey() ], $message->getParams() );
-				return $errors;
+		// Convert the input page to a Title
+		$targetTitle = null;
+		if ( $page ) {
+			$targetTitle = $page instanceof PageReference ?
+				Title::castFromPageReference( $page ) :
+				Title::castFromLinkTarget( $page );
+
+			if ( !$targetTitle->canExist() ) {
+				$targetTitle = null;
 			}
 		}
 
-		// If the user does not have a block, or the block they do have explicitly
-		// allows the action (like "read" or "upload").
-		if ( !$block || $block->appliesToRight( $action ) === false ) {
-			return $errors;
-		}
-
-		// Determine if the user is blocked from this action on this page.
 		// What gets passed into this method is a user right, not an action name.
 		// There is no way to instantiate an action by restriction. However, this
 		// will get the action where the restriction is the same. This may result
 		// in actions being blocked that shouldn't be.
-		$actionObj = null;
-		$title = Title::newFromLinkTarget( $page, 'clone' );
-		if ( $title->canExist() ) {
-			// TODO: this drags a ton of dependencies in, would be good to avoid Article
-			//  instantiation and decouple it creating an ActionPermissionChecker interface
-			// Creating an action will perform several database queries to ensure that
-			// the action has not been overridden by the content type.
-			// FIXME: avoid use of RequestContext since it drags in User and Title dependencies
-			//  probably we may use fake context object since it's unlikely that Action uses it
-			//  anyway. It would be nice if we could avoid instantiating the Action at all.
-			$context = RequestContext::getMain();
-			$actionObj = $this->actionFactory->getAction(
-				$action,
-				Article::newFromTitle( $title, $context ),
-				$context
-			);
-			// Ensure that the retrieved action matches the restriction.
-			if ( $actionObj && $actionObj->getRestriction() !== $action ) {
-				$actionObj = null;
-			}
+		$actionInfo = $this->actionFactory->getActionInfo( $action, $targetTitle );
+
+		// Ensure that the retrieved action matches the restriction.
+		if ( $actionInfo && $actionInfo->getRestriction() !== $action ) {
+			$actionInfo = null;
 		}
 
-		// If no action object is returned, assume that the action requires unblock
+		// Return null if the action does not require an unblocked user.
+		// If no ActionInfo is returned, assume that the action requires unblock
 		// which is the default.
-		if ( !$actionObj || $actionObj->requiresUnblock() ) {
-			if (
-				$this->isBlockedFrom( $user, $page, $useReplica ) ||
-				(
-					$this->options->get( MainConfigNames::EnablePartialActionBlocks ) &&
-					$block->appliesToRight( $action )
-				)
-			) {
-				// @todo FIXME: Pass the relevant context into this function.
-				$context = RequestContext::getMain();
-				$message = $this->blockErrorFormatter->getMessage(
-					$block,
-					$context->getUser(),
-					$context->getLanguage(),
-					$context->getRequest()->getIP()
-				);
-				$errors[] = array_merge( [ $message->getKey() ], $message->getParams() );
-			}
+		// NOTE: We may get null here even for known actions, if a wiki's main page
+		// is set to a special page, e.g. Special:MyLanguage/Main_Page (T348451, T346036).
+		if ( $actionInfo && !$actionInfo->requiresUnblock() ) {
+			return null;
 		}
 
-		return $errors;
+		// Remove elements from the block that do not apply to the specific page
+		if ( $targetTitle ) {
+			$targetIsUserTalk = !$userIsHidden && $targetTitle->equals( $user->getTalkPage() );
+			$block = $this->blockManager->filter(
+				$block,
+				static function ( AbstractBlock $originalBlock )
+				use ( $action, $targetTitle, $targetIsUserTalk ) {
+					if ( $originalBlock->appliesToRight( $action ) ) {
+						// An action block takes precedence over appliesToTitle().
+						// Block::appliesToRight('edit') always returns null,
+						// allowing title-based exemptions to take effect.
+						return true;
+					} elseif ( $targetIsUserTalk ) {
+						// Special handling for a user's own talk page. The block is not aware
+						// of the user, so this must be done here.
+						return $originalBlock->appliesToUsertalk( $targetTitle );
+					} else {
+						return $originalBlock->appliesToTitle( $targetTitle );
+					}
+				}
+			);
+		}
+
+		if ( $targetTitle && $block
+			&& $block instanceof AbstractBlock // for phan
+		) {
+			// Allow extensions to let a blocked user access a particular page
+			$allowUsertalk = $block->isUsertalkEditAllowed();
+			$blocked = true;
+			$this->hookRunner->onUserIsBlockedFrom( $user, $targetTitle, $blocked, $allowUsertalk );
+			if ( !$blocked ) {
+				$block = null;
+			}
+		}
+		return $block;
 	}
 
 	/**
@@ -908,107 +949,114 @@ class PermissionManager {
 	 *
 	 * @param string $action The action to check
 	 * @param User $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkQuickPermissions(
 		$action,
 		User $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove when LinkTarget usage will expand further
 		$title = Title::newFromLinkTarget( $page );
 
+		// This method is always called first, so $status is guaranteed to be empty, so we can
+		// just pass an empty $errors array, instead of converting it to the legacy format and back.
+		$errors = [];
 		if ( !$this->hookRunner->onTitleQuickPermissions( $title, $user, $action,
 			$errors, $rigor !== self::RIGOR_QUICK, $short )
 		) {
-			return $errors;
+			// $errors is an array of results, not a result, but resultToStatus() handles
+			// arrays of arrays with recursion so this will work
+			$this->resultToStatus( $status, $errors );
+			return;
 		}
 
-		$isSubPage = $this->nsInfo->hasSubpages( $title->getNamespace() ) ?
-			strpos( $title->getText(), '/' ) !== false : false;
+		$isSubPage =
+			$this->nsInfo->hasSubpages( $title->getNamespace() ) &&
+			strpos( $title->getText(), '/' ) !== false;
 
-		if ( $action == 'create' ) {
+		if ( $action === 'create' ) {
 			if (
 				( $this->nsInfo->isTalk( $title->getNamespace() ) &&
 					!$this->userHasRight( $user, 'createtalk' ) ) ||
 				( !$this->nsInfo->isTalk( $title->getNamespace() ) &&
 					!$this->userHasRight( $user, 'createpage' ) )
 			) {
-				$errors[] = $user->isNamed() ? [ 'nocreate-loggedin' ] : [ 'nocreatetext' ];
+				$status->fatal( $user->isNamed() ? 'nocreate-loggedin' : 'nocreatetext' );
 			}
-		} elseif ( $action == 'move' ) {
+		} elseif ( $action === 'move' ) {
 			if ( !$this->userHasRight( $user, 'move-rootuserpages' )
 				&& $title->getNamespace() === NS_USER && !$isSubPage
 			) {
 				// Show user page-specific message only if the user can move other pages
-				$errors[] = [ 'cant-move-user-page' ];
+				$status->fatal( 'cant-move-user-page' );
 			}
 
 			// Check if user is allowed to move files if it's a file
 			if ( $title->getNamespace() === NS_FILE &&
 				!$this->userHasRight( $user, 'movefile' )
 			) {
-				$errors[] = [ 'movenotallowedfile' ];
+				$status->fatal( 'movenotallowedfile' );
 			}
 
 			// Check if user is allowed to move category pages if it's a category page
 			if ( $title->getNamespace() === NS_CATEGORY &&
 				!$this->userHasRight( $user, 'move-categorypages' )
 			) {
-				$errors[] = [ 'cant-move-category-page' ];
+				$status->fatal( 'cant-move-category-page' );
 			}
 
 			if ( !$this->userHasRight( $user, 'move' ) ) {
 				// User can't move anything
 				$userCanMove = $this->groupPermissionsLookup
 					->groupHasPermission( 'user', 'move' );
-				$namedCanMove = $this->groupPermissionsLookup
-					->groupHasPermission( 'named', 'move' );
 				$autoconfirmedCanMove = $this->groupPermissionsLookup
 					->groupHasPermission( 'autoconfirmed', 'move' );
 				if ( $user->isAnon()
-					&& ( $userCanMove || $namedCanMove || $autoconfirmedCanMove )
+					&& ( $userCanMove || $autoconfirmedCanMove )
 				) {
 					// custom message if logged-in users without any special rights can move
-					$errors[] = [ 'movenologintext' ];
-				} elseif ( $user->isTemp() && ( $namedCanMove || $autoconfirmedCanMove ) ) {
+					$status->fatal( 'movenologintext' );
+				} elseif ( $user->isTemp() && $autoconfirmedCanMove ) {
 					// Temp user may be able to move if they log in as a proper account
-					$errors[] = [ 'movenologintext' ];
+					$status->fatal( 'movenologintext' );
 				} else {
-					$errors[] = [ 'movenotallowed' ];
+					$status->fatal( 'movenotallowed' );
 				}
 			}
-		} elseif ( $action == 'move-target' ) {
+		} elseif ( $action === 'move-target' ) {
 			if ( !$this->userHasRight( $user, 'move' ) ) {
 				// User can't move anything
-				$errors[] = [ 'movenotallowed' ];
+				$status->fatal( 'movenotallowed' );
 			} elseif ( !$this->userHasRight( $user, 'move-rootuserpages' )
 				&& $title->getNamespace() === NS_USER
 				&& !$isSubPage
 			) {
 				// Show user page-specific message only if the user can move other pages
-				$errors[] = [ 'cant-move-to-user-page' ];
+				$status->fatal( 'cant-move-to-user-page' );
 			} elseif ( !$this->userHasRight( $user, 'move-categorypages' )
 				&& $title->getNamespace() === NS_CATEGORY
 			) {
 				// Show category page-specific message only if the user can move other pages
-				$errors[] = [ 'cant-move-to-category-page' ];
+				$status->fatal( 'cant-move-to-category-page' );
+			}
+		} elseif ( $action === 'autocreateaccount' ) {
+			// createaccount implies autocreateaccount
+			if ( !$this->userHasAnyRight( $user, 'autocreateaccount', 'createaccount' ) ) {
+				$this->missingPermissionError( $action, $short, $status );
 			}
 		} elseif ( !$this->userHasRight( $user, $action ) ) {
-			$errors[] = $this->missingPermissionError( $action, $short );
+			$this->missingPermissionError( $action, $short, $status );
 		}
-
-		return $errors;
 	}
 
 	/**
@@ -1018,48 +1066,45 @@ class PermissionManager {
 	 * all of those rights to perform the action in question.
 	 *
 	 * @param string $action The action to check
-	 * @param User $user User to check
-	 * @param array $errors List of current errors
+	 * @param UserIdentity $user User to check
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkPageRestrictions(
 		$action,
-		User $user,
-		$errors,
+		UserIdentity $user,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove & rework upon further use of LinkTarget
 		$title = Title::newFromLinkTarget( $page );
 		foreach ( $this->restrictionStore->getRestrictions( $title, $action ) as $right ) {
 			// Backwards compatibility, rewrite sysop -> editprotected
-			if ( $right == 'sysop' ) {
+			if ( $right === 'sysop' ) {
 				$right = 'editprotected';
 			}
 			// Backwards compatibility, rewrite autoconfirmed -> editsemiprotected
-			if ( $right == 'autoconfirmed' ) {
+			if ( $right === 'autoconfirmed' ) {
 				$right = 'editsemiprotected';
 			}
 			if ( $right == '' ) {
 				continue;
 			}
 			if ( !$this->userHasRight( $user, $right ) ) {
-				$errors[] = [ 'protectedpagetext', $right, $action ];
+				$status->fatal( 'protectedpagetext', $right, $action );
 			} elseif ( $this->restrictionStore->areRestrictionsCascading( $title ) &&
 				!$this->userHasRight( $user, 'protect' )
 			) {
-				$errors[] = [ 'protectedpagetext', 'protect', $action ];
+				$status->fatal( 'protectedpagetext', 'protect', $action );
 			}
 		}
-
-		return $errors;
 	}
 
 	/**
@@ -1067,27 +1112,26 @@ class PermissionManager {
 	 *
 	 * @param string $action The action to check
 	 * @param UserIdentity $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkCascadingSourcesRestrictions(
 		$action,
 		UserIdentity $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove & rework upon further use of LinkTarget
 		$title = Title::newFromLinkTarget( $page );
 		if ( $rigor !== self::RIGOR_QUICK && !$title->isUserConfigPage() ) {
-			list( $cascadingSources, $restrictions ) = $this->restrictionStore->getCascadeProtectionSources( $title );
+			[ $cascadingSources, $restrictions ] = $this->restrictionStore->getCascadeProtectionSources( $title );
 			// Cascading protection depends on more than this page...
 			// Several cascading protected pages may include this page...
 			// Check each cascading level
@@ -1095,11 +1139,11 @@ class PermissionManager {
 			if ( isset( $restrictions[$action] ) ) {
 				foreach ( $restrictions[$action] as $right ) {
 					// Backwards compatibility, rewrite sysop -> editprotected
-					if ( $right == 'sysop' ) {
+					if ( $right === 'sysop' ) {
 						$right = 'editprotected';
 					}
 					// Backwards compatibility, rewrite autoconfirmed -> editsemiprotected
-					if ( $right == 'autoconfirmed' ) {
+					if ( $right === 'autoconfirmed' ) {
 						$right = 'editsemiprotected';
 					}
 					if ( $right != '' && !$this->userHasAllRights( $user, 'protect', $right ) ) {
@@ -1107,13 +1151,11 @@ class PermissionManager {
 						foreach ( $cascadingSources as $pageIdentity ) {
 							$wikiPages .= '* [[:' . $this->titleFormatter->getPrefixedText( $pageIdentity ) . "]]\n";
 						}
-						$errors[] = [ 'cascadeprotected', count( $cascadingSources ), $wikiPages, $action ];
+						$status->fatal( 'cascadeprotected', count( $cascadingSources ), $wikiPages, $action );
 					}
 				}
 			}
 		}
-
-		return $errors;
 	}
 
 	/**
@@ -1121,47 +1163,56 @@ class PermissionManager {
 	 *
 	 * @param string $action The action to check
 	 * @param User $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkActionPermissions(
 		$action,
 		User $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
-		global $wgLang;
-
+	): void {
 		// TODO: remove & rework upon further use of LinkTarget
 		$title = Title::newFromLinkTarget( $page );
 
-		if ( $action == 'protect' ) {
-			if ( count( $this->getPermissionErrorsInternal( 'edit', $user, $title, $rigor, true ) ) ) {
-				// If they can't edit, they shouldn't protect.
-				$errors[] = [ 'protect-cantedit' ];
-			}
-		} elseif ( $action == 'create' ) {
-			$title_protection = $title->getTitleProtection();
-			if ( $title_protection ) {
-				if ( $title_protection['permission'] == ''
-					|| !$this->userHasRight( $user, $title_protection['permission'] )
-				) {
-					$errors[] = [
-						'titleprotected',
-						$this->userCache->getProp( $title_protection['user'], 'name' ),
-						$title_protection['reason']
-					];
+		if ( $rigor !== self::RIGOR_QUICK && !defined( 'MW_NO_SESSION' ) ) {
+			$sessionRestrictions = $user->getRequest()->getSession()->getRestrictions();
+			if ( $sessionRestrictions ) {
+				$userCan = $sessionRestrictions->userCan( $title );
+				if ( !$userCan->isOK() ) {
+					$status->merge( $userCan );
 				}
 			}
-		} elseif ( $action == 'move' ) {
+		}
+
+		if ( $action === 'protect' ) {
+			if ( !$this->getPermissionStatus( 'edit', $user, $title, $rigor, true )->isGood() ) {
+				// If they can't edit, they shouldn't protect.
+				$status->fatal( 'protect-cantedit' );
+			}
+		} elseif ( $action === 'create' ) {
+			$createProtection = $this->restrictionStore->getCreateProtection( $title );
+			if ( $createProtection ) {
+				if ( $createProtection['permission'] == ''
+					|| !$this->userHasRight( $user, $createProtection['permission'] )
+				) {
+					$protectUserIdentity = $this->userIdentityLookup
+						->getUserIdentityByUserId( $createProtection['user'] );
+					$status->fatal(
+						'titleprotected',
+						$protectUserIdentity ? $protectUserIdentity->getName() : '',
+						$createProtection['reason']
+					);
+				}
+			}
+		} elseif ( $action === 'move' ) {
 			// Check for immobile pages
 			if ( !$this->nsInfo->isMovable( $title->getNamespace() ) ) {
 				// Specific message for this case
@@ -1169,59 +1220,65 @@ class PermissionManager {
 				if ( $nsText === '' ) {
 					$nsText = wfMessage( 'blanknamespace' )->text();
 				}
-				$errors[] = [ 'immobile-source-namespace', $nsText ];
+				$status->fatal( 'immobile-source-namespace', $nsText );
 			} elseif ( !$title->isMovable() ) {
 				// Less specific message for rarer cases
-				$errors[] = [ 'immobile-source-page' ];
+				$status->fatal( 'immobile-source-page' );
 			}
-		} elseif ( $action == 'move-target' ) {
+		} elseif ( $action === 'move-target' ) {
 			if ( !$this->nsInfo->isMovable( $title->getNamespace() ) ) {
 				$nsText = $title->getNsText();
 				if ( $nsText === '' ) {
 					$nsText = wfMessage( 'blanknamespace' )->text();
 				}
-				$errors[] = [ 'immobile-target-namespace', $nsText ];
+				$status->fatal( 'immobile-target-namespace', $nsText );
 			} elseif ( !$title->isMovable() ) {
-				$errors[] = [ 'immobile-target-page' ];
+				$status->fatal( 'immobile-target-page' );
 			}
-		} elseif ( $action == 'delete' || $action == 'delete-redirect' ) {
-			$tempErrors = $this->checkPageRestrictions( 'edit', $user, [], $rigor, true, $title );
-			if ( !$tempErrors ) {
-				$tempErrors = $this->checkCascadingSourcesRestrictions( 'edit',
-					$user, $tempErrors, $rigor, true, $title );
+		} elseif ( $action === 'delete' || $action === 'delete-redirect' ) {
+			$tempStatus = PermissionStatus::newEmpty();
+			$this->checkPageRestrictions( 'edit', $user, $tempStatus, $rigor, true, $title );
+			if ( $tempStatus->isGood() ) {
+				$this->checkCascadingSourcesRestrictions( 'edit',
+					$user, $tempStatus, $rigor, true, $title );
 			}
-			if ( $tempErrors ) {
+			if ( !$tempStatus->isGood() ) {
 				// If protection keeps them from editing, they shouldn't be able to delete.
-				$errors[] = [ 'deleteprotected' ];
+				$status->fatal( 'deleteprotected' );
 			}
 			if ( $rigor !== self::RIGOR_QUICK
-				&& $action == 'delete'
+				&& $action === 'delete'
 				&& $this->options->get( MainConfigNames::DeleteRevisionsLimit )
 				&& !$this->userCan( 'bigdelete', $user, $title )
 				&& $title->isBigDeletion()
 			) {
 				// NOTE: This check is deprecated since 1.37, see T288759
-				$errors[] = [
+				$status->fatal(
 					'delete-toobig',
-					$wgLang->formatNum( $this->options->get( MainConfigNames::DeleteRevisionsLimit ) )
-				];
+					Message::numParam( $this->options->get( MainConfigNames::DeleteRevisionsLimit ) )
+				);
 			}
 		} elseif ( $action === 'undelete' ) {
-			if ( count( $this->getPermissionErrorsInternal( 'edit', $user, $title, $rigor, true ) ) ) {
+			if ( !$this->getPermissionStatus( 'edit', $user, $title, $rigor, true )->isGood() ) {
 				// Undeleting implies editing
-				$errors[] = [ 'undelete-cantedit' ];
+				$status->fatal( 'undelete-cantedit' );
 			}
 			if ( !$title->exists()
-				&& count( $this->getPermissionErrorsInternal( 'create', $user, $title, $rigor, true ) )
+				&& !$this->getPermissionStatus( 'create', $user, $title, $rigor, true )->isGood()
 			) {
 				// Undeleting where nothing currently exists implies creating
-				$errors[] = [ 'undelete-cantcreate' ];
+				$status->fatal( 'undelete-cantcreate' );
 			}
 		} elseif ( $action === 'edit' ) {
+			if ( $this->options->get( MainConfigNames::EmailConfirmToEdit )
+				&& !$user->isEmailConfirmed()
+			) {
+				$status->fatal( 'confirmedittext' );
+			}
+
 			if ( !$title->exists() ) {
-				$errors = array_merge(
-					$errors,
-					$this->getPermissionErrorsInternal(
+				$status->merge(
+					$this->getPermissionStatus(
 						'create',
 						$user,
 						$title,
@@ -1231,7 +1288,6 @@ class PermissionManager {
 				);
 			}
 		}
-		return $errors;
 	}
 
 	/**
@@ -1239,119 +1295,121 @@ class PermissionManager {
 	 *
 	 * @param string $action The action to check
 	 * @param UserIdentity $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkSpecialsAndNSPermissions(
 		$action,
 		UserIdentity $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove & rework upon further use of LinkTarget
 		$title = Title::newFromLinkTarget( $page );
 
 		// Only 'createaccount' can be performed on special pages,
 		// which don't actually exist in the DB.
-		if ( $title->getNamespace() === NS_SPECIAL && $action !== 'createaccount' ) {
-			$errors[] = [ 'ns-specialprotected' ];
+		if ( $title->getNamespace() === NS_SPECIAL
+			&& !in_array( $action, [ 'createaccount', 'autocreateaccount' ], true )
+		) {
+			$status->fatal( 'ns-specialprotected' );
 		}
 
 		// Check $wgNamespaceProtection for restricted namespaces
-		if ( $this->isNamespaceProtected( $title->getNamespace(), $user ) ) {
+		if ( $this->isNamespaceProtected( $title->getNamespace(), $user )
+			// Allow admins and oversighters to view deleted content, even if they
+			// cannot restore it. See T362536.
+			&& !in_array( $action, [ 'deletedhistory', 'deletedtext', 'viewsuppressed' ], true )
+		) {
 			$ns = $title->getNamespace() === NS_MAIN ?
 				wfMessage( 'nstab-main' )->text() : $title->getNsText();
-			$errors[] = $title->getNamespace() === NS_MEDIAWIKI ?
-				[ 'protectedinterface', $action ] : [ 'namespaceprotected', $ns, $action ];
+			if ( $title->getNamespace() === NS_MEDIAWIKI ) {
+				$status->fatal( 'protectedinterface', $action );
+			} else {
+				$status->fatal( 'namespaceprotected', $ns, $action );
+			}
 		}
-
-		return $errors;
 	}
 
 	/**
 	 * Check sitewide CSS/JSON/JS permissions
 	 *
 	 * @param string $action The action to check
-	 * @param User $user User to check
-	 * @param array $errors List of current errors
+	 * @param UserIdentity $user User to check
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkSiteConfigPermissions(
 		$action,
-		User $user,
-		$errors,
+		UserIdentity $user,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove & rework upon further use of LinkTarget
 		$title = Title::newFromLinkTarget( $page );
 
 		if ( $action === 'patrol' ) {
-			return $errors;
+			return;
 		}
 
 		if ( in_array( $action, [ 'deletedhistory', 'deletedtext', 'viewsuppressed' ], true ) ) {
 			// Allow admins and oversighters to view deleted content, even if they
 			// cannot restore it. See T202989
-			// Not using the same handling in `getPermissionErrorsInternal` as the checks
+			// Not using the same handling in `getPermissionStatus` as the checks
 			// for skipping `checkUserConfigPermissions` since normal admins can delete
-			// user scripts, but not sitedwide scripts
-			return $errors;
+			// user scripts, but not sitewide scripts
+			return;
 		}
 
 		// Sitewide CSS/JSON/JS/RawHTML changes, like all NS_MEDIAWIKI changes, also require the
 		// editinterface right. That's implemented as a restriction so no check needed here.
 		if ( $title->isSiteCssConfigPage() && !$this->userHasRight( $user, 'editsitecss' ) ) {
-			$errors[] = [ 'sitecssprotected', $action ];
+			$status->fatal( 'sitecssprotected', $action );
 		} elseif ( $title->isSiteJsonConfigPage() && !$this->userHasRight( $user, 'editsitejson' ) ) {
-			$errors[] = [ 'sitejsonprotected', $action ];
+			$status->fatal( 'sitejsonprotected', $action );
 		} elseif ( $title->isSiteJsConfigPage() && !$this->userHasRight( $user, 'editsitejs' ) ) {
-			$errors[] = [ 'sitejsprotected', $action ];
+			$status->fatal( 'sitejsprotected', $action );
 		}
 		if ( $title->isRawHtmlMessage() && !$this->userCanEditRawHtmlPage( $user ) ) {
-			$errors[] = [ 'siterawhtmlprotected', $action ];
+			$status->fatal( 'siterawhtmlprotected', $action );
 		}
-
-		return $errors;
 	}
 
 	/**
-	 * Check CSS/JSON/JS sub-page permissions
+	 * Check CSS/JSON/JS subpage permissions
 	 *
 	 * @param string $action The action to check
 	 * @param UserIdentity $user User to check
-	 * @param array $errors List of current errors
+	 * @param PermissionStatus $status Current errors
 	 * @param string $rigor One of PermissionManager::RIGOR_ constants
 	 *   - RIGOR_QUICK  : does cheap permission checks from replica DBs (usable for GUI creation)
 	 *   - RIGOR_FULL   : does cheap and expensive checks possibly from a replica DB
 	 *   - RIGOR_SECURE : does cheap and expensive checks, using the primary DB as needed
 	 * @param bool $short Short circuit on first error
 	 * @param LinkTarget $page
-	 * @return array List of errors
 	 */
 	private function checkUserConfigPermissions(
 		$action,
 		UserIdentity $user,
-		$errors,
+		PermissionStatus $status,
 		$rigor,
 		$short,
 		LinkTarget $page
-	): array {
+	): void {
 		// TODO: remove & rework upon further use of LinkTarget
 		$title = Title::newFromLinkTarget( $page );
 
@@ -1363,17 +1421,17 @@ class PermissionManager {
 				$title->isUserCssConfigPage()
 				&& !$this->userHasAnyRight( $user, 'editmyusercss', 'editusercss' )
 			) {
-				$errors[] = [ 'mycustomcssprotected', $action ];
+				$status->fatal( 'mycustomcssprotected', $action );
 			} elseif (
 				$title->isUserJsonConfigPage()
 				&& !$this->userHasAnyRight( $user, 'editmyuserjson', 'edituserjson' )
 			) {
-				$errors[] = [ 'mycustomjsonprotected', $action ];
+				$status->fatal( 'mycustomjsonprotected', $action );
 			} elseif (
 				$title->isUserJsConfigPage()
 				&& !$this->userHasAnyRight( $user, 'editmyuserjs', 'edituserjs' )
 			) {
-				$errors[] = [ 'mycustomjsprotected', $action ];
+				$status->fatal( 'mycustomjsprotected', $action );
 			} elseif (
 				$title->isUserJsConfigPage()
 				&& !$this->userHasAnyRight( $user, 'edituserjs', 'editmyuserjsredirect' )
@@ -1384,7 +1442,7 @@ class PermissionManager {
 						!$target->inNamespace( NS_USER )
 						|| !preg_match( '/^' . preg_quote( $user->getName(), '/' ) . '\//', $target->getText() )
 				) ) {
-					$errors[] = [ 'mycustomjsredirectprotected', $action ];
+					$status->fatal( 'mycustomjsredirectprotected', $action );
 				}
 			}
 		} else {
@@ -1393,26 +1451,24 @@ class PermissionManager {
 			// attacks and should be excluded to avoid the situation where an
 			// unprivileged user can post abusive content on their subpages
 			// and only very highly privileged users could remove it,
-			// are now a part of `getPermissionErrorsInternal` and this method isn't called.
+			// are now a part of `getPermissionStatus` and this method isn't called.
 			if (
 				$title->isUserCssConfigPage()
 				&& !$this->userHasRight( $user, 'editusercss' )
 			) {
-				$errors[] = [ 'customcssprotected', $action ];
+				$status->fatal( 'customcssprotected', $action );
 			} elseif (
 				$title->isUserJsonConfigPage()
 				&& !$this->userHasRight( $user, 'edituserjson' )
 			) {
-				$errors[] = [ 'customjsonprotected', $action ];
+				$status->fatal( 'customjsonprotected', $action );
 			} elseif (
 				$title->isUserJsConfigPage()
 				&& !$this->userHasRight( $user, 'edituserjs' )
 			) {
-				$errors[] = [ 'customjsprotected', $action ];
+				$status->fatal( 'customjsprotected', $action );
 			}
 		}
-
-		return $errors;
 	}
 
 	/**
@@ -1430,7 +1486,8 @@ class PermissionManager {
 		}
 		// Use strict parameter to avoid matching numeric 0 accidentally inserted
 		// by misconfiguration: 0 == 'foo'
-		return in_array( $action, $this->getUserPermissions( $user ), true );
+		return in_array( $action, $this->getImplicitRights(), true )
+			|| in_array( $action, $this->getUserPermissions( $user ), true );
 	}
 
 	/**
@@ -1477,12 +1534,12 @@ class PermissionManager {
 	public function getUserPermissions( UserIdentity $user ): array {
 		$rightsCacheKey = $this->getRightsCacheKey( $user );
 		if ( !isset( $this->usersRights[ $rightsCacheKey ] ) ) {
-			$userObj = User::newFromIdentity( $user );
-			$this->usersRights[ $rightsCacheKey ] = $this->getGroupPermissions(
+			$userObj = $this->userFactory->newFromUserIdentity( $user );
+			$rights = $this->groupPermissionsLookup->getGroupPermissions(
 				$this->userGroupManager->getUserEffectiveGroups( $user )
 			);
 			// Hook requires a full User object
-			$this->hookRunner->onUserGetRights( $userObj, $this->usersRights[ $rightsCacheKey ] );
+			$this->hookRunner->onUserGetRights( $userObj, $rights );
 
 			// Deny any rights denied by the user's session, unless this
 			// endpoint has no sessions.
@@ -1490,34 +1547,36 @@ class PermissionManager {
 				// FIXME: $userObj->getRequest().. need to be replaced with something else
 				$allowedRights = $userObj->getRequest()->getSession()->getAllowedUserRights();
 				if ( $allowedRights !== null ) {
-					$this->usersRights[ $rightsCacheKey ] = array_intersect(
-						$this->usersRights[ $rightsCacheKey ],
-						$allowedRights
-					);
+					$rights = array_intersect( $rights, $allowedRights );
 				}
 			}
 
 			// Hook requires a full User object
-			$this->hookRunner->onUserGetRightsRemove(
-				$userObj, $this->usersRights[ $rightsCacheKey ] );
+			$this->hookRunner->onUserGetRightsRemove( $userObj, $rights );
 			// Force reindexation of rights when a hook has unset one of them
-			$this->usersRights[ $rightsCacheKey ] = array_values(
-				array_unique( $this->usersRights[ $rightsCacheKey ] )
-			);
+			$rights = array_values( array_unique( $rights ) );
 
+			// If BlockDisablesLogin is true, remove rights that anonymous
+			// users don't have. This has to be done after the hooks so that
+			// we know whether the user is exempt. (T129738)
 			if (
-				$userObj->isRegistered() &&
-				$this->options->get( MainConfigNames::BlockDisablesLogin ) &&
-				$userObj->getBlock()
+				$userObj->isRegistered()
+				&& $this->options->get( MainConfigNames::BlockDisablesLogin )
 			) {
-				$anon = new User;
-				$this->usersRights[ $rightsCacheKey ] = array_intersect(
-					$this->usersRights[ $rightsCacheKey ],
-					$this->getUserPermissions( $anon )
-				);
+				$isExempt = in_array( 'ipblock-exempt', $rights, true );
+				if ( $this->blockManager->getBlock(
+					$userObj,
+					$isExempt ? null : $userObj->getRequest()
+				) ) {
+					$anon = $this->userFactory->newAnonymous();
+					$rights = array_intersect( $rights, $this->getUserPermissions( $anon ) );
+				}
 			}
+
+			$this->usersRights[ $rightsCacheKey ] = $rights;
+		} else {
+			$rights = $this->usersRights[ $rightsCacheKey ];
 		}
-		$rights = $this->usersRights[ $rightsCacheKey ];
 		foreach ( $this->temporaryUserRights[ $user->getId() ] ?? [] as $overrides ) {
 			$rights = array_values( array_unique( array_merge( $rights, $overrides ) ) );
 		}
@@ -1548,47 +1607,6 @@ class PermissionManager {
 	 */
 	private function getRightsCacheKey( UserIdentity $user ): string {
 		return $user->isRegistered() ? "u:{$user->getId()}" : "anon:{$user->getName()}";
-	}
-
-	/**
-	 * Check, if the given group has the given permission
-	 *
-	 * If you're wanting to check whether all users have a permission, use
-	 * PermissionManager::isEveryoneAllowed() instead. That properly checks if it's revoked
-	 * from anyone.
-	 *
-	 * @since 1.34
-	 * @deprecated since 1.36 Use GroupPermissionsLookup instead
-	 * @param string $group Group to check
-	 * @param string $role Role to check
-	 * @return bool
-	 */
-	public function groupHasPermission( $group, $role ): bool {
-		return $this->groupPermissionsLookup->groupHasPermission( $group, $role );
-	}
-
-	/**
-	 * Get the permissions associated with a given list of groups
-	 *
-	 * @since 1.34
-	 * @deprecated since 1.36 Use GroupPermissionsLookup instead
-	 * @param string[] $groups internal group names
-	 * @return string[] permission key names for given groups combined
-	 */
-	public function getGroupPermissions( $groups ): array {
-		return $this->groupPermissionsLookup->getGroupPermissions( $groups );
-	}
-
-	/**
-	 * Get all the groups who have a given permission
-	 *
-	 * @since 1.34
-	 * @deprecated since 1.36, use GroupPermissionsLookup instead.
-	 * @param string $role Role to check
-	 * @return string[] internal group names with the given permission
-	 */
-	public function getGroupsWithPermission( $role ): array {
-		return $this->groupPermissionsLookup->getGroupsWithPermission( $role );
 	}
 
 	/**
@@ -1630,7 +1648,6 @@ class PermissionManager {
 		// Remove any rights that aren't allowed to the global-session user,
 		// unless there are no sessions for this endpoint.
 		if ( !defined( 'MW_NO_SESSION' ) ) {
-
 			// XXX: think what could be done with the below
 			$allowedRights = SessionManager::getGlobalSession()->getAllowedUserRights();
 			if ( $allowedRights !== null && !in_array( $right, $allowedRights, true ) ) {
@@ -1650,7 +1667,10 @@ class PermissionManager {
 	}
 
 	/**
-	 * Get a list of all available permissions.
+	 * Get a list of all permissions that can be managed through group permissions.
+	 * This does not include implicit rights which are granted to all users automatically.
+	 *
+	 * @see getImplicitRights()
 	 *
 	 * @since 1.34
 	 * @return string[] Array of permission names
@@ -1659,15 +1679,38 @@ class PermissionManager {
 		if ( $this->allRights === null ) {
 			if ( count( $this->options->get( MainConfigNames::AvailableRights ) ) ) {
 				$this->allRights = array_unique( array_merge(
-					$this->coreRights,
+					self::CORE_RIGHTS,
 					$this->options->get( MainConfigNames::AvailableRights )
 				) );
 			} else {
-				$this->allRights = $this->coreRights;
+				$this->allRights = self::CORE_RIGHTS;
 			}
 			$this->hookRunner->onUserGetAllRights( $this->allRights );
 		}
 		return $this->allRights;
+	}
+
+	/**
+	 * Get a list of implicit rights.
+	 *
+	 * Rights in this list should be granted to all users implicitly.
+	 *
+	 * Implicit rights are defined to allow rate limits to be imposed
+	 * on permissions
+	 *
+	 * @since 1.41
+	 * @return string[] Array of permission names
+	 */
+	public function getImplicitRights(): array {
+		if ( $this->implicitRights === null ) {
+			$rights = array_unique( array_merge(
+				self::CORE_IMPLICIT_RIGHTS,
+				$this->options->get( MainConfigNames::ImplicitRights )
+			) );
+
+			$this->implicitRights = array_diff( $rights, $this->getAllPermissions() );
+		}
+		return $this->implicitRights;
 	}
 
 	/**
@@ -1693,7 +1736,7 @@ class PermissionManager {
 	 * @param UserIdentity|null $user User to check
 	 * @return string[]
 	 */
-	public function getNamespaceRestrictionLevels( $index, UserIdentity $user = null ): array {
+	public function getNamespaceRestrictionLevels( $index, ?UserIdentity $user = null ): array {
 		if ( !isset( $this->options->get( MainConfigNames::NamespaceProtection )[$index] ) ) {
 			// All levels are valid if there's no namespace restriction.
 			// But still filter by user, if necessary
@@ -1701,10 +1744,10 @@ class PermissionManager {
 			if ( $user ) {
 				$levels = array_values( array_filter( $levels, function ( $level ) use ( $user ) {
 					$right = $level;
-					if ( $right == 'sysop' ) {
+					if ( $right === 'sysop' ) {
 						$right = 'editprotected'; // BC
 					}
-					if ( $right == 'autoconfirmed' ) {
+					if ( $right === 'autoconfirmed' ) {
 						$right = 'editsemiprotected'; // BC
 					}
 					return $this->userHasRight( $user, $right );
@@ -1723,14 +1766,14 @@ class PermissionManager {
 		// First, for each right, get a list of groups with that right.
 		$namespaceRightGroups = [];
 		foreach ( (array)$this->options->get( MainConfigNames::NamespaceProtection )[$index] as $right ) {
-			if ( $right == 'sysop' ) {
+			if ( $right === 'sysop' ) {
 				$right = 'editprotected'; // BC
 			}
-			if ( $right == 'autoconfirmed' ) {
+			if ( $right === 'autoconfirmed' ) {
 				$right = 'editsemiprotected'; // BC
 			}
 			if ( $right != '' ) {
-				$namespaceRightGroups[$right] = $this->getGroupsWithPermission( $right );
+				$namespaceRightGroups[$right] = $this->groupPermissionsLookup->getGroupsWithPermission( $right );
 			}
 		}
 
@@ -1738,10 +1781,10 @@ class PermissionManager {
 		$usableLevels = [ '' ];
 		foreach ( $this->options->get( MainConfigNames::RestrictionLevels ) as $level ) {
 			$right = $level;
-			if ( $right == 'sysop' ) {
+			if ( $right === 'sysop' ) {
 				$right = 'editprotected'; // BC
 			}
-			if ( $right == 'autoconfirmed' ) {
+			if ( $right === 'autoconfirmed' ) {
 				$right = 'editsemiprotected'; // BC
 			}
 
@@ -1751,7 +1794,7 @@ class PermissionManager {
 			) {
 				// Do any of the namespace rights imply the restriction right? (see explanation above)
 				foreach ( $namespaceRightGroups as $groups ) {
-					if ( !array_diff( $groups, $this->getGroupsWithPermission( $right ) ) ) {
+					if ( !array_diff( $groups, $this->groupPermissionsLookup->getGroupsWithPermission( $right ) ) ) {
 						// Yes, this one does.
 						continue 2;
 					}
@@ -1808,12 +1851,12 @@ class PermissionManager {
 	 *
 	 * @internal For testing only
 	 * @since 1.34
-	 * @param User $user
+	 * @param UserIdentity $user
 	 * @param string[]|string $rights
 	 */
 	public function overrideUserRightsForTesting( $user, $rights = [] ) {
 		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
-			throw new Exception( __METHOD__ . ' can not be called outside of tests' );
+			throw new LogicException( __METHOD__ . ' can not be called outside of tests' );
 		}
 		$this->usersRights[ $this->getRightsCacheKey( $user ) ] =
 			is_array( $rights ) ? $rights : [ $rights ];

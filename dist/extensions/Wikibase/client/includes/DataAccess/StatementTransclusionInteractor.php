@@ -2,7 +2,7 @@
 
 namespace Wikibase\Client\DataAccess;
 
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\Client\PropertyLabelNotResolvedException;
 use Wikibase\Client\Usage\UsageAccumulator;
 use Wikibase\DataModel\Entity\EntityId;
@@ -77,7 +77,7 @@ class StatementTransclusionInteractor {
 	public function render(
 		EntityId $entityId,
 		$propertyLabelOrId,
-		array $acceptableRanks = null
+		?array $acceptableRanks = null
 	) {
 		try {
 			$entity = $this->entityLookup->getEntity( $entityId );

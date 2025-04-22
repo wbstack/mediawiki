@@ -16,6 +16,11 @@
  * @license GPL-2.0-or-later
  */
 
+// Make this explicitly global for the PHPUnit bootstrap code. This is only necessary
+// because ExtensionLoadHandler tries to read the global before the bootstrap code
+// actually put these values into the global scope.
+global $wgWBClientSettings;
+
 // enable data access in user language, for LuaWikibaseIntegrationTest
 $wgWBClientSettings['allowDataAccessInUserLanguage'] = true;
 
@@ -23,6 +28,9 @@ $wgWBClientSettings['allowDataAccessInUserLanguage'] = true;
 $wgWBClientSettings['dataBridgeEnabled'] = true;
 $wgWBClientSettings['dataBridgeHrefRegExp'] = '[/=]((?:Item:)?(Q[1-9][0-9]*)).*#(P[1-9][0-9]*)$';
 $wgWBClientSettings['dataBridgeEditTags'] = [ 'Data Bridge' ];
+
+// Reduce injecting RC records batch size (T299077)
+$wgWBClientSettings['recentChangesBatchSize'] = 10;
 
 // if this is a Client-only wiki, configure a fake Repo
 if ( !( $wgEnableWikibaseRepo ?? true ) ) {

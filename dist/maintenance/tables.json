@@ -156,7 +156,7 @@
 			},
 			{
 				"name": "comment_text",
-				"comment": "Text comment summarizing the change. This text is shown in the history and other changes lists, rendered in a subset of wiki markup by Linker::formatComment(). Size limits are enforced at the application level, and should take care to crop UTF-8 strings appropriately.",
+				"comment": "Text comment summarizing the change. This text is shown in the history and other changes lists, rendered in a subset of wiki markup by MediaWiki\\CommentFormatter\\CommentFormatter::format(). Size limits are enforced at the application level, and should take care to crop UTF-8 strings appropriately.",
 				"type": "blob",
 				"options": { "length": 65535, "notnull": true }
 			},
@@ -328,7 +328,7 @@
 			{
 				"name": "ct_rc_id",
 				"comment": "RCID for the change",
-				"type": "integer",
+				"type": "bigint",
 				"options": { "unsigned": true, "notnull": false, "default": null }
 			},
 			{
@@ -482,12 +482,14 @@
 			{
 				"name": "rd_interwiki",
 				"type": "string",
-				"options": { "notnull": false, "length": 32, "default": null }
+				"options": { "notnull": false, "length": 32, "default": null },
+				"comment": "After T346290 all values have been computed and this field is never null. TODO: Mark as not null (T348029)."
 			},
 			{
 				"name": "rd_fragment",
 				"type": "binary",
-				"options": { "notnull": false, "length": 255, "default": null }
+				"options": { "notnull": false, "length": 255, "default": null },
+				"comment": "After T346290 all values have been computed and this field is never null. TODO: Mark as not null (T348029)."
 			}
 		],
 		"indexes": [
@@ -506,37 +508,33 @@
 				"options": { "notnull": true, "unsigned": true, "default": 0 }
 			},
 			{
-				"name": "pl_namespace",
-				"type": "integer",
-				"options": { "notnull": true, "default": 0 }
-			},
-			{
-				"name": "pl_title",
-				"type": "binary",
-				"options": { "notnull": true, "length": 255, "default": "" }
-			},
-			{
 				"name": "pl_from_namespace",
 				"type": "integer",
 				"comment": "Namespace for pl_from page",
 				"options": { "notnull": true, "default": 0 }
+			},
+			{
+				"name": "pl_target_id",
+				"type": "bigint",
+				"comment": "Foreign key to linktarget.lt_id",
+				"options": { "notnull": false, "unsigned": true }
 			}
 		],
 		"indexes": [
 			{
-				"name": "pl_namespace",
-				"columns": [ "pl_namespace", "pl_title", "pl_from" ],
+				"name": "pl_target_id",
+				"columns": [ "pl_target_id", "pl_from" ],
 				"comment": "Reverse index, for Special:Whatlinkshere",
 				"unique": false
 			},
 			{
-				"name": "pl_backlinks_namespace",
-				"columns": [ "pl_from_namespace", "pl_namespace", "pl_title", "pl_from" ],
+				"name": "pl_backlinks_namespace_target_id",
+				"columns": [ "pl_from_namespace", "pl_target_id", "pl_from" ],
 				"comment": "Index for Special:Whatlinkshere with namespace filter",
 				"unique": false
 			}
 		],
-		"pk": [ "pl_from", "pl_namespace", "pl_title" ]
+		"pk": [ "pl_from", "pl_target_id" ]
 	},
 	{
 		"name": "templatelinks",
@@ -678,12 +676,6 @@
 				"columns": [ "iwl_prefix", "iwl_title", "iwl_from" ],
 				"comment": "Index for ApiQueryIWBacklinks",
 				"unique": false
-			},
-			{
-				"name": "iwl_prefix_from_title",
-				"columns": [ "iwl_prefix", "iwl_from", "iwl_title" ],
-				"comment": "Index for ApiQueryIWLinks",
-				"unique": false
 			}
 		],
 		"pk": [ "iwl_from", "iwl_prefix", "iwl_title" ]
@@ -803,7 +795,7 @@
 		"columns": [
 			{
 				"name": "ir_ipb_id",
-				"comment": "The ipb_id from ipblocks",
+				"comment": "The bl_id from block",
 				"type": "integer",
 				"options": { "notnull": true, "unsigned": true }
 			},
@@ -815,7 +807,7 @@
 			},
 			{
 				"name": "ir_value",
-				"comment": "The restriction id that corresponds to the type. Typically a Page ID or a Namespace ID.",
+				"comment": "The restriction id that corresponds to the type: page ID, namespace ID or BlockActionInfo ID.",
 				"type": "integer",
 				"options": { "notnull": true, "unsigned": true }
 			}
@@ -836,7 +828,7 @@
 		"columns": [
 			{
 				"name": "qc_type",
-				"comment": "A key name, generally the base name of of the special page",
+				"comment": "A key name, generally the base name of the special page",
 				"type": "binary",
 				"options": { "length": 32, "notnull": true }
 			},
@@ -868,7 +860,7 @@
 		"columns": [
 			{
 				"name": "qcc_type",
-				"comment": "A key name, generally the base name of of the special page.",
+				"comment": "A key name, generally the base name of the special page.",
 				"type": "binary",
 				"options": { "length": 32, "notnull": true }
 			},
@@ -1138,14 +1130,7 @@
 			}
 		],
 		"indexes": [
-			{ "name": "site_global_key", "columns": [ "site_global_key" ], "unique": true },
-			{ "name": "site_type", "columns": [ "site_type" ], "unique": false },
-			{ "name": "site_group", "columns": [ "site_group" ], "unique": false },
-			{ "name": "site_source", "columns": [ "site_source" ], "unique": false },
-			{ "name": "site_language", "columns": [ "site_language" ], "unique": false },
-			{ "name": "site_protocol", "columns": [ "site_protocol" ], "unique": false },
-			{ "name": "site_domain", "columns": [ "site_domain" ], "unique": false },
-			{ "name": "site_forward", "columns": [ "site_forward" ], "unique": false }
+			{ "name": "site_global_key", "columns": [ "site_global_key" ], "unique": true }
 		],
 		"pk": [ "site_id" ]
 	},
@@ -1285,30 +1270,21 @@
 				"options": { "unsigned": true, "notnull": true, "default": 0 }
 			},
 			{
-				"name": "el_to",
-				"type": "blob",
-				"comment": "The external link",
-				"options": { "length": 65530, "notnull": true }
-			},
-			{
-				"name": "el_index",
-				"type": "blob",
-				"comment": "In the case of HTTP URLs, this is the URL with any username or password removed, and with the labels in the hostname reversed and converted to lower case which will allow faster searching for all pages with WHERE clause. Note: If PHP's intl extension is enabled/disabled, maintenance/refreshExternallinksIndex.php needs to be run to refresh this field",
-				"options": { "length": 65530, "notnull": true }
-			},
-			{
-				"name": "el_index_60",
+				"name": "el_to_domain_index",
 				"type": "binary",
-				"comment": "'el_index' truncated to 60 bytes to allow for sortable queries that aren't supported by a partial index",
-				"options": { "notnull": true, "length": 60 }
+				"comment": "Indexable domain",
+				"options": { "notnull": true, "length": 255, "default": "" }
+			},
+			{
+				"name": "el_to_path",
+				"type": "blob",
+				"comment": "Path to the external link without considering the domain",
+				"options": { "length": 65530, "notnull": false }
 			}
 		],
 		"indexes": [
-			{ "name": "el_from", "columns": [ "el_from", "el_to" ], "unique": false, "options": { "lengths": [ null, 40 ] } },
-			{ "name": "el_to", "columns": [ "el_to", "el_from" ], "unique": false, "options": { "lengths": [ 60, null ] } },
-			{ "name": "el_index", "columns": [ "el_index" ], "unique": false, "options": { "lengths": [ 60 ] } },
-			{ "name": "el_index_60", "columns": [ "el_index_60", "el_id" ], "unique": false },
-			{ "name": "el_from_index_60", "columns": [ "el_from", "el_index_60", "el_id" ], "unique": false }
+			{ "name": "el_from", "columns": [ "el_from" ], "unique": false },
+			{ "name": "el_to_domain_index_to_path", "columns": [ "el_to_domain_index", "el_to_path" ], "unique": false, "options": { "lengths": [ null, 60 ] } }
 		],
 		"pk": [ "el_id" ]
 	},
@@ -1340,28 +1316,6 @@
 			{ "name": "ipc_hex_time", "columns": [ "ipc_hex", "ipc_rev_timestamp" ], "unique": false }
 		],
 		"pk": [ "ipc_rev_id" ]
-	},
-	{
-		"name": "revision_comment_temp",
-		"comment": "Temporary table to avoid blocking on an alter of revision. On large wikis like the English Wikipedia, altering the revision table is a months-long process. This table is being created to avoid such an alter, and will be merged back into revision in the future",
-		"columns": [
-			{
-				"name": "revcomment_rev",
-				"comment": "Key to rev_id",
-				"type": "integer",
-				"options": { "unsigned": true, "notnull": true }
-			},
-			{
-				"name": "revcomment_comment_id",
-				"comment": "Key to comment_id",
-				"type": "bigint",
-				"options": { "unsigned": true, "notnull": true }
-			}
-		],
-		"indexes": [
-			{ "name": "revcomment_rev", "columns": [ "revcomment_rev" ], "unique": true }
-		],
-		"pk": [ "revcomment_rev", "revcomment_comment_id" ]
 	},
 	{
 		"name": "page_props",
@@ -1589,12 +1543,6 @@
 				"comment": "Used by the API (and some extensions)",
 				"columns": [ "cl_to", "cl_timestamp" ],
 				"unique": false
-			},
-			{
-				"name": "cl_collation_ext",
-				"comment": "Used when updating collation (e.g. updateCollation.php)",
-				"columns": [ "cl_collation", "cl_to", "cl_type", "cl_from" ],
-				"unique": false
 			}
 		],
 		"pk": [ "cl_from", "cl_to" ]
@@ -1808,7 +1756,7 @@
 			{
 				"name": "us_size",
 				"comment": "file size in bytes",
-				"type": "integer",
+				"type": "bigint",
 				"options": {
 					"unsigned": true,
 					"notnull": true
@@ -1975,7 +1923,7 @@
 			},
 			{
 				"name": "fa_size",
-				"type": "integer",
+				"type": "bigint",
 				"options": {
 					"unsigned": true,
 					"notnull": false,
@@ -2203,7 +2151,7 @@
 			},
 			{
 				"name": "oi_size",
-				"type": "integer",
+				"type": "bigint",
 				"options": {
 					"unsigned": true,
 					"notnull": true,
@@ -2396,12 +2344,12 @@
 		"pk": [ "keyname" ]
 	},
 	{
-		"name": "ipblocks",
+		"name": "block",
 		"comment": "Blocks against user accounts, IP addresses and IP ranges.",
 		"columns": [
 			{
-				"name": "ipb_id",
-				"comment": "Primary key, introduced for privacy.",
+				"name": "bl_id",
+				"comment": "Primary key.",
 				"type": "integer",
 				"options": {
 					"autoincrement": true,
@@ -2410,26 +2358,16 @@
 				}
 			},
 			{
-				"name": "ipb_address",
-				"comment": "Blocked IP address in dotted-quad form or user name.",
-				"type": "blob",
-				"options": {
-					"notnull": true,
-					"length": 255
-				}
-			},
-			{
-				"name": "ipb_user",
-				"comment": "Blocked user ID or 0 for IP blocks.",
+				"name": "bl_target",
+				"comment": "The block target. Foreign key to block_target.bt_id.",
 				"type": "integer",
 				"options": {
-					"unsigned": true,
 					"notnull": true,
-					"default": 0
+					"unsigned": true
 				}
 			},
 			{
-				"name": "ipb_by_actor",
+				"name": "bl_by_actor",
 				"comment": "Actor who made the block.",
 				"type": "bigint",
 				"options": {
@@ -2438,7 +2376,7 @@
 				}
 			},
 			{
-				"name": "ipb_reason_id",
+				"name": "bl_reason_id",
 				"comment": "Key to comment_id. Text comment made by blocker.",
 				"type": "bigint",
 				"options": {
@@ -2447,7 +2385,7 @@
 				}
 			},
 			{
-				"name": "ipb_timestamp",
+				"name": "bl_timestamp",
 				"comment": "Creation (or refresh) date in standard YMDHMS form. IP blocks expire automatically.",
 				"type": "mwtimestamp",
 				"options": {
@@ -2455,8 +2393,8 @@
 				}
 			},
 			{
-				"name": "ipb_auto",
-				"comment": "Indicates that the IP address was banned because a banned user accessed a page through it. If this is 1, ipb_address will be hidden, and the block identified by block ID number.",
+				"name": "bl_anon_only",
+				"comment": "If set to 1, block applies only to logged-out users and temporary users.",
 				"type": "mwtinyint",
 				"options": {
 					"notnull": true,
@@ -2465,17 +2403,7 @@
 				}
 			},
 			{
-				"name": "ipb_anon_only",
-				"comment": "If set to 1, block applies only to logged-out users",
-				"type": "mwtinyint",
-				"options": {
-					"notnull": true,
-					"length": 1,
-					"default": 0
-				}
-			},
-			{
-				"name": "ipb_create_account",
+				"name": "bl_create_account",
 				"comment": "Block prevents account creation from matching IP addresses",
 				"type": "mwtinyint",
 				"options": {
@@ -2485,7 +2413,7 @@
 				}
 			},
 			{
-				"name": "ipb_enable_autoblock",
+				"name": "bl_enable_autoblock",
 				"comment": "Block triggers autoblocks",
 				"type": "mwtinyint",
 				"options": {
@@ -2495,7 +2423,7 @@
 				}
 			},
 			{
-				"name": "ipb_expiry",
+				"name": "bl_expiry",
 				"comment": "Time at which the block will expire. May be \"infinity\"",
 				"type": "mwtimestamp",
 				"options": {
@@ -2506,26 +2434,8 @@
 				}
 			},
 			{
-				"name": "ipb_range_start",
-				"comment": "Start of an address range, in hexadecimal size chosen to allow IPv6. FIXME: this field were originally blank for single-IP blocks, but now it's populated. No migration was ever done. It should be fixed to be blank again for such blocks (T51504).",
-				"type": "blob",
-				"options": {
-					"notnull": true,
-					"length": 255
-				}
-			},
-			{
-				"name": "ipb_range_end",
-				"comment": "End of an address range, in hexadecimal size chosen to allow IPv6. FIXME: this field were originally blank for single-IP blocks, but now it's populated. No migration was ever done. It should be fixed to be blank again for such blocks (T51504).",
-				"type": "blob",
-				"options": {
-					"notnull": true,
-					"length": 255
-				}
-			},
-			{
-				"name": "ipb_deleted",
-				"comment": "Flag for entries hidden from users and Sysops",
+				"name": "bl_deleted",
+				"comment": "If true, this block causes the username to be hidden, and the expiry must be infinite. This is denormalized into rev_deleted and the other deleted bitfields (T346716).",
 				"type": "mwtinyint",
 				"options": {
 					"notnull": true,
@@ -2534,7 +2444,7 @@
 				}
 			},
 			{
-				"name": "ipb_block_email",
+				"name": "bl_block_email",
 				"comment": "Block prevents user from accessing Special:Emailuser",
 				"type": "mwtinyint",
 				"options": {
@@ -2544,7 +2454,7 @@
 				}
 			},
 			{
-				"name": "ipb_allow_usertalk",
+				"name": "bl_allow_usertalk",
 				"comment": "Block allows user to edit their own talk page",
 				"type": "mwtinyint",
 				"options": {
@@ -2554,8 +2464,8 @@
 				}
 			},
 			{
-				"name": "ipb_parent_block_id",
-				"comment": "ID of the block that caused this block to exist. Autoblocks set this to the original block so that the original block being deleted also deletes the autoblocks",
+				"name": "bl_parent_block_id",
+				"comment": "ID of the block that caused this block to exist. Autoblocks set this to the original block so that the original block being deleted also deletes the autoblocks.",
 				"type": "integer",
 				"options": {
 					"notnull": false,
@@ -2564,7 +2474,7 @@
 				}
 			},
 			{
-				"name": "ipb_sitewide",
+				"name": "bl_sitewide",
 				"comment": "Block user from editing any page on the site (other than their own user talk page).",
 				"type": "mwtinyint",
 				"options": {
@@ -2576,61 +2486,162 @@
 		],
 		"indexes": [
 			{
-				"name": "ipb_address_unique",
-				"comment": "Unique index to support \"user already blocked\" messages. Any new options which prevent collisions should be included",
-				"columns": [
-					"ipb_address",
-					"ipb_user",
-					"ipb_auto"
-				],
-				"unique": true,
-				"options": { "lengths": [ 255, null, null ] }
-			},
-			{
-				"name": "ipb_user",
-				"comment": "For querying whether a logged-in user is blocked",
-				"columns": [
-					"ipb_user"
-				],
-				"unique": false
-			},
-			{
-				"name": "ipb_range",
-				"comment": "For querying whether an IP address is in any range",
-				"columns": [
-					"ipb_range_start",
-					"ipb_range_end"
-				],
-				"unique": false,
-				"options": { "lengths": [ 8, 8 ] }
-			},
-			{
-				"name": "ipb_timestamp",
+				"name": "bl_timestamp",
 				"comment": "Index for Special:BlockList",
 				"columns": [
-					"ipb_timestamp"
+					"bl_timestamp"
 				],
 				"unique": false
 			},
 			{
-				"name": "ipb_expiry",
+				"name": "bl_target",
+				"comment": "For searching by target",
+				"columns": [ "bl_target" ],
+				"unique": false
+			},
+			{
+				"name": "bl_expiry",
 				"comment": "Index for table pruning",
 				"columns": [
-					"ipb_expiry"
+					"bl_expiry"
 				],
 				"unique": false
 			},
 			{
-				"name": "ipb_parent_block_id",
+				"name": "bl_parent_block_id",
 				"comment": "Index for removing autoblocks when a parent block is removed",
 				"columns": [
-					"ipb_parent_block_id"
+					"bl_parent_block_id"
 				],
 				"unique": false
 			}
 		],
 		"pk": [
-			"ipb_id"
+			"bl_id"
+		]
+	},
+	{
+		"name": "block_target",
+		"comment": "The targets of blocks",
+		"columns": [
+			{
+				"name": "bt_id",
+				"comment": "Primary key.",
+				"type": "integer",
+				"options": {
+					"autoincrement": true,
+					"notnull": true,
+					"unsigned": true
+				}
+			},
+			{
+				"name": "bt_address",
+				"comment": "Blocked IP address or range in dotted-quad form, or null for a user block. If bt_auto is 1 then the address is private.",
+				"type": "blob",
+				"options": {
+					"notnull": false,
+					"length": 255
+				}
+			},
+			{
+				"name": "bt_user",
+				"comment": "Blocked user ID or null for IP blocks.",
+				"type": "integer",
+				"options": {
+					"notnull": false,
+					"unsigned": true
+				}
+			},
+			{
+				"name": "bt_user_text",
+				"comment": "The name of the blocked user, or null for IP blocks. For Special:BlockList sorting (T48013).",
+				"type": "binary",
+				"options": {
+					"notnull": false,
+					"length": 255
+				}
+			},
+			{
+				"name": "bt_auto",
+				"comment": "Indicates that the IP address was banned because a banned user accessed a page through it. If this is 1, ipb_address will be hidden, and the block identified by block ID number.",
+				"type": "mwtinyint",
+				"options": {
+					"notnull": true,
+					"length": 1,
+					"default": 0
+				}
+			},
+			{
+				"name": "bt_range_start",
+				"comment": "Start of an address range, in hexadecimal. Null for single-IP and user blocks.",
+				"type": "blob",
+				"options": {
+					"notnull": false,
+					"length": 255
+				}
+			},
+			{
+				"name": "bt_range_end",
+				"comment": "End of an address range, in hexadecimal. Null for single-IP and user blocks.",
+				"type": "blob",
+				"options": {
+					"notnull": false,
+					"length": 255
+				}
+			},
+			{
+				"name": "bt_ip_hex",
+				"comment": "If the block is for a single IP, this is the IP address in hexadecimal. If the block is for a range, the start of the range in hexadecimal, identical to bt_range_start.",
+				"type": "blob",
+				"options": {
+					"notnull": false,
+					"length": 255
+				}
+			},
+			{
+				"name": "bt_count",
+				"comment": "The number of block rows associated with this target.",
+				"type": "integer",
+				"options": {
+					"notnull": true,
+					"default": 0
+				}
+			}
+		],
+		"indexes": [
+			{
+				"name": "bt_address",
+				"comment": "For finding single IP blocks and for Special:BlockList searching.",
+				"columns": [ "bt_address" ],
+				"options": { "lengths": [ 42 ] },
+				"unique": false
+			},
+			{
+				"name": "bt_ip_user_text",
+				"comment": "For sorting Special:BlockList by target (T48013)",
+				"columns": [ "bt_ip_hex", "bt_user_text" ],
+				"options": { "lengths": [ 35, 255 ] },
+				"unique": false
+			},
+			{
+				"name": "bt_range",
+				"comment": "For querying whether an IP address is in any range",
+				"columns": [
+					"bt_range_start",
+					"bt_range_end"
+				],
+				"options": { "lengths": [ 35, 35 ] },
+				"unique": false
+			},
+			{
+				"name": "bt_user",
+				"comment": "For querying whether a logged-in user is blocked",
+				"columns": [ "bt_user" ],
+				"unique": false
+			}
+		],
+		"pk": [
+			"bt_id"
 		]
 	},
 	{
@@ -2650,7 +2661,7 @@
 			{
 				"name": "img_size",
 				"comment": "File size in bytes.",
-				"type": "integer",
+				"type": "bigint",
 				"options": {
 					"unsigned": true,
 					"notnull": true,
@@ -2820,7 +2831,7 @@
 		"columns": [
 			{
 				"name": "rc_id",
-				"type": "integer",
+				"type": "bigint",
 				"options": {
 					"autoincrement": true,
 					"unsigned": true,
@@ -3192,7 +3203,7 @@
 			},
 			{
 				"name": "ar_rev_id",
-				"comment": "Copied from rev_id. @since 1.5 Entries from 1.4 will be NULL here. When restoring archive rows from before 1.5, a new rev_id is created.",
+				"comment": "Copied from rev_id.",
 				"type": "integer",
 				"options": {
 					"unsigned": true,
@@ -3305,7 +3316,7 @@
 			},
 			{
 				"name": "page_is_redirect",
-				"comment": "1 indicates the article is a redirect.",
+				"comment": "1 indicates the article is a redirect. If so, there is a row in the `redirect` table with rd_from=page_id, which contains the redirect target.",
 				"type": "mwtinyint",
 				"options": { "notnull": true, "unsigned": true, "default": 0 }
 			},
@@ -3339,10 +3350,7 @@
 				"type": "mwtimestamp",
 				"options": {
 					"notnull": false,
-					"default": null,
-					"CustomSchemaOptions": {
-						"allowInfinite": true
-					}
+					"default": null
 				}
 			},
 			{
@@ -3495,6 +3503,16 @@
 						"allowInfinite": true
 					}
 				}
+			},
+			{
+				"name": "user_is_temp",
+				"comment": "This exists to allow temporary users to be identified from the database only, by external applications, and is not for use within MediaWiki (see T333223). A boolean value representing whether the user is a temporary user. Zero if any type of user other than a temporary user.",
+				"type": "mwtinyint",
+				"options": {
+					"notnull": true,
+					"length": 1,
+					"default": 0
+				}
 			}
 		],
 		"indexes": [
@@ -3515,6 +3533,12 @@
 				"options": { "unsigned": true, "notnull": true }
 			},
 			{
+				"name": "uas_year",
+				"comment": "The year to which this row belongs, if $wgAutoCreateTempUser['serialProvider']['useYear'] is true.",
+				"type": "smallint",
+				"options": { "unsigned": true, "notnull": true }
+			},
+			{
 				"name": "uas_value",
 				"comment": "The maximum allocated ID value",
 				"type": "integer",
@@ -3522,7 +3546,7 @@
 			}
 		],
 		"indexes": [],
-		"pk": [ "uas_shard" ]
+		"pk": [ "uas_shard", "uas_year" ]
 	},
 	{
 		"name": "revision",
@@ -3531,7 +3555,7 @@
 			{
 				"name": "rev_id",
 				"comment": "Unique ID to identify each revision",
-				"type": "integer",
+				"type": "bigint",
 				"options": { "unsigned": true, "notnull": true, "autoincrement": true }
 			},
 			{
@@ -3544,13 +3568,13 @@
 				"name": "rev_comment_id",
 				"comment": "Key to comment.comment_id. Comment summarizing the change",
 				"type": "bigint",
-				"options": { "unsigned": true, "notnull": true, "default": 0 }
+				"options": { "unsigned": true, "notnull": true }
 			},
 			{
 				"name": "rev_actor",
 				"comment": "Key to actor.actor_id of the user or IP who made this edit",
 				"type": "bigint",
-				"options": { "unsigned": true, "notnull": true, "default": 0 }
+				"options": { "unsigned": true, "notnull": true }
 			},
 			{
 				"name": "rev_timestamp",
@@ -3579,7 +3603,7 @@
 			{
 				"name": "rev_parent_id",
 				"comment": "Key to revision.rev_id. This field is used to add support for a tree structure (The Adjacency List Model)",
-				"type": "integer",
+				"type": "bigint",
 				"options": { "unsigned": true, "notnull": false }
 			},
 			{
@@ -3630,8 +3654,8 @@
 			{
 				"name": "si_title",
 				"comment": "Munged version of title",
-				"type": "string",
-				"options": { "length": 255, "notnull": true, "default": "" }
+				"type": "text",
+				"options": { "notnull": true, "length": 16777215 }
 			},
 			{
 				"name": "si_text",
@@ -3641,11 +3665,6 @@
 			}
 		],
 		"indexes": [
-			{
-				"name": "si_page",
-				"columns": [ "si_page" ],
-				"unique": true
-			},
 			{
 				"name": "si_title",
 				"columns": [ "si_title" ],
@@ -3663,10 +3682,10 @@
 				]
 			}
 		],
-		"pk": [],
+		"pk": [ "si_page" ],
 		"table_options": [
 			"ENGINE=MyISAM",
-			"DEFAULT CHARSET=utf8"
+			"DEFAULT CHARSET=utf8mb4"
 		]
 	},
 	{

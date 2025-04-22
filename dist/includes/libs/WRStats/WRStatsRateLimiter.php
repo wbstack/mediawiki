@@ -4,6 +4,8 @@ namespace Wikimedia\WRStats;
 
 /**
  * A rate limiter with a WRStats backend
+ *
+ * @since 1.39
  */
 class WRStatsRateLimiter {
 	/** @var StatsStore */
@@ -21,10 +23,7 @@ class WRStatsRateLimiter {
 	public const BUCKET_COUNT = 30;
 
 	/**
-	 * @internal Use WRStatsFactory
-	 *
-	 * @see WRStatsFactory::createRateLimiter for full parameter documentation.
-	 *
+	 * @internal Use WRStatsFactory::createRateLimiter instead
 	 * @param StatsStore $store
 	 * @param LimitCondition[] $conditions
 	 * @param string|string[] $prefix
@@ -75,7 +74,7 @@ class WRStatsRateLimiter {
 	 */
 	public function peek(
 		string $condName,
-		EntityKey $entityKey = null,
+		?EntityKey $entityKey = null,
 		$amount = 1
 	): LimitOperationResult {
 		$actions = [ new LimitOperation( $condName, $entityKey, $amount ) ];
@@ -102,8 +101,7 @@ class WRStatsRateLimiter {
 			$name = $operation->condName;
 			$cond = $this->conditions[$name] ?? null;
 			if ( $cond === null ) {
-				throw new WRStatsError( __METHOD__ .
-					": unrecognized metric \"$name\"" );
+				throw new WRStatsError( "Unrecognized metric \"$name\"" );
 			}
 			if ( !isset( $rates[$name] ) ) {
 				$range = $reader->latest( $cond->window );
@@ -138,7 +136,7 @@ class WRStatsRateLimiter {
 	 */
 	public function tryIncr(
 		string $condName,
-		EntityKey $entityKey = null,
+		?EntityKey $entityKey = null,
 		$amount = 1
 	): LimitOperationResult {
 		$actions = [ new LimitOperation( $condName, $entityKey, $amount ) ];
@@ -171,7 +169,7 @@ class WRStatsRateLimiter {
 	 */
 	public function incr(
 		string $condName,
-		EntityKey $entityKey = null,
+		?EntityKey $entityKey = null,
 		$amount = 1
 	) {
 		$actions = [ new LimitOperation( $condName, $entityKey, $amount ) ];

@@ -58,7 +58,7 @@ class PhraseSuggestFallbackMethod implements FallbackMethod, ElasticSearchSugges
 	 * @param InterwikiResolver|null $interwikiResolver
 	 * @return FallbackMethod|null
 	 */
-	public static function build( SearchQuery $query, array $params, InterwikiResolver $interwikiResolver = null ) {
+	public static function build( SearchQuery $query, array $params, ?InterwikiResolver $interwikiResolver = null ) {
 		if ( !$query->isWithDYMSuggestion() ) {
 			return null;
 		}
@@ -112,7 +112,7 @@ class PhraseSuggestFallbackMethod implements FallbackMethod, ElasticSearchSugges
 			return FallbackStatus::noSuggestion();
 		}
 
-		list( $suggestion, $highlight ) = $this->fixDYMSuggestion( $firstPassResults );
+		[ $suggestion, $highlight ] = $this->fixDYMSuggestion( $firstPassResults );
 
 		return $this->maybeSearchAndRewrite( $context, $this->query,
 			$suggestion, $highlight );
@@ -235,11 +235,11 @@ class PhraseSuggestFallbackMethod implements FallbackMethod, ElasticSearchSugges
 		// on other wikis.
 		if ( $config->getElement( 'CirrusSearchPhraseSuggestReverseField', 'use' )
 			&& ( !$this->query->getCrossSearchStrategy()->isExtraIndicesSearchSupported()
-				|| empty( OtherIndexesUpdater::getExtraIndexesForNamespaces(
+				|| !OtherIndexesUpdater::getExtraIndexesForNamespaces(
 					$config,
 					$this->query->getNamespaces()
 				)
-			 ) )
+			 )
 		) {
 			$settings['phrase']['direct_generator'][] = [
 				'field' => $field . '.reverse',

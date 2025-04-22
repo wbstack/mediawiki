@@ -17,6 +17,7 @@
 	"pfunc_time_too_long": "Fehler: Zu viele #time-Aufrufe",
 	"pfunc_time_too_big": "Fehler: #time unterstützt nur Jahre bis 9999",
 	"pfunc_time_too_small": "Fehler: #time unterstützt nur Jahre ab 0.",
+	"pfunc_timef_bad_format": "Fehler: ungültiges Format für #timef",
 	"pfunc_rel2abs_invalid_depth": "Fehler: Ungültige Pfadtiefe: „$1“ (Zugriff auf einen Knotenpunkt oberhalb des Hauptknotenpunktes ist empfohlen)",
 	"pfunc_expr_stack_exhausted": "Expression-Fehler: Stacküberlauf",
 	"pfunc_expr_unexpected_number": "Expression-Fehler: Unerwartete Zahl",
@@ -28,8 +29,8 @@
 	"pfunc_expr_unrecognised_punctuation": "Fehler im Ausdruck: Nicht erkanntes Satzzeichen „$1“",
 	"pfunc_expr_unclosed_bracket": "Expression-Fehler: Nicht geschlossene Klammer",
 	"pfunc_expr_division_by_zero": "Division durch Null",
-	"pfunc_expr_invalid_argument": "Ungültiges Argument für $1: < -1 oder > 1",
-	"pfunc_expr_invalid_argument_ln": "Ungültiges Argument für ln: <= 0",
+	"pfunc_expr_invalid_argument": "Ungültiges Argument für $1: kleiner als -1 oder größer als 1.",
+	"pfunc_expr_invalid_argument_ln": "Ungültiges Argument für ln: kleiner oder gleich 0.",
 	"pfunc_expr_unknown_error": "Expression-Fehler: Unbekannter Fehler ($1)",
 	"pfunc_expr_not_a_number": "In $1: Ergebnis ist keine Zahl",
 	"pfunc_string_too_long": "Fehler: Zeichenkette überschreitet Zeichenlimit von $1"

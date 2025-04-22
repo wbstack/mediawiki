@@ -474,14 +474,14 @@ $specialPageAliases['yi'] = [
 	'RequestAccount' => [ 'בעטן_קאנטע' ],
 ];
 
-/** Simplified Chinese (中文（简体）‎) */
+/** Simplified Chinese (中文（简体）) */
 $specialPageAliases['zh-hans'] = [
 	'RequestAccount' => [ '申请账户' ],
 	'ConfirmAccounts' => [ '确认账户' ],
 	'UserCredentials' => [ '用户凭据' ],
 ];
 
-/** Traditional Chinese (中文（繁體）‎) */
+/** Traditional Chinese (中文（繁體）) */
 $specialPageAliases['zh-hant'] = [
 	'RequestAccount' => [ '請求帳號' ],
 	'ConfirmAccounts' => [ '確認帳號' ],

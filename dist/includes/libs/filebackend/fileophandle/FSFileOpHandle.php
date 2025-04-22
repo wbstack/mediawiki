@@ -19,10 +19,14 @@
  * @ingroup FileBackend
  */
 
+namespace Wikimedia\FileBackend\FileOpHandle;
+
+use Wikimedia\FileBackend\FSFileBackend;
+
 class FSFileOpHandle extends FileBackendStoreOpHandle {
 	/** @var string Shell command */
 	public $cmd;
-	/** var callback Post-operation success/error handling and cleanup function */
+	/** @var callback Post-operation success/error handling and cleanup function */
 	public $callback;
 
 	/**
@@ -38,3 +42,6 @@ class FSFileOpHandle extends FileBackendStoreOpHandle {
 		$this->cmd = $cmd;
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( FSFileOpHandle::class, 'FSFileOpHandle' );

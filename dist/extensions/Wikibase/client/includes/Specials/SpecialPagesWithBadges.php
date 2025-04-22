@@ -2,12 +2,12 @@
 
 namespace Wikibase\Client\Specials;
 
-use Html;
-use HTMLForm;
 use InvalidArgumentException;
-use QueryPage;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\Title;
 use Skin;
-use Title;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
@@ -88,7 +88,7 @@ class SpecialPagesWithBadges extends QueryPage {
 	}
 
 	private function prepareParams( $subPage ) {
-		$badge = $this->getRequest()->getText( 'badge', $subPage );
+		$badge = $this->getRequest()->getText( 'badge', $subPage ?: '' );
 
 		try {
 			$this->badgeId = new ItemId( $badge );
@@ -98,7 +98,7 @@ class SpecialPagesWithBadges extends QueryPage {
 					Html::element(
 						'p',
 						[
-							'class' => 'error'
+							'class' => 'error',
 						],
 						$this->msg( 'wikibase-pageswithbadges-invalid-id', $badge )->text()
 					)
@@ -119,14 +119,14 @@ class SpecialPagesWithBadges extends QueryPage {
 				'type' => 'select',
 				'id' => 'wb-pageswithbadges-badge',
 				'label-message' => 'wikibase-pageswithbadges-badge',
-				'options' => $this->getOptionsArray()
+				'options' => $this->getOptionsArray(),
 			],
 			'submit' => [
 				'name' => '',
 				'type' => 'submit',
 				'id' => 'wikibase-pageswithbadges-submit',
-				'default' => $this->msg( 'wikibase-pageswithbadges-submit' )->text()
-			]
+				'default' => $this->msg( 'wikibase-pageswithbadges-submit' )->text(),
+			],
 		];
 
 		if ( $this->badgeId !== null ) {
@@ -175,31 +175,26 @@ class SpecialPagesWithBadges extends QueryPage {
 	 * @return array[]
 	 */
 	public function getQueryInfo() {
-		return [
-			'tables' => [
-				'page',
-				'page_props'
-			],
-			'fields' => [
+		return $this->getDatabaseProvider()->getReplicaDatabase()->newSelectQueryBuilder()
+			->select( [
 				'value' => 'page_id',
 				'namespace' => 'page_namespace',
 				'title' => 'page_title',
-			],
-			'conds' => [
-				'pp_propname' => 'wikibase-badge-' . $this->badgeId->getSerialization()
-			],
-			'options' => [], // sorting is determined getOrderFields(), which returns [ 'value' ] per default.
-			'join_conds' => [
-				'page_props' => [ 'JOIN', [ 'page_id = pp_page' ] ]
-			]
-		];
+			] )
+			->from( 'page' )
+			->join( 'page_props', null, [ 'page_id = pp_page' ] )
+			->where( [
+				'pp_propname' => 'wikibase-badge-' . $this->badgeId->getSerialization(),
+			] )
+			// sorting is determined by getOrderFields(), which returns [ 'value' ] per default.
+			->getQueryInfo();
 	}
 
 	/**
 	 * @see QueryPage::formatResult
 	 *
 	 * @param Skin $skin
-	 * @param object $result
+	 * @param \stdClass $result
 	 *
 	 * @return string
 	 */

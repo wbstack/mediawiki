@@ -1,18 +1,9 @@
-@import 'mediawiki.mixins.less';
+// To be used in cases were an icon is styled like an icon only button,
+// but shouldnt be a button (i.e. spinner icon)
+.mf-spinner-icon-element {
+	padding: 12px;
 
-// Asynchronous loading
-//
-// Use the loading class along with spinner or content class whilst asynchronously loading content.
-//
-// Markup:
-// <div class="fancycaptcha-reload-loading"></div>
-// e.g. SourceEditorOverlay, MediaViewer
-.overlay-content .loading,
-.media-viewer .loading,
-.content .loading {
-	&.spinner {
-		text-align: center;
-		background-position: 50%;
-		margin: 8px auto;
+	span + span {
+		.mixin-screen-reader-text();
 	}
 }

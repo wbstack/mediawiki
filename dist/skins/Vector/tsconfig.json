@@ -1,8 +1,11 @@
 {
 	"exclude": [
 		"docs",
+		"jest.setup.js",
 		"vendor",
-		"coverage"
+		"coverage",
+		"tests/jest",
+		"tests/integration-qunit"
 	],
 	"compilerOptions": {
 		"resolveJsonModule": true,

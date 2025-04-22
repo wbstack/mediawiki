@@ -2,10 +2,10 @@
 
 namespace MediaWiki\Content\Hook;
 
-use Content;
-use ParserOptions;
-use ParserOutput;
-use Title;
+use MediaWiki\Content\Content;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Title\Title;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.
@@ -29,10 +29,10 @@ interface ContentGetParserOutputHook {
 	 *   the output can only depend on parameters provided to this hook function, not on global state.
 	 * @param bool $generateHtml Whether full HTML should be generated. If false, generation of HTML
 	 *   may be skipped, but other information should still be present in the ParserOutput object.
-	 * @param ParserOutput &$output ParserOutput to manipulate or replace
+	 * @param ParserOutput &$parserOutput ParserOutput to manipulate or replace
 	 * @return bool|void True or no return value to continue or false to abort
 	 */
 	public function onContentGetParserOutput( $content, $title, $revId, $options,
-		$generateHtml, &$output
+		$generateHtml, &$parserOutput
 	);
 }

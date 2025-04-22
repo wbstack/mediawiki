@@ -2,7 +2,7 @@
 
 namespace Wikibase\Client\DataAccess;
 
-use Language;
+use MediaWiki\Language\Language;
 use MessageLocalizer;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
@@ -30,7 +30,7 @@ class ReferenceFormatterFactory {
 	public function __construct(
 		DataAccessSnakFormatterFactory $snakFormatterFactory,
 		WellKnownReferenceProperties $properties,
-		LoggerInterface $logger = null
+		?LoggerInterface $logger = null
 	) {
 		$this->snakFormatterFactory = $snakFormatterFactory;
 		$this->properties = $properties;

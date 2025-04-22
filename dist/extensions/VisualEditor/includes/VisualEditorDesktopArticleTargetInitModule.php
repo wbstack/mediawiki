@@ -34,10 +34,10 @@ class VisualEditorDesktopArticleTargetInitModule extends FileModule {
 		// Check the localisation cache for which skins have a custom message for this.
 		// We only need this for the current skin, but ResourceLoader's message cache
 		// does not fragment by skin.
-		foreach ( [ 'edit', 'create' ] as $msgKey ) {
+		foreach ( [ 'edit', 'create', 'edit-local', 'create-local' ] as $msgKey ) {
 			// MediaWiki defaults
 			$messages[] = "skin-view-$msgKey";
-			foreach ( $services->getSkinFactory()->getSkinNames() as $skname => $unused ) {
+			foreach ( $services->getSkinFactory()->getInstalledSkins() as $skname => $unused ) {
 				// Per-skin overrides
 				// Messages: vector-view-edit, vector-view-create
 				// Disable database lookups for site-level message overrides as they

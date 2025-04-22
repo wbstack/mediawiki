@@ -1,13 +1,13 @@
 /*!
  * VisualEditor DataModel LinkAnnotation tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.dm.LinkAnnotation' );
 
-QUnit.test( 'getFragment', function ( assert ) {
-	var cases = [
+QUnit.test( 'getFragment', ( assert ) => {
+	const cases = [
 		{
 			msg: 'No fragment returns null',
 			annotation: new ve.dm.LinkAnnotation( {
@@ -58,7 +58,7 @@ QUnit.test( 'getFragment', function ( assert ) {
 		}
 	];
 
-	cases.forEach( function ( caseItem ) {
+	cases.forEach( ( caseItem ) => {
 		assert.strictEqual( caseItem.annotation.getFragment(), caseItem.expected, caseItem.msg );
 	} );
 } );

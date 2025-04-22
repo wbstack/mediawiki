@@ -21,11 +21,18 @@
  * @ingroup Content
  */
 
+namespace MediaWiki\Content;
+
 use MediaWiki\Content\Renderer\ContentParseParams;
 use MediaWiki\Content\Transform\PreSaveTransformParams;
+use MediaWiki\Html\Html;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\ParserOutputFlags;
+use MediaWiki\Title\Title;
 use Wikimedia\Minify\CSSMin;
+use WikiPage;
 
 /**
  * Content handler for CSS pages.
@@ -42,6 +49,9 @@ class CssContentHandler extends CodeContentHandler {
 		parent::__construct( $modelId, [ CONTENT_FORMAT_CSS ] );
 	}
 
+	/**
+	 * @return class-string<CssContent>
+	 */
 	protected function getContentClass() {
 		return CssContent::class;
 	}
@@ -55,12 +65,14 @@ class CssContentHandler extends CodeContentHandler {
 	 *
 	 * @param Title $destination
 	 * @param string $text ignored
+	 *
 	 * @return CssContent
 	 */
 	public function makeRedirectContent( Title $destination, $text = '' ) {
 		// The parameters are passed as a string so the / is not url-encoded by wfArrayToCgi
 		$url = $destination->getFullURL( 'action=raw&ctype=text/css', false, PROTO_RELATIVE );
 		$class = $this->getContentClass();
+
 		return new $class( '/* #REDIRECT */@import ' . CSSMin::buildUrlValue( $url ) . ';' );
 	}
 
@@ -68,18 +80,6 @@ class CssContentHandler extends CodeContentHandler {
 		Content $content,
 		PreSaveTransformParams $pstParams
 	): Content {
-		$shouldCallDeprecatedMethod = $this->shouldCallDeprecatedContentTransformMethod(
-			$content,
-			$pstParams
-		);
-
-		if ( $shouldCallDeprecatedMethod ) {
-			return $this->callDeprecatedContentPST(
-				$content,
-				$pstParams
-			);
-		}
-
 		'@phan-var CssContent $content';
 
 		// @todo Make pre-save transformation optional for script pages (T34858)
@@ -142,6 +142,11 @@ class CssContentHandler extends CodeContentHandler {
 		}
 
 		$output->clearWrapperDivClass();
-		$output->setText( $html );
+		$output->setRawText( $html );
+		// Suppress the TOC (T307691)
+		$output->setOutputFlag( ParserOutputFlags::NO_TOC );
+		$output->setSections( [] );
 	}
 }
+/** @deprecated class alias since 1.43 */
+class_alias( CssContentHandler::class, 'CssContentHandler' );

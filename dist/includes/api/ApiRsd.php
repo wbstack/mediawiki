@@ -3,7 +3,7 @@
 /**
  * API for MediaWiki 1.17+
  *
- * Copyright © 2010 Bryan Tong Minh and Brion Vibber
+ * Copyright © 2010 Bryan Tong Minh and Brooke Vibber
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,16 @@
  * @file
  */
 
+namespace MediaWiki\Api;
+
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+
 /**
  * API module for sending out RSD information
  * @ingroup API
  */
 class ApiRsd extends ApiBase {
-
 	public function execute() {
 		$result = $this->getResult();
 
@@ -81,10 +85,12 @@ class ApiRsd extends ApiBase {
 	 * @return array[]
 	 */
 	protected function getRsdApiList() {
+		// Loaded here rather than injected due to the direct extension of ApiBase.
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
 		$apis = [
 			'MediaWiki' => [
 				// The API link is required for all RSD API entries.
-				'apiLink' => wfExpandUrl( wfScript( 'api' ), PROTO_CURRENT ),
+				'apiLink' => (string)$urlUtils->expand( wfScript( 'api' ), PROTO_CURRENT ),
 
 				// Docs link is optional, but recommended.
 				'docs' => 'https://www.mediawiki.org/wiki/Special:MyLanguage/API',
@@ -148,4 +154,11 @@ class ApiRsd extends ApiBase {
 
 		return $outputData;
 	}
+
+	public function getHelpUrls() {
+		return 'https://www.mediawiki.org/wiki/Special:MyLanguage/API:Rsd';
+	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiRsd::class, 'ApiRsd' );

@@ -3,17 +3,19 @@
  *
  * Default styles for the display of table of contents in @media screen.
  *
- * Styles relating to i18n are inside the i18n.less file in the same subfolder.
  * Styles for @media print are inside print.css.
  */
+
+@import 'mediawiki.mixins.less';
+@import 'mediawiki.skin.variables.less';
 
 /* stylelint-disable selector-class-pattern */
 
 /* Table of Contents */
 .toc,
 .toccolours {
-	border: 1px solid #a2a9b1;
-	background-color: #f8f9fa;
+	background-color: @background-color-neutral-subtle;
+	border: @border-width-base @border-style-base @border-color-base;
 	padding: 5px;
 	font-size: 95%;
 }
@@ -39,16 +41,18 @@
 
 	.toctitle {
 		text-align: center;
+		direction: ltr;
 	}
 
 	ul {
 		list-style: none;
 		margin: 0.3em 0;
 		padding: 0;
-		text-align: left;
+		text-align: start;
 
 		ul {
-			margin: 0 0 0 2em;
+			margin: 0;
+			.margin-inline( 2em, 0 );
 		}
 	}
 }
@@ -75,25 +79,8 @@ table.toc {
 	text-decoration: inherit;
 }
 
-/* Space between the columns for tocnumber and toctext */
 .tocnumber {
-	color: #202122;
-	padding-left: 0;
-	padding-right: 0.5em;
-
-	.mw-content-ltr & {
-		/* @noflip */
-		padding-left: 0;
-		/* @noflip */
-		padding-right: 0.5em;
-	}
-
-	.mw-content-rtl & {
-		/* @noflip */
-		padding-left: 0.5em;
-		/* @noflip */
-		padding-right: 0;
-	}
+	color: @color-base;
 }
 
 /* Overwrite the style="display:none" and make the checkbox invisible on another way to */
@@ -113,18 +100,18 @@ table.toc {
 	font-size: 94%;
 }
 
-.toctogglespan:before {
+.toctogglespan::before {
 	content: ' [';
 }
 
-.toctogglespan:after {
+.toctogglespan::after {
 	content: ']';
 }
 
 /* Make the label look like a link. */
 .toctogglelabel {
+	color: @color-link;
 	cursor: pointer;
-	color: #0645ad;
 }
 
 .toctogglelabel:hover {
@@ -135,17 +122,14 @@ table.toc {
 /* This simulates that the label is in focus. */
 .toctogglecheckbox:focus + .toctitle .toctogglelabel {
 	text-decoration: underline;
-	outline: dotted 1px; /* Firefox style for focus */
-	outline: auto -webkit-focus-ring-color; /* Webkit style for focus */
+	outline: auto;
 }
 
 /* Change the text of the button based on the state of the checkbox. */
-.toctogglecheckbox:checked + .toctitle .toctogglelabel:after {
+.toctogglecheckbox:checked + .toctitle .toctogglelabel::after {
 	content: '@{msg-showtoc}';
 }
 
-.toctogglecheckbox:not( :checked ) + .toctitle .toctogglelabel:after {
+.toctogglecheckbox:not( :checked ) + .toctitle .toctogglelabel::after {
 	content: '@{msg-hidetoc}';
 }
-
-@import 'i18n.less';

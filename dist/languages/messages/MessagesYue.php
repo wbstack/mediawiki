@@ -1,8 +1,6 @@
 <?php
 /** Cantonese (粵語)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -22,6 +20,8 @@
  * @author Xiaomingyan
  * @author Yfdyh000
  */
+
+$fallback = 'yue-hant, yue-hans';
 
 $namespaceNames = [
 	NS_MEDIA            => '媒體',

@@ -17,6 +17,7 @@ module.exports = ( function () {
 	function newComponent( formIndex, template, beforeUpdate, mw ) {
 
 		return {
+			compatConfig: { MODE: 3 },
 			template: template,
 
 			mixins: [ RedundantLanguageIndicator( 'representations' ) ],
@@ -96,9 +97,7 @@ module.exports = ( function () {
 						formIndex: this.formIndex,
 						representations: representations
 					} );
-				}
-			},
-			filters: {
+				},
 				message: function ( key ) {
 					return mw.messages.get( key );
 				}
@@ -117,7 +116,8 @@ module.exports = ( function () {
 	 * @return {Vue} Initialized widget
 	 */
 	function create( store, formIndex, element, template, beforeUpdate, mw ) {
-		return Vue.createMwApp( $.extend( { store: store }, newComponent( formIndex, template, beforeUpdate, mw ) ) )
+		return Vue.createApp( newComponent( formIndex, template, beforeUpdate, mw ) )
+			.use( store )
 			.mount( element );
 	}
 

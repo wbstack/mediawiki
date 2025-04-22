@@ -11,6 +11,7 @@
 			"Чаховіч Уладзіслаў"
 		]
 	},
+	"ooui-copytextlayout-copy": "Скапіяваць",
 	"ooui-outline-control-move-down": "Перасунуць элемэнт ніжэй",
 	"ooui-outline-control-move-up": "Перасунуць элемэнт вышэй",
 	"ooui-outline-control-remove": "Выдаліць пункт",
@@ -26,8 +27,9 @@
 	"ooui-dialog-process-continue": "Працягваць",
 	"ooui-combobox-button-label": "Пераключыць можнасьці",
 	"ooui-selectfile-button-select": "Абраць файл",
-	"ooui-selectfile-not-supported": "Выбар файлу не падтрымліваецца",
+	"ooui-selectfile-button-select-multiple": "Абярыце файлы",
 	"ooui-selectfile-placeholder": "Ніводзін файл не абраны",
 	"ooui-selectfile-dragdrop-placeholder": "Перацягніце файл сюды",
+	"ooui-selectfile-dragdrop-placeholder-multiple": "Перацягніце файлы сюды",
 	"ooui-field-help": "Дапамога"
 }

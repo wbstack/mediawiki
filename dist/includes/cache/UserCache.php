@@ -21,17 +21,21 @@
  * @ingroup Cache
  */
 
-use MediaWiki\Cache\LinkBatchFactory;
+namespace MediaWiki\Cache;
+
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
-use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * @since 1.20
+ * @deprecated since 1.43, use ActorStore
  */
 class UserCache {
-	protected $cache = []; // (uid => property => value)
-	protected $typesCached = []; // (uid => cache type => 1)
+	/** @var array (uid => property => value) */
+	protected $cache = [];
+	/** @var array (uid => cache type => 1) */
+	protected $typesCached = [];
 
 	/** @var LoggerInterface */
 	private $logger;
@@ -39,13 +43,15 @@ class UserCache {
 	/** @var LinkBatchFactory */
 	private $linkBatchFactory;
 
-	/** @var ILoadBalancer */
-	private $loadBalancer;
+	/** @var IConnectionProvider */
+	private $dbProvider;
 
 	/**
+	 * @deprecated since 1.43, use MediaWikiServices::getInstance()->getUserCache()
 	 * @return UserCache
 	 */
 	public static function singleton() {
+		wfDeprecated( __METHOD__, '1.43' );
 		return MediaWikiServices::getInstance()->getUserCache();
 	}
 
@@ -53,16 +59,16 @@ class UserCache {
 	 * Uses dependency injection since 1.36
 	 *
 	 * @param LoggerInterface $logger
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LinkBatchFactory $linkBatchFactory
 	 */
 	public function __construct(
 		LoggerInterface $logger,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LinkBatchFactory $linkBatchFactory
 	) {
 		$this->logger = $logger;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->linkBatchFactory = $linkBatchFactory;
 	}
 
@@ -71,7 +77,7 @@ class UserCache {
 	 *
 	 * @param int $userId
 	 * @param string $prop User property
-	 * @return mixed|bool The property or false if the user does not exist
+	 * @return mixed|false The property or false if the user does not exist
 	 */
 	public function getProp( $userId, $prop ) {
 		if ( !isset( $this->cache[$userId][$prop] ) ) {
@@ -126,20 +132,19 @@ class UserCache {
 
 		// Lookup basic info for users not yet loaded...
 		if ( count( $usersToQuery ) ) {
-			$dbr = $this->loadBalancer->getConnectionRef( DB_REPLICA );
-			$tables = [ 'user', 'actor' ];
-			$conds = [ 'user_id' => $usersToQuery ];
-			$fields = [ 'user_name', 'user_real_name', 'user_registration', 'user_id', 'actor_id' ];
-			$joinConds = [
-				'actor' => [ 'JOIN', 'actor_user = user_id' ],
-			];
+			$dbr = $this->dbProvider->getReplicaDatabase();
+			$queryBuilder = $dbr->newSelectQueryBuilder()
+				->select( [ 'user_name', 'user_real_name', 'user_registration', 'user_id', 'actor_id' ] )
+				->from( 'user' )
+				->join( 'actor', null, 'actor_user = user_id' )
+				->where( [ 'user_id' => $usersToQuery ] );
 
 			$comment = __METHOD__;
 			if ( strval( $caller ) !== '' ) {
 				$comment .= "/$caller";
 			}
 
-			$res = $dbr->select( $tables, $fields, $conds, $comment, [], $joinConds );
+			$res = $queryBuilder->caller( $comment )->fetchResultSet();
 			foreach ( $res as $row ) { // load each user into cache
 				$userId = (int)$row->user_id;
 				$this->cache[$userId]['name'] = $row->user_name;
@@ -176,3 +181,6 @@ class UserCache {
 		return ( in_array( $type, $options ) && !isset( $this->typesCached[$uid][$type] ) );
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( UserCache::class, 'UserCache' );

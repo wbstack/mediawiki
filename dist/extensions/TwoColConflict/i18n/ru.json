@@ -3,8 +3,10 @@
 		"authors": [
 			"Alexander Yukal",
 			"Alexey zakharenkov",
+			"Colt browning",
 			"Diman Russkov",
 			"Facenapalm",
+			"Kaganer",
 			"Kareyac",
 			"Movses",
 			"MuratTheTurkish",
@@ -17,8 +19,7 @@
 			"Stjn",
 			"Vlad5250",
 			"Wileyfoxyx",
-			"Ләйсән",
-			"Colt browning"
+			"Ләйсән"
 		]
 	},
 	"twocolconflict": "Конфликт редактирований по абзацам",
@@ -40,8 +41,8 @@
 	"twocolconflict-special-textarea-hint": "Вы можете посмотреть и скопировать код вашей версии:",
 	"twocolconflict-special-malformed-title": "Заголовок отсутствует или непригоден.",
 	"twocolconflict-special-expired": "Здесь ничего нет. Возможно, это значит то, что вы столкнулись с конфликтом редактирований ранее, но оно было так давно, что на настоящий момент срок хранения вашего текста истёк.",
-	"twocolconflict-split-header-hint": "Вы можете помочь улучшить эту функцию, если оставите отзыв [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface на этой странице].",
-	"twocolconflict-split-header-hint-beta": "Благодарим за использование этой бета-функции. Вы можете помочь улучшить её, оставив отзыв [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface на этой странице].",
+	"twocolconflict-split-header-hint": "Вы можете помочь улучшить эту функцию, если оставите свой отзыв на [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface странице обсуждения проекта].",
+	"twocolconflict-split-header-hint-beta": "Благодарим за использование этой бета-функции. Вы можете помочь улучшить её, оставив свой отзыв на [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface странице обсуждения проекта].",
 	"twocolconflict-split-header-overview": "Пока вы редактировали, другой пользователь тоже редактировал эту страницу и опубликовал свою версию до вас. Пожалуйста, проверьте обе версии и объедините их. Когда вы нажмёте на «{{int:publishchanges}}», сохранён будет только текст из выбранных ячеек.",
 	"twocolconflict-split-your-version-header": "Ваша версия",
 	"twocolconflict-split-current-version-header": "Текущая версия, сделанная $1",

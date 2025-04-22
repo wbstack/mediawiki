@@ -22,10 +22,11 @@
  * @author Roan Kattouw
  */
 
-use MediaWiki\MediaWikiServices;
 use Wikimedia\Rdbms\IDatabase;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script to remove cache entries for removed ResourceLoader modules
@@ -45,13 +46,13 @@ class CleanupRemovedModules extends Maintenance {
 	public function execute() {
 		$this->output( "Cleaning up module_deps table...\n" );
 
-		$dbw = $this->getDB( DB_PRIMARY );
-		$rl = MediaWikiServices::getInstance()->getResourceLoader();
+		$dbw = $this->getPrimaryDB();
+		$rl = $this->getServiceContainer()->getResourceLoader();
 		$moduleNames = $rl->getModuleNames();
 		$res = $dbw->newSelectQueryBuilder()
 			->select( [ 'md_module', 'md_skin' ] )
 			->from( 'module_deps' )
-			->where( $moduleNames ? 'md_module NOT IN (' . $dbw->makeList( $moduleNames ) . ')' : '1=1' )
+			->where( $moduleNames ? $dbw->expr( 'md_module', '!=', $moduleNames ) : [] )
 			->caller( __METHOD__ )
 			->fetchResultSet();
 		$rows = iterator_to_array( $res, false );
@@ -78,5 +79,7 @@ class CleanupRemovedModules extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = CleanupRemovedModules::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

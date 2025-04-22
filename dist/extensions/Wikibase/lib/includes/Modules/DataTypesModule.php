@@ -2,10 +2,10 @@
 
 namespace Wikibase\Lib\Modules;
 
-use Exception;
 // phpcs:disable MediaWiki.Classes.FullQualifiedClassName -- T308814
 use MediaWiki\ResourceLoader as RL;
 use MediaWiki\ResourceLoader\ResourceLoader;
+use RuntimeException;
 use Wikibase\Lib\DataType;
 use Wikibase\Lib\DataTypeFactory;
 
@@ -22,11 +22,6 @@ use Wikibase\Lib\DataTypeFactory;
  * @author Daniel Werner < daniel.a.r.werner@gmail.com >
  */
 class DataTypesModule extends RL\Module {
-
-	/**
-	 * @var string[]
-	 */
-	protected $targets = [ 'desktop', 'mobile' ];
 
 	/**
 	 * @var DataType[]
@@ -61,11 +56,8 @@ class DataTypesModule extends RL\Module {
 
 	/**
 	 * @since 0.1
-	 *
 	 * @param array $resourceDefinition
-	 *
 	 * @return string
-	 * @throws Exception If the given resource definition is not sufficient
 	 */
 	public static function extractDataTypesConfigVarNameFromResourceDefinition(
 		array $resourceDefinition
@@ -73,7 +65,7 @@ class DataTypesModule extends RL\Module {
 		$dataTypesConfigVarName = $resourceDefinition['datatypesconfigvarname'] ?? null;
 
 		if ( !is_string( $dataTypesConfigVarName ) || $dataTypesConfigVarName === '' ) {
-			throw new Exception(
+			throw new RuntimeException(
 				'The "datatypesconfigvarname" value of the resource definition' .
 				' has to be a non-empty string value'
 			);
@@ -84,11 +76,8 @@ class DataTypesModule extends RL\Module {
 
 	/**
 	 * @since 0.1
-	 *
 	 * @param array $resourceDefinition
-	 *
 	 * @return DataTypeFactory
-	 * @throws Exception If the given resource definition is not sufficient
 	 */
 	public static function extractDataTypeFactoryFromResourceDefinition(
 		array $resourceDefinition
@@ -100,7 +89,7 @@ class DataTypesModule extends RL\Module {
 		}
 
 		if ( !( $dataTypeFactory instanceof DataTypeFactory ) ) {
-			throw new Exception(
+			throw new RuntimeException(
 				'The "datatypefactory" value of the resource definition has' .
 				' to be an instance of DataTypeFactory or a callback returning one'
 			);
@@ -165,7 +154,7 @@ class DataTypesModule extends RL\Module {
 		$summary = parent::getDefinitionSummary( $context );
 
 		$summary[] = [
-			'dataHash' => sha1( json_encode( array_keys( $this->dataTypes ) ) )
+			'dataHash' => sha1( json_encode( array_keys( $this->dataTypes ) ) ),
 		];
 
 		return $summary;

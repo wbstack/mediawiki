@@ -12,19 +12,22 @@
 			"global": true
 		},
 		"destructive": {
-			"color": "#d33"
+			"color": "#d73333"
 		},
 		"error": {
-			"color": "#d33"
+			"color": "#d73333"
 		},
 		"warning": {
-			"color": "#fc3"
+			"color": "#edab00"
 		},
 		"success": {
 			"color": "#14866d"
 		}
 	},
 	"images": {
+		"appearance": {
+			"file": "images/icons/appearance.svg"
+		},
 		"bright": {
 			"file": "images/icons/bright.svg"
 		},

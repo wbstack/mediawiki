@@ -2,51 +2,36 @@
 
 namespace AdvancedSearch;
 
+use MediaWiki\Html\Html;
 use MediaWiki\ResourceLoader as RL;
 use MediaWiki\ResourceLoader\ResourceLoader;
-use Xml;
 
 /**
  * ResourceLoader module providing the users "searchnamespace" token.
  */
 class SearchnamespaceTokenModule extends RL\Module {
 
-	/**
-	 * @var int
-	 */
+	/** @inheritDoc */
 	protected $origin = self::ORIGIN_CORE_INDIVIDUAL;
 
-	/**
-	 * @var string[]
-	 */
-	protected $targets = [ 'desktop', 'mobile' ];
-
-	/**
-	 * @param RL\Context $context
-	 *
-	 * @return string JavaScript code
-	 */
+	/** @inheritDoc */
 	public function getScript( RL\Context $context ) {
 		$user = $context->getUserObj();
 		// Use FILTER_NOMIN annotation to prevent needless minification and caching (T84960).
 		return ResourceLoader::FILTER_NOMIN .
-			Xml::encodeJsCall(
+			Html::encodeJsCall(
 				'mw.user.tokens.set',
 				[ 'searchnamespaceToken', $user->getEditToken( 'searchnamespace' ) ],
-				(bool)ResourceLoader::inDebugMode()
+				(bool)$context->getDebug()
 			);
 	}
 
-	/**
-	 * @return bool
-	 */
+	/** @inheritDoc */
 	public function supportsURLLoading() {
 		return false;
 	}
 
-	/**
-	 * @return string
-	 */
+	/** @inheritDoc */
 	public function getGroup() {
 		// Private modules can not be loaded as a dependency, only via OutputPage::addModules().
 		return 'private';

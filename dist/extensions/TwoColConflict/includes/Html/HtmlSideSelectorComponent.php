@@ -2,7 +2,7 @@
 
 namespace TwoColConflict\Html;
 
-use Html;
+use MediaWiki\Html\Html;
 use MessageLocalizer;
 use OOUI\RadioInputWidget;
 
@@ -12,14 +12,8 @@ use OOUI\RadioInputWidget;
  */
 class HtmlSideSelectorComponent {
 
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
+	private MessageLocalizer $messageLocalizer;
 
-	/**
-	 * @param MessageLocalizer $messageLocalizer
-	 */
 	public function __construct( MessageLocalizer $messageLocalizer ) {
 		$this->messageLocalizer = $messageLocalizer;
 	}

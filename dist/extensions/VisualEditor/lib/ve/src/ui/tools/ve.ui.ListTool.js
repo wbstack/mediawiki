@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ListTool classes.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -49,8 +49,8 @@ ve.ui.ListTool.prototype.onUpdateState = function ( fragment ) {
 	// Parent method
 	ve.ui.ListTool.super.prototype.onUpdateState.apply( this, arguments );
 
-	var style = this.constructor.static.style;
-	var isMatching = fragment.hasMatchingAncestor( 'list', { style: style }, true );
+	const style = this.constructor.static.style;
+	const isMatching = fragment.hasMatchingAncestor( 'list', { style: style }, true );
 	this.setActive( isMatching );
 };
 

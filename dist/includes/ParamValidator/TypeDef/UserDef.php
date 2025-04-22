@@ -2,14 +2,14 @@
 
 namespace MediaWiki\ParamValidator\TypeDef;
 
-use ExternalUserNames;
-use MalformedTitleException;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\TitleParser;
+use MediaWiki\User\ExternalUserNames;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserIdentityLookup;
 use MediaWiki\User\UserIdentityValue;
 use MediaWiki\User\UserNameUtils;
 use MediaWiki\User\UserRigorOptions;
-use TitleParser;
 use Wikimedia\IPUtils;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\Callbacks;
@@ -32,11 +32,12 @@ class UserDef extends TypeDef {
 	 * One or more of the following values:
 	 * - 'name': User names are allowed.
 	 * - 'ip': IP ("anon") usernames are allowed.
+	 * - 'temp': Temporary users are allowed.
 	 * - 'cidr': IP ranges are allowed.
 	 * - 'interwiki': Interwiki usernames are allowed.
 	 * - 'id': Allow specifying user IDs, formatted like "#123".
 	 *
-	 * Default is `[ 'name', 'ip', 'cidr', 'interwiki' ]`.
+	 * Default is `[ 'name', 'ip', 'temp', 'cidr', 'interwiki' ]`.
 	 *
 	 * Avoid combining 'id' with PARAM_ISMULTI, as it may result in excessive
 	 * DB lookups. If you do combine them, consider setting low values for
@@ -83,7 +84,9 @@ class UserDef extends TypeDef {
 	}
 
 	public function validate( $name, $value, array $settings, array $options ) {
-		list( $type, $user ) = $this->processUser( $value );
+		$this->failIfNotString( $name, $value, $settings, $options );
+
+		[ $type, $user ] = $this->processUser( $value );
 
 		if ( !$user || !in_array( $type, $settings[self::PARAM_ALLOWED_USER_TYPES], true ) ) {
 			// Message used: paramvalidator-baduser
@@ -96,12 +99,12 @@ class UserDef extends TypeDef {
 	public function normalizeSettings( array $settings ) {
 		if ( isset( $settings[self::PARAM_ALLOWED_USER_TYPES] ) ) {
 			$settings[self::PARAM_ALLOWED_USER_TYPES] = array_values( array_intersect(
-				[ 'name', 'ip', 'cidr', 'interwiki', 'id' ],
+				[ 'name', 'ip', 'temp', 'cidr', 'interwiki', 'id' ],
 				$settings[self::PARAM_ALLOWED_USER_TYPES]
 			) );
 		}
 		if ( empty( $settings[self::PARAM_ALLOWED_USER_TYPES] ) ) {
-			$settings[self::PARAM_ALLOWED_USER_TYPES] = [ 'name', 'ip', 'cidr', 'interwiki' ];
+			$settings[self::PARAM_ALLOWED_USER_TYPES] = [ 'name', 'ip', 'temp', 'cidr', 'interwiki' ];
 		}
 
 		return parent::normalizeSettings( $settings );
@@ -129,7 +132,7 @@ class UserDef extends TypeDef {
 			} else {
 				$bad = array_diff(
 					$settings[self::PARAM_ALLOWED_USER_TYPES],
-					[ 'name', 'ip', 'cidr', 'interwiki', 'id' ]
+					[ 'name', 'ip', 'temp', 'cidr', 'interwiki', 'id' ]
 				);
 				if ( $bad ) {
 					$ret['issues'][self::PARAM_ALLOWED_USER_TYPES] =
@@ -197,6 +200,12 @@ class UserDef extends TypeDef {
 			// to avoid converting the first character of the interwiki prefix to uppercase
 			$user = $name !== false ? new UserIdentityValue( 0, $value, UserIdentityValue::LOCAL ) : null;
 			return [ 'interwiki', $user ];
+		}
+
+		// A temp user?
+		if ( $this->userNameUtils->isTemp( $value ) ) {
+			$userIdentity = $this->userIdentityLookup->getUserIdentityByName( $value );
+			return [ 'temp', $userIdentity ];
 		}
 
 		// A valid user name?
@@ -290,7 +299,8 @@ class UserDef extends TypeDef {
 		foreach ( $settings[self::PARAM_ALLOWED_USER_TYPES] as $st ) {
 			// Messages: paramvalidator-help-type-user-subtype-name,
 			// paramvalidator-help-type-user-subtype-ip, paramvalidator-help-type-user-subtype-cidr,
-			// paramvalidator-help-type-user-subtype-interwiki, paramvalidator-help-type-user-subtype-id
+			// paramvalidator-help-type-user-subtype-interwiki, paramvalidator-help-type-user-subtype-id,
+			// paramvalidator-help-type-user-subtype-temp
 			$subtypes[] = MessageValue::new( "paramvalidator-help-type-user-subtype-$st" );
 		}
 		$info[ParamValidator::PARAM_TYPE] = MessageValue::new( 'paramvalidator-help-type-user' )

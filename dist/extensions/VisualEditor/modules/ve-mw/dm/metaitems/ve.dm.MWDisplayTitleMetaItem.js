@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWDisplayTitleMetaItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -33,7 +33,7 @@ ve.dm.MWDisplayTitleMetaItem.static.matchTagNames = [ 'meta' ];
 ve.dm.MWDisplayTitleMetaItem.static.matchRdfaTypes = [ 'mw:PageProp/displaytitle' ];
 
 ve.dm.MWDisplayTitleMetaItem.static.toDataElement = function ( domElements ) {
-	var content = domElements[ 0 ].getAttribute( 'content' );
+	const content = domElements[ 0 ].getAttribute( 'content' );
 	return {
 		type: this.name,
 		attributes: {
@@ -43,7 +43,7 @@ ve.dm.MWDisplayTitleMetaItem.static.toDataElement = function ( domElements ) {
 };
 
 ve.dm.MWDisplayTitleMetaItem.static.toDomElements = function ( dataElement, doc ) {
-	var meta = doc.createElement( 'meta' );
+	const meta = doc.createElement( 'meta' );
 	meta.setAttribute( 'property', 'mw:PageProp/displaytitle' );
 	meta.setAttribute( 'content', dataElement.attributes.content );
 	return [ meta ];

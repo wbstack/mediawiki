@@ -2,24 +2,24 @@
 
 namespace TwoColConflict\Html;
 
-use Html;
-use Language;
-use Linker;
+use MediaWiki\CommentFormatter\CommentFormatter;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
+use MediaWiki\Linker\Linker;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionRecord;
-use Message;
+use MediaWiki\SpecialPage\SpecialPage;
 use MessageLocalizer;
 use OOUI\HtmlSnippet;
 use OOUI\MessageWidget;
-use SpecialPage;
-use Title;
 use TwoColConflict\SplitConflictUtils;
+use Wikimedia\Rdbms\IDBAccessObject;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
-use WikiPage;
 
 /**
  * @license GPL-2.0-or-later
@@ -27,92 +27,58 @@ use WikiPage;
  */
 class HtmlSplitConflictHeader {
 
-	/**
-	 * @var LinkTarget
-	 */
-	private $title;
+	private LinkTarget $linkTarget;
+	private ?RevisionRecord $revision;
+	private Authority $authority;
+	private Language $language;
+	private MessageLocalizer $messageLocalizer;
+	private ConvertibleTimestamp $now;
+	private string $newEditSummary;
+	private LinkRenderer $linkRenderer;
+	private WikiPageFactory $wikiPageFactory;
+	private CommentFormatter $commentFormatter;
 
 	/**
-	 * @var RevisionRecord|null
-	 */
-	private $revision;
-
-	/**
-	 * @var Authority
-	 */
-	private $authority;
-
-	/**
-	 * @var Language
-	 */
-	private $language;
-
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
-
-	/**
-	 * @var ConvertibleTimestamp
-	 */
-	private $now;
-
-	/**
-	 * @var string
-	 */
-	private $newEditSummary;
-
-	/**
-	 * @var LinkRenderer
-	 */
-	private $linkRenderer;
-
-	/**
-	 * @var WikiPageFactory
-	 */
-	private $wikiPageFactory;
-
-	/**
-	 * @param Title $title
+	 * @param LinkTarget $linkTarget
 	 * @param Authority $authority
 	 * @param string $newEditSummary
 	 * @param Language $language
 	 * @param MessageLocalizer $messageLocalizer
+	 * @param CommentFormatter $commentFormatter
 	 * @param string|int|false $now Current time for testing. Any value the ConvertibleTimestamp
 	 *  class accepts. False for the current time.
 	 * @param RevisionRecord|null $revision Latest revision for testing, derived from the
 	 *  title otherwise.
 	 */
 	public function __construct(
-		Title $title,
+		LinkTarget $linkTarget,
 		Authority $authority,
 		string $newEditSummary,
 		Language $language,
 		MessageLocalizer $messageLocalizer,
+		CommentFormatter $commentFormatter,
 		$now = false,
-		RevisionRecord $revision = null
+		?RevisionRecord $revision = null
 	) {
 		// TODO inject?
 		$services = MediaWikiServices::getInstance();
 		$this->linkRenderer = $services->getLinkRenderer();
 		$this->wikiPageFactory = $services->getWikiPageFactory();
 
-		$this->title = $title;
+		$this->linkTarget = $linkTarget;
 		$this->revision = $revision ?? $this->getLatestRevision();
 		$this->authority = $authority;
 		$this->language = $language;
 		$this->messageLocalizer = $messageLocalizer;
+		$this->commentFormatter = $commentFormatter;
 		$this->now = new ConvertibleTimestamp( $now );
 		$this->newEditSummary = $newEditSummary;
 	}
 
-	/**
-	 * @return RevisionRecord|null
-	 */
 	private function getLatestRevision(): ?RevisionRecord {
-		$wikiPage = $this->wikiPageFactory->newFromTitle( $this->title );
+		$wikiPage = $this->wikiPageFactory->newFromLinkTarget( $this->linkTarget );
 		/** @see https://phabricator.wikimedia.org/T203085 */
-		$wikiPage->loadPageData( WikiPage::READ_LATEST );
+		$wikiPage->loadPageData( IDBAccessObject::READ_LATEST );
 		return $wikiPage->getRevisionRecord();
 	}
 
@@ -206,7 +172,7 @@ class HtmlSplitConflictHeader {
 
 		if ( $summary !== '' ) {
 			$summaryMsg = $this->messageLocalizer->msg( 'parentheses' )
-				->rawParams( Linker::formatComment( $summary, $this->title ) );
+				->rawParams( $this->commentFormatter->format( $summary, $this->linkTarget ) );
 			$html .= Html::element( 'br' ) .
 				Html::rawElement( 'span', [ 'class' => 'comment' ], $summaryMsg->escaped() );
 		}
@@ -214,10 +180,10 @@ class HtmlSplitConflictHeader {
 		return Html::rawElement( 'div', [ 'class' => $class ], $html );
 	}
 
-	private function getCopyLink() {
+	private function getCopyLink(): string {
 		$specialPage = SpecialPage::getTitleValueFor(
 			'TwoColConflictProvideSubmittedText',
-			$this->title->getPrefixedDBkey()
+			(string)$this->linkTarget
 		);
 		$label = $this->messageLocalizer->msg( 'twocolconflict-copy-tab-action' )->text();
 		$tooltip = $this->messageLocalizer->msg( 'twocolconflict-copy-tab-tooltip' )->text();
@@ -235,11 +201,6 @@ class HtmlSplitConflictHeader {
 		);
 	}
 
-	/**
-	 * @param string|null $timestamp
-	 *
-	 * @return string
-	 */
 	private function getFormattedDateTime( ?string $timestamp ): string {
 		$diff = ( new ConvertibleTimestamp( $timestamp ?: false ) )->diff( $this->now );
 
@@ -263,13 +224,13 @@ class HtmlSplitConflictHeader {
 		return $this->messageLocalizer->msg( 'just-now' )->text();
 	}
 
-	private function getMessageBox( string $messageKey, string $type, $classes = [] ): string {
+	private function getMessageBox( string $messageKey, string $type, string ...$classes ): string {
 		$html = $this->messageLocalizer->msg( $messageKey )->parse();
 		return ( new MessageWidget( [
 			'label' => new HtmlSnippet( SplitConflictUtils::addTargetBlankToLinks( $html ) ),
 			'type' => $type,
 		] ) )
-			->addClasses( array_merge( [ 'mw-twocolconflict-messageWidget' ], (array)$classes ) )
+			->addClasses( [ 'mw-twocolconflict-messageWidget', ...$classes ] )
 			->toString();
 	}
 

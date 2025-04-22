@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo;
 
 use DataValues\DataValue;
@@ -19,6 +21,7 @@ use Wikibase\Repo\Validators\CompositeValidator;
 use Wikibase\Repo\Validators\DataFieldValidator;
 use Wikibase\Repo\Validators\DataValueValidator;
 use Wikibase\Repo\Validators\EntityExistsValidator;
+use Wikibase\Repo\Validators\EntityUriValidator;
 use Wikibase\Repo\Validators\InterWikiLinkExistsValidator;
 use Wikibase\Repo\Validators\MembershipValidator;
 use Wikibase\Repo\Validators\NumberRangeValidator;
@@ -29,7 +32,6 @@ use Wikibase\Repo\Validators\TimestampPrecisionValidator;
 use Wikibase\Repo\Validators\TypeValidator;
 use Wikibase\Repo\Validators\UrlSchemeValidators;
 use Wikibase\Repo\Validators\UrlValidator;
-use Wikibase\Repo\Validators\WikiLinkExistsValidator;
 
 /**
  * Defines validators for the basic well known data types supported by Wikibase.
@@ -42,26 +44,20 @@ use Wikibase\Repo\Validators\WikiLinkExistsValidator;
  */
 class ValidatorBuilders {
 
-	/**
-	 * @var EntityLookup
-	 */
-	private $entityLookup;
+	private EntityLookup $entityLookup;
 
-	/**
-	 * @var EntityIdParser
-	 */
-	private $entityIdParser;
+	private EntityIdParser $entityIdParser;
 
 	/**
 	 * @var string[]
 	 */
-	private $urlSchemes;
+	private array $urlSchemes;
 
 	/**
 	 * @var string The base URI for the vocabulary to use for units (and in the
 	 * future, globes and calendars).
 	 */
-	private $itemVocabularyBaseUri;
+	private string $itemVocabularyBaseUri;
 
 	/**
 	 * @var string The base URI wikibase concepts, for use with the validators for time and globe
@@ -71,32 +67,17 @@ class ValidatorBuilders {
 	 * @todo use a configurable vocabulary for calendars and reference globes, instead of
 	 * hardcoding wikidata. Then replace usages of $wikidataBaseUri with $vocabularyBaseUri.
 	 */
-	private $wikidataBaseUri = 'http://www.wikidata.org/entity/';
+	private string $wikidataBaseUri = 'http://www.wikidata.org/entity/';
 
-	/**
-	 * @var ContentLanguages
-	 */
-	private $contentLanguages;
+	private ContentLanguages $contentLanguages;
 
-	/**
-	 * @var CachingCommonsMediaFileNameLookup
-	 */
-	private $mediaFileNameLookup;
+	private CachingCommonsMediaFileNameLookup $mediaFileNameLookup;
 
-	/**
-	 * @var MediaWikiPageNameNormalizer
-	 */
-	private $mediaWikiPageNameNormalizer;
+	private MediaWikiPageNameNormalizer $mediaWikiPageNameNormalizer;
 
-	/**
-	 * @var string
-	 */
-	private $geoShapeStorageApiUrl;
+	private string $geoShapeStorageApiUrl;
 
-	/**
-	 * @var string
-	 */
-	private $tabularDataStorageApiUrl;
+	private string $tabularDataStorageApiUrl;
 
 	/**
 	 * @param EntityLookup $lookup
@@ -113,12 +94,12 @@ class ValidatorBuilders {
 		EntityLookup $lookup,
 		EntityIdParser $idParser,
 		array $urlSchemes,
-		$itemVocabularyBaseUri,
+		string $itemVocabularyBaseUri,
 		ContentLanguages $contentLanguages,
 		CachingCommonsMediaFileNameLookup $cachingCommonsMediaFileNameLookup,
 		MediaWikiPageNameNormalizer $mediaWikiPageNameNormalizer,
-		$geoShapeStorageApiUrl,
-		$tabularDataStorageApiUrl
+		string $geoShapeStorageApiUrl,
+		string $tabularDataStorageApiUrl
 	) {
 		$this->entityLookup = $lookup;
 		$this->entityIdParser = $idParser;
@@ -134,21 +115,21 @@ class ValidatorBuilders {
 	/**
 	 * @return ValueValidator[]
 	 */
-	public function buildItemValidators() {
+	public function buildItemValidators(): array {
 		return $this->getEntityValidators( Item::ENTITY_TYPE );
 	}
 
 	/**
 	 * @return ValueValidator[]
 	 */
-	public function buildPropertyValidators() {
+	public function buildPropertyValidators(): array {
 		return $this->getEntityValidators( Property::ENTITY_TYPE );
 	}
 
 	/**
 	 * @return ValueValidator[]
 	 */
-	public function buildEntityValidators() {
+	public function buildEntityValidators(): array {
 		return $this->getEntityValidators();
 	}
 
@@ -157,7 +138,7 @@ class ValidatorBuilders {
 	 *
 	 * @return ValueValidator[]
 	 */
-	public function getEntityValidators( $entityType = null ) {
+	public function getEntityValidators( ?string $entityType = null ): array {
 		$typeValidator = new TypeValidator( EntityIdValue::class );
 		$entityExistsValidator = new EntityExistsValidator( $this->entityLookup, $entityType );
 
@@ -173,14 +154,18 @@ class ValidatorBuilders {
 	 *
 	 * @return ValueValidator[]
 	 */
-	private function getCommonStringValidators( $maxLength = 400 ) {
+	private function getCommonStringValidators( int $maxLength = 400 ): array {
 		$validators = [];
 
 		$validators[] = new TypeValidator( 'string' );
 		//TODO: validate UTF8 (here and elsewhere)
 		$validators[] = new StringLengthValidator( 1, $maxLength, 'mb_strlen' );
 		// no leading/trailing whitespace, no tab or vertical whitespace, no line breaks.
-		$validators[] = new RegexValidator( '/^\s|[\v\t]|\s$/u', true );
+		$validators[] = new RegexValidator(
+			'/^\s|[\v\t]|\s$/u',
+			true,
+			'illegal-string-chars'
+		);
 
 		return $validators;
 	}
@@ -190,7 +175,7 @@ class ValidatorBuilders {
 	 *
 	 * @return ValueValidator[]
 	 */
-	public function buildMediaValidators( $checkExistence = 'checkExistence' ) {
+	public function buildMediaValidators( string $checkExistence = 'checkExistence' ): array {
 		// oi_archive_name is max 255 bytes, which include a timestamp and an exclamation mark,
 		// so restrict file name to 240 bytes (see UploadBase::getTitle).
 		$validators = $this->getCommonStringValidators( 240 );
@@ -225,7 +210,7 @@ class ValidatorBuilders {
 	 *
 	 * @return ValueValidator[]
 	 */
-	public function buildGeoShapeValidators( $checkExistence = 'checkExistence' ) {
+	public function buildGeoShapeValidators( string $checkExistence = 'checkExistence' ): array {
 		$validators = $this->getCommonStringValidators( 240 );
 		//Don't forget to change message `wikibase-validator-illegal-geo-shape-title` modifying this
 		// Check for 'Data:' prefix, '.map' extension and illegal characters
@@ -253,7 +238,7 @@ class ValidatorBuilders {
 	 *
 	 * @return ValueValidator[]
 	 */
-	public function buildTabularDataValidators( $checkExistence = 'checkExistence' ) {
+	public function buildTabularDataValidators( string $checkExistence = 'checkExistence' ): array {
 		$validators = $this->getCommonStringValidators( 240 );
 		$validators[] = new RegexValidator(
 			'/^Data:[^\\[\\]#\\\:{|}]+\.tab$/u',
@@ -275,31 +260,10 @@ class ValidatorBuilders {
 	}
 
 	/**
-	 * @return ValueValidator[]
-	 */
-	public function buildEntitySchemaValidators() {
-		$validators = [];
-		$validators[] = new RegexValidator(
-			'/^E\d+$/u',
-			false,
-			'illegal-entity-schema-title'
-		);
-		$validators[] = new WikiLinkExistsValidator(
-			640
-		);
-
-		$topValidator = new DataValueValidator(
-			new CompositeValidator( $validators )
-		);
-
-		return [ new TypeValidator( DataValue::class ), $topValidator ];
-	}
-
-	/**
 	 * @param int $maxLength
 	 * @return ValueValidator[]
 	 */
-	public function buildStringValidators( $maxLength = 400 ) {
+	public function buildStringValidators( int $maxLength = 400 ): array {
 		$validators = $this->getCommonStringValidators( $maxLength );
 
 		$topValidator = new DataValueValidator(
@@ -315,7 +279,7 @@ class ValidatorBuilders {
 	 *
 	 * @return ValueValidator[]
 	 */
-	public function buildMonolingualTextValidators( $maxLength = 400 ) {
+	public function buildMonolingualTextValidators( int $maxLength = 400 ): array {
 		$validators = [];
 
 		$validators[] = new DataFieldValidator(
@@ -338,12 +302,12 @@ class ValidatorBuilders {
 	/**
 	 * @return ValueValidator[]
 	 */
-	public function buildTimeValidators() {
+	public function buildTimeValidators(): array {
 		$validators = [];
 		$validators[] = new TypeValidator( 'array' );
 
 		// Expected to be a short IRI, see TimeFormatter and TimeParser.
-		$urlValidator = $this->getUrlValidator( [ 'http', 'https' ], $this->wikidataBaseUri, 255 );
+		$urlValidator = $this->getEntityUriValidator( $this->wikidataBaseUri, 255, 'item' );
 		//TODO: enforce well known calendar models from config
 
 		$validators[] = new DataFieldValidator( 'calendarmodel', $urlValidator );
@@ -383,12 +347,12 @@ class ValidatorBuilders {
 	/**
 	 * @return ValueValidator[]
 	 */
-	public function buildCoordinateValidators() {
+	public function buildCoordinateValidators(): array {
 		$validators = [];
 		$validators[] = new TypeValidator( 'array' );
 
 		// Expected to be a short IRI, see GlobeCoordinateValue and GlobeCoordinateParser.
-		$urlValidator = $this->getUrlValidator( [ 'http', 'https' ], $this->wikidataBaseUri, 255 );
+		$urlValidator = $this->getEntityUriValidator( $this->wikidataBaseUri, 255, 'item' );
 		//TODO: enforce well known reference globes from config
 
 		$validators[] = new DataFieldValidator( 'precision', new NumberValidator() );
@@ -404,14 +368,10 @@ class ValidatorBuilders {
 
 	/**
 	 * @param string[] $urlSchemes List of URL schemes, e.g. 'http'
-	 * @param string|null $prefix a required prefix
-	 * @param int $maxLength Defaults to 500 characters. Even if URLs are unlimited in theory they
-	 * should be limited to about 2000. About 500 is a reasonable compromise.
-	 * @see http://stackoverflow.com/a/417184
-	 *
-	 * @return CompositeValidator
+	 * @param int $maxLength Maximum length in bytes; compare https://stackoverflow.com/a/417184
+	 * @return ValueValidator[]
 	 */
-	private function getUrlValidator( array $urlSchemes, $prefix = null, $maxLength = 500 ) {
+	private function getUrlValidators( array $urlSchemes, int $maxLength ): array {
 		$validators = [];
 		$validators[] = new TypeValidator( 'string' );
 		$validators[] = new StringLengthValidator( 2, $maxLength );
@@ -420,31 +380,27 @@ class ValidatorBuilders {
 		$urlValidators = $urlValidatorsBuilder->getValidators( $urlSchemes );
 		$validators[] = new UrlValidator( $urlValidators );
 
-		if ( $prefix !== null ) {
-			// FIXME: It's currently not possible to allow both http and https at this point.
-			$validators[] = $this->getPrefixValidator( $prefix, 'bad-prefix' );
-		}
-
-		return new CompositeValidator( $validators ); //Note: each validator is fatal
+		return $validators;
 	}
 
-	/**
-	 * @param string $prefix
-	 * @param string $errorCode
-	 *
-	 * @return RegexValidator
-	 */
-	private function getPrefixValidator( $prefix, $errorCode ) {
-		$regex = '/^' . preg_quote( $prefix, '/' ) . '/';
-		return new RegexValidator( $regex, false, $errorCode );
+	private function getEntityUriValidator(
+		string $prefix,
+		int $maxLength,
+		?string $entityType = null
+	): ValueValidator {
+		$validators = $this->getUrlValidators( [ 'http', 'https' ], $maxLength );
+		$validators[] = new EntityUriValidator( $this->entityIdParser, $prefix, $entityType );
+		return new CompositeValidator( $validators );
 	}
 
 	/**
 	 * @param int $maxLength
 	 * @return ValueValidator[]
 	 */
-	public function buildUrlValidators( $maxLength = 500 ) {
-		$urlValidator = $this->getUrlValidator( $this->urlSchemes, null, $maxLength );
+	public function buildUrlValidators( int $maxLength = 500 ): array {
+		$urlValidator = new CompositeValidator(
+			$this->getUrlValidators( $this->urlSchemes, $maxLength )
+		);
 
 		$topValidator = new DataValueValidator(
 			$urlValidator
@@ -456,7 +412,7 @@ class ValidatorBuilders {
 	/**
 	 * @return ValueValidator[]
 	 */
-	public function buildQuantityValidators() {
+	public function buildQuantityValidators(): array {
 		$validators = [];
 		$validators[] = new TypeValidator( 'array' );
 
@@ -468,7 +424,7 @@ class ValidatorBuilders {
 			// since we use it to represent "unitless" quantities. We could also use
 			// http://qudt.org/vocab/unit#Unitless or http://www.wikidata.org/entity/Q199
 			new MembershipValidator( [ '1' ] ),
-			$this->getUrlValidator( [ 'http', 'https' ], $this->itemVocabularyBaseUri, 255 ),
+			$this->getEntityUriValidator( $this->itemVocabularyBaseUri, 255, 'item' ),
 		] );
 		$validators[] = new DataFieldValidator( 'unit', $unitValidators );
 

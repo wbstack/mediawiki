@@ -4,10 +4,10 @@ namespace Wikibase\Repo\Maintenance;
 
 use DataValues\DecimalValue;
 use DataValues\QuantityValue;
-use Maintenance;
+use MediaWiki\Maintenance\Maintenance;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Sparql\SparqlClient;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\DataAccess\EntitySourceDefinitions;
 use Wikibase\Lib\SubEntityTypesMapper;
 use Wikibase\Lib\Units\JsonUnitStorage;
@@ -123,7 +123,7 @@ class AddUnitConversions extends Maintenance {
 		}
 
 		$diffUnits = array_diff( array_keys( $newJson ), array_keys( $oldJson ) );
-		if ( empty( $diffUnits ) ) {
+		if ( !$diffUnits ) {
 			$this->error( "No new units." );
 			return;
 		}
@@ -237,8 +237,8 @@ QUERY;
 	/**
 	 * Normalize unit and return the hash of the normalized node.
 	 *
-	 * @param string   $id Original value ID (hash)
-	 * @param string   $unit Short ID of the unit
+	 * @param string $id Original value ID (hash)
+	 * @param string $unit Short ID of the unit
 	 * @param string[] $value Value data array
 	 *
 	 * @return string Hash of the normalized node
@@ -343,7 +343,7 @@ QUERY;
 	/**
 	 * Get vocabulary instance
 	 *
-	 * @param string   $baseUri
+	 * @param string $baseUri
 	 * @param string[] $typeUris
 	 *
 	 * @return RdfVocabulary

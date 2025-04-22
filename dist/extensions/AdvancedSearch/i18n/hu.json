@@ -2,11 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Bencemac",
+			"Hanna Tardos",
 			"Tacsipacsi"
 		]
 	},
 	"advancedsearch-desc": "Egyszerű hozzáférés a haladó keresési lehetőségekhez a [[Special:Search]] oldalon.",
 	"advancedsearch-options-pane-head": "Haladó paraméterek:",
+	"advancedsearch-options-pane-preview-list": "Jelenleg használt keresési kifejezések",
 	"advancedsearch-optgroup-text": "Keresés az oldalak szövegében",
 	"advancedsearch-optgroup-structure": "Struktúra",
 	"advancedsearch-optgroup-files": "Fájlok és képek",

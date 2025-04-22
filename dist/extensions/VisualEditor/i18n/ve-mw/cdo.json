@@ -1,22 +1,19 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Davidzdh",
 			"GnuDoyng",
 			"Yejianfei",
 			"Ztl8702",
-			"唐吉訶德的侍從",
-			"Amire80"
+			"唐吉訶德的侍從"
 		]
 	},
-	"tooltip-ca-createsource": "創建茲蜀頁其源代碼",
-	"tooltip-ca-edit": "使Wiki文本來編輯茲蜀頁",
-	"tooltip-ca-editsource": "編輯茲蜀頁其源代碼",
 	"tooltip-ca-ve-edit": "Siŭ-gāi cī hiĕk",
+	"tooltip-ca-editsource": "編輯茲蜀頁其源代碼",
+	"tooltip-ca-createsource": "創建茲蜀頁其源代碼",
 	"visualeditor-advancedsettings-tool": "高級設置",
 	"visualeditor-backbutton-tooltip": "轉去",
-	"visualeditor-beta-warning": "汝會使隨時通過點擊「$1」標籤頁來切換成wiki文本編輯器，保留汝做出其任何更改。如果汝遇遘任何問題，起動汝敆下底報告。",
-	"visualeditor-browserwarning": "茲萆編輯器𣍐支持汝茲滿敆𡅏使其瀏覽器。",
 	"visualeditor-ca-createlocaldescriptionsource": "添加本地描述源代碼",
 	"visualeditor-ca-createsource": "創建源代碼",
 	"visualeditor-ca-editlocaldescriptionsource": "編輯本地描述源代碼",
@@ -101,7 +98,6 @@
 	"visualeditor-dialog-transclusion-deprecated-parameter-description": "字段已經過時了：$1",
 	"visualeditor-dialog-transclusion-loading": "敆𡅏加載",
 	"visualeditor-dialog-transclusion-param-default": "默認值：$1",
-	"visualeditor-dialog-transclusion-placeholder": "添加模板",
 	"visualeditor-dialog-transclusion-required-parameter": "著填其字段",
 	"visualeditor-dialog-transclusion-required-parameter-description": "茲萆字段硬著填。",
 	"visualeditor-dialog-transclusion-required-parameter-dialog-cancel": "返回",
@@ -128,13 +124,8 @@
 	"visualeditor-magiclinknodeinspector-title-pmid": "PMID鏈接",
 	"visualeditor-magiclinknodeinspector-title-rfc": "RFC鏈接",
 	"visualeditor-meta-tool": "選項",
-	"visualeditor-mweditmodesource-warning-cancel": "取消",
-	"visualeditor-mweditmodesource-warning-switch-discard": "放棄更改共切換",
-	"visualeditor-mweditmodeve-title": "使伓使切換遘可視化編輯模式？",
-	"visualeditor-mweditmodeve-warning": "汝拍算切換遘可視化編輯模式。\n汝當真卜繼續？",
 	"visualeditor-mwgallerydialog-title": "圖庫",
 	"visualeditor-mwsignature-tool": "汝其簽名",
-	"visualeditor-preference-core-label": "可視化編輯",
 	"visualeditor-preference-tabs": "編輯模式",
 	"visualeditor-preference-tabs-multi-tab": "顯示兩種編輯器標籤乞我",
 	"visualeditor-preference-tabs-prefer-ve": "會使其話，都讓我使視覺化編輯器",

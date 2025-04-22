@@ -15,14 +15,13 @@
  * along with MultimediaViewer.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-( function () {
-	var IP;
+const License = require( './mmv.model.License.js' );
 
+/**
+ * Represents information about a single image
+ */
+class ImageModel {
 	/**
-	 * Represents information about a single image
-	 *
-	 * @class mw.mmv.model.Image
-	 * @constructor
 	 * @param {mw.Title} title
 	 * @param {string} name Image name (e.g. title of the artwork) or human-readable file if there is no better title
 	 * @param {number} size Filesize in bytes of the original image
@@ -41,7 +40,7 @@
 	 * @param {string} source
 	 * @param {string} author
 	 * @param {number} authorCount
-	 * @param {mw.mmv.model.License} license
+	 * @param {License} license
 	 * @param {string} permission
 	 * @param {string} attribution Custom attribution string that replaces credit line when set
 	 * @param {string} deletionReason
@@ -49,7 +48,7 @@
 	 * @param {number} longitude
 	 * @param {string[]} restrictions
 	 */
-	function Image(
+	constructor(
 		title,
 		name,
 		size,
@@ -133,7 +132,7 @@
 		 */
 		this.authorCount = authorCount;
 
-		/** @property {mw.mmv.model.License} license The license under which the image is distributed */
+		/** @property {License} license The license under which the image is distributed */
 		this.license = license;
 
 		/** @property {string} additional license conditions by the author (note that this is usually a big ugly HTML blob) */
@@ -161,7 +160,6 @@
 		 */
 		this.thumbUrls = {};
 	}
-	IP = Image.prototype;
 
 	/**
 	 * Constructs a new Image object out of an object containing
@@ -171,25 +169,37 @@
 	 * @static
 	 * @param {mw.Title} title
 	 * @param {Object} imageInfo
-	 * @return {mw.mmv.model.Image}
+	 * @return {ImageModel}
 	 */
-	Image.newFromImageInfo = function ( title, imageInfo ) {
-		var name, uploadDateTime, anonymizedUploadDateTime, creationDateTime, imageData,
-			description, source, author, authorCount, license, permission, attribution,
-			deletionReason, latitude, longitude, restrictions,
-			innerInfo = imageInfo.imageinfo[ 0 ],
-			extmeta = innerInfo.extmetadata;
+	static newFromImageInfo( title, imageInfo ) {
+		let name;
+		let uploadDateTime;
+		let anonymizedUploadDateTime;
+		let creationDateTime;
+		let description;
+		let source;
+		let author;
+		let authorCount;
+		let license;
+		let permission;
+		let attribution;
+		let deletionReason;
+		let latitude;
+		let longitude;
+		let restrictions;
+		const innerInfo = imageInfo.imageinfo[ 0 ];
+		const extmeta = innerInfo.extmetadata;
 
 		if ( extmeta ) {
-			creationDateTime = this.parseExtmeta( extmeta.DateTimeOriginal, 'plaintext' );
-			uploadDateTime = this.parseExtmeta( extmeta.DateTime, 'plaintext' ).toString();
+			creationDateTime = this.parseExtmeta( extmeta.DateTimeOriginal, 'datetime' );
+			uploadDateTime = this.parseExtmeta( extmeta.DateTime, 'datetime' );
 
 			// Convert to "timestamp" format commonly used in EventLogging
 			anonymizedUploadDateTime = uploadDateTime.replace( /[^\d]/g, '' );
 
 			// Anonymise the timestamp to avoid making the file identifiable
 			// We only need to know the day
-			anonymizedUploadDateTime = anonymizedUploadDateTime.slice( 0, anonymizedUploadDateTime.length - 6 ) + '000000';
+			anonymizedUploadDateTime = `${ anonymizedUploadDateTime.slice( 0, anonymizedUploadDateTime.length - 6 ) }000000`;
 
 			name = this.parseExtmeta( extmeta.ObjectName, 'plaintext' );
 
@@ -212,7 +222,7 @@
 			name = title.getNameText();
 		}
 
-		imageData = new Image(
+		const imageData = new ImageModel(
 			title,
 			name,
 			innerInfo.size,
@@ -248,7 +258,7 @@
 		}
 
 		return imageData;
-	};
+	}
 
 	/**
 	 * Constructs a new License object out of an object containing
@@ -256,13 +266,13 @@
 	 *
 	 * @static
 	 * @param {Object} extmeta the extmeta array of the imageinfo data
-	 * @return {mw.mmv.model.License|undefined}
+	 * @return {License|undefined}
 	 */
-	Image.newLicenseFromImageInfo = function ( extmeta ) {
-		var license;
+	static newLicenseFromImageInfo( extmeta ) {
+		let license;
 
 		if ( extmeta.LicenseShortName ) {
-			license = new mw.mmv.model.License(
+			license = new License(
 				this.parseExtmeta( extmeta.LicenseShortName, 'string' ),
 				this.parseExtmeta( extmeta.License, 'string' ),
 				this.parseExtmeta( extmeta.UsageTerms, 'string' ),
@@ -273,17 +283,17 @@
 		}
 
 		return license;
-	};
+	}
 
 	/**
 	 * Reads and parses a value from the imageinfo API extmetadata field.
 	 *
 	 * @param {Array} data
-	 * @param {string} type one of 'plaintext', 'string', 'float', 'boolean', 'list'
+	 * @param {string} type one of 'plaintext', 'string', 'float', 'boolean', 'list', 'datetime'
 	 * @return {string|number|boolean|Array} value or undefined if it is missing
 	 */
-	Image.parseExtmeta = function ( data, type ) {
-		var value = data && data.value;
+	static parseExtmeta( data, type ) {
+		let value = data && data.value;
 		if ( value === null || value === undefined ) {
 			return undefined;
 		} else if ( type === 'plaintext' ) {
@@ -303,12 +313,27 @@
 			} else {
 				return undefined;
 			}
+		} else if ( type === 'datetime' ) {
+			value = value.toString();
+			// https://datatracker.ietf.org/doc/html/rfc3339
+			// adapted from https://stackoverflow.com/questions/3143070/regex-to-match-an-iso-8601-datetime-string
+			const rfc3339 = /\d{4}-[01]\d-[0-3]\d(T[0-2]\d:[0-5]\d:[0-5]\d(\.\d+)?Z?)?/;
+			const match = value.match( rfc3339 );
+			if ( !match ) {
+				return value.replace( /<.*?>/g, '' );
+			}
+			value = match[ 0 ];
+			if ( value.match( /^\d{4}-00-00/ ) ) {
+				// assume yyyy
+				return value.slice( 0, 4 );
+			}
+			return value;
 		} else if ( type === 'list' ) {
 			return value === '' ? [] : value.split( '|' );
 		} else {
-			throw new Error( 'mw.mmv.model.Image.parseExtmeta: unknown type' );
+			throw new Error( 'Image.parseExtmeta: unknown type' );
 		}
-	};
+	}
 
 	/**
 	 * Add a thumb URL
@@ -316,9 +341,9 @@
 	 * @param {number} width
 	 * @param {string} url
 	 */
-	IP.addThumbUrl = function ( width, url ) {
+	addThumbUrl( width, url ) {
 		this.thumbUrls[ width ] = url;
-	};
+	}
 
 	/**
 	 * Get a thumb URL if we have it.
@@ -326,19 +351,19 @@
 	 * @param {number} width
 	 * @return {string|undefined}
 	 */
-	IP.getThumbUrl = function ( width ) {
+	getThumbUrl( width ) {
 		return this.thumbUrls[ width ];
-	};
+	}
 
 	/**
 	 * Check whether the image has geolocation data.
 	 *
 	 * @return {boolean}
 	 */
-	IP.hasCoords = function () {
+	hasCoords() {
 		return this.latitude !== undefined && this.latitude !== null &&
 			this.longitude !== undefined && this.longitude !== null;
-	};
+	}
+}
 
-	mw.mmv.model.Image = Image;
-}() );
+module.exports = ImageModel;

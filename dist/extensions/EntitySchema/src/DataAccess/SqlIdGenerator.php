@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\DataAccess;
 
 use EntitySchema\Domain\Storage\IdGenerator;
@@ -16,37 +18,32 @@ use Wikimedia\Rdbms\ILoadBalancer;
  * @see \Wikibase\Repo\Store\Sql\SqlIdGenerator
  */
 class SqlIdGenerator implements IdGenerator {
-	/** @var ILoadBalancer */
-	private $loadBalancer;
 
-	/** @var string */
-	private $tableName;
+	private ILoadBalancer $loadBalancer;
+
+	private string $tableName;
 
 	/** @var int[] */
-	private $idsToSkip;
+	private array $idsToSkip;
 
 	/**
 	 * @param ILoadBalancer $loadBalancer
 	 * @param string        $tableName
 	 * @param int[]         $idsToSkip
 	 */
-	public function __construct( ILoadBalancer $loadBalancer, $tableName, array $idsToSkip = [] ) {
+	public function __construct( ILoadBalancer $loadBalancer, string $tableName, array $idsToSkip = [] ) {
 		$this->loadBalancer = $loadBalancer;
 		$this->tableName = $tableName;
 		$this->idsToSkip = $idsToSkip;
 	}
 
 	/**
-	 * @return int
-	 *
 	 * @throws RuntimeException
 	 */
-	public function getNewId() {
+	public function getNewId(): int {
 		$database = $this->loadBalancer->getConnection( DB_PRIMARY );
 
 		$id = $this->generateNewId( $database );
-		$this->loadBalancer->reuseConnection( $database );
-
 		return $id;
 	}
 
@@ -59,39 +56,39 @@ class SqlIdGenerator implements IdGenerator {
 	 * @throws RuntimeException
 	 * @return int
 	 */
-	private function generateNewId( IDatabase $database, bool $retry = true ) {
+	private function generateNewId( IDatabase $database, bool $retry = true ): int {
 		$database->startAtomic( __METHOD__ );
-
-		$currentId = $database->selectRow(
-			$this->tableName,
-			'id_value',
-			[],
-			__METHOD__,
-			[ 'FOR UPDATE' ]
-		);
+		$currentId = $database->newSelectQueryBuilder()
+			->select( [ 'id_value' ] )
+			->from( $this->tableName )
+			->forUpdate()
+			->caller( __METHOD__ )
+			->fetchRow();
 
 		if ( is_object( $currentId ) ) {
 			$id = $currentId->id_value + 1;
-			$success = $database->update(
-				$this->tableName,
-				[ 'id_value' => $id ],
-				IDatabase::ALL_ROWS,
-				__METHOD__
-			);
+			$database->newUpdateQueryBuilder()
+				->update( $this->tableName )
+				->set( [ 'id_value' => $id ] )
+				->where( $database::ALL_ROWS ) // there is only one row
+				->caller( __METHOD__ )->execute();
+			$success = true; // T339346
 		} else {
 			$id = 1;
 
-			$success = $database->insert(
-				$this->tableName,
-				[
+			$database->newInsertQueryBuilder()
+				->insertInto( $this->tableName )
+				->row( [
 					'id_value' => $id,
-				],
-				__METHOD__
-			);
+				] )
+				->caller( __METHOD__ )
+				->execute();
+			$success = true; // T339346
 
 			// Retry once, since a race condition on initial insert can cause one to fail.
 			// Race condition is possible due to occurrence of phantom reads is possible
 			// at non serializable transaction isolation level.
+			// @phan-suppress-next-line PhanImpossibleCondition T339346
 			if ( !$success && $retry ) {
 				$id = $this->generateNewId( $database, false );
 				$success = true;

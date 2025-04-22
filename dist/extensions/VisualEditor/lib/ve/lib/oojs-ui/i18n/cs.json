@@ -18,6 +18,7 @@
 			"ශ්වෙත"
 		]
 	},
+	"ooui-copytextlayout-copy": "Zkopírovat",
 	"ooui-outline-control-move-down": "Přesunout položku dolů",
 	"ooui-outline-control-move-up": "Přesunout položku nahoru",
 	"ooui-outline-control-remove": "Odstranit položku",
@@ -34,7 +35,6 @@
 	"ooui-combobox-button-label": "Rozbalení výběru",
 	"ooui-selectfile-button-select": "Vybrat soubor",
 	"ooui-selectfile-button-select-multiple": "Vybrat soubory",
-	"ooui-selectfile-not-supported": "Výběr souboru není podporován",
 	"ooui-selectfile-placeholder": "Nebyl vybrán žádný soubor",
 	"ooui-selectfile-dragdrop-placeholder": "Umístěte soubor sem",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Přetáhněte soubory zde",

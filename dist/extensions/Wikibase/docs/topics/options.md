@@ -40,7 +40,7 @@ EXAMPLE: ```[ 'commons', 'meta', 'wikidata' ]```
 
 ### Change Propagation
 
-See @ref md_docs_topics_change-propagation
+See @ref docs_topics_change-propagation
 
 #### useChangesTable
 Whether to record changes in the database, so they can be pushed to clients.
@@ -106,7 +106,7 @@ DEFAULT: [$wgMainCacheType]
 #### termFallbackCacheVersion {#common_termFallbackCacheVersion}
 Integer value to be appended to the shared cache prefix. Can be used to invalidate the term fallback cache by incrementing/changing this value.
 
-DEFAULT: null
+DEFAULT: ````null````
 
 ### Miscellaneous
 
@@ -174,14 +174,14 @@ EXAMPLE: ```['http://www.wikidata.org/entity/Q2' => 'earth']```
 ### Properties & Items
 
 #### idGenerator {#repo_idGenerator}
-Allows the entity id generator to be chosen. (See @ref md_docs_storage_id-counters)
+Allows the entity id generator to be chosen. (See @ref docs_storage_id-counters)
 
 DEFAULT: ```original```
 
 Allows values: `original`, `mysql-upsert`, or `auto`
 
 #### idGeneratorSeparateDbConnection {#repo_idGeneratorSeparateDbConnection}
-Should a separate DB connection be used to generate entity IDs?  (See @ref md_docs_storage_id-counters)
+Should a separate DB connection be used to generate entity IDs?  (See @ref docs_storage_id-counters)
 
 DEFAULT: ```false```
 
@@ -250,9 +250,8 @@ EXAMPLE: On wikidata.org, this is set to `P1921`, a string property named “URI
 ### Dispatching
 
 #### localClientDatabases {#client_localClientDatabases}
-An array of locally accessible client databases, for use by the dispatchChanges.php script.
+An array of locally accessible client databases, for use by @ref docs_topics_change-propagation.
 
-See @ref md_docs_topics_change-propagation
 This setting determines to which wikis changes are pushed directly.
 It must be given either as an associative array, mapping site global IDs to logical database names, or, of the database names are the same as the site global IDs, as a list of databases.
 
@@ -574,7 +573,17 @@ List of namespaces on the client wiki that should have access to repository item
 DEFAULT: ```[]``` (Treated as setting is not set, ie. All namespaces are enabled.)
 
 #### excludeNamespaces
-List of namespaces on the client wiki to disable wikibase links, etc. for.
+List of namespaces on the client wiki where the display of some sitelink-related features is disabled.
+
+This means that for pages in these namespaces:
+* The link/button to connect this page to a Wikibase repo Item is not shown
+* The menu to show language links is not populated by the connected repo and might not be shown
+	* However it might still be populated by other extensions, for example Cognate
+* Pages in this namespace are not tracked as UnexpectedUnconnected pages
+* This namespace cannot be selected on Special:UnconnectedPages
+* However it _is_ still possible to create a sitelink to this page from the Wikibase repo,
+  and it will show up as a language link on connected wikis
+* Lua and parser functions that access Wikibase data are unaffected and work as usual
 
 DEFAULT: ```[]```
 
@@ -676,6 +685,11 @@ Allows users to split the ParserCache by user language.
 
 DEFAULT: ```false```
 
+#### moveConnectedItemLinkToOtherProjects
+Switch to move connected wikibase item to the Other Projects section of the sidebar. This is a temporary switch to allow for a controlled release of the feature due to previous deployments requiring rollback.
+
+DEFAULT: ```false```
+
 #### disabledAccessEntityTypes
 List of entity types that access to them in the client should be disabled.
 
@@ -698,8 +712,20 @@ Maximum number of entities to visit in a `mw.wikibase.getReferencedEntityId` cal
 #### trackLuaFunctionCallsPerSiteGroup
 Whether to track Lua function calls with a per-sitegroup key, like `MediaWiki.wikipedia.wikibase.client.scribunto.wikibase.functionName.call`.
 
+DEFAULT: `false` (no tracking per sitegroup)
+
 #### trackLuaFunctionCallsPerWiki
 Whether to track Lua function calls with a per-site key, like `MediaWiki.dewiki.wikibase.client.scribunto.wikibase.functionName.call`.
+
+DEFAULT: `false` (no tracking per site / wiki)
+
+#### trackLuaFunctionCallsSampleRate
+A rate between 0 and 1 of how many Lua function calls to track.
+For example, a value of 0.1 will only track every tenth call (on average);
+the metric is then scaled by this value, so that, on average, the count is still in the right order of magnitude.
+Only has an effect if `trackLuaFunctionCallsPerSiteGroup` and/or `trackLuaFunctionCallsPerWiki` is enabled.
+
+DEFAULT: `1` (track each function call individually, get 100% accurate counts)
 
 ### Sitelinks
 
@@ -732,8 +758,8 @@ DEFAULT: Everything in the Wikibase [siteLinkGroups] setting.
 #### injectRecentChanges {#client_injectRecentChanges}
 Whether changes on the repository should be injected into this wiki's recent changes table, so they show up on watchlists, etc.
 
-Requires the dispatchChanges.php script to run, and this wiki to be listed in the [localClientDatabases] setting on the repository.
-See @ref md_docs_topics_change-propagation
+Requires this wiki to be listed in the [localClientDatabases] setting on the repository.
+See @ref docs_topics_change-propagation
 
 #### showExternalRecentChanges
 Whether changes on the repository should be displayed on Special:RecentChanges, Special:Watchlist, etc on the client wiki.
@@ -840,11 +866,6 @@ An array of client namespace ids defaulting to empty (disabled)
 
 Pages with a matching namespace will include a JSON-LD schema script for search engine optimization (SEO).
 
-#### entitySchemaNamespace
-Namespace id for entity schema data type
-
-DEFAULT: ```640```
-
 #### disabledUsageAspects
 Array of usage aspects that should not be saved in the [wbc_entity_usage] table.
 
@@ -919,8 +940,8 @@ DEFAULT: array mapping each well-known name to `null`.
 [purgeCacheBatchSize]: #client_purgeCacheBatchSize
 [wikiPageUpdaterDbBatchSize]: #client_wikiPageUpdaterDbBatchSize
 [siteGlobalID]: #client_siteGlobalID
-[entitysources topic]: @ref md_docs_topics_entitysources
-[wbc_entity_usage]: @ref md_docs_sql_wbc_entity_usage
+[entitysources topic]: @ref docs_topics_entitysources
+[wbc_entity_usage]: @ref docs_sql_wbc_entity_usage
 [reference URL]: https://www.wikidata.org/wiki/Property:P854
 [title]: https://www.wikidata.org/wiki/Property:P1476
 [stated in]: https://www.wikidata.org/wiki/Property:P248

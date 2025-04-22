@@ -1,17 +1,18 @@
 <?php
 /** Nias (Li Niha)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
+ *
+ * @author Banio ba Hinako
+ * @author Slaia
  */
 
 $fallback = 'id';
 
 $namespaceNames = [
 	NS_MEDIA            => 'Media',
-	NS_SPECIAL          => 'Si_tohude',
+	NS_SPECIAL          => 'Spesial',
 	NS_TALK             => 'Huhuo',
 	NS_USER             => 'Sangoguna',
 	NS_USER_TALK        => 'Huhuo_zangoguna',
@@ -27,3 +28,9 @@ $namespaceNames = [
 	NS_CATEGORY         => 'Kategori',
 	NS_CATEGORY_TALK    => 'Huhuo_kategori',
 ];
+
+$namespaceAliases = [
+	'Si_tohude' => NS_SPECIAL,
+];
+
+$linkTrail = '/^([a-zA-ZöÖŵŴ]+)(.*)$/sDu';

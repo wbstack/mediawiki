@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:Mostlinkedcategories
- *
  * Copyright © 2005, Ævar Arnfjörð Bjarmason
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,38 +18,46 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
- * @author Ævar Arnfjörð Bjarmason <avarab@gmail.com>
  */
 
+namespace MediaWiki\Specials;
+
+use HtmlArmor;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\ILanguageConverter;
 use MediaWiki\Languages\LanguageConverterFactory;
+use MediaWiki\Linker\Linker;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\Title;
+use Skin;
+use stdClass;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
 use Wikimedia\Rdbms\IResultWrapper;
 
 /**
- * A querypage to show categories ordered in descending order by the pages in them
+ * List of categories with the most pages in them
  *
  * @ingroup SpecialPage
+ * @author Ævar Arnfjörð Bjarmason <avarab@gmail.com>
  */
 class SpecialMostLinkedCategories extends QueryPage {
 
-	/** @var ILanguageConverter */
-	private $languageConverter;
+	private ILanguageConverter $languageConverter;
 
 	/**
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param LanguageConverterFactory $languageConverterFactory
 	 */
 	public function __construct(
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LinkBatchFactory $linkBatchFactory,
 		LanguageConverterFactory $languageConverterFactory
 	) {
 		parent::__construct( 'Mostlinkedcategories' );
-		$this->setDBLoadBalancer( $loadBalancer );
+		$this->setDatabaseProvider( $dbProvider );
 		$this->setLinkBatchFactory( $linkBatchFactory );
 		$this->languageConverter = $languageConverterFactory->getLanguageConverter( $this->getContentLanguage() );
 	}
@@ -61,12 +67,13 @@ class SpecialMostLinkedCategories extends QueryPage {
 	}
 
 	public function getQueryInfo() {
+		$dbr = $this->getDatabaseProvider()->getReplicaDatabase();
 		return [
 			'tables' => [ 'category' ],
 			'fields' => [ 'title' => 'cat_title',
 				'namespace' => NS_CATEGORY,
 				'value' => 'cat_pages' ],
-			'conds' => [ 'cat_pages > 0' ],
+			'conds' => [ $dbr->expr( 'cat_pages', '>', 0 ) ],
 		];
 	}
 
@@ -114,3 +121,8 @@ class SpecialMostLinkedCategories extends QueryPage {
 		return 'highuse';
 	}
 }
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialMostLinkedCategories::class, 'SpecialMostLinkedCategories' );

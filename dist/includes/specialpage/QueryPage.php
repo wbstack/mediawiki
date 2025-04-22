@@ -21,14 +21,59 @@
  * @ingroup SpecialPage
  */
 
+namespace MediaWiki\SpecialPage;
+
+use Exception;
 use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\Config\Config;
+use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Linker\LinkTarget;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Specials\SpecialAncientPages;
+use MediaWiki\Specials\SpecialBrokenRedirects;
+use MediaWiki\Specials\SpecialDeadendPages;
+use MediaWiki\Specials\SpecialDoubleRedirects;
+use MediaWiki\Specials\SpecialFewestRevisions;
+use MediaWiki\Specials\SpecialLinkSearch;
+use MediaWiki\Specials\SpecialListDuplicatedFiles;
+use MediaWiki\Specials\SpecialListRedirects;
+use MediaWiki\Specials\SpecialLonelyPages;
+use MediaWiki\Specials\SpecialLongPages;
+use MediaWiki\Specials\SpecialMediaStatistics;
+use MediaWiki\Specials\SpecialMIMESearch;
+use MediaWiki\Specials\SpecialMostCategories;
+use MediaWiki\Specials\SpecialMostImages;
+use MediaWiki\Specials\SpecialMostInterwikis;
+use MediaWiki\Specials\SpecialMostLinked;
+use MediaWiki\Specials\SpecialMostLinkedCategories;
+use MediaWiki\Specials\SpecialMostLinkedTemplates;
+use MediaWiki\Specials\SpecialMostRevisions;
+use MediaWiki\Specials\SpecialShortPages;
+use MediaWiki\Specials\SpecialUncategorizedCategories;
+use MediaWiki\Specials\SpecialUncategorizedImages;
+use MediaWiki\Specials\SpecialUncategorizedPages;
+use MediaWiki\Specials\SpecialUncategorizedTemplates;
+use MediaWiki\Specials\SpecialUnusedCategories;
+use MediaWiki\Specials\SpecialUnusedImages;
+use MediaWiki\Specials\SpecialUnusedTemplates;
+use MediaWiki\Specials\SpecialUnwatchedPages;
+use MediaWiki\Specials\SpecialWantedCategories;
+use MediaWiki\Specials\SpecialWantedFiles;
+use MediaWiki\Specials\SpecialWantedPages;
+use MediaWiki\Specials\SpecialWantedTemplates;
+use MediaWiki\Specials\SpecialWithoutInterwiki;
+use MediaWiki\Xml\Xml;
+use Skin;
+use stdClass;
 use Wikimedia\Rdbms\DBError;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * This is a class for doing query pages; since they're almost all the same,
@@ -71,6 +116,9 @@ abstract class QueryPage extends SpecialPage {
 	/** @var ILoadBalancer|null */
 	private $loadBalancer = null;
 
+	/** @var IConnectionProvider|null */
+	private $databaseProvider = null;
+
 	/** @var LinkBatchFactory|null */
 	private $linkBatchFactory = null;
 
@@ -101,7 +149,7 @@ abstract class QueryPage extends SpecialPage {
 				[ SpecialMediaStatistics::class, 'MediaStatistics', SpecialMediaStatistics::MAX_LIMIT ],
 				[ SpecialMIMESearch::class, 'MIMEsearch' ],
 				[ SpecialMostCategories::class, 'Mostcategories' ],
-				[ MostimagesPage::class, 'Mostimages' ],
+				[ SpecialMostImages::class, 'Mostimages' ],
 				[ SpecialMostInterwikis::class, 'Mostinterwikis' ],
 				[ SpecialMostLinkedCategories::class, 'Mostlinkedcategories' ],
 				[ SpecialMostLinkedTemplates::class, 'Mostlinkedtemplates' ],
@@ -116,14 +164,14 @@ abstract class QueryPage extends SpecialPage {
 				[ SpecialUnusedCategories::class, 'Unusedcategories' ],
 				[ SpecialUnusedImages::class, 'Unusedimages' ],
 				[ SpecialWantedCategories::class, 'Wantedcategories' ],
-				[ WantedFilesPage::class, 'Wantedfiles' ],
-				[ WantedPagesPage::class, 'Wantedpages' ],
+				[ SpecialWantedFiles::class, 'Wantedfiles' ],
+				[ SpecialWantedPages::class, 'Wantedpages' ],
 				[ SpecialWantedTemplates::class, 'Wantedtemplates' ],
 				[ SpecialUnwatchedPages::class, 'Unwatchedpages' ],
 				[ SpecialUnusedTemplates::class, 'Unusedtemplates' ],
 				[ SpecialWithoutInterwiki::class, 'Withoutinterwiki' ],
 			];
-			Hooks::runner()->onWgQueryPages( $qp );
+			( new HookRunner( MediaWikiServices::getInstance()->getHookContainer() ) )->onWgQueryPages( $qp );
 		}
 
 		return $qp;
@@ -151,7 +199,7 @@ abstract class QueryPage extends SpecialPage {
 	}
 
 	/**
-	 * Get a list of query pages disabled and with it's run mode
+	 * Get a list of disabled query pages and their run mode
 	 * @param Config $config
 	 * @return string[]
 	 */
@@ -203,30 +251,10 @@ abstract class QueryPage extends SpecialPage {
 	 *
 	 * Don't include an ORDER or LIMIT clause, they will be added.
 	 *
-	 * If this function is not overridden or returns something other than
-	 * an array, getSQL() will be used instead. This is for backwards
-	 * compatibility only and is strongly deprecated.
-	 * @stable to override
 	 * @return array
-	 * @since 1.18
+	 * @since 1.18, abstract since 1.43
 	 */
-	public function getQueryInfo() {
-		// @phan-suppress-next-line PhanTypeMismatchReturnProbablyReal null needed for b/c checks
-		return null;
-	}
-
-	/**
-	 * For back-compat, subclasses may return a raw SQL query here, as a string.
-	 * @deprecated since 1.39; getQueryInfo() should be overridden instead.
-	 * @throws MWException
-	 * @return string
-	 * @suppress PhanPluginNeverReturnMethod
-	 */
-	protected function getSQL() {
-		wfDeprecated( __METHOD__, '1.39' );
-		throw new MWException( "Bug in a QueryPage: doesn't implement getQueryInfo() nor "
-			. "getQuery() properly" );
-	}
+	abstract public function getQueryInfo();
 
 	/**
 	 * Subclasses return an array of fields to order by here. Don't append
@@ -372,78 +400,71 @@ abstract class QueryPage extends SpecialPage {
 	 * @stable to override
 	 *
 	 * @param int|false $limit Limit for SQL statement or false for no limit
-	 * @param bool $ignoreErrors Whether to ignore database errors
+	 * @param bool $unused Unused since 1.43, kept for backwards-compatibility
 	 * @throws DBError|Exception
 	 * @return bool|int
 	 */
-	public function recache( $limit, $ignoreErrors = true ) {
+	public function recache( $limit, $unused = true ) {
 		if ( !$this->isCacheable() ) {
 			return 0;
 		}
 
 		$fname = static::class . '::recache';
-		$dbw = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_PRIMARY );
+		$dbw = $this->getDatabaseProvider()->getPrimaryDatabase();
 
-		try {
-			// Do query
-			$res = $this->reallyDoQuery( $limit, false );
-			$num = false;
-			if ( $res ) {
-				$num = $res->numRows();
-				// Fetch results
-				$vals = [];
-				foreach ( $res as $i => $row ) {
-					if ( isset( $row->value ) ) {
-						if ( $this->usesTimestamps() ) {
-							$value = (int)wfTimestamp( TS_UNIX, $row->value );
-						} else {
-							$value = intval( $row->value ); // T16414
-						}
+		// Do query
+		$res = $this->reallyDoQuery( $limit, false );
+		$num = false;
+		if ( $res ) {
+			$num = $res->numRows();
+			// Fetch results
+			$vals = [];
+			foreach ( $res as $i => $row ) {
+				if ( isset( $row->value ) ) {
+					if ( $this->usesTimestamps() ) {
+						$value = (int)wfTimestamp( TS_UNIX, $row->value );
 					} else {
-						$value = $i;
+						$value = intval( $row->value ); // T16414
 					}
-
-					$vals[] = [
-						'qc_type' => $this->getName(),
-						'qc_namespace' => $row->namespace,
-						'qc_title' => $row->title,
-						'qc_value' => $value
-					];
+				} else {
+					$value = $i;
 				}
 
-				$dbw->doAtomicSection(
-					__METHOD__,
-					function ( IDatabase $dbw, $fname ) use ( $vals ) {
-						// Clear out any old cached data
-						$dbw->delete( 'querycache',
-							[ 'qc_type' => $this->getName() ],
-							$fname
-						);
-						// Save results into the querycache table on the primary DB
-						if ( count( $vals ) ) {
-							$dbw->insert( 'querycache', $vals, $fname );
-						}
-						// Update the querycache_info record for the page
-						$dbw->upsert(
-							'querycache_info',
-							[
-								'qci_type' => $this->getName(),
-								'qci_timestamp' => $dbw->timestamp(),
-							],
-							'qci_type',
-							[
-								'qci_timestamp' => $dbw->timestamp(),
-							],
-							$fname
-						);
-					}
-				);
+				$vals[] = [
+					'qc_type' => $this->getName(),
+					'qc_namespace' => $row->namespace,
+					'qc_title' => $row->title,
+					'qc_value' => $value
+				];
 			}
-		} catch ( DBError $e ) {
-			if ( !$ignoreErrors ) {
-				throw $e; // report query error
+
+			$dbw->doAtomicSection(
+				$fname,
+				function ( IDatabase $dbw, $fname ) use ( $vals ) {
+					// Clear out any old cached data
+					$dbw->newDeleteQueryBuilder()
+						->deleteFrom( 'querycache' )
+						->where( [ 'qc_type' => $this->getName() ] )
+						->caller( $fname )->execute();
+					// Update the querycache_info record for the page
+					$dbw->newInsertQueryBuilder()
+						->insertInto( 'querycache_info' )
+						->row( [ 'qci_type' => $this->getName(), 'qci_timestamp' => $dbw->timestamp() ] )
+						->onDuplicateKeyUpdate()
+						->uniqueIndexFields( [ 'qci_type' ] )
+						->set( [ 'qci_timestamp' => $dbw->timestamp() ] )
+						->caller( $fname )->execute();
+				}
+			);
+			// Save results into the querycache table on the primary DB
+			if ( count( $vals ) ) {
+				foreach ( array_chunk( $vals, 500 ) as $chunk ) {
+					$dbw->newInsertQueryBuilder()
+						->insertInto( 'querycache' )
+						->rows( $chunk )
+						->caller( $fname )->execute();
+				}
 			}
-			$num = false; // set result to false to indicate error
 		}
 
 		return $num;
@@ -456,7 +477,7 @@ abstract class QueryPage extends SpecialPage {
 	 */
 	protected function getRecacheDB() {
 		return $this->getDBLoadBalancer()
-			->getConnectionRef( ILoadBalancer::DB_REPLICA, [ $this->getName(), 'QueryPage::recache', 'vslow' ] );
+			->getConnection( ILoadBalancer::DB_REPLICA, 'vslow' );
 	}
 
 	/**
@@ -467,12 +488,15 @@ abstract class QueryPage extends SpecialPage {
 	 */
 	public function delete( LinkTarget $title ) {
 		if ( $this->isCached() ) {
-			$dbw = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_PRIMARY );
-			$dbw->delete( 'querycache', [
-				'qc_type' => $this->getName(),
-				'qc_namespace' => $title->getNamespace(),
-				'qc_title' => $title->getDBkey(),
-			], __METHOD__ );
+			$dbw = $this->getDatabaseProvider()->getPrimaryDatabase();
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'querycache' )
+				->where( [
+					'qc_type' => $this->getName(),
+					'qc_namespace' => $title->getNamespace(),
+					'qc_title' => $title->getDBkey(),
+				] )
+				->caller( __METHOD__ )->execute();
 		}
 	}
 
@@ -483,19 +507,19 @@ abstract class QueryPage extends SpecialPage {
 	 */
 	public function deleteAllCachedData() {
 		$fname = static::class . '::' . __FUNCTION__;
-		$dbw = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_PRIMARY );
-		$dbw->delete( 'querycache',
-			[ 'qc_type' => $this->getName() ],
-			$fname
-		);
-		$dbw->delete( 'querycachetwo',
-			[ 'qcc_type' => $this->getName() ],
-			$fname
-		);
-		$dbw->delete( 'querycache_info',
-			[ 'qci_type' => $this->getName() ],
-			$fname
-		);
+		$dbw = $this->getDatabaseProvider()->getPrimaryDatabase();
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'querycache' )
+			->where( [ 'qc_type' => $this->getName() ] )
+			->caller( $fname )->execute();
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'querycachetwo' )
+			->where( [ 'qcc_type' => $this->getName() ] )
+			->caller( $fname )->execute();
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'querycache_info' )
+			->where( [ 'qci_type' => $this->getName() ] )
+			->caller( $fname )->execute();
 	}
 
 	/**
@@ -518,43 +542,32 @@ abstract class QueryPage extends SpecialPage {
 			}
 		}
 
-		if ( is_array( $query ) ) {
-			$tables = isset( $query['tables'] ) ? (array)$query['tables'] : [];
-			$fields = isset( $query['fields'] ) ? (array)$query['fields'] : [];
-			$conds = isset( $query['conds'] ) ? (array)$query['conds'] : [];
-			$options = isset( $query['options'] ) ? (array)$query['options'] : [];
-			$join_conds = isset( $query['join_conds'] ) ? (array)$query['join_conds'] : [];
+		$tables = isset( $query['tables'] ) ? (array)$query['tables'] : [];
+		$fields = isset( $query['fields'] ) ? (array)$query['fields'] : [];
+		$conds = isset( $query['conds'] ) ? (array)$query['conds'] : [];
+		$options = isset( $query['options'] ) ? (array)$query['options'] : [];
+		$join_conds = isset( $query['join_conds'] ) ? (array)$query['join_conds'] : [];
 
-			if ( $order ) {
-				$options['ORDER BY'] = $order;
-			}
-
-			if ( $limit !== false ) {
-				$options['LIMIT'] = intval( $limit );
-			}
-
-			if ( $offset !== false ) {
-				$options['OFFSET'] = intval( $offset );
-			}
-
-			$res = $dbr->select( $tables, $fields, $conds, $fname,
-					$options, $join_conds
-			);
-		} else {
-			// Old-fashioned raw SQL style, deprecated
-			MWDebug::detectDeprecatedOverride(
-				$this,
-				__CLASS__,
-				'getSQL',
-				'1.39'
-			);
-			$sql = $this->getSQL();
-			$sql .= ' ORDER BY ' . implode( ', ', $order );
-			$sql = $dbr->limitResult( $sql, $limit, $offset );
-			$res = $dbr->query( $sql, $fname );
+		$queryBuilder = $dbr->newSelectQueryBuilder()
+			->tables( $tables )
+			->fields( $fields )
+			->conds( $conds )
+			->caller( $fname )
+			->options( $options )
+			->joinConds( $join_conds );
+		if ( $order ) {
+			$queryBuilder->orderBy( $order );
 		}
 
-		return $res;
+		if ( $limit !== false ) {
+			$queryBuilder->limit( intval( $limit ) );
+		}
+
+		if ( $offset !== false ) {
+			$queryBuilder->offset( intval( $offset ) );
+		}
+
+		return $queryBuilder->fetchResultSet();
 	}
 
 	/**
@@ -581,36 +594,28 @@ abstract class QueryPage extends SpecialPage {
 	 * @since 1.18
 	 */
 	public function fetchFromCache( $limit, $offset = false ) {
-		$dbr = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_REPLICA );
-		$options = [];
+		$dbr = $this->getDatabaseProvider()->getReplicaDatabase();
+		$queryBuilder = $dbr->newSelectQueryBuilder()
+			->select( [ 'qc_type', 'namespace' => 'qc_namespace', 'title' => 'qc_title', 'value' => 'qc_value' ] )
+			->from( 'querycache' )
+			->where( [ 'qc_type' => $this->getName() ] );
 
 		if ( $limit !== false ) {
-			$options['LIMIT'] = intval( $limit );
+			$queryBuilder->limit( intval( $limit ) );
 		}
 
 		if ( $offset !== false ) {
-			$options['OFFSET'] = intval( $offset );
+			$queryBuilder->offset( intval( $offset ) );
 		}
 
 		$order = $this->getCacheOrderFields();
 		if ( $this->sortDescending() ) {
-			foreach ( $order as &$field ) {
-				$field .= " DESC";
-			}
-		}
-		if ( $order ) {
-			$options['ORDER BY'] = $order;
+			$queryBuilder->orderBy( $order, SelectQueryBuilder::SORT_DESC );
+		} else {
+			$queryBuilder->orderBy( $order );
 		}
 
-		return $dbr->select( 'querycache',
-				[ 'qc_type',
-				'namespace' => 'qc_namespace',
-				'title' => 'qc_title',
-				'value' => 'qc_value' ],
-				[ 'qc_type' => $this->getName() ],
-				__METHOD__,
-				$options
-		);
+		return $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 	}
 
 	/**
@@ -629,10 +634,13 @@ abstract class QueryPage extends SpecialPage {
 	 */
 	public function getCachedTimestamp() {
 		if ( $this->cachedTimestamp === null ) {
-			$dbr = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_REPLICA );
+			$dbr = $this->getDatabaseProvider()->getReplicaDatabase();
 			$fname = static::class . '::getCachedTimestamp';
-			$this->cachedTimestamp = $dbr->selectField( 'querycache_info', 'qci_timestamp',
-				[ 'qci_type' => $this->getName() ], $fname );
+			$this->cachedTimestamp = $dbr->newSelectQueryBuilder()
+				->select( 'qci_timestamp' )
+				->from( 'querycache_info' )
+				->where( [ 'qci_type' => $this->getName() ] )
+				->caller( $fname )->fetchField();
 		}
 		return $this->cachedTimestamp;
 	}
@@ -650,7 +658,7 @@ abstract class QueryPage extends SpecialPage {
 	 * @return int[] list( $limit, $offset )
 	 */
 	protected function getLimitOffset() {
-		list( $limit, $offset ) = $this->getRequest()
+		[ $limit, $offset ] = $this->getRequest()
 			->getLimitOffsetForUser( $this->getUser() );
 		if ( $this->getConfig()->get( MainConfigNames::MiserMode ) ) {
 			$maxResults = $this->getMaxResults();
@@ -717,7 +725,7 @@ abstract class QueryPage extends SpecialPage {
 		$out->setSyndicated( $this->isSyndicated() );
 
 		if ( $this->limit == 0 && $this->offset == 0 ) {
-			list( $this->limit, $this->offset ) = $this->getLimitOffset();
+			[ $this->limit, $this->offset ] = $this->getLimitOffset();
 		}
 		$dbLimit = $this->getDBLimit( $this->limit, $this->offset );
 		// @todo Use doQuery()
@@ -824,7 +832,7 @@ abstract class QueryPage extends SpecialPage {
 	 *
 	 * @param OutputPage $out OutputPage to print to
 	 * @param Skin $skin User skin to use
-	 * @param IDatabase $dbr Database (read) connection to use
+	 * @param IReadableDatabase $dbr Database (read) connection to use
 	 * @param IResultWrapper $res Result pointer
 	 * @param int $num Number of available result rows
 	 * @param int $offset Paging offset
@@ -838,6 +846,7 @@ abstract class QueryPage extends SpecialPage {
 
 			// $res might contain the whole 1,000 rows, so we read up to
 			// $num [should update this to use a Pager]
+			// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.Found
 			for ( $i = 0; $i < $num && $row = $res->fetchObject(); $i++ ) {
 				$line = $this->formatResult( $skin, $row );
 				if ( $line ) {
@@ -911,6 +920,7 @@ abstract class QueryPage extends SpecialPage {
 
 	/**
 	 * @since 1.36
+	 * @deprecated since 1.43, use self::setDatabaseProvider
 	 * @param ILoadBalancer $loadBalancer
 	 */
 	final protected function setDBLoadBalancer( ILoadBalancer $loadBalancer ) {
@@ -919,6 +929,7 @@ abstract class QueryPage extends SpecialPage {
 
 	/**
 	 * @since 1.36
+	 * @deprecated since 1.43, use self::getDatabaseProvider
 	 * @return ILoadBalancer
 	 */
 	final protected function getDBLoadBalancer(): ILoadBalancer {
@@ -929,4 +940,26 @@ abstract class QueryPage extends SpecialPage {
 		}
 		return $this->loadBalancer;
 	}
+
+	/**
+	 * @since 1.41
+	 * @param IConnectionProvider $databaseProvider
+	 */
+	final protected function setDatabaseProvider( IConnectionProvider $databaseProvider ) {
+		$this->databaseProvider = $databaseProvider;
+	}
+
+	/**
+	 * @since 1.41
+	 * @return IConnectionProvider
+	 */
+	final protected function getDatabaseProvider(): IConnectionProvider {
+		if ( $this->databaseProvider === null ) {
+			$this->databaseProvider = MediaWikiServices::getInstance()->getConnectionProvider();
+		}
+		return $this->databaseProvider;
+	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( QueryPage::class, 'QueryPage' );

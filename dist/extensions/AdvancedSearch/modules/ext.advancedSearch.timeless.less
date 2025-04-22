@@ -1,10 +1,14 @@
+@import 'mediawiki.skin.variables.less';
+
 .mw-advancedSearch-container {
 	input {
+		// All of the following properties should actually be removable with
+		// mediawiki.skin.variables in use.
 		/* Hack around an incompatibility between Timeless and OOUI, please remove if possible */
 		box-shadow: none;
 		// Overwrite Timeless padding to OOUI default to fit general layout
 		padding: 0.625em 0.625em 0.546875em;
-		border-color: #a2a9b1;
+		border-color: @border-color-base;
 		margin: 0;
 		min-height: initial;
 	}

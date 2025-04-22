@@ -115,9 +115,11 @@ return [
 		'formatter-factory-callback' => static function ( $format, FormatterOptions $options ) {
 			$mwServices = MediaWikiServices::getInstance();
 			$revisionLookup = WikibaseRepo::getEntityRevisionLookup( $mwServices );
-			$language = WikibaseRepo::getUserLanguage( $mwServices );
+			$language = WikibaseRepo::getUserLanguage( $mwServices ); // TODO get from $options (T281799)
 
 			$localizedTextProvider = new MediaWikiLocalizedTextProvider( $language );
+			$entityIdLabelFormatter = WikibaseRepo::getEntityIdLabelFormatterFactory( $mwServices )
+				->getEntityIdFormatter( $language );
 
 			$languageFallbackChainFactory = WikibaseRepo::getLanguageFallbackChainFactory();
 			$fallbackChain = $languageFallbackChainFactory->newFromLanguage( $language );
@@ -125,6 +127,8 @@ return [
 
 			if ( $snakFormat->getBaseFormat( $format ) === SnakFormatter::FORMAT_HTML ) {
 				$titleLookup = WikibaseRepo::getEntityTitleLookup( $mwServices );
+				$languageNameLookup = WikibaseRepo::getLanguageNameLookupFactory( $mwServices )
+					->getForLanguage( $language );
 
 				return new EntityIdValueFormatter(
 					new SenseIdHtmlFormatter(
@@ -132,8 +136,9 @@ return [
 						$revisionLookup,
 						$localizedTextProvider,
 						$fallbackChain,
-						new LanguageFallbackIndicator( WikibaseRepo::getLanguageNameLookup( $mwServices ) ),
-						$mwServices->getLanguageFactory()
+						new LanguageFallbackIndicator( $languageNameLookup ),
+						$mwServices->getLanguageFactory(),
+						$entityIdLabelFormatter
 					)
 				);
 			}
@@ -141,7 +146,8 @@ return [
 			return new EntityIdValueFormatter(
 					new SenseIdTextFormatter(
 					$revisionLookup,
-					$localizedTextProvider
+					$localizedTextProvider,
+					$entityIdLabelFormatter
 				)
 			);
 		},

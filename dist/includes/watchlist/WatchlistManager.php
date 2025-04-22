@@ -22,27 +22,24 @@
 
 namespace MediaWiki\Watchlist;
 
-use MediaWiki\Config\ServiceOptions;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
 use MediaWiki\Linker\LinkTarget;
-use MediaWiki\MainConfigNames;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\Page\PageReference;
 use MediaWiki\Page\WikiPageFactory;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\NamespaceInfo;
 use MediaWiki\User\TalkPageNotificationManager;
+use MediaWiki\User\User;
 use MediaWiki\User\UserFactory;
 use MediaWiki\User\UserIdentity;
-use NamespaceInfo;
-use ReadOnlyMode;
-use Status;
 use StatusValue;
-use User;
-use WatchedItemStoreInterface;
 use Wikimedia\ParamValidator\TypeDef\ExpiryDef;
+use Wikimedia\Rdbms\ReadOnlyMode;
 
 /**
  * WatchlistManager service
@@ -54,14 +51,10 @@ class WatchlistManager {
 	/**
 	 * @internal For use by ServiceWiring
 	 */
-	public const CONSTRUCTOR_OPTIONS = [
-		MainConfigNames::EnotifUserTalk,
-		MainConfigNames::EnotifWatchlist,
-		MainConfigNames::ShowUpdatedMarker,
-	];
+	public const OPTION_ENOTIF = 'isEnotifEnabled';
 
-	/** @var ServiceOptions */
-	private $options;
+	/** @var bool */
+	private $isEnotifEnabled;
 
 	/** @var HookRunner */
 	private $hookRunner;
@@ -106,7 +99,7 @@ class WatchlistManager {
 	private $notificationTimestampCache = [];
 
 	/**
-	 * @param ServiceOptions $options
+	 * @param array{isEnotifEnabled:bool} $options
 	 * @param HookContainer $hookContainer
 	 * @param ReadOnlyMode $readOnlyMode
 	 * @param RevisionLookup $revisionLookup
@@ -117,7 +110,7 @@ class WatchlistManager {
 	 * @param WikiPageFactory $wikiPageFactory
 	 */
 	public function __construct(
-		ServiceOptions $options,
+		array $options,
 		HookContainer $hookContainer,
 		ReadOnlyMode $readOnlyMode,
 		RevisionLookup $revisionLookup,
@@ -127,8 +120,7 @@ class WatchlistManager {
 		NamespaceInfo $nsInfo,
 		WikiPageFactory $wikiPageFactory
 	) {
-		$options->assertRequiredOptions( self::CONSTRUCTOR_OPTIONS );
-		$this->options = $options;
+		$this->isEnotifEnabled = $options[ self::OPTION_ENOTIF ];
 		$this->hookRunner = new HookRunner( $hookContainer );
 		$this->readOnlyMode = $readOnlyMode;
 		$this->revisionLookup = $revisionLookup;
@@ -158,18 +150,17 @@ class WatchlistManager {
 			$performer = $this->userFactory->newFromUserIdentity( $performer );
 		}
 
-		if ( !$performer->isAllowed( 'editmywatchlist' ) ) {
-			// User isn't allowed to edit the watchlist
+		$user = $performer->getUser();
+
+		// NOTE: Has to be before `editmywatchlist` user right check, to ensure
+		// anonymous / temporary users have their talk page notifications cleared (T345031).
+		if ( !$this->isEnotifEnabled ) {
+			$this->talkPageNotificationManager->removeUserHasNewMessages( $user );
 			return;
 		}
 
-		$user = $performer->getUser();
-
-		if ( !$this->options->get( MainConfigNames::EnotifUserTalk ) &&
-			!$this->options->get( MainConfigNames::EnotifWatchlist ) &&
-			!$this->options->get( MainConfigNames::ShowUpdatedMarker )
-		) {
-			$this->talkPageNotificationManager->removeUserHasNewMessages( $user );
+		if ( !$performer->isAllowed( 'editmywatchlist' ) ) {
+			// User isn't allowed to edit the watchlist
 			return;
 		}
 
@@ -200,7 +191,7 @@ class WatchlistManager {
 		$performer,
 		$title,
 		int $oldid = 0,
-		RevisionRecord $oldRev = null
+		?RevisionRecord $oldRev = null
 	) {
 		if ( $this->readOnlyMode->isReadOnly() ) {
 			// Cannot change anything in read only
@@ -209,11 +200,6 @@ class WatchlistManager {
 
 		if ( !$performer instanceof Authority ) {
 			$performer = $this->userFactory->newFromUserIdentity( $performer );
-		}
-
-		if ( !$performer->isAllowed( 'editmywatchlist' ) ) {
-			// User isn't allowed to edit the watchlist
-			return;
 		}
 
 		$userIdentity = $performer->getUser();
@@ -228,18 +214,26 @@ class WatchlistManager {
 			} elseif ( !$oldRev ) {
 				$oldRev = $this->revisionLookup->getRevisionById( $oldid );
 			}
+			// NOTE: Has to be called before isAllowed() check, to ensure users with no watchlist
+			// access (by default, temporary and anonymous users) can clear their talk page
+			// notification (T345031).
 			$this->talkPageNotificationManager->clearForPageView( $userIdentity, $oldRev );
 		}
 
-		if ( !$this->options->get( MainConfigNames::EnotifUserTalk ) &&
-			!$this->options->get( MainConfigNames::EnotifWatchlist ) &&
-			!$this->options->get( MainConfigNames::ShowUpdatedMarker )
-		) {
+		if ( !$this->isEnotifEnabled ) {
 			return;
 		}
 
 		if ( !$userIdentity->isRegistered() ) {
 			// Nothing else to do
+			return;
+		}
+
+		// NOTE: Has to be checked after the TalkPageNotificationManager::clearForPageView call, to
+		// ensure users with no watchlist access (by default, temporary and anonymous users) can
+		// clear their talk page notification (T345031).
+		if ( !$performer->isAllowed( 'editmywatchlist' ) ) {
+			// User isn't allowed to edit the watchlist
 			return;
 		}
 
@@ -263,8 +257,8 @@ class WatchlistManager {
 			return false;
 		}
 
-		$cacheKey = 'u' . (string)$user->getId() . '-' .
-			(string)$title->getNamespace() . ':' . $title->getDBkey();
+		$cacheKey = 'u' . $user->getId() . '-' .
+			$title->getNamespace() . ':' . $title->getDBkey();
 
 		// avoid isset here, as it'll return false for null entries
 		if ( array_key_exists( $cacheKey, $this->notificationTimestampCache ) ) {
@@ -493,12 +487,14 @@ class WatchlistManager {
 		bool $watch,
 		Authority $performer,
 		PageIdentity $target,
-		string $expiry = null
+		?string $expiry = null
 	): StatusValue {
-		// User must be registered, and either changing the watch state or at least the expiry.
-		if ( !$performer->getUser()->isRegistered() ) {
+		// User must be registered, and (T371091) not a temp user
+		if ( !$performer->getUser()->isRegistered() || $performer->isTemp() ) {
 			return StatusValue::newGood();
 		}
+
+		// User must be either changing the watch state or at least the expiry.
 
 		// Only call addWatchIgnoringRights() or removeWatch() if there's been a change in the watched status.
 		$oldWatchedItem = $this->watchedItemStore->getWatchedItem( $performer->getUser(), $target );
@@ -523,9 +519,3 @@ class WatchlistManager {
 		return StatusValue::newGood();
 	}
 }
-
-/**
- * Retain the old class name for backwards compatibility.
- * @deprecated since 1.36
- */
-class_alias( WatchlistManager::class, 'MediaWiki\User\WatchlistNotificationManager' );

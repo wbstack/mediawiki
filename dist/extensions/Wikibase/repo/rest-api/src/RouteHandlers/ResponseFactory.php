@@ -5,32 +5,32 @@ namespace Wikibase\Repo\RestApi\RouteHandlers;
 use HttpStatus;
 use MediaWiki\Rest\Response;
 use MediaWiki\Rest\StringStream;
-use Wikibase\Repo\RestApi\Presentation\ErrorResponseToHttpStatus;
-use Wikibase\Repo\RestApi\Presentation\Presenters\ErrorJsonPresenter;
-use Wikibase\Repo\RestApi\UseCases\ErrorResponse;
+use Wikibase\Repo\RestApi\Application\UseCases\UseCaseError;
 
 /**
  * @license GPL-2.0-or-later
  */
 class ResponseFactory {
 
-	private $errorPresenter;
-
-	public function __construct( ErrorJsonPresenter $errorPresenter ) {
-		$this->errorPresenter = $errorPresenter;
+	public function newErrorResponseFromException( UseCaseError $e ): Response {
+		return $this->newErrorResponse( $e->getErrorCode(), $e->getErrorMessage(), $e->getErrorContext() );
 	}
 
-	public function newErrorResponse( ErrorResponse $useCaseResponse ): Response {
-		// respond with framework error, when user cannot edit the Item
-		if ( $useCaseResponse->getCode() === ErrorResponse::PERMISSION_DENIED ) {
+	public function newErrorResponse( string $code, string $message, ?array $context = null ): Response {
+		// respond with framework error, when user cannot edit the Item for an unknown reason
+		if ( $code === UseCaseError::PERMISSION_DENIED_UNKNOWN_REASON ) {
 			return $this->newFrameworkAlikePermissionDeniedResponse();
 		}
 
 		$httpResponse = new Response();
 		$httpResponse->setHeader( 'Content-Type', 'application/json' );
 		$httpResponse->setHeader( 'Content-Language', 'en' );
-		$httpResponse->setStatus( ErrorResponseToHttpStatus::lookup( $useCaseResponse ) );
-		$httpResponse->setBody( new StringStream( $this->errorPresenter->getJson( $useCaseResponse ) ) );
+		$httpResponse->setStatus( ErrorResponseToHttpStatus::lookup( $code ) );
+		$httpResponse->setBody( new StringStream( json_encode(
+			// use array_filter to remove 'context' from array if $context is NULL
+			array_filter( [ 'code' => $code, 'message' => $message, 'context' => $context ] ),
+			JSON_UNESCAPED_SLASHES
+		) ) );
 
 		return $httpResponse;
 	}

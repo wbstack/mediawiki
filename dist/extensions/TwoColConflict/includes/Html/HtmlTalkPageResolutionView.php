@@ -2,7 +2,7 @@
 
 namespace TwoColConflict\Html;
 
-use Html;
+use MediaWiki\Html\Html;
 use MessageLocalizer;
 use OOUI\ButtonWidget;
 use OOUI\FieldLayout;
@@ -20,20 +20,9 @@ use TwoColConflict\SplitConflictUtils;
  */
 class HtmlTalkPageResolutionView {
 
-	/**
-	 * @var HtmlEditableTextComponent
-	 */
-	private $editableTextComponent;
+	private HtmlEditableTextComponent $editableTextComponent;
+	private MessageLocalizer $messageLocalizer;
 
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
-
-	/**
-	 * @param HtmlEditableTextComponent $editableTextComponent
-	 * @param MessageLocalizer $messageLocalizer
-	 */
 	public function __construct(
 		HtmlEditableTextComponent $editableTextComponent,
 		MessageLocalizer $messageLocalizer
@@ -131,7 +120,7 @@ class HtmlTalkPageResolutionView {
 		return Html::rawElement( 'div', [ 'class' => $class ], $html );
 	}
 
-	private function buildOrderSelector() {
+	private function buildOrderSelector(): string {
 		$out = new FieldsetLayout( [
 			'label' => $this->messageLocalizer->msg( 'twocolconflict-talk-reorder-prompt' )->text(),
 			'items' => [
@@ -212,7 +201,7 @@ class HtmlTalkPageResolutionView {
 		return $this->wrapRow( $out );
 	}
 
-	private function getMessageBox( string $messageKey, string $type, $classes = [] ): string {
+	private function getMessageBox( string $messageKey, string $type, string ...$classes ): string {
 		$html = $this->messageLocalizer->msg( $messageKey )->parse();
 		// Force feedback links to be opened in a new tab, and not lose the edit
 		$html = SplitConflictUtils::addTargetBlankToLinks( $html );
@@ -220,7 +209,7 @@ class HtmlTalkPageResolutionView {
 			'label' => new HtmlSnippet( $html ),
 			'type' => $type,
 		] ) )
-			->addClasses( array_merge( [ 'mw-twocolconflict-messageWidget' ], (array)$classes ) )
+			->addClasses( [ 'mw-twocolconflict-messageWidget', ...$classes ] )
 			->toString();
 	}
 

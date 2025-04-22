@@ -3,15 +3,14 @@
 		"authors": [
 			"Elroy",
 			"Goefie",
+			"HanV",
 			"Macofe",
 			"McDutchie",
 			"Robin van der Vliet",
 			"Siebrand",
-			"Sjoerddebruin",
-			"HanV"
+			"Sjoerddebruin"
 		]
 	},
-	"apihelp-languagesearch-description": "Zoeken naar namen van talen in elk script",
 	"apihelp-languagesearch-summary": "Zoeken naar namen van talen in elk script",
 	"apihelp-languagesearch-param-search": "Zoekterm.",
 	"apihelp-languagesearch-param-typos": "Aantal toegestane spelfouten in de te zoeken tekst.",
@@ -22,7 +21,6 @@
 	"apihelp-ulslocalization-param-language": "Taalcode.",
 	"apihelp-ulslocalization-example-1": "De Tamil-lokalisatie opvragen",
 	"apihelp-ulslocalization-example-2": "De Hindi-lokalisatie opvragen",
-	"apihelp-ulssetlang-description": "Door de gebruiker ingestelde taal bijwerken.",
 	"apihelp-ulssetlang-summary": "Door de gebruiker ingestelde taal bijwerken.",
 	"apihelp-ulssetlang-param-languagecode": "De code van de voorkeurstaal.",
 	"apierror-ulssetlang-anon-notallowed": "Anonieme gebruikers mogen de taal van de interface niet wijzigen."

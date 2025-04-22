@@ -15,17 +15,17 @@
 	"license-name": "MIT",
 	"type": "specialpage",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"APIMetaModules": {
 		"notifications": {
-			"class": "ApiEchoNotifications",
+			"class": "MediaWiki\\Extension\\Notifications\\Api\\ApiEchoNotifications",
 			"services": [
 				"MainConfig"
 			]
 		},
 		"unreadnotificationpages": {
-			"class": "ApiEchoUnreadNotificationPages",
+			"class": "MediaWiki\\Extension\\Notifications\\Api\\ApiEchoUnreadNotificationPages",
 			"services": [
 				"PageStore",
 				"TitleFactory"
@@ -33,13 +33,20 @@
 		}
 	},
 	"APIModules": {
-		"echomarkread": "ApiEchoMarkRead",
-		"echomarkseen": "ApiEchoMarkSeen",
-		"echoarticlereminder": "ApiEchoArticleReminder",
+		"echomarkread": "MediaWiki\\Extension\\Notifications\\Api\\ApiEchoMarkRead",
+		"echomarkseen": "MediaWiki\\Extension\\Notifications\\Api\\ApiEchoMarkSeen",
+		"echocreateevent": {
+			"class": "MediaWiki\\Extension\\Notifications\\Api\\ApiEchoCreateEvent",
+			"services": [
+				"UserNameUtils"
+			]
+		},
+		"echoarticlereminder": "MediaWiki\\Extension\\Notifications\\Api\\ApiEchoArticleReminder",
 		"echomute": {
-			"class": "ApiEchoMute",
+			"class": "MediaWiki\\Extension\\Notifications\\Api\\ApiEchoMute",
 			"services": [
 				"CentralIdLookup",
+				"LinkBatchFactory",
 				"UserOptionsManager"
 			]
 		}
@@ -48,27 +55,71 @@
 		"echo-email-frequency": 0,
 		"echo-dont-email-read-notifications": false
 	},
+	"ConditionalUserOptions": {
+		"echo-subscriptions-web-reverted": [
+			[
+				false,
+				[
+					"registered-after",
+					"20240208200000"
+				]
+			]
+		],
+		"echo-subscriptions-web-article-linked": [
+			[
+				true,
+				[
+					"registered-after",
+					"20240208200000"
+				]
+			]
+		],
+		"echo-subscriptions-email-mention": [
+			[
+				true,
+				[
+					"registered-after",
+					"20240208200000"
+				]
+			]
+		],
+		"echo-subscriptions-email-article-linked": [
+			[
+				true,
+				[
+					"registered-after",
+					"20240208200000"
+				]
+			]
+		]
+	},
 	"ExtensionFunctions": [
 		"MediaWiki\\Extension\\Notifications\\Hooks::initEchoExtension"
 	],
 	"JobClasses": {
-		"EchoNotificationJob": "EchoNotificationJob",
-		"EchoNotificationDeleteJob": "EchoNotificationDeleteJob",
+		"EchoNotificationJob": "MediaWiki\\Extension\\Notifications\\Jobs\\NotificationJob",
+		"EchoNotificationDeleteJob": {
+			"class": "MediaWiki\\Extension\\Notifications\\Jobs\\NotificationDeleteJob",
+			"services": [
+				"JobQueueGroup"
+			]
+		},
 		"EchoPushNotificationRequest": "MediaWiki\\Extension\\Notifications\\Push\\NotificationRequestJob"
 	},
 	"SpecialPages": {
-		"Notifications": "SpecialNotifications",
+		"Notifications": "MediaWiki\\Extension\\Notifications\\Special\\SpecialNotifications",
 		"DisplayNotificationsConfiguration": {
-			"class": "SpecialDisplayNotificationsConfiguration",
+			"class": "MediaWiki\\Extension\\Notifications\\Special\\SpecialDisplayNotificationsConfiguration",
 			"services": [
 				"EchoAttributeManager",
 				"UserOptionsManager"
 			]
 		},
-		"NotificationsMarkRead": "SpecialNotificationsMarkRead"
+		"NotificationsMarkRead": "MediaWiki\\Extension\\Notifications\\Special\\SpecialNotificationsMarkRead"
 	},
 	"AvailableRights": [
-		"manage-all-push-subscriptions"
+		"manage-all-push-subscriptions",
+		"echo-create"
 	],
 	"GroupPermissions": {
 		"push-subscription-manager": {
@@ -92,7 +143,6 @@
 			"ext.echo.mobile"
 		],
 		"scripts": [
-			"tests/qunit/mobile/test_NotificationBadge.js",
 			"tests/qunit/model/test_mw.echo.dm.BundleNotificationItem.js",
 			"tests/qunit/model/test_mw.echo.dm.CrossWikiNotificationItem.js",
 			"tests/qunit/model/test_mw.echo.dm.FiltersModel.js",
@@ -106,23 +156,6 @@
 		]
 	},
 	"ResourceModules": {
-		"ext.echo.logger": {
-			"packageFiles": [
-				"logger/mw.echo.Logger.js",
-				{
-					"name": "logger/config.json",
-					"callback": "MediaWiki\\Extension\\Notifications\\Hooks::getLoggerConfigVars"
-				}
-			],
-			"dependencies": [
-				"oojs",
-				"mediawiki.user"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
 		"ext.echo.ui.desktop": {
 			"scripts": [
 				"ui/mw.echo.ui.BadgeLinkWidget.js",
@@ -135,10 +168,8 @@
 				"ext.echo.ui",
 				"ext.echo.styles.badge",
 				"mediawiki.util",
+				"mediawiki.user",
 				"mediawiki.api"
-			],
-			"targets": [
-				"desktop"
 			]
 		},
 		"ext.echo.ui": {
@@ -198,7 +229,6 @@
 			"dependencies": [
 				"ext.echo.api",
 				"ext.echo.dm",
-				"ext.echo.logger",
 				"ext.echo.secondaryicons",
 				"oojs",
 				"oojs-ui-core",
@@ -212,7 +242,8 @@
 				"oojs-ui.styles.icons-content",
 				"oojs-ui.styles.icons-interactions",
 				"oojs-ui.styles.icons-moderation",
-				"oojs-ui.styles.icons-movement"
+				"oojs-ui.styles.icons-movement",
+				"oojs-ui.styles.icons-editing-core"
 			],
 			"messages": [
 				"echo-badge-count",
@@ -255,10 +286,6 @@
 				"thursday",
 				"friday",
 				"saturday"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.echo.dm": {
@@ -287,10 +314,6 @@
 				"echo-api-failure",
 				"echo-notification-loginrequired",
 				"echo-api-failure-cross-wiki"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.echo.api": {
@@ -307,16 +330,9 @@
 				"mediawiki.api",
 				"mediawiki.ForeignApi",
 				"oojs"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.echo.mobile": {
-			"templates": {
-				"NotificationBadge.mustache": "mobile/NotificationBadge.mustache"
-			},
 			"styles": [
 				"mobile/overlay.less",
 				"mobile/notificationsFilterOverlay.less"
@@ -340,12 +356,7 @@
 					"callback": "MediaWiki\\Extension\\Notifications\\Hooks::getConfigVars"
 				},
 				"mobile/overlay.js",
-				"mobile/NotificationBadge.js",
 				"mobile/notificationsFilterOverlay.js"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.echo.init": {
@@ -359,49 +370,28 @@
 			"dependencies": [
 				"ext.echo.api",
 				"mediawiki.jqueryMsg",
-				"mediawiki.Uri"
+				"web2017-polyfills"
 			],
 			"messages": [
 				"echo-badge-count",
 				"echo-displaysnippet-title",
 				"parentheses"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
+			]
+		},
+		"ext.echo.centralauth": {
+			"packageFiles": [
+				"ext.echo.centralauth.js"
 			]
 		},
 		"ext.echo.styles.badge": {
 			"styles": [
 				"nojs/mw.echo.badge.less"
-			],
-			"skinStyles": {
-				"minerva": [
-					"nojs/mw.echo.badge.minerva.less"
-				],
-				"monobook": [
-					"nojs/mw.echo.badge.monobook.less"
-				],
-				"vector": [
-					"nojs/mw.echo.badge.vector.less"
-				],
-				"vector-2022": [
-					"nojs/mw.echo.badge.vector.less"
-				]
-			},
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.echo.styles.notifications": {
 			"styles": [
 				"nojs/mw.echo.notifications.less",
 				"styles/LabelIconWidget.less"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.echo.styles.alert": {
@@ -412,11 +402,7 @@
 				"monobook": [
 					"nojs/mw.echo.alert.monobook.less"
 				]
-			},
-			"targets": [
-				"desktop",
-				"mobile"
-			]
+			}
 		},
 		"ext.echo.special": {
 			"scripts": [
@@ -449,6 +435,7 @@
 			"dependencies": [
 				"ext.echo.ui",
 				"mediawiki.Uri",
+				"mediawiki.user",
 				"ext.echo.styles.special"
 			],
 			"messages": [
@@ -466,19 +453,11 @@
 				"echo-specialpage-section-markread",
 				"echo-specialpage-pagefilterwidget-aria-label",
 				"echo-specialpage-special-help-menu-widget-aria-label"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"ext.echo.styles.special": {
 			"styles": [
 				"nojs/mw.echo.special.less"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		}
 	},
@@ -487,44 +466,63 @@
 		"remoteExtPath": "Echo/modules"
 	},
 	"Hooks": {
-		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\Notifications\\Hooks::onLoadExtensionSchemaUpdates",
-		"GetPreferences": "MediaWiki\\Extension\\Notifications\\Hooks::getPreferences",
-		"BeforePageDisplay": "MediaWiki\\Extension\\Notifications\\Hooks::beforePageDisplay",
-		"ResourceLoaderRegisterModules": "MediaWiki\\Extension\\Notifications\\Hooks::onResourceLoaderRegisterModules",
-		"UserGroupsChanged": "MediaWiki\\Extension\\Notifications\\Hooks::onUserGroupsChanged",
-		"LoadUserOptions": "MediaWiki\\Extension\\Notifications\\Hooks::onLoadUserOptions",
-		"SaveUserOptions": "MediaWiki\\Extension\\Notifications\\Hooks::onSaveUserOptions",
-		"UserGetDefaultOptions": "MediaWiki\\Extension\\Notifications\\Hooks::onUserGetDefaultOptions",
-		"UserClearNewTalkNotification": "MediaWiki\\Extension\\Notifications\\Hooks::onUserClearNewTalkNotification",
-		"EmailUserComplete": "MediaWiki\\Extension\\Notifications\\Hooks::onEmailUserComplete",
-		"LoginFormValidErrorMessages": "MediaWiki\\Extension\\Notifications\\Hooks::onLoginFormValidErrorMessages",
-		"OutputPageCheckLastModified": "MediaWiki\\Extension\\Notifications\\Hooks::onOutputPageCheckLastModified",
-		"ArticleDeleteComplete": "MediaWiki\\Extension\\Notifications\\Hooks::onArticleDeleteComplete",
-		"ArticleUndelete": "MediaWiki\\Extension\\Notifications\\Hooks::onArticleUndelete",
-		"UserMergeAccountFields": "MediaWiki\\Extension\\Notifications\\Hooks::onUserMergeAccountFields",
-		"MergeAccountFromTo": "MediaWiki\\Extension\\Notifications\\Hooks::onMergeAccountFromTo",
-		"UserMergeAccountDeleteTables": "MediaWiki\\Extension\\Notifications\\Hooks::onUserMergeAccountDeleteTables",
-		"EchoGetBundleRules": "MediaWiki\\Extension\\Notifications\\Hooks::onEchoGetBundleRules",
-		"EchoAbortEmailNotification": "MediaWiki\\Extension\\Notifications\\Hooks::onEchoAbortEmailNotification",
-		"PageSaveComplete": "MediaWiki\\Extension\\Notifications\\Hooks::onPageSaveComplete",
-		"LocalUserCreated": "MediaWiki\\Extension\\Notifications\\Hooks::onLocalUserCreated",
-		"RollbackComplete": "MediaWiki\\Extension\\Notifications\\Hooks::onRollbackComplete",
-		"UserSaveSettings": "MediaWiki\\Extension\\Notifications\\Hooks::onUserSaveSettings",
-		"AbortTalkPageEmailNotification": "MediaWiki\\Extension\\Notifications\\Hooks::onAbortTalkPageEmailNotification",
-		"SendWatchlistEmailNotification": "MediaWiki\\Extension\\Notifications\\Hooks::onSendWatchlistEmailNotification",
-		"GetNewMessagesAlert": "MediaWiki\\Extension\\Notifications\\Hooks::abortNewMessagesAlert",
-		"LinksUpdateComplete": "MediaWiki\\Extension\\Notifications\\Hooks::onLinksUpdateComplete",
-		"SpecialMuteModifyFormFields": "MediaWiki\\Extension\\Notifications\\Hooks::onSpecialMuteModifyFormFields",
+		"LoadExtensionSchemaUpdates": "schema",
+		"GetPreferences": "main",
+		"BeforePageDisplay": "main",
+		"ResourceLoaderRegisterModules": "main",
+		"UserGroupsChanged": "main",
+		"LoadUserOptions": "main",
+		"SaveUserOptions": "main",
+		"UserGetDefaultOptions": "main",
+		"UserClearNewTalkNotification": "main",
+		"EmailUserComplete": "main",
+		"LoginFormValidErrorMessages": "main",
+		"OutputPageCheckLastModified": "main",
+		"ArticleDeleteComplete": "main",
+		"ArticleUndelete": "main",
+		"UserMergeAccountFields": "usermerge",
+		"MergeAccountFromTo": "usermerge",
+		"UserMergeAccountDeleteTables": "usermerge",
+		"PageSaveComplete": "main",
+		"LocalUserCreated": "main",
+		"RollbackComplete": "main",
+		"UserSaveSettings": "main",
+		"AbortTalkPageEmailNotification": "main",
+		"SendWatchlistEmailNotification": "main",
+		"GetNewMessagesAlert": "main",
+		"LinksUpdateComplete": "main",
+		"SpecialMuteModifyFormFields": "main",
 		"RecentChange_save": "main",
-		"ApiMain::moduleManager": "MediaWiki\\Extension\\Notifications\\Hooks::onApiMainModuleManager",
-		"SkinTemplateNavigation::Universal": "MediaWiki\\Extension\\Notifications\\Hooks::onSkinTemplateNavigationUniversal"
+		"ApiMain::moduleManager": "main",
+		"SkinTemplateNavigation::Universal": "main",
+		"PreferencesGetIcon": "main"
 	},
 	"HookHandlers": {
 		"main": {
 			"class": "MediaWiki\\Extension\\Notifications\\Hooks",
 			"services": [
-				"MainConfig"
+				"AuthManager",
+				"CentralIdLookup",
+				"MainConfig",
+				"EchoAttributeManager",
+				"HookContainer",
+				"ContentLanguage",
+				"LinkRenderer",
+				"NamespaceInfo",
+				"PermissionManager",
+				"RevisionStore",
+				"StatsFactory",
+				"TalkPageNotificationManager",
+				"UserEditTracker",
+				"UserFactory",
+				"UserOptionsManager"
 			]
+		},
+		"schema": {
+			"class": "MediaWiki\\Extension\\Notifications\\SchemaHooks"
+		},
+		"usermerge": {
+			"class": "MediaWiki\\Extension\\Notifications\\UserMergeHooks"
 		}
 	},
 	"config": {
@@ -608,14 +606,8 @@
 		},
 		"EchoNotifiers": {
 			"value": {
-				"web": [
-					"EchoNotifier",
-					"notifyWithNotification"
-				],
-				"email": [
-					"EchoNotifier",
-					"notifyWithEmail"
-				]
+				"web": "MediaWiki\\Extension\\Notifications\\Notifier::notifyWithNotification",
+				"email": "MediaWiki\\Extension\\Notifications\\Notifier::notifyWithEmail"
 			}
 		},
 		"EchoAgentBlacklist": {
@@ -669,6 +661,10 @@
 					],
 					"tooltip": "echo-pref-tooltip-edit-user-talk"
 				},
+				"edit-user-page": {
+					"priority": 1,
+					"tooltip": "echo-pref-tooltip-edit-user-page"
+				},
 				"reverted": {
 					"priority": 9,
 					"tooltip": "echo-pref-tooltip-reverted"
@@ -708,6 +704,10 @@
 				"minor-watchlist": {
 					"priority": 6,
 					"tooltip": "echo-pref-tooltip-minor-watchlist"
+				},
+				"api-triggered": {
+					"priority": 9,
+					"tooltip": "echo-pref-tooltip-api-triggered"
 				}
 			},
 			"merge_strategy": "array_plus_2d"
@@ -731,6 +731,9 @@
 				},
 				"edit": {
 					"path": "Echo/modules/icons/edit-progressive.svg"
+				},
+				"edit-user-page": {
+					"path": "Echo/modules/icons/edit-user-page.svg"
 				},
 				"edit-user-talk": {
 					"path": "Echo/modules/icons/edit-user-talk-progressive.svg"
@@ -776,6 +779,9 @@
 				},
 				"article-reminder": {
 					"path": "Echo/modules/icons/global-progressive.svg"
+				},
+				"robot": {
+					"path": "Echo/modules/icons/robot.svg"
 				}
 			},
 			"merge_strategy": "array_plus_2d"
@@ -807,18 +813,33 @@
 			"value": {
 				"welcome": {
 					"user-locators": [
-						"EchoUserLocator::locateEventAgent"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateEventAgent"
 					],
 					"canNotifyAgent": true,
 					"category": "system-noemail",
 					"group": "positive",
 					"section": "message",
-					"presentation-model": "EchoWelcomePresentationModel"
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoWelcomePresentationModel"
+				},
+				"edit-user-page": {
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoEditUserPagePresentationModel",
+					"user-locators": [
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateUserPageOwner"
+					],
+					"category": "edit-user-page",
+					"group": "interactive",
+					"section": "alert",
+					"bundle": {
+						"web": true,
+						"email": false,
+						"expandable": true
+					},
+					"immediate": true
 				},
 				"edit-user-talk": {
-					"presentation-model": "EchoEditUserTalkPresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoEditUserTalkPresentationModel",
 					"user-locators": [
-						"EchoUserLocator::locateTalkPageOwner"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateTalkPageOwner"
 					],
 					"category": "edit-user-talk",
 					"group": "interactive",
@@ -831,10 +852,10 @@
 					"immediate": true
 				},
 				"reverted": {
-					"presentation-model": "EchoRevertedPresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoRevertedPresentationModel",
 					"user-locators": [
 						[
-							"EchoUserLocator::locateFromEventExtra",
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateFromEventExtra",
 							[
 								"reverted-user-id"
 							]
@@ -845,9 +866,9 @@
 					"section": "alert"
 				},
 				"page-linked": {
-					"presentation-model": "EchoPageLinkedPresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoPageLinkedPresentationModel",
 					"user-locators": [
-						"EchoUserLocator::locateArticleCreator"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateArticleCreator"
 					],
 					"category": "article-linked",
 					"group": "neutral",
@@ -860,12 +881,12 @@
 				},
 				"minor-watchlist-change": {
 					"user-locators": [
-						"EchoUserLocator::locateUsersWatchingTitle"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateUsersWatchingTitle"
 					],
 					"category": "minor-watchlist",
 					"group": "interactive",
 					"section": "message",
-					"presentation-model": "EchoWatchlistChangePresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoWatchlistChangePresentationModel",
 					"bundle": {
 						"web": true,
 						"email": true,
@@ -874,12 +895,12 @@
 				},
 				"watchlist-change": {
 					"user-locators": [
-						"EchoUserLocator::locateUsersWatchingTitle"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateUsersWatchingTitle"
 					],
 					"section": "message",
 					"category": "watchlist",
 					"group": "interactive",
-					"presentation-model": "EchoWatchlistChangePresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoWatchlistChangePresentationModel",
 					"bundle": {
 						"web": true,
 						"email": true,
@@ -889,7 +910,7 @@
 				"mention": {
 					"user-locators": [
 						[
-							"EchoUserLocator::locateFromEventExtra",
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateFromEventExtra",
 							[
 								"mentioned-users"
 							]
@@ -898,12 +919,12 @@
 					"category": "mention",
 					"group": "interactive",
 					"section": "alert",
-					"presentation-model": "EchoMentionPresentationModel"
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoMentionPresentationModel"
 				},
 				"mention-summary": {
 					"user-locators": [
 						[
-							"EchoUserLocator::locateFromEventExtra",
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateFromEventExtra",
 							[
 								"mentioned-users"
 							]
@@ -912,12 +933,12 @@
 					"category": "mention",
 					"group": "interactive",
 					"section": "alert",
-					"presentation-model": "EchoMentionInSummaryPresentationModel"
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoMentionInSummaryPresentationModel"
 				},
 				"mention-failure": {
 					"user-locators": [
 						[
-							"EchoUserLocator::locateEventAgent"
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateEventAgent"
 						]
 					],
 					"canNotifyAgent": true,
@@ -928,24 +949,24 @@
 					},
 					"group": "negative",
 					"section": "alert",
-					"presentation-model": "EchoMentionStatusPresentationModel"
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoMentionStatusPresentationModel"
 				},
 				"mention-failure-too-many": {
 					"user-locators": [
 						[
-							"EchoUserLocator::locateEventAgent"
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateEventAgent"
 						]
 					],
 					"canNotifyAgent": true,
 					"category": "mention-failure",
 					"group": "negative",
 					"section": "alert",
-					"presentation-model": "EchoMentionStatusPresentationModel"
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoMentionStatusPresentationModel"
 				},
 				"mention-success": {
 					"user-locators": [
 						[
-							"EchoUserLocator::locateEventAgent"
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateEventAgent"
 						]
 					],
 					"canNotifyAgent": true,
@@ -956,12 +977,12 @@
 					},
 					"group": "positive",
 					"section": "message",
-					"presentation-model": "EchoMentionStatusPresentationModel"
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoMentionStatusPresentationModel"
 				},
 				"user-rights": {
 					"user-locators": [
 						[
-							"EchoUserLocator::locateFromEventExtra",
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateFromEventExtra",
 							[
 								"user"
 							]
@@ -970,13 +991,13 @@
 					"category": "user-rights",
 					"group": "neutral",
 					"section": "alert",
-					"presentation-model": "EchoUserRightsPresentationModel"
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoUserRightsPresentationModel"
 				},
 				"emailuser": {
-					"presentation-model": "EchoEmailUserPresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoEmailUserPresentationModel",
 					"user-locators": [
 						[
-							"EchoUserLocator::locateFromEventExtra",
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateFromEventExtra",
 							[
 								"to-user-id"
 							]
@@ -987,9 +1008,9 @@
 					"section": "alert"
 				},
 				"foreign": {
-					"presentation-model": "EchoForeignPresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoForeignPresentationModel",
 					"user-locators": [
-						"EchoUserLocator::locateEventAgent"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateEventAgent"
 					],
 					"category": "foreign",
 					"group": "positive",
@@ -997,46 +1018,59 @@
 				},
 				"thank-you-edit": {
 					"user-locators": [
-						"EchoUserLocator::locateEventAgent"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateEventAgent"
 					],
 					"canNotifyAgent": true,
 					"category": "thank-you-edit",
 					"group": "positive",
-					"presentation-model": "EchoEditThresholdPresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoEditThresholdPresentationModel",
 					"section": "message"
 				},
 				"article-reminder": {
 					"user-locators": [
-						"EchoUserLocator::locateEventAgent"
+						"MediaWiki\\Extension\\Notifications\\UserLocator::locateEventAgent"
 					],
 					"canNotifyAgent": true,
 					"category": "article-reminder",
 					"group": "positive",
-					"presentation-model": "EchoArticleReminderPresentationModel",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoArticleReminderPresentationModel",
 					"section": "message"
+				},
+				"api-alert": {
+					"user-locators": [
+						[
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateFromEventExtra",
+							[
+								"recipients"
+							]
+						]
+					],
+					"canNotifyAgent": true,
+					"category": "api-triggered",
+					"group": "neutral",
+					"section": "alert",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoManualPresentationModel"
+				},
+				"api-notice": {
+					"user-locators": [
+						[
+							"MediaWiki\\Extension\\Notifications\\UserLocator::locateFromEventExtra",
+							[
+								"recipients"
+							]
+						]
+					],
+					"canNotifyAgent": true,
+					"category": "api-triggered",
+					"group": "neutral",
+					"section": "message",
+					"presentation-model": "MediaWiki\\Extension\\Notifications\\Formatters\\EchoManualPresentationModel"
 				}
 			},
 			"merge_strategy": "array_plus_2d"
 		},
 		"EchoCacheVersion": {
 			"value": "1.12"
-		},
-		"EchoEventLoggingVersion": {
-			"value": "1.12"
-		},
-		"EchoEventLoggingSchemas": {
-			"value": {
-				"Echo": {
-					"enabled": false
-				},
-				"EchoMail": {
-					"enabled": false
-				},
-				"EchoInteraction": {
-					"enabled": false
-				}
-			},
-			"merge_strategy": "array_plus_2d"
 		},
 		"AllowArticleReminderNotification": {
 			"value": false,
@@ -1058,6 +1092,10 @@
 			"value": true,
 			"description": "Whether to send email notifications each time a watched page is edited (if false) or only the first time the page is changed before being visited again by the user (if true)"
 		},
+		"EchoEnableApiEvents": {
+			"value": false,
+			"description": "Whether to enable the API for creating custom Echo events"
+		},
 		"EchoEnablePush": {
 			"value": false,
 			"description": "Whether to enable push notifications"
@@ -1071,109 +1109,42 @@
 			"description": "Maximum number of push subscriptions that may be stored in the DB at any given time for a single central user ID."
 		}
 	},
-	"attributes": {
-		"EventLogging": {
-			"Schemas": {
-				"EchoInteraction": "/analytics/legacy/echointeraction/1.0.0",
-				"EchoMail": "/analytics/legacy/echomail/1.0.0"
-			}
-		}
-	},
 	"manifest_version": 2,
 	"AutoloadClasses": {
-		"ApiCrossWiki": "includes/api/ApiCrossWiki.php",
-		"ApiEchoArticleReminder": "includes/api/ApiEchoArticleReminder.php",
-		"ApiEchoMarkRead": "includes/api/ApiEchoMarkRead.php",
-		"ApiEchoMarkSeen": "includes/api/ApiEchoMarkSeen.php",
-		"ApiEchoMute": "includes/api/ApiEchoMute.php",
-		"ApiEchoNotifications": "includes/api/ApiEchoNotifications.php",
-		"ApiEchoUnreadNotificationPages": "includes/api/ApiEchoUnreadNotificationPages.php",
 		"BackfillUnreadWikis": "maintenance/backfillUnreadWikis.php",
-		"Bundleable": "includes/Bundleable.php",
-		"Bundler": "includes/Bundler.php",
-		"EchoAbstractEntity": "includes/model/AbstractEntity.php",
-		"EchoAbstractMapper": "includes/mapper/AbstractMapper.php",
-		"EchoArrayList": "includes/EchoArrayList.php",
 		"EchoAttributeManager": "includes/AttributeManager.php",
-		"EchoCachedList": "includes/EchoCachedList.php",
-		"EchoCallbackIterator": "includes/iterator/CallbackIterator.php",
-		"EchoCatchableFatalErrorException": "includes/exception/CatchableFatalErrorException.php",
-		"EchoContainmentList": "includes/EchoContainmentList.php",
-		"EchoContainmentSet": "includes/EchoContainmentSet.php",
-		"EchoDataOutputFormatter": "includes/DataOutputFormatter.php",
-		"EchoDeferredMarkAsDeletedUpdate": "includes/DeferredMarkAsDeletedUpdate.php",
-		"EchoDiffGroup": "includes/EchoDiffGroup.php",
-		"EchoDiffParser": "includes/EchoDiffParser.php",
+		"MediaWiki\\Extension\\Notifications\\AttributeManager": "includes/AttributeManager.php",
+		"EchoCallbackIterator": "includes/Iterator/CallbackIterator.php",
+		"MediaWiki\\Extension\\Notifications\\Iterator\\CallbackIterator": "includes/Iterator/CallbackIterator.php",
 		"EchoDiscussionParser": "includes/DiscussionParser.php",
-		"EchoEditThresholdPresentationModel": "includes/formatters/EditThresholdPresentationModel.php",
-		"EchoEditUserTalkPresentationModel": "includes/formatters/EditUserTalkPresentationModel.php",
-		"EchoArticleReminderPresentationModel": "includes/formatters/ArticleReminderPresentationModel.php",
-		"EchoEmailFormat": "includes/EmailFormat.php",
-		"EchoEmailFrequency": "includes/EmailFrequency.php",
-		"EchoEmailUserPresentationModel": "includes/formatters/EmailUserPresentationModel.php",
-		"EchoEvent": "includes/model/Event.php",
-		"EchoEventDigestFormatter": "includes/formatters/EchoEventDigestFormatter.php",
-		"EchoEventFormatter": "includes/formatters/EchoEventFormatter.php",
-		"EchoEventMapper": "includes/mapper/EventMapper.php",
-		"EchoEventPresentationModel": "includes/formatters/EventPresentationModel.php",
-		"EchoFilteredSequentialIterator": "includes/iterator/FilteredSequentialIterator.php",
-		"EchoFlyoutFormatter": "includes/formatters/EchoFlyoutFormatter.php",
-		"EchoForeignNotifications": "includes/ForeignNotifications.php",
-		"EchoForeignPresentationModel": "includes/formatters/EchoForeignPresentationModel.php",
-		"EchoForeignWikiRequest": "includes/ForeignWikiRequest.php",
-		"EchoHtmlDigestEmailFormatter": "includes/formatters/EchoHtmlDigestEmailFormatter.php",
-		"EchoHtmlEmailFormatter": "includes/formatters/EchoHtmlEmailFormatter.php",
-		"EchoIcon": "includes/formatters/EchoIcon.php",
-		"EchoLocalCache": "includes/cache/LocalCache.php",
-		"EchoMentionInSummaryPresentationModel": "includes/formatters/MentionInSummaryPresentationModel.php",
-		"EchoMentionPresentationModel": "includes/formatters/MentionPresentationModel.php",
-		"EchoMentionStatusPresentationModel": "includes/formatters/MentionStatusPresentationModel.php",
-		"EchoModelFormatter": "includes/formatters/EchoModelFormatter.php",
-		"EchoModerationController": "includes/controller/ModerationController.php",
-		"EchoMultipleIterator": "includes/iterator/MultipleIterator.php",
-		"EchoNotRecursiveIterator": "includes/iterator/NotRecursiveIterator.php",
-		"EchoNotification": "includes/model/Notification.php",
-		"EchoNotificationController": "includes/controller/NotificationController.php",
-		"EchoNotificationDeleteJob": "includes/jobs/NotificationDeleteJob.php",
-		"EchoNotificationJob": "includes/jobs/NotificationJob.php",
-		"EchoNotificationMapper": "includes/mapper/NotificationMapper.php",
+		"MediaWiki\\Extension\\Notifications\\DiscussionParser": "includes/DiscussionParser.php",
+		"EchoEditUserTalkPresentationModel": "includes/Formatters/EchoEditUserTalkPresentationModel.php",
+		"MediaWiki\\Extension\\Notifications\\Formatters\\EchoEditUserTalkPresentationModel": "includes/Formatters/EchoEditUserTalkPresentationModel.php",
+		"EchoEvent": "includes/Model/Event.php",
+		"MediaWiki\\Extension\\Notifications\\Model\\Event": "includes/Model/Event.php",
+		"EchoEventPresentationModel": "includes/Formatters/EchoEventPresentationModel.php",
+		"MediaWiki\\Extension\\Notifications\\Formatters\\EchoEventPresentationModel": "includes/Formatters/EchoEventPresentationModel.php",
+		"EchoMentionPresentationModel": "includes/Formatters/EchoMentionPresentationModel.php",
+		"MediaWiki\\Extension\\Notifications\\Formatters\\EchoMentionPresentationModel": "includes/Formatters/EchoMentionPresentationModel.php",
+		"EchoMentionStatusPresentationModel": "includes/Formatters/EchoMentionStatusPresentationModel.php",
+		"MediaWiki\\Extension\\Notifications\\Formatters\\EchoMentionStatusPresentationModel": "includes/Formatters/EchoMentionStatusPresentationModel.php",
+		"EchoNotification": "includes/Model/Notification.php",
+		"MediaWiki\\Extension\\Notifications\\Model\\Notification": "includes/Model/Notification.php",
+		"EchoNotificationMapper": "includes/Mapper/NotificationMapper.php",
+		"MediaWiki\\Extension\\Notifications\\Mapper\\NotificationMapper": "includes/Mapper/NotificationMapper.php",
 		"EchoNotifier": "includes/Notifier.php",
-		"EchoOnWikiList": "includes/EchoOnWikiList.php",
-		"EchoPageLinkedPresentationModel": "includes/formatters/PageLinkedPresentationModel.php",
-		"EchoPlainTextDigestEmailFormatter": "includes/formatters/EchoPlainTextDigestEmailFormatter.php",
-		"EchoPlainTextEmailFormatter": "includes/formatters/EchoPlainTextEmailFormatter.php",
-		"EchoPresentationModelSection": "includes/formatters/PresentationModelSection.php",
-		"EchoRevertedPresentationModel": "includes/formatters/RevertedPresentationModel.php",
-		"EchoRevisionLocalCache": "includes/cache/RevisionLocalCache.php",
-		"EchoSeenTime": "includes/SeenTime.php",
-		"EchoServices": "includes/EchoServices.php",
-		"EchoSummaryParser": "includes/EchoSummaryParser.php",
-		"EchoSuppressionRowUpdateGenerator": "includes/schemaUpdate.php",
-		"EchoTargetPage": "includes/model/TargetPage.php",
-		"EchoTargetPageMapper": "includes/mapper/TargetPageMapper.php",
-		"EchoTitleLocalCache": "includes/cache/TitleLocalCache.php",
-		"EchoUnreadWikis": "includes/UnreadWikis.php",
+		"MediaWiki\\Extension\\Notifications\\Notifier": "includes/Notifier.php",
+		"EchoPresentationModelSection": "includes/Formatters/EchoPresentationModelSection.php",
+		"MediaWiki\\Extension\\Notifications\\Formatters\\EchoPresentationModelSection": "includes/Formatters/EchoPresentationModelSection.php",
 		"EchoUserLocator": "includes/UserLocator.php",
-		"EchoUserNotificationGateway": "includes/gateway/UserNotificationGateway.php",
-		"EchoUserRightsPresentationModel": "includes/formatters/UserRightsPresentationModel.php",
-		"EchoWelcomePresentationModel": "includes/formatters/WelcomePresentationModel.php",
-		"EchoWatchlistChangePresentationModel": "includes/formatters/WatchlistChangePresentationModel.php",
+		"MediaWiki\\Extension\\Notifications\\UserLocator": "includes/UserLocator.php",
 		"GenerateSampleNotifications": "maintenance/generateSampleNotifications.php",
-		"MWEchoDbFactory": "includes/EchoDbFactory.php",
-		"MWEchoEmailBatch": "includes/EmailBatch.php",
-		"MWEchoEventLogging": "includes/EventLogging.php",
-		"MWEchoNotifUser": "includes/NotifUser.php",
-		"NotificationPager": "includes/special/NotificationPager.php",
+		"MWEchoDbFactory": "includes/DbFactory.php",
+		"MediaWiki\\Extension\\Notifications\\DbFactory": "includes/DbFactory.php",
 		"ProcessEchoEmailBatch": "maintenance/processEchoEmailBatch.php",
 		"RecomputeNotifCounts": "maintenance/recomputeNotifCounts.php",
 		"RemoveInvalidNotification": "maintenance/removeInvalidNotification.php",
 		"RemoveOrphanedEvents": "maintenance/removeOrphanedEvents.php",
-		"ResourceLoaderEchoImageModule": "includes/ResourceLoaderEchoImageModule.php",
-		"SpecialDisplayNotificationsConfiguration": "includes/special/SpecialDisplayNotificationsConfiguration.php",
-		"SpecialNotifications": "includes/special/SpecialNotifications.php",
-		"SpecialNotificationsFormatter": "includes/formatters/SpecialNotificationsFormatter.php",
-		"SpecialNotificationsMarkRead": "includes/special/SpecialNotificationsMarkRead.php",
-		"UpdateEchoSchemaForSuppression": "maintenance/updateEchoSchemaForSuppression.php",
 		"EchoUpdatePerUserBlacklist": "maintenance/updatePerUserBlacklist.php",
 		"EchoPush\\PushNotifier": "includes/Push/PushNotifier.php",
 		"MediaWiki\\Extension\\Notifications\\Push\\PushNotifier": "includes/Push/PushNotifier.php"
@@ -1182,8 +1153,12 @@
 		"MediaWiki\\Extension\\Notifications\\": "includes/"
 	},
 	"TestAutoloadClasses": {
-		"EchoAbstractMapperStub": "tests/phpunit/mapper/EchoAbstractMapperStub.php",
-		"EchoExecuteFirstArgumentStub": "tests/phpunit/mapper/EchoExecuteFirstArgumentStub.php"
+		"MediaWiki\\Extension\\Notifications\\Test\\EchoAbstractMapperStub": "tests/phpunit/Mapper/EchoAbstractMapperStub.php",
+		"MediaWiki\\Extension\\Notifications\\Test\\Integration\\Mapper\\EchoExecuteFirstArgumentStub": "tests/phpunit/Mapper/EchoExecuteFirstArgumentStub.php"
+	},
+	"TestAutoloadNamespaces": {
+		"MediaWiki\\Extension\\Notifications\\Test\\": "tests/phpunit/",
+		"MediaWiki\\Extension\\Notifications\\Test\\Integration\\": "tests/phpunit/integration/"
 	},
 	"ServiceWiringFiles": [
 		"ServiceWiring.php"

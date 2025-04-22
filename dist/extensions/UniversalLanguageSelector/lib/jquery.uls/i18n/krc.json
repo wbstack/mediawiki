@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Ernác",
-			"Iltever"
+			"Iltever",
+			"Къарачайлы"
 		]
 	},
 	"uls-region-WW": "Бютеудуниялы",
@@ -13,9 +15,11 @@
 	"uls-region-AS": "Азия",
 	"uls-region-ME": "Джууукъ Кюнчыгъыш",
 	"uls-region-PA": "Океания",
+	"uls-region-all": "Бютёу тилле",
 	"uls-no-results-found": "Джукъ да табылмады",
-	"uls-common-languages": "Автомат халда айырылгъан тилле",
+	"uls-common-languages": "Теджелген тилле",
 	"uls-no-results-suggestion-title": "Бу теллеге талпый болурмусуз:",
 	"uls-search-help": "Тилни неда джазманы атына кёре излерге боллукъсуз, тилни ISO-кодуна кёре неда регионнга кёре къараргъа:",
-	"uls-search-placeholder": "Тил излеу"
+	"uls-search-placeholder": "Тилни изле",
+	"uls-search-placeholder-short": "Изле"
 }

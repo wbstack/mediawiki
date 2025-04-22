@@ -84,17 +84,12 @@ class ChangeOpReference extends ChangeOpBase {
 	}
 
 	/**
-	 * @see ChangeOp::apply()
 	 * - a new reference gets added when $referenceHash is empty and $reference is set
 	 * - the reference gets set to $reference when $referenceHash and $reference are set
 	 *
-	 * @param EntityDocument $entity
-	 * @param Summary|null $summary
-	 *
-	 * @throws InvalidArgumentException
-	 * @throws ChangeOpException
+	 * @inheritDoc
 	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		if ( !( $entity instanceof StatementListProvider ) ) {
 			throw new InvalidArgumentException( '$entity must be a StatementListProvider' );
 		}
@@ -129,7 +124,7 @@ class ChangeOpReference extends ChangeOpBase {
 	 *
 	 * @throws ChangeOpException
 	 */
-	protected function addReference( ReferenceList $references, Summary $summary = null ) {
+	protected function addReference( ReferenceList $references, ?Summary $summary ) {
 		if ( $references->hasReference( $this->reference ) ) {
 			$hash = $this->reference->getHash();
 			throw new ChangeOpException( "The statement has already a reference with hash $hash" );
@@ -144,7 +139,7 @@ class ChangeOpReference extends ChangeOpBase {
 	 *
 	 * @throws ChangeOpException
 	 */
-	protected function setReference( ReferenceList $references, Summary $summary = null ) {
+	protected function setReference( ReferenceList $references, ?Summary $summary ) {
 		if ( !$references->hasReferenceHash( $this->referenceHash ) ) {
 			throw new ChangeOpException( "Reference with hash $this->referenceHash does not exist" );
 		}

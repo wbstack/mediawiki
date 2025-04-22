@@ -2,11 +2,9 @@
 
 namespace MediaWiki\Rest\Handler;
 
-use MediaWiki\Rest\HttpException;
+use MediaWiki\Request\WebResponse;
 use MediaWiki\Rest\LocalizedHttpException;
 use MediaWiki\Rest\Response;
-use MediaWiki\Rest\Validator\JsonBodyValidator;
-use WebResponse;
 use Wikimedia\Message\MessageValue;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -19,42 +17,43 @@ class CreationHandler extends EditHandler {
 	 * @inheritDoc
 	 */
 	protected function getTitleParameter() {
-		return $this->getValidatedBody()['title'];
+		$body = $this->getValidatedBody();
+		'@phan-var array $body';
+		return $body['title'];
 	}
 
 	/**
 	 * @inheritDoc
+	 * @return array
 	 */
-	public function getBodyValidator( $contentType ) {
-		if ( $contentType !== 'application/json' ) {
-			throw new HttpException( "Unsupported Content-Type",
-				415,
-				[ 'content_type' => $contentType ]
-			);
-		}
-
-		return new JsonBodyValidator( [
+	public function getBodyParamSettings(): array {
+		return [
 			'source' => [
 				self::PARAM_SOURCE => 'body',
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
+				self::PARAM_DESCRIPTION => 'The intended content of the page',
 			],
 			'title' => [
 				self::PARAM_SOURCE => 'body',
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
+				self::PARAM_DESCRIPTION => 'The title of the page to create',
 			],
 			'comment' => [
 				self::PARAM_SOURCE => 'body',
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
+				self::PARAM_DESCRIPTION => 'A comment descripting the reason for creating the page',
 			],
 			'content_model' => [
 				self::PARAM_SOURCE => 'body',
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => false,
+				self::PARAM_DESCRIPTION => 'The content model to use to interpret the source',
 			],
-		] + $this->getTokenParamDefinition() );
+		]
+		+ $this->getTokenParamDefinition();
 	}
 
 	/**
@@ -62,6 +61,7 @@ class CreationHandler extends EditHandler {
 	 */
 	protected function getActionModuleParameters() {
 		$body = $this->getValidatedBody();
+		'@phan-var array $body';
 
 		$title = $this->getTitleParameter();
 
@@ -73,7 +73,9 @@ class CreationHandler extends EditHandler {
 			);
 		}
 
-		$token = $this->getToken() ?? $this->getUser()->getEditToken();
+		// Use a known good CSRF token if a token is not needed because we are
+		// using a method of authentication that protects against CSRF, like OAuth.
+		$token = $this->needsToken() ? $this->getToken() : $this->getUser()->getEditToken();
 
 		$params = [
 			'action' => 'edit',

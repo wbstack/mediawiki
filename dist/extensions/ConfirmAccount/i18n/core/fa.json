@@ -3,8 +3,8 @@
 		"authors": [
 			"Armin1392",
 			"Beginneruser",
-			"Mjbmr",
-			"Jeeputer"
+			"Jeeputer",
+			"Mjbmr"
 		]
 	},
 	"confirmaccount-newrequests": "'''$1''' ایمیل باز [[Special:ConfirmAccounts|[[Special:ConfirmAccounts|account {{PLURAL:$1|درخواست در حال انتظار}}]] حساب]] تأیید شده است.\n'''توجه شما نیازمند شده است!'''",

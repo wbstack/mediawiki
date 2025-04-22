@@ -26,7 +26,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "Esta referencia ta utilizándose {{PLURAL:$1|una vegada|$1 vegaes}} nesta páxina. Los cambeos que se realicen equí van aplicase a tolos sitios onde se reutilice esta referencia.",
 	"cite-ve-dialog-reference-options-group-label": "Usar esti grupu",
 	"cite-ve-dialog-reference-options-group-placeholder": "Referencies xenerales",
-	"cite-ve-dialog-reference-options-name-label": "Reutilizar por esti nome",
 	"cite-ve-dialog-reference-options-responsive-label": "Usar diseñu de columna reactivu",
 	"cite-ve-dialog-reference-options-section": "Opciones",
 	"cite-ve-dialog-reference-placeholder": "Escribe o pega equí la referencia, o inxerta una plantía de cita.",
@@ -48,7 +47,5 @@
 	"cite-ve-referenceslist-missingref-in-list": "Esta referencia ta definida nuna plantía o n'otru bloque xeneráu, y de momentu namái puede entevese'n mou códigu fonte.",
 	"cite-ve-referenceslist-missingreflist": "Esta llista de referencies ta xenerada por una plantía, y de momentu sólo puede editase'n mou de códigu fonte.",
 	"cite-ve-toolbar-group-label": "Citar",
-	"cite-ve-othergroup-item": "referencia $1",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Referencies",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Nome del grupu de referencies: «$1»"
+	"cite-ve-othergroup-item": "referencia $1"
 }

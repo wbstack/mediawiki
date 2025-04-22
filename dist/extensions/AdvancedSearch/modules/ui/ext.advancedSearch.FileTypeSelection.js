@@ -1,32 +1,34 @@
-( function () {
-	'use strict';
+'use strict';
 
-	mw.libs = mw.libs || {};
-	mw.libs.advancedSearch = mw.libs.advancedSearch || {};
-	mw.libs.advancedSearch.ui = mw.libs.advancedSearch.ui || {};
+const ClassesForDropdownOptions = require( './mixins/ext.advancedSearch.ClassesForDropdownOptions.js' );
+const StoreListener = require( './ext.advancedSearch.StoreListener.js' );
 
-	var getOptions = function ( optionProvider ) {
-		return [ { data: '', label: mw.msg( 'advancedsearch-filetype-default' ) } ]
-			.concat( optionProvider.getFileGroupOptions() )
-			.concat( optionProvider.getAllowedFileTypeOptions() );
-	};
+/**
+ * @param {FileTypeOptionProvider} optionProvider
+ * @return {Object[]}
+ */
+const getOptions = function ( optionProvider ) {
+	return [ { data: '', label: mw.msg( 'advancedsearch-filetype-default' ) } ]
+		.concat( optionProvider.getFileGroupOptions() )
+		.concat( optionProvider.getAllowedFileTypeOptions() );
+};
 
-	/**
-	 * @class
-	 * @extends OO.ui.DropdownInputWidget
-	 * @constructor
-	 *
-	 * @param {mw.libs.advancedSearch.dm.SearchModel} store
-	 * @param {mw.libs.advancedSearch.dm.FileTypeOptionProvider} optionProvider
-	 * @param {Object} config
-	 */
-	mw.libs.advancedSearch.ui.FileTypeSelection = function ( store, optionProvider, config ) {
-		config = $.extend( { options: getOptions( optionProvider ) }, config );
-		this.className = 'mw-advancedSearch-filetype-';
-		mw.libs.advancedSearch.ui.FileTypeSelection.parent.call( this, store, config );
-	};
+/**
+ * @class
+ * @extends StoreListener
+ *
+ * @constructor
+ * @param {SearchModel} store
+ * @param {FileTypeOptionProvider} optionProvider
+ * @param {Object} config
+ */
+const FileTypeSelection = function ( store, optionProvider, config ) {
+	config = Object.assign( { options: getOptions( optionProvider ) }, config );
+	this.className = 'mw-advancedSearch-filetype-';
+	FileTypeSelection.super.call( this, store, config );
+};
 
-	OO.inheritClass( mw.libs.advancedSearch.ui.FileTypeSelection, mw.libs.advancedSearch.ui.StoreListener );
-	OO.mixinClass( mw.libs.advancedSearch.ui.FileTypeSelection, mw.libs.advancedSearch.ui.ClassesForDropdownOptions );
+OO.inheritClass( FileTypeSelection, StoreListener );
+OO.mixinClass( FileTypeSelection, ClassesForDropdownOptions );
 
-}() );
+module.exports = FileTypeSelection;

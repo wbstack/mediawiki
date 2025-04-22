@@ -2,10 +2,10 @@
 
 namespace Wikibase\Client\Hooks;
 
-use Html;
-use IContextSource;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\Hook\InfoActionHook;
-use Title;
+use MediaWiki\Html\Html;
+use MediaWiki\Title\Title;
 use Wikibase\Client\NamespaceChecker;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Store\ClientStore;
@@ -115,11 +115,11 @@ class InfoActionHookHandler implements InfoActionHook {
 		if ( $this->namespaceChecker->isWikibaseEnabled( $title->getNamespace() ) && $title->exists() ) {
 			$pageInfo['header-basic'][] = $this->getPageInfoRow( $context, $title );
 		}
-		if ( $localDescription ) {
+		if ( $localDescription !== null ) {
 			$pageInfo['header-basic'][] = $this->getDescriptionInfoRow( $context, $localDescription,
 				DescriptionLookup::SOURCE_LOCAL );
 		}
-		if ( $centralDescription ) {
+		if ( $centralDescription !== null ) {
 			$pageInfo['header-basic'][] = $this->getDescriptionInfoRow( $context, $centralDescription,
 				DescriptionLookup::SOURCE_CENTRAL );
 		}
@@ -158,7 +158,7 @@ class InfoActionHookHandler implements InfoActionHook {
 		return [
 			// messages: wikibase-pageinfo-description-local, wikibase-pageinfo-description-central
 			$context->msg( 'wikibase-pageinfo-description-' . $source )->parse(),
-			htmlspecialchars( $description )
+			htmlspecialchars( $description ),
 		];
 	}
 
@@ -178,7 +178,7 @@ class InfoActionHookHandler implements InfoActionHook {
 
 		return [
 			$context->msg( 'wikibase-pageinfo-entity-id' )->parse(),
-			$itemLink
+			$itemLink,
 		];
 	}
 
@@ -190,12 +190,12 @@ class InfoActionHookHandler implements InfoActionHook {
 	private function getUnconnectedItemPageInfo( IContextSource $context ) {
 		return [
 			$context->msg( 'wikibase-pageinfo-entity-id' )->parse(),
-			$context->msg( 'wikibase-pageinfo-entity-id-none' )->parse()
+			$context->msg( 'wikibase-pageinfo-entity-id-none' )->parse(),
 		];
 	}
 
 	/**
-	 * @param string[][] $aspects
+	 * @param array[] $aspects
 	 * @param IContextSource $context
 	 * @return string
 	 */
@@ -241,7 +241,7 @@ class InfoActionHookHandler implements InfoActionHook {
 			$entityIds[$entityId] = $entityUsage->getEntityId();
 			$usageAspectsByEntity[$entityId][] = [
 				$entityUsage->getAspect(),
-				$entityUsage->getModifier()
+				$entityUsage->getModifier(),
 			];
 		}
 

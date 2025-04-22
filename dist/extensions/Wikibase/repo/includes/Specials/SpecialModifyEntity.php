@@ -2,9 +2,8 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
-use Status;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Lookup\UnresolvedEntityRedirectException;
@@ -14,10 +13,12 @@ use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\StorageException;
 use Wikibase\Lib\Summary;
 use Wikibase\Lib\UserInputException;
+use Wikibase\Repo\AnonymousEditWarningBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\SummaryFormatter;
 
 /**
@@ -28,6 +29,8 @@ use Wikibase\Repo\SummaryFormatter;
  * @author Daniel Kinzler
  */
 abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
+
+	private AnonymousEditWarningBuilder $anonymousEditWarningBuilder;
 
 	/**
 	 * @var EntityDocument|null
@@ -45,7 +48,7 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 	 * @param SpecialPageCopyrightView $copyrightView
 	 * @param SummaryFormatter $summaryFormatter
 	 * @param EntityTitleLookup $entityTitleLookup
-	 * @param MediawikiEditEntityFactory $editEntityFactory
+	 * @param MediaWikiEditEntityFactory $editEntityFactory
 	 */
 	public function __construct(
 		$title,
@@ -53,7 +56,8 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 		SpecialPageCopyrightView $copyrightView,
 		SummaryFormatter $summaryFormatter,
 		EntityTitleLookup $entityTitleLookup,
-		MediawikiEditEntityFactory $editEntityFactory
+		MediaWikiEditEntityFactory $editEntityFactory,
+		AnonymousEditWarningBuilder $anonymousEditWarningBuilder
 	) {
 		parent::__construct(
 			$title,
@@ -64,6 +68,7 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 			$entityTitleLookup,
 			$editEntityFactory
 		);
+		$this->anonymousEditWarningBuilder = $anonymousEditWarningBuilder;
 	}
 
 	public function doesWrites() {
@@ -215,7 +220,7 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 				$summary = $this->modifyEntity( $updatedEntity );
 
 				if ( $summary ) {
-					$token = $this->getRequest()->getRawVal( 'wpEditToken' );
+					$token = $this->getRequest()->getRawVal( 'wpEditToken' ) ?? '';
 					$status = $this->saveEntity( $updatedEntity, $summary, $token );
 
 					$this->handleStatus( $status, $updatedEntity );
@@ -231,13 +236,12 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 		}
 	}
 
-	private function handleStatus( Status $status, EntityDocument $entity ) {
+	private function handleStatus( EditEntityStatus $status, EntityDocument $entity ) {
 		if ( $status->isOK() ) {
-			$entityUrl = $this->getEntityTitle( $this->getEntityId() )->getFullURL();
-			$this->getOutput()->redirect( $entityUrl );
+			$this->redirectToEntityPage( $status );
 		} else {
-			$errors = $status->getErrorsArray();
-			$this->showErrorHTML( $this->msg( $errors[0][0], array_slice( $errors[0], 1 ) )->parse() );
+			$errors = $status->getMessages();
+			$this->showErrorHTML( $this->msg( $errors[0] )->parse() );
 			$this->setForm( $entity );
 		}
 	}
@@ -248,7 +252,7 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 	 * @param string|null $subPage
 	 */
 	protected function processArguments( $subPage ) {
-		$parts = $subPage === '' ? [] : explode( '/', $subPage, 2 );
+		$parts = $subPage ? explode( '/', $subPage, 2 ) : [];
 
 		$idString = $this->getRequest()->getVal( 'id', $parts[0] ?? null );
 		$baseRevId = $this->getRequest()->getInt( 'revid', 0 );
@@ -269,35 +273,32 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 	 *
 	 * @return HTMLForm
 	 */
-	abstract protected function getForm( EntityDocument $entity = null );
+	abstract protected function getForm( ?EntityDocument $entity );
 
 	/**
 	 * Building the HTML form for modifying an entity.
 	 *
 	 * @param EntityDocument|null $entity
 	 */
-	private function setForm( EntityDocument $entity = null ) {
-		$this->getOutput()->addHTML( $this->getCopyrightHTML() );
-
+	private function setForm( ?EntityDocument $entity ) {
+		$submitKey = $this->getSubmitKey( $entity );
+		if ( $this->showCopyrightNotice( $entity ) ) {
+			$this->getOutput()->addHTML( $this->getCopyrightHTML( $submitKey ) );
+		}
 		if ( !$this->getUser()->isRegistered() ) {
 			$this->getOutput()->addHTML( Html::rawElement(
 				'p',
 				[ 'class' => 'warning' ],
-				$this->msg(
-					'wikibase-anonymouseditwarning',
-					$this->msg( 'wikibase-entity-item' )->text()
-				)->parse()
+				$this->anonymousEditWarningBuilder->buildAnonymousEditWarningHTML( $this->getFullTitle()->getPrefixedText() )
 			) );
 		}
-
-		$submitKey = 'wikibase-' . strtolower( $this->getName() ) . '-submit';
 
 		$this->getForm( $entity )
 			->setId( 'wb-' . strtolower( $this->getName() ) . '-form1' )
 			->setSubmitID( 'wb-' . strtolower( $this->getName() ) . '-submit' )
 			->setSubmitName( $submitKey )
 			->setSubmitTextMsg( $submitKey )
-			->setWrapperLegend( $this->getDescription() )
+			->setWrapperLegendMsg( $this->getDescription() )
 			->setSubmitCallback( function () {
 				// no-op
 			} )->show();
@@ -308,7 +309,7 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 	 *
 	 * @return array
 	 */
-	protected function getFormElements( EntityDocument $entity = null ) {
+	protected function getFormElements( ?EntityDocument $entity ) {
 		$id = 'wb-modifyentity-id';
 
 		return [
@@ -380,7 +381,7 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 	 *
 	 * @throws ChangeOpException
 	 */
-	protected function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, Summary $summary = null ) {
+	protected function applyChangeOp( ChangeOp $changeOp, EntityDocument $entity, ?Summary $summary ) {
 		// NOTE: always validate modification against the current revision!
 		// TODO: this should be re-engineered, see T126231
 		$currentEntityRevision = $this->getLatestRevision();
@@ -393,4 +394,21 @@ abstract class SpecialModifyEntity extends SpecialWikibaseRepoPage {
 		$changeOp->apply( $entity, $summary );
 	}
 
+	/**
+	 * @param EntityDocument|null $entity
+	 *
+	 * @return string submit message key
+	 */
+	protected function getSubmitKey( ?EntityDocument $entity ) {
+		return 'wikibase-' . strtolower( $this->getName() ) . '-submit';
+	}
+
+	/**
+	 * @param EntityDocument|null $entity
+	 *
+	 * @return bool
+	 */
+	protected function showCopyrightNotice( ?EntityDocument $entity ) {
+		return true;
+	}
 }

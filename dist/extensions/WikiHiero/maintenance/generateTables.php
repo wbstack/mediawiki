@@ -22,6 +22,8 @@
  * http://www.gnu.org/copyleft/gpl.html
  */
 
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\Utils\GitInfo;
 use WikiHiero\WikiHiero;
 
 $IP = getenv( 'MW_INSTALL_PATH' );
@@ -51,7 +53,7 @@ class GenerateTables extends Maintenance {
 
 		$files = $this->listFiles( $imgDir );
 		foreach ( $files as $file ) {
-			list( $width, $height, , ) = getimagesize( $imgDir . $file );
+			[ $width, $height, , ] = getimagesize( $imgDir . $file );
 			$wh_files .= "\t\"" . WikiHiero::getCode( $file ) . "\" => [ $width, $height ],\n";
 			if ( strstr( $file, '&' ) ) {
 				$wh_prefabs .= "\t\"" . WikiHiero::getCode( $file ) . "\",\n";
@@ -78,7 +80,7 @@ class GenerateTables extends Maintenance {
 		if ( is_dir( $dir ) ) {
 			$dh = opendir( $dir );
 			if ( $dh ) {
-				// phpcs:ignore MediaWiki.ControlStructures.AssignmentInControlStructures.AssignmentInControlStructures
+				// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				while ( ( $file = readdir( $dh ) ) !== false ) {
 					if ( stristr( $file, WikiHiero::IMAGE_EXT ) ) {
 						$files[] = $file;
@@ -94,6 +96,7 @@ class GenerateTables extends Maintenance {
 		return $files;
 	}
 
+	/** @var string */
 	private $moreTables = '
 $wh_phonemes	=	[ // phoneme -> Gardiner code conversion table
 	"mSa"	=>	"A12",

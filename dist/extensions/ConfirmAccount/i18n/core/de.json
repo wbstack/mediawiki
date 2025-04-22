@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Als-Holder",
+			"Justman10000",
 			"Kghbln",
 			"Leithian",
 			"MF-Warburg",
@@ -12,8 +13,7 @@
 			"Revolus",
 			"Rrosenfeld",
 			"The Evil IP address",
-			"Umherirrender",
-			"Justman10000"
+			"Umherirrender"
 		]
 	},
 	"confirmaccount-newrequests": "[[Special:ConfirmAccounts|{{PLURAL:$1|Ein offener, per E-Mail bestätigter Benutzerkontenantrag wartet|$1 offene, per E-Mail bestätigte Benutzerkontenanträge warten}}]] auf Bearbeitung. '''Bitte kümmere dich darum. Vielen Dank.'''",

@@ -2,12 +2,12 @@
 
 namespace MediaWiki\Extension\OAuth\Rest\Handler;
 
-use FormatJson;
 use GuzzleHttp\Psr7\ServerRequest;
 use MediaWiki\Extension\OAuth\Backend\MWOAuthException;
 use MediaWiki\Extension\OAuth\ResourceServer;
 use MediaWiki\Extension\OAuth\Response;
 use MediaWiki\Extension\OAuth\UserStatementProvider;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\Rest\Handler;
 use MediaWiki\Rest\HttpException;
 use MWException;
@@ -146,7 +146,9 @@ class Resource extends Handler {
 	 * @return ResponseInterface
 	 */
 	private function respond( $response, $data = [] ) {
-		$response->getBody()->write( FormatJson::encode( $data ) );
+		$response->withHeader( 'Content-Type', 'application/json' )
+			->getBody()
+			->write( FormatJson::encode( $data ) );
 		return $response;
 	}
 

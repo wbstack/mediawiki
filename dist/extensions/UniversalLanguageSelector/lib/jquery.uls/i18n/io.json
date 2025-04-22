@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"Algentem",
+			"Amire80",
 			"Joao Xavier",
 			"Robin van der Vliet"
 		]
@@ -15,9 +16,10 @@
 	"uls-region-ME": "Mez-Esto",
 	"uls-region-PA": "Pacifiko",
 	"uls-region-all": "Omna lingui",
-	"uls-no-results-found": "Ne trovis ulo",
+	"uls-no-results-found": "Nula rezulto trovesis",
 	"uls-common-languages": "Sugestanta lingui",
 	"uls-no-results-suggestion-title": "Vu povas havar intereso pri:",
 	"uls-search-help": "Vu povas serchar segun linguala kodexo, nomo dil 'script', kodexo ISO por la linguo, o vu povas serchar segun la regiono.",
-	"uls-search-placeholder": "Serchar linguo"
+	"uls-search-placeholder": "Serchar linguo",
+	"uls-search-placeholder-short": "Serchar"
 }

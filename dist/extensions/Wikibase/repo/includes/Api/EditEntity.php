@@ -4,11 +4,10 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiMain;
-use ApiUsageException;
-use IBufferingStatsdDataFactory;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Title\Title;
 use Serializers\Exceptions\SerializationException;
-use Title;
 use Wikibase\DataModel\Entity\ClearableEntity;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
@@ -29,6 +28,7 @@ use Wikibase\Repo\ChangeOp\EntityChangeOpProvider;
 use Wikibase\Repo\ChangeOp\NonLanguageBoundChangesCounter;
 use Wikibase\Repo\Store\Store;
 use Wikimedia\ParamValidator\ParamValidator;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 
 /**
  * Derived class for API modules modifying a single entity identified by id xor a combination of
@@ -190,7 +190,7 @@ class EditEntity extends ModifyEntity {
 					->onNonexistentEntity( $returnFalse )
 					->map();
 
-				if ( !$baseRevId === $latestRevision ) {
+				if ( $baseRevId !== $latestRevision ) {
 					$this->errorReporter->dieError(
 						'Tried to clear entity using baserevid of entity not equal to current revision',
 						'editconflict'
@@ -451,7 +451,7 @@ class EditEntity extends ModifyEntity {
 				],
 				self::PARAM_CLEAR => [
 					ParamValidator::PARAM_TYPE => 'boolean',
-					ParamValidator::PARAM_DEFAULT => false
+					ParamValidator::PARAM_DEFAULT => false,
 				],
 			]
 		);

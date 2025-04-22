@@ -3,6 +3,9 @@ declare( strict_types = 1 );
 
 namespace Wikimedia\Parsoid\NodeData;
 
+use Wikimedia\Parsoid\DOM\Node;
+use Wikimedia\Parsoid\Utils\DOMCompat;
+use Wikimedia\Parsoid\Utils\DOMUtils;
 use Wikimedia\Parsoid\Utils\Utils;
 
 // phpcs:disable MediaWiki.Commenting.PropertyDocumentation.ObjectTypeHintVar
@@ -17,25 +20,28 @@ use Wikimedia\Parsoid\Utils\Utils;
  * @property object|null $parsoid_diff
  * @property object|null $mw_variant
  * @property int|null $storedId
- * @property DataI18n|null $i18n
+ * @property DataMwI18n|null $i18n
  */
 #[\AllowDynamicProperties]
 class NodeData {
 	/**
-	 * @var DataParsoid|null The unserialized data-parsoid attribute
+	 * The unserialized data-parsoid attribute
 	 */
-	public $parsoid;
+	public ?DataParsoid $parsoid = null;
 
 	/**
-	 * @var object|null The unserialized data-mw attribute
+	 * The unserialized data-mw attribute
 	 */
-	public $mw;
+	public ?DataMw $mw = null;
 
 	/**
 	 * Deep clone this object
+	 * If $stripSealedFragments is true, sealed DOMFragment included in expanded attributes are deleted in the
+	 * clone.
+	 * @param bool $stripSealedFragments
 	 * @return self
 	 */
-	public function clone(): self {
+	public function cloneNodeData( bool $stripSealedFragments = false ): self {
 		$cloneableData = get_object_vars( $this );
 		// Don't clone $this->parsoid because it has a custom clone method
 		unset( $cloneableData['parsoid'] );
@@ -46,6 +52,28 @@ class NodeData {
 		$nd = clone $this;
 		if ( $nd->parsoid ) {
 			$nd->parsoid = $nd->parsoid->clone();
+		}
+		// Avoid cloning sealed DOMFragments that may occur in expanded attributes
+		if ( $nd->mw && $stripSealedFragments && is_array( $nd->mw->attribs ) ) {
+			foreach ( $nd->mw->attribs as $attr ) {
+				// Look for DOMFragments in both key and value of DataMwAttrib
+				foreach ( [ 'key', 'value' ] as $part ) {
+					if (
+						isset( $attr->$part['html'] ) &&
+						str_contains( $attr->$part['html'], 'mw:DOMFragment/sealed' )
+					) {
+						$doc = DOMUtils::parseHTML( $attr->$part['html'] );
+						DOMUtils::visitDOM( $doc, static function ( Node $node ) {
+							if (
+								DOMUtils::matchTypeOf( $node, '#^mw:DOMFragment/sealed/\w+$#D' )
+							) {
+								DOMCompat::getParentElement( $node )->removeChild( $node );
+							}
+						} );
+						$attr->$part['html'] = DOMCompat::getInnerHTML( DOMCompat::getBody( $doc ) );
+					}
+				}
+			}
 		}
 		foreach ( $cloneableData as $key => $value ) {
 			$nd->$key = $value;

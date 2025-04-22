@@ -2,8 +2,8 @@
 
 namespace Wikibase\Lexeme\Presentation\ChangeOp\Deserialization;
 
-use ApiUsageException;
-use Status;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\Status\Status;
 use Wikibase\Lexeme\MediaWiki\Api\Error\ApiError;
 
 /**
@@ -16,8 +16,10 @@ class ValidationContext {
 	 */
 	private $parentContext;
 
+	/** @var string */
 	private $field;
 
+	/** @var string */
 	private $level = '';
 
 	/**

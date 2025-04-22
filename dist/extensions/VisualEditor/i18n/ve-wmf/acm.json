@@ -4,6 +4,11 @@
 			"MRidhaAJ"
 		]
 	},
+	"tag-editcheck-newcontent-description": "ايديت شيك يكول اكو محتوه جديد اجه لهاي الصفحه",
+	"tag-editcheck-newreference-description": "خليت مرجع للصفحه",
+	"tag-editcheck-references-description": "ايديت شيك يكول المصدر المفروض يصير ضروري",
+	"tag-editcheck-references-activated": "[[{{MediaWiki:editcheck-falsepositives-link}}|ايديت شيك (المصادر) مشتعله]]",
+	"tag-editcheck-references-activated-description": "ايديت شيك يكول ضروري يصير مصدر، والواجهه جانت طالعه",
 	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|تحرير مرئي]]",
 	"tag-visualeditor-description": "إنته عدلت بـ[[{{MediaWiki:visualeditor-descriptionpagelink}}|المحرر المرئي]]",
 	"tag-visualeditor-needcheck": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|المحرر المرئي: تحقق]]",
@@ -15,7 +20,6 @@
 	"visualeditor-feedback-link": "Project:المحرر المرئي/تعليقات",
 	"visualeditor-feedback-tool": "خلي تعليق على هاذه البرنامج",
 	"visualeditor-help-label": "اقره دليل النفر",
-	"visualeditor-help-title": "دليل مستخدم على شلون تستخدم المحرر",
 	"visualeditor-welcomedialog-action": "بلش تعديل",
 	"visualeditor-welcomedialog-content": "كل الناس يكدرون يعدلون، وكل تطويره تساعد.",
 	"visualeditor-welcomedialog-content-thanks": "مشكور لان ساعدت العالم يكتشفون هواي!",

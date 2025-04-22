@@ -12,7 +12,7 @@
 	"jsonconfig-edit-action-cancel": "Prekliči",
 	"jsonconfig-edit-button-label": "Uredi kot tabelo",
 	"jsonconfig-edit-dialog-error": "Ni mogoče urediti kot tabelo: $1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "Podatki se ne ujemajo s shemo",
+	"jsonconfig-edit-dialog-error-data-invalid": "Podatki se ne ujemajo s shemo",
 	"jsonconfig-edit-dialog-error-data-missing": "JSON-lastnost <code>data</code> manjka ali pa ni matrika",
 	"jsonconfig-edit-dialog-error-data-too-large": "Podatkovni nabor je preobsežen za urejanje v obliki tabele",
 	"jsonconfig-edit-dialog-error-field-name-missing": "Vsako polje mora imeti ime",
@@ -56,10 +56,11 @@
 	"jsonconfig-license-name-dl-de-by-2.0": "Podatkovna licenca Nemčija – priznanje avtorstva – različica&nbsp;2.0",
 	"jsonconfig-license-name-GeoNutzV": "Licenca Geo Data Nemčija",
 	"jsonconfig-license-url-CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/deed.sl",
-	"jsonconfig-license-copyrightwarning": "S shranitvijo sprememb izražate strinjanje s [https://foundation.wikimedia.org/wiki/Terms_of_Use Pogoji uporabe] in nepreklicno privoljujete v objavo svojega prispevka pod licenco [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
-	"jsonconfig-license-copyrightwarning-license-unset": "S shranitvijo sprememb izražate strinjanje s [https://foundation.wikimedia.org/wiki/Terms_of_Use Pogoji uporabe] in nepreklicno privoljujete v objavo svojega prispevka v skladu z licenco, določeno v polju <code>licence</code> (licenca).",
-	"jsonconfig-license-notice": "'''Opomba:''' Ob urejanju te strani izražate strinjanje z objavo svojega prispevka pod licenco [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning": "Z objavo sprememb privoljujete v objavo svojega prispevka pod pogoji licence [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Z objavo sprememb izražate strinjanje z objavo svojega prispevka v skladu z licenco, določeno v polju <code>licence</code> (licenca).",
+	"jsonconfig-license-notice": "'''Opomba:''' Ob urejanju te strani izražate strinjanje z objavo svojega prispevka pod pogoji licence [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
 	"jsonconfig-license-notice-license-unset": "'''Opomba:''' Ob urejanju te strani izražate strinjanje z objavo svojega prispevka pod licenco, določeno v polju <code>licence</code>.",
 	"right-jsonconfig-flush": "Manipuliranje JsonConfig prek API-ja",
-	"action-jsonconfig-flush": "manipuliranje JsonConfig prek API-ja"
+	"action-jsonconfig-flush": "manipuliranje JsonConfig prek API-ja",
+	"jsonconfig-blocked-page-creation": "Naslov strani, ki ste ga navedli, se ne ujema z nobenim vzorcem, konfiguriranim za razširitev JSONConfig za ta viki."
 }

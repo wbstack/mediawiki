@@ -4,8 +4,8 @@ namespace CirrusSearch\Maintenance\Validators;
 
 use CirrusSearch\Maintenance\Printer;
 use Elastica\Index;
-use RawMessage;
-use Status;
+use MediaWiki\Language\RawMessage;
+use MediaWiki\Status\Status;
 
 class NumberOfShardsValidator extends Validator {
 	/**
@@ -23,7 +23,7 @@ class NumberOfShardsValidator extends Validator {
 	 * @param int $shardCount
 	 * @param Printer|null $out
 	 */
-	public function __construct( Index $index, $shardCount, Printer $out = null ) {
+	public function __construct( Index $index, $shardCount, ?Printer $out = null ) {
 		parent::__construct( $out );
 
 		$this->index = $index;

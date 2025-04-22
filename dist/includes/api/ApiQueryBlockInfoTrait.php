@@ -18,9 +18,17 @@
  * @file
  */
 
-use MediaWiki\Block\DatabaseBlock;
+namespace MediaWiki\Api;
+
+use MediaWiki\Block\CompositeBlock;
+use MediaWiki\Block\HideUserUtils;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\Authority;
-use Wikimedia\Rdbms\IDatabase;
+use stdClass;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\IReadableDatabase;
+use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * @ingroup API
@@ -29,39 +37,64 @@ trait ApiQueryBlockInfoTrait {
 	use ApiBlockInfoTrait;
 
 	/**
-	 * Filters hidden users (where the user doesn't have the right to view them)
-	 * Also adds relevant block information
+	 * Filter hidden users if the current user does not have the ability to
+	 * view them. Also add a field hu_deleted which will be true if the user
+	 * is hidden.
 	 *
-	 * @param bool $showBlockInfo
-	 * @return void
+	 * @since 1.42
 	 */
-	private function addBlockInfoToQuery( $showBlockInfo ) {
-		$db = $this->getDB();
-
-		if ( $showBlockInfo ) {
-			$queryInfo = DatabaseBlock::getQueryInfo();
-		} else {
-			$queryInfo = [
-				'tables' => [ 'ipblocks' ],
-				'fields' => [ 'ipb_deleted' ],
-				'joins' => [],
-			];
-		}
-
-		$this->addTables( [ 'blk' => $queryInfo['tables'] ] );
-		$this->addFields( $queryInfo['fields'] );
-		$this->addJoinConds( $queryInfo['joins'] );
-		$this->addJoinConds( [
-			'blk' => [ 'LEFT JOIN', [
-				'ipb_user=user_id',
-				'ipb_expiry > ' . $db->addQuotes( $db->timestamp() ),
-			] ],
-		] );
-
-		// Don't show hidden names
+	private function addDeletedUserFilter() {
+		// TODO: inject dependencies the way ApiWatchlistTrait does
+		$utils = MediaWikiServices::getInstance()->getHideUserUtils();
 		if ( !$this->getAuthority()->isAllowed( 'hideuser' ) ) {
-			$this->addWhere( 'ipb_deleted = 0 OR ipb_deleted IS NULL' );
+			$this->addWhere( $utils->getExpression( $this->getDB() ) );
+			// The field is always false since we are filtering out rows where it is true
+			$this->addFields( [ 'hu_deleted' => '1=0' ] );
+		} else {
+			$this->addFields( [
+				'hu_deleted' => $utils->getExpression(
+					$this->getDB(),
+					'user_id',
+					HideUserUtils::HIDDEN_USERS
+				)
+			] );
 		}
+	}
+
+	/**
+	 * For a set of rows with a user_id field, get the block details for all
+	 * users, and return them in array, formatted using
+	 * ApiBlockInfoTrait::getBlockDetails().
+	 *
+	 * @since 1.42
+	 * @param iterable<stdClass>|IResultWrapper $rows Rows with a user_id field
+	 * @return array The block details indexed by user_id. If a user is not blocked,
+	 *   the key will be absent.
+	 */
+	private function getBlockDetailsForRows( $rows ) {
+		$ids = [];
+		foreach ( $rows as $row ) {
+			$ids[] = (int)$row->user_id;
+		}
+		if ( !$ids ) {
+			return [];
+		}
+		$blocks = MediaWikiServices::getInstance()->getDatabaseBlockStore()
+			->newListFromConds( [ 'bt_user' => $ids ] );
+		$blocksByUser = [];
+		foreach ( $blocks as $block ) {
+			$blocksByUser[$block->getTargetUserIdentity()->getId()][] = $block;
+		}
+		$infoByUser = [];
+		foreach ( $blocksByUser as $id => $userBlocks ) {
+			if ( count( $userBlocks ) > 1 ) {
+				$maybeCompositeBlock = CompositeBlock::createFromBlocks( ...$userBlocks );
+			} else {
+				$maybeCompositeBlock = $userBlocks[0];
+			}
+			$infoByUser[$id] = $this->getBlockDetails( $maybeCompositeBlock );
+		}
+		return $infoByUser;
 	}
 
 	/***************************************************************************/
@@ -70,7 +103,7 @@ trait ApiQueryBlockInfoTrait {
 
 	/**
 	 * @see ApiBase::getDB
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	abstract protected function getDB();
 
@@ -95,7 +128,7 @@ trait ApiQueryBlockInfoTrait {
 
 	/**
 	 * @see ApiQueryBase::addWhere
-	 * @param string|array $conds
+	 * @param string|array|IExpression $conds
 	 */
 	abstract protected function addWhere( $conds );
 
@@ -105,6 +138,14 @@ trait ApiQueryBlockInfoTrait {
 	 */
 	abstract protected function addJoinConds( $conds );
 
+	/**
+	 * @return SelectQueryBuilder
+	 */
+	abstract protected function getQueryBuilder();
+
 	// endregion -- end of methods required from ApiQueryBase
 
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiQueryBlockInfoTrait::class, 'ApiQueryBlockInfoTrait' );

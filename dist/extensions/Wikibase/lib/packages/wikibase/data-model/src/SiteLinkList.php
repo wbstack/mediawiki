@@ -35,7 +35,7 @@ class SiteLinkList implements IteratorAggregate, Countable {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct( /* iterable */ $siteLinks = [] ) {
-		if ( !is_array( $siteLinks ) && !( $siteLinks instanceof Traversable ) ) {
+		if ( !is_iterable( $siteLinks ) ) {
 			throw new InvalidArgumentException( '$siteLinks must be iterable' );
 		}
 
@@ -105,7 +105,7 @@ class SiteLinkList implements IteratorAggregate, Countable {
 	 *
 	 * @return Iterator|SiteLink[]
 	 */
-	public function getIterator() {
+	public function getIterator(): Traversable {
 		return new ArrayIterator( $this->siteLinks );
 	}
 
@@ -114,7 +114,7 @@ class SiteLinkList implements IteratorAggregate, Countable {
 	 *
 	 * @return int
 	 */
-	public function count() {
+	public function count(): int {
 		return count( $this->siteLinks );
 	}
 
@@ -138,12 +138,12 @@ class SiteLinkList implements IteratorAggregate, Countable {
 	 *
 	 * @param string $siteId
 	 *
-	 * @return boolean
+	 * @return bool
 	 * @throws InvalidArgumentException
 	 */
 	public function hasLinkWithSiteId( $siteId ) {
 		if ( !is_string( $siteId ) ) {
-			throw new InvalidArgumentException( '$siteId must be a string; got ' . gettype( $siteId ) );
+			throw new InvalidArgumentException( '$siteId must be a string; got ' . get_debug_type( $siteId ) );
 		}
 
 		return array_key_exists( $siteId, $this->siteLinks );
@@ -193,7 +193,7 @@ class SiteLinkList implements IteratorAggregate, Countable {
 	 */
 	public function removeLinkWithSiteId( $siteId ) {
 		if ( !is_string( $siteId ) ) {
-			throw new InvalidArgumentException( '$siteId must be a string; got ' . gettype( $siteId ) );
+			throw new InvalidArgumentException( '$siteId must be a string; got ' . get_debug_type( $siteId ) );
 		}
 
 		unset( $this->siteLinks[$siteId] );

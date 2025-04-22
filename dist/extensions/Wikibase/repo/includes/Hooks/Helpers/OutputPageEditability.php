@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Hooks\Helpers;
 
-use OutputPage;
+use MediaWiki\Output\OutputPage;
 
 /**
  * Determined (likely) editability of an OutputPage by inspecting this god object's properties.
@@ -18,7 +18,7 @@ class OutputPageEditability {
 	 * @return bool
 	 */
 	public function validate( OutputPage $out ) {
-		return $out->getUser()->probablyCan( 'edit', $out->getTitle() )
+		return $out->getAuthority()->probablyCan( 'edit', $out->getTitle() )
 			&& $this->isEditView( $out );
 	}
 

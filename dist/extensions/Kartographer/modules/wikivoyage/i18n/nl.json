@@ -2,12 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Mainframe98",
-			"Romaine",
-			"McDutchie"
+			"McDutchie",
+			"Romaine"
 		]
 	},
 	"kartographer-wv-group": "Groep:",
-	"kartographer-wv-layer-nearby-articles": "Artikelen in de buurt",
 	"kartographer-wv-warning-external-source-title": "Externe databron",
 	"kartographer-wv-warning-external-source-message": "Deze inhoud is extern ondergebracht. Als u dit inschakelt worden uw IP-adres en andere gegevens gedeeld met de kaartaanbieder.",
 	"kartographer-wv-warning-external-source-agree": "Ik begrijp het",

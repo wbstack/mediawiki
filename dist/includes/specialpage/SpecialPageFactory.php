@@ -24,21 +24,160 @@
 
 namespace MediaWiki\SpecialPage;
 
-use IContextSource;
-use Language;
 use MediaWiki\Config\ServiceOptions;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
+use MediaWiki\Language\Language;
 use MediaWiki\Linker\LinkRenderer;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\PageReference;
+use MediaWiki\Profiler\ProfilingContext;
+use MediaWiki\Specials\Redirects\SpecialAllMyUploads;
+use MediaWiki\Specials\Redirects\SpecialListAdmins;
+use MediaWiki\Specials\Redirects\SpecialListBots;
+use MediaWiki\Specials\Redirects\SpecialMycontributions;
+use MediaWiki\Specials\Redirects\SpecialMylog;
+use MediaWiki\Specials\Redirects\SpecialMypage;
+use MediaWiki\Specials\Redirects\SpecialMytalk;
+use MediaWiki\Specials\Redirects\SpecialMyuploads;
+use MediaWiki\Specials\Redirects\SpecialTalkPage;
+use MediaWiki\Specials\SpecialActiveUsers;
+use MediaWiki\Specials\SpecialAllMessages;
+use MediaWiki\Specials\SpecialAllPages;
+use MediaWiki\Specials\SpecialAncientPages;
+use MediaWiki\Specials\SpecialApiHelp;
+use MediaWiki\Specials\SpecialApiSandbox;
+use MediaWiki\Specials\SpecialAuthenticationPopupSuccess;
+use MediaWiki\Specials\SpecialAutoblockList;
+use MediaWiki\Specials\SpecialBlankpage;
+use MediaWiki\Specials\SpecialBlock;
+use MediaWiki\Specials\SpecialBlockList;
+use MediaWiki\Specials\SpecialBookSources;
+use MediaWiki\Specials\SpecialBotPasswords;
+use MediaWiki\Specials\SpecialBrokenRedirects;
+use MediaWiki\Specials\SpecialCategories;
+use MediaWiki\Specials\SpecialChangeContentModel;
+use MediaWiki\Specials\SpecialChangeCredentials;
+use MediaWiki\Specials\SpecialChangeEmail;
+use MediaWiki\Specials\SpecialChangePassword;
+use MediaWiki\Specials\SpecialComparePages;
+use MediaWiki\Specials\SpecialConfirmEmail;
+use MediaWiki\Specials\SpecialContribute;
+use MediaWiki\Specials\SpecialContributions;
+use MediaWiki\Specials\SpecialCreateAccount;
+use MediaWiki\Specials\SpecialDeadendPages;
+use MediaWiki\Specials\SpecialDeletedContributions;
+use MediaWiki\Specials\SpecialDeletePage;
+use MediaWiki\Specials\SpecialDiff;
+use MediaWiki\Specials\SpecialDoubleRedirects;
+use MediaWiki\Specials\SpecialEditPage;
+use MediaWiki\Specials\SpecialEditRecovery;
+use MediaWiki\Specials\SpecialEditTags;
+use MediaWiki\Specials\SpecialEditWatchlist;
+use MediaWiki\Specials\SpecialEmailInvalidate;
+use MediaWiki\Specials\SpecialEmailUser;
+use MediaWiki\Specials\SpecialExpandTemplates;
+use MediaWiki\Specials\SpecialExport;
+use MediaWiki\Specials\SpecialFewestRevisions;
+use MediaWiki\Specials\SpecialFileDuplicateSearch;
+use MediaWiki\Specials\SpecialFilepath;
+use MediaWiki\Specials\SpecialGoToInterwiki;
+use MediaWiki\Specials\SpecialImport;
+use MediaWiki\Specials\SpecialJavaScriptTest;
+use MediaWiki\Specials\SpecialLinkAccounts;
+use MediaWiki\Specials\SpecialLinkSearch;
+use MediaWiki\Specials\SpecialListDuplicatedFiles;
+use MediaWiki\Specials\SpecialListFiles;
+use MediaWiki\Specials\SpecialListGrants;
+use MediaWiki\Specials\SpecialListGroupRights;
+use MediaWiki\Specials\SpecialListRedirects;
+use MediaWiki\Specials\SpecialListUsers;
+use MediaWiki\Specials\SpecialLockdb;
+use MediaWiki\Specials\SpecialLog;
+use MediaWiki\Specials\SpecialLonelyPages;
+use MediaWiki\Specials\SpecialLongPages;
+use MediaWiki\Specials\SpecialMediaStatistics;
+use MediaWiki\Specials\SpecialMergeHistory;
+use MediaWiki\Specials\SpecialMIMESearch;
+use MediaWiki\Specials\SpecialMostCategories;
+use MediaWiki\Specials\SpecialMostImages;
+use MediaWiki\Specials\SpecialMostInterwikis;
+use MediaWiki\Specials\SpecialMostLinked;
+use MediaWiki\Specials\SpecialMostLinkedCategories;
+use MediaWiki\Specials\SpecialMostLinkedTemplates;
+use MediaWiki\Specials\SpecialMostRevisions;
+use MediaWiki\Specials\SpecialMovePage;
+use MediaWiki\Specials\SpecialMute;
+use MediaWiki\Specials\SpecialMyLanguage;
+use MediaWiki\Specials\SpecialNamespaceInfo;
+use MediaWiki\Specials\SpecialNewFiles;
+use MediaWiki\Specials\SpecialNewPages;
+use MediaWiki\Specials\SpecialNewSection;
+use MediaWiki\Specials\SpecialPageData;
+use MediaWiki\Specials\SpecialPageHistory;
+use MediaWiki\Specials\SpecialPageInfo;
+use MediaWiki\Specials\SpecialPageLanguage;
+use MediaWiki\Specials\SpecialPagesWithProp;
+use MediaWiki\Specials\SpecialPasswordPolicies;
+use MediaWiki\Specials\SpecialPasswordReset;
+use MediaWiki\Specials\SpecialPermanentLink;
+use MediaWiki\Specials\SpecialPreferences;
+use MediaWiki\Specials\SpecialPrefixIndex;
+use MediaWiki\Specials\SpecialProtectedPages;
+use MediaWiki\Specials\SpecialProtectedTitles;
+use MediaWiki\Specials\SpecialProtectPage;
+use MediaWiki\Specials\SpecialPurge;
+use MediaWiki\Specials\SpecialRandomInCategory;
+use MediaWiki\Specials\SpecialRandomPage;
+use MediaWiki\Specials\SpecialRandomRedirect;
+use MediaWiki\Specials\SpecialRandomRootPage;
+use MediaWiki\Specials\SpecialRecentChanges;
+use MediaWiki\Specials\SpecialRecentChangesLinked;
+use MediaWiki\Specials\SpecialRedirect;
+use MediaWiki\Specials\SpecialRemoveCredentials;
+use MediaWiki\Specials\SpecialRenameUser;
+use MediaWiki\Specials\SpecialResetTokens;
+use MediaWiki\Specials\SpecialRestSandbox;
+use MediaWiki\Specials\SpecialRevisionDelete;
+use MediaWiki\Specials\SpecialRunJobs;
+use MediaWiki\Specials\SpecialSearch;
+use MediaWiki\Specials\SpecialShortPages;
+use MediaWiki\Specials\SpecialSpecialPages;
+use MediaWiki\Specials\SpecialStatistics;
+use MediaWiki\Specials\SpecialTags;
+use MediaWiki\Specials\SpecialTrackingCategories;
+use MediaWiki\Specials\SpecialUnblock;
+use MediaWiki\Specials\SpecialUncategorizedCategories;
+use MediaWiki\Specials\SpecialUncategorizedImages;
+use MediaWiki\Specials\SpecialUncategorizedPages;
+use MediaWiki\Specials\SpecialUncategorizedTemplates;
+use MediaWiki\Specials\SpecialUndelete;
+use MediaWiki\Specials\SpecialUnlinkAccounts;
+use MediaWiki\Specials\SpecialUnlockdb;
+use MediaWiki\Specials\SpecialUnusedCategories;
+use MediaWiki\Specials\SpecialUnusedImages;
+use MediaWiki\Specials\SpecialUnusedTemplates;
+use MediaWiki\Specials\SpecialUnwatchedPages;
+use MediaWiki\Specials\SpecialUpload;
+use MediaWiki\Specials\SpecialUploadStash;
+use MediaWiki\Specials\SpecialUserLogin;
+use MediaWiki\Specials\SpecialUserLogout;
+use MediaWiki\Specials\SpecialUserRights;
+use MediaWiki\Specials\SpecialVersion;
+use MediaWiki\Specials\SpecialWantedCategories;
+use MediaWiki\Specials\SpecialWantedFiles;
+use MediaWiki\Specials\SpecialWantedPages;
+use MediaWiki\Specials\SpecialWantedTemplates;
+use MediaWiki\Specials\SpecialWatchlist;
+use MediaWiki\Specials\SpecialWhatLinksHere;
+use MediaWiki\Specials\SpecialWithoutInterwiki;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFactory;
+use MediaWiki\User\User;
 use Profiler;
-use RequestContext;
-use SpecialPage;
-use Title;
-use TitleFactory;
-use User;
+use Wikimedia\DebugInfo\DebugInfoTrait;
 use Wikimedia\ObjectFactory\ObjectFactory;
 
 /**
@@ -63,201 +202,203 @@ use Wikimedia\ObjectFactory\ObjectFactory;
  * @since 1.17
  */
 class SpecialPageFactory {
+	use DebugInfoTrait;
+
 	/**
 	 * List of special page names to the subclass of SpecialPage which handles them.
 	 */
 	private const CORE_LIST = [
 		// Maintenance Reports
 		'BrokenRedirects' => [
-			'class' => \SpecialBrokenRedirects::class,
+			'class' => SpecialBrokenRedirects::class,
 			'services' => [
 				'ContentHandlerFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Deadendpages' => [
-			'class' => \SpecialDeadendPages::class,
+			'class' => SpecialDeadendPages::class,
 			'services' => [
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'DoubleRedirects' => [
-			'class' => \SpecialDoubleRedirects::class,
+			'class' => SpecialDoubleRedirects::class,
 			'services' => [
 				'ContentHandlerFactory',
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'Longpages' => [
-			'class' => \SpecialLongPages::class,
+			'class' => SpecialLongPages::class,
 			'services' => [
 				// Same as for Shortpages
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Ancientpages' => [
-			'class' => \SpecialAncientPages::class,
+			'class' => SpecialAncientPages::class,
 			'services' => [
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Lonelypages' => [
-			'class' => \SpecialLonelyPages::class,
+			'class' => SpecialLonelyPages::class,
 			'services' => [
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 				'LinksMigration',
 			]
 		],
 		'Fewestrevisions' => [
-			'class' => \SpecialFewestRevisions::class,
+			'class' => SpecialFewestRevisions::class,
 			'services' => [
 				// Same as for Mostrevisions
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Withoutinterwiki' => [
-			'class' => \SpecialWithoutInterwiki::class,
+			'class' => SpecialWithoutInterwiki::class,
 			'services' => [
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Protectedpages' => [
-			'class' => \SpecialProtectedpages::class,
+			'class' => SpecialProtectedPages::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'CommentStore',
-				'UserCache',
 				'RowCommentFormatter',
 				'RestrictionStore',
 			]
 		],
 		'Protectedtitles' => [
-			'class' => \SpecialProtectedtitles::class,
+			'class' => SpecialProtectedTitles::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'Shortpages' => [
-			'class' => \SpecialShortPages::class,
+			'class' => SpecialShortPages::class,
 			'services' => [
 				// Same as for Longpages
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Uncategorizedcategories' => [
-			'class' => \SpecialUncategorizedCategories::class,
+			'class' => SpecialUncategorizedCategories::class,
 			'services' => [
 				// Same as for SpecialUncategorizedPages and SpecialUncategorizedTemplates
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Uncategorizedimages' => [
-			'class' => \SpecialUncategorizedImages::class,
+			'class' => SpecialUncategorizedImages::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'Uncategorizedpages' => [
-			'class' => \SpecialUncategorizedPages::class,
+			'class' => SpecialUncategorizedPages::class,
 			'services' => [
 				// Same as for SpecialUncategorizedCategories and SpecialUncategorizedTemplates
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Uncategorizedtemplates' => [
-			'class' => \SpecialUncategorizedTemplates::class,
+			'class' => SpecialUncategorizedTemplates::class,
 			'services' => [
 				// Same as for SpecialUncategorizedCategories and SpecialUncategorizedPages
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Unusedcategories' => [
-			'class' => \SpecialUnusedCategories::class,
+			'class' => SpecialUnusedCategories::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Unusedimages' => [
-			'class' => \SpecialUnusedImages::class,
+			'class' => SpecialUnusedImages::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'Unusedtemplates' => [
-			'class' => \SpecialUnusedTemplates::class,
+			'class' => SpecialUnusedTemplates::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinksMigration',
 			]
 		],
 		'Unwatchedpages' => [
-			'class' => \SpecialUnwatchedPages::class,
+			'class' => SpecialUnwatchedPages::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LanguageConverterFactory',
 			]
 		],
 		'Wantedcategories' => [
-			'class' => \SpecialWantedCategories::class,
+			'class' => SpecialWantedCategories::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Wantedfiles' => [
-			'class' => \WantedFilesPage::class,
+			'class' => SpecialWantedFiles::class,
 			'services' => [
 				'RepoGroup',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Wantedpages' => [
-			'class' => \WantedPagesPage::class,
+			'class' => SpecialWantedPages::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
+				'LinksMigration',
 			]
 		],
 		'Wantedtemplates' => [
-			'class' => \SpecialWantedTemplates::class,
+			'class' => SpecialWantedTemplates::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LinksMigration',
 			]
@@ -265,43 +406,44 @@ class SpecialPageFactory {
 
 		// List of pages
 		'Allpages' => [
-			'class' => \SpecialAllPages::class,
+			'class' => SpecialAllPages::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'SearchEngineFactory',
+				'PageStore',
 			]
 		],
 		'Prefixindex' => [
-			'class' => \SpecialPrefixindex::class,
+			'class' => SpecialPrefixIndex::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkCache',
 			]
 		],
 		'Categories' => [
-			'class' => \SpecialCategories::class,
+			'class' => SpecialCategories::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'Listredirects' => [
-			'class' => \SpecialListRedirects::class,
+			'class' => SpecialListRedirects::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'WikiPageFactory',
 				'RedirectLookup'
 			]
 		],
 		'PagesWithProp' => [
-			'class' => \SpecialPagesWithProp::class,
+			'class' => SpecialPagesWithProp::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'TrackingCategories' => [
-			'class' => \SpecialTrackingCategories::class,
+			'class' => SpecialTrackingCategories::class,
 			'services' => [
 				'LinkBatchFactory',
 				'TrackingCategories',
@@ -310,60 +452,73 @@ class SpecialPageFactory {
 
 		// Authentication
 		'Userlogin' => [
-			'class' => \SpecialUserLogin::class,
+			'class' => SpecialUserLogin::class,
 			'services' => [
 				'AuthManager',
 			]
 		],
 		'Userlogout' => [
-			'class' => \SpecialUserLogout::class,
+			'class' => SpecialUserLogout::class,
+			'services' => [
+				'TempUserConfig',
+			],
 		],
 		'CreateAccount' => [
-			'class' => \SpecialCreateAccount::class,
+			'class' => SpecialCreateAccount::class,
 			'services' => [
 				'AuthManager',
+				'FormatterFactory',
 			]
 		],
 		'LinkAccounts' => [
-			'class' => \SpecialLinkAccounts::class,
+			'class' => SpecialLinkAccounts::class,
 			'services' => [
 				'AuthManager',
 			]
 		],
 		'UnlinkAccounts' => [
-			'class' => \SpecialUnlinkAccounts::class,
+			'class' => SpecialUnlinkAccounts::class,
 			'services' => [
 				'AuthManager',
 			]
 		],
 		'ChangeCredentials' => [
-			'class' => \SpecialChangeCredentials::class,
+			'class' => SpecialChangeCredentials::class,
 			'services' => [
 				'AuthManager',
 			]
 		],
 		'RemoveCredentials' => [
-			'class' => \SpecialRemoveCredentials::class,
+			'class' => SpecialRemoveCredentials::class,
 			'services' => [
 				'AuthManager',
+			]
+		],
+		'AuthenticationPopupSuccess' => [
+			'class' => SpecialAuthenticationPopupSuccess::class,
+			'services' => [
+				'SkinFactory',
 			]
 		],
 
 		// Users and rights
 		'Activeusers' => [
-			'class' => \SpecialActiveUsers::class,
+			'class' => SpecialActiveUsers::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'UserGroupManager',
+				'UserIdentityLookup',
+				'HideUserUtils',
 			]
 		],
 		'Block' => [
-			'class' => \SpecialBlock::class,
+			'class' => SpecialBlock::class,
 			'services' => [
 				'BlockUtils',
 				'BlockPermissionCheckerFactory',
 				'BlockUserFactory',
+				'DatabaseBlockStore',
 				'UserNameUtils',
 				'UserNamePrefixSearch',
 				'BlockActionInfo',
@@ -372,43 +527,48 @@ class SpecialPageFactory {
 			]
 		],
 		'Unblock' => [
-			'class' => \SpecialUnblock::class,
+			'class' => SpecialUnblock::class,
 			'services' => [
 				'UnblockUserFactory',
 				'BlockUtils',
+				'DatabaseBlockStore',
 				'UserNameUtils',
 				'UserNamePrefixSearch',
+				'WatchlistManager',
 			]
 		],
 		'BlockList' => [
-			'class' => \SpecialBlockList::class,
+			'class' => SpecialBlockList::class,
 			'services' => [
 				'LinkBatchFactory',
+				'DatabaseBlockStore',
 				'BlockRestrictionStore',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'CommentStore',
 				'BlockUtils',
+				'HideUserUtils',
 				'BlockActionInfo',
 				'RowCommentFormatter',
 			],
 		],
 		'AutoblockList' => [
-			'class' => \SpecialAutoblockList::class,
+			'class' => SpecialAutoblockList::class,
 			'services' => [
 				'LinkBatchFactory',
 				'BlockRestrictionStore',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'CommentStore',
 				'BlockUtils',
+				'HideUserUtils',
 				'BlockActionInfo',
 				'RowCommentFormatter',
 			],
 		],
 		'ChangePassword' => [
-			'class' => \SpecialChangePassword::class,
+			'class' => SpecialChangePassword::class,
 		],
 		'BotPasswords' => [
-			'class' => \SpecialBotPasswords::class,
+			'class' => SpecialBotPasswords::class,
 			'services' => [
 				'PasswordFactory',
 				'AuthManager',
@@ -418,41 +578,45 @@ class SpecialPageFactory {
 			]
 		],
 		'PasswordReset' => [
-			'class' => \SpecialPasswordReset::class,
+			'class' => SpecialPasswordReset::class,
 			'services' => [
 				'PasswordReset'
 			]
 		],
 		'DeletedContributions' => [
-			'class' => \SpecialDeletedContributions::class,
+			'class' => SpecialDeletedContributions::class,
 			'services' => [
 				'PermissionManager',
-				'DBLoadBalancer',
-				'CommentStore',
-				'RevisionFactory',
+				'ConnectionProvider',
+				'RevisionStore',
 				'NamespaceInfo',
-				'UserFactory',
 				'UserNameUtils',
 				'UserNamePrefixSearch',
+				'UserOptionsLookup',
+				'CommentFormatter',
+				'LinkBatchFactory',
+				'UserFactory',
+				'UserIdentityLookup',
+				'DatabaseBlockStore',
+				'TempUserConfig',
 			]
 		],
 		'Preferences' => [
-			'class' => \SpecialPreferences::class,
+			'class' => SpecialPreferences::class,
 			'services' => [
 				'PreferencesFactory',
 				'UserOptionsManager',
 			]
 		],
 		'ResetTokens' => [
-			'class' => \SpecialResetTokens::class,
+			'class' => SpecialResetTokens::class,
 		],
 		'Contributions' => [
-			'class' => \SpecialContributions::class,
+			'class' => SpecialContributions::class,
 			'services' => [
 				'LinkBatchFactory',
 				'PermissionManager',
-				'DBLoadBalancer',
-				'ActorMigration',
+				'ConnectionProvider',
 				'RevisionStore',
 				'NamespaceInfo',
 				'UserNameUtils',
@@ -460,10 +624,13 @@ class SpecialPageFactory {
 				'UserOptionsLookup',
 				'CommentFormatter',
 				'UserFactory',
+				'UserIdentityLookup',
+				'DatabaseBlockStore',
+				'TempUserConfig',
 			]
 		],
 		'Listgrouprights' => [
-			'class' => \SpecialListGroupRights::class,
+			'class' => SpecialListGroupRights::class,
 			'services' => [
 				'NamespaceInfo',
 				'UserGroupManager',
@@ -472,36 +639,41 @@ class SpecialPageFactory {
 			]
 		],
 		'Listgrants' => [
-			'class' => \SpecialListGrants::class,
+			'class' => SpecialListGrants::class,
 			'services' => [
 				'GrantsLocalization',
 			]
 		],
 		'Listusers' => [
-			'class' => \SpecialListUsers::class,
+			'class' => SpecialListUsers::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'UserGroupManager',
+				'UserIdentityLookup',
+				'HideUserUtils',
 			]
 		],
 		'Listadmins' => [
-			'class' => \SpecialListAdmins::class,
+			'class' => SpecialListAdmins::class,
 		],
 		'Listbots' => [
-			'class' => \SpecialListBots::class,
+			'class' => SpecialListBots::class,
 		],
 		'Userrights' => [
-			'class' => \UserrightsPage::class,
+			'class' => SpecialUserRights::class,
 			'services' => [
 				'UserGroupManagerFactory',
 				'UserNameUtils',
 				'UserNamePrefixSearch',
 				'UserFactory',
+				'ActorStoreFactory',
+				'WatchlistManager',
+				'TempUserConfig',
 			]
 		],
 		'EditWatchlist' => [
-			'class' => \SpecialEditWatchlist::class,
+			'class' => SpecialEditWatchlist::class,
 			'services' => [
 				'WatchedItemStore',
 				'TitleParser',
@@ -513,7 +685,7 @@ class SpecialPageFactory {
 			]
 		],
 		'PasswordPolicies' => [
-			'class' => \SpecialPasswordPolicies::class,
+			'class' => SpecialPasswordPolicies::class,
 			'services' => [
 				'UserGroupManager',
 			]
@@ -521,104 +693,117 @@ class SpecialPageFactory {
 
 		// Recent changes and logs
 		'Newimages' => [
-			'class' => \SpecialNewFiles::class,
+			'class' => SpecialNewFiles::class,
 			'services' => [
 				'MimeAnalyzer',
 				'GroupPermissionsLookup',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Log' => [
-			'class' => \SpecialLog::class,
+			'class' => SpecialLog::class,
 			'services' => [
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'ActorNormalization',
 				'UserIdentityLookup',
+				'UserNameUtils',
+				'LogFormatterFactory',
 			]
 		],
 		'Watchlist' => [
-			'class' => \SpecialWatchlist::class,
+			'class' => SpecialWatchlist::class,
 			'services' => [
 				'WatchedItemStore',
 				'WatchlistManager',
-				'DBLoadBalancer',
 				'UserOptionsLookup',
+				'ChangeTagsStore',
+				'UserIdentityUtils',
+				'TempUserConfig',
 			]
 		],
 		'Newpages' => [
-			'class' => \SpecialNewpages::class,
+			'class' => SpecialNewPages::class,
 			'services' => [
 				'LinkBatchFactory',
-				'CommentStore',
 				'ContentHandlerFactory',
 				'GroupPermissionsLookup',
-				'DBLoadBalancer',
 				'RevisionLookup',
 				'NamespaceInfo',
 				'UserOptionsLookup',
+				'RowCommentFormatter',
+				'ChangeTagsStore',
+				'TempUserConfig',
 			]
 		],
 		'Recentchanges' => [
-			'class' => \SpecialRecentChanges::class,
+			'class' => SpecialRecentChanges::class,
 			'services' => [
 				'WatchedItemStore',
 				'MessageCache',
-				'DBLoadBalancer',
 				'UserOptionsLookup',
+				'ChangeTagsStore',
+				'UserIdentityUtils',
+				'TempUserConfig',
 			]
 		],
 		'Recentchangeslinked' => [
-			'class' => \SpecialRecentChangesLinked::class,
+			'class' => SpecialRecentChangesLinked::class,
 			'services' => [
 				'WatchedItemStore',
 				'MessageCache',
-				'DBLoadBalancer',
 				'UserOptionsLookup',
 				'SearchEngineFactory',
+				'ChangeTagsStore',
+				'UserIdentityUtils',
+				'TempUserConfig',
 			]
 		],
 		'Tags' => [
-			'class' => \SpecialTags::class,
+			'class' => SpecialTags::class,
+			'services' => [
+				'ChangeTagsStore',
+			]
 		],
 
 		// Media reports and uploads
 		'Listfiles' => [
-			'class' => \SpecialListFiles::class,
+			'class' => SpecialListFiles::class,
 			'services' => [
 				'RepoGroup',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'CommentStore',
 				'UserNameUtils',
 				'UserNamePrefixSearch',
-				'UserCache',
+				'CommentFormatter',
+				'LinkBatchFactory',
 			]
 		],
 		'Filepath' => [
-			'class' => \SpecialFilepath::class,
+			'class' => SpecialFilepath::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'MediaStatistics' => [
-			'class' => \SpecialMediaStatistics::class,
+			'class' => SpecialMediaStatistics::class,
 			'services' => [
 				'MimeAnalyzer',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'MIMEsearch' => [
-			'class' => \SpecialMIMESearch::class,
+			'class' => SpecialMIMESearch::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'FileDuplicateSearch' => [
-			'class' => \SpecialFileDuplicateSearch::class,
+			'class' => SpecialFileDuplicateSearch::class,
 			'services' => [
 				'LinkBatchFactory',
 				'RepoGroup',
@@ -627,7 +812,7 @@ class SpecialPageFactory {
 			]
 		],
 		'Upload' => [
-			'class' => \SpecialUpload::class,
+			'class' => SpecialUpload::class,
 			'services' => [
 				'RepoGroup',
 				'UserOptionsLookup',
@@ -635,144 +820,162 @@ class SpecialPageFactory {
 			]
 		],
 		'UploadStash' => [
-			'class' => \SpecialUploadStash::class,
+			'class' => SpecialUploadStash::class,
 			'services' => [
 				'RepoGroup',
 				'HttpRequestFactory',
+				'UrlUtils',
+				'ConnectionProvider',
 			]
 		],
 		'ListDuplicatedFiles' => [
-			'class' => \SpecialListDuplicatedFiles::class,
+			'class' => SpecialListDuplicatedFiles::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 
 		// Data and tools
 		'ApiSandbox' => [
-			'class' => \SpecialApiSandbox::class,
+			'class' => SpecialApiSandbox::class,
+		],
+		'RestSandbox' => [
+			'class' => SpecialRestSandbox::class,
+			'services' => [
+				'UrlUtils',
+			]
 		],
 		'Statistics' => [
-			'class' => \SpecialStatistics::class,
+			'class' => SpecialStatistics::class,
 			'services' => [
 				'UserGroupManager',
 			]
 		],
 		'Allmessages' => [
-			'class' => \SpecialAllMessages::class,
+			'class' => SpecialAllMessages::class,
 			'services' => [
 				'LanguageFactory',
 				'LanguageNameUtils',
 				'LocalisationCache',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'Version' => [
-			'class' => \SpecialVersion::class,
+			'class' => SpecialVersion::class,
 			'services' => [
-				'Parser',
+				'ParserFactory',
+				'UrlUtils',
+				'ConnectionProvider',
 			]
 		],
 		'Lockdb' => [
-			'class' => \SpecialLockdb::class,
+			'class' => SpecialLockdb::class,
 		],
 		'Unlockdb' => [
-			'class' => \SpecialUnlockdb::class,
+			'class' => SpecialUnlockdb::class,
+		],
+		'NamespaceInfo' => [
+			'class' => SpecialNamespaceInfo::class,
+			'services' => [
+				'NamespaceInfo',
+			],
 		],
 
 		// Redirecting special pages
 		'LinkSearch' => [
-			'class' => \SpecialLinkSearch::class,
+			'class' => SpecialLinkSearch::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
+				'UrlUtils',
 			]
 		],
 		'Randompage' => [
-			'class' => \SpecialRandomPage::class,
+			'class' => SpecialRandomPage::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'NamespaceInfo',
 			]
 		],
 		'RandomInCategory' => [
-			'class' => \SpecialRandomInCategory::class,
+			'class' => SpecialRandomInCategory::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 			]
 		],
 		'Randomredirect' => [
-			'class' => \SpecialRandomRedirect::class,
+			'class' => SpecialRandomRedirect::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'NamespaceInfo',
 			]
 		],
 		'Randomrootpage' => [
-			'class' => \SpecialRandomRootPage::class,
+			'class' => SpecialRandomRootPage::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'NamespaceInfo',
 			]
 		],
 		'GoToInterwiki' => [
-			'class' => \SpecialGoToInterwiki::class,
+			'class' => SpecialGoToInterwiki::class,
 		],
 
 		// High use pages
 		'Mostlinkedcategories' => [
-			'class' => \SpecialMostLinkedCategories::class,
+			'class' => SpecialMostLinkedCategories::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
 		],
 		'Mostimages' => [
-			'class' => \MostimagesPage::class,
+			'class' => SpecialMostImages::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LanguageConverterFactory',
 			]
 		],
 		'Mostinterwikis' => [
-			'class' => \SpecialMostInterwikis::class,
+			'class' => SpecialMostInterwikis::class,
 			'services' => [
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Mostlinked' => [
-			'class' => \SpecialMostLinked::class,
+			'class' => SpecialMostLinked::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
+				'LinksMigration',
 			]
 		],
 		'Mostlinkedtemplates' => [
-			'class' => \SpecialMostLinkedTemplates::class,
+			'class' => SpecialMostLinkedTemplates::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LinksMigration',
 			]
 		],
 		'Mostcategories' => [
-			'class' => \SpecialMostCategories::class,
+			'class' => SpecialMostCategories::class,
 			'services' => [
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 			]
 		],
 		'Mostrevisions' => [
-			'class' => \SpecialMostRevisions::class,
+			'class' => SpecialMostRevisions::class,
 			'services' => [
 				// Same as for Fewestrevisions
 				'NamespaceInfo',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'LanguageConverterFactory',
 			]
@@ -780,30 +983,29 @@ class SpecialPageFactory {
 
 		// Page tools
 		'ComparePages' => [
-			'class' => \SpecialComparePages::class,
+			'class' => SpecialComparePages::class,
 			'services' => [
 				'RevisionLookup',
 				'ContentHandlerFactory',
 			]
 		],
 		'Export' => [
-			'class' => \SpecialExport::class,
+			'class' => SpecialExport::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'WikiExporterFactory',
 				'TitleFormatter',
 				'LinksMigration',
 			]
 		],
 		'Import' => [
-			'class' => \SpecialImport::class,
+			'class' => SpecialImport::class,
 			'services' => [
-				'PermissionManager',
 				'WikiImporterFactory',
 			]
 		],
 		'Undelete' => [
-			'class' => \SpecialUndelete::class,
+			'class' => SpecialUndelete::class,
 			'services' => [
 				'PermissionManager',
 				'RevisionStore',
@@ -812,18 +1014,20 @@ class SpecialPageFactory {
 				'ChangeTagDefStore',
 				'LinkBatchFactory',
 				'RepoGroup',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'UserOptionsLookup',
 				'WikiPageFactory',
 				'SearchEngineFactory',
 				'UndeletePageFactory',
 				'ArchivedRevisionLookup',
+				'CommentFormatter',
+				'WatchlistManager',
 			],
 		],
 		'Whatlinkshere' => [
-			'class' => \SpecialWhatLinksHere::class,
+			'class' => SpecialWhatLinksHere::class,
 			'services' => [
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'LinkBatchFactory',
 				'ContentHandlerFactory',
 				'SearchEngineFactory',
@@ -833,24 +1037,25 @@ class SpecialPageFactory {
 			]
 		],
 		'MergeHistory' => [
-			'class' => \SpecialMergeHistory::class,
+			'class' => SpecialMergeHistory::class,
 			'services' => [
 				'MergeHistoryFactory',
 				'LinkBatchFactory',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'RevisionStore',
+				'CommentFormatter',
 			]
 		],
 		'ExpandTemplates' => [
-			'class' => \SpecialExpandTemplates::class,
+			'class' => SpecialExpandTemplates::class,
 			'services' => [
-				'Parser',
+				'ParserFactory',
 				'UserOptionsLookup',
 				'Tidy',
 			],
 		],
 		'ChangeContentModel' => [
-			'class' => \SpecialChangeContentModel::class,
+			'class' => SpecialChangeContentModel::class,
 			'services' => [
 				'ContentHandlerFactory',
 				'ContentModelChangeFactory',
@@ -858,60 +1063,68 @@ class SpecialPageFactory {
 				'RevisionLookup',
 				'WikiPageFactory',
 				'SearchEngineFactory',
+				'CollationFactory',
 			],
 		],
 
 		// Other
 		'Booksources' => [
-			'class' => \SpecialBookSources::class,
+			'class' => SpecialBookSources::class,
 			'services' => [
 				'RevisionLookup',
+				'TitleFactory',
 			]
 		],
 
 		// Unlisted / redirects
 		'ApiHelp' => [
-			'class' => \SpecialApiHelp::class,
+			'class' => SpecialApiHelp::class,
+			'services' => [
+				'UrlUtils',
+			]
 		],
 		'Blankpage' => [
-			'class' => \SpecialBlankpage::class,
+			'class' => SpecialBlankpage::class,
 		],
 		'DeletePage' => [
-			'class' => \SpecialDeletePage::class,
+			'class' => SpecialDeletePage::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'Diff' => [
-			'class' => \SpecialDiff::class,
+			'class' => SpecialDiff::class,
 		],
 		'EditPage' => [
-			'class' => \SpecialEditPage::class,
+			'class' => SpecialEditPage::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'EditTags' => [
-			'class' => \SpecialEditTags::class,
+			'class' => SpecialEditTags::class,
 			'services' => [
 				'PermissionManager',
+				'ChangeTagsStore',
 			],
 		],
 		'Emailuser' => [
-			'class' => \SpecialEmailUser::class,
+			'class' => SpecialEmailUser::class,
 			'services' => [
 				'UserNameUtils',
 				'UserNamePrefixSearch',
 				'UserOptionsLookup',
+				'EmailUserFactory',
+				'UserFactory',
 			]
 		],
 		'Movepage' => [
-			'class' => \MovePageForm::class,
+			'class' => SpecialMovePage::class,
 			'services' => [
 				'MovePageFactory',
 				'PermissionManager',
 				'UserOptionsLookup',
-				'DBLoadBalancer',
+				'ConnectionProvider',
 				'ContentHandlerFactory',
 				'NamespaceInfo',
 				'LinkBatchFactory',
@@ -920,89 +1133,131 @@ class SpecialPageFactory {
 				'SearchEngineFactory',
 				'WatchlistManager',
 				'RestrictionStore',
+				'TitleFactory',
+				'DeletePageFactory',
 			]
 		],
 		'Mycontributions' => [
-			'class' => \SpecialMycontributions::class,
+			'class' => SpecialMycontributions::class,
+			'services' => [
+				'TempUserConfig',
+			],
 		],
 		'MyLanguage' => [
-			'class' => \SpecialMyLanguage::class,
+			'class' => SpecialMyLanguage::class,
 			'services' => [
 				'LanguageNameUtils',
 				'RedirectLookup'
 			]
 		],
+		'Mylog' => [
+			'class' => SpecialMylog::class,
+			'services' => [
+				'TempUserConfig',
+			],
+		],
 		'Mypage' => [
-			'class' => \SpecialMypage::class,
+			'class' => SpecialMypage::class,
+			'services' => [
+				'TempUserConfig',
+			],
 		],
 		'Mytalk' => [
-			'class' => \SpecialMytalk::class,
+			'class' => SpecialMytalk::class,
+			'services' => [
+				'TempUserConfig',
+			],
 		],
 		'PageHistory' => [
-			'class' => \SpecialPageHistory::class,
+			'class' => SpecialPageHistory::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'PageInfo' => [
-			'class' => \SpecialPageInfo::class,
+			'class' => SpecialPageInfo::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'ProtectPage' => [
-			'class' => \SpecialProtectPage::class,
+			'class' => SpecialProtectPage::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'Purge' => [
-			'class' => \SpecialPurge::class,
+			'class' => SpecialPurge::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'Myuploads' => [
-			'class' => \SpecialMyuploads::class,
+			'class' => SpecialMyuploads::class,
+			'services' => [
+				'TempUserConfig',
+			],
 		],
 		'AllMyUploads' => [
-			'class' => \SpecialAllMyUploads::class,
+			'class' => SpecialAllMyUploads::class,
 		],
 		'NewSection' => [
-			'class' => \SpecialNewSection::class,
+			'class' => SpecialNewSection::class,
 			'services' => [
 				'SearchEngineFactory',
 			]
 		],
 		'PermanentLink' => [
-			'class' => \SpecialPermanentLink::class,
+			'class' => SpecialPermanentLink::class,
 		],
 		'Redirect' => [
-			'class' => \SpecialRedirect::class,
+			'class' => SpecialRedirect::class,
 			'services' => [
 				'RepoGroup',
 				'UserFactory',
 			]
 		],
+		'Renameuser' => [
+			'class' => SpecialRenameUser::class,
+			'services' => [
+				'ConnectionProvider',
+				'MovePageFactory',
+				'PermissionManager',
+				'TitleFactory',
+				'UserFactory',
+				'UserNamePrefixSearch',
+				'UserNameUtils',
+			]
+		],
 		'Revisiondelete' => [
-			'class' => \SpecialRevisionDelete::class,
+			'class' => SpecialRevisionDelete::class,
 			'services' => [
 				'PermissionManager',
 				'RepoGroup',
 			],
 		],
 		'RunJobs' => [
-			'class' => \SpecialRunJobs::class,
+			'class' => SpecialRunJobs::class,
 			'services' => [
 				'JobRunner',
 				'ReadOnlyMode',
 			]
 		],
 		'Specialpages' => [
-			'class' => \SpecialSpecialpages::class,
+			'class' => SpecialSpecialPages::class,
 		],
 		'PageData' => [
-			'class' => \SpecialPageData::class,
+			'class' => SpecialPageData::class,
+		],
+		'Contribute' => [
+			'class' => SpecialContribute::class,
+		],
+		'TalkPage' => [
+			'class' => SpecialTalkPage::class,
+			'services' => [
+				'MainConfig',
+				'TitleParser',
+			],
 		],
 	];
 
@@ -1018,13 +1273,22 @@ class SpecialPageFactory {
 	/** @var Language */
 	private $contLang;
 
-	/** @var ObjectFactory */
+	/**
+	 * @var ObjectFactory
+	 * @noVarDump
+	 */
 	private $objectFactory;
 
-	/** @var HookContainer */
+	/**
+	 * @var HookContainer
+	 * @noVarDump
+	 */
 	private $hookContainer;
 
-	/** @var HookRunner */
+	/**
+	 * @var HookRunner
+	 * @noVarDump
+	 */
 	private $hookRunner;
 
 	/**
@@ -1036,6 +1300,7 @@ class SpecialPageFactory {
 		MainConfigNames::EnableEmail,
 		MainConfigNames::EnableJavaScriptTest,
 		MainConfigNames::EnableSpecialMute,
+		MainConfigNames::EnableEditRecovery,
 		MainConfigNames::PageLanguageUseDB,
 		MainConfigNames::SpecialPages,
 	];
@@ -1089,7 +1354,7 @@ class SpecialPageFactory {
 
 			if ( !$this->options->get( MainConfigNames::DisableInternalSearch ) ) {
 				$this->list['Search'] = [
-					'class' => \SpecialSearch::class,
+					'class' => SpecialSearch::class,
 					'services' => [
 						'SearchEngineConfig',
 						'SearchEngineFactory',
@@ -1098,20 +1363,23 @@ class SpecialPageFactory {
 						'InterwikiLookup',
 						'ReadOnlyMode',
 						'UserOptionsManager',
-						'LanguageConverterFactory'
+						'LanguageConverterFactory',
+						'RepoGroup',
+						'SearchResultThumbnailProvider',
+						'TitleMatcher',
 					]
 				];
 			}
 
 			if ( $this->options->get( MainConfigNames::EmailAuthentication ) ) {
 				$this->list['Confirmemail'] = [
-					'class' => \SpecialConfirmEmail::class,
+					'class' => SpecialConfirmEmail::class,
 					'services' => [
 						'UserFactory',
 					]
 				];
 				$this->list['Invalidateemail'] = [
-					'class' => \SpecialEmailInvalidate::class,
+					'class' => SpecialEmailInvalidate::class,
 					'services' => [
 						'UserFactory',
 					]
@@ -1120,7 +1388,7 @@ class SpecialPageFactory {
 
 			if ( $this->options->get( MainConfigNames::EnableEmail ) ) {
 				$this->list['ChangeEmail'] = [
-					'class' => \SpecialChangeEmail::class,
+					'class' => SpecialChangeEmail::class,
 					'services' => [
 						'AuthManager',
 					],
@@ -1129,30 +1397,40 @@ class SpecialPageFactory {
 
 			if ( $this->options->get( MainConfigNames::EnableJavaScriptTest ) ) {
 				$this->list['JavaScriptTest'] = [
-					'class' => \SpecialJavaScriptTest::class
+					'class' => SpecialJavaScriptTest::class
 				];
 			}
 
 			if ( $this->options->get( MainConfigNames::EnableSpecialMute ) ) {
 				$this->list['Mute'] = [
-					'class' => \SpecialMute::class,
+					'class' => SpecialMute::class,
 					'services' => [
 						'CentralIdLookup',
 						'UserOptionsManager',
 						'UserIdentityLookup',
+						'UserIdentityUtils',
 					]
 				];
 			}
 
 			if ( $this->options->get( MainConfigNames::PageLanguageUseDB ) ) {
 				$this->list['PageLanguage'] = [
-					'class' => \SpecialPageLanguage::class,
+					'class' => SpecialPageLanguage::class,
 					'services' => [
 						'ContentHandlerFactory',
 						'LanguageNameUtils',
-						'DBLoadBalancer',
+						'ConnectionProvider',
 						'SearchEngineFactory',
 					]
+				];
+			}
+
+			if ( $this->options->get( MainConfigNames::EnableEditRecovery ) ) {
+				$this->list['EditRecovery'] = [
+					'class' => SpecialEditRecovery::class,
+					'services' => [
+						'UserOptionsLookup',
+					],
 				];
 			}
 
@@ -1192,28 +1470,30 @@ class SpecialPageFactory {
 			// Check for $aliases being an array since Language::getSpecialPageAliases can return null
 			if ( is_array( $aliases ) ) {
 				foreach ( $aliases as $realName => $aliasList ) {
-					$aliasList = array_values( $aliasList );
-					foreach ( $aliasList as $i => $alias ) {
+					$first = true;
+					foreach ( $aliasList as $alias ) {
 						$caseFoldedAlias = $this->contLang->caseFold( $alias );
 
 						if ( isset( $this->aliases[$caseFoldedAlias] ) &&
 							$realName === $this->aliases[$caseFoldedAlias]
 						) {
+							$first = false;
 							// Ignore same-realName conflicts
 							continue;
 						}
 
 						if ( !isset( $keepAlias[$caseFoldedAlias] ) ) {
 							$this->aliases[$caseFoldedAlias] = $realName;
-							if ( !$i ) {
+							if ( $first ) {
 								$keepAlias[$caseFoldedAlias] = 'first';
 							}
-						} elseif ( !$i ) {
+						} elseif ( $first ) {
 							wfWarn( "First alias '$alias' for $realName conflicts with " .
 								"{$keepAlias[$caseFoldedAlias]} alias for " .
 								$this->aliases[$caseFoldedAlias]
 							);
 						}
+						$first = false;
 					}
 				}
 			}
@@ -1252,7 +1532,7 @@ class SpecialPageFactory {
 	 * @return bool True if a special page exists with this name
 	 */
 	public function exists( $name ) {
-		list( $title, /*...*/ ) = $this->resolveAlias( $name );
+		[ $title, /*...*/ ] = $this->resolveAlias( $name );
 
 		$specialPageList = $this->getPageList();
 		return isset( $specialPageList[$title] );
@@ -1265,7 +1545,7 @@ class SpecialPageFactory {
 	 * @return SpecialPage|null SpecialPage object or null if the page doesn't exist
 	 */
 	public function getPage( $name ) {
-		list( $realName, /*...*/ ) = $this->resolveAlias( $name );
+		[ $realName, /*...*/ ] = $this->resolveAlias( $name );
 
 		$specialPageList = $this->getPageList();
 
@@ -1328,7 +1608,7 @@ class SpecialPageFactory {
 	/**
 	 * Get listed special pages available to everyone by default.
 	 *
-	 * @return SpecialPage[]
+	 * @return array<string,SpecialPage>
 	 */
 	public function getRegularPages(): array {
 		$pages = [];
@@ -1339,6 +1619,23 @@ class SpecialPageFactory {
 			}
 		}
 
+		return $pages;
+	}
+
+	/**
+	 * Get listed special pages, including those that may require user rights.
+	 *
+	 * @since 1.42
+	 * @return array<string,SpecialPage>
+	 */
+	public function getListedPages(): array {
+		$pages = [];
+		foreach ( $this->getPageList() as $name => $rec ) {
+			$page = $this->getPage( $name );
+			if ( $page && $page->isListed() ) {
+				$pages[$name] = $page;
+			}
+		}
 		return $pages;
 	}
 
@@ -1358,7 +1655,7 @@ class SpecialPageFactory {
 	 * @return bool|Title
 	 */
 	public function executePath( $path, IContextSource $context, $including = false,
-		LinkRenderer $linkRenderer = null
+		?LinkRenderer $linkRenderer = null
 	) {
 		if ( $path instanceof PageReference ) {
 			$path = $path->getDBkey();
@@ -1370,12 +1667,11 @@ class SpecialPageFactory {
 
 		$page = $this->getPage( $name );
 		if ( !$page ) {
+			// Emulate SpecialPage::setHeaders()
 			$context->getOutput()->setArticleRelated( false );
 			$context->getOutput()->setRobotPolicy( 'noindex,nofollow' );
 
-			$send404Code = MediaWikiServices::getInstance()->getMainConfig()
-				->get( MainConfigNames::Send404Code );
-			if ( $send404Code ) {
+			if ( $context->getConfig()->get( MainConfigNames::Send404Code ) ) {
 				$context->getOutput()->setStatusCode( 404 );
 			}
 
@@ -1385,12 +1681,12 @@ class SpecialPageFactory {
 		}
 
 		if ( !$including ) {
+			ProfilingContext::singleton()->init( MW_ENTRY_POINT, $page->getName() );
 			// Narrow DB query expectations for this HTTP request
 			$trxLimits = $context->getConfig()->get( MainConfigNames::TrxProfilerLimits );
 			$trxProfiler = Profiler::instance()->getTransactionProfiler();
 			if ( $context->getRequest()->wasPosted() && !$page->doesWrites() ) {
 				$trxProfiler->setExpectations( $trxLimits['POST-nonwrite'], __METHOD__ );
-				$context->getRequest()->markAsSafeRequest();
 			}
 		}
 
@@ -1443,12 +1739,12 @@ class SpecialPageFactory {
 	 * @param PageReference $page
 	 * @param IContextSource $context
 	 * @param LinkRenderer|null $linkRenderer (since 1.28)
-	 * @return string HTML fragment
+	 * @return bool|Title
 	 */
 	public function capturePath(
-		PageReference $page, IContextSource $context, LinkRenderer $linkRenderer = null
+		PageReference $page, IContextSource $context, ?LinkRenderer $linkRenderer = null
 	) {
-		// phpcs:ignore MediaWiki.Usage.DeprecatedGlobalVariables.Deprecated$wgUser
+		// phpcs:ignore MediaWiki.Usage.DeprecatedGlobalVariables.Deprecated$wgUser,MediaWiki.Usage.DeprecatedGlobalVariables.Deprecated$wgTitle
 		global $wgTitle, $wgOut, $wgRequest, $wgUser, $wgLang;
 		$main = RequestContext::getMain();
 
@@ -1480,38 +1776,43 @@ class SpecialPageFactory {
 		$wgRequest = $context->getRequest();
 		$wgUser = $context->getUser();
 		$wgLang = $context->getLanguage();
-		$main->setTitle( $title );
+		// FIXME: Once reasonably certain that no SpecialPage subclasses
+		// rely on direct RequestContext::getMain instead of their local
+		// context getters, these can be removed (T323184)
+		// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		@$main->setTitle( $title );
 		$main->setOutput( $context->getOutput() );
 		$main->setRequest( $context->getRequest() );
 		$main->setUser( $context->getUser() );
 		$main->setLanguage( $context->getLanguage() );
 
-		// The useful part
-		$ret = $this->executePath( $page, $context, true, $linkRenderer );
-
-		// Restore old globals and context
-		$wgTitle = $glob['title'];
-		$wgOut = $glob['output'];
-		$wgRequest = $glob['request'];
-		$wgUser = $glob['user'];
-		$wgLang = $glob['language'];
-		$main->setTitle( $ctx['title'] );
-		$main->setOutput( $ctx['output'] );
-		$main->setRequest( $ctx['request'] );
-		$main->setUser( $ctx['user'] );
-		$main->setLanguage( $ctx['language'] );
-		if ( isset( $ctx['wikipage'] ) ) {
-			$main->setWikiPage( $ctx['wikipage'] );
+		try {
+			// The useful part
+			return $this->executePath( $page, $context, true, $linkRenderer );
+		} finally {
+			// Restore old globals and context
+			$wgTitle = $glob['title'];
+			$wgOut = $glob['output'];
+			$wgRequest = $glob['request'];
+			$wgUser = $glob['user'];
+			$wgLang = $glob['language'];
+			// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+			@$main->setTitle( $ctx['title'] );
+			$main->setOutput( $ctx['output'] );
+			$main->setRequest( $ctx['request'] );
+			$main->setUser( $ctx['user'] );
+			$main->setLanguage( $ctx['language'] );
+			if ( isset( $ctx['wikipage'] ) ) {
+				$main->setWikiPage( $ctx['wikipage'] );
+			}
 		}
-
-		return $ret;
 	}
 
 	/**
 	 * Get the local name for a specified canonical name
 	 *
 	 * @param string $name
-	 * @param string|bool $subpage
+	 * @param string|false|null $subpage
 	 * @return string
 	 */
 	public function getLocalNameFor( $name, $subpage = false ) {
@@ -1568,7 +1869,7 @@ class SpecialPageFactory {
 	 * @return Title|null Title or null if there is no such alias
 	 */
 	public function getTitleForAlias( $alias ) {
-		list( $name, $subpage ) = $this->resolveAlias( $alias );
+		[ $name, $subpage ] = $this->resolveAlias( $alias );
 		if ( $name != null ) {
 			return SpecialPage::getTitleFor( $name, $subpage );
 		}

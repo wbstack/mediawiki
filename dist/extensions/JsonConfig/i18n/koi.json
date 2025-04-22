@@ -1,0 +1,12 @@
+{
+	"@metadata": {
+		"authors": [
+			"DannyS712",
+			"Римма"
+		]
+	},
+	"jsonconfig-license-copyrightwarning": "Эта листбоксӧ веськӧтікӧ тійӧ согласитчатӧ пуктыны пай [{{int:jsonconfig\n-license-url-$1}} {{int:jsonconfig-license-name-$1}}] лицензия сьӧрті.",
+	"jsonconfig-license-copyrightwarning-license-unset": "Вежсьӧммез лӧсьӧтікӧ тійӧ согласитчатӧ пуктыны пай <code>licence</code> лицензия сьӧрті.",
+	"jsonconfig-license-notice": " Пасйӧм :Эта листбоксӧ веськӧтікӧ тійӧ согласитчатӧ пуктыны пай [{{int:jsonconfig\n-license-url-$1}} {{int:jsonconfig-license-name-$1}}] лицензия сьӧрті.",
+	"jsonconfig-blocked-page-creation": "Тіянӧн сетӧм листбоклӧн юрним оз лӧсяв не ӧтік балалы, кӧда лӧсьӧтӧм эта викилӧ JSONConfig паськӧтӧм вылӧ."
+}

@@ -11,12 +11,13 @@
 			"Nike",
 			"Pxos",
 			"Pyscowicz",
+			"Samoasambia",
 			"Str4nd",
 			"Taleman",
+			"Valtlai",
 			"Valtlait",
 			"Varusmies",
-			"VezonThunder",
-			"Valtlai"
+			"VezonThunder"
 		]
 	},
 	"confirmaccounts": "Myönnä käyttäjätunnuksia.",
@@ -93,7 +94,7 @@
 	"confirmaccount-email-subj": "Käyttäjätunnuspyyntö {{GRAMMAR:illative|{{SITENAME}}}}",
 	"confirmaccount-email-body": "Pyytämäsi käyttäjätunnus {{GRAMMAR:illative|{{SITENAME}}}} on hyväksytty.\n\nKäyttäjätunnus: $1\n\nSalasana: $2\n\nSalasana on vaihdettava ensimmäisellä sisäänkirjautumiskerralla tietoturvasyistä. Kirjaudu sisään sivulla {{fullurl:Special:UserLogin}}.",
 	"confirmaccount-email-body2": "Pyytämäsi käyttäjätunnus sivulle {{SITENAME}} on hyväksytty.\n\nKäyttäjätunnus: $1\n\nSalasana: $2\n\n$3\n\nSalasana on vaihdettava ensimmäisellä sisäänkirjautumiskerralla tietoturvasyistä. Kirjaudu sisään sivulla {{fullurl:Special:UserLogin}}.",
-	"confirmaccount-email-body3": "Valitettavasti pyyntösi käyttäjätunnuksesta ”$1” sivulle {{SITENAME}} on hylätty.\n\nHylkäämisen mahdollisia syitä on useita.\nLomaketta ei ehkä ole täytetty oikein, kuvaus ei ollut tarpeeksi pitkä tai joku muu toimintaperiaatteen ehdoista jäi täyttämättä.\nJos haluat tietää enemmän toimintaperiaatteista käyttäjätunnusten myöntämiseen saattaa sivuilla olla luettelo yhteystiedoista.",
+	"confirmaccount-email-body3": "Valitettavasti pyyntösi käyttäjätunnuksesta ”$1” {{GRAMMAR:inessive|{{SITENAME}}}} on hylätty.\n\nHylkäämisen mahdollisia syitä on useita.\nLomaketta ei ehkä ole täytetty oikein, kuvaus ei ollut tarpeeksi pitkä tai joku muu toimintaperiaatteen ehdoista jäi täyttämättä.\nJos haluat tietää enemmän toimintaperiaatteista käyttäjätunnusten myöntämiseen saattaa sivuilla olla luettelo yhteystiedoista.",
 	"confirmaccount-email-body4": "Valitettavasti pyyntösi käyttäjätunnuksesta ”$1” {{GRAMMAR:illative|{{SITENAME}}}} on hylätty.\n\n$2\n\nJos haluat tietää enemmän toimintaperiaatteista käyttäjätunnusten myöntämiseen saattaa sivuilla olla luettelo yhteystiedoista.",
 	"confirmaccount-email-body5": "Ennenkuin pyytämäsi käyttäjätunnus ”$1” {{GRAMMAR:illative|{{SITENAME}}}} voidaan hyväksyä, tarvitaan lisätietoja.\n\n$2\n\nJos haluat tietää enemmän toimintaperiaatteista käyttäjätunnuksesta myöntämiseen saattaa sivuilla olla luettelo yhteystiedoista."
 }

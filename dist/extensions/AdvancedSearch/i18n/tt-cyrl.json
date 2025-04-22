@@ -1,13 +1,14 @@
 {
 	"@metadata": {
 		"authors": [
+			"Don Alessandro",
 			"Ерней",
 			"Ильнар"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]] битендә киңәйтелгән эзләү мөмкинлекләрен куллану",
 	"advancedsearch-options-pane-head": "Киңәйтелгән эзләү:",
-	"advancedsearch-optgroup-text": "Битнең текстында эзләргә",
+	"advancedsearch-optgroup-text": "Битнең текстында эзләү",
 	"advancedsearch-optgroup-structure": "Корылыш",
 	"advancedsearch-optgroup-files": "Файллар һәм сурәтләр",
 	"advancedsearch-optgroup-sort": "Тәртипләү",
@@ -49,7 +50,7 @@
 	"advancedsearch-sort-preview-last-edit-desc": "Үзгәртү вакыты",
 	"advancedsearch-sort-preview-create-timestamp-desc": "Төзү вакыты",
 	"advancedsearch-namespaces-search-in": "Эзләү:",
-	"advancedsearch-namespaces-remember": "Сайлаганын киләчәк эзләүләр өчен истә калдырырга",
+	"advancedsearch-namespaces-remember": "Сайлаганын киләчәк эзләүләр өчен истә калдыру",
 	"advancedsearch-namespaces-preset-all": "Барысы",
 	"advancedsearch-namespaces-preset-default": "Гадәттәге",
 	"advancedsearch-namespaces-preset-general-help": "Гомуми белешмә",

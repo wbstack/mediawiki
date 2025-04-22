@@ -2,9 +2,9 @@
 
 namespace MediaWiki\Permissions\Hook;
 
-use MessageSpecifier;
-use Title;
-use User;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use Wikimedia\Message\MessageSpecifier;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.

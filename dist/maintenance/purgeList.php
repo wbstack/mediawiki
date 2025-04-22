@@ -21,10 +21,11 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that sends purge requests for listed pages to CDN.
@@ -49,7 +50,12 @@ class PurgeList extends Maintenance {
 		);
 		$this->addOption( 'namespace', 'Purge pages with this namespace number', false, true );
 		$this->addOption( 'all-namespaces', 'Purge pages in all namespaces', false, false );
-		$this->addOption( 'db-touch', 'Update the page.page_touched database field', false, false );
+		$this->addOption( 'db-touch',
+			"Update the page.page_touched database field.\n"
+				. "This is only considered when purging by title, not when purging by namespace or URL.",
+			false,
+			false
+		);
 		$this->addOption( 'delay', 'Number of seconds to delay between each purge', false, true );
 		$this->addOption( 'verbose', 'Show more output', false, false, 'v' );
 		$this->setBatchSize( 100 );
@@ -60,14 +66,6 @@ class PurgeList extends Maintenance {
 		$this->allNamespaces = $this->hasOption( 'all-namespaces' );
 		$this->doDbTouch = $this->hasOption( 'db-touch' );
 		$this->delay = intval( $this->getOption( 'delay', '0' ) );
-
-		$conf = $this->getConfig();
-		if ( ( $this->namespaceId !== null || $this->allNamespaces )
-			&& $this->doDbTouch
-			&& $conf->get( MainConfigNames::MiserMode )
-		) {
-			$this->fatalError( 'Prevented mass db-invalidation (MiserMode is enabled).' );
-		}
 
 		if ( $this->allNamespaces ) {
 			$this->purgeNamespace( false );
@@ -85,7 +83,7 @@ class PurgeList extends Maintenance {
 	private function doPurge() {
 		$stdin = $this->getStdin();
 		$urls = [];
-		$htmlCacheUpdater = MediaWikiServices::getInstance()->getHtmlCacheUpdater();
+		$htmlCacheUpdater = $this->getServiceContainer()->getHtmlCacheUpdater();
 
 		while ( !feof( $stdin ) ) {
 			$page = trim( fgets( $stdin ) );
@@ -120,8 +118,15 @@ class PurgeList extends Maintenance {
 	 * @param int|bool $namespace
 	 */
 	private function purgeNamespace( $namespace = false ) {
-		$dbr = $this->getDB( DB_REPLICA );
-		$htmlCacheUpdater = MediaWikiServices::getInstance()->getHtmlCacheUpdater();
+		if ( $this->doDbTouch ) {
+			// NOTE: If support for this is added in the future,
+			// it MUST NOT be allowed when $wgMiserMode is enabled.
+			// Change this to a check and error about instead! (T263957)
+			$this->fatalError( 'The --db-touch option is not supported when purging by namespace.' );
+		}
+
+		$dbr = $this->getReplicaDB();
+		$htmlCacheUpdater = $this->getServiceContainer()->getHtmlCacheUpdater();
 		$startId = 0;
 		if ( $namespace === false ) {
 			$conds = [];
@@ -129,16 +134,14 @@ class PurgeList extends Maintenance {
 			$conds = [ 'page_namespace' => $namespace ];
 		}
 		while ( true ) {
-			$res = $dbr->select( 'page',
-				[ 'page_id', 'page_namespace', 'page_title' ],
-				$conds + [ 'page_id > ' . $dbr->addQuotes( $startId ) ],
-				__METHOD__,
-				[
-					'LIMIT' => $this->getBatchSize(),
-					'ORDER BY' => 'page_id'
-
-				]
-			);
+			$res = $dbr->newSelectQueryBuilder()
+				->select( [ 'page_id', 'page_namespace', 'page_title' ] )
+				->from( 'page' )
+				->where( $conds )
+				->andWhere( $dbr->expr( 'page_id', '>', $startId ) )
+				->orderBy( 'page_id' )
+				->limit( $this->getBatchSize() )
+				->caller( __METHOD__ )->fetchResultSet();
 			if ( !$res->numRows() ) {
 				break;
 			}
@@ -157,7 +160,7 @@ class PurgeList extends Maintenance {
 	 * @param array $urls List of URLS to purge from CDNs
 	 */
 	private function sendPurgeRequest( $urls ) {
-		$hcu = MediaWikiServices::getInstance()->getHtmlCacheUpdater();
+		$hcu = $this->getServiceContainer()->getHtmlCacheUpdater();
 		if ( $this->delay > 0 ) {
 			foreach ( $urls as $url ) {
 				if ( $this->hasOption( 'verbose' ) ) {
@@ -175,5 +178,7 @@ class PurgeList extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = PurgeList::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

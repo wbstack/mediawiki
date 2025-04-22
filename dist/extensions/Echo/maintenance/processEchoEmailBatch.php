@@ -1,5 +1,9 @@
 <?php
 
+use MediaWiki\Extension\Notifications\DbFactory;
+use MediaWiki\Extension\Notifications\EmailBatch;
+use MediaWiki\Maintenance\Maintenance;
+
 $IP = getenv( 'MW_INSTALL_PATH' );
 if ( $IP === false ) {
 	$IP = __DIR__ . '/../../..';
@@ -25,7 +29,7 @@ class ProcessEchoEmailBatch extends Maintenance {
 	}
 
 	public function execute() {
-		$lbFactory = MWEchoDbFactory::newFromDefault();
+		$lbFactory = DbFactory::newFromDefault();
 		$ignoreConfiguredSchedule = $this->getOption( "ignoreConfiguredSchedule", 0 );
 
 		$this->output( "Started processing... \n" );
@@ -37,13 +41,13 @@ class ProcessEchoEmailBatch extends Maintenance {
 		while ( $count === $batchSize ) {
 			$count = 0;
 
-			$res = MWEchoEmailBatch::getUsersToNotify( $startUserId, $batchSize );
+			$res = EmailBatch::getUsersToNotify( $startUserId, $batchSize );
 
 			$updated = false;
 			foreach ( $res as $row ) {
 				$userId = intval( $row->eeb_user_id );
 				if ( $userId && $userId > $startUserId ) {
-					$emailBatch = MWEchoEmailBatch::newFromUserId( $userId, !$ignoreConfiguredSchedule );
+					$emailBatch = EmailBatch::newFromUserId( $userId, !$ignoreConfiguredSchedule );
 					if ( $emailBatch ) {
 						$this->output( "processing user_Id " . $userId . " \n" );
 						$emailBatch->process();
@@ -53,7 +57,7 @@ class ProcessEchoEmailBatch extends Maintenance {
 				}
 				$count++;
 			}
-			$lbFactory->waitForReplicas();
+			$this->waitForReplication();
 
 			// double check to make sure that the id is updated
 			if ( !$updated ) {

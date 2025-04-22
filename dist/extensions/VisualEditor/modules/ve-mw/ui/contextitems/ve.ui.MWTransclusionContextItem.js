@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MWTransclusionContextItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -11,9 +11,9 @@
  * @extends ve.ui.LinearContextItem
  *
  * @constructor
- * @param {ve.ui.Context} context Context item is in
- * @param {ve.dm.Model} model Model item is related to
- * @param {Object} config Configuration options
+ * @param {ve.ui.LinearContext} context Context the item is in
+ * @param {ve.dm.Model} model Model the item is related to
+ * @param {Object} [config]
  */
 ve.ui.MWTransclusionContextItem = function VeUiMWTransclusionContextItem() {
 	// Parent constructor
@@ -68,7 +68,7 @@ ve.ui.MWTransclusionContextItem.static.isCompatibleWith =
  */
 ve.ui.MWTransclusionContextItem.prototype.getDescription = function () {
 	/** @type {ve.ce.MWTransclusionNode} */
-	var nodeClass = ve.ce.nodeFactory.lookup( this.model.constructor.static.name );
+	const nodeClass = ve.ce.nodeFactory.lookup( this.model.constructor.static.name );
 	return ve.msg(
 		'visualeditor-dialog-transclusion-contextitem-description',
 		nodeClass.static.getDescription( this.model ),
@@ -77,10 +77,23 @@ ve.ui.MWTransclusionContextItem.prototype.getDescription = function () {
 };
 
 /**
- * @param {string} [source] Source for tracking in {@see ve.ui.WindowAction.open}
+ * @inheritdoc
  */
-ve.ui.MWTransclusionContextItem.prototype.onEditButtonClick = function ( source ) {
-	var surfaceModel = this.context.getSurface().getModel(),
+ve.ui.MWTransclusionContextItem.prototype.renderBody = function () {
+	const nodeClass = ve.ce.nodeFactory.lookup( this.model.constructor.static.name );
+	// eslint-disable-next-line no-jquery/no-append-html
+	this.$body.append( ve.htmlMsg(
+		'visualeditor-dialog-transclusion-contextitem-description',
+		nodeClass.static.getDescriptionDom( this.model ),
+		this.model.getPartsList().length
+	) );
+};
+
+/**
+ * @inheritdoc
+ */
+ve.ui.MWTransclusionContextItem.prototype.onEditButtonClick = function () {
+	const surfaceModel = this.context.getSurface().getModel(),
 		selection = surfaceModel.getSelection();
 
 	if ( selection instanceof ve.dm.TableSelection ) {
@@ -89,18 +102,14 @@ ve.ui.MWTransclusionContextItem.prototype.onEditButtonClick = function ( source 
 		)[ 0 ] );
 	}
 
-	this.toggleLoadingVisualization( true );
+	ve.ui.MWTransclusionContextItem.super.prototype.onEditButtonClick.apply( this, arguments );
 
-	// This replaces what the parent does because we can't store the `onTearDownCallback` argument
-	// in the {@see ve.ui.commandRegistry}.
-	this.getCommand().execute( this.context.getSurface(), [
-		// This will be passed as `name` and `data` arguments to {@see ve.ui.WindowAction.open}
-		ve.ui.MWTransclusionDialog.static.name,
-		{
-			onTearDownCallback: this.toggleLoadingVisualization.bind( this )
-		}
-	], source || 'context' );
-	this.emit( 'command' );
+	this.context.getSurface().getDialogs().once( 'opening', ( win, opening ) => {
+		opening.then( () => {
+			this.toggleLoadingVisualization( false );
+		} );
+	} );
+	this.toggleLoadingVisualization( true );
 };
 
 /**

@@ -22,13 +22,14 @@ use Wikibase\DataModel\Snak\Snak;
  */
 class ValuesFinderTest extends TestCase {
 
+	/** @var array */
 	private static $propertyDataTypes = [
 		'P23' => 'string',
 		'P42' => 'url',
-		'P44' => 'boolean'
+		'P44' => 'boolean',
 	];
 
-	public function snaksProvider() {
+	public static function snaksProvider() {
 		$argLists = [];
 
 		$p23 = new NumericPropertyId( 'p23' );
@@ -106,7 +107,9 @@ class ValuesFinderTest extends TestCase {
 			return $dataValue->getValue();
 		}, $actual );
 
-		$this->assertArrayEquals( $expected, $actual ); // assertArrayEquals doesn't take a message :(
+		sort( $expected );
+		sort( $actual );
+		$this->assertSame( $expected, $actual );
 	}
 
 	private function getValuesFinder() {
@@ -117,49 +120,6 @@ class ValuesFinderTest extends TestCase {
 		}
 
 		return new ValuesFinder( $dataTypeLookup );
-	}
-
-	/**
-	 * Assert that two arrays are equal. By default this means that both arrays need to hold
-	 * the same set of values. Using additional arguments, order and associated key can also
-	 * be set as relevant.
-	 *
-	 * @param array $expected
-	 * @param array $actual
-	 * @param bool $ordered If the order of the values should match
-	 * @param bool $named If the keys should match
-	 */
-	private function assertArrayEquals( array $expected, array $actual,
-		$ordered = false, $named = false
-	) {
-		if ( !$ordered ) {
-			$this->objectAssociativeSort( $expected );
-			$this->objectAssociativeSort( $actual );
-		}
-
-		if ( !$named ) {
-			$expected = array_values( $expected );
-			$actual = array_values( $actual );
-		}
-
-		call_user_func_array(
-			[ $this, 'assertEquals' ],
-			array_merge( [ $expected, $actual ], array_slice( func_get_args(), 4 ) )
-		);
-	}
-
-	/**
-	 * Does an associative sort that works for objects.
-	 *
-	 * @param array $array
-	 */
-	private function objectAssociativeSort( array &$array ) {
-		uasort(
-			$array,
-			static function ( $a, $b ) {
-				return serialize( $a ) > serialize( $b ) ? 1 : -1;
-			}
-		);
 	}
 
 }

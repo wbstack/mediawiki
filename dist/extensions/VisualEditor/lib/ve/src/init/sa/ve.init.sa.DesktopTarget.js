@@ -1,7 +1,7 @@
 /*!
  * VisualEditor Standalone Initialization Desktop Target class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -12,7 +12,7 @@
  *
  * @constructor
  * @param {Object} [config] Configuration options
- * @cfg {Object} [toolbarConfig] Configuration options for the toolbar
+ * @param {Object} [config.toolbarConfig] Configuration options for the toolbar
  */
 ve.init.sa.DesktopTarget = function VeInitSaDesktopTarget( config ) {
 	// Parent constructor

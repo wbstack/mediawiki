@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface Action class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -14,7 +14,8 @@
  *
  * @constructor
  * @param {ve.ui.Surface} surface Surface to act on
- * @param {string} [source] Label for the source of the action, for tracking
+ * @param {string} [source] Label for the source of the action.
+ *  One of 'trigger', 'sequence', 'tool', or 'context'
  */
 ve.ui.Action = function VeUiAction( surface, source ) {
 	// Properties
@@ -29,7 +30,7 @@ OO.initClass( ve.ui.Action );
 /* Static Properties */
 
 /**
- * List of allowed methods for the action.
+ * @property {string[]} List of allowed methods for the action.
  *
  * To avoid use of methods not intended to be executed via surface.execute(), the allowed methods
  * must be listed here. This information is checked by ve.ui.Surface before executing an action.
@@ -41,7 +42,6 @@ OO.initClass( ve.ui.Action );
  * be carried out.
  *
  * @static
- * @property {string[]}
  * @inheritable
  */
 ve.ui.Action.static.methods = [];

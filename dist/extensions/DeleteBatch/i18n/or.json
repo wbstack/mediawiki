@@ -1,10 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ansumang"
+			"Ansumang",
+			"Psubhashish"
 		]
 	},
 	"deletebatch-caption": "ପୃଷ୍ଠା ସୂଚୀ:",
-	"deletebatch-delete": "ଲିଭାଇବେ",
+	"deletebatch-delete": "ଲିଭାନ୍ତୁ",
 	"deletebatch-select-yourself": "ଆପଣ"
 }

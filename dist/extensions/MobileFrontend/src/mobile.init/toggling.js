@@ -1,7 +1,8 @@
 module.exports = function () {
-	var
+	const
 		currentPage = require( '../mobile.startup/currentPage' )(),
 		Toggler = require( '../mobile.startup/Toggler' ),
+		sectionCollapsing = require( '../mobile.startup/sectionCollapsing' ),
 		eventBus = require( '../mobile.startup/eventBusSingleton' );
 
 	/**
@@ -14,33 +15,38 @@ module.exports = function () {
 	 * @ignore
 	 */
 	function init( $container, prefix, page ) {
-		var headingsSelector = mw.config.get( 'wgMFMobileFormatterHeadings' ).map( function ( tagName ) {
-			return '> ' + tagName;
-		} ).join( ',' );
-		// Distinguish headings in content from other headings.
-		$container.find( headingsSelector ).addClass( 'section-heading' )
-			.removeAttr( 'onclick' );
-		// Cleanup global as it is no longer needed. We check if it's undefined because
-		// there is no guarantee this won't be run on other skins e.g. Vector or cached HTML.
-		if ( window.mfTempOpenSection !== undefined ) {
-			delete window.mfTempOpenSection;
+		const isParsoidEnabled = !!document.querySelector( '.mw-parser-output[data-mw-parsoid-version]' );
+		if ( isParsoidEnabled ) {
+			sectionCollapsing.init( $container[0] );
+		} else {
+			// Only handle headings in content processed by MakeSectionsTransform.
+			// Remove event handler added by MakeSectionsTransform::interimTogglingSupport().
+			$container.find( '.section-heading' ).removeAttr( 'onclick' );
+			// Cleanup global as it is no longer needed. We check if it's undefined because
+			// there is no guarantee this won't be run on other skins e.g. Vector or cached HTML.
+			if ( window.mfTempOpenSection !== undefined ) {
+				delete window.mfTempOpenSection;
+			}
+			// eslint-disable-next-line no-new
+			new Toggler( {
+				$container: $container,
+				prefix: prefix,
+				page: page,
+				eventBus: eventBus
+			} );
 		}
-		// eslint-disable-next-line no-new
-		new Toggler( {
-			$container: $container,
-			prefix: prefix,
-			page: page,
-			eventBus: eventBus
-		} );
 	}
 
 	if (
 		// Avoid this running on Watchlist.
 		!currentPage.inNamespace( 'special' ) &&
-		mw.config.get( 'wgAction' ) === 'view'
+		(
+			mw.config.get( 'wgAction' ) === 'view' ||
+			mw.config.get( 'wgAction' ) === 'edit'
+		)
 	) {
 		mw.hook( 'wikipage.content' ).add( function ( $container ) {
-			var $contentContainer = $container.find( '.mw-parser-output' );
+			let $contentContainer = $container.find( '.mw-parser-output' );
 			// If there was no mw-parser-output wrapper, just use the parent.
 			if ( $contentContainer.length === 0 ) {
 				$contentContainer = $container;

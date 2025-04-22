@@ -22,7 +22,7 @@ namespace MediaWiki\Block;
 
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\HookContainer\HookRunner;
-use MWException;
+use UnexpectedValueException;
 
 /**
  * Defines the actions that can be blocked by a partial block. They are
@@ -38,17 +38,16 @@ use MWException;
  * @since 1.37
  */
 class BlockActionInfo {
-	/** @var HookRunner */
-	private $hookRunner;
+	private HookRunner $hookRunner;
 
-	/** @var int */
-	private const ACTION_UPLOAD = 1;
+	/** @internal Public for testing only -- use getIdFromAction() */
+	public const ACTION_UPLOAD = 1;
 
-	/** @var int */
-	private const ACTION_MOVE = 2;
+	/** @internal Public for testing only -- use getIdFromAction() */
+	public const ACTION_MOVE = 2;
 
-	/** @var int */
-	private const ACTION_CREATE = 3;
+	/** @internal Public for testing only -- use getIdFromAction() */
+	public const ACTION_CREATE = 3;
 
 	/**
 	 * Core block actions.
@@ -62,8 +61,6 @@ class BlockActionInfo {
 	 * ipb-action-upload
 	 * ipb-action-move
 	 * ipb-action-create
-	 *
-	 * @var int[]
 	 */
 	private const CORE_BLOCK_ACTIONS = [
 		'upload' => self::ACTION_UPLOAD,
@@ -71,9 +68,6 @@ class BlockActionInfo {
 		'create' => self::ACTION_CREATE,
 	];
 
-	/**
-	 * @param HookContainer $hookContainer
-	 */
 	public function __construct( HookContainer $hookContainer ) {
 		$this->hookRunner = new HookRunner( $hookContainer );
 	}
@@ -94,7 +88,7 @@ class BlockActionInfo {
 			$this->hookRunner->onGetAllBlockActions( $this->allBlockActions );
 		}
 		if ( count( $this->allBlockActions ) !== count( array_unique( $this->allBlockActions ) ) ) {
-			throw new MWException( 'Blockable action IDs not unique' );
+			throw new UnexpectedValueException( 'Blockable action IDs not unique' );
 		}
 		return $this->allBlockActions;
 	}

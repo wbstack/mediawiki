@@ -3,8 +3,8 @@
 namespace Wikibase\Repo\Maintenance;
 
 use InvalidArgumentException;
-use Maintenance;
-use User;
+use MediaWiki\Maintenance\Maintenance;
+use MediaWiki\User\User;
 use Wikibase\DataModel\Term\AliasesProvider;
 use Wikibase\DataModel\Term\DescriptionsProvider;
 use Wikibase\DataModel\Term\LabelsProvider;
@@ -41,6 +41,7 @@ class RemoveTermsInLanguage extends Maintenance {
 		$entityIdParser = WikibaseRepo::getEntityIdParser();
 		$entityRevisionLookup = WikibaseRepo::getEntityRevisionLookup();
 		$entityStore = WikibaseRepo::getEntityStore();
+		$user = User::newSystemUser( User::MAINTENANCE_SCRIPT_USER, [ 'steal' => true ] );
 
 		foreach ( $idSerializations as $idSerialization ) {
 
@@ -76,7 +77,7 @@ class RemoveTermsInLanguage extends Maintenance {
 			$entityStore->saveEntity(
 				$entity,
 				'Removed terms in language ' . $language,
-				User::newFromName( 'Maintenance script' ),
+				$user,
 				EDIT_UPDATE,
 				$entityRevision->getRevisionId()
 			);

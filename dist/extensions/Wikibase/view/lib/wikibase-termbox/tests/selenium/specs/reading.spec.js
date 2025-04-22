@@ -1,62 +1,48 @@
-const assert = require( 'assert' );
 const TermboxPage = require( '../pageobjects/Termbox.page' );
 const TermboxLanguages = require( '../TermboxLanguages' );
 const createTermsInLanguages = require( '../createTermsInLanguages' );
 const WikibaseApi = require( 'wdio-wikibase/wikibase.api' );
 
-function assertMonolingualFingerprintHasTermsInLanguage( elements, expectedTerms, language ) {
-	assert.strictEqual(
-		elements.label.getText(),
-		expectedTerms.labels[ language ].value
-	);
-	assert.strictEqual(
-		elements.description.getText(),
-		expectedTerms.descriptions[ language ].value
-	);
-	expectedTerms.aliases[ language ].forEach( ( { value: alias }, j ) => {
-		assert.strictEqual(
-			elements.aliases[ j ].getText().trim(),
-			alias
-		);
-	} );
+async function assertMonolingualFingerprintHasTermsInLanguage( elements, expectedTerms, language ) {
+	await expect( elements.label ).toHaveText( expectedTerms.labels[ language ].value );
+	await expect( elements.description ).toHaveText( expectedTerms.descriptions[ language ].value );
+	for ( const [ i, { value: alias } ] of expectedTerms.aliases[ language ].entries() ) {
+		await expect( elements.aliases[ i ] ).toHaveText( alias, { trim: true } );
+	}
 }
 
 describe( 'Termbox: reading', () => {
 	const useLangParam = 'de';
 	let terms, id, termboxLanguages;
 
-	before( () => {
-		termboxLanguages = TermboxLanguages.initWithUseLang( useLangParam );
+	before( async () => {
+		termboxLanguages = await TermboxLanguages.initWithUseLang( useLangParam );
 		terms = createTermsInLanguages(
 			[ useLangParam ]
-				.concat( termboxLanguages.getPreferredLanguages() )
-				.concat( termboxLanguages.getNonPreferredLanguages().slice( 0, 2 ) )
+				.concat( await termboxLanguages.getPreferredLanguages() )
+				.concat( await termboxLanguages.getNonPreferredLanguages().slice( 0, 2 ) )
 		);
-		id = browser.call( () => WikibaseApi.createItem( '', terms ) );
+		id = await WikibaseApi.createItem( '', terms );
 	} );
 
-	beforeEach( () => {
-		browser.deleteAllCookies();
-		TermboxPage.openItemPage( id, useLangParam );
+	beforeEach( async () => {
+		await browser.deleteAllCookies();
+		await TermboxPage.openItemPage( id, useLangParam );
 	} );
 
-	it( 'is in reading mode when opening the item page', () => {
-		assert.ok( TermboxPage.isInReadMode );
+	it( 'is in reading mode when opening the item page', async () => {
+		await expect( await TermboxPage.isInReadMode ).toBe( true );
 	} );
 
 	describe( 'primary language terms', () => {
-		it( 'contains the expected language with respective terms', () => {
-			TermboxPage.openItemPage( id, useLangParam );
-
-			const primaryFingerprint = TermboxPage.getMonolingualFingerprintsInSection(
+		it( 'contains the expected language with respective terms', async () => {
+			const primaryFingerprint = await TermboxPage.getMonolingualFingerprintsInSection(
 				TermboxPage.primaryMonolingualFingerprint
 			)[ 0 ];
 
-			assert.strictEqual(
-				primaryFingerprint.language.getText(),
-				termboxLanguages.getContentLanguages()[ useLangParam ]
-			);
-			assertMonolingualFingerprintHasTermsInLanguage(
+			await expect( primaryFingerprint.language )
+				.toHaveText( termboxLanguages.getContentLanguages()[ useLangParam ] );
+			await assertMonolingualFingerprintHasTermsInLanguage(
 				primaryFingerprint,
 				terms,
 				useLangParam
@@ -65,96 +51,84 @@ describe( 'Termbox: reading', () => {
 	} );
 
 	describe( '"in more languages" section', () => {
-		beforeEach( () => {
-			TermboxPage.openItemPage( id, useLangParam );
+		it( 'has a collapse/expand button', async () => {
+			await expect( TermboxPage.inMoreLanguagesButton ).toBeDisplayed();
 		} );
 
-		it( 'has a collapse/expand button', () => {
-			assert.ok( TermboxPage.inMoreLanguagesButton.isDisplayed() );
+		it( 'is expanded by default', async () => {
+			await expect( TermboxPage.inMoreLanguages ).toBeDisplayed();
 		} );
 
-		it( 'is expanded by default', () => {
-			assert.ok( TermboxPage.inMoreLanguages.isDisplayed() );
+		it( 'is collapsible, also hiding the "all entered languages" section', async () => {
+			await TermboxPage.inMoreLanguagesButton.click();
+
+			await expect( TermboxPage.inMoreLanguages ).not.toBeDisplayed();
+			await expect( TermboxPage.allEnteredLanguagesButton ).not.toBeDisplayed();
 		} );
 
-		it( 'is collapsible, also hiding the "all entered languages" section', () => {
-			TermboxPage.inMoreLanguagesButton.click();
+		it( 'expands again when clicking the button twice', async () => {
+			await TermboxPage.inMoreLanguagesButton.click();
+			await TermboxPage.inMoreLanguagesButton.click();
 
-			assert.strictEqual( TermboxPage.inMoreLanguages.isDisplayed(), false );
-			assert.strictEqual( TermboxPage.allEnteredLanguagesButton.isDisplayed(), false );
+			await expect( TermboxPage.inMoreLanguages ).toBeDisplayed();
 		} );
 
-		it( 'expands again when clicking the button twice', () => {
-			TermboxPage.inMoreLanguagesButton.click();
-			TermboxPage.inMoreLanguagesButton.click();
-
-			assert.ok( TermboxPage.inMoreLanguages.isDisplayed() );
-		} );
-
-		it( 'contains the expected languages with respective terms', () => {
+		it( 'contains the expected languages with respective terms', async () => {
 			const expectedLanguages = termboxLanguages.getPreferredLanguages().slice( 1 );
-			const monolingualFingerprints = TermboxPage.getMonolingualFingerprintsInSection(
+			const monolingualFingerprints = await TermboxPage.getMonolingualFingerprintsInSection(
 				TermboxPage.inMoreLanguages
 			);
 
-			expectedLanguages.forEach( ( language, i ) => {
-				assert.strictEqual(
-					monolingualFingerprints[ i ].language.getText(),
-					termboxLanguages.getContentLanguages()[ language ]
-				);
-				assertMonolingualFingerprintHasTermsInLanguage(
+			for ( const [ i, language ] of expectedLanguages.entries() ) {
+				await expect( monolingualFingerprints[ i ].language )
+					.toHaveText( termboxLanguages.getContentLanguages()[ language ] );
+				await assertMonolingualFingerprintHasTermsInLanguage(
 					monolingualFingerprints[ i ],
 					terms,
 					language
 				);
-			} );
+			}
 		} );
 	} );
 
 	describe( '"all entered languages" section', () => {
-		beforeEach( () => {
-			TermboxPage.openItemPage( id, useLangParam );
+		it( 'is collapsed by default', async () => {
+			await expect( TermboxPage.allEnteredLanguages ).not.toBeDisplayed();
 		} );
 
-		it( 'is collapsed by default', () => {
-			assert.strictEqual( TermboxPage.allEnteredLanguages.isDisplayed(), false );
+		it( 'has a collapse/expand button', async () => {
+			await expect( TermboxPage.allEnteredLanguagesButton ).toBeDisplayed();
 		} );
 
-		it( 'has a collapse/expand button', () => {
-			assert.ok( TermboxPage.allEnteredLanguagesButton.isDisplayed() );
+		it( 'is expandable', async () => {
+			await TermboxPage.allEnteredLanguagesButton.click();
+			await expect( TermboxPage.allEnteredLanguages ).toBeDisplayed();
 		} );
 
-		it( 'is expandable', () => {
-			TermboxPage.allEnteredLanguagesButton.click();
-			assert.ok( TermboxPage.allEnteredLanguages.isDisplayed() );
+		it( 'collapses again when clicking the button twice', async () => {
+			await TermboxPage.allEnteredLanguagesButton.click();
+			await TermboxPage.allEnteredLanguagesButton.click();
+
+			await expect( TermboxPage.allEnteredLanguages ).not.toBeDisplayed();
 		} );
 
-		it( 'collapses again when clicking the button twice', () => {
-			TermboxPage.allEnteredLanguagesButton.click();
-			TermboxPage.allEnteredLanguagesButton.click();
-
-			assert.strictEqual( TermboxPage.allEnteredLanguages.isDisplayed(), false );
-		} );
-
-		it( 'contains the expected languages with respective terms', () => {
-			TermboxPage.allEnteredLanguagesButton.click();
+		it( 'contains the expected languages with respective terms', async () => {
+			await TermboxPage.allEnteredLanguagesButton.click();
 
 			const expectedLanguages = termboxLanguages.getNonPreferredLanguages().slice( 0, 2 );
-			const monolingualFingerprints = TermboxPage.getMonolingualFingerprintsInSection(
+			const monolingualFingerprints = await TermboxPage.getMonolingualFingerprintsInSection(
 				TermboxPage.allEnteredLanguages
 			);
 
-			expectedLanguages.forEach( ( language, i ) => {
-				assert.strictEqual(
-					monolingualFingerprints[ i ].language.getText(),
-					termboxLanguages.getContentLanguages()[ language ]
-				);
-				assertMonolingualFingerprintHasTermsInLanguage(
+			for ( const [ i, language ] of expectedLanguages.entries() ) {
+				await expect( monolingualFingerprints[ i ].language )
+					.toHaveText( termboxLanguages.getContentLanguages()[ language ] );
+				await assertMonolingualFingerprintHasTermsInLanguage(
 					monolingualFingerprints[ i ],
 					terms,
 					language
 				);
-			} );
+			}
 		} );
 	} );
 } );

@@ -6,7 +6,7 @@
 		]
 	},
 	"requestaccount": "Wužiwarske konto sej žadać",
-	"requestaccount-text": "'''Wupjelń slědowacy formular a wotesćel jón, zo by wužiwarske konto požadał'''. \n\nProšu přečitaj najprjedy [[{{MediaWiki:Requestaccount-page}}|wužiwanske wuměnjenja]], prjedy hač požadaš wužiwarske konto.\n\nTak ruče kaž konto je so potwjerdźiło, dóstanješ powěsć přez e-mejlku a móžeš [[Special:UserLogin|Konto wutworić abo so přizjewić]].",
+	"requestaccount-text": "'''Wupjelń slědowacy formular a wotesćel jón, zo by so wo wužiwarske konto požadał'''. \n\nProšu přečitaj sej najprjedy [[{{MediaWiki:Requestaccount-page}}|wužiwanske wuměnjenja]], prjedy hač so požadaš wo konto.\n\nRučež je so konto potwjerdźiło, dóstanješ powěsć přez e-mejlku a móžeš [[Special:UserLogin|konto wutworić abo so přizjewić]].",
 	"requestaccount-page": "{{ns:project}}:Wužiwanske wuměnjenja",
 	"requestaccount-dup": "'''Kedźbu: Sy hižo ze zregistrowanym wužiwarskim kontom přizjewjeny.'''",
 	"requestaccount-leg-user": "Wužiwarske konto",
@@ -14,7 +14,7 @@
 	"requestaccount-leg-person": "Wosobinske informacije",
 	"requestaccount-leg-other": "Druhe informacije",
 	"requestaccount-leg-tos": "Wužiwanske wuměnjenja",
-	"requestaccount-acc-text": "Na twoju e-mejlowu adresu budźe so po wotesłanju tutoho naprašowanje wobkrućenska mejlka słać. Adresa so njewozjewi. Prošu wotmołw přez kliknjenje na wobkrućenski wotkaz, kotryž mejlka wobsahuje. Skónčnje, tak ruče kaž twoje konto je wutworjene, so ći twoje hesło připósćele.",
+	"requestaccount-acc-text": "Na twoju e-mejlowu adresu sćelemy po wotesłanju tutoho naprašowanja wobkrućensku mejlku. Adresa so njewozjewi. Prošu wotmołw přez kliknjenje na wobkrućenski wotkaz w mejlce. Skónčnje, ručež je twoje konto wutworjene, so ći twoje hesło připósćele.",
 	"requestaccount-areas-text": "Wubjer slědowace temowe wobwody, w kotrychž maš wěcywustojnosć abo chceš najwjace dźěła činić.",
 	"requestaccount-ext-text": "Ze slědowacymi informacijemi so dowěrliwje wobchadźa a jenož za tute požadne wužiwa. Móžeš kontaktowe informacije, kaž na př. telefonowe čisło, podać, zo by wobdźěłowanje swojeho požadanja zjednorił.",
 	"requestaccount-bio-text": "Spytaj wšě relewantne informacije do swojeje slědowaceje biografije zapřijimać.",

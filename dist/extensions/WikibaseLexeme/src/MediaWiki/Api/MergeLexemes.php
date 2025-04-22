@@ -2,14 +2,16 @@
 
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiUsageException;
 use Exception;
 use InvalidArgumentException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
+use MediaWiki\User\UserIdentity;
 use Wikibase\Lexeme\Domain\Merge\Exceptions\MergingException;
 use Wikibase\Lexeme\Domain\Model\LexemeId;
-use Wikibase\Lexeme\WikibaseLexemeServices;
+use Wikibase\Lexeme\Interactors\MergeLexemes\MergeLexemesInteractor;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\Api\ApiHelperFactory;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -21,6 +23,8 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class MergeLexemes extends ApiBase {
 
+	use ApiCreateTempUserTrait;
+
 	public const SOURCE_ID_PARAM = 'source';
 	public const TARGET_ID_PARAM = 'target';
 	public const SUMMARY_PARAM = 'summary';
@@ -31,26 +35,32 @@ class MergeLexemes extends ApiBase {
 	 */
 	private $errorReporter;
 
+	private MergeLexemesInteractor $mergeLexemesInteractor;
+
 	public function __construct(
 		ApiMain $mainModule,
 		$moduleName,
-		callable $errorReporterCallback
+		callable $errorReporterCallback,
+		MergeLexemesInteractor $mergeLexemesInteractor
 	) {
 		parent::__construct( $mainModule, $moduleName );
 		$this->errorReporter = $errorReporterCallback( $this );
+		$this->mergeLexemesInteractor = $mergeLexemesInteractor;
 	}
 
 	public static function factory(
 		ApiMain $mainModule,
 		string $moduleName,
-		ApiHelperFactory $apiHelperFactory
+		ApiHelperFactory $apiHelperFactory,
+		MergeLexemesInteractor $mergeLexemesInteractor
 	): self {
 		return new self(
 			$mainModule,
 			$moduleName,
 			static function ( $module ) use ( $apiHelperFactory ) {
 				return $apiHelperFactory->getErrorReporter( $module );
-			}
+			},
+			$mergeLexemesInteractor
 		);
 	}
 
@@ -61,13 +71,12 @@ class MergeLexemes extends ApiBase {
 	 */
 	public function execute() {
 		$params = $this->extractRequestParams();
-		$services = WikibaseLexemeServices::newInstance();
 
 		$sourceId = $this->getLexemeIdFromParamOrDie( $params[self::SOURCE_ID_PARAM] );
 		$targetId = $this->getLexemeIdFromParamOrDie( $params[self::TARGET_ID_PARAM] );
 
 		try {
-			$services->newMergeLexemesInteractor()->mergeLexemes(
+			$status = $this->mergeLexemesInteractor->mergeLexemes(
 				$sourceId,
 				$targetId,
 				$this->getContext(),
@@ -75,6 +84,7 @@ class MergeLexemes extends ApiBase {
 				$params[self::BOT_PARAM],
 				$params['tags'] ?: []
 			);
+			$savedTempUser = $status->getSavedTempUser();
 		} catch ( MergingException $e ) {
 			$this->errorReporter->dieException(
 				$e,
@@ -87,7 +97,7 @@ class MergeLexemes extends ApiBase {
 			);
 		}
 
-		$this->showSuccessMessage();
+		$this->showSuccessMessage( $params, $savedTempUser );
 	}
 
 	private function getLexemeIdFromParamOrDie( $serialization ): LexemeId {
@@ -100,7 +110,7 @@ class MergeLexemes extends ApiBase {
 
 	/** @inheritDoc */
 	protected function getAllowedParams() {
-		return [
+		return array_merge( [
 			self::SOURCE_ID_PARAM => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
@@ -119,8 +129,8 @@ class MergeLexemes extends ApiBase {
 			self::BOT_PARAM => [
 				ParamValidator::PARAM_TYPE => 'boolean',
 				ParamValidator::PARAM_DEFAULT => false,
-			]
-		];
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
 	/** @inheritDoc */
@@ -141,11 +151,18 @@ class MergeLexemes extends ApiBase {
 		return true;
 	}
 
-	/**
-	 * @return bool
-	 */
-	private function showSuccessMessage() {
-		return $this->getResult()->addContentValue( null, 'success', 1 );
+	private function showSuccessMessage( array $params, ?UserIdentity $savedTempUser ) {
+		$result = $this->getResult();
+		$result->addContentValue( null, 'success', 1 );
+
+		if ( $savedTempUser !== null ) {
+			$result->addValue( null, 'tempusercreated', $savedTempUser->getName() );
+			$redirectUrl = $this->getTempUserRedirectUrl( $params, $savedTempUser );
+			if ( $redirectUrl === '' ) {
+				$redirectUrl = null;
+			}
+			$result->addValue( null, 'tempuserredirect', $redirectUrl );
+		}
 	}
 
 }

@@ -9,6 +9,7 @@ use CirrusSearch\Search\CirrusIndexField;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\SearchRequestLog;
 use Elastica\Document;
+use Elastica\Exception\ResponseException;
 use Elastica\Multi\ResultSet;
 use Elastica\Multi\Search as MultiSearch;
 use Elastica\Query\BoolQuery;
@@ -16,7 +17,10 @@ use Elastica\Query\Terms;
 use Elastica\Search;
 use MediaWiki\Cache\BacklinkCacheFactory;
 use MediaWiki\Logger\LoggerFactory;
-use Title;
+use MediaWiki\Page\PageIdentity;
+use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Title\Title;
+use MediaWiki\Title\TitleFormatter;
 use WikiPage;
 
 /**
@@ -67,46 +71,55 @@ class RedirectsAndIncomingLinks extends ElasticsearchIntermediary implements Pag
 	private $backlinkCacheFactory;
 
 	/**
+	 * @var TitleFormatter
+	 */
+	private $titleFormatter;
+
+	/**
 	 * @param Connection $conn
 	 * @param BacklinkCacheFactory $backlinkCacheFactory
+	 * @param TitleFormatter $titleFormatter
 	 */
 	public function __construct(
 		Connection $conn,
-		BacklinkCacheFactory $backlinkCacheFactory
+		BacklinkCacheFactory $backlinkCacheFactory,
+		TitleFormatter $titleFormatter
 	) {
 		parent::__construct( $conn, null, 0 );
 		$this->config = $conn->getConfig();
 		$this->linkCountMultiSearch = new MultiSearch( $this->connection->getClient() );
 		$this->backlinkCacheFactory = $backlinkCacheFactory;
+		$this->titleFormatter = $titleFormatter;
 	}
 
 	/**
 	 * {@inheritDoc}
-	 *
-	 * @param Document $doc The document to be populated
-	 * @param WikiPage $page The page to scope operation to
 	 */
-	public function initialize( Document $doc, WikiPage $page ): void {
+	public function initialize( Document $doc, WikiPage $page, RevisionRecord $revision ): void {
 		$title = $page->getTitle();
 		$this->pageIds[] = $page->getId();
 		$outgoingLinksToCount = [ $title->getPrefixedDBkey() ];
 
 		// Gather redirects to this page
-		$redirectTitles = $this->backlinkCacheFactory->getBacklinkCache( $title )
-			->getLinks( 'redirect', false, false, $this->config->get( 'CirrusSearchIndexedRedirects' ) );
+		$redirectPageIdentities = $this->backlinkCacheFactory->getBacklinkCache( $title )
+			->getLinkPages( 'redirect', false, false, $this->config->get( 'CirrusSearchIndexedRedirects' ) );
 		$redirects = [];
-		/** @var Title $redirect */
-		foreach ( $redirectTitles as $redirect ) {
+		/** @var PageIdentity $redirect */
+		foreach ( $redirectPageIdentities as $redirect ) {
 			// If the redirect is in main OR the same namespace as the article the index it
 			if ( $redirect->getNamespace() === NS_MAIN || $redirect->getNamespace() === $title->getNamespace() ) {
 				$redirects[] = [
 					'namespace' => $redirect->getNamespace(),
-					'title' => $redirect->getText()
+					'title' => $this->titleFormatter->getText( $redirect )
 				];
-				$outgoingLinksToCount[] = $redirect->getPrefixedDBkey();
+				$outgoingLinksToCount[] = $this->titleFormatter->getPrefixedDBkey( $redirect );
 			}
 		}
 		$doc->set( 'redirect', $redirects );
+
+		if ( !$this->config->get( 'CirrusSearchEnableIncomingLinkCounting' ) ) {
+			return;
+		}
 
 		// Count links
 		// Incoming links is the sum of:
@@ -140,6 +153,11 @@ class RedirectsAndIncomingLinks extends ElasticsearchIntermediary implements Pag
 				'query' => $linkCountClosureCount,
 			] );
 			$result = $this->linkCountMultiSearch->search();
+
+			if ( $result->count() <= 0 ) {
+				$this->raiseResponseException();
+			}
+
 			$foundNull = false;
 			for ( $index = 0; $index < $linkCountClosureCount; $index++ ) {
 				if ( $result[$index] === null ) {
@@ -166,11 +184,8 @@ class RedirectsAndIncomingLinks extends ElasticsearchIntermediary implements Pag
 
 	/**
 	 * {@inheritDoc}
-	 *
-	 * @param Document $doc
-	 * @param Title $title
 	 */
-	public function finalize( Document $doc, Title $title ): void {
+	public function finalize( Document $doc, Title $title, RevisionRecord $revision ): void {
 		// NOOP
 	}
 
@@ -235,5 +250,19 @@ class RedirectsAndIncomingLinks extends ElasticsearchIntermediary implements Pag
 			$queryType,
 			$extra
 		);
+	}
+
+	/**
+	 * @throws ResponseException
+	 * @return void
+	 */
+	private function raiseResponseException(): void {
+		$client = $this->connection->getClient();
+		$request = $client->getLastRequest();
+		$response = $client->getLastResponse();
+
+		if ( $request && $response ) {
+			throw new ResponseException( $request, $response );
+		}
 	}
 }

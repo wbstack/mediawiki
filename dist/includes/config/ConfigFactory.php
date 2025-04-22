@@ -21,7 +21,10 @@
  * @file
  */
 
-use MediaWiki\MediaWikiServices;
+namespace MediaWiki\Config;
+
+use InvalidArgumentException;
+use UnexpectedValueException;
 use Wikimedia\Assert\Assert;
 use Wikimedia\Services\SalvageableService;
 
@@ -44,15 +47,6 @@ class ConfigFactory implements SalvageableService {
 	 * @var array
 	 */
 	protected $configs = [];
-
-	/**
-	 * @deprecated since 1.27, use MediaWikiServices::getInstance()->getConfigFactory() instead.
-	 *
-	 * @return ConfigFactory
-	 */
-	public static function getDefaultInstance() {
-		return MediaWikiServices::getInstance()->getConfigFactory();
-	}
 
 	/**
 	 * Re-uses existing Cache objects from $other. Cache objects are only re-used if the
@@ -156,3 +150,6 @@ class ConfigFactory implements SalvageableService {
 	}
 
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( ConfigFactory::class, 'ConfigFactory' );

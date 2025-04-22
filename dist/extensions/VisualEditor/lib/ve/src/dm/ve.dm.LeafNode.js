@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel LeafNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -11,7 +11,7 @@
  *
  * @abstract
  * @extends ve.dm.Node
- * @mixins ve.LeafNode
+ * @mixes ve.LeafNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model

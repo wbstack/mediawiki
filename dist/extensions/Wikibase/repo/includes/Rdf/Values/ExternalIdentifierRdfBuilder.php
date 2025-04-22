@@ -38,6 +38,7 @@ class ExternalIdentifierRdfBuilder implements ValueSnakRdfBuilder {
 	 * @param string $propertyValueNamespace Property value relation namespace
 	 * @param string $propertyValueLName Property value relation name
 	 * @param string $dataType Property data type
+	 * @param string $snakNamespace
 	 * @param PropertyValueSnak $snak
 	 */
 	public function addValue(
@@ -49,6 +50,7 @@ class ExternalIdentifierRdfBuilder implements ValueSnakRdfBuilder {
 		PropertyValueSnak $snak
 	) {
 		// @fixme Add a check for that!
+		// @phan-suppress-next-line PhanTypeMismatchArgumentSuperType see fixme
 		$id = $this->getValueId( $snak->getDataValue() );
 		$uriPattern = $this->uriPatternProvider->getPropertyInfo( $snak->getPropertyId() );
 

@@ -1,4 +1,10 @@
 <?php
+
+namespace MediaWiki\HTMLForm\Field;
+
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLFormField;
+
 /**
  * Wrapper for Html::namespaceSelector to use in HTMLForm
  *
@@ -49,13 +55,28 @@ class HTMLSelectNamespace extends HTMLFormField {
 	 * @stable to override
 	 */
 	public function getInputOOUI( $value ) {
-		return new MediaWiki\Widget\NamespaceInputWidget( [
+		return new \MediaWiki\Widget\NamespaceInputWidget( [
 			'value' => $value,
 			'name' => $this->mName,
 			'id' => $this->mID,
 			'includeAllValue' => $this->mAllValue,
 			'userLang' => $this->mUserLang,
 		] );
+	}
+
+	/**
+	 * @inheritDoc
+	 * @stable to override
+	 */
+	public function getInputCodex( $value, $hasErrors ) {
+		$optionParams = [
+			'all' => $this->mAllValue,
+			'in-user-lang' => $this->mUserLang
+		];
+		$select = new HTMLSelectField( [
+			'options' => array_flip( Html::namespaceSelectorOptions( $optionParams ) )
+		] + $this->mParams );
+		return $select->getInputCodex( $value, $hasErrors );
 	}
 
 	/**
@@ -75,3 +96,6 @@ class HTMLSelectNamespace extends HTMLFormField {
 		return true;
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLSelectNamespace::class, 'HTMLSelectNamespace' );

@@ -4,10 +4,10 @@ declare( strict_types=1 );
 
 namespace Wikibase\Client\Api;
 
-use ApiBase;
-use ApiQuery;
-use ApiQueryBase;
-use ApiResult;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryBase;
+use MediaWiki\Api\ApiResult;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Usage\EntityUsage;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -57,7 +57,7 @@ class ApiPropsEntityUsage extends ApiQueryBase {
 				break;
 			}
 
-			if ( isset( $currentPageId ) && $row->eu_page_id !== $currentPageId ) {
+			if ( $currentPageId !== null && $row->eu_page_id !== $currentPageId ) {
 				// Flush out everything we built
 				$fit = $this->addPageSubItems( $currentPageId, $entry );
 				if ( !$fit ) {
@@ -106,7 +106,7 @@ class ApiPropsEntityUsage extends ApiQueryBase {
 	}
 
 	public function doQuery( array $params ): ?IResultWrapper {
-		$pages = $this->getPageSet()->getGoodTitles();
+		$pages = $this->getPageSet()->getGoodPages();
 		if ( !$pages ) {
 			return null;
 		}
@@ -114,7 +114,7 @@ class ApiPropsEntityUsage extends ApiQueryBase {
 		$this->addFields( [
 			'eu_page_id',
 			'eu_entity_id',
-			'eu_aspect'
+			'eu_aspect',
 		] );
 
 		$this->addTables( 'wbc_entity_usage' );
@@ -126,22 +126,17 @@ class ApiPropsEntityUsage extends ApiQueryBase {
 
 		if ( $params['continue'] !== null ) {
 			$db = $this->getDB();
-			[ $pageContinueSql, $entityContinueSql, $aspectContinueSql ] = explode( '|', $params['continue'], 3 );
-			$pageContinue = (int)$pageContinueSql;
-			$entityContinue = $db->addQuotes( $entityContinueSql );
-			$aspectContinue = $db->addQuotes( $aspectContinueSql );
+			[ $pageContinue, $entityContinue, $aspectContinue ] = explode( '|', $params['continue'], 3 );
 			// Filtering out results that have been shown already and
 			// starting the query from where it ended.
-			$this->addWhere(
-				"eu_page_id > $pageContinue OR " .
-				"(eu_page_id = $pageContinue AND " .
-				"(eu_entity_id > $entityContinue OR " .
-				"(eu_entity_id = $entityContinue AND " .
-				"eu_aspect >= $aspectContinue)))"
-			);
+			$this->addWhere( $db->buildComparison( '>=', [
+				'eu_page_id' => (int)$pageContinue,
+				'eu_entity_id' => $entityContinue,
+				'eu_aspect' => $aspectContinue,
+			] ) );
 		}
 
-		$orderBy = [ 'eu_page_id' , 'eu_entity_id' ];
+		$orderBy = [ 'eu_page_id', 'eu_entity_id' ];
 		if ( isset( $params['aspect'] ) ) {
 			$this->addWhereFld( 'eu_aspect', $params['aspect'] );
 		} else {
@@ -185,7 +180,7 @@ class ApiPropsEntityUsage extends ApiQueryBase {
 				ParamValidator::PARAM_TYPE => 'limit',
 				IntegerDef::PARAM_MIN => 1,
 				IntegerDef::PARAM_MAX => ApiBase::LIMIT_BIG1,
-				IntegerDef::PARAM_MAX2 => ApiBase::LIMIT_BIG2
+				IntegerDef::PARAM_MAX2 => ApiBase::LIMIT_BIG2,
 			],
 			'continue' => [
 				ApiBase::PARAM_HELP_MSG => 'api-help-param-continue',

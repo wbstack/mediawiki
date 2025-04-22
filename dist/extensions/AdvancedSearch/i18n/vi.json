@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"CactiStaccingCrane",
 			"Harriettruong3",
 			"Ioe2015",
 			"Leduyquang753",
@@ -9,8 +10,7 @@
 			"Nhatminh01",
 			"Phjtieudoc",
 			"Trần Nguyễn Minh Huy",
-			"Vinhtantran",
-			"CactiStaccingCrane"
+			"Vinhtantran"
 		]
 	},
 	"advancedsearch-desc": "Dễ dàng truy cập các chức năng tìm kiếm nâng cao tại [[Special:Search]]",

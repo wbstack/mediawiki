@@ -2,7 +2,8 @@
 
 namespace MobileFrontend\Amc;
 
-use Config;
+use MediaWiki\Config\Config;
+use MediaWiki\Config\ConfigException;
 use MobileContext;
 
 /**
@@ -36,13 +37,13 @@ final class Manager {
 
 	/**
 	 * System config
-	 * @var \Config
+	 * @var Config
 	 */
 	private $config;
 
 	/**
-	 * @param Config $config Config object
-	 * @param MobileContext $mobileContext MobileFrontend context
+	 * @param Config $config
+	 * @param MobileContext $mobileContext
 	 */
 	public function __construct( Config $config, MobileContext $mobileContext ) {
 		$this->config = $config;
@@ -52,7 +53,7 @@ final class Manager {
 	/**
 	 * Returns information if the AMC mode is available for current session
 	 * @return bool
-	 * @throws \ConfigException
+	 * @throws ConfigException
 	 */
 	public function isAvailable() {
 		return $this->mobileContext->shouldDisplayMobileView()

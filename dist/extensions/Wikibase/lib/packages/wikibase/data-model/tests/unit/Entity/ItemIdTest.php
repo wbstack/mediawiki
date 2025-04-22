@@ -7,7 +7,6 @@ use Wikibase\DataModel\Entity\ItemId;
 
 /**
  * @covers \Wikibase\DataModel\Entity\ItemId
- * @covers \Wikibase\DataModel\Entity\EntityId
  *
  * @group Wikibase
  * @group WikibaseDataModel
@@ -29,7 +28,7 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function idSerializationProvider() {
+	public static function idSerializationProvider() {
 		return [
 			[ 'q1', 'Q1' ],
 			[ 'q100', 'Q100' ],
@@ -37,9 +36,6 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 			[ 'q31337', 'Q31337' ],
 			[ 'Q31337', 'Q31337' ],
 			[ 'Q42', 'Q42' ],
-			[ ':Q42', 'Q42' ],
-			[ 'foo:Q42', 'foo:Q42' ],
-			[ 'foo:bar:q42', 'foo:bar:Q42' ],
 			[ 'Q2147483647', 'Q2147483647' ],
 		];
 	}
@@ -52,7 +48,7 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 		new ItemId( $invalidSerialization );
 	}
 
-	public function invalidIdSerializationProvider() {
+	public static function invalidIdSerializationProvider() {
 		return [
 			[ "Q1\n" ],
 			[ 'q' ],
@@ -71,16 +67,15 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 			[ 1 ],
 			[ 'Q2147483648' ],
 			[ 'Q99999999999' ],
+			// no longer supported (T291823, T338223)
+			[ 'foo:Q42', 'foo:Q42' ],
+			[ 'foo:bar:q42', 'foo:bar:Q42' ],
+			[ ':Q42', 'Q42' ],
 		];
 	}
 
 	public function testGetNumericId() {
 		$id = new ItemId( 'Q1' );
-		$this->assertSame( 1, $id->getNumericId() );
-	}
-
-	public function testGetNumericId_foreignId() {
-		$id = new ItemId( 'foo:Q1' );
 		$this->assertSame( 1, $id->getNumericId() );
 	}
 
@@ -91,31 +86,26 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 
 	public function testSerialize() {
 		$id = new ItemId( 'Q1' );
-		$this->assertSame( 'Q1', $id->serialize() );
+		$this->assertSame( [ 'serialization' => 'Q1' ], $id->__serialize() );
 	}
 
-	/**
-	 * @dataProvider serializationProvider
-	 */
-	public function testUnserialize( $json, $expected ) {
+	public function testUnserialize() {
 		$id = new ItemId( 'Q1' );
-		$id->unserialize( $json );
-		$this->assertSame( $expected, $id->getSerialization() );
+		$id->__unserialize( [ 'serialization' => 'Q2' ] );
+		$this->assertSame( 'Q2', $id->getSerialization() );
 	}
 
-	public function serializationProvider() {
-		return [
-			[ 'Q2', 'Q2' ],
-			[ '["item","Q2"]', 'Q2' ],
+	public function testUnserializeInvalid(): void {
+		$id = new ItemId( 'Q1' );
+		$this->expectException( InvalidArgumentException::class );
+		$id->__unserialize( [ 'serialization' => 'q' ] );
+	}
 
-			// All these cases are kind of an injection vector and allow constructing invalid ids.
-			[ '["string","Q2"]', 'Q2' ],
-			[ '["","string"]', 'string' ],
-			[ '["",""]', '' ],
-			[ '["",2]', 2 ],
-			[ '["",null]', null ],
-			[ '', '' ],
-		];
+	public function testUnserializeNotNormalized(): void {
+		$id = new ItemId( 'Q1' );
+		$this->expectException( InvalidArgumentException::class );
+		$id->__unserialize( [ 'serialization' => 'q2' ] );
+		// 'q2' is allowed in the constructor (silently uppercased) but not in unserialize()
 	}
 
 	/**
@@ -126,7 +116,7 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( 'Q' . $number, $id->getSerialization() );
 	}
 
-	public function numericIdProvider() {
+	public static function numericIdProvider() {
 		return [
 			[ 42 ],
 			[ '42' ],
@@ -145,7 +135,7 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 		ItemId::newFromNumber( $number );
 	}
 
-	public function invalidNumericIdProvider() {
+	public static function invalidNumericIdProvider() {
 		return [
 			[ 'Q1' ],
 			[ '42.1' ],
@@ -153,16 +143,6 @@ class ItemIdTest extends \PHPUnit\Framework\TestCase {
 			[ 2147483648 ],
 			[ '2147483648' ],
 		];
-	}
-
-	public function testNewFromRepositoryAndNumber() {
-		$id = ItemId::newFromRepositoryAndNumber( 'foo', 1 );
-		$this->assertSame( 'foo:Q1', $id->getSerialization() );
-	}
-
-	public function testNewFromRepositoryAndNumberWithInvalidNumericId() {
-		$this->expectException( InvalidArgumentException::class );
-		ItemId::newFromRepositoryAndNumber( '', 'Q1' );
 	}
 
 }

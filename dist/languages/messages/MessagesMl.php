@@ -1,8 +1,6 @@
 <?php
 /** Malayalam (മലയാളം)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -159,6 +157,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ 'സമീപകാലമാറ്റങ്ങൾ' ],
 	'Recentchangeslinked'       => [ 'ബന്ധപ്പെട്ട_മാറ്റങ്ങൾ' ],
 	'Redirect'                  => [ 'തിരിച്ചുവിടൽ' ],
+	'Renameuser'                => [ 'ഉപയോക്തൃപുനർനാമകരണം' ],
 	'ResetTokens'               => [ 'ചീട്ട്പുനഃസജ്ജീകരിക്കുക' ],
 	'Revisiondelete'            => [ 'നാൾപ്പതിപ്പ്_മായ്ക്കൽ' ],
 	'RunJobs'                   => [ 'പ്രവൃത്തിനടപ്പാക്കൽ' ],
@@ -259,7 +258,7 @@ $magicWords = [
 	'img_width'                 => [ '1', '$1ബിന്ദു', '$1px' ],
 	'index'                     => [ '1', '‌‌__സൂചിക__', '__INDEX__' ],
 	'int'                       => [ '0', 'സമ്പർക്കം:', 'INT:' ],
-	'language'                  => [ '0', '#ഭാഷ:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#ഭാഷ', '#LANGUAGE' ],
 	'localday'                  => [ '1', 'പ്രാദേശികദിവസം', 'LOCALDAY' ],
 	'localday2'                 => [ '1', 'പ്രാദേശികദിവസം2', 'LOCALDAY2' ],
 	'localdayname'              => [ '1', 'പ്രാദേശികദിവസത്തിന്റെപേര്‌', 'LOCALDAYNAME' ],

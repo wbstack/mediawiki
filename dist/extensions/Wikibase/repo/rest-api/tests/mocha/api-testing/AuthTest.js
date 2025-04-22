@@ -1,158 +1,57 @@
 'use strict';
 
+const { describeWithTestData } = require( '../helpers/describeWithTestData' );
 const { assert, action } = require( 'api-testing' );
-const { RequestBuilder } = require( '../helpers/RequestBuilder' );
+const { expect } = require( '../helpers/chaiHelper' );
 const {
-	createEntity,
-	createUniqueStringProperty,
-	newStatementWithRandomStringValue,
-	protectItem
+	changeEntityProtectionStatus
 } = require( '../helpers/entityHelper' );
-const hasJsonDiffLib = require( '../helpers/hasJsonDiffLib' );
 const { requireExtensions } = require( '../../../../../tests/api-testing/utils' );
+const {
+	getItemGetRequests,
+	getPropertyGetRequests,
+	getItemEditRequests,
+	getPropertyEditRequests,
+	getItemCreateRequest,
+	getPropertyCreateRequest
+} = require( '../helpers/happyPathRequestBuilders' );
+const { getOrCreateAuthTestUser } = require( '../helpers/testUsers' );
+const { assertValidError } = require( '../helpers/responseValidator' );
+const { newCreatePropertyRequestBuilder } = require( '../helpers/RequestBuilderFactory' );
 
-describe( 'Auth', () => {
+describeWithTestData( 'Auth', ( itemRequestInputs, propertyRequestInputs, describeEachRouteWithReset ) => {
+	let user;
+	let root;
 
-	let itemId;
-	let statementId;
-	let stringPropertyId;
-
+	// eslint-disable-next-line mocha/no-top-level-hooks
 	before( async () => {
-		stringPropertyId = ( await createUniqueStringProperty() ).entity.id;
-		const createEntityResponse = await createEntity( 'item', {
-			claims: [ newStatementWithRandomStringValue( stringPropertyId ) ]
-		} );
-		itemId = createEntityResponse.entity.id;
-		statementId = createEntityResponse.entity.claims[ stringPropertyId ][ 0 ].id;
+		// using a single-purpose user here because blocking it might interfere with other tests
+		user = await getOrCreateAuthTestUser();
+		root = await action.root();
 	} );
 
 	const editRequests = [
-		{
-			route: 'POST /entities/items/{item_id}/statements',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'POST', '/entities/items/{item_id}/statements' )
-				.withPathParam( 'item_id', itemId )
-				.withJsonBodyParam( 'statement', newStatementWithRandomStringValue( stringPropertyId ) ),
-			expectedStatusCode: 201
-		},
-		{
-			route: 'PUT /entities/items/{item_id}/statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'PUT', '/entities/items/{item_id}/statements/{statement_id}' )
-				.withPathParam( 'item_id', itemId )
-				.withPathParam( 'statement_id', statementId )
-				.withJsonBodyParam( 'statement', newStatementWithRandomStringValue( stringPropertyId ) )
-		},
-		{
-			route: 'PUT /statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'PUT', '/statements/{statement_id}' )
-				.withPathParam( 'statement_id', statementId )
-				.withJsonBodyParam( 'statement', newStatementWithRandomStringValue( stringPropertyId ) )
-		},
-		{
-			route: 'DELETE /entities/items/{item_id}/statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'DELETE', '/entities/items/{item_id}/statements/{statement_id}' )
-				.withPathParam( 'item_id', itemId )
-				.withPathParam( 'statement_id', statementId ),
-			isDestructive: true
-		},
-		{
-			route: 'DELETE /statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'DELETE', '/statements/{statement_id}' )
-				.withPathParam( 'statement_id', statementId ),
-			isDestructive: true
-		}
+		...getItemEditRequests( itemRequestInputs ),
+		...getPropertyEditRequests( propertyRequestInputs )
 	];
-
 	const allRoutes = [
-		{
-			route: 'GET /entities/items/{id}/statements',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'GET', '/entities/items/{item_id}/statements' )
-				.withPathParam( 'item_id', itemId )
-		},
-		{
-			route: 'GET /entities/items/{item_id}/statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'GET', '/entities/items/{item_id}/statements/{statement_id}' )
-				.withPathParam( 'item_id', itemId )
-				.withPathParam( 'statement_id', statementId )
-		},
-		{
-			route: 'GET /entities/items/{id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'GET', '/entities/items/{item_id}' )
-				.withPathParam( 'item_id', itemId )
-		},
-		{
-			route: 'GET /statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'GET', '/statements/{statement_id}' )
-				.withPathParam( 'statement_id', statementId )
-		},
-		...editRequests
+		...editRequests,
+		...getItemGetRequests( itemRequestInputs ),
+		...getPropertyGetRequests( propertyRequestInputs ),
+		getItemCreateRequest( itemRequestInputs ),
+		getPropertyCreateRequest( propertyRequestInputs )
 	];
 
-	// eslint-disable-next-line mocha/no-setup-in-describe
-	if ( hasJsonDiffLib() ) { // awaiting security review (T316245)
-		// eslint-disable-next-line mocha/no-setup-in-describe
-		allRoutes.push( { // TODO move this to `editRequests` to also check authorization (T313906)
-			route: 'PATCH /entities/items/{item_id}/statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'PATCH', '/entities/items/{item_id}/statements/{statement_id}' )
-				.withPathParam( 'item_id', itemId )
-				.withPathParam( 'statement_id', statementId )
-				.withJsonBodyParam( 'patch', [
-					{
-						op: 'replace',
-						path: '/mainsnak',
-						value: newStatementWithRandomStringValue( stringPropertyId ).mainsnak
-					}
-				] )
-		} );
-		// eslint-disable-next-line mocha/no-setup-in-describe
-		allRoutes.push( { // TODO move this to `editRequests` to also check authorization (T313906)
-			route: 'PATCH /statements/{statement_id}',
-			newRequestBuilder: () => new RequestBuilder()
-				.withRoute( 'PATCH', '/statements/{statement_id}' )
-				.withPathParam( 'statement_id', statementId )
-				.withJsonBodyParam( 'patch', [
-					{
-						op: 'replace',
-						path: '/mainsnak',
-						value: newStatementWithRandomStringValue( stringPropertyId ).mainsnak
-					}
-				] )
-		} );
-	}
-
-	// eslint-disable-next-line mocha/no-setup-in-describe
-	allRoutes.forEach( ( { route, newRequestBuilder, expectedStatusCode = 200, isDestructive } ) => {
-		describe( `Authentication - ${route}`, () => {
-
-			afterEach( async () => {
-				if ( isDestructive ) {
-					const createStatementResponse = await new RequestBuilder()
-						.withRoute( 'POST', '/entities/items/{item_id}/statements' )
-						.withPathParam( 'item_id', itemId )
-						.withJsonBodyParam( 'statement', newStatementWithRandomStringValue( stringPropertyId ) )
-						.makeRequest();
-					statementId = createStatementResponse.body.id;
-				}
-			} );
-
+	describe( 'Authentication', () => {
+		describeEachRouteWithReset( allRoutes, ( newRequestBuilder ) => {
 			it( 'has an X-Authenticated-User header with the logged in user', async () => {
-				const mindy = await action.mindy();
+				const response = await newRequestBuilder().withUser( user ).makeRequest();
 
-				const response = await newRequestBuilder().withUser( mindy ).makeRequest();
-
-				assert.strictEqual( response.statusCode, expectedStatusCode );
-				assert.header( response, 'X-Authenticated-User', mindy.username );
+				expect( response ).status.to.be.within( 200, 299 );
+				assert.header( response, 'X-Authenticated-User', user.username );
 			} );
 
+			// eslint-disable-next-line mocha/no-skipped-tests
 			describe.skip( 'OAuth', () => { // Skipping due to apache auth header issues. See T305709
 				before( requireExtensions( [ 'OAuth' ] ) );
 
@@ -161,27 +60,103 @@ describe( 'Auth', () => {
 						.withHeader( 'Authorization', 'Bearer this-is-an-invalid-token' )
 						.makeRequest();
 
-					assert.strictEqual( response.status, 403 );
+					expect( response ).to.have.status( 403 );
 				} );
 			} );
 		} );
 	} );
 
 	describe( 'Authorization', () => {
-		before( async () => {
-			await protectItem( itemId );
+
+		describeEachRouteWithReset(
+			[
+				...editRequests,
+				getItemCreateRequest( itemRequestInputs ),
+				getPropertyCreateRequest( propertyRequestInputs )
+			],
+			( newRequestBuilder ) => {
+				it( 'Unauthorized bot edit', async () => {
+					assertValidError(
+						await newRequestBuilder().withJsonBodyParam( 'bot', true ).makeRequest(),
+						403,
+						'permission-denied',
+						{ denial_reason: 'unauthorized-bot-edit' }
+					);
+				} );
+			}
+		);
+
+		describeEachRouteWithReset(
+			[
+				...editRequests,
+				getItemCreateRequest( itemRequestInputs ),
+				getPropertyCreateRequest( propertyRequestInputs )
+			],
+			( newRequestBuilder ) => {
+				describe( 'Blocked user', () => {
+					before( async () => {
+						await root.action( 'block', {
+							user: user.username,
+							reason: 'testing',
+							token: await root.token()
+						}, 'POST' );
+					} );
+
+					after( async () => {
+						await root.action( 'unblock', {
+							user: user.username,
+							token: await root.token()
+						}, 'POST' );
+					} );
+
+					it( 'cannot create/edit if blocked', async () => {
+						assertValidError(
+							await newRequestBuilder().withUser( user ).makeRequest(),
+							403,
+							'permission-denied',
+							{ denial_reason: 'blocked-user' }
+						);
+					} );
+				} );
+			}
+		);
+
+		// protecting/unprotecting does not always take effect immediately. These tests are isolated here to avoid
+		// accidentally testing against a protected page in the other tests and receiving false positive results.
+		editRequests.forEach( ( { newRequestBuilder, requestInputs } ) => {
+			describe( `Protected entity page - ${newRequestBuilder().getRouteDescription()}`, () => {
+				before( async () => {
+					await changeEntityProtectionStatus( requestInputs.mainTestSubject, 'sysop' ); // protect
+				} );
+
+				after( async () => {
+					await changeEntityProtectionStatus( requestInputs.mainTestSubject, 'all' ); // unprotect
+				} );
+
+				it( `Permission denied - ${newRequestBuilder().getRouteDescription()}`, async function () {
+					// this test often hits a race condition where this request is made before the entity is protected
+					this.retries( 3 );
+
+					assertValidError(
+						await newRequestBuilder().makeRequest(),
+						403,
+						'permission-denied',
+						{ denial_reason: 'resource-protected' }
+					);
+				} );
+			} );
 		} );
 
-		// eslint-disable-next-line mocha/no-setup-in-describe
-		editRequests.forEach( ( { route, newRequestBuilder } ) => {
-			it( `Permission denied for protected item - ${route}`, async () => {
-				const response = await newRequestBuilder().makeRequest();
+		it( 'cannot create a property without the property-create permission', async () => {
+			const response = await newCreatePropertyRequestBuilder( { data_type: 'string' } )
+				.withUser( user )
+				.withConfigOverride(
+					'wgGroupPermissions',
+					{ '*': { read: true, edit: true, createpage: true, 'property-create': false } }
+				)
+				.makeRequest();
 
-				assert.strictEqual( response.status, 403 );
-				assert.strictEqual( response.body.httpCode, 403 );
-				assert.strictEqual( response.body.httpReason, 'Forbidden' );
-				assert.strictEqual( response.body.error, 'rest-write-denied' );
-			} );
+			expect( response ).to.have.status( 403 );
 		} );
 	} );
 } );

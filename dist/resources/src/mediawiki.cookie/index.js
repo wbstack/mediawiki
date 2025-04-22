@@ -1,15 +1,18 @@
 'use strict';
 
-var config = require( './config.json' ),
-	defaults = {
-		prefix: config.prefix,
-		domain: config.domain,
-		path: config.path,
-		expires: config.expires,
-		secure: false,
-		sameSite: '',
-		sameSiteLegacy: config.sameSiteLegacy
-	};
+const config = require( './config.json' ),
+	jar = require( './jar.js' );
+let defaults = {
+	prefix: config.prefix,
+	domain: config.domain,
+	path: config.path,
+	expires: config.expires,
+	secure: false,
+	sameSite: ''
+};
+
+// define jQuery Cookie methods
+require( './jquery.js' );
 
 /**
  * Manage cookies in a way that is syntactically and functionally similar
@@ -18,11 +21,13 @@ var config = require( './config.json' ),
  * @author Sam Smith <samsmith@wikimedia.org>
  * @author Matthew Flaschen <mflaschen@wikimedia.org>
  *
- * @class mw.cookie
- * @singleton
+ * @module mediawiki.cookie
+ * @example
+ * mw.loader.using( 'mediawiki.cookie' ).then( () => {
+ *   mw.cookie.set('hello', 'world' );
+ * })
  */
 mw.cookie = {
-
 	/**
 	 * Set or delete a cookie.
 	 *
@@ -45,61 +50,41 @@ mw.cookie = {
 	 * @param {string} key
 	 * @param {string|null} value Value of cookie. If `value` is `null` then this method will
 	 *   instead remove a cookie by name of `key`.
-	 * @param {Object|Date|number} [options] Options object, or expiry date
-	 * @param {Date|number|null} [options.expires=wgCookieExpiration] The expiry date of the cookie,
-	 *  or lifetime in seconds. If `options.expires` is null or 0, then a session cookie is set.
-	 * @param {string} [options.prefix=wgCookiePrefix] The prefix of the key
-	 * @param {string} [options.domain=wgCookieDomain] The domain attribute of the cookie
-	 * @param {string} [options.path=wgCookiePath] The path attribute of the cookie
-	 * @param {boolean} [options.secure=false] Whether or not to include the secure attribute.
-	 *   (Does **not** use the wgCookieSecure configuration variable)
-	 * @param {string} [options.sameSite=''] The SameSite flag of the cookie ('None' / 'Lax'
-	 *   / 'Strict', case-insensitive; default is to omit the flag, which results in Lax on
-	 *   modern browsers). Set to None AND set secure=true if the cookie needs to be visible on
-	 *   cross-domain requests.
-	 * @param {boolean} [options.sameSiteLegacy=$wgUseSameSiteLegacyCookies] If true, sameSite=None
-	 *   cookies will also be sent as a non-SameSite cookie with an 'ss0-' prefix, to work around
-	 *   old browsers interpreting the standard differently.
+	 * @param {module:mediawiki.cookie~CookieOptions|Date|number} [options] Options object, or expiry date
+	 * @memberof module:mediawiki.cookie
 	 */
-	set: function ( key, value, options ) {
-		var prefix, date, sameSiteLegacy;
 
+	set: function ( key, value, options ) {
 		// The 'options' parameter may be a shortcut for the expiry.
 		if ( arguments.length > 2 && ( !options || options instanceof Date || typeof options === 'number' ) ) {
 			options = { expires: options };
 		}
 		// Apply defaults
-		options = $.extend( {}, defaults, options );
+		options = Object.assign( {}, defaults, options );
 
-		// Don't pass invalid option to $.cookie
-		prefix = options.prefix;
+		// Don't pass invalid option to jar.cookie
+		const prefix = options.prefix;
 		delete options.prefix;
 
 		if ( !options.expires ) {
 			// Session cookie (null or zero)
-			// Normalize to absent (undefined) for $.cookie.
+			// Normalize to absent (undefined) for jar.cookie.
 			delete options.expires;
 		} else if ( typeof options.expires === 'number' ) {
 			// Lifetime in seconds
-			date = new Date();
+			const date = new Date();
 			date.setTime( Number( date ) + ( options.expires * 1000 ) );
 			options.expires = date;
 		}
 
-		sameSiteLegacy = options.sameSiteLegacy;
+		// Ignore sameSiteLegacy (T344791)
 		delete options.sameSiteLegacy;
 
 		if ( value !== null ) {
 			value = String( value );
 		}
 
-		$.cookie( prefix + key, value, options );
-		if ( sameSiteLegacy && options.sameSite && options.sameSite.toLowerCase() === 'none' ) {
-			// Make testing easy by not changing the object passed to the first $.cookie call
-			options = $.extend( {}, options );
-			delete options.sameSite;
-			$.cookie( prefix + 'ss0-' + key, value, options );
-		}
+		jar.cookie( prefix + key, value, options );
 	},
 
 	/**
@@ -108,13 +93,12 @@ mw.cookie = {
 	 * @param {string} key
 	 * @param {string} [prefix=wgCookiePrefix] The prefix of the key. If `prefix` is
 	 *   `undefined` or `null`, then `wgCookiePrefix` is used
-	 * @param {Mixed} [defaultValue=null]
-	 * @return {string|null|Mixed} If the cookie exists, then the value of the
+	 * @param {null|string} [defaultValue] defaults to null
+	 * @return {string|null} If the cookie exists, then the value of the
 	 *   cookie, otherwise `defaultValue`
+	 * @memberof module:mediawiki.cookie
 	 */
 	get: function ( key, prefix, defaultValue ) {
-		var result;
-
 		if ( prefix === undefined || prefix === null ) {
 			prefix = defaults.prefix;
 		}
@@ -124,39 +108,37 @@ mw.cookie = {
 			defaultValue = null;
 		}
 
-		result = $.cookie( prefix + key );
+		const result = jar.cookie( prefix + key );
 
 		return result !== null ? result : defaultValue;
 	},
 
 	/**
-	 * Get the value of a SameSite=None cookie, using the legacy ss0- cookie if needed.
+	 * Get the value of a cookie.
+	 *
+	 * @deprecated since 1.43, use {@link module:mediawiki.cookie.get mw.cookie.get}
 	 *
 	 * @param {string} key
 	 * @param {string} [prefix=wgCookiePrefix] The prefix of the key. If `prefix` is
 	 *   `undefined` or `null`, then `wgCookiePrefix` is used
-	 * @param {Mixed} [defaultValue=null]
-	 * @return {string|null|Mixed} If the cookie exists, then the value of the
+	 * @param {null|string} [defaultValue]
+	 * @return {string|null} If the cookie exists, then the value of the
 	 *   cookie, otherwise `defaultValue`
+	 * @memberof module:mediawiki.cookie
 	 */
 	getCrossSite: function ( key, prefix, defaultValue ) {
-		var value;
-
-		value = this.get( key, prefix, null );
-		if ( value === null ) {
-			value = this.get( 'ss0-' + key, prefix, null );
-		}
-		if ( value === null ) {
-			value = defaultValue;
-		}
-		return value;
+		return this.get( key, prefix, defaultValue );
 	}
 };
 
+mw.log.deprecate( mw.cookie, 'getCrossSite', mw.cookie.getCrossSite,
+	'Use mw.cookie.get instead.', 'mw.cookie.getCrossSite' );
+
 if ( window.QUnit ) {
 	module.exports = {
+		jar,
 		setDefaults: function ( value ) {
-			var prev = defaults;
+			const prev = defaults;
 			defaults = value;
 			return prev;
 		}

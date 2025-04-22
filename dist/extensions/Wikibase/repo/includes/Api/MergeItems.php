@@ -4,12 +4,13 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
-use ApiMain;
-use ApiUsageException;
 use Exception;
 use InvalidArgumentException;
 use LogicException;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiUsageException;
 use Wikibase\DataModel\Entity\EntityIdParsingException;
 use Wikibase\DataModel\Entity\ItemId;
 use Wikibase\Lib\SettingsArray;
@@ -28,35 +29,13 @@ use Wikimedia\ParamValidator\ParamValidator;
  */
 class MergeItems extends ApiBase {
 
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
+	use ApiCreateTempUserTrait;
 
-	/**
-	 * @var ItemMergeInteractor
-	 */
-	private $interactor;
+	private ApiErrorReporter $errorReporter;
+	private ItemMergeInteractor $interactor;
+	private ResultBuilder $resultBuilder;
+	private array $sandboxEntityIds;
 
-	/**
-	 * @var ResultBuilder
-	 */
-	private $resultBuilder;
-
-	/**
-	 * @var string[]
-	 */
-	private $sandboxEntityIds;
-
-	/**
-	 * @see ApiBase::__construct
-	 *
-	 * @param ApiMain $mainModule
-	 * @param string $moduleName
-	 * @param ItemMergeInteractor $interactor
-	 * @param ApiErrorReporter $errorReporter
-	 * @param callable $resultBuilderInstantiator
-	 */
 	public function __construct(
 		ApiMain $mainModule,
 		string $moduleName,
@@ -113,6 +92,8 @@ class MergeItems extends ApiBase {
 			return new ItemId( $value );
 		} catch ( InvalidArgumentException $ex ) {
 			$this->errorReporter->dieError( $ex->getMessage(), 'invalid-entity-id' );
+
+			// @phan-suppress-next-line PhanPluginUnreachableCode Wanted
 			throw new LogicException( 'ApiErrorReporter::dieError did not throw an exception' );
 		}
 	}
@@ -134,7 +115,7 @@ class MergeItems extends ApiBase {
 				$ignoreConflicts = [];
 			}
 
-			$this->mergeItems( $fromId, $toId, $ignoreConflicts, $summary, $params['bot'], $params['tags'] ?: [] );
+			$this->mergeItems( $fromId, $toId, $ignoreConflicts, $summary, $params['bot'], $params['tags'] ?: [], $params );
 		} catch ( EntityIdParsingException $ex ) {
 			$this->errorReporter->dieException( $ex, 'invalid-entity-id' );
 		} catch ( ItemMergeException | RedirectCreationException $ex ) {
@@ -149,18 +130,27 @@ class MergeItems extends ApiBase {
 	 * @param string|null $summary
 	 * @param bool $bot
 	 * @param string[] $tags Already permission checked via ParamValidator::PARAM_TYPE => 'tags'
+	 * @param array $params Any other params (for ApiCreateTempUserTrait).
 	 * @throws ItemMergeException
 	 * @throws RedirectCreationException
 	 */
-	private function mergeItems( ItemId $fromId, ItemId $toId, array $ignoreConflicts, ?string $summary, bool $bot, array $tags ): void {
-		list( $newRevisionFrom, $newRevisionTo, $redirected )
-			= $this->interactor->mergeItems( $fromId, $toId, $this->getContext(), $ignoreConflicts, $summary, $bot, $tags );
+	private function mergeItems(
+		ItemId $fromId,
+		ItemId $toId,
+		array $ignoreConflicts,
+		?string $summary,
+		bool $bot,
+		array $tags,
+		array $params
+	): void {
+		$status = $this->interactor->mergeItems( $fromId, $toId, $this->getContext(), $ignoreConflicts, $summary, $bot, $tags );
 
 		$this->resultBuilder->setValue( null, 'success', 1 );
-		$this->resultBuilder->setValue( null, 'redirected', (int)$redirected );
+		$this->resultBuilder->setValue( null, 'redirected', (int)$status->getRedirected() );
 
-		$this->addEntityToOutput( $newRevisionFrom, 'from' );
-		$this->addEntityToOutput( $newRevisionTo, 'to' );
+		$this->addEntityToOutput( $status->getFromEntityRevision(), 'from' );
+		$this->addEntityToOutput( $status->getToEntityRevision(), 'to' );
+		$this->resultBuilder->addTempUser( $status, fn( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
 	/**
@@ -207,7 +197,7 @@ class MergeItems extends ApiBase {
 	 * @inheritDoc
 	 */
 	protected function getAllowedParams(): array {
-		return [
+		return array_merge( [
 			'fromid' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
@@ -235,8 +225,8 @@ class MergeItems extends ApiBase {
 			'token' => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
-			]
-		];
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
 	/**

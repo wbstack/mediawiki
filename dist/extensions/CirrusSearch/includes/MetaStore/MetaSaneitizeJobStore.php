@@ -3,7 +3,8 @@
 namespace CirrusSearch\MetaStore;
 
 use Elastica\Index;
-use WikiMap;
+use InvalidArgumentException;
+use MediaWiki\WikiMap\WikiMap;
 
 class MetaSaneitizeJobStore implements MetaStore {
 	public const METASTORE_TYPE = "sanitize";
@@ -78,12 +79,13 @@ class MetaSaneitizeJobStore implements MetaStore {
 	 */
 	public function update( \Elastica\Document $jobInfo ) {
 		if ( $jobInfo->get( 'type' ) != self::METASTORE_TYPE ) {
-			throw new \Exception( "Wrong document type" );
+			throw new InvalidArgumentException( "Wrong document type" );
 		}
 		$jobInfo->set( 'sanitize_job_updated', time() );
-		// Clear versioning info to prevent issues in the es 6->7 transition
 		$params = $jobInfo->getParams();
-		unset( $params['version'], $params['_version'] );
+		// Clear versioning info provided by elastica, we don't want
+		// to version these docs (they once were).
+		unset( $params['version'] );
 		$jobInfo->setParams( $params );
 
 		$this->index->addDocuments( [ $jobInfo ] );

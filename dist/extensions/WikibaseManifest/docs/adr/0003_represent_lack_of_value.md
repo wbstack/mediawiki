@@ -28,7 +28,7 @@ As of the moment of writing this ADR we are not aware of any properties that are
 
 - [OpenAPI 3.0](https://swagger.io/docs/specification/data-models/data-types/#null) doesn't have a null type per se, but it is possible to communicate a value is null by using `nullable: true`.
 
-- [The MediaWiki REST API's design principles](https://www.mediawiki.org/wiki/Core_Platform_Team/Initiative/Core_REST_API_in_Mediawiki/Design_principles) state that "Empty properties should have the value null".
+- [The MediaWiki REST API's design principles](https://www.mediawiki.org/wiki/Core_Platform_Team/Initiative/Core_REST_API_in_MediaWiki/Design_principles) state that "Empty properties should have the value null".
 
 ## Decision
 
@@ -37,4 +37,4 @@ Represent lack of value of optional spec properties by omitting the property fro
 ## Consequences
 
 - Have a concise response that doesn't include values which don't carry meaning.
-- We are consciously breaking the [MediaWiki REST API's design principles](https://www.mediawiki.org/wiki/Core_Platform_Team/Initiative/Core_REST_API_in_Mediawiki/Design_principles) by choosing to omit a property over setting its value to null.
+- We are consciously breaking the [MediaWiki REST API's design principles](https://www.mediawiki.org/wiki/Core_Platform_Team/Initiative/Core_REST_API_in_MediaWiki/Design_principles) by choosing to omit a property over setting its value to null.

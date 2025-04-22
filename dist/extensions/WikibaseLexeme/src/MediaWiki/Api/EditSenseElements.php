@@ -1,10 +1,14 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lexeme\MediaWiki\Api;
 
-use ApiMain;
 use Deserializers\Deserializer;
-use Status;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiCreateTempUserTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Message\Message;
 use Wikibase\DataModel\Deserializers\TermDeserializer;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -18,7 +22,6 @@ use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\GlossesChangeOpDeseria
 use Wikibase\Lexeme\Presentation\ChangeOp\Deserialization\SenseIdDeserializer;
 use Wikibase\Lexeme\Serialization\SenseSerializer;
 use Wikibase\Lexeme\WikibaseLexemeServices;
-use Wikibase\Lib\Store\EntityRevision;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
 use Wikibase\Lib\Store\LookupConstants;
@@ -26,11 +29,13 @@ use Wikibase\Lib\StringNormalizer;
 use Wikibase\Lib\Summary;
 use Wikibase\Repo\Api\ApiErrorReporter;
 use Wikibase\Repo\Api\ApiHelperFactory;
+use Wikibase\Repo\Api\ResultBuilder;
 use Wikibase\Repo\ChangeOp\ChangeOpException;
 use Wikibase\Repo\ChangeOp\ChangeOpFactoryProvider;
 use Wikibase\Repo\ChangeOp\ChangeOpValidationException;
 use Wikibase\Repo\ChangeOp\Deserialization\ClaimsChangeOpDeserializer;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\EditEntityStatus;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Store\Store;
 use Wikibase\Repo\SummaryFormatter;
 use Wikimedia\ParamValidator\ParamValidator;
@@ -38,44 +43,20 @@ use Wikimedia\ParamValidator\ParamValidator;
 /**
  * @license GPL-2.0-or-later
  */
-class EditSenseElements extends \ApiBase {
+class EditSenseElements extends ApiBase {
+
+	use ApiCreateTempUserTrait;
 
 	private const LATEST_REVISION = 0;
 
-	/**
-	 * @var EntityRevisionLookup
-	 */
-	private $entityRevisionLookup;
-
-	/**
-	 * @var MediawikiEditEntityFactory
-	 */
-	private $editEntityFactory;
-
-	/**
-	 * @var EditSenseElementsRequestParser
-	 */
-	private $requestParser;
-
-	/**
-	 * @var SummaryFormatter
-	 */
-	private $summaryFormatter;
-
-	/**
-	 * @var SenseSerializer
-	 */
-	private $senseSerializer;
-
-	/**
-	 * @var ApiErrorReporter
-	 */
-	private $errorReporter;
-
-	/**
-	 * @var EntityStore
-	 */
-	private $entityStore;
+	private EntityRevisionLookup $entityRevisionLookup;
+	private MediaWikiEditEntityFactory $editEntityFactory;
+	private EditSenseElementsRequestParser $requestParser;
+	private SummaryFormatter $summaryFormatter;
+	private SenseSerializer $senseSerializer;
+	private ResultBuilder $resultBuilder;
+	private ApiErrorReporter $errorReporter;
+	private EntityStore $entityStore;
 
 	public static function factory(
 		ApiMain $mainModule,
@@ -83,7 +64,7 @@ class EditSenseElements extends \ApiBase {
 		ApiHelperFactory $apiHelperFactory,
 		SerializerFactory $baseDataModelSerializerFactory,
 		ChangeOpFactoryProvider $changeOpFactoryProvider,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EntityIdParser $entityIdParser,
 		EntityStore $entityStore,
 		Deserializer $externalFormatStatementDeserializer,
@@ -119,22 +100,20 @@ class EditSenseElements extends \ApiBase {
 			),
 			$summaryFormatter,
 			$senseSerializer,
-			static function ( $module ) use ( $apiHelperFactory ) {
-				return $apiHelperFactory->getErrorReporter( $module );
-			},
+			$apiHelperFactory,
 			$entityStore
 		);
 	}
 
 	public function __construct(
 		ApiMain $mainModule,
-		$moduleName,
+		string $moduleName,
 		EntityRevisionLookup $entityRevisionLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		EditSenseElementsRequestParser $requestParser,
 		SummaryFormatter $summaryFormatter,
 		SenseSerializer $senseSerializer,
-		callable $errorReporterInstantiator,
+		ApiHelperFactory $apiHelperFactory,
 		EntityStore $entityStore
 	) {
 		parent::__construct( $mainModule, $moduleName );
@@ -144,7 +123,8 @@ class EditSenseElements extends \ApiBase {
 		$this->requestParser = $requestParser;
 		$this->summaryFormatter = $summaryFormatter;
 		$this->senseSerializer = $senseSerializer;
-		$this->errorReporter = $errorReporterInstantiator( $this );
+		$this->resultBuilder = $apiHelperFactory->getResultBuilder( $this );
+		$this->errorReporter = $apiHelperFactory->getErrorReporter( $this );
 		$this->entityStore = $entityStore;
 	}
 
@@ -152,7 +132,7 @@ class EditSenseElements extends \ApiBase {
 	 * @inheritDoc
 	 * @suppress PhanTypeMismatchArgument
 	 */
-	public function execute() {
+	public function execute(): void {
 		$params = $this->extractRequestParams();
 		$request = $this->requestParser->parse( $params );
 		if ( $request->getBaseRevId() ) {
@@ -194,7 +174,7 @@ class EditSenseElements extends \ApiBase {
 		try {
 			$changeOp->apply( $sense, $summary );
 		} catch ( ChangeOpException $exception ) {
-			$this->errorReporter->dieException( $exception,  'unprocessable-request' );
+			$this->errorReporter->dieException( $exception, 'unprocessable-request' );
 		}
 
 		$summaryString = $this->summaryFormatter->formatSummary( $summary );
@@ -205,22 +185,15 @@ class EditSenseElements extends \ApiBase {
 			$this->dieStatus( $status );
 		}
 
-		$this->generateResponse( $sense, $status );
+		$this->generateResponse( $sense, $status, $params );
 	}
 
-	/**
-	 * @param Sense $sense
-	 * @param string $summary
-	 * @param int $baseRevisionId
-	 * @param array $params
-	 * @return \Status
-	 */
 	private function saveSense(
 		Sense $sense,
-		$summary,
-		$baseRevisionId,
+		string $summary,
+		int $baseRevisionId,
 		array $params
-	) {
+	): EditEntityStatus {
 		$editEntity = $this->editEntityFactory->newEditEntity(
 			$this->getContext(),
 			$sense->getId(),
@@ -246,30 +219,19 @@ class EditSenseElements extends \ApiBase {
 		);
 	}
 
-	/**
-	 * @param Sense $sense
-	 * @param Status $status
-	 */
-	private function generateResponse( Sense $sense, Status $status ) {
-		$apiResult = $this->getResult();
+	private function generateResponse( Sense $sense, EditEntityStatus $status, array $params ): void {
+		$this->resultBuilder->addRevisionIdFromStatusToResult( $status, null );
+		$this->resultBuilder->markSuccess();
 
 		$serializedSense = $this->senseSerializer->serialize( $sense );
 		unset( $serializedSense['claims'] );
+		$this->getResult()->addValue( null, 'sense', $serializedSense );
 
-		/** @var EntityRevision $entityRevision */
-		$entityRevision = $status->getValue()['revision'];
-		$revisionId = $entityRevision->getRevisionId();
-
-		$apiResult->addValue( null, 'lastrevid', $revisionId );
-
-		// TODO: Do we really need `success` property in response?
-		$apiResult->addValue( null, 'success', 1 );
-		$apiResult->addValue( null, 'sense', $serializedSense );
+		$this->resultBuilder->addTempUser( $status, fn ( $user ) => $this->getTempUserRedirectUrl( $params, $user ) );
 	}
 
-	/** @inheritDoc */
-	protected function getAllowedParams() {
-		return [
+	protected function getAllowedParams(): array {
+		return array_merge( [
 			EditSenseElementsRequestParser::PARAM_SENSE_ID => [
 				ParamValidator::PARAM_TYPE => 'string',
 				ParamValidator::PARAM_REQUIRED => true,
@@ -288,12 +250,11 @@ class EditSenseElements extends \ApiBase {
 			'bot' => [
 				ParamValidator::PARAM_TYPE => 'boolean',
 				ParamValidator::PARAM_DEFAULT => false,
-			]
-		];
+			],
+		], $this->getCreateTempUserParams() );
 	}
 
-	/** @inheritDoc */
-	public function isWriteMode() {
+	public function isWriteMode(): bool {
 		return true;
 	}
 
@@ -301,21 +262,19 @@ class EditSenseElements extends \ApiBase {
 	 * As long as this codebase is in development and APIs might change any time without notice, we
 	 * mark all as internal. This adds an "unstable" notice, but does not hide them in any way.
 	 */
-	public function isInternal() {
+	public function isInternal(): bool {
 		return true;
 	}
 
-	/** @inheritDoc */
-	public function needsToken() {
+	public function needsToken(): string {
 		return 'csrf';
 	}
 
-	/** @inheritDoc */
-	public function mustBePosted() {
+	public function mustBePosted(): bool {
 		return true;
 	}
 
-	protected function getExamplesMessages() {
+	protected function getExamplesMessages(): array {
 		$senseId = 'L12-S1';
 		$exampleData = [
 			'glosses' => [
@@ -326,27 +285,23 @@ class EditSenseElements extends \ApiBase {
 				'de' => [
 					'value' => 'Eigenschaft eines Objekts, verschiedene Sinneseindrücke im Auge zu verursachen',
 					'language' => 'de',
-				]
+				],
 			],
 		];
 
 		$query = http_build_query( [
 			'action' => $this->getModuleName(),
 			EditSenseElementsRequestParser::PARAM_SENSE_ID => $senseId,
-			EditSenseElementsRequestParser::PARAM_DATA => json_encode( $exampleData )
+			EditSenseElementsRequestParser::PARAM_DATA => json_encode( $exampleData ),
 		] );
 
-		$languages = array_map( static function ( $r ) {
-			return $r['language'];
-		}, $exampleData['glosses'] );
-		$glosses = array_map( static function ( $r ) {
-			return $r['value'];
-		}, $exampleData['glosses'] );
+		$languages = array_column( $exampleData['glosses'], 'language' );
+		$glosses = array_column( $exampleData['glosses'], 'value' );
 
 		$glossesText = $this->getLanguage()->commaList( $glosses );
 		$languagesText = $this->getLanguage()->commaList( $languages );
 
-		$exampleMessage = new \Message(
+		$exampleMessage = new Message(
 			'apihelp-wbleditsenseelements-example-1',
 			[
 				$senseId,
@@ -356,24 +311,19 @@ class EditSenseElements extends \ApiBase {
 		);
 
 		return [
-			urldecode( $query ) => $exampleMessage
+			urldecode( $query ) => $exampleMessage,
 		];
 	}
 
 	/**
 	 * Returns $latestRevisionId if all of edits since $baseRevId are done
 	 * by the same user, otherwise returns $baseRevId.
-	 *
-	 * @param int $latestRevisionId
-	 * @param int $baseRevId
-	 * @param EntityId $entityId
-	 * @return int
 	 */
 	private function getRevIdForWhenUserWasLastToEdit(
-		$latestRevisionId,
-		$baseRevId,
+		int $latestRevisionId,
+		int $baseRevId,
 		EntityId $entityId
-	) {
+	): int {
 		if ( $baseRevId === self::LATEST_REVISION || $latestRevisionId === $baseRevId ) {
 			return $latestRevisionId;
 		}

@@ -1,5 +1,9 @@
 <?php
 
+namespace MediaWiki\Deferred;
+
+use Wikimedia\Rdbms\Platform\ISQLPlatform;
+
 /**
  * Deferrable update that must run outside of any explicit LBFactory transaction round
  *
@@ -15,9 +19,9 @@ class TransactionRoundDefiningUpdate
 
 	/**
 	 * @param callable $callback
-	 * @param string $fname Calling method
+	 * @param string $fname Calling method @phan-mandatory-param
 	 */
-	public function __construct( callable $callback, $fname = 'unknown' ) {
+	public function __construct( callable $callback, $fname = ISQLPlatform::CALLER_UNKNOWN ) {
 		$this->callback = $callback;
 		$this->fname = $fname;
 	}
@@ -38,3 +42,6 @@ class TransactionRoundDefiningUpdate
 		return self::TRX_ROUND_ABSENT;
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( TransactionRoundDefiningUpdate::class, 'TransactionRoundDefiningUpdate' );

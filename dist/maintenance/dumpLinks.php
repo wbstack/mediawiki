@@ -8,7 +8,7 @@
  * Does not include interwiki or URL links.
  * Dumps ASCII text to stdout; command-line.
  *
- * Copyright © 2005 Brion Vibber <brion@pobox.com>
+ * Copyright © 2005 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,11 @@
  * @ingroup Maintenance
  */
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
+
+use MediaWiki\Title\Title;
 
 /**
  * Maintenance script that generates a plaintext link dump.
@@ -44,18 +48,22 @@ class DumpLinks extends Maintenance {
 	}
 
 	public function execute() {
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
+		$linksMigration = $this->getServiceContainer()->getLinksMigration();
+		$queryInfo = $linksMigration->getQueryInfo( 'pagelinks' );
+		$queryInfo['tables'] = array_diff( $queryInfo['tables'], [ 'pagelinks' ] );
+		[ $blNamespace, $blTitle ] = $linksMigration->getTitleFields( 'pagelinks' );
 
 		$result = $dbr->newSelectQueryBuilder()
-			->select( [
+			->select( array_merge( [
 				'page_id',
 				'page_namespace',
 				'page_title',
-				'pl_namespace',
-				'pl_title'
-			] )
+			], $queryInfo['fields'] ) )
 			->from( 'page' )
 			->join( 'pagelinks', null, [ 'page_id=pl_from' ] )
+			->joinConds( $queryInfo['joins'] )
+			->tables( $queryInfo['tables'] )
 			->orderBy( 'page_id' )
 			->caller( __METHOD__ )
 			->fetchResultSet();
@@ -70,7 +78,7 @@ class DumpLinks extends Maintenance {
 				$this->output( $page->getPrefixedURL() );
 				$lastPage = $row->page_id;
 			}
-			$link = Title::makeTitle( $row->pl_namespace, $row->pl_title );
+			$link = Title::makeTitle( $row->$blNamespace, $row->$blTitle );
 			$this->output( " " . $link->getPrefixedURL() );
 		}
 		if ( $lastPage !== null ) {
@@ -79,5 +87,7 @@ class DumpLinks extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = DumpLinks::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

@@ -1,15 +1,15 @@
 /*!
  * VisualEditor ContentEditable ResizableNode tests.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 QUnit.module( 've.ce.ResizableNode' );
 
 /* Tests */
 
-QUnit.test( 'updateSizeLabel', function ( assert ) {
-	var view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.blockImage.html ),
+QUnit.test( 'updateSizeLabel', ( assert ) => {
+	const view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.blockImage.html ),
 		documentNode = view.getDocument().getDocumentNode(),
 		resizableNode = documentNode.children[ 0 ];
 
@@ -23,20 +23,22 @@ QUnit.test( 'updateSizeLabel', function ( assert ) {
 	resizableNode.$sizeLabel.css( { top: '', left: '' } );
 	assert.equalDomElement(
 		resizableNode.$sizeLabel[ 0 ],
-		$( '<div class="ve-ce-resizableNode-sizeLabel ve-ce-resizableNode-sizeLabel-resizing" style="width: 100px; height: 30px; line-height: 30px;">' +
-			'<span class="ve-ce-resizableNode-sizeText">' +
-				'<span class="ve-ce-resizableNode-sizeText-size">100 × 50</span>' +
-				'<span class="ve-ce-resizableNode-sizeText-scale">100%</span>' +
-			'</span>' +
-		'</div>' )[ 0 ],
+		$( ve.dm.example.singleLine`
+			<div class="ve-ce-resizableNode-sizeLabel ve-ce-resizableNode-sizeLabel-resizing" style="width: 100px; height: 30px; line-height: 30px;">
+				<span class="ve-ce-resizableNode-sizeText">
+					<span class="ve-ce-resizableNode-sizeText-size">100 × 50</span>
+					<span class="ve-ce-resizableNode-sizeText-scale">100%</span>
+				</span>
+			</div>
+		` )[ 0 ],
 		'Size label'
 	);
 
 	view.destroy();
 } );
 
-QUnit.test( 'resize events', function ( assert ) {
-	var view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.image.html ),
+QUnit.test( 'resize events', ( assert ) => {
+	const view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.image.html ),
 		documentNode = view.getDocument().getDocumentNode(),
 		resizableNode = documentNode.children[ 0 ].children[ 0 ],
 		mockEvent = {
@@ -104,8 +106,8 @@ QUnit.test( 'resize events', function ( assert ) {
 	);
 } );
 
-QUnit.test( 'notResizable', function ( assert ) {
-	var view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.image.html ),
+QUnit.test( 'notResizable', ( assert ) => {
+	const view = ve.test.utils.createSurfaceViewFromHtml( ve.dm.example.image.html ),
 		documentNode = view.getDocument().getDocumentNode(),
 		resizableNode = documentNode.children[ 0 ].children[ 0 ],
 		isMobile = OO.ui.isMobile;

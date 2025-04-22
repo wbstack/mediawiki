@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Wikibase\Lib;
 
 use InvalidArgumentException;
-use Language;
+use MediaWiki\MediaWikiServices;
 
 /**
  * FIXME: this class is not a language fallback chain. It takes and uses a fallback chain.
@@ -33,7 +33,7 @@ class TermLanguageFallbackChain {
 				return $termLanguages->hasLanguage( $language->getLanguageCode() );
 			}
 		) );
-		if ( !empty( $chain ) && empty( $this->chain ) ) {
+		if ( $chain && !$this->chain ) {
 			$this->chain = [ LanguageWithConversion::factory( 'en' ) ];
 		}
 	}
@@ -77,7 +77,7 @@ class TermLanguageFallbackChain {
 	 * ), or null when no "acceptable" data can be found.
 	 */
 	public function extractPreferredValue( array $data ): ?array {
-		if ( empty( $data ) ) {
+		if ( !$data ) {
 			return null;
 		}
 
@@ -122,8 +122,9 @@ class TermLanguageFallbackChain {
 			return $preferred;
 		}
 
+		$languageNameUtils = MediaWikiServices::getInstance()->getLanguageNameUtils();
 		foreach ( $data as $languageCode => $value ) {
-			if ( Language::isValidCode( $languageCode ) ) {
+			if ( $languageNameUtils->isValidCode( $languageCode ) ) {
 				// We cannot translate here, we do not have a LanguageWithConversion object
 				return $this->getValueArray( $value, $languageCode );
 			}

@@ -2,9 +2,9 @@
 
 namespace Wikibase\Client\UpdateRepo;
 
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserIdentity;
 use Psr\Log\LoggerInterface;
-use Title;
 use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Store\SiteLinkLookup;
 
@@ -24,6 +24,7 @@ class UpdateRepoOnMove extends UpdateRepo {
 	/**
 	 * @param SiteLinkLookup $siteLinkLookup
 	 * @param LoggerInterface $logger
+	 * @param ClientDomainDb $clientDomainDb
 	 * @param UserIdentity $user
 	 * @param string $siteId Global id of the client wiki
 	 * @param Title $oldTitle
@@ -62,7 +63,7 @@ class UpdateRepoOnMove extends UpdateRepo {
 			'entityId' => $this->getEntityId()->getSerialization(),
 			'oldTitle' => $this->title->getPrefixedText(),
 			'newTitle' => $this->newTitle->getPrefixedText(),
-			'user' => $this->user->getName()
+			'user' => $this->user->getName(),
 		];
 	}
 

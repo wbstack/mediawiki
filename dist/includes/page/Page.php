@@ -18,12 +18,13 @@
  * @file
  */
 
+use MediaWiki\Title\Title;
+
 /**
  * Interface for type hinting (accepts WikiPage, Article, ImagePage, CategoryPage)
  *
  * @deprecated since 1.35, Use WikiPage or Article instead
  * @method array getActionOverrides()
- * @method string getTimestamp()
  * @method Title getTitle()
  */
 interface Page {

@@ -2,18 +2,25 @@
 
 namespace PageImages;
 
-use ApiBase;
-use ApiMain;
-use FauxRequest;
 use File;
-use IContextSource;
+use MapCacheLRU;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
 use MediaWiki\Api\Hook\ApiOpenSearchSuggestHook;
-use MediaWiki\Hook\BeforePageDisplayHook;
+use MediaWiki\Cache\CacheKeyHelper;
+use MediaWiki\Config\Config;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\Hook\InfoActionHook;
+use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
-use OutputPage;
+use MediaWiki\Output\Hook\BeforePageDisplayHook;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Request\FauxRequest;
+use MediaWiki\Title\Title;
+use MediaWiki\User\Options\UserOptionsLookup;
+use RepoGroup;
 use Skin;
-use Title;
+use Wikimedia\Rdbms\IConnectionProvider;
 
 /**
  * @license WTFPL
@@ -55,6 +62,52 @@ class PageImages implements
 	 */
 	public const PROP_NAME_FREE = 'page_image_free';
 
+	/** @var Config */
+	private $config;
+
+	/** @var IConnectionProvider */
+	private $dbProvider;
+
+	/** @var RepoGroup */
+	private $repoGroup;
+
+	/** @var UserOptionsLookup */
+	private $userOptionsLookup;
+
+	/** @var MapCacheLRU */
+	private static $cache = null;
+
+	/**
+	 * @return PageImages
+	 */
+	private static function factory(): self {
+		$services = MediaWikiServices::getInstance();
+		return new self(
+			$services->getMainConfig(),
+			$services->getDBLoadBalancerFactory(),
+			$services->getRepoGroup(),
+			$services->getUserOptionsLookup()
+		);
+	}
+
+	/**
+	 * @param Config $config
+	 * @param IConnectionProvider $dbProvider
+	 * @param RepoGroup $repoGroup
+	 * @param UserOptionsLookup $userOptionsLookup
+	 */
+	public function __construct(
+		Config $config,
+		IConnectionProvider $dbProvider,
+		RepoGroup $repoGroup,
+		UserOptionsLookup $userOptionsLookup
+	) {
+		$this->config = $config;
+		$this->dbProvider = $dbProvider;
+		$this->repoGroup = $repoGroup;
+		$this->userOptionsLookup = $userOptionsLookup;
+	}
+
 	/**
 	 * Get property name used in page_props table. When a page image
 	 * is stored it will be stored under this property name on the corresponding
@@ -86,44 +139,72 @@ class PageImages implements
 	}
 
 	/**
-	 * Returns page image for a given title
+	 * Return page image for a given title
 	 *
 	 * @param Title $title Title to get page image for
-	 *
-	 * @return File|bool
+	 * @return File|false
 	 */
 	public static function getPageImage( Title $title ) {
-		// Do not query for special pages or other titles never in the database
+		// Cast any cacheable null to false
+		return self::factory()->getPageImageInternal( $title ) ?? false;
+	}
+
+	/**
+	 * Return page image for a given title
+	 *
+	 * @param Title $title Title to get page image for
+	 * @return File|null
+	 */
+	public function getPageImageInternal( Title $title ): ?File {
+		self::$cache ??= new MapCacheLRU( 100 );
+
+		$file = self::$cache->getWithSetCallback(
+			CacheKeyHelper::getKeyForPage( $title ),
+			fn () => $this->fetchPageImage( $title )
+		);
+
+		// Cast false to null
+		return $file ?: null;
+	}
+
+	/**
+	 * @param Title $title Title to get page image for
+	 * @return File|null|false
+	 */
+	private function fetchPageImage( Title $title ) {
 		if ( !$title->canExist() ) {
+			// Optimization: Do not query for special pages or other titles never in the database
 			return false;
 		}
 
 		if ( $title->inNamespace( NS_FILE ) ) {
-			return MediaWikiServices::getInstance()->getRepoGroup()->findFile( $title );
+			return $this->repoGroup->findFile( $title );
 		}
 
-		if ( !$title->exists() ) {
+		$pageId = $title->getArticleID();
+		if ( !$pageId ) {
 			// No page id to select from
+			// Allow caching, cast null to false later
+			return null;
+		}
+
+		$dbr = $this->dbProvider->getReplicaDatabase();
+		$fileName = $dbr->newSelectQueryBuilder()
+			->select( 'pp_value' )
+			->from( 'page_props' )
+			->where( [
+				'pp_page' => $pageId,
+				'pp_propname' => [ self::PROP_NAME, self::PROP_NAME_FREE ]
+			] )
+			->orderBy( 'pp_propname' )
+			->caller( __METHOD__ )
+			->fetchField();
+		if ( !$fileName ) {
+			// Return not found without caching.
 			return false;
 		}
 
-		$dbr = wfGetDB( DB_REPLICA );
-		$fileName = $dbr->selectField( 'page_props',
-			'pp_value',
-			[
-				'pp_page' => $title->getArticleID(),
-				'pp_propname' => [ self::PROP_NAME, self::PROP_NAME_FREE ]
-			],
-			__METHOD__,
-			[ 'ORDER BY' => 'pp_propname' ]
-		);
-
-		$file = false;
-		if ( $fileName ) {
-			$file = MediaWikiServices::getInstance()->getRepoGroup()->findFile( $fileName );
-		}
-
-		return $file;
+		return $this->repoGroup->findFile( $fileName );
 	}
 
 	/**
@@ -135,17 +216,14 @@ class PageImages implements
 	 * @param array[] &$pageInfo Auxillary information about the page.
 	 */
 	public function onInfoAction( $context, &$pageInfo ) {
-		global $wgThumbLimits;
-
-		$imageFile = self::getPageImage( $context->getTitle() );
+		$imageFile = $this->getPageImageInternal( $context->getTitle() );
 		if ( !$imageFile ) {
 			// The page has no image
 			return;
 		}
 
-		$userOptionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
-		$thumbSetting = $userOptionsLookup->getOption( $context->getUser(), 'thumbsize' );
-		$thumbSize = $wgThumbLimits[$thumbSetting];
+		$thumbSetting = $this->userOptionsLookup->getOption( $context->getUser(), 'thumbsize' );
+		$thumbSize = $this->config->get( MainConfigNames::ThumbLimits )[$thumbSetting];
 
 		$thumb = $imageFile->transform( [ 'width' => $thumbSize ] );
 		if ( !$thumb ) {
@@ -170,9 +248,7 @@ class PageImages implements
 	 * @param array[] &$results Array of results to add page images too
 	 */
 	public function onApiOpenSearchSuggest( &$results ) {
-		global $wgPageImagesExpandOpenSearchXml;
-
-		if ( !$wgPageImagesExpandOpenSearchXml || !count( $results ) ) {
+		if ( !$this->config->get( 'PageImagesExpandOpenSearchXml' ) || !count( $results ) ) {
 			return;
 		}
 
@@ -188,37 +264,6 @@ class PageImages implements
 	}
 
 	/**
-	 * SpecialMobileEditWatchlist::images hook handler, adds images to mobile watchlist A-Z view
-	 *
-	 * @param IContextSource $context Context object. Ignored
-	 * @param array[] $watchlist Array of relevant pages on the watchlist, sorted by namespace
-	 * @param array[] &$images Array of images to populate
-	 */
-	public static function onSpecialMobileEditWatchlistImages(
-		IContextSource $context, array $watchlist, array &$images
-	) {
-		$ids = [];
-		foreach ( $watchlist as $ns => $pages ) {
-			foreach ( array_keys( $pages ) as $dbKey ) {
-				$title = Title::makeTitle( $ns, $dbKey );
-				// Getting page ID here is safe because SpecialEditWatchlist::getWatchlistInfo()
-				// uses LinkBatch
-				$id = $title->getArticleID();
-				if ( $id ) {
-					$ids[$id] = $dbKey;
-				}
-			}
-		}
-
-		$data = self::getImages( array_keys( $ids ) );
-		foreach ( $data as $id => $page ) {
-			if ( isset( $page['pageimage'] ) ) {
-				$images[ $page['ns'] ][ $ids[$id] ] = $page['pageimage'];
-			}
-		}
-	}
-
-	/**
 	 * Returns image information for pages with given ids
 	 *
 	 * @param int[] $pageIds
@@ -226,7 +271,7 @@ class PageImages implements
 	 *
 	 * @return array[]
 	 */
-	private static function getImages( array $pageIds, $size = 0 ) {
+	public static function getImages( array $pageIds, $size = 0 ) {
 		$ret = [];
 		foreach ( array_chunk( $pageIds, ApiBase::LIMIT_SML1 ) as $chunk ) {
 			$request = [
@@ -260,7 +305,7 @@ class PageImages implements
 		if ( !$out->getConfig()->get( 'PageImagesOpenGraph' ) ) {
 			return;
 		}
-		$imageFile = self::getPageImage( $out->getContext()->getTitle() );
+		$imageFile = $this->getPageImageInternal( $out->getContext()->getTitle() );
 		if ( !$imageFile ) {
 			$fallback = $out->getConfig()->get( 'PageImagesOpenGraphFallbackImage' );
 			if ( $fallback ) {

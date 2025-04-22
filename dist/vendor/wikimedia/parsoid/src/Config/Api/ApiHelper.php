@@ -104,10 +104,6 @@ class ApiHelper {
 		return $data;
 	}
 
-	/**
-	 * @param array $params
-	 * @return string
-	 */
 	private function makeCurlRequest( array $params ): string {
 		$ch = curl_init( $this->endpoint );
 		if ( !$ch ) {
@@ -116,9 +112,7 @@ class ApiHelper {
 		$reset = new ScopedCallback( 'curl_close', [ $ch ] );
 
 		$params['format'] = 'json';
-		if ( !isset( $params['formatversion'] ) ) {
-			$params['formatversion'] = '2';
-		}
+		$params['formatversion'] ??= '2';
 
 		$opts = [
 			CURLOPT_POST => true,
@@ -147,15 +141,4 @@ class ApiHelper {
 
 		return $res;
 	}
-
-	/**
-	 * @param array $parsoidSettings
-	 * @return ApiHelper
-	 */
-	public static function fromSettings( array $parsoidSettings ): ApiHelper {
-		return new ApiHelper( [
-			"apiEndpoint" => $parsoidSettings['debugApi'],
-		] );
-	}
-
 }

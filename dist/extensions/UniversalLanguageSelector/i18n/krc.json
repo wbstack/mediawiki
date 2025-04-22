@@ -37,7 +37,7 @@
 	"ext-uls-webfonts-system-font": "Система шрифт",
 	"ext-uls-back-to-display-settings": "Кёрюнюу джарашдырыулагъа къайыт",
 	"ext-uls-input-settings-title": "Джазыу джарашдырыула",
-	"ext-uls-input-settings-title-short": "Джазыу",
+	"ext-uls-input-settings-title-short": "Киргизиу",
 	"ext-uls-input-settings-desc": "Башха тилдеми джазасыз?",
 	"ext-uls-input-settings-ime-settings": "$1 ючюн клавиатурала",
 	"ext-uls-input-settings-ui-language": "Джазаргъа ючюн хайырланнган тил",
@@ -73,5 +73,6 @@
 	"ext-uls-empty-state-header": "Алкъын тил джокъду",
 	"ext-uls-empty-state-desc": "Бусагъатда сайларча тил джокъду",
 	"ext-uls-empty-state-header-actions-available": "Алкъын тил джокъду. Джангысын къошайыкъмы?",
-	"ext-uls-empty-state-desc-actions-available": "Контенти аслам тилде хайырланырча эт."
+	"ext-uls-empty-state-desc-actions-available": "Контенти аслам тилде хайырланырча эт.",
+	"ext-uls-add-languages-button-label": "Тилле къош"
 }

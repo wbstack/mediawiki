@@ -3,14 +3,15 @@
 		"authors": [
 			"Joachim Mos",
 			"Servien",
-			"Wikiundeplattsnacker"
+			"Wikiundeplattsnacker",
+			"Ameisenigel"
 		]
 	},
+	"mobile-frontend-copyright": "De Inholt is ünner $1 togänglich, wenn nich anners angeven.",
 	"mobile-frontend-missing-image": "Bild",
 	"mobile-frontend-terms-text": "Brukbedingen",
 	"mobile-frontend-view": "Lütten Bildschirm",
 	"mobile-frontend-view-desktop": "Grooten Bildschirm",
-	"mobile-frontend-watchlist-a-z": "All",
 	"mobile-frontend-watchlist-filter-all": "All",
 	"mobile-frontend-watchlist-filter-other": "Annere",
 	"mobile-frontend-watchlist-filter-talk": "Diskuschoon"

@@ -2,11 +2,11 @@
 
 namespace CirrusSearch\Api;
 
-use ApiBase;
-use ApiResult;
 use CirrusSearch\Profile\SearchProfileService;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\UserTestingEngine;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiResult;
 use MediaWiki\MediaWikiServices;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -31,6 +31,7 @@ use Wikimedia\ParamValidator\ParamValidator;
 class ConfigDump extends ApiBase {
 	use ApiTrait;
 
+	/** @var string[] */
 	public static $PUBLICLY_SHAREABLE_CONFIG_VARS = [
 		'CirrusSearchDisableUpdate',
 		'CirrusSearchServers',
@@ -59,7 +60,6 @@ class ConfigDump extends ApiBase {
 		'CirrusSearchLinkedArticlesToUpdate',
 		'CirrusSearchUnlikedArticlesToUpdate',
 		'CirrusSearchWeights',
-		'CirrusSearchAllFields',
 		'CirrusSearchBoostOpening',
 		'CirrusSearchNearMatchWeight',
 		'CirrusSearchStemmedWeight',
@@ -94,6 +94,7 @@ class ConfigDump extends ApiBase {
 		'CirrusSearchRescoreFunctionChains',
 		'CirrusSearchCompletionProfiles',
 		'CirrusSearchCompletionSettings',
+		'CirrusSearchCompletionSuggesterUseDefaultSort',
 		// All the config below was added when moving this data
 		// from CirrusSearch config to a static array in this class
 		'CirrusSearchDevelOptions',
@@ -131,7 +132,6 @@ class ConfigDump extends ApiBase {
 		'CirrusSearchPhraseSuggestReverseField',
 		'CirrusSearchBoostTemplates',
 		'CirrusSearchIgnoreOnWikiBoostTemplates',
-		'CirrusSearchAllFieldsForRescore',
 		'CirrusSearchIndexBaseName',
 		'CirrusSearchInterleaveConfig',
 		'CirrusSearchMaxPhraseTokens',
@@ -157,12 +157,19 @@ class ConfigDump extends ApiBase {
 		if ( isset( $props['profiles'] ) ) {
 			$this->addProfiles( $result );
 		}
+		if ( isset( $props['replicagroup'] ) ) {
+			$this->addReplicaGroup( $result );
+		}
 		if ( isset( $props['usertesting'] ) ) {
 			$this->addUserTesting( $result );
 		}
 	}
 
-	protected function addGlobals( ApiResult $result ) {
+	/**
+	 * @param ApiResult $result
+	 * @return void
+	 */
+	protected function addGlobals( ApiResult $result ): void {
 		$config = $this->getConfig();
 		foreach ( self::$PUBLICLY_SHAREABLE_CONFIG_VARS as $key ) {
 			if ( $config->has( $key ) ) {
@@ -188,6 +195,11 @@ class ConfigDump extends ApiBase {
 			$indexName = $conn->getIndexName( $indexBaseName, $indexSuffix );
 			$result->addValue( 'CirrusSearchConcreteNamespaceMap', $ns, $indexName );
 		}
+	}
+
+	private function addReplicaGroup( ApiResult $result ) {
+		$result->addValue( null, 'CirrusSearchConcreteReplicaGroup',
+			$this->getCirrusConnection()->getConfig()->getClusterAssignment()->getCrossClusterName() );
 	}
 
 	/**
@@ -217,7 +229,12 @@ class ConfigDump extends ApiBase {
 		}
 	}
 
-	protected function addUserTesting( ApiResult $result ) {
+	/**
+	 * @param ApiResult $result
+	 * @return void
+	 * @throws \CirrusSearch\NoActiveTestException
+	 */
+	protected function addUserTesting( ApiResult $result ): void {
 		// UserTesting only automatically assigns test buckets during web requests.
 		// This api call is different from a typical search request though, this is
 		// used from non-search pages to find out what bucket to provide to a new
@@ -231,11 +248,12 @@ class ConfigDump extends ApiBase {
 	public function getAllowedParams() {
 		return [
 			'prop' => [
-				ParamValidator::PARAM_DEFAULT => 'globals|namespacemap|profiles',
+				ParamValidator::PARAM_DEFAULT => 'globals|namespacemap|profiles|replicagroup',
 				ParamValidator::PARAM_TYPE => [
 					'globals',
 					'namespacemap',
 					'profiles',
+					'replicagroup',
 					'usertesting',
 				],
 				ParamValidator::PARAM_ISMULTI => true,

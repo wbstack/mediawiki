@@ -1,9 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
+			"Jumpy01",
 			"Jun Misugi",
-			"Paulu",
-			"Jumpy01"
+			"Paulu"
 		]
 	},
 	"vector-opt-out": "Vultà à l'aspettu di nanzu",
@@ -21,5 +21,15 @@
 	"vector-view-view": "Leghje",
 	"vector-view-viewsource": "Vede a surghjente",
 	"vector-more-actions": "Più",
-	"vector-toc-beginning": "Principiu"
+	"vector-appearance-label": "Apparenza",
+	"vector-feature-limited-width-name": "Larghezza",
+	"vector-feature-limited-width-0-label": "Maiò",
+	"vector-feature-custom-font-size-name": "Testu",
+	"vector-feature-custom-font-size-0-label": "Minutu",
+	"vector-feature-custom-font-size-2-label": "Grossu",
+	"vector-toc-label": "Cuntenuti",
+	"vector-toc-beginning": "Principiu",
+	"vector-page-tools-label": "Strumenti",
+	"vector-page-tools-general-label": "Generali",
+	"vector-unpin-element-label": "piattà"
 }

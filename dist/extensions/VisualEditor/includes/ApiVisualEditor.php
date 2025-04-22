@@ -10,130 +10,124 @@
 
 namespace MediaWiki\Extension\VisualEditor;
 
-use ApiBase;
-use ApiBlockInfoTrait;
-use ApiMain;
-use ApiResult;
 use Article;
-use Config;
-use ContentHandler;
-use DerivativeContext;
-use DerivativeRequest;
-use EditPage;
-use ExtensionRegistry;
-use Html;
-use LogEventsList;
-use MediaWiki\Block\DatabaseBlock;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiBlockInfoTrait;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Api\ApiResult;
+use MediaWiki\Config\Config;
+use MediaWiki\Content\ContentHandler;
 use MediaWiki\Content\Transform\ContentTransformer;
-use MediaWiki\HookContainer\HookContainer;
-use MediaWiki\Linker\LinkRenderer;
+use MediaWiki\Content\WikitextContent;
+use MediaWiki\Context\DerivativeContext;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\EditPage\EditPage;
+use MediaWiki\EditPage\IntroMessageBuilder;
+use MediaWiki\EditPage\PreloadedContentBuilder;
+use MediaWiki\EditPage\TextboxBuilder;
+use MediaWiki\Language\RawMessage;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Page\PageReference;
 use MediaWiki\Page\WikiPageFactory;
-use MediaWiki\Permissions\RestrictionStore;
-use MediaWiki\Revision\RevisionRecord;
+use MediaWiki\Permissions\PermissionManager;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Request\DerivativeRequest;
+use MediaWiki\Revision\RevisionLookup;
 use MediaWiki\SpecialPage\SpecialPageFactory;
+use MediaWiki\Title\Title;
+use MediaWiki\User\Options\UserOptionsLookup;
+use MediaWiki\User\TempUser\TempUserCreator;
+use MediaWiki\User\User;
 use MediaWiki\User\UserFactory;
-use MediaWiki\User\UserNameUtils;
-use MediaWiki\User\UserOptionsLookup;
+use MediaWiki\User\UserIdentity;
 use MediaWiki\Watchlist\WatchlistManager;
-use Parser;
-use ParserOptions;
-use RawMessage;
-use ReadOnlyMode;
-use RequestContext;
-use Skin;
-use SpecialMyLanguage;
-use Title;
+use MessageLocalizer;
+use Wikimedia\Assert\Assert;
 use Wikimedia\ParamValidator\ParamValidator;
-use WikitextContent;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
 
 class ApiVisualEditor extends ApiBase {
 	use ApiBlockInfoTrait;
 	use ApiParsoidTrait;
 
-	/** @var UserNameUtils */
-	private $userNameUtils;
+	private RevisionLookup $revisionLookup;
+	private TempUserCreator $tempUserCreator;
+	private UserFactory $userFactory;
+	private UserOptionsLookup $userOptionsLookup;
+	private WatchlistManager $watchlistManager;
+	private ContentTransformer $contentTransformer;
+	private WikiPageFactory $wikiPageFactory;
+	private IntroMessageBuilder $introMessageBuilder;
+	private PreloadedContentBuilder $preloadedContentBuilder;
+	private SpecialPageFactory $specialPageFactory;
+	private VisualEditorParsoidClientFactory $parsoidClientFactory;
 
-	/** @var Parser */
-	private $parser;
-
-	/** @var LinkRenderer */
-	private $linkRenderer;
-
-	/** @var userOptionsLookup */
-	private $userOptionsLookup;
-
-	/** @var WatchlistManager */
-	private $watchlistManager;
-
-	/** @var ContentTransformer */
-	private $contentTransformer;
-
-	/** @var SpecialPageFactory */
-	private $specialPageFactory;
-
-	/** @var ReadOnlyMode */
-	private $readOnlyMode;
-
-	/** @var RestrictionStore */
-	private $restrictionStore;
-
-	/** @var WikiPageFactory */
-	private $wikiPageFactory;
-
-	/** @var HookContainer */
-	private $hookContainer;
-
-	/** @var UserFactory */
-	private $userFactory;
-
-	/**
-	 * @param ApiMain $main
-	 * @param string $name
-	 * @param UserNameUtils $userNameUtils
-	 * @param Parser $parser
-	 * @param LinkRenderer $linkRenderer
-	 * @param UserOptionsLookup $userOptionsLookup
-	 * @param WatchlistManager $watchlistManager
-	 * @param ContentTransformer $contentTransformer
-	 * @param SpecialPageFactory $specialPageFactory
-	 * @param ReadOnlyMode $readOnlyMode
-	 * @param RestrictionStore $restrictionStore
-	 * @param WikiPageFactory $wikiPageFactory
-	 * @param HookContainer $hookContainer
-	 * @param UserFactory $userFactory
-	 */
 	public function __construct(
 		ApiMain $main,
-		$name,
-		UserNameUtils $userNameUtils,
-		Parser $parser,
-		LinkRenderer $linkRenderer,
+		string $name,
+		RevisionLookup $revisionLookup,
+		TempUserCreator $tempUserCreator,
+		UserFactory $userFactory,
 		UserOptionsLookup $userOptionsLookup,
 		WatchlistManager $watchlistManager,
 		ContentTransformer $contentTransformer,
-		SpecialPageFactory $specialPageFactory,
-		ReadOnlyMode $readOnlyMode,
-		RestrictionStore $restrictionStore,
+		IBufferingStatsdDataFactory $statsdDataFactory,
 		WikiPageFactory $wikiPageFactory,
-		HookContainer $hookContainer,
-		UserFactory $userFactory
+		IntroMessageBuilder $introMessageBuilder,
+		PreloadedContentBuilder $preloadedContentBuilder,
+		SpecialPageFactory $specialPageFactory,
+		VisualEditorParsoidClientFactory $parsoidClientFactory
 	) {
 		parent::__construct( $main, $name );
 		$this->setLogger( LoggerFactory::getInstance( 'VisualEditor' ) );
-		$this->userNameUtils = $userNameUtils;
-		$this->parser = $parser;
-		$this->linkRenderer = $linkRenderer;
+		$this->setStats( $statsdDataFactory );
+		$this->revisionLookup = $revisionLookup;
+		$this->tempUserCreator = $tempUserCreator;
+		$this->userFactory = $userFactory;
 		$this->userOptionsLookup = $userOptionsLookup;
 		$this->watchlistManager = $watchlistManager;
 		$this->contentTransformer = $contentTransformer;
-		$this->specialPageFactory = $specialPageFactory;
-		$this->readOnlyMode = $readOnlyMode;
-		$this->restrictionStore = $restrictionStore;
 		$this->wikiPageFactory = $wikiPageFactory;
-		$this->hookContainer = $hookContainer;
-		$this->userFactory = $userFactory;
+		$this->introMessageBuilder = $introMessageBuilder;
+		$this->preloadedContentBuilder = $preloadedContentBuilder;
+		$this->specialPageFactory = $specialPageFactory;
+		$this->parsoidClientFactory = $parsoidClientFactory;
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function getParsoidClient(): ParsoidClient {
+		return $this->parsoidClientFactory->createParsoidClient(
+			$this->getRequest()->getHeader( 'Cookie' )
+		);
+	}
+
+	/**
+	 * @see EditPage::getUserForPermissions
+	 */
+	private function getUserForPermissions(): User {
+		$user = $this->getUser();
+		if ( $this->tempUserCreator->shouldAutoCreate( $user, 'edit' ) ) {
+			return $this->userFactory->newUnsavedTempUser(
+				$this->tempUserCreator->getStashedName( $this->getRequest()->getSession() )
+			);
+		}
+		return $user;
+	}
+
+	/**
+	 * @see ApiParse::getUserForPreview
+	 */
+	private function getUserForPreview(): UserIdentity {
+		$user = $this->getUser();
+		if ( $this->tempUserCreator->shouldAutoCreate( $user, 'edit' ) ) {
+			return $this->userFactory->newUnsavedTempUser(
+				$this->tempUserCreator->getStashedName( $this->getRequest()->getSession() )
+			);
+		}
+		return $user;
 	}
 
 	/**
@@ -148,61 +142,10 @@ class ApiVisualEditor extends ApiBase {
 		return $this->contentTransformer->preSaveTransform(
 			$content,
 			$title,
-			$this->getUser(),
+			$this->getUserForPreview(),
 			$this->wikiPageFactory->newFromTitle( $title )->makeParserOptions( $this->getContext() )
 		)
 		->serialize( 'text/x-wiki' );
-	}
-
-	/**
-	 * Provide the preload content for a page being created from another page
-	 *
-	 * @param string $preload The title of the page to use as the preload content
-	 * @param string[] $params The preloadTransform parameters to pass in, if any
-	 * @return string Wikitext content
-	 */
-	protected function getPreloadContent( $preload, $params ) {
-		$content = '';
-		$preloadTitle = Title::newFromText( $preload );
-
-		// Use SpecialMyLanguage redirect so that nonexistent translated pages can
-		// fall back to the corresponding page in a suitable language
-		if ( $preloadTitle && $preloadTitle->isSpecialPage() ) {
-			[ $spName, $spParam ] = $this->specialPageFactory->resolveAlias( $preloadTitle->getText() );
-			if ( $spName ) {
-				$specialPage = $this->specialPageFactory->getPage( $spName );
-				if ( $specialPage instanceof SpecialMyLanguage ) {
-					$preloadTitle = $specialPage->findTitleForTransclusion( $spParam );
-				}
-			}
-		}
-
-		// Check for existence to avoid getting MediaWiki:Noarticletext
-		if (
-			$preloadTitle instanceof Title &&
-			$preloadTitle->exists() &&
-			$this->getPermissionManager()->userCan( 'read', $this->getUser(), $preloadTitle )
-		) {
-			// If the preload title has no redirect, null will be
-			// returned which will break call to ->preloadTransform() below.
-			$preloadTitleFallback = $preloadTitle;
-			$preloadPage = $this->wikiPageFactory->newFromTitle( $preloadTitle );
-			if ( $preloadPage->isRedirect() ) {
-				$preloadTitle = $preloadPage->getRedirectTarget();
-				$preloadPage = $this->wikiPageFactory->newFromTitle( $preloadTitle );
-			}
-
-			$content = $preloadPage->getContent( RevisionRecord::RAW );
-			$parserOptions = ParserOptions::newFromUser( $this->getUser() );
-
-			$content = $this->contentTransformer->preloadTransform(
-				$content,
-				$preloadTitle ?? $preloadTitleFallback,
-				$parserOptions,
-				(array)$params
-			)->serialize();
-		}
-		return $content;
 	}
 
 	/**
@@ -215,20 +158,18 @@ class ApiVisualEditor extends ApiBase {
 		$permissionManager = $this->getPermissionManager();
 
 		$title = Title::newFromText( $params['page'] );
-		if ( $title && $title->isSpecial( 'CollabPad' ) ) {
+		if ( $title && $title->isSpecialPage() ) {
 			// Convert Special:CollabPad/MyPage to MyPage so we can parsefragment properly
-			$title = SpecialCollabPad::getSubPage( $title );
+			[ $special, $subPage ] = $this->specialPageFactory->resolveAlias( $title->getDBkey() );
+			if ( $special === 'CollabPad' ) {
+				$title = Title::newFromText( $subPage );
+			}
 		}
 		if ( !$title ) {
 			$this->dieWithError( [ 'apierror-invalidtitle', wfEscapeWikiText( $params['page'] ) ] );
 		}
 		if ( !$title->canExist() ) {
 			$this->dieWithError( 'apierror-pagecannotexist' );
-		}
-
-		$parserParams = [];
-		if ( isset( $params['oldid'] ) ) {
-			$parserParams['oldid'] = $params['oldid'];
 		}
 
 		wfDebugLog( 'visualeditor', "called on '$title' with paction: '{$params['paction']}'" );
@@ -248,10 +189,22 @@ class ApiVisualEditor extends ApiBase {
 
 				// Get information about current revision
 				if ( $title->exists() ) {
-					$revision = $this->getValidRevision( $title, $parserParams['oldid'] ?? null );
-					$latestRevision = $this->getLatestRevision( $title );
+					$latestRevision = $this->revisionLookup->getRevisionByTitle( $title );
+					if ( !$latestRevision ) {
+						$this->dieWithError(
+							[ 'apierror-missingrev-title', wfEscapeWikiText( $title->getPrefixedText() ) ],
+							'nosuchrevid'
+						);
+					}
+					if ( isset( $params['oldid'] ) ) {
+						$revision = $this->revisionLookup->getRevisionById( $params['oldid'] );
+						if ( !$revision ) {
+							$this->dieWithError( [ 'apierror-nosuchrevid', $params['oldid'] ] );
+						}
+					} else {
+						$revision = $latestRevision;
+					}
 
-					$restoring = !$revision->isCurrent();
 					$baseTimestamp = $latestRevision->getTimestamp();
 					$oldid = $revision->getId();
 
@@ -280,9 +233,6 @@ class ApiVisualEditor extends ApiBase {
 						}
 						$content = $response['body'];
 						$restbaseHeaders = $response['headers'];
-						if ( $content === false ) {
-							$this->dieWithError( 'apierror-visualeditor-docserver', 'docserver' );
-						}
 					} elseif ( $params['paction'] === 'wikitext' ) {
 						$apiParams = [
 							'action' => 'query',
@@ -317,11 +267,28 @@ class ApiVisualEditor extends ApiBase {
 								}
 							}
 						}
-						if ( $content === false ) {
-							$this->dieWithError( 'apierror-visualeditor-docserver', 'docserver' );
-						}
 					}
+				} else {
+					$revision = null;
 				}
+
+				// Use $title as the context page in every processed message (T300184)
+				$localizerWithTitle = new class( $this, $title ) implements MessageLocalizer {
+					private MessageLocalizer $base;
+					private PageReference $page;
+
+					public function __construct( MessageLocalizer $base, PageReference $page ) {
+						$this->base = $base;
+						$this->page = $page;
+					}
+
+					/**
+					 * @inheritDoc
+					 */
+					public function msg( $key, ...$params ) {
+						return $this->base->msg( $key, ...$params )->page( $this->page );
+					}
+				};
 
 				if ( !$title->exists() || $section === 'new' ) {
 					if ( isset( $params['wikitext'] ) ) {
@@ -330,28 +297,17 @@ class ApiVisualEditor extends ApiBase {
 							$content = $this->pstWikitext( $title, $content );
 						}
 					} else {
-						$content = '';
-						if ( $title->getNamespace() == NS_MEDIAWIKI && $section !== 'new' ) {
-							// If this is a system message, get the default text.
-							$msg = $title->getDefaultMessageText();
-							if ( $msg !== false ) {
-								$content = $title->getDefaultMessageText();
-							}
-						}
-
-						$contentBeforeHook = $content;
-						if ( $section !== 'new' ) {
-							$this->hookContainer->run( 'EditFormPreloadText', [ &$content, &$title ] );
-						}
-						// Make sure we don't mark default system message content as a preload
-						if ( $content !== '' && $contentBeforeHook !== $content ) {
-							$preloaded = true;
-						} elseif ( $content === '' && !empty( $params['preload'] ) ) {
-							$content = $this->getPreloadContent(
-								$params['preload'], $params['preloadparams']
-							);
-							$preloaded = true;
-						}
+						$contentObj = $this->preloadedContentBuilder->getPreloadedContent(
+							$title->toPageIdentity(),
+							$user,
+							$params['preload'],
+							$params['preloadparams'] ?? [],
+							$section
+						);
+						$dfltContent = $section === 'new' ? null :
+							$this->preloadedContentBuilder->getDefaultContent( $title->toPageIdentity() );
+						$preloaded = $dfltContent ? !$contentObj->equals( $dfltContent ) : !$contentObj->isEmpty();
+						$content = $contentObj->serialize();
 					}
 
 					if ( $content !== '' && $params['paction'] !== 'wikitext' ) {
@@ -361,201 +317,59 @@ class ApiVisualEditor extends ApiBase {
 					}
 					$baseTimestamp = wfTimestampNow();
 					$oldid = 0;
-					$restoring = false;
-				}
-
-				$notices = [];
-
-				// From EditPage#showCustomIntro
-				if ( $params['editintro'] ) {
-					$eiTitle = Title::newFromText( $params['editintro'] );
-					if (
-						$eiTitle instanceof Title &&
-						$eiTitle->exists() &&
-						$permissionManager->userCan( 'read', $user, $eiTitle )
-					) {
-						$notices['editintro'] = $this->parser->parse(
-							'<div class="mw-editintro">{{:' . $eiTitle->getFullText() . '}}</div>',
-							$title,
-							new ParserOptions( $user )
-						)->getText();
-					}
-				}
-
-				// Add all page notices
-				$notices = array_merge( $notices, $title->getEditNotices() );
-
-				// Anonymous user notice
-				if ( !$user->isRegistered() ) {
-					$notices['anoneditwarning'] = $this->msg(
-						'anoneditwarning',
-						// Log-in link
-						'{{fullurl:Special:UserLogin|returnto={{FULLPAGENAMEE}}}}',
-						// Sign-up link
-						'{{fullurl:Special:UserLogin/signup|returnto={{FULLPAGENAMEE}}}}'
-					)->page( $title )->parseAsBlock();
-				}
-
-				// Old revision notice
-				if ( $restoring ) {
-					$notices['editingold'] = $this->msg( 'editingold' )->page( $title )->parseAsBlock();
-				}
-
-				if ( $this->readOnlyMode->isReadOnly() ) {
-					$notices['readonlywarning'] = $this->msg( 'readonlywarning', $this->readOnlyMode->getReason() );
-				}
-
-				// Edit notices about the page being protected (only used when we're allowed to edit it;
-				// otherwise, a generic permission error is displayed via #getUserPermissionsErrors)
-				$protectionNotices = [];
-
-				// New page notices
-				if ( !$title->exists() ) {
-					$newArticleKey = $user->isRegistered() ? 'newarticletext' : 'newarticletextanon';
-					$notices[$newArticleKey] = $this->msg(
-						$newArticleKey,
-						wfExpandUrl( Skin::makeInternalOrExternalUrl(
-							$this->msg( 'helppage' )->inContentLanguage()->text()
-						) )
-					)->page( $title )->parseAsBlock();
-
-					// Page protected from creation
-					if ( $this->restrictionStore->getRestrictions( $title, 'create' ) ) {
-						$protectionNotices['titleprotectedwarning'] =
-							$this->msg( 'titleprotectedwarning' )->page( $title )->parseAsBlock() .
-							$this->getLastLogEntry( $title, 'protect' );
-					}
-
-					// From EditPage#showIntro, checking if the page has previously been deleted:
-					$dbr = wfGetDB( DB_REPLICA );
-					LogEventsList::showLogExtract( $out, [ 'delete', 'move' ], $title,
-						'',
-						[
-							'lim' => 10,
-							'conds' => [ 'log_action != ' . $dbr->addQuotes( 'revision' ) ],
-							'showIfEmpty' => false,
-							'msgKey' => [ 'recreate-moveddeleted-warn' ]
-						]
-					);
-					if ( $out ) {
-						$notices['recreate-moveddeleted-warn'] = $out;
-					}
 				}
 
 				// Look at protection status to set up notices + surface class(es)
-				$protectedClasses = [];
-				if (
-					$permissionManager->getNamespaceRestrictionLevels( $title->getNamespace() ) !== [ '' ]
-				) {
-					// Page protected from editing
-					if ( $this->restrictionStore->isProtected( $title, 'edit' ) ) {
-						// Is the title semi-protected?
-						if ( $this->restrictionStore->isSemiProtected( $title ) ) {
-							$protectedClasses[] = 'mw-textarea-sprotected';
+				$builder = new TextboxBuilder();
+				$protectedClasses = $builder->getTextboxProtectionCSSClasses( $title );
 
-							$noticeMsg = 'semiprotectedpagewarning';
-						} else {
-							$protectedClasses[] = 'mw-textarea-protected';
-
-							// Then it must be protected based on static groups (regular)
-							$noticeMsg = 'protectedpagewarning';
-						}
-						$protectionNotices[$noticeMsg] = $this->msg( $noticeMsg )->page( $title )->parseAsBlock() .
-							$this->getLastLogEntry( $title, 'protect' );
-					}
-
-					// Deal with cascading edit protection
-					list( $sources, $restrictions ) = $this->restrictionStore->getCascadeProtectionSources( $title );
-					if ( isset( $restrictions['edit'] ) ) {
-						$protectedClasses[] = ' mw-textarea-cprotected';
-
-						$notice = $this->msg( 'cascadeprotectedwarning', count( $sources ) )
-							->page( $title )->parseAsBlock() . '<ul>';
-						// Unfortunately there's no nice way to get only the pages which cause
-						// editing to be restricted
-						foreach ( $sources as $source ) {
-							$notice .= "<li>" .
-								$this->linkRenderer->makeLink( $source ) .
-								"</li>";
-						}
-						$notice .= '</ul>';
-						$protectionNotices['cascadeprotectedwarning'] = $notice;
-					}
-				}
-
-				// Simplified EditPage::getEditPermissionErrors()
-				$permErrors = $permissionManager->getPermissionErrors( 'edit', $user, $title, 'full' );
-
-				if ( $permErrors ) {
+				// Simplified EditPage::getEditPermissionStatus()
+				// TODO: Use API
+				// action=query&prop=info&intestactions=edit&intestactionsdetail=full&errorformat=html&errorsuselocal=1
+				$status = $permissionManager->getPermissionStatus(
+					'edit', $this->getUserForPermissions(), $title, PermissionManager::RIGOR_FULL );
+				if ( !$status->isGood() ) {
 					// Show generic permission errors, including page protection, user blocks, etc.
-					$notice = $this->getOutput()->formatPermissionsErrorMessage( $permErrors, 'edit' );
+					$notice = $this->getOutput()->formatPermissionStatus( $status, 'edit' );
 					// That method returns wikitext (eww), hack to get it parsed:
 					$notice = ( new RawMessage( '$1', [ $notice ] ) )->page( $title )->parseAsBlock();
 					// Invent a message key 'permissions-error' to store in $notices
-					$notices['permissions-error'] = $notice;
-				} elseif ( $protectionNotices ) {
-					// If we can edit, and the page is protected, then show the details about the protection
-					$notices = array_merge( $notices, $protectionNotices );
+					// (This probably shouldn't use the notices system…)
+					$notices = [ 'permissions-error' => $notice ];
+				} else {
+					$notices = $this->introMessageBuilder->getIntroMessages(
+						IntroMessageBuilder::LESS_FRAMES,
+						[
+							// This message was not shown by VisualEditor before it was switched to use
+							// IntroMessageBuilder, and it may be unexpected to display it now, so skip it.
+							'editpage-head-copy-warn',
+							// This message was not shown by VisualEditor previously, and on many Wikipedias it's
+							// technically non-empty but hidden with CSS, and not a real edit notice (T337633).
+							'editnotice-notext',
+						],
+						$localizerWithTitle,
+						$title->toPageIdentity(),
+						$revision,
+						$user,
+						$params['editintro'],
+						null,
+						false,
+						$section
+					);
 				}
 
 				// Will be false e.g. if user is blocked or page is protected
-				$canEdit = !$permErrors;
+				$canEdit = $status->isGood();
 
-				// Show notice when editing user / user talk page of a user that doesn't exist
-				// or who is blocked
-				// HACK of course this code is partly duplicated from EditPage.php :(
-				if ( $title->getNamespace() == NS_USER || $title->getNamespace() == NS_USER_TALK ) {
-					$parts = explode( '/', $title->getText(), 2 );
-					$targetUsername = $parts[0];
-					$targetUser = $this->userFactory->newFromName(
-						$targetUsername,
-						/* allow IP users*/ UserFactory::RIGOR_NONE
-					);
-					$block = $targetUser ? $targetUser->getBlock() : null;
-
-					$targetUserExists = ( $targetUser && $targetUser->isRegistered() );
-					if ( $targetUserExists && $targetUser->isHidden() &&
-						!$permissionManager->userHasRight( $user, 'hideuser' )
-					) {
-						// If the user exists, but is hidden, and the viewer cannot see hidden
-						// users, pretend like they don't exist at all. See T120883/T270453
-						$targetUserExists = false;
-					}
-					if ( !$targetUserExists && !$this->userNameUtils->isIP( $targetUsername ) ) {
-						// User does not exist
-						$notices['userpage-userdoesnotexist'] = Html::warningBox(
-							$this->msg( 'userpage-userdoesnotexist', wfEscapeWikiText( $targetUsername ) )
-								->parse(),
-							'mw-userpage-userdoesnotexist'
-						);
-					} elseif (
-						$block !== null &&
-						$block->getType() != DatabaseBlock::TYPE_AUTO &&
-						$targetUser &&
-						( $block->isSitewide() || $permissionManager->isBlockedFrom( $targetUser, $title ) )
-					) {
-						// Show log extract if the user is sitewide blocked or is partially
-						// blocked and not allowed to edit their user page or user talk page
-						$notices['blocked-notice-logextract'] = $this->msg(
-							'blocked-notice-logextract',
-							// Support GENDER in notice
-							$targetUser->getName()
-						)->parseAsBlock() . $this->getLastLogEntry( $targetUser->getUserPage(), 'block' );
-					}
-				}
-
-				$block = null;
 				$blockinfo = null;
 				// Blocked user notice
-				if ( $user->isBlockedGlobally() ) {
-					$block = $user->getGlobalBlock();
-				} elseif ( $permissionManager->isBlockedFrom( $user, $title, true ) ) {
+				if ( $permissionManager->isBlockedFrom( $user, $title, true ) ) {
 					$block = $user->getBlock();
-				}
-				if ( $block ) {
-					// Already added to $notices via #getPermissionErrors above.
-					// Add block info for MobileFrontend:
-					$blockinfo = $this->getBlockDetails( $block );
+					if ( $block ) {
+						// Already added to $notices via #getPermissionStatus above.
+						// Add block info for MobileFrontend:
+						$blockinfo = $this->getBlockDetails( $block );
+					}
 				}
 
 				// HACK: Build a fake EditPage so we can get checkboxes from it
@@ -606,14 +420,20 @@ class ApiVisualEditor extends ApiBase {
 					$value[ApiResult::META_BC_BOOLS] = [ 'default' ];
 				}
 
-				// Remove empty notices (T265798)
-				$notices = array_filter( $notices );
-
 				$copyrightWarning = EditPage::getCopyrightWarning(
 					$title,
 					'parse',
 					$this
 				);
+
+				// Copied from EditPage::maybeActivateTempUserCreate
+				// Used by code in MobileFrontend and DiscussionTools.
+				// TODO Make them use API
+				// action=query&prop=info&intestactions=edit&intestactionsautocreate=1
+				$wouldautocreate =
+					!$user->isRegistered()
+						&& $this->tempUserCreator->isAutoCreateAction( 'edit' )
+						&& $permissionManager->userHasRight( $user, 'createaccount' );
 
 				$result = [
 					'result' => 'success',
@@ -626,6 +446,7 @@ class ApiVisualEditor extends ApiBase {
 					'starttimestamp' => wfTimestampNow(),
 					'oldid' => $oldid,
 					'blockinfo' => $blockinfo,
+					'wouldautocreate' => $wouldautocreate,
 					'canEdit' => $canEdit,
 				];
 				if ( isset( $restbaseHeaders['etag'] ) ) {
@@ -644,16 +465,9 @@ class ApiVisualEditor extends ApiBase {
 				}
 
 				if ( isset( $content ) ) {
+					Assert::postcondition( is_string( $content ), 'Content expected' );
 					$result['content'] = $content;
-					if ( $preloaded ) {
-						// If the preload param was actually used, pass it
-						// back so the caller knows. (It's not obvious to the
-						// caller, because in some situations it'll depend on
-						// whether the page has been created. They can work it
-						// out from some of the other returns, but this is
-						// simpler.)
-						$result['preloaded'] = $params['preload'] ?? '1';
-					}
+					$result['preloaded'] = $preloaded;
 				}
 				break;
 
@@ -665,27 +479,22 @@ class ApiVisualEditor extends ApiBase {
 				$result = $editPage->makeTemplatesOnThisPageList( $editPage->getTemplates() );
 				break;
 
-			case 'parsedoc':
 			case 'parsefragment':
 				$wikitext = $params['wikitext'];
 				if ( $wikitext === null ) {
 					$this->dieWithError( [ 'apierror-missingparam', 'wikitext' ] );
 				}
-				$bodyOnly = ( $params['paction'] === 'parsefragment' );
 				if ( $params['pst'] ) {
 					$wikitext = $this->pstWikitext( $title, $wikitext );
 				}
 				$content = $this->transformWikitext(
-					$title, $wikitext, $bodyOnly
+					$title, $wikitext, true
 				)['body'];
-				if ( $content === false ) {
-					$this->dieWithError( 'apierror-visualeditor-docserver', 'docserver' );
-				} else {
-					$result = [
-						'result' => 'success',
-						'content' => $content
-					];
-				}
+				Assert::postcondition( is_string( $content ), 'Content expected' );
+				$result = [
+					'result' => 'success',
+					'content' => $content
+				];
 				break;
 		}
 
@@ -699,8 +508,8 @@ class ApiVisualEditor extends ApiBase {
 	 * @param int $namespaceId Namespace ID
 	 * @return bool
 	 */
-	public static function isAllowedNamespace( Config $config, $namespaceId ) {
-		return in_array( $namespaceId, self::getAvailableNamespaceIds( $config ) );
+	public static function isAllowedNamespace( Config $config, int $namespaceId ): bool {
+		return in_array( $namespaceId, self::getAvailableNamespaceIds( $config ), true );
 	}
 
 	/**
@@ -709,7 +518,7 @@ class ApiVisualEditor extends ApiBase {
 	 * @param Config $config
 	 * @return int[]
 	 */
-	public static function getAvailableNamespaceIds( Config $config ) {
+	public static function getAvailableNamespaceIds( Config $config ): array {
 		$namespaceInfo = MediaWikiServices::getInstance()->getNamespaceInfo();
 		$configuredNamespaces = array_replace(
 			ExtensionRegistry::getInstance()->getAttribute( 'VisualEditorAvailableNamespaces' ),
@@ -732,26 +541,12 @@ class ApiVisualEditor extends ApiBase {
 	 * @param string $contentModel Content model ID
 	 * @return bool
 	 */
-	public static function isAllowedContentType( Config $config, $contentModel ) {
+	public static function isAllowedContentType( Config $config, string $contentModel ): bool {
 		$availableContentModels = array_merge(
 			ExtensionRegistry::getInstance()->getAttribute( 'VisualEditorAvailableContentModels' ),
 			$config->get( 'VisualEditorAvailableContentModels' )
 		);
 		return (bool)( $availableContentModels[$contentModel] ?? false );
-	}
-
-	/**
-	 * Gets the relevant HTML for the latest log entry on a given title, including a full log link.
-	 *
-	 * @param Title $title
-	 * @param array|string $types
-	 * @return string
-	 */
-	private function getLastLogEntry( Title $title, $types = '' ) {
-		$outString = '';
-		LogEventsList::showLogExtract( $outString, $types, $title, '',
-			[ 'lim' => 1 ] );
-		return $outString;
 	}
 
 	/**
@@ -775,7 +570,6 @@ class ApiVisualEditor extends ApiBase {
 					'templatesused',
 					'wikitext',
 					'parsefragment',
-					'parsedoc',
 				],
 			],
 			'wikitext' => [
@@ -784,7 +578,9 @@ class ApiVisualEditor extends ApiBase {
 			],
 			'section' => null,
 			'stash' => false,
-			'oldid' => null,
+			'oldid' => [
+				ParamValidator::PARAM_TYPE => 'integer',
+			],
 			'editintro' => null,
 			'pst' => false,
 			'preload' => null,

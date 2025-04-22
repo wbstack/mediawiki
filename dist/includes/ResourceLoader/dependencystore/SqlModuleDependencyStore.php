@@ -21,9 +21,9 @@
 namespace Wikimedia\DependencyStore;
 
 use InvalidArgumentException;
-use Wikimedia\Rdbms\DBConnRef;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\IReadableDatabase;
 
 /**
  * Track per-module file dependencies in the core module_deps table
@@ -76,12 +76,12 @@ class SqlModuleDependencyStore extends DependencyStore {
 			return;
 		}
 
-		$dbw = $this->getPrimaryDB();
+		$dbw = $this->getPrimaryDb();
 		$depsBlobByEntity = $this->fetchDependencyBlobs( array_keys( $dataByEntity ), $dbw );
 
 		$rows = [];
 		foreach ( $dataByEntity as $entity => $data ) {
-			list( $module, $variant ) = $this->getEntityNameComponents( $entity );
+			[ $module, $variant ] = $this->getEntityNameComponents( $entity );
 			if ( !is_array( $data[self::KEY_PATHS] ) ) {
 				throw new InvalidArgumentException( "Invalid entry for '$entity'" );
 			}
@@ -104,15 +104,13 @@ class SqlModuleDependencyStore extends DependencyStore {
 		// @TODO: use a single query with VALUES()/aliases support in DB wrapper
 		// See https://dev.mysql.com/doc/refman/8.0/en/insert-on-duplicate.html
 		foreach ( $rows as $row ) {
-			$dbw->upsert(
-				'module_deps',
-				$row,
-				[ [ 'md_module', 'md_skin' ] ],
-				[
-					'md_deps' => $row['md_deps'],
-				],
-				__METHOD__
-			);
+			$dbw->newInsertQueryBuilder()
+				->insertInto( 'module_deps' )
+				->row( $row )
+				->onDuplicateKeyUpdate()
+				->uniqueIndexFields( [ 'md_module', 'md_skin' ] )
+				->set( [ 'md_deps' => $row['md_deps'] ] )
+				->caller( __METHOD__ )->execute();
 		}
 	}
 
@@ -124,54 +122,50 @@ class SqlModuleDependencyStore extends DependencyStore {
 			return;
 		}
 
-		$dbw = $this->getPrimaryDB();
+		$dbw = $this->getPrimaryDb();
 		$disjunctionConds = [];
 		foreach ( (array)$entities as $entity ) {
-			list( $module, $variant ) = $this->getEntityNameComponents( $entity );
-			$disjunctionConds[] = $dbw->makeList(
-				[ 'md_skin' => $variant, 'md_module' => $module ],
-				$dbw::LIST_AND
-			);
+			[ $module, $variant ] = $this->getEntityNameComponents( $entity );
+			$disjunctionConds[] = $dbw
+				->expr( 'md_skin', '=', $variant )
+				->and( 'md_module', '=', $module );
 		}
 
 		if ( $disjunctionConds ) {
-			$dbw->delete(
-				'module_deps',
-				$dbw->makeList( $disjunctionConds, $dbw::LIST_OR ),
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( 'module_deps' )
+				->where( $dbw->orExpr( $disjunctionConds ) )
+				->caller( __METHOD__ )->execute();
 		}
 	}
 
 	/**
 	 * @param string[] $entities
-	 * @param IDatabase $db
+	 * @param IReadableDatabase $db
 	 * @return string[]
 	 */
-	private function fetchDependencyBlobs( array $entities, IDatabase $db ) {
+	private function fetchDependencyBlobs( array $entities, IReadableDatabase $db ) {
 		$modulesByVariant = [];
 		foreach ( $entities as $entity ) {
-			list( $module, $variant ) = $this->getEntityNameComponents( $entity );
+			[ $module, $variant ] = $this->getEntityNameComponents( $entity );
 			$modulesByVariant[$variant][] = $module;
 		}
 
 		$disjunctionConds = [];
 		foreach ( $modulesByVariant as $variant => $modules ) {
-			$disjunctionConds[] = $db->makeList(
-				[ 'md_skin' => $variant, 'md_module' => $modules ],
-				$db::LIST_AND
-			);
+			$disjunctionConds[] = $db
+				->expr( 'md_skin', '=', $variant )
+				->and( 'md_module', '=', $modules );
 		}
 
 		$depsBlobByEntity = [];
 
 		if ( $disjunctionConds ) {
-			$res = $db->select(
-				'module_deps',
-				[ 'md_module', 'md_skin', 'md_deps' ],
-				$db->makeList( $disjunctionConds, $db::LIST_OR ),
-				__METHOD__
-			);
+			$res = $db->newSelectQueryBuilder()
+				->select( [ 'md_module', 'md_skin', 'md_deps' ] )
+				->from( 'module_deps' )
+				->where( $db->orExpr( $disjunctionConds ) )
+				->caller( __METHOD__ )->fetchResultSet();
 
 			foreach ( $res as $row ) {
 				$entity = "{$row->md_module}|{$row->md_skin}";
@@ -183,19 +177,19 @@ class SqlModuleDependencyStore extends DependencyStore {
 	}
 
 	/**
-	 * @return DBConnRef
+	 * @return IReadableDatabase
 	 */
 	private function getReplicaDb() {
 		return $this->lb
-			->getConnectionRef( DB_REPLICA, [], false, ( $this->lb )::CONN_TRX_AUTOCOMMIT );
+			->getConnection( DB_REPLICA, [], false, ( $this->lb )::CONN_TRX_AUTOCOMMIT );
 	}
 
 	/**
-	 * @return DBConnRef
+	 * @return IDatabase
 	 */
 	private function getPrimaryDb() {
 		return $this->lb
-			->getConnectionRef( DB_PRIMARY, [], false, ( $this->lb )::CONN_TRX_AUTOCOMMIT );
+			->getConnection( DB_PRIMARY, [], false, ( $this->lb )::CONN_TRX_AUTOCOMMIT );
 	}
 
 	/**

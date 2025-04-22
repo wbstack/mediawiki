@@ -2,26 +2,15 @@
 
 namespace CirrusSearch;
 
-use BagOStuff;
 use MediaWiki\Interwiki\InterwikiLookup;
-use WANObjectCache;
+use MediaWiki\Registration\ExtensionRegistry;
+use Wikimedia\Http\MultiHttpClient;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * Factory class used to create InterwikiResolver
  */
 class InterwikiResolverFactory {
-	/**
-	 * @const string service name used in MediaWikiServices
-	 */
-	public const SERVICE = 'CirrusSearchInterwikiResolverFactory';
-
-	/**
-	 * @return InterwikiResolverFactory
-	 */
-	public static function newFactory() {
-		return new InterwikiResolverFactory();
-	}
-
 	/**
 	 * Based on config variables available in $config
 	 * returns the approriate the InterwikiResolver
@@ -29,27 +18,26 @@ class InterwikiResolverFactory {
 	 * Fallback to EmptyInterwikiResolver.
 	 *
 	 * @param SearchConfig $config
-	 * @param \MultiHttpClient|null $client http client to fetch cirrus config
-	 * @param WANObjectCache|null $wanCache Cache object for caching repeated requests
-	 * @param BagOStuff|null $srvCache Local server cache object for caching repeated requests
-	 * @param InterwikiLookup|null $iwLookup
+	 * @param WANObjectCache $wanCache Cache object for caching repeated requests
+	 * @param InterwikiLookup $iwLookup
+	 * @param ExtensionRegistry $extensionRegistry
+	 * @param MultiHttpClient $client http client to fetch cirrus config
 	 * @return InterwikiResolver
-	 * @throws \Exception
 	 * @see CirrusSearchInterwikiResolverFactory::accepts()
 	 * @see SiteMatrixInterwikiResolver::accepts()
 	 */
-	public function getResolver(
+	public static function build(
 		SearchConfig $config,
-		\MultiHttpClient $client = null,
-		WANObjectCache $wanCache = null,
-		BagOStuff $srvCache = null,
-		InterwikiLookup $iwLookup = null
-	) {
+		WANObjectCache $wanCache,
+		InterwikiLookup $iwLookup,
+		ExtensionRegistry $extensionRegistry,
+		MultiHttpClient $client
+	): InterwikiResolver {
 		if ( CirrusConfigInterwikiResolver::accepts( $config ) ) {
-			return new CirrusConfigInterwikiResolver( $config, $client, $wanCache, $srvCache, $iwLookup );
+			return new CirrusConfigInterwikiResolver( $config, $client, $wanCache, $iwLookup );
 		}
-		if ( SiteMatrixInterwikiResolver::accepts( $config ) ) {
-			return new SiteMatrixInterwikiResolver( $config, $client, $wanCache, $srvCache );
+		if ( SiteMatrixInterwikiResolver::accepts( $config, $extensionRegistry ) ) {
+			return new SiteMatrixInterwikiResolver( $config, $client, $wanCache, $iwLookup );
 		}
 		return new EmptyInterwikiResolver();
 	}

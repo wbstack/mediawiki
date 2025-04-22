@@ -13,14 +13,12 @@ use Wikimedia\Parsoid\Tokens\SelfclosingTagTk;
 use Wikimedia\Parsoid\Tokens\SourceRange;
 use Wikimedia\Parsoid\Tokens\TagTk;
 use Wikimedia\Parsoid\Tokens\Token;
-use Wikimedia\Parsoid\Utils\DOMCompat;
-use Wikimedia\Parsoid\Utils\DOMUtils;
 use Wikimedia\Parsoid\Utils\PHPUtils;
 use Wikimedia\Parsoid\Utils\PipelineUtils;
 use Wikimedia\Parsoid\Utils\Title;
 use Wikimedia\Parsoid\Utils\TitleException;
 use Wikimedia\Parsoid\Utils\TokenUtils;
-use Wikimedia\Parsoid\Utils\Utils;
+use Wikimedia\Parsoid\Utils\WTUtils;
 use Wikimedia\Parsoid\Wikitext\Wikitext;
 use Wikimedia\Parsoid\Wt2Html\Params;
 use Wikimedia\Parsoid\Wt2Html\TokenTransformManager;
@@ -63,8 +61,6 @@ class TemplateHandler extends TokenHandler {
 	 */
 	public function __construct( TokenTransformManager $manager, array $options ) {
 		parent::__construct( $manager, $options );
-		// Set this here so that it's available in the TokenStreamPatcher,
-		// which continues to inherit from TemplateHandler.
 		$this->parserFunctions = new ParserFunctions( $this->env );
 		$this->ae = new AttributeExpander( $this->manager, [
 			'expandTemplates' => $this->options['expandTemplates'],
@@ -79,7 +75,7 @@ class TemplateHandler extends TokenHandler {
 		// return" below.
 		$this->atMaxArticleSize = !$this->env->compareWt2HtmlLimit(
 			'wikitextSize',
-			strlen( $this->env->getPageConfig()->getPageMainContent() )
+			strlen( $this->env->topFrame->getSrcText() )
 		);
 	}
 
@@ -173,73 +169,91 @@ class TemplateHandler extends TokenHandler {
 		$buf = $maybeTarget[0]; // Will always be a string
 		$tgtTokens = $maybeTarget[1];
 		$preNlContent = null;
-		foreach ( $tgtTokens as $i => $ntt ) {
+		$i = 0;
+		$n = count( $tgtTokens );
+		while ( $i < $n ) {
+			$ntt = $tgtTokens[$i];
 			if ( is_string( $ntt ) ) {
 				$buf .= $ntt;
 				if ( $preNlContent !== null && !preg_match( '/^\s*$/D', $buf ) ) {
 					// intervening newline makes this an invalid template target
 					return [ $preNlContent, array_merge( [ $buf ], array_slice( $tgtTokens, $i ) ) ];
 				}
-				continue;
-			}
+			} else {
+				switch ( get_class( $ntt ) ) {
+					case SelfclosingTagTk::class:
+						// Quotes are valid template targets
+						if ( $ntt->getName() === 'mw-quote' ) {
+							$buf .= $ntt->getAttributeV( 'value' );
+						} elseif (
+							!TokenUtils::isEmptyLineMetaToken( $ntt ) &&
+							$ntt->getName() !== 'template' &&
+							$ntt->getName() !== 'templatearg' &&
+							// Ignore annotations in template targets
+							// NOTE(T295834): There's a large discussion about who's responsible
+							// for stripping these tags in I487baaafcf1ffd771cb6a9e7dd4fb76d6387e412
+							!(
+								$ntt->getName() === 'meta' &&
+								TokenUtils::matchTypeOf( $ntt, WTUtils::ANNOTATION_META_TYPE_REGEXP )
+							)
+						) {
+							// We are okay with empty (comment-only) lines,
+							// {{..}} and {{{..}}} in template targets.
+							if ( $preNlContent !== null ) {
+								return [ $preNlContent, array_merge( [ $buf ], array_slice( $tgtTokens, $i ) ) ];
+							} else {
+								return [ $buf, array_slice( $tgtTokens, $i ) ];
+							}
+						}
+						break;
 
-			switch ( get_class( $ntt ) ) {
-				case SelfclosingTagTk::class:
-					// Quotes are valid template targets
-					if ( $ntt->getName() === 'mw-quote' ) {
-						$buf .= $ntt->getAttribute( 'value' );
-					} elseif ( !TokenUtils::isEmptyLineMetaToken( $ntt ) &&
-						$ntt->getName() !== 'template' &&
-						$ntt->getName() !== 'templatearg'
-					) {
-						// We are okay with empty (comment-only) lines,
-						// {{..}} and {{{..}}} in template targets.
+					case TagTk::class:
+						if ( TokenUtils::isEntitySpanToken( $ntt ) ) {
+							$buf .= $tgtTokens[$i + 1];
+							$i += 2;
+							break;
+						}
+						// Fall-through
+					case EndTagTk::class:
 						if ( $preNlContent !== null ) {
 							return [ $preNlContent, array_merge( [ $buf ], array_slice( $tgtTokens, $i ) ) ];
 						} else {
 							return [ $buf, array_slice( $tgtTokens, $i ) ];
 						}
-					}
-					break;
 
-				case TagTk::class:
-				case EndTagTk::class:
-					if ( $preNlContent !== null ) {
-						return [ $preNlContent, array_merge( [ $buf ], array_slice( $tgtTokens, $i ) ) ];
-					} else {
-						return [ $buf, array_slice( $tgtTokens, $i ) ];
-					}
-
-				case CommentTk::class:
-					// Ignore comments as well
-					break;
-
-				case NlTk::class:
-					// Ignore only the leading or trailing newlines
-					// (modulo whitespace and comments)
-					//
-					// If we only have whitespace in $buf thus far,
-					// the newline can be ignored. But, if we have
-					// non-ws content in $buf, everything that follows
-					// can only be ws.
-					if ( preg_match( '/^\s*$/D', $buf ) ) {
-						$buf .= "\n";
+					case CommentTk::class:
+						// Ignore comments as well
 						break;
-					} elseif ( $preNlContent === null ) {
-						// Buffer accumulated content
-						$preNlContent = $buf;
-						$buf = "\n";
-						break;
-					} else {
-						return [ $preNlContent, array_merge( [ $buf ], array_slice( $tgtTokens, $i ) ) ];
-					}
 
-				default:
-					throw new UnreachableException( 'Unexpected token type: ' . get_class( $ntt ) );
+					case NlTk::class:
+						// Ignore only the leading or trailing newlines
+						// (modulo whitespace and comments)
+						//
+						// If we only have whitespace in $buf thus far,
+						// the newline can be ignored. But, if we have
+						// non-ws content in $buf, everything that follows
+						// can only be ws.
+						if ( preg_match( '/^\s*$/D', $buf ) ) {
+							$buf .= "\n";
+							break;
+						} elseif ( $preNlContent === null ) {
+							// Buffer accumulated content
+							$preNlContent = $buf;
+							$buf = "\n";
+							break;
+						} else {
+							return [ $preNlContent, array_merge( [ $buf ], array_slice( $tgtTokens, $i ) ) ];
+						}
+
+					default:
+						throw new UnreachableException( 'Unexpected token type: ' . get_class( $ntt ) );
+				}
 			}
+			$i++;
 		}
 
 		// All good! No newline / only whitespace/comments post newline.
+		// (Well, annotation metas and template(arg) tokens too)
 		return [ $preNlContent . $buf, null ];
 	}
 
@@ -270,7 +284,7 @@ class TemplateHandler extends TokenHandler {
 		} else {
 			$toks = !is_array( $targetToks ) ? [ $targetToks ] : $targetToks;
 			$toks = $this->processToString( $this->stripIncludeTokens( $toks ) );
-			list( $target, $additionalToks ) = $toks;
+			[ $target, $additionalToks ] = $toks;
 		}
 
 		$target = trim( $target );
@@ -342,17 +356,29 @@ class TemplateHandler extends TokenHandler {
 		}
 		if ( $canonicalFunctionName !== null ) {
 			$state->parserFunctionName = $canonicalFunctionName;
+			// XXX this is made up.
+			$syntheticTitle = $env->makeTitleFromURLDecodedStr(
+				"Special:ParserFunction/$canonicalFunctionName",
+				$env->getSiteConfig()->canonicalNamespaceId( 'Special' ),
+				true // No exceptions
+			);
+			// Note that parserFunctionName/$canonicalFunctionName is not
+			// necessarily a valid title!  Parsing rules are pretty generous
+			// w/r/t valid parser function names.
+			if ( $syntheticTitle === null ) {
+				$syntheticTitle = $env->makeTitleFromText(
+					'Special:ParserFunction/unknown'
+				);
+			}
 			return [
+				'isParserFunction' => true,
+				'magicWordType' => null,
 				'name' => $canonicalFunctionName,
+				'title' => $syntheticTitle, // FIXME: Some made up synthetic title
 				'pfArg' => $pfArg,
 				'srcOffsets' => new SourceRange(
 					$srcOffsets->start + strlen( $untrimmedPrefix ) + 1,
 					$srcOffsets->end ),
-				'isPF' => true,
-					// FIXME: Some made up synthetic title
-				'title' => $env->makeTitleFromURLDecodedStr( "Special:ParserFunction/$canonicalFunctionName" ),
-				'magicWordType' => isset( Utils::magicMasqs()[$canonicalFunctionName] ) ? 'MASQ' : null,
-				'targetToks' => !is_array( $targetToks ) ? [ $targetToks ] : $targetToks,
 			];
 		}
 
@@ -440,14 +466,14 @@ class TemplateHandler extends TokenHandler {
 	 */
 	private function convertToString( Token $token, bool $expandTemplates = false ): TemplateExpansionResult {
 		$frame = $this->manager->getFrame();
-		$tsr = $token->dataAttribs->tsr;
-		$src = substr( $token->dataAttribs->src, 1, -1 );
+		$tsr = $token->dataParsoid->tsr;
+		$src = substr( $token->dataParsoid->src, 1, -1 );
 		$startOffset = $tsr->start + 1;
 		$srcOffsets = new SourceRange( $startOffset, $startOffset + strlen( $src ) );
 
 		$toks = PipelineUtils::processContentInPipeline(
 			$this->env, $frame, $src, [
-				'pipelineType' => 'text/x-mediawiki',
+				'pipelineType' => 'wikitext-to-expanded-tokens',
 				'pipelineOpts' => [
 					'inTemplate' => $this->options['inTemplate'],
 					'expandTemplates' => $expandTemplates && $this->options['expandTemplates'],
@@ -503,7 +529,7 @@ class TemplateHandler extends TokenHandler {
 		// .wikitext() methods (subclass of Array)
 
 		$target = $resolvedTgt['name'];
-		if ( isset( $resolvedTgt['isPF'] ) || isset( $resolvedTgt['isVariable'] ) ) {
+		if ( isset( $resolvedTgt['isParserFunction'] ) || isset( $resolvedTgt['isVariable'] ) ) {
 			// FIXME: HARDCODED to core parser function implementations!
 			// These should go through function hook registrations in the
 			// ParserTests mock setup ideally. But, it is complicated because the
@@ -587,7 +613,7 @@ class TemplateHandler extends TokenHandler {
 			$dump = str_repeat( '=', 28 ) . " template source " .
 				str_repeat( '=', 28 ) . "\n";
 			$dump .= 'TEMPLATE:' . $tplArgs['name'] . 'TRANSCLUSION:' .
-				PHPUtils::jsonEncode( $token->dataAttribs->src ) . "\n";
+				PHPUtils::jsonEncode( $token->dataParsoid->src ) . "\n";
 			$dump .= str_repeat( '-', 80 ) . "\n";
 			$dump .= $src . "\n";
 			$dump .= str_repeat( '-', 80 ) . "\n";
@@ -614,7 +640,7 @@ class TemplateHandler extends TokenHandler {
 			$frame,
 			$src,
 			[
-				'pipelineType' => 'text/x-mediawiki',
+				'pipelineType' => 'wikitext-to-expanded-tokens',
 				'pipelineOpts' => [
 					'inTemplate' => true,
 					'isInclude' => true,
@@ -783,9 +809,15 @@ class TemplateHandler extends TokenHandler {
 		TokenUtils::stripEOFTkfromTokens( $chunk );
 
 		foreach ( $chunk as $i => $t ) {
-			if ( $t && isset( $t->dataAttribs->tsr ) ) {
-				unset( $t->dataAttribs->tsr );
+			if ( !$t ) {
+				continue;
 			}
+
+			if ( isset( $t->dataParsoid->tsr ) ) {
+				unset( $t->dataParsoid->tsr );
+			}
+			Assert::invariant( !isset( $t->dataParsoid->tmp->endTSR ),
+				"Expected endTSR to not be set on templated content." );
 			if ( $t instanceof SelfclosingTagTk &&
 				strtolower( $t->getName() ) === 'meta' &&
 				TokenUtils::hasTypeOf( $t, 'mw:Placeholder' )
@@ -827,7 +859,10 @@ class TemplateHandler extends TokenHandler {
 		}
 
 		$start = microtime( true );
-		$pageContent = $env->getDataAccess()->fetchTemplateSource( $env->getPageConfig(), $templateName );
+		$pageContent = $env->getDataAccess()->fetchTemplateSource(
+			$env->getPageConfig(),
+			Title::newFromText( $templateName, $env->getSiteConfig() )
+		);
 		if ( $env->profiling() ) {
 			$profile = $env->getCurrentProfile();
 			$profile->bumpMWTime( "TemplateFetch", 1000 * ( microtime( true ) - $start ), "api" );
@@ -857,16 +892,14 @@ class TemplateHandler extends TokenHandler {
 	/**
 	 * Process the special magic word as specified by $resolvedTgt['magicWordType'].
 	 * ```
-	 * magicWordType === '!'    => {{!}} is the magic word
-	 * magicWordtype === 'MASQ' => DEFAULTSORT, DISPLAYTITLE are the magic words
-	 *                             (See Util::magicMasqs())
+	 * magicWordType === '!' => {{!}} is the magic word
 	 * ```
 	 * @param bool $atTopLevel
 	 * @param TemplateEncapsulator $state
 	 * @param array $resolvedTgt
 	 * @return TemplateExpansionResult
 	 */
-	public function processSpecialMagicWord(
+	private function processSpecialMagicWord(
 		bool $atTopLevel, TemplateEncapsulator $state, array $resolvedTgt
 	): TemplateExpansionResult {
 		$env = $this->env;
@@ -879,7 +912,7 @@ class TemplateHandler extends TokenHandler {
 		// positions.  However, proceeding to go through template expansion
 		// will reparse it as a table cell token.  Hence this special case
 		// handling to avoid that path.
-		if ( $resolvedTgt['magicWordType'] === '!' || $tplToken->attribs[0]->k === '!' ) {
+		if ( $resolvedTgt['magicWordType'] === '!' ) {
 			// If we're not at the top level, return a table cell. This will always
 			// be the case. Either {{!}} was tokenized as a td, or it was tokenized
 			// as template but the recursive call to fetch its content returns a
@@ -893,99 +926,11 @@ class TemplateHandler extends TokenHandler {
 			return new TemplateExpansionResult( $toks, false, (bool)$this->wrapTemplates );
 		}
 
-		Assert::invariant(
-			$resolvedTgt['magicWordType'] === 'MASQ',
-			'Unexpected magicWordType type: ' . $resolvedTgt['magicWordType']
+		throw new UnreachableException(
+			'Unsupported magic word type: ' . ( $resolvedTgt['magicWordType'] ?? 'null' )
 		);
-
-		$magicWord = mb_strtolower( $resolvedTgt['name'] );
-		$pageProp = 'mw:PageProp/';
-		if ( $magicWord === 'defaultsort' ) {
-			$pageProp .= 'category';
-		}
-		$pageProp .= $magicWord;
-
-		$metaToken = new SelfclosingTagTk( 'meta',
-			[ new KV( 'property', $pageProp ) ],
-			$tplToken->dataAttribs->clone()
-		);
-
-		if ( isset( $tplToken->dataAttribs->tmp->templatedAttribs ) ) {
-			// See [[mw:Specs/HTML#Generated_attributes_of_HTML_tags]]
-			//
-			// For every attribute that has a templated name and/or value,
-			// AttributeExpander creates a 2-item array for that attribute.
-			// [ {txt: '..', html: '..'}, { html: '..'} ]
-			// 'txt' is the plain-text name/value
-			// 'html' is the HTML-version of the name/value
-			//
-			// Massage the templated magic-word info into a similar format.
-			// In this case, the attribute name is 'content' (implicit) and
-			// since it is implicit, the name itself cannot be attribute.
-			// Hence 'html' property is empty.
-			//
-			// The attribute value has been templated and is encoded there.
-			//
-			// NOTE: If any part of the 'MAGIC_WORD:value' string is templated,
-			// we consider the magic word as having expanded attributes, rather
-			// than only when the 'value' part of it. This is because of the
-			// limitation of our token representation for templates. This is
-			// an edge case that it is not worth a refactoring right now to
-			// handle this properly and choose mw:Transclusion or mw:ExpandedAttrs
-			// depending on which part is templated.
-			//
-			// FIXME: Is there a simpler / better repn. for templated attrs?
-			$ta = $tplToken->dataAttribs->tmp->templatedAttribs;
-			$html = $ta[0][0]['html'];
-			$ta[0] = [
-				[ 'txt' => 'content' ],  // Magic-word attribute name
-				// FIXME: the content still contains the parser function prefix
-				//  (eg, the html is 'DISPLAYTITLE:Foo' even though the stripped
-				//   content attribute is 'Foo')
-				[ 'html' => $html ],     // HTML repn. of the attribute value
-			];
-			$metaToken->addAttribute( 'data-mw', PHPUtils::jsonEncode( [ 'attribs' => $ta ] ) );
-
-			// Use the textContent of the expanded attribute, similar to how
-			// Sanitizer::sanitizeTagAttr does it.  However, here we have the
-			// opportunity to strip the parser function prefix.
-			$dom = DOMUtils::parseHTML( $html );
-			$content = DOMCompat::getBody( $dom )->textContent;
-			$content = preg_replace( '#^\w+:#', '', $content, 1 );
-			$metaToken->addAttribute( 'content', $content, $resolvedTgt['srcOffsets']->expandTsrV() );
-
-			$metaToken->addAttribute( 'about', $env->newAboutId() );
-			$metaToken->addSpaceSeparatedAttribute( 'typeof', 'mw:ExpandedAttrs' );
-		} else {
-			// Leading/trailing WS should be stripped
-			//
-			// This is bogus, but preserves existing functionality
-			// Clearly we don't have an adequate representation for existing uses
-			// of the DISPLAYTITLE: magic word.
-			// phpcs:ignore Generic.Files.LineLength.TooLong
-			// Ex: {{DISPLAYTITLE:User:<span style="text-transform: lowercase;">MC</span><span style="font-size: 80%;">10</span>/Welcome}}
-			$key = trim( TokenUtils::tokensToString( $resolvedTgt['pfArg'] ) );
-
-			$src = $tplToken->dataAttribs->src ?? '';
-			if ( $src ) {
-				// If the token has original wikitext, shadow the sort-key
-				$origKey = PHPUtils::stripSuffix( preg_replace( '/[^:]+:?/', '', $src, 1 ), '}}' );
-				$metaToken->addNormalizedAttribute( 'content', $key, $origKey );
-			} else {
-				// If not, this token came from an extension/template
-				// in which case, dont bother with shadowing since the token
-				// will never be edited directly.
-				$metaToken->addAttribute( 'content', $key );
-			}
-		}
-
-		return new TemplateExpansionResult( [ $metaToken ] );
 	}
 
-	/**
-	 * @param TemplateEncapsulator $state
-	 * @return TemplateExpansionResult
-	 */
 	private function expandTemplate( TemplateEncapsulator $state ): TemplateExpansionResult {
 		$env = $this->env;
 		$token = $state->token;
@@ -993,10 +938,10 @@ class TemplateHandler extends TokenHandler {
 
 		// Since AttributeExpander runs later in the pipeline than TemplateHandler,
 		// if the template name is templated, use our copy of AttributeExpander
-		// to process all attributes to tokens, and force reprocessing of this
+		// to process the first attribute to tokens, and force reprocessing of this
 		// template token since we will then know the actual template target.
 		if ( $expandTemplates && self::hasTemplateToken( $token->attribs[0]->k ) ) {
-			$ret = $this->ae->processComplexAttributes( $token );
+			$ret = $this->ae->expandFirstAttribute( $token );
 			$toks = $ret->tokens ?? null;
 			Assert::invariant( $toks && count( $toks ) === 1 && $toks[0] === $token,
 				"Expected only the input token as the return value." );
@@ -1023,7 +968,7 @@ class TemplateHandler extends TokenHandler {
 		}
 
 		$toks = null;
-		$text = $token->dataAttribs->src ?? '';
+		$text = $token->dataParsoid->src ?? '';
 
 		$tgt = $this->resolveTemplateTarget(
 			$state, $token->attribs[0]->k, $token->attribs[0]->srcOffsets->key
@@ -1104,6 +1049,20 @@ class TemplateHandler extends TokenHandler {
 					)
 				);
 			} else {
+				if (
+					!isset( $tgt['isParserFunction'] ) &&
+					!isset( $tgt['isVariable'] ) &&
+					!$templateTitle->isExternal() &&
+					$templateTitle->isSpecialPage()
+				) {
+					$domFragment = PipelineUtils::fetchHTML( $env, $text );
+					$toks = $domFragment
+						? PipelineUtils::tunnelDOMThroughTokens( $env, $token, $domFragment, [] )
+						: [];
+					$toks = $this->processTemplateTokens( $toks );
+					return new TemplateExpansionResult( $toks, true, $this->wrapTemplates );
+				}
+
 				// Fetch and process the template expansion
 				$expansion = Wikitext::preprocess( $env, $text );
 				if ( $expansion['error'] ) {
@@ -1186,10 +1145,6 @@ class TemplateHandler extends TokenHandler {
 		return new TokenHandlerResult( $toks );
 	}
 
-	/**
-	 * @param Token $token
-	 * @return TokenHandlerResult|null
-	 */
 	public function onTag( Token $token ): ?TokenHandlerResult {
 		switch ( $token->getName() ) {
 			case "template":

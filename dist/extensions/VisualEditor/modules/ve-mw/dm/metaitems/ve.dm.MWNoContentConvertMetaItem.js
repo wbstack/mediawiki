@@ -1,12 +1,12 @@
 /*!
  * VisualEditor DataModel MWNoContentConvertMetaItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /**
- * DataModel disable content conversion meta item (for __NOCONTENTCONVERT__ and __NOCC__).
+ * DataModel disable content conversion meta item (for `__NOCONTENTCONVERT__` and `__NOCC__`).
  *
  * @class
  * @extends ve.dm.MetaItem
@@ -41,7 +41,7 @@ ve.dm.MWNoContentConvertMetaItem.static.toDataElement = function ( domElements )
 };
 
 ve.dm.MWNoContentConvertMetaItem.static.toDomElements = function ( dataElement, doc ) {
-	var meta = doc.createElement( 'meta' );
+	const meta = doc.createElement( 'meta' );
 	meta.setAttribute(
 		'property',
 		( dataElement.attributes && dataElement.attributes.originalProperty ) || 'mw:PageProp/nocontentconvert'

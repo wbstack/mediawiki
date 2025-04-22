@@ -1,16 +1,18 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki;
 
 use Diff\DiffOp\Diff\Diff;
 use Diff\Patcher\PatcherException;
 use DomainException;
-use EntitySchema\Domain\Model\SchemaId;
+use EntitySchema\Domain\Model\EntitySchemaId;
 use EntitySchema\MediaWiki\Content\EntitySchemaContent;
-use EntitySchema\Services\Diff\SchemaDiffer;
-use EntitySchema\Services\Diff\SchemaPatcher;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
-use Status;
+use EntitySchema\Services\Converter\EntitySchemaConverter;
+use EntitySchema\Services\Diff\EntitySchemaDiffer;
+use EntitySchema\Services\Diff\EntitySchemaPatcher;
+use MediaWiki\Status\Status;
 
 /**
  * @license GPL-2.0-or-later
@@ -23,12 +25,11 @@ final class UndoHandler {
 	public function validateContentIds(
 		EntitySchemaContent $undoFromContent,
 		EntitySchemaContent $undoToContent,
-		EntitySchemaContent $baseContent = null
-	): SchemaId {
-		$converter = new SchemaConverter();
+		?EntitySchemaContent $baseContent = null
+	): EntitySchemaId {
+		$converter = new EntitySchemaConverter();
 		$firstID = $converter->getSchemaID( $undoFromContent->getText() );
-		if ( $firstID !== $converter->getSchemaID( $undoToContent->getText() )
-		) {
+		if ( $firstID !== $converter->getSchemaID( $undoToContent->getText() ) ) {
 			throw new DomainException( 'ID must be the same for all contents' );
 		}
 
@@ -38,7 +39,7 @@ final class UndoHandler {
 			throw new DomainException( 'ID must be the same for all contents' );
 		}
 
-		return new SchemaId( $firstID );
+		return new EntitySchemaId( $firstID );
 	}
 
 	public function getDiffFromContents(
@@ -46,8 +47,8 @@ final class UndoHandler {
 		EntitySchemaContent $undoToContent
 	): Status {
 
-		$differ = new SchemaDiffer();
-		$converter = new SchemaConverter();
+		$differ = new EntitySchemaDiffer();
+		$converter = new EntitySchemaConverter();
 		$diff = $differ->diffSchemas(
 			$converter->getFullArraySchemaData( $undoFromContent->getText() ),
 			$converter->getFullArraySchemaData( $undoToContent->getText() )
@@ -58,8 +59,8 @@ final class UndoHandler {
 
 	public function tryPatching( Diff $diff, EntitySchemaContent $baseContent ): Status {
 
-		$patcher = new SchemaPatcher();
-		$converter = new SchemaConverter();
+		$patcher = new EntitySchemaPatcher();
+		$converter = new EntitySchemaConverter();
 
 		try {
 			$patchedSchema = $patcher->patchSchema(

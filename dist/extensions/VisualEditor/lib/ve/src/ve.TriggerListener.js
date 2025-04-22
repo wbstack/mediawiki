@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TriggerListener class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -19,11 +19,11 @@ ve.TriggerListener = function VeTriggerListener( commands, commandRegistry ) {
 	this.commandsByTrigger = {};
 	this.triggers = {};
 
-	for ( var i = this.commands.length - 1; i >= 0; i-- ) {
-		var command = this.commands[ i ];
-		var triggers = ve.ui.triggerRegistry.lookup( command );
+	for ( let i = this.commands.length - 1; i >= 0; i-- ) {
+		const command = this.commands[ i ];
+		const triggers = ve.ui.triggerRegistry.lookup( command );
 		if ( triggers ) {
-			for ( var j = triggers.length - 1; j >= 0; j-- ) {
+			for ( let j = triggers.length - 1; j >= 0; j-- ) {
 				this.commandsByTrigger[ triggers[ j ].toString() ] = commandRegistry.lookup( command );
 			}
 			this.triggers[ command ] = triggers;

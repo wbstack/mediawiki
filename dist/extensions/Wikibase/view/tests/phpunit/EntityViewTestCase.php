@@ -2,6 +2,7 @@
 
 namespace Wikibase\View\Tests;
 
+use MediaWikiTestCaseTrait;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Statement\Statement;
@@ -18,6 +19,7 @@ use Wikibase\View\EntityView;
  * @author Daniel Kinzler
  */
 abstract class EntityViewTestCase extends \PHPUnit\Framework\TestCase {
+	use MediaWikiTestCaseTrait;
 
 	/**
 	 * @param EntityId $id
@@ -64,10 +66,10 @@ abstract class EntityViewTestCase extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( [], $output->getPlaceholders() );
 
 		$html = $output->getHtml();
-		$this->assertRegexp( $regexp, $html );
+		$this->assertMatchesRegularExpression( $regexp, $html );
 
 		$entityId = $entity->getId()->getSerialization();
-		$this->assertRegExp( '/id="wb-[a-z]+-' . $entityId . '"/', $html );
+		$this->assertMatchesRegularExpression( '/id="wb-[a-z]+-' . $entityId . '"/', $html );
 		$this->assertStringContainsString( '<div id="toc"></div>', $html );
 	}
 

@@ -2,7 +2,8 @@
 
 namespace Wikibase\Lexeme\MediaWiki\Api\Error;
 
-use Message;
+use MediaWiki\Api\ApiMessage;
+use MediaWiki\Message\Message;
 
 /**
  * @license GPL-2.0-or-later
@@ -10,7 +11,7 @@ use Message;
 class InvalidSenseClaims implements ApiError {
 
 	public function asApiMessage( $parameterName, array $path ) {
-		return new \ApiMessage( new Message(
+		return new ApiMessage( new Message(
 			'apierror-wikibaselexeme-invalid-sense-claims',
 			[ $parameterName, implode( '/', $path ) ]
 		), 'bad-request' );

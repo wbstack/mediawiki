@@ -4,7 +4,7 @@ namespace CirrusSearch\Maintenance\Validators;
 
 use CirrusSearch\Maintenance\Printer;
 use Elastica\Index;
-use Status;
+use MediaWiki\Status\Status;
 
 class ReplicaRangeValidator extends Validator {
 	/**
@@ -22,7 +22,7 @@ class ReplicaRangeValidator extends Validator {
 	 * @param string $replicaCount
 	 * @param Printer|null $out
 	 */
-	public function __construct( Index $index, $replicaCount, Printer $out = null ) {
+	public function __construct( Index $index, $replicaCount, ?Printer $out = null ) {
 		parent::__construct( $out );
 
 		$this->index = $index;

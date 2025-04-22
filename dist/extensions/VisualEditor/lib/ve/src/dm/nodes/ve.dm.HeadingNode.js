@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel HeadingNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -23,6 +23,13 @@ ve.dm.HeadingNode = function VeDmHeadingNode() {
 
 OO.inheritClass( ve.dm.HeadingNode, ve.dm.ContentBranchNode );
 
+/* Methods */
+
+ve.dm.HeadingNode.prototype.compareForMerging = function ( otherNode ) {
+	return ve.dm.HeadingNode.super.prototype.compareForMerging.apply( this, arguments ) &&
+		this.getAttribute( 'level' ) === otherNode.getAttribute( 'level' );
+};
+
 /* Static Properties */
 
 ve.dm.HeadingNode.static.name = 'heading';
@@ -34,7 +41,7 @@ ve.dm.HeadingNode.static.defaultAttributes = {
 ve.dm.HeadingNode.static.matchTagNames = [ 'h1', 'h2', 'h3', 'h4', 'h5', 'h6' ];
 
 ve.dm.HeadingNode.static.toDataElement = function ( domElements ) {
-	var levels = {
+	const levels = {
 			h1: 1,
 			h2: 2,
 			h3: 3,
@@ -47,7 +54,7 @@ ve.dm.HeadingNode.static.toDataElement = function ( domElements ) {
 };
 
 ve.dm.HeadingNode.static.toDomElements = function ( dataElement, doc ) {
-	var level = dataElement.attributes && dataElement.attributes.level || 1;
+	const level = dataElement.attributes && dataElement.attributes.level || 1;
 	return [ doc.createElement( 'h' + level ) ];
 };
 
@@ -66,7 +73,7 @@ ve.dm.HeadingNode.static.describeChange = function ( key, change ) {
 		);
 	}
 	// Parent method
-	return ve.dm.HeadingNode.parent.static.describeChange.apply( this, arguments );
+	return ve.dm.HeadingNode.super.static.describeChange.apply( this, arguments );
 };
 
 /* Registration */

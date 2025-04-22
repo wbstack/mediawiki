@@ -185,11 +185,20 @@ $specialPageAliases['mt'] = [
 /** Norwegian Bokmål (norsk bokmål) */
 $specialPageAliases['nb'] = [
 	'Notifications' => [ 'Varsler' ],
+	'DisplayNotificationsConfiguration' => [ 'Vis_varselkonfigurasjon' ],
+	'NotificationsMarkRead' => [ 'Merk_varsel_som_lest' ],
 ];
 
 /** Dutch (Nederlands) */
 $specialPageAliases['nl'] = [
 	'Notifications' => [ 'Meldingen' ],
+];
+
+/** Norwegian Nynorsk (norsk nynorsk) */
+$specialPageAliases['nn'] = [
+	'Notifications' => [ 'Varsel' ],
+	'DisplayNotificationsConfiguration' => [ 'Syn_varselkonfigurasjon' ],
+	'NotificationsMarkRead' => [ 'Merk_varsel_som_lese' ],
 ];
 
 /** Punjabi (ਪੰਜਾਬੀ) */
@@ -264,17 +273,16 @@ $specialPageAliases['vi'] = [
 	'Notifications' => [ 'Thông_báo' ],
 ];
 
-/** Chinese (中文) */
-$specialPageAliases['zh'] = [
-	'Notifications' => [ '通知' ],
-];
-
 /** Simplified Chinese (中文（简体）) */
 $specialPageAliases['zh-hans'] = [
 	'Notifications' => [ '通知' ],
+	'DisplayNotificationsConfiguration' => [ '显示通知配置' ],
+	'NotificationsMarkRead' => [ '标记通知为已读' ],
 ];
 
 /** Traditional Chinese (中文（繁體）) */
 $specialPageAliases['zh-hant'] = [
 	'Notifications' => [ '通知' ],
+	'DisplayNotificationsConfiguration' => [ '顯示通知設定' ],
+	'NotificationsMarkRead' => [ '標記通知為已讀' ],
 ];

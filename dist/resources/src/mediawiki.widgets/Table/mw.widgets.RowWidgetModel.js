@@ -5,19 +5,20 @@
  */
 
 /**
- * RowWidget model.
+ * @classdesc RowWidget model.
  *
  * @class
- * @mixins OO.EventEmitter
+ * @mixes OO.EventEmitter
  *
  * @constructor
+ * @description Create an instance of `mw.widgets.RowWidgetModel`.
  * @param {Object} [config] Configuration options
- * @cfg {Array} [data] An array containing all values of the row
- * @cfg {Array} [keys] An array of keys for easy cell selection
- * @cfg {RegExp|Function|string} [validate] Validation pattern to apply on every cell
- * @cfg {string} [label=''] Row label. Defaults to empty string.
- * @cfg {boolean} [showLabel=true] Show row label. Defaults to true.
- * @cfg {boolean} [deletable=true] Allow row to be deleted. Defaults to true.
+ * @param {Array} [config.data] An array containing all values of the row
+ * @param {Array} [config.keys] An array of keys for easy cell selection
+ * @param {RegExp|Function|string} [config.validate] Validation pattern to apply on every cell
+ * @param {string} [config.label=''] Row label. Defaults to empty string.
+ * @param {boolean} [config.showLabel=true] Show row label. Defaults to true.
+ * @param {boolean} [config.deletable=true] Allow row to be deleted. Defaults to true.
  */
 mw.widgets.RowWidgetModel = function MwWidgetsRowWidgetModel( config ) {
 	config = config || {};
@@ -42,43 +43,39 @@ OO.mixinClass( mw.widgets.RowWidgetModel, OO.EventEmitter );
 /* Events */
 
 /**
- * @event valueChange
- *
  * Fired when a value inside the row has changed.
  *
+ * @event mw.widgets.RowWidgetModel.valueChange
  * @param {number} index The column index of the updated cell
  * @param {number} value The new value
  */
 
 /**
- * @event insertCell
- *
  * Fired when a new cell is inserted into the row.
  *
+ * @event mw.widgets.RowWidgetModel.insertCell
  * @param {Array} data The initial data
  * @param {number} index The index in which to insert the new cell
  */
 
 /**
- * @event removeCell
- *
  * Fired when a cell is removed from the row.
  *
+ * @event mw.widgets.RowWidgetModel.removeCell
  * @param {number} index The removed cell index
  */
 
 /**
- * @event clear
+ * Fired when the row is cleared.
  *
- * Fired when the row is cleared
- *
+ * @event mw.widgets.RowWidgetModel.clear
  * @param {boolean} clear Clear cell properties
  */
 
 /**
- * @event labelUpdate
+ * Fired when the row label might need to be updated.
  *
- * Fired when the row label might need to be updated
+ * @event mw.widgets.RowWidgetModel.labelUpdate
  */
 
 /* Methods */
@@ -91,7 +88,7 @@ OO.mixinClass( mw.widgets.RowWidgetModel, OO.EventEmitter );
  * @param {Array} props The initial cell props
  */
 mw.widgets.RowWidgetModel.prototype.initializeProps = function ( props ) {
-	var i, len;
+	let i, len;
 
 	this.cells = [];
 
@@ -108,7 +105,7 @@ mw.widgets.RowWidgetModel.prototype.initializeProps = function ( props ) {
 /**
  * Triggers the initialization process and builds the initial row.
  *
- * @fires insertCell
+ * @fires mw.widgets.RowWidgetModel.insertCell
  */
 mw.widgets.RowWidgetModel.prototype.setupRow = function () {
 	this.verifyData();
@@ -123,7 +120,7 @@ mw.widgets.RowWidgetModel.prototype.setupRow = function () {
  * @private
  */
 mw.widgets.RowWidgetModel.prototype.verifyData = function () {
-	var i, len;
+	let i, len;
 
 	for ( i = 0, len = this.cells.length; i < len; i++ ) {
 		if ( this.data[ i ] === undefined ) {
@@ -136,10 +133,10 @@ mw.widgets.RowWidgetModel.prototype.verifyData = function () {
  * Build initial row
  *
  * @private
- * @fires insertCell
+ * @fires mw.widgets.RowWidgetModel.insertCell
  */
 mw.widgets.RowWidgetModel.prototype.buildRow = function () {
-	var i, len;
+	let i, len;
 
 	for ( i = 0, len = this.cells.length; i < len; i++ ) {
 		this.emit( 'insertCell', this.data[ i ], i );
@@ -150,7 +147,7 @@ mw.widgets.RowWidgetModel.prototype.buildRow = function () {
  * Refresh the entire row with new data
  *
  * @private
- * @fires insertCell
+ * @fires mw.widgets.RowWidgetModel.insertCell
  */
 mw.widgets.RowWidgetModel.prototype.refreshRow = function () {
 	// TODO: Clear existing table
@@ -159,14 +156,14 @@ mw.widgets.RowWidgetModel.prototype.refreshRow = function () {
 };
 
 /**
- * Set the value of a particular cell
+ * Set the value of a particular cell.
  *
  * @param {number|string} handle The index or key of the cell
- * @param {Mixed} value The new value
- * @fires valueChange
+ * @param {any} value The new value
+ * @fires mw.widgets.RowWidgetModel.valueChange
  */
 mw.widgets.RowWidgetModel.prototype.setValue = function ( handle, value ) {
-	var index;
+	let index;
 
 	if ( typeof handle === 'number' ) {
 		index = handle;
@@ -183,7 +180,7 @@ mw.widgets.RowWidgetModel.prototype.setValue = function ( handle, value ) {
 };
 
 /**
- * Set the row data
+ * Set the row data.
  *
  * @param {Array} data The new row data
  */
@@ -197,10 +194,10 @@ mw.widgets.RowWidgetModel.prototype.setData = function ( data ) {
 };
 
 /**
- * Set the row index
+ * Set the row index.
  *
  * @param {number} index The new row index
- * @fires labelUpdate
+ * @fires mw.widgets.RowWidgetModel.labelUpdate
  */
 mw.widgets.RowWidgetModel.prototype.setIndex = function ( index ) {
 	this.index = index;
@@ -208,10 +205,10 @@ mw.widgets.RowWidgetModel.prototype.setIndex = function ( index ) {
 };
 
 /**
- * Set the row label
+ * Set the row label.
  *
  * @param {number} label The new row label
- * @fires labelUpdate
+ * @fires mw.widgets.RowWidgetModel.labelUpdate
  */
 mw.widgets.RowWidgetModel.prototype.setLabel = function ( label ) {
 	this.label = label;
@@ -227,11 +224,10 @@ mw.widgets.RowWidgetModel.prototype.setLabel = function ( label ) {
  * If unset or set to null, the cell will be added at the end of the row.
  * @param {string} [key] A key to quickly select this cell.
  * If unset or set to null, no key will be set.
- * @fires insertCell
+ * @fires mw.widgets.RowWidgetModel.insertCell
  */
 mw.widgets.RowWidgetModel.prototype.insertCell = function ( data, index, key ) {
-	var insertIndex = ( typeof index === 'number' ) ? index : this.cells.length,
-		insertData, i, len;
+	const insertIndex = ( typeof index === 'number' ) ? index : this.cells.length;
 
 	// Add the new cell metadata
 	this.cells.splice( insertIndex, 0, {
@@ -240,11 +236,11 @@ mw.widgets.RowWidgetModel.prototype.insertCell = function ( data, index, key ) {
 	} );
 
 	// Add the new row data
-	insertData = ( typeof data === 'string' || typeof data === 'number' ) ? data : '';
+	const insertData = ( typeof data === 'string' || typeof data === 'number' ) ? data : '';
 	this.data.splice( insertIndex, 0, insertData );
 
 	// Update all indexes in following cells
-	for ( i = insertIndex + 1, len = this.cells.length; i < len; i++ ) {
+	for ( let i = insertIndex + 1, len = this.cells.length; i < len; i++ ) {
 		this.cells[ i ].index++;
 	}
 
@@ -256,11 +252,10 @@ mw.widgets.RowWidgetModel.prototype.insertCell = function ( data, index, key ) {
  * all the following  cells will be shifted back one cell.
  *
  * @param {number|string} handle The key or numerical index of the cell to remove
- * @fires removeCell
+ * @fires mw.widgets.RowWidgetModel.removeCell
  */
 mw.widgets.RowWidgetModel.prototype.removeCell = function ( handle ) {
-	var cellProps = this.getCellProperties( handle ),
-		i, len;
+	const cellProps = this.getCellProperties( handle );
 
 	// Exit early if the row couldn't be found
 	if ( cellProps === null ) {
@@ -271,7 +266,7 @@ mw.widgets.RowWidgetModel.prototype.removeCell = function ( handle ) {
 	this.data.splice( cellProps.index, 1 );
 
 	// Update all indexes in following cells
-	for ( i = cellProps.index, len = this.cells.length; i < len; i++ ) {
+	for ( let i = cellProps.index, len = this.cells.length; i < len; i++ ) {
 		this.cells[ i ].index--;
 	}
 
@@ -279,9 +274,9 @@ mw.widgets.RowWidgetModel.prototype.removeCell = function ( handle ) {
 };
 
 /**
- * Clears the row data
+ * Clears the row data.
  *
- * @fires clear
+ * @fires mw.widgets.RowWidgetModel.clear
  */
 mw.widgets.RowWidgetModel.prototype.clear = function () {
 	this.data = [];
@@ -291,9 +286,9 @@ mw.widgets.RowWidgetModel.prototype.clear = function () {
 };
 
 /**
- * Clears the row data, as well as all cell properties
+ * Clears the row data, as well as all cell properties.
  *
- * @fires clear
+ * @fires mw.widgets.RowWidgetModel.clear
  */
 mw.widgets.RowWidgetModel.prototype.clearWithProperties = function () {
 	this.data = [];
@@ -303,7 +298,7 @@ mw.widgets.RowWidgetModel.prototype.clearWithProperties = function () {
 };
 
 /**
- * Get the validation pattern to test cells against
+ * Get the validation pattern to test cells against.
  *
  * @return {RegExp|Function|string}
  */
@@ -312,7 +307,7 @@ mw.widgets.RowWidgetModel.prototype.getValidationPattern = function () {
 };
 
 /**
- * Get all row properties
+ * Get all row properties.
  *
  * @return {Object}
  */
@@ -326,14 +321,14 @@ mw.widgets.RowWidgetModel.prototype.getRowProperties = function () {
 };
 
 /**
- * Get properties of a given cell
+ * Get properties of a given cell.
  *
  * @param {string|number} handle The key (or numeric index) of the cell
  * @return {Object|null} An object containing the `key` and `index` properties of the cell.
  * Returns `null` if the cell can't be found.
  */
 mw.widgets.RowWidgetModel.prototype.getCellProperties = function ( handle ) {
-	var cell = null,
+	let cell = null,
 		i, len;
 
 	if ( typeof handle === 'string' ) {
@@ -353,7 +348,7 @@ mw.widgets.RowWidgetModel.prototype.getCellProperties = function ( handle ) {
 };
 
 /**
- * Get properties of all cells
+ * Get properties of all cells.
  *
  * @return {Array} An array of objects containing `key` and `index` properties for each cell
  */

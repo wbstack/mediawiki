@@ -6,6 +6,8 @@
 		"wikimedia/mediawiki"
 	],
 	"rules": {
-		"max-len": "off"
+		"max-len": "off",
+		"no-jquery/no-extend": "warn",
+		"es-x/no-object-assign": "warn"
 	}
 }

@@ -4,9 +4,10 @@
 $languageNames = [
 
 	/* Not in CLDR */
-	'atj' => 'atikamekw',
 	'gcr' => 'créole guyanais',
 		# used by Wikidata, T262922
+	'gsw' => 'alémanique',
+		# T368514
 	'gsw-fr' => 'alsacien',
 	'hyw' => 'arménien occidental',
 

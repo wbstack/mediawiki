@@ -2,7 +2,10 @@
 
 namespace Elastica;
 
+use Elastica\Exception\ClientException;
+use Elastica\Exception\ConnectionException;
 use Elastica\Exception\InvalidException;
+use Elastica\Exception\ResponseException;
 use Elastica\Processor\AbstractProcessor;
 use Elasticsearch\Endpoints\AbstractEndpoint;
 use Elasticsearch\Endpoints\Ingest\DeletePipeline;
@@ -35,6 +38,7 @@ class Pipeline extends Param
 
     /**
      * @var AbstractProcessor[]
+     * @phpstan-var array{processors?: AbstractProcessor[]}
      */
     protected $_processors = [];
 
@@ -64,7 +68,7 @@ class Pipeline extends Param
 
         // TODO: Use only PutPipeline when dropping support for elasticsearch/elasticsearch 7.x
         $endpoint = \class_exists(PutPipeline::class) ? new PutPipeline() : new Put();
-        $endpoint->setID($this->id);
+        $endpoint->setId($this->id);
         $endpoint->setBody($this->toArray());
 
         return $this->requestEndpoint($endpoint);
@@ -79,7 +83,7 @@ class Pipeline extends Param
     {
         // TODO: Use only GetPipeline when dropping support for elasticsearch/elasticsearch 7.x
         $endpoint = \class_exists(GetPipeline::class) ? new GetPipeline() : new Get();
-        $endpoint->setID($id);
+        $endpoint->setId($id);
 
         return $this->requestEndpoint($endpoint);
     }
@@ -93,7 +97,7 @@ class Pipeline extends Param
     {
         // TODO: Use only DeletePipeline when dropping support for elasticsearch/elasticsearch 7.x
         $endpoint = \class_exists(DeletePipeline::class) ? new DeletePipeline() : new Delete();
-        $endpoint->setID($id);
+        $endpoint->setId($id);
 
         return $this->requestEndpoint($endpoint);
     }
@@ -170,6 +174,10 @@ class Pipeline extends Param
 
     /**
      * Makes calls to the elasticsearch server with usage official client Endpoint based on this index.
+     *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
      */
     public function requestEndpoint(AbstractEndpoint $endpoint): Response
     {

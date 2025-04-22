@@ -41,7 +41,6 @@
 	"config-memory-raised": "PHP se <code>memory_limit</code> is $1, en is verhoog tot $2.",
 	"config-memory-bad": "'''Waarskuwing:''' PHP se <code>memory_limit</code> is $1.\nDit is waarskynlik te laag.\nDie installasie mag moontlik faal!",
 	"config-apc": "[Http://www.php.net/apc APC] is geïnstalleer",
-	"config-wincache": "[Http://www.iis.net/download/WinCacheForPhp WinCache] is geïnstalleer",
 	"config-diff3-bad": "GNU diff3 nie gevind nie.",
 	"config-db-type": "Databasistipe:",
 	"config-db-host": "Databasisbediener:",
@@ -91,7 +90,6 @@
 	"config-license": "Kopiereg en lisensie:",
 	"config-license-none": "Geen lisensie in die onderskrif",
 	"config-license-pd": "Publieke Domein",
-	"config-license-cc-choose": "Kies 'n Creative Commons-lisensie",
 	"config-email-settings": "E-posinstellings",
 	"config-email-user": "Laat e-pos tussen gebruikers toe",
 	"config-email-user-help": "Stel alle gebruikers in staat om aan mekaar e-pos te stuur indien dit so in hul voorkeure aangedui is.",
@@ -101,7 +99,6 @@
 	"config-upload-settings": "Oplaai van beelde en lêer",
 	"config-upload-enable": "Aktiveer die oplaai van lêers",
 	"config-upload-deleted": "Gids vir verwyderde lêers:",
-	"config-cc-again": "Kies weer...",
 	"config-advanced-settings": "Gevorderde konfigurasie",
 	"config-memcached-servers": "Memcached-bedieners:",
 	"config-extensions": "Uitbreidings",
@@ -111,7 +108,6 @@
 	"config-install-database": "Stel die databasis op",
 	"config-install-pg-schema-not-exist": "Die skema vir PostgreSQL bestaan ​​nie.",
 	"config-install-pg-schema-failed": "Die skep van tabelle het gefaal.\nMaak seker dat die gebruiker \"$1\" na skema \"$2\" mag skryf.",
-	"config-install-pg-commit": "Wysigings word gestoor",
 	"config-install-pg-plpgsql": "Kontroleer vir taal PL/pgSQL",
 	"config-pg-no-plpgsql": "U moet die taal PL/pgSQL in die database $1 installeer",
 	"config-install-user": "Besig om die databasisgebruiker te skep",
@@ -135,5 +131,5 @@
 	"config-download-localsettings": "Laai <code>LocalSettings.php</code> af",
 	"config-help": "hulp",
 	"mainpagetext": "'''MediaWiki is suksesvol geïnstalleer.'''",
-	"mainpagedocfooter": "Konsulteer '''[https://meta.wikimedia.org/wiki/Help:Contents User's Guide]''' vir inligting oor hoe om die wikisagteware te gebruik.\n\n== Hoe om te Begin ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Configuration settings list]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki FAQ]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ MediaWiki release mailing list]"
+	"mainpagedocfooter": "Konsulteer '''[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents User's Guide]''' vir inligting oor hoe om die wikisagteware te gebruik.\n\n== Hoe om te Begin ==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Configuration settings list]\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki FAQ]\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ MediaWiki release mailing list]"
 }

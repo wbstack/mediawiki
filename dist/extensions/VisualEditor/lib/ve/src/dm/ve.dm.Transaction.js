@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel Transaction class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -26,7 +26,7 @@
 ve.dm.Transaction = function VeDmTransaction( operations, authorId ) {
 	this.operations = operations || [];
 	// TODO: remove this backwards-incompatibility check
-	this.operations.forEach( function ( op ) {
+	this.operations.forEach( ( op ) => {
 		if ( op.type && /meta/i.test( op.type ) ) {
 			throw new Error( 'Metadata ops are no longer supported' );
 		}
@@ -55,7 +55,7 @@ OO.initClass( ve.dm.Transaction );
  * If a property's treatment isn't specified, its value is simply copied without modification.
  * If an operation type's treatment isn't specified, all properties are copied without modification.
  *
- * @type {Object.<string,Object.<string,string|Object.<string, string>>>}
+ * @type {Object.<string,Object>}
  */
 ve.dm.Transaction.static.reversers = {
 	attribute: { from: 'to', to: 'from' }, // Swap .from with .to
@@ -129,7 +129,7 @@ ve.dm.Transaction.static.deserialize = function ( data ) {
  * @return {boolean} Elements are comparable
  */
 ve.dm.Transaction.static.compareElementsForTranslate = function ( a, b ) {
-	var aPlain = a,
+	let aPlain = a,
 		bPlain = b;
 
 	if ( a === b ) {
@@ -158,6 +158,18 @@ ve.dm.Transaction.static.compareElementsForTranslate = function ( a, b ) {
 
 	// Elements of the same type, consider them equal for the purpose of offset translation
 	return true;
+};
+
+/**
+ * Check if an operation only changes annotations
+ *
+ * @param {Object} op Operation object
+ * @return {boolean} Operation is annotation-only
+ */
+ve.dm.Transaction.static.isAnnotationOnlyOperation = function ( op ) {
+	return op.type === 'replace' &&
+		op.insert.length === op.remove.length &&
+		op.insert.every( ( insert, j ) => ve.dm.Transaction.static.compareElementsForTranslate( insert, op.remove[ j ] ) );
 };
 
 /* Methods */
@@ -198,7 +210,7 @@ ve.dm.Transaction.prototype.toJSON = function () {
 		return op;
 	}
 
-	var operations = this.operations.map( minify );
+	const operations = this.operations.map( minify );
 
 	if ( this.authorId !== null ) {
 		return {
@@ -235,7 +247,7 @@ ve.dm.Transaction.prototype.pushRetainOp = function ( length ) {
  * @param {number} [insertedDataLength] Length of intended insertion within fixed up data
  */
 ve.dm.Transaction.prototype.pushReplaceOp = function ( remove, insert, insertedDataOffset, insertedDataLength ) {
-	var op = { type: 'replace', remove: remove, insert: insert };
+	const op = { type: 'replace', remove: remove, insert: insert };
 	if ( insertedDataOffset !== undefined && insertedDataLength !== undefined ) {
 		op.insertedDataOffset = insertedDataOffset;
 		op.insertedDataLength = insertedDataLength;
@@ -247,8 +259,8 @@ ve.dm.Transaction.prototype.pushReplaceOp = function ( remove, insert, insertedD
  * Build an attribute operation
  *
  * @param {string} key Name of attribute to change
- * @param {Mixed} from Value to change attribute from, or undefined if not previously set
- * @param {Mixed} to Value to change attribute to, or undefined to remove
+ * @param {any} from Value to change attribute from, or undefined if not previously set
+ * @param {any} to Value to change attribute to, or undefined to remove
  */
 ve.dm.Transaction.prototype.pushAttributeOp = function ( key, from, to ) {
 	this.operations.push( { type: 'attribute', key: key, from: from, to: to } );
@@ -281,14 +293,14 @@ ve.dm.Transaction.prototype.clone = function () {
  * @return {ve.dm.Transaction} Reverse of this transaction
  */
 ve.dm.Transaction.prototype.reversed = function () {
-	var tx = new this.constructor();
+	const tx = new this.constructor();
 
 	tx.isReversed = !this.isReversed;
-	for ( var i = 0, len = this.operations.length; i < len; i++ ) {
-		var op = this.operations[ i ];
-		var newOp = ve.copy( op );
-		var reverse = this.constructor.static.reversers[ op.type ] || {};
-		for ( var prop in reverse ) {
+	for ( let i = 0, len = this.operations.length; i < len; i++ ) {
+		const op = this.operations[ i ];
+		const newOp = ve.copy( op );
+		const reverse = this.constructor.static.reversers[ op.type ] || {};
+		for ( const prop in reverse ) {
 			if ( typeof reverse[ prop ] === 'string' ) {
 				newOp[ prop ] = op[ reverse[ prop ] ];
 			} else {
@@ -335,7 +347,7 @@ ve.dm.Transaction.prototype.getOperations = function () {
  * @return {boolean} Has operations of a given type
  */
 ve.dm.Transaction.prototype.hasOperationWithType = function ( type ) {
-	for ( var i = 0, len = this.operations.length; i < len; i++ ) {
+	for ( let i = 0, len = this.operations.length; i < len; i++ ) {
 		if ( this.operations[ i ].type === type ) {
 			return true;
 		}
@@ -393,32 +405,24 @@ ve.dm.Transaction.prototype.markAsApplied = function () {
  * @return {number} Translated offset, as it will be after processing transaction
  */
 ve.dm.Transaction.prototype.translateOffset = function ( offset, excludeInsertion ) {
-	var cursor = 0,
+	let cursor = 0,
 		adjustment = 0;
 
-	for ( var i = 0; i < this.operations.length; i++ ) {
-		var op = this.operations[ i ];
-		if ( op.type === 'retain' || (
-			// If a 'replace' only changes annotations, treat it like a 'retain'
-			// This imitates the behaviour of the old 'annotate' operation type.
-			op.type === 'replace' &&
-			op.insert.length === op.remove.length &&
-			// eslint-disable-next-line no-loop-func
-			op.insert.every( function ( insert, j ) {
-				return ve.dm.Transaction.static.compareElementsForTranslate( insert, op.remove[ j ] );
-			} )
-
-		) ) {
-			var retainLength = op.type === 'retain' ? op.length : op.remove.length;
+	for ( let i = 0; i < this.operations.length; i++ ) {
+		const op = this.operations[ i ];
+		// If a 'replace' only changes annotations, treat it like a 'retain'
+		// This imitates the behaviour of the old 'annotate' operation type.
+		if ( op.type === 'retain' || ve.dm.Transaction.static.isAnnotationOnlyOperation( op ) ) {
+			const retainLength = op.type === 'retain' ? op.length : op.remove.length;
 			if ( offset >= cursor && offset < cursor + retainLength ) {
 				return offset + adjustment;
 			}
 			cursor += retainLength;
 			continue;
 		} else if ( op.type === 'replace' ) {
-			var insertLength = op.insert.length;
-			var removeLength = op.remove.length;
-			var prevAdjustment = adjustment;
+			const insertLength = op.insert.length;
+			const removeLength = op.remove.length;
+			const prevAdjustment = adjustment;
 			adjustment += insertLength - removeLength;
 			if ( offset === cursor + removeLength ) {
 				// Offset points to right after the removal or right before the insertion
@@ -464,7 +468,7 @@ ve.dm.Transaction.prototype.translateOffset = function ( offset, excludeInsertio
  * @return {ve.Range} Translated range, as it will be after processing transaction
  */
 ve.dm.Transaction.prototype.translateRange = function ( range, excludeInsertion ) {
-	var start = this.translateOffset( range.start, !excludeInsertion ),
+	const start = this.translateOffset( range.start, !excludeInsertion ),
 		end = this.translateOffset( range.end, excludeInsertion );
 	return range.isBackwards() ? new ve.Range( end, start ) : new ve.Range( start, end );
 };
@@ -480,7 +484,7 @@ ve.dm.Transaction.prototype.translateRange = function ( range, excludeInsertion 
  * @return {ve.Range} Translated range, as it will be after processing transaction
  */
 ve.dm.Transaction.prototype.translateRangeWithAuthor = function ( range, authorId ) {
-	var backward = !this.authorId || !authorId || authorId < this.authorId,
+	const backward = !this.authorId || !authorId || authorId < this.authorId,
 		start = this.translateOffset( range.start, backward ),
 		end = this.translateOffset( range.end, backward );
 	return range.isBackwards() ? new ve.Range( end, start ) : new ve.Range( start, end );
@@ -497,25 +501,35 @@ ve.dm.Transaction.prototype.translateRangeWithAuthor = function ( range, authorI
  * removal transaction it will be a zero-length range.
  *
  * @param {ve.dm.Document} doc The document in the state to which the transaction applies
- * @param {boolean} includeInternalList Include changes within the internal list
+ * @param {Object} [options] Options
+ * @param {boolean} [options.includeInternalList] Include changes within the internal list
+ * @param {boolean} [options.excludeAnnotations] Exclude annotation-only changes
+ * @param {boolean} [options.excludeAttributes] Exclude attribute changes
  * @return {ve.Range|null} Range covering modifications, or null for a no-op transaction
  */
-ve.dm.Transaction.prototype.getModifiedRange = function ( doc, includeInternalList ) {
-	var docEndOffset = doc.data.getLength(),
+ve.dm.Transaction.prototype.getModifiedRange = function ( doc, options ) {
+	let docEndOffset = doc.data.getLength(),
 		oldOffset = 0,
 		offset = 0;
 
-	if ( !includeInternalList ) {
-		var internalListNode = doc.getInternalList().getListNode();
+	if ( typeof options === 'boolean' ) {
+		// Backwards compatibility
+		options = { includeInternalList: options };
+	} else {
+		options = options || {};
+	}
+
+	if ( !options.includeInternalList ) {
+		const internalListNode = doc.getInternalList().getListNode();
 		if ( internalListNode ) {
 			docEndOffset = internalListNode.getOuterRange().start;
 		}
 	}
 
-	var start, end;
+	let start, end;
 	opLoop:
-	for ( var i = 0, len = this.operations.length; i < len; i++ ) {
-		var op = this.operations[ i ];
+	for ( let i = 0, len = this.operations.length; i < len; i++ ) {
+		const op = this.operations[ i ];
 		switch ( op.type ) {
 			case 'retain':
 				if ( oldOffset + op.length > docEndOffset ) {
@@ -526,6 +540,9 @@ ve.dm.Transaction.prototype.getModifiedRange = function ( doc, includeInternalLi
 				break;
 
 			case 'attribute':
+				if ( options.excludeAttributes ) {
+					break;
+				}
 				if ( start === undefined ) {
 					start = offset;
 				}
@@ -534,6 +551,15 @@ ve.dm.Transaction.prototype.getModifiedRange = function ( doc, includeInternalLi
 				break;
 
 			default:
+				if ( options.excludeAnnotations && this.constructor.static.isAnnotationOnlyOperation( op ) ) {
+					// Treat as 'retain'
+					if ( oldOffset + op.length > docEndOffset ) {
+						break opLoop;
+					}
+					offset += op.length;
+					oldOffset += op.length;
+					break;
+				}
 				if ( start === undefined ) {
 					// This is the first non-retain operation, set start to right before it
 					start = offset + ( op.insertedDataOffset || 0 );
@@ -560,23 +586,28 @@ ve.dm.Transaction.prototype.getModifiedRange = function ( doc, includeInternalLi
 };
 
 /**
+ * @typedef {Object} RangeAndLengthDiff
+ * @memberof ve.dm.Transaction
+ * @property {number} [start] Start offset of the active range
+ * @property {number} [end] End offset of the active range
+ * @property {number} [startOpIndex] Start operation index of the active range
+ * @property {number} [endOpIndex] End operation index of the active range
+ * @property {number} diff Length change the transaction causes
+ */
+
+/**
  * Calculate active range and length change
  *
- * @return {Object} Active range and length change
- * @return {number|undefined} return.start Start offset of the active range
- * @return {number|undefined} return.end End offset of the active range
- * @return {number|undefined} return.startOpIndex Start operation index of the active range
- * @return {number|undefined} return.endOpIndex End operation index of the active range
- * @return {number} return.diff Length change the transaction causes
+ * @return {ve.dm.Transaction.RangeAndLengthDiff} Active range and length change
  */
 ve.dm.Transaction.prototype.getActiveRangeAndLengthDiff = function () {
-	var offset = 0,
+	let offset = 0,
 		diff = 0;
 
-	var start, end, startOpIndex, endOpIndex;
-	for ( var i = 0, len = this.operations.length; i < len; i++ ) {
-		var op = this.operations[ i ];
-		var active = op.type !== 'retain';
+	let start, end, startOpIndex, endOpIndex;
+	for ( let i = 0, len = this.operations.length; i < len; i++ ) {
+		const op = this.operations[ i ];
+		const active = op.type !== 'retain';
 		// Place start marker
 		if ( active && start === undefined ) {
 			start = offset;
@@ -621,9 +652,9 @@ ve.dm.Transaction.prototype.adjustRetain = function ( place, diff ) {
 		return;
 	}
 
-	var start = place === 'start',
-		ops = this.operations,
-		i = start ? 0 : ops.length - 1;
+	const start = place === 'start',
+		ops = this.operations;
+	let i = start ? 0 : ops.length - 1;
 
 	if ( !start && ops[ i ] && ops[ i ].type === 'retainMetadata' ) {
 		i = ops.length - 2;
@@ -653,11 +684,11 @@ ve.dm.Transaction.prototype.adjustRetain = function ( place, diff ) {
  * @throws {Error} Offset is in the interior of a replace operation
  */
 ve.dm.Transaction.prototype.trySplit = function ( offset ) {
-	var n = 0;
-	var i, iLen;
+	let n = 0;
+	let i, iLen;
 	for ( i = 0, iLen = this.operations.length; i < iLen; i++ ) {
-		var op = this.operations[ i ];
-		var opLen = ( op.type === 'retain' ? op.length : op.type === 'replace' ? op.remove.length : 0 );
+		const op = this.operations[ i ];
+		const opLen = ( op.type === 'retain' ? op.length : op.type === 'replace' ? op.remove.length : 0 );
 		if ( n + opLen <= offset ) {
 			n += opLen;
 			continue;
@@ -687,7 +718,7 @@ ve.dm.Transaction.prototype.trySplit = function ( offset ) {
  * @param {number} index The index at which to unsplit
  */
 ve.dm.Transaction.prototype.tryUnsplit = function ( index ) {
-	var op1 = this.operations[ index - 1 ],
+	const op1 = this.operations[ index - 1 ],
 		op2 = this.operations[ index ];
 	if ( !op1 || !op2 || op1.type !== op2.type ) {
 		return;
@@ -716,7 +747,7 @@ ve.dm.Transaction.prototype.insertOperations = function ( offset, operations ) {
 	if ( operations.length === 0 ) {
 		return;
 	}
-	var opIndex = this.trySplit( offset );
+	const opIndex = this.trySplit( offset );
 	ve.batchSplice( this.operations, opIndex, 0, ve.copy( operations ) );
 	this.tryUnsplit( opIndex + operations.length );
 	this.tryUnsplit( opIndex );

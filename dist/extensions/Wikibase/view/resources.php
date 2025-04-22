@@ -1,5 +1,9 @@
 <?php
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\ResourceLoader\Context;
+use MediaWiki\ResourceLoader\ResourceLoader;
+use Wikibase\Repo\CopyrightMessageBuilder;
 use Wikibase\Repo\WikibaseRepo;
 use Wikibase\View\Module\TemplateModule;
 use Wikibase\View\Termbox\TermboxModule;
@@ -41,7 +45,7 @@ return call_user_func( function() {
 		'remoteExtPath' => 'Wikibase/view/lib/wikibase-data-values-value-view',
 	];
 
-	$wikibaseTermboxPaths = [
+	$wikibaseTermboxSubmodulePaths = [
 		'localBasePath' => __DIR__ . '/lib/wikibase-termbox',
 		'remoteExtPath' => 'Wikibase/view/lib/wikibase-termbox',
 	];
@@ -56,7 +60,6 @@ return call_user_func( function() {
 			'scripts' => [
 				'wikibase.js',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'jquery.wikibase.entityselector' => $moduleTemplate + [
@@ -64,7 +67,7 @@ return call_user_func( function() {
 				'jquery/wikibase/jquery.wikibase.entityselector.js',
 			],
 			'styles' => [
-				'jquery/wikibase/themes/default/jquery.wikibase.entityselector.css',
+				'jquery/wikibase/themes/default/jquery.wikibase.entityselector.less',
 			],
 			'dependencies' => [
 				'jquery.event.special.eachchange',
@@ -79,58 +82,96 @@ return call_user_func( function() {
 
 		'jquery.wikibase.toolbar.styles' => $moduleTemplate + [
 			'styles' => [
-				'jquery/wikibase/toolbar/themes/default/jquery.wikibase.toolbar.css',
-				'jquery/wikibase/toolbar/themes/default/jquery.wikibase.toolbarbutton.css',
+				'jquery/wikibase/toolbar/themes/default/jquery.wikibase.toolbar.less',
+				'jquery/wikibase/toolbar/themes/default/jquery.wikibase.toolbarbutton.less',
 			],
 		],
 
 		// Common styles independent from JavaScript being enabled or disabled.
+
+		'wikibase.alltargets' => $moduleTemplate + [
+			'styles' => [
+				'wikibase/wikibase.badgedisplay.less',
+				'wikibase/wikibase.itemlink.less',
+				'wikibase/wikibase.monolingualtext.less',
+			],
+		],
+
+		// desktop-only (though some of these should be on mobile too, see T326428)
+		'wikibase.desktop' => $moduleTemplate + [
+			'styles' => [
+				'wikibase/wikibase.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.aliasesview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.descriptionview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.entityview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguagelistview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguageview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.labelview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkgrouplistview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkgroupview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinklistview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.statementgroupview.less',
+			],
+		],
+
+		// mobile-only
+		'wikibase.mobile' => $moduleTemplate + [
+			'styles' => [
+				'wikibase/wikibase.mobile.css',
+				'jquery/wikibase/themes/default/jquery.wikibase.statementview.RankSelector.less',
+			],
+		],
+
+		// deprecated: this is effectively wikibase.alltargets + wikibase.desktop, use those instead
 		'wikibase.common' => $moduleTemplate + [
 			'styles' => [
 				// Order must be hierarchical, do not order alphabetically
 				'wikibase/wikibase.less',
-				'jquery/wikibase/themes/default/jquery.wikibase.aliasesview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.descriptionview.css',
+				'wikibase/wikibase.itemlink.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.aliasesview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.descriptionview.less',
 				'jquery/wikibase/themes/default/jquery.wikibase.entityview.less',
-				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguagelistview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguageview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.labelview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkgrouplistview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkgroupview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.sitelinklistview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkview.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.statementgroupview.css',
-			]
+				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguagelistview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguageview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.labelview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkgrouplistview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkgroupview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinklistview.less',
+				'wikibase/wikibase.badgedisplay.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.sitelinkview.less',
+				'jquery/wikibase/themes/default/jquery.wikibase.statementgroupview.less',
+			],
 		],
 
-		'wikibase.mobile' => $moduleTemplate + [
-			'styles' => [
-				'wikibase/wikibase.mobile.css',
-				'jquery/wikibase/themes/default/jquery.wikibase.statementview.RankSelector.css',
-			],
-			'targets' => 'mobile'
-		],
+		// end of common styles independent from JavaScript being enabled or disabled
 
 		'wikibase.templates' => $moduleTemplate + [
-			'class' => TemplateModule::class,
-			'scripts' => 'wikibase/templates.js',
-			'targets' => [ 'desktop', 'mobile' ],
+			'scripts' => [
+				[
+					'name' => 'wikibase/templates.config.js',
+					'callback' => [ TemplateModule::class, 'getScript' ],
+					'versionCallback' => [ TemplateModule::class, 'getVersion' ],
+				],
+				'wikibase/templates.js',
+			],
 		],
 
 		'wikibase.entityChangers.EntityChangersFactory' => $moduleTemplate + [
 			'scripts' => [
 				'wikibase/entityChangers/namespace.js',
-
 				'wikibase/entityChangers/AliasesChanger.js',
 				'wikibase/entityChangers/StatementsChanger.js',
 				'wikibase/entityChangers/StatementsChangerState.js',
 				'wikibase/entityChangers/DescriptionsChanger.js',
 				'wikibase/entityChangers/EntityTermsChanger.js',
+				'wikibase/entityChangers/ValueChangeResult.js',
 				'wikibase/entityChangers/LabelsChanger.js',
 				'wikibase/entityChangers/SiteLinksChanger.js',
 				'wikibase/entityChangers/SiteLinkSetsChanger.js',
-
+				'wikibase/entityChangers/TempUserWatcher.js',
 				'wikibase/entityChangers/EntityChangersFactory.js',
 			],
 			'dependencies' => [
@@ -138,48 +179,59 @@ return call_user_func( function() {
 				'wikibase.api.RepoApi',
 				'wikibase.datamodel', // for AliasesChanger.js
 				'wikibase.serialization',
-			]
+			],
 		],
 
 		'wikibase.utilities.ClaimGuidGenerator' => $moduleTemplate + [
 			'packageFiles' => [
 				'wikibase/utilities/wikibase.utilities.ClaimGuidGenerator.js',
-
 				'wikibase/utilities/wikibase.utilities.GuidGenerator.js',
 			],
 			'dependencies' => [
 				'util.inherit',
 				'wikibase',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'wikibase.view.__namespace' => $moduleTemplate + [
 			'scripts' => [
-				'wikibase/view/namespace.js'
+				'wikibase/view/namespace.js',
 			],
 			'dependencies' => [
-				'wikibase'
-			]
+				'wikibase',
+			],
 		],
 
 		'wikibase.view.ReadModeViewFactory' => $moduleTemplate + [
 			'scripts' => 'wikibase/view/ReadModeViewFactory.js',
 			'dependencies' => [
 				'wikibase.view.__namespace',
-				'wikibase.view.ControllerViewFactory'
+				'wikibase.view.ControllerViewFactory',
+			],
+		],
+		'wikibase.fallbackchains' => $moduleTemplate + [
+			'packageFiles' => [
+				'wikibase/wikibase.fallbackChains.js',
+				[
+					'name' => 'fallbackchains.json',
+					'callback' => '\Wikibase\View\FallbackChainModuleMethods::buildFallbackChains',
+				],
+			],
+			'dependencies' => [
+				'wikibase',
 			],
 		],
 		'wikibase.view.ControllerViewFactory' => $moduleBaseTemplate + [
 			'packageFiles' => [
 				'resources/wikibase/view/ControllerViewFactory.js',
-
 				'resources/jquery/ui/jquery.ui.TemplatedWidget.js',
 				'resources/jquery/ui/jquery.ui.closeable.js',
 				'resources/jquery/ui/jquery.ui.EditableTemplatedWidget.js',
 				'resources/wikibase/view/ViewController.js',
 				'resources/wikibase/view/ToolbarViewController.js',
 				'resources/wikibase/view/ViewFactory.js',
+				'resources/wikibase/view/termFallbackResolver.js',
+				'resources/wikibase/view/languageFallbackIndicator.js',
 				'resources/jquery/jquery.util.EventSingletonManager.js',
 				'resources/wikibase/wikibase.ValueViewBuilder.js',
 				'resources/jquery/wikibase/jquery.wikibase.pagesuggester.js',
@@ -220,28 +272,28 @@ return call_user_func( function() {
 				'resources/jquery/jquery.removeClassByRegex.js',
 				'lib/wikibase-data-values-value-view/lib/jquery.ui/jquery.ui.toggler.js',
 				'resources/wikibase/utilities/wikibase.utilities.ui.js',
-
 			],
 			'styles' => [
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.badgeselector.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinklistview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkgroupview.mw-collapsible.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkgroupview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkgrouplistview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.labelview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.descriptionview.css',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.badgeselector.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinklistview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkgroupview.mw-collapsible.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkgroupview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.sitelinkgrouplistview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.labelview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.descriptionview.less',
 				'resources/jquery/ui/jquery.ui.tagadata.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.aliasesview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguageview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguagelistview.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.entitytermsview.css',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.aliasesview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguageview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.entitytermsforlanguagelistview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.entitytermsview.less',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.mw-pulsating-dot.less',
 				'resources/jquery/wikibase/snakview/themes/default/snakview.SnakTypeSelector.css',
-				'resources/jquery/wikibase/themes/default/jquery.wikibase.statementview.RankSelector.css',
+				'resources/jquery/wikibase/themes/default/jquery.wikibase.statementview.RankSelector.less',
 				'lib/wikibase-data-values-value-view/lib/jquery.ui/jquery.ui.toggler.css',
 				'resources/jquery/wikibase/themes/default/jquery.wikibase.entityview.less',
 				'resources/wikibase/utilities/wikibase.utilities.ui.css',
-				'resources/jquery/ui/jquery.ui.closeable.css'
+				'resources/jquery/ui/jquery.ui.closeable.css',
 			],
 			'dependencies' => [
 				'dataValues.DataValue', // For snakview
@@ -255,6 +307,7 @@ return call_user_func( function() {
 				'jquery.inputautoexpand',
 				'jquery.wikibase.entityselector',
 				'wikibase.buildErrorOutput',
+				'wikibase.fallbackchains',
 				'wikibase.getLanguageNameByCode',
 				'wikibase.sites',
 				'wikibase.templates',
@@ -268,9 +321,12 @@ return call_user_func( function() {
 				'mediawiki.cookie',
 				'mediawiki.jqueryMsg', // for {{plural}} and {{gender}} support in messages
 				'mediawiki.language',
+				'mediawiki.pulsatingdot',
 				'mediawiki.user',
 				'mediawiki.util',
 				'mw.config.values.wbRefTabsEnabled',
+				'mw.config.values.wbEnableMulLanguageCode',
+				'mw.config.values.wbTmpAlwaysShowMulLanguageCode',
 				'mw.config.values.wbRepo',
 				'oojs-ui',
 				'util.highlightSubstring',
@@ -294,12 +350,20 @@ return call_user_func( function() {
 				'wikibase-entitytermsforlanguagelistview-less',
 				'wikibase-entitytermsforlanguagelistview-more',
 				'wikibase-entitytermsview-input-help-message',
+				'wikibase-entityterms-languagelistview-mul-popup-title',
+				'wikibase-entityterms-languagelistview-mul-popup-content',
+				'wikibase-entityterms-languagelistview-mul-popup-dont-show-again',
 				'wikibase-aliases-separator',
+				'wikibase-aliases-edit-placeholder-mul',
 				'wikibase-aliases-input-help-message',
 				'wikibase-alias-edit-placeholder',
 				'wikibase-description-edit-placeholder',
 				'wikibase-description-edit-placeholder-language-aware',
 				'wikibase-description-empty',
+				'wikibase-description-not-applicable',
+				'wikibase-description-not-applicable-title',
+				'wikibase-description-edit-placeholder-not-applicable',
+				'wikibase-description-edit-mul-not-applicable-accessibility-label',
 				'wikibase-statementgrouplistview-add',
 				'wikibase-description-empty',
 				'wikibase-entitytermsview-entitytermsforlanguagelistview-configure-link-label',
@@ -307,6 +371,7 @@ return call_user_func( function() {
 				'wikibase-entitytermsview-entitytermsforlanguagelistview-toggler',
 				'wikibase-label-edit-placeholder',
 				'wikibase-label-edit-placeholder-language-aware',
+				'wikibase-label-edit-placeholder-mul',
 				'wikibase-label-empty',
 				'wikibase-label-input-help-message',
 				'wikibase-outdated-client-script',
@@ -345,7 +410,6 @@ return call_user_func( function() {
 		'wikibase.datamodel' => [
 			'packageFiles' => [
 				'index.js',
-
 				'List.js',
 				'Group.js',
 				'Map.js',
@@ -380,7 +444,6 @@ return call_user_func( function() {
 				'util.inherit',
 				'dataValues.DataValue',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 			'localBasePath' => __DIR__ . '/lib/wikibase-data-model/src',
 			'remoteExtPath' => 'Wikibase/view/lib/wikibase-data-model/src',
 		],
@@ -389,7 +452,6 @@ return call_user_func( function() {
 			'scripts' => [
 				'dataValues.js',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'jquery.animateWithEvent' => $wikibaseDatavaluesValueviewLibPaths + [
@@ -403,6 +465,9 @@ return call_user_func( function() {
 		'jquery.inputautoexpand' => $wikibaseDatavaluesValueviewLibPaths + [
 			'scripts' => [
 				'jquery/jquery.inputautoexpand.js',
+			],
+			'styles' => [
+				'jquery/jquery.inputautoexpand.css',
 			],
 			'dependencies' => [
 				'jquery.event.special.eachchange',
@@ -440,7 +505,6 @@ return call_user_func( function() {
 			'dependencies' => [
 				'util.inherit',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'util.Extendable' => $wikibaseDatavaluesValueviewLibPaths + [
@@ -493,7 +557,7 @@ return call_user_func( function() {
 
 		'jquery.event.special.eachchange' => $wikibaseDatavaluesValueviewLibPaths + [
 			'scripts' => [
-				'jquery.event/jquery.event.special.eachchange.js'
+				'jquery.event/jquery.event.special.eachchange.js',
 			],
 		],
 
@@ -505,7 +569,6 @@ return call_user_func( function() {
 				'dataValues',
 				'util.inherit',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'dataValues.values' => $wikibaseDatavaluesPaths + [
@@ -531,7 +594,6 @@ return call_user_func( function() {
 				'dataValues.TimeValue',
 				'util.inherit',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'dataValues.TimeValue' => $wikibaseDatavaluesSrcPaths + [
@@ -542,7 +604,6 @@ return call_user_func( function() {
 				'dataValues.DataValue',
 				'util.inherit',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		'valueFormatters' => $wikibaseDatavaluesSrcPaths + [
@@ -588,7 +649,6 @@ return call_user_func( function() {
 		'wikibase.serialization' => [
 			'packageFiles' => [
 				'index.js',
-
 				'Deserializers/Deserializer.js',
 				'Deserializers/SnakDeserializer.js',
 				'Deserializers/StatementGroupSetDeserializer.js',
@@ -627,7 +687,6 @@ return call_user_func( function() {
 				'dataValues',
 				'dataValues.values',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 			'localBasePath' => __DIR__ . '/lib/wikibase-serialization/src',
 			'remoteExtPath' => 'Wikibase/view/lib/wikibase-serialization/src',
 		],
@@ -636,7 +695,6 @@ return call_user_func( function() {
 			'scripts' => [
 				'lib/util/util.inherit.js',
 			],
-			'targets' => [ 'desktop', 'mobile' ],
 		],
 
 		// Loads the actual valueview widget into jQuery.valueview.valueview and maps
@@ -670,7 +728,7 @@ return call_user_func( function() {
 				'util.inherit',
 				'util.MessageProviders',
 				'util.Notifier',
-				'util.Extendable'
+				'util.Extendable',
 			],
 		],
 
@@ -841,11 +899,11 @@ return call_user_func( function() {
 
 		'jquery.valueview.experts.UnDeserializableValue' => $wikibaseDatavaluesValueviewSrcPaths + [
 			'scripts' => [
-				'experts/UnDeserializableValue.js'
+				'experts/UnDeserializableValue.js',
 			],
 			'dependencies' => [
 				'jquery.valueview.Expert',
-			]
+			],
 		],
 
 		'jquery.valueview.ExpertStore' => $wikibaseDatavaluesValueviewSrcPaths + [
@@ -862,7 +920,7 @@ return call_user_func( function() {
 			'messages' => [
 				'valueview-expert-unsupportedvalue-unsupporteddatatype',
 				'valueview-expert-unsupportedvalue-unsupporteddatavalue',
-			]
+			],
 		],
 
 		'jquery.valueview.ExpertExtender' => $wikibaseDatavaluesValueviewSrcPaths + [
@@ -896,21 +954,58 @@ return call_user_func( function() {
 			],
 		],
 
-		'wikibase.termbox' => $wikibaseTermboxPaths + [
-			'class' => TermboxModule::class,
+		'wikibase.termbox' => [
 			'packageFiles' => [
-				'dist/wikibase.termbox.main.js',
+				'termbox.init.js',
+				'EntityLoadedHookEntityRepository.js',
+				'RepoApiWritingEntityRepository.js',
+				'mountTermbox.js',
 				[
-					'name' => 'dist/config.json',
+					'name' => 'config.json',
 					'callback' => function () {
 						return [
 							'tags' => WikibaseRepo::getSettings()->getSetting( 'termboxTags' ),
+							'tempUserEnabled' => MediaWikiServices::getInstance()->getTempUserConfig()->isEnabled(),
 						];
 					},
 				],
 			],
-			'es6' => true,
-			'targets' => 'mobile',
+			'remoteExtPath' => 'Wikibase/view/resources/wikibase/termbox',
+			'localBasePath' => __DIR__ . '/resources/wikibase/termbox',
+			'dependencies' => [
+				'wikibase.termbox.init',
+				'wikibase.api.RepoApi',
+			],
+		],
+
+		'wikibase.termbox.init' => $wikibaseTermboxSubmodulePaths + [
+			'class' => TermboxModule::class,
+			'scripts' => [
+				'dist/wikibase.termbox.init.js',
+				[
+					'name' => 'termbox.config.js',
+					'callback' => function ( Context $context ) {
+						global $wgEditSubmitButtonLabelPublish;
+
+						$saveMessageKey = ( $wgEditSubmitButtonLabelPublish ) ? 'wikibase-publish' : 'wikibase-save';
+						$repoSettings = WikibaseRepo::getSettings();
+						$language = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $context->getLanguage() );
+						$copyrightMessage = ( new CopyrightMessageBuilder )->build(
+							$repoSettings->getSetting( 'dataRightsUrl' ),
+							$repoSettings->getSetting( 'dataRightsText' ),
+							$language,
+							$saveMessageKey
+						);
+						return ResourceLoader::makeConfigSetScript( [
+							'wbMultiLingualStringLimit' => $repoSettings->getSetting( 'string-limits' )['multilang']['length'],
+							'wbCopyright' => [
+								'version' => $context->msg( 'wikibase-shortcopyrightwarning-version' )->parse(),
+								'messageHtml' => $copyrightMessage->inLanguage( $language )->parse(),
+							],
+						] );
+					},
+				],
+			],
 			'dependencies' => [
 				'wikibase.termbox.styles',
 				'wikibase.getLanguageNameByCode',
@@ -918,19 +1013,18 @@ return call_user_func( function() {
 				'wikibase.getUserLanguages',
 				'mw.config.values.wbRepo',
 				'vue',
-				'vuex'
+				'vuex',
 			],
 			// 'messages' are declared by ./resources.json via TermboxModule.
 		],
 
-		'wikibase.termbox.styles' => $wikibaseTermboxPaths + [
+		'wikibase.termbox.styles' => $wikibaseTermboxSubmodulePaths + [
 			'styles' => [
 				'dist/wikibase.termbox.main.css',
 			],
 			'skinStyles' => [
 				'minerva' => '../../resources/wikibase/termbox/minerva.less',
 			],
-			'targets' => 'mobile'
 		],
 
 		'wikibase.tainted-ref' => [
@@ -954,17 +1048,17 @@ return call_user_func( function() {
 			],
 			'remoteExtPath' => 'Wikibase/view/lib/wikibase-tainted-ref/dist',
 			'localBasePath' => __DIR__ . '/lib/wikibase-tainted-ref/dist',
-			'es6' => true,
 		],
 		'jquery.wikibase.wbtooltip' => $moduleTemplate + [
 			'scripts' => [
+				'jquery/wikibase/jquery.tipsy/jquery.tipsy.js',
 				'jquery/wikibase/jquery.wikibase.wbtooltip.js',
 			],
 			'styles' => [
-				'jquery/wikibase/themes/default/jquery.wikibase.wbtooltip.css'
+				'jquery/wikibase/jquery.tipsy/jquery.tipsy.css',
+				'jquery/wikibase/themes/default/jquery.wikibase.wbtooltip.css',
 			],
 			'dependencies' => [
-				'jquery.tipsy',
 				'jquery.ui',
 				'wikibase.buildErrorOutput',
 			],
@@ -1000,10 +1094,6 @@ return call_user_func( function() {
 				'wikibase-error-ui-no-external-page',
 				'wikibase-error-ui-edit-conflict',
 			],
-			'targets' => [
-				'desktop',
-				'mobile'
-			]
 		],
 
 		'wikibase.api.ValueCaller' => $wikibaseApiPaths + [
@@ -1015,7 +1105,7 @@ return call_user_func( function() {
 			'dependencies' => [
 				'wikibase.api.RepoApi',
 				'dataValues.DataValue',
-			]
+			],
 		],
 	];
 

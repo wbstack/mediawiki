@@ -4,15 +4,16 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Hooks;
 
-use MediaWiki\Hook\OutputPageParserOutputHook;
 use MediaWiki\Hook\SidebarBeforeOutputHook;
 use MediaWiki\Hook\SkinTemplateGetLanguageLinkHook;
-use OutputPage;
-use ParserOutput;
+use MediaWiki\Output\Hook\OutputPageParserOutputHook;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Title\Title;
 use Skin;
-use Title;
 use Wikibase\Client\ClientHooks;
 use Wikibase\Client\NamespaceChecker;
+use Wikibase\Lib\SettingsArray;
 
 /**
  * Handler for ParserOutput-related hooks.
@@ -35,12 +36,19 @@ class SidebarHookHandler implements
 	 */
 	private $badgeDisplay;
 
+	/**
+	 * @var SettingsArray
+	 */
+	private $clientSettings;
+
 	public function __construct(
 		LanguageLinkBadgeDisplay $badgeDisplay,
-		NamespaceChecker $namespaceChecker
+		NamespaceChecker $namespaceChecker,
+		SettingsArray $clientSettings
 	) {
 		$this->namespaceChecker = $namespaceChecker;
 		$this->badgeDisplay = $badgeDisplay;
+		$this->clientSettings = $clientSettings;
 	}
 
 	/**
@@ -58,7 +66,7 @@ class SidebarHookHandler implements
 
 		$noExternalLangLinks = NoLangLinkHandler::getNoExternalLangLinks( $parserOutput );
 
-		if ( !empty( $noExternalLangLinks ) ) {
+		if ( $noExternalLangLinks ) {
 			$outputPage->setProperty( 'noexternallanglinks', $noExternalLangLinks );
 		}
 
@@ -116,18 +124,30 @@ class SidebarHookHandler implements
 	 * @param array &$sidebar
 	 */
 	public function onSidebarBeforeOutput( $skin, &$sidebar ): void {
+		// Add the 'In other projects' section
+		$otherProjectsSidebar = $this->buildOtherProjectsSidebar( $skin );
+		$sidebar['wikibase-otherprojects'] = $otherProjectsSidebar === null ? [] : $otherProjectsSidebar;
+
 		// Add 'Wikidata item' to the toolbox
 		$wikidataItemLink = ClientHooks::buildWikidataItemLink( $skin );
 
-		if ( $wikidataItemLink !== null ) {
-			$sidebar['TOOLBOX']['wikibase'] = $wikidataItemLink;
+		if ( $wikidataItemLink !== null || $otherProjectsSidebar !== null ) {
+			$outputPage = $skin->getContext()->getOutput();
+			$outputPage->addModules( 'wikibase.sidebar.tracking' );
 		}
 
-		// Add the 'In other projects' section
-		$otherProjectsSidebar = $this->buildOtherProjectsSidebar( $skin );
+		if ( $wikidataItemLink === null ) {
+			return;
+		}
 
-		if ( $otherProjectsSidebar !== null ) {
-			$sidebar['wikibase-otherprojects'] = $otherProjectsSidebar;
+		$wikidataInOtherProjects = $this->clientSettings->getSetting( 'moveConnectedItemLinkToOtherProjects' );
+
+		if ( $wikidataInOtherProjects && $skin->getSkinName() !== 'minerva' ) {
+			$wikidataItemLink['class'] = 'wb-otherproject-link wb-otherproject-wikibase-dataitem';
+			// This automatically appends the wikidata item link to the end of the Other Projects
+			$sidebar['wikibase-otherprojects'][] = $wikidataItemLink;
+		} else {
+			$sidebar['TOOLBOX']['wikibase'] = $wikidataItemLink;
 		}
 	}
 
@@ -144,7 +164,7 @@ class SidebarHookHandler implements
 
 		$otherProjectsSidebar = $outputPage->getProperty( 'wikibase-otherprojects-sidebar' );
 
-		if ( empty( $otherProjectsSidebar ) ) {
+		if ( !$otherProjectsSidebar ) {
 			return null;
 		}
 

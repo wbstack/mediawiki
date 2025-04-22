@@ -1,8 +1,6 @@
 <?php
 /** Indonesian (Bahasa Indonesia)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  */
@@ -105,7 +103,7 @@ $magicWords = [
 	'img_top'                   => [ '1', 'atas', 'top' ],
 	'img_upright'               => [ '1', 'lurus', 'lurus=$1', 'lurus_$1', 'tegak', 'tegak=$1', 'tegak_$1', 'upright', 'upright=$1', 'upright $1' ],
 	'index'                     => [ '1', '__INDEKS__', '__INDEX__' ],
-	'language'                  => [ '0', '#BAHASA:', '#BHS:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#BAHASA', '#BHS', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'KC:', 'KECIL:', 'HURUFKECIL:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'AKC:', 'AWALKECIL:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'HARILOKAL', 'HALOK', 'LOCALDAY' ],
@@ -262,6 +260,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'Pengalihan_sembarang', 'PengalihanSembarang' ],
 	'Recentchanges'             => [ 'Perubahan_terbaru', 'PerubahanTerbaru', 'RC', 'PT' ],
 	'Recentchangeslinked'       => [ 'Perubahan_terkait', 'PerubahanTerkait' ],
+	'Renameuser'                => [ 'Ganti_nama_pengguna', 'GantiNamaPengguna' ],
 	'Revisiondelete'            => [ 'Hapus_revisi', 'HapusRevisi' ],
 	'Search'                    => [ 'Pencarian', 'Cari' ],
 	'Shortpages'                => [ 'Halaman_pendek', 'HalamanPendek' ],

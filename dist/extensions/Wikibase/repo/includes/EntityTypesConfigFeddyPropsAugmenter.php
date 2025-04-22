@@ -10,13 +10,13 @@ use function wfArrayPlus2d;
  * This service is intended to be no longer needed once we improve the way we handle
  * EntityTypeDefinitions see: T280153
  *
- * @see @ref md_docs_topics_entitytypes for the fields of a definition array
- * @see @ref repo-federated-properties for the meaning of federated properties
+ * @see @ref docs_topics_entitytypes for the fields of a definition array
+ * @see @ref docs_components_repo-federated-properties for the meaning of federated properties
  *
  * @license GPL-2.0-or-later
  */
 class EntityTypesConfigFeddyPropsAugmenter {
-	private $fedPropsEntityTypeDefinitions;
+	private array $fedPropsEntityTypeDefinitions;
 
 	public function __construct( array $fedPropsEntityTypeDefinitions ) {
 		$this->fedPropsEntityTypeDefinitions = $fedPropsEntityTypeDefinitions;

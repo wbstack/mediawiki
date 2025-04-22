@@ -6,8 +6,9 @@ const View = require( '../View' ),
 	util = require( '../util' );
 
 /**
- * @class SearchResultsView
- * @extends View
+ * Render search results.
+ *
+ * @extends module:mobile.startup/View
  * @param {Object} options
  * @param {string} options.searchContentLabel actionable label to tell the user they can "search
  *  within pages rather than doing a full text search
@@ -20,6 +21,7 @@ class SearchResultsView extends View {
 	get isTemplateMode() {
 		return true;
 	}
+
 	/** @inheritdoc */
 	get template() {
 		return util.template( `
@@ -43,6 +45,7 @@ class SearchResultsView extends View {
 </div>`
 		);
 	}
+
 	/** @inheritdoc */
 	preRender() {
 		const feedbackLink = mw.config.get( 'wgCirrusSearchFeedbackLink' );
@@ -51,19 +54,13 @@ class SearchResultsView extends View {
 				prompt: mw.msg( 'mobile-frontend-search-feedback-prompt' ) };
 		}
 	}
+
 	/** @inheritdoc */
 	postRender( options ) {
 		const feedbackLink = mw.config.get( 'wgCirrusSearchFeedbackLink' );
 		super.postRender( options );
 		this.$el.find( '.search-content' ).prepend(
-			new Icon( {
-				tagName: 'a',
-				// When this icon is clicked we want to reset the hash for subsequent views
-				href: '#',
-				name: 'articlesSearch',
-				additionalClassNames: 'mw-ui-icon-flush-left',
-				label: mw.msg( 'mobile-frontend-search-content' )
-			} ).$el
+			new Icon( { icon: 'articlesSearch' } ).$el
 		);
 		this.$el.find( '.spinner-container' ).append( $spinner );
 		if ( feedbackLink ) {

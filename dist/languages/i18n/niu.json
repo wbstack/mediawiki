@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Jose77",
 			"MinecraftAustralia",
 			"Rotemliss",
@@ -71,7 +70,7 @@
 	"portal": "Maaga ke Matutaki",
 	"portal-url": "Project:Ko e lau auloa ma maaga",
 	"privacy": "Ko e puipuiaga ke he tau talahauaga mo e talahauaga fakatagata",
-	"youhavenewmessages": "Fai $1 ($2).",
+	"new-messages": "Fai $1 ($2).",
 	"editsection": "fakahakohako",
 	"editold": "fakahakohako",
 	"editsectionhint": "Hiki e vala e: $1",
@@ -81,7 +80,6 @@
 	"mainpage-nstab": "Matapatu Lau",
 	"viewsource": "Kitekite ke mouaga",
 	"yourname": "Matahigoa he tagata:",
-	"yourpassword": "Kupu fufu:",
 	"userlogin-yourpassword": "Kupu fufu",
 	"yourpasswordagain": "Liu lolomi e kupu fufu:",
 	"login": "Hu ki loto",
@@ -105,10 +103,7 @@
 	"currentrevisionlink": "Kitekiteaga mogonei",
 	"editundo": "Liuaki",
 	"mypreferences": "Haaku a tau manako",
-	"prefs-rc": "Hikihikiaga mogoia",
 	"searchresultshead": "Kumi",
-	"youremail": "Meli hila:",
-	"username": "Matahigoa he tagata:",
 	"email": "Meli hila",
 	"recentchanges": "Hikihikiaga mogoia",
 	"hist": "Liu onoono atu ki tua",

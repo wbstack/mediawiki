@@ -15,7 +15,7 @@
 	"visualeditor-annotationbutton-bold-tooltip": "ၼႃ",
 	"visualeditor-annotationbutton-code-tooltip": "မၢႆၶူတ်ႉ ၶွမ်ႇပိဝ်ႇတႃႇ",
 	"visualeditor-annotationbutton-italic-tooltip": "ၵိူင်း",
-	"visualeditor-annotationbutton-language-tooltip": "ၽႃႇသႃႇၵႂၢမ်း",
+	"visualeditor-annotationbutton-language-tooltip": "ၽႃႇသႃႇ",
 	"visualeditor-annotationbutton-link-tooltip": "ၵွင်ႉ",
 	"visualeditor-annotationbutton-small-tooltip": "လဵၵ်ႉ",
 	"visualeditor-annotationbutton-strikethrough-tooltip": "ထတ်းတူဝ်လိၵ်ႈ",
@@ -27,7 +27,7 @@
 	"visualeditor-clipboard-cut": "တတ်း",
 	"visualeditor-clipboard-paste": "တမ်း",
 	"visualeditor-clipboard-paste-special": "တမ်းၼင်ႇ တူဝ်ႇလိၵ်ႈ လွၼ်ႉလွၼ်ႉ",
-	"visualeditor-commentinspector-edit": "မႄးထတ်း ၶေႃႈႁၼ်ထိုင်",
+	"visualeditor-command-dialog-cancel": "ႁပ်း / ယုၵ်ႉလိူၵ်ႈ လွင်ႈလႅၵ်ႈလၢႆႈ",
 	"visualeditor-commentinspector-title": "ၶေႃႈႁၼ်ထိုင်",
 	"visualeditor-commentinspector-tooltip": "ၶေႃႈႁၼ်ထိုင်",
 	"visualeditor-content-select-all": "လိူၵ်ႈမူတ်း",
@@ -40,10 +40,8 @@
 	"visualeditor-dialog-action-goback": "ၵႂႃႇၽၢႆႇလင်",
 	"visualeditor-dialog-action-insert": "ၸိမ်သႂ်ႇ",
 	"visualeditor-dialog-command-help-title": "လွၵ်းလတ်း ၶီးပူတ်ႉ",
-	"visualeditor-dialog-error": "သေဢၼ်ဢၼ်ၽိတ်းပိူင်ႈဝႆႉ...",
-	"visualeditor-dialog-error-dismiss": "ၵႂႃႇၽၢႆႇလင်",
 	"visualeditor-dialog-language-auto-direction": "ႁင်းမၼ်း",
-	"visualeditor-dialog-language-search-title": "လိူၵ်ႈ ၽႃႇသႃႇၵႂၢမ်း",
+	"visualeditor-dialog-language-search-title": "လိူၵ်ႈ ၽႃႇသႃႇ",
 	"visualeditor-dialog-table-caption": "ႁူဝ်ၶေႃႈ",
 	"visualeditor-dialog-table-title": "ၼမ်ႉၸႂ်ႉ လွၵ်းသဵၼ်ႈ",
 	"visualeditor-find-and-replace-done": "Done",
@@ -54,5 +52,7 @@
 	"visualeditor-find-and-replace-previous-button": "ႁႃၶိုၼ်း ၽၢႆႇလင်",
 	"visualeditor-find-and-replace-replace-all-button": "တႅၼ်းတီႈ တင်းမူတ်း",
 	"visualeditor-find-and-replace-replace-button": "တႅၼ်းတီႈ",
-	"visualeditor-find-and-replace-replace-text": "တႅၼ်းတီႈ"
+	"visualeditor-find-and-replace-replace-text": "တႅၼ်းတီႈ",
+	"visualeditor-specialcharacter-button-tooltip": "ဢၵ်ႉၶရႃႇၶိုၵ်ႉတွၼ်း",
+	"visualeditor-toolbar-paragraph-format": "လွင်ႈၸတ်းပိူင်"
 }
