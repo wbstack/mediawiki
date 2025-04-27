@@ -379,6 +379,8 @@ wfLoadExtension( 'EmbedVideo' );
 wfLoadExtension( 'DeleteBatch' );
 wfLoadExtension( 'MultimediaViewer' );
 wfLoadExtension( 'WikiHiero' );
+wfLoadExtension( 'WikibaseQualityConstraints' );
+
 
 # ConfirmAccount (only loaded when the setting is on)
 if( $wikiInfo->getSetting('wwExtEnableConfirmAccount') ) {
