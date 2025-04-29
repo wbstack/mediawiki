@@ -5844,10 +5844,10 @@
             "time": "2021-02-24T05:28:06+00:00",
             "type": "composer-plugin",
             "extra": {
+                "class": "Wikimedia\\Composer\\Merge\\V2\\MergePlugin",
                 "branch-alias": {
                     "dev-master": "2.x-dev"
-                },
-                "class": "Wikimedia\\Composer\\Merge\\V2\\MergePlugin"
+                }
             },
             "installation-source": "dist",
             "autoload": {
