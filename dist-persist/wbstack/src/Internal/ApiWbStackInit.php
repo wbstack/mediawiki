@@ -154,6 +154,6 @@ class ApiWbStackInit extends \ApiBase {
 		$updater = $page->newPageUpdater( $user );
         $updater->setContent( SlotRecord::MAIN, $content );
         $updater->setRcPatrolStatus( \RecentChange::PRC_PATROLLED );
-        $updater->saveRevision( $comment, EDIT_NEW );
+        $updater->saveRevision( $comment, EDIT_NEW | EDIT_FORCE_BOT );
     }
 }

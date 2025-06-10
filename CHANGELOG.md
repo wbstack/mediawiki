@@ -2,8 +2,11 @@
 
 Tags have the format: `<MediaWiki core version>-<PHP Version>-<date>-<build number>`
 
+# 1.39-7.4-20250610-0
+- Force bot flag to be set on Main Page creation (T391479)
+
 # 1.39-7.4-20250526-0
-- Add `PlatformReservedUser` to `bot` group
+- Add `PlatformReservedUser` to `bot` group (T391479)
 
 # 1.39-7.4-20250415-0
 - Add OAuth2 settings
