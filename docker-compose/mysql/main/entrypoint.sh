@@ -9,4 +9,4 @@ chmod 0444 /etc/mysql/conf.d/mwdd-custom.cnf
 bash /write-db-template.sh
 
 # Then execute the regular mysql / mariadb entrypoint
-/usr/local/bin/docker-entrypoint.sh $@
+/usr/local/bin/docker-entrypoint.sh "$@"
