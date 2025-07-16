@@ -1245,17 +1245,17 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v6.11.0",
-            "version_normalized": "6.11.0.0",
+            "version": "v6.11.1",
+            "version_normalized": "6.11.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/firebase/php-jwt.git",
-                "reference": "8f718f4dfc9c5d5f0c994cdfd103921b43592712"
+                "reference": "d1e91ecf8c598d073d0995afa8cd5c75c6e19e66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/8f718f4dfc9c5d5f0c994cdfd103921b43592712",
-                "reference": "8f718f4dfc9c5d5f0c994cdfd103921b43592712",
+                "url": "https://api.github.com/repos/firebase/php-jwt/zipball/d1e91ecf8c598d073d0995afa8cd5c75c6e19e66",
+                "reference": "d1e91ecf8c598d073d0995afa8cd5c75c6e19e66",
                 "shasum": ""
             },
             "require": {
@@ -1273,7 +1273,7 @@
                 "ext-sodium": "Support EdDSA (Ed25519) signatures",
                 "paragonie/sodium_compat": "Support EdDSA (Ed25519) signatures when libsodium is not present"
             },
-            "time": "2025-01-23T05:11:06+00:00",
+            "time": "2025-04-09T20:32:01+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1305,7 +1305,7 @@
             ],
             "support": {
                 "issues": "https://github.com/firebase/php-jwt/issues",
-                "source": "https://github.com/firebase/php-jwt/tree/v6.11.0"
+                "source": "https://github.com/firebase/php-jwt/tree/v6.11.1"
             },
             "install-path": "../firebase/php-jwt"
         },
@@ -7538,27 +7538,29 @@
         },
         {
             "name": "wmde/php-vuejs-templating",
-            "version": "2.0.0",
-            "version_normalized": "2.0.0.0",
+            "version": "2.1.0",
+            "version_normalized": "2.1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wmde/php-vuejs-templating.git",
-                "reference": "6db5bd039dfa015b8850f121e711a4fc4fa0788d"
+                "reference": "158a0ff874aa0aecfffbdcaf1bcfcdc8a75e1315"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wmde/php-vuejs-templating/zipball/6db5bd039dfa015b8850f121e711a4fc4fa0788d",
-                "reference": "6db5bd039dfa015b8850f121e711a4fc4fa0788d",
+                "url": "https://api.github.com/repos/wmde/php-vuejs-templating/zipball/158a0ff874aa0aecfffbdcaf1bcfcdc8a75e1315",
+                "reference": "158a0ff874aa0aecfffbdcaf1bcfcdc8a75e1315",
                 "shasum": ""
             },
             "require": {
+                "ext-dom": "*",
+                "ext-libxml": "*",
                 "php": ">=7.2"
             },
             "require-dev": {
                 "mediawiki/mediawiki-codesniffer": "34.0.0",
                 "phpunit/phpunit": "^8.5.3"
             },
-            "time": "2022-11-07T15:27:47+00:00",
+            "time": "2025-06-05T11:03:46+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -7578,7 +7580,7 @@
             "description": "PHP implementation of Vue.js templating engine",
             "support": {
                 "issues": "https://github.com/wmde/php-vuejs-templating/issues",
-                "source": "https://github.com/wmde/php-vuejs-templating/tree/2.0.0"
+                "source": "https://github.com/wmde/php-vuejs-templating/tree/2.1.0"
             },
             "install-path": "../wmde/php-vuejs-templating"
         },
