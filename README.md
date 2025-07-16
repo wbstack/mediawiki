@@ -6,10 +6,10 @@ The purposes and features of this repository are:
 - Update the references to code you want to build MediaWiki from
 - Download the code you want to build MediaWiki from
 - Store and then copy in the custom WBStack code
-- Adjust some MediawWiki code to load custom WBStack code
+- Adjust some MediaWiki code to load custom WBStack code
 - Build the Docker image from the code in the `dist` directory
 - Test the image
-- Build the image automatically on Github Actions platform then push it.
+- Build the image automatically on Github Actions platform then push it
 
 This ultimately repackages MediaWiki together with its extensions, skins, and the WBStack code into `dist` and `dist-persist` folders, then creates a new "application" with a much tighter external interface (particularly around configuration).
 

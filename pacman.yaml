@@ -997,28 +997,6 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
-- name: DismissableSiteNotice
-  artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-DismissableSiteNotice/zip/caca5bf6baaf5b85487a5b822e42c6ee74aa0e9d
-  artifactLevel: 1
-  destination: ./dist/extensions/DismissableSiteNotice
-  remove:
-    - tests
-    - .github
-    - .stylelintignore
-    - .nvmrc
-    - .eslintignore
-    - .phan
-    - .storybook
-    - .vscode
-    - .gitignore
-    - .eslintrc.json
-    - .gitreview
-    - .phpcs.xml
-    - .stylelintrc.json
-    - .rubocop.yml
-    - .rubocop_todo.yml
-    - Gruntfile.js
-    - Doxyfile
 - name: WikibaseInWikitext
   artifactUrl: https://codeload.github.com/wbstack/mediawiki-extensions-WikibaseInWikitext/zip/445c7efaa145fa7c31b0caca7400ef6a87cac7d9
   artifactLevel: 1

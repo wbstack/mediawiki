@@ -45,7 +45,7 @@ class WbStackPlatformReservedUser{
         $user->saveSettings();
 
         // Promote the user to platform user??
-        $services->getUserGroupManager()->addUserToGroup($user, 'platform', null, true);
+        $services->getUserGroupManager()->addUserToMultipleGroups($user, [ 'platform', 'bot' ], null, true);
 
         return true;
     }

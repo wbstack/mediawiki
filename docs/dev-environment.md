@@ -6,14 +6,14 @@ These are currently not using the real api but rather gets their settings from t
 
 The fake api is served by the [server.php](test/server.php) script and reads the corresponding [subdomain](data/WikiInfo-site1.json) from each request.
 
-
 ### Start the dev environment
 
 ```sh
 docker compose up --build
 ```
 
-> **_Note:_** It's important to include the `--build` flag after making any significant changes to `dist`. The `Dockerfile` contains important maintenance scripts (e.g., `rebuildLocalisationCache.php`) that will only run when the container image is rebuilt.
+> [!NOTE]
+> It's important to include the `--build` flag after making any significant changes to `dist`. The `Dockerfile` contains important maintenance scripts (e.g., `rebuildLocalisationCache.php`) that will only run when the container image is rebuilt.
 
 Wait until both sites are accessible:
 

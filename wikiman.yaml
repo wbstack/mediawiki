@@ -116,8 +116,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-TextExtracts
   - name: EntitySchema
     repoName: wikimedia/mediawiki-extensions-EntitySchema
-  - name: DismissableSiteNotice
-    repoName: wikimedia/mediawiki-extensions-DismissableSiteNotice
   ## These extensions should not currently use the mediawikiVersion
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
