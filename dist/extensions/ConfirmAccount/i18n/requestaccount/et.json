@@ -9,7 +9,7 @@
 	"requestaccount-leg-areas": "Põhilised huvivaldkonnad",
 	"requestaccount-leg-person": "Personaalne informatsioon",
 	"requestaccount-leg-other": "Muu informatsioon",
-	"requestaccount-real": "Tegelik nimi:",
+	"requestaccount-real": "Tegelik nimi (valikuline):",
 	"requestaccount-same": "(sama mis tegelik nimi)",
 	"requestaccount-email": "E-posti aadress:",
 	"requestaccount-reqtype": "Positsioon:",

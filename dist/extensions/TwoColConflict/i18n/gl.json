@@ -21,7 +21,7 @@
 	"twocolconflict-core-ui-hint-close": "Non amosar de novo",
 	"twocolconflict-preference-enabled": "Activa a [[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|interface de conflitos de edición baseada en parágrafos]] para resolver conflitos de edición",
 	"twocolconflict-special-footer-hint": "Pecha esta páxina para volver á interface de conflitos de edición.",
-	"twocolconflict-special-header-overview": "Mentres editabas, outro usuario editou a mesma páxina e publicouna antes ca ti. Abaixo tes dispoñible unha copia de só lectura da túa revisión. Calquera cambio feito na interface de conflitos de edición non está reflectido. Para fusionar os cambios utilizando a interface de conflitos de edición, regresa á lapela anterior.",
+	"twocolconflict-special-header-overview": "Mentres editabas, outro usuario editou a mesma páxina e publicouna antes ca ti. Abaixo tes dispoñible unha copia de lectura só da túa revisión. Calquera cambio feito na interface de conflitos de edición non está reflectido. Para fusionar os cambios utilizando a interface de conflitos de edición, regresa á lapela anterior.",
 	"twocolconflict-special-not-saved": "Non publicado",
 	"twocolconflict-special-textarea-hint": "Podes ver e copiar a fonte da túa revisión:",
 	"twocolconflict-special-malformed-title": "Falta o título ou non é válido.",

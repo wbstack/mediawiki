@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Kimberli Mäkäräinen (WMNO)",
-			"WMNO sámeprošeakta"
+			"WMNO sámeprošeakta",
+			"Yupik"
 		]
 	},
 	"advancedsearch-desc": "Álkes beassanlohpi aiddostahttojuvvon ohcanvejolašvuođaide [[Special:Search]]:s.",
@@ -53,6 +54,7 @@
 	"advancedsearch-filetype-drawing": "Sárgojupmi",
 	"advancedsearch-filetype-audio": "Jietna",
 	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Dokumeanttat",
 	"advancedsearch-filesize-equals": "lea seamma",
 	"advancedsearch-filesize-greater-than": "stuorit go",
 	"advancedsearch-filesize-smaller-than": "unnit go",

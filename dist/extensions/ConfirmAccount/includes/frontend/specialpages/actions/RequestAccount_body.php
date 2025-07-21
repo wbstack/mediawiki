@@ -1,5 +1,8 @@
 <?php
 
+use MediaWiki\Html\Html;
+use MediaWiki\Request\WebRequestUpload;
+use MediaWiki\Title\Title;
 use MediaWiki\User\UserFactory;
 
 class RequestAccountPage extends SpecialPage {
@@ -110,7 +113,7 @@ class RequestAccountPage extends SpecialPage {
 		$out->setPageTitle( $this->msg( "requestaccount" )->escaped() );
 		# Output failure message if any
 		if ( $msg ) {
-			$out->addHTML( '<div class="errorbox">' . $msg . '</div><div class="visualClear"></div>' );
+			$out->addHTML( Html::errorBox( $msg ) );
 		}
 		# Give notice to users that are logged in
 		if ( $reqUser->getID() ) {
@@ -194,6 +197,7 @@ class RequestAccountPage extends SpecialPage {
 			$form .= '<fieldset>';
 			$form .= '<legend>' . $this->msg( 'requestaccount-leg-person' )->escaped() . '</legend>';
 			if ( $this->hasItem( 'RealName' ) ) {
+				$form .= $this->msg( 'requestaccount-real-i' )->parseAsBlock() . "\n";
 				$form .= '<table style="padding:4px;">';
 				$form .= "<tr><td>" . Xml::label(
 					$this->msg( 'requestaccount-real' )->text(), 'wpRealName'

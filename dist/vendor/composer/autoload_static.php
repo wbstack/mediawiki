@@ -4,17 +4,15 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
+class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
-        'a4a119a56e50fbb293281d9a48007e0e' => __DIR__ . '/..' . '/symfony/polyfill-php80/bootstrap.php',
         '9c67151ae59aff4788964ce8eb2a0f43' => __DIR__ . '/..' . '/clue/stream-filter/src/functions_include.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'ad155f8f1cf0d418fe49e248db8c661b' => __DIR__ . '/..' . '/react/promise/src/functions_include.php',
         'c3f7f0e81464740a933532e81fa26cc7' => __DIR__ . '/..' . '/wikimedia/base-convert/src/Functions.php',
         '8cff32064859f4559445b89279f3199c' => __DIR__ . '/..' . '/php-http/message/src/filters.php',
-        '23c18046f52bef3eea034657bafda50f' => __DIR__ . '/..' . '/symfony/polyfill-php81/bootstrap.php',
         'a1105708a18b76903365ca1c4aa61b02' => __DIR__ . '/..' . '/symfony/translation/Resources/functions.php',
         '8592c7b0947d8a0965a9e8c3d16f9c24' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/autoload.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -64,8 +62,6 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         array (
             'Symfony\\Polyfill\\Php83\\' => 23,
             'Symfony\\Polyfill\\Php82\\' => 23,
-            'Symfony\\Polyfill\\Php81\\' => 23,
-            'Symfony\\Polyfill\\Php80\\' => 23,
             'Symfony\\Polyfill\\Php73\\' => 23,
             'Symfony\\Contracts\\Translation\\' => 30,
             'Symfony\\Component\\Yaml\\' => 23,
@@ -281,13 +277,13 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         ),
         'ValueParsers\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
         ),
         'ValueFormatters\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
         ),
         'Symfony\\Polyfill\\Php83\\' => 
         array (
@@ -296,14 +292,6 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         'Symfony\\Polyfill\\Php82\\' => 
         array (
             0 => __DIR__ . '/..' . '/symfony/polyfill-php82',
-        ),
-        'Symfony\\Polyfill\\Php81\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php81',
-        ),
-        'Symfony\\Polyfill\\Php80\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/symfony/polyfill-php80',
         ),
         'Symfony\\Polyfill\\Php73\\' => 
         array (
@@ -408,8 +396,8 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri/src',
-            1 => __DIR__ . '/..' . '/league/uri-interfaces/src',
+            0 => __DIR__ . '/..' . '/league/uri-interfaces/src',
+            1 => __DIR__ . '/..' . '/league/uri/src',
         ),
         'League\\OAuth2\\Server\\' => 
         array (
@@ -521,8 +509,8 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         ),
         'DataValues\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
-            1 => __DIR__ . '/..' . '/data-values/data-values/src',
+            0 => __DIR__ . '/..' . '/data-values/data-values/src',
+            1 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
         ),
         'Composer\\Semver\\' => 
         array (
@@ -625,7 +613,6 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
 
     public static $classMap = array (
         'AllowDynamicProperties' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/AllowDynamicProperties.php',
-        'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
         'CLDRPluralRuleParser\\Converter' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Converter.php',
         'CLDRPluralRuleParser\\Converter\\Expression' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Converter/Expression.php',
         'CLDRPluralRuleParser\\Converter\\Fragment' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Converter/Fragment.php',
@@ -634,7 +621,6 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         'CLDRPluralRuleParser\\Evaluator' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Evaluator.php',
         'CLDRPluralRuleParser\\Range' => __DIR__ . '/..' . '/wikimedia/cldr-plural-rule-parser/src/Range.php',
         'CSSJanus' => __DIR__ . '/..' . '/cssjanus/cssjanus/src/CSSJanus.php',
-        'CURLStringFile' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/CURLStringFile.php',
         'Carbon\\AbstractTranslator' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/AbstractTranslator.php',
         'Carbon\\Carbon' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/Carbon.php',
         'Carbon\\CarbonConverterInterface' => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon/CarbonConverterInterface.php',
@@ -2914,7 +2900,6 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         'Peast\\Syntax\\Token' => __DIR__ . '/..' . '/mck89/peast/lib/Peast/Syntax/Token.php',
         'Peast\\Syntax\\Utils' => __DIR__ . '/..' . '/mck89/peast/lib/Peast/Syntax/Utils.php',
         'Peast\\Traverser' => __DIR__ . '/..' . '/mck89/peast/lib/Peast/Traverser.php',
-        'PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/PhpToken.php',
         'Psr\\Clock\\ClockInterface' => __DIR__ . '/..' . '/psr/clock/src/ClockInterface.php',
         'Psr\\Container\\ContainerExceptionInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerExceptionInterface.php',
         'Psr\\Container\\ContainerInterface' => __DIR__ . '/..' . '/psr/container/src/ContainerInterface.php',
@@ -2956,19 +2941,14 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         'Random\\Engine\\Secure' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/Random/Engine/Secure.php',
         'Random\\RandomError' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/Random/RandomError.php',
         'Random\\RandomException' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/Random/RandomException.php',
-        'React\\Promise\\CancellablePromiseInterface' => __DIR__ . '/..' . '/react/promise/src/CancellablePromiseInterface.php',
-        'React\\Promise\\CancellationQueue' => __DIR__ . '/..' . '/react/promise/src/CancellationQueue.php',
         'React\\Promise\\Deferred' => __DIR__ . '/..' . '/react/promise/src/Deferred.php',
+        'React\\Promise\\Exception\\CompositeException' => __DIR__ . '/..' . '/react/promise/src/Exception/CompositeException.php',
         'React\\Promise\\Exception\\LengthException' => __DIR__ . '/..' . '/react/promise/src/Exception/LengthException.php',
-        'React\\Promise\\ExtendedPromiseInterface' => __DIR__ . '/..' . '/react/promise/src/ExtendedPromiseInterface.php',
-        'React\\Promise\\FulfilledPromise' => __DIR__ . '/..' . '/react/promise/src/FulfilledPromise.php',
-        'React\\Promise\\LazyPromise' => __DIR__ . '/..' . '/react/promise/src/LazyPromise.php',
+        'React\\Promise\\Internal\\CancellationQueue' => __DIR__ . '/..' . '/react/promise/src/Internal/CancellationQueue.php',
+        'React\\Promise\\Internal\\FulfilledPromise' => __DIR__ . '/..' . '/react/promise/src/Internal/FulfilledPromise.php',
+        'React\\Promise\\Internal\\RejectedPromise' => __DIR__ . '/..' . '/react/promise/src/Internal/RejectedPromise.php',
         'React\\Promise\\Promise' => __DIR__ . '/..' . '/react/promise/src/Promise.php',
         'React\\Promise\\PromiseInterface' => __DIR__ . '/..' . '/react/promise/src/PromiseInterface.php',
-        'React\\Promise\\PromisorInterface' => __DIR__ . '/..' . '/react/promise/src/PromisorInterface.php',
-        'React\\Promise\\RejectedPromise' => __DIR__ . '/..' . '/react/promise/src/RejectedPromise.php',
-        'React\\Promise\\UnhandledRejectionException' => __DIR__ . '/..' . '/react/promise/src/UnhandledRejectionException.php',
-        'ReturnTypeWillChange' => __DIR__ . '/..' . '/symfony/polyfill-php81/Resources/stubs/ReturnTypeWillChange.php',
         'SQLite3Exception' => __DIR__ . '/..' . '/symfony/polyfill-php83/Resources/stubs/SQLite3Exception.php',
         'SensitiveParameter' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/SensitiveParameter.php',
         'SensitiveParameterValue' => __DIR__ . '/..' . '/symfony/polyfill-php82/Resources/stubs/SensitiveParameterValue.php',
@@ -3039,7 +3019,6 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         'Shellbox\\ShellboxError' => __DIR__ . '/..' . '/wikimedia/shellbox/src/ShellboxError.php',
         'Shellbox\\TempDirManager' => __DIR__ . '/..' . '/wikimedia/shellbox/src/TempDirManager.php',
         'StellaMaris\\Clock\\ClockInterface' => __DIR__ . '/..' . '/stella-maris/clock/src/ClockInterface.php',
-        'Stringable' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Stringable.php',
         'Swaggest\\JsonDiff\\Exception' => __DIR__ . '/..' . '/swaggest/json-diff/src/Exception.php',
         'Swaggest\\JsonDiff\\InvalidFieldTypeException' => __DIR__ . '/..' . '/swaggest/json-diff/src/InvalidFieldTypeException.php',
         'Swaggest\\JsonDiff\\JsonDiff' => __DIR__ . '/..' . '/swaggest/json-diff/src/JsonDiff.php',
@@ -3189,9 +3168,6 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         'Symfony\\Contracts\\Translation\\TranslatorInterface' => __DIR__ . '/..' . '/symfony/translation-contracts/TranslatorInterface.php',
         'Symfony\\Contracts\\Translation\\TranslatorTrait' => __DIR__ . '/..' . '/symfony/translation-contracts/TranslatorTrait.php',
         'Symfony\\Polyfill\\Php73\\Php73' => __DIR__ . '/..' . '/symfony/polyfill-php73/Php73.php',
-        'Symfony\\Polyfill\\Php80\\Php80' => __DIR__ . '/..' . '/symfony/polyfill-php80/Php80.php',
-        'Symfony\\Polyfill\\Php80\\PhpToken' => __DIR__ . '/..' . '/symfony/polyfill-php80/PhpToken.php',
-        'Symfony\\Polyfill\\Php81\\Php81' => __DIR__ . '/..' . '/symfony/polyfill-php81/Php81.php',
         'Symfony\\Polyfill\\Php82\\NoDynamicProperties' => __DIR__ . '/..' . '/symfony/polyfill-php82/NoDynamicProperties.php',
         'Symfony\\Polyfill\\Php82\\Php82' => __DIR__ . '/..' . '/symfony/polyfill-php82/Php82.php',
         'Symfony\\Polyfill\\Php82\\Random\\Engine\\Secure' => __DIR__ . '/..' . '/symfony/polyfill-php82/Random/Engine/Secure.php',
@@ -3199,11 +3175,9 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
         'Symfony\\Polyfill\\Php83\\Php83' => __DIR__ . '/..' . '/symfony/polyfill-php83/Php83.php',
         'System' => __DIR__ . '/..' . '/pear/pear-core-minimal/src/System.php',
         'TextCat' => __DIR__ . '/..' . '/wikimedia/textcat/src/TextCat.php',
-        'UnhandledMatchError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/UnhandledMatchError.php',
         'UtfNormal\\Constants' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Constants.php',
         'UtfNormal\\Utils' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Utils.php',
         'UtfNormal\\Validator' => __DIR__ . '/..' . '/wikimedia/utfnormal/src/Validator.php',
-        'ValueError' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/ValueError.php',
         'ValueFormatters\\BasicNumberLocalizer' => __DIR__ . '/..' . '/data-values/number/src/ValueFormatters/BasicNumberLocalizer.php',
         'ValueFormatters\\DecimalFormatter' => __DIR__ . '/..' . '/data-values/number/src/ValueFormatters/DecimalFormatter.php',
         'ValueFormatters\\Exceptions\\MismatchingDataValueTypeException' => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters/Exceptions/MismatchingDataValueTypeException.php',
@@ -4509,11 +4483,11 @@ class ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitb7a2f841abc5c6ff371b585120d9a48c::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$classMap;
 
         }, null, ClassLoader::class);
     }

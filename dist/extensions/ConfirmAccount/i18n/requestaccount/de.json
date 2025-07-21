@@ -31,7 +31,7 @@
 	"requestaccount-ext-text": "Die folgenden Informationen werden vertraulich behandelt und ausschließlich für diesen Antrag verwendet.\nDu kannst Kontakt-Angaben wie eine Telefonnummer machen, um die Bearbeitung deines Antrags zu vereinfachen.",
 	"requestaccount-bio-text": "Versuche alle relevanten Informationen in deine untenstehende Biografie aufzunehmen.",
 	"requestaccount-bio-text-i": "'''Deine Biografie wird als die erste Version deiner Benutzerseite veröffentlicht.'''\nDu musst daher auch tatsächlich mit der Veröffentlichung dieser Daten einverstanden sein.",
-	"requestaccount-real": "Bürgerlicher Name:",
+	"requestaccount-real": "Bürgerlicher Name (optional):",
 	"requestaccount-same": "(wie mein bürgerlicher Name)",
 	"requestaccount-email": "E-Mail-Adresse:",
 	"requestaccount-reqtype": "Position:",

@@ -124,7 +124,7 @@ class AccountConfirmSubmission {
 					'accountconf_mailerror',
 					$context->msg( 'mailerror' )->rawParams(
 						$context->getOutput()->parseAsInterface( $result->getWikiText() )
-					)->text(),
+					)->escaped(),
 					null
 				];
 			}
@@ -183,7 +183,7 @@ class AccountConfirmSubmission {
 				'accountconf_mailerror',
 				$context->msg( 'mailerror' )->rawParams(
 					$context->getOutput()->parseAsInterface( $result->getWikiText() )
-				)->text(),
+				)->escaped(),
 				null
 			];
 		}

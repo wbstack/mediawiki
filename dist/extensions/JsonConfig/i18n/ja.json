@@ -13,7 +13,8 @@
 			"Yurik",
 			"Yusuke1109",
 			"つぶあん派",
-			"春春眠眠"
+			"春春眠眠",
+			"Shulmj"
 		]
 	},
 	"nstab-data": "データ",
@@ -39,6 +40,7 @@
 	"jsonconfig-type-name-string": "文字列",
 	"jsonconfig-type-name-number": "数値",
 	"jsonconfig-type-name-boolean": "ブール型",
+	"jsonconfig-use-category": "JsonConfig拡張機能を使用しているページ",
 	"jsonconfig-license": "データは$1の下で利用できます。",
 	"jsonconfig-license-name-CC0-1.0": "クリエイティブ・コモンズ・ゼロ",
 	"jsonconfig-license-name-GeoNutzV": "地理データライセンスドイツ",

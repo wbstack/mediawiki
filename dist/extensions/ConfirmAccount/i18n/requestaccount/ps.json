@@ -1,14 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"شاه زمان پټان"
 		]
 	},
 	"requestaccount": "د گڼون غوښتنه",
 	"requestaccount-leg-user": "گڼون",
 	"requestaccount-leg-person": "ځاني مالومات",
 	"requestaccount-leg-other": "نور مالومات",
-	"requestaccount-real": "اصلي نوم:",
+	"requestaccount-real": "ار نوم (اختياري):",
 	"requestaccount-email": "برېښليک‌پته:",
 	"requestaccount-level-0": "ليکوال",
 	"requestaccount-level-1": "سمونگر",

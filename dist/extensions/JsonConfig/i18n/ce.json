@@ -49,16 +49,19 @@
 	"jsonconfig-type-name-number": "терахь",
 	"jsonconfig-type-name-boolean": "логикин маьӀна",
 	"jsonconfig-use-category": "JsonConfig шордар лелош йолу агӀонаш",
+	"jsonconfig-use-category-desc": "ХӀокху агӀонаш лелайо [[:mw:Extension:JsonConfig|JsonConfig]] шордаран <code>mw.ext.data.get</code> метод. <code>mw.ext.data.get</code> метод дика лоруш йу.",
 	"jsonconfig-license": "ТӀекхачаран хаамаш $1 билламашца.",
 	"jsonconfig-license-not-set": "Ахьа хӀара агӀо хуьйцуш, хьо реза хуьллу хьайн къинхьегам арахеца «<code>лицензи</code>» меттигехь билгалйаьккхинчу лицензица.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
 	"jsonconfig-license-name-dl-de-zero-2.0": "Германи хаамийн лицензи — Нолан — Верси 2.0",
 	"jsonconfig-license-name-dl-de-by-1.0": "Германи хаамийн лицензи — Атрибуци — Верси 1.0",
 	"jsonconfig-license-name-dl-de-by-2.0": "Германи хаамийн лицензи — Атрибуци — Верси 2.0",
+	"jsonconfig-license-name-GeoNutzV": "Geo Data лицензи Германи",
 	"jsonconfig-license-copyrightwarning": "Хийцамаш Ӏалашбарца, хьо реза хуьллу хьайн къинхьегам арахеца [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] лицензин билламашца.",
 	"jsonconfig-license-copyrightwarning-license-unset": "Хийцамаш ларбарца, хьо реза хуьллу хьайн къинхьегам арахеца <code>licence</code> меттигехь билгалйаьккхинчу лицензица.",
 	"jsonconfig-license-notice": "'''Билгалдаккхар:''' АгӀо хийцарца хьо реза хуьллу хьайн къинхьегам арахуьйцуш хиларна [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] лицензин билламашца.",
 	"jsonconfig-license-notice-license-unset": "'''Билгалдаккхар:''' АгӀо хийцарца, хьо реза хуьллу хьайн къинхьегам арахуьйцуш хиларна <code>license</code> меттигехь билгалйаьккхинчу лицензица.",
 	"right-jsonconfig-flush": "API-ца JsonConfig-на урхалла дар",
-	"action-jsonconfig-flush": "API-ца JsonConfig-на урхалла дар"
+	"action-jsonconfig-flush": "API-ца JsonConfig-на урхалла дар",
+	"jsonconfig-blocked-page-creation": "Ахь билгалйаьккхина агӀонан цӀе нийса ца йогӀу цхьана а кепашца, хӀокху викин JSONConfig шордарна хӀоттийначу."
 }

@@ -11,6 +11,7 @@
 	"wikibasecirrus-keywordfeature-too-many-language-codes": "Avainsana $1 sisältää liian monta kielikoodia. Haetaan {{GRAMMAR:adessive|$2}} {{PLURAL:$3|annetusta $3 kielestä|annetuista $3 kielestä}}",
 	"wikibasecirrus-inlabel-no-query-provided": "inlabel-avainsanalle annettiin tyhjä hakumerkkijono",
 	"wikibasecirrus-search-bad-entity-type": "Virheellinen entiteettityyppi: $1",
+	"wikibasecirrus-haswbstatement-feature-no-valid-statements": "haswbstatement-avainsana ei sisällä kelvollisia lauseita",
 	"wikibasecirrus-haslicense-feature-no-valid-arguments": "haslicense-avainsana ei sisällä kelvollisia argumentteja",
 	"wikibasecirrus-wbstatementquantity-feature-no-valid-statements": "wbstatementquantity-avainsana ei sisällä kelvollisia lauseita",
 	"special-entitieswithoutdescription": "Entiteetit ilman kuvausta",
@@ -18,7 +19,7 @@
 	"special-entitieswithoutlabel": "Entiteetit ilman nimeä",
 	"wikibasecirrus-entitieswithoutlabel-legend": "Hae luettelo entiteeteistä, joissa ei ole nimeä",
 	"wikibasecirrus-entitieswithoutlabel-label-language": "Kielikoodi:",
-	"wikibasecirrus-entitieswithoutlabel-label-type": "Tyyppi",
+	"wikibasecirrus-entitieswithoutlabel-label-type": "Tyyppi:",
 	"wikibasecirrus-entitieswithoutlabel-submit": "Etsi",
 	"wikibasecirrus-entitieswithoutlabel-invalid-language": "”$1” ei ole kelvollinen kielikoodi.",
 	"wikibasecirrus-entitieswithoutlabel-invalid-type": "”$1” ei ole kelvollinen entiteettityyppi."

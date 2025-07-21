@@ -12,7 +12,8 @@
 			"Vugar 1981",
 			"Wertuose",
 			"Şeyx Şamil",
-			"Gadir"
+			"Gadir",
+			"Əkrəm"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "İstifadəçinin mobil interfeys vasitəsilə redaktə edib-etməməsi ($1)",
@@ -61,7 +62,7 @@
 	"mobile-frontend-editor-licensing": "Dəyişiklikləri yayımlamaqla siz töhfənizin $1 {{PLURAL:$2|lisenziyası|lisenziyaları}} altında yayımlanması ilə razılaşdığınızı bildirmiş olursunuz.",
 	"mobile-frontend-editor-licensing-with-terms": "Dəyişiklikləri yayımlamaqla siz $1ni qəbul edirsiniz və töhfənizin $2 {{PLURAL:$3|lisenziyası|lisenziyaları}} altında yayımlanması ilə razılaşdığınızı bildirmiş olursunuz.",
 	"mobile-frontend-editor-terms-link": "[$1 İstifadə Şərtləri]",
-	"mobile-frontend-editor-new-page-confirm": "{{GENDER:$1|Siz}} {{SITENAME}} layihəsində yeni səhifə yaratmaq istədiyinizdən əminsinizmi?",
+	"mobile-frontend-editor-new-page-confirm": "{{SITENAME}} saytında {{GENDER:$1|yeni səhifə yaratmaq istədiyinizə əminsiniz}}?",
 	"mobile-frontend-editor-placeholder": "Bu bölmə boşdur. Onu ilk genişləndirən siz olun!",
 	"mobile-frontend-editor-placeholder-new-page": "{{GENDER:$1|Siz}} yeni {{SITENAME}} səhifəsi yaradırsınız!",
 	"mobile-frontend-editor-previewing-page": "<span><strong>Sınaq göstərişi:</strong> $1</span>",
@@ -115,7 +116,7 @@
 	"mobile-frontend-last-modified-with-user-years": "[$4 Sonuncu {{GENDER:$1|redaktə}} {{PLURAL:$3|$3 il}} əvvəl] {{PLURAL:$5|[$6 $2]|0=anonim istifadəçi}} tərəfindən edilib",
 	"mobile-frontend-main-menu": "Ana səhifə",
 	"mobile-frontend-main-menu-settings-heading": "Nizamlamalar",
-	"mobile-frontend-media-details": "Detallar",
+	"mobile-frontend-media-details": "Ətraflı",
 	"mobile-frontend-media-license-link": "Lisenziya məlumatı",
 	"mobile-frontend-media-load-fail-message": "Bu şəkli yükləyərkən xəta baş verdi.",
 	"mobile-frontend-media-load-fail-retry": "Yenilə",

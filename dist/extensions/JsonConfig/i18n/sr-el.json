@@ -5,5 +5,30 @@
 			"Zoranzoki21"
 		]
 	},
-	"jsonconfig-desc": "Dozvoljava skladištenje JSON konfiguracije na vikiju"
+	"nstab-data": "Podaci",
+	"jsonconfig-desc": "Dozvoljava skladištenje JSON konfiguracije na vikiju",
+	"jsonconfig-edit-action-apply": "Primeni",
+	"jsonconfig-edit-action-cancel": "Otkaži",
+	"jsonconfig-edit-dialog-title": "Uredi JSON",
+	"jsonconfig-optional-field": "(neobavezno)",
+	"jsonconfig-type-name-invalid": "nevažeće",
+	"jsonconfig-type-name-string": "niz",
+	"jsonconfig-type-name-number": "broj",
+	"jsonconfig-type-name-boolean": "Bulov",
+	"jsonconfig-license": "Podaci dostupni pod licencom $1.",
+	"jsonconfig-license-name-CC-BY-1.0": "Creative Commons Autorstvo 1.0",
+	"jsonconfig-license-name-CC-BY-2.0": "Creative Commons Autorstvo 2.0",
+	"jsonconfig-license-name-CC-BY-2.5": "Creative Commons Autorstvo 2.5",
+	"jsonconfig-license-name-CC-BY-3.0": "Creative Commons Autorstvo 3.0",
+	"jsonconfig-license-name-CC-BY-4.0": "Creative Commons Autorstvo 4.0",
+	"jsonconfig-license-name-CC-BY-4.0+": "Creative Commons Autorstvo 4.0 ili kasnija verzija",
+	"jsonconfig-license-name-CC-BY-SA-1.0": "Creative Commons Autorstvo-Deliti pod istim uslovima 1.0",
+	"jsonconfig-license-name-CC-BY-SA-2.0": "Creative Commons Autorstvo-Deliti pod istim uslovima 2.0",
+	"jsonconfig-license-name-CC-BY-SA-2.5": "Creative Commons Autorstvo-Deliti pod istim uslovima 2.5",
+	"jsonconfig-license-name-CC-BY-SA-3.0": "Creative Commons Autorstvo-Deliti pod istim uslovima 3.0",
+	"jsonconfig-license-name-CC-BY-SA-4.0": "Creative Commons Autorstvo-Deliti pod istim uslovima 4.0",
+	"jsonconfig-license-name-CC-BY-SA-4.0+": "Creative Commons Autorstvo-Deliti pod istim uslovima 4.0 ili kasnija verzija",
+	"jsonconfig-license-copyrightwarning": "Objavljivanjem izmena, prihvatate da objavite svoj doprinos pod licencama [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",
+	"jsonconfig-license-copyrightwarning-license-unset": "Objavljivanjem izmena, prihvatate da objavite svoj doprinos pod licencama navedenim u polju <code>licence</code>.",
+	"jsonconfig-license-notice": "'''Napomena:''' Uređivanjem ove stranice prihvatate da objavite svoj doprinos pod licencom [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}]."
 }

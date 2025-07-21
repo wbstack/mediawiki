@@ -43,7 +43,7 @@ class InviteStore {
 		$data = [
 			'is_inviter' => $inviter->getId(),
 			'is_email' => $email,
-			'is_when' => wfTimestamp( TS_UNIX ),
+			'is_when' => wfTimestamp( TS_MW ),
 			'is_hash' => $hash,
 			'is_groups' => serialize( $groups ),
 		];
@@ -69,7 +69,7 @@ class InviteStore {
 	public function addSignupDate( User $user, $hash ) {
 		$conds = [ 'is_hash' => $hash ];
 		$data = [
-			'is_used' => wfTimestamp( TS_UNIX ),
+			'is_used' => wfTimestamp( TS_MW ),
 			'is_invitee' => $user->getId(),
 		];
 		$this->db->update( $this->dbTable, $data, $conds, __METHOD__ );

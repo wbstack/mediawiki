@@ -15,7 +15,7 @@
 	"requestaccount-leg-areas": "আগ্রহের মূল ক্ষেত্র",
 	"requestaccount-leg-person": "ব্যক্তিগত তথ্য",
 	"requestaccount-leg-other": "অন্যান্য তথ্য",
-	"requestaccount-real": "প্রকৃত নাম:",
+	"requestaccount-real": "প্রকৃত নাম (ঐচ্ছিক):",
 	"requestaccount-same": "(প্রকৃত নামের মত)",
 	"requestaccount-email": "ইমেইল ঠিকানা:",
 	"requestaccount-reqtype": "পদ:",

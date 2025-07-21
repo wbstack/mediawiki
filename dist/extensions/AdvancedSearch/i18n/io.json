@@ -18,7 +18,7 @@
 	"advancedsearch-field-hastemplate": "Pagini kun ca shabloni",
 	"advancedsearch-field-filetype": "Tipo di arkivo",
 	"advancedsearch-field-sort": "Quale organizar",
-	"advancedsearch-field-preview-sort": "Ordenar segun $1",
+	"advancedsearch-field-preview-sort": "Klasifikar segun $1",
 	"advancedsearch-help-or": ";Deskripto\n:Adminime 1 de la termini serchata mustas inkuzesar en la pagino.\n;Helpo-pagino\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Words.2C_phrases.2C_and_modifiers Vorti, frazi, e modifikeri]\n;Sintaxal equivalanta en normala serchado\n:Vorti kun <code>O</code> inter li, exemple <code>''Laptop'' O ''Notebook''</code>.",
 	"advancedsearch-filetype-section-types": "Ordinara tipi di arkivi",
 	"advancedsearch-filetype-section-video": "Formati di video",

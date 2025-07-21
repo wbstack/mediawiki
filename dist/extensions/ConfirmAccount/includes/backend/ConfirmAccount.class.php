@@ -1,6 +1,7 @@
 <?php
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\WikiMap\WikiMap;
 use Wikimedia\Rdbms\FakeResultWrapper;
 
 class ConfirmAccount {

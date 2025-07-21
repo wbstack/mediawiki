@@ -4,7 +4,8 @@
 			"Brettchenweber",
 			"Metalhead64",
 			"Umherirrender",
-			"Yurik"
+			"Yurik",
+			"McDutchie"
 		]
 	},
 	"nstab-data": "Daten",
@@ -62,7 +63,7 @@
 	"jsonconfig-license-name-GeoNutzV": "Geodatenlizenz Deutschland",
 	"jsonconfig-license-copyrightwarning": "Durch die Veröffentlichung von Änderungen erklärst du dich damit einverstanden, deinen Beitrag gemäß den Bedingungen der Lizenz [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] freizugeben.",
 	"jsonconfig-license-copyrightwarning-license-unset": "Durch die Veröffentlichung von Änderungen erklärst du dich damit einverstanden, deinen Beitrag gemäß der im Feld <code>licence</code> angegebenen Lizenz freizugeben.",
-	"jsonconfig-license-notice": "'''Hinweis:'' Wenn du diese Seite bearbeitest, erklärst du dich damit einverstanden, deinen Beitrag gemäß den Bedingungen der Lizenz [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] freizugeben.",
+	"jsonconfig-license-notice": "'''Hinweis:''' Wenn du diese Seite bearbeitest, erklärst du dich damit einverstanden, deinen Beitrag gemäß den Bedingungen der Lizenz [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] freizugeben.",
 	"jsonconfig-license-notice-license-unset": "'''Hinweis:''' Wenn du diese Seite bearbeitest, stimmst du der Veröffentlichung deines Beitrags unter der im Feld <code>licence</code> angegebenen Lizenz zu.",
 	"right-jsonconfig-flush": "JSON-Konfiguration über die API verändern",
 	"action-jsonconfig-flush": "JsonConfig über die API zu verändern",

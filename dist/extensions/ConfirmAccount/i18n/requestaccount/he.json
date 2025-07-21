@@ -24,7 +24,7 @@
 	"requestaccount-ext-text": "המידע הבא נשמר בפרטיות וישמש עבור בקשה זו בלבד.\nיתכן שתרצו לציין פרטי קשר כגון מספר טלפון כדי לסייע באימות זהותכם.",
 	"requestaccount-bio-text": "נסו לכלול הסמכות רלוונטיות בקורות החיים שלך להלן.",
 	"requestaccount-bio-text-i": "'''הביוגרפיה שלכם תוגדר בתור התוכן ההתחלתי לדף המשתמש שלכם.'''\nנא לוודא שאתם מסכימים לפרסם מידע כזה.",
-	"requestaccount-real": "שם אמיתי:",
+	"requestaccount-real": "שם אמיתי (לא חובה):",
 	"requestaccount-same": "(כמו השם האמיתי)",
 	"requestaccount-email": "כתובת הדוא\"ל:",
 	"requestaccount-reqtype": "משרה:",

@@ -273,7 +273,7 @@ function showPreview( parsedContent, parsedNote ) {
 		.append(
 			$( '<h2>' )
 				.attr( 'id', 'mw-previewheader' )
-				.append( mw.msg( 'preview' ) ),
+				.text( mw.msg( 'preview' ) ),
 			mw.util.messageBox( noteContentElement, 'warning' )
 		);
 

@@ -256,7 +256,7 @@ class ConfirmAccountsPage extends SpecialPage {
 
 			// Give grep a chance to find the usages: confirmaccount-type-0, confirmaccount-type-1
 			$out->addHTML( "<li><i>" . $this->msg( "confirmaccount-type-$i" )->escaped() . "</i>" );
-			$out->addHTML( $this->msg( 'word-separator' )->plain() );
+			$out->addHTML( $this->msg( 'word-separator' )->escaped() );
 			$params = $this->getLanguage()->pipeList( [ $open, $held, $rejects, $stale ] );
 			$out->addHTML( $this->msg( 'parentheses' )->rawParams( $params )->escaped() );
 			$out->addHTML( '</li>' );
@@ -284,7 +284,7 @@ class ConfirmAccountsPage extends SpecialPage {
 
 		# Output any failure message
 		if ( $msg != '' ) {
-			$out->addHTML( '<div class="errorbox">' . $msg . '</div><div class="visualClear"></div>' );
+			$out->addHTML( Html::errorBox( $msg ) );
 		}
 
 		$out->addWikiMsg( 'confirmaccount-text' );

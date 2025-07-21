@@ -32,7 +32,7 @@ class Literal extends TexNode {
 		array_push( $this->extendedLiterals, '\\infty', '\\emptyset' );
 	}
 
-	public function changeUnicodeFontInput( $input, $state ) {
+	public function changeUnicodeFontInput( string $input, array &$state ): string {
 		/**
 		 * In some font modifications, it is required to explicitly use Unicode
 		 * characters instead of (only) attributes in MathML to indicate the font.
@@ -50,7 +50,8 @@ class Literal extends TexNode {
 		return $input;
 	}
 
-	public function renderMML( $arguments = [], $state = [] ) {
+	/** @inheritDoc */
+	public function renderMML( $arguments = [], &$state = [] ) {
 		if ( isset( $state["intent-params"] ) ) {
 			foreach ( $state["intent-params"] as $intparam ) {
 				if ( $intparam == $this->arg ) {
@@ -149,7 +150,7 @@ class Literal extends TexNode {
 		return $this->arg;
 	}
 
-	public function setArg( $arg ) {
+	public function setArg( string $arg ) {
 		$this->arg = $arg;
 	}
 
@@ -167,14 +168,17 @@ class Literal extends TexNode {
 		return $this->extendedLiterals;
 	}
 
+	/** @inheritDoc */
 	public function extractIdentifiers( $args = null ) {
 		return $this->getLiteral( $this->literals, '/^([a-zA-Z\']|\\\\int)$/' );
 	}
 
+	/** @inheritDoc */
 	public function extractSubscripts() {
 		return $this->getLiteral( $this->extendedLiterals, '/^([0-9a-zA-Z+\',-])$/' );
 	}
 
+	/** @inheritDoc */
 	public function getModIdent() {
 		if ( $this->arg === '\\ ' ) {
 			return [ '\\ ' ];
@@ -182,7 +186,7 @@ class Literal extends TexNode {
 		return $this->getLiteral( $this->literals, '/^([0-9a-zA-Z\'])$/' );
 	}
 
-	private function getLiteral( $lit, $regexp ) {
+	private function getLiteral( array $lit, string $regexp ): array {
 		$s = trim( $this->arg );
 		if ( preg_match( $regexp, $s ) == 1 ) {
 			return [ $s ];

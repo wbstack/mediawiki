@@ -18,6 +18,7 @@
 	"advancedsearch-field-hastemplate": "Бул калыптарды камтыган барактарды",
 	"advancedsearch-field-inlanguage": "Бул тилдеги барактарды",
 	"advancedsearch-field-filetype": "Файл форматы",
+	"advancedsearch-field-filew": "Файлдын туурасы пиксел менен",
 	"advancedsearch-field-sort": "Иреттөө тартиби",
 	"advancedsearch-field-preview-sort": "$1 боюнча иреттөө",
 	"advancedsearch-placeholder-exact-text": "«мышык текени жакшы көрөт»",

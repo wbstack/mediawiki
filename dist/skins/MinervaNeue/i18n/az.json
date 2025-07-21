@@ -8,10 +8,12 @@
 			"Nemoralis",
 			"PPerviz",
 			"Toghrul Rahimli",
-			"Wertuose"
+			"Wertuose",
+			"Əkrəm",
+			"Gadir"
 		]
 	},
-	"minerva-last-modified-date": "Sonuncu redaktə $2, $1 tarixində redaktə edilib",
+	"minerva-last-modified-date": "Sonuncu redaktə $2, $1 tarixində edilib",
 	"minerva-watchlist-cta": "Bu səhifəni və ediləcək bütün redaktələri izləyin.",
 	"mobile-frontend-cookies-required": "Baxış rejimlərini dəyişmək üçün kukilər tələb olunur. Lütfən, onları aktivləşdirin və yenidən cəhd edin.",
 	"mobile-frontend-editor-edit": "Redaktə",
@@ -32,7 +34,7 @@
 	"mobile-frontend-main-menu-watchlist": "İzləmə siyahısı",
 	"mobile-frontend-meta-data-issues": "Səhifədəki problemlər",
 	"mobile-frontend-meta-data-issues-categories": "Bu kateqoriya haqqında",
-	"mobile-frontend-meta-data-issues-header": "Səhifədəki problemlər",
+	"mobile-frontend-meta-data-issues-header": "Səhifədəki bildirişlər",
 	"minerva-meta-data-issues-section-header": "Bölmə problemləri",
 	"mobile-frontend-pageaction-edit-tooltip": "Bu səhifənin giriş hissəsini redaktə et",
 	"mobile-frontend-placeholder": "{{SITENAME}} layihəsində axtar",

@@ -14,7 +14,7 @@
 	"deletebatch-desc": "[[Special:DeleteBatch|ページを一括削除する]]",
 	"deletebatch-help": "ページを一括削除できます。\nページ毎に削除できる他、ファイル内に列挙したページ群を削除することもできます。\n削除記録に表示される利用者を選択してください。\nアップロードされたファイルでは、ページ名と削除理由 (省略可能) をパイプ記号 (|) で区切って記す必要があります。",
 	"deletebatch-caption": "ページ一覧:",
-	"deletebatch-default-reason": "デフォルトの削除理由:",
+	"deletebatch-default-reason": "既定の削除理由:",
 	"deletebatch-title": "一括削除",
 	"deletebatch-link-back": "特別ページに戻る",
 	"deletebatch-as": "スクリプトを実行する名義:",

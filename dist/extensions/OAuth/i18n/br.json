@@ -30,7 +30,7 @@
 	"mwoauth-consumer-stage-expired": "Aet d'e dermen",
 	"mwoauth-consumer-stage-approved": "Aprouet",
 	"mwoauth-consumer-stage-disabled": "Diweredekaet",
-	"mwoauth-consumer-stage-suppressed": "lamet",
+	"mwoauth-consumer-stage-suppressed": "Dilamet",
 	"mwoauthconsumerregistration-navigation": "Merdeiñ :",
 	"mwoauthconsumerregistration-list": "Ma roll bevezerien",
 	"mwoauthconsumerregistration-propose-submit": "Kinnig ur bevezer",
@@ -86,5 +86,6 @@
 	"mwoauth-form-button-cancel": "Nullañ",
 	"right-mwoauthproposeconsumer": "Kinnig bevezerien OAuth nevez",
 	"right-mwoauthupdateownconsumer": "Hizivaat ar vevezerien OAuth a gontrollit",
-	"right-mwoauthmanageconsumer": "Merañ ar vevezerien OAuth"
+	"right-mwoauthmanageconsumer": "Merañ ar vevezerien OAuth",
+	"mwoauth-botpasswords-note": "<strong>Evezhiadenn:</strong> suroc'h eo <span class=\"plainlinks\">[$1 OAuth]</span> eget gerioù-tremen botoù ha dleout a rafe bezañ implijet bewech ma vez skoret gant ar bot."
 }

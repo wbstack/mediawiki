@@ -4,6 +4,8 @@
 			"David1010"
 		]
 	},
+	"requestaccount": "ანგარიშის მოთხოვნა",
+	"requestaccount-login": "ანგარიშის მოთხოვნა",
 	"requestaccount-page": "{{ns:project}}:პირობები და მომსახურება",
 	"requestaccount-leg-user": "მომხმარებლის ანგარიში",
 	"requestaccount-leg-areas": "ინტერესების ძირითადი სფერო",

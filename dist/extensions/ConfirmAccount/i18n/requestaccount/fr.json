@@ -17,7 +17,8 @@
 			"Urhixidur",
 			"Verdy p",
 			"Wladek92",
-			"Zetud"
+			"Zetud",
+			"Derugon"
 		]
 	},
 	"requestaccount": "Demande de compte d’utilisateur",
@@ -35,7 +36,7 @@
 	"requestaccount-ext-text": "Les informations suivantes restent privées et ne pourront être utilisées que pour cette demande. \nVous avez la possibilité de lister des contacts tels qu’un numéro de téléphone qui pourra aider à confirmer votre identité.",
 	"requestaccount-bio-text": "Essayez d’inclure toute référence pertinente dans votre biographie ci-dessous.",
 	"requestaccount-bio-text-i": "'''Votre biographie servira comme contenu initial de votre page utilisateur.'''\nAssurez-vous d’être à l’aise pour publier de telles informations.",
-	"requestaccount-real": "Vrai nom :",
+	"requestaccount-real": "Vrai nom (facultatif) :",
 	"requestaccount-same": "(identique au nom de votre état civil ci-dessous)",
 	"requestaccount-email": "Adresse de courriel :",
 	"requestaccount-reqtype": "Situation :",

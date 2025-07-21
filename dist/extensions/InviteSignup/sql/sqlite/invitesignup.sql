@@ -5,10 +5,10 @@
 CREATE TABLE /*_*/invitesignup (
   is_hash BLOB NOT NULL,
   is_inviter INTEGER UNSIGNED NOT NULL,
-  is_invitee INTEGER UNSIGNED NOT NULL,
+  is_invitee INTEGER UNSIGNED DEFAULT NULL,
   is_email BLOB NOT NULL,
   is_when BLOB NOT NULL,
-  is_used BLOB NOT NULL,
+  is_used BLOB DEFAULT NULL,
   is_groups BLOB NOT NULL,
   PRIMARY KEY(is_hash)
 );

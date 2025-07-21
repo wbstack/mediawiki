@@ -5,10 +5,10 @@
 CREATE TABLE /*_*/invitesignup (
   is_hash VARBINARY(40) NOT NULL,
   is_inviter INT UNSIGNED NOT NULL,
-  is_invitee INT UNSIGNED NOT NULL,
+  is_invitee INT UNSIGNED DEFAULT NULL,
   is_email VARBINARY(255) NOT NULL,
   is_when BINARY(14) NOT NULL,
-  is_used BINARY(14) NOT NULL,
+  is_used BINARY(14) DEFAULT NULL,
   is_groups LONGBLOB NOT NULL,
   PRIMARY KEY(is_hash)
 ) /*$wgDBTableOptions*/;

@@ -14,7 +14,8 @@
 				"name": "is_invitee",
 				"type": "integer",
 				"options": {
-					"unsigned": true
+					"unsigned": true,
+					"notnull": false
 				}
 			},
 			{
@@ -35,7 +36,9 @@
 			{
 				"name": "is_used",
 				"type": "mwtimestamp",
-				"options": {}
+				"options": {
+					"notnull": false
+				}
 			},
 			{
 				"name": "is_hash",

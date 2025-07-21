@@ -36,6 +36,7 @@
 	"jsonconfig-type-name-localized": "llocalizáu",
 	"jsonconfig-type-name-number": "númberu",
 	"jsonconfig-type-name-boolean": "lóxicu",
+	"jsonconfig-use-category": "Páxines qu'utilicen la estensión JsonConfig",
 	"jsonconfig-license": "Datos disponibles so la $1.",
 	"jsonconfig-license-not-set": "Al editar esta páxina aceutes lliberar les tos ediciones de conformidá colos términos de la llicencia especificada nel campu «llicencia».",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",

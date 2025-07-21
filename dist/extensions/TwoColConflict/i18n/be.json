@@ -5,7 +5,8 @@
 			"Chadyka",
 			"No Sleep till Krupki",
 			"Plaga med",
-			"Tomato Cream"
+			"Tomato Cream",
+			"Maksim L."
 		]
 	},
 	"twocolconflict": "Канфлікт правак на падставе абзацаў",
@@ -38,7 +39,7 @@
 	"twocolconflict-split-your-version-chosen": "Ваша версія",
 	"twocolconflict-split-select-all": "Выбраць увесь",
 	"twocolconflict-split-tour-dialog-dot-message": "Каб атрымаць карысныя падказкі, націсніце на мігатлівыя сінія кропкі.",
-	"twocolconflict-split-tour-dialog-header": "Аб’яднанне канфліктных версіяў",
+	"twocolconflict-split-tour-dialog-header": "Аб’яднанне канфліктных версій",
 	"twocolconflict-split-tour-dialog-message": "На жаль, пакуль вы правілі, іншы ўдзельнік таксама правіў тую ж старонку і апублікаваў раней за вас.\n\nНе хвалюйцеся, вашы праўкі не згублены! Калі ласка, праглядзіце абедзве версіі і аб’яднайце іх. Пры неабходнасці вы можаце правіць выбраны тэкст. Толькі тэкст у выбраных палях будзе захаваны пры націску «{{int:publishchanges}}».",
 	"twocolconflict-split-tour-dialog-btn-text": "Пачаць аб’яднанне",
 	"twocolconflict-split-tour-popup-btn-text": "Так, зразумела.",

@@ -1,0 +1,24 @@
+{
+	"@metadata": {
+		"authors": [
+			"Song GK"
+		]
+	},
+	"advancedsearch-optgroup-structure": "Struktur",
+	"advancedsearch-optgroup-files": "Fail enggau gambar",
+	"advancedsearch-field-filetype": "Bansa fail",
+	"advancedsearch-filetype-section-image": "Format gambar",
+	"advancedsearch-filetype-section-video": "Format video",
+	"advancedsearch-filetype-section-audio": "Format audio",
+	"advancedsearch-filetype-section-document": "Format dokumen",
+	"advancedsearch-filetype-section-other": "Format ke bukai",
+	"advancedsearch-filetype-default": "Pilih bansa fail",
+	"advancedsearch-filetype-bitmap": "Gambar",
+	"advancedsearch-filetype-audio": "Audio",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Opis",
+	"advancedsearch-filesize-equals": "sama enggau",
+	"advancedsearch-filesize-greater-than": "besai agi ari",
+	"advancedsearch-filesize-smaller-than": "mit agi ari",
+	"advancedsearch-namespaces-preset-all": "Semua"
+}

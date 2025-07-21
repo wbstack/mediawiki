@@ -33,6 +33,7 @@
 	"requestaccount-bio-text": "Used as intro text for the {{msg-mw|Requestaccount-bio}} textarea.\n\nThis message may follow the following message:\n* {{msg-mw|Requestaccount-bio-text-i}}.",
 	"requestaccount-bio-text-i": "Used as intro text.\n\nThis message is followed by {{msg-mw|Requestaccount-bio-text}}.",
 	"requestaccount-real": "When changing this message, please make sure to change {{msg-mw|requestaccount-tos|notext=yes}} too, which directly references to this message.\n{{Identical|Real name}}",
+	"requestaccount-real-i": "Used as intro text of the fieldset {{msg-mw|Requestaccount-real}} in the \"Account request\" form.",
 	"requestaccount-same": "This message follows the label {{msg-mw|Username}}.\n\nIf the \"Username\" field is disabled, this message is used.\n\nOtherwise the \"Username\" input box appears instead of this message.",
 	"requestaccount-email": "Used as label for the \"Email address\" input box.\n{{Identical|E-mail address}}",
 	"requestaccount-reqtype": "Used as label for the \"Position\" select box which has the following positions:\n* {{msg-mw|Requestaccount-level-0}}\n* {{msg-mw|Requestaccount-level-1}}\n{{Identical|Position}}",

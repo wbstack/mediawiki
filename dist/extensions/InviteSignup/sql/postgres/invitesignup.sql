@@ -5,10 +5,10 @@
 CREATE TABLE invitesignup (
   is_hash TEXT NOT NULL,
   is_inviter INT NOT NULL,
-  is_invitee INT NOT NULL,
+  is_invitee INT DEFAULT NULL,
   is_email TEXT NOT NULL,
   is_when TIMESTAMPTZ NOT NULL,
-  is_used TIMESTAMPTZ NOT NULL,
+  is_used TIMESTAMPTZ DEFAULT NULL,
   is_groups TEXT NOT NULL,
   PRIMARY KEY(is_hash)
 );

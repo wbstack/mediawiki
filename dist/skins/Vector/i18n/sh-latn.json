@@ -7,7 +7,8 @@
 			"Srdjan m",
 			"Srđan",
 			"Vlad5250",
-			"Winston Sung"
+			"Winston Sung",
+			"Aca"
 		]
 	},
 	"vector-skin-desc": "Pruža dvije varijante Vectora:\n* 2011 – Savremena verzija MonoBooka s osvježenim izgledom i mnogim poboljšanjima.\n* 2022 – Vector izrađen kao dio projekta [[mw:Desktop Improvements|Poboljšanja računarskog prikaza]] Fondacije Wikimedia.",
@@ -19,7 +20,7 @@
 	"vector-languages": "Jezici",
 	"vector-language-button-aria-label": "Prijedi na druge jezične varijante članka. Dostupno je na {{PLURAL:$1|$1 jeziku|$1 jezika}}",
 	"vector-language-button-label": "{{PLURAL:$1|$1 jezik|$1 jezika}}",
-	"vector-no-language-button-label": "Dodaj jezike",
+	"vector-no-language-button-label": "0 jezika",
 	"vector-no-language-button-aria-label": "Ovaj članak postoji samo na ovom jeziku. Dodajte druge jezike",
 	"vector-language-variant-switcher-label": "Promijeni jezičnu varijantu",
 	"vector-action-addsection": "Započni temu",
@@ -73,7 +74,7 @@
 	"tooltip-vector-anon-user-menu-title": "Više mogućnosti",
 	"vector-prefs-limited-width": "Ograniči širinu teksta",
 	"vector-prefs-limited-width-help": "Omogući režim ograničene širine za poboljšano čitanje.",
-	"empty-language-selector-body": "Sadržaj stranice nije podržan na drugim jezicima.",
+	"empty-language-selector-body": "Sadržina stranice nije podržana na drugim jezicima.",
 	"vector-toc-unpinned-popup": "Sadržaj je premješten ovdje.",
 	"vector-page-tools-unpinned-popup": "Meni s alatkama premješten je ovdje.",
 	"vector-main-menu-unpinned-popup": "Glavni meni premješten je ovdje.",

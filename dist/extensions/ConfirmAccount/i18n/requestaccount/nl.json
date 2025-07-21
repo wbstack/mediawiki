@@ -25,7 +25,7 @@
 	"requestaccount-ext-text": "De volgende informatie wordt vertrouwelijk behandeld en wordt alleen gebruikt voor deze aanvraag.\nU kunt contactgegevens zoals een telefoonnummer opgeven om te helpen bij het vaststellen van uw identiteit.",
 	"requestaccount-bio-text": "Probeer relevante gegevens in uw biografie op te nemen.",
 	"requestaccount-bio-text-i": "'''Uw biografie zal gebruikt worden als eerste inhoud van uw gebruikerspagina.'''\nZorg ervoor dat u zich comfortabel voelt met het openbaren van deze informatie.",
-	"requestaccount-real": "Echte naam:",
+	"requestaccount-real": "Echte naam (optioneel):",
 	"requestaccount-same": "(gelijk aan echte naam hieronder)",
 	"requestaccount-email": "E-mailadres:",
 	"requestaccount-reqtype": "Positie:",

@@ -6,7 +6,7 @@
 			"Pikne"
 		]
 	},
-	"confirmaccount-maintext": "'''Seda lehekülge kasutatakse saidil ''{{SITENAME}}'' ootel olevate kontotaotluste kinnitamiseks'''.\n\nIga kontotaotlusjärjekord koosneb kolmest alamjärjekorrast.\nÜhes on avatud taotlused. Teises järjekorras on taotlused, mille teine administraator on kinni pidanud ja mis ootavad edasist teavet. Kolmandas järjekorras on viimati tagasi lükatud taotlused.\n\nKui vastad taotlusele, vaata see hoolega läbi ja kui vajalik, siis kinnita selles sisalduv teave.\nSinu tegevus logitakse kinniselt.\nSult oodatakse, et vaataksid siin üle ka kogu muu tegevuse peale enda tegevuse.",
+	"confirmaccount-maintext": "'''Seda lehekülge kasutatakse ''{{GRAMMAR:inessive|{{SITENAME}}}}'' ootel olevate kontotaotluste kinnitamiseks'''.\n\nIga kontotaotlusjärjekord koosneb kolmest alamjärjekorrast.\nÜhes on avatud taotlused. Teises järjekorras on taotlused, mille teine administraator on kinni pidanud ja mis ootavad edasist teavet. Kolmandas järjekorras on viimati tagasi lükatud taotlused.\n\nKui vastad taotlusele, vaata see hoolega läbi ja kui vajalik, siis kinnita selles sisalduv teave.\nSinu tegevus logitakse kinniselt.\nSult oodatakse, et vaataksid siin üle ka kogu muu tegevuse peale enda tegevuse.",
 	"confirmaccount-real-q": "Nimi",
 	"confirmaccount-email-q": "E-post",
 	"confirmaccount-bio-q": "Biograafia",

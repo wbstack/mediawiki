@@ -6,7 +6,8 @@
 			"Priviet",
 			"Revi",
 			"Yjs5497",
-			"아라"
+			"아라",
+			"Ykhwong"
 		]
 	},
 	"requestaccount": "계정 요청",
@@ -24,7 +25,7 @@
 	"requestaccount-ext-text": "다음 정보는 공개되지 않으며 이 요청을 처리하는 데에만 사용됩니다. \n휴대 전화 번호 등 연락처를 입력하면 본인 확인에 도움이 됩니다.",
 	"requestaccount-bio-text": "아래의 경력에 관련된 자격 정보를 포함해주세요.",
 	"requestaccount-bio-text-i": "'''당신의 경력은 사용자 페이지의 첫 내용으로 설정될 것입니다.'''\n해당 정보를 공개해도 되는지 다시 한 번 확인해주세요.",
-	"requestaccount-real": "실명:",
+	"requestaccount-real": "실명(선택사항):",
 	"requestaccount-same": "(실명과 같음)",
 	"requestaccount-email": "이메일 주소:",
 	"requestaccount-reqtype": "위치:",

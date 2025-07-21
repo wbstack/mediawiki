@@ -28,6 +28,7 @@ class InviteSignupHooks {
 				MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA ),
 				'invitesignup'
 			);
+
 			$invite = $store->getInvite( $hash );
 			if ( $invite && $invite['used'] === null ) {
 				global $wgInviteSignupHash;
@@ -55,6 +56,9 @@ class InviteSignupHooks {
 			return true;
 		}
 		$rights[] = 'createaccount';
+
+		// explicitly set read right
+		$rights[] = 'read';
 	}
 
 	public static function onUserCreateForm( &$template ) {

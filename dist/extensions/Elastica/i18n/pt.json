@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"O andras"
+		]
+	},
+	"elastica-desc": "Fornece funcionalidade básica de [https://www.elastic.co/ Elasticsearch] para outras extensões, através da biblioteca [https://elastica.io/ Elastica]"
+}

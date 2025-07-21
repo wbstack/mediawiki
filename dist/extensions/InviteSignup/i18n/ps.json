@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Ahmed-Najib-Biabani-Ibrahimkhel"
+			"Ahmed-Najib-Biabani-Ibrahimkhel",
+			"شاه زمان پټان"
 		]
 	},
 	"invitesignup": "دې ويکي ته خلک رابلل",
@@ -9,7 +10,7 @@
 	"is-tableth-date": "نېټه",
 	"is-tableth-email": "برېښليک",
 	"is-tableth-inviter": "وربلونکی",
-	"is-tableth-signup": "نومليکل",
+	"is-tableth-signup": "نوم‌ليکل",
 	"is-tableth-groups": "ډلې",
 	"is-add": "ورگډول",
 	"is-delete": "ړنگول",

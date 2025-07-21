@@ -2,11 +2,13 @@
 	"@metadata": {
 		"authors": [
 			"Oby Ezeilo",
-			"Sayvhior"
+			"Sayvhior",
+			"Neme244"
 		]
 	},
 	"advancedsearch-desc": "Ụzọ dị mfe iji mee nchọpụta [[Special:Search]]",
-	"advancedsearch-options-pane-head": "Ọchịchọ na adighị mfe:",
+	"advancedsearch-options-pane-head": "Ọchụchọ dị elu:",
+	"advancedsearch-options-pane-preview-list": "Okwu ọchụchọ a na-eji eme ihe ugbu a",
 	"advancedsearch-optgroup-text": "Chọọ n'ihu akwụkwọ ederede",
 	"advancedsearch-optgroup-structure": "Nzube",
 	"advancedsearch-optgroup-files": "Failụ na ihe oyiri di iche iche",
@@ -24,5 +26,23 @@
 	"advancedsearch-field-filew": "Obosara faịlụ na pikselụ",
 	"advancedsearch-field-fileh": "Ogo faịlụ na pikselụ",
 	"advancedsearch-field-sort": "Usoro nhazi",
-	"advancedsearch-field-preview-sort": "Hazie site na $1"
+	"advancedsearch-field-preview-sort": "Hazie site na $1",
+	"advancedsearch-help-general-instruction": "Ntuziaka zuru ezu maka $1",
+	"advancedsearch-inlanguage-default": "Họrọ asụsụ",
+	"advancedsearch-filetype-section-types": "Ụdị faịlụ izugbe",
+	"advancedsearch-filetype-section-image": "Ụdị onyonyo",
+	"advancedsearch-filetype-section-video": "Ụdị vidiyo",
+	"advancedsearch-filetype-section-audio": "Ụdị ọdịyo",
+	"advancedsearch-filetype-section-document": "Ụdị akwụkwọ",
+	"advancedsearch-filetype-section-other": "Ụdị ndị ọzọ",
+	"advancedsearch-filetype-default": "Họrọ ụdị faịlụ",
+	"advancedsearch-filetype-bitmap": "Onyonyo",
+	"advancedsearch-filetype-drawing": "Ịse ihe",
+	"advancedsearch-filetype-audio": "Ọdịyo",
+	"advancedsearch-filetype-video": "Vidiyo",
+	"advancedsearch-filetype-office": "Ụlọ ọrụ",
+	"advancedsearch-filesize-greater-than": "ka ukwuu",
+	"advancedsearch-filesize-smaller-than": "dị ala karịa",
+	"advancedsearch-sort-relevance": "Mkpa",
+	"advancedsearch-sort-preview-relevance": "mkpa ọ dị"
 }

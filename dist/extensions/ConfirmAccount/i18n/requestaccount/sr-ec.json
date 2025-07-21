@@ -9,7 +9,8 @@
 			"Sasa Stefanovic",
 			"Zoranzoki21",
 			"Михајло Анђелковић",
-			"Сербијана"
+			"Сербијана",
+			"Aca"
 		]
 	},
 	"requestaccount": "Затражи налог",
@@ -21,7 +22,7 @@
 	"requestaccount-leg-person": "Личне информације",
 	"requestaccount-leg-other": "Други подаци",
 	"requestaccount-leg-tos": "Услови коришћења",
-	"requestaccount-real": "Право име:",
+	"requestaccount-real": "Право име (необавезно):",
 	"requestaccount-same": "(истоветно правом имену)",
 	"requestaccount-email": "Имејл адреса:",
 	"requestaccount-reqtype": "Положај:",
