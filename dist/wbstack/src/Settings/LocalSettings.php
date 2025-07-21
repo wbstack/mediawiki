@@ -138,6 +138,9 @@ if( !$wwDomainIsMaintenance && !empty(getenv('MW_DB_SERVER_REPLICA'))){
     ];
 }
 
+// Limit expensive queries (T399804)
+$wgMaxExecutionTimeForExpensiveQueries = 5_000;
+
 // Jobs
 # For now jobs will run in the requests, this obviously isn't the ideal solution and really
 # there should be a job running service deployed...
