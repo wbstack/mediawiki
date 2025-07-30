@@ -218,6 +218,39 @@ $wgFooterIcons = [
     ],
 ];
 
+// https://www.mediawiki.org/wiki/Manual:Footer
+// add the link to the report illegal content page
+$wgHooks['SkinAddFooterLinks'][] = function ( $skin, $key, &$footerLinks ) {
+    if ( $key === 'places' ) {
+        $aboutIndex = array_search('about', array_keys($footerLinks)); // Find the position of 'about'
+        if ($aboutIndex === false) {
+            $footerLinks['report'] = Html::element(
+                'a',
+                [
+                    'href' => 'https://wikibase.cloud/complaint',
+                    'target' => '_blank',
+                    'rel' => 'noopener noreferrer'
+                ],
+                'Report illegal content'
+            );
+        } else {
+            $footerLinks = array_slice($footerLinks, 0, $aboutIndex + 1, true)
+                + [
+                    'report' => Html::element(
+                        'a',
+                        [
+                            'href' => 'https://wikibase.cloud/complaint',
+                            'target' => '_blank',
+                            'rel' => 'noopener noreferrer'
+                        ],
+                        'Report illegal content'
+                    )
+                ]
+                + array_slice($footerLinks, $aboutIndex + 1, null, true);
+        }
+    }
+};
+
 // Custom CSS styling
 $styles = [];
 if ( version_compare( MW_VERSION, '1.43', '<' ) ) {
