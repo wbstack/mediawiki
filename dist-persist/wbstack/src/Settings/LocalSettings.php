@@ -220,34 +220,24 @@ $wgFooterIcons = [
 
 // https://www.mediawiki.org/wiki/Manual:Footer
 // add the link to the report illegal content page
-$wgHooks['SkinAddFooterLinks'][] = function ( $skin, $key, &$footerLinks ) {
+$wgHooks['SkinAddFooterLinks'][] = function ( Skin $skin, string $key, array &$footerlinks ) {
     if ( $key === 'places' ) {
-        $aboutIndex = array_search('about', array_keys($footerLinks)); // Find the position of 'about'
-        if ($aboutIndex === false) {
-            $footerLinks['report'] = Html::element(
-                'a',
-                [
-                    'href' => 'https://wikibase.cloud/complaint',
-                    'target' => '_blank',
-                    'rel' => 'noopener noreferrer'
-                ],
-                'Report illegal content'
-            );
-        } else {
-            $footerLinks = array_slice($footerLinks, 0, $aboutIndex + 1, true)
-                + [
-                    'report' => Html::element(
-                        'a',
-                        [
-                            'href' => 'https://wikibase.cloud/complaint',
-                            'target' => '_blank',
-                            'rel' => 'noopener noreferrer'
-                        ],
-                        'Report illegal content'
-                    )
-                ]
-                + array_slice($footerLinks, $aboutIndex + 1, null, true);
+        $newFooterLinks = [];
+        foreach ( $footerlinks as $k => $v ) {
+            $newFooterLinks[$k] = $v;
+            if ( $k === 'about' ) {
+                $newFooterLinks['report'] = Html::element(
+                    'a',
+                    [
+                        'href' => 'https://wikibase.cloud/complaint',
+                        'target' => '_blank',
+                        'rel' => 'noopener noreferrer'
+                    ],
+                    'Report illegal content'
+                );
+            }
         }
+        $footerlinks = $newFooterLinks;
     }
 };
 
