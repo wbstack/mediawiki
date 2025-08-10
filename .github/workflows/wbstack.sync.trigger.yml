@@ -32,7 +32,7 @@ jobs:
         # For this action to work you must explicitly allow GitHub Actions to create pull requests.
         # This setting can be found in a repository's settings under Actions > General > Workflow permissions.
       - name: Create Pull Request
-        uses: peter-evans/create-pull-request@v4
+        uses: peter-evans/create-pull-request@v5
         with:
           title: wbstack sync for branch ${{ github.event.inputs.branch }}
           commit-message: wbstack sync
