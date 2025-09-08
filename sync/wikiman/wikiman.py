@@ -2,7 +2,7 @@
 
 import sys
 from typing import Any, Dict, List
-from github import Github
+from github import Github, Auth
 import yaml
 
 TARGET_DIR = sys.argv[1]
@@ -23,7 +23,7 @@ TOKEN = None
 with open(GITHUB_TOKEN_FILE, "r") as filehandler:
     TOKEN = filehandler.readline().strip()
 
-githubClient = Github(TOKEN)
+githubClient = Github(auth=Auth.Token(TOKEN))
 
 def get_mediawiki_branch_from_version(version: str) -> str:
     return f"REL{version.replace('.', '_')}"
