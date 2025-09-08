@@ -218,6 +218,20 @@ $wgFooterIcons = [
     ],
 ];
 
+$wgHooks['SkinAddFooterLinks'][] = function ( Skin $skin, string $key, array &$footerlinks ) {
+    if ( $key === 'places' ) {
+        $footerlinks['report'] = Html::element(
+            'a',
+            [
+                'href' => 'https://wikibase.cloud/complaint',
+                'target' => '_blank',
+                'rel' => 'noopener noreferrer'
+            ],
+            'Report illegal content'
+        );
+    }
+};
+
 // Custom CSS styling
 $wgResourceModules[ 'wbstack.styling' ] = array(
     'styles' => [ 'footer-badges.css' ],
