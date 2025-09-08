@@ -277,13 +277,13 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
         ),
         'ValueParsers\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
-            1 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
+            0 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
+            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
         ),
         'ValueFormatters\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
-            1 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
+            0 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
+            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
         ),
         'Symfony\\Polyfill\\Php83\\' => 
         array (
@@ -396,8 +396,8 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri-interfaces/src',
-            1 => __DIR__ . '/..' . '/league/uri/src',
+            0 => __DIR__ . '/..' . '/league/uri/src',
+            1 => __DIR__ . '/..' . '/league/uri-interfaces/src',
         ),
         'League\\OAuth2\\Server\\' => 
         array (
@@ -509,8 +509,8 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
         ),
         'DataValues\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/data-values/src',
-            1 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
+            0 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
+            1 => __DIR__ . '/..' . '/data-values/data-values/src',
         ),
         'Composer\\Semver\\' => 
         array (
