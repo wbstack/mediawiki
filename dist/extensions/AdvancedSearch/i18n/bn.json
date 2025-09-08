@@ -5,7 +5,8 @@
 			"Aishik Rehman",
 			"Rasal Lia",
 			"আজিজ",
-			"আফতাবুজ্জামান"
+			"আফতাবুজ্জামান",
+			"Bodhisattwa"
 		]
 	},
 	"advancedsearch-desc": "[[Special:Search]]-এ উচ্চতর অনুসন্ধান ক্ষমতায় সহজে প্রবেশাধিকার দেয়",
@@ -22,7 +23,7 @@
 	"advancedsearch-field-subpageof": "এই পাতার উপপাতাগুলি",
 	"advancedsearch-field-intitle": "পাতার শিরোনামে রয়েছে",
 	"advancedsearch-field-deepcategory": "এই বিষয়শ্রেণীগুলিতে থাকা পাতাসমূহ",
-	"advancedsearch-field-hastemplate": "এই টেমপ্লেটগুলিসহ পাতাগুলি",
+	"advancedsearch-field-hastemplate": "এই টেমপ্লেটসহ পাতাগুলি",
 	"advancedsearch-field-inlanguage": "এই ভাষায় পাতাগুলি",
 	"advancedsearch-field-filetype": "ফাইলের ধরন",
 	"advancedsearch-field-filew": "পিক্সেলে ফাইল প্রস্থ",

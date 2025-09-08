@@ -8,7 +8,7 @@
 			"Winston Sung"
 		]
 	},
-	"skinname-modern": "現代（Modern）",
+	"skinname-modern": "Modern​（現代）",
 	"modern.css": "/* 此處所有的 CSS 都會在使用者使用 Modern 外觀時載入 */",
 	"modern.js": "/* 此處所有的 JavaScript 都會在使用者使用 Modern 外觀時載入 */",
 	"modern-desc": "帶有側邊欄與上方橫列的藍/灰色外觀。由 MonoBook 外觀衍生而來"

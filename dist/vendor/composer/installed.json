@@ -431,6 +431,7 @@
             "support": {
                 "source": "https://github.com/wikimedia/php-cssjanus/tree/v2.3.0"
             },
+            "abandoned": "wikimedia/cssjanus",
             "install-path": "../cssjanus/cssjanus"
         },
         {
@@ -1059,17 +1060,17 @@
         },
         {
             "name": "elasticsearch/elasticsearch",
-            "version": "v7.17.1",
-            "version_normalized": "7.17.1.0",
+            "version": "v7.17.3",
+            "version_normalized": "7.17.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/elastic/elasticsearch-php.git",
-                "reference": "f1b8918f411b837ce5f6325e829a73518fd50367"
+                "reference": "b8a60b4136ee31117d1aa1b19879530eb6d11efb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/f1b8918f411b837ce5f6325e829a73518fd50367",
-                "reference": "f1b8918f411b837ce5f6325e829a73518fd50367",
+                "url": "https://api.github.com/repos/elastic/elasticsearch-php/zipball/b8a60b4136ee31117d1aa1b19879530eb6d11efb",
+                "reference": "b8a60b4136ee31117d1aa1b19879530eb6d11efb",
                 "shasum": ""
             },
             "require": {
@@ -1082,7 +1083,7 @@
                 "ext-yaml": "*",
                 "ext-zip": "*",
                 "mockery/mockery": "^1.2",
-                "phpstan/phpstan": "^0.12",
+                "phpstan/phpstan": "^1.10",
                 "phpunit/phpunit": "^9.3",
                 "squizlabs/php_codesniffer": "^3.4",
                 "symfony/finder": "~4.0"
@@ -1091,7 +1092,7 @@
                 "ext-curl": "*",
                 "monolog/monolog": "Allows for client-level logging and tracing"
             },
-            "time": "2022-09-30T12:28:55+00:00",
+            "time": "2025-07-14T09:07:02+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -1123,7 +1124,7 @@
             ],
             "support": {
                 "issues": "https://github.com/elastic/elasticsearch-php/issues",
-                "source": "https://github.com/elastic/elasticsearch-php/tree/v7.17.1"
+                "source": "https://github.com/elastic/elasticsearch-php/tree/v7.17.3"
             },
             "install-path": "../elasticsearch/elasticsearch"
         },

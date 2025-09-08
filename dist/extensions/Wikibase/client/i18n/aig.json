@@ -5,7 +5,7 @@
 		]
 	},
 	"wikibase-dataitem": "{{WBREPONAME}} ait'm",
-	"wikibase-editlinks": "Chenj link dem",
+	"wikibase-editlinks": "Chienj link dem",
 	"wikibase-addlinkstitle": "Add langwij link dem",
 	"wikibase-linkitem-addlinks": "Add link dem",
 	"wikibase-linkitem-title": "Link up wid piej",
@@ -15,5 +15,5 @@
 	"wikibase-linkitem-input-page": "Piej:",
 	"wikibase-rc-hide-wikidata-hide": "Haid",
 	"wikibase-rc-hide-wikidata-show": "Shuo",
-	"wikibase-otherprojects": "Een odda prajek dem"
+	"wikibase-otherprojects": "Een oda prajek dem"
 }

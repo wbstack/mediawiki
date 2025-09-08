@@ -2,11 +2,14 @@
 	"@metadata": {
 		"authors": [
 			"Ansumang",
-			"Siddhartha Ghai"
+			"Siddhartha Ghai",
+			"Saurmandal"
 		]
 	},
 	"deletebatch-caption": "पृष्ठ सूची:",
 	"deletebatch-or": "<strong>या</strong>",
 	"deletebatch-delete": "हटाएँ",
-	"deletebatch-select-yourself": "आप"
+	"deletebatch-select-yourself": "आप",
+	"action-deletebatch": "पृ्ष्ठों को समूह में हटाने",
+	"right-deletebatch": "पृ्ष्ठों को समूह में हटाना"
 }

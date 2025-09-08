@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"H78c67c"
+			"H78c67c",
+			"Ktchankt"
 		]
 	},
-	"elastica-desc": "用 [https://elastica.io/ Elastica] 函式庫嚟提供畀其他擴充套件嘅基礎 [https://www.elastic.co/ Elasticsearch] 功能"
+	"elastica-desc": "用 [https://elastica.io/ Elastica] 函式庫嚟畀其他擴充套件嘅基礎 [https://www.elastic.co/ Elasticsearch] 功能"
 }

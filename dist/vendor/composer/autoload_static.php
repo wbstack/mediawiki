@@ -1734,6 +1734,7 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
         'Elasticsearch\\Serializers\\SerializerInterface' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/Elasticsearch/Serializers/SerializerInterface.php',
         'Elasticsearch\\Serializers\\SmartSerializer' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/Elasticsearch/Serializers/SmartSerializer.php',
         'Elasticsearch\\Transport' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/Elasticsearch/Transport.php',
+        'Elasticsearch\\Utility' => __DIR__ . '/..' . '/elasticsearch/elasticsearch/src/Elasticsearch/Utility.php',
         'Firebase\\JWT\\BeforeValidException' => __DIR__ . '/..' . '/firebase/php-jwt/src/BeforeValidException.php',
         'Firebase\\JWT\\CachedKeySet' => __DIR__ . '/..' . '/firebase/php-jwt/src/CachedKeySet.php',
         'Firebase\\JWT\\ExpiredException' => __DIR__ . '/..' . '/firebase/php-jwt/src/ExpiredException.php',

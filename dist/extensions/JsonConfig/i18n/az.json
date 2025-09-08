@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Nemoralis"
+			"Nemoralis",
+			"Əkrəm"
 		]
 	},
 	"tooltip-ca-nstab-data": "Data səhifəsinə bax",
@@ -21,6 +22,7 @@
 	"jsonconfig-edit-dialog-title": "JSON-u redaktə et",
 	"jsonconfig-err-array": "\"$1\" parametri siyahı olmalıdır, məsələn <kbd>[\"value1\", \"value2\", ...]</kbd>",
 	"jsonconfig-use-category": "JsonConfig uzantısından istifadə edən səhifələr",
+	"jsonconfig-license": "Data \"$1\" lisenziyası ilə əlçatandır.",
 	"jsonconfig-license-url-CC0-1.0": "https://creativecommons.org/publicdomain/zero/1.0/deed.az/",
 	"jsonconfig-license-url-CC-BY-1.0": "https://creativecommons.org/licenses/by/1.0/deed.az",
 	"jsonconfig-license-url-CC-BY-2.0": "https://creativecommons.org/licenses/by/2.0/deed.az",

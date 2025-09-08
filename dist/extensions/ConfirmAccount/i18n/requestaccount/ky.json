@@ -4,6 +4,18 @@
 			"Bosogo"
 		]
 	},
+	"requestaccount": "Аккаунтту өтүнүү",
+	"requestaccount-login": "Аккаунтту өтүнүү",
+	"requestaccount-dup": "'''Эскертме: катталган аккаунттан аракет кылып жатасыз.'''",
+	"requestaccount-leg-user": "Аккаунт",
+	"requestaccount-leg-person": "Жеке маалымат",
+	"requestaccount-leg-other": "Башка маалымат",
+	"requestaccount-email": "Электрондук почта:",
+	"requestaccount-reqtype": "Роль:",
 	"requestaccount-level-0": "автор",
-	"requestaccount-level-1": "түзөтүүчү"
+	"requestaccount-level-1": "түзөтүүчү",
+	"requestaccount-notes": "Кошумча эскертмелер:",
+	"requestaccount-submit": "Аккаунтту өтүнүү",
+	"requestaccount-email-subj": "{{SITENAME}}: электрондук почтаны ырастоо",
+	"requestaccount-email-subj-admin": "{{SITENAME}} аккаунтуна өтүнүч"
 }

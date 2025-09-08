@@ -27,7 +27,7 @@
 	"twocolconflict-special-expired": "Tukaj ni ničesar videti. To verjetno pomeni, da ste že kdaj naleteli na navzkrižje urejanj, vendar je bilo to že nekaj časa nazaj in je vaše začasno shranjeno besedilo do zdaj preteklo.",
 	"twocolconflict-split-header-hint": "To možnost lahko še pomagate izboljšati, če pustite povratno informacijo na [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface pogovorni strani projekta].",
 	"twocolconflict-split-header-hint-beta": "Hvala za uporabo te beta možnosti. Lahko jo pomagate še izboljšati tako, da pustite povratne informacije na [//www.mediawiki.org/wiki/Help_talk:Paragraph-based_Edit_Conflict_Interface pogovorni strani projekta].",
-	"twocolconflict-split-header-overview": "Medtem ko ste urejali, je drug uporabnik uredil isto stran in jo objavil pred vami. Prosimo, preglejte obe redakciji in ju združite. Ko boste kliknili »{{int:publishchanges}}«, se bo shranilo samo besedilo v izbranih poljih.",
+	"twocolconflict-split-header-overview": "Med vašim urejanjem je drug uporabnik urejal isto stran in jo je objavil pred vami. Prosimo, preglejte obe redakciji in ju združite. Ko boste kliknili »{{int:publishchanges}}«, se bo shranilo samo besedilo v izbranih poljih.",
 	"twocolconflict-split-your-version-header": "Vaša redakcija",
 	"twocolconflict-split-current-version-header": "Zadnja redakcija $1.",
 	"twocolconflict-split-not-saved-at": "Ni še objavljeno",

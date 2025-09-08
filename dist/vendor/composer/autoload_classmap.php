@@ -1128,6 +1128,7 @@ return array(
     'Elasticsearch\\Serializers\\SerializerInterface' => $vendorDir . '/elasticsearch/elasticsearch/src/Elasticsearch/Serializers/SerializerInterface.php',
     'Elasticsearch\\Serializers\\SmartSerializer' => $vendorDir . '/elasticsearch/elasticsearch/src/Elasticsearch/Serializers/SmartSerializer.php',
     'Elasticsearch\\Transport' => $vendorDir . '/elasticsearch/elasticsearch/src/Elasticsearch/Transport.php',
+    'Elasticsearch\\Utility' => $vendorDir . '/elasticsearch/elasticsearch/src/Elasticsearch/Utility.php',
     'Firebase\\JWT\\BeforeValidException' => $vendorDir . '/firebase/php-jwt/src/BeforeValidException.php',
     'Firebase\\JWT\\CachedKeySet' => $vendorDir . '/firebase/php-jwt/src/CachedKeySet.php',
     'Firebase\\JWT\\ExpiredException' => $vendorDir . '/firebase/php-jwt/src/ExpiredException.php',

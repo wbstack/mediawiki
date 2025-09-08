@@ -40,6 +40,7 @@
 	"jsonconfig-type-name-localized": "lokalizuota",
 	"jsonconfig-type-name-number": "skaičius",
 	"jsonconfig-type-name-boolean": "loginė reikšmė",
+	"jsonconfig-use-category": "Puslapiai, naudojantys JsonConfig plėtinį",
 	"jsonconfig-license": "Duomenys prieinami $1.",
 	"jsonconfig-license-not-set": "Kai redaguojate šį puslapį, sutinkate išleisti savo indėlį pagal licenciją, nurodytą <code>licence</code> lauke.",
 	"jsonconfig-license-notice": "'''Pastaba:''' Kai redaguojate šį puslapį, sutinkate išleisti savo indėlį pagal [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}].",

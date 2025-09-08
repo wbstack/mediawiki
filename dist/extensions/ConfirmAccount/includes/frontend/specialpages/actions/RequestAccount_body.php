@@ -1,6 +1,9 @@
 <?php
 
+use MediaWiki\Extension\ConfirmEdit\CaptchaTriggers;
+use MediaWiki\Extension\ConfirmEdit\Hooks as CaptchaHooks;
 use MediaWiki\Html\Html;
+use MediaWiki\Registration\ExtensionRegistry;
 use MediaWiki\Request\WebRequestUpload;
 use MediaWiki\Title\Title;
 use MediaWiki\User\UserFactory;
@@ -254,23 +257,27 @@ class RequestAccountPage extends SpecialPage {
 			$form .= '</fieldset>';
 		}
 
-		# FIXME: do this better...
-		global $wgConfirmAccountCaptchas, $wgCaptchaClass, $wgCaptchaTriggers;
-		if ( $wgConfirmAccountCaptchas && isset( $wgCaptchaClass )
-			&& $wgCaptchaTriggers['createaccount'] && !$reqUser->isAllowed( 'skipcaptcha' ) ) {
-			/** @var SimpleCaptcha $captcha */
-			$captcha = new $wgCaptchaClass;
+		$config = $this->getConfig();
+		if (
+			$config->get( 'ConfirmAccountCaptchas' ) &&
+			ExtensionRegistry::getInstance()->isLoaded( 'ConfirmEdit' )
+		) {
+			$captcha = CaptchaHooks::getInstance( CaptchaTriggers::CREATE_ACCOUNT );
+			if (
+				!$captcha->canSkipCaptcha( $reqUser, $config ) &&
+				$captcha->triggersCaptcha( CaptchaTriggers::CREATE_ACCOUNT )
+			) {
+				$formInformation = $captcha->getFormInformation();
+				$formMetainfo = $formInformation;
+				unset( $formMetainfo['html'] );
+				$captcha->addFormInformationToOutput( $out, $formMetainfo );
 
-			$formInformation = $captcha->getFormInformation();
-			$formMetainfo = $formInformation;
-			unset( $formMetainfo['html'] );
-			$captcha->addFormInformationToOutput( $out, $formMetainfo );
-
-			# Hook point to add captchas
-			$form .= '<fieldset>';
-			$form .= $this->msg( 'captcha-createaccount' )->parseAsBlock();
-			$form .= $formInformation['html'];
-			$form .= '</fieldset>';
+				# Hook point to add captchas
+				$form .= '<fieldset>';
+				$form .= $this->msg( 'captcha-createaccount' )->parseAsBlock();
+				$form .= $formInformation['html'];
+				$form .= '</fieldset>';
+			}
 		}
 		$form .= Html::hidden( 'title', $this->getPageTitle()->getPrefixedDBKey() ) . "\n";
 		$form .= Html::hidden( 'wpEditToken', $reqUser->getEditToken() ) . "\n";

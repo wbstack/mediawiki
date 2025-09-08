@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Умар"
 		]
 	},
@@ -41,7 +40,7 @@
 	"advancedsearch-help-fileh": ";Хаам\n:ХӀокху меттигаш аьтту бо файлан локхалла билгалйан.\n;Тидаме эца рогӀераниг\n:* ХӀара шоралла а, дохалла долу файлийн тайпанашна бен лелош йац, масала видео а, суьрташ а.\n;ГӀоьнан агӀо\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#File_measures Filemeasures]\n;Синтаксин эквивалент лахаран чохь\n:<code>fileh</code> терахь царна хьалхахь, масала, <code>fileh:>600</code>.",
 	"advancedsearch-help-sort": "Хаам\n:Карийнарш дӀанисйар хийцар. ЙогӀуш йолу агӀонаш Ӏад йитаран кепаца гойту лакхахь.\n;ГӀо\n:[https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch#Explicit_sort_orders Билгала къастина дӀанисйар]\n;Синтаксин эквивалент лахаран чохь\n:ХӀокху функцин коьрта дош дац, ахьа лахаран меттиге йаздан мегар долу, хӀунда аьлча иза билгалдо URL-адресан параметрехула.",
 	"advancedsearch-placeholder-exact-text": "\"цициган йеза газа\"",
-	"advancedsearch-inlanguage-default": "Харжа мотт",
+	"advancedsearch-inlanguage-default": "Мотт харжа",
 	"advancedsearch-filetype-section-types": "Файлийн йукъара тайпанаш",
 	"advancedsearch-filetype-section-image": "Суьртийн форматаш",
 	"advancedsearch-filetype-section-video": "Видеофайлийн форматаш",
