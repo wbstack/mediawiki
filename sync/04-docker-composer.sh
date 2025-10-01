@@ -29,7 +29,15 @@ cp -r "$COMPOSER_WORK_DIR"/vendor "$PWD"/dist
 
 # composer install
 COMPOSER_WORK_DIR="$PWD"/dist
-echo "Performing needed composer installations"
+
+# Run without composer-merge plugin to install using only composer.lock
+mv "$COMPOSER_WORK_DIR"/composer.local.json "$COMPOSER_WORK_DIR"/composer.local.json.tmp
+echo "Performing composer install without composer-merge plugin"
+composer_in_docker install --no-dev --no-progress --optimize-autoloader
+mv "$COMPOSER_WORK_DIR"/composer.local.json.tmp "$COMPOSER_WORK_DIR"/composer.local.json
+
+# Run again with composer-merge plugin to add missing autoload config
+echo "Performing composer install with composer-merge plugin"
 composer_in_docker install --no-dev --no-progress --optimize-autoloader
 
 # composer update (When ALSO_COMPOSER_UPDATE = 1)
