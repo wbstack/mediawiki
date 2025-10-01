@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ToolbarDialogTool class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -41,12 +41,11 @@ ve.ui.FindAndReplaceTool = function VeUiFindAndReplaceTool() {
 };
 OO.inheritClass( ve.ui.FindAndReplaceTool, ve.ui.ToolbarDialogTool );
 ve.ui.FindAndReplaceTool.static.name = 'findAndReplace';
-ve.ui.FindAndReplaceTool.static.group = 'dialog';
+ve.ui.FindAndReplaceTool.static.group = 'utility';
 ve.ui.FindAndReplaceTool.static.icon = 'articleSearch';
 ve.ui.FindAndReplaceTool.static.title =
 	OO.ui.deferMsg( 'visualeditor-find-and-replace-title' );
 ve.ui.FindAndReplaceTool.static.autoAddToCatchall = false;
-ve.ui.FindAndReplaceTool.static.autoAddToGroup = false;
 ve.ui.FindAndReplaceTool.static.commandName = 'findAndReplace';
 ve.ui.toolFactory.register( ve.ui.FindAndReplaceTool );
 

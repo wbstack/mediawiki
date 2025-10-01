@@ -95,16 +95,8 @@ class ChangeOpAliases extends ChangeOpBase {
 		$aliases->setAliasesForLanguage( $this->languageCode, $newAliases );
 	}
 
-	/**
-	 * @see ChangeOp::apply()
-	 *
-	 * @param EntityDocument $entity
-	 * @param Summary|null $summary
-	 *
-	 * @throws InvalidArgumentException
-	 * @throws ChangeOpException
-	 */
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	/** @inheritDoc */
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		if ( !( $entity instanceof AliasesProvider ) ) {
 			throw new InvalidArgumentException( '$entity must be a AliasesProvider' );
 		}
@@ -144,7 +136,7 @@ class ChangeOpAliases extends ChangeOpBase {
 	 * @return Result
 	 */
 	public function validate( EntityDocument $entity ) {
-		$languageValidator = $this->termValidatorFactory->getLanguageValidator();
+		$languageValidator = $this->termValidatorFactory->getAliasLanguageValidator();
 		$termValidator = $this->termValidatorFactory->getAliasValidator();
 
 		// check that the language is valid

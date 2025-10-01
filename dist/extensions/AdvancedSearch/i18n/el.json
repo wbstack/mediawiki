@@ -1,15 +1,17 @@
 {
 	"@metadata": {
 		"authors": [
+			"DimitriosRingas",
 			"Geraki",
 			"Giannaras99",
 			"Giorgos456",
 			"KATRINE1992",
 			"NikosLikomitros",
 			"Nikosgranturismogt",
+			"Norhorn",
 			"Protnet",
-			"DimitriosRingas",
-			"Norhorn"
+			"Αντιγόνη",
+			"Warudo"
 		]
 	},
 	"advancedsearch-desc": "Εύκολη πρόσβαση σε προηγμένες δυνατότητες αναζήτησης στην [[Special:Search]]",
@@ -55,10 +57,10 @@
 	"advancedsearch-filetype-section-other": "Άλλες μορφές",
 	"advancedsearch-filetype-default": "Επιλογή τύπου αρχείου",
 	"advancedsearch-filetype-bitmap": "Εικόνα",
-	"advancedsearch-filetype-drawing": "Ζωγραφιά",
+	"advancedsearch-filetype-drawing": "Σχέδιο",
 	"advancedsearch-filetype-audio": "Ήχος",
 	"advancedsearch-filetype-video": "Βίντεο",
-	"advancedsearch-filetype-office": "Γραφείο",
+	"advancedsearch-filetype-office": "Έγγραφο",
 	"advancedsearch-filesize-equals": "ισοδύναμο σε",
 	"advancedsearch-filesize-greater-than": "μεγαλύτερο από",
 	"advancedsearch-filesize-smaller-than": "μικρότερο από",

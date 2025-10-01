@@ -23,7 +23,9 @@
 
 namespace MediaWiki\Auth;
 
-use Message;
+use MediaWiki\Language\RawMessage;
+use MediaWiki\Message\Message;
+use UnexpectedValueException;
 
 /**
  * This is a value object for authentication requests.
@@ -177,8 +179,8 @@ abstract class AuthenticationRequest {
 			// might be boolean. Further, image buttons might submit the
 			// coordinates of the click rather than the expected value.
 			if ( $info['type'] === 'checkbox' || $info['type'] === 'button' ) {
-				$this->$field = isset( $data[$field] ) && $data[$field] !== false
-					|| isset( $data["{$field}_x"] ) && $data["{$field}_x"] !== false;
+				$this->$field = ( isset( $data[$field] ) && $data[$field] !== false )
+					|| ( isset( $data["{$field}_x"] ) && $data["{$field}_x"] !== false );
 				if ( !$this->$field && empty( $info['optional'] ) ) {
 					return false;
 				}
@@ -242,8 +244,8 @@ abstract class AuthenticationRequest {
 	 */
 	public function describeCredentials() {
 		return [
-			'provider' => new \RawMessage( '$1', [ get_called_class() ] ),
-			'account' => new \RawMessage( '$1', [ $this->getUniqueId() ] ),
+			'provider' => new RawMessage( '$1', [ get_called_class() ] ),
+			'account' => new RawMessage( '$1', [ $this->getUniqueId() ] ),
 		];
 	}
 
@@ -296,7 +298,7 @@ abstract class AuthenticationRequest {
 	 *
 	 * @param AuthenticationRequest[] $reqs
 	 * @return string|null
-	 * @throws \UnexpectedValueException If multiple different usernames are present.
+	 * @throws UnexpectedValueException If multiple different usernames are present.
 	 */
 	public static function getUsernameFromRequests( array $reqs ) {
 		$username = null;
@@ -309,7 +311,7 @@ abstract class AuthenticationRequest {
 					$otherClass = get_class( $req );
 				} elseif ( $username !== $req->username ) {
 					$requestClass = get_class( $req );
-					throw new \UnexpectedValueException( "Conflicting username fields: \"{$req->username}\" from "
+					throw new UnexpectedValueException( "Conflicting username fields: \"{$req->username}\" from "
 						// @phan-suppress-next-line PhanTypeSuspiciousStringExpression $otherClass always set
 						. "$requestClass::\$username vs. \"$username\" from $otherClass::\$username" );
 				}
@@ -322,7 +324,7 @@ abstract class AuthenticationRequest {
 	 * Merge the output of multiple AuthenticationRequest::getFieldInfo() calls.
 	 * @param AuthenticationRequest[] $reqs
 	 * @return array
-	 * @throws \UnexpectedValueException If fields cannot be merged
+	 * @throws UnexpectedValueException If fields cannot be merged
 	 */
 	public static function mergeFieldInfo( array $reqs ) {
 		$merged = [];
@@ -358,9 +360,9 @@ abstract class AuthenticationRequest {
 					$req->required === self::OPTIONAL
 					// If there is a primary not requiring this field, no matter how many others do,
 					// authentication can proceed without it.
-					|| $req->required === self::PRIMARY_REQUIRED
+					|| ( $req->required === self::PRIMARY_REQUIRED
 						// @phan-suppress-next-line PhanTypeMismatchArgumentNullableInternal False positive
-						&& !in_array( $name, $sharedRequiredPrimaryFields, true )
+						&& !in_array( $name, $sharedRequiredPrimaryFields, true ) )
 				) {
 					$options['optional'] = true;
 				} else {
@@ -373,7 +375,7 @@ abstract class AuthenticationRequest {
 				if ( !array_key_exists( $name, $merged ) ) {
 					$merged[$name] = $options;
 				} elseif ( $merged[$name]['type'] !== $type ) {
-					throw new \UnexpectedValueException( "Field type conflict for \"$name\", " .
+					throw new UnexpectedValueException( "Field type conflict for \"$name\", " .
 						"\"{$merged[$name]['type']}\" vs \"$type\""
 					);
 				} else {

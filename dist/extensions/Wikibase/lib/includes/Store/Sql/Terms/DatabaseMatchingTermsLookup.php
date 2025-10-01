@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lib\Store\Sql\Terms;
 
 use InvalidArgumentException;
@@ -13,33 +15,30 @@ use Wikibase\Lib\Store\Sql\Terms\Util\StatsdMonitoring;
 use Wikibase\Lib\Store\TermIndexSearchCriteria;
 use Wikibase\Lib\TermIndexEntry;
 use Wikimedia\Rdbms\FakeResultWrapper;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IExpression;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\IResultWrapper;
+use Wikimedia\Rdbms\LikeValue;
 
 /**
  * MatchingTermsLookup implementation in the new term store. Mostly used for search.
  *
- * @see @ref md_docs_storage_terms
+ * @see @ref docs_storage_terms
  * @license GPL-2.0-or-later
  */
 class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 
 	use StatsdMonitoring;
 
-	/** @var RepoDomainDb */
-	private $repoDb;
+	private RepoDomainDb $repoDb;
 
-	/** @var LoggerInterface */
-	private $logger;
+	private LoggerInterface $logger;
 
-	/** @var TypeIdsAcquirer */
-	private $typeIdsAcquirer;
+	private TypeIdsAcquirer $typeIdsAcquirer;
 
-	/** @var TypeIdsResolver */
-	private $typeIdsResolver;
+	private TypeIdsResolver $typeIdsResolver;
 
-	/** @var EntityIdComposer */
-	private $entityIdComposer;
+	private EntityIdComposer $entityIdComposer;
 
 	public function __construct(
 		RepoDomainDb $repoDb,
@@ -64,7 +63,7 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 		$entityType = null,
 		array $options = []
 	) {
-		if ( empty( $criteria ) ) {
+		if ( !$criteria ) {
 			return [];
 		}
 
@@ -82,7 +81,7 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 	}
 
 	/**
-	 * @param IDatabase $dbr Used for query construction and selects
+	 * @param IReadableDatabase $dbr Used for query construction and selects
 	 * @param TermIndexSearchCriteria[] $criteria
 	 * @param string|string[]|null $termType
 	 * @param string|string[]|null $entityType
@@ -91,19 +90,19 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 	 * @return IResultWrapper[]
 	 */
 	private function criteriaToQueryResults(
-		IDatabase $dbr,
+		IReadableDatabase $dbr,
 		array $criteria,
 		$termType = null,
 		$entityType = null,
 		array $options = []
-	) {
+	): array {
 		$termQueries = [];
 
 		foreach ( $criteria as $mask ) {
 			if ( $entityType === null ) {
 				$termQueries[] = $this->getTermMatchQueries( $dbr, $mask, 'item', $termType, $options );
 				$termQueries[] = $this->getTermMatchQueries( $dbr, $mask, 'property', $termType, $options );
-			} elseif ( is_array( $entityType ) === true ) {
+			} elseif ( is_array( $entityType ) ) {
 				foreach ( $entityType as $entityTypeCase ) {
 					$termQueries[] = $this->getTermMatchQueries( $dbr, $mask, $entityTypeCase, $termType, $options );
 				}
@@ -116,7 +115,7 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 	}
 
 	/**
-	 * @param IDatabase $dbr Used for query construction and selects
+	 * @param IReadableDatabase $dbr Used for query construction and selects
 	 * @param TermIndexSearchCriteria $mask
 	 * @param string $entityType
 	 * @param string|string[]|null $termType
@@ -124,7 +123,7 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 	 * @return IResultWrapper
 	 */
 	private function getTermMatchQueries(
-		IDatabase $dbr,
+		IReadableDatabase $dbr,
 		TermIndexSearchCriteria $mask,
 		string $entityType,
 		$termType = null,
@@ -139,21 +138,40 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 		);
 		// TODO: Fix case insensitive: T242644
 
-		$conditions = [];
-		// Note: Order of tables is important here for proper joins
-		$tables = [ 'wbt_term_in_lang', 'wbt_text_in_lang', 'wbt_text' ];
+		$queryBuilder = $dbr->newSelectQueryBuilder();
+
+		$queryBuilder->select( [ 'wbtl_id', 'wbtl_type_id', 'wbxl_language', 'wbx_text' ] );
+
+		if ( $entityType === 'item' ) {
+			$queryBuilder->select( 'wbit_item_id' )
+				->from( 'wbt_item_terms' )
+				->join( 'wbt_term_in_lang', null, 'wbit_term_in_lang_id=wbtl_id' );
+		} elseif ( $entityType === 'property' ) {
+			$queryBuilder->select( 'wbpt_property_id' )
+				->from( 'wbt_property_terms' )
+				->join( 'wbt_term_in_lang', null, 'wbpt_term_in_lang_id=wbtl_id' );
+		} else {
+			throw new InvalidArgumentException( 'Unknown entity type for search: ' . $entityType );
+		}
+
+		$queryBuilder->join( 'wbt_text_in_lang', null, 'wbtl_text_in_lang_id=wbxl_id' )
+			->join( 'wbt_text', null, 'wbxl_text_id=wbx_id' );
 
 		$language = $mask->getLanguage();
 		if ( $language !== null ) {
-			$conditions['wbxl_language'] = $language;
+			$queryBuilder->where( [ 'wbxl_language' => $language ] );
 		}
 
 		$text = $mask->getText();
 		if ( $text !== null ) {
 			if ( $options['prefixSearch'] ) {
-				$conditions[] = 'wbx_text' . $dbr->buildLike( $text, $dbr->anyString() );
+				$queryBuilder->where( $dbr->expr(
+					'wbx_text',
+					IExpression::LIKE,
+					new LikeValue( $text, $dbr->anyString() )
+				) );
 			} else {
-				$conditions['wbx_text'] = $text;
+				$queryBuilder->where( [ 'wbx_text' => $text ] );
 			}
 		}
 
@@ -162,7 +180,9 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 		}
 		if ( $termType !== null ) {
 			try {
-				$conditions['wbtl_type_id'] = $this->typeIdsAcquirer->acquireTypeIds( [ $termType ] )[$termType];
+				$queryBuilder->where( [
+					'wbtl_type_id' => $this->typeIdsAcquirer->acquireTypeIds( [ $termType ] )[$termType],
+				] );
 			} catch ( NameTableAccessException $e ) {
 				// Edge case: attempting to do a term lookup before the first insert of the respective term type. Unlikely to happen in
 				// production, but annoying/confusing if it happens in tests.
@@ -170,37 +190,12 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 			}
 		}
 
-		$fields = [ 'wbtl_id', 'wbtl_type_id', 'wbxl_language', 'wbx_text' ];
-		$joinConditions = [
-			'wbt_text_in_lang' => [ 'JOIN', 'wbtl_text_in_lang_id=wbxl_id' ],
-			'wbt_text' => [ 'JOIN', 'wbxl_text_id=wbx_id' ],
-		];
-
-		if ( $entityType === 'item' ) {
-			$tables[] = 'wbt_item_terms';
-			$fields[] = 'wbit_item_id';
-			$joinConditions['wbt_term_in_lang'] = [ 'JOIN', 'wbit_term_in_lang_id=wbtl_id' ];
-		} elseif ( $entityType === 'property' ) {
-			$tables[] = 'wbt_property_terms';
-			$fields[] = 'wbpt_property_id';
-			$joinConditions['wbt_term_in_lang'] = [ 'JOIN', 'wbpt_term_in_lang_id=wbtl_id' ];
-		} else {
-			throw new InvalidArgumentException( 'Unknown entity type for search: ' . $entityType );
-		}
-
-		$queryOptions = [];
 		if ( isset( $options['LIMIT'] ) && $options['LIMIT'] > 0 ) {
-			$queryOptions['LIMIT'] = $options['LIMIT'];
+			// @phan-suppress-next-line PhanTypeMismatchArgument False positive
+			$queryBuilder->limit( $options['LIMIT'] );
 		}
 
-		return $dbr->select(
-			$tables,
-			$fields,
-			$conditions,
-			__METHOD__,
-			$queryOptions,
-			$joinConditions
-		);
+		return $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 	}
 
 	/**
@@ -211,7 +206,7 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 	 * @param int|null $limit
 	 * @return TermIndexEntry[]
 	 */
-	private function buildTermResult( array $results, ?int $limit = null ) {
+	private function buildTermResult( array $results, ?int $limit = null ): array {
 		$matchingTerms = [];
 		// Union in SQL doesn't have limit, we need to enforce it here
 		$counter = 0;
@@ -236,26 +231,21 @@ class DatabaseMatchingTermsLookup implements MatchingTermsLookup {
 		return $matchingTerms;
 	}
 
-	/**
-	 * @param object $termRow
-	 *
-	 * @return EntityId|null
-	 */
-	private function getEntityId( $termRow ) {
+	private function getEntityId( object $termRow ): ?EntityId {
 		if ( isset( $termRow->wbpt_property_id ) ) {
 			return $this->entityIdComposer->composeEntityId(
-				'', 'property', $termRow->wbpt_property_id
+				'property', $termRow->wbpt_property_id
 			);
 		} elseif ( isset( $termRow->wbit_item_id ) ) {
 			return $this->entityIdComposer->composeEntityId(
-				'', 'item', $termRow->wbit_item_id
+				'item', $termRow->wbit_item_id
 			);
 		} else {
 			return null;
 		}
 	}
 
-	private function getDbr() {
+	private function getDbr(): IReadableDatabase {
 		return $this->repoDb->connections()->getReadConnection();
 	}
 }

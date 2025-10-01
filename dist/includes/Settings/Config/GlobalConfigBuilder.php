@@ -2,13 +2,12 @@
 
 namespace MediaWiki\Settings\Config;
 
-use Config;
-use GlobalVarConfig;
+use MediaWiki\Config\Config;
+use MediaWiki\Config\GlobalVarConfig;
 use function array_key_exists;
 
 class GlobalConfigBuilder extends ConfigBuilderBase {
 
-	/** @var string */
 	public const DEFAULT_PREFIX = 'wg';
 
 	/** @var string */

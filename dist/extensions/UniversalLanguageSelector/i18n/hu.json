@@ -7,11 +7,12 @@
 			"BáthoryPéter",
 			"Csega",
 			"Dorgan",
+			"Eukarióta",
 			"Máté",
 			"R-Joe",
 			"Tacsipacsi",
 			"Tgr",
-			"Eukarióta"
+			"Urbalazs"
 		]
 	},
 	"uls-desc": "Többféle módot kínál a felhasználónak nyelv kiválasztására és a nyelvi beállítások módosítására",
@@ -29,7 +30,7 @@
 	"ext-uls-display-settings-desc": "A menükben és a betűkészlet kiválasztásához használt nyelv megadása",
 	"ext-uls-language-settings-title": "Nyelvi beállítások",
 	"ext-uls-language-settings-apply": "Beállítások alkalmazása",
-	"ext-uls-language-settings-cancel": "Mégsem",
+	"ext-uls-language-settings-cancel": "Mégse",
 	"ext-uls-language-buttons-help": "Menük nyelvének módosítása. A tartalom nyelve nem fog változni.",
 	"ext-uls-display-settings-font-settings": "Betűtípus beállítások",
 	"ext-uls-display-settings-ui-language": "Megjelenítési nyelv",
@@ -80,5 +81,6 @@
 	"ext-uls-empty-state-header": "Még nincsenek nyelvek",
 	"ext-uls-empty-state-desc": "Egyelőre nem állnak rendelkezésre nyelvek",
 	"ext-uls-empty-state-header-actions-available": "Még nincsenek nyelvek. Hozzáadsz egy újat?",
-	"ext-uls-empty-state-desc-actions-available": "Tedd elérhetővé a tartalmat több nyelven."
+	"ext-uls-empty-state-desc-actions-available": "Tedd elérhetővé a tartalmat több nyelven.",
+	"ext-uls-add-languages-button-label": "Nyelvek hozzáadása"
 }

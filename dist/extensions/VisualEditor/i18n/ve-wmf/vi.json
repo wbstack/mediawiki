@@ -3,14 +3,20 @@
 		"authors": [
 			"Anh88",
 			"Cheers!",
+			"Doraemonluonbentoi",
+			"Flyplanevn27",
 			"Jdforrester",
 			"Minh Nguyen",
 			"Nghiemtrongdai VN",
 			"아라",
-			"Doraemonluonbentoi",
-			"Flyplanevn27"
+			"Nvdtn19",
+			"NgocAnMaster"
 		]
 	},
+	"tag-editcheck-newcontent-description": "Kiểm tra Sửa đổi cho rằng nội dung mới đã được thêm vào trang",
+	"tag-editcheck-newreference-description": "Một nguồn tham khảo mới đã được thêm vào trang",
+	"tag-editcheck-references-description": "Kiểm tra Sửa đổi cho rằng có thể cần phải có một nguồn tham khảo",
+	"tag-editcheck-references-activated-description": "Kiểm tra Sửa đổi cho rằng có thể cần phải có một nguồn tham khảo, và giao diện người dùng được hiển thị",
 	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Soạn thảo trực quan]]",
 	"tag-visualeditor-description": "Đã sửa đổi dùng [[{{MediaWiki:visualeditor-descriptionpagelink}}|Trình soạn thảo trực quan]]",
 	"tag-visualeditor-needcheck": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|Qua trình soạn thảo trực quan: Cần kiểm tra]]",
@@ -22,8 +28,6 @@
 	"visualeditor-feedback-link": "Project:Soạn thảo trực quan/Phản hồi",
 	"visualeditor-feedback-tool": "Để lại phản hồi về phần mềm này",
 	"visualeditor-help-label": "Đọc hướng dẫn sử dụng",
-	"visualeditor-help-link": "mw:Special:MyLanguage/Help:VisualEditor/User guide",
-	"visualeditor-help-title": "Hướng dẫn sử dụng trình soạn",
 	"visualeditor-welcomedialog-action": "Bắt đầu sửa đổi",
 	"visualeditor-welcomedialog-content": "Bất cứ người nào có thể góp tay xây dựng và cải thiện nội dung.",
 	"visualeditor-welcomedialog-content-thanks": "Xin cảm ơn bạn muốn giúp người ta khám phá và tìm hiểu!",

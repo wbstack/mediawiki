@@ -238,7 +238,7 @@ class TimeValue extends DataValueObject {
 			throw new IllegalValueException( '$timestamp must resemble ISO 8601, given ' . $timestamp );
 		}
 
-		list( , $sign, $year, $month, $day, $hour, $minute, $second ) = $matches;
+		[ , $sign, $year, $month, $day, $hour, $minute, $second ] = $matches;
 
 		if ( $month > 12 ) {
 			throw new IllegalValueException( 'Month out of allowed bounds' );
@@ -354,7 +354,11 @@ class TimeValue extends DataValueObject {
 	 * @return string
 	 */
 	public function serialize() {
-		return json_encode( array_values( $this->getArrayValue() ) );
+		return json_encode( $this->__serialize() );
+	}
+
+	public function __serialize(): array {
+		return array_values( $this->getArrayValue() );
 	}
 
 	/**
@@ -365,7 +369,11 @@ class TimeValue extends DataValueObject {
 	 * @throws IllegalValueException
 	 */
 	public function unserialize( $value ) {
-		list( $timestamp, $timezone, $before, $after, $precision, $calendarModel ) = json_decode( $value );
+		$this->__unserialize( json_decode( $value ) );
+	}
+
+	public function __unserialize( array $data ): void {
+		[ $timestamp, $timezone, $before, $after, $precision, $calendarModel ] = $data;
 		$this->__construct( $timestamp, $timezone, $before, $after, $precision, $calendarModel );
 	}
 

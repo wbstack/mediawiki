@@ -22,19 +22,18 @@
 
 namespace MediaWiki\ResourceLoader;
 
-use Config;
-use FauxRequest;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
 use MediaWiki\Page\PageReferenceValue;
+use MediaWiki\Request\FauxRequest;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\User\User;
 use MediaWiki\User\UserIdentity;
 use MediaWiki\User\UserRigorOptions;
-use Message;
 use MessageLocalizer;
-use MessageSpecifier;
 use Psr\Log\LoggerInterface;
-use User;
-use WebRequest;
+use Wikimedia\Message\MessageSpecifier;
 
 /**
  * Context object that contains information about the state of a specific
@@ -51,7 +50,8 @@ class Context implements MessageLocalizer {
 	public const DEBUG_OFF = 0;
 	/** @internal For use in ResourceLoader classes. */
 	public const DEBUG_LEGACY = 1;
-	private const DEBUG_MAIN = 2;
+	/** @internal For use in SpecialJavaScriptTest. */
+	public const DEBUG_MAIN = 2;
 
 	/** @var ResourceLoader */
 	protected $resourceLoader;
@@ -79,6 +79,8 @@ class Context implements MessageLocalizer {
 	protected $version;
 	/** @var bool */
 	protected $raw;
+	/** @var bool */
+	protected $sourcemap;
 	/** @var string|null */
 	protected $image;
 	/** @var string|null */
@@ -100,8 +102,12 @@ class Context implements MessageLocalizer {
 	/**
 	 * @param ResourceLoader $resourceLoader
 	 * @param WebRequest $request
+	 * @param string[]|null $validSkins List of valid skin names. If not passed,
+	 *   any skin name is considered valid. Invalid skins are replaced by the default.
 	 */
-	public function __construct( ResourceLoader $resourceLoader, WebRequest $request ) {
+	public function __construct(
+		ResourceLoader $resourceLoader, WebRequest $request, $validSkins = null
+	) {
 		$this->resourceLoader = $resourceLoader;
 		$this->request = $request;
 		$this->logger = $resourceLoader->getLogger();
@@ -119,22 +125,23 @@ class Context implements MessageLocalizer {
 		$this->only = $request->getRawVal( 'only' );
 		$this->version = $request->getRawVal( 'version' );
 		$this->raw = $request->getFuzzyBool( 'raw' );
+		$this->sourcemap = $request->getFuzzyBool( 'sourcemap' );
 
 		// Image requests
 		$this->image = $request->getRawVal( 'image' );
 		$this->variant = $request->getRawVal( 'variant' );
 		$this->format = $request->getRawVal( 'format' );
 
-		$this->skin = $request->getRawVal( 'skin' );
-		$skinFactory = MediaWikiServices::getInstance()->getSkinFactory();
-		$skinnames = $skinFactory->getInstalledSkins();
-
-		if ( !$this->skin || !isset( $skinnames[$this->skin] ) ) {
-			// The 'skin' parameter is required. (Not yet enforced.)
+		$skin = $request->getRawVal( 'skin' );
+		if (
+			$skin === null
+			|| ( is_array( $validSkins ) && !in_array( $skin, $validSkins ) )
+		) {
 			// For requests without a known skin specified,
-			// use MediaWiki's 'fallback' skin for skin-specific decisions.
-			$this->skin = self::DEFAULT_SKIN;
+			// use MediaWiki's 'fallback' skin for any skin-specific decisions.
+			$skin = self::DEFAULT_SKIN;
 		}
+		$this->skin = $skin;
 	}
 
 	/**
@@ -181,17 +188,6 @@ class Context implements MessageLocalizer {
 		return $this->resourceLoader;
 	}
 
-	/**
-	 * @deprecated since 1.34 Use Module::getConfig instead inside module
-	 *   methods. Use ResourceLoader::getConfig elsewhere.
-	 * @return Config
-	 * @codeCoverageIgnore
-	 */
-	public function getConfig() {
-		wfDeprecated( __METHOD__, '1.34' );
-		return $this->getResourceLoader()->getConfig();
-	}
-
 	public function getRequest(): WebRequest {
 		return $this->request;
 	}
@@ -214,8 +210,7 @@ class Context implements MessageLocalizer {
 		if ( $this->language === null ) {
 			// Must be a valid language code after this point (T64849)
 			// Only support uselang values that follow built-in conventions (T102058)
-			$lang = $this->getRequest()->getRawVal( 'lang', '' );
-			'@phan-var string $lang'; // getRawVal does not return null here
+			$lang = $this->getRequest()->getRawVal( 'lang' ) ?? '';
 			// Stricter version of RequestContext::sanitizeLangCode()
 			$validBuiltinCode = MediaWikiServices::getInstance()->getLanguageNameUtils()
 				->isValidBuiltInCode( $lang );
@@ -308,13 +303,13 @@ class Context implements MessageLocalizer {
 	public function getUserObj(): User {
 		if ( $this->userObj === null ) {
 			$username = $this->getUser();
+			$userFactory = MediaWikiServices::getInstance()->getUserFactory();
 			if ( $username ) {
 				// Use provided username if valid, fallback to anonymous user
-				$this->userObj = User::newFromName( $username ) ?: new User;
-			} else {
-				// Anonymous user
-				$this->userObj = new User;
+				$this->userObj = $userFactory->newFromName( $username, UserRigorOptions::RIGOR_VALID );
 			}
+			// Anonymous user
+			$this->userObj ??= $userFactory->newAnonymous();
 		}
 
 		return $this->userObj;
@@ -345,6 +340,14 @@ class Context implements MessageLocalizer {
 	}
 
 	/**
+	 * @since 1.41
+	 * @return bool
+	 */
+	public function isSourceMap(): bool {
+		return $this->sourcemap;
+	}
+
+	/**
 	 * @return string|null
 	 */
 	public function getImage(): ?string {
@@ -369,7 +372,7 @@ class Context implements MessageLocalizer {
 	 * If this is a request for an image, get the Image object.
 	 *
 	 * @since 1.25
-	 * @return Image|bool false if a valid object cannot be created
+	 * @return Image|false false if a valid object cannot be created
 	 */
 	public function getImageObj() {
 		if ( $this->imageObj === null ) {
@@ -502,14 +505,16 @@ class Context implements MessageLocalizer {
 		// and allows URLs to mostly remain readable.
 		$jsonFlags = JSON_UNESCAPED_SLASHES |
 			JSON_UNESCAPED_UNICODE |
+			JSON_PARTIAL_OUTPUT_ON_ERROR |
 			JSON_HEX_TAG |
 			JSON_HEX_AMP;
 		if ( $this->getDebug() ) {
 			$jsonFlags |= JSON_PRETTY_PRINT;
 		}
-		return json_encode( $data, $jsonFlags );
+		$json = json_encode( $data, $jsonFlags );
+		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			trigger_error( __METHOD__ . ' partially failed: ' . json_last_error_msg(), E_USER_WARNING );
+		}
+		return $json;
 	}
 }
-
-/** @deprecated since 1.39 */
-class_alias( Context::class, 'ResourceLoaderContext' );

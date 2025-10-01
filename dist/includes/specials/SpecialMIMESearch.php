@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:MIMESearch
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,38 +16,54 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
+ */
+
+namespace MediaWiki\Specials;
+
+use File;
+use HtmlArmor;
+use LocalFile;
+use MediaWiki\Cache\LinkBatchFactory;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Language\ILanguageConverter;
+use MediaWiki\Languages\LanguageConverterFactory;
+use MediaWiki\Linker\Linker;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\SpecialPage\QueryPage;
+use MediaWiki\Title\Title;
+use Skin;
+use stdClass;
+use Wikimedia\Rdbms\IConnectionProvider;
+
+/**
+ * Search the database for files of the requested MIME type, comparing this with the
+ * 'img_major_mime' and 'img_minor_mime' fields in the image table.
+ *
  * @ingroup SpecialPage
  * @author Ævar Arnfjörð Bjarmason <avarab@gmail.com>
  */
-
-use MediaWiki\Cache\LinkBatchFactory;
-use MediaWiki\Languages\LanguageConverterFactory;
-use MediaWiki\MediaWikiServices;
-use Wikimedia\Rdbms\ILoadBalancer;
-
-/**
- * Searches the database for files of the requested MIME type, comparing this with the
- * 'img_major_mime' and 'img_minor_mime' fields in the image table.
- * @ingroup SpecialPage
- */
 class SpecialMIMESearch extends QueryPage {
-	protected $major, $minor, $mime;
+	/** @var string */
+	protected $major;
+	/** @var string */
+	protected $minor;
+	/** @var string */
+	protected $mime;
 
-	/** @var ILanguageConverter */
-	private $languageConverter;
+	private ILanguageConverter $languageConverter;
 
 	/**
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param LinkBatchFactory $linkBatchFactory
 	 * @param LanguageConverterFactory $languageConverterFactory
 	 */
 	public function __construct(
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		LinkBatchFactory $linkBatchFactory,
 		LanguageConverterFactory $languageConverterFactory
 	) {
 		parent::__construct( 'MIMEsearch' );
-		$this->setDBLoadBalancer( $loadBalancer );
+		$this->setDatabaseProvider( $dbProvider );
 		$this->setLinkBatchFactory( $linkBatchFactory );
 		$this->languageConverter = $languageConverterFactory->getLanguageConverter( $this->getContentLanguage() );
 	}
@@ -155,18 +169,17 @@ class SpecialMIMESearch extends QueryPage {
 	}
 
 	protected function getSuggestionsForTypes() {
-		$dbr = $this->getDBLoadBalancer()->getConnectionRef( ILoadBalancer::DB_REPLICA );
-		$lastMajor = null;
-		$suggestions = [];
-		$result = $dbr->select(
-			[ 'image' ],
+		$queryBuilder = $this->getDatabaseProvider()->getReplicaDatabase()->newSelectQueryBuilder();
+		$queryBuilder
 			// We ignore img_media_type, but using it in the query is needed for MySQL to choose a
 			// sensible execution plan
-			[ 'img_media_type', 'img_major_mime', 'img_minor_mime' ],
-			[],
-			__METHOD__,
-			[ 'GROUP BY' => [ 'img_media_type', 'img_major_mime', 'img_minor_mime' ] ]
-		);
+			->select( [ 'img_media_type', 'img_major_mime', 'img_minor_mime' ] )
+			->from( 'image' )
+			->groupBy( [ 'img_media_type', 'img_major_mime', 'img_minor_mime' ] );
+		$result = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
+
+		$lastMajor = null;
+		$suggestions = [];
 		foreach ( $result as $row ) {
 			$major = $row->img_major_mime;
 			$minor = $row->img_minor_mime;
@@ -185,7 +198,7 @@ class SpecialMIMESearch extends QueryPage {
 		$this->addHelpLink( 'Help:Managing_files' );
 		$this->mime = $par ?: $this->getRequest()->getText( 'mime' );
 		$this->mime = trim( $this->mime );
-		list( $this->major, $this->minor ) = File::splitMime( $this->mime );
+		[ $this->major, $this->minor ] = File::splitMime( $this->mime );
 		$mimeAnalyzer = MediaWikiServices::getInstance()->getMimeAnalyzer();
 
 		if ( $this->major == '' || $this->minor == '' || $this->minor == 'unknown' ||
@@ -240,3 +253,9 @@ class SpecialMIMESearch extends QueryPage {
 		return 'media';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialMIMESearch::class, 'SpecialMIMESearch' );

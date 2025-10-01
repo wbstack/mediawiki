@@ -1,17 +1,16 @@
-var util = require( './util.js' ),
+const util = require( './util.js' ),
 	mfExtend = require( './mfExtend' ),
 	View = require( './View' );
 
 /**
  * Builds a section of a page
  *
- * @class Section
- * @extends View
- *
+ * @extends module:mobile.startup/View
+ * @ignore
  * @param {Object} options Configuration options
  */
 function Section( options ) {
-	var self = this;
+	const self = this;
 	options.tag = 'h' + options.level;
 	this.line = options.line;
 	this.text = options.text;
@@ -19,9 +18,8 @@ function Section( options ) {
 	this.id = options.id || null;
 	this.anchor = options.anchor;
 	this.subsections = [];
-	( options.subsections || [] ).forEach( function ( section ) {
-		self.subsections.push( new Section( section ) );
-	} );
+	( options.subsections || [] ).forEach( ( section ) => self.subsections.push(
+		new Section( section ) ) );
 	View.call( this, options );
 }
 
@@ -33,7 +31,7 @@ mfExtend( Section, View, {
 	/**
 	 * @memberof Section
 	 * @instance
-	 * @mixes View#defaults
+	 * @mixes module:mobile.startup/View#defaults
 	 * @property {Object} defaults Default options hash.
 	 * @property {string} defaults.text Section text.
 	 */

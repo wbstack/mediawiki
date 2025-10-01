@@ -19,6 +19,7 @@
  */
 
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Status\Status;
 use MediaWiki\Storage\BlobStore;
 
 /**
@@ -85,10 +86,8 @@ class MetadataStorageHelper {
 	}
 
 	/**
-	 * Do JSON encoding with local flags. Throw an exception if the data cannot be
-	 * serialized.
+	 * Do JSON encoding with local flags. Callers must make sure that the data can be serialized.
 	 *
-	 * @throws MWException
 	 * @param mixed $data
 	 * @return string
 	 */
@@ -98,7 +97,7 @@ class MetadataStorageHelper {
 			JSON_UNESCAPED_SLASHES |
 			JSON_UNESCAPED_UNICODE );
 		if ( $s === false ) {
-			throw new MWException( __METHOD__ . ': metadata is not JSON-serializable ' );
+			throw new InvalidArgumentException( __METHOD__ . ': metadata is not JSON-serializable ' );
 		}
 		return $s;
 	}

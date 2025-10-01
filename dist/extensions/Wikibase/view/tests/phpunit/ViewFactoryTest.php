@@ -2,9 +2,10 @@
 
 namespace Wikibase\View\Tests;
 
-use HashSiteStore;
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Languages\LanguageFactory;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Site\HashSiteStore;
 use Wikibase\DataModel\Services\EntityId\EntityIdFormatter;
 use Wikibase\DataModel\Services\Statement\Grouper\NullStatementGrouper;
 use Wikibase\Lib\ContentLanguages;
@@ -57,8 +58,8 @@ use Wikibase\View\ViewFactory;
 class ViewFactoryTest extends \PHPUnit\Framework\TestCase {
 
 	private function newViewFactory(
-		EntityIdFormatterFactory $htmlFactory = null,
-		EntityIdFormatterFactory $plainFactory = null
+		?EntityIdFormatterFactory $htmlFactory = null,
+		?EntityIdFormatterFactory $plainFactory = null
 	) {
 		$templateFactory = new TemplateFactory( new TemplateRegistry( [] ) );
 
@@ -85,36 +86,33 @@ class ViewFactoryTest extends \PHPUnit\Framework\TestCase {
 			[],
 			[],
 			$this->createMock( LocalizedTextProviderFactory::class ),
-			$this->createMock( SpecialPageLinker::class )
+			$this->createMock( SpecialPageLinker::class ),
+			$this->createMock( LanguageFactory::class )
 		);
 	}
 
 	/**
-	 * @dataProvider invalidConstructorArgumentsProvider
+	 * @dataProvider invalidFormatsProvider
 	 */
 	public function testConstructorThrowsException(
-		EntityIdFormatterFactory $htmlFormatterFactory,
-		EntityIdFormatterFactory $plainFormatterFactory
+		string $htmlFormat,
+		string $plainFormat
 	) {
+		$htmlFormatterFactory = $this->getEntityIdFormatterFactory( $htmlFormat );
+		$plainFormatterFactory = $this->getEntityIdFormatterFactory( $plainFormat );
 		$this->expectException( InvalidArgumentException::class );
 		$this->newViewFactory( $htmlFormatterFactory, $plainFormatterFactory );
 	}
 
-	public function invalidConstructorArgumentsProvider() {
-		$htmlFactory = $this->getEntityIdFormatterFactory( SnakFormatter::FORMAT_HTML );
-		$plainFactory = $this->getEntityIdFormatterFactory( SnakFormatter::FORMAT_PLAIN );
-		$wikiFactory = $this->getEntityIdFormatterFactory( SnakFormatter::FORMAT_WIKI );
-
-		return [
-			[ $wikiFactory, $plainFactory ],
-			[ $htmlFactory, $wikiFactory ],
-		];
+	public static function invalidFormatsProvider(): iterable {
+		yield [ SnakFormatter::FORMAT_WIKI, SnakFormatter::FORMAT_PLAIN ];
+		yield [ SnakFormatter::FORMAT_HTML, SnakFormatter::FORMAT_WIKI ];
 	}
 
 	public function testNewItemView() {
 		$factory = $this->newViewFactory();
 		$itemView = $factory->newItemView(
-			Language::factory( 'en' ),
+			MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( 'en' ),
 			new TermLanguageFallbackChain( [], $this->createStub( ContentLanguages::class ) ),
 			$this->createMock( CacheableEntityTermsView::class )
 		);
@@ -125,7 +123,7 @@ class ViewFactoryTest extends \PHPUnit\Framework\TestCase {
 	public function testNewPropertyView() {
 		$factory = $this->newViewFactory();
 		$propertyView = $factory->newPropertyView(
-			Language::factory( 'en' ),
+			MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( 'en' ),
 			new TermLanguageFallbackChain( [], $this->createStub( ContentLanguages::class ) ),
 			$this->createMock( CacheableEntityTermsView::class )
 		);

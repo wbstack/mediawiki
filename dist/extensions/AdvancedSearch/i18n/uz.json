@@ -1,10 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Malikxan"
+			"Malikxan",
+			"Diyora Iskandarova"
 		]
 	},
 	"advancedsearch-options-pane-head": "Kengaytirilgan qidiruv",
+	"advancedsearch-options-pane-preview-list": "Hozirda foydalanilayotgan qidiruv soʻzlari",
 	"advancedsearch-optgroup-text": "Sahifa matnida qidirish",
 	"advancedsearch-optgroup-structure": "Tuzilma",
 	"advancedsearch-optgroup-files": "Fayllar va tasvirlar",
@@ -19,8 +21,11 @@
 	"advancedsearch-field-hastemplate": "Bu andozalardan foydalanilgan sahifalar",
 	"advancedsearch-field-inlanguage": "Bu tildagi sahifalar",
 	"advancedsearch-field-filetype": "Fayl turi",
+	"advancedsearch-field-filew": "Fayl kengligi piksellarda",
+	"advancedsearch-field-fileh": "Fayl balandligi piksellarda",
 	"advancedsearch-field-sort": "Saralash tartibi",
 	"advancedsearch-field-preview-sort": "$1ga koʻra saralash",
+	"advancedsearch-help-general-instruction": "$1 uchun batafsil koʻrsatmalar",
 	"advancedsearch-placeholder-exact-text": "\"mushuk echkini sevadi\"",
 	"advancedsearch-inlanguage-default": "Tilni tanlash",
 	"advancedsearch-filetype-section-types": "Umumiy fayl turlari",

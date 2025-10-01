@@ -6,8 +6,8 @@ namespace Wikibase\Client\Hooks;
 
 use MediaWiki\Hook\ParserClearStateHook;
 use MediaWiki\Hook\ParserLimitReportPrepareHook;
-use Parser;
-use ParserOutput;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserOutput;
 use Wikibase\DataModel\Services\Lookup\RestrictedEntityLookup;
 use Wikibase\Lib\SettingsArray;
 
@@ -65,7 +65,7 @@ class ParserHookHandler implements
 			'limitreport-entityaccesscount',
 			[
 				$this->restrictedEntityLookup->getEntityAccessCount(),
-				$this->entityAccessLimit
+				$this->entityAccessLimit,
 			]
 		);
 	}

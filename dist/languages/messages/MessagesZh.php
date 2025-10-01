@@ -1,8 +1,6 @@
 <?php
 /** Chinese (中文)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -101,6 +99,7 @@ $specialPageAliases = [
 	'Recentchanges'             => [ '最近更改', '近期變動' ],
 	'Recentchangeslinked'       => [ '链出更改', '鏈出更改', '連出更改' ],
 	'Redirect'                  => [ '重定向', '重新導向' ],
+	'Renameuser'                => [ '重命名用户', '重新命名用户', '重新命名用戶', '重新命名使用者' ],
 	'ResetTokens'               => [ '重置密钥', '重設金鑰' ],
 	'Revisiondelete'            => [ '版本删除' ],
 	'Search'                    => [ '搜索', '搜尋' ],
@@ -205,7 +204,7 @@ $magicWords = [
 	'img_width'               => [ 1, '$1px' ],
 	'index'                   => [ 1, '__INDEX__' ],
 	'int'                     => [ 0, 'INT:' ],
-	'language'                => [ 0, '#LANGUAGE:' ],
+	'language'                => [ 0, '#LANGUAGE' ],
 	'lc'                      => [ 0, 'LC:' ],
 	'lcfirst'                 => [ 0, 'LCFIRST:' ],
 	'localday'                => [ 1, 'LOCALDAY' ],

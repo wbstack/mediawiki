@@ -3,7 +3,7 @@
 namespace MediaWiki\Page\Hook;
 
 use Article;
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.
@@ -20,7 +20,7 @@ interface ArticleViewHeaderHook {
 	 * @since 1.35
 	 *
 	 * @param Article $article
-	 * @param bool|ParserOutput &$outputDone Whether the output for this page finished or not. Set to
+	 * @param bool|ParserOutput|null &$outputDone Whether the output for this page finished or not. Set to
 	 *   a ParserOutput object to both indicate that the output is done and what
 	 *   parser output was used.
 	 * @param bool &$pcache Whether to try the parser cache or not

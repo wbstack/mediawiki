@@ -2,7 +2,7 @@
 
 namespace Wikibase\Repo\Api;
 
-use Status;
+use MediaWiki\Status\Status;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -18,11 +18,11 @@ class EntitySearchException extends \Exception {
 
 	/**
 	 * @param Status $status status with errors
-	 * @param String $message
+	 * @param string $message
 	 */
 	public function __construct( Status $status, string $message = "" ) {
 		parent::__construct( $message );
-		Assert::parameter( $status->getErrors() !== [], "status", "must have errors" );
+		Assert::parameter( $status->getMessages( 'error' ) !== [], "status", "must have errors" );
 		$this->status = $status;
 	}
 

@@ -1,8 +1,6 @@
 <?php
 /** Kinyarwanda (Ikinyarwanda)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -20,7 +18,7 @@ $namespaceNames = [
 	NS_FILE             => 'Dosiye',
 	NS_FILE_TALK        => 'Ibiganiro_kuri_dosiye',
 	NS_MEDIAWIKI        => 'MediyaWiki',
-	NS_MEDIAWIKI_TALK   => 'Ibiganiro kuri MediyaWiki',
+	NS_MEDIAWIKI_TALK   => 'Ibiganiro_kuri_MediyaWiki',
 	NS_TEMPLATE         => 'Inyandikorugero',
 	NS_TEMPLATE_TALK    => 'Ibiganiro_ku_nyandikorugero',
 	NS_HELP             => 'Ubufasha',

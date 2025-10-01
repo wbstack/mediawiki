@@ -2,7 +2,8 @@
 	"@metadata": {
 		"authors": [
 			"Robby",
-			"Soued031"
+			"Soued031",
+			"Volvox"
 		]
 	},
 	"nstab-data": "Donnéeën",
@@ -16,10 +17,12 @@
 	"jsonconfig-err-string": "De Parameter \"$1\" muss eng Zeechekette sinn",
 	"jsonconfig-err-url": "Parameter \"$1\" muss eng valabel URL sinn",
 	"jsonconfig-optional-field": "(fakultativ)",
-	"jsonconfig-type-name-invalid": "net valabel",
+	"jsonconfig-type-name-invalid": "ongülteg",
 	"jsonconfig-type-name-string": "Zeecheketten",
 	"jsonconfig-type-name-localized": "lokaliséiert",
 	"jsonconfig-type-name-number": "Zuel",
+	"jsonconfig-use-category": "Säiten, déi d'JsonConfig-Erweiderung benotzen",
+	"jsonconfig-use-category-desc": "Dës Säite benotzen d'Method <code>mw.ext.data.get</code> vun der [[:mw:Extension:JsonConfig|JsonConfig]]-Erweiderung. D'Method <code>mw.ext.data.get</code> gëllt als opwänneg.",
 	"jsonconfig-license": "D'Donnéeë sinn disponibel ënner $1.",
 	"jsonconfig-license-name-CC0-1.0": "Creative Commons Zero",
 	"right-jsonconfig-flush": "JsonConfig iwwer d'API manipuléieren"

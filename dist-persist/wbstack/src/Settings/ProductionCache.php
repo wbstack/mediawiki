@@ -19,50 +19,21 @@ if(!$wwDomainIsMaintenance) {
     $wgSessionCacheType = 'redis';
     // NOTE Passwords are set further down in config
     $wgObjectCaches['redis'] = [
-        'class' => 'ReplicatedBagOStuff',
-        'readFactory' => [
-            'factory' => [ 'ObjectCache', 'newFromParams' ],
-            'args'  => [ [
-                'class' => 'RedisBagOStuff',
-                'servers' => [ getenv('MW_REDIS_SERVER_READ') ]
-            ] ]
-        ],
-        'writeFactory' => [
-            'factory' => [ 'ObjectCache', 'newFromParams' ],
-            'args'  => [ [
-                'class' => 'RedisBagOStuff',
-                'servers' => [ getenv('MW_REDIS_SERVER_WRITE') ]
-            ] ]
-        ],
+        'class' => 'RedisBagOStuff',
+        'servers' => [ getenv('MW_REDIS_SERVER_WRITE') ],
         'loggroup'  => 'RedisBagOStuff',
         'reportDupes' => false
     ];
     $wgObjectCaches['redis2'] = [
-        'class' => 'ReplicatedBagOStuff',
-        'readFactory' => [
-            'factory' => [ 'ObjectCache', 'newFromParams' ],
-            'args'  => [ [
-                'class' => 'RedisBagOStuff',
-                'servers' => [ getenv('MW_REDIS_CACHE_SERVER_READ') ]
-            ] ]
-        ],
-        'writeFactory' => [
-            'factory' => [ 'ObjectCache', 'newFromParams' ],
-            'args'  => [ [
-                'class' => 'RedisBagOStuff',
-                'servers' => [ getenv('MW_REDIS_CACHE_SERVER_WRITE') ]
-            ] ]
-        ],
+        'class' => 'RedisBagOStuff',
+        'servers' => [ getenv('MW_REDIS_CACHE_SERVER_WRITE') ],
         'loggroup'  => 'RedisBagOStuff',
         'reportDupes' => false
     ];
     if(getenv('MW_REDIS_PASSWORD') !== '') {
         // Only set the password if not empty
-        // TODO do this optional password setting in a less evil way...
-        $wgObjectCaches['redis']['readFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
-        $wgObjectCaches['redis']['writeFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
-        $wgObjectCaches['redis2']['readFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
-        $wgObjectCaches['redis2']['writeFactory']['args'][0]['password'] = getenv('MW_REDIS_PASSWORD');
+        $wgObjectCaches['redis']['password'] = getenv('MW_REDIS_PASSWORD');
+        $wgObjectCaches['redis2']['password'] = getenv('MW_REDIS_PASSWORD');
     }
 }
 
@@ -77,25 +48,11 @@ $wgObjectCaches[CACHE_DB] = [
     ] ]
 ];
 $wgObjectCaches['db-replicated'] = [
-    'class'       => ReplicatedBagOStuff::class,
-    'readFactory' => [
-        'factory' => [ 'ObjectCache', 'newFromParams' ],
-        'args'  => [ [
-            'class' => SqlBagOStuff::class,
-            'replicaOnly' => true,
-            'purgePeriod' => 5,
-            'purgeLimit' => 1000,
-        ] ]
-    ],
-    'writeFactory' => [
-        'factory' => [ 'ObjectCache', 'newFromParams' ],
-        'args'  => [ [
-            'class' => SqlBagOStuff::class,
-            'replicaOnly' => false,
-            'purgePeriod' => 5,
-            'purgeLimit' => 1000,
-        ] ]
-    ],
+    'class' => SqlBagOStuff::class,
     'loggroup'  => 'SQLBagOStuff',
-    'reportDupes' => false
+    'reportDupes' => false,
+    'args'  => [ [
+        'purgePeriod' => 5,
+        'purgeLimit' => 1000,
+    ] ]
 ];

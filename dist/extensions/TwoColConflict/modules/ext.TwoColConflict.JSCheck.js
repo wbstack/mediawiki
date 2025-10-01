@@ -1,13 +1,9 @@
 'use strict';
 
-function initJsCheck() {
+$( () => {
 	$( '<input>' ).attr( {
 		type: 'hidden',
 		name: 'mw-twocolconflict-js',
-		value: true
+		value: 1
 	} ).prependTo( '#editform' );
-}
-
-$( function () {
-	initJsCheck();
 } );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface MWWikitextPlainTextStringTransferHandler.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -36,10 +36,10 @@ OO.inheritClass( ve.ui.MWWikitextPlainTextStringTransferHandler, ve.ui.PlainText
 
 ve.ui.MWWikitextPlainTextStringTransferHandler.static.name = 'wikitextPlainTextString';
 
-ve.ui.MWWikitextPlainTextStringTransferHandler.static.types =
-	ve.ui.MWWikitextPlainTextStringTransferHandler.super.static.types.concat(
-		[ 'text/x-wiki' ]
-	);
+ve.ui.MWWikitextPlainTextStringTransferHandler.static.types = [
+	...ve.ui.MWWikitextPlainTextStringTransferHandler.super.static.types,
+	'text/x-wiki'
+];
 
 ve.ui.MWWikitextPlainTextStringTransferHandler.static.handlesPaste = true;
 

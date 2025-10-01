@@ -1,6 +1,5 @@
 {
 	"name": "CirrusSearch",
-	"version": "6.5.4",
 	"author": [
 		"Nik Everett",
 		"Chad Horohoe",
@@ -11,7 +10,7 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.39.0",
+		"MediaWiki": ">= 1.43",
 		"extensions": {
 			"Elastica": ">= 6.0.1"
 		}
@@ -23,7 +22,8 @@
 		"cirrus-config-dump": "CirrusSearch\\Api\\ConfigDump",
 		"cirrus-mapping-dump": "CirrusSearch\\Api\\MappingDump",
 		"cirrus-settings-dump": "CirrusSearch\\Api\\SettingsDump",
-		"cirrus-profiles-dump": "CirrusSearch\\Api\\ProfilesDump"
+		"cirrus-profiles-dump": "CirrusSearch\\Api\\ProfilesDump",
+		"cirrus-check-sanity": "CirrusSearch\\Api\\CheckSanity"
 	},
 	"APIPropModules": {
 		"cirrusbuilddoc": "CirrusSearch\\Api\\QueryBuildDocument",
@@ -42,6 +42,7 @@
 		"cirrusSearchOtherIndex": "CirrusSearch\\Job\\OtherIndex",
 		"cirrusSearchElasticaWrite": "CirrusSearch\\Job\\ElasticaWrite",
 		"cirrusSearchCheckerJob": "CirrusSearch\\Job\\CheckerJob",
+		"cirrusSearchIndexArchive": "CirrusSearch\\Job\\IndexArchive",
 		"cirrusSearchDeleteArchive": "CirrusSearch\\Job\\DeleteArchive"
 	},
 	"MessagesDirs": {
@@ -52,11 +53,12 @@
 	},
 	"TestAutoloadClasses": {
 		"CirrusSearch\\CirrusIntegrationTestCase": "tests/phpunit/integration/CirrusIntegrationTestCase.php",
+		"CirrusSearch\\CirrusIntegrationTestCaseTrait": "tests/phpunit/integration/CirrusIntegrationTestCaseTrait.php",
 		"CirrusSearch\\CirrusTestCase": "tests/phpunit/unit/CirrusTestCase.php",
 		"CirrusSearch\\CirrusTestCaseTrait": "tests/phpunit/unit/CirrusTestCaseTrait.php",
 		"CirrusSearch\\Query\\SimpleKeywordFeatureTestTrait": "tests/phpunit/unit/Query/SimpleKeywordFeatureTestTrait.php",
 		"CirrusSearch\\Query\\KeywordFeatureAssertions": "tests/phpunit/unit/Query/KeywordFeatureAssertions.php",
-		"CirrusSearch\\Fallbacks\\BaseFallbackMethodTest": "tests/phpunit/unit/Fallbacks/BaseFallbackMethodTest.php"
+		"CirrusSearch\\Fallbacks\\FallbackMethodTestBase": "tests/phpunit/unit/Fallbacks/FallbackMethodTestBase.php"
 	},
 	"AutoloadNamespaces": {
 		"CirrusSearch\\": "includes/",
@@ -73,39 +75,10 @@
 			"dependencies": [
 				"mediawiki.router",
 				"mediawiki.util",
-				"mediawiki.Uri"
+				"web2017-polyfills"
 			],
 			"styles": [],
-			"messages": [],
-			"targets": [
-				"desktop",
-				"mobile"
-			]
-		},
-		"ext.cirrus.explore-similar": {
-			"scripts": [
-				"resources/ext.cirrus.explore-similar.js"
-			],
-			"dependencies": [
-				"mediawiki.util",
-				"mediawiki.api",
-				"mediawiki.template.mustache"
-			],
-			"styles": [
-				"resources/ext.cirrus.explore-similar.less"
-			],
-			"targets": [
-				"desktop"
-			],
-			"messages": [
-				"cirrussearch-explore-similar-related",
-				"cirrussearch-explore-similar-categories",
-				"cirrussearch-explore-similar-languages",
-				"otherlanguages",
-				"cirrussearch-explore-similar-related-none",
-				"cirrussearch-explore-similar-categories-none",
-				"cirrussearch-explore-similar-languages-none"
-			]
+			"messages": []
 		}
 	},
 	"ResourceFileModulePaths": {
@@ -113,35 +86,41 @@
 		"remoteExtPath": "CirrusSearch"
 	},
 	"Hooks": {
-		"APIAfterExecute": "CirrusSearch\\Hooks::onAPIAfterExecute",
-		"ApiBeforeMain": "CirrusSearch\\Hooks::onApiBeforeMain",
-		"APIQuerySiteInfoStatisticsInfo": "CirrusSearch\\Hooks::onAPIQuerySiteInfoStatisticsInfo",
-		"ArticleDelete": "CirrusSearch\\Hooks::onArticleDelete",
-		"ArticleDeleteComplete": "CirrusSearch\\Hooks::onArticleDeleteComplete",
-		"ArticleRevisionVisibilitySet": "CirrusSearch\\Hooks::onRevisionDelete",
-		"ArticleUndelete": "CirrusSearch\\Hooks::onArticleUndelete",
-		"BeforeInitialize": "CirrusSearch\\Hooks::onBeforeInitialize",
+		"APIAfterExecute": "default",
+		"ApiBeforeMain": "default",
+		"APIQuerySiteInfoStatisticsInfo": "default",
+		"APIQuerySiteInfoGeneralInfo": "apiquerysiteinfogeneralinfo",
+		"PageDelete": "changelistener",
+		"PageDeleteComplete": [
+			"changelistener",
+			"archivechangelistener"
+		],
+		"ArticleRevisionVisibilitySet": "changelistener",
+		"PageUndeleteComplete": "archivechangelistener",
+		"BeforeInitialize": "default",
 		"CirrusSearchAddQueryFeatures": "CirrusSearch\\Wikimedia\\WeightedTagsHooks::onCirrusSearchAddQueryFeatures",
 		"CirrusSearchAnalysisConfig": "CirrusSearch\\Wikimedia\\WeightedTagsHooks::onCirrusSearchAnalysisConfig",
 		"CirrusSearchSimilarityConfig": "CirrusSearch\\Wikimedia\\WeightedTagsHooks::onCirrusSearchSimilarityConfig",
 		"GetPreferences": "default",
-		"LinksUpdateComplete": "CirrusSearch\\Hooks::onLinksUpdateCompleted",
-		"MediaWikiServices": "CirrusSearch\\Hooks::onMediaWikiServices",
-		"PrefixSearchExtractNamespace": "CirrusSearch\\Hooks::onPrefixSearchExtractNamespace",
-		"ResourceLoaderGetConfigVars": "CirrusSearch\\Hooks::onResourceLoaderGetConfigVars",
-		"SearchIndexFields": [
-			"CirrusSearch\\Wikimedia\\WeightedTagsHooks::onSearchIndexFields",
-			"CirrusSearch\\Hooks\\CustomPageFields::onSearchIndexFields"
+		"LinksUpdateComplete": [
+			"changelistener",
+			"eventbusbridge"
 		],
-		"SearchGetNearMatch": "CirrusSearch\\Hooks::onSearchGetNearMatch",
-		"ShowSearchHitTitle": "CirrusSearch\\Hooks::onShowSearchHitTitle",
-		"SoftwareInfo": "CirrusSearch\\Hooks::onSoftwareInfo",
-		"SpecialSearchResults": "CirrusSearch\\Hooks::onSpecialSearchResults",
-		"SpecialSearchResultsAppend": "CirrusSearch\\Hooks::onSpecialSearchResultsAppend",
-		"SpecialStatsAddExtra": "CirrusSearch\\Hooks::onSpecialStatsAddExtra",
-		"TitleMove": "CirrusSearch\\Hooks::onTitleMove",
-		"PageMoveComplete": "CirrusSearch\\Hooks::onPageMoveComplete",
-		"UploadComplete": "CirrusSearch\\Hooks::onUploadComplete",
+		"PrefixSearchExtractNamespace": "default",
+		"ResourceLoaderGetConfigVars": "default",
+		"SearchIndexFields": [
+			"wikimediatags",
+			"custompagefields"
+		],
+		"SearchGetNearMatch": "default",
+		"ShowSearchHitTitle": "default",
+		"SoftwareInfo": "default",
+		"SpecialSearchResults": "default",
+		"SpecialSearchResultsAppend": "default",
+		"SpecialStatsAddExtra": "default",
+		"TitleMove": "changelistener",
+		"PageMoveComplete": "changelistener",
+		"UploadComplete": "changelistener",
 		"UserGetDefaultOptions": "default"
 	},
 	"HookHandlers": {
@@ -149,6 +128,51 @@
 			"class": "CirrusSearch\\Hooks",
 			"services": [
 				"ConfigFactory"
+			]
+		},
+		"wikimediatags": {
+			"class": "CirrusSearch\\Wikimedia\\WeightedTagsHooks"
+		},
+		"custompagefields": {
+			"class": "CirrusSearch\\Hooks\\CustomPageFields"
+		},
+		"changelistener": {
+			"class": "CirrusSearch\\ChangeListener",
+			"factory": "CirrusSearch\\ChangeListener::create",
+			"services": [
+				"JobQueueGroup",
+				"ConfigFactory",
+				"ConnectionProvider",
+				"RedirectLookup"
+			]
+		},
+		"archivechangelistener": {
+			"class": "CirrusSearch\\ArchiveChangeListener",
+			"factory": "CirrusSearch\\ArchiveChangeListener::create",
+			"services": [
+				"JobQueueGroup",
+				"ConfigFactory"
+			]
+		},
+		"eventbusbridge": {
+			"class": "CirrusSearch\\Event\\EventBridge",
+			"factory": "CirrusSearch\\Event\\EventBusBridge::factory",
+			"services": [
+				"ConfigFactory",
+				"MainConfig",
+				"GlobalIdGenerator",
+				"TitleFormatter",
+				"PageStore"
+			],
+			"optional_services": [
+				"EventBus.EventBusFactory",
+				"EventBus.StreamNameMapper"
+			]
+		},
+		"apiquerysiteinfogeneralinfo": {
+			"class": "CirrusSearch\\Hooks\\CirrusSearchApiQuerySiteInfoGeneralInfoHook",
+			"services": [
+				"ConnectionProvider"
 			]
 		}
 	},
@@ -160,6 +184,8 @@
 			"value": false
 		},
 		"CirrusSearchClusters": {
+			"description": "If both CirrusSearchClusters and CirrusSearchWriteClusters are specified, those clusters only appearing in CirrusSearchClusters are considered read-only.",
+			"merge_strategy": "provide_default",
 			"value": {
 				"default": [
 					"localhost"
@@ -314,6 +340,9 @@
 		"CirrusSearchAllowLeadingWildcard": {
 			"value": true
 		},
+		"CirrusSearchIndexFieldsToCleanup": {
+			"value": []
+		},
 		"CirrusSearchIndexedRedirects": {
 			"value": 1024
 		},
@@ -347,12 +376,6 @@
 				"redirect": 1,
 				"title_asciifolding": 7,
 				"redirect_asciifolding": 0.7
-			}
-		},
-		"CirrusSearchAllFields": {
-			"value": {
-				"build": true,
-				"use": true
 			}
 		},
 		"CirrusSearchBoostOpening": {
@@ -564,9 +587,6 @@
 		"CirrusSearchCrossProjectProfiles": {
 			"value": []
 		},
-		"CirrusExploreSimilarResults": {
-			"value": false
-		},
 		"CirrusSearchCrossProjectShowMultimedia": {
 			"value": false
 		},
@@ -636,6 +656,12 @@
 		"CirrusSearchFiletypeAliases": {
 			"value": []
 		},
+		"CirrusSearchDocumentSizeLimiterProfile": {
+			"value": "default"
+		},
+		"CirrusSearchDocumentSizeLimiterProfiles": {
+			"value": []
+		},
 		"CirrusSearchMaxFileTextLength": {
 			"value": -1
 		},
@@ -664,7 +690,7 @@
 			"value": 5
 		},
 		"CirrusSearchCategoryMax": {
-			"value": 256
+			"value": 1000
 		},
 		"CirrusSearchNamespaceResolutionMethod": {
 			"value": "elastic"
@@ -697,6 +723,33 @@
 		"CirrusSearchExtraFieldsInSearchResults": {
 			"description": "Defines extra fields to add to each result",
 			"value": []
+		},
+		"CirrusSearchEnableIncomingLinkCounting": {
+			"description": "Enables queries used for counting of incoming links. Disable if an external service is updating these.",
+			"value": true
+		},
+		"CirrusSearchDeduplicateAnalysis": {
+			"description": "[experimental] Deduplicate index analysis chains",
+			"value": false
+		},
+		"CirrusSearchUseEventBusBridge": {
+			"description": "Emit page-rerenders events via EventBus (requires EventBus)",
+			"value": false
+		},
+		"CirrusSearchDeduplicateInQuery": {
+			"description": "Exclude duplicate results a priori by filtering based on 'local_sites_with_dupe'",
+			"value": true
+		},
+		"CirrusSearchDeduplicateInMemory": {
+			"description": "Exclude duplicate results afterwards in memory",
+			"value": false
+		},
+		"CirrusSearchNaturalTitleSort": {
+			"description": "Configure the optional title_natural_{asc,desc} sort orders",
+			"value": {
+				"build": false,
+				"use": false
+			}
 		}
 	},
 	"SearchMappings": {

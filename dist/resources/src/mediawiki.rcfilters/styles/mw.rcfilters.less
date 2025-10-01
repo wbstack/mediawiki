@@ -1,4 +1,4 @@
-@import 'mediawiki.ui/variables.less';
+@import 'mediawiki.skin.variables.less';
 @import 'mw.rcfilters.mixins.less';
 
 @rcfilters-spinner-size: 12px;
@@ -41,10 +41,11 @@
 		padding-left: 0.5em;
 
 		&:not( .mw-recentchanges-toplinks-collapsed ) {
-			margin-top: -1px; // Make up for `border` to prevent link movement
-			margin-left: -1px;
+			// Make up for `border` to prevent link movement
+			margin-top: @position-offset-border-width-base;
+			margin-left: @position-offset-border-width-base;
 			margin-bottom: 0.5em;
-			border: 1px solid @colorGray12; // Same as the legend
+			border: @border-subtle; // Same as the legend
 			padding: 0 0.5em 0.5em 0.5em;
 		}
 
@@ -112,28 +113,28 @@
 		position: absolute;
 		left: 50%;
 		// Make sure the middle of the spinner is centered, rather than its left edge
-		margin-left: -3 * @rcfilters-spinner-size / 2;
+		margin-left: (-3 * @rcfilters-spinner-size / 2);
 		white-space: nowrap;
 
 		& .mw-rcfilters-spinner-bounce,
-		&:before,
-		&:after {
+		&::before,
+		&::after {
 			content: '';
-			background-color: @color-primary;
+			background-color: @background-color-progressive;
 			display: block;
 			float: left;
 			width: @rcfilters-spinner-size;
 			height: @rcfilters-spinner-size;
-			border-radius: 100%;
+			border-radius: @border-radius-circle;
 			animation: rcfiltersBouncedelay 1600ms ease-in-out -160ms infinite both;
 		}
 
-		&:before {
+		&::before {
 			margin-right: 4px;
 			animation-delay: -330ms;
 		}
 
-		&:after {
+		&::after {
 			margin-left: 4px;
 			animation-delay: 0s;
 		}
@@ -182,7 +183,7 @@
 
 // on smaller screen, set .watchlistDetail to full width
 // so that the spinner doesn't appear beside it. T225127#5518870
-@media screen and ( max-width: @width-breakpoint-tablet ) {
+@media screen and ( max-width: @max-width-breakpoint-mobile ) {
 	.client-js {
 		/* stylelint-disable-next-line selector-class-pattern */
 		.watchlistDetails {

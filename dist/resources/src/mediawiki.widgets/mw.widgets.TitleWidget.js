@@ -5,39 +5,43 @@
  * @license The MIT License (MIT); see LICENSE.txt
  */
 ( function () {
-	var hasOwn = Object.prototype.hasOwnProperty;
+	const hasOwn = Object.prototype.hasOwnProperty;
 
 	/**
-	 * Mixin for title widgets
+	 * @classdesc Mixin for title widgets.
 	 *
 	 * @class
 	 * @abstract
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.TitleWidget`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {number} [limit=10] Number of results to show
-	 * @cfg {number} [namespace] Namespace to prepend to queries
-	 * @cfg {number} [maxLength=255] Maximum query length
-	 * @cfg {boolean} [relative=true] If a namespace is set, display titles relative to it
-	 * @cfg {boolean} [suggestions=true] Display search suggestions
-	 * @cfg {boolean} [showRedirectTargets=true] Show the targets of redirects
-	 * @cfg {boolean} [showImages] Show page images
-	 * @cfg {boolean} [showDescriptions] Show page descriptions
-	 * @cfg {boolean} [showDisambigsLast] Show disambiguation pages as the last results
-	 * @cfg {boolean} [showMissing=true] Show missing pages
-	 * @cfg {boolean} [showInterwikis=false] Show pages with a valid interwiki prefix
-	 * @cfg {boolean} [addQueryInput=true] Add exact user's input query to results
-	 * @cfg {boolean} [excludeCurrentPage] Exclude the current page from suggestions
-	 * @cfg {boolean} [excludeDynamicNamespaces] Exclude pages whose namespace is negative
-	 * @cfg {boolean} [validateTitle=true] Whether the input must be a valid title
-	 * @cfg {boolean} [required=false] Whether the input must not be empty
-	 * @cfg {boolean} [highlightSearchQuery=true] Highlight the partial query the user used for this title
-	 * @cfg {Object} [cache] Result cache which implements a 'set' method, taking keyed values as an argument
-	 * @cfg {mw.Api} [api] API object to use, creates a default mw.Api instance if not specified
+	 * @param {number} [config.limit=10] Number of results to show
+	 * @param {number} [config.namespace] Namespace to prepend to queries
+	 * @param {number} [config.maxLength=255] Maximum query length
+	 * @param {boolean} [config.relative=true] If a namespace is set, display titles relative to it
+	 * @param {boolean} [config.suggestions=true] Display search suggestions
+	 * @param {boolean} [config.showRedirectTargets=true] Show the targets of redirects
+	 * @param {boolean} [config.showImages=false] Show page images
+	 * @param {boolean} [config.showDescriptions=false] Show page descriptions
+	 * @param {boolean} [config.showDisambigsLast=false] Show disambiguation pages as the last results
+	 * @param {boolean} [config.showMissing] Show the user's input as a missing page when a page with this
+	 *  exact name doesn't exist. Disabled by default when the namespace option is used, otherwise
+	 *  enabled by default.
+	 * @param {boolean} [config.showInterwikis=false] Show pages with a valid interwiki prefix
+	 * @param {boolean} [config.searchFragments=false] Search for hash fragments on a specific page when typed
+	 * @param {boolean} [config.addQueryInput=true] Add exact user's input query to results
+	 * @param {boolean} [config.excludeCurrentPage=false] Exclude the current page from suggestions
+	 * @param {boolean} [config.excludeDynamicNamespaces=false] Exclude pages whose namespace is negative
+	 * @param {boolean} [config.validateTitle=true] Whether the input must be a valid title
+	 * @param {boolean} [config.required=false] Whether the input must not be empty
+	 * @param {boolean} [config.highlightSearchQuery=true] Highlight the partial query the user used for this title
+	 * @param {Object} [config.cache] Result cache which implements a 'set' method, taking keyed values as an argument
+	 * @param {mw.Api} [config.api] API object to use, creates a default mw.Api instance if not specified
 	 */
 	mw.widgets.TitleWidget = function MwWidgetsTitleWidget( config ) {
 		// Config initialization
-		config = $.extend( {
+		config = Object.assign( {
 			maxLength: 255,
 			limit: 10
 		}, config );
@@ -52,8 +56,9 @@
 		this.showImages = !!config.showImages;
 		this.showDescriptions = !!config.showDescriptions;
 		this.showDisambigsLast = !!config.showDisambigsLast;
-		this.showMissing = config.showMissing !== false;
+		this.showMissing = config.showMissing !== undefined ? !!config.showMissing : this.namespace === null;
 		this.showInterwikis = !!config.showInterwikis;
+		this.searchFragments = !!config.searchFragments;
 		this.addQueryInput = config.addQueryInput !== false;
 		this.excludeCurrentPage = !!config.excludeCurrentPage;
 		this.excludeDynamicNamespaces = !!config.excludeDynamicNamespaces;
@@ -61,15 +66,11 @@
 		this.highlightSearchQuery = config.highlightSearchQuery === undefined ? true : !!config.highlightSearchQuery;
 		this.cache = config.cache;
 		this.api = config.api || new mw.Api();
-		// Supports: IE10, FF28, Chrome23
-		// eslint-disable-next-line compat/compat
-		this.compare = window.Intl && Intl.Collator ?
-			// eslint-disable-next-line compat/compat
-			new Intl.Collator(
-				mw.language.bcp47( mw.config.get( 'wgContentLanguage' ) ),
-				{ sensitivity: 'base' }
-			).compare :
-			null;
+		this.compare = new Intl.Collator(
+			mw.language.bcp47( mw.config.get( 'wgContentLanguage' ) ),
+			{ sensitivity: 'base' }
+		).compare;
+		this.sectionsCache = {};
 
 		// Initialization
 		this.$element.addClass( 'mw-widget-titleWidget' );
@@ -86,9 +87,10 @@
 	/* Methods */
 
 	/**
-	 * Get the current value of the search query
+	 * Get the current value of the search query.
 	 *
 	 * @abstract
+	 * @method
 	 * @return {string} Search query
 	 */
 	mw.widgets.TitleWidget.prototype.getQueryValue = null;
@@ -112,15 +114,13 @@
 	};
 
 	mw.widgets.TitleWidget.prototype.getInterwikiPrefixesPromise = function () {
-		var api, cache, key;
-
 		if ( !this.showInterwikis ) {
 			return $.Deferred().resolve( [] ).promise();
 		}
 
-		api = this.getApi();
-		cache = this.constructor.static.interwikiPrefixesPromiseCache;
-		key = api.defaults.ajax.url;
+		const api = this.getApi();
+		const cache = this.constructor.static.interwikiPrefixesPromiseCache;
+		const key = api.defaults.ajax.url;
 
 		if ( !Object.prototype.hasOwnProperty.call( cache, key ) ) {
 			cache[ key ] = api.get( {
@@ -132,13 +132,59 @@
 				smaxage: 60 * 60 * 24,
 				// Workaround T97096 by setting uselang=content
 				uselang: 'content'
-			} ).then( function ( data ) {
-				return data.query.interwikimap.map( function ( interwiki ) {
-					return interwiki.prefix;
-				} );
-			} );
+			} ).then( ( data ) => data.query.interwikimap.map( ( interwiki ) => interwiki.prefix ) );
 		}
 		return cache[ key ];
+	};
+
+	/**
+	 * Suggest link fragments from the sections API.
+	 *
+	 * @param {string} title Title, extracted form the user input
+	 * @param {string} fragmentQuery Partial link fragment, from the user input
+	 * @return {jQuery.Promise} Suggestions promise
+	 */
+	mw.widgets.TitleWidget.prototype.getSectionSuggestions = function ( title, fragmentQuery ) {
+		const normalizedTitle = mw.Title.newFromText( title || mw.config.get( 'wgRelevantPageName' ) );
+		if ( !normalizedTitle ) {
+			return $.Deferred().resolve( [] ).promise();
+		}
+		const normalizedTitleText = normalizedTitle.getPrefixedText();
+		this.sectionsCache[ normalizedTitleText ] = this.sectionsCache[ normalizedTitleText ] || this.getApi().get( {
+			action: 'parse',
+			page: normalizedTitleText,
+			prop: 'sections'
+		} );
+
+		function normalizeFragment( fragment ) {
+			return fragment.toLowerCase().replace( /_/g, ' ' );
+		}
+
+		return this.sectionsCache[ normalizedTitleText ].then( ( response ) => {
+			const sections = OO.getProp( response, 'parse', 'sections' ) || [];
+			const normalizedFragmentQuery = normalizeFragment( fragmentQuery );
+			const results = sections.filter( ( section ) => normalizeFragment( section.line ).indexOf( normalizedFragmentQuery ) !== -1 ).map( ( section ) => {
+				const fragment = section.linkAnchor.replace( /_/g, ' ' );
+				// TODO: Make promise abortable
+				return {
+					title: title + '#' + fragment,
+					// `title`` could be empty for a relative fragment, so store the normalized
+					// title if that is needed later.
+					normalizedTitle: normalizedTitle + '#' + fragment,
+					ns: normalizedTitle.getNamespaceId(),
+					// Sort prefix matches to the top
+					index: normalizeFragment( section.line ).indexOf( normalizedFragmentQuery ) === 0 ? 0 : 1
+				};
+			} );
+			// Sorting also happens later, but we need to do it now before we truncate
+			results.sort( ( a, b ) => a.index - b.index );
+			// Fake query result
+			return {
+				query: {
+					pages: results.slice( 0, this.limit )
+				}
+			};
+		} ).promise( { abort: function () {} } );
 	};
 
 	/**
@@ -148,12 +194,18 @@
 	 * @return {jQuery.Promise} Suggestions promise
 	 */
 	mw.widgets.TitleWidget.prototype.getSuggestionsPromise = function () {
-		var api = this.getApi(),
+		const api = this.getApi(),
 			query = this.getQueryValue(),
-			widget = this,
 			promiseAbortObject = { abort: function () {
 				// Do nothing. This is just so OOUI doesn't break due to abort being undefined.
 			} };
+
+		if ( this.searchFragments ) {
+			const hashIndex = query.indexOf( '#' );
+			if ( hashIndex !== -1 ) {
+				return this.getSectionSuggestions( query.slice( 0, hashIndex ), query.slice( hashIndex + 1 ) );
+			}
+		}
 
 		if ( !mw.Title.newFromText( query ) ) {
 			// Don't send invalid titles to the API.
@@ -161,10 +213,10 @@
 			return $.Deferred().resolve( {} ).promise( promiseAbortObject );
 		}
 
-		return this.getInterwikiPrefixesPromise().then( function ( interwikiPrefixes ) {
+		return this.getInterwikiPrefixesPromise().then( ( interwikiPrefixes ) => {
 			// Optimization: check we have any prefixes.
 			if ( interwikiPrefixes.length ) {
-				var interwiki = query.slice( 0, Math.max( 0, query.indexOf( ':' ) ) );
+				const interwiki = query.slice( 0, Math.max( 0, query.indexOf( ':' ) ) );
 				if (
 					interwiki !== '' &&
 					interwikiPrefixes.indexOf( interwiki ) !== -1
@@ -179,24 +231,28 @@
 				}
 			}
 			// Not a interwiki: do a prefix-search API lookup of the query.
-			var prefixSearchRequest = api.get( widget.getApiParams( query ) );
+			const prefixSearchRequest = api.get( this.getApiParams( query ) );
 			promiseAbortObject.abort = prefixSearchRequest.abort.bind( prefixSearchRequest ); // TODO ew
-			return prefixSearchRequest.then( function ( prefixSearchResponse ) {
-				if ( !widget.showMissing ) {
+			return prefixSearchRequest.then( ( prefixSearchResponse ) => {
+				if ( !this.showMissing ) {
 					return prefixSearchResponse;
 				}
+				const title = this.namespace && this.getMWTitle( query );
 				// Add the query title as the first result, after looking up its details.
-				var queryTitleRequest = api.get( { action: 'query', titles: query } );
+				const queryTitleRequest = api.get( {
+					action: 'query',
+					titles: title ? title.getPrefixedDb() : query
+				} );
 				promiseAbortObject.abort = queryTitleRequest.abort.bind( queryTitleRequest );
-				return queryTitleRequest.then( function ( queryTitleResponse ) {
+				return queryTitleRequest.then( ( queryTitleResponse ) => {
 					// By default, return the prefix-search result.
-					var result = prefixSearchResponse;
+					const result = prefixSearchResponse;
 					if ( prefixSearchResponse.query === undefined ) {
 						// There are no prefix-search results, so make the only result the query title.
 						// The API response structures are identical because both API calls are action=query.
 						result.query = queryTitleResponse.query;
-					} else if ( queryTitleResponse.query.pages[ -1 ] !== undefined &&
-						!widget.responseContainsNonExistingTitle( prefixSearchResponse, queryTitleResponse.query.pages[ -1 ].title )
+					} else if ( queryTitleResponse.query.pages && queryTitleResponse.query.pages[ -1 ] !== undefined &&
+						!this.responseContainsNonExistingTitle( prefixSearchResponse, queryTitleResponse.query.pages[ -1 ].title )
 					) {
 						// There are prefix-search results, but the query title isn't in them,
 						// so add it as a new result. It's under the new key 'queryTitle', because
@@ -230,7 +286,7 @@
 			return false;
 		}
 		// Check the targets against the given title.
-		for ( var redirect in apiResponse.query.redirects ) {
+		for ( const redirect in apiResponse.query.redirects ) {
 			if ( apiResponse.query.redirects[ redirect ].to === title ) {
 				return true;
 			}
@@ -240,13 +296,13 @@
 	};
 
 	/**
-	 * Get API params for a given query
+	 * Get API params for a given query.
 	 *
 	 * @param {string} query User query
 	 * @return {Object} API params
 	 */
 	mw.widgets.TitleWidget.prototype.getApiParams = function ( query ) {
-		var params = {
+		const params = {
 			action: 'query',
 			prop: [ 'info', 'pageprops' ],
 			generator: 'prefixsearch',
@@ -270,7 +326,7 @@
 	};
 
 	/**
-	 * Get the API object for title requests
+	 * Get the API object for title requests.
 	 *
 	 * @return {mw.Api} MediaWiki API
 	 */
@@ -279,14 +335,13 @@
 	};
 
 	/**
-	 * Get option widgets from the server response
+	 * Get option widgets from the server response.
 	 *
 	 * @param {Object} data Query result
 	 * @return {OO.ui.OptionWidget[]} Menu items
 	 */
 	mw.widgets.TitleWidget.prototype.getOptionsFromData = function ( data ) {
-		var i, len, index, option, pageExists, pageExistsExact, suggestionPage, page, redirect, redirects,
-			currentPageName = new mw.Title( mw.config.get( 'wgRelevantPageName' ) ).getPrefixedText(),
+		const currentPageName = new mw.Title( mw.config.get( 'wgRelevantPageName' ) ).getPrefixedText(),
 			items = [],
 			titles = [],
 			disambigs = [],
@@ -296,8 +351,8 @@
 			pageData = {};
 
 		if ( data.redirects ) {
-			for ( i = 0, len = data.redirects.length; i < len; i++ ) {
-				redirect = data.redirects[ i ];
+			for ( let r = 0, rLen = data.redirects.length; r < rLen; r++ ) {
+				const redirect = data.redirects[ r ];
 				redirectsTo[ redirect.to ] = redirectsTo[ redirect.to ] || [];
 				redirectsTo[ redirect.to ].push( redirect.from );
 				// Save the lowest index for this redirect target.
@@ -305,8 +360,8 @@
 			}
 		}
 
-		for ( index in data.pages ) {
-			suggestionPage = data.pages[ index ];
+		for ( const index in data.pages ) {
+			const suggestionPage = data.pages[ index ];
 
 			// When excludeCurrentPage is set, don't list the current page unless the user has type the full title
 			if ( this.excludeCurrentPage && suggestionPage.title === currentPageName && suggestionPage.title !== titleObj.getPrefixedText() ) {
@@ -335,8 +390,8 @@
 				titles.push( suggestionPage.title );
 			}
 
-			redirects = hasOwn.call( redirectsTo, suggestionPage.title ) ? redirectsTo[ suggestionPage.title ] : [];
-			for ( i = 0, len = redirects.length; i < len; i++ ) {
+			const redirects = hasOwn.call( redirectsTo, suggestionPage.title ) ? redirectsTo[ suggestionPage.title ] : [];
+			for ( let i = 0, iLen = redirects.length; i < iLen; i++ ) {
 				pageData[ redirects[ i ] ] = {
 					missing: false,
 					known: true,
@@ -351,21 +406,19 @@
 			}
 		}
 
-		titles.sort( function ( a, b ) {
-			return pageData[ a ].index - pageData[ b ].index;
-		} );
+		titles.sort( ( a, b ) => pageData[ a ].index - pageData[ b ].index );
 
 		// If not found, run value through mw.Title to avoid treating a match as a
 		// mismatch where normalisation would make them matching (T50476)
 
-		pageExistsExact = (
+		const pageExistsExact = (
 			hasOwn.call( pageData, this.getQueryValue() ) &&
 			(
 				!pageData[ this.getQueryValue() ].missing ||
 				pageData[ this.getQueryValue() ].known
 			)
 		);
-		pageExists = pageExistsExact || (
+		const pageExists = pageExistsExact || (
 			titleObj &&
 			hasOwn.call( pageData, titleObj.getPrefixedText() ) &&
 			(
@@ -385,9 +438,9 @@
 			this.cache.set( pageData );
 		}
 
-		for ( i = 0, len = titles.length; i < len; i++ ) {
-			page = hasOwn.call( pageData, titles[ i ] ) ? pageData[ titles[ i ] ] : {};
-			option = this.createOptionWidget( this.getOptionWidgetData( titles[ i ], page ) );
+		for ( let t = 0, tLen = titles.length; t < tLen; t++ ) {
+			const page = hasOwn.call( pageData, titles[ t ] ) ? pageData[ titles[ t ] ] : {};
+			const option = this.createOptionWidget( this.getOptionWidgetData( titles[ t ], page ) );
 
 			if ( this.showDisambigsLast && page.disambiguation ) {
 				disambigs.push( option );
@@ -400,7 +453,7 @@
 	};
 
 	/**
-	 * Create a menu option widget with specified data
+	 * Create a menu option widget with specified data.
 	 *
 	 * @param {Object} data Data for option widget
 	 * @return {OO.ui.MenuOptionWidget} Data for option widget
@@ -410,18 +463,18 @@
 	};
 
 	/**
-	 * Get menu option widget data from the title and page data
+	 * Get menu option widget data from the title and page data.
 	 *
 	 * @param {string} title Title object
 	 * @param {Object} data Page data
 	 * @return {Object} Data for option widget
 	 */
 	mw.widgets.TitleWidget.prototype.getOptionWidgetData = function ( title, data ) {
-		var mwTitle = new mw.Title( title ),
-			description = data.description;
+		let description = data.description;
 		if ( !description && ( data.missing && !data.known ) ) {
 			description = mw.msg( 'mw-widgets-titleinput-description-new-page' );
 		}
+		const mwTitle = new mw.Title( OO.getProp( data, 'originalData', 'normalizedTitle' ) || title );
 		return {
 			data: this.namespace !== null && this.relative ?
 				mwTitle.getRelativeText( this.namespace ) :
@@ -445,7 +498,7 @@
 	 * @return {mw.Title|null} Title object, or null if value is invalid
 	 */
 	mw.widgets.TitleWidget.prototype.getMWTitle = function ( value ) {
-		var title = value !== undefined ? value : this.getQueryValue(),
+		const title = value !== undefined ? value : this.getQueryValue(),
 			// mw.Title doesn't handle null well
 			titleObj = mw.Title.newFromText( title, this.namespace !== null ? this.namespace : undefined );
 
@@ -453,7 +506,7 @@
 	};
 
 	/**
-	 * Check if the query is valid
+	 * Check if the query is valid.
 	 *
 	 * @return {boolean} The query is valid
 	 */

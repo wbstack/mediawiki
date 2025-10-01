@@ -21,5 +21,10 @@
 	"vector-view-viewsource": "Source dekho",
 	"vector-more-actions": "Aur",
 	"vector-searchsuggest-containing": "<strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong> jisme hai, ke khojo",
-	"vector-toc-beginning": "Suruwaat"
+	"vector-toc-label": "Vishay suchi",
+	"vector-toc-beginning": "Suruwaat",
+	"vector-main-menu-label": "Main menu",
+	"vector-page-tools-label": "Aujaar",
+	"vector-page-tools-general-label": "General",
+	"vector-unpin-element-label": "lukao"
 }

@@ -13,10 +13,13 @@
 	"license-name": "GPL-2.0-or-later",
 	"type": "other",
 	"requires": {
-		"MediaWiki": ">= 1.39.0"
+		"MediaWiki": ">= 1.43"
 	},
 	"ExtensionFunctions": [
 		"MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onExtensionFunctions"
+	],
+	"ServiceWiringFiles": [
+		"src/ServiceWiring.php"
 	],
 	"DefaultUserOptions": {
 		"echo-subscriptions-web-oauth-owner": true,
@@ -48,7 +51,9 @@
 		"OAuth": {
 			"class": "MediaWiki\\Extension\\OAuth\\Frontend\\SpecialPages\\SpecialMWOAuth",
 			"services": [
-				"GrantsLocalization"
+				"GrantsLocalization",
+				"SkinFactory",
+				"UrlUtils"
 			]
 		},
 		"OAuthManageMyGrants": {
@@ -79,6 +84,10 @@
 	"TestAutoloadNamespaces": {
 		"MediaWiki\\Extension\\OAuth\\Tests\\": "tests/phpunit/"
 	},
+	"TestAutoloadClasses": {
+		"MediaWiki\\Extension\\OAuth\\Tests\\Entity\\MockClientEntity": "tests/phpunit/Entity/MockClientEntity.php",
+		"MediaWiki\\Extension\\OAuth\\Tests\\Entity\\Mock_ClientEntity": "tests/phpunit/Entity/MockClientEntity.php"
+	},
 	"ResourceModules": {
 		"ext.MWOAuth.styles": {
 			"styles": [
@@ -107,28 +116,46 @@
 	"HookHandlers": {
 		"abusefilter": {
 			"class": "MediaWiki\\Extension\\OAuth\\Backend\\AbuseFilterHookHandler"
+		},
+		"backend": {
+			"class": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks",
+			"services": [
+				"ChangeTagDefStore",
+				"ConnectionProvider"
+			]
+		},
+		"frontend": {
+			"class": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks",
+			"services": [
+				"PermissionManager"
+			]
+		},
+		"setup": {
+			"class": "MediaWiki\\Extension\\OAuth\\Setup"
+		},
+		"schema": {
+			"class": "MediaWiki\\Extension\\OAuth\\Backend\\UpdaterHooks"
 		}
 	},
 	"Hooks": {
 		"AbuseFilter-builder": "abusefilter",
 		"AbuseFilter-computeVariable": "abusefilter",
 		"AbuseFilter-generateUserVars": "abusefilter",
-		"ChangeTagCanCreate": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onChangeTagCanCreate",
+		"ChangeTagCanCreate": "backend",
 		"MergeAccountFromTo": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onMergeAccountFromTo",
-		"LoadExtensionSchemaUpdates": "MediaWiki\\Extension\\OAuth\\Backend\\UpdaterHooks::addSchemaUpdates",
-		"GetPreferences": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onGetPreferences",
-		"MessagesPreLoad": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onMessagesPreLoad",
-		"SpecialPageAfterExecute": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onSpecialPageAfterExecute",
-		"SpecialPageBeforeFormDisplay": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onSpecialPageBeforeFormDisplay",
+		"LoadExtensionSchemaUpdates": "schema",
+		"GetPreferences": "frontend",
+		"MessagesPreLoad": "frontend",
+		"SpecialPageAfterExecute": "frontend",
+		"SpecialPageBeforeFormDisplay": "frontend",
 		"BeforeCreateEchoEvent": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onBeforeCreateEchoEvent",
-		"CentralAuthAbortCentralAuthToken": "MediaWiki\\Extension\\OAuth\\Setup::onCentralAuthAbortCentralAuthToken",
-		"TestCanonicalRedirect": "MediaWiki\\Extension\\OAuth\\Setup::onTestCanonicalRedirect",
-		"SetupAfterCache": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onSetupAfterCache",
-		"ApiRsdServiceApis": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onApiRsdServiceApis",
-		"SpecialPage_initList": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onSpecialPage_initList",
-		"ListDefinedTags": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onListDefinedTags",
-		"ChangeTagsListActive": "MediaWiki\\Extension\\OAuth\\Backend\\Hooks::onChangeTagsListActive",
-		"LoginFormValidErrorMessages": "MediaWiki\\Extension\\OAuth\\Frontend\\UIHooks::onLoginFormValidErrorMessages"
+		"TestCanonicalRedirect": "setup",
+		"SetupAfterCache": "backend",
+		"ApiRsdServiceApis": "backend",
+		"SpecialPage_initList": "frontend",
+		"ListDefinedTags": "backend",
+		"ChangeTagsListActive": "backend",
+		"LoginFormValidErrorMessages": "frontend"
 	},
 	"ConfigRegistry": {
 		"mwoauth": "GlobalVarConfig::newInstance"
@@ -160,7 +187,11 @@
 		},
 		"MWOAuthReadOnly": {
 			"value": false,
-			"description": "Prevent write activity to the database. When this is set, consumers cannot be added or updated, and new authorizations are prohibited. Authorization headers for existing authorizations will continue to work. Useful for migrating database tables"
+			"description": "Prevent write activity to the database. When this is true, consumers cannot be added or updated, and new authorizations are prohibited. Authorization headers for existing authorizations will continue to work. Useful for migrating database tables"
+		},
+		"OAuthAutoApprove": {
+			"value": [],
+			"description": "Rules for automatically approving new consumers (instead of requiring manual review by an OAuth admin before they are usable). Takes a list of conditions; meeting any one of the conditions results in auto-approval. Conditions are an associative array of <rule name> => <rule value>; the condition is met if every one of its rules is satisfied. Current the only supported rule is 'grants', which takes a list of grant names, and is satisfied when all the grants requested for the consumer are within that list."
 		},
 		"OAuthGroupsToNotify": {
 			"value": [],
@@ -199,12 +230,12 @@
 			"description": "Controls whether clients are required to send code challenges with OAuth2 requests. This only applies to non-confidential clients"
 		},
 		"OAuth2GrantExpirationInterval": {
-			"description": "Controls validity period for access tokens. Does not apply to owner-only clients, whose access tokens are always non-expiring. Accepts ISO 8601 durations or can be set to \"infinity\" or false for non-expiring tokens",
+			"description": "Controls validity period for access tokens (stored in the cache configured in MWOAuthSessionCacheType). Does not apply to owner-only clients, whose access tokens are always non-expiring. Accepts ISO 8601 durations or can be set to \"infinity\" or false for non-expiring tokens. Defaults to one hour.",
 			"value": "PT1H"
 		},
 		"OAuth2RefreshTokenTTL": {
-			"description": "Controls validity period for refresh tokens. Accepts ISO 8601 durations or can be set to \"infinity\" or false for non-expiring tokens",
-			"value": "PT1M"
+			"description": "Controls validity period for refresh tokens (stored in the cache configured in MWOAuthSessionCacheType). Accepts ISO 8601 durations or can be set to \"infinity\" or false for non-expiring tokens. Defaults to one month.",
+			"value": "P1M"
 		}
 	},
 	"GrantPermissions": {
@@ -216,6 +247,9 @@
 	},
 	"GrantPermissionGroups": {
 		"oauthmanageownclient": "administration"
+	},
+	"GrantRiskGroups": {
+		"oauthmanageownclient": "internal"
 	},
 	"RestRoutes": [
 		{

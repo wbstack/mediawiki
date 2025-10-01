@@ -42,7 +42,7 @@ class LabelDescriptionNotEqualValidator implements EntityValidator {
 	public function validateLabelAndDescription(
 		TermList $labels,
 		TermList $descriptions,
-		array $languageCodes = null
+		?array $languageCodes = null
 	) {
 		$labels = $labels->toTextArray();
 		$descriptions = $descriptions->toTextArray();
@@ -54,7 +54,7 @@ class LabelDescriptionNotEqualValidator implements EntityValidator {
 		}
 
 		// Nothing to do if there are no labels OR no descriptions.
-		if ( empty( $labels ) || empty( $descriptions ) ) {
+		if ( !$labels || !$descriptions ) {
 			return Result::newSuccess();
 		}
 
@@ -85,7 +85,7 @@ class LabelDescriptionNotEqualValidator implements EntityValidator {
 				if ( $descriptions[$languageCode] === $label ) {
 					return Result::newError( [
 						new NotEqualViolation( 'label should not be equal to description',
-							'label-equals-description', [ $languageCode ] )
+							'label-equals-description', [ $languageCode ] ),
 					] );
 				}
 			}

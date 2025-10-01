@@ -32,7 +32,6 @@
 	"cite-ve-dialog-reference-editing-reused-long": "No çıme na pela de bu {{PLURAL:$1|rey|2=reyi|$1 reyi}} karniyaya. Vurnayışê ke tiya de biyê cayê ke no çımeyo karıyeno ê caya pêroyın dê tetbiq bo.",
 	"cite-ve-dialog-reference-options-group-label": "Na gruber bıkarn",
 	"cite-ve-dialog-reference-options-group-placeholder": "Referansê bıngey",
-	"cite-ve-dialog-reference-options-name-label": "Ney nami fına bıkarne",
 	"cite-ve-dialog-reference-options-responsive-label": "Nizamê ustına hesase bıgurene",
 	"cite-ve-dialog-reference-options-section": "Weçinıteki",
 	"cite-ve-dialog-reference-placeholder": "Çımeyê cı tiya de bınusne, ya kopya ke ya zi yew şablonê çımeyi cı ke.",
@@ -54,7 +53,5 @@
 	"cite-ve-referenceslist-missingref-in-list": "No çıme yew şablon de ya zi vıraziyaye yew vloq de şınastiyayayo. Enewke teyna modê çımey dê verqayti beno",
 	"cite-ve-referenceslist-missingreflist": "Na lista çımey terefê yew şabloni ra vıraziyayo u teyna modê çımey de vuriyeno",
 	"cite-ve-toolbar-group-label": "Vate",
-	"cite-ve-othergroup-item": "Çımeyê $1",
-	"visualeditor-internal-list-diff-default-group-name-mwreference": "Çımeyi",
-	"visualeditor-internal-list-diff-group-name-mwreference": "Namey gruba çımey :\"$1\""
+	"cite-ve-othergroup-item": "Çımeyê $1"
 }

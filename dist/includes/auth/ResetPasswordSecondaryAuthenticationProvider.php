@@ -21,6 +21,9 @@
 
 namespace MediaWiki\Auth;
 
+use MediaWiki\Message\Message;
+use MediaWiki\User\User;
+
 /**
  * Reset the local password, if signalled via $this->manager->setAuthenticationSessionData()
  *
@@ -58,11 +61,11 @@ class ResetPasswordSecondaryAuthenticationProvider extends AbstractSecondaryAuth
 
 	/**
 	 * Try to reset the password
-	 * @param \User $user
+	 * @param User $user
 	 * @param AuthenticationRequest[] $reqs
 	 * @return AuthenticationResponse
 	 */
-	protected function tryReset( \User $user, array $reqs ) {
+	protected function tryReset( User $user, array $reqs ) {
 		$data = $this->manager->getAuthenticationSessionData( 'reset-pass' );
 		if ( !$data ) {
 			return AuthenticationResponse::newAbstain();
@@ -77,7 +80,7 @@ class ResetPasswordSecondaryAuthenticationProvider extends AbstractSecondaryAuth
 
 		if ( !isset( $data->msg ) ) {
 			throw new \UnexpectedValueException( 'reset-pass msg is missing' );
-		} elseif ( !$data->msg instanceof \Message ) {
+		} elseif ( !$data->msg instanceof Message ) {
 			throw new \UnexpectedValueException( 'reset-pass msg is not valid' );
 		} elseif ( !isset( $data->hard ) ) {
 			throw new \UnexpectedValueException( 'reset-pass hard is missing' );
@@ -121,7 +124,7 @@ class ResetPasswordSecondaryAuthenticationProvider extends AbstractSecondaryAuth
 		}
 
 		if ( $req->password !== $req->retype ) {
-			return AuthenticationResponse::newUI( $needReqs, new \Message( 'badretype' ), 'error' );
+			return AuthenticationResponse::newUI( $needReqs, new Message( 'badretype' ), 'error' );
 		}
 
 		$req->username = $user->getName();

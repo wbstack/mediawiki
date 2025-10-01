@@ -6,6 +6,7 @@
 			"KuboF",
 			"Mirin",
 			"Ochilov",
+			"Pppery",
 			"Robin van der Vliet",
 			"Tlustulimu",
 			"Yekrats",
@@ -44,7 +45,6 @@
 	"config-memory-raised": "La parametro <code>memory_limit</code> de PHP estis $1, ŝanĝita al $2.",
 	"config-apc": "[https://www.php.net/apc APC] estas instalita",
 	"config-apcu": "[https://www.php.net/apcu APCu] estas instalita",
-	"config-wincache": "[https://www.iis.net/downloads/microsoft/wincache-extension WinCache] estas instalita",
 	"config-diff3-bad": "GNU diff3 ne estis trovita.",
 	"config-using-server": "Uzante servilonomon \"<nowiki>$1</nowiki>\".",
 	"config-using-uri": "Uzante servilan retadreson \"<nowiki>$1$2</nowiki>\".",
@@ -97,7 +97,6 @@
 	"config-upload-settings": "Alŝutado de bildoj kaj dosieroj",
 	"config-upload-enable": "Ebligi alŝutadon de dosieroj",
 	"config-upload-deleted": "Dosierujo por forigitaj dosieroj:",
-	"config-cc-again": "Reelekti...",
 	"config-extensions": "Kromprogramoj",
 	"config-skins": "Etosoj",
 	"config-skins-use-as-default": "Uzi ĉi tiun etoson kiel implicitan",
@@ -118,5 +117,5 @@
 	"config-extensions-requires": "$1 (postulas $2)",
 	"config-screenshot": "ekrankopio",
 	"mainpagetext": "'''MediaWiki estis sukcese instalita.'''",
-	"mainpagedocfooter": "Konsultu la [https://meta.wikimedia.org/wiki/MediaWiki_User%27s_Guide Gvidilon por uzantoj de MediaWiki] por informoj pri uzado de vikia programaro.\n\n==Kiel komenci==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Listo de konfiguraĵoj] (angle)\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki Oftaj Demandoj] (angle)\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ Anonco-dissendolisto pri MediaWiki] (angle)\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Localisation#Translation_resources Preklad MediaWiki do tvojho jazyka]"
+	"mainpagedocfooter": "Konsultu la [https://www.mediawiki.org/wiki/Special:MyLanguage/Help:Contents Gvidilon por uzantoj de MediaWiki] por informoj pri uzado de vikia programaro.\n\n==Kiel komenci==\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:Configuration_settings Listo de konfiguraĵoj] (angle)\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Manual:FAQ MediaWiki Oftaj Demandoj] (angle)\n* [https://lists.wikimedia.org/postorius/lists/mediawiki-announce.lists.wikimedia.org/ Anonco-dissendolisto pri MediaWiki] (angle)\n* [https://www.mediawiki.org/wiki/Special:MyLanguage/Localisation#Translation_resources Preklad MediaWiki do tvojho jazyka]"
 }

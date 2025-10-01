@@ -8,12 +8,12 @@
  *
  * @class
  * @extends OO.ui.SelectWidget
- * @mixins OO.ui.mixin.TabIndexedElement
- * @mixins ve.ui.MWAriaDescribe
+ * @mixes OO.ui.mixin.TabIndexedElement
+ * @mixes ve.ui.MWAriaDescribe
  *
  * @constructor
  * @param {Object} config
- * @cfg {ve.ui.MWTransclusionOutlineParameterWidget[]} items
+ * @param {ve.ui.MWTransclusionOutlineParameterWidget[]} config.items
  * @property {string|null} activeParameter Name of the currently selected parameter
  * @property {number} stickyHeaderHeight
  */
@@ -52,7 +52,7 @@ OO.mixinClass( ve.ui.MWTransclusionOutlineParameterSelectWidget, ve.ui.MWAriaDes
  * This is fired instead of the "choose" event from the {@see OO.ui.SelectWidget} base class when
  * pressing space on a parameter to toggle it or scroll it into view, without losing the focus.
  *
- * @event templateParameterSpaceDown
+ * @event ve.ui.MWTransclusionOutlineParameterSelectWidget#templateParameterSpaceDown
  * @param {ve.ui.MWTransclusionOutlineParameterWidget} item
  * @param {boolean} selected
  */
@@ -80,9 +80,8 @@ ve.ui.MWTransclusionOutlineParameterSelectWidget.static.createItem = function ( 
  * @return {ve.ui.MWTransclusionOutlineParameterSelectWidget}
  */
 ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.addItems = function ( items, index ) {
-	var self = this;
-	items.forEach( function ( item ) {
-		item.connect( self, {
+	items.forEach( ( item ) => {
+		item.connect( this, {
 			change: [ 'onCheckboxChange', item ]
 		} );
 	} );
@@ -94,7 +93,7 @@ ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.addItems = function (
 
 ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.ensureVisibilityOfFirstCheckedParameter = function () {
 	// TODO: Replace with {@see OO.ui.SelectWidget.findFirstSelectedItem} when available
-	var firstChecked = this.findSelectedItems()[ 0 ];
+	const firstChecked = this.findSelectedItems()[ 0 ];
 	if ( firstChecked ) {
 		firstChecked.ensureVisibility( this.stickyHeaderHeight );
 	}
@@ -105,7 +104,7 @@ ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.ensureVisibilityOfFir
  */
 ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.setActiveParameter = function ( paramName ) {
 	// Note: We know unnamed parameter placeholders never have an item here
-	var newItem = paramName ? this.findItemFromData( paramName ) : null;
+	const newItem = paramName ? this.findItemFromData( paramName ) : null;
 	// Unhighlight when called with no parameter name
 	this.highlightItem( newItem );
 
@@ -114,7 +113,7 @@ ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.setActiveParameter = 
 		return;
 	}
 
-	var currentItem = this.activeParameter ? this.findItemFromData( this.activeParameter ) : null;
+	const currentItem = this.activeParameter ? this.findItemFromData( this.activeParameter ) : null;
 	this.activeParameter = paramName;
 
 	if ( currentItem ) {
@@ -141,7 +140,7 @@ ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.highlightItem = funct
 ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.markParameterAsUnused = function ( paramName ) {
 	// There is no OO.ui.SelectWidget.unselectItemByData(), we need to do this manually
 	/** @type {ve.ui.MWTransclusionOutlineParameterWidget} */
-	var item = paramName ? this.findItemFromData( paramName ) : null;
+	const item = paramName ? this.findItemFromData( paramName ) : null;
 	if ( item ) {
 		item.setSelected( false );
 		// An unused parameter can't be the active (set) one; it doesn't exist in the content pane
@@ -169,21 +168,36 @@ ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.onCheckboxChange = fu
  * @inheritDoc OO.ui.SelectWidget
  */
 ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.onFocus = function ( event ) {
-	if ( event.target === this.$element[ 0 ] && !this.findHighlightedItem() ) {
-		// When tabbing into the selection list, highlight the first parameter.
-		this.highlightItem( this.items[ 0 ] );
+	if ( event.target !== this.$element[ 0 ] || this.findHighlightedItem() ) {
+		return;
 	}
+
+	let index = 0;
+	if ( event.relatedTarget ) {
+		const toolbarClass = 've-ui-mwTransclusionOutlineControlsWidget',
+			// The only elements below a parameter list can be another part or the toolbar
+			selector = '.ve-ui-mwTransclusionOutlinePartWidget, .' + toolbarClass,
+			$fromPart = $( event.relatedTarget ).closest( selector ),
+			$toPart = $( event.target ).closest( selector );
+		// When shift+tabbing into the list, highlight the last parameter
+		// eslint-disable-next-line no-jquery/no-class-state
+		if ( $fromPart.hasClass( toolbarClass ) || $fromPart.index() > $toPart.index() ) {
+			index = this.getItemCount() - 1;
+		}
+	}
+	this.highlightItem( this.items[ index ] );
+
 	// Don't call the parent. It makes assumptions what should be done here.
 };
 
 /**
  * @inheritDoc OO.ui.SelectWidget
  * @param {jQuery.Event} e
- * @fires choose
+ * @fires OO.ui.SelectWidget#choose
  */
 ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.onMouseDown = function ( e ) {
 	if ( e.which === OO.ui.MouseButtons.LEFT ) {
-		var item = this.findTargetItem( e );
+		const item = this.findTargetItem( e );
 		// Same as pressing enter, see below.
 		if ( item && item.isSelected() ) {
 			this.emit( 'choose', item, item.isSelected() );
@@ -199,11 +213,11 @@ ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.onMouseDown = functio
 /**
  * @inheritDoc OO.ui.SelectWidget
  * @param {KeyboardEvent} e
- * @fires choose
- * @fires templateParameterSpaceDown
+ * @fires OO.ui.SelectWidget#choose
+ * @fires ve.ui.MWTransclusionOutlineParameterSelectWidget#templateParameterSpaceDown
  */
 ve.ui.MWTransclusionOutlineParameterSelectWidget.prototype.onDocumentKeyDown = function ( e ) {
-	var item;
+	let item;
 
 	switch ( e.keyCode ) {
 		case OO.ui.Keys.HOME:

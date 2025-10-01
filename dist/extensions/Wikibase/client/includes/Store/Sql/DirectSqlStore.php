@@ -4,9 +4,7 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Store\Sql;
 
-use HashBagOStuff;
 use MediaWiki\MediaWikiServices;
-use ObjectCache;
 use Wikibase\Client\RecentChanges\RecentChangesFinder;
 use Wikibase\Client\Store\ClientStore;
 use Wikibase\Client\Store\DescriptionLookup;
@@ -27,15 +25,15 @@ use Wikibase\Lib\Rdbms\ClientDomainDb;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\CachingEntityRevisionLookup;
-use Wikibase\Lib\Store\CachingPropertyInfoLookup;
 use Wikibase\Lib\Store\CachingSiteLinkLookup;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Lib\Store\EntityRevisionCache;
 use Wikibase\Lib\Store\EntityRevisionLookup;
-use Wikibase\Lib\Store\PropertyInfoLookup;
 use Wikibase\Lib\Store\RevisionBasedEntityLookup;
 use Wikibase\Lib\Store\SiteLinkLookup;
 use Wikibase\Lib\Store\Sql\SiteLinkTable;
+use Wikimedia\ObjectCache\EmptyBagOStuff;
+use Wikimedia\ObjectCache\HashBagOStuff;
 use Wikimedia\Rdbms\SessionConsistentConnectionManager;
 
 /**
@@ -92,11 +90,6 @@ class DirectSqlStore implements ClientStore {
 	 * @var EntityIdLookup
 	 */
 	private $entityIdLookup;
-
-	/**
-	 * @var PropertyInfoLookup|null
-	 */
-	private $propertyInfoLookup = null;
 
 	/**
 	 * @var SiteLinkLookup|null
@@ -288,7 +281,7 @@ class DirectSqlStore implements ClientStore {
 		// TODO: Cleanup the cache, it's not needed as SqlBlobStore itself has a better cache
 		$persistentCachingLookup = new CachingEntityRevisionLookup(
 			new EntityRevisionCache(
-				ObjectCache::getInstance( CACHE_NONE ),
+				new EmptyBagOStuff(),
 				$this->cacheDuration,
 				$cacheKeyPrefix
 			),
@@ -313,28 +306,6 @@ class DirectSqlStore implements ClientStore {
 	 */
 	public function getEntityIdLookup(): EntityIdLookup {
 		return $this->entityIdLookup;
-	}
-
-	public function getPropertyInfoLookup(): PropertyInfoLookup {
-		if ( $this->propertyInfoLookup === null ) {
-			$propertyInfoLookup = $this->wikibaseServices->getPropertyInfoLookup();
-
-			$wanCachedPropertyInfoLookup = new CachingPropertyInfoLookup(
-				$propertyInfoLookup,
-				MediaWikiServices::getInstance()->getMainWANObjectCache(),
-				$this->cacheKeyGroup,
-				$this->cacheDuration
-			);
-
-			$this->propertyInfoLookup = new CachingPropertyInfoLookup(
-				$wanCachedPropertyInfoLookup,
-				MediaWikiServices::getInstance()->getLocalServerObjectCache(),
-				$this->cacheKeyGroup,
-				$this->cacheDuration
-			);
-		}
-
-		return $this->propertyInfoLookup;
 	}
 
 	public function getEntityPrefetcher(): EntityPrefetcher {

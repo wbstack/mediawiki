@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80"
+			"Rdwnnr"
 		]
 	},
-	"uls-plang-title-languages": "ᨅᨔ"
+	"uls-plang-title-languages": "ᨅᨔ",
+	"ext-uls-compact-link-count": "{{PLURAL:$1|$1 ᨄᨙᨆᨛ}}"
 }

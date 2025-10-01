@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface ToolbarDialog class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -20,7 +20,6 @@ ve.ui.ToolbarDialog = function VeUiToolbarDialog( config ) {
 
 	// Properties
 	this.disabled = false;
-	this.$shield = $( '<div>' ).addClass( 've-ui-toolbarDialog-shield' );
 
 	// Pre-initialization
 	// This class needs to exist before setup to constrain the height
@@ -36,14 +35,28 @@ OO.inheritClass( ve.ui.ToolbarDialog, OO.ui.Dialog );
 
 ve.ui.ToolbarDialog.static.size = 'full';
 
+/**
+ * The dialog is padded
+ *
+ * @static
+ * @type {boolean}
+ */
 ve.ui.ToolbarDialog.static.padded = true;
+
+/**
+ * The dialog has a frame border, for use with position='side'
+ *
+ * @static
+ * @type {boolean}
+ */
+ve.ui.ToolbarDialog.static.framed = true;
 
 /**
  * Toolbar position, either 'above', 'side' (right in LTR), 'below' or 'inline'
  * For 'inline' the caller will be manually positioning the dialog.
  *
  * @static
- * @type {string} Toolbar position
+ * @type {string}
  */
 ve.ui.ToolbarDialog.static.position = 'above';
 
@@ -56,7 +69,6 @@ ve.ui.ToolbarDialog.prototype.initialize = function () {
 	// Parent method
 	ve.ui.ToolbarDialog.super.prototype.initialize.call( this );
 
-	this.$body.append( this.$shield );
 	this.$content.addClass( 've-ui-toolbarDialog-content' );
 	// The following classes are used here:
 	// * ve-ui-toolbarDialog-position-above
@@ -66,6 +78,9 @@ ve.ui.ToolbarDialog.prototype.initialize = function () {
 	this.$element.addClass( 've-ui-toolbarDialog-position-' + this.constructor.static.position );
 	if ( this.constructor.static.padded ) {
 		this.$element.addClass( 've-ui-toolbarDialog-padded' );
+	}
+	if ( this.constructor.static.framed ) {
+		this.$element.addClass( 've-ui-toolbarDialog-framed' );
 	}
 	// Invisible title for accessibility
 	this.title.setInvisibleLabel( true );
@@ -81,10 +96,7 @@ ve.ui.ToolbarDialog.prototype.setDisabled = function ( disabled ) {
 	this.$content.addClass( 've-ui-toolbarDialog-content' );
 	if ( disabled !== this.disabled ) {
 		this.disabled = disabled;
-		this.$body
-			// Make sure shield is last child
-			.append( this.$shield )
-			.toggleClass( 've-ui-toolbarDialog-disabled', this.disabled );
+		this.$body.toggleClass( 've-ui-toolbarDialog-disabled', this.disabled );
 	}
 };
 

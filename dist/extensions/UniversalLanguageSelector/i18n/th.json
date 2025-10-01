@@ -3,17 +3,17 @@
 		"authors": [
 			"Aefgh39622",
 			"Ans",
+			"Ekminarin",
 			"Nitisart Jungtrakungrat",
 			"Patsagorn Y.",
-			"Xð",
-			"Ekminarin"
+			"Xð"
 		]
 	},
 	"uls-desc": "ให้ผู้ใช้​เลือก​ภาษาและปรับการตั้งค่าภาษาได้หลายวิธี",
 	"uls-plang-title-languages": "ภาษา",
 	"ext-uls-select-language-settings-icon-tooltip": "การตั้งค่าภาษา",
 	"ext-uls-undo-language-tooltip-text": "เปลี่ยนภาษาจาก $1 แล้ว",
-	"ext-uls-undo-language-tooltip-text-local": "เปลี่ยนภาษาสำหรับวิกินี้แล้ว ตรวจสอบ[[Special:GlobalPreferences|ค่ากำหนดทั่วโลก]]ของคุณเพื่อเปลี่ยนภาษาสำหรับวิกิทั้งหมด",
+	"ext-uls-undo-language-tooltip-text-local": "เปลี่ยนภาษาสำหรับวิกินี้แล้ว ตรวจสอบ[[Special:GlobalPreferences|การตั้งค่าส่วนกลาง]]ของคุณเพื่อเปลี่ยนภาษาสำหรับวิกิทั้งหมด",
 	"ext-uls-language-settings-preferences-link": "การตั้งค่าภาษาเพิ่มเติม",
 	"uls-betafeature-label": "ลิงก์ภาษาแบบพกพา",
 	"uls-betafeature-desc": "แสดงรายการภาษาแบบสั้น โดยแสดงเพียงภาษาที่สัมพันธ์กับคุณมากที่สุด",
@@ -63,7 +63,7 @@
 	"ext-uls-compact-link-count": "{{PLURAL:$1|อีก 1 ภาษา|อีก $1 ภาษา}}",
 	"ext-uls-compact-link-info": "ภาษาทั้งหมด (ที่เลือกไว้ตั้งแต่แรกจากตัวเลือกธรรมดาโดยคุณและคนอื่นๆ)",
 	"prefs-languages": "ภาษา",
-	"ext-uls-compact-language-links-preference": "ใช้ [[$1|รายการภาษาแบบกระชับ]] โดยมีภาษาที่เกี่ยวข้องกับคุณ",
+	"ext-uls-compact-language-links-preference": "ใช้[[$1|รายการภาษาแบบกระชับ]]โดยมีภาษาที่เกี่ยวข้องกับคุณ",
 	"ext-uls-compact-no-results": "หน้านี้ไม่มีในภาษาที่คุณค้นหา",
 	"ext-uls-setlang-error": "เกิดข้อผิดพลาดกับการอัปเดตตามภาษาที่คุณเลือก ข้อผิดพลาด: $1",
 	"ext-uls-setlang-unknown-error": "เกิดข้อผิดพลาดโดยไม่ทราบสาเหตุ",
@@ -72,10 +72,10 @@
 	"ext-uls-setlang-accept": "ยอมรับการเปลี่ยนแปลง",
 	"ext-uls-setlang-loading": "กำลังปรับใช้...",
 	"ext-uls-setlang-cancel": "ไม่ต้องเปลี่ยนตาม",
-	"ext-uls-actions-menu-header": "ตัวเลือกเพิ่ม",
 	"ext-uls-actions-menu-language-settings-item-label": "เปิดการตั้งค่าภาษา",
 	"ext-uls-empty-state-header": "ยังไม่มีภาษา",
 	"ext-uls-empty-state-desc": "ขณะนี้ยังไม่มีภาษาที่ใช้งานได้",
 	"ext-uls-empty-state-header-actions-available": "ยังไม่มีภาษา เพิ่มใหม่?",
-	"ext-uls-empty-state-desc-actions-available": "ทำเนื้อหาให้พร้อมใช้งานในภาษาต่าง ๆ มากขึ้น"
+	"ext-uls-empty-state-desc-actions-available": "ทำเนื้อหาให้พร้อมใช้งานในภาษาต่าง ๆ มากขึ้น",
+	"ext-uls-add-languages-button-label": "เพิ่มภาษา"
 }

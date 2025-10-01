@@ -38,7 +38,7 @@ class ChangeOpRemoveSenseGloss implements ChangeOp {
 		return Result::newSuccess();
 	}
 
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		Assert::parameterType( Sense::class, $entity, '$entity' );
 		'@phan-var Sense $entity';
 
@@ -57,7 +57,7 @@ class ChangeOpRemoveSenseGloss implements ChangeOp {
 		return new DummyChangeOpResult();
 	}
 
-	private function updateSummary( Sense $sense, Summary $summary = null ) {
+	private function updateSummary( Sense $sense, ?Summary $summary = null ) {
 		if ( $summary === null ) {
 			return;
 		}
@@ -66,10 +66,10 @@ class ChangeOpRemoveSenseGloss implements ChangeOp {
 
 		$summary->setLanguage( $this->language );
 		$summary->addAutoCommentArgs( [
-			$sense->getId()->getSerialization() // TODO: use SenseId not string?
+			$sense->getId()->getSerialization(), // TODO: use SenseId not string?
 		] );
 		$summary->addAutoSummaryArgs( [
-			$this->language => $sense->getGlosses()->getByLanguage( $this->language )->getText()
+			$this->language => $sense->getGlosses()->getByLanguage( $this->language )->getText(),
 		] );
 	}
 

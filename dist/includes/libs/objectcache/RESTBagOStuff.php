@@ -1,9 +1,13 @@
 <?php
 
+namespace Wikimedia\ObjectCache;
+
+use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
+use Wikimedia\Http\MultiHttpClient;
 
 /**
- * Interface to key-value storage behind an HTTP server.
+ * Store key-value data via an HTTP service.
  *
  * ### Important caveats
  *
@@ -102,24 +106,28 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 
 	/**
 	 * REST URL to use for storage.
+	 *
 	 * @var string
 	 */
 	private $url;
 
 	/**
 	 * HTTP parameters: readHeaders, writeHeaders, deleteHeaders, writeMethod.
+	 *
 	 * @var array
 	 */
 	private $httpParams;
 
 	/**
 	 * Optional serialization type to use. Allowed values: "PHP", "JSON".
+	 *
 	 * @var string
 	 */
 	private $serializationType;
 
 	/**
 	 * Optional HMAC Key for protecting the serialized blob. If omitted no protection is done
+	 *
 	 * @var string
 	 */
 	private $hmacKey;
@@ -130,7 +138,7 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 	private $extendedErrorBodyFields;
 
 	public function __construct( $params ) {
-		$params['segmentationSize'] = $params['segmentationSize'] ?? INF;
+		$params['segmentationSize'] ??= INF;
 		if ( empty( $params['url'] ) ) {
 			throw new InvalidArgumentException( 'URL parameter is required' );
 		}
@@ -141,7 +149,7 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 				'connTimeout' => $params['connTimeout'] ?? self::DEFAULT_CONN_TIMEOUT,
 				'reqTimeout' => $params['reqTimeout'] ?? self::DEFAULT_REQ_TIMEOUT,
 			];
-			foreach ( [ 'caBundlePath', 'proxy' ] as $key ) {
+			foreach ( [ 'caBundlePath', 'proxy', 'telemetry' ] as $key ) {
 				if ( isset( $params[$key] ) ) {
 					$clientParams[$key] = $params[$key];
 				}
@@ -185,7 +193,7 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 
 		$value = false;
 		$valueSize = false;
-		list( $rcode, $rdesc, $rhdrs, $rbody, $rerr ) = $this->client->run( $req );
+		[ $rcode, , $rhdrs, $rbody, $rerr ] = $this->client->run( $req );
 		if ( $rcode === 200 && is_string( $rbody ) ) {
 			$value = $this->decodeBody( $rbody );
 			$valueSize = strlen( $rbody );
@@ -194,7 +202,8 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 				$casToken = $rbody;
 			}
 		} elseif ( $rcode === 0 || ( $rcode >= 400 && $rcode != 404 ) ) {
-			$this->handleError( "Failed to fetch $key", $rcode, $rerr, $rhdrs, $rbody );
+			$this->handleError( 'Failed to fetch {cacheKey}', $rcode, $rerr, $rhdrs, $rbody,
+				[ 'cacheKey' => $key ] );
 		}
 
 		$this->updateOpStats( self::METRIC_OP_GET, [ $key => [ 0, $valueSize ] ] );
@@ -210,10 +219,11 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 			'headers' => $this->httpParams['writeHeaders'],
 		];
 
-		list( $rcode, $rdesc, $rhdrs, $rbody, $rerr ) = $this->client->run( $req );
+		[ $rcode, , $rhdrs, $rbody, $rerr ] = $this->client->run( $req );
 		$res = ( $rcode === 200 || $rcode === 201 || $rcode === 204 );
 		if ( !$res ) {
-			$this->handleError( "Failed to store $key", $rcode, $rerr, $rhdrs, $rbody );
+			$this->handleError( 'Failed to store {cacheKey}', $rcode, $rerr, $rhdrs, $rbody,
+				[ 'cacheKey' => $key ] );
 		}
 
 		$this->updateOpStats( self::METRIC_OP_SET, [ $key => [ strlen( $rbody ), 0 ] ] );
@@ -238,35 +248,16 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 			'headers' => $this->httpParams['deleteHeaders'],
 		];
 
-		list( $rcode, $rdesc, $rhdrs, $rbody, $rerr ) = $this->client->run( $req );
+		[ $rcode, , $rhdrs, $rbody, $rerr ] = $this->client->run( $req );
 		$res = in_array( $rcode, [ 200, 204, 205, 404, 410 ] );
 		if ( !$res ) {
-			$this->handleError( "Failed to delete $key", $rcode, $rerr, $rhdrs, $rbody );
+			$this->handleError( 'Failed to delete {cacheKey}', $rcode, $rerr, $rhdrs, $rbody,
+				[ 'cacheKey' => $key ] );
 		}
 
 		$this->updateOpStats( self::METRIC_OP_DELETE, [ $key ] );
 
 		return $res;
-	}
-
-	public function incr( $key, $value = 1, $flags = 0 ) {
-		return $this->doIncr( $key, $value, $flags );
-	}
-
-	public function decr( $key, $value = 1, $flags = 0 ) {
-		return $this->doIncr( $key, -$value, $flags );
-	}
-
-	private function doIncr( $key, $value = 1, $flags = 0 ) {
-		// NOTE: This is non-atomic
-		$n = $this->get( $key, self::READ_LATEST );
-		// key exists?
-		if ( $this->isInteger( $n ) ) {
-			$n = max( $n + (int)$value, 0 );
-			return $this->set( $key, $n ) ? $n : false;
-		}
-
-		return false;
 	}
 
 	protected function doIncrWithInit( $key, $exptime, $step, $init, $flags ) {
@@ -284,19 +275,11 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 		return $newValue;
 	}
 
-	public function makeKeyInternal( $keyspace, $components ) {
-		return $this->genericKeyFromComponents( $keyspace, ...$components );
-	}
-
-	protected function convertGenericKey( $key ) {
-		// short-circuit; already uses "generic" keys
-		return $key;
-	}
-
 	/**
 	 * Processes the response body.
 	 *
 	 * @param string $body request body to process
+	 *
 	 * @return mixed|bool the processed body, or false on error
 	 */
 	private function decodeBody( $body ) {
@@ -304,7 +287,7 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 		if ( count( $pieces ) !== 3 || $pieces[0] !== $this->serializationType ) {
 			return false;
 		}
-		list( , $hmac, $serialized ) = $pieces;
+		[ , $hmac, $serialized ] = $pieces;
 		if ( $this->hmacKey !== '' ) {
 			$checkHmac = hash_hmac( 'sha256', $serialized, $this->hmacKey, true );
 			if ( !hash_equals( $checkHmac, base64_decode( $hmac ) ) ) {
@@ -331,8 +314,8 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 	 * Prepares the request body (the "value" portion of our key/value store) for transmission.
 	 *
 	 * @param string $body request body to prepare
+	 *
 	 * @return string the prepared body
-	 * @throws LogicException
 	 */
 	private function encodeBody( $body ) {
 		switch ( $this->serializationType ) {
@@ -371,13 +354,14 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 	 * @param string $rerr Error message from client
 	 * @param array $rhdrs Response headers
 	 * @param string $rbody Error body from client (if any)
+	 * @param array $context Error context for PSR-3 logging
 	 */
-	protected function handleError( $msg, $rcode, $rerr, $rhdrs, $rbody ) {
+	protected function handleError( $msg, $rcode, $rerr, $rhdrs, $rbody, $context = [] ) {
 		$message = "$msg : ({code}) {error}";
 		$context = [
 			'code' => $rcode,
 			'error' => $rerr
-		];
+		] + $context;
 
 		if ( $this->extendedErrorBodyFields !== [] ) {
 			$body = $this->decodeBody( $rbody );
@@ -399,3 +383,6 @@ class RESTBagOStuff extends MediumSpecificBagOStuff {
 		$this->setLastError( $rcode === 0 ? self::ERR_UNREACHABLE : self::ERR_UNEXPECTED );
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( RESTBagOStuff::class, 'RESTBagOStuff' );

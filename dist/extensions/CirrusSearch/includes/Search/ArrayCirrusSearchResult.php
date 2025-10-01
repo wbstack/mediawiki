@@ -2,19 +2,24 @@
 
 namespace CirrusSearch\Search;
 
-use Title;
+use MediaWiki\Title\Title;
 
 class ArrayCirrusSearchResult extends CirrusSearchResult {
 	public const DOC_ID = 'doc_id';
 	public const SCORE = 'score';
 	public const EXPLANATION = 'explanation';
 	public const TEXT_SNIPPET = 'text_snippet';
+	public const TEXT_SNIPPET_FIELD = 'text_snippet_field';
 	public const TITLE_SNIPPET = 'title_snippet';
+	public const TITLE_SNIPPET_FIELD = 'title_snippet_field';
 	public const REDIRECT_SNIPPET = 'redirect_snippet';
+	public const REDIRECT_SNIPPET_FIELD = 'redirect_snippet_field';
 	public const REDIRECT_TITLE = 'redirect_title';
 	public const SECTION_SNIPPET = 'section_snippet';
+	public const SECTION_SNIPPET_FIELD = 'section_snippet_field';
 	public const SECTION_TITLE = 'section_title';
 	public const CATEGORY_SNIPPET = 'category_snippet';
+	public const CATEGORY_SNIPPET_FIELD = 'category_snippet_field';
 	public const TIMESTAMP = 'timestamp';
 	public const WORD_COUNT = 'word_count';
 	public const BYTE_SIZE = 'byte_size';
@@ -63,6 +68,13 @@ class ArrayCirrusSearchResult extends CirrusSearchResult {
 	/**
 	 * @inheritDoc
 	 */
+	public function getTextSnippetField() {
+		return $this->data[self::TEXT_SNIPPET_FIELD] ?? '';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	public function getTitleSnippet() {
 		return $this->data[self::TITLE_SNIPPET] ?? '';
 	}
@@ -70,8 +82,36 @@ class ArrayCirrusSearchResult extends CirrusSearchResult {
 	/**
 	 * @inheritDoc
 	 */
+	public function getTitleSnippetField() {
+		return $this->data[self::TITLE_SNIPPET_FIELD] ?? '';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	public function getRedirectSnippet() {
 		return $this->data[self::REDIRECT_SNIPPET] ?? '';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getRedirectSnippetField() {
+		return $this->data[self::REDIRECT_SNIPPET_FIELD] ?? '';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function clearRedirectTitle(): bool {
+		unset(
+			$this->data[self::REDIRECT_SNIPPET],
+			$this->data[self::REDIRECT_SNIPPET_FIELD] );
+
+		return !$this->containsHighlight( $this->getTextSnippet() )
+			&& $this->getTitleSnippet() === ''
+			&& $this->getSectionSnippet() === ''
+			&& $this->getCategorySnippet() === '';
 	}
 
 	/**
@@ -91,6 +131,13 @@ class ArrayCirrusSearchResult extends CirrusSearchResult {
 	/**
 	 * @inheritDoc
 	 */
+	public function getSectionSnippetField() {
+		return $this->data[self::SECTION_SNIPPET_FIELD] ?? '';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
 	public function getSectionTitle() {
 		return $this->data[self::SECTION_TITLE] ?? null;
 	}
@@ -100,6 +147,13 @@ class ArrayCirrusSearchResult extends CirrusSearchResult {
 	 */
 	public function getCategorySnippet() {
 		return $this->data[self::CATEGORY_SNIPPET] ?? '';
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	public function getCategorySnippetField() {
+		return $this->data[self::CATEGORY_SNIPPET_FIELD] ?? '';
 	}
 
 	/**

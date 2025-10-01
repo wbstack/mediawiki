@@ -42,15 +42,10 @@ class Fingerprint implements LabelsProvider, DescriptionsProvider, AliasesProvid
 	 */
 	private $aliasGroups;
 
-	/**
-	 * @param TermList|null $labels
-	 * @param TermList|null $descriptions
-	 * @param AliasGroupList|null $aliasGroups
-	 */
 	public function __construct(
-		TermList $labels = null,
-		TermList $descriptions = null,
-		AliasGroupList $aliasGroups = null
+		?TermList $labels = null,
+		?TermList $descriptions = null,
+		?AliasGroupList $aliasGroups = null
 	) {
 		$this->labels = $labels ?: new TermList();
 		$this->descriptions = $descriptions ?: new TermList();
@@ -71,7 +66,7 @@ class Fingerprint implements LabelsProvider, DescriptionsProvider, AliasesProvid
 	 *
 	 * @param string $languageCode
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasLabel( $languageCode ) {
 		return $this->labels->hasTermForLanguage( $languageCode );
@@ -125,7 +120,7 @@ class Fingerprint implements LabelsProvider, DescriptionsProvider, AliasesProvid
 	 *
 	 * @param string $languageCode
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasDescription( $languageCode ) {
 		return $this->descriptions->hasTermForLanguage( $languageCode );
@@ -179,7 +174,7 @@ class Fingerprint implements LabelsProvider, DescriptionsProvider, AliasesProvid
 	 *
 	 * @param string $languageCode
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function hasAliasGroup( $languageCode ) {
 		return $this->aliasGroups->hasGroupForLanguage( $languageCode );

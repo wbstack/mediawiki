@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Wikibase\Client\Usage\SubscriptionManager;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
 use Wikimedia\Rdbms\SessionConsistentConnectionManager;
 
 /**
@@ -52,7 +53,7 @@ class SqlSubscriptionManager implements SubscriptionManager {
 	 */
 	public function subscribe( string $subscriber, array $entityIds ): void {
 		$subscriptions = $this->idsToString( $entityIds );
-		$dbw = $this->connectionManager->getWriteConnectionRef();
+		$dbw = $this->connectionManager->getWriteConnection();
 		$dbw->startAtomic( __METHOD__ );
 		$oldSubscriptions = $this->querySubscriptions( $dbw, $subscriber, $subscriptions );
 		$newSubscriptions = array_diff( $subscriptions, $oldSubscriptions );
@@ -71,7 +72,7 @@ class SqlSubscriptionManager implements SubscriptionManager {
 	 */
 	public function unsubscribe( string $subscriber, array $entityIds ): void {
 		$unsubscriptions = $this->idsToString( $entityIds );
-		$dbw = $this->connectionManager->getWriteConnectionRef();
+		$dbw = $this->connectionManager->getWriteConnection();
 		$dbw->startAtomic( __METHOD__ );
 		$oldSubscriptions = $this->querySubscriptions( $dbw, $subscriber, $unsubscriptions );
 		$obsoleteSubscriptions = array_intersect( $unsubscriptions, $oldSubscriptions );
@@ -82,23 +83,22 @@ class SqlSubscriptionManager implements SubscriptionManager {
 	/**
 	 * For a set of potential subscriptions, returns the existing subscriptions.
 	 *
-	 * @param IDatabase $db
+	 * @param IReadableDatabase $db
 	 * @param string $subscriber
 	 * @param string[] $subscriptions
 	 *
 	 * @return string[] Entity ID strings from $subscriptions which $subscriber is already subscribed to.
 	 */
-	private function querySubscriptions( IDatabase $db, string $subscriber, array $subscriptions ): array {
+	private function querySubscriptions( IReadableDatabase $db, string $subscriber, array $subscriptions ): array {
 		if ( $subscriptions ) {
-			$subscriptions = $db->selectFieldValues(
-				'wb_changes_subscription',
-				'cs_entity_id',
-				[
+			$subscriptions = $db->newSelectQueryBuilder()
+				->select( 'cs_entity_id' )
+				->from( 'wb_changes_subscription' )
+				->where( [
 					'cs_subscriber_id' => $subscriber,
-					'cs_entity_id' => $subscriptions,
-				],
-				__METHOD__
-			);
+					'cs_entity_id' => array_values( $subscriptions ),
+				] )
+				->caller( __METHOD__ )->fetchFieldValues();
 		}
 
 		return $subscriptions;
@@ -112,14 +112,17 @@ class SqlSubscriptionManager implements SubscriptionManager {
 	 * @param string[] $subscriptions
 	 */
 	private function insertSubscriptions( IDatabase $db, string $subscriber, array $subscriptions ): void {
+		if ( $subscriptions === [] ) {
+			return;
+		}
+
 		$rows = $this->makeSubscriptionRows( $subscriber, $subscriptions );
 
-		$db->insert(
-			'wb_changes_subscription',
-			$rows,
-			__METHOD__,
-			[ 'IGNORE' ]
-		);
+		$db->newInsertQueryBuilder()
+			->insertInto( 'wb_changes_subscription' )
+			->ignore()
+			->rows( $rows )
+			->caller( __METHOD__ )->execute();
 	}
 
 	/**
@@ -131,14 +134,13 @@ class SqlSubscriptionManager implements SubscriptionManager {
 	 */
 	private function deleteSubscriptions( IDatabase $db, string $subscriber, array $subscriptions ): void {
 		if ( $subscriptions ) {
-			$db->delete(
-				'wb_changes_subscription',
-				[
+			$db->newDeleteQueryBuilder()
+				->deleteFrom( 'wb_changes_subscription' )
+				->where( [
 					'cs_subscriber_id' => $subscriber,
 					'cs_entity_id' => $subscriptions,
-				],
-				__METHOD__
-			);
+				] )
+				->caller( __METHOD__ )->execute();
 		}
 	}
 
@@ -157,7 +159,7 @@ class SqlSubscriptionManager implements SubscriptionManager {
 		foreach ( $subscriptions as $entityId ) {
 			$rows[] = [
 				'cs_entity_id' => $entityId,
-				'cs_subscriber_id' => $subscriber
+				'cs_subscriber_id' => $subscriber,
 			];
 		}
 

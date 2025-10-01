@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Deferred\LinksUpdate;
 
-use ParserOutput;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * langlinks
@@ -14,7 +14,9 @@ use ParserOutput;
  * @since 1.38
  */
 class LangLinksTable extends LinksTable {
+	/** @var string[] */
 	private $newLinks = [];
+	/** @var string[]|null */
 	private $existingLinks;
 
 	public function setParserOutput( ParserOutput $parserOutput ) {
@@ -26,7 +28,8 @@ class LangLinksTable extends LinksTable {
 		$this->newLinks = [];
 		foreach ( $ill as $link ) {
 			[ $key, $title ] = explode( ':', $link, 2 );
-			$this->newLinks[$key] = $title;
+			// Ensure that the "first" link has precedence: T26502
+			$this->newLinks[$key] ??= $title;
 		}
 	}
 

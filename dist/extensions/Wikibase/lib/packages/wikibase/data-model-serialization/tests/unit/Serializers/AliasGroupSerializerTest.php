@@ -27,17 +27,17 @@ class AliasGroupSerializerTest extends TestCase {
 		$serializer->serialize( $nonSerializable );
 	}
 
-	public function nonSerializableProvider() {
+	public static function nonSerializableProvider() {
 		return [
 			[
-				5
+				5,
 			],
 			[
-				[]
+				[],
 			],
 			[
-				new AliasGroupList()
-			]
+				new AliasGroupList(),
+			],
 		];
 	}
 
@@ -49,32 +49,32 @@ class AliasGroupSerializerTest extends TestCase {
 		$this->assertSame( $serialization, $serializer->serialize( $object ) );
 	}
 
-	public function serializationProvider() {
+	public static function serializationProvider() {
 		return [
 			[
 				[],
-				new AliasGroup( 'en', [] )
-			],
-			[
-				[
-					[ 'language' => 'en', 'value' => 'One' ]
-				],
-				new AliasGroup( 'en', [ 'One' ] )
+				new AliasGroup( 'en', [] ),
 			],
 			[
 				[
 					[ 'language' => 'en', 'value' => 'One' ],
-					[ 'language' => 'en', 'value' => 'Pony' ]
 				],
-				new AliasGroup( 'en', [ 'One', 'Pony' ] )
+				new AliasGroup( 'en', [ 'One' ] ),
+			],
+			[
+				[
+					[ 'language' => 'en', 'value' => 'One' ],
+					[ 'language' => 'en', 'value' => 'Pony' ],
+				],
+				new AliasGroup( 'en', [ 'One', 'Pony' ] ),
 			],
 			[
 				[
 					[ 'language' => 'de', 'value' => 'One', 'source' => 'fr' ],
 					[ 'language' => 'de', 'value' => 'Pony', 'source' => 'fr' ],
 				],
-				new AliasGroupFallback( 'en', [ 'One', 'Pony' ], 'de', 'fr' )
-			]
+				new AliasGroupFallback( 'en', [ 'One', 'Pony' ], 'de', 'fr' ),
+			],
 		];
 	}
 

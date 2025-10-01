@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Extension\OAuth\Entity;
 
+use DateInterval;
+use DateTimeImmutable;
 use Exception;
 use League\OAuth2\Server\Entities\AccessTokenEntityInterface;
 use League\OAuth2\Server\Entities\ScopeEntityInterface;
@@ -12,8 +14,7 @@ use MediaWiki\Extension\OAuth\Backend\MWOAuthException;
 use MediaWiki\Extension\OAuth\Backend\Utils;
 use MediaWiki\Extension\OAuth\Repository\AccessTokenRepository;
 use MediaWiki\Extension\OAuth\Repository\ClaimStore;
-use MWException;
-use User;
+use MediaWiki\User\User;
 
 class ClientEntity extends Consumer implements MWClientEntityInterface {
 
@@ -54,7 +55,7 @@ class ClientEntity extends Consumer implements MWClientEntityInterface {
 	/**
 	 * Get the grant types this client is allowed to use
 	 *
-	 * @return array
+	 * @return string[]
 	 */
 	public function getAllowedGrants() {
 		return $this->oauth2GrantTypes;
@@ -77,7 +78,6 @@ class ClientEntity extends Consumer implements MWClientEntityInterface {
 
 	/**
 	 * @return bool|User
-	 * @throws MWException
 	 */
 	public function getUser() {
 		return Utils::getLocalUserFromCentralId( $this->getUserId() );
@@ -127,10 +127,9 @@ class ClientEntity extends Consumer implements MWClientEntityInterface {
 	/**
 	 * @param User $mwUser
 	 * @param bool $update
-	 * @param array $grants
+	 * @param string[] $grants
 	 * @param null $requestTokenKey
 	 * @return bool
-	 * @throws MWException
 	 * @throws MWOAuthException
 	 */
 	public function authorize( User $mwUser, $update, $grants, $requestTokenKey = null ) {
@@ -164,7 +163,10 @@ class ClientEntity extends Consumer implements MWClientEntityInterface {
 		) {
 			// make sure client is allowed *only* client_credentials grant,
 			// so that this AT cannot be used in other grant type requests
-			throw new MWOAuthException( 'mwoauth-oauth2-error-owner-only-invalid-grant' );
+			throw new MWOAuthException( 'mwoauth-oauth2-error-owner-only-invalid-grant', [
+				'consumer' => $this->getConsumerKey(),
+				'consumer_name' => $this->getName(),
+			] );
 		}
 		$accessToken = null;
 		$accessTokenRepo = new AccessTokenRepository();
@@ -179,8 +181,8 @@ class ClientEntity extends Consumer implements MWClientEntityInterface {
 		foreach ( $claims as $claim ) {
 			$accessToken->addClaim( $claim );
 		}
-		$accessToken->setExpiryDateTime( ( new \DateTimeImmutable() )->add(
-			new \DateInterval( 'P1000Y' )
+		$accessToken->setExpiryDateTime( ( new DateTimeImmutable() )->add(
+			new DateInterval( 'P1000Y' )
 		) );
 		$accessToken->setPrivateKeyFromConfig();
 		$accessToken->setIdentifier( bin2hex( random_bytes( 40 ) ) );
@@ -193,8 +195,8 @@ class ClientEntity extends Consumer implements MWClientEntityInterface {
 	/**
 	 * Filter out scopes that application cannot use
 	 *
-	 * @param array $requested
-	 * @return array
+	 * @param string[] $requested
+	 * @return string[]
 	 */
 	private function getVerifiedScopes( $requested ) {
 		return array_intersect( $requested, $this->getGrants() );

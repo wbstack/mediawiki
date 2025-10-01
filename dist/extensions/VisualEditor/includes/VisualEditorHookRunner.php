@@ -12,9 +12,9 @@ namespace MediaWiki\Extension\VisualEditor;
  */
 
 use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Page\ProperPageIdentity;
 use MediaWiki\User\UserIdentity;
-use OutputPage;
 use Skin;
 
 class VisualEditorHookRunner implements
@@ -23,14 +23,8 @@ class VisualEditorHookRunner implements
 	VisualEditorBeforeEditorHook
 {
 
-	public const SERVICE_NAME = 'VisualEditorHookRunner';
+	private HookContainer $hookContainer;
 
-	/** @var HookContainer */
-	private $hookContainer;
-
-	/**
-	 * @param HookContainer $hookContainer
-	 */
 	public function __construct( HookContainer $hookContainer ) {
 		$this->hookContainer = $hookContainer;
 	}

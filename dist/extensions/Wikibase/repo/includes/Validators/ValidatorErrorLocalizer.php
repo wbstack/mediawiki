@@ -2,8 +2,8 @@
 
 namespace Wikibase\Repo\Validators;
 
-use Message;
-use Status;
+use MediaWiki\Message\Message;
+use MediaWiki\Status\Status;
 use ValueFormatters\FormattingException;
 use ValueFormatters\ValueFormatter;
 use ValueValidators\Error;
@@ -25,7 +25,7 @@ class ValidatorErrorLocalizer {
 	 * parameters. MUST return wikitext. This is typically some kind of dispatcher. If not
 	 * provided, naive formatting will be used, which will fail on non-primitive parameters.
 	 */
-	public function __construct( ValueFormatter $paramFormatter = null ) {
+	public function __construct( ?ValueFormatter $paramFormatter = null ) {
 		$this->paramFormatter = $paramFormatter;
 	}
 
@@ -66,6 +66,7 @@ class ValidatorErrorLocalizer {
 		// wikibase-validator-no-such-property, wikibase-validator-no-validators, wikibase-validator-not-allowed,
 		// wikibase-validator-too-high, wikibase-validator-too-long, wikibase-validator-too-low,
 		// wikibase-validator-too-short, wikibase-validator-unknown-unit, wikibase-validator-url-scheme-missing,
+		// wikibase-validator-no-mul-descriptions, wikibase-validator-bad-prefix
 		$key = 'wikibase-validator-' . $error->getCode();
 		$params = $error->getParameters();
 

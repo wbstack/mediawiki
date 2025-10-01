@@ -2,15 +2,16 @@
 
 namespace TwoColConflict;
 
-use BagOStuff;
-use Html;
-use IBufferingStatsdDataFactory;
+use MediaWiki\CommentFormatter\CommentFormatter;
 use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\Content\WikitextContent;
 use MediaWiki\EditPage\TextConflictHelper;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-use OutputPage;
-use ParserOptions;
-use Title;
+use MediaWiki\Output\OutputPage;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use TwoColConflict\Html\HtmlEditableTextComponent;
 use TwoColConflict\Html\HtmlSplitConflictHeader;
 use TwoColConflict\Html\HtmlSplitConflictView;
@@ -18,8 +19,9 @@ use TwoColConflict\Html\HtmlTalkPageResolutionView;
 use TwoColConflict\ProvideSubmittedText\SubmittedTextCache;
 use TwoColConflict\TalkPageConflict\ResolutionSuggester;
 use TwoColConflict\TalkPageConflict\TalkPageResolution;
-use User;
-use WikitextContent;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\Stats\IBufferingStatsdDataFactory;
+use Wikimedia\Stats\StatsFactory;
 
 /**
  * @license GPL-2.0-or-later
@@ -27,29 +29,22 @@ use WikitextContent;
  */
 class SplitTwoColConflictHelper extends TextConflictHelper {
 
-	/** @var TwoColConflictContext */
-	private $twoColContext;
-
-	/** @var ResolutionSuggester */
-	private $resolutionSuggester;
-
-	/** @var SubmittedTextCache|null */
-	private $textCache;
-
-	/** @var string */
-	private $newEditSummary;
-
-	/** @var string|null */
-	private $editFontOption;
+	private TwoColConflictContext $twoColContext;
+	private ResolutionSuggester $resolutionSuggester;
+	private CommentFormatter $commentFormatter;
+	private ?SubmittedTextCache $textCache;
+	private string $newEditSummary;
+	private ?string $editFontOption;
 
 	/**
 	 * @param Title $title
 	 * @param OutputPage $out
-	 * @param IBufferingStatsdDataFactory $stats
+	 * @param IBufferingStatsdDataFactory|StatsFactory $stats
 	 * @param string $submitLabel Message key for submit button's label
 	 * @param IContentHandlerFactory $contentHandlerFactory
 	 * @param TwoColConflictContext $twoColContext
 	 * @param ResolutionSuggester $resolutionSuggester
+	 * @param CommentFormatter $commentFormatter
 	 * @param BagOStuff|null $textCache
 	 * @param string $newEditSummary
 	 * @param string|null $editFontOption
@@ -57,19 +52,21 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	public function __construct(
 		Title $title,
 		OutputPage $out,
-		IBufferingStatsdDataFactory $stats,
+		$stats,
 		string $submitLabel,
 		IContentHandlerFactory $contentHandlerFactory,
 		TwoColConflictContext $twoColContext,
 		ResolutionSuggester $resolutionSuggester,
-		BagOStuff $textCache = null,
+		CommentFormatter $commentFormatter,
+		?BagOStuff $textCache = null,
 		string $newEditSummary = '',
-		string $editFontOption = null
+		?string $editFontOption = null
 	) {
 		parent::__construct( $title, $out, $stats, $submitLabel, $contentHandlerFactory );
 
 		$this->twoColContext = $twoColContext;
 		$this->resolutionSuggester = $resolutionSuggester;
+		$this->commentFormatter = $commentFormatter;
 		$this->textCache = $textCache ? new SubmittedTextCache( $textCache ) : null;
 		$this->newEditSummary = $newEditSummary;
 		$this->editFontOption = $editFontOption;
@@ -85,45 +82,63 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 	/**
 	 * @inheritDoc
 	 */
-	public function incrementConflictStats( User $user = null ) {
+	public function incrementConflictStats( ?User $user = null ) {
 		parent::incrementConflictStats( $user );
-		$this->stats->increment( 'TwoColConflict.conflict' );
-		// XXX This is copied directly from core and we may be able to refactor something here.
+		// XXX This is copied largely from core and we may be able to refactor something here.
+		$namespace = 'n/a';
+		$userBucket = 'n/a';
+		$statsdNamespaces = [ 'TwoColConflict.conflict' ];
 		// Only include 'standard' namespaces to avoid creating unknown numbers of statsd metrics
 		if (
 			$this->title->getNamespace() >= NS_MAIN &&
 			$this->title->getNamespace() <= NS_CATEGORY_TALK
 		) {
-			$this->stats->increment(
-				'TwoColConflict.conflict.byNamespaceId.' . $this->title->getNamespace()
-			);
+			// getNsText() returns empty string if getNamespace() === NS_MAIN
+			$namespace = $this->title->getNsText() ?: 'Main';
+			$statsdNamespaces[] = 'TwoColConflict.conflict.byNamespaceId.' . $this->title->getNamespace();
 		}
 		if ( $user ) {
-			$this->incrementStatsByUserEdits( $user->getEditCount(), 'TwoColConflict.conflict' );
+			$userBucket = $this->getUserBucket( $user->getEditCount() );
+			$statsdNamespaces[] = 'TwoColConflict.conflict.byUserEdits.' . $userBucket;
 		}
+
+		$this->stats->withComponent( 'TwoColConflict' )
+			->getCounter( 'edit_failure_total' )
+			->setLabel( 'namespace', $namespace )
+			->setLabel( 'user_bucket', $userBucket )
+			->copyToStatsdAt( $statsdNamespaces )
+			->increment();
 	}
 
 	/**
 	 * @inheritDoc
 	 */
-	public function incrementResolvedStats( User $user = null ) {
+	public function incrementResolvedStats( ?User $user = null ) {
 		parent::incrementResolvedStats( $user );
-		$this->stats->increment( 'TwoColConflict.conflict.resolved' );
-		// XXX This is copied directly from core and we may be able to refactor something here.
+		// XXX This is copied largely from core and we may be able to refactor something here.
+		$namespace = 'n/a';
+		$userBucket = 'n/a';
+		$statsdNamespaces = [ 'TwoColConflict.conflict.resolved' ];
 		// Only include 'standard' namespaces to avoid creating unknown numbers of statsd metrics
 		if (
 			$this->title->getNamespace() >= NS_MAIN &&
 			$this->title->getNamespace() <= NS_CATEGORY_TALK
 		) {
-			$this->stats->increment(
-				'TwoColConflict.conflict.resolved.byNamespaceId.' . $this->title->getNamespace()
-			);
+			// getNsText() returns empty string if getNamespace() === NS_MAIN
+			$namespace = $this->title->getNsText() ?: 'Main';
+			$statsdNamespaces[] = 'TwoColConflict.conflict.resolved.byNamespaceId.' . $this->title->getNamespace();
 		}
 		if ( $user ) {
-			$this->incrementStatsByUserEdits(
-				$user->getEditCount(), 'TwoColConflict.conflict.resolved'
-			);
+			$userBucket = $this->getUserBucket( $user->getEditCount() );
+			$statsdNamespaces[] = 'TwoColConflict.conflict.resolved.byUserEdits.' . $userBucket;
 		}
+
+		$this->stats->withComponent( 'TwoColConflict' )
+			->getCounter( 'edit_failure_resolved_total' )
+			->setLabel( 'namespace', $namespace )
+			->setLabel( 'user_bucket', $userBucket )
+			->copyToStatsdAt( $statsdNamespaces )
+			->increment();
 	}
 
 	/**
@@ -164,7 +179,9 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 		$storedLines = SplitConflictUtils::splitText( $this->storedversion );
 		$yourLines = SplitConflictUtils::splitText( $this->yourtext );
 
-		$suggestion = $this->twoColContext->shouldTalkPageSuggestionBeConsidered( $this->title )
+		$page = $this->out->getWikiPage();
+		$user = $this->out->getUser();
+		$suggestion = $this->twoColContext->shouldTalkPageSuggestionBeConsidered( $page, $user )
 			? $this->resolutionSuggester->getResolutionSuggestion( $storedLines, $yourLines )
 			: null;
 		if ( $suggestion ) {
@@ -191,7 +208,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 		return '';
 	}
 
-	private function getPreSaveTransformedLines() {
+	private function getPreSaveTransformedLines(): array {
 		$user = $this->out->getUser();
 
 		$content = new WikitextContent( $this->yourtext );
@@ -228,7 +245,8 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 			$user,
 			$this->newEditSummary,
 			$language,
-			$this->out->getContext()
+			$this->out->getContext(),
+			$this->commentFormatter
 		) )->getHtml( $this->twoColContext->isUsedAsBetaFeature() );
 		// @phan-suppress-next-line SecurityCheck-DoubleEscaped
 		$out .= ( new HtmlSplitConflictView(
@@ -280,7 +298,7 @@ class SplitTwoColConflictHelper extends TextConflictHelper {
 			);
 	}
 
-	private function setSubmittedTextCache() {
+	private function setSubmittedTextCache(): void {
 		if ( $this->textCache && !$this->textCache->stashText(
 			$this->title->getPrefixedDBkey(),
 			$this->out->getUser(),

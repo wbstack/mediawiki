@@ -22,11 +22,13 @@
 namespace MediaWiki\Auth;
 
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
-use StatusValue;
+use MediaWiki\Message\Message;
 
 /**
  * Check if the user is blocked, and prevent authentication if so.
+ *
+ * Not all scenarios are covered by this class, AuthManager does some block checks itself
+ * via AuthManager::authorizeCreateAccount().
  *
  * @ingroup Auth
  * @since 1.27
@@ -47,51 +49,36 @@ class CheckBlocksSecondaryAuthenticationProvider extends AbstractSecondaryAuthen
 		}
 	}
 
+	/** @inheritDoc */
 	protected function postInitSetup() {
-		if ( $this->blockDisablesLogin === null ) {
-			$this->blockDisablesLogin = $this->config->get( MainConfigNames::BlockDisablesLogin );
-		}
+		$this->blockDisablesLogin ??= $this->config->get( MainConfigNames::BlockDisablesLogin );
 	}
 
+	/** @inheritDoc */
 	public function getAuthenticationRequests( $action, array $options ) {
 		return [];
 	}
 
+	/** @inheritDoc */
 	public function beginSecondaryAuthentication( $user, array $reqs ) {
-		// @TODO Partial blocks should not prevent the user from logging in.
-		//       see: https://phabricator.wikimedia.org/T208895
 		if ( !$this->blockDisablesLogin ) {
 			return AuthenticationResponse::newAbstain();
-		} elseif ( $user->getBlock() ) {
+		}
+		$block = $user->getBlock();
+		// Ignore IP blocks and partial blocks, $wgBlockDisablesLogin was meant for
+		// blocks banning specific users.
+		if ( $block && $block->isSitewide() && $block->isBlocking( $user ) ) {
 			return AuthenticationResponse::newFail(
-				new \Message( 'login-userblocked', [ $user->getName() ] )
+				new Message( 'login-userblocked', [ $user->getName() ] )
 			);
 		} else {
 			return AuthenticationResponse::newPass();
 		}
 	}
 
+	/** @inheritDoc */
 	public function beginSecondaryAccountCreation( $user, $creator, array $reqs ) {
 		return AuthenticationResponse::newAbstain();
-	}
-
-	public function testUserForCreation( $user, $autocreate, array $options = [] ) {
-		$block = $user->isBlockedFromCreateAccount();
-		if ( $block ) {
-			$formatter = MediaWikiServices::getInstance()->getBlockErrorFormatter();
-
-			$language = \RequestContext::getMain()->getUser()->isSafeToLoad() ?
-				\RequestContext::getMain()->getLanguage() :
-				MediaWikiServices::getInstance()->getContentLanguage();
-
-			$ip = $this->manager->getRequest()->getIP();
-
-			return StatusValue::newFatal(
-				$formatter->getMessage( $block, $user, $language, $ip )
-			);
-		} else {
-			return StatusValue::newGood();
-		}
 	}
 
 }

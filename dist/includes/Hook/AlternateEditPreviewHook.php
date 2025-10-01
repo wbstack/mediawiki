@@ -2,9 +2,9 @@
 
 namespace MediaWiki\Hook;
 
-use Content;
-use EditPage;
-use ParserOutput;
+use MediaWiki\Content\Content;
+use MediaWiki\EditPage\EditPage;
+use MediaWiki\Parser\ParserOutput;
 
 /**
  * This is a hook handler interface, see docs/Hooks.md.

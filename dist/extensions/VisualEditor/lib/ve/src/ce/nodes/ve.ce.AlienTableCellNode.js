@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable AlienTableCellNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -31,6 +31,15 @@ OO.mixinClass( ve.ce.AlienTableCellNode, ve.ce.TableCellableNode );
 /* Static Properties */
 
 ve.ce.AlienTableCellNode.static.name = 'alienTableCell';
+
+/* Methods */
+
+ve.ce.AlienTableCellNode.prototype.getTagName = function () {
+	// alienTableCells have no style attribute. Give them a table
+	// cell to start with, although it will get overwritten with
+	// originalDomElements.
+	return 'td';
+};
 
 /* Registration */
 

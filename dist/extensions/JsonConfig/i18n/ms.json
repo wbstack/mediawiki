@@ -1,8 +1,13 @@
 {
 	"@metadata": {
-		"authors": []
+		"authors": [
+			"Tofeiku",
+			"Hakimi97"
+		]
 	},
 	"jsonconfig-err-bool": "Parameter \"$1\" mestilah 'true' atau 'false'",
 	"jsonconfig-err-string": "Parameter \"$1\" mestilah berbentuk rentetan",
-	"jsonconfig-optional-field": "(tidak wajib)"
+	"jsonconfig-optional-field": "(tidak wajib)",
+	"jsonconfig-use-category": "Laman menggunakan sambungan JsonConfig",
+	"jsonconfig-license-copyrightwarning": "Dengan menerbitkan perubahan, anda bersetuju untuk melepaskan sumbangan anda mengikut terma lesen [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}]."
 }

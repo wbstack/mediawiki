@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface CheckListTool classes.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -38,7 +38,7 @@ ve.ui.CheckListTool.prototype.onUpdateState = function ( fragment ) {
 	// Parent method
 	ve.ui.CheckListTool.super.prototype.onUpdateState.apply( this, arguments );
 
-	var isMatching = fragment.hasMatchingAncestor( 'checkList' );
+	const isMatching = fragment.hasMatchingAncestor( 'checkList' );
 	this.setActive( isMatching );
 };
 

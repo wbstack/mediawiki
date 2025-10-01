@@ -13,9 +13,9 @@ use Wikibase\Lib\Store\EntityTermLookupBase;
  */
 class SourceAndTypeDispatchingPrefetchingTermLookup extends EntityTermLookupBase implements PrefetchingTermLookup {
 
-	private $dispatcher;
+	private ServiceBySourceAndTypeDispatcher $dispatcher;
 
-	private $sourceLookup;
+	private EntitySourceLookup $sourceLookup;
 
 	public function __construct(
 		ServiceBySourceAndTypeDispatcher $dispatcher,
@@ -30,7 +30,7 @@ class SourceAndTypeDispatchingPrefetchingTermLookup extends EntityTermLookupBase
 	 * @param string[]|null $termTypes
 	 * @param string[]|null $languageCodes
 	 */
-	public function prefetchTerms( array $entityIds, array $termTypes = null, array $languageCodes = null ) {
+	public function prefetchTerms( array $entityIds, ?array $termTypes = null, ?array $languageCodes = null ) {
 		$entityIdsGroupedBySourceAndType = $this->groupEntityIdsBySourceAndType( $entityIds );
 
 		foreach ( $entityIdsGroupedBySourceAndType as $entityIdsGroupedByType ) {

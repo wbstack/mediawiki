@@ -3,17 +3,17 @@
 namespace MediaWiki\Extension\OAuth\Backend;
 
 use Exception;
-use IContextSource;
-use IDBAccessObject;
 use LogicException;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\Logger\LoggerFactory;
-use Message;
+use MediaWiki\Message\Message;
 use MWException;
 use Psr\Log\LoggerInterface;
 use stdClass;
-use Wikimedia\Rdbms\DBConnRef;
 use Wikimedia\Rdbms\DBError;
 use Wikimedia\Rdbms\DBReadOnlyError;
+use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IDBAccessObject;
 
 /**
  * (c) Aaron Schulz 2013, GPL
@@ -37,7 +37,7 @@ use Wikimedia\Rdbms\DBReadOnlyError;
 /**
  * Representation of a Data Access Object
  */
-abstract class MWOAuthDAO implements IDBAccessObject {
+abstract class MWOAuthDAO {
 	/** @var string object construction origin */
 	private $daoOrigin = 'new';
 	/** @var bool whether fields changed or the field is new */
@@ -66,7 +66,7 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 		$consumer = new $class();
 
 		// Make sure oauth_version is set - for backwards compat
-		$values['oauth_version'] = $values['oauth_version'] ?? Consumer::OAUTH_VERSION_1;
+		$values['oauth_version'] ??= Consumer::OAUTH_VERSION_1;
 		$consumer->loadFromValues( $values );
 		return $consumer;
 	}
@@ -82,11 +82,11 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	}
 
 	/**
-	 * @param DBConnRef $db
+	 * @param IDatabase $db
 	 * @param array|stdClass $row
 	 * @return static
 	 */
-	final public static function newFromRow( DBConnRef $db, $row ) {
+	final public static function newFromRow( IDatabase $db, $row ) {
 		$class = static::getConsumerClass( (array)$row );
 		$consumer = new $class();
 		$consumer->loadFromRow( $db, $row );
@@ -94,19 +94,22 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	}
 
 	/**
-	 * @param DBConnRef $db
+	 * @param IDatabase $db
 	 * @param int $id
-	 * @param int $flags MWOAuthDAO::READ_* bitfield
+	 * @param int $flags IDBAccessObject::READ_* bitfield
 	 * @return static|bool Returns false if not found
 	 * @throws DBError
 	 */
-	final public static function newFromId( DBConnRef $db, $id, $flags = 0 ) {
-		$row = $db->selectRow( static::getTable(),
-			array_values( static::getFieldColumnMap() ),
-			[ static::getIdColumn() => (int)$id ],
-			__METHOD__,
-			( $flags & self::READ_LOCKING ) ? [ 'FOR UPDATE' ] : []
-		);
+	final public static function newFromId( IDatabase $db, $id, $flags = 0 ) {
+		$queryBuilder = $db->newSelectQueryBuilder()
+			->select( array_values( static::getFieldColumnMap() ) )
+			->from( static::getTable() )
+			->where( [ static::getIdColumn() => (int)$id ] )
+			->caller( __METHOD__ );
+		if ( $flags & IDBAccessObject::READ_LOCKING ) {
+			$queryBuilder->forUpdate();
+		}
+		$row = $queryBuilder->fetchRow();
 
 		if ( $row ) {
 			$class = static::getConsumerClass( (array)$row );
@@ -169,32 +172,34 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	}
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	final public function getFieldNames() {
 		return array_keys( static::getFieldColumnMap() );
 	}
 
 	/**
-	 * @param DBConnRef $dbw
+	 * @param IDatabase $dbw
 	 * @return bool
 	 * @throws DBReadOnlyError
 	 */
-	public function save( DBConnRef $dbw ) {
+	public function save( IDatabase $dbw ) {
+		global $wgMWOAuthReadOnly;
+
 		$uniqueId = $this->getIdValue();
 		$idColumn = static::getIdColumn();
-		if ( !empty( $dbw->daoReadOnly ) ) {
-			throw new DBReadOnlyError( $dbw, get_class() . ": tried to save while db is read-only" );
+		if ( $wgMWOAuthReadOnly ) {
+			throw new DBReadOnlyError( $dbw, __CLASS__ . ": tried to save while db is read-only" );
 		}
 		if ( $this->daoOrigin === 'db' ) {
 			if ( $this->daoPending ) {
 				$this->logger->debug( get_class( $this ) . ': performing DB update; object changed.' );
-				$dbw->update(
-					static::getTable(),
-					$this->getRowArray( $dbw ),
-					[ $idColumn => $uniqueId ],
-					__METHOD__
-				);
+				$dbw->newUpdateQueryBuilder()
+					->update( static::getTable() )
+					->set( $this->getRowArray( $dbw ) )
+					->where( [ $idColumn => $uniqueId ] )
+					->caller( __METHOD__ )
+					->execute();
 				$this->daoPending = false;
 				return $dbw->affectedRows() > 0;
 			} else {
@@ -211,11 +216,11 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 				// auto-incrementing behavior
 				unset( $row[$acolumn] );
 			}
-			$dbw->insert(
-				static::getTable(),
-				$row,
-				__METHOD__
-			);
+			$dbw->newInsertQueryBuilder()
+				->insertInto( static::getTable() )
+				->row( $row )
+				->caller( __METHOD__ )
+				->execute();
 			if ( $afield !== null ) {
 				// update field for auto-increment field
 				$this->$afield = $dbw->insertId();
@@ -226,22 +231,24 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	}
 
 	/**
-	 * @param DBConnRef $dbw
+	 * @param IDatabase $dbw
 	 * @return bool
 	 * @throws DBReadOnlyError
 	 */
-	public function delete( DBConnRef $dbw ) {
+	public function delete( IDatabase $dbw ) {
+		global $wgMWOAuthReadOnly;
+
 		$uniqueId = $this->getIdValue();
 		$idColumn = static::getIdColumn();
-		if ( !empty( $dbw->daoReadOnly ) ) {
-			throw new DBReadOnlyError( $dbw, get_class() . ": tried to delete while db is read-only" );
+		if ( $wgMWOAuthReadOnly ) {
+			throw new DBReadOnlyError( $dbw, __CLASS__ . ": tried to delete while db is read-only" );
 		}
 		if ( $this->daoOrigin === 'db' ) {
-			$dbw->delete(
-				static::getTable(),
-				[ $idColumn => $uniqueId ],
-				__METHOD__
-			);
+			$dbw->newDeleteQueryBuilder()
+				->deleteFrom( static::getTable() )
+				->where( [ $idColumn => $uniqueId ] )
+				->caller( __METHOD__ )
+				->execute();
 			$this->daoPending = true;
 			return $dbw->affectedRows() > 0;
 		} else {
@@ -258,12 +265,11 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	 *   - table          : a table name
 	 *   - fieldColumnMap : a map of field names to column names
 	 *
-	 * @throws MWException
 	 * @return array
 	 */
 	protected static function getSchema() {
 		// Note: declaring this abstract raises E_STRICT
-		throw new MWException( "getSchema() not defined in " . get_class() );
+		throw new MWException( "getSchema() not defined in " . self::class );
 	}
 
 	/**
@@ -272,17 +278,17 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	 * This returns a map of field names to method names.
 	 * The methods check if a context user has access to the field,
 	 * returning true if they do and a Message object otherwise.
-	 * The methods take (field name, \IContextSource) as arguments.
+	 * The methods take (field name, IContextSource) as arguments.
 	 *
 	 * @see MWOAuthDAO::userCanAccess()
 	 * @see MWOAuthDAOAccessControl
 	 *
 	 * @throws LogicException Subclasses must override
-	 * @return array Map of (field name => name of method that checks access)
+	 * @return array<string,string> Map of (field name => name of method that checks access)
 	 */
 	protected static function getFieldPermissionChecks() {
 		// Note: declaring this abstract raises E_STRICT
-		throw new LogicException( "getFieldPermissionChecks() not defined in " . get_class() );
+		throw new LogicException( "getFieldPermissionChecks() not defined in " . self::class );
 	}
 
 	/**
@@ -294,7 +300,7 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	}
 
 	/**
-	 * @return array
+	 * @return array<string,string>
 	 */
 	final protected static function getFieldColumnMap() {
 		$schema = static::getSchema();
@@ -346,7 +352,6 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 
 	/**
 	 * @param array $values
-	 * @throws MWException
 	 */
 	final protected function loadFromValues( array $values ) {
 		foreach ( static::getFieldColumnMap() as $field => $column ) {
@@ -368,11 +373,11 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	abstract protected function normalizeValues();
 
 	/**
-	 * @param DBConnRef $db
+	 * @param IDatabase $db
 	 * @param stdClass|array $row
 	 * @return void
 	 */
-	final protected function loadFromRow( DBConnRef $db, $row ) {
+	final protected function loadFromRow( IDatabase $db, $row ) {
 		$row = $this->decodeRow( $db, (array)$row );
 		$values = [];
 		foreach ( static::getFieldColumnMap() as $field => $column ) {
@@ -387,28 +392,28 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 	 * Subclasses should make this to encode DB fields (e.g. timestamps).
 	 * This must also flatten any PHP data structures into flat values.
 	 *
-	 * @param DBConnRef $db
+	 * @param IDatabase $db
 	 * @param array $row
 	 * @return array
 	 */
-	abstract protected function encodeRow( DBConnRef $db, $row );
+	abstract protected function encodeRow( IDatabase $db, $row );
 
 	/**
 	 * Subclasses should make this to decode DB fields (e.g. timestamps).
 	 * This can also expand some flat values (e.g. JSON) into PHP data structures.
 	 * Note: this does not need to handle what normalizeValues() already does.
 	 *
-	 * @param DBConnRef $db
+	 * @param IDatabase $db
 	 * @param array $row
 	 * @return array
 	 */
-	abstract protected function decodeRow( DBConnRef $db, $row );
+	abstract protected function decodeRow( IDatabase $db, $row );
 
 	/**
-	 * @param DBConnRef $db
+	 * @param IDatabase $db
 	 * @return array
 	 */
-	final protected function getRowArray( DBConnRef $db ) {
+	final protected function getRowArray( IDatabase $db ) {
 		$row = [];
 		foreach ( static::getFieldColumnMap() as $field => $column ) {
 			$row[$column] = $this->$field;
@@ -455,7 +460,7 @@ abstract class MWOAuthDAO implements IDBAccessObject {
 		return hash_hmac(
 			'sha1',
 			serialize( $map ),
-			"{$context->getUser()->getId()}#{$this->getIdValue()}"
+			$context->getUser()->getId() . '#' . $this->getIdValue()
 		);
 	}
 

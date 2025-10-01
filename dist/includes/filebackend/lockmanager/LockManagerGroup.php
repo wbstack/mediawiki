@@ -47,11 +47,11 @@ class LockManagerGroup {
 		foreach ( $lockManagerConfigs as $config ) {
 			$config['domain'] = $this->domain;
 			if ( !isset( $config['name'] ) ) {
-				throw new Exception( "Cannot register a lock manager with no name." );
+				throw new InvalidArgumentException( "Cannot register a lock manager with no name." );
 			}
 			$name = $config['name'];
 			if ( !isset( $config['class'] ) ) {
-				throw new Exception( "Cannot register lock manager `{$name}` with no class." );
+				throw new InvalidArgumentException( "Cannot register lock manager `{$name}` with no class." );
 			}
 			$class = $config['class'];
 			unset( $config['class'] ); // lock manager won't need this
@@ -72,7 +72,7 @@ class LockManagerGroup {
 	 */
 	public function get( $name ) {
 		if ( !isset( $this->managers[$name] ) ) {
-			throw new Exception( "No lock manager defined with the name `$name`." );
+			throw new InvalidArgumentException( "No lock manager defined with the name `$name`." );
 		}
 		// Lazy-load the actual lock manager instance
 		if ( !isset( $this->managers[$name]['instance'] ) ) {
@@ -96,44 +96,10 @@ class LockManagerGroup {
 	 */
 	public function config( $name ) {
 		if ( !isset( $this->managers[$name] ) ) {
-			throw new Exception( "No lock manager defined with the name `$name`." );
+			throw new InvalidArgumentException( "No lock manager defined with the name `$name`." );
 		}
 		$class = $this->managers[$name]['class'];
 
 		return [ 'class' => $class ] + $this->managers[$name]['config'];
-	}
-
-	/**
-	 * Get the default lock manager configured for the site.
-	 * Returns NullLockManager if no lock manager could be found.
-	 *
-	 * @codeCoverageIgnore
-	 * @deprecated since 1.35, seemingly unused, just call get() and catch any exception instead
-	 * @return LockManager
-	 */
-	public function getDefault() {
-		wfDeprecated( __METHOD__, '1.35' );
-
-		return isset( $this->managers['default'] )
-			? $this->get( 'default' )
-			: new NullLockManager( [] );
-	}
-
-	/**
-	 * Get the default lock manager configured for the site
-	 * or at least some other effective configured lock manager.
-	 * Throws an exception if no lock manager could be found.
-	 *
-	 * @codeCoverageIgnore
-	 * @deprecated since 1.35, seemingly unused, just call get() and catch any exception instead
-	 * @return LockManager
-	 * @throws Exception
-	 */
-	public function getAny() {
-		wfDeprecated( __METHOD__, '1.35' );
-
-		return isset( $this->managers['default'] )
-			? $this->get( 'default' )
-			: $this->get( 'fsLockManager' );
 	}
 }

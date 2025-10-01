@@ -3,15 +3,13 @@
 		"authors": [
 			"Servien",
 			"Slomox",
-			"Zylbath",
-			"Wikiundeplattsnacker"
+			"Wikiundeplattsnacker",
+			"Zylbath"
 		]
 	},
-	"tooltip-ca-createsource": "Bornkood för düsse Siet opstellen",
-	"tooltip-ca-editsource": "Bornkoood vun düsse Siet ännern",
 	"tooltip-ca-ve-edit": "Disse Siet ännern",
-	"visualeditor-beta-warning": "VisualEditor is een Beta-Verschoon. Dat mag Weekwoorfehlers geven un du warrst Delen vun de Sied nich ännern könen. Klick op \"{{int:visualeditor-ca-editsource}}\", üm in den Wikitextmodus to kamen. Daarbi gaht nich spiekerte Ännern verlustig.",
-	"visualeditor-browserwarning": "Du bruukst een Browser, de vun'n VisualEditor nich apentlich stütt warrt.",
+	"tooltip-ca-editsource": "Bornkoood vun düsse Siet ännern",
+	"tooltip-ca-createsource": "Bornkood för düsse Siet opstellen",
 	"visualeditor-ca-createlocaldescriptionsource": "Föög een Beschrievung op Plattdüütsch för de Born to",
 	"visualeditor-ca-createsource": "Bornkood opstellen",
 	"visualeditor-ca-editsource": "Bornkood ännern",
@@ -38,7 +36,6 @@
 	"visualeditor-dialog-meta-languages-section": "Spraken",
 	"visualeditor-dialog-meta-settings-label": "Siedeninstellen",
 	"visualeditor-dialog-transclusion-add-template": "Vörlaag tofögen",
-	"visualeditor-dialog-transclusion-placeholder": "Ne'e Vörlaag",
 	"visualeditor-dialogbutton-media-tooltip": "Medien",
 	"visualeditor-editconflict": "Dien Ännern kunnen vunwegen een Ännernskunflikt ni spiekert warrn. Wullt du den Kunflikt manuell lösen?",
 	"visualeditor-editnotices-tool": "{{PLURAL:$1|Een Notiz|$1 Notizen}}",

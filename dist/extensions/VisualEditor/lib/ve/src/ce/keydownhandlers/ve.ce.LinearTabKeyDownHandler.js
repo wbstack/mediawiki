@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable linear escape key down handler
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /* istanbul ignore next */
@@ -33,12 +33,12 @@ ve.ce.LinearTabKeyDownHandler.static.supportedSelections = [ 'linear' ];
 /* Static methods */
 
 /**
- * @inheritdoc
- *
  * Handle tab key down events with a linear selection while table editing.
+ *
+ * @inheritdoc
  */
 ve.ce.LinearTabKeyDownHandler.static.execute = function ( surface, e ) {
-	var activeTableNode = surface.getActiveNode() && surface.getActiveNode().findParent( ve.ce.TableNode ),
+	const activeTableNode = surface.getActiveNode() && surface.getActiveNode().findParent( ve.ce.TableNode ),
 		activeTableCaptionNode = surface.getActiveNode() && surface.getActiveNode().findParent( ve.ce.TableCaptionNode ),
 		documentModel = surface.getModel().getDocument();
 	// Check we have an active table node

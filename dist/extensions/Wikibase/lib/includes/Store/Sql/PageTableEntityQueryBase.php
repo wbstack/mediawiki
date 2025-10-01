@@ -1,7 +1,10 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Lib\Store\Sql;
 
+use MediaWiki\Revision\SlotRecord;
 use MediaWiki\Storage\NameTableAccessException;
 use MediaWiki\Storage\NameTableStore;
 use stdClass;
@@ -9,7 +12,9 @@ use Traversable;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Services\Lookup\EntityLookupException;
 use Wikibase\Lib\Store\EntityNamespaceLookup;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
+use Wikimedia\Rdbms\RawSQLExpression;
+use Wikimedia\Rdbms\SelectQueryBuilder;
 
 /**
  * Abstract PageTableEntityQuery implementation allowing simple mapping between rows and entity IDs
@@ -19,15 +24,9 @@ use Wikimedia\Rdbms\IDatabase;
  */
 abstract class PageTableEntityQueryBase implements PageTableEntityQuery {
 
-	/**
-	 * @var EntityNamespaceLookup
-	 */
-	private $entityNamespaceLookup;
+	private EntityNamespaceLookup $entityNamespaceLookup;
 
-	/**
-	 * @var NameTableStore
-	 */
-	private $slotRoleStore;
+	private NameTableStore $slotRoleStore;
 
 	public function __construct(
 		EntityNamespaceLookup $entityNamespaceLookup,
@@ -39,44 +38,40 @@ abstract class PageTableEntityQueryBase implements PageTableEntityQuery {
 
 	/**
 	 * @param array $fields Fields to select
-	 * @param array $joins Joins to use, Keys must be table names.
+	 * @param array|null $revisionJoinConds If non-null, perform an INNER JOIN
+	 * against the revision table on these join conditions.
 	 * @param EntityId[] $entityIds EntityIds to select
-	 * @param IDatabase $db DB to query on
+	 * @param IReadableDatabase $db DB to query on
 	 * @return stdClass[] Array of rows with keys of their entity ID serializations
 	 */
 	public function selectRows(
 		array $fields,
-		array $joins,
+		?array $revisionJoinConds,
 		array $entityIds,
-		IDatabase $db
-	) {
-		$usesRevisionTable = array_key_exists( 'revision', $joins );
-		list( $where, $slotJoinConds ) = $this->getQueryInfo( $entityIds, $usesRevisionTable, $db );
-		$joins = array_merge( $joins, $slotJoinConds );
-		$vars = array_merge( $fields, $this->getFieldsNeededForMapping() );
-		$table = array_merge( [ 'page' ], array_keys( $joins ) );
+		IReadableDatabase $db
+	): array {
+		$queryBuilder = $db->newSelectQueryBuilder()
+			->select( $fields )
+			->select( $this->getFieldsNeededForMapping() )
+			->from( 'page' );
+		if ( $revisionJoinConds !== null ) {
+			$queryBuilder->join( 'revision', null, $revisionJoinConds );
+		}
+		$this->updateQueryBuilder( $queryBuilder, $entityIds, $db );
 
-		$res = $db->select(
-			$table,
-			$vars,
-			$where,
-			__METHOD__,
-			[],
-			$joins
-		);
+		$res = $queryBuilder->caller( __METHOD__ )->fetchResultSet();
 
 		return $this->indexRowsByEntityId( $res );
 	}
 
 	/**
+	 * @param SelectQueryBuilder $queryBuilder
 	 * @param EntityId[] $entityIds
-	 * @param bool $usesRevisionTable
-	 * @param IDatabase $db
-	 * @return array [ string $whereCondition, array $extraTables ]
+	 * @param IReadableDatabase $db
 	 */
-	private function getQueryInfo( array $entityIds, bool $usesRevisionTable, IDatabase $db ) {
+	private function updateQueryBuilder( SelectQueryBuilder $queryBuilder, array $entityIds, IReadableDatabase $db ) {
 		$where = [];
-		$slotJoinConds = [];
+		$joinSlotsTable = false;
 
 		foreach ( $entityIds as $entityId ) {
 			$entityType = $entityId->getEntityType();
@@ -100,7 +95,7 @@ abstract class PageTableEntityQueryBase implements PageTableEntityQuery {
 			 * This ensures comparability with the pre MCR schema as long as only the
 			 * main slot is used.
 			 */
-			if ( $slotRole !== 'main' ) {
+			if ( $slotRole !== SlotRecord::MAIN ) {
 				try {
 					$slotRoleId = $this->slotRoleStore->getId( $slotRole );
 				} catch ( NameTableAccessException $e ) {
@@ -109,32 +104,32 @@ abstract class PageTableEntityQueryBase implements PageTableEntityQuery {
 				}
 
 				$conditions['slot_role_id'] = $slotRoleId;
-				if ( $usesRevisionTable ) {
-					$slotJoinConds = [ 'slots' => [ 'INNER JOIN', 'rev_id=slot_revision_id' ] ];
-				} else {
-					$slotJoinConds = [ 'slots' => [ 'INNER JOIN', 'page_latest=slot_revision_id' ] ];
-				}
+				$joinSlotsTable = true;
 			}
 
-			$where[] = $db->makeList(
-				$conditions,
-				LIST_AND
-			);
+			$where[] = $db->andExpr( $conditions );
 		}
 
-		if ( empty( $where ) ) {
+		if ( !$where ) {
 			// If we skipped all entity IDs, select nothing, not everything.
-			return [ '0=1', [] ];
+			$queryBuilder->where( new RawSQLExpression( '0=1' ) );
+			return;
 		}
 
-		return [ $db->makeList( $where, LIST_OR ), $slotJoinConds ];
+		if ( $joinSlotsTable ) {
+			$usesRevisionTable = in_array( 'revision', $queryBuilder->getQueryInfo()['tables'], true );
+			$slotJoinConds = $usesRevisionTable ? 'rev_id=slot_revision_id' : 'page_latest=slot_revision_id';
+			$queryBuilder->join( 'slots', null, $slotJoinConds );
+		}
+
+		$queryBuilder->where( $db->orExpr( $where ) );
 	}
 
 	/**
 	 * @param Traversable $rows
 	 * @return stdClass[] Array of rows with keys of their entity ID serializations
 	 */
-	private function indexRowsByEntityId( Traversable $rows ) {
+	private function indexRowsByEntityId( Traversable $rows ): array {
 		$indexedRows = [];
 
 		foreach ( $rows as $row ) {

@@ -19,6 +19,7 @@
  */
 
 use MediaWiki\Logger\LoggerFactory;
+use MediaWiki\Message\Message;
 
 /**
  * Show an error that looks like an HTTP server error.
@@ -46,7 +47,7 @@ class HttpError extends MWException {
 	 * @param-taint $header tainted
 	 */
 	public function __construct( $httpCode, $content, $header = null ) {
-		parent::__construct( $content );
+		parent::__construct( (string)$content );
 		$this->httpCode = (int)$httpCode;
 		$this->header = $header;
 		$this->content = $content;
@@ -133,7 +134,7 @@ class HttpError extends MWException {
 		}
 
 		return "<!DOCTYPE html>\n" .
-		"<html><head><title>$titleHtml</title></head>\n" .
+		"<html><head><title>$titleHtml</title><meta name=\"color-scheme\" content=\"light dark\" /></head>\n" .
 		"<body><h1>$titleHtml</h1><p>$contentHtml</p></body></html>\n";
 	}
 }

@@ -29,11 +29,7 @@ class QuantityRdfBuilder implements ValueSnakRdfBuilder {
 	 */
 	private $unitConverter;
 
-	/**
-	 * @param ComplexValueRdfHelper|null $complexValueHelper
-	 * @param UnitConverter|null         $unitConverter
-	 */
-	public function __construct( ComplexValueRdfHelper $complexValueHelper = null, UnitConverter $unitConverter = null ) {
+	public function __construct( ?ComplexValueRdfHelper $complexValueHelper, ?UnitConverter $unitConverter ) {
 		$this->complexValueHelper = $complexValueHelper;
 		$this->unitConverter = $unitConverter;
 	}
@@ -45,6 +41,7 @@ class QuantityRdfBuilder implements ValueSnakRdfBuilder {
 	 * @param string $propertyValueNamespace Property value relation namespace
 	 * @param string $propertyValueLName Property value relation name
 	 * @param string $dataType Property data type
+	 * @param string $snakNamespace
 	 * @param PropertyValueSnak $snak
 	 */
 	public function addValue(
@@ -106,6 +103,7 @@ class QuantityRdfBuilder implements ValueSnakRdfBuilder {
 	/**
 	 * Connects a normalized value node to its base node via the quantityNormalized predicate.
 	 *
+	 * @param string $valueNamespace
 	 * @param string|null $valueLName
 	 * @param string|null $normLName
 	 */
@@ -126,6 +124,7 @@ class QuantityRdfBuilder implements ValueSnakRdfBuilder {
 	 * @param string $propertyValueNamespace Property value relation namespace
 	 * @param string $propertyValueLName Property value relation name
 	 * @param string $dataType Property data type
+	 * @param string $valueNamespace
 	 * @param UnboundedQuantityValue $value
 	 * @param bool $normalized Is this a normalized value?
 	 *

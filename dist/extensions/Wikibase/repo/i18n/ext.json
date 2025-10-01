@@ -5,6 +5,8 @@
 			"HackerPunki"
 		]
 	},
-	"wikibase-edit": "edital",
-	"wikibase-add": "azeñil"
+	"wikibase-edit": "adital",
+	"wikibase-add": "añidil",
+	"wikibase-description-empty": "Denguna descrición definía",
+	"wikibase-sitelinks-special": "N'otrus sitius"
 }

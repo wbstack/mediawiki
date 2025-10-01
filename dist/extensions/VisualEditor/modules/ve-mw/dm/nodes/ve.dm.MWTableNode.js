@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWTable class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,7 +10,7 @@
  *
  * @class
  * @extends ve.dm.TableNode
- * @mixins ve.dm.ClassAttributeNode
+ * @mixes ve.dm.ClassAttributeNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model
@@ -59,11 +59,11 @@ ve.dm.TableCaptionNode.static.parentNodeTypes.push( 'mwTable' );
 ve.dm.TableRowNode.static.childNodeTypes.push( 'mwTransclusionTableCell' );
 
 ve.dm.MWTableNode.static.toDataElement = function ( domElements ) {
-	var dataElement = { type: this.name },
+	const dataElement = { type: this.name },
 		domElement = domElements[ 0 ],
 		classAttr = domElement.getAttribute( 'class' );
 
-	var attributes = {
+	const attributes = {
 		hasExpandedAttrs: ( domElement.getAttribute( 'typeof' ) || '' ).indexOf( 'mw:ExpandedAttrs' ) !== -1
 	};
 
@@ -75,7 +75,7 @@ ve.dm.MWTableNode.static.toDataElement = function ( domElements ) {
 };
 
 ve.dm.MWTableNode.static.toDomElements = function ( dataElement, doc ) {
-	var element = doc.createElement( 'table' ),
+	const element = doc.createElement( 'table' ),
 		classAttr = dataElement.attributes && this.getClassAttrFromAttributes( dataElement.attributes );
 
 	if ( classAttr ) {

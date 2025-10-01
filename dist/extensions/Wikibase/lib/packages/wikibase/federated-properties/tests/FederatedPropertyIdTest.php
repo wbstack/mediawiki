@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Wikibase\Lib\Tests\FederatedProperties;
 
 use InvalidArgumentException;
+use MediaWikiTestCaseTrait;
 use PHPUnit\Framework\TestCase;
 use Wikibase\Lib\FederatedProperties\FederatedPropertyId;
 
@@ -14,10 +15,12 @@ use Wikibase\Lib\FederatedProperties\FederatedPropertyId;
  */
 class FederatedPropertyIdTest extends TestCase {
 
+	use MediaWikiTestCaseTrait;
+
 	public function testCreateAndSerializeId() {
 		$serialization = 'http://www.wikidata.org/entity/P31';
 		$id = new FederatedPropertyId( $serialization, 'P31' );
-		$this->assertEquals( $serialization, $id->serialize() );
+		$this->assertEquals( [ $serialization ], $id->__serialize() );
 		$this->assertEquals( $serialization, $id->getSerialization() );
 	}
 
@@ -36,7 +39,7 @@ class FederatedPropertyIdTest extends TestCase {
 	public function testUnserializationWithValidSerialization() {
 		$serialization = 'http://www.wikidata.org/entity/P32';
 		$id = new FederatedPropertyId( 'http://www.wikidata.org/entity/P31', 'P31' );
-		$id->unserialize( $serialization );
+		$id->__unserialize( [ $serialization ] );
 		$this->assertEquals( $serialization, $id->getSerialization() );
 	}
 
@@ -49,7 +52,7 @@ class FederatedPropertyIdTest extends TestCase {
 		$this->assertSame( $pid, $id->getRemoteIdSerialization() );
 	}
 
-	public function remoteIdProvider() {
+	public static function remoteIdProvider() {
 		yield [ 'http://www.wikidata.org/entity/P31', 'P31' ];
 		yield [ 'http://www.wikidata.org/w/index.php?title=Property:P279', 'P279' ];
 	}

@@ -28,11 +28,11 @@
 
 namespace MediaWiki\Extension\TorBlock;
 
-use CachedBagOStuff;
-use FormatJson;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Json\FormatJson;
 use MediaWiki\MediaWikiServices;
-use RequestContext;
 use Wikimedia\IPUtils;
+use Wikimedia\ObjectCache\CachedBagOStuff;
 
 /**
  * Collection of functions maintaining the list of Tor exit nodes.
@@ -113,7 +113,8 @@ class TorExitNodes {
 	private static function fetchExitNodes() {
 		wfDebugLog( 'torblock', "Loading Tor exit node list cold." );
 
-		if ( defined( 'MW_PHPUNIT_TEST' ) ) {
+		if ( defined( 'MW_PHPUNIT_TEST' ) || defined( 'MW_QUIBBLE_CI' ) ) {
+			// Avoid HTTP requests, see T265628 & T390865
 			// TEST-NET-1, RFC 5737
 			return [ '192.0.2.111', '192.0.2.222' ];
 		}
@@ -168,8 +169,10 @@ class TorExitNodes {
 	private static function fetchExitNodesFromOnionooServer() {
 		global $wgTorOnionooServer, $wgTorOnionooCA, $wgTorBlockProxy;
 
-		$url = wfExpandUrl( "$wgTorOnionooServer/details?type=relay&running=true&flag=Exit",
-			PROTO_HTTPS );
+		$url = wfExpandUrl(
+			"$wgTorOnionooServer/details?type=relay&running=true&flag=Exit&fields=or_addresses,exit_addresses",
+			PROTO_HTTPS
+		);
 		$options = [
 			'caInfo' => is_readable( $wgTorOnionooCA ) ? $wgTorOnionooCA : null
 		];

@@ -59,7 +59,7 @@ class TermboxRemoteRenderer implements TermboxRenderer {
 			throw $e;
 		} catch ( Exception $e ) {
 			$this->reportFailureOfRequest( $e->getMessage(), $e );
-			throw new TermboxRenderingException( 'Encountered request problem', null, $e );
+			throw new TermboxRenderingException( 'Encountered request problem', 0, $e );
 		}
 
 		$status = $request->getStatus();
@@ -75,7 +75,7 @@ class TermboxRemoteRenderer implements TermboxRenderer {
 						'class' => __CLASS__,
 						'status' => $status,
 						'content' => $request->getContent(),
-						'headers' => $request->getResponseHeaders()
+						'headers' => $request->getResponseHeaders(),
 					]
 				);
 				$this->stats->increment( 'wikibase.view.TermboxRemoteRenderer.unsuccessfulResponse' );
@@ -87,10 +87,10 @@ class TermboxRemoteRenderer implements TermboxRenderer {
 		return $request->getContent();
 	}
 
-	private function reportFailureOfRequest( $message, Exception $exception = null ) {
+	private function reportFailureOfRequest( $message, ?Exception $exception = null ) {
 		$context = [
 			'errormessage' => $message,
-			'class' => __CLASS__
+			'class' => __CLASS__,
 		];
 		if ( $exception !== null ) {
 			$context[ 'exception' ] = $exception;

@@ -7,32 +7,33 @@
 ( function () {
 
 	/**
-	 * Namespace input widget. Displays a dropdown box with the choice of available namespaces, plus
-	 * two checkboxes to include associated namespace or to invert selection.
+	 * @classdesc Displays a dropdown box with the choice of available namespaces,
+	 * plus two checkboxes to include associated namespace or to invert selection.
 	 *
 	 * @class
 	 * @extends OO.ui.Widget
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.ComplexNamespaceInputWidget`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {Object} namespace Configuration for the NamespaceInputWidget dropdown with list
+	 * @param {Object} config.namespace Configuration for the NamespaceInputWidget dropdown with list
 	 *     of namespaces
-	 * @cfg {string} namespace.includeAllValue If specified, add a "all namespaces"
+	 * @param {string} config.namespace.includeAllValue If specified, add a "all namespaces"
 	 *     option to the dropdown, and use this as the input value for it
-	 * @cfg {Object} invert Configuration for the "invert selection" CheckboxInputWidget. If
+	 * @param {Object} config.invert Configuration for the "invert selection" CheckboxInputWidget. If
 	 *     null, the checkbox will not be generated.
-	 * @cfg {Object} associated Configuration for the "include associated namespace"
+	 * @param {Object} config.associated Configuration for the "include associated namespace"
 	 *     CheckboxInputWidget. If null, the checkbox will not be generated.
-	 * @cfg {Object} invertLabel Configuration for the FieldLayout with label wrapping the
+	 * @param {Object} config.invertLabel Configuration for the FieldLayout with label wrapping the
 	 *     "invert selection" checkbox
-	 * @cfg {string} invertLabel.label Label text for the label
-	 * @cfg {Object} associatedLabel Configuration for the FieldLayout with label wrapping
+	 * @param {string} config.invertLabel.label Label text for the label
+	 * @param {Object} config.associatedLabel Configuration for the FieldLayout with label wrapping
 	 *     the "include associated namespace" checkbox
-	 * @cfg {string} associatedLabel.label Label text for the label
+	 * @param {string} config.associatedLabel.label Label text for the label
 	 */
 	mw.widgets.ComplexNamespaceInputWidget = function MwWidgetsComplexNamespaceInputWidget( config ) {
 		// Configuration initialization
-		config = $.extend(
+		config = Object.assign(
 			{
 				// Config options for nested widgets
 				namespace: {},
@@ -45,35 +46,35 @@
 		);
 
 		// Parent constructor
-		mw.widgets.ComplexNamespaceInputWidget.parent.call( this, config );
+		mw.widgets.ComplexNamespaceInputWidget.super.call( this, config );
 
 		// Properties
 		this.config = config;
 
 		this.namespace = new mw.widgets.NamespaceInputWidget( config.namespace );
 		if ( config.associated !== null ) {
-			this.associated = new OO.ui.CheckboxInputWidget( $.extend(
+			this.associated = new OO.ui.CheckboxInputWidget( Object.assign(
 				{ value: '1' },
 				config.associated
 			) );
 			// TODO Should use a LabelWidget? But they don't work like HTML <label>s yet
 			this.associatedLabel = new OO.ui.FieldLayout(
 				this.associated,
-				$.extend(
+				Object.assign(
 					{ align: 'inline' },
 					config.associatedLabel
 				)
 			);
 		}
 		if ( config.invert !== null ) {
-			this.invert = new OO.ui.CheckboxInputWidget( $.extend(
+			this.invert = new OO.ui.CheckboxInputWidget( Object.assign(
 				{ value: '1' },
 				config.invert
 			) );
 			// TODO Should use a LabelWidget? But they don't work like HTML <label>s yet
 			this.invertLabel = new OO.ui.FieldLayout(
 				this.invert,
-				$.extend(
+				Object.assign(
 					{ align: 'inline' },
 					config.invertLabel
 				)
@@ -106,7 +107,7 @@
 	 * @private
 	 */
 	mw.widgets.ComplexNamespaceInputWidget.prototype.updateCheckboxesState = function () {
-		var disabled = this.namespace.getValue() === this.namespace.allValue;
+		const disabled = this.namespace.getValue() === this.namespace.allValue;
 		if ( this.invert ) {
 			this.invert.setDisabled( disabled );
 		}
@@ -119,7 +120,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.ComplexNamespaceInputWidget.prototype.setDisabled = function ( disabled ) {
-		mw.widgets.ComplexNamespaceInputWidget.parent.prototype.setDisabled.call( this, disabled );
+		mw.widgets.ComplexNamespaceInputWidget.super.prototype.setDisabled.call( this, disabled );
 		if ( this.namespace ) {
 			this.namespace.setDisabled( disabled );
 		}

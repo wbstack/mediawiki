@@ -49,27 +49,31 @@ class SqlChangeStore implements ChangeStore {
 	public function deleteChangesByChangeIds( array $changeIds ): void {
 		Assert::parameterElementType( 'integer', $changeIds, '$changeIds' );
 
-		$dbw = $this->repoDomainDb->connections()->getWriteConnectionRef();
-		$dbw->delete( 'wb_changes', [ 'change_id' => $changeIds ], __METHOD__ );
+		$dbw = $this->repoDomainDb->connections()->getWriteConnection();
+		$dbw->newDeleteQueryBuilder()
+			->deleteFrom( 'wb_changes' )
+			->where( [ 'change_id' => $changeIds ] )
+			->caller( __METHOD__ )
+			->execute();
 	}
 
 	private function updateChange( ChangeRow $change ) {
-		$dbw = $this->repoDomainDb->connections()->getWriteConnectionRef();
+		$dbw = $this->repoDomainDb->connections()->getWriteConnection();
 		$values = $this->getValues( $change, $dbw );
 
-		$dbw->update(
-			'wb_changes',
-			$values,
-			[ 'change_id' => $change->getId() ],
-			__METHOD__
-		);
+		$dbw->newUpdateQueryBuilder()
+			->update( 'wb_changes' )
+			->set( $values )
+			->where( [ 'change_id' => $change->getId() ] )
+			->caller( __METHOD__ )->execute();
 	}
 
 	private function insertChange( ChangeRow $change ) {
-		$dbw = $this->repoDomainDb->connections()->getWriteConnectionRef();
-		$values = $this->getValues( $change, $dbw );
-
-		$dbw->insert( 'wb_changes', $values, __METHOD__ );
+		$dbw = $this->repoDomainDb->connections()->getWriteConnection();
+		$dbw->newInsertQueryBuilder()
+			->insertInto( 'wb_changes' )
+			->row( $this->getValues( $change, $dbw ) )
+			->caller( __METHOD__ )->execute();
 		$change->setField( ChangeRow::ID, $dbw->insertId() );
 	}
 

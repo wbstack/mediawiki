@@ -1,4 +1,3 @@
-/* global FetchEndEvent, SuggestionClickEvent, SearchSubmitEvent */
 /**
  * The value of the `inputLocation` property of any and all SearchSatisfaction events sent by the
  * corresponding instrumentation.
@@ -6,22 +5,15 @@
  * @see https://gerrit.wikimedia.org/r/plugins/gitiles/mediawiki/skins/Vector/+/refs/heads/master/includes/Constants.php
  */
 const INPUT_LOCATION_MOVED = 'header-moved',
-	wgScript = mw.config.get( 'wgScript' ),
 	// T251544: Collect search performance metrics to compare Vue search with
 	// mediawiki.searchSuggest performance. Marks and Measures will only be
 	// recorded on the Vector skin and only if browser supported.
 	shouldTestSearchPerformance = !!( window.performance &&
-		// @ts-ignore
-		window.requestAnimationFrame &&
-		/* eslint-disable compat/compat */
-		// @ts-ignore
-		performance.mark &&
-		// @ts-ignore
-		performance.measure &&
-		// @ts-ignore
-		performance.getEntriesByName &&
+		!!window.requestAnimationFrame &&
+		!!performance.mark &&
+		!!performance.measure &&
+		!!performance.getEntriesByName &&
 		performance.clearMarks ),
-	/* eslint-enable compat/compat */
 	loadStartMark = 'mwVectorVueSearchLoadStart',
 	queryMark = 'mwVectorVueSearchQuery',
 	renderMark = 'mwVectorVueSearchRender',
@@ -41,7 +33,6 @@ function onFetchStart() {
 		performance.clearMarks( queryMark );
 	}
 
-	/* eslint-disable-next-line compat/compat */
 	performance.mark( queryMark );
 }
 
@@ -64,8 +55,8 @@ function onFetchEnd( event ) {
 		// execute before the rendering steps happen (e.g. layout and paint). A
 		// nested rAF will execute after these rendering steps have completed
 		// and ensure the search results are visible to the user.
-		requestAnimationFrame( function () {
-			requestAnimationFrame( function () {
+		requestAnimationFrame( () => {
+			requestAnimationFrame( () => {
 				if ( !performance.getEntriesByName( queryMark ).length ) {
 					return;
 				}
@@ -111,53 +102,41 @@ function onSuggestionClick( event ) {
  * @return {string}
  */
 function getWprovFromResultIndex( index ) {
-
-	// If the user hasn't highlighted an autocomplete result.
-	if ( index === -1 ) {
-		return 'acrw1';
-	}
-
-	return 'acrw1' + index;
+	// result looks like: acrw1_0, acrw1_1, acrw1_2, etc.;
+	// or acrw1_-1 for index -1 (user did not highlight an autocomplete result)
+	return 'acrw1_' + index;
 }
 
 /**
  * @typedef {Object} SearchResultPartial
  * @property {string} title
+ * @property {string} [url]
  */
 
 /**
- * @typedef {Object} GenerateUrlMeta
- * @property {number} index
- */
-
-/**
- * Used by the Vue-enhanced search component to generate URLs for the search results. Adds a
- * `wprov` paramater to the URL to satisfy the SearchSatisfaction instrumentation.
+ * Return a new list of search results,
+ * with the `wprov` parameter added to each result's url (if any).
  *
- * @see getWprovFromResultIndex
- *
- * @param {SearchResultPartial|string} suggestion
- * @param {GenerateUrlMeta} meta
- * @return {string}
+ * @param {SearchResultPartial[]} results Not modified.
+ * @param {number} offset Offset to add to the index of each result.
+ * @return {SearchResultPartial[]}
  */
-function generateUrl( suggestion, meta ) {
-	const result = new mw.Uri( wgScript );
-
-	if ( typeof suggestion !== 'string' ) {
-		suggestion = suggestion.title;
-	}
-
-	result.query.title = 'Special:Search';
-	result.query.suggestion = suggestion;
-	result.query.wprov = getWprovFromResultIndex( meta.index );
-
-	return result.toString();
+function addWprovToSearchResultUrls( results, offset ) {
+	return results.map( ( result, index ) => {
+		if ( result.url ) {
+			const url = new URL( result.url, location.href );
+			url.searchParams.set( 'wprov', getWprovFromResultIndex( index + offset ) );
+			result = Object.assign( {}, result, { url: url.toString() } );
+		}
+		return result;
+	} );
 }
+
 /**
  * @typedef {Object} Instrumentation
  * @property {Object} listeners
  * @property {Function} getWprovFromResultIndex
- * @property {Function} generateUrl
+ * @property {Function} addWprovToSearchResultUrls
  */
 
 /**
@@ -185,5 +164,5 @@ module.exports = {
 		onSubmit: onSuggestionClick
 	},
 	getWprovFromResultIndex,
-	generateUrl
+	addWprovToSearchResultUrls
 };

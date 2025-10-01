@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\Content;
 
-use Content;
-use IContextSource;
+use Article;
+use MediaWiki\Content\Content;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Parser\ParserOptions;
 use MediaWiki\Revision\SlotRenderingProvider;
-use Page;
-use ParserOptions;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -111,22 +111,19 @@ class ItemHandler extends EntityHandler {
 		$this->db = $db;
 	}
 
-	/**
-	 * @return (\Closure|class-string)[]
-	 */
 	public function getActionOverrides() {
 		return [
-			'history' => function ( Page $page, IContextSource $context ) {
+			'history' => function ( Article $article, IContextSource $context ) {
 				return new HistoryEntityAction(
-					$page,
+					$article,
 					$context,
 					$this->entityIdLookup,
 					$this->labelLookupFactory->newLabelDescriptionLookup( $context->getLanguage() )
 				);
 			},
 			'view' => ViewEntityAction::class,
-			'edit' => EditEntityAction::class,
-			'submit' => SubmitEntityAction::class,
+			'edit' => EditEntityAction::SPEC,
+			'submit' => SubmitEntityAction::SPEC,
 		];
 	}
 
@@ -182,7 +179,7 @@ class ItemHandler extends EntityHandler {
 			$updates[] = new DataUpdateAdapter(
 				function ( Item $item, string $method ) {
 					$this->siteLinkStore->saveLinksOfItem( $item );
-					$this->db->connections()->getWriteConnectionRef()
+					$this->db->connections()->getWriteConnection()
 						->onTransactionCommitOrIdle( function() use ( $item ) {
 							$this->bagOStuffSiteLinkConflictLookup->clearConflictsForItem( $item );
 						}, $method );
@@ -251,7 +248,7 @@ class ItemHandler extends EntityHandler {
 	 *
 	 * @return ItemContent
 	 */
-	protected function newEntityContent( EntityHolder $entityHolder = null ) {
+	protected function newEntityContent( ?EntityHolder $entityHolder ) {
 		return new ItemContent( $entityHolder );
 	}
 

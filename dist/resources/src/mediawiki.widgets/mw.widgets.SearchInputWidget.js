@@ -7,17 +7,18 @@
 ( function () {
 
 	/**
-	 * Creates a mw.widgets.SearchInputWidget object.
+	 * @classdesc Search input widget.
 	 *
 	 * @class
 	 * @extends mw.widgets.TitleInputWidget
 	 *
 	 * @constructor
+	 * @description Create a mw.widgets.SearchInputWidget object.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {boolean} [performSearchOnClick=true] If true, the script will start a search when-
+	 * @param {boolean} [config.performSearchOnClick=true] If true, the script will start a search when-
 	 *  ever a user hits a suggestion. If false, the text of the suggestion is inserted into the
 	 *  text field only.
-	 *  @cfg {string} [dataLocation='header'] Where the search input field will be
+	 * @param {string} [config.dataLocation='header'] Where the search input field will be
 	 *  used (header or content).
 	 */
 	mw.widgets.SearchInputWidget = function MwWidgetsSearchInputWidget( config ) {
@@ -25,9 +26,9 @@
 		// be reattached until after this function is completed. As such
 		// grab a handle here. If no config.$input is passed tracking of
 		// form submissions won't work.
-		var $form = config.$input ? config.$input.closest( 'form' ) : $();
+		const $form = config.$input ? config.$input.closest( 'form' ) : $();
 
-		config = $.extend( {
+		config = Object.assign( {
 			icon: 'search',
 			maxLength: undefined,
 			showPendingRequest: false,
@@ -36,7 +37,7 @@
 		}, config );
 
 		// Parent constructor
-		mw.widgets.SearchInputWidget.parent.call( this, config );
+		mw.widgets.SearchInputWidget.super.call( this, config );
 
 		// Initialization
 		this.$element.addClass( 'mw-widget-searchInputWidget' );
@@ -50,7 +51,7 @@
 		}
 		this.setLookupsDisabled( !this.suggestions );
 
-		$form.on( 'submit', function () {
+		$form.on( 'submit', () => {
 			mw.track( 'mw.widgets.SearchInputWidget', {
 				action: 'submit-form',
 				numberOfResults: this.lastLookupItems.length,
@@ -60,7 +61,7 @@
 					this.$input.val()
 				)
 			} );
-		}.bind( this ) );
+		} );
 
 		this.connect( this, {
 			change: 'onChange'
@@ -113,7 +114,7 @@
 	};
 
 	/**
-	 * @see OO.ui.SearchInputWidget#onChange
+	 * @inheritdoc
 	 */
 	mw.widgets.SearchInputWidget.prototype.onChange = function () {
 		this.updateSearchIndicator();
@@ -133,40 +134,42 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.SearchInputWidget.prototype.setReadOnly = function ( state ) {
-		mw.widgets.SearchInputWidget.parent.prototype.setReadOnly.call( this, state );
+		mw.widgets.SearchInputWidget.super.prototype.setReadOnly.call( this, state );
 		this.updateSearchIndicator();
 		return this;
 	};
 
 	/**
-	 * @inheritdoc mw.widgets.TitleWidget
+	 * @inheritdoc
 	 */
 	mw.widgets.SearchInputWidget.prototype.getSuggestionsPromise = function () {
-		var api = this.getApi(),
-			promise,
-			self = this;
+		const api = this.getApi();
+
+		// While the name is, for historical reasons, 'session-start', this indicates
+		// a new backend request is being performed.
+		mw.track( 'mw.widgets.SearchInputWidget', {
+			action: 'session-start'
+		} );
 
 		// reuse the searchSuggest function from mw.searchSuggest
-		promise = mw.searchSuggest.request( api, this.getQueryValue(), function () {}, this.limit, this.getNamespace() );
+		const promise = mw.searchSuggest.request( api, this.getQueryValue(), () => {}, this.limit, this.getNamespace() );
 
 		// tracking purposes
-		promise.done( function ( data, jqXHR ) {
-			self.requestType = jqXHR.getResponseHeader( 'X-OpenSearch-Type' );
-			self.searchId = jqXHR.getResponseHeader( 'X-Search-ID' );
+		promise.done( ( data, jqXHR ) => {
+			this.requestType = jqXHR.getResponseHeader( 'X-OpenSearch-Type' );
+			this.searchId = jqXHR.getResponseHeader( 'X-Search-ID' );
 		} );
 
 		return promise;
 	};
 
 	/**
-	 * @inheritdoc mw.widgets.TitleInputWidget
+	 * @inheritdoc
 	 */
 	mw.widgets.SearchInputWidget.prototype.getLookupCacheDataFromResponse = function ( response ) {
-		var resp;
-
 		// mw.widgets.TitleInputWidget uses response.query, which doesn't exist for opensearch,
 		// so return the whole response (titles only, and links)
-		resp = {
+		const resp = {
 			data: response || {},
 			metadata: {
 				type: this.requestType || 'unknown',
@@ -181,19 +184,18 @@
 	};
 
 	/**
-	 * @inheritdoc mw.widgets.TitleWidget
+	 * @inheritdoc
 	 */
 	mw.widgets.SearchInputWidget.prototype.getOptionsFromData = function ( data ) {
-		var items = [],
+		const items = [],
 			titles = data.data[ 1 ],
 			descriptions = data.data[ 2 ],
-			urls = data.data[ 3 ],
-			self = this;
+			urls = data.data[ 3 ];
 
 		// eslint-disable-next-line no-jquery/no-each-util
-		$.each( titles, function ( i, result ) {
+		$.each( titles, ( i, result ) => {
 			items.push( new mw.widgets.TitleOptionWidget(
-				self.getOptionWidgetData(
+				this.getOptionWidgetData(
 					result,
 					// Create a result object that looks like the one from
 					// the parent's API query.
@@ -226,7 +228,7 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.SearchInputWidget.prototype.onLookupMenuChoose = function () {
-		mw.widgets.SearchInputWidget.parent.prototype.onLookupMenuChoose.apply( this, arguments );
+		mw.widgets.SearchInputWidget.super.prototype.onLookupMenuChoose.apply( this, arguments );
 
 		if ( this.performSearchOnClick ) {
 			this.$element.closest( 'form' ).trigger( 'submit' );
@@ -237,13 +239,11 @@
 	 * @inheritdoc
 	 */
 	mw.widgets.SearchInputWidget.prototype.getLookupMenuOptionsFromData = function () {
-		var items = mw.widgets.SearchInputWidget.parent.prototype.getLookupMenuOptionsFromData.apply(
+		const items = mw.widgets.SearchInputWidget.super.prototype.getLookupMenuOptionsFromData.apply(
 			this, arguments
 		);
 
-		this.lastLookupItems = items.map( function ( item ) {
-			return item.data;
-		} );
+		this.lastLookupItems = items.map( ( item ) => item.data );
 
 		return items;
 	};

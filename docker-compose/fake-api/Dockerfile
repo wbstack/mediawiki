@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.1.31-apache
 
 RUN set -eux; \
 	a2enmod rewrite; \

@@ -4,7 +4,10 @@
 			"Joao Xavier"
 		]
 	},
+	"is-tableth-date": "Dato",
 	"is-tableth-signup": "Enrejistrita",
 	"is-add": "Adjuntar",
-	"is-delete": "Efacez"
+	"is-delete": "Efacez",
+	"right-invitesignup": "Invitar uzeri por enrejistrar su",
+	"action-invitesignup": "invitar uzeri pri enrejistrar su en ca retsituo"
 }

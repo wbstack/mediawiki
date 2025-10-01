@@ -75,5 +75,6 @@
 	"ext-uls-empty-state-header": "Nema drugih jezika",
 	"ext-uls-empty-state-desc": "Trenutno nema drugih jezika",
 	"ext-uls-empty-state-header-actions-available": "Nema drugih jezika. Želite li dodati novi?",
-	"ext-uls-empty-state-desc-actions-available": " Učinite sadržaj dostupnim na više jezika."
+	"ext-uls-empty-state-desc-actions-available": " Učinite sadržaj dostupnim na više jezika.",
+	"ext-uls-add-languages-button-label": "Dodaj jezike"
 }

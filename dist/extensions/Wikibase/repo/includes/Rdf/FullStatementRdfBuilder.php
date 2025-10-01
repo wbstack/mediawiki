@@ -2,6 +2,7 @@
 
 namespace Wikibase\Repo\Rdf;
 
+use InvalidArgumentException;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\EntityId;
 use Wikibase\DataModel\Reference;
@@ -78,28 +79,28 @@ class FullStatementRdfBuilder implements EntityRdfBuilder {
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function getProduceQualifiers() {
 		return $this->produceQualifiers;
 	}
 
 	/**
-	 * @param boolean $produceQualifiers
+	 * @param bool $produceQualifiers
 	 */
 	public function setProduceQualifiers( $produceQualifiers ) {
 		$this->produceQualifiers = $produceQualifiers;
 	}
 
 	/**
-	 * @return boolean
+	 * @return bool
 	 */
 	public function getProduceReferences() {
 		return $this->produceReferences;
 	}
 
 	/**
-	 * @param boolean $produceReferences
+	 * @param bool $produceReferences
 	 */
 	public function setProduceReferences( $produceReferences ) {
 		$this->produceReferences = $produceReferences;
@@ -118,7 +119,11 @@ class FullStatementRdfBuilder implements EntityRdfBuilder {
 		foreach ( $statementList->getPropertyIds() as $propertyId ) {
 			$bestStatements = $statementList->getByPropertyId( $propertyId )->getBestStatements();
 			foreach ( $bestStatements->toArray() as $statement ) {
-				$bestList[$statement->getGuid()] = true;
+				$guid = $statement->getGuid();
+				if ( $guid === null ) {
+					throw new InvalidArgumentException( 'Can only add statements that have a non-null GUID' );
+				}
+				$bestList[$guid] = true;
 			}
 		}
 

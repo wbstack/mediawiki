@@ -4,8 +4,8 @@
 			"Joanmp17"
 		]
 	},
-	"tooltip-ca-createsource": "ናይዚ ገጽ ምንጪ ኮድ ፍጠር",
 	"tooltip-ca-ve-edit": "እዚ ገጽ ኣመዓራርይ",
+	"tooltip-ca-createsource": "ናይዚ ገጽ ምንጪ ኮድ ፍጠር",
 	"visualeditor-advancedsettings-tool": "ዝማዕበሉ ምምዕርራያት",
 	"visualeditor-backbutton-tooltip": "ተመለስ",
 	"visualeditor-ca-createsource": "ኮድ ፍጠር",
@@ -62,7 +62,6 @@
 	"visualeditor-dialog-transclusion-loading": "ይጽዕን ኣሎ...",
 	"visualeditor-dialog-transclusion-param-default": "ንቡር፦ $1",
 	"visualeditor-dialog-transclusion-param-example-long": "ንኣብነት፦ $1",
-	"visualeditor-dialog-transclusion-placeholder": "ሞደል ወስኽ",
 	"visualeditor-dialog-transclusion-required-parameter-dialog-cancel": "ተመለስ",
 	"visualeditor-dialog-transclusion-title-insert-known-template": "ኣእትው፦ $1",
 	"visualeditor-dialogbutton-media-tooltip": "ምስሊታትን ሕብረ-መድያን",
@@ -80,7 +79,6 @@
 	"visualeditor-media-title-image": "ምስሊ",
 	"visualeditor-media-title-video": "ቪድዮ",
 	"visualeditor-meta-tool": "ኣማራጽታት",
-	"visualeditor-mweditmodesource-warning-cancel": "ኣትርፍ",
 	"visualeditor-mweditmodeve-showagain": "ነዚ መልእኽቲ እንደገና ኣይተርእይ",
 	"visualeditor-mwgallerycontext-description": "$1 {{PLURAL:$1|ምስሊ|ምስልታት}}",
 	"visualeditor-mwgallerydialog-card-images": "ምስልታት",

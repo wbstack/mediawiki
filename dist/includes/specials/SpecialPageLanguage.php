@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:PageLanguage
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,22 +16,37 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
- * @author Kunal Grover
- * @since 1.24
  */
 
+namespace MediaWiki\Specials;
+
+use LogEventsList;
+use LogPage;
+use ManualLogEntry;
+use MediaWiki\Api\ApiMessage;
 use MediaWiki\Content\IContentHandlerFactory;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Language\RawMessage;
 use MediaWiki\Languages\LanguageNameUtils;
 use MediaWiki\MainConfigNames;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Permissions\PermissionStatus;
+use MediaWiki\SpecialPage\FormSpecialPage;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\MalformedTitleException;
+use MediaWiki\Title\Title;
+use MediaWiki\Xml\Xml;
+use SearchEngineFactory;
+use Wikimedia\Rdbms\IConnectionProvider;
 use Wikimedia\Rdbms\IDatabase;
-use Wikimedia\Rdbms\ILoadBalancer;
 
 /**
  * Special page for changing the content language of a page
  *
  * @ingroup SpecialPage
+ * @author Kunal Grover
+ * @since 1.24
  */
 class SpecialPageLanguage extends FormSpecialPage {
 	/**
@@ -41,34 +54,27 @@ class SpecialPageLanguage extends FormSpecialPage {
 	 */
 	private $goToUrl;
 
-	/** @var IContentHandlerFactory */
-	private $contentHandlerFactory;
-
-	/** @var LanguageNameUtils */
-	private $languageNameUtils;
-
-	/** @var ILoadBalancer */
-	private $loadBalancer;
-
-	/** @var SearchEngineFactory */
-	private $searchEngineFactory;
+	private IContentHandlerFactory $contentHandlerFactory;
+	private LanguageNameUtils $languageNameUtils;
+	private IConnectionProvider $dbProvider;
+	private SearchEngineFactory $searchEngineFactory;
 
 	/**
 	 * @param IContentHandlerFactory $contentHandlerFactory
 	 * @param LanguageNameUtils $languageNameUtils
-	 * @param ILoadBalancer $loadBalancer
+	 * @param IConnectionProvider $dbProvider
 	 * @param SearchEngineFactory $searchEngineFactory
 	 */
 	public function __construct(
 		IContentHandlerFactory $contentHandlerFactory,
 		LanguageNameUtils $languageNameUtils,
-		ILoadBalancer $loadBalancer,
+		IConnectionProvider $dbProvider,
 		SearchEngineFactory $searchEngineFactory
 	) {
 		parent::__construct( 'PageLanguage', 'pagelang' );
 		$this->contentHandlerFactory = $contentHandlerFactory;
 		$this->languageNameUtils = $languageNameUtils;
-		$this->loadBalancer = $loadBalancer;
+		$this->dbProvider = $dbProvider;
 		$this->searchEngineFactory = $searchEngineFactory;
 	}
 
@@ -198,7 +204,7 @@ class SpecialPageLanguage extends FormSpecialPage {
 			$newLanguage,
 			$data['reason'] ?? '',
 			[],
-			$this->loadBalancer->getConnectionRef( ILoadBalancer::DB_PRIMARY )
+			$this->dbProvider->getPrimaryDatabase()
 		);
 	}
 
@@ -214,7 +220,7 @@ class SpecialPageLanguage extends FormSpecialPage {
 	 * @return Status
 	 */
 	public static function changePageLanguage( IContextSource $context, Title $title,
-		$newLanguage, $reason = "", array $tags = [], IDatabase $dbw = null ) {
+		$newLanguage, $reason = "", array $tags = [], ?IDatabase $dbw = null ) {
 		// Get the default language for the wiki
 		$defLang = $context->getConfig()->get( MainConfigNames::LanguageCode );
 
@@ -229,13 +235,12 @@ class SpecialPageLanguage extends FormSpecialPage {
 		}
 
 		// Load the page language from DB
-		$dbw = $dbw ?? wfGetDB( DB_PRIMARY );
-		$oldLanguage = $dbw->selectField(
-			'page',
-			'page_lang',
-			[ 'page_id' => $pageId ],
-			__METHOD__
-		);
+		$dbw ??= MediaWikiServices::getInstance()->getConnectionProvider()->getPrimaryDatabase();
+		$oldLanguage = $dbw->newSelectQueryBuilder()
+			->select( 'page_lang' )
+			->from( 'page' )
+			->where( [ 'page_id' => $pageId ] )
+			->caller( __METHOD__ )->fetchField();
 
 		// Check if user wants to use the default language
 		if ( $newLanguage === 'default' ) {
@@ -266,15 +271,14 @@ class SpecialPageLanguage extends FormSpecialPage {
 		$logNew = $newLanguage ?: $defLang . '[def]';
 
 		// Writing new page language to database
-		$dbw->update(
-			'page',
-			[ 'page_lang' => $newLanguage ],
-			[
+		$dbw->newUpdateQueryBuilder()
+			->update( 'page' )
+			->set( [ 'page_lang' => $newLanguage ] )
+			->where( [
 				'page_id' => $pageId,
-				'page_lang' => $oldLanguage
-			],
-			__METHOD__
-		);
+				'page_lang' => $oldLanguage,
+			] )
+			->caller( __METHOD__ )->execute();
 
 		if ( !$dbw->affectedRows() ) {
 			return Status::newFatal( 'pagelang-db-failed' );
@@ -334,3 +338,9 @@ class SpecialPageLanguage extends FormSpecialPage {
 		return 'pagetools';
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialPageLanguage::class, 'SpecialPageLanguage' );

@@ -1,17 +1,18 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Repo\ParserOutput\PlaceholderExpander;
 
 use InvalidArgumentException;
+use MediaWiki\User\Options\UserOptionsLookup;
 use MediaWiki\User\UserIdentity;
-use MediaWiki\User\UserOptionsLookup;
-use MWException;
-use RuntimeException;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Term\AliasesProvider;
 use Wikibase\DataModel\Term\DescriptionsProvider;
 use Wikibase\DataModel\Term\LabelsProvider;
 use Wikibase\DataModel\Term\TermList;
+use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\LanguageNameLookup;
 use Wikibase\View\LanguageDirectionalityLookup;
 use Wikibase\View\LocalizedTextProvider;
@@ -32,55 +33,24 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 
 	public const INITIALLY_COLLAPSED_SETTING_NAME = 'wikibase-entitytermsview-showEntitytermslistview';
 
-	/**
-	 * @var TemplateFactory
-	 */
-	private $templateFactory;
-
-	/**
-	 * @var UserIdentity
-	 */
-	private $user;
-
-	/**
-	 * @var EntityDocument
-	 */
-	private $entity;
+	private TemplateFactory $templateFactory;
+	private UserIdentity $user;
+	private EntityDocument $entity;
+	private LanguageDirectionalityLookup $languageDirectionalityLookup;
+	private LanguageNameLookup $languageNameLookup;
+	private LocalizedTextProvider $textProvider;
+	private UserOptionsLookup $userOptionsLookup;
+	private LanguageFallbackChainFactory $languageFallbackChainFactory;
+	private bool $mulEnabled;
 
 	/**
 	 * @var string[]
 	 */
-	private $termsLanguages;
-
-	/**
-	 * @var LanguageDirectionalityLookup
-	 */
-	private $languageDirectionalityLookup;
-
-	/**
-	 * @var LanguageNameLookup
-	 */
-	private $languageNameLookup;
-
-	/**
-	 * @var LocalizedTextProvider
-	 */
-	private $textProvider;
-
-	/**
-	 * @var UserOptionsLookup
-	 */
-	private $userOptionsLookup;
-
-	/**
-	 * @var string
-	 */
-	private $cookiePrefix;
-
+	private array $termsLanguages;
 	/**
 	 * @var string[]
 	 */
-	private $termsListItems;
+	private array $termsListItems;
 
 	/**
 	 * @param TemplateFactory $templateFactory
@@ -91,7 +61,8 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 	 * @param LanguageNameLookup $languageNameLookup
 	 * @param LocalizedTextProvider $textProvider
 	 * @param UserOptionsLookup $userOptionsLookup
-	 * @param string $cookiePrefix
+	 * @param LanguageFallbackChainFactory $languageFallbackChainFactory
+	 * @param bool $mulEnabled
 	 * @param string[] $termsListItems
 	 */
 	public function __construct(
@@ -103,7 +74,8 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 		LanguageNameLookup $languageNameLookup,
 		LocalizedTextProvider $textProvider,
 		UserOptionsLookup $userOptionsLookup,
-		$cookiePrefix,
+		LanguageFallbackChainFactory $languageFallbackChainFactory,
+		bool $mulEnabled,
 		array $termsListItems = []
 	) {
 		$this->user = $user;
@@ -114,8 +86,9 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 		$this->languageNameLookup = $languageNameLookup;
 		$this->textProvider = $textProvider;
 		$this->userOptionsLookup = $userOptionsLookup;
-		$this->cookiePrefix = $cookiePrefix;
 		$this->termsListItems = $termsListItems;
+		$this->languageFallbackChainFactory = $languageFallbackChainFactory;
+		$this->mulEnabled = $mulEnabled;
 	}
 
 	/**
@@ -129,14 +102,8 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 	 *
 	 * @return string HTML to be substituted for the placeholder in the output.
 	 */
-	public function getHtmlForPlaceholder( $name ) {
-		try {
-			return $this->expandPlaceholder( $name );
-		} catch ( MWException | RuntimeException $ex ) {
-			wfWarn( "Expansion of $name failed: " . $ex->getMessage() );
-		}
-
-		return false;
+	public function getHtmlForPlaceholder( $name ): string {
+		return $this->expandPlaceholder( $name );
 	}
 
 	/**
@@ -144,12 +111,8 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 	 *
 	 * @note This encodes knowledge about which placeholders are used by EntityView with what
 	 *       intended meaning.
-	 *
-	 * @param string $name
-	 *
-	 * @return string
 	 */
-	private function expandPlaceholder( $name ) {
+	private function expandPlaceholder( string $name ): string {
 		switch ( $name ) {
 			case 'termbox':
 				return $this->renderTermBox();
@@ -164,10 +127,9 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 	/**
 	 * @return bool If the terms list should be initially collapsed for the current user.
 	 */
-	private function isInitiallyCollapsed() {
+	private function isInitiallyCollapsed(): bool {
 		if ( !$this->user->isRegistered() ) {
-			$cookieName = $this->cookiePrefix . self::INITIALLY_COLLAPSED_SETTING_NAME;
-			return isset( $_COOKIE[$cookieName] ) && $_COOKIE[$cookieName] === 'false';
+			return false;
 		} else {
 			return !$this->userOptionsLookup->getOption(
 				$this->user,
@@ -183,12 +145,14 @@ class EntityViewPlaceholderExpander implements PlaceholderExpander {
 	 * @throws InvalidArgumentException
 	 * @return string HTML
 	 */
-	private function renderTermBox() {
+	private function renderTermBox(): string {
 		$termsListView = new TermsListView(
 			$this->templateFactory,
 			$this->languageNameLookup,
 			$this->textProvider,
-			$this->languageDirectionalityLookup
+			$this->languageDirectionalityLookup,
+			$this->languageFallbackChainFactory,
+			$this->mulEnabled
 		);
 
 		$contentHtml = '';

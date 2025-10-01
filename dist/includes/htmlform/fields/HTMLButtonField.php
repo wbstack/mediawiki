@@ -1,6 +1,11 @@
 <?php
 
-use MediaWiki\MainConfigNames;
+namespace MediaWiki\HTMLForm\Field;
+
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLFormField;
+use MediaWiki\HTMLForm\VFormHTMLForm;
+use MediaWiki\Message\Message;
 
 /**
  * Adds a generic button inline to the form. Does not do anything, you must add
@@ -23,12 +28,15 @@ use MediaWiki\MainConfigNames;
  * @since 1.22
  */
 class HTMLButtonField extends HTMLFormField {
+	/** @var string */
 	protected $buttonType = 'button';
+	/** @var string|null */
 	protected $buttonLabel = null;
 
 	/** @var array Flags to add to OOUI Button widget */
 	protected $mFlags = [];
 
+	/** @var bool */
 	protected $mFormnovalidate = false;
 
 	/**
@@ -68,9 +76,7 @@ class HTMLButtonField extends HTMLFormField {
 	public function getInputHTML( $value ) {
 		$flags = '';
 		$prefix = 'mw-htmlform-';
-		if ( $this->mParent instanceof VFormHTMLForm ||
-			$this->mParent->getConfig()->get( MainConfigNames::UseMediaWikiUIEverywhere )
-		) {
+		if ( $this->mParent instanceof VFormHTMLForm ) {
 			$prefix = 'mw-ui-';
 			// add mw-ui-button separately, so the descriptor doesn't need to set it
 			$flags .= ' ' . $prefix . 'button';
@@ -87,35 +93,87 @@ class HTMLButtonField extends HTMLFormField {
 			'formnovalidate' => $this->mFormnovalidate,
 		] + $this->getAttributes( [ 'disabled', 'tabindex' ] );
 
-		if ( $this->isBadIE() ) {
-			return Html::element( 'input', $attr );
-		} else {
-			return Html::rawElement( 'button', $attr,
-				$this->buttonLabel ?: htmlspecialchars( $this->getDefault() ) );
-		}
+		return Html::rawElement( 'button', $attr,
+			$this->buttonLabel ?: htmlspecialchars( $this->getDefault() ) );
 	}
 
 	/**
 	 * Get the OOUI widget for this field.
 	 * @stable to override
 	 * @param string $value
-	 * @return OOUI\ButtonInputWidget
+	 * @return \OOUI\ButtonInputWidget
 	 */
 	public function getInputOOUI( $value ) {
-		return new OOUI\ButtonInputWidget( [
+		return new \OOUI\ButtonInputWidget( [
 			'name' => $this->mName,
 			'value' => $this->getDefault(),
-			'label' => !$this->isBadIE() && $this->buttonLabel
-				? new OOUI\HtmlSnippet( $this->buttonLabel )
+			'label' => $this->buttonLabel
+				? new \OOUI\HtmlSnippet( $this->buttonLabel )
 				: $this->getDefault(),
 			'type' => $this->buttonType,
 			'classes' => [ 'mw-htmlform-submit', $this->mClass ],
 			'id' => $this->mID,
 			'flags' => $this->mFlags,
-			'useInputTag' => $this->isBadIE(),
-		] + OOUI\Element::configFromHtmlAttributes(
+		] + \OOUI\Element::configFromHtmlAttributes(
 			$this->getAttributes( [ 'disabled', 'tabindex' ] )
 		) );
+	}
+
+	public function getInputCodex( $value, $hasErrors ) {
+		$flags = $this->mFlags;
+		$buttonLabel = $this->buttonLabel ?: htmlspecialchars( $this->getDefault() );
+		$buttonClasses = [ 'mw-htmlform-submit', 'cdx-button', $this->mClass ];
+		$buttonAttribs = [
+			'class' => $buttonClasses,
+			'id' => $this->mID,
+			'type' => $this->buttonType,
+			'name' => $this->mName,
+			'value' => $this->getDefault(),
+			'formnovalidate' => $this->mFormnovalidate,
+		] + $this->getAttributes( [ 'disabled', 'tabindex' ] );
+
+		return static::buildCodexComponent(
+			$flags,
+			$buttonLabel,
+			$buttonAttribs
+		);
+	}
+
+	/**
+	 * Build the markup of the Codex component
+	 *
+	 * @param array $flags The button's flag classes.
+	 * @param string $buttonLabel The button's label attribute.
+	 * @param array $attribs The button's list of attributes.
+	 * @return string Raw HTML.
+	 */
+	public static function buildCodexComponent(
+		$flags,
+		$buttonLabel,
+		$attribs
+	) {
+		$flagClasses = [];
+		$flagClassMap = [
+			'progressive' => 'cdx-button--action-progressive',
+			'destructive' => 'cdx-button--action-destructive',
+			'primary' => 'cdx-button--weight-primary',
+			'quiet' => 'cdx-button--weight-quiet',
+		];
+
+		foreach ( $flags as $flag ) {
+			if ( isset( $flagClassMap[$flag] ) ) {
+				$flagClasses[] = $flagClassMap[$flag];
+			}
+		}
+
+		$buttonClassesAndFlags = array_merge( $attribs[ 'class' ], $flagClasses );
+		$attribs['class'] = $buttonClassesAndFlags;
+
+		$buttonHtml = Html::rawElement(
+			'button', $attribs, $buttonLabel
+		);
+
+		return $buttonHtml;
 	}
 
 	/**
@@ -138,15 +196,7 @@ class HTMLButtonField extends HTMLFormField {
 	public function validate( $value, $alldata ) {
 		return true;
 	}
-
-	/**
-	 * IE<8 has bugs with <button>, so we'll need to avoid them.
-	 * @return bool Whether the request is from a bad version of IE
-	 */
-	private function isBadIE() {
-		$request = $this->mParent
-			? $this->mParent->getRequest()
-			: RequestContext::getMain()->getRequest();
-		return (bool)preg_match( '/MSIE [1-7]\./i', $request->getHeader( 'User-Agent' ) );
-	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLButtonField::class, 'HTMLButtonField' );

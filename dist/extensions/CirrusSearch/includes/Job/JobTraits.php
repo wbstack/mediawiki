@@ -9,7 +9,6 @@ use CirrusSearch\HashSearchConfig;
 use CirrusSearch\SearchConfig;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 
 /**
  * Traits for CirrusSearch Jobs.
@@ -60,9 +59,10 @@ trait JobTraits {
 	 * NOTE: only suited for jobs that work on multiple clusters by
 	 * inspecting the 'cluster' job param
 	 *
+	 * @param string $updateGroup UpdateGroup::* constant
 	 * @return Connection[] indexed by cluster name
 	 */
-	protected function decideClusters() {
+	protected function decideClusters( string $updateGroup ) {
 		$params = $this->getParams();
 		$searchConfig = $this->getSearchConfig();
 		$jobType = $this->getType();
@@ -70,8 +70,8 @@ trait JobTraits {
 		$cluster = $params['cluster'] ?? null;
 		$assignment = $searchConfig->getClusterAssignment();
 		if ( $cluster === null ) {
-			$clusterNames = $assignment->getWritableClusters();
-		} elseif ( $assignment->canWriteToCluster( $cluster ) ) {
+			$clusterNames = $assignment->getWritableClusters( $updateGroup );
+		} elseif ( $assignment->canWriteToCluster( $cluster, $updateGroup ) ) {
 			$clusterNames = [ $cluster ];
 		} else {
 			// Just in case a job is present in the queue but its cluster
@@ -84,7 +84,7 @@ trait JobTraits {
 				]
 			);
 			// this job does not allow retries so we just need to throw an exception
-			throw new \RuntimeException( "Received {$jobType} job for an unwritable cluster $cluster." );
+			throw new \RuntimeException( "Received {$jobType} job with {$updateGroup} updates for an unwritable cluster $cluster." );
 		}
 
 		$config = $searchConfig;
@@ -114,6 +114,7 @@ trait JobTraits {
 		}
 
 		$conns = Connection::getClusterConnections( $clusterNames, $config );
+
 		$timeout = $config->get( 'CirrusSearchClientSideUpdateTimeout' );
 		foreach ( $conns as $connection ) {
 			$connection->setTimeout( $timeout );
@@ -149,10 +150,11 @@ trait JobTraits {
 	 *
 	 * @param string $jobClass name of the job class
 	 * @param int $delay seconds to delay this job if possible
+	 * @param \JobQueueGroup $jobQueueGroup
 	 * @return array options to set to add to the job param
 	 */
-	public static function buildJobDelayOptions( $jobClass, $delay ): array {
-		$jobQueue = MediaWikiServices::getInstance()->getJobQueueGroup()->get( $jobClass );
+	public static function buildJobDelayOptions( $jobClass, $delay, \JobQueueGroup $jobQueueGroup ): array {
+		$jobQueue = $jobQueueGroup->get( $jobClass );
 		if ( !$delay || !$jobQueue->delayedJobsEnabled() ) {
 			return [];
 		}
@@ -166,5 +168,4 @@ trait JobTraits {
 	public static function buildJobName( $clazz ) {
 		return 'cirrusSearch' . str_replace( 'CirrusSearch\\Job\\', '', $clazz );
 	}
-
 }

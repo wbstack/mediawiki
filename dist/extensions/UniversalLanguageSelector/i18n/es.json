@@ -8,12 +8,12 @@
 			"Joanmp17",
 			"Larjona",
 			"Macofe",
-			"Ovruni",
-			"Pginer",
-			"Vivaelcelta",
 			"MarcoAurelio",
 			"No se",
-			"Rodney Araujo"
+			"Ovruni",
+			"Pginer",
+			"Rodney Araujo",
+			"Vivaelcelta"
 		]
 	},
 	"uls-desc": "Ofrece al usuario varias formas para seleccionar un idioma y ajustar su configuración",
@@ -83,5 +83,6 @@
 	"ext-uls-empty-state-header": "Aún no hay idiomas",
 	"ext-uls-empty-state-desc": "No hay idiomas disponibles por ahora",
 	"ext-uls-empty-state-header-actions-available": "Aún no hay idiomas. Agregar uno nuevo?",
-	"ext-uls-empty-state-desc-actions-available": " Haz que el contenido esté disponible en más idiomas."
+	"ext-uls-empty-state-desc-actions-available": " Haz que el contenido esté disponible en más idiomas.",
+	"ext-uls-add-languages-button-label": "Añadir idiomas"
 }

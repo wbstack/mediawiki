@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Arkanosis",
 			"Automatik",
 			"Boniface",
@@ -29,13 +30,10 @@
 		]
 	},
 	"thanks-desc": "Ajoute des liens pour remercier les utilisateurs pour des modifications, des commentaires, etc.",
-	"thanks-thank": "{{GENDER:$1|}}remercier{{GENDER:$2|}}",
+	"thanks-thank": "{{GENDER:$1|{{GENDER:$2|remercier}}}}",
 	"thanks-thanked": "{{GENDER:$1|}}remercié{{GENDER:$2||e|(e)}}",
 	"thanks-button-thank": "{{GENDER:$1|}}Remercier{{GENDER:$2|}}",
 	"thanks-button-thanked": "{{GENDER:$1|}}Remercié{{GENDER:$2||e|(e)}}",
-	"thanks-button-action-queued": "{{GENDER:$2|}}Remerciement de {{GENDER:$1|}}$1...",
-	"thanks-button-action-cancel": "Annuler",
-	"thanks-button-action-completed": "{{GENDER:$2|}}Vous avez remercié {{GENDER:$1|}}$1",
 	"thanks-error-undefined": "Échec de l’action de remerciement (code d’erreur : $1). Veuillez essayer à nouveau.",
 	"thanks-error-invalid-log-id": "Entrée non trouvée dans le journal",
 	"thanks-error-invalid-log-type": "Le type de journal « $1 » n’est pas dans la liste des types de journaux autorisés.",
@@ -59,7 +57,6 @@
 	"echo-pref-subscription-edit-thank": "Me remercie pour ma modification",
 	"echo-pref-tooltip-edit-thank": "Me notifier quand quelqu’un me remercie pour une modification que j’ai effectuée.",
 	"echo-category-title-edit-thank": "Remerciements",
-	"notification-thanks-diff-link": "votre modification",
 	"notification-header-rev-thank": "{{GENDER:$2|}}$1 vous a remercié{{GENDER:$4||e|(e)}} pour votre modification sur <strong>$3</strong>.",
 	"notification-header-creation-thank": "{{GENDER:$2|}}$1 vous a remercié{{GENDER:$4||e|(e)}} pour la création de <strong>$3</strong>.",
 	"notification-header-log-thank": "{{GENDER:$2|}}$1 vous a remercié{{GENDER:$4||e|(e)}} pour votre action concernant <strong>$3</strong>.",
@@ -78,7 +75,6 @@
 	"thanks-error-invalidpostid": "L’identifiant du message envoyé n’est pas valide.",
 	"flow-thanks-confirmation-special": "Voulez-vous envoyer publiquement des remerciements pour ce commentaire ?",
 	"flow-thanks-thanked-notice": "{{GENDER:$3|}}Vous avez remercié $1{{GENDER:$2|}} pour sa modification.",
-	"notification-flow-thanks-post-link": "votre commentaire",
 	"notification-header-flow-thank": "{{GENDER:$2|}}$1 vous a remercié{{GENDER:$5||e|(e)}} pour votre commentaire dans « <strong>$3</strong> ».",
 	"notification-compact-header-flow-thank": "{{GENDER:$2|}}$1 {{GENDER:$3|}}vous a remercié{{GENDER:$3||e|(e)}}.",
 	"notification-bundle-header-flow-thank": "{{PLURAL:$1|Une personne|$1 personnes|100=Au moins 100 personnes}} vous {{PLURAL:$1|a|ont}} remercié{{GENDER:$3||e|(e)}} pour votre commentaire sur « <strong>$2</strong> ».",

@@ -21,6 +21,9 @@
  * @ingroup DifferenceEngine
  */
 
+use MediaWiki\Content\Content;
+use MediaWiki\Html\Html;
+
 /**
  * Produces a warning message about not being able to render a slot diff.
  *
@@ -43,7 +46,7 @@ class UnsupportedSlotDiffRenderer extends SlotDiffRenderer {
 	}
 
 	/** @inheritDoc */
-	public function getDiff( Content $oldContent = null, Content $newContent = null ) {
+	public function getDiff( ?Content $oldContent = null, ?Content $newContent = null ) {
 		$this->normalizeContents( $oldContent, $newContent );
 
 		$oldModel = $oldContent->getModel();

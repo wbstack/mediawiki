@@ -1,6 +1,7 @@
 {
 	"name": "UniversalLanguageSelector",
-	"version": "2022-07-28",
+	"namemsg": "uls-extensionname",
+	"version": "2024-07-16",
 	"author": [
 		"Alolita Sharma",
 		"Amir Aharoni",
@@ -17,11 +18,10 @@
 	"descriptionmsg": "uls-desc",
 	"license-name": "GPL-2.0-or-later OR MIT",
 	"requires": {
-		"MediaWiki": ">= 1.37.0"
+		"MediaWiki": ">= 1.41.0"
 	},
 	"Hooks": {
 		"BeforePageDisplay": "main",
-		"EnterMobileMode": "main",
 		"GetBetaFeaturePreferences": "main",
 		"GetPreferences": "main",
 		"MakeGlobalVariablesScript": "main",
@@ -99,10 +99,6 @@
 			"description": "Enable the webfonts feature for all users by default. Can be controlled by the user. @since 2014.02",
 			"value": true
 		},
-		"ULSMobileWebfontsEnabled": {
-			"description": "Set whether webfont support is loaded within the mobile interface (via the MobileFrontend extension).",
-			"value": false
-		},
 		"ULSPosition": {
 			"description": "The location and the form of the language selection trigger.  The possible values are: (a) \"personal\"- as a link near the username or the log in link in the personal toolbar (default). (b) \"interlanguage\": as an icon near the header of the list of interlanguage  links in the sidebar.",
 			"value": "personal"
@@ -148,10 +144,6 @@
 	},
 	"ResourceModules": {
 		"ext.uls.common": {
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"scripts": [
 				"js/ext.uls.common.js"
 			],
@@ -177,8 +169,7 @@
 			"dependencies": [
 				"mediawiki.jqueryMsg",
 				"mediawiki.language",
-				"ext.uls.common",
-				"mediawiki.ui.button"
+				"ext.uls.common"
 			],
 			"messages": [
 				"ext-uls-compact-link-count",
@@ -215,9 +206,6 @@
 				"ext.uls.mediawiki",
 				"ext.uls.webfonts",
 				"mediawiki.api",
-				"mediawiki.ui.radio",
-				"mediawiki.ui.checkbox",
-				"mediawiki.ui.button",
 				"mediawiki.user"
 			]
 		},
@@ -228,10 +216,6 @@
 			]
 		},
 		"ext.uls.i18n": {
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"scripts": "js/ext.uls.i18n.js",
 			"dependencies": [
 				"jquery.i18n",
@@ -239,13 +223,17 @@
 			]
 		},
 		"ext.uls.interface": {
-			"targets": [ "desktop", "mobile" ],
 			"packageFiles": [
 				"js/ext.uls.interface.js",
 				"js/ext.uls.launch.js",
 				"js/ext.uls.actions.menu.js",
 				"js/ext.uls.actions.menu.item.js",
-				"js/ext.uls.actions.menu.items.registry.js"
+				"js/ext.uls.actions.menu.items.registry.js",
+				{
+					"name": "data.json",
+					"callback": "UniversalLanguageSelector\\Hooks::getModuleData",
+					"versionCallback": "UniversalLanguageSelector\\Hooks::getModuleDataSummary"
+				}
 			],
 			"styles": [
 				"css/ext.uls.interface.less",
@@ -264,8 +252,7 @@
 				"ext-uls-undo-language-tooltip-text",
 				"ext-uls-undo-language-tooltip-text-local",
 				"ext-uls-actions-menu-language-settings-item-label",
-				"ext-uls-actions-menu-header",
-				"ext-uls-actions-menu-language-settings-item-label",
+				"ext-uls-add-languages-button-label",
 				"ext-uls-empty-state-header",
 				"ext-uls-empty-state-desc",
 				"ext-uls-empty-state-header-actions-available",
@@ -273,7 +260,6 @@
 			]
 		},
 		"ext.uls.interlanguage": {
-			"targets": [ "desktop", "mobile" ],
 			"styles": "css/ext.uls.interlanguage.less"
 		},
 		"ext.uls.languagenames": {
@@ -285,15 +271,10 @@
 			"dependencies": [
 				"ext.uls.messages",
 				"ext.uls.preferences",
-				"jquery.uls.grid",
-				"mediawiki.ui.button"
+				"jquery.uls.grid"
 			]
 		},
 		"ext.uls.mediawiki": {
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"scripts": "js/ext.uls.mediawiki.js",
 			"dependencies": [
 				"ext.uls.common",
@@ -310,10 +291,6 @@
 			"dependencies": "ext.uls.i18n"
 		},
 		"ext.uls.preferences": {
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"scripts": "js/ext.uls.preferences.js",
 			"dependencies": [
 				"mediawiki.api",
@@ -325,7 +302,6 @@
 			"styles": "css/ext.uls.preferencespage.less"
 		},
 		"ext.uls.pt": {
-			"targets": [ "desktop", "mobile" ],
 			"styles": "css/ext.uls.pt.less",
 			"skinStyles": {
 				"default": [
@@ -333,9 +309,6 @@
 					"css/ext.uls.pt-default.less"
 				],
 				"vector": [
-					"css/ext.uls.pt-vector.less"
-				],
-				"vector-2022": [
 					"css/ext.uls.pt-vector.less"
 				],
 				"monobook": [
@@ -357,8 +330,8 @@
 			"dependencies": [
 				"mediawiki.api",
 				"mediawiki.jqueryMsg",
-				"mediawiki.ui.button",
-				"mediawiki.Uri"
+				"@wikimedia/codex",
+				"web2017-polyfills"
 			],
 			"messages": [
 				"ext-uls-setlang-error",
@@ -371,30 +344,16 @@
 			]
 		},
 		"ext.uls.webfonts": {
-			"targets": [ "desktop", "mobile" ],
 			"scripts": "js/ext.uls.webfonts.js",
 			"dependencies": [
 				"ext.uls.preferences",
 				"jquery.client"
 			]
 		},
-		"ext.uls.webfonts.mobile": {
-			"scripts": "js/ext.uls.webfonts.mobile.js",
-			"targets": [
-				"mobile"
-			],
-			"dependencies": [
-				"ext.uls.webfonts.repository"
-			]
-		},
 		"ext.uls.webfonts.repository": {
 			"scripts": [
 				"../lib/jquery.webfonts/src/jquery.webfonts.js",
 				"js/ext.uls.webfonts.repository.js"
-			],
-			"targets": [
-				"desktop",
-				"mobile"
 			]
 		},
 		"jquery.ime": {
@@ -404,10 +363,6 @@
 			"remoteExtPath": "UniversalLanguageSelector/lib"
 		},
 		"jquery.uls": {
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"scripts": [
 				"jquery.uls/src/jquery.uls.core.js",
 				"jquery.uls/src/jquery.uls.lcd.js",
@@ -430,18 +385,10 @@
 				"jquery.uls/src/jquery.uls.data.js",
 				"jquery.uls/src/jquery.uls.data.utils.js"
 			],
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"localBasePath": "lib",
 			"remoteExtPath": "UniversalLanguageSelector/lib"
 		},
 		"jquery.uls.grid": {
-			"targets": [
-				"desktop",
-				"mobile"
-			],
 			"styles": "jquery.uls/css/jquery.uls.grid.css",
 			"localBasePath": "lib",
 			"remoteExtPath": "UniversalLanguageSelector/lib"

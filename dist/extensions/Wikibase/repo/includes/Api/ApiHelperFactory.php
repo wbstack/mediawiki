@@ -2,12 +2,12 @@
 
 namespace Wikibase\Repo\Api;
 
-use ApiBase;
+use MediaWiki\Api\ApiBase;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Revision\RevisionLookup;
+use MediaWiki\Site\SiteLookup;
+use MediaWiki\Title\TitleFactory;
 use Serializers\Serializer;
-use SiteLookup;
-use TitleFactory;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Serializers\SerializerFactory;
 use Wikibase\DataModel\Services\Lookup\PropertyDataTypeLookup;
@@ -15,7 +15,7 @@ use Wikibase\Lib\EntityFactory;
 use Wikibase\Lib\Store\EntityByLinkedTitleLookup;
 use Wikibase\Lib\Store\EntityRevisionLookup;
 use Wikibase\Lib\Store\EntityStore;
-use Wikibase\Repo\EditEntity\MediawikiEditEntityFactory;
+use Wikibase\Repo\EditEntity\MediaWikiEditEntityFactory;
 use Wikibase\Repo\Localizer\ExceptionLocalizer;
 use Wikibase\Repo\Store\EntityTitleStoreLookup;
 use Wikibase\Repo\SummaryFormatter;
@@ -57,7 +57,7 @@ class ApiHelperFactory {
 	private $entityRevisionLookup;
 
 	/**
-	 * @var MediawikiEditEntityFactory
+	 * @var MediaWikiEditEntityFactory
 	 */
 	private $editEntityFactory;
 
@@ -114,12 +114,12 @@ class ApiHelperFactory {
 	 * @param SiteLookup $siteLookup
 	 * @param SummaryFormatter $summaryFormatter
 	 * @param EntityRevisionLookup $entityRevisionLookup
-	 * @param MediawikiEditEntityFactory $editEntityFactory
+	 * @param MediaWikiEditEntityFactory $editEntityFactory
 	 * @param SerializerFactory $serializerFactory
 	 * @param Serializer $entitySerializer
 	 * @param EntityIdParser $idParser
 	 * @param PermissionManager $permissionManager
-	 * @param RevisionLookup $revisionLookup,
+	 * @param RevisionLookup $revisionLookup
 	 * @param TitleFactory $titleFactory
 	 * @param EntityByLinkedTitleLookup|null $entityByLinkedTitleLookup
 	 * @param EntityFactory|null $entityFactory
@@ -132,16 +132,16 @@ class ApiHelperFactory {
 		SiteLookup $siteLookup,
 		SummaryFormatter $summaryFormatter,
 		EntityRevisionLookup $entityRevisionLookup,
-		MediawikiEditEntityFactory $editEntityFactory,
+		MediaWikiEditEntityFactory $editEntityFactory,
 		SerializerFactory $serializerFactory,
 		Serializer $entitySerializer,
 		EntityIdParser $idParser,
 		PermissionManager $permissionManager,
 		RevisionLookup $revisionLookup,
 		TitleFactory $titleFactory,
-		EntityByLinkedTitleLookup $entityByLinkedTitleLookup = null,
-		EntityFactory $entityFactory = null,
-		EntityStore $entityStore = null
+		?EntityByLinkedTitleLookup $entityByLinkedTitleLookup = null,
+		?EntityFactory $entityFactory = null,
+		?EntityStore $entityStore = null
 	) {
 		$this->entityTitleStoreLookup = $entityTitleStoreLookup;
 		$this->exceptionLocalizer = $exceptionLocalizer;
@@ -191,8 +191,7 @@ class ApiHelperFactory {
 	public function getErrorReporter( ApiBase $api ) {
 		return new ApiErrorReporter(
 			$api,
-			$this->exceptionLocalizer,
-			$api->getLanguage()
+			$this->exceptionLocalizer
 		);
 	}
 

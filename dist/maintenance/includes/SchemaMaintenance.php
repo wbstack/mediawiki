@@ -22,10 +22,16 @@
  * @ingroup Maintenance
  */
 
+namespace MediaWiki\Maintenance;
+
+use Doctrine\SqlFormatter\NullHighlighter;
+use Doctrine\SqlFormatter\SqlFormatter;
 use MediaWiki\DB\AbstractSchemaValidationError;
 use MediaWiki\DB\AbstractSchemaValidator;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 abstract class SchemaMaintenance extends Maintenance {
 	public const SUPPORTED_PLATFORMS = [
@@ -73,6 +79,10 @@ abstract class SchemaMaintenance extends Maintenance {
 		);
 	}
 
+	public function canExecuteWithoutLocalSettings(): bool {
+		return true;
+	}
+
 	public function execute() {
 		global $IP;
 
@@ -109,7 +119,6 @@ abstract class SchemaMaintenance extends Maintenance {
 		} elseif ( $platform === 'all' ) {
 			$platforms = self::SUPPORTED_PLATFORMS;
 		} else {
-			$platforms = [];
 			$this->fatalError( "'$platform' is not a supported platform!" );
 		}
 
@@ -201,6 +210,66 @@ abstract class SchemaMaintenance extends Maintenance {
 	abstract protected function generateSchema( string $platform, array $schema ): string;
 
 	/**
+	 * Takes the output of DoctrineSchemaBuilder::getSql() or
+	 * DoctrineSchemaChangeBuilder::getSchemaChangeSql() and applies presentational changes.
+	 *
+	 * @param string $platform DB engine identifier
+	 * @param array $sqlArray Array of SQL statements
+	 * @return string
+	 */
+	protected function cleanupSqlArray( string $platform, array $sqlArray ): string {
+		if ( !$sqlArray ) {
+			return '';
+		}
+
+		// Temporary
+		$sql = implode( ";\n\n", $sqlArray ) . ';';
+		$sql = ( new SqlFormatter( new NullHighlighter() ) )->format( $sql );
+
+		// Postgres hacks
+		if ( $platform === 'postgres' ) {
+			// FIXME: Fix a lot of weird formatting issues caused by
+			//   presence of partial index's WHERE clause, this should probably
+			//   be done in some better way, but for now this can work temporarily
+			$sql = str_replace(
+				[ "WHERE\n ", "\n  /*_*/\n  ", "    ", "  );", "KEY(\n  " ],
+				[ "WHERE", ' ', "  ", ');', "KEY(\n    " ],
+				$sql
+			);
+		}
+
+		// Temporary fixes until the linting issues are resolved upstream.
+		// https://github.com/doctrine/sql-formatter/issues/53
+
+		$sql = preg_replace( "!\s+/\*_\*/\s+!", " /*_*/", $sql );
+		$sql = preg_replace(
+			'!\s+/\*\$wgDBTableOptions\*/\s+;!',
+			' /*$wgDBTableOptions*/;',
+			$sql
+		);
+
+		$sql = str_replace( "; CREATE ", ";\n\nCREATE ", $sql );
+		$sql = str_replace( ";\n\nCREATE TABLE ", ";\n\n\nCREATE TABLE ", $sql );
+		$sql = preg_replace( '/^(CREATE|DROP|ALTER)\s+(TABLE|VIEW|INDEX)\s+/m', '$1 $2 ', $sql );
+		$sql = preg_replace( '/(?<!\s|;)\s+(ADD|DROP|ALTER|MODIFY|CHANGE|RENAME)\s+/', "\n  \$1 ", $sql );
+
+		$sql = str_replace( "; ", ";\n", $sql );
+
+		if ( !str_ends_with( $sql, "\n" ) ) {
+			$sql .= "\n";
+		}
+
+		// Sqlite hacks
+		if ( $platform === 'sqlite' ) {
+			// Doctrine prepends __temp__ to the table name and we set the table with the schema prefix causing invalid
+			// sqlite.
+			$sql = preg_replace( '/__temp__\s*\/\*_\*\//', '/*_*/__temp__', $sql );
+		}
+
+		return $sql;
+	}
+
+	/**
 	 * Fetches the abstract schema.
 	 *
 	 * @param string $jsonPath
@@ -235,3 +304,6 @@ abstract class SchemaMaintenance extends Maintenance {
 		return $abstractSchema;
 	}
 }
+
+/** @deprecated class alias since 1.43 */
+class_alias( SchemaMaintenance::class, 'SchemaMaintenance' );

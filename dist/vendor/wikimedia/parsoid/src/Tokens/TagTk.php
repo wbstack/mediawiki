@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Wikimedia\Parsoid\Tokens;
 
+use Wikimedia\Parsoid\NodeData\DataMw;
 use Wikimedia\Parsoid\NodeData\DataParsoid;
 
 /**
@@ -15,19 +16,19 @@ class TagTk extends Token {
 	/**
 	 * @param string $name
 	 * @param KV[] $attribs
-	 * @param ?DataParsoid $dataAttribs data-parsoid object
+	 * @param ?DataParsoid $dataParsoid data-parsoid object
+	 * @param ?DataMw $dataMw data-mw object
 	 */
 	public function __construct(
-		string $name, array $attribs = [], ?DataParsoid $dataAttribs = null
+		string $name, array $attribs = [],
+		?DataParsoid $dataParsoid = null,
+		?DataMw $dataMw = null
 	) {
+		parent::__construct( $dataParsoid, $dataMw );
 		$this->name = $name;
 		$this->attribs = $attribs;
-		$this->dataAttribs = $dataAttribs ?? new DataParsoid;
 	}
 
-	/**
-	 * @return string
-	 */
 	public function getName(): string {
 		return $this->name;
 	}
@@ -40,7 +41,8 @@ class TagTk extends Token {
 			'type' => $this->getType(),
 			'name' => $this->name,
 			'attribs' => $this->attribs,
-			'dataAttribs' => $this->dataAttribs
+			'dataParsoid' => $this->dataParsoid,
+			'dataMw' => $this->dataMw,
 		];
 	}
 }

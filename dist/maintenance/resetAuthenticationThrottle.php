@@ -24,10 +24,11 @@
 use MediaWiki\Auth\Throttler;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
-use MediaWiki\MediaWikiServices;
 use Wikimedia\IPUtils;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Reset login/signup throttling for a specified user and/or IP.
@@ -41,28 +42,32 @@ class ResetAuthenticationThrottle extends Maintenance {
 		parent::__construct();
 		$this->addDescription( 'Reset login/signup throttling for a specified user and/or IP. '
 			. "\n\n"
-			. 'When resetting signup only, provide the IP. When resetting login (or both), provide '
+			. 'When resetting signup or temp account, provide the IP. When resetting login (or both), provide '
 			. 'both username (as entered in login screen) and IP. An easy way to obtain them is '
 			. "the 'throttler' log channel." );
 		$this->addOption( 'login', 'Reset login throttle' );
 		$this->addOption( 'signup', 'Reset account creation throttle' );
-		$this->addOption( 'user', 'Username to reset', false, true );
+		$this->addOption( 'tempaccount', 'Reset temp account creation throttle' );
+		$this->addOption( 'tempaccountnameacquisition', 'Reset temp account name acquisition throttle' );
+		$this->addOption( 'user', 'Username to reset (when using --login)', false, true );
 		$this->addOption( 'ip', 'IP to reset', false, true );
 	}
 
 	public function execute() {
 		$forLogin = (bool)$this->getOption( 'login' );
 		$forSignup = (bool)$this->getOption( 'signup' );
+		$forTempAccount = (bool)$this->getOption( 'tempaccount' );
+		$forTempAccountNameAcquisition = (bool)$this->getOption( 'tempaccountnameacquisition' );
 		$username = $this->getOption( 'user' );
 		$ip = $this->getOption( 'ip' );
 
-		if ( !$forLogin && !$forSignup ) {
-			$this->fatalError( 'At least one of --login and --signup is required!' );
-		} elseif ( $forLogin && ( $ip === null || $username === null ) ) {
-			$this->fatalError( '--user and --ip are both required when using --login!' );
-		} elseif ( $forSignup && $ip === null ) {
-			$this->fatalError( '--ip is required when using --signup!' );
-		} elseif ( $ip !== null && !IPUtils::isValid( $ip ) ) {
+		if ( !$forLogin && !$forSignup && !$forTempAccount && !$forTempAccountNameAcquisition ) {
+			$this->fatalError(
+				'At least one of --login, --signup, --tempaccount, or --tempaccountnameacquisition is required!'
+			);
+		} elseif ( $ip === null ) {
+			$this->fatalError( '--ip is required!' );
+		} elseif ( !IPUtils::isValid( $ip ) ) {
 			$this->fatalError( "Not a valid IP: $ip" );
 		}
 
@@ -72,11 +77,19 @@ class ResetAuthenticationThrottle extends Maintenance {
 		if ( $forSignup ) {
 			$this->clearSignupThrottle( $ip );
 		}
+		if ( $forTempAccount ) {
+			$this->clearTempAccountCreationThrottle( $ip );
+		}
+		if ( $forTempAccountNameAcquisition ) {
+			$this->clearTempAccountNameAcquisitionThrottle( $ip );
+		}
 
-		LoggerFactory::getInstance( 'throttler' )->notice( 'Manually cleared {type} throttle', [
+		LoggerFactory::getInstance( 'throttler' )->info( 'Manually cleared {type} throttle', [
 			'type' => implode( ' and ', array_filter( [
 				$forLogin ? 'login' : null,
 				$forSignup ? 'signup' : null,
+				$forTempAccount ? 'tempaccount' : null,
+				$forTempAccountNameAcquisition ? 'tempaccountnameacquisition' : null,
 			] ) ),
 			'username' => $username,
 			'ipKey' => $ip,
@@ -96,12 +109,14 @@ class ResetAuthenticationThrottle extends Maintenance {
 			return;
 		}
 
+		$objectCacheFactory = $this->getServiceContainer()->getInstance()->getObjectCacheFactory();
+
 		$throttler = new Throttler( $passwordAttemptThrottle, [
 			'type' => 'password',
-			'cache' => ObjectCache::getLocalClusterInstance(),
+			'cache' => $objectCacheFactory->getLocalClusterInstance(),
 		] );
 		if ( $rawUsername !== null ) {
-			$usernames = MediaWikiServices::getInstance()->getAuthManager()
+			$usernames = $this->getServiceContainer()->getAuthManager()
 				->normalizeUsername( $rawUsername );
 			if ( !$usernames ) {
 				$this->fatalError( "Not a valid username: $rawUsername" );
@@ -115,7 +130,7 @@ class ResetAuthenticationThrottle extends Maintenance {
 
 		$botPasswordThrottler = new Throttler( $passwordAttemptThrottle, [
 			'type' => 'botpassword',
-			'cache' => ObjectCache::getLocalClusterInstance(),
+			'cache' => $objectCacheFactory->getLocalClusterInstance(),
 		] );
 		// @phan-suppress-next-line PhanPossiblyUndeclaredVariable T240141
 		$botPasswordThrottler->clear( $username, $ip );
@@ -142,7 +157,48 @@ class ResetAuthenticationThrottle extends Maintenance {
 		}
 		$throttler = new Throttler( $accountCreationThrottle, [
 			'type' => 'acctcreate',
-			'cache' => ObjectCache::getLocalClusterInstance(),
+			'cache' => $this->getServiceContainer()->getObjectCacheFactory()
+				->getLocalClusterInstance(),
+		] );
+
+		$throttler->clear( null, $ip );
+
+		$this->output( "done\n" );
+	}
+
+	protected function clearTempAccountCreationThrottle( string $ip ): void {
+		$this->output( 'Clearing temp account creation throttle...' );
+
+		$tempAccountCreationThrottle = $this->getConfig()->get( MainConfigNames::TempAccountCreationThrottle );
+		if ( !$tempAccountCreationThrottle ) {
+			$this->output( "none set\n" );
+			return;
+		}
+		$throttler = new Throttler( $tempAccountCreationThrottle, [
+			'type' => 'tempacctcreate',
+			'cache' => $this->getServiceContainer()->getObjectCacheFactory()
+				->getLocalClusterInstance(),
+		] );
+
+		$throttler->clear( null, $ip );
+
+		$this->output( "done\n" );
+	}
+
+	protected function clearTempAccountNameAcquisitionThrottle( string $ip ): void {
+		$this->output( 'Clearing temp account name acquisition throttle...' );
+
+		$tempAccountNameAcquisitionThrottle = $this->getConfig()->get(
+			MainConfigNames::TempAccountNameAcquisitionThrottle
+		);
+		if ( !$tempAccountNameAcquisitionThrottle ) {
+			$this->output( "none set\n" );
+			return;
+		}
+		$throttler = new Throttler( $tempAccountNameAcquisitionThrottle, [
+			'type' => 'tempacctnameacquisition',
+			'cache' => $this->getServiceContainer()->getObjectCacheFactory()
+				->getLocalClusterInstance(),
 		] );
 
 		$throttler->clear( null, $ip );
@@ -152,5 +208,7 @@ class ResetAuthenticationThrottle extends Maintenance {
 
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = ResetAuthenticationThrottle::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

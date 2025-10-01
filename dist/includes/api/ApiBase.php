@@ -20,32 +20,52 @@
  * @file
  */
 
-use MediaWiki\Api\ApiHookRunner;
+namespace MediaWiki\Api;
+
+use InvalidArgumentException;
+use LogicException;
 use MediaWiki\Api\Validator\SubmoduleDef;
 use MediaWiki\Block\Block;
+use MediaWiki\Context\ContextSource;
+use MediaWiki\Context\IContextSource;
 use MediaWiki\HookContainer\HookContainer;
-use MediaWiki\Linker\LinkTarget;
+use MediaWiki\Language\RawMessage;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
 use MediaWiki\Page\PageIdentity;
 use MediaWiki\ParamValidator\TypeDef\NamespaceDef;
 use MediaWiki\Permissions\Authority;
 use MediaWiki\Permissions\PermissionManager;
 use MediaWiki\Permissions\PermissionStatus;
+use MediaWiki\Registration\ExtensionRegistry;
+use MediaWiki\Specials\SpecialVersion;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 use MediaWiki\User\UserRigorOptions;
+use MWException;
+use ReflectionClass;
+use StatusValue;
+use stdClass;
+use Throwable;
+use Wikimedia\Message\MessageSpecifier;
 use Wikimedia\ParamValidator\ParamValidator;
 use Wikimedia\ParamValidator\TypeDef\EnumDef;
 use Wikimedia\ParamValidator\TypeDef\IntegerDef;
 use Wikimedia\ParamValidator\TypeDef\StringDef;
-use Wikimedia\Rdbms\IDatabase;
+use Wikimedia\Rdbms\IReadableDatabase;
+use Wikimedia\Timestamp\TimestampException;
+use WikiPage;
 
 /**
  * This abstract class implements many basic API functions, and is the base of
  * all API classes.
+ *
  * The class functions are divided into several areas of functionality:
  *
  * Module parameters: Derived classes can define getAllowedParams() to specify
- *    which parameters to expect, how to parse and validate them.
+ *  which parameters to expect, how to parse and validate them.
  *
  * Self-documentation: code to allow the API to document its own state
  *
@@ -158,6 +178,7 @@ abstract class ApiBase extends ContextSource {
 	/**
 	 * (string|array|Message) Specify an alternative i18n documentation message
 	 * for this parameter. Default is apihelp-{$path}-param-{$param}.
+	 * See Message::newFromSpecifier() for a description of allowed values.
 	 * @since 1.25
 	 */
 	public const PARAM_HELP_MSG = 'api-param-help-msg';
@@ -165,13 +186,14 @@ abstract class ApiBase extends ContextSource {
 	/**
 	 * ((string|array|Message)[]) Specify additional i18n messages to append to
 	 * the normal message for this parameter.
+	 * See Message::newFromSpecifier() for a description of allowed values.
 	 * @since 1.25
 	 */
 	public const PARAM_HELP_MSG_APPEND = 'api-param-help-msg-append';
 
 	/**
-	 * (array) Specify additional information tags for the parameter. Value is
-	 * an array of arrays, with the first member being the 'tag' for the info
+	 * (array) Specify additional information tags for the parameter.
+	 * The value is an array of arrays, with the first member being the 'tag' for the info
 	 * and the remaining members being the values. In the help, this is
 	 * formatted using apihelp-{$path}-paraminfo-{$tag}, which is passed
 	 * $1 = count, $2 = comma-joined list of values, $3 = module prefix.
@@ -187,11 +209,17 @@ abstract class ApiBase extends ContextSource {
 	public const PARAM_VALUE_LINKS = 'api-param-value-links';
 
 	/**
-	 * ((string|array|Message)[]) When PARAM_TYPE is an array, this is an array
-	 * mapping those values to $msg for ApiBase::makeMessage(). Any value not
-	 * having a mapping will use apihelp-{$path}-paramvalue-{$param}-{$value}.
-	 * Specify an empty array to use the default message key for all values.
+	 * ((string|array|Message)[]) When PARAM_TYPE is an array, or 'string'
+	 * with PARAM_ISMULTI, this is an array mapping parameter values to help messages.
+	 * See Message::newFromSpecifier() for a description of allowed values.
+	 *
+	 * When PARAM_TYPE is an array, any value not having a mapping will use
+	 * the apihelp-{$path}-paramvalue-{$param}-{$value} message. (This means
+	 * you can use an empty array to use the default message key for all
+	 * values.)
+	 *
 	 * @since 1.25
+	 * @note Use with PARAM_TYPE = 'string' is allowed since 1.40.
 	 */
 	public const PARAM_HELP_MSG_PER_VALUE = 'api-param-help-msg-per-value';
 
@@ -227,7 +255,7 @@ abstract class ApiBase extends ContextSource {
 	public const LIMIT_SML2 = 500;
 
 	/**
-	 * getAllowedParams() flag: When set, the result could take longer to generate,
+	 * getAllowedParams() flag: When this is set, the result could take longer to generate,
 	 * but should be more thorough. E.g. get the list of generators for ApiSandBox extension
 	 * @since 1.21
 	 */
@@ -239,19 +267,37 @@ abstract class ApiBase extends ContextSource {
 	/** @var stdClass[][] Cache for self::filterIDs() */
 	private static $filterIDsCache = [];
 
+	/** @var array Map of web UI block messages which magically gain machine-readable block info */
+	private const BLOCK_CODE_MAP = [
+		'blockedtext' => true,
+		'blockedtext-partial' => true,
+		'autoblockedtext' => true,
+		'systemblockedtext' => true,
+		'blockedtext-composite' => true,
+		'blockedtext-tempuser' => true,
+		'autoblockedtext-tempuser' => true,
+	];
+
 	/** @var array Map of web UI block messages to corresponding API messages and codes */
-	private static $blockMsgMap = [
-		'blockedtext' => [ 'apierror-blocked', 'blocked' ],
-		'blockedtext-partial' => [ 'apierror-blocked-partial', 'blocked' ],
-		'autoblockedtext' => [ 'apierror-autoblocked', 'autoblocked' ],
-		'systemblockedtext' => [ 'apierror-systemblocked', 'blocked' ],
-		'blockedtext-composite' => [ 'apierror-blocked', 'blocked' ],
+	private const MESSAGE_CODE_MAP = [
+		'actionthrottled' => [ 'apierror-ratelimited', 'ratelimited' ],
+		'actionthrottledtext' => [ 'apierror-ratelimited', 'ratelimited' ],
 	];
 
 	/** @var ApiMain */
 	private $mMainModule;
+
+	// Adding inline type hints for these two fields is non-trivial because
+	// of tests that create mocks for ApiBase subclasses and use
+	// disableOriginalConstructor(): in those cases the constructor here is never
+	// hit and thus these will be empty and any uses will raise a "Typed property
+	// must not be accessed before initialization" error.
 	/** @var string */
-	private $mModuleName, $mModulePrefix;
+	private $mModuleName;
+	/** @var string */
+	private $mModulePrefix;
+
+	/** @var IReadableDatabase|null */
 	private $mReplicaDB = null;
 	/**
 	 * @var array
@@ -266,7 +312,7 @@ abstract class ApiBase extends ContextSource {
 	 * @param string $moduleName Name of this module
 	 * @param string $modulePrefix Prefix to use for parameter names
 	 */
-	public function __construct( ApiMain $mainModule, $moduleName, $modulePrefix = '' ) {
+	public function __construct( ApiMain $mainModule, string $moduleName, string $modulePrefix = '' ) {
 		$this->mMainModule = $mainModule;
 		$this->mModuleName = $moduleName;
 		$this->mModulePrefix = $modulePrefix;
@@ -299,7 +345,8 @@ abstract class ApiBase extends ContextSource {
 	abstract public function execute();
 
 	/**
-	 * Get the module manager, or null if this module has no sub-modules
+	 * Get the module manager, or null if this module has no submodules.
+	 *
 	 * @since 1.21
 	 * @stable to override
 	 * @return ApiModuleManager|null
@@ -312,11 +359,13 @@ abstract class ApiBase extends ContextSource {
 	 * If the module may only be used with a certain format module,
 	 * it should override this method to return an instance of that formatter.
 	 * A value of null means the default format will be used.
+	 *
 	 * @note Do not use this just because you don't want to support non-json
 	 * formats. This should be used only when there is a fundamental
 	 * requirement for a specific format.
+	 *
 	 * @stable to override
-	 * @return ApiFormatBase|null Instance of a derived class of ApiFormatBase, or null
+	 * @return ApiFormatBase|null An instance of a class derived from ApiFormatBase, or null
 	 */
 	public function getCustomPrinter() {
 		return null;
@@ -340,6 +389,7 @@ abstract class ApiBase extends ContextSource {
 
 	/**
 	 * Return links to more detailed help pages about the module.
+	 *
 	 * @since 1.25, returning boolean false is deprecated
 	 * @stable to override
 	 * @return string|array
@@ -362,13 +412,14 @@ abstract class ApiBase extends ContextSource {
 	 * @return array
 	 */
 	protected function getAllowedParams( /* $flags = 0 */ ) {
-		// int $flags is not declared because it causes "Strict standards"
+		// $flags is not declared because it causes "Strict standards"
 		// warning. Most derived classes do not implement it.
 		return [];
 	}
 
 	/**
-	 * Indicates if this module needs maxlag to be checked
+	 * Indicates if this module needs maxlag to be checked.
+	 *
 	 * @stable to override
 	 * @return bool
 	 */
@@ -377,7 +428,8 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Indicates whether this module requires read rights
+	 * Indicates whether this module requires read rights.
+	 *
 	 * @stable to override
 	 * @return bool
 	 */
@@ -386,13 +438,26 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Indicates whether this module requires write mode
+	 * Indicates whether this module requires write access to the wiki.
 	 *
-	 * This should return true for modules that may require synchronous database writes.
-	 * Modules that do not need such writes should also not rely on primary database access,
-	 * since only read queries are needed and each primary DB is a single point of failure.
-	 * Additionally, requests that only need replica DBs can be efficiently routed to any
-	 * datacenter via the Promise-Non-Write-API-Action header.
+	 * API modules must override this method to return true if the operation they will
+	 * perform is not "safe" per RFC 7231 section 4.2.1. A module's operation is "safe"
+	 * if it is essentially read-only, i.e. the client does not request nor expect any
+	 * state change that would be observable in the responses to future requests.
+	 *
+	 * Implementations of this method must always return the same value, regardless of
+	 * the parameters passed to the constructor or system state.
+	 *
+	 * Modules that do not require POST requests should only perform "safe" operations.
+	 * Note that some modules might require POST requests because they need to support
+	 * large input parameters and not because they perform non-"safe" operations.
+	 *
+	 * The information provided by this method is used to perform authorization checks.
+	 * It can also be used to enforce proper routing of supposedly "safe" POST requests
+	 * to the closest datacenter via the Promise-Non-Write-API-Action header.
+	 *
+	 * @see mustBePosted()
+	 * @see needsToken()
 	 *
 	 * @stable to override
 	 * @return bool
@@ -402,7 +467,11 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Indicates whether this module must be called with a POST request
+	 * Indicates whether this module must be called with a POST request.
+	 *
+	 * Implementations of this method must always return the same value,
+	 * regardless of the parameters passed to the constructor or system state.
+	 *
 	 * @stable to override
 	 * @return bool
 	 */
@@ -411,7 +480,8 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Indicates whether this module is deprecated
+	 * Indicates whether this module is deprecated.
+	 *
 	 * @since 1.25
 	 * @stable to override
 	 * @return bool
@@ -421,8 +491,10 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Indicates whether this module is "internal"
+	 * Indicates whether this module is considered to be "internal".
+	 *
 	 * Internal API modules are not (yet) intended for 3rd party use and may be unstable.
+	 *
 	 * @since 1.25
 	 * @stable to override
 	 * @return bool
@@ -492,7 +564,8 @@ abstract class ApiBase extends ContextSource {
 	/** @name   Data access methods */
 
 	/**
-	 * Get the name of the module being executed by this instance
+	 * Get the name of the module being executed by this instance.
+	 *
 	 * @return string
 	 */
 	public function getModuleName() {
@@ -501,6 +574,7 @@ abstract class ApiBase extends ContextSource {
 
 	/**
 	 * Get parameter prefix (usually two letters or an empty string).
+	 *
 	 * @return string
 	 */
 	public function getModulePrefix() {
@@ -508,7 +582,8 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get the main module
+	 * Get the main module.
+	 *
 	 * @return ApiMain
 	 */
 	public function getMain() {
@@ -518,6 +593,7 @@ abstract class ApiBase extends ContextSource {
 	/**
 	 * Returns true if this module is the main module ($this === $this->mMainModule),
 	 * false otherwise.
+	 *
 	 * @return bool
 	 */
 	public function isMain() {
@@ -525,7 +601,8 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get the parent of this module
+	 * Get the parent of this module.
+	 *
 	 * @stable to override
 	 * @since 1.25
 	 * @return ApiBase|null
@@ -558,14 +635,14 @@ abstract class ApiBase extends ContextSource {
 	 * @return bool
 	 */
 	public function lacksSameOriginSecurity() {
-		// Main module has this method overridden, avoid infinite loops
+		// The Main module has this method overridden, avoid infinite loops
 		$this->dieIfMain( __METHOD__ );
 
 		return $this->getMain()->lacksSameOriginSecurity();
 	}
 
 	/**
-	 * Get the path to this module
+	 * Get the path to this module.
 	 *
 	 * @since 1.25
 	 * @return string
@@ -573,15 +650,17 @@ abstract class ApiBase extends ContextSource {
 	public function getModulePath() {
 		if ( $this->isMain() ) {
 			return 'main';
-		} elseif ( $this->getParent()->isMain() ) {
-			return $this->getModuleName();
-		} else {
-			return $this->getParent()->getModulePath() . '+' . $this->getModuleName();
 		}
+
+		if ( $this->getParent()->isMain() ) {
+			return $this->getModuleName();
+		}
+
+		return $this->getParent()->getModulePath() . '+' . $this->getModuleName();
 	}
 
 	/**
-	 * Get a module from its module path
+	 * Get a module from its module path.
 	 *
 	 * @since 1.25
 	 * @param string $path
@@ -600,20 +679,21 @@ abstract class ApiBase extends ContextSource {
 			$parts = explode( ' ', $path );
 		}
 
-		$count = count( $parts );
-		for ( $i = 0; $i < $count; $i++ ) {
+		foreach ( $parts as $i => $v ) {
 			$parent = $module;
 			$manager = $parent->getModuleManager();
 			if ( $manager === null ) {
 				$errorPath = implode( '+', array_slice( $parts, 0, $i ) );
 				$this->dieWithError( [ 'apierror-badmodule-nosubmodules', $errorPath ], 'badmodule' );
 			}
-			$module = $manager->getModule( $parts[$i] );
+			$module = $manager->getModule( $v );
 
 			if ( $module === null ) {
-				$errorPath = $i ? implode( '+', array_slice( $parts, 0, $i ) ) : $parent->getModuleName();
+				$errorPath = $i
+					? implode( '+', array_slice( $parts, 0, $i ) )
+					: $parent->getModuleName();
 				$this->dieWithError(
-					[ 'apierror-badmodule-badsubmodule', $errorPath, wfEscapeWikiText( $parts[$i] ) ],
+					[ 'apierror-badmodule-badsubmodule', $errorPath, wfEscapeWikiText( $v ) ],
 					'badmodule'
 				);
 			}
@@ -623,11 +703,12 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get the result object
+	 * Get the result object.
+	 *
 	 * @return ApiResult
 	 */
 	public function getResult() {
-		// Main module has this method overridden, avoid infinite loops
+		// The Main module has this method overridden, avoid infinite loops
 		$this->dieIfMain( __METHOD__ );
 
 		return $this->getMain()->getResult();
@@ -638,20 +719,23 @@ abstract class ApiBase extends ContextSource {
 	 * @return ApiErrorFormatter
 	 */
 	public function getErrorFormatter() {
-		// Main module has this method overridden, avoid infinite loops
+		// The Main module has this method overridden, avoid infinite loops
 		$this->dieIfMain( __METHOD__ );
 
 		return $this->getMain()->getErrorFormatter();
 	}
 
 	/**
-	 * Gets a default replica DB connection object
+	 * Gets a default replica DB connection object.
+	 *
 	 * @stable to override
-	 * @return IDatabase
+	 * @return IReadableDatabase
 	 */
 	protected function getDB() {
 		if ( !isset( $this->mReplicaDB ) ) {
-			$this->mReplicaDB = wfGetDB( DB_REPLICA, 'api' );
+			$this->mReplicaDB = MediaWikiServices::getInstance()
+				->getConnectionProvider()
+				->getReplicaDatabase( false, 'api' );
 		}
 
 		return $this->mReplicaDB;
@@ -661,7 +745,7 @@ abstract class ApiBase extends ContextSource {
 	 * @return ApiContinuationManager|null
 	 */
 	public function getContinuationManager() {
-		// Main module has this method overridden, avoid infinite loops
+		// The Main module has this method overridden, avoid infinite loops
 		$this->dieIfMain( __METHOD__ );
 
 		return $this->getMain()->getContinuationManager();
@@ -670,8 +754,8 @@ abstract class ApiBase extends ContextSource {
 	/**
 	 * @param ApiContinuationManager|null $manager
 	 */
-	public function setContinuationManager( ApiContinuationManager $manager = null ) {
-		// Main module has this method overridden, avoid infinite loops
+	public function setContinuationManager( ?ApiContinuationManager $manager = null ) {
+		// The Main module has this method overridden, avoid infinite loops
 		$this->dieIfMain( __METHOD__ );
 
 		$this->getMain()->setContinuationManager( $manager );
@@ -704,7 +788,7 @@ abstract class ApiBase extends ContextSource {
 	 * Get an ApiHookRunner for running core API hooks.
 	 *
 	 * @internal This is for use by core only. Hook interfaces may be removed
-	 *   without notice.
+	 *  without notice.
 	 * @since 1.35
 	 * @return ApiHookRunner
 	 */
@@ -728,6 +812,7 @@ abstract class ApiBase extends ContextSource {
 	 * @return string|array|Message|null Return null if the module does not
 	 *  support additional dynamic parameters, otherwise return a message
 	 *  describing them.
+	 *  See Message::newFromSpecifier() for a description of allowed values.
 	 */
 	public function dynamicParameterDocumentation() {
 		return null;
@@ -735,7 +820,8 @@ abstract class ApiBase extends ContextSource {
 
 	/**
 	 * This method mangles parameter name based on the prefix supplied to the constructor.
-	 * Override this method to change parameter name during runtime
+	 * Override this method to change parameter name during runtime.
+	 *
 	 * @param string|string[] $paramName Parameter name
 	 * @return string|string[] Prefixed parameter name
 	 * @since 1.29 accepts an array of strings
@@ -745,14 +831,14 @@ abstract class ApiBase extends ContextSource {
 			return array_map( function ( $name ) {
 				return $this->mModulePrefix . $name;
 			}, $paramName );
-		} else {
-			return $this->mModulePrefix . $paramName;
 		}
+
+		return $this->mModulePrefix . $paramName;
 	}
 
 	/**
 	 * Using getAllowedParams(), this function makes an array of the values
-	 * provided by the user, with key being the name of the variable, and
+	 * provided by the user, with the key being the name of the variable, and
 	 * value - validated value from user or default. limits will not be
 	 * parsed if $parseLimit is set to false; use this when the max
 	 * limit is not definitive yet, e.g. when getting revisions.
@@ -804,7 +890,7 @@ abstract class ApiBase extends ContextSource {
 			// ApiSandbox.PageLayout.prototype.updateTemplatedParams().
 			// If you update this, see if that needs updating too.
 			while ( $toProcess ) {
-				list( $name, $targets, $settings ) = array_shift( $toProcess );
+				[ $name, $targets, $settings ] = array_shift( $toProcess );
 
 				foreach ( $targets as $placeholder => $target ) {
 					if ( !array_key_exists( $target, $results ) ) {
@@ -878,7 +964,8 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get a value for the given parameter
+	 * Get a value for the given parameter.
+	 *
 	 * @param string $paramName Parameter name
 	 * @param bool $parseLimit See extractRequestParams()
 	 * @return mixed Parameter value
@@ -895,9 +982,9 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Die if none or more than one of a certain set of parameters is set and not false.
+	 * Die if 0 or more than one of a certain set of parameters is set and not false.
 	 *
-	 * @param array $params User provided set of parameters, as from $this->extractRequestParams()
+	 * @param array $params User provided parameter set, as from $this->extractRequestParams()
 	 * @param string ...$required Names of parameters of which exactly one must be set
 	 */
 	public function requireOnlyOneParameter( $params, ...$required ) {
@@ -930,10 +1017,10 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Die if more than one of a certain set of parameters is set and not false.
+	 * Dies if more than one parameter from a certain set of parameters are set and not false.
 	 *
-	 * @param array $params User provided set of parameters, as from $this->extractRequestParams()
-	 * @param string ...$required Names of parameters of which at most one must be set
+	 * @param array $params User provided parameters set, as from $this->extractRequestParams()
+	 * @param string ...$required Parameter names that cannot have more than one set
 	 */
 	public function requireMaxOneParameter( $params, ...$required ) {
 		$intersection = array_intersect( array_keys( array_filter( $params,
@@ -954,10 +1041,10 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Die if none of a certain set of parameters is set and not false.
+	 * Die if 0 of a certain set of parameters is set and not false.
 	 *
 	 * @since 1.23
-	 * @param array $params User provided set of parameters, as from $this->extractRequestParams()
+	 * @param array $params User provided parameters set, as from $this->extractRequestParams()
 	 * @param string ...$required Names of parameters of which at least one must be set
 	 */
 	public function requireAtLeastOneParameter( $params, ...$required ) {
@@ -982,13 +1069,28 @@ abstract class ApiBase extends ContextSource {
 
 	/**
 	 * Die if any of the specified parameters were found in the query part of
-	 * the URL rather than the post body.
+	 * the URL rather than the HTTP post body contents.
+	 *
 	 * @since 1.28
 	 * @param string[] $params Parameters to check
 	 * @param string $prefix Set to 'noprefix' to skip calling $this->encodeParamName()
 	 */
 	public function requirePostedParameters( $params, $prefix = 'prefix' ) {
-		// Skip if $wgDebugAPI is set or we're in internal mode
+		if ( !$this->mustBePosted() ) {
+			// In order to allow client code to choose the correct method (GET or POST) depending *only*
+			// on mustBePosted(), make sure that the module requires posting if any of its potential
+			// parameters require posting.
+
+			// TODO: Uncomment this
+			// throw new LogicException( 'mustBePosted() must be true when using requirePostedParameters()' );
+
+			// This seems to already be the case in all modules in practice, but deprecate it first just
+			// in case.
+			wfDeprecatedMsg( 'mustBePosted() must be true when using requirePostedParameters()',
+				'1.42' );
+		}
+
+		// Skip if $wgDebugAPI is set, or if we're in internal mode
 		if ( $this->getConfig()->get( MainConfigNames::DebugAPI ) ||
 		$this->getMain()->isInternalMode() ) {
 			return;
@@ -1013,7 +1115,7 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Callback function used in requireOnlyOneParameter to check whether required parameters are set
+	 * Callback function used in requireOnlyOneParameter to check whether required parameters are set.
 	 *
 	 * @param mixed $x Parameter to check is not null/false
 	 * @return bool
@@ -1023,14 +1125,14 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get a WikiPage object from a title or pageid param, if possible.
-	 * Can die, if no param is set or if the title or page id is not valid.
+	 * Attempts to load a WikiPage object from a title or pageid parameter, if possible.
+	 * It can die if no param is set or if the title or page ID is not valid.
 	 *
-	 * @param array $params User provided set of parameters, as from $this->extractRequestParams()
+	 * @param array $params User provided parameter set, as from $this->extractRequestParams()
 	 * @param string|false $load Whether load the object's state from the database:
-	 *        - false: don't load (if the pageid is given, it will still be loaded)
-	 *        - 'fromdb': load from a replica DB
-	 *        - 'fromdbmaster': load from the primary database
+	 *  - false: don't load (if the pageid is given, it will still be loaded)
+	 *  - 'fromdb': load from a replica DB
+	 *  - 'fromdbmaster': load from the primary database
 	 * @return WikiPage
 	 */
 	public function getTitleOrPageId( $params, $load = false ) {
@@ -1065,11 +1167,11 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get a Title object from a title or pageid param, if possible.
-	 * Can die, if no param is set or if the title or page id is not valid.
+	 * Get a Title object from a title or pageid param, if it is possible.
+	 * It can die if no param is set or if the title or page ID is not valid.
 	 *
 	 * @since 1.29
-	 * @param array $params User provided set of parameters, as from $this->extractRequestParams()
+	 * @param array $params User provided parameter set, as from $this->extractRequestParams()
 	 * @return Title
 	 */
 	public function getTitleFromTitleOrPageId( $params ) {
@@ -1083,7 +1185,9 @@ abstract class ApiBase extends ContextSource {
 			}
 			// @phan-suppress-next-line PhanTypeMismatchReturnNullable T240141
 			return $titleObj;
-		} elseif ( isset( $params['pageid'] ) ) {
+		}
+
+		if ( isset( $params['pageid'] ) ) {
 			$titleObj = Title::newFromID( $params['pageid'] );
 			if ( !$titleObj ) {
 				$this->dieWithError( [ 'apierror-nosuchpageid', $params['pageid'] ] );
@@ -1095,7 +1199,7 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Using the settings determine the value for the given parameter
+	 * Using the settings, determine the value for the given parameter.
 	 *
 	 * @param string $name Parameter name
 	 * @param array|mixed $settings Default value or an array of settings
@@ -1122,7 +1226,8 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Handle when a parameter was Unicode-normalized
+	 * Handle when a parameter was Unicode-normalized.
+	 *
 	 * @since 1.28
 	 * @since 1.35 $paramName is prefixed
 	 * @internal For overriding by subclasses and use by ApiParamValidatorCallbacks only.
@@ -1141,13 +1246,12 @@ abstract class ApiBase extends ContextSource {
 	 * @param string $token Supplied token
 	 * @param array $params All supplied parameters for the module
 	 * @return bool
-	 * @throws MWException
 	 */
 	final public function validateToken( $token, array $params ) {
 		$tokenType = $this->needsToken();
 		$salts = ApiQueryTokens::getTokenTypeSalts();
 		if ( !isset( $salts[$tokenType] ) ) {
-			throw new MWException(
+			throw new LogicException(
 				"Module '{$this->getModuleName()}' tried to use token type '$tokenType' " .
 					'without registering it'
 			);
@@ -1212,13 +1316,15 @@ abstract class ApiBase extends ContextSource {
 	 * first value and message parameters as subsequent values.
 	 *
 	 * @since 1.25
+	 * @deprecated since 1.43, use ApiBase::msg()
 	 * @param string|array|Message $msg
 	 * @phan-param string|non-empty-array|Message $msg
 	 * @param IContextSource $context
 	 * @param array|null $params
 	 * @return Message|null
 	 */
-	public static function makeMessage( $msg, IContextSource $context, array $params = null ) {
+	public static function makeMessage( $msg, IContextSource $context, ?array $params = null ) {
+		wfDeprecated( __METHOD__, '1.43' );
 		if ( is_string( $msg ) ) {
 			$msg = wfMessage( $msg );
 		} elseif ( is_array( $msg ) ) {
@@ -1237,29 +1343,45 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Turn an array of message keys or key+param arrays into a Status
+	 * Turn an array of messages into a Status.
+	 *
+	 * @deprecated since 1.43 Use methods that return StatusValue objects directly,
+	 *   such as PermissionManager::getPermissionStatus().
+	 *
+	 * @see ApiMessage::create
+	 *
 	 * @since 1.29
-	 * @param array $errors
-	 * @param User|null $user
+	 * @param array $errors A list of message keys, MessageSpecifier objects,
+	 *        or arrays containing the message key and parameters.
+	 * @param Authority|null $performer
 	 * @return Status
 	 */
-	public function errorArrayToStatus( array $errors, User $user = null ) {
-		if ( $user === null ) {
-			$user = $this->getUser();
-		}
+	public function errorArrayToStatus( array $errors, ?Authority $performer = null ) {
+		wfDeprecated( __METHOD__, '1.43' );
+
+		$performer ??= $this->getAuthority();
+		$block = $performer->getBlock();
 
 		$status = Status::newGood();
 		foreach ( $errors as $error ) {
 			if ( !is_array( $error ) ) {
 				$error = [ $error ];
 			}
-			if ( is_string( $error[0] ) && isset( self::$blockMsgMap[$error[0]] ) && $user->getBlock() ) {
-				list( $msg, $code ) = self::$blockMsgMap[$error[0]];
-				$status->fatal( ApiMessage::create( $msg, $code,
-					// @phan-suppress-next-line PhanTypeMismatchArgumentNullable Block is checked and not null
-					[ 'blockinfo' => $this->getBlockDetails( $user->getBlock() ) ]
+
+			$head = reset( $error );
+			$key = ( $head instanceof MessageSpecifier ) ? $head->getKey() : (string)$head;
+
+			if ( isset( self::BLOCK_CODE_MAP[$key] ) && $block ) {
+				$status->fatal( ApiMessage::create(
+					$error,
+					$this->getBlockCode( $block ),
+					[ 'blockinfo' => $this->getBlockDetails( $block ) ]
 				) );
+			} elseif ( isset( self::MESSAGE_CODE_MAP[$key] ) ) {
+				[ $msg, $code ] = self::MESSAGE_CODE_MAP[$key];
+				$status->fatal( ApiMessage::create( $msg, $code ) );
 			} else {
+				// @phan-suppress-next-line PhanParamTooFewUnpack
 				$status->fatal( ...$error );
 			}
 		}
@@ -1273,7 +1395,7 @@ abstract class ApiBase extends ContextSource {
 	 * @param StatusValue $status
 	 * @param Authority|null $user
 	 */
-	public function addBlockInfoToStatus( StatusValue $status, Authority $user = null ) {
+	public function addBlockInfoToStatus( StatusValue $status, ?Authority $user = null ) {
 		if ( $status instanceof PermissionStatus ) {
 			$block = $status->getBlock();
 		} else {
@@ -1281,19 +1403,23 @@ abstract class ApiBase extends ContextSource {
 			$block = $user->getBlock();
 		}
 
-		if ( $block ) {
-			foreach ( self::$blockMsgMap as $msg => list( $apiMsg, $code ) ) {
-				if ( $status->hasMessage( $msg ) ) {
-					$status->replaceMessage( $msg, ApiMessage::create( $apiMsg, $code,
-						[ 'blockinfo' => $this->getBlockDetails( $block ) ]
-					) );
-				}
+		if ( !$block ) {
+			return;
+		}
+		foreach ( $status->getMessages() as $msg ) {
+			if ( isset( self::BLOCK_CODE_MAP[$msg->getKey()] ) ) {
+				$status->replaceMessage( $msg->getKey(), ApiMessage::create(
+					Message::newFromSpecifier( $msg ),
+					$this->getBlockCode( $block ),
+					[ 'blockinfo' => $this->getBlockDetails( $block ) ]
+				) );
 			}
 		}
 	}
 
 	/**
-	 * Call wfTransactionalTimeLimit() if this request was POSTed
+	 * Call wfTransactionalTimeLimit() if this request was POSTed.
+	 *
 	 * @since 1.26
 	 */
 	protected function useTransactionalTimeLimit() {
@@ -1309,42 +1435,38 @@ abstract class ApiBase extends ContextSource {
 	 */
 	public static function clearCacheForTest(): void {
 		if ( !defined( 'MW_PHPUNIT_TEST' ) ) {
-			throw new RuntimeException( 'Not allowed outside tests' );
+			throw new LogicException( 'Not allowed outside tests' );
 		}
 		self::$filterIDsCache = [];
 	}
 
 	/**
 	 * Filter out-of-range values from a list of positive integer IDs
+	 *
 	 * @since 1.33
-	 * @param string[][] $fields Array of pairs of table and field to check
+	 * @param string[][] $fields Array of table and field pairs to check
 	 * @param (string|int)[] $ids IDs to filter. Strings in the array are
-	 *  expected to be stringified ints.
+	 *  expected to be stringified integers.
 	 * @return (string|int)[] Filtered IDs.
 	 */
 	protected function filterIDs( $fields, array $ids ) {
 		$min = INF;
 		$max = 0;
-		foreach ( $fields as list( $table, $field ) ) {
+		foreach ( $fields as [ $table, $field ] ) {
 			if ( isset( self::$filterIDsCache[$table][$field] ) ) {
 				$row = self::$filterIDsCache[$table][$field];
 			} else {
-				$row = $this->getDB()->selectRow(
-					$table,
-					[
-						'min_id' => "MIN($field)",
-						'max_id' => "MAX($field)",
-					],
-					'',
-					__METHOD__
-				);
+				$row = $this->getDB()->newSelectQueryBuilder()
+					->select( [ 'min_id' => "MIN($field)", 'max_id' => "MAX($field)" ] )
+					->from( $table )
+					->caller( __METHOD__ )->fetchRow();
 				self::$filterIDsCache[$table][$field] = $row;
 			}
 			$min = min( $min, $row->min_id );
 			$max = max( $max, $row->max_id );
 		}
 		return array_filter( $ids, static function ( $id ) use ( $min, $max ) {
-			return ( is_int( $id ) && $id >= 0 || ctype_digit( (string)$id ) )
+			return ( ( is_int( $id ) && $id >= 0 ) || ctype_digit( (string)$id ) )
 				&& $id >= $min && $id <= $max;
 		} );
 	}
@@ -1358,14 +1480,15 @@ abstract class ApiBase extends ContextSource {
 	/**
 	 * Add a warning for this module.
 	 *
-	 * Users should monitor this section to notice any changes in API. Multiple
-	 * calls to this function will result in multiple warning messages.
+	 * Users should monitor this section to notice any changes in the API.
+	 *
+	 * Multiple calls to this function will result in multiple warning messages.
 	 *
 	 * If $msg is not an ApiMessage, the message code will be derived from the
 	 * message key by stripping any "apiwarn-" or "apierror-" prefix.
 	 *
 	 * @since 1.29
-	 * @param string|array|Message $msg See ApiErrorFormatter::addWarning()
+	 * @param string|array|MessageSpecifier $msg See ApiErrorFormatter::addWarning()
 	 * @param string|null $code See ApiErrorFormatter::addWarning()
 	 * @param array|null $data See ApiErrorFormatter::addWarning()
 	 */
@@ -1379,7 +1502,7 @@ abstract class ApiBase extends ContextSource {
 	 * A combination of $this->addWarning() and $this->logFeatureUsage()
 	 *
 	 * @since 1.29
-	 * @param string|array|Message $msg See ApiErrorFormatter::addWarning()
+	 * @param string|array|MessageSpecifier $msg See ApiErrorFormatter::addWarning()
 	 * @param string|null $feature See ApiBase::logFeatureUsage()
 	 * @param array|null $data See ApiErrorFormatter::addWarning()
 	 */
@@ -1412,7 +1535,7 @@ abstract class ApiBase extends ContextSource {
 	 *
 	 * @note If you want to abort processing, use self::dieWithError() instead.
 	 * @since 1.29
-	 * @param string|array|Message $msg See ApiErrorFormatter::addError()
+	 * @param string|array|MessageSpecifier $msg See ApiErrorFormatter::addError()
 	 * @param string|null $code See ApiErrorFormatter::addError()
 	 * @param array|null $data See ApiErrorFormatter::addError()
 	 */
@@ -1444,7 +1567,7 @@ abstract class ApiBase extends ContextSource {
 	 * message key by stripping any "apiwarn-" or "apierror-" prefix.
 	 *
 	 * @since 1.29
-	 * @param string|array|Message $msg See ApiErrorFormatter::addError()
+	 * @param string|array|MessageSpecifier $msg See ApiErrorFormatter::addError()
 	 * @param string|null $code See ApiErrorFormatter::addError()
 	 * @param array|null $data See ApiErrorFormatter::addError()
 	 * @param int $httpCode HTTP error code to use
@@ -1466,7 +1589,6 @@ abstract class ApiBase extends ContextSource {
 	 */
 	public function dieWithException( Throwable $exception, array $options = [] ) {
 		$this->dieWithError(
-			// @phan-suppress-next-line PhanTypeMismatchArgument
 			$this->getErrorFormatter()->getMessageFromException( $exception, $options )
 		);
 	}
@@ -1481,26 +1603,21 @@ abstract class ApiBase extends ContextSource {
 	 * @return never
 	 */
 	public function dieBlocked( Block $block ) {
-		// Die using the appropriate message depending on block type
-		if ( $block->getType() == Block::TYPE_AUTO ) {
-			$this->dieWithError(
-				'apierror-autoblocked',
-				'autoblocked',
-				[ 'blockinfo' => $this->getBlockDetails( $block ) ]
-			);
-		} elseif ( !$block->isSitewide() ) {
-			$this->dieWithError(
-				'apierror-blocked-partial',
-				'blocked',
-				[ 'blockinfo' => $this->getBlockDetails( $block ) ]
-			);
-		} else {
-			$this->dieWithError(
-				'apierror-blocked',
-				'blocked',
-				[ 'blockinfo' => $this->getBlockDetails( $block ) ]
-			);
-		}
+		$blockErrorFormatter = MediaWikiServices::getInstance()->getFormatterFactory()
+			->getBlockErrorFormatter( $this->getContext() );
+
+		$msg = $blockErrorFormatter->getMessage(
+			$block,
+			$this->getUser(),
+			null,
+			$this->getRequest()->getIP()
+		);
+
+		$this->dieWithError(
+			$msg,
+			$this->getBlockCode( $block ),
+			[ 'blockinfo' => $this->getBlockDetails( $block ) ]
+		);
 	}
 
 	/**
@@ -1514,29 +1631,44 @@ abstract class ApiBase extends ContextSource {
 	 */
 	public function dieStatus( StatusValue $status ) {
 		if ( $status->isGood() ) {
-			throw new MWException( 'Successful status passed to ApiBase::dieStatus' );
+			throw new InvalidArgumentException( 'Successful status passed to ApiBase::dieStatus' );
+		}
+
+		foreach ( self::MESSAGE_CODE_MAP as $msg => [ $apiMsg, $code ] ) {
+			if ( $status->hasMessage( $msg ) ) {
+				$status->replaceMessage( $msg, ApiMessage::create( $apiMsg, $code ) );
+			}
+		}
+
+		if (
+			$status instanceof PermissionStatus
+			&& $status->isRateLimitExceeded()
+			&& !$status->hasMessage( 'apierror-ratelimited' )
+		) {
+			$status->fatal( ApiMessage::create( 'apierror-ratelimited', 'ratelimited' ) );
 		}
 
 		// ApiUsageException needs a fatal status, but this method has
 		// historically accepted any non-good status. Convert it if necessary.
 		$status->setOK( false );
-		if ( !$status->getErrorsByType( 'error' ) ) {
+		if ( !$status->getMessages( 'error' ) ) {
 			$newStatus = Status::newGood();
-			foreach ( $status->getErrorsByType( 'warning' ) as $err ) {
-				$newStatus->fatal( $err['message'], ...$err['params'] );
+			foreach ( $status->getMessages( 'warning' ) as $err ) {
+				$newStatus->fatal( $err );
 			}
-			if ( !$newStatus->getErrorsByType( 'error' ) ) {
+			if ( !$newStatus->getMessages( 'error' ) ) {
 				$newStatus->fatal( 'unknownerror-nocode' );
 			}
 			$status = $newStatus;
 		}
 
 		$this->addBlockInfoToStatus( $status );
+
 		throw new ApiUsageException( $this, $status );
 	}
 
 	/**
-	 * Helper function for readonly errors
+	 * Helper function for readonly errors.
 	 *
 	 * @throws ApiUsageException always
 	 * @return never
@@ -1550,57 +1682,48 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Helper function for permission-denied errors
+	 * Helper function for permission-denied errors.
+	 *
 	 * @since 1.29
 	 * @param string|string[] $rights
-	 * @param User|null $user deprecated since 1.36
 	 * @throws ApiUsageException if the user doesn't have any of the rights.
 	 *  The error message is based on $rights[0].
 	 */
-	public function checkUserRightsAny( $rights, $user = null ) {
-		$authority = $this->getAuthority();
-		if ( $user !== null ) {
-			wfDeprecatedMsg( __METHOD__ . ': $user parameter is deprecated', '1.36' );
-			$authority = $user;
-		}
+	public function checkUserRightsAny( $rights ) {
 		$rights = (array)$rights;
-		if ( !$authority->isAllowedAny( ...$rights ) ) {
+		if ( !$this->getAuthority()->isAllowedAny( ...$rights ) ) {
 			$this->dieWithError( [ 'apierror-permissiondenied', $this->msg( "action-{$rights[0]}" ) ] );
 		}
 	}
 
 	/**
-	 * Helper function for permission-denied errors
+	 * Helper function for permission-denied errors.
 	 *
-	 * @param PageIdentity|LinkTarget $pageIdentity deprecated passing LinkTarget since 1.36
+	 * @param PageIdentity $pageIdentity
 	 * @param string|string[] $actions
 	 * @param array $options Additional options
-	 *   - user: (User) User to use rather than $this->getUser()
-	 *   - autoblock: (bool, default false) Whether to spread autoblocks
-	 * @throws ApiUsageException if the user doesn't have all of the rights.
+	 *  - user: (User) User to use rather than $this->getUser().
+	 *  - autoblock: (bool, default false) Whether to spread autoblocks.
+	 * @phan-param array{user?:User,autoblock?:bool} $options
+	 *
+	 * @throws ApiUsageException if the user doesn't have all the necessary rights.
 	 *
 	 * @since 1.29
 	 * @since 1.33 Changed the third parameter from $user to $options.
 	 * @since 1.36 deprecated passing LinkTarget as first parameter
 	 */
 	public function checkTitleUserPermissions(
-		$pageIdentity,
+		PageIdentity $pageIdentity,
 		$actions,
 		array $options = []
 	) {
-		if ( !$pageIdentity instanceof PageIdentity ) {
-			wfDeprecatedMsg( __METHOD__ . ': passing LinkTarget as $pageIdentity parameter is deprecated',
-				'1.36' );
-			$pageIdentity = Title::castFromLinkTarget( $pageIdentity );
-		}
+		$authority = $options['user'] ?? $this->getAuthority();
 		$status = new PermissionStatus();
 		foreach ( (array)$actions as $action ) {
 			if ( $this->isWriteMode() ) {
-				// @phan-suppress-next-line PhanTypeMismatchArgumentNullable castFrom does not return null here
-				$this->getAuthority()->authorizeWrite( $action, $pageIdentity, $status );
+				$authority->authorizeWrite( $action, $pageIdentity, $status );
 			} else {
-				// @phan-suppress-next-line PhanTypeMismatchArgumentNullable castFrom does not return null here
-				$this->getAuthority()->authorizeRead( $action, $pageIdentity, $status );
+				$authority->authorizeRead( $action, $pageIdentity, $status );
 			}
 		}
 		if ( !$status->isGood() ) {
@@ -1613,10 +1736,12 @@ abstract class ApiBase extends ContextSource {
 
 	/**
 	 * Will only set a warning instead of failing if the global $wgDebugAPI
-	 * is set to true. Otherwise behaves exactly as self::dieWithError().
+	 * is set to true.
+	 *
+	 * Otherwise, it behaves exactly as self::dieWithError().
 	 *
 	 * @since 1.29
-	 * @param string|array|Message $msg
+	 * @param string|array|Message $msg Message definition, see Message::newFromSpecifier()
 	 * @param string|null $code
 	 * @param array|null $data
 	 * @param int|null $httpCode
@@ -1628,6 +1753,45 @@ abstract class ApiBase extends ContextSource {
 		} else {
 			$this->addWarning( $msg, $code, $data );
 		}
+	}
+
+	/**
+	 * Parse the 'continue' parameter in the usual format and validate the types of each part,
+	 * or die with the 'badcontinue' error if the format, types, or the number of parts is wrong.
+	 *
+	 * @param string $continue Value of 'continue' parameter obtained from extractRequestParams()
+	 * @param string[] $types Types of the expected parts in order, 'string', 'int' or 'timestamp'
+	 * @return mixed[] Array containing strings, integers or timestamps
+	 * @throws ApiUsageException
+	 * @since 1.40
+	 */
+	protected function parseContinueParamOrDie( string $continue, array $types ): array {
+		$cont = explode( '|', $continue );
+		$this->dieContinueUsageIf( count( $cont ) != count( $types ) );
+
+		foreach ( $cont as $i => &$value ) {
+			switch ( $types[$i] ) {
+				case 'string':
+					// Do nothing
+					break;
+				case 'int':
+					$this->dieContinueUsageIf( $value !== (string)(int)$value );
+					$value = (int)$value;
+					break;
+				case 'timestamp':
+					try {
+						$dbTs = $this->getDB()->timestamp( $value );
+					} catch ( TimestampException $ex ) {
+						$dbTs = false;
+					}
+					$this->dieContinueUsageIf( $value !== $dbTs );
+					break;
+				default:
+					throw new InvalidArgumentException( "Unknown type '{$types[$i]}'" );
+			}
+		}
+
+		return $cont;
 	}
 
 	/**
@@ -1647,10 +1811,10 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Internal code errors should be reported with this method
+	 * Internal code errors should be reported with this method.
+	 *
 	 * @param string $method Method or function name
 	 * @param string $message Error message
-	 * @throws MWException always
 	 * @return never
 	 */
 	protected static function dieDebug( $method, $message ) {
@@ -1660,6 +1824,7 @@ abstract class ApiBase extends ContextSource {
 	/**
 	 * Write logging information for API features to a debug log, for usage
 	 * analysis.
+	 *
 	 * @note Consider using $this->addDeprecation() instead to both warn and log.
 	 * @param string $feature Feature being used.
 	 */
@@ -1676,7 +1841,7 @@ abstract class ApiBase extends ContextSource {
 		$request = $this->getRequest();
 		$ctx = [
 			'feature' => $feature,
-			// Spaces to underscores in 'username' for historical reasons.
+			// Replace spaces with underscores in 'username' for historical reasons.
 			'username' => str_replace( ' ', '_', $this->getUser()->getName() ),
 			'clientip' => $request->getIP(),
 			'referer' => (string)$request->getHeader( 'Referer' ),
@@ -1691,6 +1856,15 @@ abstract class ApiBase extends ContextSource {
 			' "' . addslashes( $ctx['agent'] ) . '"';
 
 		wfDebugLog( 'api-feature-usage', $s, 'private', $ctx );
+
+		$this->getHookRunner()->onApiLogFeatureUsage(
+			$feature,
+			[
+				'userName' => $this->getUser()->getName(),
+				'userAgent' => $this->getMain()->getUserAgent(),
+				'ipAddress' => $request->getIP()
+			]
+		);
 	}
 
 	// endregion -- end of warning and error reporting
@@ -1707,7 +1881,7 @@ abstract class ApiBase extends ContextSource {
 	 *
 	 * @since 1.30
 	 * @stable to override
-	 * @return string|array|Message
+	 * @return string|array|Message Message definition, see Message::newFromSpecifier()
 	 */
 	protected function getSummaryMessage() {
 		return "apihelp-{$this->getModulePath()}-summary";
@@ -1721,7 +1895,8 @@ abstract class ApiBase extends ContextSource {
 	 *
 	 * @since 1.30
 	 * @stable to override
-	 * @return string|array|Message
+	 * @return string|array|Message Message definition, see Message::newFromSpecifier().
+	 *   When returning an array, the definition may also specify fallback keys.
 	 */
 	protected function getExtendedDescription() {
 		return [ [
@@ -1731,42 +1906,50 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get final module summary
+	 * Get the final module summary
 	 *
 	 * @since 1.30
 	 * @stable to override
 	 * @return Message
 	 */
 	public function getFinalSummary() {
-		return self::makeMessage( $this->getSummaryMessage(), $this->getContext(), [
+		return $this->msg(
+			Message::newFromSpecifier( $this->getSummaryMessage() ),
 			$this->getModulePrefix(),
 			$this->getModuleName(),
 			$this->getModulePath(),
-		] );
+		);
 	}
 
 	/**
-	 * Get final module description, after hooks have had a chance to tweak it as
+	 * Get the final module description, after hooks have had a chance to tweak it as
 	 * needed.
 	 *
 	 * @since 1.25, returns Message[] rather than string[]
 	 * @return Message[]
 	 */
 	public function getFinalDescription() {
-		$summary = self::makeMessage( $this->getSummaryMessage(), $this->getContext(), [
+		$summary = $this->msg(
+			Message::newFromSpecifier( $this->getSummaryMessage() ),
 			$this->getModulePrefix(),
 			$this->getModuleName(),
 			$this->getModulePath(),
-		] );
-		$extendedDescription = self::makeMessage(
-			$this->getExtendedDescription(), $this->getContext(), [
-				$this->getModulePrefix(),
-				$this->getModuleName(),
-				$this->getModulePath(),
-			]
+		);
+		$extendedDesc = $this->getExtendedDescription();
+		if ( is_array( $extendedDesc ) && is_array( $extendedDesc[0] ) ) {
+			// The definition in getExtendedDescription() may also specify fallback keys. This is weird,
+			// and it was never needed for other API doc messages, so it's only supported here.
+			$extendedDesc = Message::newFallbackSequence( $extendedDesc[0] )
+				->params( array_slice( $extendedDesc, 1 ) );
+		}
+		$extendedDesc = $this->msg(
+			Message::newFromSpecifier( $extendedDesc ),
+			$this->getModulePrefix(),
+			$this->getModuleName(),
+			$this->getModulePath(),
 		);
 
-		$msgs = [ $summary, $extendedDescription ];
+		$msgs = [ $summary, $extendedDesc ];
 
 		$this->getHookRunner()->onAPIGetDescriptionMessages( $this, $msgs );
 
@@ -1774,7 +1957,7 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Get final list of parameters, after hooks have had a chance to
+	 * Get the final list of parameters, after hooks have had a chance to
 	 * tweak it as needed.
 	 *
 	 * @param int $flags Zero or more flags like GET_VALUES_FOR_HELP
@@ -1824,13 +2007,10 @@ abstract class ApiBase extends ContextSource {
 				$settings = [];
 			}
 
-			$msg = $settings[self::PARAM_HELP_MSG] ?? $this->msg( "apihelp-$path-param-$param" );
-			$msg = self::makeMessage( $msg, $this->getContext(),
-				[ $prefix, $param, $name, $path ] );
-			if ( !$msg ) {
-				self::dieDebug( __METHOD__,
-					'Value in ApiBase::PARAM_HELP_MSG is not valid' );
-			}
+			$msg = isset( $settings[self::PARAM_HELP_MSG] )
+				? Message::newFromSpecifier( $settings[self::PARAM_HELP_MSG] )
+				: Message::newFallbackSequence( [ "apihelp-$path-param-$param", 'api-help-param-no-description' ] );
+			$msg = $this->msg( $msg, $prefix, $param, $name, $path );
 			$msgs[$param] = [ $msg ];
 
 			if ( isset( $settings[ParamValidator::PARAM_TYPE] ) &&
@@ -1889,32 +2069,35 @@ abstract class ApiBase extends ContextSource {
 					self::dieDebug( __METHOD__,
 						'ApiBase::PARAM_HELP_MSG_PER_VALUE is not valid' );
 				}
-				if ( !is_array( $settings[ParamValidator::PARAM_TYPE] ) ) {
+				$isArrayOfStrings = is_array( $settings[ParamValidator::PARAM_TYPE] )
+					|| (
+						$settings[ParamValidator::PARAM_TYPE] === 'string'
+						&& ( $settings[ParamValidator::PARAM_ISMULTI] ?? false )
+					);
+				if ( !$isArrayOfStrings ) {
 					self::dieDebug( __METHOD__,
 						'ApiBase::PARAM_HELP_MSG_PER_VALUE may only be used when ' .
-						'ParamValidator::PARAM_TYPE is an array' );
+						'ParamValidator::PARAM_TYPE is an array or it is \'string\' and ' .
+						'ParamValidator::PARAM_ISMULTI is true' );
 				}
 
+				$values = is_array( $settings[ParamValidator::PARAM_TYPE] ) ?
+					$settings[ParamValidator::PARAM_TYPE] :
+					array_keys( $settings[self::PARAM_HELP_MSG_PER_VALUE] );
 				$valueMsgs = $settings[self::PARAM_HELP_MSG_PER_VALUE];
 				$deprecatedValues = $settings[EnumDef::PARAM_DEPRECATED_VALUES] ?? [];
 
-				foreach ( $settings[ParamValidator::PARAM_TYPE] as $value ) {
-					$msg = $valueMsgs[$value] ?? "apihelp-$path-paramvalue-$param-$value";
-					$m = self::makeMessage( $msg, $this->getContext(),
-						[ $prefix, $param, $name, $path, $value ] );
-					if ( $m ) {
-						$m = new ApiHelpParamValueMessage(
-							$value,
-							// @phan-suppress-next-line PhanTypeMismatchArgumentProbablyReal
-							[ $m->getKey(), 'api-help-param-no-description' ],
-							$m->getParams(),
-							isset( $deprecatedValues[$value] )
-						);
-						$msgs[$param][] = $m->setContext( $this->getContext() );
-					} else {
-						self::dieDebug( __METHOD__,
-							"Value in ApiBase::PARAM_HELP_MSG_PER_VALUE for $value is not valid" );
-					}
+				foreach ( $values as $value ) {
+					$msg = Message::newFromSpecifier( $valueMsgs[$value] ?? "apihelp-$path-paramvalue-$param-$value" );
+					$m = $this->msg( $msg, [ $prefix, $param, $name, $path, $value ] );
+					$m = new ApiHelpParamValueMessage(
+						$value,
+						// @phan-suppress-next-line PhanTypeMismatchArgumentProbablyReal
+						[ $m->getKey(), 'api-help-param-no-description' ],
+						$m->getParams(),
+						isset( $deprecatedValues[$value] )
+					);
+					$msgs[$param][] = $m->setContext( $this->getContext() );
 				}
 			}
 
@@ -1924,14 +2107,8 @@ abstract class ApiBase extends ContextSource {
 						'Value for ApiBase::PARAM_HELP_MSG_APPEND is not an array' );
 				}
 				foreach ( $settings[self::PARAM_HELP_MSG_APPEND] as $m ) {
-					$m = self::makeMessage( $m, $this->getContext(),
-						[ $prefix, $param, $name, $path ] );
-					if ( $m ) {
-						$msgs[$param][] = $m;
-					} else {
-						self::dieDebug( __METHOD__,
-							'Value in ApiBase::PARAM_HELP_MSG_APPEND is not valid' );
-					}
+					$m = $this->msg( Message::newFromSpecifier( $m ), [ $prefix, $param, $name, $path ] );
+					$msgs[$param][] = $m;
 				}
 			}
 		}
@@ -1942,7 +2119,7 @@ abstract class ApiBase extends ContextSource {
 	}
 
 	/**
-	 * Generates the list of flags for the help screen and for action=paraminfo
+	 * Generates the list of flags for the help screen and for action=paraminfo.
 	 *
 	 * Corresponding messages: api-help-flag-deprecated,
 	 * api-help-flag-internal, api-help-flag-readrights,
@@ -1976,10 +2153,10 @@ abstract class ApiBase extends ContextSource {
 	 * Returns information about the source of this module, if known
 	 *
 	 * Returned array is an array with the following keys:
-	 * - path: Install path
-	 * - name: Extension name, or "MediaWiki" for core
-	 * - namemsg: (optional) i18n message key for a display name
-	 * - license-name: (optional) Name of license
+	 *  - path: Install path
+	 *  - name: Extension name, or "MediaWiki" for core
+	 *  - namemsg: (optional) i18n message key for a display name
+	 *  - license-name: (optional) Name of license
 	 *
 	 * @return array|null
 	 */
@@ -1998,10 +2175,10 @@ abstract class ApiBase extends ContextSource {
 		}
 		$path = realpath( $path ) ?: $path;
 
-		// Build map of extension directories to extension info
+		// Build a map of extension directories to extension info
 		if ( self::$extensionInfo === null ) {
 			$extDir = $this->getConfig()->get( MainConfigNames::ExtensionDirectory );
-			$baseDir = $this->getConfig()->get( MainConfigNames::BaseDirectory );
+			$baseDir = MW_INSTALL_PATH;
 			self::$extensionInfo = [
 				realpath( __DIR__ ) ?: __DIR__ => [
 					'path' => $baseDir,
@@ -2035,8 +2212,7 @@ abstract class ApiBase extends ContextSource {
 			}
 		}
 
-		// Now traverse parent directories until we find a match or run out of
-		// parents.
+		// Now traverse parent directories until we find a match or run out of parents.
 		do {
 			if ( array_key_exists( $path, self::$extensionInfo ) ) {
 				// Found it!
@@ -2063,7 +2239,7 @@ abstract class ApiBase extends ContextSource {
 	 * @param string[] &$help Array of help data
 	 * @param array $options Options passed to ApiHelp::getHelp
 	 * @param array &$tocData If a TOC is being generated, this array has keys
-	 *   as anchors in the page and values as for Linker::generateTOC().
+	 *   as anchors in the page and values as for SectionMetadata::fromLegacy().
 	 */
 	public function modifyHelp( array &$help, array $options, array &$tocData ) {
 	}
@@ -2080,3 +2256,6 @@ abstract class ApiBase extends ContextSource {
  *
  * vim: foldmarker=//\ region,//\ endregion foldmethod=marker
  */
+
+/** @deprecated class alias since 1.43 */
+class_alias( ApiBase::class, 'ApiBase' );

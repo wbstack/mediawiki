@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Tests\Wikibase\DataModel\Serializers;
 
 use PHPUnit\Framework\TestCase;
@@ -15,35 +17,51 @@ use Wikibase\DataModel\SiteLinkList;
  */
 class SiteLinkListSerializerTest extends TestCase {
 
-	public function testSerialize(): void {
-		$siteLink1 = new SiteLink( 'foo', 'bar' );
-		$siteLink2 = new SiteLink( 'omg', 'bbq' );
+	private SiteLink $siteLink1;
+	private SiteLink $siteLink2;
 
+	public function setUp(): void {
+		$this->siteLink1 = new SiteLink( 'foo', 'bar' );
+		$this->siteLink2 = new SiteLink( 'omg', 'bbq' );
+	}
+
+	private function createSiteLinkSerializer(): SiteLinkSerializer {
 		$siteLinkSerializer = $this->createMock( SiteLinkSerializer::class );
-		$siteLinkSerializer->expects( $this->exactly( 2 ) )
+		$siteLinkSerializer->expects( $this->atMost( 2 ) )
 			->method( 'serialize' )
-			->withConsecutive( [ $siteLink1 ], [ $siteLink2 ] )
-			->willReturnCallback( function ( SiteLink $siteLink ) {
-				return $siteLink->getPageName();
-			} );
+			->willReturnMap( [
+				[ $this->siteLink1, $this->siteLink1->getPageName() ],
+				[ $this->siteLink2, $this->siteLink2->getPageName() ],
+			] );
 
-		$serializer = new SiteLinkListSerializer( $siteLinkSerializer, false );
+		return $siteLinkSerializer;
+	}
+
+	public function testSerialize(): void {
+		$serializer = new SiteLinkListSerializer( $this->createSiteLinkSerializer(), false );
 
 		$this->assertEquals(
 			[
-				$siteLink1->getSiteId() => $siteLink1->getPageName(),
-				$siteLink2->getSiteId() => $siteLink2->getPageName(),
+				$this->siteLink1->getSiteId() => $this->siteLink1->getPageName(),
+				$this->siteLink2->getSiteId() => $this->siteLink2->getPageName(),
 			],
-			$serializer->serialize( new SiteLinkList( [ $siteLink1, $siteLink2 ] ) )
+			$serializer->serialize( new SiteLinkList( [ $this->siteLink1, $this->siteLink2 ] ) )
 		);
 	}
 
-	public function testSerializeAndUseObjects(): void {
-		$serializer = new SiteLinkListSerializer( $this->createStub( SiteLinkSerializer::class ), true );
+	public function testSerializeEmptyListUsesArrayByDefault(): void {
+		$serializer = new SiteLinkListSerializer( $this->createSiteLinkSerializer(), false );
+		$this->assertEquals(
+			[],
+			$serializer->serialize( new SiteLinkList() )
+		);
+	}
+
+	public function testSerializeEmptyListUsesObjectWhenEmptyMapsFlagIsSet(): void {
+		$serializer = new SiteLinkListSerializer( $this->createSiteLinkSerializer(), true );
 		$this->assertEquals(
 			(object)[],
 			$serializer->serialize( new SiteLinkList() )
 		);
 	}
-
 }

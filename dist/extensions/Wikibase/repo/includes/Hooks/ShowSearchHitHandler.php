@@ -4,17 +4,16 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Repo\Hooks;
 
-use Html;
 use HtmlArmor;
 use InvalidArgumentException;
-use Language;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Html\Html;
+use MediaWiki\MediaWikiServices;
 use MediaWiki\Search\Hook\ShowSearchHitHook;
 use MediaWiki\Search\Hook\ShowSearchHitTitleHook;
-use MWException;
-use RequestContext;
+use MediaWiki\Specials\SpecialSearch;
+use MediaWiki\Title\Title;
 use SearchResult;
-use SpecialSearch;
-use Title;
 use Wikibase\DataModel\Entity\EntityDocument;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Services\Lookup\EntityLookup;
@@ -24,10 +23,10 @@ use Wikibase\DataModel\Term\DescriptionsProvider;
 use Wikibase\DataModel\Term\TermFallback;
 use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Lib\LanguageFallbackIndicator;
-use Wikibase\Lib\LanguageNameLookup;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Repo\Content\EntityContentFactory;
 use Wikibase\Repo\Search\ExtendedResult;
+use Wikibase\Repo\WikibaseRepo;
 
 /**
  * Handler to format entities in the search results
@@ -153,9 +152,10 @@ class ShowSearchHitHandler implements ShowSearchHitHook, ShowSearchHitTitleHook 
 	 */
 	public static function addLanguageAttrs( array &$attr, string $displayLanguage, array $text ) {
 		if ( $text['language'] !== $displayLanguage ) {
-			try {
-				$language = Language::factory( $text['language'] );
-			} catch ( MWException $e ) {
+			$services = MediaWikiServices::getInstance();
+			if ( $services->getLanguageNameUtils()->isValidCode( $text['language'] ) ) {
+				$language = $services->getLanguageFactory()->getLanguage( $text['language'] );
+			} else {
 				// If somebody fed us broken language, ignore it
 				return;
 			}
@@ -170,7 +170,7 @@ class ShowSearchHitHandler implements ShowSearchHitHook, ShowSearchHitTitleHook 
 	 * @param SpecialSearch $searchPage
 	 */
 	public static function addDescription( string &$html, array $description, SpecialSearch $searchPage ) {
-		RequestContext::getMain()->getOutput()->addModuleStyles( [ 'wikibase.common' ] );
+		RequestContext::getMain()->getOutput()->addModuleStyles( [ 'wikibase.alltargets' ] );
 		$displayLanguage = $searchPage->getLanguage()->getCode();
 		$description = self::withLanguage( $description, $displayLanguage );
 		$attr = [ 'class' => 'wb-itemlink-description' ];
@@ -231,11 +231,13 @@ class ShowSearchHitHandler implements ShowSearchHitHook, ShowSearchHitTitleHook 
 		} catch ( InvalidArgumentException $e ) {
 			return $text;
 		}
-		$fallback = new LanguageFallbackIndicator( new LanguageNameLookup( $displayLanguage ) );
+		$fallback = new LanguageFallbackIndicator(
+			WikibaseRepo::getLanguageNameLookupFactory()->getForLanguageCode( $displayLanguage )
+		);
 		$markedText = HtmlArmor::getHtml( $text['value'] ) . $fallback->getHtml( $termFallback );
 		return [
 			'language' => $text['language'],
-			'value' => new HtmlArmor( $markedText )
+			'value' => new HtmlArmor( $markedText ),
 		];
 	}
 

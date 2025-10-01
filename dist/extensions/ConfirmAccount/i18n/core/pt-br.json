@@ -2,6 +2,7 @@
 	"@metadata": {
 		"authors": [
 			"!Silent",
+			"555",
 			"Eduardo Addad de Oliveira",
 			"Eduardo.mps",
 			"Eduardoaddad",
@@ -9,8 +10,7 @@
 			"Helder.wiki",
 			"Jaideraf",
 			"Jhonnatanricardo",
-			"Luckas Blade",
-			555
+			"Luckas Blade"
 		]
 	},
 	"confirmaccount-newrequests": "Há, neste momento, '''$1''' [[Special:ConfirmAccounts|{{PLURAL:$1|solicitação|solicitações}} pendentes de contas]]. '''Sua atenção é necessária!''",

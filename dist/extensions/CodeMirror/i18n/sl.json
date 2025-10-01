@@ -8,5 +8,8 @@
 	"codemirror-toggle-label": "Označevanje skladnje",
 	"codemirror-prefs-colorblind": "Omogoči barvno slepim prijazno shemo za označevanje skladnje pri urejanju vikibesedila",
 	"codemirror-prefs-colorblind-help": "Če uporabljate pripomoček za označevanje skladnje, ta nastavitev ne bo delovala.",
-	"prefs-accessibility": "Dostopnost"
+	"codemirror-unfold": "razširjenje",
+	"codemirror-folded-code": "strnjena koda",
+	"prefs-accessibility": "Dostopnost",
+	"prefs-syntax-highlighting": "Označevanje skladnje"
 }

@@ -3,7 +3,7 @@ namespace Wikibase\Lexeme\Search\Elastic;
 
 use CirrusSearch\Search\BaseResultsType;
 use Elastica\ResultSet;
-use Language;
+use MediaWiki\Language\Language;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\DataModel\Term\Term;
 use Wikibase\Lexeme\DataAccess\LexemeDescription;
@@ -83,14 +83,6 @@ class FormTermResult extends BaseResultsType {
 	}
 
 	/**
-	 * ES5 variant of getFields.
-	 * @return string[]
-	 */
-	public function getStoredFields() {
-		return [];
-	}
-
-	/**
 	 * Get the highlighting configuration.
 	 *
 	 * @param array $highlightSource configuration for how to highlight the source.
@@ -148,7 +140,7 @@ class FormTermResult extends BaseResultsType {
 				break;
 			}
 		}
-		if ( empty( $repr ) ) {
+		if ( $repr === '' ) {
 			// Didn't find the right id? Weird, skip it.
 			return null;
 		}
@@ -267,7 +259,7 @@ class FormTermResult extends BaseResultsType {
 		}
 
 		$langCode = $this->displayLanguage->getCode();
-		if ( empty( $rawResults ) ) {
+		if ( !$rawResults ) {
 			return [];
 		}
 		// Create prefetched lookup
@@ -290,7 +282,6 @@ class FormTermResult extends BaseResultsType {
 	 * @param string $langCode
 	 * @param array $raw
 	 * @return TermSearchResult
-	 * @throws \MWException
 	 */
 	private function produceTermResult(
 		LexemeDescription $descriptionMaker,

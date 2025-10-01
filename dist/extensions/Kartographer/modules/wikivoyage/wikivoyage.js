@@ -1,17 +1,17 @@
 /**
  * Utility methods.
  *
- * @alternateClassName wikivoyage
+ * @borrows Kartographer.Wikivoyage.wikivoyage as wikivoyage
  * @class Kartographer.Wikivoyage.wikivoyage
  * @singleton
  */
-var tileLayerDefs = {},
-	areExternalAllowed,
-	windowManager,
-	messageDialog,
-	STORAGE_KEY = 'mwKartographerExternalSources',
-	pathToKartographerImages = mw.config.get( 'wgExtensionAssetsPath' ) +
-		'/Kartographer/modules/wikivoyage/images/';
+const tileLayerDefs = {};
+let areExternalAllowed;
+let windowManager;
+let messageDialog;
+const STORAGE_KEY = 'mwKartographerExternalSources';
+const pathToKartographerImages = mw.config.get( 'wgExtensionAssetsPath' ) +
+'/Kartographer/modules/wikivoyage/images/';
 
 /**
  * @return {OO.ui.WindowManager}
@@ -57,7 +57,7 @@ module.exports = {
 	addTileLayer: function ( id, url, options ) {
 		options.wvLayerId = id;
 		options.attribution = options.attribution || '';
-		( options.attribs || [] ).forEach( function ( attrib ) {
+		( options.attribs || [] ).forEach( ( attrib ) => {
 			options.attribution += mw.html.escape( attrib.label ) + ' ' +
 			mw.html.element( 'a', { href: attrib.url }, attrib.name );
 		} );
@@ -74,7 +74,7 @@ module.exports = {
 	 * @return {{layer: L.TileLayer, name: string}}
 	 */
 	createTileLayer: function ( id ) {
-		var layerDefs = tileLayerDefs[ id ];
+		const layerDefs = tileLayerDefs[ id ];
 		return {
 			layer: new L.TileLayer( layerDefs.url, layerDefs.options ),
 			name: this.formatLayerName( layerDefs.options.wvName, layerDefs.options )
@@ -89,7 +89,7 @@ module.exports = {
 	 * @return {string} HTML
 	 */
 	formatLayerName: function ( name, options ) {
-		var icon = '';
+		let icon = '';
 		options = options || {};
 		if ( options.wvIsExternal ) {
 			icon = new OO.ui.IconWidget( {
@@ -122,7 +122,7 @@ module.exports = {
 	 * @return {jQuery.Promise}
 	 */
 	isAllowed: function ( layer ) {
-		return mw.loader.using( 'mediawiki.storage' ).then( function () {
+		return mw.loader.using( 'mediawiki.storage' ).then( () => {
 			if ( areExternalAllowed === undefined ) {
 				areExternalAllowed = mw.storage.get( STORAGE_KEY ) === '1';
 			}
@@ -130,7 +130,7 @@ module.exports = {
 			if ( !layer.options.wvIsExternal || areExternalAllowed ) {
 				return;
 			}
-			return alertExternalData().closed.then( function ( data ) {
+			return alertExternalData().closed.then( ( data ) => {
 				if ( data && data.action && data.action === 'good' ) {
 					areExternalAllowed = true;
 					mw.storage.set( STORAGE_KEY, '1' );

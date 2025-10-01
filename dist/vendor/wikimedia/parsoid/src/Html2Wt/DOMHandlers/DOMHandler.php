@@ -10,6 +10,7 @@ use Wikimedia\Parsoid\DOM\Node;
 use Wikimedia\Parsoid\DOM\Text;
 use Wikimedia\Parsoid\Html2Wt\SerializerState;
 use Wikimedia\Parsoid\Html2Wt\WTSUtils;
+use Wikimedia\Parsoid\Utils\DiffDOMUtils;
 use Wikimedia\Parsoid\Utils\DOMCompat;
 use Wikimedia\Parsoid\Utils\DOMDataUtils;
 use Wikimedia\Parsoid\Utils\DOMUtils;
@@ -50,9 +51,6 @@ class DOMHandler {
 	/** @var bool */
 	private $forceSOL;
 
-	/**
-	 * @param bool $forceSOL
-	 */
 	public function __construct( bool $forceSOL = false ) {
 		$this->forceSOL = $forceSOL;
 	}
@@ -147,9 +145,9 @@ class DOMHandler {
 			return [ 'min' => DOMUtils::isList( $node ) ? 1 : 0, 'max' => 2 ];
 		}
 
-		$nextSibling = DOMUtils::nextNonSepSibling( $node );
+		$nextSibling = DiffDOMUtils::nextNonSepSibling( $node );
 		$dp = DOMDataUtils::getDataParsoid( $otherNode );
-		if ( $nextSibling === $otherNode && ( $dp->stx ?? null ) === 'html' || isset( $dp->src ) ) {
+		if ( ( $nextSibling === $otherNode && ( $dp->stx ?? null ) === 'html' ) || isset( $dp->src ) ) {
 			return [ 'min' => 0, 'max' => 2 ];
 		} elseif ( $nextSibling === $otherNode && DOMUtils::isListOrListItem( $otherNode ) ) {
 			if ( DOMUtils::isList( $node ) && DOMCompat::nodeName( $otherNode ) === DOMCompat::nodeName( $node ) ) {
@@ -171,7 +169,7 @@ class DOMHandler {
 			return [];
 		} elseif (
 			DOMUtils::isWikitextBlockNode( $node->parentNode ) &&
-			DOMUtils::lastNonSepChild( $node->parentNode ) === $node
+			DiffDOMUtils::lastNonSepChild( $node->parentNode ) === $node
 		) {
 			// A list in a block node (<div>, <td>, etc) doesn't need a trailing empty line
 			// if it is the last non-separator child (ex: <div>..</ul></div>)
@@ -214,8 +212,9 @@ class DOMHandler {
 		$res = '';
 		while ( !DOMUtils::atTheTop( $node ) ) {
 			$dp = DOMDataUtils::getDataParsoid( $node );
-			if ( isset( $listTypes[DOMCompat::nodeName( $node )] ) ) {
-				if ( DOMCompat::nodeName( $node ) === 'li' ) {
+			$nodeName = DOMCompat::nodeName( $node );
+			if ( isset( $listTypes[$nodeName] ) ) {
+				if ( $nodeName === 'li' ) {
 					$parentNode = $node->parentNode;
 					while ( $parentNode && !( isset( $parentTypes[DOMCompat::nodeName( $parentNode )] ) ) ) {
 						$parentNode = $parentNode->parentNode;
@@ -232,7 +231,7 @@ class DOMHandler {
 						);
 					}
 				} elseif ( !WTUtils::isLiteralHTMLNode( $node ) ) {
-					$res = $listTypes[DOMCompat::nodeName( $node )] . $res;
+					$res = $listTypes[$nodeName] . $res;
 				}
 			} elseif ( !WTUtils::isLiteralHTMLNode( $node ) ||
 				empty( $dp->autoInsertedStart ) || empty( $dp->autoInsertedEnd )
@@ -297,7 +296,7 @@ class DOMHandler {
 	): string {
 		if ( $wrapperUnmodified ) {
 			$dsr = DOMDataUtils::getDataParsoid( $node )->dsr;
-			return $state->getOrigSrc( $dsr->start, $dsr->innerStart() ) ?? '';
+			return $state->getOrigSrc( $dsr->openRange() ) ?? '';
 		} else {
 			return $this->serializeTableElement( $symbol, $endSymbol, $state, $node );
 		}
@@ -319,7 +318,7 @@ class DOMHandler {
 		}
 
 		// If we have an identical previous sibling, nothing to worry about
-		$prev = DOMUtils::previousNonDeletedSibling( $node );
+		$prev = DiffDOMUtils::previousNonDeletedSibling( $node );
 		return $prev !== null && DOMCompat::nodeName( $prev ) === DOMCompat::nodeName( $node );
 	}
 
@@ -338,7 +337,7 @@ class DOMHandler {
 	): string {
 		$space = '';
 		if ( WTUtils::isNewElt( $node ) ) {
-			$fc = DOMUtils::firstNonDeletedChild( $node );
+			$fc = DiffDOMUtils::firstNonDeletedChild( $node );
 			// PORT-FIXME are different \s semantics going to be a problem?
 			if ( $fc && ( !( $fc instanceof Text ) || !preg_match( '/^\s/', $fc->nodeValue ) ) ) {
 				$space = $newEltDefault;
@@ -362,7 +361,7 @@ class DOMHandler {
 	): string {
 		$space = '';
 		if ( WTUtils::isNewElt( $node ) ) {
-			$lc = DOMUtils::lastNonDeletedChild( $node );
+			$lc = DiffDOMUtils::lastNonDeletedChild( $node );
 			// PORT-FIXME are different \s semantics going to be a problem?
 			if ( $lc && ( !( $lc instanceof Text ) || !preg_match( '/\s$/D', $lc->nodeValue ) ) ) {
 				$space = $newEltDefault;

@@ -24,7 +24,7 @@ class AccessTokenRepository extends DatabaseRepository implements AccessTokenRep
 	 * @param string|null $issuer
 	 */
 	public function __construct(
-		string $issuer = null
+		?string $issuer = null
 	) {
 		if ( !$issuer ) {
 			// TODO: When the extension is converted to proper use of DI,
@@ -41,7 +41,7 @@ class AccessTokenRepository extends DatabaseRepository implements AccessTokenRep
 	 *
 	 * @param ClientEntityInterface|ClientEntity $clientEntity
 	 * @param ScopeEntityInterface[] $scopes
-	 * @param mixed|null $userIdentifier
+	 * @param string|int|null $userIdentifier
 	 * @return AccessTokenEntityInterface
 	 * @throws OAuthServerException
 	 */
@@ -65,11 +65,11 @@ class AccessTokenRepository extends DatabaseRepository implements AccessTokenRep
 
 		$data = $this->getDbDataFromTokenEntity( $accessTokenEntity );
 
-		$this->getDB( DB_PRIMARY )->insert(
-			$this->getTableName(),
-			$data,
-			__METHOD__
-		);
+		$this->getDB( DB_PRIMARY )->newInsertQueryBuilder()
+			->insertInto( $this->getTableName() )
+			->row( $data )
+			->caller( __METHOD__ )
+			->execute();
 	}
 
 	/**
@@ -79,12 +79,12 @@ class AccessTokenRepository extends DatabaseRepository implements AccessTokenRep
 	 */
 	public function revokeAccessToken( $tokenId ) {
 		if ( $this->identifierExists( $tokenId ) ) {
-			$this->getDB( DB_PRIMARY )->update(
-				$this->getTableName(),
-				[ static::FIELD_REVOKED => 1 ],
-				[ $this->getIdentifierField() => $tokenId ],
-				__METHOD__
-			);
+			$this->getDB( DB_PRIMARY )->newUpdateQueryBuilder()
+				->update( $this->getTableName() )
+				->set( [ static::FIELD_REVOKED => 1 ] )
+				->where( [ $this->getIdentifierField() => $tokenId ] )
+				->caller( __METHOD__ )
+				->execute();
 		}
 	}
 
@@ -96,12 +96,12 @@ class AccessTokenRepository extends DatabaseRepository implements AccessTokenRep
 	 * @return bool Return true if this token has been revoked
 	 */
 	public function isAccessTokenRevoked( $tokenId ) {
-		$row = $this->getDB()->selectRow(
-			$this->getTableName(),
-			[ static::FIELD_REVOKED ],
-			[ $this->getIdentifierField() => $tokenId ],
-			__METHOD__
-		);
+		$row = $this->getDB()->newSelectQueryBuilder()
+			->select( static::FIELD_REVOKED )
+			->from( $this->getTableName() )
+			->where( [ $this->getIdentifierField() => $tokenId ] )
+			->caller( __METHOD__ )
+			->fetchRow();
 		if ( !$row ) {
 			return true;
 		}
@@ -114,13 +114,11 @@ class AccessTokenRepository extends DatabaseRepository implements AccessTokenRep
 	 * @param int $approvalId
 	 */
 	public function deleteForApprovalId( $approvalId ) {
-		$this->getDB( DB_PRIMARY )->delete(
-			$this->getTableName(),
-			[
-				static::FIELD_ACCEPTANCE_ID => $approvalId
-			],
-			__METHOD__
-		);
+		$this->getDB( DB_PRIMARY )->newDeleteQueryBuilder()
+			->deleteFrom( $this->getTableName() )
+			->where( [ static::FIELD_ACCEPTANCE_ID => $approvalId ] )
+			->caller( __METHOD__ )
+			->execute();
 	}
 
 	/**
@@ -130,12 +128,12 @@ class AccessTokenRepository extends DatabaseRepository implements AccessTokenRep
 	 * @return bool|int
 	 */
 	public function getApprovalId( $tokenId ) {
-		$row = $this->getDB()->selectRow(
-			$this->getTableName(),
-			[ static::FIELD_ACCEPTANCE_ID ],
-			[ $this->getIdentifierField() => $tokenId ],
-			__METHOD__
-		);
+		$row = $this->getDB()->newSelectQueryBuilder()
+			->select( static::FIELD_ACCEPTANCE_ID )
+			->from( $this->getTableName() )
+			->where( [ $this->getIdentifierField() => $tokenId ] )
+			->caller( __METHOD__ )
+			->fetchRow();
 
 		if ( $row ) {
 			return (int)$row->{static::FIELD_ACCEPTANCE_ID};

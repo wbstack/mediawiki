@@ -4,6 +4,7 @@
 			"Joetaras"
 		]
 	},
+	"datatypes-type-entity-schema": "Scheme de l'endità",
 	"entityschema-desc": "Reggìstre e discute Schema pe le endità de Uicchibase",
 	"special-newschema": "Ccreje 'nu EntitySchema nuève",
 	"entityschema-newschema-label": "Etichette:",
@@ -11,7 +12,6 @@
 	"entityschema-newschema-aliases": "Alias, separate da 'na barre verticale:",
 	"entityschema-newschema-schema-shexc": "Codece de l'espressiune d'a fegure:",
 	"entityschema-newschema-submit": "Ccreje",
-	"entityschema-newschema-copyright": "Cazzanne \"$1\", ste accette le [[$2|termine d'ause]], e ste accette irrevocabbelmende de relascià 'u condrebbute tune sotte a $3.",
 	"entityschema-anonymouseditwarning": "Iapre l'uecchije: non g'è trasute. Jndr'à 'u cunde d'u scheme avène reggistrate 'u 'ndirizze IP tune.",
 	"entityschema-label-edit-placeholder": "mitte 'n'etichette jndr'à $1",
 	"entityschema-description-edit-placeholder": "mitte 'na descrizione jndr'à $1",
@@ -22,7 +22,6 @@
 	"entityschema-error-schemaupdate-failed": "'U scheme non ge pò essere aggiornate",
 	"entityschema-error-schematext-conflict": "Stu scheme ave cangiate jndr'à 'u frattiembe. Pe piacere tuèrne a 'a pàgene d'u scheme e pruève arrete a cangiarle.",
 	"entityschema-error-namebadge-conflict": "Stu scheme ha state cangiate jndr'à 'u frattiembe. Pe piacere tuèrne a 'a pàgene d'u scheme e pruève arrete a cangià l'etichette, le descriziune e le alias jndr'à sta lènghe.",
-	"entityschema-error-saving-failed": "'A reggistrazione d'u scheme ha sciute a male cu stu messàgge: $1",
 	"entityschema-error-not-post": "St'azione adda essere fatte cu 'na richieste de messàgge.",
 	"entityschema-error-inconsistent-id": "Le revisiune date non ge stonne sus a 'u titole scritte.",
 	"entityschema-error-wrong-page-revisions": "'A revisione date non ge ste jndr'à pàgene de mò.",

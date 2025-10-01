@@ -1,0 +1,74 @@
+.wikibase-rankselector {
+	border: 0;
+	background: none transparent;
+	cursor: pointer;
+}
+
+.wikibase-rankselector.ui-state-disabled {
+	cursor: default;
+}
+
+.wikibase-rankselector .ui-icon.ui-icon-rankselector {
+	/* @embed */
+	background-image: url( images/rankselector.svg );
+	background-size: 6.6875rem 1.25rem; /* size of rankselector.svg */
+	width: 0.5rem;
+	height: 1.25rem;
+}
+
+.wikibase-rankselector .ui-icon.wikibase-rankselector-preferred {
+	background-position: 0;
+}
+
+.wikibase-rankselector .ui-icon.wikibase-rankselector-normal {
+	background-position: -0.5624rem;
+}
+
+.wikibase-rankselector .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -1.125rem;
+}
+
+.wikibase-rankselector.ui-state-disabled .ui-icon.wikibase-rankselector-preferred,
+.wb-edit.wikibase-rankselector.ui-state-active .ui-icon.wikibase-rankselector-preferred {
+	background-position: -1.6875rem;
+}
+
+.wikibase-rankselector.ui-state-disabled .ui-icon.wikibase-rankselector-normal,
+.wb-edit.wikibase-rankselector.ui-state-active .ui-icon.wikibase-rankselector-normal {
+	background-position: -2.25rem;
+}
+
+.wikibase-rankselector.ui-state-disabled .ui-icon.wikibase-rankselector-deprecated,
+.wb-edit.wikibase-rankselector.ui-state-active .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -2.8125rem;
+}
+
+.wikibase-rankselector.ui-state-default .ui-icon.wikibase-rankselector-preferred {
+	background-position: -3.375rem;
+}
+
+.wikibase-rankselector.ui-state-default .ui-icon.wikibase-rankselector-normal {
+	background-position: -3.9375rem;
+}
+
+.wikibase-rankselector.ui-state-default .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -4.5rem;
+}
+
+.wikibase-rankselector.ui-state-hover .ui-icon.wikibase-rankselector-preferred {
+	background-position: -5.0625rem;
+}
+
+.wikibase-rankselector.ui-state-hover .ui-icon.wikibase-rankselector-normal {
+	background-position: -5.625rem;
+}
+
+.wikibase-rankselector.ui-state-hover .ui-icon.wikibase-rankselector-deprecated {
+	background-position: -6.1875rem;
+}
+
+.wikibase-rankselector-menu {
+	cursor: pointer;
+	position: absolute;
+	z-index: 2; /* Monobook #content has 2 */
+}

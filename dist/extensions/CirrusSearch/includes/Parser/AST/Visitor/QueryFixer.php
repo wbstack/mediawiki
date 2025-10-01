@@ -125,7 +125,7 @@ class QueryFixer implements Visitor {
 		} elseif ( $this->node instanceof WordsQueryNode ) {
 			return $this->node->getWords();
 		} else {
-		/** @phan-suppress-next-line PhanImpossibleCondition I agree, this is impossible. */
+			/** @phan-suppress-next-line PhanImpossibleCondition I agree, this is impossible. */
 			Assert::invariant( false, "Unsupported node type " . get_class( $this->node ) );
 			return null;
 		}
@@ -236,7 +236,7 @@ class QueryFixer implements Visitor {
 	 * @param WildcardNode $node
 	 */
 	public function visitWildcardNode( WildcardNode $node ) {
-		if ( strpos( $node->getWildcardQuery(), '?' ) !== -1 ) {
+		if ( str_contains( $node->getWildcardQuery(), '?' ) ) {
 			$this->hasQMarkInWildcard = true;
 		}
 		$this->isComplex = true;

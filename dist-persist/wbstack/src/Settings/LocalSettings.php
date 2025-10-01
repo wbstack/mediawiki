@@ -233,12 +233,8 @@ $wgHooks['SkinAddFooterLinks'][] = function ( Skin $skin, string $key, array &$f
 };
 
 // Custom CSS styling
-$styles = [];
-if ( version_compare( MW_VERSION, '1.43', '<' ) ) {
-    array_push( $styles, 'footer-badges.css' );
-}
 $wgResourceModules[ 'wbstack.styling' ] = array(
-    'styles' => $styles,
+    'styles' => [ 'footer-badges.css' ],
     'localBasePath' => "$IP/wbstack/src/Styling",
     'remoteBasePath' => "$wgScriptPath/wbstack/src/Styling"
 );
@@ -493,7 +489,7 @@ $wgBlacklistSettings = [
 ];
 
 # Check IPs at https://whatismyipaddress.com/blacklist-check if they are troublesome
-$wgEnableDnsBlacklist = true;
+$wgEnableDnsBlacklist = !$wwDockerCompose;
 $wgDnsBlacklistUrls =
     [
         'combined.abuse.ch.',
@@ -512,12 +508,12 @@ $wwUseQuestyCaptcha = $wikiInfo->getSetting('wwUseQuestyCaptcha');
 if ($wwUseQuestyCaptcha) {
     $wwLocalization->loadExtension( 'ConfirmEdit/ReCaptchaNoCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/QuestyCaptcha' ]);
-    $wgCaptchaClass = 'QuestyCaptcha';
+    $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\QuestyCaptcha\\QuestyCaptcha';
     $wgCaptchaQuestions = json_decode($wikiInfo->getSetting('wwCaptchaQuestions'), true);
 } else {
     $wwLocalization->loadExtension( 'ConfirmEdit/QuestyCaptcha' );
     wfLoadExtensions([ 'ConfirmEdit', 'ConfirmEdit/ReCaptchaNoCaptcha' ]);
-    $wgCaptchaClass = 'ReCaptchaNoCaptcha';
+    $wgCaptchaClass = 'MediaWiki\\Extension\\ConfirmEdit\\ReCaptchaNoCaptcha\\ReCaptchaNoCaptcha';
     $wgReCaptchaSendRemoteIP = true;
     $wgReCaptchaSiteKey = getenv('MW_RECAPTCHA_SITEKEY');
     $wgReCaptchaSecretKey = getenv('MW_RECAPTCHA_SECRETKEY');
@@ -629,21 +625,16 @@ if( $wikiInfo->getSetting('wikibaseFedPropsEnable') ) {
     $wgWBRepoSettings['federatedPropertiesEnabled'] = true;
 }
 
-# Auth_remoteuser, By default not enabled, enabled in WikiInfo-maint.json
-if( $wikiInfo->getSetting('wwSandboxAutoUserLogin') ) {
-    wfLoadExtension( 'Auth_remoteuser' );
-    $wgAuthRemoteuserUserName = "SandboxAdmin";
-    # Allow Auth_remoteuser to create missing accounts
-    $wgGroupPermissions['*']['autocreateaccount'] = true;
-    # Stop users making any additional accounts
-    $wgGroupPermissions['*']['createaccount'] = false;
-
-    # Allow users to act like admins, and pretend they have confirmed emails (so no captchas)
+if ( $wwDockerCompose === true ) {
+    # Grant local users admin-like privileges
     $wgAddGroups['user'][] = 'emailconfirmed';
     $wgAddGroups['user'][] = 'sysop';
 
-    # Do not force people verify their email account, as they can't do that...
+    # Do not force local users to verify their email account
     $wgEmailConfirmToEdit = false;
+
+    # Do not force local users to complete a captcha
+    $wgGroupPermissions['*']['skipcaptcha'] = true;
 }
 
 # WikibaseManifest

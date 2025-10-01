@@ -1,4 +1,4 @@
-var PointerLine = require( './ext.RevisionSlider.PointerLine.js' ),
+const PointerLine = require( './ext.RevisionSlider.PointerLine.js' ),
 	PointerView = require( './ext.RevisionSlider.PointerView.js' );
 
 /**
@@ -13,7 +13,7 @@ function Pointer( name ) {
 	this.line = new PointerLine( this, name );
 }
 
-$.extend( Pointer.prototype, {
+Object.assign( Pointer.prototype, {
 	/**
 	 * @type {number}
 	 */

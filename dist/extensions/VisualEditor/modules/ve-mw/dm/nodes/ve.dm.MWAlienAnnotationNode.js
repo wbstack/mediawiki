@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWAlienAnnotationNode class.
  *
- * @copyright 2011-2021 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -37,14 +37,14 @@ ve.dm.MWAlienAnnotationNode.static.matchRdfaTypes = [
 
 ve.dm.MWAlienAnnotationNode.static.toDataElement = function ( domElements ) {
 	// 'Parent' method
-	var element = ve.dm.MWAlienAnnotationNode.super.static.toDataElement.call( this, domElements );
+	const element = ve.dm.MWAlienAnnotationNode.super.static.toDataElement.call( this, domElements );
 
 	element.type = 'mwAlienAnnotation';
 	return element;
 };
 
 ve.dm.MWAlienAnnotationNode.prototype.getWikitextTag = function () {
-	var type = this.getAttribute( 'type' );
+	const type = this.getAttribute( 'type' );
 	if ( type.indexOf( '/End', type.length - 4 ) !== -1 ) {
 		return '</UNKNOWN>';
 	}

@@ -42,7 +42,7 @@ HelpDialog.static.actions = [
 	}
 ];
 
-$.extend( HelpDialog.prototype, {
+Object.assign( HelpDialog.prototype, {
 	/**
 	 * @type {OO.ui.PanelLayout[]}
 	 */
@@ -69,16 +69,13 @@ $.extend( HelpDialog.prototype, {
 	 * @return {OO.ui.PanelLayout}
 	 */
 	getSlide1: function () {
-		var slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
+		const slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
 
-		slide.$element
-			.append(
-				$( '<div>' ).addClass( 'mw-revslider-help-dialog-image-landscape mw-revslider-help-dialog-slide-1' )
-			)
-			.append(
-				$( '<p>' ).addClass( 'mw-revslider-help-dialog-text' )
-					.html( mw.message( 'revisionslider-help-dialog-slide1' ).parse() )
-			);
+		slide.$element.append(
+			$( '<div>' ).addClass( 'mw-revslider-help-dialog-image-landscape mw-revslider-help-dialog-slide-1' ),
+			$( '<p>' ).addClass( 'mw-revslider-help-dialog-text' )
+				.append( mw.message( 'revisionslider-help-dialog-slide1' ).parseDom() )
+		);
 
 		slide.$element.find( 'a' ).attr( 'target', '_blank' );
 
@@ -89,14 +86,13 @@ $.extend( HelpDialog.prototype, {
 	 * @return {OO.ui.PanelLayout}
 	 */
 	getSlide2: function () {
-		var slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
+		const slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
 
-		slide.$element
-			.append( $( '<div>' ).addClass( 'mw-revslider-help-dialog-image-landscape mw-revslider-help-dialog-slide-2' ) )
-			.append(
-				$( '<p>' ).addClass( 'mw-revslider-help-dialog-text' )
-					.text( mw.msg( 'revisionslider-help-dialog-slide2' ) )
-			);
+		slide.$element.append(
+			$( '<div>' ).addClass( 'mw-revslider-help-dialog-image-landscape mw-revslider-help-dialog-slide-2' ),
+			$( '<p>' ).addClass( 'mw-revslider-help-dialog-text' )
+				.text( mw.msg( 'revisionslider-help-dialog-slide2' ) )
+		);
 
 		return slide;
 	},
@@ -105,15 +101,14 @@ $.extend( HelpDialog.prototype, {
 	 * @return {OO.ui.PanelLayout}
 	 */
 	getSlide3: function () {
-		var slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
+		const slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
 
-		slide.$element
-			.append( $( '<div>' ).addClass( 'mw-revslider-help-dialog-image-portrait mw-revslider-help-dialog-slide-3a mw-revslider-column-image' ) )
-			.append(
-				$( '<div>' ).addClass( 'mw-revslider-column-text mw-revslider-help-dialog-text' )
-					.text( mw.msg( 'revisionslider-help-dialog-slide3a' ) )
-			)
-			.append( $( '<div>' ).css( 'clear', 'both' ) );
+		slide.$element.append(
+			$( '<div>' ).addClass( 'mw-revslider-help-dialog-image-portrait mw-revslider-help-dialog-slide-3a mw-revslider-column-image' ),
+			$( '<div>' ).addClass( 'mw-revslider-column-text mw-revslider-help-dialog-text' )
+				.text( mw.msg( 'revisionslider-help-dialog-slide3a' ) ),
+			$( '<div>' ).css( 'clear', 'both' )
+		);
 
 		return slide;
 	},
@@ -122,14 +117,13 @@ $.extend( HelpDialog.prototype, {
 	 * @return {OO.ui.PanelLayout}
 	 */
 	getSlide4: function () {
-		var slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
+		const slide = new OO.ui.PanelLayout( { $: this.$, padded: true, expanded: false } );
 
-		slide.$element
-			.append( $( '<div>' ).addClass( 'mw-revslider-help-dialog-image-landscape mw-revslider-help-dialog-slide-4a' ) )
-			.append(
-				$( '<p>' ).addClass( 'mw-revslider-help-dialog-text' )
-					.text( mw.msg( 'revisionslider-help-dialog-slide4' ) )
-			);
+		slide.$element.append(
+			$( '<div>' ).addClass( 'mw-revslider-help-dialog-image-landscape mw-revslider-help-dialog-slide-4a' ),
+			$( '<p>' ).addClass( 'mw-revslider-help-dialog-text' )
+				.text( mw.msg( 'revisionslider-help-dialog-slide4' ) )
+		);
 
 		return slide;
 	},
@@ -178,17 +172,17 @@ $.extend( HelpDialog.prototype, {
  * Initializes the help dialog
  */
 HelpDialog.init = function () {
-	var windowManager = new OO.ui.WindowManager();
+	const windowManager = new OO.ui.WindowManager();
 
-	$( 'body' )
+	$( document.body )
 		.append( windowManager.$element )
-		.on( 'click', function ( event ) {
+		.on( 'click', ( event ) => {
 			if ( $( event.target ).hasClass( 'mw-revslider-help-dialog' ) ) {
 				HelpDialog.hide();
 			}
 		} );
 
-	var dialog;
+	let dialog;
 	HelpDialog.show = function () {
 		dialog = new HelpDialog( { size: 'medium', classes: [ 'mw-revslider-help-dialog' ] } );
 		windowManager.addWindows( [ dialog ] );

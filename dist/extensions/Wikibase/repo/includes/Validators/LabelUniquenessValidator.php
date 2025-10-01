@@ -63,7 +63,7 @@ class LabelUniquenessValidator implements EntityValidator {
 
 			}
 
-			if ( !empty( $errors ) ) {
+			if ( $errors ) {
 				return Result::newError( $errors );
 			}
 		}
@@ -84,7 +84,7 @@ class LabelUniquenessValidator implements EntityValidator {
 			[
 				$label,
 				$lang,
-				$collidingEntityId
+				$collidingEntityId,
 			]
 		);
 	}

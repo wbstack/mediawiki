@@ -23,27 +23,16 @@ use MediaWiki\Minerva\Menu\Definitions;
 use MediaWiki\Minerva\Menu\Entries\ProfileMenuEntry;
 use MediaWiki\Minerva\Menu\Entries\SingleMenuEntry;
 use MediaWiki\Minerva\Menu\Group;
+use MediaWiki\User\User;
 use MessageLocalizer;
-use User;
 
 /**
  * Logged-in, advanced Mobile Contributions user menu config generator.
  */
 final class AdvancedUserMenuBuilder implements IUserMenuBuilder {
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
-
-	/**
-	 * @var User
-	 */
-	private $user;
-
-	/**
-	 * @var Definitions
-	 */
-	private $definitions;
+	private MessageLocalizer $messageLocalizer;
+	private User $user;
+	private Definitions $definitions;
 
 	/**
 	 * @param MessageLocalizer $messageLocalizer

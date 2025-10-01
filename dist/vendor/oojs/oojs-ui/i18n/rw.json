@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Germain92"
 		]
 	},
@@ -21,7 +20,6 @@
 	"ooui-combobox-button-label": "Hindura amahitamo",
 	"ooui-selectfile-button-select": "Hitamo dosiye",
 	"ooui-selectfile-button-select-multiple": "Hitamo dosiye",
-	"ooui-selectfile-not-supported": "Guhitamo Dosiye ntago bishyigikiwe",
 	"ooui-selectfile-placeholder": "Nta dosiye yatoranyijwe",
 	"ooui-selectfile-dragdrop-placeholder": "Shyira dosiye hano",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Shyira dosiye hano",

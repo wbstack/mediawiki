@@ -1,28 +1,33 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace EntitySchema\MediaWiki\Actions;
 
-use CommentStoreComment;
-use EntitySchema\DataAccess\MediaWikiRevisionSchemaUpdater;
-use EntitySchema\Domain\Model\SchemaId;
+use EntitySchema\DataAccess\EntitySchemaStatus;
+use EntitySchema\DataAccess\MediaWikiRevisionEntitySchemaUpdater;
+use EntitySchema\Domain\Model\EntitySchemaId;
 use EntitySchema\MediaWiki\Content\EntitySchemaContent;
-use EntitySchema\Services\SchemaConverter\PersistenceSchemaData;
-use EntitySchema\Services\SchemaConverter\SchemaConverter;
+use EntitySchema\MediaWiki\EntitySchemaRedirectTrait;
+use EntitySchema\Services\Converter\EntitySchemaConverter;
+use EntitySchema\Services\Converter\PersistenceEntitySchemaData;
+use MediaWiki\CommentStore\CommentStoreComment;
 use MediaWiki\Revision\RevisionRecord;
 use MediaWiki\Revision\SlotRecord;
-use RuntimeException;
-use Status;
+use MediaWiki\Status\Status;
 
 /**
  * @license GPL-2.0-or-later
  */
 final class RestoreSubmitAction extends AbstractRestoreAction {
 
-	public function getName() {
+	use EntitySchemaRedirectTrait;
+
+	public function getName(): string {
 		return 'submit';
 	}
 
-	public function show() {
+	public function show(): void {
 		$checkMethodStatus = $this->checkMethod();
 		if ( !$checkMethodStatus->isOK() ) {
 			$this->showRestoreErrorPage( Status::newFatal( $checkMethodStatus ) );
@@ -45,14 +50,13 @@ final class RestoreSubmitAction extends AbstractRestoreAction {
 		$restoreStatus = $this->restore( $revStatus->getValue() );
 		if ( !$restoreStatus->isOK() ) {
 			$this->showRestoreErrorPage( $restoreStatus );
+			return;
 		}
 
-		$this->getOutput()->redirect(
-			$this->getTitle()->getFullURL()
-		);
+		$this->redirectToEntitySchema( $restoreStatus );
 	}
 
-	private function checkMethod() {
+	private function checkMethod(): Status {
 		if ( !$this->getContext()->getRequest()->wasPosted() ) {
 			return Status::newFatal( 'entityschema-error-not-post' );
 		}
@@ -70,11 +74,11 @@ final class RestoreSubmitAction extends AbstractRestoreAction {
 		return Status::newGood();
 	}
 
-	private function restore( RevisionRecord $revToRestore ): Status {
+	private function restore( RevisionRecord $revToRestore ): EntitySchemaStatus {
 		/** @var EntitySchemaContent $contentToRestore */
 		$contentToRestore = $revToRestore->getContent( SlotRecord::MAIN );
 
-		$converter = new SchemaConverter();
+		$converter = new EntitySchemaConverter();
 
 		$summary = $this->createSummaryMessageForRestore(
 			$this->getContext()->getRequest()->getText( 'wpSummary' ),
@@ -92,52 +96,40 @@ final class RestoreSubmitAction extends AbstractRestoreAction {
 	}
 
 	private function storeRestoredSchema(
-		PersistenceSchemaData $persistenceSchemaData,
-		$baseRevId,
+		PersistenceEntitySchemaData $persistenceSchemaData,
+		int $baseRevId,
 		CommentStoreComment $summary
-	): Status {
+	): EntitySchemaStatus {
 
-		$schemaUpdater = MediaWikiRevisionSchemaUpdater::newFromContext( $this->getContext() );
+		$schemaUpdater = MediaWikiRevisionEntitySchemaUpdater::newFromContext( $this->getContext() );
 
-		try {
-			$schemaUpdater->overwriteWholeSchema(
-				new SchemaId( $this->getTitle()->getTitleValue()->getText() ),
-				$persistenceSchemaData->labels,
-				$persistenceSchemaData->descriptions,
-				$persistenceSchemaData->aliases,
-				$persistenceSchemaData->schemaText,
-				$baseRevId,
-				$summary
-			);
-		} catch ( RuntimeException $e ) {
-			return Status::newFatal( 'entityschema-error-saving-failed', $e->getMessage() );
-		}
-
-		return Status::newGood();
+		return $schemaUpdater->overwriteWholeSchema(
+			new EntitySchemaId( $this->getTitle()->getTitleValue()->getText() ),
+			$persistenceSchemaData->labels,
+			$persistenceSchemaData->descriptions,
+			$persistenceSchemaData->aliases,
+			$persistenceSchemaData->schemaText,
+			$baseRevId,
+			$summary
+		);
 	}
 
-	/**
-	 * @param string $userSummary
-	 * @param RevisionRecord $revToBeRestored
-	 *
-	 * @return CommentStoreComment
-	 */
 	private function createSummaryMessageForRestore(
-		$userSummary,
+		string $userSummary,
 		RevisionRecord $revToBeRestored
 	): CommentStoreComment {
 		$revId = $revToBeRestored->getId();
 		$userName = $revToBeRestored->getUser()->getName();
-		$autoComment = MediaWikiRevisionSchemaUpdater::AUTOCOMMENT_RESTORE
+		$autoComment = MediaWikiRevisionEntitySchemaUpdater::AUTOCOMMENT_RESTORE
 			. ':' . $revId
 			. ':' . $userName;
 		return CommentStoreComment::newUnsavedComment(
 			'/* ' . $autoComment . ' */' . $userSummary,
 			[
-				'key' => MediaWikiRevisionSchemaUpdater::AUTOCOMMENT_RESTORE,
+				'key' => MediaWikiRevisionEntitySchemaUpdater::AUTOCOMMENT_RESTORE,
 				'revId' => $revId,
 				'userName' => $userName,
-				'summary' => $userSummary
+				'summary' => $userSummary,
 			]
 		);
 	}

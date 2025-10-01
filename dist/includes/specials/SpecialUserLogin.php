@@ -1,7 +1,5 @@
 <?php
 /**
- * Implements Special:UserLogin
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -18,24 +16,32 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials;
+
+use LoginHelper;
 use MediaWiki\Auth\AuthManager;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MainConfigNames;
+use MediaWiki\SpecialPage\LoginSignupSpecialPage;
+use MediaWiki\SpecialPage\SpecialPage;
+use StatusValue;
 
 /**
  * Implements Special:UserLogin
  *
  * @ingroup SpecialPage
+ * @ingroup Auth
  */
 class SpecialUserLogin extends LoginSignupSpecialPage {
+	/** @inheritDoc */
 	protected static $allowedActions = [
 		AuthManager::ACTION_LOGIN,
 		AuthManager::ACTION_LOGIN_CONTINUE
 	];
 
+	/** @inheritDoc */
 	protected static $messages = [
 		'authform-newtoken' => 'nocookiesforlogin',
 		'authform-notoken' => 'sessionfailure',
@@ -54,6 +60,10 @@ class SpecialUserLogin extends LoginSignupSpecialPage {
 		return true;
 	}
 
+	public function isListed() {
+		return $this->getAuthManager()->canAuthenticateNow();
+	}
+
 	protected function getLoginSecurityLevel() {
 		return false;
 	}
@@ -63,14 +73,14 @@ class SpecialUserLogin extends LoginSignupSpecialPage {
 	}
 
 	public function getDescription() {
-		return $this->msg( 'login' )->text();
+		return $this->msg( 'login' );
 	}
 
 	public function setHeaders() {
 		// override the page title if we are doing a forced reauthentication
 		parent::setHeaders();
 		if ( $this->securityLevel && $this->getUser()->isRegistered() ) {
-			$this->getOutput()->setPageTitle( $this->msg( 'login-security' ) );
+			$this->getOutput()->setPageTitleMsg( $this->msg( 'login-security' ) );
 		}
 	}
 
@@ -108,6 +118,7 @@ class SpecialUserLogin extends LoginSignupSpecialPage {
 		$user = $this->targetUser ?: $this->getUser();
 		$session = $this->getRequest()->getSession();
 
+		$injected_html = '';
 		if ( $direct ) {
 			$user->touch();
 
@@ -125,12 +136,11 @@ class SpecialUserLogin extends LoginSignupSpecialPage {
 				// TODO something more specific? This used to use nocookieslogin
 				return;
 			}
-		}
 
-		# Run any hooks; display injected HTML if any, else redirect
-		$injected_html = '';
-		$this->getHookRunner()->onUserLoginComplete(
-			$user, $injected_html, $direct );
+			# Run any hooks; display injected HTML if any, else redirect
+			$this->getHookRunner()->onUserLoginComplete(
+				$user, $injected_html, $direct );
+		}
 
 		if ( $injected_html !== '' || $extraMessages ) {
 			$this->showSuccessPage( 'success', $this->msg( 'loginsuccesstitle' ),
@@ -138,7 +148,7 @@ class SpecialUserLogin extends LoginSignupSpecialPage {
 		} else {
 			$helper = new LoginHelper( $this->getContext() );
 			$helper->showReturnToPage( 'successredirect', $this->mReturnTo, $this->mReturnToQuery,
-				$this->mStickHTTPS );
+				$this->mStickHTTPS, $this->mReturnToAnchor );
 		}
 	}
 
@@ -147,7 +157,7 @@ class SpecialUserLogin extends LoginSignupSpecialPage {
 	}
 
 	protected function clearToken() {
-		return $this->getRequest()->getSession()->resetToken( 'login' );
+		$this->getRequest()->getSession()->resetToken( 'login' );
 	}
 
 	protected function getTokenName() {
@@ -166,3 +176,9 @@ class SpecialUserLogin extends LoginSignupSpecialPage {
 		] );
 	}
 }
+
+/**
+ * Retain the old class name for backwards compatibility.
+ * @deprecated since 1.41
+ */
+class_alias( SpecialUserLogin::class, 'SpecialUserLogin' );

@@ -1,3 +1,4 @@
+@import 'mediawiki.skin.variables.less';
 @import 'mediawiki.mixins.less';
 @import '../mmv.mixins.less';
 
@@ -13,19 +14,17 @@
 	h3 {
 		margin: 10px;
 		padding: 0;
-		color: #54595d;
+		color: @color-subtle;
 		font-size: 0.95em;
 	}
 
 	.mw-mmv-permission-close {
-		display: none;
 		position: absolute;
 		top: 12px;
 		right: 8px;
-		width: 16px;
-		height: 16px;
-		.background-image( 'img/x_gray.svg' );
+		.cdx-mixin-css-icon( @cdx-icon-close, @param-fill-color: @color-subtle, @param-size-icon: @size-icon-small );
 		cursor: pointer;
+		display: none; // override display:inline-block from .cdx-mixin-css-icon
 	}
 
 	.mw-mmv-permission-text {
@@ -38,7 +37,7 @@
 		margin: 0 10px 10px;
 		font-size: @text-font-size;
 		line-height: @text-line-height;
-		color: #54595d;
+		color: @color-subtle;
 
 		.mw-mmv-permission-text-fader {
 			position: absolute;
@@ -50,7 +49,7 @@
 
 			a {
 				padding: 3px 0 0 1em;
-				background-color: #fff;
+				background-color: @background-color-interactive-subtle;
 				font-size: 1em;
 			}
 		}
@@ -74,7 +73,7 @@
 
 		.mw-mmv-permission-html {
 			display: block;
-			border-top: 1px solid #f8f9fa;
+			border-top: 1px solid @border-color-base;
 		}
 	}
 }

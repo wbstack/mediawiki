@@ -20,30 +20,15 @@
 namespace Wikimedia\Rdbms\Platform;
 
 use Wikimedia\Rdbms\DBLanguageError;
+use Wikimedia\Rdbms\Query;
 
 /**
  * @since 1.39
  * @see ISQLPlatform
  */
 class MySQLPlatform extends SQLPlatform {
-	/**
-	 * MySQL uses `backticks` for identifier quoting instead of the sql standard "double quotes".
-	 *
-	 * @param string $s
-	 * @return string
-	 */
-	public function addIdentifierQuotes( $s ) {
-		// Characters in the range \u0001-\uFFFF are valid in a quoted identifier
-		// Remove NUL bytes and escape backticks by doubling
-		return '`' . str_replace( [ "\0", '`' ], [ '', '``' ], $s ) . '`';
-	}
-
-	/**
-	 * @param string $name
-	 * @return bool
-	 */
-	public function isQuotedIdentifier( $name ) {
-		return strlen( $name ) && $name[0] == '`' && substr( $name, -1, 1 ) == '`';
+	protected function getIdentifierQuoteChar() {
+		return '`';
 	}
 
 	public function buildStringCast( $field ) {
@@ -101,13 +86,14 @@ class MySQLPlatform extends SQLPlatform {
 		return $sql;
 	}
 
-	public function isTransactableQuery( $sql ) {
+	public function isTransactableQuery( Query $sql ) {
 		return parent::isTransactableQuery( $sql ) &&
-			!preg_match( '/^SELECT\s+(GET|RELEASE|IS_FREE)_LOCK\(/', $sql );
+			// TODO: Use query verb
+			!preg_match( '/^SELECT\s+(GET|RELEASE|IS_FREE)_LOCK\(/', $sql->getSQL() );
 	}
 
 	public function buildExcludedValue( $column ) {
-		/* @see DatabaseMysqlBase::doUpsert() */
+		/* @see DatabaseMySQL::upsert() */
 		// Within "INSERT INTO ON DUPLICATE KEY UPDATE" statements:
 		//   - MySQL>= 8.0.20 supports and prefers "VALUES ... AS".
 		//   - MariaDB >= 10.3.3 supports and prefers VALUE().

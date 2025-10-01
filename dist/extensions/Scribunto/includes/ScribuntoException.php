@@ -2,15 +2,15 @@
 
 namespace MediaWiki\Extension\Scribunto;
 
-use MWException;
-use Status;
-use Title;
+use Exception;
+use MediaWiki\Status\Status;
+use MediaWiki\Title\Title;
 
 /**
  * An exception class which represents an error in the script. This does not
  * normally abort the request, instead it is caught and shown to the user.
  */
-class ScribuntoException extends MWException {
+class ScribuntoException extends Exception {
 	/**
 	 * @var string
 	 */
@@ -31,11 +31,7 @@ class ScribuntoException extends MWException {
 	 * @param array $params
 	 */
 	public function __construct( $messageName, $params = [] ) {
-		if ( isset( $params['args'] ) ) {
-			$this->messageArgs = $params['args'];
-		} else {
-			$this->messageArgs = [];
-		}
+		$this->messageArgs = $params['args'] ?? [];
 		if ( isset( $params['module'] ) && isset( $params['line'] ) ) {
 			$codeLocation = false;
 			if ( isset( $params['title'] ) ) {
@@ -55,8 +51,13 @@ class ScribuntoException extends MWException {
 			$codeLocation = '[UNKNOWN]';
 		}
 		array_unshift( $this->messageArgs, $codeLocation );
-		$msg = wfMessage( $messageName )->params( $this->messageArgs )->inContentLanguage()->text();
-		parent::__construct( $msg );
+		$msg = wfMessage( $messageName )
+			->params( $this->messageArgs )
+			->inContentLanguage();
+		if ( isset( $params['title'] ) ) {
+			$msg = $msg->page( $params['title'] );
+		}
+		parent::__construct( $msg->text() );
 
 		$this->messageName = $messageName;
 		$this->params = $params;

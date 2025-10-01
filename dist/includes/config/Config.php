@@ -20,6 +20,8 @@
  * @file
  */
 
+namespace MediaWiki\Config;
+
 /**
  * Interface for configuration instances
  *
@@ -47,3 +49,6 @@ interface Config {
 	 */
 	public function has( $name );
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( Config::class, 'Config' );

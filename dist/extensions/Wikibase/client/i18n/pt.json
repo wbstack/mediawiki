@@ -1,6 +1,7 @@
 {
 	"@metadata": {
 		"authors": [
+			"555",
 			"Athena in Wonderland",
 			"Cainamarques",
 			"CaiusSPQR",
@@ -23,15 +24,13 @@
 			"SandroHc",
 			"Vitorvicentevalente",
 			"Waldir",
-			"Waldyrious",
-			555
+			"Waldyrious"
 		]
 	},
 	"wikibase-client-desc": "Cliente para a extensão Wikibase",
 	"tooltip-t-wikibase": "Hiperligação para o elemento do repositório de dados",
 	"wikibase-after-page-move": "A sua movimentação deveria agora ser [$1 refletida na hiperligação intersites do elemento {{WBREPONAME}}]. Solicitamos que verifique que isto ocorreu.",
 	"wikibase-after-page-delete": "A hiperligação para esta página deveria ter sido removida [$1 do elemento {{WBREPONAME}} associado]. Pedimos que verifique que isto ocorreu.",
-	"wikibase-after-page-delete-queued": "O [$1 elemento {{WBREPONAME}}] associado a esta página será atualizado automaticamente em breve. Por favor, repare que isto poderá não ser instantâneo.",
 	"wikibase-comment-add": "Foi criado um elemento {{WBREPONAME}}.",
 	"wikibase-comment-remove": "O elemento {{WBREPONAME}} associado foi eliminado. Foram removidas as hiperligações interlínguas.",
 	"wikibase-comment-linked": "Um elemento {{WBREPONAME}} foi ligado a esta página.",
@@ -155,6 +154,7 @@
 	"wikibase-client-data-bridge-edit-decision-update-description": "O valor anterior costumava estar correto mas agora está desatualizado.",
 	"wikibase-client-data-bridge-references-heading": "Referências",
 	"wikibase-client-data-bridge-anonymous-edit-warning-heading": "Não tem sessão iniciada",
+	"wikibase-client-data-bridge-anonymous-edit-warning-tempuser-message": "Não iniciou uma sessão. Se <strong>iniciar uma sessão</strong> ou <strong>criar uma conta</strong>, as suas edições serão registadas com o seu nome de utilizador, podendo ainda usufruir de outros benefícios.",
 	"wikibase-client-data-bridge-anonymous-edit-warning-message": "<strong>Aviso:</strong> não iniciou uma sessão. O seu endereço IP poderá ser visto publicamente se realizar alguma edição. Se <strong>iniciar uma sessão</strong> ou <strong>criar uma conta</strong>, as suas edições serão registadas com o seu nome de utilizador, podendo ainda usufruir de outros benefícios.",
 	"wikibase-client-data-bridge-anonymous-edit-warning-proceed": "Editar sem iniciar sessão",
 	"wikibase-client-data-bridge-anonymous-edit-warning-login": "Entrar ou criar conta",

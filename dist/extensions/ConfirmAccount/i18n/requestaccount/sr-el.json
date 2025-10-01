@@ -17,7 +17,7 @@
 	"requestaccount-leg-person": "Lične informacije",
 	"requestaccount-leg-other": "Drugi podaci",
 	"requestaccount-leg-tos": "Uslovi korišćenja",
-	"requestaccount-real": "Pravo ime:",
+	"requestaccount-real": "Pravo ime (neobavezno):",
 	"requestaccount-same": "(istovetno pravom imenu)",
 	"requestaccount-email": "Imejl adresa:",
 	"requestaccount-reqtype": "Položaj:",

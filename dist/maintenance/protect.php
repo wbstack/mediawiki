@@ -21,9 +21,12 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
 
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that protects or unprotects a page.
@@ -69,7 +72,7 @@ class Protect extends Maintenance {
 			$this->fatalError( "Invalid title" );
 		}
 
-		$services = MediaWikiServices::getInstance();
+		$services = $this->getServiceContainer();
 		$restrictions = [];
 		foreach ( $services->getRestrictionStore()->listApplicableRestrictionTypes( $t ) as $type ) {
 			$restrictions[$type] = $protection;
@@ -89,5 +92,7 @@ class Protect extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = Protect::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

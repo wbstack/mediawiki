@@ -2,12 +2,13 @@
 
 namespace Wikibase\Repo\Specials;
 
-use Html;
-use HTMLForm;
+use MediaWiki\Html\Html;
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\Site\Site;
+use MediaWiki\Site\SiteLookup;
 use Psr\Log\LoggerInterface;
-use Site;
-use SiteLookup;
 use Wikibase\Lib\LanguageNameLookup;
+use Wikibase\Lib\LanguageNameLookupFactory;
 use Wikibase\Lib\SettingsArray;
 use Wikibase\Lib\Store\EntityTitleLookup;
 use Wikibase\Lib\Store\SiteLinkLookup;
@@ -95,6 +96,7 @@ class SpecialItemByTitle extends SpecialWikibasePage {
 	public static function factory(
 		SiteLookup $siteLookup,
 		EntityTitleLookup $entityTitleLookup,
+		LanguageNameLookupFactory $languageNameLookupFactory,
 		LoggerInterface $logger,
 		SettingsArray $repoSettings,
 		Store $store
@@ -106,7 +108,7 @@ class SpecialItemByTitle extends SpecialWikibasePage {
 
 		return new self(
 			$entityTitleLookup,
-			new LanguageNameLookup(),
+			$languageNameLookupFactory->getForAutonyms(),
 			$siteLookup,
 			// TODO move SiteLinkStore to service container and inject it directly
 			$store->newSiteLinkStore(),
@@ -126,7 +128,7 @@ class SpecialItemByTitle extends SpecialWikibasePage {
 
 		// Setup
 		$request = $this->getRequest();
-		$parts = ( $subPage === '' ) ? [] : explode( '/', $subPage, 2 );
+		$parts = $subPage ? explode( '/', $subPage, 2 ) : [];
 		$site = trim( $request->getVal( 'site', $parts[0] ?? '' ) );
 		$page = trim( $request->getVal( 'page', $parts[1] ?? '' ) );
 
@@ -222,7 +224,7 @@ class SpecialItemByTitle extends SpecialWikibasePage {
 				'options' => $this->getSiteOptions(),
 				'id' => 'wb-itembytitle-sitename',
 				'size' => 12,
-				'label-message' => 'wikibase-itembytitle-lookup-site'
+				'label-message' => 'wikibase-itembytitle-lookup-site',
 			],
 			'page' => [
 				'name' => 'page',
@@ -230,8 +232,8 @@ class SpecialItemByTitle extends SpecialWikibasePage {
 				'type' => 'text',
 				'id' => 'pagename',
 				'size' => 36,
-				'label-message' => 'wikibase-itembytitle-lookup-page'
-			]
+				'label-message' => 'wikibase-itembytitle-lookup-page',
+			],
 		];
 
 		HTMLForm::factory( 'ooui', $formDescriptor, $this->getContext() )

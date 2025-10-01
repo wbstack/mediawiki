@@ -1,7 +1,6 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
 			"Ebenoffen1",
 			"Emmanuel Bans"
 		]
@@ -22,7 +21,6 @@
 	"ooui-combobox-button-label": "Ma nkyerɛkyerɛmu no mbra",
 	"ooui-selectfile-button-select": "Yi fael bi",
 	"ooui-selectfile-button-select-multiple": "Yi files nu",
-	"ooui-selectfile-not-supported": "Yɛnngye fael yi nnto mu",
 	"ooui-selectfile-placeholder": "Innyii fael biara",
 	"ooui-selectfile-dragdrop-placeholder": "Fa fael no to ha",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Fa fael ahorow to ha",

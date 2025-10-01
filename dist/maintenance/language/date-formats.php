@@ -21,9 +21,9 @@
  * @ingroup MaintenanceLanguage
  */
 
-use MediaWiki\MediaWikiServices;
-
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/../Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that tests various language time and date functions.
@@ -32,6 +32,7 @@ require_once __DIR__ . '/../Maintenance.php';
  */
 class DateFormats extends Maintenance {
 
+	/** @var string */
 	private $ts = '20010115123456';
 
 	public function __construct() {
@@ -49,7 +50,7 @@ class DateFormats extends Maintenance {
 			}
 			$code = str_replace( '_', '-', strtolower( $m[1] ) );
 			$this->output( "$code " );
-			$lang = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $code );
+			$lang = $this->getServiceContainer()->getLanguageFactory()->getLanguage( $code );
 			$prefs = $lang->getDatePreferences();
 			if ( !$prefs ) {
 				$prefs = [ 'default' ];
@@ -80,5 +81,7 @@ class DateFormats extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = DateFormats::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

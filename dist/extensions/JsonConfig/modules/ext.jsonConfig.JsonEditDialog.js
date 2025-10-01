@@ -166,7 +166,7 @@ mw.JsonConfig.JsonEditDialog.prototype.validateJson = function () {
 				item.length === json.schema.fields.length;
 		} )
 	) {
-		throw new Error( mw.msg( 'jsonconfig-edit-dialog-error-data-inavlid' ) );
+		throw new Error( mw.msg( 'jsonconfig-edit-dialog-error-data-invalid' ) );
 	}
 
 	if ( json.data.length * json.schema.fields.length > 5000 ) {

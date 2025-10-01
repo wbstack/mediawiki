@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
+			"Amire80",
 			"Babanwalia",
 			"Bgo eiu",
+			"Cabal",
 			"Tow"
 		]
 	},
@@ -14,9 +16,11 @@
 	"uls-region-AS": "ਏਸ਼ੀਆ",
 	"uls-region-ME": "ਮੱਧ ਪੂਰਬ",
 	"uls-region-PA": "ਪ੍ਰਸ਼ਾਂਤ",
+	"uls-region-all": "ਸਾਰੀਆਂ ਭਾਸ਼ਾਵਾਂ",
 	"uls-no-results-found": "ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ ਲੱਭਾ",
 	"uls-common-languages": "ਸੁਝਾਈਆਂ ਭਾਸ਼ਾਵਾਂ",
 	"uls-no-results-suggestion-title": "ਤੁਹਾਨੂੰ ਇਹਨਾਂ ਵਿੱਚ ਦਿਲਚਸਪੀ ਹੋ ਸਕਦੀ ਹੋ:",
 	"uls-search-help": "ਤੁਸੀਂ ਭਾਸ਼ਾ ਦੇ ਨਾਂ, ਲਿਪੀ ਦੇ ਨਾਂ, ਭਾਸ਼ਾ ਦੇ ISO ਕੋਡ ਰਾਹੀਂ ਖੋਜ ਸਕਦੇ ਹੋ ਜਾਂ ਖੇਤਰ ਪੱਖੋਂ ਸਫ਼ੇ ਪਲਟ ਸਕਦੇ ਹੋ।",
-	"uls-search-placeholder": "ਭਾਸ਼ਾ ਖੋਜ"
+	"uls-search-placeholder": "ਭਾਸ਼ਾ ਖੋਜ",
+	"uls-search-placeholder-short": "ਖੋਜ"
 }

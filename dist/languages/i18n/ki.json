@@ -2,16 +2,11 @@
 	"@metadata": {
 		"authors": [
 			"Kwisha",
-			"Stephenwanjau",
 			"Ngangaesther",
-			"Amire80"
+			"Stephenwanjau",
+			"Pwangai"
 		]
 	},
-	"underline-always": "Mahinda mothe",
-	"underline-never": "Ona hanini",
-	"editfont-monospace": "Mandeko wa Monospaced",
-	"editfont-sansserif": "Mwandeko wa Sans-serif",
-	"editfont-serif": "Mwandeko wa Serif",
 	"sunday": "Kiumia",
 	"monday": "Wakeri",
 	"tuesday": "Wagatatu",
@@ -43,10 +38,10 @@
 	"october-gen": "mweri wa ikumi",
 	"november-gen": "mweri wa ikumi na imwe",
 	"december-gen": "mweri wa ikũmi na igiri",
+	"skin-view-view": "Thoma",
 	"cactions": "Makiria",
 	"nstab-image": "Failo",
 	"nstab-help": "Handu ha uteithio",
-	"action-delete": "Futa",
 	"move": "Thie",
 	"movereason": "Gitumi:",
 	"skin-action-delete": "Futa"

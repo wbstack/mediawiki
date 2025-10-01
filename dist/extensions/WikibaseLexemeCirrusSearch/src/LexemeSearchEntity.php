@@ -10,8 +10,9 @@ use Elastica\Query\DisMax;
 use Elastica\Query\MatchNone;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lexeme\MediaWiki\Content\LexemeContent;
 use Wikibase\Lib\Store\FallbackLabelDescriptionLookupFactory;
@@ -37,7 +38,7 @@ class LexemeSearchEntity implements EntitySearchHelper {
 	/**
 	 * Web request context.
 	 * Used for implementing debug features such as cirrusDumpQuery.
-	 * @var \WebRequest
+	 * @var WebRequest
 	 */
 	private $request;
 	/**
@@ -56,10 +57,10 @@ class LexemeSearchEntity implements EntitySearchHelper {
 
 	public function __construct(
 		EntityIdParser $idParser,
-		\WebRequest $request,
+		WebRequest $request,
 		Language $userLanguage,
 		FallbackLabelDescriptionLookupFactory $lookupFactory,
-		CirrusDebugOptions $options = null
+		?CirrusDebugOptions $options = null
 	) {
 		$this->idParser = $idParser;
 		$this->request = $request;
@@ -100,7 +101,7 @@ class LexemeSearchEntity implements EntitySearchHelper {
 				self::CONTEXT_LEXEME_PREFIX );
 
 		$dismax = new DisMax();
-		$dismax->setTieBreaker( 0 );
+		$dismax->setTieBreaker( $profile['tie-breaker'] ?? 0 );
 
 		$fields = [
 			[ "lemma.near_match", $profile['exact'] ],
@@ -192,7 +193,7 @@ class LexemeSearchEntity implements EntitySearchHelper {
 		$strictLanguage,
 		?string $profileContext = null
 	) {
-		$profileContext = $profileContext ?? self::CONTEXT_LEXEME_PREFIX;
+		$profileContext ??= self::CONTEXT_LEXEME_PREFIX;
 		$searcher = new WikibasePrefixSearcher( 0, $limit, $this->debugOptions );
 		$searcher->getSearchContext()->setProfileContext( $profileContext );
 		$query = $this->getElasticSearchQuery( $text, $entityType, $searcher->getSearchContext() );

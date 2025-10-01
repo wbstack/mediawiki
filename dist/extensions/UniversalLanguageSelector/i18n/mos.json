@@ -2,7 +2,6 @@
 	"@metadata": {
 		"authors": [
 			"Abdul Fatawu 352",
-			"Amire80",
 			"Hasslaebetch",
 			"Raizkgh"
 		]
@@ -74,5 +73,6 @@
 	"ext-uls-empty-state-header": "Ka gomd buud-goam ye",
 	"ext-uls-empty-state-desc": "  Buud-goam ka be masa ye",
 	"ext-uls-empty-state-header-actions-available": " Buud-goam ka be ye. Y na paas paalga ye?",
-	"ext-uls-empty-state-desc-actions-available": "Maane gʋlsg y buud-goama wʋsgo ka pʋga"
+	"ext-uls-empty-state-desc-actions-available": "Maane gʋlsg y buud-goama wʋsgo ka pʋga",
+	"ext-uls-add-languages-button-label": "Paas goama"
 }

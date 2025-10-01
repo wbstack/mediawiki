@@ -7,14 +7,15 @@
 ( function () {
 
 	/**
-	 * MediaWiki media resource queue.
+	 * @classdesc Media resource queue.
 	 *
 	 * @class
 	 * @extends mw.widgets.APIResultsQueue
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.MediaResourceQueue`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {number} maxHeight The maximum height of the media, used in the
+	 * @param {number} config.maxHeight The maximum height of the media, used in the
 	 *  search call to the API.
 	 */
 	mw.widgets.MediaResourceQueue = function MwWidgetsMediaResourceQueue( config ) {
@@ -35,7 +36,7 @@
 	 * @return {jQuery.Promise} Promise that resolves when the resources are set up
 	 */
 	mw.widgets.MediaResourceQueue.prototype.getFileRepos = function () {
-		var defaultSource = [ {
+		const defaultSource = [ {
 			url: mw.util.wikiScript( 'api' ),
 			local: ''
 		} ];
@@ -45,12 +46,8 @@
 				action: 'query',
 				meta: 'filerepoinfo'
 			} ).then(
-				function ( resp ) {
-					return resp.query && resp.query.repos || defaultSource;
-				},
-				function () {
-					return $.Deferred().resolve( defaultSource );
-				}
+				( resp ) => resp.query && resp.query.repos || defaultSource,
+				() => $.Deferred().resolve( defaultSource )
 			);
 		}
 
@@ -58,7 +55,7 @@
 	};
 
 	/**
-	 * Get image maximum height
+	 * Get image maximum height.
 	 *
 	 * @return {string} Image max height
 	 */

@@ -1,5 +1,8 @@
 <?php
 declare( strict_types = 1 );
+// Suppress UnusedPluginSuppression because
+// Phan on PHP 7.4 and PHP 8.1 need different suppressions
+// @phan-file-suppress UnusedPluginSuppression,UnusedPluginFileSuppression
 
 /**
  * Front-end/Wrapper for a particular tree builder, in this case the
@@ -12,6 +15,7 @@ namespace Wikimedia\Parsoid\Wt2Html\TreeBuilder;
 use Generator;
 use Wikimedia\Parsoid\Config\Env;
 use Wikimedia\Parsoid\DOM\Node;
+use Wikimedia\Parsoid\NodeData\DataMw;
 use Wikimedia\Parsoid\NodeData\DataParsoid;
 use Wikimedia\Parsoid\NodeData\NodeData;
 use Wikimedia\Parsoid\NodeData\TempData;
@@ -44,21 +48,12 @@ class TreeBuilderStage extends PipelineStage {
 	/** @var RemexPipeline */
 	private $remexPipeline;
 
-	/** @var string|Token */
+	/** @var string|Token|null */
 	private $lastToken;
 
-	/** @var array<string|NlTk> */
-	private $textContentBuffer;
+	/** @var string */
+	private $textContentBuffer = '';
 
-	/** @var bool */
-	private $needTransclusionShadow;
-
-	/**
-	 * @param Env $env
-	 * @param array $options
-	 * @param string $stageId
-	 * @param ?PipelineStage $prevStage
-	 */
 	public function __construct(
 		Env $env, array $options = [], string $stageId = "",
 		?PipelineStage $prevStage = null
@@ -94,10 +89,9 @@ class TreeBuilderStage extends PipelineStage {
 		 * -------------------------------------------------------------------- */
 		$this->tableDepth = 0;
 
-		// We only need one for every run of strings and newline tokens.
-		$this->needTransclusionShadow = false;
-
-		$this->remexPipeline = $this->env->fetchRemexPipeline( $this->atTopLevel );
+		$this->remexPipeline = $this->env->fetchRemexPipeline( $this->toFragment );
+		$this->textContentBuffer = '';
+		$this->lastToken = null;
 	}
 
 	/**
@@ -123,22 +117,17 @@ class TreeBuilderStage extends PipelineStage {
 		}
 	}
 
-	/**
-	 * @return Node
-	 */
 	public function finalizeDOM(): Node {
 		// Check if the EOFTk actually made it all the way through, and flag the
 		// page where it did not!
 		if ( isset( $this->lastToken ) && !( $this->lastToken instanceof EOFTk ) ) {
 			$this->env->log(
 				'error', 'EOFTk was lost in page',
-				$this->env->getPageConfig()->getTitle()
+				$this->env->getContextTitle()->getPrefixedText()
 			);
 		}
 
-		if ( $this->atTopLevel ) {
-			$node = DOMCompat::getBody( $this->remexPipeline->doc );
-		} else {
+		if ( $this->toFragment ) {
 			// This is similar to DOMCompat::setInnerHTML() in that we can
 			// consider it equivalent to the fragment parsing algorithm,
 			// https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
@@ -146,15 +135,13 @@ class TreeBuilderStage extends PipelineStage {
 			DOMUtils::migrateChildrenBetweenDocs(
 				DOMCompat::getBody( $this->remexPipeline->doc ), $node
 			);
+		} else {
+			$node = DOMCompat::getBody( $this->remexPipeline->doc );
 		}
 
 		return $node;
 	}
 
-	/**
-	 * @param array $kvArr
-	 * @return array
-	 */
 	private function kvArrToAttr( array $kvArr ): array {
 		$attribs = [];
 		foreach ( $kvArr as $kv ) {
@@ -168,19 +155,18 @@ class TreeBuilderStage extends PipelineStage {
 	 * Keep this in sync with `DOMDataUtils.setNodeData()`
 	 *
 	 * @param array $attribs
-	 * @param DataParsoid $dataAttribs
+	 * @param DataParsoid $dataParsoid
 	 * @return array
 	 */
-	private function stashDataAttribs( array $attribs, DataParsoid $dataAttribs ): array {
+	private function stashDataAttribs( array $attribs, DataParsoid $dataParsoid, ?DataMw $dataMw ): array {
 		$data = new NodeData;
-		$data->parsoid = $dataAttribs;
-		if ( isset( $attribs['data-mw'] ) ) {
-			$data->mw = json_decode( $attribs['data-mw'] );
-			unset( $attribs['data-mw'] );
+		$data->parsoid = $dataParsoid;
+		if ( $dataMw !== null ) {
+			$data->mw = $dataMw;
 		}
 		// Store in the top level doc since we'll be importing the nodes after treebuilding
-		$docId = DOMDataUtils::stashObjectInDoc( $this->env->topLevelDoc, $data );
-		$attribs[DOMDataUtils::DATA_OBJECT_ATTR_NAME] = (string)$docId;
+		$nodeId = DOMDataUtils::stashObjectInDoc( $this->env->topLevelDoc, $data );
+		$attribs[DOMDataUtils::DATA_OBJECT_ATTR_NAME] = (string)$nodeId;
 		return $attribs;
 	}
 
@@ -201,8 +187,9 @@ class TreeBuilderStage extends PipelineStage {
 
 		$dispatcher = $this->remexPipeline->dispatcher;
 		$attribs = isset( $token->attribs ) ? $this->kvArrToAttr( $token->attribs ) : [];
-		$dataAttribs = $token->dataAttribs ?? new DataParsoid;
-		$tmp = $dataAttribs->getTemp();
+		$dataParsoid = !is_string( $token ) ? $token->dataParsoid : new DataParsoid;
+		$dataMw = $token->dataMw ?? null;
+		$tmp = $dataParsoid->getTemp();
 
 		if ( $this->inTransclusion ) {
 			$tmp->setFlag( TempData::IN_TRANSCLUSION );
@@ -220,34 +207,36 @@ class TreeBuilderStage extends PipelineStage {
 		// Store the last token
 		$this->lastToken = $token;
 
-		// If we encountered a non-string non-nl token, we have broken a run of
-		// string+nl content.  If we need transclusion shadow protection, now's
-		// the time to insert it.
-		if (
-			!is_string( $token ) && !( $token instanceof NlTk ) &&
-			$this->needTransclusionShadow
-		) {
-			$this->needTransclusionShadow = false;
+		$isString = is_string( $token ) || $token instanceof NlTk;
+		if ( !$isString && $this->textContentBuffer !== '' ) {
+			// Finalize the combined string tokens
+			$dispatcher->characters( $this->textContentBuffer, 0, strlen( $this->textContentBuffer ), 0, 0 );
+
 			// If inside a table and a transclusion, add a meta tag after every
 			// text node so that we can detect fostered content that came from
 			// a transclusion.
-			$this->env->log( 'debug/html', $this->pipelineId, 'Inserting shadow transclusion meta' );
-			$this->remexPipeline->insertExplicitStartTag( 'meta',
-				[ 'typeof' => 'mw:TransclusionShadow' ],
-				true );
+			if ( $this->inTransclusion && $this->tableDepth > 0 ) {
+				// The HTML spec says, "Space characters separated from non-space
+				// characters by non-character tokens are not affected by foster
+				// parenting"
+				if ( !preg_match( '/^\s*$/D', $this->textContentBuffer ) ) {
+					$this->env->log(
+						'debug/html', $this->pipelineId,
+						'Inserting shadow transclusion meta'
+					);
+					$this->remexPipeline->insertExplicitStartTag(
+						'meta', [ 'typeof' => 'mw:TransclusionShadow' ], true
+					);
+				}
+			}
+
+			$this->textContentBuffer = '';
 		}
 
-		if ( is_string( $token ) || $token instanceof NlTk ) {
+		if ( $isString ) {
 			$data = $token instanceof NlTk ? "\n" : $token;
-			$dispatcher->characters( $data, 0, strlen( $data ), 0, 0 );
-			// NlTks are only fostered when accompanied by non-whitespace.
-			// Safe to ignore.
-			if (
-				$this->inTransclusion && $this->tableDepth > 0 &&
-				is_string( $token )
-			) {
-				$this->needTransclusionShadow = true;
-			}
+			// Combine string tokens to be finalized later
+			$this->textContentBuffer .= $data;
 		} elseif ( $token instanceof TagTk ) {
 			$tName = $token->getName();
 			if ( $tName === 'table' ) {
@@ -267,41 +256,31 @@ class TreeBuilderStage extends PipelineStage {
 
 			$node = $this->remexPipeline->insertExplicitStartTag(
 				$tName,
-				$this->stashDataAttribs( $attribs, $dataAttribs ),
+				$this->stashDataAttribs( $attribs, $dataParsoid, $dataMw ),
 				false
 			);
 			if ( !$node ) {
-				$this->handleDeletedStartTag( $tName, $dataAttribs );
+				$this->handleDeletedStartTag( $tName, $dataParsoid );
 			}
 		} elseif ( $token instanceof SelfclosingTagTk ) {
 			$tName = $token->getName();
 
 			// Re-expand an empty-line meta-token into its constituent comment + WS tokens
 			if ( TokenUtils::isEmptyLineMetaToken( $token ) ) {
-				$this->processChunk( $dataAttribs->tokens );
+				$this->processChunk( $dataParsoid->tokens );
 				return;
 			}
 
 			$wasInserted = false;
 
-			// FIXME: This prevents fostering of all metas except those
-			// that are explictly identified for fostering. Instead,
-			// this should foster all metas except those are explicitly
-			// barred from being fostered.
-
-			// <*include*> metas, behavior switch metas
-			// should be fostered since they end up generating
-			// HTML content at the marker site.
+			// Transclusion metas are placeholders and are eliminated after template-wrapping.
+			// Fostering them unnecessarily expands template ranges. Same for mw:Param metas.
 			if ( $tName === 'meta' ) {
-				$shouldFoster = TokenUtils::matchTypeOf(
+				$shouldNotFoster = TokenUtils::matchTypeOf(
 					$token,
-					'#^mw:Includes/(OnlyInclude|IncludeOnly|NoInclude)(/|$)#'
+					'#^mw:(Transclusion|Param)(/|$)#'
 				);
-				if ( !$shouldFoster ) {
-					$prop = $token->getAttribute( 'property' ) ?? '';
-					$shouldFoster = preg_match( '/^(mw:PageProp\/[a-zA-Z]*)\b/', $prop );
-				}
-				if ( !$shouldFoster ) {
+				if ( $shouldNotFoster ) {
 					// transclusions state
 					$transType = TokenUtils::matchTypeOf( $token, '#^mw:Transclusion#' );
 					if ( $transType ) {
@@ -309,7 +288,7 @@ class TreeBuilderStage extends PipelineStage {
 						$this->inTransclusion = ( $transType === 'mw:Transclusion' );
 					}
 					$this->remexPipeline->insertUnfosteredMeta(
-						$this->stashDataAttribs( $attribs, $dataAttribs ) );
+						$this->stashDataAttribs( $attribs, $dataParsoid, $dataMw ) );
 					$wasInserted = true;
 				}
 			}
@@ -317,16 +296,16 @@ class TreeBuilderStage extends PipelineStage {
 			if ( !$wasInserted ) {
 				$node = $this->remexPipeline->insertExplicitStartTag(
 					$tName,
-					$this->stashDataAttribs( $attribs, $dataAttribs ),
+					$this->stashDataAttribs( $attribs, $dataParsoid, $dataMw ),
 					false
 				);
 				if ( $node ) {
 					if ( !Utils::isVoidElement( $tName ) ) {
 						$this->remexPipeline->insertExplicitEndTag(
-							$tName, ( $dataAttribs->stx ?? '' ) === 'html' );
+							$tName, ( $dataParsoid->stx ?? '' ) === 'html' );
 					}
 				} else {
-					$this->insertPlaceholderMeta( $tName, $dataAttribs, true );
+					$this->insertPlaceholderMeta( $tName, $dataParsoid, true );
 				}
 			}
 		} elseif ( $token instanceof EndTagTk ) {
@@ -336,27 +315,29 @@ class TreeBuilderStage extends PipelineStage {
 			}
 			$node = $this->remexPipeline->insertExplicitEndTag(
 				$tName,
-				( $dataAttribs->stx ?? '' ) === 'html'
+				( $dataParsoid->stx ?? '' ) === 'html'
 			);
 			if ( $node ) {
 				// Copy data attribs from the end tag to the element
 				$nodeDP = DOMDataUtils::getDataParsoid( $node );
 				if ( !WTUtils::hasLiteralHTMLMarker( $nodeDP )
-					&& isset( $dataAttribs->endTagSrc )
+					&& isset( $dataParsoid->endTagSrc )
 				) {
-					$nodeDP->endTagSrc = $dataAttribs->endTagSrc;
+					$nodeDP->endTagSrc = $dataParsoid->endTagSrc;
 				}
-				if ( !empty( $dataAttribs->stx ) ) {
+				if ( !empty( $dataParsoid->stx ) ) {
 					// FIXME: Not sure why we do this. For example,
 					// with "{|\n|x\n</table>", why should the entire table
 					// be marked HTML syntax? This is probably entirely
 					// 2013-era historical stuff. Investigate & fix.
 					//
+					// Same behavior with '''foo</b>
+					//
 					// Transfer stx flag
-					$nodeDP->stx = $dataAttribs->stx;
+					$nodeDP->stx = $dataParsoid->stx;
 				}
-				if ( isset( $dataAttribs->tsr ) ) {
-					$nodeDP->getTemp()->endTSR = $dataAttribs->tsr;
+				if ( isset( $dataParsoid->tsr ) ) {
+					$nodeDP->getTemp()->endTSR = $dataParsoid->tsr;
 				}
 				if ( isset( $nodeDP->autoInsertedStartToken ) ) {
 					$nodeDP->autoInsertedStart = true;
@@ -368,9 +349,17 @@ class TreeBuilderStage extends PipelineStage {
 				}
 			} else {
 				// The tag was stripped. Insert an mw:Placeholder for round-tripping
-				$this->insertPlaceholderMeta( $tName, $dataAttribs, false );
+				$this->insertPlaceholderMeta( $tName, $dataParsoid, false );
 			}
 		} elseif ( $token instanceof CommentTk ) {
+			$dp = $token->dataParsoid;
+			// @phan-suppress-next-line PhanUndeclaredProperty dynamic property
+			if ( isset( $dp->unclosedComment ) ) {
+				// Add a marker meta tag to aid accurate DSR computation
+				$attribs = [ 'typeof' => 'mw:Placeholder/UnclosedComment' ];
+				$this->remexPipeline->insertUnfosteredMeta(
+					$this->stashDataAttribs( $attribs, $dp, $token->dataMw ) );
+			}
 			$dispatcher->comment( $token->value, 0, 0 );
 		} elseif ( $token instanceof EOFTk ) {
 			$dispatcher->endDocument( 0 );
@@ -463,7 +452,7 @@ class TreeBuilderStage extends PipelineStage {
 			$this->remexPipeline->insertUnfosteredMeta(
 				$this->stashDataAttribs(
 					[ 'typeof' => 'mw:Placeholder/StrippedTag' ],
-					$metaDP
+					$metaDP, null
 				)
 			);
 		}
@@ -472,7 +461,7 @@ class TreeBuilderStage extends PipelineStage {
 	/**
 	 * @inheritDoc
 	 */
-	public function process( $input, array $opts = null ) {
+	public function process( $input, array $opts ) {
 		'@phan-var array $input'; // @var array $input
 		$this->processChunk( $input );
 		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
@@ -482,7 +471,7 @@ class TreeBuilderStage extends PipelineStage {
 	/**
 	 * @inheritDoc
 	 */
-	public function processChunkily( $input, array $opts = null ): Generator {
+	public function processChunkily( $input, array $opts ): Generator {
 		if ( $this->prevStage ) {
 			foreach ( $this->prevStage->processChunkily( $input, $opts ) as $chunk ) {
 				'@phan-var array $chunk'; // @var array $chunk

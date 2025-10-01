@@ -21,7 +21,8 @@ use Wikimedia\Assert\Assert;
  */
 class ChangeOpsFormsEdit implements ChangeOp {
 
-	private $changeOpForForm;
+	/** @var ChangeOp[] */
+	private array $changeOpForForm;
 
 	/**
 	 * @param ChangeOp[] $changeOpForForm [ string $formId => ChangeOp $changeOp ]
@@ -48,7 +49,7 @@ class ChangeOpsFormsEdit implements ChangeOp {
 						null,
 						'form-not-found',
 						[ $formId ]
-					)
+					),
 				] );
 			}
 		}
@@ -56,7 +57,7 @@ class ChangeOpsFormsEdit implements ChangeOp {
 		return Result::newSuccess();
 	}
 
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		Assert::parameterType( Lexeme::class, $entity, '$entity' );
 		'@phan-var Lexeme $entity';
 		/** @var Lexeme $entity */

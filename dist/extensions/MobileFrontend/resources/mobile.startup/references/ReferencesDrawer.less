@@ -1,21 +1,28 @@
+@import 'mediawiki.skin.variables.less';
 @import '../../../mobile.less/mobile.variables.less';
 @import 'mediawiki.mixins.less';
 
 @drawerPadding: 20px;
 
 .drawer.references-drawer {
-	background-color: @colorGray1;
-	color: @colorGray12;
+	background-color: #000; // Fixed colors, don't use color design tokens
+	color: #c8ccd1; // Fixed colors, don't use color design tokens
 	max-height: 50%; // on tablet this will become capped at 400px
 	overflow-y: auto;
 	padding: @drawerPadding/2 @drawerPadding @drawerPadding @drawerPadding;
 
-	.mw-ui-icon:before {
-		opacity: 0.5;
-	}
-
 	a {
 		color: #69f;
+	}
+
+	a.new {
+		color: @color-link-red;
+	}
+
+	img {
+		// Invert MathML images to ensure formulas
+		// appear as white on dark background T366220
+		filter: invert( 1 );
 	}
 
 	.references-drawer__header {
@@ -25,7 +32,7 @@
 	}
 
 	.references-drawer__title {
-		color: @colorGray7;
+		color: @color-subtle;
 		cursor: default;
 		letter-spacing: 0.2em;
 		font-size: 0.75em;
@@ -33,10 +40,26 @@
 		margin-left: 1em;
 		flex-grow: 1;
 	}
+
+	.main-reference-content {
+		display: inline;
+		margin-left: 0.2em;
+		word-break: break-word;
+	}
 }
 
-@media all and ( min-width: @width-breakpoint-tablet ) {
+@media all and ( min-width: @min-width-breakpoint-tablet ) {
 	.drawer.references-drawer {
 		max-height: 400px;
 	}
+}
+
+.mf-icon-reference {
+	.cdx-mixin-css-icon( @cdx-icon-reference, @param-is-button-icon: false,
+	@param-fill-color: @color-subtle, @param-size-icon: @size-icon-small );
+}
+
+.mf-icon-close-small {
+	.cdx-mixin-css-icon( @cdx-icon-close, @param-is-button-icon: false,
+	@param-fill-color: #a2a9b1, @param-size-icon: @size-icon-small );
 }

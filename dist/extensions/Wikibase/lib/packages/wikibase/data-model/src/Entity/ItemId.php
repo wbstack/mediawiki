@@ -22,14 +22,15 @@ class ItemId extends SerializableEntityId implements Int32EntityId {
 	 * @throws InvalidArgumentException
 	 */
 	public function __construct( $idSerialization ) {
-		$parts = self::splitSerialization( $idSerialization );
-		$this->assertValidIdFormat( $parts[2] );
-		parent::__construct( self::joinSerialization(
-			[ $parts[0], $parts[1], strtoupper( $parts[2] ) ]
-		) );
+		$this->assertValidIdFormat( $idSerialization );
+		parent::__construct( strtoupper( $idSerialization ) );
 	}
 
 	private function assertValidIdFormat( $idSerialization ) {
+		if ( !is_string( $idSerialization ) ) {
+			throw new InvalidArgumentException( '$idSerialization must be a string' );
+		}
+
 		if ( !preg_match( self::PATTERN, $idSerialization ) ) {
 			throw new InvalidArgumentException( '$idSerialization must match ' . self::PATTERN );
 		}
@@ -48,8 +49,7 @@ class ItemId extends SerializableEntityId implements Int32EntityId {
 	 * @return int Guaranteed to be a distinct integer in the range [1..2147483647].
 	 */
 	public function getNumericId() {
-		$serializationParts = self::splitSerialization( $this->serialization );
-		return (int)substr( $serializationParts[2], 1 );
+		return (int)substr( $this->serialization, 1 );
 	}
 
 	/**
@@ -59,27 +59,15 @@ class ItemId extends SerializableEntityId implements Int32EntityId {
 		return 'item';
 	}
 
-	/**
-	 * @see Serializable::serialize
-	 *
-	 * @since 7.0 serialization format changed in an incompatible way
-	 *
-	 * @return string
-	 */
-	public function serialize() {
-		return $this->serialization;
+	public function __serialize(): array {
+		return [ 'serialization' => $this->serialization ];
 	}
 
-	/**
-	 * @see Serializable::unserialize
-	 *
-	 * @param string $serialized
-	 */
-	public function unserialize( $serialized ) {
-		$array = json_decode( $serialized );
-		$this->serialization = is_array( $array ) ? $array[1] : $serialized;
-		list( $this->repositoryName, $this->localPart ) =
-			self::extractRepositoryNameAndLocalPart( $this->serialization );
+	public function __unserialize( array $data ): void {
+		$this->__construct( $data['serialization'] );
+		if ( $this->serialization !== $data['serialization'] ) {
+			throw new InvalidArgumentException( '$data contained invalid serialization' );
+		}
 	}
 
 	/**
@@ -100,25 +88,6 @@ class ItemId extends SerializableEntityId implements Int32EntityId {
 		}
 
 		return new self( 'Q' . $numericId );
-	}
-
-	/**
-	 * CAUTION: Use the full string serialization whenever you can and avoid using numeric IDs.
-	 *
-	 * @since 7.0
-	 *
-	 * @param string $repositoryName
-	 * @param int|float|string $numericId
-	 *
-	 * @return self
-	 * @throws InvalidArgumentException
-	 */
-	public static function newFromRepositoryAndNumber( $repositoryName, $numericId ) {
-		if ( !is_numeric( $numericId ) ) {
-			throw new InvalidArgumentException( '$numericId must be numeric' );
-		}
-
-		return new self( self::joinSerialization( [ $repositoryName, '', 'Q' . $numericId ] ) );
 	}
 
 }

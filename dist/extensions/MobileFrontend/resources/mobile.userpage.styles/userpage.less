@@ -1,13 +1,15 @@
+@import 'mediawiki.skin.variables.less';
 @import '../../mobile.less/mobile.variables.less';
 
 .cta-holder {
-	background-color: @colorGray14;
+	background-color: @background-color-interactive;
 	box-sizing: border-box;
 	border-radius: @border-radius-base;
 	padding: 30px 20px;
 	text-align: center;
 
 	.userpage-image-placeholder {
+		background-image: url( userpage.svg );
 		height: 56px;
 		margin-bottom: 30px;
 		margin-top: 10px;
@@ -15,6 +17,18 @@
 		background-position: center;
 		background-repeat: no-repeat;
 		opacity: 0.2;
+
+		@media screen {
+			html.skin-theme-clientpref-night & {
+				filter: invert( 1 ) hue-rotate( 180deg );
+			}
+		}
+
+		@media screen and ( prefers-color-scheme: dark ) {
+			html.skin-theme-clientpref-os & {
+				filter: invert( 1 ) hue-rotate( 180deg );
+			}
+		}
 	}
 
 	// be specific in order to override default padding
@@ -25,7 +39,7 @@
 	}
 
 	.desc {
-		color: @colorGray7;
+		color: @color-subtle;
 		margin-bottom: 20px;
 	}
 

@@ -1,8 +1,6 @@
 <?php
 /**
- * Implements Special:ListBots
- *
- * Copyright © 2004 Brion Vibber, lcrocker, Tim Starling,
+ * Copyright © 2004 Brooke Vibber, lcrocker, Tim Starling,
  * Domas Mituzas, Antoine Musso, Jens Frank, Zhengzhu,
  * 2006 Rob Church <robchur@gmail.com>
  *
@@ -22,11 +20,14 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
 
+namespace MediaWiki\Specials\Redirects;
+
+use MediaWiki\SpecialPage\SpecialRedirectToSpecial;
+
 /**
- * Redirect page: Special:ListBots --> Special:ListUsers/bot.
+ * Redirect to Special:ListUsers/bot.
  *
  * @ingroup SpecialPage
  */
@@ -35,3 +36,6 @@ class SpecialListBots extends SpecialRedirectToSpecial {
 		parent::__construct( 'Listbots', 'Listusers', 'bot' );
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialListBots::class, 'SpecialListBots' );

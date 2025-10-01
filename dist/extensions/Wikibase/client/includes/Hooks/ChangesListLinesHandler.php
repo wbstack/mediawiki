@@ -5,10 +5,10 @@ declare( strict_types = 1 );
 namespace Wikibase\Client\Hooks;
 
 use EnhancedChangesList;
-use Language;
 use MediaWiki\Hook\EnhancedChangesListModifyBlockLineDataHook;
 use MediaWiki\Hook\EnhancedChangesListModifyLineDataHook;
 use MediaWiki\Hook\OldChangesListRecentChangesLineHook;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\User\UserNameUtils;
 use OldChangesList;
@@ -64,14 +64,15 @@ class ChangesListLinesHandler implements
 		$formatter = new ChangeLineFormatter(
 			$repoLinker,
 			$userNameUtils,
-			MediaWikiServices::getInstance()->getLinkRenderer()
+			MediaWikiServices::getInstance()->getLinkRenderer(),
+			MediaWikiServices::getInstance()->getCommentFormatter()
 		);
 
 		return new self( $changeFactory, $formatter );
 	}
 
 	/**
-	 * @param OldChangesList &$changesList
+	 * @param OldChangesList $changesList
 	 * @param string &$s
 	 * @param RecentChange $rc
 	 * @param string[] &$classes

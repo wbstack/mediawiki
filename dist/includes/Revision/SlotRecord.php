@@ -22,9 +22,9 @@
 
 namespace MediaWiki\Revision;
 
-use Content;
 use InvalidArgumentException;
 use LogicException;
+use MediaWiki\Content\Content;
 use OutOfBoundsException;
 use Wikimedia\Assert\Assert;
 use Wikimedia\NonSerializable\NonSerializableTrait;
@@ -310,6 +310,8 @@ class SlotRecord {
 	 *
 	 * @throws SuppressedDataException if access to the content is not allowed according
 	 * to the audience check performed by RevisionRecord::getSlot().
+	 * @throws BadRevisionException if the revision is permanently missing
+	 * @throws RevisionAccessException for other storage access errors
 	 *
 	 * @return Content The slot's content. This is a direct reference to the internal instance,
 	 * copy before exposing to application logic!

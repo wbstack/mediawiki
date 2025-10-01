@@ -84,12 +84,27 @@ class MockApiHelper extends ApiHelper {
 			'duration' => 4.3666666666667,
 			'mime' => 'video/ogg; codecs="theora"',
 			'mediatype' => 'VIDEO',
-			'title' => 'Original Ogg file, 320 × 240 (590 kbps)',
-			'shorttitle' => 'Ogg source',
 			# hacky way to get seek parameters to return the correct info
 			'extraParams' => [
 				'seek=1.2' => 'seek%3D1.2',
 				'seek=85' => 'seek%3D3.3666666666667', # hard limited by duration
+			],
+		],
+		'Transcode.webm' => [
+			'size' => 12345,
+			'width' => 492,
+			'height' => 360,
+			'bits' => 0,
+			'duration' => 4,
+			'mime' => 'video/webm; codecs="vp8, vorbis"',
+			'mediatype' => 'VIDEO',
+			'derivatives' => [
+				[
+					'type' => 'video/webm; codecs="vp9, opus"',
+					'transcodekey' => '240p.vp9.webm',
+					'width' => 328,
+					'height' => 240,
+				],
 			],
 		],
 		'Audio.oga' => [
@@ -102,9 +117,14 @@ class MockApiHelper extends ApiHelper {
 			'duration' => 0.99875,
 			'mime' => 'audio/ogg; codecs="vorbis"',
 			'mediatype' => 'AUDIO',
-			'title' => 'Original Ogg file (41 kbps)',
-			'shorttitle' => 'Ogg source',
-		]
+		],
+		'Hi-ho.jpg' => [
+			'size' => 7881,
+			'width' => 1941,
+			'height' => 220,
+			'bits' => 8,
+			'mime' => 'image/jpeg'
+		],
 	];
 
 	private $articleCache = [];
@@ -403,6 +423,7 @@ class MockApiHelper extends ApiHelper {
 		'Archivo:Foobar.jpg' => 'Foobar.jpg',
 		'Mynd:Foobar.jpg' => 'Foobar.jpg',
 		"Датотека:Foobar.jpg" => 'Foobar.jpg',
+		'Dosiero:Foobar.jpg' => 'Foobar.jpg',
 		'Image:Foobar.svg' => 'Foobar.svg',
 		'File:Foobar.svg' => 'Foobar.svg',
 		'Файл:Foobar.svg' => 'Foobar.svg',
@@ -411,8 +432,10 @@ class MockApiHelper extends ApiHelper {
 		'File:Thumb.png' => 'Thumb.png',
 		'File:LoremIpsum.djvu' => 'LoremIpsum.djvu',
 		'File:Video.ogv' => 'Video.ogv',
+		'File:Transcode.webm' => 'Transcode.webm',
 		'File:Audio.oga' => 'Audio.oga',
 		'File:Bad.jpg' => 'Bad.jpg',
+		'File:Hi-ho.jpg' => 'Hi-ho.jpg',
 	];
 
 	private const PNAMES = [
@@ -482,13 +505,15 @@ class MockApiHelper extends ApiHelper {
 	/** @var string wiki prefix for which we are mocking the api access */
 	private $prefix = 'enwiki';
 
-	/**
-	 * @param ?string $prefix
-	 */
-	public function __construct( ?string $prefix = null ) {
-		if ( $prefix ) {
-			$this->prefix = $prefix;
-		}
+	/** @var callable(string):string A helper to normalize titles. */
+	private $normalizeTitle = null;
+
+	public function __construct( ?string $prefix = null, ?callable $normalizeTitleFunc = null ) {
+		$this->prefix = $prefix ?? $this->prefix;
+		$this->normalizeTitle = $normalizeTitleFunc ??
+			// poor man's normalization
+			( fn ( $t ) => str_replace( ' ', '_', $t ) );
+
 		// PORT-FIXME: Need to get this value
 		// $wtSizeLimit = $parsoidOptions->limits->wt2html->maxWikitextSize;
 		$wtSizeLimit = 1000000;
@@ -509,15 +534,16 @@ class MockApiHelper extends ApiHelper {
 	 * the proper known/missing information about that title.
 	 * @param string $key The normalized title of the article
 	 * @param Article $article The contents of the article
+	 * @return callable
 	 */
-	public function addArticle( string $key, Article $article ): void {
+	public function addArticle( string $key, Article $article ): callable {
+		$oldVal = $this->articleCache[$key] ?? null;
 		$this->articleCache[$key] = $article;
+		return function () use ( $key, $oldVal ) {
+			$this->articleCache[$key] = $oldVal;
+		};
 	}
 
-	/**
-	 * @param array $params
-	 * @return array
-	 */
 	public function makeRequest( array $params ): array {
 		switch ( $params['action'] ?? null ) {
 			case 'query':
@@ -542,6 +568,54 @@ class MockApiHelper extends ApiHelper {
 
 			default:
 				return []; // FIXME: Maybe some error
+		}
+	}
+
+	/**
+	 * Image scaling computation helper.
+	 *
+	 * Linker.php in core calls File::transform(...) for each dimension (1x,
+	 * 1.5x, 2x) which then scales the image dimensions, using round/ceil/floor
+	 * as appropriate to yield integer dimensions.  Note that the results
+	 * may be unintuitive due to the conversion to integer: eg, a 442px width
+	 * image may become 883px in 2x mode.  Resist the temptation to "optimize"
+	 * this by computing the transformed size once and then scaling that;
+	 * always scale the input dimensions instead.
+	 * @see ImageHandler::normaliseParams, MediaHandler::fitBoxWidth,
+	 * File::scaleHeight, etc, in core.
+	 *
+	 * Either $twidth or $theight or both will be set when called; both
+	 * will be set when this function returns.
+	 *
+	 * @param int $width Original image width
+	 * @param int $height Original image height
+	 * @param int|float|null &$twidth Thumbnail width (inout parameter)
+	 * @param int|float|null &$theight Thumbnail height (inout parameter)
+	 */
+	public static function transformHelper( $width, $height, &$twidth, &$theight ) {
+		if ( $theight === null ) {
+			// File::scaleHeight in PHP
+			$theight = round( $height * $twidth / $width );
+		} elseif (
+			$twidth === null ||
+			// Match checks in ImageHandler.php::normaliseParams in core
+			( $twidth * $height > $theight * $width )
+		) {
+			// MediaHandler::fitBoxWidth in PHP
+			// This is crazy!
+			$idealWidth = $width * $theight / $height;
+			$roundedUp = ceil( $idealWidth );
+			if ( round( $roundedUp * $height / $width ) > $theight ) {
+				$twidth = floor( $idealWidth );
+			} else {
+				$twidth = $roundedUp;
+			}
+		} else {
+			if ( round( $height * $twidth / $width ) > $theight ) {
+				$twidth = ceil( $width * $theight / $height );
+			} else {
+				$theight = round( $height * $twidth / $width );
+			}
 		}
 	}
 
@@ -614,26 +688,13 @@ class MockApiHelper extends ApiHelper {
 		}
 
 		if ( $theight || $twidth ) {
-			if ( $theight === null ) {
-				// File::scaleHeight in PHP
-				$theight = round( $height * $twidth / $width );
-			} elseif ( $twidth === null ) {
-				// MediaHandler::fitBoxWidth in PHP
-				// This is crazy!
-				$idealWidth = $width * $theight / $height;
-				$roundedUp = ceil( $idealWidth );
-				if ( round( $roundedUp * $height / $width ) > $theight ) {
-					$twidth = floor( $idealWidth );
-				} else {
-					$twidth = $roundedUp;
-				}
-			} else {
-				if ( round( $height * $twidth / $width ) > $theight ) {
-					$twidth = ceil( $width * $theight / $height );
-				} else {
-					$theight = round( $height * $twidth / $width );
-				}
-			}
+
+			// Save $twidth and $theight
+			$origThumbHeight = $theight;
+			$origThumbWidth = $twidth;
+
+			// Set $twidth and $theight
+			self::transformHelper( $width, $height, $twidth, $theight );
 
 			$urlWidth = $twidth;
 			if ( $twidth > $width ) {
@@ -693,10 +754,19 @@ class MockApiHelper extends ApiHelper {
 			$info['thumbheight'] = $theight;
 			$info['thumburl'] = $turl;
 			// src set info; added to core API result as part of T226683
+			// See Linker.php::processResponsiveImages() in core
 			foreach ( [ 1.5, 2 ] as $scale ) {
+				$stwidth = $stheight = null;
+				if ( $origThumbWidth !== null ) {
+					$stwidth = round( $origThumbWidth * $scale );
+				}
+				if ( $origThumbHeight !== null ) {
+					$stheight = round( $origThumbHeight * $scale );
+				}
+				self::transformHelper( $width, $height, $stwidth, $stheight );
 				$turl = $baseurl;
 				if (
-					round( $twidth * $scale ) < $width ||
+					$stwidth < $width ||
 					$mediatype === 'DRAWING' ||
 					$mediatype === 'OFFICE'
 				) {
@@ -707,7 +777,7 @@ class MockApiHelper extends ApiHelper {
 					if ( $lang !== null ) {
 						$turl .= "lang{$lang}-";
 					}
-					$turl .= round( $twidth * $scale ) . 'px-' . $normFileName;
+					$turl .= $stwidth . 'px-' . $normFileName;
 					if ( $mediatype === 'VIDEO' || $mediatype === 'OFFICE' ) {
 						$turl .= '.jpg';
 					} elseif ( $mediatype === 'DRAWING' ) {
@@ -719,21 +789,26 @@ class MockApiHelper extends ApiHelper {
 				}
 			}
 		}
-		// Make this look like a TMH response
-		if ( isset( $props['title'] ) || isset( $props['shorttitle'] ) ) {
+
+		if ( isset( $props['derivatives'] ) ) {
 			$info['derivatives'] = [
 				[
 					'src' => $info['url'],
 					'type' => $info['mime'],
 					'width' => strval( $info['width'] ),
 					'height' => strval( $info['height'] ),
-				]
+				],
 			];
-			if ( isset( $props['title'] ) ) {
-				$info['derivatives'][0]['title'] = $props['title'];
-			}
-			if ( isset( $props['shorttitle'] ) ) {
-				$info['derivatives'][0]['shorttitle'] = $props['shorttitle'];
+			foreach ( $props['derivatives'] as $derivative ) {
+				$info['derivatives'][] = [
+					'src' => self::IMAGE_BASE_URL . '/transcoded/' .
+						$md5prefix . $normFileName . '/' .
+						$normFileName . '.' . $derivative['transcodekey'],
+					'type' => $derivative['type'],
+					'transcodekey' => $derivative['transcodekey'],
+					'width' => strval( $derivative['width'] ),
+					'height' => strval( $derivative['height'] ),
+				];
 			}
 		}
 
@@ -743,17 +818,32 @@ class MockApiHelper extends ApiHelper {
 		];
 	}
 
-	/**
-	 * @param array $params
-	 * @return array
-	 */
+	private const TRACKING_CATEGORIES = [
+		'broken-file-category' => 'Pages with broken file links',
+		'magiclink-tracking-rfc' => 'Pages using RFC magic links',
+		'magiclink-tracking-isbn' => 'Pages using ISBN magic links',
+		'magiclink-tracking-pmid' => 'Pages using PMID magic links',
+	];
+
 	private function processQuery( array $params ): array {
 		if ( ( $params['meta'] ?? null ) === 'siteinfo' ) {
 			if ( !isset( $this->cachedConfigs[$this->prefix] ) ) {
 				$this->cachedConfigs[$this->prefix] = json_decode(
-					file_get_contents( __DIR__ . "/../../baseconfig/2/$this->prefix.json" ), true );
+					file_get_contents( __DIR__ . "/../../baseconfig/$this->prefix.json" ), true );
 			}
 			return $this->cachedConfigs[$this->prefix];
+		}
+
+		if ( ( $params['meta'] ?? null ) === 'allmessages' ) {
+			$allmessages = [];
+			if ( isset( self::TRACKING_CATEGORIES[$params['ammessages']] ) ) {
+				$allmessages[] = [
+					'content' => self::TRACKING_CATEGORIES[$params['ammessages']]
+				];
+			} else {
+				$allmessages[] = [ 'missing' => true ];
+			}
+			return [ 'query' => [ 'allmessages' => $allmessages ] ];
 		}
 
 		$revid = $params['revids'] ?? null;
@@ -800,7 +890,8 @@ class MockApiHelper extends ApiHelper {
 			$titles = preg_split( '/\|/', $params['titles'] );
 			foreach ( $titles as $t ) {
 				$props = [ 'title' => $t ];
-				$key = str_replace( ' ', '_', $t ); # poor man's normalization
+				$normalizeTitle = $this->normalizeTitle;
+				$key = $normalizeTitle( $t );
 				$definedInPt = isset( $this->articleCache[$key] );
 				if ( in_array( $t, self::$missingTitles, true ) ||
 					 !$definedInPt ) {
@@ -874,11 +965,6 @@ class MockApiHelper extends ApiHelper {
 		return [ "error" => new Error( 'Uh oh!' ) ];
 	}
 
-	/**
-	 * @param string $text
-	 * @param bool $onlypst
-	 * @return array
-	 */
 	private function parse( string $text, bool $onlypst ): array {
 		// We're performing a subst
 		if ( $onlypst ) {
@@ -921,12 +1007,6 @@ class MockApiHelper extends ApiHelper {
 		return [ 'parse' => $parse ];
 	}
 
-	/**
-	 * @param string $title
-	 * @param string $text
-	 * @param ?int $revid
-	 * @return ?array
-	 */
 	private function preProcess(
 		string $title, string $text, ?int $revid
 	): ?array {
@@ -946,10 +1026,6 @@ class MockApiHelper extends ApiHelper {
 		}
 	}
 
-	/**
-	 * @param array $params
-	 * @return array
-	 */
 	private function fetchTemplateData( array $params ): array {
 		return [
 			// Assumes that titles is a single title

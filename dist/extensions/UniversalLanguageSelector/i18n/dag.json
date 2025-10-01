@@ -2,9 +2,9 @@
 	"@metadata": {
 		"authors": [
 			"Hidrash",
+			"Issahiddris98",
 			"Musahfm",
-			"Sir Amugi",
-			"Issahiddris98"
+			"Sir Amugi"
 		]
 	},
 	"uls-desc": "Timi ŋun yɛn zaŋ tum tuma soya pam ka o tooi pii zuliya ka ni tooi mali ŋa zali",
@@ -74,5 +74,6 @@
 	"ext-uls-empty-state-header": "Zuliya shɛli na kani",
 	"ext-uls-empty-state-desc": "Zuliya shɛli na kani ti ni ʒiya sahashɛli ŋɔ",
 	"ext-uls-empty-state-header-actions-available": "Zuliyanima nabi pahi. Pahimi zaɣ' palli",
-	"ext-uls-empty-state-desc-actions-available": "Che ka lahibali maa kpe zuliya bɔbigu ni"
+	"ext-uls-empty-state-desc-actions-available": "Che ka lahibali maa kpe zuliya bɔbigu ni",
+	"ext-uls-add-languages-button-label": "Pahimi zuliyanima"
 }

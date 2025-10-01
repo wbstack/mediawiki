@@ -1,7 +1,7 @@
 /*!
  * VisualEditor MediaWiki test utilities.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -138,9 +138,9 @@
 	 *
 	 * @inheritdoc ve#getDomElementSummary
 	 */
-	ve.getDomElementSummary = ( element, includeHtml ) =>
+	ve.getDomElementSummary = function ( element, includeHtml ) {
 		// "Parent" method
-		getDomElementSummaryCore( element, includeHtml, ( name, value ) => {
+		return getDomElementSummaryCore( element, includeHtml, ( name, value ) => {
 			if ( name === 'data-mw' ) {
 				const obj = JSON.parse( value ),
 					html = ve.getProp( obj, 'body', 'html' );
@@ -151,4 +151,5 @@
 			}
 			return value;
 		} );
+	};
 }

@@ -1,5 +1,5 @@
 ---
-mediawikiVersion: "1.39"
+mediawikiVersion: "1.43"
 #mediawikiRepoRef: commit hash goes here
 mediawikiRemove:
   - docs
@@ -106,8 +106,6 @@ extensions:
     repoName: wikimedia/mediawiki-extensions-DeleteBatch
   - name: MultimediaViewer
     repoName: wikimedia/mediawiki-extensions-MultimediaViewer
-  - name: Auth_remoteuser
-    repoName: wikimedia/mediawiki-extensions-Auth_remoteuser
   - name: WikibaseManifest
     repoName: wikimedia/mediawiki-extensions-WikibaseManifest
     remove:
@@ -122,9 +120,6 @@ extensions:
   - name: WikibaseInWikitext
     repoName: wbstack/mediawiki-extensions-WikibaseInWikitext
     repoRef: 445c7efaa145fa7c31b0caca7400ef6a87cac7d9
-  - name: WikibaseExampleData
-    repoName: wmde/WikibaseExampleData
-    repoRef: c129f0b759bf4602aa9b09e2bb9b694682784320
   - name: WikibaseEdtf
     repoName: ProfessionalWiki/WikibaseEdtf
     repoRef: "1.2.0"
@@ -132,9 +127,8 @@ extensions:
     repoName: nyurik/ThatSrc
     repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
   ## These extensions use urls directly
-  ### Obtain wikibase tar URL from https://www.mediawiki.org/wiki/Special:ExtensionDistributor?extdistname=Wikibase&extdistversion=REL1_39
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/bea851b57845f049ba292f4d9eac6fc4823f736e/wikibase-1713968655-REL1_39.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/4467d5781c718b3c0a82b114e92741937d700e3f/Wikibase-1757337697-REL1_43.tar.gz
     remove:
       - build
       - vendor
@@ -170,7 +164,7 @@ extensions:
   - name: EmbedVideo
     url: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
   - name: VisualEditor
-    url: https://github.com/wbstack/mediawiki-tars/raw/337ca7e216df2eeb0521f55b001d857a7cc9a5a7/visualeditor-1731406049-REL1_39.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/9b622fc78d4c9ee019165f4b7fff46bb73b13ab9/VisualEditor-1757337760-REL1_43.tar.gz
 
 skins:
   - name: Vector

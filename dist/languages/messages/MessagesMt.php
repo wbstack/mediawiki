@@ -1,8 +1,6 @@
 <?php
 /** Maltese (Malti)
  *
- * To improve a translation please visit https://translatewiki.net
- *
  * @file
  * @ingroup Languages
  *
@@ -109,6 +107,7 @@ $specialPageAliases = [
 	'Randomredirect'            => [ 'RiindirizzKwalunkwe' ],
 	'Recentchanges'             => [ 'TibdilRiċenti' ],
 	'Recentchangeslinked'       => [ 'TibdilRelatat' ],
+	'Renameuser'                => [ 'BiddelIsemUtent' ],
 	'Revisiondelete'            => [ 'ĦassarReviżjoni' ],
 	'Search'                    => [ 'Fittex' ],
 	'Shortpages'                => [ 'PaġniQosra' ],
@@ -192,7 +191,7 @@ $magicWords = [
 	'img_top'                   => [ '1', 'fuq', 'top' ],
 	'img_upright'               => [ '1', 'wieqaf', 'wieqaf=$1', 'wieqaf $1', 'upright', 'upright=$1', 'upright $1' ],
 	'index'                     => [ '1', '__INDIĊI__', '__INDEX__' ],
-	'language'                  => [ '0', '#LINGWA:', '#LANGUAGE:' ],
+	'language'                  => [ '0', '#LINGWA', '#LANGUAGE' ],
 	'lc'                        => [ '0', 'KŻ:', 'LC:' ],
 	'lcfirst'                   => [ '0', 'IBDAKŻ:', 'LCFIRST:' ],
 	'localday'                  => [ '1', 'ĠURNATALOKALI', 'LOCALDAY' ],

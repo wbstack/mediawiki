@@ -9,9 +9,10 @@ use Elastica\Query\BoolQuery;
 use Elastica\Query\DisMax;
 use Elastica\Query\MatchQuery;
 use Elastica\Query\Term;
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
-use WebRequest;
+use MediaWiki\Request\FauxRequest;
+use MediaWiki\Request\WebRequest;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\LanguageFallbackChainFactory;
 use Wikibase\Repo\Api\EntitySearchException;
@@ -81,7 +82,7 @@ class EntitySearchElastic implements EntitySearchHelper {
 	/**
 	 * Web request context.
 	 * Used for implementing debug features such as cirrusDumpQuery.
-	 * @var \WebRequest
+	 * @var WebRequest
 	 */
 	private $request;
 
@@ -114,14 +115,14 @@ class EntitySearchElastic implements EntitySearchHelper {
 		EntityIdParser $idParser,
 		Language $userLang,
 		array $contentModelMap,
-		WebRequest $request = null,
-		CirrusDebugOptions $options = null
+		?WebRequest $request = null,
+		?CirrusDebugOptions $options = null
 	) {
 		$this->languageChainFactory = $languageChainFactory;
 		$this->idParser = $idParser;
 		$this->userLang = $userLang;
 		$this->contentModelMap = $contentModelMap;
-		$this->request = $request ?: new \FauxRequest();
+		$this->request = $request ?: new FauxRequest();
 		$this->debugOptions = $options ?: CirrusDebugOptions::fromRequest( $this->request );
 	}
 
@@ -159,7 +160,7 @@ class EntitySearchElastic implements EntitySearchHelper {
 				$context->getProfileContextParams() );
 
 		// Set some bc defaults for properties that didn't always exist.
-		$profile['tie-breaker'] = $profile['tie-breaker'] ?? 0;
+		$profile['tie-breaker'] ??= 0;
 
 		// There are two flavors of profiles: fully specified, and generic
 		// fallback. When language-chain is provided we assume a fully
@@ -291,9 +292,9 @@ class EntitySearchElastic implements EntitySearchHelper {
 		$entityType,
 		$limit,
 		$strictLanguage,
-		string $profileContext = null
+		?string $profileContext = null
 	) {
-		$profileContext = $profileContext ?? self::CONTEXT_WIKIBASE_PREFIX;
+		$profileContext ??= self::CONTEXT_WIKIBASE_PREFIX;
 		$searcher = new WikibasePrefixSearcher( 0, $limit, $this->debugOptions );
 		$searcher->getSearchContext()->setProfileContext(
 			$profileContext,
@@ -326,19 +327,6 @@ class EntitySearchElastic implements EntitySearchHelper {
 		}
 
 		return $result;
-	}
-
-	/**
-	 * Determine from the classpath which elastic version we
-	 * aim to be compatible with.
-	 * @return int
-	 */
-	public static function getExpectedElasticMajorVersion() {
-		if ( class_exists( '\Elastica\Task' ) ) {
-			return 6;
-		}
-
-		return 5;
 	}
 
 }

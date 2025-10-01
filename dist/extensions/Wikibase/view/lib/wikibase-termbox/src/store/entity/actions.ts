@@ -12,7 +12,7 @@ import {
 	ENTITY_ALIAS_REMOVE,
 	ENTITY_ROLLBACK,
 } from '@/store/entity/actionTypes';
-import FingerprintableEntity from '@/datamodel/FingerprintableEntity';
+import { newFingerprintableEntity } from '@/datamodel/FingerprintableEntity';
 import {
 	EDITABILITY_UPDATE,
 	ENTITY_UPDATE,
@@ -21,10 +21,10 @@ import {
 	ENTITY_SET_LABEL as SET_ENTITY_LABEL_MUTATION,
 	ENTITY_SET_DESCRIPTION as SET_ENTITY_DESCRIPTION_MUTATION,
 	ENTITY_REMOVE_ALIAS,
-	ENTITY_ROLLBACK as ENTITY_ROLLBACK_MUTATION,
+	ENTITY_ROLLBACK as ENTITY_ROLLBACK_MUTATION, ENTITY_REDIRECT_UPDATE,
 } from '@/store/entity/mutationTypes';
 import { Term } from '@wmde/wikibase-datamodel-types';
-import EntityRevision from '@/datamodel/EntityRevision';
+import EntityRevisionWithRedirect from '@/datamodel/EntityRevisionWithRedirect';
 
 // eslint-disable-next-line max-len
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type, @typescript-eslint/explicit-module-boundary-types
@@ -48,14 +48,17 @@ export default (
 	},
 
 	[ ENTITY_SAVE ]( context: ActionContext<EntityState, any> ): Promise<void> {
-		return writingEntityRepository.saveEntity( new FingerprintableEntity(
+		return writingEntityRepository.saveEntity( newFingerprintableEntity(
 			context.state.id,
 			context.state.labels,
 			context.state.descriptions,
 			context.state.aliases,
-		), context.state.baseRevision ).then( ( entityRevision: EntityRevision ) => {
+		), context.state.baseRevision ).then( ( entityRevision: EntityRevisionWithRedirect ) => {
 			context.commit( ENTITY_REVISION_UPDATE, entityRevision.revisionId );
 			context.commit( ENTITY_UPDATE, entityRevision.entity );
+			if ( entityRevision.redirectUrl !== undefined ) {
+				context.commit( ENTITY_REDIRECT_UPDATE, entityRevision.redirectUrl );
+			}
 		} );
 	},
 

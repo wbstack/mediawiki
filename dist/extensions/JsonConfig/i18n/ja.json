@@ -2,18 +2,19 @@
 	"@metadata": {
 		"authors": [
 			"Akki-102525",
+			"Chqaz",
 			"Kkairri",
 			"Object＊tofu",
 			"Otokoume",
 			"Shirayuki",
 			"Suyama",
 			"Thibaut120094",
+			"Tmv",
 			"Yurik",
 			"Yusuke1109",
 			"つぶあん派",
 			"春春眠眠",
-			"Chqaz",
-			"Tmv"
+			"Shulmj"
 		]
 	},
 	"nstab-data": "データ",
@@ -22,7 +23,7 @@
 	"jsonconfig-edit-action-cancel": "キャンセル",
 	"jsonconfig-edit-button-label": "テーブルとして編集",
 	"jsonconfig-edit-dialog-error": "テーブルとして編集できません：$1",
-	"jsonconfig-edit-dialog-error-data-inavlid": "データがスキーマと一致しません",
+	"jsonconfig-edit-dialog-error-data-invalid": "データがスキーマと一致しません",
 	"jsonconfig-edit-dialog-error-data-too-large": "データセットが大きすぎるためテーブルとして編集できません",
 	"jsonconfig-edit-dialog-error-field-name-missing": "各フィールドは名前が必須です",
 	"jsonconfig-edit-dialog-title": "JSONを編集",
@@ -39,6 +40,7 @@
 	"jsonconfig-type-name-string": "文字列",
 	"jsonconfig-type-name-number": "数値",
 	"jsonconfig-type-name-boolean": "ブール型",
+	"jsonconfig-use-category": "JsonConfig拡張機能を使用しているページ",
 	"jsonconfig-license": "データは$1の下で利用できます。",
 	"jsonconfig-license-name-CC0-1.0": "クリエイティブ・コモンズ・ゼロ",
 	"jsonconfig-license-name-GeoNutzV": "地理データライセンスドイツ",

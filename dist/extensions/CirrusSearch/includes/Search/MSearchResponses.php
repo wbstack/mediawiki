@@ -4,7 +4,7 @@ namespace CirrusSearch\Search;
 
 use Elastica\ResultSet as ElasticaResultSet;
 use Elastica\Search;
-use Status;
+use MediaWiki\Status\Status;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -32,7 +32,7 @@ class MSearchResponses {
 	 * @param Search[] $requests
 	 * @param Status|null $status failure
 	 */
-	public function __construct( array $resultSets, array $requests, Status $status = null ) {
+	public function __construct( array $resultSets, array $requests, ?Status $status = null ) {
 		$this->resultSets = $resultSets;
 		$this->requests = $requests;
 		Assert::parameter( $status === null || !$status->isOK(), '$status', 'must be a failure if set' );
@@ -55,7 +55,7 @@ class MSearchResponses {
 	 * @param callable|null $reordering reordering function
 	 * @return Status
 	 */
-	public function transformAndGetMulti( ResultsType $transformation, array $keys, callable $reordering = null ): Status {
+	public function transformAndGetMulti( ResultsType $transformation, array $keys, ?callable $reordering = null ): Status {
 		$result = [];
 		$input = array_intersect_key( $this->resultSets, array_flip( $keys ) );
 		foreach ( $input as $k => $v ) {

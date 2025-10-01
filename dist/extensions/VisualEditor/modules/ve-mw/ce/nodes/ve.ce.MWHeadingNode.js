@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWHeadingNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -49,24 +49,23 @@ ve.ce.MWHeadingNode.prototype.onTeardown = function () {
 };
 
 ve.ce.MWHeadingNode.prototype.onUpdate = function () {
-	var surface = this.surface,
-		node = this;
+	const surface = this.surface;
 
 	// Parent method
 	ve.ce.MWHeadingNode.super.prototype.onUpdate.call( this );
 
 	if ( surface && surface.mwTocWidget ) {
-		surface.getModel().getDocument().once( 'transact', function () {
-			surface.mwTocWidget.updateNode( node );
+		surface.getModel().getDocument().once( 'transact', () => {
+			surface.mwTocWidget.updateNode( this );
 		} );
 	}
 };
 
 ve.ce.MWHeadingNode.prototype.rebuildToc = function () {
-	var surface = this.surface;
+	const surface = this.surface;
 
 	if ( surface && surface.mwTocWidget ) {
-		surface.getModel().getDocument().once( 'transact', function () {
+		surface.getModel().getDocument().once( 'transact', () => {
 			surface.mwTocWidget.rebuild();
 		} );
 	}

@@ -2,8 +2,9 @@
 
 namespace Wikibase\Client\Api;
 
-use ApiQuery;
-use ApiQueryBase;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiQuery;
+use MediaWiki\Api\ApiQueryBase;
 use Wikibase\Lib\SettingsArray;
 use Wikimedia\ParamValidator\ParamValidator;
 
@@ -59,7 +60,7 @@ class ApiClientInfo extends ApiQueryBase {
 			switch ( $p ) {
 				case 'url':
 					$data['repo'] = [
-						'url' => $this->getRepoUrls()
+						'url' => $this->getRepoUrls(),
 					];
 					break;
 				case 'siteid':
@@ -101,8 +102,9 @@ class ApiClientInfo extends ApiQueryBase {
 				ParamValidator::PARAM_DEFAULT => 'url|siteid',
 				ParamValidator::PARAM_ISMULTI => true,
 				ParamValidator::PARAM_TYPE => [
-					'url', 'siteid'
-				]
+					'url', 'siteid',
+				],
+				ApiBase::PARAM_HELP_MSG_PER_VALUE => [],
 			],
 		];
 	}

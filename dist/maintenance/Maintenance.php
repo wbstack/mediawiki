@@ -42,6 +42,13 @@ if ( defined( 'MEDIAWIKI' ) ) {
 	return;
 }
 
+// Abort if called from a web server
+// wfIsCLI() is not available yet
+if ( PHP_SAPI !== 'cli' && PHP_SAPI !== 'phpdbg' ) {
+	echo "This script must be run from the command line\n";
+	exit( 1 );
+}
+
 define( 'MW_ENTRY_POINT', 'cli' );
 
 // Bail on old versions of PHP, or if composer has not been run yet to install
@@ -51,7 +58,7 @@ require_once __DIR__ . '/../includes/PHPVersionCheck.php';
 wfEntryPointCheck( 'text' );
 
 /**
- * @var string|false
+ * @var string|false $maintClass
  * @phan-var class-string|false
  */
 $maintClass = false;

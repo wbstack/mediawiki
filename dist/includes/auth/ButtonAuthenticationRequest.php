@@ -21,8 +21,8 @@
 
 namespace MediaWiki\Auth;
 
-use Message;
-use RawMessage;
+use MediaWiki\Language\RawMessage;
+use MediaWiki\Message\Message;
 
 /**
  * This is an authentication request that just implements a simple button.
@@ -30,6 +30,7 @@ use RawMessage;
  * @ingroup Auth
  * @since 1.27
  */
+#[\AllowDynamicProperties]
 class ButtonAuthenticationRequest extends AuthenticationRequest {
 	/** @var string */
 	protected $name;

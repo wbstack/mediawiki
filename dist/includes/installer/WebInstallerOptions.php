@@ -1,4 +1,5 @@
 <?php
+
 /**
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +20,10 @@
  * @ingroup Installer
  */
 
+namespace MediaWiki\Installer;
+
+use MediaWiki\Html\Html;
+use MediaWiki\Specials\SpecialVersion;
 use Wikimedia\IPUtils;
 
 class WebInstallerOptions extends WebInstallerPage {
@@ -119,7 +124,7 @@ class WebInstallerOptions extends WebInstallerPage {
 			// For grep: The following messages are used as the item labels:
 			// config-license-cc-by, config-license-cc-by-sa, config-license-cc-by-nc-sa,
 			// config-license-cc-0, config-license-pd, config-license-gfdl,
-			// config-license-none, config-license-cc-choose
+			// config-license-none
 			$this->parent->getRadioSet( [
 				'var' => '_LicenseCode',
 				'label' => 'config-license',
@@ -127,7 +132,6 @@ class WebInstallerOptions extends WebInstallerPage {
 				'values' => array_keys( $this->parent->licenses ),
 				'commonAttribs' => [ 'class' => 'licenseRadio' ],
 			] ) .
-			$this->getCCChooser() .
 			$this->parent->getHelpBox( 'config-license-help' )
 		);
 	}
@@ -207,7 +211,7 @@ class WebInstallerOptions extends WebInstallerPage {
 					'<div class="config-skins-item">' .
 					$this->parent->getCheckBox( [
 						'var' => "skin-$skin",
-						'rawtext' => $screenshotText,
+						'rawtext' => $screenshotText . $this->makeMoreInfoLink( $info ),
 						'value' => $this->getVar( "skin-$skin", true ), // all found skins enabled by default
 					] ) .
 					'<div class="config-skins-use-as-default">' . $radioButtons[strtolower( $skin )] . '</div>' .
@@ -215,7 +219,7 @@ class WebInstallerOptions extends WebInstallerPage {
 			}
 		} else {
 			$skinHtml .=
-				Html::warningBox( wfMessage( 'config-skins-missing' )->plain(), 'config-warning-box' ) .
+				Html::warningBox( wfMessage( 'config-skins-missing' )->parse(), 'config-warning-box' ) .
 				Html::hidden( 'config_wgDefaultSkin', $chosenSkinName );
 		}
 
@@ -257,16 +261,11 @@ class WebInstallerOptions extends WebInstallerPage {
 				}
 				$extHtml .= Html::element( 'h2', [], $message );
 				foreach ( $extByType[$type] as $ext => $info ) {
-					$urlText = '';
-					if ( isset( $info['url'] ) ) {
-						$urlText = ' ' . Html::element( 'a', [ 'href' => $info['url'] ], '(more information)' );
-					}
 					$attribs = [
 						'data-name' => $ext,
-						'class' => 'config-ext-input'
+						'class' => 'config-ext-input cdx-checkbox__input'
 					];
 					$labelAttribs = [];
-					$fullDepList = [];
 					if ( isset( $info['requires']['extensions'] ) ) {
 						$dependencyMap[$ext]['extensions'] = $info['requires']['extensions'];
 						$labelAttribs['class'] = 'mw-ext-with-dependencies';
@@ -307,7 +306,7 @@ class WebInstallerOptions extends WebInstallerPage {
 					}
 					$extHtml .= $this->parent->getCheckBox( [
 						'var' => "ext-$ext",
-						'rawtext' => $text,
+						'rawtext' => $text . $this->makeMoreInfoLink( $info ),
 						'attribs' => $attribs,
 						'labelAttribs' => $labelAttribs,
 					] );
@@ -319,7 +318,7 @@ class WebInstallerOptions extends WebInstallerPage {
 			$this->addHTML( $extHtml );
 			// Push the dependency map to the client side
 			$this->addHTML( Html::inlineScript(
-				'var extDependencyMap = ' . Xml::encodeJsVar( $dependencyMap )
+				'var extDependencyMap = ' . Html::encodeJsVar( $dependencyMap )
 			) );
 		}
 	}
@@ -448,95 +447,20 @@ class WebInstallerOptions extends WebInstallerPage {
 	}
 
 	/**
-	 * @return string
+	 * @param array $info
+	 * @return string HTML
 	 */
-	public function getCCPartnerUrl() {
-		$server = $this->getVar( 'wgServer' );
-		$exitUrl = $server . $this->parent->getUrl( [
-			'page' => 'Options',
-			'SubmitCC' => 'indeed',
-			'config__LicenseCode' => 'cc',
-			'config_wgRightsUrl' => '[license_url]',
-			'config_wgRightsText' => '[license_name]',
-			'config_wgRightsIcon' => '[license_button]',
-		] );
-		$styleUrl = $server . dirname( dirname( $this->parent->getUrl() ) ) .
-			'/mw-config/config-cc.css';
-		$iframeUrl = 'https://creativecommons.org/license/?' .
-			wfArrayToCgi( [
-				'partner' => 'MediaWiki',
-				'exit_url' => $exitUrl,
-				'lang' => $this->getVar( '_UserLang' ),
-				'stylesheet' => $styleUrl,
-			] );
-
-		return $iframeUrl;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getCCChooser() {
-		$iframeAttribs = [
-			'class' => 'config-cc-iframe',
-			'name' => 'config-cc-iframe',
-			'id' => 'config-cc-iframe',
-			'frameborder' => 0,
-			'width' => '100%',
-			'height' => '100%',
-		];
-		if ( $this->getVar( '_CCDone' ) ) {
-			$iframeAttribs['src'] = $this->parent->getUrl( [ 'ShowCC' => 'yes' ] );
-		} else {
-			$iframeAttribs['src'] = $this->getCCPartnerUrl();
+	private function makeMoreInfoLink( $info ) {
+		if ( !isset( $info['url'] ) ) {
+			return '';
 		}
-		$wrapperStyle = ( $this->getVar( '_LicenseCode' ) == 'cc-choose' ) ? '' : 'display: none';
-
-		return "<div class=\"config-cc-wrapper\" id=\"config-cc-wrapper\" style=\"$wrapperStyle\">\n" .
-			Html::element( 'iframe', $iframeAttribs ) .
-			"</div>\n";
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getCCDoneBox() {
-		$js = "parent.document.getElementById('config-cc-wrapper').style.height = '$1';";
-		// If you change this height, also change it in config.css
-		$expandJs = str_replace( '$1', '54em', $js );
-		$reduceJs = str_replace( '$1', '70px', $js );
-
-		return '<p>' .
-			Html::element( 'img', [ 'src' => $this->getVar( 'wgRightsIcon' ) ] ) .
-			"\u{00A0}\u{00A0}" .
-			htmlspecialchars( $this->getVar( 'wgRightsText' ) ) .
-			"</p>\n" .
-			"<p style=\"text-align: center;\">" .
-			Html::element( 'a',
-				[
-					'href' => $this->getCCPartnerUrl(),
-					'onclick' => $expandJs,
-				],
-				wfMessage( 'config-cc-again' )->text()
-			) .
-			"</p>\n" .
-			"<script>\n" .
-			# Reduce the wrapper div height
-			htmlspecialchars( $reduceJs ) .
-			"\n" .
-			"</script>\n";
-	}
-
-	public function submitCC() {
-		$newValues = $this->parent->setVarsFromRequest(
-			[ 'wgRightsUrl', 'wgRightsText', 'wgRightsIcon' ] );
-		if ( count( $newValues ) != 3 ) {
-			$this->parent->showError( 'config-cc-error' );
-
-			return;
-		}
-		$this->setVar( '_CCDone', true );
-		$this->addHTML( $this->getCCDoneBox() );
+		return ' ' . wfMessage( 'parentheses' )->rawParams(
+			Html::element(
+				'a',
+				[ 'href' => $info['url'] ],
+				wfMessage( 'config-ext-skins-more-info' )->text()
+			)
+		)->escaped();
 	}
 
 	/**
@@ -571,21 +495,14 @@ class WebInstallerOptions extends WebInstallerPage {
 		$retVal = true;
 
 		if ( !array_key_exists( $this->getVar( '_RightsProfile' ), $this->parent->rightsProfiles ) ) {
-			reset( $this->parent->rightsProfiles );
-			$this->setVar( '_RightsProfile', key( $this->parent->rightsProfiles ) );
+			$this->setVar( '_RightsProfile', array_key_first( $this->parent->rightsProfiles ) );
 		}
 
 		$code = $this->getVar( '_LicenseCode' );
-		if ( $code == 'cc-choose' ) {
-			if ( !$this->getVar( '_CCDone' ) ) {
-				$this->parent->showError( 'config-cc-not-chosen' );
-				$retVal = false;
-			}
-		} elseif ( array_key_exists( $code, $this->parent->licenses ) ) {
+		if ( array_key_exists( $code, $this->parent->licenses ) ) {
 			// Messages:
 			// config-license-cc-by, config-license-cc-by-sa, config-license-cc-by-nc-sa,
-			// config-license-cc-0, config-license-pd, config-license-gfdl, config-license-none,
-			// config-license-cc-choose
+			// config-license-cc-0, config-license-pd, config-license-gfdl, config-license-none
 			$entry = $this->parent->licenses[$code];
 			$this->setVar( 'wgRightsText',
 				$entry['text'] ?? wfMessage( 'config-license-' . $code )->text() );

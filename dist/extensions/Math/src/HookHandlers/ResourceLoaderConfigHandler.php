@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\Math\HookHandlers;
 
-use Config;
+use MediaWiki\Config\Config;
 use MediaWiki\Extension\Math\MathConfig;
 use MediaWiki\ResourceLoader\Hook\ResourceLoaderGetConfigVarsHook;
 
@@ -22,6 +22,7 @@ class ResourceLoaderConfigHandler implements
 		$this->mathConfig = $mathConfig;
 	}
 
+	/** @inheritDoc */
 	public function onResourceLoaderGetConfigVars( array &$vars, $skin, Config $config ): void {
 		$vars['wgMathEntitySelectorUrl'] = $this->mathConfig->getMathEntitySelectorUrl();
 	}

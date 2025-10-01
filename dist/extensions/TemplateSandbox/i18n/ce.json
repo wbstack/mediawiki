@@ -14,7 +14,7 @@
 	"templatesandbox-prefix-label": "АгӀонан цӀе:",
 	"templatesandbox-page-label": "Гайта агӀо:",
 	"templatesandbox-revid-label": "Гойту верси:",
-	"templatesandbox-text-label": "Гойту вики-йоза:",
+	"templatesandbox-text-label": "Вики-текст гайтар:",
 	"templatesandbox-submit": "Хьажа",
 	"templatesandbox-title-output": "Кепийн ловзаран майда: $1",
 	"templatesandbox-editform-legend": "Кеп лелош йолучу агӀоне хьалххе хьажар",
@@ -25,7 +25,17 @@
 	"templatesandbox-invalid-title": "Ахьа йазйина йолу цӀе ца магайо.",
 	"templatesandbox-title-not-exists": "Ахьа йазйина коьрта цӀе, йан а йац.",
 	"templatesandbox-revision-not-exists": "Ахьа билгалйина верси йац.",
+	"templatesandbox-revision-no-content": "Билгалйаьккхинчу верси чохь хӀумма а йац йа хьан бакъо йац цуьнан чулацаме хьажа",
+	"templatesandbox-invalid-prefix": "Нийса йоцу ловзаран майданан префикс билгалйаьккхина.",
+	"templatesandbox-prefix-not-local": "Ахьа билгалйаьккхина ловзаран майданан префикс локалан йац.",
 	"templatesandbox-page-or-revid": "Ахьа йазйан йеза агӀонан цӀе йа версин лоьмар.",
+	"templatesandbox-fail-post": "<em>Сессин хаамаш дайар бахьана долуш, хьалххе хьажар къайладоккху JavaScript-атакех лардаларан Ӏалашонца.</em>\n\n<strong>Нагахь санна хӀара низамехь хьалххе хьажар хиллехь, йуха а хьажа.</strong>\nНагахь санна хьан хӀинца а аьтто бацахь, хьажа [[Special:UserLogout|белхан сеанс чекхйаьккхина]] а йуха авторизаци йан.",
+	"templatesandbox-fail-post-anon": "<em>Ахьа авторизаци йина ца хиларна, хьалххе хьажар къайладоккху, JavaScript-атакех лардаларан Ӏалашонца.</em>\n\n<strong>Нагахь санна хӀара низамехь хьалххе хьажар делахь, дехар до, [[Special:UserLogin|авторизаци йина]] йуха а хьажа.</strong>",
+	"templatesandbox-anon-limited-preview": "JavaScript а, CSS а хийцамашка хьалххе хьажар дӀадоккху, ахьа авторизаци йина ца хиларна. Хьайна и тайпа хийцамаш ган лаахь, дехар ду [[Special:UserLogin|авторизаци йина]] йуха а хьажа.",
 	"templatesandbox-editform-need-template": "ХӀара кеп лелош йолу кхечу агӀоне хьажа, агӀонан цӀе йазйан йеза.",
-	"templatesandbox-editform-need-title": "ХӀара кеп лелош йолу кхечу агӀоне хьажа, агӀонан цӀе йазйан йеза."
+	"templatesandbox-editform-need-title": "ХӀара кеп лелош йолу кхечу агӀоне хьажа, агӀонан цӀе йазйан йеза.",
+	"templatesandbox-editform-invalid-template": "Ахьа билгалйаьккхина кепан цӀе нийса йац.",
+	"templatesandbox-editform-invalid-title": "Ахьа хьалххе хьажархьама йазйина цӀе нийса йац.",
+	"templatesandbox-editform-title-not-exists": "Ахьа хьалххе хьажархьама билгалйаьккхина цӀе йоцуш йу.",
+	"templatesandbox-failed-replace-section": "Йолуш йолу агӀонан тӀехь цхьа дакъа хийца аьтто ца баьлла."
 }

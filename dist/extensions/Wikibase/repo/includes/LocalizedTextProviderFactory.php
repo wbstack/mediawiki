@@ -4,9 +4,8 @@ declare( strict_types=1 );
 
 namespace Wikibase\Repo;
 
-use Language;
+use MediaWiki\Language\Language;
 use MediaWiki\Languages\LanguageFactory;
-use MWException;
 use Wikibase\View\LocalizedTextProvider;
 
 /**
@@ -31,9 +30,6 @@ class LocalizedTextProviderFactory {
 		return new MediaWikiLocalizedTextProvider( $language );
 	}
 
-	/**
-	 * @throws MWException
-	 */
 	public function getForLanguageCode( string $langCode ): LocalizedTextProvider {
 		$language = $this->languageFactory->getLanguage( $langCode );
 		return $this->getForLanguage( $language );

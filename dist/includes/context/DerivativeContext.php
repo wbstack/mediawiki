@@ -18,8 +18,23 @@
  * @author Daniel Friesen
  * @file
  */
+
+namespace MediaWiki\Context;
+
+use MediaWiki\Config\Config;
+use MediaWiki\Language\Language;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Message\Message;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Permissions\Authority;
+use MediaWiki\Request\WebRequest;
+use MediaWiki\Title\Title;
+use MediaWiki\User\User;
+use Skin;
+use Timing;
+use Wikimedia\Assert\Assert;
+use Wikimedia\Message\MessageSpecifier;
+use WikiPage;
 
 /**
  * An IContextSource implementation which will inherit context from another source
@@ -46,9 +61,9 @@ class DerivativeContext extends ContextSource implements MutableContext {
 	private $wikipage;
 
 	/**
-	 * @var string
+	 * @var string|null|false
 	 */
-	private $action;
+	private $action = false;
 
 	/**
 	 * @var OutputPage
@@ -108,17 +123,6 @@ class DerivativeContext extends ContextSource implements MutableContext {
 	}
 
 	/**
-	 * @deprecated since 1.27 use a StatsdDataFactory from MediaWikiServices (preferably injected).
-	 *  Hard deprecated since 1.39.
-	 *
-	 * @return IBufferingStatsdDataFactory
-	 */
-	public function getStats() {
-		wfDeprecated( __METHOD__, '1.27' );
-		return MediaWikiServices::getInstance()->getStatsdDataFactory();
-	}
-
-	/**
 	 * @return Timing
 	 */
 	public function getTiming() {
@@ -144,6 +148,7 @@ class DerivativeContext extends ContextSource implements MutableContext {
 	 */
 	public function setTitle( Title $title ) {
 		$this->title = $title;
+		$this->action = null;
 	}
 
 	/**
@@ -183,6 +188,7 @@ class DerivativeContext extends ContextSource implements MutableContext {
 			$this->setTitle( $pageTitle );
 		}
 		$this->wikipage = $wikiPage;
+		$this->action = null;
 	}
 
 	/**
@@ -217,7 +223,15 @@ class DerivativeContext extends ContextSource implements MutableContext {
 	 * @return string Action
 	 */
 	public function getActionName(): string {
-		return $this->action ?: $this->getContext()->getActionName();
+		if ( $this->action === false ) {
+			return $this->getContext()->getActionName();
+		}
+
+		$this->action ??= MediaWikiServices::getInstance()
+			->getActionFactory()
+			->getActionName( $this );
+
+		return $this->action;
 	}
 
 	/**
@@ -271,18 +285,16 @@ class DerivativeContext extends ContextSource implements MutableContext {
 
 	/**
 	 * @param Language|string $language Language instance or language code
-	 * @throws MWException
 	 * @since 1.19
 	 */
 	public function setLanguage( $language ) {
+		Assert::parameterType( [ Language::class, 'string' ], $language, '$language' );
 		if ( $language instanceof Language ) {
 			$this->lang = $language;
-		} elseif ( is_string( $language ) ) {
+		} else {
 			$language = RequestContext::sanitizeLangCode( $language );
 			$obj = MediaWikiServices::getInstance()->getLanguageFactory()->getLanguage( $language );
 			$this->lang = $obj;
-		} else {
-			throw new MWException( __METHOD__ . " was passed an invalid type of data." );
 		}
 	}
 
@@ -326,3 +338,6 @@ class DerivativeContext extends ContextSource implements MutableContext {
 		return wfMessage( $key, ...$params )->setContext( $this );
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( DerivativeContext::class, 'DerivativeContext' );

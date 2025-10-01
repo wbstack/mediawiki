@@ -8,7 +8,7 @@
 	"descriptionmsg": "wikibase-desc",
 	"license-name": "GPL-2.0-or-later",
 	"requires": {
-		"MediaWiki": ">= 1.38"
+		"MediaWiki": ">= 1.43"
 	},
 	"APIModules": {
 		"wbavailablebadges": {
@@ -71,7 +71,9 @@
 				"WikibaseRepo.DataTypeFactory",
 				"WikibaseRepo.DataValueFactory",
 				"WikibaseRepo.EntityIdParser",
+				"WikibaseRepo.PropertyDataTypeLookup",
 				"WikibaseRepo.SnakFormatterFactory",
+				"WikibaseRepo.SnakValueDeserializer",
 				"WikibaseRepo.ValueFormatterFactory"
 			]
 		},
@@ -180,7 +182,7 @@
 			"services": [
 				"LinkBatchFactory",
 				"WikibaseRepo.ApiHelperFactory",
-				"WikibaseRepo.EnabledEntityTypes",
+				"WikibaseRepo.EnabledEntityTypesForSearch",
 				"WikibaseRepo.EntityArticleIdLookup",
 				"WikibaseRepo.EntitySearchHelper",
 				"WikibaseRepo.EntitySourceLookup",
@@ -313,9 +315,8 @@
 	"APIMetaModules": {
 		"wbcontentlanguages": {
 			"class": "\\Wikibase\\Repo\\Api\\MetaContentLanguages",
-			"factory": "\\Wikibase\\Repo\\Api\\MetaContentLanguages::factory",
 			"services": [
-				"LanguageNameUtils",
+				"WikibaseRepo.LanguageNameLookupFactory",
 				"WikibaseRepo.WikibaseContentLanguages"
 			]
 		}
@@ -331,16 +332,327 @@
 			]
 		}
 	},
+	"RestRoutes": [
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items",
+			"method": "POST",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\CreateItemRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchItemRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties",
+			"method": "POST",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\CreatePropertyRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchPropertyRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/statements",
+			"method": "POST",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\AddItemStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/statements",
+			"method": "POST",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\AddPropertyStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/statements/{statement_id}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/statements/{statement_id}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/statements/{statement_id}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/statements",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemStatementsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/statements",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyStatementsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/statements/{statement_id}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\ReplaceStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/statements/{statement_id}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\ReplaceItemStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/statements/{statement_id}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\ReplacePropertyStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/statements/{statement_id}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemoveStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/statements/{statement_id}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemoveItemStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/statements/{statement_id}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemovePropertyStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/statements/{statement_id}",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/statements/{statement_id}",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchItemStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/statements/{statement_id}",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchPropertyStatementRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/labels",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemLabelsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/labels",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyLabelsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/labels/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemLabelRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/labels_with_language_fallback/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemLabelWithFallbackRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/labels/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyLabelRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/labels_with_language_fallback/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyLabelWithFallbackRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/labels/{language_code}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\SetItemLabelRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/labels/{language_code}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\SetPropertyLabelRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/labels",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchItemLabelsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/labels",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchPropertyLabelsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/labels/{language_code}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemoveItemLabelRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/labels/{language_code}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemovePropertyLabelRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/descriptions",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemDescriptionsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/descriptions",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchItemDescriptionsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/descriptions",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchPropertyDescriptionsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/descriptions/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemDescriptionRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/descriptions_with_language_fallback/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemDescriptionWithFallbackRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/descriptions/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyDescriptionRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/descriptions_with_language_fallback/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyDescriptionWithFallbackRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/descriptions/{language_code}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\SetItemDescriptionRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/descriptions/{language_code}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\SetPropertyDescriptionRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/descriptions/{language_code}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemoveItemDescriptionRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/descriptions/{language_code}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemovePropertyDescriptionRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/aliases",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemAliasesRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/descriptions",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyDescriptionsRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/aliases",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyAliasesRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/aliases",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchItemAliasesRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/aliases",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchPropertyAliasesRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/aliases/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetItemAliasesInLanguageRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/aliases/{language_code}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyAliasesInLanguageRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/aliases/{language_code}",
+			"method": "POST",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\AddItemAliasesInLanguageRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/properties/{property_id}/aliases/{language_code}",
+			"method": "POST",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\AddPropertyAliasesInLanguageRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/sitelinks",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetSitelinksRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/sitelinks",
+			"method": "PATCH",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\PatchSitelinksRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/sitelinks/{site_id}",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetSitelinkRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/sitelinks/{site_id}",
+			"method": "DELETE",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\RemoveSitelinkRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/entities/items/{item_id}/sitelinks/{site_id}",
+			"method": "PUT",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\SetSitelinkRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/openapi.json",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetOpenApiDocRouteHandler::factory"
+		},
+		{
+			"path": "/wikibase/v1/property-data-types",
+			"method": "GET",
+			"factory": "Wikibase\\Repo\\RestApi\\RouteHandlers\\GetPropertyDataTypesHandler::factory"
+		}
+	],
 	"SpecialPages": {
 		"NewItem": {
 			"class": "Wikibase\\Repo\\Specials\\SpecialNewItem",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialNewItem::factory",
 			"services": [
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityNamespaceLookup",
 				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.FallbackLabelDescriptionLookupFactory",
 				"WikibaseRepo.ItemTermsCollisionDetector",
+				"WikibaseRepo.MobileSite",
 				"WikibaseRepo.Settings",
+				"WikibaseRepo.SiteLinkPageNormalizer",
 				"WikibaseRepo.SiteLinkTargetProvider",
 				"WikibaseRepo.SummaryFormatter",
 				"WikibaseRepo.TermValidatorFactory",
@@ -351,10 +663,12 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialNewProperty",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialNewProperty::factory",
 			"services": [
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.DataTypeFactory",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityNamespaceLookup",
 				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.MobileSite",
 				"WikibaseRepo.PropertyTermsCollisionDetector",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.SummaryFormatter",
@@ -368,6 +682,7 @@
 			"services": [
 				"SiteLookup",
 				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.LanguageNameLookupFactory",
 				"WikibaseRepo.Logger",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.Store"
@@ -385,10 +700,10 @@
 		},
 		"ItemDisambiguation": {
 			"class": "Wikibase\\Repo\\Specials\\SpecialItemDisambiguation",
-			"factory": "Wikibase\\Repo\\Specials\\SpecialItemDisambiguation::factory",
 			"services": [
-				"WikibaseRepo.EntitySearchHelperCallbacks",
-				"WikibaseRepo.EntityTitleLookup",
+				"WikibaseRepo.EntitySearchHelper",
+				"WikibaseRepo.ItemDisambiguationFactory",
+				"WikibaseRepo.LanguageNameLookupFactory",
 				"WikibaseRepo.TermsLanguages"
 			]
 		},
@@ -397,6 +712,8 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialSetLabel",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialSetLabel::factory",
 			"services": [
+				"LanguageNameUtils",
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityPermissionChecker",
@@ -410,6 +727,8 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialSetDescription",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialSetDescription::factory",
 			"services": [
+				"LanguageNameUtils",
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityPermissionChecker",
@@ -423,6 +742,8 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialSetAliases",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialSetAliases::factory",
 			"services": [
+				"LanguageNameUtils",
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityPermissionChecker",
@@ -436,6 +757,9 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialSetLabelDescriptionAliases",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialSetLabelDescriptionAliases::factory",
 			"services": [
+				"LanguageNameUtils",
+				"MainConfig",
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityPermissionChecker",
@@ -449,6 +773,7 @@
 			"class": "Wikibase\\Repo\\Specials\\SpecialSetSiteLink",
 			"factory": "Wikibase\\Repo\\Specials\\SpecialSetSiteLink::factory",
 			"services": [
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.ChangeOpFactoryProvider",
 				"WikibaseRepo.EditEntityFactory",
 				"WikibaseRepo.EntityTitleLookup",
@@ -497,22 +822,27 @@
 		"MyLanguageFallbackChain": {
 			"class": "Wikibase\\Repo\\Specials\\SpecialMyLanguageFallbackChain",
 			"services": [
+				"LanguageFactory",
+				"LanguageNameUtils",
 				"WikibaseRepo.LanguageFallbackChainFactory"
 			]
 		},
 		"MergeItems": {
 			"class": "Wikibase\\Repo\\Specials\\SpecialMergeItems",
 			"services": [
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.EntityIdParser",
 				"WikibaseRepo.EntityTitleLookup",
 				"WikibaseRepo.ExceptionLocalizer",
 				"WikibaseRepo.ItemMergeInteractor",
+				"WikibaseRepo.MobileSite",
 				"WikibaseRepo.TokenCheckInteractor"
 			]
 		},
 		"RedirectEntity": {
 			"class": "Wikibase\\Repo\\Specials\\SpecialRedirectEntity",
 			"services": [
+				"WikibaseRepo.AnonymousEditWarningBuilder",
 				"WikibaseRepo.EntityIdParser",
 				"WikibaseRepo.ExceptionLocalizer",
 				"WikibaseRepo.ItemRedirectCreationInteractor",
@@ -535,8 +865,8 @@
 				"WikibaseRepo.EntityIdHtmlLinkFormatterFactory",
 				"WikibaseRepo.EntityTitleLookup",
 				"WikibaseRepo.FallbackLabelDescriptionLookupFactory",
-				"WikibaseRepo.Settings",
-				"WikibaseRepo.Store"
+				"WikibaseRepo.PropertyInfoLookup",
+				"WikibaseRepo.Settings"
 			]
 		}
 	},
@@ -595,10 +925,13 @@
 		"Wikibase\\Repo\\Tests\\Maintenance\\": "repo/tests/phpunit/maintenance/",
 		"Wikibase\\Repo\\Tests\\Unit\\": "repo/tests/phpunit/unit/",
 		"Wikibase\\Repo\\Tests\\RestApi\\": "repo/rest-api/tests/phpunit/",
+		"Wikibase\\Repo\\Tests\\RestApi\\Architecture\\": "repo/rest-api/tests/architecture/",
 		"Wikibase\\Lib\\Tests\\": "lib/tests/phpunit/",
 		"Wikibase\\Lib\\Tests\\Changes\\": "lib/packages/wikibase/changes/tests/",
 		"Wikibase\\DataModel\\Fixtures\\": "lib/packages/wikibase/data-model/tests/fixtures/",
+		"Tests\\Wikibase\\DataModel\\": "lib/packages/wikibase/data-model-serialization/tests/unit/",
 		"Wikibase\\DataModel\\Services\\Fixtures\\": "lib/packages/wikibase/data-model-services/tests/fixtures/",
+		"Wikibase\\DataModel\\Services\\Tests\\": "lib/packages/wikibase/data-model-services/tests/unit/",
 		"Wikibase\\DataModel\\Tests\\": "lib/packages/wikibase/data-model/tests/unit/",
 		"Wikibase\\Lib\\Tests\\FederatedProperties\\": "lib/packages/wikibase/federated-properties/tests/",
 		"Tests\\Integration\\Wikibase\\InternalSerialization\\": "lib/packages/wikibase/internal-serialization/tests/integration/",
@@ -685,6 +1018,8 @@
 			"view/tests/qunit/wikibase/entityChangers/LabelsChanger.tests.js",
 			"view/tests/qunit/wikibase/entityChangers/SiteLinksChanger.tests.js",
 			"view/tests/qunit/wikibase/entityChangers/SiteLinkSetsChanger.tests.js",
+			"view/tests/qunit/wikibase/entityChangers/TempUserWatcher.tests.js",
+			"view/tests/qunit/wikibase/special/wikibase.special.languageLabelDescriptionAliases.tests.js",
 			"view/tests/qunit/wikibase/utilities/ClaimGuidGenerator.tests.js",
 			"view/tests/qunit/wikibase/view/testViewController.js",
 			"view/tests/qunit/wikibase/wikibase.WikibaseContentLanguages.tests.js",
@@ -737,7 +1072,17 @@
 			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.addtoolbar.js",
 			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.edittoolbar.js",
 			"view/resources/jquery/wikibase/toolbar/jquery.wikibase.removetoolbar.js",
-			"view/resources/wikibase/view/ToolbarFactory.js"
+			"view/resources/wikibase/view/ToolbarFactory.js",
+			"view/tests/qunit/wikibase/view/languageFallbackIndicator.tests.js",
+			"view/resources/wikibase/view/languageFallbackIndicator.js",
+			"view/tests/qunit/wikibase/view/termFallbackResolver.tests.js",
+			"view/resources/wikibase/view/termFallbackResolver.js",
+			"view/resources/wikibase/termbox/EntityLoadedHookEntityRepository.js",
+			"view/tests/qunit/wikibase/termbox/EntityLoadedHookEntityRepository.tests.js",
+			"view/resources/wikibase/termbox/RepoApiWritingEntityRepository.js",
+			"view/tests/qunit/wikibase/termbox/RepoApiWritingEntityRepository.tests.js",
+			"view/resources/wikibase/termbox/mountTermbox.js",
+			"view/tests/qunit/wikibase/termbox/mountTermbox.tests.js"
 		],
 		"dependencies": [
 			"wikibase.EntityInitializer",
@@ -750,6 +1095,7 @@
 			"jquery.wikibase.wbtooltip",
 			"util.inherit",
 			"util.Notifier",
+			"mediawiki.htmlform.ooui",
 			"wikibase",
 			"wikibase.api.RepoApi",
 			"wikibase.datamodel",
@@ -765,6 +1111,7 @@
 			"wikibase.view.__namespace",
 			"wikibase.view.ControllerViewFactory",
 			"wikibase.view.ReadModeViewFactory",
+			"wikibase.special.languageLabelDescriptionAliases",
 			"wikibase.WikibaseContentLanguages",
 			"wikibase.getUserLanguages"
 		]
@@ -786,6 +1133,7 @@
 			"services": [
 				"WikibaseRepo.LanguageFallbackChainFactory",
 				"WikibaseRepo.LinkTargetEntityIdLookup",
+				"WikibaseRepo.Logger",
 				"WikibaseRepo.PrefetchingTermLookup",
 				"WikibaseRepo.Settings"
 			]
@@ -822,6 +1170,7 @@
 				"WikibaseRepo.LanguageFallbackChainFactory",
 				"WikibaseRepo.LinkTargetEntityIdLookup",
 				"WikibaseRepo.LocalEntityNamespaceLookup",
+				"WikibaseRepo.MobileSite",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.TermLookup"
 			]
@@ -833,6 +1182,7 @@
 				"TitleFactory",
 				"WikibaseRepo.EntityIdLookup",
 				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.Logger",
 				"WikibaseRepo.PrefetchingTermLookup",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.TermBuffer"
@@ -840,6 +1190,16 @@
 		},
 		"LibHooks": {
 			"class": "\\Wikibase\\Lib\\LibHooks"
+		},
+		"MakeGlobalVariablesScript": {
+			"class": "\\Wikibase\\Repo\\Hooks\\MakeGlobalVariablesScriptHookHandler",
+			"factory": "\\Wikibase\\Repo\\Hooks\\MakeGlobalVariablesScriptHookHandler::factory",
+			"services": [
+				"ContentLanguage",
+				"WikibaseRepo.EntityContentFactory",
+				"WikibaseRepo.Settings",
+				"WikibaseRepo.TermsLanguages"
+			]
 		},
 		"OutputPageBeforeHTML": {
 			"class": "Wikibase\\Repo\\Hooks\\OutputPageBeforeHTMLHookHandler",
@@ -853,18 +1213,12 @@
 				"WikibaseRepo.EntityFactory",
 				"WikibaseRepo.EntityIdParser",
 				"WikibaseRepo.EntityRevisionLookup",
+				"WikibaseRepo.LanguageDirectionalityLookup",
 				"WikibaseRepo.LanguageFallbackChainFactory",
+				"WikibaseRepo.LanguageNameLookupFactory",
 				"WikibaseRepo.Logger",
 				"WikibaseRepo.Settings",
 				"WikibaseRepo.TermsLanguages"
-			]
-		},
-		"OutputPageJsConfig": {
-			"class": "\\Wikibase\\Repo\\Hooks\\OutputPageJsConfigHookHandler",
-			"factory": "\\Wikibase\\Repo\\Hooks\\OutputPageJsConfigHookHandler::factory",
-			"services": [
-				"WikibaseRepo.EntityNamespaceLookup",
-				"WikibaseRepo.Settings"
 			]
 		},
 		"PageHistoryPagerHookHandler": {
@@ -873,6 +1227,7 @@
 			"services": [
 				"WikibaseRepo.LanguageFallbackChainFactory",
 				"WikibaseRepo.LinkTargetEntityIdLookup",
+				"WikibaseRepo.Logger",
 				"WikibaseRepo.PrefetchingTermLookup",
 				"WikibaseRepo.Settings"
 			]
@@ -918,7 +1273,6 @@
 		"ArticleUndelete": "\\Wikibase\\Repo\\RepoHooks::onArticleUndelete",
 		"BeforeDisplayNoArticleText": "\\Wikibase\\Repo\\Actions\\ViewEntityAction::onBeforeDisplayNoArticleText",
 		"BeforePageDisplay": "\\Wikibase\\Repo\\RepoHooks::onBeforePageDisplay",
-		"BeforePageDisplayMobile": "\\Wikibase\\Repo\\RepoHooks::onBeforePageDisplayMobile",
 		"ChangesListInitRows": "LabelPrefetch",
 		"ContentModelCanBeUsedOn": "\\Wikibase\\Repo\\RepoHooks::onContentModelCanBeUsedOn",
 		"DifferenceEngineViewHeader": "DifferenceEngineViewHeaderHookHandler",
@@ -930,11 +1284,9 @@
 		"InfoAction": "\\Wikibase\\Repo\\RepoHooks::onInfoAction",
 		"LoadExtensionSchemaUpdates": "DatabaseSchemaUpdater",
 		"MaintenanceShellStart": "\\Wikibase\\Repo\\RepoHooks::onMaintenanceShellStart",
+		"MakeGlobalVariablesScript": "MakeGlobalVariablesScript",
 		"NamespaceIsMovable": "\\Wikibase\\Repo\\RepoHooks::onNamespaceIsMovable",
-		"OutputPageBeforeHTML": [
-			"OutputPageBeforeHTML",
-			"OutputPageJsConfig"
-		],
+		"OutputPageBeforeHTML": "OutputPageBeforeHTML",
 		"OutputPageBodyAttributes": "\\Wikibase\\Repo\\RepoHooks::onOutputPageBodyAttributes",
 		"OutputPageParserOutput": "\\Wikibase\\Repo\\RepoHooks::onOutputPageParserOutput",
 		"PageHistoryLineEnding": "\\Wikibase\\Repo\\RepoHooks::onPageHistoryLineEnding",
@@ -942,7 +1294,6 @@
 		"ParserFirstCallInit": "\\Wikibase\\Repo\\RepoHooks::onParserFirstCallInit",
 		"ParserOptionsRegister": "\\Wikibase\\Repo\\RepoHooks::onParserOptionsRegister",
 		"RecentChange_save": "RecentChangeSave",
-		"RejectParserCacheValue": "\\Wikibase\\Repo\\RepoHooks::onRejectParserCacheValue",
 		"ResourceLoaderRegisterModules": [
 			"\\Wikibase\\Repo\\RepoHooks::onResourceLoaderRegisterModules",
 			"LibHooks",
@@ -954,13 +1305,13 @@
 		"ShowSearchHitTitle": "ShowSearchHit",
 		"SidebarBeforeOutput": "\\Wikibase\\Repo\\RepoHooks::onSidebarBeforeOutput",
 		"SkinTemplateNavigation::Universal": "\\Wikibase\\Repo\\RepoHooks::onSkinTemplateNavigationUniversal",
-		"SpecialPage_reorderPages": "\\Wikibase\\Repo\\RepoHooks::onSpecialPageReorderPages",
 		"TitleGetRestrictionTypes": "\\Wikibase\\Repo\\RepoHooks::onTitleGetRestrictionTypes",
 		"UnitTestsList": [
 			"\\Wikibase\\Repo\\RepoHooks::registerUnitTests",
 			"LibHooks",
 			"ViewHooks"
 		],
+		"VectorSearchResourceLoaderConfig": "\\Wikibase\\Repo\\RepoHooks::onVectorSearchResourceLoaderConfig",
 		"WikibaseContentLanguages": "\\Wikibase\\Repo\\RepoHooks::onWikibaseContentLanguages"
 	},
 	"RateLimits": {
@@ -969,5 +1320,6 @@
 		}
 	},
 	"callback": "\\Wikibase\\Repo\\RepoHooks::onRegistration",
+	"load_composer_autoloader": true,
 	"manifest_version": 2
 }

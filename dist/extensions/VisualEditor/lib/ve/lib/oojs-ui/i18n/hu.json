@@ -13,6 +13,7 @@
 			"ViDam"
 		]
 	},
+	"ooui-copytextlayout-copy": "Másolás",
 	"ooui-outline-control-move-down": "Elem mozgatása lefelé",
 	"ooui-outline-control-move-up": "Elem mozgatása felfelé",
 	"ooui-outline-control-remove": "Elem eltávolítása",
@@ -28,7 +29,6 @@
 	"ooui-dialog-process-continue": "Folytatás",
 	"ooui-selectfile-button-select": "Fájl kiválasztása",
 	"ooui-selectfile-button-select-multiple": "Fájlok kijelölése",
-	"ooui-selectfile-not-supported": "A fájl kiválasztása nincs támogatva",
 	"ooui-selectfile-placeholder": "Nincs fájl kiválasztva",
 	"ooui-selectfile-dragdrop-placeholder": "Dobd ide a fájlt",
 	"ooui-selectfile-dragdrop-placeholder-multiple": "Dobd ide a fájlt",

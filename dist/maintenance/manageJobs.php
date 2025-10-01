@@ -21,9 +21,9 @@
  * @ingroup Maintenance
  */
 
-use MediaWiki\MediaWikiServices;
-
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Maintenance script that handles managing job queue admin tasks (re-push, delete, ...)
@@ -43,7 +43,7 @@ class ManageJobs extends Maintenance {
 		$type = $this->getOption( 'type' );
 		$action = $this->getOption( 'action' );
 
-		$group = MediaWikiServices::getInstance()->getJobQueueGroup();
+		$group = $this->getServiceContainer()->getJobQueueGroup();
 		$queue = $group->get( $type );
 
 		if ( $action === 'delete' ) {
@@ -62,7 +62,7 @@ class ManageJobs extends Maintenance {
 	}
 
 	private function repushAbandoned( JobQueue $queue ) {
-		$cache = ObjectCache::getInstance( CACHE_DB );
+		$cache = $this->getServiceContainer()->getObjectCacheFactory()->getInstance( CACHE_DB );
 		$key = $cache->makeGlobalKey( 'last-job-repush', $queue->getDomain(), $queue->getType() );
 
 		$now = wfTimestampNow();
@@ -77,7 +77,7 @@ class ManageJobs extends Maintenance {
 		$skipped = 0;
 		foreach ( $queue->getAllAbandonedJobs() as $job ) {
 			/** @var Job $job */
-			if ( $job->getQueuedTimestamp() < wfTimestamp( TS_UNIX, $lastRepushTime ) ) {
+			if ( $job instanceof Job && $job->getQueuedTimestamp() < wfTimestamp( TS_UNIX, $lastRepushTime ) ) {
 				++$skipped;
 				continue; // already re-pushed in prior round
 			}
@@ -96,5 +96,7 @@ class ManageJobs extends Maintenance {
 	}
 }
 
+// @codeCoverageIgnoreStart
 $maintClass = ManageJobs::class;
 require_once RUN_MAINTENANCE_IF_MAIN;
+// @codeCoverageIgnoreEnd

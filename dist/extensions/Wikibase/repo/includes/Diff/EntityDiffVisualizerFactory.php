@@ -2,9 +2,9 @@
 
 namespace Wikibase\Repo\Diff;
 
-use IContextSource;
-use RequestContext;
-use SiteLookup;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Context\RequestContext;
+use MediaWiki\Site\SiteLookup;
 use ValueFormatters\FormatterOptions;
 use ValueFormatters\ValueFormatter;
 use Wikibase\Lib\Formatters\OutputFormatSnakFormatterFactory;
@@ -80,7 +80,7 @@ class EntityDiffVisualizerFactory {
 		$langCode = $context->getLanguage()->getCode();
 		$options = new FormatterOptions( [
 			//TODO: fallback chain
-			ValueFormatter::OPT_LANG => $langCode
+			ValueFormatter::OPT_LANG => $langCode,
 		] );
 		$entityIdFormatter = $this->entityIdFormatterFactory->getEntityIdFormatter( $context->getLanguage() );
 		$diffSnakView = new DifferencesSnakVisualizer(
@@ -91,8 +91,7 @@ class EntityDiffVisualizerFactory {
 		);
 		$claimDiffView = new ClaimDifferenceVisualizer( $diffSnakView, $langCode );
 
-		if ( $type === null || !array_key_exists( $type, $this->entityDiffVisualizerInstantiators )
-		) {
+		if ( $type === null || !array_key_exists( $type, $this->entityDiffVisualizerInstantiators ) ) {
 			return new BasicEntityDiffVisualizer(
 				$context,
 				$this->claimDiffer,

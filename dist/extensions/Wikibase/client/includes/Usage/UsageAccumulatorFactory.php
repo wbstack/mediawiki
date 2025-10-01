@@ -4,7 +4,9 @@ declare( strict_types=1 );
 
 namespace Wikibase\Client\Usage;
 
-use ParserOutput;
+use MediaWiki\Parser\Parser;
+use Wikibase\Client\ParserOutput\ParserOutputProvider;
+use Wikibase\Client\ParserOutput\ParserWrappingParserOutputProvider;
 use Wikibase\DataModel\Services\Lookup\EntityRedirectTargetLookup;
 
 /**
@@ -37,15 +39,19 @@ class UsageAccumulatorFactory {
 		$this->entityRedirectTargetLookup = $entityRedirectTargetLookup;
 	}
 
-	public function newFromParserOutput( ParserOutput $parserOutput ): UsageAccumulator {
+	public function newFromParserOutputProvider( ParserOutputProvider $parserOutputProvider ): UsageAccumulator {
 		return new RedirectTrackingUsageAccumulator(
 			new ParserOutputUsageAccumulator(
-				$parserOutput,
+				$parserOutputProvider,
 				$this->entityUsageFactory,
 				$this->usageDeduplicator
 			),
 			$this->entityRedirectTargetLookup
 		);
+	}
+
+	public function newFromParser( Parser $parser ): UsageAccumulator {
+		return $this->newFromParserOutputProvider( new ParserWrappingParserOutputProvider( $parser ) );
 	}
 
 }

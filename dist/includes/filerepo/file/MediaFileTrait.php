@@ -37,17 +37,18 @@ trait MediaFileTrait {
 	 * @return array response data
 	 */
 	private function getFileInfo( $file, Authority $performer, $transforms ) {
+		$urlUtils = MediaWikiServices::getInstance()->getUrlUtils();
 		// If there is a problem with the file, there is very little info we can reliably
 		// return (T228286, T239213), but we do what we can (T201205).
 		$responseFile = [
 			'title' => $file->getTitle()->getText(),
-			'file_description_url' => wfExpandUrl( $file->getDescriptionUrl(), PROTO_RELATIVE ),
+			'file_description_url' => $urlUtils->expand( $file->getDescriptionUrl(), PROTO_RELATIVE ),
 			'latest' => null,
 			'preferred' => null,
 			'original' => null,
 		];
 
-		foreach ( array_keys( $transforms ) as $transformType ) {
+		foreach ( $transforms as $transformType => $_ ) {
 			$responseFile[$transformType] = null;
 		}
 
@@ -96,7 +97,7 @@ trait MediaFileTrait {
 				'width' => $file->getWidth() ?: null,
 				'height' => $file->getHeight() ?: null,
 				'duration' => $duration,
-				'url' => wfExpandUrl( $file->getUrl(), PROTO_RELATIVE ),
+				'url' => $urlUtils->expand( $file->getUrl(), PROTO_RELATIVE ),
 			];
 		}
 
@@ -113,29 +114,26 @@ trait MediaFileTrait {
 	private function getTransformInfo( $file, $duration, $maxWidth, $maxHeight ) {
 		$transformInfo = null;
 
-		try {
-			list( $width, $height ) = $file->getDisplayWidthHeight( $maxWidth, $maxHeight );
-			$transform = $file->transform( [ 'width' => $width, 'height' => $height ] );
-			if ( $transform && !$transform->isError() ) {
-				// $file->getSize() returns original size. Only include if dimensions match.
-				$size = null;
-				if ( $file->getWidth() == $transform->getWidth() &&
-					$file->getHeight() == $transform->getHeight()
-				) {
-					$size = $file->getSize();
-				}
-
-				$transformInfo = [
-					'mediatype' => $transform->getFile()->getMediaType(),
-					'size' => $size,
-					'width' => $transform->getWidth() ?: null,
-					'height' => $transform->getHeight() ?: null,
-					'duration' => $duration,
-					'url' => wfExpandUrl( $transform->getUrl(), PROTO_RELATIVE ),
-				];
+		[ $width, $height ] = $file->getDisplayWidthHeight( $maxWidth, $maxHeight );
+		$transform = $file->transform( [ 'width' => $width, 'height' => $height ] );
+		if ( $transform && !$transform->isError() ) {
+			// $file->getSize() returns original size. Only include if dimensions match.
+			$size = null;
+			if ( $file->getWidth() == $transform->getWidth() &&
+				$file->getHeight() == $transform->getHeight()
+			) {
+				$size = $file->getSize();
 			}
-		} catch ( MWException $e ) {
-			// Caller decides what to do on failure
+
+			$transformInfo = [
+				'mediatype' => $transform->getFile()->getMediaType(),
+				'size' => $size,
+				'width' => $transform->getWidth() ?: null,
+				'height' => $transform->getHeight() ?: null,
+				'duration' => $duration,
+				'url' => MediaWikiServices::getInstance()->getUrlUtils()
+					->expand( $transform->getUrl(), PROTO_RELATIVE ),
+			];
 		}
 
 		return $transformInfo;
@@ -155,7 +153,7 @@ trait MediaFileTrait {
 		$optionsLookup = MediaWikiServices::getInstance()->getUserOptionsLookup();
 		$option = $optionsLookup->getIntOption( $user, $optionName );
 		if ( !isset( $imageLimits[$option] ) ) {
-			$option = $optionsLookup->getDefaultOption( $optionName );
+			$option = $optionsLookup->getDefaultOption( $optionName, $user );
 		}
 
 		// The user offset might still be incorrect, specially if

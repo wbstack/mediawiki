@@ -8,7 +8,7 @@
 	"jsonconfig-edit-action-cancel": "بىكار قىلىش",
 	"jsonconfig-edit-button-label": "جەدۋەل ھالەتتە تەھرىرلەڭ",
 	"jsonconfig-edit-dialog-error": "$1:جەدۋەل سۈپىتىدە تەھرىرلەشكە ئامالسىز",
-	"jsonconfig-edit-dialog-error-data-inavlid": "سانلىق مەلۇمات لايىھەگە ماس كەلمەيدۇ",
+	"jsonconfig-edit-dialog-error-data-invalid": "سانلىق مەلۇمات لايىھەگە ماس كەلمەيدۇ",
 	"jsonconfig-edit-dialog-error-data-missing": "JSON 'سانلىق مەلۇمات' خاسلىقى يوقاپ كەتتى ياكى سانلار گۇرپىسى ئەمەس",
 	"jsonconfig-edit-dialog-error-data-too-large": "سانلىق مەلۇمات جەدۋىلى بەك چوڭ بولۇپ ، جەدۋەل ھالەتتە تەھرىرلىيەلمەيدۇ",
 	"jsonconfig-edit-dialog-error-field-name-missing": "ھەر بىر ساھەنىڭ ئىسمى بولۇشى كېرەك",

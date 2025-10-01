@@ -7,26 +7,27 @@
 ( function () {
 
 	/**
-	 * Creates a mw.widgets.TitleOptionWidget object.
+	 * @classdesc Title option widget.
 	 *
 	 * @class
 	 * @extends OO.ui.MenuOptionWidget
 	 *
 	 * @constructor
+	 * @description Create a mw.widgets.TitleOptionWidget object.
 	 * @param {Object} config Configuration options
-	 * @cfg {string} data Label to display
-	 * @cfg {string} url URL of page
-	 * @cfg {boolean} [showImages] Whether to attempt to show images
-	 * @cfg {string} [imageUrl] Thumbnail image URL with URL encoding
-	 * @cfg {string} [description] Page description
-	 * @cfg {boolean} [missing] Page doesn't exist
-	 * @cfg {boolean} [redirect] Page is a redirect
-	 * @cfg {boolean} [disambiguation] Page is a disambiguation page
-	 * @cfg {string} [query] Matching query string to highlight
-	 * @cfg {Function} [compare] String comparison function for query highlighting
+	 * @param {string} config.data Label to display
+	 * @param {string} config.url URL of page
+	 * @param {boolean} [config.showImages] Whether to attempt to show images
+	 * @param {string} [config.imageUrl] Thumbnail image URL with URL encoding
+	 * @param {string} [config.description] Page description
+	 * @param {boolean} [config.missing] Page doesn't exist
+	 * @param {boolean} [config.redirect] Page is a redirect
+	 * @param {boolean} [config.disambiguation] Page is a disambiguation page
+	 * @param {string} [config.query] Matching query string to highlight
+	 * @param {Function} [config.compare] String comparison function for query highlighting
 	 */
 	mw.widgets.TitleOptionWidget = function MwWidgetsTitleOptionWidget( config ) {
-		var icon;
+		let icon;
 
 		if ( !config.showImages ) {
 			icon = null;
@@ -41,7 +42,7 @@
 		}
 
 		// Config initialization
-		config = $.extend( {
+		config = Object.assign( {
 			icon: icon,
 			label: config.data,
 			autoFitLabel: false,
@@ -49,7 +50,7 @@
 		}, config );
 
 		// Parent constructor
-		mw.widgets.TitleOptionWidget.parent.call( this, config );
+		mw.widgets.TitleOptionWidget.super.call( this, config );
 
 		// Remove check icon
 		this.checkIcon.$element.remove();
@@ -64,7 +65,7 @@
 		this.$label.attr( 'tabindex', '-1' );
 
 		// Allow opening the link in new tab, but not regular navigation.
-		this.$label.on( 'click', function ( e ) {
+		this.$label.on( 'click', ( e ) => {
 			// Don't interfere with special clicks (e.g. to open in new tab)
 			if ( !( e.which !== 1 || e.altKey || e.ctrlKey || e.shiftKey || e.metaKey ) ) {
 				e.preventDefault();
@@ -87,7 +88,7 @@
 
 		if ( config.showImages && config.imageUrl ) {
 			this.$icon
-				.addClass( 'mw-widget-titleOptionWidget-hasImage' )
+				.addClass( 'mw-widget-titleOptionWidget-hasImage mw-no-invert' )
 				.css( 'background-image', 'url(' + config.imageUrl + ')' );
 		}
 

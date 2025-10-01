@@ -6,7 +6,8 @@
 			"Milicevic01",
 			"Obsuser",
 			"Zoranzoki21",
-			"Сербијана"
+			"Сербијана",
+			"Aca"
 		]
 	},
 	"cirrussearch-backend-error": "Нисмо могли завршити претрагу због привременог проблема. Покушајте поново касније.",
@@ -14,7 +15,7 @@
 	"cirrussearch-too-busy-error": "Претрага је тренутно презаузета. Покушајте поново касније.",
 	"cirrussearch-regex-syntax-error": "Регуларни израз грешке синтаксе у $2: $1",
 	"cirrussearch-regex-too-busy-error": "Превише регуларних израза претраживања тренутно ради. Покушајте поново касније.",
-	"cirrussearch-now-using": "Овај вики користи нови претраживач. ([[mw:Special:MyLanguage/Help:CirrusSearch|Сазнајте више]])",
+	"cirrussearch-now-using": "Овај вики користи нови претраживач. ([https://www.mediawiki.org/wiki/Special:MyLanguage/Help:CirrusSearch Сазнајте више])",
 	"cirrussearch-pref-label": "Нова претрага",
 	"cirrussearch-give-feedback": "Дајте нам Ваше мишљење.",
 	"cirrussearch-query-too-long": "Прекорачен максималан број карактера за претрагу. ($1; максимум: $2)",
@@ -38,11 +39,6 @@
 	"cirrussearch-regex-timed-out": "Истекло је време за извршење претраге с регуларним изразом. Доступан је само део резултата. Поједноставите израз да бисте видели више ставки.",
 	"cirrussearch-feature-deepcat-invalid-title": "Наведена категорија није ваљана.",
 	"cirrussearch-feature-pageid-invalid-id": "Неважећи {{PLURAL:$2|ID|ID-ови}} странице: $1",
-	"cirrussearch-explore-similar-related": "Повезано",
-	"cirrussearch-explore-similar-categories": "Категорије",
-	"cirrussearch-explore-similar-languages": "Језици",
 	"cirrussearch-explore-similar-related-none": "Нема доступних повезаних страница",
-	"cirrussearch-explore-similar-categories-none": "Нема доступних категорија",
-	"cirrussearch-explore-similar-languages-none": "Није доступно на другим језицима",
 	"cirrussearch-article-words": "Речи на свим страницама садржаја"
 }

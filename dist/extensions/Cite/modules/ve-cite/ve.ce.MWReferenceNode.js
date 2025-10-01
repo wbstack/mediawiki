@@ -1,3 +1,5 @@
+'use strict';
+
 /*!
  * VisualEditor ContentEditable MWReferenceNode class.
  *
@@ -8,11 +10,9 @@
 /**
  * ContentEditable MediaWiki reference node.
  *
- * @class
- * @extends ve.ce.LeafNode
- * @mixin ve.ce.FocusableNode
- *
  * @constructor
+ * @extends ve.ce.LeafNode
+ * @mixes ve.ce.FocusableNode
  * @param {ve.dm.MWReferenceNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
@@ -26,7 +26,6 @@ ve.ce.MWReferenceNode = function VeCeMWReferenceNode() {
 	// DOM changes
 	this.$link = $( '<a>' ).attr( 'href', '#' );
 	this.$element.addClass( 've-ce-mwReferenceNode mw-ref reference' ).append( this.$link );
-	// Add a backwards-compatible text for browsers that don't support counters
 	this.$text = $( '<span>' ).addClass( 'mw-reflink-text' );
 	this.$link.append( this.$text );
 
@@ -54,7 +53,7 @@ OO.mixinClass( ve.ce.MWReferenceNode, ve.ce.FocusableNode );
 
 ve.ce.MWReferenceNode.static.name = 'mwReference';
 
-ve.ce.MWReferenceNode.static.tagName = 'span';
+ve.ce.MWReferenceNode.static.tagName = 'sup';
 
 ve.ce.MWReferenceNode.static.primaryCommandName = 'reference';
 
@@ -65,6 +64,7 @@ ve.ce.MWReferenceNode.static.primaryCommandName = 'reference';
  */
 ve.ce.MWReferenceNode.prototype.onSetup = function () {
 	ve.ce.MWReferenceNode.super.prototype.onSetup.call( this );
+	// FIXME: if this is about getIndex, just do it once at a higher level.
 	this.internalList.connect( this, { update: 'onInternalListUpdate' } );
 };
 
@@ -107,15 +107,17 @@ ve.ce.MWReferenceNode.prototype.onAttributeChange = function ( key ) {
 };
 
 /**
- * @inheritdoc ve.ce.FocusableNode
+ * @override
+ * @see ve.ce.FocusableNode
  */
 ve.ce.MWReferenceNode.prototype.executeCommand = function () {
-	var items = ve.ui.contextItemFactory.getRelatedItems( [ this.model ] );
+	const items = ve.ui.contextItemFactory.getRelatedItems( [ this.model ] );
 
 	if ( items.length ) {
-		var contextItem = ve.ui.contextItemFactory.lookup( items[ 0 ].name );
+		const contextItem = ve.ui.contextItemFactory.lookup( items[ 0 ].name );
 		if ( contextItem ) {
-			var command = this.getRoot().getSurface().getSurface().commandRegistry.lookup( contextItem.static.commandName );
+			const command = this.getRoot().getSurface().getSurface().commandRegistry
+				.lookup( contextItem.static.commandName );
 			if ( command ) {
 				command.execute( this.focusableSurface.getSurface() );
 			}
@@ -127,14 +129,9 @@ ve.ce.MWReferenceNode.prototype.executeCommand = function () {
  * Update the rendering
  */
 ve.ce.MWReferenceNode.prototype.update = function () {
-	this.$text.text( this.model.getIndexLabel() );
-	this.$link.css( 'counterReset', 'mw-Ref ' + this.model.getIndex() );
-	var group = this.model.getGroup();
-	if ( group ) {
-		this.$link.attr( 'data-mw-group', group );
-	} else {
-		this.$link.removeAttr( 'data-mw-group' );
-	}
+	this.$text.html( this.model.getIndexLabel() );
+	this.$link
+		.attr( 'data-mw-group', this.model.getGroup() || null );
 	this.$element.toggleClass( 've-ce-mwReferenceNode-placeholder', !!this.model.getAttribute( 'placeholder' ) );
 };
 

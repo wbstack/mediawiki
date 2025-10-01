@@ -73,6 +73,8 @@ $specialPageAliases['fi'] = [
 
 /** Hebrew (עברית) */
 $specialPageAliases['he'] = [
+	'EntityUsage' => [ 'שימוש בישויות' ],
+	'PagesWithBadges' => [ 'דפים עם סמלים' ],
 	'UnconnectedPages' => [ 'דפים_שאינם_מקושרים_לפריטים', 'דפים_שלא_מקושרים_לפריטים' ],
 ];
 
@@ -122,6 +124,13 @@ $specialPageAliases['nn'] = [
 	'EntityUsage' => [ 'Entitetsbruk' ],
 	'PagesWithBadges' => [ 'Sider_med_merker' ],
 	'UnconnectedPages' => [ 'Ikkje-tilknytta_sider' ],
+];
+
+/** Polish (polski) */
+$specialPageAliases['pl'] = [
+	'EntityUsage' => [ 'Wykorzystanie_obiektów', 'Wykorzystanie_elementów' ],
+	'PagesWithBadges' => [ 'Strony_z_odznakami' ],
+	'UnconnectedPages' => [ 'Niepołączone_strony', 'Strony_bez_interwiki', 'Strony_bez_Wikidanych' ],
 ];
 
 /** Portuguese (português) */

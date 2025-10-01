@@ -1,5 +1,12 @@
 <?php
 
+namespace MediaWiki\HTMLForm\Field;
+
+use InvalidArgumentException;
+use MediaWiki\HTMLForm\HTMLFormField;
+use MediaWiki\Json\FormatJson;
+use MediaWiki\Xml\XmlSelect;
+
 /**
  * Text field for selecting a value from a large list of possible values, with
  * auto-completion and optionally with a select dropdown for selecting common
@@ -29,6 +36,7 @@
  * @stable to extend
  */
 class HTMLAutoCompleteSelectField extends HTMLTextField {
+	/** @var string[] */
 	protected $autocompleteData = [];
 
 	/**
@@ -53,7 +61,7 @@ class HTMLAutoCompleteSelectField extends HTMLTextField {
 			}
 		}
 		if ( !is_array( $this->autocompleteData ) || !$this->autocompleteData ) {
-			throw new MWException( 'HTMLAutoCompleteSelectField called without any autocompletions' );
+			throw new InvalidArgumentException( 'HTMLAutoCompleteSelectField called without any autocompletions' );
 		}
 
 		$this->getOptions();
@@ -95,9 +103,10 @@ class HTMLAutoCompleteSelectField extends HTMLTextField {
 
 		$validOptions = HTMLFormField::flattenOptions( $this->getOptions() ?: [] );
 
-		if ( in_array( strval( $value ), $validOptions, true ) ) {
-			return true;
-		} elseif ( in_array( strval( $value ), $this->autocompleteData, true ) ) {
+		if (
+			in_array( strval( $value ), $validOptions, true ) ||
+			in_array( strval( $value ), $this->autocompleteData, true )
+		) {
 			return true;
 		} elseif ( $this->mParams['require-match'] ) {
 			return $this->msg( 'htmlform-select-badoption' );
@@ -181,3 +190,6 @@ class HTMLAutoCompleteSelectField extends HTMLTextField {
 		return false;
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLAutoCompleteSelectField::class, 'HTMLAutoCompleteSelectField' );

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel MWRedirectMetaItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -34,17 +34,26 @@ ve.dm.MWRedirectMetaItem.static.matchRdfaTypes = [ 'mw:PageProp/redirect' ];
 
 ve.dm.MWRedirectMetaItem.static.toDataElement = function ( domElements, converter ) {
 	// HACK piggy-back on MWInternalLinkAnnotation's ./ stripping logic
-	var linkData = ve.dm.MWInternalLinkAnnotation.static.toDataElement( domElements, converter );
-	linkData.type = this.name;
+	const linkData = ve.dm.MWInternalLinkAnnotation.static.toDataElement( domElements, converter );
+	if ( linkData ) {
+		linkData.type = this.name;
+	}
 	return linkData;
 };
 
-ve.dm.MWRedirectMetaItem.static.toDomElements = function ( dataElement, doc ) {
-	var meta = doc.createElement( 'link' );
-	meta.setAttribute( 'rel', 'mw:PageProp/redirect' );
-	// HACK piggy-back on MWInternalLinkAnnotation's logic
-	meta.setAttribute( 'href', ve.dm.MWInternalLinkAnnotation.static.getHref( dataElement ) );
-	return [ meta ];
+ve.dm.MWRedirectMetaItem.static.toDomElements = function ( dataElement, doc, converter ) {
+	let domElement;
+	const href = ve.dm.MWInternalLinkAnnotation.static.getHref( dataElement );
+	if ( converter.isForPreview() ) {
+		// TODO: Move this a DM utility that doesn't use jQuery internally
+		domElement = ve.init.mw.ArticleTarget.static.buildRedirectMsg( dataElement.attributes.title )[ 0 ];
+	} else {
+		domElement = doc.createElement( 'link' );
+		domElement.setAttribute( 'rel', 'mw:PageProp/redirect' );
+		// HACK piggy-back on MWInternalLinkAnnotation's logic
+		domElement.setAttribute( 'href', href );
+	}
+	return [ domElement ];
 };
 
 ve.dm.MWRedirectMetaItem.static.describeChange = function ( key, change ) {
@@ -57,3 +66,19 @@ ve.dm.MWRedirectMetaItem.static.describeChange = function ( key, change ) {
 /* Registration */
 
 ve.dm.modelRegistry.register( ve.dm.MWRedirectMetaItem );
+
+ve.ui.metaListDiffRegistry.register( 'mwRedirect', ( diffElement, diffQueue, documentNode, documentSpacerNode ) => {
+	diffQueue = diffElement.processQueue( diffQueue );
+
+	if ( !diffQueue.length ) {
+		return;
+	}
+
+	const redirects = document.createElement( 'div' );
+	diffElement.renderQueue(
+		diffQueue,
+		redirects,
+		documentSpacerNode
+	);
+	documentNode.insertBefore( redirects, documentNode.firstChild );
+} );

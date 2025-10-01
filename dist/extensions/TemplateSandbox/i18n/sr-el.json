@@ -12,6 +12,7 @@
 	"templatesandbox": "Pesak za šablone",
 	"templatesandbox-desc": "[[Special:TemplateSandbox|Renderuje stranicu]] sa šablonom iz peska",
 	"templatesandbox-suffix": "pesak",
+	"templatesandbox-submit": "Prikaži",
 	"templatesandbox-editform-legend": "Pretpregled stranice sa ovim šablonom",
 	"templatesandbox-editform-page-label": "Naslov stranice",
 	"templatesandbox-editform-view-label": "Pretpregled",

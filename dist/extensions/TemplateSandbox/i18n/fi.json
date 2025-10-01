@@ -6,6 +6,7 @@
 			"Nike",
 			"Olli",
 			"Pxos",
+			"Samoasambia",
 			"Stryn"
 		]
 	},
@@ -13,6 +14,7 @@
 	"templatesandbox-desc": "[[Special:TemplateSandbox|Renderöi sivun]] ottaen mukaan mallineet hiekkalaatikosta",
 	"templatesandbox-suffix": "hiekkalaatikko",
 	"templatesandbox-legend": "Mallinehiekkalaatikko",
+	"templatesandbox-text": "Voit valita joukon hiekkalaatikkosivuillesi tallentamia mallineita käyttämällä asianmukaista hiekkalaatikon etuliitettä.\nEsimerkiksi, jos haluat esikatsella mallineen {{ns:Template}}:Testi versiota, jonka olet tallentanut nimellä ”{{ns:User}}:Foo/{{int:templatesandbox-suffix}}/{{ns:Template}}:Testi”, käytä etuliitteenä ”{{ns:User}}:Foo/{{int:templatesandbox-suffix}}”.",
 	"templatesandbox-prefix-label": "Hiekkalaatikon etuliite:",
 	"templatesandbox-page-label": "Renderöi sivu:",
 	"templatesandbox-revid-label": "Renderöi versio:",
@@ -24,13 +26,17 @@
 	"templatesandbox-editform-view-label": "Näytä esikatselu",
 	"templatesandbox-preview": "Sivun $2 esikatselu",
 	"templatesandbox-previewnote": "'''Muista, että tämä on sivun [[:$1]] esikatselu.'''\nMuutoksia ei ole tallennettu!",
-	"templatesandbox-invalid-title": "Määrittämäsi otsikko ei kelpaa.",
-	"templatesandbox-title-not-exists": "Määrittämääsi otsikkoa ei ole.",
+	"templatesandbox-invalid-title": "Antamasi otsikko on virheellinen.",
+	"templatesandbox-title-not-exists": "Antamaasi otsikkoa ei ole.",
 	"templatesandbox-revision-not-exists": "Määrittämääsi versiota ei ole.",
-	"templatesandbox-invalid-prefix": "Määrittämääsi hiekkalaatikon etuliitettä ei ole.",
-	"templatesandbox-prefix-not-local": "Määrittämäsi hiekkalaatikon etuliite ei sijaitse tällä sivustolla.",
-	"templatesandbox-page-or-revid": "Anna joko sivun otsikko tai muokkaustunniste.",
+	"templatesandbox-revision-no-content": "Määrittämäässäsi versiossa ei ole sisältöä tai sinulla ei ole oikeuksia nähdä sitä.",
+	"templatesandbox-invalid-prefix": "Antamaasi hiekkalaatikon etuliitettä ei ole.",
+	"templatesandbox-prefix-not-local": "Antamasi hiekkalaatikon etuliite ei sijaitse tällä sivustolla.",
+	"templatesandbox-page-or-revid": "Anna joko sivun otsikko tai versiotunniste.",
+	"templatesandbox-editform-need-template": "Esikatsellaksesi toista sivua tällä mallineella, täytyy mallineen nimi olla annettuna.",
 	"templatesandbox-editform-need-title": "Esikatsellaksesi toista sivua tällä mallineella, täytyy sivun otsikko olla annettuna.",
-	"templatesandbox-editform-invalid-title": "Esikatselua varten määrittämäsi otsikko ei kelpaa.",
-	"templatesandbox-editform-title-not-exists": "Esikatselua varten määrittämääsi otsikkoa ei ole."
+	"templatesandbox-editform-invalid-template": "Antamasi mallineen nimi ei kelpaa.",
+	"templatesandbox-editform-invalid-title": "Esikatselua varten antamasi otsikko ei kelpaa.",
+	"templatesandbox-editform-title-not-exists": "Esikatselua varten antamaasi otsikkoa ei ole.",
+	"templatesandbox-failed-replace-section": "Olemassa olevan sivun osion korvaaminen epäonnistui."
 }

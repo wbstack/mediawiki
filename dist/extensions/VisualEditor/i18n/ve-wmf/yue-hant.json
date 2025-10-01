@@ -1,9 +1,15 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"Winston Sung",
+			"JeffreyKim",
+			"Ktchankt"
 		]
 	},
+	"tag-editcheck-newcontent-description": "EditCheck認為頁面加入咗新內容",
+	"tag-editcheck-newreference-description": "喺頁面加入咗參考資料",
+	"tag-editcheck-references-description": "EditCheck認為可能需要啲參考資料",
+	"tag-editcheck-references-activated-description": "EditCheck認為可能需要返啲參考資料，並且顯示埋用戶介面",
 	"tag-visualeditor": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|可見修改]]",
 	"tag-visualeditor-description": "用[[{{MediaWiki:visualeditor-descriptionpagelink}}|VisualEditor]]改嘅",
 	"tag-visualeditor-needcheck": "[[{{MediaWiki:visualeditor-descriptionpagelink}}|VisualEditor: 請檢查]]",
@@ -15,7 +21,6 @@
 	"visualeditor-feedback-link": "Project:VisualEditor/Feedback",
 	"visualeditor-feedback-tool": "畀意見",
 	"visualeditor-help-label": "睇用家指南",
-	"visualeditor-help-title": "編輯器使用指南",
 	"visualeditor-welcomedialog-action": "開始改",
 	"visualeditor-welcomedialog-content": "人人都改得，每個改動都有用。",
 	"visualeditor-welcomedialog-content-thanks": "多謝你幫世界各地嘅人增加知識！",

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DOM selection-like class
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -111,7 +111,7 @@ ve.SelectionState.prototype.getNativeRange = function ( doc ) {
 	if ( this.anchorNode === null ) {
 		return null;
 	}
-	var range = doc.createRange();
+	const range = doc.createRange();
 	try {
 		if ( this.isBackwards ) {
 			range.setStart( this.focusNode, this.focusOffset );

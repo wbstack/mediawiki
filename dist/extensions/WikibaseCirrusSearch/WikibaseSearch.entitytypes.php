@@ -5,6 +5,7 @@
  */
 
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Request\WebRequest;
 use Wikibase\DataModel\Entity\Item;
 use Wikibase\DataModel\Entity\Property;
 use Wikibase\DataModel\Services\Lookup\InProcessCachingDataTypeLookup;
@@ -39,7 +40,7 @@ return [
 							WikibaseRepo::getTermLookup(),
 							$languageFallbackChainFactory->newFromLanguage( $userLanguage )
 						),
-						WikibaseRepo::getEntityTypeToRepositoryMapping()
+						WikibaseRepo::getEnabledEntityTypes()
 					),
 					new EntitySearchElastic(
 						$languageFallbackChainFactory,
@@ -64,14 +65,15 @@ return [
 			);
 		},
 		Def::SEARCH_FIELD_DEFINITIONS => static function ( array $languageCodes, SettingsArray $searchSettings ) {
-			$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
+			$configFactory = MediaWikiServices::getInstance()->getConfigFactory();
 			return new ItemFieldDefinitions( [
-				new LabelsProviderFieldDefinitions( $languageCodes ),
-				new DescriptionsProviderFieldDefinitions( $languageCodes, $config->get( 'UseStemming' ) ),
+				new LabelsProviderFieldDefinitions( $languageCodes, $configFactory ),
+				new DescriptionsProviderFieldDefinitions( $languageCodes, $configFactory ),
 				StatementProviderFieldDefinitions::newFromSettings(
 					new InProcessCachingDataTypeLookup( WikibaseRepo::getPropertyDataTypeLookup() ),
 					WikibaseRepo::getDataTypeDefinitions()->getSearchIndexDataFormatterCallbacks(),
-					$searchSettings
+					$searchSettings,
+					WikibaseRepo::getLogger()
 				)
 			] );
 		},
@@ -80,16 +82,17 @@ return [
 	'property' => [
 		Def::SEARCH_FIELD_DEFINITIONS => static function ( array $languageCodes, SettingsArray $searchSettings ) {
 			$services = MediaWikiServices::getInstance();
-			$config = $services->getConfigFactory()->makeConfig( 'WikibaseCirrusSearch' );
+			$configFactory = $services->getConfigFactory();
 			return new PropertyFieldDefinitions( [
-				new LabelsProviderFieldDefinitions( $languageCodes ),
-				new DescriptionsProviderFieldDefinitions( $languageCodes, $config->get( 'UseStemming' ) ),
+				new LabelsProviderFieldDefinitions( $languageCodes, $configFactory ),
+				new DescriptionsProviderFieldDefinitions( $languageCodes, $configFactory ),
 				StatementProviderFieldDefinitions::newFromSettings(
 					new InProcessCachingDataTypeLookup(
 						WikibaseRepo::getPropertyDataTypeLookup( $services ) ),
 					WikibaseRepo::getDataTypeDefinitions( $services )
 						->getSearchIndexDataFormatterCallbacks(),
-					$searchSettings
+					$searchSettings,
+					WikibaseRepo::getLogger( $services )
 				)
 			] );
 		},
@@ -108,7 +111,7 @@ return [
 								WikibaseRepo::getTermLookup(),
 								$languageFallbackChainFactory->newFromLanguage( $userLanguage )
 							),
-							WikibaseRepo::getEntityTypeToRepositoryMapping()
+							WikibaseRepo::getEnabledEntityTypes()
 						),
 						new EntitySearchElastic(
 							$languageFallbackChainFactory,

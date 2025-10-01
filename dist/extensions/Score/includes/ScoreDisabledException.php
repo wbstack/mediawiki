@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\Score;
 
-use Html;
+use MediaWiki\Html\Html;
 
 class ScoreDisabledException extends ScoreException {
 	public function __construct() {
@@ -18,10 +18,12 @@ class ScoreDisabledException extends ScoreException {
 		);
 	}
 
+	/** @inheritDoc */
 	public function isTracked() {
 		return false;
 	}
 
+	/** @inheritDoc */
 	public function getStatsdKey() {
 		return false;
 	}

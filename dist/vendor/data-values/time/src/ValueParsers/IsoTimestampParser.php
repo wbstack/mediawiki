@@ -58,8 +58,8 @@ class IsoTimestampParser extends StringValueParser {
 	 * @param ParserOptions|null $options
 	 */
 	public function __construct(
-		CalendarModelParser $calendarModelParser = null,
-		ParserOptions $options = null
+		?CalendarModelParser $calendarModelParser = null,
+		?ParserOptions $options = null
 	) {
 		parent::__construct( $options );
 
@@ -114,7 +114,7 @@ class IsoTimestampParser extends StringValueParser {
 			throw new ParseException( 'Malformed time' );
 		}
 
-		list( , $sign, $year, $month, $day, $hour, $minute, $second, $calendarModel ) = $matches;
+		[ , $sign, $year, $month, $day, $hour, $minute, $second, $calendarModel ] = $matches;
 
 		if ( $sign === ''
 			&& strlen( $year ) < 3
@@ -176,7 +176,7 @@ class IsoTimestampParser extends StringValueParser {
 		$option = $this->getOption( self::OPT_PRECISION );
 
 		if ( $option !== null ) {
-			if ( !is_int( $option ) && !ctype_digit( $option ) ) {
+			if ( !is_int( $option ) && ( !is_string( $option ) || !ctype_digit( $option ) ) ) {
 				throw new ParseException( 'Precision must be an integer' );
 			}
 
@@ -228,7 +228,7 @@ class IsoTimestampParser extends StringValueParser {
 	 * @return string URI
 	 */
 	private function getCalendarModel( array $timeParts ) {
-		list( $sign, $unsignedYear, , , , , , $calendarModel ) = $timeParts;
+		[ $sign, $unsignedYear, , , , , , $calendarModel ] = $timeParts;
 
 		if ( !empty( $calendarModel ) ) {
 			return $this->calendarModelParser->parse( $calendarModel );

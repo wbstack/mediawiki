@@ -1,8 +1,9 @@
 {
 	"@metadata": {
 		"authors": [
-			"Winston Sung"
+			"H78c67c",
+			"Ktchankt"
 		]
 	},
-	"elastica-desc": "用 [http://elastica.io/ Elastica] 函式庫嚟提供其他擴充套件基礎嘅[http://www.elasticsearch.org/ Elasticsearch] 功能"
+	"elastica-desc": "用 [https://elastica.io/ Elastica] 函式庫嚟畀其他擴充套件嘅基礎 [https://www.elastic.co/ Elasticsearch] 功能"
 }

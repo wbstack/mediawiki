@@ -21,17 +21,17 @@
 
 namespace MediaWiki\Parser;
 
-use BagOStuff;
-use IBufferingStatsdDataFactory;
 use MediaWiki\Config\ServiceOptions;
 use MediaWiki\HookContainer\HookContainer;
 use MediaWiki\Json\JsonCodec;
 use MediaWiki\MainConfigNames;
 use MediaWiki\Page\WikiPageFactory;
-use ParserCache;
+use MediaWiki\Title\TitleFactory;
 use Psr\Log\LoggerInterface;
-use TitleFactory;
-use WANObjectCache;
+use Wikimedia\ObjectCache\BagOStuff;
+use Wikimedia\ObjectCache\WANObjectCache;
+use Wikimedia\Stats\StatsFactory;
+use Wikimedia\UUID\GlobalIdGenerator;
 
 /**
  * Returns an instance of the ParserCache by its name.
@@ -42,6 +42,9 @@ class ParserCacheFactory {
 
 	/** @var string name of ParserCache for the default parser */
 	public const DEFAULT_NAME = 'pcache';
+
+	/** @var string name of RevisionOutputCache for the default parser */
+	public const DEFAULT_RCACHE_NAME = 'rcache';
 
 	/** @var BagOStuff */
 	private $parserCacheBackend;
@@ -55,7 +58,7 @@ class ParserCacheFactory {
 	/** @var JsonCodec */
 	private $jsonCodec;
 
-	/** @var IBufferingStatsdDataFactory */
+	/** @var StatsFactory */
 	private $stats;
 
 	/** @var LoggerInterface */
@@ -66,6 +69,8 @@ class ParserCacheFactory {
 
 	/** @var WikiPageFactory */
 	private $wikiPageFactory;
+
+	private GlobalIdGenerator $globalIdGenerator;
 
 	/** @var ParserCache[] */
 	private $parserCaches = [];
@@ -81,6 +86,7 @@ class ParserCacheFactory {
 	 */
 	public const CONSTRUCTOR_OPTIONS = [
 		MainConfigNames::CacheEpoch,
+		MainConfigNames::ParserCacheFilterConfig,
 		MainConfigNames::OldRevisionParserCacheExpireTime,
 	];
 
@@ -89,22 +95,24 @@ class ParserCacheFactory {
 	 * @param WANObjectCache $revisionOutputCacheBackend
 	 * @param HookContainer $hookContainer
 	 * @param JsonCodec $jsonCodec
-	 * @param IBufferingStatsdDataFactory $stats
+	 * @param StatsFactory $stats
 	 * @param LoggerInterface $logger
 	 * @param ServiceOptions $options
 	 * @param TitleFactory $titleFactory
 	 * @param WikiPageFactory $wikiPageFactory
+	 * @param GlobalIdGenerator $globalIdGenerator
 	 */
 	public function __construct(
 		BagOStuff $parserCacheBackend,
 		WANObjectCache $revisionOutputCacheBackend,
 		HookContainer $hookContainer,
 		JsonCodec $jsonCodec,
-		IBufferingStatsdDataFactory $stats,
+		StatsFactory $stats,
 		LoggerInterface $logger,
 		ServiceOptions $options,
 		TitleFactory $titleFactory,
-		WikiPageFactory $wikiPageFactory
+		WikiPageFactory $wikiPageFactory,
+		GlobalIdGenerator $globalIdGenerator
 	) {
 		$this->parserCacheBackend = $parserCacheBackend;
 		$this->revisionOutputCacheBackend = $revisionOutputCacheBackend;
@@ -117,6 +125,7 @@ class ParserCacheFactory {
 		$this->options = $options;
 		$this->titleFactory = $titleFactory;
 		$this->wikiPageFactory = $wikiPageFactory;
+		$this->globalIdGenerator = $globalIdGenerator;
 	}
 
 	/**
@@ -136,8 +145,16 @@ class ParserCacheFactory {
 				$this->stats,
 				$this->logger,
 				$this->titleFactory,
-				$this->wikiPageFactory
+				$this->wikiPageFactory,
+				$this->globalIdGenerator
 			);
+
+			$filterConfig = $this->options->get( MainConfigNames::ParserCacheFilterConfig );
+
+			if ( isset( $filterConfig[$name] ) ) {
+				$filter = new ParserCacheFilter( $filterConfig[$name] );
+				$cache->setFilter( $filter );
+			}
 
 			$this->parserCaches[$name] = $cache;
 		}
@@ -159,7 +176,8 @@ class ParserCacheFactory {
 				$this->options->get( MainConfigNames::CacheEpoch ),
 				$this->jsonCodec,
 				$this->stats,
-				$this->logger
+				$this->logger,
+				$this->globalIdGenerator
 			);
 
 			$this->revisionOutputCaches[$name] = $cache;

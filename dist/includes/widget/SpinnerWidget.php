@@ -2,6 +2,9 @@
 
 namespace MediaWiki\Widget;
 
+use MediaWiki\Html\Html;
+use Stringable;
+
 /**
  * PHP version of jquery.spinner.
  *
@@ -11,9 +14,11 @@ namespace MediaWiki\Widget;
  * @copyright 2011-2020 MediaWiki Widgets Team and others; see AUTHORS.txt
  * @license MIT
  */
-class SpinnerWidget {
+class SpinnerWidget implements Stringable {
 
+	/** @var array */
 	private $attributes;
+	/** @var string */
 	private $content;
 
 	/**
@@ -47,7 +52,7 @@ class SpinnerWidget {
 	 * @return string HTML serialization
 	 */
 	public function toString() {
-		return \Html::rawElement( 'div', $this->attributes, $this->content );
+		return Html::rawElement( 'div', $this->attributes, $this->content );
 	}
 
 	/**
@@ -58,10 +63,6 @@ class SpinnerWidget {
 	 * @return string
 	 */
 	public function __toString() {
-		try {
-			return $this->toString();
-		} catch ( \Exception $ex ) {
-			trigger_error( (string)$ex, E_USER_ERROR );
-		}
+		return $this->toString();
 	}
 }

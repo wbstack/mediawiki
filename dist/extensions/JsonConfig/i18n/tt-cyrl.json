@@ -1,0 +1,10 @@
+{
+	"@metadata": {
+		"authors": [
+			"Mansur"
+		]
+	},
+	"jsonconfig-license-copyrightwarning-license-unset": "Үзгәрешләрне бастырганда сез <code>licence</code> кырында күрсәтелгән лицензия нигезендә үз өлешегезне бастырырга ризалашасыз.",
+	"jsonconfig-license-notice": "'''Искәрмә:''' Бу битне үзгәрткәндә сез [{{int:jsonconfig-license-url-$1}} {{int:jsonconfig-license-name-$1}}] лицензиясе шартлары нигезендә үз өлешегезне бастырырга ризалашасыз.",
+	"jsonconfig-blocked-page-creation": "Сез күрсәткән бит исеме бу вики өчен JSONConfigны киңәйтү өчен көйләнгән калыпларның берсенә дә туры килми."
+}

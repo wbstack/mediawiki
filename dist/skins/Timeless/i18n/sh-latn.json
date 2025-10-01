@@ -1,11 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
+			"Vlad5250",
 			"Winston Sung",
-			"Vlad5250"
+			"Aca"
 		]
 	},
-	"timeless-anonymous": "Anoniman",
+	"timeless-anonymous": "Neprijavljen",
 	"timeless-loggedinas": "Prijavljeni ste kao '''$1'''",
 	"timeless-notloggedin": "Niste prijavljeni",
 	"timeless-userpage": "{{GENDER:$1|Korisnička}} stranica",

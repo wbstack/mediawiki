@@ -1,8 +1,10 @@
 {
 	"@metadata": {
 		"authors": [
-			"KHMELNYTSKYIA"
+			"KHMELNYTSKYIA",
+			"Constraque"
 		]
 	},
+	"scribunto-doc-page-does-not-exist": "''Документація про тот модул може быти вытворена на [[$1]]''",
 	"scribunto-lua-error": "Помилка Lua: $2."
 }

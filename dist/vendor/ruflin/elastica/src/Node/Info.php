@@ -2,6 +2,9 @@
 
 namespace Elastica\Node;
 
+use Elastica\Exception\ClientException;
+use Elastica\Exception\ConnectionException;
+use Elastica\Exception\ResponseException;
 use Elastica\Node as BaseNode;
 use Elastica\Response;
 use Elasticsearch\Endpoints\Nodes\Info as NodesInfo;
@@ -127,7 +130,7 @@ class Info
     public function getPlugins(): array
     {
         if (!\in_array('plugins', $this->_params, true)) {
-            //Plugin data was not retrieved when refresh() was called last. Get it now.
+            // Plugin data was not retrieved when refresh() was called last. Get it now.
             $this->_params[] = 'plugins';
             $this->refresh($this->_params);
         }
@@ -204,6 +207,10 @@ class Info
      *
      * @param array $params Params to return (default none). Possible options: settings, os, process, jvm, thread_pool, network, transport, http, plugin
      *
+     * @throws ClientException
+     * @throws ConnectionException
+     * @throws ResponseException
+     *
      * @return Response Response object
      */
     public function refresh(array $params = []): Response
@@ -212,7 +219,7 @@ class Info
 
         // TODO: Use only NodesInfo when dropping support for elasticsearch/elasticsearch 7.x
         $endpoint = \class_exists(NodesInfo::class) ? new NodesInfo() : new \Elasticsearch\Endpoints\Cluster\Nodes\Info();
-        $endpoint->setNodeID($this->getNode()->getId());
+        $endpoint->setNodeId($this->getNode()->getId());
 
         if ($params) {
             $endpoint->setMetric($params);

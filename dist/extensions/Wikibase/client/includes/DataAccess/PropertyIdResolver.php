@@ -80,13 +80,14 @@ class PropertyIdResolver {
 			[ $propertyLabel ]
 		);
 
-		if ( empty( $propertyIds ) ) {
+		if ( !$propertyIds ) {
 			throw new PropertyLabelNotResolvedException( $propertyLabel, $languageCode );
 		}
 
 		$propertyId = $propertyIds[$propertyLabel];
 		$this->usageAccumulator->addLabelUsage( $propertyId, $languageCode );
 
+		// @phan-suppress-next-line PhanTypeMismatchReturnSuperType
 		return $propertyId;
 	}
 

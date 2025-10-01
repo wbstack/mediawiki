@@ -2,9 +2,9 @@
 namespace Wikibase\Lexeme\Search\Elastic;
 
 use CirrusSearch\Search\Result;
-use Html;
 use HtmlArmor;
-use Language;
+use MediaWiki\Html\Html;
+use MediaWiki\Language\Language;
 use Wikibase\Lexeme\DataAccess\LexemeDescription;
 
 /**
@@ -35,7 +35,6 @@ class LexemeResult extends Result {
 	 * @param Language $displayLanguage
 	 * @param LexemeDescription $descriptionMaker
 	 * @param array $result Result from LexemeFulltextResult
-	 * @throws \MWException
 	 */
 	public function __construct(
 		Language $displayLanguage,

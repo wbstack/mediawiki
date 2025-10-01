@@ -21,8 +21,10 @@
 
 namespace MediaWiki\Auth;
 
+use MediaWiki\Language\RawMessage;
 use MediaWiki\MainConfigNames;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Password\PasswordFactory;
 
 /**
  * This represents the intention to set a temporary password for the user.
@@ -73,7 +75,7 @@ class TemporaryPasswordAuthenticationRequest extends AuthenticationRequest {
 		$config = MediaWikiServices::getInstance()->getMainConfig();
 
 		// get the min password length
-		$minLength = $config->get( MainConfigNames::MinimalPasswordLength );
+		$minLength = 0;
 		$policy = $config->get( MainConfigNames::PasswordPolicy );
 		foreach ( $policy['policies'] as $p ) {
 			foreach ( [ 'MinimalPasswordLength', 'MinimumPasswordLengthToLogin' ] as $check ) {
@@ -81,7 +83,7 @@ class TemporaryPasswordAuthenticationRequest extends AuthenticationRequest {
 			}
 		}
 
-		$password = \PasswordFactory::generateRandomPasswordString( $minLength );
+		$password = PasswordFactory::generateRandomPasswordString( $minLength );
 
 		return new self( $password );
 	}
@@ -91,8 +93,7 @@ class TemporaryPasswordAuthenticationRequest extends AuthenticationRequest {
 	 * @return TemporaryPasswordAuthenticationRequest
 	 */
 	public static function newInvalid() {
-		$request = new self( null );
-		return $request;
+		return new self( null );
 	}
 
 	/**
@@ -102,7 +103,7 @@ class TemporaryPasswordAuthenticationRequest extends AuthenticationRequest {
 	public function describeCredentials() {
 		return [
 			'provider' => wfMessage( 'authmanager-provider-temporarypassword' ),
-			'account' => new \RawMessage( '$1', [ $this->username ] ),
+			'account' => new RawMessage( '$1', [ $this->username ] ),
 		] + parent::describeCredentials();
 	}
 

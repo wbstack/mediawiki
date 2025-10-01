@@ -1,7 +1,7 @@
 /*!
  * VisualEditor user interface NodeDialog class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.ui.FragmentDialog
- * @mixins ve.ui.NodeWindow
+ * @mixes ve.ui.NodeWindow
  *
  * @constructor
  * @param {Object} [config] Configuration options
@@ -44,7 +44,7 @@ ve.ui.NodeDialog.prototype.initialize = function ( data ) {
  */
 ve.ui.NodeDialog.prototype.getSetupProcess = function ( data ) {
 	// Parent method
-	var process = ve.ui.NodeDialog.super.prototype.getSetupProcess.call( this, data );
+	const process = ve.ui.NodeDialog.super.prototype.getSetupProcess.call( this, data );
 	// Mixin method
 	return ve.ui.NodeWindow.prototype.getSetupProcess.call( this, data, process );
 };
@@ -54,7 +54,7 @@ ve.ui.NodeDialog.prototype.getSetupProcess = function ( data ) {
  */
 ve.ui.NodeDialog.prototype.getTeardownProcess = function ( data ) {
 	// Parent method
-	var process = ve.ui.NodeDialog.super.prototype.getTeardownProcess.call( this, data );
+	const process = ve.ui.NodeDialog.super.prototype.getTeardownProcess.call( this, data );
 	// Mixin method
 	return ve.ui.NodeWindow.prototype.getTeardownProcess.call( this, data, process );
 };

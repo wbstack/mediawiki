@@ -1,8 +1,5 @@
 <?php
 /**
- * Redirect from Special:Diff/### to index.php?diff=### and
- * from Special:Diff/###/### to index.php?oldid=###&diff=###.
- *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -19,8 +16,13 @@
  * http://www.gnu.org/copyleft/gpl.html
  *
  * @file
- * @ingroup SpecialPage
  */
+
+namespace MediaWiki\Specials;
+
+use MediaWiki\HTMLForm\HTMLForm;
+use MediaWiki\SpecialPage\RedirectSpecialPage;
+use MediaWiki\Title\Title;
 
 /**
  * Redirect from Special:Diff/### to index.php?diff=### and
@@ -120,7 +122,7 @@ class SpecialDiff extends RedirectSpecialPage {
 
 	public function getDescription() {
 		// 'diff' message is in lowercase, using own message
-		return $this->msg( 'diff-form' )->text();
+		return $this->msg( 'diff-form' );
 	}
 
 	public function getName() {
@@ -135,3 +137,6 @@ class SpecialDiff extends RedirectSpecialPage {
 		return 'redirects';
 	}
 }
+
+/** @deprecated class alias since 1.41 */
+class_alias( SpecialDiff::class, 'SpecialDiff' );

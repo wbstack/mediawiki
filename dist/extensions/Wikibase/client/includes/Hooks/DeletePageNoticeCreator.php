@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Client\Hooks;
 
-use Html;
+use MediaWiki\Html\Html;
+use MediaWiki\Output\OutputPage;
 use MediaWiki\Page\Hook\ArticleDeleteAfterSuccessHook;
-use OutputPage;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\Client\RepoLinker;
 use Wikibase\Client\Store\ClientStore;
 use Wikibase\Lib\SettingsArray;
@@ -65,7 +65,10 @@ class DeletePageNoticeCreator implements ArticleDeleteAfterSuccessHook {
 	 * @param OutputPage $outputPage
 	 */
 	public function onArticleDeleteAfterSuccess( $title, $outputPage ): void {
-		$outputPage->addHTML( $this->getPageDeleteNoticeHtml( $title ) );
+		$notice = $this->getPageDeleteNoticeHtml( $title );
+		if ( $notice !== null ) {
+			$outputPage->addHTML( $notice );
+		}
 	}
 
 	/**
@@ -101,27 +104,15 @@ class DeletePageNoticeCreator implements ArticleDeleteAfterSuccessHook {
 			return null;
 		}
 
-		$msg = $this->getMessage( $title );
-
 		$html = Html::rawElement(
 			'div',
 			[
-				'class' => 'plainlinks'
+				'class' => 'plainlinks',
 			],
-			wfMessage( $msg, $itemLink )->parse()
+			wfMessage( 'wikibase-after-page-delete', $itemLink )->parse()
 		);
 
 		return $html;
-	}
-
-	private function getMessage( Title $title ): string {
-		if ( isset( $title->wikibasePushedDeleteToRepo ) ) {
-			// We're going to update the item using the repo job queue \o/
-			return 'wikibase-after-page-delete-queued';
-		}
-
-		// The user has to update the item per hand for some reason
-		return 'wikibase-after-page-delete';
 	}
 
 }

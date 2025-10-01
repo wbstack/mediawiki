@@ -1,13 +1,15 @@
-var references,
-	Drawer = require( '../Drawer' ),
+const Drawer = require( '../Drawer' ),
 	util = require( '../util' ),
 	icons = require( '../icons' ),
 	ReferencesGateway = require( './ReferencesGateway' ),
-	Icon = require( '../Icon' );
+	Icon = require( '../Icon' ),
+	ReferencesHtmlScraperGateway = require( './ReferencesHtmlScraperGateway' ),
+	IconButton = require( '../IconButton' );
 
 /**
  * Create a callback for clicking references
  *
+ * @ignore
  * @param {Function} onNestedReferenceClick
  * @return {Function}
  */
@@ -28,21 +30,34 @@ function makeOnNestedReferenceClickHandler( onNestedReferenceClick ) {
 /**
  * Drawer for references
  *
- * @uses Icon
+ * @memberof module:mobile.startup/references
+ * @uses IconButton
  * @param {Object} props
  * @param {boolean} [props.error] whether an error has occurred
  * @param {string} props.title of reference e.g [1]
  * @param {string} props.text is the HTML of the reference
  * @param {string} [props.parentText] is the HTML of the parent reference if there is one
+ * @param {boolean} props.isSubref true when this reference has a parent
  * @param {Function} [props.onNestedReferenceClick] callback for when a reference
  *  inside the reference is clicked.
- * @return {Drawer}
+ * @return {module:mobile.startup/Drawer}
  */
 function referenceDrawer( props ) {
-	const errorIcon = props.error ? new Icon( {
+	const errorIcon = props.error ? new IconButton( {
 		name: 'error',
 		isSmall: true
 	} ).$el : null;
+
+	const mainRef = props.isSubref ? props.parentText : props.text;
+	const mainRefHtml = util.parseHTML( '<div>' )
+		.addClass( 'main-reference-content' )
+		.html( mainRef );
+	if ( !mainRef ) {
+		mainRefHtml.append( icons.spinner().$el );
+	}
+	const subRefHtml = props.isSubref ?
+		util.parseHTML( '<div>' ).html( props.text ) : '';
+
 	return new Drawer(
 		util.extend(
 			{
@@ -61,27 +76,22 @@ function referenceDrawer( props ) {
 						.addClass( 'references-drawer__header' )
 						.append( [
 							new Icon( {
-								isSmall: true,
-								name: 'reference',
-								type: ''
+								icon: 'reference',
+								isSmall: true
 							} ).$el,
 							util.parseHTML( '<span>' ).addClass( 'references-drawer__title' ).text( mw.msg( 'mobile-frontend-references-citation' ) ),
 							icons.cancel( 'gray', {
 								isSmall: true,
-								type: 'element',
-								additionalClassNames: 'mw-ui-icon-flush-right'
+								additionalClassNames: 'mf-button-flush-right'
 							} ).$el
 						] ),
+
 					// Add .mw-parser-output so that TemplateStyles styles apply (T244510)
 					util.parseHTML( '<div>' ).addClass( 'mw-parser-output' ).append( [
 						errorIcon,
-						props.parentText ?
-							util.parseHTML( '<div>' ).html( props.parentText ) :
-							'',
 						util.parseHTML( '<sup>' ).text( props.title ),
-						props.text ?
-							util.parseHTML( '<span>' ).html( ' ' + props.text ) :
-							icons.spinner().$el
+						mainRefHtml,
+						subRefHtml
 					] )
 				]
 			},
@@ -90,10 +100,16 @@ function referenceDrawer( props ) {
 	);
 }
 
-references = {
+/**
+ * Internal for use inside Minerva only. See {@link module:mobile.startup} for access.
+ *
+ * @exports module:mobile.startup/references
+ */
+const references = {
 	test: {
 		makeOnNestedReferenceClickHandler
 	},
+	ReferencesHtmlScraperGateway,
 	referenceDrawer,
 	/**
 	 * Fetch and render nested reference upon click
@@ -101,21 +117,22 @@ references = {
 	 * @param {string} id of the reference to be retrieved
 	 * @param {Page} page to locate reference for
 	 * @param {string} refNumber the number it identifies as in the page
-	 * @param {PageHTMLParser} pageHTMLParser
-	 * @param {Gateway} gateway
+	 * @param {module:mobile.startup/PageHTMLParser} pageHTMLParser
+	 * @param {module:mobile.startup/references~Gateway} gateway
 	 * @param {Object} props for referenceDrawer
 	 * @param {Function} onShowNestedReference function call when a nested reference is triggered.
 	 * @return {jQuery.Deferred}
 	 */
-	showReference: function ( id, page, refNumber, pageHTMLParser, gateway, props,
+	showReference( id, page, refNumber, pageHTMLParser, gateway, props,
 		onShowNestedReference
 	) {
-		return gateway.getReference( id, page, pageHTMLParser ).then( function ( reference ) {
+		return gateway.getReference( id, page, pageHTMLParser ).then( ( reference ) => {
 			const drawer = referenceDrawer( util.extend( {
 				title: refNumber,
 				text: reference.text,
 				parentText: reference.parentText,
-				onNestedReferenceClick: function ( href, text ) {
+				isSubref: reference.isSubref,
+				onNestedReferenceClick( href, text ) {
 					references.showReference(
 						href,
 						page,
@@ -127,7 +144,7 @@ references = {
 							onShowNestedReference( drawer, nestedDrawer );
 						} else {
 							mw.log.warn( 'Please provide onShowNestedReferences parameter.' );
-							document.body.appendChild( nestedDrawer.$el[ 0 ] );
+							document.body.appendChild( nestedDrawer.$el[0] );
 							drawer.hide();
 							nestedDrawer.show();
 						}
@@ -135,7 +152,7 @@ references = {
 				}
 			}, props ) );
 			return drawer;
-		}, function ( err ) {
+		}, ( err ) => {
 			// If non-existent reference nothing to do.
 			if ( err === ReferencesGateway.ERROR_NOT_EXIST ) {
 				return;

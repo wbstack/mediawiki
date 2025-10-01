@@ -1,7 +1,7 @@
 /*!
  * VisualEditor annotated text content state chunk class
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -74,7 +74,7 @@ ve.ce.TextStateChunk.prototype.hasEqualElements = function ( other ) {
 	if ( this.elements.length !== other.elements.length ) {
 		return false;
 	}
-	for ( var i = 0, len = this.elements.length; i < len; i++ ) {
+	for ( let i = 0, len = this.elements.length; i < len; i++ ) {
 		if ( !this.constructor.static.compareElements( this.elements[ i ], other.elements[ i ] ) ) {
 			return false;
 		}

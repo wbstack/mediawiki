@@ -1,9 +1,9 @@
-var userOffset;
+let userOffset;
 
 /* global moment:false */
 /**
  * @class Revision
- * @param {Object} data - Containing keys `id`, `size`, `comment`, `parsedcomment`, `timestamp`, `user` and `minor`
+ * @param {Object} data - Containing keys `id`, `size`, `parsedcomment`, `timestamp`, `user` and `minor`
  * @constructor
  */
 function Revision( data ) {
@@ -13,24 +13,13 @@ function Revision( data ) {
 	this.minor = !!data.minor || data.minor === '';
 
 	// Comments, tags, and users can be suppressed thus we must check if they exist
-	if ( 'comment' in data ) {
-		this.comment = data.comment;
-	}
-	if ( 'parsedcomment' in data ) {
-		this.parsedComment = data.parsedcomment;
-	}
-	if ( 'tags' in data ) {
-		this.tags = data.tags;
-	}
-	if ( 'user' in data ) {
-		this.user = data.user;
-		if ( 'userGender' in data ) {
-			this.userGender = data.userGender;
-		}
-	}
+	this.parsedComment = data.parsedcomment || '';
+	this.tags = data.tags || [];
+	this.user = data.user || '';
+	this.userGender = data.userGender || '';
 }
 
-$.extend( Revision.prototype, {
+Object.assign( Revision.prototype, {
 	/**
 	 * @type {number}
 	 */
@@ -42,14 +31,9 @@ $.extend( Revision.prototype, {
 	size: 0,
 
 	/**
-	 * @type {string}
-	 */
-	comment: '',
-
-	/**
 	 * @type {string[]}
 	 */
-	tags: [],
+	tags: null,
 
 	/**
 	 * @type {boolean}
@@ -77,7 +61,7 @@ $.extend( Revision.prototype, {
 	userGender: '',
 
 	/**
-	 * @type {number}
+	 * @type {number} Warning, only set for Revision objects that are part of a RevisionList
 	 */
 	relativeSize: 0,
 
@@ -110,20 +94,6 @@ $.extend( Revision.prototype, {
 	},
 
 	/**
-	 * @return {boolean}
-	 */
-	hasEmptyComment: function () {
-		return this.getComment().trim().length === 0;
-	},
-
-	/**
-	 * @return {string}
-	 */
-	getComment: function () {
-		return this.comment;
-	},
-
-	/**
 	 * @return {string[]}
 	 */
 	getTags: function () {
@@ -131,28 +101,13 @@ $.extend( Revision.prototype, {
 	},
 
 	/**
-	 * @return {boolean}
-	 */
-	hasNoTags: function () {
-		return this.tags.length === 0;
-	},
-
-	/**
 	 * Uses moment.js to format the date
 	 *
-	 * @param {string} rawDate
-	 * @return {string}
-	 */
-	formatDate: function ( rawDate ) {
-		var offset = parseInt( userOffset );
-		return moment( rawDate ).utcOffset( offset ).format( 'LLL' );
-	},
-
-	/**
 	 * @return {string}
 	 */
 	getFormattedDate: function () {
-		return this.formatDate( this.timestamp );
+		const offset = parseInt( userOffset );
+		return moment( this.timestamp ).utcOffset( offset ).format( 'LLL' );
 	},
 
 	/**
@@ -186,5 +141,7 @@ $.extend( Revision.prototype, {
 
 module.exports = {
 	Revision: Revision,
-	setUserOffset: function ( offset ) { userOffset = offset; }
+	setUserOffset: function ( offset ) {
+		userOffset = offset;
+	}
 };

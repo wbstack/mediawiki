@@ -5,10 +5,10 @@ declare( strict_types = 1 );
 namespace Wikibase\Repo;
 
 use BatchRowIterator;
-use HtmlCacheUpdater;
 use Job;
+use MediaWiki\Cache\HTMLCacheUpdater;
 use MediaWiki\MediaWikiServices;
-use Title;
+use MediaWiki\Title\Title;
 use Wikibase\DataModel\Entity\EntityIdParser;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Repo\LinkedData\EntityDataUriManager;
@@ -29,7 +29,7 @@ class PurgeEntityDataJob extends Job {
 	/** @var RepoDomainDb */
 	private $repoDb;
 
-	/** @var HtmlCacheUpdater */
+	/** @var HTMLCacheUpdater */
 	private $htmlCacheUpdater;
 
 	/** @var int */
@@ -39,7 +39,7 @@ class PurgeEntityDataJob extends Job {
 		EntityIdParser $entityIdParser,
 		EntityDataUriManager $entityDataUriManager,
 		RepoDomainDb $repoDb,
-		HtmlCacheUpdater $htmlCacheUpdater,
+		HTMLCacheUpdater $htmlCacheUpdater,
 		int $batchSize,
 		array $params
 	) {
@@ -63,7 +63,7 @@ class PurgeEntityDataJob extends Job {
 		);
 	}
 
-	public function run(): void {
+	public function run(): bool {
 		$entityId = $this->entityIdParser->parse( $this->params['entityId'] );
 
 		// URLs for latest data...
@@ -79,6 +79,8 @@ class PurgeEntityDataJob extends Job {
 		if ( $urls !== [] ) {
 			$this->htmlCacheUpdater->purgeUrls( $urls );
 		}
+
+		return true;
 	}
 
 	private function getArchivedRevisionIds(): iterable {

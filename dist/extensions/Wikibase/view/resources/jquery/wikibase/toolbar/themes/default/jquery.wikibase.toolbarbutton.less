@@ -1,0 +1,83 @@
+/**
+ * @license GNU GPL v2+
+ * @author H. Snater < mediawiki@snater.com >
+ */
+
+.wikibase-toolbarbutton-disabled a {
+	cursor: default;
+}
+
+.wikibase-toolbarbutton-disabled a:link,
+.wikibase-toolbarbutton-disabled a:hover,
+.wikibase-toolbarbutton-disabled a:active,
+.wikibase-toolbarbutton-disabled a:visited {
+	color: #72777d;
+	text-decoration: none;
+}
+
+.wikibase-toolbarbutton.oo-ui-buttonElement {
+	padding: 0;
+}
+
+.wikibase-toolbarbutton.oo-ui-buttonElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+	height: 1em;
+	width: 1em;
+}
+
+.wikibase-toolbarbutton.ui-state-disabled.oo-ui-buttonElement > .oo-ui-buttonElement-button > .oo-ui-iconElement-icon {
+	opacity: 0.33;
+}
+
+.wikibase-toolbarbutton.ui-state-disabled.oo-ui-buttonElement > .oo-ui-buttonElement-button {
+	cursor: default;
+}
+
+.wikibase-toolbar-button a {
+	/* common styles */
+	font-size: small;
+	padding: 0;
+}
+
+.wikibase-toolbar-button .wb-icon {
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: 1rem 1rem;
+	display: inline-block;
+	width: 1.25rem;
+	height: 1.25rem;
+	vertical-align: middle;
+	opacity: 0.87;
+}
+
+.wikibase-toolbar-button a:hover .wb-icon {
+	opacity: 1;
+}
+
+.wikibase-toolbar-button.ui-state-disabled a:hover .wb-icon {
+	opacity: 0.5;
+}
+
+.wikibase-toolbar-button-edit .wb-icon {
+	/* @embed */
+	background-image: url( images/icons/ooui/edit.svg );
+}
+
+.wikibase-toolbar-button-save .wb-icon {
+	/* @embed */
+	background-image: url( images/icons/ooui/check.svg );
+}
+
+.wikibase-toolbar-button-remove .wb-icon {
+	/* @embed */
+	background-image: url( images/icons/ooui/trash.svg );
+}
+
+.wikibase-toolbar-button-cancel .wb-icon {
+	/* @embed */
+	background-image: url( images/icons/ooui/close.svg );
+}
+
+.wikibase-toolbar-button-add .wb-icon {
+	/* @embed */
+	background-image: url( images/icons/ooui/add.svg );
+}

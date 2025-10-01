@@ -6,6 +6,7 @@ use DOMDocument;
 use DOMElement;
 use MobileFrontend\Transforms\Utils\HtmlClassUtils;
 use MobileFrontend\Transforms\Utils\HtmlStyleUtils;
+use Wikimedia\Parsoid\Utils\DOMCompat;
 
 class LazyImageTransform implements IMobileTransform {
 
@@ -39,7 +40,20 @@ class LazyImageTransform implements IMobileTransform {
 	 * @param DOMElement $node to be transformed
 	 */
 	public function apply( DOMElement $node ) {
-		$sections = $node->getElementsByTagName( 'section' );
+		// Parsoid can have nested sections, so ideally we'd use a child combinator
+		// here to avoid multiple applications of the lazy image transform to the
+		// nested sections.  For example, `.mw-parser-output > section`
+		$query = 'section';
+
+		// Until section collapsing in MFE is made to work with Parsoid output,
+		// all of Parsoid's sections are nested in the first mf section.
+		$parserOutput = DOMCompat::querySelector( $node, '.mw-parser-output' );
+		$isParsoid = $parserOutput && $parserOutput->hasAttribute( 'data-mw-parsoid-version' );
+		if ( $isParsoid ) {
+			$query = '#mf-section-0 > section';
+		}
+
+		$sections = DOMCompat::querySelectorAll( $node, $query );
 		$sectionNumber = 0;
 		foreach ( $sections as $sectionNumber => $section ) {
 			if ( $sectionNumber > 0 ) {
@@ -141,12 +155,15 @@ class LazyImageTransform implements IMobileTransform {
 	 * Enables images to be loaded asynchronously
 	 *
 	 * @param DOMElement|DOMDocument $el Element or document to rewrite images in.
-	 * @param DOMDocument $doc Document to create elements in
+	 * @param ?DOMDocument $doc Document to create elements in
 	 */
-	private function doRewriteImagesForLazyLoading( $el, DOMDocument $doc ) {
+	private function doRewriteImagesForLazyLoading( $el, ?DOMDocument $doc ) {
+		if ( $doc === null ) {
+			return;
+		}
 		$lazyLoadSkipSmallImages = $this->skipSmall;
 
-		foreach ( $el->getElementsByTagName( 'img' ) as $img ) {
+		foreach ( DOMCompat::querySelectorAll( $el, 'img' ) as $img ) {
 			$parent = $img->parentNode;
 			$dimensions = $this->getImageDimensions( $img );
 			$hasCompleteDimensions = isset( $dimensions['width'] ) && isset( $dimensions['height'] );
@@ -192,7 +209,8 @@ class LazyImageTransform implements IMobileTransform {
 			);
 			foreach ( [ 'src', 'alt', 'width', 'height', 'srcset', 'class', 'usemap' ] as $attr ) {
 				if ( $img->hasAttribute( $attr ) ) {
-					$imgPlaceholder->setAttribute( "data-$attr", $img->getAttribute( $attr ) );
+					$prefix = ( $attr === 'src' || $attr === 'srcset' ) ? 'data-mw-' : 'data-';
+					$imgPlaceholder->setAttribute( $prefix . $attr, $img->getAttribute( $attr ) );
 				}
 			}
 			// Assume data saving and remove srcset attribute from the non-js experience
@@ -274,7 +292,7 @@ class LazyImageTransform implements IMobileTransform {
 		p = ns[i].nextSibling;
 		if ( p && p.className && p.className.indexOf( 'lazy-image-placeholder' ) > -1 ) {
 			img = document.createElement( 'img' );
-			img.setAttribute( 'src', p.getAttribute( 'data-src' ) );
+			img.setAttribute( 'src', p.getAttribute( 'data-mw-src' ) );
 			img.setAttribute( 'width', p.getAttribute( 'data-width' ) );
 			img.setAttribute( 'height', p.getAttribute( 'data-height' ) );
 			img.setAttribute( 'alt', p.getAttribute( 'data-alt' ) );

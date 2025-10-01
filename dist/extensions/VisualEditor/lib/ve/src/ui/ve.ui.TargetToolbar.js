@@ -1,7 +1,7 @@
 /*!
  * VisualEditor UserInterface TargetToolbar class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -47,7 +47,7 @@ ve.ui.TargetToolbar.prototype.getTarget = function () {
  * @inheritdoc
  */
 ve.ui.TargetToolbar.prototype.getTriggers = function ( name ) {
-	var triggers = ve.ui.TargetToolbar.super.prototype.getTriggers.apply( this, arguments );
+	const triggers = ve.ui.TargetToolbar.super.prototype.getTriggers.apply( this, arguments );
 	return triggers ||
 		this.getTarget().targetTriggerListener.getTriggers( name ) ||
 		this.getTarget().documentTriggerListener.getTriggers( name );

@@ -7,7 +7,7 @@ use CirrusSearch\Parser\AST\KeywordFeatureNode;
 use CirrusSearch\Search\SearchContext;
 use CirrusSearch\SearchConfig;
 use CirrusSearch\WarningCollector;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Finds pages similar to another one.
@@ -45,6 +45,7 @@ class MoreLikeFeature extends SimpleKeywordFeature implements LegacyKeywordFeatu
 		return true;
 	}
 
+	/** @inheritDoc */
 	protected function getKeywords() {
 		return [ self::MORE_LIKE_THIS ];
 	}

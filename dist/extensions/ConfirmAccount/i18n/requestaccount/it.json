@@ -24,7 +24,7 @@
 	"requestaccount-ext-text": "Le seguenti informazioni saranno tenute private e saranno usate solo per questa richiesta.\nPotresti voler inserire dei contatti come un numero di telefono per aiutare l'identificazione.",
 	"requestaccount-bio-text": "Cerca di inserire tutte le credenziali e le informazioni rilevanti nella tua biografia.",
 	"requestaccount-bio-text-i": "'''La tua biografia sarà impostata come contenuto predefinito per la tua pagina utente.'''\nAssicurati di voler pubblicare tali informazioni.",
-	"requestaccount-real": "Nome vero:",
+	"requestaccount-real": "Nome reale (facoltativo):",
 	"requestaccount-same": "(uguale al vero nome)",
 	"requestaccount-email": "Indirizzo email:",
 	"requestaccount-reqtype": "Posizione:",

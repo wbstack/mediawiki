@@ -1,13 +1,12 @@
 {
 	"@metadata": {
 		"authors": [
-			"Amire80",
-			"MongolWiki",
-			"Sembuk",
-			"Wisdom",
-			"TayfunEt.",
 			"Chinneeb",
 			"Enkhsaihan2005",
+			"MongolWiki",
+			"Sembuk",
+			"TayfunEt.",
+			"Wisdom",
 			"Zolgoyo"
 		]
 	},
@@ -18,13 +17,11 @@
 	"mobile-frontend-editor-disabled": "Энэ хуудсыг эвдэн сүйтгэхээс сэргийлэх үүднээс хамгаалсан байна. [ $1 Кодоор харах]",
 	"mobile-frontend-editor-publish": "Хэвлэх",
 	"mobile-frontend-editor-save": "Хадгалах",
-	"mobile-frontend-editor-success": "Амжилт! Таны засвар нийтлэгдсэн.",
 	"mobile-frontend-editor-summary-request": "Та хуудсыг хэрхэн сайжруулсан бэ?",
 	"mobile-frontend-editor-summary": "Товч агуулга:",
 	"mobile-frontend-editor-switch-editor": "Редакторыг солих",
 	"mobile-frontend-editor-switch-visual-editor": "Визуал засвар руу шилжих",
 	"mobile-frontend-editor-loading": "Засварлагчийг ачаалж байна...",
-	"mobile-frontend-featured-article": "Өнөөдрийн онцлох өгүүлэл",
 	"mobile-frontend-last-modified-date": "Хамгийн сүүлд $1-нд $2-т засварлагдсан",
 	"mobile-frontend-main-menu": "Үндсэн цэс",
 	"mobile-frontend-terms-text": "Хэрэглэх нөхцөл",

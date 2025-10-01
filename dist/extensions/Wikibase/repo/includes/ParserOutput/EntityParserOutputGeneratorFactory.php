@@ -2,11 +2,12 @@
 
 namespace Wikibase\Repo\ParserOutput;
 
-use ExtensionRegistry;
-use Hooks;
-use Language;
 use Liuggio\StatsdClient\Factory\StatsdDataFactoryInterface;
+use MediaWiki\Cache\LinkBatchFactory;
 use MediaWiki\Extension\Math\MathDataUpdater;
+use MediaWiki\HookContainer\HookContainer;
+use MediaWiki\Language\Language;
+use MediaWiki\Registration\ExtensionRegistry;
 use PageImages\PageImages;
 use RepoGroup;
 use Wikibase\DataModel\Services\Entity\PropertyDataTypeMatcher;
@@ -94,6 +95,17 @@ class EntityParserOutputGeneratorFactory {
 	private $repoGroup;
 
 	/**
+	 * @var LinkBatchFactory
+	 */
+	private $linkBatchFactory;
+
+	/**
+	 * @var HookContainer
+	 */
+	private $hookContainer;
+	private bool $isMobileView;
+
+	/**
 	 * @param DispatchingEntityViewFactory $entityViewFactory
 	 * @param DispatchingEntityMetaTagsCreatorFactory $entityMetaTagsCreatorFactory
 	 * @param EntityTitleLookup $entityTitleLookup
@@ -104,6 +116,9 @@ class EntityParserOutputGeneratorFactory {
 	 * @param CachingKartographerEmbeddingHandler|null $kartographerEmbeddingHandler
 	 * @param StatsdDataFactoryInterface $stats
 	 * @param RepoGroup $repoGroup
+	 * @param LinkBatchFactory $linkBatchFactory
+	 * @param HookContainer $hookContainer
+	 * @param bool $isMobileView
 	 * @param string[] $preferredGeoDataProperties
 	 * @param string[] $preferredPageImagesProperties
 	 * @param string[] $globeUris Mapping of globe URIs to canonical globe names, as recognized by
@@ -120,6 +135,9 @@ class EntityParserOutputGeneratorFactory {
 		?CachingKartographerEmbeddingHandler $kartographerEmbeddingHandler,
 		StatsdDataFactoryInterface $stats,
 		RepoGroup $repoGroup,
+		LinkBatchFactory $linkBatchFactory,
+		HookContainer $hookContainer,
+		bool $isMobileView,
 		array $preferredGeoDataProperties = [],
 		array $preferredPageImagesProperties = [],
 		array $globeUris = []
@@ -134,9 +152,12 @@ class EntityParserOutputGeneratorFactory {
 		$this->kartographerEmbeddingHandler = $kartographerEmbeddingHandler;
 		$this->stats = $stats;
 		$this->repoGroup = $repoGroup;
+		$this->linkBatchFactory = $linkBatchFactory;
+		$this->hookContainer = $hookContainer;
 		$this->preferredGeoDataProperties = $preferredGeoDataProperties;
 		$this->preferredPageImagesProperties = $preferredPageImagesProperties;
 		$this->globeUris = $globeUris;
+		$this->isMobileView = $isMobileView;
 	}
 
 	public function getEntityParserOutputGenerator( Language $userLanguage ): EntityParserOutputGenerator {
@@ -147,7 +168,8 @@ class EntityParserOutputGeneratorFactory {
 			$this->getLanguageFallbackChain( $userLanguage ),
 			$this->entityDataFormatProvider,
 			$this->getDataUpdaters(),
-			$userLanguage
+			$userLanguage,
+			$this->isMobileView
 		);
 
 		$pog = new StatsdTimeRecordingEntityParserOutputGenerator(
@@ -188,7 +210,7 @@ class EntityParserOutputGeneratorFactory {
 			new ImageLinksDataUpdater( $propertyDataTypeMatcher, $this->repoGroup )
 		);
 
-		if ( !empty( $this->preferredPageImagesProperties )
+		if ( $this->preferredPageImagesProperties
 			&& ExtensionRegistry::getInstance()->isLoaded( 'PageImages' )
 		) {
 			$statementUpdater->addUpdater( $this->newPageImagesDataUpdater() );
@@ -217,16 +239,16 @@ class EntityParserOutputGeneratorFactory {
 			),
 			new ReferencedEntitiesDataUpdater(
 				$this->entityReferenceExtractorDelegator,
-				$this->entityTitleLookup
-			)
+				$this->entityTitleLookup,
+				$this->linkBatchFactory
+			),
 		];
 
-		// TODO: do not use global state
-		Hooks::run(
+		$this->hookContainer->run(
 			'WikibaseRepoOnParserOutputUpdaterConstruction',
 			[
 				$statementUpdater,
-				&$entityUpdaters
+				&$entityUpdaters,
 			]
 		);
 

@@ -1,7 +1,7 @@
 /*!
  * VisualEditor DataModel InlineImageNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.dm.LeafNode
- * @mixins ve.dm.ImageNode
+ * @mixes ve.dm.ImageNode
  *
  * @constructor
  * @param {Object} [element] Reference to element in linear model
@@ -37,7 +37,7 @@ ve.dm.InlineImageNode.static.isContent = true;
 ve.dm.InlineImageNode.static.matchTagNames = [ 'img' ];
 
 ve.dm.InlineImageNode.static.toDataElement = function ( domElements ) {
-	var domElement = domElements[ 0 ],
+	const domElement = domElements[ 0 ],
 		alt = domElement.getAttribute( 'alt' ),
 		width = domElement.getAttribute( 'width' ),
 		height = domElement.getAttribute( 'height' );
@@ -54,7 +54,7 @@ ve.dm.InlineImageNode.static.toDataElement = function ( domElements ) {
 };
 
 ve.dm.InlineImageNode.static.toDomElements = function ( dataElement, doc ) {
-	var domElement = doc.createElement( 'img' );
+	const domElement = doc.createElement( 'img' );
 	ve.setDomAttributes( domElement, dataElement.attributes, [ 'alt', 'src', 'width', 'height' ] );
 	return [ domElement ];
 };

@@ -28,7 +28,7 @@ class DataValueFactory {
 	 * Constructs and returns a new DataValue of specified type with the provided data.
 	 *
 	 * @param string $dataValueType
-	 * @param mixed  $data
+	 * @param mixed $data
 	 *
 	 * @return DataValue
 	 * @throws InvalidArgumentException
@@ -41,7 +41,7 @@ class DataValueFactory {
 		try {
 			$value = $this->deserializer->deserialize( [
 				'value' => $data,
-				'type' => $dataValueType
+				'type' => $dataValueType,
 			] );
 		} catch ( DeserializationException $ex ) {
 			throw new InvalidArgumentException( $ex->getMessage(), 0, $ex );

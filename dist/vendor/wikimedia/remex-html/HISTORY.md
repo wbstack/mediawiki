@@ -1,5 +1,33 @@
 # Release History
 
+## RemexHtml 4.1.1 (2024-11-05)
+* build: Updating composer dependencies (libraryupgrader)
+* build: Updating mediawiki/mediawiki-codesniffer to 44.0.0 (libraryupgrader)
+* build: Updating mediawiki/mediawiki-codesniffer to 45.0.0 (libraryupgrader)
+* build: Updating mediawiki/mediawiki-phan-config to 0.14.0 (libraryupgrader)
+* Bump version after release (C. Scott Ananian)
+
+## RemexHtml 4.1.0 (2024-03-16)
+* In DOMBuilder, make ::insertNode() protected to allow clients to
+  support the special HTML5 insertion logic for <template> nodes.
+* Workaround PHP bug which limits the set of characters allowed for
+  tag and attribute names even more than the XML spec does.
+* Refine exception types thrown in PropGuard and TreeBuilder.
+* build: Updating mediawiki/mediawiki-codesniffer to 43.0.0.
+* build: Update PHPUnit to 9.6.16.
+
+## RemexHtml 4.0.1 (2023-08-29)
+* build: Drop claimed support for utfnormal 1.x and 2.x, we require PHP 7.4 (James D. Forrester)
+* Add support for wikimedia/utfnormal 4.0.0 (Derick Alangi)
+* build: Switch phan to special library mode (James D. Forrester)
+* build: Cleanup of PHPUnit 8.x compatibility (Umherirrender)
+* build: Updating mediawiki/mediawiki-codesniffer to 41.0.0 (libraryupgrader)
+* Bump version after release (C. Scott Ananian)
+
+## RemexHtml 4.0.0 (2023-02-24)
+* Drop PHP 7.2 and PHP 7.3 support.
+* Update PHPUnit dependency.
+
 ## RemexHtml 3.0.3 (2022-12-21)
 * Workaround PHP bug which decodes entities when setting attribute values.
   (T324408, https://github.com/php/php-src/pull/10132 )

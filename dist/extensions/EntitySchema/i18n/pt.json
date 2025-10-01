@@ -5,14 +5,16 @@
 			"Hamilton Abreu"
 		]
 	},
+	"datatypes-type-entity-schema": "Esquema de entidade",
 	"entityschema-desc": "Armazenar e discutir esquemas para entidades Wikibase",
 	"special-newschema": "Criar um esquema de entidade novo",
+	"nstab-entityschema": "Esquema de entidade",
+	"tooltip-ca-nstab-entityschema": "Definição de esquema de entidade",
 	"entityschema-newschema-label": "Etiqueta:",
 	"entityschema-newschema-description": "Descrição:",
 	"entityschema-newschema-aliases": "Nomes alternativos, separados por barras verticais (|):",
 	"entityschema-newschema-schema-shexc": "Código de expressões de forma:",
 	"entityschema-newschema-submit": "Criar",
-	"entityschema-newschema-copyright": "Ao clicar \"$1\", concorda com as [[$2|condições de utilização]] e concorda irrevogavelmente em disponibilizar a sua contribuição ao abrigo da licença $3.",
 	"entityschema-anonymouseditwarning": "Aviso: não está autenticado. O seu endereço IP será gravado no historial de edições deste esquema.",
 	"entityschema-label-edit-placeholder": "introduzir uma etiqueta em $1",
 	"entityschema-description-edit-placeholder": "introduzir uma descrição em $1",
@@ -23,7 +25,6 @@
 	"entityschema-error-schemaupdate-failed": "Não foi possível atualizar o esquema",
 	"entityschema-error-schematext-conflict": "Este esquema foi atualizado entretanto. Volte à página do esquema e tente editá-la novamente, por favor.",
 	"entityschema-error-namebadge-conflict": "Este esquema foi atualizado entretanto. Volte à página do esquema, por favor, e tente editar as etiquetas, descrições e nomes alternativos nesta língua novamente.",
-	"entityschema-error-saving-failed": "A gravação do esquema falhou com a seguinte mensagem: $1",
 	"entityschema-error-not-post": "Esta operação deve ser feita com um pedido ''post''.",
 	"entityschema-error-inconsistent-id": "As revisões fornecidas não pertencem todas ao título dado.",
 	"entityschema-error-wrong-page-revisions": "A revisão fornecida não pertence à página atual.",
@@ -79,5 +80,9 @@
 	"entityschema-special-setlabeldescriptionaliases-info": "Está a definir a etiqueta, descrição e nomes alternativos em '''$1''' do esquema [[$3|$2]].",
 	"entityschema-special-label": "Etiqueta:",
 	"entityschema-special-description": "Descrição:",
-	"entityschema-special-aliases": "Nomes alternativos, separados por barras verticais (|):"
+	"entityschema-special-aliases": "Nomes alternativos, separados por barras verticais (|):",
+	"wikibase-listdatatypes-entity-schema-head": "Esquema de entidade",
+	"wikibase-listdatatypes-entity-schema-body": "Hiperligação para esquemas de entidade armazenados no espaço nominal configurado na mesma wiki. O valor não pode ter o prefixo de espaço nominal \"EntitySchema:\".",
+	"wikibase-validator-illegal-entity-schema-title": "O valor deve começar por <code>E</code> e o resto devem ser só algarismos.",
+	"wikibase-validator-no-such-entity-schema": "O esquema de entidade $1 não existe."
 }

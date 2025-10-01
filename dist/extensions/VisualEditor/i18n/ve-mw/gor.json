@@ -4,13 +4,11 @@
 			"Marwan Mohamad"
 		]
 	},
-	"tooltip-ca-createsource": "Mohutu kode bungo lo halaman botiye",
-	"tooltip-ca-edit": "Boli'a halaman botiya mopohuna teks wiki",
-	"tooltip-ca-editsource": "Boli'a kode bungo lo halaman botiye",
 	"tooltip-ca-ve-edit": "Boli'a halaman botiye",
+	"tooltip-ca-editsource": "Boli'a kode bungo lo halaman botiye",
+	"tooltip-ca-createsource": "Mohutu kode bungo lo halaman botiye",
 	"visualeditor-advancedsettings-tool": "Atuurangi lapatiyoma'o",
 	"visualeditor-backbutton-tooltip": "Pohuwalinga",
-	"visualeditor-browserwarning": "Yi'o hemomake peramban web u ja dudukungi olo editor botiye.",
 	"visualeditor-ca-createlocaldescriptionsource": "Duhengi bungo deskripsi lokal",
 	"visualeditor-ca-createsource": "Pohutu bungo",
 	"visualeditor-ca-editlocaldescriptionsource": "Boli'a bungo deskripsi lokal",
@@ -88,6 +86,5 @@
 	"visualeditor-dialog-transclusion-deprecated-parameter": "Tayadu motupo",
 	"visualeditor-dialog-transclusion-deprecated-parameter-description": "Tayadu ma motupo. $1",
 	"visualeditor-dialog-transclusion-loading": "Hemodetohu...",
-	"visualeditor-dialog-transclusion-param-default": "Kakali: $1",
-	"visualeditor-dialog-transclusion-placeholder": "Duhengi templat"
+	"visualeditor-dialog-transclusion-param-default": "Kakali: $1"
 }

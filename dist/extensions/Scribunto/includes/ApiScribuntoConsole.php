@@ -2,13 +2,14 @@
 
 namespace MediaWiki\Extension\Scribunto;
 
-use ApiBase;
-use Html;
+use MediaWiki\Api\ApiBase;
+use MediaWiki\Api\ApiMain;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
-use ObjectCache;
-use Parser;
-use ParserOptions;
-use Title;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\ParserFactory;
+use MediaWiki\Parser\ParserOptions;
+use MediaWiki\Title\Title;
 use Wikimedia\ParamValidator\ParamValidator;
 
 /**
@@ -17,6 +18,21 @@ use Wikimedia\ParamValidator\ParamValidator;
 class ApiScribuntoConsole extends ApiBase {
 	private const SC_MAX_SIZE = 500000;
 	private const SC_SESSION_EXPIRY = 3600;
+	private ParserFactory $parserFactory;
+
+	/**
+	 * @param ApiMain $main
+	 * @param string $action
+	 * @param ParserFactory $parserFactory
+	 */
+	public function __construct(
+		ApiMain $main,
+		$action,
+		ParserFactory $parserFactory
+	) {
+		parent::__construct( $main, $action );
+		$this->parserFactory = $parserFactory;
+	}
 
 	/**
 	 * @suppress PhanTypePossiblyInvalidDimOffset
@@ -35,7 +51,9 @@ class ApiScribuntoConsole extends ApiBase {
 			$sessionId = mt_rand( 0, 0x7fffffff );
 		}
 
-		$cache = ObjectCache::getInstance( CACHE_ANYTHING );
+		$services = MediaWikiServices::getInstance();
+
+		$cache = $services->getObjectCacheFactory()->getInstance( CACHE_ANYTHING );
 		$sessionKey = $cache->makeKey( 'scribunto-console', $this->getUser()->getId(), $sessionId );
 		$session = null;
 		$sessionIsNew = false;
@@ -103,7 +121,7 @@ class ApiScribuntoConsole extends ApiBase {
 	 * @return array Result data
 	 */
 	protected function runConsole( array $params ) {
-		$parser = MediaWikiServices::getInstance()->getParser();
+		$parser = $this->parserFactory->getInstance();
 		$options = new ParserOptions( $this->getUser() );
 		$parser->startExternalParse( $params['title'], $options, Parser::OT_HTML, true );
 		$engine = Scribunto::getParserEngine( $parser );
@@ -145,6 +163,12 @@ class ApiScribuntoConsole extends ApiBase {
 		];
 	}
 
+	/** @inheritDoc */
+	public function needsToken() {
+		return 'csrf';
+	}
+
+	/** @inheritDoc */
 	public function isInternal() {
 		return true;
 	}

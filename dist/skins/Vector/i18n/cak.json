@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Chocoj",
-			"CeciMagi"
+			"CeciMagi",
+			"Chocoj"
 		]
 	},
 	"vector-languages": "taq ch'ab'äl",
@@ -13,5 +13,8 @@
 	"vector-view-edit": "Tanuk'u'",
 	"vector-view-history": "Tatz'eta' ri natab'äl",
 	"vector-view-view": "Tasik'ij",
-	"vector-more-actions": "Ch'aqa chik"
+	"vector-more-actions": "Ch'aqa chik",
+	"vector-main-menu-label": "Nïm okem",
+	"vector-page-tools-general-label": "Ronojel",
+	"vector-unpin-element-label": "ti ewäx"
 }

@@ -2,12 +2,12 @@
 
 namespace Wikibase\Search\Elastic;
 
-use Html;
 use HtmlArmor;
-use IContextSource;
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Html\Html;
+use MediaWiki\Specials\SpecialSearch;
+use MediaWiki\Title\Title;
 use SearchResult;
-use SpecialSearch;
-use Title;
 use Wikibase\Lib\Store\EntityIdLookup;
 use Wikibase\Repo\Hooks\Formatters\EntityLinkFormatter;
 use Wikibase\Repo\Hooks\ShowSearchHitHandler;

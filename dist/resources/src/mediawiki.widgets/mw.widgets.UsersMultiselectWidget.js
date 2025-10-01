@@ -7,8 +7,7 @@
 ( function () {
 
 	/**
-	 * UsersMultiselectWidget can be used to input list of users in a single
-	 * line.
+	 * @classdesc Input list of users in a single line.
 	 *
 	 * If used inside HTML form the results will be sent as the list of
 	 * newline-separated usernames.
@@ -20,40 +19,47 @@
 	 * @extends OO.ui.MenuTagMultiselectWidget
 	 *
 	 * @constructor
+	 * @description Create an instance of `mw.widgets.UsersMultiselectWidget`.
 	 * @param {Object} [config] Configuration options
-	 * @cfg {mw.Api} [api] Instance of mw.Api (or subclass thereof) to use for queries
-	 * @cfg {number} [limit=10] Number of results to show in autocomplete menu
-	 * @cfg {string} [name] Name of input to submit results (when used in HTML forms)
-	 * @cfg {boolean} [ipAllowed=false] Show IP addresses in autocomplete menu
+	 * @param {mw.Api} [config.api] Instance of mw.Api (or subclass thereof) to use for queries
+	 * @param {number} [config.limit=10] Number of results to show in autocomplete menu
+	 * @param {string} [config.name] Name of input to submit results (when used in HTML forms)
+	 * @param {boolean} [config.ipAllowed=false] Show IP addresses in autocomplete menu
 	 *  If false, single IP addresses are not allowed, even if IP ranges are allowed.
-	 * @cfg {boolean} [ipRangeAllowed=false] Show IP ranges in autocomplete menu
-	 * @cfg {Object} [ipRangeLimits] Maximum allowed IP ranges (defaults match HTMLUserTextField.php)
-	 * @cfg {number} [ipRangeLimits.IPv4 = 16] Maximum allowed IPv4 range
-	 * @cfg {number} [ipRangeLimits.IPv6 = 32] Maximum allowed IPv6 range
+	 * @param {boolean} [config.ipRangeAllowed=false] Show IP ranges in autocomplete menu
+	 * @param {Object} [config.ipRangeLimits] Maximum allowed IP ranges (defaults match HTMLUserTextField.php)
+	 * @param {number} [config.ipRangeLimits.IPv4 = 16] Maximum allowed IPv4 range
+	 * @param {number} [config.ipRangeLimits.IPv6 = 32] Maximum allowed IPv6 range
+	 * @param {boolean} [config.excludenamed] Whether to exclude named users or not
+	 * @param {boolean} [config.excludetemp] Whether to exclude temporary users or not
 	 */
 	mw.widgets.UsersMultiselectWidget = function MwWidgetsUsersMultiselectWidget( config ) {
 		// Config initialization
-		config = $.extend( {
+		config = Object.assign( {
 			limit: 10,
 			ipAllowed: false,
 			ipRangeAllowed: false,
 			ipRangeLimits: {
 				IPv4: 16,
 				IPv6: 32
-			}
+			},
+			excludeNamed: false,
+			excludeTemp: false
 		}, config );
 
 		// Parent constructor
-		mw.widgets.UsersMultiselectWidget.parent.call( this, $.extend( {}, config, {} ) );
+		mw.widgets.UsersMultiselectWidget.super.call( this, Object.assign( {}, config, {} ) );
 
 		// Mixin constructors
-		OO.ui.mixin.PendingElement.call( this, $.extend( {}, config, { $pending: this.$handle } ) );
+		OO.ui.mixin.PendingElement.call( this, Object.assign( {}, config, { $pending: this.$handle } ) );
 
 		// Properties
 		this.limit = config.limit;
 		this.ipAllowed = config.ipAllowed;
 		this.ipRangeAllowed = config.ipRangeAllowed;
 		this.ipRangeLimits = config.ipRangeLimits;
+		this.excludeNamed = config.excludeNamed;
+		this.excludeTemp = config.excludeTemp;
 
 		if ( 'name' in config ) {
 			// Use this instead of <input type="hidden">, because hidden inputs do not have separate
@@ -72,7 +78,7 @@
 		// Events
 		// When list of selected usernames changes, update hidden input
 		this.connect( this, {
-			change: 'onMultiselectChange'
+			change: 'updateHiddenInput'
 		} );
 
 		// API init
@@ -87,7 +93,7 @@
 	/* Methods */
 
 	/**
-	 * Get currently selected usernames
+	 * Get currently selected usernames.
 	 *
 	 * @return {string[]} usernames
 	 */
@@ -96,14 +102,12 @@
 	};
 
 	/**
-	 * Update autocomplete menu with items
+	 * Update autocomplete menu with items.
 	 *
 	 * @private
 	 */
 	mw.widgets.UsersMultiselectWidget.prototype.updateMenuItems = function () {
-		var isValidIp,
-			isValidRange,
-			inputValue = this.input.getValue();
+		const inputValue = this.input.getValue();
 
 		if ( inputValue === this.inputValue ) {
 			// Do not restart api query if nothing has changed in the input
@@ -117,6 +121,7 @@
 		if ( inputValue.length > 0 ) {
 			this.pushPending();
 
+			let isValidIp, isValidRange;
 			if ( this.ipAllowed || this.ipRangeAllowed ) {
 				isValidIp = mw.util.isIPAddress( inputValue, false );
 				isValidRange = !isValidIp &&
@@ -139,13 +144,16 @@
 					action: 'query',
 					list: 'allusers',
 					auprefix: inputValue,
-					aulimit: this.limit
-				} ).done( function ( response ) {
-					var suggestions = response.query.allusers,
-						selected = this.getSelectedUsernames();
+					aulimit: this.limit,
+					auexcludenamed: this.excludeNamed,
+					auexcludetemp: this.excludeTemp
+				} ).done( ( response ) => {
+					let suggestions = response.query.allusers;
+
+					const selected = this.getSelectedUsernames();
 
 					// Remove usernames, which are already selected from suggestions
-					suggestions = suggestions.map( function ( user ) {
+					suggestions = suggestions.map( ( user ) => {
 						if ( selected.indexOf( user.name ) === -1 ) {
 							return new OO.ui.MenuOptionWidget( {
 								data: user.name,
@@ -154,9 +162,7 @@
 							} );
 						}
 						return undefined;
-					} ).filter( function ( item ) {
-						return item !== undefined;
-					} );
+					} ).filter( ( item ) => item !== undefined );
 
 					// Remove all items from menu add fill it with new
 					this.menu.clearItems();
@@ -171,7 +177,7 @@
 					this.menu.toggle( true );
 
 					this.popPending();
-				}.bind( this ) ).fail( this.popPending.bind( this ) );
+				} ).fail( this.popPending.bind( this ) );
 			}
 
 		} else {
@@ -192,7 +198,7 @@
 	};
 
 	mw.widgets.UsersMultiselectWidget.prototype.onInputChange = function () {
-		mw.widgets.UsersMultiselectWidget.parent.prototype.onInputChange.apply( this, arguments );
+		mw.widgets.UsersMultiselectWidget.super.prototype.onInputChange.apply( this, arguments );
 
 		this.updateMenuItems();
 	};
@@ -213,13 +219,15 @@
 	};
 
 	/**
-	 * React to the 'change' event.
+	 * We have an empty menu when the input is empty, override the implementation from
+	 * MenuTagMultiselectWidget to avoid error and make tags editable.
 	 *
-	 * Updates the hidden input and clears the text from the text box.
+	 * Only editable when the input is empty.
 	 */
-	mw.widgets.UsersMultiselectWidget.prototype.onMultiselectChange = function () {
-		this.updateHiddenInput();
-		this.input.setValue( '' );
+	mw.widgets.UsersMultiselectWidget.prototype.onTagSelect = function () {
+		if ( this.hasInput && !this.input.getValue() ) {
+			OO.ui.TagMultiselectWidget.prototype.onTagSelect.apply( this, arguments );
+		}
 	};
 
 }() );

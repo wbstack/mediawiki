@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable LinkAnnotation class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see http://ve.mit-license.org
+ * @copyright See AUTHORS.txt
  */
 
 /**
@@ -9,7 +9,7 @@
  *
  * @class
  * @extends ve.ce.Annotation
- * @mixins ve.ce.NailedAnnotation
+ * @mixes ve.ce.NailedAnnotation
  * @constructor
  * @param {ve.dm.LinkAnnotation} model Model to observe
  * @param {ve.ce.ContentBranchNode} [parentNode] Node rendering this annotation
@@ -24,9 +24,10 @@ ve.ce.LinkAnnotation = function VeCeLinkAnnotation( model, parentNode, config ) 
 
 	this.$element.addClass( 've-ce-linkAnnotation' )
 		.prop( {
-			href: ve.resolveUrl( this.model.getHref(), this.getModelHtmlDocument() ),
 			title: this.constructor.static.getDescription( this.model )
 		} );
+	// T322704
+	ve.setAttributeSafe( this.$element[ 0 ], 'href', ve.resolveUrl( this.model.getHref(), this.getModelHtmlDocument() ), '#' );
 
 	this.$element.on( 'click', this.onClick.bind( this ) );
 	// Deprecated, use this.$element

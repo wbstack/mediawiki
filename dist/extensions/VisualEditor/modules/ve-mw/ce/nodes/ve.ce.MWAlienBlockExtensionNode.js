@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWAlienBlockExtensionNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -11,7 +11,7 @@
  * @class
  * @abstract
  * @extends ve.ce.MWBlockExtensionNode
- * @mixins ve.ce.MWAlienExtensionNode
+ * @mixes ve.ce.MWAlienExtensionNode
  *
  * @constructor
  * @param {ve.dm.MWAlienBlockExtensionNode} model Model to observe

@@ -6,6 +6,7 @@ use Wikibase\DataModel\Services\Statement\GuidGenerator;
 use Wikibase\Lexeme\DataAccess\ChangeOp\ChangeOpRemoveSense;
 use Wikibase\Lexeme\DataAccess\ChangeOp\ChangeOpSenseAdd;
 use Wikibase\Lexeme\DataAccess\ChangeOp\ChangeOpsSensesEdit;
+use Wikibase\Lexeme\MediaWiki\Api\Error\JsonFieldHasWrongType;
 use Wikibase\Lexeme\MediaWiki\Api\Error\JsonFieldIsRequired;
 use Wikibase\Repo\ChangeOp\ChangeOp;
 use Wikibase\Repo\ChangeOp\ChangeOpDeserializer;
@@ -63,9 +64,21 @@ class SenseListChangeOpDeserializer implements ChangeOpDeserializer {
 		$lexemeChangeOps = new ChangeOps();
 		$changeOpsForSense = [];
 
+		if ( !is_array( $changeRequest['senses'] ) ) {
+			$this->validationContext->addViolation(
+				new JsonFieldHasWrongType( 'array', gettype( $changeRequest['senses'] ) )
+			);
+		}
+
 		foreach ( $changeRequest['senses'] as $index => $serializedSense ) {
 			$senseValidationContext = $this->validationContext->at( $index );
 			$this->senseChangeOpDeserializer->setContext( $senseValidationContext );
+
+			if ( !is_array( $serializedSense ) ) {
+				$senseValidationContext->addViolation(
+					new JsonFieldHasWrongType( 'array', gettype( $serializedSense ) )
+				);
+			}
 
 			if ( array_key_exists( 'remove', $serializedSense ) ) {
 				if ( !array_key_exists( self::PARAM_SENSE_ID, $serializedSense ) ) {

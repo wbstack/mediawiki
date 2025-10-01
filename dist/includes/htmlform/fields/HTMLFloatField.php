@@ -1,5 +1,7 @@
 <?php
 
+namespace MediaWiki\HTMLForm\Field;
+
 /**
  * A field that will contain a numeric value
  *
@@ -18,6 +20,9 @@ class HTMLFloatField extends HTMLTextField {
 		}
 
 		$value = trim( $value ?? '' );
+		if ( $value === '' ) {
+			return true;
+		}
 
 		# https://www.w3.org/TR/html5/infrastructure.html#floating-point-numbers
 		# with the addition that a leading '+' sign is ok.
@@ -51,6 +56,9 @@ class HTMLFloatField extends HTMLTextField {
 	 * @stable to override
 	 */
 	protected function getInputWidget( $params ) {
-		return new OOUI\NumberInputWidget( $params );
+		return new \OOUI\NumberInputWidget( $params );
 	}
 }
+
+/** @deprecated class alias since 1.42 */
+class_alias( HTMLFloatField::class, 'HTMLFloatField' );

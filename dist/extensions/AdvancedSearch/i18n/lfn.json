@@ -1,0 +1,41 @@
+{
+	"@metadata": {
+		"authors": [
+			"Elefentiste"
+		]
+	},
+	"advancedsearch-field-intitle": "Titulo de paje conteni",
+	"advancedsearch-field-deepcategory": "Pajes en esta categorias",
+	"advancedsearch-field-hastemplate": "Pajes con esta modeles",
+	"advancedsearch-field-inlanguage": "Pajes en esta lingua",
+	"advancedsearch-field-filetype": "Tipo de fix",
+	"advancedsearch-field-filew": "Largia de fix en pixeles",
+	"advancedsearch-field-fileh": "Altia de fix en pixeles",
+	"advancedsearch-field-preview-sort": "Ordina par $1",
+	"advancedsearch-help-general-instruction": "Instruis detaliosa per $1",
+	"advancedsearch-inlanguage-default": "Eleje lingua",
+	"advancedsearch-filetype-section-image": "Formatos de imaje",
+	"advancedsearch-filetype-section-video": "Formatos de video",
+	"advancedsearch-filetype-section-audio": "Formatos de audio",
+	"advancedsearch-filetype-section-document": "Formatos de documento",
+	"advancedsearch-filetype-section-other": "Otra formatos",
+	"advancedsearch-filetype-default": "Eleje tipo de fix",
+	"advancedsearch-filetype-bitmap": "Imaje",
+	"advancedsearch-filetype-drawing": "Desinia",
+	"advancedsearch-filetype-audio": "Audio",
+	"advancedsearch-filetype-video": "Video",
+	"advancedsearch-filetype-office": "Ofisia",
+	"advancedsearch-filesize-equals": "egal a",
+	"advancedsearch-filesize-greater-than": "plu ca",
+	"advancedsearch-filesize-smaller-than": "min ca",
+	"advancedsearch-sort-relevance": "Pertine",
+	"advancedsearch-sort-preview-relevance": "pertine",
+	"advancedsearch-sort-preview-last-edit-asc": "la min resente editada",
+	"advancedsearch-sort-preview-last-edit-desc": "data de edita",
+	"advancedsearch-sort-preview-create-timestamp-asc": "la min resente creada",
+	"advancedsearch-sort-preview-create-timestamp-desc": "data de crea",
+	"advancedsearch-namespaces-search-in": "Xerca en:",
+	"advancedsearch-namespaces-remember": "Memori la eleje per xercas futur",
+	"advancedsearch-namespaces-preset-all": "Tota",
+	"advancedsearch-namespaces-preset-discussion": "Discute"
+}

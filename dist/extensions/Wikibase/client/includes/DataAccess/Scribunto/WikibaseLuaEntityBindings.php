@@ -1,8 +1,9 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Wikibase\Client\DataAccess\Scribunto;
 
-use Language;
 use Wikibase\Client\DataAccess\StatementTransclusionInteractor;
 use Wikibase\Client\Usage\UsageAccumulator;
 use Wikibase\DataModel\Entity\EntityIdParser;
@@ -17,57 +18,27 @@ use Wikibase\Lib\ContentLanguages;
  */
 class WikibaseLuaEntityBindings {
 
-	/**
-	 * @var StatementTransclusionInteractor
-	 */
-	private $plainTextTransclusionInteractor;
-
-	/**
-	 * @var StatementTransclusionInteractor
-	 */
-	private $richWikitextTransclusionInteractor;
-
-	/**
-	 * @var EntityIdParser
-	 */
-	private $entityIdParser;
-
-	/**
-	 * @var Language
-	 */
-	private $language;
-
-	/**
-	 * @var UsageAccumulator
-	 */
-	private $usageAccumulator;
-
-	/**
-	 * @var string
-	 */
-	private $siteId;
-
-	/**
-	 * @var ContentLanguages
-	 */
-	private $termsLanguages;
+	private StatementTransclusionInteractor $plainTextTransclusionInteractor;
+	private StatementTransclusionInteractor $richWikitextTransclusionInteractor;
+	private EntityIdParser $entityIdParser;
+	private UsageAccumulator $usageAccumulator;
+	private ContentLanguages $termsLanguages;
+	private string $globalSiteId;
 
 	public function __construct(
 		StatementTransclusionInteractor $plainTextTransclusionInteractor,
 		StatementTransclusionInteractor $richWikitextTransclusionInteractor,
 		EntityIdParser $entityIdParser,
 		ContentLanguages $termsLanguages,
-		Language $language,
 		UsageAccumulator $usageAccumulator,
-		$siteId
+		string $globalSiteId
 	) {
 		$this->plainTextTransclusionInteractor = $plainTextTransclusionInteractor;
 		$this->richWikitextTransclusionInteractor = $richWikitextTransclusionInteractor;
 		$this->entityIdParser = $entityIdParser;
-		$this->language = $language;
 		$this->usageAccumulator = $usageAccumulator;
-		$this->siteId = $siteId;
 		$this->termsLanguages = $termsLanguages;
+		$this->globalSiteId = $globalSiteId;
 	}
 
 	/**
@@ -80,7 +51,11 @@ class WikibaseLuaEntityBindings {
 	 *
 	 * @return string Wikitext
 	 */
-	public function formatPropertyValues( $entityId, $propertyLabelOrId, array $acceptableRanks = null ) {
+	public function formatPropertyValues(
+		string $entityId,
+		string $propertyLabelOrId,
+		?array $acceptableRanks = null
+	): string {
 		$entityId = $this->entityIdParser->parse( $entityId );
 
 		return $this->plainTextTransclusionInteractor->render(
@@ -100,7 +75,11 @@ class WikibaseLuaEntityBindings {
 	 *
 	 * @return string Wikitext
 	 */
-	public function formatStatements( $entityId, $propertyLabelOrId, array $acceptableRanks = null ) {
+	public function formatStatements(
+		string $entityId,
+		string $propertyLabelOrId,
+		?array $acceptableRanks = null
+	): string {
 		$entityId = $this->entityIdParser->parse( $entityId );
 
 		return $this->richWikitextTransclusionInteractor->render(
@@ -116,7 +95,7 @@ class WikibaseLuaEntityBindings {
 	 * @param string $entityId The Entity from which the statements were accessed.
 	 * @param string $propertyId Property id of the statements accessed.
 	 */
-	public function addStatementUsage( $entityId, $propertyId ) {
+	public function addStatementUsage( string $entityId, string $propertyId ): void {
 		$entityId = $this->entityIdParser->parse( $entityId );
 		$propertyId = new NumericPropertyId( $propertyId );
 
@@ -129,7 +108,7 @@ class WikibaseLuaEntityBindings {
 	 * @param string $entityId The Entity from which the labels were accessed.
 	 * @param string|null $langCode Language code the labels accessed.
 	 */
-	public function addLabelUsage( $entityId, $langCode ) {
+	public function addLabelUsage( string $entityId, ?string $langCode ): void {
 		$entityId = $this->entityIdParser->parse( $entityId );
 		if ( !$this->termsLanguages->hasLanguage( $langCode ) ) {
 			$langCode = null;
@@ -143,7 +122,7 @@ class WikibaseLuaEntityBindings {
 	 * @param string $entityId The Entity from which the descriptions were accessed.
 	 * @param string|null $langCode Language code the descriptions accessed.
 	 */
-	public function addDescriptionUsage( $entityId, $langCode ) {
+	public function addDescriptionUsage( string $entityId, ?string $langCode ): void {
 		$entityId = $this->entityIdParser->parse( $entityId );
 		if ( !$this->termsLanguages->hasLanguage( $langCode ) ) {
 			$langCode = null;
@@ -156,7 +135,7 @@ class WikibaseLuaEntityBindings {
 	 *
 	 * @param string $entityId The Entity from which something was accessed.
 	 */
-	public function addOtherUsage( $entityId ) {
+	public function addOtherUsage( string $entityId ): void {
 		$entityId = $this->entityIdParser->parse( $entityId );
 		$this->usageAccumulator->addOtherUsage( $entityId );
 	}
@@ -165,32 +144,16 @@ class WikibaseLuaEntityBindings {
 	 * Add a sitelink usage (called once any sitelink is accessed).
 	 *
 	 * @param string $entityId The Entity from which the sitelinks were accessed.
+	 * @param string|null $requestedSiteId The site for which a specific sitelink is requested.
 	 */
-	public function addSiteLinksUsage( $entityId ) {
+	public function addTitleOrSiteLinksUsage( string $entityId, ?string $requestedSiteId ): void {
 		$entityId = $this->entityIdParser->parse( $entityId );
-		$this->usageAccumulator->addSiteLinksUsage( $entityId );
-	}
+		$requestedSiteId = $requestedSiteId ?: $this->globalSiteId;
 
-	/**
-	 * Get global site ID (e.g. "enwiki")
-	 * This is basically a helper function.
-	 * @todo Make this part of mw.site in the Scribunto extension.
-	 *
-	 * @return string
-	 */
-	public function getGlobalSiteId() {
-		return $this->siteId;
+		if ( $requestedSiteId === $this->globalSiteId ) {
+			$this->usageAccumulator->addTitleUsage( $entityId );
+		} else {
+			$this->usageAccumulator->addSiteLinksUsage( $entityId );
+		}
 	}
-
-	/**
-	 * Get the language we are currently working with.
-	 * @todo Once T114640 has been implemented, this should probably be
-	 * generally exposed in Scribunto as parser target language.
-	 *
-	 * @return string
-	 */
-	public function getLanguageCode() {
-		return $this->language->getCode();
-	}
-
 }

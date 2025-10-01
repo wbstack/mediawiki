@@ -2,16 +2,14 @@
 
 namespace MediaWiki\Skin;
 
-use Config;
-use Html;
-use Linker;
+use InvalidArgumentException;
+use MediaWiki\Config\Config;
+use MediaWiki\Html\Html;
+use MediaWiki\Linker\Linker;
 use MediaWiki\MainConfigNames;
-use Message;
+use MediaWiki\Message\Message;
+use MediaWiki\Title\Title;
 use MessageLocalizer;
-use MWException;
-use SpecialPage;
-use Title;
-use User;
 
 /**
  * This program is free software; you can redistribute it and/or modify
@@ -34,12 +32,8 @@ use User;
 class SkinComponentSearch implements SkinComponent {
 	/** @var Config */
 	private $config;
-	/** @var User */
-	private $user;
 	/** @var MessageLocalizer */
 	private $localizer;
-	/** @var Title|null */
-	private $relevantTitle;
 	/** @var Title */
 	private $searchTitle;
 	/** @var array|null */
@@ -47,33 +41,18 @@ class SkinComponentSearch implements SkinComponent {
 
 	/**
 	 * @param Config $config
-	 * @param User $user
 	 * @param MessageLocalizer $localizer
-	 * @param Title|null $searchTitle
-	 * @param Title|null $relevantTitle
+	 * @param Title $searchTitle
 	 */
 	public function __construct(
 		Config $config,
-		User $user,
 		MessageLocalizer $localizer,
-		$searchTitle,
-		$relevantTitle
+		Title $searchTitle
 	) {
 		$this->config = $config;
-		$this->user = $user;
 		$this->localizer = $localizer;
-		$this->searchTitle = $searchTitle ?? SpecialPage::newSearchPage(
-			$user
-		);
-		$this->relevantTitle = $relevantTitle;
+		$this->searchTitle = $searchTitle;
 		$this->cachedData = null;
-	}
-
-	/**
-	 * @return Title|null
-	 */
-	private function getRelevantTitle() {
-		return $this->relevantTitle;
 	}
 
 	/**
@@ -99,13 +78,6 @@ class SkinComponentSearch implements SkinComponent {
 	}
 
 	/**
-	 * @return User
-	 */
-	private function getUser(): User {
-		return $this->user;
-	}
-
-	/**
 	 * @param array $attrs (optional) will be passed to tooltipAndAccesskeyAttribs
 	 *  and decorate the resulting input
 	 * @return string of HTML input
@@ -118,7 +90,6 @@ class SkinComponentSearch implements SkinComponent {
 	 * @param string $mode representing the type of button wanted
 	 *  either `go` OR `fulltext`.
 	 * @param array $attrs (optional)
-	 * @throws MWException if bad value of $mode passed in
 	 * @return string of HTML button
 	 */
 	private function makeSearchButton( string $mode, array $attrs = [] ) {
@@ -136,16 +107,13 @@ class SkinComponentSearch implements SkinComponent {
 						"search-$mode",
 						[],
 						null,
-						$this->getMessageLocalizer(),
-						$this->getUser(),
-						$this->getConfig(),
-						$this->getRelevantTitle()
+						$this->getMessageLocalizer()
 					),
 					$attrs
 				);
 				return Html::element( 'input', $realAttrs );
 			default:
-				throw new MWException( 'Unknown mode passed to ' . __METHOD__ );
+				throw new InvalidArgumentException( 'Unknown mode passed to ' . __METHOD__ );
 		}
 	}
 
@@ -172,10 +140,7 @@ class SkinComponentSearch implements SkinComponent {
 				'search',
 				[],
 				null,
-				$this->getMessageLocalizer(),
-				$this->getUser(),
-				$this->getConfig(),
-				$this->getRelevantTitle()
+				$this->getMessageLocalizer()
 			),
 			$attrs
 		);
@@ -205,8 +170,6 @@ class SkinComponentSearch implements SkinComponent {
 		}
 
 		$config = $this->getConfig();
-		$user = $this->getUser();
-		$relevantTitle = $this->getRelevantTitle();
 		$localizer = $this->getMessageLocalizer();
 		$searchButtonAttributes = [
 			'class' => 'searchButton'
@@ -227,10 +190,7 @@ class SkinComponentSearch implements SkinComponent {
 			'search-go',
 			[],
 			null,
-			$localizer,
-			$user,
-			$config,
-			$relevantTitle
+			$localizer
 		);
 		$fulltextButtonAttributes = $fallbackButtonAttributes + $buttonAttributes + [
 			'name' => 'fulltext'
@@ -238,10 +198,7 @@ class SkinComponentSearch implements SkinComponent {
 			'search-fulltext',
 			[],
 			null,
-			$localizer,
-			$user,
-			$config,
-			$relevantTitle
+			$localizer
 		);
 
 		$this->cachedData = [

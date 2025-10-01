@@ -1,7 +1,7 @@
 /*!
  * VisualEditor ContentEditable MWInlineImageNode class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
@@ -10,26 +10,33 @@
  *
  * @class
  * @extends ve.ce.LeafNode
- * @mixins ve.ce.MWImageNode
+ * @mixes ve.ce.MWImageNode
  *
  * @constructor
  * @param {ve.dm.MWInlineImageNode} model Model to observe
  * @param {Object} [config] Configuration options
  */
 ve.ce.MWInlineImageNode = function VeCeMWInlineImageNode( model, config ) {
-	var $image;
+	let $image;
+	let hasHref = false;
 
 	if ( model.getAttribute( 'isError' ) ) {
 		this.$element = $( '<a>' )
 			.addClass( 'new' )
-			.text( model.getFilename() );
+			.append(
+				$( '<span>' )
+					.addClass( 'mw-file-element mw-broken-media' )
+					.text( model.getAttribute( 'errorText' ) )
+			);
 		$image = $( [] );
 	} else {
+		$image = $( '<img>' ).addClass( 'mw-file-element' );
 		if ( model.getAttribute( 'href' ) ) {
-			this.$element = $( '<a>' );
-			$image = $( '<img>' ).appendTo( this.$element );
+			hasHref = true;
+			this.$element = $( '<a>' ).addClass( 'mw-file-description' );
+			$image.appendTo( this.$element );
 		} else {
-			this.$element = $image = $( '<img>' );
+			this.$element = $image;
 		}
 	}
 
@@ -45,6 +52,11 @@ ve.ce.MWInlineImageNode = function VeCeMWInlineImageNode( model, config ) {
 		.attr( 'src', this.getResolvedAttribute( 'src' ) )
 		.attr( 'width', this.model.getAttribute( 'width' ) )
 		.attr( 'height', this.model.getAttribute( 'height' ) );
+
+	if ( hasHref ) {
+		// T322704
+		ve.setAttributeSafe( this.$element[ 0 ], 'href', this.getResolvedAttribute( 'href' ) || '', '#' );
+	}
 
 	this.showHandles( [ this.$element.css( 'direction' ) === 'rtl' ? 'sw' : 'se' ] );
 
@@ -73,7 +85,7 @@ ve.ce.MWInlineImageNode.static.name = 'mwInlineImage';
  * Update CSS classes based on current attributes
  */
 ve.ce.MWInlineImageNode.prototype.updateClasses = function () {
-	var valign = this.model.getAttribute( 'valign' );
+	const valign = this.model.getAttribute( 'valign' );
 
 	// Border
 	this.$element.toggleClass( 'mw-image-border', !!this.model.getAttribute( 'borderImage' ) );

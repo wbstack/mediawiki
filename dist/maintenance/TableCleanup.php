@@ -21,7 +21,11 @@
  * @ingroup Maintenance
  */
 
+use MediaWiki\WikiMap\WikiMap;
+
+// @codeCoverageIgnoreStart
 require_once __DIR__ . '/Maintenance.php';
+// @codeCoverageIgnoreEnd
 
 /**
  * Generic class to cleanup a database table. Already subclasses Maintenance.
@@ -29,6 +33,7 @@ require_once __DIR__ . '/Maintenance.php';
  * @ingroup Maintenance
  */
 class TableCleanup extends Maintenance {
+	/** @var array */
 	protected $defaultParams = [
 		'table' => 'page',
 		'conds' => [],
@@ -36,10 +41,16 @@ class TableCleanup extends Maintenance {
 		'callback' => 'processRow',
 	];
 
+	/** @var bool */
 	protected $dryrun = false;
+	/** @var int */
 	protected $reportInterval = 100;
 
-	protected $processed, $updated, $count, $startTime, $table;
+	protected int $processed;
+	protected int $updated;
+	protected int $count;
+	protected float $startTime;
+	protected string $table;
 
 	public function __construct() {
 		parent::__construct();
@@ -105,34 +116,38 @@ class TableCleanup extends Maintenance {
 
 	/**
 	 * @param array $params
-	 * @throws MWException
 	 */
 	public function runTable( $params ) {
-		$dbr = $this->getDB( DB_REPLICA );
+		$dbr = $this->getReplicaDB();
 
 		if ( array_diff( array_keys( $params ),
 			[ 'table', 'conds', 'index', 'callback' ] )
 		) {
-			throw new MWException( __METHOD__ . ': Missing parameter ' . implode( ', ', $params ) );
+			$this->fatalError( __METHOD__ . ': Missing parameter ' . implode( ', ', $params ) );
 		}
 
 		$table = $params['table'];
 		// count(*) would melt the DB for huge tables, we can estimate here
-		$count = $dbr->estimateRowCount( $table, '*', '', __METHOD__ );
+		$count = $dbr->newSelectQueryBuilder()
+			->table( $table )
+			->caller( __METHOD__ )
+			->estimateRowCount();
 		$this->init( $count, $table );
 		$this->output( "Processing $table...\n" );
 
 		$index = (array)$params['index'];
 		$indexConds = [];
-		$options = [
-			'ORDER BY' => implode( ',', $index ),
-			'LIMIT' => $this->getBatchSize()
-		];
 		$callback = [ $this, $params['callback'] ];
 
 		while ( true ) {
 			$conds = array_merge( $params['conds'], $indexConds );
-			$res = $dbr->select( $table, '*', $conds, __METHOD__, $options );
+			$res = $dbr->newSelectQueryBuilder()
+				->select( '*' )
+				->from( $table )
+				->where( $conds )
+				->orderBy( implode( ',', $index ) )
+				->limit( $this->getBatchSize() )
+				->caller( __METHOD__ )->fetchResultSet();
 			if ( !$res->numRows() ) {
 				// Done
 				break;
@@ -148,20 +163,12 @@ class TableCleanup extends Maintenance {
 			}
 
 			// Update the conditions to select the next batch.
-			// Construct a condition string by starting with the least significant part
-			// of the index, and adding more significant parts progressively to the left
-			// of the string.
-			$nextCond = '';
-			foreach ( array_reverse( $index ) as $field ) {
+			$conds = [];
+			foreach ( $index as $field ) {
 				// @phan-suppress-next-line PhanPossiblyUndeclaredVariable $res has at at least one item
-				$encValue = $dbr->addQuotes( $row->$field );
-				if ( $nextCond === '' ) {
-					$nextCond = "$field > $encValue";
-				} else {
-					$nextCond = "$field > $encValue OR ($field = $encValue AND ($nextCond))";
-				}
+				$conds[ $field ] = $row->$field;
 			}
-			$indexConds = [ $nextCond ];
+			$indexConds = [ $dbr->buildComparison( '>', $conds ) ];
 		}
 
 		$this->output( "Finished $table... $this->updated of $this->processed rows updated\n" );

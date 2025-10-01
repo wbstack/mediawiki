@@ -30,6 +30,7 @@ use MediaWiki\Extension\OAuth\Lib\OAuthConsumer;
 use MediaWiki\Extension\OAuth\Lib\OAuthRequest;
 use MediaWiki\Extension\OAuth\Lib\OAuthToken;
 use MediaWiki\Logger\LoggerFactory;
+use Psr\Log\LoggerInterface;
 
 /**
  * A class for implementing a Signature Method
@@ -37,7 +38,7 @@ use MediaWiki\Logger\LoggerFactory;
  */
 abstract class OAuthSignatureMethod {
 
-	/** @var \\Psr\\Log\\LoggerInterface */
+	/** @var LoggerInterface */
 	protected $logger;
 
 	public function __construct() {
@@ -67,28 +68,15 @@ abstract class OAuthSignatureMethod {
 	 * @param OAuthRequest $request
 	 * @param OAuthConsumer $consumer
 	 * @param OAuthToken $token
-	 * @param string $signature
+	 * @param string|null $signature
 	 * @return bool
 	 */
 	public function check_signature( $request, $consumer, $token, $signature ) {
+		$signature ??= '';
 		$this->logger->debug( __METHOD__ . ": Expecting: '$signature'" );
 		$built = $this->build_signature( $request, $consumer, $token );
 		$this->logger->debug( __METHOD__ . ": Built: '$built'" );
-		// Check for zero length, although unlikely here
-		if ( strlen( $built ) == 0 || strlen( $signature ) == 0 ) {
-			return false;
-		}
 
-		if ( strlen( $built ) != strlen( $signature ) ) {
-			return false;
-		}
-
-		// Avoid a timing leak with a ( hopefully ) time insensitive compare
-		$result = 0;
-		for ( $i = 0; $i < strlen( $signature ); $i++ ) {
-			$result |= ord( $built[$i] ) ^ ord( $signature[$i] );
-		}
-
-		return $result == 0;
+		return hash_equals( $built, $signature );
 	}
 }

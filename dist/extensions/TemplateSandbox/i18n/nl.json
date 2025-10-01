@@ -3,12 +3,12 @@
 		"authors": [
 			"JurgenNL",
 			"Mainframe98",
+			"McDutchie",
 			"Multichill",
 			"Romaine",
 			"Siebrand",
 			"Sjoerddebruin",
-			"Southparkfan",
-			"McDutchie"
+			"Southparkfan"
 		]
 	},
 	"templatesandbox": "Sjabloonzandbak",
@@ -23,7 +23,7 @@
 	"templatesandbox-submit": "Bekijken",
 	"templatesandbox-title-output": "Sjabloonzandbak: $1",
 	"templatesandbox-editform-legend": "Voorvertoning weergeven met dit sjabloon",
-	"templatesandbox-editform-page-label": "Paginanaam",
+	"templatesandbox-editform-page-label": "Paginatitel",
 	"templatesandbox-editform-view-label": "Voorvertoning weergeven",
 	"templatesandbox-preview": "Voorvertoning van $2",
 	"templatesandbox-previewnote": "'''Vergeet niet dat dit slechts een voorvertoning is van [[:$1]].'''\nUw wijzigingen zijn nog niet opgeslagen!",

@@ -11,7 +11,6 @@ use Wikibase\Lexeme\MediaWiki\Api\RemoveForm;
 use Wikibase\Lexeme\MediaWiki\Api\RemoveSense;
 use Wikibase\Lexeme\MediaWiki\Specials\SpecialMergeLexemes;
 use Wikibase\Lexeme\MediaWiki\Specials\SpecialNewLexeme;
-use Wikibase\Lexeme\MediaWiki\Specials\SpecialNewLexemeAlpha;
 use Wikibase\Lib\WikibaseSettings;
 
 /**
@@ -111,6 +110,7 @@ class Registrar {
 			'factory' => 'Wikibase\Lexeme\MediaWiki\Api\MergeLexemes::factory',
 			'services' => [
 				'WikibaseRepo.ApiHelperFactory',
+				'WikibaseLexemeMergeLexemesInteractor',
 			],
 		];
 
@@ -118,52 +118,36 @@ class Registrar {
 			'class' => SpecialNewLexeme::class,
 			'factory' => 'Wikibase\Lexeme\MediaWiki\Specials\SpecialNewLexeme::factory',
 			'services' => [
+				'LinkRenderer',
+				'StatsdDataFactory',
+				'TempUserConfig',
+				'WikibaseRepo.AnonymousEditWarningBuilder',
 				'WikibaseRepo.EditEntityFactory',
 				'WikibaseRepo.EntityNamespaceLookup',
-				'WikibaseRepo.EntityTitleLookup',
+				'WikibaseRepo.EntityTitleStoreLookup',
+				'WikibaseRepo.EntityLookup',
+				'WikibaseRepo.EntityIdParser',
 				'WikibaseRepo.Settings',
 				'WikibaseRepo.SummaryFormatter',
+				'WikibaseRepo.EntityIdHtmlLinkFormatterFactory',
+				'WikibaseRepo.FallbackLabelDescriptionLookupFactory',
 				'WikibaseRepo.ValidatorErrorLocalizer',
 				'WikibaseLexemeLemmaTermValidator',
 			],
 		];
-
-		global $wgLexemeEnableNewAlpha, $wgWikimediaJenkinsCI;
-		if ( $wgWikimediaJenkinsCI ?? false ) {
-			$wgLexemeEnableNewAlpha = true;
-		}
-
-		if ( $wgLexemeEnableNewAlpha ) {
-			$wgSpecialPages['NewLexemeAlpha'] = [
-				'class' => SpecialNewLexemeAlpha::class,
-				'factory' => 'Wikibase\Lexeme\MediaWiki\Specials\SpecialNewLexemeAlpha::factory',
-				'services' => [
-					'LinkRenderer',
-					'StatsdDataFactory',
-					'WikibaseRepo.EditEntityFactory',
-					'WikibaseRepo.EntityNamespaceLookup',
-					'WikibaseRepo.EntityTitleStoreLookup',
-					'WikibaseRepo.EntityLookup',
-					'WikibaseRepo.EntityIdParser',
-					'WikibaseRepo.Settings',
-					'WikibaseRepo.SummaryFormatter',
-					'WikibaseRepo.EntityIdHtmlLinkFormatterFactory',
-					'WikibaseRepo.FallbackLabelDescriptionLookupFactory',
-					'WikibaseRepo.ValidatorErrorLocalizer',
-					'WikibaseLexemeLemmaTermValidator',
-				],
-			];
-		}
 
 		$wgSpecialPages['MergeLexemes'] = [
 			'class' => SpecialMergeLexemes::class,
 			'factory' => 'Wikibase\Lexeme\MediaWiki\Specials\SpecialMergeLexemes::factory',
 			'services' => [
 				'PermissionManager',
+				'WikibaseRepo.AnonymousEditWarningBuilder',
 				'WikibaseRepo.EntityTitleLookup',
 				'WikibaseRepo.ExceptionLocalizer',
 				'WikibaseRepo.Settings',
-			]
+				'WikibaseRepo.TokenCheckInteractor',
+				'WikibaseLexemeMergeLexemesInteractor',
+			],
 		];
 
 		$wgResourceModules = array_merge(

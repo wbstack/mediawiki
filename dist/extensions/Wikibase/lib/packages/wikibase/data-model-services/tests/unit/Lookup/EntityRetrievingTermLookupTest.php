@@ -47,23 +47,23 @@ class EntityRetrievingTermLookupTest extends TestCase {
 		$termLookup->getLabel( new ItemId( 'Q503' ), 'en' );
 	}
 
-	public function getLabelsProvider() {
+	public static function getLabelsProvider() {
 		return [
 			[
 				[ 'en' => 'New York City', 'es' => 'Nueva York' ],
 				new ItemId( 'Q116' ),
-				[ 'en', 'es' ]
+				[ 'en', 'es' ],
 			],
 			[
 				[ 'es' => 'Nueva York' ],
 				new ItemId( 'Q116' ),
-				[ 'es' ]
+				[ 'es' ],
 			],
 			[
 				[ 'de' => 'Berlin' ],
 				new ItemId( 'Q117' ),
-				[ 'de' ]
-			]
+				[ 'de' ],
+			],
 		];
 	}
 
@@ -106,7 +106,7 @@ class EntityRetrievingTermLookupTest extends TestCase {
 		$this->assertNull( $termLookup->getDescription( new ItemId( 'Q116' ), 'fr' ) );
 	}
 
-	public function getDescriptionsProvider() {
+	public static function getDescriptionsProvider() {
 		return [
 			[
 				[
@@ -114,20 +114,20 @@ class EntityRetrievingTermLookupTest extends TestCase {
 					'en' => 'largest city in New York and the United States of America',
 				],
 				new ItemId( 'Q116' ),
-				[ 'de', 'en' ]
+				[ 'de', 'en' ],
 			],
 			[
 				[
 					'de' => 'Metropole an der Ostküste der Vereinigten Staaten',
 				],
 				new ItemId( 'Q116' ),
-				[ 'de', 'fr' ]
+				[ 'de', 'fr' ],
 			],
 			[
 				[],
 				new ItemId( 'Q117' ),
-				[]
-			]
+				[],
+			],
 		];
 	}
 

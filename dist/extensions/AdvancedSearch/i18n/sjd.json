@@ -16,7 +16,9 @@
 	"advancedsearch-field-inlanguage": "Лыст тэнн кӣлэсьт",
 	"advancedsearch-field-filetype": "Фа̄ял на̄лль",
 	"advancedsearch-field-sort": "Ко̄ппчем обрядт",
+	"advancedsearch-placeholder-exact-text": "\"пуаз шоабашт коа̄з\"",
 	"advancedsearch-inlanguage-default": "Воа̄лэшьт кӣл",
 	"advancedsearch-filetype-default": "Воа̄лэшьт фа̄ял на̄лль",
-	"advancedsearch-sort-relevance": "Релевантвудт"
+	"advancedsearch-sort-relevance": "Релевантвудт",
+	"advancedsearch-namespaces-placeholder": "Лажьхэ нэ̄ммко̄ммтвудэтҍ..."
 }

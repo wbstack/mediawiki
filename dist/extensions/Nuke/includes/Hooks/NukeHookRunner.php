@@ -3,7 +3,7 @@
 namespace MediaWiki\Extension\Nuke\Hooks;
 
 use MediaWiki\HookContainer\HookContainer;
-use Title;
+use MediaWiki\Title\Title;
 
 /**
  * Handle running Nuke's hooks
@@ -11,12 +11,8 @@ use Title;
  */
 class NukeHookRunner implements NukeDeletePageHook, NukeGetNewPagesHook {
 
-	/** @var HookContainer */
-	private $hookContainer;
+	private HookContainer $hookContainer;
 
-	/**
-	 * @param HookContainer $hookContainer
-	 */
 	public function __construct( HookContainer $hookContainer ) {
 		$this->hookContainer = $hookContainer;
 	}

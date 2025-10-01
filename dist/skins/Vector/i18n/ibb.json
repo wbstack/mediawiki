@@ -3,10 +3,10 @@
 		"authors": [
 			"Akpanufun",
 			"Anietie2",
-			"Uduakj",
-			"Okon Ibiono",
 			"Effiong badi",
 			"Ekemini5",
+			"Okon Ibiono",
+			"Uduakj",
 			"Uduakumana"
 		]
 	},
@@ -21,5 +21,10 @@
 	"vector-view-history": "Se mkpo ini edem",
 	"vector-more-actions": "afen",
 	"vector-searchsuggest-containing": "Yem ikpa nwed anieghe <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
-	"vector-toc-beginning": "Ntak"
+	"vector-toc-label": "Si sine",
+	"vector-toc-beginning": "Ntak",
+	"vector-main-menu-label": "Ata usung",
+	"vector-page-tools-label": "Mkpo utom",
+	"vector-page-tools-general-label": "Uked",
+	"vector-unpin-element-label": "dịbe"
 }

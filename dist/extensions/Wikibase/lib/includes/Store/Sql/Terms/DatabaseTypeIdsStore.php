@@ -6,13 +6,13 @@ use MediaWiki\Storage\NameTableAccessException;
 use MediaWiki\Storage\NameTableStore;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
-use WANObjectCache;
 use Wikibase\Lib\Rdbms\RepoDomainDb;
+use Wikimedia\ObjectCache\WANObjectCache;
 
 /**
  * An acquirer and resolver for term type IDs implemented using a NameTableStore for wbt_type.
  *
- * @see @ref md_docs_storage_terms
+ * @see @ref docs_storage_terms
  * @license GPL-2.0-or-later
  */
 class DatabaseTypeIdsStore implements TypeIdsAcquirer, TypeIdsResolver, TypeIdsLookup {
@@ -23,7 +23,7 @@ class DatabaseTypeIdsStore implements TypeIdsAcquirer, TypeIdsResolver, TypeIdsL
 	public function __construct(
 		RepoDomainDb $db,
 		WANObjectCache $cache,
-		LoggerInterface $logger = null
+		?LoggerInterface $logger = null
 	) {
 		$this->nameTableStore = new NameTableStore(
 			$db->loadBalancer(),

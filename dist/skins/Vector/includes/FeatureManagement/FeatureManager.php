@@ -22,7 +22,12 @@
 
 namespace MediaWiki\Skins\Vector\FeatureManagement;
 
+use MediaWiki\Context\IContextSource;
+use MediaWiki\Skins\Vector\ConfigHelper;
+use MediaWiki\Skins\Vector\Constants;
 use MediaWiki\Skins\Vector\FeatureManagement\Requirements\SimpleRequirement;
+use MediaWiki\User\Options\UserOptionsLookup;
+use RuntimeException;
 use Wikimedia\Assert\Assert;
 
 /**
@@ -35,8 +40,9 @@ use Wikimedia\Assert\Assert;
  *
  * @package MediaWiki\Skins\Vector\FeatureManagement
  * @internal
+ * @final
  */
-final class FeatureManager {
+class FeatureManager {
 
 	/**
 	 * A map of feature name to the array of requirements (referenced by name). A feature is only
@@ -57,6 +63,17 @@ final class FeatureManager {
 	 * @var Array<string,Requirement>
 	 */
 	private $requirements = [];
+
+	private UserOptionsLookup $userOptionsLookup;
+	private IContextSource $context;
+
+	public function __construct(
+		UserOptionsLookup $userOptionsLookup,
+		IContextSource $context
+	) {
+		$this->userOptionsLookup = $userOptionsLookup;
+		$this->context = $context;
+	}
 
 	/**
 	 * Register a feature and its requirements.
@@ -127,17 +144,103 @@ final class FeatureManager {
 	}
 
 	/**
+	 * Gets user's preference value
+	 *
+	 * If user preference is not set or did not appear in config
+	 * set it to default value we go back to defualt suffix value
+	 * that will ensure that the feature will be enabled when requirements are met
+	 *
+	 * @param string $preferenceKey User preference key
+	 * @return string
+	 */
+	public function getUserPreferenceValue( $preferenceKey ) {
+		return $this->userOptionsLookup->getOption(
+			$this->context->getUser(),
+			$preferenceKey
+			// For client preferences, this should be the same as `preferenceKey`
+			// in 'resources/skins.vector.js/clientPreferences.json'
+		);
+	}
+
+	/**
 	 * Return a list of classes that should be added to the body tag
 	 *
 	 * @return array
 	 */
 	public function getFeatureBodyClass() {
-		$featureManager = $this;
-		return array_map( static function ( $featureName ) use ( $featureManager ) {
+		return array_map( function ( $featureName ) {
 			// switch to lower case and switch from camel case to hyphens
 			$featureClass = ltrim( strtolower( preg_replace( '/[A-Z]([A-Z](?![a-z]))*/', '-$0', $featureName ) ), '-' );
 			$prefix = 'vector-feature-' . $featureClass . '-';
-			return $featureManager->isFeatureEnabled( $featureName ) ? $prefix . 'enabled' : $prefix . 'disabled';
+
+			// some features (eg night mode) will require request context to determine status
+			$request = $this->context->getRequest();
+			$config = $this->context->getConfig();
+			$title = $this->context->getTitle();
+
+			// Client side preferences
+			switch ( $featureName ) {
+				// This feature has 3 possible states: 0, 1, 2 and -excluded.
+				// It persists for all users.
+				case CONSTANTS::FEATURE_FONT_SIZE:
+					if ( ConfigHelper::shouldDisable(
+						$config->get( 'VectorFontSizeConfigurableOptions' ), $request, $title
+					) ) {
+						return $prefix . 'clientpref--excluded';
+					}
+					$suffixEnabled = 'clientpref-' . $this->getUserPreferenceValue( CONSTANTS::PREF_KEY_FONT_SIZE );
+					$suffixDisabled = 'clientpref-0';
+					break;
+				// This feature has 4 possible states: day, night, os and -excluded.
+				// It persists for all users.
+				case CONSTANTS::PREF_NIGHT_MODE:
+					// if night mode is disabled for the page, add the exclude class instead and return early
+					if ( ConfigHelper::shouldDisable( $config->get( 'VectorNightModeOptions' ), $request, $title ) ) {
+						// The additional "-" prefix, makes this an invalid client preference for anonymous users.
+						return 'skin-theme-clientpref--excluded';
+					}
+
+					$prefix = '';
+					$valueRequest = $request->getRawVal( 'vectornightmode' );
+					// If night mode query string is used, hardcode pref value to the night mode value
+					// NOTE: The query string parameter only works for logged in users.
+					// IF you have set a cookie locally this will be overriden.
+					$value = $valueRequest !== null ? self::resolveNightModeQueryValue( $valueRequest ) :
+						$this->getUserPreferenceValue( CONSTANTS::PREF_KEY_NIGHT_MODE );
+					$suffixEnabled = 'clientpref-' . $value;
+					$suffixDisabled = 'clientpref-day';
+					// Must be hardcoded to 'skin-theme-' to be consistent with Minerva
+					// So that editors can target the same class across skins
+					$prefix .= 'skin-theme-';
+					break;
+				// These features persist for all users and have two valid states: 0 and 1.
+				case CONSTANTS::FEATURE_LIMITED_WIDTH:
+				case CONSTANTS::FEATURE_TOC_PINNED:
+				case CONSTANTS::FEATURE_APPEARANCE_PINNED:
+					$suffixEnabled = 'clientpref-1';
+					$suffixDisabled = 'clientpref-0';
+					break;
+				// These features only persist for logged in users so do not contain the clientpref suffix.
+				// These features have two valid states: enabled and disabled. In future it would be nice if these
+				// were 0 and 1 so that the features.js module cannot be applied to server side only flags.
+				case CONSTANTS::FEATURE_MAIN_MENU_PINNED:
+				case CONSTANTS::FEATURE_PAGE_TOOLS_PINNED:
+				// Server side only feature flags.
+				// Note these classes are fixed and cannot be changed at runtime by JavaScript,
+				// only via modification to LocalSettings.php.
+				case Constants::FEATURE_NIGHT_MODE:
+				case Constants::FEATURE_LIMITED_WIDTH_CONTENT:
+				case Constants::FEATURE_LANGUAGE_IN_HEADER:
+				case Constants::FEATURE_LANGUAGE_IN_MAIN_PAGE_HEADER:
+				case Constants::FEATURE_STICKY_HEADER:
+					$suffixEnabled = 'enabled';
+					$suffixDisabled = 'disabled';
+					break;
+				default:
+					throw new RuntimeException( "Feature $featureName has no associated feature class." );
+			}
+			return $this->isFeatureEnabled( $featureName ) ?
+				$prefix . $suffixEnabled : $prefix . $suffixDisabled;
 		}, array_keys( $this->features ) );
 	}
 
@@ -166,15 +269,13 @@ final class FeatureManager {
 	}
 
 	/**
-	 * Register a complex requirement.
+	 * Register a complex {@see Requirement}.
 	 *
 	 * A complex requirement is one that depends on object that may or may not be fully loaded
 	 * while the application is booting, e.g. see `User::isSafeToLoad`.
 	 *
 	 * Such requirements are expected to be registered during a hook that is run early on in the
 	 * application lifecycle, e.g. the `BeforePerformAction` and `APIBeforeMain` hooks.
-	 *
-	 * @see FeatureManager::registerRequirement
 	 *
 	 * @param Requirement $requirement
 	 *
@@ -191,12 +292,10 @@ final class FeatureManager {
 	}
 
 	/**
-	 * Register a requirement.
+	 * Register a {@see SimpleRequirement}.
 	 *
 	 * A requirement is some condition of the application state that a feature requires to be true
 	 * or false.
-	 *
-	 * @see FeatureManager::registerComplexRequirement
 	 *
 	 * @param string $name The name of the requirement
 	 * @param bool $isMet Whether the requirement is met
@@ -221,5 +320,25 @@ final class FeatureManager {
 		}
 
 		return $this->requirements[$name]->isMet();
+	}
+
+	/**
+	 * Converts "1", "2", and "0" to equivalent values.
+	 *
+	 * @return string
+	 */
+	private static function resolveNightModeQueryValue( string $value ) {
+		switch ( $value ) {
+			case 'day':
+			case 'night':
+			case 'os':
+				return $value;
+			case '1':
+				return 'night';
+			case '2':
+				return 'os';
+			default:
+				return 'day';
+		}
 	}
 }

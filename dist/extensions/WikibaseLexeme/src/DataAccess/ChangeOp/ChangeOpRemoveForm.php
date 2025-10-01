@@ -42,7 +42,7 @@ class ChangeOpRemoveForm extends ChangeOpBase {
 					'Form does not exist',
 					null,
 					'form-not-found',
-					[ $this->formId->serialize() ]
+					[ $this->formId->getSerialization() ]
 				),
 			] );
 		}
@@ -50,7 +50,7 @@ class ChangeOpRemoveForm extends ChangeOpBase {
 		return Result::newSuccess();
 	}
 
-	public function apply( EntityDocument $entity, Summary $summary = null ) {
+	public function apply( EntityDocument $entity, ?Summary $summary = null ) {
 		Assert::parameterType( Lexeme::class, $entity, '$entity' );
 		'@phan-var Lexeme $entity';
 

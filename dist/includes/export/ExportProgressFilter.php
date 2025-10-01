@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2005 Brion Vibber <brion@pobox.com>
+ * Copyright © 2005 Brooke Vibber <bvibber@wikimedia.org>
  * https://www.mediawiki.org/
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,6 +20,8 @@
  *
  * @file
  */
+
+use MediaWiki\Maintenance\BackupDumper;
 
 /**
  * @ingroup Dump

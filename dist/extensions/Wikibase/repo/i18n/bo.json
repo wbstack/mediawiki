@@ -1,8 +1,11 @@
 {
 	"@metadata": {
 		"authors": [
-			"TayfunEt."
+			"TayfunEt.",
+			"Zolgoyo",
+			"Tenzin Thoesam"
 		]
 	},
-	"wikibase-edit": "རྩོམ་སྒྲིག"
+	"wikibase-edit": "རྩོམ་སྒྲིག",
+	"wikibase-add": "སྣོན་"
 }

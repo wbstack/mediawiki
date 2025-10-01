@@ -19,9 +19,7 @@
  */
 namespace MediaWiki\Minerva\Menu\PageActions;
 
-use MediaWiki\Minerva\MinervaUI;
 use MessageLocalizer;
-use MWException;
 
 /**
  * Director responsible for building Page Actions menu.
@@ -29,20 +27,9 @@ use MWException;
  */
 final class PageActionsDirector {
 
-	/**
-	 * @var ToolbarBuilder
-	 */
-	private $toolbarBuilder;
-
-	/**
-	 * @var IOverflowBuilder
-	 */
-	private $overflowBuilder;
-
-	/**
-	 * @var MessageLocalizer
-	 */
-	private $messageLocalizer;
+	private ToolbarBuilder $toolbarBuilder;
+	private IOverflowBuilder $overflowBuilder;
+	private MessageLocalizer $messageLocalizer;
 
 	/**
 	 * Director responsible for Page Actions menu building
@@ -65,11 +52,11 @@ final class PageActionsDirector {
 	 * Build the menu data array that can be passed to views/javascript
 	 * @param array $toolbox An array of common toolbox items from the sidebar menu
 	 * @param array $actions An array of actions usually bucketed under the more menu
+	 * @param array $views An array of actions usually bucketed under the view menu
 	 * @return array
-	 * @throws MWException
 	 */
-	public function buildMenu( array $toolbox, array $actions ): array {
-		$toolbar = $this->toolbarBuilder->getGroup();
+	public function buildMenu( array $toolbox, array $actions, array $views ): array {
+		$toolbar = $this->toolbarBuilder->getGroup( $actions, $views );
 		$overflowMenu = $this->overflowBuilder->getGroup( $toolbox, $actions );
 
 		$menu = [
@@ -77,18 +64,42 @@ final class PageActionsDirector {
 		];
 		if ( $overflowMenu->hasEntries() ) {
 			// See includes/Skins/ToggleList.
+			$toggleID = 'page-actions-overflow-toggle';
+			$checkboxID = 'page-actions-overflow-checkbox';
 			$menu[ 'overflowMenu' ] = [
 				'item-id' => 'page-actions-overflow',
-				'checkboxID' => 'page-actions-overflow-checkbox',
-				'toggleID' => 'page-actions-overflow-toggle',
+				'checkboxID' => $checkboxID,
+				'toggleID' => $toggleID,
+				'data-btn' => [
+					'tag-name' => 'label',
+					'data-icon' => [
+						'icon' => 'ellipsis',
+					],
+					'classes' => 'toggle-list__toggle',
+					'array-attributes' => [
+						[
+							'key' => 'id',
+							'value' => $toggleID,
+						],
+						[
+							'key' => 'for',
+							'value' => $checkboxID,
+						],
+						[
+							'key' => 'aria-hidden',
+							'value' => 'true'
+						],
+						[
+							'key' => 'data-event-name',
+							'value' => 'ui.overflowmenu',
+						],
+					],
+					// class = toggle-list__toggle {{toggleClass}}
+					// data-event-name="{{analyticsEventName}}">
+					'label' => $this->messageLocalizer->msg( 'minerva-page-actions-overflow' ),
+				],
 				'listID' => $overflowMenu->getId(),
-				'toggleClass' => MinervaUI::iconClass(
-					'ellipsis',
-					'element',
-					'mw-ui-icon-with-label-desktop' ),
 				'listClass' => 'page-actions-overflow-list toggle-list__list--drop-down',
-				'text' => $this->messageLocalizer->msg( 'minerva-page-actions-overflow' ),
-				'analyticsEventName' => 'ui.overflowmenu',
 				'items' => $overflowMenu->getEntries()
 			];
 		}

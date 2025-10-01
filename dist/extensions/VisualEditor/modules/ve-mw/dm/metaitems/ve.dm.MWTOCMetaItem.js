@@ -1,12 +1,12 @@
 /*!
  * VisualEditor DataModel MWTOCDisableMetaItem class.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
 
 /**
- * DataModel TOC meta item (for __FORCETOC__ and __NOTOC__).
+ * DataModel TOC meta item (for `__FORCETOC__` and `__NOTOC__`).
  *
  * @class
  * @extends ve.dm.MWFlaggedMetaItem

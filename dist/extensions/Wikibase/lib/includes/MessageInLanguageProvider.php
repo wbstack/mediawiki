@@ -4,11 +4,11 @@ declare( strict_types = 1 );
 
 namespace Wikibase\Lib;
 
-use Language;
-use Message;
+use MediaWiki\Language\Language;
+use MediaWiki\Message\Message;
+use MediaWiki\StubObject\StubUserLang;
 use MessageLocalizer;
-use MessageSpecifier;
-use StubUserLang;
+use Wikimedia\Message\MessageSpecifier;
 
 /**
  * A provider for messages in a particular language.

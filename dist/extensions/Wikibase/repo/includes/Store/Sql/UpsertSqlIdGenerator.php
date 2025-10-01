@@ -7,6 +7,7 @@ use Wikibase\Lib\Rdbms\RepoDomainDb;
 use Wikibase\Repo\Store\IdGenerator;
 use Wikimedia\Rdbms\IDatabase;
 use Wikimedia\Rdbms\ILoadBalancer;
+use Wikimedia\Rdbms\RawSQLValue;
 
 /**
  * Unique Id generator implemented using an SQL table and an UPSERT query.
@@ -85,8 +86,6 @@ class UpsertSqlIdGenerator implements IdGenerator {
 
 		} while ( $this->idIsReserved( $type, $id ) );
 
-		$this->db->connections()->releaseConnection( $database );
-
 		return $id;
 	}
 
@@ -106,16 +105,7 @@ class UpsertSqlIdGenerator implements IdGenerator {
 	private function generateNewId( IDatabase $database, $type ) {
 		$database->startAtomic( __METHOD__ );
 
-		$success = $this->upsertId( $database, $type );
-
-		// Retry once
-		if ( !$success ) {
-			$success = $this->upsertId( $database, $type );
-		}
-
-		if ( !$success ) {
-			throw new RuntimeException( 'Could not generate a reliably unique ID.' );
-		}
+		$this->upsertId( $database, $type );
 
 		$id = $database->insertId();
 
@@ -132,19 +122,19 @@ class UpsertSqlIdGenerator implements IdGenerator {
 	/**
 	 * @param IDatabase $database
 	 * @param string $type
-	 * @return bool Query success
 	 */
 	private function upsertId( IDatabase $database, $type ) {
-		return $database->upsert(
-			'wb_id_counters',
-			[
+		$database->newInsertQueryBuilder()
+			->insertInto( 'wb_id_counters' )
+			->row( [
 				'id_type' => $type,
 				'id_value' => 1,
-			],
-			'id_type',
-			[ 'id_value = LAST_INSERT_ID(id_value + 1)' ],
-			__METHOD__
-		);
+			] )
+			->onDuplicateKeyUpdate()
+			->uniqueIndexFields( 'id_type' )
+			->set( [ 'id_value' => new RawSQLValue( 'LAST_INSERT_ID(id_value + 1)' ) ] )
+			->caller( __METHOD__ )
+			->execute();
 	}
 
 }

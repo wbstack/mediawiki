@@ -1,3 +1,4 @@
+@import 'mediawiki.skin.variables.less';
 @import 'mediawiki.mixins.less';
 @import '../echo.variables.less';
 
@@ -9,7 +10,7 @@
 			> .oo-ui-popupWidget-head {
 				box-sizing: border-box;
 				height: 3.1428571em; // = 44px as result of 44 / 16 (font-size browser) / 0.875 (OOUI WikimediaUI theme font-size)
-				border-bottom: 1px solid #c8ccd1;
+				border-bottom: @border-width-base @border-style-base @border-color-subtle;
 				margin: 0;
 
 				> .oo-ui-iconWidget {
@@ -32,45 +33,24 @@
 				}
 			}
 
-			> .oo-ui-popupWidget-body {
-				// Work around scrollbar rendering bug in Chrome
-				overflow-y: visible;
-				// ...but make sure we don't actually overflow in the Y direction,
-				// to avoid breaking ClippableElement
-				overflow-x: auto;
-
-				> .mw-echo-ui-notificationsListWidget > .mw-echo-ui-notificationItemWidget {
-					// The popup body itself has a border. We need to override the notification
-					// item widget styles so that the edge borders of the items are not duplicated
-					border-left: 0;
-					border-right: 0;
-
-					&:last-child {
-						border-bottom: 0;
-					}
-				}
-			}
-
 			> .oo-ui-popupWidget-footer {
 				width: 100%;
 				margin: 0; // Override OOUI's popup footer margins (T171302)
-				border-top: 1px solid #c8ccd1;
+				border-top: @border-width-base @border-style-base @border-color-subtle;
 
 				> .oo-ui-buttonGroupWidget {
 					display: block;
 				}
 
 				.mw-echo-ui-notificationBadgeButtonPopupWidget-footer-buttons {
-					display: table-row;
+					display: flex;
+					padding-bottom: 0;
 
 					.oo-ui-buttonElement {
-						display: table-cell;
-						white-space: normal;
-						width: @notification-popup-width / 2;
-						box-sizing: border-box;
+						flex: 1;
 
 						&:last-child {
-							border-left: 1px solid #c8ccd1;
+							border-left: @border-width-base @border-style-base @border-color-subtle;
 						}
 
 						> .oo-ui-buttonElement-button {
@@ -79,6 +59,11 @@
 							margin: 0;
 							border: 0;
 							padding: 0 0.5em;
+
+							// Compensate for hidden borders
+							&:focus {
+								box-shadow: @box-shadow-inset-medium @box-shadow-color-progressive--focus;
+							}
 						}
 					}
 				}

@@ -1,24 +1,30 @@
-var Revision = require( './ext.RevisionSlider.Revision.js' ).Revision,
+const Revision = require( './ext.RevisionSlider.Revision.js' ).Revision,
 	RevisionListView = require( './ext.RevisionSlider.RevisionListView.js' );
 
 /**
  * @class RevisionList
- * @param {Revision[]} revs
- * @param {Object[]} availableTags
+ * @param {Revision[]} [revs=[]]
+ * @param {Object[]} [availableTags=[]]
  * @constructor
  */
 function RevisionList( revs, availableTags ) {
+	// Make sure RevisionList instances don't accidentally share the same Array object
 	this.revisions = [];
-	this.availableTags = availableTags;
-	this.initialize( revs );
+	this.availableTags = availableTags || [];
+	this.push( revs || [] );
 	this.view = new RevisionListView( this );
 }
 
-$.extend( RevisionList.prototype, {
+Object.assign( RevisionList.prototype, {
 	/**
 	 * @type {Revision[]}
 	 */
-	revisions: [],
+	revisions: null,
+
+	/**
+	 * @type {Object[]}
+	 */
+	availableTags: null,
 
 	/**
 	 * @type {RevisionListView}
@@ -26,30 +32,10 @@ $.extend( RevisionList.prototype, {
 	view: null,
 
 	/**
-	 * Initializes the RevisionList from a list of Revisions
-	 *
-	 * @param {Revision[]} revs
-	 */
-	initialize: function ( revs ) {
-		for ( var i = 0; i < revs.length; i++ ) {
-			var rev = revs[ i ];
-			rev.setRelativeSize( i > 0 ? rev.getSize() - revs[ i - 1 ].getSize() : rev.getSize() );
-
-			this.revisions.push( rev );
-		}
-	},
-
-	/**
 	 * @return {number}
 	 */
 	getBiggestChangeSize: function () {
-		var max = 0;
-
-		for ( var i = 0; i < this.revisions.length; i++ ) {
-			max = Math.max( max, Math.abs( this.revisions[ i ].getRelativeSize() ) );
-		}
-
-		return max;
+		return Math.max( ...this.revisions.map( ( rev ) => Math.abs( rev.getRelativeSize() ) ) );
 	},
 
 	/**
@@ -80,9 +66,12 @@ $.extend( RevisionList.prototype, {
 		return this.availableTags;
 	},
 
+	/**
+	 * @return {Object.<string,string>}
+	 */
 	getUserGenders: function () {
-		var userGenders = {};
-		this.revisions.forEach( function ( revision ) {
+		const userGenders = {};
+		this.revisions.forEach( ( revision ) => {
 			if ( revision.getUser() ) {
 				userGenders[ revision.getUser() ] = revision.getUserGender();
 			}
@@ -96,15 +85,13 @@ $.extend( RevisionList.prototype, {
 	 * @param {Revision[]} revs
 	 */
 	push: function ( revs ) {
-		for ( var i = 0; i < revs.length; i++ ) {
-			var rev = revs[ i ];
-			rev.setRelativeSize(
-				i > 0 ?
-					rev.getSize() - revs[ i - 1 ].getSize() :
-					rev.getSize() - this.revisions[ this.revisions.length - 1 ].getSize()
-			);
-
+		const last = this.revisions[ this.revisions.length - 1 ];
+		let sizeBefore = last ? last.getSize() : 0;
+		for ( let i = 0; i < revs.length; i++ ) {
+			const rev = revs[ i ];
+			rev.setRelativeSize( rev.getSize() - sizeBefore );
 			this.revisions.push( rev );
+			sizeBefore = rev.getSize();
 		}
 	},
 
@@ -115,12 +102,12 @@ $.extend( RevisionList.prototype, {
 	 * @param {number} sizeBefore optional size of the revision preceding the first of revs, defaults to 0
 	 */
 	unshift: function ( revs, sizeBefore ) {
-		var originalFirstRev = this.revisions[ 0 ];
+		const originalFirstRev = this.revisions[ 0 ];
 		sizeBefore = sizeBefore || 0;
 
 		originalFirstRev.setRelativeSize( originalFirstRev.getSize() - revs[ revs.length - 1 ].getSize() );
-		for ( var i = revs.length - 1; i >= 0; i-- ) {
-			var rev = revs[ i ];
+		for ( let i = revs.length - 1; i >= 0; i-- ) {
+			const rev = revs[ i ];
 			rev.setRelativeSize( i > 0 ? rev.getSize() - revs[ i - 1 ].getSize() : rev.getSize() - sizeBefore );
 
 			this.revisions.unshift( rev );
@@ -135,7 +122,7 @@ $.extend( RevisionList.prototype, {
 	 * @return {RevisionList}
 	 */
 	slice: function ( begin, end ) {
-		var slicedList = new RevisionList( [], this.getAvailableTags() );
+		const slicedList = new RevisionList( [], this.getAvailableTags() );
 		slicedList.view = new RevisionListView( slicedList );
 		slicedList.revisions = this.revisions.slice( begin, end );
 		return slicedList;
@@ -154,13 +141,11 @@ $.extend( RevisionList.prototype, {
  * Transforms an array of revision data returned by MediaWiki API (including user gender information) into
  * an array of Revision objects
  *
- * @param {Array} revs
+ * @param {Object[]} revs
  * @return {Revision[]}
  */
 function makeRevisions( revs ) {
-	return revs.map( function ( revData ) {
-		return new Revision( revData );
-	} );
+	return revs.map( ( data ) => new Revision( data ) );
 }
 
 module.exports = {

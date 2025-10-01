@@ -1,15 +1,19 @@
-@media print {
-	.mw-revslider-container {
-		display: none;
-	}
-}
+@import 'mediawiki.skin.variables.less';
 
 .mw-revslider-container {
+	.client-nojs & {
+		display: none;
+	}
+
+	@media print {
+		display: none;
+	}
+
 	/* This will flip with CSSJanus in case */
 	/* the interface is in RTL */
 	direction: ltr;
 	position: relative;
-	border: 1px solid #c8ccd1;
+	border: @border-width-base @border-style-base @border-color-subtle;
 
 	.mw-revslider-toggle-button.oo-ui-buttonElement-frameless.oo-ui-labelElement {
 		width: 100%;
@@ -35,9 +39,12 @@
 }
 
 .mw-revslider-slider-wrapper {
+	// Same as the .mw-revslider-arrow height
 	min-height: 142px;
-	border-top: 1px solid #c8ccd1;
+	border-top: @border-width-base @border-style-base @border-color-subtle;
 	padding: 20px 10px;
+	// Not a fix for resize issues like T336729 but makes it appear much less broken
+	overflow-x: clip;
 }
 
 /* Loading spinner code borrowed from
@@ -49,25 +56,25 @@ https://codepen.io/Volker_E/pen/yqNXMe */
 	margin: 60px auto;
 
 	.mw-revslider-bounce,
-	&:before,
-	&:after {
+	&::before,
+	&::after {
 		content: '';
 		background-color: #72777d;
 		display: block;
 		float: left;
 		width: 16px;
 		height: 16px;
-		border-radius: 100%;
+		border-radius: @border-radius-circle;
 		animation: bouncedelay 1600ms infinite ease-in-out both;
 		animation-delay: -160ms;
 	}
 
-	&:before {
+	&::before {
 		margin-right: 4px;
 		animation-delay: -330ms;
 	}
 
-	&:after {
+	&::after {
 		margin-left: 4px;
 		animation-delay: 0s;
 	}

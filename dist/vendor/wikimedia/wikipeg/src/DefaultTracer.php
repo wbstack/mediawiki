@@ -2,6 +2,8 @@
 
 namespace Wikimedia\WikiPEG;
 
+use InvalidArgumentException;
+
 class DefaultTracer implements Tracer {
 	private $indentLevel = 0;
 
@@ -23,7 +25,7 @@ class DefaultTracer implements Tracer {
 			break;
 
 		default:
-			throw new \Exception( "Invalid event type {$event['type']}" );
+			throw new InvalidArgumentException( "Invalid event type {$event['type']}" );
 		}
 	}
 
@@ -69,6 +71,3 @@ class DefaultTracer implements Tracer {
 		}
 	}
 }
-
-// Retain the old namespace for backwards compatibility.
-class_alias( DefaultTracer::class, 'WikiPEG\DefaultTracer' );

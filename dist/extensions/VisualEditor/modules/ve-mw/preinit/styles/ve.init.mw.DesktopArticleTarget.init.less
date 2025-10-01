@@ -1,9 +1,10 @@
 /*!
  * VisualEditor MediaWiki DesktopArticleTarget init styles.
  *
- * @copyright 2011-2020 VisualEditor Team and others; see AUTHORS.txt
+ * @copyright See AUTHORS.txt
  * @license The MIT License (MIT); see LICENSE.txt
  */
+@import 'mediawiki.skin.variables.less';
 
 /* stylelint-disable selector-max-id */
 
@@ -19,10 +20,9 @@
  * Deactivated          | ve-available
  */
 
-/* Only hide the #toc inside the original article, not generated ones in VE (T187636) */
 .ve-active {
-	.ve-init-mw-desktopArticleTarget-editableContent #toc,
-	#siteNotice,
+	// Hide banners only on skins where they would be shown in the editable area (T324055)
+	.ve-init-mw-desktopArticleTarget-targetContainer #siteNotice,
 	.mw-indicators,
 	#t-print,
 	#t-permalink,
@@ -133,7 +133,7 @@
 			position: fixed;
 			top: 0;
 			z-index: 1;
-			background: #fff;
+			background: @background-color-base;
 		}
 	}
 }
@@ -146,20 +146,11 @@
 /* Section edit links */
 
 .mw-editsection {
-	/* bidi isolation: */
-	unicode-bidi: -moz-isolate;
-	unicode-bidi: -webkit-isolate;
-	unicode-bidi: isolate;
-
-	&:before {
+	&::before {
 		content: '\200B';
 	}
 
 	a {
 		white-space: nowrap;
 	}
-}
-
-.mw-editsection-divider {
-	color: #54595d;
 }

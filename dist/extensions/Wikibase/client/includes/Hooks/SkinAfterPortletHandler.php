@@ -50,7 +50,7 @@ class SkinAfterPortletHandler implements SkinAfterPortletHook {
 	/**
 	 * @param Skin $skin
 	 * @param string $portlet
-	 * @param string $html
+	 * @param string &$html
 	 */
 	public function onSkinAfterPortlet( $skin, $portlet, &$html ): void {
 		if ( $portlet === 'lang' ) {
@@ -68,7 +68,6 @@ class SkinAfterPortletHandler implements SkinAfterPortletHook {
 	 *
 	 * @param Skin $skin
 	 * @return null|string
-	 * @suppress PhanTypeComparisonFromArray
 	 */
 	public function doSkinAfterPortlet( Skin $skin ): ?string {
 		$out = $skin->getOutput();
@@ -78,7 +77,7 @@ class SkinAfterPortletHandler implements SkinAfterPortletHook {
 		$prefixedId = $out->getProperty( 'wikibase_item' );
 		$action = $skin->getActionName();
 		$noExternalLangLinks = $out->getProperty( 'noexternallanglinks' );
-		$hasLangLinks = $languageUrls !== false && !empty( $languageUrls );
+		$hasLangLinks = (bool)$languageUrls;
 
 		$itemLink = $this->repoItemLinkGenerator->getLink( $title, $action,
 			$hasLangLinks, $noExternalLangLinks, $prefixedId

@@ -4,5 +4,10 @@
 			"Bosogo"
 		]
 	},
-	"usercredentials-user": "Колдонуучунун аты:"
+	"usercredentials-user": "Колдонуучунун аты:",
+	"usercredentials-leg-user": "Аккаунт",
+	"usercredentials-leg-person": "Жеке маалымат",
+	"usercredentials-leg-other": "Башка маалымат",
+	"usercredentials-email": "Электрондук почта:",
+	"usercredentials-notes": "Кошумча эскертмелер:"
 }

@@ -20,7 +20,7 @@ use Wikibase\DataModel\Snak\SnakList;
  */
 class SnakListTest extends \PHPUnit\Framework\TestCase {
 
-	public function elementInstancesProvider() {
+	public static function elementInstancesProvider() {
 		$id42 = new NumericPropertyId( 'P42' );
 
 		$argLists = [];
@@ -32,14 +32,14 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 		return $argLists;
 	}
 
-	public function instanceProvider() {
+	public static function instanceProvider() {
 		$id42 = new NumericPropertyId( 'P42' );
 		$id9001 = new NumericPropertyId( 'P9001' );
 
 		return [
 			[ new SnakList() ],
 			[ new SnakList( [
-				new PropertyNoValueSnak( $id42 )
+				new PropertyNoValueSnak( $id42 ),
 			] ) ],
 			[ new SnakList( [
 				new PropertyNoValueSnak( $id42 ),
@@ -61,7 +61,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 		new SnakList( $input );
 	}
 
-	public function invalidConstructorArgumentsProvider() {
+	public static function invalidConstructorArgumentsProvider() {
 		$id1 = new NumericPropertyId( 'P1' );
 
 		return [
@@ -156,7 +156,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $elementCount, $array->count() );
 	}
 
-	public function orderByPropertyProvider() {
+	public static function orderByPropertyProvider() {
 		$id1 = new NumericPropertyId( 'P1' );
 		$id2 = new NumericPropertyId( 'P2' );
 		$id3 = new NumericPropertyId( 'P3' );
@@ -176,7 +176,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 			'Unknown id in order' => [
 				[],
 				[],
-				[ 'P1' ]
+				[ 'P1' ],
 			],
 			[
 				[ new PropertyNoValueSnak( $id1 ) ],
@@ -215,7 +215,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 					new PropertyNoValueSnak( $id3 ),
 					new PropertyValueSnak( $id1, new StringValue( 'a' ) ),
 				],
-				[ 'P2' ]
+				[ 'P2' ],
 			],
 			[
 				[
@@ -232,7 +232,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 					new PropertyNoValueSnak( $id2 ),
 					new PropertyNoValueSnak( $id2 ),
 				],
-				[ 'P1' ]
+				[ 'P1' ],
 			],
 			'Multiple IDs in order' => [
 				[
@@ -253,7 +253,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 					new PropertyValueSnak( $id4, new StringValue( 'e' ) ),
 					new PropertyValueSnak( $id4, new StringValue( 'g' ) ),
 				],
-				[ 'P2', 'P3', 'P1' ]
+				[ 'P2', 'P3', 'P1' ],
 			],
 		];
 
@@ -263,7 +263,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 			$arguments[$key] = [
 				new SnakList( $rawArgument[0] ),
 				new SnakList( $rawArgument[1] ),
-				array_key_exists( 2, $rawArgument ) ? $rawArgument[2] : []
+				array_key_exists( 2, $rawArgument ) ? $rawArgument[2] : [],
 			];
 		}
 
@@ -308,7 +308,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $expected, $list1->equals( $list2 ) );
 	}
 
-	public function equalsProvider() {
+	public static function equalsProvider() {
 		$empty = new SnakList();
 		$oneSnak = new SnakList( [ new PropertyNoValueSnak( 1 ) ] );
 
@@ -316,27 +316,27 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 			'empty object is equal to itself' => [
 				$empty,
 				$empty,
-				true
+				true,
 			],
 			'non-empty object is equal to itself' => [
 				$oneSnak,
 				$oneSnak,
-				true
+				true,
 			],
 			'different empty objects are equal' => [
 				$empty,
 				new SnakList(),
-				true
+				true,
 			],
 			'different objects with same content are equal' => [
 				$oneSnak,
 				new SnakList( [ new PropertyNoValueSnak( 1 ) ] ),
-				true
+				true,
 			],
 			'different objects with different content are not equal' => [
 				$oneSnak,
 				new SnakList( [ new PropertyNoValueSnak( 2 ) ] ),
-				false
+				false,
 			],
 		];
 	}
@@ -372,7 +372,7 @@ class SnakListTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( $self->getHash(), $other->getHash() );
 	}
 
-	public function provideEqualSnakLists() {
+	public static function provideEqualSnakLists() {
 		$empty = new SnakList();
 		$oneSnak = new SnakList( [ new PropertyNoValueSnak( 1 ) ] );
 

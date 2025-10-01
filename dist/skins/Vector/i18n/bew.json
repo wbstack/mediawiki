@@ -1,9 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Naval Scene",
-			"Amire80",
-			"Bangrapip"
+			"Bangrapip",
+			"Naval Scene"
 		]
 	},
 	"vector-skin-desc": "Nyediain 2 kulit Bèktor:\n* 2011 - Pèrsi moderen deri MonoBook dengen roman anyar èn banyak peningkatan kebegunaan.\n* 2022 -Bèktor nyang dibangun sebagé bagèan deri proyèk WMF [[mw:Desktop Improvements]].",
@@ -17,7 +16,6 @@
 	"vector-language-button-label": "{{PLURAL:$1|$1 basa}}",
 	"vector-no-language-button-label": "Tambah basa",
 	"vector-no-language-button-aria-label": "Ni makalah cuman ada dalem ni basa. Tambah makalah bakal laèn-laèn basa",
-	"vector-language-redirect-to-top": "Di ni {{SITENAME}}, sènggètan basa ada di atas halaman di sampingnya judulmakalah. [[#p-lang-btn|Ke atas]].",
 	"vector-language-variant-switcher-label": "Robah ragem basa",
 	"vector-action-addsection": "Tambah topik",
 	"vector-action-delete": "Apus",
@@ -34,9 +32,23 @@
 	"vector-jumptosearch": "Loncat ke penyarian",
 	"vector-jumptocontent": "Loncat ke isi",
 	"vector-more-actions": "Laènnya",
+	"vector-appearance-label": "Roman",
+	"vector-feature-limited-width-name": "Lèbar",
+	"vector-feature-limited-width-0-label": "Lèbar",
+	"vector-feature-limited-width-1-label": "Pakem",
+	"vector-feature-custom-font-size-name": "Tulisan",
+	"vector-feature-custom-font-size-0-label": "Kecil",
+	"vector-feature-custom-font-size-1-label": "Pakem",
+	"vector-feature-custom-font-size-2-label": "Gedé",
+	"skin-theme-name": "Kelir",
+	"skin-theme-day-label": "Terang",
+	"skin-theme-night-label": "Kereng",
+	"skin-theme-os-label": "Kendirinya",
+	"skin-theme-exclusion-notice": "Ni halaman paké hodeng terang mulu.",
 	"vector-search-loader": "Munggah saran penyarian",
 	"vector-searchsuggest-containing": "Cari halaman nyang ada <strong class=\"cdx-typeahead-search__search-footer__query\">$1</strong>",
 	"vector-intro-page": "Help:Mukadimah",
+	"vector-toc-label": "Daptar isi",
 	"vector-toc-beginning": "Awal",
 	"vector-toc-toggle-button-label": "Cetèkin anakbagèan $1",
 	"vector-anon-user-menu-pages": "Halaman bakal pemermak nyang kuar",
@@ -46,6 +58,20 @@
 	"vector-toc-menu-tooltip": "Daptar isi",
 	"vector-toc-collapsible-button-label": "Cetèkin daptar isi",
 	"vector-site-nav-label": "Pelampang",
+	"vector-main-menu-label": "Menu utama",
+	"vector-feature-custom-font-size-exclusion-notice": "Ni halaman maké ukuran gaya tulisan kecil mulu",
+	"vector-page-tools-label": "Peranti",
+	"vector-page-tools-general-label": "Umum",
+	"vector-page-tools-actions-label": "Piil",
+	"vector-pin-element-label": "pindah ke palang samping",
+	"vector-unpin-element-label": "umpetin",
 	"vector-2022-prefs-talkpage": "[[mw:Talk:Reading/Web/Desktop_Improvements|Perhadring]]",
-	"tooltip-vector-anon-user-menu-title": "Pilihan laènnya"
+	"tooltip-vector-anon-user-menu-title": "Pilihan laènnya",
+	"vector-page-tools-nav-label": "Peranti halaman",
+	"vector-prefs-limited-width": "Nyalain mode lèbar kewates",
+	"vector-prefs-limited-width-help": "Nyalain mode lèbar kewates biar lebi ènak ngebacanya.",
+	"empty-language-selector-body": "Isi halaman kaga' didukung di laèn-laèn basa.",
+	"vector-toc-unpinned-popup": "Daptar isi udah mingsèr ke mari.",
+	"vector-page-tools-unpinned-popup": "Menu peranti udah mingsèr ke mari.",
+	"vector-main-menu-unpinned-popup": "Menu utama udah mingsèr ke mari."
 }

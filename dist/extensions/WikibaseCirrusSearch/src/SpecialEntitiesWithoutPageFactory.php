@@ -23,7 +23,7 @@ class SpecialEntitiesWithoutPageFactory {
 		return new self(
 			WikibaseRepo::getLocalEntityTypes(),
 			WikibaseRepo::getTermsLanguages(),
-			new LanguageNameLookup(),
+			WikibaseRepo::getLanguageNameLookupFactory()->getForAutonyms(),
 			WikibaseRepo::getEntityFactory(),
 			WikibaseRepo::getEntityNamespaceLookup()
 		);

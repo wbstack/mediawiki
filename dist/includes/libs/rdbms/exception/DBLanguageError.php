@@ -24,11 +24,10 @@ use Throwable;
 /**
  * @since 1.39
  * @newable
- * @stable to extend
  * @ingroup Database
  */
 class DBLanguageError extends DBUnexpectedError {
-	public function __construct( $error, Throwable $prev = null ) {
+	public function __construct( $error, ?Throwable $prev = null ) {
 		parent::__construct( null, $error, $prev );
 	}
 }
