@@ -145,7 +145,7 @@ class WbStackPlatformReservedUser{
             $user->getId(),
             $c,
             $c->getWiki(),
-            \MediaWiki\Extension\OAuth\Backend\ConsumerAcceptance::READ_NORMAL,
+            \IDBAccessObject::READ_NORMAL,
             $c->getOAuthVersion(),
         );
 
