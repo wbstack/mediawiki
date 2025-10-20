@@ -19,11 +19,11 @@ mediawiki_version = codebases['mediawikiVersion']
 extensions = codebases['extensions']
 skins = codebases['skins']
 
-TOKEN = None
+token = None
 with open(GITHUB_TOKEN_FILE, "r") as filehandler:
-    TOKEN = filehandler.readline().strip()
+    token = filehandler.readline().strip()
 
-githubClient = Github(auth=Auth.Token(TOKEN))
+github_client = Github(auth=Auth.Token(token))
 
 def get_mediawiki_branch_from_version(version: str) -> str:
     return f"REL{version.replace('.', '_')}"
@@ -39,7 +39,7 @@ def make_artifact_entry(details: Dict[str, str], extra_remove: List[str]) -> Dic
     name = details['name']
 
     if "repoName" in details.keys():
-        artifact_url = get_github_url_from_ref(githubClient, details['repoRef'], details['repoName'])
+        artifact_url = get_github_url_from_ref(github_client, details['repoRef'], details['repoName'])
     elif "url" in details.keys():
         artifact_url = details['url']
     else:
