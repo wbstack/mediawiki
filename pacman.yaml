@@ -424,6 +424,8 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
+  patchUrls:
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FOAuth~1197610/revisions/2/patch?download
 - name: WikibaseLexeme
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-WikibaseLexeme/zip/9d1ad5a6bd52eb0e6b9d7d31a06202236198b467
   artifactLevel: 1
