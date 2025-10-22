@@ -76,9 +76,9 @@ jobs:
         run: |
           TAG="$(echo ${{ steps.docker_meta.outputs.tags }} | cut -d':' -f2)"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
-          sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-staging/k8s/helmfile/env/local/mediawiki-139.values.yaml.gotmpl
-          sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-staging/k8s/helmfile/env/staging/mediawiki-139.values.yaml.gotmpl
-          sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-production/k8s/helmfile/env/production/mediawiki-139.values.yaml.gotmpl
+          sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-staging/k8s/helmfile/env/local/mediawiki-143.values.yaml.gotmpl
+          sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-staging/k8s/helmfile/env/staging/mediawiki-143.values.yaml.gotmpl
+          sed -i "/image:/{n;s/tag:.*/tag: $TAG/;}" ./repos/wbaas-deploy-production/k8s/helmfile/env/production/mediawiki-143.values.yaml.gotmpl
       -
         name: Truncate commit message
         if: github.event_name != 'pull_request'
