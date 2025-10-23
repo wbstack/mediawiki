@@ -1,7 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"IJzeren Jan"
+			"IJzeren Jan",
+			"SaldırganSincap"
 		]
 	},
 	"templatesandbox": "Pěskovišče za šablony",
@@ -29,7 +30,7 @@
 	"templatesandbox-page-or-revid": "Trěba vvesti ili nazvu stranice ili identifikator versije.",
 	"templatesandbox-fail-post": "<em>Iz pričiny utraty danyh sesije, prědgled jest skryty kako měra protiv napadam s pomočju JavaScript’a.</em> \n\n<strong>Ako to jest legitimno pokušenje prědgleda, poprobujte ješče raz.</strong> Ako to ne pomože, poprobujte [[Special:UserLogout|odjaviti se]] i prijaviti se ponovno.",
 	"templatesandbox-fail-post-anon": "<em>Zatože vy ne jeste prijavjeni, prědgled jest skryty kako měra protiv napadam s pomočju JavaScript’a.</em> \n\n<strong>Ako to jest legitimno pokušenje prědgleda, [[Special:UserLogin|prijavite se]] i poprobujte ješče raz.</strong>",
-	"templatesandbox-anon-limited-preview": "Prědgled izměn JavaScript’a i CSS’a jest izključeny za neprijavjenyh koristnikov. Ako trěba vam prědgleděti take izměny, [[Special:UserLogin|prijavite se]] i poprobujte ješče raz.</strong>",
+	"templatesandbox-anon-limited-preview": "Prědgled izměn JavaScript’a i CSS’a jest izključeny za neprijavjenyh koristnikov. Ako trěba vam prědgleděti take izměny, [[Special:UserLogin|prijavite se]] i poprobujte ješče raz.",
 	"templatesandbox-editform-need-template": "Za prědgleděnje drugoj stranice s tutym šablonom trěba ukazati nazvu šablona.",
 	"templatesandbox-editform-need-title": "Za prědgleděnje drugoj stranice s tutym šablonom trěba ukazati nazvu stranice.",
 	"templatesandbox-editform-invalid-template": "Ukazana vami nazva šablona jest nepravilna.",
