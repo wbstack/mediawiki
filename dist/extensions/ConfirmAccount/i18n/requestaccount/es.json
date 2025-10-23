@@ -14,7 +14,8 @@
 			"Matiia",
 			"Pertile",
 			"Sanbec",
-			"Translationista"
+			"Translationista",
+			"Yupik"
 		]
 	},
 	"requestaccount": "Solicitar cuenta",
@@ -32,7 +33,7 @@
 	"requestaccount-ext-text": "La siguiente información se mantiene privada y sólo será usada para esta solicitud.\nPuede listar contactos como un número de teléfono para ayudar en la confirmación de la identidad.",
 	"requestaccount-bio-text": "Trata de incluir alguna credencial relevante en tu biografía abajo.",
 	"requestaccount-bio-text-i": "'''Su biografía se establecerá como el contenido inicial de tu página de usuario.'''\nAsegúrate de estar cómodo con la publicación de dicha información.",
-	"requestaccount-real": "Nombre real:",
+	"requestaccount-real": "Nombre real (opcional):",
 	"requestaccount-same": "(igual que el nombre real de abajo)",
 	"requestaccount-email": "Dirección de correo electrónico:",
 	"requestaccount-reqtype": "Posición:",

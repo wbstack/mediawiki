@@ -128,7 +128,7 @@ extensions:
     repoRef: 3e039311504eb82f8c5c488a457b9e376b5cf7e3
   ## These extensions use urls directly
   - name: Wikibase
-    url: https://github.com/wbstack/mediawiki-tars/raw/4467d5781c718b3c0a82b114e92741937d700e3f/Wikibase-1757337697-REL1_43.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/ae333245e6fd22b888a925f088ac5637c6f9b6c1/Wikibase-1761224062-REL1_43.tar.gz
     remove:
       - build
       - vendor
@@ -164,7 +164,7 @@ extensions:
   - name: EmbedVideo
     url: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
   - name: VisualEditor
-    url: https://github.com/wbstack/mediawiki-tars/raw/9b622fc78d4c9ee019165f4b7fff46bb73b13ab9/VisualEditor-1757337760-REL1_43.tar.gz
+    url: https://github.com/wbstack/mediawiki-tars/raw/75bedb27afda71878d19f62fc5d96e5c3481cd43/VisualEditor-1761224161-REL1_43.tar.gz
 
 skins:
   - name: Vector

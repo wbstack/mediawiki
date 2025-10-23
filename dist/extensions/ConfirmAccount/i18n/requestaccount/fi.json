@@ -15,7 +15,8 @@
 			"Str4nd",
 			"Taleman",
 			"Valtlait",
-			"Varusmies"
+			"Varusmies",
+			"Yupik"
 		]
 	},
 	"requestaccount": "Pyydä käyttäjätunnusta",
@@ -32,7 +33,7 @@
 	"requestaccount-areas-text": "Valitse alta alueet, joissa olet asiantuntija tai joiden parissa haluaisit enimmäkseen työskennellä.",
 	"requestaccount-ext-text": "Seuraavat tiedot pidetään luottamuksellisina ja niitä käytetään vain tämän pyynnön käsittelyssä.\nHaluat ehkä antaa tunnistamista helpottavia yhteystietoja, puhelinnumeron esimerkiksi.",
 	"requestaccount-bio-text": "Yritä kirjoittaa kaikki olennaiset tiedot itsestäsi omaelämäkertaasi eli kuvaukseesi itsestäsi.",
-	"requestaccount-real": "Oikea nimi:",
+	"requestaccount-real": "Oikea nimi (vapaaehtoinen tieto):",
 	"requestaccount-same": "(sama kuin oikea nimi)",
 	"requestaccount-email": "Sähköpostiosoite:",
 	"requestaccount-reqtype": "Asema:",

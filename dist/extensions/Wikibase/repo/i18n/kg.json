@@ -4,5 +4,8 @@
 			"BOKOBA VEROLY"
 		]
 	},
-	"wikibase-edit": "kubalula"
+	"wikibase-edit": "kubalula",
+	"wikibase-add": "yika",
+	"wikibase-label-empty": "No label defined",
+	"wikibase-sitelinks-special": "Bisika ya nkaka"
 }
