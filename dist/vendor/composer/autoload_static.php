@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
+class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -277,13 +277,13 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
         ),
         'ValueParsers\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
         ),
         'ValueFormatters\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
         ),
         'Symfony\\Polyfill\\Php83\\' => 
         array (
@@ -396,8 +396,8 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri/src',
-            1 => __DIR__ . '/..' . '/league/uri-interfaces/src',
+            0 => __DIR__ . '/..' . '/league/uri-interfaces/src',
+            1 => __DIR__ . '/..' . '/league/uri/src',
         ),
         'League\\OAuth2\\Server\\' => 
         array (
@@ -509,8 +509,8 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
         ),
         'DataValues\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
-            1 => __DIR__ . '/..' . '/data-values/data-values/src',
+            0 => __DIR__ . '/..' . '/data-values/data-values/src',
+            1 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
         ),
         'Composer\\Semver\\' => 
         array (
@@ -4484,11 +4484,11 @@ class ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit1febb575cd61ffbdfb0ac1695ecb04ae::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$classMap;
 
         }, null, ClassLoader::class);
     }

@@ -23,7 +23,8 @@
 			"Quangquy322",
 			"Chaiwan2009",
 			"Nvdtn19",
-			"Băng Tỏa"
+			"Băng Tỏa",
+			"Saurmandal"
 		]
 	},
 	"abusefilter-edit-builder-vars-user-mobile": "Người dùng có sửa đổi thông qua giao diện di động hay không ($1)",
@@ -31,7 +32,7 @@
 	"mobile-frontend-changeslist-nocomment": "không có tóm lược sửa đổi",
 	"mobile-frontend-clear-search": "Tẩy trống",
 	"mobile-frontend-copyright": "Nội dung được phát hành theo $1, ngoại trừ khi có ghi chú khác.",
-	"mobile-frontend-desc": "Giúp cải thiện trang MediaWiki cho người dùng di động",
+	"mobile-frontend-desc": "Giúp cải thiện giao diện MediaWiki cho người dùng di động",
 	"mobile-frontend-edit-login-action": "<strong>Giúp cải thiện {{SITENAME}}.</strong><br />\nHãy đăng nhập để sửa đổi.",
 	"mobile-frontend-edit-signup-action": "<strong>Giúp cải thiện {{SITENAME}}.</strong><br />Mở tài khoản để sửa đổi.",
 	"mobile-frontend-editor-anon": "Sửa đổi ẩn danh (không đăng nhập)",
