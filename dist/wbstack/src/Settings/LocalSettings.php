@@ -24,7 +24,7 @@ if ( !defined( 'STDERR' ) ) {
 require_once __DIR__ . '/Localization.php';
 
 // Define some conditions to switch behaviour on
-$wwDomainSaysLocal = preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
+$wwDomainSaysLocal = isset($_SERVER['SERVER_NAME']) && preg_match("/(\w\.localhost)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
