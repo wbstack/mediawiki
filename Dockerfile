@@ -47,7 +47,7 @@ RUN set -eux; \
 		bz2 \
 	; \
 	\
-	pecl install apcu-5.1.21; \
+	pecl install apcu-5.1.27; \
 	# redis added for wbstack
 	pecl install redis-5.3.4; \
 	docker-php-ext-enable \
