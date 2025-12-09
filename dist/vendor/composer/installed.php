@@ -248,8 +248,8 @@
             'type' => 'library',
             'install_path' => __DIR__ . '/../league/oauth2-server',
             'aliases' => array(
-                0 => '9.0.0',
-                1 => '9999999-dev',
+                0 => '9999999-dev',
+                1 => '9.0.0',
             ),
             'dev_requirement' => false,
         ),
