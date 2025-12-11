@@ -55,7 +55,12 @@ class CustomLogger extends AbstractLogger {
         $payload[ 'severity' ] = $level;
         $payload[ 'serviceContext' ] = [
             'service' => 'WBaaS MediaWiki',
-            'version' => '1.0.0'
+            'version' => '2.0.0'
+        ];
+        $payload[ 'context' ] = [
+            'mediawiki' => MW_VERSION, // https://github.com/wbstack/mediawiki/blob/main/dist/includes/Defines.php#L37
+            'domain' => $GLOBALS[WBSTACK_INFO_GLOBAL]->requestDomain,
+            'php' => getenv('PHP_VERSION'),
         ];
 
         $output = json_encode( $payload );
