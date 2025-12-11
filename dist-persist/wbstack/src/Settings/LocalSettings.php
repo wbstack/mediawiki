@@ -611,6 +611,10 @@ $wgWBRepoSettings['dataRightsText'] = '';
 // Until we can scale redis memory we don't want to do this - https://github.com/addshore/wbstack/issues/37
 $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
 
+// Enable mul language code
+$wgWBRepoSettings['tmpEnableMulLanguageCode'] = true;
+$wgWBRepoSettings['tmpAlwaysShowMulLanguageCode'] = true;
+
 # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
     wfLoadExtension( 'WikibaseLexeme' );

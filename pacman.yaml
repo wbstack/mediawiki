@@ -756,6 +756,10 @@
     - .rubocop_todo.yml
     - Gruntfile.js
     - Doxyfile
+  patchUrls:
+    # This patch URL fixes SQLBagOStuff duplicate warnings due to bug in Echo extension.
+    # Remove when updated to 1.44+ (Bug: T412100).
+    - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FEcho~1093496/revisions/1/patch?download
 - name: Poem
   artifactUrl: https://codeload.github.com/wikimedia/mediawiki-extensions-Poem/zip/7f17973c881e9d066e3ae584cb7415279964ee6a
   artifactLevel: 1
