@@ -138,6 +138,9 @@ if( !$wwDomainIsMaintenance && !empty(getenv('MW_DB_SERVER_REPLICA'))){
     ];
 }
 
+// Disable TransactionProfiler for masterConns on GET (T408101)
+unset( $wgTrxProfilerLimits['GET']['masterConns'] );
+
 // Limit expensive queries (T399804)
 $wgMaxExecutionTimeForExpensiveQueries = 5_000;
 
