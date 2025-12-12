@@ -11,7 +11,8 @@
 			"Macofe",
 			"Najami",
 			"Per",
-			"WikiPhoenix"
+			"WikiPhoenix",
+			"Yupik"
 		]
 	},
 	"requestaccount": "Ansök om konto",
@@ -29,7 +30,7 @@
 	"requestaccount-ext-text": "Följande information kommer hållas hemlig och bara användas för denna ansökan.\nOm du vill kan du här ange kontaktinformation, t.ex. telefonnummer, för att lättare bekräfta din identitet.",
 	"requestaccount-bio-text": "Försök att ange relevanta meriter och referenser i biografin nedan.",
 	"requestaccount-bio-text-i": "'''Din biografi kommer att anges som det ursprungliga innehållet för din användarsida.'''\nSe till att du känner dig bekväm med att publicera sådan information.",
-	"requestaccount-real": "Riktigt namn:",
+	"requestaccount-real": "Riktigt namn (valfritt):",
 	"requestaccount-same": "(samma som ditt riktiga namn)",
 	"requestaccount-email": "E-postadress:",
 	"requestaccount-reqtype": "Ställning:",

@@ -10,7 +10,8 @@
 			"Penn Station",
 			"Shirayuki",
 			"Tmv",
-			"ネイ"
+			"ネイ",
+			"Kokage si"
 		]
 	},
 	"twocolconflict": "段落に基づいた編集の競合",
@@ -19,9 +20,12 @@
 	"twocolconflict-beta-feature-message": "段落に基づいた編集の競合",
 	"twocolconflict-beta-feature-description": "進化型の段落に基づく表示により編集の競合を表示します。",
 	"twocolconflict-copy-action": "すべての文をコピー",
+	"twocolconflict-copy-tab-action": "全文を表示",
+	"twocolconflict-core-ui-hint-close": "再び表示しない",
 	"twocolconflict-preference-enabled": "[[mw:Special:MyLanguage/Help:Paragraph-based Edit Conflict Interface|段落単位の編集競合インターフェイス]]を有効にして編集の競合を解決できるようにする",
+	"twocolconflict-special-footer-hint": "編集競合インターフェースに戻るには現在のページを閉じます。",
 	"twocolconflict-special-not-saved": "未公開",
-	"twocolconflict-split-header-hint-beta": "このベータ機能をご使用いただきありがとうございます。さらに改善するためご協力いただけるようでしたら、ぜひフィードバックを[//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View こちらのページ]に投稿してください。",
+	"twocolconflict-split-header-hint-beta": "このベータ機能をご使用いただきありがとうございます。さらに改善するためご協力いただけるようでしたら、ぜひフィードバックを[//www.mediawiki.org/wiki/Help_talk:Two_Column_Edit_Conflict_View プロジェクトのトークページ]に投稿してください。",
 	"twocolconflict-split-your-version-header": "あなたが修正した版",
 	"twocolconflict-split-current-version-header": "$1時点の最終版",
 	"twocolconflict-split-not-saved-at": "まだ公開していません",
@@ -29,6 +33,7 @@
 	"twocolconflict-split-other-version-chosen": "競合した版",
 	"twocolconflict-split-your-version-chosen": "あなたの版",
 	"twocolconflict-split-select-all": "すべて選択",
+	"twocolconflict-split-tour-dialog-dot-message": "役立つヒントは、点滅する青い点をクリックしてください。",
 	"twocolconflict-split-tour-dialog-header": "競合している版を統合する",
 	"twocolconflict-split-tour-dialog-message": "あいにく、あなたの編集作業中にほかの利用者も同時に編集をして、先に保存したようです。\nご心配は無用です、あなたの編集内容は消えていません。2つの版を読み比べて統合してください。必要に応じて、文を選択し編集ができます。「{{int:publishchanges}}」を押すと、選択したボックス内の文のみ保存されます。",
 	"twocolconflict-split-tour-dialog-btn-text": "統合作業を開始する",
@@ -48,6 +53,9 @@
 	"twocolconflict-split-collapse-tooltip": "変更されていない文を折りたたむ",
 	"twocolconflict-split-expand-tooltip": "変更されていない文を展開する",
 	"twocolconflict-split-help-tooltip": "ヘルプを表示",
+	"twocolconflict-split-tour-dialog-header-single-column-view": "競合する投稿",
+	"twocolconflict-split-tour-dialog-btn-text-single-column-view": "問題を解決",
 	"twocolconflict-talk-your": "あなたのコメント",
-	"twocolconflict-talk-conflicting": "競合したコメント"
+	"twocolconflict-talk-conflicting": "競合したコメント",
+	"twocolconflict-talk-switch-tooltip": "順序を切り替え"
 }

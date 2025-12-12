@@ -149,12 +149,6 @@ class ConsumerSubmitControl extends SubmitControl {
 						return StatusValue::newFatal(
 							new ApiMessage( 'mwoauth-error-callback-url-must-be-https', 'invalid_callback_url' )
 						);
-					} elseif ( ( $isOAuth1 || $vals['oauth2IsConfidential'] )
-						&& WikiMap::getWikiFromUrl( $s )
-					) {
-						return StatusValue::newGood()->warning(
-							new ApiMessage( 'mwoauth-error-callback-server-url', 'invalid_callback_url' )
-						);
 					} elseif ( ( $isOAuth2 || !$vals['callbackIsPrefix'] )
 						&& in_array( $urlParts['path'] ?? '', [ '', '/' ], true )
 						&& !( $urlParts['query'] ?? false )

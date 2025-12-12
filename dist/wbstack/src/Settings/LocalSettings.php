@@ -24,7 +24,7 @@ if ( !defined( 'STDERR' ) ) {
 require_once __DIR__ . '/Localization.php';
 
 // Define some conditions to switch behaviour on
-$wwDomainSaysLocal = preg_match("/\w\.(localhost|wbaas\.dev)/", $_SERVER['SERVER_NAME']) === 1;
+$wwDomainSaysLocal = isset($_SERVER['SERVER_NAME']) && preg_match("/\w\.(localhost|wbaas\.dev)/", $_SERVER['SERVER_NAME']) === 1;
 $wwDomainIsMaintenance = $wikiInfo->requestDomain === 'maintenance';
 $wwIsPhpUnit = isset( $maintClass ) && $maintClass === 'PHPUnitMaintClass';
 $wwIsLocalisationRebuild = basename( $_SERVER['SCRIPT_NAME'] ) === 'rebuildLocalisationCache.php';
@@ -137,6 +137,9 @@ if( !$wwDomainIsMaintenance && !empty(getenv('MW_DB_SERVER_REPLICA'))){
         'load' => 100,
     ];
 }
+
+// Disable TransactionProfiler for masterConns on GET (T408101)
+unset( $wgTrxProfilerLimits['GET']['masterConns'] );
 
 // Limit expensive queries (T399804)
 $wgMaxExecutionTimeForExpensiveQueries = 5_000;
@@ -620,6 +623,10 @@ $wgWBRepoSettings['dataRightsText'] = '';
 
 // Until we can scale redis memory we don't want to do this - https://github.com/addshore/wbstack/issues/37
 $wgWBRepoSettings['sharedCacheType'] = CACHE_NONE;
+
+// Enable mul language code
+$wgWBRepoSettings['tmpEnableMulLanguageCode'] = true;
+$wgWBRepoSettings['tmpAlwaysShowMulLanguageCode'] = true;
 
 # WikibaseLexeme, By default not enabled, enabled in WikiInfo-maint.json
 if( $wikiInfo->getSetting('wwExtEnableWikibaseLexeme') ) {
