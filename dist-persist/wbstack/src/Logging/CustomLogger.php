@@ -63,8 +63,8 @@ class CustomLogger extends AbstractLogger {
 
         $payload[ 'severity' ] = $level;
         $payload[ 'serviceContext' ] = [
-            'service' => 'TEST WBaaS MediaWiki',
-            'version' => '0.0.2'
+            'service' => 'WBaaS MediaWiki',
+            'version' => '2.0.0'
         ];
         $payload[ 'context' ] = [
             // set in /includes/Defines.php
