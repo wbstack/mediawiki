@@ -64,7 +64,7 @@ class CustomLogger extends AbstractLogger {
         $payload[ 'severity' ] = $level;
         $payload[ 'serviceContext' ] = [
             'service' => 'WBaaS MediaWiki',
-            'version' => '2.0.0'
+            'version' => MW_VERSION,
         ];
         $payload[ 'context' ] = [
             // set in /includes/Defines.php
@@ -77,7 +77,7 @@ class CustomLogger extends AbstractLogger {
             'php'           => phpversion(),
 
             // https://www.php-fig.org/psr/psr-3/#13-context
-            'context'       => $context,
+            'log_context'       => $context,
         ];
 
         $output = json_encode( $payload );
