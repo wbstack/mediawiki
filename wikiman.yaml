@@ -162,7 +162,7 @@ extensions:
   # There was a MR up for fixing that https://gitlab.com/hydrawiki/extensions/EmbedVideo/-/merge_requests/148 so lets directly use that commit?
   # We were using v2.9.0 before this
   - name: EmbedVideo
-    url: https://gitlab.com/jmnote/EmbedVideo/-/archive/e1e965527e19a00de34e534f87d6b7cdae8b262f/EmbedVideo-e1e965527e19a00de34e534f87d6b7cdae8b262f.zip
+    repoName: StarCitizenWiki/mediawiki-extensions-EmbedVideo
   - name: VisualEditor
     url: https://github.com/wbstack/mediawiki-tars/raw/75bedb27afda71878d19f62fc5d96e5c3481cd43/VisualEditor-1761224161-REL1_43.tar.gz
 
