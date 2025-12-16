@@ -66,6 +66,9 @@
         },
         "remove": {
           "$ref": "#/$defs/RemoveList"
+        },
+        "patchUrls": {
+          "$ref": "#/$defs/PatchUrlList"
         }
       },
       "additionalProperties": false,
@@ -88,6 +91,9 @@
         },
         "remove": {
           "$ref": "#/$defs/RemoveList"
+        },
+        "patchUrls": {
+          "$ref": "#/$defs/PatchUrlList"
         }
       },
       "additionalProperties": false,
@@ -98,6 +104,13 @@
     },
     "RemoveList": {
       "description": "Files to remove from the repo",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "PatchUrlList": {
+      "description": "A list of gerrit URLs pointing to a base64 encoded git patch",
       "type": "array",
       "items": {
         "type": "string"

@@ -7,6 +7,21 @@ graph TD
     B-->|pacman|C[dist folder with things in it]
 ```
 
+### Checklist for updating mediawiki
+- `wikiman.yaml`
+  - Check `mediawikiVersion` is still set to the version we want to target e.g. 1.39
+  - Check if `mediawikiRepoRef` is set to a specific value for a reason that still makes sense
+    - If not remove it
+- Review `patchUrls`
+  - Open each patch and determine if it has now been merged into the updated version you are targeting
+    - If so: remove it
+    - If not determine if we should:
+      - Apply it as is
+      - Edit it so that is correctly applies to the newly updated code
+      - Remove it since it's no longer needed
+- Run `./sync/wikiman/wikiman .`
+- Run `./sync.sh`
+
 ### sync.sh
 
 This script will resync the `dist` directory.
@@ -40,7 +55,7 @@ This needs to be run by developers when updating component versions in `wikiman.
 This is run as a step in `sync.sh`
 
 #### Syncing patches
-To apply additional gerrit patches, you can specify patch URLs in the corresponding codebase part of `pacman.yaml`
+To apply additional gerrit patches, you can specify patch URLs in the corresponding codebase part of `wikiman.yaml`.
 
 Example:
 ```
@@ -48,6 +63,3 @@ Example:
   patchUrls:
   - https://gerrit.wikimedia.org/r/changes/mediawiki%2Fextensions%2FWikibase~833742/revisions/15/patch?download
 ```
-
-> [!WARNING]
-> Currently patches will get overridden if `wikiman` is used to generate the `pacman.yaml` file!
