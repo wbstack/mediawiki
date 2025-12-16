@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
+class ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b
 {
     public static $files = array (
         '6e3fae29631ef280660b3cdad06f25a8' => __DIR__ . '/..' . '/symfony/deprecation-contracts/function.php',
@@ -247,11 +247,11 @@ class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
         ),
         'Wikimedia\\' => 
         array (
-            0 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
-            1 => __DIR__ . '/..' . '/wikimedia/php-session-serializer/src',
-            2 => __DIR__ . '/..' . '/wikimedia/relpath/src',
-            3 => __DIR__ . '/..' . '/wikimedia/running-stat/src',
-            4 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
+            0 => __DIR__ . '/..' . '/wikimedia/scoped-callback/src',
+            1 => __DIR__ . '/..' . '/wikimedia/ip-utils/src',
+            2 => __DIR__ . '/..' . '/wikimedia/php-session-serializer/src',
+            3 => __DIR__ . '/..' . '/wikimedia/relpath/src',
+            4 => __DIR__ . '/..' . '/wikimedia/running-stat/src',
             5 => __DIR__ . '/..' . '/wikimedia/wait-condition-loop/src',
             6 => __DIR__ . '/..' . '/wikimedia/wrappedstring/src',
         ),
@@ -277,13 +277,13 @@ class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
         ),
         'ValueParsers\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueParsers',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueParsers',
         ),
         'ValueFormatters\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
-            1 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            0 => __DIR__ . '/..' . '/data-values/interfaces/src/ValueFormatters',
+            1 => __DIR__ . '/..' . '/data-values/common/src/ValueFormatters',
         ),
         'Symfony\\Polyfill\\Php83\\' => 
         array (
@@ -343,8 +343,8 @@ class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
         ),
         'Psr\\Http\\Message\\' => 
         array (
-            0 => __DIR__ . '/..' . '/psr/http-factory/src',
-            1 => __DIR__ . '/..' . '/psr/http-message/src',
+            0 => __DIR__ . '/..' . '/psr/http-message/src',
+            1 => __DIR__ . '/..' . '/psr/http-factory/src',
         ),
         'Psr\\Http\\Client\\' => 
         array (
@@ -396,8 +396,8 @@ class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
         ),
         'League\\Uri\\' => 
         array (
-            0 => __DIR__ . '/..' . '/league/uri/src',
-            1 => __DIR__ . '/..' . '/league/uri-interfaces/src',
+            0 => __DIR__ . '/..' . '/league/uri-interfaces/src',
+            1 => __DIR__ . '/..' . '/league/uri/src',
         ),
         'League\\OAuth2\\Server\\' => 
         array (
@@ -509,8 +509,8 @@ class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
         ),
         'DataValues\\' => 
         array (
-            0 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
-            1 => __DIR__ . '/..' . '/data-values/data-values/src',
+            0 => __DIR__ . '/..' . '/data-values/data-values/src',
+            1 => __DIR__ . '/..' . '/data-values/common/src/DataValues',
         ),
         'Composer\\Semver\\' => 
         array (
@@ -563,8 +563,8 @@ class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
         array (
             'Net' => 
             array (
-                0 => __DIR__ . '/..' . '/pear/net_smtp',
-                1 => __DIR__ . '/..' . '/pear/net_socket',
+                0 => __DIR__ . '/..' . '/pear/net_socket',
+                1 => __DIR__ . '/..' . '/pear/net_smtp',
             ),
         ),
         'M' => 
@@ -4484,11 +4484,11 @@ class ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInite65dc3899ad3a63ed8a7260aa4f23630::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit5df423d91a36e9d087cfbf939df4b23b::$classMap;
 
         }, null, ClassLoader::class);
     }

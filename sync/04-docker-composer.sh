@@ -39,16 +39,16 @@ cp -r "$COMPOSER_WORK_DIR"/vendor "$PWD"/dist
 # composer install
 COMPOSER_WORK_DIR="$PWD"/dist
 
-echo "Performing composer install with composer-merge plugin"
-composer_in_docker install --no-dev --no-progress --optimize-autoloader
 
-# composer update (When ALSO_COMPOSER_UPDATE = 1)
-if [ "${ALSO_COMPOSER_UPDATE}" = "1" ]; then
-    echo "Performing composer update"
+
+# composer update (When COMPOSER_UPDATE = 1)
+if [ "${COMPOSER_UPDATE}" = "1" ]; then
+    echo "Performing composer update with composer-merge plugin"
     composer_in_docker update --no-dev --no-progress --optimize-autoloader
     cp dist/composer.lock dist-persist/
 else
-    echo "SKIPPING: composer update (As you didn't request it)"
+    echo "Performing composer install with composer-merge plugin"
+    composer_in_docker install --no-dev --no-progress --optimize-autoloader
 fi;
 
 # Sometimes composer git clones things rather than using zips.
