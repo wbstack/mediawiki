@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
+set -e
 
 SCRIPT_COMPOSER_CACHE=${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 
@@ -8,11 +9,18 @@ mkdir -p ${COMPOSER_CACHE_DIR:-$HOME/.cache/composer}
 ## T302558 Pre-installing composer-merge-plugin
 #
 # Because of https://github.com/wikimedia/composer-merge-plugin/issues/202
-# We are required to install the composer-merge plugin separately
-# This avoids the unwanted update that happens on a fresh install
+# We are required to install the composer-merge plugin separately.
+# This avoids the unwanted composer update that happens on a
+# fresh install of the composer-merge-plugin
+#
+# There are a number of people looking at the problem upstream; it may be that
+# in the future this work around can be removed. See:
+# - https://github.com/wikimedia/composer-merge-plugin/issues/252
+# - https://github.com/wikimedia/composer-merge-plugin/pull/257
 #
 # This means for now, the wikimedia/composer-merge-plugin version needs to be defined here
-COMPOSER_MERGE_PLUGIN_VERSION=v2.0.1
+# and should be roughly kept in sync with core composer.json
+COMPOSER_MERGE_PLUGIN_VERSION=v2.1.0
 
 composer_in_docker () {
   docker run --rm -u $(id -u ${USER}):$(id -g ${USER}) -v "$COMPOSER_WORK_DIR":/app \
@@ -22,6 +30,7 @@ composer_in_docker () {
 }
 
 COMPOSER_WORK_DIR=$(mktemp -d -p "$DIR")
+echo '{"config": {"allow-plugins": true}}' > "$COMPOSER_WORK_DIR"/composer.json
 composer_in_docker require wikimedia/composer-merge-plugin:$COMPOSER_MERGE_PLUGIN_VERSION
 
 # Copy the temporary vendor folder to clean dist/
@@ -30,13 +39,6 @@ cp -r "$COMPOSER_WORK_DIR"/vendor "$PWD"/dist
 # composer install
 COMPOSER_WORK_DIR="$PWD"/dist
 
-# Run without composer-merge plugin to install using only composer.lock
-mv "$COMPOSER_WORK_DIR"/composer.local.json "$COMPOSER_WORK_DIR"/composer.local.json.tmp
-echo "Performing composer install without composer-merge plugin"
-composer_in_docker install --no-dev --no-progress --optimize-autoloader
-mv "$COMPOSER_WORK_DIR"/composer.local.json.tmp "$COMPOSER_WORK_DIR"/composer.local.json
-
-# Run again with composer-merge plugin to add missing autoload config
 echo "Performing composer install with composer-merge plugin"
 composer_in_docker install --no-dev --no-progress --optimize-autoloader
 
