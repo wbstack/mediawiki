@@ -23,13 +23,13 @@ Help()
 }
 
 # Set variable defaults
-ALSO_COMPOSER_UPDATE=""
+COMPOSER_UPDATE=""
 
 # Get the options
 while getopts ":uh" option; do
    case $option in
       u)
-         ALSO_COMPOSER_UPDATE="1";;
+         COMPOSER_UPDATE="1";;
       h) # display Help
          Help
          exit;;
@@ -37,7 +37,7 @@ while getopts ":uh" option; do
 done
 
 # Export vars for other scripts
-export ALSO_COMPOSER_UPDATE=${ALSO_COMPOSER_UPDATE}
+export COMPOSER_UPDATE=${COMPOSER_UPDATE}
 
 # includes filenames beginning with a '.' in the results of filename expansion (/*)
 shopt -s dotglob
